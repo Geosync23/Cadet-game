@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.36.26
+   STARSHIP CADET: CSV Wren                           build 0.36.27
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.36.26';                           // keep in step with the header's build line
+const GAME_BUILD = '0.36.27';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -13917,10 +13917,10 @@ const bitsOf = set => { const b = new Uint8Array(Math.ceil(SOC.n / 8)); for (con
 const setOf = hex => { const s = new Set(); for (let i = 0; i < SOC.n; i++) if (parseInt(hex.substr((i >> 3) * 2, 2), 16) >> (i & 7) & 1) s.add(SOC.crew[i].id); return s; };
 function socSave() {
   socInit();
-  const rel = {}; for (const id in SHIP.rel) { const r = SHIP.rel[id]; rel[id] = [r.pts, r.met, r.lastTalk, r.known.slice(), r.chatDay || 0, r.mealDay || 0, r.workDay || 0, r.favDay || 0, r.seekDay || 0, r.arc || 0, r.arcDay || 0, r.showDay || 0, r.giftWeek || 0, r.inviteDay || 0]; }
+  const rel = {}; for (const id in SHIP.rel) { const r = SHIP.rel[id]; rel[id] = [r.pts, r.met, r.lastTalk, r.known.slice(), r.chatDay || 0, r.mealDay || 0, r.workDay || 0, r.favDay || 0, r.seekDay || 0, r.arc || 0, r.arcDay || 0, r.showDay || 0, r.giftWeek || 0, r.inviteDay || 0, r.visitDay || 0]; }
   let bin = ''; for (const x of new Uint8Array(SHIP.aff.buffer)) bin += String.fromCharCode(x);
   return { ids: socHash(SOC.ids), hour: SHIP.social.hour, aff: btoa(bin), news: NEWS.map(x => ({ ...x, k: bitsOf(SHIP.knows[x.id] || []) })),
-           heard: SHIP.heard.slice(-60), fault: { ...SHIP.social.fault }, pairs: { ...SHIP.social.pairs }, mail: SHIP.social.mail.map(x => ({ ...x })), feuds: JSON.parse(JSON.stringify(SHIP.social.feuds)), courtesy: { ...SHIP.social.courtesy }, cues: SHIP.social.cues.map(x => ({ ...x })), mentor: SHIP.social.mentor || null, given: (SHIP.social.given || []).map(x => ({ ...x })), keepsakes: (SHIP.social.keepsakes || []).map(x => ({ ...x })), rep: SHIP.rep ? JSON.parse(JSON.stringify(SHIP.rep)) : null, invites: (SHIP.social.invites || []).map(x => ({ ...x })), rel, ...memSave() };
+           heard: SHIP.heard.slice(-60), fault: { ...SHIP.social.fault }, pairs: { ...SHIP.social.pairs }, mail: SHIP.social.mail.map(x => ({ ...x })), feuds: JSON.parse(JSON.stringify(SHIP.social.feuds)), courtesy: { ...SHIP.social.courtesy }, cues: SHIP.social.cues.map(x => ({ ...x })), mentor: SHIP.social.mentor || null, given: (SHIP.social.given || []).map(x => ({ ...x })), keepsakes: (SHIP.social.keepsakes || []).map(x => ({ ...x })), rep: SHIP.rep ? JSON.parse(JSON.stringify(SHIP.rep)) : null, invites: (SHIP.social.invites || []).map(x => ({ ...x })), notes: (SHIP.social.notes || []).map(x => ({ ...x })), visitDay: SHIP.social.visitDay || 0, rel, ...memSave() };
 }
 function socLoad(s) {
   try {
@@ -13929,14 +13929,15 @@ function socLoad(s) {
     for (let i = 0; i < a.length; i++) a[i] = bin.charCodeAt(i) << 24 >> 24;
     SHIP.aff = a; SHIP.social = { hour: s.hour, fault: { ...(s.fault || {}) }, pairs: { ...(s.pairs || {}) }, mail: Array.isArray(s.mail) ? s.mail.filter(x => x && isFinite(x.at) && typeof x.body === 'string') : [], feuds: s.feuds && typeof s.feuds === 'object' ? JSON.parse(JSON.stringify(s.feuds)) : {}, courtesy: s.courtesy && typeof s.courtesy === 'object' ? { ...s.courtesy } : {}, cues: Array.isArray(s.cues) ? s.cues.filter(x => x && typeof x.key === 'string' && isFinite(x.until)).map(x => ({ ...x })) : [], mentor: typeof s.mentor === 'string' && SOC.idx.has(s.mentor) ? s.mentor : null,
       given: Array.isArray(s.given) ? s.given.filter(x => x && typeof x.from === 'string').map(x => ({ ...x })) : [], keepsakes: Array.isArray(s.keepsakes) ? s.keepsakes.filter(x => x && typeof x.from === 'string').slice(0, 8).map(x => ({ ...x })) : [],
-      invites: Array.isArray(s.invites) ? s.invites.filter(x => x && typeof x.from === 'string' && isFinite(x.day)).map(x => ({ ...x })) : [] };
+      invites: Array.isArray(s.invites) ? s.invites.filter(x => x && typeof x.from === 'string' && isFinite(x.day)).map(x => ({ ...x })) : [],
+      notes: Array.isArray(s.notes) ? s.notes.filter(x => x && typeof x.from === 'string' && typeof x.text === 'string').map(x => ({ ...x })) : [], visitDay: s.visitDay | 0 };
     NEWS.length = 0; SHIP.knows = {};
     for (const x of Array.isArray(s.news) ? s.news : []) if (x && typeof x.id === 'string' && Array.isArray(x.lines) && typeof x.k === 'string') {
       const { k, ...it } = x; NEWS.push(it); SHIP.knows[it.id] = setOf(k);
     }
     SHIP.heard = Array.isArray(s.heard) ? s.heard.filter(h => h && typeof h.id === 'string').slice(-60) : [];
     SHIP.rel = {};
-    for (const id in s.rel || {}) { const r = s.rel[id]; if (SOC.idx.has(id) && Array.isArray(r) && isFinite(r[0])) SHIP.rel[id] = { pts: +r[0], tier: 0, met: r[1] ?? null, lastTalk: r[2] ?? null, known: Array.isArray(r[3]) ? r[3].slice() : [], chatDay: r[4] | 0, mealDay: r[5] | 0, workDay: r[6] | 0, favDay: r[7] | 0, seekDay: r[8] | 0, arc: r[9] | 0, arcDay: r[10] | 0, showDay: r[11] | 0, giftWeek: r[12] | 0, inviteDay: r[13] | 0 }; }
+    for (const id in s.rel || {}) { const r = s.rel[id]; if (SOC.idx.has(id) && Array.isArray(r) && isFinite(r[0])) SHIP.rel[id] = { pts: +r[0], tier: 0, met: r[1] ?? null, lastTalk: r[2] ?? null, known: Array.isArray(r[3]) ? r[3].slice() : [], chatDay: r[4] | 0, mealDay: r[5] | 0, workDay: r[6] | 0, favDay: r[7] | 0, seekDay: r[8] | 0, arc: r[9] | 0, arcDay: r[10] | 0, showDay: r[11] | 0, giftWeek: r[12] | 0, inviteDay: r[13] | 0, visitDay: r[14] | 0 }; }
     for (const id in SHIP.rel) SHIP.rel[id].tier = relTierOf(SHIP.rel[id].pts);
     memLoad(s);
     SHIP.rep = s.rep && typeof s.rep === 'object' && s.rep.dept && s.rep.ship ? JSON.parse(JSON.stringify(s.rep)) : null;
@@ -14401,7 +14402,7 @@ const INVITE_HABIT = { stargazer: 'observatory', 'lounge-regular': 'lounge', 'ga
 const INVITE_WHERE = { dinner: s => s.act === 'dinner', observatory: s => /observ/i.test(s.room || ''), lounge: s => /lounge/i.test(s.room || ''), garden: s => /garden/i.test(s.room || ''),
   game: s => /common|lounge/i.test(s.room || ''), music: s => /music/i.test(s.room || ''), tiles: s => /common|lounge/i.test(s.room || ''), running: s => /gym/i.test(s.room || '') };
 const INVITE_ASK = { dinner: 'Eat with me tonight? I\'ll save you a seat.', observatory: 'Come up to the observatory after dark? The view\'s worth it.', lounge: 'Drink in the lounge later? My shout.',
-  garden: 'I\'m in the garden this evening. Come and get your hands dirty?', game: 'Fancy a game this evening?', music: 'I\'ll be in the music room tonight. Come and listen?', tiles: 'Tiles tonight? I\'ll go easy on you. Probably.', running: 'Run with me later?' };
+  garden: 'I\'m in the garden this evening. Come and get your hands dirty?', game: 'Fancy a game this evening?', music: 'I\'ll be in the music room tonight. Come and listen?', tiles: 'Tiles tonight? I\'ll go easy on you. Probably.', running: 'Run with me later?', quarters: 'Come round to my quarters tonight, about eight? There\'s something I want to show you.' };
 function socInvites(h) {
   const d = Math.floor(h / 24) + 1, I = SHIP.social.invites || (SHIP.social.invites = []), t = h * 60 + 30;
   for (let k = I.length - 1; k >= 0; k--) if (I[k].day < d - 7) I.splice(k, 1);
@@ -14422,7 +14423,9 @@ function socInvites(h) {
     const r = SHIP.rel[p.id]; if ((r.inviteDay || 0) > d - INVITE_GAP || schedU(p.seed, d, 656) >= INVITE_PERSONAL * (warmth(p.id, t) === 'warm' ? 1.5 : 1)) continue;
     const v = typeof VOICE !== 'undefined' && VOICE[p.id], kinds = (v && Array.isArray(v.invites) && v.invites.length ? v.invites : [...new Set((p.habits || []).map(x => INVITE_HABIT[x]).filter(Boolean))]).concat(['dinner']);
     let hit = null;
-    for (const k of kinds) {
+    const bed = S.byId.get(p.bed), at8 = (d - 1) * 1440 + 1200, w8 = planWhere(p, at8);   // close friends ask you round to their quarters (doorOpenFor lets you in)
+    if (relTier(p.id) >= 4 && bed && w8 && !w8.moving && (w8.act === 'leisure' || w8.act === 'off') && schedU(p.seed, d, 662) < .3) hit = { k: 'quarters', seg: { from: at8, to: at8 + 45, placeId: bed.id } };
+    if (!hit) for (const k of kinds) {
       const test = INVITE_WHERE[k]; if (!test) continue;
       const seg = planDay(p, d).find(s => s.placeId && s.from - (d - 1) * 1440 >= 1020 && s.from - (d - 1) * 1440 < 1320 && (s.act === 'leisure' || s.act === 'dinner') && test({ act: s.act, room: (() => { const pl = S.byId.get(s.placeId); return pl && ((DECKS[pl.deck].rooms || {})[pl.room] || {}).name; })() }));
       if (seg) { hit = { k, seg }; break; }
@@ -14443,6 +14446,64 @@ function socInviteMail(now) {                            // not said in person b
     x.said = true; const p = SOC.idx.has(x.from) && SOC.crew[SOC.idx.get(x.from)]; if (!p || !apptList().some(a => a.id === x.appt && a.status === 'asked')) continue;
     if (typeof mailSend === 'function') mailSend({ at: now, from: p.name, subject: x.trad ? 'Tonight?' : 'This evening?', body: inviteLine(p, x) + ' ' + shortName(p) });
   }
+}
+// ---- bunk visits and notes (0.36.27, A8; plans/social-deep-plan.md Part 5) ----
+// Once week 1 is done (socGate('done')), between 19:00 and 21:30, a friend (tier 3+) who's free may drop by your bunk
+// room: if you're there and awake, a prompt at the screen's edge ("Rina knocks at the door."); tap it and they come in
+// (section 10's crewComeTo(p, placeId, onArrive) walks them to your bunk when it's there and they're on your deck) and
+// the card opens with a visit line, or a moment's hint when one is ready. Ignore it and they go with a kind word. If
+// you're out, sometimes they leave a note on your bunk instead (SHIP.social.notes, saved; a Mail "A note on your bunk",
+// and bunkNote() for section 15's bunk tap). At most one visit or note a ship day (SHIP.social.visitDay), once a friend
+// every VISIT_GAP days (rel.visitDay), likelier when they're warm. Visitors leave at 22:00 (quiet hours). On paper
+// nobody's plan changes. A kept visit: +3 and a medium visit memory, Kindness +1.
+const VISIT_FROM = 1140, VISIT_TO = 1290, VISIT_END = 1320, VISIT_GAP = 5, VISIT_ODDS = .02, NOTE_ODDS = .006;
+const VISIT_LINES = ['Thought I\'d see how you\'re settling in.', 'I was passing. Well, I wasn\'t, but I am now.', 'Got a minute? Nothing important. Just fancied the company.',
+  'Brought you a tea. It\'s probably cold. The lift was slow.', 'Your bunk\'s tidier than mine. Don\'t tell anyone.'];
+const NOTE_LINES = ['Came by to say hello. You were out, saving the ship I expect.', 'Knocked, nobody home. Come and find me tomorrow?', 'Popped round with news. It\'ll keep. Find me!',
+  'Was going to drag you to the lounge. Next time.'];
+let VISIT = null;                                        // { p, until, inside }
+function playerInBunk() {
+  if (typeof deckDef === 'undefined' || typeof playerBed !== 'function' || typeof roomAt !== 'function') return false;
+  const id = playerBed(), d = deckOf(id), bed = DECKS[d] && (DECKS[d].places || []).find(q => q.id === id); if (!bed || deckDef.num !== d) return false;
+  const P = player.obj.position; return roomAt(Math.floor(P.x + OX), Math.floor(P.z + OZ)) === bed.room;
+}
+function socialVisit(m) {
+  const min = SHIP.time.min, day = SHIP.time.day;
+  if (VISIT) {
+    if (!VISIT.inside && performance.now() > VISIT.until) { const p = VISIT.p; seekEnd(); VISIT = null; toast(shortName(p), '"' + ['No answer. I\'ll catch you tomorrow.', 'Must be asleep. Night!', 'Another time, then.'][Math.floor(schedU(p.seed, day, 657) * 3)] + '" They head off.'); }
+    if (VISIT && VISIT.inside && (min >= VISIT_END || !CHAT || CHAT.p !== VISIT.p)) { const p = VISIT.p; VISIT = null; if (min >= VISIT_END && CHAT && CHAT.p === p) { chatSay('Is that the time? Quiet hours. Night, ' + chatName() + '.'); setTimeout(() => { if (CHAT && CHAT.p === p) chatClose(); }, 2500); } }
+    return;
+  }
+  if (!socGate('done') || min < VISIT_FROM || min >= VISIT_TO || SHIP.social.visitDay === day || CHAT || SEEK || sleeping) return;
+  const home = playerInBunk(); if (schedU(day, m, 658) >= (home ? VISIT_ODDS : NOTE_ODDS)) return;
+  const t = shipNow(), who = SOC.crew.filter(p => { const r = SHIP.rel[p.id]; if (!r || r.tier < 3 || (r.visitDay || 0) > day - VISIT_GAP) return false; const w = whereIs(p, t); return w && !w.moving && (w.act === 'leisure' || w.act === 'off'); })
+    .sort((a, b) => (warmth(b.id) === 'warm') - (warmth(a.id) === 'warm') || schedU(a.seed, day, 659) - schedU(b.seed, day, 659));
+  const p = who[0]; if (!p) return;
+  SHIP.social.visitDay = day; relGet(p.id).visitDay = day;
+  if (!home) {                                           // you're out: a note on your bunk
+    const l = socLine(p, 'note', { t, tier: relTier(p.id) }), text = l ? l.text : NOTE_LINES[Math.floor(schedU(p.seed, day, 660) * NOTE_LINES.length)];
+    const N = SHIP.social.notes || (SHIP.social.notes = []); N.push({ from: p.id, day, text, read: false }); if (N.length > 10) N.shift();
+    if (typeof mailSend === 'function') mailSend({ at: t, from: p.name, subject: 'A note on your bunk', body: text + ' ' + shortName(p) });
+    return;
+  }
+  const el = seekEl(); el.innerHTML = ''; const b = document.createElement('b'); b.textContent = shortName(p); el.appendChild(b);
+  el.appendChild(document.createTextNode(' knocks at the door.')); el.hidden = false;
+  SEEK = { p, until: performance.now() + SEEK_SECS * 1000, visit: true }; VISIT = { p, until: SEEK.until, inside: false };
+}
+function visitIn() {                                     // you tapped "knocks at the door": they come in
+  const p = VISIT && VISIT.p; if (!p) return;
+  VISIT.inside = true; seekEnd();
+  const id = playerBed(), open = () => { const t = shipNow(), mo = typeof momentReady === 'function' ? momentReady(p, t) : null, l = mo ? null : socLine(p, 'visit', { t, tier: relTier(p.id), warmth: warmth(p.id) });
+    chatOpen(p, false, mo ? null : { text: l ? l.text : VISIT_LINES[Math.floor(schedU(p.seed, Math.floor(t / 60), 661) * VISIT_LINES.length)], kind: 'visit', say: true });
+    if (CHAT) CHAT.visit = true; relAdd(p.id, 'visit', REL_PTS.appt); memAdd(p.id, 'visit'); repAdd(null, 0, { kindness: 1 }); };
+  const a = typeof DECK_CREW !== 'undefined' && DECK_CREW.find(x => x.p === p);
+  if (a && typeof crewComeTo === 'function') { try { crewComeTo(p, id, open); return; } catch (e) { } }
+  open();
+}
+function bunkNote() {                                    // section 15's bunk tap: the oldest unread note, marked read, or null
+  socInit(); const n = (SHIP.social.notes || []).find(x => !x.read); if (!n) return null;
+  n.read = true; const p = SOC.idx.has(n.from) && SOC.crew[SOC.idx.get(n.from)];
+  return { from: p ? p.name : n.from, text: n.text };
 }
 const repAskedFor = dept => ['well', 'theirs'].includes(repBand(dept));
 const repNotes = () => (repInit().notes || []).slice().reverse();
@@ -14623,7 +14684,7 @@ function socialTick() {                                  // the main loop: the c
   chatTick();
   const m = Math.floor(shipNow()); if (m === SOC_MIN) return;
   const step = SOC_MIN >= 0 && m > SOC_MIN && m - SOC_MIN < 30 ? m - SOC_MIN : 0;
-  SOC_MIN = m; socialTo(m); socialTogether(step); socialSeek(m); socialChatter(m); socialMail(m); socialAppts(); socInviteMail(m);
+  SOC_MIN = m; socialTo(m); socialTogether(step); socialSeek(m); socialChatter(m); socialMail(m); socialAppts(); socInviteMail(m); socialVisit(m);
 }
 // chatter you overhear (0.36.5) in the performance engineer's speech bubbles (section 8b: bubbleSay(who, text, secs),
 // at most two on screen; inert without it). Now and then (CHATTER_ODDS a ship minute, at most one every CHATTER_GAP
@@ -14669,14 +14730,14 @@ function seekEl() {
   st.textContent = '#seek{position:fixed;right:12px;top:50%;transform:translateY(-50%);z-index:3;max-width:min(220px,60vw);background:var(--glass);border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-size:13px;color:#e6f0f1;line-height:1.35;cursor:pointer;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}#seek b{color:#bdeee6;font-weight:600}';
   document.head.appendChild(st);
   el = document.createElement('div'); el.id = 'seek'; el.hidden = true; document.body.appendChild(el);
-  el.onclick = () => { const s = SEEK; seekEnd(); if (s) { const a = DECK_CREW.find(x => x.p === s.p); if (a) { a.talking = 6; player.stop(); player.face = Math.atan2(a.x - player.obj.position.x, a.z - player.obj.position.z); } chatOpen(s.p, true); } };
+  el.onclick = () => { if (SEEK && SEEK.visit) { visitIn(); return; } const s = SEEK; seekEnd(); if (s) { const a = DECK_CREW.find(x => x.p === s.p); if (a) { a.talking = 6; player.stop(); player.face = Math.atan2(a.x - player.obj.position.x, a.z - player.obj.position.z); } chatOpen(s.p, true); } };
   return el;
 }
 function seekEnd() { SEEK = null; const el = document.getElementById('seek'); if (el) el.hidden = true; }
 function socialSeek(m) {
   if (typeof DECK_CREW === 'undefined') return;
   const near = a => Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) <= SEEK_NEAR;
-  if (SEEK) { const a = DECK_CREW.find(x => x.p === SEEK.p); if (!a || !near(a) || performance.now() > SEEK.until || CHAT) seekEnd(); return; }
+  if (SEEK) { if (SEEK.visit) return; const a = DECK_CREW.find(x => x.p === SEEK.p); if (!a || !near(a) || performance.now() > SEEK.until || CHAT) seekEnd(); return; }
   if (CHAT || sleeping) return;
   const day = SHIP.time.day;
   for (const a of DECK_CREW) {
@@ -14997,14 +15058,14 @@ function chatShow() {
   const el = chatEl(); el.hidden = false;
   (CHAT_SKIN.draw || chatDraw)(el, v);
 }
-function chatOpen(p, greet) {                             // greet: they came to you (socialSeek), so they say hello first
+function chatOpen(p, greet, line) {                       // greet: they came to you (socialSeek), so they say hello first; line: one to open with (a visit)
   if (!p || !p.id) return false;
   socInit(); if (!SOC.idx.has(p.id)) return false;
   const w = typeof whereIs === 'function' ? whereIs(p, shipNow()) : null;
   if (w && w.act === 'sleep') { chatClose(); toast(p.name, p.role + '. Fast asleep. Better not wake them.'); return true; }
   const r = relGet(p.id); if (r.met === null) r.met = Math.floor(shipNow());
   const a = typeof DECK_CREW !== 'undefined' && DECK_CREW.find(x => x.p === p), d = a ? Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) : 0;
-  CHAT = { p, line: greet ? chatGreet(p) : chatLine(p), ask: false, fav: favourOf(p), at: shipNow(), reach: Math.max(4, d + 1.5) };   // walk off further than that and it closes
+  CHAT = { p, line: line || (greet ? chatGreet(p) : chatLine(p)), ask: false, fav: favourOf(p), at: shipNow(), reach: Math.max(4, d + 1.5) };   // walk off further than that and it closes
   if (CHAT.line.news) playerHeard(CHAT.line.news, p.id);
   if (CHAT.line.kind === 'story') arcTold(p);
   if (CHAT.line.kind === 'invite') CHAT.line.invite.said = true;
@@ -15076,7 +15137,7 @@ function chatDo(id) {
 }
 // the card closes when you walk off or they leave the deck (socialTick, every frame)
 function chatTick() {
-  if (!CHAT) return;
+  if (!CHAT || CHAT.visit) return;                       // a visitor in your bunk room stays till you close it (or 22:00)
   const a = typeof DECK_CREW !== 'undefined' && DECK_CREW.find(x => x.p === CHAT.p);
   if (!a || Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) > CHAT.reach) chatClose();
 }

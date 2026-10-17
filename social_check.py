@@ -292,6 +292,30 @@ with sync_playwright() as pw:
     if max(iv['days']) > 2 or sum(iv['days']) < 4 or iv['bad']: fail(f"invitations wrong: per day {iv['days']}, not fitting their plan {iv['bad']}")
     if iv.get('line') and iv['line']['kind'] != 'invite': fail(f"the inviter's tap line should be the invitation: {iv.get('line')}")
 
+    # 12. bunk visits and notes (0.36.27): a friend knocks in the evening when you're in your bunk room; notes when you're out
+    vs = g.ev(r"""(() => {
+      const o = { visits: [], notes: [] }, keepS = JSON.stringify(socSave()), t0 = shipNow(), inBunk = playerInBunk;
+      for (const id of ['tomas', 'pell', 'rina']) { relGet(id).pts = 70; relGet(id).tier = 3; }
+      o.home = playerInBunk();
+      window.playerInBunk = () => true;
+      for (let d = 8; d <= 17 && o.visits.length < 3; d++) for (let m = 1100; m < 1340; m++) {
+        setShipNow((d - 1) * 1440 + m); socialVisit((d - 1) * 1440 + m);
+        if (VISIT && !VISIT.inside) { o.visits.push([d, m, VISIT.p.id]); if (o.visits.length === 1) { visitIn(); o.card = CHAT && [CHAT.line.kind, CHAT.visit, !!mem(VISIT.p.id, 'visit')]; } else { VISIT.until = 0; socialVisit(0); } }
+        if (m === 1325 && o.visits.length === 1 && o.closed === undefined) o.closed = VISIT === null;
+        if (m > 1290 && VISIT && !VISIT.inside) o.late = true;
+      }
+      chatClose(); seekEnd(); VISIT = null; window.playerInBunk = () => false; SHIP.social.notes = [];
+      for (let d = 20; d <= 34 && o.notes.length < 2; d++) for (let m = 1140; m < 1290; m++) { setShipNow((d - 1) * 1440 + m); socialVisit((d - 1) * 1440 + m); const n = SHIP.social.notes.length; if (n > o.notes.length) o.notes.push([d, m]); }
+      o.read = [bunkNote(), bunkNote()]; o.read[1] = o.read[1] && o.read[1].text;
+      o.days = new Set(o.visits.map(v => v[0])).size === o.visits.length;
+      const s = JSON.stringify(socSave()); socLoad(JSON.parse(s)); o.saved = s === JSON.stringify(socSave());
+      window.playerInBunk = inBunk; setShipNow(t0); socLoad(JSON.parse(keepS)); return o;
+    })()""")
+    print('Visits:', json.dumps(vs))
+    if len(vs['visits']) < 2 or not vs['days'] or vs.get('late') or vs.get('card', [None])[:2] != ['visit', True] or not vs['card'][2]: fail('bunk visits wrong')
+    if vs.get('closed') is not True: fail('a visitor should leave at 22:00')
+    if not vs['notes'] or not vs['read'][0] or not vs['saved']: fail('notes on your bunk wrong')
+
     print('errors', g.errors[:5])
     if g.errors: ok = False
     print('SOCIAL CHECK OK' if ok else 'SOCIAL CHECK FAILED')
