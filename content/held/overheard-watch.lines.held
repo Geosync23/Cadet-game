@@ -1,0 +1,35 @@
+@overheard watch
+// Writer (command), batch 3c. The Watch: patrol pairs, the night rounds, Holt's lectures.
+
+== overheard
+? pair:chief+junior dept:watch
+A: Nearest suit locker. Don't look.
+B: Behind the... second door?
+A: Hm. Adequate.   #funny
+
+? pair:chief+junior dept:watch deck:2
+A: Hatches. Why do we check them twice?
+B: Once is luck. Twice is the job.
+A: Who told you that?
+B: You did. Tuesday.   #funny
+
+? pair:watch+watch time:night
+A: Deck 4, all quiet.
+B: Pell's talking in his sleep again.
+A: Engines?
+B: Engines.   #funny
+
+? pair:watch+watch time:morning
+A: Did the Chief laugh last night?
+B: Mensah says twice.
+A: Mensah always says twice.   #funny
+
+? pair:watch+watch
+A: Friendly on patrol.
+B: Firm at the airlock.
+A: Every day, that's the job.   #warm
+
+? pair:watch+any deck:2
+A: The Envoy's door's got a new knot.
+B: How do you know?
+A: The Chief counts them. Don't tell him I know.

@@ -6,6 +6,10 @@ wins; on tone, this page wins.
 
 ---
 
+**Approved by the user (2026-10-17, ~03:37):** the Voices sampler as it stood: all ten story voices (Torres, Calder,
+Tomas, Pell, Rina, Brennan, Vance, the Captain, Holt, Kovac), the names, and the arrival scenes. Their cards and lines
+are the reference for everyone else's; don't change a story voice without the head writer asking the lead first.
+
 ## 1. The one-paragraph version
 
 The Wren is a good place to work, full of competent people who like each other more than they say. Most of what they say

@@ -1,0 +1,28 @@
+@overheard command
+// Writer (command), batch 3c. The bridge and the senior corridor: the night bridge, helm and comms, the senior officers.
+
+== overheard
+? pair:command+any time:night deck:1
+A: Quiet night.
+B: You always say that.
+A: And I'm always reading. Chapter twelve.   #funny
+
+? pair:helm+command deck:1
+A: She's pulling left.
+B: The console says she's straight.
+A: The console hasn't flown her for twenty years.   #funny
+
+? pair:comms+any deck:1
+A: Relay's slow again.
+B: How slow?
+A: Twelve messages home, all waiting. And everyone asks me why.
+
+? pair:senior+any deck:2
+A: Did you read Gull this week?
+B: The one about the airlock?
+A: I can't stop thinking about it. Not in a good way.   #funny
+
+? pair:command+command time:morning
+A: Ninety seconds early.
+B: Is that good?
+A: For him, it's practically late.   #funny

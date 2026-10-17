@@ -1,0 +1,22 @@
+@crew lindgren
+// Writer (command: guests), batch 3b. Dr. Lindgren: delighted, fast, numbers; keeps looking out of the window.
+
+== greet
+? tier=stranger
+- Oh, hello! Lindgren, astrophysics. Have you seen it yet? The nebula? Go and look!
+- Hi there. Sorry, I'm looking past you. There's a nebula behind your head.   #funny
+? tier>=acquaintance
+- {me}! It's brighter tonight. Twelve per cent. I measured. Twice.
+== feel
+? mood:high
+- Seven years chasing nebulae. This one waited for me. I could cry. I might.   #warm
+? mood:low
+- Cloud of dust in front of my best view. Typical. Still beautiful.
+== near
+? deck:2
+- The observatory! Dr. Sato lent me her best stool. I'm told that's a big deal.   #funny
+? time:night
+- Don't make me go to bed. It's out there right now, being enormous.   #funny
+== life
+? tier>=acquaintance
+- I'm giving a talk in the observation room before I go. Come. There are charts.
