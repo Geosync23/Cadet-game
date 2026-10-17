@@ -40,16 +40,20 @@ PAPER = r"""(({ plan, days, friends }) => {
     if (plan === 'casual') return wd === 1 || wd === 3 ? 'late' : wd === 2 && wk % 2 ? 'skip' : 'work';
     if (plan === 'leave') return wd === 2 && wk % 2 === 0 ? 'sick' : 'leave';   // every leave day it can, sick every other Wednesday, else work
     if (plan === 'skip') return 'skip';
+    if (plan === 'twoTwo') return [8, 9, 11, 12].includes(d) ? 'skip' : 'work';   // Mon, Tue missed, Wed worked, Thu, Fri missed: no talk
+    if (plan === 'three') return [8, 9, 10].includes(d) ? 'skip' : 'work';       // three in a row: the talk
+    if (plan === 'lateDaily') return 'lateNoJobs';
     if (plan.startsWith('skipUntil')) return 'dyn';     // (d): driven by the ladder below
     return 'work';
   };
-  let mode = 'skip', round = 0;                          // (d): skip to the step, work until it re-arms, skip again
+  let mode = 'skip', round = 0, worked = 0;                          // (d): skip to the step, work until it re-arms, skip again
   const want = plan === 'skipUntilChief' ? 1 : 2;
   for (let d = 1; d <= days && !ended; d++) {
     let c = code(d);
-    if (c === 'dyn') { const st = (SHIP.career || {}).st || 0;
-      if (mode === 'skip' && st >= want) { mode = 'work'; round++; }
-      else if (mode === 'work' && st < want) { mode = round >= 2 ? 'work' : 'skip'; }
+    if (c === 'dyn') { const C0 = SHIP.career || {}, st = want === 1 ? (C0.ca ? 1 : 0) : C0.st || 0;   // the Chief's step: taken for this run (ca)
+      if (mode === 'skip' && st >= want) { mode = 'work'; round++; worked = 0; }
+      else if (mode === 'work' && st < want && (want > 1 || worked >= 5)) { mode = round >= 2 ? 'work' : 'skip'; }   // the Chief's: a week's work first, then three more missed
+      if (mode === 'work' && playerShiftOn(d)) worked++;
       c = mode; }
     careerTick(at(d, 0));
     if (weekday(d) === 6) { repWeek(Math.floor(at(d, 240) / 60)); careerTick(at(d, 240)); }
@@ -58,8 +62,8 @@ PAPER = r"""(({ plan, days, friends }) => {
     const work0 = careerWork();
     careerTick(at(d, 420));
     if (playerShiftOn(d)) {
-      if (c === 'work' || c === 'late') { const late = c === 'late' ? 40 : 0; at(d, 480 + late); simNote('shiftStart', { late }); repNote('shiftStart', { late }); careerTick(at(d, 480 + late));
-        for (let k = 0; k < (c === 'late' ? 2 : 3); k++) { at(d, 600 + 90 * k); repAdd('works', 3, { work: 2 }, 'jobs'); } }
+      if (c === 'work' || c === 'late' || c === 'lateNoJobs') { const late = c === 'work' ? 0 : 40; at(d, 480 + late); simNote('shiftStart', { late }); repNote('shiftStart', { late }); careerTick(at(d, 480 + late));
+        for (let k = 0; k < (c === 'lateNoJobs' ? 0 : c === 'late' ? 2 : 3); k++) { at(d, 600 + 90 * k); repAdd('works', 3, { work: 2 }, 'jobs'); } }
       else { at(d, 600); simNote('shiftStart', { late: 120, missed: true }); repNote('shiftStart', { late: 120, missed: true }); }
     } else if (careerOn(d) || (SHIP.career.s || []).includes(d)) offLeave.push(d);
     careerTick(at(d, 750)); careerTick(at(d, 900)); careerTick(at(d, 1439));
@@ -127,6 +131,14 @@ with sync_playwright() as pw:
         print(f'  {plan}: lowest work {lo:.1f}, steps {r["steps"]}'); show(r, 21)
         check(not r['steps'] and r['letGo'] is None, f'{plan}: got a summons or let go: {r["steps"]}')
 
+    print('The Chief after three missed shifts in a row (the user\'s rule), and never for lateness:')
+    for plan, want in (('twoTwo', False), ('three', True), ('lateDaily', False)):
+        r = ev(f"({PAPER})({{ plan: '{plan}', days: {70 if plan == 'lateDaily' else 21}, friends: [] }})")
+        got = any(x['step'] == 'chief' for x in r['steps'])
+        print(f"  {plan}: steps {r['steps']}, lowest work {min(x['w'] for x in r['log']):.1f}")
+        check(got == want, f"{plan}: the Chief's talk {'missing' if want else 'given'}")
+        if plan == 'three' and got: check(r['steps'][0]['day'] == 10, f"three in a row: the Chief on day {r['steps'][0]['day']}, not day 10")
+
     print('(b) All their leave and sick days, over 16 weeks:')
     r = ev(f"({PAPER})({{ plan: 'leave', days: 112, friends: [] }})")
     drops = [x for x in r['log'] if x['c'] in ('leave', 'sick') and x['drop'] < 0]
@@ -144,7 +156,7 @@ with sync_playwright() as pw:
     check('chief' in st and 'captain' in st and r['letGo'] and r['ended'], 'the ladder did not run to the end')
     if 'chief' in st and 'captain' in st and r['letGo']:
         check(st['chief'] < st['captain'] < r['letGo'], 'the steps came out of order')
-        check(8 <= st['chief'] <= 14, f"the Chief on day {st['chief']} (expected in the second week: the first is a grace)")
+        check(st['chief'] == 10, f"the Chief on day {st['chief']} (expected day 10: the third missed shift after the first week's grace)")
         check(14 <= r['letGo'] <= 35, f"let go on day {r['letGo']} (expected in about two to four weeks of skipping)")
         check(r['ended'] == r['letGo'], 'the end did not come on the last day')
     check({'career:chief', 'career:captain', 'career:eve', 'career:day'} <= set(r['asks']), 'friends were not asked to come and find you at every step')

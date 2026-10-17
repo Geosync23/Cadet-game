@@ -223,7 +223,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.61.3
+   STARSHIP CADET: CSV Wren                           build 0.61.4
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7564,7 +7564,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.61.3';                           // keep in step with the header's build line
+const GAME_BUILD = '0.61.4';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -27006,10 +27006,11 @@ const movedOff = id => (socInit(), (SHIP.social.moved || []).some(x => x.id === 
 // is a big hit to Works and ship-wide work (repAdd: softened near the bottom, pulled to the middle each Sunday); being
 // late stays section 20's small dip. Started: in a Works room on Deck 5 (shiftTick's test), or a repair of yours. Your
 // first week aboard is a grace (days up to CAREER.grace never count as missed).
-// The ladder, on SHIP.rep.ship.work: under CAREER.chief, the Chief's talk; under CAREER.captain, the Captain's
-// reprimand. Each is an occasion (appointment, Mail, meeting), booked at 07:00 on a day its person is on shift (or
-// after CAREER.wait days anyway), the Captain's only once the Chief's has been held, so the Mail can say "today". Each
-// comes once until you recover (CAREER.rearm). When it's booked, a tip (a warning: shown even with tips off) and up to
+// The ladder: CAREER.chiefRun workday shifts missed in a row (days off, leave and sick days neither count nor break
+// the run; the user's rule, 0.61.4) bring the Chief's talk, again after each worked shift; then, once it's been held,
+// SHIP.rep.ship.work under CAREER.captain brings the Captain's reprimand. Each is an occasion (appointment, Mail, meeting), booked at 07:00 on a day its person is on shift (or
+// after CAREER.wait days anyway), the Captain's only once the Chief's has been held, so the Mail can say "today". The
+// Captain's comes again only once you recover (CAREER.rearm; back to rearm.chief clears both steps). When it's booked, a tip (a warning: shown even with tips off) and up to
 // CAREER.worried friends (tier 2+) come and find you, worried. Under CAREER.bottom at the end of a workday, once the
 // Captain's reprimand has been held (kept or missed), is a day at the bottom (days off and leave neither count nor
 // reset); CAREER.days in a row and you're let go, so it always comes after both talks: the notice day (Mail and tip,
@@ -27019,21 +27020,22 @@ const movedOff = id => (socInit(), (SHIP.social.moved || []).some(x => x.id === 
 // shows the card), with New game the only way on.
 //   SHIP.career (saved) = { l: leave held, w: grants so far, b: [booked days], s: [sick days], st: 0 | 1 Chief | 2
 //   Captain, n: bottom days in a row, on: the last day you started your shift, e: the last day checked for a miss,
-//   z: the last day whose end is counted, k: once-only warnings (1 late, 2 missed), q: a step waiting to be booked (1,
+//   z: the last day whose end is counted, k: once-only warnings (1 late, 2 missed), ms: missed shifts in a row, ca: 1
+//   once the Chief's step has been taken for this run (cleared by a worked shift), q: a step waiting to be booked (1,
 //   2), qd: the day it fell due, fl: the goodbye's steps done (1 the notice, 2 the last morning), go: the notice day,
 //   f: [who stands with you at the send-off], end }
 // The words are head writer 4's (content/meetings/careerChief|careerCaptain|careerLetGo|careerSendoff.meet, the bank
 // content/banks/career.lines and each voice's content/career/*.lines).
 // Nothing here calls R().
 const CAREER = { leave: 3, every: 28, max: 5, bookBy: 450, missBy: 750, grace: 7, hitDept: 6, hitWork: 15,
-  chief: 25, captain: 12, bottom: 5, rearm: { chief: 40, captain: 25 }, days: 3, worried: 3, sendOff: 4, wait: 3,
+  chiefRun: 3, captain: 12, bottom: 5, rearm: { chief: 40, captain: 25 }, days: 3, worried: 3, sendOff: 4, wait: 3,
   chiefAt: 930, captainAt: 660, letGoAt: 600, sendOffAt: 870, seeOff: ['torres-zeke', 'pell', 'calder'] };
 SHIP.career = null;
 (() => { const s = SAVED && SAVED.ship && SAVED.ship.career; if (s && typeof s === 'object' && Number.isInteger(s.l)) SHIP.career = careerClean(s); })();
 function careerClean(s) {
   const days = a => Array.isArray(a) ? a.filter(Number.isInteger).slice(-8) : [], int = (v, x) => Number.isInteger(v) ? v : x;
   return { l: int(s.l, CAREER.leave), w: int(s.w, 0), b: days(s.b), s: days(s.s), st: int(s.st, 0), n: int(s.n, 0), on: int(s.on, 0), e: int(s.e, 0), z: int(s.z, 0),
-    k: int(s.k, 0), q: int(s.q, 0), qd: int(s.qd, 0), fl: int(s.fl, 0), go: int(s.go, null), f: Array.isArray(s.f) ? s.f.filter(x => typeof x === 'string').slice(0, 8) : [], end: !!s.end };
+    k: int(s.k, 0), ms: int(s.ms, 0), ca: int(s.ca, 0), q: int(s.q, 0), qd: int(s.qd, 0), fl: int(s.fl, 0), go: int(s.go, null), f: Array.isArray(s.f) ? s.f.filter(x => typeof x === 'string').slice(0, 8) : [], end: !!s.end };
 }
 SAVE_EXTRA.push(s => { if (SHIP.career) s.ship.career = SHIP.career; });
 onSim('newGame', () => { SHIP.career = null; careerCard(false); });
@@ -27041,7 +27043,7 @@ function careerInit(now = shipNow()) {
   if (SHIP.career) return SHIP.career;
   const d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;   // an older save starts here: no back pay of leave, no misses before today
   const sent = simNotes('shiftStart').filter(n => Math.floor(n.t / 1440) + 1 === d), on = (sent.length ? sent.some(n => !n.missed) : flag('shiftSent') === d) ? d : 0;   // already started today (reviewer 1d)
-  return SHIP.career = { l: CAREER.leave, w: Math.max(0, Math.floor((d - 1) / CAREER.every)), b: [], s: [], st: 0, n: 0, on, e: m >= CAREER.missBy ? d : d - 1, z: d - 1, k: 0, q: 0, qd: 0, fl: 0, go: null, f: [], end: false };
+  return SHIP.career = { l: CAREER.leave, w: Math.max(0, Math.floor((d - 1) / CAREER.every)), b: [], s: [], st: 0, n: 0, on, e: m >= CAREER.missBy ? d : d - 1, z: d - 1, k: 0, ms: 0, ca: 0, q: 0, qd: 0, fl: 0, go: null, f: [], end: false };
 }
 const careerWork = () => SHIP.rep && SHIP.rep.ship && isFinite(SHIP.rep.ship.work) ? SHIP.rep.ship.work : 50;
 const careerRota = d => { try { return isWorkDay(ROSTER_PLAYER, d); } catch (e) { return weekday(d) < 5; } };   // your rota alone (playerShiftOn without leave)
@@ -27118,8 +27120,10 @@ function careerLadder(now) {
   const c = careerInit(), w = careerWork();
   const st = c.st; if (c.st >= 1 && w >= CAREER.rearm.chief) c.st = 0; else if (c.st >= 2 && w >= CAREER.rearm.captain) c.st = 1;   // recovered: the steps come again
   if (c.st < st) { if (c.q > c.st) c.q = 0; careerTip('up'); }
-  if (c.go != null) return;
-  if (!c.q && (c.st === 0 && w < CAREER.chief || c.st === 1 && w < CAREER.captain)) { c.st++; c.q = c.st; c.qd = Math.floor(now / 1440) + 1; }   // booked by careerDue
+  if (c.go != null || c.q) return;                       // a step waiting is booked by careerDue
+  const d = Math.floor(now / 1440) + 1;
+  if (c.st <= 1 && !c.ca && c.ms >= CAREER.chiefRun) { c.ca = 1; c.st = 1; c.q = 1; c.qd = d; }   // the Chief: missed shifts in a row (the user's rule, 0.61.4)
+  else if (c.st === 1 && w < CAREER.captain && careerHeld('careerChief', now)) { c.st = 2; c.q = 2; c.qd = d; }   // the Captain: very low standing, after the Chief's talk
 }
 function careerLetGo(d, now) {                           // notice on day d, the last day d + 1
   const c = careerInit(), see = CAREER.seeOff.filter(id => { const p = socP(id); return p && socAboard(p, d + 1); });
@@ -27151,7 +27155,7 @@ function careerTick(now = shipNow()) {
   const g = Math.max(0, Math.floor((d - 1) / CAREER.every)); while (c.w < g) { c.w++; c.l = Math.min(CAREER.max, c.l + 1); }
   if (c.on !== d && m >= 420 && m < CAREER.missBy && careerRota(d) && !careerOff(d) && careerAtWork()) c.on = d;
   for (let k = Math.min(c.e, c.z) + 1; k <= d; k++) {
-    if (c.e < k && (k < d || m >= CAREER.missBy)) { c.e = k; if (k > CAREER.grace && careerRota(k) && !careerOff(k) && c.on !== k) careerMissed(k); }
+    if (c.e < k && (k < d || m >= CAREER.missBy)) { c.e = k; if (k > CAREER.grace && careerRota(k) && !careerOff(k)) { if (c.on !== k) { c.ms++; careerMissed(k); } else { c.ms = 0; c.ca = 0; } } }   // a worked shift ends the run and re-arms the Chief; days off, leave and sick days do neither
     careerLadder(now);
     if (c.z < k && k < d) { c.z = k; careerDayEnd(k, now); }
   }
