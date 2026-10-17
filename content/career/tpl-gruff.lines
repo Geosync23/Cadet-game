@@ -1,18 +1,29 @@
 @template gruff
-== career.worried
-? tier>=colleague flag:career.missed
+
+== career.missed
+? tier>=colleague
 - Missed shift. Hm. Don't make it two.
-? tier>=friend flag:career.low
-- Calder's calling you in. She's fair. Take what she says. Then do it.
-? tier>=friend flag:career.verylow
+
+== worried.chief
+? tier>=friend
+- Calder's had her say. She's fair. Now do it.
+
+== worried.captain
+? tier>=friend
 - Captain, now. Listen, {nick}. I've seen good people go this way. Not you.   #serious
-? tier>=friend flag:career.bottom
+
+== worried.last
+? tier>=friend
 - Morning. Bay. Eight. I'll be checking.   #serious
-? tier>=friend flag:career.up
+
+== career.up
+? tier>=friend
 - On time today. Hm. Good.
-== career.eve
-? tier>=friend flag:career.eve
+
+== farewell.eve
+? tier>=friend
 - Tomorrow. Hm. Shame. Real shame.   #serious
-== career.bye
-? tier>=friend flag:career.lastday
+
+== farewell.day
+? tier>=friend
 - Off you go, then. Stand up straight. You'll do.   #warm

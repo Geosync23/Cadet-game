@@ -1,28 +1,39 @@
 @crew pell
 // Head writer 4: career lines. Pell nearly left in his first month; he knows the feeling from the inside.
-== career.worried
-? tier>=acquaintance flag:career.missed
+
+== career.missed
+? tier>=acquaintance
 - Took your scrubber job this morning. No bother. Just... you all right, {nick}?
-? tier>=colleague flag:career.low
-- Chief's talk? Had one my first month. Felt like the floor went. It didn't. Go.   #warm
-? tier>=friend flag:career.verylow
+
+== worried.chief
+? tier>=colleague
+- Had the Chief's talk? Me too, my first month. Felt like the floor went. It didn't.   #warm
+
+== worried.captain
+? tier>=friend
 - I nearly left too, my first month. Glad every day I didn't. Don't you go either.   #serious
-? tier>=friend flag:career.bottom
+
+== worried.last
+? tier>=friend
 - I'll sleep at night for once. Swear. Then I'll wake you. Shift, tomorrow. Yeah?   #serious
-? tier>=acquaintance flag:career.up
+
+== career.up
+? tier>=acquaintance
 - Back on the board! The bay sounds right again.
-== career.eve
-? tier>=friend flag:career.eve
+
+== farewell.eve
+? tier>=friend
 - Tomorrow? Oh, {nick}. I didn't think. I really didn't think it'd go this far.   #serious
-== career.bye
-? tier>=acquaintance flag:career.lastday
+
+== farewell.day
+? tier>=acquaintance
 - Today, eh. I'll be at the Tern. Bringing you something. Don't guess.   #warm
-== career.seeoff
-? tier>=acquaintance flag:career.lastday
 - Every ship I've fixed is in my tin. You're in there now too.   #warm
-== career.leave
-? flag:leave.booked
+
+== career.leave.booked
+?
 - Leave? Nice. Sleep all day. That's what I'd do. That's what I do anyway.   #funny
+
 == career.back
-? flag:leave.back
+?
 - You're back! I did your rounds. The Deck 5 panel still sticks. Some things never change.

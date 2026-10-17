@@ -1,7 +1,7 @@
 # Handover: head writer (Pillar 4, seat 11)
 
 **Head writer 4** (session_01MWyyMaXv6D7yKtDNy9VbCA) holds the seat from 0.48.61 (2026-10-17 evening). 0.48.61: the career
-lines (leave, missed shifts, being let go; design-doc on claude/lead-pillar1 70eada3) in `content/career/` and meetings
+lines (leave, missed shifts, being let go) in `content/career/` + `content/banks/career.lines` (0.48.63: on the Career engineer session_01862tURG1qXAVGj2sdUrVCw's keys) and meetings
 careerChief, careerCaptain, careerLetGo, careerSendoff; keys and flags in DEV_NOTES's 0.48.61 row and career.lines' header.
 The Career engineer builds it on claude/leave. Calder and Marrow are she/her (the brief said "his": roster wins).
 Local branch note: the container's claude/content had unrelated history; the stale copy is kept as claude/content-stale-local.

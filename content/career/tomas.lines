@@ -1,28 +1,39 @@
 @crew tomas
 // Head writer 4: career lines. Your bunkmate. He was afraid of staying home; he knows about being afraid.
-== career.worried
-? tier>=acquaintance flag:career.missed
+
+== career.missed
+? tier>=acquaintance
 - You were still in your bunk when I left. Are you ill? Should I fetch someone?
-? tier>=colleague flag:career.low
-- The Chief? I'd be terrified. But she's fair, everyone says. You'll be all right.
-? tier>=friend flag:career.verylow
+
+== worried.chief
+? tier>=colleague
+- You saw the Chief? I'd have been terrified. You'll be all right. I can wake you.
+
+== worried.captain
+? tier>=friend
 - I write to my brother every week. I don't want to write that my bunkmate went.   #serious
-? tier>=friend flag:career.bottom
+
+== worried.last
+? tier>=friend
 - I'll wake you. I'm up at six anyway. Please let me, {nick}.   #serious
-? tier>=acquaintance flag:career.up
+
+== career.up
+? tier>=acquaintance
 - You were up before me today! First time ever. I'm telling my brother.   #funny
-== career.eve
-? tier>=friend flag:career.eve
+
+== farewell.eve
+? tier>=friend
 - Your bunk will be empty tomorrow. I'll look up at the star map and think of you.   #serious
-== career.bye
-? tier>=acquaintance flag:career.lastday
+
+== farewell.day
+? tier>=acquaintance
 - Somewhere new, then. That's brave. You're braver than me.   #warm
-== career.seeoff
-? tier>=acquaintance flag:career.lastday
 - Look out of the window. Wave at the farm moon for me.   #warm
-== career.leave
-? flag:leave.booked
+
+== career.leave.booked
+?
 - A day off tomorrow? We could do the long way round Deck 2. If you like.
+
 == career.back
-? flag:leave.back
+?
 - Welcome back, bunkmate. I kept your side tidy. Mostly.

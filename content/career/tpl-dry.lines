@@ -1,18 +1,29 @@
 @template dry
-== career.worried
-? tier>=colleague flag:career.missed
+
+== career.missed
+? tier>=colleague
 - The board noticed you weren't there. So did I. I'm quieter about it.
-? tier>=friend flag:career.low
-- An appointment with the Chief. Wear something sensible. Mostly, listen.
-? tier>=friend flag:career.verylow
+
+== worried.chief
+? tier>=friend
+- A talk with the Chief. I've had one. You live. Then you turn up at eight.
+
+== worried.captain
+? tier>=friend
 - The ready room. Mind the step. And then mind your shifts. I'm serious.   #serious
-? tier>=friend flag:career.bottom
+
+== worried.last
+? tier>=friend
 - I'd rather not lose you to paperwork. Go to work tomorrow. Humour me.   #serious
-? tier>=friend flag:career.up
+
+== career.up
+? tier>=friend
 - On shift again. Look at you. Practically furniture.   #funny
-== career.eve
-? tier>=friend flag:career.eve
+
+== farewell.eve
+? tier>=friend
 - Tomorrow, then. I had a joke ready. It's not funny. I'm sorry, {nick}.   #serious
-== career.bye
-? tier>=friend flag:career.lastday
+
+== farewell.day
+? tier>=friend
 - Go on. I'll pretend I'm fine. I'm very good at it.   #warm

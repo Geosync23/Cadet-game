@@ -1,18 +1,20 @@
 @crew calder
 // Head writer 4: career lines. Exact, fair; worried shows as asking for the numbers again. Never a lecture twice.
-== career.worried
-? tier>=acquaintance flag:career.up
+
+== career.up
+? tier>=acquaintance
 - On time again. Good.
 - On the board this morning. Ten to eight. Good. Good.
-== career.bye
-? flag:career.lastday
+
+== farewell.day
+?
 - The Tern won't wait. Don't be late for that one.
-== career.seeoff
-? flag:career.lastday
 - I came to check the ramp seals.
-== career.leave
-? flag:leave.booked
+
+== career.leave.booked
+?
 - Leave's booked. Noted. Better on paper than a surprise.
+
 == career.back
-? flag:leave.back
+?
 - Back. Good. Board's there.
