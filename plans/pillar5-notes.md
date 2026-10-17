@@ -110,3 +110,9 @@ Worked out by the Pillar 5 designer as `plans/pillar5-plan.md` Part 6 ("head-scr
 
 All taken into `plans/pillar5-plan.md` and `.html`. For design-doc.md (the lead's): laundry duty every two weeks; the seven mechanics; Pillar 5 built on its own; the logger and the test rig as tools; the clash at Tier 3.
 
+
+## The user's addition: career progression into Pillar 5 (2026-10-17, through the lead)
+
+"Since it all coincides", career progression moves from Pillar 7 into Pillar 5. The user's points: promotion is unmistakable (an appointment with the Chief during the work day, a real summons); a proper promotion scene, the crew reacting, the badge; someone senior walks you to your new quarters with your things moved; a small formal officer ceremony with the Captain on becoming an officer; later, at a higher rank, a visitors' cabin on Deck 2 converts to your cabin; and it's clear that reputation from jobs is how you rank up and get better, more complex tasks.
+
+Worked out as `plans/pillar5-plan.md` Part 7 and the "Added: career progression" section of the html. New questions C1-C10 for the user's survey. For design-doc.md (the lead's): the player's top rank (Senior Officer at Tiers 3-4, question C3), the Deck 2 cabin (C4), the roadmap (career progression in Pillar 5; Pillar 7 = Tiers 3-4 and the story, C10).

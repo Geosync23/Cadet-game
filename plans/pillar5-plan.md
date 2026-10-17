@@ -1,10 +1,12 @@
 # Pillar 5 plan: new ways to work (expanded core mechanics)
 
-**DRAFT 2 (2026-10-17, the Pillar 5 planner, branch `claude/pillar5-plan`).** Rewritten from the user's survey answers (`plans/pillar5-notes.md`, "The user's answers"): **Pillar 5 is expanded core mechanics only.** Ship-wide events move to Pillar 6; career progression, story and the night shift to Pillar 7 (design-doc.md, "Roadmap after Pillar 4"). The user asked for a detailed plan before any work, and for new mechanic ideas from the planner. **Nothing is built until the user approves this plan, and each mechanic gets its own short spec page the user reviews before it's built.** **Update 2026-10-17: the user answered every open question** (see the end); this draft takes them all in: laundry duty every two weeks, all seven "more ideas" on the ladder (M11-M17), and **Pillar 5 built on its own after Pillar 4**, by one lean team (Parts 4 and 5 rewritten).
+**DRAFT 2 (2026-10-17, the Pillar 5 planner, branch `claude/pillar5-plan`).** Rewritten from the user's survey answers (`plans/pillar5-notes.md`, "The user's answers"): **Pillar 5 is expanded core mechanics only.** Ship-wide events move to Pillar 6; career progression, story and the night shift to Pillar 7 *(changed 2026-10-17: career progression is now in Pillar 5, Part 7; Pillar 7 keeps Tiers 3-4, the story and the night shift)* (design-doc.md, "Roadmap after Pillar 4"). The user asked for a detailed plan before any work, and for new mechanic ideas from the planner. **Nothing is built until the user approves this plan, and each mechanic gets its own short spec page the user reviews before it's built.** **Update 2026-10-17: the user answered every open question** (see the end); this draft takes them all in: laundry duty every two weeks, all seven "more ideas" on the ladder (M11-M17), and **Pillar 5 built on its own after Pillar 4**, by one lean team (Parts 4 and 5 rewritten).
 
 Read with `design-doc.md` ("The clockwork", "The player", "Works progression", "Roadmap after Pillar 4"), `plans/pillar4-plan.md` (Part 6: the rules for sharing the one game file), `TEAM.md`, `DEV_NOTES.md` ("Machines and wear", "Chores and openJobs", "Player needs and the device", "Player interactions", "Hook register") and the handover notes for systems, player, galley and device.
 
 A plain-language version for the user is `plans/pillar5-plan.html`.
+
+**Added 2026-10-17 (the Pillar 5 designer): Part 7, career progression** (the user: fold it into Pillar 5 "since it all coincides"): how ranking up works (Works reputation from jobs → harder jobs → certification → promotion), the first promotion as a full sequence (an urgent summons to the Chief, the scene, the crew, an escorted move, an officer ceremony with the Captain), and the second promotion (Senior Officer, a Deck 2 cabin) designed now and switched on with Tier 3. Pillar 7 shrinks to Tiers 3-4 and the story.
 
 **Added 2026-10-17 (the Pillar 5 designer): Part 6, deductive repair puzzles ("head-scratchers").** The user: keep the whole plan, and add deduction puzzles to some repairs, **starting about 30-50% of the way into the progression** (the early job has none). They begin about a third of the way in (Day 13 of the Day 1 to about Day 42 arc) and grow from there. Part 6 adds a track beside the ladder, inside the same arc; nothing in Parts 1-5 is removed or shrunk.
 
@@ -26,7 +28,7 @@ Today the Works job is one verb: **fetch a part and replace it** (or hold to wor
 | 5 | **Tuning** | adjust a machine by watching it respond | Brennan (the ovens) with Calder | Day 15 |
 | 6 | **Making it safe** (small incidents) | isolate first, then clean up, then fix | Calder, at the first one | Day 16 |
 | 7 | **The scanner and diagnosing** | read a machine and work out which part is failing | Torres | Day 18 |
-| — | **Certification and your first promotion** | a supervised job using what you've learned | Calder | about Day 20 |
+| — | **Certification and your first promotion** (now a full sequence: Part 7) | a supervised job using what you've learned; the summons, the scene, the move, the officer ceremony | Calder; the Captain | about Day 20-22 |
 | 8 | **Team jobs** | one pair of hands on a big job with others | a Works officer | Day 22 (after promotion) |
 | 11 | **Tool upkeep** | recharge, clean and re-seal your tools at your bench | Torres | Day 23 |
 | 9 | **Tracing connected faults** (Tier 2) | follow a symptom back along pipes and ducts | Calder | Day 24 |
@@ -39,6 +41,8 @@ Today the Works job is one verb: **fetch a part and replace it** (or hold to wor
 | 17 | **On the lift roof** | ride the lift car's roof down the spine, greasing the guides | a Works officer | Day 35 |
 
 **Added (Part 6):** beside the ladder, a **puzzle track**: some real faults become **head-scratchers** you solve by deduction from clues gathered around the ship (nine types designed, eight built in Pillar 5 (the clash waits for Tier 3); the first about a third of the way in, at Day 13, after hauling; then growing to the end of Pillar 5 at about Day 42, with fault-finder grades, two new tools and crew asking you for help).
+
+**Added (Part 7): career progression.** Ranking up is one clear rule: good work grows your Works reputation, which brings harder jobs, then certification, then promotion. The first promotion (about Day 20) is a full sequence: an urgent summons to Calder's office, the badge, the crew's reaction, Calder walking you to cabin 4-23 with your things moved, and an officer ceremony with the Captain. The second (Senior Officer, a Deck 2 cabin) is designed now and switched on with Tier 3.
 
 Around the ladder: **more real faults reach you**; **repairs get quicker with practice** (in words); **tools arrive one at a time, each with training**; **off-shift tinkering, cabin touches and star logging**; **the device's work pages** (your training record, work log, tools). Still Works only.
 
@@ -165,8 +169,8 @@ Each card: **the verb · how it's taught · how it unlocks · how it grows · wh
 - **Reliability (trust):** reads Pillar 4's **Work reputation** (social A's ship-wide Work axis), plus turning up to the drill and the inspection. One score for the ship, not two.
 - **Calder's progress talks** (built in Pillar 3) say how close you are, in words.
 - **The certification job:** a real Tier 2 job held for you (a Deck 4 air scrubber or the water recycler), using what you've learned (a round finds it, the scanner reads it, you fetch and fit, maybe a tuning step), with Calder following and saying a word at each step (Torres on her days off). Go wrong and she tells you what to practise and sets another in a week: **only delayed, never passed over** (the user).
-- **The moment:** at the board the next morning Calder hands you the Officer's badge in front of the Works crew (a short meeting); the Captain's Mail; the news spreads (`simNote('promoted')`).
-- **Your own cabin:** Spare 4-23 on the officers' corridor: your bed and locker move, the door opens for you, Tomas says goodbye as a bunkmate, and Pillar 4's "Come over" visits start. *(Bigger story around promotion is Pillar 7; Pillar 5 builds the working moment.)*
+- **The moment:** *(Changed: Part 7, "Added: career progression".)* An urgent summons to Calder's office during the next work day, the scene with the badge, the crew reacting, Calder walking you to your cabin with your things moved, and the officer ceremony with the Captain the next afternoon (7.3).
+- **Your own cabin:** Spare 4-23 on the officers' corridor: your bed and locker move, the door opens for you, Tomas says goodbye as a bunkmate, and Pillar 4's "Come over" visits start. *(Career progression is now in Pillar 5: Part 7.)*
 - **Touches:** 24 core; 17 (the held job; `playerTier()`); 14/13 (the sim engineer: `playerBed()` and the cabin door, after Pillar 4's wave 3); 20 (reads only).
 - **Test:** `career_check` (new): end to end on paper, a live certification (pass, delay, pass), the bed and doors, an old save loads as Tier 1.
 
@@ -336,12 +340,12 @@ The user picked all seven. They come **after promotion**, in weeks 4-6, because 
 | Step | What's built | Seats active (at most 6) | Check-in with the user |
 | --- | --- | --- | --- |
 | 0 | Approval: **done** (the user answered every question, 2026-10-17). Pillar 5 waits for Pillar 4 to finish. | — | — |
-| 1 · Foundation | `playerTier()`, more real faults, job kinds with steps (17); the work steps (15); section 24 core: the ladder, training moments, tools, skill in words, trust, device pages, inert then switched on. The designer's pages for the foundation, M1-M4 and the case engine. | D, B, C, S, P | **1:** a work day with more real faults and quicker repairs; approve the pages |
+| 1 · Foundation | `playerTier()`, more real faults, job kinds with steps (17); the work steps (15); section 24 core: the ladder, training moments, tools, skill in words, trust, **reputation bands deciding the jobs left for you and the Record's "What's next" (Part 7)**, device pages, inert then switched on. The designer's pages for the foundation, M1-M4 and the case engine. | D, B, C, S, P | **1:** a work day with more real faults and quicker repairs; approve the pages |
 | 2 · Your second week | M1 rounds, M2 laundry and uniforms, M3 the drill and inspection, M4 hauling; their places | D, B, C, M1, A (S, P on call) | **2:** play your second week |
 | 3 · Puzzles start; the rest of Tier 1 | the case engine, P3, P1, P2, P4 (H); M5 tuning, M6 incidents (M2); M7 the scanner (M3); lines (W, briefly) | D, B, H, M2, M3 (+W) | **3:** the first head-scratchers, tuning, a burst pipe, the scanner |
-| 4 · Promotion | certification with its puzzle step, the badge, cabin 4-23 (sim on call for the bed) | D, B, C, A, W | **4:** from a save near certification to your own cabin |
+| 4 · Promotion | certification with its puzzle step; **the full promotion sequence (Part 7): the summons, the scene and the crew, the badge, the escorted move to cabin 4-23, the officer ceremony** (sim and performance on call) | D, B, C, A, W | **4:** from a save near certification, through the summons and the move, to the ceremony |
 | 5 · After promotion, part 1 | M8 team jobs, M9 tracing with P5 and the logger, M10 the workshop with P8 and the test rig, M11 tool upkeep, M12 the logbook, M13 leak hunting | D, B, M1, M3, H (+A) | **5:** weeks 4-5 |
-| 6 · After promotion, part 2 | M14 irrigation, M15 rewiring, P6, P7, M16 coolant rounds, M17 the lift roof, the fault-finder grades, favour cases, the cold-case board, cabin touches, star logging | D, B, M2, M3, H (+W) | **6:** Pillar 5 final; then a pull request to `main` with the user's OK |
+| 6 · After promotion, part 2 | M14 irrigation, M15 rewiring, P6, P7, M16 coolant rounds, M17 the lift roof, the fault-finder grades, favour cases, the cold-case board, cabin touches, star logging; **the second promotion's machinery, inert** (Part 7.4) | D, B, M2, M3, H (+W) | **6:** Pillar 5 final; then a pull request to `main` with the user's OK |
 
 **Merge order inside a step:** systems (17) → player (15) → career (24 core) → mechanics (24a… in ladder order) → head-scratchers (24k, 24l) → deck architect 2 → the writer's lines (generated blocks re-baked with `content_gen.py`, never merged by hand).
 
@@ -620,6 +624,87 @@ cadet_test: with head-scratchers off, ALL IDENTICAL
 
 ---
 
+## Part 7: Added: career progression
+
+**Added 2026-10-17 by the Pillar 5 designer, from the user (through the lead):** career progression moves **into Pillar 5** "since it all coincides" (until now it was Pillar 7's). The user's points: promotion must be **unmistakable** (a real summons to an appointment with the Chief during the work day, not a note); a **proper promotion scene** with the crew reacting and the badge; **someone senior walks you to your new quarters**, with your things already moved; a **small formal officer ceremony with the Captain** when you become an officer; later, at a higher rank, **a visitors' cabin on Deck 2 (the Command deck) becomes your cabin**; and it must be **clear how ranking up works: reputation from jobs is how you rank up and get better, more complex tasks.** Everything in Parts 1-6 stays; this part replaces only "The moment" in Part 2's certification card with the full sequence below.
+
+### 7.1 How ranking up works (one clear rule)
+
+**Do good work → your Works reputation grows → you're given harder, more interesting jobs → when it's high enough and you've learned the job, the Chief sets your certification → pass it and you're promoted.**
+
+- **One measure you can see: your Works reputation,** in words, never a number. It's Pillar 4's Work reputation (the ship's opinion of your work, which already exists), so there's one idea, not two. Part 2's "experience" and "trust" are what feed it, not separate things you track.
+- **What raises it:** jobs finished (bigger faults count more), faults you found before they broke, the right part first time, a clever fix on a head-scratcher, turning up to the drill and the inspection, keeping your shift. **What lowers it:** missed shifts and abandoned jobs (the design's existing rules, with their warnings and the Chief's talk).
+- **What it gives you: better, more complex tasks.** Each band changes which jobs the crew leave for you on the board (the systems engineer's "jobs left for you"):
+
+| Band (words; Pillar 4's Work bands where they already have words) | Jobs left for you | Ladder and career |
+| --- | --- | --- |
+| **New** (week 1) | fetch and replace, chores | Pillar 4's first week |
+| **Steady** | about half real faults; rounds, laundry, hauling | the week-2 mechanics open |
+| **Reliable** | urgent jobs too; the first head-scratchers; tuning and incidents | Days 13-19's openings |
+| **Trusted** | a supervised Tier 2 job now and then; the hardest Tier 1 faults | Calder says you're nearly there |
+| **Relied on** | — | **Calder sets your certification** |
+
+  After promotion the bands start again for your new rank ("New officer" → … → "Relied on"), and each lifts you to harder Tier 2 work: traced faults, team jobs, Tier 2 head-scratchers, then the fault-finder tickets.
+- **The ladder still waits for use** (Part 1): a mechanic opens when the one before has been used a few times **and** your reputation has reached its band. For a steady player the band is already there, so nothing changes; a careless player waits a little longer, and is told why.
+- **You always know where you stand:** your device's Record shows your rank, your reputation in words and **one "What's next" line** ("Calder wants to see you handle a scrubber before she puts you up"); Calder's progress talks (built in Pillar 3) say the same in person. Never demoted: a falling reputation only means fewer interesting jobs until you pick up again.
+
+### 7.2 The ranks, and which promotions happen in Pillar 5
+
+The ship's ranks (design-doc): Junior Officer → Officer → Senior Officer → Department Chief → Executive Officer → Captain. **You climb but never command**, so your career tops out at Senior Officer.
+
+| Rank | Works title (tier) | Room | Ceremony | When |
+| --- | --- | --- | --- | --- |
+| Junior Officer | Junior Technician (Tier 1) | Bunk 1, junior wing (Deck 4) | — | Day 0, your arrival (Pillar 4) |
+| **Officer** | **Technician (Tier 2)** | **Cabin 4-23, officers' corridor (Deck 4)** | **The officer ceremony with the Captain** | **About Day 20: built in full in Pillar 5** |
+| Officer | the fault-finder grades (inside Tier 2) | 4-23 | a pin from Calder at the board | Days 34-38, and after (Part 6) |
+| **Senior Officer** | **Senior Technician (Tier 3)** | **Deck 2's second visitors' cabin, converted to yours** | a smaller one: the Captain's word at the Captain's table | **When Tier 3 comes (a later pillar)**: designed now, its scenes built on Pillar 5's machinery |
+| Senior Officer | Engine Specialist (Tier 4) | your Deck 2 cabin | a commendation | later still |
+
+*This changes two lines in design-doc.md (the lead's): the player could rise "to Officer and senior technician, but not beyond", and Tiers 3-4 were "Officer" rank. The plan's default puts Tiers 3-4 at **Senior Officer**, the rank of the six senior officers who live on Deck 2 and sit at briefings (the conference table "by right from Tier 3" already fits). Still never command. (Question C3.)*
+
+**Inside Pillar 5's arc** (Day 1 to about Day 42) that's **one promotion, Junior Officer to Officer, with the whole sequence (7.3)**, plus the fault-finder grades as smaller recognitions. The second promotion needs Tier 3's work (shutdowns, planning around the crew) to mean anything, so it goes live when Tier 3 is built (question C2). Pillar 5 builds every piece it uses (the summons, the scene, the escorted move, the ceremony, the cabin conversion as data), so the later pillar only adds Tier 3 and switches it on.
+
+### 7.3 The first promotion, step by step (about Day 20)
+
+1. **The certification job** (Part 2, unchanged): a real Tier 2 job held for you, with Calder following. Only ever delayed: if it goes wrong she tells you there and then what to practise and sets another in a week.
+2. **The summons, the next work day:** mid-morning (about 10:30) your device sounds an **urgent toast**, not a quiet badge: *"Chief Calder: My office, 11:00. — C."* It's a real appointment (Pillar 3's appointments) in her glass office in the Works bay. The goal arrow points there, and Torres says "Go on. She doesn't bite. Usually." **It can't be missed:** if you don't come by 11:15, Calder walks over to find you wherever you are on the ship (the escort's lead-and-follow walking, from Pillar 4) and says it there.
+3. **The scene in her office** (a short meeting, `MEETING_SCRIPTS`): she tells you you've passed; she hands you the **Technician's badge** and your **Officer's collar pip**; one choice of reply (proud, surprised, "about time"), which she remembers.
+4. **The crew react:** you walk out into the Works bay and the Works crew on shift have gathered by the board: applause, Torres's grin, a "Told you" from Pell if he's on. That day **everyone who knows you reacts** when you meet (Pillar 4's lines via `simNote('promoted')`: friends congratulate, acquaintances nod, a rival grumbles), **Mail** from friends and the Captain, a **ship news item** in the Ship app, and **Brennan's cake** at the Works tea corner after the shift.
+5. **Your new quarters, that evening (about 17:00):** **Calder walks you there** (on her day off, Commander Vance, the Executive Officer): from the Works bay, up the lift, along the officers' corridor (the escort's walking again; she talks on the way about officers' ways: your door, the "Come over" visits, quiet hours). **On the way you pass Tomas and Pell carrying your box.** At 4-23 the **door plate already has your name and rank**; your key opens it; **your things are already there**: your locker's contents, the keepsakes on your shelf, the framed menu if you have one, gifts you were given. Tomas says goodbye as a bunkmate ("Don't be a stranger, Officer"). That night you sleep in your own cabin, and Pillar 4's "Come over" visits start.
+6. **The officer ceremony, the next afternoon (about 16:30, after your shift):** a summons from the Captain's office by Mail in the morning, so you can get ready (a clean uniform matters: M2). In the **observation room on Deck 1** (the conference table, the stern windows): the Captain, Commander Vance, Calder, Torres, and the friends you're closest to (up to three, invited by the game from your relationships). Short and formal: the Captain reads your commission, **pins your Officer's insignia** (your uniform now shows it: a small collar mark, a material change, no new meshes), a handshake, one line from you, a toast with the Captain's tea. A **keepsake** (the framed commission) goes on your cabin shelf. Your Record: "Commissioned Officer, Day 21."
+7. **After:** your Tier 2 key opens the Deck 5 machine rooms and the pipe galleries; the board starts leaving you Tier 2 jobs; the next mechanic (team jobs) opens the day after; your reputation bands start again as "New officer".
+
+*Pacing check:* certification about Day 20, the summons Day 21 morning, the move Day 21 evening, the ceremony Day 22 afternoon. Team jobs (M8) open on Day 22 as planned, so the ceremony and team jobs share a day: the ceremony isn't a ladder opening, so Part 1's "one opening a day" still holds.
+
+### 7.4 The second promotion (designed now; live when Tier 3 comes)
+
+- **Ranking up again works the same way:** Tier 2 reputation reaches "Relied on", the ladder's Tier 2 steps are used, and Calder sets a Tier 3 certification (a supervised shutdown job, once Tier 3 exists).
+- **The summons comes from higher up:** Calder first ("My office"), then together to the **Captain's ready room**, where the Captain tells you yourself.
+- **Your Deck 2 cabin:** the **second visitors' cabin** (inside the senior corridor's loop, no window, next to the Deputy Survey Chief) **is converted to yours.** You see it happen: in the days before, a Works job on the board refits it (you can take it yourself or leave it to the crew), and its door plate changes from "Visitors" to your name. **Commander Vance walks you up to Deck 2**, with your things moved from 4-23 (which goes back to being a spare). The visitors' suite and Envoy Saruth's cabin stay as they are; from then on, ship-wide events (Pillar 6) lodge any extra visitors in Deck 4's guest cabins. (Question C4: or the visitors' suite, with its window.)
+- **The ceremony:** smaller, as senior officers have it: the Captain's word and a toast at the **Captain's table** dinner (built in Pillar 3), and your place at the conference table "by right".
+
+### 7.5 What moves where (and how Pillar 7 shrinks)
+
+| Was in Pillar 7 | Now |
+| --- | --- |
+| How ranking up works (reputation, certification, what's next) | **Pillar 5** (7.1) |
+| The first promotion's scenes: summons, crew reaction, badge, escorted move, officer ceremony | **Pillar 5** (7.3) |
+| The second promotion's design and machinery (the Deck 2 cabin conversion, Vance's walk, the Captain's table) | **Pillar 5** builds it; it **switches on with Tier 3** |
+| Tier 3 (Senior Technician: shutdowns, planning around the crew, "the clash" puzzle) and Tier 4 (Engine Specialist: engine repairs, leading team jobs) | **Pillar 7** |
+| The night shift assignment, the story and milestones around your career, mentoring a junior | **Pillar 7** |
+
+**So Pillar 7 becomes "Tiers 3 and 4, and the story":** it adds new work and story to a career system that already exists, rather than building the system. (design-doc.md's roadmap is the lead's to update; question C10.)
+
+### 7.6 What it adds to the build (lean, no new seats)
+
+- **Who:** the **career engineer (C)** already owns certification and promotion; the scenes are theirs. The **designer** writes a "Promotion" spec page (the sequence, the scripts' outline, the ceremony's room and guests) and a short page for the second promotion. **On call:** sim (Calder coming to find you, the crew gathering, the ceremony's guests, `playerBed()`, Tomas and Pell carrying the box, Vance's walk later), performance (the collar mark on your uniform, a box-carry pose), deck architect 2 (4-23's door plate and keepsake shelf, ceremony places in the observation room, Deck 2's second visitors' cabin as data for later), the Works writer (the summons, the scene, the crew's reactions, the walk, the ceremony), social (reactions on `simNote('promoted')`).
+- **When:** the reputation bands and "What's next" in **Step 1** (the foundation: C with S, since bands decide which jobs are left for you); the whole first promotion in **Step 4** (already the promotion step; check-in 4 now plays the summons, the scene, the move and the ceremony); the second promotion's machinery inert in **Step 6**, tested on paper. **No new seats; still at most about 6 at once.**
+- **Save:** `save.career` gains rank, reputation band per rank, ceremony done, keepsakes; read defensively; `SAVE_V` stays 2.
+- **Tests (`career_check`):** the bands change the jobs left for you; the summons is an urgent appointment during the shift, and Calder comes to find you if you miss it; the badge and pip; the move (bed, door plate, things, Tomas's goodbye); the ceremony's guests are there and it happens once; an old save loads as Tier 1; the second promotion's conversion on paper (door plate, bed, 4-23 back to spare) with a test-only Tier 3 switch; determinism twice. **`day_check`** on Day 21 and Day 22 (the crew still reach their places around the gathering and the ceremony). **`intro_check`** unchanged.
+- **Risks:** *a promotion you miss* (answer: the urgent toast, Calder comes to you, the move waits for you); *crowding Deck 1 and the voice budget at the ceremony* (answer: at most about 8 people, after shifts, never on an event or tradition evening; it moves a day if needed); *a hollow second promotion* (answer: it waits for Tier 3's real work).
+
+---
+
 ## Risks
 
 - **Too much at once for a new player.** *Answer:* the ladder: one mechanic at a time, taught by a person, never two on a day, waiting for you to use the last one; everything earlier keeps working the simple way.
@@ -637,7 +722,7 @@ cadet_test: with head-scratchers off, ALL IDENTICAL
 
 ---
 
-## The user's answers (2026-10-17; all questions answered)
+## The user's answers (2026-10-17), and new questions
 
 1. **Tuning (M5):** turning a setting and watching the machine respond: right side of "no mini-games"? **Answered: yes, as described.**
 2. **Your uniform:** grubby with work, changed at your locker, washed through the laundry. Should a grubby uniform look different on your character (a duller shade)? **Answered: yes, slightly duller.**
@@ -658,3 +743,16 @@ cadet_test: with head-scratchers off, ALL IDENTICAL
 14. **Crew favour cases and the cold-case board** (optional, for keen players)? **Answered: yes, both.**
 15. **The name:** "head-scratchers" (the crew's word), "Fault notes" (the device page), "the Chief's notes" (the hint binder)? **Answered: yes, keep the names.**
 16. **The P9 fix moves a crew member's routine** (the laundry wash to 08:00): fine for a Tier 2 case, or keep moving routines for Tier 3 (Pillar 7)? **Answered: keep it for later tiers.** P9 The clash moves to Tier 3 (a later pillar), designed here and built with Tier 3.
+
+**Added with Part 7 (career progression), for the user's survey:**
+
+- C1. **The summons:** an urgent toast mid-morning the day after you pass ("My office, 11:00"), and Calder comes to find you if you don't come. Right? *Default:* yes.
+- C2. **How many promotions in Pillar 5:** just the first (Officer, about Day 20), with the second (Senior Officer, the Deck 2 cabin) built now but switched on when Tier 3's work comes in a later pillar? Or build Tier 3 into Pillar 5 too, so the Deck 2 move happens in this pillar (a much bigger pillar)? *Default:* the first only; the second switches on with Tier 3.
+- C3. **Your top rank:** Senior Officer at Tier 3 (the rank whose crew live on Deck 2 and sit at briefings), still never in command? The design doc today says you stop at Officer. *Default:* yes, Senior Officer.
+- C4. **Which Deck 2 cabin becomes yours:** the second visitors' cabin (inside the loop, no window), or the visitors' suite (on the hull, with a window)? Envoy Saruth's stays hers either way. *Default:* the second visitors' cabin; events then lodge extra visitors on Deck 4.
+- C5. **Who walks you to your new cabin:** Calder (Commander Vance on her day off), with Tomas and Pell carrying your box past you? *Default:* yes.
+- C6. **The move:** the same evening as the summons? *Default:* yes, about 17:00.
+- C7. **The officer ceremony:** the next afternoon after your shift, in the observation room on Deck 1, with the Captain, Commander Vance, Calder, Torres and up to three of your closest friends? *Default:* yes.
+- C8. **Your insignia:** should your uniform show your rank (a small collar mark) once you're an officer? *Default:* yes.
+- C9. **Reputation in words** in your Record, with one "What's next" line, and bands deciding which jobs are left for you? A falling reputation means fewer interesting jobs, never a lower rank. *Default:* yes.
+- C10. **Pillar 7's new scope:** Tiers 3 and 4 (with the second promotion switched on), the night shift, the career story and milestones, mentoring a junior. *Default:* yes.
