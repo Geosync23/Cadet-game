@@ -313,7 +313,7 @@ with sync_playwright() as pw:
       if (typeof gardenCarry === 'function' && SHIP.galley && SHIP.galley.garden) {   // a garden run with herbs and tomatoes: both into your hands once picked up
         const id = gardenCarry({ at: Math.floor(shipNow()) - 1, crates: 2 }), j = SHIP.jobs.find(x => x.id === id), hi = GARDEN_CROPS.findIndex(c => c.id === 'herbs'), ti = GARDEN_CROPS.findIndex(c => c.id === 'tomatoes');
         SHIP.galley.garden.crates.push({ at: shipNow(), items: [[hi, 5], [ti, 20]], id });
-        j.claimedBy = 'you'; j.status = 'claimed'; j.stepsDone = [0]; gardenGift(); out.garden = P.carry.slice(); P.carry = []; gardenGift(); out.again = P.carry.slice();
+        for (const x of SHIP.jobs) if (x.claimedBy === 'you' && x !== j) { x.claimedBy = null; x.status = 'open'; } j.claimedBy = 'you'; j.status = 'claimed'; j.stepsDone = [0]; out.mine = myJob() && myJob().id; const t0 = shipNow(); let hd = SHIP.time.day; if (typeof gardenHarvestDay === 'function') { while (!gardenHarvestDay(hd) && hd < SHIP.time.day + 60) hd++; out.notToday = SHIP.time.day === hd ? null : (gardenGift(), P.carry.slice()); GARDEN_GIVEN.delete(id); setShipNow((hd - 1) * 1440 + SHIP.time.min); } gardenGift(); out.garden = P.carry.slice(); P.carry = []; gardenGift(); out.again = P.carry.slice(); setShipNow(t0);
         SHIP.galley.garden.crates = SHIP.galley.garden.crates.filter(c => c.id !== id); SHIP.jobs = SHIP.jobs.filter(x => x !== j); P.carry = [];
       }
       if (stub) { delete window.giftAdd; delete window.GIFT_MAKES; }
@@ -323,6 +323,7 @@ with sync_playwright() as pw:
     check(set(gf['gifts']) <= {'tin of tea', 'biscuits', 'postcard', 'little plant', 'puzzle book'} and len(gf['gifts']) == 5, f"the store's gifts are section 20's names ({gf['gifts']})")
     check(gf['made'] == ['keyring'], f"a gift made in the machine shop goes into your hands ({gf['made']})")
     if 'garden' in gf: check(gf['garden'] == ['herbs', 'tomato'] and gf['again'] == [], f"a garden run's herbs and tomato into your hands, once ({gf.get('garden')}, {gf.get('again')})")
+    if gf.get('notToday') is not None: check(gf['notToday'] == [], f"no garden gift on a day that isn't a harvest day ({gf['notToday']})")
 
     print('Social from chatting and company:')
     ch = g.ev(r"""(() => { const n = SHIP.player.needs, out = []; SHIP.player.chats = {};
