@@ -468,3 +468,17 @@ introduces them), unless noted.
 | Amadi: the best window on Deck 5 is in the shuttle bay | Amadi | writer-works, batch 2 |
 | "Calder is the clock" (Works joke); in Teague's comic she's a very tidy cloud who says "Fair." | Works | writer-works, batch 2 |
 | The Veyli like their cabins warm | the delegation | writer-commons, reactions |
+| Captain Varga started the portrait gallery | Marrow | writer-command, batch 3 |
+| Vance's regulations: six (shoes off in cabins), nine (rest), eleven section two (leave at port on request); he breakfasts at 06:05 | Vance | writer-command, batch 3 and arcs |
+| Tomas is fourth on Vance's treadmill board | Vance, Tomas | writer-command, batch 3 |
+| The blue crate in the Works bay is Calder's (don't sit on it) | Works | the voice bible; Moleth asks about it |
+| Saruth: "Do not bow. Most of you do it wrong."; humans knock twice; the cord tied loose means "you are expected"; Saruth respects Holt's plain distrust as "a kind of honesty" | Saruth | writer-command, batch 3 |
+| The salvage (a later event): the derelict's crew were all rescued; nobody died. Quill was cook to 22 people; Petrie navigated for 11 years | guests | writer-command, batch 3 (to be confirmed by the events engineer) |
+| Vance's father's two messages have waited since Sowing; 22 years since the academy; Gull's line "Oh treadmill, thou belt of endless toil" | Vance | writer-command, arcs |
+| Mensah's joke: why did the airlock break up with the hatch? Too many seals | Mensah, Holt | writer-command, arcs |
+| The first Veyli knot: under, over, through, and back | Holt, Saruth | writer-command, arcs |
+| Marrow writes every junior's answer in a little book; you're on page forty; officially there are no cats aboard | Marrow | writer-command, arcs |
+| Holt's favourite dish is in Brennan's book (unnamed); Brennan's mother taught her to cook by ear and sings to her pans; the Port Halloran restaurant had twelve tables and a harbour window | Brennan | writer-commons, arcs |
+| A lad two doors down from Pell's mum's shop is good with his hands | Pell | writer-commons, arcs |
+| Torres's father calls him by his uncle's name; he used to hum to the engines, badly | Torres | writer-works, arcs |
+| Kovac counted 112 bolts; she knits two-colour only once, for you | Kovac | writer-works, arcs |

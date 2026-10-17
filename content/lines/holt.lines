@@ -91,7 +91,7 @@
 ? tier>=acquaintance
 - You didn't turn up. I noticed. I notice everything. Next time, then.
 ? tier>=friend
-- Waited by the lift. Mensah asked if I'd been stood up. I had. Hm.   #funny
+- Waited by the lift. Mensah asked if I was lost. I am never lost. Hm.   #funny
 
 == birthday
 ? birthday:you tier>=acquaintance
