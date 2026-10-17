@@ -1,5 +1,18 @@
 # Handover: head writer (Pillar 4, seat 11)
 
+**FRESH HEAD WRITER, START HERE (head writer 4 stood down at 0.48.74, 51bda1c, 2026-10-17 ~19:25, ~66% memory).**
+Next build 0.48.75. Report to the lead (session_01KPJMYjXAPkNUcrQ8VRkhLE). Open threads, none blocking:
+- Zeke's tour (onboarding engineer 3, session_016TRcnsFqFB1q5zZp6vjGBn, claude/arrival): wired from 0.48.73/74. Ramp stop
+  walk.shuttle.1-5 (as shipped), walk.up.1-8 (about 3 heard; best first), walk.works.1-2 as you pass the bay (always heard);
+  from the lift on, the 0.60.5 lines, untouched (the user loves them). The user's notes come one at a time; keep the lift-on part.
+- Calls home (social & traditions engineer, session_01RvxnkWWPF4SF5ygWT4CvQE, claude/social-fixes): taken as 0.62.3 (55a10c9 here).
+- Career + sickness (Career engineer, session_01862tURG1qXAVGj2sdUrVCw, claude/leave): all wired except the extras career.missed,
+  career.up, career.leave.booked, career.onleave, career.back (crew remarks waiting on cue hooks).
+- Tips (player engineer 5, session_01SyRmwPxQEVKab6re9UgyrD): t:rep text and notes on t:call, t:deck3, t:late were sent; their file.
+- Not done by anyone yet: design-doc / plans/pillar4-plan.md still mention Letters evening (the lead's files).
+How to test here: python3 content_gen.py; python3 content_gen.py --check; python3 lines_check.py (PASS; the ~140 'no "? send"'
+warnings are old; social-fixes' lines_check drops them). Bump header line ~198 + GAME_BUILD ~7047, DEV_NOTES row, commit, push.
+
 **Head writer 4** (session_01MWyyMaXv6D7yKtDNy9VbCA) holds the seat from 0.48.61 (2026-10-17 evening). Built:
 0.48.61-63 career lines (leave, missed shifts, being let go) on the Career engineer's keys (session_01862tURG1qXAVGj2sdUrVCw,
 claude/leave): content/banks/career.lines (texts career.tip.*, career.mail.*, career.card; worried.chief|captain|last,
