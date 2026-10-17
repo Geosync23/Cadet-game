@@ -345,7 +345,8 @@ with sync_playwright() as pw:
     # stand-in walks up a tile when the line moves, and you are where it is; leaving takes you out of the line
     stub = g.ev("""(() => { if (typeof lineSpot === 'function') return false; const j = galleyJoin('player');
       window.__ls = { x: j.xy[0] - OX, z: j.xy[1] - OZ, face: Math.PI, at: j.at.slice() }; window.__left = 0;
-      window.lineJoin = () => window.__ls; window.lineSpot = () => window.__ls; window.lineLeave = () => { window.__left++; }; return true; })()""")
+      window.lineJoin = () => window.__ls; window.lineSpot = () => window.__ls; window.lineLeave = () => { window.__left++; };
+      window.__gt = galleyTurn; window.galleyTurn = () => false; return true; })()""")   # your turn held back while the line moves
     if stub:
         g.ev("SHIP.player.needs.hunger = 30"); g.ev(f"({TAP})({json.dumps({'title': 'Servery', 'near': None})})")
         for j in range(60):
@@ -353,9 +354,9 @@ with sync_playwright() as pw:
             if g.ev("!!ACT && ACT.kind === 'queue' && ACT.phase === 'do'"): break
         z0 = g.ev("ACT && ACT.z"); g.ev("window.__ls = { ...window.__ls, z: window.__ls.z + 1, at: [window.__ls.at[0], window.__ls.at[1] + 1] }")
         for j in range(20): g.step(5)
-        mv = g.ev("[!!ACT && ACT.kind, +(ACT.z - window.__ls.z).toFixed(2), +(player.obj.position.z - window.__ls.z).toFixed(2)]")
+        mv = g.ev("ACT ? [ACT.kind, +(ACT.z - window.__ls.z).toFixed(2), +(player.obj.position.z - window.__ls.z).toFixed(2)] : [null]")
         g.ev("queueAsk(); document.getElementById('qLeave').click()"); g.step(3)
-        lv = g.ev("[!!ACT, window.__left]"); g.ev("delete window.lineJoin; delete window.lineSpot; delete window.lineLeave")
+        lv = g.ev("[!!ACT, window.__left]"); g.ev("delete window.lineJoin; delete window.lineSpot; delete window.lineLeave; window.galleyTurn = window.__gt")
         print('  moving with the line (stand-in): from z', z0, '->', mv, '| left:', lv)
         check(z0 is not None and mv == ['queue', 0, 0] and lv[0] is False and lv[1] >= 1, f'the line moves you up a tile, and Leave takes you out of it: {z0} {mv} {lv}')
     qn = g.ev("[actProgress({ kind: 'queue', phase: 'do', body: {}, def: { title: 'In the queue' }, o: { turnAt: shipNow() + 5 } })]")
