@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.36.81
+   STARSHIP CADET: CSV Wren                           build 0.36.82
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7322,7 +7322,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.36.81';                           // keep in step with the header's build line
+const GAME_BUILD = '0.36.82';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -25619,11 +25619,13 @@ function affVals(str, ids) {                              // the saved affinity 
   if (!ids) return null;
   const P = ids.map(id => SOC.idx.has(id) ? SOC.crew[SOC.idx.get(id)] : null), st = affStarts(P), bin = atob(str.slice(2)), v = new Array(st.length);
   let p = 0; const vi = () => { let x = 0, sh = 0, b; do { b = bin.charCodeAt(p++); x |= (b & 127) << sh; sh += 7; } while (b & 128); return x; };
-  for (let k = 0; k < st.length && p < bin.length;) {
+  let k = 0;
+  while (k < st.length && p < bin.length) {
     const z = vi();
-    if (!z) { const r = vi(); for (let q = 0; q < r && k < st.length; q++, k++) v[k] = st[k]; }
+    if (!z) { const r = vi(); if (k + r > st.length) return null; for (let q = 0; q < r; q++, k++) v[k] = st[k]; }
     else { v[k] = st[k] + (z & 1 ? -(z + 1) / 2 : z / 2); k++; }
   }
+  if (k !== st.length || p !== bin.length) return null;   // cut short or too long: refused, like the raw form's wrong length
   const gone = P.some(x => !x); for (let k = 0; k < v.length; k++) { if (v[k] === undefined) v[k] = NaN; else if (gone) { const i = pairOf(k, P.length); if (!P[i[0]] || !P[i[1]]) v[k] = NaN; } }
   return v;
 }

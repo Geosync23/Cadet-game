@@ -178,9 +178,10 @@ with sync_playwright() as pw:
       const older = JSON.stringify(Array.from(SHIP.aff)) === A && JSON.stringify(SHIP.rel) === R; socLoad(sv);
       const N = () => JSON.stringify([NEWS.map(({ seed, ...x }) => x), NEWS.map(x => [...SHIP.knows[x.id]].sort()), SHIP.social.cues]), n0 = N(), s3 = JSON.parse(JSON.stringify(socSave())); socLoad(JSON.parse(JSON.stringify(s3)));   // news and cues as rows, and the older object forms
       const rows = N() === n0 && Array.isArray(s3.news[0] || []) && Array.isArray(s3.cues[0] || []); const o3 = JSON.parse(JSON.stringify(s3)); o3.news = s3.news.map(r => newsRow(r)); o3.cues = s3.cues.map(r => cueObj(r)); socLoad(o3);
-      const oldRows = N() === n0; socLoad(sv); return [packed, same, older, sv.aff.length, bin.length * 4 / 3 | 0, rows, oldRows, NEWS.length]; })()""")
+      const oldRows = N() === n0; socLoad(sv); const cut = JSON.parse(JSON.stringify(sv)); cut.aff = 'd:' + btoa(atob(sv.aff.slice(2)).slice(0, 900)); const refused = socLoad(cut) === false; socLoad(sv);   // a cut-short aff is refused (reviewer 1c)
+      return [packed, same, older, sv.aff.length, bin.length * 4 / 3 | 0, rows, oldRows, NEWS.length, refused]; })()""")
     print('Affinity, relationships, news and cues packed (packed, same after load, older form loads, packed size, raw size, news/cue rows, older news/cues, news):', pk)
-    if pk[:3] != [True, True, True] or pk[5:7] != [True, True]: fail(f'the packed affinity, relationships, news or cues wrong: {pk}')
+    if pk[:3] != [True, True, True] or pk[5:7] != [True, True] or pk[8] is not True: fail(f'the packed affinity, relationships, news or cues wrong: {pk}')
     if not mm[0]: fail('a save and load changes cues, pair news, what you heard or what you know')
     print('Save and load give back the same:', rt)
     xl = g.ev(r"""(() => { const s0 = socSave(), A = JSON.stringify(Array.from(SHIP.aff)), R = JSON.stringify(SHIP.rel), Bd = JSON.stringify(SHIP.social.bonds || {});
