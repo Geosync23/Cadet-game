@@ -30,6 +30,7 @@ SCENES = [
     {'name': 'junior wing, Sunday 20:30', 'day': 7, 'time': '20:30', 'deck': 4, 'room': r'common room'},
     # traditions (Sowing morning is day 6 in the garden; until it's built, the harvest morning there)
     {'name': 'Sowing / harvest morning, garden 10:00', 'day': 6, 'time': '10:00', 'deck': 3, 'room': r'garden'},
+    {'name': 'Tiles night, bow lounge Tue 20:30', 'day': 2, 'time': '20:30', 'deck': 3, 'room': r'^Bow lounge$'},
     {'name': 'quiz night, bow lounge 20:30', 'day': 4, 'time': '20:30', 'deck': 3, 'room': r'^Bow lounge$'},
     {'name': 'breakfast rush, the mess 07:10', 'day': 2, 'time': '07:10', 'deck': 3, 'room': r'^Mess'},
 ]
