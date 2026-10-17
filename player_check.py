@@ -24,6 +24,7 @@
 #   activity (keeping what you'd gained); someone's private wash pod isn't offered; draw calls stay under BUDGET
 #   the bathroom need (0.28.19): toilets in the public washrooms (Decks 4 and 3) sit you down and fill it; cabins' are private
 #   seeing it work (0.28.20, 0.28.21): each tapped activity shows the progress bar and a +N note for its need
+#   the kit bag and the device lock (0.28.26): held from the ramp, into the locker after the bunk step
 #   gifts (0.28.25): store gifts and machine-shop gifts into your hands (giftAdd); a friend's note on your bunk
 #   a reserved training job (0.28.24): the shelf part, the bracket made in the machine shop with the bar, the stops marked, the repair
 #   the note bus (0.28.22): simNote('act', ...) for wash, eat (with), call, buy; your name saved and cleaned
@@ -710,6 +711,29 @@ with sync_playwright() as pw:
     nm = json.loads(ev("JSON.stringify([SHIP.player.name, playerNameSet('  Ada   Okafor '), playerNameSet(''), playerNameSet(42), playerNameSet('x'.repeat(40)).length])"))
     print('  your name (0.28.22): fresh, set, empty, junk, long:', nm)
     check(nm == [None, 'Ada Okafor', None, None, 24], f'playerNameSet cleans names: {nm}')
+    # the kit bag and the device lock (0.28.26, Pillar 4): section 21's intro when it's there, else stand-ins
+    kb = json.loads(ev("""(() => {
+      const real = typeof introBegin === 'function', P = SHIP.player, b = document.getElementById('devBtn'), out = [];
+      if (real) introBegin(); else { SHIP.intro = { on: true, ended: false, done: {}, missed: [], flags: {} }; window.introOn = () => SHIP.intro.on && !SHIP.intro.ended; window.introFlag = k => !!SHIP.intro.flags[k]; }
+      P.carry = []; P.locker = [];
+      out.push([bagGive(), bagGive(), P.carry.slice()]);
+      bagTick(); floatsTick(); b.click();
+      out.push([bagHeld(), deviceLocked(), b.querySelector('span').textContent, typeof DEV !== 'undefined' && !!DEV.open, handsFix('Fit those first')]);
+      if (typeof returnPart === 'function' && typeof jobEnd === 'function') { P.carry.push('valve'); jobEnd({ kind: 'stow' }); out.push(P.carry.slice()); } else out.push(['kit bag']);
+      SHIP.intro.done.bunk = SHIP.time.min; if (real) introFlagSet('intro.device'); else SHIP.intro.flags['intro.device'] = true;
+      bagTick(); floatsTick(); b.click();
+      out.push([bagHeld(), P.locker.slice(), deviceLocked(), b.querySelector('span').textContent, typeof DEV === 'undefined' || !!DEV.open]);
+      if (typeof deviceClose === 'function') deviceClose();
+      P.carry = ['kit bag']; SHIP.intro.ended = true; bagTick();      // the intro off with the bag in hand: quietly to the locker
+      out.push([bagHeld(), P.locker.length, handsFix('Fit those first')]);
+      return JSON.stringify(out);
+    })()"""))
+    print('  kit bag and device lock (0.28.26):', kb)
+    check(kb[0] == [True, False, ['kit bag']], f'bagGive puts one kit bag in your hands: {kb[0]}')
+    check(kb[1] == [True, True, 'No device yet', False, 'Put your bag in your locker first'], f'before the bunk: the bag held, the device locked and shut: {kb[1]}')
+    check(kb[2] == ['kit bag'], f'main storage takes back parts, never the kit bag: {kb[2]}')
+    check(kb[3] == [False, ['kit bag'], False, 'Device', True], f'after the bunk: the bag in your locker, the device opens: {kb[3]}')
+    check(kb[4] == [False, 1, 'Fit those first'], f'the intro off: the bag goes to the locker once: {kb[4]}')
     ev("localStorage.removeItem(SAVE_KEY)")
     b.close()
 
