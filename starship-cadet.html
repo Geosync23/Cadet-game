@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.48.32
+   STARSHIP CADET: CSV Wren                           build 0.48.33
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.48.32';                           // keep in step with the header's build line
+const GAME_BUILD = '0.48.33';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -15505,6 +15505,9 @@ const VOICE = {
         {"text": "Off with you. Mind the hatch on Deck 4. It sticks.", "id": "p3utps", "tier": [1, 4]},
         {"text": "Right. Back to it. Both of us.", "id": "1mk1pws", "tier": [1, 4]},
         {"text": "Off you go, {nick}. Hm. Good talk. Don't tell anyone.", "id": "1nvzz21", "tone": "warm", "tier": [3, 4]},
+        {"text": "Right. Go and eat something. That's an order. Not really. Mostly.", "id": "eylfue", "tone": "funny", "not": {"week1": "true"}},
+        {"text": "As you were, {nick}. Get some sleep.", "id": "1gjylht", "not": {"week1": "true"}},
+        {"text": "Off with you. Mind the hatch. And yourself.", "id": "19cjhei", "tone": "warm", "not": {"week1": "true"}},
       ],
       "callback": [
         {"text": "Behind the second door, on the left. You knew. Good. Now learn the rest.", "id": "1xabpy6", "told": "moment.holt.locker"},
@@ -15525,12 +15528,38 @@ const VOICE = {
         {"text": "Saw your repair. That hatch shuts properly now. Hm. Good.", "id": "1mshk4g", "told": "fixed."},
         {"text": "You came. I saw you. I see everyone. Still. Good.", "id": "hukzla", "told": "came."},
         {"text": "Someone remembered my birthday. You. Mensah's doing, I expect. Hm. Thank you.", "id": "71bggt", "tone": "warm", "told": "bday"},
+        {"text": "First night you came aboard, I clocked you at the lift. Lost. Took the right turn anyway.", "id": "qnavam", "tier": [1, 4], "told": "intro.arrival", "not": {"week1": "true"}},
+        {"text": "Your first night, I watched the Tern land. Always do. A good one got off. Hm.", "id": "15etdtd", "tone": "warm", "tier": [3, 4], "told": "intro.arrival"},
+        {"text": "Quiz night. You knew the airlock question. I saw. Adequate.", "id": "g0llnt", "tone": "funny", "tier": [1, 4], "told": "came.quiz"},
+        {"text": "Running club. You kept pace with Vance. Don't tell him. He'll start a board.", "id": "12d1x0a", "tone": "funny", "tier": [1, 4], "told": "came.running"},
+        {"text": "You came on the long walk. Five in the morning. Most don't. Hm. Again sometime.", "id": "lmwrc3", "tone": "warm", "tier": [2, 4], "told": "moment.holt.walk"},
+        {"text": "Saw your name on a job sheet. {thing}. Done properly. Noted.", "id": "712zyk", "tier": [1, 4], "told": "fixed."},
+        {"text": "Your birthday. Mensah reminded me. I'd remembered. Hm. Mostly.", "id": "15pt14f", "tone": "funny", "tier": [2, 4], "told": "bday"},
+        {"text": "Observatory night. You stood by the door. Good habit. Look up, too, though.", "id": "7wjli6", "tone": "funny", "tier": [1, 4], "told": "came.observatory"},
       ],
       "chat": [
         {"text": "Questions? Ask now. In an emergency, there isn't time.", "id": "jr5sfd", "tier": [0, 0]},
         {"text": "Where's the nearest suit locker from your bunk? Good. Now from the mess? Hm. Learn it.", "id": "1u9cpvn", "tier": [1, 4]},
         {"text": "Watch is easy. Know where everyone is, and stay calm. The second bit's harder.", "id": "om8orw", "tier": [1, 4]},
         {"text": "Mensah says I should smile more at juniors. This is me smiling. Hm.", "id": "dx8r6j", "tone": "funny", "tier": [2, 4]},
+        {"text": "Breakfast after the rounds. Eggs. Toast. Same table. Never changes. Good.", "id": "brlxjz", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Vance runs on the treadmill like it owes him money. I lift. Quietly. Not discussing it.", "id": "rodsvn", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Mensah told me a joke at breakfast. I didn't laugh. Inside, I laughed a little.", "id": "mjic2k", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "The juniors think I don't know about \"one lecture at a time\". I named it.", "id": "1xbp9jz", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "I don't care for tea. I drink it because it's there. That's all.", "id": "1997miv", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Rest day tomorrow. I'll walk the decks anyway. Slower. With a book after.", "id": "md93rb", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "I read on rest days. Old stories. Ships, storms, people getting home. Simple stuff.", "id": "15ok0st", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "Brennan's pudding is adequate. I've had it four times this week. Adequate.", "id": "aoy7ov", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "Tomas asked me about my first posting. I told him. Took an hour. He took notes.", "id": "t08zll", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "Vasquez quoted me back at me. Correctly. I've never been so proud and so annoyed.", "id": "943xf5", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "The Captain asked my opinion at breakfast. Then took it. Good Captain.", "id": "1nocnqu", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "Nakamura grows herbs on his windowsill. Brought me some mint. For the tea I don't drink.", "id": "ayk202", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "Quiz night. I'm on Mensah's team. I know the answers. I don't shout them. Vance shouts.", "id": "o7valo", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "I like a quiet corner and a full plate. Most of what I want, that is.", "id": "1h558n2", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "All these years of watches. I still check under my bunk. Old habit. Hm. Don't laugh.", "id": "wimusd", "tone": "funny", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "The Envoy keeps the same hour every day. So do I. We've that in common. Not much else.", "id": "hm1s3j", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "You know what I worry about? Nothing, most days. You lot made that true. Hm.", "id": "9628k9", "tone": "warm", "tier": [4, 4], "not": {"week1": "true"}},
+        {"text": "If I ever retire, I'll want a window and a door I can see. And a biscuit tin.", "id": "10q1voz", "tone": "funny", "tier": [4, 4], "not": {"week1": "true"}},
       ],
       "cue": [
         {"text": "Storm coming. Everyone to their post. Don't run. Walk fast.", "id": "1wmqcie", "cue": "event.ionStorm.warning"},
@@ -15550,6 +15579,9 @@ const VOICE = {
         {"text": "Ordinary day. Doors shut, people safe. That's what ordinary is for.", "id": "icm3o0", "mood": "ok"},
         {"text": "Bad night. Old dreams. Gone by breakfast. Usually.", "id": "1ivlaph", "beat": "holt.3", "mood": "low", "tier": [3, 4]},
         {"text": "Good day. Mensah made me laugh. Once. He's insufferable.", "id": "b4sueu", "tone": "funny", "mood": "high", "tier": [3, 4]},
+        {"text": "Good day. Mensah made me laugh twice. I'll deny the second.", "id": "1eekz19", "tone": "funny", "mood": "high", "not": {"week1": "true"}},
+        {"text": "Fine. Doors shut. People fed. Fine is a good day.", "id": "1l9jcga", "mood": "ok", "not": {"week1": "true"}},
+        {"text": "Tired. Long night. Walked an extra deck. Helps. Usually.", "id": "191h2n0", "mood": "low", "tier": [3, 4], "not": {"week1": "true"}},
       ],
       "gift": [
         {"text": "For me. Hm. That's. Hm. Thank you, {nick}. Really.", "id": "18x2nc", "tone": "warm", "gift": "loved"},
@@ -15580,6 +15612,14 @@ const VOICE = {
         {"text": "Lanterns. Somebody always hangs one on a hatch wheel. Not you. Good.", "id": "1ta80yf", "season": "lanterns", "tier": [1, 4]},
         {"text": "Cadet. Watch speaks well of you. Vasquez quoted you. To me. Hm.", "id": "1vupn7b", "tone": "funny", "rep": "well"},
         {"text": "Hm. Reliable, they say. I don't say things like that. I'm nodding.", "id": "wricnt", "tone": "funny", "you": "reliable"},
+        {"text": "Cadet. Eaten? Hm. Eat. Then talk.", "id": "1r77nyh", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Hm. You. Sleep well? Good. Somebody should.", "id": "4vtezk", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Evening, cadet. Off shift. Both of us. Act like it.", "id": "a5xcbi", "tone": "funny", "tier": [1, 4], "time": "evening", "not": {"week1": "true"}},
+        {"text": "Hm. {nick}. Sit, if you're sitting. Don't hover.", "id": "1xxwxg6", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "{nick}. Mensah says I'm to ask how your week was. How was your week?", "id": "15lgntp", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "{nick}. Good. There's a seat with a view of the door. Take the other one.", "id": "y3g3qo", "tone": "funny", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "There you are. I've a biscuit going spare. Don't tell anyone I had two.", "id": "zr63rq", "tone": "funny", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "Kid. Sit down. Tell me something ordinary. I like ordinary.", "id": "1l3i6tf", "tone": "warm", "tier": [4, 4], "not": {"week1": "true"}},
       ],
       "hint": [
         {"text": "Cadet. Walk with me. One deck. Not about work.", "id": "zfatr8", "tier": [3, 4]},
@@ -15593,6 +15633,8 @@ const VOICE = {
         {"text": "Five in the morning, every door where it should be. Nothing better aboard.", "id": "1uormhg", "tone": "warm", "tier": [2, 4]},
         {"text": "A deck at five in the morning. Lights low, doors shut, the ship breathing. Good.", "id": "1cjwnsy", "tier": [1, 4]},
         {"text": "Rounds done before anyone's up. Every door, every deck. Then tea. Hm.", "id": "uzil07", "tier": [3, 4]},
+        {"text": "The first cup of something hot after rounds. Whatever it is. Not tea. Hm. Tea.", "id": "1tdo4by", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "A junior doing the right thing without being told. I don't say it. I notice it.", "id": "fjggay", "tone": "warm", "tier": [2, 4], "not": {"week1": "true"}},
       ],
       "life": [
         {"text": "Border patrol, before the Wren. Long nights. This ship's easier. Mostly.", "id": "1w53fbl", "tier": [1, 4]},
@@ -15603,6 +15645,10 @@ const VOICE = {
         {"text": "I don't trust easily. The Veyli least of all. Mensah says that's my problem. He's right.", "id": "b0ewyn", "tier": [2, 4], "not": {"beat": "holt.3"}},
         {"text": "I wrote to Rook. About the Wren. Short letter. She'll laugh at it.", "id": "4gielp", "beat": "holt.3"},
         {"text": "Tea with the Envoy, every tenth day. Don't make a thing of it. Mensah has.", "id": "17v4dz6", "tone": "funny", "beat": "holt.5"},
+        {"text": "I keep a tin of mints in my desk. For the juniors. Mostly for the juniors.", "id": "b0rynl", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Still got my first patrol boots. Resoled twice. They'll see me out.", "id": "eqoty6", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "Mensah and I've worked together years. He talks, I listen. It's a fair split.", "id": "eua1dp", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "I've a book I read every Lanterns. Same one. A ship gets home in the end.", "id": "2a2ypx", "tier": [3, 4], "not": {"week1": "true"}},
       ],
       "missed": [
         {"text": "You didn't turn up. I noticed. I notice everything. Next time, then.", "id": "h6jp25", "tier": [1, 4]},
@@ -15620,6 +15666,13 @@ const VOICE = {
         {"text": "The Envoy's door. New knot this month. Hm. I counted. Don't ask why.", "id": "18htm9a", "deck": "2", "tier": [2, 4]},
         {"text": "Weights. After shift. That's all you need to know.", "id": "1032943", "tone": "funny", "habit": "gym-regular"},
         {"text": "Breakfast after the rounds. Every deck. Long way. Earned it.", "id": "2rc2iz", "place": "mess", "time": "morning"},
+        {"text": "Rounds done. Now breakfast. Same seat. Back to the wall.", "id": "11cg6ol", "act": "breakfast", "not": {"week1": "true"}},
+        {"text": "Late dinner. Quieter. Pudding's still on. Good.", "id": "1auzzzl", "act": "dinner", "not": {"week1": "true"}},
+        {"text": "I'm here for the weights. We've discussed this. We have not discussed this.", "id": "1fm1rbq", "tone": "funny", "act": "gym"},
+        {"text": "Rest day. Book, walk, book. No drills. Don't tempt me.", "id": "16guh3h", "tone": "funny", "act": "off"},
+        {"text": "Lounge. Hm. Mensah dragged me. I'm sitting by the door. Naturally.", "id": "el6w6j", "tone": "funny", "place": "lounge"},
+        {"text": "Mess. Every seat's taken but one. It faces the door. Mine.", "id": "e0fcvo", "tone": "funny", "place": "mess", "not": {"week1": "true"}},
+        {"text": "Quiz night. Team's called something Mensah chose. I won't say it.", "id": "ldvwhe", "tone": "funny", "trad": "quiz"},
       ],
       "note": [
         {"text": "Your door didn't shut properly. It does now. That's all.", "id": "yxouyj", "tier": [3, 4]},
@@ -22093,6 +22146,9 @@ const VOICE = {
         {"text": "Carry on, {nick}. On time, and tidy.", "id": "51w0c7", "tier": [1, 4]},
         {"text": "As you were. Do try to be as you were tomorrow too.", "id": "1bmnaya", "tone": "funny", "tier": [1, 4]},
         {"text": "Carry on, {nick}. And thank you. Noted, and meant.", "id": "6qs0o2", "tone": "warm", "tier": [3, 4]},
+        {"text": "Carry on. Eat something. Rest a little. In that order.", "id": "1du9mpo", "not": {"week1": "true"}},
+        {"text": "Dismissed, {nick}. Kindly. Very kindly, today.", "id": "118mxya", "tone": "warm", "not": {"week1": "true"}},
+        {"text": "As you were. On time tomorrow. I'll know.", "id": "1hpwpdh", "tone": "funny", "not": {"week1": "true"}},
       ],
       "callback": [
         {"text": "You said I knew Gull's poem well. I read the newsletter thoroughly. That's all.", "id": "1058r6v", "tone": "funny", "told": "moment.vance.suspect", "not": {"beat": "vance.5"}},
@@ -22114,12 +22170,38 @@ const VOICE = {
         {"text": "You came to running club. Your pace was correct. Next week, faster.", "id": "c69e6s", "tone": "funny", "told": "came.running"},
         {"text": "You came. Attendance noted. Warmly noted.", "id": "1tj2ole", "tone": "warm", "told": "came."},
         {"text": "You remembered my birthday. It's on the roster, I know. You still remembered.", "id": "1650o3j", "tone": "warm", "told": "bday"},
+        {"text": "Running club. You kept a steady pace. I noted it. On paper. In ink.", "id": "q63dm6", "tone": "funny", "tier": [1, 4], "told": "came.running"},
+        {"text": "Quiz night. You knew regulation six. I may have nodded. Visibly.", "id": "7bs10p", "tone": "funny", "tier": [1, 4], "told": "came.quiz"},
+        {"text": "You read Gull with me. You laughed in the right places. There are few right places.", "id": "xyufey", "tone": "funny", "tier": [2, 4], "told": "moment.vance.gull"},
+        {"text": "You held the stopwatch. Accurately. I've told no one my time. You know it. Keep it.", "id": "1r5ans2", "tone": "funny", "tier": [2, 4], "told": "moment.vance.board"},
+        {"text": "Your birthday. On the roster. I said it out loud. I'll say it again: happy birthday.", "id": "1i67lr", "tier": [1, 4], "told": "bday"},
+        {"text": "Your repair. {thing}. Done correctly, on time and tidily. Three for three.", "id": "1v8rdca", "tier": [1, 4], "told": "fixed."},
+        {"text": "I logged your arrival, the Sunday you came. On time. The Tern wasn't. You were.", "id": "nt8sh3", "tone": "funny", "tier": [1, 4], "told": "intro.arrival", "not": {"week1": "true"}},
+        {"text": "Observatory night. You were early. So was I. We waited correctly.", "id": "1p9p0pg", "tone": "funny", "tier": [1, 4], "told": "came.observatory"},
       ],
       "chat": [
         {"text": "Questions, cadet? Ask them. Unasked questions cause most of the trouble aboard.", "id": "mgs0c7", "tier": [0, 0]},
         {"text": "Have you read the regulations yet? Not all. The first ten. They're the good ones.", "id": "8bc67g", "tone": "funny", "tier": [1, 4]},
         {"text": "Status report, {nick}. Unofficial. How's the week? Short version.", "id": "59y2be", "tier": [1, 4]},
         {"text": "You've the makings of a good officer. Don't let it go to your head. Your boots, maybe.", "id": "vjfcd0", "tone": "funny", "tier": [2, 4]},
+        {"text": "Did you read Gull this week? \"Oh corridor, thou long and grey.\" Two errors of metre.", "id": "10iozmi", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "The good records. A waiting list exists for a reason. The reason is me.", "id": "x73rua", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Breakfast at 06:05. Porridge, toast, a small biscuit. The biscuit is not regulation.", "id": "1pjxikt", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "I read on my rest days. Old naval histories. And, once, a mystery. Don't tell Achterberg.", "id": "85g4bx", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Lindqvist set a treadmill time yesterday. I've studied it. Respectfully. Closely.", "id": "1jkoi1q", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Rest day tomorrow. I've planned it to the minute. Most minutes say \"nothing\".", "id": "tpfv6a", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Tea, properly made: warm the pot, three minutes, no more. Torres agrees. A rare alliance.", "id": "1kil7eh", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "The Captain plays on Thursdays. I don't listen at the door. I happen to pass. Slowly.", "id": "g5cbjw", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "Brennan's shortbread. Three pieces. A personal limit. I've never once kept it.", "id": "tujonx", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "Tomas runs better when nobody's watching. So I watch from the corner. Discreetly.", "id": "z1sx6z", "tone": "warm", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "Gull rhymed \"Wren\" with \"again\" this week. Lazy. Also, I admit, rather moving.", "id": "ny98sf", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "I rowed six to a boat at the academy. Now I run alone. Different. Still good.", "id": "1pw7tuu", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "I had a cup of the Envoy's tea once. Formally. It was correct.", "id": "h04yd0", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "The Counsellor says I should have a hobby that isn't a list. I'm making a list of options.", "id": "z6c7ke", "tone": "funny", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "I like a well-made record. Clean, warm and on time. Like a good watch.", "id": "vivqvq", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "The juniors I've recommended write to me. Not often. Enough. I keep every one.", "id": "g2jk5s", "tone": "warm", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "I used to think a day off was a day wasted. I've revised that. Regulation nine, my edit.", "id": "1bp0cxy", "tone": "funny", "tier": [4, 4], "not": {"week1": "true"}},
+        {"text": "You're on my list, you know. The good one. It's not a leaderboard. It's better.", "id": "1l9cfm2", "tone": "warm", "tier": [4, 4], "not": {"week1": "true"}},
       ],
       "cue": [
         {"text": "Storm warning. Stations in ten minutes. Calmly. Briskly. Both.", "id": "1qolekc", "cue": "event.ionStorm.warning"},
@@ -22139,6 +22221,9 @@ const VOICE = {
         {"text": "An ordinary day. Everything correct. That's harder than it looks.", "id": "jdae40", "mood": "ok"},
         {"text": "A heavy day. Not the work. Just heavy. I'll run it off. Eventually.", "id": "h52m59", "mood": "low", "tier": [3, 4]},
         {"text": "A good day. Tomas beat his time. I pretended not to watch. I watched.", "id": "1c39wpm", "tone": "warm", "mood": "high", "tier": [3, 4]},
+        {"text": "Excellent day. Board clear, record on, pudding, and a fourth thing. I forget. Allow it.", "id": "1kk0f83", "tone": "funny", "mood": "high", "not": {"week1": "true"}},
+        {"text": "Correct. Steady. Nothing to report. That's a good report.", "id": "1ogjjv2", "mood": "ok", "not": {"week1": "true"}},
+        {"text": "Quieter today. I ran an extra kilometre. It didn't help. It usually does.", "id": "zzlmej", "mood": "low", "tier": [3, 4], "not": {"week1": "true"}},
       ],
       "gift": [
         {"text": "For me? That's. Thank you. It's going on my desk. Square to the edge.", "id": "1yt4jwq", "tone": "warm", "gift": "loved"},
@@ -22169,6 +22254,14 @@ const VOICE = {
         {"text": "{nick}. Lanterns. Nothing hung across a hatch, by regulation. Otherwise, enjoy.", "id": "lhdix5", "season": "lanterns", "tier": [1, 4]},
         {"text": "{nick}. The bridge speaks well of you. Briefly. That's how the bridge speaks.", "id": "1ekq8av", "rep": "well"},
         {"text": "{nick}. \"Reliable,\" they say. My favourite word. After \"punctual\".", "id": "hcq7ip", "tone": "funny", "you": "reliable"},
+        {"text": "Cadet. Fed, rested and dressed. Two out of three would do. Three is better.", "id": "19iywxr", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Cadet. You're early. I'm earlier. We're both correct.", "id": "18q2eqf", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Cadet. My rest day. I'm not on duty. I'm merely observing.", "id": "g00joa", "tone": "funny", "tier": [1, 4], "weekday": "tue|wed", "not": {"week1": "true"}},
+        {"text": "{nick}. Good. I've a record playing in my head and nobody to tell. Sit.", "id": "1tbw7ne", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "{nick}. A question, informal: pudding or the treadmill first? I've done both.", "id": "1o412mo", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "{nick}. Good to see you. Sit. Tea's poured. Milk, no sugar. Correct?", "id": "16x2sfp", "tone": "warm", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "{nick}. I saved you the seat by the door. Punctual people deserve it.", "id": "dn721q", "tone": "warm", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "{nick}. Off duty. Both of us. Let's be bad at it together.", "id": "ax49bj", "tone": "funny", "tier": [4, 4], "not": {"week1": "true"}},
       ],
       "hint": [
         {"text": "{nick}. A word. Not about work. When you've a moment.", "id": "pysd0x", "tier": [3, 4]},
@@ -22182,6 +22275,8 @@ const VOICE = {
         {"text": "Rowing, at the academy. Six of us, one boat, nobody late. The best thing I've ever done.", "id": "17kt1mf", "tier": [2, 4]},
         {"text": "A new leaderboard. Clean paper, straight tape. All those empty lines, waiting.", "id": "tnlkb3", "tone": "funny", "tier": [1, 4]},
         {"text": "The first five minutes of a shift. Everyone in place. Then it gets interesting.", "id": "1kc03ev", "tier": [3, 4]},
+        {"text": "A fresh sheet of paper on a new leaderboard. All those empty lines. Splendid.", "id": "144ybhw", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "A record that starts exactly when you lower the needle. Small things. Correct things.", "id": "t6zjro", "tier": [2, 4], "not": {"week1": "true"}},
       ],
       "life": [
         {"text": "I keep the waiting list for the good records. You're ninth. Waiting builds character.", "id": "wsteyd", "tone": "funny", "tier": [1, 4]},
@@ -22191,6 +22286,10 @@ const VOICE = {
         {"text": "Twenty-two years since the academy. I can still tell you who was late, and by how much.", "id": "rv8g1x", "tone": "funny", "tier": [2, 4]},
         {"text": "My father kept every report of mine. Every one. I'm still getting used to that.", "id": "1ajdtwn", "beat": "vance.4", "tier": [3, 4]},
         {"text": "Gull's next poem is about the rowing machine. Keep that to yourself.", "id": "c863jc", "tone": "funny", "beat": "vance.5"},
+        {"text": "I iron my uniform on Sundays. All seven. Yes, seven. Don't ask about the eighth.", "id": "banmhw", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "I keep the rowing pin from the academy in my desk. I look at it when the board's quiet.", "id": "sib6u9", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "My cabin has one shelf of regulations and one shelf of novels. The novels are winning.", "id": "cdpk9x", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "I baked once. Shortbread, for a junior's leaving do. Brennan inspected it. Passed.", "id": "17eg9yy", "tier": [3, 4], "not": {"week1": "true"}},
       ],
       "missed": [
         {"text": "You missed our appointment. Noted. Things happen. Don't make it a habit.", "id": "1hkxvcw", "tier": [1, 4]},
@@ -22208,6 +22307,13 @@ const VOICE = {
         {"text": "The senior corridor. Shoes off in the cabins, on in the corridor. Regulation six.", "id": "1dam560", "deck": "2"},
         {"text": "The record cabinet. Waiting list, page one. You're still ninth. Patience.", "id": "18vwv5e", "tone": "funny", "place": "musicroom"},
         {"text": "Ring corridor, eight laps. It's not on a leaderboard. I'm considering it.", "id": "15x20oq", "tone": "funny", "habit": "runner"},
+        {"text": "06:05. Porridge. The biscuit. Don't look at the biscuit.", "id": "az8j1e", "tone": "funny", "act": "breakfast", "not": {"week1": "true"}},
+        {"text": "Treadmill. Five kilometres. Then I'll pretend not to look at the board.", "id": "5ry2i", "tone": "funny", "act": "gym", "not": {"week1": "true"}},
+        {"text": "Dinner at 18:00. On time. Pudding at 18:20. Also on time.", "id": "170gv39", "tone": "funny", "act": "dinner", "not": {"week1": "true"}},
+        {"text": "Rest day. A book, a long walk, a record. A fourth thing: tea. Allow it.", "id": "ted7t0", "tone": "funny", "act": "off"},
+        {"text": "The good records live here. I'm only checking the list. And listening. Briefly.", "id": "aj3b5m", "place": "musicroom"},
+        {"text": "The lounge. Off duty. I'm sitting very casually. Observe.", "id": "dqjixa", "tone": "funny", "place": "lounge", "not": {"week1": "true"}},
+        {"text": "Running club. I'll set the pace. Then I'll quietly lower it.", "id": "1f5bb38", "tone": "warm", "trad": "running"},
       ],
       "note": [
         {"text": "Called by. You were out. Correctly: it's your evening. See you at 06:05.", "id": "fzhjvy", "tier": [3, 4]},
