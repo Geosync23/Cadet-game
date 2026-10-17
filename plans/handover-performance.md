@@ -57,6 +57,12 @@ All in sections 8 and 8b unless named. The DEV_NOTES rows have the detail.
 - **Numbers now:** desktop 1280×760, widest 0.55: D2 325, D3 356, D4 470, D5 299; zoom 1.0: 179-241. Phone portrait 390×844: D4 383 at the widest 0.7 (871 at 0.27.18), 210 at 1.5. day_check day 1 peaks about 170-250.
 - **Gotchas found:** `renderer.info.render.calls` (the budget's number) counts the main pass only, not the shadow pass. The window glass is merged into the hull decor bucket and so casts a faint shadow although its `castShadow` is false; marking it noMerge changes the picture, so it's left alone. Big `push(...array)` spreads overflow the stack on Deck 5: use loops. My `until pgrep -f` wait loops matched their own command line and never ended: wait on a background command instead.
 
+## Standing role: phone-speed watchdog (Pillar 4, from 2026-10-17)
+- For each combined attempt the build master (session_012K7RZ3oSX2vpBb1rR66MBh, claude/integration-test) sends, run `perf_check.py NEW.html OLD.html` (mine, ~5 minutes) and tell the lead PASS or the regressions with the commit that caused them.
+- Its SCENES are stand-ins until Pillar 4's moments exist: switch them to the arrival steps (Deck 5 ramp 17:40 on Day 0, Works door, Bunk 1, dinner with Calder), Sowing morning (day 6 garden), Sunday roast, Tiles night (Tuesday 20:00 bow lounge), talent night and the lantern walk (promenade) as each lands.
+- Baseline 0.41.10: all under 450 on phones; the junior common room zoomed out (portrait 0.7) is the tightest at 428.
+- On call for Pillar 4's performance rows: two-person bubbles, the device hand-over and bag props, sigh/laugh/listen/play poses, lantern instancing (plans/pillar4-plan.md on ship-integration, Parts 4-6).
+
 ## Waiting (at 0.27.22)
 - Desktop widest Deck 4 is 470, a little over 450; everything else, and every phone view, is under. The next cuts, if wanted: hide the smallest wall pieces (light switches, small plates) below about zoom 0.65, or merge wall decor that never drops. Wall decor batching per wall run was tried and saved only 7 calls (most pieces are alone on their wall stretch).
 - The user may want the zoom-out limit (0.55 desktop, 0.7 tall screens) widened now that it's cheaper; the near/far planes and shadows already follow the zoom.
