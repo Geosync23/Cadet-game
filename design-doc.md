@@ -35,7 +35,7 @@ When the crew keep up, the ship hums. When they fall behind, or the player skips
 ### Ground rules
 
 - **Everything functional, everything simulated** (the project's ethos, agreed 2026-10-15). Every room and every function aboard is used, by the crew in their day-to-day and by the player. The gym is for working out, the booths are for calling home, the store is for shopping, the galley really cooks. Where full simulation isn't possible, get as close as we can, and never build a room that is only scenery.
-- **No fail state.** A neglected ship gets shabby, uncomfortable and talked about. It is never lost. Losing would break the feeling of being just another crew member.
+- **One fail state, and it is very hard to reach** (the user, 2026-10-17, replacing "no fail state"). A neglected ship gets shabby, uncomfortable and talked about; it is never lost, and needs never fail you. The only way to lose is to stop turning up for work, again and again, until the ship lets you go (see "Leave, missed shifts and being let go"). You really have to not try.
 - **The player climbs but never commands.** They start on simple jobs (filters, lamps, carts), then move up to the engines and eventually sit in briefings with the Captain. Rank decides which jobs and which parts of an event reach the player.
 - **18 ship hours take 30 real minutes** (agreed 2026-10-16). A whole 24-hour ship day lasts 40 real minutes, one ship hour is 100 real seconds, and a 7-day ship week is about 4⅔ hours of play.
 - **The ship doesn't run while the game is closed.** Time stops when you leave and resumes where you were. Nothing catches up while you're away (confirmed 2026-10-16).
@@ -109,7 +109,7 @@ The daily loop spans three decks: sleep on Deck 4, eat on Deck 3, work from Deck
 
 **Build order:** Deck 4, then Deck 5, then Deck 3, then Decks 6, 1 and 2. All six decks now have agreed plans (`plans/deckN-plan.html`). Decks 4, 5 and 3 are built and signed off. Decks 6, 1 and 2 are built as shells, rooms and furniture, without crew or machines (see DEV_NOTES and TEAM.md for their review status).
 
-**Access and mood.** The lift reaches every deck from day one. Utility rooms lock by tier (agreed 2026-10-16): closets at Tier 1, plant rooms at Tier 2, batteries and power junctions at Tier 3. The player starts at Tier 1, a Works junior. Locking by story comes later, with the story work; until then, sealed rooms and hatches show what's behind them with tap text. Each deck has its own lighting mood: warmer and dimmer on Deck 6, cooler on the bridge.
+**Access and mood.** The lift reaches every deck from day one. Utility rooms are open to the player from the start (the user, 2026-10-17, replacing the tier locks of 2026-10-16): you can walk into any utility room whose inside is built, at any tier. Tiers still decide which jobs you may take (closets Tier 1, plant rooms Tier 2, batteries and power junctions Tier 3), and crew outside Works still treat the hatches as walls. The player starts at Tier 1, a Works junior. Locking by story comes later, with the story work; until then, sealed rooms and hatches show what's behind them with tap text. Each deck has its own lighting mood: warmer and dimmer on Deck 6, cooler on the bridge.
 
 
 ## Crew and rooms
@@ -439,6 +439,12 @@ Daily routines belong to the crew's ordinary day instead: the bridge watch hands
 
 You work the day shift as a Works maintenance tech, taking jobs from the same list as the rest of the crew and doing them with your own hands.
 
+**Leave, missed shifts and being let go** (the user, 2026-10-17; the lead's defaults in brackets, easy to change).
+- **Paid leave.** Besides the weekend you have a few days of leave, booked on your device (Schedule): very few [3 to start, 1 more every 4 ship weeks, at most 5 held]. Book a workday at least the evening before [or before 07:30 the same day]; cancel to get it back. Time in the infirmary when you're ill never counts.
+- **Missing work.** Skipping a workday shift without leave is a big hit to your reputation (Works and ship-wide work) [missing most of the shift counts; being a bit late is a small dip]. Working well lifts it again as usual.
+- **Going down, step by step, with plenty of warning.** As your work reputation falls, tips explain what's happening and how to fix it, and friends come and find you, worried. Low: the Chief calls you in (an appointment) for a talking-to. Very low: the Captain calls you to his ready room and reprimands you. At the bottom for several days in a row [3 ship days], you are let go.
+- **Being let go** is the game's only fail state. You get a goodbye like any crew member leaving: friends say goodbye a day before and on the day, and see you off in the shuttle bay. Then that save ends and the game offers a new game (the user's choice).
+
 **Arriving by shuttle** (Pillar 4, agreed 2026-10-17; plans/pillar4-plan.md, Part 1). A new game opens on **Day 0, Sunday, 17:40**: you sign the Tern's manifest with your name inside the shuttle; the pilot, Dev Raman, says a word over the speaker, the ramp opens, and you walk down it into the Deck 5 shuttle bay (it closes behind you; the user, 2026-10-17), and **Zeke Torres** (a Works engine officer, one rank above you, a future friend) meets you. He walks ahead talking (the haulway, the Works bay door, the lift, the junior wing): at each place he says its two to four key lines, pausing briefly while he does, and if you linger there he tells you more, which you lose once you've both moved on (the user's "pacing A", 2026-10-17), hands you your device at your bunk, and takes you to dinner in the mess, where Chief Calder stops by the table. You always walk yourself; if you wander off he waits, then moves on, and anything you miss arrives by Mail. Bed ends the evening and Monday is your first shift. The first week is taught by people (Torres's shadow shift on Monday, Calder's first solo job on Tuesday, Sowing morning with Tomas on Saturday), with an optional Settling-in list on the device and an "I know my way around" button to end it. **Skipping** (offered on later new games): you start Monday 06:00 in Bunk 1 with the same friendships as after the evening, but no scripted week (the tips teach instead) and every social feature open at once (decided 2026-10-17, the onboarding engineer).
 
 **The job loop.** Every job follows the same physical steps:
@@ -736,7 +742,7 @@ Done so far:
 - The player starts in Bunk 1 with Tomas, and Pell and Rina are in Bunk 2 (answered since v3).
 - 18 ship hours take 30 real minutes, so a whole day is 40 (agreed 2026-10-16; first 30 minutes a day, before that a guess of 10). This sets every wear rate.
 - What triggers the first story events: ship-wide events are the main missions, about one every 1–2 ship weeks, starting with the ion storm (see "Ship-wide events").
-- Decks 6 and 1 are reachable by lift from day one. Utility rooms lock by tier (closets 1, plant rooms 2, batteries and power junctions 3, so Deck 6's junctions stay at tier 3); locking by story comes later (agreed 2026-10-16).
+- Decks 6 and 1 are reachable by lift from day one. Utility rooms are open to the player from the start (the user, 2026-10-17); tiers (closets 1, plant rooms 2, batteries and power junctions 3) now only gate which jobs you may take. Locking by story comes later.
 - The bridge's sunken command ring is faked for now with a rail, a painted step edge and a curved step strip.
 - The bridge washroom stays.
 - The game starts on Day 1, a Monday, at 06:00, with the player in Bunk 1 (agreed 2026-10-15).
