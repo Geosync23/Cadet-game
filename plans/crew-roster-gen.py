@@ -915,12 +915,14 @@ ARC_OVERRIDE = {'kovac-zainab': ('arc:kovac', [   # all her details from canon (
     (2, 'home', 'Writes to a big, noisy family more often than her family writes back.'),
     (3, 'past', 'Takes the maintenance ladder between decks "for the exercise", every time.'),
     (4, 'secret', 'Is afraid of the lift, and thinks she is the only one aboard who is.')])}
+ARC_FIELDS = {'kovac-zainab': {'home': 'Marra Station'}}      # her arc's beat 3: she grew up on Marra Station (0.16.18)
 def arc_fixes(people):
     for e in people:
         if e['id'] not in ARC_OVERRIDE: continue
         th, lines = ARC_OVERRIDE[e['id']]
         e['thread'] = th
         e['about'] = [dict(tier=t, topic=k, text=x) for t, k, x in lines]
+        e.update(ARC_FIELDS.get(e['id'], {}))
         assert len(e['about']) >= 6, e['id']
 
 def kin_lost(people):
