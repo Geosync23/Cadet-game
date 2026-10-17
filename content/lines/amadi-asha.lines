@@ -40,3 +40,43 @@
 == joy
 ? tier>=acquaintance
 - The best window aboard changes every week. This week it's the observatory.
+
+// ---- Writer 2, batch 1: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue)
+== greet
+? tier>=acquaintance time:evening
+- Evening. Late dinner for me. Mess is empty, window's free. Perfect.
+? tier>=acquaintance warmth:cold
+- Oh, there you are. I'd started checking windows for you. You weren't in any.   #funny
+
+== near
+? habit:music
+- Music room in the evenings now. I just listen. Only listen. Honest.   #funny
+? place:overlook
+- Coils from the overlook. Best view on Deck 6. Well, the only view on Deck 6.   #funny
+
+== invite
+- Observatory tonight? I'll show you the window seat. It's the best one this week.
+? tier>=colleague
+- Friday jam? I won't sing. I'll sit. You can sit too. Sitting's nice.
+
+== accept
+- Ooh, yes. I'll bag us a window.
+- Yes. Lovely. I'll be the one by the glass.
+
+== decline
+- Not tonight. Late dinner, window seat. It's booked. By me. Tomorrow?
+? weekday:tue|wed
+- Rest day. I'm doing a tour of every window on the ship. Another time?   #funny
+
+== missed
+- You missed it. That's all right. I had the window to myself. It was fine. Almost.
+
+== birthday
+? birthday:you
+- Happy birthday! I'll give you the window side all day. That's a big present, that.   #warm
+? birthday:me
+- My birthday. The washroom sang to me this morning. All of them. Badly. I loved it.   #funny
+
+== cue
+? cue:repair.you@dept
+- Was that your fix on Deck 6? The coils look happier. I'm telling everyone.

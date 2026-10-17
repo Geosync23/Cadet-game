@@ -39,3 +39,43 @@
 == joy
 ? tier>=acquaintance
 - Picture it: the boat, Hesper Dock, morning, rain on the deck. Just me and a kettle.
+
+// ---- Writer 2, batch 1: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue)
+== greet
+? tier>=acquaintance time:evening
+- Hey. Bar, then stars, then maybe bed. Don't hold me to the bed.
+? tier>=acquaintance warmth:cold
+- There you are. Thought you'd gone off to buy a boat. Mine, I mean. Don't.   #funny
+
+== near
+? place:lounge
+- One drink. I'm pricing sails in my head. Don't look at me like that.
+? place:mess
+- Toast, standing up. It's faster. It's also better. Argue with me.   #funny
+
+== invite
+- Observatory? I need a witness. I'm about to log my four hundredth star.
+? tier>=colleague
+- Quiz night. I'll argue every answer. You tell me when I'm right.   #funny
+
+== accept
+- Yes. Fine. Good. I was going anyway. Now it's better.
+- Done. I'll be there. I'll be awake. I'm always awake.   #funny
+
+== decline
+- Not tonight. Extra shift. The boat won't buy itself. Ask me again.
+? weekday:tue|wed
+- Rest day. I'm sleeping. Don't tell anyone. Another time.   #funny
+
+== missed
+- You didn't come. I argued with myself instead. I won. Next time?   #funny
+
+== birthday
+? birthday:you
+- Happy birthday. I'd name the boat after you, but no. Every name's wrong. Have a tea.   #funny
+? birthday:me
+- My birthday. I've put a day's credits in the boat jar. That's my present.
+
+== cue
+? cue:repair.you@dept
+- Saw your job. You did it the right way. I'd have done the quick way. Fair enough.

@@ -39,3 +39,43 @@
 == joy
 ? tier>=acquaintance
 - Press a flower right and it keeps its colour for years. Look. This one's from Sowing.
+
+// ---- Writer 2, batch 1: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue)
+== greet
+? tier>=acquaintance time:evening
+- Hiya. Just off for a late dinner. The mess is lovely when it's empty. Promise.
+? tier>=acquaintance warmth:cold
+- Ooh, look who's back. I nearly sent a search party. A small one. Just me.   #funny
+
+== near
+? habit:gym-regular
+- Gym crowd after shift now. Bet I can do more laps than you. Prove me wrong.
+? place:teacorner
+- Coffee machine's purring. That's me. You're welcome.   #funny
+
+== invite
+- Fancy a run? Two laps of the deck. Loser gets the coffees. That's me, usually.   #funny
+? tier>=acquaintance
+- Garden after shift? Help me find a flower worth pressing. Cruz won't see. Probably.
+
+== accept
+- Ooh, yes. I'll be there first. Bet you.
+- Yes, lovely. I'll bring a stopwatch, just in case.   #funny
+
+== decline
+- Not tonight, I'm shattered. Rain check? Do we say that here? We do now.
+? weekday:sun|mon
+- Rest day. I'm pressing flowers and doing nothing else. Another time?
+
+== missed
+- You missed it. That's fine. I won anyway. It's easy, when it's only you.   #funny
+
+== birthday
+? birthday:you
+- Happy birthday! I pressed you a flower. Garden green. Don't sit on it.   #warm
+? birthday:me
+- My birthday. Kovac's challenged me to a scrubber race. Best present yet.   #funny
+
+== cue
+? cue:repair.you@dept
+- Was that your job? How long? Don't tell me. It was faster than mine. Was it?   #funny

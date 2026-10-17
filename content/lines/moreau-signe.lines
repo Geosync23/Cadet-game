@@ -39,3 +39,44 @@
 == joy
 ? tier>=acquaintance
 - The moment in a mystery when you know. Right or wrong. That's the best page.
+
+// ---- Writer 2, batch 1: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue)
+== greet
+? tier>=acquaintance time:evening
+- Evening. Your sleeve's caught on something. Grease, by the look. Bench three.
+? tier>=acquaintance warmth:cold
+- There you are. You've been off the board for days. I noticed. I notice things.
+
+== near
+? habit:gym-regular
+- Gym after shift now. Rowing, then weights. Santos is ahead. Not for long.
+? habit:music
+- Music room. I'm allowed to be soft about one thing. This is the thing.
+
+== invite
+? tier>=acquaintance
+- Gym after shift? Rowing. I'll set the pace. You'll hate me. Then you'll thank me.   #funny
+? tier>=colleague
+- Friday jam. Sit with me. I'll tell you which song comes next. I'm always right.
+
+== accept
+- Yes. Good. Be on time. I'll know.
+- Fine. I'm in. Bring that book back while you're at it.
+
+== decline
+- Can't. I'm on the rower at seven. Tomorrow.
+? weekday:fri|sat
+- Rest day. One book, the whole thing. I'll have guessed by lunch. Another time.   #funny
+
+== missed
+- You didn't turn up. I noticed. I notice everything. Next time, yes?
+
+== birthday
+? birthday:you
+- Happy birthday. I got you a mystery. I haven't read it. That's my present to you.   #funny
+? birthday:me
+- My birthday. Achterberg gave me a book with the last page torn out. Best present ever.   #funny
+
+== cue
+? cue:repair.you@dept
+- I checked your seal. It's good. I'd have said if it wasn't.
