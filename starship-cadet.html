@@ -10018,6 +10018,7 @@ function jobStopMark(j, step) {                          // tell section 17 a st
   if (typeof jobStepDone !== 'function' || typeof jobStops !== 'function') return;
   const k = jobStops(j).findIndex(x => x.step === step); if (k >= 0) try { jobStepDone(j.id, k); } catch (e) { /* not ours to mend */ }
 }
+const giftHeld = () => typeof giftInHands === 'function' && !!giftInHands();   // a gift among the things in your hands (section 20, 0.28.25)
 const partList = a => { const n = {}; for (const k of a) n[k] = (n[k] || 0) + 1; return Object.entries(n).map(([k, c]) => (c > 1 ? c + ' × ' : /^[aeiou]/i.test(k) ? 'an ' : 'a ') + k).join(' and '); };
 const machineName = m => (typeof MACHINE_KINDS !== 'undefined' && MACHINE_KINDS[m.kind] ? MACHINE_KINDS[m.kind].name : m.kind).toLowerCase();
 // a tap (section 11, through playerTap): main storage, or the machine of the job you hold. False: not the job's business
@@ -10033,7 +10034,7 @@ function jobTap(it, at) {
     const need = shelfNeeds(mw.j, mw.w, P.carry);
     if (!need.length && jobNeeds(mw.j, mw.w, P.carry).length) { toast(it.t, 'The ' + mw.j.make + ' isn\'t kept on the shelves: you make it yourself in the machine shop next door.'); return true; }   // 0.28.24
     if (!need.length) { toast(it.t, 'You have what the job needs: ' + partList(P.carry) + '. It\'s at the ' + machineName(machineById(mw.j.machine)) + ' on Deck ' + mw.j.deck + '.'); return true; }
-    if (P.carry.length >= CARRY_MAX) { toast(it.t, 'Your hands are full (' + partList(P.carry) + '). Fit those first, then come back for ' + partList(need) + '.'); return true; }
+    if (P.carry.length >= CARRY_MAX) { toast(it.t, 'Your hands are full (' + partList(P.carry) + '). ' + (giftHeld() ? 'Give the gift away first' : 'Fit those first') + ', then come back for ' + partList(need) + '.'); return true; }
     const o = { title: it.t, flavour: it.x, after: 'You look for ' + partList(need) + '.' }, pl = jobPlaceNear('storage', 'r', at);
     if (pl) actStart('fetch', pl.id, { ...o, pose: 'browse' }); else approach(at.clone(), it.front, it.depth, () => actStart('fetch', null, o));
     return true;
@@ -10053,7 +10054,7 @@ function jobTap(it, at) {
     const make = (P.work.make && P.work.make.part) || (want.includes(madeHere(mw.j)) ? mw.j.make : want.find(p => !(SHIP.stores[p] > 0) && !(typeof NO_MAKE !== 'undefined' && NO_MAKE.has(p))));
     const pl = make && jobPlaceNear('storage', 'f', at);
     if (make && pl) {
-      if (P.carry.length >= CARRY_MAX) { toast(it.t, 'Your hands are full (' + partList(P.carry) + '). Fit those first.'); return true; }
+      if (P.carry.length >= CARRY_MAX) { toast(it.t, 'Your hands are full (' + partList(P.carry) + '). ' + (giftHeld() ? 'Give the gift away first.' : 'Fit those first.')); return true; }
       if (!P.work.make || P.work.make.part !== make) P.work.make = { part: make, done: 0 };
       const left = Math.max(1, makeMins(mw.j) - P.work.make.done);
       actStart('make', pl.id, { title: it.t, flavour: it.x, part: make, after: (P.work.make.done ? 'Back to the ' : 'You start on a new ') + make + ': about ' + taskMins(left) + ' minutes. Walk away to pause.' });
