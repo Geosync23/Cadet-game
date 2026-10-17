@@ -15,12 +15,15 @@
 import re, subprocess, sys, tempfile, os
 
 def declared(text):
-    out = {}
+    out = {}; cont = False                             # cont: the line before was a const/let/var line ending in ','
     for i, line in enumerate(text.split('\n')):
         m = re.match(r'^(?:async\s+)?(const|let|var|function\*?|class)\s+(.*)', line)
-        if not m: continue
+        if not m and cont:                              # a declarator carried on to the next line: const A = 1,\n      B = 2;
+            m = re.match(r'^\s+()([A-Za-z_$][\w$]*\s*=(?!=).*)', line)
+        if not m: cont = False; continue
+        cont = bool(re.search(r',\s*(//.*)?$', line)) and (m.group(1) not in ('function', 'class'))
         kind, rest = m.group(1), m.group(2)
-        if kind.startswith('function') or kind == 'class':
+        if kind and (kind.startswith('function') or kind == 'class'):
             n = re.match(r'\*?\s*([A-Za-z_$][\w$]*)', rest)
             if n: out.setdefault(n.group(1), []).append(i + 1)
             continue
