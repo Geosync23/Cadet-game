@@ -50,8 +50,8 @@
 
 == decline
 - Not tonight. A long turn tomorrow. I like to sleep before a long turn.
-? weekday:fri|sat
-- Rest day. The model ship needs a new mast. Ask me Sunday?
+? weekday:sat|sun
+- Rest day. The model ship needs a new mast. Ask me Monday?
 
 == missed
 - You didn't come. No matter. I kept the window seat. It was very peaceful.

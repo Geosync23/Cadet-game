@@ -51,7 +51,7 @@
 - Why are you up? Lights out was ages ago. Twenty minutes. Ages.   #funny
 ? tier>=colleague warmth:cold
 - Oh, you're back. I'd started a lost-property tag for you.   #funny
-? tier>=colleague weekday:sun|mon
+? tier>=colleague weekday:mon|tue
 - {hi}. Day off. I'm baking. Don't come in. Do come in later. With a plate.
 ? tier>=close
 - {hi}, {nick}. I saved you the corner piece. Corners are the best bit. Fact.   #warm

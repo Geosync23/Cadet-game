@@ -63,7 +63,7 @@
 
 == decline
 - Not tonight. I'm sending a message home. It's a long one. Tomorrow?
-? weekday:sun|mon
+? weekday:sat|sun
 - It's my rest day. I'm going to sit in the garden and listen. Another time?
 
 == missed

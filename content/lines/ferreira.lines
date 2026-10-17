@@ -50,7 +50,7 @@
 
 == decline
 - Oh, I can't. The relay's playing up. I'll be with it all evening. Next time?
-? weekday:wed|thu
+? weekday:sat|sun
 - Rest day! I'm calling home and then talking to no one. Ask me Friday.
 
 == missed

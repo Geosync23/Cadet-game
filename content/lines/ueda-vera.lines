@@ -50,8 +50,8 @@
 
 == decline
 - Not tonight. Early bed. I'm sorry. Another evening?
-? weekday:mon|tue
-- Rest day. I'm writing home to Valo. It's a long letter this week. Wednesday?
+? weekday:wed|thu
+- Rest day. I'm writing home to Valo. It's a long letter this week. Friday?
 
 == missed
 - You didn't come. That's all right. I wrote a little more of my letter.

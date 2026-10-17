@@ -4,13 +4,13 @@
 // her exam.
 title: Your health check
 from: Rina Deshi
-gist: Rina's health check: your needs are in the Needs app. High ones help, low ones slow you down. Drink some water.
+gist: Rina's health check: your six needs are in the Needs app. High ones help, low ones slow you down. Drink some water.
 == lines
 rina: You're my two o'clock. Sit. Arm out. Don't touch anything blue.   [gesture]
-rina > you: Needs. Hunger, energy, hygiene, social, fitness. They're on your device, in the Needs app.
+rina > you: Needs. Food, energy, hygiene, social, fitness, bathroom. They're on your device, in the Needs app.
 rina: Keep one high and it helps. You work faster, or walk faster. That's the good news.
 rina: Let one drop low and it slows you down. Nothing worse. You'll just feel it.
-rina: Eat in the mess. Sleep in your bunk. Shower. Talk to people. The gym, if you must.
+rina: Eat in the mess. Sleep in your bunk. Shower. Talk to people. The gym, if you must. You know where the toilets are.
 ? choice
 * What if I forget?   flavour:practical
   rina: Your device marks it. Up for good, down for bad. You'll learn.   [nod]

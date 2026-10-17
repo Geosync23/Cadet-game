@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.48.47
+   STARSHIP CADET: CSV Wren                           build 0.48.48
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.48.47';                           // keep in step with the header's build line
+const GAME_BUILD = '0.48.48';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -13037,7 +13037,7 @@ const VOICE = {
       ],
       "decline": [
         {"text": "Not tonight. I've a comic to finish. Another time?", "id": "1qwexjd"},
-        {"text": "Rest day. Pencils, common room, quiet. Saturday?", "id": "13lm473", "weekday": "thu|fri"},
+        {"text": "Rest day. Pencils, common room, quiet. Tuesday?", "id": "5sdeqp", "weekday": "sun|mon"},
       ],
       "feel": [
         {"text": "Good day. New comic up. Three people laughed in front of it.", "id": "16r3fzx", "mood": "high"},
@@ -13129,7 +13129,7 @@ const VOICE = {
       ],
       "decline": [
         {"text": "Not tonight. Night Watch. Somebody has to be calm at three in the morning.", "id": "1r8vz29"},
-        {"text": "Rest day. A call home and a mystery. Probably in that order. Tuesday?", "id": "7o55sa", "weekday": "sun|mon"},
+        {"text": "Rest day. A call home and a mystery. Probably in that order. Thursday?", "id": "qrdind", "weekday": "tue|wed"},
       ],
       "feel": [
         {"text": "Quiet night, tidy forms, and I guessed the ending by page ten.", "id": "1g5m0s2", "mood": "high"},
@@ -13224,7 +13224,7 @@ const VOICE = {
       ],
       "decline": [
         {"text": "Not tonight. Recipe night. My sister's sent one with nine things we don't have.", "id": "s8fhse", "tone": "funny"},
-        {"text": "Rest day. Gerald and I have plans. Watering. Sunday?", "id": "13k1nhe", "tone": "funny", "weekday": "fri|sat"},
+        {"text": "Rest day. Gerald and I have plans. Watering. Monday?", "id": "1lbthmq", "tone": "funny", "weekday": "sat|sun"},
       ],
       "feel": [
         {"text": "Good day! Gerald grew. A whole millimetre. I measured.", "id": "1pur5ie", "tone": "funny", "mood": "high"},
@@ -13318,7 +13318,7 @@ const VOICE = {
       ],
       "decline": [
         {"text": "Not tonight. Late dinner, window seat. It's booked. By me. Tomorrow?", "id": "wv51id"},
-        {"text": "Rest day. I'm doing a tour of every window on the ship. Another time?", "id": "1t6dygm", "tone": "funny", "weekday": "wed|thu"},
+        {"text": "Rest day. I'm doing a tour of every window on the ship. Another time?", "id": "1t6dygm", "tone": "funny", "weekday": "sat|sun"},
       ],
       "feel": [
         {"text": "Bit grey today. I'll find a window. That usually does it.", "id": "lfzpkj", "mood": "low"},
@@ -14089,7 +14089,7 @@ const VOICE = {
       ],
       "decline": [
         {"text": "Not tonight. I'm recording a message home. It'll take hours. Sorry.", "id": "1wfhmwn", "tone": "funny"},
-        {"text": "Rest day. I'm half-planning a trip to the observatory. Half. Monday?", "id": "1mrwhl9", "weekday": "sat|sun"},
+        {"text": "Rest day. I'm half-planning a trip to the observatory. Half. Thursday?", "id": "10dm59j", "weekday": "tue|wed"},
       ],
       "feel": [
         {"text": "Lovely day. Sang all the way through patrol. In my head. Mostly.", "id": "edepts", "mood": "high"},
@@ -14307,7 +14307,7 @@ const VOICE = {
       ],
       "decline": [
         {"text": "Not tonight. Patrol report. It's long and it's mine. Another time?", "id": "gkuccg"},
-        {"text": "Rest day. I'm finishing a scarf. Who for? Wait and see. Wednesday?", "id": "tlepuj", "weekday": "mon|tue"},
+        {"text": "Rest day. I'm finishing a scarf. Who for? Wait and see. Monday?", "id": "f55r1r", "weekday": "sat|sun"},
       ],
       "feel": [
         {"text": "Good day. Patrol was easy, and I finished a mitten. The left one.", "id": "1k74bjx", "mood": "high"},
@@ -14560,7 +14560,7 @@ const VOICE = {
       ],
       "decline": [
         {"text": "Not tonight. Gran's sent a message. It's long. She talks slower than the relay.", "id": "1qu7gso", "tone": "funny"},
-        {"text": "Rest day. One window, one map, no people. Nothing personal. Another time.", "id": "akrta", "weekday": "thu|fri"},
+        {"text": "Rest day. One window, one map, no people. Nothing personal. Another time.", "id": "akrta", "weekday": "wed|thu"},
       ],
       "feel": [
         {"text": "No answer from home today. It's the relay. It's always the relay.", "id": "4fe6jv", "mood": "low"},
@@ -14800,7 +14800,7 @@ const VOICE = {
       ],
       "decline": [
         {"text": "Not tonight. Early bed. Very early. Another time?", "id": "17csuzp"},
-        {"text": "Rest day. I'm sorting the record cabinet. Nobody asked. Sunday?", "id": "g71l1e", "weekday": "fri|sat"},
+        {"text": "Rest day. I'm sorting the record cabinet. Nobody asked. Monday?", "id": "1pr5pe", "weekday": "sat|sun"},
       ],
       "feel": [
         {"text": "Clear channels all day. Every voice came through like you were in the room.", "id": "1wshjv7", "mood": "high"},
@@ -14892,7 +14892,7 @@ const VOICE = {
       ],
       "decline": [
         {"text": "Oh, I can't. The relay's playing up. I'll be with it all evening. Next time?", "id": "apisce"},
-        {"text": "Rest day! I'm calling home and then talking to no one. Ask me Friday.", "id": "10mlm6b", "weekday": "wed|thu"},
+        {"text": "Rest day! I'm calling home and then talking to no one. Ask me Friday.", "id": "10mlm6b", "weekday": "sat|sun"},
       ],
       "feel": [
         {"text": "Every message through, no drops. And I learnt a new Veyli word. Good day.", "id": "1m07fk3", "mood": "high"},
@@ -14987,7 +14987,7 @@ const VOICE = {
       ],
       "decline": [
         {"text": "Not tonight. Box audit. Someone put a sock in the wrong box. Another night.", "id": "mgov5", "tone": "funny"},
-        {"text": "Rest day. I'm pressing flowers. Very slowly. Wednesday?", "id": "xt50hr", "weekday": "mon|tue"},
+        {"text": "Rest day. I'm pressing flowers. Very slowly. Sunday?", "id": "142xoxr", "weekday": "fri|sat"},
       ],
       "feel": [
         {"text": "Good day. Returned three lost things and won at Tiles. Twice.", "id": "1m43kec", "mood": "high"},
@@ -15081,7 +15081,7 @@ const VOICE = {
       ],
       "decline": [
         {"text": "Can't. Patrol. Someone has to be friendly at the airlock. Next time.", "id": "1svnhqe"},
-        {"text": "Rest day. I'm doing nothing, loudly. Thursday?", "id": "5xaglm", "tone": "funny", "weekday": "tue|wed"},
+        {"text": "Rest day. I'm doing nothing, loudly. Saturday?", "id": "1jmqp4t", "tone": "funny", "weekday": "thu|fri"},
       ],
       "feel": [
         {"text": "Fixed four pairs of headphones and the garden pump. Proper useful night.", "id": "1j6ep35", "mood": "high"},
@@ -15724,7 +15724,7 @@ const VOICE = {
       "decline": [
         {"text": "Can't. Rounds. Another day.", "id": "eu9w0i", "tier": [1, 4]},
         {"text": "No. Not that one. But ask again. I mean that.", "id": "16524wp", "tier": [1, 4]},
-        {"text": "Rest day. I'll walk the decks anyway. Slower. Saturday?", "id": "rcjoh0", "tone": "funny", "weekday": "thu|fri"},
+        {"text": "Rest day. I'll walk the decks anyway. Slower. Monday?", "id": "1cfqgex", "tone": "funny", "weekday": "sat|sun"},
       ],
       "feel": [
         {"text": "Quiet decks, doors shut, nobody where they shouldn't be. Good day.", "id": "r67rg", "mood": "high"},
@@ -15906,7 +15906,7 @@ const VOICE = {
       ],
       "decline": [
         {"text": "Not tonight. Sweep at midnight. I need to find my stylus first. Another time?", "id": "mwaa8i"},
-        {"text": "Rest day. Sleep, lose at Tiles, sleep again. Saturday?", "id": "hn6k28", "tone": "funny", "weekday": "thu|fri"},
+        {"text": "Rest day. Sleep, lose at Tiles, sleep again. Sunday?", "id": "1ttmb4p", "tone": "funny", "weekday": "fri|sat"},
       ],
       "feel": [
         {"text": "Clean sweep! Every sensor sang. I could hug the array. I won't, it's cold.", "id": "802dh6", "tone": "funny", "mood": "high"},
@@ -16286,7 +16286,7 @@ const VOICE = {
       ],
       "decline": [
         {"text": "I can't, I'm on the coils. Sorry. Really. Another night? Maybe?", "id": "1grfy6m"},
-        {"text": "It's my rest day. I'm calling home. Probably twice. Another time?", "id": "17psocb", "weekday": "tue|wed"},
+        {"text": "It's my rest day. I'm calling home. Probably twice. Another time?", "id": "17psocb", "weekday": "wed|thu"},
       ],
       "feel": [
         {"text": "Bit of a worry night. Nothing wrong. I just worried. It's what I do.", "id": "dmtjy8", "mood": "low"},
@@ -16382,7 +16382,7 @@ const VOICE = {
       ],
       "decline": [
         {"text": "Can't, I'm on the coils tonight. Tomorrow? I'll be bright as a button.", "id": "10dyrso"},
-        {"text": "Rest day. I'm sending Gran a long one. A really long one. Next time?", "id": "1wt9eb2", "weekday": "mon|tue"},
+        {"text": "Rest day. I'm sending Gran a long one. A really long one. Next time?", "id": "1wt9eb2", "weekday": "fri|sat"},
       ],
       "feel": [
         {"text": "Bit flat. I've cleaned this panel twice. It was clean the first time.", "id": "136mj7", "mood": "low"},
@@ -16513,7 +16513,7 @@ const VOICE = {
       ],
       "decline": [
         {"text": "Not tonight. Three pairs of headphones waiting. Another time?", "id": "qmjllp"},
-        {"text": "Rest day. I'm unfolding maps. All of them. Thursday?", "id": "16evkan", "weekday": "tue|wed"},
+        {"text": "Rest day. I'm unfolding maps. All of them. Wednesday?", "id": "mumnlt", "weekday": "mon|tue"},
       ],
       "feel": [
         {"text": "Fixed two pairs of headphones. Both owners did a little dance.", "id": "v01vih", "tone": "funny", "mood": "high"},
@@ -16847,7 +16847,7 @@ const VOICE = {
       ],
       "decline": [
         {"text": "Not tonight. I'm on the bridge. Someone has to watch the stars not move.", "id": "1qcm3hx", "tone": "funny"},
-        {"text": "Rest day. One novel, one pot of tea, no alarms. Ask me Friday.", "id": "ypmvv8", "weekday": "wed|thu"},
+        {"text": "Rest day. One novel, one pot of tea, no alarms. Ask me Friday.", "id": "ypmvv8", "weekday": "tue|wed"},
       ],
       "feel": [
         {"text": "Quiet night. The ship hummed, the stars stayed put, I finished the book.", "id": "164y2tm", "mood": "high"},
@@ -17190,7 +17190,7 @@ const VOICE = {
       ],
       "decline": [
         {"text": "Can't. Rowing. Moreau's two seconds ahead. Not having it.", "id": "5urjhk"},
-        {"text": "Rest day. I'm going to try sitting still. Tuesday? If I survive.", "id": "5d6yy8", "tone": "funny", "weekday": "sun|mon"},
+        {"text": "Rest day. I'm going to try sitting still. Tuesday? If I survive.", "id": "5d6yy8", "tone": "funny", "weekday": "mon|tue"},
       ],
       "feel": [
         {"text": "Felt a drift before the console did. Corrected it. Nobody even noticed. Perfect.", "id": "ieu32", "mood": "high"},
@@ -17483,7 +17483,7 @@ const VOICE = {
       "decline": [
         {"text": "Not today, I'm afraid. The ship has me. Ask again?", "id": "d11p7t", "tier": [1, 4]},
         {"text": "I can't. Not tonight. But thank you. It means more than you'd think.", "id": "15243t", "tier": [1, 4]},
-        {"text": "My rest day. Scales, and not thinking about the ship. Wednesday?", "id": "1wqt49k", "weekday": "mon|tue"},
+        {"text": "My rest day. Scales, and not thinking about the ship. Monday?", "id": "1f0ifwy", "weekday": "sat|sun"},
       ],
       "feel": [
         {"text": "A good day. Everyone where they should be, and two people told me the truth.", "id": "1scr9y5", "mood": "high"},
@@ -17536,7 +17536,7 @@ const VOICE = {
         {"text": "{me}. Someone told me you were kind to them. They didn't say who. I didn't ask.", "id": "1jkuanm", "tone": "warm", "you": "kind"},
         {"text": "{hi}, {me}. One question today, a small one: what did you have for breakfast?", "id": "1vp8br2", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
         {"text": "{hi}, {me}. You look rested. Is that true, or is it the lighting?", "id": "15vx200", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
-        {"text": "{hi}, {me}. My day off. I'm practising doing nothing. I'm not very good.", "id": "119udsh", "tone": "funny", "tier": [1, 4], "weekday": "mon|tue", "not": {"week1": "true"}},
+        {"text": "{hi}, {me}. My day off. I'm practising doing nothing. I'm not very good.", "id": "119udsh", "tone": "funny", "tier": [1, 4], "weekday": "sat|sun", "not": {"week1": "true"}},
         {"text": "{hi}, {me}. Sit a moment. I'd like to hear about something that isn't the ship.", "id": "1dt8xrr", "tier": [2, 4], "not": {"week1": "true"}},
         {"text": "Ah, {me}. What are you reading? Everyone should be reading something.", "id": "1re0qpz", "tier": [2, 4], "not": {"week1": "true"}},
         {"text": "{me}. Good. Tea? I've a pot going. I always have a pot going.", "id": "u4u9zq", "tone": "warm", "tier": [3, 4], "not": {"week1": "true"}},
@@ -17887,7 +17887,7 @@ const VOICE = {
       ],
       "decline": [
         {"text": "Can't. I'm on the rower at seven. Tomorrow.", "id": "1yn5tkq"},
-        {"text": "Rest day. One book, the whole thing. I'll have guessed by lunch. Another time.", "id": "1s93zf0", "tone": "funny", "weekday": "sat|sun"},
+        {"text": "Rest day. One book, the whole thing. I'll have guessed by lunch. Another time.", "id": "1s93zf0", "tone": "funny", "weekday": "thu|fri"},
       ],
       "feel": [
         {"text": "Dropped a place on the leaderboard. Santos. Fair's fair. I'll be back.", "id": "yge63n", "mood": "low"},
@@ -17983,7 +17983,7 @@ const VOICE = {
       ],
       "decline": [
         {"text": "Oh, I can't. Lab inventory. Two hundred samples. Another night?", "id": "1fdxlc0"},
-        {"text": "It's my rest day. I'm going to try to rest. I've made a list for it.", "id": "inmgmv", "tone": "funny", "weekday": "wed|thu"},
+        {"text": "It's my rest day. I'm going to try to rest. I've made a list for it.", "id": "inmgmv", "tone": "funny", "weekday": "thu|fri"},
       ],
       "feel": [
         {"text": "Every sample labelled, every chart right. Even Dr. Sato said \"good\". Once.", "id": "dl8h8s", "mood": "high"},
@@ -18077,7 +18077,7 @@ const VOICE = {
       ],
       "decline": [
         {"text": "Not tonight. The herbs need potting. They're very particular this week.", "id": "1l1sbbc"},
-        {"text": "Rest day. I'm writing to my twin. I have news. Finally. Tuesday?", "id": "1749gsk", "weekday": "sun|mon"},
+        {"text": "Rest day. I'm writing to my twin. I have news. Finally. Thursday?", "id": "1pl5txv", "weekday": "tue|wed"},
       ],
       "feel": [
         {"text": "Good day. Clean patrol, and Brennan took my thyme. She called it \"decent\".", "id": "1yv1my1", "mood": "high"},
@@ -18171,7 +18171,7 @@ const VOICE = {
       ],
       "decline": [
         {"text": "Not tonight. Clinic notes. Another time.", "id": "1dsflix"},
-        {"text": "Rest day. Garden, book, early night. Wednesday?", "id": "n0yaio", "weekday": "mon|tue"},
+        {"text": "Rest day. Garden, book, early night. Thursday?", "id": "16eh07k", "weekday": "tue|wed"},
       ],
       "feel": [
         {"text": "Quiet morning. Nobody bleeding, two chillies ripe. A good day.", "id": "67eodi", "mood": "high"},
@@ -18362,7 +18362,7 @@ const VOICE = {
       ],
       "decline": [
         {"text": "Not tonight. Office hours run late. Another evening?", "id": "bwllya"},
-        {"text": "My rest day. I'm sitting in the garden doing nothing. It's very hard work.", "id": "9d3b5l", "tone": "funny", "weekday": "tue|wed"},
+        {"text": "My rest day. I'm sitting in the garden doing nothing. It's very hard work.", "id": "9d3b5l", "tone": "funny", "weekday": "sat|sun"},
       ],
       "feel": [
         {"text": "A good day. Three people laughed in my office, and one of them was me.", "id": "1gzfze3", "mood": "high"},
@@ -18581,7 +18581,7 @@ const VOICE = {
       ],
       "decline": [
         {"text": "I can't. Extra shift. The boat, you know. Another night?", "id": "l2svo2"},
-        {"text": "Rest day. I'm actually resting. Oduya made me promise. Friday?", "id": "4d2upz", "weekday": "wed|thu"},
+        {"text": "Rest day. I'm actually resting. Oduya made me promise. Wednesday?", "id": "kxm0lk", "weekday": "mon|tue"},
       ],
       "feel": [
         {"text": "Good patrol. Quiet decks. I worked out the boat's sail, in my head.", "id": "1k5a5uc", "mood": "high"},
@@ -19068,7 +19068,7 @@ const VOICE = {
       ],
       "decline": [
         {"text": "Not tonight. The herbs need potting. They're very needy this week.", "id": "okzgql"},
-        {"text": "Rest day. I've a book and a windowsill. Another time?", "id": "m13gby", "weekday": "thu|fri"},
+        {"text": "Rest day. I've a book and a windowsill. Another time?", "id": "m13gby", "weekday": "sun|mon"},
       ],
       "feel": [
         {"text": "The parsley's wilting. I'm taking it personally.", "id": "1nzy7iy", "mood": "low"},
@@ -19164,7 +19164,7 @@ const VOICE = {
       ],
       "decline": [
         {"text": "Not tonight. Extra shift. The boat won't buy itself. Ask me again.", "id": "vjs022"},
-        {"text": "Rest day. I'm sleeping. Don't tell anyone. Another time.", "id": "qte9u5", "tone": "funny", "weekday": "wed|thu"},
+        {"text": "Rest day. I'm sleeping. Don't tell anyone. Another time.", "id": "qte9u5", "tone": "funny", "weekday": "mon|tue"},
       ],
       "feel": [
         {"text": "Did the boat sums again. Still short. It'll come.", "id": "1curd5g", "mood": "low"},
@@ -19259,7 +19259,7 @@ const VOICE = {
       ],
       "decline": [
         {"text": "Not tonight. A long turn tomorrow. I like to sleep before a long turn.", "id": "e0go8n"},
-        {"text": "Rest day. The model ship needs a new mast. Ask me Sunday?", "id": "jljoje", "weekday": "fri|sat"},
+        {"text": "Rest day. The model ship needs a new mast. Ask me Monday?", "id": "m55e56", "weekday": "sat|sun"},
       ],
       "feel": [
         {"text": "Clean turn today. You'd not have felt it with a full mug in your hand.", "id": "1n680p1", "mood": "high"},
@@ -19359,7 +19359,7 @@ const VOICE = {
       ],
       "decline": [
         {"text": "I can't, I'm on the coils. Next time? Ask again. Please ask again.", "id": "1usd8ad"},
-        {"text": "It's my rest day. I'm writing to Lisk. It's two pages already. Another time?", "id": "wg6t5", "tone": "funny", "weekday": "fri|sat"},
+        {"text": "It's my rest day. I'm writing to Lisk. It's two pages already. Another time?", "id": "wg6t5", "tone": "funny", "weekday": "tue|wed"},
       ],
       "feel": [
         {"text": "Long watch. Coil three was shy all night. I sat with her. That's allowed.", "id": "74qkza", "mood": "low"},
@@ -19767,7 +19767,7 @@ const VOICE = {
       ],
       "decline": [
         {"text": "I can't, early bed. I'm up for the first star. Tomorrow?", "id": "1lkkm5m"},
-        {"text": "It's my rest day. I'm calling home. They'll ask if I'm winning. Another time?", "id": "1k9ghaa", "weekday": "tue|wed"},
+        {"text": "It's my rest day. I'm calling home. They'll ask if I'm winning. Another time?", "id": "1k9ghaa", "weekday": "mon|tue"},
       ],
       "feel": [
         {"text": "No Veyli word today. I couldn't make one stick. Tomorrow.", "id": "7ygmnr", "mood": "low"},
@@ -19863,7 +19863,7 @@ const VOICE = {
       ],
       "decline": [
         {"text": "Not tonight. It's nearly ten. You know me. Tomorrow?", "id": "1b1zdqy"},
-        {"text": "Rest day. I'm writing to the Halcyon. Next episode's due. Another time?", "id": "hy84tj", "weekday": "thu|fri"},
+        {"text": "Rest day. I'm writing to the Halcyon. Next episode's due. Another time?", "id": "hy84tj", "weekday": "sat|sun"},
       ],
       "feel": [
         {"text": "No letter from the Halcyon this week. It'll come. Relays are slow.", "id": "kofb9c", "mood": "low"},
@@ -19998,7 +19998,7 @@ const VOICE = {
         {"text": "Look who it is. Thought you'd been traded. I'd have got a good price.", "id": "1jfq1ct", "tone": "funny", "tier": [2, 4], "warmth": "cold"},
         {"text": "{hi}. Sorting. Don't read over my shoulder. I'm joking. Don't, though.", "id": "1ckv9g8", "act": "work", "tier": [2, 4]},
         {"text": "{nick}! Tell you what: you, me, tea, half an hour. My shout. Rarest deal I do.", "id": "7zn6sq", "tone": "warm", "tier": [4, 4]},
-        {"text": "{hi}. Day off. Rowing, then a nap, then rowing. Busy day.", "id": "1hmtxd8", "tone": "funny", "tier": [1, 4], "weekday": "sat|sun"},
+        {"text": "{hi}. Day off. Rowing, then a nap, then rowing. Busy day.", "id": "1hmtxd8", "tone": "funny", "tier": [1, 4], "weekday": "sun|mon"},
         {"text": "There you are. Tell you what: you tell me your day, I'll tell you the gossip. Fair trade.", "id": "1u2itrz", "tier": [3, 4], "time": "evening"},
         {"text": "Comms rates you, {nick}. I've been talking you up. No charge.", "id": "m34gzx", "tone": "funny", "rep": "well", "tier": [1, 4]},
         {"text": "You're one of Comms now. Best deal on the ship. Lifetime membership.", "id": "1iauyvj", "tone": "warm", "rep": "theirs"},
@@ -20183,7 +20183,7 @@ const VOICE = {
       ],
       "decline": [
         {"text": "No. That's a full sentence, but I'm sorry anyway. The array needs me.", "id": "1qix561"},
-        {"text": "My rest day. I'm resting. In the lab. It's restful there. Thursday?", "id": "ny671g", "tone": "funny", "weekday": "tue|wed"},
+        {"text": "My rest day. I'm resting. In the lab. It's restful there. Monday?", "id": "woklme", "tone": "funny", "weekday": "sat|sun"},
       ],
       "feel": [
         {"text": "A good day. The array caught something odd. Odd is my favourite word.", "id": "1bu9oym", "mood": "high"},
@@ -20279,7 +20279,7 @@ const VOICE = {
       ],
       "decline": [
         {"text": "Not tonight. Early bed. Patrol at eight. Another time.", "id": "1jm9wl5"},
-        {"text": "Rest day. I'm in the store looking at valves. Don't ask. Sunday?", "id": "zo4loa", "tone": "funny", "weekday": "fri|sat"},
+        {"text": "Rest day. I'm in the store looking at valves. Don't ask. Monday?", "id": "i618re", "tone": "funny", "weekday": "sat|sun"},
       ],
       "feel": [
         {"text": "Machine purred all morning. Nobody queued. Good day.", "id": "t4ospo", "mood": "high"},
@@ -20375,7 +20375,7 @@ const VOICE = {
       ],
       "decline": [
         {"text": "Not tonight. I'm sending a message home. It's a long one. Tomorrow?", "id": "1p2rq5g"},
-        {"text": "It's my rest day. I'm going to sit in the garden and listen. Another time?", "id": "1663sy3", "weekday": "sun|mon"},
+        {"text": "It's my rest day. I'm going to sit in the garden and listen. Another time?", "id": "1663sy3", "weekday": "sat|sun"},
       ],
       "feel": [
         {"text": "Grey day. In my head, I mean. The ship's the same as always.", "id": "1ot5oo9", "mood": "low"},
@@ -20471,7 +20471,7 @@ const VOICE = {
       ],
       "decline": [
         {"text": "Can't. That oven on Deck 3's making a noise. Not tonight.", "id": "1n1d3u8"},
-        {"text": "Rest day. I'm doing nothing, very hard. Ask me Tuesday.", "id": "1uih0ad", "tone": "funny", "weekday": "sun|mon"},
+        {"text": "Rest day. I'm doing nothing, very hard. Ask me Tuesday.", "id": "1uih0ad", "tone": "funny", "weekday": "sat|sun"},
       ],
       "feel": [
         {"text": "Lamp, oven, washer. All three today. All three. I've nothing left to grumble with.", "id": "cqxx7u", "mood": "low"},
@@ -20845,7 +20845,7 @@ const VOICE = {
       ],
       "decline": [
         {"text": "Can't. Deadline. The comics wall waits for no one.", "id": "xmgvu4", "tone": "funny"},
-        {"text": "Rest day. I'm drawing all of it. Next time, yeah?", "id": "ft5suy", "weekday": "mon|tue"},
+        {"text": "Rest day. I'm drawing all of it. Next time, yeah?", "id": "ft5suy", "weekday": "sat|sun"},
       ],
       "feel": [
         {"text": "No comic this week. Nothing funny happened. That's never true. I just couldn't see it.", "id": "3k2q2c", "mood": "low"},
@@ -21259,7 +21259,7 @@ const VOICE = {
         {"text": "It's your first day off. Sleep in. A bit.", "id": "8v9fqa", "flag": "beat.d5-invite.4"},
         {"text": "Here! Pick a pot. Any pot. That one's yours.", "id": "qv7sll", "flag": "beat.d6-sowing.1"},
         {"text": "Seed in, soil on, a little water. Not too much.", "id": "nhd6kj", "flag": "beat.d6-sowing.2"},
-        {"text": "Day off. Nobody's working. Well, the garden is.", "id": "1lx6b9a", "tone": "funny", "flag": "beat.d6-sowing.3"},
+        {"text": "Your day off. My lunch break. Holt said ten minutes.", "id": "lsukgw", "tone": "funny", "flag": "beat.d6-sowing.3"},
         {"text": "It'll grow all year. So will you, I think.", "id": "1jamgua", "tone": "warm", "flag": "beat.d6-sowing.4"},
         {"text": "Film night later! You're coming. I've decided.", "id": "16idzcf", "tone": "funny", "flag": "beat.d6-sowing.5"},
       ],
@@ -21660,7 +21660,7 @@ const VOICE = {
         {"text": "{hi}, {me}. Long dinner. Best part of the day. Sit, if you're staying.", "id": "18dc61r", "tier": [1, 4], "time": "evening"},
         {"text": "Why are you up? Lights out was ages ago. Twenty minutes. Ages.", "id": "w4lw8u", "tone": "funny", "tier": [1, 4], "time": "night"},
         {"text": "Oh, you're back. I'd started a lost-property tag for you.", "id": "4x7kmv", "tone": "funny", "tier": [2, 4], "warmth": "cold"},
-        {"text": "{hi}. Day off. I'm baking. Don't come in. Do come in later. With a plate.", "id": "1ohusvd", "tier": [2, 4], "weekday": "sun|mon"},
+        {"text": "{hi}. Day off. I'm baking. Don't come in. Do come in later. With a plate.", "id": "1ohusvd", "tier": [2, 4], "weekday": "mon|tue"},
         {"text": "{hi}, {nick}. I saved you the corner piece. Corners are the best bit. Fact.", "id": "1h7p19r", "tone": "warm", "tier": [4, 4]},
         {"text": "{hi}. On the hour, every hour. Don't distract me. Distract me at five past.", "id": "1ozmycp", "tone": "funny", "act": "work", "tier": [1, 4]},
         {"text": "There you are. Dinner's better with company. Even the stew.", "id": "14wxr4k", "tier": [3, 4], "time": "evening"},
@@ -21787,7 +21787,7 @@ const VOICE = {
       ],
       "decline": [
         {"text": "Not tonight. Early bed. I'm sorry. Another evening?", "id": "e2dbwk"},
-        {"text": "Rest day. I'm writing home to Valo. It's a long letter this week. Wednesday?", "id": "iu2vjg", "weekday": "mon|tue"},
+        {"text": "Rest day. I'm writing home to Valo. It's a long letter this week. Friday?", "id": "1rxkb4j", "weekday": "wed|thu"},
       ],
       "feel": [
         {"text": "A letter came from Valo. On paper. It took six weeks. Worth it.", "id": "w4sgyk", "mood": "high"},
@@ -22827,7 +22827,7 @@ const VOICE = {
       "decline": [
         {"text": "I can't. Duty roster. But it was a good idea, correctly put.", "id": "1oany1y", "tier": [1, 4]},
         {"text": "Not tonight. Ask me again on my rest day. That's Tuesday.", "id": "1v02nwv", "tier": [1, 4]},
-        {"text": "Rest day. I'm resting. Correctly. It's harder than it looks. Thursday?", "id": "1umgavf", "tone": "funny", "weekday": "tue|wed"},
+        {"text": "Rest day. I'm resting. Correctly. It's harder than it looks. Friday?", "id": "3i4bxg", "tone": "funny", "weekday": "wed|thu"},
       ],
       "feel": [
         {"text": "A good day. Board clear, drills on time, and my name top of the treadmill.", "id": "1ehz06p", "mood": "high"},
@@ -22879,7 +22879,7 @@ const VOICE = {
         {"text": "{nick}. \"Reliable,\" they say. My favourite word. After \"punctual\".", "id": "hcq7ip", "tone": "funny", "you": "reliable"},
         {"text": "Cadet. Fed, rested and dressed. Two out of three would do. Three is better.", "id": "19iywxr", "tier": [1, 4], "not": {"week1": "true"}},
         {"text": "Cadet. You're early. I'm earlier. We're both correct.", "id": "18q2eqf", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
-        {"text": "Cadet. My rest day. I'm not on duty. I'm merely observing.", "id": "g00joa", "tone": "funny", "tier": [1, 4], "weekday": "tue|wed", "not": {"week1": "true"}},
+        {"text": "Cadet. My rest day. I'm not on duty. I'm merely observing.", "id": "g00joa", "tone": "funny", "tier": [1, 4], "weekday": "wed|thu", "not": {"week1": "true"}},
         {"text": "{nick}. Good. I've a record playing in my head and nobody to tell. Sit.", "id": "1tbw7ne", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
         {"text": "{nick}. A question, informal: pudding or the treadmill first? I've done both.", "id": "1o412mo", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
         {"text": "{nick}. Good to see you. Sit. Tea's poured. Milk, no sugar. Correct?", "id": "16x2sfp", "tone": "warm", "tier": [3, 4], "not": {"week1": "true"}},
@@ -23244,7 +23244,7 @@ const VOICE = {
       ],
       "decline": [
         {"text": "Not tonight, I'm shattered. Rain check? Do we say that here? We do now.", "id": "11ykwxn"},
-        {"text": "Rest day. I'm pressing flowers and doing nothing else. Another time?", "id": "1ckyb4h", "weekday": "mon|tue"},
+        {"text": "Rest day. I'm pressing flowers and doing nothing else. Another time?", "id": "1ckyb4h", "weekday": "fri|sat"},
       ],
       "feel": [
         {"text": "Bit tired. I'll get dinner late, I think. When it's quiet.", "id": "1sc4xix", "mood": "low"},
@@ -23465,7 +23465,7 @@ const VOICE = {
       ],
       "decline": [
         {"text": "Not tonight. Early bed. Big bake tomorrow. Another time?", "id": "1p9ifbd"},
-        {"text": "Rest day. Brennan's given me an oven. One oven. I'm not leaving it. Friday?", "id": "13lmvdb", "tone": "funny", "weekday": "wed|thu"},
+        {"text": "Rest day. Brennan's given me an oven. One oven. I'm not leaving it. Thursday?", "id": "1fszfg0", "tone": "funny", "weekday": "tue|wed"},
       ],
       "feel": [
         {"text": "Good day. The bread rose, the joke landed, Nils groaned. Perfect.", "id": "1h669eo", "mood": "high"},
@@ -23772,7 +23772,7 @@ const VOICE = {
       ],
       "decline": [
         {"text": "Not tonight. The board's running a check. It needs supervising. Another night?", "id": "k616hm"},
-        {"text": "Rest day. I'm sleeping in. I've earned it at full price. Saturday?", "id": "16vvp3b", "tone": "funny", "weekday": "thu|fri"},
+        {"text": "Rest day. I'm sleeping in. I've earned it at full price. Thursday?", "id": "wg4mkk", "tone": "funny", "weekday": "tue|wed"},
       ],
       "feel": [
         {"text": "Every light on the board told the truth today. I nearly cried.", "id": "hjjnqu", "tone": "funny", "mood": "high"},
@@ -25201,7 +25201,7 @@ const MEETINGS_BAKED = {
   "introBunk": {"title": "Your bunk", "from": "Zeke Torres", "gist": "Torres showed you Bunk 1 and your locker, and handed you your device.", "lines": [{"who": "torres-zeke", "text": "Bunk 1. Home. Top bunk at the back is yours.", "pose": "gesture"}, {"who": "torres-zeke", "text": "Your locker's under it. Bag in there. Go on, it's yours now.", "to": "you"}, {"who": "tomas", "text": "Oh! You're here! Hi. I'm Tomas. Watch. Bottom bunk, by the door."}, {"who": "tomas", "text": "I only got here last Sunday. So I'm not the newest any more. Sorry. I'm very pleased about that.", "to": "you"}, {"who": "tomas", "text": "I'll show you the washroom in the morning. It's left at the end. It's left. It's probably left."}, {"who": "torres-zeke", "text": "And this is yours too. Your device. Mail, your schedule, maps, the lot.", "pose": "gesture", "to": "you"}, {"who": "torres-zeke", "text": "It'll want to say hello. They always do. Let it."}, {"choice": [{"text": "What do I do first?", "rel": {"torres-zeke": 1}, "flavour": "practical", "reply": {"who": "torres-zeke", "text": "Dinner. Always dinner first. Then everything else.", "pose": "nod"}}, {"text": "Is it always this much?", "rel": {"torres-zeke": 1}, "flavour": "share", "reply": {"who": "torres-zeke", "text": "First night, yes. By Thursday it's just home with a lift in it.", "pose": "nod"}}, {"text": "(Just nod)", "reply": {"who": "torres-zeke", "text": "Good. The quiet ones last longest."}}]}, {"who": "torres-zeke", "text": "Right, onward. The mess is on Deck 3, and Brennan doesn't hold plates for anyone.", "pose": "gesture"}]},
   "introChief": {"title": "The Chief stops by", "from": "Chief Ines Calder", "gist": "Chief Calder: Torres has you on Monday, ten to eight in the Works bay. Your first job on Tuesday is hers.", "lines": [{"who": "torres-zeke", "text": "Chief. Didn't think we'd see you tonight."}, {"who": "calder", "text": "You haven't. I'm not here. Day off.", "pose": "nod"}, {"who": "calder", "text": "Calder. Works is mine. Welcome aboard.", "to": "you"}, {"who": "calder", "text": "Tomorrow you're with Torres. Ten to eight, the Works bay. Not eight. Ten to."}, {"who": "calder", "text": "Tuesday, your first job's mine. I'll pick it. You'll do it."}, {"choice": [{"text": "Looking forward to it.", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "Good."}}, {"text": "What should I read up on?", "rel": {"calder": 2}, "reply": {"who": "calder", "text": "The scrubber manual. Chapter three. Nobody reads chapter three."}}, {"text": "(Say nothing)", "reply": {"who": "calder", "text": "Quiet. Good. The ship's loud enough."}}]}, {"who": "calder", "text": "One thing. Nobody thanks the air. That's how you know it's working."}, {"who": "torres-zeke", "text": "She tells everyone that."}, {"who": "calder", "text": "It's true for everyone.", "pose": "nod"}, {"who": "calder", "text": "Eat something. That's an order, and I'm not even here.", "to": "you"}]},
   "introDinner": {"title": "Dinner with Zeke", "from": "Zeke Torres", "gist": "Dinner with Zeke Torres: the drive coils, how a ship day runs, and what brought you out here.", "lines": [{"who": "torres-zeke", "text": "Sit, sit. Eat while it's hot. Brennan notices.", "pose": "gesture"}, {"who": "torres-zeke", "text": "So. Engines, that's me. Three drive coils on Deck 6. I mind them on days.", "to": "you"}, {"who": "torres-zeke", "text": "Reyes has them on nights. We leave each other notes at shift change. Mostly about coil three."}, {"who": "torres-zeke", "text": "She sulks, coil three. Reyes says she's shy. One of us is wrong, and it isn't me.", "pose": "laugh"}, {"who": "torres-zeke", "text": "How a day runs, then. Breakfast from six. Shift at eight. Tea at half ten, in the corner.", "to": "you"}, {"who": "torres-zeke", "text": "Off at half four. Dinner from six. Then the evening's yours. Gym, lounge, Tiles, bed."}, {"who": "torres-zeke", "text": "Two days off in a row each week. Yours are the weekend, like most of Works."}, {"who": "torres-zeke", "text": "Right. Your turn. What brought you all the way out here, {me}?", "pose": "listen", "to": "you"}, {"choice": [{"text": "I wanted to see the stars.", "rel": {"torres-zeke": 1}, "flavour": "share", "mem": "intro.dinner.stars", "reply": {"who": "torres-zeke", "text": "Best reason there is. Get a window seat, then. Every time.", "pose": "nod"}}, {"text": "I like fixing things.", "rel": {"torres-zeke": 1}, "flavour": "practical", "mem": "intro.dinner.fixing", "reply": {"who": "torres-zeke", "text": "Then you're in the right bay. She's got plenty for you. Lovingly.", "pose": "laugh"}}, {"text": "I'm not sure yet.", "rel": {"torres-zeke": 1}, "flavour": "listen", "mem": "intro.dinner.unsure", "reply": {"who": "torres-zeke", "text": "That's allowed. Most of us found out once we got here. Me included.", "pose": "nod"}}]}, {"who": "torres-zeke", "text": "Oh. Look who's coming over. Sit up straight.", "pose": "gesture"}]},
-  "introHealth": {"title": "Your health check", "from": "Rina Deshi", "gist": "Rina's health check: your needs are in the Needs app. High ones help, low ones slow you down. Drink some water.", "lines": [{"who": "rina", "text": "You're my two o'clock. Sit. Arm out. Don't touch anything blue.", "pose": "gesture"}, {"who": "rina", "text": "Needs. Hunger, energy, hygiene, social, fitness. They're on your device, in the Needs app.", "to": "you"}, {"who": "rina", "text": "Keep one high and it helps. You work faster, or walk faster. That's the good news."}, {"who": "rina", "text": "Let one drop low and it slows you down. Nothing worse. You'll just feel it."}, {"who": "rina", "text": "Eat in the mess. Sleep in your bunk. Shower. Talk to people. The gym, if you must."}, {"choice": [{"text": "What if I forget?", "flavour": "practical", "reply": {"who": "rina", "text": "Your device marks it. Up for good, down for bad. You'll learn.", "pose": "nod"}}, {"text": "Do you check yours?", "flavour": "share", "reply": {"who": "rina", "text": "Every hour. Mostly I just drink water."}}, {"text": "(Hold out your arm)", "reply": {"who": "rina", "text": "Good. You're a better patient than Pell already.", "pose": "laugh"}}]}, {"who": "rina", "text": "Done. Drink some water on the way out. That's not a suggestion."}]},
+  "introHealth": {"title": "Your health check", "from": "Rina Deshi", "gist": "Rina's health check: your six needs are in the Needs app. High ones help, low ones slow you down. Drink some water.", "lines": [{"who": "rina", "text": "You're my two o'clock. Sit. Arm out. Don't touch anything blue.", "pose": "gesture"}, {"who": "rina", "text": "Needs. Food, energy, hygiene, social, fitness, bathroom. They're on your device, in the Needs app.", "to": "you"}, {"who": "rina", "text": "Keep one high and it helps. You work faster, or walk faster. That's the good news."}, {"who": "rina", "text": "Let one drop low and it slows you down. Nothing worse. You'll just feel it."}, {"who": "rina", "text": "Eat in the mess. Sleep in your bunk. Shower. Talk to people. The gym, if you must. You know where the toilets are."}, {"choice": [{"text": "What if I forget?", "flavour": "practical", "reply": {"who": "rina", "text": "Your device marks it. Up for good, down for bad. You'll learn.", "pose": "nod"}}, {"text": "Do you check yours?", "flavour": "share", "reply": {"who": "rina", "text": "Every hour. Mostly I just drink water."}}, {"text": "(Hold out your arm)", "reply": {"who": "rina", "text": "Good. You're a better patient than Pell already.", "pose": "laugh"}}]}, {"who": "rina", "text": "Done. Drink some water on the way out. That's not a suggestion."}]},
   "introSoloJob": {"title": "Your first solo job", "from": "Chief Ines Calder", "gist": "Calder gave you your first solo job: it's on your device. Every job goes in your Record. Book a progress talk any time.", "lines": [{"who": "calder", "text": "Come in. Don't sit. This won't take long.", "pose": "gesture"}, {"who": "calder", "text": "Your first solo job. It's on your device. Deck, machine, part. Read the whole card. Twice.", "to": "you"}, {"who": "calder", "text": "You'll do it alone. Torres is on Deck 6. He'll look in at tea. Once."}, {"who": "calder", "text": "Every job you finish goes in your Record. So does every job you leave half done. I read the Record."}, {"who": "calder", "text": "Progress talks: any time. Book one on your device. I'll keep it."}, {"choice": [{"text": "What if I need help?", "rel": {"calder": 2}, "flavour": "practical", "reply": {"who": "calder", "text": "Ask. Asking isn't failing. Hiding it is.", "pose": "nod"}}, {"text": "I won't let you down, Chief.", "rel": {"calder": 1}, "flavour": "cheer", "reply": {"who": "calder", "text": "Don't let the machine down. I'll be fine."}}, {"text": "(Take the job and go)", "reply": {"who": "calder", "text": "Good. That's an answer too."}}]}, {"who": "calder", "text": "One more thing. Finish what you start. Off you go."}]},
 };
 // ---- END MEETINGS ----

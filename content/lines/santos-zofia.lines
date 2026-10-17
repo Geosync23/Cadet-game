@@ -130,7 +130,7 @@
 - You're the one above me! Brilliant. I'm Zofia. Comms. I don't snore. Tran does.   #funny
 
 == greet
-? tier>=acquaintance weekday:sat|sun
+? tier>=acquaintance weekday:sun|mon
 - {hi}. Day off. Rowing, then a nap, then rowing. Busy day.   #funny
 ? tier>=friend time:evening
 - There you are. Tell you what: you tell me your day, I'll tell you the gossip. Fair trade.

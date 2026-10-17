@@ -228,7 +228,7 @@
 - Observatory's open tonight. Come up if you see this in time. If not, I'll tell you all about it.
 
 // Writer 3, batch 3: towards 120. Seasons, places, bubbles (smalltalk and rumour, 60 characters), cues. Rest days
-// Fri, Sat (the game's roster); rest-day lines use act:off. Why he left home only at close.
+// Mon, Tue (roster 0.16.17; was wrongly Fri-Sat); rest-day lines use act:off. Why he left home only at close.
 
 == greet
 ? tier>=acquaintance place:mess
@@ -374,7 +374,7 @@
 
 // Writer 5, batch 1: Tomas's ordinary weeks, after week one. Mostly not work: letters to his brother, the stars,
 // toast, running club at the back, film night, the window seat, the bunk (Chloe's lights out, Lukas up early), rest
-// days Fri-Sat, the farm moon, counting windows. Gates kept: the exam only from beat:tomas.5, the transfer list only
+// days (now Mon-Tue), the farm moon, counting windows. Gates kept: the exam only from beat:tomas.5, the transfer list only
 // from beat:tomas.6, why he left home only at close; his brother's star map only from beat:tomas.4.
 
 == greet
@@ -540,7 +540,7 @@
 
 // Writer 5, batch 6: seasons and traditions (the game's ids: running Mon, quiz Thu, works-tea and jam Fri, film and
 // observatory-night Sat, market (the swap meet) Sun, harvest (harvest morning), hull-lights, founding (day 100),
-// quiet-watch (day 300)), plus trad:today. Gaps filled only; arc gates kept. Tomas's rest days are Fri-Sat, so film and observatory nights are his.
+// quiet-watch (day 300)), plus trad:today. Gaps filled only; arc gates kept. Tomas's rest days are Mon-Tue (roster 0.16.17); film and observatory nights are after his shift.
 
 == greet
 ? trad:today tier>=acquaintance !week1:true
@@ -564,7 +564,7 @@
 
 // Writer 5, batch 9: week-1 beats for the onboarding hook (onboarding seat 1's list, 2026-10-17). One flag key per
 // line, beat.<beatId>.<n>, said in order as bubbles while you are in the beat's room in its window; best first
-// (onboarding drops the rest when you leave). Mail texts: mail.<beatId>, one line "Subject | body", unsigned. Tomas is off Fri-Sat, so d5 and d6 are his own time.
+// (onboarding drops the rest when you leave). Mail texts: mail.<beatId>, one line "Subject | body", unsigned. Tomas is off Mon-Tue: d5 is after his shift, d6 is his lunch break.
 
 == week1
 // beat d1-wash: Monday 06:00, Bunk 1
@@ -591,7 +591,7 @@
 ? flag:beat.d6-sowing.2
 - Seed in, soil on, a little water. Not too much.
 ? flag:beat.d6-sowing.3
-- Day off. Nobody's working. Well, the garden is.   #funny
+- Your day off. My lunch break. Holt said ten minutes.   #funny
 ? flag:beat.d6-sowing.4
 - It'll grow all year. So will you, I think.   #warm
 ? flag:beat.d6-sowing.5

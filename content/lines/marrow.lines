@@ -197,8 +197,8 @@
 - A junior's first good answer. You can watch them surprise themselves.
 
 == decline
-? weekday:mon|tue
-- My rest day. Scales, and not thinking about the ship. Wednesday?
+? weekday:sat|sun
+- My rest day. Scales, and not thinking about the ship. Monday?
 
 == callback
 ? told:moment.marrow.stillthink
@@ -280,7 +280,7 @@
 ? tier>=acquaintance !week1:true
 - {hi}, {me}. One question today, a small one: what did you have for breakfast?   #funny
 - {hi}, {me}. You look rested. Is that true, or is it the lighting?   #funny
-? tier>=acquaintance !week1:true weekday:mon|tue
+? tier>=acquaintance !week1:true weekday:sat|sun
 - {hi}, {me}. My day off. I'm practising doing nothing. I'm not very good.   #funny
 ? tier>=colleague !week1:true
 - {hi}, {me}. Sit a moment. I'd like to hear about something that isn't the ship.
