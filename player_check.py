@@ -24,6 +24,7 @@
 #   activity (keeping what you'd gained); someone's private wash pod isn't offered; draw calls stay under BUDGET
 #   the bathroom need (0.28.19): toilets in the public washrooms (Decks 4 and 3) sit you down and fill it; cabins' are private
 #   seeing it work (0.28.20, 0.28.21): each tapped activity shows the progress bar and a +N note for its need
+#   a reserved training job (0.28.24): the shelf part, the bracket made in the machine shop with the bar, the stops marked, the repair
 #   the note bus (0.28.22): simNote('act', ...) for wash, eat (with), call, buy; your name saved and cleaned
 #   saving: a v 2 save keeps needs; a v 1 save loads with needs at 80; ?nosave neither reads nor writes
 # Setup and environment as for cadet_test.py.
@@ -550,6 +551,34 @@ with sync_playwright() as pw:
             print('  made:', s6[1], '|', s6[3][:100])
             check(s6[1] == ['element'] and s6[2]['make'] is None, 'job loop: making should leave the part in your hands')
             g.ev(f"SHIP.stores.element = window.__stock; dropJob({json.dumps(mk)}); SHIP.player.carry = []")
+        # a reserved training job (0.28.24, section 17's jobReserve): a shelf part, then a bracket you make, then the repair
+        if g.ev("typeof jobReserve === 'function'"):
+            rj = g.ev(r"""(() => { SHIP.player.carry = []; SHIP.player.work = null; const id = jobReserve('lights', SHIP.time.day, Math.max(0, SHIP.time.min - 1), 3);
+              if (!id || !claimJob(id)) return null; myWork(); const j = myJob(); return [id, j.parts, j.make, machineById(j.machine).deck, jobStops(j).map(x => x.step)]; })()""")
+            print('  a reserved job:', rj)
+            if check(rj and rj[2] and rj[2] in rj[1] and 'make' in rj[4], f'reserved job: should need a part you make ({rj})'):
+                g.ev("goToDeck(5)"); g.step(5)
+                shelf = g.ev("JSON.stringify(ITEMS.filter(i => roomAt(...cellAt(i.hit.getWorldPosition(_wp).x, _wp.z)) === 'r' && !/tarp/i.test(i.t)).map(i => i.t)[0])")
+                g.ev(TAPS % shelf); r1 = jrun(); print('  fetched:', r1[1], '|', r1[3][:120])
+                check(r1[1] == [x for x in rj[1] if x != rj[2]] and 'machine shop' in r1[3], f'reserved job: fetch takes the shelf part only and points to the machine shop ({r1[1]}, {r1[3]})')
+                g.ev(TAPS % shelf); g.step(3); t2 = g.ev("document.getElementById('tx').textContent")
+                check("isn't kept on the shelves" in t2, f'reserved job: storage says the {rj[2]} is made, not kept ({t2})')
+                g.ev(f"SHIP.player.work.make = {{ part: {json.dumps(rj[2])}, done: makeMins(myJob()) - 3 }}")
+                lathe = g.ev("JSON.stringify(ITEMS.filter(i => roomAt(...cellAt(i.hit.getWorldPosition(_wp).x, _wp.z)) === 'f').map(i => i.t)[0])")
+                g.ev(TAPS % lathe); bar = None
+                for k in range(80):
+                    g.step(10); bar = bar or g.ev("(p => p && p.title + ' ' + Math.round(p.frac * 100))(actProgress())")
+                    if bar: break
+                r2 = jrun(); sd = g.ev("(() => { const j = myJob(); return [j.stepsDone || [], jobStops(j).map(x => x.step)]; })()")
+                print('  made:', r2[1], '| bar', bar, '| stops done', sd, '|', r2[3][:100])
+                check(sorted(r2[1]) == sorted(rj[1]) and bar and bar.startswith('Machine shop'), f'reserved job: the {rj[2]} made, in your hands, with the progress bar ({r2[1]}, {bar})')
+                check(sd[1].index('fetch') in sd[0] and sd[1].index('make') in sd[0], f'reserved job: the fetch and make stops marked done ({sd})')
+                g.ev(f"goToDeck({rj[3]})"); g.step(5)
+                check(g.ev(TAPI) is True, 'reserved job: a tap on the machine'); r3 = jrun(200)
+                g.ev("(() => { const j = typeof turnInJob === 'function' && myJob(); if (j && j.workDone) turnInJob(j.id); })()")
+                rd = g.ev(f"(() => {{ const j = SHIP.jobs.find(j => j.id === {json.dumps(rj[0])}); return [j.status, !!myJob()]; }})()")
+                print('  repaired:', rd, '|', r3[3][:80])
+                check(rd == ['done', False], f'reserved job: done after fitting both parts and the repair ({rd})')
         # the wrist comm: a job you could take, posted while you're free
         nt = g.ev(r"""(() => { const t0 = document.getElementById('tx').textContent; JOB_SEEN = new Set(); machinesNow();
           const j = SHIP.jobs.find(j => j.machine && j.status !== 'done' && jobTier(j) <= PLAYER_TIER && !ENGINE_KINDS.has(machineById(j.machine).kind));

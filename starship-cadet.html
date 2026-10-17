@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.28.23
+   STARSHIP CADET: CSV Wren                           build 0.28.24
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.28.23';                           // keep in step with the header's build line
+const GAME_BUILD = '0.28.24';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -9987,6 +9987,17 @@ function jobNeeds(j, w, less = []) {                     // the parts still to f
   for (const p of w.fitted.concat(less)) { const i = need.indexOf(p); if (i >= 0) need.splice(i, 1); }
   return need;
 }
+// a part the job says you make yourself (0.28.24, Pillar 4: section 17's reserved jobs carry j.make, e.g. 'bracket'):
+// never taken off the shelf, always made in the machine shop (j.makeMins, else PLAYER_ACTS.make's hour). shelfNeeds:
+// what's left to fetch from main storage. whereFrom: where the parts still needed come from, for the toasts.
+const madeHere = j => typeof j.make === 'string' && j.make ? j.make : null;
+function shelfNeeds(j, w, less) { const n = jobNeeds(j, w, less), i = madeHere(j) ? n.indexOf(j.make) : -1; if (i >= 0) n.splice(i, 1); return n; }
+const makeMins = j => Number.isFinite(j && j.makeMins) && j.makeMins > 0 ? j.makeMins : PLAYER_ACTS.make.mins;
+const whereFrom = (j, need) => need.includes(madeHere(j)) ? 'Make the ' + j.make + ' in the machine shop on Deck 5' + (need.length > 1 ? '; the rest is in main storage next door.' : '.') : 'Main storage is on Deck 5.';
+function jobStopMark(j, step) {                          // tell section 17 a stop is done (its stepsDone, simNote('job', 'stop'))
+  if (typeof jobStepDone !== 'function' || typeof jobStops !== 'function') return;
+  const k = jobStops(j).findIndex(x => x.step === step); if (k >= 0) try { jobStepDone(j.id, k); } catch (e) { /* not ours to mend */ }
+}
 const partList = a => { const n = {}; for (const k of a) n[k] = (n[k] || 0) + 1; return Object.entries(n).map(([k, c]) => (c > 1 ? c + ' × ' : /^[aeiou]/i.test(k) ? 'an ' : 'a ') + k).join(' and '); };
 const machineName = m => (typeof MACHINE_KINDS !== 'undefined' && MACHINE_KINDS[m.kind] ? MACHINE_KINDS[m.kind].name : m.kind).toLowerCase();
 // a tap (section 11, through playerTap): main storage, or the machine of the job you hold. False: not the job's business
@@ -9999,7 +10010,8 @@ function jobTap(it, at) {
       approach(at.clone(), it.front, it.depth, () => actStart('stow', null, { title: it.t }));
       return true;
     }
-    const need = jobNeeds(mw.j, mw.w, P.carry);
+    const need = shelfNeeds(mw.j, mw.w, P.carry);
+    if (!need.length && jobNeeds(mw.j, mw.w, P.carry).length) { toast(it.t, 'The ' + mw.j.make + ' isn\'t kept on the shelves: you make it yourself in the machine shop next door.'); return true; }   // 0.28.24
     if (!need.length) { toast(it.t, 'You have what the job needs: ' + partList(P.carry) + '. It\'s at the ' + machineName(machineById(mw.j.machine)) + ' on Deck ' + mw.j.deck + '.'); return true; }
     if (P.carry.length >= CARRY_MAX) { toast(it.t, 'Your hands are full (' + partList(P.carry) + '). Fit those first, then come back for ' + partList(need) + '.'); return true; }
     const o = { title: it.t, flavour: it.x, after: 'You look for ' + partList(need) + '.' }, pl = jobPlaceNear('storage', 'r', at);
@@ -10008,12 +10020,13 @@ function jobTap(it, at) {
   }
   if (!mw) return false;
   if (deckDef.num === 5 && roomAt(...c) === 'f') {         // the machine shop: make a part storage has run out of
-    const make = (P.work.make && P.work.make.part) || jobNeeds(mw.j, mw.w, P.carry).find(p => !(SHIP.stores[p] > 0) && !(typeof NO_MAKE !== 'undefined' && NO_MAKE.has(p)));
+    const want = jobNeeds(mw.j, mw.w, P.carry);           // the job's own made part first (0.28.24), else one storage has run out of
+    const make = (P.work.make && P.work.make.part) || (want.includes(madeHere(mw.j)) ? mw.j.make : want.find(p => !(SHIP.stores[p] > 0) && !(typeof NO_MAKE !== 'undefined' && NO_MAKE.has(p))));
     const pl = make && jobPlaceNear('storage', 'f', at);
     if (make && pl) {
       if (P.carry.length >= CARRY_MAX) { toast(it.t, 'Your hands are full (' + partList(P.carry) + '). Fit those first.'); return true; }
       if (!P.work.make || P.work.make.part !== make) P.work.make = { part: make, done: 0 };
-      const left = Math.max(1, PLAYER_ACTS.make.mins - P.work.make.done);
+      const left = Math.max(1, makeMins(mw.j) - P.work.make.done);
       actStart('make', pl.id, { title: it.t, flavour: it.x, part: make, after: (P.work.make.done ? 'Back to the ' : 'You start on a new ') + make + ': about ' + taskMins(left) + ' minutes. Walk away to pause.' });
       if (ACT && ACT.kind === 'make') ACT.def.mins = left;
       return true;
@@ -10044,7 +10057,7 @@ function jobBegin(A) {
     A.o.after = fitted + 'You open the panel on the ' + name + ' and look it over.'; A.o.need = need;
     return true;
   }
-  ACT = null; toast(A.o.title, fitted + 'The ' + name + ' still needs ' + partList(need) + '. Main storage is on Deck 5.'); device.refresh();
+  ACT = null; toast(A.o.title, fitted + 'The ' + name + ' still needs ' + partList(need) + '. ' + whereFrom(j, need)); device.refresh();
   return false;
 }
 // done (actEnd, not walked away): what each step leaves you with
@@ -10055,24 +10068,26 @@ function jobEnd(A) {
     toast('Main storage', back.length ? 'You put back ' + partList(back) + '.' : 'Nothing to put back.');
   } else if (A.kind === 'make' && mw && P.work.make) {
     const part = P.work.make.part; P.work.make = null;
-    if (P.carry.length < CARRY_MAX) { P.carry.push(part); toast('Machine shop', 'You make ' + partList([part]) + '. Now to the ' + machineName(machineById(mw.j.machine)) + ' on Deck ' + mw.j.deck + '.'); }
+    if (P.carry.length < CARRY_MAX) { P.carry.push(part); toast('Machine shop', 'You make ' + partList([part]) + '. ' + (shelfNeeds(mw.j, mw.w, P.carry).length ? 'Now ' + partList(shelfNeeds(mw.j, mw.w, P.carry)) + ' from main storage next door.' : 'Now to the ' + machineName(machineById(mw.j.machine)) + ' on Deck ' + mw.j.deck + '.')); }
+    if (part === madeHere(mw.j)) jobStopMark(mw.j, 'make');   // the job's make stop (0.28.24)
   } else if (A.kind === 'fetch' && mw) {
-    const need = jobNeeds(mw.j, mw.w, P.carry), got = [], none = [];
+    const need = shelfNeeds(mw.j, mw.w, P.carry), got = [], none = [];
     for (const p of need) {
       if (P.carry.length >= CARRY_MAX) break;
       if (takePart(p)) { P.carry.push(p); got.push(p); } else if (!none.includes(p)) none.push(p);
     }
-    const rest = jobNeeds(mw.j, mw.w, P.carry);
+    const rest = shelfNeeds(mw.j, mw.w, P.carry), toMake = jobNeeds(mw.j, mw.w, P.carry).includes(madeHere(mw.j));
+    if (madeHere(mw.j) && got.length && !rest.length) jobStopMark(mw.j, 'fetch');   // the job's fetch stop (0.28.24)
     toast('Main storage', (got.length ? 'You take ' + partList(got) + '.' : 'Nothing you need is on the shelves.')
       + (none.length ? ' None left: ' + none.join(', ') + '. ' + (none.some(p => typeof NO_MAKE !== 'undefined' && !NO_MAKE.has(p)) ? 'The machine shop next door can make one (about an hour at the lathe).' : 'It can\'t be made aboard; the next delivery is on Wednesday.') : '')
       + (rest.length && !none.length ? ' Your hands are full; you\'ll need another trip for ' + partList(rest) + '.' : '')
-      + (got.length ? ' Now to the ' + machineName(machineById(mw.j.machine)) + ' on Deck ' + mw.j.deck + '.' : ''));
+      + (got.length ? toMake && !rest.length ? ' Now make the ' + mw.j.make + ' in the machine shop next door.' : ' Now to the ' + machineName(machineById(mw.j.machine)) + ' on Deck ' + mw.j.deck + '.' : ''));
   } else if (A.kind === 'job' && mw) {
     const name = machineName(machineById(mw.j.machine));
     if (A.o.repair) {
       if (finishJob(mw.j.id)) { P.work = null; P.credits += JOB_PAY; toast('Job done', 'The ' + name + ' is running sweetly again. That\'s one off the board. +' + JOB_PAY + ' credits.'); }
       else toast('Your job', 'The job isn\'t yours any more.');
-    } else toast('Inspecting', 'The ' + name + ' needs ' + partList(A.o.need) + '. ' + (P.carry.length ? '' : 'Main storage is on Deck 5.'));
+    } else toast('Inspecting', 'The ' + name + ' needs ' + partList(A.o.need) + '. ' + (P.carry.length && !A.o.need.includes(madeHere(mw.j)) ? '' : whereFrom(mw.j, A.o.need)));
   }
   device.refresh();
 }
