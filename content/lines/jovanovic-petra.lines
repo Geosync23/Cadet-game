@@ -56,7 +56,7 @@
 == invite
 ? tier>=acquaintance
 - Tiles in the common room? I'm not very good. Maybe. I win sometimes. Probably by accident.
-- Film night? I like the quiet ones. You can sit with me. If you want. No pressure.
+- Film night? I like the quiet ones. Sit with our lot. If you want. No pressure.
 
 == accept
 - Oh. Yes. I'd like that. I think. Yes, I would.
@@ -64,7 +64,7 @@
 
 == decline
 - I can't, I'm on the coils. Sorry. Really. Another night? Maybe?
-? weekday:mon|tue
+? weekday:tue|wed
 - It's my rest day. I'm calling home. Probably twice. Another time?
 
 == missed

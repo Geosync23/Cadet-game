@@ -54,7 +54,7 @@
 - Second tea. Now I'm here. Hello. How long have you been standing there?   #funny
 
 == invite
-- Observatory tonight? We could just look. No talking. Well, a bit of talking.
+- Observatory tonight? Our lot just looks. No talking. Well, a bit of talking.
 - Come and see the sprinklers? Seven, in the garden. It's nearly rain.
 
 == accept
@@ -63,7 +63,7 @@
 
 == decline
 - Not tonight. I'm sending a message home. It's a long one. Tomorrow?
-? weekday:sat|sun
+? weekday:sun|mon
 - It's my rest day. I'm going to sit in the garden and listen. Another time?
 
 == missed
@@ -83,7 +83,7 @@
 
 // ---- Writer 2, batch 1b: a hint (a moment is ready) and an about line for a named friend
 == hint
-- Sit with me a bit, later? Somewhere with a window. I've been thinking.
+- Got a minute later? I've been thinking. About home, mostly.
 
 == about
 ? aff:soto-marta:friend

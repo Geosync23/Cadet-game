@@ -64,7 +64,7 @@
 
 == decline
 - Not tonight, I'm shattered. Rain check? Do we say that here? We do now.
-? weekday:sun|mon
+? weekday:mon|tue
 - Rest day. I'm pressing flowers and doing nothing else. Another time?
 
 == missed
@@ -82,7 +82,7 @@
 
 // ---- Writer 2, batch 1b: a hint (a moment is ready) and an about line for a named friend
 == hint
-- Fancy a cuppa later? Just us. No races. Promise.
+- Fancy a cuppa later? No races. Promise. I've something to tell you.
 
 == about
 ? aff:kovac-zainab:friend

@@ -65,7 +65,7 @@
 
 == decline
 - Not tonight. Late dinner, window seat. It's booked. By me. Tomorrow?
-? weekday:tue|wed
+? weekday:wed|thu
 - Rest day. I'm doing a tour of every window on the ship. Another time?   #funny
 
 == missed
@@ -83,7 +83,7 @@
 
 // ---- Writer 2, batch 1b: a hint (a moment is ready) and an about line for a named friend
 == hint
-- Meet me at a window later? Any window. I'll find you.
+- Got a minute later? I've saved a window. Not for the view, this time.
 
 == about
 ? aff:salo-saad:friend

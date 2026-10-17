@@ -495,3 +495,6 @@ introduces them), unless noted.
 | Zofia Santos's cousin runs her old Hesper Dock stall, "badly"; Chloe Tran bakes because it smells like her gran's kitchen; Lukas Dlamini has the same bar stool and the same drink every night | Bunk 1 | writer-commons, batch 5 |
 | Thea Grieve's fish are called One, Two and Three; the first Gerald is still going, very old now; Ivo Madsen has carried trays for three years; Tariq Varga once lost a race to Erik Strand | the commons crew | writer-commons, batch 6 |
 | Speaker conditions for overheard: `who:` (A is one of) and `with:` (B is one of), crew ids (dialogue 0.43.8) | everyone | head writer |
+| Femi Rossi and Lucia Ferreira practise Veyli together (Rossi from a phrasebook; Ferreira is better, Rossi louder); Rossi is learning a Veyli song in the music room | Rossi, Ferreira | Writer 2, batch 1 |
+| Rahman is about to log a four hundredth star; Reyes's letters to Lisk run to pages; Moreau gets a mystery with the last page torn out from Achterberg | Works | Writer 2, batch 1 |
+| `weekday:` on a rest-day line must match the roster's `rota.offDays` (0 = Monday): check the game's ROSTER, not memory | everyone | head writer, 0.48.11 |

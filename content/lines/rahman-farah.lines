@@ -64,7 +64,7 @@
 
 == decline
 - Not tonight. Extra shift. The boat won't buy itself. Ask me again.
-? weekday:tue|wed
+? weekday:wed|thu
 - Rest day. I'm sleeping. Don't tell anyone. Another time.   #funny
 
 == missed

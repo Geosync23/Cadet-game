@@ -64,8 +64,8 @@
 
 == decline
 - Not tonight. I'm on the board till morning. Another night?
-? weekday:tue|wed
-- Rest day. I've promised myself a book and a long sleep. Ask me Thursday?
+? weekday:wed|thu
+- Rest day. I've promised myself a book and a long sleep. Ask me Friday?
 
 == missed
 - I waited a little. Then I sorted the box. No harm done. Next time.
@@ -86,7 +86,7 @@
 
 // ---- Writer 2, batch 1b: a hint (a moment is ready) and an about line for a named friend
 == hint
-- Have you a moment later? Somewhere quiet. Nothing's lost. I'd just like to talk.
+- Have you a moment later? Nothing's lost. I've something to tell you, that's all.
 
 == about
 ? aff:salo-saad:friend

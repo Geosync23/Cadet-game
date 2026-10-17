@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.48.10
+   STARSHIP CADET: CSV Wren                           build 0.48.11
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.48.10';                           // keep in step with the header's build line
+const GAME_BUILD = '0.48.11';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -13132,9 +13132,27 @@ const VOICE = {
     "tpl": "playful",
     "words": {"hi": ["Hey", "Oh, hello", "Hi, you"], "bye": ["See you round", "Bye", "Off you go"], "yes": ["Why not", "Sure", "Yes, go on"], "thanks": ["Thanks", "Ta, that's nice"], "wow": ["Ooh, look", "Not bad at all"], "sigh": ["Ah well, sunny side", "Oh, go on"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
+      "about": [
+        {"text": "Salo reads his twin's letters out at tea. I save him the window seat for it.", "id": "17m9g55", "aff": "salo-saad:friend"},
+      ],
+      "accept": [
+        {"text": "Ooh, yes. I'll bag us a window.", "id": "1hfrcwk"},
+        {"text": "Yes. Lovely. I'll be the one by the glass.", "id": "1qcr6xs"},
+      ],
+      "birthday": [
+        {"text": "Happy birthday! I'll give you the window side all day. That's a big present, that.", "id": "11dqhzi", "tone": "warm", "birthday": "you"},
+        {"text": "My birthday. The washroom sang to me this morning. All of them. Badly. I loved it.", "id": "m15bpt", "tone": "funny", "birthday": "me"},
+      ],
       "bye": [
         {"text": "See you round.", "id": "bqgwk8"},
         {"text": "Bye! Find a window. Any window.", "id": "1s5k1d9"},
+      ],
+      "cue": [
+        {"text": "Was that your fix on Deck 6? The coils look happier. I'm telling everyone.", "id": "ntms4c", "cue": "repair.you@dept"},
+      ],
+      "decline": [
+        {"text": "Not tonight. Late dinner, window seat. It's booked. By me. Tomorrow?", "id": "wv51id"},
+        {"text": "Rest day. I'm doing a tour of every window on the ship. Another time?", "id": "1t6dygm", "tone": "funny", "weekday": "wed|thu"},
       ],
       "feel": [
         {"text": "Bit grey today. I'll find a window. That usually does it.", "id": "lfzpkj", "mood": "low"},
@@ -13147,6 +13165,15 @@ const VOICE = {
         {"text": "Hey, {me}. I was in the washroom earlier. You didn't hear anything. Good.", "id": "18iaiah", "tone": "funny", "tier": [1, 4]},
         {"text": "{me}. Come here. Look out there. Nothing. Miles of nothing. Isn't it great?", "id": "17dmi51", "tier": [2, 4]},
         {"text": "Oh, it's you. I saved you the window side. Friends get the best side.", "id": "1a5ptdi", "tone": "warm", "tier": [3, 4]},
+        {"text": "Evening. Late dinner for me. Mess is empty, window's free. Perfect.", "id": "s3fn9s", "tier": [1, 4], "time": "evening"},
+        {"text": "Oh, there you are. I'd started checking windows for you. You weren't in any.", "id": "1m4vezx", "tone": "funny", "tier": [1, 4], "warmth": "cold"},
+      ],
+      "hint": [
+        {"text": "Got a minute later? I've saved a window. Not for the view, this time.", "id": "196w2gv"},
+      ],
+      "invite": [
+        {"text": "Observatory tonight? I'll show you the window seat. It's the best one this week.", "id": "1rl6xs9"},
+        {"text": "Friday jam? I won't sing. I'll sit. You can sit too. Sitting's nice.", "id": "bhc2r6", "tier": [2, 4]},
       ],
       "joy": [
         {"text": "The best window aboard changes every week. This week it's the observatory.", "id": "o2qpyg", "tier": [1, 4]},
@@ -13155,9 +13182,14 @@ const VOICE = {
         {"text": "The whole washroom knows my songs. In order. I've stopped pretending they don't.", "id": "19dx2df", "tone": "funny", "tier": [1, 4]},
         {"text": "The big tree in the garden? Never climbed it. Why, is there a leaf in my hair?", "id": "99ycif", "tone": "funny", "tier": [2, 4]},
       ],
+      "missed": [
+        {"text": "You missed it. That's all right. I had the window to myself. It was fine. Almost.", "id": "18ham8g"},
+      ],
       "near": [
         {"text": "Coil two's lovely today. Look at the needle. Barely moving. Happy coil.", "id": "hpyd5r", "act": "work"},
         {"text": "Late dinner, window seat, nobody in the queue. This is what winning looks like.", "id": "1m9jyh6", "tone": "funny", "act": "dinner"},
+        {"text": "Music room in the evenings now. I just listen. Only listen. Honest.", "id": "28g9gd", "tone": "funny", "habit": "music"},
+        {"text": "Coils from the overlook. Best view on Deck 6. Well, the only view on Deck 6.", "id": "117gp31", "tone": "funny", "place": "overlook"},
       ],
     },
   },
@@ -13713,9 +13745,27 @@ const VOICE = {
     "tpl": "dry",
     "words": {"hi": ["Oh. Hello", "Hi", "You again"], "bye": ["Off you go", "Don't get lost", "Bye, then"], "yes": ["Fine", "If I must", "Yes"], "thanks": ["Thanks", "Noted, thanks"], "wow": ["Huh", "Well, well"], "sigh": ["Of course", "Naturally"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
+      "about": [
+        {"text": "Keane and I might share a gran. We've agreed not to check. It's nicer this way.", "id": "15013pm", "tone": "funny", "aff": "keane-davi:friend"},
+      ],
+      "accept": [
+        {"text": "Fine. Yes. I'll be there at the time. Exactly the time.", "id": "16ixue8"},
+        {"text": "Yes. I'll bring a map. You won't need it. That's not the point.", "id": "weull3", "tone": "funny"},
+      ],
+      "birthday": [
+        {"text": "Happy birthday. I found you a map. It's out of date. That's the best kind.", "id": "19m0amy", "tone": "warm", "birthday": "you"},
+        {"text": "My birthday. Gran sent a voice message. It's mostly singing. I've played it four times.", "id": "ashtl0", "tone": "warm", "birthday": "me", "tier": [3, 4]},
+      ],
       "bye": [
         {"text": "Off you go. Don't get lost. Or do. I have maps.", "id": "1nejf1p", "tone": "funny"},
         {"text": "Bye, then. Booths are quiet at two, if you need one.", "id": "1x9fhvs"},
+      ],
+      "cue": [
+        {"text": "Your job's closed. Notes are tidy. I checked. You didn't need to know that.", "id": "1kzkn31", "tone": "funny", "cue": "repair.you@dept"},
+      ],
+      "decline": [
+        {"text": "Not tonight. Gran's sent a message. It's long. She talks slower than the relay.", "id": "1qu7gso", "tone": "funny"},
+        {"text": "Rest day. One window, one map, no people. Nothing personal. Another time.", "id": "akrta", "weekday": "thu|fri"},
       ],
       "feel": [
         {"text": "No answer from home today. It's the relay. It's always the relay.", "id": "4fe6jv", "mood": "low"},
@@ -13728,6 +13778,15 @@ const VOICE = {
         {"text": "You again. Good. I'd started to think the lift ate you.", "id": "lrsj9v", "tier": [1, 4]},
         {"text": "{me}. Found a map of Hesper Dock from before the market moved. Useless. I love it.", "id": "2carqf", "tone": "funny", "tier": [2, 4]},
         {"text": "Oh. It's you. I've decided you're all right. Don't make it a thing.", "id": "dpjko0", "tone": "warm", "tier": [3, 4]},
+        {"text": "Evening. Booths are empty. Lounge is full. The ship's upside down.", "id": "1lsbowm", "tone": "funny", "tier": [1, 4], "time": "evening"},
+        {"text": "You. I'd marked you down as lost. I was about to draw you a map.", "id": "nrnn4c", "tone": "funny", "tier": [1, 4], "warmth": "cold"},
+      ],
+      "hint": [
+        {"text": "Have you a minute later? I'd like to talk. Not about maps. Well. A bit about maps.", "id": "1t7vr8k"},
+      ],
+      "invite": [
+        {"text": "Tiles tonight? I won't win. I'll lose very neatly.", "id": "1eytjyn", "tone": "funny"},
+        {"text": "Swap table tonight. I'm after maps. You're after whatever you're after. Come.", "id": "mj2qfi", "tier": [1, 4]},
       ],
       "joy": [
         {"text": "An old map is a picture of a place that isn't there any more. I find that very calming.", "id": "yng6iu", "tier": [1, 4]},
@@ -13736,9 +13795,14 @@ const VOICE = {
         {"text": "My gran's on Kesh. So is Keane's. It might be the same gran. We don't ask.", "id": "1gqyane", "tone": "funny", "tier": [1, 4]},
         {"text": "My maps of Hesper Dock are all out of date. That's the point. You can see where it's been.", "id": "196lzyb", "tier": [2, 4]},
       ],
+      "missed": [
+        {"text": "You weren't there. I timed it. Twelve minutes. I'm not cross. I'm precise.", "id": "18qwooq", "tone": "funny"},
+      ],
       "near": [
         {"text": "Toolbelt, left to right: spanners, drivers, tape. If yours isn't, I'll know.", "id": "12xrzlg", "act": "work"},
         {"text": "Lounge, window seat, one map. That's my evening. Don't make it sound sad.", "id": "1kbmsav", "tone": "funny", "act": "leisure"},
+        {"text": "I help in the garden now. The beds are numbered. Someone numbered them wrong.", "id": "enl98e", "tone": "funny", "habit": "gardener"},
+        {"text": "Four in the queue. Eleven minutes. I'm never wrong about the queue.", "id": "1lhk4hj", "place": "booths"},
       ],
     },
   },
@@ -14129,9 +14193,27 @@ const VOICE = {
     "tpl": "warm",
     "words": {"hi": ["Morning, morning", "Hello, you", "Ah, hello"], "bye": ["Look after yourself", "Off you pop", "Ta-ta for now"], "yes": ["Course I will", "Lovely, yes", "Happy to"], "thanks": ["Ah, lovely", "You're a treasure", "Thanks ever so"], "wow": ["Ooh, look at that", "Well, isn't that grand"], "sigh": ["Oh, dear me", "Ah, well"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
+      "about": [
+        {"text": "Yoon's breakfast jokes are nearly as bad as mine. Nearly. I'm very proud of her.", "id": "1dfg7dl", "tone": "funny", "aff": "yoon-elif:friend"},
+      ],
+      "accept": [
+        {"text": "Lovely. Yes. I'll bring something baked. I'll bring two somethings.", "id": "1ggjxmj", "tone": "funny"},
+        {"text": "Yes. I was going to say yes before you finished asking.", "id": "73x5ky", "tone": "funny"},
+      ],
+      "birthday": [
+        {"text": "Happy birthday! I baked. I told Brennan it was an emergency. It was.", "id": "1rz3mk8", "tone": "funny", "birthday": "you"},
+        {"text": "My birthday. I baked my own cake. Is that sad? It's a very good cake.", "id": "l48ihi", "tone": "funny", "birthday": "me"},
+      ],
       "bye": [
         {"text": "{bye}. And eat something, mind.", "id": "2zydle"},
         {"text": "{bye}. Tea's at half ten. You know where.", "id": "z0xbrh"},
+      ],
+      "cue": [
+        {"text": "Saw your job on the board. Done, signed, closed. Lovely. Have a biscuit.", "id": "8ytt0c", "tone": "warm", "cue": "repair.you@dept"},
+      ],
+      "decline": [
+        {"text": "I'd love to. I can't. I've said yes to three people tonight. Tomorrow? Please?", "id": "h0fzxh"},
+        {"text": "Not tonight, I'm covering the rota. I'm always covering the rota. Next time.", "id": "17fwf0m"},
       ],
       "feel": [
         {"text": "No joke today. Don't look at me like that. I'll have two tomorrow.", "id": "z6khxn", "mood": "low"},
@@ -14144,6 +14226,15 @@ const VOICE = {
         {"text": "{hi}. I had a joke for you. I've lost it. That's probably for the best.", "id": "1kbvfw5", "tone": "funny", "tier": [1, 4], "time": "morning"},
         {"text": "{hi}, {me}. Sit down a minute. You look like you've been standing since Tuesday.", "id": "1n8rx75", "tier": [2, 4]},
         {"text": "{me}. Lovely. I saved you a scone. Don't tell Brennan where it came from.", "id": "15jqcx2", "tone": "warm", "tier": [3, 4]},
+        {"text": "{hi}. Afternoon slump. I've a joke for it. No? Fair. Have you eaten, at least?", "id": "10pqk7y", "tier": [1, 4], "time": "afternoon"},
+        {"text": "{hi}, stranger. Have you been eating? You've been somewhere. Sit. Tell me.", "id": "llxxa6", "tier": [1, 4], "warmth": "cold"},
+      ],
+      "hint": [
+        {"text": "Could I borrow you a minute later? Not for a job. For me, for once.", "id": "1sb7tux"},
+      ],
+      "invite": [
+        {"text": "Works tea, half ten, tea corner. Bring yourself. I'll find you a mug.", "id": "ol5tw8", "tier": [1, 4]},
+        {"text": "Come and see the tomatoes after shift? The garden's lovely in the evening.", "id": "y193lp", "tier": [1, 4]},
       ],
       "joy": [
         {"text": "The face people make at a warm scone. That's why I bake. Well, that and the scone.", "id": "11z97z7", "tier": [1, 4]},
@@ -14152,9 +14243,15 @@ const VOICE = {
         {"text": "I trade breakfast jokes with Yoon. Mine are worse. It's not a contest. It is a bit.", "id": "1yaiv69", "tone": "funny", "tier": [1, 4]},
         {"text": "I swapped my days off so Torres could meet you. Best swap I ever made.", "id": "1pqo5vd", "tone": "warm", "tier": [2, 4]},
       ],
+      "missed": [
+        {"text": "I kept you a scone. It's a bit sad now. I'll eat it. For you.", "id": "d5qslx", "tone": "funny"},
+      ],
       "near": [
         {"text": "Board's tidy, rota's done, kettle's on. Lovely. Now, what's broken?", "id": "1rrfhy8", "act": "work"},
         {"text": "Just made it. I always just make it. The joke takes the time.", "id": "ctopcc", "tone": "funny", "act": "breakfast"},
+        {"text": "Kettle's on, mugs on the rack, rota on the wall. All's right with the world.", "id": "1wb8sua", "place": "teacorner"},
+        {"text": "The tomatoes are coming on. I check them every day. They don't seem to mind.", "id": "1s9zj0h", "habit": "garden-lover"},
+        {"text": "Music room most evenings now. I sit at the back and tap my foot. Badly.", "id": "3fj0yx", "tone": "funny", "habit": "music"},
       ],
       "week1": [
         {"text": "Works tea tomorrow at half ten. Don't be late. There's a reason. I can't say.", "id": "7jmeub", "tone": "funny", "week1": "true", "weekday": "thu"},
@@ -14581,9 +14678,28 @@ const VOICE = {
     "tpl": "shy",
     "words": {"hi": ["Oh, hi", "Hello", "Um, hi"], "bye": ["Bye, then", "Take care", "Sorry, I should go"], "yes": ["I think so", "Yes, okay", "I can try"], "thanks": ["Thank you", "Oh, thanks"], "wow": ["Oh", "Oh, that's good"], "sigh": ["Oh dear", "Um, well"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
+      "about": [
+        {"text": "Reyes and I swap coil worries at handover. It halves them, somehow. I think.", "id": "agsa3r", "tone": "warm", "aff": "reyes-alejandro:friend"},
+      ],
+      "accept": [
+        {"text": "Oh. Yes. I'd like that. I think. Yes, I would.", "id": "x14yoe"},
+        {"text": "Yes. I'll be there. Probably early. Is that all right?", "id": "fevv27"},
+      ],
+      "birthday": [
+        {"text": "Happy birthday. I wasn't sure what to say. That. I think that's it. Happy birthday.", "id": "grwgm1", "tone": "warm", "birthday": "you"},
+        {"text": "My birthday. Reyes played a song on the watch room table. Coil three hummed. I think.", "id": "11xwcj3", "tone": "funny", "birthday": "me"},
+      ],
       "bye": [
         {"text": "Bye, then. Sorry. I should go. The coils.", "id": "k3xjor"},
         {"text": "Take care. Um. You too. I mean, take care. Yes.", "id": "p0gq2s", "tone": "funny"},
+      ],
+      "cue": [
+        {"text": "Storm's in. The coils will be twitchy. I'll watch them. I'm good at watching.", "id": "1i9p7qc", "cue": "event.ionStorm.onset"},
+        {"text": "I looked at your repair. Sorry. I check everything. It's right. I'm sure. Yes.", "id": "1yllage", "cue": "repair.you@dept"},
+      ],
+      "decline": [
+        {"text": "I can't, I'm on the coils. Sorry. Really. Another night? Maybe?", "id": "1grfy6m"},
+        {"text": "It's my rest day. I'm calling home. Probably twice. Another time?", "id": "17psocb", "weekday": "tue|wed"},
       ],
       "feel": [
         {"text": "Bit of a worry night. Nothing wrong. I just worried. It's what I do.", "id": "dmtjy8", "mood": "low"},
@@ -14596,6 +14712,15 @@ const VOICE = {
         {"text": "Hello. Sorry, I'm in the way. No? Oh. Good. Hi.", "id": "wpvo8r", "tone": "funny", "tier": [1, 4]},
         {"text": "Oh, {me}. Hi. I think coil two's running warm. Probably fine. I'll check it twice.", "id": "1l83l89", "tier": [2, 4]},
         {"text": "Oh. It's you. Good. I don't have to think about what I say with you.", "id": "13jvy3h", "tone": "warm", "tier": [3, 4]},
+        {"text": "Oh. Morning. I'm off to bed. I think. Yes. Bed. Night. Morning. Sorry.", "id": "9dgs38", "tone": "funny", "tier": [1, 4], "time": "morning"},
+        {"text": "Oh. Hello. I thought maybe you'd moved decks. Probably not. I'm glad. I think.", "id": "1g1yqed", "tier": [1, 4], "warmth": "cold"},
+      ],
+      "hint": [
+        {"text": "Um. Have you a minute later? It's nothing. Probably. I'd like to tell someone.", "id": "1nf2nms"},
+      ],
+      "invite": [
+        {"text": "Tiles in the common room? I'm not very good. Maybe. I win sometimes. Probably by accident.", "id": "p9lm9y", "tier": [1, 4]},
+        {"text": "Film night? I like the quiet ones. Sit with our lot. If you want. No pressure.", "id": "u5nigb", "tier": [1, 4]},
       ],
       "joy": [
         {"text": "When the coils run just right, there's a purr under the hum. Reyes hears it too.", "id": "1507slt", "tier": [1, 4]},
@@ -14604,9 +14729,14 @@ const VOICE = {
         {"text": "I married just before the tour. Silva, Soto and I compare day counts at breakfast.", "id": "13hejou", "tier": [1, 4]},
         {"text": "On Valo it rains every day at four. You can set your clock by it. I miss that.", "id": "1nzoq5d", "tier": [2, 4]},
       ],
+      "missed": [
+        {"text": "You didn't come. That's fine. Probably you were busy. I hope you were all right.", "id": "nocyjh"},
+      ],
       "near": [
         {"text": "I think that reading's right. Yes. It's right. I'll check it again anyway.", "id": "1y9d0p8", "act": "work"},
         {"text": "Common room's nice before a night shift. Everyone's going to bed. I'm getting up.", "id": "1fgneku", "act": "leisure"},
+        {"text": "Music room before shift. Someone's always learning the guitar. Badly. It's nice, though.", "id": "1u8l800", "habit": "music"},
+        {"text": "One drink before the night watch. Just one. Then the coils. I think that's fair.", "id": "i820d", "place": "lounge"},
       ],
     },
   },
@@ -14626,9 +14756,27 @@ const VOICE = {
     "tpl": "warm",
     "words": {"hi": ["Hey, hey", "Hiya", "Hello"], "bye": ["Night, then", "See you below", "Mind how you go"], "yes": ["Yes, mate", "Course", "Sure thing"], "thanks": ["Ah, cheers", "You're a good one"], "wow": ["Look at that shine", "Oh, nice"], "sigh": ["Ah, well", "Never mind"], "nick": [null, null, "{me}", "mate", "mate"]},
     "lines": {
+      "about": [
+        {"text": "Eklund and I might share a gran. She says don't check. I'd love to check.", "id": "4in0rh", "tone": "funny", "aff": "eklund-leila:friend"},
+      ],
+      "accept": [
+        {"text": "Yes! Brilliant. I'll be there. Early, probably. I'm always up.", "id": "z4vies"},
+        {"text": "Course, {nick}. Wouldn't miss it.", "id": "ds9vls"},
+      ],
+      "birthday": [
+        {"text": "Happy birthday! I cleaned a whole panel in your honour. Go and look. It shines.", "id": "15bqjqv", "tone": "funny", "birthday": "you"},
+        {"text": "My birthday! Gran sent a song. Eklund says her gran sent the same one. Hm.", "id": "1d9ucsw", "tone": "funny", "birthday": "me"},
+      ],
       "bye": [
         {"text": "Night, then! Mind the floor. It's wet. In a good way.", "id": "1djmssh"},
         {"text": "See you below, {nick}.", "id": "ufx5ff"},
+      ],
+      "cue": [
+        {"text": "Saw your job. Tidy work, and you swept up after. That's a friend for life, that is.", "id": "1cpg2qi", "tone": "warm", "cue": "repair.you@dept"},
+      ],
+      "decline": [
+        {"text": "Can't, I'm on the coils tonight. Tomorrow? I'll be bright as a button.", "id": "10dyrso"},
+        {"text": "Rest day. I'm sending Gran a long one. A really long one. Next time?", "id": "1wt9eb2", "weekday": "mon|tue"},
       ],
       "feel": [
         {"text": "Bit flat. I've cleaned this panel twice. It was clean the first time.", "id": "136mj7", "mood": "low"},
@@ -14641,6 +14789,14 @@ const VOICE = {
         {"text": "Hello! Took the ladder down. Great for the legs. You should try it. Or not.", "id": "1pfay3t", "tone": "funny", "tier": [1, 4]},
         {"text": "{me}! Come and see the panels. I polished them. You can see your face. Look.", "id": "a5ps5z", "tier": [2, 4]},
         {"text": "{nick}! Good. I was hoping you'd come by. Nights go quicker with a friend about.", "id": "bkp64a", "tone": "warm", "tier": [3, 4]},
+        {"text": "{me}! There you are! I was going to send the floor polisher to find you.", "id": "1bmkqjm", "tone": "funny", "tier": [1, 4], "warmth": "cold"},
+      ],
+      "hint": [
+        {"text": "Got a minute later, {nick}? Not about the floor. Something else.", "id": "1s2bte3"},
+      ],
+      "invite": [
+        {"text": "Running before my shift? Deck 3, three laps. I'll go easy. I won't. I'll try.", "id": "1rkbx4m", "tone": "funny"},
+        {"text": "Gym at seven? Night shift's warm-up. Come and lift something heavy. I'll spot you.", "id": "17apsb7", "tier": [1, 4]},
       ],
       "joy": [
         {"text": "Fresh polish on the coil rails. Under the lights it glows. I could stand there all night.", "id": "1kjtf6m", "tier": [1, 4]},
@@ -14651,12 +14807,16 @@ const VOICE = {
         {"text": "Rode the lift today with Kovac and Cruz. Deck 4 to 6. We held the rail. Very brave.", "id": "aom7il", "tone": "funny", "beat": "kovac.4"},
         {"text": "Kovac says you sat with her about the lift. Thanks, {nick}. From the whole club.", "id": "t28qq2", "tone": "warm", "beat": "kovac.4", "tier": [2, 4]},
       ],
+      "missed": [
+        {"text": "You missed it! No harm. I polished something. Feel better already.", "id": "1rnhfrq", "tone": "funny"},
+      ],
       "near": [
         {"text": "Engine room's clean enough to eat in. I have. Don't tell Brennan.", "id": "5n4wvn", "tone": "funny", "act": "work"},
         {"text": "Morning run's done. Well, my morning. It's your evening. Same run.", "id": "fjouo1", "act": "gym"},
         {"text": "Lift? No, I'll take the ladder. Leg day. Every day's leg day.", "id": "1um6ij3", "tone": "funny", "tier": [1, 4], "not": {"beat": "kovac.1"}},
         {"text": "Saw you by the ladder. Exercise, was it? Same. Just exercise.", "id": "1lzdwdk", "tone": "funny", "beat": "kovac.1"},
         {"text": "Kovac and Cruz were on the ladder again. We nodded. Very fit, the three of us.", "id": "8z3gf2", "tone": "funny", "beat": "kovac.2", "not": {"beat": "kovac.4"}},
+        {"text": "Bow lounge before shift. Curved windows, cup of tea. Then down to the floor.", "id": "1b9sseo", "habit": "lounge-regular"},
       ],
     },
   },
@@ -14748,14 +14908,42 @@ const VOICE = {
     "tpl": "shy",
     "words": {"hi": ["Oh. Hi", "Um, hello", "Hi"], "bye": ["Bye, then", "See you", "Mind the seals"], "yes": ["Okay", "If you like", "Yes. Yes, fine"], "thanks": ["Thanks. Really", "Oh. Thank you"], "wow": ["Oh, wow", "That's very tidy"], "sigh": ["Oh"], "nick": [null, "{me}", "{me}", "{me}", "{me}"]},
     "lines": {
+      "accept": [
+        {"text": "Oh. Yes. Okay. I'll be there on time. Sorry if that's early.", "id": "1861evf"},
+        {"text": "Yes. Yes, fine. Thank you for asking me.", "id": "1717mu3", "tone": "warm"},
+      ],
+      "birthday": [
+        {"text": "Happy birthday. I made you something. It's small. It's very neat. Sorry.", "id": "en02ej", "tone": "warm", "birthday": "you"},
+        {"text": "It's my birthday. Um. Don't tell anyone. Especially not loudly.", "id": "14v7epp", "birthday": "me"},
+        {"text": "My birthday's the day after the Chief's. She doesn't know. That's fine. Better, even.", "id": "1xc3sw7", "birthday": "me"},
+      ],
+      "bye": [
+        {"text": "{bye}. Um. Spanner back on its hook? The right hook. Thanks.", "id": "oof7am"},
+        {"text": "Bye, then. Sorry. I mean, see you.", "id": "1ukt224", "tone": "funny"},
+      ],
+      "cue": [
+        {"text": "I looked at your repair. Sorry. I always look. The seal's very good.", "id": "ofe0ba", "tone": "warm", "cue": "repair.you@dept"},
+      ],
+      "decline": [
+        {"text": "Oh. Um. Not tonight. Sorry. I'm halfway down a row. Another night?", "id": "1gisdle"},
+        {"text": "I can't. Sorry. Really. Ask again? I'd like you to ask again.", "id": "19g3vjq"},
+      ],
       "feel": [
         {"text": "Nine and a half minutes. The scrubber on Deck 5. I timed it. Twice.", "id": "3tnyrt", "mood": "high"},
         {"text": "Sorry. Bit quiet today. I've sorted the spanner wall. Twice.", "id": "1olcizn", "mood": "low"},
+        {"text": "Fine. Normal day. One scrubber, two filters. Good numbers.", "id": "37iq25", "mood": "ok"},
       ],
       "greet": [
         {"text": "Oh. Hi. Scrubber jobs are on the left of the board. If you were wondering.", "id": "14ishus", "tier": [0, 0]},
         {"text": "Um, hello, {nick}. Your spanners are back in order. I didn't. Well. I did.", "id": "vkg1vk", "tone": "funny", "tier": [1, 4]},
         {"text": "Oh, good. It's you. I saved you a seat. Sorry. Is that odd?", "id": "dy725q", "tone": "warm", "tier": [3, 4]},
+        {"text": "Oh. Morning. I've had breakfast. Well. Tea. Tea counts.", "id": "cii0m7", "tone": "funny", "tier": [1, 4], "time": "morning"},
+        {"text": "{hi}, {me}. Scrubber on Deck 6 if you want it. I'll time you. Quietly.", "id": "45q748", "tier": [2, 4]},
+        {"text": "Oh. You're back. Um. Good. Your hook's been empty. I kept it clear.", "id": "aq1ff7", "tone": "warm", "tier": [1, 4], "warmth": "cold"},
+      ],
+      "invite": [
+        {"text": "The garden's quiet after shift. I sit by the beans. You could. If you like.", "id": "rdha44"},
+        {"text": "Knitting circle tonight, tea corner. Torres is coming. Bring patience.", "id": "v6l9qi", "tone": "funny", "tier": [3, 4]},
       ],
       "joy": [
         {"text": "A scrubber put back right hums. You feel it through the panel. That's my favourite bit.", "id": "m937t1", "tier": [2, 4]},
@@ -14763,9 +14951,15 @@ const VOICE = {
       "life": [
         {"text": "I don't take the lift much. The ladder's good exercise. Very good exercise.", "id": "cjpe0", "tone": "funny", "tier": [1, 4]},
         {"text": "Torres's scarves are very long. He's very keen. I don't say anything.", "id": "13kazhu", "tone": "funny", "tier": [2, 4]},
+        {"text": "The ladder club met again. Cruz, Keane, me. Nobody said a word. We just climbed.", "id": "s80uue", "tone": "funny", "beat": "kovac.2"},
+        {"text": "Four, please. I said it in the lift today. Out loud. Just the once.", "id": "1b64jh", "tone": "warm", "beat": "kovac.4"},
+      ],
+      "missed": [
+        {"text": "Oh. You didn't come. That's okay. I knitted. It was fine. Really.", "id": "1mi3tor"},
       ],
       "near": [
         {"text": "Hold the seal there. No, there. Yes. Sorry. That's perfect.", "id": "682r98", "act": "work"},
+        {"text": "Knitting. Row forty. No. Forty-one. Sorry. I count out loud sometimes.", "id": "1cps0td", "place": "teacorner"},
       ],
       "week1": [
         {"text": "Um. If you get stuck, I'm on the board most days. Just. You know. Ask.", "id": "18wu0l", "week1": "true"},
@@ -15301,9 +15495,27 @@ const VOICE = {
     "tpl": "brisk",
     "words": {"hi": ["Hey", "Right, you", "Oh, hi"], "bye": ["Go on", "See you on the board", "Off you go"], "yes": ["Done", "Sure", "Yes"], "thanks": ["Thanks", "Good, thanks"], "wow": ["Oh, nice", "Now that's sharp"], "sigh": ["Hm", "Not again"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
+      "about": [
+        {"text": "Achterberg lends me mysteries with the ending circled. I never look. Mostly.", "id": "zij2bf", "tone": "funny", "aff": "achterberg-lars:friend"},
+      ],
+      "accept": [
+        {"text": "Yes. Good. Be on time. I'll know.", "id": "18e5ajm"},
+        {"text": "Fine. I'm in. Bring that book back while you're at it.", "id": "1jxs3rv"},
+      ],
+      "birthday": [
+        {"text": "Happy birthday. I got you a mystery. I haven't read it. That's my present to you.", "id": "1tmqhmn", "tone": "funny", "birthday": "you"},
+        {"text": "My birthday. Achterberg gave me a book with the last page torn out. Best present ever.", "id": "1jd9n6q", "tone": "funny", "birthday": "me"},
+      ],
       "bye": [
         {"text": "Go on. See you on the board.", "id": "lk8nu1"},
         {"text": "Off you go. And check that seal.", "id": "5rbzzv"},
+      ],
+      "cue": [
+        {"text": "I checked your seal. It's good. I'd have said if it wasn't.", "id": "l1tbg8", "cue": "repair.you@dept"},
+      ],
+      "decline": [
+        {"text": "Can't. I'm on the rower at seven. Tomorrow.", "id": "1yn5tkq"},
+        {"text": "Rest day. One book, the whole thing. I'll have guessed by lunch. Another time.", "id": "1s93zf0", "tone": "funny", "weekday": "sat|sun"},
       ],
       "feel": [
         {"text": "Dropped a place on the leaderboard. Santos. Fair's fair. I'll be back.", "id": "yge63n", "mood": "low"},
@@ -15316,6 +15528,15 @@ const VOICE = {
         {"text": "{hi}. Your panel on Deck 4's not flush. Left corner. Go and look. I'll wait.", "id": "1auvwxj", "tier": [1, 4]},
         {"text": "{me}. Chapter two and I know who did it. The cook. It's always the cook.", "id": "1h6ct7t", "tone": "funny", "tier": [2, 4]},
         {"text": "{me}. Good. You're the only one who doesn't spoil the ending. Sit.", "id": "mvkdal", "tone": "warm", "tier": [3, 4]},
+        {"text": "Evening. Your sleeve's caught on something. Grease, by the look. Bench three.", "id": "1ivvm57", "tier": [1, 4], "time": "evening"},
+        {"text": "There you are. You've been off the board for days. I noticed. I notice things.", "id": "19y4xlo", "tier": [1, 4], "warmth": "cold"},
+      ],
+      "hint": [
+        {"text": "Find me after shift. I need someone who'll be straight with me. That's you.", "id": "zqldnz"},
+      ],
+      "invite": [
+        {"text": "Gym after shift? Rowing. I'll set the pace. You'll hate me. Then you'll thank me.", "id": "kuex6q", "tone": "funny", "tier": [1, 4]},
+        {"text": "Friday jam. Sit with me. I'll tell you which song comes next. I'm always right.", "id": "1wq3c36", "tier": [2, 4]},
       ],
       "joy": [
         {"text": "The moment in a mystery when you know. Right or wrong. That's the best page.", "id": "11fc5xf", "tier": [1, 4]},
@@ -15324,9 +15545,14 @@ const VOICE = {
         {"text": "Vance moved to the treadmill. We think he's scared of the rowing board. We're right.", "id": "d1xy2j", "tone": "funny", "tier": [1, 4]},
         {"text": "Achterberg, Quist and I swap mysteries. Then we ruin them for each other. It's lovely.", "id": "1i99i52", "tone": "funny", "tier": [2, 4]},
       ],
+      "missed": [
+        {"text": "You didn't turn up. I noticed. I notice everything. Next time, yes?", "id": "72fsf"},
+      ],
       "near": [
         {"text": "Hold that. No, lower. There. See the crack? Nobody else saw that crack.", "id": "2ygm0r", "act": "work"},
         {"text": "Five hundred metres. Don't talk to me. Talk to me after.", "id": "im0z2", "act": "gym"},
+        {"text": "Gym after shift now. Rowing, then weights. Santos is ahead. Not for long.", "id": "1vmun6w", "habit": "gym-regular"},
+        {"text": "Music room. I'm allowed to be soft about one thing. This is the thing.", "id": "1sx6c2r", "habit": "music"},
       ],
     },
   },
@@ -15460,9 +15686,28 @@ const VOICE = {
     "tpl": "steady",
     "words": {"hi": ["Hello", "Evening", "There you are"], "bye": ["Mind how you go", "Take care, then", "See you at handover"], "yes": ["Can do", "Noted", "Leave it with me"], "thanks": ["Thank you", "Much obliged", "That's a help"], "wow": ["Well, now", "That's neat work"], "sigh": ["Ah well", "It'll turn up"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
+      "about": [
+        {"text": "Salo and I both have twins on the Halcyon. We compare letters. His twin's are funnier.", "id": "t67f2d", "tone": "funny", "aff": "salo-saad:friend"},
+      ],
+      "accept": [
+        {"text": "{yes}. I'll be there five minutes early. I always am.", "id": "445ljw"},
+        {"text": "Noted. I'll put it in my handover notes. Under \"Good things\".", "id": "fe3sqn", "tone": "funny"},
+      ],
+      "birthday": [
+        {"text": "Happy birthday, {me}. I've put a note on the board. Under \"Important\".", "id": "dw90z5", "tone": "warm", "birthday": "you"},
+        {"text": "My birthday. The night shift left a cake on the board. Labelled. With a summary.", "id": "lf9pvv", "tone": "funny", "birthday": "me"},
+      ],
       "bye": [
         {"text": "{bye}. Mind the wet patch by the lift. It's been there since Tuesday.", "id": "xei5we"},
         {"text": "{bye}. I'll leave you a note on the board if anything turns up.", "id": "6pnmxf"},
+      ],
+      "cue": [
+        {"text": "Saw your job closed on the board. Neat notes, too. That's how it's done.", "id": "9cfp6x", "cue": "repair.you@dept"},
+        {"text": "Storm's on. Strap down anything loose. Or it'll end up in my box.", "id": "1qyxyn8", "tone": "funny", "cue": "event.ionStorm.onset"},
+      ],
+      "decline": [
+        {"text": "Not tonight. I'm on the board till morning. Another night?", "id": "1i2mks2"},
+        {"text": "Rest day. I've promised myself a book and a long sleep. Ask me Friday?", "id": "h9ciyw", "weekday": "wed|thu"},
       ],
       "feel": [
         {"text": "Quiet night. Too quiet. I've sorted the lost-property box twice.", "id": "v5uj9a", "mood": "low"},
@@ -15475,17 +15720,32 @@ const VOICE = {
         {"text": "Still up? The night shift's quieter than you'd think. Mostly the fans.", "id": "11ebdop", "tier": [1, 4], "time": "night"},
         {"text": "{hi}, {me}. Your collar's folded. There. Better.", "id": "gtg3t0", "tier": [2, 4]},
         {"text": "There you are. I kept you a seat by the window. Nobody argued.", "id": "b1fgv1", "tone": "warm", "tier": [3, 4]},
+        {"text": "Morning. Well, my evening. Fourteen jobs on the night board. Every one closed.", "id": "6pt67q", "tier": [1, 4], "time": "morning"},
+        {"text": "{hi}. Not seen you in a while. I checked the lost-property box. Just in case.", "id": "ih27j", "tone": "funny", "tier": [1, 4], "warmth": "cold"},
+      ],
+      "hint": [
+        {"text": "Have you a moment later? Nothing's lost. I've something to tell you, that's all.", "id": "1y8n905"},
+      ],
+      "invite": [
+        {"text": "Two laps of the track before my shift? I'll go slow. Mostly.", "id": "2cp625", "tier": [2, 4]},
+        {"text": "Observatory night. I'll bring a flask. Nobody's lost a star yet.", "id": "ujjdyv", "tone": "funny", "tier": [2, 4]},
       ],
       "joy": [
         {"text": "A spanner came back to its owner today. Three weeks in the box. They nearly cried.", "id": "mt9q1o", "tone": "warm", "tier": [1, 4]},
       ],
       "life": [
         {"text": "Third glove this week in the box. Same hand every time. Someone's very unlucky.", "id": "1usb4dt", "tone": "funny", "tier": [1, 4]},
-        {"text": "My twin's on the Halcyon. They think the Wren's twins are a joke. There are three of us.", "id": "dhwwpt", "tier": [2, 4]},
+        {"text": "My twin's on the Halcyon. They think the Wren's twins are a joke. There are three of us.", "id": "dhwwpt", "tier": [3, 4]},
+      ],
+      "missed": [
+        {"text": "I waited a little. Then I sorted the box. No harm done. Next time.", "id": "13nzs9p"},
+        {"text": "You didn't come. That's all right. I'd just like to know you're well.", "id": "nbhape", "tone": "warm", "tier": [3, 4]},
       ],
       "near": [
         {"text": "Handover notes. Headings, summary, jobs. The day shift pretends not to read them.", "id": "1wtr1v1", "tone": "funny", "act": "work"},
         {"text": "Ten more minutes on the track. Then breakfast. Well, my breakfast. Your dinner.", "id": "wourba", "act": "gym"},
+        {"text": "Breakfast for you, dinner for me. Brennan does me eggs anyway. It's kind of her.", "id": "1ichu83", "place": "mess"},
+        {"text": "I help in the garden now. Cruz lost a trowel. I found it. Of course I found it.", "id": "y5li9d", "tone": "funny", "habit": "gardener"},
       ],
     },
   },
@@ -15828,9 +16088,27 @@ const VOICE = {
     "tpl": "dreamy",
     "words": {"hi": ["Oh, hello", "Hm? Hi", "Hello, you"], "bye": ["Bye, then", "Mind the basil", "See you"], "yes": ["Mm, all right", "Suppose so", "Yes, fine"], "thanks": ["Thanks", "That's nice of you"], "wow": ["Oh, that's good", "Huh. Lovely"], "sigh": ["Mm", "Well, then"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
+      "about": [
+        {"text": "Moreau talked me into the gym. She runs ahead, then waits. She always waits.", "id": "13lmrqk", "tone": "warm", "aff": "moreau-signe:friend"},
+      ],
+      "accept": [
+        {"text": "Oh. Yes. I'll come. I'll bring a leaf. For smelling.", "id": "q3vikr"},
+        {"text": "Mm. All right. That sounds nice. I'll try to be on time.", "id": "1erp9ia"},
+      ],
+      "birthday": [
+        {"text": "Happy birthday. Here. A sprig of thyme. It's the nicest thing I own.", "id": "1guduk9", "tone": "warm", "birthday": "you"},
+        {"text": "My birthday. Brennan put my herbs in tonight's soup. She said it was a present. It was.", "id": "1cm8sij", "birthday": "me"},
+      ],
       "bye": [
         {"text": "Bye, then. Mind the basil.", "id": "1ukgzmh"},
         {"text": "See you. I'll be with the herbs. They're better listeners than most.", "id": "jp82jr", "tone": "funny"},
+      ],
+      "cue": [
+        {"text": "Was that your pump job? The garden's wetter than it was. In a good way.", "id": "uxzbhe", "cue": "repair.you@dept"},
+      ],
+      "decline": [
+        {"text": "Not tonight. The herbs need potting. They're very needy this week.", "id": "okzgql"},
+        {"text": "Rest day. I've a book and a windowsill. Another time?", "id": "m13gby", "weekday": "thu|fri"},
       ],
       "feel": [
         {"text": "The parsley's wilting. I'm taking it personally.", "id": "1nzy7iy", "mood": "low"},
@@ -15843,6 +16121,15 @@ const VOICE = {
         {"text": "Hello, you. Have you watered anything today? Not you. A plant.", "id": "nwivl5", "tier": [1, 4]},
         {"text": "{me}. I'm on chapter three and I know who did it. I'm going to keep reading anyway.", "id": "15z0iq5", "tier": [2, 4]},
         {"text": "Oh, it's you. Good. The thyme likes you. It said so. It didn't. It would.", "id": "a52qgh", "tone": "warm", "tier": [3, 4]},
+        {"text": "Oh. Evening. The garden lights have gone warm. Best hour. Don't tell the basil.", "id": "hrkeus", "tier": [1, 4], "time": "evening"},
+        {"text": "Oh. You. The thyme's been asking. It hasn't. It might have.", "id": "8nxbxs", "tone": "funny", "tier": [1, 4], "warmth": "cold"},
+      ],
+      "hint": [
+        {"text": "Come to the garden later? I'd like to say something. The basil can listen too.", "id": "1iioyo1"},
+      ],
+      "invite": [
+        {"text": "Garden after shift? You could help with the basil. It likes an audience.", "id": "1b02a1g", "tone": "funny"},
+        {"text": "Running round Deck 3 tonight. Slowly. We go past the garden twice. That's the plan.", "id": "kbijwo", "tier": [1, 4]},
       ],
       "joy": [
         {"text": "Rub a basil leaf. Go on. Smell your fingers. That's the whole summer, right there.", "id": "d4144s", "tier": [1, 4]},
@@ -15851,9 +16138,14 @@ const VOICE = {
         {"text": "I grow herbs on the bunk windowsill for the galley. The basil's a bit of a show-off.", "id": "ppudtp", "tone": "funny", "tier": [1, 4]},
         {"text": "Moreau guesses by chapter two. I guess by chapter three. We're both wrong half the time.", "id": "1ssjf6h", "tier": [2, 4]},
       ],
+      "missed": [
+        {"text": "You weren't there. I talked to the mint instead. It doesn't say much.", "id": "wra19t", "tone": "funny"},
+      ],
       "near": [
         {"text": "Pump's fine. I just like it down here. It smells of the garden.", "id": "1i745d5", "act": "work"},
         {"text": "Same mystery, chapter nine. I was right in chapter three. Still reading.", "id": "g1qyt4", "tone": "funny", "act": "leisure"},
+        {"text": "Watering. Don't mind me. The rosemary's thirsty. It's always thirsty.", "id": "1ik97gw", "habit": "garden-lover"},
+        {"text": "Gym after shift now. Moreau said I'd hate it. I don't. I won't tell her that.", "id": "10jp0lq", "habit": "gym-regular"},
       ],
     },
   },
@@ -15873,9 +16165,27 @@ const VOICE = {
     "tpl": "brisk",
     "words": {"hi": ["Hey", "You", "All right"], "bye": ["Right", "Later", "Off with you"], "yes": ["Fine", "Sure", "Go on"], "thanks": ["Ta", "Cheers"], "wow": ["Huh. Nice", "Not bad"], "sigh": ["Pfft", "Whatever"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
+      "about": [
+        {"text": "Takahashi's star journal is longer than mine. For now. We count at the observatory.", "id": "1oq5nu1", "aff": "takahashi-wen:friend"},
+      ],
+      "accept": [
+        {"text": "Yes. Fine. Good. I was going anyway. Now it's better.", "id": "1hmrzck"},
+        {"text": "Done. I'll be there. I'll be awake. I'm always awake.", "id": "jn9ttc", "tone": "funny"},
+      ],
+      "birthday": [
+        {"text": "Happy birthday. I'd name the boat after you, but no. Every name's wrong. Have a tea.", "id": "1xl95e1", "tone": "funny", "birthday": "you"},
+        {"text": "My birthday. I've put a day's credits in the boat jar. That's my present.", "id": "4nult6", "birthday": "me"},
+      ],
       "bye": [
         {"text": "Right. Off with you.", "id": "tt98by"},
         {"text": "Later. Mind the top shelf. It's a trap.", "id": "wm0fkd", "tone": "funny"},
+      ],
+      "cue": [
+        {"text": "Saw your job. You did it the right way. I'd have done the quick way. Fair enough.", "id": "12fx77i", "cue": "repair.you@dept"},
+      ],
+      "decline": [
+        {"text": "Not tonight. Extra shift. The boat won't buy itself. Ask me again.", "id": "vjs022"},
+        {"text": "Rest day. I'm sleeping. Don't tell anyone. Another time.", "id": "qte9u5", "tone": "funny", "weekday": "wed|thu"},
       ],
       "feel": [
         {"text": "Did the boat sums again. Still short. It'll come.", "id": "1curd5g", "mood": "low"},
@@ -15888,6 +16198,15 @@ const VOICE = {
         {"text": "Still up? Me too. Always. Stars are better after midnight.", "id": "1y1547l", "tier": [1, 4], "time": "night"},
         {"text": "{me}. Settle something. Quick way or right way? Quick way. Thank you.", "id": "15upe8y", "tone": "funny", "tier": [2, 4]},
         {"text": "Oh good, you. Sit. I need someone who won't argue. Then argue with me.", "id": "1id1rc5", "tone": "warm", "tier": [3, 4]},
+        {"text": "Hey. Bar, then stars, then maybe bed. Don't hold me to the bed.", "id": "ys8q40", "tier": [1, 4], "time": "evening"},
+        {"text": "There you are. Thought you'd gone off to buy a boat. Mine, I mean. Don't.", "id": "11iltqq", "tone": "funny", "tier": [1, 4], "warmth": "cold"},
+      ],
+      "hint": [
+        {"text": "You busy later? I need to say something out loud. To someone who'll argue back.", "id": "15r9cnq"},
+      ],
+      "invite": [
+        {"text": "Observatory? I need a witness. I'm about to log my four hundredth star.", "id": "vsp2ro"},
+        {"text": "Quiz night. I'll argue every answer. You tell me when I'm right.", "id": "zild5i", "tone": "funny", "tier": [2, 4]},
       ],
       "joy": [
         {"text": "Picture it: the boat, Hesper Dock, morning, rain on the deck. Just me and a kettle.", "id": "14exn6e", "tier": [1, 4]},
@@ -15896,9 +16215,14 @@ const VOICE = {
         {"text": "I'm saving for a boat on Hesper Dock. Small. Blue. No name yet. Every name's wrong.", "id": "yo6kk6", "tier": [1, 4]},
         {"text": "I log every star I've seen. Takahashi and Esposito think their journals are longer. Wrong.", "id": "3ulzdz", "tone": "funny", "tier": [2, 4]},
       ],
+      "missed": [
+        {"text": "You didn't come. I argued with myself instead. I won. Next time?", "id": "1bajls9", "tone": "funny"},
+      ],
       "near": [
         {"text": "There's a quicker way. I'll show you. Then do it the right way. Calder's watching.", "id": "1sx6tot", "tone": "funny", "act": "work"},
         {"text": "One drink, then the observatory. Then bed. Maybe bed.", "id": "555f2j", "act": "leisure"},
+        {"text": "One drink. I'm pricing sails in my head. Don't look at me like that.", "id": "1aqjylc", "place": "lounge"},
+        {"text": "Toast, standing up. It's faster. It's also better. Argue with me.", "id": "10obx0i", "tone": "funny", "place": "mess"},
       ],
     },
   },
@@ -15956,9 +16280,28 @@ const VOICE = {
     "tpl": "chatty",
     "words": {"hi": ["Oh! Hi", "Hey, hey", "Hello, hi"], "bye": ["Right, anyway", "Off I go", "Catch you later"], "yes": ["Yes, sure", "Course, course", "Sure thing"], "thanks": ["Oh, thanks", "Thanks, really", "You're kind"], "wow": ["Oh, wow", "Ha, look at that"], "sigh": ["Ah, anyway", "Oh well"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
+      "about": [
+        {"text": "Torres leaves me a note every shift. He's wrong about coil three. He's a good friend.", "id": "1ihjs1k", "tone": "warm", "aff": "torres-zeke:friend"},
+      ],
+      "accept": [
+        {"text": "Yes! Oh. Yes. Good. I'll be early. Then nervous. Then fine.", "id": "bc5jvm", "tone": "funny"},
+        {"text": "Yes, please. Thank you for asking. People forget to ask the night shift.", "id": "1id3ync", "tone": "warm"},
+      ],
+      "birthday": [
+        {"text": "Happy birthday! It's going in my letter home. My neighbour will tell the cat.", "id": "19z15sa", "tone": "funny", "birthday": "you"},
+        {"text": "My birthday. Torres left a note on the coils. Coil three signed it. Sort of.", "id": "1w1t2d7", "tone": "funny", "birthday": "me"},
+      ],
       "bye": [
         {"text": "{bye}. Sorry, I talked a lot. I always talk a lot.", "id": "1ln6goo"},
         {"text": "Right, anyway. Coils won't tend themselves. Well, they would, but badly.", "id": "10rsh0c"},
+      ],
+      "cue": [
+        {"text": "Storm's in. The coils hate it. I'll sit with them. You stay where it's warm.", "id": "lgrbl7", "cue": "event.ionStorm.onset"},
+        {"text": "You fixed that? Good! I'll put it in the notes for Torres. He'll say he knew.", "id": "wt9o3n", "tone": "funny", "cue": "repair.you@dept"},
+      ],
+      "decline": [
+        {"text": "I can't, I'm on the coils. Next time? Ask again. Please ask again.", "id": "1usd8ad"},
+        {"text": "It's my rest day. I'm writing to Lisk. It's two pages already. Another time?", "id": "wg6t5", "tone": "funny", "weekday": "fri|sat"},
       ],
       "feel": [
         {"text": "Long watch. Coil three was shy all night. I sat with her. That's allowed.", "id": "74qkza", "mood": "low"},
@@ -15971,6 +16314,15 @@ const VOICE = {
         {"text": "{hi}! Did I tell you about the cat? I did. I'll tell you again. Anyway, hi.", "id": "1xjt6nl", "tone": "funny", "tier": [1, 4]},
         {"text": "{me}! Good. Sit. Tell me something that isn't about coils. Please.", "id": "1ni8xg6", "tier": [2, 4]},
         {"text": "Oh, it's you. Good. You're the only one who lets me finish a story. Anyway.", "id": "1ccpepc", "tone": "warm", "tier": [3, 4]},
+        {"text": "Oh, you're up. Me too. Obviously, I'm on. Coils are calm. For now. Anyway.", "id": "1cnoggy", "tier": [1, 4], "time": "night"},
+        {"text": "{me}! Where've you been? I worried a bit. Not a lot. A normal amount. Anyway.", "id": "wyq2q5", "tone": "funny", "tier": [1, 4], "warmth": "cold"},
+      ],
+      "hint": [
+        {"text": "Have you got a minute? A real one? I'll try not to talk too much. Anyway.", "id": "fj1yeq"},
+      ],
+      "invite": [
+        {"text": "Friday jam? I'll drum on a table. It's allowed there. It's better with people.", "id": "1bj6191", "tier": [2, 4]},
+        {"text": "Film night? I'll talk through it. Sorry in advance. Anyway, come.", "id": "1y6ozzy", "tone": "funny", "tier": [2, 4]},
       ],
       "joy": [
         {"text": "I play in the music room after shift. Nobody's awake to mind. Ideal.", "id": "1ls1glc", "tier": [1, 4]},
@@ -15979,9 +16331,14 @@ const VOICE = {
         {"text": "My cat back home is furious about the tour. My neighbour writes to tell me. Often.", "id": "1pmcqeb", "tone": "funny", "tier": [1, 4]},
         {"text": "I write home to Lisk every rest day. On paper. The letters are always a page too long.", "id": "1oylo4t", "tier": [2, 4]},
       ],
+      "missed": [
+        {"text": "I waited. I told coil three about it. She was very understanding. Anyway.", "id": "1pahcro", "tone": "funny"},
+      ],
       "near": [
         {"text": "Listen. Coil three's quieter than coil two. Not sulking. Shy. Torres is wrong.", "id": "d51j5o", "tone": "funny", "act": "work"},
         {"text": "I'll stay a bit. I like it when the mess empties. You can hear the cups.", "id": "ovd0vs", "act": "dinner"},
+        {"text": "Last one in the mess again. I like the cups after. All stacked. Very calm.", "id": "1onh9eq", "place": "mess"},
+        {"text": "I'm on the observatory list now. Rossi lent me a telescope. I'm scared of it.", "id": "15cqyij", "tone": "funny", "habit": "stargazer"},
       ],
     },
   },
@@ -16107,9 +16464,27 @@ const VOICE = {
     "tpl": "earnest",
     "words": {"hi": ["Hello", "Hi, hi", "Oh, hello"], "bye": ["See you", "Race you back", "Bye for now"], "yes": ["Yes", "Definitely", "On it"], "thanks": ["Thanks", "Brilliant, thanks"], "wow": ["Brilliant", "Oh, wow"], "sigh": ["Oh, bother", "Next time, then"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
+      "about": [
+        {"text": "Ferreira and I practise Veyli together. She's better. I'm louder.", "id": "m3ozqf", "tone": "funny", "aff": "ferreira:friend"},
+      ],
+      "accept": [
+        {"text": "Yes! Brilliant. Race you there.", "id": "3dj8pj"},
+        {"text": "Yes. First one there gets the good seat. That'll be me.", "id": "111amy4", "tone": "funny"},
+      ],
+      "birthday": [
+        {"text": "Happy birthday! I looked up the Veyli for it. Ready? No, wait. Tomorrow.", "id": "ox5taw", "tone": "funny", "birthday": "you"},
+        {"text": "My birthday! That counts as a win. I'm not explaining how.", "id": "1lslfqa", "tone": "funny", "birthday": "me"},
+      ],
       "bye": [
         {"text": "{bye}! Race you back.", "id": "iom6yq"},
         {"text": "See you! Bed early. Observatory early. Stars don't wait.", "id": "5i7k6k"},
+      ],
+      "cue": [
+        {"text": "You closed it first! All right. You're ahead. For now.", "id": "2qacp8", "tone": "funny", "cue": "repair.you@dept"},
+      ],
+      "decline": [
+        {"text": "I can't, early bed. I'm up for the first star. Tomorrow?", "id": "1lkkm5m"},
+        {"text": "It's my rest day. I'm calling home. They'll ask if I'm winning. Another time?", "id": "1k9ghaa", "weekday": "tue|wed"},
       ],
       "feel": [
         {"text": "No Veyli word today. I couldn't make one stick. Tomorrow.", "id": "7ygmnr", "mood": "low"},
@@ -16122,6 +16497,15 @@ const VOICE = {
         {"text": "{hi}, {me}. I'm three jobs ahead this week. I'm telling you so you'll catch up.", "id": "1avr849", "tier": [1, 4]},
         {"text": "{me}! Brilliant. You can be my witness. I'm going to finish this before tea.", "id": "1cot11w", "tier": [2, 4]},
         {"text": "{me}! I let you win the last race. Didn't I? No? Oh. Well done, then.", "id": "1vi0vsf", "tone": "warm", "tier": [3, 4]},
+        {"text": "Evening! Nearly bed. But first, one star. Then bed. Definitely bed.", "id": "valyx", "tone": "funny", "tier": [1, 4], "time": "evening"},
+        {"text": "{me}! You're back. I've been ahead all week. It wasn't any fun.", "id": "18s5dj9", "tone": "warm", "tier": [1, 4], "warmth": "cold"},
+      ],
+      "hint": [
+        {"text": "Can I talk to you later? Not a race. Just talking. I'm not very good at that bit.", "id": "1yuwiom"},
+      ],
+      "invite": [
+        {"text": "Observatory night! Bring your eyes. I'll bring the telescope.", "id": "1dg8axm"},
+        {"text": "Quiz night? We'll win. I've been revising. The Veyli round is mine.", "id": "oznsq9", "tier": [1, 4]},
       ],
       "joy": [
         {"text": "The first star of the evening. I look for it every night. I've never missed it once.", "id": "1evm6w8", "tier": [1, 4]},
@@ -16130,9 +16514,14 @@ const VOICE = {
         {"text": "I brought a telescope from home. It's the smallest at observatory night. And the best.", "id": "gynjpy", "tone": "funny", "tier": [1, 4]},
         {"text": "I call home on Tuesdays. They always ask if I'm winning. I always am.", "id": "clzfuz", "tone": "funny", "tier": [2, 4]},
       ],
+      "missed": [
+        {"text": "You missed it! I kept you the best seat. Then I sat in it. Sorry.", "id": "1wxy26y", "tone": "funny"},
+      ],
       "near": [
         {"text": "Done! Four minutes. Is that a record? Tell me it's a record.", "id": "120b8vg", "act": "work"},
         {"text": "I don't care about the leaderboard. I'm just here. Twice a day. Not caring.", "id": "493vs8", "tone": "funny", "act": "gym"},
+        {"text": "Music room tonight. I'm learning a Veyli song. The tune's easy. The words aren't.", "id": "1jus6n7", "habit": "music"},
+        {"text": "I eat fast. It's not a race. It's a bit of a race. Nobody else knows it's a race.", "id": "6j5h8k", "tone": "funny", "place": "mess"},
       ],
     },
   },
@@ -16152,9 +16541,27 @@ const VOICE = {
     "tpl": "steady",
     "words": {"hi": ["Hello, hello", "Hi there", "Oh, hello"], "bye": ["Night, then", "Take your time", "See you"], "yes": ["Sure", "No rush, yes", "Happy to"], "thanks": ["Thanks, friend", "Kind of you"], "wow": ["Oh, lovely", "That's nice work"], "sigh": ["Ah, well", "No matter"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
+      "about": [
+        {"text": "Amadi always finds the best window. I find it second. It's a good system.", "id": "1g4fd17", "tone": "funny", "aff": "amadi-asha:friend"},
+      ],
+      "accept": [
+        {"text": "Yes, lovely. Not past ten, mind.", "id": "zb53wv"},
+        {"text": "Happy to. Take your time getting there. I'll save a seat.", "id": "12oevkg"},
+      ],
+      "birthday": [
+        {"text": "Happy birthday. I'll tell my twin. They'll tell the Halcyon. You're famous now.", "id": "ufz315", "tone": "funny", "birthday": "you"},
+        {"text": "My birthday. My twin's letter came early. They timed it. Took them three tries.", "id": "er4t0u", "tone": "warm", "birthday": "me"},
+      ],
       "bye": [
         {"text": "Night, then. Well, it's not night. It's night for me soon. Ten o'clock.", "id": "2zpgkg", "tone": "funny"},
         {"text": "Take your time. See you.", "id": "r8ojea"},
+      ],
+      "cue": [
+        {"text": "That was yours? Nicely done. You took your time. That's how it should be.", "id": "5aeo01", "cue": "repair.you@dept"},
+      ],
+      "decline": [
+        {"text": "Not tonight. It's nearly ten. You know me. Tomorrow?", "id": "1b1zdqy"},
+        {"text": "Rest day. I'm writing to the Halcyon. Next episode's due. Another time?", "id": "hy84tj", "weekday": "thu|fri"},
       ],
       "feel": [
         {"text": "No letter from the Halcyon this week. It'll come. Relays are slow.", "id": "kofb9c", "mood": "low"},
@@ -16167,6 +16574,15 @@ const VOICE = {
         {"text": "Oh, hello. Last time on the Halcyon: my twin lost a boot. More news Friday.", "id": "1ju21ym", "tone": "funny", "tier": [1, 4]},
         {"text": "{me}. Good. Sit a minute. You're walking like you're late. You're not late.", "id": "1ayhzz4", "tier": [2, 4]},
         {"text": "Oh, hello, friend. I was telling Keane about you. Good things. Only good things.", "id": "sk45jk", "tone": "warm", "tier": [3, 4]},
+        {"text": "Evening. One tea, one chapter, then bed. You're welcome to the chapter.", "id": "11dyf37", "tier": [1, 4], "time": "evening"},
+        {"text": "Oh, hello. It's been a while. Sit. Tell me everything. Slowly.", "id": "hx9gsc", "tier": [1, 4], "warmth": "cold"},
+      ],
+      "hint": [
+        {"text": "Sit with me before ten? There's something I'd like to say. No rush.", "id": "frvb2h"},
+      ],
+      "invite": [
+        {"text": "Tiles in the common room? I'm slow. Very slow. You'll have time to think.", "id": "133ttar", "tier": [1, 4]},
+        {"text": "Film night? I'll stay till ten. Then I'll go to bed. Mid-film. Every time.", "id": "1k9j8pi", "tone": "funny", "tier": [1, 4]},
       ],
       "joy": [
         {"text": "My twin's letters come in episodes. I read one a week. Saves the good bits.", "id": "10h7ycp", "tier": [1, 4]},
@@ -16175,9 +16591,14 @@ const VOICE = {
         {"text": "My twin's on the Halcyon. So are Navarro's and Nakamura's. They find it hilarious.", "id": "w7ojk9", "tone": "funny", "tier": [1, 4]},
         {"text": "The Tevan belt has storms you can hear coming. Rain on a tin roof. I miss the noise.", "id": "p29p46", "tier": [2, 4]},
       ],
+      "missed": [
+        {"text": "You didn't come. That's all right. I read a chapter. I'll tell you the good bit.", "id": "4zd325"},
+      ],
       "near": [
         {"text": "Let me show you that again. Slowly. There. Once more? Happy to.", "id": "2covm7", "act": "work"},
         {"text": "One tea, one chapter, then bed. Ten sharp. You can set the ship's clock by me.", "id": "1jzw5yq", "act": "leisure"},
+        {"text": "I help in the garden now. Nobody hurries a seed. It's my kind of job.", "id": "1iilbu2", "habit": "gardener"},
+        {"text": "Tea's a meal if you try. Biscuit, tea, biscuit. Lunch.", "id": "8dqllw", "tone": "funny", "place": "teacorner"},
       ],
     },
   },
@@ -16435,9 +16856,28 @@ const VOICE = {
     "tpl": "dreamy",
     "words": {"hi": ["Oh, hello", "Mm, hi", "Hello there"], "bye": ["Bye, then", "See you around", "Off I drift"], "yes": ["Mm, yes", "All right", "I can do that"], "thanks": ["Oh, thank you", "That's kind"], "wow": ["Oh, look", "That's lovely"], "sigh": ["Mm", "Oh, well"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
+      "about": [
+        {"text": "Marta and I compare day counts at breakfast. She pretends it's a contest. It isn't.", "id": "1hsr31u", "aff": "soto-marta:friend"},
+      ],
+      "accept": [
+        {"text": "Oh. Yes. I'd like that. I'll bring my second tea. Or my third.", "id": "omx9ba"},
+        {"text": "Mm, yes. Remind me, though. I drift.", "id": "1pqeia1", "tone": "funny"},
+      ],
+      "birthday": [
+        {"text": "Happy birthday. I hope it rains somewhere for you. Sorry. That's a Coriel thing.", "id": "9761wt", "tone": "warm", "birthday": "you"},
+        {"text": "My birthday. I'll do the day count later. Today's just mine.", "id": "1isicmx", "birthday": "me"},
+      ],
       "bye": [
         {"text": "{bye}. Mind the puddle. There isn't one. I just like saying it.", "id": "15438bc", "tone": "funny"},
         {"text": "Bye, then. I'll be in the filters if anyone asks. Nobody asks.", "id": "619isf"},
+      ],
+      "cue": [
+        {"text": "Was that your filter? It sounds lovely now. Like wind dropping.", "id": "v2al6p", "cue": "repair.you@dept"},
+        {"text": "Storm's here. The ship sounds like thunder. I don't mind it. Is that strange?", "id": "1dhuvk6", "cue": "event.ionStorm.onset"},
+      ],
+      "decline": [
+        {"text": "Not tonight. I'm sending a message home. It's a long one. Tomorrow?", "id": "1p2rq5g"},
+        {"text": "It's my rest day. I'm going to sit in the garden and listen. Another time?", "id": "1663sy3", "weekday": "sun|mon"},
       ],
       "feel": [
         {"text": "Grey day. In my head, I mean. The ship's the same as always.", "id": "1ot5oo9", "mood": "low"},
@@ -16450,6 +16890,15 @@ const VOICE = {
         {"text": "{hi}, {me}. The vents are drizzly today. Can you hear it? Like rain on a roof.", "id": "o6taxk", "tier": [1, 4]},
         {"text": "Oh, it's you. Good. Come and listen to this filter. It's nearly singing.", "id": "digkyr", "tier": [2, 4]},
         {"text": "{me}. Sit here. It's the quiet end. I kept it quiet for you.", "id": "1bku4vm", "tone": "warm", "tier": [3, 4]},
+        {"text": "Oh, evening. The vents have gone quiet. Like after rain. I like this bit.", "id": "oa7zpm", "tier": [1, 4], "time": "evening"},
+        {"text": "Oh, there you are. It's been a while. Like a dry spell.", "id": "1wy57sx", "tier": [1, 4], "warmth": "cold"},
+      ],
+      "hint": [
+        {"text": "Got a minute later? I've been thinking. About home, mostly.", "id": "xqr7t8"},
+      ],
+      "invite": [
+        {"text": "Observatory tonight? Our lot just looks. No talking. Well, a bit of talking.", "id": "8ntjg4"},
+        {"text": "Come and see the sprinklers? Seven, in the garden. It's nearly rain.", "id": "47p7ga"},
       ],
       "joy": [
         {"text": "Rain on a window, on Coriel. If you ever go, sit by a window. That's all. Just sit.", "id": "ibn1kf", "tier": [1, 4]},
@@ -16458,9 +16907,14 @@ const VOICE = {
         {"text": "Coriel rains nearly every day. People complain. I'd give a week's credits for one shower.", "id": "1y1vxac", "tier": [1, 4]},
         {"text": "I married just before the tour. I know the day count. Don't ask unless you want it.", "id": "1fzvhxg", "tier": [2, 4]},
       ],
+      "missed": [
+        {"text": "I waited. Then I listened to the vents for a bit. It wasn't wasted. Next time?", "id": "1ucy22f"},
+      ],
       "near": [
         {"text": "Filter's out, filter's in. Hear that? Like wind dropping. That's a good filter.", "id": "e55w74", "act": "work"},
         {"text": "Tea first. Then I'll know who you are.", "id": "1cqfb3n", "tone": "funny", "act": "breakfast"},
+        {"text": "Music room in the evenings now. Someone played a rain song. I stayed for three.", "id": "jipar4", "habit": "music"},
+        {"text": "Second tea. Now I'm here. Hello. How long have you been standing there?", "id": "12kmn47", "tone": "funny", "place": "teacorner"},
       ],
     },
   },
@@ -16480,9 +16934,27 @@ const VOICE = {
     "tpl": "gruff",
     "words": {"hi": ["Huh. You", "Hm. Hello", "Oh, it's you"], "bye": ["Go on, then", "Off", "Mind yourself"], "yes": ["Fine", "S'pose", "Yeah, all right"], "thanks": ["Ta", "Hm. Thanks"], "wow": ["Well, I never", "Huh, not bad"], "sigh": ["Typical", "Here we go"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
+      "about": [
+        {"text": "Pell found my tin. Of course he did. I let him have one. One. He's a good lad.", "id": "7274xa", "tone": "warm", "aff": "pell:friend"},
+      ],
+      "accept": [
+        {"text": "Fine. Yes. Don't be late.", "id": "1syfc1h"},
+        {"text": "Huh. All right. I'll come. Don't make a fuss about it.", "id": "1o9e73j"},
+      ],
+      "birthday": [
+        {"text": "Happy birthday. Here. Two biscuits. Don't ask where from. Don't tell Pell.", "id": "l79zf3", "tone": "warm", "birthday": "you"},
+        {"text": "My birthday. Don't. Fine. One cake. Small. Fine.", "id": "p2kyxo", "tone": "funny", "birthday": "me"},
+      ],
       "bye": [
         {"text": "Go on, then. Off.", "id": "1tkeq02"},
         {"text": "Mind yourself. And mind that washer.", "id": "1qn9ghc"},
+      ],
+      "cue": [
+        {"text": "That washer. You did it? Hm. Good. It spins. That's all I'll say.", "id": "8bjjys", "cue": "repair.you@dept"},
+      ],
+      "decline": [
+        {"text": "Can't. That oven on Deck 3's making a noise. Not tonight.", "id": "1n1d3u8"},
+        {"text": "Rest day. I'm doing nothing, very hard. Ask me Tuesday.", "id": "1uih0ad", "tone": "funny", "weekday": "sun|mon"},
       ],
       "feel": [
         {"text": "Lamp, oven, washer. All three today. All three. I've nothing left to grumble with.", "id": "cqxx7u", "mood": "low"},
@@ -16495,6 +16967,15 @@ const VOICE = {
         {"text": "Oh, it's you. Fine. Hello. Don't tell anyone I said hello.", "id": "r24d0q", "tone": "funny", "tier": [1, 4]},
         {"text": "Hm. You. Sit down. No, there. That chair wobbles. I'm fixing it. Eventually.", "id": "z3pdat", "tier": [2, 4]},
         {"text": "Oh, it's you. Good. Here. Biscuit. Don't ask where from.", "id": "ur6vr", "tone": "warm", "tier": [3, 4]},
+        {"text": "Huh. You. Evening. Washer's behaving. Don't say anything. It'll hear.", "id": "sl72cn", "tone": "funny", "tier": [1, 4], "time": "evening"},
+        {"text": "Hm. You. Where've you been? Never mind. You're here. Sit.", "id": "1wvytzq", "tier": [1, 4], "warmth": "cold"},
+      ],
+      "hint": [
+        {"text": "Hm. You. Later, the quiet corner. Bring nothing. Just come.", "id": "bq9iaf"},
+      ],
+      "invite": [
+        {"text": "Works tea, half ten. Come. There might be biscuits. I didn't say that.", "id": "1dn589d", "tone": "funny", "tier": [1, 4]},
+        {"text": "Tiles tonight. Common room. Come and lose with me. It's nicer in company.", "id": "1ac7t4g", "tier": [2, 4]},
       ],
       "joy": [
         {"text": "A washer that spins first time. Not a wobble. Just spins. Best noise on the ship.", "id": "1gorw4d", "tier": [1, 4]},
@@ -16503,9 +16984,14 @@ const VOICE = {
         {"text": "I married just before the tour. I count the days. So do Silva and Jovanovic. We compare.", "id": "1jnsegz", "tier": [1, 4]},
         {"text": "I keep a tin of good biscuits. Nobody knows where. Pell knows where. Nobody else.", "id": "1dgkosv", "tone": "funny", "tier": [2, 4]},
       ],
+      "missed": [
+        {"text": "You didn't come. Hm. Saved you a biscuit. Ate it. Your fault.", "id": "15fplrk", "tone": "funny"},
+      ],
       "near": [
         {"text": "This lamp. This lamp. Every week. Fine. Fine. There. It works. Of course it works.", "id": "gebb9e", "tone": "funny", "act": "work"},
         {"text": "Quiet corner. Mine. You can sit if you don't talk. Or talk a bit. A bit.", "id": "1v2luut", "act": "leisure"},
+        {"text": "Tiles night. I'm terrible. Rina's merciless. I keep coming. Don't ask me why.", "id": "cbxc5v", "tone": "funny", "habit": "common-room"},
+        {"text": "Tea. Strong. No talking for one minute. Right. Hello.", "id": "byk8ru", "place": "teacorner"},
       ],
     },
   },
@@ -16705,9 +17191,27 @@ const VOICE = {
     "tpl": "playful",
     "words": {"hi": ["Oi", "Hey", "All right"], "bye": ["Laters", "Off you go", "Don't do anything I'd draw"], "yes": ["Yeah, go on", "Easy", "Done"], "thanks": ["Cheers", "Nice one"], "wow": ["No way", "Ha, look at that"], "sigh": ["Ugh", "Typical"], "nick": [null, "new hand", "{me}", "{me}", "{me}"]},
     "lines": {
+      "about": [
+        {"text": "Hart draws better comics than me. I tell Hart so. Then I go and draw harder.", "id": "1pnz3to", "tone": "funny", "aff": "hart-ravi:friend"},
+      ],
+      "accept": [
+        {"text": "Yes. Good. Done. I'll draw it after.", "id": "10qe7rf"},
+        {"text": "Course. I'm in. I'll be early. I'm never early. This'll be a first.", "id": "1n4rhzk", "tone": "funny"},
+      ],
+      "birthday": [
+        {"text": "Happy birthday. There's a comic about you on the wall. Go and look. It's a nice one.", "id": "1g8rvc1", "tone": "warm", "birthday": "you"},
+        {"text": "My birthday. I'm putting a song about cake on the playlist. Fifteen songs, then.", "id": "f6io3z", "tone": "funny", "birthday": "me"},
+      ],
       "bye": [
         {"text": "Laters. Don't trip, I'll have to draw it.", "id": "1kqacpk", "tone": "funny"},
         {"text": "{bye}. Playlist's up on Friday. One song's yours. Guess which.", "id": "ws2vaq"},
+      ],
+      "cue": [
+        {"text": "Saw your job closed. Clean. Annoying. I wanted that one.", "id": "50px1p", "tone": "funny", "cue": "repair.you@dept"},
+      ],
+      "decline": [
+        {"text": "Can't. Deadline. The comics wall waits for no one.", "id": "xmgvu4", "tone": "funny"},
+        {"text": "Rest day. I'm drawing all of it. Next time, yeah?", "id": "ft5suy", "weekday": "mon|tue"},
       ],
       "feel": [
         {"text": "No comic this week. Nothing funny happened. That's never true. I just couldn't see it.", "id": "3k2q2c", "mood": "low"},
@@ -16720,6 +17224,15 @@ const VOICE = {
         {"text": "{hi}, {nick}. Stand still. No, the other way. Got you. You're in next week's.", "id": "1sbsixg", "tone": "funny", "tier": [1, 4]},
         {"text": "{me}. Good. I need a second opinion on a joke. It's about Calder. It's very kind.", "id": "1o3k6el", "tier": [2, 4]},
         {"text": "{me}! There you are. I drew you a whole panel. You're the hero. Don't get big-headed.", "id": "5uf6s1", "tone": "warm", "tier": [3, 4]},
+        {"text": "{hi}. Bar, one drink, then the comics wall. Big week. Three panels.", "id": "17om28a", "tier": [1, 4], "time": "evening"},
+        {"text": "Oh, it's you. I had to draw you from memory. You were holding a spanner. As usual.", "id": "1ij1a12", "tone": "funny", "tier": [1, 4], "warmth": "cold"},
+      ],
+      "hint": [
+        {"text": "Got a minute later? No joke this time. Well. Maybe one. After.", "id": "rfu10o"},
+      ],
+      "invite": [
+        {"text": "Quiz tonight? I'm useless after question ten. Come and be useful.", "id": "102qxos", "tone": "funny"},
+        {"text": "Friday jam: my playlist against O'Neill's. I need a fair judge. Be unfair. For me.", "id": "1cqgz0h", "tone": "funny", "tier": [2, 4]},
       ],
       "joy": [
         {"text": "Someone laughed at the comics wall this morning. Out loud. I heard it from the corridor.", "id": "19cge53", "tier": [1, 4]},
@@ -16728,9 +17241,14 @@ const VOICE = {
         {"text": "I drew Calder as a very tidy cloud. She saw it. She said, \"Fair.\" Best day of my life.", "id": "1ui00ky", "tone": "funny", "tier": [1, 4]},
         {"text": "O'Neill's playlist is wrong. Every week. We've agreed to settle it at the Friday jam.", "id": "1xs3zig", "tone": "funny", "tier": [2, 4]},
       ],
+      "missed": [
+        {"text": "You missed it. I drew it anyway. You're in it, looking very sorry.", "id": "kx51yu", "tone": "funny"},
+      ],
       "near": [
         {"text": "Job done. I'd draw it, but a fixed lamp isn't funny. A broken one is.", "id": "x26ouz", "act": "work"},
         {"text": "Comics wall's getting full. Hart's are better. Don't tell Hart.", "id": "o4lvt2", "act": "leisure"},
+        {"text": "The bar's busy. Good. Busy bars are funny. I've got a pencil.", "id": "q38r3o", "place": "lounge"},
+        {"text": "I'm on the observatory list now. Stars are hard to draw. They're just dots. Good dots.", "id": "1hkoda1", "habit": "stargazer"},
       ],
     },
   },
@@ -17014,6 +17532,19 @@ const VOICE = {
         {"text": "Not done till it's turned in, though. Back to the board.", "id": "yh33b2", "flag": "walk.job.done"},
         {"text": "Turned in. Your first one in the Record. Right, onward.", "id": "nfrxz0", "flag": "walk.job.turnin"},
         {"text": "Lunch, then you lead the next one. I'll just follow.", "id": "14z283", "tone": "warm", "flag": "walk.job.turnin"},
+        {"text": "Your pick. Your lead. I'm just your shadow.", "id": "17gqldt", "flag": "walk.job2.take"},
+        {"text": "Your lead. I'm just the shadow. A chatty shadow.", "id": "17wr5vn", "tone": "funny", "flag": "walk.job2.take"},
+        {"text": "Stuck? Part number's on the card. The shelf's yours to find.", "id": "pxdmm6", "flag": "walk.job2.fetch"},
+        {"text": "Not saying a word. Well. Mind your fingers.", "id": "tpz2uu", "tone": "funny", "flag": "walk.job2.make"},
+        {"text": "Look before you touch. You know this bit.", "id": "1ujz6r5", "flag": "walk.job2.panel"},
+        {"text": "Quiet as anything. Hear that? That's you.", "id": "1al0v4w", "tone": "warm", "flag": "walk.job2.done"},
+        {"text": "Two in one day. Start to end, all yours.", "id": "1q1tmfu", "tone": "warm", "flag": "walk.job2.turnin"},
+        {"text": "I barely spoke. Calder will never believe it.", "id": "bdpkvi", "tone": "funny", "flag": "walk.job2.turnin"},
+        {"text": "How's the solo going? Don't tell me. No, tell me.", "id": "93pe9y", "tone": "funny", "flag": "walk.job3.tea"},
+        {"text": "Calder gave you a real one, then. Good. You're ready.", "id": "1ddaagy", "flag": "walk.job3.tea"},
+        {"text": "Stuck on anything? Ask. Asking isn't failing.", "id": "nukitz", "flag": "walk.job3.tea"},
+        {"text": "Solo, and turned in. Look at you. Right, onward.", "id": "nb39el", "tone": "warm", "flag": "walk.job3.turnin"},
+        {"text": "Saw it on the board. I didn't help once. Proud of us both.", "id": "1lqm0s7", "tone": "funny", "flag": "walk.job3.turnin"},
       ],
     },
   },
@@ -17392,9 +17923,27 @@ const VOICE = {
     "tpl": "playful",
     "words": {"hi": ["Hiya", "Ooh, hello", "Hey, you"], "bye": ["Ta-ra", "Run along", "See you"], "yes": ["Ooh, yes", "Go on then", "Easy"], "thanks": ["Ta muchly", "Thanks, you"], "wow": ["Ooh", "Look at you"], "sigh": ["Oh, go on", "Aw"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
+      "about": [
+        {"text": "Kovac says our scrubber races don't matter. She times every one. I love that.", "id": "1b4mjxd", "tone": "warm", "aff": "kovac-zainab:friend"},
+      ],
+      "accept": [
+        {"text": "Ooh, yes. I'll be there first. Bet you.", "id": "1ql82pm"},
+        {"text": "Yes, lovely. I'll bring a stopwatch, just in case.", "id": "1aebg0v", "tone": "funny"},
+      ],
+      "birthday": [
+        {"text": "Happy birthday! I pressed you a flower. Garden green. Don't sit on it.", "id": "1r6l9qz", "tone": "warm", "birthday": "you"},
+        {"text": "My birthday. Kovac's challenged me to a scrubber race. Best present yet.", "id": "bz41nz", "tone": "funny", "birthday": "me"},
+      ],
       "bye": [
         {"text": "Ta-ra. Run along.", "id": "1mxow7t"},
         {"text": "See you. And if the coffee machine beeps, you know who to call.", "id": "j6tvqu"},
+      ],
+      "cue": [
+        {"text": "Was that your job? How long? Don't tell me. It was faster than mine. Was it?", "id": "1ubhz16", "tone": "funny", "cue": "repair.you@dept"},
+      ],
+      "decline": [
+        {"text": "Not tonight, I'm shattered. Rain check? Do we say that here? We do now.", "id": "11ykwxn"},
+        {"text": "Rest day. I'm pressing flowers and doing nothing else. Another time?", "id": "1ckyb4h", "weekday": "mon|tue"},
       ],
       "feel": [
         {"text": "Bit tired. I'll get dinner late, I think. When it's quiet.", "id": "1sc4xix", "mood": "low"},
@@ -17407,6 +17956,15 @@ const VOICE = {
         {"text": "Hey, you. Bet you can't get to the board in under a minute. Go.", "id": "6nr2vh", "tier": [1, 4]},
         {"text": "Ooh, {me}. Rematch with Kovac on Friday. Scrubbers. Bring a stopwatch.", "id": "7lfmqq", "tier": [2, 4]},
         {"text": "Hey, you. I pressed you a flower. Don't sit on it.", "id": "aj6mkq", "tone": "warm", "tier": [3, 4]},
+        {"text": "Hiya. Just off for a late dinner. The mess is lovely when it's empty. Promise.", "id": "1gte20w", "tier": [1, 4], "time": "evening"},
+        {"text": "Ooh, look who's back. I nearly sent a search party. A small one. Just me.", "id": "1s3vtc", "tone": "funny", "tier": [1, 4], "warmth": "cold"},
+      ],
+      "hint": [
+        {"text": "Fancy a cuppa later? No races. Promise. I've something to tell you.", "id": "1056l2p"},
+      ],
+      "invite": [
+        {"text": "Fancy a run? Two laps of the deck. Loser gets the coffees. That's me, usually.", "id": "1v32jju", "tone": "funny"},
+        {"text": "Garden after shift? Help me find a flower worth pressing. Cruz won't see. Probably.", "id": "1n11wsd", "tier": [1, 4]},
       ],
       "joy": [
         {"text": "Press a flower right and it keeps its colour for years. Look. This one's from Sowing.", "id": "19hzkb8", "tier": [1, 4]},
@@ -17415,9 +17973,14 @@ const VOICE = {
         {"text": "I press flowers from the garden. Cruz hasn't noticed. Cruz has definitely noticed.", "id": "13p9gti", "tone": "funny", "tier": [1, 4]},
         {"text": "Yoon and Shah both say they're best at the coffee machine. They're very brave.", "id": "g2ga2v", "tone": "funny", "tier": [2, 4]},
       ],
+      "missed": [
+        {"text": "You missed it. That's fine. I won anyway. It's easy, when it's only you.", "id": "h77yye", "tone": "funny"},
+      ],
       "near": [
         {"text": "Ready? Panel off. Filter out. Seal. Go. Ooh, not bad. Again?", "id": "15dzdm5", "act": "work"},
         {"text": "Two laps, then I'll race you. Fine. One lap.", "id": "1w1l2b0", "act": "gym"},
+        {"text": "Gym crowd after shift now. Bet I can do more laps than you. Prove me wrong.", "id": "1g779er", "habit": "gym-regular"},
+        {"text": "Coffee machine's purring. That's me. You're welcome.", "id": "18mm1we", "tone": "funny", "place": "teacorner"},
       ],
     },
   },
