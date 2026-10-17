@@ -16,17 +16,22 @@ canvas{position:fixed;inset:0;display:block;z-index:1}
 .hud .room{font-size:17px;font-weight:600}
 .hud .sub{font-size:12.5px;color:var(--muted);margin-top:2px}
 .hud .clock{font-size:12.5px;color:#cfe9e4;margin-top:3px;font-variant-numeric:tabular-nums}
+.hud{max-width:max(150px,calc(30vw - 26px))}              /* 0.35.36: every line on one line, at every width: the buttons own the rest */
+.hud .room,.hud .sub,.hud .clock{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .controls{position:fixed;right:12px;top:12px;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;max-width:70vw}
 button{appearance:none;border:1px solid var(--line);background:var(--glass);color:var(--ink);font:inherit;font-size:13px;padding:8px 12px;border-radius:999px;display:flex;align-items:center;gap:6px;cursor:pointer;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
 button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-@media (max-width:600px){                                 /* 0.35.34: narrow phones: the six buttons as two rows of 44px icons beside the place and clock */
+@media (max-width:600px),(max-height:500px){             /* 0.35.34: narrow phones (0.35.36: and short landscape ones): the six buttons as two rows of 44px icons beside the place and clock */
   .controls{display:grid;grid-template-columns:repeat(3,44px);gap:8px;top:10px;max-width:none}
   .controls button{width:44px;height:44px;padding:0;justify-content:center;font-size:0;gap:0}
   .controls button svg{width:19px;height:19px}
   .controls #newgame.ask{background:var(--teal);color:#08201d}
   .hud{max-width:calc(100vw - 14px - 148px - 12px - 12px)}
-  .hud .room,.hud .sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+}
+@media (max-width:360px){                                 /* 0.35.36: the narrowest phones: a little tighter, so "Day 100, Wed 06:00" fits on one line */
+  .hud{padding:5px 8px 6px;max-width:calc(100vw - 14px - 148px - 12px - 8px)}
+  .hud .sub,.hud .clock{font-size:12px}
 }
 .toast{position:fixed;left:50%;bottom:18px;transform:translate(-50%,10px);width:min(440px,calc(100% - 24px));background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:12px 16px;opacity:0;transition:opacity .35s,transform .35s;pointer-events:none;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 .toast.show{opacity:1;transform:translate(-50%,0)}
@@ -218,7 +223,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.35.35
+   STARSHIP CADET: CSV Wren                           build 0.35.36
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7247,7 +7252,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.35.35';                           // keep in step with the header's build line
+const GAME_BUILD = '0.35.36';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -7399,7 +7404,7 @@ const newBtn = document.getElementById('newgame'); let newAsk = 0;
 newBtn.onclick = () => {
   const span = newBtn.querySelector('span');
   if (!newAsk) { span.textContent = 'Tap again'; newBtn.classList.add('ask'); newAsk = setTimeout(() => { newAsk = 0; span.textContent = 'New game'; newBtn.classList.remove('ask'); }, 4000);
-    if (matchMedia('(max-width:600px)').matches) toast('New game', 'Tap again to start over.');   // 0.35.34: the label is hidden on narrow phones
+    if (matchMedia('(max-width:600px),(max-height:500px)').matches) toast('New game', 'Tap again to start over.');   // 0.35.34: the label is hidden on narrow phones
     return; }
   clearTimeout(newAsk); newAsk = 0; span.textContent = 'New game'; newBtn.classList.remove('ask');
   if (ride) return;                                      // not mid-ride
@@ -19742,10 +19747,13 @@ const clockEl = document.getElementById('clock'), roomEl = document.getElementBy
 function updateClock() {
   const night = nightAt() > .5;
   clockEl.textContent = clockText(); drawClock(hhmm(SHIP.time.min));
+  if (clockEl.scrollWidth > clockEl.clientWidth + 1)   // 0.35.36: too long for its line (a narrow phone, a long weekday): the short weekday
+    clockEl.textContent = 'Day ' + SHIP.time.day + ', ' + WEEKDAYS[weekday(SHIP.time.day)].slice(0, 3) + ' ' + hhmm(SHIP.time.min);
   lightBtn.querySelector('span').textContent = night ? 'Day' : 'Night';
   lightBtn.setAttribute('aria-label', night ? 'Debug: sleep until 07:40' : 'Debug: skip to 21:40');
 }
 updateClock();
+addEventListener('resize', () => updateClock());          // 0.35.36: the clock's length follows the screen's width
 let lastRoom = null;
 
 // ---- changing decks: you step out by the lift on deck n. The lift will call this (milestone step 6c). ----

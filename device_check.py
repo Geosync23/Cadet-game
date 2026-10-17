@@ -514,6 +514,28 @@ def run(path):
               deviceShow('home'); out.own = own; return out; })()""")
             print('  pillar 4 pages:', p4)
             check(all(p4.get(k) for k in ['home', 'cal', 'rep', 'keep', 'left', 'keepBad', 'movedBad']), f'season on Home and Calendar, reputation, keepsakes, Left the Wren: {p4}')
+            if name == 'phone':
+                # the top-left place and clock (0.35.34, 0.35.36, reviewer 2b): at widths 320-600 and landscape phones, every weekday
+                # on days 1-365 and every room name aboard: the clock on one line, nothing under the buttons, above the Device button
+                HUDCHK = """(() => { const keep = { day: SHIP.time.day, room: document.getElementById('room').textContent, deck: document.getElementById('deck').textContent }, bad = [];
+                  const R = e => e.getBoundingClientRect(), hud = document.querySelector('.hud'), clock = document.getElementById('clock'), btn = document.getElementById('devBtn');
+                  const btns = [...document.querySelectorAll('.controls button')].filter(b => b.offsetWidth).map(R);
+                  const hits = () => { const h = R(hud); return btns.some(b => b.left < h.right && h.left < b.right && b.top < h.bottom && h.top < b.bottom) || h.bottom > R(btn).top; };
+                  const days = []; for (const a of [1, 10, 100, 300, 359]) for (let k = 0; k < 7; k++) days.push(a + k);
+                  for (const d of days) { SHIP.time.day = d; updateClock(); if (R(clock).height > 20 || clock.scrollWidth > clock.clientWidth + 1 || hits()) { bad.push('day ' + d + ': ' + clock.textContent); break; } }
+                  SHIP.time.day = keep.day; updateClock();
+                  const names = new Set(); for (const n of Object.keys(DECKS)) for (const k in DECKS[n].rooms || {}) { const r = DECKS[n].rooms[k]; if (r && r.name) names.add(r.name + '|' + n); }
+                  for (const x of names) { const [nm, n] = x.split('|'); document.getElementById('room').textContent = nm; document.getElementById('deck').textContent = 'Deck ' + n + ', CSV Wren';
+                    if (hits()) { bad.push(nm); if (bad.length > 3) break; } }
+                  document.getElementById('room').textContent = keep.room; document.getElementById('deck').textContent = keep.deck;
+                  return { n: names.size, bad, clock: clock.textContent }; })()"""
+                hud = {}
+                for vw, vh in [(320, 640), (340, 700), (360, 740), (375, 667), (390, 844), (412, 915), (430, 932), (480, 800), (540, 900), (600, 900), (601, 375), (667, 375), (740, 360), (844, 390), (900, 420), (1024, 600), (1280, 800)]:
+                    g.page.set_viewport_size({'width': vw, 'height': vh}); g.step(1); r = g.ev(HUDCHK)
+                    if r['bad']: hud[f'{vw}x{vh}'] = r['bad']
+                g.page.set_viewport_size({'width': w, 'height': h}); g.step(1); g.ev("updateClock()")
+                print('  HUD sweep (sizes with a problem):', hud or 'none')
+                check(not hud, f'HUD: one-line clock, nothing under the buttons, above the Device button, at every size: {hud}')
             g.ev("deviceClose(); window.__opens = 0"); g.step(1)
             # never opens by itself (0.35.15, the user: "sometimes it just pops up"): a whole ship day of reminders, tips,
             # notices, an address, the meeting panel and an invitation, and a drag up from the bottom edge (the old swipe)
