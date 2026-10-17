@@ -1,6 +1,6 @@
 # Handover: the onboarding engineer (Pillar 4, seat 1)
 
-Written 2026-10-17 by session_01KaHzfqSqF8B4bkNFrH1tsx; **refreshed at handover, ~08:30 UTC, at about 68% memory** (latest: 0.42.21, 54d7911; screenshots 0ea5048). A fresh session taking over this role reads this first, then CLAUDE.md, DEV_NOTES.md ("The arrival (section 21)" and "Hook register"), plans/pillar4-plan.md Part 1 and Part 5, and plans/social-deep-plan.md Part 7.
+Written 2026-10-17 by session_01KaHzfqSqF8B4bkNFrH1tsx (onboarding 1); **taken over ~08:20 UTC by onboarding engineer 2, session_0163dcLt17oTCdR8po9HRo2p** (latest: 0.42.26, 9de4291; side branch claude/arrival-0603 0.42.21b, 046a019, in 0.60.3). A fresh session taking over this role reads this first, then CLAUDE.md, DEV_NOTES.md ("The arrival (section 21)" and "Hook register"), plans/pillar4-plan.md Part 1 and Part 5, and plans/social-deep-plan.md Part 7.
 
 ## Role, branch and builds
 
@@ -46,7 +46,26 @@ Written 2026-10-17 by session_01KaHzfqSqF8B4bkNFrH1tsx; **refreshed at handover,
 
 - None open. Wave 2's check-in A is the lead's to run.
 
-## In flight at handover (do these next, in the lead's order)
+## Done by onboarding 2 (0.42.22-0.42.24, 0.42.21b)
+
+- **0.42.22 (9b37dd9), the shuttle start:** INTRO_START [5,7] face 0 in the Tern's aisle; ramp shut at the manifest, Dev Raman's toast (`introWriterLine('pilot.ramp', 'raman')`) ~2 s after signing and `ternRamp(true)`; closes behind you once you and everyone are off (`introTernTick`), opens again at 'free'. ramp/hello checkpoints at the ramp foot [5,11]; the tour's shuttle point [5,10]. Needs decks-p3 + sim's SHIP_START_ARRIVAL [5,7] face 0 in the same combine (0.60.4).
+- **0.42.21b on claude/arrival-0603 (046a019, from 0ea5048, for 0.60.3) = 0.42.23 on claude/arrival (8645a20, a merge):** the tour paced (pacing A). One queue (`INTRO_UI.tour`), places strictly in order, core lines (`walk.<place>.1..N`, N in INTRO_TOUR's `core`, head writer 3's content 0.48.49) always heard, Torres pauses (`INTRO_UI.pause` -> escortPlan 'wait' at his tile; held time capped per place), extras while you linger, a left deck's places dropped, the last core lines finish before the dinner chat (introTick's meeting gate) and may run on into 'free'. Following: 27/27 core, 32-34/61 lines. The walk is ~30 ship minutes longer (sit ~18:47); the lead accepted it given hot food (checked), seats (checked) and the bunk arrow before 20:00 (19:00). Reviewer 1's should-fixes in the same commit: bunk arrow only when no other arrow; `introUiReset()` on New game; intro_check asserts the dinner seats.
+- **0.42.24 (7cca991), tap-to-ask:** `introTap(p)` (sim 0.26.31's hook in tapCrew): at a tour place with extras left, the next extra now; else the writers' introAsk, three asks at most.
+- **0.42.25 (2b3971b), reviewer 1's lows:** health check kind 'checkup' via `introHealthAppt` (drops an earlier game's future booking), rebooked once on `apptMissed` (`introHealthMissed`, Rina's Mail), Settling-in ticks on any kept check-up with Rina; `introSeekMail` (Mail when a seek ask expires undone; writers' `mail.<id>` else `INTRO_SEEK_MAIL`).
+- **0.42.26 (9de4291), the week in play (job 4):** `introBeatTick` (the writers' `beat.<id>.<n>` on the beat's `who`, once, in the beat's room in its window with them there; they stop via `a.talking`; no-room beats when within 6 tiles), `introSowTick` (Tomas walked to a free `3-tend-*` for ~10 min at Sowing), the pilot on the frame clock (`INTRO_UI.pilotAt`, `done.pilot`). intro_check part 12 = `week(g)`, also `--week [--beats=a,b]` alone (a full intro_check on a content merge now takes ~50 min; part 12 alone ~35).
+- **Closed:** reviewer 1's "?debug save mid-arrival reloads at 17:40" (probe wrote the clock while the manifest was unsigned; the manifest holds 17:40 on purpose).
+- **Scratch merges that work:** arrival + decks-p3 + sim-engineer + content (resolve build-line hunks to HEAD, other conflicting game hunks to content's side, DEV_NOTES to HEAD), then `git checkout <content hash> -- content/ content_gen.py` and `python3 content_gen.py starship-cadet.html`; for the Tern start also edit SHIP_START_ARRIVAL to [5,7] face 0 in the scratch.
+
+## Still to do (onboarding 2's queue)
+
+- **Job 5, wave 4 guiding: PARKED until promotion exists** (the lead, 2026-10-17 ~15:00). Guiding a newcomer only switches on after a promotion (flag('promoted')), and nothing sets that yet. When promotion is built: social A's A10 contract (`simNote('guideAssigned', { id, day })`, `socialGuide(id)` -> your `introGuide(id)`, `socialGuideEnd('handed')` -> your `introGuideEnd(id)`), a separate state `SHIP.intro.guide` (never touch `SHIP.intro.on`), the evening's steps with you as the escort and the newcomer following; see "In flight" item 5 below for the details. Test with the flag set in intro_check only.
+- **Handed over** by onboarding 2 at ~15:00 UTC, at about 60% memory (the lead's call, to save cost). Nothing else is in flight; 0.42.26 (9de4291) was with reviewer 1c.
+
+## For other seats
+
+- **Player engineer 5 (section 15):** reviewer 1's low 7 (arrival-54d7911). You stand through "Dinner with Torres": `dinnerTick` sits you only from the Chief's step, but the evening now has a 'table' step (the introDinner chat) before it. `introSeat('you')` already returns your seat from 'table' on (null outside table/chief/free), so dinnerTick can simply sit you whenever it's non-null. (The player seat was vacant when this was found; the lead asked for it here.)
+
+## In flight at handover (onboarding 1's list; 1-3 done by onboarding 2)
 
 1. **The shuttle start** (the user: "you start inside the shuttle, the ramp opens, you walk out"; the lead approved the defaults). The deck architect's walk-in Tern is in claude/decks-p3 eb0e776 (0.38.18): places 5-tern-aisle-1 [5,7] (start, face 0 = south), 5-tern-seat-1 [4,8], 5-tern-ramp-top [5,9], 5-tern-ramp-foot [5,11] (Torres); `DECKS[5].tern = { aisle, well [5,8], ramp [[5,9],[5,10]], foot [5,11], start }`; calls `ternRamp(open, secs = 2.5)`, `ternRampOpen()` 0..1, `ternClear()`, `ternInside()`; open by default; the well is blocked until the ramp is fully open. To do in section 21:
    - `INTRO_START = { day: 0, min: 1060, deck: 5, tile: [5, 7], face: 0 }` (sim engineer 4 moves SHIP_START_ARRIVAL to exactly this in the same combine).

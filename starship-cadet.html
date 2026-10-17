@@ -7613,10 +7613,10 @@ function flagSet(key, value = true) {
 }
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
-// a new game that arrives by shuttle (Pillar 4): day 0, a real ship Sunday, 17:40, on the Tern's ramp on Deck 5 (day 1
+// a new game that arrives by shuttle (Pillar 4): day 0, a real ship Sunday, 17:30 (17:40 until 0.42.27), on the Tern's ramp on Deck 5 (day 1
 // stays Monday, so the calendar never moves). Section 21 starts it: newGameStart(true), from New game or, on a first
 // launch with no save, from its own load (this section can't see section 21 while it loads). Never with ?nosave
-const SHIP_START_ARRIVAL = { day: 0, min: 17 * 60 + 40, deck: 5, tile: [5, 7], face: 0 };   // in the Tern's aisle (5-tern-aisle-1, the deck architect's walkable Tern), facing south to the door (section 21's INTRO_START; 0.26.35)
+const SHIP_START_ARRIVAL = { day: 0, min: 17 * 60 + 30, deck: 5, tile: [5, 7], face: 0 };   // in the Tern's aisle (5-tern-aisle-1, the deck architect's walkable Tern), facing south to the door (section 21's INTRO_START; 0.26.35)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
 const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const shipNow = () => (SHIP.time.day - 1) * 1440 + SHIP.time.min;    // absolute ship minutes
@@ -7726,7 +7726,7 @@ newBtn.onclick = () => {
   deviceChoose({ title: 'New game', text: 'How do you want to start?', choices: ['Arrive by shuttle (Sunday evening)', 'Skip to Monday morning'] },
     i => { if (i === 0) newGameStart(true); else { newGameStart(false); if (typeof introSkip === 'function') introSkip(); } });
 };
-// a new game (Pillar 4): by shuttle on day 0 at 17:40 (arrival true: section 21 then calls introBegin), or in Bunk 1
+// a new game (Pillar 4): by shuttle on day 0 at 17:30 (arrival true: section 21 then calls introBegin), or in Bunk 1
 // on Monday at 06:00 (false; section 21 calls introSkip when you skipped the arrival). Clears the save, the decks'
 // state, the habit changes, the flag store and the notes, then sections 15, 20 start again
 function newGameStart(arrival) {
@@ -28832,7 +28832,7 @@ function homeMessage(k, t = shipNow()) {                 // their message, one-s
 // =====================================================================
 // 21. ARRIVAL
 // The arrival and the first week (plans/pillar4-plan.md, Part 1; the social side is plans/social-deep-plan.md,
-// Part 7). A new game opens on Day 0, Sunday 17:40, on the Tern's ramp in the Deck 5 shuttle bay: Zeke Torres (Works,
+// Part 7). A new game opens on Day 0, Sunday 17:30 (the user, after 0.60.3; was 17:40), on the Tern's ramp in the Deck 5 shuttle bay: Zeke Torres (Works,
 // one rank above you) walks you to your bunk and to dinner, Chief Calder stops by the table, and the week after is
 // taught by people (the shadow shift on Monday, your first solo job on Tuesday, Sowing morning on Saturday).
 // On paper so far (0.42.0): the steps, the week's beats, the Settling-in list, the flags and the save. Nothing calls
@@ -28852,7 +28852,7 @@ function homeMessage(k, t = shipNow()) {                 // their message, one-s
 // =====================================================================
 const INTRO_ESCORT = 'torres-zeke';                      // the user: a future friend, one notch above you in Works
 const INTRO_KEY = 'starship-cadet-arrived';              // set once you've finished or ended an intro: New game offers the skip (outside the save)
-const INTRO_START = { day: 0, min: 17 * 60 + 40, deck: 5, tile: [5, 7], face: 0 };   // inside the Tern, in its aisle facing the door (south; the deck architect's DECKS[5].tern.start, 0.38.18)
+const INTRO_START = { day: 0, min: 17 * 60 + 30, deck: 5, tile: [5, 7], face: 0 };   // inside the Tern, in its aisle facing the door (south; the deck architect's DECKS[5].tern.start, 0.38.18)
 const introAbs = (day, min) => (day - 1) * 1440 + min;
 const INTRO_REACH = 2;                                   // a step is done when you're in its checkpoint's room, this many tiles from it at most
 const introRoomAt = (deck, tile) => { const D = DECKS[deck], ch = D && D.map[tile[1]] && D.map[tile[1]][tile[0]], r = D && D.rooms[ch]; return r ? r.name : null; };
@@ -28881,35 +28881,35 @@ const introMail = (m, at) => { if (m && typeof mailSend === 'function') mailSend
 // rel: points to people when the step is done (the social plan's end state: Torres 10, Tomas 10, Pell 5, Calder 3, Brennan 3).
 // Checkpoint tiles are provisional until wave 2 walks them (intro_check: in the room, on the deck's map).
 const INTRO_STEPS = [
-  { id: 'manifest', day: 0, at: 17 * 60 + 40, who: null, mode: 'free', where: 'the shuttle manifest',
+  { id: 'manifest', day: 0, at: 17 * 60 + 30, who: null, mode: 'free', where: 'the shuttle manifest',
     teaches: 'your name' },
-  { id: 'ramp', day: 0, at: 17 * 60 + 40, who: INTRO_ESCORT, mode: 'wait', where: 'the Tern\'s ramp',
+  { id: 'ramp', day: 0, at: 17 * 60 + 30, who: INTRO_ESCORT, mode: 'wait', where: 'the Tern\'s ramp',
     checkpoint: { deck: 5, tile: [5, 11], room: 'Shuttle bay' }, tip: 'walk', fallback: { wait: 20, later: 'hello' } },
-  { id: 'hello', day: 0, at: 17 * 60 + 42, who: INTRO_ESCORT, mode: 'wait', where: 'the ramp foot',
+  { id: 'hello', day: 0, at: 17 * 60 + 32, who: INTRO_ESCORT, mode: 'wait', where: 'the ramp foot',
     checkpoint: { deck: 5, tile: [5, 11], room: 'Shuttle bay' }, rel: { [INTRO_ESCORT]: 4 }, fallback: { wait: 20, later: 'haulway' } },
-  { id: 'haulway', day: 0, at: 17 * 60 + 44, who: INTRO_ESCORT, mode: 'lead', where: 'the haulway',
+  { id: 'haulway', day: 0, at: 17 * 60 + 34, who: INTRO_ESCORT, mode: 'lead', where: 'the haulway',
     checkpoint: { deck: 5, tile: [12, 8], room: 'Haulway' }, fallback: { wait: 20, later: 'works' } },
-  { id: 'works', day: 0, at: 17 * 60 + 46, who: INTRO_ESCORT, mode: 'lead', where: 'the Works bay door',
+  { id: 'works', day: 0, at: 17 * 60 + 36, who: INTRO_ESCORT, mode: 'lead', where: 'the Works bay door',
     checkpoint: { deck: 5, tile: [16, 6], room: 'Lift lobby' }, fallback: { wait: 20, later: 'lift' } },
-  { id: 'lift', day: 0, at: 17 * 60 + 48, who: INTRO_ESCORT, mode: 'lead', where: 'the lift, Deck 5',
+  { id: 'lift', day: 0, at: 17 * 60 + 38, who: INTRO_ESCORT, mode: 'lead', where: 'the lift, Deck 5',
     checkpoint: { deck: 5, tile: [15, 9], room: 'Lift lobby' }, fallback: { wait: 20, later: 'wing' } },
-  { id: 'wing', day: 0, at: 17 * 60 + 50, who: INTRO_ESCORT, mode: 'lead', where: 'the junior wing, Deck 4',
+  { id: 'wing', day: 0, at: 17 * 60 + 40, who: INTRO_ESCORT, mode: 'lead', where: 'the junior wing, Deck 4',
     checkpoint: { deck: 4, tile: [12, 4], room: 'Junior corridor' }, fallback: { wait: 20, later: 'bunk' } },
-  { id: 'bunk', day: 0, at: 17 * 60 + 53, who: INTRO_ESCORT, mode: 'meet', where: 'Bunk 1', meeting: 'introBunk',
+  { id: 'bunk', day: 0, at: 17 * 60 + 43, who: INTRO_ESCORT, mode: 'meet', where: 'Bunk 1', meeting: 'introBunk',
     checkpoint: { deck: 4, tile: [8, 3], room: 'Bunk 1' }, rel: { [INTRO_ESCORT]: 3, tomas: 10 }, flags: ['intro.device'],
     fallback: { wait: 30, later: 'toMess', mail: { from: 'Zeke Torres', subject: 'Your bunk', body: 'Couldn\'t find you. Your bunk\'s in Bunk 1, Deck 4: drop your bag in your locker when you can. Your device I\'ll hand you myself. Dinner\'s on Three. — Z.' } } },
-  { id: 'toMess', day: 0, at: 18 * 60 + 5, who: INTRO_ESCORT, mode: 'lead', where: 'to the mess, Deck 3',
+  { id: 'toMess', day: 0, at: 17 * 60 + 55, who: INTRO_ESCORT, mode: 'lead', where: 'to the mess, Deck 3',
     checkpoint: { deck: 3, tile: [22, 7], room: 'Lift plaza' }, fallback: { wait: 20, later: 'servery' } },
-  { id: 'servery', day: 0, at: 18 * 60 + 12, who: INTRO_ESCORT, mode: 'lead', where: 'the mess servery',
+  { id: 'servery', day: 0, at: 18 * 60 + 2, who: INTRO_ESCORT, mode: 'lead', where: 'the mess servery',
     checkpoint: { deck: 3, tile: [33, 3], room: 'Mess hall' }, rel: { pell: 5, brennan: 3 }, fallback: { wait: 25, later: 'table' } },
-  { id: 'table', day: 0, at: 18 * 60 + 14, who: INTRO_ESCORT, mode: 'meet', where: 'your table in the mess', meeting: 'introDinner',   // 0.42.20: Torres about himself, before the Chief
+  { id: 'table', day: 0, at: 18 * 60 + 4, who: INTRO_ESCORT, mode: 'meet', where: 'your table in the mess', meeting: 'introDinner',   // 0.42.20: Torres about himself, before the Chief
     checkpoint: { deck: 3, tile: [28, 1], room: 'Mess hall' }, fallback: { wait: 15, later: 'chief' } },
-  { id: 'chief', day: 0, at: 18 * 60 + 30, who: 'calder', mode: 'meet', where: 'your table in the mess', meeting: 'introChief',
+  { id: 'chief', day: 0, at: 18 * 60 + 20, who: 'calder', mode: 'meet', where: 'your table in the mess', meeting: 'introChief',
     checkpoint: { deck: 3, tile: [28, 1], room: 'Mess hall' }, rel: { calder: 3 }, flags: ['met.calder'],
     seats: { you: '3-mess-10', [INTRO_ESCORT]: '3-mess-12', calder: '3-mess-9' },   // you, Torres beside you, the Chief across
-    fallback: { until: 20 * 60, later: 'free', mail: { from: 'I. Calder', subject: 'Tomorrow', body: 'Missed you at dinner. Torres has you tomorrow; ten to eight, the Works bay. — I. Calder' } } },
-  { id: 'free', day: 0, at: 19 * 60, who: INTRO_ESCORT, mode: 'free', where: 'the mess', rel: { [INTRO_ESCORT]: 3 } },
-  { id: 'tomas', day: 0, at: 19 * 60, who: 'tomas', mode: 'free', where: 'the junior common room or Bunk 1', teaches: 'Chat and Ask about', seek: 22 * 60 },
+    fallback: { until: 19 * 60 + 30, later: 'free', mail: { from: 'I. Calder', subject: 'Tomorrow', body: 'Missed you at dinner. Torres has you tomorrow; ten to eight, the Works bay. — I. Calder' } } },
+  { id: 'free', day: 0, at: 19 * 60 + 30, who: INTRO_ESCORT, mode: 'free', where: 'the mess', rel: { [INTRO_ESCORT]: 3 } },   // he lets you go after his goodnight (introNightTick), 19:30 at the latest (reviewer 1c: no fixed 19:00)
+  { id: 'tomas', day: 0, at: 19 * 60 + 30, who: 'tomas', mode: 'free', where: 'the junior common room or Bunk 1', teaches: 'Chat and Ask about', seek: 22 * 60 },
   { id: 'night', day: 0, at: 20 * 60, who: null, mode: 'free', where: 'your bunk', teaches: 'sleep' },
 ];
 // the meetings the writers fill (content/meetings, merged into MEETING_SCRIPTS): their gist is what Mail says if you miss them
@@ -28969,7 +28969,7 @@ const SETTLE = [
   { id: 'lead', title: 'Lead a job', teacher: INTRO_ESCORT, place: { deck: 5, room: 'Works bay' }, done: (k, d) => k === 'job' && d.step === 'turnin' && d.reserved === 2 },
   { id: 'eat', title: 'Eat with the crew', teacher: 'brennan', place: { deck: 3, room: 'Mess hall' }, done: (k, d) => k === 'act' && d.act === 'eat' && d.with > 0 },
   { id: 'solo', title: 'Your first solo job', teacher: 'calder', place: { deck: 5, room: 'Works Chief\'s office' }, done: (k, d) => k === 'job' && d.step === 'turnin' && (d.reserved === 3 || !d.reserved) },
-  { id: 'health', title: 'Health check', teacher: 'rina', place: { deck: 3, room: 'Infirmary' }, done: (k, d) => k === 'apptKept' && (d.id === 'intro-health' || (SHIP.intro && d.id === SHIP.intro.done['d2-health:appt'])) },
+  { id: 'health', title: 'Health check', teacher: 'rina', place: { deck: 3, room: 'Infirmary' }, done: (k, d) => k === 'apptKept' && (d.id === 'intro-health' || (SHIP.intro && d.id === SHIP.intro.done['d2-health:appt']) || (Array.isArray(d.with) && d.with.includes('rina'))) },   // any check-up with Rina (a skipped arrival books none)
   { id: 'call', title: 'Call home', teacher: 'eklund-leila', place: { deck: 3, room: 'Call-home booths' }, done: (k, d) => k === 'act' && d.act === 'call' },
   { id: 'take', title: 'Take a job yourself', teacher: INTRO_ESCORT, place: { deck: 5, room: 'Works bay' }, done: (k, d) => k === 'job' && d.step === 'take' && !d.reserved },
   { id: 'buy', title: 'Buy something', teacher: 'ishikawa-orla', place: { deck: 3, room: 'Crew store' }, done: (k, d) => k === 'act' && d.act === 'buy' },
@@ -28981,7 +28981,7 @@ const SETTLE = [
 ];
 // the list listens on section 13's bus once it's there (onSim(kind, fn), fn called with the note's data)
 let INTRO_HEARD = false;
-if (typeof onSim === 'function') { INTRO_HEARD = true; for (const k of SETTLE_KINDS) onSim(k, d => settleNote(k, d)); onSim('job', introJobNote); }
+if (typeof onSim === 'function') { INTRO_HEARD = true; for (const k of SETTLE_KINDS) onSim(k, d => settleNote(k, d)); onSim('job', introJobNote); onSim('apptMissed', introHealthMissed); }
 // what Torres says as you work (stand-ins until the writers' lines): slot 1, the shadow shift, step by step; slot 2,
 // the one you lead, only at the end
 const INTRO_JOB_LINES = {
@@ -29079,11 +29079,11 @@ function introNewGame(arriving) { try { introUiReset(); } catch (e) {} if (arriv
 // what the evening in play keeps between frames, back to a fresh start on New game (reviewer 1: on a second arrival
 // the Chief never came to your table); an arrow of its own (Torres's, your bunk's) goes too
 function introUiReset() {
-  const U = INTRO_UI; (U.said || []).forEach(clearTimeout); if (U.pilot) clearTimeout(U.pilot);
+  const U = INTRO_UI; (U.said || []).forEach(clearTimeout); U.night = null; U.chiefD = null;
   const own = typeof IX_GOAL !== 'undefined' && IX_GOAL && (IX_GOAL.label === 'Your bunk' || IX_GOAL.label === 'Zeke Torres');
   if (own && typeof clearGoal === 'function') clearGoal();
-  Object.assign(U, { min: null, step: undefined, said: [], callAt: 0, goal: false, goalKey: '', meet: [], next: 0, still: 0, stillAt: null, more: 0, bed: false, tour: [], pause: null, calder: false, calls: 0 });
-  if ('pilot' in U) Object.assign(U, { pilot: 0, ternOpened: false, ternShut: false });
+  Object.assign(U, { min: null, step: undefined, said: [], callAt: 0, goal: false, goalKey: '', meet: [], next: 0, still: 0, stillAt: null, more: 0, bed: false, tour: [], pause: null, calder: false, calls: 0, beat: null, sow: false });
+  if ('pilotAt' in U) Object.assign(U, { pilotAt: 0, ternOpened: false, ternShut: false });
 }
 // section 14 plans the crew again when this changes (introBeats depends on nothing else)
 const introSig = () => (introOn() ? 'on' : 'off') + (SHIP.intro.skipped ? '|skipped' : '');
@@ -29169,7 +29169,7 @@ function introSkip() {
 // the escort's walker mode at minute t (section 10 drives him with it): lead to the checkpoint, wait there, follow
 // you (Monday afternoon), or null (his own plan)
 // the dinner table (0.42.15, the lead: Calder comes visibly to your table and you all sit): who sits where from the
-// Chief's step until Torres lets you go at 19:00. Section 10 seats Torres and Calder, section 15 the player.
+// Chief's step until Torres lets you go (after his goodnight, 19:30 at the latest). Section 10 seats Torres and Calder, section 15 the player.
 function introSeat(who) {
   if (!introOn()) return null;
   const I = SHIP.intro; if (I.step !== 'table' && I.step !== 'chief' && I.step !== 'free') return null;
@@ -29184,7 +29184,7 @@ function escortPlan(p, t) {
   if (introEscorting(st) && introSeat(p.id)) return { mode: 'wait', to: introSeat(p.id) };   // at dinner: he walks to his seat and sits (section 10, sim 0.26.26)
   if (introEscorting(st) && st.mode === 'lead' && INTRO_UI.pause) return { mode: 'wait', to: INTRO_UI.pause };   // pausing for the tour's core lines (introTourTick)
   if (introEscorting(st)) return { mode: st.who === p.id && st.mode !== 'lead' ? 'wait' : 'lead', to: { deck: st.checkpoint.deck, tile: st.checkpoint.tile } };
-  if (st && st.id === 'free' && introSeat(p.id)) return { mode: 'wait', to: introSeat(p.id) };   // at the table until 19:00
+  if (st && st.id === 'free' && introSeat(p.id)) return { mode: 'wait', to: introSeat(p.id) };   // at the table until his goodnight
   for (const b of INTRO_WEEK) if (b.escort && b.who === p.id && t >= introAbs(b.day, b.at) && t < introAbs(b.day, b.until)) return { mode: b.escort, to: b.where };
   return null;
 }
@@ -29239,7 +29239,7 @@ INTRO_STUB_SCRIPTS.introSoloJob = { title: 'Your first solo job', from: 'I. Cald
   { who: 'calder', text: 'Every job goes in your Record. I read the Record, not the talk.' },
   { who: 'calder', text: 'Progress talks: any time. Book it. Now go and fix my lamp.' }] };
 for (const id of ['introBriefing', 'introSoloJob']) if (!MEETING_SCRIPTS[id]) MEETING_SCRIPTS[id] = { ...INTRO_STUB_SCRIPTS[id], gist: INTRO_MEETINGS[id].gist };
-const INTRO_UI = { min: null, step: undefined, said: [], callAt: 0, goal: false, goalKey: '', manifest: null, meet: [], next: 0, still: 0, stillAt: null, more: 0, bed: false, tour: [], pause: null, pilot: 0, ternOpened: false, ternShut: false };
+const INTRO_UI = { min: null, step: undefined, said: [], callAt: 0, goal: false, goalKey: '', manifest: null, meet: [], next: 0, still: 0, stillAt: null, more: 0, bed: false, tour: [], pause: null, pilotAt: 0, ternOpened: false, ternShut: false };
 INTRO_STUB_SCRIPTS.introDinner = { title: 'Dinner with Torres', from: 'Zeke Torres', lines: [
   { who: INTRO_ESCORT, text: 'Engines, me. Deck 6. The drive coils, mostly. Coil three\'s my favourite. Don\'t tell the others.' },
   { who: INTRO_ESCORT, text: 'Two years aboard. Day shift, tea at half ten. Works never misses tea.' },
@@ -29321,9 +29321,32 @@ function introTourTick() {
 }
 // the first night (the user): after Torres lets you go on Sunday, and on Monday evening if you never found it, the
 // goal arrow points to your own bunk until you reach it (or sleep)
+// the goodnight (the user, after 0.60.3): once the Chief's welcome is over and his last tour lines are said, Torres says
+// goodnight (the writers' walk.goodnight.<n> in order, else the stand-in), and that lets you go: the 'free' step (else
+// at 19:30, reviewer 1c: the evening isn't held to a fixed 19:00). The first night's bunk arrow waits for it
+// (introBedTick). Not with you then (another deck, or more than 6 tiles off), or gone before he's finished: no line, the
+// arrow anyway. SHIP.intro.done.goodnight: when (null: not said; day 0's minutes are negative)
+const INTRO_GOODNIGHT = ['Explore as long as you like tonight. Early start, mind: get some sleep.'];
+function introNightTick() {
+  const I = SHIP.intro; if (!introOn() || I.done.goodnight !== undefined || typeof player === 'undefined') return;
+  // after the Chief's welcome (her step done and her meeting over, or missed), or once 'free' came by the clock (19:30)
+  const said = I.done['chief:end'] !== undefined || I.missed.includes('chief');
+  if (I.done.free === undefined && (I.done.chief === undefined || !said || DIALOGUE || INTRO_UI.meet.length)) return;
+  const p = player.obj.position, U = INTRO_UI, now = performance.now(), a = introWalker(), near = !!a && Math.hypot(a.x - p.x, a.z - p.z) <= 6;
+  if (!U.night) {
+    if (U.tour.some(q => q.core.length)) return;          // his last tour lines first
+    if (!near) { I.done.goodnight = null; introDone('free'); return; }
+    U.night = []; for (let n = 1; n <= 4; n++) { const l = introWriterLine('walk.goodnight.' + n); if (!l) break; U.night.push(l[0]); }
+    if (!U.night.length) U.night = INTRO_GOODNIGHT.slice();
+  }
+  if (!a || Math.hypot(a.x - p.x, a.z - p.z) > 10) { I.done.goodnight = Math.floor(shipNow()); U.night = null; introDone('free'); return; }   // you went: the arrow anyway
+  if (DIALOGUE || now < U.next || typeof bubbleSay !== 'function') return;
+  bubbleSay(a.h, U.night.shift(), 4.5); U.next = now + INTRO_TOUR_GAP;
+  if (!U.night.length) { I.done.goodnight = Math.floor(shipNow()); U.night = null; introDone('free'); }   // and he lets you go
+}
 function introBedTick() {
   const I = SHIP.intro; if (I.done.bed !== undefined || typeof setGoal !== 'function') return;
-  const now = Math.floor(shipNow()), on = (now >= introAbs(0, 19 * 60) && now < introAbs(1, 0) && I.done.free !== undefined) || (now >= introAbs(1, 19 * 60) && now < introAbs(2, 0));
+  const now = Math.floor(shipNow()), on = (now < introAbs(1, 0) && I.done.goodnight !== undefined) || (now >= introAbs(1, 19 * 60) && now < introAbs(2, 0));
   const bed = typeof playerBed === 'function' ? playerBed() : '4-B1-4', pl = (DECKS[4].places || []).find(q => q.id === bed), me = player.here();
   // (reviewer 1: only when you have no arrow of your own, and it never clears one it didn't set)
   const mine = typeof IX_GOAL !== 'undefined' && IX_GOAL && IX_GOAL.label === 'Your bunk';
@@ -29345,14 +29368,14 @@ function introSay(lines) {                                // his lines, one now 
   INTRO_UI.said.forEach(clearTimeout); INTRO_UI.said = [];
   (lines || []).forEach((text, i) => INTRO_UI.said.push(setTimeout(() => { const a = introWalker(); if (a && typeof bubbleSay === 'function') bubbleSay(a.h, text, 4.5); }, i * 4800)));
 }
-// A0: the shuttle's manifest, before the fade-in. The ship's clock holds at 17:40 until you've typed your name.
+// A0: the shuttle's manifest, before the fade-in. The ship's clock holds at 17:30 (INTRO_START) until you've typed your name.
 function introManifest() {
   if (INTRO_UI.manifest) return;
   const el = INTRO_UI.manifest = document.createElement('div');
   el.style.cssText = 'position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;background:#05080a;color:#d8efe6;font:16px/1.45 system-ui,sans-serif;padding:16px';
   el.innerHTML = '<form style="max-width:340px;width:100%;border:1px solid #2f4a44;border-radius:12px;padding:18px 18px 16px;background:#0c1416">'
     + '<div style="font-size:12px;letter-spacing:.12em;color:#7fb8a8">SHUTTLE TERN · PASSENGER MANIFEST</div>'
-    + '<div style="margin:10px 0 4px">Destination: CSV Wren, Works department.<br>Arriving Sunday, 17:40.</div>'
+    + '<div style="margin:10px 0 4px">Destination: CSV Wren, Works department.<br>Arriving Sunday, ' + String(Math.floor(INTRO_START.min / 60)).padStart(2, '0') + ':' + String(INTRO_START.min % 60).padStart(2, '0') + '.</div>'
     + '<label style="display:block;margin-top:12px;font-size:13px;color:#9fc9bc">Your name</label>'
     + '<input maxlength="24" autocomplete="off" style="width:100%;box-sizing:border-box;margin-top:4px;padding:10px;border-radius:8px;border:1px solid #3d5a52;background:#132022;color:#e8f4ef;font:inherit">'
     + '<button style="width:100%;margin-top:12px;padding:10px;border-radius:8px;border:0;background:#2f6f5f;color:#fff;font:inherit">Sign and go aboard</button></form>';
@@ -29365,24 +29388,30 @@ function introManifest() {
     introDone('manifest', introAbs(INTRO_START.day, INTRO_START.min));
     if (typeof eventFeel === 'function') eventFeel(['jolt'], 1);   // the Tern settles
     if (typeof tipShow === 'function') tipShow('walk', 'Tap where you want to go, or press and hold to walk.');
-    INTRO_UI.pilot = setTimeout(introPilot, 2000);
+    INTRO_UI.pilotAt = performance.now() + 2000;   // introTernTick, on the frame clock (reviewer 1c: not a timer)
     saveGame();
   };
   document.body.appendChild(el); setTimeout(() => input.focus(), 50);
 }
 // the Tern's ramp (0.42.22; the deck architect's ternRamp, 0.38.18): shut while you sign the manifest; about 2 s after,
-// the pilot's line (Dev Raman over the speaker: the writers' raman week1 'pilot.ramp', else a stand-in) and it opens.
+// the pilot's line (on the frame clock, and once: done.pilot; Dev Raman over the speaker: the writers' raman week1 'pilot.ramp', else a stand-in) and it opens.
 // Once you're off it and nobody's in its well or on the ramp (ternClear), it closes behind you; it opens again once
 // Torres lets you go (on another deck it just snaps). After a reload the ramp is simply open, as the Tern always was.
 const INTRO_PILOT = 'Down gently. Ramp\'s opening. Welcome to the Wren.';
 function introPilot() {
-  INTRO_UI.pilot = 0; if (!introOn() || typeof ternRamp !== 'function') return;
+  INTRO_UI.pilotAt = 0; if (!introOn() || typeof ternRamp !== 'function') return;
+  SHIP.intro.done.pilot = Math.floor(shipNow());
   const text = (introWriterLine('pilot.ramp', 'raman') || [INTRO_PILOT])[0];
   toast('Dev Raman, the pilot', text); ternRamp(true, 2.5); INTRO_UI.ternOpened = true;
 }
 function introTernTick() {
   if (typeof ternRamp !== 'function' || !DECKS[5].tern) return;
   const I = SHIP.intro, k = INTRO_STEPS.findIndex(x => x.id === I.step), free = INTRO_STEPS.findIndex(x => x.id === 'free');
+  if (I.step === 'ramp' && I.done.pilot === undefined) {   // the pilot's line is due (after a reload too: shut it again, then he speaks)
+    if (!INTRO_UI.pilotAt) { INTRO_UI.pilotAt = performance.now() + 2000; ternRamp(false, 0); }
+    else if (performance.now() >= INTRO_UI.pilotAt) introPilot();
+    return;
+  }
   if (INTRO_UI.ternShut) { if (k < 0 || k >= free) { INTRO_UI.ternShut = false; ternRamp(true); } return; }
   if (!INTRO_UI.ternOpened || deckDef.num !== 5 || ternRampOpen() < 1 || k < 0 || k >= free) return;
   const t = DECKS[5].tern, at = player.here();
@@ -29417,13 +29446,81 @@ function introScriptHere(id, m, keep) {   // keep: the step's own speaker, never
 // section 19; kept or missed by section 14's apptTick, which sends apptKept { id }: "Health check" ticks on it)
 function introBookHealth() {
   const D = SHIP.device; if (!D || !Array.isArray(D.appts) || SHIP.intro.done['d2-health:appt'] !== undefined) return;
-  const pl = typeof apptPlaces === 'function' && apptPlaces().find(x => x.deck === 3 && /infirmary/i.test(x.name)); if (!pl) return;
+  introHealthAppt(introAbs(2, 14 * 60));
+}
+// the booking itself (kind 'checkup', the infirmary's, section 14's apptKind): any earlier game's one still to come is
+// dropped first (reviewer 1: two New games in a page booked it twice); a missed one is booked again once, a day later
+const INTRO_HEALTH_TITLE = 'New-crew health check';
+function introHealthAppt(at) {
+  const D = SHIP.device, pl = typeof apptPlaces === 'function' && apptPlaces().find(x => x.deck === 3 && /infirmary/i.test(x.name)); if (!pl) return null;
+  D.appts = D.appts.filter(x => !(x.by === 'rina' && x.title === INTRO_HEALTH_TITLE && x.status === 'yes' && x.at > shipNow()));
   const id = D.appts.reduce((m, x) => Math.max(m, x.id), 0) + 1;
-  D.appts.push({ id, with: ['rina'], at: introAbs(2, 14 * 60), len: 30, where: pl.id, kind: 'health', status: 'yes', by: 'rina', title: 'New-crew health check' });
-  SHIP.intro.done['d2-health:appt'] = id;
+  D.appts.push({ id, with: ['rina'], at, len: 30, where: pl.id, kind: 'checkup', status: 'yes', by: 'rina', title: INTRO_HEALTH_TITLE });
+  SHIP.intro.done['d2-health:appt'] = id; return id;
+}
+function introHealthMissed(n) {
+  const I = SHIP.intro; if (!introOn() || !n || n.id !== I.done['d2-health:appt'] || I.done['d2-health:again'] !== undefined) return;
+  const at = (Math.floor(shipNow() / 1440) + 1) * 1440 + 14 * 60;   // tomorrow, 14:00
+  if (introHealthAppt(at)) { I.done['d2-health:again'] = Math.floor(shipNow()); introMail({ from: 'Rina Deshi', subject: 'Health check, again', body: 'Missed you today. No harm done: same time tomorrow, the infirmary. Ten minutes, I promise.' }, shipNow()); }
 }
 // the Works team's mug at Friday tea (a moment, no meeting): in the tea corner during it, they hand it over; else it's
 // on the rack when you look, and a note says so
+// the week's beats said in play (0.42.26; the writers' week-1 lines beat.<id>.<n>, kind week1 on the beat's teacher):
+// in the beat's room during its window with them there too, their lines one bubble at a time (INTRO_TOUR_GAP), once;
+// they stop while they talk; leave and the rest is dropped. A beat with no room of its own (Friday's invite) plays when they're within
+// INTRO_BEAT_NEAR tiles of you in the four hours after it.
+const INTRO_BEAT_NEAR = 6;
+function introBeatLines(b) { const out = []; for (let n = 1; n <= 12; n++) { const l = introWriterLine('beat.' + b.id + '.' + n, b.who); if (!l) break; out.push(l[0]); } return out; }
+function introBeatHere(b, a) {
+  if (!a || typeof player === 'undefined') return false;
+  const P = player.obj.position, room = c => (ROOMS[roomAt(...c)] || {}).name;
+  if (!b.where || b.where === 'seek') return Math.hypot(a.x - P.x, a.z - P.z) <= INTRO_BEAT_NEAR;
+  return deckDef.num === b.where.deck && room(player.here()) === b.where.room && room(cellAt(a.x, a.z)) === b.where.room;
+}
+function introBeatTick() {
+  if (typeof DECK_CREW === 'undefined' || typeof bubbleSay !== 'function') return;
+  const I = SHIP.intro, U = INTRO_UI, now = shipNow(), t = performance.now(), crew = id => DECK_CREW.find(x => x.p && x.p.id === id);
+  if (U.beat) {
+    const a = crew(U.beat.b.who);
+    if (!introBeatHere(U.beat.b, a)) U.beat = null;   // you (or they) left: the rest is dropped
+    else if ((a.talking = Math.max(a.talking || 0, 1)) && !DIALOGUE && t >= U.next) { bubbleSay(a.h, U.beat.lines.shift(), 4.5); U.next = t + INTRO_TOUR_GAP; if (!U.beat.lines.length) U.beat = null; }   // they stop for it, facing you (section 10's tap pause)
+    return;
+  }
+  if (DIALOGUE) return;
+  for (const b of INTRO_WEEK) {
+    if (!b.who || I.done[b.id + ':said'] !== undefined) continue;
+    const from = introAbs(b.day, b.at), until = b.until !== undefined ? introAbs(b.day, b.until) : from + 240;
+    if (now < from || now >= until || !introBeatHere(b, crew(b.who))) continue;
+    I.done[b.id + ':said'] = Math.floor(now); const lines = introBeatLines(b); if (lines.length) { U.beat = { b, lines }; return; }
+  }
+}
+// Saturday's Sowing (d6-sowing, 11:45): Tomas is on watch then (the crew have no lunch in the sim), so while you're on
+// Deck 3 in its window he's walked to the garden for about ten minutes ("Holt said ten minutes"; section 10's
+// crewComeTo) and then goes back to his watch; his rota is unchanged
+const INTRO_SOW_MIN = 10, INTRO_SOW_SPOTS = ['3-tend-3', '3-tend-2', '3-tend-4', '3-tend-1'];
+function introSowTick(now) {
+  const b = INTRO_WEEK.find(x => x.id === 'd6-sowing'); if (!b || INTRO_UI.sow || typeof crewComeTo !== 'function' || deckDef.num !== b.where.deck) return;
+  const from = introAbs(b.day, b.at), until = introAbs(b.day, b.until); if (now < from || now >= until - 5) return;
+  const spot = INTRO_SOW_SPOTS.find(id => (typeof PLACE_OF === 'undefined' || PLACE_OF.has(id)) && !(typeof heldBy === 'function' && heldBy(id))); if (!spot) return;
+  INTRO_UI.sow = true; crewComeTo(b.who, spot, null, { until: Math.min(until, now + INTRO_SOW_MIN + 5) });   // (+5: the walk up from Deck 2)
+}
+// someone who was to come and find you this week (section 20's socialSeekAsk) and never did: when the window ends, a
+// Mail from them instead (reviewer 1): the writers' mail.<beatId> ("Subject | body", kind week1), else a stand-in
+const INTRO_SEEK_MAIL = {
+  'd3-pell': { subject: 'Quiz tomorrow', body: 'Looked for you tonight! Quiz night tomorrow, the bow lounge at eight. You\'re on my team.' },
+  'd4-favour': { subject: 'A small favour', body: 'Could you look at the tea-corner kettle on Five when you pass? It clicks and sulks. Thank you!' },
+};
+function introSeekMail(now) {
+  const I = SHIP.intro;
+  for (const b of INTRO_WEEK) {
+    if (!b.seek || I.done[b.id + ':seek'] !== undefined || now < introAbs(b.day, b.until)) continue;
+    const ask = ((SHIP.social && SHIP.social.seekAsks) || []).find(a => a.id === b.who && a.from === introAbs(b.day, b.at));
+    I.done[b.id + ':seek'] = ask && ask.done ? 1 : -1; if (ask && ask.done) continue;
+    const w = introWriterLine('mail.' + b.id, b.who), k = w && w[0].indexOf(' | '), p = typeof ROSTER !== 'undefined' && ROSTER.find(x => x.id === b.who);
+    const m = w && k > 0 ? { subject: w[0].slice(0, k), body: w[0].slice(k + 3) } : INTRO_SEEK_MAIL[b.id];
+    if (m) introMail({ from: (p && p.name) || b.who, ...m }, now);
+  }
+}
 function introMoments(now) {
   const I = SHIP.intro;
   for (const b of INTRO_WEEK) {
@@ -29465,20 +29562,22 @@ function introTick() {
     for (const st of INTRO_UI.meet.slice()) {
       if (typeof dialogueShow !== 'function') { INTRO_UI.meet.length = 0; break; }
       const cp = st.checkpoint, room = new RegExp('^' + cp.room.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$'), m = { id: 'intro-' + st.id, who: INTRO_MEETINGS[st.meeting].cast.filter(w => !/:/.test(w)), where: { deck: cp.deck, room }, at: now };
-      if (!inMeeting(m)) { INTRO_UI.meet.splice(INTRO_UI.meet.indexOf(st), 1); if (typeof meetingGist === 'function') meetingGist(st.meeting); continue; }
+      if (!inMeeting(m)) { INTRO_UI.meet.splice(INTRO_UI.meet.indexOf(st), 1); if (typeof meetingGist === 'function') meetingGist(st.meeting); if (st.id === 'chief') I.done['chief:end'] = null; continue; }
       if (DIALOGUE || INTRO_UI.tour.some(q => q.core.length)) break;   // after the tour's last core lines
       INTRO_UI.meet.splice(INTRO_UI.meet.indexOf(st), 1); dialogueShow(introScriptHere(st.meeting, m, st.who), m);
+      if (st.id === 'chief') { I.done['chief:met'] = now; INTRO_UI.chiefD = DIALOGUE; }   // the Chief's welcome: the goodnight waits for it (0.42.27)
     }
   }
-  if (now === INTRO_UI.min) { introWeekMeetings(now); introMoments(now); }
+  if (INTRO_UI.chiefD && DIALOGUE !== INTRO_UI.chiefD) { const D = INTRO_UI.chiefD; INTRO_UI.chiefD = null; I.done['chief:end'] = D.i >= D.queue.length ? Math.floor(shipNow()) : null; }   // all her lines, or walked away (null: day 0's minutes are negative)
+  if (now === INTRO_UI.min) { introWeekMeetings(now); introMoments(now); introSeekMail(now); introSowTick(now); }
   // the Chief comes over to your table for her step (section 10's crewComeTo, live only, so again after a reload)
   if ((I.step === 'chief' || I.step === 'free') && !INTRO_UI.calder && introSeat('calder') && typeof crewComeTo === 'function' && deckDef.num === 3) {
     INTRO_UI.calder = true; crewComeTo('calder', introSeat('calder'), null, { until: introAbs(0, 19 * 60) });
   }
   // his lines for a step once its time has come and no meeting is on ("I'm on Four if you need me" waits for 19:00)
   const cur = introStepById(I.step);
-  if (I.step !== INTRO_UI.step && !DIALOGUE && (!cur || Math.floor(shipNow()) >= introAbs(cur.day, cur.at))) { INTRO_UI.step = I.step; if (I.step === 'free') introSay(introLines(I.step)); }
-  introTourTick(); introBedTick(); introTernTick();
+  if (I.step !== INTRO_UI.step && !DIALOGUE && (!cur || Math.floor(shipNow()) >= introAbs(cur.day, cur.at))) { INTRO_UI.step = I.step; }   // ('free' said walk.free here until 0.42.27: his goodnight, introNightTick, says it now)
+  introTourTick(); introNightTick(); introBedTick(); introTernTick(); introBeatTick();
   // the goal arrow points at him while he's leading you (section 15b's setGoal), and is cleared when he lets you go
   const st = introStep(), lead = !DIALOGUE && introEscorting(st);   // while he's yours, not over a meeting
   if (lead) {
