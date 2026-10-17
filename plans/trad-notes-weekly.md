@@ -44,7 +44,7 @@ Two at most an evening, never two on one deck at once (the voice budget). Birthd
 
 ### The traditions engineer
 - **Tally `tasting`** with `choices=herb-flatbread|pickled-beans|...` (dashes for spaces; show them with spaces): each week two choices, the crew who went each pick one (seeded), the winner is read on Sunday by the galley. A token you drop yourself counts as one more vote.
-- **Tally `tiles-night`**: the night's results, kept for a week, for news and chatter ("Rina won again"). The game and the crew's games on paper are the Tiles engineer's (session_01DG3in6CvFFta6NrLpoVCJV); this tally is only where the results live, if that suits them. Please pass the question on.
+- **Tiles night's results: no tally.** The Tiles engineer keeps them in section 23 (`tilesNight(d, came)`, `SHIP.tiles.night`, filled when the tiles-night ship note arrives). This file's texts may say the night's games happened, but scores are the Tiles engineer's.
 - **The `meal` field** above, for the grammar and the loader.
 - **Birthday versus Tiles night:** on day 100 the voice budget dropped Tiles night for Founding Day (right). Birthdays on Tuesdays happened alongside it (day 9); if the rule ever drops Tiles night for a birthday, Rina's streak skips a week, which is fine.
 
@@ -58,7 +58,7 @@ Two at most an evening, never two on one deck at once (the voice budget). Birthd
 
 | Id (k) | When, where | Who, host | Ties |
 | --- | --- | --- | --- |
-| `tiles-night` (435) | Tue 20:00-21:30, Bow lounge lounge seats | Rina always, lounge regulars, bar regulars, juniors; host Rina; invite 40% | decor `tilesNight`, tally `tiles-night` |
+| `tiles-night` (435) | Tue 20:00-21:30, Bow lounge lounge seats | Rina always, lounge regulars, bar regulars, juniors; host Rina; invite 40% | decor `tilesNight` (results: section 23) |
 | `tasting-table` (436) | Wed 18:15-19:15, Mess hall, hold none | Brennan always, galley crew, lingerers, everyone 35%; invite 25% | galley extra=tasting, tally `tasting` |
 | `garden-hour` (437) | Sat 14:00-15:00, garden-tend then garden | Tove Cruz always, gardeners, garden-lovers; invite 25% | garden tend |
 | `late-piano` (438) | Wed and Thu 21:45-22:30, music room | the Captain always (plays), music listeners, musicians, night owls; invite 10% | none |
