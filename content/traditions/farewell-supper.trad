@@ -22,9 +22,10 @@ who: honoree always, friends-of-honoree 85%, everyone 15%
 anim: talk
 from: brennan
 ties: galley meal=dinner dish=favourite
+ties: decor longTables
 
 == mail
-- {names} leaves the Wren on Sunday's shuttle. Farewell supper tomorrow, {time}, in the mess. Come and say goodbye properly.
+- Sunday's shuttle takes {names} away from the Wren. Farewell supper tomorrow, {time}, in the mess. Come and say goodbye properly.
 
 == ask
 - Farewell supper for {first} tonight. I'm not ready.   #warm
@@ -32,13 +33,13 @@ ties: galley meal=dinner dish=favourite
 - I've written {first} a card. It's mostly jokes. Some of it isn't.   #warm
 
 == here
-- To {first}. The Wren won't be the same.   #warm
+- To {names}. The Wren won't be the same.   #warm
 - Remember the night the lift stuck? {first} sang the whole time.   #funny
 - Write to us. Properly, not just one line.   #warm
 - Save a seat for {first}. It's still theirs tonight.
 
 == thanks
-- You join the long table for {first}'s farewell supper. There's laughing, and one or two quiet bits.   #warm
+- You join the long table for the farewell supper for {names}. There's laughing, and one or two quiet bits.   #warm
 
 == chatter
 - I'll miss {first}. The new posting sounds good, though.
