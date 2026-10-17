@@ -42,7 +42,7 @@ The project lead session keeps this file current. A new lead session reads it fi
 
 **Test branch (approved by the user 2026-10-16):** `claude/integration-test` holds unfinished, unchecked combined attempts (the lead's lead-wip) so helpers can reproduce and fix failures on their own machines in parallel, and check-runner sessions can run one check each at the same time. Helpers never push to it. Only builds that pass every check go to `claude/ship-integration`.
 
-**Playable build (the one link the user uses), from 0.60.2:** https://claude.ai/artifact/V4DydXnczhPGHdGVJLe2nq, published by the lead session_01KPJMYjXAPkNUcrQ8VRkhLE from its scratchpad file `pub/starship-cadet.html` (same path = same link). A later lead can't update it in place: it publishes a fresh link and tells the user. Older links: https://claude.ai/artifact/FYGHHcT6kc21Hu6BvFphSG (0.60.0-0.60.1), https://claude.ai/artifact/XCcqMGBhAa149cf7s4Mc8y (0.41.10).
+**Playable build (from 0.60.3, 2026-10-17 ~15:06): https://claude.ai/artifact/SmL8Na1iTB2JQZDP4dYdou** (0.60.2 was on V4DydXnczhPGHdGVJLe2nq).
 
 ## Chain of command (the user, 2026-10-17)
 
@@ -179,7 +179,7 @@ Pillar 2, all started 2026-10-15 (see `plans/pillar2-plan.md` for the workstream
 | session_01AS3Tzju3TuFbM9XAEYdvPX | P4 Writer 3 (hired ~04:16): Commons and juniors, overheard and reactions banks; reports to head writer 2 | `claude/writer-commons` | — | Archived ~05:06 (10 batches; handover plans/handover-writer-commons.md) | `plans/handover-writer-commons.md` |
 | session_01AB5f3VLMh8huiLWbEnqa8U | P4 Writer 4 (hired ~05:06): Commons; booth one-sided overheard, everyday non-work chatter; reports to head writer 2 | `claude/writer-commons` | — | Archived ~05:53 (18 batches; handover plans/handover-writer-commons.md) | `plans/handover-writer-commons.md` |
 | session_01HW7UxnuNvRXoEjn8tK4sQq | P4 Writer 5 (hired ~05:53): Tomas/Pell/Rina everyday passes, story-crew goodbyes; reports to head writer 3 | `claude/writer-commons` | — | Archived ~14:05 (team cut, the user's ask; work on branch) | `plans/handover-writer-commons.md` |
-| session_01PGFJbAfDYddQRGYQJktgXj, session_012zFHAS6jkPUhCrpBn2zW9Q, session_01USkJjdw16L4K2tuK8otcc6, session_01V5ghkKLy1XQkZkKS9yKUkr, session_01PPVXqo8s4NvK8JkBWt3WoH, session_01L5Bg1nrCfowojNxeVZJHoi | Standing check runners R1-R6 (2026-10-17 ~02:36, the user's ask): R1 cadet_test, R2 day_check, R3 player+interactions, R4 events+intro, R5 food+machine+deck, R6 social+device+lines+content_gen; report to the build master; no pushes | — | — | Active (Full level) | — |
+| session_01PGFJbAfDYddQRGYQJktgXj, session_012zFHAS6jkPUhCrpBn2zW9Q, session_01USkJjdw16L4K2tuK8otcc6, session_01V5ghkKLy1XQkZkKS9yKUkr, session_01PPVXqo8s4NvK8JkBWt3WoH, session_01L5Bg1nrCfowojNxeVZJHoi | Standing check runners R1-R6 (2026-10-17 ~02:36, the user's ask): R1 cadet_test, R2 day_check, R3 player+interactions, R4 events+intro, R5 food+machine+deck, R6 social+device+lines+content_gen; report to the build master; no pushes | — | — | R1/R4/R5/R6 archived ~15:06 (team cut); R2 session_012zFHAS6jkPUhCrpBn2zW9Q and R3 session_01USkJjdw16L4K2tuK8otcc6 stay | — |
 | session_011Gh8MbJgkYYWwWk2s3oA4y | Deck 3 builder | `claude/deck-building-workflow-iayt67` | — | Archived | — |
 
 **Hiring for a retired role:** start a fresh session on `claude/ship-integration`, have it read its predecessor's handover note first, and give it a new branch and build range (the old branch can be reused if the new session is created with it).
