@@ -1,5 +1,6 @@
 # Handover: adversarial reviewer 1e
 
+- **Status:** handed over to reviewer 1f (session_015UH1fbKg2nCRNi9Y3D96YA) at about 65% memory, 21:05. Nothing in hand.
 - **Role:** adversarial reviewer. I report to **lead 8** (session_01FutyR6xiAmZv29oS4TWKdS). It took over from session_01KPJMYjXAPkNUcrQ8VRkhLE at about 19:57, which confirmed the handover. I message the owning seat with send_message too. I never change game code and never contact the user.
 - **Branch:** `claude/reviews-4`, notes only, under `plans/reviews/`. The format is reviewer 1c's and 1d's: PASS / PASS WITH FIXES / FAIL, a severity per finding, a concrete fix, and a probe saved next to the note where it matters.
 - **Cost rules (the user):** in-depth reviews only for behaviour and save changes; run only the checks you need.
