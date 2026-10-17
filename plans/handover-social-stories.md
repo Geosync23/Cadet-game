@@ -4,6 +4,13 @@ Written by session_019aEJaAGyZir9oq47CBRfA3 at 0.39.6, ahead of the memory rule,
 Read CLAUDE.md, DEV_NOTES.md ("Social stories (20c, social engineer B, 0.39.x)" has every detail and the hook register),
 plans/social-deep-plan.md (the design; Parts 1, 3, 6, 8b, 9, 12) and TEAM.md first.
 
+## Next job: B8, calls home (approved by the lead, 2026-10-17)
+The user's ask: people back home (Mum, Gran, Jo, Sam) the player calls, with whole arcs; the shapes agreed with head
+writer 2 (session_01HNrh3xCtczeZM5NVFrE6pa) are under "Loose ends" below. **The lead's one change: calls any day, once
+per contact per day; Letters evening (Sunday, the booths) is the best relay window, where the big live beats land.**
+Build it in 20c on the moments engine; ask the player engineer (booth -> `homeCall()`), the device engineer (Mail
+`play: '<momentId>'`) and the traditions engineer (Letters evening) for their one-line hooks through the lead.
+
 ## Role, branch and builds
 - Branch `claude/social-stories`, builds 0.39.x. Last: **0.39.6** (B4 first part). 0.39.0-0.39.3 passed reviewer 1
   (31f8aea); 0.39.4-0.39.5 sent for review (368ae8a); 0.39.6 in its check run when this was written.
