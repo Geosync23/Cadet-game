@@ -54,7 +54,7 @@ CHECK = """(() => {
 # hatches for work:works places)
 PLACES = r"""(() => {
   const ps = deckDef.places; if (!ps) return null;
-  const TYPES = ['bed', 'shower', 'basin', 'toilet', 'mess-seat', 'servery-queue', 'grab-shelf', 'gym', 'lounge-seat', 'garden', 'callhome',
+  const TYPES = ['bed', 'timeclock', 'shower', 'basin', 'toilet', 'mess-seat', 'servery-queue', 'grab-shelf', 'gym', 'lounge-seat', 'garden', 'callhome',
     'music', 'bench', 'common-room', 'laundry', 'lift-wait', 'shop', 'storage', 'event', 'patient-bed'], POSES = ['sit', 'stand', 'lie', 'work'], FACES = ['n', 'e', 's', 'w'];
   const WORKS = { dept: 'works', tier: 3, rank: 'senior' };
   const passFor = who => (i, j, i2, j2) => { const e = EDGES.get(i2 !== i ? `v,${Math.max(i, i2)},${j}` : `h,${i},${Math.max(j, j2)}`); return !e || !edgeBlocks(e, who) || e.type === 'closed'; };

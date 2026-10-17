@@ -4364,6 +4364,7 @@ DECKS[5] = {
     { id: '5-bench-3', type: 'work:works', at: [18, 3], face: 'n', pose: 'work', room: 'w' },
     { id: '5-bench-4', type: 'work:works', at: [19, 3], face: 'n', pose: 'work', room: 'w' },
     { id: '5-jobboard-1', type: 'work:works', at: [15, 1], face: 'n', pose: 'stand', room: 'w' },
+    { id: '5-timeclock-1', type: 'timeclock', at: [20, 0], xy: [20.6, .5], face: 'n', pose: 'stand', room: 'w' },   // the time clock (0.61.13), past the tool wall by the tea corner door: crew clock in and out here
     { id: '5-toolwall-1', type: 'work:works', at: [19, 1], face: 'n', pose: 'stand', room: 'w' },
     { id: '5-stool-1', type: 'work:works', at: [11, 3], face: 'e', pose: 'sit', room: 'w', xy: [11.57, 3.63], y: 0.49 },
     { id: '5-office-1', type: 'work:works', at: [11, 1], face: 'n', pose: 'sit', room: 'o', xy: [11.5, 1.4], y: 0.5 },
@@ -4531,6 +4532,7 @@ DECKS[5] = {
     placeWall('g', 'valveStation', 'n', 4.5, { it: IT('Valve station', 'Halfway along the port gallery: three valves and a gauge. Close the blue one and storage gets no water.') });
     placeWall('h', 'valveStation', 's', 8.5, { it: IT('Valve station', 'Halfway along the starboard gallery. The gauge has a sticky note: TAP IT.') });
     // the Ship health board (0.30.12), on the hull wall between the Chief's office glass and the job board
+    placeWall('w', 'timeClock', 'n', 10.6, { hitW: .6, it: IT('Time clock', 'Clock in when your shift starts and out when it ends. Your card is the one with your name on it, in pencil.') });   // 0.61.13
     placeWall('w', 'healthBoard', 'n', 3.6, { hitW: .84, it: IT('Ship health', 'Every system aboard, how well it\'s running right now. When a bar goes amber, the job board fills up. When it goes red, the Chief stops drinking her tea.') });
     // lived-in touches (0.30.12): a sign in the air plant, the cart bay's calendar, a mug on the closet's breakers
     placeWall('a', 'plate', 'w', 1.0, { text: 'No naked flames' });
@@ -4553,6 +4555,17 @@ Object.assign(WALL_KIT, {
       const x = -.3 + k * .12; cyl(.008, .008, .05, M.metal, x, 1.52, .045, g, 6).rotation.x = Math.PI / 2;
       if (m) { cyl(.036, .032, .08, m, x, 1.44, .075, g, 12); box(.012, .04, .02, m, x + .042, 1.44, .075, g); }
     });
+  },
+});
+// ---- the time clock (0.61.13, the career engineer; made at load, no R(), existing materials): a small console on the
+// Works bay wall with a green screen and a rack of time cards beside it. You and the Works crew clock in and out here
+Object.assign(WALL_KIT, {
+  timeClock(g) {
+    box(.34, .44, .07, M.slateDark, -.08, 1.42, .035, g);   // the console
+    box(.22, .1, .02, KM.vacant, -.08, 1.53, .08, g);       // its screen
+    box(.12, .05, .03, M.metal, -.08, 1.33, .085, g);       // the card slot
+    box(.16, .5, .04, M.metal, .2, 1.4, .02, g);            // the card rack
+    for (let k = 0; k < 5; k++) box(.1, .08, .012, KM.paper, .2, 1.22 + k * .09, .046, g);   // time cards
   },
 });
 // ---- Gym kit (Pillar 3, C9, 0.38.2, the deck architect; made at load, no R()): a punch bag on its stand and a single stretching mat ----
@@ -7929,10 +7942,11 @@ function shiftTick() {
   const d = SHIP.time.day, m = SHIP.time.min;
   if (m < 480 || flag('shiftSent') === d || !playerShiftOn(d)) return;
   let here = false;
-  try { here = deckDef.num === 5 && (DECKS[5].places || []).some(pl => pl.type === 'work:works' && pl.room === roomAt(...player.here())); } catch (e) { here = false; }
-  if (!here && m < 600) return;
+  try { here = typeof careerAtWork === 'function' ? careerAtWork() : deckDef.num === 5 && (DECKS[5].places || []).some(pl => pl.type === 'work:works' && pl.room === roomAt(...player.here())); } catch (e) { here = false; }   // clocked in (the career engineer's time clock, 0.61.13)
+  if (!here && m < (typeof CAREER !== 'undefined' ? CAREER.missBy : 600)) return;   // the career engineer's time clock (0.61.17): missed only if not clocked in by 12:30, as the career counts it
   flagSet('shiftSent', d);
-  simNote('shiftStart', here ? { late: Math.max(0, Math.round(m - 480)) } : { late: 120, missed: true });
+  const inAt = typeof careerClockedIn === 'function' && careerClockedIn(d) ? SHIP.career.ci % 1440 : m;   // late by the clock-in time
+  simNote('shiftStart', here ? { late: Math.max(0, Math.round(inAt - 480)) } : { late: 120, missed: true });
 }
 // whether you (the player) are on shift on day d: your own rota, like a Works junior's (ROSTER_PLAYER.rota.offDays,
 // section 9: Saturday and Sunday off). A day off has no shift and no jobs expected; the job board stays open. Read
@@ -8500,7 +8514,8 @@ function schedBuild(p, d, occ, S) {
   // the shift from now to `to`, with its breaks: tea (the habit, or about one day in three for anyone) on a seat
   // or bench on the work deck, and a toilet break most days
   const shiftWithBreaks = to => {
-    const br = [];
+    const br = [], clocks = p.dept === 'works' && wd === 5 && p.shift !== 'night' && (S.shared.get('5|timeclock') || []).length > 0;   // the Works crew clock in and out (the career engineer, 0.61.13)
+    if (clocks) take('work', [[5, 'timeclock']], 1, { wait: 6, min: 1, tag: 'clock' });   // a short queue at the clock
     if (H.has('tea-break') || U(31) < .35) br.push([600 + Math.round(240 * U(30)), 'tea']);
     if (U(32) < .6) br.push([540 + Math.round(400 * U(33)), 'toilet']);
     if (F.double) br.push([1050 + Math.round(30 * U(36)), 'staff']);   // a double shift (C7): dinner at the station
@@ -8519,6 +8534,7 @@ function schedBuild(p, d, occ, S) {
       else toilet(34);
     }
     work(to);
+    if (clocks) take('work', [[5, 'timeclock']], 1, { wait: 6, min: 1, tag: 'clock' });   // out as the shift ends (a short queue after 17:00)
   };
   // showers in the evening: the habit, or about one day in three for anyone else
   const eveShower = H.has('evening-shower') || U(90) < .3;
@@ -9768,6 +9784,7 @@ deviceApp({ id: 'schedule', title: 'Schedule', icon: 'schedule', order: 10,
     B.push({ kind: 'text', text: devDayName(day) + ' · ' + WEEKDAYS[weekday(day)] + (typeof careerOn === 'function' && careerOn(day) ? ' · Leave' : typeof sickToday === 'function' && sickToday(day) ? ' · Sick' + (SHIP.career.sh === 1 ? ', seen by Rina' : SHIP.career.sh === 2 ? ', seen in the infirmary' : '') : devShiftOn(day) ? '' : ' · Day off'), mark: 'head' });
     B.push({ kind: 'list', rows: devDay(day).map(x => ({ text: hhmm(x.from) + (x.kind === 'tradition' ? '' : '–' + hhmm(x.to)) + '  ' + x.title, sub: x.where,
       mark: day === d && x.from <= m && m < x.to ? 'hot' : day === d && x.to <= m ? 'past' : null })) });
+    if (day === d && typeof careerClockedIn === 'function' && careerClockedIn(d)) B.push({ kind: 'text', text: 'Clocked in ' + hhmm(SHIP.career.ci % 1440) + (careerClockedOut(d) ? ' · out ' + hhmm(SHIP.career.co % 1440) : '') });   // your hours (0.61.13)
     const lv = typeof careerCanBook === 'function' ? careerCanBook(day) : null;   // leave (0.61.0): a workday you can still book, or cancel, until 07:30 that day
     if (lv) { B.push({ kind: 'buttons', items: [{ label: lv === 'book' ? 'Take this day as leave (' + SHIP.career.l + ' left)' : 'Cancel this leave', action: { app: 'schedule', do: 'leave', arg: day } }] }); tipShow('career.leave', careerText('career.tip.leave')); }
   }
@@ -10406,7 +10423,7 @@ function needEffects(n = SHIP.player.needs) {             // -> { walk, task, dr
     e.marks[k] = [side === 'hi' ? 'up' : 'down', fx[1]]; e.notes.push(fx[1]);
   }
   const sk = n === SHIP.player.needs && typeof sickFx === 'function' ? sickFx() : null;   // being sick (the career engineer, 0.61.5): slower, more tired
-  if (sk) { e.walk *= sk.walk; e.drain *= sk.drain; e.notes.push(sk.note); }
+  if (sk) { e.walk = Math.max(SICK.floor, e.walk * sk.walk); e.drain *= sk.drain; e.notes.push(sk.note); }   // never slower than SICK.floor, 40% (reviewer 1d, the lead: phones)
   return e;
 }
 function needsLoad(s) {                                  // from the save (section 13): v 2 has needs; v 1, none
@@ -14461,6 +14478,32 @@ const VOICE_TEMPLATES = {
       "career.up": [
         {"text": "Saw your name on the board. Turned in. Good.", "id": "10k7kf5", "tier": [3, 4]},
       ],
+      "clock.back": [
+        {"text": "Back. Good. Easy job first. Then normal.", "id": "14epk7h", "tone": "warm"},
+        {"text": "Welcome back. We managed. Barely.", "id": "1tgz5h7", "tone": "funny"},
+      ],
+      "clock.early": [
+        {"text": "Off early. Fine. Rest if you need it.", "id": "1ifvmqt"},
+        {"text": "Short day. Noted. Back at eight.", "id": "1hoxjnf"},
+      ],
+      "clock.friday": [
+        {"text": "Week done. Rest properly. Monday, eight.", "id": "1g35r6a"},
+        {"text": "Weekend. Plans? Make some. Then rest.", "id": "1hgnaof"},
+      ],
+      "clock.in": [
+        {"text": "Morning. Board's up. Take the top one.", "id": "bmnebs"},
+        {"text": "Eight sharp. Good. Scrubbers first.", "id": "1vc5ypn"},
+        {"text": "On time. Keep it that way.", "id": "1lx12fw"},
+      ],
+      "clock.monday": [
+        {"text": "Monday. Good weekend? Short answer. Jobs waiting.", "id": "1jxds6n"},
+        {"text": "Rested? Good. Week starts now.", "id": "qdf0w1"},
+      ],
+      "clock.out": [
+        {"text": "Done. Good shift. Go eat.", "id": "1j8tl4a"},
+        {"text": "Clocked out. Rest. Back at eight.", "id": "17uq4lx"},
+        {"text": "Board's shorter than this morning. That's the job.", "id": "1vn5xgq"},
+      ],
       "farewell.day": [
         {"text": "Go well, {nick}. Do it right next time. You can.", "id": "1hqa0q7", "tone": "warm", "tier": [3, 4]},
       ],
@@ -14488,6 +14531,32 @@ const VOICE_TEMPLATES = {
       ],
       "career.up": [
         {"text": "You were on shift! I told everyone. Well, three people. It's a start.", "id": "b4tv0u", "tone": "funny", "tier": [3, 4]},
+      ],
+      "clock.back": [
+        {"text": "You're back! It's been so quiet. I talked to the racks.", "id": "1m88zbq", "tone": "warm"},
+        {"text": "Welcome back! Are you all right? Really? Sit with me at tea.", "id": "1i8ytjq", "tone": "warm"},
+      ],
+      "clock.early": [
+        {"text": "Off already? Everything all right? You'd tell me, wouldn't you?", "id": "1dxiym0"},
+        {"text": "Short day! Lucky you. Or not lucky? Are you all right?", "id": "1til2o2"},
+      ],
+      "clock.friday": [
+        {"text": "Friday! Weekend plans? Tell me so I can be jealous.", "id": "oswsmk"},
+        {"text": "Two whole days off! Do something you can tell me about Monday.", "id": "1qato9s"},
+      ],
+      "clock.in": [
+        {"text": "Guess who was in the mess at six! Tea first, then I'll tell you.", "id": "32fr6j", "tone": "funny"},
+        {"text": "{hi}! Big board today. We'll get through it. Probably. Mostly!", "id": "13x243y"},
+        {"text": "There you are! I've talked to nobody all morning. Well, the kettle.", "id": "i7t1vh", "tone": "funny"},
+      ],
+      "clock.monday": [
+        {"text": "Monday! Right. Weekend. Everything. Go.", "id": "cshqic", "tone": "funny"},
+        {"text": "How was your weekend? Did you go anywhere? Anywhere on the ship, I mean!", "id": "y2da8j"},
+      ],
+      "clock.out": [
+        {"text": "That's us! What are you doing tonight? I'm doing nothing. Loudly.", "id": "9a9e3x", "tone": "funny"},
+        {"text": "Five already! Where does a day go? Into filters, that's where.", "id": "pp8ujl"},
+        {"text": "Off you go! Tell me tomorrow if anything good happens at dinner.", "id": "1jf0ig8"},
       ],
       "farewell.day": [
         {"text": "Write. Every week. Long ones. I'll write back longer. You know I will.", "id": "1afbjq", "tone": "warm", "tier": [3, 4]},
@@ -14517,6 +14586,32 @@ const VOICE_TEMPLATES = {
       "career.up": [
         {"text": "You look lighter. Like a window's been opened.", "id": "i4rlit", "tier": [3, 4]},
       ],
+      "clock.back": [
+        {"text": "You're back. The bay sounded wrong without you. Now it's right.", "id": "1wg7vid", "tone": "warm"},
+        {"text": "Welcome back. I kept thinking I saw you by the racks.", "id": "yhgss8", "tone": "warm"},
+      ],
+      "clock.early": [
+        {"text": "Leaving early? The afternoon's yours, then. Be gentle with it.", "id": "o41x9s"},
+        {"text": "Off already? I hope it's something nice.", "id": "rp03ju"},
+      ],
+      "clock.friday": [
+        {"text": "Friday. Two days. Go somewhere with a window.", "id": "xnoen1"},
+        {"text": "Off for the weekend? I hope it's slow. The good kind of slow.", "id": "n7rpb1"},
+      ],
+      "clock.in": [
+        {"text": "The lift hummed all the way down. Like it was waking up too.", "id": "1o48vef"},
+        {"text": "Saw a star from the shuttle bay window. Just one. A good sign.", "id": "matg0w"},
+        {"text": "Is it eight already? The kettle hasn't even thought about it yet.", "id": "k5l4hy", "tone": "funny"},
+      ],
+      "clock.monday": [
+        {"text": "Monday. Did your weekend feel long or short? Mine never knows.", "id": "wqjwcy"},
+        {"text": "How was the weekend? Find anything nice? People always do.", "id": "ew2dr0"},
+      ],
+      "clock.out": [
+        {"text": "The bay goes so quiet at five. I like to listen for a bit.", "id": "1ldj96h"},
+        {"text": "Done. I might go and sit by the windows. Watch nothing for a while.", "id": "g5zz4f"},
+        {"text": "Good day, I think. It felt soft round the edges.", "id": "1ucx9kt"},
+      ],
       "farewell.day": [
         {"text": "Somewhere out there's a ship that needs you. Go and find it.", "id": "1fbyw3a", "tone": "warm", "tier": [3, 4]},
       ],
@@ -14545,6 +14640,32 @@ const VOICE_TEMPLATES = {
       "career.up": [
         {"text": "On shift again. Look at you. Practically furniture.", "id": "yygy9w", "tone": "funny", "tier": [3, 4]},
       ],
+      "clock.back": [
+        {"text": "Oh, you're back. Good. Nobody else laughs at my jokes.", "id": "172wt8l", "tone": "warm"},
+        {"text": "Welcome back. The filters didn't change themselves. I checked.", "id": "b0hifb", "tone": "funny"},
+      ],
+      "clock.early": [
+        {"text": "Off early. I'll tell the board you said goodbye.", "id": "11th0fj", "tone": "funny"},
+        {"text": "Short day? Fair. Someone has to beat the dinner queue.", "id": "5b2cwq", "tone": "funny"},
+      ],
+      "clock.friday": [
+        {"text": "Friday. Two days off. Try not to fix anything for free.", "id": "1elhcac", "tone": "funny"},
+        {"text": "Weekend. Go. Before someone finds you a job.", "id": "1nit9hd"},
+      ],
+      "clock.in": [
+        {"text": "Morning. The board's long. Someone's been breaking things on purpose.", "id": "1343j86", "tone": "funny"},
+        {"text": "Eight o'clock. My favourite time. That's a lie.", "id": "1bmkkh3", "tone": "funny"},
+        {"text": "{hi}. Tea at half ten. I'm counting.", "id": "yg7nfc"},
+      ],
+      "clock.monday": [
+        {"text": "Monday. Good weekend? Lie if it wasn't. I won't check.", "id": "rj0tl6", "tone": "funny"},
+        {"text": "Back. Did you rest, or just change which ceiling you looked at?", "id": "arh4nw", "tone": "funny"},
+      ],
+      "clock.out": [
+        {"text": "Clocked out. Another day the ship didn't fall apart. You're welcome.", "id": "awxwna", "tone": "funny"},
+        {"text": "Done. I'm going to go and be extremely still.", "id": "112bwju", "tone": "funny"},
+        {"text": "Not bad. Nothing exploded. High bar, but we cleared it.", "id": "6exvfc", "tone": "funny"},
+      ],
       "farewell.day": [
         {"text": "Go on. I'll pretend I'm fine. I'm very good at it.", "id": "1l1ux93", "tone": "warm", "tier": [3, 4]},
       ],
@@ -14571,6 +14692,32 @@ const VOICE_TEMPLATES = {
       ],
       "career.up": [
         {"text": "You're turning up again. I'm so glad. I really am.", "id": "104c4f7", "tone": "warm", "tier": [3, 4]},
+      ],
+      "clock.back": [
+        {"text": "You're back! I'm so glad. We all wondered how you were.", "id": "1kx0hou", "tone": "warm"},
+        {"text": "Welcome back. If you need a hand today, I'm right here.", "id": "1kv5qfe", "tone": "warm"},
+      ],
+      "clock.early": [
+        {"text": "Off early? I hope everything's all right.", "id": "xpxlld", "tone": "warm"},
+        {"text": "Of course. I'll finish up here. Don't worry.", "id": "2ja0he"},
+      ],
+      "clock.friday": [
+        {"text": "Have a lovely weekend, {nick}. You've earned it this week.", "id": "1at5quy"},
+        {"text": "Any plans for your days off? Something nice, I hope.", "id": "1bmsi4y"},
+      ],
+      "clock.in": [
+        {"text": "Good morning! I've read the board twice. Want to hear the plan?", "id": "fvze43"},
+        {"text": "Morning, {nick}. I think today's a good one. I've got a feeling.", "id": "rsb0qg"},
+        {"text": "Clocked in! Right, onward. Which job are you taking?", "id": "1buoeql"},
+      ],
+      "clock.monday": [
+        {"text": "Good morning! How was your weekend? I'd really like to know.", "id": "oaovvc"},
+        {"text": "Monday! I hope your weekend was restful. Was it?", "id": "ism44x"},
+      ],
+      "clock.out": [
+        {"text": "Thank you for today. Honestly, that went really well.", "id": "17msvhh"},
+        {"text": "Five already. I write down what I learned each day. Is that odd?", "id": "9cg2wo"},
+        {"text": "Good shift. Same time tomorrow? I'll be early. I'm always early.", "id": "11ryuz9"},
       ],
       "farewell.day": [
         {"text": "You were a good friend to me. Remember that, wherever you go.", "id": "8emiw8", "tone": "warm", "tier": [3, 4]},
@@ -14600,6 +14747,32 @@ const VOICE_TEMPLATES = {
       "career.up": [
         {"text": "On time today. Hm. Good.", "id": "mh00ci", "tier": [3, 4]},
       ],
+      "clock.back": [
+        {"text": "Back. Hm. Good. Sit down if you need to.", "id": "bjj0lp", "tone": "warm"},
+        {"text": "You're back. Saved you the easy job. Don't mention it.", "id": "11ad4au", "tone": "warm"},
+      ],
+      "clock.early": [
+        {"text": "Off? Hm. Fine. Look after yourself.", "id": "tves8", "tone": "warm"},
+        {"text": "Going? Go on. We'll manage.", "id": "15e7top"},
+      ],
+      "clock.friday": [
+        {"text": "Friday. Two days. Sleep.", "id": "f62qva"},
+        {"text": "Weekend. Don't come down here. I mean it.", "id": "qhck9l", "tone": "warm"},
+      ],
+      "clock.in": [
+        {"text": "Morning. Tea's made. Didn't make it for you. Have some anyway.", "id": "1rolc7y", "tone": "warm"},
+        {"text": "Hm. Eight. Board's there.", "id": "aktbl"},
+        {"text": "Up, then. Good. Gloves.", "id": "qxj1pc"},
+      ],
+      "clock.monday": [
+        {"text": "Monday. Weekend all right? Hm. Good.", "id": "1lbaiwj"},
+        {"text": "Back. You rested? Looks like it. Good.", "id": "gsxgg1"},
+      ],
+      "clock.out": [
+        {"text": "Done. Go on. Eat something.", "id": "fkeezl"},
+        {"text": "Clocked out. Hang your gloves up properly.", "id": "s98pc8"},
+        {"text": "Hm. Fair shift. Don't let it go to your head.", "id": "m68g1n", "tone": "funny"},
+      ],
       "farewell.day": [
         {"text": "Off you go, then. Stand up straight. You'll do.", "id": "7n5kvd", "tone": "warm", "tier": [3, 4]},
       ],
@@ -14627,6 +14800,32 @@ const VOICE_TEMPLATES = {
       ],
       "career.up": [
         {"text": "Look who's on the board again! Gold star. I'll make you one.", "id": "psrs8x", "tone": "funny", "tier": [3, 4]},
+      ],
+      "clock.back": [
+        {"text": "They're back! The bay's fun again. Officially.", "id": "ok8fd8", "tone": "warm"},
+        {"text": "You're back! I kept your spot. I may have put a sign on it.", "id": "ssmhgc", "tone": "funny"},
+      ],
+      "clock.early": [
+        {"text": "Off early! You win the escape points today.", "id": "62nexq", "tone": "funny"},
+        {"text": "Short day? I'll pretend I didn't see. Go!", "id": "1dddbrc"},
+      ],
+      "clock.friday": [
+        {"text": "Friday! Weekend plans? Points for anything that isn't sleeping.", "id": "fbwy55", "tone": "funny"},
+        {"text": "Two days off! Go have fun. Report back Monday. Full report.", "id": "11x5nj6", "tone": "funny"},
+      ],
+      "clock.in": [
+        {"text": "First to the board gets the good job. Too late. I'm first.", "id": "1n7hx5x", "tone": "funny"},
+        {"text": "Clocked in! Points for being on time. You're winning. Slightly.", "id": "12ai9q1", "tone": "funny"},
+        {"text": "Eight o'clock! Who invented eight o'clock? I'd like a word.", "id": "16pqrgr", "tone": "funny"},
+      ],
+      "clock.monday": [
+        {"text": "Monday! Weekend score out of ten? Go.", "id": "wyrcti", "tone": "funny"},
+        {"text": "Back! What did you get up to? Anything I should've been at?", "id": "1hshn1c"},
+      ],
+      "clock.out": [
+        {"text": "Five! That's the bell. Race you to the mess.", "id": "19z894r", "tone": "funny"},
+        {"text": "Clocked out. I fixed four things today. You? Don't answer if it's five.", "id": "1he97iz", "tone": "funny"},
+        {"text": "Done! Off to do absolutely nothing at top speed.", "id": "1xu2irb", "tone": "funny"},
       ],
       "farewell.day": [
         {"text": "Go on, then. Find a ship that deserves you. Then tell me all about it.", "id": "r82zej", "tone": "warm", "tier": [3, 4]},
@@ -14656,6 +14855,32 @@ const VOICE_TEMPLATES = {
       "career.up": [
         {"text": "You were on shift. I saw. I'm... really glad.", "id": "1cjbmuq", "tone": "warm", "tier": [3, 4]},
       ],
+      "clock.back": [
+        {"text": "Oh. You're back. That's... good. Really good.", "id": "d0m1ra", "tone": "warm"},
+        {"text": "Welcome back. I left you a clean pair of gloves.", "id": "f8m01w", "tone": "warm"},
+      ],
+      "clock.early": [
+        {"text": "Oh. You're going? That's... fine. Take care.", "id": "15ysvg5"},
+        {"text": "Off early. I hope you're all right.", "id": "19qvgui"},
+      ],
+      "clock.friday": [
+        {"text": "Have a good weekend. Um. Rest.", "id": "18pu9tq"},
+        {"text": "Two days off. That's nice. For you, I mean.", "id": "bhg3d"},
+      ],
+      "clock.in": [
+        {"text": "Oh. Morning. I... put the kettle on. If you want.", "id": "l7g0a1"},
+        {"text": "Hi. The board's long. Sorry. Not my fault. Still.", "id": "2comm9"},
+        {"text": "Morning. I like it quiet like this. Before everyone.", "id": "19si7qt"},
+      ],
+      "clock.monday": [
+        {"text": "Morning. Was your weekend... nice?", "id": "1iw7vod"},
+        {"text": "Hi. Good weekend? You don't have to tell me. Unless you want.", "id": "15smkf0"},
+      ],
+      "clock.out": [
+        {"text": "Good shift. I think. Yes.", "id": "1klld3n"},
+        {"text": "Five. That's... us. See you tomorrow.", "id": "jy0th8"},
+        {"text": "Oh. Clocked out already? Today went fast.", "id": "qe21uy"},
+      ],
       "farewell.day": [
         {"text": "Bye, {nick}. Thank you for talking to me. Most people don't.", "id": "yb6dxk", "tone": "warm", "tier": [3, 4]},
       ],
@@ -14684,6 +14909,32 @@ const VOICE_TEMPLATES = {
       "career.up": [
         {"text": "That's better. Steady does it.", "id": "vdqorm", "tier": [3, 4]},
       ],
+      "clock.back": [
+        {"text": "Welcome back. Take it steady today.", "id": "lp5pfd", "tone": "warm"},
+        {"text": "Good to have you back. No rush. Start small.", "id": "6qwb2x", "tone": "warm"},
+      ],
+      "clock.early": [
+        {"text": "Short day. That's all right. See you tomorrow.", "id": "1bfoi7a"},
+        {"text": "Off early? Take care of whatever it is.", "id": "1p3hsxc"},
+      ],
+      "clock.friday": [
+        {"text": "Have a good weekend. Rest properly.", "id": "13yv4rr"},
+        {"text": "Week's done. Go and enjoy your days off.", "id": "1pvrfa4"},
+      ],
+      "clock.in": [
+        {"text": "Morning. Fair board today. Nothing we can't do.", "id": "1rq9cex"},
+        {"text": "{hi}, {nick}. Tea at half ten. Pace yourself.", "id": "18b1978"},
+        {"text": "On time. Good. Let's get started.", "id": "857z4q"},
+      ],
+      "clock.monday": [
+        {"text": "Morning. Good weekend? Rested?", "id": "m9b2k9"},
+        {"text": "Monday. Fresh week. How were your days off?", "id": "1g7ehvf"},
+      ],
+      "clock.out": [
+        {"text": "That's the day. Good work.", "id": "vqn6we"},
+        {"text": "Clocked out. Eat well, sleep well. Same again tomorrow.", "id": "1vg9p2j"},
+        {"text": "Done. The board's shorter. That's a good day.", "id": "l7vfht"},
+      ],
       "farewell.day": [
         {"text": "Go steady. You'll find your place. I believe that.", "id": "1yiun9p", "tone": "warm", "tier": [3, 4]},
       ],
@@ -14711,6 +14962,32 @@ const VOICE_TEMPLATES = {
       ],
       "career.up": [
         {"text": "There. Look at you. I knew you would.", "id": "1695bwl", "tone": "warm", "tier": [3, 4]},
+      ],
+      "clock.back": [
+        {"text": "You're back! Oh, come here. How are you feeling?", "id": "8i3edy", "tone": "warm"},
+        {"text": "Welcome back, {nick}. Easy does it today. I'll keep an eye.", "id": "j0lz0g", "tone": "warm"},
+      ],
+      "clock.early": [
+        {"text": "Off early? You look after yourself, {nick}.", "id": "uvlvb9", "tone": "warm"},
+        {"text": "Go on, go and rest. Everything all right?", "id": "16z17nf", "tone": "warm"},
+      ],
+      "clock.friday": [
+        {"text": "Have a lovely weekend. Sleep in. Eat well.", "id": "1ovvixl", "tone": "warm"},
+        {"text": "Two days off. Go and be looked after. You deserve it.", "id": "kcrsz4", "tone": "warm"},
+      ],
+      "clock.in": [
+        {"text": "Morning, {nick}. Did you eat? Tell me you ate.", "id": "ltc44c", "tone": "warm"},
+        {"text": "{hi}, {nick}. Kettle's on. Have a cup before you start.", "id": "148br0p", "tone": "warm"},
+        {"text": "Morning! Early starts are hard. You're doing grand.", "id": "b7e9aw", "tone": "warm"},
+      ],
+      "clock.monday": [
+        {"text": "Morning! How was your weekend? Did you rest? Did you call home?", "id": "c70tqz", "tone": "warm"},
+        {"text": "Monday. Come and tell me about your weekend at tea.", "id": "1nnmabd", "tone": "warm"},
+      ],
+      "clock.out": [
+        {"text": "Well done today. Go and have a proper dinner.", "id": "1boug2", "tone": "warm"},
+        {"text": "That's us. You worked hard. I saw.", "id": "1lffhv6", "tone": "warm"},
+        {"text": "Off you go, {nick}. Do something nice this evening.", "id": "1tqwgl0"},
       ],
       "farewell.day": [
         {"text": "Look after yourself. Eat properly. And write, or I'll worry.", "id": "1v6wogu", "tone": "warm", "tier": [3, 4]},
@@ -15416,6 +15693,36 @@ const VOICE = JSON.parse([
   '{"text":"The toolbox on my shelf isn\'t mine. That\'s all. I\'m not ready for the rest.","id":"1dp1cub","tier":[3,4],"not":{"week1":"true"}},',
   '{"text":"You\'re good company. I don\'t say it. I\'ve said it. Noted.","id":"47dg9a","tone":"warm","tier":[4,4],"not":{"week1":"true"}},',
   '{"text":"Some nights I sit in the bay with the lights low. Just listening. It\'s like the sea.","id":"fnno3w","tier":[4,4],"not":{"week1":"true"}}]',
+  ',"clock.back":[',
+  '{"text":"Back. Good. Light jobs today. Then normal.","id":"1d9y0yk","tone":"warm"},',
+  '{"text":"Welcome back. The board missed you. So did I. That\'s all.","id":"qpxuyb","tone":"warm"},',
+  '{"text":"You\'re back. Don\'t overdo it. That\'s also an order.","id":"f2vq7o","tone":"warm"}]',
+  ',"clock.early":[',
+  '{"text":"Short day. Noted. Not a problem. Tomorrow, eight.","id":"1xrcga8"},',
+  '{"text":"Going? Fine. Rest, if that\'s what it\'s for.","id":"ups43s"}]',
+  ',"clock.friday":[',
+  '{"text":"Friday. Rest. Properly. That\'s an order.","id":"1hl78gn"},',
+  '{"text":"Two days off. Use them. I\'ll know if you don\'t.","id":"qrj9p","tone":"funny"},',
+  '{"text":"Weekend. Monday, 08:00. Not 08:01.","id":"11pfom2"}]',
+  ',"clock.in":[',
+  '{"text":"07:59. Good.","id":"1vdem9v"},',
+  '{"text":"Morning. Fan on Five, bay two. You\'ll hear it. Then fix it.","id":"1her109"},',
+  '{"text":"Board\'s long. Start at the top.","id":"5qunag"},',
+  '{"text":"Clocked in. Tea\'s at half ten. For you. Not me.","id":"v1zjeb"},',
+  '{"text":"Morning. Gloves.","id":"8hmkv3"},',
+  '{"text":"Seven jobs on the board. By five, fewer.","id":"rgjwys"}]',
+  ',"clock.late":[',
+  '{"text":"The clock says what it says. Tomorrow, eight.","id":"739o6q"}]',
+  ',"clock.monday":[',
+  '{"text":"Monday. Weekend? Brief, please.","id":"szob9o","tone":"funny"},',
+  '{"text":"My weekend? I read a manual. It was a good manual.","id":"gmtdqe","tone":"funny"},',
+  '{"text":"Rested? Good. The ship wasn\'t.","id":"1rqg23o"}]',
+  ',"clock.out":[',
+  '{"text":"17:00. Off you go.","id":"1y5jcqq"},',
+  '{"text":"Done. Board\'s shorter. That\'s the measure.","id":"1xfnlbz"},',
+  '{"text":"Clocked out. Rest. I want you sharp tomorrow.","id":"18ky0wq"},',
+  '{"text":"Fair day\'s work. Go.","id":"1spbhur"},',
+  '{"text":"That job today. Done right. Don\'t make me say it twice.","id":"qj9pej","tone":"warm","cue":"repair.you@dept"}]',
   ',"cue":[',
   '{"text":"Your job\'s closed. Numbers right. Card signed. Good.","id":"nyq44f","cue":"repair.you@dept"},',
   '{"text":"Storm\'s coming. Strap the loose racks. Count the spare filters. Then wait.","id":"1e1iuvz","cue":"event.ionStorm.warning"},',
@@ -16535,6 +16842,24 @@ const VOICE = JSON.parse([
   ',"bye":[',
   '{"text":"{bye}. And eat something, mind.","id":"2zydle"},',
   '{"text":"{bye}. Tea\'s at half ten. You know where.","id":"z0xbrh"}]',
+  ',"clock.back":[',
+  '{"text":"You\'re back! I saved you a scone. It\'s a bit old. So\'s the joke.","id":"1u2iyew","tone":"funny"},',
+  '{"text":"Welcome back, {nick}. Good to see you up and about.","id":"jw5t7m","tone":"warm"}]',
+  ',"clock.early":[',
+  '{"text":"Off early? Hope all\'s well. I\'ll save you a joke.","id":"1wsl42v","tone":"funny"}]',
+  ',"clock.friday":[',
+  '{"text":"Weekend! I\'m baking Saturday, if Brennan allows. Come and taste it.","id":"ucsc01"},',
+  '{"text":"Have a good weekend. I\'ll have a new joke by Monday. Brace yourself.","id":"1lxvme7","tone":"funny"}]',
+  ',"clock.in":[',
+  '{"text":"Why did the fan quit? It was a big fan of quitting. Hm. Working on it.","id":"1ch6fk2","tone":"funny"},',
+  '{"text":"{hi}, {nick}. Board\'s busy. We\'ll do it together.","id":"jpne4f"},',
+  '{"text":"Morning. Kettle\'s on. That\'s the most important job, and it\'s done.","id":"1wzmmbn"}]',
+  ',"clock.monday":[',
+  '{"text":"I baked on Sunday. Scones in the tea corner. Brennan approved.","id":"1n11mio","tone":"warm"},',
+  '{"text":"Good weekend? Mine was flour, mostly. Brennan inspected. I passed. Just.","id":"ly3jxx","tone":"funny"}]',
+  ',"clock.out":[',
+  '{"text":"That\'s us. Good work today, {nick}.","id":"1blrlah","tone":"warm"},',
+  '{"text":"Clocked out! Dinner. Then I\'ll think of a better joke for tomorrow.","id":"yxugti","tone":"funny"}]',
   ',"cue":[',
   '{"text":"Saw your job on the board. Done, signed, closed. Lovely. Have a biscuit.","id":"8ytt0c","tone":"warm","cue":"repair.you@dept"}]',
   ',"decline":[',
@@ -17426,6 +17751,30 @@ const VOICE = JSON.parse([
   '{"text":"I\'m teaching Torres to cast off. It\'s going. Slowly. Very slowly.","id":"v5zqb7","tone":"funny","tier":[3,4],"not":{"week1":"true"}},',
   '{"text":"You know when it\'s quiet and it\'s nice? Not lonely quiet. The garden after shift. That.","id":"ovsdj6","tone":"warm","tier":[4,4],"not":{"week1":"true"}},',
   '{"text":"I counted my friends aboard. It took longer than last year. Sorry. That\'s a good thing.","id":"12a6rfw","tone":"warm","tier":[4,4],"not":{"week1":"true"}}]',
+  ',"clock.back":[',
+  '{"text":"Oh. You\'re back. Good. I kept your bench tidy.","id":"1j1ouje","tone":"warm"},',
+  '{"text":"Welcome back. Are you... all right now? Good. Good.","id":"2pthoe","tone":"warm"}]',
+  ',"clock.early":[',
+  '{"text":"Oh. You\'re off? That\'s all right. I\'ll tidy your bench.","id":"4gj68t"},',
+  '{"text":"Take care. I\'ll... finish the scrubber.","id":"mwgvec"}]',
+  ',"clock.friday":[',
+  '{"text":"Have a good weekend. I\'ll be here. Keeping things neat.","id":"1is4beg"},',
+  '{"text":"Two days off. Go to the garden. The tomatoes are nearly ready.","id":"cr9r7g"}]',
+  ',"clock.in":[',
+  '{"text":"Oh. Morning. I re-sorted the spanner wall. Sorry. It needed it.","id":"1sj4p4t"},',
+  '{"text":"Hi. Scrubber on the board. I can do it in ten minutes. Nine and a half.","id":"1f69w36"},',
+  '{"text":"Morning. It\'s quiet. I like it before everyone comes.","id":"1tujkm3"},',
+  '{"text":"Hi. I put the kettle on. For... everyone. And you.","id":"1odwxvu","tone":"warm"}]',
+  ',"clock.late":[',
+  '{"text":"Oh. Hi. I did the first scrubber. Don\'t worry. Really.","id":"1xf7lfm","tone":"warm"}]',
+  ',"clock.monday":[',
+  '{"text":"Morning. Good weekend? I was here. It was nice. Quiet.","id":"5ggq65"},',
+  '{"text":"Hi. Did you... rest? You should. Rest, I mean.","id":"ez74i7"}]',
+  ',"clock.out":[',
+  '{"text":"Good shift. Yes. I think so.","id":"1spfr3w"},',
+  '{"text":"Five. I\'m going to the garden. Just to sit.","id":"nec0hc"},',
+  '{"text":"See you tomorrow. I\'ll... be here early. I always am.","id":"oqv6hg"},',
+  '{"text":"That repair. You did the seals right. Most people don\'t.","id":"56wpkq","tone":"warm","cue":"repair.you@dept"}]',
   ',"cue":[',
   '{"text":"I looked at your repair. Sorry. I always look. The seal\'s very good.","id":"ofe0ba","tone":"warm","cue":"repair.you@dept"},',
   '{"text":"Storm. Um. I\'ll do the scrubbers. Scrubbers are calm. I\'m calm. Mostly.","id":"uzv3qn","cue":"event.ionStorm.onset"},',
@@ -18925,6 +19274,34 @@ const VOICE = JSON.parse([
   '{"text":"Every ship, I find the warmest spot in my first week. Here it\'s the tea corner.","id":"1bj4t7e","tier":[3,4],"not":{"week1":"true"}},',
   '{"text":"Some evenings I wind all the music boxes at once. Sounds like rain on the shop roof.","id":"6rp0ei","tier":[3,4],"not":{"week1":"true"}},',
   '{"text":"Know what I like here? Nobody minds a nap. Well, Calder. But quietly.","id":"4g9wnw","tone":"funny","tier":[4,4],"not":{"week1":"true"}}]',
+  ',"clock.back":[',
+  '{"text":"Spanner! You\'re back! The bay was so boring.","id":"1jbz3kt","tone":"warm"},',
+  '{"text":"Welcome back. I did your jobs. Badly. You\'ll see.","id":"10fotww","tone":"funny"},',
+  '{"text":"Oi oi. Feeling better? Good. Tea\'s on me. Well, on the kettle.","id":"1lbzi03","tone":"warm"}]',
+  ',"clock.early":[',
+  '{"text":"Off early? Take a nap for me. Not jealous at all.","id":"ufnqsu","tone":"funny"},',
+  '{"text":"Short day, spanner? Fair enough. You all right?","id":"1nwptp2"}]',
+  ',"clock.friday":[',
+  '{"text":"Off for the weekend? I\'m on. Bay\'s all mine. Mwah ha.","id":"10umrv2","tone":"funny"},',
+  '{"text":"Friday! Enjoy it, {nick}. I\'ll keep the scrubbers in line.","id":"nvwrau"},',
+  '{"text":"Two days off for you. Sleep in for me, yeah? Someone should.","id":"1nkcgkv","tone":"funny"}]',
+  ',"clock.in":[',
+  '{"text":"Oi oi. I\'m awake. Technically. Ask again after tea.","id":"z5psc0","tone":"funny"},',
+  '{"text":"Right, so. Board\'s full and I\'ve already had two breakfasts.","id":"7zz4an","tone":"funny"},',
+  '{"text":"{hi}, {nick}. That panel on Five\'s sticking again. It knows me.","id":"1743odo"},',
+  '{"text":"Morning! Slept like a log. For an hour. Then I didn\'t.","id":"1ufo0y6","tone":"funny"},',
+  '{"text":"There\'s a scrubber on the board calling your name. I\'m taking the fan.","id":"11d1m15"}]',
+  ',"clock.late":[',
+  '{"text":"Late? You? Welcome to my world, spanner. It\'s comfy here.","id":"1ydoyxa","tone":"funny"}]',
+  ',"clock.monday":[',
+  '{"text":"Monday! How was your weekend? I was down here. Bay\'s ace on a Sunday.","id":"17r2exi"},',
+  '{"text":"Good weekend? Tell me. I worked mine. I found a biscuit tin.","id":"or974k","tone":"funny"},',
+  '{"text":"Oi oi. Rested? You look rested. Rude.","id":"g8pqjr","tone":"funny"}]',
+  ',"clock.out":[',
+  '{"text":"Five! Mess. Now. Before the stew goes.","id":"13fb21a","tone":"funny"},',
+  '{"text":"Good shift, {nick}. You were quicker than me. Don\'t tell anyone.","id":"1ljmvee"},',
+  '{"text":"Off you go. I\'m having a nap. At five. Then I won\'t sleep. Classic.","id":"5oro21","tone":"funny"},',
+  '{"text":"Grab shelf if you miss dinner. It\'s for emergencies. And me.","id":"17k7c1g","tone":"funny"}]',
   ',"cue":[',
   '{"text":"Storm\'s here. Grab shelf\'s stocked. I checked first. Priorities.","id":"1oxt0d4","tone":"funny","cue":"event.ionStorm.onset"},',
   '{"text":"Storm\'s done. Everything held. Told you she\'s a good ship.","id":"1iz3mzz","tone":"warm","cue":"event.ionStorm.resolution"},',
@@ -20905,6 +21282,32 @@ const VOICE = JSON.parse([
   '{"text":"Sometimes I sit at the overlook with tea and just listen. Is that odd? It\'s not odd.","id":"e650md","tier":[3,4],"not":{"week1":"true"}},',
   '{"text":"Glad you came out here, you know. To the Wren. The bay\'s better for it.","id":"1q4w9p","tone":"warm","tier":[4,4],"not":{"week1":"true"}},',
   '{"text":"If I ever get serious, tell me to put a record on. It works. Every time.","id":"1oaac30","tone":"funny","tier":[4,4],"not":{"week1":"true"}}]',
+  ',"clock.back":[',
+  '{"text":"You\'re back! The bay\'s been all wrong. Even coil three noticed.","id":"bkolaq","tone":"warm"},',
+  '{"text":"Welcome back, {nick}. Easy jobs today. I\'ve already picked some.","id":"1idl6x5","tone":"warm"},',
+  '{"text":"There you are. Feeling all right? Good. Right, onward. Gently.","id":"bzqjw9","tone":"warm"}]',
+  ',"clock.early":[',
+  '{"text":"Off early? Course. Coil three and I will hold on.","id":"iwv79m"},',
+  '{"text":"Heading off? Hope all\'s well, {nick}. See you tomorrow.","id":"sr01s0","tone":"warm"}]',
+  ',"clock.in":[',
+  '{"text":"There you are! Coil three\'s sulking. Don\'t take it personally.","id":"8hoyxg","tone":"funny"},',
+  '{"text":"Morning, {nick}. Reyes left me a note: \\"coils fine, three shy\\". Shy!","id":"4cvahv","tone":"funny"},',
+  '{"text":"{hi}! Ten more minutes with the coils and I\'m all yours. Right, onward.","id":"1ot57ff"},',
+  '{"text":"Board\'s lovely today. Look at it. Proper variety.","id":"1o7ive"},',
+  '{"text":"Morning! I skipped breakfast for the coils. Don\'t tell Brennan.","id":"uo4dnx","tone":"funny"},',
+  '{"text":"Your scarf grew another row last night. Can\'t show you yet.","id":"1r09yve","tone":"warm","tier":[3,4]}]',
+  ',"clock.late":[',
+  '{"text":"There you are! Coil three thought you weren\'t coming. So did I.","id":"1o0wmae","tone":"funny"}]',
+  ',"clock.monday":[',
+  '{"text":"Monday! Good weekend? The coils and I had a quiet one.","id":"31g7c7","tone":"funny"},',
+  '{"text":"How were your days off? I was down here. The coils were good company.","id":"1tunkh9"},',
+  '{"text":"Morning! Tell me one thing you did at the weekend. Just one.","id":"5qg6fz"}]',
+  ',"clock.out":[',
+  '{"text":"That\'s the day! You did well. I mean it.","id":"x7jdko","tone":"warm"},',
+  '{"text":"Five already? I\'ll just say goodnight to coil three. Then dinner.","id":"rmv9ts"},',
+  '{"text":"Good shift, {nick}. Same again tomorrow?","id":"15rx4oi"},',
+  '{"text":"Off you go. I\'ll be in the music room later, if you fancy a song.","id":"den4e"},',
+  '{"text":"You fixed it today. Properly. I watched. Lovely work.","id":"16teuv9","tone":"warm","cue":"repair.you@dept"}]',
   ',"decline":[',
   '{"text":"Ah, I can\'t tonight. Coil three needs a sit with. Ask me again? Please do.","id":"1xv47ld"},',
   '{"text":"Not tonight. I\'m on call for the coils. Next time, promise.","id":"1auxm1a"},',
@@ -22770,6 +23173,8 @@ const LINES = JSON.parse([
   '{"text":"The Captain has sent for you. One more step down and you\'re sent home. It\'s not too late.","id":"uls9to"}]',
   ',"career.tip.chief":[',
   '{"text":"Chief Calder has sent for you. To climb back: be on shift by 08:00 and turn in jobs.","id":"uf8e29"}]',
+  ',"career.tip.clock":[',
+  '{"text":"Clock in by the tea corner at shift start, out at the end. Leave and sick days need none.","id":"1d7qpjy"}]',
   ',"career.tip.late":[',
   '{"text":"Late for your shift. A little late is only a small dip. Be in the Works bay by 08:00.","id":"irxo4j"}]',
   ',"career.tip.leave":[',
@@ -22792,6 +23197,107 @@ const LINES = JSON.parse([
   '{"text":"I\'m off again soon. Tell me one thing I shouldn\'t miss before I go.","id":"e8586c","dept":"guest"},',
   '{"text":"{missed} left me a mug. I use it every morning. Don\'t tell anyone.","id":"14fdcqd","tone":"warm","tier":[2,4]},',
   '{"text":"I still save things up to tell {missed}. Then I write them all down. Long letters.","id":"uyiu9m","tier":[3,4]}]',
+  ',"clock.auto":[',
+  '{"text":"The clock signed you out at 17:00. It does that.","id":"b89c73"},',
+  '{"text":"17:00. The clock signed you out for you. Go and eat.","id":"14d7qkk"},',
+  '{"text":"Shift over: the clock signed you out at 17:00.","id":"apntzo"}]',
+  ',"clock.back":[',
+  '{"text":"You\'re back! Good to see you, {nick}.","id":"1uvkge1","tone":"warm","dept":"works"},',
+  '{"text":"Welcome back. Bay wasn\'t the same.","id":"1cv7a49","tone":"warm","dept":"works"},',
+  '{"text":"{hi}. Feeling better? Take it easy today.","id":"45symq","tone":"warm","dept":"works"},',
+  '{"text":"Look who\'s back. The board\'s been asking after you.","id":"47ujnw","tone":"funny","dept":"works"},',
+  '{"text":"There you are. Kettle\'s on. Ease in.","id":"cxfmqn","tone":"warm","dept":"works"},',
+  '{"text":"Back with us! Your gloves are where you left them.","id":"1xrc67h","dept":"works"},',
+  '{"text":"Good to have you back. Pick an easy one to start.","id":"ciz2lk","dept":"works"},',
+  '{"text":"Welcome back, {nick}. You were missed. Properly.","id":"1xdp4ol","tone":"warm","dept":"works"},',
+  '{"text":"Oh, you\'re back. I\'ve saved up all the gossip.","id":"wfdu3a","tone":"warm","dept":"works","tier":[3,4]},',
+  '{"text":"Missed you on the bay. Don\'t do that again. Well, do, if you need to.","id":"f6fahp","tone":"warm","dept":"works","tier":[3,4]}]',
+  ',"clock.early":[',
+  '{"text":"Off already? Hope all\'s well.","id":"e7ggf0","dept":"works"},',
+  '{"text":"Short day? Fair enough.","id":"15csr3w","dept":"works"},',
+  '{"text":"Heading off? Look after yourself.","id":"1mmplvn","dept":"works"},',
+  '{"text":"Early one. The board will keep. Go on.","id":"1ruzm3d","dept":"works"},',
+  '{"text":"Off you go. We\'ll hold the fort.","id":"110r9k3","dept":"works"},',
+  '{"text":"All right? Shout if you need anything.","id":"61l78i","tone":"warm","dept":"works"},',
+  '{"text":"Early finish. Rest up, if that\'s what it is.","id":"1yn70wv","dept":"works"},',
+  '{"text":"Off early? Find me at dinner if you want company.","id":"jqr9ej","tone":"warm","dept":"works","tier":[3,4]}]',
+  ',"clock.friday":[',
+  '{"text":"Friday! Two days off for you. Any plans?","id":"s9zt9y","dept":"works"},',
+  '{"text":"That\'s the week. {bye}, {nick}. Enjoy the weekend.","id":"1ne8swr","dept":"works"},',
+  '{"text":"Off for two days? Rest. Properly. No fixing anything.","id":"1kvd1jm","dept":"works"},',
+  '{"text":"Weekend plans? Bunk counts as a plan.","id":"1t1351b","tone":"funny","dept":"works"},',
+  '{"text":"Friday. Music jam tonight, if you fancy it.","id":"1k2gvhu","dept":"works"},',
+  '{"text":"Have a good weekend. Don\'t let anyone hand you a spanner.","id":"tur44v","tone":"funny","dept":"works"},',
+  '{"text":"The week\'s done. Go and do something that isn\'t filters.","id":"uumn1z","dept":"works"},',
+  '{"text":"Enjoy your days off. The bay will still be here Monday.","id":"1myzk5p","dept":"works"},',
+  '{"text":"Going to the garden at the weekend? It\'s lovely on a rest day.","id":"c3aqtg","dept":"works"},',
+  '{"text":"Two days off. Sleep in. Hot water\'s yours before the rush.","id":"12oq1d1","dept":"works"},',
+  '{"text":"Have a good one, {nick}. Tell me all about it Monday.","id":"5u01aq","tone":"warm","dept":"works","tier":[3,4]}]',
+  ',"clock.in":[',
+  '{"text":"{hi}, {nick}. Board\'s full this morning. Pick a good one.","id":"c4hjv5","dept":"works"},',
+  '{"text":"Morning. Kettle\'s on in the tea corner, if you\'re quick.","id":"1ookyox","dept":"works"},',
+  '{"text":"Eight o\'clock. Somebody should do something about eight o\'clock.","id":"2h0z7a","tone":"funny","dept":"works"},',
+  '{"text":"There\'s a scrubber on the board with your name on it. Not literally.","id":"1g4wwt9","dept":"works"},',
+  '{"text":"{hi}. Tea\'s at half ten. Hold on till then.","id":"hinnb3","dept":"works"},',
+  '{"text":"Clocked in? Good. The fans on Five are humming again.","id":"pzbk4","dept":"works"},',
+  '{"text":"Another day, another filter. {hi}, {nick}.","id":"fi0vdb","dept":"works"},',
+  '{"text":"You look awake. How? Tell me how.","id":"d3evde","tone":"funny","dept":"works"},',
+  '{"text":"Quiet night, the night lot say. Let\'s keep it that way.","id":"79n9rp","dept":"works"},',
+  '{"text":"{hi}. Grab a job before the Chief gives you one.","id":"1iwpj3u","dept":"works"},',
+  '{"text":"Bay smells of oil and toast. Someone ate breakfast in here.","id":"piabji","tone":"funny","dept":"works"},',
+  '{"text":"Mind the panel by the racks. It sticks. It always sticks.","id":"1ts7ol3","dept":"works"},',
+  '{"text":"First job\'s always the hardest. After that it\'s just the day.","id":"woask","dept":"works"},',
+  '{"text":"Saw the stars on the way down. Nice start, that.","id":"41binl","dept":"works"},',
+  '{"text":"{hi}. Night shift left us a note. Mostly crossed out.","id":"h5kgv7","tone":"funny","dept":"works"},',
+  '{"text":"I\'m here. My eyes aren\'t yet. Give them an hour.","id":"1f3lw87","tone":"funny","dept":"works"},',
+  '{"text":"Board\'s light today. Don\'t tell it I said so.","id":"mzyezg","dept":"works"},',
+  '{"text":"Morning. Gloves are back on the hook. Somebody tidied.","id":"e7oivy","dept":"works"},',
+  '{"text":"Oh good, it\'s you. The day just got easier.","id":"18l7z6r","tone":"warm","dept":"works","tier":[3,4]},',
+  '{"text":"Saved you the good spanner. Don\'t say I never do anything.","id":"1uxvdlz","tone":"warm","dept":"works","tier":[3,4]},',
+  '{"text":"Afternoon start? Lucky. You missed the morning rush.","id":"518mlx","dept":"works","time":"afternoon"}]',
+  ',"clock.late":[',
+  '{"text":"Afternoon! Oh, sorry. It just felt like afternoon.","id":"m3j6yc","tone":"funny","dept":"works"},',
+  '{"text":"There you are. The board ate two jobs while you were out.","id":"1i27owh","tone":"funny","dept":"works"},',
+  '{"text":"Lie-in? Don\'t let the Chief see the clock.","id":"1rzvjoa","tone":"funny","dept":"works"},',
+  '{"text":"Late one. Grab a job, quick, look busy.","id":"1hjs6z5","tone":"funny","dept":"works"},',
+  '{"text":"Morning, {nick}. Well. Most of it\'s still morning.","id":"82ayjq","tone":"funny","dept":"works"},',
+  '{"text":"Hot water ran out, did it? Happens to us all.","id":"4pzbpp","tone":"funny","dept":"works"},',
+  '{"text":"The kettle waited for you. It\'s that kind of kettle.","id":"17hgf18","tone":"funny","dept":"works"},',
+  '{"text":"Saved you a job. Not a good one. You were late.","id":"doo8fp","tone":"funny","dept":"works","tier":[3,4]}]',
+  ',"clock.monday":[',
+  '{"text":"Monday. {hi}. Good weekend?","id":"18nd4e6","dept":"works"},',
+  '{"text":"Back again! Did you get any rest, or did the ship keep you busy?","id":"168s9hh","dept":"works"},',
+  '{"text":"{hi}, {nick}. Do anything nice at the weekend?","id":"1w85ooc","dept":"works"},',
+  '{"text":"Weekend go all right? You look like you slept.","id":"1qvzevx","dept":"works"},',
+  '{"text":"Monday morning. Tell me something good from the weekend.","id":"1etfhpu","dept":"works"},',
+  '{"text":"How was the weekend? Garden, gym, or bunk?","id":"1uqn7v8","tone":"funny","dept":"works"},',
+  '{"text":"Monday. The board missed you. Well, it\'s longer, anyway.","id":"1kf7p7u","tone":"funny","dept":"works"},',
+  '{"text":"Good to see you. Weekend\'s always too short, isn\'t it?","id":"jjcevb","dept":"works"},',
+  '{"text":"{hi}. Did you call home at the weekend? All well?","id":"dulhxe","dept":"works"},',
+  '{"text":"Back to it. Was the mess busy on Sunday? Bread day.","id":"c1gcig","dept":"works"},',
+  '{"text":"There you are. Quiet bay without you, Monday or not.","id":"ruhqte","tone":"warm","dept":"works","tier":[3,4]},',
+  '{"text":"I want the whole weekend. Every bit. At tea, mind.","id":"16ijw95","tone":"warm","dept":"works","tier":[3,4]}]',
+  ',"clock.out":[',
+  '{"text":"Five o\'clock. That\'s us. {bye}.","id":"ne6b6p","dept":"works"},',
+  '{"text":"Good day, that. Nothing caught fire. Nothing even smoked.","id":"hca787","tone":"funny","dept":"works"},',
+  '{"text":"Off you go, {nick}. Dinner\'s on till half eight.","id":"ehow6l","dept":"works"},',
+  '{"text":"Clocked out. The board can wait till morning.","id":"tsjf3s","dept":"works"},',
+  '{"text":"That\'s the day done. My feet have opinions.","id":"1i8dcwr","tone":"funny","dept":"works"},',
+  '{"text":"Nice work today. The bay sounds right.","id":"13021ds","dept":"works"},',
+  '{"text":"Off to the mess. If there\'s stew, I\'m having two.","id":"1xmty4z","dept":"works"},',
+  '{"text":"Done. Shower before the hot water goes, that\'s my plan.","id":"eb1ivy","dept":"works"},',
+  '{"text":"{bye}, {nick}. Leave the scrubbers to dream.","id":"1p3e5vi","dept":"works"},',
+  '{"text":"Long one. Good one, though.","id":"3csmc4","dept":"works"},',
+  '{"text":"Hang your gloves up or the Chief will notice. She notices.","id":"c9z93u","dept":"works"},',
+  '{"text":"Evening, then. Anything on tonight?","id":"at6ks2","dept":"works"},',
+  '{"text":"Off you go. Tomorrow\'s jobs aren\'t going anywhere.","id":"1jgnpqv","dept":"works"},',
+  '{"text":"I\'m going to sit down and not fix anything for hours.","id":"f6ejo5","tone":"funny","dept":"works"},',
+  '{"text":"Same time tomorrow. Bring your good mood back.","id":"kk4zoc","dept":"works"},',
+  '{"text":"Today was a tea-break day. Some days the tea is the high point.","id":"1rmnimy","tone":"funny","dept":"works"},',
+  '{"text":"Good shift with you, {nick}. Same again tomorrow?","id":"148eih1","tone":"warm","dept":"works","tier":[3,4]},',
+  '{"text":"Save me a seat at dinner if you get there first.","id":"u89fbu","dept":"works","tier":[3,4]},',
+  '{"text":"Rough one. Tomorrow\'s a fresh board.","id":"s6rni1","dept":"works","mood":"low"},',
+  '{"text":"You fixed it today. I heard it start up. Lovely sound.","id":"1qd6a1y","tone":"warm","cue":"repair.you@dept","dept":"works"}]',
   ',"cue":[',
   '{"text":"My lamp\'s still going. Every night I switch it on and think, that was {me}.","id":"1jvw16d","tone":"warm","cue":["favour","favour.lamp.you@me"]},',
   '{"text":"I can read in bed again. You\'ve no idea. {thanks}.","id":"1i0thk5","cue":["favour","favour.lamp.you@me"]},',
@@ -27071,14 +27577,14 @@ const movedOff = id => (socInit(), (SHIP.social.moved || []).some(x => x.id === 
 // content/banks/career.lines and each voice's content/career/*.lines).
 // Nothing here calls R().
 const CAREER = { leave: 3, every: 28, max: 5, bookBy: 450, missBy: 750, grace: 7, hitDept: 6, hitWork: 15,
-  chiefRun: 3, chiefLow: 15, captain: 12, bottom: 5, rearm: { chief: 40, captain: 25 }, days: 3, worried: 3, sendOff: 4, wait: 3,
+  chiefRun: 3, chiefLow: 15, captain: 12, clockOut: 1020, earlyOut: 900, autoOut: 1080, clockSeed: 4421, remarkOdds: .5, bottom: 5, rearm: { chief: 40, captain: 25 }, days: 3, worried: 3, sendOff: 4, wait: 3,
   chiefAt: 930, captainAt: 660, letGoAt: 600, sendOffAt: 870, seeOff: ['torres-zeke', 'pell', 'calder'] };
 SHIP.career = null;
 (() => { const s = SAVED && SAVED.ship && SAVED.ship.career; if (s && typeof s === 'object' && Number.isInteger(s.l)) SHIP.career = careerClean(s); })();
 function careerClean(s) {
   const days = a => Array.isArray(a) ? a.filter(Number.isInteger).slice(-8) : [], int = (v, x) => Number.isInteger(v) ? v : x;
   return { l: int(s.l, CAREER.leave), w: int(s.w, 0), b: days(s.b), s: days(s.s), st: int(s.st, 0), n: int(s.n, 0), on: int(s.on, 0), e: int(s.e, 0), z: int(s.z, 0),
-    k: int(s.k, 0), md: int(s.md, 0), sd: int(s.sd, 0), sh: int(s.sh, 0), ss: int(s.ss, -1), sc: int(s.sc, 0), ms: int(s.ms, 0), ca: int(s.ca, 0), q: int(s.q, 0), qd: int(s.qd, 0), fl: int(s.fl, 0), go: int(s.go, null), f: Array.isArray(s.f) ? s.f.filter(x => typeof x === 'string').slice(0, 8) : [], end: !!s.end };
+    k: int(s.k, 0), ci: int(s.ci, 0), co: int(s.co, 0), rm: int(s.rm, 0), gs: int(s.gs, 0), md: int(s.md, 0), mx: isFinite(s.mx) ? +s.mx : 0, sd: int(s.sd, 0), sh: int(s.sh, 0), ss: int(s.ss, -1), sc: int(s.sc, 0), ms: int(s.ms, 0), ca: int(s.ca, 0), q: int(s.q, 0), qd: int(s.qd, 0), fl: int(s.fl, 0), go: int(s.go, null), f: Array.isArray(s.f) ? s.f.filter(x => typeof x === 'string').slice(0, 8) : [], end: !!s.end };
 }
 SAVE_EXTRA.push(s => { if (SHIP.career) s.ship.career = SHIP.career; });
 onSim('newGame', () => { SHIP.career = null; careerCard(false); });
@@ -27086,7 +27592,7 @@ function careerInit(now = shipNow()) {
   if (SHIP.career) return SHIP.career;
   const d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;   // an older save starts here: no back pay of leave, no misses before today
   const sent = simNotes('shiftStart').filter(n => Math.floor(n.t / 1440) + 1 === d), on = (sent.length ? sent.some(n => !n.missed) : flag('shiftSent') === d) ? d : 0;   // already started today (reviewer 1d)
-  return SHIP.career = { l: CAREER.leave, w: Math.max(0, Math.floor((d - 1) / CAREER.every)), b: [], s: [], st: 0, n: 0, on, e: m >= CAREER.missBy ? d : d - 1, z: d - 1, k: 0, md: 0, sd: 0, sh: 0, ss: -1, sc: 0, ms: 0, ca: 0, q: 0, qd: 0, fl: 0, go: null, f: [], end: false };
+  return SHIP.career = { l: CAREER.leave, w: Math.max(0, Math.floor((d - 1) / CAREER.every)), b: [], s: [], st: 0, n: 0, on, e: m >= CAREER.missBy ? d : d - 1, z: d - 1, k: 0, ci: 0, co: 0, rm: 0, gs: NOSAVE ? 0 : (Date.now() ^ Math.floor(Math.random() * 2147483647)) | 0, md: 0, mx: 0, sd: 0, sh: 0, ss: -1, sc: 0, ms: 0, ca: 0, q: 0, qd: 0, fl: 0, go: null, f: [], end: false };
 }
 const careerWork = () => SHIP.rep && SHIP.rep.ship && isFinite(SHIP.rep.ship.work) ? SHIP.rep.ship.work : 50;
 const careerRota = d => { try { return isWorkDay(ROSTER_PLAYER, d); } catch (e) { return weekday(d) < 5; } };   // your rota alone (playerShiftOn without leave)
@@ -27094,7 +27600,7 @@ const careerOn = d => !!SHIP.career && SHIP.career.b.includes(d);   // a booked 
 function careerSick(d, on = true) {                      // a sick day: excused (a booked leave day comes back; a miss already counted is undone)
   const c = careerInit(); c.s = c.s.filter(x => x !== d); if (!on) return; c.s.push(d); c.s = c.s.slice(-8);
   if (c.b.includes(d)) { c.b = c.b.filter(x => x !== d); c.l++; }
-  if (c.md === d) { c.md = 0; c.ms = Math.max(0, c.ms - 1); repAdd('works', CAREER.hitDept, { work: CAREER.hitWork }, 'sickNote'); }
+  if (c.md > 0 && c.md === d) { c.md = 0; c.ms = Math.max(0, c.ms - 1); repAdd('works', CAREER.hitDept, null, 'sickNote'); if (SHIP.rep && SHIP.rep.ship) SHIP.rep.ship.work = Math.min(100, careerWork() + (c.mx || 0)); }   // reviewer 1d: the work it took, not more
 }
 function careerOff(d) {                                  // no shift that day: leave, sick, or let go (section 14's playerShiftOn asks)
   const c = SHIP.career; return !!c && (c.b.includes(d) || c.s.includes(d) || (c.go != null && d >= c.go));
@@ -27148,17 +27654,82 @@ function careerStarted(t) {                              // you started your shi
 }
 onSim('shiftStart', n => { if (!n.missed) careerStarted(n.t); else return;
   const c = careerInit(); if (n.late >= 20 && !(c.k & 1)) { c.k |= 1; careerTip('late'); } });
-onSim('repair', n => { if (n.who === 'you') careerStarted(n.t); });
+onSim('repair', n => { if (n.who === 'you' && Math.floor(n.t / 1440) + 1 <= CAREER.grace) careerStarted(n.t); });   // a repair starts your day only in your first week; after that, the clock (reviewer 1e)
+// at work: clocked in at the time clock (0.61.13, the user's); in your first week (the grace) being in a Works room on Deck
+// 5 still counts, while you learn the clock (section 14's shiftTick asks this too)
 function careerAtWork() {
+  if (careerClockedIn()) return true; if (SHIP.time.day > CAREER.grace) return false;
   try { return deckDef.num === 5 && (DECKS[5].places || []).some(pl => pl.type === 'work:works' && pl.room === roomAt(...player.here())); } catch (e) { return false; }
 }
+// ---- the time clock (0.61.13, the user's: "clock in and out for work... something on the wall"): on the Works bay's
+// north wall past the tool wall, by the tea corner door, along from the job board (WALL_KIT.timeClock, place 5-timeclock-1, where the Works crew stop at the start and end of their
+// shift). Tap it to clock in (ci) and later out (co). Clocking in from 07:00 starts your shift (careerStarted: late
+// after 08:00, missed if not by 12:30); forget to clock out and it signs you out at 17:00 (after CAREER.autoOut), no
+// harm done. Leave and sick days need none. About one time in two a Works crew member near you says something
+// (clock.in / out / monday / friday / back / late, from content; careerRemark). The Schedule shows today's hours.
+const careerClockedIn = (d = SHIP.time.day) => !!SHIP.career && SHIP.career.ci > 0 && Math.floor(SHIP.career.ci / 1440) + 1 === d;
+const careerClockedOut = (d = SHIP.time.day) => careerClockedIn(d) && SHIP.career.co > SHIP.career.ci;
+const careerFullDay = d => d <= CAREER.grace || !careerClockedIn(d) || !careerClockedOut(d) || SHIP.career.co % 1440 >= CAREER.earlyOut;   // not a short shift (no clock record: the first week, or on paper)
+function careerClock(now = shipNow()) {                  // -> 'in' | 'out' | null, with a toast
+  const c = careerInit(now), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
+  if (!playerShiftOn(d)) { toast('Time clock', careerOn(d) ? 'You\'re on leave today. No need to clock in.' : sickToday(d) ? 'You\'re off sick. No need to clock in.' : 'No shift today. The clock can wait.'); return null; }
+  if (!careerClockedIn(d)) {
+    if (m >= CAREER.clockOut) { toast('Time clock', 'The day shift is over. See you tomorrow.'); return null; }
+    if (m < 420) { toast('Time clock', 'Too early: the clock opens at 07:00. The shift starts at 08:00.'); return null; }   // reviewer 1e
+    c.ci = Math.floor(now); c.co = 0; careerStarted(now); toast('Time clock', 'Clocked in at ' + hhmm(m) + '.');
+    careerRemark('in', now, m - 480); simNote('clock', { what: 'in' }); return 'in';
+  }
+  if (careerClockedOut(d)) { toast('Time clock', 'You\'re clocked out for the day.'); return null; }
+  c.co = Math.floor(now); const h = c.co - c.ci, early = m < CAREER.earlyOut;
+  if (early) repAdd(null, 0, { work: -2 }, 'early');   // a short shift: a small dip, like being late, never a missed shift (the user's choice, 0.61.18)
+  toast('Time clock', 'Clocked out at ' + hhmm(m) + '. ' + Math.floor(h / 60) + 'h ' + String(h % 60).padStart(2, '0') + 'm today.' + (early ? ' An early finish: it\'s noted.' : ''));
+  careerRemark(early ? 'early' : 'out', now); simNote('clock', { what: 'out' }); return 'out';
+}
+function careerClockTap(it, at) {                        // section 15's PLAYER_TAPS: walk up to the clock and use it
+  if (it.t !== 'Time clock' || typeof approach !== 'function') return false;
+  approach(at.clone(), it.front, it.depth, () => careerClock()); return true;
+}
+if (typeof PLAYER_TAPS !== 'undefined') PLAYER_TAPS.unshift(careerClockTap);
+// ---- reputation you can see (0.61.15, the user's: "when you complete a job, rep goes up a little; we need a visual
+// indication"): when you turn a job in, a small chip floats up from you, "+ Works reputation" in the department's
+// colour (section 15's needFloat; words only, never numbers), and the Record app gets a quiet mark once until you look.
+// One at a time (REP_CHIP_GAP real seconds apart), and none while a conversation or a meeting is on screen. A repair is
+// scored by section 20 (repNote 'repair'); any other job you turn in (a restock, a chore, a run) now counts a little too
+const REP_CHIP_GAP = 8, REP_DEPT_COL = { works: '#f0b24a', galley: '#e98b5a', garden: '#8fd08a', infirmary: '#8fd3e8', store: '#d9b3f0', command: '#e9e2c8',
+  helm: '#9bb8ff', comms: '#9be0c8', watch: '#c8c0ff', survey: '#ffd27f' };
+let REP_CHIP_AT = -1e9;
+function careerJobIn(n) {
+  if (!n || n.step !== 'turnin') return;
+  const m = n.machine && typeof machineById === 'function' ? machineById(n.machine) : null, dept = m && typeof repDeptOf === 'function' ? repDeptOf(m) : 'works';
+  if (!n.machine && typeof repAdd === 'function') repAdd(dept, 1, { work: 1 }, 'jobs');   // a job with no machine: section 20 has no repair for it
+  const now = performance.now(); if (now - REP_CHIP_AT < REP_CHIP_GAP * 1000 || (typeof DIALOGUE !== 'undefined' && DIALOGUE) || CHAT || typeof needFloat !== 'function') return;
+  REP_CHIP_AT = now; needFloat('+ ' + dept[0].toUpperCase() + dept.slice(1) + ' reputation');
+  const f = typeof FLOATS !== 'undefined' && FLOATS[FLOATS.length - 1]; if (f && f[0]) { f[0].style.color = REP_DEPT_COL[dept] || ''; f[0].style.borderColor = REP_DEPT_COL[dept] || ''; }
+  if (typeof DEV !== 'undefined' && DEV.notes && !DEV.notes.record) DEV.notes.record = 1;   // the Record's badge, once until you look
+}
+onSim('job', careerJobIn);
+const CLOCK_SAID = {};                                   // what -> the day a remark was last said (one each way a day)
+function careerBack(d) {                                 // your last workday before d was leave or sick
+  const c = SHIP.career; for (let k = d - 1; k >= d - 10 && k > 0; k--) if (careerRota(k)) return c.b.includes(k) || c.s.includes(k); return false;
+}
+function careerRemark(what, now, late = 0) {             // a Works crew member near you says something, about one time in two
+  if (typeof DECK_CREW === 'undefined' || typeof bubbleSay !== 'function') return null;
+  const d = Math.floor(now / 1440) + 1; if (CLOCK_SAID[what] === d || schedU(CAREER.clockSeed, Math.floor(now), what === 'in' ? 951 : 952) >= CAREER.remarkOdds) return null;
+  const P = player.obj.position, dist = x => Math.hypot(x.x - P.x, x.z - P.z);
+  const a = DECK_CREW.filter(x => x.p && x.p.dept === 'works' && dist(x) < 5).sort((x, y) => dist(x) - dist(y))[0]; if (!a) return null;
+  const wd = weekday(d), kinds = what === 'in' ? [careerBack(d) && 'clock.back', late >= 20 && 'clock.late', wd === 0 && 'clock.monday', 'clock.in'] : what === 'early' ? ['clock.early', 'clock.out'] : [wd === 4 && 'clock.friday', 'clock.out'];
+  for (const k of kinds.filter(Boolean)) { const l = socLine(a.p, k, { t: now, tier: relTier(a.p.id) }); if (l) { CLOCK_SAID[what] = d; bubbleSay(a.h, l.text); return k; } }
+  return null;
+}
 function careerMissed(d) {
-  repAdd('works', -CAREER.hitDept, { work: -CAREER.hitWork }, 'missed');
-  const c = careerInit(); c.md = d; if (!(c.k & 2)) { c.k |= 2; careerTip('missed'); }
+  const w0 = careerWork(); repAdd('works', -CAREER.hitDept, { work: -CAREER.hitWork }, 'missed');
+  const c = careerInit(); c.md = d; c.mx = Math.round((w0 - careerWork()) * 100) / 100;   // what it took, so a sick note gives back exactly that
+  if (!(c.k & 2)) { c.k |= 2; careerTip('missed'); }
   simNote('shiftMissed', { day: d });
 }
 function careerDayEnd(d, now) {                          // a workday ends: at the bottom (after the Captain) or not
   const c = careerInit(); if (c.go != null || !careerRota(d) || careerOff(d)) return;
+  if (c.on === d && careerFullDay(d)) { c.ms = 0; c.ca = 0; }   // a full day's work (a short shift, out before 15:00, counts neither way: the user's choice, 0.61.18)
   c.n = c.st >= 2 && !c.q && careerHeld('careerCaptain', now) && careerWork() < CAREER.bottom ? c.n + 1 : 0;   // only once the reprimand has been held
   if (c.n === 1) { careerTip('bottom'); careerSeek('last', now, now + 1440, CAREER.worried); }
   if (c.n >= CAREER.days) careerLetGo(d + 1, now);
@@ -27201,8 +27772,16 @@ function careerTick(now = shipNow()) {
   const d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
   const g = Math.max(0, Math.floor((d - 1) / CAREER.every)); while (c.w < g) { c.w++; c.l = Math.min(CAREER.max, c.l + 1); }
   if (c.on !== d && m >= 420 && m < CAREER.missBy && careerRota(d) && !careerOff(d) && careerAtWork()) c.on = d;
+  if (c.ci > 0 && !(c.co > c.ci)) { const cd = Math.floor(c.ci / 1440) + 1;   // forgot to clock out: signed out at 17:00, no harm done
+    if (cd < d || m >= CAREER.autoOut) { c.co = (cd - 1) * 1440 + CAREER.clockOut; if (cd === d) toast('Time clock', careerText('clock.auto', d) || 'You forgot to clock out. The clock signed you out at 17:00.'); } }
+  if (c.rm !== d && d > CAREER.grace && m >= 420 && m < CAREER.clockOut && playerShiftOn(d) && !careerClockedIn(d)) {   // in the Works bay, not clocked in: a reminder, once a day
+    let inBay = false; try { inBay = deckDef.num === 5 && roomAt(...player.here()) === 'w'; } catch (e) { inBay = false; }
+    if (inBay) { c.rm = d; toast('Time clock', 'Don\'t forget to clock in: the time clock is past the tool wall, by the tea corner.'); }
+  }
+  if (!(c.k & 8) && m >= 420 && playerShiftOn(d)) { let inBay = false; try { inBay = deckDef.num === 5 && roomAt(...player.here()) === 'w'; } catch (e) { inBay = false; }
+    if (inBay && typeof tipShow === 'function') { c.k |= 8; tipShow('career.clock', careerText('career.tip.clock') || 'Clock in at the time clock in the Works bay (past the tool wall) when your shift starts, and out when it ends. Leave and sick days need none.'); } }
   for (let k = Math.min(c.e, c.z) + 1; k <= d; k++) {
-    if (c.e < k && (k < d || m >= CAREER.missBy)) { c.e = k; if (k > CAREER.grace && careerRota(k) && !careerOff(k)) { if (c.on !== k) { c.ms++; careerMissed(k); } else { c.ms = 0; c.ca = 0; } } }   // a worked shift ends the run and re-arms the Chief; days off, leave and sick days do neither
+    if (c.e < k && (k < d || m >= CAREER.missBy)) { c.e = k; if (k > CAREER.grace && careerRota(k) && !careerOff(k) && c.on !== k) { c.ms++; careerMissed(k); } }   // a full worked shift ends the run and re-arms the Chief at the day's end (careerDayEnd); days off, leave and sick days do neither
     careerLadder(now);
     if (c.z < k && k < d) { c.z = k; careerDayEnd(k, now); }
   }
@@ -27219,14 +27798,18 @@ SIM_ADVANCE.push((from, to) => careerTick(to));
 // and find you to nudge you. Two cures: the infirmary (in the Infirmary or the Exam room on Deck 3, an exam plays:
 // Rina's when she's on shift, else a medic on duty's; it ends with the medicine) or your bunk (lying down sleeps it off
 // by day, SICK.nap minutes). Crew who see you say a get-well line, and the next day or two they're glad you're better.
-//   SHIP.career (saved) adds sd: the last sick day, sh: how it ended (0 not yet, 1 Rina, 2 a medic on duty, 3 slept it
+//   SHIP.career (saved) adds gs: the game's own seed (made once with the career, Date.now and Math.random; never R();
+//   0 with ?nosave, so the checks are the same every run), sd: the last sick day, sh: how it ended (0 not yet, 1 Rina, 2 a medic on duty, 3 slept it
 //   off), ss: the last stage told, sc: the day the card was shown
 // The words are head writer 4's (career.sick.*, career.tip.sick, sick.getwell / sick.nudge / sick.better, the meetings
 // sickExam1-3 and sickExamCover). Nothing here calls R().
-const SICK = { seed: 7919, odds: 1 / 28, gap: 21, rollAt: 300, nap: 180, stages: [[0, .85], [150, .7], [300, .55], [450, .4]], drain: 1.5 };
-const sickToday = (d = SHIP.time.day) => !!SHIP.career && SHIP.career.sd > 0 && SHIP.career.sd === d;   // 0.60.5a: sd 0 means never sick (day 0 is a real day)
+const SICK = { seed: 7919, odds: 1 / 28, gap: 21, rollAt: 300, nap: 180, floor: .4, stages: [[0, .85], [150, .7], [300, .55], [450, .4]], drain: 1.5 };
+const sickToday = (d = SHIP.time.day) => !!SHIP.career && SHIP.career.sd > 0 && SHIP.career.sd === d;   // sd 0 is 'never', not day 0 (the arrival)
 const sickNow = () => sickToday() && !SHIP.career.sh;    // unwell and untreated, right now
-function sickDue(d) { const c = SHIP.career; return d > CAREER.grace && (!c || !c.sd || d - c.sd >= SICK.gap) && schedU(SICK.seed, d, 901) < SICK.odds; }
+function sickDue(d) {                                   // seeded by the day and the game's own seed (gs), so each game has its own sick days (reviewer 1d)
+  const c = SHIP.career, seed = SICK.seed ^ (c && c.gs || 0);
+  return d > CAREER.grace && (!c || !c.sd || d - c.sd >= SICK.gap) && schedU(seed, d, 901) < SICK.odds;
+}
 function sickStage(now = shipNow()) {                    // 0-3 while unwell (by minutes since 06:00), else -1
   if (!sickNow()) return -1; const m = now - (SHIP.time.day - 1) * 1440 - WAKE_AT; let k = 0;
   for (let i = 0; i < SICK.stages.length; i++) if (m >= SICK.stages[i][0]) k = i; return k;

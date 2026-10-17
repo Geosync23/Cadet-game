@@ -1,0 +1,27 @@
+@template dry
+
+== clock.in
+- Morning. The board's long. Someone's been breaking things on purpose.   #funny
+- Eight o'clock. My favourite time. That's a lie.   #funny
+- {hi}. Tea at half ten. I'm counting.
+
+== clock.out
+- Clocked out. Another day the ship didn't fall apart. You're welcome.   #funny
+- Done. I'm going to go and be extremely still.   #funny
+- Not bad. Nothing exploded. High bar, but we cleared it.   #funny
+
+== clock.monday
+- Monday. Good weekend? Lie if it wasn't. I won't check.   #funny
+- Back. Did you rest, or just change which ceiling you looked at?   #funny
+
+== clock.friday
+- Friday. Two days off. Try not to fix anything for free.   #funny
+- Weekend. Go. Before someone finds you a job.
+
+== clock.back
+- Oh, you're back. Good. Nobody else laughs at my jokes.   #warm
+- Welcome back. The filters didn't change themselves. I checked.   #funny
+
+== clock.early
+- Off early. I'll tell the board you said goodbye.   #funny
+- Short day? Fair. Someone has to beat the dinner queue.   #funny
