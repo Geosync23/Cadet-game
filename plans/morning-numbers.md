@@ -26,3 +26,17 @@ Loading: unchanged (about 12 s at 4x slower CPU, about 7 s at normal speed; re-m
 
 Load time: about the same (~12 s at phone speed; maybe up to 0.5 s slower from the bigger file). Draw calls unchanged (max 430 of 450). Memory flat over a week. File 2.96 → 3.29 MB (new writing).
 Decision (lead, 12:57): the speed work goes into 0.60.3 itself (reviewed, identical picture and routes) so the morning build is the smooth one.
+
+## FINAL 0.60.3 (cand-0603 2f7fb2a) vs 0.60.2, phone-like, measured by perf engineer 3 (~14:41 UTC; slower test machine, compare builds with each other)
+
+| | 0.60.2 | 0.60.3 |
+|---|---|---|
+| Sunday dinner, average frame | 9.5-11.9 ms | 5.2-7.0 ms |
+| Sunday dinner, missed frames/hour | 130-260 | 17-37 |
+| Sunday dinner, visible hitches/hour | 16-22 | 2-6 |
+| Breakfast (27 → 45 crew), average frame | 7.5-8.4 ms | 3.6-4.0 ms |
+| Breakfast, missed frames/hour | 91-102 | 21-27 |
+| Breakfast, visible hitches/hour | 8-12 | 3-7 |
+| Load time | same | same |
+
+Plain words: about twice as smooth on a phone at the busiest meals, same load time. GPU draws about a third fewer. Memory flat over a week of play.
