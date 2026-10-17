@@ -37,8 +37,109 @@
 ? tier>=acquaintance
 - Listen. Nothing. Every fan on this deck running right. Best sound there is.
 
+== greet
+? tier>=acquaintance warmth:cold
+- You've been scarce. The board noticed. So did I.
+? tier>=acquaintance time:afternoon
+- Afternoon. Three jobs closed on the board. Two of them yours. Keep going.
+? tier>=colleague time:morning
+- Morning. Tea's made. Not by me. I don't take a break. Have mine.
+? tier>=colleague
+- {me}. Good. I need someone who listens before they lift a spanner.
+? tier>=close
+- {me}. Sit. Five minutes. The board can wait five minutes. Don't tell it.   #warm
+
+== bye
+- Back to it.
+? tier>=friend
+- Go on. Good work today. Same again tomorrow.   #warm
+?
+- Carry on. Finish what you started.
+? act:work
+- Board's there. Pick the next one.
+? time:evening
+- Go and eat. Then sleep. In that order.
+
+== feel
+? mood:high tier>=colleague
+- Every fan on Deck 5 at the right pitch. I stood and listened. Two whole minutes.
+? mood:ok
+- Board's at eleven. Nothing loud. Nothing quiet that should be loud.
+? mood:low tier>=colleague
+- Long one. I'll sleep on it. Then I'll fix it.
+
+== near
+? act:work tier>=acquaintance
+- Seal kit's on the left of the bench. Always the left. Put it back there.
+? act:dinner tier>=colleague
+- Sit. You eat, I'll read the logs. That counts as company.   #funny
+? act:breakfast
+- Tea. Toast. Board. In that order, every day.
+? act:gym
+- I walk. Every deck, every vent. That's my gym.
+? place:worksbay
+- Hear that pump? It's fine. I like to listen anyway. You should too.
+? act:leisure
+- I'm not working. I'm reading the maintenance logs. That's different.   #funny
+
+== life
+? tier>=acquaintance
+- Every machine on the Wren has a serial number. I know them. Ask me one.
+? tier>=colleague
+- Torres has good hands. I've told him. Once. That's plenty.
+- Nobody thanks the air. That's how you know it's working. Remember that one.
+? tier>=friend
+- I gave up tea breaks. There's always one more job on the board. Don't copy me.
+
+== invite
+? tier>=colleague
+- Works tea on Friday. You'll be there. That's not a question.
+? trad:today tier>=colleague
+- {trad} tonight. I'll look in for ten minutes. You can find me there.
+
+== accept
+- Fine. Ten minutes.
+- Agreed. I'll be there on time. Be early.
+? tier>=friend
+- Yes. I'd like that. Don't make it a thing.   #warm
+
+== decline
+- Not tonight. Board's at fourteen.
+- Can't. Ask me next week. I'll mean it.
+? weekday:sat|sun
+- It's my day off. I'm going to listen to a fan for an hour. Alone.   #funny
+
+== missed
+- You missed our time. Book another. I'll keep it.
+- Ten minutes I waited. That's fine once. Book another.
+? tier>=friend
+- You missed it. Is everything all right? Say if it isn't.
+
+== hint
+- Have you got ten minutes? Off the board. Not about work.
+- When you're done, come and find me. It isn't a job.
+
+== birthday
+? birthday:you
+- Someone said it's your birthday. I've written it down. I won't remember.   #funny
+- Your birthday. Fine. Take the easy job. Just today.
+? birthday:me
+- It's not my birthday. Who told you. Kovac. It was Kovac.   #funny
+- A card on my desk. Signed by Works. I'm keeping it. Don't tell them.   #warm
+
 == week1
 ? week1:true
 - First week. Nobody expects you to be fast. I expect you to be right.
 ? week1:true mem:intro.dinner
 - You ate something on Sunday. Good. Keep doing that.   #funny
+? week1:true weekday:mon
+- Briefing's done. You're with Torres. Watch his hands, not his mouth.
+? week1:true weekday:tue
+- Your first job's mine. Glass office, quarter to eight. I'll pick it. You'll do it.
+- Rina has you at two. Health check. Go. It isn't optional.
+? week1:true weekday:wed
+- Pick your own job today. Read the whole card. Then pick.
+? week1:true weekday:thu
+- Torres is off. Board's yours. Questions come to me.
+? week1:true weekday:fri
+- Works tea at half ten. Bring your hands. There's a mug for you.

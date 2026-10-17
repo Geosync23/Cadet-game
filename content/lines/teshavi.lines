@@ -1,0 +1,22 @@
+@crew teshavi
+// Writer (command: guests), batch 3b. Speaker Teshavi: grave, slow, ceremonial; long silences.
+
+== greet
+? tier=stranger
+- Greetings. I am Teshavi, who speaks for the council. You may speak to me. Briefly is fine.
+- Good day, cadet. Your ship is very loud. It is a cheerful kind of loud.   #funny
+? tier>=acquaintance
+- Good day, {me}. You are the one Saruth mentioned. Saruth mentions few.   #warm
+== feel
+? mood:high
+- The talks go well. The tea goes better.   #funny
+? mood:low
+- A long day of words. I will have a long hour of none.
+== near
+? deck:3 act:free
+- Your garden is small and very busy. Like your people.
+? place:calm
+- Sit. We need not speak. Among my people, this is a fine conversation.   #funny
+== life
+? tier>=acquaintance
+- I brought your Captain a gift in seven knots. No, I will not say what is inside.   #funny

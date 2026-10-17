@@ -38,12 +38,109 @@
 ? tier>=acquaintance
 - Kovac's teaching me to knit. Properly, she says. I'm on my third go at properly.
 
+== greet
+? tier>=acquaintance time:evening
+- {hi}, {nick}. Long day? Mine too. Good long, though. The coils behaved.
+? tier>=acquaintance warmth:cold
+- There you are. Thought the lift had eaten you. Where've you been hiding?   #funny
+? tier>=colleague time:morning
+- Morning! Skipped breakfast. Don't tell Brennan. She'll send a tray down.   #funny
+? tier>=colleague
+- {hi}, {nick}. Come down to Deck 6 one day. I'll introduce you to the coils.
+? tier>=close
+- {nick}. Good. Sit. Tell me one thing that went right today. Then I'll tell you mine.   #warm
+
+== bye
+- Right, onward. Mind how you go.
+- {bye}. Ask me anything, any time. I mean it.
+? act:work
+- Off you go, then. Coil three's calling. Well, sulking. Same thing.   #funny
+? time:evening
+- {bye}. Hot water till ten, remember. After that it's character-building.   #funny
+
+== feel
+? mood:ok
+- Middling. Coil two's thinking too hard. So am I. We'll both get there.
+? mood:high tier>=colleague
+- I'm in a singing mood. You've been warned. Something about a lighthouse.   #funny
+
+== near
+? act:breakfast
+- Just here for the tea. Breakfast is for people without coils.   #funny
+? act:gym
+- I don't really do the gym. I do the stairs to the overlook, very fast, twice.
+? act:leisure
+- Music room's free. I'm going to sing something badly. You're welcome to join.   #funny
+? place:overlook
+- Look down there. All three coils. People think engines are noise. They're a choir.
+
+== life
+? tier>=acquaintance
+- I'm in cabin 14 on Deck 4. You'll know it. There's always music.
+? tier>=colleague
+- Reyes and I swap notes at shift change. Half coils, half arguments about coil three.   #funny
+- Calder trusts my hands. Not my patience. She's right on both.
+? tier>=friend
+- Every new hand asks where the lift is. Then where the tea is. You'll fit right in.   #warm
+
+== invite
+? trad:today
+- {trad} tonight. Come with me? I'll save you a seat. I really will, this time.
+- {trad} later. You coming? Go on. You'll like it. I'll make sure you do.
+? tier>=colleague
+- Friday jam in the music room. I'll be singing. Come and stop me.   #funny
+- Observatory night? Stars, tea, and Rossi's tiny telescope. Come on.
+
+== accept
+- Course! Happy to. I'll be there early. I'm always early.
+- Yes. Brilliant. Right, onward, then. Lead the way.
+? tier>=friend
+- Yes! Brilliant. I'll bring biscuits. The good ones, from Soto's tin.   #warm
+
+== decline
+- Ah, I can't tonight. Coil three needs a sit with. Ask me again? Please do.
+- Not tonight. I'm on call for the coils. Next time, promise.
+? weekday:thu|fri
+- It's my day off and I'm going to sit still for once. Tomorrow? Ask me tomorrow.   #funny
+
+== missed
+- Missed you earlier. No harm done. The coils kept me company. Next time?
+- I waited a bit. Then I knitted a bit. Then I gave up. Are you all right?
+? tier>=friend
+- You missed it. That's fine. I just like knowing you're all right. Are you?   #warm
+
+== hint
+- Got a minute? Properly, I mean. Not a coil minute. A real one.
+- Have you got a bit of time later? There's something I want to say. Nothing bad.
+
+== birthday
+? birthday:you
+- Happy birthday! I'd have knitted you something, but you know what that's like.   #funny
+- It's your birthday? Nobody told me. Right. Tea's on me. All day.
+? birthday:me
+- My birthday. I'm not making a fuss. A small fuss. There's cake in the tea corner.   #funny
+- Reyes left a note: "Happy birthday. Coil three says so too." She never says a thing.   #funny
+
 // ---- week 1: Torres is your trainer (his mentor role; the confident side of him) ----
 == week1
 ? week1:true mem:intro.shadowShift
 - You did the turn-in yourself. Good. That's the bit everyone forgets.
 ? week1:true
 - How's the first week? Honestly, mind. I'll know if you're being polite.
+? week1:true weekday:mon
+- First day. You don't need to know everything. You need to know who to ask. Me. Ask me.
+- Board, part, machine, turn-in. That's the whole job. The rest is practice.
+? week1:true weekday:tue
+- Calder's giving you your first solo job today. You'll be fine. Read the card twice.
+- Rina's got you for a health check this afternoon. Don't touch anything blue.   #funny
+? week1:true weekday:wed
+- Your pick today. Choose a job off the board yourself. I'm on Deck 6 if you get stuck.
+? week1:true weekday:thu|fri
+- My day off. You're on your own at the board. You're ready. Don't break anything big.   #funny
+? week1:true weekday:sat
+- Day off for you! The board's open if you're bored. Nobody expects you there, though.
+? week1:true weekday:sun
+- One week aboard. Look at you. You know where the tea is and everything.   #warm
 
 // ---- Day 0: his walking lines, replacing section 21's INTRO_LINES and INTRO_CALL ----
 // Each step's lines are gated by flag:walk.<step>, which nothing sets yet, so they're never said as ordinary week-1
