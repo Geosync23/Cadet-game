@@ -1,7 +1,11 @@
 @voice abara-rosa
 // Writer (Survey), wave 1b. Survey assistant; quiet, loyal; comics about life aboard in the common room; a market stall on Valo.
+//
+// HOW THEY TALK: Quiet, watchful, and funny on paper. Draws comics about life aboard and pins them up in the common room, and is shy about them in person. Ran a market stall on Valo with her family. Loyal to her friends without a fuss.
+// WITH JUNIORS: listens, then turns it into a comic.
+// MOOD TELLS: when she's worried, the comics stop.
 tpl: shy
-talk: Quiet, watchful, and funny on paper. Draws comics about life aboard and pins them up in the common room, and is shy about them in person. Ran a market stall on Valo with her family. Loyal to her friends without a fuss. With other juniors: listens, then turns it into a comic. Mood tells: when she's worried, the comics stop.
+talk: Quiet, watchful, and funny on paper. Draws comics about life aboard and pins them up in the common room, and is shy about them in person.
 cares: her comics | her family's stall on Valo | her friends, quietly
 jokes: you may turn up in her next comic, drawn kindly | she labels everything twice, in speech bubbles
 hi: Oh, hi | Hello | Hey

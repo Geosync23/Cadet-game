@@ -1,7 +1,11 @@
 @voice kim-yusuf
 // Writer (Survey), wave 1b. Survey assistant; curious, quiet; collects old maps of Marra Station; fixes headphones.
+//
+// HOW THEY TALK: Quiet and curious; asks small questions that turn out to be big ones. Collects old maps of Marra Station and knows the corridors that aren't there any more. Fixes headphones as a way to talk to people.
+// WITH JUNIORS: shy, kind, a good listener.
+// MOOD TELLS: when homesick he unfolds a map.
 tpl: shy
-talk: Quiet and curious; asks small questions that turn out to be big ones. Collects old maps of Marra Station and knows the corridors that aren't there any more. Fixes headphones as a way to talk to people. With other juniors: shy, kind, a good listener. Mood tells: when homesick he unfolds a map.
+talk: Quiet and curious; asks small questions that turn out to be big ones. Collects old maps of Marra Station and knows the corridors that aren't there any more.
 cares: old maps of Marra Station | how things work | headphones that work
 jokes: he collects maps of a station that has been rebuilt twice | he fixes headphones as an excuse to say hello
 hi: Oh, hi | Hello | Hey

@@ -1,0 +1,27 @@
+@crew vasquez-uma
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Hi hi! Vasquez, Watch. You're new! I was new once. Last Sowing. It gets better.
+? tier>=acquaintance
+- Hello, {me}! Chief Holt did the lecture on hatches today. Twice. I loved it.   #funny
+- Oh, hey, {me}! Any news? I've got none. My fish have news. Big news. Bubbles.   #funny
+? tier>=friend
+- {me}! You made my day by turning up. That's not nothing. That's a lot.   #warm
+== feel
+? mood:high
+- Good day! Message from home. The orange fish is fine. Bigger, even.
+? mood:low
+- Bit of a flat day. But the lift worked first time! Little wins.
+== near
+? habit:window-seat
+- I like the windows. Somewhere out there is home. Left a bit. Further.
+? habit:bar-regular
+- Just the one, then bed. The Chief says a tired Watch is a careless Watch.
+== life
+? tier>=acquaintance
+- I keep fish back home on the Ostrander colonies. Mum feeds them. She tells me their moods.
+== joy
+? tier>=colleague
+- News of my fish. Every message home, first question. They're doing great, by the way.

@@ -1,7 +1,11 @@
 @voice ibarra-rafael
 // Writer (Survey), wave 1b. Survey officer, nights; forgetful, sarcastic; lives for the sensor sweep; secret biscuits; Tiles.
+//
+// HOW THEY TALK: Quick and sarcastic, but the joke is usually on himself. Loses his train of thought, then finds a better one. Talks about sensor sweeps the way others talk about sport.
+// WITH JUNIORS: friendly, a bit chaotic, very generous with biscuits (secretly).
+// MOOD TELLS: when worried he forgets more; when happy he narrates the sweep.
 tpl: playful
-talk: Quick and sarcastic, but the joke is usually on himself. Loses his train of thought, then finds a better one. Talks about sensor sweeps the way others talk about sport. With juniors: friendly, a bit chaotic, very generous with biscuits (secretly). Mood tells: when worried he forgets more; when happy he narrates the sweep.
+talk: Quick and sarcastic, but the joke is usually on himself. Loses his train of thought, then finds a better one.
 cares: the next sensor sweep | his secret tin of good biscuits | Tiles, win or lose
 jokes: he keeps a tin of good biscuits and tells no one, so everyone knows | he loses at Tiles gracefully, and often
 hi: Oh, hey | Hello, you | Hi

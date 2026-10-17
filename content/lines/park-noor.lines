@@ -1,0 +1,27 @@
+@crew park-noor
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Hi. Park, night Watch. I'll show you the patrol route if you're ever up late.
+? tier>=acquaintance
+- Hi, {me}. Picked up an extra shift. That's another plank of the boat.
+- Hello, {me}. Locker tidy? Mine is. I've labelled the labels.   #funny
+? tier>=friend
+- Oh, hi, {me}. I'm glad you came by. It's been a long week.   #warm
+== feel
+? mood:high
+- Good patrol. Quiet decks. I worked out the boat's sail, in my head.
+? mood:low
+- Tired. Two shifts back to back. The boat had better be worth it.
+== near
+? act:leisure
+- I'm learning the guitar, badly. There's a waiting list for the book.   #funny
+? habit:stargazer
+- I pick out the stars over Coriel. You can't see them from here. I pretend.
+== life
+? tier>=acquaintance
+- I'm saving for a boat on Coriel. A small one. Blue, I think.
+== joy
+? tier>=colleague
+- The boat. Water slapping the side, nothing to fix, nowhere to be. One day.

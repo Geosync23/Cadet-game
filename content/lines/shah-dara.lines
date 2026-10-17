@@ -1,0 +1,27 @@
+@crew shah-dara
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Oh. Hi. Shah, Watch. Coffee machine's on Deck 3. If it's broken, I'm near.
+? tier>=acquaintance
+- Hey, {me}. Coffee's good this morning. You're welcome.   #funny
+- Hi. Quiet patrol. That's the good kind.
+? tier>=friend
+- Hey, {me}. You're easy to be around. That's rare. I mean it.   #warm
+== feel
+? mood:high
+- Machine purred all morning. Nobody queued. Good day.
+? mood:low
+- Long day. The machine and I aren't speaking.   #funny
+== near
+? act:breakfast
+- Don't. Not yet. I'm talking to the coffee machine. It's a private matter.   #funny
+? habit:shopper
+- Store's got new valves. Not for anything. Just in case.
+== life
+? tier>=acquaintance
+- My parent served on the Wren, a long time back. Watch, too. Big boots.
+== joy
+? tier>=colleague
+- A coffee machine that works. Sounds small. At six in the morning, it's everything.

@@ -1,0 +1,27 @@
+@crew nakamura-bilal
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Hello. Nakamura, Watch. Learning the Watch from Holt, one lecture at a time.
+? tier>=acquaintance
+- Hello, {me}. The basil's coming on. I wasn't worried. I was a little worried.
+- {me}. Letter from my twin. On the Halcyon. Doing better than me, apparently.   #funny
+? tier>=friend
+- {hi}, {me}. Have some mint. I don't give the mint to just anyone.   #warm
+== feel
+? mood:high
+- Good day. Clean patrol, and Brennan took my thyme. She called it "decent".
+? mood:low
+- My twin got a commendation. I'm pleased for them. I'm going for a run.
+== near
+? habit:runner
+- Running clears the head. And it's one thing my twin can't do better by letter.   #funny
+? deck:3 act:free
+- These are my herbs. Please ask before you pick. The mint has opinions.   #funny
+== life
+? tier>=acquaintance
+- I grow herbs for the galley. Window pots, mostly. Brennan collects on Fridays.
+== joy
+? tier>=colleague
+- My herbs. You plant a seed and a week later it smells of home. It still amazes me.

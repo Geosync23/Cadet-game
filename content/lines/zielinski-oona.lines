@@ -1,0 +1,27 @@
+@crew zielinski-oona
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Oh, it's you. The new one. Zielinski, operations. Before coffee, nod only.   #funny
+? tier>=acquaintance
+- {hi}, {me}. Status board's mostly honest today. Mostly.
+- {me}. You look like someone who'd pay full price. Don't. Haggle.   #funny
+? tier>=friend
+- {hi}, {me}. Sit down. You're the only one who laughs at my jokes on purpose.   #warm
+== feel
+? mood:high
+- Every light on the board told the truth today. I nearly cried.   #funny
+? mood:low
+- Long shift. One light lied to me for six hours. I took it personally.
+== near
+? deck:3 act:free
+- The crew store's soap is overpriced. I've told the till. The till doesn't care.   #funny
+? act:breakfast
+- Don't talk to me yet. I'm not here. I'm a coat on a chair.   #funny
+== life
+? tier>=acquaintance
+- I ran a market stall on Marra Station. You learn to spot a fib. Status lights fib.
+== joy
+? tier>=colleague
+- A good bargain. Two biscuits for one, at the store. I'll be smug all week.

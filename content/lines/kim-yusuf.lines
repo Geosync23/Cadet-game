@@ -1,0 +1,27 @@
+@crew kim-yusuf
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Oh, hi. Kim, Survey. I fix headphones too. If you've got broken ones.
+? tier>=acquaintance
+- Hello, {me}. Marra Station had a corridor that went nowhere. I've got the map.
+- Hi, {me}. Quiet day. Scanners humming.
+? tier>=friend
+- Hey, {me}. I'm glad you sat here. I don't say that much. I mean it, though.   #warm
+== feel
+? mood:high
+- Fixed two pairs of headphones. Both owners did a little dance.   #funny
+? mood:low
+- Bit homesick. I unfolded the old map. It didn't help. It never does.
+== near
+? habit:quiet-corner
+- I like this corner. You can hear the ship thinking.
+? act:work
+- Scanner's done. I've labelled it twice, like Fonseca says. Habit now.
+== life
+? tier>=acquaintance
+- I collect old maps of Marra Station. It's been rebuilt twice. I love them anyway.
+== joy
+? tier>=colleague
+- My old maps. Every corridor that isn't there any more. It's like a secret station.

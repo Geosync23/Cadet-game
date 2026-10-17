@@ -1,0 +1,27 @@
+@crew mbeki-bo
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Hey. Mbeki, Survey. Labs on Deck 2. Ask me anything. I'll check before I answer.
+? tier>=acquaintance
+- Hello, {me}. Telescope's clean, sums are done. Good day so far.
+- Hi there, {me}. Music room tonight? I've a new piece. Practised it exactly.
+? tier>=friend
+- {hi}, {me}. I made two of my sister's biscuits. To the gram. One's yours.   #warm
+== feel
+? mood:high
+- Good day. Every sum right the first time. I checked twice anyway.
+? mood:low
+- Off day. I've checked the same number three times. That's a tell.
+== near
+? habit:musician
+- Music room. I play it exactly as written. Then once more, a bit less exactly.
+? time:night
+- My telescope's cleaner than the big one. Don't tell the observatory.   #funny
+== life
+? tier>=acquaintance
+- My sister on Kesh sends recipes. "A handful of flour." Whose hand? How big?   #funny
+== joy
+? tier>=colleague
+- Playing in the music room. The notes go just where they should. Nothing in between.

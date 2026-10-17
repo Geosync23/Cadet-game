@@ -1,0 +1,27 @@
+@crew abara-rosa
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Oh, hi. Abara, Survey. The comics in the common room? Some of those are mine.
+? tier>=acquaintance
+- Hello, {me}. You might be in the next one. Drawn kindly. Mostly.   #funny
+- Hi, {me}. Scanner's free if you need it. I'm just labelling.
+? tier>=friend
+- Hey, {me}. I drew you. Holding a spanner. Looking heroic. Don't make it weird.   #warm
+== feel
+? mood:high
+- Good day. New comic up. Three people laughed in front of it.
+? mood:low
+- Couldn't draw today. That's how I know it's a bad day.
+== near
+? habit:common-room
+- The comics wall. Mine's the one with the lift that sulks.   #funny
+? act:meal
+- Our family stall on Valo did soup like this. Not as good. Don't tell Brennan.
+== life
+? tier>=acquaintance
+- My family runs a market stall on Valo. I grew up shouting prices. Now I whisper.   #funny
+== joy
+? tier>=colleague
+- My comics. Little squares of life aboard. People find themselves in them, and smile.

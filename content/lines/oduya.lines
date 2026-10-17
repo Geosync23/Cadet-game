@@ -1,0 +1,27 @@
+@crew oduya
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- {hi}, cadet. Oduya, counsellor. Deck 3, sweets on the desk, just knock.
+? tier>=acquaintance
+- {hi}, {me}. How's the week treating you? Take your time, I'm not in a hurry.
+- {me}! I know when your birthday is. Don't look so worried.   #funny
+? tier>=friend
+- {hi}, {me}. You always leave a room a bit lighter. People notice.   #warm
+== feel
+? mood:high
+- A good day. Three people laughed in my office, and one of them was me.
+? mood:low
+- Busy week. Seventy-five people, a long way from home. I'll have a sweet.
+== near
+? habit:garden-lover
+- The garden at this hour. People talk more freely near growing things.
+? act:meal
+- I'm a slow eater. Sit down, you'll be here a while.   #funny
+== life
+? tier>=acquaintance
+- Nobody takes the green sweets. I keep buying them. It's an experiment.   #funny
+== joy
+? tier>=colleague
+- The garden, at the quiet hour. Just the pumps and the leaves. I'd live there if I could.

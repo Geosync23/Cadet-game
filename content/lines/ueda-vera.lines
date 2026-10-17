@@ -1,0 +1,27 @@
+@crew ueda-vera
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Hello. Ueda, Watch. You'll find me early to dinner and early to bed.
+? tier>=acquaintance
+- Hello, {me}. I'm writing home tonight. Can I say I met you?
+- Hi there, {me}. Quiet day. I like quiet days.
+? tier>=friend
+- Oh, hello, {me}. I put you in my letter home. Mum says hello back.   #warm
+== feel
+? mood:high
+- A letter came from Valo. On paper. It took six weeks. Worth it.
+? mood:low
+- Long shift. I'll write a long letter. It helps, somehow.
+== near
+? habit:musician
+- Music room's free. I'll play one piece, then bed. Short concerts are my speciality.   #funny
+? act:leisure
+- My telescope's tiny next to the big one. It still finds the moon.
+== life
+? tier>=acquaintance
+- I write home to Valo every rest day, on paper. Tariq and I share the post bag.
+== joy
+? tier>=colleague
+- Writing letters. Proper paper, slow words. When it arrives, the news is old and lovely.

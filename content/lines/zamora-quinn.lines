@@ -1,0 +1,27 @@
+@crew zamora-quinn
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Oh. Hi. Zamora, Survey. Chart room's on Deck 2. The stars are labelled. Correctly.
+? tier>=acquaintance
+- {hi}, {me}. Clear tonight. Good for the telescope.
+- Hi, {me}. Somebody called a planet a star at breakfast. I've recovered.   #funny
+? tier>=friend
+- {hi}, {me}. I kept a seat at the window for you. Observatory, later?   #warm
+== feel
+? mood:high
+- Good night for seeing. I found three I'd only read about.
+? mood:low
+- Cloudy lens. Cleaned it twice. Still cloudy. Hm.
+== near
+? act:wash
+- I don't sing in the shower. The washroom is mistaken.   #funny
+? time:night
+- Still up. The sky doesn't do day shifts either.
+== life
+? tier>=acquaintance
+- I brought my telescope from home. It's small. It sees enough.
+== joy
+? tier>=colleague
+- My telescope, the bow window, and nobody naming things wrong. Perfect night.

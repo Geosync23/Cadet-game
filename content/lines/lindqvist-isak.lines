@@ -1,0 +1,27 @@
+@crew lindqvist-isak
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Hey. Lindqvist, helm. She's pulling left today. Don't worry, I've got her.
+? tier>=acquaintance
+- Hey, {me}. Rowing later? I'm chasing the Commander's time.
+- Oh, hey, {me}. My turn with the guitar book. It's always my turn.   #funny
+? tier>=friend
+- {hi}, {me}. Sit still for once. You and me both.   #warm
+== feel
+? mood:high
+- Felt a drift before the console did. Corrected it. Nobody even noticed. Perfect.
+? mood:low
+- Restless day. I rowed. Then I rowed again.
+== near
+? act:gym
+- The Commander's moved to the treadmill. Scared of me, I reckon.   #funny
+? habit:music
+- Music room. Don't listen too closely. The guitar and I are still arguing.   #funny
+== life
+? tier>=acquaintance
+- I can feel a drift in our course before the console shows it. Like a tilt in your tea.
+== joy
+? tier>=colleague
+- A smooth turn. The whole ship leans, just a hair, and nobody spills a drop.

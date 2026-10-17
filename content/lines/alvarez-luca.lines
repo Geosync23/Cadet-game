@@ -1,0 +1,27 @@
+@crew alvarez-luca
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Hiya! Alvarez, Survey. Have you met Gerald? He's a cactus. He's lovely.   #funny
+? tier>=acquaintance
+- Hello, {me}! Gerald says hi. He doesn't, he's a cactus, but he would.   #funny
+- Hey, hey, {me}! My sister sent a recipe. It needs a lemon. We have no lemons.
+? tier>=friend
+- {me}! Gerald and I were just saying how glad we are you're aboard.   #warm
+== feel
+? mood:high
+- Good day! Gerald grew. A whole millimetre. I measured.   #funny
+? mood:low
+- Bit of a flat one. I've told Gerald. He listened. He's good like that.
+== near
+? habit:garden-lover
+- The garden's lovely now. I said good morning to every plant. It took a while.
+? habit:stargazer
+- One day I'll name a star. Something cheerful. Maybe Gerald.   #funny
+== life
+? tier>=acquaintance
+- My sister on Coriel sends recipes. They all need things we don't have. I make them anyway.
+== joy
+? tier>=colleague
+- Gerald. Every cactus aboard is called Gerald, but mine's the first. Probably.

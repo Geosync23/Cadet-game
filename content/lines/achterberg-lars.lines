@@ -1,0 +1,27 @@
+@crew achterberg-lars
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Evening, cadet. Achterberg, night Watch. If something's on fire, there's a form.   #funny
+? tier>=acquaintance
+- {hi}, {me}. All quiet. Suspiciously quiet. Chapter two of a mystery quiet.   #funny
+- {me}. Form filled in? Good. You'll go far.
+? tier>=friend
+- {hi}, {me}. Good to see a face I'd trust with the paperwork.   #warm
+== feel
+? mood:high
+- Quiet night, tidy forms, and I guessed the ending by page ten.
+? mood:low
+- Long night. A form went missing. I found it. In the wrong drawer. Mine.
+== near
+? habit:bar-regular
+- One drink, one chapter, and bed. That's a good evening.
+? act:meal
+- Take your time. Meals are the only thing on this ship that isn't urgent.
+== life
+? tier>=acquaintance
+- I know every song in the record cabinet. Ask four others. They disagree.   #funny
+== joy
+? tier>=colleague
+- A good mystery. I guess the ending early. Then I enjoy being right for two hundred pages.   #funny

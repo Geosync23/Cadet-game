@@ -1,0 +1,27 @@
+@crew lemaire-nils
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Hello. Lemaire, Survey, nights. I carry samples. One day I'll name a star.
+? tier>=acquaintance
+- Hi, {me}. Why did the comet skip breakfast? It was running late. Sorry.   #funny
+- {hi}, {me}. Sweep tonight. I'll be the one carrying the boxes.
+? tier>=friend
+- {hi}, {me}. You laughed at the comet joke. Nobody laughs at the comet joke.   #warm
+== feel
+? mood:high
+- Good night! Dr. Sato said my labels were "acceptable". I'm framing that.   #funny
+? mood:low
+- No joke today. Bad night. Tomorrow's will be twice as bad, to make up.
+== near
+? act:breakfast
+- Karin's joke today was worse than mine. I'm furious. And proud.   #funny
+? habit:music
+- Music room, then sleep. Night shift lives backwards. It works, mostly.
+== life
+? tier>=acquaintance
+- I ran a market stall on the Ostrander colonies. I still sell ideas. Nobody buys.   #funny
+== joy
+? tier>=colleague
+- My list of star names. For stars nobody's found yet. Somebody has to be ready.

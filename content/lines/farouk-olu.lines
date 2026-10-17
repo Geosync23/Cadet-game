@@ -1,0 +1,27 @@
+@crew farouk-olu
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Hello. Farouk, comms. I'll know your voice on the channel before long.
+? tier>=acquaintance
+- Oh, hello, {me}. Heard you on the board this morning. Clear. Good.
+- Hi there, {me}. That song you're humming. The second line's wrong. Sorry.   #funny
+? tier>=friend
+- Hello, {me}. Your voice is one of the ones I listen for. I like hearing it.   #warm
+== feel
+? mood:high
+- Clear channels all day. Every voice came through like you were in the room.
+? mood:low
+- Long shift. So many tired voices. Mine too. Early to bed tonight.
+== near
+? habit:tea-break
+- Tea break. Five minutes of nobody talking in my ear. It's lovely.
+? act:leisure
+- The record cabinet. I know every song in it. Quietly. Unlike some.   #funny
+== life
+? tier>=acquaintance
+- I ran a market stall on Lisk. Fair trades only. A good message is a fair trade, too.
+== joy
+? tier>=colleague
+- The record cabinet's songs. With the right words. I'll sing you one, quietly.
