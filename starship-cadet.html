@@ -7387,7 +7387,7 @@ function onSim(kind, fn) {
 }
 function simNote(kind, data) {
   const now = typeof SHIP !== 'undefined' && SHIP.time ? (SHIP.time.day - 1) * 1440 + SHIP.time.min : 0;
-  const t = data && typeof data === 'object' && isFinite(data.t) ? data.t : now;   // a sender may say when it happened (section 17's hours, run late)
+  const t = data && typeof data === 'object' && Number.isFinite(data.t) ? data.t : now;   // a sender may say when it happened (section 17's hours, run late)
   let note;                                              // a plain copy, so it always saves: an object that won't (a walker, a cycle) drops the note
   try { note = Object.assign(JSON.parse(JSON.stringify(data && typeof data === 'object' ? data : {})), { kind, t }); }
   catch (e) { if (typeof DEBUG !== 'undefined' && DEBUG) console.warn('simNote ' + kind + ': data is not plain JSON; note dropped'); return null; }
@@ -7859,7 +7859,7 @@ function apptReply(p, a) {
 function apptWhere(p, t) {
   for (const a of apptList()) {
     if (!apptOn(a) || !a.with.includes(p.id)) continue;
-    const end = a.at + (a.status === 'kept' ? (a.len || 30) : APPT_WAIT), pl = apptPlace(a); if (!pl) continue;
+    const end = a.at + (a.status === 'kept' || a.occ ? (a.len || 30) : APPT_WAIT), pl = apptPlace(a); if (!pl) continue;   // an occasion's host (section 18 via apptAdd, `occ`) stays the whole time, you or no you (0.26.34)
     // they set off in time to be there at a.at: the walk from the lift (about 1.3 x the straight line, at CREW_SPEED)
     const lift = DECKS[pl.deck].lift || pl.at, walk = Math.ceil(1.3 * Math.hypot(pl.at[0] - lift[0], pl.at[1] - lift[1]) / 1.15 * SHIP_RATE) + 1;   // ship minutes
     const go = a.at - walk, C = SCHED_COMMUTE;
@@ -12847,7 +12847,7 @@ const CART_RUNS = new Map(), CART_PENDING = [];         // food runs set by cart
 const SIM_Q = [];
 // each stamped with when it happened: the hour being run (SIM_AT, set by machinesNow's loop), else now (your own actions)
 let SIM_AT = null;
-const simLater = (kind, d) => { if (typeof simNote === 'function') SIM_Q.push([kind, { ...(d || {}), t: d && isFinite(d.t) ? d.t : SIM_AT != null ? SIM_AT : shipNow() }]); };
+const simLater = (kind, d) => { if (typeof simNote === 'function') SIM_Q.push([kind, { ...(d || {}), t: d && Number.isFinite(d.t) ? d.t : SIM_AT != null ? SIM_AT : shipNow() }]); };
 function simFlush() { while (SIM_Q.length) { const [k, d] = SIM_Q.shift(); simNote(k, d); } }
 let MACH_HOUR = null, MACH_SEEN = -1, MACH_REV = 0;     // the first ship hour not yet run; the last time asked; a counter of changes
 const machFresh = m => Math.round((70 + 30 * schedU(m.seed, 0, 1)) * 10) / 10;   // a new game: 70-100, a few already worn
@@ -30383,7 +30383,11 @@ class CrewAgent {
     if (!m) {                                            // first seen during the meal: from the queue, or already eating
       const q = lineSeg(w);
       m = this.meal = { key, served: !q, tray: false };
-      if (!q) { const pv = whereIs(this.p, w.from - .01); m.tray = !!(pv && pv.act === w.act && lineSeg(pv)) && trayTo(w.placeId); }
+      if (!q) {
+        const pv = whereIs(this.p, w.from - .01), queued = !!(pv && pv.act === w.act && lineSeg(pv));
+        if (queued && trayTo(w.placeId) && roomAt(...this.here()) !== 'M') m.served = false;   // up late (out of the lift): the line first, so a tray's only ever in the mess hall (the performance engineer, 0.26.34)
+        else m.tray = queued && trayTo(w.placeId);
+      }
     }
     if (!m.served) return this.mealLine(now);
     if (m.next !== undefined && lineSeg(w)) {            // served before the plan's queue time is up
@@ -30513,6 +30517,43 @@ function deckCrewFill() {
   PLACE_OF = new Map((deckDef.places || []).map(p => [p.id, p])); SPOT_OF = new Map();
   const now = shipNow(), N = deckDef.num;
   for (const p of schedPeople()) { const w = whereIs(p, now); if (w.deck === N) crewArrive(p, w, now, true); }
+  lineCatchUp(now);
+}
+// a mid fill on the way to the servery line (0.26.34, player engineer 4: a scene started at 07:12 had 21 in the line,
+// all set off at once): when each would have reached the line, walking from where they set off; then the line played
+// forward to now, a serving at a time. Served: on to their seat, partway; still waiting: in their place in the line;
+// not there yet: partway along. So a deck entered mid-meal looks like one watched from the start
+const LINE_CATCH = [];
+function lineCatchUp(now) {
+  const L = LINE_CATCH.splice(0); if (!L.length) return;
+  const serve = typeof galleyServeMins === 'function' ? galleyServeMins(now) : LINE_SERVE;
+  const rows = L.map(([a, w]) => {
+    let s = w; for (let k = 0; k < 4; k++) { const pv = whereIs(a.p, s.from - .01); if (!pv || !lineSeg(pv) || pv.act !== w.act) break; s = pv; }   // when they set off for it
+    a.retarget(lineSpotId(0));
+    return { a, w, off: s.from, arrive: s.from + a.path.length / CREW_SPEED * SHIP_RATE };
+  }).sort((x, y) => x.arrive - y.arrive || (x.a.p.id < y.a.p.id ? -1 : 1));
+  let free = -Infinity;
+  for (const { a, w, off, arrive } of rows) {
+    a.meal = { key: w.act + Math.floor(w.from / 1440), served: false, tray: false };
+    if (arrive > now) {                                  // still walking
+      const done = Math.floor((now - off) / SHIP_RATE * CREW_SPEED);
+      if (done > 0 && done < a.path.length) { const c = cellPos(...a.path[done - 1]); a.x = c.x; a.z = c.z; a.path = a.path.slice(done); }
+      continue;
+    }
+    const t = (free = Math.max(arrive, free) + serve); LINE_LOG.joined++;
+    if (t <= now) {                                      // served already: from the counter towards their seat
+      const c = placeSpot(lineSpotId(0)); a.served(w, t); a.path = []; a.spot = null; a.settled = false; a.goalId = undefined;
+      if (c) { a.x = c.x; a.z = c.z; }
+      const goal = a.meal.next; if (!goal || goal === '@lift') continue;
+      a.retarget(goal); const sp = placeSpot(goal), done = Math.floor((now - t) / SHIP_RATE * CREW_SPEED);
+      if (sp && a.path.length && done >= a.path.length) { a.path = []; a.x = sp.x; a.z = sp.z; a.settled = true; a.pose = crewPose(a); a.face = sp.face; a.y = sp.y; }
+      else if (done > 0 && done < a.path.length) { const q = cellPos(...a.path[done - 1]); a.x = q.x; a.z = q.z; a.path = a.path.slice(done); }
+      continue;
+    }
+    const k = LINE.length, id = lineSpotId(k), sp = id && placeSpot(id);   // waiting: their place in the line
+    LINE.push(a.p.id); a.lineAt = now; LINE_LOG.long = Math.max(LINE_LOG.long, LINE.length);
+    if (sp) { a.retarget(id); a.path = []; a.x = sp.x; a.z = sp.z; a.settled = true; a.face = sp.face; a.pose = 'stand'; }
+  }
 }
 function crewArrive(p, w, now, mid) {
   const N = deckDef.num, lift = liftTiles();
@@ -30532,6 +30573,7 @@ function crewArrive(p, w, now, mid) {
   const prevSpot = prev && prev.deck === N && prev.placeId && placeSpot(prev.placeId);
   const start = prevSpot ? prevSpot.walk : lift.length ? lift[idHash(p.id) % lift.length] : nearestOpen(LIFT_AT[0], LIFT_AT[1], null);
   const a = new CrewAgent(p, start); DECK_CREW.push(a);
+  if (mid && N === 3 && lineSeg(w) && (w.act === 'breakfast' || w.act === 'dinner')) { LINE_CATCH.push([a, w]); return; }   // placed by lineCatchUp, in line order
   a.retarget(w.placeId || null);
   if (!mid || !spot || !a.path.length) return;
   const done = Math.floor((now - w.from) / SHIP_RATE * CREW_SPEED);   // tiles walked since they set off
