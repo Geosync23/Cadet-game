@@ -215,8 +215,8 @@
 
 // ---- Day 0: the arrival tour (head writer 3, 0.48.22; cut to five stops in 0.48.54 after the user played 0.60.3).
 // Each stop plays walk.<stop>.1, .2, ... IN ORDER (about 5 s apart) when you and Torres are near it; one flag key
-// per line, so lineFor returns exactly that line. Stops in walking order: shuttle, works, lift, wing, servery (the
-// other points have no core lines now: he walks straight past). Core = what a newcomer needs: who he is and where
+// per line, so lineFor returns exactly that line. Order (0.48.55, the user's note): shuttle greeting, then
+// works as walk-and-talk to the lift, lift, wing (your bunk: the first stop), servery. The other points are quiet. Core = what a newcomer needs: who he is and where
 // you're going, the Operations deck and the Chief, how the ship runs, your room, the mess. Everything else is in
 // walk.extra.<point>.<n>: heard only if you tap him to ask at that point. walk.call.<n>: his "this way" when you
 // lag. walk.more.<n>: linger lines about himself. No scarf (beat 1), no father, no list. introDinner tells how a
@@ -229,21 +229,23 @@
   - I've been assigned as your welcome guide.   #warm
 ? flag:walk.shuttle.3
   - Follow me, I'll show you to your room. Then we'll get some dinner.
-// stop: works
+// walk-and-talk: works (said on the way past Works to the lift, no stop)
 ? flag:walk.works.1
-  - Deck 5's Operations. And this bit's Works. That's us.
+  - Deck 5's Operations. Works is through there. That's us.
 ? flag:walk.works.2
-  - Glass office is the Chief's. Calder. Exact, but fair.
+  - The glass office is the Chief's. Calder. Exact, but fair.
 ? flag:walk.works.3
-  - Faults go on that board. Take one, fix it, turn it in.
+  - Faults go on the board. Take one, fix it, turn it in.
 // stop: lift
 ? flag:walk.lift.1
   - Six decks. Bridge flies her, Works keeps her going.
 ? flag:walk.lift.2
   - Four, please. Go on, the panel's all yours.
-// stop: wing
+// stop: wing (the bunk, Room One: his first stop after the greeting)
 ? flag:walk.wing.1
-  - Deck 4, quarters. You're in One. Washrooms just there.
+  - Room One. This is you. This is where you sleep.   #warm
+? flag:walk.wing.2
+  - Locker's yours. Washrooms are just down the hall.
 // stop: servery
 ? flag:walk.servery.1
   - Tray first, then take what smells best. I'll find a table.

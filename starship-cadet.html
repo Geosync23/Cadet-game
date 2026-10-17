@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.48.54
+   STARSHIP CADET: CSV Wren                           build 0.48.55
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.48.54';                           // keep in step with the header's build line
+const GAME_BUILD = '0.48.55';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -21505,12 +21505,13 @@ const VOICE = {
         {"text": "Hello, {me}! Welcome aboard! My name is Zeke.", "id": "1vhra9x", "flag": "walk.shuttle.1"},
         {"text": "I've been assigned as your welcome guide.", "id": "1t9qx12", "tone": "warm", "flag": "walk.shuttle.2"},
         {"text": "Follow me, I'll show you to your room. Then we'll get some dinner.", "id": "1wtdif6", "flag": "walk.shuttle.3"},
-        {"text": "Deck 5's Operations. And this bit's Works. That's us.", "id": "1uzka7", "flag": "walk.works.1"},
-        {"text": "Glass office is the Chief's. Calder. Exact, but fair.", "id": "1pk79fx", "flag": "walk.works.2"},
-        {"text": "Faults go on that board. Take one, fix it, turn it in.", "id": "175l6lt", "flag": "walk.works.3"},
+        {"text": "Deck 5's Operations. Works is through there. That's us.", "id": "msjzza", "flag": "walk.works.1"},
+        {"text": "The glass office is the Chief's. Calder. Exact, but fair.", "id": "q8f52u", "flag": "walk.works.2"},
+        {"text": "Faults go on the board. Take one, fix it, turn it in.", "id": "1smud1v", "flag": "walk.works.3"},
         {"text": "Six decks. Bridge flies her, Works keeps her going.", "id": "197zfie", "flag": "walk.lift.1"},
         {"text": "Four, please. Go on, the panel's all yours.", "id": "ayonit", "flag": "walk.lift.2"},
-        {"text": "Deck 4, quarters. You're in One. Washrooms just there.", "id": "1arxs3b", "flag": "walk.wing.1"},
+        {"text": "Room One. This is you. This is where you sleep.", "id": "f9nc75", "tone": "warm", "flag": "walk.wing.1"},
+        {"text": "Locker's yours. Washrooms are just down the hall.", "id": "189wvb9", "flag": "walk.wing.2"},
         {"text": "Tray first, then take what smells best. I'll find a table.", "id": "l727bc", "flag": "walk.servery.1"},
         {"text": "That's the Tern behind you. She brought you the whole way.", "id": "1joz0o3", "flag": "walk.extra.shuttle.1"},
         {"text": "Long trip? I bet. Tell me all about it at dinner.", "id": "8pwvkd", "flag": "walk.extra.shuttle.2"},
