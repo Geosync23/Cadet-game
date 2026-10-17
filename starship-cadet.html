@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.27.25
+   STARSHIP CADET: CSV Wren                           build 0.27.26
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -2813,6 +2813,25 @@ function shadowStandIns() {
     mesh.matrixAutoUpdate = false; mesh.raycast = () => {}; deckRoot.add(mesh); SHADOW_PROXY.push({ mesh, follow: b.follow, vis: b.vis });
   }
 }
+// 0.27.26: three.js recomputes every object's place in the world every frame unless told it doesn't move. After the
+// build, the furniture (staticRoot), the tall pieces (TALL) and the wall pieces (WALL_DECOR) are marked so
+// (matrixAutoUpdate off, their matrix computed once), except anything that moves: noMerge parts and everything under
+// them (gym seats, the punch bag, rotors), SPINS targets, STEAM puffs, and the groups that hold any of those. Hull, doors, curved
+// walls and void blocks change size with the cutaway and are left alone. Children added later keep updating themselves.
+function freezeStill() {
+  const keep = new Set();
+  const mark = o => { for (let p = o; p && p !== deckRoot; p = p.parent) keep.add(p); };
+  for (const sp of SPINS) if (sp.o && sp.o.isObject3D) mark(sp.o);
+  for (const st of STEAM) mark(st.s);                   // steam puffs rise every frame
+  const roots = [staticRoot, ...TALL.map(t => t.g), ...WALL_DECOR.map(d => d.g)];
+  for (const r of roots) r.traverse(o => { if (o.userData.noMerge) mark(o); });
+  const freeze = o => {
+    if (o.userData.noMerge) return;                     // it, and all under it, keep moving
+    if (!keep.has(o)) { o.updateMatrix(); o.matrixAutoUpdate = false; }
+    for (const c of o.children) freeze(c);
+  };
+  for (const r of roots) freeze(r);
+}
 const shownChain = o => { for (let p = o; p; p = p.parent) if (!p.visible) return false; return true; };
 { const sm = renderer.shadowMap, draw = sm.render.bind(sm);   // the stand-ins show only to the shadow pass, each where its original is
   sm.render = (...a) => {
@@ -3291,6 +3310,7 @@ function buildDeck(def) {
   for (const d of WALL_DECOR) mergeMeshes(d.g);
   for (const hr of HULL_RUNS) mergeMeshes(hr.decor);
   shadowStandIns();                                      // 0.27.25: shadows drawn from a few stand-ins, not every piece
+  freezeStill();                                         // 0.27.26: furniture and wall pieces stop recomputing their place every frame
   for (const it of ITEMS) it.hit.userData.item = it;
 }
 // Working-deck floor markings: gold-and-charcoal bands across every doorway onto a steel floor,
@@ -7390,7 +7410,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.27.25';                           // keep in step with the header's build line
+const GAME_BUILD = '0.27.26';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
