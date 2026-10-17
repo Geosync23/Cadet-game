@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.27.30
+   STARSHIP CADET: CSV Wren                           build 0.27.31
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7410,7 +7410,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.27.30';                           // keep in step with the header's build line
+const GAME_BUILD = '0.27.31';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -30261,6 +30261,7 @@ function updateRide(dt) {
 // =====================================================================
 // 12. MAIN LOOP
 // =====================================================================
+const HRUN_EDGES = { of: null, n: -1, list: [] };          // 0.27.31: see the wall cut below
 const clock = new THREE.Clock(); let scrT = 0;
 function loop() {
   const dt = Math.min(clock.getDelta(), .05), t = clock.elapsedTime;
@@ -30286,10 +30287,11 @@ function loop() {
     : wallsMode === 'up' ? false : wallsLow || (r.out && r.out[0] * cx + r.out[1] * cz > .3) || r.edges.some(hides);
   for (const e of edgeList) e.s += ((e.run.cut ? .12 : 1) - e.s) * k7;
   for (const c of CURVES) if (c.run) { c.s += ((c.run.cut ? .12 : 1) - c.s) * k7; c.g.scale.y = c.s; }
-  for (const p of POSTS) p.s = Math.max(...p.touch.map(e => e.s));
+  for (const p of POSTS) { let m = -Infinity; for (let i = 0; i < p.touch.length; i++) m = Math.max(m, p.touch[i].s); p.s = m; }   // 0.27.31: no array each frame
   writeWalls();
   for (const hr of HULL_RUNS) { hr.s += ((hr.cut ? .12 : 1) - hr.s) * k7; hr.g.scale.y = hr.s; hr.decor.visible = hr.s > .9; }
-  for (const e of EDGES.values()) if (e.hrun) e.s = e.hrun.s;
+  if (HRUN_EDGES.of !== EDGES || HRUN_EDGES.n !== EDGES.size) { HRUN_EDGES.of = EDGES; HRUN_EDGES.n = EDGES.size; HRUN_EDGES.list = [...EDGES.values()].filter(e => e.hrun); }
+  for (const e of HRUN_EDGES.list) e.s = e.hrun.s;       // 0.27.31: the edges that follow a hull run, listed once per deck (was a Map walk each frame)
   for (const d of DOOR_OBJS) d.g.scale.y = d.e.s;
   for (const t of TALL) {                              // tall furniture fades when it would hide you
     const hides = t.pts.some(p => { const dep = (p.x - pp.x) * cx + (p.z - pp.z) * cz; return dep > .3 && dep < 4.5 && Math.abs((p.x - pp.x) * rx + (p.z - pp.z) * rz) < .5 + p.w / 2; });
@@ -30305,7 +30307,7 @@ function loop() {
   for (const d of WALL_DECOR) d.g.visible = d.e ? d.e.s > .9 : true;
   for (const v of VOID_BLOCKS) {
     const b = v.m.geometry.boundingBox || (v.m.geometry.computeBoundingBox(), v.m.geometry.boundingBox);
-    const near = Math.max(...[[b.min.x, b.min.z], [b.max.x, b.min.z], [b.min.x, b.max.z], [b.max.x, b.max.z]].map(([x, z]) => (v.cx + x - pp.x) * cx + (v.cz + z - pp.z) * cz));
+    const dep = (x, z) => (v.cx + x - pp.x) * cx + (v.cz + z - pp.z) * cz, near = Math.max(dep(b.min.x, b.min.z), dep(b.max.x, b.min.z), dep(b.min.x, b.max.z), dep(b.max.x, b.max.z));
     v.s += ((wallsLow || (wallsMode === 'auto' && near > .25) ? .12 : 1) - v.s) * k7; v.m.scale.y = v.s;
   }
 
