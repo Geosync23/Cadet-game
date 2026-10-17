@@ -327,7 +327,9 @@ def run(path):
               deviceShow('home'); out.home = document.getElementById('devBody').textContent.includes('Settling in: 1 of ' + L.length);
               if (real) { const endF = introEnd; window.__endCalls = 0; }
               deviceShow('settle'); const endB = () => [...document.querySelectorAll('#devBody .btns .act')].find(b => /way around|end the welcome/.test(b.textContent));
-              endB().click(); out.firstTap = /end the welcome/.test(endB().textContent); endB().click();
+              endB().click(); out.firstTap = /end the welcome/.test(endB().textContent);
+              deviceShow('home'); deviceShow('settle'); out.reset = /way around/.test(endB().textContent);   // 0.35.24: leaving clears the confirm
+              endB().click(); endB().click();
               out.ended = real ? !!SHIP.intro.ended : !!window.__ended;
               SHIP.intro.settle = { all: 1 }; out.hiddenWhenAll = !deviceApps().some(a => a.id === 'settle');
               deviceShow('home');
@@ -336,7 +338,7 @@ def run(path):
             print('  arrival:', ar)
             check(ar.get('locked') == [False, True] and ar.get('bootReset') and ar.get('boot') == [True, 'boot', True] and ar.get('second') == 'home'
                   and ar.get('listed') and ar.get('count') and ar.get('done') and ar.get('go') and ar.get('goal') and ar.get('home')
-                  and ar.get('firstTap') and ar.get('ended') and ar.get('hiddenWhenAll'), f'the arrival: locked, the first switch-on once, Settling in, the end button: {ar}')
+                  and ar.get('firstTap') and ar.get('reset') and ar.get('ended') and ar.get('hiddenWhenAll'), f'the arrival: locked, the first switch-on once, Settling in, the end button: {ar}')
             # deviceChoose (0.35.23): a question in the panel's style (section 13's New game asks it); the choice's index, -1 for
             # Not now and for the ×; the panel goes
             ch = g.ev("""(() => { const got = [], q = { title: 'New game', text: 'How do you want to start?', choices: ['Arrive by shuttle (Sunday evening)', 'Skip to Monday morning'] };
@@ -366,9 +368,16 @@ def run(path):
               deviceShow('roster'); const ro = document.getElementById('devBody').textContent; out.left = ro.includes('Left the Wren') && !rosterPeople().some(x => x.p.id === 'pell');
               if (keepSoc) { const k = JSON.parse(keepSoc); if (own.keep) { if (k.k) SHIP.social.keepsakes = k.k; else delete SHIP.social.keepsakes; } if (own.moved) { if (k.m) SHIP.social.moved = k.m; else delete SHIP.social.moved; } }
               for (const n of ['seasonOf', 'repView', 'keepsakes', 'movedOn', 'movedOff']) if (Object.prototype.hasOwnProperty.call(window, n)) delete window[n];
+              // 0.35.24 (reviewer 2): rows with missing fields don't break the pages
+              if (own.keep) (SHIP.social.keepsakes = SHIP.social.keepsakes || []).push({ from: 'tomas' }); else window.keepsakes = () => [{ from: 'tomas' }, null];
+              if (own.moved) (SHIP.social.moved = SHIP.social.moved || []).push({ id: 'pell' }); else window.movedOn = () => [{ id: 'pell' }, null];
+              deviceShow('wallet'); out.keepBad = !document.getElementById('devBody').textContent.includes('failed to draw');
+              deviceShow('roster'); out.movedBad = !document.getElementById('devBody').textContent.includes('failed to draw');
+              if (keepSoc) { const k = JSON.parse(keepSoc); if (own.keep) { if (k.k) SHIP.social.keepsakes = k.k; else delete SHIP.social.keepsakes; } if (own.moved) { if (k.m) SHIP.social.moved = k.m; else delete SHIP.social.moved; } }
+              for (const n of ['keepsakes', 'movedOn']) if (Object.prototype.hasOwnProperty.call(window, n)) delete window[n];
               deviceShow('home'); out.own = own; return out; })()""")
             print('  pillar 4 pages:', p4)
-            check(all(p4.get(k) for k in ['home', 'cal', 'rep', 'keep', 'left']), f'season on Home and Calendar, reputation, keepsakes, Left the Wren: {p4}')
+            check(all(p4.get(k) for k in ['home', 'cal', 'rep', 'keep', 'left', 'keepBad', 'movedBad']), f'season on Home and Calendar, reputation, keepsakes, Left the Wren: {p4}')
             g.ev("deviceClose(); window.__opens = 0"); g.step(1)
             # never opens by itself (0.35.15, the user: "sometimes it just pops up"): a whole ship day of reminders, tips,
             # notices, an address, the meeting panel and an invitation, and a drag up from the bottom edge (the old swipe)

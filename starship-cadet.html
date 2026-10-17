@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.35.23
+   STARSHIP CADET: CSV Wren                           build 0.35.24
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.35.23';                           // keep in step with the header's build line
+const GAME_BUILD = '0.35.24';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -8461,6 +8461,7 @@ function deviceShow(id) {
   if (!DEV.open && devLocked()) { try { if (typeof deviceLockedTap === 'function') deviceLockedTap(); } catch (e) { /* section 15's */ } return; }
   if (!DEV.open && !SHIP.device.booted && devTry(() => SHIP.intro && SHIP.intro.on && !SHIP.intro.skipped)) { SHIP.device.booted = true; id = 'boot'; }
   if (!DEVICE_APPS.has(id)) id = 'home';
+  if (id !== 'settle') settleSure = false;               // 0.35.24 (reviewer 2): the end-the-welcome confirm never outlives the screen
   DEV.app = id; delete DEV.notes[id];
   if (!DEV.open) { DEV.open = true; DEVICE_SKIN.open(); deviceFrame(!DEVICE_SKIN.wide()); deviceFire('open');
     tipShow('device', 'Your device: Schedule and Calendar for your day, Maps to find your way, Jobs to track your work, Mail and Memos, Needs for how you feel.'); }
@@ -8820,7 +8821,7 @@ deviceApp({ id: 'home', title: 'Home', icon: 'home', order: 0, view: () => {
 // Schedule: today as a timeline, with where you're expected right now; tomorrow below. A day picked in the Calendar
 // (0.35.10: { app: 'schedule', day }) shows instead of tomorrow until the device closes.
 let schedDay = null;
-deviceOn('close', () => { schedDay = null; if (typeof mapFor !== 'undefined') mapFor = null; });
+deviceOn('close', () => { schedDay = null; if (typeof mapFor !== 'undefined') mapFor = null; if (typeof settleSure !== 'undefined') settleSure = false; });
 deviceApp({ id: 'schedule', title: 'Schedule', icon: 'schedule', order: 10,
   act(verb, arg) { if (verb === 'open' && arg && Number.isInteger(arg.day)) schedDay = arg.day > SHIP.time.day ? arg.day : null; else if (verb === 'today') schedDay = null; },
   view: () => {
@@ -9022,7 +9023,9 @@ deviceApp({ id: 'roster', title: 'Roster', icon: 'crew', order: 52,
     for (const [d, title] of ROSTER_DEPTS) group(title, rest.filter(x => x.p.dept === d).sort(byName));
     group('Others aboard', rest.filter(x => !known.has(x.p.dept)).sort(byName));
     let gone = []; try { gone = typeof movedOn === 'function' ? movedOn() || [] : []; } catch (e) { gone = []; }   // 0.35.22: section 20's movedOn
-    if (gone.length) B.push({ kind: 'text', text: 'Left the Wren', mark: 'head' }, { kind: 'list', rows: gone.map(x => ({ text: x.name, sub: (x.role || '') + ' · left on Day ' + x.day + (x.to ? ', for ' + x.to : ''), mark: 'past' })) });
+    gone = gone.filter(x => x && typeof x === 'object');
+    if (gone.length) B.push({ kind: 'text', text: 'Left the Wren', mark: 'head' }, { kind: 'list', rows: gone.map(x => ({ text: String(x.name || x.id || 'Someone'),
+      sub: [x.role, isFinite(x.day) ? 'left on Day ' + x.day : 'left the ship'].filter(Boolean).join(' · ') + (x.to ? ', for ' + x.to : ''), mark: 'past' })) });
     if (!ps.length) B.push({ kind: 'text', text: 'No crew list yet.' });
     return { title: 'Roster', blocks: B };
   } });
@@ -9337,7 +9340,9 @@ deviceApp({ id: 'wallet', title: 'Wallet', icon: 'wallet', order: 90, view: () =
   const P = SHIP.player;
   const B = [{ kind: 'text', text: P.credits + ' credits.' + (P.locker.length ? ' In your locker: ' + P.locker.join(', ') + '.' : ' Your locker is empty.') }];
   let ks = []; try { ks = typeof keepsakes === 'function' ? keepsakes() || [] : []; } catch (e) { ks = []; }   // gifts from friends (0.35.22, section 20)
-  if (ks.length) B.push({ kind: 'text', text: 'Keepsakes', mark: 'head' }, { kind: 'list', rows: ks.map(k => ({ text: k.what.charAt(0).toUpperCase() + k.what.slice(1), sub: 'From ' + (k.name || k.from) + (k.day ? ', Day ' + k.day : '') })) });
+  ks = ks.filter(k => k && typeof k === 'object');      // 0.35.24 (reviewer 2): a row with a missing field never breaks the page
+  if (ks.length) B.push({ kind: 'text', text: 'Keepsakes', mark: 'head' }, { kind: 'list', rows: ks.map(k => { const w = String(k.what || 'a keepsake');
+    return { text: w.charAt(0).toUpperCase() + w.slice(1), sub: 'From ' + (k.name || k.from || 'a friend') + (isFinite(k.day) ? ', Day ' + k.day : '') }; }) });
   return { title: 'Wallet', blocks: B };
 } });
 
