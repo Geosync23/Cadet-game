@@ -2,6 +2,20 @@
 
 Written at 0.40.8 (merged up to claude/ship-integration 980e6a9), brought up to date at 0.27.18 (on ship-integration d89a3f5 / 0.41.7) and again at 0.27.22, 0.27.27 and 0.27.32 by the second performance engineer (session_01XAkY9U3mmstHQT2yAMTocA; claude/crowd-render abe6d2b, on ship-integration 0.60.2 / 142b503). Plain notes for whoever picks this area up.
 
+## Read first: state at handover (2026-10-17 ~13:40, the second performance engineer)
+- **Branch:** `claude/crowd-render`. The last build is 0.27.32 (abe6d2b); handover notes are on top of it. All of 0.27.25–0.27.32 passed review by reviewer 2b (session_01F93LiFWtciyCLNV34qPsjP; notes in plans/reviews/ on claude/reviews-2). None of them are in the 0.60.3 candidate (claude/cand-0603 f0f8a7c). I recommended merging abe6d2b into 0.60.4; the only conflicts are the two build lines.
+- **First job for the next performance session: 0.27.33, stand-ins built over a few frames on a deck change** (the plan is below, under Slow frames, "Next job"). The lead approved it on 2026-10-17. The picture must be identical at every moment.
+- **0.60.3 candidate 2, measured** (CPU slowed 4×, an hour in the mess, game code only, two runs). Figures are 0.60.2 → 0.60.3 → 0.60.3 + crowd-render:
+  - Sunday dinner, average frame: 6.5–6.8 → 6.8–7.2 → 4.5–4.9 ms.
+  - Sunday dinner, frames over 16.7 ms an hour: 51–62 → 44–60 → 10–12.
+  - Sunday dinner, frames over 33 ms an hour: 6–13 → 9 → 1–2.
+  - Breakfast, average frame: 4.1 → 5.2–5.4 (45 crew, against 26) → 3.0–3.2 ms.
+  - Breakfast, frames over 16.7 ms an hour: 18–20 → 43–48 → 4–6.
+  - Load at 4×: about 11.5–12 s for all three. perf_check: PASS; the file grows 2.96 → 3.29 MB.
+  - Sent to the lead and to build master 2 (session_01F8ph7FKqViF3heRn94YgBr).
+- **Waiting on others:** section 10/14 garbage (`crewNearDoor`, `whereIs`/`shipDay`) is with sim engineer 4, now handing over, for after 0.60.4. Re-measure it with alloc.py's method (below) when their successor asks.
+- **Watchdog role:** continue it. For each combined build, run perf_check NEW OLD, plus the phone-like runs if the lead wants numbers for the user.
+
 ## Role, branch, builds
 - **Role:** making many crew cheap to draw (Pillar 1, workstream 5) and giving them activity poses and props (Pillar 2, A2). I also cut Deck 6's draw calls.
 - **Branch:** `claude/crowd-render`. Lead merges it into `claude/ship-integration`.
@@ -63,7 +77,7 @@ Items 3, 1, 2 and 2b of the plan are done. Item 4 (dialogue as JSON.parse) was d
 - **0.27.26, freezeStill()** (4c, after shadowStandIns): the staticRoot, TALL and WALL_DECOR subtrees stop recomputing their matrices (`matrixAutoUpdate = false`). Kept moving: noMerge subtrees, SPINS targets and their ancestors, STEAM puffs (freezing them changed 8 shots on Decks 3 and 6). Gain was small (scene matrix update 0.35 → 0.33 ms), which is why 2b followed.
 - **0.27.27, posing only who's on screen** (8b, `crowd.update`): see the DEV_NOTES row. `CROWD_POSE_EVERY` (10) and `CROWD_POSE_MARGIN` (4 m). Always posed: talking/esc agents, `fresh`, dirty chunks, and everyone after the camera turns (`az` moves) or zooms. Crowd posing at Sunday dinner 1.07 → 0.41 ms (desktop). The sim can't tell: a fingerprint of crew positions, poses and `R()` matches across builds (scratchpad probe simeq.py: skipTo Sunday 18:20, Deck 3, six zooms × 150 frames, md5 of `[R(), DECK_CREW.map(a => [pos, pose])]`).
 - **How I measure:** `perf_check.py` (js = game code per frame, the best of 3 batches, counted after one drawn frame so the ship time doesn't drift). Chrome's CPU throttle gave no steady numbers headless, so phone times are desktop × 4 to 5. Don't run perf_check at the same time as other checks: load times jump (6.8 → 9.7 s seen) and js gets noisy. For a crowd micro-benchmark, time `crowd.update(1/30, 10)` 100 times in the page.
-- **Reviews (reviewer 2b, session_01F93LiFWtciyCLNV34qPsjP):** 0.27.25, 0.27.26 and 0.27.27 PASS (notes on claude/reviews-2). 0.27.28 PASS (it mirrored the GPU buffers: 0 mismatches). 0.27.29, 0.27.30 and 0.27.31 PASS; 0.27.32 sent.
+- **Reviews (reviewer 2b, session_01F93LiFWtciyCLNV34qPsjP):** 0.27.25, 0.27.26 and 0.27.27 PASS (notes on claude/reviews-2). 0.27.28 PASS (it mirrored the GPU buffers: 0 mismatches). 0.27.29 to 0.27.32 PASS.
 
 ## Slow frames (0.27.28 to 0.27.30, the lead's "find the spike source")
 - **Method:** a scratch combine (a local worktree, never pushed: 0.60.2 + sim + galley + my builds; build lines resolved to mine). A CPU profile of only the frames over 4 ms: CDP Profiler at 100 µs, aligned to the page by a named busy marker function (`MARKFN`), 3,000 frames with drawing skipped (one ship hour), in the mess at Sunday dinner (6*1440+18*60+25) and Tuesday breakfast (1440+7*60+5). Garbage: `HeapProfiler.startSampling` over 1,500 frames, by function. The scripts are in the scratchpad (pspike.py, spike.py, alloc.py, fpstat.py, rbwhy.py, arrive.py) and are not committed: re-create them from this description if needed.
@@ -91,7 +105,6 @@ Items 3, 1, 2 and 2b of the plan are done. Item 4 (dialogue as JSON.parse) was d
   - Keep the `onUpload` array release.
   - Check: cadet_test identical, the 48-shot all-deck comparison, deck_check memory flat over round trips, and that `unloadDeck` mid-build leaves nothing behind.
   - Measure with scratchpad ssi.py (wrap `shadowStandIns`/`freezeStill`, time each `goToDeck`).
-- **In flight (2026-10-17 ~11:40):** the phone-like measurement of the 0.60.3 candidate (claude/cand-0603) against 0.60.2, for the user's morning report via the lead: dinner, breakfast, frames over 16.7/33 ms, 99th percentile, worst frame, load. Start when build master 2 or the lead says the candidate is final.
 
 ## Standing role: phone-speed watchdog (Pillar 4, from 2026-10-17)
 - For each combined attempt the build master (now build master 2, session_01F8ph7FKqViF3heRn94YgBr; first was session_012K7RZ3oSX2vpBb1rR66MBh, claude/integration-test) sends, run `perf_check.py NEW.html OLD.html` (mine, ~5 minutes) and tell the lead PASS or the regressions with the commit that caused them.
