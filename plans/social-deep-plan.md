@@ -619,6 +619,7 @@ No open questions remain on the social side. Numbers (points, half-lives, odds, 
 // 20. SOCIAL (deep, Pillar 4): pure queries (line conditions read only these)
 relTier(id) ; mem(id, key) ; warmth(id) ; affBand(a, b) ; bondOf(id, kind) ; moodOf(p) ; beatOf(arcId)
 knowsNews(p, newsId) ; repBand(dept) ; repShip(kind) ; knownFor() ; cue(kind) ; aboard(id, day)
+inWeek1() ; leavingSoon(id) ; newHere(id) ; movedOff(id) ; memThing(key) ; CALM_TYPES
 // state changes (section 20 only, mostly from bus notes)
 memAdd(crewId, key, { w }) ; memTold(crewId, key)
 socialInvite({ trad | kind, day, from, at, where }) -> appointment id | null
