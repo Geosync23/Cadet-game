@@ -11,7 +11,8 @@ prio: 2
 jitter: 10
 early: 5
 where: 3 room Mess hall: mess-seat
-where: 3 pool @long-table
+where: 3 room Mess hall: @long-table
+where: 3 room Promenade: @long-table
 where: 3 pool mess-seat
 hold: 1
 who: honoree always, friends-of-honoree 85%, everyone 15%
