@@ -230,6 +230,9 @@ with sync_playwright() as pw:
       careerTick(at(15, 0)); out.early = careerClock(at(15, 180)); flagSet('shiftSent', null); SHIP.notes = [];
       const sent = []; const stop = onSim('shiftStart', n => sent.push(n)); careerClock(at(15, 690)); shiftTick(); at(15, 691); shiftTick(); stop();
       out.lateNote = sent.map(n => [n.late, !!n.missed]);
+      careerTick(at(22, 0)); c.ms = 2; careerClock(at(22, 480)); const w1 = careerWork(); careerClock(at(22, 600)); out.earlyDip = Math.round((w1 - careerWork()) * 10) / 10;
+      careerTick(at(22, 760)); careerTick(at(23, 0)); out.shortKeepsRun = c.ms === 2 && c.md !== 22;
+      careerClock(at(23, 480)); careerClock(at(23, 960)); careerTick(at(23, 1000)); careerTick(at(24, 0)); out.fullEndsRun = c.ms === 0;
       c.b.push(16); careerTick(at(16, 500)); out.leave = careerClock(at(16, 500));
       careerTick(at(17, 0)); out.back = careerBack(17);
       const S = schedData(), pl = S.byId.get('5-timeclock-1'), w = SOC.crew.filter(p => p.dept === 'works' && p.shift !== 'night' && isWorkDay(p, 10) && socAboard(p, 10) && planDay(p, 10).some(x => x.act === 'work' && /^5-/.test(x.placeId || '')));   // aboard, stationed on Deck 5
@@ -243,6 +246,8 @@ with sync_playwright() as pw:
     check(r['sat'] is None and r['leave'] is None, 'the clock let you clock in on a day off or on leave')
     check(r['back'], 'the first clock-in after leave is not "back"')
     check(r['early'] is None, 'the clock let you clock in at 03:00')
+    check(r['earlyDip'] > 0 and r['shortKeepsRun'], f"a short shift (out at 10:00): dip {r['earlyDip']}, run kept and no miss: {r['shortKeepsRun']}")
+    check(r['fullEndsRun'], 'a full shift (out at 16:00) did not end the run of missed shifts')
     check(r['lateNote'] == [[210, False]], f"clocking in at 11:30: the shift's start note was {r['lateNote']} (late 210, not missed, wanted)")
     check(r['place'] and r['crew'] and min(r['crew']) >= 1 and sum(1 for n in r['crew'] if n >= 2) >= len(r['crew']) * 3 // 4, f"the Works crew don't use the clock: {r['crew']}")
 

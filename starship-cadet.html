@@ -223,7 +223,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.61.17
+   STARSHIP CADET: CSV Wren                           build 0.61.18
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7577,7 +7577,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.61.17';                           // keep in step with the header's build line
+const GAME_BUILD = '0.61.18';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -27526,7 +27526,7 @@ const movedOff = id => (socInit(), (SHIP.social.moved || []).some(x => x.id === 
 // content/banks/career.lines and each voice's content/career/*.lines).
 // Nothing here calls R().
 const CAREER = { leave: 3, every: 28, max: 5, bookBy: 450, missBy: 750, grace: 7, hitDept: 6, hitWork: 15,
-  chiefRun: 3, chiefLow: 15, captain: 12, clockOut: 1020, autoOut: 1080, clockSeed: 4421, remarkOdds: .5, bottom: 5, rearm: { chief: 40, captain: 25 }, days: 3, worried: 3, sendOff: 4, wait: 3,
+  chiefRun: 3, chiefLow: 15, captain: 12, clockOut: 1020, earlyOut: 900, autoOut: 1080, clockSeed: 4421, remarkOdds: .5, bottom: 5, rearm: { chief: 40, captain: 25 }, days: 3, worried: 3, sendOff: 4, wait: 3,
   chiefAt: 930, captainAt: 660, letGoAt: 600, sendOffAt: 870, seeOff: ['torres-zeke', 'pell', 'calder'] };
 SHIP.career = null;
 (() => { const s = SAVED && SAVED.ship && SAVED.ship.career; if (s && typeof s === 'object' && Number.isInteger(s.l)) SHIP.career = careerClean(s); })();
@@ -27618,6 +27618,7 @@ function careerAtWork() {
 // (clock.in / out / monday / friday / back / late, from content; careerRemark). The Schedule shows today's hours.
 const careerClockedIn = (d = SHIP.time.day) => !!SHIP.career && SHIP.career.ci > 0 && Math.floor(SHIP.career.ci / 1440) + 1 === d;
 const careerClockedOut = (d = SHIP.time.day) => careerClockedIn(d) && SHIP.career.co > SHIP.career.ci;
+const careerFullDay = d => d <= CAREER.grace || !careerClockedIn(d) || !careerClockedOut(d) || SHIP.career.co % 1440 >= CAREER.earlyOut;   // not a short shift (no clock record: the first week, or on paper)
 function careerClock(now = shipNow()) {                  // -> 'in' | 'out' | null, with a toast
   const c = careerInit(now), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
   if (!playerShiftOn(d)) { toast('Time clock', careerOn(d) ? 'You\'re on leave today. No need to clock in.' : sickToday(d) ? 'You\'re off sick. No need to clock in.' : 'No shift today. The clock can wait.'); return null; }
@@ -27628,8 +27629,10 @@ function careerClock(now = shipNow()) {                  // -> 'in' | 'out' | nu
     careerRemark('in', now, m - 480); simNote('clock', { what: 'in' }); return 'in';
   }
   if (careerClockedOut(d)) { toast('Time clock', 'You\'re clocked out for the day.'); return null; }
-  c.co = Math.floor(now); const h = c.co - c.ci; toast('Time clock', 'Clocked out at ' + hhmm(m) + '. ' + Math.floor(h / 60) + 'h ' + String(h % 60).padStart(2, '0') + 'm today.');
-  careerRemark('out', now); simNote('clock', { what: 'out' }); return 'out';
+  c.co = Math.floor(now); const h = c.co - c.ci, early = m < CAREER.earlyOut;
+  if (early) repAdd(null, 0, { work: -2 }, 'early');   // a short shift: a small dip, like being late, never a missed shift (the user's choice, 0.61.18)
+  toast('Time clock', 'Clocked out at ' + hhmm(m) + '. ' + Math.floor(h / 60) + 'h ' + String(h % 60).padStart(2, '0') + 'm today.' + (early ? ' An early finish: it\'s noted.' : ''));
+  careerRemark(early ? 'early' : 'out', now); simNote('clock', { what: 'out' }); return 'out';
 }
 function careerClockTap(it, at) {                        // section 15's PLAYER_TAPS: walk up to the clock and use it
   if (it.t !== 'Time clock' || typeof approach !== 'function') return false;
@@ -27663,7 +27666,7 @@ function careerRemark(what, now, late = 0) {             // a Works crew member 
   const d = Math.floor(now / 1440) + 1; if (CLOCK_SAID[what] === d || schedU(CAREER.clockSeed, Math.floor(now), what === 'in' ? 951 : 952) >= CAREER.remarkOdds) return null;
   const P = player.obj.position, dist = x => Math.hypot(x.x - P.x, x.z - P.z);
   const a = DECK_CREW.filter(x => x.p && x.p.dept === 'works' && dist(x) < 5).sort((x, y) => dist(x) - dist(y))[0]; if (!a) return null;
-  const wd = weekday(d), kinds = what === 'in' ? [careerBack(d) && 'clock.back', late >= 20 && 'clock.late', wd === 0 && 'clock.monday', 'clock.in'] : [wd === 4 && 'clock.friday', 'clock.out'];
+  const wd = weekday(d), kinds = what === 'in' ? [careerBack(d) && 'clock.back', late >= 20 && 'clock.late', wd === 0 && 'clock.monday', 'clock.in'] : what === 'early' ? ['clock.early', 'clock.out'] : [wd === 4 && 'clock.friday', 'clock.out'];
   for (const k of kinds.filter(Boolean)) { const l = socLine(a.p, k, { t: now, tier: relTier(a.p.id) }); if (l) { CLOCK_SAID[what] = d; bubbleSay(a.h, l.text); return k; } }
   return null;
 }
@@ -27675,6 +27678,7 @@ function careerMissed(d) {
 }
 function careerDayEnd(d, now) {                          // a workday ends: at the bottom (after the Captain) or not
   const c = careerInit(); if (c.go != null || !careerRota(d) || careerOff(d)) return;
+  if (c.on === d && careerFullDay(d)) { c.ms = 0; c.ca = 0; }   // a full day's work (a short shift, out before 15:00, counts neither way: the user's choice, 0.61.18)
   c.n = c.st >= 2 && !c.q && careerHeld('careerCaptain', now) && careerWork() < CAREER.bottom ? c.n + 1 : 0;   // only once the reprimand has been held
   if (c.n === 1) { careerTip('bottom'); careerSeek('last', now, now + 1440, CAREER.worried); }
   if (c.n >= CAREER.days) careerLetGo(d + 1, now);
@@ -27726,7 +27730,7 @@ function careerTick(now = shipNow()) {
   if (!(c.k & 8) && m >= 420 && playerShiftOn(d)) { let inBay = false; try { inBay = deckDef.num === 5 && roomAt(...player.here()) === 'w'; } catch (e) { inBay = false; }
     if (inBay && typeof tipShow === 'function') { c.k |= 8; tipShow('career.clock', careerText('career.tip.clock') || 'Clock in at the time clock in the Works bay (past the tool wall) when your shift starts, and out when it ends. Leave and sick days need none.'); } }
   for (let k = Math.min(c.e, c.z) + 1; k <= d; k++) {
-    if (c.e < k && (k < d || m >= CAREER.missBy)) { c.e = k; if (k > CAREER.grace && careerRota(k) && !careerOff(k)) { if (c.on !== k) { c.ms++; careerMissed(k); } else { c.ms = 0; c.ca = 0; } } }   // a worked shift ends the run and re-arms the Chief; days off, leave and sick days do neither
+    if (c.e < k && (k < d || m >= CAREER.missBy)) { c.e = k; if (k > CAREER.grace && careerRota(k) && !careerOff(k) && c.on !== k) { c.ms++; careerMissed(k); } }   // a full worked shift ends the run and re-arms the Chief at the day's end (careerDayEnd); days off, leave and sick days do neither
     careerLadder(now);
     if (c.z < k && k < d) { c.z = k; careerDayEnd(k, now); }
   }
