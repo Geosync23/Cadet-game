@@ -224,7 +224,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.28.48
+   STARSHIP CADET: CSV Wren                           build 0.28.49
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7562,7 +7562,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.28.48';                           // keep in step with the header's build line
+const GAME_BUILD = '0.28.49';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -10546,7 +10546,7 @@ let TEACH_CK = -1e9, TEACH_ST = null;
 const teachRecent = (at, c, ms = 120000) => at !== undefined && c.now - at < ms;
 const teachMeal = m => m >= 360 && m < 480 || m >= 1020 && m < 1230;   // breakfast and dinner at the servery
 const TEACH = [   // text: head writer 3. A 4th element { sure: true }: shown when due whatever the 3-minute and 60 s pacing says
-  ['t:rep', c => c.d >= 1 && (c.S.turnin || c.min >= 1020 || c.d >= 2), 'People notice good work, kindness and joining in. Each department has its own view of you, and so does the ship. The Record app shows where you stand.', { sure: true }],   // the user's: on the 2nd day (Monday), after your first job's turned in or at the shift's end
+  ['t:rep', c => c.d >= 1 && (c.S.turnin !== undefined && shipNow() - c.S.turnin >= 30 || c.min >= 1020 || c.d >= 2), 'Not just jobs: kindness and joining in count too. Each department has its own view of you, and so does the ship.', { sure: true }],   // the user's: on the 2nd day (Monday), after your first job's turned in or at the shift's end; half an hour after the turn-in, so Zeke says his part first (0.28.49)
   ['t:a-sched', c => c.app === 'schedule', 'Your day at a glance: meals, your shift, anything booked. Tap an entry and the marker shows the way.'],
   ['t:a-cal', c => c.app === 'calendar', 'The weeks ahead: days off, traditions, birthdays and appointments.'],
   ['t:a-maps', c => c.app === 'maps', 'Every deck, room by room. Tap a room to put the marker on it.'],
@@ -10593,7 +10593,7 @@ function teachWatch(now) {                               // what's happened, for
 }
 if (typeof onSim === 'function') {
   onSim('tierUp', x => { if (TEACH_ST && x && x.tier > TEACH_ST.tierUp) TEACH_ST.tierUp = x.tier; });
-  onSim('job', x => { if (TEACH_ST && x && x.step === 'turnin') TEACH_ST.turnin = true; });
+  onSim('job', x => { if (TEACH_ST && x && x.step === 'turnin' && TEACH_ST.turnin === undefined) TEACH_ST.turnin = shipNow(); });   // when (0.28.49)
 }
 // the intro's arrival (day 0's scripted steps) teaches by itself: tips wait for it. Its first week runs on (introOn() till
 // day 8) with tips, which is when they're most use.
@@ -10684,7 +10684,7 @@ function newsTrad(at, d, when) {                         // today's traditions (
   if (typeof eventsOn !== 'function') return;
   let es = []; try { es = eventsOn(d) || []; } catch (e) { es = []; }
   for (const e of es.slice(0, 2)) {
-    const ctx = when === 'today' ? { trad: e.id } : { flags: { ['trad.tomorrow.' + e.id]: true } };
+    const ctx = when === 'today' ? { trad: String(e.name || e.id).toLowerCase(), tradId: e.id } : { flags: { ['trad.tomorrow.' + e.id]: true } };   // {trad} fills with the name (0.28.49, reviewer 1e)
     newsPost('trad', at, ctx, when === 'today' ? 'Today aboard: ' + e.name + ' at ' + hhmm(e.from) + '.' : null);
   }
 }
@@ -10700,7 +10700,9 @@ function newsRows(at) {                                  // a ship system gettin
   }
 }
 if (typeof onSim === 'function') {
-  onSim('tradition', x => { if (x && x.id) newsPost('trad', isFinite(x.at) ? x.at : shipNow(), { trad: x.id, flags: { ['trad.done.' + x.id]: true } }); });
+  onSim('tradition', x => { if (!x || !x.id) return; const at = isFinite(x.at) ? x.at : shipNow(), d = Number.isInteger(x.day) ? x.day : Math.floor(at / 1440) + 1;
+    let e = null; try { e = typeof eventsOn === 'function' ? (eventsOn(d) || []).find(q => q.id === x.id) : null; } catch (err) { e = null; }
+    newsPost('trad', at, { trad: String(e && e.name || x.id.replace(/-/g, ' ')).toLowerCase(), tradId: x.id, flags: { ['trad.done.' + x.id]: true } }); });
   onSim('repair', x => { if (x && x.who === 'you') newsPost('works', isFinite(x.t) ? x.t : shipNow(), { machine: typeof machineLabel === 'function' && typeof machineById === 'function' && machineById(x.machine) ? machineLabel(machineById(x.machine)) : undefined }); });
 }
 function newsTick(now) {                                 // once a ship minute (playerUpdate)
@@ -24618,7 +24620,7 @@ function lineCond(k, v, p, ctx) {
       const r = (LINE_PLACES[x] || x.replace(/_/g, ' ')).toLowerCase(); return ctx.place === x || (ctx.room || '').toLowerCase().replace(/^the /, '') === r; });   // a room: its name with _ for spaces, or a short alias
     case 'deck': { const d = ctx.deck != null ? ctx.deck : typeof deckDef !== 'undefined' && deckDef ? deckDef.num : null; return any(v, x => String(d) === x); }   // the scene's deck (where you are), not the speaker's home deck
     case 'event': return any(v, x => { const [ev, ph] = x.split('.'), n = lineQ('eventNow', t); return !!n && n.id === ev && (!ph || n.phase === ph); });
-    case 'trad': return any(v, x => ctx.trad === x || (x === 'today' && !!ctx.trad));
+    case 'trad': return any(v, x => ctx.trad === x || ctx.tradId === x || (x === 'today' && !!ctx.trad));   // ctx.tradId: the id when ctx.trad is the name (0.28.49)
     case 'gift': return any(v, x => ctx.how === x || ctx.tag === x);
     case 'came': return any(v, x => !!ctx.trad && (x === 'any' || ctx.trad === x || ctx.tradId === x));   // you went to a tradition lately (the caller passes ctx.trad)
     case 'friend': return any(v, x => !!ctx.friend && (x === 'any' || ctx.friendId === x));   // you have a friend aboard (ctx.friend: their name)   // the gift being thanked: how it landed (loved|liked|polite, ctx.how) or its tag (ctx.tag)
@@ -25504,7 +25506,7 @@ function eventsPlayer(now) {
   SHIP.events.joined.push(key);
   if (e.ev.trace) traceAdd(e.ev.trace, d);              // e.g. Sowing morning plants your seedling (the deck architect's seedlingYours)
   const bb = typeof bondBest === 'function' && typeof DECK_CREW !== 'undefined' ? Math.max(1, bondBest(DECK_CREW.filter(c => c.settled && c.spot && e.rooms.has(deckDef.num + '|' + c.spot.room)).map(c => (c.p || c).id))) : 1;   // 0.28.43: by the best bond there
-  const n = SHIP.player && SHIP.player.needs; if (n && typeof n.social === 'number') n.social = Math.min(100, n.social + 12 * bb);
+  const n = SHIP.player && SHIP.player.needs; if (n && typeof n.social === 'number') n.social = Math.min(100, n.social + Math.min(20, 12 * bb));   // at most +20 even among close friends (0.28.49, the lead)
   toast(e.name, evText(e.ev.thanks, e));
   if (typeof mailSend === 'function') mailSend({ at: now, from: e.ev.from, subject: 'Thanks for coming', body: 'Good to see you at ' + e.name.toLowerCase() + '. Same time next one?', quiet: true });   // the join toast says it already
 }
