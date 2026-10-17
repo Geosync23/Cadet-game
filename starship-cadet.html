@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.28.22
+   STARSHIP CADET: CSV Wren                           build 0.28.23
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.28.22';                           // keep in step with the header's build line
+const GAME_BUILD = '0.28.23';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -9751,7 +9751,8 @@ function actUpdate(dt, t) {
 // Drains never show. needPulse(k) is true for PULSE_SECS after need k showed a rise (for the device's Needs bars).
 // DOM and CSS made here, so the HTML stays as it was; nothing calls R(). ----
 const FLOAT_EVERY = 5, FLOAT_WAIT = .6, FLOAT_MIN = 1, FLOAT_SECS = 1.8, PULSE_SECS = 1.5;
-let NEED_SEEN = null, FLOAT_LIVE = 0;
+let NEED_SEEN = null, FLOAT_LIVE = 0, PULSE_AT = -1e9;
+const FLOATS = [];                                       // live notes [el, born]: faded by the frame clock (0.28.23), so tests see the same thing every run
 const FLOAT_LOG = [];                                    // the last notes shown (player_check reads it: notes come and go on real-time timers)
 const NEED_RISE = {}, NEED_PULSE = {}, floatV = new THREE.Vector3();
 const needPulse = k => (NEED_PULSE[k] || 0) > performance.now();
@@ -9759,10 +9760,8 @@ function needFxLayer() {
   let el = document.getElementById('needFx'); if (el) return el;
   const st = document.createElement('style');
   st.textContent = '#needFx{position:fixed;left:0;top:0;width:0;height:0;z-index:2;pointer-events:none}'
-    + '#needFx .nf{position:absolute;transform:translate(-50%,-100%);white-space:nowrap;font-size:12.5px;font-weight:600;color:#bdeee6;padding:2px 9px;border-radius:999px;background:var(--glass);border:1px solid var(--line);text-shadow:0 1px 6px rgba(0,0,0,.5);animation:nfup ' + FLOAT_SECS + 's ease-out forwards}'
-    + '@keyframes nfup{0%{opacity:0;margin-top:6px}15%{opacity:1}70%{opacity:1}100%{opacity:0;margin-top:-34px}}'
-    + '.devbtn.npulse{animation:npulse .9s ease-out}@keyframes npulse{0%{box-shadow:0 0 0 0 rgba(76,195,181,.7)}100%{box-shadow:0 0 0 12px rgba(76,195,181,0)}}'
-    + '@media (prefers-reduced-motion:reduce){@keyframes nfup{0%{opacity:0}15%{opacity:1}70%{opacity:1}100%{opacity:0}}.devbtn.npulse{animation:none}}';
+    + '#needFx .nf{position:absolute;transform:translate(-50%,-100%);white-space:nowrap;font-size:12.5px;font-weight:600;color:#bdeee6;padding:2px 9px;border-radius:999px;background:var(--glass);border:1px solid var(--line);text-shadow:0 1px 6px rgba(0,0,0,.5);opacity:0}'
+    ;
   document.head.appendChild(st);
   el = document.createElement('div'); el.id = 'needFx'; el.setAttribute('aria-live', 'polite'); document.body.appendChild(el);
   return el;
@@ -9774,9 +9773,21 @@ function needFloat(text) {                               // one note over your h
   const x = Math.max(60, Math.min(innerWidth - 60, (floatV.x + 1) * innerWidth / 2)), y = Math.max(40, (1 - floatV.y) * innerHeight / 2 - FLOAT_LIVE * 24 - (actProgress() ? 40 : 0));   // above the progress bar (0.28.21)
   const n = document.createElement('div'); n.className = 'nf'; n.textContent = text; n.style.left = x.toFixed(1) + 'px'; n.style.top = y.toFixed(1) + 'px';
   needFxLayer().appendChild(n); FLOAT_LIVE++; FLOAT_LOG.push(text); if (FLOAT_LOG.length > 20) FLOAT_LOG.shift();
-  setTimeout(() => { n.remove(); FLOAT_LIVE = Math.max(0, FLOAT_LIVE - 1); }, FLOAT_SECS * 1000);
-  const b = document.getElementById('devBtn');
-  if (b) { b.classList.remove('npulse'); void b.offsetWidth; b.classList.add('npulse'); }
+  FLOATS.push([n, performance.now()]); PULSE_AT = performance.now();
+}
+// each frame (0.28.23): notes rise and fade, and the device button's glow, by performance.now() (the frame clock; a
+// virtual one in the tests) instead of CSS animations and real-time timers, which made screenshots differ run to run
+const PULSE_SECS_BTN = .9;
+function floatsTick() {
+  const now = performance.now(), still = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  for (let i = FLOATS.length - 1; i >= 0; i--) {
+    const [n, born] = FLOATS[i], f = (now - born) / (FLOAT_SECS * 1000);
+    if (f >= 1) { n.remove(); FLOATS.splice(i, 1); FLOAT_LIVE = Math.max(0, FLOAT_LIVE - 1); continue; }
+    n.style.opacity = (f < .15 ? f / .15 : f > .7 ? (1 - f) / .3 : 1).toFixed(3);
+    n.style.marginTop = still ? '0px' : (6 - 40 * (1 - (1 - f) * (1 - f))).toFixed(1) + 'px';   // ease-out, 6 px down to 34 up
+  }
+  const b = document.getElementById('devBtn'), g = (now - PULSE_AT) / (PULSE_SECS_BTN * 1000);
+  if (b && (g < 1 || b.style.boxShadow)) b.style.boxShadow = g < 1 && !still ? '0 0 0 ' + (12 * g).toFixed(1) + 'px rgba(76,195,181,' + (.7 * (1 - g)).toFixed(3) + ')' : '';
 }
 function needsSeen() {                                   // once a frame: what rose since the last frame
   const n = SHIP.player.needs, now = performance.now();
@@ -9872,7 +9883,7 @@ function playerUpdate(dt, t) {
     slowWas[k] = slow;
   }
   if (ACT) actUpdate(dt, t);
-  needsSeen();                                           // a need that rose shows it (0.28.20)
+  needsSeen(); floatsTick();                             // a need that rose shows it (0.28.20; faded by frames, 0.28.23)
   actBar();                                              // and how long the activity has left (0.28.21)
   const m = Math.floor(now);
   if (m !== devMin) { devMin = m; jobNotice(); jobTouch(); cartAuto(); device.refresh(); }
