@@ -223,7 +223,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.61.8
+   STARSHIP CADET: CSV Wren                           build 0.61.9
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7564,7 +7564,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.61.8';                           // keep in step with the header's build line
+const GAME_BUILD = '0.61.9';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -10417,7 +10417,7 @@ function needEffects(n = SHIP.player.needs) {             // -> { walk, task, dr
     e.marks[k] = [side === 'hi' ? 'up' : 'down', fx[1]]; e.notes.push(fx[1]);
   }
   const sk = n === SHIP.player.needs && typeof sickFx === 'function' ? sickFx() : null;   // being sick (the career engineer, 0.61.5): slower, more tired
-  if (sk) { e.walk = Math.max(SICK.floor, e.walk * sk.walk); e.drain *= sk.drain; e.notes.push(sk.note); }   // never slower than SICK.floor (reviewer 1d: phones)
+  if (sk) { e.walk = Math.max(SICK.floor, e.walk * sk.walk); e.drain *= sk.drain; e.notes.push(sk.note); }   // never slower than SICK.floor, 40% (reviewer 1d, the lead: phones)
   return e;
 }
 function needsLoad(s) {                                  // from the save (section 13): v 2 has needs; v 1, none
@@ -27090,7 +27090,7 @@ SHIP.career = null;
 function careerClean(s) {
   const days = a => Array.isArray(a) ? a.filter(Number.isInteger).slice(-8) : [], int = (v, x) => Number.isInteger(v) ? v : x;
   return { l: int(s.l, CAREER.leave), w: int(s.w, 0), b: days(s.b), s: days(s.s), st: int(s.st, 0), n: int(s.n, 0), on: int(s.on, 0), e: int(s.e, 0), z: int(s.z, 0),
-    k: int(s.k, 0), md: int(s.md, 0), mx: isFinite(s.mx) ? +s.mx : 0, sd: int(s.sd, 0), sh: int(s.sh, 0), ss: int(s.ss, -1), sc: int(s.sc, 0), ms: int(s.ms, 0), ca: int(s.ca, 0), q: int(s.q, 0), qd: int(s.qd, 0), fl: int(s.fl, 0), go: int(s.go, null), f: Array.isArray(s.f) ? s.f.filter(x => typeof x === 'string').slice(0, 8) : [], end: !!s.end };
+    k: int(s.k, 0), gs: int(s.gs, 0), md: int(s.md, 0), mx: isFinite(s.mx) ? +s.mx : 0, sd: int(s.sd, 0), sh: int(s.sh, 0), ss: int(s.ss, -1), sc: int(s.sc, 0), ms: int(s.ms, 0), ca: int(s.ca, 0), q: int(s.q, 0), qd: int(s.qd, 0), fl: int(s.fl, 0), go: int(s.go, null), f: Array.isArray(s.f) ? s.f.filter(x => typeof x === 'string').slice(0, 8) : [], end: !!s.end };
 }
 SAVE_EXTRA.push(s => { if (SHIP.career) s.ship.career = SHIP.career; });
 onSim('newGame', () => { SHIP.career = null; careerCard(false); });
@@ -27098,7 +27098,7 @@ function careerInit(now = shipNow()) {
   if (SHIP.career) return SHIP.career;
   const d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;   // an older save starts here: no back pay of leave, no misses before today
   const sent = simNotes('shiftStart').filter(n => Math.floor(n.t / 1440) + 1 === d), on = (sent.length ? sent.some(n => !n.missed) : flag('shiftSent') === d) ? d : 0;   // already started today (reviewer 1d)
-  return SHIP.career = { l: CAREER.leave, w: Math.max(0, Math.floor((d - 1) / CAREER.every)), b: [], s: [], st: 0, n: 0, on, e: m >= CAREER.missBy ? d : d - 1, z: d - 1, k: 0, md: 0, mx: 0, sd: 0, sh: 0, ss: -1, sc: 0, ms: 0, ca: 0, q: 0, qd: 0, fl: 0, go: null, f: [], end: false };
+  return SHIP.career = { l: CAREER.leave, w: Math.max(0, Math.floor((d - 1) / CAREER.every)), b: [], s: [], st: 0, n: 0, on, e: m >= CAREER.missBy ? d : d - 1, z: d - 1, k: 0, gs: (Date.now() ^ Math.floor(Math.random() * 2147483647)) | 0, md: 0, mx: 0, sd: 0, sh: 0, ss: -1, sc: 0, ms: 0, ca: 0, q: 0, qd: 0, fl: 0, go: null, f: [], end: false };
 }
 const careerWork = () => SHIP.rep && SHIP.rep.ship && isFinite(SHIP.rep.ship.work) ? SHIP.rep.ship.work : 50;
 const careerRota = d => { try { return isWorkDay(ROSTER_PLAYER, d); } catch (e) { return weekday(d) < 5; } };   // your rota alone (playerShiftOn without leave)
@@ -27231,15 +27231,15 @@ SIM_ADVANCE.push((from, to) => careerTick(to));
 // and find you to nudge you. Two cures: the infirmary (in the Infirmary or the Exam room on Deck 3, an exam plays:
 // Rina's when she's on shift, else a medic on duty's; it ends with the medicine) or your bunk (lying down sleeps it off
 // by day, SICK.nap minutes). Crew who see you say a get-well line, and the next day or two they're glad you're better.
-//   SHIP.career (saved) adds sd: the last sick day, sh: how it ended (0 not yet, 1 Rina, 2 a medic on duty, 3 slept it
+//   SHIP.career (saved) adds gs: the game's own seed (made once with the career, Date.now and Math.random; never R()), sd: the last sick day, sh: how it ended (0 not yet, 1 Rina, 2 a medic on duty, 3 slept it
 //   off), ss: the last stage told, sc: the day the card was shown
 // The words are head writer 4's (career.sick.*, career.tip.sick, sick.getwell / sick.nudge / sick.better, the meetings
 // sickExam1-3 and sickExamCover). Nothing here calls R().
-const SICK = { seed: 7919, odds: 1 / 28, gap: 21, rollAt: 300, nap: 180, floor: .35, stages: [[0, .85], [150, .7], [300, .55], [450, .4]], drain: 1.5 };
+const SICK = { seed: 7919, odds: 1 / 28, gap: 21, rollAt: 300, nap: 180, floor: .4, stages: [[0, .85], [150, .7], [300, .55], [450, .4]], drain: 1.5 };
 const sickToday = (d = SHIP.time.day) => !!SHIP.career && SHIP.career.sd === d;
 const sickNow = () => sickToday() && !SHIP.career.sh;    // unwell and untreated, right now
-function sickDue(d) {                                   // seeded by the day and your name, so each game has its own sick days (reviewer 1d)
-  const c = SHIP.career, seed = SICK.seed ^ (typeof socHash === 'function' ? socHash(SHIP.player.name || '') : 0);
+function sickDue(d) {                                   // seeded by the day and the game's own seed (gs), so each game has its own sick days (reviewer 1d)
+  const c = SHIP.career, seed = SICK.seed ^ (c && c.gs || 0);
   return d > CAREER.grace && (!c || !c.sd || d - c.sd >= SICK.gap) && schedU(seed, d, 901) < SICK.odds;
 }
 function sickStage(now = shipNow()) {                    // 0-3 while unwell (by minutes since 06:00), else -1

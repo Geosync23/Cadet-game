@@ -56,7 +56,7 @@ PAPER = r"""(({ plan, days, friends }) => {
       else if (mode === 'work' && st < want && (want > 1 || worked >= 5)) { mode = round >= 2 ? 'work' : 'skip'; }   // the Chief's: a week's work first, then three more missed
       if (mode === 'work' && playerShiftOn(d)) worked++;
       c = mode; }
-    careerTick(at(d, 0));
+    careerTick(at(d, 0)); if (d === 1) SHIP.career.sd = 99999;   // no sickness in these runs (the game seed is random; sickness has its own case)
     if (weekday(d) === 6) { repWeek(Math.floor(at(d, 240) / 60)); careerTick(at(d, 240)); }
     if (c === 'leave') { const ok = careerRota(d) && SHIP.career.l > 0 ? careerBook(d, at(d - 1, 1200)) : false; if (!ok) c = 'work'; }
     if (c === 'sick') careerSick(d);
@@ -185,10 +185,10 @@ with sync_playwright() as pw:
 
     print('Sickness (0.61.5): rare, never the first week, three weeks apart; excused; worse untreated; two cures:')
     r = ev("""(() => { const at = (d, m) => { SHIP.time.day = d; SHIP.time.min = m; return (d - 1) * 1440 + m; };
-      SHIP.career = null; SHIP.rep = null; SHIP.occasions.length = 0; careerTick(at(1, 0)); const c = SHIP.career, days = [];
+      SHIP.career = null; SHIP.rep = null; SHIP.occasions.length = 0; careerTick(at(1, 0)); const c = SHIP.career, days = []; c.gs = 12345;   // a fixed game seed: the same days every run
       for (let d = 1; d <= 420; d++) { c.e = c.z = d - 1; careerTick(at(d, 330)); if (c.sd === d) { days.push(d); c.sh = 3; } }
       const out = { days };
-      SHIP.career = null; careerTick(at(1, 0)); const C = SHIP.career, d = days[0] || 50; C.e = C.z = d - 1; C.w = Math.floor((d - 1) / 28); C.b.push(d); C.l--;
+      SHIP.career = null; careerTick(at(1, 0)); const C = SHIP.career, d = days[0] || 50; C.gs = 12345; C.e = C.z = d - 1; C.w = Math.floor((d - 1) / 28); C.b.push(d); C.l--;
       const l0 = C.l, w0 = careerWork(); careerTick(at(d, 330)); out.sick = sickToday(d); out.excused = !playerShiftOn(d); out.leaveBack = C.l === l0 + 1 && !C.b.includes(d);
       out.speeds = [420, 600, 780, 930].map(m => { careerTick(at(d, m)); return [Math.round(needEffects().walk * 100) / 100, sickBent()]; });
       careerTick(at(d, 760)); out.noMiss = careerWork() >= w0 - 0.01 && C.ms === 0;
@@ -198,8 +198,8 @@ with sync_playwright() as pw:
       SHIP.career.sd = d + 1; SHIP.career.sh = 0; at(d + 1, 700); out.nap = sickCure(3) && !sickNow();
       SHIP.career = null; SHIP.rep = null; careerTick(at(30, 0)); repInit().ship.work = 30; const K = SHIP.career; K.e = K.z = 29; careerTick(at(30, 800)); out.missTo = Math.round(careerWork());
       careerSick(30); out.refund = Math.round(careerWork());
-      const name = SHIP.player.name, dueOf = nm => { SHIP.player.name = nm; SHIP.career = null; const L = []; for (let d = 8; d <= 200; d++) if (sickDue(d)) L.push(d); return L.join(','); };
-      out.namesDiffer = dueOf('Ada') !== dueOf('Bo'); SHIP.player.name = name;
+      const dueOf = gs => { SHIP.career.sd = 0; SHIP.career.gs = gs; const L = []; for (let d = 8; d <= 200; d++) if (sickDue(d)) L.push(d); return L.join(','); };
+      out.namesDiffer = dueOf(1) !== dueOf(2); out.seeded = typeof careerClean(JSON.parse(JSON.stringify(SHIP.career))).gs === 'number';
       out.save = JSON.stringify(SHIP.career || {}).length; out.lines = !!(LINES['sick.getwell'] && LINES['sick.better']); return out; })()""")
     gaps = [b - a for a, b in zip(r['days'], r['days'][1:])]
     print(f"  sick days in 60 weeks: {r['days']} (gaps {gaps})")
@@ -213,7 +213,7 @@ with sync_playwright() as pw:
     check(r['cure'] and r['after'][0] >= 0.99 and not r['after'][1] and not r['after'][2], 'the medicine did not cure it')
     check(r['nap'], 'sleeping it off did not cure it')
     check(r['refund'] == 30 and r['missTo'] < 30, f"a sick note gave back {r['refund'] - r['missTo']} for a miss that took {30 - r['missTo']}")
-    check(r['namesDiffer'], 'every game is sick on the same days')
+    check(r['namesDiffer'] and r['seeded'], 'every game is sick on the same days, or the game seed is not saved')
     if r['lines']: check(r['getwell'] == 'sick.getwell' and r['better'] == 'sick.better', 'crew have no get-well or glad-you-are-better line')
     else: print('  (no sick.getwell / sick.better lines baked yet)')
     check(r['save'] < SAVE_MAX, f"the save with sickness is {r['save']} bytes")
