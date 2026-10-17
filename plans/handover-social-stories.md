@@ -12,8 +12,8 @@ for arc:, the roster for themes (0.39.17, the lead); affWeek ceiling (0.39.18, 6
 pairs by day 140); read-only moment queries via storyPeek (0.39.19). arc_check on dialogue+content+roster 0.16.16: arcs
 OK (10 story incl. Kovac, 4 home), themes OK (all 12). Hooks in elsewhere: momentWantsVisit (social A 0.36.68),
 pair:best/mentor + goodbye preference + {missed} (dialogue 0.43.27), goodbye conversations and missed lines (writer 5,
-claude/writer-commons, merged into content by head writer 3). Waiting on: sim engineer 4 (session_01EJUGywZv9BpcUezjXES9AC)
-to plan farewellCrew to the shuttle bay 14:30-15:00 on leave days (then check it against social A's Sunday farewells).
+claude/writer-commons, merged into content by head writer 3). farewellCrew is planned by sim engineer 5 (session_01Do3HU5Rh96tgUsPTUbsF8a, claude/sim-engineer 13a6fe9, 0.26.38): the
+shuttle bay 14:30-15:00, couples together, no double booking with social A's 14:00 farewell. Nothing open.
 Budget: the social save is ~27.9 KB at day 140 with a player (30 KB budget): watch anything that grows. Lead
 session_01KPJMYjXAPkNUcrQ8VRkhLE; reviewer 1b session_018XY1NbMBxo2SLDPxooe5yx. Refresh before handing over.**
 

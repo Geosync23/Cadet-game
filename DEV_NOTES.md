@@ -1402,6 +1402,7 @@ Pillar 4's dialogue engine and the writers' kit (plans/pillar4-plan.md Part 2; p
 | `if (typeof homeBeatOf === 'function' && /^home\./.test(arcId)) return homeBeatOf(arcId);` | section 20, `beatOf`, first line (0.36.59) | social engineer A |
 | `if (A.kind === 'call' && typeof homeBooth === 'function') homeBooth();` | section 15, `actBegin`, last line (player engineer 3's 0.28.30, claude/player-needs 8abc711) | player engineer 3 |
 | An open Mail gets 'Play' while `mailPlayable(m)` (through `devPlayable(m)`), calling `mailPlay(m)` and closing the device on true; Mail from `homeFolks()` (through `devHomeFolks()`) first under "From home" | section 19, the Mail app (0.35.27, claude/device 4979eec) | device engineer 3 |
+| `farewellCrew(leaver, d)` friends who are free get 14:30-15:00 at the shuttle bay's gather spots (tag 'farewell', anim 'talk'); couples take neighbouring spots in any gather pool | section 14, the leaver's day (0.26.38, claude/sim-engineer 13a6fe9) | sim engineer 5 |
 
 ## Your device (section 19, the device engineer, 0.35.x)
 
