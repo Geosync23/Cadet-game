@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.26.29
+   STARSHIP CADET: CSV Wren                           build 0.26.30
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7053,7 +7053,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.26.29';                           // keep in step with the header's build line
+const GAME_BUILD = '0.26.30';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -7320,6 +7320,7 @@ const SOCIAL_TYPES = new Set(['mess-seat', 'lounge-seat', 'common-room', 'music'
 // the most people Deck 3 holds in the evening (17:00-24:00) before leisure goes elsewhere; meals aren't capped.
 // Infinity: no cap (about 64-73 at the peak). Set it to what the crowd can draw there.
 const DECK3_EVENING_MAX = Infinity;
+const LINE_WALK = [4, .55, [33, 4]];                    // the walk to the servery line (0.26.30): ship minutes for serving and getting to a seat, a tile's walk (CREW_SPEED), the line
 const STOPS = new Set(['queue', 'grab', 'drill', 'inspection', 'tea', 'toilet', 'hands', 'lift', 'pay', 'break']);   // short stops that never stretch to fill time
 const RANK_ORDER = ['captain', 'xo', 'chief', 'senior', 'officer', 'junior', 'guest'];
 
@@ -8009,8 +8010,11 @@ function schedBuild(p, d, occ, S) {
   // a sit-down meal: queue at the servery, then a seat; `by` is when it has to end
   const meal = (meal, k, by) => {
     let dur = 22 + Math.round(15 * U(k)); if (H.has('lingers-at-meals')) dur += 15 + Math.round(10 * U(k + 1));
-    if (by - (t + (deck !== 3 ? C : 0)) < 18) return grab(meal, k);
-    take(meal, [[3, 'servery-queue']], 3, { wait: 8, tag: 'queue', min: 1 });
+    const l = segs[segs.length - 1], from = deck === 3 && l && l.placeId && S.byId.get(l.placeId), at = from ? from.at : DECKS[3].lift;
+    const walk = Math.round(LINE_WALK[0] + (Math.abs(at[0] - LINE_WALK[2][0]) + Math.abs(at[1] - LINE_WALK[2][1])) * LINE_WALK[1]);   // to the line, which section 10 walks, from the lift or where you are on Deck 3
+    if (by - (t + (deck !== 3 ? C : 0)) < 15 + walk) return grab(meal, k);   // the walk, the queue stop and 12 minutes sat
+    go(3); seg(meal, t + walk, null, null, { tag: 'queue' });   // (0.26.30) the galley still takes the food 2 minutes into the meal's first segment
+    take(meal, [[3, 'servery-queue']], 3, { wait: walk ? 0 : 8, tag: 'queue', min: 1 });   // no waiting for it after the walk: a wait would split the meal
     if (!take(meal, [[3, 'mess-seat']], dur, { wait: 5, by, min: 12 }) && !take(meal, [[3, 'lounge-seat'], [3, 'bench']], dur, { wait: 5, by, min: 12 })) {
       go(3); seg(meal, Math.min(by, t + dur), null, null);
     }
@@ -8459,13 +8463,12 @@ function comeWhere(p, t) {
   return { deck: N, act: 'visit', type: null, placeId: v.placeId, moving: false, from: t - 1, until: v.until, tag: 'visit', visit: v };
 }
 // what someone carries (answer 23; the performance engineer draws it from the pose's '+hold'): what the job or plan
-// says first (a cart, parts), else a tray at a mess-hall meal, a toolbox for Works crew out on a job, a datapad for
-// officers at the handover, on the Captain's walk or on a tea break
+// says first (a cart, parts), else a toolbox for Works crew out on a job, a datapad for officers at the handover, on
+// the Captain's walk or on a tea break. A meal's tray isn't planned: section 10 hands it over at the servery (mealStep)
 const OFFICER_RANKS = new Set(['officer', 'senior', 'chief', 'xo', 'captain']);
 function withHold(p, w, job) {
   if (!w || w.hold) return w;
-  const h = (w.act === 'breakfast' || w.act === 'dinner') && w.type === 'mess-seat' ? 'tray'
-    : job && p.dept === 'works' ? 'toolbox'
+  const h = job && p.dept === 'works' ? 'toolbox'
     : OFFICER_RANKS.has(p.rank) && (w.tag === 'handover' || w.tag === 'stroll' || w.tag === 'tea') ? 'datapad' : null;
   return h ? { ...w, hold: h } : w;
 }
@@ -8508,7 +8511,7 @@ function dayReport(day) {
     for (let i = 0; i < today.length; i++) {
       const s = today[i];
       if (i ? s.from !== today[i - 1].to : s.from !== B) rep.gaps.push(p.id + '@' + s.from);
-      if (!s.placeId && s.act !== 'commute') rep.unplaced[s.act] = (rep.unplaced[s.act] || 0) + 1;
+      if (!s.placeId && s.act !== 'commute' && s.tag !== 'queue') rep.unplaced[s.act] = (rep.unplaced[s.act] || 0) + 1;
     }
     if (!today.length || today[today.length - 1].to !== B + 1440) rep.gaps.push(p.id + ' end');
   }
@@ -18376,7 +18379,8 @@ const edgeTiles = k => { const [o, i, j] = k.split(','); return o === 'v' ? [[+i
 function placeSpot(id) {
   if (SPOT_OF.has(id)) return SPOT_OF.get(id);
   const pl = PLACE_OF.get(id); let s = null;
-  if (pl) {
+  if (!pl && id[0] === '@') s = lineSpotMake(id);       // the servery line past its queue places, the tray return
+  else if (pl) {
     const c = cellPos(...pl.at); let x = pl.xy ? pl.xy[0] - OX : c.x, z = pl.xy ? pl.xy[1] - OZ : c.z;
     if (pl.type === 'bed' && !pl.xy) {                   // a bed is longer than a tile: lie on the middle of the bed itself
       let best = null, bd = 1.3;
@@ -18434,6 +18438,48 @@ function crewPath(s, g, rooms, who) {
   }
   try { return findPath(s, g, undefined, who); } finally { for (const e of opened) e.type = 'closed'; }
 }
+// The servery line on Deck 3 (0.26.30): LINE is who's standing in it, front first (crew ids, and 'player' when
+// section 15 joins you): real bodies only, joined on reaching its back. Its spots run up column 33 from the counter
+// (3-queue-4, at the servery's south end) past the trays (3-queue-1), then back along the row-2 aisle; past those,
+// stand where you are. The first LINE_COUNTER stand along the servery and are served there after galleyServeMins
+// (section 16; LINE_SERVE until then) when galleyCanServe says there's food; you're served by section 15, which
+// calls lineLeave('player'). Trays go back at the rack by the drinks (TRAY_AT), dropped as each person reaches it.
+// For other sections: servLine() (who's in it, front first), lineJoin(id), lineLeave(id), lineSpot(id) ({ at, xy,
+// face } to stand at, null past the spots), lineFront(id) (at the servery). LINE_LOG counts for day_check.
+const LINE_AT = [[33, 6], [33, 5], [33, 4], [33, 3], [32, 3], [32, 2], [31, 2], [30, 2], [29, 2], [28, 2], [27, 2], [26, 2], [25, 2], [24, 2], [23, 2]];
+const LINE_Q = ['3-queue-4', '3-queue-3', '3-queue-2', '3-queue-1'], TRAY_AT = [[33, 2], [33, 1]];   // the queue places, front first; at the tray return
+const LINE_SERVE = .6, LINE_LATE = 12, LINE_COUNTER = 1;                   // ship minutes: serving one at the counter, still heading for the line after the meal's time; how many are served at once
+const LINE = [], LINE_LOG = { joined: 0, served: 0, trays: 0, left: 0, returned: 0, back: 0, long: 0, wait: 0, who: [] };
+const lineSpotId = k => k < LINE_Q.length ? LINE_Q[k] : k < LINE_AT.length ? '@line-' + k : null;
+const ALT_SEAT = new Set(['mess-seat', 'lounge-seat', 'bench']);   // places where someone sitting in yours sends you to the next one
+const lineSeg = w => w.type === 'servery-queue' || w.tag === 'queue';   // the plan's walk to the line, its queue stop, a grab at the servery
+const trayTo = id => { const pl = id && PLACE_OF.get(id); return !!pl && pl.room === 'M'; };   // a tray only to a seat in the mess hall
+function lineSpotMake(id) {
+  const m = /^@(line|tray)-(\d+)$/.exec(id), at = m && (m[1] === 'line' ? LINE_AT : TRAY_AT)[+m[2]]; if (!at) return null;
+  const c = cellPos(...at), to = m[1] === 'line' ? cellPos(...LINE_AT[+m[2] - 1]) : cellPos(34, 2).add(new THREE.Vector3(.12, 0, 0));   // facing the one ahead, or the rack
+  return { id, walk: at, x: c.x, z: c.z, y: 0, face: Math.atan2(to.x - c.x, to.z - c.z), pose: 'stand', anim: null, room: 'M', onTile: true };
+}
+const servLine = () => LINE.slice(), lineFront = id => { const k = LINE.indexOf(id); return k >= 0 && k < LINE_COUNTER; };
+function lineJoin(id) { if (!LINE.includes(id)) LINE.push(id); return lineSpot(id); }
+function lineLeave(id, gaveUp) { const k = LINE.indexOf(id); if (k < 0) return; LINE.splice(k, 1); if (gaveUp) LINE_LOG.left++; }
+function lineSpot(id) {                                 // where to stand now: world x, z, face (radians, as the crew), the tile, and front (at the servery)
+  const k = LINE.indexOf(id), sp = k >= 0 && lineSpotId(k) && placeSpot(lineSpotId(k)); if (!sp) return null;
+  return { x: sp.x, z: sp.z, face: sp.face, at: sp.walk.slice(), front: k < LINE_COUNTER };
+}
+// once a frame: the first LINE_COUNTER in the line stand along the servery and are served there, each after their
+// own serving time (timed from reaching it; stepping up between those spots keeps the clock), when there's food
+function lineTick(dt, now) {
+  const mins = typeof galleyServeMins === 'function' ? galleyServeMins(now) : LINE_SERVE;
+  for (let k = 0; k < Math.min(LINE_COUNTER, LINE.length); k++) {
+    const f = LINE[k]; if (f === 'player') continue;    // you're served by section 15
+    const a = DECK_CREW.find(o => o.p.id === f);
+    if (!a || !a.meal || a.meal.served) { LINE.splice(k--, 1); continue; }   // gone (the lift, a skip)
+    const at = LINE_Q.indexOf(a.goalId), sp = at >= 0 && at < LINE_COUNTER && a.spot;
+    if (!sp || Math.hypot(sp.x - a.x, sp.z - a.z) > 1.2) { a.lineT = 0; continue; }
+    a.lineT = (a.lineT || 0) + dt * SHIP_RATE;
+    if (a.lineT >= mins && (typeof galleyCanServe !== 'function' || galleyCanServe(now))) { LINE.splice(k--, 1); a.lineT = 0; a.served(whereIs(a.p, now), now); }
+  }
+}
 const liftTiles = () => (ROOM_TILES['@'] || []).slice().sort((a, b) => a[1] - b[1] || a[0] - b[0]);
 class CrewAgent {
   constructor(p, cell) {
@@ -18470,7 +18516,7 @@ class CrewAgent {
     if (w && w.visit && !w.visit.arrived && this.spot && this.spot.id === w.visit.placeId && this.settled) {   // a visit: there
       w.visit.arrived = true; if (w.visit.onArrive) { try { w.visit.onArrive(this); } catch (e) { /* the caller's problem */ } }
     }
-    this.hold = w && w.hold || null;                      // something in hand: a hover cart on a run (section 17's whereIs)
+    this.hold = w && w.hold || (this.meal && this.meal.tray ? 'tray' : null);   // something in hand: a hover cart on a run (section 17's whereIs), your tray (mealStep)
     if (this.talking > 0) {                              // stopped for a word with you
       this.talking -= dt;
       if (!this.settled) { this.pose = 'stand'; this.face = Math.atan2(player.obj.position.x - this.x, player.obj.position.z - this.z); }
@@ -18481,11 +18527,9 @@ class CrewAgent {
     else if (w.act === 'commute') { const nx = whereIs(this.p, w.until); goalId = nx.deck === N ? nx.placeId || null : '@lift'; }
     else goalId = w.placeId || null;
     this.tag = w.placeId === goalId ? w.tag || null : null;   // what they'll do there (the plan's tag)
-    if (goalId && goalId === PLAYER_PLACE) goalId = null;  // you're using it (section 15): they wait nearby
-    if (typeof galleyHold === 'function' && w.deck === N) {   // section 16: waiting for food, at a queue spot nobody else is heading for (on the plan's deck)
-      const h = galleyHold(this.p, now);
-      if (h !== undefined) goalId = h && DECK_CREW.some(o => o !== this && o.goalId === h) ? null : h;
-    }
+    const mg = this.mealStep(w, now, N);                 // the servery line and the tray, inside the mess hall (0.26.30)
+    if (mg !== undefined) { goalId = mg; this.tag = null; }
+    if (goalId && (goalId === PLAYER_PLACE || BUSY.has(goalId) && !(this.settled && this.spot && this.spot.id === goalId))) goalId = this.elsewhere(goalId);   // you're using it (section 15), or someone's sat there: another seat, else wait nearby
     if (goalId !== this.goalId) this.retarget(goalId);
     const ox = this.x, oz = this.z;
     if (this.path.length) {
@@ -18504,6 +18548,65 @@ class CrewAgent {
     if (going && Math.hypot(this.x - ox, this.z - oz) < 1e-4) { this.stuck += dt * SHIP_RATE; this.stuckMax = Math.max(this.stuckMax, this.stuck); } else this.stuck = 0;
     this.h.set({ x: this.x, y: this.y, z: this.z }, this.face, heldPose(this));
     return true;
+  }
+  // someone's in your place: a free seat of the same kind close by (kept while the plan's place stays the same), else
+  // stand nearby (null); not a seat: stand nearby (0.26.30, the lead: nobody stands about holding a tray)
+  elsewhere(id) {
+    const pl = PLACE_OF.get(id);
+    if (!pl || !ALT_SEAT.has(pl.type)) return id === PLAYER_PLACE ? null : id;   // not a seat: wait nearby for you, and as before for anyone else
+    if (this.alt && this.alt[0] === id && this.alt[1] !== PLAYER_PLACE && (!BUSY.has(this.alt[1]) || this.settled && this.spot && this.spot.id === this.alt[1])) return this.alt[1];
+    const k = seatsBeside(id, 1, [pl.type])[0]; this.alt = k ? [id, k] : null; return k || null;
+  }
+  // a meal from the servery (0.26.30, the user's rule): whoever's plan has them at a servery-queue place walks to the
+  // back of the line and joins it in the mess hall, steps up as the front is served, is served at the counter, then
+  // goes where the plan goes next (a sit-down meal: its seat, with a tray if the seat's in the mess hall). When the
+  // meal's over, a tray goes back to the tray return before anything else. Undefined: follow the plan
+  mealStep(w, now, N) {
+    const eat = N === 3 && w.deck === 3 && (w.act === 'breakfast' || w.act === 'dinner'), key = eat ? w.act + Math.floor(w.from / 1440) : null;
+    let m = this.meal;
+    if (m && m.key !== key) {                            // over (or something else came up): out of the line, the tray back
+      const k = m.served ? -1 : LINE.indexOf(this.p.id);
+      if (k >= 0) return lineSpotId(k);                  // already in the line: nobody misses a meal for it (served, they go on)
+      if (!m.served && key === null && now - (m.over || (m.over = now)) < LINE_LATE) return this.mealLine(now);   // on the way (a grab stop is shorter than the walk): a little late for what's next
+      if (!m.served) { LINE_LOG.left++; if (LINE_LOG.who.length < 8) LINE_LOG.who.push(this.p.id + ' ' + hhmm(now % 1440)); }
+      if (m.tray && N === 3) return this.trayBack(m, now);
+      m = this.meal = null;
+    }
+    if (!eat) return undefined;
+    if (!m) {                                            // first seen during the meal: from the queue, or already eating
+      const q = lineSeg(w);
+      m = this.meal = { key, served: !q, tray: false };
+      if (!q) { const pv = whereIs(this.p, w.from - .01); m.tray = !!(pv && pv.act === w.act && lineSeg(pv)) && trayTo(w.placeId); }
+    }
+    if (!m.served) return this.mealLine(now);
+    if (m.next !== undefined && lineSeg(w)) return m.next;   // served before the plan's queue time is up
+    if (m.seat && !w.placeId) return m.seat;             // no seat planned: the one picked at the counter
+    return undefined;
+  }
+  mealLine(now) {                                        // to the back of the line; in it, your place in it
+    let k = LINE.indexOf(this.p.id);
+    const back = k < 0 && lineSpotId(LINE.length) && placeSpot(lineSpotId(LINE.length));   // join on reaching the back (past the spots: in the mess hall)
+    if (k < 0 && roomAt(...this.here()) === 'M' && (!back || Math.hypot(back.x - this.x, back.z - this.z) < 1.6)) { k = LINE.length; LINE.push(this.p.id); LINE_LOG.joined++; LINE_LOG.long = Math.max(LINE_LOG.long, LINE.length); }
+    if (k >= 0 && !this.lineAt) this.lineAt = now;
+    return lineSpotId(k < 0 ? LINE.length : k);
+  }
+  served(w, now) {                                       // at the counter (lineTick): food, and on to the plan's next place
+    const m = this.meal; if (!m) return;
+    m.served = true; LINE_LOG.served++; LINE_LOG.wait = Math.max(LINE_LOG.wait, now - (this.lineAt || now)); this.lineAt = 0;
+    let nx = w; while (lineSeg(nx) && nx.act === w.act) nx = whereIs(this.p, nx.until);   // past the walk-in and the queue stop
+    const same = nx.act === w.act && w.act + Math.floor(w.from / 1440) === m.key && nx.deck === 3;
+    m.tray = same && trayTo(nx.placeId);
+    if (lineSeg(w)) m.next = nx.deck !== 3 || nx.act === 'commute' ? '@lift' : nx.placeId || (same ? seatsBeside(LINE_Q[0], 1, ['mess-seat'])[0] || null : null);   // a meal with no seat planned: the nearest free one
+    if (same && !nx.placeId && m.next) { m.tray = true; m.seat = m.next; }
+    if (m.tray) LINE_LOG.trays++;
+  }
+  trayBack(m, now) {                                     // the tray return: in it goes as you reach it, and on you go (nobody waits for a spot)
+    const id = '@tray-' + idHash(this.p.id) % TRAY_AT.length, sp = placeSpot(id);
+    if (!m.since) m.since = now;
+    if (this.goalId === id && !this.path.length && sp && Math.hypot(sp.x - this.x, sp.z - this.z) < .6) {
+      m.tray = false; this.meal = null; LINE_LOG.returned++; LINE_LOG.back = Math.max(LINE_LOG.back, now - m.since); return undefined;
+    }
+    return id;
   }
   // the escort (Pillar 4, section 21's escortPlan): 'lead' walks to `to` (a place id or a [c, r] tile) and stops,
   // facing you, while you're more than ESC_WAIT tiles behind (on again within ESC_GO); 'follow' keeps about ESC_NEAR
@@ -18592,7 +18695,7 @@ function crewDetail() {                                  // who gets a full rig:
 const BUSY = new Set(); let PLAYER_PLACE = null;
 const placeBusy = id => BUSY.has(id) || PLAYER_PLACE === id;
 let crewCheckT = 0;
-function deckCrewClear() { for (const a of DECK_CREW) a.remove(); DECK_CREW.length = 0; BUSY.clear(); }
+function deckCrewClear() { for (const a of DECK_CREW) a.remove(); DECK_CREW.length = 0; BUSY.clear(); LINE.length = 0; }
 // everyone whereIs puts on this deck, mid-activity: at their place, partway there, or still in the lift
 function deckCrewFill() {
   deckCrewClear();
@@ -18627,6 +18730,7 @@ function crewArrive(p, w, now, mid) {
 // once a frame from the main loop: everyone moves; now and then, anyone due on this deck who isn't here yet arrives
 function updateDeckCrew(dt) {
   const now = shipNow(), N = deckDef.num;
+  lineTick(dt, now);
   for (let i = DECK_CREW.length - 1; i >= 0; i--) if (!DECK_CREW[i].update(dt, now, N)) { DECK_CREW[i].remove(); DECK_CREW.splice(i, 1); }
   for (const a of DECK_CREW) if (a.h.full) { a.h.update(dt, clock.elapsedTime); a.h.rig.root.visible = crowd.visible; }
   BUSY.clear(); for (const a of DECK_CREW) if (a.settled && a.spot) BUSY.add(a.spot.id);
