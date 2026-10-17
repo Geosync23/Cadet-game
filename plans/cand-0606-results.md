@@ -8,3 +8,4 @@ One line per finished check (check, game commit, OK/FAIL, key numbers). A new bu
 - a6ad933 (c20e8cd + poses 0.27.44-45) food_check OK (the day-7 miss gone with the washrooms reverted)
 - c20e8cd deck_check OK (Deck 4 memory steady 373 geo / 39 tex) · leave_check OK
 - c20e8cd day_check (R2): day 1 OK; days 0/6/7/35 FAIL: 'shift short' (2 crew 1-2 min under 540) + day 0/35 'standing still with a tray' once on Deck 3 (~18:00). Peak calls D3 277. Re-running on a6ad933 and bisecting.
+- c20e8cd perf (perf 3): FAIL phone speed: dinner 6.1→9.2 ms, slow frames 29→279/h, breakfast worst 213 ms; cause poses 0.27.40 seatCushion ray (~9 ms). Calls peak 431, memory 150 flat. Fix pending (lead's call).
