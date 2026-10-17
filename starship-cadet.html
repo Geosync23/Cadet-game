@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.39.10
+   STARSHIP CADET: CSV Wren                           build 0.39.11
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.39.10';                            // keep in step with the header's build line
+const GAME_BUILD = '0.39.11';                            // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -15310,7 +15310,7 @@ function chatTick() {
 // ---------------------------------------------------------------------
 // 20c. SOCIAL STORIES (social engineer B, 0.39.x; plans/social-deep-plan.md, steps B1-B8)
 // Voice cards and steps (0.39.0), crew-to-crew bonds, introductions and the weekly snapshot (0.39.1), moments
-// (0.39.3), goodbyes (0.39.4), couples and the story arcs (0.39.5-0.39.6), calls home (0.39.7-0.39.10). Lazy like the rest
+// (0.39.3), goodbyes (0.39.4), couples and the story arcs (0.39.5-0.39.6), calls home (0.39.7-0.39.11). Lazy like the rest
 // of section 20 (ROSTER comes later in the file); nothing here draws anything or calls R(). schedU keys 672-699.
 //   voiceOf(id) -> the person's voice card: the writers' VOICE[id] (baked from content/voices), over the crew
 //     designer's generated fields on the roster (tpl, loves, likes, joy, thread, needs, openness, keepsake, mentors), over
@@ -15738,8 +15738,8 @@ function momentShow(id) {
 const storyPlace = (type, deck) => { const S = schedData(); for (const pl of S.byId.values()) if (pl.type === type && (deck === undefined || pl.deck === deck)) return pl; return null; };
 const STORY_FAVOURS = {
   brennanSage: p => { const pl = storyPlace('garden', 3); return pl && { from: p.id, title: 'Sage from the garden for ' + shortName(p) + ' (Deck 3)', bring: 'a bunch of sage', stops: [{ deck: pl.deck, placeId: pl.id, mins: 3, tag: 'pickup' }] }; },
-  pellPractice: p => { const pl = p.work && storyPlace(p.work.place, p.work.deck); return pl && { from: p.id, title: 'Help ' + shortName(p) + ' practise for his certification (Deck ' + pl.deck + ')', stops: [{ deck: pl.deck, placeId: pl.id, mins: 15, tag: 'pickup' }] }; },
-  liftBrakes: p => p.work && p.work.place ? { from: p.id, title: 'Check the lift brakes with ' + shortName(p), kind: 'lamp', where: p.work.place, deck: p.work.deck, parts: ['lamp'] } : null,
+  pellPractice: p => { const pl = p.work && storyPlace(p.work.place, p.work.deck); return pl && { from: p.id, title: 'Help ' + shortName(p) + ' practise for his certification (Deck ' + pl.deck + ')', stops: [{ deck: pl.deck, placeId: pl.id, mins: 15, tag: 'favour' }] }; },
+  liftBrakes: p => { const pl = p.work && storyPlace(p.work.place, p.work.deck); return pl && { from: p.id, title: 'Check the lift brakes with ' + shortName(p) + ' (Deck ' + pl.deck + ')', stops: [{ deck: pl.deck, placeId: pl.id, mins: 15, tag: 'favour' }] }; },   // a stop at their station (reviewer 1: not a lamp swap)
 };
 function storyFavour(p, id) {
   const mk = STORY_FAVOURS[id]; if (!mk || typeof favourPost !== 'function') return false;
@@ -15867,6 +15867,7 @@ function homeOk(e, hp, ctx) {                            // a beat's when, a cha
   const o = { ...e }, beat = o.beat; delete o.beat;
   const told = x => { const i = x.lastIndexOf('.'), a = x.slice(0, i); return (a.startsWith('home.') ? homeBeatOf(a) : typeof beatOf === 'function' ? beatOf(a) || 0 : 0) >= +x.slice(i + 1); };
   if (beat !== undefined && ![].concat(beat).every(v => String(v).split('|').some(told))) return false;
+  for (const k of HOME_META) delete o[k];                // a send line's data (reply, flavour, sets, memo...) isn't a condition, whichever section 22 judges it
   if (typeof linesOk === 'function') { try { return !!linesOk(o, hp, ctx); } catch (e2) { return false; } }
   for (const k in o) {                                   // no dialogue engine yet: flags, weekdays, came: and friend:; anything else waits for it
     if (HOME_META.has(k)) continue;
@@ -16011,9 +16012,9 @@ function homeMessage(k, t = shipNow()) {                 // their message, then 
   const [HC, , , HCH] = homeBaked(), hc = HC && HC[k], c = hc && homePeekC(k), e = c && c.msg && !c.msg.done && HCH && HCH[k] && HCH[k][c.msg.i]; if (!e) return false;
   const hp = homeP(hc), ctx = homeCtx(t), say = x => ({ who: hc.name, text: homeFill(x.text, hp, ctx) ?? String(x.text), pose: x.pose });
   const ch = homeSends(k, hp, ctx).map(o => ({ text: o.text, flavour: o.x.flavour, c: o.x }));
-  let picked = null;
+  let picked = null;   // nothing to say back: heard to the end, it's done (else that contact would never record again)
   MEETING_SCRIPTS['home:msg:' + k] = { title: hc.name + ', recorded', lines: e.lines.filter(l => !l.send).map(say).concat(ch.length ? [{ choice: ch }] : []),
-    onPick: (i, x) => { picked = x; }, onEnd: () => { delete MEETING_SCRIPTS['home:msg:' + k]; if (picked) homeMsgDone(k, picked, t); } };
+    onPick: (i, x) => { picked = x; }, onEnd: f => { delete MEETING_SCRIPTS['home:msg:' + k]; if (picked) homeMsgDone(k, picked, t); else if (f && !ch.length) { const m = homeC(k).msg; if (m) m.done = true; } } };
   return dialogueShow('home:msg:' + k, { id: 'home:msg:' + k, who: [], at: t });
 }
 function homeMsgDone(k, x, t) {                          // you recorded a reply (stopped before that: the message waits)
