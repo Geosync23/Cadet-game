@@ -1,0 +1,37 @@
+@voice vance
+// THE STORY CREW CARD (head writer). Commander Teo Vance: Executive Officer, cabin 2-X. By the book, every page of it.
+//
+// HOW HE TALKS: precise and complete. Lists in threes ("Clean, quick and on time."). Cites regulations by number, from
+// memory, and is usually right. Full sentences, formal words, then an unexpected flash of dry humour that he pretends
+// didn't happen. Calls everyone by rank. "Carry on." Says "Noted." where others say "Thanks".
+// WITH JUNIORS: by the rules, and fair to the letter, which makes him kinder than he looks: he knows exactly which rule
+// lets him help you. Keeps a list of every junior he's recommended. A soft spot for anyone who breaks a rule for a good
+// reason (he was one).
+// WHAT HE NOTICES: punctuality, uniforms, the leaderboard, whether a thing was done correctly.
+// MOOD TELLS: happy = adds a fourth item to the list. Low = runs (the treadmill). Rattled = quotes a regulation he
+// doesn't need to.
+// NEVER: swears (not even "blast"); late; admits the poems are his (until close); opens the two messages from home
+// (until his arc).
+// RUNNING: the rowing leaderboard he taped up himself; the new treadmill leaderboard; the waiting list for the good
+// records; leaving the bridge on time now, on the Counsellor's advice (and visibly hating it); "Gull", the pen name of
+// the worst poet in the ship's newsletter (everyone's read them; nobody knows it's him).
+tpl: brisk
+talk: Precise and complete; lists in threes; cites regulations by number; formal, then a flash of dry humour he pretends didn't happen; "Carry on."
+cares: the ship run correctly | the juniors he's recommended | the leaderboard | the Captain's trust
+jokes: the rowing leaderboard he taped up himself, and now the treadmill one | keeps the waiting list for the good records | leaves the bridge on time now, and hates it | "Gull", the newsletter's worst poet, is a mystery to everyone
+hi: Cadet | Good | As you were
+bye: Carry on | Dismissed. Kindly | As you were
+yes: Agreed | Correct | Very well
+thanks: Noted. Thank you | Well done
+wow: Impressive | Hm. Correct
+sigh: Regrettable
+nick: Cadet | Cadet | Cadet {me} | {me} | {me}
+needs: practical
+openness: guarded
+loves: book | sweet
+likes: music | tea
+invites: running
+joy: a clean leaderboard with his name at the top
+thread: arc:vance
+keepsake: his academy rowing pin, which he says he's "lending" you
+avoid: the two messages from home (until beat vance.3) | the poems being his (until close) | anything late

@@ -1,0 +1,38 @@
+@voice rina
+// THE STORY CREW CARD (head writer). Rina Deshi: Infirmary aide, Bunk 2 berth 3. Undefeated at Tiles. Arc beats 1-4
+// already in the game (gran in hospital, two days without news, gran home and cheating): never contradict them.
+//
+// HOW SHE TALKS: dry, quick, deadpan. Short sentences. Teases the people she likes, and the more she likes you the
+// more she teases. Never says how she feels straight out: she says it sideways ("I didn't sleep. Talk about
+// literally anything else."). "Honestly." Gives medical advice as orders ("Drink some water. That's not a
+// suggestion."). Competitive about everything, and keeps count.
+// WITH YOU: a challenge first (Tiles), a friend second, then the one who notices when you're not all right.
+// WHAT SHE NOTICES: whether you've drunk water, slept, eaten; the score; when someone's pretending to be fine
+// (because she does it).
+// MOOD TELLS: happy = wins at Tiles and gloats. Low = quieter, journals as a pillow, reads them instead. Worried =
+// extra dry, extra brisk, and then one honest sentence.
+// NEVER: gushes; cruel (the teasing is affection, and she stops instantly if it lands wrong); talks about her sister
+// without arguing with her a little; mentions the qualifying exam before her arc reaches it.
+// RUNNING: undefeated at Tiles in the junior common room, and keeps count (the count is precise); her gran taught her
+// and cheated; medical journals as a pillow; "drink some water" (she learnt it from Nandakumar); she and her sister
+// argue about everything by message.
+tpl: dry
+talk: Dry, quick, deadpan; short sentences; teases the people she likes; never says how she feels straight out; gives health advice as orders; keeps count.
+cares: her gran | the infirmary running right | Tiles, and the count | being a ship's doctor one day | her sister (though she'll argue)
+jokes: undefeated at Tiles, and keeps count | her gran cheats at Tiles, shamelessly | journals as a pillow | "Drink some water. That's not a suggestion."
+hi: Oh, it's you | Hey | You again
+bye: Off you go | Don't break anything | Drink some water
+yes: Fine | Go on then | If you insist
+thanks: Ta | You're all right, you
+wow: Well, look at that
+sigh: Honestly
+nick: - | {me} | {me} | trouble | trouble
+needs: cheer
+openness: guarded
+loves: game | sweet
+likes: tea | book
+invites: tiles | observatory
+joy: Tiles, and winning at it
+thread: arc:rina
+keepsake: a Tiles piece, the one her gran always cheated with
+avoid: the qualifying exam (until beat rina.5) | her hard year at home (until close) | saying she's scared, straight out

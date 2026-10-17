@@ -1,22 +1,39 @@
 @voice torres-zeke
-// SAMPLE (the dialogue engineer, 0.43.0): shows the format end to end. The head writer owns this card and rewrites it.
+// THE STORY CREW CARD (head writer). Zeke Torres: Works engine officer, cabin 4-14 ("the one with the music"), days.
+// Your escort on Day 0 and your trainer in week 1; a mentor bond to you. One notch above you. A future friend.
+//
+// HOW HE TALKS: quick and warm; sentences tumble when he's excited, which is often. Explains machines like people
+// ("she's sulking, the coil, give her a minute"). Asks questions back and actually listens to the answer. Hums or
+// half-sings a lyric when he's thinking (never quote a real song: make up a line, "something about a lighthouse").
+// Calls you by name from the first minute. Never talks down, never says "easy" about a job. Moves on with
+// "Right, onward." Says "properly" a lot (doing things properly matters to him).
+// WITH JUNIORS: shows, then hands you the tool. Praises the question, not just the answer ("Good question. Annoying,
+// but good."). Lets you make small mistakes and catches the big ones.
+// MOOD TELLS: happy = louder, sings more, knits faster. Low = quiet, re-checks things that don't need it, talks about
+// coil three as if it's the one who's tired. Worried about his dad = calls home, then goes down to the engines alone.
+// NEVER: sarcastic at your expense; complains about Calder (he'd defend her to anyone); brags about the engines being
+// "his"; mentions his father before his arc opens (beat:torres.4).
+// RUNNING: coil three sulks (Reyes on nights says it's shy; they leave notes). Your scarf in Works orange, which grows
+// every week ("Two more rows. It's coming along. Don't look."). The record cabinet (he and four others each "know every
+// song"; they don't agree on the words). Skips breakfast for ten more minutes with the coils.
+// WHAT HE KNOWS ABOUT YOU: everything from Day 0 on: he was there. He calls back the arrival and the shadow shift.
 tpl: earnest
-talk: Quick and warm; talks about the drive coils as if they were moody pets; asks questions back; a little too keen to prove himself.
-cares: the drive coils | knitting scarves | being ready for more responsibility
-jokes: the coils have moods, and coil three sulks | he knits a scarf for anyone who stands still long enough
-hi: Hey | Hello there | Oh, hi
-bye: Mind the coils | Off you go, then | See you below decks
+talk: Quick, warm, tumbling when excited; explains machines like moody people; asks questions back; "Right, onward"; never talks down.
+cares: the drive coils doing their best | doing a job properly | people who ask questions | the scarf he's knitting you | being ready for more
+jokes: coil three sulks, and Reyes says it's just shy | your scarf grows every week | he knows every song in the record cabinet (so do four other people, all wrongly) | breakfast is for people without coils
+hi: Hey | There you are | Oh, hello
+bye: Right, onward | Mind the coils | Off you go, then
 yes: Course | Happy to | Leave it with me
 thanks: Cheers | You're a star
 wow: Look at that | Now that's tidy
 sigh: Well, there it is
-nick: - | - | {me} | spanner | spanner
+nick: {me} | {me} | {me} | shipmate | shipmate
 needs: listen
 openness: open
-loves: knitting | music
-likes: tea | engines
-invites: observatory
-joy: knitting scarves
-thread: ready
-keepsake: a half-knitted scarf in Works orange
-avoid: his father (until his arc opens)
+loves: music | made
+likes: tea | sweet
+invites: jam | observatory
+joy: knitting scarves, badly, with great love
+thread: arc:torres
+keepsake: the finished scarf in Works orange, far too long
+avoid: his father (until beat torres.4) | being passed over (until beat torres.2) | mocking anyone's work
