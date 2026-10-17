@@ -1479,6 +1479,8 @@ They checked:
 
 **interactions_check.py** (0.37.0): the player's extra interactions, the job board and the goal pointer (section 15b); see "Player interactions". Run it with player_check whenever sections 15, 15b or the places change.
 
+**perf_check.py** (the performance engineer, Pillar 4's phone-speed watchdog): `CADET_CHROME=/opt/pw-browsers/chromium python3 perf_check.py NEW.html [OLD.html]` (about 5 minutes per build) measures the busy moments on phone views (portrait 390×844 at zoom 1.5 and 0.7, landscape 844×390 at 1.15): draw calls (budget 450), triangles, milliseconds of game code a frame (rendering skipped: SwiftShader can't say how fast a phone draws) and crew on the deck, then memory over three deck round trips. With OLD it marks regressions (calls up over 10% and 25, game code up over 30%, memory growing). Scenes are a list at the top (`SCENES`); add one when a tradition or moment lands. Baseline at 0.41.10: everything under 450; the busiest is the junior common room zoomed out on a portrait phone (428), then the bow lounge at quiz night (378); game code at most about 3 ms a frame (the mess at Sunday dinner, 68 people).
+
 **deck_check.py** (0.6.8) does that: `CADET_CHROME=/opt/pw-browsers/chromium python3 deck_check.py BUILD.html` visits every deck in `DECKS` and checks every room tile and every tappable item can be reached from the lift, lists the rooms nobody can get into yet (locked cabins, sealed rooms; not failures), flags any room you can only partly get into, lists the active crew and draw calls, and checks Deck 4's memory over round trips. Run it on every turn alongside cadet_test.py.
 
 
