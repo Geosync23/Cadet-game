@@ -4,15 +4,19 @@ Written by session_019aEJaAGyZir9oq47CBRfA3 at 0.39.6, ahead of the memory rule,
 Read CLAUDE.md, DEV_NOTES.md ("Social stories (20c, social engineer B, 0.39.x)" has every detail and the hook register),
 plans/social-deep-plan.md (the design; Parts 1, 3, 6, 8b, 9, 12) and TEAM.md first.
 
-**Status (social B2, session_014A3w2gK8FBNWs66YC3LfME), refreshed 06:40 UTC: B8 calls home built, 0.39.7-0.39.11
-(c689063; reviewer 1b passed 0.39.6, passed 0.39.7-0.39.10 with fixes, all fixed in 0.39.11, final look pending). Every
-hook is in on its owner's branch: player eng 3's homeBooth line (claude/player-needs 8abc711), social A's beatOf line
-(claude/social 0.36.59, merged here), device eng 3's Mail Play button + From home heading (claude/device 4979eec). Next
-(the lead's overnight plan, after 07:30 UTC): a 70-day check that every arc (crew and home) can reach its last beat, then
-the arcs to their last beats with head writer 3 (session_01FopKMT2ZKxuWcNDcmF7565), then crew-to-crew goodbyes and couples
-on rotation days. The lead is session_01KPJMYjXAPkNUcrQ8VRkhLE; reviewer 1b session_018XY1NbMBxo2SLDPxooe5yx. Test
-scaffolding: a scratch merge of this branch + claude/dialogue + claude/content (run content_gen.py on it) for HOME_* data.
-Refresh this note right before handing over (the user's rule).**
+**Status (social B2, session_014A3w2gK8FBNWs66YC3LfME), refreshed 08:25 UTC at 0.39.16 (05dd4a1). Built since the B8
+calls home (0.39.7-0.39.11, passed by reviewer 1b): 0.39.12 arc_check.py + momentCtx (a beat's when sees the tradition
+on now and the person's deck) + momentWantsVisit; 0.39.13 theme needs via socialFill; 0.39.14 bonds with someone not
+aboard frozen as `gone`, bondOf(id,'missed'); 0.39.15 rivalry sparring partners, arc_check modes (arcs | themes: both OK
+in 70 days on a dialogue+content merge); 0.39.16 farewellCrew(leaver, d). Reviewer 1b has 0.39.12-0.39.16 queued.
+Waiting on: social A (session_012pK2XVi5UhqEd28fakYk68) for the visit-picker line (momentWantsVisit) and the rivals
+tuning (118 rival bonds by day 140 on the combined build, theirs); sim engineer 3 (session_01517opwS4UAxYZKNwJytaEK) to
+plan farewellCrew to the shuttle bay 14:30-15:00 on leave days; dialogue engineer 2 (session_01S26bs4oMahyGJkuVaCKQGT)
+for pair:best/mentor, goodbye conversations preferred when near you, {missed}; head writer 3
+(session_01FopKMT2ZKxuWcNDcmF7565) for the goodbye conversations and Tomas 7 (where: calm, content 0.48.42: rerun
+arc_check then). The split-couple thread waits until a couple can leave (the lead). Lead session_01KPJMYjXAPkNUcrQ8VRkhLE.
+Test scaffolding: a scratch merge of this branch + claude/dialogue + claude/content (content_gen.py) for arc_check; the
+combined build (claude/ship-integration) with this 20c swapped in for rotation days. Refresh before handing over.**
 
 ## Next job: B8, calls home (approved by the lead, 2026-10-17)
 The user's ask: people back home (Mum, Gran, Jo, Sam) the player calls, with whole arcs; the shapes agreed with head
