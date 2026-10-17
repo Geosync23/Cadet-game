@@ -32,6 +32,7 @@ A1 0.36.20 query API; A2 0.36.21 memories; A3 0.36.22 lines through `lineFor`; A
 - Plans' blocks (`planDay`) are in absolute ship minutes.
 - Test overrides: `window.foo = ...` doesn't replace a script's own function. social_check's `g.ev` runs inside the game's scope, so swap with a plain `foo = ...` there (save the real one first, put it back after); consts can't be swapped (move the player instead, or push onto the real array). Never set `SHIP.intro` to null (section 13/21 read it): restore the saved object. With section 10's `crewComeTo` merged, a visitor's card opens on arrival, later; tests stand in an instant arrival.
 - Before pushing a seam another seat depends on, a trial merge plus `node --check` on the main script catches name clashes.
+- **Never merge claude/ship-systems** (the lead's rule): section 17 comes only from claude/sim-engineer, which already contains it; an old section 17 makes bus notes carry the send time.
 - **Trial merges: never `git merge -X ours`.** It keeps your side of a whole conflict block, and a block can swallow another seat's new code next to it (the build-number line sits right beside section 13's bus, so `-X ours` silently dropped the bus). Merge normally, take theirs for every conflict outside section 20 (a small script on the markers), and check the other seat's key function is in the result (e.g. `grep -c 'function simNote'`).
 
 ## How to test

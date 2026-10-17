@@ -14028,7 +14028,7 @@ function affinityPlan(a, b, d) {
 //   cue(kind)         -> a ship note still talked about (SHIP.social.cues, from the bus), or null; kind matches by prefix,
 //                        and a trailing '.you' wants one you did: cue('repair.oven'), cue('repair.oven.you')
 //   socialFill(p, name, ctx) -> the words for a social placeholder ({me}, {nick}, {partner}, {friend}, {best}, {rival},
-//                        {mentor}, {mentee}, {boss}, {thing}, {trad}), or null when it can't be filled (skip the line)
+//                        {mentor}, {mentee}, {boss}, {thing}, {trad}, {home}, {family}, {hobby}, {since}), or null when it can't be filled (skip the line)
 SHIP.mem = {}; SHIP.rep = null;
 const REP_START = {},                   // a new arrival has no reputation anywhere, your own Works included (the lead's call, 0.36.43)
       REP_DEPTS = ['command', 'helm', 'comms', 'works', 'watch', 'survey', 'infirmary', 'galley', 'store'];
@@ -14067,7 +14067,11 @@ function bondOf(id, kind) {
   return null;
 }
 const moodOf = p => { socInit(); const q = p && p.id ? p : SOC.crew[SOC.idx.get(p)]; if (!q) return 'ok'; const m = crewMood(q, shipNow()); return m < 40 ? 'low' : m >= 70 ? 'high' : 'ok'; };
-const beatOf = arcId => (socInit(), SHIP.rel[arcId] ? SHIP.rel[arcId].arc || 0 : 0);
+function beatOf(arcId) {                                // beats told of an arc; an arc id isn't always a crew id ('torres' is torres-zeke's): 20c's arcCrew, else the roster's thread 'arc:<id>'
+  socInit(); let id = typeof arcCrew === 'function' ? arcCrew(arcId) : null;
+  if (!id || !SOC.idx.has(id)) { const p = SOC.crew.find(q => q.thread === 'arc:' + arcId); id = p ? p.id : arcId; }
+  return SHIP.rel[id] ? SHIP.rel[id].arc || 0 : 0;
+}
 function knowsNews(p, newsId) {
   socInit(); const id = socId(p);
   if (SHIP.knows[newsId]) return SHIP.knows[newsId].has(id);
@@ -14092,15 +14096,17 @@ function cue(kind) {
 // for a day or two. SOC_CUE_OF: note kind -> [the cue's key from its data, days it lasts]. Memories (A2) and
 // reputation (A6) listen here too
 const SOC_CUE_OF = {
-  repair: [d => 'repair.' + ((typeof machineById === 'function' && d.machine && machineById(d.machine) || {}).kind || (d.kind !== 'repair' && d.kind) || 'machine'), 2],   // the machine's own kind first (the bus's note has its own `kind`)
-  tradition: [d => 'tradition.' + d.id, 1], eventPhase: [d => 'event.' + d.id + '.' + d.phase, 1], favour: [d => 'favour', 1],
-  gift: [d => 'gift', 1], harvest: [d => 'harvest', 2], lateMeal: [d => 'lateMeal', 1],
+  repair: [d => 'repair.' + ((typeof machineById === 'function' && d.machine && machineById(d.machine) || {}).kind || d.job || (d.kind !== 'repair' && d.kind) || 'machine'), 2],   // the machine's own kind first (the bus's note has its own `kind`)
+  tradition: [d => 'tradition.' + d.id, 1], eventPhase: [d => 'event.' + d.id + '.' + d.phase, 1], favour: [d => 'favour' + (d.fav ? '.' + d.fav : ''), 1],
+  gift: [d => 'gift' + (d.tag ? '.' + d.tag : ''), 1], harvest: [d => 'harvest', 2], lateMeal: [d => 'lateMeal', 1],
 };
 function socNote(kind, d) {
   socInit(); d = d || {};
   const c = SOC_CUE_OF[kind]; if (!c) return;
-  const now = Math.floor(socNow()), key = c[0](d), you = d.who === 'you' || d.you === true || (Array.isArray(d.came) && d.came.includes('you'));
-  SHIP.social.cues.push({ key, at: now, until: now + c[1] * 1440, you, deck: d.deck || null });
+  const now = Math.floor(socNow()), key = c[0](d), you = d.who === 'you' || d.from === 'you' || d.you === true || (Array.isArray(d.came) && d.came.includes('you'));
+  const m = kind === 'repair' && typeof machineById === 'function' && d.machine ? machineById(d.machine) : null;   // who it's about (the dialogue engineer's cue:...@me)
+  const who = kind === 'gift' ? d.who || d.to || null : kind === 'favour' ? d.from || d.for || null : kind === 'repair' ? (d.who !== 'you' ? d.who : null) || null : null;
+  SHIP.social.cues.push({ key, at: now, until: now + c[1] * 1440, you, deck: d.deck || (m && m.deck) || null, who, dept: m ? repDeptOf(m) : null, room: m ? m.room || null : null });
   SHIP.social.cues = SHIP.social.cues.filter(x => x.until > now).slice(-30);
 }
 // notes are queued and applied when the social hour they happened in runs (socialHour), at their own time (SOC_T), so one
@@ -14136,6 +14142,8 @@ function memThing(key) {                                 // {thing}: a memory's 
   return null;
 }
 // place:calm (and moments' readiness) is the places' own: CALM_TYPES and placeCalm(p) in DECKS' kit (the deck architect, 0.38.9)
+const SOC_HOBBY = { musician: 'playing music', music: 'listening to records', gardener: 'gardening', 'garden-lover': 'pottering in the garden', runner: 'running', stargazer: 'stargazing',
+  'gym-regular': 'training in the gym', shopper: 'browsing the store', 'quiet-corner': 'reading in quiet corners', 'lounge-regular': 'playing Tiles in the lounge', 'common-room': 'playing games in the common room', 'window-seat': 'watching the stars go by' };
 function socialFill(p, name, ctx = {}) {
   socInit(); const tier = relTier(p.id), nameOf = id => id === 'you' ? chatName() : id && SOC.idx.has(id) ? shortName(SOC.crew[SOC.idx.get(id)]) : null;
   if (name === 'me') return chatName();
@@ -14149,6 +14157,16 @@ function socialFill(p, name, ctx = {}) {
     return top.length ? shortName(top[0]) : null;
   }
   if (name === 'thing') return memThing(ctx.mem && (ctx.mem.key || ctx.mem));
+  // theme fill-ins from the roster (the writers' {home}: a place, {family}: "my <someone>", {hobby}: an -ing activity, {since}: a duration)
+  if (name === 'home') return typeof p.home === 'string' && p.home ? p.home : null;
+  if (name === 'family') { const f = typeof p.family === 'string' && p.family.trim(); return f ? (/^(a|an|her|his|their|my|the)\s+/i.test(f) ? f.replace(/^(a|an|her|his|their|my|the)\s+/i, 'my ') : 'my ' + f) : null; }
+  if (name === 'hobby') { if (typeof p.hobby === 'string' && p.hobby) return p.hobby; const h = (p.habits || []).map(x => SOC_HOBBY[x]).find(Boolean); return h || null; }
+  if (name === 'since') {                                // the roster's since (crew designer 2's 0.16.14); for someone who arrived during the game, from their arrival day
+    const a = arriveDay(p), d = SHIP.time.day;
+    if (a != null && a > 1 && d >= a) { const n = d - a, w = Math.floor(n / 7), N = ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'];
+      return n < 2 ? 'a day or two' : n < 7 ? N[n - 1] + ' days' : w < 9 ? (w === 1 ? 'a week' : N[w - 1] + ' weeks') : Math.round(n / 30) < 13 ? Math.round(n / 30) + ' months' : 'over a year'; }
+    return typeof p.since === 'string' && p.since ? p.since : null;
+  }
   if (name === 'trad') {
     const id = ctx.trad, d = SHIP.time.day, es = typeof eventsOn === 'function' ? eventsOn(d) : [];
     const e = id ? es.find(x => x.id === id) || (typeof SHIP_TRADITIONS !== 'undefined' ? SHIP_TRADITIONS.find(x => x.id === id) : null) : es.find(x => !x.honorees || !x.honorees.length);
@@ -14183,7 +14201,7 @@ const socGreet = (p, t = shipNow(), peek = false) => { const l = socLine(p, 'gre
 //   memAdd(id, key, { w, cls }) -> the memory (a repeat refreshes it: today, and the heavier weight)
 const MEM_CLASS = { small: [30, 7], medium: [60, 21], big: [90, 60], core: [100, 0], sour: [40, 4] };
 const MEM_KIND = { chat: 'small', came: 'small', meeting: 'small', heard: 'small', fav: 'medium', fixed: 'medium', appt: 'medium', visit: 'medium', introduced: 'medium',
-  bday: 'medium', mended: 'medium', gift: 'medium', moment: 'big', show: 'big', helped: 'big', intro: 'core', keepsake: 'core', missed: 'sour', grubby: 'sour' };
+  bday: 'medium', mended: 'medium', gift: 'medium', moment: 'big', show: 'big', helped: 'big', readyroom: 'big', intro: 'core', keepsake: 'core', missed: 'sour', grubby: 'sour' };
 const MEM_MAX = 8, MEM_FORGET = 10;
 const memClass = key => { for (let s = key; s; s = s.includes('.') ? s.slice(0, s.lastIndexOf('.')) : '') if (MEM_KIND[s]) return MEM_KIND[s]; return 'small'; };
 function memAdd(id, key, o = {}) {
@@ -14336,7 +14354,7 @@ function giftGive(p, item) {                             // -> { how: 'loved' | 
   relAdd(p.id, 'gift', GIFT_PTS[how] * (bday ? 2 : 1)); repAdd(null, 0, { kindness: 2 }, 'kind');
   memAdd(p.id, 'gift.' + g.tag, { cls: GIFT_MEM[how] });
   if (how === 'loved') { const k = 'Loves ' + ({ tea: 'tea', sweet: 'sweet things', star: 'the stars', plant: 'plants', book: 'a good book', garden: 'anything from the garden', made: 'things made by hand', music: 'music', game: 'a game' }[g.tag] || g.tag) + '.'; if (!r.known.includes(k)) r.known.push(k); }
-  if (typeof simNote === 'function') simNote('gift', { to: p.id, item: g.item, tag: g.tag, how });
+  if (typeof simNote === 'function') simNote('gift', { who: p.id, to: p.id, from: 'you', item: g.item, tag: g.tag, how });   // who: the one who got it
   const l = socLine(p, 'gift', { how, item: g.item, tag: g.tag, bday }), U = k => schedU(p.seed, Math.floor(shipNow() / 60), k);
   const text = l ? l.text : how === 'loved' ? ['Oh! How did you know? I love these.', 'For me? This is perfect. Thank you!', 'You absolute star. This is exactly my thing.'][Math.floor(U(648) * 3)]
     : how === 'liked' ? ['That\'s really kind. Thank you.', 'Oh, nice! Thanks, ' + chatName() + '.', 'You didn\'t have to. I\'ll enjoy this.'][Math.floor(U(648) * 3)]
@@ -15248,7 +15266,9 @@ function chatDo(id) {
     if (!f) chatSay(pick(['I\'m all right for now, thanks.', 'Nothing I need, but thanks for asking.', 'Kind of you. Nothing right now.'], 623));
     else if (f.idea || f.status === 'offered') { C.offer = true; chatSay(f.idea ? f.ask : 'Still could use a hand: ' + f.title.toLowerCase() + '.'); }
     else if (f.workDone || !f.stops.length) {          // handing it back, face to face
-      if (favourTurnIn(f.id)) { relAdd(p.id, 'favour', REL_PTS.favour); memAdd(p.id, 'fav.' + (f.kind === 'lamp' ? 'lamp' : f.bring ? 'fetch' : 'job')); repAdd(p.dept, 2, { kindness: 3 }, 'kind'); C.fav = null; chatSay(pick(['You\'re a star. Thank you!', 'Oh, brilliant. I owe you one.', 'Perfect. Thanks, ' + chatName() + '.', 'You didn\'t have to, but thank you.'], 629)); }
+      if (favourTurnIn(f.id)) { relAdd(p.id, 'favour', REL_PTS.favour); const fk = f.kind === 'lamp' ? 'lamp' : f.bring ? 'fetch' : 'job'; memAdd(p.id, 'fav.' + fk); repAdd(p.dept, 2, { kindness: 3 }, 'kind');
+        if (typeof simNote === 'function') simNote('favour', { who: 'you', from: p.id, for: p.id, fav: fk, id: f.id });   // a favour you did for them
+        C.fav = null; chatSay(pick(['You\'re a star. Thank you!', 'Oh, brilliant. I owe you one.', 'Perfect. Thanks, ' + chatName() + '.', 'You didn\'t have to, but thank you.'], 629)); }
       else chatSay('Hmm, not quite done yet, is it?');
     } else chatSay(pick(['No rush. Whenever you can.', 'Thanks for doing that, by the way.', 'Any luck yet?'], 630));
   } else if (id === 'fav-yes' || id === 'fav-no') {
