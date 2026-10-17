@@ -412,6 +412,8 @@ What higher tiers unlock:
 
 **Ship traditions** (agreed 2026-10-16; "ship traditions" is the official name, while the big ones are "ship-wide events"; built in 0.34.0). Alongside the big ship-wide events, the Wren has small, recurring traditions, "lots of little holiday-like things, almost like Stardew Valley". The crew who are free simply go, and talk about them; nothing stops daily life, and there are no menus or cutscenes. One events system runs them. They're announced in Mail the evening before, shown on the device's Calendar, and the Calendar reminds you before each one:
 
+**Pillar 4's new traditions: the user's choices (2026-10-17 ~04:07, traditions survey).** Keep: Tiles night, Brennan's tasting table, late piano (maybe **twice a week**), long breakfast, Sunday long table, letters evening, book circle, department cup, open lab, Sowing morning, first-fruit supper, Midtour, harvest supper, lantern walk, Year's end, new hand's tea, one week aboard, four weeks aboard. **Cut:** crossover supper, mending day, rummage day. **Changed:** garden hour moves to **Saturday**; **talent night only once a year**; **bridge hour once a month, but only after you're first invited to the bridge in a story beat** (written later); **letters evening gets plenty of dialogue and people to call home to, with complete story arcs** (family and friends back home). Mending day prompted a new mechanic for Pillar 5: **a laundry system**.
+
 - **Weekly:** running club (Monday evening, the gym), quiz night (Thursday, the bow lounge), Works Friday tea and tool cleaning (Deck 5) and the Friday music jam (Deck 4), film night and observatory night (Saturday: the junior common room, and Deck 2's observatory), and the Sunday swap meet on the promenade.
 - **Every few weeks:** harvest morning in the garden (every other Saturday, fresh salad at dinner) and the hull-lights evening (every four weeks).
 - **Birthdays.** Every crew member has a birthday on a ship day of the year (1 to 364: 52 weeks of 7 days, day 1 being the game's Day 1), spread so about one falls each week. The galley bakes a cake and the mess gathers after dinner (20:15): their department, their bunkmates and plenty of others.
@@ -706,15 +708,18 @@ Done so far:
 
 **After that:** progression to tier 2 (certification, promotion to Officer and your own cabin, the Deck 5 machine rooms and connected-system faults) and the spine's crawlways and pipe galleries. (The shuttle arrival is now part of Pillar 4.)
 
+**Roadmap after Pillar 4 (the user, 2026-10-17 ~04:10, Pillar 5 survey):**
+- **Pillar 5: expanded core mechanics.** New ways to work beyond fetching a part and replacing it: several new, evolving mechanics that unlock slowly as you work on more of the ship, each one taught to you (you're trained on new tools and tasks). It starts simple. More real faults reach you; repairs get faster with practice (shown in words); new tools unlocked one by one with training; the weekly drill and inspection made real; small machine incidents between big events; tinkering, cabin touches and star logging off shift; light device work apps; the first promotion (about 2 ship weeks of steady work). Diagnosing faults and Tier 2 traced faults come later, as further mechanics. A **laundry system** (the user, traditions survey) belongs here. Still Works only. The planner brings new mechanic ideas of its own. A detailed plan comes first, before any work.
+- **Pillar 6: ship-wide events** (the comet viewing, the diplomatic visit, power surge, illness, late supply shuttle, the garden creature, nebula, salvage; recurring variations after the list; event parts by rank). Out of Pillar 5.
+- **Pillar 7: career progression, story and milestones.** Including being **assigned to the night shift for a while** (no opt-in night on-call duty). Out of Pillar 5.
+
 
 ## Open questions
 
 **The game:**
 
 - The Works Chief is Chief Ines Calder. Her personality and how she judges your work are still to be designed, before Pillar 2, because she runs the job board and certifies the player.
-- Should the player ever work the night shift, for example as part of on-call duty?
 - How does diagnosing a fault look on screen: a simple panel with labelled components, or something more hands-on? Prototype it in Pillar 2.
-- Can the player be passed over for certification, or only delayed?
 - Beyond the name you type on the shuttle, should the player ever choose their look? (No choice of look for now, the user, 2026-10-16.)
 - Does the diplomacy-and-story starship game become its own future project?
 
@@ -723,6 +728,9 @@ Done so far:
 - Who keeps the engine watch on Deck 6: is there a watch on both shifts, and are they Works crew?
 
 **Answered:**
+
+- Night shift: yes, later: you're assigned the night shift for a while in Pillar 7 (career); no opt-in on-call (the user, 2026-10-17).
+- Passed over for certification: never, only delayed (the user, 2026-10-17).
 
 - Who meets you off the shuttle, and which milestone builds the arrival: Zeke Torres, a Works engine officer, built in Pillar 4 (the user, 2026-10-16/17). See "The player".
 - The device's phosphor colour is the Wren's cyan, with amber and green as options in Settings (the user, 2026-10-16).
