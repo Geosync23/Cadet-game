@@ -7,9 +7,9 @@
 (session_0142TQw4ke8caPSyAC93VT98) reviews you. Tradition designers may ask you for a tone check.
 
 **Branch:** `claude/content` (push only there). Builds **0.48.x** (header line ~198 and `GAME_BUILD` ~7047 in
-`starship-cadet.html`; keep both in step; a row in DEV_NOTES's build table for each). Last build: **0.48.16** (Head writer 2, 7eb91e5):
-3,620 lines, 1 home contact (Mum), 128 conversations, 5 meetings (bridgeInvite added), 83 voice cards (all 74 crew, Saruth, 8 event guests), 10 templates, 87 overheard conversations, 45 arc moments,
-12 struggle themes, 4 intro meetings. Next build number: 0.48.17.
+`starship-cadet.html`; keep both in step; a row in DEV_NOTES's build table for each). Last build: **0.48.17** (Head writer 2, 9b5bdd6):
+3,704 lines, 4 home contacts (Mum, Gran, Jo, Sam; facts 4d), 128 conversations, 5 meetings (bridgeInvite added), 83 voice cards (all 74 crew, Saruth, 8 event guests), 10 templates, 87 overheard conversations, 45 arc moments,
+12 struggle themes, 4 intro meetings. Next build number: 0.48.18.
 
 ## What you own
 
@@ -67,7 +67,7 @@
 | **Writer 2** (Works + command) | session_01Cf6D2dFZaKspr9mwUnCrBm | claude/writer-works | batches 1, 1b, 2 merged (0.48.11, 0.48.14); batches 1-3 merged (everyone in their area at ~30); on batch 4 (Calder, Kovac toward ~100), then 5 (Vance, Marrow, Holt), then overheard pairs, visitor cards last |
 | writer-command | session_01HdsVyhcPUgWse8qpaYqKex | claude/writer-command | retired (`plans/handover-writer-command.md`) |
 | writer-commons | session_01DfadYjSP8skcVF72f6JxBw | claude/writer-commons | retired |
-| **Writer 3** (Commons) | session_01AS3Tzju3TuFbM9XAEYdvPX | claude/writer-commons | batches 1-2 merged (0.48.14); on batch 3 (story crew to ~120), then Gran, Jo, Sam call-home arcs from mum.call. rep/knownFor: as greet/near lines with rep:/you: until the kinds are called; gift thanks held (asked the dialogue engineer for `gift:loved|liked|polite`) |
+| **Writer 3** (Commons) | session_01AS3Tzju3TuFbM9XAEYdvPX | claude/writer-commons | batches 1-8 merged (to 0.48.17: story four ~130-140, the 19 at ~40+, gran/jo/sam.call, gift thanks); on batch 9 (crew asking after your people via flag:home.*), then their handover (~65%). rep/knownFor: as greet/near lines with rep:/you: until the kinds are called; gift thanks held (asked the dialogue engineer for `gift:loved|liked|polite`) |
 
 Writer 2 is on batch 1 (Works 1-8 and Kovac to ~30, Torres's job-2/job-3 bubbles under `flag:walk.job2.<step>` and
 `flag:walk.job3.tea|turnin`, telling onboarding when they're in). Newcomer replies are on hold (they wait for the guide
@@ -93,7 +93,8 @@ overheard can now be written.
   writes Gran, Jo, Sam from it. The calls themselves wait on social B's successor (B8) and the booth hook.
 - **Bridge invite:** `meetings/bridgeInvite.meet` (Vance, day 22, `flag:bridge.invited`); trigger not wired yet.
 - **Holt beat 1** has `where: meal` (social B's 0.39.6 word; plays once their engine is in the integration build).
-- Dialogue engineer: session_01UmrVVpV7eBqEsa4sBucASP (claude/dialogue; tool requests go direct).
+- Dialogue engineer 2: session_01S26bs4oMahyGJkuVaCKQGT (claude/dialogue, took over from DE1). Asked: `you:` with `_`,
+  knownFor tag list, the stricter .call romance check, the one-sided booth overheard format (for a later batch).
 
 ## Open questions with others
 
