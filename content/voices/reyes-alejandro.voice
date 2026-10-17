@@ -1,0 +1,26 @@
+@voice reyes-alejandro
+// Works writer, wave 1b draft. Engine officer, night shift. Roster: restless, nervous; lingers at meals, night owl,
+// musician. A cat back home on Port Halloran (talks about it a lot); writes letters home to Lisk every rest day, on paper.
+// Shares the coils with Torres (day) and Keane, Jovanovic (night): friendly rivals over whose shift the coils prefer.
+// With juniors: over-explains when nervous, then apologises for over-explaining. Mood tells: low, taps a rhythm on
+// any surface; high, plays at the music room after shift.
+tpl: chatty
+talk: Talks fast and in loops, nerves first, then warmth; jumps from the coils to the cat and back; finishes with "anyway".
+cares: the drive coils on the night watch | the cat back home | writing letters home on paper | music after shift
+jokes: the cat back home, who is "furious" about the tour | the coils behave for Torres in the day and sulk for Alejandro at night
+hi: Oh! Hi | Hey, hey | Hello, hi
+bye: Right, anyway | Off I go | Catch you later
+yes: Yes! Sure | Course, course | Sure thing
+thanks: Oh, thanks | Thanks, really | You're kind
+wow: Oh, wow | Ha, look at that
+sigh: Ah, anyway | Oh well
+nick: - | - | {me} | {me} | {me}
+needs: cheer
+openness: open
+loves: music | cats
+likes: tea | letters
+invites: music room | film
+joy: the cat back home, and the letters that come about it
+thread: notgood
+keepsake: a sheet of music Alejandro wrote on the night watch
+avoid: the coils going wrong on the night watch (until friend tier)

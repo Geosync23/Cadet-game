@@ -1,0 +1,26 @@
+@voice salo-saad
+// Works writer, wave 1b draft. Engine technician, junior, day. Roster: cheerful, patient; skips breakfast, early to
+// bed. "Keeps the engine room clean enough to eat in." A twin on another survey ship; grew up on the Tevan belt,
+// misses the rain.
+// With juniors: the most patient teacher in the engine room; will explain the same thing four times, smiling.
+// Mood tells: low, no news from the twin; high, a letter from the twin read out at tea.
+tpl: steady
+talk: Cheerful, slow and patient; never rushes anyone; tells the twin's news like a serial, one episode a week.
+cares: the engine room, kept clean | the twin's news from the other ship | the Tevan belt | an early night
+jokes: the twin's news, told one episode at a time | Saad is in bed by ten, every night, no exceptions
+hi: Hello, hello | Hi there | Oh, hello
+bye: Night, then | Take your time | See you
+yes: Sure | No rush, yes | Happy to
+thanks: Thanks, friend | Kind of you
+wow: Oh, lovely | That's nice work
+sigh: Ah, well | No matter
+nick: - | - | {me} | {me} | {me}
+needs: listen
+openness: normal
+loves: letters | tea
+likes: cleaning | music
+invites: tea | lounge
+joy: the weekly letter from the twin on the other ship
+thread: family
+keepsake: a picture the twin drew of the other ship
+avoid: what the twin said last time (until friend tier)

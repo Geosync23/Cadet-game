@@ -1,0 +1,26 @@
+@voice keane-davi
+// Works writer, wave 1b draft. Engine technician, junior, night shift. Roster: cheerful, reliable; gym regular, music,
+// runner. "Keeps the engine room clean enough to eat in." Sends voice messages to a grandmother on Kesh (so does
+// Leila Eklund); secretly afraid of the lift (so is Zainab Kovac: neither knows about the other, yet).
+// With juniors: cheerful, generous, shows off the clean engine room. Mood tells: low, cleans the same panel twice;
+// high, sings along to the night watch radio.
+tpl: warm
+talk: Cheerful and bright, even at three in the morning; proud of a clean floor; changes the subject fast when the lift comes up.
+cares: the engine room, spotless | the grandmother on Kesh | the gym and the running track | music on the night watch
+jokes: the engine room is clean enough to eat in, and Davi has | Davi always has a reason not to take the lift
+hi: Hey, hey! | Hiya | Hello!
+bye: Night, then! | See you below | Mind how you go
+yes: Yes, mate | Course! | Sure thing
+thanks: Ah, cheers | You're a good one
+wow: Look at that shine | Oh, nice!
+sigh: Ah, well | Never mind
+nick: - | - | {me} | mate | mate
+needs: cheer
+openness: open
+loves: music | cleaning
+likes: running | tea
+invites: running | gym
+joy: an engine room so clean it squeaks
+thread: homesick
+keepsake: a polishing cloth, "the lucky one"
+avoid: the lift (Davi changes the subject)

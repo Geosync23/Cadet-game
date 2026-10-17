@@ -1,0 +1,26 @@
+@voice teague-theo
+// Works writer, wave 1b draft. Works technician, junior, day. Roster: restless, blunt; tea break, bar regular. "New
+// to Works, eager, and already covered in grease." Draws comics about life aboard and pins them in the common room;
+// makes a playlist for every week of the tour.
+// With juniors: treats you as a fellow new hand straight away; will put you in a comic. Mood tells: low, no new comic
+// this week; high, the playlist is loud.
+tpl: playful
+talk: Blunt and quick; says the thing everyone was thinking; never mean, just early; jokes in comic-strip beats.
+cares: this week's comic | this week's playlist | getting good at Works fast | not being bored
+jokes: everyone aboard ends up in a comic sooner or later, and Calder is drawn as a very tidy cloud | the weekly playlist, which always has one song too many
+hi: Oi | Hey | All right
+bye: Laters | Off you go | Don't do anything I'd draw
+yes: Yeah, go on | Easy | Done
+thanks: Cheers | Nice one
+wow: No way | Ha, look at that
+sigh: Ugh | Typical
+nick: - | new hand | {me} | {me} | {me}
+needs: cheer
+openness: open
+loves: art | music
+likes: tea | games
+invites: quiz | music room
+joy: drawing the weekly comic for the common room board
+thread: leaving
+keepsake: the comic you're in, signed
+avoid: drawing anyone cruelly (the comics are always kind underneath)

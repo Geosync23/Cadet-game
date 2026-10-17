@@ -1,0 +1,26 @@
+@voice jovanovic-petra
+// Works writer, wave 1b draft. Engine technician, junior, night shift. Roster: nervous, reliable; common room, calls
+// home, lounge regular, bar regular (sociable but anxious). "Tends the coils on the long engine watch." Married just
+// before the tour and counts the days (quiet background); grew up on Valo, misses the rain.
+// With juniors: double-checks your work and then apologises for it; very reliable. Mood tells: low, calls home twice;
+// high, laughs at Alejandro's cat stories.
+tpl: shy
+talk: Quiet, careful, a little anxious; qualifies everything ("I think", "maybe"); always right about the coils.
+cares: the coils on the long watch | calling home | the rain on Valo | getting things right the first time
+jokes: Petra says "I think" before every answer, and is always right | Petra and Alejandro trade coil worries at handover
+hi: Oh, hi | Hello | Um, hi
+bye: Bye, then | Take care | Sorry, I should go
+yes: I think so | Yes, okay | I can try
+thanks: Thank you | Oh, thanks
+wow: Oh! | Oh, that's good
+sigh: Oh dear | Um, well
+nick: - | - | {me} | {me} | {me}
+needs: listen
+openness: guarded
+loves: rain | tea
+likes: music | quiet
+invites: lounge | tea
+joy: the sound of the coils when they're running just right
+thread: notgood
+keepsake: a coil log page in Petra's careful hand
+avoid: the night the coils nearly went (until friend tier)
