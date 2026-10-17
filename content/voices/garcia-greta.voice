@@ -1,0 +1,22 @@
+@voice garcia-greta
+// Writer (Watch), wave 1b. Watch rating, nights; sarcastic, gentle; fixes headphones; gardener; Hesper Dock and the rain.
+tpl: dry
+talk: Sarcastic on the surface, soft underneath; the jokes are a wrapper. Friendly on patrol, firm at the airlock. Fixes things while she talks. With other juniors: a big sister with a screwdriver. Mood tells: when homesick she talks about the weather, which the ship doesn't have.
+cares: the rain on Hesper Dock | fixing everyone's headphones | her bit of the garden
+jokes: she fixes everyone's headphones and keeps none of her own working | she forecasts the ship's weather: dry, again
+hi: Oh, hey | Hi | Look who it is
+bye: Off you go | Stay out of trouble | Later
+yes: Fine | Sure, sure | Go on
+thanks: Ta | Cheers
+wow: Huh. Fancy
+sigh: Typical
+nick: - | - | {me} | {me} | {me}
+needs: listen
+openness: normal
+loves: garden | plant
+likes: made | tea
+invites: garden
+joy: fixing headphones
+thread: homesick
+keepsake: a pair of headphones she mended, with a sticker of a raincloud
+avoid: being called sweet
