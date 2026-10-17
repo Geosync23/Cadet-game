@@ -20,6 +20,7 @@ Read this with the voice bible and `content/facts.md` (the head writer's), and t
 | `traditions/<id>.trad` | a tradition's data and words, in the traditions engineer's format (`plans/trad-format.md`) | tradition |
 | `arcs/<arcId>.arc` | a story crew member's arc: their moments, beat by beat (from the head writer's outlines) | arc |
 | `themes/<theme>.arc` | a struggle theme for generated crew, three beats with roster fill-ins | theme |
+| `home/<contact>.call` | calls home: your people back home, their arc, what you can tell them, everyday calls | contact |
 | `gifts.list` | coming with social engineer A | |
 
 Crew ids are the roster's (`tomas`, `pell`, `rina`, `torres-zeke`, `calder`, ...): see `plans/crew-roster.html`.
@@ -121,6 +122,9 @@ These are the only condition words. `lines_check.py` rejects anything else. Put 
 | `dept:` `rank:` `trait:` `habit:` | the speaker's department, rank, trait or habit | `dept:galley`, `rank:junior`, `trait:shy`, `habit:gardener` |
 | `act:` | what they're doing | `work`, `breakfast`, `dinner`, `meal` (either), `gym`, `wash`, `leisure`, `off`, `free` (either) |
 | `birthday:` | `me` (the speaker's) or `you` (yours) | `birthday:me` |
+| `came:` | calls home: you went to a tradition lately (`any`, or its id); the call passes it, and `{trad}` fills from it | `came:any` |
+| `friend:` | calls home: you have a friend aboard (`any`); `{friend}` fills from it | `friend:any` |
+| `gift:` | thanking for a gift: how it landed (`loved`, `liked`, `polite`) or its tag | `gift:loved`, `gift:sweet` |
 | `who:` | the speaker is one of these crew (overheard: speaker A) | `who:torres-zeke\|dahl-mira\|kovac-zainab` |
 | `with:` | the other crew member in the scene is one of these (overheard: speaker B) | `with:kovac-zainab` |
 | `pair:` `topic:` | overheard only (below) | |
@@ -285,6 +289,26 @@ them: Was I any good, as your trainer?   [sigh]
 - **Placeholders and voice tokens** work as in lines (`{me}`, `{hi}`, `{home}`...). Lines are 140 characters at most;
   the hint 90; a Mail body 400.
 - Beats 1-4 of Tomas, Pell and Rina are already in the game; their files start at `== beat 5`.
+
+## Calls home (.call)
+
+Your people back home (Mum, Gran, Jo and Sam) live in `content/home/<contact>.call`. A call file is an arc file with
+three differences:
+
+- **The header:** `@arc home.<contact>`, `who: home:<contact>`, `name: Mum` (what you call them), and `pron: they`
+  where it applies.
+- **Beats** take every arc field plus `via: reply` (an ordinary call) or `via: live` (it waits for a clear line, Letters
+  evening). Chain them with `when: beat:home.mum.2` or `when: flag:home.mum.called`.
+- **After the beats**, two sections:
+  - `== send`: things you can tell them on a call. `? conditions`, then `- text   flavour:share` (optionally `flag:<key>`
+    or `mem:<word>`, set when you choose it) with their reaction indented under it (`  them: text [pose]`). Conditions
+    last until the next `?`, so put a bare `?` before lines anyone can say. `came:any` and `friend:any` (with `{trad}`
+    and `{friend}`) are for "I went to quiz night" and "I've made a friend".
+  - `== chat`: whole everyday calls for days with no beat, separated by `--`. An optional `when: <conditions>` first,
+    the lines, and `? send` where your choice of news goes.
+
+Family warmth ("I love you", "love to you") is fine in call files; the head writer reads them for tone. Jo, Sam and the
+contacts' names count as known names.
 
 ## Meetings (.meet)
 

@@ -11,6 +11,7 @@ The nine small updates once listed here for the design doc (Chef Brennan, Deck 3
 
 ## Current build: 0.60.1 (about 19,800 lines)
 ## Current build: 0.43.9 (about 17,250 lines)
+## Current build: 0.43.11 (about 17,250 lines)
 
 Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (Operations) is built and dressed: the Works complex, storage, machine shop, shuttle bay with the shuttle Tern, the door gear and the fan. Pell works there.
 
@@ -461,6 +462,8 @@ Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (
 | 0.43.7 | `cue:` conditions take `@me` (the newest matching cue is about the speaker: `cue.who === p.id`, e.g. `cue:gift.you@me` for the receiver's thanks) and `@dept` (`cue.dept === p.dept`, a repair in their department), reading the `who`/`dept` fields social A added to cue records (0.36.53). Writers' guide updated. cadet_test ALL IDENTICAL. |
 | 0.43.8 | For overheard conversations about particular people (the head writer's ask): new conditions `who:<id>|...` (the speaker, overheard speaker A) and `with:<id>|...` (`ctx.other`, speaker B), and `pair:x+y` sides may be crew ids. lines_check checks the ids. cadet_test ALL IDENTICAL. |
 | 0.43.9 | Social B's questions on the arcs: `rep:` and `ship.*:` now mean "this band or better" (`LINE_REP` new < known < well < theirs, `LINE_SHIP` low < ok < high; `!rep:well` = below well), so Calder's arc opens and stays open as your Works standing rises; `deck:` is the scene's deck (`ctx.deck`, else the deck you're on), not the speaker's. cadet_test ALL IDENTICAL. |
+| 0.43.10 | `gift:` condition (head writer 2's ask): the gift being thanked, `ctx.how` (loved, liked, polite, as social A's socLine passes it) or `ctx.tag`; with `cue:gift.you@me gift:loved` the receiver thanks you for a gift they love. cadet_test ALL IDENTICAL. |
+| 0.43.11 | Calls home (head writer 2's model file, for social B's B8): content_gen bakes `content/home/<contact>.call` (an arc with `name:`/`pron:`, beats with `via: reply|live`, a `== send` section of things you can tell them with their reactions, and `== chat` everyday calls with a `? send` slot) into `HOME_CONTACTS`, `HOME_MOMENTS['<contact>:<n>']`, `HOME_SEND[contact]` (`sets`/`memo` for what a choice sets) and `HOME_CHAT[contact]`. New conditions `came:any|<id>` (ctx.trad) and `friend:any` (ctx.friend), whose `{trad}`/`{friend}` fill from the call's ctx. lines_check reads call files under the moment rules, allows family warmth ("I love you"), knows Jo and Sam, and accepts `beat:home.mum.2`. `LINE_META` gains flavour, reply, sets, memo (data, not conditions). Mum's model file (88 lines) bakes and passes. cadet_test ALL IDENTICAL. |
 
 Deck 4's static screenshots are pixel-identical from 0.5.0 through 0.5.7. The only Deck 4 changes are the spine and lobbies (not in the harness views), and crew routes that shifted when Pell left and when the car and benches changed which tiles are walkable.
 

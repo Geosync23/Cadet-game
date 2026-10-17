@@ -6,7 +6,8 @@
 Reads content/ (see content/README.md, the writers' guide) and rewrites, in the game file (default
 starship-cadet.html), everything between these markers, which sit in section 22 (LINES):
 
-    // ---- BEGIN LINES ...       // ---- END LINES ----        VOICE_TEMPLATES, VOICE, LINES, CONVOS, MOMENTS, MOMENT_THEMES
+    // ---- BEGIN LINES ...       // ---- END LINES ----        VOICE_TEMPLATES, VOICE, LINES, CONVOS, MOMENTS, MOMENT_THEMES,
+                                                                 HOME_CONTACTS, HOME_MOMENTS, HOME_SEND, HOME_CHAT
     // ---- BEGIN MEETINGS ...    // ---- END MEETINGS ----     MEETINGS_BAKED (merged into MEETING_SCRIPTS)
     // ---- BEGIN TRADITIONS ...  // ---- END TRADITIONS ----   TRADITIONS, an array (section 18's loader; plans/trad-format.md)
 
@@ -36,7 +37,8 @@ COND_KEYS = {
     # the dialogue engine's (section 22)
     'time': 'lines', 'weekday': 'lines', 'season': 'lines', 'place': 'lines', 'deck': 'lines', 'event': 'lines',
     'trad': 'lines', 'dept': 'lines', 'rank': 'lines', 'trait': 'lines', 'habit': 'lines', 'act': 'lines',
-    'birthday': 'lines', 'pair': 'lines', 'topic': 'lines', 'who': 'lines', 'with': 'lines',
+    'birthday': 'lines', 'pair': 'lines', 'topic': 'lines', 'who': 'lines', 'with': 'lines', 'gift': 'lines',
+    'came': 'lines', 'friend': 'lines',
 }
 NUM_KEYS = ('w', 'odds')                     # numbers, not conditions: a weight, and a seeded chance
 TONES = ('light', 'funny', 'warm', 'serious')
@@ -381,13 +383,13 @@ def parse_meeting(path, rel, out):
 
 MOMENT_TONES = ('light', 'heartfelt', 'serious', 'resolution')
 MOMENT_FIELDS = ('tone', 'where', 'when', 'tier', 'metDays', 'gapDays', 'duty', 'crisis', 'hint', 'mem', 'flag', 'keepsake',
-                 'learn', 'mail', 'needs')
+                 'learn', 'mail', 'needs', 'via')
 THEMES = ('homesick', 'exams', 'family', 'stuck', 'notgood', 'lonely', 'loss', 'talent', 'burnout', 'leaving', 'rivalry',
           'startover')                    # social B's frozen theme names
 FLAVOURS = ('listen', 'cheer', 'practical', 'share')
 
 
-def parse_arc(path, rel, out):
+def parse_arc(path, rel, out, home=False):
     """A story arc (content/arcs/<arcId>.arc: '@arc <arcId>' then 'who: <crewId>') or a struggle theme
     (content/themes/<theme>.arc: '@theme <theme>'). Each '== beat <n>' has fields, then the script:
       tone: light|heartfelt|serious|resolution   where: calm|visit|appt|<room name>   when: <conditions>
@@ -401,6 +403,12 @@ def parse_arc(path, rel, out):
     MOMENT_THEMES[theme] = [ { beat, ...fields, lines }, ... ] (social B's shapes)."""
     lines = read_lines(path)
     hd = header(lines, path)
+    rest, contact = [], {}
+    if home:                                   # a call home (content/home/<contact>.call): '@arc home.<contact>'
+        if hd[0] != 'arc' or len(hd) != 2 or not hd[1].startswith('home.'):
+            raise GenError(f'{path}: a .call file starts with "@arc home.<contact>"')
+        cut = next((n for n, (i, l) in enumerate(lines) if l.strip() in ('== send', '== chat')), len(lines))
+        lines, rest = lines[:cut], lines[cut:]
     if hd[0] == 'arc' and len(hd) == 2:
         theme, aid, who = False, hd[1], None
     elif hd[0] == 'theme' and len(hd) == 2:
@@ -415,9 +423,13 @@ def parse_arc(path, rel, out):
         s = l.strip()
         if not s or l.startswith('@'):
             continue
-        m = re.fullmatch(r'who:\s*([\w-]+)', s)
+        m = re.fullmatch(r'who:\s*([\w:-]+)', s)
         if m and cur is None and not theme:
             who = m.group(1)
+            continue
+        m = re.fullmatch(r'(name|pron):\s*(.+)', s)
+        if m and cur is None and home:
+            contact[m.group(1)] = m.group(2).strip()
             continue
         m = re.fullmatch(r'==\s*beat\s+(\d+)', s)
         if m:
@@ -458,6 +470,10 @@ def parse_arc(path, rel, out):
                 cur['after'] = {'mail': {'after': int(parts[0]), 'subject': parts[1], 'body': parts[2]}}
             elif k == 'needs':
                 cur[k] = [x.strip() for x in v.split(',') if x.strip()]
+            elif k == 'via':
+                if not home or v not in ('reply', 'live'):
+                    raise GenError(f'{where}: via: is reply or live, in calls home only')
+                cur[k] = v
             else:
                 cur[k] = v
             continue
@@ -511,6 +527,15 @@ def parse_arc(path, rel, out):
     if ns != sorted(set(ns)) or (ns and ns[0] < 1):
         raise GenError(f'{path}: beats must rise (1, 2, 3...; a gap is fine while beats are still being written), each number once')
     order = ('beat',) + MOMENT_FIELDS + ('after', 'lines')
+    if home:
+        cid = aid[5:]
+        if not who or who != 'home:' + cid or 'name' not in contact:
+            raise GenError(f'{path}: a call home needs "who: home:{cid}" and "name: <what you call them>"')
+        out['HOME_CONTACTS'][cid] = {'id': who, 'arc': aid, **contact}
+        for b in beats:
+            out['HOME_MOMENTS'][f'{cid}:{b["beat"]}'] = {'who': who, 'thread': 'arc:' + aid, **{k: b[k] for k in order if k in b}}
+        parse_home_rest(rest, path, rel, cid, who, out)
+        return
     if theme:
         if aid in out['MOMENT_THEMES']:
             raise GenError(f'{path}: theme {aid} is in two files')
@@ -523,8 +548,73 @@ def parse_arc(path, rel, out):
             out['MOMENTS'][mid] = {'who': who, 'thread': 'arc:' + aid, **{k: b[k] for k in order if k in b}}
 
 
+def parse_home_rest(lines, path, rel, cid, who, out):
+    """A call home's '== send' (what you can tell them: '? conditions', '- text   flavour:x flag:y', their reaction
+    indented under it as '  them: text [pose]') and '== chat' (whole everyday calls separated by '--': an optional
+    'when: <conditions>' first, script lines, and '? send' where your choice of news goes)."""
+    sec, conds, sends, chats, cur = None, {}, [], [], None
+    def line_of(s, where):
+        m = re.fullmatch(r'([\w:-]+):\s*(.+?)(?:\s+\[(\w+)\])?', s)
+        if not m:
+            raise GenError(f'{where}: script lines are "them: text [pose]"')
+        ln = {'who': who if m.group(1) == 'them' else m.group(1), 'text': m.group(2)}
+        if m.group(3):
+            ln['pose'] = m.group(3)
+        return ln
+    for i, l in lines:
+        where = f'{path}:{i}'
+        s = l.strip()
+        if not s:
+            continue
+        if s in ('== send', '== chat'):
+            sec, conds, cur = s[3:], {}, None
+            continue
+        if sec == 'send':
+            if s.startswith('?'):
+                conds = parse_conds(s[1:], where)
+                continue
+            if s.startswith('- '):
+                parts = re.split(r'\s+(?=(?:flavour|flag|mem):)', s[2:].strip())
+                text, tone = split_tone(parts[0], where)
+                e = entry(rel, 'send', text, tone, conds)
+                for p in parts[1:]:
+                    k, v = p.split(':', 1)
+                    if k == 'flavour' and v not in FLAVOURS:
+                        raise GenError(f'{where}: flavour is {", ".join(FLAVOURS)}')
+                    e[{'flag': 'sets', 'mem': 'memo'}.get(k, k)] = v   # set when chosen (not conditions): sets, memo
+                sends.append(e)
+                continue
+            if l.startswith(' ') and sends:
+                if 'reply' in sends[-1]:
+                    raise GenError(f'{where}: one reaction per thing you tell them')
+                sends[-1]['reply'] = line_of(s, where)
+                continue
+            raise GenError(f'{where}: under "== send": "? conditions", "- text  flavour:x" and an indented "  them: ..."')
+        if sec == 'chat':
+            if s == '--':
+                cur = None
+                continue
+            if cur is None:
+                cur = {'lines': []}
+                chats.append(cur)
+            if s.startswith('when:') and not cur['lines']:
+                cur['when'] = parse_conds(s[5:], where)
+                continue
+            if s == '? send':
+                cur['lines'].append({'send': True})
+                continue
+            cur['lines'].append(line_of(s, where))
+            continue
+        raise GenError(f'{where}: after the beats only "== send" and "== chat"')
+    for c in chats:
+        if not any('text' in x for x in c['lines']):
+            raise GenError(f'{path}: an everyday call with no lines')
+    out['HOME_SEND'][cid] = sends
+    out['HOME_CHAT'][cid] = [{k: c[k] for k in ('when', 'lines') if k in c} for c in chats]
+
+
 def bake():
-    out = {'VOICE_TEMPLATES': {}, 'VOICE': {}, 'LINES': {}, 'CONVOS': [], 'MOMENTS': {}, 'MOMENT_THEMES': {}, 'MEETINGS_BAKED': {}, 'TRADITIONS': []}
+    out = {'VOICE_TEMPLATES': {}, 'VOICE': {}, 'LINES': {}, 'CONVOS': [], 'MOMENTS': {}, 'MOMENT_THEMES': {}, 'HOME_CONTACTS': {}, 'HOME_MOMENTS': {}, 'HOME_SEND': {}, 'HOME_CHAT': {}, 'MEETINGS_BAKED': {}, 'TRADITIONS': []}
     files = []
     for d, _, fs in os.walk(CONTENT):
         for f in fs:
@@ -540,6 +630,8 @@ def bake():
             parse_meeting(path, rel, out)
         elif ext == 'arc':
             parse_arc(path, rel, out)
+        elif ext == 'call':
+            parse_arc(path, rel, out, home=True)
     # traditions: the traditions engineer's grammar and shape (plans/trad-format.md), read by their trad_parse.read_all
     # (the interface is theirs and frozen). Baked as one array: const TRADITIONS = [ one tradition a line ];
     tdir = os.path.join(CONTENT, 'traditions')
@@ -597,7 +689,9 @@ def blocks(out):
     lines = js_cards('VOICE_TEMPLATES', out['VOICE_TEMPLATES']) + js_cards('VOICE', out['VOICE']) \
         + js_obj_of_lists('LINES', out['LINES']) + ['const CONVOS = ['] + [f'  {js(c)},' for c in out['CONVOS']] + ['];'] \
         + ['const MOMENTS = {'] + [f'  {js(k)}: {js(out["MOMENTS"][k])},' for k in sorted(out['MOMENTS'])] + ['};'] \
-        + ['const MOMENT_THEMES = {'] + [f'  {js(k)}: {js(out["MOMENT_THEMES"][k])},' for k in sorted(out['MOMENT_THEMES'])] + ['};']
+        + ['const MOMENT_THEMES = {'] + [f'  {js(k)}: {js(out["MOMENT_THEMES"][k])},' for k in sorted(out['MOMENT_THEMES'])] + ['};'] \
+        + sum(([f'const {n} = {{'] + [f'  {js(k)}: {js(out[n][k])},' for k in sorted(out[n])] + ['};']
+               for n in ('HOME_CONTACTS', 'HOME_MOMENTS', 'HOME_SEND', 'HOME_CHAT')), [])
     meet = ['const MEETINGS_BAKED = {'] + [f'  {js(k)}: {js(out["MEETINGS_BAKED"][k])},' for k in sorted(out['MEETINGS_BAKED'])] + ['};']
     trad = ['const TRADITIONS = ['] + [f'  {js(t)},' for t in out['TRADITIONS']] + ['];']
     return {'LINES': lines, 'MEETINGS': meet, 'TRADITIONS': trad}
@@ -627,7 +721,7 @@ def main(argv):
         return 2
     n = sum(len(v) for v in out['LINES'].values()) + sum(len(es) for c in list(out['VOICE'].values()) + list(out['VOICE_TEMPLATES'].values()) for es in c.get('lines', {}).values())
     summary = (f'{n} lines, {len(out["VOICE"])} voice cards, {len(out["VOICE_TEMPLATES"])} templates, {len(out["CONVOS"])} conversations, '
-               f'{len(out["MOMENTS"])} moments, {len(out["MOMENT_THEMES"])} themes, {len(out["MEETINGS_BAKED"])} meetings, {len(out["TRADITIONS"])} traditions')
+               f'{len(out["MOMENTS"])} moments, {len(out["MOMENT_THEMES"])} themes, {len(out["HOME_CONTACTS"])} home contacts, {len(out["MEETINGS_BAKED"])} meetings, {len(out["TRADITIONS"])} traditions')
     if check:
         print(('up to date: ' if new == html else 'OUT OF DATE: ') + summary)
         return 0 if new == html else 1
