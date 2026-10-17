@@ -39,4 +39,4 @@ So if you pause, or your phone hides the tab, while someone knocks or waves, the
 **LOW:** while paused, keyboard focus can still reach the HUD buttons under the card (Tab + Enter on the device button or Walls), so you can change things while "paused". Fix: make the rest of the page `inert` while paused, or ignore HUD clicks when `PAUSE.on`.
 
 ## player_check
-Running on 2e69a13 (reviewer 1f); the result will be added here.
+PLAYER CHECK OK on 2e69a13 (reviewer 1f), no page errors. The pause lines: paused, the overlay shows and time, needs and position stand still; resumed, time runs and the tip gap moved on by the pause.
