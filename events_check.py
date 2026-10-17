@@ -427,7 +427,7 @@ with sync_playwright() as pw:
 
     # 3. the Mail the evening before: a week of skips from Day 1 (and the ship note after each tradition, Pillar 4:
     # the sim engineer's bus when it's in, else a stand-in simNote that only records)
-    g.ev("setShipNow(360); EV_LAST = null; EV_MIN = -1; eventsTick(); SHIP.events.sent.length = 0; EV_MAILBOX.length = 0")
+    g.ev("setShipNow(360); EV_LAST = null; EV_MIN = -1; eventsTick(); SHIP.events.sent.length = 0; EV_MAILBOX.length = 0; WEEK_MAILS.length = 0")
     g.ev("window.__notes = []; SHIP.events.noted.length = 0; if (typeof onSim === 'function') { onSim('tradition', n => __notes.push(n)); onSim('choice', n => __notes.push(n)); } else window.simNote = (kind, data) => __notes.push({ ...data, kind })")
     g.ev("for (let t = 360 + 600; t <= 7 * 1440; t += 600) skipTo(t)")
     nt = g.ev("""(() => {
@@ -446,6 +446,22 @@ with sync_playwright() as pw:
     print(f"Mail: {len(m)} announcements for days 2-8 ({len(due)} events due); e.g. {m[0][2] if m else '-'}")
     for k in due:
         if k not in got: fail(f"no Mail for {k}")
+    # the Sunday "This week aboard" Mail (Pillar 4): sent on day 7 at 18:00 (the first Sunday after you arrive), once,
+    # in time order within a day; section 18's WEEK_MAIL is a copy of content/traditions/this-week-aboard.mail
+    wm = g.ev("WEEK_MAILS.map(m => [m.day, m.at, m.body])")
+    print(f"This week aboard: {[(x[0], x[1]) for x in wm]}; day 7 reads: " + (wm[0][2].replace(chr(10), ' / ')[:300] if wm else '-'))
+    if [x[0] for x in wm] != [7] or wm[0][1] != 6 * 1440 + 1080: fail(f"the Sunday Mail: {[(x[0], x[1]) for x in wm]}")
+    import json as _json, re as _re2
+    tw = os.path.join(tdir, 'this-week-aboard.mail')
+    if os.path.exists(tw):
+        want, sec = {}, None
+        for l in open(tw, encoding='utf-8').read().splitlines():
+            st = l.strip()
+            if not st or st.startswith('//') or st.startswith('@'): continue
+            if st.startswith('=='): sec = st[2:].strip(); want[sec] = []; continue
+            if sec is None: k, v = st.split(':', 1); want[k.strip()] = v.strip(); continue
+            t = st[2:].strip(); mt = _re2.search(r'\s#(\w+)\s*$', t); want[sec].append(t[:mt.start()].rstrip() if mt else t)
+        if g.ev("WEEK_MAIL") != want: fail('WEEK_MAIL in section 18 differs from content/traditions/this-week-aboard.mail: copy it again')
     if len(got) != len(set(got)): fail('a Mail sent twice')
     for k, at, _ in m:
         d = int(k.split('@')[1])
@@ -482,6 +498,26 @@ with sync_playwright() as pw:
     print('Sowing morning joined:', sw)
     if sw.get('err') or sw['joined'] != ['sowing@6'] or len(sw['tr']) != 1 or sw['tr'][0].get('day') != 6: fail(f"joining Sowing morning should plant your seedling once: {sw}")
     if sw.get('dec') != ['', 'testDecor', 'testDecor', '']: fail(f"a tradition's decor window: {sw.get('dec')}")
+
+    # 4c. tallies (Pillar 4): the tasting vote (two dishes a week, in turn), the department cup by teams, the same twice,
+    # your vote counts once and only on the day, the galley's tallyLast, a decor with a tally shows the votes
+    ty = g.ev("""(() => {
+      const d1 = [...Array(28).keys()].map(x => x + 1).find(x => eventsOn(x).some(e => e.id === 'tasting-table'));
+      const d2 = d1 + 7, cup = [...Array(56).keys()].map(x => x + 1).find(x => eventsOn(x).some(e => e.id === 'department-cup'));
+      if (!d1) return { err: 'no tasting table' };
+      const a = tallyOf('tasting-table', d1); TALLY_MEMO.clear(); const a2 = tallyOf('tasting-table', d1), b = tallyOf('tasting-table', d2);
+      const votes0 = { ...SHIP.events.votes }, t0 = shipNow();
+      setShipNow((d1 - 1) * 1440 + 1100); const ok = tallyVote('tasting-table', a.choices[1]); const late = (setShipNow((d1 - 1) * 1440 + 1200), tallyVote('tasting-table', a.choices[0]));
+      const v = tallyOf('tasting-table', d1), last = tallyLast('tasting-table', d1 + 4);
+      const e = eventsOn(d1).find(x => x.id === 'tasting-table'), ties = e.ev.ties; e.ev.ties = { ...ties, decor: 'testDecor' };
+      const dec = tradDecor((d1 - 1) * 1440 + Math.round((e.from + e.to) / 2)).find(x => x.id === 'testDecor'); e.ev.ties = ties;
+      SHIP.events.votes = votes0; TALLY_MEMO.clear();
+      return { d1, a, same: JSON.stringify(a) === JSON.stringify(a2), b: b && b.choices, ok, late, you: v.you, plus: v.counts[a.choices[1]] - a.counts[a.choices[1]], last: last && last.day, dec, cup: cup && tallyOf('department-cup', cup) };
+    })()""")
+    print('Tallies:', ty)
+    if ty.get('err') or not ty['same'] or len(ty['a']['choices']) != 2 or ty['b'] == ty['a']['choices'] or not ty['ok'] or ty['late'] or ty['plus'] != 1 or ty['last'] != ty['d1']: fail(f"the tasting tally: {ty}")
+    if not ty.get('dec') or ' or ' not in ty['dec'].get('title', '') or len(ty['dec'].get('lines', [])) != 2: fail(f"a decor with a tally: {ty.get('dec')}")
+    if not ty.get('cup') or sum(ty['cup']['counts'].values()) == 0: fail(f"the department cup's teams: {ty.get('cup')}")
 
 
     # 5. a ship-wide event on paper: the ion storm's skeleton, twice

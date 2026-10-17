@@ -117,7 +117,7 @@ Each is read by its owner with `tradTies(kind, day)`; ask the traditions enginee
 | `ties: galley dish=<dishId> meal=dinner batch=10` | the galley engineer | a dish or a special meal that day |
 | `ties: garden sow` / `tend` / `harvest` | the galley engineer (the garden) | the garden's part |
 | `ties: decor <id>` | the deck architect | props on its deck (a DECK_DRESS id, e.g. `tilesNight`), shown from 30 minutes before to 15 after; at most 6 draw calls |
-| `ties: tally <kind> choices=a\|b\|c` | the traditions engineer | a simple vote or score kept for a week |
+| `ties: tally <kind> choices=a\|b\|c [per=2] [mode=teams]` | the traditions engineer | a vote or score kept for a week: crew who go vote (seeded), you can vote too; `per=2` puts two of the list up each week in turn; `mode=teams` scores each goer for their department's team (bridge = command, helm, comms; commons = galley, infirmary, store, garden, civilian). The galley reads the winner with `tallyLast(id, day)`; a decor with a tally shows the choices and the votes coming in |
 
 ## Texts
 
