@@ -1,0 +1,12 @@
+@voice v-pacheco-ines
+// Writer 2, batch 8: a short card for a short-stay visitor (GUESTS in section 9). No pronouns (not in facts.md).
+tpl: brisk
+talk: Brisk and fair; clipboard first, smile second; collects a mission patch from every ship.
+hi: Morning | Hello
+bye: On to the next deck | Carry on
+yes: Noted | Fine
+thanks: Thank you | Noted, thanks
+wow: Well, now
+sigh: Hm
+likes: card | star
+nick: - | {me} | {me} | {me} | {me}

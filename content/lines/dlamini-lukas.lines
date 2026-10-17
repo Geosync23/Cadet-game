@@ -1,0 +1,244 @@
+@crew dlamini-lukas
+// Writer-commons, batch 3: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Hm. Dlamini. Galley. Bottom bunk by the wall. I'm up at five. Sorry in advance.
+? tier>=acquaintance
+- {hi}. Two hundred and three.
+- {hi}, {me}. Breakfast's done. You missed nothing. You missed porridge.   #funny
+? tier>=friend
+- {hi}, {nick}. Saved you the last of the toast. Don't tell Tran.   #warm
+
+== feel
+? mood:high
+- Good day. One hundred and ninety. Under two hundred. Feels different, somehow.
+? mood:low
+- Typical day. Long one. The number's still the number.
+
+== near
+? act:work weekday:fri|sat
+- Brennan's off. The galley runs itself. That's me, running.   #funny
+? habit:garden-lover act:leisure
+- Misting hour. Stand here. Breathe in. That's rain. Near enough.
+
+== life
+? tier>=acquaintance
+- Got married just before the tour. I count the days. Out loud, apparently.
+? tier>=colleague
+- Port Halloran rains three days in four. I moaned the whole time. I'd love a wet coat now.
+
+== joy
+? tier>=acquaintance
+- The garden at misting hour. Best smell aboard. Don't tell Brennan it beats her bread.
+
+== about
+? aff:bakshi-sol:friend
+- Sol misses the rain too. We stand in the garden at misting hour. Don't say anything.   #warm
+? bond:friends
+- {friend}. Good sort. Doesn't fuss. High praise from me.
+
+// Writer-commons, batch 5: towards 60 (a bunkmate). Up at five for the early team; off Tue, Wed; runs the galley
+// Fri, Sat. The countdown is a number said with no context.
+
+== greet
+? tier>=acquaintance time:morning deck:4
+- {hi}. Quiet. Tran's still asleep. She'll tell you lights out was too late.   #funny
+? tier>=acquaintance time:morning
+- Hm. Morning. Breakfast's on. I made it. Don't look at me like that.
+? tier>=acquaintance time:evening
+- {hi}. Bar or bunk. I haven't decided. Bar.
+? tier>=acquaintance time:night
+- Still up? Me too. Night owl in an early job. Bad combination.
+? tier>=colleague warmth:cold
+- You're back. Thought you'd moved bunks. Wouldn't have blamed you. Tomas hums.   #funny
+? tier>=colleague
+- {hi}. One hundred and eighty-four. Don't ask. You know.
+? tier>=close
+- {hi}, {nick}. Sit. I'll tell you the number. And why I like it getting smaller.   #warm
+
+== bye
+? tier>=acquaintance
+- Right. Go on.
+- {bye}. Don't wake me. Up at five.
+? tier>=colleague time:night
+- Night. Lights out. Tran's orders. I just enforce them.   #funny
+? tier>=friend
+- Glad you're in our bunk. Don't tell the others I said so.   #warm
+
+== feel
+? mood:ok
+- Fine. Number's going down. Can't complain. Do anyway.   #funny
+? mood:high tier>=colleague
+- Good day. Brennan's off, galley ran, nobody noticed. That's the job.
+? mood:low tier>=friend
+- Bit flat. Raining back home, they said. I'd give a lot to be cold and wet.
+
+== near
+? act:work
+- Galley at five. Quiet. The best hour. Don't tell anyone it's the best hour.
+? act:work weekday:fri|sat
+- Brennan's day off. Everything's fine. Everything is fine. Pass me that ladle.   #funny
+? act:leisure deck:3
+- The bar's quiet. That's how I like it. One drink, one chat, then bed. Maybe two chats.
+? deck:4 time:night
+- Can't sleep. Lying there counting. Not sheep. Days.
+? act:breakfast
+- I don't eat breakfast. I make it. That's enough breakfast for anyone.   #funny
+
+== life
+? tier>=acquaintance
+- I skip breakfast. Six hours of cooking it and I can't face it. Fair, really.
+? tier>=colleague
+- Married just before the tour. Best decision. Worst timing. Both true.
+? tier>=colleague
+- Silva, Soto, Jovanovic and me. We compare counts. I'm not winning. Nobody's winning.
+? tier>=friend
+- Port Halloran's grey and wet and loud. I didn't know I'd love it till I left.
+? tier>=friend
+- They write every week. Short letters. I read them twice. Then once more in the morning.   #warm
+
+== joy
+? tier>=colleague
+- Misting hour. Close your eyes. That's rain on Port Halloran. Near enough.
+
+== invite
+? tier>=colleague time:afternoon
+- Garden at misting hour? Five minutes. No talking. Best five minutes of the day.
+? tier>=friend time:evening
+- Bar later? I'll buy. One. Don't get used to it.   #funny
+
+== accept
+- Fine. I'll be there.
+- Go on then. I'll bring the number.   #funny
+
+== decline
+- Can't. Up at five. Ask me on a Tuesday.
+- Not tonight. Writing home. It's the long letter week.
+
+== missed
+- You didn't turn up. That's fine. I counted the days instead.   #funny
+- Missed you. No bother. There's always tomorrow. Well. Fewer tomorrows. Good ones.
+
+== birthday
+? birthday:me
+- It's my birthday. That's one more day closer. Best present there is.   #warm
+? birthday:you
+- Happy birthday. Saved you something from the galley. Don't ask what. Just eat it.   #warm
+
+== hint
+- Got a minute? Not here. Garden.
+
+== week1
+? week1:true weekday:mon time:morning tier<=acquaintance
+- You're the new one. Bottom bunk by the wall's me. I'm up at five. Sorry in advance.
+? week1:true time:night tier<=acquaintance
+- Settling in? The pipes knock at two. That's normal. Go back to sleep.
+
+== near
+? act:dinner
+- Eat. It's good tonight. I didn't make it. That's not why it's good. Probably.   #funny
+? deck:3 act:leisure time:evening
+- Same stool every night. Same drink. That's home, a bit.
+
+== greet
+? tier>=acquaintance weekday:tue|wed
+- {hi}. Day off. I'm going to do nothing, very slowly.
+? tier>=friend
+- There you are, {nick}. Saved you the good chair. Nobody fought me for it. Shame.   #funny
+
+== life
+? tier>=acquaintance
+- Brennan trusts me with her galley two days a week. I try not to let it go to my head.
+? tier>=colleague
+- Varga thinks we're racing at onions. We are. He's winning. Don't tell him I know.   #funny
+
+// Writer 3, batch 4: bubbles (smalltalk and rumour, 60 characters, said to no one in particular).
+
+== smalltalk
+- Two hundred and six.   #funny
+- Runs itself, this galley.   #funny
+- Typical.
+- Rain on the vents. No. Just vents.
+? act:work
+- Onions. Thirty-nine. Close.
+
+== rumour
+- Fact. Not gossip. Fact.
+- Heard it. Probably true. Typical.
+
+// Writer 3, batch 5: callbacks (told: said once).
+
+== callback
+? told:fav.fetch
+- You fetched it. Quick. Thanks. That's all. Thanks.   #warm
+? told:fav.job
+- You did my job. Saved me an hour. I spent it sitting down. Thanks.   #funny
+? told:fixed.chiller
+- Chiller's fixed. Brennan smiled at the cold store. First time in weeks.   #funny
+? told:came.harvest
+- You came to the harvest. Carried a basket. Didn't drop it. Good.   #funny
+? told:gift.garden
+- From the garden. Smells like rain. Nearly. Thanks, {nick}.   #warm
+? told:bday
+- My birthday. You noticed. One less day. In a good way.   #warm
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- Galley rates you. Brennan, Walsh, me. Three votes. That's all of them that count.   #funny
+? rep:theirs
+- You're galley. Officially. Don't let it go to your head. Let it go to your stomach.   #funny
+? you:reliable
+- Reliable. That's the word about you. Good word. Rare word.
+
+// Writer 3, batch 8: thanks for a gift (gift: loved | liked | polite, or the gift's tag; dialogue 0.43.10).
+
+== gift
+? gift:garden
+- From the garden. Smells green. Thanks, {nick}. That's a good one.   #warm
+? gift:loved
+- That's a good one. Really good. Thanks. I mean it.   #warm
+? gift:liked
+- Thanks. Nice. Kind.
+? gift:polite
+- Huh. Thanks. Typical you. Kind about it.
+
+// Writer 3, batch 9: asking after your people back home (the home flags; only the big news you'd have told them).
+
+== greet
+? flag:home.gran.hip !flag:home.gran.won tier>=colleague
+- Your gran. The hip. Getting better? Good. Grans are tough.
+? flag:home.sam.sundays tier>=colleague
+- Sunday story. Good idea. Mine get a number. Yours get a story. Better.
+
+// Writer 4, batch 2: everyday chatter, not about work (meals, rest days, home, hobbies, seasons, traditions).
+== smalltalk
+? act:meal
+- Soup. Good. Typical.
+- Skipped breakfast. Lunch counts double.   #funny
+? act:off
+- Rest day. Garden at misting hour. Best hour.
+- Bar stool. Same drink. Don't move it.   #funny
+- Wrote home. Two lines. They know the rest.
+? time:evening
+- Two hundred and five. Tomorrow.
+- Same stool. Same drink. Same view. Good.
+? time:night
+- Can't sleep. Counting. Not sheep.   #funny
+- The vents sound like rain. They don't.
+? season:greening
+- Garden's misting more. Smells like home.
+? season:lanterns
+- Lanterns. Port Halloran does them in the rain.
+? trad:quiz
+- Quiz. I know one answer. Every week.   #funny
+? place:lounge
+- Window. Black. Still. Not rain. Shame.
+- Hm. Quiet tonight. Good.
+
+== rumour
+- Heard something. One word: true.
+- Not gossip. Facts. Two of them.   #funny

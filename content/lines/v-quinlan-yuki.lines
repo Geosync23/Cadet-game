@@ -1,0 +1,27 @@
+@crew v-quinlan-yuki
+// Writer 2, batch 8: a short-stay visitor. Mostly not about work.
+
+== greet
+? tier=stranger
+- Hello. Quinlan. Charts. Yes, two pencils. One's for emergencies.   #funny
+? tier>=acquaintance
+- {hi}, {me}. I've drawn your mess hall. You're in it. Small.   #funny
+?
+
+== chat
+- Two pencils. One draws, one argues.   #funny
+- The bar here's quiet enough to draw in. That's high praise.
+
+== near
+? habit:window-seat
+- Window seat. The view never needs correcting.
+? habit:bar-regular
+- One drink. One sketch. That's the deal.
+?
+
+== bye
+- {bye}. Don't move. I've nearly got you.   #funny
+
+== smalltalk
+- Second pencil. Emergency.   #funny
+- Draws the charts. Doesn't read them.   #funny

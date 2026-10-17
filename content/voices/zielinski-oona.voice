@@ -1,0 +1,26 @@
+@voice zielinski-oona
+// Writer (command), wave 1b. Operations officer; meticulous, sarcastic; the market stall on Marra; a parent who served aboard.
+//
+// HOW THEY TALK: Fast and sharp, a market trader's patter with a bridge officer's precision. Sarcastic, never mean. Prices things out of habit. Calls the status lights "the little liars".
+// WITH JUNIORS: teases, then helps properly.
+// MOOD TELLS: when tired she stops joking and starts counting; not a morning person.
+tpl: dry
+talk: Fast and sharp, a market trader's patter with a bridge officer's precision. Sarcastic, never mean.
+cares: honest status lights | a good bargain | being more than "the one from the market stall"
+jokes: she haggles with the crew store till | every status light on the bridge is a little liar until proven honest
+hi: Oh, it's you | Hey | Hi
+bye: Off you go | Don't break anything | Later
+yes: Fine | Done | If I must
+thanks: Ta | Cheers, then
+wow: Huh. Not bad
+sigh: Typical
+nick: - | - | {me} | {me} | {me}
+needs: cheer
+openness: normal
+loves: sweet | game
+likes: tea | made
+invites: swap
+joy: a good bargain at the crew store
+thread: startover
+keepsake: a brass weight from her old market scales
+avoid: mornings, before coffee

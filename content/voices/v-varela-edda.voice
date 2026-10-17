@@ -1,0 +1,12 @@
+@voice v-varela-edda
+// Writer 2, batch 8: a short card for a short-stay visitor (GUESTS in section 9). No pronouns (not in facts.md).
+tpl: chatty
+talk: Bright and quick, a born seller; every sentence ends at a price; means it kindly.
+hi: Hello hello | Oh, hi
+bye: Lovely to chat | Catch you at the bar
+yes: Done deal | Oh, go on
+thanks: Thank you | You're a gem
+wow: Ooh, look
+sigh: Oh well
+likes: tea | sweet
+nick: - | {me} | {me} | {me} | {me}

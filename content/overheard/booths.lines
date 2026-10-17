@@ -1,0 +1,516 @@
+@overheard booths
+// Writer 4, batch 1. The one-sided booth overheard: crew on calls home, and you only hear their side. Warm,
+// ordinary, varied. Speaker A only; `place:booths`. Family is facts.md's (sections 5, 6 and 11); everyone else's
+// people stay unnamed ("Mum", "my sister"). Head writer 3: the generic calls skip Torres, Vance, Calder, Marrow and Holt
+// (their family is arc-gated canon). Never romantic: the newlyweds' calls stay at the count and "miss you".
+
+== overheard
+// ---- anyone ----
+? place:booths !who:torres-zeke|vance|calder|marrow|holt
+A: Can you hear me? Mum? There you are.
+A: Yes, I'm eating. Yes, properly.
+A: No, the food's good. Better than yours. Sorry.   #funny
+
+? place:booths !who:torres-zeke|vance|calder|marrow|holt
+A: Hello? You've gone quiet. Relay lag.
+A: ...There. Say that again?
+A: Oh, that's lovely news. Tell them well done.   #warm
+
+? place:booths !who:torres-zeke|vance|calder|marrow|holt
+A: Is it raining there? Course it is.
+A: No, nothing here. It never rains here.
+A: I know. I miss it too. Bit.
+
+? place:booths !who:torres-zeke|vance|calder|marrow|holt
+A: How's the dog? Has he forgiven me yet?
+A: He sat by the door for a week? Oh no.
+A: Give him an ear rub from me. A big one.   #warm
+
+? place:booths !who:torres-zeke|vance|calder|marrow|holt
+A: Dad. Dad. You don't have to shout.
+A: It's a relay, not a tin can. I can hear you.
+A: Yes, all right. Loud and clear. Very loud.   #funny
+
+? place:booths !who:torres-zeke|vance|calder|marrow|holt
+A: Did you pass? You did? I knew you would!
+A: Don't be modest. You worked for that.
+A: I'm telling everyone. Well, the queue.   #warm
+
+? place:booths !who:torres-zeke|vance|calder|marrow|holt
+A: Sorry, did I wake you? What time is it there?
+A: Oh, stars. Go back to bed. Call you tomorrow.
+A: No, really. Bed. Night night.   #funny
+
+? place:booths !who:torres-zeke|vance|calder|marrow|holt
+A: Gran, it's me. No, the other one.
+A: Yes, the one on the ship. Yes, still.
+A: No, they don't let me steer. Not yet.   #funny
+
+? place:booths !who:torres-zeke|vance|calder|marrow|holt
+A: What did you have for tea?
+A: Cottage pie? Oh, don't. Don't tell me.
+A: We had soup. It was good soup. Not that good.   #funny
+
+? place:booths !who:torres-zeke|vance|calder|marrow|holt
+A: Is that the baby? Hello, little one!
+A: Who's this, then? That's right. It's me.
+A: Has she got bigger? She sounds bigger.   #warm
+
+? place:booths !who:torres-zeke|vance|calder|marrow|holt
+A: Has the garden come up? The beans?
+A: Ours have too. We've got beans in space.
+A: No, they taste the same. Mostly.   #funny
+
+? place:booths !who:torres-zeke|vance|calder|marrow|holt
+A: I posted it weeks ago. It's on its way.
+A: You'll know it when you see it.
+A: No, I'm not telling. Wait and see.
+
+? place:booths !who:torres-zeke|vance|calder|marrow|holt
+A: How's Grandad's knee? Still?
+A: Tell him to do the stretches. All of them.
+A: I know he won't. Tell him anyway.   #funny
+
+? place:booths !who:torres-zeke|vance|calder|marrow|holt
+A: Hello? Hello? Oh, blast. Dropped.
+A: ...Hello? Yes! Still me. Sorry.
+A: Talk fast. The relay's in a mood.   #funny
+
+? place:booths !who:torres-zeke|vance|calder|marrow|holt
+A: No, I'm not lonely. I've got friends here.
+A: Yes, real ones. They make me tea.
+A: I'll tell them you said thank you.   #warm
+
+? place:booths !who:torres-zeke|vance|calder|marrow|holt
+A: You painted the kitchen? What colour?
+A: Yellow? Bright yellow? Oh, Mum.
+A: No, I'm sure it's lovely. I'm sure.   #funny
+
+? place:booths !who:torres-zeke|vance|calder|marrow|holt
+A: Is that the cat? It is, isn't it.
+A: I can hear her. Hello, puss.
+A: No, leave her. She's saying hello.   #warm
+
+? place:booths !who:torres-zeke|vance|calder|marrow|holt
+A: Did the parcel come? The wool one?
+A: It's a scarf. A friend aboard knits.
+A: No, I didn't knit it. Can you tell?   #funny
+
+? place:booths !who:torres-zeke|vance|calder|marrow|holt
+A: Who won the match? Don't tell me. Tell me.
+A: No! How? They were winning!
+A: Right. I'm not speaking to anyone for a day.   #funny
+
+? place:booths !who:torres-zeke|vance|calder|marrow|holt
+A: I'm fine. Honestly. Good days, mostly.
+A: Today was a good one. Shift, dinner, quiz.
+A: We came fourth. Out of four. Still good.   #funny
+
+? place:booths !who:torres-zeke|vance|calder|marrow|holt
+A: Have you fixed the gate yet? Or is it string?
+A: Still string. Of course it is.
+A: I'll fix it when I'm home. I'm good at gates now.   #funny
+
+? place:booths !who:torres-zeke|vance|calder|marrow|holt
+A: Can you put Nan on? Nan? It's me.
+A: Yes, I'm wrapping up warm.
+A: It isn't cold here. I'm wrapping up anyway.   #warm
+
+? place:booths !who:torres-zeke|vance|calder|marrow|holt
+A: Did you get my letter? The long one?
+A: Six pages? Was it? Sorry.
+A: You read all six? Oh, you're the best.   #warm
+
+? place:booths !who:torres-zeke|vance|calder|marrow|holt
+A: Are you all at the table? Hello, everyone!
+A: Yes, I can hear you. All at once. Lovely.
+A: One at a time. No, all right. All at once.   #funny
+
+? place:booths !who:torres-zeke|vance|calder|marrow|holt
+A: What's the news at home? Anything?
+A: The bakery shut? The one on the corner?
+A: Oh. I'll miss their buns. I miss them now.
+
+? place:booths !who:torres-zeke|vance|calder|marrow|holt
+A: Is that you crying? Don't cry. I'm fine.
+A: Oh, it's the onions. Right. Good.
+A: Cry at the onions all you like, then.   #funny
+
+? place:booths !who:torres-zeke|vance|calder|marrow|holt
+A: My turn, quick. There's a queue.
+A: Everyone's well. Everyone sends love.
+A: Same time next week. Love to all. Bye!   #warm
+
+? place:booths !who:torres-zeke|vance|calder|marrow|holt
+A: Did my brother tidy his room? Ha. No.
+A: Tell him I know. Tell him I can see it.
+A: I can't. But he doesn't know that.   #funny
+
+? place:booths !who:torres-zeke|vance|calder|marrow|holt
+A: No, there aren't any aliens. Just the Veyli.
+A: They're people. Very polite people.
+A: They don't have tentacles, Grandad.   #funny
+
+? place:booths !who:torres-zeke|vance|calder|marrow|holt
+A: Ten minutes left on the booth. Go on.
+A: Tell me everything. From the start.
+A: No, slower. I want it to last.   #warm
+
+? place:booths !who:torres-zeke|vance|calder|marrow|holt
+A: Happy birthday! Did I get the day right?
+A: Yesterday? Oh no. Happy yesterday!
+A: The relay ate a day. It does that.   #funny
+
+? place:booths !who:torres-zeke|vance|calder|marrow|holt
+A: Are you keeping my room for me?
+A: You've put a bike in it. A bike.
+A: Fine. The bike can have it till I'm back.   #funny
+
+? place:booths !who:torres-zeke|vance|calder|marrow|holt
+A: I made a cake. On a ship. It rose.
+A: Yes, I'm proud. Very proud.
+A: Chef had a bit. Chef said "fine". That's a lot.   #funny
+
+? place:booths !who:torres-zeke|vance|calder|marrow|holt
+A: Who's the new neighbour, then?
+A: They brought round a pie? On the first day?
+A: Keep them. Keep them forever.   #funny
+
+? place:booths !who:torres-zeke|vance|calder|marrow|holt
+A: Have you been sleeping? Properly?
+A: Mum. That's not properly. That's a nap.
+A: Ha. Yes. I know where I get it from.   #funny
+
+? place:booths !who:torres-zeke|vance|calder|marrow|holt
+A: Guess what. I learned a new card game.
+A: No, not for money. For honour.
+A: I'm terrible at it. I'll teach you anyway.   #funny
+
+? place:booths !who:torres-zeke|vance|calder|marrow|holt
+A: Is the river high? With all the rain?
+A: Up to the steps? Not the top step?
+A: Good. Tell Dad to stop watching it.
+
+? place:booths !who:torres-zeke|vance|calder|marrow|holt
+A: How's the shop? Busy?
+A: Busy is good. Busy pays.
+A: Don't do the late nights alone, though.
+
+? place:booths !who:torres-zeke|vance|calder|marrow|holt
+A: I'm not homesick. A bit. Sundays.
+A: Sundays, and when it smells like toast.
+A: Don't worry. It passes by dinner.
+
+? place:booths !who:torres-zeke|vance|calder|marrow|holt
+A: Your exams are when? Next week?
+A: You'll be fine. You always panic, then fine.
+A: Ring me after. Well. I'll ring you.   #warm
+
+? place:booths !who:torres-zeke|vance|calder|marrow|holt
+A: Sorry, there's a queue. I'll be quick.
+A: Love to you. Love to the dog. And the neighbour.
+A: No, not that neighbour. The nice one.   #funny
+
+? place:booths !who:torres-zeke|vance|calder|marrow|holt
+A: You sound tired. Are you all right?
+A: Just work? You're sure?
+A: All right. Put the kettle on, then. Go on.   #warm
+
+? place:booths !who:torres-zeke|vance|calder|marrow|holt
+A: Can you hear that? That's the ship.
+A: It hums. All the time. You stop hearing it.
+A: I'll miss it, when I'm home. Strange.
+
+? place:booths !who:torres-zeke|vance|calder|marrow|holt
+A: Has the old tree come down? The big one?
+A: Oh, I'm glad. I climbed that tree.
+A: Well, half of it. I climbed half.   #funny
+
+? place:booths !who:torres-zeke|vance|calder|marrow|holt
+A: Grandad, did you get the letter?
+A: You read it to the pigeons? Did they like it?
+A: Good. Tell them the next one's longer.   #funny
+
+? place:booths !who:torres-zeke|vance|calder|marrow|holt
+A: Listen. I'm doing well. They said so.
+A: Well, not "well". "Fine." Here "fine" is good.
+A: Yes. I'm proud too. Bit.   #warm
+
+// ---- the seasons and the ship's days ----
+? place:booths season:sowing !who:torres-zeke|vance|calder|marrow|holt
+A: We're planting here too. Sowing, they call it.
+A: Everyone gets a seedling. Mine's up!
+A: No, I haven't named it. Not yet.   #funny
+
+? place:booths season:greening !who:torres-zeke|vance|calder|marrow|holt
+A: The garden's gone green all at once.
+A: It smells like the park. After rain.
+A: I sat there for an hour. Just sat.
+
+? place:booths season:harvest !who:torres-zeke|vance|calder|marrow|holt
+A: It's Harvest here. Pumpkins everywhere.
+A: There's a pumpkin as big as a chair.
+A: The chef wants it for soup. All of it.   #funny
+
+? place:booths season:lanterns !who:torres-zeke|vance|calder|marrow|holt
+A: It's Lanterns here. The whole deck's lit up.
+A: Little lights in every window. Like home.
+A: I'll make one for you. Paper. I'll post it.   #warm
+
+? place:booths weekday:sun !who:torres-zeke|vance|calder|marrow|holt
+A: Sunday call. Like always.
+A: What's for roast? Don't tell me. Tell me.
+A: Chicken? With the crispy bits? Oh, stop.   #funny
+
+? place:booths time:morning !who:torres-zeke|vance|calder|marrow|holt
+A: Morning! Is it morning there? No?
+A: Evening, then. Good evening.
+A: I never get it right. Twelve hours off, roughly.   #funny
+
+? place:booths time:evening !who:torres-zeke|vance|calder|marrow|holt
+A: Long day. Not bad. Just long.
+A: Dinner was good. I'm going to sit for a bit.
+A: No, just wanted to hear you. That's all.   #warm
+
+? place:booths trad:quiz !who:torres-zeke|vance|calder|marrow|holt
+A: Quiz tonight. Can't talk long.
+A: Our team's name is terrible. Don't ask.
+A: No. I'm not saying it. Not on a relay.   #funny
+
+? place:booths trad:today !who:torres-zeke|vance|calder|marrow|holt
+A: There's a do on tonight. Everyone's going.
+A: Yes, I'll go. Yes, I'll talk to people.
+A: I will! I talk to people now. Loads.   #funny
+
+? place:booths event:ionStorm !who:torres-zeke|vance|calder|marrow|holt
+A: Hello? Can you hear me? It's the storm.
+A: We're fine. Honestly. Just the lines.
+A: If I drop, I'm fine. Say it back. Good.   #warm
+
+? place:booths weekday:fri !who:torres-zeke|vance|calder|marrow|holt
+A: It's Friday here. Music night.
+A: No, I'm not playing. I'm clapping.
+A: I'm a very good clapper. Ask anyone.   #funny
+
+// ---- the story crew ----
+? place:booths who:tomas
+A: Yes, it's huge out here. Massive.
+A: And then a storm. I was very brave.
+A: Well. Quite brave. Brave enough.   #funny
+
+? place:booths who:tomas beat:tomas.4
+A: Is your map still up? On the ceiling?
+A: That's the Wren's patch of sky. Near enough.
+A: Look at it before bed. I'll look at mine.   #warm
+
+? place:booths who:pell
+A: Yes, Mum. I'm eating. I'm sleeping.
+A: And I'm calling. Look. Here I am, calling.
+A: I'll read the messages. Soon. I will.   #funny
+
+? place:booths who:rina
+A: No. You're wrong. No, listen, you're wrong.
+A: I don't care if you're a doctor. I will be.
+A: Fine. We're both right. You're less right.   #funny
+
+? place:booths who:rina
+A: Put Gran on. Gran. I heard about the Tiles.
+A: You turned the board round. Gran.
+A: That's cheating. Yes, it is. I'm still proud.   #funny
+
+? place:booths who:brennan
+A: Mum, how long do I leave the stew?
+A: "Until it sounds right." Of course.
+A: No, it's a good answer. It's the right one.   #warm
+
+? place:booths who:nandakumar
+A: Mum? The chillies have fruited. Your seeds.
+A: Yes, all of them. Bright red. Very hot.
+A: The chef says they're too hot. She says thank you.   #funny
+
+// ---- the circles ----
+? place:booths who:navarro-mateo|salo-saad|nakamura-bilal
+A: Hello? Yes, it's the Wren. Yes, me.
+A: Tell your crew to stop calling us "the set".
+A: It's not funny. Well. It's a bit funny.   #funny
+
+? place:booths who:navarro-mateo|salo-saad|nakamura-bilal
+A: Is the Halcyon nice? Nicer than here?
+A: Bigger mess? So? Ours has better soup.
+A: No, I'm not jealous. Of a mess. Honestly.   #funny
+
+? place:booths who:eklund-leila|keane-davi
+A: Hello, Gran. It's me, a message again.
+A: What's the weather on Kesh? Tell me next time.
+A: I'll record another on my day off. Big hug.   #warm
+
+? place:booths who:eklund-leila|keane-davi
+A: Gran, I got your message. All twenty minutes.
+A: The bit about the market was the best bit.
+A: Do another. Longer. I don't mind.   #warm
+
+? place:booths who:chen-carmen
+A: Hello, Grandma. Message for Lisk, from me.
+A: I sang in the shower again. The washroom clapped.
+A: No, they didn't. But they should have.   #funny
+
+? place:booths who:varga-tariq
+A: Dear Grandmother. Sorry. Habit.
+A: Hello. It's Tariq. I hope this finds you well.
+A: Sorry. Habit again. Hello, Grandmother.   #funny
+
+? place:booths who:vasquez-uma
+A: How are the fish? Which one's sulking?
+A: The orange one? He always sulks.
+A: Tell him I'm coming back. Tell him slowly.   #funny
+
+? place:booths who:walsh-esme
+A: Have you fed them? Not too much?
+A: A pinch. A small pinch. Not your pinch.
+A: Thank you. Really. I know they're my fish.   #warm
+
+? place:booths who:grieve-thea
+A: How are One, Two and Three?
+A: Three's hiding again? Under the castle?
+A: Leave Three be. Three's always been shy.   #warm
+
+? place:booths who:hart-ravi
+A: Nan, did you draw them again? The fish?
+A: Post it. I'll pin it up by the bed.
+A: You gave the little one a hat? Brilliant.   #funny
+
+? place:booths who:reyes-alejandro
+A: Is she eating? She's eating. Good.
+A: Does she sit in my chair? Every night?
+A: Tell her I'm coming back. She won't care.   #funny
+
+? place:booths who:rossi-femi weekday:tue
+A: Tuesday! Told you I'd ring. Every Tuesday.
+A: Want to hear a Veyli word? Ready?
+A: No, that was the whole word. It's long.   #funny
+
+? place:booths who:achterberg-lars
+A: Dad. Dad, no. Don't you dare.
+A: I'm on chapter three! Dad!
+A: ...He did it. He told me who did it.   #funny
+
+? place:booths who:santos-zofia
+A: You put the prices up? On a Tuesday?
+A: Oh, cousin. Nobody buys on a Tuesday.
+A: Fine. Your stall. Your Tuesdays.   #funny
+
+? place:booths who:tran-chloe
+A: Gran, what's in your scones? Really?
+A: No, the real amount. Not "some".
+A: "Some" and "a bit". Thank you. Very useful.   #funny
+
+? place:booths who:alvarez-luca|mbeki-bo
+A: I made your recipe! The one you sent.
+A: Well. I made something. It was brown.
+A: Was it meant to be brown? Good. Then yes.   #funny
+
+? place:booths who:larsen-hamid
+A: Is the boat still for sale? Don't let them sell it.
+A: I've saved half. More than half. Nearly.
+A: She's called the Morning Tide. This week.   #funny
+
+? place:booths who:rahman-farah|park-noor
+A: Did you go to the boatyard? Is it still there?
+A: Still blue? Still a bit leaky? Perfect.
+A: Tell them I'm coming. Tell them not to paint it.
+
+? place:booths who:zielinski-oona|dahl-mira|shah-dara
+A: Which deck was your bunk on? Back then?
+A: Four? So's mine! Which room?
+A: Bunk 3? I'll knock on the door for you.   #warm
+
+? place:booths who:silva-bea|soto-marta|jovanovic-petra
+A: Day two hundred and something. I'm counting.
+A: You're counting too? Good.
+A: Miss you. Go on, it's late there. Sleep.   #warm
+
+? place:booths who:dlamini-lukas
+A: Two hundred and six. Yes. Down from three hundred.
+A: The window box? Water it. Not much.
+A: Hm. Miss you. Bye.   #warm
+
+// ---- the Commons people ----
+? place:booths who:madsen-ivo
+A: Right, listen. So it starts on a Tuesday.
+A: No, the start-start. There's trays in it.
+A: Seven. I carried seven. Don't tell Mum. Tell Mum.   #funny
+
+? place:booths who:haddad-tamsin
+A: Listen, I'll play you the chord. Ready?
+A: ...Well. It's coming. Isn't it? Wasn't that close?
+A: Sorry. Sorry. I'll practise. It'll be fine.   #funny
+
+? place:booths who:esposito-yara
+A: Star three hundred and two last night.
+A: Yes, I wrote it down. With the time.
+A: Gerald's well. Thank you for asking about Gerald.   #funny
+
+? place:booths who:ishikawa-orla
+A: The view's good tonight. Lots of stars.
+A: You'd like it. You'd count them.
+A: No, I haven't. I've tried. I lose count.   #warm
+
+? place:booths who:yoon-elif
+A: Want to hear a joke? It's a good one.
+A: ...Hello? Did the line drop, or...
+A: Oh, you're laughing. That's laughing. Good.   #funny
+
+? place:booths who:janssen-hugo
+A: Steady out here. Nice and steady.
+A: Gerald's grown a new arm. Well, a bit.
+A: Yes, I'll tell him you said hello. He'll be pleased.   #funny
+
+? place:booths who:takahashi-wen
+A: You're static. Say it again.
+A: No. Static. Again. Slower.
+A: There. Yes. Me too. Bye.   #funny
+
+? place:booths who:bakshi-sol
+A: Is it raining there? Describe it.
+A: On the roof, or just the window? Slowly.
+A: Mm. Thank you. That's lovely. Keep going.   #warm
+
+? place:booths who:cruz-tove
+A: Mm. The tomatoes are in week six. Yes.
+A: No, I'm eating. Tomatoes count.
+A: ...Hello? Still there? Good. Week six.   #funny
+
+? place:booths who:oneill-imani
+A: I've made you a playlist. Forty-something.
+A: Well, I'll post the list. You'll have to hum.
+A: Yes, it's better than his. All of them are.   #funny
+
+? place:booths who:strand-erik
+A: No, I'm not reading you a poem.
+A: Because it's mine. Because it's bad.
+A: Fine. One line. ...That's all you get.   #funny
+
+? place:booths who:larsen-hamid|haddad-tamsin|lindqvist-isak|park-noor
+A: I'm learning the guitar. Listen, I'll hum it.
+A: That's a G. Or nearly a G.
+A: It sounds better on the guitar. Bit.   #funny
+
+? place:booths who:halloran-emeka|yilmaz-karin|lemaire-nils
+A: Why did the relay cross the void? Go on.
+A: To get to the other end! ...Hello?
+A: The line didn't drop. You just hung on. Rude.   #funny
+
+? place:booths who:ferreira
+A: Sorry, wrong language. Long day.
+A: That one? That was "hello". Probably.
+A: I'll ask the Envoy. Love to everyone.   #funny
+
+? place:booths who:kim-yusuf
+A: They're doing up the old square? On Marra?
+A: Oh, don't. I've got the old map of it.
+A: Fine. I'll keep the old maps. All of them.   #funny
+
+? place:booths who:ueda-vera|varga-tariq
+A: Did my letter come? The paper one?
+A: Six weeks, yes. It's a slow bag.
+A: No, read it slowly. That's the point.   #warm

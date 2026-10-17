@@ -108,8 +108,9 @@ with sync_playwright() as pw:
     if a['size'] > SAVE_MAX: fail('the save is too big')
     rt = g.ev("(() => { const s = JSON.stringify(socSave()); socLoad(JSON.parse(s)); return s === JSON.stringify(socSave()); })()")
     print('Save and load give back the same:', rt)
-    xl = g.ev(r"""(() => { const s0 = socSave(), A = JSON.stringify(Array.from(SHIP.aff)), R = JSON.stringify(SHIP.rel);
-      const s1 = JSON.parse(JSON.stringify(s0)); s1.ids = 12345; socLoad(s1); const moved = JSON.stringify(Array.from(SHIP.aff)) === A && JSON.stringify(SHIP.rel) === R;
+    xl = g.ev(r"""(() => { const s0 = socSave(), A = JSON.stringify(Array.from(SHIP.aff)), R = JSON.stringify(SHIP.rel), Bd = JSON.stringify(SHIP.social.bonds || {});
+      const s1 = JSON.parse(JSON.stringify(s0)); s1.ids = 12345; socLoad(s1); const moved = JSON.stringify(Array.from(SHIP.aff)) === A && JSON.stringify(SHIP.rel) === R && JSON.stringify(SHIP.social.bonds) === Bd;
+      const s3 = JSON.parse(JSON.stringify(s0)); s3.bonds = JSON.parse(Bd); socLoad(s3); if (JSON.stringify(SHIP.social.bonds) !== Bd) return ['old bond form', Bd.length];
       const s2 = JSON.parse(JSON.stringify(s0)); s2.ids = 12345; delete s2.idl; socLoad(s2); const kept = JSON.stringify(SHIP.rel) === R && NEWS.length === 0;
       socLoad(s0); return [moved, kept]; })()""")
     print('A save from a different crew list: affinity moved across by id, rest kept:', xl)
@@ -119,7 +120,7 @@ with sync_playwright() as pw:
       const own = typeof ROSTER_RESERVE !== 'undefined' && Array.isArray(ROSTER_RESERVE), RR = own ? ROSTER_RESERVE : (window.ROSTER_RESERVE = []);   // the game's own reserve when it has one
       RR.push({ ...JSON.parse(JSON.stringify(t)), id: 'reserve-test', name: 'Testy Reserve', seed: 4242, aboard: [400, null] });
       SOC = null; socInit(); const n = SOC.n; socLoad(s0);
-      const o = [n === s0.idl.split(',').length + 1, JSON.stringify(SHIP.rel) === R, JSON.stringify(SHIP.mem) === M, JSON.stringify(SHIP.rep) === P, affinity('tomas', 'pell') === A, affinity('tomas', 'reserve-test') === affStart(t, SOC.crew[SOC.idx.get('reserve-test')])];
+      const o = [n === s0.idl.split(',').length + 1 && JSON.stringify(SHIP.social.bonds) === JSON.stringify(bondsUnpack(s0.bonds, s0.idl.split(','))), JSON.stringify(SHIP.rel) === R, JSON.stringify(SHIP.mem) === M, JSON.stringify(SHIP.rep) === P, affinity('tomas', 'pell') === A, affinity('tomas', 'reserve-test') === affStart(t, SOC.crew[SOC.idx.get('reserve-test')])];
       RR.pop(); if (!own) delete window.ROSTER_RESERVE; SOC = null; socInit(); socLoad(s0); return o; })()""")
     print('A reserve person added between save and load (bigger crew, rel, mem, rep, affinity kept, new pair from its start):', rv)
     if rv != [True] * 6: fail('adding a reserve person loses what the save had')
@@ -418,6 +419,72 @@ with sync_playwright() as pw:
       chatClose(); socLoad(JSON.parse(keep)); return o; })()""")
     print('A favour handed in:', fv)
     if fv is not None and (not fv['mem'] or not fv['kind'] or fv['kind'] <= 50): fail(f'handing in a favour gives no memory or reputation: {fv}')
+
+    # 16. guiding a newcomer (0.36.65, A10): only once promoted; Calder assigns a new cadet a week ahead (card, else Mail),
+    # it starts on their arrival day (onboarding's introGuide), their questions with three answers, settled a week on; hand back
+    gd = g.ev(r"""(() => {
+      const keep = JSON.stringify(socSave()), t0 = shipNow(), F = SHIP.flags || (SHIP.flags = {}), kf = { promoted: F.promoted, ga: F['guide.active'] };
+      const x = SOC.crew.find(p => p.cadet), cal = SOC.crew[SOC.idx.get('calder')], ab = x && x.aboard, A = 43, o = {};
+      if (!x || !cal) return { skip: true };
+      const stub = typeof introGuide !== 'function', calls = []; if (stub) { window.introGuide = id => calls.push(['go', id]); window.introGuideEnd = id => calls.push(['end', id]); }
+      const step = (d0, d1) => { for (let d = d0; d <= d1; d++) { setShipNow((d - 1) * 1440 + 480); socialTo(shipNow()); } };
+      x.aboard = [A, null]; setShipNow(32 * 1440); socReset(32 * 24); repAdd('works', 40);
+      step(34, 37); o.off = !SHIP.social.guide;                       // not promoted: nothing
+      flagSet('promoted', true); setShipNow(32 * 1440); socReset(32 * 24); repAdd('works', 40);
+      step(34, 36); const G = SHIP.social.guide; o.assigned = G ? [G.id === x.id, G.at, G.day] : null; o.ask = chatLine(cal, shipNow()).kind;
+      step(37, 37); o.mail = SHIP.social.mail.some(m => m.subject === 'A newcomer for you') && G.told; o.notYet = !G.on;
+      step(38, A); o.on = [G.on, !!flag('guide.active'), relTier(x.id), bondOf(x.id, 'mentor'), stub ? calls.some(c => c[0] === 'go' && c[1] === x.id) : true];
+      socIntroNote({ step: 'hello', who: x.id }); o.stepMem = !!mem(x.id, 'guide.hello');
+      const q = chatLine(x, shipNow()); o.q = [q.kind, (q.answers || []).length];
+      chatClose(); CHAT = { p: x, line: q, ask: false, fav: null, at: shipNow(), reach: 99 }; let got = []; const dr = CHAT_SKIN.draw; CHAT_SKIN.draw = (el, v) => { got = v.buttons.map(b => b.label); }; chatShow();
+      o.buttons = got.length;
+      const k0 = repInit().ship.kindness; chatDo('nq:2'); o.answered = [G.qs, repInit().ship.kindness > k0, chatLine(x, shipNow()).kind !== 'newcomer'];
+      CHAT = { p: cal, line: { text: '', say: true }, ask: false, fav: null, at: shipNow(), reach: 99 }; chatShow();
+      o.handBtn = got.some(b => /^Hand /.test(b)); CHAT_SKIN.draw = dr; chatClose();
+      const s = JSON.stringify(socSave()); socLoad(JSON.parse(s)); o.saved = s === JSON.stringify(socSave());
+      step(A + 1, A + 8); const G2 = SHIP.social.guide; o.settled = [G2.end, !!flag('guide.active'), knownFor().includes('good with newcomers'), SHIP.social.mail.some(m => /settled in/.test(m.subject))];
+      setShipNow(32 * 1440); socReset(32 * 24); repAdd('works', 40); step(34, A);   // hand back on Calder's card
+      CHAT = { p: cal, line: { text: '', say: true }, ask: false, fav: null, at: shipNow(), reach: 99 }; chatDo('guide-back'); chatClose();
+      o.back = [SHIP.social.guide && SHIP.social.guide.end, !!flag('guide.active'), bondOf(x.id, 'mentor') === 'you', stub ? calls.some(c => c[0] === 'end') : true];
+      if (stub) { delete window.introGuide; delete window.introGuideEnd; }
+      x.aboard = ab; if (kf.promoted === undefined) delete F.promoted; else F.promoted = kf.promoted; if (kf.ga === undefined) delete F['guide.active']; else F['guide.active'] = kf.ga;
+      setShipNow(t0); socLoad(JSON.parse(keep)); return o; })()""")
+    print('Guiding a newcomer:', json.dumps(gd))
+    if not gd.get('skip'):
+        if not gd['off'] or not gd['assigned'] or gd['assigned'] != [True, 36, 43] or gd['ask'] != 'guide' or not gd['mail'] or not gd['notYet']: fail(f'the newcomer assignment wrong: {gd}')
+        if gd['on'] != [True, True, 1, 'you', True] or not gd['stepMem'] or gd['q'] != ['newcomer', 3] or gd['buttons'] != 3: fail(f'guiding a newcomer does not start right: {gd}')
+        if gd['answered'] != [1, True, True] or not gd['handBtn'] or not gd['saved'] or gd['settled'] != ['settled', False, True, True] or gd['back'] != ['handed', False, False, True]: fail(f'guiding a newcomer wrong: {gd}')
+
+    # 17. your own room (0.36.66, A11): Come over on a friend's card once promoted, an appointment at your quarters, the host line when kept
+    hs = g.ev(r"""(() => {
+      const keep = JSON.stringify(socSave()), t0 = shipNow(), F = SHIP.flags || (SHIP.flags = {}), kp = F.promoted, D = SHIP.device;
+      if (!D || !Array.isArray(D.appts) || typeof playerBed !== 'function') return { skip: true };
+      const n0 = D.appts.length, o = {}, dr = CHAT_SKIN.draw; let got = []; CHAT_SKIN.draw = (el, v) => { got = v.buttons.map(b => b.label); };
+      setShipNow(9 * 1440 + 720); const tomas = SOC.crew[SOC.idx.get('tomas')], r = relGet('tomas'); r.pts = 70; r.tier = 3; r.hostDay = 0;
+      const card = () => { chatClose(); CHAT = { p: tomas, line: { text: '', say: true }, ask: false, fav: null, at: shipNow(), reach: 99 }; chatShow(); return got.slice(); };
+      o.off = !card().includes('Come over');
+      flagSet('promoted', true); o.on = card().includes('Come over');
+      chatDo('host'); o.said = CHAT && CHAT.line.text; o.again = card().includes('Asked over');
+      const a = D.appts.slice(n0).find(x => x.host), bed = playerBed(), L = DECKS[deckOf(bed)].places, room = L.find(q => q.id === bed).room;
+      o.appt = a ? [a.status, a.with[0], L.find(q => q.id === a.where).room === room, a.where !== bed || !L.some(q => q.room === room && q.id !== bed), a.at % 1440 >= 1170] : null;
+      if (a) { const k0 = repInit().ship.kindness; a.status = 'kept'; chatClose(); socialAppts(); o.kept = [!!mem('tomas', 'hosted'), CHAT && CHAT.line.kind, repInit().ship.kindness > k0, !!CHAT && CHAT.visit]; }
+      const s = JSON.stringify(socSave()); socLoad(JSON.parse(s)); o.saved = SHIP.rel.tomas.hostDay === 10;
+      chatClose(); VISIT = null; CHAT_SKIN.draw = dr; D.appts.length = n0; if (kp === undefined) delete F.promoted; else F.promoted = kp;
+      setShipNow(t0); socLoad(JSON.parse(keep)); return o; })()""")
+    print('Your own room:', json.dumps(hs))
+    if not hs.get('skip'):
+        if not hs['off'] or not hs['on'] or not hs['again'] or not hs['saved']: fail(f'Come over button wrong: {hs}')
+        if hs['appt'] and (hs['appt'][:2] != ['yes', 'tomas'] or not all(hs['appt'][2:]) or hs.get('kept') != [True, 'host', True, True]): fail(f'Come over appointment or visit wrong: {hs}')
+        if not hs['appt'] and 'Not tonight' not in (hs['said'] or ''): fail(f'Come over made no appointment: {hs}')
+
+    # 18. small seams (0.36.68): the roster's short theme fields through socialFill ("" is none); the hour of the day on Day 0; one unclaimed-job dip a department a week (0.36.71)
+    sm = g.ev(r"""(() => { const p = { ...SOC.crew[SOC.idx.get('tomas')], kin: 'my gran', lost: '', hobbyNoun: ' chess ' };
+      const keep = JSON.stringify(socSave()), t0 = shipNow(); SHIP.rep = null; const g0 = repInit().dept.galley;   // unclaimed jobs: one dip a department a week (0.36.71)
+      setShipNow(7 * 1440 + 600); repNote('jobUnclaimed', { dept: 'galley' }); setShipNow(9 * 1440 + 600); repNote('jobUnclaimed', { dept: 'galley' }); const g1 = repInit().dept.galley;
+      setShipNow(15 * 1440 + 600); repNote('jobUnclaimed', { dept: 'galley' }); const g2 = repInit().dept.galley; setShipNow(t0); socLoad(JSON.parse(keep));
+      return [socialFill(p, 'kin'), socialFill(p, 'lost'), socialFill(p, 'hobbyNoun'), socHr(-5), socHr(31), g0 - g1, g0 - g2]; })()""")
+    print('Small seams:', sm)
+    if sm != ['my gran', None, 'chess', 19, 7, 1, 2]: fail(f'kin / lost / hobbyNoun, socHr or the weekly unclaimed dip wrong: {sm}')
 
     print('errors', g.errors[:5])
     if g.errors: ok = False

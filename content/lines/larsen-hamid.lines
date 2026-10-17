@@ -1,0 +1,166 @@
+@crew larsen-hamid
+// Writer-commons, batch 3: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- {hi}! Larsen, infirmary. Drink some water. That's my whole introduction.
+? tier>=acquaintance
+- {hi}, {me}! Did you know most people aboard drink too little water? Most people!
+- {hi}! The boat's called the Morning Tide now. Last week it was something else.   #funny
+? tier>=friend
+- {hi}, {me}! I'll give you a ride on the boat. First passenger. It's yours.   #warm
+
+== feel
+? mood:high
+- Good day. Saved forty credits for the boat. That's one oar. Nearly.
+? mood:low
+- Long day. I'll play the guitar tonight. Quietly. For everyone's sake.
+
+== near
+? act:work
+- Sit up straight. No, straighter. Good. Your back will thank you in twenty years.
+? act:leisure
+- Music room's free. Tamsin and I are practising. Earplugs are by the door.   #funny
+
+== life
+? tier>=acquaintance
+- I'm saving for a boat on the Ostrander colonies. Small. Blue. Named. Renamed.
+? tier>=colleague
+- I tell everyone to eat breakfast. I skip breakfast. I'm aware. I'm working on it.   #funny
+
+== joy
+? tier>=acquaintance
+- Want to hear the boat fund? To the credit? I'll tell you anyway. It's going up.
+
+== about
+? aff:haddad-tamsin:friend
+- Tamsin's a terrible guitarist. Like me. That's why we get on.   #funny
+
+// Writer-commons, batch 6: towards about 30 own lines.
+
+== greet
+? tier>=acquaintance time:morning
+- {hi}! Did you eat breakfast? Me? No. Do as I say, not as I do.   #funny
+? tier>=acquaintance time:evening
+- {hi}, {me}! Guess how much is in the boat fund. Higher. Higher. Lower. There.
+? tier>=colleague warmth:cold
+- There you are! Hydrated, I hope. You look slightly underwatered. Like a plant.   #funny
+
+== bye
+? tier>=acquaintance
+- {bye}! Sit up straight on the way out!
+? tier>=friend
+- See you, {me}. Thanks for listening. I do talk a lot. I know. I'm working on it.   #warm
+
+== feel
+? mood:ok
+- Fine! Good, actually. Did you know people blink fifteen times a minute? I'm fine.   #funny
+
+== near
+? act:work
+- Pillow corners, sheet corners, bed corners. Corners are the whole job, really.
+? act:meal
+- Eat slowly. Your stomach takes twenty minutes to notice. Fact.
+
+== life
+? tier>=colleague
+- Tamsin and I are the worst guitarists aboard. Together we're nearly one good one.   #funny
+? tier>=friend
+- The boat. I keep saving. One day I'll leave the Wren for it. Not soon. One day.
+
+== invite
+? trad:jam tier>=acquaintance
+- Music jam tonight! I'll play. Badly. Come and be supportive. Loudly.
+
+== accept
+- Absolutely! Brilliant. I'll be there. I'll bring water. For both of us.
+== decline
+- Can't tonight, sorry. Guitar practice. The neighbours insist I do it far away.   #funny
+== missed
+- You didn't come! I had a whole fact ready. I'll save it.   #funny
+== birthday
+? birthday:me
+- It's my birthday! I'm putting all the presents in the boat fund. Kidding. Mostly.   #funny
+? birthday:you
+- Happy birthday! Drink some water. That's from me. Also here's a biscuit.   #warm
+== hint
+- Got a minute? I'll talk less this time. Promise.
+
+// Writer 3, batch 4: bubbles (smalltalk and rumour, 60 characters, said to no one in particular).
+
+== smalltalk
+- Water first. Then everything else.
+- The boat's got a new name this week. Again.   #funny
+- Breakfast is important. I've skipped it.   #funny
+- Stretch before the gym. Please.
+? act:work
+- Sit. Breathe. Tell me where it hurts.
+
+== rumour
+- Right, so, I heard a thing. Full details.
+- I've a theory. Several, actually.
+
+// Writer 3, batch 5: callbacks (told: said once).
+
+== callback
+? told:fav.fetch
+- You fetched it! Brilliant. Did you lift with your knees? Tell me you did.   #funny
+? told:fav.job
+- You did my job! Thank you. I used the time to plan the boat. Full rig.   #funny
+? told:fixed.uv
+- Steriliser's running clean. Was that you? Good. Clean is everything.
+? told:came.jam
+- You came to the jam! Tamsin and I were... learning. Thanks for staying.   #funny
+? told:gift.music
+- Your music's on every evening. I've named the boat after a song. This week.   #funny
+? told:bday
+- You remembered my birthday! Drink some water to celebrate. I am.   #funny
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- Infirmary likes you! Your water intake's improved. I've been watching. Kindly.   #funny
+? rep:theirs
+- You're infirmary family now. That means we nag. Kindly. Mostly about water.   #funny
+? you:chatty
+- They say you chat to everyone. Brilliant. Good for the heart, talking. Proven.
+
+// Writer 3, batch 8: thanks for a gift (gift: loved | liked | polite, or the gift's tag; dialogue 0.43.10).
+
+== gift
+? gift:loved
+- Brilliant! Oh, that's brilliant. I'm naming the boat after this. This week.   #funny
+? gift:liked
+- Thanks! Good for morale, presents. Proven. Very good for morale.
+? gift:polite
+- Oh! Thanks. Very kind. I'll find a use for it. I've a plan for everything.
+
+// Writer 4, batch 2: everyday chatter, not about work (meals, rest days, home, hobbies, seasons, traditions).
+== smalltalk
+? act:meal
+- Did you know soup counts as water? Partly. Have soup.
+- I skipped breakfast. Don't copy me. Seriously.   #funny
+- Greens! Eat the greens. Your eyes will thank you.
+? act:off
+- Rest day. Guitar, then boat plans, then guitar.
+- The boat's called the Evening Star this week.   #funny
+- I've drawn the boat again. With a bigger sail.
+? time:evening
+- Practised with Tamsin. We're getting worse. Together.   #funny
+- Saved twelve more credits. The boat's nearer. Bit.
+? time:night
+- Night owl. Not great for sleep. Do as I say.   #funny
+? season:harvest
+- Harvest! Pears are good for you. I'll stop.   #funny
+? trad:jam
+- Music night. I'll play the G. The one G.   #funny
+? place:lounge
+- If I had a boat here, I'd park it by that window.
+? act:gym
+- Stretch first! Everyone stretch! Thank you.
+
+== rumour
+- I heard something. Health-wise, it's fine. News-wise...
+- Right, so. This is good news, mostly.

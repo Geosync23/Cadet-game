@@ -184,3 +184,20 @@ Also run every turn: `cadet_test.py` (ALL IDENTICAL, since section 17 draws noth
 3. **Help with cart runs** as a player job: push the food cart yourself. It was designed and is simple to add.
 4. **Supplies running short as a story beat** (a late shuttle, filters rationed)? The stock and delivery numbers are easy to change.
 5. **Should ship health and faults affect crew mood visibly** (grumbling, chatter) once Pillar 3 (social) starts? The `mood` numbers are already there to read.
+
+## This session (2026-10-16/17, session_01TqLepvhqDZRwFj7ZuLb6Xa): 0.33.32-0.33.39
+
+Leads: session_015QoyPWBdMPM4ywf5W2jMMs, then session_01PxXKwc5mkC7tV5MPi3p7PP (current; report to them after each push: files, what changed, checks, memory %). Build master: session_012K7RZ3oSX2vpBb1rR66MBh. Social A (reputation, reads repair / jobAbandoned / jobUnclaimed): session_012pK2XVi5UhqEd28fakYk68. Reviewer 1: session_01HK4m33sUiLuVim8VWaCPMs (reviewed ae58e43: PASS, plans/reviews/ship-systems-ae58e43.md on claude/reviews; reviewing f211129). Section 15 has a new owner (player engineer 3, via the lead).
+
+- **0.33.32-33, the user's bug "the job board never has any jobs":** `CREW_LEAVE` (3 ship hours) was only 5 real minutes. Now `leaveEnd` holds a small job to the end of the shift its wait runs out in, at most `HOLD_MAX` (6) at once (`j.released` for the ones let go), and nothing on the player's days off (`playerShiftOn(d)`, Sat/Sun, the sim engineer's). Day 1's first two chores post at 06:00. machine_check 5i: a week, weekday shifts ~4.4 jobs for you, no empty hour, nothing held Sat/Sun.
+- **0.33.34-35, the working garden (with the galley engineer):** machine kind `growlight` (real `3-growlight-1/2` with panels from decks 0.38.6); `gardenAt(t)` -> { water, feed, light } 0-1, pure, 1 at worn or better (`min(1, machWorks/85)`); `gardenCarry({ at, crates, title })` -> 'garden@<min>', `carryWaiting(id, t)`, `carryArrivedAt(id)`; your drop calls the galley's `galleyCarryLand(id)` once. Pickup `3-crates-1`. machine_check 5j.
+- **0.33.36-37, Pillar 4 for onboarding (session_01KaHzfqSqF8B4bkNFrH1tsx):** `jobReserve(kind, day, at, slot, { until })`, `jobReserved(slot)`, `jobRelease(slot?)`; `heldForYou(j)`; reserved jobs have a `make` stop (`RESERVE_MAKE` 'bracket', `makeMins` 30, the player engineer's 0.28.24 does the make step). Slots: 1 Mon 08:00 shadow, 2 Mon 13:00, 3 Tue 07:45; onboarding calls them from `introBegin`, `jobRelease()` from `introEnd`. `simNote('job', { id, step, reserved, ... })`: take / stop (k, tag) / done / turnin / drop / lapse.
+- **0.33.38:** merged decks 0.38.8 (real washers `4-washer-1..4`). Fixed crew "two jobs at once": busy until a job's route ends (`j.end > t`), not just while claimed.
+- **0.33.39, for social A:** `simNote('repair', { who, machine, state, ... })`, `simNote('jobAbandoned', { machine, dept: null })`, `simNote('jobUnclaimed', { machine, dept: null })`. All section 17 notes queue in `SIM_Q` and go out via `simFlush()` after `machinesNow`'s hours or at the end of a player action, never inside `jobsHour` (social's handlers read the schedules).
+
+**Open / known:**
+- player_check fails one line on decks 0.38.8 and later: "a washer tap should find its stub machine" (section 15's test assumes stand-in washers). Told the player engineer (session_012J4ctzJgFRBaUFU5sJvega).
+- Still on call for Pillar 4: the "asked for you" mark for reputation beyond reserved jobs (social A has `repAskedFor(dept)`; the board could show it on jobs for departments that think well of you). Not asked yet.
+- `jobUnclaimed` fires when a held job's wait ends, even if the crew are too busy to take it that hour.
+
+**Gotchas added:** machine_check runs must only move the clock forward inside one case (going back = New game, which wipes the jobs). Run player_check with a timeout of 20 minutes (it takes ~10). A `pkill -f` pattern can match your own shell command and kill it.

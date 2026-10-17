@@ -1,0 +1,46 @@
+@tradition lantern-walk
+// Lantern walk: Lanterns, week 7, Monday evening (day 316 in the first year). The Watch dims the promenade lights and
+// crew walk it with paper lanterns, then hang them along the rail. The season is named for it. Monday, after running
+// club (19:15-20:00, the gym): two traditions that evening, never at once. A known draw-call risk: the lanterns are
+// one instanced mesh (decor lanternWalk, at most 3 draw calls, promenade only, during the window); the deck architect's
+// lantern places (event: 'lantern-walk') come first. Design note: plans/trad-notes-seasons.md.
+k: 477
+title: Lantern walk
+when: quarter week 7 monday season lanterns
+at: 20:30-21:20
+min: 20
+prio: 1
+jitter: 10
+where: 3 room Promenade: bench
+where: 3 room Lift plaza: bench
+where: 3 room Bow lounge: lounge-seat
+hold: none
+who: holt always, tomas 90%, stargazer 75%, quiet-corner 60%, juniors 50%, everyone 35%
+anim: talk
+host: holt
+from: holt
+ties: decor lanternWalk
+invite: host=tomas odds=40% line="Lantern walk tonight. I made you one. It's a bit lopsided, but it lights."
+
+== mail
+- Lantern walk tomorrow at {time}. The Watch will dim the promenade, and there are paper lanterns at the lift plaza for anyone who wants one. Walk slowly.
+
+== ask
+- Lantern walk tonight. I've been folding mine all week.
+- The promenade goes dark at half eight. Bring a lantern.
+- Lantern walk later. It's the one night the promenade is quiet.   #warm
+
+== here
+- Hold it up a bit. There. Now everyone can see you.   #warm
+- Mine's crooked. It still counts.   #funny
+- Look back down the rail. All those little lights.
+- Slow down. There's nowhere to be tonight.   #warm
+
+== thanks
+- You carry a paper lantern down the dim promenade with the others, and hang it on the rail.   #warm
+- You walk the promenade with a lantern. For a while, nobody says much, and it's nice.   #warm
+
+== chatter
+- Did you see the lanterns on the rail? One was shaped like a fish.   #funny
+- The lantern walk is my favourite night of {season}.   #warm
+- Holt pretends the lantern walk is just a lighting test. Nobody believes it.   #funny

@@ -1,0 +1,22 @@
+@crew petrie
+// Writer (command: guests), batch 3b. Jonah Petrie: quiet, a little lost in time; kind; loses at cards on purpose.
+
+== greet
+? tier=stranger
+- Oh. Hello. Petrie. Navigator, before. What day is it?
+- Hello. Sorry. I was at the window. I'm usually at a window.
+? tier>=acquaintance
+- Hello, {me}. It's {weekday}. I asked. I'm getting better at it.   #funny
+== feel
+? mood:high
+- A good day. I knew it was {weekday} before anyone told me.   #funny
+? mood:low
+- Quiet day. I lost count of the hours again. The stars don't mind.
+== near
+? place:calm
+- Cards? I'll probably lose. I'm very good at losing.   #funny
+? time:night
+- That bright one, low down. I used to steer by it. Still there.
+== life
+? tier>=acquaintance
+- I navigated for eleven years. Now someone else drives. It's restful. Odd, but restful.

@@ -1,0 +1,26 @@
+@voice yilmaz-karin
+// Writer (Survey), wave 1b. Survey assistant; quiet, playful; terrible breakfast jokes; bakes on rest days, if Brennan allows it.
+//
+// HOW THEY TALK: Quiet until she's comfortable, then playful and silly. Tells terrible jokes at breakfast and is in a running contest with Nils over whose are worse. Bakes on rest days if Brennan allows it, and talks about it as a treaty.
+// WITH JUNIORS: shy, then a terrible pun.
+// MOOD TELLS: when low, no puns; when happy, bread.
+tpl: playful
+talk: Quiet until she's comfortable, then playful and silly. Tells terrible jokes at breakfast and is in a running contest with Nils over whose are worse.
+cares: baking on rest days | the breakfast joke contest | samples, carried safely
+jokes: she and Nils are in a contest for the worst breakfast joke | she bakes on rest days, if Brennan allows it, which is a treaty
+hi: Hello | Hi | Oh, hey
+bye: Bye | See you | Off I go
+yes: Sure | OK | Go on, then
+thanks: Thanks | Oh, ta
+wow: Ooh
+sigh: Oh well
+nick: - | - | {me} | {me} | {me}
+needs: cheer
+openness: normal
+loves: sweet | garden
+likes: tea | game
+invites: tasting
+joy: baking on rest days
+thread: rivalry
+keepsake: a small loaf, still warm
+avoid: being rushed in the mornings

@@ -6,8 +6,11 @@
 #   the same day planned twice gives the same events;
 #   on the deck, minute by minute through each event (the CrewAgents, no drawing): attendees reach their places,
 #   nobody is stuck for more than 10 ship minutes, nobody shares a place; draw calls at the event under BUDGET;
-#   the Mail the evening before (18:00), once each; decor on the deck while it's on, and gone after;
+#   the Mail the evening before (18:00), once each; the ship note after each tradition (simNote, once, who came);
+#   the voice budget (at most two traditions an evening, never two at once on a deck) every day of a year; decor on the deck while it's on, and gone after;
 #   the player joining by being in the room (a little social, once); the tap line before it;
+#   a whole ship year on paper (Pillar 4): the new rhythms (every 2 or 4 weeks, by quarter, by year, from your arrival)
+#   due exactly when they should be, the four seasons, the baked traditions (content/traditions) loaded and filled;
 #   a ship-wide event on paper: the ion storm's skeleton from day 10, its phases in order, eventMod in each, the same twice.
 # Setup and environment as for cadet_test.py.
 # Run:  python3 events_check.py BUILD.html [DAYS]     (DAYS defaults to 28, from Day 1, plus days 100 and 300)
@@ -19,14 +22,31 @@ DAYS = int(sys.argv[2]) if len(sys.argv) > 2 else 28
 BUDGET = 450
 STEP = 0.05                    # real seconds a step, as day_check
 
+# Pillar 4's rhythms, worked out forwards from each rhythm's first day (not with the game's evDue), for days lo..hi
+DUE_NEW = r"""((w, lo, hi) => {
+  const s = new Set(), wdOf = d => ((d - 1) % 7 + 7) % 7, seas = d => ['sowing', 'greening', 'harvest', 'lanterns'][Math.floor((((d - 1) % 364) + 364) % 364 / 91)];
+  const add = d => { if (d >= lo && d <= hi && (!w.season || [].concat(w.season).includes(seas(d))) && (w.from == null || d >= w.from) && (w.until == null || d <= w.until)) s.add(d); };
+  const n = { week: 1, '2weeks': 2, '4weeks': 4 }[w.every || (w.weekday != null ? 'week' : '')];
+  if (Array.isArray(w.weekday)) { for (const x of w.weekday) dueNew({ ...w, weekday: x }, lo, hi).forEach(d => s.add(d)); return s; }
+  if (w.after === 'arrival') { const a = typeof introArrival === 'function' ? introArrival() : 0;
+    if (w.days != null) add(a + w.days); else add(a + 1 + (w.weekday - wdOf(a + 1) + 7) % 7 + 7 * ((w.nth || 1) - 1)); }
+  else if (n) { const first = 1 + 7 * ((w.week || 1) - 1) + w.weekday; for (let d = first; d <= hi; d += 7 * n) add(d); for (let d = first - 7 * n; d >= lo; d -= 7 * n) add(d); }
+  else if (w.every === 'quarter') for (let q = 0; 91 * q + 1 <= hi; q++) add(91 * q + (w.quarterDay != null ? w.quarterDay : 1 + 7 * ((w.week || 1) - 1) + w.weekday));
+  else if (w.every === 'year') for (let y = 0; 364 * y + 1 <= hi; y++) add(364 * y + (w.dayOfYear != null ? w.dayOfYear : 1 + 7 * ((w.week || 1) - 1) + w.weekday));
+  return s;
+})"""
+IS_NEW = "(w => typeof w.every === 'string' || !!w.after || w.season != null || w.from != null || w.until != null || Array.isArray(w.weekday))"
+
 PLANS = r"""(days => {
-  const out = { days: [], bad: [], empty: [], ids: SHIP_TRADITIONS.map(e => e.id) }, LINGER = 25;   // staying on a little after the end is fine
+  const out = { days: [], bad: [], empty: [], ids: SHIP_TRADITIONS.filter(e => !e.flag || (typeof flag === 'function' && flag(e.flag))).map(e => e.id) }, LINGER = 25;   // staying on a little after the end is fine
+  const isNew = """ + IS_NEW + r""", dueNew = """ + DUE_NEW + r""", lo = Math.min(...days), hi = Math.max(...days);
+  const DUE = new Map(SHIP_TRADITIONS.filter(ev => isNew(ev.when)).map(ev => [ev.id, dueNew(ev.when, lo, hi)]));
   const tagId = tag => { const m = /^ev-(.+?)(-(talk|drink|play|water|wash|read))?$/.exec(tag); return m && m[1]; };
   for (const d of days) {
     const on = eventsOn(d), wd = weekday(d), yd = shipYearDay(d), row = { d, wd: WEEKDAYS[wd].slice(0, 3), ev: [] };
     // due exactly when the table says
     for (const ev of SHIP_TRADITIONS) {
-      const w = ev.when, due = (w.birthday ? schedPeople().some(p => birthdayOf(p) === yd) : (w.weekday === wd || (w.every && d % w.every === w.on) || w.yearDay === yd)) && !eventPauses(ev, d);   // a ship-wide event's quiet days
+      const w = ev.when, due = !(ev.flag && !(typeof flag === 'function' && flag(ev.flag))) && (w.birthday ? schedPeople().some(p => birthdayOf(p) === yd && (typeof aboard !== 'function' || (aboard(p, d) && (typeof guestStay !== 'function' || guestStay(p, d) !== 'leave')))) : DUE.has(ev.id) ? DUE.get(ev.id).has(d) : (w.weekday === wd || (w.every && d % w.every === w.on) || w.yearDay === yd)) && !eventPauses(ev, d) && !(EV_DROPPED.get(d) || []).includes(ev.id);   // a ship-wide event's quiet days; the voice budget
       if (due !== on.some(e => e.id === ev.id)) out.bad.push(d + ' ' + ev.id + (due ? ' due but not on' : ' on but not due'));
     }
     const S = schedData(), went = {}, places = {};
@@ -34,7 +54,8 @@ PLANS = r"""(days => {
       if (!s.tag || !/^ev-/.test(s.tag)) continue;
       const id = tagId(s.tag), e = on.find(x => x.id === id), B = (d - 1) * 1440;
       if (!e) { out.bad.push(d + ' ' + p.id + ' at ' + id + ', which is not on'); continue; }
-      if (s.from < B + e.from - (e.ev.early || 0) || s.to > B + e.to + LINGER) out.bad.push(d + ' ' + p.id + ' at ' + id + ' ' + hhmm(s.from - B) + '-' + hhmm(s.to - B) + ' outside ' + hhmm(e.from) + '-' + hhmm(e.to));
+      if (s.from < B + e.from - Math.max(e.ev.early || 0, p.id === e.ev.host ? 5 : 0) ||   // the sim plans a host 5 minutes early
+         s.to > B + e.to + LINGER) out.bad.push(d + ' ' + p.id + ' at ' + id + ' ' + hhmm(s.from - B) + '-' + hhmm(s.to - B) + ' outside ' + hhmm(e.from) + '-' + hhmm(e.to));
       const pools = eventOpts(e.ev, p).map(([n, k]) => S.shared.get(n + '|' + k) || []).flat().map(pl => pl.id);
       if (!pools.includes(s.placeId)) out.bad.push(d + ' ' + p.id + ' at ' + id + ' in ' + s.placeId + ', not one of its places');
       (went[id] = went[id] || new Set()).add(p.id); (places[id] = places[id] || new Set()).add(s.placeId);
@@ -163,6 +184,7 @@ LIVE = r"""(() => {
   const seen = []; let n = 0;
   while (DIALOGUE && n++ < 30) { const v = dialogueView(); seen.push((v.choices ? '[choice] ' + v.choices.join(' / ') : v.name + ': ' + v.text)); dialogueStep(v.choices ? 0 : undefined); }
   D.lines = seen; D.mine = { ...SHIP.event.mine }; D.closed = !DIALOGUE;
+  D.choiceNotes = (window.__notes || []).filter(x => x.kind === 'choice').map(x => x.script + ':' + x.k + ':' + x.who.length);   // the ship note for your reply
   // the front: day 11, 14:00, on Deck 3
   skipTo(10 * 1440 + 13 * 60 + 50); put(3, '3-grab-1'); tick(10 * 1440 + 13 * 60 + 51, 10 * 1440 + 14 * 60 + 1);
   D.feel = FEEL.log.map(f => f.kinds.join('+')); D.banner = !!(ADDRESS_EL && !ADDRESS_EL.hidden) || !!(document.getElementById('devAddr') && !document.getElementById('devAddr').hidden); D.flicker = FEEL.flicker; D.calls2 = frames();   // the banner: the plain one, or section 19's
@@ -198,12 +220,41 @@ OCC = r"""(() => {
   while (DIALOGUE && n++ < 20) { const v = dialogueView(); seen.push(v.choices ? '[choice]' : v.who + ': ' + v.text); dialogueStep(v.choices ? 2 : undefined); }
   R.lines = seen; tick(16 * 1440 + 662, 16 * 1440 + 690);
   R.after = SHIP.occasions.map(r => r.key + ' ' + r.status);
-  R.ask = !!occasionAsk('progressTalk', 17 * 1440 + 840); R.askOff = !!occasionAsk('progressTalk', 21 * 1440 + 840);   // day 22 is a Monday: Calder's off
+  R.ask = !!occasionAsk('progressTalk', 17 * 1440 + 840); const cOff = [19, 20, 21, 22, 23, 24, 25].find(d => !isWorkDay(schedPeople().find(p => p.id === 'calder'), d)); R.askOff = !!occasionAsk('progressTalk', (cOff - 1) * 1440 + 840);   // on a day Calder's off (the roster's days off)
   skipTo(18 * 1440 + 900); R.table = SHIP.occasions.map(r => r.key + ' ' + hhmm(r.at % 1440) + ' ' + r.status);
   R.batch = eventMod('galley', 'batch', 19 * 1440 + 900); R.noBatch = eventMod('galley', 'batch', 18 * 1440 + 900);
   skipTo(20 * 1440 + 60); R.end = SHIP.occasions.map(r => r.key + ' ' + r.status); R.mails = mails; R.traces = SHIP.traces.slice();
   mailSend = send; SHIP.occasions.length = 0; SHIP.occasions.push(...keep.o); SHIP.commendations.length = 0; SHIP.commendations.push(...keep.c);
   SHIP.event = keep.e; SHIP.traces.length = 0; SHIP.traces.push(...keep.tr); MEETINGS.length = 0; if (DIALOGUE) dialogueEnd(true);
+  return R;
+})()"""
+
+# the bridge invite (0.34.35): Vance at breakfast in the mess on day 22, the day before the first bridge hour; a reply
+# sets flag bridge.invited and bridge hour is then on day 23; slept through (day 50), it's missed, the gist comes and the flag too
+INVITE = r"""(() => {
+  const R = {}, mails = [], send = mailSend; mailSend = m => { mails.push(Math.floor(m.at / 1440) + 1 + ' ' + hhmm(m.at % 1440) + ' ' + m.subject); };
+  const keep = SHIP.occasions.slice(); SHIP.occasions.length = 0; MEETINGS.length = 0; flagSet('bridge.invited', null);
+  const tick = (a, b) => { for (let t = a; t <= b; t++) { setShipNow(t); eventsTick(); } };
+  R.eves = [...Array(120).keys()].filter(d => d >= 15 && occBridgeEve(d)); R.before = eventsOn(23).some(e => e.id === 'bridge-hour');
+  tick(21 * 1440 + 300, 21 * 1440 + 300); R.booked = SHIP.occasions.map(r => r.key + ' ' + hhmm(r.at % 1440) + ' ' + r.status);   // set, not skipped: earlier parts leave the clock past day 22
+  const r = SHIP.occasions.find(x => x.id === 'bridgeInvite'), v = schedPeople().find(p => p.id === 'vance');
+  R.vanceThere = !!r && planDay(v, 22).some(s => s.placeId && s.placeId.startsWith('3-mess-') && s.from <= r.at && s.to >= r.at);
+  R.appt = typeof APPTS !== 'undefined' ? APPTS.some(a => /^bridgeInvite/.test(a.id)) : false;
+  if (r) {
+    goToDeck(3); const b = ROOM_BOX.M; player.obj.position.copy(cellPos(Math.floor((b.i0 + b.i1) / 2), Math.floor((b.j0 + b.j1) / 2))); target.copy(player.obj.position).setY(.7);
+    tick(21 * 1440 + 301, r.at + 1);
+    R.open = DIALOGUE ? DIALOGUE.id : null; const seen = []; let n = 0;
+    while (DIALOGUE && n++ < 20) { const v = dialogueView(); seen.push(v.choices ? '[choice]' : v.who + ': ' + v.text); if (v.choices) R.flagBefore = !!flag('bridge.invited'); dialogueStep(v.choices ? 1 : undefined); }
+    R.lines = seen; R.flagAfter = !!flag('bridge.invited'); tick(r.at + 2, r.at + r.len + 2);
+  }
+  R.after = SHIP.occasions.map(r => r.key + ' ' + r.status); R.on23 = eventsOn(23).some(e => e.id === 'bridge-hour');
+  R.going = schedPeople().filter(p => planDay(p, 23).some(s => s.tag && s.tag.startsWith('ev-bridge-hour'))).length;
+  skipTo(21 * 1440 + 18 * 60 + 5); R.mails1 = mails.slice();
+  // slept through: the next eve (day 50) with no flag, skipped straight to 09:00, past Vance's breakfast
+  SHIP.occasions.length = 0; MEETINGS.length = 0; flagSet('bridge.invited', null); mails.length = 0;
+  skipTo(48 * 1440 + 22 * 60); skipTo(49 * 1440 + 540);
+  R.slept = SHIP.occasions.map(r => r.key + ' ' + r.status); R.sleptFlag = !!flag('bridge.invited'); R.mails2 = mails.slice();
+  mailSend = send; SHIP.occasions.length = 0; SHIP.occasions.push(...keep); MEETINGS.length = 0; flagSet('bridge.invited', null); if (DIALOGUE) dialogueEnd(true);
   return R;
 })()"""
 
@@ -282,6 +333,9 @@ with sync_playwright() as pw:
     g.ev("player.steer = null; player.stop()")
     print(f"{g.ev('SHIP_TRADITIONS.length')} events: " + ', '.join(g.ev("SHIP_TRADITIONS.map(e => e.id)")))
     days = list(range(1, DAYS + 1)) + [100, 300]
+    # and each tradition's first day in the year, when it isn't among those (seasonal, yearly, life moments: Pillar 4)
+    first = g.ev("Object.fromEntries(SHIP_TRADITIONS.filter(e => !e.when.birthday).map(e => [e.id, [...Array(364).keys()].map(x => x + 1).find(x => eventsOn(x).some(o => o.id === e.id)) || null]))")
+    days += sorted({d for i, d in first.items() if d and not any(d == x for x in days) and not g.ev(f"{days}.some(x => eventsOn(x).some(o => o.id === '{i}'))")})
 
     # 1. on paper: due days, who goes, where, and the schedules
     r = g.ev(f"({PLANS})({days})")
@@ -298,11 +352,98 @@ with sync_playwright() as pw:
     print('Plans the same twice (day 4):', same)
     if not same: fail('day 4 planned differently the second time')
 
+    # 1b. a whole ship year on paper (Pillar 4): the new rhythms due exactly when they should be, from day 0 (your
+    # arrival) to day 364; the four seasons; the baked traditions (content/traditions, the TRADITIONS block) loaded
+    yr = g.ev("""(() => {
+      const isNew = """ + IS_NEW + """, dueNew = """ + DUE_NEW + """, out = { bad: [], count: {}, seasons: [], errors: TRAD_ERRORS.slice(), baked: [] };
+      for (const ev of SHIP_TRADITIONS.filter(e => isNew(e.when))) {
+        const due = dueNew(ev.when, 0, 364), on = new Set();
+        for (let d = 0; d <= 364; d++) if (eventsOn(d).some(e => e.id === ev.id)) on.add(d);
+        if (ev.flag && !(typeof flag === 'function' && flag(ev.flag))) { if (on.size) out.bad.push(ev.id + ' on without its flag ' + ev.flag); out.count[ev.id] = []; continue; }
+        for (const d of due) if (!on.has(d) && !eventPauses(ev, d) && !(EV_DROPPED.get(d) || []).includes(ev.id)) out.bad.push(ev.id + ' due on day ' + d + ' but not on');
+        for (const d of on) if (!due.has(d)) out.bad.push(ev.id + ' on day ' + d + ' but not due');
+        out.count[ev.id] = [...on].sort((a, b) => a - b);
+      }
+      // the voice budget, every day of the year: at most two traditions an evening (from 17:00), never two at once on a
+      // deck (birthdays aside), and what it left out
+      out.dropped = [];
+      for (let d = 0; d <= 364; d++) {
+        const t = eventsOn(d).filter(e => SHIP_TRADITIONS.includes(e.ev) && !e.ev.when.birthday);
+        if (t.filter(e => e.from >= 1020 && e.to > 1080).length > 2) out.bad.push('day ' + d + ': more than two traditions in the evening');
+        for (const a of t) for (const b of t) if (a !== b && a.from < b.to && b.from < a.to && a.ev.where.some(w => b.ev.where.some(x => x.deck === w.deck))) out.bad.push('day ' + d + ': ' + a.id + ' and ' + b.id + ' at once on one deck');
+        if (EV_DROPPED.get(d)) out.dropped.push(d + ':' + EV_DROPPED.get(d).join('+'));
+      }
+      for (const d of [0, 1, 91, 92, 182, 183, 273, 274, 364, 365]) out.seasons.push(d + ':' + season(d) + ':' + seasonOf(d).week);
+      const ks = SHIP_TRADITIONS.map(e => e.k); if (new Set(ks).size !== ks.length) out.bad.push('two traditions share a hash key k');
+      out.invites = SHIP_TRADITIONS.filter(e => e.invite).map(e => e.id + ':' + e.invite.host);   // for section 20's invitations
+      for (const e of SHIP_TRADITIONS.filter(e => e.invite)) { const v = e.invite;
+        if (!schedPeople().some(p => p.id === v.host) || !(v.odds > 0 && v.odds <= 1) || typeof v.line !== 'string' || !v.line || v.line.length > 140) out.bad.push(e.id + ': invite ' + JSON.stringify(v)); }
+      for (const t of TRAD_LIST) {
+        const ev = SHIP_TRADITIONS.find(e => e.id === t.id); if (!ev || !ev.baked) { out.bad.push('baked ' + t.id + ' not loaded'); continue; }
+        let n = 0; for (let d = 0; d <= 364; d++) if (eventsOn(d).some(e => e.id === t.id)) n++;
+        if (!n && !t.when.birthday && !t.flag) out.bad.push('baked ' + t.id + ' never happens in a whole year');   // a flagged one waits for its story beat (tested above)
+        const d = [...(out.count[t.id] || [])].find(x => x >= 1) || 1, e = eventsOn(d).find(x => x.id === t.id) || { ev, day: d, names: '', first: '', from: ev.at[0], honorees: [] };
+        for (const k of ['mail', 'ask', 'here']) if ((t.text || {})[k] && !evText(ev[k], e, schedPeople()[0])) out.bad.push(t.id + ': no ' + k + ' line could be filled');
+        for (const [c] of t.who.concat(Array.isArray(t.anim) ? t.anim : [])) for (const p of schedPeople()) tradIs(c, p, d, e, t.host);   // every word resolves (TRAD_ERRORS)
+        out.baked.push({ id: t.id, from: ev.from, mail: evText(ev.mail, e), ties: t.ties || null });
+      }
+      // a tradition that waits for a story flag (bridge hour: 'bridge.invited') comes on once it's set, and goes again
+      for (const ev of SHIP_TRADITIONS.filter(e => e.flag && typeof flagSet === 'function')) {
+        const was = flag(ev.flag), on = () => [...Array(56).keys()].filter(x => eventsOn(x + 1).some(e => e.id === ev.id)).length;
+        flagSet(ev.flag, null); const off = on(); flagSet(ev.flag, true); const yes = on(); flagSet(ev.flag, was === undefined ? null : was); eventsOn(1);
+        out.flags = (out.flags || []).concat(ev.id + ': ' + off + ' without, ' + yes + ' with ' + ev.flag);
+        if (off || !yes) out.bad.push(ev.id + ' and its flag ' + ev.flag + ': ' + off + ' days without, ' + yes + ' with');
+      }
+      // and each rhythm on its own, as a tradition designer might write it
+      for (const w of [{ every: 'week', weekday: 6 }, { every: '2weeks', weekday: 1 }, { every: '2weeks', weekday: 1, week: 2 }, { every: '4weeks', weekday: 5, week: 3 },
+          { every: 'quarter', quarterDay: 1 }, { every: 'quarter', week: 13, weekday: 6 }, { every: 'year', dayOfYear: 182 }, { every: 'year', week: 52, weekday: 6 },
+          { after: 'arrival', days: 7 }, { after: 'arrival', days: 28 }, { after: 'arrival', weekday: 4 }, { after: 'arrival', weekday: 4, nth: 4 },
+          { every: 'week', weekday: 2, season: 'greening' }, { every: 'week', weekday: 0, season: ['harvest', 'lanterns'], from: 200 }]) {
+        const due = dueNew(w, 0, 400);
+        for (let d = 0; d <= 400; d++) if (evDue(w, d) !== due.has(d)) { out.bad.push('rhythm ' + JSON.stringify(w) + ' wrong on day ' + d); break; }
+        if (!due.size) out.bad.push('rhythm ' + JSON.stringify(w) + ' never due');
+      }
+      out.errors = TRAD_ERRORS.slice();
+      return out;
+    })()""")
+    print('A year on paper:', '; '.join(f"{k} {len(v)}x (days {', '.join(map(str, v[:6]))}{'...' if len(v) > 6 else ''})" for k, v in yr['count'].items()))
+    print('Seasons (day:season:week):', ' '.join(yr['seasons']))
+    print('The voice budget left out (day:ids):', ' '.join(yr['dropped']) or 'nothing')
+    print('Invitations (tradition:host):', ' '.join(yr['invites']) or 'none')
+    print('Flagged traditions:', yr.get('flags') or 'none')
+    exp = ['0:lanterns:13', '1:sowing:1', '91:sowing:13', '92:greening:1', '182:greening:13', '183:harvest:1', '273:harvest:13', '274:lanterns:1', '364:lanterns:13', '365:sowing:1']
+    if yr['seasons'] != exp: fail(f"seasons {yr['seasons']}")
+    for b in yr['baked']: print(f"  baked {b['id']}: from {b['from']}; ties {b['ties']}; Mail: {b['mail']}")
+    import os, re as _re                                  # every .trad file in the repo is in the game (an empty baked block must not hide one)
+    tdir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'content', 'traditions')
+    files = sorted(f for f in os.listdir(tdir) if f.endswith('.trad')) if os.path.isdir(tdir) else []
+    want_ids = [m.group(1) for f in files for m in [_re.search(r'^@tradition\s+(\S+)', open(os.path.join(tdir, f), encoding='utf-8').read(), _re.M)] if m]
+    loaded = g.ev("SHIP_TRADITIONS.filter(e => e.baked).map(e => e.id)")
+    print(f"Tradition files: {len(files)} ({', '.join(want_ids)}); loaded from the baked block or stand-in: {', '.join(loaded) or 'none'}")
+    for i in want_ids:
+        if i not in loaded: fail(f"content/traditions has {i}, but the game didn't load it (bake the TRADITIONS block again)")
+    # every decor and trace id a tradition names is one the deck architect built (DECK_DRESS) or has announced, or one
+    # a designer has asked for (it shows nothing until built); anything else is a typo
+    ANNOUNCED = {'tilesNight', 'seedlingYours', 'tastingTable', 'lanternWalk', 'mugYours', 'longTables', 'harvestTables', 'cupBoard', 'talentStage', 'yearsEnd', 'openLab'}   # the deck architect, 0.38.10-0.38.14 and their list
+    ASKED = set()                                         # asked for in plans/trad-notes-*.md, not yet named by the deck architect
+    ids = g.ev("SHIP_TRADITIONS.flatMap(e => [e.ties && e.ties.decor, e.trace].filter(Boolean).map(x => [e.id, x]))")
+    built = set(g.ev("typeof DECK_DRESS === 'undefined' ? [] : Object.keys(DECK_DRESS)"))
+    waiting = sorted({x for _, x in ids if x not in built})
+    print(f"Props and traces: {len(ids)} named; not in this build yet: {', '.join(waiting) or 'none'}")
+    for t, x in ids:
+        if x not in built and x not in ANNOUNCED and x not in ASKED: fail(f"{t}: decor or trace '{x}' isn't in DECK_DRESS, announced or asked for (a typo?)")
+    for x in yr['errors']: fail('TRAD_ERRORS: ' + x)
+    for b in yr['bad'][:20]: fail(b)
+
     # 2. on the deck: one of each kind, walked through minute by minute
     bd = g.ev(f"[...Array({DAYS}).keys()].map(i => i + 1).find(d => eventsOn(d).some(e => e.id === 'birthday'))")
     sims = [(1, 'running'), (6, 'observatory-night'), (4, 'quiz'), (5, 'works-tea'), (5, 'jam'), (bd, 'birthday'), (6, 'film'), (6, 'harvest'), (7, 'market'), (24, 'hull-lights'), (100, 'founding'), (300, 'quiet-watch')]
+    sims += [(next(x for x in yr['count'][b['id']] if x >= 1), b['id']) for b in yr['baked'] if any(x >= 1 for x in yr['count'].get(b['id'], []))]   # the baked ones too
     for d, i in sims:
-        if not g.ev(f"eventsOn({d}).some(e => e.id === '{i}')"): fail(f"{i} not on day {d}"); continue
+        if not g.ev(f"eventsOn({d}).some(e => e.id === '{i}')"):   # another tradition may take its day (the voice budget): its next one
+            d2 = g.ev(f"[...Array({max(DAYS, 28)}).keys()].map(x => x + 1).find(x => eventsOn(x).some(e => e.id === '{i}'))")
+            if not d2: fail(f"{i} not on day {d} nor any day to {max(DAYS, 28)}"); continue
+            print(f"  ({i} isn't on day {d} (the voice budget: {g.ev(f'(EV_DROPPED.get({d}) || []).join()') or '-'}); walking day {d2})"); d = d2
         s = g.ev(f"({SIM})({{ d: {d}, id: '{i}', step: {STEP} }})")
         for x in s['decks']:
             print(f"  {i} day {d}, Deck {x['n']}: {x['reached']}/{x['att']} reached their places, worst stuck {x['stuck']:.1f} min {x['stuckWho']}, draw calls {x['calls']} ({x['crew']} crew{', decor ' + str(x['decor']) + ' meshes' if x['decor'] else ''})")
@@ -324,15 +465,43 @@ with sync_playwright() as pw:
         print(f"Decor ({k}): {on} meshes during {i}, {off} after")
         if not on or off: fail(f"{k} decor: {on} during, {off} after")
 
-    # 3. the Mail the evening before: a week of skips from Day 1
-    g.ev("setShipNow(360); EV_LAST = null; EV_MIN = -1; eventsTick(); SHIP.events.sent.length = 0; EV_MAILBOX.length = 0")
+    # 3. the Mail the evening before: a week of skips from Day 1 (and the ship note after each tradition, Pillar 4:
+    # the sim engineer's bus when it's in, else a stand-in simNote that only records)
+    g.ev("setShipNow(360); EV_LAST = null; EV_MIN = -1; eventsTick(); SHIP.events.sent.length = 0; EV_MAILBOX.length = 0; WEEK_MAILS.length = 0")
+    g.ev("window.__notes = []; SHIP.events.noted.length = 0; if (typeof onSim === 'function') { onSim('tradition', n => __notes.push(n)); onSim('choice', n => __notes.push(n)); } else window.simNote = (kind, data) => __notes.push({ ...data, kind })")
     g.ev("for (let t = 360 + 600; t <= 7 * 1440; t += 600) skipTo(t)")
+    nt = g.ev("""(() => {
+      const want = [1, 2, 3, 4, 5, 6].flatMap(d => eventsOn(d).filter(e => (d - 1) * 1440 + e.to > 360).map(e => ({ key: e.id + '@' + d, n: schedPeople().filter(p => planDay(p, d).some(s => s.tag && /^ev-/.test(s.tag) && evTagId(s.tag) === e.id)).length })));
+      return { want, got: __notes.map(n => ({ key: n.id + '@' + n.day, n: n.came.length, kind: n.kind, src: n.src, at: n.at })) };
+    })()""")
+    gk = [x['key'] for x in nt['got']]
+    print(f"Ship notes after each tradition (days 1-6): {len(gk)}, e.g. {nt['got'][:3]}")
+    for w in nt['want']:
+        x = [n for n in nt['got'] if n['key'] == w['key']]
+        if len(x) != 1: fail(f"tradition note for {w['key']}: {len(x)} sent")
+        elif x[0]['n'] != w['n'] or x[0]['kind'] != 'tradition': fail(f"tradition note for {w['key']}: came {x[0]['n']}, planned {w['n']}")
     m = g.ev("EV_MAILBOX.map(x => [x.event, x.at, x.subject])")
     due = g.ev("[2, 3, 4, 5, 6, 7, 8].flatMap(d => eventsOn(d).map(e => e.id + '@' + d))")
     got = [x[0] for x in m]
     print(f"Mail: {len(m)} announcements for days 2-8 ({len(due)} events due); e.g. {m[0][2] if m else '-'}")
     for k in due:
         if k not in got: fail(f"no Mail for {k}")
+    # the Sunday "This week aboard" Mail (Pillar 4): sent on day 7 at 18:00 (the first Sunday after you arrive), once,
+    # in time order within a day; section 18's WEEK_MAIL is a copy of content/traditions/this-week-aboard.mail
+    wm = g.ev("WEEK_MAILS.map(m => [m.day, m.at, m.body])")
+    print(f"This week aboard: {[(x[0], x[1]) for x in wm]}; day 7 reads: " + (wm[0][2].replace(chr(10), ' / ')[:300] if wm else '-'))
+    if [x[0] for x in wm] != [7] or wm[0][1] != 6 * 1440 + 1080: fail(f"the Sunday Mail: {[(x[0], x[1]) for x in wm]}")
+    import json as _json, re as _re2
+    tw = os.path.join(tdir, 'this-week-aboard.mail')
+    if os.path.exists(tw):
+        want, sec = {}, None
+        for l in open(tw, encoding='utf-8').read().splitlines():
+            st = l.strip()
+            if not st or st.startswith('//') or st.startswith('@'): continue
+            if st.startswith('=='): sec = st[2:].strip(); want[sec] = []; continue
+            if sec is None: k, v = st.split(':', 1); want[k.strip()] = v.strip(); continue
+            t = st[2:].strip(); mt = _re2.search(r'\s#(\w+)\s*$', t); want[sec].append(t[:mt.start()].rstrip() if mt else t)
+        if g.ev("WEEK_MAIL") != want: fail('WEEK_MAIL in section 18 differs from content/traditions/this-week-aboard.mail: copy it again')
     if len(got) != len(set(got)): fail('a Mail sent twice')
     for k, at, _ in m:
         d = int(k.split('@')[1])
@@ -351,6 +520,44 @@ with sync_playwright() as pw:
     })()""")
     print(f"Player in room {j['room']} during the quiz: joined {j['joined']}, social {j['n0']} -> {j['social']}")
     if j['joined'] != ['quiz@4'] or j['social'] <= j['n0']: fail('the player did not join the quiz')
+
+    # 4b. Pillar 4: joining Sowing morning (day 6) leaves your seedling (trace seedlingYours with its day); a tradition's
+    # ties.decor goes to dressShow only in its window
+    sw = g.ev("""(() => {
+      goToDeck(3); const at = (DECKS[3].places.find(p => p.id === '3-garden-5') || {}).at; if (!at) return { err: 'no 3-garden-5' };
+      player.obj.position.copy(cellPos(...nearestOpen(...cellPos(...at).toArray().filter((_, i) => i !== 1), player)));
+      const t0 = SHIP.traces.slice(); SHIP.events.joined.length = 0;
+      const e = eventsOn(6).find(x => x.id === 'sowing'); if (!e) return { err: 'sowing not on day 6' };
+      for (const m of [e.from + 1, e.from + 4, e.from + 7, e.from + 10]) { setShipNow(5 * 1440 + m); EV_MIN = -1; eventsTick(); }
+      const tr = SHIP.traces.filter(x => x.id === 'seedlingYours'); SHIP.traces.length = 0; SHIP.traces.push(...t0);
+      const ties = e.ev.ties; e.ev.ties = { ...ties, decor: 'testDecor' };
+      const dec = [e.from - 40, e.from - 20, e.to + 10, e.to + 20].map(m => tradDecor(5 * 1440 + m).map(x => x.id).join());
+      e.ev.ties = ties;
+      return { room: roomAt(...player.here()), joined: SHIP.events.joined.slice(), tr, dec };
+    })()""")
+    print('Sowing morning joined:', sw)
+    if sw.get('err') or sw['joined'] != ['sowing@6'] or len(sw['tr']) != 1 or sw['tr'][0].get('day') != 6: fail(f"joining Sowing morning should plant your seedling once: {sw}")
+    if sw.get('dec') != ['', 'testDecor', 'testDecor', '']: fail(f"a tradition's decor window: {sw.get('dec')}")
+
+    # 4c. tallies (Pillar 4): the tasting vote (two dishes a week, in turn), the department cup by teams, the same twice,
+    # your vote counts once and only on the day, the galley's tallyLast, a decor with a tally shows the votes
+    ty = g.ev("""(() => {
+      const d1 = [...Array(28).keys()].map(x => x + 1).find(x => eventsOn(x).some(e => e.id === 'tasting-table'));
+      const d2 = d1 + 7, cup = [...Array(56).keys()].map(x => x + 1).find(x => eventsOn(x).some(e => e.id === 'department-cup'));
+      if (!d1) return { err: 'no tasting table' };
+      const a = tallyOf('tasting-table', d1); TALLY_MEMO.clear(); const a2 = tallyOf('tasting-table', d1), b = tallyOf('tasting-table', d2);
+      const votes0 = { ...SHIP.events.votes }, t0 = shipNow();
+      setShipNow((d1 - 1) * 1440 + 1100); const ok = tallyVote('tasting-table', a.choices[1]); const late = (setShipNow((d1 - 1) * 1440 + 1200), tallyVote('tasting-table', a.choices[0]));
+      const v = tallyOf('tasting-table', d1), last = tallyLast('tasting-table', d1 + 4);
+      const e = eventsOn(d1).find(x => x.id === 'tasting-table'), ties = e.ev.ties; e.ev.ties = { ...ties, decor: 'testDecor' };
+      const dec = tradDecor((d1 - 1) * 1440 + Math.round((e.from + e.to) / 2)).find(x => x.id === 'testDecor'); e.ev.ties = ties;
+      SHIP.events.votes = votes0; TALLY_MEMO.clear();
+      return { d1, a, same: JSON.stringify(a) === JSON.stringify(a2), b: b && b.choices, ok, late, you: v.you, plus: v.counts[a.choices[1]] - a.counts[a.choices[1]], last: last && last.day, dec, cup: cup && tallyOf('department-cup', cup) };
+    })()""")
+    print('Tallies:', ty)
+    if ty.get('err') or not ty['same'] or len(ty['a']['choices']) != 2 or ty['b'] == ty['a']['choices'] or not ty['ok'] or ty['late'] or ty['plus'] != 1 or ty['last'] != ty['d1']: fail(f"the tasting tally: {ty}")
+    if not ty.get('dec') or ' or ' not in ty['dec'].get('title', '') or len(ty['dec'].get('lines', [])) != 2: fail(f"a decor with a tally: {ty.get('dec')}")
+    if not ty.get('cup') or sum(ty['cup']['counts'].values()) == 0: fail(f"the department cup's teams: {ty.get('cup')}")
 
 
     # 5. a ship-wide event on paper: the ion storm's skeleton, twice
@@ -399,6 +606,18 @@ with sync_playwright() as pw:
     b = L['briefing']
     if not b['open'] or set(b.get('cast', {})) != {'calder', 'tech1', 'tech2'} or not L['panel']: fail(f"the briefing didn't open with its cast: {b}")
     if not any(x.startswith('[choice]') for x in L['lines']) or not any('Mind the lift' in x for x in L['lines']) or not L['closed']: fail('the briefing script did not play through with the reply')
+    print('  ship notes for your replies:', L.get('choiceNotes'))
+    mo = g.ev("""(() => {   // social B's moments play on this panel: onPick and onEnd on the script (20c)
+      const got = []; MEETING_SCRIPTS['moment:test'] = { title: 'Test', lines: [{ who: 'tomas', text: 'Hi.' }, { choice: [{ text: 'A' }, { text: 'B' }] }, { who: 'tomas', text: 'Bye.' }],
+        onPick: (k, c) => { got.push('pick:' + k + ':' + c.text); throw new Error('a bad listener'); }, onEnd: f => got.push('end:' + f) };
+      const ev0 = SHIP.event; SHIP.event = { id: 'x', startDay: 1, phase: null, threads: {}, mine: {} };   // a moment never counts as the event's meeting
+      dialogueShow('moment:test'); dialogueStep(); dialogueStep(1); dialogueStep(); dialogueEnd(true);
+      if (Object.keys(SHIP.event.mine).length) got.push('counted:' + Object.keys(SHIP.event.mine).join()); SHIP.event = ev0;
+      delete MEETING_SCRIPTS['moment:test']; return got;
+    })()""")
+    print('  a moment on the panel:', mo)
+    if mo != ['pick:1:B', 'end:true']: fail(f"a moment's onPick / onEnd: {mo}")
+    if not any(x.startswith('stormBriefing:0:') or x.startswith('calderStorm:0:') for x in L.get('choiceNotes') or []): fail(f"no simNote('choice') for the briefing reply: {L.get('choiceNotes')}")
     if L['mine'].get('choice:calderStorm') != 1 or not (L['mine'].get('wants:stormBatteries') or L['mine'].get('jobs')): fail(f"the briefing choice was not recorded: {L['mine']}")
     if any('Storm briefing (notes)' in x for x in L['mails']): fail('a gist was mailed for a briefing played to the end')
     if not L['feel'] or 'jolt' not in L['feel'][0] or not L['banner'] or not L['flicker']: fail('the front was not felt (jolt, banner, flicker)')
@@ -448,6 +667,25 @@ with sync_playwright() as pw:
     if len(a['addr']) != 2 or len(a['meets']) != 2 or not a['farewell'] or a['going'] < 3: fail('the visit\'s addresses, meetings or farewell')
     if a['guests'][0] != 'teshavi:2-7' and a['guests'][0] != 'teshavi:-': fail(f"the guests' days: {a['guests']}")
     if 'Speaker Teshavi' not in V['names'] or 'Envoy Saruth' not in V['names']: fail(f"the greeting's cast: {V['names']}")
+
+    # 9b. tradOn (0.34.37, social B's calls home): letters evening's window in absolute ship minutes, null outside it
+    T = g.ev("""(() => { const d = [...Array(28).keys()].map(x => x + 1).find(x => eventsOn(x).some(e => e.id === 'letters')); if (!d) return null;
+      const e = eventsOn(d).find(x => x.id === 'letters'), B = (d - 1) * 1440;
+      return { d, at: [B + e.from - 1, B + e.from, B + e.to - 1, B + e.to].map(t => tradOn('letters', t)), other: tradOn('letters', B + 600), none: tradOn('nope', B + e.from) }; })()""")
+    print('tradOn letters:', T and T['d'], T and [x and (x['from'], x['to']) for x in T['at']])
+    if not T or T['at'][0] or not T['at'][1] or not T['at'][2] or T['at'][3] or T['other'] or T['none'] or T['at'][1]['day'] != T['d']: fail(f"tradOn('letters'): {T}")
+
+    # 10. the bridge invite (0.34.35), last: it skips on to day 50
+    I = g.ev(INVITE)
+    print('Bridge invite: eves', I['eves'][:4], '| booked', I['booked'], '| Vance there', I['vanceThere'], '| open', I.get('open'), '| flag', I.get('flagBefore'), '->', I.get('flagAfter'), '| after', I['after'], '| bridge hour day 23', I['before'], '->', I['on23'], f"({I['going']} going)")
+    print('  slept through:', I['slept'], 'flag', I['sleptFlag'], '| Mail', [x for x in I['mails1'] + I['mails2'] if 'invitation' in x or 'Bridge hour' in x])
+    if I['eves'][:2] != [22, 50] or I['before']: fail(f"the bridge invite's days: {I['eves']} (bridge hour on day 23 before the invite: {I['before']})")
+    if len(I['booked']) != 1 or not I['booked'][0].startswith('bridgeInvite@22 ') or not I['booked'][0].endswith(' asked'): fail(f"the bridge invite wasn't booked for day 22: {I['booked']}")
+    if not I['vanceThere'] or I['appt']: fail(f"the bridge invite: Vance not at breakfast in the mess, or an appointment made: {I['vanceThere']} {I['appt']}")
+    if I.get('open') != 'bridgeInvite' or I.get('flagBefore') or not I.get('flagAfter') or not any('best view' in x for x in I.get('lines', [])): fail(f"the bridge invite didn't play, or its reply didn't set the flag: {I.get('open')} {I.get('lines')}")
+    if I['after'] != ['bridgeInvite@22 kept'] or not I['on23'] or not I['going']: fail(f"after the invite: {I['after']}, bridge hour on day 23 {I['on23']} ({I['going']} going)")
+    if any('An invitation (notes)' in x for x in I['mails1']) or not any(x.startswith('22 18:00') and 'Bridge hour' in x for x in I['mails1']): fail(f"the Mail around a played invite: {I['mails1']}")
+    if I['slept'] != ['bridgeInvite@50 missed'] or not I['sleptFlag'] or not any('An invitation (notes)' in x for x in I['mails2']): fail(f"a slept-through invite: {I['slept']} flag {I['sleptFlag']} {I['mails2']}")
 
     if g.errors: fail(f"console: {g.errors[:4]}")
     g.b.close()

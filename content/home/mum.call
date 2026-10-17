@@ -1,0 +1,163 @@
+@arc home.mum
+who: home:mum
+name: Mum
+// The player's people back home (the user's ruling, 2026-10-17: a fixed cast, Mum, Gran, Jo and Sam; home stays
+// unnamed, just "home"). Calls play at the call-home booths, once per person per day, any day; Letters evening is the
+// relay's best window, and `via: live` beats wait for it. Social B's step B8 plays them; the dialogue engineer bakes
+// this file (HOME_CONTACTS, HOME_MOMENTS, HOME_SEND, HOME_CHAT). `.call`, not `.arc`, until the baker reads it
+// (content_gen reads every .arc as a crew arc). The head writer's model file for the other three.
+//
+// HOW SHE TALKS: fast, in questions, then catches herself ("Listen to me."). Calls you {me}, or "pet". Practical worry:
+//   food, sleep, socks. Drives the number nine bus; tells you about the route. Laughs at herself first.
+// NEVER: guilt-trips you for leaving, says "I'm lonely" straight out (she says "the house is quiet"), or genders you.
+// GRAN lives with her (Gran is her mum); she shouts things from the other room. JO is your older sibling (they).
+// RUNNING: the pottery (from beat 2), the number nine, Gran's commentary, the relay lag ("Is that the delay?").
+
+// ---- the arc: worry to pride; the empty room becomes a pottery room; a lopsided mug in the post bag ----
+== beat 1
+tone: light
+via: reply
+mem: firstcall
+flag: home.mum.called
+them: Is that you? {me}? There's a delay. Is that the delay? Hello!   [laugh]
+them: Are you eating? Is there food? Proper food, I mean, not just biscuits.
+them: Gran says hello. She says it louder than that. She's in the kitchen.
+? choice
+* The food's good, Mum. The chef's brilliant.   flavour:cheer mem:food
+  them: Oh, thank goodness. Tell the chef thank you from me. No, I mean it. Tell them.
+* It's a lot. But I like it here.   flavour:share mem:likeit
+  them: A lot's all right. A lot's how it should be at the start. I'm glad you like it, pet.
+  + them: Then that's all I need to hear. Well. Nearly all. Are you sleeping?   [listen]
+* How are you, Mum?   flavour:listen mem:asked
+  them: Me? Oh, fine. Same route, same bus. The number nine misses you. It told me.
+them: Right. I'll let you go. You've got a ship to run. Call again? Call again.
+
+== beat 2
+tone: light
+via: reply
+when: flag:home.mum.called
+mem: pottery
+flag: home.mum.pottery
+them: Guess what I've done. No, don't guess. I've signed up for pottery. Tuesday nights, at the hall.
+them: I made a bowl. It isn't a bowl. Gran says it's a hat. Gran's wearing it.   [laugh]
+? choice
+* Send me a picture! Wait. Describe it.   flavour:cheer mem:describe
+  them: It's sort of brown. And sort of leaning. Like the number nine on a windy day.
+* You've always wanted to try that.   flavour:listen mem:always
+  them: Have I? I suppose I have. Nobody ever asked. You've gone and asked.
+  + them: I have. For years. I just never went. Then the house went quiet, and I thought, well. Go.   [nod]
+them: Next week, a cup. A proper one. With a handle. Probably.
+
+== beat 3
+tone: heartfelt
+via: live
+when: beat:home.mum.2
+mem: room
+flag: home.mum.room
+hint: The relay's clear tonight. Mum's on the line.
+them: Clear line tonight! No delay at all. I can hear your kettle. Is that your kettle?   [laugh]
+them: Listen. I've been sitting in your room. Just sitting. The house is quiet without you.
+them: I'd like to put the wheel in there. For the pottery. Only if you say yes. It's still your room.
+? choice
+* Yes. Of course. Fill it with pots.   flavour:practical mem:yes
+  them: Oh, pet. All right. I'll keep the window clear. You liked the window.
+* Keep my shelf? The rest is yours.   flavour:practical mem:shelf
+  them: Your shelf stays. Every last thing on it. I'll dust round it. Carefully.
+* I miss it too. My room. Home.   flavour:share mem:misshome
+  them: Course you do. That's allowed. Missing it means it was a good room. Put the kettle on, wherever you are.
+  + them: Course you do. I'll tell you what. I'll leave your shelf exactly as it is, and the rest can get muddy. Deal?   [listen]
+them: Thank you. Gran says she's having the chair. Gran's always having the chair.
+
+== beat 4
+tone: light
+via: reply
+when: beat:home.mum.3
+mem: wheel
+them: The wheel's in! It spins. Mostly. I've had clay in my hair since Sunday.   [laugh]
+them: Gran sits in your chair and tells me I'm doing it wrong. She's never touched clay in her life.
+them: And Jo came round and made a little pot. Better than mine. Don't tell them I said.
+? choice
+* Tell Jo I said so.   flavour:cheer mem:teasejo
+  them: I will not! I've got my pride. Well. What's left of it after the hat.
+* I'm proud of you, Mum.   flavour:share mem:proud
+  them: Oh. Now look. You've set me off. It's only clay, pet. Thank you.
+them: The bus is late tomorrow, they say. I'll be on the wheel instead. Living dangerously.
+
+== beat 5
+tone: serious
+via: live
+when: beat:home.mum.4
+mem: nearly
+flag: home.mum.told
+hint: Clear line tonight. Mum sounds like she's got something to say.
+them: Can I tell you something? I've been carrying it about. Like a pot that's too hot.   [sigh]
+them: When you got the letter for the Wren, I nearly asked you not to go. I had the words ready.
+them: I didn't, because you'd have stayed. For me. And then you'd have been here, wishing.
+? choice
+* I'm glad you didn't. And glad you told me.   flavour:listen mem:glad
+  them: So am I. Both of those. There. It's out. I feel lighter. Lighter than the hat, anyway.
+* I'd have stayed, you know.   flavour:share mem:stayed
+  them: I know. That's exactly why I kept quiet. Don't you dare come home early on my account.
+  + them: I know you would. That's why I didn't ask. You're out there because you're meant to be. I can hear it in your voice.   [listen]
+them: Right. Enough of that. Tell me something happy. Tell me what you had for dinner.
+
+== beat 6
+tone: resolution
+via: live
+when: beat:home.mum.5
+mem: mug
+flag: home.mum.mug
+keepsake: Mum's mug
+learn: Mum made you a mug on her wheel, in the room that used to be yours. It leans. It holds tea.
+mail: 2880 | From home | A parcel came up in the post bag: one mug, wrapped in a scarf, a little lopsided. A note inside: "It holds tea. Mostly. Love, Mum."
+them: Has it come yet? The parcel? No, it won't have. The post's slow. It's on its way.   [laugh]
+them: I made you a mug. On the wheel, in your room. Our room. It leans a bit. Like the bus.
+them: It holds tea. Mostly. Every time you drink from it, that's me saying "Are you eating?"
+? choice
+* I'll use it every day.   flavour:cheer mem:everyday
+  them: You'd better. I'll know. Mothers know. It's a whole thing.
+* Thank you, Mum. For all of it.   flavour:share mem:thanks
+  them: Oh, pet. Thank you for calling. Every week. You don't know what it does.
+  + them: Thank you for ringing, every time. The house isn't quiet any more. It's got clay in it. And you, on the line.   [listen]
+them: Off you go. Ship to run. I love you. Gran says she does too. Louder than that.
+
+// ---- what you can tell her on a call (social B offers 2-3 whose condition holds, newest first). A condition lasts
+// until the next `?` line; a bare `?` means anyone, any time. came:any fills {trad}, friend:any fills {friend}.
+== send
+? flag:intro.soloJob
+- I did my first job on my own. Start to finish.   flavour:share
+  them: On your own! Oh, pet. I'm telling the whole bus.
+? cue:event.ionStorm.afterglow
+- We had an ion storm. Everyone was fine. It was loud.   flavour:share
+  them: A storm? In space? Is that allowed? You're fine? Good. Wear a jumper.
+? came:any
+- We had a {trad} on the ship. I went.   flavour:share
+  them: You went! Good. Did you talk to anyone? Course you did.
+? friend:any
+- I've made a friend. {friend}. You'd like them.   flavour:share
+  them: {friend}. Say hello from me. Feed them a biscuit. Is that allowed?
+?
+- I'm eating. I promise.   flavour:cheer
+  them: Promise properly. Vegetables count. Biscuits don't.
+- Tell me about home.   flavour:listen
+  them: Nothing's changed. Everything's changed. The number nine's got a new driver on Sundays. Scandal.
+
+// ---- everyday calls when no beat is due: whole little calls; `? send` is where the choice above goes.
+== chat
+them: Hello! Is it you? It's you. The kettle's on. Not that you can have any.   [laugh]
+? send
+them: Love to you. Gran says love. Jo says nothing, Jo's asleep. Bye, pet.
+--
+them: {me}! I was just thinking about ringing you. Well, you can't ring me. But I was thinking it.
+? send
+them: Right. Off you go. Sleep. Eat. Don't touch anything that sparks.
+--
+when: flag:home.mum.pottery
+them: Quick one. I've clay on the receiver. Gran's watching. Say hello to Gran.
+? send
+them: Must go. My cup's collapsing. It does that. Bye!   [laugh]
+--
+when: weekday:tue
+them: Can't stop, it's pottery night. Five minutes. Tell me one thing.
+? send
+them: Lovely. Right. Off to make another hat. I mean bowl.

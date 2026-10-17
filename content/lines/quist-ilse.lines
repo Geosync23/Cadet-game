@@ -1,0 +1,104 @@
+@crew quist-ilse
+// Ilse Quist (they/them), Works technician, days. The Works writer, batch 2. Slow, dry; herbs as friends.
+
+== greet
+? tier=stranger
+- Oh, hello. You're new. The garden's on Deck 3, if you need to stand somewhere green.
+- Hm? Hi. If a job says garden pumps, bring a towel. Trust me.
+? tier>=acquaintance time:morning
+- Oh, hello. The basil grew overnight. It's very pleased with itself.   #funny
+? tier>=acquaintance
+- Hello, you. Have you watered anything today? Not you. A plant.
+? tier>=colleague
+- {me}. I'm on chapter three and I know who did it. I'm going to keep reading anyway.
+? tier>=friend
+- Oh, it's you. Good. The thyme likes you. It said so. It didn't. It would.   #warm
+
+== bye
+- Bye, then. Mind the basil.
+- See you. I'll be with the herbs. They're better listeners than most.   #funny
+
+== feel
+? mood:low
+- The parsley's wilting. I'm taking it personally.
+? mood:high
+- Brennan used my herbs tonight. She said so. Out loud. In front of people.
+
+== near
+? act:work
+- Pump's fine. I just like it down here. It smells of the garden.
+? act:leisure
+- Same mystery, chapter nine. I was right in chapter three. Still reading.   #funny
+
+== life
+? tier>=acquaintance
+- I grow herbs on the bunk windowsill for the galley. The basil's a bit of a show-off.   #funny
+? tier>=colleague
+- Moreau guesses by chapter two. I guess by chapter three. We're both wrong half the time.
+
+== joy
+? tier>=acquaintance
+- Rub a basil leaf. Go on. Smell your fingers. That's the whole summer, right there.
+
+// ---- Writer 2, batch 1: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue)
+== greet
+? tier>=acquaintance time:evening
+- Oh. Evening. The garden lights have gone warm. Best hour. Don't tell the basil.
+? tier>=acquaintance warmth:cold
+- Oh. You. The thyme's been asking. It hasn't. It might have.   #funny
+
+== near
+? habit:garden-lover
+- Watering. Don't mind me. The rosemary's thirsty. It's always thirsty.
+? habit:gym-regular
+- Gym after shift now. Moreau said I'd hate it. I don't. I won't tell her that.
+
+== invite
+- Garden after shift? You could help with the basil. It likes an audience.   #funny
+? tier>=acquaintance
+- Running round Deck 3 tonight. Slowly. We go past the garden twice. That's the plan.
+
+== accept
+- Oh. Yes. I'll come. I'll bring a leaf. For smelling.
+- Mm. All right. That sounds nice. I'll try to be on time.
+
+== decline
+- Not tonight. The herbs need potting. They're very needy this week.
+? weekday:thu|fri
+- Rest day. I've a book and a windowsill. Another time?
+
+== missed
+- You weren't there. I talked to the mint instead. It doesn't say much.   #funny
+
+== birthday
+? birthday:you
+- Happy birthday. Here. A sprig of thyme. It's the nicest thing I own.   #warm
+? birthday:me
+- My birthday. Brennan put my herbs in tonight's soup. She said it was a present. It was.
+
+== cue
+? cue:repair.you@dept
+- Was that your pump job? The garden's wetter than it was. In a good way.
+
+// ---- Writer 2, batch 1b: a hint (a moment is ready) and an about line for a named friend
+== hint
+- Come to the garden later? I'd like to say something. The basil can listen too.
+
+== about
+? aff:moreau-signe:friend
+- Moreau talked me into the gym. She runs ahead, then waits. She always waits.   #warm
+
+// ---- Writer 2, batch 6: bubbles (smalltalk, rumour), at most one in five about work. 60 characters.
+== smalltalk
+- The basil's showing off again.   #funny
+- The parsley's wilting. I take it personally.
+- Chapter three. I know. Still reading.
+? act:off
+- Rest day. Windowsill. Herbs. Good.
+? act:work
+- Pump's fine. Smells of the garden.
+?
+
+== rumour
+- Hm? Oh. The thyme told me.   #funny
+- Slowly, then. Here's the thing.

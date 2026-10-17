@@ -1,0 +1,100 @@
+@crew ueda-vera
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Hello. Ueda, Watch. You'll find me early to dinner and early to bed.
+? tier>=acquaintance
+- Hello, {me}. I'm writing home tonight. Can I say I met you?
+- Hi there, {me}. Quiet day. I like quiet days.
+? tier>=friend
+- Oh, hello, {me}. I put you in my letter home. Mum says hello back.   #warm
+== feel
+? mood:high
+- A letter came from Valo. On paper. It took six weeks. Worth it.
+? mood:low
+- Long shift. I'll write a long letter. It helps, somehow.
+== near
+? habit:musician
+- Music room's free. I'll play one piece, then bed. Short concerts are my speciality.   #funny
+? act:leisure
+- My telescope's tiny next to the big one. It still finds the moon.
+== life
+? tier>=acquaintance
+- I write home to Valo every rest day, on paper. Tariq and I share the post bag.
+== joy
+? tier>=colleague
+- Writing letters. Proper paper, slow words. When it arrives, the news is old and lovely.
+
+// ---- Writer 2, batch 2: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue, hint, about)
+== greet
+? tier>=acquaintance time:evening
+- Good evening, {me}. Early dinner, early bed. I'm halfway there.
+? tier>=acquaintance warmth:cold
+- Oh, {me}. I've missed seeing you about. I hope all's well.
+
+== near
+? habit:runner
+- I run now. Slowly. I think in letters while I run. Dear Mum, my legs hurt.   #funny
+? place:mess
+- I like the end table. People drift over. Nobody eats alone there.
+
+== invite
+- Observatory night? Bring a coat. My telescope's small, but it's very keen.   #funny
+? tier>=colleague
+- Friday jam? I'll play one piece before bed. A short concert. Come early.   #funny
+
+== accept
+- Yes. Thank you. I'll be there.
+- Oh, yes. I'll put it in my letter. "Went out. Had a nice time."   #funny
+
+== decline
+- Not tonight. Early bed. I'm sorry. Another evening?
+? weekday:mon|tue
+- Rest day. I'm writing home to Valo. It's a long letter this week. Wednesday?
+
+== missed
+- You didn't come. That's all right. I wrote a little more of my letter.
+
+== birthday
+? birthday:you
+- Happy birthday, {me}. It's going in my letter. Valo will know in six weeks.   #warm
+? birthday:me
+- My birthday. Mum's card came. She sent it six weeks early, so it would be on time.   #warm
+
+== cue
+? cue:event.ionStorm.onset
+- Storm's in. Stay near people tonight. That's my advice. It's good advice.
+
+== hint
+- {me}. Have you a minute later? There's something I'd like to talk through.
+
+== about
+? aff:varga-tariq:friend
+- Tariq and I share the post bag to Valo. His letters are thicker. Mine are neater.   #funny
+
+// ---- Writer 2, batch 2: top-up (bye, greet by time, life at friend tier)
+== bye
+- Goodnight, {me}. Well. Good evening. I'll be asleep soon.   #funny
+- Take care. I'll mention you in my letter.
+== greet
+? tier>=acquaintance time:morning
+- Morning, {me}. I've a letter half written. You're in paragraph two.
+== life
+? tier>=friend
+- A letter's slow, so you choose the words twice. I like choosing the words twice.
+
+// ---- Writer 2, batch 6: bubbles (smalltalk, rumour), at most one in five about work. 60 characters.
+== smalltalk
+- Letter home. Paragraph two.
+- Six weeks to Valo, by post.
+- One piece, then bed. A short concert.   #funny
+? time:evening
+- Early dinner, early bed.
+? act:off
+- Rest day. Paper and ink.
+?
+
+== rumour
+- Slowly, then. Here's the news.
+- It'll be in my letter. You hear it first.

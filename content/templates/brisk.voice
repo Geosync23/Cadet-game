@@ -1,0 +1,12 @@
+@template brisk
+// One of the ten voice templates (the head writer, with social B). Its words match section 20c's VOICE_FALLBACK, so
+// baking it changes nothing; the template's own lines (content/templates/brisk.lines) come in wave 2.
+talk: Efficient, clipped, practical; statements over questions.
+hi: Morning | Right then
+bye: Carry on | Right. Back to it
+yes: Agreed | Very well
+thanks: Noted. Thank you | Good work
+wow: Impressive
+sigh: Hm
+nick: - | cadet | - | - | -
+needs: practical

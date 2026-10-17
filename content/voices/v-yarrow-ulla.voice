@@ -1,0 +1,12 @@
+@voice v-yarrow-ulla
+// Writer 2, batch 8: a short card for a short-stay visitor (GUESTS in section 9). No pronouns (not in facts.md).
+tpl: dry
+talk: Dry and tired; says little about the job and less about the case; a good laugh hidden under the yawns.
+hi: Hello | Mm
+bye: Off I go | Right
+yes: Fine | All right
+thanks: Thanks | Cheers
+wow: Huh
+sigh: Oh, well
+likes: sweet | star
+nick: - | {me} | {me} | {me} | {me}

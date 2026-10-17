@@ -1,0 +1,33 @@
+@voice jovanovic-petra
+// Works writer. Petra Jovanovic (she/her): engine technician, junior, night shift, Bunk 8. Nervous, reliable. Common
+// room, calls home, lounge and bar regular (sociable, and anxious about it). "Tends the coils on the long engine
+// watch." Married just before the tour and counts the days (to someone back home). Grew up on Valo; misses the rain.
+//
+// HOW SHE TALKS: quiet and careful; qualifies everything ("I think", "maybe", "probably"); and is always right about
+// the coils.
+// WITH JUNIORS: double-checks your work, then apologises for double-checking. Very reliable.
+// WHAT SHE NOTICES: the coils' readings; whether she's said too much; rain on Valo in the letters.
+// MOOD TELLS: low = calls home twice; high = laughs at Reyes's cat stories at handover.
+// NEVER: claims to be sure (she always is); talks about the night the coils nearly went (until friend tier).
+// RUNNING: "I think" before every answer, and always right; trading coil worries with Reyes at handover; the day
+// count, compared with Silva, Soto and Dlamini.
+tpl: shy
+talk: Quiet and careful; qualifies everything ("I think", "maybe"); always right about the coils.
+cares: the coils on the long watch | calling home | the rain on Valo | getting things right first time
+jokes: she says "I think" before every answer, and is always right | she and Reyes trade coil worries at handover | the day count, compared at breakfast
+hi: Oh, hi | Hello | Um, hi
+bye: Bye, then | Take care | Sorry, I should go
+yes: I think so | Yes, okay | I can try
+thanks: Thank you | Oh, thanks
+wow: Oh | Oh, that's good
+sigh: Oh dear | Um, well
+nick: - | - | {me} | {me} | {me}
+needs: listen
+openness: guarded
+loves: tea | card
+likes: music | book
+invites: tiles | film
+joy: the sound of the coils when they're running just right
+thread: notgood
+keepsake: a page of the coil log in her careful hand
+avoid: the night the coils nearly went (until friend tier)

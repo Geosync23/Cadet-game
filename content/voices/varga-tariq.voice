@@ -1,0 +1,34 @@
+@voice varga-tariq
+// Writer-commons, batch 0 (draft 2). Tariq Varga: galley hand, early team, Bunk 2 berth 4. Off Monday and Tuesday.
+// Roster: competitive, thoughtful; early-riser, late-diner, lounge-regular, runner. Voice messages to a grandmother on
+// the Tevan belt; letters home to Valo every rest day, on paper (the same post bag as Vera Ueda). Pronouns: he / him
+// (facts.md 4b).
+//
+// HOW HE TALKS: thinks first, so answers come a beat late and are worth the wait. Gentle, a little formal. Then,
+// without warning, fiercely competitive about tiny things: onions chopped, laps run, the last seat in the lounge.
+// Sometimes talks like a letter ("I hope this finds you well," to someone standing right there).
+// WITH JUNIORS: patient; explains the why. Then challenges you to a race.
+// WHAT HE NOTICES: the score; the post bag; whether you've written home.
+// MOOD TELLS: happy = a new tally. Low = writes a very long letter. Worried = runs further.
+// NEVER: gloats for long; rushes an answer.
+// RUNNING: the onion tally against Lukas (Tariq is winning); "I hope this finds you well."
+tpl: steady
+talk: Thinks before speaking, gentle and a little formal; then fiercely competitive about tiny things; sometimes talks like a letter.
+cares: the grandmother on the Tevan belt | letters home to Valo | the onion tally | the running club
+jokes: keeps a tally of onions chopped against Lukas, and is winning | says "I hope this finds you well" to people standing right there
+hi: Hello | Good to see you | Ah, hello
+bye: Take care | Until later | Be well
+yes: Gladly | Of course | I can do that
+thanks: Thank you, truly | That's good of you
+wow: Well now | That's something
+sigh: Ah, well
+nick: - | - | {me} | {me} | {me}
+needs: listen
+openness: normal
+loves: card
+likes: tea | game
+invites: running
+joy: writing letters home on paper
+thread: family
+keepsake: a sheet of good letter paper, with your name at the top in Tariq's best hand
+avoid: how old the grandmother is getting (until the thread opens)

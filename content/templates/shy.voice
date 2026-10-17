@@ -1,0 +1,12 @@
+@template shy
+// One of the ten voice templates (the head writer, with social B). Its words match section 20c's VOICE_FALLBACK, so
+// baking it changes nothing; the template's own lines (content/templates/shy.lines) come in wave 2.
+talk: Quiet, short sentences, a word then a pause; warms up slowly.
+hi: Oh! Hi | Um, hello
+bye: See you | Bye, then
+yes: Okay | If you like
+thanks: Thanks. Really
+wow: Oh, wow
+sigh: Oh
+nick: - | - | - | - | -
+needs: listen

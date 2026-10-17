@@ -1,0 +1,27 @@
+@crew v-orme-ronan
+// Writer 2, batch 8: a short-stay visitor. Mostly not about work.
+
+== greet
+? tier=stranger
+- Hello there. Ronan. Plants. Your garden's lovely. I have notes.   #funny
+? tier>=acquaintance
+- {hi}, {me}. The tomatoes and I have been talking. They're doing well.
+?
+
+== chat
+- Plants grown in space lean towards voices. So I talk to them. Science.   #funny
+- Cruz has done wonders here. I've told them so. Twice.
+
+== near
+? deck:3
+- That big tree. Somebody's been climbing it. I won't say who.   #funny
+? habit:bar-regular
+- One drink after the garden. The soil's still under my nails.
+?
+
+== bye
+- {bye}. Say hello to the tomatoes if you pass.
+
+== smalltalk
+- Lovely loam, this.
+- Morning, tomatoes.   #funny

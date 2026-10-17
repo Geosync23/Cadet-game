@@ -1,0 +1,12 @@
+@voice v-mbatha-zora
+// Writer 2, batch 8: a short card for a short-stay visitor (GUESTS in section 9). No pronouns (not in facts.md).
+tpl: warm
+talk: Warm and late-night; plays every evening in the music room; makes room for anyone who wanders in.
+hi: Hey | Hello, you
+bye: Night, then | See you later
+yes: Sure | Course
+thanks: Thanks | Cheers
+wow: Oh, nice
+sigh: Ah
+likes: music | garden
+nick: - | {me} | {me} | {me} | {me}

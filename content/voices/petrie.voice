@@ -1,0 +1,26 @@
+@voice petrie
+// Writer (command: guests). Jonah Petrie (they/them), survivor from the derelict (the salvage, 7 days). Was the
+// derelict's navigator. Quiet; watches the stars from any window. Keeps asking what day it is. Good at cards, and better
+// at losing on purpose. Window seat, night owl.
+// HOW THEY TALK: quiet, slow, a little lost in time; asks the day; kind; a sly smile when they lose at cards.
+// NEVER: complains; wins at cards against someone who needs a win.
+tpl: dreamy
+talk: Quiet and slow, a little lost in time; asks what day it is; kind, with a sly smile.
+cares: the stars from any window | knowing what day it is | the cards
+jokes: keeps asking what day it is | good at cards, better at losing on purpose
+hi: Oh, hello | Hello
+bye: Goodnight | See you
+yes: All right | Yes
+thanks: Thank you | That's kind
+wow: Oh, look
+sigh: Ah
+nick: - | - | {me} | {me} | {me}
+needs: listen
+openness: normal
+loves: star | game
+likes: tea | book
+invites: observatory | tiles
+joy: watching the stars from a window
+thread: homesick
+keepsake: a playing card, the one they always lose with
+avoid: the derelict's last days

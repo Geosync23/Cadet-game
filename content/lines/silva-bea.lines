@@ -1,0 +1,106 @@
+@crew silva-bea
+// Bea Silva (she/her), Works technician, days. The Works writer, batch 2. Soft, drifting; hears the ship as weather.
+
+== greet
+? tier=stranger
+- Oh, hello. Filters are my thing. If one's clogged, the board will say. Then it's mine.
+- Mm, hi. You're new. The second tea's the good one. The urn's in the tea corner.
+? tier>=acquaintance time:morning
+- Mm. Morning. Don't mind me. I'm not here until the second tea.   #funny
+? tier>=acquaintance
+- {hi}, {me}. The vents are drizzly today. Can you hear it? Like rain on a roof.
+? tier>=colleague
+- Oh, it's you. Good. Come and listen to this filter. It's nearly singing.
+? tier>=friend
+- {me}. Sit here. It's the quiet end. I kept it quiet for you.   #warm
+
+== bye
+- {bye}. Mind the puddle. There isn't one. I just like saying it.   #funny
+- Bye, then. I'll be in the filters if anyone asks. Nobody asks.
+
+== feel
+? mood:low
+- Grey day. In my head, I mean. The ship's the same as always.
+? mood:high
+- The sprinklers ran in the garden this morning. I stood under the edge. Nearly rain.
+
+== near
+? act:work
+- Filter's out, filter's in. Hear that? Like wind dropping. That's a good filter.
+? act:breakfast
+- Tea first. Then I'll know who you are.   #funny
+
+== life
+? tier>=acquaintance
+- Coriel rains nearly every day. People complain. I'd give a week's credits for one shower.
+? tier>=colleague
+- I married just before the tour. I know the day count. Don't ask unless you want it.
+
+== joy
+? tier>=acquaintance
+- Rain on a window, on Coriel. If you ever go, sit by a window. That's all. Just sit.
+
+// ---- Writer 2, batch 1: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue)
+== greet
+? tier>=acquaintance time:evening
+- Oh, evening. The vents have gone quiet. Like after rain. I like this bit.
+? tier>=acquaintance warmth:cold
+- Oh, there you are. It's been a while. Like a dry spell.
+
+== near
+? habit:music
+- Music room in the evenings now. Someone played a rain song. I stayed for three.
+? place:teacorner
+- Second tea. Now I'm here. Hello. How long have you been standing there?   #funny
+
+== invite
+- Observatory tonight? Our lot just looks. No talking. Well, a bit of talking.
+- Come and see the sprinklers? Seven, in the garden. It's nearly rain.
+
+== accept
+- Oh. Yes. I'd like that. I'll bring my second tea. Or my third.
+- Mm, yes. Remind me, though. I drift.   #funny
+
+== decline
+- Not tonight. I'm sending a message home. It's a long one. Tomorrow?
+? weekday:sun|mon
+- It's my rest day. I'm going to sit in the garden and listen. Another time?
+
+== missed
+- I waited. Then I listened to the vents for a bit. It wasn't wasted. Next time?
+
+== birthday
+? birthday:you
+- Happy birthday. I hope it rains somewhere for you. Sorry. That's a Coriel thing.   #warm
+? birthday:me
+- My birthday. I'll do the day count later. Today's just mine.
+
+== cue
+? cue:repair.you@dept
+- Was that your filter? It sounds lovely now. Like wind dropping.
+? cue:event.ionStorm.onset
+- Storm's here. The ship sounds like thunder. I don't mind it. Is that strange?
+
+// ---- Writer 2, batch 1b: a hint (a moment is ready) and an about line for a named friend
+== hint
+- Got a minute later? I've been thinking. About home, mostly.
+
+== about
+? aff:soto-marta:friend
+- Marta and I compare day counts at breakfast. She pretends it's a contest. It isn't.
+
+// ---- Writer 2, batch 6: bubbles (smalltalk, rumour), at most one in five about work. 60 characters.
+== smalltalk
+- The vents are drizzly today.
+- Day count's up one. It always is.
+? act:meal
+- Second tea. Now I'm awake.
+? season:sowing
+- Sprinklers ran. Nearly rain.
+? act:work
+- Filter's singing. Good filter.
+?
+
+== rumour
+- Mm. I heard something. Let me find it.
+- Don't quote me. I was half asleep.   #funny

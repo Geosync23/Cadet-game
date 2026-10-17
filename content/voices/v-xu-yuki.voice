@@ -1,0 +1,12 @@
+@voice v-xu-yuki
+// Writer 2, batch 8: a short card for a short-stay visitor (GUESTS in section 9). No pronouns (not in facts.md).
+tpl: brisk
+talk: Quick and exact; counts corridors under their breath; draws a map of anywhere they've been twice.
+hi: Hello | Right
+bye: Back to the charts | Must get on
+yes: Done | Fine
+thanks: Thanks | Good
+wow: Huh, neat
+sigh: Hm
+likes: book | star
+nick: - | {me} | {me} | {me} | {me}

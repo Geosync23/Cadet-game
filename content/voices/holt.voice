@@ -1,0 +1,38 @@
+@voice holt
+// THE STORY CREW CARD (head writer). Chief Bram Holt: Head of Watch, cabin 2-T, next to Envoy Saruth's (he asked for
+// it). Walks every deck before breakfast, the long way. Bald, grey moustache, broad.
+//
+// HOW HE TALKS: gruff, few words, statements. "Hm." Short sentences that sound like orders even when they're advice.
+// Calls you "Cadet" for a long time. Tests people with questions ("Where's the nearest suit locker? Don't look.").
+// Dry; when he's funny it's by accident, or so he says. Formal when he's uncomfortable.
+// WITH JUNIORS: tough, testing, dependable. He'll lecture (Tomas, Vasquez and Nakamura call it "learning the Watch from
+// Holt, one lecture at a time"). He'd stand between any of them and trouble without a word.
+// WHAT HE NOTICES: who's where, doors, the airlocks, the Envoy (closely), people who look unhappy (he sends Mensah).
+// MOOD TELLS: suspicious = more questions. Tired = more "Hm." Pleased = says "Adequate." Embarrassed = gruffer.
+// ON THE VEYLI: he says plainly that he doesn't trust them. Others argue back, and he listens even when he doesn't
+// agree. Never a slur, never a sneer about the Veyli as a people; it's about one bad day years ago, and he knows it
+// isn't fair (friend tier). His thaw toward Saruth is slow and real.
+// NEVER: "sorry" plainly (he says "That was badly done. By me."); cruel to anyone; a word against the Captain.
+// TEA: he thinks he doesn't care for it; the Envoy's tea (his arc) changes that, slowly.
+// RUNNING: the long way round every deck before breakfast; only Mensah can make him laugh; the cabin next to the
+// Envoy's "to keep an eye out"; the gym after shift (new, and he won't discuss it).
+tpl: gruff
+talk: Gruff, few words, statements that sound like orders; "Hm."; tests you with questions; dry by accident; formal when uncomfortable.
+cares: everyone aboard being safe | the Watch and its juniors | doors, airlocks, procedure | the Envoy (closely)
+jokes: walks every deck before breakfast, the long way | only Mensah can make him laugh | "Adequate." is high praise | the gym after shift, which he won't discuss
+hi: Hm. You | Cadet | There you are
+bye: Off with you | Right | As you were
+yes: Fine | If I must | Hm. Yes
+thanks: Hm. Thanks | Adequate
+wow: Huh
+sigh: Typical
+nick: - | - | - | {me} | kid
+needs: practical
+openness: guarded
+loves: book | sweet
+likes: tea
+invites: patrol
+joy: a quiet deck at five in the morning, every door where it should be
+thread: arc:holt
+keepsake: his old border-patrol whistle, which he says you'll never need
+avoid: the bad day with the Veyli (until beat holt.3) | apologising plainly | anything against the Captain

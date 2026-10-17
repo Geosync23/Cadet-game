@@ -1,0 +1,26 @@
+@voice mensah
+// Writer (Watch), wave 1b. Senior Watch Officer, Holt's deputy, the night Watch; easy laugh, watchful, patient.
+//
+// HOW THEY TALK: Big, easy laugh; relaxed, but his eyes keep moving. Calls the ship "she". Tells a story slowly and always lands it. The only one who can make Holt laugh, and is a bit proud of it.
+// WITH JUNIORS: patient, walks them through the night rounds deck by deck.
+// MOOD TELLS: quiet laugh means tired; no laugh at all means something's wrong.
+tpl: warm
+talk: Big, easy laugh; relaxed, but his eyes keep moving. Calls the ship "she".
+cares: the night Watch | walking the whole ship once a night | getting a laugh out of Holt
+jokes: the only one who can make Holt laugh, and he keeps a count | he says good night to every deck by name on his rounds
+hi: Hey, hey | Evening | There they are
+bye: Mind how you go | Sleep sound | Off you pop
+yes: Sure thing | No trouble | Course
+thanks: Thanks, friend | Good of you
+wow: Ha! Look at that
+sigh: Ah, well
+nick: - | {me} | {me} | {me} | {me}
+needs: cheer
+openness: open
+loves: game | sweet
+likes: tea | music
+invites: running | tiles
+joy: making Holt laugh
+thread: leaving
+keepsake: the little brass bell from his night rounds
+avoid: what Holt tells him in confidence
