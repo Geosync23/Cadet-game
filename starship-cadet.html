@@ -15596,15 +15596,18 @@ function momentDef(id) {                                 // '<crewId>:<beat>' ->
   const m = /^(.+):(\d+)$/.exec(String(id)); if (!m) return null;
   const who = m[1], beat = +m[2], [MO, TH] = momentBaked(), thread = voiceOf(who).thread || '';
   let d = MO && MO[id] || MOMENTS_BUILTIN[id] || null;
-  if (!d && !thread.startsWith('arc:') && TH && Array.isArray(TH[thread])) d = TH[thread][beat - 1] || null;
+  if (!d && !thread.startsWith('arc:') && TH && Array.isArray(TH[thread])) d = TH[thread].find(x => x && x.beat === beat) || null;
   if (!d || !Array.isArray(d.lines)) return null;
+  const p = socP(who); if (Array.isArray(d.needs) && (!p || d.needs.some(f => p[f] == null || p[f] === ''))) return null;   // a theme beat needs roster details they have
   return Object.assign({ who, beat, thread, tone: thread.startsWith('arc:') ? 'heartfelt' : MOMENT_TONE[beat - 1] || 'heartfelt' }, d, { who, beat });
 }
 const storyM = id => { const S = SHIP.social.stories || (SHIP.social.stories = {}), M = S.m || (S.m = {}); return M[id] || (M[id] = { b: 0, at: null, hf: null }); };
-function momentNextId(p) {                               // the next beat's id, ready or not
-  const v = voiceOf(p.id), th = v.thread || '';
-  if (th.startsWith('arc:')) { const r = SHIP.rel[p.id], n = r ? r.arc || 0 : 0; return n >= 1 || !STORY_ARCS[p.id] ? p.id + ':' + (n + 1) : null; }   // beats told so far (rel.arc); an arc with card lines tells beat 1 on the card
-  return p.id + ':' + (storyM(p.id).b + 1);
+function momentNextId(p) {                               // the next beat's id that has a script, ready or not (writers' beats may have gaps)
+  const v = voiceOf(p.id), th = v.thread || '', r = SHIP.rel[p.id];
+  const n = th.startsWith('arc:') ? (r ? r.arc || 0 : 0) : storyM(p.id).b;   // beats told so far (rel.arc for arcs)
+  if (th.startsWith('arc:') && n < 1 && STORY_ARCS[p.id]) return null;   // an arc with card lines tells beat 1 on the card
+  for (let b = n + 1; b <= n + 6; b++) if (momentDef(p.id + ':' + b)) return p.id + ':' + b;
+  return null;
 }
 const momentOwnsBeat = (id, n) => n >= 1 && (voiceOf(id).thread || '').startsWith('arc:') && !!momentDef(id + ':' + (n + 1));   // section 20's arcBeat leaves it to a moment
 const momentHint = id => { const d = momentDef(id); return d && d.hint ? voiceFill(d.who, d.hint) : null; };
@@ -15646,12 +15649,14 @@ function momentShow(id) {
   socInit(); const d = momentDef(id), p = d && socP(d.who); if (!d || !p || typeof MEETING_SCRIPTS === 'undefined' || typeof dialogueShow !== 'function') return false;
   if (typeof DIALOGUE !== 'undefined' && DIALOGUE) return false;
   const t = shipNow(), arc = STORY_ARCS[p.id], fill = s => voiceFill(p.id, typeof s === 'function' ? s(p) : s, t);
+  const who = w => !w || w === 'them' ? p.id : w;        // a theme's speaker is whoever has the theme
+  const say = (x, w) => typeof x === 'object' && x ? { who: who(x.who || w), text: fill(x.text), pose: x.pose } : { who: who(w), text: fill(x) };   // a reply as text, or { who, text, pose }
   const lines = d.lines.map(l => l.choice ? { choice: l.choice.map(c => ({ text: fill(c.text), flavour: c.flavour, fit: c.flavour === voiceOf(p.id).needs, c,
-      reply: c.reply ? { who: c.reply.who || p.id, text: fill(c.reply.text || c.reply) } : null })) }
-    : { who: l.who || p.id, text: fill(l.say !== undefined && arc && arc[l.say] ? arc[l.say].say : l.text), pose: l.pose });
+      reply: c.reply ? say(c.reply) : null })) }
+    : { who: who(l.who), text: fill(l.say !== undefined && arc && arc[l.say] ? arc[l.say].say : l.text), pose: l.pose, to: l.to });
   let picked = null;
   MEETING_SCRIPTS['moment:' + id] = { title: shortName(p), lines,
-    onPick: (k, c) => { picked = c; if (c.fit && c.c.warm) c.reply = { who: p.id, text: fill(c.c.warm) }; },   // the reply that fits them best can have a warmer answer
+    onPick: (k, c) => { picked = c; if (c.fit && c.c.warm) c.reply = say(c.c.warm); },   // the reply that fits them best can have a warmer answer
     onEnd: () => { delete MEETING_SCRIPTS['moment:' + id]; if (picked) momentDone(p, d, picked); } };
   return dialogueShow('moment:' + id, { id: 'moment:' + id, who: [p.id], at: t });
 }
@@ -15665,7 +15670,7 @@ function momentDone(p, d, c) {                           // the reply was picked
   relAdd(p.id, 'moment', pts);
   const word = c.c && c.c.mem || d.mem;                 // the writers' memory word (moment.<arc>.<word>), else one made from the beat
   memAdd(p.id, 'moment.' + th + '.' + (word || d.beat + '.' + flavour), d.tone === 'resolution' ? { cls: 'core' } : {});
-  if (c.c && c.c.flag && typeof flagSet === 'function') flagSet(c.c.flag);   // a reply that sets a flag for later beats
+  if (typeof flagSet === 'function') for (const f of [d.flag, c.c && c.c.flag]) if (f) flagSet(f);   // the beat's flag, and the reply's, for later beats
   if (d.learn && !r.known.includes('@story:' + d.learn)) r.known.push('@story:' + d.learn);
   if (typeof simNote === 'function') simNote('moment', { id: p.id + ':' + d.beat, who: p.id, beat: d.beat, flavour, tone: d.tone, fit: !!c.fit });
   if (d.tone === 'resolution' && typeof giftKeepsake === 'function') giftKeepsake(p, d.keepsake || v.keepsake);
