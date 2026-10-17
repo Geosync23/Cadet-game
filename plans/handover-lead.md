@@ -232,3 +232,4 @@ Supersedes the 04:03 summary where they differ.
 - 05:25 Device engineer 3 hired: session_01SskqNx45iEGyQq2W9Fjg5Y (tipSeen for section 21, isFinite nit, call-home Mail with social B2, Needs app if needed). Onboarding 0.42.19 e270ee2 (briefing fix) up; priorities set: Zeke's tour hooks → bed arrow → week Tue-Sun. Content 058f864 (4,000 lines). Perf PASS on c1.
 - 05:30 The user: many crew stand in the mess with trays instead of sitting → sim 3 (find cause; everyone sits to eat; count standing-with-tray at peaks). design-doc updated.
 - 05:32 Writer 3 archived; Writer 4 hired: session_01AB5f3VLMh8huiLWbEnqa8U. Head writer 2 at ~68%: asked for its handover note now. Content c6a1e40 (4,060 lines; 60 everyday non-work bubbles).
+- 05:34 Head writer 2 handed over (ccea7bc) and archived; head writer 3 hired: session_01FopKMT2ZKxuWcNDcmF7565 (first job Zeke's tour). Onboarding told to reply to it.
