@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.29.29
+   STARSHIP CADET: CSV Wren                           build 0.29.30
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.29.29';                          // keep in step with the header's build line
+const GAME_BUILD = '0.29.30';                          // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -11086,8 +11086,9 @@ const galleyNames = ps => ps.map(p => p.player ? 'you' : galleyFirst(p)).join(' 
 // with `cake: true` (eventsOn(d), e.g. Founding Day); gather is when the event's gathering starts, if there is one
 function galleyCake(d) {
   const all = typeof eventsOn === 'function' ? eventsOn(d) : [], who = galleyBirthdays(d);
-  // (a cake with the tradition's own decor 'cake' is someone else's, away from the mess: four weeks aboard's at Works tea)
-  const bev = all.find(e => e.id === 'birthday'), other = all.find(e => e.id !== 'birthday' && (e.cake || (e.ev && e.ev.cake)) && !(e.ev && e.ev.ties && e.ev.ties.decor === 'cake'));
+  // (a cake for a tradition held off Deck 3, or with its own decor 'cake', isn't on the servery: four weeks aboard's at Works tea)
+  const away = e => !!(e.ev && ((e.ev.ties && e.ev.ties.decor === 'cake') || (Array.isArray(e.ev.where) && e.ev.where.length && e.ev.where.every(w => w.deck !== 3))));
+  const bev = all.find(e => e.id === 'birthday'), other = all.find(e => e.id !== 'birthday' && (e.cake || (e.ev && e.ev.cake)) && !away(e));
   if (who.length) return { who, name: '', gather: bev ? bev.from : null };
   if (other) { const g = other.ev && other.ev.ties && other.ev.ties.galley; return { who: [], name: other.name, gather: other.from > CAKE.out ? other.from : null, pie: !!(g && /harvest/.test(g.dish || '')) }; }
   return null;

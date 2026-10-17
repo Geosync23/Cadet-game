@@ -216,7 +216,7 @@ with sync_playwright() as pw:
     ev = g.ev(f"""(() => {{ const real = typeof eventsOn === 'function', keep = real ? eventsOn : undefined, fd = {DAY} + 3, hv = {DAY} + 5;
       if (!real) window.__sc(`eventsOn = d => d === ${{fd}} ? [{{ id: 'founding', name: 'Founding Day', from: 1170, to: 1290, ev: {{ cake: true }}, honorees: [] }}] : d === ${{hv}} ? [{{ id: 'harvest', name: 'Harvest morning', from: 570, to: 690, ev: {{}}, honorees: [] }}] : []`);
       const days = real ? [...Array(364)].map((_, k) => {DAY} + k) : [fd, hv];
-      const f = days.find(d => !galleyBirthdays(d).length && eventsOn(d).some(e => (e.cake || (e.ev && e.ev.cake)) && !(e.ev && e.ev.ties && e.ev.ties.decor === 'cake'))), h = days.find(d => eventsOn(d).some(e => e.id === 'harvest'));
+      const f = days.find(d => !galleyBirthdays(d).length && eventsOn(d).some(e => (e.cake || (e.ev && e.ev.cake)) && !(e.ev && ((e.ev.ties && e.ev.ties.decor === 'cake') || (Array.isArray(e.ev.where) && e.ev.where.length && e.ev.where.every(w => w.deck !== 3)))))), h = days.find(d => eventsOn(d).some(e => e.id === 'harvest'));
       GALLEY_MENU.clear(); for (const E of GALLEY_EV.values()) E.k = 0;
       const out = {{ real, f, h }};
       if (f) {{ out.cakes = galleyReport(f, 1)[0].cakes; out.board = galleyBoard(f); const mail = []; window.__keepMail = window.mailSend; window.__mailBox = mail; window.__sc("mailSend = x => window.__mailBox.push(x)");
