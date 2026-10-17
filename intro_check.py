@@ -27,7 +27,7 @@ from playwright.sync_api import sync_playwright
 RUN = r"""(({ who, reload, to, skip, endAt, pace }) => {
   const FLAGS = INTRO_FLAGS;
   socInit(); socReset(0); SHIP.mail.length = 0;
-  SHIP.intro = introBlank(); SHIP.notes = [];   // section 13's flags are NOT reset: introBegin must clear what the last run left
+  SHIP.intro = introBlank(); SHIP.notes = []; if (SHIP.device) SHIP.device.appts = [];   // each run books its own health check   // section 13's flags are NOT reset: introBegin must clear what the last run left
   const t0 = introAbs(INTRO_START.day, INTRO_START.min), order = [], flagAt = {};
   if (skip) { setShipNow(t0); introSkip(); }
   else introBegin('Sam');
@@ -200,6 +200,7 @@ with sync_playwright() as pw:
     for f, t in when.items():
         if a['flagAt'].get(f) != t: fail(f"{f} at {mins(a['flagAt'][f]) if f in a['flagAt'] else 'never'}, wanted {mins(t)}")
     if not a['I']['ended']: fail('the intro did not end on Day 8')
+    if 'd2-health:appt' not in a['I']['done']: fail('Tuesday\'s health check was never booked')
     print('  mail:', '; '.join(f"{mins(int(m[0]))} {m[1]}: {m[2]}" for m in a['mail']))
     if any(m[2] in ('Your bunk', 'Tomorrow') for m in a['mail']): fail('a fallback Mail went out with the player there')
 
@@ -264,12 +265,19 @@ with sync_playwright() as pw:
     for x in t['bad']: fail(x)
     if not t['all']: fail('ticking everything did not finish the list')
 
+    tl = g.ev("typeof introTourLines === 'function' ? INTRO_TOUR.map(x => [x.id, introTourLines(x.id, x.stub).length, introWriterLine('walk.' + x.id + '.1') ? 'writers' : 'stand-ins']) : null")
+    if tl: print('  Torres\'s tour (lines per place):', ', '.join(f'{i} {n} ({w})' for i, n, w in tl))
+    if tl and g.ev("typeof LINES !== 'undefined' && !!LINES.crew && !!LINES.crew['torres-zeke']") and any(w != 'writers' for i, n, w in tl): fail('the writers\' tour lines are in this build but a place has none: ' + str([i for i, n, w in tl if w != 'writers']))
     print('8. The evening in the real game (New game arriving, a player who follows Torres and taps through meetings)')
     if not g.ev("typeof newGameStart === 'function' && typeof escortPlanOf === 'function'"):
         fail('no newGameStart or escort walker (sections 13 and 10, the sim engineer): the arrival cannot start')
     else:
         g.ev('newGameStart(true)'); g.step(5)
         g.page.fill('form input[maxlength="24"]', 'Sam'); g.page.click('form button'); g.step(5)
+        tl2 = g.ev("(() => { const L = (typeof VOICE !== 'undefined' && VOICE['torres-zeke'] && VOICE['torres-zeke'].lines && VOICE['torres-zeke'].lines.week1) || []; return INTRO_TOUR.map(x => [x.id, introTourLines(x.id, x.stub).length, L.filter(e => (e.flag || '').startsWith('walk.' + x.id + '.')).length]); })()")
+        wrong = [i for i, n, w in tl2 if w and n != w]
+        print('  tour lines with the week under way (place, played, written):', tl2)
+        if wrong: fail('a tour place plays other lines than its own: ' + ', '.join(wrong))
         order, peak, led = [], {}, 0
         for k in range(420):
             g.step(20)
@@ -304,8 +312,55 @@ with sync_playwright() as pw:
         print(f"  saved at {before}, loaded at step {after['step']} on Day {after['day']}, manifest {'up' if after['form'] else 'gone'}, name {after['name']}")
         if after['step'] != before['step'] or after['day'] != 0 or after['form']: fail('a Day 0 save did not load at its step')
         if after['name'] != 'Sam': print('  (the name comes back once section 15 saves SHIP.player.name: player engineer 3)')
+        print('11. Reload mid-walk: follow Torres to the lift, save and reload there, then on to your bunk')
+        mid = None
+        for k in range(120):
+            g.step(20); r = g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'follow'])
+            if r['step'] == 'lift': mid = r; break
+        g.ev('saveGame()')
+        g.page.goto(url + '?debug'); g.page.wait_for_function('window.__sc !== undefined || window.__err', timeout=60000); g.step(10)
+        back = g.ev("(() => { const a = DECK_CREW.find(x => x.p.id === INTRO_ESCORT), pp = player.obj.position; return { step: SHIP.intro.step, deck: deckDef.num, esc: a ? Math.round(Math.hypot(a.x - pp.x, a.z - pp.z)) : null, plan: (escortPlan(ROSTER.find(p => p.id === INTRO_ESCORT), shipNow()) || {}).mode }; })()")
+        print(f"  saved at step {mid and mid['step']} ({mid and mid['t']}); after the reload: step {back['step']}, Deck {back['deck']}, Torres {back['esc']} tiles away ({back['plan']})")
+        if not mid or back['step'] != 'lift' or back['esc'] is None: fail(f'reloading mid-walk lost the step or Torres: {back}')
+        for k in range(200):
+            g.step(20); r = g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'follow'])
+            if r['step'] == 'toMess': break
+        bunk = g.ev("({ done: SHIP.intro.done.bunk !== undefined, missed: SHIP.intro.missed.slice(), device: introFlag('intro.device') })")
+        print(f"  on to the bunk after the reload: reached {bunk['done']}, missed {bunk['missed']}, device {bunk['device']}")
+        if not bunk['done'] or bunk['missed'] or not bunk['device']: fail(f'after reloading mid-walk the evening went wrong: {bunk}')
         g.page.evaluate('localStorage.clear()')
-    print('Not yet (wave 3 and later): the reserved jobs, the week in play, reload mid-walk in the real game')
+    print('10. Monday in the real game: the three jobs held at 05:00, the briefing at 07:50, the shadow shift with Torres')
+    if not g.ev("typeof jobReserve === 'function' && typeof newGameStart === 'function'"):
+        print('  not yet: this build has no jobReserve (section 17, systems 0.33.36+)')
+    else:
+        g.ev('localStorage.clear()'); g.ev('newGameStart(true)'); g.step(5)
+        g.page.fill('form input[maxlength="24"]', 'Sam'); g.page.click('form button'); g.step(5)
+        g.ev('skipTo(introAbs(1, 7 * 60 + 40))'); g.ev('(() => { goToDeck(5); player.obj.position.copy(cellPos(15, 3)); })()'); g.step(5)   # the next frames run 05:00's beat, which holds the jobs
+        res = g.ev("[1, 2, 3].map(k => SHIP.jobs.find(x => x.reserved === k)).map(j => j && j.machine)")
+        print('  held for you:', res)
+        if not all(res): fail('the week\'s three jobs are not all held')
+        met = None
+        for i in range(40):
+            g.step(30); met = g.ev('DIALOGUE && DIALOGUE.id')
+            if met: break
+        print('  07:50 in the Works bay:', met)
+        who = g.ev("DIALOGUE ? { lines: DIALOGUE.queue.filter(l => l.who).map(l => l.who), cal: (() => { const a = DECK_CREW.find(x => x.p.id === 'calder'); return a ? (ROOMS[roomAt(...cellAt(a.x, a.z))] || {}).name : null; })() } : null")
+        print('  its speakers:', who)
+        if not met or not met.startswith('introBriefing'): fail('the Monday briefing did not play')
+        elif who and 'calder' in who['lines'] and who['cal'] != 'Works bay' and g.ev('shipNow() < introAbs(1, 480)'): fail('Calder speaks the briefing from ' + str(who['cal']))
+        g.ev('(() => { for (let k = 0; DIALOGUE && k < 60; k++) { const l = DIALOGUE.queue[DIALOGUE.i]; if (l && l.choice) dialogueChoose(0); else dialogueNext(); } })()')
+        for i in range(40):
+            g.step(30)
+            if g.ev('shipNow() >= introAbs(1, 486)'): break
+        took = g.ev("claimJob(SHIP.jobs.find(x => x.reserved === 1).id)")
+        g.step(60)
+        esc = g.ev("(() => { const a = DECK_CREW.find(x => x.p.id === INTRO_ESCORT), e = escortPlan(ROSTER.find(p => p.id === INTRO_ESCORT), shipNow()), pp = player.obj.position; return { mode: e && e.mode, d: a ? Math.round(Math.hypot(a.x - pp.x, a.z - pp.z)) : null }; })()")
+        fin = g.ev("(() => { const j = SHIP.jobs.find(x => x.reserved === 1); jobStops(j).forEach((s, k) => jobStepDone(j.id, k)); j.workDone = true; return { t: turnInJob(j.id), shadow: !!SHIP.intro.settle.shadow, mem: (SHIP.notes || []).some(n => n.kind === 'introStep' && n.step === 'd1-shadow') }; })()")
+        print(f"  took it: {took}; Torres {esc['mode']}, {esc['d']} tiles from you; turned in: {fin['t']}; 'Shadow a job' ticked: {fin['shadow']}; d1-shadow note: {fin['mem']}")
+        if not took: fail('could not take the shadow job at 08:06')
+        if esc['mode'] != 'follow' or esc['d'] is None or esc['d'] > 4: fail(f'Torres is not with you on the shadow shift: {esc}')
+        if not (fin['t'] and fin['shadow'] and fin['mem']): fail(f'the shadow job did not complete the intro\'s side: {fin}')
+    print('Not yet: Tuesday to Sunday walked in the real game (with social A, traditions and the writers combined)')
     if g.errors: fail('page errors: ' + ' | '.join(g.errors[:6]))
     g.close()
 
