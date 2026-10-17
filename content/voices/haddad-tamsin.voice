@@ -2,17 +2,17 @@
 // Writer-commons, batch 0 (draft 2). Tamsin Haddad: galley hand, early team, Bunk 6 berth 2. Off Wednesday and
 // Thursday. Roster: optimistic, nervous; evening-shower, lingers-at-meals. Knows every song in the record cabinet (one
 // of five who say so, none agreeing); learning the guitar, badly (from the same battered book as Hamid, Noor Park and
-// Isak Lindqvist). No pronouns in facts.md: "Tamsin" or "they".
+// Isak Lindqvist). Pronouns: she / her (facts.md 4b).
 //
-// HOW THEY TALK: bright, quick to say it'll all be fine, then a small "won't it?" on the end. Sings under their breath
-// and stops when noticed. Apologises for things that aren't their fault.
+// HOW SHE TALKS: bright, quick to say it'll all be fine, then a small "won't it?" on the end. Sings under her breath
+// and stops when noticed. Apologises for things that aren't her fault.
 // WITH JUNIORS: delighted to help; slightly too much.
-// WHAT THEY NOTICE: the radio; the words to anything; anyone left out.
+// WHAT SHE NOTICES: the radio; the words to anything; anyone left out.
 // MOOD TELLS: happy = sings out loud. Nervous = "It'll be fine!" twice. Low = lingers at the table long after the meal.
-// NEVER: unkind; sure of themselves for long.
+// NEVER: unkind; sure of herself for long.
 // RUNNING: today is always the day the chord comes right; the lyrics war; guitar practice with Hamid, which helps neither.
 tpl: warm
-talk: Bright, quick to say it'll be fine, then "won't it?"; sings under their breath and stops when noticed; apologises too much.
+talk: Bright, quick to say it'll be fine, then "won't it?"; sings under her breath and stops when noticed; apologises too much.
 cares: the record cabinet's songs | the chord that won't come | the early team's breakfast out on time | home
 jokes: today is always the day the chord comes right | knows every word to every song, and so does everyone else, differently | practises guitar with Hamid, which helps neither of them
 hi: Hi! | Oh, hello | Hey, you
@@ -30,4 +30,4 @@ invites: jam
 joy: singing along to the record cabinet
 thread: homesick
 keepsake: a song written out for you, chords and all
-avoid: being told they're always cheerful (they aren't, and it costs them)
+avoid: being told she's always cheerful (she isn't, and it costs her)

@@ -2,14 +2,14 @@
 // Writer-commons, batch 0 (draft 2). Dr. Elif Yoon: night doctor, cabin 4-22. Off Wednesday and Thursday. Roster:
 // nervous, patient; calls-home, tea-break, lounge-regular, bar-regular. Terrible jokes at breakfast (traded with
 // Halloran, Lemaire and Yilmaz; Halloran's are worse); the best at fixing the coffee machine (so say Volkov and Shah too).
-// No pronouns in facts.md: "Dr. Yoon", "Elif" or "they". Juniors say "Doctor".
+// Pronouns: she / her (facts.md 4b). Juniors say "Doctor".
 //
-// HOW THEY TALK: soft, a little nervous in company, apologises a lot; completely steady with a patient. Tells a
+// HOW SHE TALKS: soft, a little nervous in company, apologises a lot; completely steady with a patient. Tells a
 // terrible joke when nervous, then winces at it.
 // WITH JUNIORS: gentle; makes you sit down; never makes you feel silly for coming in.
-// WHAT THEY NOTICE: how people are sleeping; the coffee machine's noises.
+// WHAT SHE NOTICES: how people are sleeping; the coffee machine's noises.
 // MOOD TELLS: happy = two jokes. Nervous = three. Tired = breakfast is dinner and dinner is breakfast.
-// NEVER: shares a patient's details; raises their voice.
+// NEVER: shares a patient's details; raises her voice.
 // RUNNING: the jokes; the coffee machine answers to Elif (and Volkov, and Shah, and none of them agree why).
 tpl: warm
 talk: Soft, nervous in company, apologises a lot; steady with a patient; tells a terrible joke when nervous, then winces.
