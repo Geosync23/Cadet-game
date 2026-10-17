@@ -477,11 +477,14 @@ with sync_playwright() as pw:
         if hs['appt'] and (hs['appt'][:2] != ['yes', 'tomas'] or not all(hs['appt'][2:]) or hs.get('kept') != [True, 'host', True, True]): fail(f'Come over appointment or visit wrong: {hs}')
         if not hs['appt'] and 'Not tonight' not in (hs['said'] or ''): fail(f'Come over made no appointment: {hs}')
 
-    # 18. small seams (0.36.68): the roster's short theme fields through socialFill ("" is none); the hour of the day on Day 0
+    # 18. small seams (0.36.68): the roster's short theme fields through socialFill ("" is none); the hour of the day on Day 0; one unclaimed-job dip a department a week (0.36.71)
     sm = g.ev(r"""(() => { const p = { ...SOC.crew[SOC.idx.get('tomas')], kin: 'my gran', lost: '', hobbyNoun: ' chess ' };
-      return [socialFill(p, 'kin'), socialFill(p, 'lost'), socialFill(p, 'hobbyNoun'), socHr(-5), socHr(31)]; })()""")
+      const keep = JSON.stringify(socSave()), t0 = shipNow(); SHIP.rep = null; const g0 = repInit().dept.galley;   // unclaimed jobs: one dip a department a week (0.36.71)
+      setShipNow(7 * 1440 + 600); repNote('jobUnclaimed', { dept: 'galley' }); setShipNow(9 * 1440 + 600); repNote('jobUnclaimed', { dept: 'galley' }); const g1 = repInit().dept.galley;
+      setShipNow(15 * 1440 + 600); repNote('jobUnclaimed', { dept: 'galley' }); const g2 = repInit().dept.galley; setShipNow(t0); socLoad(JSON.parse(keep));
+      return [socialFill(p, 'kin'), socialFill(p, 'lost'), socialFill(p, 'hobbyNoun'), socHr(-5), socHr(31), g0 - g1, g0 - g2]; })()""")
     print('Small seams:', sm)
-    if sm != ['my gran', None, 'chess', 19, 7]: fail(f'kin / lost / hobbyNoun or socHr wrong: {sm}')
+    if sm != ['my gran', None, 'chess', 19, 7, 1, 2]: fail(f'kin / lost / hobbyNoun, socHr or the weekly unclaimed dip wrong: {sm}')
 
     print('errors', g.errors[:5])
     if g.errors: ok = False
