@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.26.36
+   STARSHIP CADET: CSV Wren                           build 0.26.37
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7053,7 +7053,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.26.36';                           // keep in step with the header's build line
+const GAME_BUILD = '0.26.37';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -8411,7 +8411,9 @@ function introLay(p, d, occ, segs) {
   let out = segs.slice();
   for (const e of add.filter(e => e && e.to > e.from).sort((a, b) => a.from - b.from)) {
     const a = B + Math.max(0, e.from), b = B + Math.min(1440, e.to), cut = [];
-    const free = id => !(occ.get(id) || []).some(([x, y]) => x < b && a < y), pid = e.alts && e.alts.length ? e.alts.find(free) || e.placeId : e.placeId, pl = pid ? byId.get(pid) : null;   // never a place someone already has then (Calder and Torres at Monday's briefing)
+    const free = id => !(occ.get(id) || []).some(([x, y]) => x < b && a < y)   // never a place someone already has then (Calder and Torres at Monday's briefing),
+      && !(occ.res && (occ.res.get(id) || []).some(([x, y, ev]) => x < b && a < y && ev !== 'intro:' + p.id));   // nor one held for someone else (Calder's named seat) or an event (reviewer 1, 0.26.37)
+    const pid = e.alts && e.alts.length ? e.alts.find(free) || null : e.placeId, pl = pid ? byId.get(pid) : null;   // none free: there, standing
     for (const x of out) {
       if (x.to <= a || x.from >= b) { cut.push(x); continue; }
       if (x.from < a) cut.push({ ...x, to: a });
@@ -18259,7 +18261,7 @@ const K = c => c[0] + ',' + c[1];
 function occupiedBy(except) {                 // cells other people stand in, or are heading to
   const s = new Set();
   for (const o of walkers) if (o !== except && o.active) { s.add(K(o.here())); if (o.goal) s.add(K(o.goal)); }
-  for (const a of DECK_CREW) if (a.settled && a.spot && a.spot.onTile && !(except && except.isPlayer && sharedTile(a.spot.walk))) s.add(K(a.spot.walk));   // crew standing at their place (on a tile two places share, they make way for you: 0.26.36)
+  for (const a of DECK_CREW) if (a.settled && a.spot && a.spot.onTile) s.add(K(a.spot.walk));   // crew standing at their place
   return s;
 }
 function nearestOpen(x, z, who) {
@@ -18292,6 +18294,9 @@ class Walker {
   here() { return cellAt(this.obj.position.x, this.obj.position.z); }
   goTo(goal, cb, extraAvoid) {
     const avoid = occupiedBy(this); if (extraAvoid) avoid.add(K(extraAvoid));
+    // your goal on a tile two places share (the cook's station on a range panel): the crew member there makes way, so
+    // it's yours unless another walker is on it or heading for it. Passing through, you still squeeze past (0.26.37)
+    if (this.isPlayer && goal && sharedTile(goal) && !walkers.some(o => o !== this && o.active && (K(o.here()) === K(goal) || o.goal && K(o.goal) === K(goal)))) avoid.delete(K(goal));
     if (!goal || !free(...goal) || avoid.has(K(goal))) return false;
     let p = findPath(this.here(), goal, avoid, this);
     if (!p && this.isPlayer && typeof squeezePath === 'function') p = squeezePath(this, goal, avoid);   // section 15: squeeze past settled crew
@@ -18605,7 +18610,7 @@ class CrewAgent {
     const way = crewWayOn(now);                          // crewMakeWay: off a tile you're heading for, waiting beside it
     if (way && goalId !== '@lift') {
       const sp = goalId && placeSpot(goalId), here = this.here();
-      if (sp && (way.has(K(sp.walk)) || way.has(K(cellAt(sp.x, sp.z)))) || way.has(K(here))) {
+      if (sp && (sp.onTile || CREW_WAY.has(K(sp.walk))) && (way.has(K(sp.walk)) || way.has(K(cellAt(sp.x, sp.z)))) || !this.settled && way.has(K(here))) {   // standing at their place (the cook), not a diner whose seat shares a walk-to tile with yours (0.26.37)
         if (this.goalId !== '@aside') {
           const to = asideTile(here, way); this.retarget(null); this.goalId = '@aside';
           const pth = to && crewPath(this.here(), to, new Set([...this.rooms, roomAt(...this.here())]), this); if (pth) this.path = pth;
