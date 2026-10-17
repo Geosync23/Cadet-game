@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.48.35
+   STARSHIP CADET: CSV Wren                           build 0.48.36
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.48.35';                           // keep in step with the header's build line
+const GAME_BUILD = '0.48.36';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -13501,7 +13501,7 @@ const VOICE = {
         {"text": "Painting a tiny lantern on a tiny portrait.", "id": "69f0va", "season": "lanterns"},
         {"text": "That window. If you squint, it's rain.", "id": "i8oosi", "place": "lounge"},
         {"text": "Somebody's left a little portrait. Not mine. Maybe.", "id": "pkiq5z", "tone": "funny", "place": "commons"},
-        {"text": "Observatory night. I'll paint a star. A small one.", "id": "110kql7", "trad": "observatory"},
+        {"text": "Observatory night. I'll paint a star. A small one.", "id": "110kql7", "trad": "observatory-night"},
       ],
       "tiles.dock": [
         {"text": "Three. I think. Is that three? Yes. Three.", "id": "15y85a3"},
@@ -14691,7 +14691,7 @@ const VOICE = {
         {"text": "Star three hundred and three tonight. Maybe.", "id": "1mz5pg5", "time": "evening"},
         {"text": "Gym after shift. Then a sit. Then nothing.", "id": "1hjhc2e", "time": "evening"},
         {"text": "Three hundred and four. Wrote it down. Bed.", "id": "1d8nwrf", "time": "night"},
-        {"text": "Observatory night. Bringing the journal. Obviously.", "id": "1kww8q9", "trad": "observatory"},
+        {"text": "Observatory night. Bringing the journal. Obviously.", "id": "1kww8q9", "trad": "observatory-night"},
         {"text": "Harvest. Everyone's buying jars. Jam season.", "id": "6r9dr0", "season": "harvest"},
         {"text": "Common room's warm tonight. I'm staying put.", "id": "wu6cpk", "place": "commons"},
         {"text": "Who's got the Tiles board? No, keep it. I'll watch.", "id": "1ggr6ay", "place": "commons"},
@@ -15212,7 +15212,7 @@ const VOICE = {
         {"text": "I found the other sock. No, a different other sock.", "id": "1qhkjnb", "tone": "funny", "time": "evening"},
         {"text": "I can't sleep. I'm going to look at the stars.", "id": "1m2hnuf", "time": "night"},
         {"text": "Sowing. The garden's careful this time of year. So am I.", "id": "ouejur", "season": "sowing"},
-        {"text": "Observatory night. I'm taking a blanket. Two.", "id": "1150csb", "trad": "observatory"},
+        {"text": "Observatory night. I'm taking a blanket. Two.", "id": "1150csb", "trad": "observatory-night"},
         {"text": "I like the corner seat. You can see the door.", "id": "1builz0", "place": "lounge"},
         {"text": "Quiz night. I'll know the body ones. Only those.", "id": "2thzvn", "trad": "quiz"},
       ],
@@ -16013,7 +16013,7 @@ const VOICE = {
         {"text": "Counted stars. Lost count. Started again.", "id": "66w2j8", "tone": "funny", "time": "night"},
         {"text": "Greening. My mint's gone wild. Brennan's pleased.", "id": "162o3dv", "season": "greening"},
         {"text": "I hung my lantern in the window. Like at home.", "id": "1ld8hnf", "season": "lanterns"},
-        {"text": "Observatory night. I'll find the bright one again.", "id": "zbckrr", "trad": "observatory"},
+        {"text": "Observatory night. I'll find the bright one again.", "id": "zbckrr", "trad": "observatory-night"},
         {"text": "The windows here are best. Don't tell the garden.", "id": "1qeshoa", "place": "lounge"},
         {"text": "The washroom choir was in fine voice today.", "id": "1uvhzum", "tone": "funny", "time": "morning"},
         {"text": "Good morning. The herbs say good morning too.", "id": "pgln4d", "time": "morning"},
@@ -16173,7 +16173,7 @@ const VOICE = {
         {"text": "Greening. Gerald's got a new arm. Small one.", "id": "1y3gvrx", "season": "greening"},
         {"text": "Gerald's got a lantern by him. He's very festive.", "id": "19rffib", "tone": "funny", "season": "lanterns"},
         {"text": "Ah. Window seat. Best seat on the ship.", "id": "1yfnrhm", "place": "lounge"},
-        {"text": "Observatory night. Gerald's seen more stars than me.", "id": "nzzcbo", "tone": "funny", "trad": "observatory"},
+        {"text": "Observatory night. Gerald's seen more stars than me.", "id": "nzzcbo", "tone": "funny", "trad": "observatory-night"},
         {"text": "Morning. That means bed, for me. Goodnight.", "id": "1etj7yx", "tone": "funny", "time": "morning"},
       ],
     },
@@ -17498,7 +17498,7 @@ const VOICE = {
         {"text": "The piano. A little out of tune. I like it like that. It's honest.", "id": "v1u891", "place": "musicroom"},
         {"text": "The garden. I come here to think. Then I stop thinking. That's the point.", "id": "1qipx3i", "place": "hydroponics_garden"},
         {"text": "The lounge window. I could stand here all evening. Some evenings I do.", "id": "rc20pr", "place": "lounge", "not": {"week1": "true"}},
-        {"text": "Observatory night. I'm here to see what you all see. Show me something.", "id": "1800br9", "trad": "observatory"},
+        {"text": "Observatory night. I'm here to see what you all see. Show me something.", "id": "1800br9", "trad": "observatory-night"},
       ],
       "note": [
         {"text": "Called by. You were out. My question can wait. It's a good one, though.", "id": "c4yl2h", "tier": [3, 4]},
@@ -20384,7 +20384,7 @@ const VOICE = {
         {"text": "Greening! Everything's growing. Me too, probably.", "id": "cpsc1o", "season": "greening"},
         {"text": "Sowing. I planted mine in a hurry. It came up.", "id": "1mf7m18", "season": "sowing"},
         {"text": "Light's lovely in here. Can't stay. Just a minute.", "id": "18xsfwa", "place": "hydroponics_garden"},
-        {"text": "Stars! Nine new ones tonight. I'm counting.", "id": "1c5ht1h", "trad": "observatory"},
+        {"text": "Stars! Nine new ones tonight. I'm counting.", "id": "1c5ht1h", "trad": "observatory-night"},
       ],
     },
   },
@@ -20540,7 +20540,7 @@ const VOICE = {
         {"text": "Song round. I'll win it. Facts.", "id": "16ve3lt", "trad": "quiz"},
         {"text": "Lanterns. Too many lights. Nice, though.", "id": "15d3dap", "season": "lanterns"},
         {"text": "Side two, track three. The real words are mine.", "id": "1hc8swp", "tone": "funny", "place": "musicroom"},
-        {"text": "Bring your journal. Don't bring opinions.", "id": "7sr7kd", "tone": "funny", "trad": "observatory"},
+        {"text": "Bring your journal. Don't bring opinions.", "id": "7sr7kd", "tone": "funny", "trad": "observatory-night"},
         {"text": "Breakfast. Then sleep. Don't talk to me.", "id": "1v1bpcw", "tone": "funny", "act": "breakfast"},
       ],
     },
@@ -20713,6 +20713,8 @@ const VOICE = {
         {"text": "Thanks for this. Really. You always make me feel less lost.", "id": "u882bi", "tone": "warm", "tier": [3, 4]},
         {"text": "Off on patrol. If you see Holt, tell him I'm already there. Early. Obviously.", "id": "g3hoaz", "tone": "funny", "tier": [1, 4], "time": "morning"},
         {"text": "See you later, {nick}. Back at the bunk. Mind the star map.", "id": "1t9aqah", "tone": "warm", "tier": [4, 4]},
+        {"text": "Right, I'll go. I've a letter to finish. Page three. It's about soup.", "id": "13z2ujg", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Bye! I'm going the short way. Just once. To see what it's like.", "id": "vk94rp", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
       ],
       "callback": [
         {"text": "You never told anyone. About the exam. I knew you wouldn't. I still checked. Sorry.", "id": "gr2hgo", "tone": "warm", "told": "moment.tomas.promised"},
@@ -20737,6 +20739,36 @@ const VOICE = {
         {"text": "You came to find me on my birthday. My brother always does that. Now two people do.", "id": "ebk7yb", "tone": "warm", "told": "bday"},
         {"text": "Rina says you're all right. From Rina that's practically a medal.", "id": "1ro6akg", "tone": "funny", "told": "heard.moment.rina"},
         {"text": "Pell says you're the best. He says that about anyone with biscuits. But he meant it.", "id": "1x63yz", "tone": "funny", "told": "heard.moment.pell"},
+        {"text": "Your seedling stands up straight. Mine leans. Yours is like Holt. Mine's like me.", "id": "16o5tfp", "tone": "funny", "told": "came.sowing", "not": {"week1": "true"}},
+        {"text": "You came to quiz! I knew one answer. It was \"the Tern\". I said it far too loud.", "id": "1avaa3x", "tone": "funny", "told": "came.quiz"},
+        {"text": "You came to the jam! You clapped in time. I didn't. We balanced out.", "id": "1p8rng8", "tone": "funny", "told": "came.jam"},
+        {"text": "The market! We looked at everything and bought nothing. Good afternoon, that.", "id": "hgivqi", "tone": "warm", "told": "came.market"},
+        {"text": "Harvest! You carried more than me. I'm telling everyone I carried more.", "id": "vmj0wd", "tone": "funny", "told": "came.harvest"},
+        {"text": "I'm reading your book slowly, so it lasts. I'm on the bit with the storm.", "id": "1xn5nb4", "tone": "warm", "told": "gift.book"},
+        {"text": "Was it you who fixed the lights? The corridor's brighter. I nearly didn't get lost.", "id": "18nmqkz", "tone": "funny", "told": "fixed.lights"},
+        {"text": "Your first night, you found the common room in an hour. It took me three days.", "id": "qxed9z", "tone": "funny", "told": "intro.arrival", "not": {"week1": "true"}},
+        {"text": "Observatory night's better with the bunk there. You, Chloe, Zofia. Even Lukas, once.", "id": "poo172", "tone": "warm", "mem": "came.observatory-night", "tier": [3, 4]},
+      ],
+      "chat": [
+        {"text": "My brother asked what we eat. I said \"Brennan's food\". He says that's not an answer.", "id": "nopk86", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "The toast here is better than home. Don't tell home.", "id": "1kyezvm", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "I'm on chapter three of a book about old ships. It's taken a month. Long chapters.", "id": "h4be7q", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Running club's all right. I run at the back. You can see everyone from the back.", "id": "xbwku", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Film night was the one with the lighthouse. Seen it twice. Still don't get the ending.", "id": "1hui113", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "I'm counting every window on the Wren. I'm on twenty-two. Some are portholes.", "id": "14jaig5", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Rest days I sleep in till seven. Seven! My brother says that's not sleeping in.", "id": "12p70ss", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "Brennan let me knead the Sunday bread. She said \"gently, love\". I was too gentle.", "id": "196ta7k", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "Chloe and Zofia hear the news before anyone. I just wait at the bunk. It comes to me.", "id": "10ouk31", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "Lukas has the same bar stool every night. I sat on it once. It felt wrong. Like a hat.", "id": "1y2lm4o", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "The garden's my favourite after the observatory. It smells like after rain.", "id": "1tadcto", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "I write to my brother about the crew. No names. He'd tell the whole moon.", "id": "1jgs7g9", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "At home we had one shop. Here there's a whole store. I mostly just look.", "id": "1dze4be", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "Vance asked how my knees were. Then said \"Good\" and wrote something down.", "id": "1cz0jyj", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "Some nights I look at the star map and guess which one's home. I never get it.", "id": "10m3zpb", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "I used to think grey was just what skies did. Now I miss the grey a bit. Funny.", "id": "1q0h4mo", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "Holt asked if I was settling in. I said yes. He said \"Really?\" I said yes again.", "id": "jt9wpx", "tone": "funny", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "My brother says his ceiling map is bigger than mine. It isn't. I've measured.", "id": "1ofbelw", "tone": "funny", "beat": "tomas.4", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "I'm a bit less lost every week. Not found. Less lost. That's good, isn't it?", "id": "p50ek8", "tone": "warm", "tier": [4, 4], "not": {"week1": "true"}},
       ],
       "cue": [
         {"text": "The storm's here. Holt says stay calm. I'm staying calm. Very calm. Loudly.", "id": "1ieybf1", "tone": "funny", "cue": "event.ionStorm.onset"},
@@ -20756,6 +20788,9 @@ const VOICE = {
         {"text": "Good day! I found the laundry on the first try. That's a first. I'm a new man.", "id": "u9b114", "tone": "funny", "mood": "high", "tier": [2, 4]},
         {"text": "Brilliant day. My brother wrote. Two pages. About the weather. It was grey.", "id": "1ff4ee1", "tone": "funny", "mood": "high", "tier": [3, 4]},
         {"text": "Quiet day. I'm writing to my brother. Saying things on paper helps.", "id": "p60ki1", "mood": "low", "tier": [2, 4]},
+        {"text": "Good day. My brother's letter had a drawing. A cow, I think. Possibly me.", "id": "1cz30zj", "tone": "funny", "mood": "high", "not": {"week1": "true"}},
+        {"text": "Fine! Medium-good. Toast was hot. Lift came first time. Small things.", "id": "1vu94zl", "mood": "ok", "not": {"week1": "true"}},
+        {"text": "Bit far from home today. Not sad. Just far. The stars usually sort it.", "id": "z75kje", "mood": "low", "tier": [3, 4], "not": {"week1": "true"}},
       ],
       "gift": [
         {"text": "Oh, wow. For me? This is going right by the star map. Right by it. Thank you, really.", "id": "1tcmisq", "tone": "warm", "gift": "star"},
@@ -20789,6 +20824,15 @@ const VOICE = {
         {"text": "How's your gran's hip? I asked my brother to think good thoughts at it. He's thinking.", "id": "uq53g", "tone": "warm", "flag": "home.gran.hip", "tier": [2, 4], "not": {"flag": "home.gran.won"}},
         {"text": "The Little Wren! I told my brother your Jo built a boat. Now he wants to build boats.", "id": "12y2l64", "tone": "funny", "flag": "home.jo.launched", "tier": [2, 4]},
         {"text": "Sunday story day? I've started one with my brother. I copied you. Is that all right?", "id": "k79tvq", "tone": "warm", "flag": "home.sam.sundays", "tier": [3, 4]},
+        {"text": "{hi}! Have you eaten? I've eaten. Toast. You knew that.", "id": "zi6910", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "{hi}. I'm off to send a letter. I say \"post\". It sounds nicer.", "id": "clzjs0", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Morning! Lukas was up at five again. I heard every sock.", "id": "lkupjp", "tone": "funny", "tier": [1, 4], "time": "morning", "not": {"week1": "true"}},
+        {"text": "{hi}! Chloe says lights out in an hour. She said it like a weather report.", "id": "1k2fv8j", "tone": "funny", "tier": [1, 4], "time": "evening", "not": {"week1": "true"}},
+        {"text": "{hi}, {me}. Nothing's happened all day. I think I like that.", "id": "12b8ebx", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "{hi}! Found the laundry first go again. Twice in a row. That's a streak.", "id": "jpjp8j", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "{nick}! Sit a minute. I want to hear about your day. All of it.", "id": "15v9j03", "tone": "warm", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "There you are. I've been saving up things to tell you. Small things. Three.", "id": "1r4zj0w", "tone": "funny", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "{nick}. Good. The bunk feels right when everyone's back in it.", "id": "1c32w6l", "tone": "warm", "tier": [4, 4], "not": {"week1": "true"}},
       ],
       "hint": [
         {"text": "Got a minute? Not a big thing. A medium thing.", "id": "i0qvrz"},
@@ -20799,11 +20843,16 @@ const VOICE = {
         {"text": "Running club? Vance will be there. Come and stand between us.", "id": "dg31le", "tone": "funny", "tier": [2, 4], "trad": "running"},
         {"text": "Observatory after dinner? I've found a new star. Possibly a smudge.", "id": "161nf1j", "tone": "funny", "tier": [2, 4], "time": "evening"},
         {"text": "Quiz tonight! I'm useless at it. Will you be useless with me?", "id": "1qwgxck", "tone": "funny", "tier": [1, 4], "trad": "quiz"},
+        {"text": "Rest day walk? The long way round Deck 2. I'll show you the good windows.", "id": "ydutbh", "act": "off", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "Market's on! Come and look at things we can't afford? It's my favourite.", "id": "1xchfo9", "tone": "funny", "tier": [1, 4], "trad": "market"},
+        {"text": "Music jam tonight. I can't play anything. I clap. Come and clap with me?", "id": "ya3djg", "tone": "funny", "tier": [2, 4], "trad": "jam"},
       ],
       "joy": [
         {"text": "Observatory night! I've named three stars. Not officially. They don't know yet.", "id": "1n70fta", "tone": "funny", "tier": [1, 4]},
         {"text": "The Wren's passed more stars than I'll ever count. I'm trying to catch up.", "id": "1cxfb3u", "tier": [2, 4]},
         {"text": "Best bit of my week? Observatory night. Second best? Film night with the bunk.", "id": "108y8lp", "tone": "warm", "tier": [3, 4]},
+        {"text": "Naming stars! I'm on six. One's called Toast. It's a very reliable star.", "id": "1xi8cs8", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "When my brother's letter comes, I save it till bedtime. Like pudding.", "id": "11ff83p", "tone": "warm", "tier": [3, 4], "not": {"week1": "true"}},
       ],
       "life": [
         {"text": "I write to my little brother every week. I make the job sound exciting. It is, mostly.", "id": "2krso8", "tier": [1, 4]},
@@ -20816,6 +20865,10 @@ const VOICE = {
         {"text": "On the farm moon there was one road and three fences. Here there are hundreds of doors.", "id": "1ojbiai", "tier": [1, 4]},
         {"text": "My brother wants to be a pilot now. Last month a cook. I'm keeping up.", "id": "uthlno", "tone": "funny", "tier": [2, 4]},
         {"text": "I was scared I'd stay home for the rest of my life. So I signed up. Scared's useful.", "id": "19hbg8r", "tier": [4, 4]},
+        {"text": "My brother keeps my letters in a biscuit tin. He says it's nearly full.", "id": "sl5jzr", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "On the farm moon it rained on Tuesdays. Mostly. Grey, then wet, then grey.", "id": "12vekdg", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "I brought one jumper from home. It's itchy. I wear it every rest day.", "id": "1mt5mqa", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "I wrote down the first thing I saw from the shuttle window. It's in my locker.", "id": "lc7gq3", "tier": [3, 4], "not": {"week1": "true"}},
       ],
       "missed": [
         {"text": "I waited for you. That's all right. Something came up, I expect. Next time?", "id": "2ummtc"},
@@ -20834,6 +20887,14 @@ const VOICE = {
         {"text": "{dish}? Is that what it is? I'll say yes and eat it.", "id": "1eg9bm0", "tone": "funny", "act": "dinner"},
         {"text": "The bow windows! You can see where we're going. Well, where we're pointing.", "id": "wyhlmf", "place": "lounge"},
         {"text": "Hot water's still on! Quick, before it's character-building.", "id": "hqx5jj", "tone": "funny", "act": "wash"},
+        {"text": "Toast, tea, window. That's breakfast. I can't start a day without the window.", "id": "eeo9q9", "act": "breakfast", "not": {"week1": "true"}},
+        {"text": "Seconds, if there are any. Running club makes me hungry. Vance never seems hungry.", "id": "sf6316", "tone": "funny", "act": "dinner", "not": {"week1": "true"}},
+        {"text": "Rest day. Letter first. Then the window seat. Then I'll see. The window seat.", "id": "1ich3on", "tone": "funny", "act": "off", "not": {"week1": "true"}},
+        {"text": "Vance said \"gentle jog\". Vance has never jogged gently in his life.", "id": "12pmvie", "tone": "funny", "act": "gym"},
+        {"text": "The stern window's best after dinner. Everything's going away from you. Nicely.", "id": "ijxtij", "place": "junior_common_room", "not": {"week1": "true"}},
+        {"text": "The big tree's grown again. I measure it with my hand. Seven hands, now.", "id": "15kbsve", "place": "hydroponics_garden"},
+        {"text": "Everything comes out warm. Best smell on the ship. Nearly.", "id": "1c8zrv9", "place": "laundry"},
+        {"text": "Film night! I bring a blanket. Is that too much? Pell brings two.", "id": "iye9dl", "tone": "funny", "trad": "film"},
       ],
       "note": [
         {"text": "Came to find you. You were out. You're always out! Saving the ship, probably. See you at the bunk.", "id": "1il0ir0"},
@@ -20845,6 +20906,8 @@ const VOICE = {
       "rumour": [
         {"text": "Heard something on patrol. Is it gossip if it's Watch?", "id": "16zj0ox"},
         {"text": "I wasn't listening. I've just got very good ears.", "id": "h97cb", "tone": "funny"},
+        {"text": "Did you hear? New film this week. With a boat.", "id": "xqa9bg", "not": {"week1": "true"}},
+        {"text": "Chloe heard it first. So it's probably true.", "id": "1h2zgms", "tone": "funny", "not": {"week1": "true"}},
       ],
       "smalltalk": [
         {"text": "Is it left here? It's left. It's probably left.", "id": "j878ad", "tone": "funny"},
@@ -20852,6 +20915,11 @@ const VOICE = {
         {"text": "The long way's nicer. Honestly.", "id": "kbxfmy"},
         {"text": "I've folded my blanket three times. It's fine.", "id": "k4olui", "tone": "funny"},
         {"text": "Patrol. All quiet. Very quiet. Too quiet? No. Fine.", "id": "egcq5q", "tone": "funny", "act": "work"},
+        {"text": "Toast was perfect today. Just saying.", "id": "16s8ois", "not": {"week1": "true"}},
+        {"text": "Twenty-two windows. Twenty-three? Counting.", "id": "ch1vu8", "tone": "funny", "not": {"week1": "true"}},
+        {"text": "Is it Friday? It feels like a Friday.", "id": "m9ycw9", "not": {"week1": "true"}},
+        {"text": "Rest day. Window seat. No plans. Perfect.", "id": "1o647na", "act": "off"},
+        {"text": "Best window on the ship. Nobody believes me.", "id": "yxddvd", "place": "junior_common_room"},
       ],
       "tiles.dock": [
         {"text": "Was that three? It was! Was it?", "id": "1f6w6hf"},
@@ -21052,7 +21120,7 @@ const VOICE = {
         {"text": "Side two, track one. I know every word. I'll prove it. Don't check.", "id": "18k5v3b", "tone": "funny", "place": "musicroom"},
         {"text": "Tea corner's the best room on Deck 5. Kettle, biscuits, and nobody in a hurry.", "id": "1pqo3ke", "place": "teacorner", "not": {"week1": "true"}},
         {"text": "Lounge window. Tea. Somebody playing Tiles badly. That's me. I'm playing badly.", "id": "1eao8y0", "tone": "funny", "place": "lounge", "not": {"week1": "true"}},
-        {"text": "Observatory night! Tea flask, two biscuits, and a lot of looking up.", "id": "1ikvvbp", "trad": "observatory"},
+        {"text": "Observatory night! Tea flask, two biscuits, and a lot of looking up.", "id": "1ikvvbp", "trad": "observatory-night"},
       ],
       "rumour": [
         {"text": "Right. You'll want to hear this.", "id": "c4cwzy"},
@@ -24090,7 +24158,7 @@ const LINES = {
     {"text": "Quiz tonight. Our team's going to win. Probably not.", "id": "1t609j9", "tone": "funny", "deck": "4", "rank": "junior", "trad": "quiz"},
     {"text": "Film night. I'm bringing my blanket from the bunk.", "id": "1gafyuc", "deck": "4", "rank": "junior", "trad": "film"},
     {"text": "Music night. Is anyone borrowing my guitar? No? Good.", "id": "43yrt5", "deck": "4", "rank": "junior", "trad": "jam"},
-    {"text": "Observatory night. Wrap up warm. It isn't cold. Still.", "id": "1axzlu3", "deck": "4", "rank": "junior", "trad": "observatory"},
+    {"text": "Observatory night. Wrap up warm. It isn't cold. Still.", "id": "1axzlu3", "deck": "4", "rank": "junior", "trad": "observatory-night"},
     {"text": "Swap meet today. I'm swapping my old jumper.", "id": "1oqjp0y", "deck": "4", "rank": "junior", "trad": "market"},
     {"text": "It's my birthday. Somebody's hidden a cake. I can smell it.", "id": "17m6g47", "tone": "warm", "birthday": "me", "deck": "4", "rank": "junior"},
     {"text": "Birthday! I got a card from the whole bunk.", "id": "1wwq95", "tone": "warm", "birthday": "me", "deck": "4", "rank": "junior"},
@@ -24462,7 +24530,7 @@ const CONVOS = [
   {"id": "moirh", "tone": "warm", "act": "dinner", "place": "mess", "topic": "dinner", "who": "ueda-vera", "with": "varga-tariq", "lines": [{"who": "A", "text": "Did the post bag come?"}, {"who": "B", "text": "Next week, they say."}, {"who": "A", "text": "Six weeks, every time."}, {"who": "B", "text": "Makes the letters taste better."}]},
   {"id": "5basqi", "tone": "funny", "act": "dinner", "pair": "any+any", "place": "mess", "topic": "dinner", "trad": "quiz", "lines": [{"who": "A", "text": "Quiz after this. Are you on our team?"}, {"who": "B", "text": "Only if I'm not on the song round."}, {"who": "A", "text": "You're on the song round."}, {"who": "B", "text": "Then no."}]},
   {"id": "1yuwhnq", "tone": "funny", "act": "dinner", "pair": "any+any", "place": "mess", "topic": "dinner", "trad": "jam", "lines": [{"who": "A", "text": "Music night later."}, {"who": "B", "text": "Are you singing?"}, {"who": "A", "text": "Everyone's singing. Nobody agrees on the words."}]},
-  {"id": "3f4ipv", "tone": "warm", "act": "dinner", "pair": "any+any", "place": "mess", "topic": "dinner", "trad": "observatory", "lines": [{"who": "A", "text": "Observatory after dinner?"}, {"who": "B", "text": "Bring a flask."}, {"who": "A", "text": "And biscuits."}, {"who": "B", "text": "Obviously biscuits."}]},
+  {"id": "3f4ipv", "tone": "warm", "act": "dinner", "pair": "any+any", "place": "mess", "topic": "dinner", "trad": "observatory-night", "lines": [{"who": "A", "text": "Observatory after dinner?"}, {"who": "B", "text": "Bring a flask."}, {"who": "A", "text": "And biscuits."}, {"who": "B", "text": "Obviously biscuits."}]},
   {"id": "1gdvnb9", "tone": "funny", "act": "dinner", "pair": "friend", "place": "mess", "topic": "dinner", "trad": "film", "lines": [{"who": "A", "text": "Film night. Is it the long one?"}, {"who": "B", "text": "It's always the long one."}, {"who": "A", "text": "I'll bring the big cushion."}, {"who": "B", "text": "I'll bring the other big cushion."}]},
   {"id": "1i7xa16", "tone": "funny", "act": "dinner", "pair": "any+any", "place": "mess", "topic": "dinner", "trad": "running", "lines": [{"who": "A", "text": "Running club after this."}, {"who": "B", "text": "After all this pudding?"}, {"who": "A", "text": "Especially after."}, {"who": "B", "text": "Then I'll walk. Briskly."}]},
   {"id": "lbdmk7", "tone": "funny", "act": "dinner", "pair": "any+any", "place": "mess", "season": "sowing", "topic": "dinner", "lines": [{"who": "A", "text": "Have you planted yours?"}, {"who": "B", "text": "Yesterday. In a pot on the windowsill."}, {"who": "A", "text": "Mine's up already."}, {"who": "B", "text": "Show-off."}]},
