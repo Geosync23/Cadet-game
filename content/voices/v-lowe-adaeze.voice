@@ -1,0 +1,12 @@
+@voice v-lowe-adaeze
+// Writer 2, batch 8: a short card for a short-stay visitor (GUESTS in section 9). No pronouns (not in facts.md).
+tpl: steady
+talk: Calm and capable; between postings and itching to help; watches stars through any window going.
+hi: Morning | Hello
+bye: See you round | Back to the window
+yes: Happy to | Sure
+thanks: Thanks | Kind of you
+wow: Oh, tidy
+sigh: Ah, well
+likes: star | made
+nick: - | {me} | {me} | {me} | {me}

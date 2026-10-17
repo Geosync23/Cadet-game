@@ -33,7 +33,8 @@ inventions in 11); `content/briefs.md`; `plans/pillar4-notes.md` (the user's wor
 | 4 | Calder (116) and Kovac (106): seasons, rep/you, callbacks on arc memories, gifts, cues, visits, notes, bubbles |
 | 5 | Vance, Marrow, Holt to ~110 the same way |
 | 6 | 322 smalltalk/rumour bubbles for 46 people, at most one in five about work (the user's note: chatter felt all about work). Pushed ada7567; head writer 3 to merge |
-| 7 | ~40 named overheard pairs (`who:`/`with:` plus `place:`/`deck:`) appended to `overheard/works|watch|survey|command.lines`. Pushed with this note |
+| 7 | ~40 named overheard pairs (`who:`/`with:` plus `place:`/`deck:`) appended to `overheard/works|watch|survey|command.lines` (8c958d8) |
+| 8 | Short voice cards and ~9 own lines each for the first 16 short-stay visitors (`content/voices/v-*.voice`, `content/lines/v-*.lines`: Jaramillo to Quinlan, arriving days 5-114). Last batch of this session |
 
 ## Rules that bit (the head writers' notes)
 
@@ -59,9 +60,12 @@ inventions in 11); `content/briefs.md`; `plans/pillar4-notes.md` (the user's wor
 
 ## What's next
 
-1. Head writer 3's notes on batches 6 and 7.
-2. **Visitor cards** for the 16 short-stay guests (`GUESTS` `v-...` ids in section 9 of the game); ask the head writer if
-   they want cards or only `banks/guests.lines` lines.
+1. Head writer 3's notes on batches 7 and 8 (batch 6 merged in 0.48.23 with the scarf bubble gated on `mem:moment.torres.scarf`).
+2. **The other 15 visitors** (`GUESTS` in section 9 arriving from day 116: Tamura, Kalnins, Delacroix, Ferro, Upton,
+   Ekwueme, Mercer, Kessler, Ellery, Rocha, Aalto, Gunn, Dunmore, Grimaldi, Abbas, Marsh) need cards and lines the same
+   way: a short card (tpl, talk, hi/bye/yes/thanks/wow/sigh, likes, nick) and ~9 lines (greet stranger x2 + acquaintance,
+   chat x2, near by habit/place, bye, smalltalk x2). Batch 8's files are the model. No pronouns (none in facts.md).
+   Several share a role and bio (cartographers, retired captains, relief doctors): give each a different voice.
 3. Newcomer reply sets: on hold until social's guide script format (Part 8b).
 4. Goodbyes and letters for my people (later batches).
 
