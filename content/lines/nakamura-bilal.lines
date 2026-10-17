@@ -29,7 +29,7 @@
 // ---- Writer 2, batch 2: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue, hint, about)
 == greet
 ? tier>=acquaintance time:morning
-- Morning, {me}. Skipped breakfast. Ran instead. My twin ran further. By letter.   #funny
+- Morning, {me}. Breakfast standing up, then a run. My twin ran further. By letter.   #funny
 ? tier>=acquaintance warmth:cold
 - {me}. It's been a while. The basil's grown two inches. You've missed a lot.   #funny
 

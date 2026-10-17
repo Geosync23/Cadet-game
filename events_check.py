@@ -46,7 +46,7 @@ PLANS = r"""(days => {
     const on = eventsOn(d), wd = weekday(d), yd = shipYearDay(d), row = { d, wd: WEEKDAYS[wd].slice(0, 3), ev: [] };
     // due exactly when the table says
     for (const ev of SHIP_TRADITIONS) {
-      const w = ev.when, due = !(ev.flag && !(typeof flag === 'function' && flag(ev.flag))) && (w.birthday ? schedPeople().some(p => birthdayOf(p) === yd && (typeof aboard !== 'function' || (aboard(p, d) && (typeof guestStay !== 'function' || guestStay(p, d) !== 'leave')))) : DUE.has(ev.id) ? DUE.get(ev.id).has(d) : (w.weekday === wd || (w.every && d % w.every === w.on) || w.yearDay === yd)) && !eventPauses(ev, d) && !(EV_DROPPED.get(d) || []).includes(ev.id);   // a ship-wide event's quiet days; the voice budget
+      const w = ev.when, due = !(ev.flag && !(typeof flag === 'function' && flag(ev.flag))) && (w.birthday ? schedPeople().some(p => birthdayOf(p) === yd && (typeof aboard !== 'function' || (aboard(p, d) && (typeof guestStay !== 'function' || guestStay(p, d) !== 'leave')))) : w.rotation != null ? ROSTER_ROTATIONS.some(r => (w.rotation === 'after' ? d > r.day && d <= r.day + 7 && weekday(d) === w.weekday : d === r.day + w.rotation) && (w.rotation !== 'after' && w.rotation < 0 ? r.out : r.in).some(id => { const p = schedPeople().find(q => q.id === id); return p && (typeof aboard !== 'function' || aboard(p, d)); })) : DUE.has(ev.id) ? DUE.get(ev.id).has(d) : (w.weekday === wd || (w.every && d % w.every === w.on) || w.yearDay === yd)) && !eventPauses(ev, d) && !(EV_DROPPED.get(d) || []).includes(ev.id);   // a ship-wide event's quiet days; the voice budget
       if (due !== on.some(e => e.id === ev.id)) out.bad.push(d + ' ' + ev.id + (due ? ' due but not on' : ' on but not due'));
     }
     const S = schedData(), went = {}, places = {};
@@ -382,7 +382,7 @@ with sync_playwright() as pw:
         const ev = SHIP_TRADITIONS.find(e => e.id === t.id); if (!ev || !ev.baked) { out.bad.push('baked ' + t.id + ' not loaded'); continue; }
         let n = 0; for (let d = 0; d <= 364; d++) if (eventsOn(d).some(e => e.id === t.id)) n++;
         if (!n && !t.when.birthday && !t.flag) out.bad.push('baked ' + t.id + ' never happens in a whole year');   // a flagged one waits for its story beat (tested above)
-        const d = [...(out.count[t.id] || [])].find(x => x >= 1) || 1, e = eventsOn(d).find(x => x.id === t.id) || { ev, day: d, names: '', first: '', from: ev.at[0], honorees: [] };
+        const d = [...(out.count[t.id] || [])].find(x => x >= 1) || [...Array(365).keys()].find(x => x >= 1 && eventsOn(x).some(e => e.id === t.id)) || 1, e = eventsOn(d).find(x => x.id === t.id) || { ev, day: d, names: '', first: '', from: ev.at[0], honorees: [] };
         for (const k of ['mail', 'ask', 'here']) if ((t.text || {})[k] && !evText(ev[k], e, schedPeople()[0])) out.bad.push(t.id + ': no ' + k + ' line could be filled');
         for (const [c] of t.who.concat(Array.isArray(t.anim) ? t.anim : [])) for (const p of schedPeople()) tradIs(c, p, d, e, t.host);   // every word resolves (TRAD_ERRORS)
         out.baked.push({ id: t.id, from: ev.from, mail: evText(ev.mail, e), ties: t.ties || null });
@@ -668,17 +668,32 @@ with sync_playwright() as pw:
     if a['guests'][0] != 'teshavi:2-7' and a['guests'][0] != 'teshavi:-': fail(f"the guests' days: {a['guests']}")
     if 'Speaker Teshavi' not in V['names'] or 'Envoy Saruth' not in V['names']: fail(f"the greeting's cast: {V['names']}")
 
-    # 9b. tradOn (0.34.37, social B's calls home): letters evening's window in absolute ship minutes, null outside it
-    T = g.ev("""(() => { const d = [...Array(28).keys()].map(x => x + 1).find(x => eventsOn(x).some(e => e.id === 'letters')); if (!d) return null;
-      const e = eventsOn(d).find(x => x.id === 'letters'), B = (d - 1) * 1440;
-      return { d, at: [B + e.from - 1, B + e.from, B + e.to - 1, B + e.to].map(t => tradOn('letters', t)), other: tradOn('letters', B + 600), none: tradOn('nope', B + e.from) }; })()""")
-    print('tradOn letters:', T and T['d'], T and [x and (x['from'], x['to']) for x in T['at']])
-    if not T or T['at'][0] or not T['at'][1] or not T['at'][2] or T['at'][3] or T['other'] or T['none'] or T['at'][1]['day'] != T['d']: fail(f"tradOn('letters'): {T}")
+    # 9b. tradOn (0.34.37, social B's calls home): the Sunday long table's window (Letters evening, its first user, went in 0.62.0) in absolute ship minutes, null outside it
+    T = g.ev("""(() => { const d = [...Array(28).keys()].map(x => x + 1).find(x => eventsOn(x).some(e => e.id === 'sunday-table')); if (!d) return null;
+      const e = eventsOn(d).find(x => x.id === 'sunday-table'), B = (d - 1) * 1440;
+      return { d, at: [B + e.from - 1, B + e.from, B + e.to - 1, B + e.to].map(t => tradOn('sunday-table', t)), other: tradOn('sunday-table', B + 600), none: tradOn('nope', B + e.from) }; })()""")
+    print('tradOn sunday-table:', T and T['d'], T and [x and (x['from'], x['to']) for x in T['at']])
+    if not T or T['at'][0] or not T['at'][1] or not T['at'][2] or T['at'][3] or T['other'] or T['none'] or T['at'][1]['day'] != T['d']: fail(f"tradOn('sunday-table'): {T}")
 
     # 9c. upcomingTraditions' deck and room (0.34.42, the device's Go there): a deck number, and a room key on that deck or null
     U = g.ev("upcomingTraditions(0, 8 * 1440).map(x => [x.id, x.deck, x.room, Number.isInteger(x.deck) && (x.room === null || !!(DECKS[x.deck].rooms || {})[x.room])])")
     print('upcomingTraditions, days 1-8:', len(U), 'with a room key:', sum(1 for u in U if u[2]))
     if not U or not all(u[3] for u in U) or not any(u[2] for u in U): fail(f"upcomingTraditions' deck/room: {[u for u in U if not u[3]][:5]}")
+
+    # 9d. crew rotation traditions (0.34.43): the farewell supper the day before each rotation day (its leavers), the
+    # crew welcome tea the first Friday after (its arrivals); {names} filled; the honorees' friends, department, cabin
+    RT = g.ev("""(() => ROSTER_ROTATIONS.map(r => { const row = { day: r.day };
+      for (const [id, d, ids] of [['farewell-supper', r.day - 1, r.out], ['crew-welcome-tea', r.day + 1 + (4 - weekday(r.day + 1) + 7) % 7, r.in]]) {
+        const e = eventsOn(d).find(x => x.id === id), go = e ? schedPeople().filter(p => planDay(p, d).some(s => s.tag && s.tag.startsWith('ev-' + id))) : [];
+        row[id] = e ? { d, hon: e.honorees.map(p => p.id).sort().join(',') === ids.slice().sort().join(','), names: e.names, mail: !!(e.ev.mail && e.ev.mail(e)), went: go.length,
+          honWent: go.filter(p => e.honorees.includes(p)).map(p => p.id + (p.shift === 'night' ? '(night)' : '')), others: go.filter(p => !e.honorees.includes(p)).length } : { d, missing: true, dropped: (EV_DROPPED.get(d) || []).includes(id) };
+      }
+      return row; }))()""")
+    for r in RT:
+        print(f"  rotation day {r['day']}: " + '; '.join(f"{k} day {v['d']}: " + ('MISSING' if v.get('missing') else f"{v['names']} ({'honorees ok' if v['hon'] else 'WRONG honorees'}), went {v['went']}, honorees {v['honWent']}") for k, v in r.items() if k != 'day'))
+        for k, v in r.items():
+            if k == 'day': continue
+            if v.get('missing') or not v['hon'] or not v['mail'] or v['others'] < 2: fail(f"{k} for the rotation on day {r['day']}: {v}")
 
     # 10. the bridge invite (0.34.35), last: it skips on to day 50
     I = g.ev(INVITE)
@@ -691,6 +706,18 @@ with sync_playwright() as pw:
     if I['after'] != ['bridgeInvite@22 kept'] or not I['on23'] or not I['going']: fail(f"after the invite: {I['after']}, bridge hour on day 23 {I['on23']} ({I['going']} going)")
     if any('An invitation (notes)' in x for x in I['mails1']) or not any(x.startswith('22 18:00') and 'Bridge hour' in x for x in I['mails1']): fail(f"the Mail around a played invite: {I['mails1']}")
     if I['slept'] != ['bridgeInvite@50 missed'] or not I['sleptFlag'] or not any('An invitation (notes)' in x for x in I['mails2']): fail(f"a slept-through invite: {I['slept']} flag {I['sleptFlag']} {I['mails2']}")
+
+    # 11. a New game (0.34.50; reviewer 1b): section 18's per-game state starts again (last: it restarts the game)
+    NG = g.ev("""(() => {
+      SHIP.commendations.push({ event: 'ionStorm', day: 16 }); skipTo(18 * 1440 + 900);   // books the Captain's table (day 20)
+      SHIP.traces.push('framedMenu'); SHIP.events.sent.push('quiz@4'); SHIP.events.votes['tasting-table@3'] = 'x'; flagSet('bridge.invited');
+      const before = { occ: SHIP.occasions.length, com: SHIP.commendations.length, tr: SHIP.traces.length };
+      newGameStart(false); skipTo(3 * 1440 + 600);
+      return { before, occ: SHIP.occasions.map(o => o.key), com: SHIP.commendations.length, ev: SHIP.event, log: SHIP.eventLog.length, tr: SHIP.traces.slice(),
+        sent: SHIP.events.sent.filter(k => !/@[1-5]$/.test(k)), votes: Object.keys(SHIP.events.votes), meet: MEETINGS.filter(m => m.event === 'occasion').map(m => m.id), flag: !!flag('bridge.invited'), day: Math.floor(shipNow() / 1440) + 1 };
+    })()""")
+    print('New game: before', NG['before'], '| after: occasions', NG['occ'], 'commendations', NG['com'], 'traces', NG['tr'], 'old Mail keys', NG['sent'], 'votes', NG['votes'], 'occasion meetings', NG['meet'], 'flag', NG['flag'], 'day', NG['day'])
+    if not NG['before']['occ'] or NG['occ'] or NG['com'] or NG['ev'] or NG['log'] or NG['tr'] or NG['sent'] or NG['votes'] or NG['meet'] or NG['flag']: fail(f"a New game kept section 18's state: {NG}")
 
     if g.errors: fail(f"console: {g.errors[:4]}")
     g.b.close()

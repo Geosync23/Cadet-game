@@ -1,11 +1,13 @@
 @theme loss
 // Writer-commons, themes batch. From content/arcs/outlines.md, "The struggle themes". Any department, either shift.
-// Fill-ins assumed: {home} a place ("Lisk"), {family} with "my" ("my gran"), {hobby} an activity ("painting"),
+// Fill-ins: {home} a place ("Lisk"), {kin} a living relative with "my" ("my gran"), {lost} (canon deaths only, with "my"),
+// {hobbyNoun} an activity noun ("knitting"),
 // {since} a length of time ("five years"). A beat that names one lists it in needs:, so people without it skip it.
 // Gentle grief, long ago; never recent, never on screen. Beat 3 is a small ritual with you, and hopeful.
 
 == beat 1
 tone: light
+needs: lost
 hint: Don't mind me today. It's just a quiet sort of day.
 mem: quietday
 them: Quiet day for me. Not a bad one. Just quiet. I get one of these every year.
@@ -19,10 +21,10 @@ them: Thanks. See you tomorrow. The noisy me.
 
 == beat 2
 tone: heartfelt
-needs: family
+needs: lost
 hint: You asked about my quiet day once. Sit with me? I'll tell you.
 mem: who
-them: The quiet day. It's the day we lost {family}. Years ago now. I was younger than you.   [sigh]
+them: The quiet day. It's the day we lost {lost}. Years ago now. I was younger than you.   [sigh]
 them: They taught me to whistle. Badly. We were both terrible at it. Best part of every week.
 them: It doesn't hurt like it did. It's just a day I keep for them.
 ? choice
@@ -35,16 +37,16 @@ them: There. That's them. Now you know them a little bit too.
 
 == beat 3
 tone: resolution
-needs: family
+needs: lost
 hint: It's the quiet day again. Would you come and sit by the window with me?
 mem: ritual
 them: Every year I sit somewhere with a view and remember them. This year I wanted company.
-them: There. That's all it is. A window, a cup of tea, and a few minutes thinking of {family}.
+them: There. That's all it is. A window, a cup of tea, and a few minutes thinking of {lost}.
 them: I think they'd have liked you. They liked people who stay for the quiet bits.
 ? choice
 * I'll come every year, if you like.   flavour:practical mem:everyyear
   them: Would you? Yes. I'd like that very much.
   + them: Every year. Yes. Then it's not a sad day any more. It's a day with company in it. And them.
 * Raise your cup to them?   flavour:share
-  them: To {family}. Who laughed at everything.   [laugh]
+  them: To {lost}. Who laughed at everything.   [laugh]
 them: Thank you. It feels lighter this year. It's the company.

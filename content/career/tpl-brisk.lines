@@ -1,0 +1,30 @@
+@template brisk
+// Head writer 4: career lines in the brisk voice (see career.lines for the flags).
+
+== career.missed
+? tier>=colleague
+- You weren't on shift. Problem? Tell me. Then fix it.
+
+== worried.chief
+? tier>=friend
+- Chief's had her word. Good. Now: eight sharp. Every day.
+
+== worried.captain
+? tier>=friend
+- Ready room. That's serious. Eight o'clock tomorrow. No excuses.   #serious
+
+== worried.last
+? tier>=friend
+- Listen. One shift. Tomorrow. That's all it takes to stop this.   #serious
+
+== career.up
+? tier>=friend
+- Saw your name on the board. Turned in. Good.
+
+== farewell.eve
+? tier>=friend
+- Tomorrow. Right. I'm not good at this. I'm sorry. Truly.   #serious
+
+== farewell.day
+? tier>=friend
+- Go well, {nick}. Do it right next time. You can.   #warm

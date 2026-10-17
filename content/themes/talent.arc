@@ -1,14 +1,15 @@
 @theme talent
 // Writer-commons, themes batch. From content/arcs/outlines.md, "The struggle themes". Any department, either shift.
-// Fill-ins assumed: {home} a place ("Lisk"), {family} with "my" ("my gran"), {hobby} an activity ("painting"),
+// Fill-ins: {home} a place ("Lisk"), {kin} a living relative with "my" ("my gran"), {lost} (canon deaths only, with "my"),
+// {hobbyNoun} an activity noun ("knitting"),
 // {since} a length of time ("five years"). A beat that names one lists it in needs:, so people without it skip it.
 
 == beat 1
 tone: light
-needs: hobby
-hint: Oh! I didn't see you there. That? That's nothing. Just a bit of {hobby}.
+needs: hobbyNoun
+hint: Oh! I didn't see you there. That? That's nothing. Just a bit of {hobbyNoun}.
 mem: caught
-them: Oh! You caught me. I do a bit of {hobby}. When nobody's looking. Mostly when nobody's looking.   [laugh]
+them: Oh! You caught me. I do a bit of {hobbyNoun}. When nobody's looking. Mostly when nobody's looking.   [laugh]
 them: It's nothing. It's just for me.
 ? choice
 * Can I see?   flavour:listen mem:asked
@@ -19,11 +20,11 @@ them: Don't tell anyone. Not because it's a secret. It's just mine.
 
 == beat 2
 tone: heartfelt
-needs: hobby
+needs: hobbyNoun
 hint: You asked to see. All right. Only you. Don't say anything till I'm ready.
 mem: shown
 them: All right. Here. This is what I've been doing. Don't laugh. Laugh if it's funny.
-them: I've done {hobby} since I was small. Nobody aboard's ever seen it. You're the first.   [nod]
+them: I've done {hobbyNoun} since I was small. Nobody aboard's ever seen it. You're the first.   [nod]
 them: I'm always scared it isn't any good. Then I do it anyway.
 ? choice
 * It's really good. I mean it.   flavour:cheer mem:good
@@ -35,11 +36,11 @@ them: Thank you for looking. Properly looking. That's rare.
 
 == beat 3
 tone: resolution
-needs: hobby
+needs: hobbyNoun
 hint: I did it. I showed people. Come and see. No. Come and see now.
 mem: show
 them: I showed them. A little show in the common room. People came. People stayed!   [laugh]
-them: Someone asked to learn. Me, teaching {hobby}. Imagine.
+them: Someone asked to learn. Me, teaching {hobbyNoun}. Imagine.
 them: And this one's for you. I made it for you. Don't make a fuss. Make a small fuss.
 ? choice
 * I'll keep it forever.   flavour:listen mem:keep

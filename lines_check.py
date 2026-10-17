@@ -22,11 +22,14 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 
 TOKENS = {'hi', 'bye', 'yes', 'thanks', 'wow', 'sigh', 'nick'}
 PLACEHOLDERS = {'me', 'name', 'first', 'friend', 'best', 'rival', 'partner', 'mentor', 'mentee', 'boss', 'thing', 'trad',
-                'machine', 'room', 'deck', 'dish', 'weekday', 'home', 'family', 'hobby', 'since', 'other'}
+                'machine', 'room', 'deck', 'dish', 'weekday', 'home', 'family', 'hobby', 'since', 'other',
+                'kin', 'lost', 'hobbyNoun', 'missed'}   # kin, lost: "my gran", "my wife" (with the my); hobbyNoun: "knitting", "the piano"
+PAIR_WORDS = {'same', 'bunk', 'friend', 'rival', 'senior', 'couple', 'best', 'mentor', 'mentee'}   # section 22's linePair
+NEEDS = {'home', 'family', 'hobby', 'since', 'kin', 'lost', 'hobbyNoun'}   # what a theme beat's needs: can name
 TRAD_PLACEHOLDERS = {'trad', 'host', 'names', 'first', 'season', 'weekday', 'time'}   # tradition texts: only these (plans/trad-format.md, tradFill)
 VALUES = {
     'warmth': {'cold', 'warm'},
-    'bond': {'best', 'friends', 'friend', 'rivals', 'rival', 'mentor', 'mentee', 'drifting', 'couple', 'partner'},   # section 20's BOND_KINDS and bondOf's aliases 'mood': {'low', 'ok', 'high'},
+    'bond': {'best', 'friends', 'friend', 'rivals', 'rival', 'mentor', 'mentee', 'drifting', 'couple', 'partner', 'missed'},   # section 20's BOND_KINDS and bondOf's aliases 'mood': {'low', 'ok', 'high'},
     'rep': {'new', 'known', 'well', 'theirs'}, 'ship.work': {'low', 'ok', 'high'}, 'ship.kindness': {'low', 'ok', 'high'},
     'ship.spirit': {'low', 'ok', 'high'}, 'week1': {'true', 'false'}, 'leaving': {'soon', 'you'}, 'newhere': {'true', 'false'},
     'guide': {'true', 'false'},
@@ -37,7 +40,7 @@ VALUES = {
     'act': {'work', 'breakfast', 'dinner', 'meal', 'gym', 'wash', 'sleep', 'leisure', 'off', 'free', 'event', 'shop', 'call'},
 }
 BUBBLE_KINDS = {'smalltalk', 'rumour', 'overheard'}        # spoken over heads: 60 characters (90 at most)
-LONG_KINDS = ('story', 'arc', 'moment', 'note', 'trad')    # chat lines, moments, Mail: 140
+LONG_KINDS = ('story', 'arc', 'moment', 'note', 'trad', 'career')    # chat lines, moments, Mail: 140
 CARD = 90
 HOME_IDS = {'mum', 'gran', 'jo', 'sam'}                  # your people back home (content/home/<id>.call)
 NAME_W = 9                                                 # a filled-in name counts as this many characters
@@ -188,6 +191,21 @@ def main(argv):
     known_words |= {w for c in out['HOME_CONTACTS'].values() for w in c.get('name', '').split()}
     for where, b, who in moment_beats():
         src = 'home' if where.startswith('call ') else 'moment'
+        # a roster word used in a theme beat must be in its needs: (else social lets in people without it, and those lines
+        # drop: a loss beat for someone who lost nobody); in story arcs (one known person) only {lost} must be
+        if src == 'moment':
+            texts = [b.get(k) or '' for k in ('hint', 'keepsake', 'learn')] + [(b.get('after') or {}).get('mail', {}).get('body', '')]
+            for l in b['lines']:
+                texts += [l['text']] if 'text' in l else [c[r]['text'] if r in ('reply', 'warm') else c['text'] for c in l['choice'] for r in ('text', 'reply', 'warm') if r == 'text' or r in c]
+            used = set(re.findall(r'\{(home|since|kin|lost|hobbyNoun)\}', ' '.join(texts)))
+            want = used if where.startswith('theme ') else used & {'lost'}
+            for n in sorted(want - set(b.get('needs') or [])):
+                errors.append(f'{where}: uses {{{n}}} but its needs: lacks {n} (people without it would get this beat with the line missing)')
+        for n in b.get('needs') or []:
+            if n not in NEEDS:
+                errors.append(f'{where}: needs: {n} is not one of {", ".join(sorted(NEEDS))}')
+            elif src == 'moment' and n in ('family', 'hobby'):
+                errors.append(f'{where}: needs: {n}: use {"kin or lost" if n == "family" else "hobbyNoun"} (short, line-ready; the roster\'s {n} is a description)')
         if who not in people and who != 'them' and who not in home_ids:
             errors.append(f'{where}: who "{who}" is not a crew member or guest')
         allx.append((where, 'hint', {'text': b['hint'], 'id': where}, None, src)) if b.get('hint') else None
@@ -212,8 +230,8 @@ def main(argv):
         for n, c in enumerate(cs, 1):
             if c.get('when'):
                 allx.append((f'call home.{cid} chat {n}', 'moment', dict(c['when'], text='', id=f'{cid}.chat{n}'), None, 'home'))
-            if not any(x.get('send') for x in c['lines']):
-                warns.append(f'call home.{cid} chat {n}: no "? send" (you never get to tell them anything)')
+            if any(x.get('send') for x in c['lines']):     # calls are one-sided since 0.62.0 (the user): you never tell them anything
+                warns.append(f'call home.{cid} chat {n}: a "? send" line (calls are one-sided now; it is left out)')
             for x in c['lines']:
                 if 'text' in x:
                     allx.append((f'call home.{cid} chat {n}', 'moment', {'text': x['text'], 'id': f'{cid}.chat{n}'}, None, 'home'))
@@ -247,6 +265,10 @@ def main(argv):
         t, tag = e['text'], f'{where} [{kind}] "{e["text"][:50]}"'
         if not t and src not in ('moment', 'home'):
             continue
+        if src == 'moment' and re.search(r'\{(family|hobby)\}', t):   # story arcs and themes: the roster's descriptions don't fit a sentence
+            errors.append(f'{tag}: {{family}} / {{hobby}} read as descriptions ("late wife, who I still talk about"): use {{kin}} or {{lost}} ("my gran") or {{hobbyNoun}} ("knitting")')
+        if re.search(r'\bmy \{(kin|lost)\}', t, re.I):
+            errors.append(f'{tag}: {{kin}} and {{lost}} include the "my" ("my gran"): write {{kin}}, not "my {{kin}}"')
         for tok in re.findall(r'\{([^}]*)\}', t):
             if (tok not in TRAD_PLACEHOLDERS) if kind.startswith('trad.') else (tok not in TOKENS | PLACEHOLDERS):
                 errors.append(f'{tag}: unknown token {{{tok}}}')
@@ -281,6 +303,8 @@ def main(argv):
                 if k == 'pair':
                     for x in (v if isinstance(v, list) else [v]):
                         for alt in str(x).split('|'):
+                            if '+' not in alt and alt not in PAIR_WORDS:
+                                errors.append(f'{tag}: pair:{alt} is not x+y or one of {", ".join(sorted(PAIR_WORDS))}')
                             for side in (alt.split('+') if '+' in alt else []):
                                 if side not in people and side not in VALUES['dept'] and side not in VALUES['rank'] and side != 'any':
                                     errors.append(f'{tag}: pair:{alt}: "{side}" is not a department, rank, crew id or any')

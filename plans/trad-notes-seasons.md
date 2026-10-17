@@ -17,14 +17,14 @@ Tone throughout: light and cozy; a few warm lines; nothing sad for long (the use
 | New hand's tea | `new-hands-tea` 480 | your first Friday (5) | Works tea corner, 18:40-19:30 | **Merged with Works Friday tea:** that Friday the weekly tea becomes yours (same deck and time; the rarer wins). Calder hangs your mug on the rack, and it stays there (`trace: mugYours`). |
 | One week aboard | `one-week-aboard` 481 | your first Sunday (7) | bow lounge, 17:15-17:55 | Calder's Mail, plus a tea with Zeke Torres straight after his shift (he works day 7 until 17:00 in 0.60.1's roster; Pell and Tomas are on shift: reviewer 2). It ends before 18:00, so it doesn't take an evening slot (the budget counts traditions running past 18:00). |
 | Four weeks aboard | `four-weeks-aboard` 482 | your fourth Friday (26) | Works tea corner, 18:40-19:30 | **Merged with Works Friday tea** (it replaces it that Friday): the Works team's cake. On day 26 (the 4th Friday), not day 28, so it can be at Friday tea. |
-| Farewell supper | `farewell-supper` 483 | the evening before a rotation day | mess, 18:00-19:20 | **Draft** (`farewell-supper.trad-draft`, not baked): needs a rotation rhythm (below). |
-| New hand's tea, for new crew | `crew-welcome-tea` 484 | the first Friday after a rotation day | mess, 18:40-19:30 | **Draft** (`crew-welcome-tea.trad-draft`): the plan's "newcomers get their own new hand's tea". Needs the same rhythm. |
+| Farewell supper | `farewell-supper` 483 | the Saturday before each rotation day (6 a year) | mess, 18:00-19:20 | Baked in 0.34.43 (`when: rotation -1`; honorees are the leavers). Long tables (`ties: decor longTables`, the weekly Sunday table's prop). The budget lets it replace observatory night that Saturday; I accept that, 6 times a year. |
+| New hand's tea, for new crew | `crew-welcome-tea` 484 | the Friday after each rotation day | mess, 18:40-19:30 | Baked in 0.34.43 (`when: rotation friday`; honorees are the arrivals). The budget drops the jam that Friday; I accept that, 6 times a year. |
 
 Not added: anything else for the seasons. Each season already has Sowing morning; Greening, Harvest and Lanterns each get one more. Sowing has none, since it has Founding Day (100, just after it ends). Founding Day and the quiet watch stay hand-written in section 18 (the engineer's).
 
 ## Asks of the traditions engineer (code or checks)
 
-1. **A rotation rhythm** for the two drafts: `when: rotation -1` (the day before each rotation day) and `when: rotation friday` (the first Friday after one), read from the sim engineer's / crew designer's rotation calendar. The honorees are that rotation's leavers (`-1`) or arrivals (`friday`), so `{names}` and `{first}` fill like a birthday's. New `who` words: `friends-of-honoree` (affinity 40+ with any honoree, like `friends-of-host`), `dept-of-honoree`, `bunk-of-honoree` (the birthday's own department and bunkmate rules). When it's in, I rename the drafts to `.trad` and check them. (Checked now with a stand-in rhythm: both parse.)
+1. **Rotation:** done (0.34.43): `when: rotation -1` / `rotation friday`, rotation honorees, and the words friends-of-honoree, dept-of-honoree, bunk-of-honoree. Texts use {names} ("A, B and C") where there may be several, {first} for one-to-one lines.
 2. **`events_check.py`'s walk-sim of works-tea on day 5** now fails ("works-tea not on day 5"): new hand's tea replaces it on day 5 by design. Swap that sim to `new-hands-tea` on day 5 (or `works-tea` on day 12). Same on day 26 (four weeks aboard).
 3. **Midtour and Year's end letters:** joining Midtour sets a flag (your letter written, and the day); at Year's end the player gets a Mail "A letter from you" (from Matthias Oduya), whether or not you go. The letter is one of a few seeded templates that name what was true at Midtour (your Works reputation band, a friend's name, the season). The writers can write the templates; you say where they go. If you never went to Midtour, no letter: Oduya's Mail just says "Next year, then."
 4. **The tally** for the harvest supper: `harvest-best`, choices tomatoes, beans, squash, herbs, kept for a week. The winner could be planted more next season (a nice-to-have for the galley engineer's garden; the result as news is enough).
@@ -38,7 +38,7 @@ Not added: anything else for the seasons. Each season already has Sowing morning
 - **First-fruit supper (day 134):** `dish=first-fruits`, a small bowl on each mess table at dinner (the first crop of Greening's beds). `ties: garden harvest` that day.
 - **Harvest supper (day 231):** `dish=harvest-supper batch=60`, a dinner all from the garden, plus a pie after (`cake: yes`: a pie, not a cake, if that's easy to tell apart).
 - **Four weeks aboard (day 26):** `cake: yes`, but the cake goes to the **Works tea corner (Deck 5)** at 18:40, not the mess. It's the only cake that isn't in the mess.
-- **Farewell supper (draft):** `dish=favourite`: the leaver's favourite dish if the roster has one (`loves`), otherwise the Friday treat.
+- **Farewell supper:** `dish=favourite`: the leaver's favourite dish if the roster has one (`loves`), otherwise the Friday treat.
 - **Year's end (day 364):** `cake: yes` after the reading.
 
 ## Asks of the deck architect (decor: at most 6 draw calls, only on its deck, only during its window)
@@ -66,11 +66,11 @@ Nothing for Midtour or One week aboard (people at their seats are enough).
 
 ## The texts
 
-Every tradition has a Mail, 2-4 `ask`, 2-4 `here`, 1-2 `thanks` and 1-3 `chatter`. Placeholders: `{time}` and `{season}` only (plus `{names}`/`{first}` in the drafts). No crew pronouns: the roster doesn't record them, so lines use names or none. Lines that name the host are skipped when the host says them (section 18's rule), so each section has lines without names.
+Every tradition has a Mail, 2-4 `ask`, 2-4 `here`, 1-2 `thanks` and 1-3 `chatter`. Placeholders: `{time}` and `{season}` only (plus `{names}`/`{first}` in the rotation ones). No crew pronouns: the roster doesn't record them, so lines use names or none. Lines that name the host are skipped when the host says them (section 18's rule), so each section has lines without names.
 
 ## How it was checked (before every push)
 
 - `python3 plans/trad_parse.py`: 9 traditions OK.
 - `python3 content_gen.py --check`: OUT OF DATE in the repo's own game file. That's expected, since this seat never touches the game. Baked into a scratch copy, it's up to date, and `lines_check.py` on that copy gives PASS (0 errors, 10 warnings: the names `Midtour` and `Year`).
-- The drafts: parsed with a stand-in rhythm (`weekly saturday` / `weekly friday`) in a scratch folder.
+- The rotation traditions: baked since 0.34.43; over a year, 6 farewell suppers (9-14 go) and 6 welcome teas (17-35 go), per the traditions engineer's events_check.
 - `events_check.py` on the scratch copy: see the latest report to the traditions engineer.

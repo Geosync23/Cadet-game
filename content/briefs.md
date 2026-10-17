@@ -31,7 +31,7 @@ meetings (done), and anything nobody else owns.
 - One `.voice` per person in `content/voices/<crewId>.voice`, in the README's format, **plus comment lines** (`//`)
   like the story cards: HOW THEY TALK, WITH JUNIORS, WHAT THEY NOTICE, MOOD TELLS, NEVER, RUNNING. 100-250 words each.
 - **Start from the roster.** Their traits, habits, bio, life and `about` are canon; the card turns them into a way of
-  talking. Use the shared quirks in `facts.md` section 5 (the knitting circle, the ladder club, Gerald the cactus...).
+  talking. Use the shared quirks in `facts.md` section 5 (the knitting circle, the lift club, Gerald the cactus...).
 - **Every card different.** Two Works technicians with the same traits still don't sound the same: give each a sentence
   shape, a pet word, a thing they notice.
 - `tpl:` one of `warm dry shy brisk chatty earnest gruff dreamy steady playful`.

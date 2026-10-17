@@ -395,11 +395,12 @@ with sync_playwright() as pw:
     })()""")
     print(f"Tapping a machine: '{mu['text']}' ran {mu['ran']}, running {mu['running']}, extra wear {mu['extra']:.3f}, a crew member's adds none {mu['crewSame']}; broken starts {mu['broken']} ('{mu['brokenText']}'); no use starts {mu['plainUse']}")
     print(f"Stores' Mail over 28 days: {mu['mails']} ({mu['late']} late deliveries, landed on the late day {mu['lateLanded']}), shape ok {mu['shapeOk']}, sent twice {mu['twice']}: {mu['subj']}")
-    print(f"Tier locks (a tier-3 hatch): {mu['tiers']}")
+    print(f"Tier locks (a tier-3 hatch; you pass every hatch since 0.27.35, crew by rank): {mu['tiers']}")
     if not (mu['ran'] and mu['running'] and .25 < mu['extra'] < .35 and mu['crewSame'] and not mu['broken'] and not mu['plainUse'] and not mu['none']): fail('machineUse')
     if not mu['shapeOk'] or mu['twice'] or (mu['late'] and mu['lateLanded'] is False) or mu['mails'] > 28: fail("Stores' Mail")
     tt = mu['tiers']
-    if tt and (tt['you'] or not tt['youTier1'] or tt['junior'] or tt['senior'] is False): fail('tier locks')
+    # 0.27.35 (the user, 2026-10-17): the player passes every service hatch whatever its tier; crew still pass by rank
+    if tt and (not tt['you'] or not tt['youTier1'] or tt['junior'] or tt['senior'] is False): fail('tier locks')
 
     # 5e. chores (0.33.19): many kinds of job, every stop a real place, tier-1 ones only in rooms you can enter;
     # openJobs gives what you may take, in the shared shape; you can take a chore and finish it, and it does its work

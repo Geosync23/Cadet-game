@@ -1,0 +1,44 @@
+@crew tomas
+// Head writer 4: career lines. Your bunkmate. He was afraid of staying home; he knows about being afraid.
+
+== career.missed
+? tier>=acquaintance
+- You were still in your bunk when I left. Are you ill? Should I fetch someone?
+
+== worried.chief
+? tier>=colleague
+- You saw the Chief? I'd have been terrified. You'll be all right. I can wake you.
+
+== worried.captain
+? tier>=friend
+- I write to my brother every week. I don't want to write that my bunkmate went.   #serious
+
+== worried.last
+? tier>=friend
+- I'll wake you. I'm up at six anyway. Please let me, {nick}.   #serious
+
+== career.up
+? tier>=acquaintance
+- You were up before me today! First time ever. I'm telling my brother.   #funny
+
+== farewell.eve
+? tier>=friend
+- Your bunk will be empty tomorrow. I'll look up at the star map and think of you.   #serious
+
+== farewell.day
+? tier>=acquaintance
+- Somewhere new, then. That's brave. You're braver than me.   #warm
+- Look out of the window. Wave at the farm moon for me.   #warm
+
+== career.leave.booked
+?
+- A day off tomorrow? We could do the long way round Deck 2. If you like.
+
+== career.back
+?
+- Welcome back, bunkmate. I kept your side tidy. Mostly.
+
+// Being ill (head writer 4)
+== sick.nudge
+? tier>=friend
+- You were coughing all night. I don't mind. But please go and see Rina.   #warm

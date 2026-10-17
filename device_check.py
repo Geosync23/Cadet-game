@@ -64,6 +64,7 @@ def run(path):
         for name, w, h in SIZES:
             print(f'{name} ({w} x {h}):')
             g = Game(pw, path, w, h)
+            g.page.add_style_tag(content='#devHu:not([hidden]){display:flex!important}')   # cadet_test's Game hides the heads-up strip; this check needs it
             g.step(3)
             apps = g.ev("deviceApps().map(a => a.id)")
             print('  apps:', apps)
@@ -105,7 +106,7 @@ def run(path):
             check(nt == ['1', 'Paid', False], f'deviceNotify: badge, toast, cleared on opening: {nt}')
             # heads-ups (0.35.29, built on the calendar reminders): R.ahead (15) ship minutes before a tradition, the strip off
             # shift and a quiet Calendar badge on shift; nothing earlier; none for Don't; Remind me shows even on shift
-            rm = g.ev("""(() => { const t0 = shipNow(), R = SHIP.device.calendarRemind, out = {}; R.ahead = 15;
+            rm = g.ev("""(() => { const t0 = shipNow(), R = SHIP.device.calendarRemind, out = {}; R.ahead = 15; R.on = true;
               const tr = devTraditions(t0, t0 + 14 * 1440); if (!tr.length) return 'no traditions in two weeks';
               const x = tr[0], save = { day: SHIP.time.day, min: SHIP.time.min }, hu = () => document.getElementById('devHu');
               const at = (m, f) => { SHIP.time.day = Math.floor(m / 1440) + 1; SHIP.time.min = ((m % 1440) + 1440) % 1440; devHeadsReset(); delete DEV.notes.calendar;
@@ -142,16 +143,73 @@ def run(path):
               go(T - 10); out.queue = [HU_Q.filter(q => q.key.startsWith('appt|')).length, txt().includes('starts in 10 min')]; devHeadsDo('done'); out.next = txt().includes('starts in 15 min');
               devHeadsReset(); document.body.classList.add('dlgon'); go(T - 10, true); out.busy = [txt(), HU_Q.filter(q => q.key.startsWith('appt|')).length];
               document.body.classList.remove('dlgon'); devTickMin = -1; SHIP.time.min += 1; deviceTick(); out.after = txt().includes('starts in');
-              const r = el().getBoundingClientRect(); out.inside = r.left >= 0 && r.right <= innerWidth && r.height <= 120;
+              const r = el().getBoundingClientRect(); out.inside = r.left >= 0 && r.right <= innerWidth && r.height > 0 && r.height <= 120;
               el().click(); out.tap = [DEV.open, DEV.app]; if (!wasOpen) deviceClose();
-              R.on = false; out.off = go(T - 15); R.on = true;
+              R.on = false; out.off = go(T - 15); D.appts = []; out.offMeal = go(bf - 15); R.on = true;
               D.appts = keepAppts; SHIP.time.day = save.day; SHIP.time.min = save.min; devHeadsReset(); devTickMin = -1; delete DEV.notes.calendar; __ev.length = 0; __ev.push(...ev0); out.nm = nm; return out; })()""")
             print('  heads-ups:', hu)
             check(hu['soon'].startswith('With ' + hu['nm'] + ' starts in 15 min') and hu['go'] == 'Go there' and hu['goal'] and hu['hidden'], f'heads-up: an appointment 15 min before, Go there sets the arrow: {hu}')
             check(hu['start'].startswith('With ' + hu['nm'] + ' is starting') and hu['again'] and hu['saved'], f'heads-up: as it starts, once, remembered in the save: {hu}')
             check(hu['meal'].startswith('Breakfast starts in 15 min') and hu['mealOff'] == '', f'heads-up: meals, and the switch for meals and shift: {hu}')
             check(hu['queue'] == [2, True] and hu['next'] and hu['busy'] == ['', 2] and hu['after'], f'heads-up: one at a time, waits behind a meeting: {hu}')
-            check(hu['inside'] and hu['tap'] == [True, 'schedule'] and hu['off'] == '', f'heads-up: on screen, a tap opens the Schedule, off with the switch: {hu}')
+            check(hu['inside'] and hu['tap'] == [True, 'schedule'] and hu['off'].startswith('With ') and hu['offMeal'] == '', f'heads-up: on screen, a tap opens the Schedule; switched off, only appointments: {hu}')
+            # 0.35.33 (reviewer 2): a showing strip steps back when a chat card opens (it waits); a group that gains a person
+            # isn't announced again
+            cb = g.ev("""(() => { const D = SHIP.device, keepA = D.appts, save = { day: SHIP.time.day, min: SHIP.time.min }, d = SHIP.time.day + 2, T = (d - 1) * 1440 + 1290;
+              const pl = apptPlaces()[0], ps = apptPeople().slice(0, 2).map(p => p.id), el = document.getElementById('devHu');
+              D.appts = [{ id: 911, grp: 911, with: [ps[0]], at: T, len: 30, where: pl.id, kind: 'social', status: 'yes' }];
+              SHIP.time.day = d; SHIP.time.min = 1290 - 15; devHeadsReset(); devTickMin = -1; deviceTick(); const out = { shown: !el.hidden };
+              let c = document.getElementById('chat'), made = false; if (!c) { c = document.createElement('div'); c.id = 'chat'; document.body.appendChild(c); made = true; }
+              const was = [c.hidden, c.className]; c.hidden = false; c.className = 'devchat'; SHIP.time.min += 1; devTickMin = -1; deviceTick(); out.back = el.hidden && HU_Q.filter(q => q.key.startsWith('appt|')).length === 1;
+              c.hidden = was[0]; c.className = was[1]; if (made) c.remove(); SHIP.time.min += 1; devTickMin = -1; deviceTick(); out.again = !el.hidden;
+              devHeadsDo('done'); D.appts.push({ id: 912, grp: 911, with: [ps[1] || ps[0]], at: T, len: 30, where: pl.id, kind: 'social', status: 'yes' });
+              SHIP.time.min += 1; devTickMin = -1; deviceTick(); out.grown = el.hidden && HU_Q.filter(q => q.key.startsWith('appt|')).length === 0;
+              D.appts = keepA; SHIP.time.day = save.day; SHIP.time.min = save.min; devHeadsReset(); devTickMin = -1; return out; })()""")
+            print('  heads-up vs chat card, group:', cb)
+            check(cb == {'shown': True, 'back': True, 'again': True, 'grown': True}, f'heads-up: waits while a chat card is open; a grown group is not new: {cb}')
+            # section 18's occasions in the Schedule and heads-ups (0.35.30): a booked Captain's table is listed and gets a heads-up
+            # with Go there; a chance one (the bridge invite, a surprise) never shows; one already kept doesn't either
+            oc = g.ev("""(() => { if (typeof OCCASIONS === 'undefined' || !Array.isArray(SHIP.occasions)) return { own: false };
+              const keep = SHIP.occasions.slice(), save = { day: SHIP.time.day, min: SHIP.time.min }, d = SHIP.time.day + 3, T = (d - 1) * 1440 + 1170, ct = OCCASIONS.captainsTable;
+              const ch = Object.keys(OCCASIONS).find(k => OCCASIONS[k].chance);
+              SHIP.occasions.push({ id: 'captainsTable', key: 'captainsTable@' + d, at: T, len: 90, deck: ct.deck, room: ct.room, status: 'asked', kind: 'invite' });
+              if (ch) SHIP.occasions.push({ id: ch, key: ch + '@' + d, at: T - 600, len: 30, deck: OCCASIONS[ch].deck, room: OCCASIONS[ch].room, status: 'asked', kind: 'meeting' });
+              SHIP.occasions.push({ id: 'readyRoom', key: 'readyRoom@' + d, at: T - 400, len: 25, deck: 1, room: 'R', status: 'kept', kind: 'summons' });
+              const titles = devDay(d).map(x => x.title), out = { own: true, listed: titles.includes(ct.title), chance: !ch || !titles.includes(OCCASIONS[ch].title), kept: !titles.includes(OCCASIONS.readyRoom.title) };
+              SHIP.time.day = d; SHIP.time.min = 1170 - 15; devHeadsReset(); devTickMin = -1; deviceTick(); const h = document.getElementById('devHu');
+              out.hu = h && !h.hidden ? h.textContent : ''; out.go = DEV.hu && DEV.hu.goal ? [DEV.hu.goal.deck, DEV.hu.goal.room] : null;
+              SHIP.occasions.length = 0; SHIP.occasions.push(...keep); SHIP.time.day = save.day; SHIP.time.min = save.min; devHeadsReset(); devTickMin = -1; return out; })()""")
+            # the heads-up never covers section 15's needs strip or activity bar (0.35.31): on a phone it moves below them
+            # (stand-ins with those ids when this build has none); on a wide screen they're apart and it stays at the top
+            ov = g.ev("""(() => { const made = []; for (const [id, top] of [['needStrip', 124], ['actBar', 166]]) if (!document.getElementById(id)) {
+                const e = document.createElement('div'); e.id = id; e.style.cssText = 'position:fixed;left:14px;top:' + top + 'px;width:212px;height:36px'; document.body.appendChild(e); made.push(e); }
+              DEVICE_SKIN.heads({ text: 'Dinner starts in 15 min', where: 'the mess, Deck 3', go: true });
+              const r = id => document.getElementById(id).getBoundingClientRect(), h = r('devHu'), hit = ['needStrip', 'actBar'].filter(id => { const b = r(id); return b.width && b.right > h.left && b.left < h.right && b.bottom > h.top && b.top < h.bottom; });
+              const out = { hit, top: Math.round(h.top), bottom: Math.round(h.bottom), inside: h.bottom <= innerHeight };
+              DEVICE_SKIN.heads(null); made.forEach(e => e.remove()); return out; })()""")
+            print('  heads-up vs needs strip:', ov)
+            check(ov['hit'] == [] and ov['inside'] and ov['bottom'] > ov['top'], f'heads-up: never over the needs strip or activity bar: {ov}')
+            # apptAdd (0.35.32): section 18's occasionAdd books a real appointment: once, a spot in the room (locked rooms too),
+            # the host in `with`, listed by its title, no Cancel; meeting it (the occasion's met) keeps it; saved and read back
+            aa = g.ev("""(() => { if (typeof occasionAdd !== 'function') return { own: false };
+              const D = SHIP.device, keepA = D.appts.slice(), keepO = SHIP.occasions.slice(), d = SHIP.time.day + 3, T = (d - 1) * 1440 + 1170;
+              D.appts = []; SHIP.occasions.length = 0; const r = occasionAdd('captainsTable', T, true); occasionAdd('captainsTable', T, true);
+              const a = D.appts[0], pl = a && apptPlace(a), out = { own: true, n: D.appts.length, host: a && a.with.join(), kind: a && a.kind, room: pl && [pl.deck, pl.room], occ: a && a.occ };
+              out.sched = devDay(d).filter(x => x.title === OCCASIONS.captainsTable.title).map(x => x.kind);
+              deviceShow('appointments'); out.cancel = [...document.querySelectorAll('#devBody button')].some(b => b.textContent === 'Cancel it');
+              out.saved = deviceLoad(JSON.parse(JSON.stringify({ device: D }))).appts.some(x => x.occ === a.occ && x.title === OCCASIONS.captainsTable.title);
+              const dd = Math.floor(T / 1440) + 1, held = typeof shipDay === 'function' ? shipDay(dd).occ : null; out.free = !held || !(held.get(a.where) || []).some(([x, y]) => x < T + a.len && T - 10 < y);   // 0.35.35: a seat no plan holds
+              if (r) { r.met = true; devTickMin = -1; deviceTick(); out.kept = a.status; a.status = 'missed'; devTickMin = -1; deviceTick(); out.final = a.status; }   // 0.35.38: missed is final
+              D.appts = keepA; SHIP.occasions.length = 0; SHIP.occasions.push(...keepO); deviceShow('home'); return out; })()""")
+            # a New game starts with no appointments (0.35.37, reviewer 1b): the old game's would list and walk people to old times
+            ng = g.ev("""(() => { const D = SHIP.device, keep = D.appts.slice(); D.appts = [{ id: 950, with: ['pell'], at: shipNow() + 600, len: 30, where: apptPlaces()[0].id, kind: 'social', status: 'yes' }];
+              simNote('newGame', { arrival: false }); const out = D.appts.length; D.appts = keep; return out; })()""")
+            check(ng == 0, f'a New game clears the appointments: {ng}')
+            print('  apptAdd:', aa)
+            check(not aa['own'] or (aa['n'] == 1 and aa['host'] == 'marrow' and aa['kind'] == 'invite' and aa['room'] == [2, 'C'] and aa['occ'] == 'captainsTable@' + str(aa['occ']).split('@')[-1]
+                and aa['sched'] == ['appt'] and not aa['cancel'] and aa['saved'] and aa['free'] and aa['kept'] == 'kept' and aa['final'] == 'missed'), f'apptAdd: an occasion becomes one appointment, listed, kept when met: {aa}')
+            print('  occasions:', oc)
+            check(not oc['own'] or (oc['listed'] and oc['chance'] and oc['kept'] and oc['hu'].startswith("The Captain's table starts in 15 min") and oc['go'] == [2, 'C']), f'occasions: in the Schedule with a heads-up and Go there; no surprises, none kept: {oc}')
             # Jobs tracks only: no Take it on the device; Track switches the arrow off and on
             jb = g.ev("""(() => { deviceShow('jobs'); const t = document.getElementById('devBody').textContent; deviceShow('home'); return [t.includes('Take it'), t.includes('job board')]; })()""")
             check(jb == [False, True], f'Jobs: no taking on the device, points to the board: {jb}')
@@ -463,6 +521,28 @@ def run(path):
               deviceShow('home'); out.own = own; return out; })()""")
             print('  pillar 4 pages:', p4)
             check(all(p4.get(k) for k in ['home', 'cal', 'rep', 'keep', 'left', 'keepBad', 'movedBad']), f'season on Home and Calendar, reputation, keepsakes, Left the Wren: {p4}')
+            if name == 'phone':
+                # the top-left place and clock (0.35.34, 0.35.36, reviewer 2b): at widths 320-600 and landscape phones, every weekday
+                # on days 1-365 and every room name aboard: the clock on one line, nothing under the buttons, above the Device button
+                HUDCHK = """(() => { const keep = { day: SHIP.time.day, room: document.getElementById('room').textContent, deck: document.getElementById('deck').textContent }, bad = [];
+                  const R = e => e.getBoundingClientRect(), hud = document.querySelector('.hud'), clock = document.getElementById('clock'), btn = document.getElementById('devBtn');
+                  const btns = [...document.querySelectorAll('.controls button')].filter(b => b.offsetWidth).map(R);
+                  const hits = () => { const h = R(hud); return btns.some(b => b.left < h.right && h.left < b.right && b.top < h.bottom && h.top < b.bottom) || h.bottom > R(btn).top; };
+                  const days = []; for (const a of [1, 10, 100, 300, 359]) for (let k = 0; k < 7; k++) days.push(a + k);
+                  for (const d of days) { SHIP.time.day = d; updateClock(); if (R(clock).height > 20 || clock.scrollWidth > clock.clientWidth + 1 || hits()) { bad.push('day ' + d + ': ' + clock.textContent); break; } }
+                  SHIP.time.day = keep.day; updateClock();
+                  const names = new Set(); for (const n of Object.keys(DECKS)) for (const k in DECKS[n].rooms || {}) { const r = DECKS[n].rooms[k]; if (r && r.name) names.add(r.name + '|' + n); }
+                  for (const x of names) { const [nm, n] = x.split('|'); document.getElementById('room').textContent = nm; document.getElementById('deck').textContent = 'Deck ' + n + ', CSV Wren';
+                    if (hits()) { bad.push(nm); if (bad.length > 3) break; } }
+                  document.getElementById('room').textContent = keep.room; document.getElementById('deck').textContent = keep.deck;
+                  return { n: names.size, bad, clock: clock.textContent }; })()"""
+                hud = {}
+                for vw, vh in [(320, 640), (340, 700), (360, 740), (375, 667), (390, 844), (412, 915), (430, 932), (480, 800), (540, 900), (600, 900), (640, 960), (700, 1000), (720, 1100), (768, 1024), (601, 375), (667, 375), (740, 360), (844, 390), (900, 420), (900, 760), (1024, 600), (1280, 800)]:
+                    g.page.set_viewport_size({'width': vw, 'height': vh}); g.step(1); r = g.ev(HUDCHK)
+                    if r['bad']: hud[f'{vw}x{vh}'] = r['bad']
+                g.page.set_viewport_size({'width': w, 'height': h}); g.step(1); g.ev("updateClock()")
+                print('  HUD sweep (sizes with a problem):', hud or 'none')
+                check(not hud, f'HUD: one-line clock, nothing under the buttons, above the Device button, at every size: {hud}')
             g.ev("deviceClose(); window.__opens = 0"); g.step(1)
             # never opens by itself (0.35.15, the user: "sometimes it just pops up"): a whole ship day of reminders, tips,
             # notices, an address, the meeting panel and an invitation, and a drag up from the bottom edge (the old swipe)

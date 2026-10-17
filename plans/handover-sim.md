@@ -1,11 +1,32 @@
 # Handover: the sim engineer
 
-Written at build 0.40.8, brought up to date at 0.26.18 and at 0.26.31 (sim engineer 3: see the first "Start here") (Pillar 3, 16 October, by the second sim engineer, session_01R6RBwwBM9aorpsqDCrztDU), so a fresh session can take over. **Start with the Pillar 3 section at the end:** it has the work in progress. The detailed notes are in DEV_NOTES.md, in four sections: "Ship time and saving", "Schedules", "Crew on the deck" and "Every room in use". This page is the short version, plus the things that only live in my head.
+Written at build 0.40.8, brought up to date at 0.26.18, 0.26.31 and 0.26.37 (sim engineer 4: see the first "Start here") (Pillar 3, 16 October, by the second sim engineer, session_01R6RBwwBM9aorpsqDCrztDU), so a fresh session can take over. **Start with the Pillar 3 section at the end:** it has the work in progress. The detailed notes are in DEV_NOTES.md, in four sections: "Ship time and saving", "Schedules", "Crew on the deck" and "Every room in use". This page is the short version, plus the things that only live in my head.
 
+
+## Start here: 0.26.38 to 0.26.40 (sim engineer 5, session_01Do3HU5Rh96tgUsPTUbsF8a, 17 October)
+
+Read this first, then sim engineer 4's section below. **Builds on `claude/sim-engineer`:** 0.26.38 13a6fe9 (+0d3def9 notes), 0.26.39 7ca2249 (on e4d6ace, cherry-pickable alone; merged here as 063c3ec, notes f545ac4), 0.26.40 8f4d49f. Reviewer 1c (session_01YcSJkhhJ2MnCjsJs7QV8ud, the only reviewer now) PASSed 0.26.38 and 0.26.39. Same ownership: sections 10, 13, 14, 17, `day_check.py`, `machine_check.py`. Perf engineer 3: session_01S8FWAPFnpaAAUN1wpDQbbo. **The team is small now (the user's cost cut):** run only the quick checks for what you touched, send behaviour changes to 1c, no new jobs without the lead.
+
+### What I built (DEV_NOTES rows have the tests)
+- **0.26.38 farewell friends** (social B2's design): on a crew leaver's day, 20c's `farewellCrew(leaver, d)` friends who are free get a 14:30-15:00 gathering (tag 'farewell') at `5|@gather-shuttle-bay` (schedData: every venue's non-lead `gather` places as `n|@gather-<venue>`); leavers' own spots held first (`occ.res` 'leave:<id>', the front spots, passed to `guestTrim`'s 4th argument); couples: take() puts a gather pool's spots nearest your partner's first. Inert without 20c (claude/social-stories).
+- **0.26.39 the arrival dinner's seats:** with Calder's chief-step hold, shipDay holds the step's other `seats` ('intro:player', 'intro:<escort>') from the table step - 5 to 20:00; introLay lays an unused hold of yours as an 'intro-seat' beat (not booked in occ again) and a stand-in beat near it sits you there; seatsBeside skips 'intro:' holds (the paced tour).
+- **0.26.40 garbage per frame:** crewNearDoor, shipDay's `evChanged()`, jobWhere, updateDeckCrew without closures/strings/iterators. planWhere/whereIs caching deliberately not done (35 callers might mutate; live escorts would lag).
+- No build needed: the section 17 jump notes were social_check's hour-by-hour arm (fixed by social A); the long table passes; social A's purity rerun is pure; the night shift leaving their posts at 06:00 is 0.26.30's planned walk.
+
+### Gotchas
+- **cadet_test copies a build to `$CADET_WORK/test/_run_<file name>`:** checks run in parallel on files with the same name test each other's copies. Give every build its own file name.
+- CDP heap sampling needs `includeObjectsCollectedByMajorGC/MinorGC: true`, or it only shows live objects (scratchpad al/alloc.py; drive frames with `window.__step(1, 17)`).
+- Killing test runs with `ps | grep <name> | kill` in a command whose own text has the name kills your shell (exit 144): run the kill on its own.
+- A probe that plans the arrival: call `newGameStart(true)` first (a ?debug load starts on day 1, intro off).
+
+### Loose ends
+- Still parked: the tray-return lateness should-fix; per-frame string building in mealStep/lineTick; a crewHold on someone in the line blocks the counter.
+- Day 231 store-till double booking: still not reproduced.
 
 ## Start here: 0.26.32 to 0.26.37 (sim engineer 4, session_01EJUGywZv9BpcUezjXES9AC, 17 October)
 
 Read this first, then sim engineer 3's section below it. **Builds on `claude/sim-engineer`:** 0.26.32 f9a145c, 0.26.33 7a11c73 (+6e87e6b row), 0.26.34 236810f, 0.26.35 7c1feea, then 0.26.36 and 0.26.37 (see DEV_NOTES' rows for their hashes and tests). Same ownership: sections 10, 13, 14, 17, `day_check.py`, `machine_check.py`. Lead session_01KPJMYjXAPkNUcrQ8VRkhLE (report only to it, by send_message); reviewer 1 session_018XY1NbMBxo2SLDPxooe5yx; build master 2 session_01F8ph7FKqViF3heRn94YgBr.
+Read this first, then sim engineer 3's section below it. **Builds on `claude/sim-engineer`:** 0.26.32 f9a145c, 0.26.33 7a11c73 (+6e87e6b row), 0.26.34 236810f, 0.26.35 7c1feea (the Tern start: 0.60.4 only), 0.26.36 f16a110 + 0.26.37 e4d6ace (for 0.60.3, always together: 0.26.37 corrects 0.26.36). DEV_NOTES' rows have the tests. Same ownership: sections 10, 13, 14, 17, `day_check.py`, `machine_check.py`. Lead session_01KPJMYjXAPkNUcrQ8VRkhLE (report only to it, by send_message); reviewer 1 session_018XY1NbMBxo2SLDPxooe5yx; build master 2 session_01F8ph7FKqViF3heRn94YgBr.
 
 ### What I built (each has a DEV_NOTES row with its probes and tests)
 - **0.26.32 (reviewer 1's 0.26.29 fixes):** named intro seats held in `occ.res` as `'intro:<id>'` before anyone is planned; the repair note's `t` is `Math.max(t, SIM_AT)` in the hour loop; a meal tradition's diners are planned right after hosts, then its seat holds are dropped (their bookings keep their seats); `trayLate` (served early into a full mess: no tray till seated).
@@ -14,6 +35,8 @@ Read this first, then sim engineer 3's section below it. **Builds on `claude/sim
 - **0.26.35:** `SHIP_START_ARRIVAL` = 5-tern-aisle-1 [5, 7], face 0. Only with decks-p3's walkable Tern and onboarding's INTRO_START move (0.60.4). day_check prints where leavers wait in the bay.
 - **0.26.36 (blocks 0.60.3):** the cook steps aside. `sharedTile(t)` (a walk tile two places share, e.g. 3-galley-2 on 3-range-1's panel [39,4]); `occupiedBy(player)` ignores crew settled on one; crew whose place is on the tile you're heading for (`player.goal`) or using (`PLAYER_PLACE`) step beside it (`asideTile`, goal '@aside') and go back after. `crewMakeWay(tile, mins)` -> release() for any other tile (player 0.28.40 uses it as a fallback).
 - **0.26.37 (blocks 0.60.3):** introLay's `free()` also refuses `occ.res` holds for someone else or an event, and no fallback to the named place when no alt is free (Torres took Calder's 3-mess-9).
+- **0.26.36 + 0.26.37 (0.60.3):** the cook steps aside. `sharedTile(t)` (a walk tile two places share, e.g. 3-galley-2 on 3-range-1's panel [39,4]; Deck 3 has 27, most of them seat pairs); the player's `goTo` frees its goal tile when it's shared and no other walker is on or heading for it (passing through, you still squeeze past); crew standing at their place (`spot.onTile`) on the tile you're heading for (`player.goal`) or using (`PLAYER_PLACE`) step beside it (`asideTile`, goal '@aside') and go back after. Seated diners never get up for it. `crewMakeWay(tile, mins)` -> release() for any other tile (player 0.28.40 uses it as a fallback).
+- **0.26.37 also:** introLay's `free()` also refuses `occ.res` holds for someone else or an event, and no fallback to the named place when no alt is free (Torres took Calder's 3-mess-9).
 - Answered (no code): night-shift honorees already get their events since 0.26.31 (traditions engineer 2 was on an older base).
 
 ### Loose ends and asks waiting

@@ -6,7 +6,7 @@ Written by session_01UmrVVpV7eBqEsa4sBucASP (the first dialogue engineer); kept 
 it is the full spec of the file formats and the condition vocabulary) first.
 
 ## Role, branch, builds
-- Branch `claude/dialogue`, builds **0.43.x** (last: **0.43.22**, 6fed418). Reviewer 2 passed up to 0.43.19; 0.43.20-0.43.22 are with them. Since 0.43.17
+- Branch `claude/dialogue`, builds **0.43.x** (last: **0.43.27**, c084a1a). Reviewer 2 passed up to 0.43.25 and Tiles 0.46.6, then handed over; reviewer 2b (session_01F93LiFWtciyCLNV34qPsjP) has 0.43.26 and 0.43.27. Also (lead-assigned, Tiles seat vacant) Tiles 0.46.6 = 99609d3 on claude/tiles (crewHold for the opponent), with reviewer 2. 0.43.23: the JSON.parse strings are an array joined with join(''), not a + chain (Safari). Since 0.43.17
   (7c888e4) the branch carries claude/ship-integration 0.60.1 (merged, the lead's call), so onSim, cue() and social are here.
 - I own: section **`// 22. LINES`** in starship-cadet.html (between section 17's end and `// 18. SHIP EVENTS`), the
   generated blocks' markers (LINES, MEETINGS, TRADITIONS), **content_gen.py**, **lines_check.py**, **content/README.md**.
@@ -79,9 +79,19 @@ it is the full spec of the file formats and the condition vocabulary) first.
 
 ## Loose ends / next (wave 2, waiting for the lead's go-ahead)
 - Wave 2 is done (overheard, the ring, booth lines, reactions, the --day check).
+- 0.43.24 {kin} {lost} {hobbyNoun}: crew designer 3's (session_01TDCn9auvCBML52hyjWGY6x) line-ready roster fields;
+  socialFill first, else the roster; lines_check errors on {family}/{hobby} in arcs/themes. Head writer 3 switches the
+  family/loss/talent themes, then takes the new lines_check. Social A hasn't said whether socialFill will answer them.
+- 0.43.25: a theme beat's roster words must be in its needs: ({lost} in arcs too). 0.43.24/25 make lines_check fail on the
+  writers' content until head writer 3 switches the family/loss/talent themes: they ship together.
+- 0.43.26 perf: the minute's overheard/reaction tries one a frame (OVH_SCAN, OVH_PER_FRAME 1), lineQuick (cheap
+  conditions first), LINE_CUE memo, lineFor fills only its top group. Benchmarks (scratch scripts): every crew x kind x 4 times
+  gives identical lines before/after. Performance engineer 2 (session_01XAkY9U3mmstHQT2yAMTocA) may send phone numbers.
+- 0.43.27 goodbyes (social B2, session_014A3w2gK8FBNWs66YC3LfME): pair:best / pair:mentor, {missed}, a leaver's
+  `leaving:` conversation first, once per pair (SHIP.lines.bye). That was the last Pillar 4 piece on this side.
 - In flight (asked 07:5x UTC): head writer 3 (session_01FopKMT2ZKxuWcNDcmF7565) and social B2
-  (session_014A3w2gK8FBNWs66YC3LfME): what the arcs' last beats need from section 22; whether Tiles needs more
-  (trait:dry_humour under == tiles.* already works). Build what they ask, after the lead agrees.
+  (session_014A3w2gK8FBNWs66YC3LfME): what the arcs' last beats need from section 22 (head writer 3: nothing; Tiles: nothing more). Social B2 hasn't
+  answered yet.
 - (done: overheard played, the ring, booth one-speaker lines.) Test script for overheard in a browser: see
   DEV_NOTES 0.43.12 (stand the player by a group on Deck 3 at dinner, step, log `bubbles.list` and `OVH`).
 

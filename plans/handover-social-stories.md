@@ -4,9 +4,18 @@ Written by session_019aEJaAGyZir9oq47CBRfA3 at 0.39.6, ahead of the memory rule,
 Read CLAUDE.md, DEV_NOTES.md ("Social stories (20c, social engineer B, 0.39.x)" has every detail and the hook register),
 plans/social-deep-plan.md (the design; Parts 1, 3, 6, 8b, 9, 12) and TEAM.md first.
 
-**Status (social B2, session_014A3w2gK8FBNWs66YC3LfME): B8 built, 0.39.7-0.39.8 (bf240b7): calls home, one live beat per
-contact on Letters evening, recorded messages (mailPlay). Waiting on: player engineer 3's actBegin line (0.28.30), device
-engineer 3 (session_01SskqNx45iEGyQq2W9Fjg5Y) for Mail's play field + Play button; reviewer 1b on 0.39.6-0.39.8.**
+**Status (social B2, session_014A3w2gK8FBNWs66YC3LfME), refreshed 09:50 UTC at 0.39.20 (0d02c21). Reviewer 1b has passed
+everything to 0.39.20 (all fixes done). Built: B8 calls home (0.39.7-0.39.11); arc_check.py + momentCtx/momentWantsVisit
+(0.39.12); theme needs via socialFill (0.39.13); bonds with someone not aboard frozen as `gone`, bondOf 'missed'
+(0.39.14); rivalry sparring partners, arc_check modes arcs|themes (0.39.15); farewellCrew (0.39.16); threads: VOICE only
+for arc:, the roster for themes (0.39.17, the lead); affWeek ceiling (0.39.18, 600 since 0.39.20: never binds, peak 585
+pairs by day 140); read-only moment queries via storyPeek (0.39.19). arc_check on dialogue+content+roster 0.16.16: arcs
+OK (10 story incl. Kovac, 4 home), themes OK (all 12). Hooks in elsewhere: momentWantsVisit (social A 0.36.68),
+pair:best/mentor + goodbye preference + {missed} (dialogue 0.43.27), goodbye conversations and missed lines (writer 5,
+claude/writer-commons, merged into content by head writer 3). farewellCrew is planned by sim engineer 5 (session_01Do3HU5Rh96tgUsPTUbsF8a, claude/sim-engineer 13a6fe9, 0.26.38): the
+shuttle bay 14:30-15:00, couples together, no double booking with social A's 14:00 farewell. Nothing open.
+Budget: the social save is ~27.9 KB at day 140 with a player (30 KB budget): watch anything that grows. Lead
+session_01KPJMYjXAPkNUcrQ8VRkhLE; reviewer 1b session_018XY1NbMBxo2SLDPxooe5yx. Refresh before handing over.**
 
 ## Next job: B8, calls home (approved by the lead, 2026-10-17)
 The user's ask: people back home (Mum, Gran, Jo, Sam) the player calls, with whole arcs; the shapes agreed with head
@@ -85,6 +94,8 @@ Build it in 20c on the moments engine; ask the player engineer (booth -> `homeCa
   shift changes and transfers); the forced test (a pair kept apart 3 weeks drifts on day 19) is the check.
 
 ## Gotchas
+- **Merging social A: check every conflict hunk by hand.** At 0.36.71 A's new section 13 bus/flag store sat in the same
+  hunk as GAME_BUILD; keeping "mine" for that hunk dropped it (restored in 10e904f). Keep my build lines, take the rest of theirs.
 - 20c sits after section 20 but before ROSTER (section 9): everything lazy; `socInit()` first.
 - Never declare `MOMENTS`, `MOMENT_THEMES`, `VOICE`, `VOICE_TEMPLATES`: section 22's generated block does. Read them
   through `momentBaked()` / `voiceData()` (try/catch for not-yet-declared consts).

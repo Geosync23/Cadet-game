@@ -48,7 +48,7 @@
 ? tier>=acquaintance time:afternoon
 - {nick}. Afternoon. Half the shift done, half to go. Pace yourself.
 ? tier>=acquaintance time:evening
-- {nick}. Evening. I left the bridge at 16:30 exactly. Under protest.   #funny
+- {nick}. Evening. I left the bridge at 17:00 exactly. Under protest.   #funny
 ? tier>=acquaintance time:night
 - {nick}. It's late. Regulation nine: rest. I wrote that one down for myself.   #funny
 ? tier>=acquaintance warmth:cold

@@ -1,8 +1,8 @@
 @overheard circles
 // Writer 3, batch 2. The ship's little circles (facts.md 5), by speaker: who: is A, with: is B (dialogue 0.43.8).
-// The knitting circle, the ladder club, the Halcyon twins, the fish keepers, the rainy-places club, the four
+// The knitting circle, the lift club, the Halcyon twins, the fish keepers, the rainy-places club, the four
 // lost-property boxes, the coffee machine fixers, the star journals, the herb growers, the headphones, the Kesh
-// grandmothers, the Valo post bag (the ladder club keeps to "exercise"; the lift line waits for beat:kovac.2), the playlists, the mystery swappers, the old Wren families, the telescopes, the
+// grandmothers, the Valo post bag (the lift club keeps to "Lovely lift"; the lift line waits for beat:kovac.2), the playlists, the mystery swappers, the old Wren families, the telescopes, the
 // tiny portraits, the breakfast jokers and the rest-day bakers. quirks.lines keeps the habit-based ones.
 
 == overheard
@@ -26,9 +26,9 @@ B: Where?
 A: Somewhere in the last metre.   #funny
 
 ? pair:any+any who:kovac-zainab|cruz-tove|keane-davi with:kovac-zainab|cruz-tove|keane-davi
-A: Oh. You're on the ladder too.
-B: For the exercise.
-A: Yes. The exercise. Me too.   #funny
+A: Oh. You're holding the rail too.
+B: It's a nice rail.
+A: Yes. Very nice. Me too.   #funny
 
 ? pair:any+any who:kovac-zainab|cruz-tove|keane-davi with:kovac-zainab|cruz-tove|keane-davi beat:kovac.2
 A: The lift's working again, you know.
@@ -37,7 +37,7 @@ A: After you, then.
 B: No, no. After you.   #funny
 
 ? pair:any+any who:kovac-zainab|cruz-tove|keane-davi with:kovac-zainab|cruz-tove|keane-davi
-A: Thirty-one rungs, Deck 4 to Deck 5.
+A: Eleven seconds, Deck 4 to Deck 5.
 B: You counted too?
 A: I... no. Did you?   #funny
 

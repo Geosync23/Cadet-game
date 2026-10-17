@@ -26,7 +26,7 @@
 ? tier>=acquaintance
 - I'm saving for a boat on the Ostrander colonies. Small. Blue. Named. Renamed.
 ? tier>=colleague
-- I tell everyone to eat breakfast. I skip breakfast. I'm aware. I'm working on it.   #funny
+- I tell everyone to eat a proper breakfast. Mine's toast in the corridor. I'm aware.   #funny
 
 == joy
 ? tier>=acquaintance
@@ -91,7 +91,7 @@
 == smalltalk
 - Water first. Then everything else.
 - The boat's got a new name this week. Again.   #funny
-- Breakfast is important. I've skipped it.   #funny
+- Breakfast is important. I ate mine walking.   #funny
 - Stretch before the gym. Please.
 ? act:work
 - Sit. Breathe. Tell me where it hurts.
@@ -141,7 +141,7 @@
 == smalltalk
 ? act:meal
 - Did you know soup counts as water? Partly. Have soup.
-- I skipped breakfast. Don't copy me. Seriously.   #funny
+- Breakfast was toast, standing up. Don't copy me. Seriously.   #funny
 - Greens! Eat the greens. Your eyes will thank you.
 ? act:off
 - Rest day. Guitar, then boat plans, then guitar.

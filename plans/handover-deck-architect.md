@@ -6,7 +6,7 @@ Written at build 0.38.9 (`claude/decks-p3` 3b28718) by session_014PT5L2QxXYoVhqF
 
 - **Role:** the one architect for every deck's data: `DECKS[n]` (places, machines, rooms, dress), deck kit, gathering venues, event dressing and visit rooms. It replaced the bridge (Decks 1, 3), command (Deck 2) and Deck 6 (Decks 4-6) architects.
 - **Branch:** `claude/decks-p3`. **Builds:** 0.38.x; the last is 0.38.9. Bump both the header line (`build 0.38.x`) and `GAME_BUILD`, and add a DEV_NOTES row each turn.
-- **Lead:** session_01KPJMYjXAPkNUcrQ8VRkhLE (from 2026-10-17 ~04:35; before that session_01PJtmxWgAPLebXSZKP6ZRpG and session_01PxXKwc5mkC7tV5MPi3p7PP). Chain of command: the user → the lead → everyone; helpers never contact the user.
+- **Lead:** session_01KPJMYjXAPkNUcrQ8VRkhLE (from 2026-10-17 ~04:35; the user's rule: refresh this note right before handing over; before that session_01PJtmxWgAPLebXSZKP6ZRpG and session_01PxXKwc5mkC7tV5MPi3p7PP). Chain of command: the user → the lead → everyone; helpers never contact the user.
 - **Holder since 0.38.10:** session_01ToE6RJFCw9deB3HcJRLKxS. Report after every push with send_message: commit, what, checks, judgement calls.
 - **Merging:** before a job, merge the latest `claude/ship-integration` (or the branch the lead names). The conflicts are always the two build lines (keep yours) and DEV_NOTES rows (keep both; watch for duplicate rows the lead already copied).
 
@@ -28,6 +28,10 @@ All in one block just after `DECKS[1]` (search `Big gatherings (Pillar 3`), plus
 | 0.38.10 | Sowing morning, Tiles | kit `seedlingStand` (garden NE corner), `DECKS[3].seedlings`, place `3-seedlings-1` (`sowing`), trace `seedlingYours`; kit `tilesTable` (bow lounge), places `3-tiles-1/2` (`tiles`), `TILES_KIT`/`tilesBoardGeo()`, `DECKS[3].tiles`, `tilesSeats(k)`, dress `tilesNight` (one InstancedMesh) |
 | 0.38.11 | Letters, tasting, lanterns, calm | kit `postbox` + `3-postbox-1` (`letters`); dress `tastingTable` (title, lines), `lanternWalk`; `3-lantern-1..12` (`lanterns`); calm false on 3-wbench-1/2, true on 2-obsnight-1/6/7 and the Tiles stools |
 | 0.38.12 | Review fixes | `TILES` renamed `TILES_KIT` (section 23 owns `TILES`); every Tiles-night board names at least two seats (sixth field) |
+| 0.38.17 | Tiles, approved design | `TILES_KIT` repainted; taps 'Tiles station' / 'Tiles board' (one per Tiles-night board via dressShow's `more`); trace `tilesTrophy` (Deck 4, `DECKS[4].keepsakes.trophy`) |
+| 0.38.18 | The walk-in Tern (plans/shuttle-plan.md) | kit `shuttle` rebuilt (aisle, benches, cockpit, lockers, roof group hidden inside, hinged ramp); `DECKS[5].tern`; places `5-tern-*`; `ternRamp`, `ternRampOpen`, `ternInside`, `ternClear`; shuttle-bay venue focus/leads moved. On ship integration 0.60.2. |
+| 0.38.19 | Tern review fixes | the ramp never closes on anyone (`ternRamp` returns false; a close in progress waits); the well blocks below half-open; plan numbers; rota-day note |
+| 0.38.20 | Long-table seats | `3-longtable-1..13` (`event: 'long-table'`): mess end chairs and a promenade trestle, drawn by `longTables` / `harvestTables` via `messExtra` / `MESS_EXTRA` |
 | 0.38.14-16 | Traditions' asks | places `2-open-lab-*`, `1-bridge-hour-*`, `4-music-1` (`late-piano`), lantern places `lantern-walk`; traces `mugYours`; dress `longTables`, `harvestTables`, `cupBoard`, `talentStage`, `yearsEnd` (Deck 3), `openLab` (Deck 2). Mending day, rummage day and the crossover supper were cut by the user. |
 | 0.38.9 | Arrival evening | `keepsakeShelf` above berth 4's bunk + `DECKS[4].keepsakes` (slots, place `4-B1-4-keepsake`); `mugRack` in the Works tea corner + `DECKS[5].mugRack.yours`; `CALM_TYPES` / `placeCalm(p)` |
 
@@ -41,6 +45,8 @@ All in one block just after `DECKS[1]` (search `Big gatherings (Pillar 3`), plus
 ## Part 6, seat 8: status
 
 All of seat 8's places are built (0.38.9-0.38.12). Still to do: decor for each new tradition when the tradition designers ask (DECK_DRESS, at most 6 draw calls, its own deck only). The traditions engineer (now Traditions engineer 2, see TEAM.md; the first, session_018WZccmSvEfz2LC7DCfxdii, has handed over) lists a tradition's `ties: decor <id>` to dressShow from 30 minutes before to 15 after, and Sowing morning's `trace: seedlingYours` pushes `{ id, day }` to SHIP.traces. The Tiles engineer (session_01DG3in6CvFFta6NrLpoVCJV, section 23) may change the board's look once the user approves the design; keep the station and boards simple until then. When the Tiles game is built, its station places can become `lounge-seat` (this changes crew plans, to be explained then).
+
+**In flight (as of 0.38.20, a71ac47):** the onboarding engineer (session_01KaHzfqSqF8B4bkNFrH1tsx) wires the arrival scene to the Tern (ternRamp(true, 2.5) after the fade-in, ternRamp(false, 3) once ternClear()); SHIP_START_ARRIVAL (sim engineer 4, session_01EJUGywZv9BpcUezjXES9AC) and INTRO_START (section 21) move from [7, 8] to 5-tern-aisle-1 [5, 7], face 0, in the same combine as the hull. Traditions engineer 2 and sim engineer 4 point the Sunday table and harvest supper at '@long-table'. Reviewer 2 has 0.38.17-0.38.20 to review. Waiting on Tiles (section 23 pushes the tilesTrophy trace).
 
 ## Gotchas (learned the hard way)
 

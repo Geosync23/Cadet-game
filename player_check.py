@@ -222,6 +222,17 @@ with sync_playwright() as pw:
     check(bg[0][:3] == [.7, .7, True] and bg[0][3] > .9 and bg[0][4] == 0 and bg[0][5] == 'Bursting', f"bathroom 0: hold yourself ('+go', no prop) and walk at 70%: {bg[0]}")
     check(bg[1][:3] == [1, 1, False] and bg[1][3] < .1 and bg[1][5] != 'Bursting', f'bathroom above 0: the pose and the slow walk end: {bg[1]}')
 
+    print('Walking speed on arrival (0.28.47, the user\'s "walking very slowly at the start"):')
+    ar = g.ev(r"""(() => { if (typeof sickNow !== 'function' || typeof careerInit !== 'function') return null;
+      const t0 = shipNow(), c = careerInit(), keep = { sd: c.sd, sh: c.sh }, n = SHIP.player.needs, n0 = { ...n }; Object.assign(n, NEEDS_FRESH);
+      setShipNow(-1440 + 17 * 60 + 30); c.sd = 0; c.sh = 0; const a = [SHIP.time.day, sickNow(), playerSpeed(), needEffects().notes.some(x => /unwell/.test(x))];
+      setShipNow(5 * 1440 + 12 * 60); c.sd = SHIP.time.day; c.sh = 0; const b = [sickNow(), playerSpeed() < 1];   // a real sick day still counts
+      Object.assign(c, keep); setShipNow(t0); Object.assign(n, n0); return JSON.stringify([a, b]); })()""")
+    if ar is None: print('  (no career section in this build)')
+    else:
+        ar = json.loads(ar); print('  day 0 at 17:30 [day, unwell, speed, an unwell note]; a real sick day [unwell, slower]:', ar)
+        check(ar[0] == [0, False, 1, False] and ar[1] == [True, True], f'a new arrival is not "unwell" (a sick day 0 meant never): full speed at 17:30 on day 0: {ar}')
+
     print('No tray, no meal (0.28.45, the user\'s):')
     def table_go(tray):
         g.ev(f"""(() => {{ actEnd(true); if (deckDef.num !== 3) goToDeck(3); setShipNow(Math.floor(shipNow() / 1440) * 1440 + 18 * 60 + 5); needsT = null;

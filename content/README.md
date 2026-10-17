@@ -138,10 +138,13 @@ the hours it could.
 skipped, so it's safe to use them.
 
 `{me}` your name, `{name}` the speaker's name, `{first}` their first name, `{nick}` what they call you,
-`{friend}` `{best}` `{rival}` `{partner}` `{mentor}` `{mentee}` a crewmate with that bond, `{boss}` their chief,
+`{friend}` `{best}` `{rival}` `{partner}` `{mentor}` `{mentee}` a crewmate with that bond, `{missed}` the close friend,
+partner or mentor who has left the ship ("I miss {missed}."; a line is skipped for someone who misses nobody), `{boss}` their chief,
 `{other}` the other crew member in the scene, `{thing}` what the line's memory is about (`mem:fav.lamp` gives "the lamp"), `{trad}` the tradition,
 `{machine}`, `{room}`, `{deck}`, `{dish}`, `{weekday}`, and from their roster entry `{home}`, `{family}`, `{hobby}`,
-`{since}`.
+`{since}`. In story arcs and themes use the short, line-ready forms instead (0.43.24): `{kin}` and `{lost}` (they
+include the "my": "my gran", "my wife"; write `{kin}`, never "my {kin}") and `{hobbyNoun}` ("knitting", "the piano");
+there `{family}` and `{hobby}` are errors, because the roster's are descriptions ("late wife, who I still talk about").
 
 **Voice tokens** come from the speaker's voice card, so one shared line sounds like each person:
 `{hi}` `{bye}` `{yes}` `{thanks}` `{wow}` `{sigh}` `{nick}`.
@@ -209,7 +212,11 @@ A: No promises.
   `pair:galley+any`, `pair:dlamini-lukas+silva-bea`); for a group (the knitting circle) use `who:` and `with:` with ids
   separated by `|`;
   or one word for how they relate: `same` (department), `bunk` (share a bunk room), `friend`, `rival`, `senior`
-  (A outranks B), `couple` (one of the established crew couples).
+  (A outranks B), `couple` (one of the established crew couples), `best` (best friends), `mentor` (B is A's
+  mentor), `mentee` (B is A's mentee). lines_check knows these words.
+- **Goodbyes** (0.43.27): a conversation with `leaving:soon` is someone's goodbye before they leave the ship. When the
+  person leaving is near you with someone close by, their goodbye plays first, whatever the usual odds, once per pair (a goodbye cut short can come again).
+  Give it a pair (`? leaving:soon pair:best|mentor|friend|couple`) so it's said to the right person.
 - The conditions are read for speaker A; `{other}` is the other one. The topic is the file's name.
 - In the game (0.43.12): two crew standing or sitting together near you talk now and then, one bubble every 3 seconds
   or so, A and B taking turns. `act:`, `place:` and `deck:` are where speaker A is and what they're doing. Once you've
@@ -293,7 +300,7 @@ them: Was I any good, as your trainer?   [sigh]
 | `keepsake:` | what they give you to keep (resolution beats) |
 | `learn:` | one line for the Crew app's "What you know" (their story) |
 | `mail:` | a Mail from them afterwards: `<minutes later> \| <subject> \| <body>` |
-| `needs:` | themes only: the roster details a beat uses (`needs: home, family`); people without them skip it |
+| `needs:` | themes only: the roster details a beat uses (`needs: home, kin`): `home`, `since`, `kin`, `lost`, `hobbyNoun`; people without them skip it. Every one of these a beat's lines use must be listed (lines_check says so); in story arcs, `{lost}` needs `needs: lost` |
 
 - **The script** follows: `them: text [pose]` (`them` is the arc's person; a crew id or `you` also work;
   `them > you: ...` for a line said to you). Poses: `sigh`, `laugh`, `listen`, `nod`, `gesture`.
@@ -312,15 +319,18 @@ three differences:
 
 - **The header:** `@arc home.<contact>`, `who: home:<contact>`, `name: Mum` (what you call them), and `pron: they`
   where it applies.
-- **Beats** take every arc field plus `via: reply` (an ordinary call) or `via: live` (it waits for a clear line, Letters
-  evening). Chain them with `when: beat:home.mum.2` or `when: flag:home.mum.called`.
-- **After the beats**, two sections:
-  - `== send`: things you can tell them on a call. `? conditions`, then `- text   flavour:share` (optionally `flag:<key>`
-    or `mem:<word>`, set when you choose it) with their reaction indented under it (`  them: text [pose]`). Conditions
-    last until the next `?`, so put a bare `?` before lines anyone can say. `came:any` and `friend:any` (with `{trad}`
-    and `{friend}`) are for "I went to quiz night" and "I've made a friend".
-  - `== chat`: whole everyday calls for days with no beat, separated by `--`. An optional `when: <conditions>` first,
-    the lines, and `? send` where your choice of news goes.
+- **One-sided** (the user, 0.62.0): only they speak; you listen. No `? choice` in beats and no `== send`; one call home
+  a day in all, and you pick who.
+- **Beats** (`== beat N`, 6-10 `them:` lines) take every arc field (tone, when, mem, flag, keepsake, learn, mail, hint);
+  `via: live` is optional and makes that call come on a clear line. A beat plays on your first call to them 7 or more
+  days after their last beat, any day, so don't write "tonight" or a weekday unless its `when:` asks for it. `hint:` is
+  what the booth screen says while that beat is due. Chain them with `when: beat:home.mum.2` or `when: flag:home.mum.called`.
+- **`== chat`**: whole ordinary calls for days with no beat, separated by `--`, 5-8 `them:` lines each, an optional
+  `when: <conditions>` first. `beat=home.mum.2` (exactly two beats told) ties a scene to a stage of the arc; weekday:,
+  season: and time: add colour. A scene whose when uses `cue:`, `came:`, `friend:` or `flag:intro.*` is a news reaction
+  (they heard your news by Mail) and plays once. The game picks a news reaction first, then a scene you haven't heard in
+  your last 16 calls to them (staged ones first), else the one heard longest ago. Recorded messages in Mail use the same
+  scenes (not the news reactions).
 
 Family warmth ("I love you", "love to you") is fine in call files, and only that: any other romance word ("in love",
 "my love", "my heart"...) is an error there as everywhere; the head writer reads them for tone. The contacts are `mum`,

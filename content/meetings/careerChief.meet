@@ -1,0 +1,26 @@
+@meeting careerChief
+// Head writer 4 (career system, design-doc "Leave, missed shifts and being let go"): the step at "low". Calder calls
+// you to her glass office on Deck 5. Exact but fair, worried rather than angry, clear about what has to change. No
+// wrong answer; she says it once and won't bring it up again if you fix it.
+title: A word with the Chief
+from: Chief Ines Calder
+gist: You didn't come to my office. Missed shifts. Be in the bay at ten to eight, every workday. Need a day? Book leave.
+== lines
+calder: Door. Thank you. Sit.   [gesture]
+calder > you: I'll be plain. You've missed shifts. Not one. Several.
+calder: The board doesn't wait. When you're not there, someone else takes your jobs. Then they're late on theirs.
+calder: I'm not angry. I'm worried. Those are different, and I'd like you to know which.
+calder > you: So. What's going on, {me}? Take your time.   [listen]
+? choice
+* It's been hard. I've been tired.   rel:calder+1 flavour:share mem:career.chief.tired
+  calder: Tired I can work with. If you're ill, the infirmary. Time there never counts against you.
+* I don't have a good reason.   rel:calder+1 mem:career.chief.honest
+  calder: Honest. Good. I can work with honest.   [nod]
+* It won't happen again.   mem:career.chief.promise
+  calder: Don't promise me. Show the board.
+calder: Here's what changes. You're in the bay at ten to eight. Every workday.
+calder: You take a job. You finish it. You turn it in at the board. Do that, and this goes away.
+calder: Need a day? Book leave on your device. An empty slot on paper beats a surprise.
+calder: If nothing changes, the Captain will want to see you. Neither of us wants that.
+calder > you: Nobody thanks the air. But somebody has to turn up and keep it going. I'd like that to be you.
+calder: That's all. I won't say it twice. Board's there.   [nod]

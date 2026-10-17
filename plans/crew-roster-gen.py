@@ -642,7 +642,7 @@ ABOUT_THEME = {   # tier 3 (past or work, opens up) and tier 4 (secret) per stru
 SOCIAL_HAND = {
     'marrow': dict(tpl='steady', openness='guarded', needs='listen', loves=['music'], likes=['tea', 'book'], joy='the piano on Thursday nights', thread='arc:marrow', keepsake='a page of sheet music she wrote', home='Port Halloran', family='daughter at the Concord academy'),
     'vance': dict(tpl='brisk', openness='guarded', needs='practical', loves=['game'], likes=['made', 'tea'], joy='the rowing leaderboard', thread='arc:vance', keepsake='his old academy rowing medal', home='New Aberdeen', family='brother in the Concord navy'),
-    'sato': dict(tpl='dreamy', openness='normal', needs='share', loves=['tea', 'star'], likes=['book', 'plant'], joy='her terrible tea', thread='arc:sato', keepsake='a tin of the terrible tea', home='Lisk', family='partner on a research station'),
+    'sato': dict(tpl='dreamy', openness='normal', needs='share', loves=['tea', 'star'], likes=['book', 'plant'], joy='her terrible tea', thread='notgood', keepsake='a tin of the terrible tea', home='Lisk', family='partner on a research station'),
     'holt': dict(tpl='gruff', openness='guarded', needs='practical', loves=['made'], likes=['tea', 'game'], joy='walking the decks before breakfast', thread='arc:holt', keepsake='his first Watch badge', home='Marra Station', family='old border-patrol crew, who I still write to'),
     'calder': dict(tpl='brisk', openness='guarded', needs='practical', loves=['made'], likes=['tea', 'book'], joy='a fan that runs sweetly', thread='arc:calder', keepsake='a spanner from the battered toolbox', home='the Tevan belt shipyards', family='first chief, as near to family as I had'),
     'pell': dict(tpl='chatty', openness='open', needs='cheer', loves=['music', 'sweet'], likes=['made', 'game'], joy='his tin of screws from every ship', thread='arc:pell', keepsake='his smallest music box', home='Coriel', family='mum, who messages every week'),
@@ -874,6 +874,68 @@ def hobby_since(people):
         assert e['hobby'].split()[0].endswith('ing') and e['since'], e['id']
         f = e['family']        # said after "my": a noun phrase, no article, no third person
         assert not re.match(r'(a|an|the|my) ', f) and not NO_MY.search(f), (e['id'], f)
+
+# ---- kin, lost and hobbyNoun (0.16.15, short fill-ins for the writers' theme lines, after reviewer 2's dialogue review).
+# Plain rules on what each person already has, no random draws, so nobody moves.
+# kin: one living close relative, with "my", never a partner ("It's {kin}. Not well."); "" when their text has none.
+# lost: someone who has died, only where their text already says so (Oduya's wife; the loss secret "Lost someone close"),
+#       never anyone their other lines treat as alive; "" for everyone else.
+# hobbyNoun: the hobby as a short activity noun, for "a bit of X", "teaching X", "I've done X since I was small".
+KIN_HAND = {'marrow': 'my daughter', 'vance': 'my brother', 'sato': '', 'holt': '', 'calder': '', 'pell': 'my mum', 'rina': 'my gran',
+            'brennan': '', 'tomas': 'my little brother', 'nandakumar': 'my eldest son', 'kowalczyk': 'my dad', 'raman': 'my daughter',
+            'ferreira': 'my mum', 'oduya': '', 'mensah': 'my twin', 'mori': 'my mum', 'torres-zeke': 'my gran', 'saruth': ''}
+KIN_OF = {'younger brother': ['my younger brother'], 'two older sisters': ['my big sister'], 'parents, who run a repair shop': ['my mum', 'my dad'],
+          'grandmother, who raised me': ['my gran'], 'big, noisy family': ['my mum', 'my dad'], 'twin': ['my twin'], 'mother, who writes every week': ['my mum'],
+          'father, who grows apples': ['my dad'], 'three cousins, who I grew up with': ['my cousin'], 'aunt, who was a pilot': ['my aunt'],
+          'little sister, who wants to join up': ['my little sister'], 'parents on a mining station': ['my mum', 'my dad']}
+LOST_HAND = {'oduya': 'my wife'}
+LOST_OF = ['my grandad', 'my best friend', 'my uncle']        # nobody's kin or family, so no line treats them as alive
+HOBBY_NOUN = {'baking': 'baking', 'looking after a cactus called Gerald': 'cactus care', 'writing letters home': 'letter writing', 'learning the guitar, badly': 'guitar',
+              'reading': 'reading', 'growing herbs': 'herb growing', 'reading mystery novels': 'reading', 'trying new teas': 'tea tasting', 'drawing comics': 'drawing',
+              'pressing flowers': 'flower pressing', 'playing Tiles': 'Tiles', 'collecting souvenirs': 'souvenir collecting', 'keeping a journal': 'journalling',
+              'lifting weights': 'weightlifting', 'knitting scarves': 'knitting', 'running': 'running', 'telling terrible jokes': 'comedy',
+              'painting tiny portraits of the crew': 'painting', 'recording messages for home': 'recording', 'drawing pictures of the cat back home': 'drawing',
+              'playing the harmonica': 'harmonica', 'playing the piano': 'piano', 'rowing': 'rowing', 'brewing terrible tea': 'tea brewing',
+              'writing letters by hand': 'letter writing', 'fixing broken things': 'tinkering', 'collecting music boxes': 'music-box collecting', 'mapping the stars': 'star mapping',
+              'growing chillies': 'gardening', 'reading old paper novels': 'reading', 'building a model of the Wren': 'model making', 'learning languages': 'languages',
+              'trying sweets from every port': 'sweet tasting', 'practising card tricks': 'magic', 'drawing charts': 'drawing', 'collecting old records': 'record collecting',
+              'knitting': 'knitting', 'doing crosswords in the bow lounge': 'crosswords', 'making playlists': 'music mixing', 'watching the stars go by': 'stargazing',
+              'growing cuttings': 'gardening', 'gardening': 'gardening', 'cooking recipes from home': 'cooking', 'sketching in the garden': 'sketching',
+              'tying cord knots': 'knotwork', 'collecting mission patches': 'patch collecting', 'playing the fiddle': 'fiddle', 'playing the drums': 'drums',
+              'playing the keyboard': 'keyboard', 'singing': 'singing', 'stargazing': 'stargazing', 'playing chess': 'chess', 'listening to old records': 'record collecting',
+              'playing cards at the bar': 'cards', 'doing puzzles': 'puzzles', 'making models': 'model making'}
+# ---- story arcs the writers own (0.16.16, head writer 3 and social B2: the roster's thread wins for themes, the voice files
+# only for 'arc:' threads). Sato's thread is the notgood theme (facts 11; her own secret already fits it). Zainab Kovac has
+# the writers' four-beat arc (the lift club, facts 6; reworded in 0.16.21: everyone rides the lift and eats breakfast), so her thread is arc:kovac and all her generated details give way
+# to her canon ones. Applied last, with no random draws, so nobody moves.
+ARC_OVERRIDE = {'kovac-zainab': ('arc:kovac', [   # all her details from canon (facts 6 and 11), worded by head writer 3 (0.16.17)
+    (0, 'work', 'Can strip a scrubber in ten minutes flat.'), (0, 'hobby', 'Knits the neatest scarves in the knitting circle, without a single dropped stitch.'),
+    (1, 'hobby', 'Bolts breakfast to get to the garden; her beans are the tidiest rows there.'), (1, 'hobby', 'Browses the crew store for wool; never buys the first ball she likes.'),
+    (2, 'home', 'Writes to a big, noisy family more often than her family writes back.'),
+    (3, 'past', 'Holds the lift rail with both hands, and tells anyone who notices "Lovely lift."'),
+    (4, 'secret', 'Is afraid of the lift, and thinks she is the only one aboard who is.')])}
+ARC_FIELDS = {'kovac-zainab': {'home': 'Marra Station'}}      # her arc's beat 3: she grew up on Marra Station (0.16.18)
+def arc_fixes(people):
+    for e in people:
+        if e['id'] not in ARC_OVERRIDE: continue
+        th, lines = ARC_OVERRIDE[e['id']]
+        e['thread'] = th
+        e['about'] = [dict(tier=t, topic=k, text=x) for t, k, x in lines]
+        e.update(ARC_FIELDS.get(e['id'], {}))
+        assert len(e['about']) >= 6, e['id']
+
+# the talent theme ("I do a bit of X when nobody's looking", "Me, teaching X", "I made it for you") needs a secret craft, not a
+# public pastime, so talent-thread people get one hand-set from their hobby (0.16.20, reviewer 1c); the generator asserts it.
+TALENT_NOUN = {'ibarra-rafael': 'crossword setting', 'silva-bea': 'tea blending', 'quist-ilse': 'story writing', 'jovanovic-petra': 'tile carving',
+               'amadi-asha': 'star sketching', 'juarez-nell': 'patch sewing'}
+def kin_lost(people):
+    for e in people:
+        k = KIN_HAND[e['id']] if e['id'] in KIN_HAND else KIN_OF[e['family']][stable(e['id']) % len(KIN_OF[e['family']])]
+        lost = LOST_HAND.get(e['id']) or ('' if e['id'] in LOST_HAND or not any(a['text'].startswith('Lost someone close') for a in e.get('about', []))
+                                          else LOST_OF[stable(e['id']) % len(LOST_OF)])
+        e['kin'], e['lost'], e['hobbyNoun'] = k, lost, TALENT_NOUN[e['id']] if e['thread'] == 'talent' else HOBBY_NOUN[e['hobby']]
+        for v in (k, lost): assert v == '' or (v.startswith('my ') and len(v.split()) <= 3 and 'partner' not in v and 'wife' not in v or v == LOST_HAND.get(e['id'])), (e['id'], v)
+        assert (k != lost or not k) and not e['hobbyNoun'].startswith(('a ', 'my ', 'the ')), e['id']
 
 DROPPED = []
 COUPLED = []
@@ -1156,8 +1218,8 @@ THEME_WORDS = {'homesick': 'homesick', 'exams': 'exam nerves', 'family': 'family
 def social_words(x, entries):
     if not x.get('tpl'): return 'you'
     th = x['thread']; th = THEME_WORDS.get(th, 'their own story')
-    w = '%s voice, %s; loves %s, likes %s; joy: %s; hobby: %s; from %s; family: my %s; aboard %s; struggle: %s; keepsake: %s' % (
-        x['tpl'], x['openness'], ' and '.join(x['loves']), ' and '.join(x['likes']), x['joy'], x.get('hobby', '-'), x['home'], x['family'],
+    w = '%s voice, %s; loves %s, likes %s; joy: %s; hobby: %s; from %s; family: my %s%s; aboard %s; struggle: %s; keepsake: %s' % (
+        x['tpl'], x['openness'], ' and '.join(x['loves']), ' and '.join(x['likes']), x['joy'], x.get('hobby', '-'), x['home'], x['family'], (' (lines: %s)' % ', '.join(v for v in (x.get('kin'), x.get('lost') and 'lost ' + x['lost'], x.get('hobbyNoun')) if v)) if x.get('hobbyNoun') else '',
         x.get('since', '-') if not x.get('reserve') else x.get('since', '-') + ' (from arrival)', th, x['keepsake'])
     if x.get('partner'): w += '. Partner: ' + next(y['name'] for y in entries if y['id'] == x['partner'])
     return w + ('. Stays aboard.' if x.get('stays') else '. Could be posted to %s.' % x['transferTo'] if x.get('transferTo') else '.')
@@ -1243,6 +1305,8 @@ if __name__ == '__main__':
     visits = visitors(entries)
     reserve_pool, rotations = reserve(entries + visits)
     hobby_since(crew + [x for x in guests if x['id'] in SOCIAL_HAND] + reserve_pool)   # 0.16.14
+    kin_lost(crew + [x for x in guests if x['id'] in SOCIAL_HAND] + reserve_pool)      # 0.16.15
+    arc_fixes(crew)                                                                    # 0.16.16
     block = ('// ---- BEGIN ROSTER (generated by plans/crew-roster-gen.py: fixed data; to change the crew, edit the generator and re-run it) ----\n'
              'const HABITS = ' + json.dumps(HABITS, ensure_ascii=False, indent=2) + ';\n'
              'const ROSTER = [\n' + js(crew) + '\n];\n'

@@ -1,0 +1,54 @@
+@crew rina
+// Head writer 4: career lines. Infirmary aide: she checks you're not ill before anything else. Dry, then direct.
+
+== career.missed
+? tier>=acquaintance
+- You missed a shift. Ill? Come to the infirmary. If you're ill, it doesn't count.
+
+== worried.chief
+? tier>=colleague
+- Saw Calder, did you? Sleep, eat, turn up. Medical advice. Free of charge.
+
+== worried.captain
+? tier>=friend
+- I'm keeping count, {nick}. Not at Tiles. Of you. Go to work.   #serious
+
+== worried.last
+? tier>=friend
+- I had a hard year once. Routine helped more than anything. Try it. For me.   #serious
+
+== career.up
+? tier>=acquaintance
+- Colour's back in your face. Keep it there.
+
+== farewell.eve
+? tier>=friend
+- Tomorrow. Right. I'll lose at Tiles once, as a send-off. Don't tell anyone.   #serious
+
+== farewell.day
+? tier>=acquaintance
+- Look after yourself. Sleep. Eat. That's not advice, that's an order.   #warm
+- Came to check you're fit to fly. You are. I'll see you at the bay.   #warm
+
+== career.leave.booked
+?
+- Taking leave? Good. Rest is medicine. The cheap kind.
+
+== career.onleave
+?
+- Ill isn't leave, by the way. If you're ill, come and see me.
+
+== career.back
+?
+- Rested? Let me look. Hm. Better. You'll live.   #funny
+
+// Being ill (head writer 4): Rina is the one who notices first and says it as an order.
+== sick.getwell
+? tier>=acquaintance
+- You look like a dropped tray. Infirmary. I'm on till five.
+== sick.nudge
+? tier>=friend
+- I've kept a bed warm. Not a metaphor. Come and get in it. Infirmary, now.   #warm
+== sick.better
+? tier>=acquaintance
+- Temperature down? Good. Drink some water. That's not a suggestion.

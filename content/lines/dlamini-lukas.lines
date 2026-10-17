@@ -88,7 +88,7 @@
 
 == life
 ? tier>=acquaintance
-- I skip breakfast. Six hours of cooking it and I can't face it. Fair, really.
+- Breakfast? Two bites. Six hours of cooking it and I can't face more. Fair, really.
 ? tier>=colleague
 - Married just before the tour. Best decision. Worst timing. Both true.
 ? tier>=colleague
@@ -218,7 +218,7 @@
 == smalltalk
 ? act:meal
 - Soup. Good. Typical.
-- Skipped breakfast. Lunch counts double.   #funny
+- Two-bite breakfast. Lunch counts double.   #funny
 ? act:off
 - Rest day. Garden at misting hour. Best hour.
 - Bar stool. Same drink. Don't move it.   #funny
