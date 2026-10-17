@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.39.4 
+   STARSHIP CADET: CSV Wren                           build 0.39.5 
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.39.4';                            // keep in step with the header's build line
+const GAME_BUILD = '0.39.5';                            // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -13896,6 +13896,7 @@ function socClash(p, q) {
   return SOC_CLASH.some(([x, y]) => (has(a, x) && has(b, y)) || (has(a, y) && has(b, x)));
 }
 function affStart(p, q) {                                // where a pair starts: work, bunk, habits and traits in common
+  if (p.partner === q.id || q.partner === p.id) return 90;   // a couple (B6: the roster's partners, together from the start)
   let v = 0;
   if (p.dept === q.dept) v += 12;
   if (socRoom(p) === socRoom(q)) v += 18;
@@ -13923,7 +13924,7 @@ function socSave() {
   const rel = {}; for (const id in SHIP.rel) { const r = SHIP.rel[id]; rel[id] = [r.pts, r.met, r.lastTalk, r.known.slice(), r.chatDay || 0, r.mealDay || 0, r.workDay || 0, r.favDay || 0, r.seekDay || 0, r.arc || 0, r.arcDay || 0, r.showDay || 0, r.giftWeek || 0, r.inviteDay || 0, r.visitDay || 0, r.bye || 0]; }
   let bin = ''; for (const x of new Uint8Array(SHIP.aff.buffer)) bin += String.fromCharCode(x);
   return { ids: socHash(SOC.ids), idl: SOC.ids, hour: SHIP.social.hour, aff: btoa(bin), news: NEWS.map(x => ({ ...x, k: bitsOf(SHIP.knows[x.id] || []) })),
-           heard: SHIP.heard.slice(-60), fault: { ...SHIP.social.fault }, pairs: { ...SHIP.social.pairs }, mail: SHIP.social.mail.map(x => ({ ...x })), feuds: JSON.parse(JSON.stringify(SHIP.social.feuds)), courtesy: { ...SHIP.social.courtesy }, cues: SHIP.social.cues.map(x => ({ ...x })), mentor: SHIP.social.mentor || null, given: (SHIP.social.given || []).map(x => ({ ...x })), keepsakes: (SHIP.social.keepsakes || []).map(x => ({ ...x })), rep: SHIP.rep ? JSON.parse(JSON.stringify(SHIP.rep)) : null, invites: (SHIP.social.invites || []).map(x => ({ ...x })), notes: (SHIP.social.notes || []).map(x => ({ ...x })), visitDay: SHIP.social.visitDay || 0, moved: (SHIP.social.moved || []).map(x => ({ ...x, mem: x.mem.slice() })), bonds: JSON.parse(JSON.stringify(SHIP.social.bonds || {})), affWeek: typeof SHIP.social.affWeek === 'string' ? SHIP.social.affWeek : null, stories: JSON.parse(JSON.stringify(SHIP.social.stories || {})), rel, ...memSave() };
+           heard: SHIP.heard.slice(-60), fault: { ...SHIP.social.fault }, pairs: { ...SHIP.social.pairs }, mail: SHIP.social.mail.map(x => ({ ...x })), feuds: JSON.parse(JSON.stringify(SHIP.social.feuds)), courtesy: { ...SHIP.social.courtesy }, cues: SHIP.social.cues.map(x => ({ ...x })), mentor: SHIP.social.mentor || null, given: (SHIP.social.given || []).map(x => ({ ...x })), keepsakes: (SHIP.social.keepsakes || []).map(x => ({ ...x })), rep: SHIP.rep ? JSON.parse(JSON.stringify(SHIP.rep)) : null, invites: (SHIP.social.invites || []).map(x => ({ ...x })), notes: (SHIP.social.notes || []).map(x => ({ ...x })), visitDay: SHIP.social.visitDay || 0, moved: (SHIP.social.moved || []).map(x => ({ ...x, mem: x.mem.slice() })), bonds: JSON.parse(JSON.stringify(SHIP.social.bonds || {})), affWeek: typeof SHIP.social.affWeek === 'string' ? SHIP.social.affWeek : null, stories: JSON.parse(JSON.stringify(SHIP.social.stories || {})), noteq: JSON.parse(JSON.stringify(SHIP.social.noteq || [])), rel, ...memSave() };
 }
 function socLoad(s) {
   try {
@@ -13944,7 +13945,8 @@ function socLoad(s) {
       invites: Array.isArray(s.invites) ? s.invites.filter(x => x && typeof x.from === 'string' && isFinite(x.day)).map(x => ({ ...x })) : [],
       notes: Array.isArray(s.notes) ? s.notes.filter(x => x && typeof x.from === 'string' && typeof x.text === 'string').map(x => ({ ...x })) : [], visitDay: s.visitDay | 0,
       moved: Array.isArray(s.moved) ? s.moved.filter(x => x && typeof x.id === 'string' && Array.isArray(x.mem)).map(x => ({ ...x, mem: x.mem.slice() })) : [],
-      bonds: s.bonds && typeof s.bonds === 'object' ? JSON.parse(JSON.stringify(s.bonds)) : {}, affWeek: typeof s.affWeek === 'string' ? s.affWeek : null, stories: s.stories && typeof s.stories === 'object' ? JSON.parse(JSON.stringify(s.stories)) : {} };   // 20c's bonds, weekly snapshot and moment state ride here
+      bonds: s.bonds && typeof s.bonds === 'object' ? JSON.parse(JSON.stringify(s.bonds)) : {}, affWeek: typeof s.affWeek === 'string' ? s.affWeek : null, stories: s.stories && typeof s.stories === 'object' ? JSON.parse(JSON.stringify(s.stories)) : {},
+      noteq: Array.isArray(s.noteq) ? s.noteq.filter(x => Array.isArray(x) && isFinite(x[0]) && typeof x[1] === 'string').map(x => JSON.parse(JSON.stringify(x))) : [] };   // 20c's bonds, weekly snapshot and moment state ride here
     NEWS.length = 0; SHIP.knows = {};
     for (const x of Array.isArray(s.news) ? s.news : []) if (x && typeof x.id === 'string' && Array.isArray(x.lines) && typeof x.k === 'string' && (same || old)) {
       const { k, ...it } = x; NEWS.push(it); SHIP.knows[it.id] = same ? setOf(k) : setOfIds(k, old);
@@ -14090,23 +14092,46 @@ function cue(kind) {
 // for a day or two. SOC_CUE_OF: note kind -> [the cue's key from its data, days it lasts]. Memories (A2) and
 // reputation (A6) listen here too
 const SOC_CUE_OF = {
-  repair: [d => 'repair.' + (d.kind || (typeof machineById === 'function' && machineById(d.machine) || {}).kind || 'machine'), 2],
+  repair: [d => 'repair.' + ((typeof machineById === 'function' && d.machine && machineById(d.machine) || {}).kind || (d.kind !== 'repair' && d.kind) || 'machine'), 2],   // the machine's own kind first (the bus's note has its own `kind`)
   tradition: [d => 'tradition.' + d.id, 1], eventPhase: [d => 'event.' + d.id + '.' + d.phase, 1], favour: [d => 'favour', 1],
   gift: [d => 'gift', 1], harvest: [d => 'harvest', 2], lateMeal: [d => 'lateMeal', 1],
 };
 function socNote(kind, d) {
   socInit(); d = d || {};
   const c = SOC_CUE_OF[kind]; if (!c) return;
-  const now = Math.floor(shipNow()), key = c[0](d), you = d.who === 'you' || d.you === true || (Array.isArray(d.came) && d.came.includes('you'));
+  const now = Math.floor(socNow()), key = c[0](d), you = d.who === 'you' || d.you === true || (Array.isArray(d.came) && d.came.includes('you'));
   SHIP.social.cues.push({ key, at: now, until: now + c[1] * 1440, you, deck: d.deck || null });
   SHIP.social.cues = SHIP.social.cues.filter(x => x.until > now).slice(-30);
 }
-if (typeof onSim === 'function') for (const k in SOC_CUE_OF) onSim(k, d => socNote(k, d));
-const SOC_THING = { fav: 'the favour', 'fav.lamp': 'the lamp', fixed: 'the repair', came: 'coming along', gift: 'the present', visit: 'the visit', bday: 'my birthday' };
+// notes are queued and applied when the social hour they happened in runs (socialHour), at their own time (SOC_T), so one
+// big time jump and the same hours played one by one come out the same (0.36.49)
+let SOC_T = null;
+const socNow = () => SOC_T != null ? SOC_T : shipNow(), socDay = () => Math.floor(socNow() / 1440) + 1;
+const SOC_HEARS = ['repair', 'tradition', 'eventPhase', 'favour', 'gift', 'harvest', 'lateMeal', 'choice', 'introStep', 'jobAbandoned', 'jobUnclaimed', 'shiftStart', 'moment'];
+function socHear(kind, d) {
+  socInit(); d = d || {}; const t = isFinite(d.t) ? d.t : shipNow(), Q = SHIP.social.noteq || (SHIP.social.noteq = []);
+  if (t < SHIP.social.hour * 60) { socApply(kind, d, t); return; }   // its hour has already run (a late note): now, at its own time
+  Q.push([t, kind, JSON.parse(JSON.stringify(d))]);
+}
+function socApply(kind, d, t) {
+  const was = SOC_T; SOC_T = t;
+  try { if (SOC_CUE_OF[kind]) socNote(kind, d); memNote(kind, d); if (kind === 'introStep') socIntroNote(d); repNote(kind, d); } finally { SOC_T = was; }
+}
+function socNotesTo(tEnd) {                              // apply the queued notes before tEnd, oldest first (arrival order on a tie)
+  const Q = SHIP.social.noteq; if (!Q || !Q.length) return;
+  const due = Q.filter(x => x[0] < tEnd).sort((a, b) => a[0] - b[0]); if (!due.length) return;
+  SHIP.social.noteq = Q.filter(x => x[0] >= tEnd);
+  for (const [t, kind, d] of due) socApply(kind, d, t);
+}
+if (typeof onSim === 'function') for (const k of SOC_HEARS) onSim(k, d => socHear(k, d));
+const SOC_THING = { fav: 'the favour', 'fav.lamp': 'the lamp', 'fav.fetch': 'you fetching my things', fixed: 'the repair', came: 'you coming along', gift: 'the present', visit: 'the visit', bday: 'my birthday',
+  show: 'the show', 'show.pell-show': 'the music boxes', appt: 'our catch-ups', mended: 'you patching things up', helped: 'your help' };
 function memThing(key) {                                 // {thing}: a memory's object in words ('fixed.oven' -> 'the oven'), or null
   if (typeof key !== 'string' || !key) return null;
   const mk = /^fixed\.(.+)/.exec(key), kind = mk && typeof MACHINE_KINDS !== 'undefined' && MACHINE_KINDS[mk[1]];
   if (kind) return 'the ' + kind.name.toLowerCase();
+  const mc = /^came\.(.+)/.exec(key), tr = mc && typeof SHIP_TRADITIONS !== 'undefined' && SHIP_TRADITIONS.find(x => x.id === mc[1]);   // came.quiz -> 'the quiz night'
+  if (tr) return 'the ' + tr.name.toLowerCase();
   for (let s = key; s; s = s.includes('.') ? s.slice(0, s.lastIndexOf('.')) : '') if (SOC_THING[s]) return SOC_THING[s];
   return null;
 }
@@ -14164,7 +14189,7 @@ const memClass = key => { for (let s = key; s; s = s.includes('.') ? s.slice(0, 
 function memAdd(id, key, o = {}) {
   socInit(); id = socId(id); if (!SOC.idx.has(id) || typeof key !== 'string' || !key) return null;
   const cls = MEM_CLASS[o.cls] ? o.cls : memClass(key), [w0, half] = MEM_CLASS[cls], w = isFinite(o.w) ? Math.max(0, Math.min(100, o.w)) : w0;
-  const day = Math.floor(shipNow() / 1440) + 1, l = SHIP.mem[id] || (SHIP.mem[id] = []);
+  const day = socDay(), l = SHIP.mem[id] || (SHIP.mem[id] = []);
   let m = l.find(x => x[0] === key);
   if (m) { m[1] = day; m[2] = Math.max(m[2], w); m[4] = half && m[4] ? Math.max(m[4], half) : 0; }
   else {
@@ -14201,7 +14226,7 @@ function memFade() {                                     // once a ship day, at 
 function memRepair(d) {
   if (d.who !== 'you' || typeof machineById !== 'function') return;
   const m = d.machine && machineById(d.machine); if (!m || !m.room) return;
-  const S = schedData(), day = Math.floor(shipNow() / 1440) + 1;
+  const S = schedData(), day = socDay();
   const users = SOC.crew.filter(p => planDay(p, day).some(s => { const pl = s.placeId && S.byId.get(s.placeId); return pl && pl.deck === m.deck && pl.room === m.room; }))
     .sort((a, b) => relTier(b.id) - relTier(a.id) || schedU(a.seed, day, 644) - schedU(b.seed, day, 644)).slice(0, 6);
   for (const p of users) memAdd(p.id, 'fixed.' + m.kind);
@@ -14212,7 +14237,6 @@ function memNote(kind, d) {
     for (const id of d.came) if (id !== 'you' && SHIP.rel[id] && SHIP.rel[id].met !== null) memAdd(id, 'came.' + d.id);
   if (kind === 'choice' && d.script) for (const id of [].concat(d.who || [])) memAdd(id, typeof d.mem === 'string' && d.mem ? d.mem : 'meeting.' + d.script + '.' + (d.k ?? 0));   // the choice's own mem key when the script gives one
 }
-if (typeof onSim === 'function') for (const k of ['repair', 'tradition', 'choice']) onSim(k, d => { socInit(); memNote(k, d || {}); });
 
 // ---- the first week (0.36.23, A4; plans/social-deep-plan.md Part 7) ----
 // Onboarding (section 21) runs the arrival and week 1 and sets flags in section 13's store (flag / flagSet). While its
@@ -14246,7 +14270,6 @@ function socIntroNote(d) {                                  // the bus's introSt
   const key = INTRO_MEM[d.step]; if (!key) return;
   for (const id of [].concat(d.who || [], INTRO_MEM[d.step] === 'intro.dinner' && SOC.idx.has('calder') ? ['calder'] : [], e ? [e] : [])) memAdd(id, key, { cls: 'core' });
 }
-if (typeof onSim === 'function') onSim('introStep', d => socIntroNote(d || {}));
 function socialInvite(o = {}) {
   socInit(); const from = o.from, p = SOC.idx.has(from) ? SOC.crew[SOC.idx.get(from)] : null;
   if (!p || !SHIP.device || !Array.isArray(SHIP.device.appts)) return null;
@@ -14291,10 +14314,11 @@ const GIFT_HABIT = { 'tea-break': 'tea', 'garden-lover': 'garden', gardener: 'pl
 const GIFT_NOTES = [['a biscuit, wrapped in a napkin', 'Saved you one. Don\'t tell the others.'], ['a little sketch of the Wren', 'Drew this on my break. It\'s you, by the lift. Sort of.'],
   ['a cutting from the garden', 'It\'ll root if you keep it wet. Put it by your bunk.'], ['a cup of tea, gone cold', 'Made you a tea and you weren\'t here. It\'s the thought that counts.'], ['a folded paper star', 'Found the instructions in an old book. Took me six tries.']];
 const giftOf = item => { const k = item && (item.name || item); return typeof k === 'string' && SOC_GIFTS[k.toLowerCase()] ? { item: k.toLowerCase(), ...SOC_GIFTS[k.toLowerCase()] } : null; };
-const socWeek = (d = SHIP.time.day) => Math.floor((d - 1) / 7);
+const socWeek = (d = socDay()) => Math.floor((d - 1) / 7);
+const GIFT_TAG_ALIAS = { card: 'star', postcard: 'star', books: 'book', games: 'game', plants: 'plant', sweets: 'sweet' };   // writers' words -> SOC_GIFTS tags
 function giftTaste(p) {                                  // { loves: [tags], likes: [tags] }
-  const v = typeof VOICE !== 'undefined' && VOICE[p.id];
-  if (v && (Array.isArray(v.loves) || Array.isArray(v.likes))) return { loves: (v.loves || []).slice(), likes: (v.likes || []).slice() };
+  const v = typeof VOICE !== 'undefined' && VOICE[p.id], tag = x => GIFT_TAG_ALIAS[x] || x;
+  if (v && (Array.isArray(v.loves) || Array.isArray(v.likes))) return { loves: (v.loves || []).map(tag), likes: (v.likes || []).map(tag) };
   const tags = [...new Set((p.habits || []).map(h => GIFT_HABIT[h]).filter(Boolean).concat(p.dept === 'works' ? ['made'] : p.dept === 'galley' ? ['garden'] : p.dept === 'survey' ? ['star'] : []))];
   return { loves: tags.slice(0, 1), likes: tags.slice(1).concat(tags.includes('sweet') ? [] : ['sweet']) };
 }
@@ -14376,7 +14400,7 @@ function repAdd(dept, n, ship, why) {                    // n to the department 
   if (why) R.cnt[why] = (R.cnt[why] || 0) + 1;
   if (dept) repBandCheck(dept);
 }
-const repOnce = (what, day = SHIP.time.day) => { const R = repInit(); if (R.day[what] === day) return false; R.day[what] = day; return true; };
+const repOnce = (what, day = socDay()) => { const R = repInit(); if (R.day[what] === day) return false; R.day[what] = day; return true; };
 const REP_DEPT_OF = new Map();
 function repDeptOf(m) {                                  // the department that uses a machine: who works in its room (day 1's plans), else by system
   if (!m) return 'works'; if (REP_DEPT_OF.has(m.id)) return REP_DEPT_OF.get(m.id);
@@ -14391,7 +14415,7 @@ function repNote(kind, d) {                              // from the bus
   if (kind === 'repair' && d.who === 'you') {
     const m = typeof machineById === 'function' && machineById(d.machine), bad = /failing|broken/.test(d.state || d.was || '') || d.failing === true;
     repAdd(m ? repDeptOf(m) : d.dept || 'works', bad ? 5 : 3, { work: bad ? 3 : 2 }, 'jobs');
-    if (m || d.kind) repInit().cnt['fix.' + (m ? m.kind : d.kind)] = (repInit().cnt['fix.' + (m ? m.kind : d.kind)] || 0) + 1;
+    if (m) repInit().cnt['fix.' + m.kind] = (repInit().cnt['fix.' + m.kind] || 0) + 1;
   } else if (kind === 'tradition' && (d.you || (Array.isArray(d.came) && d.came.includes('you')))) {
     const dp = tradDept(d.id), R = repInit(), wk = socWeek();
     if (dp && R.wk[dp] !== wk) { R.wk[dp] = wk; repAdd(dp, 1); }
@@ -14404,7 +14428,6 @@ function repNote(kind, d) {                              // from the bus
     if (d.late >= 20) { repAdd(null, 0, { work: -2 }); repInit().cnt.late = (repInit().cnt.late || 0) + 1; } else repAdd(null, 0, { work: 1 });
   } else if (kind === 'moment' && d.flavour === 'listen') repAdd(null, 0, { kindness: 2 }, 'kind');
 }
-if (typeof onSim === 'function') for (const k of ['repair', 'tradition', 'jobAbandoned', 'jobUnclaimed', 'shiftStart', 'moment']) onSim(k, d => repNote(k, d));
 function repBandCheck(dept) {                            // a band changed: a quiet badge on the Record; reaching 'theirs', their thank-you
   const R = repInit(), b = repBand(dept); if (R.bands[dept] === b) return;
   const was = R.bands[dept]; R.bands[dept] = b;
@@ -14414,12 +14437,12 @@ function repBandCheck(dept) {                            // a band changed: a qu
     R.thanks.push(dept);
     const chief = SOC.crew.find(p => p.dept === dept && (p.rank === 'chief' || p.rank === 'captain')) || SOC.crew.find(p => p.dept === dept);
     if (chief) {
-      SHIP.social.mail.push({ at: Math.floor(shipNow()) + 30, from: chief.name, subject: 'From all of us', body: 'The ' + dept + ' crew asked me to say thank you. You\'ve been a real help to us. Consider yourself one of ours. ' + shortName(chief) });
+      SHIP.social.mail.push({ at: Math.floor(socNow()) + 30, from: chief.name, subject: 'From all of us', body: 'The ' + dept + ' crew asked me to say thank you. You\'ve been a real help to us. Consider yourself one of ours. ' + shortName(chief) });
       if (dept !== 'works') repNoteAdd(chief.name, shortName(chief) + ' told Chief Calder you\'ve been a great help to ' + dept + '.');
     }
   }
 }
-function repNoteAdd(from, text) { const R = repInit(); R.notes.push({ day: SHIP.time.day, from, text }); if (R.notes.length > 20) R.notes.shift(); }
+function repNoteAdd(from, text) { const R = repInit(); R.notes.push({ day: socDay(), from, text }); if (R.notes.length > 20) R.notes.shift(); }
 function repWeek(h) {                                    // Sunday 04:00 (socialHour): the pull to the middle, floors, Calder's note, gossip about you
   const R = repInit(), d = Math.floor(h / 24) + 1;
   for (const k in R.ship) R.ship[k] = Math.round((R.ship[k] + (50 - R.ship[k]) * .1) * 100) / 100;
@@ -14448,7 +14471,7 @@ function repWeek(h) {                                    // Sunday 04:00 (social
 const INVITE_MAX = 2, INVITE_ODDS = .5, INVITE_PERSONAL = .12, INVITE_GAP = 4;
 const INVITE_HABIT = { stargazer: 'observatory', 'lounge-regular': 'lounge', 'garden-lover': 'garden', gardener: 'garden', 'common-room': 'game', music: 'music', 'lingers-at-meals': 'dinner' };
 const INVITE_WHERE = { dinner: s => s.act === 'dinner', observatory: s => /observ/i.test(s.room || ''), lounge: s => /lounge/i.test(s.room || ''), garden: s => /garden/i.test(s.room || ''),
-  game: s => /common|lounge/i.test(s.room || ''), music: s => /music/i.test(s.room || ''), tiles: s => /common|lounge/i.test(s.room || ''), running: s => /gym/i.test(s.room || '') };
+  game: s => /common|lounge/i.test(s.room || ''), music: s => /music/i.test(s.room || ''), tiles: s => /common|lounge/i.test(s.room || ''), running: s => /gym/i.test(s.room || ''), gym: s => /gym/i.test(s.room || '') };
 const INVITE_ASK = { dinner: 'Eat with me tonight? I\'ll save you a seat.', observatory: 'Come up to the observatory after dark? The view\'s worth it.', lounge: 'Drink in the lounge later? My shout.',
   garden: 'I\'m in the garden this evening. Come and get your hands dirty?', game: 'Fancy a game this evening?', music: 'I\'ll be in the music room tonight. Come and listen?', tiles: 'Tiles tonight? I\'ll go easy on you. Probably.', running: 'Run with me later?', quarters: 'Come round to my quarters tonight, about eight? There\'s something I want to show you.' };
 function socInvites(h) {
@@ -14471,6 +14494,8 @@ function socInvites(h) {
     const r = SHIP.rel[p.id]; if ((r.inviteDay || 0) > d - INVITE_GAP || schedU(p.seed, d, 656) >= INVITE_PERSONAL * (warmth(p.id, t) === 'warm' ? 1.5 : 1)) continue;
     const v = typeof VOICE !== 'undefined' && VOICE[p.id], kinds = (v && Array.isArray(v.invites) && v.invites.length ? v.invites : [...new Set((p.habits || []).map(x => INVITE_HABIT[x]).filter(Boolean))]).concat(['dinner']);
     let hit = null;
+    const trad = kinds.map(k => (typeof eventsOn === 'function' ? eventsOn(d) : []).find(e => e.id === k && going(p, e.id))).find(Boolean);   // a voice card's invites may name a tradition: they ask you along when they're going
+    if (trad && !I.some(x => x.day === d && x.trad === trad.id)) { const appt = socialInvite({ trad: trad.id, day: d, from: p.id }); if (appt) { r.inviteDay = d; I.push({ day: d, from: p.id, trad: trad.id, kind: 'trad', appt, said: false, line: (trad.ev && trad.ev.invite && trad.ev.invite.line) || (trad.ev && trad.ev.ask) || null }); n++; continue; } }
     const bed = S.byId.get(p.bed), at8 = (d - 1) * 1440 + 1200, w8 = planWhere(p, at8);   // close friends ask you round to their quarters (doorOpenFor lets you in)
     if (relTier(p.id) >= 4 && bed && w8 && !w8.moving && (w8.act === 'leisure' || w8.act === 'off') && schedU(p.seed, d, 662) < .3) hit = { k: 'quarters', seg: { from: at8, to: at8 + 45, placeId: bed.id } };
     if (!hit) for (const k of kinds) {
@@ -14575,9 +14600,9 @@ function socTransfers(h) {                               // 07:00 each ship day 
   for (const p of SOC.crew) {
     const L = leaveDay(p), A = arriveDay(p); if (L == null && A == null) continue;
     const n = shortName(p), to = p.transferTo ? 'the ' + p.transferTo.replace(/^the /i, '') : 'another ship', near = SOC.crew.filter(q => q !== p && socAboard(q, d) && (q.dept === p.dept || socRoom(q) === socRoom(p)));
-    if (L != null && d === L - 10 && typeof eventOneOff === 'function') {   // their farewell at the shuttle bay on the day (section 18 plans it like a tradition, host first): 15:00 on a Sunday (rotation day), else 19:45 when the day shift can come (the best turnout on paper)
-      try { eventOneOff({ id: 'farewell-' + p.id, name: 'Farewell for ' + shortName(p), day: L, at: weekday(L) === 6 ? [900, 930] : [1185, 1230], venue: 'shuttle-bay', where: [{ deck: 5, room: 'Shuttle bay', types: ['event'] }], host: p.id, hostAnim: 'talk', chance: .2, anim: 'talk',
-        ask: weekday(L) === 6 ? 'Coming to see me off at the shuttle? Three o\'clock.' : 'Coming to see me off at the shuttle tonight? Quarter to eight.', here: 'I\'ll miss this old ship.', thanks: 'You see ' + shortName(p) + ' off at the shuttle bay. Hugs, a few tears, a joke about the coffee.' }); } catch (e) { }
+    if (L != null && d === L - 10 && typeof eventOneOff === 'function') {   // their farewell at the shuttle bay on the day (section 18 plans it like a tradition, host first): 14:00 on a Sunday (rotation day: the shuttle leaves at 15:00), else 19:45 when the day shift can come (the best turnout on paper)
+      try { eventOneOff({ id: 'farewell-' + p.id, name: 'Farewell for ' + shortName(p), day: L, at: weekday(L) === 6 ? [840, 870] : [1185, 1230], venue: 'shuttle-bay', where: [{ deck: 5, room: 'Shuttle bay', types: ['event'] }], host: p.id, hostAnim: 'talk', chance: .2, anim: 'talk',
+        ask: weekday(L) === 6 ? 'Coming to see me off at the shuttle? Two o\'clock, before I board.' : 'Coming to see me off at the shuttle tonight? Quarter to eight.', here: 'I\'ll miss this old ship.', thanks: 'You see ' + shortName(p) + ' off at the shuttle bay. Hugs, a few tears, a joke about the coffee.' }); } catch (e) { }
     }
     if (L != null && d === L - 10) newsAdd({ id: 'leaving:' + p.id, about: p.id, kind: 'transfer', weight: .8, life: 10, born: t, seed: socPick(near, 4, p.seed, d, 663).map(q => q.id),
       lines: ['Did you hear? ' + n + '\'s transferring to ' + to + '.', n + ' is leaving us. ' + to[0].toUpperCase() + to.slice(1) + ', in ten days.', 'Ten days and ' + n + '\'s off to ' + to + '. Can you believe it?'] });
@@ -14671,6 +14696,7 @@ function socBorn(h, rooms) {
 }
 // ---- one ship hour on paper: who spent time together, affinity drifting, news passing on ----
 function socialHour(h) {
+  socNotesTo((h + 1) * 60);                               // the bus notes of this hour, at their own times
   const { crew, n } = SOC, t = h * 60 + 30, S = schedData(), rooms = new Map(), aff = SHIP.aff;
   if (typeof machinesNow === 'function' && typeof MACH_HIST !== 'undefined' && !MACH_HIST.has(h) && t <= shipNow()) machinesNow();
   for (let i = 0; i < n; i++) {
