@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.48.79
+   STARSHIP CADET: CSV Wren                           build 0.48.80
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.48.79';                           // keep in step with the header's build line
+const GAME_BUILD = '0.48.80';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -12967,6 +12967,10 @@ const VOICE_TEMPLATES = {
         {"text": "Back. Good. Easy job first. Then normal.", "id": "14epk7h", "tone": "warm"},
         {"text": "Welcome back. We managed. Barely.", "id": "1tgz5h7", "tone": "funny"},
       ],
+      "clock.early": [
+        {"text": "Off early. Fine. Rest if you need it.", "id": "1ifvmqt"},
+        {"text": "Short day. Noted. Back at eight.", "id": "1hoxjnf"},
+      ],
       "clock.friday": [
         {"text": "Week done. Rest properly. Monday, eight.", "id": "1g35r6a"},
         {"text": "Weekend. Plans? Make some. Then rest.", "id": "1hgnaof"},
@@ -13016,6 +13020,10 @@ const VOICE_TEMPLATES = {
       "clock.back": [
         {"text": "You're back! It's been so quiet. I talked to the racks.", "id": "1m88zbq", "tone": "warm"},
         {"text": "Welcome back! Are you all right? Really? Sit with me at tea.", "id": "1i8ytjq", "tone": "warm"},
+      ],
+      "clock.early": [
+        {"text": "Off already? Everything all right? You'd tell me, wouldn't you?", "id": "1dxiym0"},
+        {"text": "Short day! Lucky you. Or not lucky? Are you all right?", "id": "1til2o2"},
       ],
       "clock.friday": [
         {"text": "Friday! Weekend plans? Tell me so I can be jealous.", "id": "oswsmk"},
@@ -13067,6 +13075,10 @@ const VOICE_TEMPLATES = {
         {"text": "You're back. The bay sounded wrong without you. Now it's right.", "id": "1wg7vid", "tone": "warm"},
         {"text": "Welcome back. I kept thinking I saw you by the racks.", "id": "yhgss8", "tone": "warm"},
       ],
+      "clock.early": [
+        {"text": "Leaving early? The afternoon's yours, then. Be gentle with it.", "id": "o41x9s"},
+        {"text": "Off already? I hope it's something nice.", "id": "rp03ju"},
+      ],
       "clock.friday": [
         {"text": "Friday. Two days. Go somewhere with a window.", "id": "xnoen1"},
         {"text": "Off for the weekend? I hope it's slow. The good kind of slow.", "id": "n7rpb1"},
@@ -13117,6 +13129,10 @@ const VOICE_TEMPLATES = {
         {"text": "Oh, you're back. Good. Nobody else laughs at my jokes.", "id": "172wt8l", "tone": "warm"},
         {"text": "Welcome back. The filters didn't change themselves. I checked.", "id": "b0hifb", "tone": "funny"},
       ],
+      "clock.early": [
+        {"text": "Off early. I'll tell the board you said goodbye.", "id": "11th0fj", "tone": "funny"},
+        {"text": "Short day? Fair. Someone has to beat the dinner queue.", "id": "5b2cwq", "tone": "funny"},
+      ],
       "clock.friday": [
         {"text": "Friday. Two days off. Try not to fix anything for free.", "id": "1elhcac", "tone": "funny"},
         {"text": "Weekend. Go. Before someone finds you a job.", "id": "1nit9hd"},
@@ -13165,6 +13181,10 @@ const VOICE_TEMPLATES = {
       "clock.back": [
         {"text": "You're back! I'm so glad. We all wondered how you were.", "id": "1kx0hou", "tone": "warm"},
         {"text": "Welcome back. If you need a hand today, I'm right here.", "id": "1kv5qfe", "tone": "warm"},
+      ],
+      "clock.early": [
+        {"text": "Off early? I hope everything's all right.", "id": "xpxlld", "tone": "warm"},
+        {"text": "Of course. I'll finish up here. Don't worry.", "id": "2ja0he"},
       ],
       "clock.friday": [
         {"text": "Have a lovely weekend, {nick}. You've earned it this week.", "id": "1at5quy"},
@@ -13216,6 +13236,10 @@ const VOICE_TEMPLATES = {
         {"text": "Back. Hm. Good. Sit down if you need to.", "id": "bjj0lp", "tone": "warm"},
         {"text": "You're back. Saved you the easy job. Don't mention it.", "id": "11ad4au", "tone": "warm"},
       ],
+      "clock.early": [
+        {"text": "Off? Hm. Fine. Look after yourself.", "id": "tves8", "tone": "warm"},
+        {"text": "Going? Go on. We'll manage.", "id": "15e7top"},
+      ],
       "clock.friday": [
         {"text": "Friday. Two days. Sleep.", "id": "f62qva"},
         {"text": "Weekend. Don't come down here. I mean it.", "id": "qhck9l", "tone": "warm"},
@@ -13265,6 +13289,10 @@ const VOICE_TEMPLATES = {
       "clock.back": [
         {"text": "They're back! The bay's fun again. Officially.", "id": "ok8fd8", "tone": "warm"},
         {"text": "You're back! I kept your spot. I may have put a sign on it.", "id": "ssmhgc", "tone": "funny"},
+      ],
+      "clock.early": [
+        {"text": "Off early! You win the escape points today.", "id": "62nexq", "tone": "funny"},
+        {"text": "Short day? I'll pretend I didn't see. Go!", "id": "1dddbrc"},
       ],
       "clock.friday": [
         {"text": "Friday! Weekend plans? Points for anything that isn't sleeping.", "id": "fbwy55", "tone": "funny"},
@@ -13316,6 +13344,10 @@ const VOICE_TEMPLATES = {
         {"text": "Oh. You're back. That's... good. Really good.", "id": "d0m1ra", "tone": "warm"},
         {"text": "Welcome back. I left you a clean pair of gloves.", "id": "f8m01w", "tone": "warm"},
       ],
+      "clock.early": [
+        {"text": "Oh. You're going? That's... fine. Take care.", "id": "15ysvg5"},
+        {"text": "Off early. I hope you're all right.", "id": "19qvgui"},
+      ],
       "clock.friday": [
         {"text": "Have a good weekend. Um. Rest.", "id": "18pu9tq"},
         {"text": "Two days off. That's nice. For you, I mean.", "id": "bhg3d"},
@@ -13366,6 +13398,10 @@ const VOICE_TEMPLATES = {
         {"text": "Welcome back. Take it steady today.", "id": "lp5pfd", "tone": "warm"},
         {"text": "Good to have you back. No rush. Start small.", "id": "6qwb2x", "tone": "warm"},
       ],
+      "clock.early": [
+        {"text": "Short day. That's all right. See you tomorrow.", "id": "1bfoi7a"},
+        {"text": "Off early? Take care of whatever it is.", "id": "1p3hsxc"},
+      ],
       "clock.friday": [
         {"text": "Have a good weekend. Rest properly.", "id": "13yv4rr"},
         {"text": "Week's done. Go and enjoy your days off.", "id": "1pvrfa4"},
@@ -13415,6 +13451,10 @@ const VOICE_TEMPLATES = {
       "clock.back": [
         {"text": "You're back! Oh, come here. How are you feeling?", "id": "8i3edy", "tone": "warm"},
         {"text": "Welcome back, {nick}. Easy does it today. I'll keep an eye.", "id": "j0lz0g", "tone": "warm"},
+      ],
+      "clock.early": [
+        {"text": "Off early? You look after yourself, {nick}.", "id": "uvlvb9", "tone": "warm"},
+        {"text": "Go on, go and rest. Everything all right?", "id": "16z17nf", "tone": "warm"},
       ],
       "clock.friday": [
         {"text": "Have a lovely weekend. Sleep in. Eat well.", "id": "1ovvixl", "tone": "warm"},
@@ -14379,6 +14419,10 @@ const VOICE = {
         {"text": "Back. Good. Light jobs today. Then normal.", "id": "1d9y0yk", "tone": "warm"},
         {"text": "Welcome back. The board missed you. So did I. That's all.", "id": "qpxuyb", "tone": "warm"},
         {"text": "You're back. Don't overdo it. That's also an order.", "id": "f2vq7o", "tone": "warm"},
+      ],
+      "clock.early": [
+        {"text": "Short day. Noted. Not a problem. Tomorrow, eight.", "id": "1xrcga8"},
+        {"text": "Going? Fine. Rest, if that's what it's for.", "id": "ups43s"},
       ],
       "clock.friday": [
         {"text": "Friday. Rest. Properly. That's an order.", "id": "1hl78gn"},
@@ -15969,6 +16013,9 @@ const VOICE = {
         {"text": "You're back! I saved you a scone. It's a bit old. So's the joke.", "id": "1u2iyew", "tone": "funny"},
         {"text": "Welcome back, {nick}. Good to see you up and about.", "id": "jw5t7m", "tone": "warm"},
       ],
+      "clock.early": [
+        {"text": "Off early? Hope all's well. I'll save you a joke.", "id": "1wsl42v", "tone": "funny"},
+      ],
       "clock.friday": [
         {"text": "Weekend! I'm baking Saturday, if Brennan allows. Come and taste it.", "id": "ucsc01"},
         {"text": "Have a good weekend. I'll have a new joke by Monday. Brace yourself.", "id": "1lxvme7", "tone": "funny"},
@@ -17219,6 +17266,10 @@ const VOICE = {
       "clock.back": [
         {"text": "Oh. You're back. Good. I kept your bench tidy.", "id": "1j1ouje", "tone": "warm"},
         {"text": "Welcome back. Are you... all right now? Good. Good.", "id": "2pthoe", "tone": "warm"},
+      ],
+      "clock.early": [
+        {"text": "Oh. You're off? That's all right. I'll tidy your bench.", "id": "4gj68t"},
+        {"text": "Take care. I'll... finish the scrubber.", "id": "mwgvec"},
       ],
       "clock.friday": [
         {"text": "Have a good weekend. I'll be here. Keeping things neat.", "id": "1is4beg"},
@@ -19350,6 +19401,10 @@ const VOICE = {
         {"text": "Spanner! You're back! The bay was so boring.", "id": "1jbz3kt", "tone": "warm"},
         {"text": "Welcome back. I did your jobs. Badly. You'll see.", "id": "10fotww", "tone": "funny"},
         {"text": "Oi oi. Feeling better? Good. Tea's on me. Well, on the kettle.", "id": "1lbzi03", "tone": "warm"},
+      ],
+      "clock.early": [
+        {"text": "Off early? Take a nap for me. Not jealous at all.", "id": "ufnqsu", "tone": "funny"},
+        {"text": "Short day, spanner? Fair enough. You all right?", "id": "1nwptp2"},
       ],
       "clock.friday": [
         {"text": "Off for the weekend? I'm on. Bay's all mine. Mwah ha.", "id": "10umrv2", "tone": "funny"},
@@ -22078,6 +22133,10 @@ const VOICE = {
         {"text": "Welcome back, {nick}. Easy jobs today. I've already picked some.", "id": "1idl6x5", "tone": "warm"},
         {"text": "There you are. Feeling all right? Good. Right, onward. Gently.", "id": "bzqjw9", "tone": "warm"},
       ],
+      "clock.early": [
+        {"text": "Off early? Course. Coil three and I will hold on.", "id": "iwv79m"},
+        {"text": "Heading off? Hope all's well, {nick}. See you tomorrow.", "id": "sr01s0", "tone": "warm"},
+      ],
       "clock.in": [
         {"text": "There you are! Coil three's sulking. Don't take it personally.", "id": "8hoyxg", "tone": "funny"},
         {"text": "Morning, {nick}. Reyes left me a note: \"coils fine, three shy\". Shy!", "id": "4cvahv", "tone": "funny"},
@@ -24732,6 +24791,16 @@ const LINES = {
     {"text": "Welcome back, {nick}. You were missed. Properly.", "id": "1xdp4ol", "tone": "warm", "dept": "works"},
     {"text": "Oh, you're back. I've saved up all the gossip.", "id": "wfdu3a", "tone": "warm", "dept": "works", "tier": [3, 4]},
     {"text": "Missed you on the bay. Don't do that again. Well, do, if you need to.", "id": "f6fahp", "tone": "warm", "dept": "works", "tier": [3, 4]},
+  ],
+  "clock.early": [
+    {"text": "Off already? Hope all's well.", "id": "e7ggf0", "dept": "works"},
+    {"text": "Short day? Fair enough.", "id": "15csr3w", "dept": "works"},
+    {"text": "Heading off? Look after yourself.", "id": "1mmplvn", "dept": "works"},
+    {"text": "Early one. The board will keep. Go on.", "id": "1ruzm3d", "dept": "works"},
+    {"text": "Off you go. We'll hold the fort.", "id": "110r9k3", "dept": "works"},
+    {"text": "All right? Shout if you need anything.", "id": "61l78i", "tone": "warm", "dept": "works"},
+    {"text": "Early finish. Rest up, if that's what it is.", "id": "1yn70wv", "dept": "works"},
+    {"text": "Off early? Find me at dinner if you want company.", "id": "jqr9ej", "tone": "warm", "dept": "works", "tier": [3, 4]},
   ],
   "clock.friday": [
     {"text": "Friday! Two days off for you. Any plans?", "id": "s9zt9y", "dept": "works"},

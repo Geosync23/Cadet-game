@@ -21,3 +21,6 @@
 == clock.back
 - You're back! I saved you a scone. It's a bit old. So's the joke.   #funny
 - Welcome back, {nick}. Good to see you up and about.   #warm
+
+== clock.early
+- Off early? Hope all's well. I'll save you a joke.   #funny
