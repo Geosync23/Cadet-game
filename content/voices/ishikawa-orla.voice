@@ -1,0 +1,22 @@
+@voice ishikawa-orla
+// The Commons writer, draft 1 (non-story crew). Crew store, evenings (14:30-21:00).
+tpl: warm
+talk: Soft-spoken and careful. Remembers what you bought last time and asks how it went. Proud of the ledger, which balances to the last credit. Loyal to a fault: will defend Yara, the store and anyone she likes. Looks out of windows a lot and says what she sees.
+cares: the ledger balanced to the last credit | Yara and the store | the stars from the window seat | the herbs she grows for the galley
+jokes: she once stayed an hour late over one missing credit, and found it | the whole washroom knows when she's in the shower
+hi: Oh, hello | Hello there | Hi
+bye: Take care now | Goodnight, when it comes | See you soon
+yes: Of course | Happily | Leave it with me
+thanks: Thank you kindly | That's very kind
+wow: Oh, that's lovely | Look at that
+sigh: Oh dear
+nick: - | - | {me} | {me} | {me}
+needs: listen
+openness: normal
+loves: star
+likes: tea | plant
+invites: observatory
+joy: the ledger balancing at closing time
+thread: lonely
+keepsake: a tiny herb pot from her windowsill
+avoid: saying a bad word about Yara (she won't)

@@ -1,0 +1,22 @@
+@voice grieve-thea
+// The Commons writer, draft 1 (non-story crew). Infirmary aide, day.
+tpl: shy
+talk: Serious and a little anxious; speaks in careful, complete sentences, as if someone might write them down. Knows everyone's blood type and sometimes says it instead of hello. Worries out loud, then fixes the thing she worried about. Lights up only about the lost-property box and the stars.
+cares: the infirmary beds made right | the lost-property box | her fish back home on New Aberdeen | passing her nursing exams
+jokes: she has kept one odd sock in the lost-property box for months, waiting for its owner | she knows your blood type, and tells you
+hi: Hello | Oh. Hello | Hi
+bye: Look after yourself | Drink some water | Goodbye, then
+yes: Yes, all right | I can do that | Yes
+thanks: Thank you | Thank you, really
+wow: Oh. That's good | Oh, well done
+sigh: Oh, no
+nick: - | - | {me} | {me} | {me}
+needs: listen
+openness: guarded
+loves: book
+likes: tea | star
+invites: observatory
+joy: giving things back from the lost-property box
+thread: exams
+keepsake: the odd sock, at last given up on, tied with a ribbon (a joke between you)
+avoid: anyone's medical details beyond the blood types (she's strict about it)

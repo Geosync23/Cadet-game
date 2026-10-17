@@ -1,0 +1,22 @@
+@voice janssen-hugo
+// The Commons writer, draft 1 (non-story crew). Helm officer, night.
+tpl: warm
+talk: Calm, slow night voice; always has a cup of tea in one hand. Curious about everyone and asks real questions. Talks about Gerald, his cactus, as a person. Kind without making a show of it. Says "steady" a lot, as a helm officer would.
+cares: a steady course through the night | Gerald the cactus | the herbs he grows for the galley | calling home
+jokes: Gerald the cactus has "seen more stars than most captains" | he flies with one hand on the helm and one on a cup of tea
+hi: Hello there | Ah, hello | Hi
+bye: Steady as she goes | Mind how you go | Off you go, then
+yes: Steady, yes | Of course | Happy to
+thanks: Thank you | Much obliged
+wow: Well now | Look at that
+sigh: Ah, well
+nick: - | - | {me} | {me} | {me}
+needs: listen
+openness: open
+loves: plant | tea
+likes: garden
+invites: observatory
+joy: Gerald the cactus on the windowsill
+thread: family
+keepsake: a cutting from Gerald, in a tiny pot (Gerald the Second)
+avoid: making a fuss of his rank
