@@ -1,11 +1,21 @@
 @voice ishikawa-orla
-// The Commons writer, draft 1 (non-story crew). Crew store, evenings (14:30-21:00).
+// Writer-commons, batch 0 (draft 2). Orla Ishikawa: storekeeper, evenings (14:30-21:00), Bunk 5 berth 6. Off Thursday
+// and Friday. Roster: loyal, kind; window-seat, tea-break, stargazer. Sings in the shower (the dawn chorus); grows herbs
+// for the galley (Brennan collects). No pronouns in facts.md: "Orla" or "they".
+//
+// HOW THEY TALK: soft-spoken and careful. Remembers what you bought last time and asks how it went. Says what's out of
+// the window. Proud of the ledger.
+// WITH JUNIORS: patient with the till, the Wallet, the lot. Explains it twice without sighing.
+// WHAT THEY NOTICE: the ledger; the stars from the window seat; who comes in alone in the evenings.
+// MOOD TELLS: happy = the ledger balanced. Low = a long look out of the window. Worried = counts the till again.
+// NEVER: says a bad word about Yara or the store; rushes a customer.
+// RUNNING: once stayed an hour late over one missing credit, and found it; the herbs on the windowsill.
 tpl: warm
-talk: Soft-spoken and careful. Remembers what you bought last time and asks how it went. Proud of the ledger, which balances to the last credit. Loyal to a fault: will defend Yara, the store and anyone she likes. Looks out of windows a lot and says what she sees.
-cares: the ledger balanced to the last credit | Yara and the store | the stars from the window seat | the herbs she grows for the galley
-jokes: she once stayed an hour late over one missing credit, and found it | the whole washroom knows when she's in the shower
+talk: Soft-spoken and careful; remembers what you bought and asks how it went; says what's out of the window; proud of the ledger.
+cares: the ledger, balanced to the last credit | Yara and the store | the stars from the window seat | the herbs for the galley
+jokes: once stayed an hour late over one missing credit, and found it | the washroom's dawn chorus
 hi: Oh, hello | Hello there | Hi
-bye: Take care now | Goodnight, when it comes | See you soon
+bye: Take care now | See you soon | Mind how you go
 yes: Of course | Happily | Leave it with me
 thanks: Thank you kindly | That's very kind
 wow: Oh, that's lovely | Look at that
@@ -18,5 +28,5 @@ likes: tea | plant
 invites: observatory
 joy: the ledger balancing at closing time
 thread: lonely
-keepsake: a tiny herb pot from her windowsill
-avoid: saying a bad word about Yara (she won't)
+keepsake: a tiny herb pot from Orla's windowsill
+avoid: a bad word about Yara (Orla won't say one)

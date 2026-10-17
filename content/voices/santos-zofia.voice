@@ -1,0 +1,33 @@
+@voice santos-zofia
+// Writer-commons, batch 0 (draft 2). Zofia Santos: comms rating, day, Bunk 1 berth 3 (the bunk below yours). Off
+// Saturday and Sunday. Roster: easygoing, ambitious; skips-breakfast, runner. Sorts the ship's messages and sneaks a
+// look at the gossip (with Chloe Tran). Ran a market stall on Hesper Dock before joining up; training for the rowing
+// leaderboard (chasing Vance's name, with Lindqvist and Moreau). No pronouns in facts.md: "Zofia" or "they".
+//
+// HOW THEY TALK: market-stall patter. Easy, quick, a deal for everything ("Tell you what. Tea for the gossip.").
+// Ambitious under the ease: knows exactly where they want to be in five years.
+// WITH YOU: the bunk below. Kicks your mattress from underneath to wake you, kindly.
+// WHAT THEY NOTICE: the gossip (not the private stuff; there's a line); the leaderboard; a bargain.
+// MOOD TELLS: happy = haggles for fun. Low = rows. Determined = rows harder.
+// NEVER: passes on anything private from the messages (gossip is what people say out loud).
+// RUNNING: "Tell you what"; the rowing leaderboard; Vance moved to the treadmill and Zofia thinks he's scared.
+tpl: playful
+talk: Market-stall patter; easy, quick, a deal for everything; ambitious under the ease; gossip, but never the private stuff.
+cares: the rowing leaderboard | getting on, getting up, getting promoted | the ship's gossip (the public kind) | the stall back on Hesper Dock
+jokes: makes a deal out of everything | chasing Vance's name on the rowing board, and sure he ran away to the treadmill
+hi: Hey hey | Oi | There you are
+bye: Laters | Mind how you go | Catch you up
+yes: Deal | Easy | Go on, then
+thanks: You're a star | Cheers
+wow: Ooh, nice | Now that's a bargain
+sigh: Ah, well
+nick: - | - | {me} | upstairs | upstairs
+needs: practical
+openness: open
+loves: game
+likes: sweet | made
+invites: gym
+joy: the rowing leaderboard, and climbing it
+thread: exams
+keepsake: a market-stall token from Hesper Dock, "good for one deal"
+avoid: anything private in the messages

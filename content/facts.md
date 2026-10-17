@@ -215,6 +215,32 @@ taken from what's already written about them; **for everyone else, use their nam
 | Envoy Saruth | they / them | the head writer's call: the Veyli are not described in human terms; "the Envoy" is always safe |
 | You (the player) | never gendered | the crew say "you", your name, "cadet", "the new hand" |
 
+### 4b. The Commons and juniors (writer-commons; one row each)
+
+Pronouns stay unset unless the roster or the head writer gives them: write the name or "they".
+
+| Who | Pronouns | Where they live, when they're off | In a line |
+| --- | --- | --- | --- |
+| Esme Walsh (galley, late) | not set | Bunk 2 berth 5; off Sat, Sun | exact, quiet; grams and minutes; runs the promenade |
+| Ivo Madsen (galley, late) | not set | Bunk 2 berth 1; off Mon, Tue | six trays; argues with Brennan about bowls, never wins; pressed flowers |
+| Tariq Varga (galley, early) | not set | Bunk 2 berth 4; off Mon, Tue | thoughtful, then competitive; the onion tally against Lukas; letters to Valo |
+| Tamsin Haddad (galley, early) | not set | Bunk 6 berth 2; off Wed, Thu | "It'll be fine. Won't it?"; the lyrics war; guitar with Hamid |
+| Lukas Dlamini (galley, early) | not set (spouse: they/them, unnamed) | Bunk 1 berth 5; off Tue, Wed; runs the galley Fri, Sat | dry; the countdown number; misses Port Halloran's rain |
+| Yara Esposito (store, mornings) | not set | Bunk 5 berth 4; off Mon, Tue | knows what you've run out of; shops at their own store |
+| Orla Ishikawa (store, evenings) | not set | Bunk 5 berth 6; off Thu, Fri | soft; the ledger to the last credit; herbs on the sill |
+| Thea Grieve (infirmary aide) | not set | Bunk 3 berth 1; off Thu, Fri | serious; your blood type; one of the four lost-property boxes |
+| Hamid Larsen (infirmary aide) | not set | Bunk 3 berth 2; off Fri, Sat | health facts at length; the boat's name changes weekly |
+| Dr. Elif Yoon (night doctor) | not set | cabin 4-22; off Wed, Thu | soft, steady with patients; terrible jokes at breakfast; the coffee machine |
+| Hugo Janssen (helm, night) | not set | cabin 4-11; off Sat, Sun | calm; tea in one hand; Gerald |
+| Wen Takahashi (comms, night) | they / them (roster) | cabin 4-12; off Thu, Fri | blunt; "static"; the lyrics war |
+| Sol Bakshi (helm rating, night) | not set | Bunk 8 berth 1; off Mon, Tue | dreamy; courses to nowhere; tiny portraits; misses Lisk's rain |
+| Tove Cruz (senior gardener) | not set | cabin 4-18; off Sat, Sun | talks to plants; every Gerald; the ladder club |
+| Imani O'Neill (gardener, late) | not set | Bunk 6 berth 4; off Wed, Thu | deadpan cheer; the weekly playlist; the war with Teague |
+| Ravi Hart (gardener, early) | not set | Bunk 5 berth 5; off Mon, Tue | a late sleeper on the early team; the comics wall |
+| Erik Strand (helm rating, day) | not set | Bunk 2 berth 6; off Tue, Wed | sunny, restless; counts watches; the hidden poems |
+| Zofia Santos (comms rating, day) | not set | Bunk 1 berth 3 (below yours); off Sat, Sun | market-stall patter; the rowing board; public gossip only |
+| Chloe Tran (comms rating, day) | not set | Bunk 1 berth 2; off Sun, Mon | "Lights out." at ten; bakes; disapproves of gossip, then asks for more |
+
 ## 5. Shared quirks: details the roster gives to several people
 
 The roster's generator gave some life details to more than one person. They are all canon, so they're **ship things**,

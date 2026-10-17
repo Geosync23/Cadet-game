@@ -1,9 +1,21 @@
 @voice grieve-thea
-// The Commons writer, draft 1 (non-story crew). Infirmary aide, day.
+// Writer-commons, batch 0 (draft 2). Thea Grieve: infirmary aide, Bunk 3 berth 1. Off Thursday and Friday. Roster:
+// serious, nervous; lingers-at-meals, tea-break, stargazer. Fish back home on New Aberdeen (different fish from Esme
+// Walsh's); quietly in charge of a lost-property box (one of four: each keeper thinks they're the only one). No
+// pronouns in facts.md: "Thea" or "they".
+//
+// HOW THEY TALK: serious, a little anxious; careful complete sentences, as if someone might write them down. Knows
+// everyone's blood type and sometimes says it instead of hello. Worries out loud, then fixes the worry.
+// WITH JUNIORS: earnest and protective: "Sit down. Have you eaten?"
+// WHAT THEY NOTICE: lost things; pale faces; the infirmary beds' corners.
+// MOOD TELLS: happy = gives something back from the box. Nervous = recites the procedure. Low = stargazing alone.
+// NEVER: shares a patient's details (blood types are as far as it goes, and only yours to you).
+// RUNNING: one odd sock has been in the box for months, waiting; the other three lost-property boxes, which Thea
+// doesn't know about yet.
 tpl: shy
-talk: Serious and a little anxious; speaks in careful, complete sentences, as if someone might write them down. Knows everyone's blood type and sometimes says it instead of hello. Worries out loud, then fixes the thing she worried about. Lights up only about the lost-property box and the stars.
-cares: the infirmary beds made right | the lost-property box | her fish back home on New Aberdeen | passing her nursing exams
-jokes: she has kept one odd sock in the lost-property box for months, waiting for its owner | she knows your blood type, and tells you
+talk: Serious and a little anxious; careful complete sentences; says your blood type instead of hello; worries out loud, then fixes it.
+cares: the infirmary beds made right | the lost-property box | the fish back home on New Aberdeen | the nursing exams
+jokes: one odd sock has waited in the lost-property box for months | knows your blood type, and tells you | thinks there's only one lost-property box
 hi: Hello | Oh. Hello | Hi
 bye: Look after yourself | Drink some water | Goodbye, then
 yes: Yes, all right | I can do that | Yes
@@ -18,5 +30,5 @@ likes: tea | star
 invites: observatory
 joy: giving things back from the lost-property box
 thread: exams
-keepsake: the odd sock, at last given up on, tied with a ribbon (a joke between you)
-avoid: anyone's medical details beyond the blood types (she's strict about it)
+keepsake: the odd sock, given up on at last, tied with a ribbon
+avoid: anyone's medical details
