@@ -223,7 +223,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.27.43
+   STARSHIP CADET: CSV Wren                           build 0.27.44
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -1090,8 +1090,8 @@ const KIT = {
     if (o.light) addLamp(g, 0, 1.3, .9, 5.5, .6, 1.9);
     return { w: .45, d: .45, tall: true };
   },
-  beanbag(g, o = {}) {
-    soft(o.fab || MUS.fab[0], 0, .2, 0, .4, .22, .4, g); soft(o.fab || MUS.fab[0], 0, .34, -.22, .32, .22, .15, g);
+  beanbag(g, o = {}) {                                   // 0.27.44: shallower (front .3 ahead, was .4), so a sitter's knees reach its front
+    soft(o.fab || MUS.fab[0], 0, .2, -.07, .4, .22, .3, g); soft(o.fab || MUS.fab[0], 0, .34, -.25, .32, .22, .15, g);
     return { w: .8, d: .8 };
   },
   recordCabinet(g) {
@@ -1212,20 +1212,20 @@ const KIT = {
     return { w, d: .56 };
   },
   sofa(g, o = {}) {
-    const f = o.fab || M.tealFab, w = o.w || 2;
-    box(w, .3, .85, M.slateDark, 0, .15, 0, g);
-    box(w - .3, .14, .7, f, 0, .37, .06, g);
+    const f = o.fab || M.tealFab, w = o.w || 2;          // 0.27.44: the seat ends .12 ahead of centre (was .425), so knees reach its front; d unchanged
+    box(w, .3, .54, M.slateDark, 0, .15, -.155, g);
+    box(w - .3, .14, .41, f, 0, .37, -.085, g);
     box(w, .5, .2, f, 0, .55, -.32, g);
-    for (const sd of [-1, 1]) box(.16, .55, .85, f, sd * (w / 2 - .08), .4, 0, g);
+    for (const sd of [-1, 1]) box(.16, .55, .555, f, sd * (w / 2 - .08), .4, -.1475, g);
     soft(M.mustard, -w * .28, .58, -.12, .2, .16, .07, g).rotation.z = .2;
     return { w, d: .85 };
   },
   armchair(g, o = {}) {
-    const f = o.fab || M.plum;
-    box(.86, .3, .82, M.slateDark, 0, .15, 0, g);
-    box(.56, .14, .66, f, 0, .37, .06, g);
+    const f = o.fab || M.plum;                            // 0.27.44: the seat ends .125 ahead of centre (was .41), so knees reach its front; d unchanged
+    box(.86, .3, .53, M.slateDark, 0, .15, -.145, g);
+    box(.56, .14, .395, f, 0, .37, -.0725, g);
     box(.86, .52, .2, f, 0, .55, -.31, g);
-    for (const sd of [-1, 1]) box(.15, .52, .82, f, sd * .355, .41, 0, g);
+    for (const sd of [-1, 1]) box(.15, .52, .54, f, sd * .355, .41, -.14, g);
     return { w: .86, d: .82 };
   },
   coffeeTable(g) {
@@ -4057,10 +4057,10 @@ DECKS[4] = {
     { id: '4-common-1', type: 'common-room', at: [2, 9], face: 'e', pose: 'sit', room: 'j', window: true, y: 0.52 },
     { id: '4-common-2', type: 'common-room', at: [2, 10], face: 'e', pose: 'sit', room: 'j', window: true, y: 0.52 },
     { id: '4-common-3', type: 'common-room', at: [2, 11], face: 'e', pose: 'sit', room: 'j', window: true, y: 0.52 },
-    { id: '4-common-4', type: 'common-room', at: [7, 9], face: 'w', pose: 'sit', room: 'j', xy: [7.36, 9.64], y: 0.44 },
-    { id: '4-common-5', type: 'common-room', at: [7, 10], face: 'w', pose: 'sit', room: 'j', xy: [7.45, 10.5], y: 0.44 },
-    { id: '4-common-6', type: 'common-room', at: [5, 8], face: 's', pose: 'sit', room: 'j', xy: [5.5, 8.3], y: 0.44 },
-    { id: '4-common-7', type: 'common-room', at: [5, 12], face: 'n', pose: 'sit', room: 'j', xy: [5.42, 12.16], y: 0.44 },
+    { id: '4-common-4', type: 'common-room', at: [7, 9], face: 'w', pose: 'sit', room: 'j', xy: [7.41, 9.64], y: 0.44, cush: .2 },
+    { id: '4-common-5', type: 'common-room', at: [7, 10], face: 'w', pose: 'sit', room: 'j', xy: [7.41, 10.5], y: 0.44, cush: .2 },
+    { id: '4-common-6', type: 'common-room', at: [5, 8], face: 's', pose: 'sit', room: 'j', xy: [5.5, 7.89], y: 0.44, cush: .2 },
+    { id: '4-common-7', type: 'common-room', at: [5, 12], face: 'n', pose: 'sit', room: 'j', xy: [5.42, 12.11], y: 0.44, cush: .2 },
     // the card-table stools: on the four stool tops round the table (centre 3.15, 7.1), facing it in degrees (0.30.17; 0 south, 90 east)
     { id: '4-common-8', type: 'common-room', at: [3, 6], face: 0, pose: 'sit', room: 'j', xy: [3.15, 6.45], y: 0.49 },
     { id: '4-common-9', type: 'common-room', at: [3, 8], face: 180, pose: 'sit', room: 'j', xy: [3.15, 7.75], y: 0.49 },
@@ -4068,10 +4068,10 @@ DECKS[4] = {
     { id: '4-common-11', type: 'common-room', at: [4, 7], face: 270, pose: 'sit', room: 'j', xy: [3.8, 7.1], y: 0.49 },
     { id: '4-common-kettle', type: 'common-room', at: [7, 7], face: 'n', pose: 'stand', room: 'j' },
     { id: '4-music-1', type: 'music', anim: 'play', at: [44, 5], face: 'e', pose: 'sit', room: 'n', xy: [44.87, 5.35], y: 0.55, event: 'late-piano' },   // the piano bench (late piano, 0.38.14: the Captain's)
-    { id: '4-music-2', type: 'music', at: [45, 7], face: 'e', pose: 'sit', room: 'n', y: 0.42 },
-    { id: '4-music-3', type: 'music', at: [45, 8], face: 'e', pose: 'sit', room: 'n', y: 0.42 },
-    { id: '4-music-4', type: 'music', at: [45, 11], face: 'e', pose: 'sit', room: 'n', y: 0.42 },
-    { id: '4-music-5', type: 'music', at: [46, 11], face: 'e', pose: 'sit', room: 'n', y: 0.42 },
+    { id: '4-music-2', type: 'music', at: [45, 7], face: 112.9, pose: 'sit', room: 'n', xy: [45.5, 7.5], y: 0.42, cush: .2 },
+    { id: '4-music-3', type: 'music', at: [45, 8], face: 95.7, pose: 'sit', room: 'n', xy: [45.5, 8.5], y: 0.42, cush: .2 },
+    { id: '4-music-4', type: 'music', at: [45, 11], face: 72.8, pose: 'sit', room: 'n', xy: [45.5, 11.5], y: 0.42, cush: .2 },
+    { id: '4-music-5', type: 'music', at: [46, 11], face: 55.6, pose: 'sit', room: 'n', xy: [46.5, 11.5], y: 0.42, cush: .2 },
     { id: '4-music-records', type: 'music', at: [45, 14], face: 's', pose: 'stand', room: 'n' },
     { id: '4-bench-1', type: 'bench', at: [18, 6], face: 'e', pose: 'sit', room: '+', xy: [18.4, 6.5], y: 0.48 },
     { id: '4-bench-2', type: 'bench', at: [18, 7], face: 'e', pose: 'sit', room: '+', xy: [18.4, 7.5], y: 0.48 },
@@ -4380,7 +4380,7 @@ DECKS[5] = {
     { id: '5-toolwall-1', type: 'work:works', at: [19, 1], face: 'n', pose: 'stand', room: 'w' },
     { id: '5-stool-1', type: 'work:works', at: [11, 3], face: 'e', pose: 'sit', room: 'w', xy: [11.57, 3.63], y: 0.49 },
     { id: '5-office-1', type: 'work:works', at: [11, 1], face: 'n', pose: 'sit', room: 'o', xy: [11.5, 1.4], y: 0.5 },
-    { id: '5-tea-1', type: 'lounge-seat', at: [23, 0], face: 'w', pose: 'sit', room: 't', window: true, xy: [23.5, 0.6], y: 0.44 },
+    { id: '5-tea-1', type: 'lounge-seat', at: [23, 0], face: 'w', pose: 'sit', room: 't', window: true, xy: [23.66, 0.6], y: 0.44, cush: .2 },
     { id: '5-tea-2', type: 'lounge-seat', at: [21, 0], face: 'e', pose: 'sit', room: 't', window: true, xy: [21.64, 0.64], y: 0.49 },
     { id: '5-tea-3', type: 'lounge-seat', at: [21, 1], face: 's', pose: 'stand', room: 't' },
     { id: '5-shower-1', type: 'shower', at: [21, 3], face: 'n', pose: 'stand', room: 'q' },
@@ -4982,15 +4982,15 @@ DECKS[3] = {
     { id: '3-lounge-22', type: 'lounge-seat', at: [42, 19], xy: [42.23, 19.3], walk: [42, 20], face: 'n', pose: 'sit', anim: 'talk', y: .54, room: 'L' },
     { id: '3-lounge-23', type: 'lounge-seat', at: [41, 17], xy: [41.57, 17.9], walk: [43, 17], face: 's', pose: 'sit', anim: 'talk', y: .54, room: 'L' },
     { id: '3-lounge-24', type: 'lounge-seat', at: [42, 17], xy: [42.23, 17.9], walk: [43, 17], face: 's', pose: 'sit', anim: 'talk', y: .54, room: 'L' },
-    { id: '3-lounge-25', type: 'lounge-seat', at: [48, 11], xy: [48.01, 11.8], walk: [48, 11], face: 'e', pose: 'sit', anim: 'talk', room: 'L' },
-    { id: '3-lounge-26', type: 'lounge-seat', at: [48, 11], xy: [48.01, 11], walk: [48, 11], face: 'e', pose: 'sit', anim: 'talk', room: 'L' },
-    { id: '3-lounge-27', type: 'lounge-seat', at: [48, 10], xy: [48.01, 10.2], walk: [48, 10], face: 'e', pose: 'sit', anim: 'talk', room: 'L' },
-    { id: '3-lounge-28', type: 'lounge-seat', at: [49, 9], xy: [49.59, 9.06], walk: [49, 9], face: 's', pose: 'sit', anim: 'read', room: 'L' },
-    { id: '3-lounge-29', type: 'lounge-seat', at: [49, 12], xy: [49.59, 12.94], walk: [49, 12], face: 'n', pose: 'sit', anim: 'read', room: 'L' },
-    { id: '3-lounge-30', type: 'lounge-seat', at: [46, 4], xy: [46.9, 4.94], walk: [46, 5], face: 'e', pose: 'sit', anim: 'read', room: 'L' },
-    { id: '3-lounge-31', type: 'lounge-seat', at: [48, 6], xy: [48.4, 6.71], walk: [48, 7], face: 'w', pose: 'sit', anim: 'read', room: 'L' },
-    { id: '3-lounge-32', type: 'lounge-seat', at: [46, 17], xy: [46.9, 17.06], walk: [46, 16], face: 'e', pose: 'sit', anim: 'read', room: 'L' },
-    { id: '3-lounge-33', type: 'lounge-seat', at: [48, 15], xy: [48.4, 15.29], walk: [48, 14], face: 'w', pose: 'sit', anim: 'read', room: 'L' },
+    { id: '3-lounge-25', type: 'lounge-seat', at: [48, 11], xy: [47.84, 11.8], walk: [48, 11], face: 'e', pose: 'sit', anim: 'talk', room: 'L', cush: .2 },
+    { id: '3-lounge-26', type: 'lounge-seat', at: [48, 11], xy: [47.84, 11], walk: [48, 11], face: 'e', pose: 'sit', anim: 'talk', room: 'L', cush: .2 },
+    { id: '3-lounge-27', type: 'lounge-seat', at: [48, 10], xy: [47.84, 10.2], walk: [48, 10], face: 'e', pose: 'sit', anim: 'talk', room: 'L', cush: .2 },
+    { id: '3-lounge-28', type: 'lounge-seat', at: [49, 9], xy: [49.61, 8.9], walk: [49, 9], face: -8.6, pose: 'sit', anim: 'read', room: 'L', cush: .2 },
+    { id: '3-lounge-29', type: 'lounge-seat', at: [49, 12], xy: [49.61, 13.1], walk: [49, 12], face: -171.4, pose: 'sit', anim: 'read', room: 'L', cush: .2 },
+    { id: '3-lounge-30', type: 'lounge-seat', at: [46, 4], xy: [46.77, 4.83], walk: [46, 5], face: 51.6, pose: 'sit', anim: 'read', room: 'L', cush: .2 },
+    { id: '3-lounge-31', type: 'lounge-seat', at: [48, 6], xy: [48.53, 6.82], walk: [48, 7], face: -128.4, pose: 'sit', anim: 'read', room: 'L', cush: .2 },
+    { id: '3-lounge-32', type: 'lounge-seat', at: [46, 17], xy: [46.77, 17.17], walk: [46, 16], face: 128.4, pose: 'sit', anim: 'read', room: 'L', cush: .2 },
+    { id: '3-lounge-33', type: 'lounge-seat', at: [48, 15], xy: [48.53, 15.18], walk: [48, 14], face: -51.6, pose: 'sit', anim: 'read', room: 'L', cush: .2 },
     { id: '3-lounge-34', type: 'lounge-seat', at: [50, 8], xy: [50.7, 8.02], walk: [50, 8], face: 'w', pose: 'stand', room: 'L' },
     { id: '3-tend-1', type: 'garden', at: [4, 1], xy: [4.4, 1.13], walk: [4, 1], face: 'n', pose: 'work', anim: 'water', room: 'G' },
     { id: '3-tend-2', type: 'garden', at: [6, 1], xy: [6.4, 1.13], walk: [6, 1], face: 'n', pose: 'work', anim: 'water', room: 'G' },
@@ -5087,8 +5087,8 @@ DECKS[3] = {
     { id: '3-callhome-2', type: 'callhome', at: [37, 21], xy: [37.84, 21.15], walk: [37, 20], face: 's', pose: 'sit', anim: 'call', y: .53, room: 'B' },
     { id: '3-callhome-3', type: 'callhome', at: [39, 21], xy: [39.06, 21.15], walk: [39, 20], face: 's', pose: 'sit', anim: 'call', y: .53, room: 'B' },
     { id: '3-callhome-4', type: 'callhome', at: [40, 21], xy: [40.28, 21.15], walk: [40, 20], face: 's', pose: 'sit', anim: 'call', y: .53, room: 'B' },
-    { id: '3-bench-17', type: 'bench', at: [38, 16], xy: [38, 16.06], walk: [37, 17], face: 's', pose: 'sit', room: 'B' },
-    { id: '3-bench-18', type: 'bench', at: [39, 16], xy: [39, 16.06], walk: [38, 17], face: 's', pose: 'sit', room: 'B' },
+    { id: '3-bench-17', type: 'bench', at: [38, 16], xy: [38, 15.89], walk: [37, 17], face: 's', pose: 'sit', room: 'B', cush: .2 },
+    { id: '3-bench-18', type: 'bench', at: [39, 16], xy: [39, 15.89], walk: [38, 17], face: 's', pose: 'sit', room: 'B', cush: .2 },
     { id: '3-lift-1', type: 'lift-wait', at: [17, 9], xy: [17.5, 9.5], walk: [17, 9], face: 'e', pose: 'stand', room: '+' },
     { id: '3-lift-2', type: 'lift-wait', at: [17, 10], xy: [17.5, 10.5], walk: [17, 10], face: 'e', pose: 'stand', room: '+' },
     { id: '3-lift-3', type: 'lift-wait', at: [17, 11], xy: [17.5, 11.5], walk: [17, 11], face: 'e', pose: 'stand', room: '+' },
@@ -6086,22 +6086,22 @@ DECKS[2] = {
     { id: '2-windowseat-1', type: 'lounge-seat', at: [2, 12], face: 'e', pose: 'sit', room: 'C', y: 0.52, anim: 'read', window: true },
     { id: '2-windowseat-2', type: 'lounge-seat', at: [2, 10], face: 'e', pose: 'sit', room: 'C', y: 0.52, anim: 'read', window: true },
     { id: '2-command-1', type: 'work:command', at: [4, 15], face: 'n', pose: 'sit', room: 'C', xy: [4.43, 15.37], y: 0.5, anim: 'read' },
-    { id: '2-armchair-11', type: 'lounge-seat', at: [2, 15], face: 'e', pose: 'sit', room: 'C', y: 0.44, anim: 'read' },
+    { id: '2-armchair-11', type: 'lounge-seat', at: [2, 15], face: 'e', pose: 'sit', room: 'C', xy: [2.54, 15.5], y: 0.44, anim: 'read', cush: .2 },
     // Vance
-    { id: '2-X', type: 'bed', at: [6, 1], face: 's', pose: 'lie', room: 'X' }, { id: '2-armchair-9', type: 'lounge-seat', at: [3, 2], face: 'e', pose: 'sit', room: 'X', xy: [3.43, 2.63], y: 0.44, anim: 'read' },
-    { id: '2-armchair-10', type: 'lounge-seat', at: [5, 2], face: 'w', pose: 'sit', room: 'X', xy: [5.3, 2.65], y: 0.44, anim: 'read' },
+    { id: '2-X', type: 'bed', at: [6, 1], face: 's', pose: 'lie', room: 'X' }, { id: '2-armchair-9', type: 'lounge-seat', at: [3, 2], face: 'e', pose: 'sit', room: 'X', xy: [3.04, 2.63], y: 0.44, anim: 'read', cush: .2 },
+    { id: '2-armchair-10', type: 'lounge-seat', at: [5, 2], face: 'w', pose: 'sit', room: 'X', xy: [5.25, 2.65], y: 0.44, anim: 'read', cush: .2 },
     { id: '2-desk-11', type: 'lounge-seat', at: [2, 4], face: 'w', pose: 'sit', room: 'X', xy: [2.8, 4.5], y: 0.5, anim: 'read' }, { id: '2-shower-13', type: 'shower', at: [6, 4], face: 'n', pose: 'stand', room: 'X' },
     { id: '2-basin-13', type: 'basin', at: [6, 4], face: 'n', pose: 'stand', room: 'X' }, { id: '2-toilet-13', type: 'toilet', at: [5, 4], face: 'e', pose: 'sit', room: 'X', xy: [5.96, 4.2], y: 0.42 },
     // Works Chief
     { id: '2-O', type: 'bed', at: [10, 1], face: 's', pose: 'lie', room: 'O' }, { id: '2-shower-1', type: 'shower', at: [11, 4], face: 'w', pose: 'stand', room: 'O' },
     { id: '2-basin-1', type: 'basin', at: [11, 4], face: 'w', pose: 'stand', room: 'O' }, { id: '2-toilet-1', type: 'toilet', at: [11, 4], face: 'n', pose: 'sit', room: 'O', xy: [11.2, 4.64], y: 0.42 },
     { id: '2-desk-1', type: 'lounge-seat', at: [11, 2], face: 'e', pose: 'sit', room: 'O', xy: [11.16, 2.79], y: 0.5, anim: 'read' },
-    { id: '2-armchair-1', type: 'lounge-seat', at: [8, 2], face: 'e', pose: 'sit', room: 'O', xy: [8.57, 2.63], y: 0.44, anim: 'read' },
+    { id: '2-armchair-1', type: 'lounge-seat', at: [8, 2], face: 'e', pose: 'sit', room: 'O', xy: [8.42, 2.63], y: 0.44, anim: 'read', cush: .2 },
     // Infirmary Chief
     { id: '2-I', type: 'bed', at: [14, 1], face: 's', pose: 'lie', room: 'I' }, { id: '2-shower-2', type: 'shower', at: [15, 4], face: 'w', pose: 'stand', room: 'I' },
     { id: '2-basin-2', type: 'basin', at: [15, 4], face: 'w', pose: 'stand', room: 'I' }, { id: '2-toilet-2', type: 'toilet', at: [15, 4], face: 'n', pose: 'sit', room: 'I', xy: [15.2, 4.64], y: 0.42 },
     { id: '2-desk-2', type: 'lounge-seat', at: [15, 2], face: 'e', pose: 'sit', room: 'I', xy: [15.16, 2.79], y: 0.5, anim: 'read' },
-    { id: '2-armchair-2', type: 'lounge-seat', at: [12, 2], face: 'e', pose: 'sit', room: 'I', xy: [12.57, 2.63], y: 0.44, anim: 'read' },
+    { id: '2-armchair-2', type: 'lounge-seat', at: [12, 2], face: 'e', pose: 'sit', room: 'I', xy: [12.42, 2.63], y: 0.44, anim: 'read', cush: .2 },
     // Dr. Sato
     { id: '2-V', type: 'bed', at: [17, 1], face: 's', pose: 'lie', room: 'V' }, { id: '2-shower-3', type: 'shower', at: [16, 3], face: 'e', pose: 'stand', room: 'V' },
     { id: '2-basin-3', type: 'basin', at: [16, 3], face: 'e', pose: 'stand', room: 'V' }, { id: '2-toilet-3', type: 'toilet', at: [16, 2], face: 's', pose: 'sit', room: 'V', xy: [16.8, 2.81], y: 0.42 },
@@ -6110,7 +6110,7 @@ DECKS[2] = {
     { id: '2-S', type: 'bed', at: [21, 1], face: 's', pose: 'lie', room: 'S' }, { id: '2-shower-4', type: 'shower', at: [22, 4], face: 'w', pose: 'stand', room: 'S' },
     { id: '2-basin-4', type: 'basin', at: [22, 4], face: 'w', pose: 'stand', room: 'S' }, { id: '2-toilet-4', type: 'toilet', at: [22, 4], face: 'n', pose: 'sit', room: 'S', xy: [22.2, 4.64], y: 0.42 },
     { id: '2-desk-4', type: 'lounge-seat', at: [22, 2], face: 'e', pose: 'sit', room: 'S', xy: [22.16, 2.79], y: 0.5, anim: 'read' },
-    { id: '2-armchair-3', type: 'lounge-seat', at: [19, 2], face: 'e', pose: 'sit', room: 'S', xy: [19.5, 2.6], y: 0.44, anim: 'read' },
+    { id: '2-armchair-3', type: 'lounge-seat', at: [19, 2], face: 'e', pose: 'sit', room: 'S', xy: [19.43, 2.6], y: 0.44, anim: 'read', cush: .2 },
     // Envoy Saruth (visitor)
     { id: '2-E', type: 'bed', at: [6, 20], face: 'n', pose: 'lie', room: 'E' }, { id: '2-cushion-1', type: 'lounge-seat', at: [4, 19], face: 's', pose: 'sit', room: 'E', xy: [4.24, 19.65], y: 0.18, anim: 'drink' },
     { id: '2-cushion-2', type: 'lounge-seat', at: [4, 18], face: 's', pose: 'sit', room: 'E', xy: [4.3, 18.35], y: 0.18, anim: 'drink' },
@@ -6121,12 +6121,12 @@ DECKS[2] = {
     { id: '2-T', type: 'bed', at: [10, 20], face: 'n', pose: 'lie', room: 'T' }, { id: '2-shower-5', type: 'shower', at: [11, 17], face: 'w', pose: 'stand', room: 'T' },
     { id: '2-basin-5', type: 'basin', at: [11, 17], face: 'w', pose: 'stand', room: 'T' }, { id: '2-toilet-5', type: 'toilet', at: [11, 17], face: 'n', pose: 'sit', room: 'T', xy: [11.2, 17.84], y: 0.42 },
     { id: '2-desk-5', type: 'lounge-seat', at: [11, 19], face: 'e', pose: 'sit', room: 'T', xy: [11.16, 19.21], y: 0.5, anim: 'read' },
-    { id: '2-armchair-4', type: 'lounge-seat', at: [8, 19], face: 'e', pose: 'sit', room: 'T', xy: [8.43, 19.37], y: 0.44, anim: 'read' },
+    { id: '2-armchair-4', type: 'lounge-seat', at: [8, 19], face: 'e', pose: 'sit', room: 'T', xy: [8.43, 19.37], y: 0.44, anim: 'read', cush: .2 },
     // visitors' suite
     { id: '2-B', type: 'bed', at: [14, 20], face: 'n', pose: 'lie', room: 'B' }, { id: '2-shower-6', type: 'shower', at: [15, 17], face: 'w', pose: 'stand', room: 'B' },
     { id: '2-basin-6', type: 'basin', at: [15, 17], face: 'w', pose: 'stand', room: 'B' }, { id: '2-toilet-6', type: 'toilet', at: [15, 17], face: 'n', pose: 'sit', room: 'B', xy: [15.2, 17.84], y: 0.42 },
     { id: '2-desk-6', type: 'lounge-seat', at: [15, 19], face: 'e', pose: 'sit', room: 'B', xy: [15.16, 19.21], y: 0.5, anim: 'read' },
-    { id: '2-armchair-5', type: 'lounge-seat', at: [12, 19], face: 'e', pose: 'sit', room: 'B', xy: [12.43, 19.37], y: 0.44, anim: 'read' },
+    { id: '2-armchair-5', type: 'lounge-seat', at: [12, 19], face: 'e', pose: 'sit', room: 'B', xy: [12.43, 19.37], y: 0.44, anim: 'read', cush: .2 },
     // Senior Helm
     { id: '2-H', type: 'bed', at: [17, 20], face: 'n', pose: 'lie', room: 'H' }, { id: '2-shower-7', type: 'shower', at: [18, 18], face: 'w', pose: 'stand', room: 'H' },
     { id: '2-basin-7', type: 'basin', at: [18, 18], face: 'w', pose: 'stand', room: 'H' }, { id: '2-toilet-7', type: 'toilet', at: [18, 19], face: 'n', pose: 'sit', room: 'H', xy: [18.2, 19.19], y: 0.42 },
@@ -6135,11 +6135,11 @@ DECKS[2] = {
     { id: '2-R', type: 'bed', at: [21, 20], face: 'n', pose: 'lie', room: 'R' }, { id: '2-shower-8', type: 'shower', at: [22, 17], face: 'w', pose: 'stand', room: 'R' },
     { id: '2-basin-8', type: 'basin', at: [22, 17], face: 'w', pose: 'stand', room: 'R' }, { id: '2-toilet-8', type: 'toilet', at: [22, 17], face: 'n', pose: 'sit', room: 'R', xy: [22.2, 17.84], y: 0.42 },
     { id: '2-desk-8', type: 'lounge-seat', at: [22, 19], face: 'e', pose: 'sit', room: 'R', xy: [22.16, 19.21], y: 0.5, anim: 'read' },
-    { id: '2-armchair-6', type: 'lounge-seat', at: [19, 19], face: 'e', pose: 'sit', room: 'R', xy: [19.5, 19.4], y: 0.44, anim: 'read' },
+    { id: '2-armchair-6', type: 'lounge-seat', at: [19, 19], face: 'e', pose: 'sit', room: 'R', xy: [19.43, 19.4], y: 0.44, anim: 'read', cush: .2 },
     // Counsellor
     { id: '2-N', type: 'bed', at: [11, 9], face: 'n', pose: 'lie', room: 'N' }, { id: '2-shower-9', type: 'shower', at: [12, 7], face: 'w', pose: 'stand', room: 'N' },
     { id: '2-basin-9', type: 'basin', at: [12, 7], face: 'w', pose: 'stand', room: 'N' }, { id: '2-toilet-9', type: 'toilet', at: [12, 7], face: 'n', pose: 'sit', room: 'N', xy: [12.2, 7.84], y: 0.42 },
-    { id: '2-armchair-7', type: 'lounge-seat', at: [9, 9], face: 'e', pose: 'sit', room: 'N', y: 0.44, anim: 'read' },
+    { id: '2-armchair-7', type: 'lounge-seat', at: [9, 9], face: 'e', pose: 'sit', room: 'N', xy: [9.43, 9.5], y: 0.44, anim: 'read', cush: .2 },
     // Senior Watch Officer
     { id: '2-G', type: 'bed', at: [15, 9], face: 'n', pose: 'lie', room: 'G' }, { id: '2-shower-10', type: 'shower', at: [16, 7], face: 'w', pose: 'stand', room: 'G' },
     { id: '2-basin-10', type: 'basin', at: [16, 7], face: 'w', pose: 'stand', room: 'G' }, { id: '2-toilet-10', type: 'toilet', at: [16, 7], face: 'n', pose: 'sit', room: 'G', xy: [16.2, 7.84], y: 0.42 },
@@ -6151,7 +6151,7 @@ DECKS[2] = {
     // visitors' cabin
     { id: '2-U', type: 'bed', at: [15, 12], face: 's', pose: 'lie', room: 'U' }, { id: '2-shower-12', type: 'shower', at: [16, 14], face: 'w', pose: 'stand', room: 'U' },
     { id: '2-basin-12', type: 'basin', at: [16, 14], face: 'w', pose: 'stand', room: 'U' }, { id: '2-toilet-12', type: 'toilet', at: [16, 14], face: 'n', pose: 'sit', room: 'U', xy: [16.2, 14.64], y: 0.42 },
-    { id: '2-armchair-8', type: 'lounge-seat', at: [13, 12], face: 'e', pose: 'sit', room: 'U', y: 0.44, anim: 'read' },
+    { id: '2-armchair-8', type: 'lounge-seat', at: [13, 12], face: 'e', pose: 'sit', room: 'U', xy: [13.42, 12.5], y: 0.44, anim: 'read', cush: .2 },
     // the Watch office
     { id: '2-watch-1', type: 'work:watch', at: [24, 1], face: 's', pose: 'work', room: 'W' }, { id: '2-watch-2', type: 'work:watch', at: [25, 1], face: 's', pose: 'work', room: 'W' },
     { id: '2-watch-3', type: 'work:watch', at: [26, 1], face: 's', pose: 'work', room: 'W' }, { id: '2-watch-4', type: 'work:watch', at: [25, 6], face: 'w', pose: 'sit', room: 'W', xy: [25, 6], y: 0.5 },
@@ -6167,7 +6167,7 @@ DECKS[2] = {
     { id: '2-windowseat-3', type: 'lounge-seat', at: [28, 0], face: 's', pose: 'sit', room: 'K', y: 0.52, anim: 'read', window: true },
     { id: '2-windowseat-4', type: 'lounge-seat', at: [30, 0], face: 's', pose: 'sit', room: 'K', y: 0.52, anim: 'read', window: true },
     { id: '2-windowseat-5', type: 'common-room', at: [31, 0], face: 's', pose: 'sit', room: 'K', y: 0.52, anim: 'read', window: true },
-    { id: '2-armchair-12', type: 'common-room', at: [27, 7], face: 'e', pose: 'sit', room: 'K', y: 0.44, anim: 'read' },
+    { id: '2-armchair-12', type: 'common-room', at: [27, 7], face: 'e', pose: 'sit', room: 'K', xy: [27.5, 7.5], y: 0.44, anim: 'read', cush: .2 },
     // the Survey lab
     { id: '2-survey-6', type: 'work:survey', at: [33, 1], face: 's', pose: 'work', room: 'L' }, { id: '2-survey-7', type: 'work:survey', at: [35, 1], face: 's', pose: 'work', room: 'L' },
     { id: '2-survey-8', type: 'work:survey', at: [36, 1], face: 's', pose: 'work', room: 'L' }, { id: '2-survey-9', type: 'work:survey', at: [37, 1], face: 's', pose: 'work', room: 'L' },
@@ -6183,8 +6183,8 @@ DECKS[2] = {
     { id: '2-windowseat-6', type: 'common-room', at: [41, 1], face: 's', pose: 'sit', room: 'J', xy: [41.5, 1.2], y: 0.52, anim: 'read', window: true, event: 'observatory-night' },
     { id: '2-windowseat-7', type: 'common-room', at: [43, 1], face: 's', pose: 'sit', room: 'J', xy: [43.5, 1.2], y: 0.52, anim: 'read', window: true, event: 'observatory-night' },
     { id: '2-survey-16', type: 'work:survey', at: [42, 5], face: 's', pose: 'work', room: 'J' },
-    { id: '2-beanbag-1', type: 'common-room', at: [42, 6], face: 's', pose: 'sit', room: 'J', xy: [42.13, 6.65], y: 0.39, anim: 'talk', event: 'observatory-night' },
-    { id: '2-beanbag-2', type: 'common-room', at: [43, 7], face: 's', pose: 'sit', room: 'J', xy: [43.35, 7.5], y: 0.4, anim: 'talk', event: 'observatory-night' },
+    { id: '2-beanbag-1', type: 'common-room', at: [42, 6], face: 28.6, pose: 'sit', room: 'J', xy: [42, 6.8], y: 0.39, anim: 'talk', event: 'observatory-night', cush: .2 },
+    { id: '2-beanbag-2', type: 'common-room', at: [43, 7], face: -17.2, pose: 'sit', room: 'J', xy: [43.2, 7.4], y: 0.4, anim: 'talk', event: 'observatory-night', cush: .2 },
     // observatory night (0.32.3, answer 25): one evening a week off-duty crew gather here (the sim engineer schedules it).
     // Everything tagged event 'observatory-night' is the gathering: the bench and beanbag seats above, and these, which are
     // type 'event' so the everyday habits leave them alone. window: by the bow glass.
@@ -6477,8 +6477,8 @@ DECKS[6] = {
   places: [
     { id: '6-control-1', type: 'work:engine', at: [25, 5], face: 'e', pose: 'sit', room: 'K', xy: [25.42, 5.37], y: 0.5 },
     { id: '6-control-2', type: 'work:engine', at: [25, 6], face: 'e', pose: 'sit', room: 'K', xy: [25.58, 6.63], y: 0.5 },
-    { id: '6-watch-1', type: 'work:engine', at: [12, 8], face: 'w', pose: 'sit', room: 'S', xy: [12.84, 8.1], y: 0.44 },
-    { id: '6-watch-2', type: 'work:engine', at: [12, 9], face: 'w', pose: 'sit', room: 'S', xy: [12.84, 9.9], y: 0.44 },
+    { id: '6-watch-1', type: 'work:engine', at: [12, 8], face: 'w', pose: 'sit', room: 'S', xy: [13.01, 8.1], y: 0.44, cush: .2 },
+    { id: '6-watch-2', type: 'work:engine', at: [12, 9], face: 'w', pose: 'sit', room: 'S', xy: [13.01, 9.9], y: 0.44, cush: .2 },
     { id: '6-engine-1', type: 'work:engine', at: [4, 4], face: 's', pose: 'work', room: 'E' },
     { id: '6-engine-2', type: 'work:engine', at: [7, 7], face: 'n', pose: 'work', room: 'E' },
     { id: '6-engine-3', type: 'work:engine', at: [3, 8], face: 'w', pose: 'work', room: 'E' },
@@ -7571,7 +7571,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.27.43';                           // keep in step with the header's build line
+const GAME_BUILD = '0.27.44';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -29918,7 +29918,7 @@ const armTo = (a, s, sx, ex, sz = .1, hx = 0) => {
 // until they move or the deck changes. Only a surface near the seat's own height counts (not a table above, not the floor)
 // 0.27.43 (reviewer 1e: the JS heap stayed 40 MB up): the caches are keyed by a deck-load number, never the deck itself,
 // and emptied when a deck unloads (deckUnloaded, from unloadDeck), so nothing here keeps an old deck's meshes alive
-const SEAT_RC = { gen: 1, list: null, rc: new THREE.Raycaster(), o: new THREE.Vector3(), d: new THREE.Vector3(0, -1, 0) };
+const SEAT_RC = { gen: 1, list: null, cushK: [], rc: new THREE.Raycaster(), o: new THREE.Vector3(), d: new THREE.Vector3(0, -1, 0) };
 function deckUnloaded() {
   SEAT_RC.gen++; SEAT_RC.list = null;
   if (typeof tableTrays !== 'undefined') { for (const h of tableTrays.eaters) h.eating = false; tableTrays.eaters.length = 0; tableTrays.ownOf = 0; tableTrays.own = null; tableTrays.n = -1; }
@@ -29929,8 +29929,12 @@ function seatCushion(o, sy) {
   c.x = p.x; c.z = p.z; c.r = o.face; c.gen = SEAT_RC.gen; c.v = 0;
   if (!deckRoot) return 0;
   const S = SEAT_RC;
-  if (!S.list) { S.list = []; deckRoot.traverse(m => { if (m.isMesh && !m.isInstancedMesh && !m.isSkinnedMesh && m.material !== SHADOW_PROXY_MAT[0] && m.material !== SHADOW_PROXY_MAT[1] && m.material !== SHADOW_PROXY_MAT[2]) S.list.push(m); }); }
-  const f = o.face || 0, k = .3 * (o.h || 1);
+  if (!S.list) { S.list = []; deckRoot.traverse(m => { if (m.isMesh && !m.isInstancedMesh && !m.isSkinnedMesh && m.material !== SHADOW_PROXY_MAT[0] && m.material !== SHADOW_PROXY_MAT[1] && m.material !== SHADOW_PROXY_MAT[2]) S.list.push(m); });
+    S.cushK = []; for (const q of deckDef.places || []) if (q.cush) { const sp = placeSpot(q.id); S.cushK.push(sp.x, sp.z, q.cush); } }   // numbers only (0.27.43)
+  // 0.27.44: the deep seats (armchairs, sofas, beanbags) were made shallower, and their places carry cush: .2, so the ray looks
+  // .2 x height ahead there instead of .3: the knees reach the front edge and the shins hang clear of it, whatever the height
+  let kf = .3; for (let i = 0; i < S.cushK.length; i += 3) if (Math.abs(S.cushK[i] - p.x) < .05 && Math.abs(S.cushK[i + 1] - p.z) < .05) { kf = S.cushK[i + 2]; break; }
+  const f = o.face || 0, k = kf * (o.h || 1);
   S.rc.set(S.o.set(p.x + Math.sin(f) * k, sy + .2, p.z + Math.cos(f) * k), S.d); S.rc.far = .5;
   for (const hit of S.rc.intersectObjects(S.list, false)) { const y = hit.point.y; if (y > .1 && y > sy - .2 && y < sy + .05) { c.v = y; break; } }
   return c.v;
