@@ -316,8 +316,9 @@ three differences:
   - `== chat`: whole everyday calls for days with no beat, separated by `--`. An optional `when: <conditions>` first,
     the lines, and `? send` where your choice of news goes.
 
-Family warmth ("I love you", "love to you") is fine in call files; the head writer reads them for tone. Jo, Sam and the
-contacts' names count as known names.
+Family warmth ("I love you", "love to you") is fine in call files, and only that: any other romance word ("in love",
+"my love", "my heart"...) is an error there as everywhere; the head writer reads them for tone. The contacts are `mum`,
+`gran`, `jo` and `sam` (a file for anyone else is an error). Jo, Sam and the contacts' names count as known names.
 
 ## Meetings (.meet)
 
