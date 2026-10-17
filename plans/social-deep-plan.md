@@ -116,6 +116,8 @@ Nothing is ever forced: you can ignore the button forever. If you have an appoin
 | Old rivalry | sharp about someone aboard | why it started | the two make up (a crew-to-crew drama) |
 | Starting over | evasive about the past | why they really came aboard | they say it out loud, and are glad they did |
 
+**Canonical ids** (decided 2026-10-17; the roster generator's ids win, social B's table follows): the themes are `homesick`, `exams`, `family`, `stuck`, `notgood` (not good enough), `lonely`, `loss` (an old loss), `talent` (secret talent), `burnout`, `leaving` (leaving soon?), `rivalry` (old rivalry) and `startover` (starting over); a story crew member's thread is `arc:<id>` (`arc:tomas`, `arc:torres`), which points at their hand-written arc in `content/arcs/<id>.arc`. A theme's file is `content/themes/<theme id>.arc`.
+
 Light moments at colleague come from the joy and from small confessions ("I've named the scrubber on Deck 4. Don't tell Calder."). That keeps the ratio about two light moments for every serious one.
 
 **Pacing in numbers.** With today's points, a player who chats daily and eats with someone reaches friend in about 2 to 3 weeks (Tomas in the social check: a friend after two weeks). A whole three-beat thread therefore unfolds over about a month of play for the people you're closest to, while acquaintances stay at the light level. About 6 to 10 close friends in a long game feels right; nothing caps it.
@@ -192,6 +194,8 @@ The pair affinity (`SHIP.aff`, Int8 per pair, hourly drift from time together) s
 ## Part 4: Small gifts
 
 **What you can give.** Gifts are things you carry in your hands, like parts (you already carry two items): you buy them at the crew store (a tin of tea, biscuits, a postcard, a little plant), pick them in the garden on harvest days (herbs, a tomato, a flower), or make them in the machine shop (a small trinket from scrap, once Works lets you: a keyring, a bookend, a little gear on a chain). The store's and the garden's lists get a `gift` tag; the machine shop gets three cheap "make" recipes.
+
+**Every gift tag has items** (so nobody's loves are unreachable): `tea` (a tin of tea), `sweet` (biscuits, a bar of chocolate), `plant` (a little plant), `garden` (herbs, a tomato, a flower on harvest days), `book` (a paper novel, a notebook), `star` (a star chart postcard), `made` (machine-shop trinkets: a keyring, a bookend, a gear on a chain), **`music`** (a music chip of old songs at the store; a tin whistle from the machine shop) and **`game`** (a pocket puzzle or a spare Tiles set at the store; a metal puzzle from the machine shop). The store and machine-shop lists get these items; the roster's loves stay as they are.
 
 **How you give.** With a giftable item in your hands, the chat card shows **Give …** (the item's name). One gift per person per ship week (`rel.giftWeek`), so it can't be farmed.
 
