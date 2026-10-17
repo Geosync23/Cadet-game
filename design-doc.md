@@ -447,7 +447,7 @@ You work the day shift as a Works maintenance tech, with **two days off a week**
 1. **Notice and take.** A fault shows on the Works bay job board, someone flags you down, or you spot a worn machine on your rounds. You always take jobs at the board (agreed 2026-10-16). The device's Jobs app only tracks them: the tracked job sets the on-screen arrow and the map pins, step by step (board, storage, machine shop, machine, back to the board). The pointer is a marker over the place when it's on screen, an arrow at the screen edge when it isn't, and "Take the lift to Deck N" when it's on another deck; Maps uses the same pointer.
 2. **Diagnose.** Open the panel and inspect it. You see which component is failing and what the fix needs.
 3. **Fetch.** Get the part or tool from main storage or the Works bay, or make it in the machine shop. You can carry two items at a time.
-4. **Repair.** Hold to work. Repairs take longer on broken machines and go faster as your skill grows.
+4. **Repair.** Hold to work. **Starting is automatic (the user, 2026-10-17):** when you are on a job and carry the part it needs, walking up to the thing to repair starts the work by itself, no tap needed; walking away pauses it. Repairs take longer on broken machines and go faster as your skill grows.
 5. **Turn in.** The machine recovers and the people it affected notice, but the job only completes when you turn it in back at the board, which is when it counts toward credit, your Record and commendations (agreed 2026-10-16). Favours are the exception: you accept them in person in a chat and hand them back to that person.
 
 What makes it interesting:
