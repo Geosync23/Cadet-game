@@ -226,7 +226,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.28.51
+   STARSHIP CADET: CSV Wren                           build 0.28.53
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7564,7 +7564,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.28.51';                           // keep in step with the header's build line
+const GAME_BUILD = '0.28.53';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -8120,6 +8120,7 @@ function apptTick() {
 // with no appointments it changes nothing. Section 4's edgeBlocks asks it for 'closed' doors; section 10 opens the door.
 function doorOpenFor(room, who, t = shipNow(), deck = typeof deckDef !== 'undefined' ? deckDef.num : null) {
   if ((who === 'player' || who === 'you' || (who && who.isPlayer)) && typeof occasionDoorOpen === 'function' && occasionDoorOpen(deck, room, t)) return true;   // section 18's occasions: a summons, the Captain's table
+  if ((who === 'player' || who === 'you' || (who && who.isPlayer)) && typeof jobDoorOpen === 'function' && jobDoorOpen(deck, room)) return true;   // section 15: your job's next stop is in there (0.28.52)
   for (const a of apptList()) {
     if (!apptOn(a) || !/^(invite|summons|meeting|checkup|work|social)$/.test(a.kind || 'social')) continue;
     const pl = apptPlace(a); if (!pl || pl.deck !== deck || pl.room !== room) continue;
@@ -10960,6 +10961,7 @@ function playerTap(it, at, point) {
   if (bunkTap(it, at)) return true;                      // a friend's note on your bunk (0.28.25)
   if (cartTap(it, at)) return true;                      // a restock job: the hover cart (below)
   if (jobTap(it, at)) return true;                       // the job loop (below): main storage, or the machine you're working on
+  if (!/job board|ship health/i.test(it.t) && jobSpotTap(point)) return true;   // anything near your job's stop: the lamp in a lobby (0.28.52)
   if (PLAYER_TAPS.some(f => f(it, at, point))) return true;   // other sections' taps (15b)
   const rule = ACT_TAP.find(r => r[0].test(it.t)); if (!rule) return sitTap(it, at, point) || machineTap(it, at);
   const [, types, kind] = rule;
@@ -11024,6 +11026,7 @@ const FLOOR_ACTS = { gym: pl => pl.anim === 'run' ? 'Treadmill' : pl.anim === 'r
 function playerFloorTap(point) {
   if (queueHeld()) return true;                          // in the line: ask first (0.28.31)
   if (bagLockerTap(point)) return true;                  // the kit bag into your locker (0.28.26)
+  if (jobSpotTap(point)) return true;                    // the floor at your job's stop (0.28.52, the user's lamp)
   if (typeof PLACE_OF === 'undefined' || typeof ray === 'undefined') return false;
   const o = ray.ray.origin, d = ray.ray.direction, hits = [];
   for (const pl of PLACE_OF.values()) {
@@ -11516,6 +11519,7 @@ function playerUpdate(dt, t) {
   }
   if (PLAYER_V0 === undefined) PLAYER_V0 = player.maxV;
   bagTick();                                             // the kit bag into your locker after the bunk step (0.28.26)
+  handTick();                                            // the Repair button (0.28.52)
   dinnerTick();                                          // sit down at your table for the arrival dinner (0.28.28)
   const P = SHIP.player, hold = P.cart ? (P.cart.stage === 'full' ? 'cartfull' : 'cart') : P.carry.length > 0 ? true
     : ACT && ACT.kind === 'eat' && ACT.o.fed && ACT.phase === 'walk' || !ACT && P.tray ? 'tray' : typeof ixHold === 'function' && ixHold() || false;   // a tray from the servery to your seat (0.28.15); 15b's ixHold: a job's toolbox or crate
@@ -11755,6 +11759,69 @@ function jobTap(it, at) {
   if (Math.hypot(spot.x - at.x, spot.z - at.z) > ACT_NEAR + .6 && Math.hypot(mc.x - at.x, mc.z - at.z) > 1.6) return false;
   actStart('job', pid, { title: it.t, pose: (typeof poseOf === 'function' ? poseOf(PLACE_OF.get(pid)) : null) || 'work' });
   return true;
+}
+// your job's work from where you are (0.28.52, the user's lamp report: a lamp's stop is a spot in a lobby with nothing of
+// its own to tap, so a tap at the marker only walked you there): the next stop of your chore (15b's ixChoreTap) or the
+// panel of the machine you're repairing (jobTap), within JOB_REACH m of point p on this deck, or (a tap: viaRay) under
+// the tap's line of sight as it passes over the spot (a thing in front, like Deck 1's trunk head, catches the tap first).
+// Null: no work here. parts: what it fits is in hand (or fitted), so the work itself starts (the Repair button's test)
+const JOB_REACH = 1.5, JOB_RAY = .6;
+function jobRayDist(s) {                                 // the tap's ray from the floor to 1.2 m up: how close it passes to spot s
+  const o = ray.ray.origin, d = ray.ray.direction; let best = Infinity;
+  for (let y = 0; y <= 1.2; y += .1) { const k = (y - o.y) / d.y; if (k > 0) best = Math.min(best, Math.hypot(o.x + d.x * k - s.x, o.z + d.z * k - s.z)); }
+  return best;
+}
+function jobHere(p, viaRay) {
+  if (!jobsOn() || typeof deckDef === 'undefined' || !p) return null;
+  const near = pid => { const s = pid && PLACE_OF.has(pid) ? placeSpot(pid) : null; return s && (Math.hypot(s.x - p.x, s.z - p.z) < JOB_REACH || viaRay && jobRayDist(s) < JOB_RAY) ? s : null; };
+  const P = SHIP.player, j = typeof ixChore === 'function' ? ixChore() : null;
+  if (j && !j.workDone) {
+    const nx = ixNextStop(j), s = nx && nx.s.step !== 'fetch' && nx.s.deck === deckDef.num ? near(nx.s.places[0]) : null;
+    if (s) return { parts: !!j.parts.length && !jobNeeds(j, { fitted: [] }, P.carry).length, go: () => ixChoreTap({ t: j.title, x: '' }, new THREE.Vector3(s.x, 0, s.z)) };
+  }
+  const mj = myJob(), m = mj && mj.machine && !mj.workDone ? machineById(mj.machine) : null, s = m && m.deck === deckDef.num ? near(panelPlace(m.id)) : null;
+  const w = P.work && P.work.job === (mj && mj.id) ? P.work : { fitted: [] };   // not myWork(): it makes P.work, and this runs every few frames
+  if (s) return { parts: !jobNeeds(mj, w, P.carry).length, go: () => jobTap({ t: machineName(m)[0].toUpperCase() + machineName(m).slice(1), x: '', front: 0, depth: 0 }, new THREE.Vector3(s.x, 0, s.z)) };
+  return null;
+}
+// a locked room your job's next stop is in opens for you (0.28.52: section 18's veyliLamp is a lamp in the Captain's
+// quarters, which you could never get into; section 14's doorOpenFor asks). Chores only; it closes once the stops are done
+function jobDoorOpen(deck, room) {
+  const j = typeof myJob === 'function' ? myJob() : null; if (!j || j.workDone || !Array.isArray(j.stops) || typeof placeById !== 'function') return false;
+  const k = j.parts.length ? 1 : 0, done = j.stepsDone || [];   // jobStops puts the fetch first when there are parts
+  for (let i = 0; i < j.stops.length; i++) if (!done.includes(i + k)) { const pl = j.stops[i].placeId && placeById(j.stops[i].placeId); return !!pl && pl.deck === deck && pl.room === room; }
+  return false;
+}
+const jobSpotTap = p => { const h = jobHere(p, typeof ray !== 'undefined'); return !!(h && h.go()); };   // a tap on the floor or on anything near your job's stop
+// the Repair button (0.28.52, the user's design, "Repair" step): small and thumb-sized at the bottom right, in the slot
+// above Put down's (player engineer 8's #putDown), shown only when it applies: you stand at your job's stop (jobHere at
+// your feet) with what it fits in hand, and aren't already at work. It starts the same work as a tap there. handTick (playerUpdate) checks four times a
+// second of real time; nothing it does touches the ship, so tests and replays are unchanged
+const HAND = { at: -1e9, repair: null };
+function handEl() {
+  let el = document.getElementById('handBtns'); if (el) return el;
+  const st = document.createElement('style');
+  st.textContent = '#handBtns{position:fixed;right:max(12px,env(safe-area-inset-right));bottom:calc(76px + env(safe-area-inset-bottom));z-index:2;display:flex;flex-direction:column;align-items:flex-end;gap:8px;pointer-events:none}'
+    + '#handBtns button{pointer-events:auto;min-width:44px;min-height:44px;padding:8px 14px;border-radius:22px;font-size:14px;display:flex;align-items:center;gap:6px;touch-action:manipulation}'
+    + '#handBtns button[hidden]{display:none}#handBtns svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}'
+    + '#repairBtn{border-color:#e8c06a;color:#f2e3bf}body.dlgon #handBtns{display:none}';
+  document.head.appendChild(st);
+  el = document.createElement('div'); el.id = 'handBtns';
+  el.innerHTML = '<button type="button" id="repairBtn" hidden aria-label="Repair: start the work here"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.1L4 16.7 7.3 20l5.3-5.3a4 4 0 0 0 5.1-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg><span>Repair</span></button>';
+  document.body.appendChild(el);
+  for (const b of el.querySelectorAll('button')) b.addEventListener('pointerdown', e => e.stopPropagation());   // never a tap on the deck behind
+  document.getElementById('repairBtn').onclick = e => { e.stopPropagation(); const h = handRepair(); if (h) h.go(); handTick(true); };
+  return el;
+}
+// your job's work at your feet with its parts in hand, while you're free to start it (null: no Repair button)
+function handRepair() {
+  if (PAUSE.on || (typeof ride !== 'undefined' && ride) || ACT && (ACT.kind === 'ixStop' || ACT.kind === 'job' || ACT.phase === 'do')) return null;
+  const h = jobHere(player.obj.position); return h && h.parts ? h : null;
+}
+function handTick(now) {
+  const t = performance.now(); if (!now && t - HAND.at < 250) return; HAND.at = t;
+  const el = handEl(), r = document.getElementById('repairBtn'), h = handRepair();
+  HAND.repair = !!h; if (r.hidden === !h) return; r.hidden = !h;
 }
 // at the panel (actBegin): fit the parts you carry, then repair if they're all in, else look it over the first time
 function jobBegin(A) {
@@ -12010,7 +12077,7 @@ function ixChoreTap(it, at) {
   }
   if (st.deck !== deckDef.num) return false;
   const pid = st.places[0], spot = pid && PLACE_OF.has(pid) ? placeSpot(pid) : null;
-  if (!spot || !(ixDist(it, spot) < IX_NEAR + .6 || PLACE_OF.get(pid).room === room)) return false;
+  if (!spot || !(it.hit ? ixDist(it, spot) < IX_NEAR + .6 : Math.hypot(spot.x - at.x, spot.z - at.z) < JOB_REACH) && PLACE_OF.get(pid).room !== room) return false;   // no thing (jobHere, 0.28.52): from the point
   const [title, pose] = IX_STOP[st.step] || ['Your job', 'work'];
   // the stop's spot, not the place: a lamp over the lift queue is yours to change even with someone waiting there
   actStart('ixStop', null, { ...o, pose, spot: { ...spot, id: null, pose: 'stand' }, after: j.title + ': about ' + Math.ceil(st.mins || 10) + ' minutes. Walk away to pause.' });
@@ -33091,7 +33158,7 @@ function tap(cx, cy) {
     return;
   }
   if (ud.item && ud.item.lift) { enterLift(); return; }
-  if (ud.item && ud.item.see) { toast(ud.item.t, ud.item.x); return; }   // seen through glass: nothing to walk to
+  if (ud.item && ud.item.see) { if (typeof jobSpotTap === 'function' && jobSpotTap(h.point)) return; toast(ud.item.t, ud.item.x); return; }   // seen through glass: nothing to walk to (but your job's stop past it: section 15, 0.28.52)
   if (ud.item) {
     const it = ud.item; it.hit.getWorldPosition(_wp);
     if (playerTap(it, _wp.clone(), h.point)) return;     // section 15: eat, shower, work out, call home, shop

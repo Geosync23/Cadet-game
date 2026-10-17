@@ -1003,6 +1003,37 @@ with sync_playwright() as pw:
             check(c3[0] and c3[0]['stage'] == 'done' and c3[1] == 'cart', f'cart run: unloading in storage ({c3})')
             check(c4[0] is None and not c4[1] and 'Job done' in c4[2], f'cart run: docking the cart finishes the job ({c4})')
             check(fin[0] == 'done' and pre[1] > 0 and fin[1] == pre[0] + pre[1] and fin[2] is None, f'cart run: the delivery is on the shelves ({pre} -> {fin})')
+        # the Repair button (0.28.52, the user's design): at your job's stop with its part in hand, a small Repair button shows
+        # (thumb-sized, on screen); a real click starts the same work as a tap there; hidden while at work, without the
+        # part, or away from the stop. A lamp chore in Deck 4's lift lobby and an oven repair (its seal in hand)
+        if g.ev("typeof handTick === 'function' && typeof CHORES !== 'undefined'"):
+            print('The Repair button (0.28.52):')
+            RB = r"""(() => { handTick(true); const b = document.getElementById('repairBtn'), r = b.getBoundingClientRect();
+              return { shown: !b.hidden && r.width > 0, w: Math.round(r.width), h: Math.round(r.height), x: r.left + r.width / 2, y: r.top + r.height / 2,
+                inside: r.left >= 0 && r.top >= 0 && r.right <= innerWidth && r.bottom <= innerHeight, act: ACT && [ACT.kind, ACT.phase] }; })()"""
+            HJ = r"""((kind) => { for (const j of SHIP.jobs) if (j.claimedBy === 'you' && j.status === 'claimed') { j.claimedBy = null; j.status = 'open'; }
+              actEnd(true); SHIP.player.work = null; SHIP.player.carry = []; const t = shipNow(); let j, pid;
+              if (kind === 'lamp') { const c = choreWhere('lamp').find(c => c.key === '4-lift-1'); pid = c.key;
+                j = { id: 'pcrb-lamp', machine: null, deck: 4, room: c.room, kind: 'chore', chore: 'lamp', target: c.key, title: c.title, tier: 1, stops: c.stops.map(x => ({ ...x })), urgency: 0, posted: t, found: t, claimedBy: 'you', status: 'claimed', start: t, parts: ['lamp'] }; }
+              else { const m = machineById('3-oven-1'); pid = panelPlace(m.id);
+                j = { id: 'pcrb-oven', machine: m.id, deck: 3, room: m.room, kind: Object.keys(JOB_TYPES)[0], urgency: 1, posted: t, found: t, claimedBy: 'you', status: 'claimed', start: t, parts: ['seal'], title: 'Repair the oven' }; }
+              SHIP.jobs.push(j); MACH_REV++; if (kind === 'lamp') jobStepDone(j.id, 0); SHIP.player.carry = j.parts.slice();
+              return pid; })"""
+            PUTAT = r"""((pid, off) => { const s = placeSpot(pid), gl = nearestOpen(s.x + off, s.z, player); player.obj.position.copy(cellPos(...gl)); player.stop(); })"""
+            for kind, deck, want in [('lamp', 4, 'ixStop'), ('oven', 3, 'job')]:
+                g.ev(f"goToDeck({deck})"); g.step(3)
+                pid = g.ev(f"({HJ})('{kind}')")
+                g.ev(f"({PUTAT})('{pid}', 6)"); g.step(5); away = g.ev(RB)
+                g.ev(f"({PUTAT})('{pid}', 0)"); g.step(5); at = g.ev(RB)
+                g.ev("SHIP.player.carry = []"); none = g.ev(RB); g.ev(f"SHIP.player.carry = {json.dumps(['lamp'] if kind == 'lamp' else ['seal'])}")
+                at = g.ev(RB); g.page.mouse.click(at['x'], at['y']); g.step(60); work = g.ev(RB)
+                print(f'  {kind}: away {away["shown"]}, at the stop {at["shown"]} ({at["w"]}x{at["h"]}, on screen {at["inside"]}), no part {none["shown"]}, clicked -> {work["act"]}, then shown {work["shown"]}')
+                check(not away['shown'], f'{kind}: no Repair button 6 m from the stop')
+                check(at['shown'] and at['inside'] and at['w'] >= 44 and at['h'] >= 44, f'{kind}: the Repair button at the stop, thumb-sized and on screen ({at})')
+                check(not none['shown'], f'{kind}: no Repair button without the part')
+                check(work['act'] and work['act'][0] == want and not work['shown'], f'{kind}: clicking Repair starts the work ({work["act"]}) and the button goes')
+                g.ev("actEnd(true)")
+            g.ev("for (const j of SHIP.jobs) if (j.claimedBy === 'you' && j.status === 'claimed') { j.claimedBy = null; j.status = 'open'; } SHIP.jobs = SHIP.jobs.filter(j => !String(j.id).startsWith('pcrb-')); SHIP.player.carry = []; SHIP.player.work = null; MACH_REV++; handTick(true)")
     else:
         print('The job loop: this build has no section 17 jobs (myJob, finishJob): skipped')
 
