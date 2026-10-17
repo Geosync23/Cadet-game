@@ -1,0 +1,14 @@
+# Finding: the ship notes bus overwrites `kind` and `t` in every note (sim, systems, social A), and the time-jump failure
+
+Reviewer 1, 2026-10-17, on my full merge of arrival 7abf466 + sim 6dd8967 + crew 98df62f + social 45b0595 + social B 31f8aea + systems f211129.
+
+## 1. MUST FIX (sim, with systems and social A): `simNote` overwrites the payload's `kind` and `t`
+- `simNote(kind, data)` builds `Object.assign(<copy of data>, { kind, t })`. Any field of the payload named `kind` or `t` is replaced by the note's own kind and the current time.
+- The plan's appendix defines `repair {who, machine, kind, deck}`, and systems sends exactly that (`simLater('repair', { who, machine, state, kind: j.kind, deck, id })`). Every real repair note reaches the listeners as `kind: 'repair'`. Social's cue key is `'repair.' + (d.kind || machine kind)`, so it becomes **`repair.repair`** for every repair in play, and a writer's `cue('repair.oven')` line can never match a real repair.
+- Proven on the merge: the hour-by-hour run's cues are `repair.repair` for every crew repair (decks 4, 3, 2, ...). Social_check's own stand-in notes give `repair.oven` only because the test calls `socHear` directly and never goes through `simNote`.
+- The same clobbering kills any sender-supplied time, which the time-jump fix depends on: a `t` in the payload is overwritten by the send time.
+- Fix (one line in section 13, while the sim engineer has `simNote` open): let the payload keep its own fields. Either take the note's time from `data.t` when it's a finite number (the sender's time), or put the bus's own kind and time under names a payload never uses. And settle the payload names: the repair's job kind as `job` (or the machine kind as `mkind`), never `kind`. Then social's cue key reads the machine kind from `machineById(d.machine)` first. Add a social_check case that sends through `simNote` itself, not `socHear`.
+
+## 2. The time-jump check fails on the full merge (`Two days in one jump the same as hour by hour (with bus notes): False`)
+- Each pair of branches passes. Only the full merge fails, because there systems' real notes (crew repairs, `jobUnclaimed`) are in play. In a jump, section 17 runs the skipped hours and then sends all their notes at once, stamped with the end of the jump. Social queues each note by its time, so they land in different social hours than when played hour by hour. Proven: the hour-by-hour run has repair cues at 12:00, 14:00 and 16:00 and two `unclaimed` reputation dips; the jump has none of them yet (they're still in `noteq`), and reputation differs (Works 9 vs 10, galley 17 vs 18).
+- So the sim's pending fix ("notes keep their sender time") also needs **systems to put the real time on each note** (`simLater(kind, { ..., t: <the minute it happened> })`), and finding 1 so that `t` survives. Then run social_check on the full merge.
