@@ -109,7 +109,7 @@ The daily loop spans three decks: sleep on Deck 4, eat on Deck 3, work from Deck
 
 **Build order:** Deck 4, then Deck 5, then Deck 3, then Decks 6, 1 and 2. All six decks now have agreed plans (`plans/deckN-plan.html`). Decks 4, 5 and 3 are built and signed off. Decks 6, 1 and 2 are built as shells, rooms and furniture, without crew or machines (see DEV_NOTES and TEAM.md for their review status).
 
-**Access and mood.** The lift reaches every deck from day one. Utility rooms lock by tier (agreed 2026-10-16): closets at Tier 1, plant rooms at Tier 2, batteries and power junctions at Tier 3. The player starts at Tier 1, a Works junior. Locking by story comes later, with the story work; until then, sealed rooms and hatches show what's behind them with tap text. Each deck has its own lighting mood: warmer and dimmer on Deck 6, cooler on the bridge.
+**Access and mood.** The lift reaches every deck from day one. You can walk into every utility room with a built inside from the start (the user, 2026-10-17; it replaces the tier locks agreed 2026-10-16). Tiers still decide which jobs are yours: closets are Tier 1 work, plant rooms Tier 2, batteries and power junctions Tier 3, and crew still pass the hatches by rank (Works only). The player starts at Tier 1, a Works junior. Locking by story comes later, with the story work; until then, sealed rooms and hatches show what's behind them with tap text. Each deck has its own lighting mood: warmer and dimmer on Deck 6, cooler on the bridge.
 
 
 ## Crew and rooms
@@ -488,7 +488,7 @@ What makes it interesting:
 
 You progress by earning clearance to work on deeper, more connected systems, and each tier changes how the job plays, not just how big the numbers are. Tier 2 is also your first promotion: Officer rank and your own cabin. Rank also decides which parts of a ship-wide event reach you.
 
-| Tier | Title | Rank | Room | Systems you can work on | What's new in the gameplay | Parts of the ship opened |
+| Tier | Title | Rank | Room | Systems you can work on | What's new in the gameplay | Where its jobs are (you can walk in at any tier) |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | Junior Technician | Junior Officer | Bunk, junior wing | Galley oven, lights, doors, washroom fixtures, laundry washers, cabin fixtures | One machine, one fault. Learn the loop: diagnose, fetch, repair, service | Works bay, storage, machine shop, utility closets |
 | 2 | Technician | Officer (first promotion) | Own cabin, officers' corridor | Air scrubbers, water recycler, heating, air plant, fan | Connected systems. Ducts and pipes run between rooms and decks, so a fault can start upstream. Trace it from the manifold room and junctions | Air plant, fan hall, manifold room, pipe galleries, Deck 4 scrubbers and heating, Deck 3 recycler |
@@ -503,7 +503,7 @@ How you earn a tier:
 
 What each tier gives you:
 
-- **Access.** Keycards to new rooms and systems. The ship literally opens up as you grow, and at tier 2 your key opens a cabin of your own.
+- **Access.** Work on new systems. You can already walk into every utility room (2026-10-17); each tier makes the jobs in them yours, and at tier 2 your key opens a cabin of your own.
 - **Tools.** A diagnostic scanner, a pipe kit, a conduit tester, a calibration rig. Each one makes new kinds of faults readable.
 - **Responsibility.** Night on-call duty, where emergencies can wake you. Later, a junior tech to mentor.
 - **Skill.** Repairs get faster and cleaner in tiers you have mastered, so old jobs become quick wins while new ones stay challenging.
