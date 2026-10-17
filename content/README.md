@@ -227,6 +227,11 @@ A: No promises.
 - Someone fixed the lamp at last.
 ```
 
+In the game (0.43.16): soon after something happens (a repair, a gift, a tradition, a storm's phase...), and now and
+then while it's still talked about (a day or two), someone near you says one of these as a bubble. Each person reacts
+to a kind (the file's `@reactions` kind) once a day at most, and you won't hear the same line again for 7 ship days,
+so give each cue several lines and spread them over who'd notice (`dept:`, `who:`).
+
 ## Traditions (.trad)
 
 A `.trad` file follows the traditions engineer's format, `plans/trad-format.md` (comments start with `//`). content_gen.py bakes it with their `plans/trad_parse.py`
