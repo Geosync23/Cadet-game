@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.36.62
+   STARSHIP CADET: CSV Wren                           build 0.36.63
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.36.62';                           // keep in step with the header's build line
+const GAME_BUILD = '0.36.63';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -14938,9 +14938,13 @@ function socialSeekAsks(m) {
   }
   return false;
 }
-function seekSpot() {                                    // a place by you on this deck for someone to walk to: the nearest one
+function seekSpot() {                                    // somewhere by you for someone to walk to: a free seat (section 10's seatsBeside), else the nearest sitting place nobody's using
   const P = player.obj.position, L = (DECKS[deckDef.num] && DECKS[deckDef.num].places || []).filter(q => Array.isArray(q.at));
-  let best = null, bd = 1e9; for (const q of L) { const c = cellPos(...q.at), d = Math.hypot(c.x - P.x, c.z - P.z); if (d < bd && d > .5) { bd = d; best = q; } }
+  const SEAT = ['mess-seat', 'lounge-seat', 'bench', 'common-room', 'garden', 'music'], used = new Set(DECK_CREW.map(a => a.goalId || (a.spot && a.spot.id)).filter(Boolean));
+  let near = null, bd = 1e9; for (const q of L) { const c = cellPos(...q.at), d = Math.hypot(c.x - P.x, c.z - P.z); if (d < bd) { bd = d; near = q; } }
+  if (near && typeof seatsBeside === 'function') { try { const id = seatsBeside(near.id, 1)[0], q = id && L.find(x => x.id === id); if (q && Math.hypot(cellPos(...q.at).x - P.x, cellPos(...q.at).z - P.z) <= SEEK_NEAR) return q; } catch (e) { } }
+  let best = null; bd = 1e9;                             // never a bed, a work station or a spot someone holds
+  for (const q of L) { if (!SEAT.includes(q.type) || used.has(q.id)) continue; const c = cellPos(...q.at), d = Math.hypot(c.x - P.x, c.z - P.z); if (d < bd) { bd = d; best = q; } }
   return best && bd <= SEEK_NEAR ? best : null;
 }
 function socialSeek(m) {
