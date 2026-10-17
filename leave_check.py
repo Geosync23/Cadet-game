@@ -43,6 +43,7 @@ PAPER = r"""(({ plan, days, friends }) => {
     if (plan === 'twoTwo') return [8, 9, 11, 12].includes(d) ? 'skip' : 'work';   // Mon, Tue missed, Wed worked, Thu, Fri missed: no talk
     if (plan === 'three') return [8, 9, 10].includes(d) ? 'skip' : 'work';       // three in a row: the talk
     if (plan === 'lateDaily') return 'lateNoJobs';
+    if (plan === 'twoOneTwo') return d <= 7 || wd === 2 ? 'work' : 'skip';   // every week: two missed, one worked, two missed
     if (plan.startsWith('skipUntil')) return 'dyn';     // (d): driven by the ladder below
     return 'work';
   };
@@ -132,12 +133,16 @@ with sync_playwright() as pw:
         check(not r['steps'] and r['letGo'] is None, f'{plan}: got a summons or let go: {r["steps"]}')
 
     print('The Chief after three missed shifts in a row (the user\'s rule), and never for lateness:')
-    for plan, want in (('twoTwo', False), ('three', True), ('lateDaily', False)):
-        r = ev(f"({PAPER})({{ plan: '{plan}', days: {70 if plan == 'lateDaily' else 21}, friends: [] }})")
+    for plan, want in (('twoTwo', False), ('three', True), ('lateDaily', False), ('twoOneTwo', True)):
+        r = ev(f"({PAPER})({{ plan: '{plan}', days: {70 if plan in ('lateDaily', 'twoOneTwo') else 21}, friends: [] }})")
         got = any(x['step'] == 'chief' for x in r['steps'])
         print(f"  {plan}: steps {r['steps']}, lowest work {min(x['w'] for x in r['log']):.1f}")
         check(got == want, f"{plan}: the Chief's talk {'missing' if want else 'given'}")
         if plan == 'three' and got: check(r['steps'][0]['day'] == 10, f"three in a row: the Chief on day {r['steps'][0]['day']}, not day 10")
+        if plan == 'lateDaily': check(min(x['w'] for x in r['log']) > 15, 'late every day fell under 15 (the Chief by reputation)')
+        if plan == 'twoOneTwo':
+            print(f"    let go (last day): {r['letGo']}")
+            check(any(x['step'] == 'captain' for x in r['steps']), 'two missed, one worked, two missed every week never reaches the Captain')
 
     print('(b) All their leave and sick days, over 16 weeks:')
     r = ev(f"({PAPER})({{ plan: 'leave', days: 112, friends: [] }})")
