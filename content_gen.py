@@ -401,13 +401,10 @@ def bake():
         if not trad_parse:
             raise GenError('content/traditions has .trad files but plans/trad_parse.py (the traditions engineer\'s) is missing')
         try:
-            js_block = trad_parse.bake_traditions(tdir)
-            for f in sorted(os.listdir(tdir)):
-                if f.endswith('.trad'):
-                    out['TRADITIONS'] += trad_parse.parse_trad(open(os.path.join(tdir, f), encoding='utf-8').read(), f)
+            out['TRADITIONS'] += trad_parse.read_all(tdir)   # TRIAL GLUE: 0.34.21's trad_parse has read_all, not bake_traditions
         except trad_parse.TradError as e:
             raise GenError('content/traditions/' + str(e))
-        out['TRAD_JS'] = js_block[js_block.index('const TRADITIONS'):js_block.index('// ---- END TRADITIONS')].rstrip('\n')
+        out['TRAD_JS'] = 'const TRADITIONS = [\n' + ''.join('  ' + json.dumps(t, ensure_ascii=False) + ',\n' for t in out['TRADITIONS']) + '];'
     ids = {}
     for kind, es in out['LINES'].items():
         for e in es:

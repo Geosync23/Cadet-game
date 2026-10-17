@@ -128,7 +128,7 @@ def main(argv):
             allx.append((f'overheard {c["topic"]}', 'overheard', dict(c, text=l['text']), None, 'convo'))
     for tr in out['TRADITIONS']:                           # the traditions engineer's shape: text: { kind: [{ t, tone }] }
         for sec, es in tr.get('text', {}).items():
-            allx += [(f'tradition {tr["id"]}', 'trad.' + sec, {'text': e['t'], 'tone': e.get('tone', 'light'), 'id': tr['id']}, None, 'trad') for e in es]
+            allx += [(f'tradition {tr["id"]}', 'trad.' + sec, {'text': e.get('text', e.get('t')), 'tone': e.get('tone', 'light'), 'id': tr['id']}, None, 'trad') for e in es]
     for mid, sc in out['MEETINGS_BAKED'].items():
         for l in sc['lines']:
             for x in ([l] if 'text' in l else [c for c in l['choice']] + [c['reply'] for c in l['choice'] if 'reply' in c]):
