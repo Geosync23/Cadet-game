@@ -7,10 +7,10 @@
 ## My seats (session ids)
 | Seat | Branch | Session | Last reviewed | Verdict |
 | --- | --- | --- | --- | --- |
-| Sim engineer | `claude/sim-engineer` | session_01R6RBwwBM9aorpsqDCrztDU | 2f6d8dd (0.26.27) | PASS (also owns section 17 now: the systems engineer retired). Open: simNote still overwrites a payload's `kind` (social's cue key works around it); `introPlan` double-books places (Calder and Torres on 5-stool-1) |
+| Sim engineer | `claude/sim-engineer` | session_01R6RBwwBM9aorpsqDCrztDU | 971b4c7 (0.26.28) | PASS (leavers wait in the bay 14:30-15:00; also owns section 17 now: the systems engineer retired). Open: simNote still overwrites a payload's `kind` (social's cue key works around it); `introPlan` double-books places (Calder and Torres on 5-stool-1) |
 | Onboarding | `claude/arrival` | session_01KaHzfqSqF8B4bkNFrH1tsx | 4f6d0b2 (0.42.17) | PASS WITH FIXES: the Monday briefing starts before its cast is in the room (intro_check part 10 fails on the full merge); writes device tipsSeen directly |
-| Social A | `claude/social` | session_012pK2XVi5UhqEd28fakYk68 | 945c447 (0.36.51) | PASS (cue key from the machine; bonds restored in the test; full merge social_check OK) |
-| Social B | `claude/social-stories` | session_019aEJaAGyZir9oq47CBRfA3 | 31f8aea (0.39.3) | PASS (moments; sparse snapshot at ±30; save 19.4 kB of 30 with the reserve) |
+| Social A | `claude/social` | session_012pK2XVi5UhqEd28fakYk68 | 945c447 (0.36.51) | PASS. Tip 0.36.57 not reviewed in full; its social_check beatOf test leaves a rel record for Torres (purity FAIL on the full merge; one-line test fix sent) |
+| Social B | `claude/social-stories` | session_019aEJaAGyZir9oq47CBRfA3 | 368ae8a (0.39.5) | PASS (couples, goodbye moments). 0.39.6 WIP after it, not reviewed |
 | Crew designer | `claude/deck-plans-1-2-6` | session_01JScnVG158eYAHYvKDz3jZG | 98df62f (0.16.13) | PASS |
 | Galley engineer 3 (added 2026-10-17 ~04:00) | `claude/galley-food` | session_018cicfPQZQXbxmtn6ygmL84 | 812bedd (0.29.26) | PASS (two low notes; the galleyBirthdays aboard() fix still owed) |
 | Systems (retired; section 17 is the sim engineer's now) | `claude/ship-systems` | session_01TqLepvhqDZRwFj7ZuLb6Xa (inactive) | f211129 (0.33.39) | PASS |
@@ -46,4 +46,6 @@ Every review note is in `plans/reviews/<branch>-<commit>.md` on `claude/reviews`
 - name_check reads only lines that start with a declaration; a declarator carried on to the next line is handled since 4ad33f0.
 
 ## Memory
-Handed over (this note written) at about half memory, ahead of the 70% rule; it's kept current as reviews land.
+At about 70% (2026-10-17 ~04:30 UTC): handing over now, per the rule. A fresh reviewer should start by reviewing: social A 0.36.52-0.36.57 (the tip), social B 0.39.6 when final, arrival's fixes for 4f6d0b2 (the briefing start), the sim's introPlan occupancy fix, and galley's next push (the galleyBirthdays aboard() fix).
+
+The full-merge recipe I used: a worktree at origin/claude/arrival, then merge sim-engineer, deck-plans-1-2-6, social, social-stories, player-needs (never ship-systems, never `-X ours/theirs`), resolve only build-line conflicts and keep both sides elsewhere, then name_check, intro_check, social_check (social A's copy), day_check on the days that matter (0, 6, 15, 35).
