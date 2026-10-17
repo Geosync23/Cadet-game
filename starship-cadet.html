@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.29.34
+   STARSHIP CADET: CSV Wren                           build 0.29.35
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7322,7 +7322,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.29.34';                          // keep in step with the header's build line
+const GAME_BUILD = '0.29.35';                          // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -11471,7 +11471,11 @@ function galleyFresh() {
 }
 function galleyTies(d) {
   galleyFresh();
-  if (GALLEY_TIES.has(d)) return GALLEY_TIES.get(d);
+  // section 18 makes a day's events again when they change (a one-off booked, the arrival day set: its eventsOn(d) is
+  // another list); then this day's ties, tasting, rota and day events, and the menus, are worked out again (reviewer 1)
+  const src = !GALLEY_TEST.tradTies && typeof eventsOn === 'function' ? eventsOn(d).map(e => e.id + '@' + e.from + '-' + e.to).join() : null, had = GALLEY_TIES.get(d);   // by content: a list made again the same changes nothing
+  if (had && had.src !== src) { GALLEY_TIES.delete(d); GALLEY_TASTE.delete(d); GALLEY_ROTA.delete(d); GALLEY_EV.delete(d); GALLEY_MENU.clear(); }
+  else if (had) return had.out;
   const f = GALLEY_TEST.tradTies || (typeof tradTies === 'function' ? tradTies : null), out = {};
   for (const x of (f && f('galley', d)) || []) {
     const t = x.tie && typeof x.tie === 'object' ? x.tie : {}, o = out[t.meal === 'breakfast' ? 'breakfast' : 'dinner'] || (out[t.meal === 'breakfast' ? 'breakfast' : 'dinner'] = { ids: [] });
@@ -11483,7 +11487,7 @@ function galleyTies(d) {
     for (const k of ['dish', 'until', 'side', 'extra', 'batch']) if (t[k] != null && o[k] == null) o[k] = t[k];
     if (t.dish === 'favourite' && !o.honorees) { const e = x.honorees ? x : typeof eventsOn === 'function' ? eventsOn(d).find(e => e.id === x.id) : null; o.honorees = e && e.honorees || []; }
   }
-  GALLEY_TIES.set(d, out); for (const k of GALLEY_TIES.keys()) if (k < d - 8 || k > d + 8) GALLEY_TIES.delete(k);
+  GALLEY_TIES.set(d, { out, src }); for (const k of GALLEY_TIES.keys()) if (k < d - 8 || k > d + 8) GALLEY_TIES.delete(k);
   return out;
 }
 // when a meal's serving ends on day d (minutes of the day): FOOD.serveTo, or later for a tradition's `until`; and when
@@ -11543,7 +11547,7 @@ function galleyVote(choice) {
 // four doesn't bother. The most votes wins (ties: the earlier in MENU.fav).
 const GALLEY_MENU = new Map();
 function galleyMenu(d) {
-  galleyFresh();
+  galleyTies(d);                                         // (fresh: drops this day's menu when its events changed)
   if (GALLEY_MENU.has(d)) return GALLEY_MENU.get(d);
   const wd = weekday(d), w = Math.floor((d - 1) / 7), C = MENU.cycle, out = { breakfast: MENU.breakfast[wd], dinner: '', note: '' };
   const ppl = schedPeople().slice().sort((a, b) => a.id < b.id ? -1 : 1), regular = k => C[(w * 4 + k) % C.length];

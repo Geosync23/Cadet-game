@@ -483,6 +483,19 @@ with sync_playwright() as pw:
     print('An early cake (a mess gathering before 19:30):', ec if ec else 'none in these days (the welcome tea comes with section 18\'s rotations)')
     if ec and (ec['before'] or not ec['after']): fail(f"early cake: {ec}")
 
+    # 4s. a day's events changing after the galley worked it out (0.29.35, reviewer 1's note: a one-off booked late, a
+    # tradition's flag set): the galley sees the new list (its day caches start again). A stand-in one-off through
+    # section 18's eventOneOff (one-offs carry no galley ties, so it's the cache that's checked), then removed
+    if g.ev("typeof eventOneOff === 'function'"):
+        oo = g.ev(f"""(() => {{ const d = Math.floor(shipNow() / 1440) + 4; galleyTies(d); const src0 = GALLEY_TIES.get(d).src;
+          const ok = eventOneOff({{ id: 'galley-test', name: 'Test gathering', day: d, at: [1080, 1140], where: [{{ deck: 3, room: '^Mess hall$', types: ['mess-seat'] }}] }});
+          galleyTies(d); const src1 = GALLEY_TIES.get(d).src;
+          SHIP.events.oneOffs = SHIP.events.oneOffs.filter(r => r.id !== 'galley-test'); EV_DAYS.clear(); SHIP_DAYS.clear(); SCHED_DATA = null; galleyTies(d);
+          return {{ d, ok, before: src0, after: src1, again: GALLEY_TIES.get(d).src }}; }})()""")
+        print('A one-off booked late:', oo)
+        if not oo['ok'] or 'galley-test' not in (oo['after'] or '') or 'galley-test' in (oo['again'] or '') or 'galley-test' in (oo['before'] or ''): fail(f"one-off: {oo}")
+    else: print('A one-off booked late: no eventOneOff in this build; not checked')
+
     # 4g. your cart run (0.29.13): while section 17's cartWaiting(hour) says the run is yours and not unloaded, its
     # meals wait past arriveAt; galleyCartLand(hour) lands them when you unload. A stand-in cartWaiting until it's there
     yc = g.ev(f"""(() => {{ const real = typeof cartWaiting === 'function', keep = real ? cartWaiting : null, mine = new Set();
