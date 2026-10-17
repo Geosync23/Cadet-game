@@ -111,7 +111,7 @@ Gotchas added: a group meeting is one appointment per person (each a seat of the
 
 ## Device engineer 3 (from 2026-10-17, session_01SskqNx45iEGyQq2W9Fjg5Y)
 
-- **Lead:** session_01KPJMYjXAPkNUcrQ8VRkhLE (report only to it). Reviewer 2 reviews each push.
+- **Lead:** session_01KPJMYjXAPkNUcrQ8VRkhLE (report only to it). Reviewers now: **2b** (session_01F93LiFWtciyCLNV34qPsjP; device and HUD) and **1b** (session_018XY1NbMBxo2SLDPxooe5yx; sim/social sides). Reviewer 2 is closed.
 - **0.35.26 (b081853):** claude/device fast-forwarded onto ship integration 0.60.1 (it already held 0.35.25), so the branch now has sections 13-21 and intro_check.py. `tipSeen(id)` for section 21 (onboarding engineer told), and `Number.isFinite` for the keepsake / leaver days (reviewer 2's "Day null" nit). device_check, intro_check OK; cadet_test ALL IDENTICAL vs 0.60.1.
 - **Setup in a fresh container:** `pip install playwright`, then three.js r128 into /tmp/cadet-work/three (see DEV_NOTES "Testing"); `CADET_CHROME=/opt/pw-browsers/chromium`.
 - **0.35.27 (4979eec):** calls home in Mail with social B2 (session_014A3w2gK8FBNWs66YC3LfME, section 20c): "From home" group from `homeFolks()`, Play while `mailPlayable(m)` → `mailPlay(m)`, device closes on true (helpers `devHomeFolks`, `devPlayable`). Home's servery queue line has no guessed wait (lead, for the user). Reviewer 2 passed 0.35.26.
@@ -127,6 +127,16 @@ Gotchas added: a group meeting is one appointment per person (each a seat of the
 - **0.35.36 (812abfa):** reviewer 2b's must-fixes on the HUD (one-line clock with the short weekday when needed, place capped with … at every width, icon buttons also under 500px tall; ≤360px tighter). device_check's HUD sweep (sizes × weekdays × room names) guards it. Waiting on reviewer 2b's recheck (and 0.35.35).
 - **0.35.37 (c4b2479):** reviewer 1b (notes plans/reviews/device-ee3fcdd.md): a New game clears SHIP.device.appts. Asked traditions engineer 2 to reset SHIP.occasions/commendations on newGame. Combine with sim 0.26.33 + social 0.36.74 for the occasion rules.
 - **0.35.38 (15bc0fa):** the lead: an occasion's 'missed' is final (deviceTick flips only 'yes' → 'kept'). Reviews: 2b passed 0.35.33 and 0.35.35; 0.35.36-0.35.38 with 2b. 2b's LOW (the strip closes on real time, so cadet_test shots can vary on a loaded machine; ship time would steady it) is not done. Missing an undeclinable invitation costs only section 18's effects + Mail (the lead).
+- **0.35.39 (c89f00f):** reviewer 2b's optional HUD notes (the lead: do all three): icon buttons up to 720px; `hudFit` lets the place use all the room up to the nearest button; the short clock from `clockText()`. Sweep adds tablet sizes. Screenshot plans/shots/hud-tablet-700.png.
+
+### State at handover (device engineer 3, standing down at ~66% memory, 2026-10-17 ~10:10 UTC)
+
+- **Branch head:** claude/device c89f00f + this note. Builds this session: 0.35.26-0.35.39. The branch sits on ship integration 0.60.1 (fast-forwarded at 0.35.26); later device commits are not yet in ship integration as far as I know (the lead combines).
+- **Reviews:** passed: 0.35.26-0.35.29 (reviewer 2), 0.35.31, 0.35.32 (2 / 1b with fixes, done in 0.35.37-0.35.38), 0.35.33, 0.35.35, 0.35.36 (2b). **Waiting on 2b:** 0.35.37, 0.35.38 (2b to check missed-then-kept on a merge with sim 0.26.34 + social 0.36.74) and 0.35.39. Not reviewed by anyone: 0.35.30 (occasions listed from SHIP.occasions; superseded in part by apptAdd, still used when an occasion has no appointment).
+- **Open asks of others:** traditions engineer 2 (session_01WEEoe5DyRegEqVMZgKRHWB): reset SHIP.occasions / commendations on onSim('newGame'); `upcomingMeetings(a, b)` offered if the lead wants event meetings (the storm briefing) in the Schedule. Nothing else pending.
+- **Not done, small:** 2b's LOW that the heads-up strip closes on a real-time timer (6/9 s), so cadet_test shots can vary on a loaded machine (it hides #devHu, so it doesn't today); moving the close onto ship time would steady it.
+- **Combining notes for the lead:** occasion appointments need sim 0.26.33+ (host stays the whole len) and social 0.36.74+ (no points/remarks on `a.occ`) to behave as agreed. cadet_test differs from 0.60.1 only in the HUD box since 0.35.34 (the new backing); vs 0.35.38 it's identical.
+- **Hooks this role added:** `tipSeen`, `apptAdd(o)` (section 18), `devOccasions`, `devHeadsTick`/`HU_Q`/`devHeadsReset`/`devHeadsBack`/`devHeadsDo`, `DEVICE_SKIN.heads`, `devHomeFolks`/`devPlayable` (section 20c's `homeFolks`, `mailPlayable`, `mailPlay`), `devFxLine`/`devNeedLook` (section 15's `NEED_FX`, `NEED_ICON`, `NEED_COL`, `NEED_AMBER`), `hudFit`; `calendarRemind.heard`/`everyday` in the save.
 - **Checks this role now runs:** device_check, intro_check, cadet_test; for wider changes also day_check, social_check, events_check (all take BUILD.html). device_check un-hides #devHu itself.
 - **Rule (the user):** refresh this note right before handing over. Section 15 is player engineer 3's: don't edit it on claude/device.
 - **Gotcha:** a `git add` that fails stops a `&&` chain but not a push on the next line: keep the push in the chain.
