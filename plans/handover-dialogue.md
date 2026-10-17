@@ -6,7 +6,7 @@ Written by session_01UmrVVpV7eBqEsa4sBucASP (the first dialogue engineer); kept 
 it is the full spec of the file formats and the condition vocabulary) first.
 
 ## Role, branch, builds
-- Branch `claude/dialogue`, builds **0.43.x** (last: **0.43.24**, 9d8e56d). Reviewer 2 passed up to 0.43.23; 0.43.24 is with them. 0.43.23: the JSON.parse strings are an array joined with join(''), not a + chain (Safari). Since 0.43.17
+- Branch `claude/dialogue`, builds **0.43.x** (last: **0.43.25**, 46e948b). Reviewer 2 passed up to 0.43.24 (with the fix that became 0.43.25); 0.43.25 is with them. Also (lead-assigned, Tiles seat vacant) Tiles 0.46.6 = 99609d3 on claude/tiles (crewHold for the opponent), with reviewer 2. 0.43.23: the JSON.parse strings are an array joined with join(''), not a + chain (Safari). Since 0.43.17
   (7c888e4) the branch carries claude/ship-integration 0.60.1 (merged, the lead's call), so onSim, cue() and social are here.
 - I own: section **`// 22. LINES`** in starship-cadet.html (between section 17's end and `// 18. SHIP EVENTS`), the
   generated blocks' markers (LINES, MEETINGS, TRADITIONS), **content_gen.py**, **lines_check.py**, **content/README.md**.
@@ -82,6 +82,8 @@ it is the full spec of the file formats and the condition vocabulary) first.
 - 0.43.24 {kin} {lost} {hobbyNoun}: crew designer 3's (session_01TDCn9auvCBML52hyjWGY6x) line-ready roster fields;
   socialFill first, else the roster; lines_check errors on {family}/{hobby} in arcs/themes. Head writer 3 switches the
   family/loss/talent themes, then takes the new lines_check. Social A hasn't said whether socialFill will answer them.
+- 0.43.25: a theme beat's roster words must be in its needs: ({lost} in arcs too). 0.43.24/25 make lines_check fail on the
+  writers' content until head writer 3 switches the family/loss/talent themes: they ship together.
 - In flight (asked 07:5x UTC): head writer 3 (session_01FopKMT2ZKxuWcNDcmF7565) and social B2
   (session_014A3w2gK8FBNWs66YC3LfME): what the arcs' last beats need from section 22 (head writer 3: nothing; Tiles: nothing more). Social B2 hasn't
   answered yet.
