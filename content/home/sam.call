@@ -1,6 +1,7 @@
 @arc home.sam
 who: home:sam
 name: Sam
+pron: they
 // Writer 3, from the head writer's model (mum.call) and the approved arc: Sam (they / them), your best friend since
 // school. Plainly platonic: old friends, never a partner, no "I miss you" that could read romantic (they say "the
 // bench is boring without you", "the quiz team's useless"). Messages get shorter across the distance; one beat where
@@ -123,15 +124,16 @@ them: Same time next Sunday. Every Sunday. Even when there's nothing. Especially
 
 // ---- what you can tell them on a call
 == send
-? flag:intro.soloJob (?)
+? flag:intro.soloJob
 - I did my first job on my own.   flavour:share
   them: Look at you! A proper job! The Bench is very proud. I've told them.
-? came:any (?)
+? came:any
 - We had a {trad} on the ship. I went.   flavour:share
   them: A {trad}? In space? Was there a quiz? Tell me there was a quiz.
-? friend:any (?)
+? friend:any
 - I've made a friend. {friend}.   flavour:share
   them: Good. Tell {friend} hello from the Bench. And ask if they know anything about engines.
+?
 - Tell me one thing from home.   flavour:listen
   them: The café's got the old biscuits back. Peace has returned to the town.
 - How did the Bench do at quiz?   flavour:cheer

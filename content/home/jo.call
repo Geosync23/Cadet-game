@@ -1,6 +1,7 @@
 @arc home.jo
 who: home:jo
 name: Jo
+pron: they
 // Writer 3, from the head writer's model (mum.call) and the approved arc: Jo, your older sibling (they / them), stuck
 // in a dull job, proud of you and a bit envious, quits to apprentice at a boatyard, and launches their first boat.
 //
@@ -126,7 +127,7 @@ them: I've sent you a curl of wood. From her first plank. Keep it somewhere. Rig
 
 // ---- what you can tell them on a call
 == send
-? flag:intro.soloJob (?)
+? flag:intro.soloJob
 - I did my first job on my own.   flavour:share
   them: On your own? Show-off. Well done, kid. Really.
 ? cue:event.ionStorm.afterglow
@@ -135,6 +136,7 @@ them: I've sent you a curl of wood. From her first plank. Keep it somewhere. Rig
 ? flag:home.jo.weekends
 - How's the boatyard?   flavour:listen
   them: Sawdust. Splinters. Wick says I'm improving. Wick says that to the boats too.
+?
 - Say hello to Steve for me.   flavour:cheer
   them: Steve sends his regards. Steve's a stapler. You know that, right?
 - Tell me something from home.   flavour:listen
