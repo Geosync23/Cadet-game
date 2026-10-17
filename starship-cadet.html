@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.34.32
+   STARSHIP CADET: CSV Wren                           build 0.34.33
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.34.32';                           // keep in step with the header's build line
+const GAME_BUILD = '0.34.33';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -13628,7 +13628,7 @@ function eventsOn(d) {
   const out = [], yd = shipYearDay(d);
   for (const ev of evTable()) {
     const w = ev.when; let honorees = [];
-    if (w.birthday) { honorees = schedPeople().filter(p => birthdayOf(p) === yd); if (!honorees.length) continue; }
+    if (w.birthday) { honorees = schedPeople().filter(p => birthdayOf(p) === yd && (typeof aboard !== 'function' || (aboard(p, d) && guestStay(p, d) !== 'leave'))); if (!honorees.length) continue; }   // only crew aboard that evening (reserve crew aren't yet; a leaver's gone by 15:00)
     else if (w.ship) { const o = typeof eventOn === 'function' ? eventOn(d) : null; if (!o || o.id !== w.ship || o.day !== w.day) continue; }
     else if (w.date) { if (d !== w.date) continue; }
     else if (!evDue(w, d)) continue;

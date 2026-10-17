@@ -45,7 +45,7 @@ PLANS = r"""(days => {
     const on = eventsOn(d), wd = weekday(d), yd = shipYearDay(d), row = { d, wd: WEEKDAYS[wd].slice(0, 3), ev: [] };
     // due exactly when the table says
     for (const ev of SHIP_TRADITIONS) {
-      const w = ev.when, due = (w.birthday ? schedPeople().some(p => birthdayOf(p) === yd) : DUE.has(ev.id) ? DUE.get(ev.id).has(d) : (w.weekday === wd || (w.every && d % w.every === w.on) || w.yearDay === yd)) && !eventPauses(ev, d) && !(EV_DROPPED.get(d) || []).includes(ev.id);   // a ship-wide event's quiet days; the voice budget
+      const w = ev.when, due = (w.birthday ? schedPeople().some(p => birthdayOf(p) === yd && (typeof aboard !== 'function' || (aboard(p, d) && guestStay(p, d) !== 'leave'))) : DUE.has(ev.id) ? DUE.get(ev.id).has(d) : (w.weekday === wd || (w.every && d % w.every === w.on) || w.yearDay === yd)) && !eventPauses(ev, d) && !(EV_DROPPED.get(d) || []).includes(ev.id);   // a ship-wide event's quiet days; the voice budget
       if (due !== on.some(e => e.id === ev.id)) out.bad.push(d + ' ' + ev.id + (due ? ' due but not on' : ' on but not due'));
     }
     const S = schedData(), went = {}, places = {};
