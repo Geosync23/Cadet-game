@@ -155,6 +155,12 @@
 - That's it. You're free. The bunk's yours any time from eight.
 - I'm on Deck 4 if you need me. 14, the one with the music.
 - Good first night. Properly good. Sleep well.   #warm
+// step: night (0.48.57, the user's note): his goodnight at the end of the arrival dinner, after introChief; then the
+// first-night bed arrow. Said IN ORDER, one flag key per line. Replaces walk.free once sim engineer 5 wires it.
+? flag:walk.night.1
+- Right, that's me. Evening's yours. Have a wander, explore.
+? flag:walk.night.2
+- Early start, though. Ten to eight. Get some sleep soon.   #warm
 
 // ---- Day 1: his talk-through on the shadow job (said as bubbles while you work; replaces INTRO_JOB_LINES on
 // claude/arrival). Each step is gated by flag:walk.job.<step>, which the onboarding hook sets. 60 characters or fewer.

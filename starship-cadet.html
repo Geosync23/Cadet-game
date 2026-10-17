@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.48.56
+   STARSHIP CADET: CSV Wren                           build 0.48.57
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.48.56';                           // keep in step with the header's build line
+const GAME_BUILD = '0.48.57';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -21476,6 +21476,8 @@ const VOICE = {
         {"text": "That's it. You're free. The bunk's yours any time from eight.", "id": "1s5nars", "flag": "walk.free"},
         {"text": "I'm on Deck 4 if you need me. 14, the one with the music.", "id": "gphbe7", "flag": "walk.free"},
         {"text": "Good first night. Properly good. Sleep well.", "id": "1fv9wtq", "tone": "warm", "flag": "walk.free"},
+        {"text": "Right, that's me. Evening's yours. Have a wander, explore.", "id": "1mre9oi", "flag": "walk.night.1"},
+        {"text": "Early start, though. Ten to eight. Get some sleep soon.", "id": "rk38m7", "tone": "warm", "flag": "walk.night.2"},
         {"text": "That one's ours. It's on your device now, under Jobs.", "id": "1x2e7ad", "flag": "walk.job.take"},
         {"text": "Follow the arrow. I'm right behind you. Promise.", "id": "308fka", "flag": "walk.job.take"},
         {"text": "Storage. Find the part number on the card, then the shelf.", "id": "v6mjbl", "flag": "walk.job.fetch"},
