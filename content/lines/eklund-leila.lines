@@ -39,3 +39,51 @@
 == joy
 ? tier>=acquaintance
 - An old map is a picture of a place that isn't there any more. I find that very calming.
+
+// ---- Writer 2, batch 1: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue)
+== greet
+? tier>=acquaintance time:evening
+- Evening. Booths are empty. Lounge is full. The ship's upside down.   #funny
+? tier>=acquaintance warmth:cold
+- You. I'd marked you down as lost. I was about to draw you a map.   #funny
+
+== near
+? habit:gardener
+- I help in the garden now. The beds are numbered. Someone numbered them wrong.   #funny
+? place:booths
+- Four in the queue. Eleven minutes. I'm never wrong about the queue.
+
+== invite
+- Tiles tonight? I won't win. I'll lose very neatly.   #funny
+? tier>=acquaintance
+- Swap table tonight. I'm after maps. You're after whatever you're after. Come.
+
+== accept
+- Fine. Yes. I'll be there at the time. Exactly the time.
+- Yes. I'll bring a map. You won't need it. That's not the point.   #funny
+
+== decline
+- Not tonight. Gran's sent a message. It's long. She talks slower than the relay.   #funny
+? weekday:wed|thu
+- Rest day. One window, one map, no people. Nothing personal. Another time.
+
+== missed
+- You weren't there. I timed it. Twelve minutes. I'm not cross. I'm precise.   #funny
+
+== birthday
+? birthday:you
+- Happy birthday. I found you a map. It's out of date. That's the best kind.   #warm
+? tier>=friend birthday:me
+- My birthday. Gran sent a voice message. It's mostly singing. I've played it four times.   #warm
+
+== cue
+? cue:repair.you@dept
+- Your job's closed. Notes are tidy. I checked. You didn't need to know that.   #funny
+
+// ---- Writer 2, batch 1b: a hint (a moment is ready) and an about line for a named friend
+== hint
+- Have you a minute later? I'd like to talk. Not about maps. Well. A bit about maps.
+
+== about
+? aff:keane-davi:friend
+- Keane and I might share a gran. We've agreed not to check. It's nicer this way.   #funny

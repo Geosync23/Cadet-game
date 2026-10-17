@@ -33,9 +33,61 @@
 == life
 ? tier>=acquaintance
 - Third glove this week in the box. Same hand every time. Someone's very unlucky.   #funny
-? tier>=colleague
+? tier>=friend
 - My twin's on the Halcyon. They think the Wren's twins are a joke. There are three of us.
 
 == joy
 ? tier>=acquaintance
 - A spanner came back to its owner today. Three weeks in the box. They nearly cried.   #warm
+
+// ---- Writer 2, batch 1: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue)
+== greet
+? tier>=acquaintance time:morning
+- Morning. Well, my evening. Fourteen jobs on the night board. Every one closed.
+? tier>=acquaintance warmth:cold
+- {hi}. Not seen you in a while. I checked the lost-property box. Just in case.   #funny
+
+== near
+? place:mess
+- Breakfast for you, dinner for me. Brennan does me eggs anyway. It's kind of her.
+? habit:gardener
+- I help in the garden now. Cruz lost a trowel. I found it. Of course I found it.   #funny
+
+== invite
+? tier>=colleague
+- Two laps of the track before my shift? I'll go slow. Mostly.
+- Observatory night. I'll bring a flask. Nobody's lost a star yet.   #funny
+
+== accept
+- {yes}. I'll be there five minutes early. I always am.
+- Noted. I'll put it in my handover notes. Under "Good things".   #funny
+
+== decline
+- Not tonight. I'm on the board till morning. Another night?
+? weekday:tue|wed
+- Rest day. I've promised myself a book and a long sleep. Ask me Thursday?
+
+== missed
+- I waited a little. Then I sorted the box. No harm done. Next time.
+? tier>=friend
+- You didn't come. That's all right. I'd just like to know you're well.   #warm
+
+== birthday
+? birthday:you
+- Happy birthday, {me}. I've put a note on the board. Under "Important".   #warm
+? birthday:me
+- My birthday. The night shift left a cake on the board. Labelled. With a summary.   #funny
+
+== cue
+? cue:repair.you@dept
+- Saw your job closed on the board. Neat notes, too. That's how it's done.
+? cue:event.ionStorm.onset
+- Storm's on. Strap down anything loose. Or it'll end up in my box.   #funny
+
+// ---- Writer 2, batch 1b: a hint (a moment is ready) and an about line for a named friend
+== hint
+- Have you a moment later? Somewhere quiet. Nothing's lost. I'd just like to talk.
+
+== about
+? aff:salo-saad:friend
+- Salo and I both have twins on the Halcyon. We compare letters. His twin's are funnier.   #funny

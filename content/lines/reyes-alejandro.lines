@@ -39,3 +39,53 @@
 == joy
 ? tier>=acquaintance
 - I play in the music room after shift. Nobody's awake to mind. Ideal.
+
+// ---- Writer 2, batch 1: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue)
+== greet
+? tier>=acquaintance time:night
+- Oh, you're up. Me too. Obviously, I'm on. Coils are calm. For now. Anyway.
+? tier>=acquaintance warmth:cold
+- {me}! Where've you been? I worried a bit. Not a lot. A normal amount. Anyway.   #funny
+
+== near
+? place:mess
+- Last one in the mess again. I like the cups after. All stacked. Very calm.
+? habit:stargazer
+- I'm on the observatory list now. Rossi lent me a telescope. I'm scared of it.   #funny
+
+== invite
+? tier>=colleague
+- Friday jam? I'll drum on a table. It's allowed there. It's better with people.
+- Film night? I'll talk through it. Sorry in advance. Anyway, come.   #funny
+
+== accept
+- Yes! Oh. Yes. Good. I'll be early. Then nervous. Then fine.   #funny
+- Yes, please. Thank you for asking. People forget to ask the night shift.   #warm
+
+== decline
+- I can't, I'm on the coils. Next time? Ask again. Please ask again.
+? weekday:thu|fri
+- It's my rest day. I'm writing to Lisk. It's two pages already. Another time?   #funny
+
+== missed
+- I waited. I told coil three about it. She was very understanding. Anyway.   #funny
+
+== birthday
+? birthday:you
+- Happy birthday! It's going in my letter home. My neighbour will tell the cat.   #funny
+? birthday:me
+- My birthday. Torres left a note on the coils. Coil three signed it. Sort of.   #funny
+
+== cue
+? cue:event.ionStorm.onset
+- Storm's in. The coils hate it. I'll sit with them. You stay where it's warm.
+? cue:repair.you@dept
+- You fixed that? Good! I'll put it in the notes for Torres. He'll say he knew.   #funny
+
+// ---- Writer 2, batch 1b: a hint (a moment is ready) and an about line for a named friend
+== hint
+- Have you got a minute? A real one? I'll try not to talk too much. Anyway.
+
+== about
+? aff:torres-zeke:friend
+- Torres leaves me a note every shift. He's wrong about coil three. He's a good friend.   #warm

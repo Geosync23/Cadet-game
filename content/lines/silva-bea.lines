@@ -39,3 +39,52 @@
 == joy
 ? tier>=acquaintance
 - Rain on a window, on Coriel. If you ever go, sit by a window. That's all. Just sit.
+
+// ---- Writer 2, batch 1: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue)
+== greet
+? tier>=acquaintance time:evening
+- Oh, evening. The vents have gone quiet. Like after rain. I like this bit.
+? tier>=acquaintance warmth:cold
+- Oh, there you are. It's been a while. Like a dry spell.
+
+== near
+? habit:music
+- Music room in the evenings now. Someone played a rain song. I stayed for three.
+? place:teacorner
+- Second tea. Now I'm here. Hello. How long have you been standing there?   #funny
+
+== invite
+- Observatory tonight? We could just look. No talking. Well, a bit of talking.
+- Come and see the sprinklers? Seven, in the garden. It's nearly rain.
+
+== accept
+- Oh. Yes. I'd like that. I'll bring my second tea. Or my third.
+- Mm, yes. Remind me, though. I drift.   #funny
+
+== decline
+- Not tonight. I'm sending a message home. It's a long one. Tomorrow?
+? weekday:sat|sun
+- It's my rest day. I'm going to sit in the garden and listen. Another time?
+
+== missed
+- I waited. Then I listened to the vents for a bit. It wasn't wasted. Next time?
+
+== birthday
+? birthday:you
+- Happy birthday. I hope it rains somewhere for you. Sorry. That's a Coriel thing.   #warm
+? birthday:me
+- My birthday. I'll do the day count later. Today's just mine.
+
+== cue
+? cue:repair.you@dept
+- Was that your filter? It sounds lovely now. Like wind dropping.
+? cue:event.ionStorm.onset
+- Storm's here. The ship sounds like thunder. I don't mind it. Is that strange?
+
+// ---- Writer 2, batch 1b: a hint (a moment is ready) and an about line for a named friend
+== hint
+- Sit with me a bit, later? Somewhere with a window. I've been thinking.
+
+== about
+? aff:soto-marta:friend
+- Marta and I compare day counts at breakfast. She pretends it's a contest. It isn't.

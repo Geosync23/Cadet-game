@@ -50,3 +50,53 @@
 - Hook's the one on the end of the rack. Yours from now on. Nobody else touches it.
 ? flag:mug
 - Your mug's still on the rack. I gave it a rinse. Don't tell anyone I'm soft.   #funny
+
+// ---- Writer 2, batch 1: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue)
+// He never says no (his thread): his declines are yeses postponed.
+== greet
+? tier>=acquaintance time:afternoon
+- {hi}. Afternoon slump. I've a joke for it. No? Fair. Have you eaten, at least?
+? tier>=acquaintance warmth:cold
+- {hi}, stranger. Have you been eating? You've been somewhere. Sit. Tell me.
+
+== near
+? place:teacorner
+- Kettle's on, mugs on the rack, rota on the wall. All's right with the world.
+? habit:garden-lover
+- The tomatoes are coming on. I check them every day. They don't seem to mind.
+? habit:music
+- Music room most evenings now. I sit at the back and tap my foot. Badly.   #funny
+
+== invite
+? tier>=acquaintance
+- Works tea, half ten, tea corner. Bring yourself. I'll find you a mug.
+- Come and see the tomatoes after shift? The garden's lovely in the evening.
+
+== accept
+- Lovely. Yes. I'll bring something baked. I'll bring two somethings.   #funny
+- Yes. I was going to say yes before you finished asking.   #funny
+
+== decline
+- I'd love to. I can't. I've said yes to three people tonight. Tomorrow? Please?
+- Not tonight, I'm covering the rota. I'm always covering the rota. Next time.
+
+== missed
+- I kept you a scone. It's a bit sad now. I'll eat it. For you.   #funny
+
+== birthday
+? birthday:you
+- Happy birthday! I baked. I told Brennan it was an emergency. It was.   #funny
+? birthday:me
+- My birthday. I baked my own cake. Is that sad? It's a very good cake.   #funny
+
+== cue
+? cue:repair.you@dept
+- Saw your job on the board. Done, signed, closed. Lovely. Have a biscuit.   #warm
+
+// ---- Writer 2, batch 1b: a hint (a moment is ready) and an about line for a named friend
+== hint
+- Could I borrow you a minute later? Not for a job. For me, for once.
+
+== about
+? aff:yoon-elif:friend
+- Yoon's breakfast jokes are nearly as bad as mine. Nearly. I'm very proud of her.   #funny

@@ -39,3 +39,51 @@
 == joy
 ? tier>=acquaintance
 - My twin's letters come in episodes. I read one a week. Saves the good bits.
+
+// ---- Writer 2, batch 1: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue)
+== greet
+? tier>=acquaintance time:evening
+- Evening. One tea, one chapter, then bed. You're welcome to the chapter.
+? tier>=acquaintance warmth:cold
+- Oh, hello. It's been a while. Sit. Tell me everything. Slowly.
+
+== near
+? habit:gardener
+- I help in the garden now. Nobody hurries a seed. It's my kind of job.
+? place:teacorner
+- Tea's a meal if you try. Biscuit, tea, biscuit. Lunch.   #funny
+
+== invite
+? tier>=acquaintance
+- Tiles in the common room? I'm slow. Very slow. You'll have time to think.
+- Film night? I'll stay till ten. Then I'll go to bed. Mid-film. Every time.   #funny
+
+== accept
+- Yes, lovely. Not past ten, mind.
+- Happy to. Take your time getting there. I'll save a seat.
+
+== decline
+- Not tonight. It's nearly ten. You know me. Tomorrow?
+? weekday:wed|thu
+- Rest day. I'm writing to the Halcyon. Next episode's due. Another time?
+
+== missed
+- You didn't come. That's all right. I read a chapter. I'll tell you the good bit.
+
+== birthday
+? birthday:you
+- Happy birthday. I'll tell my twin. They'll tell the Halcyon. You're famous now.   #funny
+? birthday:me
+- My birthday. My twin's letter came early. They timed it. Took them three tries.   #warm
+
+== cue
+? cue:repair.you@dept
+- That was yours? Nicely done. You took your time. That's how it should be.
+
+// ---- Writer 2, batch 1b: a hint (a moment is ready) and an about line for a named friend
+== hint
+- Sit with me before ten? There's something I'd like to say. No rush.
+
+== about
+? aff:amadi-asha:friend
+- Amadi always finds the best window. I find it second. It's a good system.   #funny

@@ -39,3 +39,51 @@
 == joy
 ? tier>=acquaintance
 - The first star of the evening. I look for it every night. I've never missed it once.
+
+// ---- Writer 2, batch 1: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue)
+== greet
+? tier>=acquaintance time:evening
+- Evening! Nearly bed. But first, one star. Then bed. Definitely bed.   #funny
+? tier>=acquaintance warmth:cold
+- {me}! You're back. I've been ahead all week. It wasn't any fun.   #warm
+
+== near
+? habit:music
+- Music room tonight. I'm learning a Veyli song. The tune's easy. The words aren't.
+? place:mess
+- I eat fast. It's not a race. It's a bit of a race. Nobody else knows it's a race.   #funny
+
+== invite
+- Observatory night! Bring your eyes. I'll bring the telescope.
+? tier>=acquaintance
+- Quiz night? We'll win. I've been revising. The Veyli round is mine.
+
+== accept
+- Yes! Brilliant. Race you there.
+- Yes. First one there gets the good seat. That'll be me.   #funny
+
+== decline
+- I can't, early bed. I'm up for the first star. Tomorrow?
+? weekday:mon|tue
+- It's my rest day. I'm calling home. They'll ask if I'm winning. Another time?
+
+== missed
+- You missed it! I kept you the best seat. Then I sat in it. Sorry.   #funny
+
+== birthday
+? birthday:you
+- Happy birthday! I looked up the Veyli for it. Ready? No, wait. Tomorrow.   #funny
+? birthday:me
+- My birthday! That counts as a win. I'm not explaining how.   #funny
+
+== cue
+? cue:repair.you@dept
+- You closed it first! All right. You're ahead. For now.   #funny
+
+// ---- Writer 2, batch 1b: a hint (a moment is ready) and an about line for a named friend
+== hint
+- Can I talk to you later? Not a race. Just talking. I'm not very good at that bit.
+
+== about
+? aff:ferreira:friend
+- Ferreira and I practise Veyli together. She's better. I'm louder.   #funny

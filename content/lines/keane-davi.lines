@@ -56,3 +56,48 @@
 - Rode the lift today with Kovac and Cruz. Deck 4 to 6. We held the rail. Very brave.   #funny
 ? beat:kovac.4 tier>=colleague
 - Kovac says you sat with her about the lift. Thanks, {nick}. From the whole club.   #warm
+
+// ---- Writer 2, batch 1: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue)
+// Keane never says "afraid"; the lift is always changed fast into something else.
+== greet
+? tier>=acquaintance warmth:cold
+- {me}! There you are! I was going to send the floor polisher to find you.   #funny
+
+== near
+? habit:lounge-regular
+- Bow lounge before shift. Curved windows, cup of tea. Then down to the floor.
+
+== invite
+- Running before my shift? Deck 3, three laps. I'll go easy. I won't. I'll try.   #funny
+? tier>=acquaintance
+- Gym at seven? Night shift's warm-up. Come and lift something heavy. I'll spot you.
+
+== accept
+- Yes! Brilliant. I'll be there. Early, probably. I'm always up.
+- Course, {nick}. Wouldn't miss it.
+
+== decline
+- Can't, I'm on the coils tonight. Tomorrow? I'll be bright as a button.
+? weekday:sun|mon
+- Rest day. I'm sending Gran a long one. A really long one. Next time?
+
+== missed
+- You missed it! No harm. I polished something. Feel better already.   #funny
+
+== birthday
+? birthday:you
+- Happy birthday! I cleaned a whole panel in your honour. Go and look. It shines.   #funny
+? birthday:me
+- My birthday! Gran sent a song. Eklund says her gran sent the same one. Hm.   #funny
+
+== cue
+? cue:repair.you@dept
+- Saw your job. Tidy work, and you swept up after. That's a friend for life, that is.   #warm
+
+// ---- Writer 2, batch 1b: a hint (a moment is ready) and an about line for a named friend
+== hint
+- Got a minute later, {nick}? Not about the floor. Something else.
+
+== about
+? aff:eklund-leila:friend
+- Eklund and I might share a gran. She says don't check. I'd love to check.   #funny

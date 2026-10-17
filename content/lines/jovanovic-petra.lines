@@ -39,3 +39,53 @@
 == joy
 ? tier>=acquaintance
 - When the coils run just right, there's a purr under the hum. Reyes hears it too.
+
+// ---- Writer 2, batch 1: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue)
+== greet
+? tier>=acquaintance time:morning
+- Oh. Morning. I'm off to bed. I think. Yes. Bed. Night. Morning. Sorry.   #funny
+? tier>=acquaintance warmth:cold
+- Oh. Hello. I thought maybe you'd moved decks. Probably not. I'm glad. I think.
+
+== near
+? habit:music
+- Music room before shift. Someone's always learning the guitar. Badly. It's nice, though.
+? place:lounge
+- One drink before the night watch. Just one. Then the coils. I think that's fair.
+
+== invite
+? tier>=acquaintance
+- Tiles in the common room? I'm not very good. Maybe. I win sometimes. Probably by accident.
+- Film night? I like the quiet ones. You can sit with me. If you want. No pressure.
+
+== accept
+- Oh. Yes. I'd like that. I think. Yes, I would.
+- Yes. I'll be there. Probably early. Is that all right?
+
+== decline
+- I can't, I'm on the coils. Sorry. Really. Another night? Maybe?
+? weekday:mon|tue
+- It's my rest day. I'm calling home. Probably twice. Another time?
+
+== missed
+- You didn't come. That's fine. Probably you were busy. I hope you were all right.
+
+== birthday
+? birthday:you
+- Happy birthday. I wasn't sure what to say. That. I think that's it. Happy birthday.   #warm
+? birthday:me
+- My birthday. Reyes played a song on the watch room table. Coil three hummed. I think.   #funny
+
+== cue
+? cue:event.ionStorm.onset
+- Storm's in. The coils will be twitchy. I'll watch them. I'm good at watching.
+? cue:repair.you@dept
+- I looked at your repair. Sorry. I check everything. It's right. I'm sure. Yes.
+
+// ---- Writer 2, batch 1b: a hint (a moment is ready) and an about line for a named friend
+== hint
+- Um. Have you a minute later? It's nothing. Probably. I'd like to tell someone.
+
+== about
+? aff:reyes-alejandro:friend
+- Reyes and I swap coil worries at handover. It halves them, somehow. I think.   #warm

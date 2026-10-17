@@ -39,3 +39,52 @@
 == joy
 ? tier>=acquaintance
 - A washer that spins first time. Not a wobble. Just spins. Best noise on the ship.
+
+// ---- Writer 2, batch 1: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue)
+== greet
+? tier>=acquaintance time:evening
+- Huh. You. Evening. Washer's behaving. Don't say anything. It'll hear.   #funny
+? tier>=acquaintance warmth:cold
+- Hm. You. Where've you been? Never mind. You're here. Sit.
+
+== near
+? habit:common-room
+- Tiles night. I'm terrible. Rina's merciless. I keep coming. Don't ask me why.   #funny
+? place:teacorner
+- Tea. Strong. No talking for one minute. Right. Hello.
+
+== invite
+? tier>=acquaintance
+- Works tea, half ten. Come. There might be biscuits. I didn't say that.   #funny
+? tier>=colleague
+- Tiles tonight. Common room. Come and lose with me. It's nicer in company.
+
+== accept
+- Fine. Yes. Don't be late.
+- Huh. All right. I'll come. Don't make a fuss about it.
+
+== decline
+- Can't. That oven on Deck 3's making a noise. Not tonight.
+? weekday:sat|sun
+- Rest day. I'm doing nothing, very hard. Ask me Monday.   #funny
+
+== missed
+- You didn't come. Hm. Saved you a biscuit. Ate it. Your fault.   #funny
+
+== birthday
+? birthday:you
+- Happy birthday. Here. Two biscuits. Don't ask where from. Don't tell Pell.   #warm
+? birthday:me
+- My birthday. Don't. Fine. One cake. Small. Fine.   #funny
+
+== cue
+? cue:repair.you@dept
+- That washer. You did it? Hm. Good. It spins. That's all I'll say.
+
+// ---- Writer 2, batch 1b: a hint (a moment is ready) and an about line for a named friend
+== hint
+- Hm. You. Later, the quiet corner. Bring nothing. Just come.
+
+== about
+? aff:pell:friend
+- Pell found my tin. Of course he did. I let him have one. One. He's a good lad.   #warm

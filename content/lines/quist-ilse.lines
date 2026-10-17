@@ -39,3 +39,51 @@
 == joy
 ? tier>=acquaintance
 - Rub a basil leaf. Go on. Smell your fingers. That's the whole summer, right there.
+
+// ---- Writer 2, batch 1: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue)
+== greet
+? tier>=acquaintance time:evening
+- Oh. Evening. The garden lights have gone warm. Best hour. Don't tell the basil.
+? tier>=acquaintance warmth:cold
+- Oh. You. The thyme's been asking. It hasn't. It might have.   #funny
+
+== near
+? habit:garden-lover
+- Watering. Don't mind me. The rosemary's thirsty. It's always thirsty.
+? habit:gym-regular
+- Gym after shift now. Moreau said I'd hate it. I don't. I won't tell her that.
+
+== invite
+- Garden after shift? You could help with the basil. It likes an audience.   #funny
+? tier>=acquaintance
+- Running round Deck 3 tonight. Slowly. We go past the garden twice. That's the plan.
+
+== accept
+- Oh. Yes. I'll come. I'll bring a leaf. For smelling.
+- Mm. All right. That sounds nice. I'll try to be on time.
+
+== decline
+- Not tonight. The herbs need potting. They're very needy this week.
+? weekday:wed|thu
+- Rest day. I've a book and a windowsill. Another time?
+
+== missed
+- You weren't there. I talked to the mint instead. It doesn't say much.   #funny
+
+== birthday
+? birthday:you
+- Happy birthday. Here. A sprig of thyme. It's the nicest thing I own.   #warm
+? birthday:me
+- My birthday. Brennan put my herbs in tonight's soup. She said it was a present. It was.
+
+== cue
+? cue:repair.you@dept
+- Was that your pump job? The garden's wetter than it was. In a good way.
+
+// ---- Writer 2, batch 1b: a hint (a moment is ready) and an about line for a named friend
+== hint
+- Come to the garden later? I'd like to say something. The basil can listen too.
+
+== about
+? aff:moreau-signe:friend
+- Moreau talked me into the gym. She runs ahead, then waits. She always waits.   #warm

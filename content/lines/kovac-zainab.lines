@@ -33,3 +33,57 @@
 == week1
 ? week1:true
 - Um. If you get stuck, I'm on the board most days. Just. You know. Ask.
+
+// ---- Writer 2, batch 1: Kovac to ~30. The lift stays "exercise" until beat:kovac.2.
+== greet
+? tier>=acquaintance time:morning
+- Oh. Morning. I've had breakfast. Well. Tea. Tea counts.   #funny
+? tier>=colleague
+- {hi}, {me}. Scrubber on Deck 6 if you want it. I'll time you. Quietly.
+? tier>=acquaintance warmth:cold
+- Oh. You're back. Um. Good. I noticed. Not in a strange way.   #warm
+
+== bye
+- {bye}. Um. Spanner back on its hook? The right hook. Thanks.
+- Bye, then. Sorry. I mean, see you.   #funny
+
+== feel
+? mood:ok
+- Fine. Normal day. One scrubber, two filters. Good numbers.
+
+== near
+? place:teacorner
+- Knitting. Row forty. No. Forty-one. Sorry. I count out loud sometimes.
+
+== invite
+- The garden's quiet after shift. I sit by the beans. You could. If you like.
+? tier>=friend
+- Knitting circle tonight, tea corner. Torres is coming. Bring patience.   #funny
+
+== accept
+- Oh. Yes. Okay. I'll be there on time. Sorry if that's early.
+- Yes. Yes, fine. Thank you for asking me.   #warm
+
+== decline
+- Oh. Um. Not tonight. Sorry. I'm halfway down a row. Another night?
+- I can't. Sorry. Really. Ask again? I'd like you to ask again.
+
+== missed
+- Oh. You didn't come. That's okay. I knitted. It was fine. Really.
+
+== birthday
+? birthday:you
+- Happy birthday. I made you something. It's small. It's very neat. Sorry.   #warm
+? birthday:me
+- It's my birthday. Um. Don't tell anyone. Especially not loudly.
+- My birthday's the day after the Chief's. She doesn't know. That's fine. Better, even.
+
+== cue
+? cue:repair.you@dept
+- I looked at your repair. Sorry. I always look. The seal's very good.   #warm
+
+== life
+? beat:kovac.2
+- The ladder club met again. Cruz, Keane, me. Nobody said a word. We just climbed.   #funny
+? beat:kovac.4
+- Four, please. I said it in the lift today. Out loud. Just the once.   #warm
