@@ -1,0 +1,22 @@
+@voice bakshi-sol
+// The Commons writer, draft 1 (non-story crew). Helm rating, night.
+tpl: dreamy
+talk: Easygoing and gentle, unhurried. Drifts off mid-sentence to look at something, then comes back. Plots courses for fun on rest days, to places the Wren will never go. Paints tiny portraits of the crew and always wants you to hold still. Misses the rain on Lisk.
+cares: plotting courses to nowhere | tiny portraits of the crew | the rain on Lisk | saving up (for what, he won't say yet)
+jokes: he's painting everyone aboard, tiny, and you're next: "Hold still. No, the other side." | he has a course plotted to every planet he's ever heard of, and one he made up
+hi: Oh, hey | Hello, you | Hi
+bye: Fair winds | See you round | Go gently
+yes: Sure | Why not | Mm, yes
+thanks: Thanks, friend | That's nice of you
+wow: Oh, wow | Pretty, that
+sigh: Ah, well
+nick: - | - | {me} | {me} | {me}
+needs: share
+openness: open
+loves: star
+likes: sweet | book
+invites: observatory
+joy: plotting courses to places the Wren will never go
+thread: homesick
+keepsake: a tiny portrait of you, painted from memory
+avoid: rushing him

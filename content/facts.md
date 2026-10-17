@@ -25,8 +25,8 @@ in section 20, the meetings in section 18) are canon too: never contradict a bea
 - **The shuttle:** the **Tern**, on its pad in the Deck 5 shuttle bay. You arrive on it.
 - **Other ships, by name:** the **Halcyon** (another survey ship; where transfers often go). Ask before adding more.
 - **Places people come from** (only these, for now): **Port Halloran** (a port city; rain; Brennan's old restaurant),
-  **Hesper Dock** (a big station-port: market stalls, boats, rain), **Kesh**, **Lisk**, **Valo**, **Coriel**,
-  **Marra Station**, **New Aberdeen**, and Tomas's **farm moon** (unnamed: "the farm moon", a sky that is always the same
+  **Hesper Dock** (a big station-port: market stalls, boats, rain), **Kesh**, **Lisk** (a place: "letters home to Lisk"), **Valo**, **Coriel**,
+  **Marra Station** (rebuilt twice; Kim collects its old maps), **New Aberdeen**, **the Ostrander colonies**, **the Tevan belt**, and Tomas's **farm moon** (unnamed: "the farm moon", a sky that is always the same
   grey). Pell's home town and the others not listed are unnamed until a writer needs one: ask.
 - **Time:** a ship day is 18 waking hours of play; 06:00 breakfast, 08:00 shift, dinner from 18:00. The day shift runs
   08:00-16:30; the night shift is its own world (Bunk 8, the inner cabins). Tea break at 10:30 in Works.
@@ -60,6 +60,7 @@ in section 20, the meetings in section 18) are canon too: never contradict a bea
 - **The record cabinet** is in the Deck 4 music room. **The grand piano** is in the music room too; the Captain plays it
   late on Thursdays.
 - **The rowing leaderboard** in the gym was taped up by Vance; he has since started a treadmill one (roster).
+- **The garden's big tree:** the hydroponics garden has one big tree. Asha Amadi climbs it when nobody is looking.
 - **Tiles** is the ship's tile game (a playable one comes later in Pillar 4): boards in the junior common room and the
   bow lounge. Rina is undefeated in the junior common room, and keeps count.
 
@@ -205,15 +206,35 @@ juniors' pattern (Sat-Sun).
 
 ## 4. Pronouns
 
-The roster has no pronoun field yet (asked of the crew designer through the lead). Until it does, these are canon,
-taken from what's already written about them; **for everyone else, use their name, or "they"**, and never guess.
+**`facts.md` is the source of truth for pronouns** (the lead, 2026-10-17; there's no roster field). Every crew member
+gets a line here; each writer fills in **their own area's subsection** (and only that one, so branches merge cleanly),
+choosing a natural mix. Until someone's listed, use their name or "they". The player is never gendered.
+
+**Set by the head writer** (from the roster's own words, the plans, and the story cards):
 
 | Who | Pronouns | From |
 | --- | --- | --- |
-| Captain Marrow, Chief Calder, Chef Brennan, Rina, Dr. Sato, Dr. Nandakumar, Zainab Kovac | she / her | roster and plans ("her portrait gallery", "her first chief", "her sister", "her lab", "her door"); Kovac: the head writer's call for her arc |
-| Commander Vance, Chief Holt, Tomas, Pell, Zeke Torres, Emeka Halloran | he / him | roster and plans ("his academy", "his deputy", "his little brother", "his mum", "his father", "his Friday mug") |
+| Captain Marrow, Chief Calder, Chef Brennan, Rina, Dr. Sato, Dr. Nandakumar, Hana Mori, Lucia Ferreira, Zainab Kovac | she / her | roster text ("her portrait gallery", "her first chief", "her sister", "her lab", "her door", "her"); Kovac: the head writer's call for her arc |
+| Commander Vance, Chief Holt, Tomas, Pell, Zeke Torres, Emeka Halloran, Dev Raman, Matthias Oduya | he / him | roster text and plans ("his academy", "his deputy", "his little brother", "his mum", "his father", "his Friday mug", "his", "him") |
+| Wen Takahashi, Farah Rahman, Yara Esposito | they / them | their roster life lines say "they" |
 | Envoy Saruth | they / them | the head writer's call: the Veyli are not described in human terms; "the Envoy" is always safe |
 | You (the player) | never gendered | the crew say "you", your name, "cadet", "the new hand" |
+| The newlyweds' spouses back home (Silva, Soto, Jovanovic, Dlamini) | they / them, unnamed | nobody aboard names them |
+
+### 4a. Works (writer-works fills this in)
+
+| Who | Pronouns |
+| --- | --- |
+
+### 4b. Commons, galley, infirmary, store, garden, night shift, helm and comms juniors (writer-commons fills this in)
+
+| Who | Pronouns |
+| --- | --- |
+
+### 4c. Command, helm and comms officers, Watch, Survey, guests (writer-command fills this in)
+
+| Who | Pronouns |
+| --- | --- |
 
 ### 4a. Works crew (writer-works, batch 1)
 
@@ -259,6 +280,13 @@ not coincidences. Use them as running jokes and small links between people:
 | Sends voice messages to a grandmother on Kesh | Leila Eklund, Davi Keane | Different grandmothers. Possibly. |
 | Fixes everyone's broken headphones | Greta Garcia, Yusuf Kim | One on nights, one on days, so the ship is covered. |
 | Makes a playlist for every week of the tour | Theo Teague, Imani O'Neill | Rival playlists at the Friday jam. |
+
+| Misses the rain (several people, from Port Halloran, Hesper Dock, Lisk) | Lukas Dlamini, Sol Bakshi and others | A rainy-places club at the windows. Good for overheard pairs. |
+| Keeps fish back home | Esme Walsh (Port Halloran), Thea Grieve (New Aberdeen) | Different fish, same worry about who's feeding them. |
+| A grandmother on Kesh | Leila Eklund, Davi Keane | Different grandmothers (probably); they compare notes. |
+
+**Ruling on the shared quirks:** every person the roster gives a detail to keeps it. Don't hand a shared detail to just
+one of them (every cactus is Gerald, so all five have a Gerald); make it a link between them instead.
 
 **Same bio, different people.** Several roles share a bio line (all the Survey assistants "carry samples and dream of
 naming a star"; Watch ratings are "friendly on patrol, firm at the airlock"). That's what the job looks like from outside.

@@ -1,0 +1,22 @@
+@voice yoon-elif
+// The Commons writer, draft 1 (non-story crew). Night doctor.
+tpl: warm
+talk: Soft, a little nervous in company, apologises a lot; completely steady with a patient. Tells terrible jokes when nervous, then winces at them. Her mornings are her evenings: breakfast is when she winds down. The only one the coffee machine obeys.
+cares: her patients, and their sleep | the coffee machine | calling home | the night shift looking after itself
+jokes: her jokes at breakfast are terrible, and she knows | the coffee machine works for her and nobody else | she has dusted off an old instrument and plays it in the music room, quietly
+hi: Oh, hello | Hello | Hi there
+bye: Sleep well, when you do | Take care | Goodnight, or good morning
+yes: Of course | Yes, I can | Mm, yes
+thanks: Thank you, really | Oh, thank you
+wow: Oh, that's lovely | Goodness
+sigh: Oh dear
+nick: - | - | {me} | {me} | {me}
+needs: listen
+openness: normal
+loves: tea
+likes: sweet | music
+invites: dinner
+joy: telling a terrible joke at breakfast
+thread: notgood
+keepsake: a spare part from the coffee machine, polished, with a note: "in case"
+avoid: patients' details, ever
