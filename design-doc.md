@@ -417,8 +417,11 @@ What higher tiers unlock:
 - **Birthdays.** Every crew member has a birthday on a ship day of the year (1 to 364: 52 weeks of 7 days, day 1 being the game's Day 1), spread so about one falls each week. The galley bakes a cake and the mess gathers after dinner (20:15): their department, their bunkmates and plenty of others.
 - **Once a year:** Founding Day (day 100: cake and a few words from the Captain) and the quiet watch (day 300: a quiet while at the windows for the people they miss). The bigger Founders' Day festival on the plaza is a short ship-wide event (see "Ship-wide events").
 - **Hearing about them:** besides Mail and the Calendar, crew mention them when you talk to them ("Coming to the quiz tonight?").
-- **Joining in:** be in the room while it's on. It gives a little social, and the organiser thanks you.
-- More to come, in the same system.
+- **Joining in:** be in the room while it's on. It gives a little social, and the organiser thanks you. Afterwards the crew who were there remember it (a ship note for the social system, Pillar 4).
+- **The ship's year and its seasons** (the user, 2026-10-17): 364 days in four seasons of 13 weeks, named for the garden: **Sowing** (days 1-91), **Greening** (92-182), **Harvest** (183-273) and **Lanterns** (274-364). You arrive on day 0, the last evening of Lanterns. Traditions can come every week, every two or four weeks, once a season, once a year, or counted from your arrival (your first week, your first four weeks).
+- **Sowing morning** (built in 0.34.20, the first of Pillar 4's new traditions): the first Saturday of each season, late morning in the garden straight after the harvest; everyone plants a seedling. Day 6 is your first weekend.
+- **Not too much at once** (Pillar 4's voice budget): at most two traditions on an evening, and never two at once on the same deck. The rarer one wins (on day 300 the quiet watch replaces observatory night). Birthdays are never moved.
+- **Many more to come in Pillar 4** (about 35 in all): tradition designers write them as plain text files (`content/traditions/`), with no code needed.
 
 Daily routines belong to the crew's ordinary day instead: the bridge watch hands over at the command ring at 06:00 and 18:00, and the Captain takes an evening walk through the observation room.
 
