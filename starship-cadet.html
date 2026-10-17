@@ -27024,9 +27024,9 @@ function chatTick() {
 }
 
 // ---------------------------------------------------------------------
-// 20c. SOCIAL STORIES (social engineer B, 0.39.x; plans/social-deep-plan.md, steps B1-B6)
+// 20c. SOCIAL STORIES (social engineer B, 0.39.x; plans/social-deep-plan.md, steps B1-B8)
 // Voice cards and steps (0.39.0), crew-to-crew bonds, introductions and the weekly snapshot (0.39.1), moments
-// (0.39.3), goodbyes (0.39.4); later couples and the story arcs. Lazy like the rest
+// (0.39.3), goodbyes (0.39.4), couples and the story arcs (0.39.5-0.39.6), calls home (0.39.7-0.39.10). Lazy like the rest
 // of section 20 (ROSTER comes later in the file); nothing here draws anything or calls R(). schedU keys 672-699.
 //   voiceOf(id) -> the person's voice card: the writers' VOICE[id] (baked from content/voices), over the crew
 //     designer's generated fields on the roster (tpl, loves, likes, joy, thread, needs, openness, keepsake, mentors), over
@@ -27182,6 +27182,7 @@ function storyHour(h, pairs) {
     if (typeof simNote === 'function') { const [a, c] = k.split(':'); simNote('bond', { a, b: c, kind, was }); } };
   const drop = k => { const b = B[k]; if (!b) return; delete B[k]; if (typeof simNote === 'function') { const [a, c] = k.split(':'); simNote('bond', { a, b: c, kind: null, was: b.kind }); } };
   affWeekTake(h);
+  homeMsgHour(h);
   for (const [i, j] of pairs || []) { const b = B[crew[i].id + ':' + crew[j].id]; if (b) b.seen = h; }
   // couples (B6): the roster's partners are a couple from the start and stay one, at COUPLE_AFF or more; no story of
   // their own, never involving you. Their bond outranks the others, so they're never best friends, rivals or mentor
@@ -27388,6 +27389,11 @@ function momentNextId(p) {                               // the next beat's id t
   for (let b = n + 1; b <= n + 6; b++) if (momentDef(p.id + ':' + b)) return p.id + ':' + b;
   return null;
 }
+const ARC_CREW = new Map();
+function arcCrew(arcId) {                                 // whose story an arc is: the crew member whose thread is 'arc:<arcId>' (Torres's is 'torres', his id 'torres-zeke'), else the id itself
+  if (!ARC_CREW.size || (VOICE_SRC && ARC_CREW.src !== VOICE_SRC)) { ARC_CREW.clear(); ARC_CREW.src = VOICE_SRC; socInit(); for (const p of SOC.crew) { const th = voiceOf(p.id).thread || ''; if (th.startsWith('arc:') && !ARC_CREW.has(th.slice(4))) ARC_CREW.set(th.slice(4), p.id); } }
+  return ARC_CREW.get(arcId) || arcId;
+}
 const momentOwnsBeat = (id, n) => n >= 1 && (voiceOf(id).thread || '').startsWith('arc:') && !!momentDef(id + ':' + (n + 1));   // section 20's arcBeat leaves it to a moment
 const momentHint = id => { const d = momentDef(id); return d && d.hint ? voiceFill(d.who, d.hint) : null; };
 const MOMENT_SERIOUS = new Set(['heartfelt', 'serious', 'resolution']);
@@ -27399,9 +27405,10 @@ function momentCalm(p, t, duty) {                        // off duty (or on, for
   const pl = w.placeId && schedData().byId.get(w.placeId);
   return !!pl && (typeof SIT_TYPES === 'undefined' || SIT_TYPES.has(pl.type) || (duty && w.act === 'work'));
 }
-function momentWhere(p, t, d) {                          // the script's where: 'calm' (default), 'visit', 'appt', 'any' (played in place, wherever you meet), or a room's name
+function momentWhere(p, t, d) {                          // the script's where: 'calm' (default), 'visit', 'appt', 'meal' (at a mess table at breakfast or dinner), 'any' (played in place), or a room's name
   return (Array.isArray(d.where) ? d.where : [d.where || 'calm']).some(x => {
     if (x === 'any') return true;
+    if (x === 'meal') { const w = typeof whereIs === 'function' ? whereIs(p, t) : null, pl = w && !w.moving && w.placeId && schedData().byId.get(w.placeId); return !!pl && (w.act === 'breakfast' || w.act === 'dinner') && pl.type === 'mess-seat'; }   // sitting with them at a meal
     if (x === 'calm') return momentCalm(p, t, d.duty);
     if (x === 'visit') return momentVisit(p);
     if (x === 'appt') return momentAppt(p, t);
@@ -27440,6 +27447,23 @@ function momentShow(id) {
     onEnd: () => { delete MEETING_SCRIPTS['moment:' + id]; if (picked) momentDone(p, d, picked); } };
   return dialogueShow('moment:' + id, { id: 'moment:' + id, who: [p.id], at: t });
 }
+// favours that matter (0.39.6, B4): a moment's practical reply with `favour: <id>` starts one of these on section 20's
+// favour types (the lead's ruling: no new jobs), accepted at once (you offered), in your Jobs, handed back on their
+// card ("Done: here you go"). Any other favour id, or one done in the scene itself (holt.invite), is just a flag.
+// STORY_FAVOURS[id](p) -> the favourPost argument, or null
+const storyPlace = (type, deck) => { const S = schedData(); for (const pl of S.byId.values()) if (pl.type === type && (deck === undefined || pl.deck === deck)) return pl; return null; };
+const STORY_FAVOURS = {
+  brennanSage: p => { const pl = storyPlace('garden', 3); return pl && { from: p.id, title: 'Sage from the garden for ' + shortName(p) + ' (Deck 3)', bring: 'a bunch of sage', stops: [{ deck: pl.deck, placeId: pl.id, mins: 3, tag: 'pickup' }] }; },
+  pellPractice: p => { const pl = p.work && storyPlace(p.work.place, p.work.deck); return pl && { from: p.id, title: 'Help ' + shortName(p) + ' practise for his certification (Deck ' + pl.deck + ')', stops: [{ deck: pl.deck, placeId: pl.id, mins: 15, tag: 'pickup' }] }; },
+  liftBrakes: p => p.work && p.work.place ? { from: p.id, title: 'Check the lift brakes with ' + shortName(p), kind: 'lamp', where: p.work.place, deck: p.work.deck, parts: ['lamp'] } : null,
+};
+function storyFavour(p, id) {
+  const mk = STORY_FAVOURS[id]; if (!mk || typeof favourPost !== 'function') return false;
+  let post = null; try { post = mk(p); } catch (e) { post = null; } if (!post) return false;
+  const fid = favourPost(post); if (!fid) return false;
+  if (typeof favourAccept === 'function') favourAccept(fid);
+  return true;
+}
 function momentDone(p, d, c) {                           // the reply was picked: the moment counts
   const t = Math.floor(shipNow()), day = Math.floor(t / 1440) + 1, st = storyM(p.id), S = SHIP.social.stories, v = voiceOf(p.id), r = relGet(p.id);
   if (d.tone === 'goodbye') return goodbyeDone(p, d, c);
@@ -27451,6 +27475,7 @@ function momentDone(p, d, c) {                           // the reply was picked
   const word = c.c && c.c.mem || d.mem;                 // the writers' memory word (moment.<arc>.<word>), else one made from the beat
   memAdd(p.id, 'moment.' + th + '.' + (word || d.beat + '.' + flavour), d.tone === 'resolution' ? { cls: 'core' } : {});
   if (typeof flagSet === 'function') for (const f of [d.flag, c.c && c.c.flag, c.c && c.c.favour]) if (f) flagSet(f);   // the beat's flag, the reply's, and a favour done in the scene itself, for later beats
+  if (c.c && c.c.favour) storyFavour(p, c.c.favour);   // a favour that matters, in your Jobs
   if (d.learn && !r.known.includes('@story:' + d.learn)) r.known.push('@story:' + d.learn);
   if (typeof simNote === 'function') simNote('moment', { id: p.id + ':' + d.beat, who: p.id, beat: d.beat, flavour, tone: d.tone, fit: !!c.fit });
   if (d.tone === 'resolution' && typeof giftKeepsake === 'function') giftKeepsake(p, d.keepsake || v.keepsake);
@@ -27506,6 +27531,212 @@ function goodbyeDone(p, d, c) {
   memAdd(p.id, 'moment.bye.' + flavour, { cls: 'core' });
   if (typeof simNote === 'function') simNote('moment', { id: p.id + ':bye', who: p.id, beat: 'bye', flavour, tone: 'goodbye', fit: !!c.fit });
   if (relTier(p.id) >= 4 && typeof giftKeepsake === 'function') giftKeepsake(p, d.keepsake || v.keepsake);
+}
+// ---- calls home (0.39.7, B8; the user's design, head writer 2's call files, the dialogue engineer's baked shapes) ----
+// Your people back home: Mum, Gran, Jo and Sam (HOME_CONTACTS, baked from content/home/<contact>.call; Jo and Sam are
+// "they"; home stays unnamed). At a call-home booth, section 15's "Calling home" asks homeBooth(): whom to call, each
+// once a ship day, any day. A call plays their next arc beat when it's due (HOME_MOMENTS['<contact>:<n>']), else an
+// everyday call (HOME_CHAT) with a choice of things to tell them (HOME_SEND lines whose conditions hold: up to two
+// pieces of news you haven't told them, then the anytime ones). Pacing: beat 1 on the first call; each later beat 7+
+// days after the one before (HOME_GAP), with an everyday call in between, at most one a ship day; `via: live` beats
+// wait for the clear line of Letters evening (homeLive). Every reply is the warm one where the writers wrote one (home
+// people have no voice card's needs). State in SHIP.social.stories.home (saved by section 20) =
+// { day, f: { <flag>: 1 }, learn: [], c: { <contact>: { b, at, chat, day, last, sent: [], mem: [] } } }.
+//   homeBooth(t) -> the booth's picker, then the call, in one dialogue (false if one is up)   homeCall(contact, t) -> one call
+//   homeCallable(t) -> [{ contact, name, due, wait, hint }] whom you can call now   homeLive(t) -> the clear line is on
+//   homeBeatOf('home.mum') -> beats told   homeKnown() -> what you've learned about home   homeFlags() -> the home flags
+//   After a call: the beat's and reply's flags (here and section 13's flagSet), memory words, learn, keepsake, Mail;
+//   simNote('homeCall', { contact, who, beat, tone, via, live, flavour })
+const HOME_GAP = 7, HOME_LIVE = { before: 30, after: 180 }, HOME_SUNDAY = [1140, 1440];   // days between beats; the clear line around Letters evening (minutes), else Sunday evening
+const HOME_ORDER = ['mum', 'gran', 'jo', 'sam'], HOME_DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+const HOME_META = new Set(['text', 'id', 'tone', 'flavour', 'reply', 'sets', 'memo', 'lines', 'w', 'odds', 'old']);
+const homeBaked = () => { const g = f => { try { return f() || null; } catch (e) { return null; } };   // section 22's baked blocks (not there yet: none)
+  return [g(() => typeof HOME_CONTACTS !== 'undefined' && HOME_CONTACTS), g(() => typeof HOME_MOMENTS !== 'undefined' && HOME_MOMENTS), g(() => typeof HOME_SEND !== 'undefined' && HOME_SEND), g(() => typeof HOME_CHAT !== 'undefined' && HOME_CHAT)]; };
+const homeState = () => { socInit(); const S = SHIP.social.stories || (SHIP.social.stories = {}); return S.home || (S.home = { day: null, f: {}, learn: [], c: {} }); };
+const homeC = k => { const H = homeState(); return H.c[k] || (H.c[k] = { b: 0, at: null, chat: null, day: null, last: null, sent: [], mem: [] }); };
+const HOME_NONE = Object.freeze({ day: null, f: Object.freeze({}), learn: Object.freeze([]), c: Object.freeze({}) }), HOME_C0 = Object.freeze({ b: 0, at: null, chat: null, day: null, last: null, sent: Object.freeze([]), mem: Object.freeze([]) });
+const homePeek = () => (SHIP.social && SHIP.social.stories && SHIP.social.stories.home) || HOME_NONE;   // read-only: queries (line conditions, the device) never write the save
+const homePeekC = k => homePeek().c[k] || HOME_C0;
+const homeP = hc => ({ id: hc.id, name: hc.name, pron: hc.pron || null, seed: socHash(hc.id) });   // a home person for section 22's linesOk / linesFill
+const homeBeatOf = arcId => { const m = /^home\.(.+)$/.exec(String(arcId)); return m ? homePeekC(m[1]).b : 0; };
+const homeFlags = () => ({ ...homePeek().f });
+const homeKnown = () => homePeek().learn.slice();
+const homeCond = x => Object.keys(x).some(k => !HOME_META.has(k));   // a send line with conditions is news (told once)
+function homeLive(t = shipNow()) {                       // the relay's clear line: around Letters evening (traditions), else Sunday evening
+  const d = Math.floor(t / 1440) + 1, m = t - (d - 1) * 1440;
+  let es = null; try { es = typeof eventsOn === 'function' ? eventsOn(d) : null; } catch (e) { es = null; }
+  const L = es && es.find(e => e.id === 'letters'); if (L) return m >= L.from - HOME_LIVE.before && m < L.to + HOME_LIVE.after;
+  const has = typeof SHIP_TRADITIONS !== 'undefined' && SHIP_TRADITIONS.some(x => x.id === 'letters');   // in the table but not today (paused): no clear line
+  return !has && weekday(d) === 6 && m >= HOME_SUNDAY[0] && m < HOME_SUNDAY[1];
+}
+function homeCtx(t) {                                    // the call's ctx: home flags, the tradition you went to lately (last 3 days), your closest friend aboard
+  const H = homePeek(), d = Math.floor(t / 1440) + 1, ctx = { t, flags: { ...H.f } };
+  const J = ((SHIP.events && SHIP.events.joined) || []).map(k => /^(.+)@(\d+)$/.exec(k)).filter(m => m && m[1] !== 'letters' && +m[2] <= d && +m[2] >= d - 3).pop();
+  if (J) { let tr = typeof SHIP_TRADITIONS !== 'undefined' ? SHIP_TRADITIONS.find(x => x.id === J[1]) : null; try { tr = tr || (typeof eventsOn === 'function' ? eventsOn(+J[2]).find(x => x.id === J[1]) : null); } catch (e) { }
+    if (tr && tr.name) { ctx.trad = tr.name.toLowerCase(); ctx.tradId = J[1]; } }
+  let best = null; for (const id in SHIP.rel) { const r = SHIP.rel[id]; if (r && r.tier >= 3 && SOC.idx.has(id) && (!best || r.pts > best[1].pts)) best = [id, r]; }
+  if (best) { ctx.friend = shortName(socP(best[0])); ctx.friendId = best[0]; }
+  return ctx;
+}
+function homeOk(e, hp, ctx) {                            // a beat's when, a chat's when, a send line: home beats here, the rest by section 22's linesOk
+  if (!e) return true;
+  const o = { ...e }, beat = o.beat; delete o.beat;
+  const told = x => { const i = x.lastIndexOf('.'), a = x.slice(0, i); return (a.startsWith('home.') ? homeBeatOf(a) : typeof beatOf === 'function' ? beatOf(a) || 0 : 0) >= +x.slice(i + 1); };
+  if (beat !== undefined && ![].concat(beat).every(v => String(v).split('|').some(told))) return false;
+  if (typeof linesOk === 'function') { try { return !!linesOk(o, hp, ctx); } catch (e2) { return false; } }
+  for (const k in o) {                                   // no dialogue engine yet: flags, weekdays, came: and friend:; anything else waits for it
+    if (HOME_META.has(k)) continue;
+    const all = f => [].concat(o[k]).every(v => String(v).split('|').some(f));
+    if (k === 'flag') { if (!all(x => x in ctx.flags ? !!ctx.flags[x] : typeof flag === 'function' && !!flag(x))) return false; }
+    else if (k === 'weekday') { if (!all(x => HOME_DAYS[weekday(Math.floor(ctx.t / 1440) + 1)] === x)) return false; }
+    else if (k === 'came') { if (!all(x => !!ctx.trad && (x === 'any' || ctx.tradId === x))) return false; }
+    else if (k === 'friend') { if (!all(() => !!ctx.friend)) return false; }
+    else return false;
+  }
+  return true;
+}
+function homeFill(text, hp, ctx) {                       // section 22's linesFill (null: a placeholder it can't fill), else {me}, {trad}, {friend}
+  if (typeof linesFill === 'function') { try { return linesFill(text, hp, ctx); } catch (e) { return null; } }
+  let ok = true; const s = String(text).replace(/\{([a-z]+)\}/g, (m, k) => { const x = k === 'me' ? (typeof ROSTER_PLAYER !== 'undefined' && ROSTER_PLAYER.first) || 'cadet' : ctx[k]; if (x == null) ok = false; return x == null ? m : String(x); });
+  return ok ? s : null;
+}
+function homeNext(k, t) {                                // their next beat if its time has come ('<contact>:<n>'), live or not; else null
+  const [HC, HM] = homeBaked(), hc = HC && HC[k]; if (!hc || !HM) return null;
+  const c = homePeekC(k), H = homePeek(), id = k + ':' + (c.b + 1), d = HM[id], day = Math.floor(t / 1440) + 1;
+  if (!d || !Array.isArray(d.lines)) return null;
+  if (c.b > 0 && (c.at === null || (t - c.at) / 1440 < HOME_GAP || !(c.chat > c.at) || (H.day === day && !(d.via === 'live' && homeLive(t))))) return null;   // 7 days, a call in between, one home beat a day (beat 1 is the first call; on Letters evening each of them can have their live beat, the lead 2026-10-17)
+  return homeOk(d.when, homeP(hc), homeCtx(t)) ? id : null;
+}
+function homeDue(k, t = shipNow()) { const id = homeNext(k, t), d = id && homeBaked()[1][id]; return d && (d.via !== 'live' || homeLive(t)) ? id : null; }   // the beat a call now plays
+function homeCallable(t = shipNow()) {
+  const [HC, HM] = homeBaked(); if (!HC) return [];
+  let ev = null; try { ev = typeof eventNow === 'function' ? eventNow(t) : null; } catch (e) { ev = null; } if (ev && ev.phase === 'onset') return [];   // the relay's down while a ship-wide event starts
+  const day = Math.floor(t / 1440) + 1, live = homeLive(t), ord = k => HOME_ORDER.includes(k) ? HOME_ORDER.indexOf(k) : 99;
+  return Object.keys(HC).sort((a, b) => ord(a) - ord(b) || (a < b ? -1 : 1)).filter(k => homePeekC(k).day !== day).map(k => {
+    const n = homeNext(k, t), d = n && HM[n], lv = !!d && d.via === 'live';
+    return { contact: k, name: HC[k].name, due: !!d && (!lv || live), wait: lv && !live, hint: lv && live && d.hint ? homeFill(d.hint, homeP(HC[k]), homeCtx(t)) || d.hint : null };
+  });
+}
+function homeLines(k, t) {                               // one call: { d (the beat, or null), title, live, lines } for section 18's panel
+  const [HC, HM, HS, HCH] = homeBaked(), hc = HC && HC[k]; if (!hc) return null;
+  const hp = homeP(hc), ctx = homeCtx(t), c = homeC(k), live = homeLive(t), id = homeDue(k, t), d = id && HM[id], name = hc.name;
+  const fill = s => homeFill(s, hp, ctx) ?? String(s), who = w => !w || w === 'them' || w === hc.id ? name : w;   // section 18 shows a name it doesn't know as it is
+  const say = x => x && (typeof x === 'object' ? { who: who(x.who), text: fill(x.text), pose: x.pose } : { who: name, text: fill(x) });
+  const title = name + (live ? ', on a clear line' : ', on the relay');
+  if (d) return { d, title, live, lines: d.lines.map(l => l.choice ? { choice: l.choice.map(x => ({ text: fill(x.text), flavour: x.flavour, c: x, reply: say(x.warm || x.reply) })) } : say(l)) };
+  const pool = ((HCH && HCH[k]) || []).filter(e => e && Array.isArray(e.lines) && homeOk(e.when, hp, ctx)); if (!pool.length) return null;
+  const day = Math.floor(t / 1440) + 1, seed = hp.seed, spec = pool.filter(e => e.when), pick = a => a[Math.floor(schedU(seed, day, 683) * a.length)];
+  let e = spec.length && schedU(seed, day, 682) < .5 ? pick(spec) : pick(pool);   // a call that fits the day (pottery night, a Sunday) half the time
+  const tag = x => socHash(JSON.stringify(x.lines[0] || ''));
+  if (pool.length > 1 && tag(e) === c.last) e = pool[(pool.indexOf(e) + 1) % pool.length];   // not the same call twice running
+  c.last = tag(e);
+  const ch = homeSends(k, hp, ctx).map(o => ({ text: o.text, flavour: o.x.flavour, c: o.x, send: true, reply: say(o.x.reply) }));
+  return { d: null, title, live, lines: e.lines.flatMap(l => l.send ? (ch.length ? [{ choice: ch }] : []) : [say(l)]) };
+}
+function homeSends(k, hp, ctx) {                         // what you can tell them: up to two pieces of news not told yet, then anytime lines, three in all
+  const HS = homeBaked()[2], c = homePeekC(k), day = Math.floor(ctx.t / 1440) + 1, seed = hp.seed;
+  const sends = ((HS && HS[k]) || []).map(x => ({ x, text: homeFill(x.text, hp, ctx) })).filter(o => o.text && homeOk(o.x, hp, ctx));
+  const news = sends.filter(o => homeCond(o.x) && !c.sent.includes(o.x.id)).slice(0, 2);
+  return news.concat(sends.filter(o => !homeCond(o.x)).sort((a, b) => schedU(seed ^ socHash(a.x.id), day, 684) - schedU(seed ^ socHash(b.x.id), day, 684)).slice(0, 3 - news.length));
+}
+function homeNews(k, x) {                                // a send line you chose: news is told once; its flag and memory word
+  const c = homeC(k), H = homeState();
+  if (homeCond(x) && !c.sent.includes(x.id)) c.sent.push(x.id);
+  if (x.sets) { H.f[x.sets] = 1; if (typeof flagSet === 'function') flagSet(x.sets); }
+  if (x.memo && !c.mem.includes(x.memo)) c.mem.push(x.memo);
+}
+function homeScript(k, t) {                              // the call as a script with onPick / onEnd; null if you can't call them now
+  if (!homeCallable(t).some(x => x.contact === k)) return null;
+  const L = homeLines(k, t); if (!L) return null;
+  const c = homeC(k); c.day = Math.floor(t / 1440) + 1; if (!L.d) c.chat = Math.floor(t);   // they picked up: one call each a ship day
+  if (c.msg && !c.msg.done) c.msg.done = true;            // a call answers their recorded message
+  let picked = null;
+  return { title: L.title, lines: L.lines, onPick: (i, x) => { picked = x; }, onEnd: () => { delete MEETING_SCRIPTS['home:' + k]; homeDone(k, L, picked, t); } };
+}
+function homeCall(k, t = shipNow()) {
+  if (typeof MEETING_SCRIPTS === 'undefined' || typeof dialogueShow !== 'function' || (typeof DIALOGUE !== 'undefined' && DIALOGUE)) return false;
+  const s = homeScript(k, t); if (!s) return false;
+  MEETING_SCRIPTS['home:' + k] = s;
+  return dialogueShow('home:' + k, { id: 'home:' + k, who: [], at: t });
+}
+function homeBooth(t = shipNow()) {                      // the booth: whom to call, then the call, in one dialogue
+  if (typeof MEETING_SCRIPTS === 'undefined' || typeof dialogueShow !== 'function' || (typeof DIALOGUE !== 'undefined' && DIALOGUE)) return false;
+  const [HC] = homeBaked(), can = homeCallable(t), hint = can.find(x => x.hint);
+  const text = !HC ? 'The screen says the relay\'s busy. Try again later.' : !can.length ? 'You\'ve called everyone today. Tomorrow, then.'
+    : hint ? hint.hint : homeLive(t) ? 'The relay\'s clear tonight. No lag on the line.' : 'The relay\'s up, with a little lag.' + (can.some(x => x.wait) ? ' Letters evening, on Sunday, is clearer.' : '');
+  const lines = [{ who: 'Booth', text }]; let call = null;
+  if (can.length) lines.push({ choice: can.map(x => ({ text: 'Call ' + x.name, k: x.contact })).concat([{ text: 'Not now', k: null }]) });
+  MEETING_SCRIPTS['home:booth'] = { title: 'Calling home', lines,
+    onPick: (i, c) => { if (call) return call.onPick(i, c); const s = c.k && homeScript(c.k, t); if (!s || !DIALOGUE) return;
+      call = s; MEETING_SCRIPTS['home:booth'].title = s.title; DIALOGUE.queue.splice(DIALOGUE.i + 1, 0, ...s.lines); },   // the call goes on in the same panel
+    onEnd: f => { delete MEETING_SCRIPTS['home:booth']; if (call) call.onEnd(f); } };
+  return dialogueShow('home:booth', { id: 'home:booth', who: [], at: t });
+}
+function homeDone(k, L, x, t) {                          // the call ended: a beat counts once a reply was picked; news counts once told
+  const hc = homeBaked()[0][k], c = homeC(k), H = homeState(), d = L.d, now = Math.floor(t);
+  const on = f => { if (!f) return; H.f[f] = 1; if (typeof flagSet === 'function') flagSet(f); };
+  const word = w => { if (w && !c.mem.includes(w)) c.mem.push(w); };
+  if (d && x) {
+    c.b = Math.max(c.b, d.beat); c.at = now; H.day = Math.floor(t / 1440) + 1;
+    on(d.flag); on(x.c && x.c.flag); word((x.c && x.c.mem) || d.mem);
+    if (d.learn && !H.learn.includes(d.learn)) H.learn.push(d.learn);
+    if (d.keepsake) { const K = SHIP.social.keepsakes || (SHIP.social.keepsakes = []); if (!K.some(q => q.from === hc.name) && K.length < 8) K.push({ from: hc.name, what: d.keepsake, day: SHIP.time.day }); }   // your shelf (section 20's keepsakes)
+    if (d.after && d.after.mail) SHIP.social.mail.push({ at: now + (d.after.mail.after || 60), from: hc.name, subject: d.after.mail.subject, body: homeFill(d.after.mail.body, homeP(hc), homeCtx(t)) ?? d.after.mail.body });
+  } else if (x && x.send) homeNews(k, x.c);
+  if (typeof simNote === 'function') simNote('homeCall', { contact: k, who: hc.id, beat: d && x ? d.beat : null, tone: d ? d.tone : 'chat', via: d ? d.via || 'reply' : null, live: !!L.live, flavour: x ? x.flavour || null : null });
+}
+// recorded messages (0.39.8, the user's extra): someone you haven't called for HOME_MSG.quiet days records a message
+// (one of their everyday calls, HOME_CHAT) at noon (storyHour), at most one message a ship day and each person every
+// HOME_MSG.every days, half the time. It comes in Mail with `play: 'home:<contact>'`; the device's Play (section 19 asks
+// mailPlay(m)) plays it and asks what to record back (the same send lines as a call); their answer comes by Mail the
+// next day. A call to them answers it too. State: c.msg = { day, i (the HOME_CHAT call), done }, home.msgDay.
+//   mailPlay(m) -> plays a recorded message from home (by its sender and subject, or `play: 'home:<contact>'`), else a
+//     Mail's `play` moment id (momentShow); mailPlayable(m) -> whether there's anything to play; homeFolks() -> their names
+const HOME_MSG = { quiet: 3, every: 5, hour: 12, odds: .5, back: 1440 };
+function homeMsgHour(h) {                                // storyHour, every ship hour
+  if (h % 24 !== HOME_MSG.hour) return;
+  const [HC, , , HCH] = homeBaked(); if (!HC || !HCH) return;
+  const t = h * 60, day = Math.floor(t / 1440) + 1, ord = k => HOME_ORDER.includes(k) ? HOME_ORDER.indexOf(k) : 99;
+  if (homePeek().msgDay === day) return;
+  for (const k of Object.keys(HC).sort((a, b) => ord(a) - ord(b) || (a < b ? -1 : 1))) {
+    const c = homePeekC(k), hp = homeP(HC[k]);
+    if (!c.b || (c.msg && !c.msg.done) || (c.msg && day - c.msg.day < HOME_MSG.every) || (c.day !== null && day - c.day < HOME_MSG.quiet)) continue;   // called once, not lately, no message waiting
+    if (schedU(hp.seed, day, 685) >= HOME_MSG.odds) continue;
+    const ctx = homeCtx(t), pool = (HCH[k] || []).map((e, i) => [e, i]).filter(([e]) => e && Array.isArray(e.lines) && homeOk(e.when, hp, ctx)); if (!pool.length) continue;
+    const [e, i] = pool[Math.floor(schedU(hp.seed, day, 686) * pool.length)], first = e.lines.find(l => !l.send);
+    homeC(k).msg = { day, i, done: false }; homeState().msgDay = day;   // only now does the save change
+    SHIP.social.mail.push({ at: t, from: HC[k].name, subject: HOME_MSG_SUBJECT, play: 'home:' + k,
+      body: (first ? '"' + (homeFill(first.text, hp, ctx) ?? first.text) + '" ' : '') + '(Recorded at home. Play it to hear the rest and record a reply.)' });
+    return;
+  }
+}
+const HOME_MSG_SUBJECT = 'A recorded message';
+const homeFolks = () => { const HC = homeBaked()[0]; return HC ? Object.values(HC).map(x => x.name) : []; };   // for section 19's "From home" heading
+function homeMailOf(m) {                                 // the contact whose recorded message a Mail is (Mail keeps no extra fields: by sender and subject), else null
+  if (!m) return null; const HC = homeBaked()[0]; if (!HC) return null;
+  if (m.play) { const hm = /^home:(.+)$/.exec(String(m.play)); return hm && HC[hm[1]] ? hm[1] : null; }
+  return m.subject === HOME_MSG_SUBJECT ? Object.keys(HC).find(k => HC[k].name === m.from) || null : null;
+}
+const mailPlayable = m => { const k = homeMailOf(m), c = k && homePeekC(k); return !!(c && c.msg && !c.msg.done) || !!(m && m.play && !homeMailOf(m)); };   // section 19 shows Play while it's true
+function mailPlay(m) {
+  const k = homeMailOf(m); if (k) return homeMessage(k);
+  return m && m.play && typeof momentShow === 'function' ? momentShow(m.play) : false;
+}
+function homeMessage(k, t = shipNow()) {                 // their message, then your reply (no answer in the scene: it comes by Mail)
+  if (typeof MEETING_SCRIPTS === 'undefined' || typeof dialogueShow !== 'function' || (typeof DIALOGUE !== 'undefined' && DIALOGUE)) return false;
+  const [HC, , , HCH] = homeBaked(), hc = HC && HC[k], c = hc && homePeekC(k), e = c && c.msg && !c.msg.done && HCH && HCH[k] && HCH[k][c.msg.i]; if (!e) return false;
+  const hp = homeP(hc), ctx = homeCtx(t), say = x => ({ who: hc.name, text: homeFill(x.text, hp, ctx) ?? String(x.text), pose: x.pose });
+  const ch = homeSends(k, hp, ctx).map(o => ({ text: o.text, flavour: o.x.flavour, c: o.x }));
+  let picked = null;
+  MEETING_SCRIPTS['home:msg:' + k] = { title: hc.name + ', recorded', lines: e.lines.filter(l => !l.send).map(say).concat(ch.length ? [{ choice: ch }] : []),
+    onPick: (i, x) => { picked = x; }, onEnd: () => { delete MEETING_SCRIPTS['home:msg:' + k]; if (picked) homeMsgDone(k, picked, t); } };
+  return dialogueShow('home:msg:' + k, { id: 'home:msg:' + k, who: [], at: t });
+}
+function homeMsgDone(k, x, t) {                          // you recorded a reply (stopped before that: the message waits)
+  const hc = homeBaked()[0][k], c = homeC(k), r = x.c.reply; c.msg.done = true; c.chat = Math.floor(t);   // counts as a call between beats
+  homeNews(k, x.c);
+  if (r && r.text) SHIP.social.mail.push({ at: Math.floor(t) + HOME_MSG.back, from: hc.name, subject: 'Re: your message', body: homeFill(r.text, homeP(hc), homeCtx(t)) ?? r.text });
+  if (typeof simNote === 'function') simNote('homeCall', { contact: k, who: hc.id, beat: null, tone: 'message', via: 'message', live: false, flavour: x.flavour || null });
 }
 // ---- end of 20c ----
 
