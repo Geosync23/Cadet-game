@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.48.24
+   STARSHIP CADET: CSV Wren                           build 0.48.25
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.48.24';                           // keep in step with the header's build line
+const GAME_BUILD = '0.48.25';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -13458,6 +13458,18 @@ const VOICE = {
         {"text": "Somebody's left a little portrait. Not mine. Maybe.", "id": "pkiq5z", "tone": "funny", "place": "commons"},
         {"text": "Observatory night. I'll paint a star. A small one.", "id": "110kql7", "trad": "observatory"},
       ],
+      "tiles.dock": [
+        {"text": "Three. I think. Is that three? Yes. Three.", "id": "15y85a3"},
+      ],
+      "tiles.lose": [
+        {"text": "Well played. Hold still. That face. I'm painting it.", "id": "yy0qk7", "tone": "funny"},
+      ],
+      "tiles.start": [
+        {"text": "Oh, a game. Lovely. Where was I? Your move.", "id": "1sm4d5t"},
+      ],
+      "tiles.win": [
+        {"text": "I won? I was thinking about rain. Good game.", "id": "13cfcpa", "tone": "funny"},
+      ],
     },
   },
   "brennan": {
@@ -14467,6 +14479,21 @@ const VOICE = {
         {"text": "Who's got the Tiles board? No, keep it. I'll watch.", "id": "1ggr6ay", "place": "commons"},
         {"text": "Hot water. Five minutes. I'm timing it.", "id": "asvjsw", "tone": "funny", "act": "wash"},
       ],
+      "tiles.dock": [
+        {"text": "Three. I saw that one coming. Like a shopping list.", "id": "3g9z4k", "tone": "funny"},
+      ],
+      "tiles.lose": [
+        {"text": "Well played. I'll put it in the journal. Next to the stars.", "id": "pcy9sq", "tone": "warm"},
+      ],
+      "tiles.miss": [
+        {"text": "You missed a dock. I won't tell. I never tell.", "id": "e6hbc0", "tone": "funny"},
+      ],
+      "tiles.start": [
+        {"text": "I knew you'd come in for a game. Your move.", "id": "1lsv1nm", "tone": "funny"},
+      ],
+      "tiles.win": [
+        {"text": "Good game. Same time tomorrow? I'll keep the board.", "id": "xig45x"},
+      ],
     },
   },
   "farouk-olu": {
@@ -15041,6 +15068,18 @@ const VOICE = {
         {"text": "If there's a song round, I'm ready. Am I ready?", "id": "1w97h3u", "trad": "quiz"},
         {"text": "Lanterns is my favourite. It'll be fine. It's lovely.", "id": "16c1yxv", "season": "lanterns"},
         {"text": "Sorry, still humming. I'll stop. I've stopped.", "id": "1yehfue", "tone": "funny", "time": "night"},
+      ],
+      "tiles.dock": [
+        {"text": "Oh! Three! Sorry. Was that all right?", "id": "qgflt1"},
+      ],
+      "tiles.lose": [
+        {"text": "Well done! You were lovely at that. Really.", "id": "1f11mjq", "tone": "warm"},
+      ],
+      "tiles.start": [
+        {"text": "A game? Oh, lovely. I'm not very good. Am I?", "id": "1veh0lz"},
+      ],
+      "tiles.win": [
+        {"text": "I won? Sorry! It'll be your turn next. It will.", "id": "1ckoujd"},
       ],
     },
   },
@@ -16751,6 +16790,19 @@ const VOICE = {
         {"text": "Music night. I'm singing. Nobody's stopped me yet.", "id": "1rnt8ov", "tone": "funny", "trad": "jam"},
         {"text": "Smell that? That's the roses. Well, one rose.", "id": "h6lix0", "place": "hydroponics_garden"},
       ],
+      "tiles.dock": [
+        {"text": "Three! That's the system! The system works!", "id": "90ckhl", "tone": "funny"},
+      ],
+      "tiles.lose": [
+        {"text": "Beaten. The system needs work. Well played.", "id": "fja013", "tone": "funny"},
+      ],
+      "tiles.start": [
+        {"text": "Right, listen. Tiles. I've got a system. It's new.", "id": "12b9bz0", "tone": "funny"},
+        {"text": "Your move, pal. I'll tell you a story while you think.", "id": "tw5uvv"},
+      ],
+      "tiles.win": [
+        {"text": "I won! Right, listen. Let me tell you how.", "id": "gfwgeo", "tone": "funny"},
+      ],
     },
   },
   "marrow": {
@@ -18030,6 +18082,30 @@ const VOICE = {
         {"text": "Hear that? Bearing. I'll put it on the board.", "id": "1kh6o5m"},
         {"text": "Hold this. Ta. No, the other end.", "id": "1kwg70f", "act": "work"},
       ],
+      "tiles.dock": [
+        {"text": "Docked! Click, like a panel. Lovely.", "id": "2yg911"},
+        {"text": "Three. Did you see that? Tell Rina.", "id": "1r20ual", "tone": "funny"},
+        {"text": "Snug as a screw in a tin.", "id": "1jqu0pk", "tone": "funny"},
+      ],
+      "tiles.lose": [
+        {"text": "Fair. You got me. Biscuits are on me.", "id": "1c3zqqj", "tone": "funny"},
+        {"text": "Beaten. Lovely. I'm going for a nap.", "id": "ak4khj", "tone": "funny"},
+        {"text": "Well played. Don't tell Rina. She'll be thrilled.", "id": "vt3v59", "tone": "funny"},
+      ],
+      "tiles.miss": [
+        {"text": "Ooh, you missed one. Just there. By the corner.", "id": "1k8rpwt"},
+        {"text": "That's a three, that is. Was. Gone now.", "id": "orpryn", "tone": "funny"},
+      ],
+      "tiles.start": [
+        {"text": "Oi oi. Tiles. Loser fetches the biscuits.", "id": "frrf47", "tone": "funny"},
+        {"text": "Go on, you first. I'm just waking up.", "id": "190hal", "tone": "funny"},
+        {"text": "I play like I fix things. Badly, then brilliantly.", "id": "1vlknz6", "tone": "funny"},
+      ],
+      "tiles.win": [
+        {"text": "I won? Write it down. Show Rina.", "id": "y15i1z", "tone": "funny"},
+        {"text": "Good game. Biscuits are on you.", "id": "uk985v", "tone": "funny"},
+        {"text": "Close one. I nearly dozed off and still won.", "id": "18m8zg0", "tone": "funny"},
+      ],
       "visit": [
         {"text": "Oi oi. Brought snacks. Don't ask from where. Shove up.", "id": "1in0t2g", "tone": "funny"},
         {"text": "Couldn't sleep. Course I couldn't, it's night. Fancy a natter?", "id": "16gy71n", "tone": "funny"},
@@ -18651,6 +18727,37 @@ const VOICE = {
         {"text": "Hm. Someone's limping. Noted.", "id": "eb8206"},
         {"text": "Honestly.", "id": "13nmbcv"},
       ],
+      "tiles.dock": [
+        {"text": "Three. Mine.", "id": "1mhvchb"},
+        {"text": "Docked. Obviously.", "id": "1pvv0ki", "tone": "funny"},
+        {"text": "Honestly. You left that open.", "id": "15ug5b3", "tone": "funny"},
+        {"text": "Three. Gran would've turned the board for that.", "id": "rnwbrw", "tone": "funny"},
+      ],
+      "tiles.lose": [
+        {"text": "...Again. Now.", "id": "13y0uua", "tone": "funny"},
+        {"text": "No. No. Again. Sit down.", "id": "1arkk38", "tone": "funny"},
+        {"text": "I'm writing this down. In pencil. For now.", "id": "duqjxy", "tone": "funny"},
+        {"text": "Fine. Well played. Again. Now.", "id": "gvvuo1", "tone": "funny"},
+        {"text": "Don't tell Pell. Don't tell anyone. Again.", "id": "1mvjd2n", "tone": "funny"},
+      ],
+      "tiles.miss": [
+        {"text": "You had a dock there. I'm not saying where.", "id": "bwesv3", "tone": "funny"},
+        {"text": "Look again. No, I'm not helping.", "id": "17n9pye", "tone": "funny"},
+        {"text": "That was a three. I'd have taken it.", "id": "25kuf6"},
+      ],
+      "tiles.start": [
+        {"text": "Best of one. Try to keep up.", "id": "18juogw"},
+        {"text": "Sit. Board's set. Don't touch my tea.", "id": "l5ax1e"},
+        {"text": "My gran taught me. She cheated. I don't need to.", "id": "1890mzi", "tone": "funny"},
+        {"text": "Honestly, you're brave. Your move.", "id": "1b0e55e", "tone": "funny"},
+        {"text": "The notebook's open. No pressure.", "id": "vzbqzn", "tone": "funny"},
+      ],
+      "tiles.win": [
+        {"text": "Good game. Again?", "id": "17auqyv"},
+        {"text": "Another one for the notebook.", "id": "9ox3cn", "tone": "funny"},
+        {"text": "Close. Closer than most. That's a compliment.", "id": "hsv9gj"},
+        {"text": "Good game. Honestly. You're getting there.", "id": "bl84mz"},
+      ],
       "visit": [
         {"text": "Pell's asleep and talking about engines. I've come for some peace. Shove over.", "id": "m9km32", "tone": "funny"},
         {"text": "Have you drunk any water today? I've brought some. Drink. Then we'll talk.", "id": "1uaqqe5", "tone": "funny"},
@@ -18979,6 +19086,19 @@ const VOICE = {
         {"text": "Harvest market, back home. Best prices of the year.", "id": "18qyovz", "season": "harvest"},
         {"text": "Gossip corner's open. Public stuff only.", "id": "t9ac5q", "tone": "funny", "place": "commons"},
         {"text": "Skipped breakfast. Coffee's breakfast. Don't tell.", "id": "324i4w", "act": "breakfast"},
+      ],
+      "tiles.dock": [
+        {"text": "Three. Good trade, that. For me.", "id": "3v6rvb", "tone": "funny"},
+      ],
+      "tiles.lose": [
+        {"text": "Well played. Pudding's yours. I'm good for it.", "id": "1av9ejo"},
+      ],
+      "tiles.start": [
+        {"text": "Tiles? Winner picks pudding. Deal?", "id": "1hj3ijm", "tone": "funny"},
+        {"text": "Tiles? I'll make you a deal. Your move first.", "id": "d4oav7"},
+      ],
+      "tiles.win": [
+        {"text": "Good game. Pudding's mine. Fair's fair.", "id": "10kax2e", "tone": "funny"},
       ],
       "week1": [
         {"text": "You're the one above me! Brilliant. I'm Zofia. Comms. I don't snore. Tran does.", "id": "46yjzf", "tone": "funny", "deck": "4", "tier": [0, 1], "week1": "true"},
@@ -19958,6 +20078,30 @@ const VOICE = {
         {"text": "I've folded my blanket three times. It's fine.", "id": "k4olui", "tone": "funny"},
         {"text": "Patrol. All quiet. Very quiet. Too quiet? No. Fine.", "id": "egcq5q", "tone": "funny", "act": "work"},
       ],
+      "tiles.dock": [
+        {"text": "Was that three? It was! Was it?", "id": "1f6w6hf"},
+        {"text": "Oh! Docked! I did that!", "id": "d7hbqx"},
+        {"text": "Is that how it works? I think that's how it works.", "id": "1y5qukq", "tone": "funny"},
+      ],
+      "tiles.lose": [
+        {"text": "Well played. Will you show me how you did that?", "id": "kx0z73"},
+        {"text": "You got me. Again sometime? I'll get better.", "id": "16v83qv"},
+        {"text": "Good game. I'll practise. On my own. With the board.", "id": "ja0h36", "tone": "funny"},
+      ],
+      "tiles.miss": [
+        {"text": "Was there a three there? I think there was.", "id": "1pqii80"},
+        {"text": "You could've docked by the edge. I think.", "id": "w2dfp9"},
+      ],
+      "tiles.start": [
+        {"text": "Tiles? Yes. Can I go second? Is that allowed?", "id": "13oosde"},
+        {"text": "I'm still learning. Is that all right?", "id": "1s7ja1p"},
+        {"text": "Rina says watch the corners. Which corners?", "id": "cfcn6t", "tone": "funny"},
+      ],
+      "tiles.win": [
+        {"text": "I won? Really? Can I tell my brother?", "id": "jxtyvq", "tone": "warm"},
+        {"text": "Good game. Was it a good game? It felt like one.", "id": "mb3ykw"},
+        {"text": "That was lucky. Wasn't it? Good game.", "id": "1vbo9mc"},
+      ],
       "visit": [
         {"text": "Knock, knock. I know I live here. It felt polite.", "id": "1why7h1", "tone": "funny"},
         {"text": "Are you busy? I'm not. I've been not busy all evening. It's lonely, not being busy.", "id": "j19slr", "tone": "funny"},
@@ -20343,6 +20487,18 @@ const VOICE = {
         {"text": "Somebody left a mug. Two mugs. The box is full.", "id": "fgtzgg", "tone": "funny", "place": "commons"},
         {"text": "Up early. Slept well. That's the secret.", "id": "1bbzvmq", "act": "breakfast"},
       ],
+      "tiles.dock": [
+        {"text": "Three. Accurately.", "id": "ci5wsk"},
+      ],
+      "tiles.lose": [
+        {"text": "Well played. That's a fair result. Bed, though.", "id": "17zwghp", "tone": "funny"},
+      ],
+      "tiles.start": [
+        {"text": "One game. Then bed. I mean it.", "id": "h816kd"},
+      ],
+      "tiles.win": [
+        {"text": "Good game. Now bed. It's nearly ten.", "id": "1tqz5sn", "tone": "funny"},
+      ],
       "week1": [
         {"text": "You're new. Welcome to Bunk 1. Lights out at ten. Everything else, ask Tomas. Or me.", "id": "8ixm28", "deck": "4", "tier": [0, 1], "week1": "true"},
       ],
@@ -20432,6 +20588,441 @@ const VOICE = {
         {"text": "One piece, then bed. A short concert.", "id": "11lc16g", "tone": "funny"},
         {"text": "Early dinner, early bed.", "id": "ac26rq", "time": "evening"},
         {"text": "Rest day. Paper and ink.", "id": "14u6cqo", "act": "off"},
+      ],
+    },
+  },
+  "v-bjork-ines": {
+    "likes": ["star", "tea"],
+    "talk": "Calm and patient; measures twice; names new stars after cafés back home.",
+    "tpl": "steady",
+    "words": {"hi": ["Hello", "Evening"], "bye": ["Back to the dome", "Goodnight"], "yes": ["All right", "Yes"], "thanks": ["Thanks", "Kind of you"], "wow": ["Oh, lovely"], "sigh": ["Well"], "nick": [null, "{me}", "{me}", "{me}", "{me}"]},
+    "lines": {
+      "bye": [
+        {"text": "{bye}. Look up tonight. Third from the left. That's a bakery.", "id": "14003nf", "tone": "funny"},
+      ],
+      "chat": [
+        {"text": "Every new star gets a café's name. My mother says it's undignified.", "id": "7tpuvt", "tone": "funny"},
+        {"text": "A week of measurements. Then home, and a very long report.", "id": "zq2azu"},
+      ],
+      "greet": [
+        {"text": "Hello. Ines. Astronomer. I'm borrowing your observatory for a week.", "id": "1ggpb2m", "tier": [0, 0]},
+        {"text": "{hi}, {me}. I named a star last night. After a café. It had good buns.", "id": "gkyhv2", "tone": "funny", "tier": [1, 4]},
+      ],
+      "near": [
+        {"text": "Clear skies. Rare, even out here. I'm not wasting them.", "id": "1iannae", "deck": "2", "time": "night"},
+        {"text": "Calling home before bed. They like to know which café won.", "id": "cvqqjw", "tone": "funny", "habit": "calls-home"},
+      ],
+      "smalltalk": [
+        {"text": "Measure twice.", "id": "9swtkg"},
+        {"text": "That one's a tea room.", "id": "1a76nln", "tone": "funny"},
+      ],
+    },
+  },
+  "v-brandt-esra": {
+    "likes": ["game", "tea"],
+    "talk": "Gruff and short; sealed pouches, sealed lips; warms up slowly over cards in the lounge.",
+    "tpl": "gruff",
+    "words": {"hi": ["Evening", "Hm"], "bye": ["Night", "Right then"], "yes": ["Fine", "Aye"], "thanks": ["Thanks", "Ta"], "wow": ["Hm. Not bad"], "sigh": ["Hm"], "nick": [null, "{me}", "{me}", "{me}", "{me}"]},
+    "lines": {
+      "bye": [
+        {"text": "{bye}. Don't wait up.", "id": "ehvr8g"},
+      ],
+      "chat": [
+        {"text": "Ships, pouches, ships. The lounge here's the best seat I've had.", "id": "oazble"},
+        {"text": "Up all night, every ship. Habit. Couriers don't sleep. We nap.", "id": "1vauwof", "tone": "funny"},
+      ],
+      "greet": [
+        {"text": "Evening. Brandt. Courier. Pouches are sealed. So am I.", "id": "73god7", "tone": "funny", "tier": [0, 0]},
+        {"text": "Hm, {me}. Sit, if you like. I'll lose at cards. I always do.", "id": "jhx6t9", "tier": [1, 4]},
+      ],
+      "near": [
+        {"text": "Bow lounge. Window, tea, nobody asking questions.", "id": "13mw0j9", "habit": "lounge-regular"},
+        {"text": "Night's when the ship's honest. Quiet, mostly.", "id": "1e4rtso", "time": "night"},
+      ],
+      "smalltalk": [
+        {"text": "Hm. Sealed.", "id": "o4vr9e"},
+        {"text": "Good tea, this.", "id": "i82tec"},
+      ],
+    },
+  },
+  "v-jaramillo-ulla": {
+    "likes": ["music", "star"],
+    "talk": "Light and quick; turns anything into a tune; hums you back what you just said.",
+    "tpl": "playful",
+    "words": {"hi": ["Hey there", "Oh, hello"], "bye": ["Catch you later", "Keep humming"], "yes": ["Go on, then", "Sure"], "thanks": ["Ta", "Lovely, thanks"], "wow": ["Ooh"], "sigh": ["Ah well"], "nick": [null, "{me}", "{me}", "{me}", "{me}"]},
+    "lines": {
+      "bye": [
+        {"text": "{bye}. If you hear a tune tonight, that was you.", "id": "mwqcny"},
+      ],
+      "chat": [
+        {"text": "Every ship hums a different note. The Wren's a low G. Very calm.", "id": "12877bx"},
+        {"text": "I call home after every show. They ask if anyone clapped. Somebody always does.", "id": "10l77ym"},
+      ],
+      "greet": [
+        {"text": "Hello! Ulla. I play lounges. Hum me something. Anything.", "id": "10j1g6f", "tier": [0, 0]},
+        {"text": "Oh, hi. Passing through. Is the bow lounge always this cosy?", "id": "3xrc4l", "tier": [0, 0]},
+        {"text": "{hi}, {me}. I turned your hello into a tune. It's in three-four.", "id": "1xkd19n", "tone": "funny", "tier": [1, 4]},
+      ],
+      "near": [
+        {"text": "Best room I've played all season. The windows do half the work.", "id": "sp51gw", "place": "lounge"},
+        {"text": "Stars after a show. That's the encore I like.", "id": "1vt79es", "habit": "stargazer"},
+      ],
+      "smalltalk": [
+        {"text": "Hum it. I'll play it.", "id": "1yl2lhg", "tone": "funny"},
+        {"text": "The Wren's a low G.", "id": "4ez7th"},
+      ],
+    },
+  },
+  "v-lindahl-milo": {
+    "likes": ["sweet", "plant"],
+    "talk": "Cheeky and hopeful; learning the trade by talking; sees a better kettle in everyone's future.",
+    "tpl": "playful",
+    "words": {"hi": ["Hiya", "Oh, hey"], "bye": ["Must dash", "See you"], "yes": ["Deal", "Go on"], "thanks": ["Cheers", "Ta very much"], "wow": ["Ooh, nice"], "sigh": ["Ah, well"], "nick": [null, "{me}", "{me}", "{me}", "{me}"]},
+    "lines": {
+      "bye": [
+        {"text": "{bye}. Think about the kettle.", "id": "v4b4aq", "tone": "funny"},
+      ],
+      "chat": [
+        {"text": "I'm learning the trade. Mostly I'm learning people say no.", "id": "1xh9ovx", "tone": "funny"},
+        {"text": "Your garden's lovely. I'd sell it if I could. I can't. Good.", "id": "ipa9u1"},
+      ],
+      "greet": [
+        {"text": "Hiya. Milo. Trader's apprentice. Want a better kettle? Everyone does.", "id": "zs0hw6", "tier": [0, 0]},
+        {"text": "{hi}, {me}. Sold a kettle to the Watch. Holt looked at it for an hour.", "id": "1civnip", "tone": "funny", "tier": [1, 4]},
+      ],
+      "near": [
+        {"text": "Studying the competition. The crew store's very good. Annoyingly.", "id": "f8o0si", "tone": "funny", "habit": "shopper"},
+        {"text": "The garden. Nobody here wants a kettle. Restful.", "id": "mk1eus", "habit": "garden-lover"},
+      ],
+      "smalltalk": [
+        {"text": "Better kettle. Just saying.", "id": "1gdmgh8", "tone": "funny"},
+        {"text": "Two sold. Practically famous.", "id": "oqypdf"},
+      ],
+    },
+  },
+  "v-lowe-adaeze": {
+    "likes": ["star", "made"],
+    "talk": "Calm and capable; between postings and itching to help; watches stars through any window going.",
+    "tpl": "steady",
+    "words": {"hi": ["Morning", "Hello"], "bye": ["See you round", "Back to the window"], "yes": ["Happy to", "Sure"], "thanks": ["Thanks", "Kind of you"], "wow": ["Oh, tidy"], "sigh": ["Ah, well"], "nick": [null, "{me}", "{me}", "{me}", "{me}"]},
+    "lines": {
+      "bye": [
+        {"text": "{bye}. If anything needs a second pair of hands, I'm free.", "id": "160lv0a"},
+      ],
+      "chat": [
+        {"text": "Between postings is the strangest job. Nothing to do and all day to do it.", "id": "l3v54h", "tone": "funny"},
+        {"text": "Marra Station next. Three panels, I'm told. Can't wait.", "id": "1gak7m0"},
+      ],
+      "greet": [
+        {"text": "Hello. Adaeze. Works, on my way to Marra Station. Need a hand?", "id": "dkksun", "tier": [0, 0]},
+        {"text": "{hi}, {me}. Kovac let me hold the stopwatch. Big day.", "id": "1l29k1z", "tone": "funny", "tier": [1, 4]},
+      ],
+      "near": [
+        {"text": "Window seat. I've counted the same stars every night. They're still there.", "id": "6w38ak", "habit": "window-seat"},
+        {"text": "Observatory. Your big telescope's lovely. Tell nobody I said so.", "id": "o585bd", "habit": "stargazer"},
+      ],
+      "smalltalk": [
+        {"text": "Need a hand?", "id": "gsb11b"},
+        {"text": "Still there. Good stars.", "id": "6drn32"},
+      ],
+    },
+  },
+  "v-mbatha-zora": {
+    "likes": ["music", "garden"],
+    "talk": "Warm and late-night; plays every evening in the music room; makes room for anyone who wanders in.",
+    "tpl": "warm",
+    "words": {"hi": ["Hey", "Hello, you"], "bye": ["Night, then", "See you later"], "yes": ["Sure", "Course"], "thanks": ["Thanks", "Cheers"], "wow": ["Oh, nice"], "sigh": ["Ah"], "nick": [null, "{me}", "{me}", "{me}", "{me}"]},
+    "lines": {
+      "bye": [
+        {"text": "{bye}. Music room's open late. You know where.", "id": "4rdrsy"},
+      ],
+      "chat": [
+        {"text": "Your piano's out of tune. Just a bit. I like it that way.", "id": "uohird"},
+        {"text": "Night owl. The ship's at its prettiest when it's mostly asleep.", "id": "vpf6ug"},
+      ],
+      "greet": [
+        {"text": "Hey. Zora. Music room, every evening. Come in, sit, no fee.", "id": "nmptwn", "tier": [0, 0]},
+        {"text": "{hi}, {me}. Last night someone asked for a song I didn't know. I learnt it.", "id": "ttday0", "tier": [1, 4]},
+      ],
+      "near": [
+        {"text": "Requests are open. Hum it, I'll find it.", "id": "w8xwmg", "place": "musicroom"},
+        {"text": "The garden smells like home after rain. I come here to think.", "id": "6qmw3", "habit": "garden-lover"},
+      ],
+      "smalltalk": [
+        {"text": "One more, then bed.", "id": "1xgcx7f"},
+        {"text": "Out of tune. Just right.", "id": "948qrp"},
+      ],
+    },
+  },
+  "v-nash-odo": {
+    "likes": ["music", "garden"],
+    "talk": "Slow and soft; loses the thread, finds a song instead; talks to plants as if they were the audience.",
+    "tpl": "dreamy",
+    "words": {"hi": ["Oh, hello", "Hey"], "bye": ["Mind how you go", "See you around"], "yes": ["Mm, yes", "Why not"], "thanks": ["Thanks", "That's kind"], "wow": ["Oh, look at that"], "sigh": ["Mm"], "nick": [null, "{me}", "{me}", "{me}", "{me}"]},
+    "lines": {
+      "bye": [
+        {"text": "{bye}. Hum something on the way. It helps.", "id": "18b2xl4"},
+      ],
+      "chat": [
+        {"text": "I hum to the tomatoes. They seem to like it. Hard to tell with tomatoes.", "id": "16rx51f", "tone": "funny"},
+        {"text": "Every station has a song. I'm still learning this one.", "id": "1q6hrl4"},
+      ],
+      "greet": [
+        {"text": "Oh, hello. Odo. I play things. Mostly at night. Mostly softly.", "id": "fr8mve", "tier": [0, 0]},
+        {"text": "Mm, {me}. The garden's got good acoustics. Nobody tells you that.", "id": "1eletg7", "tier": [1, 4]},
+        {"text": "Evening. There's a tune in the vents tonight. Can you hear it?", "id": "1l5xms", "time": "evening"},
+      ],
+      "near": [
+        {"text": "The garden's my green room. Is that a joke? It's a bit of one.", "id": "17l7qsg", "tone": "funny", "habit": "garden-lover"},
+        {"text": "One drink, one song. Then maybe one more song.", "id": "f9fxdm", "habit": "bar-regular"},
+      ],
+      "smalltalk": [
+        {"text": "Good acoustics, gardens.", "id": "5h30t0"},
+        {"text": "One more song. Just one.", "id": "16sinfp", "tone": "funny"},
+      ],
+    },
+  },
+  "v-orme-ronan": {
+    "likes": ["plant", "garden"],
+    "talk": "Warm and unhurried; holds strong opinions about soil, gently; talks to the tomatoes.",
+    "tpl": "warm",
+    "words": {"hi": ["Hello there", "Oh, hello"], "bye": ["Back to the beds", "Take care"], "yes": ["Of course", "Lovely"], "thanks": ["Thank you kindly", "Ta"], "wow": ["Oh, isn't that grand"], "sigh": ["Ah"], "nick": [null, "{me}", "{me}", "{me}", "{me}"]},
+    "lines": {
+      "bye": [
+        {"text": "{bye}. Say hello to the tomatoes if you pass.", "id": "1qiq1kj"},
+      ],
+      "chat": [
+        {"text": "Plants grown in space lean towards voices. So I talk to them. Science.", "id": "yil8gi", "tone": "funny"},
+        {"text": "Cruz has done wonders here. I've told them so. Twice.", "id": "1obd87n"},
+      ],
+      "greet": [
+        {"text": "Hello there. Ronan. Plants. Your garden's lovely. I have notes.", "id": "9wxsv5", "tone": "funny", "tier": [0, 0]},
+        {"text": "{hi}, {me}. The tomatoes and I have been talking. They're doing well.", "id": "16yf96d", "tier": [1, 4]},
+      ],
+      "near": [
+        {"text": "That big tree. Somebody's been climbing it. I won't say who.", "id": "18g6x4p", "tone": "funny", "deck": "3"},
+        {"text": "One drink after the garden. The soil's still under my nails.", "id": "1gbnie4", "habit": "bar-regular"},
+      ],
+      "smalltalk": [
+        {"text": "Lovely loam, this.", "id": "i1n60y"},
+        {"text": "Morning, tomatoes.", "id": "mc5aou", "tone": "funny"},
+      ],
+    },
+  },
+  "v-pacheco-ines": {
+    "likes": ["card", "star"],
+    "talk": "Brisk and fair; clipboard first, smile second; collects a mission patch from every ship.",
+    "tpl": "brisk",
+    "words": {"hi": ["Morning", "Hello"], "bye": ["On to the next deck", "Carry on"], "yes": ["Noted", "Fine"], "thanks": ["Thank you", "Noted, thanks"], "wow": ["Well, now"], "sigh": ["Hm"], "nick": [null, "{me}", "{me}", "{me}", "{me}"]},
+    "lines": {
+      "bye": [
+        {"text": "{bye}. Don't mind me. I'm only looking.", "id": "1ifqips"},
+      ],
+      "chat": [
+        {"text": "I collect a patch from every ship I inspect. The Wren's is my favourite so far.", "id": "1jw82ul"},
+        {"text": "Clipboard first, then tea. Brennan's tea's the best of the tour.", "id": "nozgjc"},
+      ],
+      "greet": [
+        {"text": "Morning. Pacheco, Concord. Hull inspection. Carry on as you were.", "id": "j8ncwh", "tier": [0, 0]},
+        {"text": "{hi}, {me}. Your hull's very clean. Calder's doing. I've noted it.", "id": "1rl34j7", "tier": [1, 4]},
+      ],
+      "near": [
+        {"text": "Calder answered every question before I asked it. Unnerving.", "id": "12d0mrs", "tone": "funny", "place": "worksbay"},
+        {"text": "Off duty. Clipboard down. Stars up.", "id": "1mpy4hr", "habit": "stargazer"},
+      ],
+      "smalltalk": [
+        {"text": "Noted. Very good.", "id": "1k9wsro"},
+        {"text": "One more patch for the collection.", "id": "g9p2zg"},
+      ],
+    },
+  },
+  "v-quinlan-yuki": {
+    "likes": ["book", "tea"],
+    "talk": "Dry and quick; a pencil behind each ear; maps everything and admits to nothing.",
+    "tpl": "dry",
+    "words": {"hi": ["Hello", "Afternoon"], "bye": ["Back to it", "Right"], "yes": ["Fine", "Go on"], "thanks": ["Ta", "Thanks"], "wow": ["Huh"], "sigh": ["Mm"], "nick": [null, "{me}", "{me}", "{me}", "{me}"]},
+    "lines": {
+      "bye": [
+        {"text": "{bye}. Don't move. I've nearly got you.", "id": "1mie9dq", "tone": "funny"},
+      ],
+      "chat": [
+        {"text": "Two pencils. One draws, one argues.", "id": "1gn1t16", "tone": "funny"},
+        {"text": "The bar here's quiet enough to draw in. That's high praise.", "id": "1oth4cp"},
+      ],
+      "greet": [
+        {"text": "Hello. Quinlan. Charts. Yes, two pencils. One's for emergencies.", "id": "gt70zp", "tone": "funny", "tier": [0, 0]},
+        {"text": "{hi}, {me}. I've drawn your mess hall. You're in it. Small.", "id": "mhf3xn", "tone": "funny", "tier": [1, 4]},
+      ],
+      "near": [
+        {"text": "Window seat. The view never needs correcting.", "id": "14zp88m", "habit": "window-seat"},
+        {"text": "One drink. One sketch. That's the deal.", "id": "b7jbmc", "habit": "bar-regular"},
+      ],
+      "smalltalk": [
+        {"text": "Second pencil. Emergency.", "id": "1dmab57", "tone": "funny"},
+        {"text": "Draws the charts. Doesn't read them.", "id": "wl6wk2", "tone": "funny"},
+      ],
+    },
+  },
+  "v-saarinen-teo": {
+    "likes": ["star", "book"],
+    "talk": "Quiet and careful; carries a lens the size of a dinner plate; names stars after cafés, shyly.",
+    "tpl": "shy",
+    "words": {"hi": ["Oh, hello", "Hi"], "bye": ["Bye, then", "See you"], "yes": ["Okay", "Yes, all right"], "thanks": ["Thanks", "Oh, thank you"], "wow": ["Oh"], "sigh": ["Oh, well"], "nick": [null, "{me}", "{me}", "{me}", "{me}"]},
+    "lines": {
+      "bye": [
+        {"text": "Bye, then. Um. Thanks for talking.", "id": "pprsps"},
+      ],
+      "chat": [
+        {"text": "The lens is the size of a dinner plate. I carried it on my knees the whole way.", "id": "ag0cn2", "tone": "funny"},
+        {"text": "I call home every night. They ask if I've talked to anyone. Now I can say yes.", "id": "yd78no", "tone": "warm"},
+      ],
+      "greet": [
+        {"text": "Oh. Hello. Teo. Astronomy. Mind the lens. It's very big.", "id": "1obi6s7", "tier": [0, 0]},
+        {"text": "Hi, {me}. I named a star. After a café. Please don't laugh.", "id": "ajjy1m", "tier": [1, 4]},
+      ],
+      "near": [
+        {"text": "Window seat. I'm counting the ones I haven't named yet.", "id": "15xroo3", "habit": "window-seat"},
+        {"text": "Observatory. Quiet. Lens fitted. Perfect.", "id": "74nge0", "deck": "2", "time": "night"},
+      ],
+      "smalltalk": [
+        {"text": "Mind the lens.", "id": "1hewhvr"},
+        {"text": "That one's a café now.", "id": "pv5p5y", "tone": "funny"},
+      ],
+    },
+  },
+  "v-thorne-kaito": {
+    "likes": ["book", "garden"],
+    "talk": "Eager and careful; on loan from the charts office; keeps asking which way is forward.",
+    "tpl": "earnest",
+    "words": {"hi": ["Hello", "Oh, hi"], "bye": ["Back to the charts", "See you"], "yes": ["Of course", "Yes, please"], "thanks": ["Thank you", "Thanks so much"], "wow": ["Oh, wow"], "sigh": ["Oh dear"], "nick": [null, "{me}", "{me}", "{me}", "{me}"]},
+    "lines": {
+      "bye": [
+        {"text": "{bye}. If I'm lost later, I'm on Deck 4.", "id": "1eqlerz", "tone": "funny"},
+      ],
+      "chat": [
+        {"text": "The charts office is very quiet. The Wren is very not quiet. I love it.", "id": "1k2uy0y"},
+        {"text": "I'm drawing the corridors from memory. Deck 3 is done. Mostly.", "id": "lfli0g"},
+      ],
+      "greet": [
+        {"text": "Hello. Kaito. Charts office, on loan. Which way's forward? Sorry.", "id": "1nk8vlo", "tier": [0, 0]},
+        {"text": "{hi}, {me}. I got lost on Deck 4 again. I'm mapping it. Badly.", "id": "1yx9g5b", "tone": "funny", "tier": [1, 4]},
+      ],
+      "near": [
+        {"text": "The garden's the only place I always find. I follow the smell.", "id": "148um53", "tone": "funny", "habit": "garden-lover"},
+        {"text": "One drink, then the corridor map. Wish me luck.", "id": "14n36ye", "habit": "bar-regular"},
+      ],
+      "smalltalk": [
+        {"text": "Which way's forward?", "id": "s7x24z", "tone": "funny"},
+        {"text": "Deck 4. Lost again.", "id": "1gvkux6", "tone": "funny"},
+      ],
+    },
+  },
+  "v-varela-edda": {
+    "likes": ["tea", "sweet"],
+    "talk": "Bright and quick, a born seller; every sentence ends at a price; means it kindly.",
+    "tpl": "chatty",
+    "words": {"hi": ["Hello hello", "Oh, hi"], "bye": ["Lovely to chat", "Catch you at the bar"], "yes": ["Done deal", "Oh, go on"], "thanks": ["Thank you", "You're a gem"], "wow": ["Ooh, look"], "sigh": ["Oh well"], "nick": [null, "{me}", "{me}", "{me}", "{me}"]},
+    "lines": {
+      "bye": [
+        {"text": "{bye}. If you want a kettle, I'll be by the window.", "id": "1mstdny"},
+      ],
+      "chat": [
+        {"text": "My case is all samples. Spoons, mostly. And one very nice kettle.", "id": "1mie6vy"},
+        {"text": "I call home every night. Mum asks what I sold. Today: a smile.", "id": "h7xjvk"},
+      ],
+      "greet": [
+        {"text": "Hello hello. Edda. I sell kettles. Do you need a kettle? Everyone does.", "id": "kki1im", "tier": [0, 0]},
+        {"text": "{hi}, {me}. Two kettles sold already. The galley said no. Rudely.", "id": "1ci5s4n", "tone": "funny", "tier": [1, 4]},
+      ],
+      "near": [
+        {"text": "The bar's the best shop on any ship. Everyone's in a buying mood.", "id": "1re7m6x", "tone": "funny", "habit": "bar-regular"},
+        {"text": "Your galley has six kettles. I counted. They're very good kettles.", "id": "thezoc", "place": "mess"},
+      ],
+      "smalltalk": [
+        {"text": "Lovely kettle, that. Not as good as mine.", "id": "pv6pr6", "tone": "funny"},
+        {"text": "Two sold. One to go.", "id": "1qhcpan"},
+      ],
+    },
+  },
+  "v-wexley-hale": {
+    "likes": ["made", "tea"],
+    "talk": "Keen and practical; can't keep their hands still; asks what's broken before asking your name.",
+    "tpl": "earnest",
+    "words": {"hi": ["Morning", "Hello"], "bye": ["Off to find a job", "See you in the bay"], "yes": ["Happy to", "Right away"], "thanks": ["Thanks", "Much appreciated"], "wow": ["Oh, that's tidy"], "sigh": ["Ah, well"], "nick": [null, "{me}", "{me}", "{me}", "{me}"]},
+    "lines": {
+      "bye": [
+        {"text": "{bye}. Shout if anything rattles. Please.", "id": "65ddo9"},
+      ],
+      "chat": [
+        {"text": "Marra Station's been rebuilt twice. I'll probably help with the third.", "id": "6nktee", "tone": "funny"},
+        {"text": "Window seat at sunrise. Well, ship's morning. Still counts.", "id": "10a2uf9"},
+      ],
+      "greet": [
+        {"text": "Hello. Hale. Works, between postings. Anything broken? Asking for me.", "id": "snd4rs", "tone": "funny", "tier": [0, 0]},
+        {"text": "Morning. I'm off to Marra Station. Till then I'm bored. Help.", "id": "jb63kf", "tone": "funny", "tier": [0, 0]},
+        {"text": "{hi}, {me}. Calder let me hold a spanner. I'm calmer now.", "id": "1pcbw5w", "tone": "funny", "tier": [1, 4]},
+      ],
+      "near": [
+        {"text": "Best part of a transfer: windows. Worst part: nothing to fix.", "id": "11rddsc", "habit": "window-seat"},
+        {"text": "Just watching. I won't touch. I might touch.", "id": "1xv7lmj", "tone": "funny", "place": "worksbay"},
+      ],
+      "smalltalk": [
+        {"text": "Is that a loose panel? Can I?", "id": "xg9jkq", "tone": "funny"},
+        {"text": "Marra Station soon. Then work.", "id": "jiv2wf"},
+      ],
+    },
+  },
+  "v-xu-yuki": {
+    "likes": ["book", "star"],
+    "talk": "Quick and exact; counts corridors under their breath; draws a map of anywhere they've been twice.",
+    "tpl": "brisk",
+    "words": {"hi": ["Hello", "Right"], "bye": ["Back to the charts", "Must get on"], "yes": ["Done", "Fine"], "thanks": ["Thanks", "Good"], "wow": ["Huh, neat"], "sigh": ["Hm"], "nick": [null, "{me}", "{me}", "{me}", "{me}"]},
+    "lines": {
+      "bye": [
+        {"text": "{bye}. If you find a thirteenth door, tell me.", "id": "94pqj1", "tone": "funny"},
+      ],
+      "chat": [
+        {"text": "I'm mapping the Wren from memory. Deck 4's a maze. A nice one.", "id": "u7tmy3"},
+        {"text": "Up early, up late. Charts don't draw themselves. Mostly.", "id": "yttnut", "tone": "funny"},
+      ],
+      "greet": [
+        {"text": "Hello. Xu. Charts. Is that corridor eleven doors or twelve?", "id": "4fpsmm", "tier": [0, 0]},
+        {"text": "{hi}, {me}. Twelve. It was twelve. I've added it to the map.", "id": "1ddny2x", "tier": [1, 4]},
+      ],
+      "near": [
+        {"text": "The chart room here is better than ours. Don't tell the office.", "id": "1281puv", "tone": "funny", "deck": "2"},
+        {"text": "Mess, then the chart room. Same route both ways. Efficient.", "id": "1gvhct7", "place": "mess"},
+      ],
+      "smalltalk": [
+        {"text": "Eleven. Twelve. Twelve.", "id": "2a4uvl"},
+        {"text": "That's not on the map. Yet.", "id": "1as0how", "tone": "funny"},
+      ],
+    },
+  },
+  "v-yarrow-ulla": {
+    "likes": ["sweet", "star"],
+    "talk": "Dry and tired; says little about the job and less about the case; a good laugh hidden under the yawns.",
+    "tpl": "dry",
+    "words": {"hi": ["Hello", "Mm"], "bye": ["Off I go", "Right"], "yes": ["Fine", "All right"], "thanks": ["Thanks", "Cheers"], "wow": ["Huh"], "sigh": ["Oh, well"], "nick": [null, "{me}", "{me}", "{me}", "{me}"]},
+    "lines": {
+      "bye": [
+        {"text": "{bye}. If anyone asks, you didn't see a case.", "id": "m7vxm6", "tone": "funny"},
+      ],
+      "chat": [
+        {"text": "Three ships this month. The Wren's got the best toast.", "id": "1osgwm"},
+        {"text": "The crew store sells good sweets. That's the only thing I'm taking home.", "id": "8nbwvu"},
+      ],
+      "greet": [
+        {"text": "Hello. Courier. Don't ask about the case. Nobody tells me either.", "id": "1lzjil5", "tone": "funny", "tier": [0, 0]},
+        {"text": "Mm, {me}. Slept with the case again. It snores.", "id": "1ds08u5", "tone": "funny", "tier": [1, 4]},
+      ],
+      "near": [
+        {"text": "Observatory. Quiet, dark, nobody asking about the case. Perfect.", "id": "1vyhg3b", "habit": "stargazer"},
+        {"text": "Window shopping. My case is full. Of what, I couldn't say.", "id": "60hqj0", "tone": "funny", "habit": "shopper"},
+      ],
+      "smalltalk": [
+        {"text": "It's just a case.", "id": "h9qybj"},
+        {"text": "Toast. Good toast.", "id": "wasn88"},
       ],
     },
   },
@@ -20719,6 +21310,19 @@ const VOICE = {
         {"text": "My grandmother loves Lanterns. I'll tell her ours.", "id": "lvyere", "tone": "warm", "season": "lanterns"},
         {"text": "Good morning. Sincerely.", "id": "1nghgbz", "tone": "funny", "time": "morning"},
         {"text": "The view from here would fill a letter. Two.", "id": "1lb30at", "place": "lounge"},
+      ],
+      "tiles.dock": [
+        {"text": "Three. One to me. I'm counting.", "id": "1mkte1a"},
+      ],
+      "tiles.lose": [
+        {"text": "Well played. I'll write it in the tally. Honestly.", "id": "1ypkqc2"},
+      ],
+      "tiles.start": [
+        {"text": "A game. Splendid. I hope this finds you ready.", "id": "1yonry9", "tone": "funny"},
+        {"text": "I warn you, I keep a tally. Of everything.", "id": "1f25sp5", "tone": "funny"},
+      ],
+      "tiles.win": [
+        {"text": "Good game. A clear win. By one dock. A clear dock.", "id": "16sjj6a", "tone": "funny"},
       ],
     },
   },
@@ -21976,6 +22580,78 @@ const LINES = {
     {"text": "Tea first. Board second.", "id": "1jhqc37", "act": "breakfast", "dept": "works"},
     {"text": "Nearly tea. Nearly.", "id": "9cmxpn", "dept": "works", "time": "afternoon"},
   ],
+  "tiles.dock": [
+    {"text": "Docked.", "id": "3iewhz"},
+    {"text": "That's three.", "id": "48r1ss"},
+    {"text": "There we go.", "id": "15dm5r3"},
+    {"text": "Oh, that's nice. That's three.", "id": "1nsg63r"},
+    {"text": "Three in. Lovely.", "id": "1uzygj3"},
+    {"text": "Sorry. Not sorry. Docked.", "id": "3kzghu", "tone": "funny"},
+    {"text": "Didn't see that coming, did you? Neither did I.", "id": "1v10fv4", "tone": "funny"},
+    {"text": "One more for me.", "id": "1t1epub"},
+    {"text": "Three. Write it down.", "id": "wd10g3", "tone": "funny", "trait": "competitive"},
+    {"text": "And that's how it's done.", "id": "1jq4eks", "trait": "competitive"},
+    {"text": "Ooh, look at that! Three! Look!", "id": "i4tjoo", "trait": "chatty"},
+    {"text": "Oh. That docked. Sorry.", "id": "hi8rhu", "trait": "shy"},
+    {"text": "Ha! Three! I love this game.", "id": "1xzk997", "trait": "cheerful"},
+  ],
+  "tiles.lose": [
+    {"text": "Well played.", "id": "jeinq8"},
+    {"text": "You got me. Fair and square.", "id": "1praf8s"},
+    {"text": "Good game. You earned that one.", "id": "w3gs91"},
+    {"text": "Oh, that's me done. Well played.", "id": "18lu7co"},
+    {"text": "Beaten. Lovely. I mean it. Well, nearly.", "id": "14ee94r", "tone": "funny"},
+    {"text": "I'll get you next time. Good game.", "id": "muwbpx"},
+    {"text": "Where did you learn that? Well played.", "id": "1mpcf77"},
+    {"text": "You're getting good at this. Too good.", "id": "1chuie1", "tone": "funny"},
+    {"text": "Again. Best of three. Starting now.", "id": "1yte66a", "tone": "funny", "trait": "competitive"},
+    {"text": "Hm. Well played. I'm writing that down.", "id": "9tp4vd", "trait": "competitive"},
+    {"text": "You're a natural! I knew it! Did I teach you that?", "id": "11m022j", "tone": "funny", "trait": "chatty"},
+    {"text": "Oh, well done. Really. That was good.", "id": "1wlpooq", "trait": "shy"},
+    {"text": "Ha! Beaten! Brilliant. Well played.", "id": "1wves6r", "trait": "cheerful"},
+  ],
+  "tiles.miss": [
+    {"text": "Ooh. You could have docked there.", "id": "1p70si"},
+    {"text": "That was a three, just there. Next time.", "id": "bt5pf1"},
+    {"text": "Don't look now, but you missed one.", "id": "15d6d96", "tone": "funny"},
+    {"text": "Close. There was a dock by the corner.", "id": "6iweww"},
+    {"text": "Shh. I didn't see that. I saw that.", "id": "t39id5", "tone": "funny"},
+    {"text": "Look left next time. Just saying.", "id": "ozhd9r"},
+    {"text": "I'll take that dock, then. Thank you.", "id": "1nvvrt", "tone": "funny", "trait": "competitive"},
+    {"text": "Oh, you nearly had one! Just there! Never mind.", "id": "1q62cni", "trait": "chatty"},
+    {"text": "Um. There was a three. Sorry. Just there.", "id": "exiga1", "trait": "shy"},
+    {"text": "So close! You'll have it next go.", "id": "1pu612x", "trait": "cheerful"},
+  ],
+  "tiles.start": [
+    {"text": "{hi}. Your move.", "id": "mhr6ux"},
+    {"text": "Right. Let's see what you've got.", "id": "1b94lq5"},
+    {"text": "Best of one? Best of one.", "id": "1tium7b"},
+    {"text": "I'll go easy. No, I won't. Your move.", "id": "1tjt1lf", "tone": "funny"},
+    {"text": "Tea's poured. Board's set. Off you go.", "id": "1c5f7yb"},
+    {"text": "Lovely. I've been wanting a game.", "id": "120nvan"},
+    {"text": "Mind the corners. That's all I'll say.", "id": "1uejskc"},
+    {"text": "Go on, then. I'm ready.", "id": "1hxdjlg"},
+    {"text": "I don't play for fun. Well. Mostly for fun.", "id": "8zsbmp", "tone": "funny", "trait": "competitive"},
+    {"text": "Fair warning: I keep score.", "id": "xfzfds", "tone": "funny", "trait": "competitive"},
+    {"text": "Oh good, a game. Did I tell you about my week?", "id": "rw3r89", "tone": "funny", "trait": "chatty"},
+    {"text": "Right, so, Tiles. I love Tiles. Your move.", "id": "1o9valr", "trait": "chatty"},
+    {"text": "Oh. A game? All right. Yes. You first.", "id": "1na7bjk", "trait": "shy"},
+    {"text": "Brilliant! A game! Your move, {nick}.", "id": "6jyc4p", "trait": "cheerful"},
+  ],
+  "tiles.win": [
+    {"text": "Good game.", "id": "536zov"},
+    {"text": "Close one. Really close.", "id": "1x88wpb"},
+    {"text": "Good game. Again sometime?", "id": "adbl1"},
+    {"text": "I got lucky with that last three.", "id": "145i4d8"},
+    {"text": "You'll have me next time. You nearly did.", "id": "91gdpn"},
+    {"text": "Thanks for the game. That was fun.", "id": "xyd7qy"},
+    {"text": "Phew. That was a fight. Good game.", "id": "cisr5e"},
+    {"text": "Shake? Good game, {nick}.", "id": "1uhfon5"},
+    {"text": "Good game. Rematch whenever you like.", "id": "lpfmmz", "trait": "competitive"},
+    {"text": "I won! I never win! Well, sometimes. Today!", "id": "szqsei", "tone": "funny", "trait": "chatty"},
+    {"text": "Oh. I won? Sorry. It was close.", "id": "o5k6wy", "trait": "shy"},
+    {"text": "That was lovely. Again? Let's go again.", "id": "1wnajqh", "trait": "cheerful"},
+  ],
 };
 const CONVOS = [
   {"id": "s77ign", "tone": "funny", "place": "booths", "topic": "booths", "not": {"who": "torres-zeke|vance|calder|marrow|holt"}, "lines": [{"who": "A", "text": "Can you hear me? Mum? There you are."}, {"who": "A", "text": "Yes, I'm eating. Yes, properly."}, {"who": "A", "text": "No, the food's good. Better than yours. Sorry."}]},
@@ -22220,6 +22896,36 @@ const CONVOS = [
   {"id": "1nj3fmg", "tone": "warm", "pair": "any+any", "time": "night", "topic": "night", "lines": [{"who": "A", "text": "Stars are good tonight."}, {"who": "B", "text": "Stars are always good. It's space."}, {"who": "A", "text": "Still. Look at them."}]},
   {"id": "17rdca", "tone": "funny", "act": "meal", "pair": "any+any", "time": "night", "topic": "night", "lines": [{"who": "A", "text": "Is this breakfast or dinner?"}, {"who": "B", "text": "Yes."}]},
   {"id": "3wtfko", "pair": "any+any", "time": "evening", "topic": "night", "lines": [{"who": "A", "text": "Off to bed?"}, {"who": "B", "text": "Off to work."}, {"who": "A", "text": "Night shift? Sorry."}, {"who": "B", "text": "Don't be. It's the best view on the ship."}]},
+  {"id": "g75xkt", "tone": "funny", "place": "mess", "topic": "pairs", "who": "madsen-ivo", "with": "walsh-esme", "lines": [{"who": "A", "text": "Right, listen. So this morning, right..."}, {"who": "B", "text": "Short version, Ivo."}, {"who": "A", "text": "I dropped a spoon."}, {"who": "B", "text": "Thank you."}]},
+  {"id": "50uu9h", "tone": "funny", "place": "mess", "topic": "pairs", "who": "varga-tariq", "with": "dlamini-lukas", "lines": [{"who": "A", "text": "I hope your breakfast finds you well."}, {"who": "B", "text": "Hm. It does. Toast."}, {"who": "A", "text": "Forty-one onions to thirty-eight, by the way."}, {"who": "B", "text": "Not at breakfast, Tariq."}]},
+  {"id": "jp493u", "tone": "funny", "place": "mess", "topic": "pairs", "who": "larsen-hamid", "with": "grieve-thea", "lines": [{"who": "A", "text": "You skipped breakfast."}, {"who": "B", "text": "You skip breakfast every day."}, {"who": "A", "text": "That's how I know it's bad."}, {"who": "B", "text": "Pass the toast, then. Two slices."}]},
+  {"id": "1gons9d", "tone": "funny", "place": "mess", "topic": "pairs", "who": "tran-chloe", "with": "santos-zofia", "lines": [{"who": "A", "text": "Eat something that isn't coffee."}, {"who": "B", "text": "Coffee's a bean. Beans are food."}, {"who": "A", "text": "That's not how beans work."}, {"who": "B", "text": "It's how my beans work."}]},
+  {"id": "1vl8czb", "tone": "warm", "act": "breakfast", "place": "mess", "topic": "pairs", "who": "yoon-elif", "with": "janssen-hugo", "lines": [{"who": "A", "text": "Why did the cup go to bed early? It was tea-red."}, {"who": "B", "text": "...Steady, Elif."}, {"who": "A", "text": "Sorry. Sorry. It's the night shift."}, {"who": "B", "text": "It's the jokes. But I like them."}]},
+  {"id": "tjpq71", "tone": "warm", "place": "lounge", "topic": "pairs", "who": "dlamini-lukas", "with": "bakshi-sol", "lines": [{"who": "A", "text": "Window."}, {"who": "B", "text": "No rain."}, {"who": "A", "text": "No rain."}, {"who": "B", "text": "We could pretend."}]},
+  {"id": "nyc8gp", "tone": "warm", "place": "lounge", "topic": "pairs", "who": "ishikawa-orla", "with": "esposito-yara", "lines": [{"who": "A", "text": "That's a new star. Just there. See it?"}, {"who": "B", "text": "Three hundred and five. Write it down for me?"}, {"who": "A", "text": "In your journal or mine?"}, {"who": "B", "text": "Both. Then we're sure."}]},
+  {"id": "1odtvu4", "tone": "funny", "place": "lounge", "topic": "pairs", "who": "takahashi-wen", "with": "haddad-tamsin", "lines": [{"who": "A", "text": "It's \"harbour\". Not \"harder\"."}, {"who": "B", "text": "Is it? I always sang \"harder\". Didn't I?"}, {"who": "A", "text": "Everyone sings it wrong. Except me."}, {"who": "B", "text": "And Zeke, and Olu, and..."}]},
+  {"id": "1epj7cn", "tone": "funny", "place": "lounge", "topic": "pairs", "who": "janssen-hugo|cruz-tove|esposito-yara|walsh-esme|alvarez-luca", "with": "janssen-hugo|cruz-tove|esposito-yara|walsh-esme|alvarez-luca", "lines": [{"who": "A", "text": "How's your Gerald?"}, {"who": "B", "text": "Leaning. Thinking, I expect. Yours?"}, {"who": "A", "text": "New arm."}, {"who": "B", "text": "Oh, lovely. Give him my best."}]},
+  {"id": "1qalr5i", "tone": "funny", "place": "lounge", "topic": "pairs", "who": "santos-zofia", "with": "strand-erik", "lines": [{"who": "A", "text": "Rowing board. I'm two seconds off."}, {"who": "B", "text": "Off who?"}, {"who": "A", "text": "Vance. Who's on the treadmill now. Scared."}, {"who": "B", "text": "Or just bored of winning."}]},
+  {"id": "9nd2wu", "tone": "funny", "place": "hydroponics_garden", "time": "morning", "topic": "pairs", "who": "cruz-tove", "with": "hart-ravi", "lines": [{"who": "A", "text": "Mm. Morning."}, {"who": "B", "text": "Hate it."}, {"who": "A", "text": "The beans like it."}, {"who": "B", "text": "...The beans have a point."}]},
+  {"id": "rssr2", "tone": "funny", "place": "hydroponics_garden", "topic": "pairs", "who": "oneill-imani", "with": "cruz-tove", "lines": [{"who": "A", "text": "The garden needs a playlist."}, {"who": "B", "text": "Mm. It's got the misters."}, {"who": "A", "text": "That's percussion. I'll add a tune."}, {"who": "B", "text": "Nothing loud. The lettuces."}]},
+  {"id": "1ry7nj8", "tone": "warm", "place": "hydroponics_garden", "topic": "pairs", "who": "madsen-ivo", "with": "cruz-tove", "lines": [{"who": "A", "text": "Can I press one of the marigolds? Just one?"}, {"who": "B", "text": "Mm. Which one?"}, {"who": "A", "text": "The one by the bench. It's perfect."}, {"who": "B", "text": "...Go on, then. Don't tell anyone."}]},
+  {"id": "1gxteq2", "tone": "warm", "place": "hydroponics_garden", "topic": "pairs", "who": "dlamini-lukas", "with": "hart-ravi", "lines": [{"who": "A", "text": "Misting hour."}, {"who": "B", "text": "Best hour."}, {"who": "A", "text": "Smells like rain."}, {"who": "B", "text": "Smells like home. Somewhere's home."}]},
+  {"id": "5wak0b", "tone": "funny", "place": "hydroponics_garden", "topic": "pairs", "who": "strand-erik", "with": "oneill-imani", "lines": [{"who": "A", "text": "Did you paint me? A tiny me? On my bunk?"}, {"who": "B", "text": "Couldn't say."}, {"who": "A", "text": "It had my running shoes."}, {"who": "B", "text": "Lovely shoes. Whoever painted them."}]},
+  {"id": "4vrt0s", "tone": "funny", "place": "lounge", "topic": "pairs", "who": "rina", "with": "pell", "lines": [{"who": "A", "text": "Tiles?"}, {"who": "B", "text": "On the warped board?"}, {"who": "A", "text": "I win on any board. Sit down."}, {"who": "B", "text": "Fine. But I'm having the good chair."}]},
+  {"id": "1f8frhr", "tone": "funny", "place": "mess", "topic": "pairs", "who": "hart-ravi", "with": "teague-theo|abara-rosa", "lines": [{"who": "A", "text": "Who drew me with a moustache?"}, {"who": "B", "text": "Not me."}, {"who": "A", "text": "It's in your pen."}, {"who": "B", "text": "It's a very good moustache, though."}]},
+  {"id": "1to6pc3", "tone": "funny", "place": "lounge", "topic": "pairs", "who": "esposito-yara|bakshi-sol", "with": "rina", "lines": [{"who": "A", "text": "Best of three?"}, {"who": "B", "text": "Best of one. I don't need three."}, {"who": "A", "text": "Fair."}, {"who": "B", "text": "Your move. Honestly, take your time."}]},
+  {"id": "37p5j1", "tone": "funny", "place": "lounge", "time": "evening", "topic": "pairs", "who": "tran-chloe", "with": "dlamini-lukas", "lines": [{"who": "A", "text": "Nearly ten."}, {"who": "B", "text": "Hm."}, {"who": "A", "text": "Lights out at ten."}, {"who": "B", "text": "I know. Two hundred and five times I know."}]},
+  {"id": "1tw722g", "tone": "funny", "place": "infirmary", "topic": "pairs", "who": "grieve-thea", "with": "tran-chloe|fonseca-arjun", "lines": [{"who": "A", "text": "There's a hat in the lost-property box."}, {"who": "B", "text": "There's a hat in mine too."}, {"who": "A", "text": "Your box?"}, {"who": "B", "text": "My box. The real one."}]},
+  {"id": "1c8mrur", "tone": "funny", "place": "gym", "topic": "pairs", "who": "santos-zofia", "with": "lindqvist-isak|moreau-signe", "lines": [{"who": "A", "text": "Two seconds. Two."}, {"who": "B", "text": "One and a half, after this morning."}, {"who": "A", "text": "You didn't."}, {"who": "B", "text": "I did. I'm coming for you. And Vance."}]},
+  {"id": "xtq6n2", "tone": "funny", "place": "gym", "topic": "pairs", "who": "larsen-hamid", "with": "esposito-yara", "lines": [{"who": "A", "text": "Stretch first. Please."}, {"who": "B", "text": "I always stretch."}, {"who": "A", "text": "You stretch your arms. Legs too."}, {"who": "B", "text": "Fine. For you, legs."}]},
+  {"id": "30es6i", "tone": "funny", "place": "gym", "topic": "pairs", "who": "varga-tariq", "with": "strand-erik", "lines": [{"who": "A", "text": "That race. I was ahead at the turn."}, {"who": "B", "text": "You were ahead at the start."}, {"who": "A", "text": "The turn's what counts."}, {"who": "B", "text": "The end's what counts, Tariq."}]},
+  {"id": "1vpoyhj", "tone": "funny", "place": "booths", "topic": "pairs", "who": "vasquez-uma", "with": "walsh-esme|grieve-thea|hart-ravi", "lines": [{"who": "A", "text": "How are your fish?"}, {"who": "B", "text": "Fat, apparently. Yours?"}, {"who": "A", "text": "My mum says the orange one's sulking."}, {"who": "B", "text": "Mine sulk too. It's a fish thing."}]},
+  {"id": "1jwg61y", "tone": "funny", "place": "booths", "topic": "pairs", "who": "eklund-leila", "with": "keane-davi", "lines": [{"who": "A", "text": "Message for your gran?"}, {"who": "B", "text": "For my gran. You?"}, {"who": "A", "text": "For mine. Are they the same gran?"}, {"who": "B", "text": "Can't be. Mine's never mentioned you."}]},
+  {"id": "xxpzdv", "tone": "funny", "place": "booths", "topic": "pairs", "who": "navarro-mateo|salo-saad|nakamura-bilal", "with": "navarro-mateo|salo-saad|nakamura-bilal", "lines": [{"who": "A", "text": "Calling the Halcyon?"}, {"who": "B", "text": "Calling my twin. Same thing, this week."}, {"who": "A", "text": "Tell the set I said hello."}, {"who": "B", "text": "You're the set. We're the set."}]},
+  {"id": "1ny3v9x", "tone": "funny", "place": "mess", "topic": "pairs", "who": "haddad-tamsin", "with": "larsen-hamid", "lines": [{"who": "A", "text": "Practise after dinner? The chord?"}, {"who": "B", "text": "The chord."}, {"who": "A", "text": "It's coming. Isn't it?"}, {"who": "B", "text": "Something's coming. I'll bring the book."}]},
+  {"id": "oq9qky", "tone": "funny", "place": "crew_store", "topic": "pairs", "who": "madsen-ivo", "with": "esposito-yara", "lines": [{"who": "A", "text": "I've lost a sock. Blue. A flower on it."}, {"who": "B", "text": "Bought here last Tuesday. With a matching one."}, {"who": "A", "text": "How do you remember that?"}, {"who": "B", "text": "I always remember. I never tell."}]},
+  {"id": "1lfduxi", "tone": "funny", "act": "work", "place": "mess", "topic": "pairs", "who": "walsh-esme", "with": "varga-tariq", "lines": [{"who": "A", "text": "These carrots are big."}, {"who": "B", "text": "They're the right size."}, {"who": "A", "text": "Ivo cut them."}, {"who": "B", "text": "Ah. They're Ivo-sized."}]},
+  {"id": "1xtxl9y", "tone": "warm", "act": "work", "place": "mess", "topic": "pairs", "who": "dlamini-lukas", "with": "haddad-tamsin", "lines": [{"who": "A", "text": "Brennan's off. Galley runs itself."}, {"who": "B", "text": "You've been running for an hour."}, {"who": "A", "text": "It runs itself. Through me."}, {"who": "B", "text": "Sit down for one minute. Please."}]},
   {"id": "1x82zq", "tone": "funny", "pair": "any+any", "topic": "quirks", "lines": [{"who": "A", "text": "Is your cactus called Gerald?"}, {"who": "B", "text": "Of course. What else would it be called?"}]},
   {"id": "1rf21db", "tone": "funny", "habit": "music", "pair": "any+any", "topic": "quirks", "lines": [{"who": "A", "text": "That's not the words."}, {"who": "B", "text": "Those are exactly the words."}, {"who": "A", "text": "Ask Takahashi."}, {"who": "B", "text": "Takahashi's wrong too."}]},
   {"id": "q3sqes", "habit": "musician", "pair": "any+any", "topic": "quirks", "lines": [{"who": "A", "text": "Is it my turn with the guitar book?"}, {"who": "B", "text": "You had it Tuesday."}, {"who": "A", "text": "I had it for ten minutes Tuesday."}]},

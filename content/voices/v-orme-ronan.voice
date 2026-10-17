@@ -1,0 +1,12 @@
+@voice v-orme-ronan
+// Writer 2, batch 8: a short card for a short-stay visitor (GUESTS in section 9). No pronouns (not in facts.md).
+tpl: warm
+talk: Warm and unhurried; holds strong opinions about soil, gently; talks to the tomatoes.
+hi: Hello there | Oh, hello
+bye: Back to the beds | Take care
+yes: Of course | Lovely
+thanks: Thank you kindly | Ta
+wow: Oh, isn't that grand
+sigh: Ah
+likes: plant | garden
+nick: - | {me} | {me} | {me} | {me}

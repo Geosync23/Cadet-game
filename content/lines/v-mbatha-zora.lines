@@ -1,0 +1,27 @@
+@crew v-mbatha-zora
+// Writer 2, batch 8: a short-stay visitor. Mostly not about work.
+
+== greet
+? tier=stranger
+- Hey. Zora. Music room, every evening. Come in, sit, no fee.
+? tier>=acquaintance
+- {hi}, {me}. Last night someone asked for a song I didn't know. I learnt it.
+?
+
+== chat
+- Your piano's out of tune. Just a bit. I like it that way.
+- Night owl. The ship's at its prettiest when it's mostly asleep.
+
+== near
+? place:musicroom
+- Requests are open. Hum it, I'll find it.
+? habit:garden-lover
+- The garden smells like home after rain. I come here to think.
+?
+
+== bye
+- {bye}. Music room's open late. You know where.
+
+== smalltalk
+- One more, then bed.
+- Out of tune. Just right.

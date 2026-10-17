@@ -1,0 +1,27 @@
+@crew v-thorne-kaito
+// Writer 2, batch 8: a short-stay visitor. Mostly not about work.
+
+== greet
+? tier=stranger
+- Hello. Kaito. Charts office, on loan. Which way's forward? Sorry.
+? tier>=acquaintance
+- {hi}, {me}. I got lost on Deck 4 again. I'm mapping it. Badly.   #funny
+?
+
+== chat
+- The charts office is very quiet. The Wren is very not quiet. I love it.
+- I'm drawing the corridors from memory. Deck 3 is done. Mostly.
+
+== near
+? habit:garden-lover
+- The garden's the only place I always find. I follow the smell.   #funny
+? habit:bar-regular
+- One drink, then the corridor map. Wish me luck.
+?
+
+== bye
+- {bye}. If I'm lost later, I'm on Deck 4.   #funny
+
+== smalltalk
+- Which way's forward?   #funny
+- Deck 4. Lost again.   #funny
