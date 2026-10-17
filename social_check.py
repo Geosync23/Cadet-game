@@ -92,7 +92,7 @@ with sync_playwright() as pw:
 
     if a.get('bonds') is not None:          # 20c's bonds (social B), once storyHour is in
         bk = a['bonds']; print('Bonds after the run:', json.dumps(bk))
-        if not (15 <= bk.get('friends', 0) <= 40) or not (2 <= bk.get('rivals', 0) <= 6) or not bk.get('mentor'): print('  NOTE bond numbers outside the plan\'s targets (friends 15-40, rivals 2-6, a mentor)')
+        if not (15 <= bk.get('friends', 0) + bk.get('best', 0) <= 40) or not (2 <= bk.get('rivals', 0) <= 6) or not bk.get('mentor'): print('  NOTE bond numbers outside the plan\'s targets (friends 15-40, rivals 2-6, a mentor)')
     rp = a['rep']
     print('Reputation after the run:', json.dumps(rp and {'dept': rp['dept'], 'ship': rp['ship'], 'knownFor': rp['view']['knownFor']}))
     if not rp or rp['dept']['galley'] < 20 or max(v for k, v in rp['dept'].items() if k not in ('galley', 'works')) >= 20: fail('a stand-in who fixes galley ovens should be known in the galley, and only there')
