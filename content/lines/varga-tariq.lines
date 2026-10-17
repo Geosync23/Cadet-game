@@ -37,3 +37,53 @@
 - Lukas is my rival in onions and my friend in everything else.   #warm
 ? bond:friends
 - {friend} writes back. On paper. I'd do anything for someone who writes back.
+
+// Writer-commons, batch 6: towards about 30 own lines.
+
+== greet
+? tier>=acquaintance time:morning
+- Good morning. I've been up since four. The bread's been up since five. We're both proud.
+? tier>=acquaintance time:evening
+- Hello, {me}. Late dinner for me. I like the mess when it's emptying out.
+? tier>=colleague warmth:cold
+- Ah, there you are. I nearly wrote you a letter. A long one.   #warm
+
+== bye
+? tier>=acquaintance
+- Take care. Until later.
+? tier>=friend
+- Thank you for the company. I'll mention you in my next letter. Kindly.   #warm
+
+== feel
+? mood:ok
+- Well enough. A good morning's work. A long letter waiting.
+
+== near
+? act:leisure deck:3
+- The lounge window. Best seat on the ship. I got here first. I always do.   #funny
+? time:morning act:work
+- Rolls in the oven, porridge on. Six o'clock, and the galley's already won.
+
+== life
+? tier>=colleague
+- Vera Ueda and I share the post bag to Valo. We compete to write the longest letter.   #funny
+? tier>=friend
+- I lost a race to Strand once. One. I think about it more than I should.   #funny
+
+== invite
+? trad:running tier>=acquaintance
+- Running club tonight. I'll race you. Kindly. Then less kindly.   #funny
+
+== accept
+- Gladly. I'll be there.
+== decline
+- I can't, I'm afraid. It's my letter night. Another time, truly.
+== missed
+- You didn't come. That's all right. I wrote a page while I waited. A good page.
+== birthday
+? birthday:me
+- It's my birthday. My grandmother will send a message. One very long sentence.   #warm
+? birthday:you
+- Happy birthday. I've written you a card. On paper. Properly.   #warm
+== hint
+- Have you a minute? I'd like to say something. Properly.

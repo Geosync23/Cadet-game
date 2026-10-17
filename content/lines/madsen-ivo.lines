@@ -35,3 +35,53 @@
 == about
 ? bond:friends
 - {friend}'s great. Lets me tell the whole story. From the start. Every time.   #funny
+
+// Writer-commons, batch 6: towards about 30 own lines.
+
+== greet
+? tier>=acquaintance time:morning
+- {hi}! Morning! Did I wake you? In the washroom? Sorry. Not sorry. It was a good song.   #funny
+? tier>=acquaintance time:evening
+- {hi}, {me}! Dinner! Sit anywhere. I'll find you. With a tray. Or six.
+? tier>=colleague warmth:cold
+- There you are! I thought you'd gone to another ship. I was going to write a song about it.   #funny
+
+== bye
+? tier>=acquaintance
+- {bye}! I'll tell you the rest of the story later. There's a lot of rest.
+? tier>=friend
+- Cheers, {nick}. You're a good listener. You have to be, with me.   #warm
+
+== feel
+? mood:ok
+- All right! Busy. Talking. The usual.
+
+== near
+? act:dinner
+- Mind your back, six trays coming through! Seven! No, six.   #funny
+? deck:3 act:leisure
+- The store's got new pressing paper in. Don't tell Esposito I was excited.
+
+== life
+? tier>=colleague
+- Brennan says I can run the pass one day. "One day." I've asked which day. No answer.   #funny
+? tier>=friend
+- Same trays, same tables, three years. I love it. I want a bit more. Is that greedy?
+
+== invite
+? tier>=acquaintance time:afternoon
+- Come to the garden with me. I'm looking for the purple ones. Don't tell Cruz.
+
+== accept
+- Yes! Brilliant! I'll bring things to say.   #funny
+== decline
+- Ah, I can't. Late team. Tell me everything after. Every bit.
+== missed
+- You weren't there! I had so much to tell you. I've saved it. All of it.   #funny
+== birthday
+? birthday:me
+- It's my birthday! I've told everyone. Some of them twice. Some of them three times.   #funny
+? birthday:you
+- Happy birthday! I pressed you a flower. It's from the week you arrived.   #warm
+== hint
+- Right, listen. Not a story this time. Well. A different kind.
