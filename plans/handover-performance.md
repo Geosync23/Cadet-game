@@ -84,6 +84,13 @@ Items 3, 1, 2 and 2b of the plan are done. Item 4 (dialogue as JSON.parse) was d
   - Section 10's `crewNearDoor`, about 40 KB/frame (a closure per crew member per door per frame), and section 14's `whereIs`/`shipDay`, about 15 KB. Sent to sim engineer 4 (session_01EJUGywZv9BpcUezjXES9AC, near handover) for after 0.60.4. Don't touch sections 10 or 14 yourself: they're changing for 0.60.3.
   - What's left in 8b is number boxing in `animateActivity` (about 15 KB/frame); it would need restructuring.
 
+- **Load time:** unchanged by 0.27.25–0.27.32: about 12 s at 4× slower CPU and about 7 s at normal speed, alternating 0.60.2, 0.27.25 and 0.27.32 over 6 runs each. An earlier "+0.8 s" was one low run of 0.60.2. Always alternate builds when measuring load.
+- **Next job, proposed to the lead (0.27.33): stand-ins built over a few frames.** `shadowStandIns()` (4c, called in `buildDeck`) costs, on a desktop, D1 20 ms, D2 95, D3 175, D4 63, D5 28, D6 9: about 15–20% of a deck change (130–850 ms), so perhaps 0.7 s on a phone for Deck 3. Plan:
+  - Keep the two passes, but fill a few buckets per frame after the deck appears.
+  - A bucket's originals keep `castShadow = true` until its proxy mesh exists, then switch: the same depth, so the shadows are the same at every moment.
+  - Keep the `onUpload` array release.
+  - Check: cadet_test identical, the 48-shot all-deck comparison, deck_check memory flat over round trips, and that `unloadDeck` mid-build leaves nothing behind.
+  - Measure with scratchpad ssi.py (wrap `shadowStandIns`/`freezeStill`, time each `goToDeck`).
 - **In flight (2026-10-17 ~11:40):** the phone-like measurement of the 0.60.3 candidate (claude/cand-0603) against 0.60.2, for the user's morning report via the lead: dinner, breakfast, frames over 16.7/33 ms, 99th percentile, worst frame, load. Start when build master 2 or the lead says the candidate is final.
 
 ## Standing role: phone-speed watchdog (Pillar 4, from 2026-10-17)
