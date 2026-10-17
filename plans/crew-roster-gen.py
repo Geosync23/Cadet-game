@@ -16,7 +16,7 @@ import json, random, hashlib, html, os
 
 R = random.Random(20261015)
 DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-UNIFORM = {'command': 'command', 'helm': 'command', 'comms': 'command', 'works': 'works', 'galley': 'works', 'store': 'works',
+UNIFORM = {'command': 'command', 'helm': 'command', 'comms': 'command', 'works': 'works', 'galley': 'works', 'store': 'works', 'garden': 'survey',
            'watch': 'watch', 'survey': 'survey', 'infirmary': 'infirmary'}
 RANK_NUM = {'junior': 0, 'officer': 1, 'senior': 1, 'chief': 2, 'xo': 3, 'captain': 4}
 
@@ -50,13 +50,14 @@ WORK = {   # where each kind of job is done: deck and place type
     'command': (1, 'work:command'), 'helm': (1, 'work:helm'), 'ops': (1, 'work:ops'), 'comms-bridge': (1, 'work:comms'),
     'comms': (2, 'work:comms'), 'watch': (2, 'work:watch'), 'survey': (2, 'work:survey'),
     'galley': (3, 'work:galley'), 'infirmary': (3, 'work:infirmary'),
-    'works': (5, 'work:works'), 'engine': (6, 'work:engine'), 'store': (3, 'work:store'),
+    'works': (5, 'work:works'), 'engine': (6, 'work:engine'), 'store': (3, 'work:store'), 'garden': (3, 'work:garden'),
 }
 WORK_WORDS = {
     'work:command': 'the bridge', 'work:helm': 'the helm, on the bridge', 'work:ops': 'the ops console, on the bridge',
     'work:comms': 'comms', 'work:watch': 'the Watch office', 'work:survey': 'the Survey labs',
     'work:galley': 'the galley', 'work:infirmary': 'the infirmary', 'work:works': 'the Works bay', 'work:engine': 'the engine room',
     'work:store': 'the crew store',
+    'work:garden': 'the hydroponics garden',
 }
 
 # ---------------------------------------------------------------- story crew and senior names (by hand)
@@ -317,6 +318,15 @@ SHIFT_DROPS = {
 # the rank line on a door plate (the ranks of design-doc "The crew", as the game's RANK_NAME says them)
 PLATE_RANK = {'captain': 'Captain', 'xo': 'Executive Officer', 'chief': 'Department Chief', 'senior': 'Senior Officer',
               'officer': 'Officer', 'guest': 'Veyli Envoy'}
+# the gardeners (0.16.11): role, team, days off, hours, hours on other days ([{ days, hours }]: they replace hours
+# on those days), bio
+GARDENERS = {
+    'cruz-tove': ('Senior gardener', 'senior', [5, 6], [[480, 1020]],
+                  [{'days': [0, 1], 'hours': [[360, 840]]}, {'days': [2, 3], 'hours': [[780, 1260]]}],
+                  'Runs the hydroponics garden, and knows every plant by the week it was sown.'),
+    'hart-ravi': ('Gardener', 'early', [0, 1], [[360, 840]], None, 'Waters the garden at first light, before anyone else is up.'),
+    "oneill-imani": ('Gardener', 'late', [2, 3], [[780, 1260]], None, 'Tends the garden into the evening, and picks the galley\'s herbs for the next day.'),
+}
 # the galley staff: team and days off (0 = Monday)
 GALLEY_TEAMS = {'brennan': ('chef', [4, 5]), 'varga-tariq': ('early', [0, 1]), 'haddad-tamsin': ('early', [2, 3]),
                 'dlamini-lukas': ('early', [1, 2]), 'walsh-esme': ('late', [5, 6]), 'madsen-ivo': ('late', [0, 1])}
@@ -602,6 +612,20 @@ def main():
     for p, (hours, off, bio) in zip([p for p in crew if p['role'] == 'Works technician' and not p.get('story')][-2:], STOREKEEPERS):
         p.update(dept='store', role='Storekeeper', job='store', bio=bio)
         p['rota'] = {'offDays': off, 'hours': hours}
+    # ---- the garden (0.16.11): the three day crew with the gardener habit tend the working garden. Ravi Hart works
+    # early, Imani O'Neill late; Tove Cruz, the senior gardener, works days, and on their days off takes their hours
+    # (rota.hoursOn), so the garden has early and late cover every day. Their beds and habits stay; they work at the
+    # garden's work:garden stations (the deck architect's 0.38.6)
+    for p in crew:
+        if p['id'] in GARDENERS:
+            role, team, off, hours, on, bio = GARDENERS[p['id']]
+            p.update(dept='garden', role=role, job='garden', bio=bio)
+            p['rota'] = {'offDays': off, 'hours': hours, 'team': team}
+            if on: p['rota']['hoursOn'] = on
+    for d in range(7):
+        hrs = [h for p in crew if p['dept'] == 'garden' and d not in p['rota']['offDays']
+               for h in next((o['hours'] for o in p['rota'].get('hoursOn', []) if d in o['days']), p['rota']['hours'])]
+        assert any(a <= 360 for a, b in hrs) and any(b >= 1260 for a, b in hrs), ('garden cover', d)
     # ---- the galley staff's teams, agreed with the galley engineer (section 16 owns their hours, in GALLEY_SHIFTS; shift
     # stays 'day'). Days off give a chef and at least one early and one late hand every day; Lukas Dlamini, an early
     # hand, works the chef's shift on Brennan's days off (Fri and Sat)
@@ -691,6 +715,7 @@ GROUPS = [('command', 'Command', 'The bridge: the Captain, the Executive Officer
           ('infirmary', 'Infirmary', 'Crew health and rest, in the infirmary on Deck 3.'),
           ('galley', 'Galley', 'Two meals a day for seventy-five people, in the galley and mess hall on Deck 3.'),
           ('store', 'Crew store', 'The crew store on Deck 3: snacks, soap, socks and the odd luxury, from the counter by the till.'),
+          ('garden', 'Garden', 'The hydroponics garden on Deck 3: herbs and greens for the galley, from first light to late evening.'),
           ('guest', 'Guests', 'Not crew: visitors who live aboard.')]
 RANK_ORDER = ['captain', 'xo', 'chief', 'senior', 'officer', 'junior', 'guest']
 RANK_WORDS = {'captain': 'Captain', 'xo': 'Executive Officer', 'chief': 'Department Chief', 'senior': 'Senior Officer', 'officer': 'Officer', 'junior': 'Junior Officer', 'guest': 'Guest'}
@@ -808,9 +833,11 @@ def page(entries, visits=None):
                      (' <span class="b night">Night shift</span>' if x['shift'] == 'night' else '')
             off = ' and '.join(DAYS[d] for d in x['rota']['offDays']) or 'none'
             work = (WORK_WORDS[x['work']['place']] + ' (Deck %d)' % x['work']['deck']) if x['work'] else 'no ship duties'
-            shift = GALLEY_WORDS[x['rota']['team']] if x['rota'].get('team') else \
+            shift = GALLEY_WORDS[x['rota']['team']] if x['dept'] == 'galley' else \
                     ('Days, 08:00 to 17:00' if x['shift'] == 'day' else 'Nights, 21:00 to 06:00') if not x['rota'].get('hours') else \
                     ' and '.join('%02d:%02d to %02d:%02d' % (a // 60, a % 60, b // 60 % 24, b % 60) for a, b in x['rota']['hours'])
+            for o in x['rota'].get('hoursOn', []):
+                shift += '; %s: %s' % (' and '.join(DAYS[d] for d in o['days']), ' and '.join('%02d:%02d to %02d:%02d' % (a // 60, a % 60, b // 60 % 24, b % 60) for a, b in o['hours']))
             out.append('<article class="p" data-text="%s" data-shift="%s"><i class="dot" style="background:%s"></i>\n'
                        '  <div class="who"><b>%s</b>%s<span class="role">%s%s</span></div>\n'
                        '  <p class="bio">%s</p>\n'

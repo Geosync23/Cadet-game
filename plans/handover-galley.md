@@ -71,6 +71,35 @@ All four of the galley's rows are built and shipped in combined 0.41.4 (claude/s
 - **food_check's live-vs-report test** runs with `cartWaiting` off, because the test doesn't run the job list.
 - **Still open on other sections:** crew don't claim meals runs (the systems engineer's). player_check had pre-existing failures on 0.41.4 (grab, sitting, the stores cart run; the player and systems engineers').
 
+## Pillar 3 and the working garden (builds 0.29.18–0.29.25)
+
+The full detail is in the DEV_NOTES build table, rows 0.29.18 to 0.29.25.
+
+- **Event hooks (C7).** Once an hour the galley reads section 18's `eventMod('galley', key, t)` into `S.ev` (it uses `eventModAt` first if that exists). Keys:
+  - `menu`: a dish id from `GALLEY_EV_DISH`, or a dish name.
+  - `cook`, `grab`, `extra`: multipliers and extra portions.
+  - `batch`: a number or `{ meals, label, at }`, a dinner away from the mess, from 15:00.
+  - `trays`: trays for the bridge at 18:00, sent through section 17's `cartTrays`.
+  - `herbs`: the batch takes 4 units of garden herbs.
+- **Threads scored** (live only, once per minute per thread, through `galleyScore`):
+  - `spoiled`: meals binned while an event runs.
+  - `bridgeHungry`: hours from 12:00 until `traysArrivedAt` says the trays reached the bridge (stops at 18:00 without it).
+  - `dinnersLate`: minutes a batch is late (150 minutes of cooking from 15:00, longer with worn ovens).
+  - `noHerbs`: a batch cooked without herbs.
+- **Test stand-ins.** `GALLEY_TEST` holds them: eventMod, cartTrays, traysArrivedAt, gardenAt, gardenDay, gardenCrew, gardenCarry, carryWaiting. Use it instead of reassigning other sections' functions, because some of those are consts.
+- **The garden.**
+  - Crops: `GARDEN_CROPS` (greens, herbs, beans, tomatoes, roots). Growth: `gardenCond(d)`, which is water × feed × light from section 17's `gardenAt` times tending hours from section 14's `gardenDay`.
+  - Picking: at 10:45 if `gardenCrew(d)` has someone on duty; harvest mornings pick everything ripe at 11:30.
+  - Carrying: each pick becomes one section 17 `gardenCarry` job. The crates are held while `carryWaiting` is true, and `galleyCarryLand(id)` lands them when the player unloads.
+  - Storage and cooking: produce sits in `S.cold.produce` and is used first, up to half of each pot. Cart claims count it.
+  - Mail and texts: a thin harvest sends a Mail; `galleyText('garden')`; fresh-produce lines at the servery and on the menu board.
+  - Numbers: about 28 meal units a day with the machines as new, about 23 with the real machines' wear.
+- **The other sections' garden pieces:** systems 0.33.34 (gardenAt, gardenCarry, growlights), the deck architect's 0.38.6 (3-gardenwork-1..5, 3-crates-1), the crew designer's 0.16.11 (three gardeners), sim 0.26.20 (gardenDay, gardenCrew).
+- **Possible next steps:**
+  - a garden view (crops on the beds), with the performance engineer;
+  - wiring galleyText('garden') to a tap in the garden (the player engineer);
+  - tuning yields once the user has played it.
+
 ## Gotchas
 
 - **`InstancedMesh.setColorAt` in r128** sizes the colour buffer from the mesh's *current* `count`. Set the colours before setting `count = 0`, or every instance is black (the fix in 0.29.0).

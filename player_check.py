@@ -22,6 +22,8 @@
 #   (browse, pay); each need rises by its gain, the pose is right, you're back on your feet and visible after
 #   places held by crew are left alone ("In use"); the servery is closed between meals; walking away stops an
 #   activity (keeping what you'd gained); someone's private wash pod isn't offered; draw calls stay under BUDGET
+#   the bathroom need (0.28.19): toilets in the public washrooms (Decks 4 and 3) sit you down and fill it; cabins' are private
+#   seeing it work (0.28.20, 0.28.21): each tapped activity shows the progress bar and a +N note for its need
 #   saving: a v 2 save keeps needs; a v 1 save loads with needs at 80; ?nosave neither reads nor writes
 # Setup and environment as for cadet_test.py.
 # Run:  python3 player_check.py BUILD.html
@@ -51,11 +53,11 @@ PAPER = r"""(({ normal }) => {
   const sleep = mins => { needsDrain(mins, true); look(); };
   for (let day = 1; day <= 7; day++) {                    // 06:00 to 06:00
     if (normal) {
-      awake(60); act('shower'); awake(5); act('eat'); awake(25);                  // 06:00-08:00
-      awake(9 * 60);                                                              // the shift, 08:00-17:00
-      awake(30); act('eat'); awake(40);                                           // dinner about 17:30
+      act('toilet'); awake(57); act('shower'); awake(5); act('eat'); awake(25);   // 06:00-08:00 (the toilet: 0.28.19)
+      awake(4 * 60); act('toilet'); awake(5 * 60 - 3);                            // the shift, 08:00-17:00, with a break at noon
+      awake(30); act('eat'); act('toilet'); awake(37);                            // dinner about 17:30
       if (day % 2) act('gym'); else act('call');
-      awake(22 * 60 - (18 * 60 + 30) - (day % 2 ? 30 : 15));                      // to 22:00
+      awake(22 * 60 - (18 * 60 + 30) - (day % 2 ? 30 : 15) - 3); act('toilet');   // to 22:00, and before bed
       sleep(8 * 60);
     } else { awake(16 * 60); sleep(8 * 60); }                                     // no meals, no shower, no gym, no calls
   }
@@ -76,9 +78,11 @@ TAP = r"""(({ title, near }) => {
 STATE = r"""JSON.stringify({ act: ACT && [ACT.kind, ACT.placeId, ACT.phase, ACT.pose, Math.round(ACT.done * 10) / 10, player.holding === undefined ? null : player.holding, typeof TRAY_ON !== 'undefined' && TRAY_ON.visible],
   needs: Object.fromEntries(NEED_KEYS.map(k => [k, Math.round(SHIP.player.needs[k] * 10) / 10])), basket,
   visible: player.obj.visible, toast: document.getElementById('tt').textContent + ': ' + document.getElementById('tx').textContent,
-  time: hhmm(SHIP.time.min), calls: renderer.info.render.calls, deck: deckDef.num })"""
+  time: hhmm(SHIP.time.min), calls: renderer.info.render.calls, deck: deckDef.num,
+  bar: (b => b && !b.hidden ? b.textContent : null)(document.getElementById('actBar')), nf: typeof FLOAT_LOG === 'undefined' ? [] : FLOAT_LOG.splice(0) })"""
 
 def state(g): return json.loads(g.ev(STATE))
+UI = {}                                                   # per activity: progress-bar texts and floating notes seen (0.28.20, 0.28.21)
 
 def run_activity(g, title, near=None, limit=4000, label=None):
     """tap, then step until the activity is over (or the limit); returns (tapped, states seen, end state)"""
@@ -91,8 +95,12 @@ def run_activity(g, title, near=None, limit=4000, label=None):
     for k in range(limit // 30):
         g.step(30); s = state(g); peak = max(peak, s['calls'])
         if s['act']: seen.append(s['act'])
+        u = UI.setdefault(label or title, {'bar': [], 'nf': set()})
+        if s['bar'] and s['bar'] not in u['bar']: u['bar'].append(s['bar'])
+        u['nf'].update(s['nf'])
         if not s['act'] and k > 0: break
-    end = state(g)
+    g.step(30)                                            # the last +N note shows just after (once the rise has stopped)
+    end = state(g); UI.setdefault(label or title, {'bar': [], 'nf': set()})['nf'].update(end['nf'])
     if not any(x[2] == 'do' for x in seen) and re.match(r"In use|There's a queue", end['toast'].split(': ', 1)[1]) and limit > 0:
         print('   ', title, 'taken on arrival:', end['toast'][:80]); g.step(190)
         return run_activity(g, title, near, limit - 1000, label)
@@ -103,7 +111,7 @@ def run_activity(g, title, near=None, limit=4000, label=None):
 
 def body_check(name, need, gain, before, end, seen, pose):
     if pose: check(any(a[2] == 'do' and a[3] in ((pose,) if isinstance(pose, str) else pose) for a in seen), f'{name}: pose {pose} not taken ({sorted(set(str(a[3]) for a in seen))})')
-    if need: check(end['needs'][need] >= min(100, before['needs'][need] + gain - 3) - .1, f"{name}: {need} {before['needs'][need]} -> {end['needs'][need]} (gain {gain})")
+    if need: check(end['needs'][need] >= min(99.5, before['needs'][need] + gain - 3) - .1, f"{name}: {need} {before['needs'][need]} -> {end['needs'][need]} (gain {gain})")
     check(end['visible'] and not end['act'], f'{name}: not back on your feet ({end})')
 
 with sync_playwright() as pw:
@@ -112,7 +120,7 @@ with sync_playwright() as pw:
 
     print('On paper, a week of normal days:')
     p = g.ev(f"({PAPER})({{ normal: true }})"); print('  lowest', p['lo'], 'slow minutes', p['slowMins'])
-    for k, v in p['lo'].items(): check(v >= (25 if k == 'energy' else 30), f'normal week: {k} fell to {v}')
+    for k, v in p['lo'].items(): check(v >= (25 if k in ('energy', 'bathroom') else 30), f'normal week: {k} fell to {v}')
     check(p['slowMins'] == 0, f"normal week: slowed for {p['slowMins']} minutes")
     print('On paper, a week of neglect:')
     p = g.ev(f"({PAPER})({{ normal: false }})"); print('  end', p['end'], 'lowest', p['lo'], 'highest', p['hi'])
@@ -185,7 +193,7 @@ with sync_playwright() as pw:
     check(not asked and bed[0] == day0 + 1 and bed[1] == '06:00' and bed[2] == 100 and bed[3] == 'Good morning', f'the bunk at 21:00 should sleep you to 06:00: {bed}')
 
     print('One player day, tapping the real things:')
-    g.ev("Object.assign(SHIP.player.needs, { hunger: 20, energy: 100, hygiene: 10, fitness: 30, social: 20 }); basket = false")
+    g.ev("Object.assign(SHIP.player.needs, { hunger: 20, energy: 100, hygiene: 10, fitness: 30, social: 20, bathroom: 20 }); basket = false")
     g.ev("setShipNow(10 * 60 + 30 + 1440 * 7); needsT = null; goToDeck(4); Object.assign(player.obj.position, cellPos(7, 3)); player.stop()"); g.step(5)
     # someone's own wash pod is not offered
     t = g.ev(f"({TAP})({json.dumps({'title': 'Wash pod'})})"); g.step(5)
@@ -193,12 +201,27 @@ with sync_playwright() as pw:
     peak = 0
     tp, b, seen, e, pk = run_activity(g, 'Shower', near=[3, 1]); peak = max(peak, pk)
     check(tp is True and seen and seen[0][1].startswith('4-shower'), f'shower: {seen[:1]}'); body_check('shower', 'hygiene', 80, b, e, seen, 'stand')
+    # the toilet (0.28.19, the user's bathroom need): the junior wing's, sitting, and bathroom fills
+    tp, b, seen, e, pk = run_activity(g, 'Toilet', near=[5, 1]); peak = max(peak, pk)
+    check(tp is True and seen and seen[0][1].startswith('4-toilet'), f'toilet: {seen[:1]}'); body_check('toilet', 'bathroom', 100, b, e, seen, None)
+    check(any(a[2] == 'do' and str(a[3]).startswith('sit') for a in seen), f"toilet: should sit ({sorted(set(str(a[3]) for a in seen))})")
     g.ev("setShipNow(shipNow() + 1); goToDeck(3)"); g.step(5)   # mid-morning on Deck 3: the crew are at work
     tp, b, seen, e, pk = run_activity(g, 'Grab and go'); peak = max(peak, pk); body_check('grab', 'hunger', 25, b, e, seen, None)
     tp, b, seen, e, pk = run_activity(g, 'Treadmills'); peak = max(peak, pk); body_check('treadmill', 'fitness', 30, b, e, seen, 'run')
     tp, b, seen, e, pk = run_activity(g, 'Weights'); peak = max(peak, pk); body_check('weights', 'fitness', 30, b, e, seen, 'lift')
     tp, b, seen, e, pk = run_activity(g, 'Booth 1'); peak = max(peak, pk); body_check('booth', 'social', 40, b, e, seen, ('call', 'sit:call'))
     check(seen and seen[0][1].startswith('3-callhome'), 'booth: should use a callhome place')
+    g.ev("SHIP.player.needs.bathroom = 30")              # a public toilet on Deck 3 (0.28.19)
+    tp, b, seen, e, pk = run_activity(g, 'Toilet', near=[20, 20]); peak = max(peak, pk)
+    check(tp is True and seen and seen[0][1].startswith('3-toilet'), f'deck 3 toilet: {seen[:1]}'); body_check('deck 3 toilet', 'bathroom', 70, b, e, seen, None)
+    print('Seeing it work (0.28.20, 0.28.21): progress bars and +N notes')
+    for name, need in [('Shower', 'Hygiene'), ('Toilet', 'Bathroom'), ('Grab and go', 'Food'), ('Treadmills', 'Fitness'), ('Booth 1', 'Social')]:
+        u = UI.get(name, {'bar': [], 'nf': set()}); print(f"  {name:12s} bar {u['bar'][:2]}{'...' if len(u['bar']) > 2 else ''} notes {sorted(u['nf'])[:4]}")
+        check(u['bar'] and any('min' in x or 'nearly' in x for x in u['bar']), f'{name}: no progress bar seen')
+        check(any(x.startswith('+') and x.endswith(need) for x in u['nf']), f'{name}: no +N {need} note seen')
+    pv = g.ev("(() => { goToDeck(2); const r = [...PLACE_OF.values()].filter(q => q.type === 'toilet').map(q => [q.id, privatePlace(q)]); goToDeck(3); return r; })()"); g.step(5)
+    print('  Deck 2 toilets private:', sum(1 for x in pv if x[1]), 'of', len(pv), [x[0] for x in pv if not x[1]])
+    check(all(x[1] == ('wctoilet' not in x[0]) for x in pv), f'cabin toilets are private, the washroom ones public: {pv}')
     t = g.ev(f"({TAP})({json.dumps({'title': 'Counter'})})"); g.step(60)
     check(t is False and not state(g)['act'], 'the counter with nothing picked out should just show its text')
     tp, b, seen, e, pk = run_activity(g, 'Shelves'); peak = max(peak, pk); body_check('browse', None, 0, b, e, seen, 'browse')
@@ -275,7 +298,7 @@ with sync_playwright() as pw:
       const near = seats.slice(1).map(q => [q, placeSpot(q.id)]).filter(([, s]) => s && Math.hypot(s.x - s0.x, s.z - s0.z) < COMPANY_NEAR).slice(0, 4);
       const fake = near.map(([q, s]) => ({ settled: true, goalId: q.id, x: s.x, z: s.z, p: { name: 'Test' } })); const out = [];
       for (const k of [0, 2, 4]) {
-        DECK_CREW.push(...fake.slice(0, k)); Object.assign(n, { hunger: 50, social: 50, hygiene: 50, energy: 50, fitness: 50 });
+        DECK_CREW.push(...fake.slice(0, k)); Object.assign(n, { hunger: 50, social: 50, hygiene: 50, energy: 50, fitness: 50, bathroom: 50 });
         FX_MIN = Math.floor(shipNow()); FX_NOW = { deck: deckDef.num, restore: {}, drain: {}, notes: [] };
         ACT = { kind: 'eat', def: PLAYER_ACTS.eat, phase: 'do', done: 0, o: {}, spot: s0, deck: deckDef, x: 0, z: 0, y: 0, face: player.face, to: {}, body: { set() {}, update() {}, dispose() {} } };
         needsT = shipNow() - 10; playerUpdate(0, 0); out.push([company(ACT), Math.round((n.social - 50 + NEED_DRAIN.social[0] / 6) * 10) / 10]);
@@ -431,7 +454,7 @@ with sync_playwright() as pw:
       needsDrain(60, false, playerFx()); const out = { drainHungerX2: Math.round((50 - n.hunger) * 10) / 10, hygieneDrain: Math.round((50 - n.hygiene) * 10) / 10 };
       playerUpdate(0, 0); out.speed = playerSpeed() / needEffects().walk; out.maxV = player.maxV / PLAYER_V0 / needEffects().walk;   // the needs' own walk only
       device.open(); out.note = document.getElementById('devBody').textContent.includes('showers are running weak'); device.close();
-      n.hygiene = 10; ACT = { kind: 'shower', def: PLAYER_ACTS.shower, phase: 'do', done: 0, o: {}, deck: deckDef, x: 0, z: 0, y: 0, face: player.face, to: {}, body: { set() {}, update() {}, dispose() {} } };
+      n.hygiene = 10; n.bathroom = 50; ACT = { kind: 'shower', def: PLAYER_ACTS.shower, phase: 'do', done: 0, o: {}, deck: deckDef, x: 0, z: 0, y: 0, face: player.face, to: {}, body: { set() {}, update() {}, dispose() {} } };
       needsT = shipNow() - PLAYER_ACTS.shower.mins; """ + FX + r""" playerUpdate(0, 0); out.shower = Math.round(n.hygiene); ACT = null; FX_MIN = -1;
       return out; })()""")
     print(' ', st)
@@ -440,7 +463,7 @@ with sync_playwright() as pw:
     check(st['note'], 'the ship notes should show on the device')
     check(st['shower'] == 50, f"a weak shower (restore x0.5) should give half: 10 -> {st['shower']}")
     if real[2]:
-        live = g.ev("(() => { FX_MIN = -1; const f = playerFx(), r = shipEffects(deckDef.num); return f === r && NEED_KEYS.every(k => isFinite(f.restore[k]) && isFinite(f.drain[k])); })()")
+        live = g.ev("(() => { FX_MIN = -1; const f = playerFx(), r = shipEffects(deckDef.num); return f === r && NEED_KEYS.every(k => k === 'bathroom' ? !(k in f.restore) || isFinite(f.restore[k]) && isFinite(f.drain[k]) : isFinite(f.restore[k]) && isFinite(f.drain[k])); })()   // section 17 knows the first five needs (bathroom, 0.28.19: 1 when left out)")
         print('  playerFx is the real shipEffects for this deck:', live)
         check(live, 'playerFx should read the real shipEffects')
     if not real[0]:                                   # the galley's food on its own, with stand-ins (a combined build tests the real one above)
@@ -587,25 +610,25 @@ with sync_playwright() as pw:
     ev = load()
     v1 = json.loads(ev("JSON.stringify([SHIP.time.day, SHIP.player.needs])")); print('  v 1 save:', v1)
     check(v1[0] == 2 and all(v == 80 for v in v1[1].values()), 'a v 1 save should load with needs at 80')
-    ev("Object.assign(SHIP.player.needs, { hunger: 11, energy: 22, hygiene: 33, fitness: 44, social: 55 }); saveGame()")
+    ev("Object.assign(SHIP.player.needs, { hunger: 11, energy: 22, hygiene: 33, fitness: 44, social: 55, bathroom: 66 }); saveGame()")
     raw = json.loads(ev("localStorage.getItem(SAVE_KEY)")); print('  saved:', raw['v'], raw['player'].get('needs'))
-    check(raw['v'] == 2 and raw['player']['needs'] == {'hunger': 11, 'energy': 22, 'hygiene': 33, 'fitness': 44, 'social': 55}, 'v 2 save should hold the needs')
+    check(raw['v'] == 2 and raw['player']['needs'] == {'hunger': 11, 'energy': 22, 'hygiene': 33, 'fitness': 44, 'social': 55, 'bathroom': 66}, 'v 2 save should hold the needs')
     ev = load()
     v2 = json.loads(ev("JSON.stringify(SHIP.player.needs)")); print('  v 2 save:', v2)
     ev("mailSend({ from: 'Test', subject: 'Kept', body: 'b' }); SHIP.player.credits = 77; SHIP.player.locker = ['a deck of cards']; SHIP.player.chats = { x: SHIP.time.day }; saveGame()")
     ev = load()
     kept = json.loads(ev("JSON.stringify([SHIP.mail.map(m => m.subject), SHIP.player.credits, SHIP.player.locker, Object.keys(SHIP.player.chats)])")); print('  mail, credits, locker, chats kept:', kept)
     check(kept == [['Kept'], 77, ['a deck of cards'], ['x']], f'the save should keep mail, credits, locker and chats: {kept}')
-    check(v2 == {'hunger': 11, 'energy': 22, 'hygiene': 33, 'fitness': 44, 'social': 55}, 'a v 2 save should load its needs')
+    check(v2 == {'hunger': 11, 'energy': 22, 'hygiene': 33, 'fitness': 44, 'social': 55, 'bathroom': 66}, 'a v 2 save should load its needs')
     ev("localStorage.setItem(SAVE_KEY, JSON.stringify({ v: 2, build: 'x', time: { day: 2, min: 600 }, player: { deck: 4, tile: [7, 3], facing: 0, needs: { hunger: 'x', energy: 500 } }, ship: { decks: {} }, crew: {} })); Storage.prototype.setItem = () => {}")
     ev = load()
     bad = json.loads(ev("Storage.prototype.setItem = () => {}; JSON.stringify(SHIP.player.needs)")); print('  junk needs:', bad)
-    check(bad == {'hunger': 80, 'energy': 100, 'hygiene': 80, 'fitness': 80, 'social': 80}, 'junk needs should be clamped or filled at 80')
+    check(bad == {'hunger': 80, 'energy': 100, 'hygiene': 80, 'fitness': 80, 'social': 80, 'bathroom': 80}, 'junk needs should be clamped or filled at 80')
     raw0 = ev("localStorage.getItem(SAVE_KEY)")
     ev = load('?nosave')
     ns = json.loads(ev("const n0 = NEED_KEYS.map(k => SHIP.player.needs[k]); SHIP.player.needs.hunger = 1; saveGame(); JSON.stringify([n0, localStorage.getItem(SAVE_KEY)])"))
     print('  ?nosave:', ns[0])
-    check(ns[0] == [60, 100, 60, 70, 70], f'?nosave should start fresh: {ns[0]}')
+    check(ns[0] == [60, 100, 60, 70, 70, 60], f'?nosave should start fresh: {ns[0]}')
     wl = json.loads(ev("JSON.stringify([SHIP.mail.map(m => [m.from, m.subject, m.read]), SHIP.player.credits])")); print('  a fresh start: mail', wl[0], 'credits', wl[1])
     check(len(wl[0]) == 1 and wl[0][0][1].startswith('Welcome') and wl[0][0][2] is False and wl[1] == 40, f'a fresh start should have the welcome mail and 40 credits: {wl}')
     check(ns[1] == raw0, '?nosave should not write the save')

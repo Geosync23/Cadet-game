@@ -113,6 +113,10 @@ html[data-ph="green"] body #seek,.devaddr[data-ph="green"],.devdlg[data-ph="gree
 .device .need i{height:14px;border:2px solid var(--crt-dim);border-radius:2px;overflow:hidden;background:transparent}
 .device .need b{display:block;height:100%;background:var(--crt-ink);box-shadow:0 0 6px var(--crt-glow)}
 .device .need.low b{background:repeating-linear-gradient(90deg,var(--crt-hot) 0 6px,transparent 6px 9px)}
+.device .need.pulse b{background:var(--crt-hot);box-shadow:0 0 10px var(--crt-glow)}
+.device.fx .need.pulse b{animation:devpulse .5s steps(2) 3}
+@keyframes devpulse{50%{opacity:.4}}
+@media (prefers-reduced-motion:reduce){.device.fx .need.pulse b{animation:none}}
 .device .need span:last-child{text-align:right;font-variant-numeric:tabular-nums}
 .device .need em{font-style:normal;font-size:15px;margin-left:6px;color:var(--crt-hot)}
 .device .apps{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px;margin-top:14px}
@@ -504,7 +508,15 @@ let MAP = [], STAND = new Set(), ROOM_BOX = {}, EDGES = new Map();
 let HULL_PTS = [], HULL_SEGS = [], HULL_NRM = [];
 let floor = null, edgeList = [], wallEdges = [], frameEdges = [], wallIM = null, hdrIM = null;
 let POSTS = [], RUNS = [], fullPosts = [], hdrPosts = [], postIM = null, hpostIM = null;
-let DOOR_OBJS = [], HULL_RUNS = [], HULL_MESHES = [], VOID_BLOCKS = [];
+let DOOR_OBJS = [], HULL_RUNS = [], HULL_MESHES = [], VOID_BLOCKS = [], DOOR_LEAVES = [];
+const _leafM = new THREE.Matrix4(), _leafS = new THREE.Matrix4(), LEAF_HIDE = new THREE.Matrix4().makeScale(0, 0, 0);
+function doorLeavesSync() {                              // each frame, before the render: the leaves where the doors put them
+  for (const d of DOOR_OBJS) d.g.updateMatrixWorld(true);
+  for (const { im, list } of DOOR_LEAVES) {
+    list.forEach((l, k) => im.setMatrixAt(k, l.visible ? _leafM.multiplyMatrices(l.matrixWorld, _leafS.makeScale(l.userData.leaf.sx, 1, 1)) : LEAF_HIDE));
+    im.instanceMatrix.needsUpdate = true;
+  }
+}
 let staticRoot = null, BLOCKED = new Set(), ITEMS = [], WALL_DECOR = [], SPOTS = [];
 let TALL = [], TALL_BY_ROOM = {}, NO_FADE = new Set();   // tall furniture fades a room at a time; locked rooms stay solid
 let LAMPS = [], STEAM = [], DUST = [], SPINS = [];   // SPINS: parts that turn (fan rotors, gears): { o, ax, w }
@@ -764,13 +776,19 @@ const SKY = (() => {
     const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.generateMipmaps = false; t.minFilter = THREE.LinearFilter; return t;
   };
   const mat = new THREE.ShaderMaterial({
-    uniforms: { tFar: { value: layer(320, 1.1, 1.8, .03) }, tNear: { value: layer(70, 1.6, 2.8, .12) }, uFar: { value: new THREE.Vector2() }, uNear: { value: new THREE.Vector2() }, uPR: { value: 1 }, uK: { value: .8 } },
+    uniforms: { tFar: { value: layer(320, 1.1, 1.8, .03) }, tNear: { value: layer(70, 1.6, 2.8, .12) }, uFar: { value: new THREE.Vector2() }, uNear: { value: new THREE.Vector2() }, uPR: { value: 1 }, uK: { value: .8 },
+      uWash: { value: 0 }, uT: { value: 0 }, uA: { value: new THREE.Color() }, uB: { value: new THREE.Color() } },   // 0.27.19: an event's mood (section 8b's shipFeelFrame)
     vertexShader: 'void main() { gl_Position = vec4(position.xy, .9999, 1.0); }',
-    fragmentShader: `uniform sampler2D tFar, tNear; uniform vec2 uFar, uNear; uniform float uPR, uK;
+    fragmentShader: `uniform sampler2D tFar, tNear; uniform vec2 uFar, uNear; uniform float uPR, uK, uWash, uT; uniform vec3 uA, uB;
       void main() {
         vec2 p = gl_FragCoord.xy / uPR;
         vec4 a = texture2D(tFar, (p + uFar) / 512.0), b = texture2D(tNear, (p + uNear) / 512.0);
-        gl_FragColor = vec4((a.rgb * a.a * .6 + b.rgb * b.a) * uK, 1.0);
+        vec3 c = (a.rgb * a.a * .6 + b.rgb * b.a) * uK;
+        if (uWash > 0.0) {                               // slow broad bands of ion light drifting across space
+          float w1 = .5 + .5 * sin(p.x * .0042 + p.y * .0061 + uT * .23), w2 = .5 + .5 * sin(p.y * .0053 - p.x * .0021 - uT * .17 + 1.7);
+          c = c * mix(vec3(1.0), uA * 1.6 + .45, .35 * min(uWash, 1.0)) + uWash * .75 * (uA * w1 * w1 * w1 + uB * w2 * w2 * w2 * w2);
+        }
+        gl_FragColor = vec4(c, 1.0);
       }`,
     transparent: true, blending: THREE.AdditiveBlending, depthWrite: false,
   });
@@ -846,6 +864,9 @@ const hatchLeafTex = tex(120, 220, (g, w, h) => {
   g.fillStyle = '#c9b98a'; g.fillRect(w / 2 - 20, h * .46, 6, 26); g.fillRect(w / 2 + 14, h * .46, 6, 26);
 });
 const hatchLeafMats = [0, .5].map(o => { const t = hatchLeafTex.clone(); t.needsUpdate = true; t.repeat.set(.5, 1); t.offset.set(o, 0); return new THREE.MeshStandardMaterial({ map: t, roughness: .6, metalness: .35 }); });
+// 0.27.21: every door leaf on a deck is drawn by one InstancedMesh per leaf material (doorLeavesSync), from this
+// one shared box, 1 m wide and stretched to each leaf's width. The leaves themselves stay as invisible boxes for taps.
+const DOOR_LEAF_GEO = packGroups(new THREE.BoxGeometry(1, 2.2, .07), [capMat, capMat, capMat, capMat, null, null]);
 // inner glass walls: a wall-textured sill to 1 m, a pane, and the usual header above 2.2 m
 const SILL = 1.0;
 const sillGeo = new THREE.BoxGeometry(SEG, SILL, T); sillGeo.translate(0, SILL / 2, 0);
@@ -1562,19 +1583,21 @@ const KIT = {
   // ---- the hydroponics garden ----
   raisedBed(g, o = {}) {                                 // a timber bed of soil, planted by o.crop; greens and herbs get a grow light
     const w = o.w || 1.8, crop = o.crop || 'greens', L = GD.leaves;
+    const P = o.live ? plantSlots(g, o.live, .475) : null, lf = P ? P.leaf : leaf, sf = P ? P.soft : soft;   // o.live: section 8b's garden view grows them (0.27.23)
     box(w, .46, .9, GD.bed, 0, .23, 0, g); box(w - .1, .03, .8, GD.soil, 0, .46, 0, g);
     for (const x of [-w / 2 + .02, w / 2 - .02]) box(.06, .5, .92, GD.post, x, .25, 0, g);
     const nx = Math.floor((w - .2) / .3);
     for (let r = 0; r < 2; r++) for (let k = 0; k < nx; k++) {
       const x = -w / 2 + .22 + k * (w - .44) / Math.max(1, nx - 1), z = r ? .2 : -.2, j = R();
-      if (crop === 'greens') { leaf(L[(k + r) % 2 ? 2 : 4], x, .56, z, .16 + j * .03, .11, .16, g); leaf(L[1], x, .62, z, .08, .06, .08, g); }
-      else if (crop === 'herbs') { leaf(L[(k * 3 + r) % 5], x, .56 + j * .04, z, .07, .1 + j * .05, .07, g); leaf(L[(k + 1) % 5], x + .06, .54, z + .04, .05, .07, .05, g); }
+      if (crop === 'greens') { lf(L[(k + r) % 2 ? 2 : 4], x, .56, z, .16 + j * .03, .11, .16, g); lf(L[1], x, .62, z, .08, .06, .08, g); }
+      else if (crop === 'herbs') { lf(L[(k * 3 + r) % 5], x, .56 + j * .04, z, .07, .1 + j * .05, .07, g); lf(L[(k + 1) % 5], x + .06, .54, z + .04, .05, .07, .05, g); }
       else if (crop === 'flowers') { leaf(L[1], x, .54, z, .1, .07, .1, g); leaf(GD.flowers[(k + r * 2) % 5], x + (j - .5) * .05, .64 + j * .05, z, .055, .045, .055, g); }
+      else if (crop === 'roots') { lf(L[(k + r) % 2 ? 1 : 3], x, .58 + j * .02, z, .05, .13 + j * .04, .05, g); sf(GD.orange, x, .49, z, .045, .03, .045, g); }   // feathery tops, orange shoulders in the soil (0.38.7)
       else if (crop === 'tomato') {
         if (k % 2) continue;
         cyl(.012, .012, 1.3, GD.post, x, 1.1, z, g, 6);
-        for (let h = 0; h < 4; h++) leaf(L[(h + k) % 5], x + (R() - .5) * .1, .65 + h * .26, z + (R() - .5) * .1, .14, .12, .14, g);
-        for (let h = 0; h < 3; h++) if (R() < .8) soft(GD.tomato, x + (R() - .5) * .18, .7 + h * .3, z + .1, .04, .04, .04, g);
+        for (let h = 0; h < 4; h++) lf(L[(h + k) % 5], x + (R() - .5) * .1, .65 + h * .26, z + (R() - .5) * .1, .14, .12, .14, g);
+        for (let h = 0; h < 3; h++) if (R() < .8) sf(GD.tomato, x + (R() - .5) * .18, .7 + h * .3, z + .1, .04, .04, .04, g);
       }
     }
     if (crop === 'greens' || crop === 'herbs') {
@@ -1602,13 +1625,14 @@ const KIT = {
     glow('#ff7ae0', .8, 0, 1.2, .1, g, .3);
     return { w: 1.8, d: .6, tall: true };
   },
-  trellis(g) {                                           // a climbing frame lost under beans and vines
+  trellis(g, o = {}) {                                   // a climbing frame lost under beans and vines
     for (const x of [-.75, .75]) box(.05, 2.0, .05, GD.post, x, 1.0, 0, g);
     for (const y of [.6, 1.2, 1.9]) box(1.55, .03, .03, GD.post, 0, y, 0, g);
     box(1.6, .3, .35, GD.bed, 0, .15, 0, g);
-    for (let k = 0; k < 16; k++) leaf(GD.leaves[k % 5], -.7 + R() * 1.4, .4 + R() * 1.6, (R() - .5) * .2, .12 + R() * .08, .12, .1, g);
-    for (let k = 0; k < 8; k++) cyl(.012, .01, .14, GD.bean, -.6 + R() * 1.2, .6 + R() * 1.2, .08, g, 5);
-    for (let k = 0; k < 5; k++) leaf(GD.flowers[k % 5], -.6 + R() * 1.2, .6 + R() * 1.3, .1, .04, .04, .04, g);
+    const P = o.live ? plantSlots(g, o.live, .3) : null, lf = P ? P.leaf : leaf, pd = P ? P.pod : cyl;   // o.live: grown by section 8b (0.27.23)
+    for (let k = 0; k < 16; k++) lf(GD.leaves[k % 5], -.7 + R() * 1.4, .4 + R() * 1.6, (R() - .5) * .2, .12 + R() * .08, .12, .1, g);
+    for (let k = 0; k < 8; k++) pd(.012, .01, .14, GD.bean, -.6 + R() * 1.2, .6 + R() * 1.2, .08, g, 5);
+    for (let k = 0; k < 5; k++) lf(GD.flowers[k % 5], -.6 + R() * 1.2, .6 + R() * 1.3, .1, .04, .04, .04, g);
     return { w: 1.6, d: .4, tall: true };
   },
   citrusTree(g, o = {}) {                                // a little orange (or lemon) tree in a big pot
@@ -2632,6 +2656,64 @@ const TEMPLATES = {
 };
 
 // ---- merge everything static into a few meshes ----
+// 0.27.23: a garden kit with o.live records its plants here instead of building them (section 8b's gardenView grows
+// them with the galley's beds). Same calls in the same order, so R() is drawn exactly as before. GARDEN_PLOTS is the
+// deck's list: { g, crop, n (the nth bed of that crop on the deck), base (soil height), slots }
+let GARDEN_PLOTS = [];
+function plantSlots(g, crop, base) {
+  const P = { g, crop, n: GARDEN_PLOTS.filter(p => p.crop === crop).length, base, slots: [] }; GARDEN_PLOTS.push(P);
+  const fruit = m => m === GD.tomato || m === GD.bean || GD.flowers.includes(m);
+  const put = (geo, mat, x, y, z, sx, sy, sz) => { P.slots.push({ geo, mat, x, y, z, sx, sy, sz, fruit: fruit(mat) }); };
+  return { leaf: (mat, x, y, z, sx, sy, sz) => put('leaf', mat, x, y, z, sx, sy, sz), soft: (mat, x, y, z, sx, sy, sz) => put('ball', mat, x, y, z, sx, sy, sz),
+    pod: (rt, rb, h, mat, x, y, z) => put('pod', mat, x, y, z, 1, 1, 1) };
+}
+// 0.27.20: neighbouring faces of one geometry that share a material become one group, so a door leaf's box (four
+// edge faces, then two faces) draws in 2 calls, not 6, in the picture and in the shadows. Same triangles in the same
+// order, so nothing on screen changes.
+function packGroups(geo, mats) {
+  const out = [];
+  for (const gr of geo.groups) { const p = out[out.length - 1]; if (p && mats[p.materialIndex] === mats[gr.materialIndex] && p.start + p.count === gr.start) p.count += gr.count; else out.push({ ...gr }); }
+  geo.groups = out; return geo;
+}
+// 0.27.22: tall furniture is drawn together: one mesh per material (and shadow flag) for the whole deck, made from
+// every room's merged pieces in room order, with one more copy of the material made like each room's own (so it
+// doesn't pulse or wilt with the shared one, as before). A room that is fading or faded (t.o below 1) shows its own
+// meshes again, and the deck-wide mesh skips that room's stretch (tallSync, each frame after the fades). Opaque only.
+let TALL_ALL = [], TALL_KEY = null;
+function tallCombine() {
+  const buckets = new Map(); TALL_ALL = []; TALL_KEY = null;
+  TALL.forEach((t, ti) => {
+    t.own = [];
+    for (const o of t.g.children.slice()) {
+      const base = o.isMesh && !o.userData.noMerge && !Array.isArray(o.material) && t.src.get(o.material);
+      if (!base || base.transparent || base.opacity < 1) continue;
+      const key = base.uuid + (o.castShadow ? '' : '-ns');
+      let b = buckets.get(key); if (!b) buckets.set(key, b = { mat: base.clone(), shadow: o.castShadow, P: [], N: [], U: [], ranges: [] });
+      const a = o.geometry.attributes, n = a.position.count;
+      b.ranges.push([ti, b.P.length / 3, n]); for (const [d, s] of [[b.P, a.position], [b.N, a.normal], [b.U, a.uv]]) for (const v of s.array) d.push(v);
+      o.visible = false; t.own.push(o);
+    }
+  });
+  for (const b of buckets.values()) {
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(b.P, 3)); geo.setAttribute('normal', new THREE.Float32BufferAttribute(b.N, 3));
+    geo.setAttribute('uv', new THREE.Float32BufferAttribute(b.U, 2)); geo.computeBoundingSphere();
+    const mesh = new THREE.Mesh(geo, [b.mat]); mesh.castShadow = b.shadow; mesh.receiveShadow = true; mesh.raycast = () => {}; deckRoot.add(mesh);
+    TALL_ALL.push({ mesh, ranges: b.ranges });
+  }
+  tallSync();
+}
+function tallSync() {
+  let key = ''; TALL.forEach((t, i) => { if (t.o !== 1) key += i + ','; });
+  if (key === TALL_KEY) return;
+  TALL_KEY = key; const out = new Set(key.split(',').filter(Boolean).map(Number));
+  TALL.forEach((t, i) => { for (const o of t.own || []) o.visible = out.has(i); });
+  for (const b of TALL_ALL) {
+    const gr = [];
+    for (const [ti, start, count] of b.ranges) { if (out.has(ti)) continue; const p = gr[gr.length - 1]; if (p && p.start + p.count === start) p.count += count; else gr.push({ start, count, materialIndex: 0 }); }
+    b.mesh.geometry.groups = gr; b.mesh.visible = gr.length > 0;
+  }
+}
 function mergeMeshes(root) {
   root.updateMatrixWorld(true);
   const inv = new THREE.Matrix4().copy(root.matrixWorld).invert(), m4 = new THREE.Matrix4();
@@ -2892,13 +2974,14 @@ function buildDeck(def) {
   frameEdges = edgeList.filter(e => e.type !== 'wall' && e.type !== 'window');   // doors, lifts, hatches and glass all carry a header
   glassEdges = edgeList.filter(e => e.type === 'glass' || e.type === 'pass'); sillIM = paneIM = null;   // a pass is glass with no pane
   if (glassEdges.length) {
-    sillIM = new THREE.InstancedMesh(sillGeo, [capMat, capMat, M.trim, capMat, wallMat, wallMat], glassEdges.length);
+    const sm = [capMat, capMat, M.trim, capMat, wallMat, wallMat]; sillIM = new THREE.InstancedMesh(packGroups(sillGeo, sm), sm, glassEdges.length);
     paneIM = new THREE.InstancedMesh(paneGeo, paneMat, glassEdges.length);
     glassEdges.forEach((e, k) => e.ginst = k);
     sillIM.castShadow = sillIM.receiveShadow = true; deckRoot.add(sillIM, paneIM);
   }
-  wallIM = new THREE.InstancedMesh(wallGeo, [capMat, capMat, capMat, capMat, wallMat, wallMat], wallEdges.length);
-  hdrIM = new THREE.InstancedMesh(hdrGeo, [capMat, capMat, capMat, capMat, wallMat, wallMat], frameEdges.length);
+  const wm = [capMat, capMat, capMat, capMat, wallMat, wallMat];   // 0.27.20: packGroups, 6 calls to 2
+  wallIM = new THREE.InstancedMesh(packGroups(wallGeo, wm), wm, wallEdges.length);
+  hdrIM = new THREE.InstancedMesh(packGroups(hdrGeo, wm), wm, frameEdges.length);
   wallEdges.forEach((e, k) => e.inst = k); frameEdges.forEach((e, k) => e.hinst = k);
   // posts at every corner where walls meet
   POSTS = [];
@@ -2942,8 +3025,8 @@ function buildDeck(def) {
     const mats = e.type === 'lift' ? liftLeafMats : e.type === 'hatch' ? hatchLeafMats : leafMats, leaves = [];
     for (const sd of [-1, 1]) {
       const m = mats[sd < 0 ? 0 : 1];
-      const leaf = new THREE.Mesh(new THREE.BoxGeometry(span / 2, 2.2, .07), [capMat, capMat, capMat, capMat, m, m]);
-      leaf.position.set(sd * span / 4, 1.1, sd * .012); leaf.castShadow = true; g.add(leaf); leaves.push(leaf);
+      const leaf = new THREE.Mesh(new THREE.BoxGeometry(span / 2, 2.2, .07), HIT_MAT); leaf.userData.leaf = { m, sx: span / 2 };   // drawn by DOOR_LEAVES
+      leaf.position.set(sd * span / 4, 1.1, sd * .012); g.add(leaf); leaves.push(leaf);
     }
     if (e.type === 'door' || e.type === 'lift') {
       const th = new THREE.Mesh(new THREE.BoxGeometry(span - .1, .02, .1), thrMat); th.position.set(0, .01, 0); deckRoot.add(th); th.position.add(g.position); th.rotation.y = g.rotation.y;
@@ -2952,6 +3035,12 @@ function buildDeck(def) {
     if (CLOSED_DOORS[e.key]) hit.userData.closedDoor = e.key;
     if (e.type === 'lift') hit.userData.liftDoor = e.key;
     DOOR_OBJS.push({ e, g, leaves, open: 0, passable: e.type === 'door' || e.type === 'lift', svc: !!e.service, cx, cz, span });
+  }
+  DOOR_LEAVES = [];                                      // 0.27.21: one InstancedMesh per leaf material (2 draw calls each, not 2 a leaf)
+  for (const m of new Set(DOOR_OBJS.flatMap(d => d.leaves.map(l => l.userData.leaf.m)))) {
+    const list = DOOR_OBJS.flatMap(d => d.leaves).filter(l => l.userData.leaf.m === m);
+    const im = new THREE.InstancedMesh(DOOR_LEAF_GEO, [capMat, capMat, capMat, capMat, m, m], list.length);
+    im.castShadow = true; im.frustumCulled = false; im.raycast = () => {}; deckRoot.add(im); DOOR_LEAVES.push({ im, list });
   }
 
   // ---- the hull wall: a thick ribbon along the outline, split into runs by the room inside it ----
@@ -3032,6 +3121,7 @@ function buildDeck(def) {
         n = e;
       }
       for (const p of parts) {
+        mergeMeshes(p.g);                                 // 0.27.20: one mesh per material for each piece (was one per strip); the decor is merged below
         p.g.traverse(o => { if (o.isMesh) HULL_MESHES.push(o); });
         // the hull doesn't follow you: pieces facing the camera stay low, the rest stay up
         let ox = 0, oz = 0; const edges = [];
@@ -3055,14 +3145,14 @@ function buildDeck(def) {
   for (const [i, j, w, d] of Object.entries(ROOM_BOX).filter(([k]) => ROOMS[k].void).map(([, b]) => [b.i0, b.j0, b.i1 - b.i0 + 1, b.j1 - b.j0 + 1])) {
     const t = hatchTex.clone(); t.needsUpdate = true; t.repeat.set(w / 2, d / 2);
     const top = new THREE.MeshStandardMaterial({ map: t, roughness: .9 });
-    const m = new THREE.Mesh(new THREE.BoxGeometry(w - .21, H - .03, d - .21), [capMat, capMat, top, capMat, capMat, capMat]);
+    const vm = [capMat, capMat, top, capMat, capMat, capMat], m = new THREE.Mesh(packGroups(new THREE.BoxGeometry(w - .21, H - .03, d - .21), vm), vm);
     m.geometry.translate(0, (H - .03) / 2, 0); m.position.set(X0(i) + w / 2, 0, Z0(j) + d / 2); m.receiveShadow = true; deckRoot.add(m);
     VOID_BLOCKS.push({ m, cx: m.position.x, cz: m.position.z, s: 1 });
   }
 
   // ---- furnish ----
   staticRoot = new THREE.Group(); deckRoot.add(staticRoot);
-  BLOCKED = new Set(); SNUG = new Map(); ITEMS = []; WALL_DECOR = []; SPOTS = []; SPINS = []; PULSES = []; MOVERS = [];
+  BLOCKED = new Set(); SNUG = new Map(); ITEMS = []; WALL_DECOR = []; SPOTS = []; SPINS = []; PULSES = []; MOVERS = []; GARDEN_PLOTS = [];
   TALL = []; TALL_BY_ROOM = {}; NO_FADE = new Set();
   def.dress(def);
   buildCurves(def);
@@ -3079,8 +3169,9 @@ function buildDeck(def) {
     const clones = new Map();
     const cl = m => { if (!clones.has(m)) { const c = m.clone(); c.userData.base = { op: m.opacity, tr: m.transparent }; clones.set(m, c); } return clones.get(m); };
     t.g.traverse(o => { if (o.isMesh && !o.userData.noMerge) o.material = Array.isArray(o.material) ? o.material.map(cl) : cl(o.material); });
-    mergeMeshes(t.g); t.mats = [...clones.values()];
+    mergeMeshes(t.g); t.mats = [...clones.values()]; t.src = new Map([...clones].map(([b, c]) => [c, b]));
   }
+  tallCombine();
   for (const d of WALL_DECOR) mergeMeshes(d.g);
   for (const hr of HULL_RUNS) mergeMeshes(hr.decor);
   for (const it of ITEMS) it.hit.userData.item = it;
@@ -3152,7 +3243,7 @@ function unloadDeck() {
   for (const t of texs) { t.dispose(); const c = t.userData && t.userData.c; if (c && c === t.image) c.width = c.height = 0; }
   scene.remove(deckRoot);
   deckRoot = staticRoot = floor = wallIM = hdrIM = postIM = hpostIM = sillIM = paneIM = null; glassEdges = [];
-  LAMPS = []; STEAM = []; DUST = []; SPINS = []; PULSES = []; MOVERS = []; TALL = []; ITEMS = []; WALL_DECOR = []; DOOR_OBJS = []; HULL_RUNS = []; HULL_MESHES = []; VOID_BLOCKS = [];
+  LAMPS = []; STEAM = []; DUST = []; SPINS = []; PULSES = []; MOVERS = []; TALL = []; ITEMS = []; WALL_DECOR = []; DOOR_OBJS = []; HULL_RUNS = []; HULL_MESHES = []; VOID_BLOCKS = []; DOOR_LEAVES = [];
   RUNS = []; POSTS = []; edgeList = []; wallEdges = []; frameEdges = []; fullPosts = []; hdrPosts = []; glows.length = 0;
   CURVES = []; CURVE_SEGS = [];
 }
@@ -3612,6 +3703,11 @@ DECKS[4] = {
     { id: '4-pump-2', kind: 'heatpump', at: [19, 19], room: 't', face: 'e', panel: [20, 19], look: { lamp: [0, 0.45, 0.33], drip: [0, 0.42, 0.38] } },
     { id: '4-junction-1', kind: 'lights', at: [18, 19], room: 'k', face: 'n', panel: [18, 18], look: { lamp: [0, 1.2, 0.13], drip: [0, 0.9, 0.18] } },
     { id: '4-junction-2', kind: 'lights', at: [42, 19], room: 'y', face: 'n', panel: [42, 18], look: { lamp: [0, 1.2, 0.13], drip: [0, 0.9, 0.18] } },
+    // the laundry's four washers (C9, 0.38.8): real machines in place of section 17's stand-ins (same ids), Washer 1 by the door end
+    { id: '4-washer-1', kind: 'washer', at: [14, 19], room: 'l', face: 'n', panel: [14, 18], look: { lamp: [0, .75, .34], drip: [0, .12, .37], light: [0, .95, .34] } },
+    { id: '4-washer-2', kind: 'washer', at: [13, 19], room: 'l', face: 'n', panel: [13, 18], look: { lamp: [0, .75, .34], drip: [0, .12, .37], light: [0, .95, .34] } },
+    { id: '4-washer-3', kind: 'washer', at: [12, 19], room: 'l', face: 'n', panel: [12, 18], look: { lamp: [0, .75, .34], drip: [0, .12, .37], light: [0, .95, .34] } },
+    { id: '4-washer-4', kind: 'washer', at: [11, 19], room: 'l', face: 'n', panel: [11, 18], look: { lamp: [0, .75, .34], drip: [0, .12, .37], light: [0, .95, .34] } },
   ],
   hull: { sternX: 2, stern: 1.5, bowFrom: 40, bowLen: 9.6, byFace: true },   // stern line, stern corner radius, where the bow curve starts, how far it reaches; one hull piece per facing (0.30.11)
   // 0.17.1: the bunk rooms grew, so the floor painter draws a different count of random numbers west of column 21. At column 21
@@ -3773,6 +3869,10 @@ DECKS[4] = {
     { id: '4-pump-2-svc', machine: '4-pump-2', type: 'work:works', at: [20, 19], face: 'w', pose: 'work', room: 't' },
     { id: '4-junction-1-svc', machine: '4-junction-1', type: 'work:works', at: [18, 18], face: 's', pose: 'work', room: 'k' },
     { id: '4-junction-2-svc', machine: '4-junction-2', type: 'work:works', at: [42, 18], face: 's', pose: 'work', room: 'y' },
+    { id: '4-washer-1-svc', machine: '4-washer-1', type: 'work:works', at: [14, 18], xy: [14.5, 18.75], face: 's', pose: 'work', room: 'l' },
+    { id: '4-washer-2-svc', machine: '4-washer-2', type: 'work:works', at: [13, 18], xy: [13.5, 18.75], face: 's', pose: 'work', room: 'l' },
+    { id: '4-washer-3-svc', machine: '4-washer-3', type: 'work:works', at: [12, 18], xy: [12.5, 18.75], face: 's', pose: 'work', room: 'l' },
+    { id: '4-washer-4-svc', machine: '4-washer-4', type: 'work:works', at: [11, 18], xy: [11.5, 18.75], face: 's', pose: 'work', room: 'l' },
   ],
   // the officer whose bed is in cabin num ('4-06'), from ROSTER (0.30.12); none for guest and spare cabins
   officer(num) { return /^4-\d\d$/.test(num) && typeof ROSTER !== 'undefined' ? ROSTER.find(p => p.bed === num) || null : null; },
@@ -4546,6 +4646,9 @@ DECKS[3] = {
     { id: '3-lights-1', kind: 'lights', at: [16, 15], room: 'R', face: 'w', panel: [16, 15] },
     { id: '3-nutrient-1', kind: 'nutrient', at: [5, 18], room: 'i', face: 'w', panel: [4, 18], look: { lamp: [0, 1.2, .7], drip: [0, .9, .74], light: [0, 2.1, .7] } },
     { id: '3-irrigation-1', kind: 'irrigation', at: [5, 20], room: 'i', face: 'w', panel: [4, 20], look: { lamp: [0, .96, .6], drip: [0, .9, .64], light: [0, 2.1, .6] } },
+    // the garden's grow racks (C9, 0.38.6, for the systems engineer): kind 'growlight', the north four racks and the south two
+    { id: '3-growlight-1', kind: 'growlight', at: [5, 0], room: 'G', face: 's', panel: [5, 1], look: { lamp: [-.4, 1.55, .17], drip: [-.4, .4, .2], light: [-.4, 2.05, .17] } },
+    { id: '3-growlight-2', kind: 'growlight', at: [8, 21], room: 'G', face: 'n', panel: [8, 20], look: { lamp: [.4, 1.55, .18], drip: [.4, .4, .21], light: [.4, 2.05, .18] } },
   ],
   places: [
     { id: '3-bench-1', type: 'bench', at: [22, 14], xy: [22.7, 14.15], walk: [22, 13], face: 'w', pose: 'sit', room: '+' },
@@ -4668,6 +4771,13 @@ DECKS[3] = {
     { id: '3-tend-15', type: 'garden', at: [10, 16], xy: [10.6, 16.25], walk: [10, 16], face: 'n', pose: 'work', anim: 'water', room: 'G' },
     { id: '3-tend-16', type: 'garden', at: [8, 19], xy: [8, 19.65], walk: [8, 19], face: 'n', pose: 'work', anim: 'water', room: 'G' },
     { id: '3-tend-17', type: 'garden', at: [10, 19], xy: [10.6, 19.65], walk: [10, 19], face: 'n', pose: 'work', anim: 'water', room: 'G' },
+    // gardeners at work (C9, 0.38.6): standing at the racks and beds, watering; free tiles that aren't tend spots
+    { id: '3-gardenwork-1', type: 'work:garden', at: [7, 1], xy: [7.1, 1.15], face: 'n', pose: 'stand', anim: 'water', room: 'G' },   // the north racks
+    { id: '3-gardenwork-2', type: 'work:garden', at: [9, 1], xy: [9.1, 1.15], face: 'n', pose: 'stand', anim: 'water', room: 'G' },
+    { id: '3-gardenwork-3', type: 'work:garden', at: [4, 4], xy: [4.5, 4.4], face: 's', pose: 'stand', anim: 'water', room: 'G' },   // the beds
+    { id: '3-gardenwork-4', type: 'work:garden', at: [8, 4], xy: [8, 4.4], face: 's', pose: 'stand', anim: 'water', room: 'G' },
+    { id: '3-gardenwork-5', type: 'work:garden', at: [5, 14], xy: [5, 14.4], face: 's', pose: 'stand', anim: 'water', room: 'G' },
+    { id: '3-crates-1', type: 'storage', at: [9, 12], face: 'e', pose: 'stand', room: 'G' },   // where garden crates are picked up, by the glass doors
     { id: '3-garden-1', type: 'garden', at: [6, 8], xy: [6.15, 8.45], walk: [5, 8], face: 's', pose: 'sit', room: 'G' },
     { id: '3-garden-2', type: 'garden', at: [6, 8], xy: [6.85, 8.45], walk: [7, 8], face: 's', pose: 'sit', room: 'G' },
     { id: '3-garden-3', type: 'garden', at: [6, 13], xy: [6.85, 13.55], walk: [7, 13], face: 'n', pose: 'sit', room: 'G' },
@@ -4733,6 +4843,8 @@ DECKS[3] = {
     { id: '3-lights-1-panel', type: 'work:works', at: [16, 15], xy: [16.7, 15.5], walk: [16, 15], face: 'e', pose: 'work', machine: '3-lights-1', room: 'R' },
     { id: '3-nutrient-1-panel', type: 'work:works', at: [4, 18], xy: [4.7, 18.5], walk: [4, 18], face: 'e', pose: 'work', machine: '3-nutrient-1', room: 'i' },
     { id: '3-irrigation-1-panel', type: 'work:works', at: [4, 20], xy: [4.7, 20.5], walk: [4, 20], face: 'e', pose: 'work', machine: '3-irrigation-1', room: 'i' },
+    { id: '3-growlight-1-panel', type: 'work:works', at: [5, 1], xy: [5.4, 1.15], walk: [5, 1], face: 'n', pose: 'work', machine: '3-growlight-1', room: 'G' },
+    { id: '3-growlight-2-panel', type: 'work:works', at: [8, 20], xy: [8.4, 20.8], walk: [8, 20], face: 's', pose: 'work', machine: '3-growlight-2', room: 'G' },
     { id: '3-callhome-1', type: 'callhome', at: [36, 21], xy: [36.62, 21.15], walk: [36, 20], face: 's', pose: 'sit', anim: 'call', y: .53, room: 'B' },
     { id: '3-callhome-2', type: 'callhome', at: [37, 21], xy: [37.84, 21.15], walk: [37, 20], face: 's', pose: 'sit', anim: 'call', y: .53, room: 'B' },
     { id: '3-callhome-3', type: 'callhome', at: [39, 21], xy: [39.06, 21.15], walk: [39, 20], face: 's', pose: 'sit', anim: 'call', y: .53, room: 'B' },
@@ -4856,9 +4968,9 @@ DECKS[3] = {
       tomato: 'Vines up their stakes and fruit going red. Everyone eats one straight off the plant. Everyone denies it.', flowers: 'Not for eating. For bees, if we had them, and for people, who we do.' };
     [[3.4, 2.75, 'greens'], [6.0, 2.75, 'herbs'], [8.6, 2.75, 'greens'], [3.4, 5.3, 'tomato'], [6.0, 5.3, 'flowers'], [8.6, 5.3, 'tomato'],
      [3.4, 15.4, 'flowers'], [6.0, 15.4, 'greens'], [8.6, 15.4, 'herbs'], [6.0, 18.8, 'greens'], [8.6, 18.8, 'tomato']].forEach(([x, z, crop], k) =>
-      place(G, 'raisedBed', x, z, 'n', { crop, butterflies: crop === 'flowers', it: [0, 1, 3, 4].includes(k) ? IT(BED[crop], BEDX[crop]) : undefined }));
-    place(G, 'trellis', .3, 5.0, 'w', { it: IT('Bean trellis', 'Runner beans up a frame against the stern windows, so the beans get the stars.') });
-    place(G, 'trellis', 9.75, 16.5, 'e');
+      place(G, 'raisedBed', x, z, 'n', { crop, live: { greens: 'greens', herbs: 'herbs', tomato: 'tomatoes' }[crop], butterflies: crop === 'flowers', it: [0, 1, 3, 4].includes(k) ? IT(BED[crop], BEDX[crop]) : undefined }));
+    place(G, 'trellis', .3, 5.0, 'w', { live: 'beans', it: IT('Bean trellis', 'Runner beans up a frame against the stern windows, so the beans get the stars.') });
+    place(G, 'trellis', 9.75, 16.5, 'e', { live: 'beans' });
     placeWall(G, 'herbWall', 'e', 7.5, { hitW: 1.6, it: IT('Herb wall', 'Pockets of herbs by the door, labelled FOR THE GALLEY in Chef Brennan\'s writing. Take a sprig and she will know.') });
     // the pond, its benches and the path
     place(G, 'moss', 4.5, 11.0, 'n', { r: 1.75 });
@@ -4957,6 +5069,9 @@ DECKS[3] = {
     [1.0, 1.8].forEach((x, k) => place('F', 'rower', x, 4.6, 's', { place: '3-gym-' + (11 + k), it: k ? IT('Rowing machines', 'A matched pair, side by side, so two people can race. Somebody always says it isn\'t a race.') : undefined }));
     place('F', 'punchBag', 7.5, 4.5, 'e', { place: '3-gym-13', it: IT('Punch bag', 'Patched with tape in three places. The Watch crew say it helps them think. The Works crew say it helps them not think.') });
     place('F', 'gymMat', 4.9, 4.6, 's', { it: IT('Stretching mat', 'One more mat, rolled out in the middle of the room, for people who want to stretch where everyone can see them do it.') });
+    // ---- the galley's root beds and third bean bed (C9, 0.38.7), grown by section 8b's garden view; last, since raisedBed and trellis draw R() ----
+    [[8.1, 8.9, 'e'], [8.1, 13.15, 'e'], [5.7, 17.45, 'n']].forEach(([x, z, b], k) => place('G', 'raisedBed', x, z, b, { crop: 'roots', live: 'roots', it: k ? undefined : IT('Root beds', 'Carrots, beets and turnips, a month from seed to the galley. Chef Brennan pulls one up every few days to check, and pretends she\'s only weeding.') }));
+    place('G', 'trellis', .3, 14.8, 'w', { live: 'beans', it: IT('Bean trellis', 'A second frame of runner beans against the stern windows. The galley wanted more beans. The galley always wants more beans.') });
   },
 
 };
@@ -6667,7 +6782,7 @@ DECKS[3].gathers = {
 };
 DECKS[5].gathers = {
   'shuttle-bay': { name: 'the shuttle bay', focus: [6.0, 10.6], rooms: 'S', seats: [], also: [],
-    lead: [[6.0, 10.15, 0], [6.0, 11.3, 180], [5.0, 11.3, 180], [7.0, 11.3, 180]],   // the foot of the Tern's ramp: whoever arrives (lead 1), facing the Captain, the Envoy and the XO
+    lead: [[6.0, 11.3, 180], [5.0, 11.3, 180], [6.0, 10.15, 0]],   // the foot of the Tern's ramp: the Captain (lead 1) and Envoy Saruth, facing the Speaker or whoever arrives (lead 3)
     at: '4,10 4,11 5,12 6,12 4,12 7,12 3,10 8,10 7,8 3,11 8,11 3,9 8,9 5,13 8,8 4,13 7,7 2,10 9,10 9,11 2,9 9,9 5,14 6,14 8,7 2,8 5,6 6,6 4,14 7,14 4,6 7,6 1,10 1,11 1,9 2,7 3,6 8,6 5,15 6,15 1,8 5,5 6,5 4,15 7,15 4,5 7,5 2,6 9,6 1,7 3,5 8,5 1,6 5,4 6,4 2,5 9,5 4,4 7,4 3,4 8,4 1,5 9,4 5,3 6,3 4,3 7,3 3,3 8,3 1,4 2,3 9,3 5,2 6,2 4,2 7,2 1,3 3,2 8,2 2,2 9,2 5,1 6,1 4,1 7,1 1,2 3,1 8,1 2,1 9,1 5,0 6,0 1,1 4,0 7,0 3,0 8,0 2,0 9,0 10,9 11,9 11,8 10,6 11,7 12,8 11,6 12,7 13,9 12,6 13,8 13,7 13,6 14,9 14,8 14,7 14,6 15,8 15,7 16,9 20,8' },
   'works-bay': { name: 'the Works bay', focus: [16.5, 1.6], rooms: 'w', seats: [], also: [],
     lead: [[16.6, 0.7, 0], [17.6, 1.0, -25], [14.4, 0.8, 25]],   // the Chief beside the job board (lead 1), two techs either side
@@ -6812,6 +6927,18 @@ const DECK_DRESS = {
     dressBox(s, .16, .11, .004, '#f4efe2', .18, .38, .062);         // a note
     return { t: 'Taped panel', x: 'An access panel taped shut with hazard tape. The note says DO NOT OPEN: WAITING ON PARTS. The ion storm cooked whatever is behind it.', wall: ['u', 'w', 1.5], y: .55 };
   } },
+  veyliCordSculpture: { deck: 3, what: 'the Veyli delegation\'s gift: a cord sculpture hung on the bow lounge wall between the booths', make(g) {
+    const s = dressAt(g, 'L', 'w', 17.6), C = ['#c45a3f', '#e8c06a', '#2a9d8f'];   // the diplomatic visit's trace (section 18, when it goes smoothly)
+    dressBox(s, .05, .05, .16, '#c9a24a', 0, 2.3, .08);                // a bracket off the wall
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(.3, .022, 8, 28), dressMat('#c9a24a')); ring.position.set(0, 2.0, .18); s.add(ring);   // the brass ring, upright
+    dressBox(s, .012, .14, .012, '#c9a24a', 0, 2.37, .18);             // and the cord it hangs by
+    for (let k = 0; k < 9; k++) {                                         // nine knotted cords from the ring's lower half, longest in the middle
+      const a = Math.PI * (1.12 + k * .095), x = Math.cos(a) * .3, y = 2.0 + Math.sin(a) * .3, len = .45 + .4 * Math.sin(Math.PI * (k + .5) / 9), z = .15 + (k % 3) * .03;
+      const c = new THREE.Mesh(new THREE.CylinderGeometry(.008, .008, len, 5), dressMat(C[k % 3])); c.position.set(x, y - len / 2, z); s.add(c);
+      for (const f of [.45, 1]) { const b = new THREE.Mesh(new THREE.SphereGeometry(f === 1 ? .03 : .02, 8, 6), dressMat(C[(k + 1) % 3])); b.position.set(x, y - len * f, z); s.add(b); }
+    }
+    return { t: 'Veyli cord sculpture', x: 'A gift from the Veyli delegation: knotted cords in three colours, hung from a brass ring. Envoy Saruth says each knot is a promise, and that it would be rude to count them.', wall: ['L', 'w', 17.6], y: 1.9, w: .7, h: 1.0 };
+  } },
   partyLounge: { deck: 3, what: 'party decorations in the bow lounge: bunting, balloons and a banner', make(g, o) {
     const s = dressAt(g, 'L', 'floor', 0, 0), C = ['#c45a3f', '#e8c06a', '#5fd6c6'], y = 2.2;
     const pts = [[41.4, 9.0], [46.44, 8.27], [46.44, 13.73], [41.4, 13.0]].map(([x, z]) => [x - ROOM_BOX.L.i0, z - ROOM_BOX.L.j0]);
@@ -6882,10 +7009,18 @@ sun.shadow.bias = -.0004; sun.shadow.normalBias = .03;
 const sunDir = SUN_OFF.clone().normalize();
 const sunR = new THREE.Vector3().crossVectors(new THREE.Vector3(0, 1, 0), sunDir).normalize();
 const sunU = new THREE.Vector3().crossVectors(sunDir, sunR);
+let SHADOW_K = 1;
 function placeSun(p) {
-  const ts = 20 / sun.shadow.mapSize.x, v = new THREE.Vector3(p.x, 0, p.z), a = v.dot(sunR), b = v.dot(sunU);
+  // 0.27.18: zoomed out, the shadowed square grows with the view (k), so shadows never stop short on screen; the
+  // texels per screen pixel stay about the same. At the usual zooms k is 1 and nothing changes.
+  const hd = Math.hypot((camera.right - camera.left) / 2, (camera.top - camera.bottom) / 2 / Math.sin(.62)) / camera.zoom, k = Math.max(1, hd / 9.5);
+  if (k !== SHADOW_K) {
+    SHADOW_K = k; Object.assign(sun.shadow.camera, { left: -10 * k, right: 10 * k, top: 10 * k, bottom: -10 * k, far: 30 * k });
+    sun.shadow.camera.updateProjectionMatrix(); sun.shadow.normalBias = .03 * k;
+  }
+  const ts = 20 * k / sun.shadow.mapSize.x, v = new THREE.Vector3(p.x, 0, p.z), a = v.dot(sunR), b = v.dot(sunU);
   v.addScaledVector(sunR, Math.round(a / ts) * ts - a).addScaledVector(sunU, Math.round(b / ts) * ts - b);
-  sun.target.position.copy(v); sun.position.copy(v).add(SUN_OFF);
+  sun.target.position.copy(v); sun.position.copy(v).addScaledVector(SUN_OFF, k);
 }
 
 const DAY = { sky: col('#e3ebf1'), gnd: col('#5b4d41'), hemi: .85, sun: col('#fff2e0'), sunI: 1.6, exp: 1.05, bg: new THREE.Color('#151d2c') };
@@ -7149,7 +7284,7 @@ function schedData() {
   // stations nobody on the day shift has, outside locked rooms: someone from that department stands in each day
   const taken = new Set(people.filter(p => p.shift !== 'night').map(p => desks.get(p.id)));
   const spare = [...shared.entries()].filter(([k]) => /\|work:/.test(k)).flatMap(([, l]) => l)
-    .filter(pl => !taken.has(pl.id) && !schedRoomLocked(pl.deck, pl.room) && !pl.machine && !(galleyRotaOn() && pl.type === 'work:galley'));
+    .filter(pl => !taken.has(pl.id) && !schedRoomLocked(pl.deck, pl.room) && !pl.machine && !(galleyRotaOn() && pl.type === 'work:galley') && pl.type !== 'work:garden');
   // the new habits' places: treadmills (gym, anim 'run'), the garden's standing spots (tending), the bar's seats
   // (anim 'drink'), and the observatory on Deck 2
   for (const n of Object.keys(DECKS).map(Number)) {
@@ -7181,12 +7316,12 @@ function schedRoomLocked(n, room) {
 // rooms (bedrooms' places are private already); else none (null)
 function schedDesks(people, shared) {
   const desks = new Map(), used = new Map();
-  const order = people.filter(p => p.work && !(galleyRotaOn() && p.dept === 'galley')).sort((a, b) => RANK_ORDER.indexOf(a.rank) - RANK_ORDER.indexOf(b.rank) || (a.id < b.id ? -1 : 1));
+  const order = people.filter(p => p.work && !(galleyRotaOn() && p.dept === 'galley') && p.dept !== 'garden').sort((a, b) => RANK_ORDER.indexOf(a.rank) - RANK_ORDER.indexOf(b.rank) || (a.id < b.id ? -1 : 1));
   for (const pass of [0, 1]) for (const p of order) {
     if (desks.has(p.id) && desks.get(p.id)) continue;
     const pool = (pass === 0 ? shared.get(p.work.deck + '|' + p.work.place) || []
       : [...shared.entries()].filter(([k]) => k.startsWith(p.work.deck + '|work:')).flatMap(([, l]) => l).filter(pl => !schedRoomLocked(pl.deck, pl.room)))
-      .filter(pl => !pl.machine && !(galleyRotaOn() && pl.type === 'work:galley'));   // machine panels are for servicing (B2); the galley books its own
+      .filter(pl => !pl.machine && !(galleyRotaOn() && pl.type === 'work:galley') && pl.type !== 'work:garden');   // machine panels are for servicing (B2); the galley and the garden book their own
     // a desk is taken for a shift, or, for people with rota.hours, only for those hours (the storekeepers share the till)
     const hrs = p.rota && p.rota.hours, clash = (a, b) => !a || !b || a.some(([x, y]) => b.some(([u, v]) => x < v && u < y));
     const d = pool.find(pl => !(used.get(p.shift + '|' + pl.id) || []).some(h => clash(h, hrs)));
@@ -7219,6 +7354,11 @@ function playerShiftOn(d) {
 // rota.hours ([[from, to], ...] in minutes from midnight, on their work days, at their own desk: the storekeepers)
 function shiftBlocks(p, d) {
   if (p.shift === 'night') return null;
+  if (p.dept === 'garden') {                             // the garden crew: gardenDay, below, shaped like galleyDay
+    const g = gardenDay(p, d); if (!g) return null;
+    const blocks = g.role ? g.blocks.map(x => [x.from, x.to, x.placeId || null, x.task || null]) : [];
+    return { blocks: blocks.length ? blocks : null, wake: g.wake, bedBy: g.bedBy, meals: g.meals || {} };
+  }
   const hrs = p.rota && p.rota.hours;
   if (p.dept !== 'galley' || !(typeof galleyDay === 'function' || typeof galleyShift === 'function')) {
     if (!Array.isArray(hrs) || !hrs.length || !isWorkDay(p, d)) return null;
@@ -7236,6 +7376,49 @@ function shiftBlocks(p, d) {
   return null;
 }
 const galleyRotaOn = () => typeof galleyDay === 'function';   // the galley books its own stations
+// ---- the garden crew (the working garden, with the galley engineer's crops and yields) ----
+// gardenDay(p, d) -> null | { role, wake, bedBy, blocks: [{ from, to, placeId, task }], meals }, galleyDay's shape, for
+// dept 'garden' (null for anyone else; role null on their days off, rota.offDays). A work day is their own hours: the
+// rota.hoursOn item whose `days` hold today's weekday (the senior gardener covering the others' days off), else
+// rota.hours, else 07:00-15:30. 'tend' at their own bed station (the deck architect's 'work:garden' places on Deck 3,
+// one each; until those exist, the garden's standing spots, held so nobody else stands there; if theirs is taken, the
+// next free one along the beds), and whoever is on at 10:00 does the day's 'pick' 10:00-10:45 there. The galley takes
+// the pick at its end and posts the carry as a job (section 17's gardenCarry). On a harvest morning (section 18's
+// 'harvest') the gardeners on duty lead it from their stations for its whole window instead of the pick (the senior,
+// rota.team 'senior', is the lead). Meals at the normal times (an early or late stint eats at the station when it
+// covers a whole meal window, as the galley does). gardenCrew(d) -> [{ id, pick, harvest, lead, hours }] for the
+// galley's yields. Pure (rota, places and the traditions only); nothing changes while nobody is in dept 'garden'.
+const GARDEN_SHIFT = [420, 930], GARDEN_PICK = [600, 645];
+const gardenSpots = () => {
+  const P = (DECKS[3] && DECKS[3].places) || [], nat = (a, b) => a.id.localeCompare(b.id, 'en', { numeric: true });
+  const w = P.filter(pl => pl.type === 'work:garden' && !pl.machine).sort(nat);
+  return w.length ? w : P.filter(pl => pl.type === 'garden' && pl.pose !== 'sit' && pl.anim === 'water').sort(nat);
+};
+const gardeners = d => schedPeople().filter(p => p.dept === 'garden' && p.shift !== 'night' && isWorkDay(p, d)).sort((a, b) => (a.id < b.id ? -1 : 1));
+function gardenDay(p, d) {
+  if (p.dept !== 'garden' || p.shift === 'night') return null;
+  if (!isWorkDay(p, d)) return { role: null, wake: null, bedBy: null, blocks: [], meals: {} };
+  const crew = gardeners(d), i = Math.max(0, crew.indexOf(p)), spots = gardenSpots();
+  const own = spots.length ? spots[(i * Math.max(1, Math.floor(spots.length / Math.max(1, crew.length)))) % spots.length].id : null;
+  let hv = null;
+  try { hv = typeof eventsOn === 'function' && eventsOn(d).find(e => e.id === 'harvest') || null; } catch (e) { hv = null; }
+  // their hours today: the rota.hoursOn item whose `days` hold today's weekday (covering someone's days off), else
+  // rota.hours, else 07:00-15:30
+  const r = p.rota || {}, oi = Array.isArray(r.hoursOn) ? r.hoursOn.find(x => x && Array.isArray(x.days) && x.days.includes(weekday(d))) : null, on = oi && oi.hours;
+  const hrs = (Array.isArray(on) && on.length ? on : Array.isArray(r.hours) && r.hours.length ? r.hours : [GARDEN_SHIFT])
+    .filter(x => x[1] > x[0]).slice().sort((x, y) => x[0] - y[0]);
+  const [p0, p1] = hv ? [hv.from, hv.to] : GARDEN_PICK, blocks = [];
+  const add = (from, to, placeId, task) => { if (to > from) blocks.push({ from, to, placeId, task }); };
+  for (const [a, b] of hrs) {
+    if (p0 >= a && p0 < b) {                             // on at the pick (or the harvest): pick, then back to the beds
+      const e1 = Math.min(p1, b);
+      add(a, p0, own, 'tend'); add(p0, e1, own, hv ? 'harvest' : 'pick'); add(e1, b, own, 'tend');
+    } else add(a, b, own, 'tend');
+  }
+  return { role: 'gardener', wake: null, bedBy: null, blocks, meals: {} };
+}
+const gardenCrew = d => gardeners(d).map(p => { const b = gardenDay(p, d).blocks, f = t => { const x = b.find(y => y.task === t); return x ? [x.from, x.to] : null; };
+  return { id: p.id, pick: f('pick') || f('harvest'), harvest: !!f('harvest'), lead: !!(p.rota && p.rota.team === 'senior'), hours: b.reduce((n, x) => n + x.to - x.from, 0) }; });
 // a person's plans for a day before anyone else is considered: when they mean to wake and go to bed, and whether they work
 // ---- appointments (Pillar 3, C3): the crew side of the device's Appointments ----
 // SHIP.device.appts (section 19, the device engineer; saved there): { id, with: [crewId | 'guest:id' | 'place:id'],
@@ -7826,6 +8009,10 @@ function schedBuild(p, d, occ, S) {
         if (t < a - C) leisureUntil(a - C, 94 + i);          // back a ride early, wherever the free time took them
       }
       go(wd); linger(a);                                 // early: wait for the stint (someone else may be at that station)
+      if (p.dept === 'garden' && pid && !isFree(pid, Math.max(t, a), Math.min(b, 1440))) {   // someone already stands there: the next free spot along the beds
+        const alt = task === 'carry' ? [] : gardenSpots(); pid = (alt.find(pl => isFree(pl.id, Math.max(t, a), Math.min(b, 1440))) || {}).id || null;
+      }
+      if (p.dept === 'garden' && pid) hold(pid, Math.max(t, a), Math.min(b, 1440));
       if (!given.breakfast && !given.dinner) for (const m of ['breakfast', 'dinner']) {   // no time given and none free: eat at the station
         const [, w1] = MEALS[m];
         if (!ate[m] && Math.max(a, t) <= w1 - 30 && b >= w1 - 10 && !GB.some(x => x[0] > b && x[0] < w1)) { workAt(pid, task, w1 - 30); seg(m, w1 - 10, pid && S.byId.get(pid) ? S.byId.get(pid).type : wtype, pid, { tag: 'staff' }); ate[m] = true; }
@@ -7987,7 +8174,7 @@ function shipDay(d) {
   occ.who = new Map();                                   // who -> the places they hold (seating by friendship)
   S.spare.forEach((pl, i) => {
     const dept = pl.type.slice(5), c = S.people.filter(p => p.dept === dept && p.shift !== 'night' && isWorkDay(p, d) && !occ.rot.has(p.id) && !shiftBlocks(p, d));
-    if (c.length) occ.rot.set(c[Math.floor(schedU(9001 + i, d, 7) * c.length)].id, { deck: pl.deck, id: pl.id, type: pl.type });
+    if (c.length) occ.rot.set(c[Math.floor(schedU(strSeed(pl.id), d, 7) * c.length)].id, { deck: pl.deck, id: pl.id, type: pl.type });   // by the station's id, so a new station never reshuffles the others
   });
   const wakeAt = p => { const F = schedFrame(p, d); return F.night ? (schedFrame(p, d - 1).works ? 360 : F.wake) : F.wake; };
   // an event's host (section 18's eventPlan, host: true: Pell at his own show) is planned first, so their seat is theirs
@@ -8295,6 +8482,7 @@ function deviceFrame(on) { DEV.frOn = !!on; }
 let devFrameT = 0;
 function deviceFrameStep(now) {
   requestAnimationFrame(deviceFrameStep);
+  devPulseStep();
   const dt = Math.min(.1, Math.max(0, (now - (devFrameT || now)) / 1000)); devFrameT = now;
   const want = DEV.frOn ? 1 : 0; if (DEV.fr === want && !DEV.frApplied) return;
   DEV.fr += (want - DEV.fr) * Math.min(1, dt * 6); if (Math.abs(want - DEV.fr) < .002) DEV.fr = want;
@@ -8363,7 +8551,7 @@ const DEVICE_SKIN = (() => {
     bars(b) {
       const box = mk('div', 'bars');
       for (const it of b.items || []) {
-        const row = mk('div', 'need' + (it.level ? ' ' + it.level : '')), lab = mk('span', '', it.label), bar = mk('i'), fill = mk('b'), v = Math.max(0, Math.min(100, +it.value || 0));
+        const row = mk('div', 'need' + (it.level ? ' ' + it.level : '') + (it.pulse ? ' pulse' : '')), lab = mk('span', '', it.label), bar = mk('i'), fill = mk('b'), v = Math.max(0, Math.min(100, +it.value || 0));
         fill.style.width = v.toFixed(1) + '%';
         if (it.mark) { const em = mk('em', it.mark, it.mark === 'up' ? '▲' : '▼'); if (it.note) em.title = it.note; em.setAttribute('aria-label', it.mark === 'up' ? 'bonus' : 'penalty'); lab.appendChild(em); }
         row.setAttribute('role', 'meter'); row.setAttribute('aria-label', it.label); row.setAttribute('aria-valuenow', Math.round(v));
@@ -9015,10 +9203,18 @@ deviceApp({ id: 'appointments', title: 'Appointments', short: 'Appts', icon: 'ca
     return { title: 'Appointments', blocks: B };
   } });
 
+// a need's bar lights up for a moment when it rises (0.35.19): section 15's needPulse(k), true for about 1.5 s after
+// a "+N" note; while Needs is open the frame loop redraws it when that changes (it blinks with Screen effects on)
+const devPulse = k => { if (typeof needPulse !== 'function') return false; try { return !!needPulse(k); } catch (e) { return false; } };
+let devPulseKey = '';
+function devPulseStep() {
+  if (!DEV.open || DEV.app !== 'needs' || typeof needPulse !== 'function' || typeof NEED_KEYS === 'undefined') { devPulseKey = ''; return; }
+  const k = NEED_KEYS.map(devPulse).join(); if (k !== devPulseKey) { devPulseKey = k; deviceRefresh(); }
+}
 // Needs: five bars with their bonus or penalty marks, the reasons, and your walking speed
 deviceApp({ id: 'needs', title: 'Needs', icon: 'needs', order: 20, view: () => {
   const n = SHIP.player.needs, fx = needEffects(n), B = [];
-  B.push({ kind: 'bars', items: NEED_KEYS.map(k => ({ label: NEED_LABEL[k], value: n[k], level: n[k] < SLOW_BELOW ? 'low' : n[k] < 50 ? 'mid' : '',
+  B.push({ kind: 'bars', items: NEED_KEYS.map(k => ({ label: NEED_LABEL[k], value: n[k], level: n[k] < SLOW_BELOW ? 'low' : n[k] < 50 ? 'mid' : '', pulse: devPulse(k),
     mark: fx.marks[k] ? fx.marks[k][0] : null, note: fx.marks[k] ? fx.marks[k][1] : null })) });
   for (const k of NEED_KEYS) if (fx.marks[k]) B.push({ kind: 'text', text: (fx.marks[k][0] === 'up' ? '▲ ' : '▼ ') + fx.marks[k][1], mark: fx.marks[k][0] });
   const sp = playerSpeed();
@@ -9067,11 +9263,11 @@ deviceApp({ id: 'wallet', title: 'Wallet', icon: 'wallet', order: 90, view: () =
 
 // =====================================================================
 // 15. PLAYER NEEDS & DEVICE
-// Your needs (hunger, energy, hygiene, fitness, social; 0-100, 100 = fully
-// met) in SHIP.player.needs. They drain with ship time and come back by
+// Your needs (hunger, energy, hygiene, fitness, social, bathroom; 0-100,
+// 100 = fully met) in SHIP.player.needs. They drain with ship time and come back by
 // doing things: eat (the servery, a mess seat, the grab shelf), sleep (your
 // bunk, section 13), shower, work out (treadmill, weights), call home (a
-// booth). Tap the thing to do it: you walk there, take the pose, time runs,
+// booth), use a toilet (any public washroom, 0.28.19). Tap the thing to do it: you walk there, take the pose, time runs,
 // the need rises; walk away to stop. Places crew hold are left alone.
 // Needs give bonuses and penalties (needEffects, 0.28.9): over NEED_HIGH a
 // bonus, under NEED_LOW a penalty (low fitness or energy: you walk slower).
@@ -9092,16 +9288,17 @@ deviceApp({ id: 'wallet', title: 'Wallet', icon: 'wallet', order: 90, view: () =
 // crew tap (10: playerChat), Walker.update's pose (10: holding, crouch),
 // playerUpdate in the main loop (12), the device's HTML and CSS.
 // =====================================================================
-const NEED_KEYS = ['hunger', 'energy', 'hygiene', 'fitness', 'social'];   // the plan's NEEDS (section 14 has it too, as NEEDS)
-const NEED_LABEL = { hunger: 'Food', energy: 'Energy', hygiene: 'Hygiene', fitness: 'Fitness', social: 'Social' };
+const NEED_KEYS = ['hunger', 'energy', 'hygiene', 'fitness', 'social', 'bathroom'];   // the plan's NEEDS (section 14 has it too, as NEEDS); bathroom: the user's, 0.28.19
+const NEED_LABEL = { hunger: 'Food', energy: 'Energy', hygiene: 'Hygiene', fitness: 'Fitness', social: 'Social', bathroom: 'Bathroom' };
 // drain per ship hour (so they hold whatever SHIP_RATE is): [awake, asleep]. A normal day (breakfast, dinner, a
 // shower, a night's sleep) keeps food, hygiene and fitness above 40; the gym every two or three days keeps fitness
 // up; a call home every two days keeps social up. Energy (0.28.9, the user's long days): 4.4 an hour takes a rested
 // player from 100 to the tired line (25) in 17 ship hours at average fitness, about 18 when fit and 16 when not
-// (needEffects' drain, below).
-const NEED_DRAIN = { hunger: [4, 2], energy: [4.4, 0], hygiene: [2.5, 1], fitness: [.6, .3], social: [1, .25] };
+// (needEffects' drain, below). Bathroom (0.28.19, the user's): 12 an hour awake, from a visit to the low line in
+// about six hours, so it comes up three or four times a day (on waking, midday, dinner, bedtime); 3 asleep.
+const NEED_DRAIN = { hunger: [4, 2], energy: [4.4, 0], hygiene: [2.5, 1], fitness: [.6, .3], social: [1, .25], bathroom: [12, 3] };
 const SLEEP_GAIN = 12.5;                                 // energy per ship hour asleep: 8 hours fills it
-const NEEDS_FRESH = { hunger: 60, energy: 100, hygiene: 60, fitness: 70, social: 70 };   // a new game: just woken, before breakfast
+const NEEDS_FRESH = { hunger: 60, energy: 100, hygiene: 60, fitness: 70, social: 70, bathroom: 60 };   // a new game: just woken, before breakfast
 const NEEDS_OLD = 80;                                    // a v 1 save had no needs: start them here
 const SLOW_BELOW = 25, SLOW_SPEED = .8;                  // fitness or energy under this: walk at this speed (each one counts)
 const needClamp = v => Math.max(0, Math.min(100, v));
@@ -9116,6 +9313,7 @@ const NEED_FX = {   // need: { hi: [effects, reason], lo: [effects, reason] }
   hunger:  { hi: [{ drain: .96 }, 'Well fed: you tire a little more slowly.'], lo: [{ task: .85 }, 'Hungry: tasks go 15% slower.'] },
   hygiene: { hi: [{ socialGain: 1.5 }, 'Fresh and clean: chatting does you more good.'], lo: [{ socialGain: .5 }, 'You could do with a wash: chatting does half the good.'] },
   social:  { hi: [{ task: 1.1 }, 'In good spirits: tasks go 10% faster.'], lo: [{ drain: 1.05 }, 'Lonely: you tire a little sooner.'] },
+  bathroom: { hi: [{ task: 1.05 }, 'Comfortable: tasks go 5% faster.'], lo: [{ task: .9 }, 'You need the toilet: it\'s hard to concentrate, tasks go 10% slower.'] },
 };
 function needEffects(n = SHIP.player.needs) {             // -> { walk, task, drain, socialGain, notes: [reason], marks: { need: ['up' | 'down', reason] } }
   const e = { walk: 1, task: 1, drain: 1, socialGain: 1, notes: [], marks: {} };
@@ -9176,6 +9374,7 @@ const NEED_SAY = {
   hunger: ['You\'re hungry. The mess serves breakfast 06:00-08:00 and dinner 17:00-20:30; the grab shelf is always open.', 'You\'re getting peckish.'],
   hygiene: ['You need a shower. The washrooms are at the ends of the junior wing on Deck 4.', 'A shower would be nice.'],
   social: ['You miss home. The call-home booths are on Deck 3.', 'You\'d like to hear from home.'],
+  bathroom: ['You really need the toilet. The washrooms are at the ends of the junior wing on Deck 4.', 'You could do with a trip to the toilet.'],
 };
 function needsLine() {
   const n = SHIP.player.needs, k = NEED_KEYS.slice().sort((a, b) => n[a] - n[b])[0];
@@ -9225,6 +9424,7 @@ const PLAYER_ACTS = {   // need and gain over mins ship minutes; pose: the crowd
   browse: { mins: 8, pose: 'browse', title: 'Browsing' },
   pay:    { mins: 2, pose: 'pay', title: 'Paying' },
   shower: { need: 'hygiene', gain: 80, mins: 10, pose: 'stand', title: 'Showering', done: 'Clean, and smelling of the ship\'s one soap.' },
+  toilet: { need: 'bathroom', gain: 100, mins: 3, pose: 'sit', title: 'Toilet', done: 'You wash your hands on the way out.' },   // any public toilet (0.28.19)
   tray:   { mins: 1, pose: 'stand', title: 'At the servery' },
   queue:  { mins: 1, pose: 'stand', title: 'In the queue', until: A => {   // the servery's queue (section 16): wait for your turn, then take a tray
     if (!galleyTurn('player')) return false;
@@ -9266,7 +9466,9 @@ const ACT_TAP = [   // what you tapped (its title), the place types it leads to,
   [/^grab and go$/i, ['grab-shelf'], 'grab'],
   [/table/i, ['mess-seat'], 'eat'],
   [/^shower$/i, ['shower'], 'shower'],
+  [/^toilet$/i, ['toilet'], 'toilet'],
 ];
+const PRIVATE_TYPES = new Set(['shower', 'toilet']);     // someone's own (privatePlace) is never offered: wash pods, cabins' toilets
 const ACT_NEAR = 2.4;
 let ACT = null, basket = null, needsT = null, PLAYER_V0, slowWas = {}, devMin = -1;
 const heldBy = id => DECK_CREW.find(a => a.goalId === id);       // crew at a place, or on their way to it
@@ -9306,7 +9508,7 @@ function playerTap(it, at, point) {
   if (PLAYER_TAPS.some(f => f(it, at, point))) return true;   // other sections' taps (15b)
   const rule = ACT_TAP.find(r => r[0].test(it.t)); if (!rule) return sitTap(it, at, point) || machineTap(it, at);
   const [, types, kind] = rule;
-  const near = [...PLACE_OF.values()].filter(pl => types.includes(pl.type) && !(pl.type === 'shower' && privatePlace(pl)))
+  const near = [...PLACE_OF.values()].filter(pl => types.includes(pl.type) && !(PRIVATE_TYPES.has(pl.type) && privatePlace(pl)))
     .map(pl => [pl, placeSpot(pl.id)]).filter(([, s]) => s && Math.hypot(s.x - at.x, s.z - at.z) < ACT_NEAR)
     .sort((m, n) => Math.hypot(m[1].x - point.x, m[1].z - point.z) - Math.hypot(n[1].x - point.x, n[1].z - point.z));
   if (!near.length) return false;
@@ -9328,7 +9530,7 @@ function playerTap(it, at, point) {
   const free = near.find(([pl]) => !heldBy(pl.id));
   if (!free) {
     const a = heldBy(near[0][0].id);
-    toast(it.t, (kind === 'tray' ? 'There\'s a queue at the servery. Try again in a minute.' : 'In use: ' + a.p.name + ' is ' + (kind === 'eat' ? 'sitting there.' : 'on it.')) + ' ' + it.x);
+    toast(it.t, (kind === 'tray' ? 'There\'s a queue at the servery. Try again in a minute.' : kind === 'toilet' ? 'Occupied: the little light is red. Try another, or wait a minute.' : 'In use: ' + a.p.name + ' is ' + (kind === 'eat' ? 'sitting there.' : 'on it.')) + ' ' + it.x);
     return true;
   }
   const [pl, spot] = free;
@@ -9362,12 +9564,12 @@ function sitTap(it, at, point) {
 // usable place's spot at any height up to 1.2 m (the belt, the console, the seat), use that place as a tap on it
 // would: the gym, a call-home booth, a store shelf, or a seat to sit on. Else the floor tap walks, as always.
 const FLOOR_NEAR = .5;
-const FLOOR_ACTS = { gym: pl => pl.anim === 'run' ? 'Treadmill' : pl.anim === 'row' ? 'Rowing machine' : pl.pose === 'lie' ? 'Mats' : 'Weights', callhome: () => 'Booth', shop: () => 'Shelves' };
+const FLOOR_ACTS = { gym: pl => pl.anim === 'run' ? 'Treadmill' : pl.anim === 'row' ? 'Rowing machine' : pl.pose === 'lie' ? 'Mats' : 'Weights', callhome: () => 'Booth', shop: () => 'Shelves', toilet: () => 'Toilet' };
 function playerFloorTap(point) {
   if (typeof PLACE_OF === 'undefined' || typeof ray === 'undefined') return false;
   const o = ray.ray.origin, d = ray.ray.direction, hits = [];
   for (const pl of PLACE_OF.values()) {
-    const use = FLOOR_ACTS[pl.type] ? 'act' : SIT_TYPES.has(pl.type) && pl.pose === 'sit' && !privatePlace(pl) ? 'sit' : null; if (!use) continue;
+    const use = FLOOR_ACTS[pl.type] && !(PRIVATE_TYPES.has(pl.type) && privatePlace(pl)) ? 'act' : SIT_TYPES.has(pl.type) && pl.pose === 'sit' && !privatePlace(pl) ? 'sit' : null; if (!use) continue;
     const sp = placeSpot(pl.id); if (!sp) continue;
     let best = Infinity;
     for (let y = 0; y <= 1.2; y += .1) { const k = (y - o.y) / d.y; if (!(k > 0)) continue; best = Math.min(best, Math.hypot(o.x + d.x * k - sp.x, o.z + d.z * k - sp.z)); }
@@ -9420,7 +9622,7 @@ function actBegin() {
   const A = ACT; if (!A) return;
   const pl = A.placeId && PLACE_OF.get(A.placeId), who = pl && heldBy(pl.id);
   if (who) {                                             // someone got there first: the next free one of its kind nearby, if any
-    const alt = [...PLACE_OF.values()].filter(q => q.type === pl.type && q.id !== pl.id && !heldBy(q.id) && !(q.type === 'shower' && privatePlace(q)))
+    const alt = [...PLACE_OF.values()].filter(q => q.type === pl.type && q.id !== pl.id && !heldBy(q.id) && !(PRIVATE_TYPES.has(q.type) && privatePlace(q)))
       .map(q => [q, placeSpot(q.id)]).filter(([, s]) => s && Math.hypot(s.x - A.spot.x, s.z - A.spot.z) < ACT_NEAR)
       .sort((m, n) => Math.hypot(m[1].x - A.spot.x, m[1].z - A.spot.z) - Math.hypot(n[1].x - A.spot.x, n[1].z - A.spot.z))[0];
     if (alt && !A.o.moved) { actStart(A.kind, alt[0].id, { ...A.o, moved: true, pose: A.kind === 'eat' ? alt[1].pose : A.o.pose }); return; }
@@ -9535,6 +9737,94 @@ function actUpdate(dt, t) {
   A.body.set({ x: A.x, y: A.y, z: A.z }, A.face, pose);
   A.body.update(dt, t);
 }
+// ---- you can see it working (0.28.20, the user's): when a need rises, a small "+25 Food" note floats up from your
+// character and the device button gives a soft pulse. Read off the needs themselves once a frame (needsSeen), so
+// every gain shows, whichever section made it (meals, showers, the toilet, sleep, chats, company, the store, 15b's
+// and 20's): rises add up per need and show once they stop for FLOAT_WAIT real seconds, or every FLOAT_EVERY
+// seconds while they go on (a toilet visit or the grab shelf shows one note; a long meal a few).
+// Drains never show. needPulse(k) is true for PULSE_SECS after need k showed a rise (for the device's Needs bars).
+// DOM and CSS made here, so the HTML stays as it was; nothing calls R(). ----
+const FLOAT_EVERY = 5, FLOAT_WAIT = .6, FLOAT_MIN = 1, FLOAT_SECS = 1.8, PULSE_SECS = 1.5;
+let NEED_SEEN = null, FLOAT_LIVE = 0;
+const FLOAT_LOG = [];                                    // the last notes shown (player_check reads it: notes come and go on real-time timers)
+const NEED_RISE = {}, NEED_PULSE = {}, floatV = new THREE.Vector3();
+const needPulse = k => (NEED_PULSE[k] || 0) > performance.now();
+function needFxLayer() {
+  let el = document.getElementById('needFx'); if (el) return el;
+  const st = document.createElement('style');
+  st.textContent = '#needFx{position:fixed;left:0;top:0;width:0;height:0;z-index:2;pointer-events:none}'
+    + '#needFx .nf{position:absolute;transform:translate(-50%,-100%);white-space:nowrap;font-size:12.5px;font-weight:600;color:#bdeee6;padding:2px 9px;border-radius:999px;background:var(--glass);border:1px solid var(--line);text-shadow:0 1px 6px rgba(0,0,0,.5);animation:nfup ' + FLOAT_SECS + 's ease-out forwards}'
+    + '@keyframes nfup{0%{opacity:0;margin-top:6px}15%{opacity:1}70%{opacity:1}100%{opacity:0;margin-top:-34px}}'
+    + '.devbtn.npulse{animation:npulse .9s ease-out}@keyframes npulse{0%{box-shadow:0 0 0 0 rgba(76,195,181,.7)}100%{box-shadow:0 0 0 12px rgba(76,195,181,0)}}'
+    + '@media (prefers-reduced-motion:reduce){@keyframes nfup{0%{opacity:0}15%{opacity:1}70%{opacity:1}100%{opacity:0}}.devbtn.npulse{animation:none}}';
+  document.head.appendChild(st);
+  el = document.createElement('div'); el.id = 'needFx'; el.setAttribute('aria-live', 'polite'); document.body.appendChild(el);
+  return el;
+}
+function needFloat(text) {                               // one note over your head (the stand-in's while you're at a place)
+  if (typeof camera === 'undefined' || typeof player === 'undefined') return;
+  const A = ACT && ACT.body && ACT.phase !== 'walk' ? ACT : null, p = player.obj.position;
+  floatV.set(A ? A.x : p.x, (A ? A.y : 0) + 2, A ? A.z : p.z).project(camera);
+  const x = Math.max(60, Math.min(innerWidth - 60, (floatV.x + 1) * innerWidth / 2)), y = Math.max(40, (1 - floatV.y) * innerHeight / 2 - FLOAT_LIVE * 24 - (actProgress() ? 40 : 0));   // above the progress bar (0.28.21)
+  const n = document.createElement('div'); n.className = 'nf'; n.textContent = text; n.style.left = x.toFixed(1) + 'px'; n.style.top = y.toFixed(1) + 'px';
+  needFxLayer().appendChild(n); FLOAT_LIVE++; FLOAT_LOG.push(text); if (FLOAT_LOG.length > 20) FLOAT_LOG.shift();
+  setTimeout(() => { n.remove(); FLOAT_LIVE = Math.max(0, FLOAT_LIVE - 1); }, FLOAT_SECS * 1000);
+  const b = document.getElementById('devBtn');
+  if (b) { b.classList.remove('npulse'); void b.offsetWidth; b.classList.add('npulse'); }
+}
+function needsSeen() {                                   // once a frame: what rose since the last frame
+  const n = SHIP.player.needs, now = performance.now();
+  if (!NEED_SEEN) { NEED_SEEN = { ...n }; return; }
+  for (const k of NEED_KEYS) {
+    const d = n[k] - NEED_SEEN[k]; NEED_SEEN[k] = n[k];
+    const r = NEED_RISE[k] || (NEED_RISE[k] = { v: 0, t: 0 });
+    if (d > 0) { if (!(r.v > 0)) r.t0 = now; r.v += d; r.t = now; }
+    const stopped = now - r.t > FLOAT_WAIT * 1000;      // a slow trickle under FLOAT_MIN keeps adding up until it stops
+    if (r.v > 0 && (stopped || r.v >= FLOAT_MIN && now - r.t0 > FLOAT_EVERY * 1000)) {
+      if (r.v >= FLOAT_MIN) { needFloat('+' + Math.round(r.v) + ' ' + NEED_LABEL[k]); NEED_PULSE[k] = now + PULSE_SECS * 1000; }
+      r.v = 0;
+    }
+  }
+}
+// ---- progress for things that take time (0.28.21, the user's): a small bar over your character while an activity
+// runs, with what you're doing and how long is left. Any activity of a set length shows it (eating, the grab shelf,
+// a shower, the toilet, a workout, a call home, browsing, paying, the job loop's steps, the cart run, and 15b's
+// activities, which are ACTs too); the servery queue shows the wait to your turn; sitting (until you get up) shows
+// none. actProgress(A) -> { title, frac, left } or null; the bar is placed once a frame. DOM only. ----
+const BAR_Y = 1.95;                                      // over the stand-in's head, m
+let BAR_TXT = '';
+function actProgress(A = ACT) {
+  if (!A || A.phase !== 'do' || !A.body) return null;
+  const title = A.def.title || A.o.title || '';
+  if (A.kind === 'queue') {
+    if (!isFinite(A.o.turnAt)) return null;
+    const now = shipNow(), t0 = isFinite(A.o.qFrom) ? A.o.qFrom : (A.o.qFrom = now), left = Math.max(0, A.o.turnAt - now);
+    return { title, left, frac: A.o.turnAt > t0 ? Math.min(1, (now - t0) / (A.o.turnAt - t0)) : 1 };
+  }
+  if (A.def.until || !(A.def.mins > 0)) return null;
+  return { title, frac: Math.max(0, Math.min(1, A.done / A.def.mins)), left: Math.max(0, (A.def.mins - A.done) / needEffects().task) };
+}
+function actBar() {
+  let el = document.getElementById('actBar');
+  const pr = actProgress();
+  if (!pr) { if (el && !el.hidden) el.hidden = true; return; }
+  if (!el) {
+    needFxLayer();
+    const st = document.createElement('style');
+    st.textContent = '#actBar{position:fixed;left:0;top:0;z-index:2;pointer-events:none;width:124px;margin:-34px 0 0 -62px;padding:4px 9px 6px;border-radius:10px;background:var(--glass);border:1px solid var(--line);font-size:11.5px;line-height:1.3;color:#cfd9dc;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
+      + '#actBar[hidden]{display:none}#actBar i{display:block;height:4px;margin-top:3px;border-radius:2px;background:rgba(150,200,196,.22);overflow:hidden}'
+      + '#actBar b{display:block;height:100%;background:var(--teal);transform-origin:left center}';
+    document.head.appendChild(st);
+    el = document.createElement('div'); el.id = 'actBar'; el.setAttribute('role', 'progressbar'); el.setAttribute('aria-valuemin', 0); el.setAttribute('aria-valuemax', 100);
+    el.innerHTML = '<span></span><i><b></b></i>'; document.body.appendChild(el); BAR_TXT = '';
+  }
+  const A = ACT, txt = pr.title + ' · ' + (pr.left < 1 ? 'nearly done' : Math.ceil(pr.left) + ' min');
+  if (txt !== BAR_TXT) { BAR_TXT = txt; el.children[0].textContent = txt; el.setAttribute('aria-label', txt); }
+  el.children[1].children[0].style.transform = 'scaleX(' + pr.frac.toFixed(3) + ')'; el.setAttribute('aria-valuenow', Math.round(pr.frac * 100));
+  floatV.set(A.x, A.y + BAR_Y, A.z).project(camera);
+  const x = Math.max(66, Math.min(innerWidth - 66, (floatV.x + 1) * innerWidth / 2)), y = Math.max(44, (1 - floatV.y) * innerHeight / 2);
+  el.style.transform = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px)'; el.hidden = false;
+}
 // once a frame from the main loop (section 12): needs over ship time, walking speed, the activity, the device
 function playerUpdate(dt, t) {
   const now = shipNow(), n = SHIP.player.needs;
@@ -9576,6 +9866,8 @@ function playerUpdate(dt, t) {
     slowWas[k] = slow;
   }
   if (ACT) actUpdate(dt, t);
+  needsSeen();                                           // a need that rose shows it (0.28.20)
+  actBar();                                              // and how long the activity has left (0.28.21)
   const m = Math.floor(now);
   if (m !== devMin) { devMin = m; jobNotice(); jobTouch(); cartAuto(); device.refresh(); }
 }
@@ -9622,7 +9914,7 @@ SIM_ADVANCE.push((from, to) => {
 });
 // New game (section 13): fresh needs, nothing in hand
 function playerNew() {
-  actEnd(true); basket = null; SHIP.player.needs = needsLoad(null); SHIP.player.carry = []; SHIP.player.work = null; needsT = null; slowWas = {};
+  actEnd(true); basket = null; SHIP.player.needs = needsLoad(null); NEED_SEEN = null; SHIP.player.carry = []; SHIP.player.work = null; needsT = null; slowWas = {};
   Object.assign(SHIP.player, walletLoad(null)); SHIP.player.bought = 0; SHIP.player.cart = null; SHIP.mail = []; mailWelcome(); device.refresh();
 }
 
@@ -10252,6 +10544,7 @@ function ixFrame() {
   if (ixGoalAt !== key) { ixGoalAt = key; try { ixJobGoal = ixJobStep(); } catch (e) { ixJobGoal = null; } }
   const g = IX_GOAL || (SHIP.player.track === null ? null : ixJobGoal);   // the job's step only while it's tracked
   if (!g) { if (!el.hidden) el.hidden = true; return; }
+  if (typeof actProgress === 'function' && actProgress(ACT)) { if (!el.hidden) el.hidden = true; return; }   // section 15's progress bar is up over you: it says it all
   const here = deckDef.num === g.deck, w = here ? ixGoalWorld(g) : { x: LIFT_AT[0], z: LIFT_AT[1] };
   if (!w) { el.hidden = true; return; }
   const label = here ? g.label : 'Take the lift to Deck ' + g.deck + (g.label ? ': ' + g.label.charAt(0).toLowerCase() + g.label.slice(1) : '');
@@ -10455,6 +10748,66 @@ function galleyBusy(d) {
 // cakes). On the day the galley bakes a cake at 15:00 (4 meals from the cold store), puts it out on the servery's tray
 // slide after dinner (19:30) and it's gone by 21:30; Mail says so at 12:00
 const CAKE = { mail: 720, bake: 900, out: 1170, gone: 1290, meals: 4 };
+// ---- the garden (the user's ask, 0.29.23+): food grows in Deck 3's hydroponic garden, is picked, carried to the cold
+// store and cooked. All on paper, a ship day at a time, the same in replays and live (no R()). Each crop has `beds`
+// beds; a bed grows by the day's condition (0-1) and is ripe when it has grown `days`; its yield (meal units) is scaled
+// by how well it grew (grown / days taken), so a poor garden gives less, later. Salad and herbs are picked every
+// morning (GARDEN.pick); beans, tomatoes and roots on harvest mornings (section 18's 'harvest', else every 14th day).
+// Picked produce goes to the cold store as its own stock (S.cold.produce: [[crop, meals, day picked], ...]), keeps
+// `keep` days, and the cooks use it first (up to GARDEN.potShare of a pot).
+const GARDEN_CROPS = [
+  { id: 'greens', name: 'salad greens', beds: 4, days: 6, yield: 12, keep: 3, daily: true },
+  { id: 'herbs', name: 'herbs', beds: 2, days: 4, yield: 5, keep: 3, daily: true },
+  { id: 'beans', name: 'beans', beds: 3, days: 14, yield: 36, keep: 5 },
+  { id: 'tomatoes', name: 'tomatoes', beds: 3, days: 21, yield: 54, keep: 7 },
+  { id: 'roots', name: 'root vegetables', beds: 3, days: 28, yield: 72, keep: 14 },
+];
+const GARDEN = {
+  pick: 645, harvest: 690, carry: 30,     // the daily pick (10:00-10:45) and the harvest morning's (to 11:30) are taken at their end; the
+                                          // crates reach the cold store by section 17's gardenCarry job, else 30 minutes later
+  tendHours: 8, untended: .4,             // gardener hours a day for a fully tended garden; growth with nobody tending
+  potShare: .5,                           // at most half of a pot is fresh produce
+};
+// the garden's condition on day d (0-1): water, feed and light from section 17's gardenAt(t) (pure; 1s without it), and
+// tending: gardener hours that day from gardenDay(p, d) (section 14's hook), or a fully tended garden while there's none
+const GARDEN_COND = new Map();
+function gardenCond(d) {
+  if (GARDEN_COND.has(d)) return GARDEN_COND.get(d);
+  const t = (d - 1) * 1440 + 720, g = (GALLEY_TEST.gardenAt || (typeof gardenAt === 'function' ? gardenAt : null));
+  const e = g ? g(t) || {} : {}, f = v => typeof v === 'number' && isFinite(v) ? Math.max(0, Math.min(1, v)) : 1;
+  let tend = 1;
+  const gd = GALLEY_TEST.gardenDay || (typeof gardenDay === 'function' ? gardenDay : null);
+  if (gd) {
+    let h = 0; for (const p of ROSTER) { const x = gd(p, d); if (x && x.blocks) for (const b of x.blocks) h += Math.max(0, b.to - b.from) / 60; }
+    tend = GARDEN.untended + (1 - GARDEN.untended) * Math.min(1, h / GARDEN.tendHours);
+  }
+  const out = { water: f(e.water), feed: f(e.feed), light: f(e.light), tend };
+  out.grow = out.water * out.feed * out.light * out.tend;
+  GARDEN_COND.set(d, out); for (const k of GARDEN_COND.keys()) if (k < d - 30 || k > d + 30) GARDEN_COND.delete(k);
+  return out;
+}
+const gardenHarvestDay = d => typeof eventsOn === 'function' ? eventsOn(d).some(e => e.id === 'harvest') : d % 14 === 6;
+// a fresh garden on day d: every bed part-grown, staggered so something is always coming ripe. Beds: [crop, grown, days]
+const GARDEN_START = d => ({ beds: GARDEN_CROPS.flatMap((c, ci) => [...Array(c.beds)].map((_, b) => { const g = Math.floor(c.days * ((b + .5) / c.beds + (d % c.days) / c.days) % c.days); return [ci, g, g]; })), crates: [] });
+const GARDEN_HARVEST = GARDEN_CROPS.reduce((a, c) => a + (c.daily ? 0 : c.beds * c.yield * 14 / c.days), 0);   // a usual harvest morning's slow crops
+const GARDEN_WHY = { water: 'The irrigation is struggling.', feed: 'The nutrient dosing is off.', light: 'The grow lights are failing.', tend: 'There haven\'t been enough hands in the garden.' };
+const gardenNames = items => { const n = items.map(x => GARDEN_CROPS[x[0]].name); return n.length > 1 ? n.slice(0, -1).join(', ') + ' and ' + n[n.length - 1] : n[0] || 'produce'; };
+// the player unloads the garden's crates at the cold store: section 17 calls this with the carry job's id; they land now
+function galleyCarryLand(id) {
+  const S = galleyAdvance(shipNow()), G = S.garden; if (!G || !id) return 0;
+  const d = Math.floor(shipNow() / 1440) + 1; let n = 0;
+  G.crates = G.crates.filter(c => { if (c.id !== id) return true; for (const [ci, k] of c.items) { S.cold.produce.push([ci, k, d]); n += k; } return false; });
+  return n;
+}
+// what's fresh in the cold store, by crop (most first)
+const produceByCrop = S => { const m = new Map(); for (const b of S.cold.produce || []) m.set(b[0], (m.get(b[0]) || 0) + b[1]); return [...m].sort((a, b) => b[1] - a[1]); };
+const produceMeals = S => (S.cold.produce || []).reduce((n, b) => n + b[1], 0);
+// take up to n meal units of produce, oldest first; returns how many
+function produceTake(S, n) {
+  let got = 0; const P = S.cold.produce || [];
+  while (got < n && P.length) { const b = P[0], k = Math.min(b[1], n - got); b[1] -= k; got += k; if (!b[1]) P.shift(); }
+  return got;
+}
 // (yours too: ROSTER_PLAYER's birthday, when it's there)
 const galleyBirthdays = d => ROSTER.concat(typeof ROSTER_PLAYER !== 'undefined' && ROSTER_PLAYER ? [ROSTER_PLAYER] : []).filter(p => p.birthday && p.birthday === ((d - 1) % 364 + 364) % 364 + 1);
 const galleyNames = ps => ps.map(p => p.player ? 'you' : galleyFirst(p)).join(' and ');
@@ -10471,7 +10824,7 @@ function galleyCake(d) {
 const galleyCakeFor = c => c.who.length ? galleyWhose(c.who) + ' birthday' : c.name;
 const galleyWhose = ps => ps.length === 1 && ps[0].player ? 'your' : galleyNames(ps) + '\'s';
 const galleyMeal = md => md >= FOOD.open.breakfast - FOOD.lead && md < FOOD.close.breakfast ? 'breakfast' : md >= FOOD.open.dinner - FOOD.lead && md < FOOD.close.dinner ? 'dinner' : null;
-const GALLEY_START = () => ({ cold: { meals: FOOD.coldCap }, servery: { portions: 0, dish: '' }, grab: { items: 8 }, dirty: 0, inUse: 0, pots: [], wait: [], back: [], carts: [] });
+const GALLEY_START = () => ({ cold: { meals: FOOD.coldCap, produce: [] }, servery: { portions: 0, dish: '' }, grab: { items: 8 }, dirty: 0, inUse: 0, pots: [], wait: [], back: [], carts: [] });
 // ship-wide events (Pillar 3, C7): section 18's eventMod('galley', key) changes the galley while an event runs;
 // null (no event, or no section 18) means no change. Read on the hour into S.ev (galleyStep):
 //   menu:  a dish (an id in GALLEY_EV_DISH, or the dish's own name) instead of the menu's, at both meals
@@ -10486,10 +10839,20 @@ const GALLEY_START = () => ({ cold: { meals: FOOD.coldCap }, servery: { portions
 // replays agree with the live galley; an eventMod without the third argument is read live only (eventNow / eventMod:
 // now), and replays run as if there were none.
 const GALLEY_EV_DISH = { stormStew: 'storm stew', veyli: 'Veyli spiced grains with garden herbs', feast: 'the Founding Day feast', bland: 'plain rice and beans' };
-const GALLEY_EV_KEYS = ['menu', 'cook', 'grab', 'extra', 'batch', 'trays'];
+const GALLEY_EV_KEYS = ['menu', 'cook', 'grab', 'extra', 'batch', 'trays', 'herbs'];
+// a batch's dinner (the diplomatic visit's formal dinners): it starts at the batch's `at` (minutes of the day), else
+// 19:00; cooking takes GALLEY_BATCH_T from 15:00, longer with worn ovens (galleyCookT); `herbs: true` wants
+// GALLEY_HERBS meal units of the garden's herbs from the cold store. Late minutes and a dinner without herbs are the
+// event's threads 'dinnersLate' and 'noHerbs' (live only)
+const GALLEY_BATCH_T = 150, GALLEY_HERBS = 4;
+const produceOf = (S, id) => (S.cold.produce || []).reduce((n, b) => n + (GARDEN_CROPS[b[0]].id === id ? b[1] : 0), 0);
+function produceTakeOf(S, id, n) {
+  let got = 0; for (const b of S.cold.produce || []) if (GARDEN_CROPS[b[0]].id === id && got < n) { const k = Math.min(b[1], n - got); b[1] -= k; got += k; }
+  S.cold.produce = (S.cold.produce || []).filter(b => b[1] > 0); return got;
+}
 // GALLEY_TEST: stand-ins a test copy can set (food_check), since section 17's and 18's functions may be consts it
 // can't replace: eventMod(kind, key, t), cartTrays(o) and traysArrivedAt(day, to). null in the game
-const GALLEY_TEST = { eventMod: null, cartTrays: null, traysArrivedAt: null };
+const GALLEY_TEST = { eventMod: null, cartTrays: null, traysArrivedAt: null, gardenAt: null, gardenDay: null, gardenCrew: null, gardenCarry: null, carryWaiting: null };
 function galleyEvRead(m, replay) {
   let get = null;
   if (GALLEY_TEST.eventMod) get = k => GALLEY_TEST.eventMod('galley', k, m);
@@ -10553,7 +10916,7 @@ function galleyStep(S, m, st) {
     // meals already on their way (a run held for you, or not landed yet) count as in the cold store, so a run waiting
     // on the board doesn't set off another every hour. In replays the carts land within the hour, so it's 0 there
     if (md % 60 === 0) {
-      const coming = S.carts.reduce((n, c) => n + c[1], 0), c = cartClaim(m, Math.min(FOOD.coldCap, S.cold.meals + coming), { replay: !!st });
+      const coming = S.carts.reduce((n, c) => n + c[1], 0), c = cartClaim(m, Math.min(FOOD.coldCap, S.cold.meals + coming + produceMeals(S)), { replay: !!st });
       if (c && c.meals > 0) S.carts.push([Math.max(m, Math.floor(c.arriveAt)), c.meals, Math.floor(m / 60)]);
     }
     // a run that's yours (section 17's cartWaiting(hour): on the board for you, or yours and not unloaded yet) waits
@@ -10578,11 +10941,65 @@ function galleyStep(S, m, st) {
     if (!st && n) galleyMail(m, 'Spoiled food binned', `The cold store's chiller is running warm, and ${n} meal${n > 1 ? 's' : ''} had to go in the bin at the ${hhmm(md)} check. Works has been told.`);
   }
   if (md === FOOD.binOut) S.bin = 0;
+  // the garden: a day's growth at midnight; the morning pick (salad, herbs) and the harvest morning (the rest); the
+  // crates reach the cold store GARDEN.carry minutes later; produce past its keeping days is binned at the bin checks
+  if (!S.garden) S.garden = GARDEN_START(d);
+  if (S.garden.crates.length && Array.isArray(S.garden.crates[0])) S.garden.crates = S.garden.crates.map(c => ({ at: c[0] - GARDEN.carry, items: [[c[1], c[2]]], id: null }));   // a 0.29.23 save
+  if (!S.cold.produce) S.cold.produce = [];
+  const G = S.garden;
+  if (md === 0) { const c = gardenCond(d).grow; for (const b of G.beds) if (b[1] < GARDEN_CROPS[b[0]].days) { b[2]++; b[1] = Math.min(GARDEN_CROPS[b[0]].days, b[1] + c); } }   // a ripe bed waits for its pick
+  // the daily pick needs a gardener on duty (section 14's gardenCrew(d), when it's there); the harvest morning has
+  // volunteers. One carry for each pick: G.crates = [{ at, items: [[crop, meals]], id }]
+  let pickNow = md === GARDEN.pick ? 'daily' : md === GARDEN.harvest && gardenHarvestDay(d) ? 'harvest' : null;
+  const crew = GALLEY_TEST.gardenCrew || (typeof gardenCrew === 'function' ? gardenCrew : null);
+  if (pickNow === 'daily' && (gardenHarvestDay(d) || (crew && !(crew(d) || []).length))) pickNow = null;
+  if (pickNow) {
+    const items = [];
+    for (const b of G.beds) {
+      const c = GARDEN_CROPS[b[0]]; if (b[1] < c.days || (pickNow === 'daily' && !c.daily)) continue;   // the harvest morning picks everything ripe
+      const n = Math.round(c.yield * Math.min(1, c.days / Math.max(c.days, b[2])));
+      if (n > 0) { const it = items.find(x => x[0] === b[0]); if (it) it[1] += n; else items.push([b[0], n]); if (st) st.picked += n; }
+      b[1] = 0; b[2] = 0;
+    }
+    const got = items.reduce((a, x) => a + x[1], 0);
+    if (got) {
+      const cr = { at: m, items, id: null };
+      if (!st) {                                         // live: section 17's carry job (the player first, then the crew)
+        const gc = GALLEY_TEST.gardenCarry || (typeof gardenCarry === 'function' ? gardenCarry : null);
+        if (gc) cr.id = gc({ at: m, crates: Math.ceil(got / 10), title: `Carry ${Math.ceil(got / 10)} crate${got > 10 ? 's' : ''} of ${gardenNames(items)} from the garden to the cold store` }) || null;
+      }
+      G.crates.push(cr);
+    }
+    if (pickNow === 'harvest' && !st && got < GARDEN_HARVEST / 2) {   // half a usual harvest morning or less: Brennan writes
+      const c = gardenCond(d), worst = ['water', 'feed', 'light', 'tend'].sort((a, b) => c[a] - c[b])[0];
+      galleyMail(m, 'A thin harvest', `Only ${got} meals' worth came in from the garden this morning (a good harvest is about ${Math.round(GARDEN_HARVEST / 10) * 10}). ${GARDEN_WHY[worst]} We'll lean on the stores until it picks up.`);
+    }
+  }
+  if (G.crates.length) {
+    const keep = [], cw = GALLEY_TEST.carryWaiting || (typeof carryWaiting === 'function' ? carryWaiting : null);
+    for (const c of G.crates) {
+      const waiting = !st && c.id && cw ? cw(c.id, m) : m < c.at + GARDEN.carry;
+      if (waiting) keep.push(c); else for (const [ci, n] of c.items) S.cold.produce.push([ci, n, d]);
+    }
+    G.crates = keep;
+  }
+  if (FOOD.binAt.includes(md) && S.cold.produce.length) {
+    const keep = []; let n = 0;
+    for (const b of S.cold.produce) if (d - b[2] > GARDEN_CROPS[b[0]].keep) n += b[1]; else keep.push(b);
+    if (n) { S.cold.produce = keep; S.bin = (S.bin || 0) + n; if (st) st.produceBinned += n; }
+  }
   // an event (C7): its galley settings, on the hour; a batch for a dinner away from the mess at 15:00
   if (md % 60 === 0) S.ev = galleyEvRead(m, !!st);
   if (md === 900 && S.ev && S.ev.batch) {
     const b = S.ev.batch, want = Math.round(galleyEvNum(typeof b === 'object' ? b.meals : b, 0)), n = Math.min(want, S.cold.meals);
-    if (n > 0) { S.cold.meals -= n; S.batch = { d, meals: n, label: (typeof b === 'object' && b.label) || 'a formal dinner' }; if (st) st.batch += n; }
+    if (n > 0) {
+      S.cold.meals -= n; S.batch = { d, meals: n, label: (typeof b === 'object' && b.label) || 'a formal dinner' }; if (st) st.batch += n;
+      const start = typeof b === 'object' && b.at > 900 ? b.at : 1140, ready = 900 + galleyCookT(GALLEY_BATCH_T, m);
+      S.batch.late = Math.max(0, ready - start);
+      if (S.ev.herbs) S.batch.herbs = produceTakeOf(S, 'herbs', GALLEY_HERBS) >= GALLEY_HERBS;
+      if (!st && S.batch.late) galleyScore(m, 'dinnersLate', S.batch.late);
+      if (!st && S.ev.herbs && !S.batch.herbs) galleyScore(m, 'noHerbs', 1);
+    }
   }
   if (md === FOOD.open.breakfast) S.batch = null;
   // a cake: a birthday, or one of section 18's events with cake: true (Founding Day)
@@ -10610,8 +11027,8 @@ function galleyStep(S, m, st) {
     const more = Math.round(galleyEvNum(ev.extra, 0)) + (meal === 'dinner' && md < FOOD.trayAt ? Math.round(galleyEvNum(ev.trays, 0)) : 0);
     let need = Math.min(FOOD.serveryCap, countFrom(E.left[meal], m) + S.wait.length + FOOD.slack + more) - S.servery.portions - inPots('hot');
     for (let idle = cooks - potsOf('hot'); idle > 0 && need > 0; idle--) {
-      const n = Math.min(FOOD.batch, S.cold.meals); if (n <= 0) { if (st) st.coldOut++; break; }
-      S.cold.meals -= n; S.pots.push([galleyCookT(FOOD.cookT * (busy('slow') ? FOOD.slowOven : 1) * galleyEvNum(ev.cook, 1), m), n, 'hot']); need -= n; if (st) st.cooked += n;
+      const fresh = produceTake(S, Math.floor(FOOD.batch * GARDEN.potShare)), n = fresh + Math.min(FOOD.batch - fresh, S.cold.meals); if (n <= 0) { if (st) st.coldOut++; break; }
+      S.cold.meals -= n - fresh; if (st) st.fresh += fresh; S.pots.push([galleyCookT(FOOD.cookT * (busy('slow') ? FOOD.slowOven : 1) * galleyEvNum(ev.cook, 1), m), n, 'hot']); need -= n; if (st) st.cooked += n;
     }
   }
   {
@@ -10770,8 +11187,16 @@ function galleyText(what = 'servery') {
   const S = galleyAdvance(shipNow()), md = SHIP.time.min, meal = md >= FOOD.close.breakfast && md < FOOD.close.dinner ? 'dinner' : 'breakfast';
   if (what === 'grab') return S.grab.items ? `${S.grab.items} on the shelf.` : 'The shelf is empty.';
   if (what === 'dish') return S.dirty ? `${S.dirty} plates waiting to be washed.` : 'All washed up.';
-  if (what === 'cold') return `About ${S.cold.meals} meals in the cold store.` + (S.spoil ? ' It\'s running warm.' : '') + (S.bin ? ` ${S.bin} spoiled meals binned by the dish pit.` : '');
+  if (what === 'cold') return `About ${S.cold.meals} meals in the cold store` + (produceMeals(S) ? `, and ${produceMeals(S)} of fresh produce from the garden.` : '.') + (S.spoil ? ' It\'s running warm.' : '') + (S.bin ? ` ${S.bin} spoiled meals binned by the dish pit.` : '');
   if (what === 'menu') return galleyBoard();
+  if (what === 'garden') {
+    const G = S.garden || { beds: [], crates: [] }, ripe = new Map(), c = gardenCond(SHIP.time.day);
+    for (const b of G.beds) if (b[1] >= GARDEN_CROPS[b[0]].days) ripe.set(b[0], (ripe.get(b[0]) || 0) + 1);
+    const r = [...ripe].map(([ci, k]) => `${GARDEN_CROPS[ci].name} (${k} bed${k > 1 ? 's' : ''})`);
+    let next = SHIP.time.day; while (!gardenHarvestDay(next) && next < SHIP.time.day + 15) next++;
+    return (r.length ? `Ripe: ${r.join(', ')}.` : 'Nothing ripe just now.') + (c.grow < .7 ? ' ' + GARDEN_WHY[['water', 'feed', 'light', 'tend'].sort((a, b) => c[a] - c[b])[0]] : ' Growing well.')
+      + ` Next harvest morning: ${next === SHIP.time.day ? 'today' : WEEKDAYS[weekday(next)]}.` + (G.crates.length ? ' Crates waiting to go to the cold store.' : '');
+  }
   if (what === 'event') return S.batch && S.batch.d === SHIP.time.day ? `Brennan is cooking for ${S.batch.label} (${S.batch.meals} meals).` : '';
   const open = md >= FOOD.open[meal] && md < (meal === 'breakfast' ? 480 : 1230);
   const evd = galleyEvDish(S.ev && S.ev.menu), M = evd ? { dinner: evd, note: '' } : galleyMenu(SHIP.time.day), ck = galleyCake(SHIP.time.day), now = galleyEvents(SHIP.time.day).busy.find(b => md >= b.from && md < b.to);
@@ -10779,7 +11204,9 @@ function galleyText(what = 'servery') {
   if (S.wait.length) extra = ` ${S.wait.length} waiting` + (now ? `: ${GALLEY_BUSY_TEXT[now.kind]}.` : '.') + extra;
   if (S.cake && S.cake.out && ck) extra += ck.who.length ? ` Birthday cake for ${galleyNames(ck.who)} on the end of the counter.` : ` A ${ck.name} cake on the end of the counter.`;
   else if (ck && md < CAKE.out) extra += ` Cake after dinner: it's ${galleyCakeFor(ck)}.`;
-  if (S.batch && S.batch.d === SHIP.time.day && md < 1260) extra += ` Brennan is also cooking for ${S.batch.label}.`;
+  const fresh = produceByCrop(S).slice(0, 2).map(x => GARDEN_CROPS[x[0]].name);
+  if (fresh.length && (S.servery.portions || open)) extra += ` Fresh from the garden: ${fresh.join(' and ')}.`;
+  if (S.batch && S.batch.d === SHIP.time.day && md < 1260) extra += ` Brennan is also cooking for ${S.batch.label}` + (S.batch.late ? ', running late' : '') + (S.batch.herbs === false ? ', without the garden\'s herbs' : '') + '.';
   if (S.trays && S.trays.d === SHIP.time.day && md >= FOOD.trayAt && md < FOOD.trayAt + 60) extra += ` ${S.trays.n} trays have gone up to the bridge.`;
   if (S.servery.portions) return `${open ? 'Serving' : 'Ready'}: ${S.servery.dish}. ${S.servery.portions} portions in the pans.` + extra;
   return (open ? 'The pans are empty. The next pot is on its way.' : `Closed. ${meal === 'breakfast' ? 'Breakfast from 06:00' : 'Dinner from 17:00'}.`) + extra;
@@ -10796,12 +11223,13 @@ function galleyReport(day, days = 1) {
   const S = { at: (day - 1) * 1440, ...GALLEY_START() }, out = [];
   for (const E of GALLEY_EV.values()) E.k = 0;
   for (let d = day; d < day + days; d++) {
-    const st = { day: d, spoiled: 0, cakes: 0, batch: 0, trays: 0, mealMax: { breakfast: 0, dinner: 0 }, busy: galleyBusy(d), ate: 0, eaten: 0, grabbed: 0, waits: [], maxWait: 0, maxWho: '', missed: [], cooked: 0, baked: 0, washed: 0, waste: 0, delivered: 0, coldOut: 0, coldMin: Infinity, ready: {}, hours: [] };
+    const st = { day: d, picked: 0, fresh: 0, produceBinned: 0, spoiled: 0, cakes: 0, batch: 0, trays: 0, mealMax: { breakfast: 0, dinner: 0 }, busy: galleyBusy(d), ate: 0, eaten: 0, grabbed: 0, waits: [], maxWait: 0, maxWho: '', missed: [], cooked: 0, baked: 0, washed: 0, waste: 0, delivered: 0, coldOut: 0, coldMin: Infinity, ready: {}, hours: [] };
     for (let m = (d - 1) * 1440; m < d * 1440; m++) galleyStep(S, m, st);
     const rota = galleyRota(d), staff = [];
     for (const [id, g] of rota) if (g.role) staff.push({ id, role: g.role, wake: g.wake, bedBy: g.bedBy, first: g.blocks.length ? g.blocks[0].from : null, blocks: g.blocks.length });
     st.staff = staff;
     st.waited = st.waits.filter(w => w > 0).length;
+    st.produceEnd = produceMeals(S); st.grow = gardenCond(d).grow;
     st.end = { cold: S.cold.meals, servery: S.servery.portions, grab: S.grab.items, dirty: S.dirty, inUse: S.inUse, pots: S.pots.length, wait: S.wait.length };
     delete st.waits; out.push(st);
   }
@@ -10904,7 +11332,10 @@ function galleyBoardDraw(t, d) {
   if (M.note) line(cap(M.note), 118, '500 14px system-ui,sans-serif', '#e8eef0');
   const ck = galleyCake(d);
   if (ck) line('Cake after dinner: ' + (ck.who.length ? 'happy birthday, ' + galleyNames(ck.who) + '!' : 'happy ' + ck.name + '!'), 148, '600 15px system-ui,sans-serif', '#e8c06a');
-  else line('Fresh rolls, garden greens', 148, '500 15px system-ui,sans-serif', '#e8eef0');
+  else {
+    const fr = d === SHIP.time.day && SHIP.galley ? produceByCrop(SHIP.galley).slice(0, 2).map(x => GARDEN_CROPS[x[0]].name) : [];
+    line(fr.length ? 'Fresh from the garden: ' + fr.join(' and ') : 'Fresh rolls from the galley', 148, '500 15px system-ui,sans-serif', '#e8eef0');
+  }
   line('Grab & go by the line', 172, '500 15px system-ui,sans-serif', '#e8eef0');
   c.fillStyle = '#c86b4a'; c.fillRect(18, 186, 60, 3);
   t.needsUpdate = true;
@@ -14211,7 +14642,12 @@ function frame() {
 const _r = new THREE.Vector3(), _u = new THREE.Vector3();
 function placeCam() {
   const el = .62;
-  camera.position.set(target.x + 30 * Math.cos(el) * Math.sin(az), target.y + 30 * Math.sin(el), target.z + 30 * Math.cos(el) * Math.cos(az));
+  // 0.27.18: how far the view reaches along the line of sight; zoomed far out (mostly on tall phones) the near and far
+  // planes move out with it, so the deck is never sliced off. At the usual zooms it's the old 16 to 46 at 30.
+  const reach = (camera.top - camera.bottom) / 2 / camera.zoom / Math.tan(el) + 4, dist = Math.max(30, reach + 2);
+  const near = reach > 14 ? dist - reach : 16, far = reach > 14 ? dist + reach : 46;
+  if (camera.near !== near || camera.far !== far) { camera.near = near; camera.far = far; camera.updateProjectionMatrix(); }
+  camera.position.set(target.x + dist * Math.cos(el) * Math.sin(az), target.y + dist * Math.sin(el), target.z + dist * Math.cos(el) * Math.cos(az));
   camera.lookAt(target); camera.updateMatrixWorld();
   const wpp = (camera.top - camera.bottom) / camera.zoom / renderer.domElement.height;   // snap to device pixels
   _r.setFromMatrixColumn(camera.matrixWorld, 0); _u.setFromMatrixColumn(camera.matrixWorld, 1);
@@ -14221,8 +14657,12 @@ function placeCam() {
 }
 frame();
 camera.zoom = innerWidth / innerHeight < .8 ? 1.5 : 1.15; camera.updateProjectionMatrix();
-const ZOOM_MIN = .45, ZOOM_MAX = 2.4;
-addEventListener('resize', () => { renderer.setSize(innerWidth, innerHeight); frame(); });
+// 0.27.18 (the user: a decent zoom out, but no visible culling): the widest zoom is 0.55, or 0.7 on a tall screen
+// (which already sees far more of the deck top to bottom); shadows and the near and far planes follow the zoom.
+const ZOOM_MAX = 2.4; let ZOOM_MIN = .55;
+const fitZoomMin = () => { ZOOM_MIN = innerWidth / innerHeight < .8 ? .7 : .55; if (camera.zoom < ZOOM_MIN) { camera.zoom = ZOOM_MIN; camera.updateProjectionMatrix(); } };
+fitZoomMin();
+addEventListener('resize', () => { renderer.setSize(innerWidth, innerHeight); frame(); fitZoomMin(); });
 
 // =====================================================================
 // 7. GRID & PATHFINDING
@@ -14610,6 +15050,7 @@ const CROWD_DETAIL = [{ sph: [10, 7], cap: [10, 5], cyl: 8, tor: [4, 10] }, { sp
   { sph: [5, 4], cap: [5, 3], cyl: 4, tor: [3, 5], min: .03 }];   // 2 (0.27.8): coarse, for big crowds; parts smaller than min (eyes, badges) left out
 const CROWD_FAR = 9, CROWD_FAR_ZOOM = .75;
 const CROWD_MANY = 70, CROWD_FAR2 = 16;                  // with more than CROWD_MANY people, those further than CROWD_FAR2 (or all, zoomed out) go coarse
+const CROWD_GATHER = 40, CROWD_GATHER2 = 12;             // at an event's gathering: more than 40 on the deck, coarse from 12 tiles (0.27.19)
 const CROWD_SEAT = { sit: .475, lie: .5 };               // default seat and mattress heights
 let CROWD_PER = 0, CROWD_MAT = null, CROWD_EMPTY = null; // made on first use, so a game without a crowd has none of it
 const CROWD_REST = new THREE.Object3D();                 // stands in for empty bone slots
@@ -15005,7 +15446,9 @@ class CrowdPerson {
     if (this.phase !== undefined) g.p = this.phase; else { g.p += this.moved / (CYCLE * h); if (!walking && act !== 'run' && g.w < .02) g.p = 0; }
     this.moved = 0;
     if (act !== 'run') g.w = this.fresh ? (walking ? 1 : 0) : g.w + ((walking ? 1 : 0) - g.w) * Math.min(1, dt * (walking ? 6 : 7));
+    if (this.lookOff) rig.head.rotation.x += this.lookOff;   // 0.27.19: last frame's look up, taken off again
     animateActivity(this, this.pose, dt, t + g.t0, sk, this.pos.y);
+    this.lookOff = base === 'lie' ? 0 : .5 * feelLook(g.t0); rig.head.rotation.x -= this.lookOff;   // a jolt: everyone looks up a moment
     const lie = ss(this.k.lie || 0), fx = Math.sin(this.rot), fz = Math.cos(this.rot), off = .76 * h * lie;
     const floor = base === 'sit' || base === 'lie' || this.pos.y >= .3 ? 0 : this.pos.y;   // standing on a stage or a treadmill
     const root = rig.root;
@@ -15087,16 +15530,20 @@ const crowd = {
   },
   update(dt, t) {
     machineFx.tick(dt, t);                               // wear and faults on the machines (0.27.9)
+    gardenView.tick(t);                                  // the garden's crops grow with the galley's beds (0.27.23)
     deviceHook(); bubbles.tick(dt);                      // the device pose's hook and chatter bubbles (0.27.13)
     if (CROWD_DEMO) CROWD_DEMO.tick(dt, t);
     if (POSE_DEMO) POSE_DEMO.tick(dt, t);
     if (SEAT_DEMO) SEAT_DEMO.tick(dt, t);
     if (!this.chunks.length) return;
-    const allFar = camera.zoom < CROWD_FAR_ZOOM, many = this.people.length > CROWD_MANY;
+    // 0.27.19: at a ship-wide event's gathering on this deck (FEEL_S.gather: the storm's all-clear party), the coarse
+    // level of detail starts nearer (CROWD_GATHER2 tiles) once the deck holds more than CROWD_GATHER people
+    const gather = FEEL_S.gather && this.people.length > CROWD_GATHER, many = this.people.length > CROWD_MANY || gather;
+    const allFar = camera.zoom < CROWD_FAR_ZOOM, far2 = gather ? CROWD_GATHER2 : CROWD_FAR2;
     for (const p of this.people) {
       const d = Math.hypot(p.pos.x - target.x, p.pos.z - target.z);
       let lod = allFar || d > CROWD_FAR + (p.lod ? -.5 : .5) ? 1 : 0;
-      if (many && lod && (allFar || d > CROWD_FAR2 + (p.lod === 2 ? -.5 : .5))) lod = 2;   // only in a big crowd: normal play never gets here
+      if (many && lod && (allFar || d > far2 + (p.lod === 2 ? -.5 : .5))) lod = 2;   // only in a big crowd: normal play never gets here
       if (lod !== p.lod) { p.lod = lod; p.chunk.dirty = true; }
       p.update(dt, t);
     }
@@ -15234,6 +15681,133 @@ const machineFx = {
   },
 };
 
+// ---- how a ship-wide event feels on your deck (0.27.19, Pillar 3 C7). Section 18's eventFeel calls shipFeel(kinds, len)
+// for a felt moment: 'jolt' (a short light camera shake and a flash of ion light in the windows), 'lightsDip' (every
+// light dips and comes back), 'flicker' (then it flickers for the rest of len seconds). shipFeelFrame(t, dt) runs every
+// frame from the main loop, after applyLight and the camera: the event's mood by phase (FEEL_MOODS: in the storm the
+// space outside shifts to violet and teal with slow drifting bands, and the ship's light cools a little), the odd
+// flicker while eventMod('effect', 'flicker'), and emergency lighting while section 17's blackoutAt has this deck
+// dark: the lights cut out for a second, then come back dim red-amber, and flicker back to normal at the end.
+// Visual only, in real time; never the simulation, never R(). Reduced motion: no shake, and flickers become soft dips.
+// With no event on, it returns at once and changes nothing.
+const FEEL_CALM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const FEEL_MOODS = {                                     // by event id: its mood (0-1) in each phase, and its colours
+  ionStorm: { phases: { warning: .15, onset: .75, escalation: 1 }, a: col('#7a3cff'), b: col('#19d6c8'), light: col('#a99cff'), bg: col('#4a2488') },
+};
+const FEEL_EMERG = col('#ff7a3c'), FEEL_WHITE = new THREE.Color(1, 1, 1);
+const FEEL_S = { t0: -1, until: -1, kinds: [], mood: 0, moodT: 0, def: null, flick: false, dark: false, darkT: -99, check: -1, deck: undefined, first: true, gather: false };
+function shipFeel(kinds, len = 4) { const s = FEEL_S; s.t0 = performance.now() / 1000; s.until = s.t0 + len; s.kinds = kinds.slice(); }
+// ---- the garden view (0.27.23, with the galley's working garden, section 16): the crops on Deck 3's raised beds and
+// bean trellises grow with the galley's beds (SHIP.galley.garden.beds: [crop, grown, days]): bare soil just after a
+// pick, seedlings, then full and fruiting when ripe. The kits record each plant (GARDEN_PLOTS, o.live) instead of
+// building it; here they're drawn as instances, one InstancedMesh per shape and material, culled with the garden.
+// Looked at about once a second; the matrices are only rewritten when a bed's growth has moved on. The nth bed of a
+// crop on the deck is the galley's nth bed of it; beds with no place in the garden (the third bean bed, the root
+// vegetables) aren't shown. The grow racks' microgreens and the flower beds stay as they were. Plants in a tall piece
+// (the bean trellises) get their own copies of the materials, in that room's fade list, so they fade with it (0.27.24).
+const gardenView = {
+  root: null, list: [], key: '', next: 0, m: new THREE.Matrix4(), p: new THREE.Matrix4(), v: new THREE.Vector3(), s: new THREE.Vector3(), q: new THREE.Quaternion(),
+  make() {                                               // the deck's instanced meshes, once per deck build
+    this.root = deckRoot; this.list = []; this.key = ''; this.next = 0; if (!deckRoot || !GARDEN_PLOTS.length) return;
+    deckRoot.updateMatrixWorld(true);
+    const geo = { leaf: LEAF_GEO, ball: new THREE.SphereGeometry(1, 10, 7), pod: new THREE.CylinderGeometry(.012, .01, .14, 5) }, by = new Map(), box = new THREE.Box3();
+    const tallOf = P => { for (let o = P.g.parent; o; o = o.parent) { const t = TALL.find(t => t.g === o); if (t) return t; } return null; };
+    for (const P of GARDEN_PLOTS) for (const sl of P.slots) {
+      const t = tallOf(P), k = sl.geo + '|' + sl.mat.uuid + '|' + (t ? TALL.indexOf(t) : '');
+      let b = by.get(k);
+      if (!b) {                                          // in a tall piece (the trellises): its own copy of the material, faded with the room (0.27.24)
+        const mat = t ? sl.mat.clone() : sl.mat; if (t) { mat.userData.base = { op: sl.mat.opacity, tr: sl.mat.transparent }; t.mats.push(mat); }
+        by.set(k, b = { geo: sl.geo, mat, items: [] });
+      }
+      b.items.push({ P, sl }); box.expandByPoint(this.v.set(sl.x, sl.y, sl.z).applyMatrix4(P.g.matrixWorld));
+    }
+    const sphere = box.getBoundingSphere(new THREE.Sphere()); sphere.radius += 1;
+    for (const b of by.values()) {
+      const g = geo[b.geo].clone(); g.boundingSphere = sphere.clone();   // culled with the garden as a whole
+      const im = new THREE.InstancedMesh(g, b.mat, b.items.length); im.castShadow = im.receiveShadow = true; im.raycast = () => {};
+      deckRoot.add(im); this.list.push({ im, items: b.items });
+    }
+  },
+  grown(P) {                                             // a plot's growth, 0 (just picked) to 1 (ripe); 1 without the galley's beds
+    const G = SHIP.galley && SHIP.galley.garden, ci = typeof GARDEN_CROPS !== 'undefined' ? GARDEN_CROPS.findIndex(c => c.id === P.crop) : -1;
+    if (!G || ci < 0) return 1;
+    const b = G.beds.filter(x => x[0] === ci)[P.n]; return b ? Math.min(1, b[1] / GARDEN_CROPS[ci].days) : 1;
+  },
+  tick(t) {
+    if (this.root !== deckRoot) this.make();
+    if (!this.list.length || t < this.next) return;
+    this.next = t + 1;
+    const gr = new Map(GARDEN_PLOTS.map(P => [P, this.grown(P)])), key = [...gr.values()].map(x => Math.round(x * 50)).join();
+    if (key === this.key) return;
+    this.key = key;
+    for (const { im, items } of this.list) {
+      items.forEach(({ P, sl }, i) => {
+        const g = gr.get(P), lf = g < .03 ? 0 : .3 + .7 * Math.min(1, g / .75), f = sl.fruit ? (g < .6 ? 0 : (g - .6) / .4) * lf : lf;
+        if (!f) { im.setMatrixAt(i, LEAF_HIDE); return; }
+        this.m.compose(this.v.set(sl.x, P.base + (sl.y - P.base) * lf, sl.z), this.q, this.s.set(sl.sx * f, sl.sy * f, sl.sz * f));
+        im.setMatrixAt(i, this.p.multiplyMatrices(P.g.matrixWorld, this.m));
+      });
+      im.instanceMatrix.needsUpdate = true;
+    }
+  },
+};
+// a jolt's look up (0-1), for 8b's people: each a beat apart (by their animation offset), up for about two seconds
+function feelLook(t0) {
+  const s = FEEL_S; if (!s.kinds.includes('jolt')) return 0;
+  const e = performance.now() / 1000 - s.t0 - .25 - (t0 % 1) * .5;
+  return e <= 0 || e > 3 ? 0 : e < .4 ? ss(e / .4) : e < 2.2 ? 1 : 1 - ss((e - 2.2) / .8);
+}
+const feelHash = (a, b) => { const h = Math.sin(a * 12.9898 + b * 78.233) * 43758.5453; return h - Math.floor(h); };
+function shipFeelFrame(t, dt) {
+  const s = FEEL_S, now = performance.now() / 1000, dn = deckDef ? deckDef.num : null;
+  if (now >= s.check || dn !== s.deck) {                 // twice a second: the event's phase, its flicker, this deck's blackout
+    s.check = now + .5;
+    const ev = typeof eventNow === 'function' ? eventNow() : null, md = ev && FEEL_MOODS[ev.id];
+    if (md) s.def = md;
+    s.moodT = md ? md.phases[ev.phase] || 0 : 0;
+    s.flick = !!(ev && typeof eventMod === 'function' && eventMod('effect', 'flicker'));
+    const bo = ev && typeof blackoutAt === 'function' ? blackoutAt(shipNow()) : null, dark = !!bo && bo.deck === dn;
+    if (dark !== s.dark || dn !== s.deck) s.darkT = dn !== s.deck || s.first ? -99 : now;   // arriving on a dark deck: no cut-out
+    s.dark = dark; s.deck = dn;
+    const e = ev && SHIP.event, sd = e && SHIP_EVENTS[e.id], tn = shipNow();   // one of the event's gatherings on this deck, now (for 8b's crowd)
+    s.gather = !!sd && (sd.moments || []).some(mo => mo.gathering && mo.where && mo.where.deck === dn && (at => tn >= at - 30 && tn < at + (mo.len || 60) + 30)((e.startDay - 1 + mo.at[0]) * 1440 + mo.at[1]));
+    if (s.first) { s.mood = s.moodT; s.first = false; }
+  }
+  s.mood += (s.moodT - s.mood) * Math.min(1, dt * .4); if (Math.abs(s.mood - s.moodT) < .002) s.mood = s.moodT;
+  const se = now - s.t0, felt = now < s.until, de = now - s.darkT;
+  if (!s.mood && !felt && !s.flick && !s.dark && de > 2) { SKY.mat.uniforms.uWash.value = 0; return; }
+  const has = k => felt && s.kinds.includes(k);
+  let k = 1, emerg = s.dark ? 1 : 0, flash = 0;
+  // a felt moment: the shake, the dip, then flickers
+  if (has('jolt') && se < .8 && !FEEL_CALM) {
+    const a = 5 * (1 - se / .8) ** 2 * (camera.top - camera.bottom) / camera.zoom / renderer.domElement.height;   // about 5 pixels
+    camera.position.addScaledVector(_r, a * Math.sin(se * 58)).addScaledVector(_u, a * .7 * Math.sin(se * 43 + 1)); camera.updateMatrixWorld();
+  }
+  if (has('jolt') && se < .9) flash = 1 - se / .9;
+  if (has('lightsDip')) k = se < .25 ? 1 - se / .25 * .65 : se < 1.4 ? .35 : Math.min(1, .35 + (se - 1.4) * .45);
+  if (has('flicker') && se > 1.4) k *= FEEL_CALM ? .9 + .1 * Math.cos(se * 2) : feelHash(Math.floor(se * 8), 3) < .3 ? .55 : 1;
+  // the odd flicker while the event's 'flicker' effect is on (about one in 30 tenths of a second)
+  if (s.flick && !felt && !FEEL_CALM && feelHash(Math.floor(now * 9), 7) < .035) k *= .68;
+  // emergency lighting: cut out, then dim red-amber; at the end it flickers back
+  if (s.dark && de < 1.1) { k *= FEEL_CALM ? 1 - Math.min(1, de) * .9 : .08; emerg = de / 1.1; }
+  else if (s.dark && de < 1.9 && !FEEL_CALM && feelHash(Math.floor(de * 12), 5) < .5) k *= .15;
+  else if (!s.dark && de < .9) emerg = FEEL_CALM ? 1 - de / .9 : feelHash(Math.floor(de * 12), 6) < .5 ? 1 : 0;
+  // the mood: the space outside and the ship's light
+  const m = s.mood, d = s.def;
+  if (m && d) {
+    hemi.color.lerp(d.light, .28 * m); sun.color.lerp(d.light, .3 * m); sun.intensity *= 1 - .12 * m;
+    scene.background.lerp(d.bg, .7 * m);
+  }
+  const U = SKY.mat.uniforms;
+  if (d && (m || flash)) { U.uWash.value = .55 * m + .9 * flash * Math.max(m, .3); U.uT.value = t; U.uA.value.copy(d.a); U.uB.value.copy(d.b); }
+  else U.uWash.value = 0;
+  if (emerg) {
+    const e = emerg; hemi.color.lerp(FEEL_EMERG, .62 * e); hemi.intensity *= 1 - .58 * e; sun.color.lerp(FEEL_EMERG, .6 * e); sun.intensity *= 1 - .85 * e;
+    for (const L of LAMPS) L.l.intensity *= 1 - .75 * e;
+  }
+  if (k < 1) { hemi.intensity *= k; sun.intensity *= k; for (const L of LAMPS) L.l.intensity *= k; }
+}
+
 // ---- seeing yourself use the device (0.27.13, Pillar 3 C11): when section 19's deviceOn('open'|'close', fn) exists,
 // opening the device sets player.deviceOut and the player raises it ('+device', HOLDS), closing puts it away. Hooked
 // on the first frame it's there, so nothing happens without it. Something already in your hands wins.
@@ -15265,7 +15839,7 @@ const bubbles = { list: [], hidden: false, el: null, v: new THREE.Vector3(),
       const w = b.who, p = w.pos || (w.obj && w.obj.position) || w, h = w.h || 1;
       const seat = w.pos && w.pos.y >= .3 ? w.pos.y : 0;   // seated: above the head on the seat; standing: above a standing head
       this.v.set(p.x, seat ? seat + 1.15 * h : (w.pos ? w.pos.y : w.obj ? w.obj.position.y : p.y || 0) + 2.0 * h, p.z).project(camera);
-      const vis = !this.hidden && this.v.z < 1 && Math.abs(this.v.x) < 1 && this.v.y < .95 && this.v.y > -1 && camera.zoom > .6;
+      const vis = !this.hidden && this.v.z < 1 && Math.abs(this.v.x) < 1 && this.v.y < .95 && this.v.y > -1;   // any zoom the camera allows (0.27.18)
       b.el.style.display = vis ? '' : 'none';
       if (vis) { const hw = b.el.offsetWidth / 2 + 8; b.el.style.left = Math.min(innerWidth - hw, Math.max(hw, (this.v.x + 1) / 2 * innerWidth)).toFixed(0) + 'px'; b.el.style.top = ((1 - this.v.y) / 2 * innerHeight).toFixed(0) + 'px'; b.el.style.opacity = Math.min(1, b.t * 2, (b.life - b.t) * 4).toFixed(2); }
     }
@@ -15525,7 +16099,7 @@ const ROSTER = [
   {"id": "achterberg-lars", "name": "Lars Achterberg", "rank": "officer", "dept": "watch", "uniform": "watch", "role": "Watch officer", "shift": "night", "rota": {"offDays": [6, 0]}, "bed": "4-19", "work": {"deck": 2, "place": "work:watch"}, "habits": ["lingers-at-meals", "calls-home", "bar-regular"], "traits": ["reliable", "dry humour"], "looks": {"skin": 0, "hair": "bald", "hairColor": "auburn", "height": 1.07, "build": "average", "acc": ["glasses"]}, "bio": "Calm in a crisis, fussy about paperwork.", "life": ["Knows the lyrics to every song in the record cabinet.", "Reads mystery novels and guesses the ending too early."], "seed": 464758, "birthday": 340, "plate": {"rank": "Officer", "name": "Lars Achterberg"}, "habitShifts": [{"add": "stargazer", "why": "Lars's name is on the observatory-night list now."}]},
   {"id": "dahl-mira", "name": "Mira Dahl", "rank": "officer", "dept": "watch", "uniform": "watch", "role": "Watch officer", "shift": "day", "rota": {"offDays": [0, 1]}, "bed": "4-17", "work": {"deck": 2, "place": "work:watch"}, "habits": ["night-owl", "late-diner", "musician"], "traits": ["practical", "thoughtful"], "looks": {"skin": 2, "hair": "bald", "hairColor": "blonde", "height": 1.01, "build": "average", "acc": ["headband"]}, "bio": "Calm in a crisis, fussy about paperwork.", "life": ["Knits scarves for anyone who stands still long enough.", "Has a parent who served on the Wren years ago."], "seed": 598747, "birthday": 220, "plate": {"rank": "Officer", "name": "Mira Dahl"}, "habitShifts": [{"add": "bar-regular", "why": "Mira has become a regular at the lounge bar."}, {"drop": "night-owl", "why": "Mira has started going to bed on time."}]},
   {"id": "ibarra-rafael", "name": "Rafael Ibarra", "rank": "officer", "dept": "survey", "uniform": "survey", "role": "Survey officer", "shift": "night", "rota": {"offDays": [3, 4]}, "bed": "4-20", "work": {"deck": 2, "place": "work:survey"}, "habits": ["lounge-regular", "early-to-bed"], "traits": ["forgetful", "sarcastic"], "looks": {"skin": 2, "hair": "bun", "hairColor": "black", "height": 1.02, "build": "average", "acc": []}, "bio": "Lives for the next sensor sweep.", "life": ["Keeps a tin of good biscuits and tells no one.", "Plays Tiles, and loses gracefully."], "seed": 109188, "birthday": 219, "plate": {"rank": "Officer", "name": "Rafael Ibarra"}, "habitShifts": [{"add": "runner", "why": "Rafael has taken up running on the treadmills."}]},
-  {"id": "cruz-tove", "name": "Tove Cruz", "rank": "officer", "dept": "survey", "uniform": "survey", "role": "Survey officer", "shift": "day", "rota": {"offDays": [4, 5]}, "bed": "4-18", "work": {"deck": 2, "place": "work:survey"}, "habits": ["night-owl", "lingers-at-meals", "gardener"], "traits": ["messy", "shy"], "looks": {"skin": 5, "hair": "short", "hairColor": "auburn", "height": 0.92, "build": "broad", "acc": ["beard", "headband"]}, "bio": "Can name every star in the chart room, and argues about the rest.", "life": ["Is secretly afraid of the lift.", "Keeps a cactus called Gerald on the windowsill."], "seed": 168991, "birthday": 61, "plate": {"rank": "Officer", "name": "Tove Cruz"}, "habitShifts": [{"add": "evening-shower", "why": "Tove has switched to showering at night."}, {"add": "early-to-bed", "drop": "night-owl", "why": "Tove has started going to bed early."}]},
+  {"id": "cruz-tove", "name": "Tove Cruz", "rank": "officer", "dept": "garden", "uniform": "survey", "role": "Senior gardener", "shift": "day", "rota": {"offDays": [5, 6], "hours": [[480, 1020]], "team": "senior", "hoursOn": [{"days": [0, 1], "hours": [[360, 840]]}, {"days": [2, 3], "hours": [[780, 1260]]}]}, "bed": "4-18", "work": {"deck": 3, "place": "work:garden"}, "habits": ["night-owl", "lingers-at-meals", "gardener"], "traits": ["messy", "shy"], "looks": {"skin": 5, "hair": "short", "hairColor": "auburn", "height": 0.92, "build": "broad", "acc": ["beard", "headband"]}, "bio": "Runs the hydroponics garden, and knows every plant by the week it was sown.", "life": ["Is secretly afraid of the lift.", "Keeps a cactus called Gerald on the windowsill."], "seed": 168991, "birthday": 61, "plate": {"rank": "Officer", "name": "Tove Cruz"}, "habitShifts": [{"add": "evening-shower", "why": "Tove has switched to showering at night."}, {"add": "early-to-bed", "drop": "night-owl", "why": "Tove has started going to bed early."}]},
   {"id": "zamora-quinn", "name": "Quinn Zamora", "rank": "officer", "dept": "survey", "uniform": "survey", "role": "Survey officer", "shift": "day", "rota": {"offDays": [5, 6]}, "bed": "4-21", "work": {"deck": 2, "place": "work:survey"}, "habits": ["late-diner", "night-owl", "runner"], "traits": ["meticulous", "quiet"], "looks": {"skin": 1, "hair": "short", "hairColor": "blonde", "height": 1.09, "build": "slim", "acc": []}, "bio": "Can name every star in the chart room, and argues about the rest.", "life": ["Brought a telescope from home.", "Sings in the shower; the whole washroom knows."], "seed": 379086, "birthday": 94, "plate": {"rank": "Officer", "name": "Quinn Zamora"}, "habitShifts": [{"drop": "runner", "why": "Quinn has given up running for now."}]},
   {"id": "yoon-elif", "name": "Elif Yoon", "rank": "officer", "dept": "infirmary", "uniform": "infirmary", "role": "Doctor", "shift": "night", "rota": {"offDays": [2, 3]}, "bed": "4-22", "work": {"deck": 3, "place": "work:infirmary"}, "habits": ["calls-home", "tea-break", "lounge-regular", "bar-regular"], "traits": ["nervous", "patient"], "looks": {"skin": 4, "hair": "short", "hairColor": "dark", "height": 0.93, "build": "average", "acc": []}, "bio": "Night doctor. Steady hands and a soft voice at three in the morning.", "life": ["Tells terrible jokes at breakfast.", "Is the best at fixing the coffee machine."], "seed": 951856, "birthday": 151, "plate": {"rank": "Officer", "name": "Elif Yoon"}, "habitShifts": [{"add": "musician", "why": "Elif has dusted off an old instrument and plays in the music room now."}]},
   {"id": "bakshi-sol", "name": "Sol Bakshi", "rank": "junior", "dept": "helm", "uniform": "command", "role": "Helm rating", "shift": "night", "rota": {"offDays": [0, 1]}, "bed": "4-B8-1", "work": {"deck": 1, "place": "work:helm"}, "habits": ["lounge-regular", "common-room", "early-riser", "shopper"], "traits": ["easygoing", "gentle"], "looks": {"skin": 5, "hair": "buzz", "hairColor": "dark", "height": 1.01, "build": "average", "acc": []}, "bio": "Plots courses for fun on rest days.", "life": ["Paints tiny portraits of the crew.", "Grew up on Lisk, and misses the rain."], "seed": 224075, "birthday": 66, "habitShifts": [{"drop": "shopper", "why": "Sol is saving up, and has stopped browsing the store."}]},
@@ -15537,12 +16111,12 @@ const ROSTER = [
   {"id": "rossi-femi", "name": "Femi Rossi", "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician", "shift": "day", "rota": {"offDays": [1, 2]}, "bed": "4-B7-1", "work": {"deck": 5, "place": "work:works"}, "habits": ["tea-break", "calls-home", "early-to-bed"], "traits": ["optimistic", "competitive"], "looks": {"skin": 1, "hair": "ponytail", "hairColor": "auburn", "height": 0.91, "build": "broad", "acc": []}, "bio": "New to Works, eager, and already covered in grease.", "life": ["Brought a telescope from home.", "Is learning Veyli from a phrasebook."], "seed": 211718, "birthday": 354, "habitShifts": [{"add": "music", "why": "Femi has started listening in the music room in the evenings."}]},
   {"id": "rahman-farah", "name": "Farah Rahman", "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician", "shift": "day", "rota": {"offDays": [2, 3]}, "bed": "4-B6-6", "work": {"deck": 5, "place": "work:works"}, "habits": ["early-riser", "calls-home", "night-owl", "bar-regular"], "traits": ["stubborn", "restless"], "looks": {"skin": 4, "hair": "bun", "hairColor": "blonde", "height": 0.92, "build": "average", "acc": ["beard", "moustache"]}, "bio": "Good with filters, bad with mornings.", "life": ["Is saving up for a boat on Hesper Dock.", "Keeps a journal of every star they have seen."], "seed": 828477, "birthday": 276, "habitShifts": [{"add": "evening-shower", "why": "Farah has switched to showering at night."}]},
   {"id": "eklund-leila", "name": "Leila Eklund", "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician", "shift": "day", "rota": {"offDays": [3, 4]}, "bed": "4-B5-3", "work": {"deck": 5, "place": "work:works"}, "habits": ["calls-home", "lounge-regular"], "traits": ["dry humour", "meticulous"], "looks": {"skin": 4, "hair": "curls", "hairColor": "brown", "height": 1.04, "build": "average", "acc": ["headband"]}, "bio": "New to Works, eager, and already covered in grease.", "life": ["Collects old maps of Hesper Dock.", "Sends voice messages to a grandmother on Kesh."], "seed": 489006, "birthday": 130, "habitShifts": [{"add": "gardener", "why": "Leila has started helping out in the garden."}]},
-  {"id": "oneill-imani", "name": "Imani O'Neill", "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician", "shift": "day", "rota": {"offDays": [4, 5]}, "bed": "4-B6-4", "work": {"deck": 5, "place": "work:works"}, "habits": ["night-owl", "quiet-corner", "gardener"], "traits": ["dry humour", "cheerful"], "looks": {"skin": 0, "hair": "long", "hairColor": "dark", "height": 0.99, "build": "average", "acc": ["moustache"]}, "bio": "Good with filters, bad with mornings.", "life": ["Paints tiny portraits of the crew.", "Makes a playlist for every week of the tour."], "seed": 513421, "birthday": 19, "habitShifts": [{"add": "early-to-bed", "drop": "night-owl", "why": "Imani has started going to bed early."}, {"add": "shopper", "why": "Imani has started browsing the crew store after shift."}]},
+  {"id": "oneill-imani", "name": "Imani O'Neill", "rank": "junior", "dept": "garden", "uniform": "survey", "role": "Gardener", "shift": "day", "rota": {"offDays": [2, 3], "hours": [[780, 1260]], "team": "late"}, "bed": "4-B6-4", "work": {"deck": 3, "place": "work:garden"}, "habits": ["night-owl", "quiet-corner", "gardener"], "traits": ["dry humour", "cheerful"], "looks": {"skin": 0, "hair": "long", "hairColor": "dark", "height": 0.99, "build": "average", "acc": ["moustache"]}, "bio": "Tends the garden into the evening, and picks the galley's herbs for the next day.", "life": ["Paints tiny portraits of the crew.", "Makes a playlist for every week of the tour."], "seed": 513421, "birthday": 19, "habitShifts": [{"add": "early-to-bed", "drop": "night-owl", "why": "Imani has started going to bed early."}, {"add": "shopper", "why": "Imani has started browsing the crew store after shift."}]},
   {"id": "moreau-signe", "name": "Signe Moreau", "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician", "shift": "day", "rota": {"offDays": [5, 6]}, "bed": "4-B6-3", "work": {"deck": 5, "place": "work:works"}, "habits": ["music"], "traits": ["stubborn", "sharp-eyed"], "looks": {"skin": 5, "hair": "buzz", "hairColor": "black", "height": 0.98, "build": "slim", "acc": ["moustache"]}, "bio": "Good with filters, bad with mornings.", "life": ["Is training for the gym's rowing leaderboard.", "Reads mystery novels and guesses the ending too early."], "seed": 222356, "birthday": 304, "habitShifts": [{"add": "gym-regular", "why": "Signe has joined the after-shift gym crowd."}]},
   {"id": "soto-marta", "name": "Marta Soto", "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician", "shift": "day", "rota": {"offDays": [6, 0]}, "bed": "4-B7-4", "work": {"deck": 5, "place": "work:works"}, "habits": ["quiet-corner", "evening-shower"], "traits": ["loyal", "blunt"], "looks": {"skin": 1, "hair": "buzz", "hairColor": "auburn", "height": 0.99, "build": "slim", "acc": ["headband"]}, "bio": "Fixes lamps, ovens and washers, and grumbles about all three.", "life": ["Keeps a tin of good biscuits and tells no one.", "Got married just before the tour and counts the days."], "seed": 101468, "birthday": 188, "habitShifts": [{"add": "common-room", "why": "Marta has joined the Tiles nights in the common room."}]},
   {"id": "volkov-maeve", "name": "Maeve Volkov", "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician", "shift": "day", "rota": {"offDays": [0, 1]}, "bed": "4-B7-6", "work": {"deck": 5, "place": "work:works"}, "habits": ["late-diner", "runner"], "traits": ["kind", "playful"], "looks": {"skin": 2, "hair": "long", "hairColor": "dark", "height": 1.06, "build": "slim", "acc": ["headband"]}, "bio": "Can strip a scrubber in ten minutes flat.", "life": ["Collects pressed flowers from the garden.", "Is the best at fixing the coffee machine."], "seed": 299177, "birthday": 78, "habitShifts": [{"add": "gym-regular", "why": "Maeve has joined the after-shift gym crowd."}]},
   {"id": "kovac-zainab", "name": "Zainab Kovac", "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician", "shift": "day", "rota": {"offDays": [1, 2]}, "bed": "4-B6-1", "work": {"deck": 5, "place": "work:works"}, "habits": ["skips-breakfast", "garden-lover", "shopper"], "traits": ["meticulous", "shy"], "looks": {"skin": 3, "hair": "ponytail", "hairColor": "auburn", "height": 1.04, "build": "average", "acc": []}, "bio": "Can strip a scrubber in ten minutes flat.", "life": ["Knits scarves for anyone who stands still long enough.", "Is secretly afraid of the lift."], "seed": 741137, "birthday": 212, "habitShifts": [{"add": "tea-break", "why": "Zainab has started taking a mid-shift tea break."}]},
-  {"id": "hart-ravi", "name": "Ravi Hart", "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician", "shift": "day", "rota": {"offDays": [2, 3]}, "bed": "4-B5-5", "work": {"deck": 5, "place": "work:works"}, "habits": ["late-sleeper", "garden-lover", "gardener"], "traits": ["stubborn", "gentle"], "looks": {"skin": 2, "hair": "short", "hairColor": "auburn", "height": 0.95, "build": "average", "acc": []}, "bio": "Good with filters, bad with mornings.", "life": ["Draws comics about life aboard and pins them in the common room.", "Keeps fish back home on Valo."], "seed": 929678, "birthday": 82, "habitShifts": [{"add": "gym-regular", "why": "Ravi has joined the after-shift gym crowd."}]},
+  {"id": "hart-ravi", "name": "Ravi Hart", "rank": "junior", "dept": "garden", "uniform": "survey", "role": "Gardener", "shift": "day", "rota": {"offDays": [0, 1], "hours": [[360, 840]], "team": "early"}, "bed": "4-B5-5", "work": {"deck": 3, "place": "work:garden"}, "habits": ["late-sleeper", "garden-lover", "gardener"], "traits": ["stubborn", "gentle"], "looks": {"skin": 2, "hair": "short", "hairColor": "auburn", "height": 0.95, "build": "average", "acc": []}, "bio": "Waters the garden at first light, before anyone else is up.", "life": ["Draws comics about life aboard and pins them in the common room.", "Keeps fish back home on Valo."], "seed": 929678, "birthday": 82, "habitShifts": [{"add": "gym-regular", "why": "Ravi has joined the after-shift gym crowd."}]},
   {"id": "quist-ilse", "name": "Ilse Quist", "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician", "shift": "day", "rota": {"offDays": [3, 4]}, "bed": "4-B6-5", "work": {"deck": 5, "place": "work:works"}, "habits": ["garden-lover", "runner"], "traits": ["dreamy", "dry humour"], "looks": {"skin": 2, "hair": "long", "hairColor": "blonde", "height": 1.0, "build": "slim", "acc": ["headband"]}, "bio": "New to Works, eager, and already covered in grease.", "life": ["Grows herbs for the galley.", "Reads mystery novels and guesses the ending too early."], "seed": 349564, "birthday": 256, "habitShifts": [{"add": "gym-regular", "why": "Ilse has joined the after-shift gym crowd."}]},
   {"id": "esposito-yara", "name": "Yara Esposito", "rank": "junior", "dept": "store", "uniform": "works", "role": "Storekeeper", "shift": "day", "rota": {"offDays": [0, 1], "hours": [[480, 870]]}, "bed": "4-B5-4", "work": {"deck": 3, "place": "work:store"}, "habits": ["tea-break", "common-room", "gym-regular", "shopper"], "traits": ["dry humour", "kind"], "looks": {"skin": 4, "hair": "ponytail", "hairColor": "brown", "height": 0.98, "build": "average", "acc": ["moustache"]}, "bio": "Opens the crew store in the morning and knows who has run out of what.", "life": ["Keeps a cactus called Gerald on the windowsill.", "Keeps a journal of every star they have seen."], "seed": 468786, "birthday": 62, "habitShifts": [{"add": "gardener", "why": "Yara has started helping out in the garden."}]},
   {"id": "ishikawa-orla", "name": "Orla Ishikawa", "rank": "junior", "dept": "store", "uniform": "works", "role": "Storekeeper", "shift": "day", "rota": {"offDays": [3, 4], "hours": [[870, 1260]]}, "bed": "4-B5-6", "work": {"deck": 3, "place": "work:store"}, "habits": ["window-seat", "tea-break", "stargazer"], "traits": ["loyal", "kind"], "looks": {"skin": 2, "hair": "bald", "hairColor": "auburn", "height": 0.93, "build": "slim", "acc": ["earrings", "headband"]}, "bio": "Keeps the crew store open into the evening, and the ledger in perfect order.", "life": ["Sings in the shower; the whole washroom knows.", "Grows herbs for the galley."], "seed": 960153, "birthday": 30, "habitShifts": [{"add": "lounge-regular", "why": "Orla spends evenings in the bow lounge now."}]},
@@ -16349,7 +16923,8 @@ function loop() {
   }
 
   nightT += (nightAt() - nightT) * Math.min(1, dt * 1.8); applyLight(nightT);
-  if (typeof machineFx !== 'undefined') machineFx.lamps(t);   // section 8b: lamps stutter while the deck's light relays flicker (0.27.10)
+  doorLeavesSync(); tallSync();                          // section 4: door leaves (0.27.21) and tall furniture (0.27.22), drawn together
+  if (typeof machineFx !== 'undefined') { machineFx.lamps(t); shipFeelFrame(t, dt); }   // section 8b: lamps stutter while the deck's light relays flicker (0.27.10); a ship-wide event's feel (0.27.19)
 
   // ambient life
   // stars outside: the sky drifts aft across the screen, with a touch of parallax as the camera follows you.

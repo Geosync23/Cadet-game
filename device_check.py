@@ -8,6 +8,7 @@
 #   Maps (0.35.3): every deck draws; picking a room and Go there sets the goal arrow (setGoal)
 #   Memos (0.35.4): the form, pin to Home, Remember this on Mail, saved; tips once each with a switch; the phone's
 #   camera framing while the sheet is open (deviceFrame), none on wide screens
+#   a need's bar pulses while section 15's needPulse says it just rose (0.35.19)
 #   the Schedule lists only what really happens (0.35.18): every ship item and tradition for a week has people there
 #   days off (0.35.17): section 14's playerShiftOn shows Day off in Schedule, the strip and the Calendar
 #   never opens by itself (0.35.15): a ship day of reminders, tips, notices, an address, a dialogue, an invitation
@@ -210,6 +211,13 @@ def run(path):
               D.appts = []; deviceShow('home'); return out; })()""")
             print('  group meeting:', gm)
             check(gm == [2, True, True, 2, True, True, True, True, 'kept', 'no,no'], f'group meetings: ask all, a seat each, saved, one row, kept together, cancelled together: {gm}')
+            # a need's bar pulses (0.35.19) while section 15's needPulse(k) says it just rose (a stand-in when there's none)
+            g.ev("window.__pk = 'energy'; window.__ownPulse = typeof needPulse === 'function'; if (!__ownPulse) window.needPulse = k => k === window.__pk; deviceShow('needs')"); g.step(2)
+            p1 = g.ev("[...document.querySelectorAll('#devBody .need.pulse')].map(r => r.getAttribute('aria-label'))")
+            g.ev("window.__pk = null"); g.step(2)
+            p2 = g.ev("document.querySelectorAll('#devBody .need.pulse').length")
+            g.ev("if (!window.__ownPulse) delete window.needPulse; deviceShow('home')")
+            check(p1 == [g.ev("NEED_LABEL.energy")] and p2 == 0, f'Needs: the bar pulses while it has just risen, then stops: {p1} {p2}')
             # the Schedule only lists what really happens (0.35.18, the user: "the schedule says there is a Works meeting but
             # nothing happened"): for a week, every ship item and tradition has at least two people there doing it (an
             # event's tag, the drill, the bunk tidy) within its first half hour, on its deck
