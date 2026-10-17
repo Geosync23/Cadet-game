@@ -501,4 +501,6 @@ introduces them), unless noted.
 | Mori names one tiny rock on each survey after someone aboard (a secret); Achterberg's dad reads him endings on purpose; Ferreira learnt her first language from her gran and her fourth from a cook; Park's boat name is a secret even from her | command, Watch | Writer 2, batch 2 |
 | Kim made Garcia a card that plays a tune; Volkov beat Shah to the coffee machine on Shah's birthday; Nakamura and Garcia argue about planters | Watch | Writer 2, batch 2 |
 | Thirty-one rungs on the ladder from Deck 4 to Deck 5; the Halcyon calls the three twins "the set"; Lukas Dlamini counts down the days to home, the other newlyweds count up from the wedding | the circles | Writer 3, batch 2 |
+| Pell's screw tin holds screws from seven ships; he naps in the parts store (Calder knows); Brennan's mother posts her recipes ("until it sounds right"); the farm moon had one road and three fences; the bow lounge's Tiles board is warped | story crew | Writer 3, batch 3 |
+| Varga and Strand still dispute their running races; O'Neill names playlist forty-one after you if you do her job | commons | Writer 3, batch 5 |
 | `weekday:` on a rest-day line must match the roster's `rota.offDays` (0 = Monday): check the game's ROSTER, not memory | everyone | head writer, 0.48.11 |

@@ -121,6 +121,7 @@ These are the only condition words. `lines_check.py` rejects anything else. Put 
 | `dept:` `rank:` `trait:` `habit:` | the speaker's department, rank, trait or habit | `dept:galley`, `rank:junior`, `trait:shy`, `habit:gardener` |
 | `act:` | what they're doing | `work`, `breakfast`, `dinner`, `meal` (either), `gym`, `wash`, `leisure`, `off`, `free` (either) |
 | `birthday:` | `me` (the speaker's) or `you` (yours) | `birthday:me` |
+| `gift:` | thanking for a gift: how it landed (`loved`, `liked`, `polite`) or its tag | `gift:loved`, `gift:sweet` |
 | `who:` | the speaker is one of these crew (overheard: speaker A) | `who:torres-zeke\|dahl-mira\|kovac-zainab` |
 | `with:` | the other crew member in the scene is one of these (overheard: speaker B) | `with:kovac-zainab` |
 | `pair:` `topic:` | overheard only (below) | |

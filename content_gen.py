@@ -36,7 +36,7 @@ COND_KEYS = {
     # the dialogue engine's (section 22)
     'time': 'lines', 'weekday': 'lines', 'season': 'lines', 'place': 'lines', 'deck': 'lines', 'event': 'lines',
     'trad': 'lines', 'dept': 'lines', 'rank': 'lines', 'trait': 'lines', 'habit': 'lines', 'act': 'lines',
-    'birthday': 'lines', 'pair': 'lines', 'topic': 'lines', 'who': 'lines', 'with': 'lines',
+    'birthday': 'lines', 'pair': 'lines', 'topic': 'lines', 'who': 'lines', 'with': 'lines', 'gift': 'lines',
 }
 NUM_KEYS = ('w', 'odds')                     # numbers, not conditions: a weight, and a seeded chance
 TONES = ('light', 'funny', 'warm', 'serious')
