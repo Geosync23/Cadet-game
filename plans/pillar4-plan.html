@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pillar 4 Plan</title>
+<style>
+:root{--ink:#e8eef0;--muted:#93a6ae;--teal:#4cc3b5;--gold:#e9c46a;--rose:#e58f7a;--glass:rgba(13,21,33,.78);--line:rgba(150,200,196,.22);--chip:rgba(76,195,181,.14)}
+*{box-sizing:border-box}
+html,body{margin:0;background:#121a27;color:var(--ink);font-family:"Avenir Next","Segoe UI",system-ui,sans-serif}
+body{background:radial-gradient(ellipse at 50% 20%,#22304a 0%,#141c2b 60%,#0c111b 100%) fixed;line-height:1.5}
+header{padding:18px 16px 4px;max-width:1100px;margin:0 auto}
+h1{font-size:21px;font-weight:600;margin:0}
+h2{font-size:17px;font-weight:600;margin:0 0 8px;color:#bdeee6}
+h3{font-size:14.5px;font-weight:600;margin:12px 0 4px;color:#d9eeea}
+.sub{font-size:13.5px;color:var(--muted);margin-top:4px}
+.draft{display:inline-block;font-size:11.5px;color:#14202a;background:var(--gold);border-radius:999px;padding:2px 9px;margin-left:6px;vertical-align:2px}
+nav{position:sticky;top:0;z-index:5;background:rgba(14,20,31,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+nav div{display:flex;gap:6px;overflow-x:auto;padding:8px 16px;max-width:1100px;margin:0 auto;-webkit-overflow-scrolling:touch}
+nav a{flex:none;text-decoration:none;border:1px solid var(--line);background:var(--glass);color:var(--ink);font-size:13px;padding:6px 11px;border-radius:999px}
+nav a:focus-visible,nav a:hover{border-color:var(--teal);color:#bdeee6;outline:none}
+main{max-width:1100px;margin:0 auto;padding:6px 16px 40px}
+section{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:14px 0;scroll-margin-top:56px}
+p{margin:6px 0;font-size:14px;color:#d6e0e3}
+ul{margin:6px 0;padding-left:20px;font-size:14px;color:#d6e0e3}
+li{margin:3px 0}
+.note{font-size:12.5px;color:var(--muted)}
+.grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.card{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.025)}
+.card b{display:block;color:#bdeee6;font-size:14px;margin-bottom:2px}
+.card span{font-size:13px;color:#cfd9dc}
+.card .meta{display:block;font-size:12px;color:var(--muted);margin-top:4px}
+.tag{display:inline-block;font-size:11.5px;border-radius:999px;padding:1px 8px;margin:2px 4px 0 0;background:var(--chip);color:#bdeee6;border:1px solid var(--line)}
+.tag.new{background:rgba(233,196,106,.16);color:#f1dca0}
+.tag.old{opacity:.75}
+.steps{list-style:none;padding:0;margin:8px 0;counter-reset:s}
+.steps li{position:relative;padding:8px 10px 8px 46px;border-left:2px solid rgba(76,195,181,.35);margin:0 0 0 14px}
+.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:-15px;top:8px;width:28px;height:28px;border-radius:50%;background:#183040;border:1px solid var(--teal);color:#bdeee6;font-size:12.5px;display:flex;align-items:center;justify-content:center}
+.steps time{display:block;font-size:12px;color:var(--gold)}
+.steps b{color:#e4f3f0;font-weight:600}
+.steps span{font-size:13.5px;color:#cfd9dc}
+.week{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.day{border:1px solid var(--line);border-radius:12px;padding:9px 10px;background:rgba(255,255,255,.02)}
+.day h4{margin:0 0 4px;font-size:13.5px;color:var(--gold);font-weight:600}
+.day p{font-size:12.5px;margin:4px 0;color:#cfd9dc}
+.day .who{color:#bdeee6;font-weight:600}
+.lines{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;background:#0b141c;border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:#9fe7dc;white-space:pre-wrap;overflow-x:auto;margin:8px 0}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0}
+.flow .box{border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:13px;background:rgba(255,255,255,.03)}
+.flow .arrow{color:var(--teal)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:12px}
+.tablewrap{overflow-x:auto}
+.waves{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+.wave{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.025)}
+.wave b{color:var(--gold);display:block}
+.wave .ci{display:block;margin-top:6px;font-size:12.5px;color:#f1dca0}
+ol.q{padding-left:22px;font-size:14px;color:#d6e0e3}
+ol.q li{margin:6px 0}
+ol.q em{color:var(--muted);font-style:normal;font-size:12.5px}
+svg text{font-family:inherit}
+</style>
+</head>
+<body>
+<header>
+  <h1>Pillar 4: arriving on the Wren <span class="draft">Final · starting now</span></h1>
+  <div class="sub">How a new game begins, a voice for every crew member, deeper friendships, and many more ship traditions. A big pass with 17 helper seats. It includes your answers of 17 October (listed at the end). The detailed version for the team is <code>plans/pillar4-plan.md</code>.</div>
+</header>
+<nav><div>
+  <a href="#big">In short</a><a href="#arrive">Arrival</a><a href="#people">Torres &amp; Calder</a><a href="#come">Coming &amp; going</a><a href="#tiles">Tiles</a><a href="#week">First week</a><a href="#voices">Voices</a><a href="#social">Friendships</a><a href="#trad">Traditions</a><a href="#team">Team</a><a href="#waves">Order</a><a href="#risks">Risks</a><a href="#q">Your answers</a>
+</div></nav>
+<main>
+
+<section id="big">
+  <h2>In short</h2>
+  <div class="grid">
+    <div class="card"><b>1. You arrive</b><span>Every new game opens on a Sunday evening as your shuttle settles in the Deck 5 bay. A Works officer meets you at the ramp and walks you to your bunk, hands you your device, and takes you to dinner, where Chief Calder stops by. You always walk yourself; there are no cutscenes.</span></div>
+    <div class="card"><b>2. Your first week</b><span>People teach you, not pop-ups. Monday you shadow a real job from start to finish. Through the week, the crew each show you one thing. An optional "Settling in" list on your device keeps track. Your first Saturday, you plant a seedling of your own.</span></div>
+    <div class="card"><b>3. A voice for everyone</b><span>All 75 crew get their own way of talking and their own lines: greetings, moods, work talk, reactions to what really happens, and conversations you overhear as you pass. Ten main characters get story arcs. Mostly light, with real moments as you grow close. No romance.</span></div>
+    <div class="card"><b>4. Deeper friendships</b><span>Designed by the new social system designer: crew remember what you did, crew friendships change on their own, small gifts, friends visiting your bunk.</span></div>
+    <div class="card"><b>5. Many more traditions</b><span>From a dozen to about 35: new weekly evenings, monthly days, four ship seasons tied to the garden, a midyear and a year's end, and life moments like your first week.</span></div>
+    <div class="card"><b>How it's built</b><span>17 helper seats in waves, hooks for the writers first. A head writer gathers the writers' work and one engineer gathers the tradition designers', so the lead isn't swamped. Three check-ins with you. Starting now.</span></div>
+  </div>
+</section>
+
+<section id="arrive">
+  <h2>The arrival evening (Sunday)</h2>
+  <p>Monday stays Day 1, so nothing else in the calendar moves. The arrival is "Day 0": about two and a half ship hours, or 5 to 10 real minutes. The escort walks ahead talking in speech bubbles, waits if you fall behind, and the goal arrow points at him if you wander. The important conversations use the same dialogue panel as the storm briefing, and you can walk away from any of them (the gist then comes by Mail).</p>
+  <svg viewBox="0 0 640 120" width="100%" role="img" aria-label="The route: Deck 5 shuttle bay, haulway, Works bay door, lift, Deck 4 bunk, then Deck 3 mess">
+    <defs><marker id="ah" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#4cc3b5"/></marker></defs>
+    <g font-size="11" fill="#cfd9dc">
+      <rect x="8" y="78" width="250" height="34" rx="8" fill="rgba(233,196,106,.08)" stroke="rgba(233,196,106,.4)"/><text x="16" y="99" fill="#e9c46a">Deck 5</text>
+      <rect x="275" y="44" width="170" height="34" rx="8" fill="rgba(76,195,181,.08)" stroke="rgba(76,195,181,.4)"/><text x="283" y="65" fill="#4cc3b5">Deck 4</text>
+      <rect x="462" y="8" width="170" height="34" rx="8" fill="rgba(229,143,122,.08)" stroke="rgba(229,143,122,.45)"/><text x="470" y="29" fill="#e58f7a">Deck 3</text>
+      <circle cx="80" cy="95" r="5" fill="#e9c46a"/><text x="62" y="73">Shuttle</text>
+      <circle cx="140" cy="95" r="5" fill="#e9c46a"/><text x="118" y="73">Works bay</text>
+      <circle cx="225" cy="95" r="5" fill="#e9c46a"/><text x="214" y="73">Lift</text>
+      <circle cx="380" cy="61" r="5" fill="#4cc3b5"/><text x="340" y="39">Bunk 1 + device</text>
+      <circle cx="580" cy="25" r="5" fill="#e58f7a"/><text x="556" y="55">Mess + Calder</text>
+      <path d="M86,95 L134,95" stroke="#4cc3b5" stroke-width="2" marker-end="url(#ah)"/>
+      <path d="M146,95 L219,95" stroke="#4cc3b5" stroke-width="2" marker-end="url(#ah)"/>
+      <path d="M230,92 L374,64" stroke="#4cc3b5" stroke-width="2" marker-end="url(#ah)" stroke-dasharray="4 3"/>
+      <path d="M386,58 L574,28" stroke="#4cc3b5" stroke-width="2" marker-end="url(#ah)" stroke-dasharray="4 3"/>
+    </g>
+  </svg>
+  <ol class="steps">
+    <li><time>before</time><b>Your name.</b> <span>One screen on the shuttle: type your name (just a name, for now). The crew use it from then on.</span></li>
+    <li><time>17:40</time><b>The shuttle bay.</b> <span>Fade in at the top of the Tern's ramp, holding your kit bag. The one and only "how to walk" tip. Torres waves from the bottom.</span></li>
+    <li><time>17:44</time><b>The haulway.</b> <span>He walks ahead, telling you about the ship ("mind the carts, they don't mind you").</span></li>
+    <li><time>17:46</time><b>The Works bay door.</b> <span>"That's us." The job board, the tea corner, the Chief's glass office. "Tomorrow, ten to eight."</span></li>
+    <li><time>17:48</time><b>The lift.</b> <span>"Four, please." You press the button yourself, and he rides up with you.</span></li>
+    <li><time>17:53</time><b>Your bunk.</b> <span>You put your bag in your locker. He hands you your device; it switches on for the first time and shows a new "Settling in" list. Tomas, your bunkmate, is delighted not to be the newest any more.</span></li>
+    <li><time>18:12</time><b>Dinner in the mess.</b> <span>Lift down to Deck 3, a tray at the servery, a table with Torres (Pell joins if he's there).</span></li>
+    <li><time>18:30</time><b>Chief Calder stops by.</b> <span>She sits with her mug for exactly one minute. You can reply one of three ways; there's no wrong answer. "I'm not here. Day off. Welcome aboard." Then: "Torres has you tomorrow. Tuesday, your first job's mine."</span></li>
+    <li><time>19:00</time><b>You're free.</b> <span>"Bunk's yours from eight. I'm on Four, number 14, the one with the music." Tomas comes to find you for your first proper chat.</span></li>
+    <li><time>from 20:00</time><b>Bed.</b> <span>Sleep skips to Monday 06:00: your first shift.</span></li>
+  </ol>
+  <p class="note">If you wander off, Torres waits and then moves on to the next stop. If you miss dinner, Calder sends a Mail and Brennan leaves you a plate. Nothing can get stuck. Saving works at any point: reloading puts Torres back at the last stop.</p>
+</section>
+
+<section id="people">
+  <h2>Who meets you, and your boss</h2>
+  <div class="grid">
+    <div class="card"><b>Zeke Torres, your escort</b><span>Works engine officer, one rank above you, and a friend to be, as you asked. Curious and ambitious; knows the words to every song in the record cabinet; knits scarves for anyone who stands still long enough (you will get one). He talks about machines as if they were people. His days off move to Thursday and Friday, so he's there on Sunday and Monday and away just when the game lets you loose. He lives on Deck 4, cabin 14.</span><span class="meta">His heartfelt side, later: passed over twice for Engine Specialist, he wonders if he's ready; and, gently, his father back home is losing his memory.</span><span class="meta">Pell stays your friend next door: he's a junior like you, two years ahead, so not one rank above.</span></div>
+    <div class="card"><b>Chief Ines Calder, Head of Works</b><span>Few words, all exact. Numbers instead of adjectives ("Sixty-one. Not sixty."). Never raises her voice; gets quieter when annoyed. Humour so dry you notice it a beat later. Rare, plain praise: "Good. Clean work." Her creed: "Nobody thanks the air. That's how you know it's working."</span><span class="meta">How she judges you: by your Record, not your words. Catching faults early and finishing what you start count most; leaving a job half-done counts against you more than being slow. She notices who you helped.</span><span class="meta">Her heartfelt side, later: the battered toolbox on her shelf belonged to her first chief, who has written to her; she hasn't answered.</span></div>
+    <div class="card"><b>Your first solo job: Tuesday</b><span>As you asked, sooner than Wednesday. Calder's days off move to Saturday and Sunday: she stops by your table at Sunday dinner on her day off, runs Monday's briefing, and gives you your first job of your own on Tuesday morning.</span></div>
+  </div>
+</section>
+
+<section id="week">
+  <h2>Your first week</h2>
+  <p>Each thing is taught by a person, in their real day. If you miss it, it happens later or comes by Mail. The "Settling in" list on your device (about 14 items, all optional) ticks itself, says who can show you each thing, and has an "I know my way around" button to end the introduction whenever you like.</p>
+  <div class="week">
+    <div class="day"><h4>Mon 1</h4><p><span class="who">Tomas:</span> wash before breakfast.</p><p><span class="who">Calder:</span> the Monday briefing.</p><p><span class="who">Torres:</span> <b>a real job from start to finish</b> with you: the board, storage, making a part in the machine shop, the repair, handing it in.</p><p>Afternoon: <b>you lead, he follows.</b></p><p><span class="who">Brennan:</span> how the mess works.</p></div>
+    <div class="day"><h4>Tue 2</h4><p><span class="who">Calder:</span> her office, 07:45: <b>your first solo job</b>, your Record, progress talks.</p><p><span class="who">Rina:</span> your new-crew health check at the infirmary (already in your Appointments).</p><p><span class="who">Leila:</span> Mail from home, and how the call-home booths work.</p></div>
+    <div class="day"><h4>Wed 3</h4><p><span class="who">Torres:</span> "Pick one." You choose a job from the board yourself.</p><p><span class="who">Orla:</span> the crew store and your credits.</p><p><span class="who">Pell:</span> comes to find you for a chat and invites you to quiz night.</p></div>
+    <div class="day"><h4>Thu 4</h4><p>Torres's day off ("Don't break anything big").</p><p><span class="who">Zainab:</span> your first favour.</p><p>Bunk inspection (Tomas panics).</p><p><b>Quiz night</b> with Pell.</p></div>
+    <div class="day"><h4>Fri 5</h4><p><span class="who">Works team:</span> Friday tea, and <b>your own mug</b>, with your name on it, on the tea corner rack from then on.</p><p><span class="who">Tomas:</span> invites you to Saturday.</p></div>
+    <div class="day"><h4>Sat 6</h4><p>Your first day off.</p><p><b>Sowing morning</b> in the garden: you plant a seedling that grows all game.</p><p>Film night with Tomas.</p></div>
+    <div class="day"><h4>Sun 7</h4><p>The swap meet.</p><p><span class="who">Calder</span> by Mail: "One week. You'll do."</p><p>The introduction ends; the ion storm arrives a few days later.</p></div>
+  </div>
+  <h3>Later new games</h3>
+  <p>Once you've arrived once, New game asks: <b>arrive by shuttle</b>, or <b>skip to Monday morning</b> (today's start, with your device, the same friendships, and the usual tips).</p>
+  <h3>How we check it works</h3>
+  <p>A new automatic check plays the whole week three ways: someone who follows along, someone who keeps wandering off, and someone who stands still all week. It also saves and reloads at every step, checks the skip option, and makes sure the rest of the game is unchanged.</p>
+</section>
+
+<section id="come">
+  <h2>Days off, and crew coming and going</h2>
+  <div class="grid">
+    <div class="card"><b>Everyone's own days off</b><span>Every crew member gets two days off in a row. Plenty at weekends, but not all; the night shift has its own pattern; every department is staffed every day.</span></div>
+    <div class="card"><b>Goodbyes</b><span>Not often (about once every three or four ship weeks, never in your first month), someone is transferred. A day or two before, if you know them, they find you to talk about your friendship. Their friends hold a farewell supper, and on the day there's a small farewell at the shuttle. Now and then a letter arrives from them afterwards.</span></div>
+    <div class="card"><b>New faces</b><span>Whoever arrives comes on the Sunday-evening shuttle, just as you did, and some are new cadets like you. They get their own escort, their own dinner, and their own mug at Friday tea.</span></div>
+    <div class="card"><b>Your turn to guide</b><span>After your first month, once Works knows you, Calder asks you to meet the next new cadet. You walk them from the shuttle to their bunk, hand over their device, take them to dinner, and show them a real job on Monday. They become your mentee, a friend who thinks you know everything.</span></div>
+  </div>
+</section>
+
+<section id="tiles">
+  <h2>Tiles, a game you can play</h2>
+  <p>A simple two-player tile game with ship-themed tiles, learnt in one game and finished in about three minutes. There's a small Tiles station in the bow lounge, and on Tiles night a board on every lounge table. Crew play with a bit of personality (Rina plays to win; Tomas plays to chat). Nothing to lose: a win is a little friendship and some gossip ("Rina lost! To the new hand!"). It's designed later in the pillar: you'll see a short design page at the second check-in before it's built.</p>
+</section>
+
+<section id="voices">
+  <h2>A voice for everyone</h2>
+  <p>Writers write <b>plain text files</b>, not code. A small program turns them into the game's lines, and an automatic checker catches mistakes (wrong names, lines too long, a serious line too early). About 8,000 to 9,000 short lines in all.</p>
+  <div class="grid">
+    <div class="card"><b>Voice cards</b><span>One for each of the 75 crew: how they talk, what they care about, their running joke, how they are with juniors. Built from what the crew already have (their traits and life details).</span></div>
+    <div class="card"><b>Their own lines</b><span>Greetings that change as you get to know them, moods, work talk, the ship around them, their lives, favours, invitations, gentle remarks ("Waited for you at the gym yesterday").</span></div>
+    <div class="card"><b>Overheard</b><span>Two crew chatting as you walk past, in alternating bubbles: about the ship, a tradition, the storm, each other. About 150 little conversations.</span></div>
+    <div class="card"><b>Reactions</b><span>To things that really happened: "That lamp's been blinking since Tuesday. Nicely done." The storm, a harvest, a birthday, a guest arriving.</span></div>
+    <div class="card"><b>Story arcs</b><span>Ten main characters: Torres, Tomas, Pell, Rina, Calder, Brennan, Commander Vance, the Captain, Chief Holt, and Zainab Kovac (a Works junior secretly afraid of the lift, to show anyone can matter). Plus small threads for 20 others.</span></div>
+    <div class="card"><b>Not too chatty</b><span>One bubble on screen at a time, no line repeated to you within a week, at most one serious moment a day.</span></div>
+  </div>
+  <h3>What a writer's file looks like</h3>
+  <div class="lines">@crew torres-zeke
+
+== greet
+? tier=stranger
+- Evening. You'll be the new hand.
+? tier&gt;=acquaintance time:morning
+- {hi}, {me}. Coil three's sulking. Don't take it personally.   #funny
+
+== overheard
+? pair:works+works topic:board
+A: Board's light today.
+B: Then it'll be heavy tomorrow. It always is.</div>
+  <p class="note">"? tier=stranger" means the line is for people who don't know you yet; {me} is your name and {hi} is how this person says hello, both filled in by the game; #funny is a tone tag.</p>
+  <h3>How lines are checked for voice and tone</h3>
+  <div class="flow"><span class="box">Writer</span><span class="arrow">→</span><span class="box">Automatic checker</span><span class="arrow">→</span><span class="box">Head writer reads every batch</span><span class="arrow">→</span><span class="box">Lead samples</span><span class="arrow">→</span><span class="box">You approve the main voices</span></div>
+  <p>Generally light, cozy and funny; warmth over wit. Serious moments come only with friendship, and are about ordinary things: homesickness, a failed exam, a parent getting older, self-doubt. Nobody dies on screen. No romance. You'll see a <b>Voices sampler</b> page (each main character with ten lines) before the bulk is written.</p>
+</section>
+
+<section id="social">
+  <h2>Deeper friendships</h2>
+  <p>This part is designed by the <b>social system designer</b>, a separate helper hired at the same time, in their own plan. This plan schedules it and makes sure the pieces fit: what crew remember about you, crew friendships and rivalries that change on their own, small gifts, friends visiting your bunk, and the heartfelt moments friendship opens up. Two social engineers build it.</p>
+  <p>Your answers built in: a few <b>crew couples</b> live quietly in the background (never involving you); <b>reputation</b> with each department that can rise and dip; <b>gifts you make</b> in the machine shop; <b>bunk visits</b> now, and when you're promoted, your own room to invite people to; what you know about someone is shown, <b>never counted</b>; gentle grief is allowed, and nobody dies on screen.</p>
+  <p>The joins between the parts are agreed early: lines can depend on how well someone knows you, what they remember, their mood and their friendships; one shared "ship notes" signal tells everyone when something happens (a repair, a favour, a tradition you went to); after the arrival evening you're already on first-name terms with Torres and Tomas.</p>
+</section>
+
+<section id="trad">
+  <h2>Many more traditions</h2>
+  <p>A ship day is 40 real minutes, so a week is about 4⅔ hours of play and four weeks about 19. So most new traditions are <b>weekly</b> (what you live with) or <b>every four weeks</b> (occasions); seasonal and yearly ones are rare treats. Three tradition designers propose them; you pick from a calendar page at the first check-in.</p>
+  <h3>The ship's year: four seasons from the garden</h3>
+  <p><span class="tag">Sowing</span><span class="tag">Greening</span><span class="tag">Harvest</span><span class="tag">Lanterns</span> <span class="note">13 weeks each</span></p>
+  <div class="tablewrap"><table>
+    <tr><th>How often</th><th>Tradition</th><th>What happens</th></tr>
+    <tr><td>Weekly</td><td><span class="tag new">Tiles night</span></td><td>Tuesdays in the bow lounge, a board on every table; Rina defends her title. You can really play.</td></tr>
+    <tr><td>Weekly</td><td><span class="tag new">Brennan's tasting table</span></td><td>Wednesday dinner: a new dish, crew vote, the winner joins the menu.</td></tr>
+    <tr><td>Weekly</td><td><span class="tag new">Garden hour</span></td><td>Volunteers tend the garden; it grows better.</td></tr>
+    <tr><td>Weekly</td><td><span class="tag new">Late piano</span></td><td>Thursday night, the Captain plays in the music room.</td></tr>
+    <tr><td>Weekly</td><td><span class="tag new">Long breakfast</span></td><td>Saturday pancakes, breakfast till ten.</td></tr>
+    <tr><td>Weekly</td><td><span class="tag new">Sunday roast</span></td><td>Long tables in the mess.</td></tr>
+    <tr><td>Weekly</td><td><span class="tag new">Letters evening</span></td><td>Sunday: the call-home booths, and a postbox for paper letters.</td></tr>
+    <tr><td>Every 4 weeks</td><td><span class="tag new">Talent night</span></td><td>The bow lounge stage.</td></tr>
+    <tr><td>Every 4 weeks</td><td><span class="tag new">Department cup</span></td><td>A rowing relay in the gym; Commander Vance keeps score.</td></tr>
+    <tr><td>Every 4 weeks</td><td><span class="tag new">Crossover breakfast</span></td><td>Day and night shifts share one meal: the only time they meet.</td></tr>
+    <tr><td>Every 4 weeks</td><td><span class="tag new">Mending day</span>, <span class="tag new">Rummage day</span>, <span class="tag new">Open lab</span>, <span class="tag new">Bridge hour</span></td><td>Uniforms mended; odd things from the hold; Dr. Sato's samples; juniors visit the bridge.</td></tr>
+    <tr><td>Seasonal</td><td><span class="tag new">Sowing morning</span>, <span class="tag new">First-fruit supper</span>, <span class="tag new">Harvest supper</span>, <span class="tag new">Lantern walk</span></td><td>Planting (your first is your first Saturday); suppers from the garden; paper lanterns along the promenade.</td></tr>
+    <tr><td>Yearly</td><td><span class="tag new">Midtour</span>, <span class="tag new">Year's end</span></td><td>Write a letter to yourself halfway through the year; it's read back at the end.</td></tr>
+    <tr><td>Life moments</td><td><span class="tag new">New hand's tea</span>, <span class="tag new">One week / four weeks aboard</span>, <span class="tag new">Farewell supper</span></td><td>Your mug; a cake at four weeks; saying goodbye on crew rotation day.</td></tr>
+    <tr><td>Already aboard</td><td><span class="tag old">Running club</span><span class="tag old">Quiz</span><span class="tag old">Works Friday tea</span><span class="tag old">Friday jam</span><span class="tag old">Film night</span><span class="tag old">Observatory night</span><span class="tag old">Swap meet</span><span class="tag old">Harvest morning</span><span class="tag old">Hull-lights</span><span class="tag old">Birthdays</span><span class="tag old">Founding Day</span><span class="tag old">Quiet watch</span></td><td>All kept.</td></tr>
+  </table></div>
+  <p class="note">Each one ties into what's already built: the galley's menus, the garden, the gym, the schedules. Never more than two on the same evening.</p>
+</section>
+
+<section id="team">
+  <h2>The team: 17 seats</h2>
+  <p>Never more than about 14 at once: the crew designer finishes early, and the Tiles engineer joins later. Each owns its own part of the one game file. Writers and tradition designers only write text files; their work reaches the game through two "collectors", so the lead merges about ten helpers' work, not seventeen.</p>
+  <div class="grid">
+    <div class="card"><b>Engineers (10)</b><span>Onboarding (the arrival, the first week, guiding a newcomer) · Dialogue (the writers' kit, and turning their files into lines) · Social A and Social B (the social designer's plan) · Traditions · Crew schedules (the escort walking with you, Sunday, crew coming and going) · Device · Decks and decor · Crew designer (everyone's days off, couples, the future crew) · Tiles.</span></div>
+    <div class="card"><b>Writers (4)</b><span>A <b>head writer</b> (the style guide, the main characters' voices, reads and gathers everything) and three writers: Works and the arrival · Command, Survey, Watch and guests · the Commons and the juniors.</span></div>
+    <div class="card"><b>Tradition designers (3)</b><span>Weekly · every few weeks · seasons, the year and life moments.</span></div>
+    <div class="card"><b>On call</b><span>Existing helpers for small pieces: machines (the training job), galley (new dishes), visuals (props, poses, keeping phones fast), the player and the interactions engineers. The social system designer stays on to answer questions.</span></div>
+  </div>
+</section>
+
+<section id="waves">
+  <h2>In what order</h2>
+  <div class="waves">
+    <div class="wave"><b>Wave 1a: hooks first</b>As you asked, the engineers first build everything the writers need: the writing format and its checker, the connections to friendships, the traditions format, Sunday's schedule, everyone's days off. Ends with one combined build where a sample crew member and a sample tradition come from writers' files.</div>
+    <div class="wave"><b>Wave 1b: writers start</b>The head writer, three writers and three tradition designers join: the style guide, every crew member's voice card, the tradition designs.</div>
+    <div class="wave"><b>Wave 2: the arrival evening</b>Playable from the shuttle to your bunk and dinner; the first voices, overheard talk and reactions; the first new weekly traditions.<span class="ci">Check-in A: play the arrival; approve the main voices; pick traditions from a calendar page.</span></div>
+    <div class="wave"><b>Wave 3: the first week</b>The whole first week; crew coming and going with goodbyes; everyone's lines; gifts, reputation, visits; more traditions; the Tiles design.<span class="ci">Check-in B: play a whole first week; approve the Tiles design.</span></div>
+    <div class="wave"><b>Wave 4: finish</b>Tiles built; your turn to guide a newcomer; story arcs to their ends; the seasonal and yearly traditions; a phone speed check at the busiest moments.<span class="ci">Check-in C: Pillar 4 final, then it goes into the main game with your OK.</span></div>
+  </div>
+</section>
+
+<section id="risks">
+  <h2>What could go wrong, and what we'll do</h2>
+  <ul>
+    <li><b>Slow on phones</b> (the busy mess, decorations, two bubbles): a limit for each tradition's decorations, only one bubble at a time, and the busiest moments checked automatically.</li>
+    <li><b>Fifteen helpers, one game file:</b> each owns its own part; the writing is generated, never merged by hand; a fixed merge order.</li>
+    <li><b>Too much for the lead to review:</b> the head writer and the traditions engineer gather the others' work first.</li>
+    <li><b>Usage limits</b> stopping everyone at once: helpers start in waves, and the lead's hourly check-in restarts anything that stalls.</li>
+    <li><b>Crew sounding alike, or contradicting each other:</b> voice cards and one fact sheet first; the head writer reads everything; you approve the main voices early.</li>
+    <li><b>Too much talk:</b> one bubble at a time, no repeats within a week.</li>
+    <li><b>The introduction breaking</b> if you wander or reload: stops to wait at, Mail as a fallback, and the "wanderer", "idler" and reload tests.</li>
+  </ul>
+</section>
+
+<section id="q">
+  <h2>Your answers (17 October), and where they went</h2>
+  <ol class="q">
+    <li><b>Escort:</b> Zeke Torres (Pell is a junior, so not one rank above; he stays your friend next door).</li>
+    <li><b>First solo job sooner:</b> Tuesday, from Calder; her days off move to the weekend.</li>
+    <li><b>Name only:</b> you type it on the shuttle.</li>
+    <li><b>First weekend:</b> Sowing morning, your seedling, film night with Tomas.</li>
+    <li><b>Writers:</b> a head writer and three.</li>
+    <li><b>Start early, hooks first:</b> wave 1a builds the writers' kit; writers start right after.</li>
+    <li><b>Seasons:</b> Sowing, Greening, Harvest, Lanterns.</li>
+    <li><b>Serious moments:</b> all of it, gentle grief included; nobody dies on screen.</li>
+    <li><b>Couples:</b> a few, in the background, never involving you.</li>
+    <li><b>Bunk visits:</b> yes; your own room to invite people to after promotion (later).</li>
+    <li><b>Machine-shop gifts:</b> yes.</li>
+    <li><b>Reputation:</b> yes, by department, and it can dip.</li>
+    <li><b>"5 of 11" counts:</b> none.</li>
+    <li><b>The remaining big events:</b> a later phase.</li>
+    <li><b>Also:</b> everyone's own days off, crew coming and going with goodbyes and new cadets, your turn to guide one, and a playable Tiles game.</li>
+  </ol>
+</section>
+
+</main>
+</body>
+</html>
