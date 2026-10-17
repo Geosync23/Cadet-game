@@ -10,7 +10,8 @@
 #   camera framing while the sheet is open (deviceFrame), none on wide screens
 #   a need's bar pulses while section 15's needPulse says it just rose (0.35.19)
 #   the Schedule lists only what really happens (0.35.18): every ship item and tradition for a week has people there
-#   deviceChoose (0.35.23): a question with buttons for section 13's New game; Not now and the × give -1
+#   deviceChoose (0.35.23): a question with buttons for section 13's New game; Not now and the × give -1; refused while
+#   a meeting is up, cancelled by a meeting drawn over it (0.35.25)
 #   Pillar 4 pages (0.35.22): the season, reputation in the Record, keepsakes in the Wallet, Left the Wren in the Roster
 #   the arrival (0.35.21): locked until handed over, the first switch-on, Settling in with Go there and the end button
 #   days off (0.35.17): section 14's playerShiftOn shows Day off in Schedule, the strip and the Calendar
@@ -347,6 +348,16 @@ def run(path):
               deviceChoose(q, k => got.push(k)); p.querySelectorAll('.btns .act')[2].click();
               deviceChoose(q, k => got.push(k)); p.querySelector('.x').click(); out.push(p.hidden, got.join(','), !DEV.choose); return out; })()""")
             check(ch == [True, True, 3, True, True, '1,-1,-1', True], f'deviceChoose: the question, a choice, Not now, the ×: {ch}')
+            # 0.35.25 (reviewer 2): one panel for both. A question is refused while a meeting is up; a meeting drawn over a
+            # question cancels it (-1) and keeps its own taps and ×
+            cm = g.ev("""(() => { const got = [], taps = [], q = { title: 'New game', text: 'Start?', choices: ['A', 'B'] }, p = document.getElementById('devDlg');
+              deviceDialogue({ title: 'Briefing', name: 'Chief', text: 'Gather round.', choices: null, i: 0, n: 1 }, k => taps.push(k === undefined ? 'next' : k));
+              const out = [deviceChoose(q, k => got.push(k)), p.textContent.includes('Gather round.')];
+              deviceDialogue(null); out.push(deviceChoose(q, k => got.push('q' + k)));
+              deviceDialogue({ title: 'Briefing', name: 'Chief', text: 'Over here.', choices: null, i: 0, n: 1 }, k => taps.push(k === undefined ? 'next' : k));
+              out.push(got.join(','), !DEV.choose, p.textContent.includes('Over here.')); p.querySelector('.next').click(); out.push(taps.join(','));
+              deviceDialogue(null); out.push(p.hidden); return out; })()""")
+            check(cm == [False, True, True, 'q-1', True, True, 'next', True], f'deviceChoose and meetings share the panel safely: {cm}')
             # Pillar 4 pages (0.35.22): the season on Home and the Calendar (section 18's seasonOf), reputation in the Record
             # (section 20's repView, words only), keepsakes in the Wallet (keepsakes), "Left the Wren" in the Roster
             # (movedOn; they leave the lists). Stand-ins without them; with them, section 20's own state is set and put back
