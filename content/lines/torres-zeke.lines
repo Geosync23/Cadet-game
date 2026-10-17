@@ -164,6 +164,8 @@
 == week1
 // step: take (you take the job at the board)
 ? flag:walk.job.take
+- Every fault on the ship lands on that board. Pick one.
+- Glass office is the Chief's. She sees the whole bay.
 - That one's ours. It's on your device now, under Jobs.
 - Follow the arrow. I'm right behind you. Promise.
 // step: fetch (main storage)
@@ -185,16 +187,21 @@
 - Not done till it's turned in, though. Back to the board.
 // step: turnin (at the board)
 ? flag:walk.job.turnin
-- Turned in. Your first one in the Record. Right, onward.
+- Tool wall. Every tool has its outline. Back in it, after.
+- Tea corner's behind the racks. Half ten. It's sacred.   #funny
+// Head writer 5 (the user's request): reputation, in order, after the first turn-in.
+- Turned in. A job done well nudges your reputation up.
+- Have a look. Device, then Record. It's under Reputation.
+- That's how you rank up. Better jobs. Trickier ones.   #warm
 - Lunch, then you lead the next one. I'll just follow.   #warm
 
 // ---- Writer 2: job 2 (Day 1 afternoon: you lead, he follows) and job 3 (Tuesday: Calder's solo job).
 // Gated by flag:walk.job2.<step> and flag:walk.job3.<step>, which the onboarding hook sets. 60 characters or fewer.
-// Job 2: one line a step, only "if you're stuck" nudges, then a proud turn-in.
+// Job 2: one line a step, only "if you're stuck" nudges, then a proud turn-in. From onboarding 0.42.30 EVERY line
+// under a walk.job*/job2/job3 step plays, in file order, ~4.8 s apart: write each step as a sequence, not alternatives.
 == week1
 ? flag:walk.job2.take
-- Your pick. Your lead. I'm just your shadow.
-- Your lead. I'm just the shadow. A chatty shadow.   #funny
+- Your pick. Your lead. I'm just the shadow. A chatty one.   #funny
 ? flag:walk.job2.fetch
 - Stuck? Part number's on the card. The shelf's yours to find.
 ? flag:walk.job2.make
@@ -215,15 +222,21 @@
 - Solo, and turned in. Look at you. Right, onward.   #warm
 - Saw it on the board. I didn't help once. Proud of us both.   #funny
 
-// ---- Day 0: the arrival tour (head writer 3, 0.48.22; the onboarding engineer's hooks, arrival 0.42.20+).
-// Each tour point plays walk.<point>.1, .2, ... IN ORDER (about 5 s apart) when you and Torres are near it; one
-// flag key per line, so lineFor returns exactly that line. Points in walking order: shuttle, bay, haulway, stores,
-// works, lift, wing, officers, deck3, servery. walk.call.<n>: his "this way" when you lag. walk.more.<n>: linger
-// lines (you stand near him ~8 s), about himself, in order, never repeated. No scarf (beat 1), no father, no list.
-// CORE: at every place, .1-.3 are the core lines (who Zeke is / what the place is / the key action); .4+ are extras.
-// introDinner and introAsk are meetings (content/meetings/). Bubbles: 60 characters or fewer.
+// ---- Day 0: the arrival tour (head writer 3, 0.48.22; the pre-lift part rewritten by head writer 4, 0.48.70).
+// The user (0.60.5): Zeke stopped too much on Deck 5 and said next-day things there; "all his dialogue once in the
+// elevator is great"; "Zeke should stop and welcome you"). So: a stop at the Tern's ramp, walk.shuttle.1-5 as shipped, then
+// walk.up.1-8 (measured: about 3 heard at Zeke's stroll, so the best come first; the rest are for dawdlers),
+// walk-and-talk across Deck 5 to the
+// lift (IN ORDER, a line every few seconds while you walk with him, not tied to places; any left unsaid when you
+// reach the lift are skipped), and walk.works.1-2 as you pass the Works bay (no stop). The Deck 5 points bay, haulway
+// and stores are retired; their job material (the
+// board, the Chief's office, the tool wall, tea) is on Monday's walk.job.take/turnin. From the lift on, unchanged:
+// each point plays walk.<point>.1, .2, ... IN ORDER when you and Torres are near it; one flag key per line. Points:
+// lift, wing, officers, deck3, servery. walk.call.<n>: his "this way" when you lag. walk.more.<n>: linger lines about
+// himself, in order, never repeated. No scarf (beat 1), no father, no list. introDinner and introAsk are meetings.
+// Bubbles: 60 characters or fewer.
 == week1
-// point: shuttle
+// at the ramp: a stop (the user: "Zeke should stop and welcome you"); the 0.60.5 lines as shipped
 ? flag:walk.shuttle.1
 - {me}? There you are. Zeke Torres. Works, engines.
 ? flag:walk.shuttle.2
@@ -234,60 +247,28 @@
 - Long trip? I bet. Tell me all about it at dinner.
 ? flag:walk.shuttle.5
 - Bag all right? Right, onward. Stay close. She's big.
-// point: bay
-? flag:walk.bay.1
-- Shuttle bay. The Tern lives here when she's home.
-? flag:walk.bay.2
-- Best window on Deck 5, this. Amadi says so. She's right.
-? flag:walk.bay.3
-- Those are stars, not lights. You'll stop staring. Eventually.
-? flag:walk.bay.4
-- Deck 5's Operations. Works, stores, cargo. Us, mostly.
-? flag:walk.bay.5
-- Door's heavy. Lean on it. There. You've got it.
-// point: haulway
-? flag:walk.haulway.1
-- This is the haulway. Everything big comes through here.
-? flag:walk.haulway.2
-- Cargo hold on the left. Cart bay on the right.
-? flag:walk.haulway.3
-- Hear that hum? The drive coils, one deck down. I mind them.
-? flag:walk.haulway.4
-- Mind the carts. They don't mind you.   #funny
-? flag:walk.haulway.5
-- They've got moods, the coils. You'll see. Don't laugh.   #funny
-? flag:walk.haulway.6
-- I'll take you down to the engines this week. Promise.
-// point: stores
-? flag:walk.stores.1
-- Machine shop. If we can't find a part, we make it.
-? flag:walk.stores.2
-- Main storage. Every part on the ship has its own shelf.
-? flag:walk.stores.3
-- You'll know every shelf by Friday. Everyone does.
-? flag:walk.stores.4
-- Smell that? Oil and dust. Best smell on the ship.
-? flag:walk.stores.5
-- Pell naps in there sometimes. You didn't hear it from me.   #funny
-// point: works
+// walking across Deck 5 to the lift
+? flag:walk.up.1
+- Don't learn it all tonight. Nobody does. I didn't.
+? flag:walk.up.2
+- Honestly? We've all been waiting on you. Me most.   #warm
+? flag:walk.up.3
+- Lost? Ask anyone. I got lost in a cupboard. An hour.   #funny
+? flag:walk.up.4
+- You'll pick it all up in a week. Promise.   #warm
+? flag:walk.up.5
+- Say hello to anyone. They'll say it back. Honest.
+? flag:walk.up.6
+- Evenings? Tea, Tiles, someone humming. Lovely, really.
+? flag:walk.up.7
+- After dinner it's the lounge. Bring a jumper. Trust me.   #funny
+? flag:walk.up.8
+- Weekends are yours. I spend mine with the coils. Don't.   #funny
+// passing the Works bay (said as you walk past; no stop)
 ? flag:walk.works.1
-- And this is us. Works. Home from eight till five.
+- And that's us. Works. You and me, {me}.
 ? flag:walk.works.2
-- That's the job board. Every fault on the ship lands there.
-? flag:walk.works.3
-- Glass office is the Chief's. Calder. Exact, but fair.
-? flag:walk.works.4
-- Tomorrow, ten to eight. Right here. Not eight. Ten to.
-? flag:walk.works.5
-- Take a job, fix it properly, turn it in. That's the heart of it.
-? flag:walk.works.6
-- Tea corner's behind the racks. Half ten. It's sacred.   #funny
-? flag:walk.works.7
-- She's off today. She'll find you anyway. She always does.   #funny
-? flag:walk.works.8
-- Blue crate's hers too. Don't sit on it. Learnt that one.   #funny
-? flag:walk.works.9
-- Tool wall. Every tool has its outline. Back in it, after.
+- This is where we'll be most days. You'll love it. I do.   #warm
 // point: lift
 ? flag:walk.lift.1
 - The lift. Runs right up the spine of the ship.
