@@ -1,0 +1,39 @@
+@tradition rummage-day
+// Rummage day: every fourth Sunday (week 4 of the cycle: days 28, 56, 84...), afternoon, the cargo hold on Deck 5.
+// Main storage opens the old crates and lays out odd things nobody has claimed; take what's useful. Kept apart from the
+// Sunday swap meet (mornings, the promenade) by deck and time; whatever nobody wants goes to the next swap meet.
+// From day 1: the cycle also falls on day 0, your arrival afternoon, before you are aboard. No host: it's signed by Main storage. Needs the deck architect's places in the hold (event: 'rummage-day').
+k: 459
+title: Rummage day
+when: every 4 weeks sunday week 4 from day 1
+at: 14:00-15:45
+min: 20
+jitter: 25
+where: 5 room Cargo hold: storage
+where: 5 room Haulway: event
+hold: none
+who: shopper 70%, works 35%, everyone 18%
+anim: talk
+from: Main storage
+ties: decor rummage-crates
+
+== mail
+- Rummage day tomorrow, {time}, the cargo hold. We're opening the old crates: spare parts, odd boots, a box of games nobody remembers loading. Take what's useful.
+
+== ask
+- Rummage day! Last time I found a perfectly good kettle.
+- They're opening the old crates in the cargo hold this afternoon.
+- I'm after a lamp. Or a hat. I'll know it when I see it.   #funny
+
+== here
+- What on earth is this?   #funny
+- Who packed six left boots?   #funny
+- Ooh. That's going on my shelf.
+
+== thanks
+- You dig through the old crates with the others and come away with something odd and lovely.   #warm
+
+== chatter
+- I found a whole box of chess pieces at rummage day. No board.   #funny
+- Anything left from rummage day goes to the swap meet.
+- The cargo hold smells of old crates and far-off places.   #warm
