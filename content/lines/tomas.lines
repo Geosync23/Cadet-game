@@ -226,3 +226,92 @@
 - Your blanket was falling off, so I folded it. Badly. Holt would weep.   #funny
 ? trad:observatory-night
 - Observatory's open tonight. Come up if you see this in time. If not, I'll tell you all about it.
+
+// Writer 3, batch 3: towards 120. Seasons, places, bubbles (smalltalk and rumour, 60 characters), cues. Rest days
+// Fri, Sat (the game's roster); rest-day lines use act:off. Why he left home only at close.
+
+== greet
+? tier>=acquaintance place:mess
+- {hi}! Sit here. I saved a seat. Well, I put my tray on it.
+? tier>=friend time:morning
+- Morning, {nick}. I dreamt I was lost on Deck 2. Woke up on Deck 4. Progress.   #funny
+? tier>=acquaintance season:lanterns
+- The lanterns are up! Everything looks like a story. A nice one.
+? tier>=acquaintance season:sowing
+- Sowing! How's your seedling? Mine's leaning. Towards the light, I hope.
+? tier>=acquaintance season:greening
+- It's all green in the garden. I keep going in just to breathe.
+? tier>=acquaintance season:harvest
+- Harvest! Brennan says I can help carry. I've been practising carrying.   #funny
+
+== bye
+? tier>=acquaintance time:morning
+- Off on patrol. If you see Holt, tell him I'm already there. Early. Obviously.   #funny
+? tier>=close
+- See you later, {nick}. Same bunk, same stars. Best bit of the day.   #warm
+
+== feel
+? mood:high tier>=friend
+- Brilliant day. My brother wrote. Two pages. About the weather. It was grey.   #funny
+? mood:low tier>=colleague
+- Quiet day. I'm writing to my brother. Saying things on paper helps.
+
+== near
+? place:observatory
+- Every time I come up here, there's more. I don't know how. There just is.
+? act:breakfast
+- Toast. Always toast. My brother says I'm boring. I say toast is reliable.   #funny
+? act:dinner
+- {dish}? Is that what it is? I'll say yes and eat it.   #funny
+? place:lounge
+- The bow windows! You can see where we're going. Well, where we're pointing.
+? act:wash
+- Hot water's still on! Quick, before it's character-building.   #funny
+
+== life
+? tier>=acquaintance
+- On the farm moon there was one road and three fences. Here there are hundreds of doors.
+? tier>=colleague
+- My brother wants to be a pilot now. Last month a cook. I'm keeping up.   #funny
+? tier>=close
+- I was scared I'd stay home for the rest of my life. So I signed up. Scared's useful.
+
+== joy
+? tier>=colleague
+- The Wren's passed more stars than I'll ever count. I'm trying to catch up.
+? tier>=friend
+- Best bit of my week? Observatory night. Second best? This. Talking.   #warm
+
+== invite
+? tier>=colleague time:evening
+- Come and look at the star map? I've found a new star. Possibly a smudge.   #funny
+? trad:quiz tier>=acquaintance
+- Quiz tonight! I'm useless at it. Will you be useless with me?   #funny
+
+== about
+? aff:holt:friend
+- Holt said "Good" to me today. One word. I've told my brother twice.   #funny
+? bond:mentor
+- {mentor} looks out for me. Like I look out for you. It goes down the line.   #warm
+
+== smalltalk
+- Is it left here? It's left. It's probably left.   #funny
+- Look at the stars out there. Every single time.
+- The long way's nicer. Honestly.
+- I've folded my blanket three times. It's fine.   #funny
+? act:work
+- Patrol. All quiet. Very quiet. Too quiet? No. Fine.   #funny
+
+== rumour
+- Heard something on patrol. Is it gossip if it's Watch?
+- I wasn't listening. I've just got very good ears.   #funny
+
+== cue
+? cue:event.ionStorm.onset
+- The storm's here. Holt says stay calm. I'm staying calm. Very calm. Loudly.   #funny
+? cue:event.ionStorm.afterglow
+- Did you see the sky after the storm? All those colours. I wrote my brother three pages.
+? cue:harvest
+- Harvest! The garden smells like home. A nicer home. With more plants.
+? cue:repair.lift.you
+- Was that you on the lift? I rode it twice to check. For the Watch.   #funny

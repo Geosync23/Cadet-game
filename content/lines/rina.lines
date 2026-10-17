@@ -234,3 +234,84 @@
 - You looked tired today. Sleep. Eight hours. I'll ask tomorrow.   #warm
 ? beat:rina.5
 - Left you a journal on bones. Light reading. Page twelve's the good bit.
+
+// Writer 3, batch 3: towards 120. Seasons, places, bubbles, cues. Rest days Sun, Mon (the game's roster);
+// rest-day lines use act:off. Gran's Tiles by message only from beat:rina.4 (she's home).
+
+== greet
+? tier>=acquaintance place:infirmary
+- {hi}. If you're here, something's wrong. Is something wrong? Sit.   #funny
+? tier>=colleague act:off
+- Day off. I'm not studying. I'm reading. It's different. It isn't.   #funny
+? tier>=friend time:night
+- It's late, {nick}. Why are you up? Don't say "fine". I can see you.   #warm
+? tier>=acquaintance season:lanterns
+- Lanterns. Everyone's cheerful. Suspicious. I'm keeping an eye on it.   #funny
+? tier>=acquaintance season:harvest
+- Harvest. Half the ship's got blisters from the garden. Gloves, people.   #funny
+
+== bye
+? tier>=acquaintance time:evening
+- Off you go. Water, then sleep. In that order.
+? tier>=close
+- Off you go, {nick}. Come back in one piece. I've only got so much gauze.   #warm
+
+== feel
+? mood:low tier>=colleague
+- Tired. Don't. I know. I'll drink some water. Happy?
+? mood:high tier>=friend
+- Good day. My sister admitted I was right. In writing. I've saved it.   #funny
+
+== near
+? place:infirmary
+- Infirmary's my second home. My first's the Tiles table.   #funny
+? act:breakfast
+- Breakfast. A real one. Not just tea. I'm watching you.   #funny
+? place:lounge
+- The lounge board's warped. I still win on it.   #funny
+? place:hydroponics_garden
+- Nandakumar's chillies live here. Don't touch them. Then don't touch your eyes.
+
+== life
+? tier>=acquaintance
+- Nandakumar's the best doctor I've worked under. Don't tell her. She'll get ideas.
+? tier>=colleague
+- My sister says I'm stubborn. I say I'm consistent. We've argued it for years.   #funny
+? beat:rina.4 tier>=friend
+- Gran plays Tiles with me by message now. She still cheats. I don't know how.   #funny
+
+== joy
+? tier>=colleague
+- Best sound aboard? The click of the last tile going down. Mine. Winning.   #funny
+
+== invite
+? tier>=colleague time:evening
+- Tiles. Now. I'm bored of beating myself.   #funny
+? trad:running tier>=acquaintance
+- Running club tonight. I'll be at the end with water. Come and run to it.
+
+== about
+? aff:nandakumar:friend
+- Nandakumar? Best in the Service. She'll tell you to drink water. She'll be right.   #warm
+? aff:tomas:friend
+- Tomas? Kind to a fault. He thanked a door once. It was closing on him.   #funny
+
+== smalltalk
+- Drink some water. Yes, you.   #funny
+- Forty-three. Not that I'm counting.   #funny
+- Hm. Someone's limping. Noted.
+- Honestly.
+
+== rumour
+- I don't gossip. I observe. Then I mention.   #funny
+- The infirmary hears everything. Mostly coughs.   #funny
+
+== cue
+? cue:event.ionStorm.onset
+- Storm. Infirmary's ready. Please don't fall over anything.
+? cue:event.ionStorm.afterglow
+- Storm's done. Three bumps, one bruise. Nobody drank water. Typical.   #funny
+? cue:repair.uv.you
+- You did the steriliser? Clean work. Cleaner than Pell's. Don't tell him.   #funny
+? cue:tradition.quiz.you beat:rina.5
+- You got the bones question at quiz. I taught you that. You're welcome.   #funny
