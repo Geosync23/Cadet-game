@@ -9,7 +9,7 @@ This file replaces DEV_NOTES_2. The repo holds it with design-doc.md, the build,
 The nine small updates once listed here for the design doc (Chef Brennan, Deck 3's rooms and layout, two meals a day, no freight lift and the Cart bay, the one-floor lounge, the music room, the walk-in lift car, the spine behind glass, Pell on Deck 5) are now in design-doc.md.
 
 
-## Current build: 0.43.0 (about 17,250 lines)
+## Current build: 0.60.0 (about 18,700 lines)
 
 Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (Operations) is built and dressed: the Works complex, storage, machine shop, shuttle bay with the shuttle Tern, the door gear and the fan. Pell works there.
 
@@ -390,6 +390,7 @@ Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (
 | 0.42.4 | For the sim engineer's 0.26.23 (Day 0 start, `introPlan`, the escort walker): `introWanted()` (a new game arrives by shuttle unless it's a test URL or you've arrived before; wave 2 adds the choice), `introNewGame(arriving)` (the intro's side of New game) and `introSig()` (crew plans redone when the intro starts, ends or is skipped). intro_check OK; cadet_test vs 0.42.3 ALL IDENTICAL. |
 | 0.42.5 | Wave 2 begins: the arrival evening in play, still inert until the sim engineer's Day 0 start is merged. `introTick()` (one line in the main loop after `socialTick`, typeof-guarded): the shuttle manifest (you type your name; the clock holds at 17:40 until you sign), then the steps once a ship minute from where you are; a meeting step plays its script on arrival (`dialogueShow`, closed and sent as a gist if you walk out); Torres's lines in his speech bubble as each step becomes yours (`INTRO_LINES`, stand-ins from the plan); the goal arrow on him while he leads, hidden during a meeting; a call ("This way!") when you're over 6 tiles away. Stand-in scripts for "Your bunk" and "The Chief stops by" (with the three replies) only when the writers' `MEETING_SCRIPTS` aren't there. Smoke test: manifest up at Day 0 17:40, signing moves on to the ramp, standing in Bunk 1 plays "Your bunk" and hands over the device. intro_check OK; cadet_test vs 0.42.4 identical apart from the known `g_nocrew` flake. |
 | 0.42.6 | Skip-intro means "I know the ship": the evening's points and steps, every social gate open at once (all of `INTRO_FLAGS` but `mug` and `seedling`), no scripted week (`ended`, so no beats, no escort, no reserved jobs); the Settling-in list stays (design-doc.md, "Arriving by shuttle", updated). Turning in reserved slot 1 or 2 sends `introStep` `d1-shadow` / `d1-lead` (`introJobNote`, listening to section 17's job notes), the core memory social keeps. intro_check OK; cadet_test vs 0.42.5 identical apart from the known `g_nocrew` flake. |
+| 0.60.0 | Pillar 4 wave 1a, "the writers' kit" (combined by the build master on `claude/integration-test`, from ship integration 0.41.10): sim 0.26.22 (the ship notes bus and the flag store), systems 0.33.36-0.33.37 (`simNote('job')`, reserved jobs, `makeMins`), device 0.35.20 (device_check's Needs-pulse test fixed; it was the test, not the game), social A 0.36.20-0.36.41 (the query API, A2-A9, the affinity tuning, reviewer 1's fixes), social B 0.39.0 (voice cards and steps, 20c), traditions 0.34.19-0.34.24 (new rhythms, seasons, the TRADITIONS loader, Sowing morning, invitations, the `linesMeetings` hook), dialogue 0.43.0 (the writers' kit: section 22, `content_gen.py`, `lines_check.py`, `content/`; one TRADITIONS array baked through `plans/trad_parse.py`; Zeke Torres the sample person), arrival 0.42.0-0.42.6 (section 21, `intro_check.py`, the arrival evening part 1, skip-intro; inert with the intro off). Generated blocks re-baked with `content_gen.py` (`--check` up to date). No merge glue: the name clashes found in the trial combines (two TRADITIONS blocks, `introOn`/`introNote`, `BOND_KINDS`) were fixed on the helpers' branches. `cadet_test.py` takes the player engineer's 2806e6d (it hides section 15's floating need notes and the device button's glow, which faded on real-time timers and made the g_nocrew shot flaky). The crew designer's days-off change and arrival 0.42.7+ wait for 0.60.1. Hook register brought up to date. |
 
 Deck 4's static screenshots are pixel-identical from 0.5.0 through 0.5.7. The only Deck 4 changes are the spine and lobbies (not in the harness views), and crew routes that shifted when Pell left and when the car and benches changed which tiles are walkable.
 
@@ -1091,8 +1092,33 @@ Pillar 4, Part 1 (plans/pillar4-plan.md). Section 21 sits right after section 20
 
 One-line, `typeof`-guarded calls from one section into another (plans/pillar4-plan.md, "Keeping the one file from colliding"). The lead keeps this list; owners add their rows.
 
-| Line (where) | Calls | Owner of the call | Status |
+| Line (where) | Calls | Owner of the call | Status in 0.60.0 |
 | --- | --- | --- | --- |
+| section 13 (the bus itself) | `simNote`, `onSim`, `simNotes`, `flag`, `flagSet`: function declarations, so any section may call them while it loads | sim engineer | in (0.26.22) |
+| section 17 `simNote('job', { id, step, k, tag, reserved })` | `simNote` (13) | systems engineer | in (0.33.36) |
+| section 17 `jobReserve(kind, day, at, slot)`, `jobReserved(slot)`, `jobRelease(slot?)`; `j.makeMins` | called by section 21's week (slots 1 Mon shadow, 2 Mon you lead, 3 Tue solo) | systems engineer | in (0.33.36-0.33.37); section 21 doesn't call them yet (wave 3) |
+| section 18 `introArrival()` for the "after arrival" rhythms | `introArrival` (21) | traditions engineer | in (0.34.19 + 0.42.2) |
+| section 18 `simNote('tradition', { id, day, came, you })` | `simNote` (13) | traditions engineer | in (0.34.21) |
+| section 18 thanks | `relAdd` (20) | traditions engineer | in |
+| section 18 `if (typeof linesMeetings === 'function') linesMeetings(MEETING_SCRIPTS);` | `linesMeetings` (22): the baked meetings into MEETING_SCRIPTS | traditions engineer (asked by dialogue) | in (0.34.23) |
+| section 20 `CHATTER_IDLE`, `CHAT_GREET`, `CHAT_NEAR`, `CHAT_LIFE`, `CHAT_DEPT` = `linesLegacy(kind)`; chatGreet's first statement asks `lineFor` | `linesLegacy`, `lineFor` (22; 22 sits before 20, so these run at load) | dialogue engineer | in (0.43.0) |
+| section 20 listeners: `onSim` for repair, tradition, eventPhase, favour, gift, harvest, lateMeal, introStep | `onSim` (13) | social A | in (0.36.20-0.36.41) |
+| section 20 `simNote('tierUp', { id, tier })` and others | `simNote` (13) | social A | in |
+| section 20 week-1 gating (`socIntroOn`, `inWeek1`, `socGate`) | `flag` (13): `week1.*`, `escort.<id>` | social A | in (renamed from `introOn`/`introNote` in 0.36.34; section 21 declares those) |
+| section 12 main loop, after `socialTick()` | `introTick()` (21) | onboarding | in (0.42.5) |
+| section 13 `newGameStart(arrival)` | `introWanted()`, `introNewGame(arriving)` (21) | sim engineer | 21's side in (0.42.4); 13's call comes with sim 0.26.23 |
+| section 14 plan cache | `introSig()` (21): plans again when the intro starts, ends or is skipped | sim engineer | 21's side in (0.42.4); 14's call comes with sim 0.26.23 |
+| section 21 `introNote` | `simNote(kind, data)` (13) | onboarding | in |
+| section 21 `introFlag`, `introFlagSet` | `flag`, `flagSet` (13) | onboarding | in (13 has them now) |
+| section 21 `introRel` | `relAdd(id, 'intro:<step>', pts)` (20) | onboarding | in |
+| section 21 `introMail` | `mailSend` (15) | onboarding | in |
+| section 21 `introBegin` | `playerNameSet(name)` (15) | onboarding | in; 15's `playerNameSet` comes with player 0.28.22+ (until then it sets `SHIP.player.name`) |
+| section 21 `introAdvance` | `socialInvite(...)` (20) | onboarding | in |
+| section 21 at load: `onSim(kind, d => settleNote(kind, d))` for each of `SETTLE_KINDS`, and `onSim('job', introJobNote)` | `onSim` (13) | onboarding | in (0.42.0, 0.42.6) |
+| section 22 line conditions | `flag` (13), `memTold`, `inWeek1`, `socialFill` (20), `season` (18) | dialogue engineer | in |
+| section 10 walkers | `escortPlan(p, t)` (21) | sim engineer | asked (wave 2) |
+| section 14 `introPlan(p, d)` | `introBeats(p.id, d)` (21) | sim engineer | asked (wave 2) |
+| section 15 | `simNote('act', { act: 'wash'\|'eat'\|'laundry'\|'buy'\|'call', with, item })` | player engineer | coming (0.28.22, not in 0.60.0 yet) |
 | section 21 `introNote` | `simNote(kind, data)` (13) | onboarding | in 0.42.0; 13's bus is sim 0.26.22 (listeners get the note `{ kind, t, ...data }`) |
 | section 21 `introFlag`, `introFlagSet` | `flag`, `flagSet` (13) | onboarding | in 0.42.0, stand-in until 13 has it |
 | section 21 `introRel` | `relAdd(id, 'intro:<step>', pts)` (20) | onboarding | in 0.42.0 |
@@ -1109,7 +1135,6 @@ One-line, `typeof`-guarded calls from one section into another (plans/pillar4-pl
 | section 15 | `simNote('act', { act: 'wash'\|'eat'\|'laundry'\|'buy'\|'call', with, item })` | player engineer | in 0.28.22 |
 | section 17 | `simNote('job', { id, step: 'take'\|'stop'\|'done'\|'turnin'\|'drop'\|'lapse', k, tag, reserved: slot 1\|2\|3 or 0 })`; `jobReserve(kind, day, at, slot)`, `jobReserved(slot)`, a release for slots not taken | systems engineer | agreed, coming |
 | section 14 | `simNote('apptKept', { id })` | sim engineer | in the plan |
-| section 20 | `simNote('tierUp', { id, tier })` | social A | in the plan |
 
 ## Social life (section 20, the social engineer, 0.36.x)
 
