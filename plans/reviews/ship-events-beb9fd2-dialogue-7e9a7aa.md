@@ -14,3 +14,10 @@ Trial merge (integration, then ship-events beb9fd2, then dialogue 7e9a7aa). Conf
   - The eventsOn cache clears when introArrival() changes.
 - Still the build master's step: re-run content_gen.py after merging dialogue (the block on the dialogue branch can
   be empty), and the build label.
+
+## Addendum: e1a5d01 (0.34.24): PASS
+- events_check now fails when a content/traditions/*.trad id isn't among the baked SHIP_TRADITIONS. This closes the
+  "empty block hides Sowing" hole.
+- `simNote('choice', { script, k, meeting, who, flavour, mem, flag })` in dialogueStep, inside section 18 and
+  typeof-guarded. `D.m` is already relied on two lines above, and `who` is de-duplicated ids. No state change, no R(),
+  nothing per frame.
