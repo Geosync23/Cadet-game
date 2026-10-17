@@ -9,7 +9,7 @@ Chain of command: only the lead talks to the user.
 ## My seats and their state (last verdicts)
 | Seat | Branch | Engineer (session) | Last passed | Open from me |
 | --- | --- | --- | --- | --- |
-| Dialogue (section 22, content_gen, lines_check) | claude/dialogue | dialogue eng 2, 01S26bs4oMahyGJkuVaCKQGT | 621a432 (0.43.23) | none |
+| Dialogue (section 22, content_gen, lines_check) | claude/dialogue | dialogue eng 2, 01S26bs4oMahyGJkuVaCKQGT | 9d8e56d (0.43.24, PASS WITH FIXES) | none |
 | Traditions (section 18, .trad, events_check) | claude/ship-events | traditions eng (01018WZcc... was 1; check TEAM.md) | f78dd03 (0.34.41) | meal-tradition turnout waits on the sim's `meal` work (not this seat's) |
 | Device (section 19) | claude/device | device eng 3, 01SskqNx45iEGyQq2W9Fjg5Y | be8e2ab (0.35.28) | none |
 | Decks (DECKS, DECK_DRESS) | claude/decks-p3 | deck architect 2, 01ToE6RJFCw9deB3HcJRLKxS | 9377551 (0.38.17) | Tern plan sketch 8e8894b: PASS WITH FIXES (to the plan; reviews/decks-p3-8e8894b-tern-plan.md); check the build against it |
