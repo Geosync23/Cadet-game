@@ -371,3 +371,140 @@
 - Well played. Will you show me how you did that?
 - You got me. Again sometime? I'll get better.
 - Good game. I'll practise. On my own. With the board.   #funny
+
+// Writer 5, batch 1: Tomas's ordinary weeks, after week one. Mostly not work: letters to his brother, the stars,
+// toast, running club at the back, film night, the window seat, the bunk (Chloe's lights out, Lukas up early), rest
+// days Fri-Sat, the farm moon, counting windows. Gates kept: the exam only from beat:tomas.5, the transfer list only
+// from beat:tomas.6, why he left home only at close; his brother's star map only from beat:tomas.4.
+
+== greet
+? tier>=acquaintance !week1:true
+- {hi}! Have you eaten? I've eaten. Toast. You knew that.   #funny
+- {hi}. I'm off to send a letter. I say "post". It sounds nicer.
+? tier>=acquaintance !week1:true time:morning
+- Morning! Lukas was up at five again. I heard every sock.   #funny
+? tier>=acquaintance !week1:true time:evening
+- {hi}! Chloe says lights out in an hour. She said it like a weather report.   #funny
+? tier>=colleague !week1:true
+- {hi}, {me}. Nothing's happened all day. I think I like that.
+- {hi}! Found the laundry first go again. Twice in a row. That's a streak.   #funny
+? tier>=friend !week1:true
+- {nick}! Sit a minute. I want to hear about your day. All of it.   #warm
+- There you are. I've been saving up things to tell you. Small things. Three.   #funny
+? tier>=close !week1:true
+- {nick}. Good. The bunk feels right when everyone's back in it.   #warm
+
+== chat
+? tier>=acquaintance !week1:true
+- My brother asked what we eat. I said "Brennan's food". He says that's not an answer.   #funny
+- The toast here is better than home. Don't tell home.   #funny
+- I'm on chapter three of a book about old ships. It's taken a month. Long chapters.   #funny
+- Running club's all right. I run at the back. You can see everyone from the back.
+- Film night was the one with the lighthouse. Seen it twice. Still don't get the ending.   #funny
+- I'm counting every window on the Wren. I'm on twenty-two. Some are portholes.
+? tier>=colleague !week1:true
+- Rest days I sleep in till seven. Seven! My brother says that's not sleeping in.   #funny
+- Brennan let me knead the Sunday bread. She said "gently, love". I was too gentle.   #funny
+- Chloe and Zofia hear the news before anyone. I just wait at the bunk. It comes to me.   #funny
+- Lukas has the same bar stool every night. I sat on it once. It felt wrong. Like a hat.   #funny
+- The garden's my favourite after the observatory. It smells like after rain.
+- I write to my brother about the crew. No names. He'd tell the whole moon.   #funny
+- At home we had one shop. Here there's a whole store. I mostly just look.
+- Vance asked how my knees were. Then said "Good" and wrote something down.   #funny
+? tier>=friend !week1:true
+- Some nights I look at the star map and guess which one's home. I never get it.
+- I used to think grey was just what skies did. Now I miss the grey a bit. Funny.
+- Holt asked if I was settling in. I said yes. He said "Really?" I said yes again.   #funny
+? tier>=friend beat:tomas.4 !week1:true
+- My brother says his ceiling map is bigger than mine. It isn't. I've measured.   #funny
+? tier>=close !week1:true
+- I'm a bit less lost every week. Not found. Less lost. That's good, isn't it?   #warm
+
+== near
+? act:breakfast !week1:true
+- Toast, tea, window. That's breakfast. I can't start a day without the window.
+? act:dinner !week1:true
+- Seconds, if there are any. Running club makes me hungry. Vance never seems hungry.   #funny
+? act:off !week1:true
+- Rest day. Letter first. Then the window seat. Then I'll see. The window seat.   #funny
+? act:gym
+- Vance said "gentle jog". Vance has never jogged gently in his life.   #funny
+? place:junior_common_room !week1:true
+- The stern window's best after dinner. Everything's going away from you. Nicely.
+? place:hydroponics_garden
+- The big tree's grown again. I measure it with my hand. Seven hands, now.
+? place:laundry
+- Everything comes out warm. Best smell on the ship. Nearly.
+? trad:film
+- Film night! I bring a blanket. Is that too much? Pell brings two.   #funny
+
+== feel
+? mood:high !week1:true
+- Good day. My brother's letter had a drawing. A cow, I think. Possibly me.   #funny
+? mood:ok !week1:true
+- Fine! Medium-good. Toast was hot. Lift came first time. Small things.
+? mood:low tier>=friend !week1:true
+- Bit far from home today. Not sad. Just far. The stars usually sort it.
+
+== life
+? tier>=acquaintance !week1:true
+- My brother keeps my letters in a biscuit tin. He says it's nearly full.
+? tier>=colleague !week1:true
+- On the farm moon it rained on Tuesdays. Mostly. Grey, then wet, then grey.
+- I brought one jumper from home. It's itchy. I wear it every rest day.
+? tier>=friend !week1:true
+- I wrote down the first thing I saw from the shuttle window. It's in my locker.
+
+== joy
+? tier>=acquaintance !week1:true
+- Naming stars! I'm on six. One's called Toast. It's a very reliable star.   #funny
+? tier>=friend !week1:true
+- When my brother's letter comes, I save it till bedtime. Like pudding.   #warm
+
+== invite
+? tier>=colleague !week1:true act:off
+- Rest day walk? The long way round Deck 2. I'll show you the good windows.
+? trad:market tier>=acquaintance
+- Market's on! Come and look at things we can't afford? It's my favourite.   #funny
+? trad:jam tier>=colleague
+- Music jam tonight. I can't play anything. I clap. Come and clap with me?   #funny
+
+== bye
+? tier>=acquaintance !week1:true
+- Right, I'll go. I've a letter to finish. Page three. It's about soup.   #funny
+- Bye! I'm going the short way. Just once. To see what it's like.   #funny
+
+== smalltalk
+? !week1:true
+- Toast was perfect today. Just saying.
+- Twenty-two windows. Twenty-three? Counting.   #funny
+- Is it Friday? It feels like a Friday.
+? act:off
+- Rest day. Window seat. No plans. Perfect.
+? place:junior_common_room
+- Best window on the ship. Nobody believes me.
+
+== rumour
+? !week1:true
+- Did you hear? New film this week. With a boat.
+- Chloe heard it first. So it's probably true.   #funny
+
+== callback
+? told:came.sowing !week1:true
+- Your seedling stands up straight. Mine leans. Yours is like Holt. Mine's like me.   #funny
+? told:came.quiz
+- You came to quiz! I knew one answer. It was "the Tern". I said it far too loud.   #funny
+? told:came.jam
+- You came to the jam! You clapped in time. I didn't. We balanced out.   #funny
+? told:came.market
+- The market! We looked at everything and bought nothing. Good afternoon, that.   #warm
+? told:came.harvest
+- Harvest! You carried more than me. I'm telling everyone I carried more.   #funny
+? told:gift.book
+- I'm reading your book slowly, so it lasts. I'm on the bit with the storm.   #warm
+? told:fixed.lights
+- Was it you who fixed the lights? The corridor's brighter. I nearly didn't get lost.   #funny
+? told:intro.arrival !week1:true
+- Your first night, you found the common room in an hour. It took me three days.   #funny
+? mem:came.observatory-night tier>=friend
+- Observatory night's better with the bunk there. You, Chloe, Zofia. Even Lukas, once.   #warm
