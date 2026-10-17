@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.26.37
+   STARSHIP CADET: CSV Wren                           build 0.26.38
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7053,7 +7053,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.26.37';                           // keep in step with the header's build line
+const GAME_BUILD = '0.26.38';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -7375,6 +7375,8 @@ function schedData() {
     // gatherings' places (answers 24 and 25): anything with `event: 'handover' | 'walk' | 'observatory-night'`, as
     // n|@handover and so on, in id order (the Captain walks them in that order). Type 'event' places serve nothing else
     const evs = new Map(); for (const pl of places.concat(evPlaces)) if (pl.deck === n && pl.event) { if (!evs.has(pl.event)) evs.set(pl.event, []); evs.get(pl.event).push(pl); }
+    // and a venue's crowd spots (the deck architect's `gather` places, not the lead's) as n|@gather-<venue>: the shuttle bay's for farewell friends (0.26.38)
+    for (const pl of places) if (pl.deck === n && pl.gather && !pl.lead) { const k = 'gather-' + pl.gather; if (!evs.has(k)) evs.set(k, []); evs.get(k).push(pl); }
     for (const [ev, l] of evs) sub('@' + ev, l.sort(nat));
     sub('window', [...new Set([...shared.entries()].filter(([k]) => k.startsWith(n + '|') && !/\|work:/.test(k)).flatMap(([, l]) => l))].filter(pl => pl.window));   // answer 21: seats by a window
   }
@@ -7649,7 +7651,7 @@ const guestWard = n => (schedData().shared.get(n + '|patient-bed') || []).length
 // which day of their stay day d is for a guest: 1 on the day they arrive (counted up to `max`; past it, max + 1)
 const guestDayNo = (p, d, max = 7) => { for (let i = 0; i < max; i++) if (guestStay(p, d - i) === 'arrive') return i + 1; return max + 1; };
 // a guest's day on an arrival or departure day: away until 10:00 then the shuttle bay, or the shuttle bay then away
-function guestTrim(p, d, segs) {
+function guestTrim(p, d, segs, spot) {
   if (aboardAllDay(p, d)) return segs;
   const B = (d - 1) * 1440, away = (from, to) => ({ from, to, act: 'away', deck: 0, type: null, placeId: null });
   if (!aboard(p, d)) return [away(B, B + 1440)];
@@ -7664,7 +7666,7 @@ function guestTrim(p, d, segs) {
     const w0 = cut - ROTA_WAIT;
     for (const s of segs) if (s.from < w0) out.push({ ...s, to: Math.min(s.to, w0) });
     const last = out[out.length - 1], bay = (schedData().shared.get('5|event') || []).filter(pl => /shuttle-bay-crowd/.test(pl.id));
-    const placeId = last && last.deck === 5 && /shuttle-bay/.test(last.placeId || '') ? last.placeId : bay.length ? bay[strSeed(p.id) % bay.length].id : null;
+    const placeId = spot || (last && last.deck === 5 && /shuttle-bay/.test(last.placeId || '') ? last.placeId : bay.length ? bay[strSeed(p.id) % bay.length].id : null);   // spot: held for them by shipDay (0.26.38)
     if (last && last.deck !== 5 && last.to - last.from > SCHED_COMMUTE) { last.to = w0 - SCHED_COMMUTE; out.push({ from: w0 - SCHED_COMMUTE, to: w0, act: 'commute', deck: 5, type: 'lift', placeId: null, fromDeck: last.deck }); }
     out.push({ from: w0, to: cut, act: 'off', deck: 5, type: null, placeId, tag: 'leave' }, away(cut, B + 1440));
   }
@@ -7752,6 +7754,13 @@ function gatherings(p, d, F) {
   if (typeof eventPlan === 'function') for (const e of eventPlan(p, d) || []) {   // a host (host: true) is there 5 minutes early
     const early = e.host ? 5 : 0;
     out.push({ at: e.from - early, dur: e.to - e.from + early, where: e.opts, tag: e.tag, anim: e.anim, min: e.min || 20, host: !!e.host, meal: e.meal || null, act: e.meal || undefined });   // a meal tradition (meal: 'dinner' | 'breakfast') is that meal
+  }
+  // social B2's farewell friends (20c's farewellCrew(leaver, d) -> ids, pure per day): on a crew member's last day, each
+  // of their friends who is free stands with them in the shuttle bay while they wait to board, 14:30-15:00 (0.26.38)
+  if (!p.guest && typeof farewellCrew === 'function') {
+    const S = schedData(), bye = S.people.filter(q => q !== p && !q.guest && crewLeaving(q) === d && aboard(q, d));
+    if (bye.some(q => { try { return (farewellCrew(q, d) || []).includes(p.id); } catch (e) { return false; } }))
+      out.push({ at: ROTA_OFF - ROTA_WAIT, dur: ROTA_WAIT, where: [[5, '@gather-shuttle-bay']], tag: 'farewell', anim: 'talk', min: 20 });
   }
   if (F.night && F.works) return out;                    // on the night shift tonight: the ship's events still (eventFree keeps them clear of the shift), not Deck 1's routines (0.26.31)
   // answer 24, Deck 1: the evening handover at the command ring (places with `event: 'handover'`) at 18:00, for the
@@ -7915,11 +7924,15 @@ function schedBuild(p, d, occ, S) {
     for (const [dk, type] of opts) {
       if (dk === 3 && act === 'leisure' && !o.event && DECK3_EVENING_MAX < Infinity && deck3Full(t + (deck !== 3 ? C : 0), o.by !== undefined ? o.by : t + dur)) continue;
       const ownL = (S.own.get(p.bed) || []).filter(pl => pl.type === type && pl.deck === dk);
-      const pool = ownL.length ? ownL : (S.shared.get(dk + '|' + type) || []);
+      let pool = ownL.length ? ownL : (S.shared.get(dk + '|' + type) || []);
       if (!pool.length) continue;
       const soc = mates && SEAT_SOCIAL.has(type) && (mates.fr.length || mates.foe.length);
       const fav = pool[0].gather ? 0 : Math.floor(pool.length * (U(40 + type.length) < .7 ? schedU(p.seed, 0, 41 + type.length) : U(42 + type.length)));
       const arrive = t + (dk !== deck ? C : 0), wait = o.wait || 0;
+      if (pool[0].gather && p.partner && occ.who) {      // couples stand together in a crowd: the spots nearest your partner's first, if they're already there (0.26.38)
+        const ids = new Set(pool.map(q => q.id)), at = (occ.who.get(p.partner) || []).find(([x, y, id]) => ids.has(id) && x < B + arrive + dur && B + arrive < y), q0 = at && S.byId.get(at[2]);
+        if (q0) { const xy = q => q.xy || [q.at[0] + .5, q.at[1] + .5], [x0, z0] = xy(q0), dist = q => Math.hypot(xy(q)[0] - x0, xy(q)[1] - z0); pool = pool.slice().sort((a, b) => dist(a) - dist(b)); }
+      }
       for (let s = arrive; s <= arrive + wait; s++) {
         let end = s + dur; if (o.by !== undefined) end = Math.min(end, o.by);
         if (end - s < (o.min || Math.min(dur, 10))) break;
@@ -8358,6 +8371,13 @@ function shipDay(d) {
       occ.res.get(e.placeId).push([(d - 1) * 1440 + Math.max(0, e.from), (d - 1) * 1440 + Math.min(1440, e.to), 'intro:' + p.id]);
     }
   }
+  // crew leaving today wait in the shuttle bay 14:30-15:00 (guestTrim): each one's spot is held for them before anyone is
+  // planned ('leave:<id>', which no tag matches), so their farewell friends stand round them, never in it (0.26.38)
+  const leave = new Map(), bayL = (S.shared.get('5|event') || []).filter(pl => /shuttle-bay-crowd/.test(pl.id));
+  for (const p of S.people) if (!p.guest && bayL.length && guestStay(p, d) === 'leave') {
+    const id = (bayL.find(pl => ![...leave.values()].includes(pl.id)) || bayL[0]).id; leave.set(p.id, id);   // the front spots, nearest the shuttle
+    if (!occ.res.has(id)) occ.res.set(id, []); occ.res.get(id).push([(d - 1) * 1440 + ROTA_OFF - ROTA_WAIT, (d - 1) * 1440 + ROTA_OFF, 'leave:' + p.id]);
+  }
   // a meal tradition's diners are planned next (after any hosts), and then its held seats are let go (their own bookings
   // keep theirs), so ordinary diners use the seats nobody took, or left early, not the lounge (reviewer 1b, 0.26.32)
   const goer = mealEv.size ? new Set(S.people.filter(p => aboard(p, d) && (eventPlan(p, d) || []).some(x => mealEv.has(x.id))).map(p => p.id)) : null;
@@ -8368,7 +8388,7 @@ function shipDay(d) {
       trimmed = true;
       for (const [id, rs] of occ.res) occ.res.set(id, rs.filter(([x, y, ev]) => !mealEv.has(ev)));
     }
-    const plan = introLay(p, d, occ, guestTrim(p, d, aboard(p, d) ? schedBuild(p, d, occ, S) : [])); plans.set(p.id, plan);   // a guest away has no day here
+    const plan = introLay(p, d, occ, guestTrim(p, d, aboard(p, d) ? schedBuild(p, d, occ, S) : [], leave.get(p.id))); plans.set(p.id, plan);   // a guest away has no day here
     for (const s of plan) if (s.deck === 3) for (let m = Math.max(0, s.from - (d - 1) * 1440); m < s.to - (d - 1) * 1440; m++) occ.heads[m]++;
   }
   const day = { d, plans, occ };
