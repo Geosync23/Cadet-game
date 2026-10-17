@@ -19,3 +19,8 @@ On this branch alone a new game still starts at `SHIP_START_ARRIVAL.tile = [7,8]
 Low:
 - When open, the ramp is a 1.88 m plate at -1.52 rad from a hinge at y 0.1, so its far end sits at about y 0.2 and slopes slightly **up**, away from the door. A hinge at about -1.62 rad, or one lower, would let it rest on the floor.
 - The cabin floor is a 2 cm box on the deck (top at y 0.02). It isn't coplanar, but it's close; watch for flicker on a phone at a distance.
+
+## Addendum: 0.38.19 (a570274)
+- Fix 2 is done: `ternRamp(false)` returns false when not clear, a close in progress waits, and the well blocks only below half open.
+- **Fix 1 is still open:** `ternClear()` is unchanged and still checks only `walkers`. Now that both the refusal and the waiting go through it, a crew agent (escort, arrival crowd: `DECK_CREW`) on the ramp or in the well is still not seen, so the ramp closes on them. One line: `|| DECK_CREW.some(a => tiles.has(cellAt(a.x, a.z).join(',')))`.
+- The traditions side for this pass: 0.34.45 to 0.34.47 (708c4ca, e23620a, 3377935) PASS, see ship-events-2951e5b.md.

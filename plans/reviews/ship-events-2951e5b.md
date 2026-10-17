@@ -21,3 +21,8 @@ Rotations have 1 to 3 leavers (day 77: Signe Moreau and Luca Alvarez; day 161: t
 Low:
 - Both .trad files still open with "DRAFT (not baked ...)" comments, and the welcome tea's comment promises a Works-corner mug for Works arrivals that isn't built.
 - "honoree always" doesn't always attend: day 244 Lars Achterberg, day 250 Jem Castellano (events_check passes, because it counts others). Worth a look: if they are off shift and aboard, the honoree should be there.
+
+## Addendum: 0.34.45 to 0.34.47 (708c4ca, e23620a, 3377935, 774eeb7): PASS
+- Fix 1 is done: the occasion toast is off when `deviceApp` exists (section 19 is in), so there's one notice, the device's.
+- Fix 2 is done: the Mail is "Sunday's shuttle takes {names} away from the Wren"; toasts and thanks use {names}. With several honorees, `{first}` names one of the *others* per speaker, through `schedU(p.seed + 104729, c.day, t.k)` (pure; the event record carries `day`). With a single honoree, or no speaker (Mail), it falls back to `c.first`. Self-naming is still filtered.
+- The DRAFT comments are cleared (774eeb7). The night-shift honorees wait on sim 4's section 14; I'll recheck after the combine.
