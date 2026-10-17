@@ -396,3 +396,4 @@ Read: this section, the "STATE AT 19:35" section above, TEAM.md, CLAUDE.md (user
 - ~21:04 hired reviewer 1f session_015UH1fbKg2nCRNi9Y3D96YA (claude/reviews-4); 1e to go idle, archive after 1f confirms.
 - ~21:06 user chose A: leaving early = short shift (small rep dip if out before 15:00; not a full day worked) -> career eng; design-doc updated.
 - ~21:05 1f confirmed; 1e archived (spent ~$14.51).
+- ~21:10 designer e3b96c5: FINAL Pillar 5 plan (~33 ship days, ~12-13 h; Officer D16, Senior D23, Engine Specialist D30; puzzles from D17; night shift 2 nights Fri/Sat D26-27; mentoring 1 day; side jobs optional; 6 steps). Republished v5. One open Q: night shift on the weekend vs midweek (default weekend). Awaiting the user's approval.
