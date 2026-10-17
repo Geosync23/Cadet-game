@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.42.13
+   STARSHIP CADET: CSV Wren                           build 0.42.14
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.42.13';                           // keep in step with the header's build line
+const GAME_BUILD = '0.42.14';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -14908,14 +14908,13 @@ function introLoad(s) {
   return I;
 }
 SHIP.intro = introLoad(SAVED);
-// a first launch arriving by shuttle (section 13's ARRIVING: no save, not a test URL, never arrived on this device)
-if (typeof ARRIVING !== 'undefined' && ARRIVING && !SAVED) introBegin();
-// from sim 0.26.25 section 13 starts every first launch on Monday and leaves arriving to this section: the first frame
-// (introTick) calls newGameStart(true) when there's no save, it isn't a test URL and this device has never arrived
-let INTRO_BOOT = !SHIP.intro.on && typeof SAVED !== 'undefined' && !SAVED && !NOSAVE && introWanted();
+// a first launch arriving by shuttle (the lead's one design, with sim 0.26.25): section 13 starts every game as before
+// and this section decides; its first frame (introTick, once every section has run) calls section 13's
+// newGameStart(true) when there's no save, it isn't a test URL and this device has never arrived
+let INTRO_BOOT = typeof SAVED !== 'undefined' && !SAVED && !NOSAVE && introWanted();
 const introSave = () => JSON.parse(JSON.stringify(SHIP.intro));
 SAVE_EXTRA.push(s => { s.intro = introSave(); });
-const introOn = () => !!SHIP.intro.on && !SHIP.intro.ended;
+const introOn = () => !!(SHIP.intro && SHIP.intro.on && !SHIP.intro.ended);
 // the day you came aboard (section 18's "after arrival" rhythms count from it): always the arrival Sunday, Day 0, for
 // you, whether you walked the evening, skipped it or started before there was an arrival
 const introArrival = () => INTRO_START.day;

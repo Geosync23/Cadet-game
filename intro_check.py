@@ -266,7 +266,7 @@ with sync_playwright() as pw:
 
     print('8. The evening in the real game (New game arriving, a player who follows Torres and taps through meetings)')
     if not g.ev("typeof newGameStart === 'function' && typeof escortPlanOf === 'function'"):
-        print('  not yet: this build has no Day 0 start or escort walker (section 13/10, the sim engineer)')
+        fail('no newGameStart or escort walker (sections 13 and 10, the sim engineer): the arrival cannot start')
     else:
         g.ev('newGameStart(true)'); g.step(5)
         g.page.fill('form input[maxlength="24"]', 'Sam'); g.page.click('form button'); g.step(5)
@@ -288,7 +288,7 @@ with sync_playwright() as pw:
         if led < 20: fail('Torres hardly led you')
     print('9. A first launch arrives (no save, never arrived, not a test URL), and its Day 0 save loads at the same step')
     if not g.ev("typeof newGameStart === 'function'"):
-        print('  not yet: no Day 0 start in this build')
+        fail('no newGameStart (section 13): a first launch cannot arrive')
     else:
         url = g.page.url.split('?')[0]
         g.page.evaluate('localStorage.clear()')
