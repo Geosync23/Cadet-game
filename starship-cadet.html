@@ -11950,13 +11950,16 @@ const galleyLine = () => typeof lineJoin === 'function' && typeof lineSpot === '
 function galleyJoin(who = 'player') {
   const now = shipNow(); galleyAdvance(now);
   const ahead = galleyAhead(now), j = { at: GALLEY_JOIN.at.slice(), xy: GALLEY_JOIN.xy.slice(), face: GALLEY_JOIN.face, ahead, since: now, turnAt: now + GALLEY_SERVE.you + ahead * galleyServeMins(now) };
-  if (galleyLine()) {
+  if (galleyLine()) {                                   // lineSpot: world x, z and face in radians; ours: the deck's x, y and degrees
     lineJoin(who); const sp = lineSpot(who);
-    if (sp && sp.at) { j.at = sp.at.slice(); j.xy = sp.xy ? sp.xy.slice() : j.xy; j.face = sp.face !== undefined ? sp.face : j.face; }
-    j.line = true; j.front = null;
+    if (sp && sp.at) { j.at = sp.at.slice(); if (isFinite(sp.x)) j.xy = [sp.x + OX, sp.z + OZ]; if (isFinite(sp.face)) j.face = sp.face * 180 / Math.PI; }
+    j.line = true; j.front = null; if (typeof servLine === 'function') j.ahead = Math.max(0, servLine().indexOf(who));
   }
   GALLEY_JOINED.set(who, j); return j;
 }
+// out of the line without being served (you walked away): section 15 may call it; galleyTick does it anyway once you
+// aren't queueing (section 15's ACT), so nobody behind you is stuck at the counter
+function galleyLeave(who = 'player') { const j = GALLEY_JOINED.get(who); GALLEY_JOINED.delete(who); if (typeof lineLeave === 'function' && (!j || j.line)) lineLeave(who); }
 function galleyTurn(who = 'player') {
   const j = GALLEY_JOINED.get(who); if (!j) return false;
   const now = shipNow();
@@ -12165,7 +12168,10 @@ function galleyBoardDraw(t, d) {
   t.needsUpdate = true;
 }
 // once a frame from the main loop: the galley up to the minute, and on Deck 3, what it looks like
-function galleyTick() { galleyAdvance(shipNow()); galleyShow(); }
+function galleyTick() {
+  galleyAdvance(shipNow()); galleyShow();
+  if (GALLEY_JOINED.has('player') && typeof ACT !== 'undefined' && !(ACT && ACT.kind === 'queue')) galleyLeave('player');   // walked away from the line
+}
 
 // =====================================================================
 // 17. MACHINES & JOBS

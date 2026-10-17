@@ -438,11 +438,11 @@ with sync_playwright() as pw:
     for k in range(25):
         g.step(30); empty.append(g.ev(probe))
     # your own turn, played: join at 17:12 with frames running, until galleyTurn
-    g.ev(f"SHIP.galley = null; setShipNow({B} + 17 * 60 + 12); galleyAdvance(shipNow()); deckCrewFill(); window.__j = galleyJoin('player')")
+    g.ev(f"SHIP.galley = null; setShipNow({B} + 17 * 60 + 12); galleyAdvance(shipNow()); deckCrewFill(); window.__j = galleyJoin('tester')")
     n = 0
-    while n < 300 and not g.ev("galleyTurn('player')"): g.step(3); n += 3
+    while n < 300 and not g.ev("galleyTurn('tester')"): g.step(3); n += 3
     mine = g.ev("[window.__j.ahead, +(shipNow() - window.__j.since).toFixed(2)]")
-    g.ev("GALLEY_JOINED.delete('player'); SHIP.galley = null; window.__sc('tickShip = () => {}')")
+    g.ev("galleyLeave('tester'); SHIP.galley = null; window.__sc('tickShip = () => {}')")
     print('Queue at dinner (time, standing at the queue spots, planned in a queue stop, ahead shown, minutes to your turn, rush, galley waiting):', qq[::4])
     print('  with an empty galley:', empty[::5])
     print(f"  your turn, joining at 17:12: {mine[0]} ahead, served after {mine[1]} ship minutes ({mine[1] / 0.6:.1f} real seconds)")
