@@ -23878,7 +23878,7 @@ function lineCond(k, v, p, ctx) {
     case 'news': return any(v, x => !!lineQ('knowsNews', p, x));
     case 'rep': return any(v, x => LINE_REP.indexOf(lineQ('repBand', p.dept)) >= LINE_REP.indexOf(x));   // this band or better (!rep:well = below well)
     case 'ship.work': case 'ship.kindness': case 'ship.spirit': return any(v, x => LINE_SHIP.indexOf(lineQ('repShip', k.slice(5))) >= LINE_SHIP.indexOf(x));   // this or better
-    case 'you': return any(v, x => (lineQ('knownFor') || []).includes(x));
+    case 'you': return any(v, x => (lineQ('knownFor') || []).includes(x.replace(/_/g, ' ')));   // you:night_owl: _ for a space
     case 'cue': return any(v, x => { const [k, at] = x.split('@'), c = lineQ('cue', k); return !!c && (!at || (at === 'me' ? c.who === id : at === 'dept' ? c.dept === p.dept : false)); });   // cue:gift.you@me: about the speaker; @dept: their department's
     case 'flag': return any(v, x => ctx.flags && x in ctx.flags ? !!ctx.flags[x] : !!lineQ('flag', x));   // ctx.flags: { key: true } answers for those keys (onboarding asks for a step's lines)
     case 'week1': { const on = !!lineQ('inWeek1'); return any(v, x => (x === 'true') === on); }
@@ -23901,7 +23901,7 @@ function lineCond(k, v, p, ctx) {
     case 'with': { const o = ctx.other && (ctx.other.id || ctx.other); return !!o && any(v, x => o === x); }   // the other person in the scene
     case 'dept': return any(v, x => p.dept === x);
     case 'rank': return any(v, x => p.rank === x);
-    case 'trait': return any(v, x => (p.traits || []).includes(x));
+    case 'trait': return any(v, x => (p.traits || []).includes(x.replace(/_/g, ' ')));   // trait:dry_humour
     case 'habit': { const hs = lineQ('habitsOn', p, Math.floor(t / 1440) + 1) || p.habits || []; return any(v, x => hs.includes(x)); }   // today's habits (habit shifts too)
     case 'act': return any(v, x => (LINE_ACTS[x] || [x]).includes(ctx.act));
     case 'birthday': return any(v, x => x === 'me' ? !!(typeof isBirthday === 'function' && isBirthday(p, t)) : x === 'you' ? !!(typeof isBirthday === 'function' && typeof ROSTER_PLAYER !== 'undefined' && isBirthday(ROSTER_PLAYER, t)) : false);
@@ -24054,7 +24054,7 @@ if (typeof SAVE_EXTRA !== 'undefined') SAVE_EXTRA.push(s => {
   for (const id in L.reacted || {}) if (L.reacted[id].day === day) reacted[id] = L.reacted[id];   // only today's count
   s.lines = { ring: L.ring.slice(-LINES_RING_MAX), serious: L.serious, reacted };
 });
-function linesNew() { if (typeof SHIP !== 'undefined') SHIP.lines = { ring: [], serious: 0, reacted: {} }; OVH = null; OVH_AT = -1e9; REACT_AT = -1e9; LINE_RECENT.length = 0; }   // a new game (section 13 calls it)
+function linesNew() { if (typeof SHIP !== 'undefined') SHIP.lines = { ring: [], serious: 0, reacted: {} }; OVH = null; OVH_AT = -1e9; REACT_AT = -1e9; LINE_RECENT.length = 0; }   // a new game (section 13's simNote('newGame'))
 // the ids heard within the ring's days (an entry from a later day than today is from an earlier game: it doesn't count)
 function linesRing(day) { const L = linesState(); return L ? L.ring.filter(r => r[1] <= day && day - r[1] < LINES_RING_DAYS).map(r => r[0]) : []; }
 function linesHeard(id, day, tone) {
@@ -24114,6 +24114,7 @@ function linesTalk() {
 // goes in the ring like a conversation (not again within 7 ship days); #serious ones count towards the day's one.
 const REACT_ODDS = .2, REACT_FRESH = 30, REACT_SECS = 4.5;
 let REACT_AT = -1e9;                                      // the ship minute of the last note worth reacting to
+if (typeof onSim === 'function') onSim('newGame', () => linesNew());   // section 13's New game: nothing heard yet
 if (typeof onSim === 'function') onSim('*', n => { if (n && isFinite(n.t) && (typeof SOC_CUE_OF === 'undefined' || SOC_CUE_OF[n.kind])) REACT_AT = Math.max(REACT_AT, n.t); });
 const reactKind = e => [].concat(e.cue || [])[0] || null;
 function linesReact(near, t, day) {

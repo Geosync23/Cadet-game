@@ -99,7 +99,7 @@ These are the only condition words. `lines_check.py` rejects anything else. Put 
 | `news:<id>` | they know that piece of news | `news:storm` |
 | `rep:` | your standing with their department is at least this: `new` < `known` < `well` < `theirs` (`!rep:well`: below well) | `rep:well` |
 | `ship.work:`, `ship.kindness:`, `ship.spirit:` | the ship's view of you is at least this: `low` < `ok` < `high` | `ship.kindness:high` |
-| `you:<tag>` | you're known for it | `you:reliable` |
+| `you:<tag>` | you're known for it (`_` for a space): `reliable`, `kind`, `chatty`, `quiz_regular`, `gym_rat`, `always_at_the_garden`, `the_one_who_fixes_ovens`, `good_with_newcomers`, `night_owl` | `you:night_owl` |
 | `cue:<what>` | it happened in the last day or two (`.you` on the end: and you did it; `@me`: and it was about the speaker, e.g. their gift or favour; `@dept`: a repair in the speaker's department) | `cue:repair.oven`, `cue:repair.oven.you`, `cue:gift.you@me`, `cue:repair.you@dept` |
 | `flag:<key>` | a story flag is set | `flag:met.calder`, `flag:mug` |
 | `week1:` | `true` during your first week (from the arrival evening until the week is done) | `week1:true` |
@@ -119,7 +119,7 @@ These are the only condition words. `lines_check.py` rejects anything else. Put 
 | `deck:` | the deck where it happens (where you are) | `deck:3` |
 | `event:<id>[.<phase>]` | a ship-wide event is on | `event:ionStorm`, `event:ionStorm.onset` |
 | `trad:` | a tradition (`today`: any tradition today) | `trad:quiz`, `trad:today` |
-| `dept:` `rank:` `trait:` `habit:` | the speaker's department, rank, trait or habit | `dept:galley`, `rank:junior`, `trait:shy`, `habit:gardener` |
+| `dept:` `rank:` `trait:` `habit:` | the speaker's department, rank, trait (one of the roster's, `_` for a space) or habit | `dept:galley`, `rank:junior`, `trait:dry_humour`, `habit:gardener` |
 | `act:` | what they're doing | `work`, `breakfast`, `dinner`, `meal` (either), `gym`, `wash`, `leisure`, `off`, `free` (either), `call` (on a call home) |
 | `birthday:` | `me` (the speaker's) or `you` (yours) | `birthday:me` |
 | `came:` | calls home: you went to a tradition lately (`any`, or its id); the call passes it, and `{trad}` fills from it | `came:any` |
