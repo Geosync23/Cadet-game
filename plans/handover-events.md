@@ -138,3 +138,5 @@ Read plans/pillar4-plan.md (Part 4, Part 5's Tiles night, Part 6 seat 5) and pla
 - **Next:** the Sunday "This week aboard" Mail (with the monthly designer); then collecting the three designers' files.
 - **Gotcha:** cadet_test's g_nocrew shot can catch section 15's "+N Energy" need label (a real-time fade): a 1921 px difference that vanishes on a re-run.
 - **Hash keys I give out:** 434 sowing; next free 435.
+- **0.34.24-0.34.26:** simNote('choice') on meeting replies; events_check fails on an unloaded .trad; the storm pinned to day 10 (`spread`); tradition props (`ties.decor` -> the deck architect's DECK_DRESS via dressShow) and `trace` (Sowing: seedlingYours { id, day }).
+- **Agreed with the sim engineer (0.26.24):** hosts are planned first (5 minutes early, may join half late); errands don't start within 70 minutes of a gathering; dinner moves around one. For meal traditions (Sunday roast, harvest supper, long breakfast, the 06:00 crossover) put `meal: 'dinner' | 'breakfast'` on the eventPlan entry (from the tradition) and section 14 eats there instead of the servery: send the sim engineer the concrete asks when the designers deliver.
