@@ -174,6 +174,39 @@ with sync_playwright() as pw:
         if not e['kinds'].get(k): fail(f'no {k} lines asked of the engine')
     if 'callback' not in e['tomas']: fail("Tomas never calls back the lamp")
 
+    # 8. the first week (0.36.23): gates from onboarding's flags, intro memories, the escort as mentor, socialInvite
+    w = g.ev(r"""(() => {
+      const o = {}, F = new Set(), had = typeof flag === 'function' ? flag : null; SHIP.mem = {};
+      o.open = ['d2', 'd3', 'd5', 'done'].every(socGate);
+      SHIP.intro = { step: 'arrival', escort: 'torres-zeke' }; window.flag = k => F.has(k);
+      o.shut = ['d2', 'd3', 'd5', 'done'].map(socGate); F.add('week1.d2'); F.add('week1.d3'); o.tue = ['d2', 'd3', 'd5', 'done'].map(socGate);
+      introNote({ step: 'arrival', who: ['torres-zeke'] }); introNote({ step: 'dinner', who: [] }); introNote({ step: 'look', who: ['pell'] });
+      o.mem = [mem('torres-zeke', 'intro.arrival') && mem('torres-zeke', 'intro.arrival').w, !!mem('calder', 'intro.dinner'), !!mem('pell', 'intro')];
+      o.mentor = [SHIP.social.mentor, bondOf('torres-zeke', 'mentee'), socialFill(SOC.crew[SOC.idx.get('torres-zeke')], 'mentee')];
+      window.lineFor = (p, kind) => kind === 'week1' ? { text: 'w1', id: 'w1', kind } : null;
+      o.week1 = chatLine(SOC.crew[SOC.idx.get('torres-zeke')]).kind;
+      F.add('week1.done'); o.done = [introOn(), socGate('done'), chatLine(SOC.crew[SOC.idx.get('torres-zeke')]).kind !== 'week1'];
+      delete window.lineFor; SHIP.intro = null; if (had) window.flag = had; else delete window.flag;
+      const s = JSON.stringify(socSave()); socLoad(JSON.parse(s)); o.saved = SHIP.social.mentor === 'torres-zeke';
+      SHIP.social.mentor = null; SHIP.mem = {};
+      // an invitation to a tradition someone is going to
+      let hit = null;
+      for (let d = 2; d <= 14 && !hit; d++) for (const e of eventsOn(d)) { if (hit) break; for (const p of SOC.crew) { const seg = planDay(p, d).find(x => x.placeId && x.tag && x.tag.startsWith('ev-' + e.id)); if (seg) { hit = { d, id: e.id, p: p.id, seg }; break; } } }
+      if (hit) {
+        const keep = SHIP.device.appts.slice(), t = shipNow(); setShipNow((hit.d - 1) * 1440 + 360);
+        const id = socialInvite({ trad: hit.id, day: hit.d, from: hit.p }), a = SHIP.device.appts.find(x => x.id === id);
+        o.invite = { trad: hit.id, day: hit.d, ok: !!a && a.status === 'asked' && a.kind === 'invite' && a.by === hit.p && a.where === hit.seg.placeId && a.at === (hit.d - 1) * 1440 + hit.seg.from,
+                     again: socialInvite({ trad: hit.id, day: hit.d, from: hit.p }), none: socialInvite({ trad: 'nothing', day: hit.d, from: hit.p }) };
+        SHIP.device.appts.length = 0; SHIP.device.appts.push(...keep); setShipNow(t);
+      }
+      return o;
+    })()""")
+    print('First week:', json.dumps(w))
+    if not w['open'] or w['shut'] != [False, False, False, False] or w['tue'] != [True, True, False, False]: fail('week-1 gates wrong')
+    if w['mem'] != [100, True, False] or w['mentor'][:2] != ['torres-zeke', 'you']: fail(f"intro memories or mentor wrong: {w['mem']} {w['mentor']}")
+    if w['week1'] != 'week1' or w['done'] != [False, True, True] or not w['saved']: fail('week-1 lines or the end of week 1 wrong')
+    if not w.get('invite') or not w['invite']['ok'] or w['invite']['again'] is not None or w['invite']['none'] is not None: fail(f"socialInvite wrong: {w.get('invite')}")
+
     print('errors', g.errors[:5])
     if g.errors: ok = False
     print('SOCIAL CHECK OK' if ok else 'SOCIAL CHECK FAILED')

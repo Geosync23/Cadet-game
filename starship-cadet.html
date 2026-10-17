@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.36.22
+   STARSHIP CADET: CSV Wren                           build 0.36.23
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.36.22';                           // keep in step with the header's build line
+const GAME_BUILD = '0.36.23';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -13919,14 +13919,14 @@ function socSave() {
   const rel = {}; for (const id in SHIP.rel) { const r = SHIP.rel[id]; rel[id] = [r.pts, r.met, r.lastTalk, r.known.slice(), r.chatDay || 0, r.mealDay || 0, r.workDay || 0, r.favDay || 0, r.seekDay || 0, r.arc || 0, r.arcDay || 0, r.showDay || 0]; }
   let bin = ''; for (const x of new Uint8Array(SHIP.aff.buffer)) bin += String.fromCharCode(x);
   return { ids: socHash(SOC.ids), hour: SHIP.social.hour, aff: btoa(bin), news: NEWS.map(x => ({ ...x, k: bitsOf(SHIP.knows[x.id] || []) })),
-           heard: SHIP.heard.slice(-60), fault: { ...SHIP.social.fault }, pairs: { ...SHIP.social.pairs }, mail: SHIP.social.mail.map(x => ({ ...x })), feuds: JSON.parse(JSON.stringify(SHIP.social.feuds)), courtesy: { ...SHIP.social.courtesy }, cues: SHIP.social.cues.map(x => ({ ...x })), rel, ...memSave() };
+           heard: SHIP.heard.slice(-60), fault: { ...SHIP.social.fault }, pairs: { ...SHIP.social.pairs }, mail: SHIP.social.mail.map(x => ({ ...x })), feuds: JSON.parse(JSON.stringify(SHIP.social.feuds)), courtesy: { ...SHIP.social.courtesy }, cues: SHIP.social.cues.map(x => ({ ...x })), mentor: SHIP.social.mentor || null, rel, ...memSave() };
 }
 function socLoad(s) {
   try {
     if (!s || s.ids !== socHash(SOC.ids) || !Number.isInteger(s.hour) || typeof s.aff !== 'string') return false;
     const bin = atob(s.aff), a = new Int8Array(SOC.n * (SOC.n - 1) / 2); if (bin.length !== a.length) return false;
     for (let i = 0; i < a.length; i++) a[i] = bin.charCodeAt(i) << 24 >> 24;
-    SHIP.aff = a; SHIP.social = { hour: s.hour, fault: { ...(s.fault || {}) }, pairs: { ...(s.pairs || {}) }, mail: Array.isArray(s.mail) ? s.mail.filter(x => x && isFinite(x.at) && typeof x.body === 'string') : [], feuds: s.feuds && typeof s.feuds === 'object' ? JSON.parse(JSON.stringify(s.feuds)) : {}, courtesy: s.courtesy && typeof s.courtesy === 'object' ? { ...s.courtesy } : {}, cues: Array.isArray(s.cues) ? s.cues.filter(x => x && typeof x.key === 'string' && isFinite(x.until)).map(x => ({ ...x })) : [] };
+    SHIP.aff = a; SHIP.social = { hour: s.hour, fault: { ...(s.fault || {}) }, pairs: { ...(s.pairs || {}) }, mail: Array.isArray(s.mail) ? s.mail.filter(x => x && isFinite(x.at) && typeof x.body === 'string') : [], feuds: s.feuds && typeof s.feuds === 'object' ? JSON.parse(JSON.stringify(s.feuds)) : {}, courtesy: s.courtesy && typeof s.courtesy === 'object' ? { ...s.courtesy } : {}, cues: Array.isArray(s.cues) ? s.cues.filter(x => x && typeof x.key === 'string' && isFinite(x.until)).map(x => ({ ...x })) : [], mentor: typeof s.mentor === 'string' && SOC.idx.has(s.mentor) ? s.mentor : null };
     NEWS.length = 0; SHIP.knows = {};
     for (const x of Array.isArray(s.news) ? s.news : []) if (x && typeof x.id === 'string' && Array.isArray(x.lines) && typeof x.k === 'string') {
       const { k, ...it } = x; NEWS.push(it); SHIP.knows[it.id] = setOf(k);
@@ -14025,6 +14025,7 @@ const affBand = (a, b) => { const v = affinity(a, b); return v <= -40 ? 'rival' 
 function bondOf(id, kind) {
   socInit(); id = socId(id);
   if (kind === 'couple') { const p = SOC.idx.has(id) && SOC.crew[SOC.idx.get(id)]; if (p && p.partner && SOC.idx.has(p.partner)) return p.partner; }
+  if (kind === 'mentee' && SHIP.social.mentor && SHIP.social.mentor === id) return 'you';   // your escort mentors you (A4)
   const B = SHIP.social.bonds || {}, want = kind === 'mentee' ? 'mentor' : kind;
   for (const k in B) {                                   // 'a:b' -> { kind, since }; for 'mentor', a is the mentor and b the mentee
     const [a, b] = k.split(':'); if (B[k].kind !== want) continue;
@@ -14069,7 +14070,7 @@ function socNote(kind, d) {
 if (typeof onSim === 'function') for (const k in SOC_CUE_OF) onSim(k, d => socNote(k, d));
 const SOC_THING = { fav: 'the favour', 'fav.lamp': 'the lamp', fixed: 'the repair', came: 'coming along', gift: 'the present', visit: 'the visit', bday: 'my birthday' };
 function socialFill(p, name, ctx = {}) {
-  socInit(); const tier = relTier(p.id), nameOf = id => id && SOC.idx.has(id) ? shortName(SOC.crew[SOC.idx.get(id)]) : null;
+  socInit(); const tier = relTier(p.id), nameOf = id => id === 'you' ? chatName() : id && SOC.idx.has(id) ? shortName(SOC.crew[SOC.idx.get(id)]) : null;
   if (name === 'me') return chatName();
   if (name === 'nick') {
     const n = typeof VOICE !== 'undefined' && VOICE[p.id] && VOICE[p.id].words && VOICE[p.id].words.nick, v = Array.isArray(n) ? n[tier] : null;
@@ -14160,6 +14161,51 @@ function memNote(kind, d) {
   if (kind === 'choice' && d.script) for (const id of [].concat(d.who || [])) memAdd(id, 'meeting.' + d.script + '.' + (d.k ?? 0));
 }
 if (typeof onSim === 'function') for (const k of ['repair', 'tradition', 'choice']) onSim(k, d => { socInit(); memNote(k, d || {}); });
+
+// ---- the first week (0.36.23, A4; plans/social-deep-plan.md Part 7) ----
+// Onboarding (section 21) runs the arrival and week 1 and sets flags in section 13's store (flag / flagSet). While its
+// intro is running (SHIP.intro, not done or skipped, and no week1.done flag), social features wait for their day:
+// chat cards always; favours from week1.d2 (Tuesday), friends waving you over from week1.d3, invitations from week1.d5,
+// moments and bunk visits once week1.done (socGate('d2' | 'd3' | 'd5' | 'done'), for 20c too). With no intro (older
+// saves, test URLs, skip-intro's end state) everything is open. introStep notes on the bus give core memories (the
+// arrival and the shadow shift with the escort, the dinner with Calder and the escort), and the escort becomes your
+// mentor (SHIP.social.mentor, saved; bondOf(escort, 'mentee') -> 'you'): week-1 lines first on their card, and an
+// evening check-in, a wave from them each evening of week 1.
+// socialInvite({ trad | kind, day, from, at, where, len }) -> an appointment id, or null: an invitation you accept or
+// decline on the device (Appointments, status 'asked', kind 'invite'). For a tradition, it's where and when the host's
+// plan has them there that day (their 'ev-<trad>' block), so the host keeps their own day; else at / where as given.
+const INTRO_MEM = { arrival: 'intro.arrival', dinner: 'intro.dinner', shadowShift: 'intro.shadowShift' };
+const introOn = () => !!(SHIP.intro && typeof SHIP.intro === 'object' && !SHIP.intro.done && !SHIP.intro.skipped) && !(typeof flag === 'function' && flag('week1.done'));
+const socGate = stage => !introOn() || (typeof flag === 'function' && !!flag(stage === 'done' ? 'week1.done' : 'week1.' + stage));
+function escortId() {
+  socInit(); const e = SHIP.intro && SHIP.intro.escort; if (e && SOC.idx.has(e)) return e;
+  if (typeof flag === 'function') for (const p of SOC.crew) if (flag('escort.' + p.id)) return p.id;
+  return null;
+}
+function introNote(d) {                                  // the bus's introStep { step, who }
+  socInit(); const e = escortId(); if (e && !SHIP.social.mentor) SHIP.social.mentor = e;
+  const key = INTRO_MEM[d.step]; if (!key) return;
+  for (const id of [].concat(d.who || [], d.step === 'dinner' && SOC.idx.has('calder') ? ['calder'] : [], e ? [e] : [])) memAdd(id, key, { cls: 'core' });
+}
+if (typeof onSim === 'function') onSim('introStep', d => introNote(d || {}));
+function socialInvite(o = {}) {
+  socInit(); const from = o.from, p = SOC.idx.has(from) ? SOC.crew[SOC.idx.get(from)] : null;
+  if (!p || !SHIP.device || !Array.isArray(SHIP.device.appts)) return null;
+  const day = o.day || SHIP.time.day, D = SHIP.device;
+  let at = isFinite(o.at) ? (o.at < 1440 ? (day - 1) * 1440 + o.at : o.at) : null, where = o.where || null, len = o.len || 60;
+  if (o.trad) {
+    const seg = planDay(p, day).find(s => s.placeId && s.tag && (s.tag === 'ev-' + o.trad || s.tag.startsWith('ev-' + o.trad + '-')));
+    if (!seg) return null;                               // they aren't going after all
+    at = (day - 1) * 1440 + seg.from; where = seg.placeId; len = Math.min(60, seg.to - seg.from);
+  }
+  if (!isFinite(at) || !where || at < shipNow()) return null;
+  if (D.appts.some(a => a.by === from && a.kind === 'invite' && Math.abs(a.at - at) < 60 && a.status !== 'no')) return null;   // asked already
+  const id = D.appts.reduce((m, x) => Math.max(m, x.id || 0), 0) + 1;
+  D.appts.push({ id, with: [from], at, len, where, kind: 'invite', status: 'asked', by: from, trad: o.trad || null, inv: o.kind || (o.trad ? 'trad' : 'personal') });
+  if (typeof simNote === 'function') simNote('invite', { from, id, trad: o.trad || null });
+  if (typeof deviceNotify === 'function') deviceNotify({ app: 'appointments', text: shortName(p) + ' has invited you' + (o.trad ? ' along' : '') + '.', urgent: false });
+  return id;
+}
 
 // ---- news ----
 function newsAdd({ id, about = null, lines, weight = .6, seed = [], born = Math.floor(shipNow()), kind = 'gossip', event = null, life = 4 }) {
@@ -14386,8 +14432,9 @@ function socialSeek(m) {
   if (CHAT || sleeping) return;
   const day = SHIP.time.day;
   for (const a of DECK_CREW) {
-    const p = a.p; if (!SOC.idx.has(p.id) || relTier(p.id) < 3 || !near(a)) continue;
-    const r = SHIP.rel[p.id]; if (r.seekDay === day || schedU(p.seed, m, 633) >= SEEK_ODDS) continue;
+    const p = a.p, mentor = introOn() && p.id === SHIP.social.mentor && SHIP.time.min >= 1080 && SHIP.time.min < 1290;   // week 1: the escort checks in each evening
+    if (!SOC.idx.has(p.id) || !near(a) || !(mentor || (relTier(p.id) >= 3 && socGate('d3')))) continue;
+    const r = relGet(p.id); if (r.seekDay === day || schedU(p.seed, m, 633) >= (mentor ? .25 : SEEK_ODDS)) continue;
     const w = whereIs(p, shipNow()); if (!w || !(w.act === 'leisure' || w.act === 'off') || w.tag === 'tea') continue;
     r.seekDay = day;
     const el = seekEl(), U = k => schedU(p.seed, m, k);
@@ -14602,7 +14649,8 @@ function chatLine(p, t = shipNow(), peek = false) {    // peek: only looking ahe
   const missed = apptMissedBy(p, t); if (missed) return { text: apptRemark(p, missed, t), kind: 'missed', appt: missed.id, say: true };
   if (p.id === 'holt' && typeof eventMod === 'function' && (() => { try { return eventMod('effect', 'guests', t); } catch (e) { return null; } })())
     return { text: ['Veyli on my ship. Don\'t expect me to smile about it.', 'I\'m keeping an eye on our guests. Someone has to.', 'The Captain wants courtesy. I\'m being courteous. This is my courteous face.'][Math.floor(schedU(p.seed, Math.floor(t / 60), 643) * 3)], kind: 'guests', say: true };
-  const mo = typeof momentReady === 'function' ? momentReady(p, t) : null;   // a moment is ready (20c): its hint, and Sit with them
+  if (introOn()) { const l = eng('week1', { escort: p.id === SHIP.social.mentor }); if (l) return l; }   // onboarding's week-1 lines
+  const mo = typeof momentReady === 'function' && socGate('done') ? momentReady(p, t) : null;   // a moment is ready (20c): its hint, and Sit with them
   if (mo) { const hint = typeof MOMENTS !== 'undefined' && MOMENTS[mo] && MOMENTS[mo].hint, l = hint ? null : eng('hint');
     return { text: hint || (l ? l.text : 'Got a minute? Properly, I mean.'), kind: 'hint', moment: mo, say: true, line: l ? l.line : undefined }; }
   const beat = arcBeat(p, t); if (beat) return { text: typeof beat.say === 'function' ? beat.say(p) : beat.say, kind: 'story', say: true };
@@ -14645,6 +14693,7 @@ const FAVOUR_THINGS = ['datapad', 'mug', 'jacket', 'notebook', 'glasses case', '
 function favourOf(p) {
   if (typeof favourPost !== 'function' || typeof favoursOf !== 'function') return null;
   const open = favoursOf(p.id)[0]; if (open) return open;
+  if (!socGate('d2')) return null;                       // the first week: favours from Tuesday
   const r = relGet(p.id), d = SHIP.time.day, U = k => schedU(p.seed, d, k), tier = relTier(p.id);
   if (r.favDay === d || U(624) >= FAVOUR_ODDS[tier]) return null;
   const S = schedData(), left = planDay(p, d - 1).filter(s => s.placeId && SOCIAL_TYPES.has(s.type) && s.type !== 'servery-queue').map(s => S.byId.get(s.placeId)).filter(pl => pl && DECKS[pl.deck]);
