@@ -454,6 +454,28 @@ with sync_playwright() as pw:
         if gd['on'] != [True, True, 1, 'you', True] or not gd['stepMem'] or gd['q'] != ['newcomer', 3] or gd['buttons'] != 3: fail(f'guiding a newcomer does not start right: {gd}')
         if gd['answered'] != [1, True, True] or not gd['handBtn'] or not gd['saved'] or gd['settled'] != ['settled', False, True, True] or gd['back'] != ['handed', False, False, True]: fail(f'guiding a newcomer wrong: {gd}')
 
+    # 17. your own room (0.36.66, A11): Come over on a friend's card once promoted, an appointment at your quarters, the host line when kept
+    hs = g.ev(r"""(() => {
+      const keep = JSON.stringify(socSave()), t0 = shipNow(), F = SHIP.flags || (SHIP.flags = {}), kp = F.promoted, D = SHIP.device;
+      if (!D || !Array.isArray(D.appts) || typeof playerBed !== 'function') return { skip: true };
+      const n0 = D.appts.length, o = {}, dr = CHAT_SKIN.draw; let got = []; CHAT_SKIN.draw = (el, v) => { got = v.buttons.map(b => b.label); };
+      setShipNow(9 * 1440 + 720); const tomas = SOC.crew[SOC.idx.get('tomas')], r = relGet('tomas'); r.pts = 70; r.tier = 3; r.hostDay = 0;
+      const card = () => { chatClose(); CHAT = { p: tomas, line: { text: '', say: true }, ask: false, fav: null, at: shipNow(), reach: 99 }; chatShow(); return got.slice(); };
+      o.off = !card().includes('Come over');
+      flagSet('promoted', true); o.on = card().includes('Come over');
+      chatDo('host'); o.said = CHAT && CHAT.line.text; o.again = card().includes('Asked over');
+      const a = D.appts.slice(n0).find(x => x.host), bed = playerBed(), L = DECKS[deckOf(bed)].places, room = L.find(q => q.id === bed).room;
+      o.appt = a ? [a.status, a.with[0], L.find(q => q.id === a.where).room === room, a.where !== bed || !L.some(q => q.room === room && q.id !== bed), a.at % 1440 >= 1170] : null;
+      if (a) { const k0 = repInit().ship.kindness; a.status = 'kept'; chatClose(); socialAppts(); o.kept = [!!mem('tomas', 'hosted'), CHAT && CHAT.line.kind, repInit().ship.kindness > k0, !!CHAT && CHAT.visit]; }
+      const s = JSON.stringify(socSave()); socLoad(JSON.parse(s)); o.saved = SHIP.rel.tomas.hostDay === 10;
+      chatClose(); VISIT = null; CHAT_SKIN.draw = dr; D.appts.length = n0; if (kp === undefined) delete F.promoted; else F.promoted = kp;
+      setShipNow(t0); socLoad(JSON.parse(keep)); return o; })()""")
+    print('Your own room:', json.dumps(hs))
+    if not hs.get('skip'):
+        if not hs['off'] or not hs['on'] or not hs['again'] or not hs['saved']: fail(f'Come over button wrong: {hs}')
+        if hs['appt'] and (hs['appt'][:2] != ['yes', 'tomas'] or not all(hs['appt'][2:]) or hs.get('kept') != [True, 'host', True, True]): fail(f'Come over appointment or visit wrong: {hs}')
+        if not hs['appt'] and 'Not tonight' not in (hs['said'] or ''): fail(f'Come over made no appointment: {hs}')
+
     print('errors', g.errors[:5])
     if g.errors: ok = False
     print('SOCIAL CHECK OK' if ok else 'SOCIAL CHECK FAILED')
