@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.48.38
+   STARSHIP CADET: CSV Wren                           build 0.48.39
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.48.38';                           // keep in step with the header's build line
+const GAME_BUILD = '0.48.39';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -13893,6 +13893,9 @@ const VOICE = {
         {"text": "Good day. Good. That's twice. Write it down.", "id": "19stgru", "tone": "funny", "mood": "high", "not": {"week1": "true"}},
         {"text": "Nominal. Like the air. That's a good report.", "id": "8fcoii", "mood": "ok", "not": {"week1": "true"}},
         {"text": "Tired. I'll listen to the fans for a bit. Then sleep. It works.", "id": "j6vzjq", "mood": "low", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "Ten days. The board's handed over. Every job. Every note.", "id": "1wdynqz", "leaving": "soon"},
+        {"text": "Packing. One bag. The mug comes. It's a mug.", "id": "1vdta06", "tone": "funny", "leaving": "soon"},
+        {"text": "Walked the bay twice tonight. Listening. The fans are all right. Good.", "id": "17tdfbh", "leaving": "soon", "tier": [3, 4]},
       ],
       "gift": [
         {"text": "For me. Hm. It's going on the good shelf. Next to the box.", "id": "xdduub", "tone": "warm", "gift": "loved"},
@@ -13900,6 +13903,11 @@ const VOICE = {
         {"text": "Noted. Thank you. I'll find a place for it.", "id": "7pyu5r", "gift": "polite"},
         {"text": "A book. I'll read it on my day off. Cover to cover. Then again, slower.", "id": "dohw4s", "gift": "book"},
         {"text": "You made this. The joins are clean. I looked. Thank you.", "id": "9guqqe", "tone": "warm", "gift": "made"},
+      ],
+      "goodbye": [
+        {"text": "I'm leaving the Wren. The board's in good hands. Do the jobs on it.", "id": "13gwgzb", "leaving": "you", "tier": [1, 4]},
+        {"text": "You do clean work, {me}. Keep doing it. That's all.", "id": "3hb11z", "leaving": "you", "tier": [2, 4]},
+        {"text": "I keep a list of every tech I've certified. You'll be on it one day. Note's written.", "id": "il2der", "tone": "warm", "leaving": "you", "tier": [3, 4]},
       ],
       "greet": [
         {"text": "Cadet. The board's behind you. Urgent jobs first. Then the rest.", "id": "1o6n02m", "tier": [0, 0]},
@@ -13942,6 +13950,11 @@ const VOICE = {
         {"text": "A pump that's coughed for a week. Then doesn't. That's the whole job, really.", "id": "1f876rg", "tier": [2, 4]},
         {"text": "A whole deck where every fan sounds right. I stand there. Two minutes. Sometimes three.", "id": "gxj2gp", "tier": [1, 4], "not": {"week1": "true"}},
         {"text": "Somebody I certified fixing a thing I never taught them. Quietly. That one.", "id": "1rsotb7", "tone": "warm", "tier": [2, 4], "not": {"week1": "true"}},
+      ],
+      "letter": [
+        {"text": "New ship. Their fans are loud and nobody's noticed. I've noticed. Keep the Wren's board short.", "id": "14kzz4g"},
+        {"text": "The board here is longer than ours. I've started on it. Tell Torres to be patient. He won't be.", "id": "44b1cj", "tone": "funny"},
+        {"text": "Nobody thanks the air. I've been thinking about the Wren's, though. Still working, I expect. That's you lot. Carry on.", "id": "1m2akp6", "tone": "warm", "tier": [3, 4]},
       ],
       "life": [
         {"text": "People ask what's on my mug. Nothing. It's a mug.", "id": "1dktqzj", "tone": "funny", "tier": [1, 4]},
@@ -15704,12 +15717,21 @@ const VOICE = {
         {"text": "Good day. Mensah made me laugh twice. I'll deny the second.", "id": "1eekz19", "tone": "funny", "mood": "high", "not": {"week1": "true"}},
         {"text": "Fine. Doors shut. People fed. Fine is a good day.", "id": "1l9jcga", "mood": "ok", "not": {"week1": "true"}},
         {"text": "Tired. Long night. Walked an extra deck. Helps. Usually.", "id": "191h2n0", "mood": "low", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "Ten days. Walked every deck this morning. The long way. Twice.", "id": "174nuzn", "leaving": "soon"},
+        {"text": "Packing. Boots, books, a tin of mints. Mensah keeps the rest. The rest is jokes.", "id": "3axh39", "tone": "funny", "leaving": "soon"},
+        {"text": "Hm. I'll miss the rounds here. The doors. The people behind them. Don't repeat that.", "id": "1k30b36", "tone": "warm", "leaving": "soon", "tier": [3, 4]},
       ],
       "gift": [
         {"text": "For me. Hm. That's. Hm. Thank you, {nick}. Really.", "id": "18x2nc", "tone": "warm", "gift": "loved"},
         {"text": "Hm. Useful. Thank you.", "id": "1qxfl79", "gift": "liked"},
         {"text": "Thank you. I'll find a shelf.", "id": "11cjw62", "gift": "polite"},
         {"text": "Tea. Hm. I know someone who'll want to try that. Don't ask who.", "id": "18kupkz", "tone": "funny", "beat": "holt.5", "gift": "tea"},
+      ],
+      "goodbye": [
+        {"text": "I'm off, cadet. Mind the hatches. Mind each other.", "id": "1m1nprf", "leaving": "you", "tier": [1, 4]},
+        {"text": "You did the job properly. Every time I checked. I checked a lot. Hm.", "id": "gog5m8", "tone": "funny", "leaving": "you", "tier": [2, 4]},
+        {"text": "{nick}. Adequate. More than. That's all I'm saying. It's a lot, from me.", "id": "1vd9gia", "tone": "warm", "leaving": "you", "tier": [3, 4]},
+        {"text": "Kid. Look after Mensah. He'll say he's fine. He needs someone to tell jokes to.", "id": "12xqtwy", "tone": "warm", "leaving": "you", "tier": [4, 4]},
       ],
       "greet": [
         {"text": "{hi}. Nearest suit locker. Don't look. Point.", "id": "2sxan5", "tier": [0, 0]},
@@ -15757,6 +15779,11 @@ const VOICE = {
         {"text": "Rounds done before anyone's up. Every door, every deck. Then tea. Hm.", "id": "uzil07", "tier": [3, 4]},
         {"text": "The first cup of something hot after rounds. Whatever it is. Not tea. Hm. Tea.", "id": "1tdo4by", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
         {"text": "A junior doing the right thing without being told. I don't say it. I notice it.", "id": "fjggay", "tone": "warm", "tier": [2, 4], "not": {"week1": "true"}},
+      ],
+      "letter": [
+        {"text": "New ship. Walked every deck. Took four hours. The long way. Tell Mensah one of his jokes landed here. Once.", "id": "16pzq3u", "tone": "funny"},
+        {"text": "They keep the doors wrong here. I've said. Politely. Hm. Hello to the Wren. Eat something.", "id": "149d97g"},
+        {"text": "Still check under my bunk. Old habit. Then I think of the Wren and sleep fine. Hm. Write, if you like.", "id": "1jppdah", "tier": [3, 4]},
       ],
       "life": [
         {"text": "Border patrol, before the Wren. Long nights. This ship's easier. Mostly.", "id": "1w53fbl", "tier": [1, 4]},
@@ -16620,6 +16647,9 @@ const VOICE = {
         {"text": "Good day. The beans are up. The stitches are even. Somebody said hello first.", "id": "1ubt4jh", "tone": "warm", "mood": "high", "not": {"week1": "true"}},
         {"text": "Fine. Normal. Normal's good. I like normal.", "id": "1wivl2e", "mood": "ok", "not": {"week1": "true"}},
         {"text": "Bit quiet. I've re-sorted the wool. By colour, then by weight. Sorry. It helps.", "id": "82dt94", "mood": "low", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "Packing. Very neatly. Ten days. Sorry. I don't know why I said sorry.", "id": "18qsrbw", "tone": "funny", "leaving": "soon"},
+        {"text": "I re-sorted the spanner wall. One last time. Don't tell anyone.", "id": "59w00i", "leaving": "soon"},
+        {"text": "I'll miss the garden. And the scrubbers. Is that strange? It's a bit strange.", "id": "18srcfk", "leaving": "soon", "tier": [3, 4]},
       ],
       "gift": [
         {"text": "Oh. Oh. That's. Thank you. Really. I'm keeping it forever. Sorry. That's a lot.", "id": "m5ysrp", "tone": "warm", "gift": "loved"},
@@ -16627,6 +16657,11 @@ const VOICE = {
         {"text": "Oh. Thank you. That's. Yes. Thank you.", "id": "vtguur", "gift": "polite"},
         {"text": "A plant. Oh. I'll put it by the beans. They'll get on.", "id": "7r492e", "tone": "warm", "gift": "plant"},
         {"text": "You made this? It's very neat. I checked the joins. Sorry. I always do.", "id": "1wjdvda", "tone": "warm", "gift": "made"},
+      ],
+      "goodbye": [
+        {"text": "I'm going to a new ship. Um. Mind the seals. That's... that's it. Bye.", "id": "tm2iii", "leaving": "you", "tier": [1, 4]},
+        {"text": "Nine and a half minutes, for a scrubber. You can beat it. I think you can.", "id": "1g09nst", "tone": "warm", "leaving": "you", "tier": [2, 4]},
+        {"text": "Thank you. For being patient, when I didn't talk much. I talk more now. A bit.", "id": "zcdfir", "tone": "warm", "leaving": "you", "tier": [3, 4]},
       ],
       "greet": [
         {"text": "Oh. Hi. Scrubber jobs are on the left of the board. If you were wondering.", "id": "14ishus", "tier": [0, 0]},
@@ -16668,6 +16703,11 @@ const VOICE = {
         {"text": "Two colours, one scarf. I've only done it once. You know which one.", "id": "1n9t0bc", "tone": "warm", "mem": "moment.kovac.fourplease"},
         {"text": "The last stitch of a scarf. When it's even. I always sit very still for a minute.", "id": "1ecwx78", "tier": [1, 4], "not": {"week1": "true"}},
         {"text": "Somebody wearing a thing I knitted. Without knowing I'm looking. That's the best.", "id": "5qu6bz", "tone": "warm", "tier": [2, 4], "not": {"week1": "true"}},
+      ],
+      "letter": [
+        {"text": "New ship. Their scrubbers are a different model. Eleven minutes. I'll get it down. Hello to the bay.", "id": "hkxbe3"},
+        {"text": "I found their garden. It's small. I've planted beans. Tell Cruz they're coming up. Mind the seals.", "id": "z9gej6"},
+        {"text": "The lift here is very quiet. I still take the ladder. Mostly. Some days I don't. I thought you'd like to know.", "id": "13azvpm", "tone": "warm", "beat": "kovac.2", "tier": [3, 4]},
       ],
       "life": [
         {"text": "I don't take the lift much. The ladder's good exercise. Very good exercise.", "id": "cjpe0", "tone": "funny", "tier": [1, 4]},
@@ -17421,12 +17461,20 @@ const VOICE = {
         {"text": "A good day. I've asked two questions and got two honest answers. Rare luck.", "id": "1ci2rzi", "mood": "high", "not": {"week1": "true"}},
         {"text": "Quite well, thank you. The ship's well. I'm well. In that order, usually.", "id": "4vpfy0", "mood": "ok", "not": {"week1": "true"}},
         {"text": "Tired. I'll play longer on Thursday. It helps more than sleep, sometimes.", "id": "1ycnfuy", "mood": "low", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "Ten days. I've said goodbye to every portrait in the gallery. Even mine. Especially mine.", "id": "g1p44n", "tone": "funny", "leaving": "soon"},
+        {"text": "The ready room's packed. Mind the step, whoever comes next. Everyone trips on it.", "id": "ekid03", "leaving": "soon"},
+        {"text": "I keep playing the piano late. Not only on Thursdays now. You'll forgive me.", "id": "1obcfez", "leaving": "soon", "tier": [3, 4]},
       ],
       "gift": [
         {"text": "Oh. Thank you, {me}. That's going in the ready room. The Admiral approves.", "id": "1oasggg", "tone": "warm", "gift": "loved"},
         {"text": "How kind. Thank you. Truly.", "id": "xn4inx", "gift": "liked"},
         {"text": "Thank you, {me}. That's thoughtful.", "id": "wc6080", "gift": "polite"},
         {"text": "Music. Oh, that's lovely. I'll try it on Thursday. Badly, then less badly.", "id": "vxun21", "tone": "warm", "gift": "music"},
+      ],
+      "goodbye": [
+        {"text": "I'm leaving the Wren, cadet. I remember your answer. I always will.", "id": "p5tdcz", "leaving": "you", "tier": [1, 4]},
+        {"text": "You're on page forty of my little book. It comes with me. Look after her, {me}.", "id": "lwf54o", "tone": "warm", "leaving": "you", "tier": [2, 4]},
+        {"text": "The Wren's in good hands. Some of them are yours. Thank you. Mind the step.", "id": "1ccltm9", "tone": "warm", "leaving": "you", "tier": [3, 4]},
       ],
       "greet": [
         {"text": "{hi}. You're our new cadet. One question, then: what's the best thing aboard so far?", "id": "fz50br", "tier": [0, 0]},
@@ -17475,6 +17523,11 @@ const VOICE = {
         {"text": "A junior's first good answer. You can watch them surprise themselves.", "id": "1skxwh6", "tier": [3, 4]},
         {"text": "The last note on a Thursday, with the ship asleep. Then the walk back. Both the best part.", "id": "4g1ee9", "tier": [1, 4], "not": {"week1": "true"}},
         {"text": "A junior asking me a question back. I collect those too.", "id": "1385vsv", "tone": "warm", "tier": [2, 4], "not": {"week1": "true"}},
+      ],
+      "letter": [
+        {"text": "My new ready room has no step. I keep tripping on nothing. Say hello to the gallery for me.", "id": "1hcqojy", "tone": "funny"},
+        {"text": "I read page forty again tonight. The word I underlined still fits. I hope the Wren's well. Mind the step.", "id": "1kith28"},
+        {"text": "Someone here asked me what the Admiral is. I told them he outranks us all. Some things travel. Hello to everyone.", "id": "1iqnbi7", "tone": "funny", "tier": [3, 4]},
       ],
       "life": [
         {"text": "I learnt the piano as a girl, and took it up again on my first command. It helps.", "id": "d1cc7j", "tier": [1, 4]},
@@ -21233,6 +21286,14 @@ const VOICE = {
         {"text": "Good mood. Singing mood. Knitting-fast mood. You've been warned.", "id": "ozch25", "tone": "funny", "mood": "high", "not": {"week1": "true"}},
         {"text": "Fine. Steady. A cup of tea and I'll be better than fine.", "id": "dgsx1k", "mood": "ok", "not": {"week1": "true"}},
         {"text": "Bit quiet today. Checked a valve three times. Fine all three. That's how I know.", "id": "2p2n6z", "mood": "low", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "Packing! Ten days. I said goodbye to coil three. It sulked. Course it did.", "id": "pewokk", "tone": "funny", "leaving": "soon"},
+        {"text": "New ship, new coils. I'll have to learn all their moods. Right, onward. Sort of.", "id": "yswsk9", "leaving": "soon"},
+        {"text": "Bit strange, going. I've knitted three rows and unpicked them. That's how you can tell.", "id": "udp5sc", "leaving": "soon", "tier": [3, 4]},
+      ],
+      "goodbye": [
+        {"text": "Off to a new ship. Talk to coil three for me. It likes being asked how it is.", "id": "r2ens7", "leaving": "you", "tier": [1, 4]},
+        {"text": "Your scarf's not finished. It's never finished. Take it anyway. Keep it growing.", "id": "h5j71u", "tone": "warm", "leaving": "you", "mem": "moment.torres.scarf", "tier": [2, 4]},
+        {"text": "You'll be brilliant, {nick}. You already are. I just got to see it first.", "id": "qo0cy6", "tone": "warm", "leaving": "you", "tier": [3, 4]},
       ],
       "greet": [
         {"text": "{hi}. You'll be the new hand. Zeke Torres, engines. Ask me anything.", "id": "ux824s", "tier": [0, 0]},
@@ -21271,6 +21332,11 @@ const VOICE = {
         {"text": "A whole corridor singing the wrong words together. Nothing better. Honestly.", "id": "1mrqurg", "tone": "warm", "tier": [1, 4], "not": {"week1": "true"}},
         {"text": "First cup of tea after shift. The one where you sit down. That one.", "id": "17i2ehe", "tier": [1, 4], "not": {"week1": "true"}},
         {"text": "Finishing a row without dropping a stitch. Happens once a week. I cheer every time.", "id": "wugii9", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+      ],
+      "letter": [
+        {"text": "New engine room. Their coils don't sulk, they grumble. Different thing altogether. Tell Reyes. Tell coil three I said hello.", "id": "23ag2k", "tone": "funny"},
+        {"text": "Found a record cabinet here. I don't know a single song in it. Not one! I'm learning the words. Wrongly, Takahashi would say.", "id": "1tlqkrk", "tone": "funny"},
+        {"text": "Started a scarf for someone here. Nowhere near as long as yours. How's the bay? Has Calder said \"Fine\" to you yet? She will.", "id": "7l077e", "tone": "warm", "mem": "moment.torres.scarf", "tier": [3, 4]},
       ],
       "life": [
         {"text": "I know the words to every song in the record cabinet. So do four other people. Wrongly.", "id": "p17gpr", "tone": "funny", "tier": [1, 4]},
@@ -22692,12 +22758,20 @@ const VOICE = {
         {"text": "Excellent day. Board clear, record on, pudding, and a fourth thing. I forget. Allow it.", "id": "1kk0f83", "tone": "funny", "mood": "high", "not": {"week1": "true"}},
         {"text": "Correct. Steady. Nothing to report. That's a good report.", "id": "1ogjjv2", "mood": "ok", "not": {"week1": "true"}},
         {"text": "Quieter today. I ran an extra kilometre. It didn't help. It usually does.", "id": "zzlmej", "mood": "low", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "Ten days. Three lists to hand on: the treadmill board, the record list, the rota.", "id": "sor5nr", "leaving": "soon"},
+        {"text": "Regulation eleven, section two, does not cover this. I have checked. Twice.", "id": "td3fbu", "tone": "funny", "leaving": "soon"},
+        {"text": "I have left the bridge on time every day this week. Partly advice. Partly goodbyes.", "id": "16q4v3i", "leaving": "soon", "tier": [3, 4]},
       ],
       "gift": [
         {"text": "For me? That's. Thank you. It's going on my desk. Square to the edge.", "id": "1yt4jwq", "tone": "warm", "gift": "loved"},
         {"text": "Thank you, {nick}. Most kind. Correctly wrapped, too.", "id": "1na68ig", "tone": "funny", "gift": "liked"},
         {"text": "Thank you. Noted. Kindly.", "id": "14pw46d", "gift": "polite"},
         {"text": "Music. It's going on the waiting list. At the top. I've jumped my own queue.", "id": "ulm6pw", "tone": "funny", "gift": "music"},
+      ],
+      "goodbye": [
+        {"text": "I'm transferring, Cadet. Carry on as you are. That is an order. A kind one.", "id": "1kz0ahh", "leaving": "you", "tier": [1, 4]},
+        {"text": "You are on my list of juniors I would recommend. In ink. Carry on, {nick}.", "id": "17gh94p", "tone": "warm", "leaving": "you", "tier": [2, 4]},
+        {"text": "Three things, {nick}. Eat. Rest. Read regulation nine. It is the one about rest.", "id": "1tsj11t", "tone": "funny", "leaving": "you", "tier": [3, 4]},
       ],
       "greet": [
         {"text": "{hi}. Uniform straight, on time, and you found the right deck. Three for three.", "id": "1afgnbe", "tier": [0, 0]},
@@ -22745,6 +22819,11 @@ const VOICE = {
         {"text": "The first five minutes of a shift. Everyone in place. Then it gets interesting.", "id": "1kc03ev", "tier": [3, 4]},
         {"text": "A fresh sheet of paper on a new leaderboard. All those empty lines. Splendid.", "id": "144ybhw", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
         {"text": "A record that starts exactly when you lower the needle. Small things. Correct things.", "id": "t6zjro", "tier": [2, 4], "not": {"week1": "true"}},
+      ],
+      "letter": [
+        {"text": "New ship. Their treadmill board was empty. I have corrected this. I am also on it. Carry on.", "id": "55sg8f", "tone": "funny"},
+        {"text": "Please tell whoever is next on the record list that it moves up one. Fairly. In order. Thank you.", "id": "1mbgazk"},
+        {"text": "There was no rowing board here. I have taped one up. Tell Lindqvist the Wren's is his to chase. Tell him I said so. Carry on.", "id": "146jrn9", "tier": [3, 4]},
       ],
       "life": [
         {"text": "I keep the waiting list for the good records. You're ninth. Waiting builds character.", "id": "wsteyd", "tone": "funny", "tier": [1, 4]},
