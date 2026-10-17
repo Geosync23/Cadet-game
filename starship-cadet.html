@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.26.26
+   STARSHIP CADET: CSV Wren                           build 0.26.27
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7053,11 +7053,12 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.26.26';                           // keep in step with the header's build line
+const GAME_BUILD = '0.26.27';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
 //   ship days as a cue (simNotes(kind, since) -> those notes, newest last), saved with the game (save.notes).
+//   data.t, when given, is when it happened (section 17 runs hours late, in a time jump); otherwise now.
 //   Kinds (pillar4-plan, appendix): repair {who, machine, kind, deck}, favour {who, from}, tradition {id, day, came, you},
 //   gift {to, item}, apptKept / apptMissed {id, with}, introStep {step, who}, eventPhase {id, phase}, choice {script, k,
 //   who}, jobAbandoned {machine, dept}, harvest, lateMeal, job {id, step}, need {key, low}; social: tierUp, moment, bond, invite.
@@ -7073,14 +7074,16 @@ function onSim(kind, fn) {
   return () => { const l = m.get(kind), i = l ? l.indexOf(fn) : -1; if (i >= 0) l.splice(i, 1); };   // to stop listening
 }
 function simNote(kind, data) {
-  const t = typeof SHIP !== 'undefined' && SHIP.time ? (SHIP.time.day - 1) * 1440 + SHIP.time.min : 0;
+  const now = typeof SHIP !== 'undefined' && SHIP.time ? (SHIP.time.day - 1) * 1440 + SHIP.time.min : 0;
+  const t = data && typeof data === 'object' && isFinite(data.t) ? data.t : now;   // a sender may say when it happened (section 17's hours, run late)
   let note;                                              // a plain copy, so it always saves: an object that won't (a walker, a cycle) drops the note
   try { note = Object.assign(JSON.parse(JSON.stringify(data && typeof data === 'object' ? data : {})), { kind, t }); }
   catch (e) { if (typeof DEBUG !== 'undefined' && DEBUG) console.warn('simNote ' + kind + ': data is not plain JSON; note dropped'); return null; }
   if (typeof SHIP !== 'undefined') {
     const ring = SHIP.notes || (SHIP.notes = []);
-    ring.push(note);
-    while (ring.length > SIM_RING || (ring.length && ring[0].t < t - SIM_CUE)) ring.shift();
+    let i = ring.length; while (i > 0 && ring[i - 1].t > t) i--;   // kept in time order (an earlier hour's note goes before later ones)
+    ring.splice(i, 0, note);
+    while (ring.length > SIM_RING || (ring.length && ring[0].t < Math.max(now, t) - SIM_CUE)) ring.shift();
   }
   if (SIM_ON && SIM_DEPTH < 8) {                          // a listener may send notes of its own, a few deep at most
     SIM_DEPTH++;
@@ -8343,8 +8346,9 @@ function introPlan(p, d) {
   return beats.filter(x => x && x.where && x.where !== 'seek' && x.until > x.at).map(x => {
     const w = x.where, rooms = (DECKS[w.deck] && DECKS[w.deck].rooms) || {};
     const inRoom = q => q.deck === w.deck && (q.room === w.room || (rooms[q.room] && rooms[q.room].name === w.room)) && q.type !== 'bed' && !S.owner.has(q.id) && !S.deskOf(q.id) && !q.machine;
-    const cand = S.places.filter(inRoom).sort(nat), dist = q => Math.hypot(q.at[0] - w.tile[0], q.at[1] - w.tile[1]);
-    const pl = w.tile ? cand.filter(q => q.type !== 'event').sort((a, b) => dist(a) - dist(b))[0] : cand[0];   // a tile: the place nearest it (a seat by Calder's table)
+    const cand = S.places.filter(inRoom).sort(nat), dist = q => w.tile ? Math.hypot(q.at[0] - w.tile[0], q.at[1] - w.tile[1]) : 0;
+    const pl = w.placeId && S.byId.get(w.placeId) ? S.byId.get(w.placeId)   // a named place (Calder's seat across from yours)
+      : w.tile ? cand.filter(q => q.type !== 'event').sort((a, b) => dist(a) - dist(b))[0] : cand[0];   // a tile: the place nearest it
     return { from: x.at, to: x.until, deck: w.deck, placeId: pl ? pl.id : null, tag: 'intro-' + x.id };
   });
 }
@@ -11750,7 +11754,9 @@ const CART_RUNS = new Map(), CART_PENDING = [];         // food runs set by cart
 // ship notes from section 17 (simNote, section 13's bus) wait here and go out once the hours have run or your action is
 // done (simFlush), never from inside jobsHour: a listener may read the jobs or the schedules
 const SIM_Q = [];
-const simLater = (kind, d) => { if (typeof simNote === 'function') SIM_Q.push([kind, d]); };
+// each stamped with when it happened: the hour being run (SIM_AT, set by machinesNow's loop), else now (your own actions)
+let SIM_AT = null;
+const simLater = (kind, d) => { if (typeof simNote === 'function') SIM_Q.push([kind, { ...(d || {}), t: d && isFinite(d.t) ? d.t : SIM_AT != null ? SIM_AT : shipNow() }]); };
 function simFlush() { while (SIM_Q.length) { const [k, d] = SIM_Q.shift(); simNote(k, d); } }
 let MACH_HOUR = null, MACH_SEEN = -1, MACH_REV = 0;     // the first ship hour not yet run; the last time asked; a counter of changes
 const machFresh = m => Math.round((70 + 30 * schedU(m.seed, 0, 1)) * 10) / 10;   // a new game: 70-100, a few already worn
@@ -11773,6 +11779,7 @@ function machinesNow() {
   for (const m of list) if (!SHIP.machines[m.id]) { const c = machFresh(m); SHIP.machines[m.id] = { cond: c, state: machineState(c), lastService: null }; }
   if (now >= MACH_HOUR) MACH_REV++;
   for (; MACH_HOUR <= now; MACH_HOUR++) {
+    SIM_AT = MACH_HOUR * 60;                             // notes from this hour say so, however late they go out
     if (JOBS_ON) jobsHour(MACH_HOUR);
     for (const m of list) {
       const s = SHIP.machines[m.id];
@@ -11782,6 +11789,7 @@ function machinesNow() {
     machRecord(MACH_HOUR);
     for (const k in MACH_EXTRA) delete MACH_EXTRA[k];
   }
+  SIM_AT = null;
   if (CART_PENDING.length) cartPost();
   simFlush();
   return SHIP.machines;
