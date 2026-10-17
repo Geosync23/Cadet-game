@@ -7,7 +7,8 @@ title: Your bunk
 from: Zeke Torres
 gist: Torres showed you Bunk 1 and your locker, and handed you your device.
 == lines
-torres-zeke: Bunk 1. Home. Top bunk at the back is yours.   [gesture]
+torres-zeke > you: Bunk 1. This is you. This is where you sleep.   [gesture]
+torres-zeke: Top bunk at the back is yours.
 torres-zeke > you: Your locker's under it. Bag in there. Go on, it's yours now.
 tomas: Oh! You're here! Hi. I'm Tomas. Watch. Bottom bunk, by the door.
 tomas > you: I only got here last Sunday. So I'm not the newest any more. Sorry. I'm very pleased about that.

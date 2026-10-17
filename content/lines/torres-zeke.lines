@@ -216,7 +216,7 @@
 // ---- Day 0: the arrival tour (head writer 3, 0.48.22; cut to five stops in 0.48.54 after the user played 0.60.3).
 // Each stop plays walk.<stop>.1, .2, ... IN ORDER (about 5 s apart) when you and Torres are near it; one flag key
 // per line, so lineFor returns exactly that line. Order (0.48.55, the user's note): shuttle greeting, then
-// works as walk-and-talk to the lift, lift, wing (your bunk: the first stop), servery. The other points are quiet. Core = what a newcomer needs: who he is and where
+// works as walk-and-talk to the lift, lift, wing, then Bunk 1 (introBunk: the first stop), servery. The other points are quiet. Core = what a newcomer needs: who he is and where
 // you're going, the Operations deck and the Chief, how the ship runs, your room, the mess. Everything else is in
 // walk.extra.<point>.<n>: heard only if you tap him to ask at that point. walk.call.<n>: his "this way" when you
 // lag. walk.more.<n>: linger lines about himself. No scarf (beat 1), no father, no list. introDinner tells how a
@@ -241,11 +241,9 @@
   - Six decks. Bridge flies her, Works keeps her going.
 ? flag:walk.lift.2
   - Four, please. Go on, the panel's all yours.
-// stop: wing (the bunk, Room One: his first stop after the greeting)
+// walk-and-talk: wing (on the way to Bunk 1; the bunk stop itself is the introBunk meeting)
 ? flag:walk.wing.1
-  - Room One. This is you. This is where you sleep.   #warm
-? flag:walk.wing.2
-  - Locker's yours. Washrooms are just down the hall.
+  - Deck 4. Quarters. Your bunk's just along here.
 // stop: servery
 ? flag:walk.servery.1
   - Tray first, then take what smells best. I'll find a table.
