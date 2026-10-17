@@ -26,7 +26,7 @@ in section 20, the meetings in section 18) are canon too: never contradict a bea
 - **Other ships, by name:** the **Halcyon** (another survey ship; where transfers often go). Ask before adding more.
 - **Places people come from** (only these, for now): **Port Halloran** (a port city; rain; Brennan's old restaurant),
   **Hesper Dock** (a big station-port: market stalls, boats, rain), **Kesh**, **Lisk** (a place: "letters home to Lisk"), **Valo**, **Coriel**,
-  **Marra Station**, **New Aberdeen**, and Tomas's **farm moon** (unnamed: "the farm moon", a sky that is always the same
+  **Marra Station** (rebuilt twice; Kim collects its old maps), **New Aberdeen**, **the Ostrander colonies**, **the Tevan belt**, and Tomas's **farm moon** (unnamed: "the farm moon", a sky that is always the same
   grey). Pell's home town and the others not listed are unnamed until a writer needs one: ask.
 - **Time:** a ship day is 18 waking hours of play; 06:00 breakfast, 08:00 shift, dinner from 18:00. The day shift runs
   08:00-16:30; the night shift is its own world (Bunk 8, the inner cabins). Tea break at 10:30 in Works.
@@ -60,6 +60,7 @@ in section 20, the meetings in section 18) are canon too: never contradict a bea
 - **The record cabinet** is in the Deck 4 music room. **The grand piano** is in the music room too; the Captain plays it
   late on Thursdays.
 - **The rowing leaderboard** in the gym was taped up by Vance; he has since started a treadmill one (roster).
+- **The garden's big tree:** the hydroponics garden has one big tree. Asha Amadi climbs it when nobody is looking.
 - **Tiles** is the ship's tile game (a playable one comes later in Pillar 4): boards in the junior common room and the
   bow lounge. Rina is undefeated in the junior common room, and keeps count.
 
