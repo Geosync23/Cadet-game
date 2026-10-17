@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.38.9
+   STARSHIP CADET: CSV Wren                           build 0.38.10
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -1216,6 +1216,13 @@ const KIT = {
     cyl(.18, .18, .06, M.tealFab, 0, .46, 0, g, 18); cyl(.03, .03, .42, M.metal, 0, .22, 0, g, 10); cyl(.16, .18, .02, M.slateDark, 0, .01, 0, g, 18);
     return { w: .36, d: .36, noBlock: true };
   },
+  tilesTable(g) {                                        // the bow lounge's Tiles station: a square table, a board always set up, two stools (Pillar 4, seat 8)
+    box(.72, .04, .72, LNG.wood, 0, .7, 0, g); cyl(.05, .06, .68, M.slateDark, 0, .34, 0, g, 12); cyl(.26, .28, .03, M.slateDark, 0, .015, 0, g, 20);
+    const b = new THREE.Mesh(TILES.geo, TILES.mat); b.scale.set(.44, 1, .44); b.position.set(0, .722, 0); b.receiveShadow = true; g.add(b);
+    box(.16, .05, .08, LNG.wood, .26, .747, -.28, g);    // the tray of spare tiles
+    for (const sd of [-1, 1]) { cyl(.17, .17, .06, LNG.rust, sd * .6, .46, 0, g, 16); cyl(.025, .025, .43, LNG.brass, sd * .6, .215, 0, g, 8); cyl(.14, .16, .02, M.slateDark, sd * .6, .01, 0, g, 16); }
+    return { w: .72, d: .72 };
+  },
   cardTable(g) {
     box(.9, .05, .9, std('#2f5e4f', .9), 0, .72, 0, g);
     box(.94, .04, .94, M.wood, 0, .69, 0, g);
@@ -1624,6 +1631,23 @@ const KIT = {
     }
     glow('#ff7ae0', .8, 0, 1.2, .1, g, .3);
     return { w: 1.8, d: .6, tall: true };
+  },
+  seedlingStand(g, o = {}) {                             // three timber steps of pots, a seedling in each but o.yours (Pillar 4, seat 8: Sowing morning)
+    for (let t = 0; t < 3; t++) {                        // front step lowest; plank tops at .28, .52, .76
+      const y = .26 + t * .24, z = .17 - t * .17;
+      box(.62, .04, .2, GD.bed, 0, y, z, g);
+      for (const x of [-.31, .31]) box(.03, y + .01, .18, GD.post, x, (y + .01) / 2, z, g);   // the stepped sides, under the plank's ends
+      for (let k = 0; k < 4; k++) {
+        const i = t * 4 + k, x = -.225 + k * .15, top = y + .02;
+        cyl(.055, .042, .1, GD.pot, x, top + .05, z, g, 10); cyl(.05, .05, .012, GD.soil, x, top + .1, z, g, 10);   // the soil heaped just over the rim
+        if (i === o.yours) continue;
+        const s = .7 + ((i * 7 + 3) % 5) * .12;          // sown the same morning, grown a little differently
+        leaf(GD.leaves[(i + t) % 5], x - .018 * s, top + .13 + .02 * s, z, .03 * s, .045 * s, .03 * s, g);
+        leaf(GD.leaves[(i + 2) % 5], x + .02 * s, top + .14 + .025 * s, z + .01, .028 * s, .04 * s, .028 * s, g);
+        if (s > 1) leaf(GD.leaves[(i + 4) % 5], x, top + .17 + .03 * s, z - .01, .024 * s, .035 * s, .024 * s, g);
+      }
+    }
+    return { w: .64, d: .58 };
   },
   trellis(g, o = {}) {                                   // a climbing frame lost under beans and vines
     for (const x of [-.75, .75]) box(.05, 2.0, .05, GD.post, x, 1.0, 0, g);
@@ -2492,6 +2516,24 @@ const GD = {
   pad: std('#3f8a4a', .6), fish: std('#f08a2e', .4), pot: std('#b4553f', .8), post: std('#5a4636', .7),
   wing: ['#f2c94c', '#e86a9a', '#7ac7e8'].map(c => std(c, .6, 0, { side: THREE.DoubleSide })),
 };
+// a Tiles board (Pillar 4, seat 8): a game half played on a 6 x 6 grid, painted on one canvas. tilesBoardGeo() is a unit
+// box 2 cm thick standing on y 0, its top showing the board and its sides the frame, so a board is one material and one
+// draw call (and Tiles night's boards one InstancedMesh). Made at load, no R().
+function tilesBoardGeo() {
+  const g = new THREE.BoxGeometry(1, .02, 1), uv = g.attributes.uv; g.translate(0, .01, 0);
+  for (let v = 0; v < uv.count; v++) if (v < 8 || v >= 12) uv.setXY(v, .02, .02);   // every face but the top (+y) takes the frame's colour
+  return g;
+}
+const TILES = { tex: tex(128, 128, (c, w, h) => {
+  c.fillStyle = '#6b4a2e'; c.fillRect(0, 0, w, h); c.fillStyle = '#24453c'; c.fillRect(8, 8, w - 16, h - 16);
+  c.strokeStyle = '#3d6b5e'; c.lineWidth = 1;
+  for (let k = 0; k <= 6; k++) { c.beginPath(); c.moveTo(10 + k * 18, 10); c.lineTo(10 + k * 18, 118); c.stroke(); c.beginPath(); c.moveTo(10, 10 + k * 18); c.lineTo(118, 10 + k * 18); c.stroke(); }
+  for (const [i, j, f] of [[1, 1, '#e9c46a'], [2, 1, '#e9c46a'], [2, 2, '#5fd6c6'], [3, 2, '#f1ece2'], [3, 3, '#e07a5f'], [4, 3, '#5fd6c6'], [1, 4, '#f1ece2'], [2, 4, '#e07a5f'], [4, 4, '#e9c46a']]) {
+    c.fillStyle = f; c.fillRect(12 + i * 18, 12 + j * 18, 14, 14);
+    c.fillStyle = '#2b2b2b'; c.beginPath(); c.arc(19 + i * 18, 19 + j * 18, 2.5, 0, Math.PI * 2); c.fill();   // a star on each tile
+  }
+}) };
+TILES.mat = new THREE.MeshStandardMaterial({ map: TILES.tex, roughness: .7 }); TILES.geo = tilesBoardGeo();
 const MED = {
   white: std('#eef1ef', .45), frame: std('#b9c2c6', .3, .6), mattress: std('#dfe9ec', .8), sheet: std('#c9e2e6', .85),
   curtain: std('#9fcfd6', .8, 0, { transparent: true, opacity: .8, side: THREE.DoubleSide }), cross: std('#c8463c', .5),
@@ -5089,6 +5131,9 @@ DECKS[3] = {
     // ---- the galley's root beds and third bean bed (C9, 0.38.7), grown by section 8b's garden view; last, since raisedBed and trellis draw R() ----
     [[8.1, 8.9, 'e'], [8.1, 13.15, 'e'], [5.7, 17.45, 'n']].forEach(([x, z, b], k) => place('G', 'raisedBed', x, z, b, { crop: 'roots', live: 'roots', it: k ? undefined : IT('Root beds', 'Carrots, beets and turnips, a month from seed to the galley. Chef Brennan pulls one up every few days to check, and pretends she\'s only weeding.') }));
     place('G', 'trellis', .3, 14.8, 'w', { live: 'beans', it: IT('Bean trellis', 'A second frame of runner beans against the stern windows. The galley wanted more beans. The galley always wants more beans.') });
+    // ---- Pillar 4, seat 8 (0.38.10): the seedling stand in the garden's north-east corner (Sowing morning) and the bow lounge's Tiles station ----
+    place('G', 'seedlingStand', 9.63, .42, 'n', { yours: DECKS[3].seedlings.yours, it: IT('Seedlings', 'A little stepped stand of pots by the grow racks: one seedling for everyone who came to the last Sowing morning. One pot is only soil, waiting.') });
+    place('L', 'tilesTable', 3.5, 18.5, 'n', { it: IT('Tiles', 'A Tiles board, always set up, a tray of spare tiles and two stools. Sit down and someone usually sits down opposite.') });
   },
 
 };
@@ -6864,6 +6909,30 @@ DECKS[4].keepsakes = { room: 'a', bed: '4-B1-4', place: '4-B1-4-keepsake', slots
 DECKS[5].mugRack = { room: 't', yours: [21.8, 1.44, 2.83] };
 const CALM_TYPES = ['lounge-seat', 'common-room', 'garden', 'bench', 'mess-seat', 'music'];
 const placeCalm = p => !!p && (p.calm !== undefined ? !!p.calm : CALM_TYPES.includes(p.type) && p.pose === 'sit' && !p.machine);
+// 0.38.10: seedlings: the garden's seedling stand (kit seedlingStand, north-east corner by the grow racks); `pots` are the
+// twelve pots' soil tops (x and z in tiles, y in metres), front step first, west to east; `yours` is the empty pot, where
+// Sowing morning's trace seedlingYours (DECK_DRESS) plants your seedling; `place` is where you stand to plant and tend it.
+// tiles: the bow lounge's Tiles station (kit tilesTable; places `station`, west stool then east) and its board's centre;
+// `boards` are Tiles night's boards, one on every lounge table ([x, y (the table top), z, turn, size]: the three booths,
+// the two high tables, the coffee table, the two tea tables), drawn by DECK_DRESS.tilesNight. tilesSeats(k) -> the
+// lounge seats within 1.5 m of board k and nearer it than any other board, nearest first (k = 'station' for the station's own two).
+// The new places are type 'event' with an event tag ('sowing', 'tiles'), so nobody uses them day to day (crew plans unchanged).
+DECKS[3].places.push(
+  { id: '3-seedlings-1', type: 'event', event: 'sowing', at: [11, 1], xy: [11.6, 1.2], face: 'n', pose: 'stand', anim: 'water', room: 'G' },   // in front of the stand
+  { id: '3-tiles-1', type: 'event', event: 'tiles', at: [43, 18], xy: [43.9, 18.5], face: 'e', pose: 'sit', anim: 'talk', y: .49, room: 'L' },   // the station's stools
+  { id: '3-tiles-2', type: 'event', event: 'tiles', at: [45, 18], xy: [45.1, 18.5], face: 'w', pose: 'sit', anim: 'talk', y: .49, room: 'L' },
+);
+DECKS[3].seedlings = { room: 'G', place: '3-seedlings-1', yours: 1, pots: [0, 1, 2].flatMap(t => [0, 1, 2, 3].map(k => [+(11.405 + k * .15).toFixed(3), +(.386 + t * .24).toFixed(3), +(.59 - t * .17).toFixed(2)])) };
+DECKS[3].tiles = { room: 'L', station: ['3-tiles-1', '3-tiles-2'], board: [44.5, .722, 18.5],
+  boards: [[42.25, .765, 14.52, 0, .26], [42.25, .765, 16.52, 0, .26], [42.25, .765, 18.52, 0, .26], [45.7, 1.08, 2.84, 0, .26], [44.587, 1.08, 1.93, .8, .26],
+    [49.4, .405, 10.895, 0, .26], [47.6, .445, 6.27, 0, .24], [47.6, .445, 16.27, 0, .24]] };
+function tilesSeats(k) {
+  const T3 = DECKS[3].tiles, B = T3.boards, d = (p, b) => Math.hypot(p.xy[0] - b[0], p.xy[1] - b[2]);
+  if (k === 'station') return T3.station.slice();
+  if (!B[k]) return [];
+  return DECKS[3].places.filter(p => p.type === 'lounge-seat' && p.xy && d(p, B[k]) < 1.5 && B.every(b => d(p, b) >= d(p, B[k])))
+    .sort((a, b) => d(a, B[k]) - d(b, B[k]) || (a.id < b.id ? -1 : 1)).map(p => p.id);
+}
 function visitSpots(id) {
   for (const n of Object.keys(DECKS)) {
     const v = (DECKS[n].visits || {})[id]; if (!v) continue;
@@ -6965,6 +7034,34 @@ const DECK_DRESS = {
       for (const f of [.45, 1]) { const b = new THREE.Mesh(new THREE.SphereGeometry(f === 1 ? .03 : .02, 8, 6), dressMat(C[(k + 1) % 3])); b.position.set(x, y - len * f, z); s.add(b); }
     }
     return { t: 'Veyli cord sculpture', x: 'A gift from the Veyli delegation: knotted cords in three colours, hung from a brass ring. Envoy Saruth says each knot is a promise, and that it would be rude to count them.', wall: ['L', 'w', 17.6], y: 1.9, w: .7, h: 1.0 };
+  } },
+  // Pillar 4, seat 8 (0.38.10). seedlingYours: a lasting trace from your first Sowing morning (SHIP.traces gets
+  // { id: 'seedlingYours', day }: the day you planted it). It grows by how long ago that was, looked at whenever Deck 3 is built.
+  seedlingYours: { deck: 3, what: 'your seedling in the garden\'s seedling stand, with your name on a stake', make(g, o) {
+    const S3 = DECKS[3].seedlings, r = ROOM_BOX.G, [px, py, pz] = S3.pots[S3.yours], x = px - r.i0, z = pz - r.j0, s = dressAt(g, 'G', 'floor', 0, 0);
+    const today = typeof shipNow === 'function' ? Math.floor(shipNow() / 1440) + 1 : 1, age = Math.max(0, today - (o.day || today));
+    const st = age < 7 ? 0 : age < 28 ? 1 : age < 91 ? 2 : 3, h = [.03, .07, .13, .22][st], n = [2, 4, 6, 8][st], k = [.6, .85, 1.1, 1.4][st];
+    const stem = new THREE.Mesh(new THREE.CylinderGeometry(.004 * k, .005 * k, h, 5), dressMat('#4c8a57')); stem.position.set(x, py + h / 2, z); s.add(stem);
+    for (let i = 0; i < n; i++) {                        // leaves in pairs up the stem, each pair turned a quarter
+      const a = i * Math.PI / 2 + (i % 2) * Math.PI, y = py + h * (.35 + .65 * Math.floor(i / 2) / Math.max(1, n / 2 - 1)), l = new THREE.Mesh(new THREE.SphereGeometry(1, 6, 4), dressMat(i % 2 ? '#6ba86a' : '#4c8a57'));
+      l.scale.set(.022 * k, .009 * k, .012 * k); l.rotation.y = a; l.position.set(x + Math.cos(a) * .02 * k, Math.min(y, py + h), z - Math.sin(a) * .02 * k); s.add(l);
+    }
+    dressBox(s, .006, .12, .006, '#a07a4f', x + .03, py + .04, z + .028);       // the stake, pushed into the soil
+    dressBox(s, .05, .028, .005, '#f4efe2', x + .03, py + .1, z + .034);        // and its tag, your name on it
+    const say = ['Two leaves, barely up. You check on it more often than it needs.', 'Four true leaves now, leaning toward the grow lights like everything else in here.',
+      'A proper little plant. Someone waters it on the days you forget.', 'It has outgrown its pot twice, and the gardeners keep finding it a bigger one.'][st];
+    return { t: 'Your seedling', x: 'Planted on your first Sowing morning, your name on the stake. ' + say, floor: ['G', x, z], y: py + .08, w: .2, h: .25, d: .2 };
+  } },
+  // tilesNight: Tuesday's Tiles night (section 18 lists it while the night is on): a board on every lounge table, one
+  // InstancedMesh (one draw call, no shadow), from DECKS[3].tiles.boards
+  tilesNight: { deck: 3, what: 'Tiles night: a Tiles board on every table in the bow lounge', make(g) {
+    const B = DECKS[3].tiles.boards, r = ROOM_BOX.L, s = dressAt(g, 'L', 'floor', 0, 0), m = new THREE.Matrix4(), q = new THREE.Quaternion(), up = new THREE.Vector3(0, 1, 0);
+    const mat = new THREE.MeshStandardMaterial({ map: TILES.tex.clone(), roughness: .7 }); mat.map.needsUpdate = true;   // its own copies, which dressHide disposes
+    const im = new THREE.InstancedMesh(tilesBoardGeo(), mat, B.length); im.userData.noMerge = true; im.frustumCulled = false;
+    B.forEach(([x, y, z, turn, w], k) => im.setMatrixAt(k, m.compose(new THREE.Vector3(x - r.i0, y + .002, z - r.j0), q.setFromAxisAngle(up, turn), new THREE.Vector3(w, 1, w))));
+    s.add(im);
+    const [cx, cy, cz] = B[5];                           // the tap: the coffee table's board
+    return { t: 'Tiles night', x: 'A Tiles board on every table tonight, and a game going on most of them. Rina is defending her title, and saying so.', floor: ['L', cx - r.i0, cz - r.j0], y: cy + .05, w: .3, h: .1, d: .3 };
   } },
   partyLounge: { deck: 3, what: 'party decorations in the bow lounge: bunting, balloons and a banner', make(g, o) {
     const s = dressAt(g, 'L', 'floor', 0, 0), C = ['#c45a3f', '#e8c06a', '#5fd6c6'], y = 2.2;
@@ -7080,7 +7177,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.38.9';                           // keep in step with the header's build line
+const GAME_BUILD = '0.38.10';                          // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
