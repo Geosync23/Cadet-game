@@ -1,0 +1,63 @@
+@mail this-week-aboard
+// The Sunday "This week aboard" Mail (Pillar 4's voice budget; the seat 16 designer's, claude/trad-monthly).
+// Not a .trad file: plans/trad_parse.py and content_gen.py only read *.trad, so this file isn't baked yet. It's the
+// words and the rules; the traditions engineer decides how it reaches the game (a `== week` kind, a small block of its
+// own, or copied into section 18 by hand). Full design: plans/trad-notes-monthly.md, "This week aboard".
+//
+// When: every Sunday at 18:00 (the same hour as the evening-before Mail; that Sunday's own evening-before Mail for
+// Monday is still sent). Day 0, your arrival, is a Sunday: no digest then (the intro has its own welcome Mail); the
+// first one is day 7.
+// What: the seven days from Monday to Sunday, in order. A day with nothing is left out.
+//   - Listed in full (one == item line each): every tradition that isn't weekly (every two or four weeks, seasonal,
+//     yearly, life moments) and every birthday, plus any weekly one that the voice budget drops that week ("no quiz
+//     this Thursday": the == dropped line).
+//   - The weekly ones are one line (== weekly), not listed, unless it's your first digest (day 7), when they're listed
+//     in full so you learn the week's shape.
+// Places: the first `where` line's room name ("the bow lounge"), or for a pool: gym "the gym", garden "the garden",
+//   garden-tend "the garden", common-room "the junior common room", music "the music room", mess-seat "the mess",
+//   lounge-seat "the bow lounge", bench "the promenade". Deck 1 and 2 rooms add "Deck 1" / "Deck 2".
+// Placeholders: {weekday} {trad} {time} {place} {names} (a birthday's people) {season} {count} (traditions listed).
+//   One line per placeholder set; a line whose placeholder can't be filled is skipped (as for .trad texts).
+// Length: each line at most 90 characters; the whole Mail is longer than an ordinary one (a list), so it's exempt
+//   from the 200-character Mail limit.
+// Picking: one variant per section, seeded by the week number (the same week always reads the same).
+from: oduya
+subject: This week aboard
+
+== open
+- Here's the week ahead aboard the Wren.
+- The week ahead, all in one place. Mark the ones you like on your Calendar.
+- A new week aboard. Here's what's on.
+
+== season
+// the digest on the Sunday before a season's first Monday (days 91, 182, 273, 364, and so on each year)
+- {season} starts this week. New season, new seedlings.
+- A new season this week: {season}. The garden's been waiting.   #warm
+
+== day
+// a day heading, then its items
+- {weekday}
+
+== item
+- {trad}, {time}, {place}.
+
+== birthday
+- {names}'s birthday: cake in the mess, 20:15.
+
+== dropped
+// a weekly tradition the voice budget left out this week
+- {trad}: not this {weekday}, as something rarer is on.
+
+== weekly
+- And all the usual weekly ones: the Calendar has them.
+- Plus the usual weekly ones. They're on your Calendar.
+
+== quiet
+// a week with nothing but the weekly ones
+- A quiet week: just the usual weekly ones, on your Calendar.
+- Nothing special this week. Sometimes that's the best kind.   #warm
+
+== close
+- See you there. Matthias
+- Come to one, if you can. Matthias   #warm
+- That's the week. Rest well tonight. Matthias   #warm

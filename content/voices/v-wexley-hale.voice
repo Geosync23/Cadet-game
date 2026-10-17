@@ -1,0 +1,12 @@
+@voice v-wexley-hale
+// Writer 2, batch 8: a short card for a short-stay visitor (GUESTS in section 9). No pronouns (not in facts.md).
+tpl: earnest
+talk: Keen and practical; can't keep their hands still; asks what's broken before asking your name.
+hi: Morning | Hello
+bye: Off to find a job | See you in the bay
+yes: Happy to | Right away
+thanks: Thanks | Much appreciated
+wow: Oh, that's tidy
+sigh: Ah, well
+likes: made | tea
+nick: - | {me} | {me} | {me} | {me}

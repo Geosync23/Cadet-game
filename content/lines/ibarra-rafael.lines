@@ -1,0 +1,93 @@
+@crew ibarra-rafael
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Oh, hey. Ibarra, Survey, nights. If I forget your name, I'm sorry in advance.   #funny
+? tier>=acquaintance
+- Hello, {me}! Sweep's at midnight. Best part of my day. Well, night.
+- {me}! Have you seen my... no. Never mind. It'll turn up.   #funny
+? tier>=friend
+- {hi}, {me}. I saved you a biscuit. From the tin. Which doesn't exist.   #warm
+== feel
+? mood:high
+- Clean sweep! Every sensor sang. I could hug the array. I won't, it's cold.   #funny
+? mood:low
+- Long night. Lost my stylus, my mug and my train of thought. Found the mug.   #funny
+== near
+? habit:lounge-regular
+- Tiles later? I'll lose. I always lose. It's very relaxing.   #funny
+? act:breakfast
+- Breakfast before bed. That's the night shift for you. Toast tastes like midnight.
+== life
+? tier>=acquaintance
+- I lose at Tiles gracefully. It's the one thing I'm reliably good at.   #funny
+== joy
+? tier>=colleague
+- A sensor sweep, full and clean. All the dark out there, turned into numbers. Lovely.
+
+// ---- Writer 2, batch 3: to ~30 (greet by time and warmth, bye, near, invite, accept, decline, missed, birthday, cue, hint, about, life)
+== greet
+? tier>=acquaintance time:morning
+- Morning, {me}! Off to bed. Wait, I've left something. No. Yes. Bed.   #funny
+? tier>=acquaintance warmth:cold
+- {me}! There you are. Or here I am. One of us was lost. Probably me.   #funny
+
+== bye
+- {bye}! If you find a stylus, it's mine. Probably.   #funny
+
+== near
+? habit:runner
+- A run before the sweep. Clears the head. Then I fill it with numbers again.
+? habit:lounge-regular
+- Bow lounge, big windows. Somewhere out there is tonight's sweep. Can't wait.
+
+== invite
+- Tiles tonight? Come and watch me lose. It's very calming.   #funny
+
+== accept
+- Yes! Good. If I forget, remind me. I'll forget.   #funny
+- Love to. I'll bring something. I'll remember what on the way.   #funny
+
+== decline
+- Not tonight. Sweep at midnight. I need to find my stylus first. Another time?
+? weekday:thu|fri
+- Rest day. Sleep, lose at Tiles, sleep again. Saturday?   #funny
+
+== missed
+- You missed it? Or did I? Honestly, either. Next time.   #funny
+
+== birthday
+? birthday:you
+- Happy birthday! Here's a biscuit. From somewhere. Don't ask where.   #warm
+? birthday:me
+- My birthday. Pell found my tin and left a card in it. The cheek. Lovely cheek.   #funny
+
+== cue
+? cue:event.ionStorm.onset
+- Storm's in. The sensors will sulk all night. I'll sulk with them.   #funny
+
+== hint
+- {me}. Have you a minute later? I've something to say. If I don't forget it.
+
+== about
+? aff:mori:friend
+- Mori finds everything I lose. Every single thing. I'd be lost without her. Literally.   #funny
+
+== life
+? tier>=friend
+- I forget things. Not the sweeps, though. Never the sweeps. Funny, that.
+
+// ---- Writer 2, batch 6: bubbles (smalltalk, rumour), at most one in five about work. 60 characters.
+== smalltalk
+- Have you seen my... never mind.   #funny
+- Tiles. I'll lose. Relaxing.   #funny
+- Sweep tonight. Best bit.
+- Biscuit? What tin?   #funny
+? time:morning
+- Toast tastes like midnight.
+?
+
+== rumour
+- Wait, I had news. Yes. This.   #funny
+- Don't quote me. I'll forget I said it.   #funny

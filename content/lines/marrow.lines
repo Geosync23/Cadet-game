@@ -1,0 +1,273 @@
+@crew marrow
+// Writer (command), batch 1: the Captain, for the Voices sampler. Calm, curious, a quiet joke folded in; "we" for the ship.
+
+== greet
+? tier=stranger
+- {hi}. You're our new cadet. One question, then: what's the best thing aboard so far?
+- Cadet. Welcome aboard. If you ever reach the ready room, mind the step.   #funny
+? tier>=acquaintance
+- {hi}, {me}. How does the ship look from where you stand today?
+- {me}. Tell me one thing that went wrong this week. Nobody up top will.
+? tier>=acquaintance weekday:thu time:afternoon|evening
+- Thursday. I'll be at the piano later. If you hear a wrong note, it was on purpose.   #funny
+? tier>=friend
+- There you are. I was hoping someone would give me an honest answer today.   #warm
+
+== feel
+? mood:high
+- A good day. Everyone where they should be, and two people told me the truth.
+? mood:low
+- A long day up top. The Admiral was no help at all.   #funny
+
+== near
+? deck:2 tier>=acquaintance
+- Varga, Moro, Brenner. I say good morning to every one of them. Not to mine.   #funny
+? deck:2 time:evening|night
+- I come up to the observatory to see what you all see. It beats the bridge.
+
+== life
+? tier>=acquaintance
+- I learnt the piano as a girl, and took it up again on my first command. It helps.
+
+== joy
+? tier>=colleague
+- The piano, late on a Thursday, with the ship asleep around us. Best hour of the week.   #warm
+
+// ---- batch 3: greet by time, bye, invite, accept, decline, missed, birthday, hint, near by place ----
+
+== greet
+? tier=stranger time:morning
+- Good morning, cadet. Early start? Good. The ship's nicest before the rush.
+? tier=stranger time:evening
+- Evening, cadet. Off shift? Then you're off. Go and find the lounge.
+? tier=stranger deck:1
+- You found the bridge. Most new cadets take a week. Well done.
+? tier>=acquaintance time:morning
+- Morning, {me}. Did you sleep? Honest answer, please. It's a habit of mine.
+- {hi}, {me}. Breakfast first. Questions after. I've got one for you.
+? tier>=acquaintance time:afternoon
+- {hi}, {me}. Afternoon. The quiet hour on the bridge. I'm stretching my legs.
+? tier>=acquaintance time:evening
+- Evening, {me}. What did the ship teach you today?
+? tier>=acquaintance time:night
+- You're up late, {me}. So am I. Let's not tell the counsellor.   #funny
+? tier>=colleague
+- {me}. I asked Calder how you were getting on. She said "fine". That's high praise.   #funny
+? tier>=acquaintance warmth:cold
+- There you are, {me}. I wondered where you'd got to. The ship's big, but not that big.
+? tier>=friend time:evening
+- Ah, {me}. Walk with me a little? I like the corridors at this hour.   #warm
+
+== bye
+? tier=stranger
+- Thank you, cadet. Back to it.
+- Carry on. And mind the step, if you ever come up.
+? tier>=acquaintance
+- Thank you, {me}. That helped. It usually does.
+- Off you go. I'll have another question for you next time.
+? tier>=friend
+- Thank you for the honest answer. Rare, up top.   #warm
+
+== invite
+? trad:observatory-night tier>=acquaintance
+- Observatory night tonight. I'll be there, to see what the juniors see. Come?
+? weekday:thu tier>=colleague
+- I play late on Thursdays. Come and listen, if you like. Sit at the back. I won't look.
+? trad:today tier>=colleague
+- {trad} today. I'll look in. It'd be nice to see a familiar face there.
+
+== accept
+? tier>=acquaintance
+- Yes. I'd like that. Thank you for asking.
+- Of course. I'll make the time. It's the one thing I can always find.
+
+== decline
+? tier>=acquaintance
+- Not today, I'm afraid. The ship has me. Ask again?
+- I can't. Not tonight. But thank you. It means more than you'd think.
+
+== missed
+? tier>=acquaintance
+- I missed you yesterday. No harm done. The ship pulls us all about.
+? tier>=friend
+- You didn't come. That's all right. I'll save you a question for next time.
+
+== birthday
+? birthday:you tier>=acquaintance
+- Happy birthday, {me}. I asked the galley for something. Captain's privilege.   #warm
+? birthday:you tier=stranger
+- I'm told it's your birthday, cadet. Happy birthday. We're glad you're aboard.
+? birthday:me tier>=acquaintance
+- Yes, it's my birthday. No, I'm not saying which one. Thank you.   #funny
+
+== hint
+? tier>=friend
+- Have you a minute, {me}? Not an order. Just a minute.
+
+== near
+? deck:1 tier>=acquaintance
+- The bridge at shift change. Everyone pretending not to watch me. I pretend too.   #funny
+? deck:1
+- Mind the step in the ready room. Everyone trips on it. The Admiral finds it funny.   #funny
+? deck:4 time:evening|night
+- The music room. The piano's out of tune again. So am I, a little.   #funny
+? deck:3 act:meal
+- I eat in the mess when I can. You hear more here in ten minutes than in a week of reports.
+? place:calm tier>=colleague
+- Sit, sit. I'm not on duty for five minutes. I've checked.   #funny
+
+== feel
+? mood:high tier>=acquaintance
+- Two juniors asked me a question today. Normally I ask. It was lovely.   #warm
+? mood:ok
+- An ordinary day. On a ship, that's the best kind.
+
+== life
+? tier>=colleague
+- Every new junior gets one question from me. I remember every answer. Yours too.
+- I dislike my own portrait. They made me look patient. I was very cross that day.   #funny
+
+== joy
+? tier>=acquaintance
+- The ship at night. Seventy-five people asleep, and every one of them safe. Lovely.
+
+== chat
+? tier=stranger
+- My question: what would you change aboard, if you could? Think. I'll ask again.
+? tier>=acquaintance
+- What are the juniors saying about the senior crew? Kindly, please. Or honestly. Both.   #funny
+- Tell me something good from today. One thing. It doesn't have to be big.
+? tier>=colleague
+- I've a theory you'll be good at this. I'm usually right about theories. Not always.
+
+== smalltalk
+- The ship sounds well today.
+- Mind the step, everyone.   #funny
+- Thursday soon. The piano waits.
+
+== rumour
+- I hear things up top. Not everything. Most things.
+
+== near
+? deck:2 tier>=colleague
+- Captain Varga started the gallery. Varga would have hated my portrait too.   #funny
+? deck:3 place:calm
+- The lounge windows. Six years, and the view still stops me.
+
+// ---- Writer 2, batch 5: the Captain toward ~100. The Admiral is never explained. Her daughter's letters only from
+// beat:marrow.4; the academy post only from beat:marrow.5. Rest days Mon, Tue.
+== greet
+? tier>=acquaintance season:sowing
+- {hi}, {me}. Sowing. My favourite season. Everything aboard starts again.
+? tier>=acquaintance season:greening
+- {hi}, {me}. Greening. The garden's louder than the bridge. Quite right too.
+? tier>=acquaintance season:harvest
+- Harvest, {me}. Best thing you've eaten this week? I'm asking for the galley.
+? tier>=acquaintance season:lanterns
+- Lanterns. The ship looks like a birthday cake. I'm told that's the point.   #funny
+? rep:well
+- {me}. The bridge thinks well of you. They don't know I asked. Now you do.
+? you:kind
+- {me}. Someone told me you were kind to them. They didn't say who. I didn't ask.   #warm
+
+== feel
+? mood:low tier>=friend
+- A tired day. Nothing wrong. Just the kind of tired a ship makes.
+? mood:high tier>=friend
+- I got the left hand right in the slow bit. Thursday's going to be good.   #funny
+
+== near
+? habit:stargazer
+- The observatory. Nobody salutes in the dark. Not that anyone salutes. Regulation two.   #funny
+? place:musicroom
+- The piano. Don't look at the sheet music. I don't read it either.   #funny
+
+== life
+? tier>=colleague
+- Six years in command. I still learn something every week. Usually from a junior.
+? tier>=friend
+- My little book of answers. You're on page forty. Page forty's a good page.   #warm
+? beat:marrow.4
+- I write to my daughter every week. Ordinary news. She likes the ordinary news.
+? beat:marrow.5
+- Ask me again in a year, I said. I meant it. Ask me.
+
+== joy
+? tier>=friend
+- A junior's first good answer. You can watch them surprise themselves.
+
+== decline
+? weekday:mon|tue
+- My rest day. Scales, and not thinking about the ship. Wednesday?
+
+== callback
+? told:moment.marrow.stillthink
+- You still think the same. Good. So do I. I checked my book.   #warm
+? told:moment.marrow.changed
+- You changed your mind. That's the best answer there is. I've written it in.
+? told:moment.marrow.wroteitdown
+- Yes, I really wrote it down. Page forty. I've underlined a word. Guess which.   #funny
+? told:moment.marrow.cat
+- A ship's cat. A very quiet one. Added to the theories. Officially, no cats.   #funny
+? told:moment.marrow.whatever
+- "Whatever we need him to be." The Admiral was very pleased with that one.   #funny
+? told:moment.marrow.notknow
+- You'd rather not know. Wise. The Admiral agrees. He usually does.   #funny
+? told:moment.marrow.listened
+- Thank you for Thursday. For listening. It was a kindness. I don't forget those.   #warm
+? told:moment.marrow.shared
+- You eat alone some days too, you said. The mess is better full. Let's both remember.
+? told:moment.marrow.quiz
+- I came to quiz. Nobody was the Captain. We came third. I'm insufferable about it.   #funny
+? told:moment.marrow.ordinary
+- Ordinary news. I wrote to her about the soup. She wrote back. About the soup.   #warm
+? told:moment.marrow.notworried
+- "To know they're not worried." I put that in a letter. Not in those words.
+? told:moment.marrow.noreply
+- Not having to write back straight away. I've stopped waiting on the device. It helps.
+? told:moment.marrow.go
+- You told me to go. That took courage. I'm still thinking. Ask me again in a year.
+? told:moment.marrow.miss
+- "It's your life, not the ship's." True. Thank you for saying it plainly.   #warm
+? told:moment.marrow.readyroom
+- I asked the ready room. The Admiral said nothing. He usually doesn't.   #funny
+? told:came.observatory-night
+- You came to observatory night. You were looking the right way. Most don't.   #funny
+? told:fixed.
+- Calder showed me your repair in the log. She didn't say anything. She showed me.   #warm
+? told:bday
+- You knew my birthday. It's not on the board. Someone told you. I'll find out who.   #funny
+
+== gift
+? gift:loved
+- Oh. Thank you, {me}. That's going in the ready room. The Admiral approves.   #warm
+? gift:liked
+- How kind. Thank you. Truly.
+? gift:polite
+- Thank you, {me}. That's thoughtful.
+? gift:music
+- Music. Oh, that's lovely. I'll try it on Thursday. Badly, then less badly.   #warm
+
+== cue
+? cue:event.ionStorm.onset
+- Storm's here. Stay at your post. Stay calm. The Wren's been through worse.
+? cue:event.ionStorm.afterglow
+- Storm's passed. Everyone safe. That's all I ever want to say after.
+? cue:tradition.harvest
+- Harvest. The garden fed us all again. I never tire of that.
+
+== visit
+? tier>=friend
+- {me}. I was walking the junior wing. Captain's privilege. One question, then I'll go.
+
+== note
+? tier>=friend
+- Called by. You were out. My question can wait. It's a good one, though.
+- The Admiral sends his regards. I'd make nothing of it.   #funny
+
+== smalltalk
+- One question. Just one.   #funny
+- The Admiral's in a mood.   #funny
+
+== rumour
+- The Admiral heard this first.   #funny

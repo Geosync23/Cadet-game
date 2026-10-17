@@ -1,0 +1,39 @@
+@tradition book-circle
+// Book circle: every other Monday (week 1 of two: days 15, 29, 43...; from day 8, so not in your arrival week), the
+// junior common room on Deck 4. Bring a page you liked and read it aloud, or just listen. Matthias Oduya hosts.
+// Added (not in the plan's table): Monday evenings had only running club, and a quiet, cozy evening suits the ship.
+// The other Mondays of the four-week cycle have talent night (week 2) and the department cup (week 4).
+k: 462
+title: Book circle
+when: every 2 weeks monday week 1 from day 8
+at: 20:15-21:30
+min: 25
+jitter: 20
+where: 4 pool common-room
+where: 4 room Lift lobby: bench
+who: oduya always, quiet-corner 55%, window-seat 35%, common-room 35%, everyone 15%
+anim: read
+host: oduya
+from: oduya
+invite: host=oduya odds=25% line="Book circle tonight. Bring a page you liked, or just come and listen."
+
+== mail
+- Book circle tomorrow, {time}, the junior common room. Bring a page you liked and read it to us, or just come and listen. There will be cocoa.
+
+== ask
+- Book circle tonight. I've marked my favourite page.
+- I'm halfway through a very long book. Don't tell me the end.   #funny
+- Book circle's nice. Nobody minds if you only listen.   #warm
+
+== here
+- Read that bit again?
+- Oh, I like that.   #warm
+- Shh. This is the good part.
+
+== thanks
+- You curl up in the common room while someone reads aloud. For an hour, the ship is very quiet.   #warm
+
+== chatter
+- Someone read a recipe at book circle. We all got hungry.   #funny
+- We swap books after book circle. Mine came back with a pressed leaf in it.   #warm
+- Matthias reads like it's a bedtime story. Best sleep I've had all week.   #funny

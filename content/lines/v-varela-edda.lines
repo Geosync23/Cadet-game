@@ -1,0 +1,27 @@
+@crew v-varela-edda
+// Writer 2, batch 8: a short-stay visitor. Mostly not about work.
+
+== greet
+? tier=stranger
+- Hello hello. Edda. I sell kettles. Do you need a kettle? Everyone does.
+? tier>=acquaintance
+- {hi}, {me}. Two kettles sold already. The galley said no. Rudely.   #funny
+?
+
+== chat
+- My case is all samples. Spoons, mostly. And one very nice kettle.
+- I call home every night. Mum asks what I sold. Today: a smile.
+
+== near
+? habit:bar-regular
+- The bar's the best shop on any ship. Everyone's in a buying mood.   #funny
+? place:mess
+- Your galley has six kettles. I counted. They're very good kettles.
+?
+
+== bye
+- {bye}. If you want a kettle, I'll be by the window.
+
+== smalltalk
+- Lovely kettle, that. Not as good as mine.   #funny
+- Two sold. One to go.

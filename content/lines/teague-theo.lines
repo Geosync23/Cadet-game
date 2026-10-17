@@ -1,0 +1,104 @@
+@crew teague-theo
+// Theo Teague (he/him), Works technician, days. The Works writer, batch 2. Blunt, quick; comic-strip beats.
+
+== greet
+? tier=stranger
+- {hi}. New hand? Take the short jobs first. You'll look good. I didn't.
+- {hi}. Theo. Works. The comics on the common room wall are mine. Some of them.
+? tier>=acquaintance time:morning
+- {hi}, {nick}. You look like page one of a very long comic.   #funny
+? tier>=acquaintance
+- {hi}, {nick}. Stand still. No, the other way. Got you. You're in next week's.   #funny
+? tier>=colleague
+- {me}. Good. I need a second opinion on a joke. It's about Calder. It's very kind.
+? tier>=friend
+- {me}! There you are. I drew you a whole panel. You're the hero. Don't get big-headed.   #warm
+
+== bye
+- Laters. Don't trip, I'll have to draw it.   #funny
+- {bye}. Playlist's up on Friday. One song's yours. Guess which.
+
+== feel
+? mood:low
+- No comic this week. Nothing funny happened. That's never true. I just couldn't see it.
+? mood:high
+- This week's playlist is perfect. Twelve songs. Thirteen. Fine, fourteen.   #funny
+
+== near
+? act:work
+- Job done. I'd draw it, but a fixed lamp isn't funny. A broken one is.
+? act:leisure
+- Comics wall's getting full. Hart's are better. Don't tell Hart.
+
+== life
+? tier>=acquaintance
+- I drew Calder as a very tidy cloud. She saw it. She said, "Fair." Best day of my life.   #funny
+? tier>=colleague
+- O'Neill's playlist is wrong. Every week. We've agreed to settle it at the Friday jam.   #funny
+
+== joy
+? tier>=acquaintance
+- Someone laughed at the comics wall this morning. Out loud. I heard it from the corridor.
+
+// ---- Writer 2, batch 1: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue)
+== greet
+? tier>=acquaintance time:evening
+- {hi}. Bar, one drink, then the comics wall. Big week. Three panels.
+? tier>=acquaintance warmth:cold
+- Oh, it's you. I had to draw you from memory. You were holding a spanner. As usual.   #funny
+
+== near
+? place:lounge
+- The bar's busy. Good. Busy bars are funny. I've got a pencil.
+? habit:stargazer
+- I'm on the observatory list now. Stars are hard to draw. They're just dots. Good dots.
+
+== invite
+- Quiz tonight? I'm useless after question ten. Come and be useful.   #funny
+? tier>=colleague
+- Friday jam: my playlist against O'Neill's. I need a fair judge. Be unfair. For me.   #funny
+
+== accept
+- Yes. Good. Done. I'll draw it after.
+- Course. I'm in. I'll be early. I'm never early. This'll be a first.   #funny
+
+== decline
+- Can't. Deadline. The comics wall waits for no one.   #funny
+? weekday:mon|tue
+- Rest day. I'm drawing all of it. Next time, yeah?
+
+== missed
+- You missed it. I drew it anyway. You're in it, looking very sorry.   #funny
+
+== birthday
+? birthday:you
+- Happy birthday. There's a comic about you on the wall. Go and look. It's a nice one.   #warm
+? birthday:me
+- My birthday. I'm putting a song about cake on the playlist. Fifteen songs, then.   #funny
+
+== cue
+? cue:repair.you@dept
+- Saw your job closed. Clean. Annoying. I wanted that one.   #funny
+
+// ---- Writer 2, batch 1b: a hint (a moment is ready) and an about line for a named friend
+== hint
+- Got a minute later? No joke this time. Well. Maybe one. After.
+
+== about
+? aff:hart-ravi:friend
+- Hart draws better comics than me. I tell Hart so. Then I go and draw harder.   #funny
+
+// ---- Writer 2, batch 6: bubbles (smalltalk, rumour), at most one in five about work. 60 characters.
+== smalltalk
+- That's a comic. That, right there.   #funny
+- Playlist's at fourteen songs. Fifteen.   #funny
+- O'Neill's playlist is wrong. Again.   #funny
+? act:off
+- Rest day. Pencil, paper, bar. Bliss.
+? act:work
+- Grease to the elbows. Standard.
+?
+
+== rumour
+- Right. This'll be a comic by Friday.   #funny
+- Blunt version? Here's the blunt version.

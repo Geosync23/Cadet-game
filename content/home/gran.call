@@ -1,0 +1,165 @@
+@arc home.gran
+who: home:gran
+name: Gran
+// Writer 3, from the head writer's model (mum.call) and the approved arc: Gran learns to record a message, an
+// allotment rivalry with a neighbour, a fall and a new hip (the serious one, plainly told, she recovers), back on the
+// allotment, and she wins the show with a marrow she has named "the Captain". Home stays unnamed.
+//
+// HOW SHE TALKS: loud, short, cheeky; says what she thinks and then laughs at it. Talks to the recorder as if it's a
+//   person ("Is the light on? Light. Are you on?"). Calls you {me} or "petal". Proud of you and says so, bluntly.
+// NEVER: frail or pitiful (even after the fall she's cross, not sad); guilt-trips; genders you.
+// LIVES with Mum (Gran is Mum's mum): sits in your chair, wears Mum's pottery "hat", heckles Mum's calls.
+// NEW HERE (to approve): the allotment was Grandad's plot first (he died years ago; gentle, never a scene); the rival
+//   is "Number Fourteen", a neighbour Gran only ever calls by the house number (no name, no pronoun); the village
+//   show; the marrow called "the Captain".
+// RUNNING: "Is the light on?"; Number Fourteen; the hat; the Captain (the marrow, from beat 4).
+
+== beat 1
+tone: light
+via: reply
+mem: firstcall
+flag: home.gran.called
+them: Is the light on? Your mum says the light's on. Light. Are you on? Hello? It's Gran.   [laugh]
+them: I'm recording. Into a box. Like a newsreader. Your mum showed me twice and I still don't trust it.
+them: So. Are they feeding you up there? Is it up? Out? Wherever it is.
+? choice
+* It's out, Gran. And yes, they feed me loads.   flavour:cheer mem:out
+  them: Out. Right. I'll say out. Good. Loads is the right amount. Loads and a pudding.
+* You did it! You recorded a message.   flavour:cheer mem:didit
+  them: I did, didn't I. Nobody tell your mum. She'll make me do the washing machine next.
+* I miss you, Gran.   flavour:share mem:missed
+  them: Course you do. I'm very missable. I'll record another one, then. Tomorrow. If the light comes on.
+them: Right. How do I stop it? Which one stops it? Is this one stop? Petal, I've no idea. Bye!
+
+== beat 2
+tone: light
+via: reply
+when: flag:home.gran.called
+mem: fourteen
+flag: home.gran.fourteen
+them: Light's on. I'm getting good at this. Listen. Number Fourteen's put a fence up. Round the allotment.
+them: A fence! Round runner beans! Who's going to steal runner beans? Me, that's who. If they're any good.   [laugh]
+them: Theirs came up first. I'm not saying it was the fence. I'm saying the fence didn't help me.
+? choice
+* Beat them at the show, Gran.   flavour:cheer mem:beatthem
+  them: That's my petal. I've been thinking the very same thing since Tuesday.
+* Who's Number Fourteen?   flavour:listen mem:who
+  them: Next door but two. I've known them forty years. I've never once called them by their name. I'm not starting now.
+  + them: Next door but two. Forty years of beans. We'd be friends if they weren't wrong about everything.   [laugh]
+them: Your mum says stop shouting into the box. I'm not shouting. This is my voice.
+
+== beat 3
+tone: heartfelt
+via: live
+when: beat:home.gran.2
+mem: grandad
+flag: home.gran.grandad
+hint: The relay's clear tonight. Gran's on the line, live.
+them: Is this live? It's live. Your mum says it's live. So you can hear every word. Good.
+them: I was up the allotment today. Your grandad's plot. It was his first, you know. Before it was mine.   [sigh]
+them: He'd have hated that fence. He'd have hated the beans more. I keep it going because it's still a bit of him.
+them: Don't go soft on me. It's a nice thing, not a sad one. Mostly a nice thing.
+? choice
+* Tell me about him?   flavour:listen mem:tellme
+  them: Big hands. Terrible whistler. Grew a marrow once the size of the cat. We never had a cat. That's how big.   [laugh]
+  + them: Big hands, terrible whistler, grew marrows the size of a cat. He'd have liked you. He liked anyone who asked.
+* He'd be proud of the plot.   flavour:cheer mem:proud
+  them: He would. He'd say so, too. Then he'd move all my canes.
+* I keep things too. To remember.   flavour:share mem:keep
+  them: Course you do. You're my petal. We're keepers, us lot.
+them: Right. Enough. That's my live minute. Tell me what you had for tea.
+
+== beat 4
+tone: light
+via: reply
+when: beat:home.gran.3
+mem: captain
+flag: home.gran.captain
+them: Light's on. Big news. I've a marrow. A proper one. Coming on lovely. I've given it a name.
+them: It's called the Captain. After your captain. I don't know her. I've decided she's very good.   [laugh]
+them: Number Fourteen came to look. Said nothing. Nothing! That's how you know it's a good marrow.
+? choice
+* I'll tell the Captain she's got a marrow named after her.   flavour:cheer mem:tellcaptain
+  them: You will not! Well. You can if she's in a good mood. Is she ever in a good mood? Find out.
+* What does the Captain need?   flavour:practical mem:needs
+  them: Water, sun, and nobody from Number Fourteen breathing on it.
+them: I talk to it every morning. Your mum says that's daft. Your mum talks to clay.
+
+== beat 5
+tone: serious
+via: live
+when: beat:home.gran.4
+mem: hip
+flag: home.gran.hip
+hint: Clear line tonight. It's Gran, and she's calling from her bed.
+them: Now don't panic. I had a fall. At the allotment, by the water butt. I'm all right. I'm saying it first.   [sigh]
+them: I've a new hip. A whole new one. The doctors say I did well. I said I always do well.
+them: It hurts. I'll not pretend it doesn't. And I can't get up the allotment. That's the worst bit, if you want to know.
+them: Your mum's been marvellous. Jo's been round every night. Don't tell them I said marvellous.
+? choice
+* I'm so glad you're all right, Gran.   flavour:listen mem:glad
+  them: So am I, petal. I've a lot left to do. And a marrow to see to.
+* Who's watering the Captain?   flavour:practical mem:water
+  them: That's the thing. That's exactly the thing. Jo, I think. I'll make them a list.   [laugh]
+  + them: Jo. I've given them a list. Two pages. Underlined. That marrow is going to the show if I go in a barrow.
+* Can I do anything from here?   flavour:practical mem:help
+  them: Call me. That's it. That's the doing. Call me and tell me nonsense.
+them: Right. The nurse is giving me a look. I'll get better. I've said so, so it's decided.
+
+== beat 6
+tone: resolution
+via: live
+when: beat:home.gran.5
+mem: show
+flag: home.gran.won
+keepsake: a packet of seeds from the Captain
+learn: Gran fell and had a new hip. She's back on the allotment, and her marrow, the Captain, won the village show.
+mail: 2880 | From Gran | A packet in the post bag, Gran's writing on it in thick pencil: "Seeds from the Captain. Grow one up there. Beat somebody. Gran."
+them: Is it on? It's on. Guess. No, I'll tell you. First prize. The Captain. First prize!   [laugh]
+them: I walked up the allotment on my new hip to see it weighed. With a stick. I'll not use the stick. I used the stick.
+them: Number Fourteen came second. They shook my hand. I said thank you. I meant it. A bit.
+them: I've saved you seeds. From the Captain. They're coming up in the post. Grow one. Out there. Wherever it is.
+? choice
+* I'll grow one and name it after you.   flavour:cheer mem:nameit
+  them: You'll do no such thing. Name it after Number Fourteen. Then beat it.   [laugh]
+* I'm so proud of you, Gran.   flavour:share mem:proud
+  them: Course you are. So am I. Of you. I tell everyone at the shop. They've heard it.
+  + them: Petal. I tell the shop about you every week. Now I've got a rosette too, they'll never get away.
+them: Right. Stop button. Which one? I know which one. Bye, petal. Light's going off now.
+
+// ---- what you can tell her on a call (social B offers 2-3 whose condition holds, newest first)
+== send
+? flag:intro.soloJob
+- I did my first job on my own.   flavour:share
+  them: On your own! Good. Did you do it right? Course you did.
+? cue:harvest
+- We had a harvest in the ship's garden.   flavour:share
+  them: A garden! Up there! What's the biggest thing? Bigger than the Captain? I doubt it.
+? came:any
+- We had a {trad} on the ship. I went.   flavour:share
+  them: Good. Go to everything. You can sit down when you're my age.
+?
+- Are you behaving, Gran?   flavour:cheer
+  them: Never. Ask your mum. No, don't ask your mum.
+- Tell me about the allotment.   flavour:listen
+  them: Beans up, slugs down, Number Fourteen sulking. A good week.
+
+// ---- everyday calls when no beat is due
+== chat
+them: Is the light on? It's on. Hello, petal. I've nothing to say. I just like the box now.   [laugh]
+? send
+them: Right. Off. Stop button. Bye!
+--
+when: flag:home.gran.fourteen
+them: Quick one. Number Fourteen's got slugs. I'm not saying I'm pleased. I'm saying I'm not sad.   [laugh]
+? send
+them: Bye, petal. Eat a vegetable. For me.
+--
+them: Your mum's on the wheel. I'm in your chair. Wearing the hat. We're all very artistic here.
+? send
+them: That's my lot. Love you. Light off.
+--
+when: flag:home.gran.hip
+them: I did the stairs today. Both of them. Well, all of them. Don't tell the nurse I counted.
+? send
+them: Right. Off you go. I've a marrow to talk to.

@@ -1,0 +1,190 @@
+@crew varga-tariq
+// Writer-commons, batch 3: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Hello. Varga, galley, the early team. Breakfast is my fault, if it's good.
+? tier>=acquaintance
+- Hello, {me}. I hope this finds you well. It does find you. You're right here.   #funny
+- {hi}, {me}. Onions today: forty-one. Lukas: thirty-eight. Not that I'm counting.
+? tier>=friend
+- Ah, {me}. I wrote about you in my letter home. Only good things. Mostly.   #warm
+
+== feel
+? mood:high
+- Good morning's work. And a new record on the treadmill. A small one. Still a record.
+? mood:low
+- A slow day. I'll write a long letter tonight. It sorts my head out.
+
+== near
+? act:work
+- Early team's done before most people wake. I like it. The galley's quiet at five.
+? act:gym
+- Race you. No? Fair. I'd have won. I'm only saying.   #funny
+
+== life
+? tier>=acquaintance
+- I write home to Valo every rest day. On paper. Vera Ueda and I share the post bag.
+? tier>=colleague
+- I send voice messages to my gran on the Tevan belt. She answers in one long sentence.
+
+== joy
+? tier>=acquaintance
+- Letters on paper. You think harder when you can't delete anything.
+
+== about
+? aff:dlamini-lukas:friend
+- Lukas is my rival in onions and my friend in everything else.   #warm
+? bond:friends
+- {friend} writes back. On paper. I'd do anything for someone who writes back.
+
+// Writer-commons, batch 6: towards about 30 own lines.
+
+== greet
+? tier>=acquaintance time:morning
+- Good morning. I've been up since four. The bread's been up since five. We're both proud.
+? tier>=acquaintance time:evening
+- Hello, {me}. Late dinner for me. I like the mess when it's emptying out.
+? tier>=colleague warmth:cold
+- Ah, there you are. I nearly wrote you a letter. A long one.   #warm
+
+== bye
+? tier>=acquaintance
+- Take care. Until later.
+? tier>=friend
+- Thank you for the company. I'll mention you in my next letter. Kindly.   #warm
+
+== feel
+? mood:ok
+- Well enough. A good morning's work. A long letter waiting.
+
+== near
+? act:leisure deck:3
+- The lounge window. Best seat on the ship. I got here first. I always do.   #funny
+? time:morning act:work
+- Rolls in the oven, porridge on. Six o'clock, and the galley's already won.
+
+== life
+? tier>=colleague
+- Vera Ueda and I share the post bag to Valo. We compete to write the longest letter.   #funny
+? tier>=friend
+- I lost a race to Strand once. One. I think about it more than I should.   #funny
+
+== invite
+? trad:running tier>=acquaintance
+- Running club tonight. I'll race you. Kindly. Then less kindly.   #funny
+
+== accept
+- Gladly. I'll be there.
+== decline
+- I can't, I'm afraid. It's my letter night. Another time, truly.
+== missed
+- You didn't come. That's all right. I wrote a page while I waited. A good page.
+== birthday
+? birthday:me
+- It's my birthday. My grandmother will send a message. One very long sentence.   #warm
+? birthday:you
+- Happy birthday. I've written you a card. On paper. Properly.   #warm
+== hint
+- Have you a minute? I'd like to say something. Properly.
+
+// Writer 3, batch 4: bubbles (smalltalk and rumour, 60 characters, said to no one in particular).
+
+== smalltalk
+- Forty-one onions to thirty-eight.   #funny
+- I hope this finds you well.   #funny
+- Ah, well. Tomorrow, then.
+- The post bag's due. I hope.
+? act:work
+- Another onion. Another point.
+
+== rumour
+- I should not say. I will, though.
+- A small piece of news, if I may.
+
+// Writer 3, batch 5: callbacks (told: said once).
+
+== callback
+? told:fav.fetch
+- I hope this finds you well. It did. Thank you for fetching it.   #funny
+? told:fav.job
+- You did my work. I'm grateful. I'll write it down. In a letter. To you.   #warm
+? told:fixed.oven
+- The oven is mended. Was it you? Then thank you. Formally.
+? told:came.running
+- You came running. I won by a step. Don't tell Strand. He'll ask for a rematch.   #funny
+? told:gift.card
+- Your card is on my shelf, beside the letters from Valo. Good company.   #warm
+? told:bday
+- You marked my birthday. It went into my letter home. You're in it now.   #warm
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- The galley speaks well of you. I wrote it in my letter. Valo will know in six weeks.   #funny
+? rep:theirs
+- You are counted as galley now. That is not a small thing. I hope you know.   #warm
+? you:reliable
+- They say you are reliable. I had already decided so. I'm pleased to be agreed with.
+
+// Writer 3, batch 8: thanks for a gift (gift: loved | liked | polite, or the gift's tag; dialogue 0.43.10).
+
+== gift
+? gift:card
+- A card. Thank you. It will go beside the letters from Valo. In good company.   #warm
+? gift:loved
+- I'm very touched. Truly. I'll write about it in my next letter home.   #warm
+? gift:liked
+- Thank you. That is kind of you. I'm grateful.
+? gift:polite
+- Thank you. Ah, well. I shall find it a home. I'm sure I shall.
+
+// Writer 3, batch 9: asking after your people back home (the home flags; only the big news you'd have told them).
+
+== greet
+? flag:home.sam.sundays tier>=colleague
+- A story every Sunday, to an old friend. That's a letter, in a way. I approve. Very much.   #warm
+? flag:home.gran.hip !flag:home.gran.won tier>=colleague
+- I hope this finds your gran well. I mean it properly. How is her hip?
+
+// Writer 4, batch 2: everyday chatter, not about work (meals, rest days, home, hobbies, seasons, traditions).
+== smalltalk
+? act:meal
+- I hope this soup finds you well.   #funny
+- Second helping. For the running, you see.
+? act:breakfast
+- Up at five. Ran a lap before the toast.
+? act:off
+- Writing to Valo. Page two. Dear everyone.
+- A voice message for my grandmother. She likes them long.
+- Rest day. A letter, a run, a letter.
+? time:evening
+- I raced Erik. I won. By a stride. A clear stride.   #funny
+- The lounge is quiet tonight. I like it quiet.
+? trad:running
+- Running club tonight. I'm not competitive. I'm winning.   #funny
+? season:sowing
+- Sowing. At home they'll be ploughing now.
+? season:lanterns
+- My grandmother loves Lanterns. I'll tell her ours.   #warm
+? time:morning
+- Good morning. Sincerely.   #funny
+? place:lounge
+- The view from here would fill a letter. Two.
+
+== rumour
+- I have news. I'll tell it properly. In order.
+- Forgive me. I heard something. Shall I?
+
+// Writer 4, batch 4: Tiles talk.
+== tiles.start
+- A game. Splendid. I hope this finds you ready.   #funny
+- I warn you, I keep a tally. Of everything.   #funny
+== tiles.dock
+- Three. One to me. I'm counting.
+== tiles.win
+- Good game. A clear win. By one dock. A clear dock.   #funny
+== tiles.lose
+- Well played. I'll write it in the tally. Honestly.

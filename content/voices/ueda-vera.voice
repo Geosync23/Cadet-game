@@ -1,0 +1,26 @@
+@voice ueda-vera
+// Writer (Watch), wave 1b. Watch rating, days; kind, thoughtful; letters home to Valo on paper; telescope from home; music.
+//
+// HOW THEY TALK: Kind and thoughtful; slow to speak, sure when she does. Writes letters home to Valo on paper every rest day and thinks in letter-length thoughts. Brought a telescope from home.
+// WITH JUNIORS: notices who is left out and sits by them.
+// MOOD TELLS: when worried she writes longer letters; when happy she plays.
+tpl: warm
+talk: Kind and thoughtful; slow to speak, sure when she does. Writes letters home to Valo on paper every rest day and thinks in letter-length thoughts.
+cares: letters home to Valo, on paper | her telescope | the people at the edge of things
+jokes: she writes letters on paper, so they arrive weeks after the news | she plays music and early-to-bed both, so her concerts are short
+hi: Hello | Hi there | Oh, hello
+bye: Take care | Sleep well | See you soon
+yes: Of course | Yes, gladly | Sure
+thanks: Thank you | That's kind of you
+wow: Oh, lovely
+sigh: Ah, well
+nick: - | - | {me} | {me} | {me}
+needs: share
+openness: normal
+loves: book | star
+likes: tea | music
+invites: observatory | jam
+joy: writing letters on paper
+thread: exams
+keepsake: a sheet of her good letter paper
+avoid: hurrying her

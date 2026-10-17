@@ -1,0 +1,96 @@
+@crew alvarez-luca
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Hiya! Alvarez, Survey. Have you met Gerald? He's a cactus. He's lovely.   #funny
+? tier>=acquaintance
+- Hello, {me}! Gerald says hi. He doesn't, he's a cactus, but he would.   #funny
+- Hey, hey, {me}! My sister sent a recipe. It needs a lemon. We have no lemons.
+? tier>=friend
+- {me}! Gerald and I were just saying how glad we are you're aboard.   #warm
+== feel
+? mood:high
+- Good day! Gerald grew. A whole millimetre. I measured.   #funny
+? mood:low
+- Bit of a flat one. I've told Gerald. He listened. He's good like that.
+== near
+? habit:garden-lover
+- The garden's lovely now. I said good morning to every plant. It took a while.
+? habit:stargazer
+- One day I'll name a star. Something cheerful. Maybe Gerald.   #funny
+== life
+? tier>=acquaintance
+- My sister on Coriel sends recipes. They all need things we don't have. I make them anyway.
+== joy
+? tier>=colleague
+- Gerald. Every cactus aboard is called Gerald, but mine's the first. Probably.
+
+// ---- Writer 2, batch 3: to ~30 (greet by time and warmth, bye, near, invite, accept, decline, missed, birthday, cue, hint, about, life)
+== greet
+? tier>=acquaintance time:morning
+- Morning, {me}! I'm up early now. Gerald was very surprised.   #funny
+? tier>=acquaintance warmth:cold
+- {me}! There you are. Gerald was wondering. Well, I was. Gerald's a cactus.   #funny
+
+== bye
+- Bye! Say bye to Gerald on your way out. He likes that.   #funny
+
+== near
+? habit:garden-lover
+- Morning, tomatoes. Morning, beans. Sorry, {me}. This takes a while.   #funny
+? habit:stargazer
+- Observatory. I bring Gerald. He doesn't see much. He enjoys it, though.   #funny
+
+== invite
+- Garden after shift? I'll introduce you to everyone. The plants, I mean.   #funny
+? tier>=acquaintance
+- Observatory night? Bring a cheerful name. In case we find something.
+
+== accept
+- Yes! Lovely. Gerald will be thrilled. Well. Gerald will be there.   #funny
+- Course. I'll bring snacks. My sister's recipe. Minus the lemon.   #funny
+
+== decline
+- Not tonight. Recipe night. My sister's sent one with nine things we don't have.   #funny
+? weekday:fri|sat
+- Rest day. Gerald and I have plans. Watering. Sunday?   #funny
+
+== missed
+- You missed it! That's all right. I told Gerald all about it.
+
+== birthday
+? birthday:you
+- Happy birthday! I made my sister's cake. Without half the things. Still good.   #warm
+? birthday:me
+- My birthday. My sister sent a cake recipe. It needs a lemon. Of course it does.   #funny
+
+== cue
+? cue:event.ionStorm.onset
+- Storm's in. I've moved Gerald off the windowsill. Safety first.   #funny
+
+== hint
+- {me}. Have you a minute later? I'd like to tell you something. Gerald already knows.
+
+== about
+? aff:cruz-tove:friend
+- Cruz gave me Gerald's cutting. Cruz gives everyone a Gerald. Mine's the best, though.   #funny
+
+== life
+? tier>=friend
+- My sister and I cook the same recipe on the same day. Far apart. Same smell, I bet.   #warm
+
+// ---- Writer 2, batch 6: bubbles (smalltalk, rumour), at most one in five about work. 60 characters.
+== smalltalk
+- Gerald says hi. He doesn't.   #funny
+- Morning, beans. Morning, tomatoes.
+- The recipe needs a lemon. Again.   #funny
+? act:off
+- Watering with Gerald. Big plans.
+? time:evening
+- Cheerful star names. Gerald's top.   #funny
+?
+
+== rumour
+- Gerald heard this first.   #funny
+- Cheerful news. Mostly.

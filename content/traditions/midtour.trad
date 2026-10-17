@@ -1,0 +1,41 @@
+@tradition midtour
+// Midtour: day 182, half the year (a Sunday, Greening's last day). In the bow lounge crew write a letter to
+// themselves; Oduya seals them, and Year's end (day 364) gives them back. The player's letter comes back by Mail then.
+// On a Sunday it takes the weekly letters evening's slot if that's built (it's letter-writing either way).
+// Design note: plans/trad-notes-seasons.md.
+k: 478
+title: Midtour
+when: year day 182
+at: 20:00-21:00
+min: 25
+prio: 2
+jitter: 10
+where: 3 room Bow lounge: lounge-seat
+where: 3 room Mess hall: mess-seat
+hold: none
+who: oduya always, calls-home 70%, quiet-corner 65%, everyone 50%
+anim: read
+host: oduya
+from: oduya
+invite: host=oduya odds=20% line="Midtour tonight. Write to the you of six months from now. I'll keep it safe."
+
+== mail
+- Tomorrow is half the year. Midtour, {time}, in the bow lounge: write a letter to yourself. I'll seal them, and you'll get yours back at Year's end.
+
+== ask
+- Midtour tonight. I never know what to write until I start.
+- Half the year gone. Are you writing a letter tonight?
+- Midtour letters at eight. I'm going to tell myself to drink more water.   #funny
+
+== here
+- Don't read over my shoulder. It's for future me.   #funny
+- Six months. Say something kind to yourself.   #warm
+- I read last year's letter back. I was worried about things that never happened.   #warm
+
+== thanks
+- You write a letter to yourself and fold it into an envelope. Oduya seals it with a smile.   #warm
+
+== chatter
+- What did you write for Midtour? No, don't tell me. That's the rule.
+- My Midtour letter last year was one line long. It was a good line.   #funny
+- Oduya keeps the Midtour letters in a box nobody's allowed to touch.

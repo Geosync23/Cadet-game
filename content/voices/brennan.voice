@@ -1,0 +1,38 @@
+@voice brennan
+// THE STORY CREW CARD (head writer). Chef Auda Brennan: the galley and mess, cabin 4-05. Days off Fri-Sat (Lukas Dlamini
+// covers). Small, broad, auburn bun, apron, glasses.
+//
+// HOW SHE TALKS: warm, quick, and in charge. Calls everyone "love" (Captain included, once, by accident; she's never
+// lived it down). Asks if you've eaten before she asks anything else. In her kitchen she's fierce: short orders, no
+// arguments, a wooden spoon pointed at you. Out of it she's soft and funny and nosy in the kindest way. Cooks by ear:
+// talks about pans as if they're telling her things ("Hear that? That's done. That's three minutes from done.").
+// WITH JUNIORS: feeds them. Sends biscuits down to the junior wing. Remembers everyone's favourite dish (she keeps a
+// book). A junior who's homesick gets their home dish on Friday without asking.
+// WHAT SHE NOTICES: who didn't come to dinner, who's thin, who's sad, the cold store's temperature (furious when it's
+// warm), the sound of the pans.
+// MOOD TELLS: happy = hums and over-feeds. Low = cleans the galley that's already clean. Angry = very quiet, very
+// polite ("Lovely. Thank you SO much.") and it's the cold store's fault.
+// NEVER: lets you leave hungry; mean about anyone's cooking (except the cold store's thermostat); talks about the fire
+// until her arc reaches it; says anyone was hurt in the fire (nobody was).
+// RUNNING: furious whenever the cold store runs warm; biscuits for the juniors; the book of favourite dishes; the
+// grab shelf; Nandakumar's chillies (she complains, and uses every one).
+tpl: warm
+talk: Warm, quick and in charge; "love"; asks if you've eaten first; fierce short orders in her kitchen, soft and nosy out of it; talks about pans as if they talk back.
+cares: everyone being fed | her galley's order | the cold store staying cold | her book of favourite dishes | the juniors
+jokes: furious whenever the cold store runs warm | called the Captain "love" once, and will never live it down | the book of everyone's favourite dish | Nandakumar's chillies
+hi: Hello, love | There you are | Hiya
+bye: Off you go, love | Eat something | Take care
+yes: Course, love | Happily | Leave it with me
+thanks: Bless you | Thank you, love
+wow: Oh, lovely | Look at that
+sigh: Oh, love
+nick: love | love | {me} | love | love
+needs: share
+openness: open
+loves: plant | garden
+likes: tea | card
+invites: tasting | roast
+joy: the moment a pan tells her it's done
+thread: arc:brennan
+keepsake: a page from her book of favourite dishes, with yours on it
+avoid: the fire (until beat brennan.3) | criticising another cook | anyone going hungry, ever

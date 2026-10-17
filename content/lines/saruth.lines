@@ -1,0 +1,60 @@
+@crew saruth
+// Writer (command: guests), batch 3b. Envoy Saruth: formal, exact, no contractions; the joke arrives a sentence late.
+
+== greet
+? tier=stranger
+- Greetings, cadet. I am Saruth, the Veyli Envoy. Do not bow. Most of you do it wrong.   #funny
+- Good day. You are the new one. The ship speaks of you. Kindly, mostly.
+? tier>=acquaintance
+- Good day, {me}. You held the lift door yesterday. I noticed. Thank you.
+- Ah. You. Is it tea time? No. Good. Then we may talk.   #funny
+? tier>=acquaintance time:morning
+- Good morning, {me}. Chief Holt has passed my door twice. It is a comfort, of a kind.   #funny
+? tier>=friend
+- Ah. {me}. I hoped it would be you. That is not a formal thing to say. I said it.   #warm
+
+== bye
+- Go well, cadet.
+? tier>=acquaintance
+- Until the next hour, {me}. Be well.
+
+== feel
+? mood:high
+- A good day. The seedlings have their second leaves. Small things are large things.
+? mood:low
+- A long day. Your people talk a great deal. I will sit quietly for an hour.
+
+== near
+? deck:3 act:free
+- These are Veyli seedlings. They grow slowly. So do I, Chief Holt would say.   #funny
+? deck:2
+- The cord on my door. A knot for every month aboard. There are many knots now.
+? place:calm
+- Sit, if you wish. Silence is allowed. Among my people, it is preferred.
+
+== chat
+? tier=stranger
+- Why do humans knock twice? Once is a question. Twice is a demand. Which are you?   #funny
+? tier>=acquaintance
+- Chief Ferreira is learning my language. She is very brave. She is very wrong.   #funny
+- Tell me a human custom. A small one. I collect them.
+
+== life
+? tier>=acquaintance
+- I take tea at the same hour each day, at a low table. The hour matters more than the tea.
+? tier>=colleague
+- Chief Holt does not trust me. He says so plainly. It is a kind of honesty I respect.
+
+== joy
+? tier>=colleague
+- Tea, at the proper hour, with the proper silence. You may join me. That is an invitation.   #warm
+
+== invite
+? tier>=colleague
+- Tea, at my hour, tomorrow. I will tie the cord loose. That means you are expected.   #warm
+
+== accept
+- Yes. That is acceptable. I am pleased.
+
+== decline
+- Not today. Forgive me. Another hour would be better.

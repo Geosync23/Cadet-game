@@ -1,0 +1,166 @@
+@crew takahashi-wen
+// Writer-commons, batch 3: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Takahashi. Comms. Nights. If a message is late, it isn't me.
+? tier>=acquaintance
+- {hi}, {me}. Say what you need. Plainly. I've had static all night.
+- {hi}. You're up. Good. Someone should be.
+? tier>=friend
+- {hi}, {me}. Sit. I'll put a record on. The right words, this time.   #warm
+
+== feel
+? mood:high
+- Clean signal all night. Not a crackle. That's a good night.
+? mood:low
+- Static. All night. I'm tired of static.
+
+== near
+? act:work
+- Quiet. I'm listening for something. It isn't you.
+? act:leisure
+- Music room. Headphones on. Don't take that personally.
+
+== life
+? tier>=acquaintance
+- I call home every week. Short calls. We say what we mean and hang up. Efficient.
+? tier>=colleague
+- Five people aboard know every song. Four of them are wrong. Guess which one's right.   #funny
+
+== joy
+? tier>=acquaintance
+- The record cabinet. The right words. Put on track three and you'll see.
+
+== about
+? bond:friends
+- {friend}. Knows when to talk. Knows when not to. Rare.
+
+// Writer-commons, batch 6: towards about 30 own lines.
+
+== greet
+? tier>=acquaintance time:morning
+- Morning. Bed for me. Talk later. Or don't. Either.
+? tier>=acquaintance time:evening
+- {hi}. Off to the relay room soon. Anything you need sending, say now.
+? tier>=colleague warmth:cold
+- You. Where've you been? Not complaining. Noting.
+
+== bye
+? tier>=acquaintance
+- Later.
+? tier>=friend
+- Good talk. Clean. No static. Thanks.   #warm
+
+== feel
+? mood:ok
+- Fine. Quiet relay. Good.
+
+== near
+? deck:4 act:leisure
+- Music room. Record three. Listen. Those are the right words. Tell Haddad.   #funny
+? act:work
+- Hear that? Nothing. That's a good signal. Nothing's what you want.
+
+== life
+? tier>=colleague
+- I call home. Short calls. We don't waste words. Family trait.
+? tier>=friend
+- I don't say much. Doesn't mean I'm not glad you're here. I am. Said it.   #warm
+
+== invite
+? trad:jam tier>=colleague
+- Jam tonight. Come. I'll sing the right words. Someone has to.   #funny
+
+== accept
+- Yes. There.
+== decline
+- No. On shift. Another time.
+== missed
+- You didn't come. Noted. Not cross. Just noted.
+== birthday
+? birthday:me
+- Birthday. Don't sing. If you sing, sing it right.   #funny
+? birthday:you
+- Happy birthday. Here. A record. The words are right. I checked.   #warm
+== hint
+- Got a minute. Plain talk.
+
+// Writer 3, batch 4: bubbles (smalltalk and rumour, 60 characters, said to no one in particular).
+
+== smalltalk
+- Static.
+- That's not the words.   #funny
+- Relay's clear. For once.
+- Ask a proper question.
+? act:work
+- Signal's good. Next.
+
+== rumour
+- Here's the signal. Skip the static.
+- Not gossip. Information.
+
+// Writer 3, batch 5: callbacks (told: said once).
+
+== callback
+? told:fav.fetch
+- You fetched it. Fast. Thanks.   #warm
+? told:fav.job
+- You did my job. Clean signal. Thanks.   #warm
+? told:fixed.relay
+- Relay's clear. No static. Was that you? Good work.
+? told:came.observatory-night
+- You came to observatory night. Good. Ask me which ones I've logged.
+? told:gift.music
+- Your record. I know all the words. The real ones. Thanks.   #warm
+? told:bday
+- You remembered my birthday. No static. Thanks.   #warm
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- Comms hears good things about you. Clear signal. No static.
+? you:chatty
+- You talk to everyone. Lot of signal. Some static. Mostly signal.   #funny
+
+// Writer 3, batch 8: thanks for a gift (gift: loved | liked | polite, or the gift's tag; dialogue 0.43.10).
+
+== gift
+? gift:loved
+- Good signal. Thanks. Really.   #warm
+? gift:liked
+- Thanks. Useful.
+? gift:polite
+- Thanks. Bit of static. Kind of you, though.
+
+// Writer 4, batch 2: everyday chatter, not about work (meals, rest days, home, hobbies, seasons, traditions).
+== smalltalk
+? act:meal
+- Soup's fine. Not static. Fine.
+- Pass the salt. Thanks.
+? act:off
+- Rest day. Records. Then more records.
+- Called home. Clear line. Rare.
+? time:evening
+- That's not the words. It's "harbour", not "harder".   #funny
+- Star nine hundred and something. Logged.
+? time:night
+- Quiet. Good. Quiet is a clean signal.
+? trad:jam
+- Music night. Somebody will sing it wrong. Torres.   #funny
+? trad:quiz
+- Song round. I'll win it. Facts.
+? season:lanterns
+- Lanterns. Too many lights. Nice, though.
+? place:musicroom
+- Side two, track three. The real words are mine.   #funny
+? trad:observatory
+- Bring your journal. Don't bring opinions.   #funny
+? act:breakfast
+- Breakfast. Then sleep. Don't talk to me.   #funny
+
+== rumour
+- Heard something. Not static. Real.
+- Short version. You want it?

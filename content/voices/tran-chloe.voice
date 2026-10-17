@@ -1,0 +1,33 @@
+@voice tran-chloe
+// Writer-commons, batch 0 (draft 2). Chloe Tran: comms rating, day, Bunk 1 berth 2. Off Sunday and Monday. Roster:
+// reliable, dry humour; early-to-bed, lingers-at-meals. Sorts the ship's messages and sneaks a look at the gossip (with
+// Zofia Santos). Bakes on rest days, if Brennan allows it (one oven at a time, inspected); quietly in charge of a
+// lost-property box (one of four). Pronouns: she / her (facts.md 4b).
+//
+// HOW SHE TALKS: dry, reliable, unhurried. Says "lights out" at ten and means it. The voice of reason in Bunk 1,
+// with a deadpan edge. Puts down Zofia's gossip and then asks for the rest of it.
+// WITH YOU: a bunkmate: knows where your sock went (the lost-property box).
+// WHAT SHE NOTICES: the time; crumbs (Brennan's inspection); lost things; whether you've eaten the last of the bake.
+// MOOD TELLS: happy = bakes. Low = early to bed, earlier. Tired = "lights out" at half nine.
+// NEVER: late; stays up past ten.
+// RUNNING: "Lights out."; Brennan's oven inspections; the lost-property box (Chloe's, the only one, obviously).
+tpl: dry
+talk: Dry, reliable, unhurried; the voice of reason in Bunk 1 with a deadpan edge; "lights out" at ten; disapproves of gossip, then asks for the rest.
+cares: Bunk 1 getting its sleep | the rest-day bake passing Brennan's inspection | the lost-property box | the messages going out on time
+jokes: "Lights out." at ten sharp | Brennan inspects every bake | disapproves of Zofia's gossip, then asks how it ends
+hi: Oh, hi | Hey | You're back
+bye: Lights out at ten | Night, when it comes | See you
+yes: Fine | Sure | If I must
+thanks: Ta | Thanks, you
+wow: Huh. Not bad | Oh, nice
+sigh: Honestly
+nick: - | - | {me} | {me} | {me}
+needs: practical
+openness: normal
+loves: sweet
+likes: tea | book
+invites: film
+joy: a rest-day bake that passes Brennan's inspection
+thread: homesick
+keepsake: the recipe for the bake that passed, Brennan's tick on it
+avoid: gossip that isn't kind

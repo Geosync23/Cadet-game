@@ -1,0 +1,27 @@
+@crew v-brandt-esra
+// Writer 2, batch 8: a short-stay visitor. Mostly not about work.
+
+== greet
+? tier=stranger
+- Evening. Brandt. Courier. Pouches are sealed. So am I.   #funny
+? tier>=acquaintance
+- Hm, {me}. Sit, if you like. I'll lose at cards. I always do.
+?
+
+== chat
+- Ships, pouches, ships. The lounge here's the best seat I've had.
+- Up all night, every ship. Habit. Couriers don't sleep. We nap.   #funny
+
+== near
+? habit:lounge-regular
+- Bow lounge. Window, tea, nobody asking questions.
+? time:night
+- Night's when the ship's honest. Quiet, mostly.
+?
+
+== bye
+- {bye}. Don't wait up.
+
+== smalltalk
+- Hm. Sealed.
+- Good tea, this.

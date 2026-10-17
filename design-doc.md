@@ -52,7 +52,7 @@ V4 redesigns the ship around a daily loop across three decks and folds in everyt
 - Six decks, not five, numbered from the top. The bridge gets its own small deck, and living is split into a Commons deck and a Quarters deck. Sleep on Deck 4, eat on Deck 3, work from Deck 5.
 - Crew and rooms worked out. All 75 crew have a rank and a bed: senior suites on Deck 2, officer cabins and junior bunk rooms on Deck 4.
 - Promotion means moving. Tier 2 brings Officer rank and your own cabin across the deck. The tier table now carries rank and room.
-- You arrive by shuttle in the Deck 5 shuttle bay and find your own way up to your bunk.
+- You arrive by shuttle in the Deck 5 shuttle bay on a Sunday evening, and Zeke Torres from Works walks you to your bunk and to dinner.
 - Deck 5 brief added: the ship's garage, built first so the Works bay can anchor the job list.
 - Decks as data. The build now loads one deck at a time from a definition, with a ship-wide state that outlives it.
 - The old living deck (build 0.3.x) is retired as a layout and kept as the style reference.
@@ -417,8 +417,11 @@ What higher tiers unlock:
 - **Birthdays.** Every crew member has a birthday on a ship day of the year (1 to 364: 52 weeks of 7 days, day 1 being the game's Day 1), spread so about one falls each week. The galley bakes a cake and the mess gathers after dinner (20:15): their department, their bunkmates and plenty of others.
 - **Once a year:** Founding Day (day 100: cake and a few words from the Captain) and the quiet watch (day 300: a quiet while at the windows for the people they miss). The bigger Founders' Day festival on the plaza is a short ship-wide event (see "Ship-wide events").
 - **Hearing about them:** besides Mail and the Calendar, crew mention them when you talk to them ("Coming to the quiz tonight?").
-- **Joining in:** be in the room while it's on. It gives a little social, and the organiser thanks you.
-- More to come, in the same system.
+- **Joining in:** be in the room while it's on. It gives a little social, and the organiser thanks you. Afterwards the crew who were there remember it (a ship note for the social system, Pillar 4).
+- **The ship's year and its seasons** (the user, 2026-10-17): 364 days in four seasons of 13 weeks, named for the garden: **Sowing** (days 1-91), **Greening** (92-182), **Harvest** (183-273) and **Lanterns** (274-364). You arrive on day 0, the last evening of Lanterns. Traditions can come every week, every two or four weeks, once a season, once a year, or counted from your arrival (your first week, your first four weeks).
+- **Sowing morning** (built in 0.34.20, the first of Pillar 4's new traditions): the first Saturday of each season, late morning in the garden straight after the harvest; everyone plants a seedling. Day 6 is your first weekend.
+- **Not too much at once** (Pillar 4's voice budget): at most two traditions on an evening (one that starts from 17:00 and runs past 18:00; a tea straight after shift doesn't count), and never two at once on the same deck. The rarer one wins (on day 300 the quiet watch replaces observatory night). Birthdays are never moved.
+- **Many more to come in Pillar 4** (about 35 in all): tradition designers write them as plain text files (`content/traditions/`), with no code needed.
 
 Daily routines belong to the crew's ordinary day instead: the bridge watch hands over at the command ring at 06:00 and 18:00, and the Captain takes an evening walk through the observation room.
 
@@ -429,7 +432,7 @@ Daily routines belong to the crew's ordinary day instead: the bridge watch hands
 
 You work the day shift as a Works maintenance tech, taking jobs from the same list as the rest of the crew and doing them with your own hands.
 
-**Arriving by shuttle.** The game opens with your shuttle landing in the Deck 5 shuttle bay. You step off onto the pad, walk the haulway to the lift lobby, glimpse the Works bay that will be your workplace, and find your own way up to your bunk on Deck 4. The shuttle Tern is already in the bay with its ramp down, ready for it. Until the arrival is built, the game starts with you waking in Bunk 1. Still to decide: which milestone builds it, and who meets you off the shuttle.
+**Arriving by shuttle** (Pillar 4, agreed 2026-10-17; plans/pillar4-plan.md, Part 1). A new game opens on **Day 0, Sunday, 17:40**: you sign the Tern's manifest with your name, step onto the ramp in the Deck 5 shuttle bay, and **Zeke Torres** (a Works engine officer, one rank above you, a future friend) meets you. He walks ahead talking (the haulway, the Works bay door, the lift, the junior wing), hands you your device at your bunk, and takes you to dinner in the mess, where Chief Calder stops by the table. You always walk yourself; if you wander off he waits, then moves on, and anything you miss arrives by Mail. Bed ends the evening and Monday is your first shift. The first week is taught by people (Torres's shadow shift on Monday, Calder's first solo job on Tuesday, Sowing morning with Tomas on Saturday), with an optional Settling-in list on the device and an "I know my way around" button to end it. **Skipping** (offered on later new games): you start Monday 06:00 in Bunk 1 with the same friendships as after the evening, but no scripted week (the tips teach instead) and every social feature open at once (decided 2026-10-17, the onboarding engineer).
 
 **The job loop.** Every job follows the same physical steps:
 
@@ -548,6 +551,7 @@ Whatever you saw or missed, the crew retell it in chatter for a day or two, with
 - **A commendation** comes when an event ends and you did two or more of its jobs, or one job and a meeting. It's a letter from the Captain, kept on your record.
 - **The Captain's ready room:** your first commendation (or a close friendship with Commander Vance) gets you a summons at 11:00 on the next day the Captain is on shift. She thanks you, asks for a junior's view, and introduces the Admiral.
 - **The Captain's table:** a dinner in her quarters every four weeks (days 20, 48, ...) at 19:30. You're invited the day before if you were commended in the last four weeks, or have three close friends. The galley cooks an extra batch, and you keep a framed menu if you go.
+- **The bridge invite** (built in 0.34.35; the head writer's lines): bridge hour waits for it. At breakfast in the mess the day before your first bridge hour (day 22, a Monday), Commander Vance stops by your table and passes on the Captain's invitation. It's a chance meeting, so there's no appointment or notice first. Any reply counts as a yes; if you miss him, his note comes by Mail and you're invited anyway. Bridge hour is then on the calendar from day 23.
 - **Progress talks** with Chief Calder are appointments you ask for. They take place in her office on any day she's on shift.
 - Each is an appointment that opens its door for its window. If you miss one, a short Mail tells you; nothing is lost.
 
@@ -698,7 +702,6 @@ Done so far:
 **The game:**
 
 - The Works Chief is Chief Ines Calder. Her personality and how she judges your work are still to be designed, before Pillar 2, because she runs the job board and certifies the player.
-- Who meets you off the shuttle, and which milestone builds the arrival?
 - Should the player ever work the night shift, for example as part of on-call duty?
 - How does diagnosing a fault look on screen: a simple panel with labelled components, or something more hands-on? Prototype it in Pillar 2.
 - Can the player be passed over for certification, or only delayed?

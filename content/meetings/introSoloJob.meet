@@ -1,0 +1,20 @@
+@meeting introSoloJob
+// Day 2, Tuesday 07:45, the Chief's glass office: Calder alone gives you your first solo job (the job is on your
+// device). The Works writer. Teaches the Record and progress talks. One choice, no wrong answer; no "well done".
+title: Your first solo job
+from: Chief Ines Calder
+gist: Calder gave you your first solo job: it's on your device. Every job goes in your Record. Book a progress talk any time.
+== lines
+calder: Come in. Don't sit. This won't take long.   [gesture]
+calder > you: Your first solo job. It's on your device. Deck, machine, part. Read the whole card. Twice.
+calder: You'll do it alone. Torres is on Deck 6. He'll look in at tea. Once.
+calder: Every job you finish goes in your Record. So does every job you leave half done. I read the Record.
+calder: Progress talks: any time. Book one on your device. I'll keep it.
+? choice
+* What if I need help?   rel:calder+2 flavour:practical
+  calder: Ask. Asking isn't failing. Hiding it is.   [nod]
+* I won't let you down, Chief.   rel:calder+1 flavour:cheer
+  calder: Don't let the machine down. I'll be fine.
+* (Take the job and go)
+  calder: Good. That's an answer too.
+calder: One more thing. Finish what you start. Off you go.

@@ -1,0 +1,163 @@
+@overheard circles
+// Writer 3, batch 2. The ship's little circles (facts.md 5), by speaker: who: is A, with: is B (dialogue 0.43.8).
+// The knitting circle, the ladder club, the Halcyon twins, the fish keepers, the rainy-places club, the four
+// lost-property boxes, the coffee machine fixers, the star journals, the herb growers, the headphones, the Kesh
+// grandmothers, the Valo post bag (the ladder club keeps to "exercise"; the lift line waits for beat:kovac.2), the playlists, the mystery swappers, the old Wren families, the telescopes, the
+// tiny portraits, the breakfast jokers and the rest-day bakers. quirks.lines keeps the habit-based ones.
+
+== overheard
+? pair:any+any who:torres-zeke with:kovac-zainab|dahl-mira mem:moment.torres.scarf
+A: It's for the new hand.
+B: It's longer than the new hand.
+A: They'll grow into it.   #funny
+
+? pair:any+any who:kovac-zainab with:torres-zeke|dahl-mira
+A: Your tension's off.
+B: My tension's fine.
+A: Your scarf disagrees.   #funny
+
+? pair:any+any who:dahl-mira with:torres-zeke|kovac-zainab
+A: Grey again. It goes with everything.
+B: It goes with nothing. That's the same thing.
+
+? pair:any+any who:torres-zeke with:kovac-zainab|dahl-mira
+A: I've dropped a stitch.
+B: Where?
+A: Somewhere in the last metre.   #funny
+
+? pair:any+any who:kovac-zainab|cruz-tove|keane-davi with:kovac-zainab|cruz-tove|keane-davi
+A: Oh. You're on the ladder too.
+B: For the exercise.
+A: Yes. The exercise. Me too.   #funny
+
+? pair:any+any who:kovac-zainab|cruz-tove|keane-davi with:kovac-zainab|cruz-tove|keane-davi beat:kovac.2
+A: The lift's working again, you know.
+B: I know.
+A: After you, then.
+B: No, no. After you.   #funny
+
+? pair:any+any who:kovac-zainab|cruz-tove|keane-davi with:kovac-zainab|cruz-tove|keane-davi
+A: Thirty-one rungs, Deck 4 to Deck 5.
+B: You counted too?
+A: I... no. Did you?   #funny
+
+? pair:any+any who:navarro-mateo|salo-saad|nakamura-bilal with:navarro-mateo|salo-saad|nakamura-bilal
+A: Heard from your twin?
+B: Says the Halcyon's food is better.
+A: Mine says that too. They're in it together.   #funny
+
+? pair:any+any who:navarro-mateo|salo-saad|nakamura-bilal with:navarro-mateo|salo-saad|nakamura-bilal
+A: The Halcyon crew call our three "the set".
+B: The set of what?
+A: Twins. Collect all three, apparently.   #funny
+
+? pair:any+any who:grieve-thea with:walsh-esme|vasquez-uma|hart-ravi
+A: Two's sulking, my sister says.
+B: How can she tell?
+A: He's facing the wall. Very pointedly.   #funny
+
+? pair:any+any who:hart-ravi with:grieve-thea|walsh-esme|vasquez-uma
+A: Nan drew my fish again.
+B: Any good?
+A: One of them has a hat now. I doubt it's accurate.   #funny
+
+? pair:any+any who:vasquez-uma with:grieve-thea|walsh-esme|hart-ravi
+A: Mum says my fish are in a mood.
+B: All of them?
+A: It's catching, apparently.   #funny
+
+? pair:any+any who:walsh-esme with:grieve-thea|vasquez-uma|hart-ravi
+A: My brother's overfeeding mine. I can tell.
+B: From here?
+A: From his letters. Too cheerful.   #funny
+
+? pair:any+any who:dlamini-lukas|bakshi-sol|walsh-esme|santos-zofia with:dlamini-lukas|bakshi-sol|walsh-esme|santos-zofia
+A: Hear that? Sounded like rain for a second.
+B: The vents. Don't. You'll set me off.   #funny
+
+? pair:any+any who:dlamini-lukas|bakshi-sol|walsh-esme|santos-zofia with:dlamini-lukas|bakshi-sol|walsh-esme|santos-zofia
+A: What I'd give for a wet coat.
+B: A soggy shoe.
+A: A dripping hood.
+B: Stop it. This is lovely.   #funny
+
+? pair:any+any who:navarro-mateo|tran-chloe|fonseca-arjun|grieve-thea with:navarro-mateo|tran-chloe|fonseca-arjun|grieve-thea
+A: Found a glove. It's going in the lost-property box.
+B: Which one?
+A: The lost-property box. Mine.
+B: Hm. Mine's on Deck 4.   #funny
+
+? pair:any+any who:navarro-mateo|tran-chloe|fonseca-arjun|grieve-thea with:navarro-mateo|tran-chloe|fonseca-arjun|grieve-thea
+A: Someone's been taking things out of my box.
+B: Your box?
+A: The ship's box. Which I look after. Mine.   #funny
+
+? pair:any+any who:yoon-elif|volkov-maeve|shah-dara with:yoon-elif|volkov-maeve|shah-dara
+A: Coffee machine's making the noise again.
+B: I'll fix it.
+A: I was going to fix it.
+B: Race you.   #funny
+
+? pair:any+any who:takahashi-wen|esposito-yara with:rahman-farah
+A: How many in your star journal now?
+B: Three hundred and ninety-nine.
+A: Show-off.   #funny
+
+? pair:any+any who:janssen-hugo|quist-ilse|ishikawa-orla|nakamura-bilal with:janssen-hugo|quist-ilse|ishikawa-orla|nakamura-bilal
+A: Brennan took my basil.
+B: She took my mint.
+A: Did she say thanks?
+B: She said "lovely" and walked off. That counts.   #funny
+
+? pair:any+any who:garcia-greta|kim-yusuf with:garcia-greta|kim-yusuf
+A: Left side's dead on these headphones.
+B: Day shift does left sides.
+A: Fine. Night shift does the right.   #funny
+
+? pair:any+any who:eklund-leila|keane-davi with:eklund-leila|keane-davi
+A: Gran sent eleven minutes about her neighbour's goat.
+B: Mine sent a goat story too.
+A: ...Same goat?   #funny
+
+? pair:any+any who:ueda-vera|varga-tariq with:ueda-vera|varga-tariq
+A: Post bag's in. Anything from Valo?
+B: One letter. Six weeks old.
+A: Mine's seven. Yours is fresher.   #funny
+
+? pair:any+any who:teague-theo|oneill-imani with:teague-theo|oneill-imani
+A: My playlist's better this week.
+B: Yours has the same song on it twice.
+A: On purpose. It's a theme.   #funny
+
+? pair:any+any who:achterberg-lars|moreau-signe|quist-ilse with:achterberg-lars|moreau-signe|quist-ilse
+A: Don't tell me the ending.
+B: I didn't say a word.
+A: You smiled. Now I know.   #funny
+
+? pair:any+any who:zielinski-oona|dahl-mira|shah-dara with:zielinski-oona|dahl-mira|shah-dara
+A: We should check the old crew lists one day.
+B: We always say that.
+A: We do always say that.
+
+? pair:any+any who:zamora-quinn|rossi-femi|ueda-vera|mbeki-bo with:zamora-quinn|rossi-femi|ueda-vera|mbeki-bo trad:observatory-night
+A: Mine's the small one by the door.
+B: They're all small ones by the door.
+A: Mine's the smallest.   #funny
+
+? pair:any+any who:bakshi-sol|strand-erik|oneill-imani with:bakshi-sol|strand-erik|oneill-imani
+A: Someone left a tiny portrait on Holt's desk.
+B: Wasn't me.
+A: Wasn't me either.
+B: It was very good, though.   #funny
+
+? pair:any+any who:halloran-emeka|yoon-elif|lemaire-nils|yilmaz-karin with:halloran-emeka|yoon-elif|lemaire-nils|yilmaz-karin act:breakfast
+A: Why did the scrubber go to the infirmary?
+B: Don't.
+A: Its filter was feeling low.
+B: I said don't.   #funny
+
+? pair:any+any who:halloran-emeka|tran-chloe|yilmaz-karin with:halloran-emeka|tran-chloe|yilmaz-karin
+A: Brennan says the oven's mine on Saturday.
+B: She told me it's mine.
+A: One oven.
+B: Bake-off, then.   #funny

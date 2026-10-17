@@ -1,0 +1,22 @@
+@meeting bridgeInvite
+// The first invitation to the bridge (the user's ask, via the lead, 2026-10-17). Commander Vance at breakfast (he
+// breakfasts at 06:05), the day before your first bridge hour (bridge-hour.trad: every fourth Tuesday, so day 22, a
+// Monday). Every reply sets flag bridge.invited, which the traditions engineer's bridge-hour gate reads. When and where
+// it plays: social B and the traditions engineer. The head writer's lines.
+title: An invitation
+from: Commander Teo Vance
+gist: Commander Vance: the Captain invites you to bridge hour, tomorrow after the day shift, on Deck 1.
+== lines
+vance > you: Cadet. A moment. You may finish chewing.   [nod]
+vance: The Captain's compliments. You're invited to bridge hour. Tomorrow, after the day shift, Deck 1.
+vance: Juniors visit the bridge once every four weeks. No regulation requires it. I approve of it anyway.
+vance: Three things. Clean boots. Hands behind your back at the helm. Nothing red is to be touched.
+? choice
+* I'll be there.   flag:bridge.invited rel:vance+1
+  vance: Good. Five minutes early is on time.
+* What's up there, exactly?   flag:bridge.invited rel:vance+2
+  vance: The helm, the chart table, the Captain's chair. And the best view on the ship. Don't tell Amadi I said so.
+* (Say nothing)   flag:bridge.invited
+  vance: I'll take that as a yes. Most people do.
+vance: The Captain will say hello. She'll know your name. Don't let that unsettle you. It unsettles everyone.
+vance: That's all. As you were.   [nod]
