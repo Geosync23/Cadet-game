@@ -62,3 +62,13 @@ passes, as it should.
 **Still open:** "dating" is on no list, so "Rumour is {me} and Pell are dating." passes both as an overheard line
 (under pair:couple) and as a rumour said to you. Add `\bdating\b`, `\bgoing out\b` and `\bseeing each other\b` to the
 couple words, so the player-reference rule catches them. Once that's in, writers can start on every kind.
+
+## Addendum: 7069ce5 (0.43.6): two things left
+Test matrix (12 lines): all the "must fail" lines fail except one, and ordinary lines ("go out to the observatory",
+"seeing the Chief at ten", "parents married forty years") pass.
+1. **Still passes:** feel "Are you seeing anyone, {me}?". Only "seeing each other" was added. Add
+   `\bseeing (anyone|someone)\b` (and "single", "taken"? the head writer's call).
+2. **Against the lead's ruling** (crew-couple gossip to the player is fine in about, rumour and smalltalk with no player
+   reference): rumour "Those two are in love, everyone knows." and about "Okafor and Lin are in love." are now errors,
+   because 0.43.6 put about/rumour/smalltalk back under the full ban. That followed my earlier suggestion, which the
+   lead's ruling overrode. Restore the relaxation for those kinds, keeping the player-reference rule.
