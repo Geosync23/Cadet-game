@@ -13549,7 +13549,7 @@ function tradLoad(t) {
   const words = () => { if (checked) return; checked = true; for (const [c] of t.who.concat(Array.isArray(t.anim) ? t.anim : [])) for (const w of c.split('+')) if (!/^(everyone|host|honoree|juniors|officers|friends-of-host)$/.test(w)) tradWord(w); };
   return {
     id: t.id, name: t.name || t.id, k: t.k, when: t.when, at: t.at.slice(), min: t.min || 20, prio: t.prio || 0, jitter: t.jitter || 0, early: t.early || 0,
-    hold: t.hold, cake: !!t.cake, decor: t.decor || null, host: t.host || null, ties: t.ties || null, invite: t.invite || null, trace: t.trace || null, text: t.text || {}, baked: true,
+    hold: t.hold, cake: !!t.cake, decor: t.decor || null, host: t.host || null, ties: t.ties || null, invite: t.invite || null, trace: t.trace || null, meal: t.meal || null, text: t.text || {}, baked: true,
     where: t.where.map(w => w.room ? { ...w, room: new RegExp(w.room), ids: w.ids ? new RegExp(w.ids) : undefined } : { ...w }),
     who: (p, d, c) => { words(); return tradRule(t.who, p, d, c, t.host, 0); },
     anim: (p, d) => typeof t.anim === 'string' ? t.anim : Array.isArray(t.anim) ? tradRule(t.anim, p, d, null, t.host, null) : null,
@@ -13704,7 +13704,7 @@ function eventPlan(p, d) {
     const opts = eventOpts(ev, p); if (!opts.length) continue;
     const anim = ev.anim(p, d) || null;
     const from = e.from - (ev.early && e.honorees.includes(p) ? ev.early : 0), to = e.to - Math.round((ev.jitter || 0) * schedU(p.seed, d, ev.k + 100));   // 420-433
-    out.push({ id: ev.id, from, to, opts, anim, tag: 'ev-' + ev.id + (anim ? '-' + anim : ''), min: ev.min || 20, prio: ev.prio || 0, host: !!(ev.host && ev.host === p.id) });   // host: section 14 seats them first
+    out.push({ id: ev.id, from, to, opts, anim, tag: 'ev-' + ev.id + (anim ? '-' + anim : ''), min: ev.min || 20, prio: ev.prio || 0, host: !!(ev.host && ev.host === p.id), meal: ev.meal || null });   // host: section 14 seats them first; meal: going IS their dinner or breakfast (section 14)
   }
   out.sort((x, y) => y.prio - x.prio || x.from - y.from);
   const keep = [];
@@ -14326,7 +14326,7 @@ function dialogueShow(scriptId, m) {
   const sc = MEETING_SCRIPTS[scriptId]; if (!sc) return false;
   m = m || MEETINGS.find(x => x.script === scriptId) || { id: scriptId, who: [], at: shipNow() };
   DIALOGUE = { id: scriptId, m, cast: meetingCast(m), ctx: evCtx(SHIP.event), queue: sc.lines.slice(), i: 0, at: 0 };
-  eventMine('meetings', 1);
+  if (!/^moment:/.test(scriptId)) eventMine('meetings', 1);   // a moment (20c) never counts toward a commendation
   dialogueDraw(); return true;
 }
 function dialogueView() {
@@ -14364,8 +14364,8 @@ function dialogueStep(k) {
   const l = D.queue[D.i];
   if (l && l.choice) {
     const c = l.choice[k]; if (!c) return;
-    { const sc = MEETING_SCRIPTS[D.id]; if (sc && typeof sc.onPick === 'function') sc.onPick(k, c); }   // a moment's reply (20c)
-    eventMine('choice:' + D.id, k + 1);
+    { const sc = MEETING_SCRIPTS[D.id]; if (sc && typeof sc.onPick === 'function') try { sc.onPick(k, c); } catch (e) { /* the panel goes on */ } }   // a moment's reply (20c)
+    if (!/^moment:/.test(D.id)) eventMine('choice:' + D.id, k + 1);   // social B's moments aren't the event's meetings
     for (const [who, pts] of Object.entries(c.rel || {})) { const p = D.cast[who] || schedPeople().find(q => q.id === who); if (p && typeof relAdd === 'function') relAdd(p.id, 'meeting:' + D.m.id, pts); }
     if (c.job) eventTakeJob(c.job);
     for (const [th, n] of Object.entries(c.thread || {})) eventScore(th, n);   // a small nudge to the event's thread
@@ -14389,7 +14389,7 @@ function eventTakeJob(job) {
 function dialogueEnd(finished) {
   const D = DIALOGUE; if (!D) return;
   DIALOGUE = null;
-  { const sc = MEETING_SCRIPTS[D.id]; if (sc && typeof sc.onEnd === 'function') sc.onEnd(finished); }   // a moment ending (20c)
+  { const sc = MEETING_SCRIPTS[D.id]; if (sc && typeof sc.onEnd === 'function') try { sc.onEnd(finished); } catch (e) { /* closes anyway */ } }   // a moment ending (20c)
   if (typeof deviceDialogue === 'function') deviceDialogue(null); else if (DIALOGUE_EL) DIALOGUE_EL.hidden = true;
   if (!finished && D.m.event !== 'occasion') meetingGist(D.id);   // an occasion's gist is for missing it, not leaving early
 }
