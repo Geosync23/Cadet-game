@@ -2,6 +2,10 @@
 
 Written at 0.40.8 (merged up to claude/ship-integration 980e6a9), brought up to date at 0.27.18 (on ship-integration d89a3f5 / 0.41.7) and again at 0.27.22, 0.27.27 and 0.27.32 by the second performance engineer (session_01XAkY9U3mmstHQT2yAMTocA; claude/crowd-render abe6d2b, on ship-integration 0.60.2 / 142b503). Plain notes for whoever picks this area up.
 
+## Performance engineer 3 (session started 2026-10-17, reports to lead session_01KPJMYjXAPkNUcrQ8VRkhLE)
+- **0.27.33 done** (73b8998): stand-ins built a slice a frame (`shadowStep`, `SHADOW_JOB`, `SHADOW_STEP`); see its DEV_NOTES row. Sent to reviewer 2b. Scratchpad probes (not committed): sseq.py (stand-ins bit-for-bit vs an old build), ssi2.py (per-slice timing using `Performance.prototype.now.call(performance)`, since the test harness fakes `performance.now`), shots.py (54 shots, all decks, mid-build and done), midb.py (leave a deck mid-build, memory flat).
+- **Waiting:** build master 2's final 0.60.3, then the phone-like measurement against 0.60.2.
+
 ## Read first: state at handover (2026-10-17 ~13:40, the second performance engineer)
 - **Branch:** `claude/crowd-render`. The last build is 0.27.32 (abe6d2b); handover notes are on top of it. All of 0.27.25–0.27.32 passed review by reviewer 2b (session_01F93LiFWtciyCLNV34qPsjP; notes in plans/reviews/ on claude/reviews-2). None of them are in the 0.60.3 candidate (claude/cand-0603 f0f8a7c). I recommended merging abe6d2b into 0.60.4; the only conflicts are the two build lines.
 - **First job for the next performance session: 0.27.33, stand-ins built over a few frames on a deck change** (the plan is below, under Slow frames, "Next job"). The lead approved it on 2026-10-17. The picture must be identical at every moment.
