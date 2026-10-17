@@ -157,8 +157,8 @@ with sync_playwright() as pw:
       out.fill = { me: socialFill(tomas, 'me'), nick: socialFill(tomas, 'nick'), boss: socialFill(works, 'boss'), thing: socialFill(tomas, 'thing', { mem: 'fixed.oven' }), none: socialFill(tomas, 'rival') };
       out.calm = memThing('fixed.oven') === 'the oven' && memThing('nothing') === null && memThing('came.quiz') === 'the quiz night' && memThing('show.pell-show') === 'the music boxes';
       out.memNone = mem('tomas', 'fav') === null && bondOf('tomas', 'best') === null;
-      SHIP.social.bonds = { 'tomas:pell': { kind: 'friends', since: 1 }, 'calder:tomas': { kind: 'mentor', since: 1 } };
-      out.bonds = [socialFill(tomas, 'friend'), bondOf('tomas', 'friend'), bondOf('pell', 'friends'), socialFill(tomas, 'mentor'), bondOf('calder', 'mentee'), socialFill(tomas, 'best')]; SHIP.social.bonds = {};
+      const B0 = SHIP.social.bonds; SHIP.social.bonds = { 'tomas:pell': { kind: 'friends', since: 1 }, 'calder:tomas': { kind: 'mentor', since: 1 } };
+      out.bonds = [socialFill(tomas, 'friend'), bondOf('tomas', 'friend'), bondOf('pell', 'friends'), socialFill(tomas, 'mentor'), bondOf('calder', 'mentee'), socialFill(tomas, 'best')]; SHIP.social.bonds = B0;
       out.pure = JSON.stringify(socSave()) === before;
       socNote('repair', { who: 'you', kind: 'oven', deck: 3 }); socNote('repair', { who: 'pell', kind: 'fan', deck: 5 });
       out.cue = [!!cue('repair.oven'), !!cue('repair.oven.you'), !!cue('repair.fan'), !!cue('repair.fan.you'), !!cue('repair'), cue('repair.lift') === null];

@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.36.50
+   STARSHIP CADET: CSV Wren                           build 0.36.51
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.36.50';                           // keep in step with the header's build line
+const GAME_BUILD = '0.36.51';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -14089,7 +14089,7 @@ function cue(kind) {
 // for a day or two. SOC_CUE_OF: note kind -> [the cue's key from its data, days it lasts]. Memories (A2) and
 // reputation (A6) listen here too
 const SOC_CUE_OF = {
-  repair: [d => 'repair.' + ((typeof machineById === 'function' && d.machine && machineById(d.machine) || {}).kind || (d.kind !== 'repair' && d.kind) || 'machine'), 2],   // the machine's own kind first (the bus's note has its own `kind`)
+  repair: [d => 'repair.' + ((typeof machineById === 'function' && d.machine && machineById(d.machine) || {}).kind || d.job || (d.kind !== 'repair' && d.kind) || 'machine'), 2],   // the machine's own kind first (the bus's note has its own `kind`)
   tradition: [d => 'tradition.' + d.id, 1], eventPhase: [d => 'event.' + d.id + '.' + d.phase, 1], favour: [d => 'favour', 1],
   gift: [d => 'gift', 1], harvest: [d => 'harvest', 2], lateMeal: [d => 'lateMeal', 1],
 };
