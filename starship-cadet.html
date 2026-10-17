@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.36.30
+   STARSHIP CADET: CSV Wren                           build 0.36.31
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.36.30';                           // keep in step with the header's build line
+const GAME_BUILD = '0.36.31';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -14686,6 +14686,7 @@ function socialHour(h) {
   for (const [K, id] of learnt) K.add(id);
   socBorn(h, rooms);
   socCourtesy(h, rooms);
+  if (typeof storyHour === 'function') storyHour(h, pairs);   // bonds between crew (20c)
   if (h % 24 === 4) memFade();
   if (h % 24 === 19) socCrewGift(h);
   if (h % 24 === 7) { socTransfers(h); socInvites(h); }
@@ -15116,7 +15117,9 @@ function chatDraw(el, v) {
 function chatShow() {
   const C = CHAT, p = C.p, r = relGet(p.id), today = SHIP.time.day;
   const f = C.fav, ready = f && !f.idea && f.status === 'claimed' && f.claimedBy === 'you' && (f.workDone || !f.stops.length);
-  const buttons = C.ask ? [{ id: 'ask-news', label: 'News' }, { id: 'ask-work', label: 'Their work' }, { id: 'ask-home', label: 'Home' }, { id: 'back', label: 'Back' }]
+  const intro = C.ask === 'intro' && typeof introOptions === 'function' ? introOptions(p) : [];   // "Do you know...?" (20c's introductions)
+  const buttons = C.ask === 'intro' ? intro.slice(0, 3).map(x => ({ id: 'intro:' + x.id, label: x.name })).concat([{ id: 'back', label: 'Back' }])
+    : C.ask ? [{ id: 'ask-news', label: 'News' }, { id: 'ask-work', label: 'Their work' }, { id: 'ask-home', label: 'Home' }].concat(typeof introOptions === 'function' && introOptions(p).length ? [{ id: 'ask-intro', label: 'Do you know…?' }] : [], [{ id: 'back', label: 'Back' }])
     : C.offer ? [{ id: 'fav-yes', label: 'I\'ll do it' }, { id: 'fav-no', label: 'Not now' }]
     : [{ id: 'chat', label: r.chatDay === today ? 'Chatted today' : 'Chat', off: r.chatDay === today }, { id: 'ask', label: 'Ask about…' },
        { id: 'help', label: ready ? 'Done: here you go' : 'Help?' }, { id: 'meet', label: 'Meet up' }];
@@ -15170,6 +15173,8 @@ function chatDo(id) {
   else if (id === 'give') { const g = giftInHands(), res = g && giftGive(p, g); if (res) chatSay(res.text); }
   else if (id === 'sit') { const mo = C.line.moment; if (mo && typeof momentShow === 'function') { chatClose(); momentShow(mo); } }
   else if (id === 'back') { C.ask = false; chatShow(); }
+  else if (id === 'ask-intro') { C.ask = 'intro'; chatSay(pick(['Who did you have in mind?', 'Go on, who?', 'Introduce me to someone? All right.'], 665)); }
+  else if (id.startsWith('intro:')) { const l = typeof introDo === 'function' ? introDo(p, id.slice(6)) : null; C.ask = true; chatSay(l || 'Maybe another time.'); }
   else if (id === 'ask-news') {
     const heard = new Set(SHIP.heard.map(x => x.id)), n = newsKnownBy(p).find(x => !heard.has(x.id) && !(x.about === p.id && x.kind !== 'fault') && x.about !== 'you');
     if (n) { playerHeard(n.id, p.id); chatSay(pick(n.lines, 620)); } else chatSay(pick(['Nothing new, really.', 'Quiet week. I\'ll let you know.', 'Not that I\'ve heard.'], 621));

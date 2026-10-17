@@ -39,7 +39,8 @@ RUN = r"""(({ days, player, jump }) => {
            up: moved.filter(v => v > 0).length, down: moved.filter(v => v < 0).length },
     born: stats.born, spread: stats.spread, news: NEWS.length, heard: SHIP.heard.length,
     rel: Object.fromEntries(Object.entries(SHIP.rel).map(([k, r]) => [k, [r.pts, REL_NAMES[r.tier]]])),
-    sample: NEWS.slice(-6).map(x => x.lines[0]), mem: Object.fromEntries(Object.entries(SHIP.mem).map(([k, l]) => [k, l.map(m => m[0] + ' ' + Math.round(m[2]))])), rep: SHIP.rep && { dept: SHIP.rep.dept, ship: SHIP.rep.ship, view: repView() } };
+    sample: NEWS.slice(-6).map(x => x.lines[0]), mem: Object.fromEntries(Object.entries(SHIP.mem).map(([k, l]) => [k, l.map(m => m[0] + ' ' + Math.round(m[2]))])), rep: SHIP.rep && { dept: SHIP.rep.dept, ship: SHIP.rep.ship, view: repView() },
+    bonds: typeof storyHour === 'function' ? Object.values(SHIP.social.bonds || {}).reduce((o, b) => (o[b.kind] = (o[b.kind] || 0) + 1, o), {}) : null };
 })"""
 
 ok = True
@@ -89,6 +90,9 @@ with sync_playwright() as pw:
     if 'intro.arrival 100' not in m.get('pell', []): fail('a core memory should stay at 100')
     if not any(k != 'rina' and any(x.startswith('heard.moment.test.1') for x in l) for k, l in m.items()): print('  (nobody heard of the big memory: Rina has no friends at 40+)')
 
+    if a.get('bonds') is not None:          # 20c's bonds (social B), once storyHour is in
+        bk = a['bonds']; print('Bonds after the run:', json.dumps(bk))
+        if not (15 <= bk.get('friends', 0) <= 40) or not (2 <= bk.get('rivals', 0) <= 6) or not bk.get('mentor'): print('  NOTE bond numbers outside the plan\'s targets (friends 15-40, rivals 2-6, a mentor)')
     rp = a['rep']
     print('Reputation after the run:', json.dumps(rp and {'dept': rp['dept'], 'ship': rp['ship'], 'knownFor': rp['view']['knownFor']}))
     if not rp or rp['dept']['galley'] < 20 or max(v for k, v in rp['dept'].items() if k not in ('galley', 'works')) >= 20: fail('a stand-in who fixes galley ovens should be known in the galley, and only there')
