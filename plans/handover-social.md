@@ -3,7 +3,7 @@
 Written by session_012pK2XVi5UhqEd28fakYk68 (took over from session_01DzZ669spGpdSdVMYzUog2N, whose Pillar 3 note this replaces; its content is in DEV_NOTES "Social life"). Read CLAUDE.md, DEV_NOTES.md ("Social life (section 20)", all of it), plans/pillar4-plan.md (Part 6, seat 3) and plans/social-deep-plan.md on claude/social-design (the A steps, Parts 2, 4, 5, 6, 7, 8, 8b) first.
 
 ## Role, branch and builds
-- Branch `claude/social`, builds 0.36.20+. Last: **0.36.73** (1e8f091). Ship integration 0.60.2 merged in at 0.36.64 (84e992e).
+- Branch `claude/social`, builds 0.36.20+. Last: **0.36.76** (2cfbc63). Ship integration 0.60.2 merged in at 0.36.64 (84e992e).
 - 0.36.41 passed the full set; later builds ran social_check (17 parts), plus intro_check and cadet_test where they touched anything visible (0.36.65/0.36.66 ALL IDENTICAL). Reviewer 1b (session_018XY1NbMBxo2SLDPxooe5yx) reviews; 0.36.52-0.36.59 PASS WITH FIXES, fixed in 0.36.60-0.36.62.
 - I own section `// 20. SOCIAL` (except the sub-block `// 20c. SOCIAL STORIES` at its end, social B's) and `social_check.py`.
 - Report to the lead (now session_01KPJMYjXAPkNUcrQ8VRkhLE) after each push. Onboarding engineer: session_01KaHzfqSqF8B4bkNFrH1tsx.
@@ -26,7 +26,8 @@ A1 0.36.20 query API; A2 0.36.21 memories; A3 0.36.22 lines through `lineFor`; A
 - When social B's bonds merge, turn social_check's bond NOTE into a FAIL (friends 15-40, rivals 2-6, a mentor at day 14).
 - A10's other half is onboarding's: `introGuide(id)` (you lead, the newcomer follows) and `introGuideEnd(id)`; I asked them to keep `introOn()` about your own intro while you guide (else week-1 gates close again). `simNote('guideAssigned', { id, day })` goes out at assignment.
 - A12 done on paper; the rest waits for the user's play. The month runner is a scratch script (month.py: social_check's harness plus a stand-in player; easy to rebuild from social_check's RUN).
-- The save is 26.6 KB at day 56 (budget 30 KB): aff 4.9, affWeek (20c) 3.6, cues 3.5, bonds 3.2, rel 2.6. Cues could be capped lower if it creeps.
+- The save (the lead's rule): at most 30 KB at day 140, under 40 KB at any length; every saved part hard-bounded, worst cases in DEV_NOTES "Social life", Save bounds. `social_check.py BUILD --long` (280 days, ~30 min) checks it; measure on a build merged with social B's latest. 0.36.74: occasions' appointments (`a.occ`) skipped. 0.36.75-0.36.76: heard/cues/pairs/known packed, pairs 300, moved 24. Social B2 is adding storyBondsPack/Unpack for socSave: wire it in when they send it.
+- Open: sim engineer 4's 'purity wrong' report on ship-events + 69876a7 never reproduced here; social_check now names the changed save part.
 
 ## Gotchas
 - **Run social_check before every push**, even one-liners (0.36.38 lost a helper and broke every card; reviewer 1 caught it).
@@ -39,7 +40,7 @@ A1 0.36.20 query API; A2 0.36.21 memories; A3 0.36.22 lines through `lineFor`; A
 - **Trial merges: never `git merge -X ours`.** It keeps your side of a whole conflict block, and a block can swallow another seat's new code next to it (the build-number line sits right beside section 13's bus, so `-X ours` silently dropped the bus). Merge normally, take theirs for every conflict outside section 20 (a small script on the markers), and check the other seat's key function is in the result (e.g. `grep -c 'function simNote'`).
 
 ## How to test
-- `CADET_CHROME=/opt/pw-browsers/chromium python3 social_check.py BUILD.html` (18 parts, ~4 min). Then the full set one at a time (deck, day 1, player, events, interactions, food, machine, cadet_test vs the previous build), from a scratch copy of the build.
+- `CADET_CHROME=/opt/pw-browsers/chromium python3 social_check.py BUILD.html` (18 parts, ~4 min; `--long` for the long-play save check). Then the full set one at a time (deck, day 1, player, events, interactions, food, machine, cadet_test vs the previous build), from a scratch copy of the build.
 
 ## Open questions for the user
 - Are the numbers right once played (visits, invitations, gift points, reputation dips)? More drama or gentler?

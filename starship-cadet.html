@@ -25550,6 +25550,7 @@ const setOfIds = (hex, ids) => { const s = new Set(); ids.forEach((id, i) => { i
 // 20c's bonds packed for the save (0.36.67): [a, b, kind, since, peak, seen(, other fields)] by crew index, kinds by
 // SOC_BOND_KINDS; about a third of the size of the 'a:b' object form, which older saves have and still load
 function bondsPack(B) {
+  if (typeof storyBondsPack === 'function') { const v = storyBondsPack(B); if (v) return v; }   // 20c's compact form
   const l = []; for (const k in B || {}) { const [a, b] = k.split(':'), x = B[k], i = SOC.idx.get(a), j = SOC.idx.get(b), ki = SOC_BOND_KINDS.indexOf(x.kind);
     if (i === undefined || j === undefined || ki < 0) continue;
     const { kind, since, peak, seen, ...rest } = x, r = [i, j, ki, since ?? null, peak ?? null, seen ?? null]; if (Object.keys(rest).length) r.push(rest); l.push(r); }
@@ -25557,6 +25558,7 @@ function bondsPack(B) {
 }
 function bondsUnpack(o, ids) {                            // ids: the save's crew list (idl)
   if (!o || typeof o !== 'object') return {};
+  if (o.v === 2 && typeof storyBondsUnpack === 'function') return storyBondsUnpack(o, ids);   // 20c's compact form
   if (o.v !== 1 || !Array.isArray(o.l)) return JSON.parse(JSON.stringify(o));   // the older form
   const B = {}; for (const r of o.l) { if (!Array.isArray(r)) continue; const a = ids[r[0]], b = ids[r[1]], kind = SOC_BOND_KINDS[r[2]]; if (!a || !b || !kind || !SOC.idx.has(a) || !SOC.idx.has(b)) continue;
     const x = { kind }; if (r[3] != null) x.since = r[3]; if (r[4] != null) x.peak = r[4]; if (r[5] != null) x.seen = r[5]; if (r[6] && typeof r[6] === 'object') Object.assign(x, r[6]); B[a + ':' + b] = x; }
@@ -25565,6 +25567,16 @@ function bondsUnpack(o, ids) {                            // ids: the save's cre
 // what you've heard, for the save (0.36.75): everything about news still going round (it decides what crew still tell you,
 // so picks never change), and the HEARD_FEED latest of the rest for the Ship app's feed; in heard order, as short arrays
 const HEARD_FEED = 12;
+// what you know about someone, for the save (0.36.76): their roster lines as '#a<i>' (about) / '#l<i>' (life), the rest as written
+function knownPack(id, K) { const p = SOC.idx.has(id) && SOC.crew[SOC.idx.get(id)], A = p && (p.about || []).map(x => x && x.text), L = p && p.life || [];
+  return K.map(k => { const i = A ? A.indexOf(k) : -1; if (i >= 0) return '#a' + i; const j = L.indexOf(k); return j >= 0 ? '#l' + j : k; }); }
+function knownUnpack(id, K) { const p = SOC.idx.has(id) && SOC.crew[SOC.idx.get(id)];
+  return K.map(k => { const m = typeof k === 'string' && /^#([al])(\d+)$/.exec(k); if (!m) return k; const x = m[1] === 'a' ? p && p.about && p.about[+m[2]] && p.about[+m[2]].text : p && p.life && p.life[+m[2]]; return x || null; }).filter(k => typeof k === 'string'); }
+const PAIRS_MAX = 300, MOVED_MAX = 24;                    // the pair news already told, and who moved on, at most (oldest go first; 04:00 each day)
+function socTrim() {
+  const P = SHIP.social.pairs, ks = Object.keys(P); for (let k = 0; k < ks.length - PAIRS_MAX; k++) delete P[ks[k]];
+  const M = SHIP.social.moved; if (M && M.length > MOVED_MAX) M.splice(0, M.length - MOVED_MAX);
+}
 function heardKept() {
   const live = new Set(NEWS.map(x => x.id)), H = SHIP.heard.slice(-60), old = H.filter(h => !live.has(h.id)).slice(-HEARD_FEED);
   const keep = new Set(old); return H.filter(h => live.has(h.id) || keep.has(h)).map(h => live.has(h.id) ? [h.id, h.from, h.at] : [h.id, h.from, h.at, h.line]);   // [id, from, at(, line)]: a live item's line comes back from NEWS on load
@@ -25573,7 +25585,7 @@ const cueSaved = c => Object.fromEntries(Object.entries(c).filter(([, v]) => v !
 const pairsSaved = P => Object.entries(P).map(([k, v]) => k + v).join(',');   // '12-45f,3-9r': the pair news already told
 function socSave() {
   socInit();
-  const rel = {}; for (const id in SHIP.rel) { const r = SHIP.rel[id]; rel[id] = [r.pts, r.met, r.lastTalk, r.known.slice(), r.chatDay || 0, r.mealDay || 0, r.workDay || 0, r.favDay || 0, r.seekDay || 0, r.arc || 0, r.arcDay || 0, r.showDay || 0, r.giftWeek || 0, r.inviteDay || 0, r.visitDay || 0, r.bye || 0, r.hostDay || 0]; const x = rel[id]; while (x.length > 4 && !x[x.length - 1]) x.pop(); }   // trailing zeros left off (they load as 0)
+  const rel = {}; for (const id in SHIP.rel) { const r = SHIP.rel[id]; rel[id] = [r.pts, r.met, r.lastTalk, knownPack(id, r.known), r.chatDay || 0, r.mealDay || 0, r.workDay || 0, r.favDay || 0, r.seekDay || 0, r.arc || 0, r.arcDay || 0, r.showDay || 0, r.giftWeek || 0, r.inviteDay || 0, r.visitDay || 0, r.bye || 0, r.hostDay || 0]; const x = rel[id]; while (x.length > 4 && !x[x.length - 1]) x.pop(); }   // trailing zeros left off (they load as 0)
   let bin = ''; for (const x of new Uint8Array(SHIP.aff.buffer)) bin += String.fromCharCode(x);
   return { ids: socHash(SOC.ids), idl: SOC.ids, hour: SHIP.social.hour, aff: btoa(bin), news: NEWS.map(x => ({ ...x, k: bitsOf(SHIP.knows[x.id] || []) })),
            heard: heardKept(), fault: { ...SHIP.social.fault }, pairs: pairsSaved(SHIP.social.pairs), mail: SHIP.social.mail.map(x => ({ ...x })), feuds: JSON.parse(JSON.stringify(SHIP.social.feuds)), courtesy: { ...SHIP.social.courtesy }, cues: SHIP.social.cues.map(cueSaved), mentor: SHIP.social.mentor || null, given: (SHIP.social.given || []).map(x => ({ ...x })), keepsakes: (SHIP.social.keepsakes || []).map(x => ({ ...x })), rep: SHIP.rep ? JSON.parse(JSON.stringify(SHIP.rep)) : null, invites: (SHIP.social.invites || []).map(x => ({ ...x })), notes: (SHIP.social.notes || []).map(x => ({ ...x })), visitDay: SHIP.social.visitDay || 0, moved: (SHIP.social.moved || []).map(x => ({ ...x, mem: x.mem.slice() })), bonds: bondsPack(SHIP.social.bonds), affWeek: typeof SHIP.social.affWeek === 'string' ? SHIP.social.affWeek : null, stories: JSON.parse(JSON.stringify(SHIP.social.stories || {})), noteq: JSON.parse(JSON.stringify(SHIP.social.noteq || [])), seekAsks: (SHIP.social.seekAsks || []).map(x => ({ id: x.id, from: x.from, until: x.until, why: x.why, done: !!x.done })), guide: SHIP.social.guide ? { ...SHIP.social.guide } : null, rel, ...memSave() };
@@ -25607,7 +25619,7 @@ function socLoad(s) {
     }
     SHIP.heard = Array.isArray(s.heard) ? s.heard.map(h => Array.isArray(h) ? { id: h[0], from: h[1] ?? null, at: h[2], line: h.length > 3 ? h[3] : (NEWS.find(x => x.id === h[0]) || { lines: [null] }).lines[0] } : h).filter(h => h && typeof h.id === 'string').slice(-60) : [];   // arrays since 0.36.75, objects before
     SHIP.rel = {};
-    for (const id in s.rel || {}) { const r = s.rel[id]; if (SOC.idx.has(id) && Array.isArray(r) && isFinite(r[0])) SHIP.rel[id] = { pts: +r[0], tier: 0, met: r[1] ?? null, lastTalk: r[2] ?? null, known: Array.isArray(r[3]) ? r[3].slice() : [], chatDay: r[4] | 0, mealDay: r[5] | 0, workDay: r[6] | 0, favDay: r[7] | 0, seekDay: r[8] | 0, arc: r[9] | 0, arcDay: r[10] | 0, showDay: r[11] | 0, giftWeek: r[12] | 0, inviteDay: r[13] | 0, visitDay: r[14] | 0, bye: r[15] | 0, hostDay: r[16] | 0 }; }
+    for (const id in s.rel || {}) { const r = s.rel[id]; if (SOC.idx.has(id) && Array.isArray(r) && isFinite(r[0])) SHIP.rel[id] = { pts: +r[0], tier: 0, met: r[1] ?? null, lastTalk: r[2] ?? null, known: Array.isArray(r[3]) ? knownUnpack(id, r[3]) : [], chatDay: r[4] | 0, mealDay: r[5] | 0, workDay: r[6] | 0, favDay: r[7] | 0, seekDay: r[8] | 0, arc: r[9] | 0, arcDay: r[10] | 0, showDay: r[11] | 0, giftWeek: r[12] | 0, inviteDay: r[13] | 0, visitDay: r[14] | 0, bye: r[15] | 0, hostDay: r[16] | 0 }; }
     for (const id in SHIP.rel) SHIP.rel[id].tier = relTierOf(SHIP.rel[id].pts);
     memLoad(s);
     SHIP.rep = s.rep && typeof s.rep === 'object' && s.rep.dept && s.rep.ship ? JSON.parse(JSON.stringify(s.rep)) : null;
@@ -26549,7 +26561,7 @@ function socialHour(h) {
   socBorn(h, rooms);
   socCourtesy(h, rooms);
   if (typeof storyHour === 'function') storyHour(h, pairs);   // bonds between crew (20c)
-  if (socHr(h) === 4) { memFade(); socHeal(h); }
+  if (socHr(h) === 4) { memFade(); socHeal(h); socTrim(); }
   if (socHr(h) === 19) socCrewGift(h);
   if (socHr(h) === 7) { socTransfers(h); socInvites(h); socGuideDay(h); }
   if (socHr(h) === 15) socGuideMail(h);
@@ -26686,6 +26698,7 @@ function socialSeekAsk(id, o = {}) {
   socInit(); if (!SOC.idx.has(id) || !isFinite(o.from) || !isFinite(o.until)) return false;
   const A = SHIP.social.seekAsks || (SHIP.social.seekAsks = []);
   if (A.some(a => a.id === id && a.from === o.from)) return true;
+  for (let k = A.length - 1; k >= 0; k--) if (A[k].until < shipNow() - 1440) A.splice(k, 1);   // asks over a day ago are gone (a bound for the save)
   A.push({ id, from: o.from, until: o.until, why: o.why || null, done: false }); return true;
 }
 const seekAskFor = (id, t) => (SHIP.social.seekAsks || []).find(a => a.id === id && !a.done && t >= a.from && t < a.until) || null;
