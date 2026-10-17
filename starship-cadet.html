@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.48.19
+   STARSHIP CADET: CSV Wren                           build 0.48.20
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.48.19';                           // keep in step with the header's build line
+const GAME_BUILD = '0.48.20';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -15048,21 +15048,56 @@ const VOICE = {
         {"text": "Right. Back to it. Both of us.", "id": "1mk1pws", "tier": [1, 4]},
         {"text": "Off you go, {nick}. Hm. Good talk. Don't tell anyone.", "id": "1nvzz21", "tone": "warm", "tier": [3, 4]},
       ],
+      "callback": [
+        {"text": "Behind the second door, on the left. You knew. Good. Now learn the rest.", "id": "1xabpy6", "told": "moment.holt.locker"},
+        {"text": "\"No idea, Chief.\" Honest. Now you know. Second door. Left.", "id": "mcy4bd", "told": "moment.holt.noidea"},
+        {"text": "Yes. It was a test. You passed. Don't tell Mensah.", "id": "19jeem4", "tone": "funny", "told": "moment.holt.test"},
+        {"text": "Under, over, through, and back. You saw I'd learnt it. Keep seeing things.", "id": "2e46yp", "told": "moment.holt.learnt"},
+        {"text": "You offered to fetch the Envoy. I'd have had to explain myself. Thank you for not.", "id": "dqvid9", "tone": "funny", "told": "moment.holt.fetch"},
+        {"text": "The knot. Our secret. Mensah suspects. He suspects everything. My fault.", "id": "zvnaqr", "tone": "funny", "told": "moment.holt.secret"},
+        {"text": "The other night. You listened. That's rarer than courage. Thank you.", "id": "hck8vp", "tone": "warm", "told": "moment.holt.listened"},
+        {"text": "You asked what would help. Asking helped. I didn't say so. Saying now.", "id": "1rv0q85", "tone": "warm", "told": "moment.holt.help"},
+        {"text": "A rite. Six hours. Knowing helps. A bit. More than I thought.", "id": "y8rxx9", "told": "moment.holt.knowing"},
+        {"text": "You carried the invitation. I went in. I'll not forget that.", "id": "1av8aa8", "tone": "warm", "told": "moment.holt.carried"},
+        {"text": "\"It's only tea.\" You were right. It was only tea. It was very good tea.", "id": "r3wd4k", "tone": "funny", "told": "moment.holt.onlytea"},
+        {"text": "You stood at that door with me. Some time, it was. Thank you.", "id": "gd12m", "tone": "warm", "told": "moment.holt.stood"},
+        {"text": "You said you were glad. So am I. Hm. Don't spread it about.", "id": "zbp0n", "tone": "warm", "told": "moment.holt.glad"},
+        {"text": "Three knots. You've learnt one. Badly. Practise.", "id": "1dgo1mz", "tone": "funny", "told": "moment.holt.knot"},
+        {"text": "Mensah is unbearable. You were right. He's bought me a cup with a knot on it.", "id": "1op8w0z", "tone": "funny", "told": "moment.holt.mensah"},
+        {"text": "Saw your repair. That hatch shuts properly now. Hm. Good.", "id": "1mshk4g", "told": "fixed."},
+        {"text": "You came. I saw you. I see everyone. Still. Good.", "id": "hukzla", "told": "came."},
+        {"text": "Someone remembered my birthday. You. Mensah's doing, I expect. Hm. Thank you.", "id": "71bggt", "tone": "warm", "told": "bday"},
+      ],
       "chat": [
         {"text": "Questions? Ask now. In an emergency, there isn't time.", "id": "jr5sfd", "tier": [0, 0]},
         {"text": "Where's the nearest suit locker from your bunk? Good. Now from the mess? Hm. Learn it.", "id": "1u9cpvn", "tier": [1, 4]},
         {"text": "Watch is easy. Know where everyone is, and stay calm. The second bit's harder.", "id": "om8orw", "tier": [1, 4]},
         {"text": "Mensah says I should smile more at juniors. This is me smiling. Hm.", "id": "dx8r6j", "tone": "funny", "tier": [2, 4]},
       ],
+      "cue": [
+        {"text": "Storm coming. Everyone to their post. Don't run. Walk fast.", "id": "1wmqcie", "cue": "event.ionStorm.warning"},
+        {"text": "It's here. Count your exits. I've counted mine.", "id": "p1gu4a", "cue": "event.ionStorm.onset"},
+        {"text": "Storm's done. Every door held. Every person accounted for. Good.", "id": "ffgqzj", "cue": "event.ionStorm.afterglow"},
+        {"text": "Veyli delegation aboard. I'll be at the door. Being polite. Watch me.", "id": "h3upiu", "tone": "funny", "cue": "event.diplomatic.onset"},
+      ],
       "decline": [
         {"text": "Can't. Rounds. Another day.", "id": "eu9w0i", "tier": [1, 4]},
         {"text": "No. Not that one. But ask again. I mean that.", "id": "16524wp", "tier": [1, 4]},
+        {"text": "Rest day. I'll walk the decks anyway. Slower. Saturday?", "id": "rcjoh0", "tone": "funny", "weekday": "thu|fri"},
       ],
       "feel": [
         {"text": "Quiet decks, doors shut, nobody where they shouldn't be. Good day.", "id": "r67rg", "mood": "high"},
         {"text": "Long shift. Mensah tried a joke on me. It nearly worked.", "id": "xcwmf2", "tone": "funny", "mood": "low"},
         {"text": "Drill went well. Every junior to their post in under two minutes. Adequate.", "id": "9tqdoj", "tone": "funny", "mood": "high", "tier": [1, 4]},
         {"text": "Ordinary day. Doors shut, people safe. That's what ordinary is for.", "id": "icm3o0", "mood": "ok"},
+        {"text": "Bad night. Old dreams. Gone by breakfast. Usually.", "id": "1ivlaph", "beat": "holt.3", "mood": "low", "tier": [3, 4]},
+        {"text": "Good day. Mensah made me laugh. Once. He's insufferable.", "id": "b4sueu", "tone": "funny", "mood": "high", "tier": [3, 4]},
+      ],
+      "gift": [
+        {"text": "For me. Hm. That's. Hm. Thank you, {nick}. Really.", "id": "18x2nc", "tone": "warm", "gift": "loved"},
+        {"text": "Hm. Useful. Thank you.", "id": "1qxfl79", "gift": "liked"},
+        {"text": "Thank you. I'll find a shelf.", "id": "11cjw62", "gift": "polite"},
+        {"text": "Tea. Hm. I know someone who'll want to try that. Don't ask who.", "id": "18kupkz", "tone": "funny", "beat": "holt.5", "gift": "tea"},
       ],
       "greet": [
         {"text": "{hi}. Nearest suit locker. Don't look. Point.", "id": "2sxan5", "tier": [0, 0]},
@@ -15081,6 +15116,12 @@ const VOICE = {
         {"text": "There you are. Haven't seen you on my rounds. Noticed. That's my job.", "id": "39rfyk", "tier": [1, 4], "warmth": "cold"},
         {"text": "Hm. Cadet. You did the drill right on Tuesday. Didn't say. Saying now.", "id": "1ne2rju", "tier": [2, 4]},
         {"text": "{nick}. Walked the long way this morning. Thought you'd be up. You weren't.", "id": "ucrp5f", "tone": "funny", "tier": [3, 4], "time": "morning"},
+        {"text": "Sowing. New season, same doors. Shut them.", "id": "1pa91tb", "season": "sowing", "tier": [1, 4]},
+        {"text": "Greening. Founding Day's coming. Drills first. Bunting after.", "id": "17jriut", "season": "greening", "tier": [1, 4]},
+        {"text": "Harvest. The garden's open late. More doors to check. Fine.", "id": "ocg6z8", "season": "harvest", "tier": [1, 4]},
+        {"text": "Lanterns. Somebody always hangs one on a hatch wheel. Not you. Good.", "id": "1ta80yf", "season": "lanterns", "tier": [1, 4]},
+        {"text": "Cadet. Watch speaks well of you. Vasquez quoted you. To me. Hm.", "id": "1vupn7b", "tone": "funny", "rep": "well"},
+        {"text": "Hm. Reliable, they say. I don't say things like that. I'm nodding.", "id": "wricnt", "tone": "funny", "you": "reliable"},
       ],
       "hint": [
         {"text": "Cadet. Walk with me. One deck. Not about work.", "id": "zfatr8", "tier": [3, 4]},
@@ -15093,12 +15134,17 @@ const VOICE = {
       "joy": [
         {"text": "Five in the morning, every door where it should be. Nothing better aboard.", "id": "1uormhg", "tone": "warm", "tier": [2, 4]},
         {"text": "A deck at five in the morning. Lights low, doors shut, the ship breathing. Good.", "id": "1cjwnsy", "tier": [1, 4]},
+        {"text": "Rounds done before anyone's up. Every door, every deck. Then tea. Hm.", "id": "uzil07", "tier": [3, 4]},
       ],
       "life": [
         {"text": "Border patrol, before the Wren. Long nights. This ship's easier. Mostly.", "id": "1w53fbl", "tier": [1, 4]},
         {"text": "Mensah keeps count of the times he's made me laugh. His count's wrong. It's lower.", "id": "19uqeoj", "tone": "funny", "tier": [2, 4]},
         {"text": "My juniors call it \"learning the Watch from Holt, one lecture at a time\". It's fair.", "id": "comxoj", "tone": "funny", "tier": [2, 4]},
         {"text": "I asked for the cabin next to the Envoy's. To keep an eye out. That's all it is.", "id": "vzncry", "tier": [2, 4]},
+        {"text": "Border patrol taught me to count exits. I still do it. In the mess. In the gym. Here.", "id": "zyvmdh", "tier": [3, 4]},
+        {"text": "I don't trust easily. The Veyli least of all. Mensah says that's my problem. He's right.", "id": "b0ewyn", "tier": [2, 4], "not": {"beat": "holt.3"}},
+        {"text": "I wrote to Rook. About the Wren. Short letter. She'll laugh at it.", "id": "4gielp", "beat": "holt.3"},
+        {"text": "Tea with the Envoy, every tenth day. Don't make a thing of it. Mensah has.", "id": "17v4dz6", "tone": "funny", "beat": "holt.5"},
       ],
       "missed": [
         {"text": "You didn't turn up. I noticed. I notice everything. Next time, then.", "id": "h6jp25", "tier": [1, 4]},
@@ -15114,14 +15160,26 @@ const VOICE = {
         {"text": "Sit. Hm. Five minutes. I'm off duty. My eyes aren't.", "id": "b0coo0", "tone": "funny", "place": "calm", "tier": [2, 4]},
         {"text": "Junior wing, lights out. Quiet. Except Pell. Pell talks in his sleep.", "id": "1fp57qg", "tone": "funny", "deck": "4", "time": "night"},
         {"text": "The Envoy's door. New knot this month. Hm. I counted. Don't ask why.", "id": "18htm9a", "deck": "2", "tier": [2, 4]},
+        {"text": "Weights. After shift. That's all you need to know.", "id": "1032943", "tone": "funny", "habit": "gym-regular"},
+        {"text": "Breakfast after the rounds. Every deck. Long way. Earned it.", "id": "2rc2iz", "place": "mess", "time": "morning"},
+      ],
+      "note": [
+        {"text": "Your door didn't shut properly. It does now. That's all.", "id": "yxouyj", "tier": [3, 4]},
+        {"text": "Long way round tomorrow, before breakfast. If you're up.", "id": "33k3v8", "tier": [3, 4]},
       ],
       "rumour": [
         {"text": "Heard something. Don't repeat it.", "id": "r6vutj"},
+        {"text": "You didn't hear this from the Watch.", "id": "1ccu8rm"},
       ],
       "smalltalk": [
         {"text": "Hm.", "id": "feqvsb"},
         {"text": "Door's not shut. Fix that.", "id": "1q2w73p"},
         {"text": "Long way round. Always.", "id": "1vm092w"},
+        {"text": "Count your exits.", "id": "17piu6b"},
+        {"text": "Shut that.", "id": "119ihor", "tone": "funny"},
+      ],
+      "visit": [
+        {"text": "Rounds. Your door's on them. Everything all right in here? Hm. Good.", "id": "1ixbf8z", "tier": [3, 4]},
       ],
     },
   },
@@ -16350,21 +16408,55 @@ const VOICE = {
         {"text": "Off you go. I'll have another question for you next time.", "id": "xv9tir", "tier": [1, 4]},
         {"text": "Thank you for the honest answer. Rare, up top.", "id": "r0ahry", "tone": "warm", "tier": [3, 4]},
       ],
+      "callback": [
+        {"text": "You still think the same. Good. So do I. I checked my book.", "id": "12g0ygn", "tone": "warm", "told": "moment.marrow.stillthink"},
+        {"text": "You changed your mind. That's the best answer there is. I've written it in.", "id": "1dz5uuv", "told": "moment.marrow.changed"},
+        {"text": "Yes, I really wrote it down. Page forty. I've underlined a word. Guess which.", "id": "8gvi5f", "tone": "funny", "told": "moment.marrow.wroteitdown"},
+        {"text": "A ship's cat. A very quiet one. Added to the theories. Officially, no cats.", "id": "dz53p0", "tone": "funny", "told": "moment.marrow.cat"},
+        {"text": "\"Whatever we need him to be.\" The Admiral was very pleased with that one.", "id": "1kqrsk0", "tone": "funny", "told": "moment.marrow.whatever"},
+        {"text": "You'd rather not know. Wise. The Admiral agrees. He usually does.", "id": "1ebbstm", "tone": "funny", "told": "moment.marrow.notknow"},
+        {"text": "Thank you for Thursday. For listening. It was a kindness. I don't forget those.", "id": "sm9sl6", "tone": "warm", "told": "moment.marrow.listened"},
+        {"text": "You eat alone some days too, you said. The mess is better full. Let's both remember.", "id": "f2kex1", "told": "moment.marrow.shared"},
+        {"text": "I came to quiz. Nobody was the Captain. We came third. I'm insufferable about it.", "id": "1l6f4gv", "tone": "funny", "told": "moment.marrow.quiz"},
+        {"text": "Ordinary news. I wrote to her about the soup. She wrote back. About the soup.", "id": "1uh2fzw", "tone": "warm", "told": "moment.marrow.ordinary"},
+        {"text": "\"To know they're not worried.\" I put that in a letter. Not in those words.", "id": "1jkm6np", "told": "moment.marrow.notworried"},
+        {"text": "Not having to write back straight away. I've stopped waiting on the device. It helps.", "id": "1ep2a72", "told": "moment.marrow.noreply"},
+        {"text": "You told me to go. That took courage. I'm still thinking. Ask me again in a year.", "id": "1413u4l", "told": "moment.marrow.go"},
+        {"text": "\"It's your life, not the ship's.\" True. Thank you for saying it plainly.", "id": "9y3rw6", "tone": "warm", "told": "moment.marrow.miss"},
+        {"text": "I asked the ready room. The Admiral said nothing. He usually doesn't.", "id": "1fefbai", "tone": "funny", "told": "moment.marrow.readyroom"},
+        {"text": "You came to observatory night. You were looking the right way. Most don't.", "id": "1ck9vi7", "tone": "funny", "told": "came.observatory-night"},
+        {"text": "Calder showed me your repair in the log. She didn't say anything. She showed me.", "id": "u817ef", "tone": "warm", "told": "fixed."},
+        {"text": "You knew my birthday. It's not on the board. Someone told you. I'll find out who.", "id": "17fiy6d", "tone": "funny", "told": "bday"},
+      ],
       "chat": [
         {"text": "My question: what would you change aboard, if you could? Think. I'll ask again.", "id": "igq45i", "tier": [0, 0]},
         {"text": "What are the juniors saying about the senior crew? Kindly, please. Or honestly. Both.", "id": "16ytne9", "tone": "funny", "tier": [1, 4]},
         {"text": "Tell me something good from today. One thing. It doesn't have to be big.", "id": "7nn0mu", "tier": [1, 4]},
         {"text": "I've a theory you'll be good at this. I'm usually right about theories. Not always.", "id": "mfnf8g", "tier": [2, 4]},
       ],
+      "cue": [
+        {"text": "Storm's here. Stay at your post. Stay calm. The Wren's been through worse.", "id": "t929ld", "cue": "event.ionStorm.onset"},
+        {"text": "Storm's passed. Everyone safe. That's all I ever want to say after.", "id": "iukncl", "cue": "event.ionStorm.afterglow"},
+        {"text": "Harvest. The garden fed us all again. I never tire of that.", "id": "haalc7", "cue": "tradition.harvest"},
+      ],
       "decline": [
         {"text": "Not today, I'm afraid. The ship has me. Ask again?", "id": "d11p7t", "tier": [1, 4]},
         {"text": "I can't. Not tonight. But thank you. It means more than you'd think.", "id": "15243t", "tier": [1, 4]},
+        {"text": "My rest day. Scales, and not thinking about the ship. Wednesday?", "id": "1wqt49k", "weekday": "mon|tue"},
       ],
       "feel": [
         {"text": "A good day. Everyone where they should be, and two people told me the truth.", "id": "1scr9y5", "mood": "high"},
         {"text": "A long day up top. The Admiral was no help at all.", "id": "1ueeoj3", "tone": "funny", "mood": "low"},
         {"text": "Two juniors asked me a question today. Normally I ask. It was lovely.", "id": "n6h8jz", "tone": "warm", "mood": "high", "tier": [1, 4]},
         {"text": "An ordinary day. On a ship, that's the best kind.", "id": "100ra5d", "mood": "ok"},
+        {"text": "A tired day. Nothing wrong. Just the kind of tired a ship makes.", "id": "1p15dr3", "mood": "low", "tier": [3, 4]},
+        {"text": "I got the left hand right in the slow bit. Thursday's going to be good.", "id": "tjaivj", "tone": "funny", "mood": "high", "tier": [3, 4]},
+      ],
+      "gift": [
+        {"text": "Oh. Thank you, {me}. That's going in the ready room. The Admiral approves.", "id": "1oasggg", "tone": "warm", "gift": "loved"},
+        {"text": "How kind. Thank you. Truly.", "id": "xn4inx", "gift": "liked"},
+        {"text": "Thank you, {me}. That's thoughtful.", "id": "wc6080", "gift": "polite"},
+        {"text": "Music. Oh, that's lovely. I'll try it on Thursday. Badly, then less badly.", "id": "vxun21", "tone": "warm", "gift": "music"},
       ],
       "greet": [
         {"text": "{hi}. You're our new cadet. One question, then: what's the best thing aboard so far?", "id": "fz50br", "tier": [0, 0]},
@@ -16384,6 +16476,12 @@ const VOICE = {
         {"text": "{me}. I asked Calder how you were getting on. She said \"fine\". That's high praise.", "id": "9ahlse", "tone": "funny", "tier": [2, 4]},
         {"text": "There you are, {me}. I wondered where you'd got to. The ship's big, but not that big.", "id": "k5i6cl", "tier": [1, 4], "warmth": "cold"},
         {"text": "Ah, {me}. Walk with me a little? I like the corridors at this hour.", "id": "uqz7mo", "tone": "warm", "tier": [3, 4], "time": "evening"},
+        {"text": "{hi}, {me}. Sowing. My favourite season. Everything aboard starts again.", "id": "nvgam", "season": "sowing", "tier": [1, 4]},
+        {"text": "{hi}, {me}. Greening. The garden's louder than the bridge. Quite right too.", "id": "10a2tnx", "season": "greening", "tier": [1, 4]},
+        {"text": "Harvest, {me}. Best thing you've eaten this week? I'm asking for the galley.", "id": "8uqnqn", "season": "harvest", "tier": [1, 4]},
+        {"text": "Lanterns. The ship looks like a birthday cake. I'm told that's the point.", "id": "7t9mcc", "tone": "funny", "season": "lanterns", "tier": [1, 4]},
+        {"text": "{me}. The bridge thinks well of you. They don't know I asked. Now you do.", "id": "15ynz88", "rep": "well"},
+        {"text": "{me}. Someone told me you were kind to them. They didn't say who. I didn't ask.", "id": "1jkuanm", "tone": "warm", "you": "kind"},
       ],
       "hint": [
         {"text": "Have you a minute, {me}? Not an order. Just a minute.", "id": "h29iy3", "tier": [3, 4]},
@@ -16396,11 +16494,16 @@ const VOICE = {
       "joy": [
         {"text": "The piano, late on a Thursday, with the ship asleep around us. Best hour of the week.", "id": "1cg13li", "tone": "warm", "tier": [2, 4]},
         {"text": "The ship at night. Seventy-five people asleep, and every one of them safe. Lovely.", "id": "13ohuj9", "tier": [1, 4]},
+        {"text": "A junior's first good answer. You can watch them surprise themselves.", "id": "1skxwh6", "tier": [3, 4]},
       ],
       "life": [
         {"text": "I learnt the piano as a girl, and took it up again on my first command. It helps.", "id": "d1cc7j", "tier": [1, 4]},
         {"text": "Every new junior gets one question from me. I remember every answer. Yours too.", "id": "1yicw0a", "tier": [2, 4]},
         {"text": "I dislike my own portrait. They made me look patient. I was very cross that day.", "id": "1eyr11v", "tone": "funny", "tier": [2, 4]},
+        {"text": "Six years in command. I still learn something every week. Usually from a junior.", "id": "1enxqaf", "tier": [2, 4]},
+        {"text": "My little book of answers. You're on page forty. Page forty's a good page.", "id": "livg3k", "tone": "warm", "tier": [3, 4]},
+        {"text": "I write to my daughter every week. Ordinary news. She likes the ordinary news.", "id": "1eb3irh", "beat": "marrow.4"},
+        {"text": "Ask me again in a year, I said. I meant it. Ask me.", "id": "1jdbjk4", "beat": "marrow.5"},
       ],
       "missed": [
         {"text": "I missed you yesterday. No harm done. The ship pulls us all about.", "id": "bvuzlm", "tier": [1, 4]},
@@ -16416,14 +16519,26 @@ const VOICE = {
         {"text": "Sit, sit. I'm not on duty for five minutes. I've checked.", "id": "16phml", "tone": "funny", "place": "calm", "tier": [2, 4]},
         {"text": "Captain Varga started the gallery. Varga would have hated my portrait too.", "id": "1kfgck2", "tone": "funny", "deck": "2", "tier": [2, 4]},
         {"text": "The lounge windows. Six years, and the view still stops me.", "id": "1w2mbj4", "deck": "3", "place": "calm"},
+        {"text": "The observatory. Nobody salutes in the dark. Not that anyone salutes. Regulation two.", "id": "5k954y", "tone": "funny", "habit": "stargazer"},
+        {"text": "The piano. Don't look at the sheet music. I don't read it either.", "id": "p558ku", "tone": "funny", "place": "musicroom"},
+      ],
+      "note": [
+        {"text": "Called by. You were out. My question can wait. It's a good one, though.", "id": "c4yl2h", "tier": [3, 4]},
+        {"text": "The Admiral sends his regards. I'd make nothing of it.", "id": "1ktpsld", "tone": "funny", "tier": [3, 4]},
       ],
       "rumour": [
         {"text": "I hear things up top. Not everything. Most things.", "id": "1uymcxy"},
+        {"text": "The Admiral heard this first.", "id": "las95b", "tone": "funny"},
       ],
       "smalltalk": [
         {"text": "The ship sounds well today.", "id": "1l3cewl"},
         {"text": "Mind the step, everyone.", "id": "1b3bal3", "tone": "funny"},
         {"text": "Thursday soon. The piano waits.", "id": "2asf7o"},
+        {"text": "One question. Just one.", "id": "lutyj", "tone": "funny"},
+        {"text": "The Admiral's in a mood.", "id": "z8b2od", "tone": "funny"},
+      ],
+      "visit": [
+        {"text": "{me}. I was walking the junior wing. Captain's privilege. One question, then I'll go.", "id": "1cx7knz", "tier": [3, 4]},
       ],
     },
   },
@@ -19600,21 +19715,57 @@ const VOICE = {
         {"text": "As you were. Do try to be as you were tomorrow too.", "id": "1bmnaya", "tone": "funny", "tier": [1, 4]},
         {"text": "Carry on, {nick}. And thank you. Noted, and meant.", "id": "6qs0o2", "tone": "warm", "tier": [3, 4]},
       ],
+      "callback": [
+        {"text": "You said I knew Gull's poem well. I read the newsletter thoroughly. That's all.", "id": "1058r6v", "tone": "funny", "told": "moment.vance.suspect", "not": {"beat": "vance.5"}},
+        {"text": "Your fix for Gull's line two. Ten beats. I counted. Gull should take notes.", "id": "1twkmsx", "tone": "funny", "told": "moment.vance.fixed"},
+        {"text": "You said you liked Gull's poem. Hm. Someone should. Correct of you.", "id": "n78cp3", "tone": "funny", "told": "moment.vance.likeit"},
+        {"text": "You held the stopwatch steady. Lindqvist says it was wrong. It wasn't.", "id": "i9fp4s", "tone": "funny", "told": "moment.vance.timed"},
+        {"text": "You cheered. Loudly. Against regulations, possibly. I'll allow it.", "id": "wbfuph", "tone": "funny", "told": "moment.vance.cheered"},
+        {"text": "You asked if it was about Lindqvist. It was. It still is. Carry on.", "id": "b5uq3g", "tone": "funny", "told": "moment.vance.lindqvist"},
+        {"text": "You offered to sit with me while I open them. I haven't forgotten.", "id": "4865qf", "tone": "warm", "told": "moment.vance.sitwith", "not": {"beat": "vance.4"}},
+        {"text": "Thank you for listening, the other night. Noted, and meant.", "id": "1vvxdlk", "tone": "warm", "told": "moment.vance.listened"},
+        {"text": "You said your family doesn't always talk either. It helped. More than I said.", "id": "k4o8r0", "tone": "warm", "told": "moment.vance.shared"},
+        {"text": "I requested the leave. Eleven, section two. The Captain signed it in a minute.", "id": "nff7et", "tone": "warm", "told": "moment.vance.leave"},
+        {"text": "You let me read it twice. I read it four times, after. Thank you.", "id": "x5tkgk", "tone": "warm", "told": "moment.vance.again"},
+        {"text": "\"Like your list of juniors.\" I hadn't seen it. You did. Thank you.", "id": "1m5l5n1", "tone": "warm", "told": "moment.vance.likehim"},
+        {"text": "The scansion gave me away. Gull is taking lessons. Privately.", "id": "1r2w1rn", "tone": "funny", "told": "moment.vance.knew"},
+        {"text": "You said you were proud. I've added it to a list. A short one. Very short.", "id": "9l9esz", "tone": "warm", "told": "moment.vance.proud"},
+        {"text": "Your word on Gull. I trust it. I'd trust it with the bridge.", "id": "o4cm75", "tone": "warm", "told": "moment.vance.safe"},
+        {"text": "Your entry in the repair log. Signed, timed, legible. Exemplary.", "id": "ilzeb8", "told": "fixed."},
+        {"text": "You came to running club. Your pace was correct. Next week, faster.", "id": "c69e6s", "tone": "funny", "told": "came.running"},
+        {"text": "You came. Attendance noted. Warmly noted.", "id": "1tj2ole", "tone": "warm", "told": "came."},
+        {"text": "You remembered my birthday. It's on the roster, I know. You still remembered.", "id": "1650o3j", "tone": "warm", "told": "bday"},
+      ],
       "chat": [
         {"text": "Questions, cadet? Ask them. Unasked questions cause most of the trouble aboard.", "id": "mgs0c7", "tier": [0, 0]},
         {"text": "Have you read the regulations yet? Not all. The first ten. They're the good ones.", "id": "8bc67g", "tone": "funny", "tier": [1, 4]},
         {"text": "Status report, {nick}. Unofficial. How's the week? Short version.", "id": "59y2be", "tier": [1, 4]},
         {"text": "You've the makings of a good officer. Don't let it go to your head. Your boots, maybe.", "id": "vjfcd0", "tone": "funny", "tier": [2, 4]},
       ],
+      "cue": [
+        {"text": "Storm warning. Stations in ten minutes. Calmly. Briskly. Both.", "id": "1qolekc", "cue": "event.ionStorm.warning"},
+        {"text": "Storm. Everyone at their post. Including you. Go.", "id": "1euuuiz", "cue": "event.ionStorm.onset"},
+        {"text": "Storm's passed. Drill times were excellent. I've already written the report.", "id": "uah6pe", "cue": "event.ionStorm.afterglow"},
+        {"text": "You ran. On time, in order, no shortcuts. I'd put you on the board.", "id": "1lu5rbv", "cue": "tradition.running.you"},
+      ],
       "decline": [
         {"text": "I can't. Duty roster. But it was a good idea, correctly put.", "id": "1oany1y", "tier": [1, 4]},
         {"text": "Not tonight. Ask me again on my rest day. That's Tuesday.", "id": "1v02nwv", "tier": [1, 4]},
+        {"text": "Rest day. I'm resting. Correctly. It's harder than it looks. Thursday?", "id": "1umgavf", "tone": "funny", "weekday": "tue|wed"},
       ],
       "feel": [
         {"text": "A good day. Board clear, drills on time, and my name top of the treadmill.", "id": "1ehz06p", "mood": "high"},
         {"text": "A long day. I've run four kilometres about it. It hasn't helped yet.", "id": "10y36ml", "mood": "low"},
         {"text": "A good day. A junior I recommended was promoted. That's another name on my list.", "id": "1y1a3e4", "tone": "warm", "mood": "high", "tier": [1, 4]},
         {"text": "An ordinary day. Everything correct. That's harder than it looks.", "id": "jdae40", "mood": "ok"},
+        {"text": "A heavy day. Not the work. Just heavy. I'll run it off. Eventually.", "id": "h52m59", "mood": "low", "tier": [3, 4]},
+        {"text": "A good day. Tomas beat his time. I pretended not to watch. I watched.", "id": "1c39wpm", "tone": "warm", "mood": "high", "tier": [3, 4]},
+      ],
+      "gift": [
+        {"text": "For me? That's. Thank you. It's going on my desk. Square to the edge.", "id": "1yt4jwq", "tone": "warm", "gift": "loved"},
+        {"text": "Thank you, {nick}. Most kind. Correctly wrapped, too.", "id": "1na68ig", "tone": "funny", "gift": "liked"},
+        {"text": "Thank you. Noted. Kindly.", "id": "14pw46d", "gift": "polite"},
+        {"text": "Music. It's going on the waiting list. At the top. I've jumped my own queue.", "id": "ulm6pw", "tone": "funny", "gift": "music"},
       ],
       "greet": [
         {"text": "{hi}. Uniform straight, on time, and you found the right deck. Three for three.", "id": "1afgnbe", "tier": [0, 0]},
@@ -19633,6 +19784,12 @@ const VOICE = {
         {"text": "{nick}. I haven't seen you in days. Noted. Not a complaint. An observation.", "id": "1tu1xyv", "tier": [1, 4], "warmth": "cold"},
         {"text": "{nick}. Your name came up on the board today. In a good way. Carry on.", "id": "o9lvbp", "tier": [2, 4]},
         {"text": "{nick}. Join me for breakfast. Table by the door. Punctual people sit there.", "id": "9wer1g", "tone": "warm", "tier": [3, 4], "time": "morning"},
+        {"text": "{nick}. Sowing. New season, new leaderboard. Clean paper. Wonderful.", "id": "sbj2it", "tone": "funny", "season": "sowing", "tier": [1, 4]},
+        {"text": "{nick}. Greening. Founding Day drills soon. I've already drafted the timings.", "id": "19y5pwy", "season": "greening", "tier": [1, 4]},
+        {"text": "{nick}. Harvest. The garden's ahead of schedule. I find that very satisfying.", "id": "uoqka1", "season": "harvest", "tier": [1, 4]},
+        {"text": "{nick}. Lanterns. Nothing hung across a hatch, by regulation. Otherwise, enjoy.", "id": "lhdix5", "season": "lanterns", "tier": [1, 4]},
+        {"text": "{nick}. The bridge speaks well of you. Briefly. That's how the bridge speaks.", "id": "1ekq8av", "rep": "well"},
+        {"text": "{nick}. \"Reliable,\" they say. My favourite word. After \"punctual\".", "id": "hcq7ip", "tone": "funny", "you": "reliable"},
       ],
       "hint": [
         {"text": "{nick}. A word. Not about work. When you've a moment.", "id": "pysd0x", "tier": [3, 4]},
@@ -19645,12 +19802,16 @@ const VOICE = {
       "joy": [
         {"text": "Rowing, at the academy. Six of us, one boat, nobody late. The best thing I've ever done.", "id": "17kt1mf", "tier": [2, 4]},
         {"text": "A new leaderboard. Clean paper, straight tape. All those empty lines, waiting.", "id": "tnlkb3", "tone": "funny", "tier": [1, 4]},
+        {"text": "The first five minutes of a shift. Everyone in place. Then it gets interesting.", "id": "1kc03ev", "tier": [3, 4]},
       ],
       "life": [
         {"text": "I keep the waiting list for the good records. You're ninth. Waiting builds character.", "id": "wsteyd", "tone": "funny", "tier": [1, 4]},
         {"text": "Did you read Gull this week? A rhyme for \"airlock\" ought to be against regulations.", "id": "11m4ejl", "tone": "funny", "tier": [1, 4]},
         {"text": "I keep a list of every junior I've recommended. It's a long list. I'm proud of it.", "id": "k95jp0", "tier": [2, 4]},
         {"text": "Lindqvist thinks I moved to the treadmill out of fear. I moved for a fresh board.", "id": "xhxtlz", "tone": "funny", "tier": [2, 4]},
+        {"text": "Twenty-two years since the academy. I can still tell you who was late, and by how much.", "id": "rv8g1x", "tone": "funny", "tier": [2, 4]},
+        {"text": "My father kept every report of mine. Every one. I'm still getting used to that.", "id": "1ajdtwn", "beat": "vance.4", "tier": [3, 4]},
+        {"text": "Gull's next poem is about the rowing machine. Keep that to yourself.", "id": "c863jc", "tone": "funny", "beat": "vance.5"},
       ],
       "missed": [
         {"text": "You missed our appointment. Noted. Things happen. Don't make it a habit.", "id": "1hkxvcw", "tier": [1, 4]},
@@ -19666,14 +19827,27 @@ const VOICE = {
         {"text": "Sit. I'm off duty. Officially. I've told the bridge where I am anyway.", "id": "1xi2m1u", "place": "calm", "tier": [2, 4]},
         {"text": "Treadmill board's filling up. Tomas is fourth. Don't tell him he's fourth.", "id": "bcotav", "tone": "funny", "act": "gym", "deck": "3"},
         {"text": "The senior corridor. Shoes off in the cabins, on in the corridor. Regulation six.", "id": "1dam560", "deck": "2"},
+        {"text": "The record cabinet. Waiting list, page one. You're still ninth. Patience.", "id": "18vwv5e", "tone": "funny", "place": "musicroom"},
+        {"text": "Ring corridor, eight laps. It's not on a leaderboard. I'm considering it.", "id": "15x20oq", "tone": "funny", "habit": "runner"},
+      ],
+      "note": [
+        {"text": "Called by. You were out. Correctly: it's your evening. See you at 06:05.", "id": "fzhjvy", "tier": [3, 4]},
+        {"text": "The waiting list moved. You're eighth. Don't let it go to your head.", "id": "1v0ytm0", "tone": "funny", "tier": [3, 4]},
       ],
       "rumour": [
         {"text": "Not gossip. A briefing. Informal. Listen.", "id": "11tgokf", "tone": "funny"},
+        {"text": "For your information only.", "id": "beaswt"},
       ],
       "smalltalk": [
         {"text": "Clean, quick and on time.", "id": "1q64ci1"},
         {"text": "Ninety seconds early. Good.", "id": "n8n7ni", "tone": "funny"},
         {"text": "Someone has moved my tape.", "id": "1q272iv", "tone": "funny"},
+        {"text": "Regulation two, section four.", "id": "cjqqw9"},
+        {"text": "Tape's straight. Good.", "id": "13w54c5"},
+      ],
+      "visit": [
+        {"text": "{nick}. Evening. I won't stay. Regulation six: my shoes are at the door.", "id": "1q2gs9i", "tone": "funny", "tier": [3, 4]},
+        {"text": "I was passing. Correction: I came by. Is this a good time? Be honest.", "id": "1cwqbkn", "tier": [3, 4]},
       ],
     },
   },
