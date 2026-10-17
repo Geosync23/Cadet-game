@@ -9595,6 +9595,7 @@ function sitTap(it, at, point) {
 const FLOOR_NEAR = .5;
 const FLOOR_ACTS = { gym: pl => pl.anim === 'run' ? 'Treadmill' : pl.anim === 'row' ? 'Rowing machine' : pl.pose === 'lie' ? 'Mats' : 'Weights', callhome: () => 'Booth', shop: () => 'Shelves', toilet: () => 'Toilet' };
 function playerFloorTap(point) {
+  if (bagLockerTap(point)) return true;                  // the kit bag into your locker (0.28.26)
   if (typeof PLACE_OF === 'undefined' || typeof ray === 'undefined') return false;
   const o = ray.ray.origin, d = ray.ray.direction, hits = [];
   for (const pl of PLACE_OF.values()) {
@@ -10047,11 +10048,12 @@ function jobStopMark(j, step) {                          // tell section 17 a st
   const k = jobStops(j).findIndex(x => x.step === step); if (k >= 0) try { jobStepDone(j.id, k); } catch (e) { /* not ours to mend */ }
 }
 const giftHeld = () => typeof giftInHands === 'function' && !!giftInHands();   // a gift among the things in your hands (section 20, 0.28.25)
-// the kit bag (0.28.26, Pillar 4: section 21's arrival): from the top of the Tern's ramp you hold your kit bag in one of
-// your two hands (P.carry, saved with it). Section 21 calls bagGive() at step A1. It goes in your locker by itself once
-// the bunk step is done (a toast) or missed (quiet: Torres's mail says it's there), or when the intro is off. Never a
-// part: main storage doesn't take it back. handsFix(what): what to do about full hands, for the toasts.
-const KIT_BAG = 'kit bag';
+// the kit bag (0.28.26, Pillar 4, agreed with section 21): from the top of the Tern's ramp (introOn(), step 'ramp') you
+// hold your kit bag in one of your two hands (P.carry, saved with it). It goes in your locker when you tap anywhere in
+// Bunk 1 (bagLockerTap, from playerFloorTap), or by itself once the bunk step is done; a missed bunk step leaves it in
+// your hands until you do. Never with the intro off: then it goes in quietly. bagGive() / bagStow(quiet) for section 21.
+// Never a part: main storage doesn't take it back. handsFix(what): what to do about full hands, for the toasts.
+const KIT_BAG = 'kitbag';
 const bagHeld = () => SHIP.player.carry.includes(KIT_BAG);
 function bagGive() { const P = SHIP.player; if (bagHeld() || P.carry.length >= CARRY_MAX) return false; P.carry.unshift(KIT_BAG); return true; }
 function bagStow(quiet) {
@@ -10061,10 +10063,17 @@ function bagStow(quiet) {
   return true;
 }
 function bagTick() {
-  if (!bagHeld()) return;
-  const I = typeof introOn === 'function' && introOn() ? SHIP.intro : null;
-  if (I && (I.done || {}).bunk === undefined) return;
-  bagStow(!I || (I.missed || []).includes('bunk'));
+  const on = typeof introOn === 'function' && introOn(), I = SHIP.intro || {};
+  if (!bagHeld()) { if (on && I.step === 'ramp') bagGive(); return; }
+  if (!on) bagStow(true);
+  else if ((I.done || {}).bunk !== undefined && !(I.missed || []).includes('bunk')) bagStow(false);
+}
+function bagLockerTap(point) {                           // a tap in Bunk 1 with the bag in your hands: walk there, stow it
+  if (!bagHeld() || typeof deckDef === 'undefined' || deckDef.num !== 4) return false;
+  const ch = roomAt(...cellAt(point.x, point.z)), rm = ch && deckDef.rooms && deckDef.rooms[ch];
+  if (!rm || rm.name !== 'Bunk 1') return false;
+  approach(new THREE.Vector3(point.x, 0, point.z), 0, 0, () => bagStow(false));
+  return true;
 }
 const handsFix = what => bagHeld() ? 'Put your bag in your locker first' : giftHeld() ? 'Give the gift away first' : what;
 const partList = a => { const n = {}; for (const k of a) n[k] = (n[k] || 0) + 1; return Object.entries(n).map(([k, c]) => (c > 1 ? c + ' × ' : /^[aeiou]/i.test(k) ? 'an ' : 'a ') + k).join(' and '); };

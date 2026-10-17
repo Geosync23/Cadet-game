@@ -24,7 +24,7 @@
 #   activity (keeping what you'd gained); someone's private wash pod isn't offered; draw calls stay under BUDGET
 #   the bathroom need (0.28.19): toilets in the public washrooms (Decks 4 and 3) sit you down and fill it; cabins' are private
 #   seeing it work (0.28.20, 0.28.21): each tapped activity shows the progress bar and a +N note for its need
-#   the kit bag and the device lock (0.28.26): held from the ramp, into the locker after the bunk step
+#   the kit bag and the device lock (0.28.26): held from the ramp, into the locker in Bunk 1
 #   gifts (0.28.25): store gifts and machine-shop gifts into your hands (giftAdd); a friend's note on your bunk
 #   a reserved training job (0.28.24): the shelf part, the bracket made in the machine shop with the bar, the stops marked, the repair
 #   the note bus (0.28.22): simNote('act', ...) for wash, eat (with), call, buy; your name saved and cleaned
@@ -714,26 +714,42 @@ with sync_playwright() as pw:
     # the kit bag and the device lock (0.28.26, Pillar 4): section 21's intro when it's there, else stand-ins
     kb = json.loads(ev("""(() => {
       const real = typeof introBegin === 'function', P = SHIP.player, b = document.getElementById('devBtn'), out = [];
-      if (real) introBegin(); else { SHIP.intro = { on: true, ended: false, done: {}, missed: [], flags: {} }; window.introOn = () => SHIP.intro.on && !SHIP.intro.ended; window.introFlag = k => !!SHIP.intro.flags[k]; }
+      if (real) { introBegin(); SHIP.intro.step = 'ramp'; } else { SHIP.intro = { on: true, ended: false, step: 'ramp', done: {}, missed: [], flags: {} }; window.introOn = () => SHIP.intro.on && !SHIP.intro.ended; window.introFlag = k => !!SHIP.intro.flags[k]; }
+      window.__devSet = () => real ? introFlagSet('intro.device') : (SHIP.intro.flags['intro.device'] = true);
       P.carry = []; P.locker = [];
-      out.push([bagGive(), bagGive(), P.carry.slice()]);
-      bagTick(); floatsTick(); b.click();
+      bagTick(); bagTick(); out.push(P.carry.slice());
+      SHIP.intro.step = 'wing'; bagTick(); floatsTick(); b.click();
       out.push([bagHeld(), deviceLocked(), b.querySelector('span').textContent, typeof DEV !== 'undefined' && !!DEV.open, handsFix('Fit those first')]);
-      if (typeof returnPart === 'function' && typeof jobEnd === 'function') { P.carry.push('valve'); jobEnd({ kind: 'stow' }); out.push(P.carry.slice()); } else out.push(['kit bag']);
-      SHIP.intro.done.bunk = SHIP.time.min; if (real) introFlagSet('intro.device'); else SHIP.intro.flags['intro.device'] = true;
-      bagTick(); floatsTick(); b.click();
+      if (typeof returnPart === 'function' && typeof jobEnd === 'function') { P.carry.push('valve'); jobEnd({ kind: 'stow' }); out.push(P.carry.slice()); } else out.push(['kitbag']);
+      SHIP.intro.done.bunk = SHIP.time.min; SHIP.intro.missed.push('bunk'); SHIP.intro.step = 'toMess'; bagTick();
+      out.push([bagHeld(), P.locker.slice()]);              // a missed bunk: still in your hands
+      const d4 = DECKS[4], bunk = d4 && Object.keys(d4.rooms).find(k => d4.rooms[k].name === 'Bunk 1'); let cell = null;
+      if (deckDef.num === 4 && bunk) for (let j = 0; j < d4.map.length && !cell; j++) for (let i = 0; i < d4.map[j].length; i++) if (d4.map[j][i] === bunk) { cell = [i, j]; break; }
+      const pt = cell ? cellPos(...cell) : null;
+      out.push([!!pt, pt ? bagLockerTap(new THREE.Vector3(pt.x, 0, pt.z)) : null, bagLockerTap(new THREE.Vector3(999, 0, 999))]);
+      return JSON.stringify(out);
+    })()"""))
+    try:
+        page.wait_for_function('!bagHeld()', timeout=30000); walked = True
+    except Exception: walked = False
+    kb2 = json.loads(ev("""(() => {
+      const P = SHIP.player, b = document.getElementById('devBtn'), out = [P.locker.slice()];
+      P.carry = ['kitbag']; P.locker = []; SHIP.intro.missed = []; bagTick();   // the bunk step done: it goes in by itself
+      __devSet(); floatsTick(); b.click();
       out.push([bagHeld(), P.locker.slice(), deviceLocked(), b.querySelector('span').textContent, typeof DEV === 'undefined' || !!DEV.open]);
       if (typeof deviceClose === 'function') deviceClose();
-      P.carry = ['kit bag']; SHIP.intro.ended = true; bagTick();      // the intro off with the bag in hand: quietly to the locker
+      P.carry = ['kitbag']; SHIP.intro.ended = true; bagTick();      // the intro off with the bag in hand: quietly to the locker
       out.push([bagHeld(), P.locker.length, handsFix('Fit those first')]);
       return JSON.stringify(out);
     })()"""))
-    print('  kit bag and device lock (0.28.26):', kb)
-    check(kb[0] == [True, False, ['kit bag']], f'bagGive puts one kit bag in your hands: {kb[0]}')
+    print('  kit bag and device lock (0.28.26):', kb, walked, kb2)
+    check(kb[0] == ['kitbag'], f'at the ramp you hold one kit bag: {kb[0]}')
     check(kb[1] == [True, True, 'No device yet', False, 'Put your bag in your locker first'], f'before the bunk: the bag held, the device locked and shut: {kb[1]}')
-    check(kb[2] == ['kit bag'], f'main storage takes back parts, never the kit bag: {kb[2]}')
-    check(kb[3] == [False, ['kit bag'], False, 'Device', True], f'after the bunk: the bag in your locker, the device opens: {kb[3]}')
-    check(kb[4] == [False, 1, 'Fit those first'], f'the intro off: the bag goes to the locker once: {kb[4]}')
+    check(kb[2] == ['kitbag'], f'main storage takes back parts, never the kit bag: {kb[2]}')
+    check(kb[3] == [True, []], f'a missed bunk step leaves the bag in your hands: {kb[3]}')
+    check(kb[4] == [True, True, False] and walked and kb2[0] == ['kitbag'], f'a tap in Bunk 1 walks you there and stows the bag: {kb[4]} {walked} {kb2[0]}')
+    check(kb2[1] == [False, ['kitbag'], False, 'Device', True], f'the bunk step done: the bag in your locker, the device opens: {kb2[1]}')
+    check(kb2[2] == [False, 1, 'Fit those first'], f'the intro off: the bag goes to the locker once: {kb2[2]}')
     ev("localStorage.removeItem(SAVE_KEY)")
     b.close()
 
