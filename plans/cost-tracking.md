@@ -21,3 +21,22 @@ Method: snapshot every active session now; snapshot again at each release; the d
 | | **Total (reported)** | **~378** |
 
 Archived earlier today (for reference): head writer 3 ended at 108.03.
+
+## Snapshot at the 0.60.5 release, 18:48 UTC (90 minutes after the baseline)
+
+| Session | 17:18 | 18:48 | Spent |
+|---|---|---|---|
+| Lead | 172.48 | 189.77 | 17.29 |
+| Build master 2 | 90.87 | 98.24 | 7.37 |
+| Sim engineer 5 | 38.83 | 48.19 | 9.36 |
+| Perf engineer 3 | ~8.49 | 22.68 | ~14.19 |
+| Player engineer 5 | (not reported) | 21.73 | ≤21.73 (since 15:54) |
+| Career engineer | 9.04 | 19.80 | 10.76 |
+| Reviewer 1d (17:11-18:38) | 0 | 11.09 | 11.09 |
+| Head writer 4 | 11.18 | 12.39 | 1.21 |
+| Pillar 5 designer | 4.23 | 6.16 | 1.93 |
+| Social & traditions eng | 10.00 | 10.00 | 0 |
+| **Total** | | | **~95** |
+
+What those 90 minutes bought: 0.60.5 finished (reviews, combine, full checks, phone run, release) AND most of 0.60.6 built and reviewed (tips, warnings, social by bond, news feed, tray fixes, poses, bubbles, forks, feast queues, sickness fixes), plus the Pillar 5 plan update.
+Whole day's active team so far (current totals + archived head writer 3 + reviewer 1c): ~$580 since ~04:30, covering 0.60.3, 0.60.4, 0.60.5 and most of 0.60.6. Roughly $120-150 per build at today's pace.
