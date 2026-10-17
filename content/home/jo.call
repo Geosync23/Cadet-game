@@ -1,0 +1,157 @@
+@arc home.jo
+who: home:jo
+name: Jo
+// Writer 3, from the head writer's model (mum.call) and the approved arc: Jo, your older sibling (they / them), stuck
+// in a dull job, proud of you and a bit envious, quits to apprentice at a boatyard, and launches their first boat.
+//
+// HOW THEY TALK: dry, teasing, big-sibling; short messages, long pauses; calls you "kid" (always, at any age) or {me}.
+//   Jokes first, means it second. Says the honest thing late at night.
+// NEVER: bitter at you (the envy is about them, not you, and they say so); guilt-trips; genders you.
+// NEW HERE (to approve): the job is checking forms at the freight office ("the office"); the boatyard is down by the
+//   water at home; the old boatwright is "Wick" (they / them); the first boat is a small rowing boat Jo names the
+//   Little Wren. Jo visits Mum and Gran and waters Gran's marrow after her fall (gran.call beat 5).
+// RUNNING: "kid"; the stapler at the office; sawdust everywhere; the Little Wren.
+
+== beat 1
+tone: light
+via: reply
+mem: firstcall
+flag: home.jo.called
+them: Kid. It's Jo. Mum says you're on a spaceship. I said I'll believe it when it rings me.   [laugh]
+them: So. How is it? Is it all buttons? I bet it's all buttons. Don't touch the red ones.
+them: Seriously, though. You did it. You actually went. I told everyone at work. Nobody at work cares. I told them anyway.
+? choice
+* It's mostly corridors. And a lot of tea.   flavour:cheer mem:corridors
+  them: Corridors and tea. Great. You've run away to a big kitchen.
+* I nearly didn't go.   flavour:share mem:nearly
+  them: I know. I watched you nearly not. Glad you went, kid. Someone in this family had to.
+* How's work?   flavour:listen mem:work
+  them: Work is forms. Then more forms. Then lunch. Then forms about lunch. Ask me something else.
+them: Right. Mum's waving at me to give her the receiver. She's not even on this call. Bye, kid.
+
+== beat 2
+tone: light
+via: reply
+when: flag:home.jo.called
+mem: office
+flag: home.jo.office
+them: Kid. Day four hundred and something at the office. I've named my stapler. It's called Steve. Steve's my best mate.   [laugh]
+them: In my lunch hour I walk down to the water and watch them at the boatyard. They're building a boat. By hand.
+them: I've been carving a little one. On my desk. With a letter opener. Don't tell the office.
+? choice
+* Send it to me when it's done.   flavour:cheer mem:sendit
+  them: It's terrible. It's lopsided. It's very, very small. Fine. I'll send it.
+* You've always liked making things.   flavour:listen mem:making
+  them: Have I? I suppose. Shelves. That treehouse. The go-kart Mum still won't talk about.
+  + them: Yeah. I did, didn't I. The treehouse. The go-kart. Then I got a desk and stopped. Funny how that happens.
+them: Lunch is over. Back to Steve. Steve needs me.
+
+== beat 3
+tone: heartfelt
+via: live
+when: beat:home.jo.2
+mem: envy
+flag: home.jo.envy
+hint: The relay's clear tonight. Jo's on the line, and it's late there.
+them: Can't sleep. Thought I'd ring. Live, look at me. Clear line. You sound like you're next door.
+them: Can I say something stupid? I'm proud of you. And I'm a bit jealous. Both. At the same time.   [sigh]
+them: Not of you. Of the going. You got on a shuttle. I got on the number nine to the office. Every day.
+them: It's not your fault. It's not anyone's. I just needed to say it to someone who wouldn't make it a thing.
+? choice
+* You could still go somewhere. Do something.   flavour:practical mem:couldgo
+  them: Could I? At my age? Hm. Don't answer that. I'm going to think about it all night now. Thanks, kid.
+* Thanks for telling me. I'm glad you did.   flavour:listen mem:glad
+  them: Yeah. Me too. That's a weight off. A small weight. A stapler-sized weight.   [laugh]
+  + them: Yeah. Funny. I feel better already. You were always good at that. Even when you were tiny and annoying.
+* I was scared to go. I still am, some days.   flavour:share mem:scared
+  them: Were you? Huh. You hid it well. Maybe that's what brave is. Going anyway.
+them: Right. Bed. Forms tomorrow. Night, kid. Don't tell Mum I rang this late.
+
+== beat 4
+tone: light
+via: reply
+when: beat:home.jo.3
+mem: sawdust
+flag: home.jo.weekends
+them: Kid. I went in. To the boatyard. I asked if I could help on Saturdays. For nothing. Just to learn.   [laugh]
+them: The old boatwright's called Wick. Wick looked at my hands and said "Those'll do." Best review I've ever had.
+them: I've sawdust in places I didn't know I had. Mum made me shake out on the step. Gran laughed for an hour.
+? choice
+* That's brilliant, Jo.   flavour:cheer mem:brilliant
+  them: It is, isn't it? I sanded a plank for six hours. Best six hours of my life.
+* What's Wick building?   flavour:listen mem:wick
+  them: A rowing boat. Clinker-built. That means the planks overlap. I know words now. Boat words.
+them: Monday tomorrow. Steve and I are not on speaking terms. I've moved on.
+
+== beat 5
+tone: serious
+via: live
+when: beat:home.jo.4
+mem: quit
+flag: home.jo.quit
+hint: Clear line tonight. Jo's on, and they sound like they've been pacing.
+them: Wick's offered me an apprenticeship. A proper one. Four years. The money's half what the office pays.   [sigh]
+them: I'd have to quit. Actually quit. With a letter. I've written the letter. It's in my pocket. It's been there a week.
+them: Mum says do what makes me happy. Mum says that about everything. Gran says "about time". I need someone who'll be honest.
+them: What if I'm too old? What if I'm no good at it? What if I quit and it's just... a different desk?
+? choice
+* You said "best six hours of my life". About sanding.   flavour:cheer mem:sixhours
+  them: I did, didn't I. Sanding. Who says that about sanding? Someone who should quit, that's who.   [laugh]
+* What would you tell me, if it was me?   flavour:listen mem:ifme
+  them: Go. I'd tell you go. I did tell you go. Oh, that's not fair, kid. That's not fair at all.
+  + them: I'd say go. I did say go. I said it when you got the letter for the Wren. Right. Right. I hear it.
+* Half the money's still money. Can you live on it?   flavour:practical mem:money
+  them: Just. If I stop buying lunch. I'll bring sandwiches. Like a proper apprentice.
+them: Right. I'm going to hand it in tomorrow. Before I lose my nerve. Ring me Thursday and check I did?
+
+== beat 6
+tone: resolution
+via: live
+when: beat:home.jo.5
+mem: launch
+flag: home.jo.launched
+keepsake: a curl of wood from Jo's first boat
+learn: Jo left the freight office to apprentice at the boatyard at home. Their first boat is called the Little Wren.
+mail: 2880 | From Jo | A small envelope in the post bag. Inside, one curl of pale wood and a note: "From the Little Wren. First plank. Don't lose it, kid. Jo."
+them: Kid. She floats. My first boat. In the water this morning. Wick let me push her off. She floats!   [laugh]
+them: Mum cried. Gran banged her stick on the jetty and shouted "Go on!" at a rowing boat. Everyone stared.
+them: I named her. Don't laugh. The Little Wren. After your ship. Because you went first, and I followed. Sort of. Slowly.
+? choice
+* The Little Wren. I love that.   flavour:cheer mem:littlewren
+  them: Good. Because it's painted on now. In gold. Slightly wonky gold.
+* I'm so proud of you, Jo.   flavour:share mem:proud
+  them: Stop it. Don't. Fine. Thank you, kid. That's the whole of it. Thank you.
+  + them: Don't. You'll set Mum off again and she's only just stopped. Thanks, kid. Really. It means more from you.
+them: I've sent you a curl of wood. From her first plank. Keep it somewhere. Right, Wick's shouting. Boats to build.
+
+// ---- what you can tell them on a call
+== send
+? flag:intro.soloJob (?)
+- I did my first job on my own.   flavour:share
+  them: On your own? Show-off. Well done, kid. Really.
+? cue:event.ionStorm.afterglow
+- We had an ion storm. Everyone was fine.   flavour:share
+  them: Of course you did. Don't tell Mum. I'll tell Mum. Gently.
+? flag:home.jo.weekends
+- How's the boatyard?   flavour:listen
+  them: Sawdust. Splinters. Wick says I'm improving. Wick says that to the boats too.
+- Say hello to Steve for me.   flavour:cheer
+  them: Steve sends his regards. Steve's a stapler. You know that, right?
+- Tell me something from home.   flavour:listen
+  them: The tide's out, the chip shop's shut, and Mum made another hat. Nothing changes.
+
+// ---- everyday calls when no beat is due
+== chat
+them: Kid. It's me. Nothing to report. I just wanted to hear something that wasn't forms.
+? send
+them: Right. Off. Don't touch the red buttons.
+--
+when: flag:home.jo.weekends
+them: Quick one. Covered in varnish. Don't ask. Tell me something good.   [laugh]
+? send
+them: Cheers, kid. Back to the boats.
+--
+when: flag:home.gran.hip
+them: Been round Mum's. Gran's bossing everyone from her chair. Your chair. I watered the Captain. Two pages of instructions.
+? send
+them: Right. Bye, kid. Gran says call her.
