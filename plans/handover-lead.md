@@ -397,3 +397,4 @@ Read: this section, the "STATE AT 19:35" section above, TEAM.md, CLAUDE.md (user
 - ~21:06 user chose A: leaving early = short shift (small rep dip if out before 15:00; not a full day worked) -> career eng; design-doc updated.
 - ~21:05 1f confirmed; 1e archived (spent ~$14.51).
 - ~21:10 designer e3b96c5: FINAL Pillar 5 plan (~33 ship days, ~12-13 h; Officer D16, Senior D23, Engine Specialist D30; puzzles from D17; night shift 2 nights Fri/Sat D26-27; mentoring 1 day; side jobs optional; 6 steps). Republished v5. One open Q: night shift on the weekend vs midweek (default weekend). Awaiting the user's approval.
+- ~21:08 1f: leave 0.61.18 ea89382 PASS. LOW (lead's call: leave it): walking off without clocking out gets the 17:00 auto sign-out with no dip, while an honest 14:00 clock-out costs -2. Kept: the user said forgetting to clock out has no penalty; the dip is small.
