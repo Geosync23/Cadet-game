@@ -1,0 +1,116 @@
+@crew halloran-emeka
+// Emeka Halloran (he/him), Works systems officer, days. The Works writer, batch 2. Warm; terrible jokes; "lovely".
+
+== greet
+? tier=stranger
+- {hi}. You'll be new. Have you eaten? Breakfast's in the mess till eight.
+- {hi}. Emeka Halloran, systems. Tea corner's behind the parts racks, if you need me.
+? tier>=acquaintance time:morning
+- {hi}. Why did the scrubber go to the infirmary? It had a filter cough.   #funny
+- {hi}. I had a joke for you. I've lost it. That's probably for the best.   #funny
+? tier>=colleague
+- {hi}, {me}. Sit down a minute. You look like you've been standing since Tuesday.
+? tier>=friend
+- {me}. Lovely. I saved you a scone. Don't tell Brennan where it came from.   #warm
+
+== bye
+- {bye}. And eat something, mind.
+- {bye}. Tea's at half ten. You know where.
+
+== feel
+? mood:low
+- No joke today. Don't look at me like that. I'll have two tomorrow.
+? mood:high
+- Brennan let me have an oven on Saturday. A whole oven. I'm still glowing.   #funny
+
+== near
+? act:work
+- Board's tidy, rota's done, kettle's on. Lovely. Now, what's broken?
+? act:breakfast
+- Just made it. I always just make it. The joke takes the time.   #funny
+
+== life
+? tier>=acquaintance
+- I trade breakfast jokes with Yoon. Mine are worse. It's not a contest. It is a bit.   #funny
+? tier>=colleague
+- I swapped my days off so Torres could meet you. Best swap I ever made.   #warm
+
+== joy
+? tier>=acquaintance
+- The face people make at a warm scone. That's why I bake. Well, that and the scone.
+
+// ---- Day 5, Friday: the new hand's mug at Works tea (week 1; facts.md section 9). Halloran gives it. After that,
+// flag:mug (onboarding sets it) means your mug hangs on the tea corner rack.
+== week1
+? week1:true weekday:thu
+- Works tea tomorrow at half ten. Don't be late. There's a reason. I can't say.   #funny
+? week1:true weekday:fri
+- Here. Your mug. Your name on it and everything. Welcome to Works, properly.   #warm
+- Every new hand gets a mug on their first Friday. It's the law. Well, it's me.   #funny
+- Hook's the one on the end of the rack. Yours from now on. Nobody else touches it.
+? flag:mug
+- Your mug's still on the rack. I gave it a rinse. Don't tell anyone I'm soft.   #funny
+
+// ---- Writer 2, batch 1: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue)
+// He never says no (his thread): his declines are yeses postponed.
+== greet
+? tier>=acquaintance time:afternoon
+- {hi}. Afternoon slump. I've a joke for it. No? Fair. Have you eaten, at least?
+? tier>=acquaintance warmth:cold
+- {hi}, stranger. Have you been eating? You've been somewhere. Sit. Tell me.
+
+== near
+? place:teacorner
+- Kettle's on, mugs on the rack, rota on the wall. All's right with the world.
+? habit:garden-lover
+- The tomatoes are coming on. I check them every day. They don't seem to mind.
+? habit:music
+- Music room most evenings now. I sit at the back and tap my foot. Badly.   #funny
+
+== invite
+? tier>=acquaintance
+- Works tea, half ten, tea corner. Bring yourself. I'll find you a mug.
+- Come and see the tomatoes after shift? The garden's lovely in the evening.
+
+== accept
+- Lovely. Yes. I'll bring something baked. I'll bring two somethings.   #funny
+- Yes. I was going to say yes before you finished asking.   #funny
+
+== decline
+- I'd love to. I can't. I've said yes to three people tonight. Tomorrow? Please?
+- Not tonight, I'm covering the rota. I'm always covering the rota. Next time.
+
+== missed
+- I kept you a scone. It's a bit sad now. I'll eat it. For you.   #funny
+
+== birthday
+? birthday:you
+- Happy birthday! I baked. I told Brennan it was an emergency. It was.   #funny
+? birthday:me
+- My birthday. I baked my own cake. Is that sad? It's a very good cake.   #funny
+
+== cue
+? cue:repair.you@dept
+- Saw your job on the board. Done, signed, closed. Lovely. Have a biscuit.   #warm
+
+// ---- Writer 2, batch 1b: a hint (a moment is ready) and an about line for a named friend
+== hint
+- Could I borrow you a minute later? Not for a job. For me, for once.
+
+== about
+? aff:yoon-elif:friend
+- Yoon's breakfast jokes are nearly as bad as mine. Nearly. I'm very proud of her.   #funny
+
+// ---- Writer 2, batch 6: bubbles (smalltalk, rumour), at most one in five about work. 60 characters.
+== smalltalk
+- I've a joke. Nobody wants it. Here it is.   #funny
+- Brennan says I can have an oven Saturday.
+- Has everyone eaten? Somebody hasn't.
+- Tomatoes are nearly red. Nearly.
+? act:work
+- Kettle's on. Rota's done. Lovely.
+?
+
+== rumour
+- Lovely bit of news, this.
+- Heard it over a scone. Very reliable.   #funny

@@ -1,0 +1,22 @@
+@crew quill
+// Writer (command: guests), batch 3b. Mara Quill: warm, grateful, practical; thanks you, then asks what needs doing.
+
+== greet
+? tier=stranger
+- Oh, hello, love. Mara. I'm the one they brought in. Thank you. All of you.
+- Hello. Is there anything needs doing? I'm no good at sitting still.
+? tier>=acquaintance
+- {me}! Thank you again. I know, I know. I'll stop thanking people one day.   #funny
+== feel
+? mood:high
+- Good day. Dr. Nandakumar says I'm mending. Chef says I can help on Friday.
+? mood:low
+- Tired today. Everything's new. Kind, but new.
+== near
+? deck:3 act:meal
+- This soup's lovely. A pinch more salt, mind. Don't tell Chef I said that.   #funny
+? deck:3 act:free
+- The garden. Oh, the smell of it. Herbs. I could cook a whole week from this corner.
+== life
+? tier>=acquaintance
+- I was the cook on our ship. Twenty-two people, one stove. I miss the stove.

@@ -1,0 +1,192 @@
+@overheard pairs
+// Writer 4, batch 4. Commons pairs: two named crew talking as you pass, in the room the talk belongs to. Life,
+// food, home, hobbies and the shared circles (facts.md 5); at most one in five about work. No couples here.
+
+== overheard
+// ---- the mess ----
+? place:mess who:madsen-ivo with:walsh-esme
+A: Right, listen. So this morning, right...
+B: Short version, Ivo.
+A: I dropped a spoon.
+B: Thank you.   #funny
+
+? place:mess who:varga-tariq with:dlamini-lukas
+A: I hope your breakfast finds you well.
+B: Hm. It does. Toast.
+A: Forty-one onions to thirty-eight, by the way.
+B: Not at breakfast, Tariq.   #funny
+
+? place:mess who:larsen-hamid with:grieve-thea
+A: You skipped breakfast.
+B: You skip breakfast every day.
+A: That's how I know it's bad.
+B: Pass the toast, then. Two slices.   #funny
+
+? place:mess who:tran-chloe with:santos-zofia
+A: Eat something that isn't coffee.
+B: Coffee's a bean. Beans are food.
+A: That's not how beans work.
+B: It's how my beans work.   #funny
+
+? place:mess who:yoon-elif with:janssen-hugo act:breakfast
+A: Why did the cup go to bed early? It was tea-red.
+B: ...Steady, Elif.
+A: Sorry. Sorry. It's the night shift.
+B: It's the jokes. But I like them.   #warm
+
+// ---- the bow lounge ----
+? place:lounge who:dlamini-lukas with:bakshi-sol
+A: Window.
+B: No rain.
+A: No rain.
+B: We could pretend.   #warm
+
+? place:lounge who:ishikawa-orla with:esposito-yara
+A: That's a new star. Just there. See it?
+B: Three hundred and five. Write it down for me?
+A: In your journal or mine?
+B: Both. Then we're sure.   #warm
+
+? place:lounge who:takahashi-wen with:haddad-tamsin
+A: It's "harbour". Not "harder".
+B: Is it? I always sang "harder". Didn't I?
+A: Everyone sings it wrong. Except me.
+B: And Zeke, and Olu, and...   #funny
+
+? place:lounge who:janssen-hugo|cruz-tove|esposito-yara|walsh-esme|alvarez-luca with:janssen-hugo|cruz-tove|esposito-yara|walsh-esme|alvarez-luca
+A: How's your Gerald?
+B: Leaning. Thinking, I expect. Yours?
+A: New arm.
+B: Oh, lovely. Give him my best.   #funny
+
+? place:lounge who:santos-zofia with:strand-erik
+A: Rowing board. I'm two seconds off.
+B: Off who?
+A: Vance. Who's on the treadmill now. Scared.
+B: Or just bored of winning.   #funny
+
+// ---- the garden ----
+? place:hydroponics_garden who:cruz-tove with:hart-ravi time:morning
+A: Mm. Morning.
+B: Hate it.
+A: The beans like it.
+B: ...The beans have a point.   #funny
+
+? place:hydroponics_garden who:oneill-imani with:cruz-tove
+A: The garden needs a playlist.
+B: Mm. It's got the misters.
+A: That's percussion. I'll add a tune.
+B: Nothing loud. The lettuces.   #funny
+
+? place:hydroponics_garden who:madsen-ivo with:cruz-tove
+A: Can I press one of the marigolds? Just one?
+B: Mm. Which one?
+A: The one by the bench. It's perfect.
+B: ...Go on, then. Don't tell anyone.   #warm
+
+? place:hydroponics_garden who:dlamini-lukas with:hart-ravi
+A: Misting hour.
+B: Best hour.
+A: Smells like rain.
+B: Smells like home. Somewhere's home.   #warm
+
+? place:hydroponics_garden who:strand-erik with:oneill-imani
+A: Did you paint me? A tiny me? On my bunk?
+B: Couldn't say.
+A: It had my running shoes.
+B: Lovely shoes. Whoever painted them.   #funny
+
+// ---- more of Deck 3 (moved from the common room: Deck 4 is batch 3's) ----
+? place:lounge who:rina with:pell
+A: Tiles?
+B: On the warped board?
+A: I win on any board. Sit down.
+B: Fine. But I'm having the good chair.   #funny
+
+? place:mess who:hart-ravi with:teague-theo|abara-rosa
+A: Who drew me with a moustache?
+B: Not me.
+A: It's in your pen.
+B: It's a very good moustache, though.   #funny
+
+? place:lounge who:esposito-yara|bakshi-sol with:rina
+A: Best of three?
+B: Best of one. I don't need three.
+A: Fair.
+B: Your move. Honestly, take your time.   #funny
+
+? place:lounge who:tran-chloe with:dlamini-lukas time:evening
+A: Nearly ten.
+B: Hm.
+A: Lights out at ten.
+B: I know. Two hundred and five times I know.   #funny
+
+? place:infirmary who:grieve-thea with:tran-chloe|fonseca-arjun
+A: There's a hat in the lost-property box.
+B: There's a hat in mine too.
+A: Your box?
+B: My box. The real one.   #funny
+
+// ---- the gym ----
+? place:gym who:santos-zofia with:lindqvist-isak|moreau-signe
+A: Two seconds. Two.
+B: One and a half, after this morning.
+A: You didn't.
+B: I did. I'm coming for you. And Vance.   #funny
+
+? place:gym who:larsen-hamid with:esposito-yara
+A: Stretch first. Please.
+B: I always stretch.
+A: You stretch your arms. Legs too.
+B: Fine. For you, legs.   #funny
+
+? place:gym who:varga-tariq with:strand-erik
+A: That race. I was ahead at the turn.
+B: You were ahead at the start.
+A: The turn's what counts.
+B: The end's what counts, Tariq.   #funny
+
+// ---- the booths queue ----
+? place:booths who:vasquez-uma with:walsh-esme|grieve-thea|hart-ravi
+A: How are your fish?
+B: Fat, apparently. Yours?
+A: My mum says the orange one's sulking.
+B: Mine sulk too. It's a fish thing.   #funny
+
+? place:booths who:eklund-leila with:keane-davi
+A: Message for your gran?
+B: For my gran. You?
+A: For mine. Are they the same gran?
+B: Can't be. Mine's never mentioned you.   #funny
+
+? place:booths who:navarro-mateo|salo-saad|nakamura-bilal with:navarro-mateo|salo-saad|nakamura-bilal
+A: Calling the Halcyon?
+B: Calling my twin. Same thing, this week.
+A: Tell the set I said hello.
+B: You're the set. We're the set.   #funny
+
+// ---- the store, and the mess again ----
+? place:mess who:haddad-tamsin with:larsen-hamid
+A: Practise after dinner? The chord?
+B: The chord.
+A: It's coming. Isn't it?
+B: Something's coming. I'll bring the book.   #funny
+
+? place:crew_store who:madsen-ivo with:esposito-yara
+A: I've lost a sock. Blue. A flower on it.
+B: Bought here last Tuesday. With a matching one.
+A: How do you remember that?
+B: I always remember. I never tell.   #funny
+
+// ---- work, once ----
+? place:mess who:walsh-esme with:varga-tariq act:work
+A: These carrots are big.
+B: They're the right size.
+A: Ivo cut them.
+B: Ah. They're Ivo-sized.   #funny
+
+? place:mess who:dlamini-lukas with:haddad-tamsin act:work
+A: Brennan's off. Galley runs itself.
+B: You've been running for an hour.
+A: It runs itself. Through me.
+B: Sit down for one minute. Please.   #warm

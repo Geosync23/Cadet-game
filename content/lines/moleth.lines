@@ -1,0 +1,22 @@
+@crew moleth
+// Writer (command: guests), batch 3b. Moleth: eager, formal, all questions.
+
+== greet
+? tier=stranger
+- Greetings! May I ask a question? Why do you all say "cheers"? Is something being cheered?   #funny
+- Good day. You work in Works? Then you know the engine room. May I see it? Please?
+? tier>=acquaintance
+- Ah, {me}! I have four new questions. And three old ones you did not finish.   #funny
+== feel
+? mood:high
+- Chief Calder answered question nineteen. I have twenty-one to go.   #funny
+? mood:low
+- Nobody would tell me what the blue crate is for. I will find out.
+== near
+? deck:5
+- Your Works bay! Every tool has a shadow on the wall. Who decides the shadows?
+? deck:3 act:meal
+- Humans eat three times a day, together, talking. It is very sociable. And loud.
+== life
+? tier>=acquaintance
+- I study human ships. Yours is my favourite so far. It hums when it is happy.   #warm

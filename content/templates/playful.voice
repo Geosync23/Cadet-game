@@ -1,0 +1,12 @@
+@template playful
+// One of the ten voice templates (the head writer, with social B). Its words match section 20c's VOICE_FALLBACK, so
+// baking it changes nothing; the template's own lines (content/templates/playful.lines) come in wave 2.
+talk: Jokey, bouncy, competitive in fun; nicknames everything.
+hi: Oi oi | Look who it is
+bye: Don't be a stranger | Laters
+yes: Go on, then | You bet
+thanks: Cheers
+wow: Get in
+sigh: Ah, nuts
+nick: - | - | - | champ | champ
+needs: cheer

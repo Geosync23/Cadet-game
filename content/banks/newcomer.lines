@@ -1,0 +1,24 @@
+@bank all
+// The Works writer. The newcomer you guide (social plan Part 8b): a new cadet asking you things in their first
+// days, the way you once asked. Neutral in personality (voice tokens make them sound like themselves).
+// Light and a bit lost; never romance. Your answers are the guide script's reply choices, not lines here.
+
+== newcomer
+? guide:true
+- Where's the mess again? Deck 3? I keep pressing 5.   #funny
+- Is the food always this good, or is it because I'm new?
+- Who's the scary one? Everyone says a different name.   #funny
+- Do I call the Chief "Chief"? Or "Calder"? Or nothing, and just nod?
+- Is it normal to get lost twice before breakfast?   #funny
+- What's the board? I mean, I know what it is. What do I do with it?
+- Hot water till ten, someone said. What happens at ten?   #funny
+- Where do I put my bag? Is there a right way to put a bag?
+- Does the lift always make that noise?
+- When's tea? Someone said tea counts as work. Is that true?
+- How long did it take you to stop getting lost?
+- Can I ask you something daft? It's about the toilets.   #funny
+- Everyone knows everyone. How do I start?
+- Was your first week like this? Tell me it was like this.
+? guide:true time:evening
+- I think I like it here. Is that too quick to say?   #warm
+- {thanks}. For today. I'd have walked into the cargo hold twice without you.   #warm

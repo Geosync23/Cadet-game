@@ -94,6 +94,12 @@ with sync_playwright() as pw:
     g.ev("actEnd(true)"); tap('Folding table'); g.step(40); check(st()['act'], f'at the folding table ({st()["toast"][:80]})')
     g.ev("player.steer = { x: 1, z: 0, k: 1 }"); g.step(10); g.ev("player.steer = null"); g.step(5); s = st()
     check(not s['act'] and s['visible'], 'walking away stops it')
+    if g.ev("typeof actProgress === 'function'"):          # 0.37.8: the goal marker steps aside while section 15's progress bar shows
+        g.ev(f"({TAP})({{title: 'Folding table'}})"); g.ev("(() => { setGoal({ deck: 4, at: player.here(), label: 'Laundry' }); })()"); g.step(60); s = st()
+        check(s['act'] and not s['goal'] and g.ev("!!actProgress()"), f'the goal marker hides while the progress bar shows ({s["act"]}, {s["goal"]})')
+        g.ev("player.steer = { x: 1, z: 0, k: 1 }"); g.step(10); g.ev("player.steer = null"); g.step(5); s = st()
+        check(not s['act'] and s['goal'] == 'Laundry', f'and comes back when it ends ({s["goal"]})')
+        g.ev("clearGoal()")
 
     print('== the job board and the goal pointer')
     # the first tips (C13): a stand-in tipShow records which fire, when the build has none of its own (the device's, 19)

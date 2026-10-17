@@ -1,0 +1,32 @@
+@voice eklund-leila
+// Works writer. Leila Eklund (she/her): Works technician, junior, day shift, Bunk 5. Dry humour, meticulous. Calls
+// home; lounge regular. Collects old maps of Hesper Dock. Sends voice messages to a grandmother on Kesh (so does
+// Davi Keane: different grandmothers, possibly). Shows you the call-home booths on your first Tuesday.
+//
+// HOW SHE TALKS: deadpan and precise. Says less than she means and means all of it; the joke lands a second late.
+// Almost never an exclamation mark.
+// WITH JUNIORS: deadpan, then quietly helpful. Will fix your toolbelt without asking.
+// WHAT SHE NOTICES: order; the booth queue (she can time it to the minute); a map that's out of date.
+// MOOD TELLS: low = her grandmother hasn't answered; high = a new old map.
+// NEVER: gushes; talks about her grandmother's health before friend tier.
+// RUNNING: her maps of Hesper Dock are all out of date, and that's the point; the booth queue; the toolbelt.
+tpl: dry
+talk: Deadpan and precise; says less than she means; the joke lands a second after the line.
+cares: her grandmother on Kesh | old maps of Hesper Dock | a tidy toolbelt | the call-home booth queue
+jokes: her maps are all out of date, and that's the point | she can time the booth queue to the minute | she and Keane may or may not have the same grandmother
+hi: Oh. Hello | Hi | You again
+bye: Off you go | Don't get lost | Bye, then
+yes: Fine | If I must | Yes
+thanks: Thanks | Noted, thanks
+wow: Huh | Well, well
+sigh: Of course | Naturally
+nick: - | - | {me} | {me} | {me}
+needs: share
+openness: guarded
+loves: book | card
+likes: tea | game
+invites: tiles | swap
+joy: old maps of Hesper Dock, the older the better
+thread: family
+keepsake: an old map of Hesper Dock, with "you are here" in her writing
+avoid: her grandmother's health (until friend tier)

@@ -1,0 +1,26 @@
+@voice shah-dara
+// Writer (Watch), wave 1b. Watch rating, days; shy, dry humour; fixes the coffee machine; a parent who served on the Wren.
+//
+// HOW THEY TALK: Quiet, few words, then a dry line that lands late. Better with machines than people, and knows it. Mends the coffee machine and lets others take the credit.
+// WITH JUNIORS: shy at first, then loyal.
+// MOOD TELLS: when worried they hide in the coffee machine; when happy, the coffee is better.
+tpl: shy
+talk: Quiet, few words, then a dry line that lands late. Better with machines than people, and knows it.
+cares: the coffee machine | doing right by the Watch | living up to a parent who served aboard
+jokes: Dara is the best at fixing the coffee machine, which makes them very popular at 06:00 | Dara talks to the coffee machine, never to people, before breakfast
+hi: Oh. Hi | Hey | Hello
+bye: Bye | See you | Right, then
+yes: Yes | OK | Sure
+thanks: Thanks | Cheers
+wow: Huh
+sigh: Hm
+nick: - | - | {me} | {me} | {me}
+needs: cheer
+openness: guarded
+loves: made | music
+likes: sweet | tea
+invites: jam
+joy: a coffee machine that works
+thread: family
+keepsake: a spare coffee machine valve, polished
+avoid: being compared with their parent

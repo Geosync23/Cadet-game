@@ -1,0 +1,12 @@
+@voice v-quinlan-yuki
+// Writer 2, batch 8: a short card for a short-stay visitor (GUESTS in section 9). No pronouns (not in facts.md).
+tpl: dry
+talk: Dry and quick; a pencil behind each ear; maps everything and admits to nothing.
+hi: Hello | Afternoon
+bye: Back to it | Right
+yes: Fine | Go on
+thanks: Ta | Thanks
+wow: Huh
+sigh: Mm
+likes: book | tea
+nick: - | {me} | {me} | {me} | {me}

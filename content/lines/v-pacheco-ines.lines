@@ -1,0 +1,27 @@
+@crew v-pacheco-ines
+// Writer 2, batch 8: a short-stay visitor. Mostly not about work.
+
+== greet
+? tier=stranger
+- Morning. Pacheco, Concord. Hull inspection. Carry on as you were.
+? tier>=acquaintance
+- {hi}, {me}. Your hull's very clean. Calder's doing. I've noted it.
+?
+
+== chat
+- I collect a patch from every ship I inspect. The Wren's is my favourite so far.
+- Clipboard first, then tea. Brennan's tea's the best of the tour.
+
+== near
+? place:worksbay
+- Calder answered every question before I asked it. Unnerving.   #funny
+? habit:stargazer
+- Off duty. Clipboard down. Stars up.
+?
+
+== bye
+- {bye}. Don't mind me. I'm only looking.
+
+== smalltalk
+- Noted. Very good.
+- One more patch for the collection.

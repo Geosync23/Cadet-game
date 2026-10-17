@@ -1,0 +1,26 @@
+@voice chen-carmen
+// Writer (Watch), wave 1b. Watch rating, days; dreamy, restless; voice messages to a grandmother on Lisk; sings in the shower.
+//
+// HOW THEY TALK: Drifts mid-sentence, then comes back with a better idea. Restless, always half-planning to be somewhere else. Sends long voice messages to her grandmother on Lisk and narrates the ship for her.
+// WITH JUNIORS: friendly, a bit far away.
+// MOOD TELLS: when restless she paces the patrol; when happy she sings.
+tpl: dreamy
+talk: Drifts mid-sentence, then comes back with a better idea. Restless, always half-planning to be somewhere else.
+cares: her grandmother on Lisk | finding where she fits | her bench in the garden
+jokes: she sings in the shower and the whole washroom knows | her voice messages home are longer than most shifts
+hi: Oh, hi | Hello | Hey, you
+bye: See you | Bye, then | Off I drift
+yes: Mm, sure | Yes | All right
+thanks: Thanks | Oh, thank you
+wow: Oh, look
+sigh: Oh, well
+nick: - | - | {me} | {me} | {me}
+needs: share
+openness: normal
+loves: garden | music
+likes: sweet | plant
+invites: garden
+joy: her garden bench
+thread: stuck
+keepsake: a pressed leaf from her garden bench
+avoid: being told to focus

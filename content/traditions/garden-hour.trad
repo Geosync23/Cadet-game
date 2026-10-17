@@ -1,0 +1,42 @@
+@tradition garden-hour
+// Garden hour (weekly, seat 15). Moved from the plan's Wednesday 18:00 (it would share Deck 3 with the tasting table),
+// then from Monday 17:30 (the monthly designer's Monday evenings made it a third with running club), to Saturday
+// afternoon: the garden is free after harvest morning (ends 11:30) and Sowing (12:40), and daytime doesn't count toward
+// the two-an-evening cap. Volunteers on their day off; the gardeners show them what to do. Notes: plans/trad-notes-weekly.md.
+k: 437
+title: Garden hour
+when: weekly saturday
+at: 14:00-15:00
+min: 20
+jitter: 10
+where: 3 pool garden-tend
+where: 3 pool garden
+hold: 1
+who: cruz-tove always, gardener 85%, garden-lover 60%, everyone 10%
+anim: water
+host: cruz-tove
+from: cruz-tove
+ties: garden tend
+invite: host=cruz-tove odds=25% line="Garden hour this afternoon. Spare hands for the beans? They've got ambitions."
+
+== mail
+- Garden hour tomorrow, {time}, in the hydroponics garden: watering, tying in and a bit of weeding. No experience needed. The tomatoes won't judge.
+
+== ask
+- Garden hour this afternoon. Best way to spend a Saturday, honestly.   #warm
+- I'm off to the garden at two. The beans need tying in again.
+- Garden hour later. Nothing smells as good as the garden after watering.   #warm
+
+== here
+- Water at the roots, not the leaves.
+- Look, the new ones have come up. Tiny!   #warm
+- Hand me the twine? This one's wandering off again.
+
+== thanks
+- You spend an hour with your hands in the beds. {host} shows you how to pinch out a tomato.   #warm
+- You water a row of greens and tie in a bean that was making a run for it.   #funny
+
+== chatter
+- I tied in a bean at garden hour and now I feel responsible for it.   #funny
+- Garden hour is the only hour of the week nobody talks about engines.
+- The garden always looks its best the day after garden hour.

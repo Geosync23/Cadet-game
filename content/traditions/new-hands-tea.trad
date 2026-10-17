@@ -1,0 +1,43 @@
+@tradition new-hands-tea
+// New hand's tea: your first Friday aboard (day 5). Works Friday tea, but for you: Calder hangs a mug with your name on
+// the Works tea corner's rack, and it stays there all game. Same deck, same time as the weekly works-tea (18:45-19:30),
+// and the rarer one wins, so that Friday it replaces it. New crew get their own on the Friday after they arrive
+// (that needs a rotation rhythm: plans/trad-notes-seasons.md). The player is the honoree, so there's no {first}.
+k: 480
+title: New hand's tea
+when: arrival friday
+at: 18:40-19:30
+min: 20
+prio: 2
+early: 5
+where: 5 room Tea corner: lounge-seat
+where: 5 room Works bay: work:works, free
+where: 5 room Machine shop: work:works, free
+where: 5 room Main storage: work:works, free
+hold: 1
+who: calder always, torres-zeke always, pell 95%, works 85%
+anim: calder talk, everyone drink
+host: calder
+from: calder
+trace: mugYours
+
+== mail
+- Friday tea tomorrow after dinner, {time}, Works tea corner. It's your first, so it's your new hand's tea. Bring nothing. That's the point.
+
+== ask
+- Friday tea tonight. Your first one. That's a big deal round here.
+- New hand's tea after dinner. You don't have to make a speech.   #funny
+- Don't be late tonight. There's a mug with your name on it.   #warm
+
+== here
+- Welcome to Works, properly.   #warm
+- Your mug goes on the rack, next to mine. Don't let it get dusty.
+- Everyone gets one on their first Friday. Mine has a chip in it.   #funny
+
+== thanks
+- Calder hangs a mug with your name on it on the rack and fills it. You're Works now.   #warm
+
+== chatter
+- The new hand's mug is up on the rack. It's a nice mug.
+- I still remember my new hand's tea. I spilled mine on the Chief.   #funny
+- Every name on that rack had a first Friday.   #warm

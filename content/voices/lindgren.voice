@@ -1,0 +1,26 @@
+@voice lindgren
+// Writer (command: guests). Dr. Soraya Lindgren (she/her), visiting astrophysicist (the nebula, 6 days). Cabin 4-04. Chases
+// nebulae across the frontier, and has finally caught one. Lives on tea and star charts; gives a talk in the observation
+// room before she leaves. Stargazer, night owl.
+// HOW SHE TALKS: delighted, fast, full of numbers; can't stop looking out of windows. Gets on famously with Sato.
+// NEVER: sleeps while the nebula's visible.
+tpl: chatty
+talk: Delighted and fast, full of numbers; keeps looking out of the window mid-sentence.
+cares: the nebula | her talk in the observation room | tea and star charts
+jokes: she has chased nebulae for years, and this one finally waited | lives on tea and star charts
+hi: Oh, hello | Hi there
+bye: Must dash, it's moving | Bye
+yes: Yes, yes | Absolutely
+thanks: Thank you | Oh, lovely
+wow: Look at that
+sigh: Oh, well
+nick: - | {me} | {me} | {me} | {me}
+needs: share
+openness: open
+loves: star | tea
+likes: book | sweet
+invites: observatory
+joy: the nebula, at last
+thread: exams
+keepsake: a star chart with the nebula drawn in by hand
+avoid: being told to rest

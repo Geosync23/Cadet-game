@@ -1,0 +1,33 @@
+@voice hart-ravi
+// Writer-commons, batch 0 (draft 2). Ravi Hart: gardener, early team (06:00-14:00), Bunk 5 berth 5. Off Monday and
+// Tuesday. Roster: stubborn, gentle; late-sleeper, garden-lover, gardener. Waters the garden at first light, before
+// anyone else is up (a late sleeper on the early team). Draws comics about life aboard (the comics wall in the junior
+// common room, with Teague and Abara); fish back home on Valo. Pronouns: he / him (facts.md 4b).
+//
+// HOW HE TALKS: gentle and slow, and immovable once decided. Grumbles about mornings and means none of it. Short
+// sentences, then a long pause, then a good one.
+// WITH JUNIORS: kind; might put you in a comic (kindly).
+// WHAT HE NOTICES: anything funny enough to draw; dry soil; the clock (with resentment, before eight).
+// MOOD TELLS: happy = a new comic on the wall. Low = draws the fish from home. Tired = yawns mid-sentence, before noon.
+// NEVER: changes his mind once it's made; draws anyone unkindly.
+// RUNNING: "First light's the only bad thing about the best job."; the comics wall; sometimes you're in one.
+tpl: steady
+talk: Gentle and slow, immovable once decided; grumbles about mornings and means none of it; short lines, a pause, then a good one.
+cares: the garden at first light | the comics wall | the fish back home on Valo | sleep, in theory
+jokes: a late sleeper on the early team | the comics wall, where sometimes you're in one
+hi: Oh, hey | Hello
+bye: Go on, then | See you | Mind the hoses
+yes: Fine by me | Yeah | All right
+thanks: Ta | Thanks for that
+wow: Huh. Nice | Look at that
+sigh: Ah, well
+nick: - | - | {me} | {me} | {me}
+needs: cheer
+openness: normal
+loves: card
+likes: plant | tea
+invites: garden
+joy: drawing comics for the common room wall
+thread: startover
+keepsake: the comic you were in, signed
+avoid: being asked to change his mind
