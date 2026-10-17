@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.39.9 
+   STARSHIP CADET: CSV Wren                           build 0.39.10
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.39.9';                            // keep in step with the header's build line
+const GAME_BUILD = '0.39.10';                            // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -15310,7 +15310,7 @@ function chatTick() {
 // ---------------------------------------------------------------------
 // 20c. SOCIAL STORIES (social engineer B, 0.39.x; plans/social-deep-plan.md, steps B1-B8)
 // Voice cards and steps (0.39.0), crew-to-crew bonds, introductions and the weekly snapshot (0.39.1), moments
-// (0.39.3), goodbyes (0.39.4), couples and the story arcs (0.39.5-0.39.6), calls home (0.39.7-0.39.9). Lazy like the rest
+// (0.39.3), goodbyes (0.39.4), couples and the story arcs (0.39.5-0.39.6), calls home (0.39.7-0.39.10). Lazy like the rest
 // of section 20 (ROSTER comes later in the file); nothing here draws anything or calls R(). schedU keys 672-699.
 //   voiceOf(id) -> the person's voice card: the writers' VOICE[id] (baked from content/voices), over the crew
 //     designer's generated fields on the roster (tpl, loves, likes, joy, thread, needs, openness, keepsake, mentors), over
@@ -15838,10 +15838,13 @@ const homeBaked = () => { const g = f => { try { return f() || null; } catch (e)
   return [g(() => typeof HOME_CONTACTS !== 'undefined' && HOME_CONTACTS), g(() => typeof HOME_MOMENTS !== 'undefined' && HOME_MOMENTS), g(() => typeof HOME_SEND !== 'undefined' && HOME_SEND), g(() => typeof HOME_CHAT !== 'undefined' && HOME_CHAT)]; };
 const homeState = () => { socInit(); const S = SHIP.social.stories || (SHIP.social.stories = {}); return S.home || (S.home = { day: null, f: {}, learn: [], c: {} }); };
 const homeC = k => { const H = homeState(); return H.c[k] || (H.c[k] = { b: 0, at: null, chat: null, day: null, last: null, sent: [], mem: [] }); };
+const HOME_NONE = Object.freeze({ day: null, f: Object.freeze({}), learn: Object.freeze([]), c: Object.freeze({}) }), HOME_C0 = Object.freeze({ b: 0, at: null, chat: null, day: null, last: null, sent: Object.freeze([]), mem: Object.freeze([]) });
+const homePeek = () => (SHIP.social && SHIP.social.stories && SHIP.social.stories.home) || HOME_NONE;   // read-only: queries (line conditions, the device) never write the save
+const homePeekC = k => homePeek().c[k] || HOME_C0;
 const homeP = hc => ({ id: hc.id, name: hc.name, pron: hc.pron || null, seed: socHash(hc.id) });   // a home person for section 22's linesOk / linesFill
-const homeBeatOf = arcId => { const m = /^home\.(.+)$/.exec(String(arcId)), H = m && homeState(); return H && H.c[m[1]] ? H.c[m[1]].b : 0; };
-const homeFlags = () => ({ ...homeState().f });
-const homeKnown = () => homeState().learn.slice();
+const homeBeatOf = arcId => { const m = /^home\.(.+)$/.exec(String(arcId)); return m ? homePeekC(m[1]).b : 0; };
+const homeFlags = () => ({ ...homePeek().f });
+const homeKnown = () => homePeek().learn.slice();
 const homeCond = x => Object.keys(x).some(k => !HOME_META.has(k));   // a send line with conditions is news (told once)
 function homeLive(t = shipNow()) {                       // the relay's clear line: around Letters evening (traditions), else Sunday evening
   const d = Math.floor(t / 1440) + 1, m = t - (d - 1) * 1440;
@@ -15851,7 +15854,7 @@ function homeLive(t = shipNow()) {                       // the relay's clear li
   return !has && weekday(d) === 6 && m >= HOME_SUNDAY[0] && m < HOME_SUNDAY[1];
 }
 function homeCtx(t) {                                    // the call's ctx: home flags, the tradition you went to lately (last 3 days), your closest friend aboard
-  const H = homeState(), d = Math.floor(t / 1440) + 1, ctx = { t, flags: { ...H.f } };
+  const H = homePeek(), d = Math.floor(t / 1440) + 1, ctx = { t, flags: { ...H.f } };
   const J = ((SHIP.events && SHIP.events.joined) || []).map(k => /^(.+)@(\d+)$/.exec(k)).filter(m => m && m[1] !== 'letters' && +m[2] <= d && +m[2] >= d - 3).pop();
   if (J) { let tr = typeof SHIP_TRADITIONS !== 'undefined' ? SHIP_TRADITIONS.find(x => x.id === J[1]) : null; try { tr = tr || (typeof eventsOn === 'function' ? eventsOn(+J[2]).find(x => x.id === J[1]) : null); } catch (e) { }
     if (tr && tr.name) { ctx.trad = tr.name.toLowerCase(); ctx.tradId = J[1]; } }
@@ -15883,7 +15886,7 @@ function homeFill(text, hp, ctx) {                       // section 22's linesFi
 }
 function homeNext(k, t) {                                // their next beat if its time has come ('<contact>:<n>'), live or not; else null
   const [HC, HM] = homeBaked(), hc = HC && HC[k]; if (!hc || !HM) return null;
-  const c = homeC(k), H = homeState(), id = k + ':' + (c.b + 1), d = HM[id], day = Math.floor(t / 1440) + 1;
+  const c = homePeekC(k), H = homePeek(), id = k + ':' + (c.b + 1), d = HM[id], day = Math.floor(t / 1440) + 1;
   if (!d || !Array.isArray(d.lines)) return null;
   if (c.b > 0 && (c.at === null || (t - c.at) / 1440 < HOME_GAP || !(c.chat > c.at) || (H.day === day && !(d.via === 'live' && homeLive(t))))) return null;   // 7 days, a call in between, one home beat a day (beat 1 is the first call; on Letters evening each of them can have their live beat, the lead 2026-10-17)
   return homeOk(d.when, homeP(hc), homeCtx(t)) ? id : null;
@@ -15893,7 +15896,7 @@ function homeCallable(t = shipNow()) {
   const [HC, HM] = homeBaked(); if (!HC) return [];
   let ev = null; try { ev = typeof eventNow === 'function' ? eventNow(t) : null; } catch (e) { ev = null; } if (ev && ev.phase === 'onset') return [];   // the relay's down while a ship-wide event starts
   const day = Math.floor(t / 1440) + 1, live = homeLive(t), ord = k => HOME_ORDER.includes(k) ? HOME_ORDER.indexOf(k) : 99;
-  return Object.keys(HC).sort((a, b) => ord(a) - ord(b) || (a < b ? -1 : 1)).filter(k => homeC(k).day !== day).map(k => {
+  return Object.keys(HC).sort((a, b) => ord(a) - ord(b) || (a < b ? -1 : 1)).filter(k => homePeekC(k).day !== day).map(k => {
     const n = homeNext(k, t), d = n && HM[n], lv = !!d && d.via === 'live';
     return { contact: k, name: HC[k].name, due: !!d && (!lv || live), wait: lv && !live, hint: lv && live && d.hint ? homeFill(d.hint, homeP(HC[k]), homeCtx(t)) || d.hint : null };
   });
@@ -15915,7 +15918,7 @@ function homeLines(k, t) {                               // one call: { d (the b
   return { d: null, title, live, lines: e.lines.flatMap(l => l.send ? (ch.length ? [{ choice: ch }] : []) : [say(l)]) };
 }
 function homeSends(k, hp, ctx) {                         // what you can tell them: up to two pieces of news not told yet, then anytime lines, three in all
-  const HS = homeBaked()[2], c = homeC(k), day = Math.floor(ctx.t / 1440) + 1, seed = hp.seed;
+  const HS = homeBaked()[2], c = homePeekC(k), day = Math.floor(ctx.t / 1440) + 1, seed = hp.seed;
   const sends = ((HS && HS[k]) || []).map(x => ({ x, text: homeFill(x.text, hp, ctx) })).filter(o => o.text && homeOk(o.x, hp, ctx));
   const news = sends.filter(o => homeCond(o.x) && !c.sent.includes(o.x.id)).slice(0, 2);
   return news.concat(sends.filter(o => !homeCond(o.x)).sort((a, b) => schedU(seed ^ socHash(a.x.id), day, 684) - schedU(seed ^ socHash(b.x.id), day, 684)).slice(0, 3 - news.length));
@@ -15977,15 +15980,15 @@ const HOME_MSG = { quiet: 3, every: 5, hour: 12, odds: .5, back: 1440 };
 function homeMsgHour(h) {                                // storyHour, every ship hour
   if (h % 24 !== HOME_MSG.hour) return;
   const [HC, , , HCH] = homeBaked(); if (!HC || !HCH) return;
-  const t = h * 60, day = Math.floor(t / 1440) + 1, H = homeState(), ord = k => HOME_ORDER.includes(k) ? HOME_ORDER.indexOf(k) : 99;
-  if (H.msgDay === day) return;
+  const t = h * 60, day = Math.floor(t / 1440) + 1, ord = k => HOME_ORDER.includes(k) ? HOME_ORDER.indexOf(k) : 99;
+  if (homePeek().msgDay === day) return;
   for (const k of Object.keys(HC).sort((a, b) => ord(a) - ord(b) || (a < b ? -1 : 1))) {
-    const c = homeC(k), hp = homeP(HC[k]);
+    const c = homePeekC(k), hp = homeP(HC[k]);
     if (!c.b || (c.msg && !c.msg.done) || (c.msg && day - c.msg.day < HOME_MSG.every) || (c.day !== null && day - c.day < HOME_MSG.quiet)) continue;   // called once, not lately, no message waiting
     if (schedU(hp.seed, day, 685) >= HOME_MSG.odds) continue;
     const ctx = homeCtx(t), pool = (HCH[k] || []).map((e, i) => [e, i]).filter(([e]) => e && Array.isArray(e.lines) && homeOk(e.when, hp, ctx)); if (!pool.length) continue;
     const [e, i] = pool[Math.floor(schedU(hp.seed, day, 686) * pool.length)], first = e.lines.find(l => !l.send);
-    c.msg = { day, i, done: false }; H.msgDay = day;
+    homeC(k).msg = { day, i, done: false }; homeState().msgDay = day;   // only now does the save change
     SHIP.social.mail.push({ at: t, from: HC[k].name, subject: HOME_MSG_SUBJECT, play: 'home:' + k,
       body: (first ? '"' + (homeFill(first.text, hp, ctx) ?? first.text) + '" ' : '') + '(Recorded at home. Play it to hear the rest and record a reply.)' });
     return;
@@ -15998,14 +16001,14 @@ function homeMailOf(m) {                                 // the contact whose re
   if (m.play) { const hm = /^home:(.+)$/.exec(String(m.play)); return hm && HC[hm[1]] ? hm[1] : null; }
   return m.subject === HOME_MSG_SUBJECT ? Object.keys(HC).find(k => HC[k].name === m.from) || null : null;
 }
-const mailPlayable = m => { const k = homeMailOf(m), c = k && homeC(k); return !!(c && c.msg && !c.msg.done) || !!(m && m.play && !homeMailOf(m)); };   // section 19 shows Play while it's true
+const mailPlayable = m => { const k = homeMailOf(m), c = k && homePeekC(k); return !!(c && c.msg && !c.msg.done) || !!(m && m.play && !homeMailOf(m)); };   // section 19 shows Play while it's true
 function mailPlay(m) {
   const k = homeMailOf(m); if (k) return homeMessage(k);
   return m && m.play && typeof momentShow === 'function' ? momentShow(m.play) : false;
 }
 function homeMessage(k, t = shipNow()) {                 // their message, then your reply (no answer in the scene: it comes by Mail)
   if (typeof MEETING_SCRIPTS === 'undefined' || typeof dialogueShow !== 'function' || (typeof DIALOGUE !== 'undefined' && DIALOGUE)) return false;
-  const [HC, , , HCH] = homeBaked(), hc = HC && HC[k], c = hc && homeC(k), e = c && c.msg && !c.msg.done && HCH && HCH[k] && HCH[k][c.msg.i]; if (!e) return false;
+  const [HC, , , HCH] = homeBaked(), hc = HC && HC[k], c = hc && homePeekC(k), e = c && c.msg && !c.msg.done && HCH && HCH[k] && HCH[k][c.msg.i]; if (!e) return false;
   const hp = homeP(hc), ctx = homeCtx(t), say = x => ({ who: hc.name, text: homeFill(x.text, hp, ctx) ?? String(x.text), pose: x.pose });
   const ch = homeSends(k, hp, ctx).map(o => ({ text: o.text, flavour: o.x.flavour, c: o.x }));
   let picked = null;
