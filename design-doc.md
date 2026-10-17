@@ -109,7 +109,7 @@ The daily loop spans three decks: sleep on Deck 4, eat on Deck 3, work from Deck
 
 **Build order:** Deck 4, then Deck 5, then Deck 3, then Decks 6, 1 and 2. All six decks now have agreed plans (`plans/deckN-plan.html`). Decks 4, 5 and 3 are built and signed off. Decks 6, 1 and 2 are built as shells, rooms and furniture, without crew or machines (see DEV_NOTES and TEAM.md for their review status).
 
-**Access and mood.** The lift reaches every deck from day one. Utility rooms lock by tier (agreed 2026-10-16): closets at Tier 1, plant rooms at Tier 2, batteries and power junctions at Tier 3. The player starts at Tier 1, a Works junior. Locking by story comes later, with the story work; until then, sealed rooms and hatches show what's behind them with tap text. Each deck has its own lighting mood: warmer and dimmer on Deck 6, cooler on the bridge.
+**Access and mood.** The lift reaches every deck from day one. Utility rooms are open to the player from the start (the user, 2026-10-17, replacing the tier locks of 2026-10-16): you can walk into any utility room whose inside is built, at any tier. Tiers still decide which jobs you may take (closets Tier 1, plant rooms Tier 2, batteries and power junctions Tier 3), and crew outside Works still treat the hatches as walls. The player starts at Tier 1, a Works junior. Locking by story comes later, with the story work; until then, sealed rooms and hatches show what's behind them with tap text. Each deck has its own lighting mood: warmer and dimmer on Deck 6, cooler on the bridge.
 
 
 ## Crew and rooms
@@ -748,7 +748,7 @@ Done so far:
 - The player starts in Bunk 1 with Tomas, and Pell and Rina are in Bunk 2 (answered since v3).
 - 18 ship hours take 30 real minutes, so a whole day is 40 (agreed 2026-10-16; first 30 minutes a day, before that a guess of 10). This sets every wear rate.
 - What triggers the first story events: ship-wide events are the main missions, about one every 1–2 ship weeks, starting with the ion storm (see "Ship-wide events").
-- Decks 6 and 1 are reachable by lift from day one. Utility rooms lock by tier (closets 1, plant rooms 2, batteries and power junctions 3, so Deck 6's junctions stay at tier 3); locking by story comes later (agreed 2026-10-16).
+- Decks 6 and 1 are reachable by lift from day one. Utility rooms are open to the player from the start (the user, 2026-10-17); tiers (closets 1, plant rooms 2, batteries and power junctions 3) now only gate which jobs you may take. Locking by story comes later.
 - The bridge's sunken command ring is faked for now with a rail, a painted step edge and a curved step strip.
 - The bridge washroom stays.
 - The game starts on Day 1, a Monday, at 06:00, with the player in Bunk 1 (agreed 2026-10-15).
