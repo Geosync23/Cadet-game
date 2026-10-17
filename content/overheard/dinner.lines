@@ -132,7 +132,7 @@ A: Music night later.
 B: Are you singing?
 A: Everyone's singing. Nobody agrees on the words.   #funny
 
-? place:mess act:dinner trad:observatory pair:any+any
+? place:mess act:dinner trad:observatory-night pair:any+any
 A: Observatory after dinner?
 B: Bring a flask.
 A: And biscuits.
