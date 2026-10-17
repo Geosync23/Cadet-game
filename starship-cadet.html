@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.36.35
+   STARSHIP CADET: CSV Wren                           build 0.36.36
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.36.35';                           // keep in step with the header's build line
+const GAME_BUILD = '0.36.36';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -14206,7 +14206,7 @@ function memNote(kind, d) {
   if (kind === 'repair') memRepair(d);
   else if (kind === 'tradition' && Array.isArray(d.came) && (d.you || d.came.includes('you')))   // you came: those there who know you
     for (const id of d.came) if (id !== 'you' && SHIP.rel[id] && SHIP.rel[id].met !== null) memAdd(id, 'came.' + d.id);
-  if (kind === 'choice' && d.script) for (const id of [].concat(d.who || [])) memAdd(id, 'meeting.' + d.script + '.' + (d.k ?? 0));
+  if (kind === 'choice' && d.script) for (const id of [].concat(d.who || [])) memAdd(id, typeof d.mem === 'string' && d.mem ? d.mem : 'meeting.' + d.script + '.' + (d.k ?? 0));   // the choice's own mem key when the script gives one
 }
 if (typeof onSim === 'function') for (const k of ['repair', 'tradition', 'choice']) onSim(k, d => { socInit(); memNote(k, d || {}); });
 
@@ -14554,7 +14554,7 @@ function bunkNote() {                                    // section 15's bunk ta
 // news and the Crew app. A leaver's transfer is news 10 days ahead ("transferring to the Halcyon": the roster's
 // transferTo); a day or two before, anyone who knows you comes to say goodbye (their card's first line, kind 'goodbye':
 // 20c's goodbyeMoment(p) when there is one, else the engine's goodbye line, else one built from their heaviest memories
-// of you); on the day, a farewell at the shuttle bay at 15:00 (section 18's gathering, when it's there) and, if you
+// of you); on the day, a farewell at the shuttle bay at 15:00 (section 18's eventOneOff, booked ten days ahead) and, if you
 // didn't say goodbye, a Mail. After, friends write now and then (letters, every two weeks for six weeks, then every six;
 // the engine's letter kind, else built from your memories), and they're under "Moved on" in the Crew app
 // (SHIP.social.moved, saved). Arrivals are news a week ahead, and new for their first week (newHere: ctx.newHere).
@@ -14568,6 +14568,10 @@ function socTransfers(h) {                               // 07:00 each ship day 
   for (const p of SOC.crew) {
     if (!Array.isArray(p.aboard)) continue;
     const n = shortName(p), to = p.transferTo ? 'the ' + p.transferTo.replace(/^the /i, '') : 'another ship', near = SOC.crew.filter(q => q !== p && socAboard(q, d) && (q.dept === p.dept || socRoom(q) === socRoom(p)));
+    if (p.aboard[1] != null && d === p.aboard[1] - 10 && typeof eventOneOff === 'function') {   // their farewell at the shuttle bay on the day (section 18 plans it like a tradition, host first)
+      try { eventOneOff({ id: 'farewell-' + p.id, name: 'Farewell for ' + shortName(p), day: p.aboard[1], at: [900, 930], venue: 'shuttle-bay', where: [{ deck: 5, room: 'Shuttle bay', types: ['event'] }], host: p.id, hostAnim: 'talk', chance: .2, anim: 'talk',
+        ask: 'Coming to see me off at the shuttle? Three o\'clock.', here: 'I\'ll miss this old ship.', thanks: 'You see ' + shortName(p) + ' off at the shuttle bay. Hugs, a few tears, a joke about the coffee.' }); } catch (e) { }
+    }
     if (p.aboard[1] != null && d === p.aboard[1] - 10) newsAdd({ id: 'leaving:' + p.id, about: p.id, kind: 'transfer', weight: .8, life: 10, born: t, seed: socPick(near, 4, p.seed, d, 663).map(q => q.id),
       lines: ['Did you hear? ' + n + '\'s transferring to ' + to + '.', n + ' is leaving us. ' + to[0].toUpperCase() + to.slice(1) + ', in ten days.', 'Ten days and ' + n + '\'s off to ' + to + '. Can you believe it?'] });
     if (p.aboard[0] != null && p.aboard[0] > 1 && d === p.aboard[0] - 7) newsAdd({ id: 'arriving:' + p.id, about: p.id, kind: 'arrival', weight: .6, life: 8, born: t, seed: socPick(SOC.crew.filter(q => q.dept === p.dept && socAboard(q, d)), 3, p.seed, d, 664).map(q => q.id),
@@ -14575,7 +14579,6 @@ function socTransfers(h) {                               // 07:00 each ship day 
     if (p.aboard[1] != null && d === p.aboard[1] && !M.some(x => x.id === p.id && x.day === d)) {
       const r = SHIP.rel[p.id], tier = r ? r.tier : 0, mem = (SHIP.mem[p.id] || []).slice().sort((a, b) => b[2] - a[2]).slice(0, 3).map(m => m[0]);
       M.push({ id: p.id, day: d, tier, mem, letters: 0, next: tier >= 3 ? d + 14 : null });
-      if (typeof gathering === 'function') { try { gathering({ id: 'farewell-' + p.id, where: { deck: 5, room: /^Shuttle bay$/ }, at: [(d - 1) * 1440 + 900, (d - 1) * 1440 + 930], who: [p.id].concat(SOC.crew.filter(q => q !== p && socAboard(q, d) && (q.dept === p.dept || affinity(p, q) >= 40)).map(q => q.id)) }); } catch (e) { } }
       if (tier >= 1 && !(r.bye >= d - 2)) SHIP.social.mail.push({ at: (d - 1) * 1440 + 960, from: p.name, subject: 'Sorry I missed you', body: 'Sorry I missed you at the shuttle. ' + byeLine(p, true) + ' ' + shortName(p) });
     }
   }
