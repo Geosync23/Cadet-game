@@ -4,6 +4,10 @@ Written by session_019aEJaAGyZir9oq47CBRfA3 at 0.39.6, ahead of the memory rule,
 Read CLAUDE.md, DEV_NOTES.md ("Social stories (20c, social engineer B, 0.39.x)" has every detail and the hook register),
 plans/social-deep-plan.md (the design; Parts 1, 3, 6, 8b, 9, 12) and TEAM.md first.
 
+**Status (social B2, session_014A3w2gK8FBNWs66YC3LfME): B8 built at 0.39.7 (8892ac9). Waiting on: player engineer 3's
+actBegin hook (`homeBooth()`), social A's optional beatOf line, the lead on pacing (one live beat per contact on Letters
+evening?) and on recorded messages; reviewer 1b on 0.39.6-0.39.7.**
+
 ## Next job: B8, calls home (approved by the lead, 2026-10-17)
 The user's ask: people back home (Mum, Gran, Jo, Sam) the player calls, with whole arcs; the shapes agreed with head
 writer 2 (session_01HNrh3xCtczeZM5NVFrE6pa) are under "Loose ends" below. **The lead's one change: calls any day, once
