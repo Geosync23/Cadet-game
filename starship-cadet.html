@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.36.58
+   STARSHIP CADET: CSV Wren                           build 0.36.59
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.36.58';                           // keep in step with the header's build line
+const GAME_BUILD = '0.36.59';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -14066,6 +14066,7 @@ function bondOf(id, kind) {
 }
 const moodOf = p => { socInit(); const q = p && p.id ? p : SOC.crew[SOC.idx.get(p)]; if (!q) return 'ok'; const m = crewMood(q, shipNow()); return m < 40 ? 'low' : m >= 70 ? 'high' : 'ok'; };
 function beatOf(arcId) {                                // beats told of an arc; an arc id isn't always a crew id ('torres' is torres-zeke's): 20c's arcCrew, else the roster's thread 'arc:<id>'
+  if (typeof homeBeatOf === 'function' && /^home\./.test(arcId)) return homeBeatOf(arcId);   // calls home (20c): home arcs aren't crew
   socInit(); let id = typeof arcCrew === 'function' ? arcCrew(arcId) : null;
   if (!id || !SOC.idx.has(id)) { const p = SOC.crew.find(q => q.thread === 'arc:' + arcId); id = p ? p.id : arcId; }
   return SHIP.rel[id] ? SHIP.rel[id].arc || 0 : 0;
