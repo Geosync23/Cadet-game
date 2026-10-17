@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.48.65
+   STARSHIP CADET: CSV Wren                           build 0.48.66
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.48.65';                           // keep in step with the header's build line
+const GAME_BUILD = '0.48.66';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -14165,7 +14165,6 @@ const VOICE = {
       ],
       "farewell.day": [
         {"text": "The Tern won't wait. Don't be late for that one.", "id": "p86op5"},
-        {"text": "I came to check the ramp seals.", "id": "1va5y6d"},
       ],
       "feel": [
         {"text": "The air's nominal on every deck. Nobody's noticed. Good.", "id": "jhrl7r", "mood": "high"},
@@ -19859,7 +19858,7 @@ const VOICE = {
       ],
       "farewell.day": [
         {"text": "Look after yourself. Sleep. Eat. That's not advice, that's an order.", "id": "tk75ue", "tone": "warm", "tier": [1, 4]},
-        {"text": "I'm only here to check you're fit to fly. You are. Go on.", "id": "30f1k3", "tone": "warm", "tier": [1, 4]},
+        {"text": "Came to check you're fit to fly. You are. I'll see you at the bay.", "id": "lh1cy3", "tone": "warm", "tier": [1, 4]},
       ],
       "farewell.eve": [
         {"text": "Tomorrow. Right. I'll lose at Tiles once, as a send-off. Don't tell anyone.", "id": "2k50po", "tone": "serious", "tier": [3, 4]},
@@ -21728,7 +21727,7 @@ const VOICE = {
       ],
       "farewell.day": [
         {"text": "Today, then. I'll walk you down. Least I can do.", "id": "6o9tgd", "tone": "warm", "tier": [1, 4]},
-        {"text": "Window seat. Every time. You remember.", "id": "o37o4z", "tone": "warm", "tier": [1, 4]},
+        {"text": "Half two, the bay. I'll be there. Where else would I be?", "id": "1qxw1e1", "tone": "warm", "tier": [1, 4]},
       ],
       "farewell.eve": [
         {"text": "Tomorrow, then. I'll be at the Tern. Same spot as when you came.", "id": "1vm6jq5", "tone": "warm", "tier": [1, 4]},
@@ -24628,7 +24627,7 @@ const LINES = {
     {"text": "{bye}, {nick}. Safe trip on the Tern.", "id": "1rz0hru", "tier": [1, 4]},
     {"text": "Off today, then. Good luck out there. I mean it.", "id": "1etbqx6", "tier": [1, 4]},
     {"text": "Go well. Turn up wherever you land. The rest comes.", "id": "nt2rd8", "tone": "warm", "tier": [2, 4]},
-    {"text": "Came to see you off. Couldn't not.", "id": "1wca0dh", "tone": "warm", "tier": [3, 4]},
+    {"text": "Came to find you. Couldn't let today go without it.", "id": "1nglpyy", "tone": "warm", "tier": [3, 4]},
     {"text": "Window seat. Promise me.", "id": "13kmyqa", "tone": "warm", "tier": [3, 4]},
     {"text": "Write when you land. Proper Mail.", "id": "1phxnb2", "tone": "warm", "tier": [3, 4]},
   ],
@@ -26049,7 +26048,7 @@ const HOME_MOMENTS = {
   "sam:3": {"who": "home:sam", "thread": "arc:home.sam", "beat": 3, "tone": "heartfelt", "when": {"beat": "home.sam.2"}, "mem": "bench", "flag": "home.sam.bench", "lines": [{"who": "home:sam", "text": "Hi. There's a hum on the line. Is that your ship? Hello, ship."}, {"who": "home:sam", "text": "I sat on the bench today. By the school gate. Where we met. We were seven and you had a plaster on your knee."}, {"who": "home:sam", "text": "You gave me half a biscuit. The bigger half. I've never forgotten that. Nobody gives away the bigger half."}, {"who": "home:sam", "text": "It's daft. Everything here feels too small to tell you. Library, quiz, bench. You've got stars. I've got a trolley.", "pose": "sigh"}, {"who": "home:sam", "text": "Same bench next week. I'll be on it, anyway. Bye, {me}."}]},
   "sam:4": {"who": "home:sam", "thread": "arc:home.sam", "beat": 4, "tone": "light", "when": {"beat": "home.sam.3"}, "mem": "short", "flag": "home.sam.short", "lines": [{"who": "home:sam", "text": "Hi. Busy. Quiz Thursday. Lost. Wheel still wonky. You?", "pose": "laugh"}, {"who": "home:sam", "text": "That's... that's the whole call. I'm sorry. I had loads to say and it all sounded like a weather report."}, {"who": "home:sam", "text": "Oh. One thing. Mrs Abbot from the café says hello. She never says hello. To anyone."}, {"who": "home:sam", "text": "There. One thing. Bye, {me}."}]},
   "sam:5": {"who": "home:sam", "thread": "arc:home.sam", "beat": 5, "tone": "serious", "when": {"beat": "home.sam.4"}, "hint": "Sam's calling, and they sound quieter than usual.", "mem": "drifting", "flag": "home.sam.drifting", "lines": [{"who": "home:sam", "text": "Can I say something? We're getting shorter. These calls. I've been counting the minutes. That's how bad it is.", "pose": "sigh"}, {"who": "home:sam", "text": "I know it's the distance. It's nobody's fault. But we've been friends since the bench. I don't want us to fade out."}, {"who": "home:sam", "text": "I'm scared we'll end up as two people who used to be friends. Who send a card once a year. I'd hate that."}, {"who": "home:sam", "text": "So here's an idea. Every Sunday, I tell you one story. Any story. Even a boring one. Especially a boring one."}, {"who": "home:sam", "text": "And you write me one back. In your messages. One a week. That's all. That's a rule now. You love rules."}, {"who": "home:sam", "text": "Deal? I'm taking that silence as a deal. Bye, {me}."}]},
-  "sam:6": {"who": "home:sam", "thread": "arc:home.sam", "beat": 6, "tone": "resolution", "when": {"beat": "home.sam.5"}, "mem": "sunday", "flag": "home.sam.sunday", "keepsake": "Sam's first Sunday story, written on the back of a library card", "learn": "Sam, your oldest friend, felt you drifting apart. Now you swap one story every Sunday, however small.", "after": {"mail": {"after": 2880, "subject": "From Sam", "body": "In the post bag: an old library card, written on the back in tiny letters. \"Sunday story number one. The wonky wheel came off. I carried it home. It's on my windowsill now. Your turn. Sam\""}}, "lines": [{"who": "home:sam", "text": "It's Sunday! Story time. I've got a good one. The trolley wheel came off, and I carried it home on the bus.", "pose": "laugh"}, {"who": "home:sam", "text": "Your mum was driving. She didn't ask. She just nodded at the wheel like it was a passenger."}, {"who": "home:sam", "text": "It's on my windowsill now. Like a trophy. A small, squeaky trophy. That's my story. That's the whole of it."}, {"who": "home:sam", "text": "I've written it down too. On a library card. It's in the post. So you've got it. Proof."}, {"who": "home:sam", "text": "This is working, isn't it? I look forward to Sundays now. Same time next Sunday. Even when there's nothing."}]},
+  "sam:6": {"who": "home:sam", "thread": "arc:home.sam", "beat": 6, "tone": "resolution", "when": {"beat": "home.sam.5", "weekday": "sun"}, "mem": "sunday", "flag": "home.sam.sunday", "keepsake": "Sam's first Sunday story, written on the back of a library card", "learn": "Sam, your oldest friend, felt you drifting apart. Now you swap one story every Sunday, however small.", "after": {"mail": {"after": 2880, "subject": "From Sam", "body": "In the post bag: an old library card, written on the back in tiny letters. \"Sunday story number one. The wonky wheel came off. I carried it home. It's on my windowsill now. Your turn. Sam\""}}, "lines": [{"who": "home:sam", "text": "It's Sunday! Story time. I've got a good one. The trolley wheel came off, and I carried it home on the bus.", "pose": "laugh"}, {"who": "home:sam", "text": "Your mum was driving. She didn't ask. She just nodded at the wheel like it was a passenger."}, {"who": "home:sam", "text": "It's on my windowsill now. Like a trophy. A small, squeaky trophy. That's my story. That's the whole of it."}, {"who": "home:sam", "text": "I've written it down too. On a library card. It's in the post. So you've got it. Proof."}, {"who": "home:sam", "text": "This is working, isn't it? I look forward to Sundays now. Same time next Sunday. Even when there's nothing."}]},
 };
 const HOME_SEND = {
   "gran": [],

@@ -76,7 +76,7 @@ them: Deal? I'm taking that silence as a deal. Bye, {me}.
 
 == beat 6
 tone: resolution
-when: beat:home.sam.5
+when: beat:home.sam.5 weekday:sun
 mem: sunday
 flag: home.sam.sunday
 keepsake: Sam's first Sunday story, written on the back of a library card
