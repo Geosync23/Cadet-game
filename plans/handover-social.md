@@ -30,7 +30,7 @@ A1 0.36.20 query API; A2 0.36.21 memories; A3 0.36.22 lines through `lineFor`; A
 - **Run social_check before every push**, even one-liners (0.36.38 lost a helper and broke every card; reviewer 1 caught it).
 - Section 20 sits before ROSTER (section 9) and section 21: everything lazy (`socInit`); `typeof` on a later const throws during load, so keep such checks inside try or out of load-time code.
 - Plans' blocks (`planDay`) are in absolute ship minutes.
-- Test overrides: `window.foo = ...` doesn't replace a script's own function or const; move the player instead, or push onto the real array.
+- Test overrides: `window.foo = ...` doesn't replace a script's own function. social_check's `g.ev` runs inside the game's scope, so swap with a plain `foo = ...` there (save the real one first, put it back after); consts can't be swapped (move the player instead, or push onto the real array). Never set `SHIP.intro` to null (section 13/21 read it): restore the saved object. With section 10's `crewComeTo` merged, a visitor's card opens on arrival, later; tests stand in an instant arrival.
 - Before pushing a seam another seat depends on, a trial merge plus `node --check` on the main script catches name clashes.
 
 ## How to test
