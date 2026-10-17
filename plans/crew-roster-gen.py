@@ -906,13 +906,13 @@ HOBBY_NOUN = {'baking': 'baking', 'looking after a cactus called Gerald': 'cactu
               'playing cards at the bar': 'cards', 'doing puzzles': 'puzzles', 'making models': 'model making'}
 # ---- story arcs the writers own (0.16.16, head writer 3 and social B2: the roster's thread wins for themes, the voice files
 # only for 'arc:' threads). Sato's thread is the notgood theme (facts 11; her own secret already fits it). Zainab Kovac has
-# the writers' four-beat arc (the ladder club, facts 6), so her thread is arc:kovac and all her generated details give way
+# the writers' four-beat arc (the lift club, facts 6; reworded in 0.16.21: everyone rides the lift and eats breakfast), so her thread is arc:kovac and all her generated details give way
 # to her canon ones. Applied last, with no random draws, so nobody moves.
 ARC_OVERRIDE = {'kovac-zainab': ('arc:kovac', [   # all her details from canon (facts 6 and 11), worded by head writer 3 (0.16.17)
     (0, 'work', 'Can strip a scrubber in ten minutes flat.'), (0, 'hobby', 'Knits the neatest scarves in the knitting circle, without a single dropped stitch.'),
-    (1, 'hobby', 'Skips breakfast for the garden; her beans are the tidiest rows there.'), (1, 'hobby', 'Browses the crew store for wool; never buys the first ball she likes.'),
+    (1, 'hobby', 'Bolts breakfast to get to the garden; her beans are the tidiest rows there.'), (1, 'hobby', 'Browses the crew store for wool; never buys the first ball she likes.'),
     (2, 'home', 'Writes to a big, noisy family more often than her family writes back.'),
-    (3, 'past', 'Takes the maintenance ladder between decks "for the exercise", every time.'),
+    (3, 'past', 'Holds the lift rail with both hands, and tells anyone who notices "Lovely lift."'),
     (4, 'secret', 'Is afraid of the lift, and thinks she is the only one aboard who is.')])}
 ARC_FIELDS = {'kovac-zainab': {'home': 'Marra Station'}}      # her arc's beat 3: she grew up on Marra Station (0.16.18)
 def arc_fixes(people):
