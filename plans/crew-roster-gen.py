@@ -903,8 +903,7 @@ HOBBY_NOUN = {'baking': 'baking', 'looking after a cactus called Gerald': 'cactu
               'growing cuttings': 'gardening', 'gardening': 'gardening', 'cooking recipes from home': 'cooking', 'sketching in the garden': 'sketching',
               'tying cord knots': 'knotwork', 'collecting mission patches': 'patch collecting', 'playing the fiddle': 'fiddle', 'playing the drums': 'drums',
               'playing the keyboard': 'keyboard', 'singing': 'singing', 'stargazing': 'stargazing', 'playing chess': 'chess', 'listening to old records': 'record collecting',
-              'playing cards at the bar': 'cards', 'doing puzzles': 'puzzles', 'making models': 'model making', 'growing cuttings': 'gardening',
-              'recording messages for home': 'recording', 'doing crosswords in the bow lounge': 'crosswords'}
+              'playing cards at the bar': 'cards', 'doing puzzles': 'puzzles', 'making models': 'model making'}
 # ---- story arcs the writers own (0.16.16, head writer 3 and social B2: the roster's thread wins for themes, the voice files
 # only for 'arc:' threads). Sato's thread is the notgood theme (facts 11; her own secret already fits it). Zainab Kovac has
 # the writers' four-beat arc (the ladder club, facts 6), so her thread is arc:kovac and all her generated details give way
@@ -925,12 +924,16 @@ def arc_fixes(people):
         e.update(ARC_FIELDS.get(e['id'], {}))
         assert len(e['about']) >= 6, e['id']
 
+# the talent theme ("I do a bit of X when nobody's looking", "Me, teaching X", "I made it for you") needs a secret craft, not a
+# public pastime, so talent-thread people get one hand-set from their hobby (0.16.20, reviewer 1c); the generator asserts it.
+TALENT_NOUN = {'ibarra-rafael': 'crossword setting', 'silva-bea': 'tea blending', 'quist-ilse': 'story writing', 'jovanovic-petra': 'tile carving',
+               'amadi-asha': 'star sketching', 'juarez-nell': 'patch sewing'}
 def kin_lost(people):
     for e in people:
         k = KIN_HAND[e['id']] if e['id'] in KIN_HAND else KIN_OF[e['family']][stable(e['id']) % len(KIN_OF[e['family']])]
         lost = LOST_HAND.get(e['id']) or ('' if e['id'] in LOST_HAND or not any(a['text'].startswith('Lost someone close') for a in e.get('about', []))
                                           else LOST_OF[stable(e['id']) % len(LOST_OF)])
-        e['kin'], e['lost'], e['hobbyNoun'] = k, lost, HOBBY_NOUN[e['hobby']]
+        e['kin'], e['lost'], e['hobbyNoun'] = k, lost, TALENT_NOUN[e['id']] if e['thread'] == 'talent' else HOBBY_NOUN[e['hobby']]
         for v in (k, lost): assert v == '' or (v.startswith('my ') and len(v.split()) <= 3 and 'partner' not in v and 'wife' not in v or v == LOST_HAND.get(e['id'])), (e['id'], v)
         assert (k != lost or not k) and not e['hobbyNoun'].startswith(('a ', 'my ', 'the ')), e['id']
 
