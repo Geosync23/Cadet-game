@@ -213,3 +213,32 @@
 - Your gran. The hip. Getting better? Good. Grans are tough.
 ? flag:home.sam.sundays tier>=colleague
 - Sunday story. Good idea. Mine get a number. Yours get a story. Better.
+
+// Writer 4, batch 2: everyday chatter, not about work (meals, rest days, home, hobbies, seasons, traditions).
+== smalltalk
+? act:meal
+- Soup. Good. Typical.
+- Skipped breakfast. Lunch counts double.   #funny
+? act:off
+- Rest day. Garden at misting hour. Best hour.
+- Bar stool. Same drink. Don't move it.   #funny
+- Wrote home. Two lines. They know the rest.
+? time:evening
+- Two hundred and five. Tomorrow.
+- Same stool. Same drink. Same view. Good.
+? time:night
+- Can't sleep. Counting. Not sheep.   #funny
+- The vents sound like rain. They don't.
+? season:greening
+- Garden's misting more. Smells like home.
+? season:lanterns
+- Lanterns. Port Halloran does them in the rain.
+? trad:quiz
+- Quiz. I know one answer. Every week.   #funny
+? place:lounge
+- Window. Black. Still. Not rain. Shame.
+- Hm. Quiet tonight. Good.
+
+== rumour
+- Heard something. One word: true.
+- Not gossip. Facts. Two of them.   #funny

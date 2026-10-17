@@ -136,3 +136,33 @@
 - Nice. Thanks. That's a good-week song, this.
 ? gift:polite
 - Oh, well. Thank you. It's going on a playlist somewhere. A quiet one.
+
+// Writer 4, batch 2: everyday chatter, not about work (meals, rest days, home, hobbies, seasons, traditions).
+== smalltalk
+? act:meal
+- Breakfast has a theme song. It's slow.   #funny
+- This pudding is a ballad. A sad one. It's gone.   #funny
+? act:off
+- Rest day. Playlist forty-something, side two.
+- Painted a tiny portrait. Won't say whose.
+? time:evening
+- Teague's playlist was fine. Fine. That's all.   #funny
+- Quiet garden after dinner. Best song there is.
+? time:night
+- Night owl playlist. All slow. All good.
+? trad:jam
+- Music night. Teague's going down. Nicely.   #funny
+? season:greening
+- Greening has a sound. It's sort of a hum.
+? season:lanterns
+- Lanterns playlist is done. It's mostly bells.
+? place:commons
+- Who moved the comics wall? Oh, it's grown.
+? trad:quiz
+- Music round. Hand on heart, I'll win it.
+? weekday:fri
+- Friday. Big playlist day. Don't touch the dial.   #funny
+
+== rumour
+- Great news, said very flatly: it's great news.   #funny
+- Heard it. Got a song for it. Here's the news.

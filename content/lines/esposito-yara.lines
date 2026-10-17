@@ -138,3 +138,31 @@
 - Nice choice. I'd have guessed you'd pick that. Thank you.   #funny
 ? gift:polite
 - Ah, well. Thank you. It's the thought. I'll know where it's from.
+
+// Writer 4, batch 2: everyday chatter, not about work (meals, rest days, home, hobbies, seasons, traditions).
+== smalltalk
+? act:meal
+- Someone's bought every biscuit. I won't say who.   #funny
+- Soup again. Good. I'm a soup person.
+? act:off
+- Rest day. Gym, Gerald, journal. In that order.
+- Gerald's leaning left. He's thinking.   #funny
+- I shopped at the store. Yes, my own. I know.   #funny
+? time:evening
+- Star three hundred and three tonight. Maybe.
+- Gym after shift. Then a sit. Then nothing.
+? time:night
+- Three hundred and four. Wrote it down. Bed.
+? trad:observatory
+- Observatory night. Bringing the journal. Obviously.
+? season:harvest
+- Harvest. Everyone's buying jars. Jam season.
+? place:commons
+- Common room's warm tonight. I'm staying put.
+- Who's got the Tiles board? No, keep it. I'll watch.
+? act:wash
+- Hot water. Five minutes. I'm timing it.   #funny
+
+== rumour
+- I can't say who. I can say it's lovely.
+- I don't tell what people buy. I'll tell you this.

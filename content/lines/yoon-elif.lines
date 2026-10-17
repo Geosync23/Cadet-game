@@ -136,3 +136,31 @@
 - Thank you. That's lovely. Really.
 ? gift:polite
 - Oh dear. Thank you. You shouldn't have. I mean that nicely.
+
+// Writer 4, batch 2: everyday chatter, not about work (meals, rest days, home, hobbies, seasons, traditions).
+== smalltalk
+? act:meal
+- Why did the toast go to the doctor? Crumbs. Sorry.   #funny
+- Is this breakfast or dinner? Nights are odd.   #funny
+- Sorry, is that your seat? I'll move. Sorry.
+? act:off
+- Rest day. I called home. Everyone's well.
+- I'm going to sleep in the day. Properly.
+? time:morning
+- Good morning. Or good night. Both, for me.   #funny
+? time:evening
+- Coffee, then the night. The machine likes me.
+- Just a cup of tea at the bar. Nothing fancy.
+? time:night
+- The ship's so quiet now. I like it like this.
+- Why are vents good listeners? They're all ears. Sorry.   #funny
+? season:lanterns
+- The lanterns look lovely from the night side.
+? trad:quiz
+- I'm on a team. I'll mostly cheer. Quietly.
+? place:lounge
+- I like the lounge late. The stars feel nearer.
+
+== rumour
+- Oh, I heard something. Is it all right to say?
+- Sorry. Have you heard? It's good, I promise.
