@@ -1,0 +1,18 @@
+@template warm
+== career.worried
+? tier>=colleague flag:career.missed
+- Oh, {nick}, you missed your shift. Are you eating? Sleeping? Tell me.
+? tier>=friend flag:career.low
+- Come here. Whatever it is, the Chief will be fair. And I'm on your side.   #warm
+? tier>=friend flag:career.verylow
+- Oh, love. The ready room. Sit with me a minute. Then early to bed, yes?   #serious
+? tier>=friend flag:career.bottom
+- I'm worried sick. Go tomorrow. Please. For me, if not for you.   #serious
+? tier>=friend flag:career.up
+- There. Look at you. I knew you would.   #warm
+== career.eve
+? tier>=friend flag:career.eve
+- Tomorrow. Oh dear. I'm going to cry, and you're not to mind.   #serious
+== career.bye
+? tier>=friend flag:career.lastday
+- Look after yourself. Eat properly. And write, or I'll worry.   #warm

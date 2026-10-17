@@ -1,0 +1,18 @@
+@template chatty
+== career.worried
+? tier>=colleague flag:career.missed
+- There you are! Everyone was asking where you'd got to. You all right? Honestly?
+? tier>=friend flag:career.low
+- Calder wants you? Oh, {nick}. Want me to walk you down? I'll wait outside.
+? tier>=friend flag:career.verylow
+- The ready room! Look, whatever's going on, talk to me. I'm a good listener. Sometimes.   #serious
+? tier>=friend flag:career.bottom
+- I'm worried, {nick}. Properly. I'll knock for you in the morning. Every morning.   #serious
+? tier>=friend flag:career.up
+- You were on shift! I told everyone. Well, three people. It's a start.   #funny
+== career.eve
+? tier>=friend flag:career.eve
+- I don't even know what to say, and I always know what to say. I'm so sorry.   #serious
+== career.bye
+? tier>=friend flag:career.lastday
+- Write. Every week. Long ones. I'll write back longer. You know I will.   #warm

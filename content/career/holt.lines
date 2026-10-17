@@ -1,0 +1,10 @@
+@crew holt
+// Head writer 4: career lines. Holt walks every deck before breakfast; he notices who isn't where they should be.
+== career.worried
+? tier>=acquaintance flag:career.missed
+- Walked past the Works bay at eight. You weren't in it. Fix that.
+? tier>=friend flag:career.bottom
+- I've seen people let go. Don't be one. Tomorrow, eight. I'll check.   #serious
+== career.bye
+? tier>=acquaintance flag:career.lastday
+- Leaving. Hm. Do better on the next one. You've got it in you.

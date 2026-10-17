@@ -1,0 +1,18 @@
+@template steady
+== career.worried
+? tier>=colleague flag:career.missed
+- You missed a shift. It happens. Make tomorrow a good one.
+? tier>=friend flag:career.low
+- The Chief will tell you what needs to change. It won't be much. You can do it.   #warm
+? tier>=friend flag:career.verylow
+- Hard week? Sit a minute. Then let's work out how you get to your shift.   #serious
+? tier>=friend flag:career.bottom
+- One day at a time, {nick}. Tomorrow's the only one that matters.   #serious
+? tier>=friend flag:career.up
+- That's better. Steady does it.
+== career.eve
+? tier>=friend flag:career.eve
+- I'm sorry it came to this. You're still the same person to me.   #serious
+== career.bye
+? tier>=friend flag:career.lastday
+- Go steady. You'll find your place. I believe that.   #warm

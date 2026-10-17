@@ -1,0 +1,30 @@
+@crew brennan
+// Head writer 4: career lines. Brennan feeds the worry. Keeps a book of everyone's favourite dish.
+== career.worried
+? tier>=acquaintance flag:career.missed
+- Missed your shift and your breakfast? Sit. Eat. Then tell me.
+? tier>=colleague flag:career.low
+- Calder's not cruel, love. She's like me with a pan. She wants it right.
+? tier>=friend flag:career.verylow
+- The Captain? Oh, love. Eat something first. Then listen to her. She's kind.   #serious
+? tier>=friend flag:career.verylow beat:brennan.3
+- I left a place once, after the fire. I don't want you leaving like that. Eat, then go.   #serious
+? tier>=friend flag:career.bottom
+- Breakfast at seven, here, with me. Then your shift. I'll be watching the door.   #serious
+? tier>=acquaintance flag:career.up
+- There's my good eater. Back on shift? Have seconds.
+== career.eve
+? tier>=friend flag:career.eve
+- Tomorrow? I'm making your favourite tonight. Don't argue.   #serious
+== career.bye
+? tier>=acquaintance flag:career.lastday
+- Packed you something for the Tern. Biscuits. Don't eat them all at once.   #warm
+== career.seeoff
+? tier>=acquaintance flag:career.lastday
+- You're still in my book, love. Favourite dish and all. That doesn't come out.   #warm
+== career.leave
+? flag:leave.booked
+- Day off tomorrow? Come for a late breakfast. I'll keep you a plate.
+== career.back
+? flag:leave.back
+- Back! Sit down. You've a day's eating to catch up on.

@@ -1,0 +1,18 @@
+@template earnest
+== career.worried
+? tier>=colleague flag:career.missed
+- You missed your shift. Is everything all right? I don't mean to pry.
+? tier>=friend flag:career.low
+- I know it's hard. But you can do this. I really think you can.   #warm
+? tier>=friend flag:career.verylow
+- Please don't give up. Tell me what's wrong, and we'll work it out together.   #serious
+? tier>=friend flag:career.bottom
+- I'll set two alarms. One for me, one for you. Please, {nick}. One shift.   #serious
+? tier>=friend flag:career.up
+- You're turning up again. I'm so glad. I really am.   #warm
+== career.eve
+? tier>=friend flag:career.eve
+- I wish I'd done more. I'm sorry. I'll miss you so much.   #serious
+== career.bye
+? tier>=friend flag:career.lastday
+- You were a good friend to me. Remember that, wherever you go.   #warm

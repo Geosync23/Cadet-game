@@ -1,0 +1,30 @@
+@crew torres-zeke
+// Head writer 4: career lines. Torres walked you up from the Tern; he trained you. He takes it personally, kindly.
+== career.worried
+? tier>=acquaintance flag:career.missed
+- Your board slot was empty this morning. Coil three noticed. So did I. You all right?
+? tier>=colleague flag:career.low
+- Calder's called you in? Go early. Say it straight. She respects straight.
+? tier>=friend flag:career.verylow
+- Up top to the Captain. {sigh}. I trained you, shipmate. I know what you can do.   #serious
+? tier>=friend flag:career.bottom
+- I'll knock at ten to eight. Not eight. Ten to. We walk down together.   #serious
+? tier>=acquaintance flag:career.up
+- That's my trainee. Board, job, turn in. Like I showed you.
+== career.eve
+? tier>=acquaintance flag:career.eve
+- Tomorrow, then. I'll be at the Tern. Same spot as when you came.   #warm
+? tier>=friend flag:career.eve
+- I keep going over it. What I'd have said. Doesn't matter now. I'm sorry, shipmate.   #serious
+== career.bye
+? tier>=acquaintance flag:career.lastday
+- Today, then. I'll walk you down. Least I can do.   #warm
+== career.seeoff
+? tier>=acquaintance flag:career.lastday
+- Window seat. Every time. You remember.   #warm
+== career.leave
+? flag:leave.booked
+- Leave tomorrow? Good. Don't come near the bay. I mean it.
+== career.back
+? flag:leave.back
+- Back! Coil three behaved while you were off. Suspicious, honestly.   #funny

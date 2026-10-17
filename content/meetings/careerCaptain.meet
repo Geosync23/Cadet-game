@@ -1,0 +1,26 @@
+@meeting careerCaptain
+// Head writer 4: the step at "very low". Captain Marrow's ready room on Deck 1: a formal reprimand, serious and still
+// humane. She asks her one question, as she does with every junior. The step; the Admiral, never explained.
+title: The ready room
+from: Captain Odile Marrow
+gist: Captain Marrow, in her ready room: a formal reprimand, and the way back.
+== lines
+marrow: Come in. Mind the step. Everyone trips on it.   [gesture]
+marrow > you: Sit, please, {me}. This is a formal reprimand, and I'd like you to hear all of it.
+marrow: The Chief has spoken to you. The shifts are still being missed. It goes on your record today.
+marrow: I don't say that to frighten you. I say it because it's true, and you deserve the truth.
+marrow: A ship runs on people turning up. Every one of us. Me included.
+marrow > you: I ask everyone one question. Here's yours today. What would help you turn up?   [listen]
+? choice
+* Knowing someone noticed.   rel:marrow+1 flavour:share mem:career.captain.noticed
+  marrow: Then know it. I noticed. The Chief noticed. So did your friends.
+* More sleep, honestly.   rel:marrow+1 mem:career.captain.sleep
+  marrow: Then sleep. Regulation nine is rest. Commander Vance will be thrilled someone asked.   [laugh]
+* I don't know yet.   mem:career.captain.unsure
+  marrow: An honest answer. Find out, then. Come back and tell me.
+marrow: Here is where we stand. If your work falls any further and stays there, the Wren will let you go.
+marrow: Not as a punishment. A ship has to be able to count on its crew.
+marrow: It isn't there yet. One good shift turns it round. Then another. Then it's behind you.
+marrow > you: I'd much rather remember you for something else. Give me the chance.
+marrow: The Admiral agrees. He outranks us all.   [nod]
+marrow: That's all. Thank you for coming up.

@@ -1,0 +1,18 @@
+@template gruff
+== career.worried
+? tier>=colleague flag:career.missed
+- Missed shift. Hm. Don't make it two.
+? tier>=friend flag:career.low
+- Calder's calling you in. She's fair. Take what she says. Then do it.
+? tier>=friend flag:career.verylow
+- Captain, now. Listen, {nick}. I've seen good people go this way. Not you.   #serious
+? tier>=friend flag:career.bottom
+- Morning. Bay. Eight. I'll be checking.   #serious
+? tier>=friend flag:career.up
+- On time today. Hm. Good.
+== career.eve
+? tier>=friend flag:career.eve
+- Tomorrow. Hm. Shame. Real shame.   #serious
+== career.bye
+? tier>=friend flag:career.lastday
+- Off you go, then. Stand up straight. You'll do.   #warm

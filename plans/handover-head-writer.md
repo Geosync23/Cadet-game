@@ -1,5 +1,11 @@
 # Handover: head writer (Pillar 4, seat 11)
 
+**Head writer 4** (session_01MWyyMaXv6D7yKtDNy9VbCA) holds the seat from 0.48.61 (2026-10-17 evening). 0.48.61: the career
+lines (leave, missed shifts, being let go; design-doc on claude/lead-pillar1 70eada3) in `content/career/` and meetings
+careerChief, careerCaptain, careerLetGo, careerSendoff; keys and flags in DEV_NOTES's 0.48.61 row and career.lines' header.
+The Career engineer builds it on claude/leave. Calder and Marrow are she/her (the brief said "his": roster wins).
+Local branch note: the container's claude/content had unrelated history; the stale copy is kept as claude/content-stale-local.
+
 **Head writer 3** (session_01FopKMT2ZKxuWcNDcmF7565) holds the seat from 0.48.22 (2026-10-17 ~05:10). Built so far:
 0.48.22 Zeke's arrival tour (`walk.<point>.<n>` at shuttle, bay, haulway, stores, works, lift, wing, officers, deck3,
 servery; `walk.call.<n>`; linger `walk.more.<n>`; meetings `introDinner`, `introAsk`; onboarding's keys, arrival 0.42.20+);

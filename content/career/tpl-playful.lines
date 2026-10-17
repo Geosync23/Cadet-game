@@ -1,0 +1,18 @@
+@template playful
+== career.worried
+? tier>=colleague flag:career.missed
+- Skiving, were we? Kidding. Mostly. You all right?
+? tier>=friend flag:career.low
+- In trouble with the Chief? You? Go on, go. I'll save you a biscuit.   #warm
+? tier>=friend flag:career.verylow
+- No jokes this time, {nick}. The Captain's serious. So am I.   #serious
+? tier>=friend flag:career.bottom
+- I'm not losing my favourite pest. Shift tomorrow. I'll drag you if I have to.   #serious
+? tier>=friend flag:career.up
+- Look who's on the board again! Gold star. I'll make you one.   #funny
+== career.eve
+? tier>=friend flag:career.eve
+- I keep thinking of jokes and none of them are funny. I'm sorry.   #serious
+== career.bye
+? tier>=friend flag:career.lastday
+- Go on, then. Find a ship that deserves you. Then tell me all about it.   #warm

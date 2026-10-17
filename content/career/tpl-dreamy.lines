@@ -1,0 +1,18 @@
+@template dreamy
+== career.worried
+? tier>=colleague flag:career.missed
+- Your spot in the bay was empty today. Odd, how you notice a gap.
+? tier>=friend flag:career.low
+- Is it heavy at the moment? Things get heavy. You can put some down with me.   #warm
+? tier>=friend flag:career.verylow
+- I keep thinking the ship would be smaller without you. Please go tomorrow.   #serious
+? tier>=friend flag:career.bottom
+- Go to your shift, {nick}. Just the next one. Don't look further than that.   #serious
+? tier>=friend flag:career.up
+- You look lighter. Like a window's been opened.
+== career.eve
+? tier>=friend flag:career.eve
+- Tomorrow you'll be stars away. I'll look out of the window and wave anyway.   #serious
+== career.bye
+? tier>=friend flag:career.lastday
+- Somewhere out there's a ship that needs you. Go and find it.   #warm
