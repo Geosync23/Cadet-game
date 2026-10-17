@@ -10080,7 +10080,8 @@ function bagLockerTap(point) {                           // a tap in Bunk 1 with
 // tile, title) sits you at the free public seat nearest that tile (within DINNER_NEAR m; false if none or you're
 // elsewhere); section 21 may call it. dinnerTick() does it once by itself: section 21's 'chief' step (your table in the
 // mess) while it's yours, or in its first DINNER_MINS after you reached it, when you stand idle within DINNER_NEAR of
-// its checkpoint. Tap anywhere to get up, as with any seat.
+// its checkpoint: at section 21's introSeat('you') (3-mess-10, by Torres) when it names a free one, else the nearest.
+// Tap anywhere to get up, as with any seat.
 const DINNER_NEAR = 3, DINNER_MINS = 30;
 let DINNER_SAT = false;
 function playerSitNear(deck, tile, title = 'Mess table') {
@@ -10099,6 +10100,8 @@ function dinnerTick() {
   const done = (I.done || {}).chief, yours = I.step === 'chief' || done !== undefined && !(I.missed || []).includes('chief') && shipNow() - done < DINNER_MINS;
   if (!yours) return;
   const c = cellPos(...cp.tile), p = player.obj.position; if (Math.hypot(p.x - c.x, p.z - c.z) > DINNER_NEAR) return;
+  const mine = typeof introSeat === 'function' ? introSeat('you') : null, sp = mine && PLACE_OF.has(mine) && !heldBy(mine) ? placeSpot(mine) : null;
+  if (sp) { actStart('sit', mine, { pose: sp.pose, title: 'Mess table', after: 'You sit down at the table. Tap anywhere to get up.' }); DINNER_SAT = true; return; }
   DINNER_SAT = playerSitNear(cp.deck, cp.tile);
 }
 const handsFix = what => bagHeld() ? 'Put your bag in your locker first' : giftHeld() ? 'Give the gift away first' : what;

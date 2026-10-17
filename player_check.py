@@ -758,9 +758,9 @@ with sync_playwright() as pw:
       const w = cellPos(28, 2), c = nearestOpen(w.x, w.z, player); player.obj.position.copy(cellPos(...c)); player.path.length = 0;
       return JSON.stringify([real, c]); })()"""))
     for _ in range(10): page.evaluate('window.__step(15, 1000 / 30)')
-    dn = json.loads(ev("JSON.stringify([ACT && ACT.kind, ACT && ACT.phase, ACT && ACT.placeId, DINNER_SAT])"))
+    dn = json.loads(ev("JSON.stringify([ACT && ACT.kind, ACT && ACT.phase, ACT && ACT.placeId, DINNER_SAT, typeof introSeat === 'function' ? introSeat('you') : null])"))
     print('  the arrival dinner (0.28.28):', dn0, dn)
-    check(dn[0] == 'sit' and dn[1] == 'do' and str(dn[2]).startswith('3-mess') and dn[3] is True, f'at your table for the dinner you sit down: {dn}')
+    check(dn[0] == 'sit' and dn[1] == 'do' and str(dn[2]).startswith('3-mess') and dn[3] is True and (dn[4] is None or dn[2] == dn[4]), f'at your table for the dinner you sit down (in your own seat when section 21 names one): {dn}')
     ev("actEnd(true); SHIP.intro.ended = true; goToDeck(4)")
     check(kb[0] == ['kitbag'], f'at the ramp you hold one kit bag: {kb[0]}')
     check(kb[1] == [True, True, 'No device yet', False, 'Put your bag in your locker first'], f'before the bunk: the bag held, the device locked and shut: {kb[1]}')
