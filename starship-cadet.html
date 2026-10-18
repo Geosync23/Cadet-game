@@ -12870,7 +12870,7 @@ function ixChoreTap(it, at) {
   const [title, pose] = IX_STOP[st.step] || ['Your job', 'work'];
   // the stop's spot, not the place: a lamp over the lift queue is yours to change even with someone waiting there
   actStart('ixStop', null, { ...o, pose, spot: { ...spot, id: null, pose: 'stand' }, after: j.title + ': about ' + Math.ceil(st.mins || 10) + ' minutes. Walk away to pause.' });
-  if (ACT && ACT.kind === 'ixStop') { ACT.def.mins = (st.mins || 10) * (typeof careerSpeed === 'function' ? careerSpeed(jobKindOfMachine(j)) : 1); ACT.def.title = title; }
+  if (ACT && ACT.kind === 'ixStop') { ACT.def.mins = st.mins || 10; ACT.def.title = title; }
   return true;
 }
 // what you carry for your job between stops (section 15 asks, for the held prop: 8b's '+toolbox', '+carry'), after its own
