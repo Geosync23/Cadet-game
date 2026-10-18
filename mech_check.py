@@ -74,11 +74,17 @@ M1_RUN = r"""(() => {
   SHIP.jobs = SHIP.jobs.filter(x => !(x.machine && j.route.includes(x.machine)));   // no jobs on them yet
   out.claimed = claimJob(j.id); const xp0 = W.xp;
   out.stops = jobStops(j).map(s => [s.how, s.places[0] || null, (s.opts && s.opts.marks || []).length]);
-  j.route.forEach((id, k) => jobStepDone(j.id, k, { pick: worn.includes(id) ? 'worn' : k === 1 ? 'worn' : 'fine' }));
-  out.workDone = !!j.workDone; out.turnin = turnInJob(j.id);
+  const mark = (x, k) => jobStepDone(x.id, k, { pick: worn.includes(x.route[k]) ? 'worn' : k === 1 ? 'worn' : 'fine' });
+  mark(j, 0); mark(j, 1);
+  // a save and reload mid-round: the jobs as saved (JSON), section 17's tidy, then on with the rest
+  SHIP.jobs = JSON.parse(JSON.stringify(SHIP.jobs)); if (typeof jobsTidy === 'function') jobsTidy();
+  const jr = SHIP.jobs.find(x => x.id === j.id); out.reload = jr ? [jr.claimedBy, (jr.stepsDone || []).length, Object.keys(jr.marks || {}).length, jobStops(jr).length] : null;
+  if (!jr) return out;
+  for (let k = 2; k < jr.route.length; k++) mark(jr, k);
+  out.workDone = !!jr.workDone; out.turnin = turnInJob(jr.id);
   out.found = worn.map(id => { const x = SHIP.jobs.find(y => y.machine === id && y.status !== 'done'); return x ? [x.kind, x.foundBy || null, x.found <= shipNow()] : null; });
   out.healthyJobs = healthy.filter(id => SHIP.jobs.some(y => y.machine === id && y.status !== 'done')).length;
-  out.xp = W.xp - xp0; out.use = W.use.m1; out.marks = j.marks;
+  out.xp = W.xp - xp0; out.use = W.use.m1; out.marks = jr.marks;
   // Day 4: nobody takes it; at 11:00 it's the crew's, and they finish it by evening
   const d2 = 4, t2 = (d2 - 1) * 1440;
   run(t0 + 440, t2 + 430);
@@ -91,7 +97,13 @@ M1_RUN = r"""(() => {
   out.off = [6, 7].map(dd => { SHIP.jobs = []; MACH_HOUR = null; run((dd - 1) * 1440 + 400, (dd - 1) * 1440 + 430); return SHIP.jobs.some(x => x.kind === 'rounds' && Math.floor(x.posted / 1440) + 1 === dd); });
   return out;
 })()"""
+M1_ASK = r"""(() => { SHIP.works = null; SHIP.occasions.length = 0; SHIP.jobs = []; WORKS_TICK.m = WORKS_TICK.h = -1; setShipNow(1440 + 300); machinesNow();
+  const W = worksInit(); W.log.push(['x', 1, 0, 'service']); for (let m = 1440 + 360; m <= 1440 + 700; m += 10) { setShipNow(m); machinesNow(); worksCareerTick(m); }
+  const r = SHIP.occasions.find(x => x.id === 'works.m1'); return r ? r.at % 1440 : null; })()"""
 def m1_part(g):
+    at = g.ev(M1_ASK)
+    print('  24a: Day 2\'s meeting with Torres at', at)
+    check(at is not None and at >= 635, f"m1: Day 2's meeting at {at} (after the 10:30 tea, 10:35 or later)")
     a = g.ev(M1_RUN)
     b = g.ev(M1_RUN)
     print('  24a rounds:', json.dumps({k: a.get(k) for k in ('posted', 'route', 'leaveEnd', 'stops', 'found', 'healthyJobs', 'xp', 'use', 'crew', 'crewFound', 'stage4', 'stage5', 'off')}))
@@ -100,6 +112,7 @@ def m1_part(g):
     check(4 <= len(a['route']) <= 6, f"m1: route of {len(a['route'])} (4-6 expected)")
     check(a['held'] and a['leaveEnd'] == 660, f"m1: held for you to 11:00 (ends {a['leaveEnd']})")
     check(a['claimed'] and all(s[0] == 'look' and s[1] and s[2] == 3 for s in a['stops']), f"m1: stops {a['stops']}")
+    check(a.get('reload') and a['reload'][0] == 'you' and a['reload'][1] == 2 and a['reload'][2] == 2 and a['reload'][3] == len(a['route']), f"m1: reloaded mid-round {a.get('reload')}")
     check(a['workDone'] and a['turnin'], 'm1: the round not done and turned in')
     check(all(f and f[1] == 'you' and f[2] for f in a['found']), f"m1: worn machines found by you: {a['found']}")
     check(a['healthyJobs'] == 0, f"m1: {a['healthyJobs']} jobs posted for healthy machines")

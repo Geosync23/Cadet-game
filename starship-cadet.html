@@ -249,7 +249,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.45.1
+   STARSHIP CADET: CSV Wren                           build 0.45.2
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7808,7 +7808,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.45.1';                           // keep in step with the header's build line
+const GAME_BUILD = '0.45.2';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -35562,7 +35562,7 @@ function drillCalendar() {
   const plain = e.title;
   Object.defineProperty(e, 'title', { configurable: true, enumerable: true, get() {
     const d0 = SHIP.time.day, d = d0 + ((2 - weekday(d0)) + 7) % 7;   // this week's Wednesday, today or next
-    return drillDue(d) ? worksText('drill.cal', 'Drill at 15:00: {drill}').replace('{drill}', worksText('drill.kind.' + drillKind(d), drillKind(d) + ' drill')) + '. Muster at the Works bay' : plain; } });
+    return drillDue(d) ? worksText('drill.cal', 'Drill at 15:00: {drill}').replace('{drill}', worksText('drill.kind.' + drillKind(d), drillKind(d).replace(/^./, x => x.toUpperCase()) + ' drill')) + '. Muster at the Works bay' : plain; } });
 }
 const DRILL_TEA = /^(works-tea|new-hands-tea)$/;
 WORK_TICKS.push((now, skip) => {
