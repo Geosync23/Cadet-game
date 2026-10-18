@@ -502,3 +502,4 @@ Why: lead 10 is at ~54% memory with 0.60.7's release and Pillar 5 Steps 1-2 (ove
 - ~05:35 lead 11 (session_01YKC3CGA9VS4b7wuqLbPT7V, depth 1) took over; check-in trig_01FmYQUHPko5peyLCEdC3qNr; lead 10's disabled; helpers told.
 - ~05:45 the user: overnight exception to the session chain rule (TEAM.md). ~05:47 **the user went to bed: overnight mode ON** (leads may start leads/workers; quiet; push-notify only for the 0.60.7 release or a real blocker). Ends when the user checks in.
 - ~05:53 the user briefly woke (asked for the build link) and said to keep all overnight rules in place: overnight mode stays ON.
+- 05:55 check-in: memory BM3 55%, reviewer 55%, traditions 48%, PE6 46%, DA4 44%, social 43%, onboarding 4 37%, head writer 32%, lead 11 15%; systems working (usage not reported, no ETA yet). All tips reviewed PASS except systems 0.33.41/42 (pending), onboarding 4 Day 3, PE6 0.28.65. BM3 and reviewer to be replaced for Pillar 5.
