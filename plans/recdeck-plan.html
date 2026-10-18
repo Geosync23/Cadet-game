@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Starship Cadet: rec deck plan</title>
+<style>
+:root{--ink:#e8eef0;--muted:#93a6ae;--teal:#4cc3b5;--glass:rgba(13,21,33,.78);--line:rgba(150,200,196,.22)}
+*{box-sizing:border-box}
+html,body{margin:0;background:#121a27;color:var(--ink);font-family:"Avenir Next","Segoe UI",system-ui,sans-serif}
+body{background:radial-gradient(ellipse at 50% 40%,#22304a 0%,#141c2b 60%,#0c111b 100%) fixed}
+header{padding:16px 16px 6px;max-width:1100px;margin:0 auto}
+h1{font-size:20px;font-weight:600;margin:0}
+.sub{font-size:13px;color:var(--muted);margin-top:4px;line-height:1.45}
+.bar{display:flex;gap:8px;flex-wrap:wrap;padding:8px 16px;max-width:1100px;margin:0 auto}
+button{appearance:none;border:1px solid var(--line);background:var(--glass);color:var(--ink);font:inherit;font-size:13px;padding:7px 12px;border-radius:999px;cursor:pointer}
+button[aria-pressed="true"]{border-color:var(--teal);color:#bdeee6}
+button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+#wrap{overflow:auto;max-width:1100px;margin:0 auto;padding:4px 10px 10px;-webkit-overflow-scrolling:touch}
+svg{display:block}
+.room{cursor:pointer}
+.room:focus-visible{outline:none}
+.lbl{font-size:10px;fill:#eef3f1;text-anchor:middle;dominant-baseline:central;pointer-events:none;paint-order:stroke;stroke:rgba(10,14,20,.55);stroke-width:2.5px}
+.lbl.sm{font-size:8.5px}
+.room.sealed{opacity:.38}
+#info{max-width:1100px;margin:0 auto 10px;padding:0 16px}
+#card{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:12px 16px;min-height:74px}
+#card b{display:block;font-size:15px;color:#bdeee6;font-weight:600;margin-bottom:3px}
+#card span{font-size:13.5px;color:#cfd9dc;line-height:1.5}
+#card .meta{display:block;font-size:12px;color:var(--muted);margin-top:4px}
+.legend{max-width:1100px;margin:0 auto 24px;padding:0 16px;display:flex;flex-wrap:wrap;gap:10px 16px;font-size:12.5px;color:var(--muted)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.doc{max-width:1100px;margin:0 auto 40px;padding:0 16px;font-size:13.5px;color:#cfd9dc;line-height:1.55}
+.doc h2{font-size:16px;font-weight:600;color:var(--ink);margin:26px 0 6px;padding-top:8px;border-top:1px solid var(--line)}
+.doc h3{font-size:14px;font-weight:600;color:#bdeee6;margin:14px 0 4px}
+.doc p{margin:0 0 10px;max-width:820px}
+.doc ul,.doc ol{margin:0 0 10px;padding-left:20px;max-width:840px}
+.doc li{margin:2px 0}
+.doc b{color:var(--ink);font-weight:600}
+.doc code{font-size:12px;color:#bdeee6}
+.doc .tw{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:4px 0 12px}
+.doc table{border-collapse:collapse;width:100%;font-size:12.5px;min-width:560px}
+.doc th,.doc td{text-align:left;padding:5px 8px 5px 0;vertical-align:top;border-bottom:1px solid rgba(150,200,196,.12)}
+.doc th{color:var(--ink);font-weight:600}
+.doc .say{color:#e9d8a6;font-style:italic}
+.doc .q li{margin:6px 0}
+.doc .pill{display:inline-block;font-size:11px;padding:1px 7px;border-radius:999px;border:1px solid var(--line);color:var(--muted);margin-left:4px}
+.doc .grid{display:flex;flex-wrap:wrap;gap:12px}
+.doc .cardx{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:10px 14px;flex:1 1 300px;min-width:0}
+.doc .cardx b{display:block;color:#bdeee6;margin-bottom:2px}
+.doc .court svg{max-width:100%;height:auto}
+</style>
+</head>
+<body>
+<header>
+  <h1>The rec dec: the Recreation Deck (lift button R, between Decks 4 and 5)</h1>
+  <div class="sub">Plan, sketch 1, for review. Officially "the Recreation Deck"; everyone aboard calls it "the rec dec". Bow points right, port is at the top (on a phone held upright the bow points up). A double-height deck of play: the auditorium fills the bow, the disc court and the river hall share the stern, the pool and the low-gravity float room sit either side of the lift. Tap any room. Every room here is new, so there are no gold rings. Phase 1 note and the user's picks came through lead 13.</div>
+</header>
+<div class="bar">
+  <button id="zin" aria-label="Zoom in">Zoom in</button>
+  <button id="zout" aria-label="Zoom out">Zoom out</button>
+  <button id="grid" aria-pressed="false">Tile grid</button>
+  <button id="turns" aria-pressed="false">Build turns</button>
+</div>
+<div id="wrap"><svg id="plan" xmlns="http://www.w3.org/2000/svg"></svg></div>
+<div id="info"><div id="card"><b>The rec dec at a glance</b><span>46 × 18 tiles, between Deck 4 (50 × 20) and Deck 5 (44 × 16), so the hull tapers through it. A concourse runs stern to bow through the lift lobby. Aft: the river hall with its kayak rivers and climbing wall (port), the disc court with its stands and scoreboard (starboard). Midships: changing rooms and the kit hire desk, the lift lobby, the float room. Forward: the pool (port, under the hull windows), a washroom and the rec office, the light and sound booth, the foyer, and the 76-seat auditorium across the bow with the stars behind its stage. Sealed service rooms hold the river pumps, the pool plant, the court's emitters and the float room's gravity plant.</span></div></div>
+<div class="legend" id="legend"></div>
+<script>
+// =====================================================================
+// REC DECK DATA, in the game's format: no margin rows, so this map, DOORSR
+// and HULLR can go straight into DECKS[7] (key 7, label 'R'; see "Fitting it
+// into the code"). '.' is outside the hull. Halls (= concourse, + lobby,
+// f foyer) join each other with no wall.
+// Alignment: lift [20, 9]. The car is 2 x 3 (columns 19-20, rows 7-9) on the
+// deck's centre line, trunks Y on row 6 behind glass, ladder Z on row 10, as
+// on every deck, so the spine lines up with Decks 4 and 5.
+// =====================================================================
+const DECKR_MAP = [
+  '..KKKKKKKKKKKKKKKwwwwwwPPPPPPPPPppAAAA........',
+  '.KKKKKKKKKKKKKKKKwwwwwwPPPPPPPPPppAAAAAA......',
+  '.KKKKKKKKKKKKKKKKwwwwwwPPPPPPPPPppAAAAAAAA....',
+  '.KKKKKKKKKKKKKKKKwwwwwwPPPPPPPPPppAAAAAAAAA...',
+  '.KKKKKKKKKKKKKKKKkkkkkkPPPPPPPPPppAAAAAAAAAA..',
+  '.KKKKKKKKKKKKKKKKkkkkkkPPPPPPPPPppAAAAAAAAAAA.',
+  '.KKKKKKKKKKKKKKKK++YY++PPPPPPPPPppAAAAAAAAAAA.',
+  '.rrr=============++@@++=======ffffAAAAAAAAAAA.',
+  '.rrr=============++@@++=======ffffAAAAAAAAAAAA',
+  '.rrr=============++@@++=======ffffAAAAAAAAAAAA',
+  '.rrr=============++ZZ++=======ffffAAAAAAAAAAA.',
+  '.eeeTTTTTTTTTTTTT++++++==uuuubbbbbAAAAAAAAAAA.',
+  '.eeeTTTTTTTTTTTTTFFFFFFFFuuuubbbbbAAAAAAAAAAA.',
+  '.eeeCCCCCCCCCCCCCFFFFFFFFuuuubbbbbAAAAAAAAAA..',
+  '.eeeCCCCCCCCCCCCCFFFFFFFFooooGGGGGAAAAAAAAA...',
+  '.eeeCCCCCCCCCCCCCFFFFFFFFooooGGGGGAAAAAAAA....',
+  '.eeeCCCCCCCCCCCCCFFFFFFFFooooGGGGGAAAAAA......',
+  '..eeCCCCCCCCCCCCCFFFFFFFFooooGGGGGAAAA........'
+];
+const W = 46, D = 18;
+const HULLR = { sternX: 1, stern: 2, bowFrom: 34, bowLen: 11.6, byFace: true };   // same meaning as the game's hull
+// doors, in game edge keys. door: open to all. hatch: service access (Works crew and the player). glass: inner window.
+// lift: the main lift. pass: a counter opening (the kit hire desk).
+const DOORSR = {
+  'v,19,7': 'lift', 'v,19,8': 'lift', 'v,19,9': 'lift', 'v,21,7': 'lift', 'v,21,8': 'lift', 'v,21,9': 'lift',   // one wide door each side
+  'v,19,6': 'glass', 'v,21,6': 'glass',                                                   // the trunks, behind glass above the car
+  'v,19,10': 'glass', 'v,21,10': 'glass', 'h,19,11': 'glass', 'h,20,11': 'hatch',          // the ladder, with its hatch
+  'h,17,6': 'pass', 'h,18,6': 'pass', 'h,22,6': 'door',                                    // kit hire: the counter onto the lobby, and its door
+  'h,21,4': 'door',                                                                         // kit hire through to the changing rooms
+  'v,17,1': 'door', 'v,17,2': 'glass',                                                      // changing rooms to the river hall (the wet way)
+  'v,23,2': 'door', 'v,23,1': 'glass',                                                      // changing rooms to the pool (the wet way)
+  'h,9,7': 'door', 'h,10,7': 'door', 'h,5,7': 'glass', 'h,6,7': 'glass', 'h,7,7': 'glass', 'h,8,7': 'glass',
+  'h,11,7': 'glass', 'h,12,7': 'glass', 'h,13,7': 'glass', 'h,14,7': 'glass', 'h,15,7': 'glass',   // the river hall's viewing glass on the concourse
+  'v,4,8': 'hatch',                                                                         // river pump room, off the concourse's aft end
+  'h,6,11': 'door', 'h,14,11': 'door', 'h,7,11': 'glass', 'h,8,11': 'glass', 'h,9,11': 'glass', 'h,10,11': 'glass',
+  'h,11,11': 'glass', 'h,12,11': 'glass', 'h,13,11': 'glass', 'h,15,11': 'glass',           // the stands, open to the concourse behind glass
+  'h,10,13': 'door', 'h,4,13': 'glass', 'h,5,13': 'glass', 'h,6,13': 'glass', 'h,7,13': 'glass', 'h,8,13': 'glass', 'h,9,13': 'glass',
+  'h,11,13': 'glass', 'h,12,13': 'glass', 'h,13,13': 'glass', 'h,14,13': 'glass', 'h,15,13': 'glass', 'h,16,13': 'glass',   // the court's rail: a low force-field over a kick board, one gate
+  'v,4,15': 'hatch',                                                                        // the court's emitter room
+  'h,26,7': 'door', 'h,23,7': 'glass', 'h,24,7': 'glass', 'h,25,7': 'glass', 'h,27,7': 'glass', 'h,28,7': 'glass', 'h,29,7': 'glass',   // the pool's gallery door and glass
+  'v,32,3': 'hatch',                                                                        // pool plant, from the pool deck
+  'v,34,7': 'door', 'v,34,8': 'door', 'v,34,9': 'door', 'v,34,10': 'door',                 // foyer into the auditorium: four wide doors
+  'h,26,11': 'door',                                                                        // washroom
+  'h,18,12': 'door', 'h,17,12': 'glass', 'h,21,12': 'glass', 'h,22,12': 'glass', 'h,23,12': 'glass', 'h,24,12': 'glass',   // float room, glass onto the lobby
+  'v,25,15': 'door', 'v,25,14': 'glass', 'v,25,16': 'glass',                                // rec office, with glass onto the float room
+  'h,31,11': 'hatch', 'v,34,12': 'glass', 'v,34,11': 'hatch',                              // light and sound booth: from the foyer, its window and stage door into the auditorium
+  'h,31,14': 'hatch',                                                                       // gravity plant, through the booth
+};
+const KIND = {
+  show:  { c: '#4a3a7a', name: 'Auditorium' },
+  court: { c: '#1f3550', name: 'Disc court and stands' },
+  water: { c: '#2f6f80', name: 'Pool and river hall' },
+  float: { c: '#8a4f68', name: 'Float room' },
+  kit:   { c: '#7a6a3f', name: 'Changing and kit hire' },
+  staff: { c: '#5f6f5a', name: 'Rec office' },
+  wash:  { c: '#8ea2a3', name: 'Washroom' },
+  corr:  { c: '#4c555f', name: 'Concourse and foyer' },
+  lobby: { c: '#4f6466', name: 'Lift lobby' },
+  core:  { c: '#1d252d', name: 'Spine' },
+  serv:  { c: '#2e373c', name: 'Service space' },
+};
+const CORR = new Set(['=', '+', 'f']);
+// turn: which deck build turn makes the room (R1 shell ... R6). Sealed service rooms get their insides in R6 too.
+const ROOMS = {
+  '=': { kind: 'corr', name: 'Concourse', turn: 1, x: 'The rec dec\'s main street, four tiles wide, stern to bow. Rubber sports flooring in charcoal with a neon stripe down each side (cyan to port, magenta to starboard) that runs on into every room. Glass all along both sides aft: the rivers to port, the court to starboard, so the deck feels busy the moment you step out of the lift. Towel bins, a water fountain, benches, and the smell of the pool.' },
+  '+': { kind: 'lobby', name: 'Lift lobby', turn: 1, x: 'The lift, its trunks and ladder behind glass. The deck plate says RECREATION DECK in brushed steel; someone has taped a card under it that says "rec dec" in marker, and nobody takes it down. A directory board, the kit hire counter on the port side, and glass onto the float room on the starboard side, where you can watch people tumbling in slow motion while you wait for the lift.' },
+  '@': { kind: 'core', name: 'Main lift', label: 'Lift', x: 'The main lift: 2 × 3, one wide door each side. Its panel gets an R button between 4 and 5.' },
+  'Y': { kind: 'core', name: 'Trunks', label: 'Trunks', x: 'The main power and air trunks, behind glass above the car, as on every deck.' },
+  'Z': { kind: 'core', name: 'Spine ladder', label: 'Ladder', x: 'The maintenance ladder, behind glass, with its hatch.' },
+  A: { kind: 'show', name: 'Auditorium', label: 'Auditorium', turn: 2, win: true, x: 'The whole bow, double height. 76 seats in six raked rows that rise toward the back, in three blocks with two aisles, deep violet with gold seat numbers. A cross aisle along the back by the four foyer doors, and room to stand there. The stage curves round the bow, and behind it the hull windows sweep from side to side, so every show is played against the stars. A film screen lowers in front of the windows; a lighting truss hangs over the stage; a lectern for the Captain, a grand piano for talent night (stage left), and the booth\'s window high in the back wall. Home of the Captain\'s all-hands, big film night and talent night: it seats the whole crew bar the night shift, who are asleep.' },
+  b: { kind: 'serv', name: 'Light and sound booth', label: 'Booth', turn: 6, x: 'Works and rec staff only (a hatch off the foyer). The lighting desk and dimmer racks, the sound rack, the projector, and shelves of spare seat parts. A window looks down over the seats to the stage, and a stage door leads into the auditorium\'s back corner. Hamid runs the shows from here. Tier 1 for seats and lamps, tier 2 for the dimmer racks.' },
+  f: { kind: 'corr', name: 'Foyer', label: 'Foyer', turn: 2, x: 'The concourse widens before the auditorium\'s four doors. A poster frame (tonight\'s film, the talent night sign-up sheet, the Captain\'s all-hands notice), the Wren League table in lights, and a curved neon sign over the doors that spells REC DEC in pink, because the official one was too long to fit.' },
+  C: { kind: 'court', name: 'Disc court', label: 'Disc court', turn: 3, x: 'A black court, 13 × 5, with glowing lines (cyan for one end, orange for the other) and a shimmering force-field net across the middle. The side walls are force fields too: the disc bounces off them with a flash. Two players, one at each end, return a glowing disc to each other. The scoreboard fills the stern wall above the court, two storeys tall. Home of the disc game and the Wren League.' },
+  T: { kind: 'court', name: 'Stands', label: 'Stands', turn: 3, x: 'Three stepped benches along the court\'s inboard side, about 30 seats, behind a low rail with one gate onto the court. Department banners hang above them on league nights. Glass behind, onto the concourse.' },
+  e: { kind: 'serv', name: 'Emitter room', label: 'Emitters', turn: 6, x: 'The court\'s force-field emitters (net and side walls), their power unit, and the scoreboard\'s driver. Through a hatch at the court\'s stern end. Tier 2 for the scoreboard and the side walls, tier 3 for the net emitter.' },
+  K: { kind: 'water', name: 'River hall', label: 'River hall', turn: 5, win: true, x: 'Double height, the green room of the deck: two artificial rivers in one loop, a fast white-water run along the port windows and a slow, wide return channel on the inboard side, with a wave gate at the bow end that kicks up standing waves. Raised banks of grey-green fake rock with ferns, a pebble beach and a kayak dock by the door, a rack of bright kayaks (red, yellow, blue, green). At the stern end, the climbing wall: ochre and rust rock from the floor to the roof, four routes in coloured holds, each with an auto-belay at the top, and a brass bell at the very top for the climbing challenge. Viewing glass on the concourse.' },
+  r: { kind: 'serv', name: 'River pump room', label: 'Pumps', turn: 6, x: 'Two big current pumps, the wave gate\'s drive and the river\'s filter, through a hatch at the concourse\'s aft end. Tier 2: the rivers draw on the Deck 3 recycler\'s water, so a fault can start upstream.' },
+  w: { kind: 'kit', name: 'Changing rooms', label: 'Changing', turn: 1, x: 'Lockers, benches, two showers, a hair dryer that sounds like a shuttle, and a lost-property box. Doors at both ends: through to the river hall (aft) and onto the pool deck (forward), so wet feet never cross the concourse. In from the lobby through the kit hire room.' },
+  k: { kind: 'kit', name: 'Kit hire', label: 'Kit hire', turn: 1, x: 'A counter onto the lobby: swim kit, towels, helmets, buoyancy vests, paddles, climbing shoes and harnesses, disc gloves, grip socks for the float room. Hamid, the rec steward, works it by day; a self-serve shelf when he\'s off. Through to the changing rooms.' },
+  F: { kind: 'float', name: 'Float room', label: 'Float room', turn: 6, x: 'A padded room in soft coral and pink, with floating light orbs, where the gravity plates are turned down to about a fifth. You bounce, drift and tumble in slow motion. Glass onto the lobby, so the whole deck watches. The rec office looks onto it too, because someone always tries a triple somersault.' },
+  G: { kind: 'serv', name: 'Gravity plant', label: 'Grav plant', turn: 6, x: 'The float room\'s gravity plate controller and its cooling, through the booth. Tier 3 (power): a fault here is felt, not just seen.' },
+  P: { kind: 'water', name: 'Pool', label: 'Pool', turn: 4, win: true, x: 'A raised pool under the port hull windows: three short lanes and a shallow end with steps, aqua tiles with a mosaic of the Wren on the floor, lane ropes in orange and white, so you swim lengths beside the stars. The lifeguard\'s tall chair, loungers along the inboard side, a gallery door from the concourse for spectators, and the wet way in from the changing rooms. Open while the lifeguard is on: 07:00 to 21:00.' },
+  p: { kind: 'serv', name: 'Pool plant', label: 'Pool plant', turn: 6, x: 'Two sand filters, the water balance doser and the heat exchanger (fed from the Deck 4 heating plant above), through a hatch on the pool deck. Tier 1 for filter changes, tier 2 for the doser and the heat exchanger.' },
+  u: { kind: 'wash', name: 'Washroom', label: 'Wash', turn: 1, x: 'Toilets and basins for the auditorium crowd and the court, off the concourse.' },
+  o: { kind: 'staff', name: 'Rec office', label: 'Rec office', turn: 6, x: 'Hamid\'s desk and the lifeguard\'s first-aid locker, the booking board for the court and the kayaks, a kettle, a trophy shelf for the Wren League and the regatta. Glass onto the float room. In from the float room.' },
+};
+
+// ---- hull, as in the game: stern rounded, bow an ellipse ----
+const hullL = y => { const d = Math.min(y, D - y), r = HULLR.stern; return HULLR.sternX + (d < r ? r - Math.sqrt(Math.max(0, r * r - (r - d) ** 2)) : 0); };
+const hullR = y => { const v = (y - D / 2) / (D / 2); return HULLR.bowFrom + HULLR.bowLen * Math.sqrt(Math.max(0, 1 - v * v)); };
+
+const S = 22;
+const at = (i, j) => (i < 0 || j < 0 || i >= W || j >= D) ? '.' : DECKR_MAP[j][i];
+const BOX = {};
+for (let j = 0; j < D; j++) for (let i = 0; i < W; i++) {
+  const r = at(i, j); if (r === '.') continue;
+  const b = BOX[r] || (BOX[r] = { i0: i, j0: j, i1: i, j1: j, n: 0, sx: 0, sy: 0 });
+  b.i0 = Math.min(b.i0, i); b.j0 = Math.min(b.j0, j); b.i1 = Math.max(b.i1, i); b.j1 = Math.max(b.j1, j); b.n++; b.sx += i; b.sy += j;
+}
+const SPINE = new Set(['@', 'Z', 'Y']);
+const open = (a, b) => (CORR.has(a) && CORR.has(b)) || (a === '@' && b === '@');
+
+const svg = document.getElementById('plan'), NS = 'http://www.w3.org/2000/svg';
+const el = (t, a, p = svg) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); p.appendChild(e); return e; };
+const PAD = 26, VW = W * S + PAD * 2, VH = D * S + PAD * 2;
+const PORTRAIT = innerHeight > innerWidth * 1.15;   // phones held upright: bow points up, port on the left
+const PW = PORTRAIT ? VH : VW, PH = PORTRAIT ? VW : VH;
+svg.setAttribute('viewBox', `${-PAD} ${-PAD} ${PW} ${PH}`);
+const T = (x, y) => PORTRAIT ? [y, W * S - x] : [x, y];
+
+const pts = [];
+for (let y = 0; y <= D + .001; y += .1) pts.push([hullR(Math.min(y, D)), Math.min(y, D)]);
+for (let y = D; y >= -.001; y -= .1) pts.push([hullL(Math.max(y, 0)), Math.max(y, 0)]);
+const hullD = 'M' + pts.map(([x, y]) => `${(x * S).toFixed(1)},${(y * S).toFixed(1)}`).join('L') + 'Z';
+const defs = el('defs', {});
+const clip = el('clipPath', { id: 'hull' }, defs); el('path', { d: hullD }, clip);
+const pat = el('pattern', { id: 'hz', width: 8, height: 8, patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(45)' }, defs);
+el('rect', { width: 8, height: 8, fill: '#2e373c' }, pat); el('rect', { width: 2, height: 8, fill: 'rgba(233,196,106,.16)' }, pat);
+
+const mainG = el('g', PORTRAIT ? { transform: `matrix(0,-1,1,0,0,${W * S})` } : {});
+el('path', { d: hullD, fill: '#141a22', stroke: 'none' }, mainG);
+const floorG = el('g', { 'clip-path': 'url(#hull)' }, mainG);
+const roomEls = {};
+for (const [k, b] of Object.entries(BOX)) {
+  const R_ = ROOMS[k], kind = KIND[R_.kind];
+  const g = el('g', { class: 'room', tabindex: 0, role: 'button', 'aria-label': R_.name }, floorG);
+  for (let j = b.j0; j <= b.j1; j++) for (let i = b.i0; i <= b.i1; i++) if (at(i, j) === k)
+    el('rect', { x: i * S - .3, y: j * S - .3, width: S + .6, height: S + .6, fill: R_.kind === 'serv' ? 'url(#hz)' : kind.c }, g);
+  roomEls[k] = g;
+  const go = () => show(k); g.addEventListener('click', go); g.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+}
+const deco = (t, a) => el(t, { 'pointer-events': 'none', ...a }, floorG);
+// the concourse's neon stripes
+deco('rect', { x: 4 * S, y: 7.1 * S - 1, width: 13 * S, height: 2.5, fill: 'rgba(80,230,255,.75)' });
+deco('rect', { x: 4 * S, y: 10.9 * S - 1, width: 13 * S, height: 2.5, fill: 'rgba(255,80,190,.75)' });
+deco('rect', { x: 23 * S, y: 7.1 * S - 1, width: 11 * S, height: 2.5, fill: 'rgba(80,230,255,.75)' });
+deco('rect', { x: 23 * S, y: 10.9 * S - 1, width: 7 * S, height: 2.5, fill: 'rgba(255,80,190,.75)' });
+for (const x of [7.5, 13.5, 26.5]) deco('rect', { x: x * S, y: 8.75 * S, width: 1.4 * S, height: .5 * S, rx: 2, fill: '#5d6b74' });
+// lift car, ladder rungs
+deco('rect', { x: 19 * S + 4, y: 7 * S + 2, width: 2 * S - 8, height: 3 * S - 4, rx: 3, fill: '#37434c', stroke: '#e8c06a', 'stroke-width': 1.5 });
+for (let y = 10.15; y < 10.95; y += .3) deco('rect', { x: 19.25 * S, y: y * S, width: 1.5 * S, height: 1.4, fill: 'rgba(200,210,215,.35)' });
+for (const x of [19.5, 20.5]) deco('circle', { cx: x * S, cy: 6.5 * S, r: .3 * S, fill: 'none', stroke: 'rgba(200,210,215,.5)', 'stroke-width': 1.5 });
+// auditorium: 76 seats in six raked rows (columns 35-40), aisles on rows 4 and 13, a cross aisle on column 34, the apron on 41
+const SEATS = [];
+for (let c = 35; c <= 40; c++) for (let j = 1; j <= 16; j++) {
+  if (j === 4 || j === 13 || at(c, j) !== 'A' || at(c, j - 1) !== 'A' || at(c, j + 1) !== 'A') continue;
+  SEATS.push([c, j]);
+}
+SEATS.forEach(([c, j], n) => deco('rect', { x: (c + .2) * S, y: (j + .12) * S, width: .55 * S, height: .76 * S, rx: 3, fill: '#d9b14a', opacity: .55 + (40 - c) * .07 }));
+// the stage, curved round the bow, and the lowered film screen in front of the windows
+deco('path', { d: `M${41.6 * S},${2.4 * S} Q${43 * S},${9 * S} ${41.6 * S},${15.6 * S} L${hullR(15.6) * S - 6},${15.6 * S} Q${46 * S},${9 * S} ${hullR(2.4) * S - 6},${2.4 * S} Z`, fill: '#2b1f48', stroke: '#e9c46a', 'stroke-width': 1.5 });
+deco('path', { d: `M${44.2 * S},${4.2 * S} Q${45.4 * S},${9 * S} ${44.2 * S},${13.8 * S}`, fill: 'none', stroke: '#f2f2ff', 'stroke-width': 3.5, 'stroke-linecap': 'round', opacity: .8 });
+deco('rect', { x: 42.2 * S, y: 3.6 * S, width: 1.2 * S, height: .8 * S, rx: 3, fill: '#111' });          // the piano, stage left
+deco('rect', { x: 42.5 * S, y: 8.7 * S, width: .5 * S, height: .6 * S, rx: 1, fill: '#b98b52' });       // the lectern
+// court: neon lines, the net, the scoreboard on the stern wall
+deco('rect', { x: 4.25 * S, y: 13.25 * S, width: 12.5 * S, height: 4.5 * S, fill: 'none', stroke: 'rgba(80,230,255,.9)', 'stroke-width': 1.5 });
+deco('line', { x1: 10.5 * S, y1: 13.2 * S, x2: 10.5 * S, y2: 17.8 * S, stroke: 'rgba(255,255,255,.9)', 'stroke-width': 3, 'stroke-dasharray': '3 3' });
+deco('line', { x1: 5.5 * S, y1: 13.3 * S, x2: 5.5 * S, y2: 17.7 * S, stroke: 'rgba(80,230,255,.8)', 'stroke-width': 1.2 });
+deco('line', { x1: 15.5 * S, y1: 13.3 * S, x2: 15.5 * S, y2: 17.7 * S, stroke: 'rgba(255,160,60,.9)', 'stroke-width': 1.2 });
+deco('circle', { cx: 5 * S, cy: 15.5 * S, r: .32 * S, fill: '#50e6ff' });
+deco('circle', { cx: 16 * S, cy: 14.6 * S, r: .32 * S, fill: '#ffa03c' });
+deco('path', { d: `M${5.4 * S},${15.4 * S} L${9 * S},${17.6 * S} L${12.6 * S},${13.4 * S} L${15.6 * S},${14.7 * S}`, fill: 'none', stroke: 'rgba(255,255,255,.55)', 'stroke-width': 1.2, 'stroke-dasharray': '4 3' });
+deco('circle', { cx: 12.6 * S, cy: 13.45 * S, r: .2 * S, fill: '#fff' });
+deco('rect', { x: 4.1 * S, y: 13.6 * S, width: .3 * S, height: 3.8 * S, fill: '#ffd166' });                 // scoreboard, stern wall
+for (const y of [11.25, 11.75, 12.4]) deco('rect', { x: 4.4 * S, y: y * S, width: 12.2 * S, height: .3 * S, fill: '#3a5a80' });   // stand benches
+// river hall: the white-water run and the slow loop, the wave gate, the kayak dock, the climbing wall at the stern
+deco('path', { d: `M${4.4 * S},${1.6 * S} L${15.2 * S},${1.6 * S} Q${16.4 * S},${3.2 * S} ${15.2 * S},${4.6 * S} L${4.4 * S},${4.6 * S} Q${3.4 * S},${3.1 * S} ${4.4 * S},${1.6 * S} Z`, fill: 'none', stroke: '#4fd1e0', 'stroke-width': 13, 'stroke-linejoin': 'round', opacity: .85 });
+for (let x = 6; x < 15; x += 1.6) deco('path', { d: `M${x * S},${1.25 * S} q${.35 * S},${.35 * S} 0,${.7 * S}`, fill: 'none', stroke: '#fff', 'stroke-width': 1.4, opacity: .8 });
+deco('rect', { x: 15.3 * S, y: 2.6 * S, width: .5 * S, height: 1.2 * S, fill: '#e9c46a' });                // wave gate
+deco('rect', { x: 8.6 * S, y: 5.3 * S, width: 2.8 * S, height: .5 * S, fill: '#8a7055' });                // kayak dock
+for (const [x, c] of [[8.8, '#e63946'], [9.5, '#ffd166'], [10.2, '#4895ef'], [10.9, '#52b788']]) deco('rect', { x: x * S, y: 5.95 * S, width: .45 * S, height: .9 * S, rx: 4, fill: c });
+deco('rect', { x: 1.2 * S, y: .9 * S, width: 1.5 * S, height: 5.4 * S, rx: 3, fill: '#b5622e' });          // climbing wall
+for (let k = 0; k < 18; k++) deco('circle', { cx: (1.5 + (k * 37 % 10) / 10) * S, cy: (1.2 + (k * 0.29)) * S, r: 2.2, fill: ['#ffd166', '#ef476f', '#06d6a0', '#118ab2'][k % 4] });
+deco('circle', { cx: 2.2 * S, cy: .95 * S, r: 4, fill: '#e9c46a', stroke: '#fff', 'stroke-width': 1 });   // the bell
+// pool: the raised basin, three lanes, the shallow end's steps, the lifeguard's chair
+deco('rect', { x: 23.8 * S, y: .9 * S, width: 7.4 * S, height: 3.6 * S, rx: 4, fill: '#56d0e8', stroke: '#e8f7fb', 'stroke-width': 2 });
+for (const y of [2.1, 3.3]) deco('line', { x1: 24 * S, y1: y * S, x2: 31 * S, y2: y * S, stroke: '#ff8c42', 'stroke-width': 1.6, 'stroke-dasharray': '4 3' });
+for (let k = 0; k < 3; k++) deco('rect', { x: (24 + k * .3) * S, y: 3.6 * S, width: .25 * S, height: .8 * S, fill: 'rgba(255,255,255,.5)' });
+deco('rect', { x: 29.4 * S, y: 4.95 * S, width: .7 * S, height: .7 * S, rx: 2, fill: '#e63946' });
+for (const x of [24.4, 25.9, 27.4]) deco('rect', { x: x * S, y: 5.3 * S, width: 1.2 * S, height: .5 * S, rx: 3, fill: '#f4e3c1' });
+// float room: light orbs; kit counter; changing benches; the league board in the foyer
+for (const [x, y, r] of [[18.6, 13.6, .45], [20.4, 15.2, .6], [22.6, 13.8, .4], [23.6, 16.3, .5], [19.2, 16.6, .35]]) deco('circle', { cx: x * S, cy: y * S, r: r * S, fill: 'rgba(255,230,240,.55)', stroke: '#ffd6e6', 'stroke-width': 1 });
+deco('rect', { x: 17.2 * S, y: 5.6 * S, width: 1.6 * S, height: .3 * S, fill: '#c58b4a' });
+for (const y of [1.2, 2.6]) deco('rect', { x: 17.6 * S, y: y * S, width: 4.6 * S, height: .35 * S, fill: '#9a7a52' });
+deco('rect', { x: 30.3 * S, y: 7.15 * S, width: 3.2 * S, height: .3 * S, fill: '#ffd166' });
+
+const gridG = el('g', { 'clip-path': 'url(#hull)', 'pointer-events': 'none', style: 'display:none' }, mainG);
+for (let i = 0; i <= W; i++) el('line', { x1: i * S, y1: 0, x2: i * S, y2: D * S, stroke: 'rgba(255,255,255,.1)', 'stroke-width': .6 }, gridG);
+for (let j = 0; j <= D; j++) el('line', { x1: 0, y1: j * S, x2: W * S, y2: j * S, stroke: 'rgba(255,255,255,.1)', 'stroke-width': .6 }, gridG);
+
+const wallG = el('g', { 'clip-path': 'url(#hull)', 'pointer-events': 'none' }, mainG);
+const seg = (x1, y1, x2, y2, st, w, dash) => el('line', { x1, y1, x2, y2, stroke: st, 'stroke-width': w, 'stroke-linecap': 'square', ...(dash ? { 'stroke-dasharray': dash } : {}) }, wallG);
+const WALL = '#d7dfdc', WINC = '#9fe3ff', DOORC = { door: 'rgba(95,214,198,.85)', closed: '#c9b98a', lift: '#e8c06a' };
+function edge(key, a, b, x1, y1, x2, y2) {
+  if (a === b || a === '.' || b === '.' || open(a, b)) return;
+  const type = DOORSR[key], hz = y1 === y2;
+  if (type === 'door' || type === 'closed' || type === 'lift') {
+    const mx = (x1 + x2) / 2, my = (y1 + y2) / 2, g = type === 'lift' ? 9 : 7;
+    seg(x1, y1, hz ? mx - g : x1, hz ? y1 : my - g, WALL, 2.6);
+    seg(hz ? mx + g : x2, hz ? y2 : my + g, x2, y2, WALL, 2.6);
+    seg(hz ? mx - g : x1, hz ? y1 : my - g, hz ? mx + g : x2, hz ? y2 : my + g, DOORC[type], type === 'lift' ? 3 : 1.6);
+    return;
+  }
+  if (type === 'pass') { seg(x1, y1, x2, y2, '#c58b4a', 4); return; }
+  if (type === 'hatch') { seg(x1, y1, x2, y2, WALL, 2.6); seg(x1 + (hz ? 5 : 0), y1 + (hz ? 0 : 5), x2 - (hz ? 5 : 0), y2 - (hz ? 0 : 5), '#e9c46a', 2.6, '3 2'); return; }
+  if (type === 'glass') { seg(x1, y1, x2, y2, '#56646b', 3.4); seg(x1 + (hz ? 2 : 0), y1 + (hz ? 0 : 2), x2 - (hz ? 2 : 0), y2 - (hz ? 0 : 2), WINC, 2); return; }
+  seg(x1, y1, x2, y2, WALL, 2.6);
+}
+for (let j = 0; j <= D; j++) for (let i = 0; i < W; i++) edge(`h,${i},${j}`, at(i, j - 1), at(i, j), i * S, j * S, (i + 1) * S, j * S);
+for (let j = 0; j < D; j++) for (let i = 0; i <= W; i++) edge(`v,${i},${j}`, at(i - 1, j), at(i, j), i * S, j * S, i * S, (j + 1) * S);
+
+el('path', { d: hullD, fill: 'none', stroke: '#8c9aa0', 'stroke-width': 4, 'pointer-events': 'none' }, mainG);
+const winG = el('g', { 'pointer-events': 'none' }, mainG);
+{
+  const P = [];
+  for (let k = 0; k < pts.length; k++) {
+    const [x, y] = pts[k], [x2, y2] = pts[(k + 1) % pts.length], n = Math.max(1, Math.ceil(Math.hypot(x2 - x, y2 - y) / .25));
+    for (let s = 0; s < n; s++) P.push([x + (x2 - x) * s / n, y + (y2 - y) * s / n]);
+  }
+  const N = P.length; let run = [];
+  const flush = () => { if (run.length > 1) el('polyline', { points: run.map(([x, y]) => `${(x * S).toFixed(1)},${(y * S).toFixed(1)}`).join(' '), fill: 'none', stroke: WINC, 'stroke-width': 3.2, 'stroke-linecap': 'butt', 'stroke-linejoin': 'round' }, winG); run = []; };
+  for (let k = 0; k < N; k++) {
+    const [x, y] = P[k], [x2, y2] = P[(k + 1) % N];
+    const mx = (x + x2) / 2, my = (y + y2) / 2, dx = x2 - x, dy = y2 - y, l = Math.hypot(dx, dy) || 1;
+    const r = ROOMS[at(Math.floor(mx - dy / l * .6), Math.floor(my + dx / l * .6))];
+    // the river hall's windows are on the port hull only (the stern is the climbing wall)
+    if (r && r.win && !(r === ROOMS.K && mx < 3)) { if (!run.length) run.push([x, y]); run.push([x2, y2]); } else flush();
+  }
+  flush();
+}
+
+const lblG = el('g', {});
+const SMALL = new Set(['b', 'e', 'r', 'p', 'G', 'u', 'o', 'k', 'w', 'Z', 'Y', 'f', 'T']);
+const POS = { A: [38, 17.2], K: [10, 3.1], C: [8, 15.5], T: [10.5, 12], F: [21, 14.4], P: [27.5, 2.7], w: [20, 2], k: [20, 4.6], '@': [20, 8.5], Z: [20, 10.5], Y: [20, 6.4], u: [27, 12], o: [27, 16], b: [31.5, 12], G: [31.5, 16], p: [33, 3.2], r: [2, 8.8], e: [2.2, 14.5], f: [32, 9.6] };
+for (const [k, b] of Object.entries(BOX)) {
+  const R_ = ROOMS[k]; if (k === '=' || k === '+') continue;
+  const [px, py] = POS[k] || [b.sx / b.n + .5, b.sy / b.n + .5];
+  const [tx, ty] = T(px * S, py * S), t = el('text', { x: tx, y: ty, class: 'lbl' + (SMALL.has(k) ? ' sm' : '') }, lblG);
+  t.textContent = R_.label || R_.name;
+}
+const note = (x0, y0, s, size = 10, fill = '#c3d3d6', turn) => { const [x, y] = T(x0, y0), t = el('text', { x, y, ...(turn && PORTRAIT ? { transform: `rotate(-90 ${x} ${y})` } : {}), 'font-size': size, fill, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'pointer-events': 'none' }, lblG); t.textContent = s; };
+note(10 * S, 9 * S, 'Concourse', 10, 'rgba(225,240,238,.75)', true);
+note(26.5 * S, 9.6 * S, 'Concourse', 9, 'rgba(225,240,238,.6)', true);
+note(17.9 * S, 9.5 * S, 'Lobby', 8, 'rgba(225,240,238,.7)', true);
+note(43.1 * S, 9.9 * S, 'stage', 8, 'rgba(240,210,170,.9)');
+note(1.95 * S, 6.6 * S, 'wall', 7, 'rgba(255,220,190,.9)');
+note(15.6 * S, 4.3 * S, 'wave gate', 6.5, 'rgba(255,240,200,.9)');
+note(VW / 2 - PAD, -12, 'Port', 11, '#93a6ae', true);
+note(VW / 2 - PAD, D * S + 13, 'Starboard', 11, '#93a6ae', true);
+note(W * S + 12, 9 * S, 'Bow', 11, '#93a6ae');
+{ const [x, y] = T(-13, 9 * S), t = el('text', { x, y, ...(PORTRAIT ? {} : { transform: `rotate(-90 ${x} ${y})` }), 'font-size': 11, fill: '#93a6ae', 'text-anchor': 'middle', 'dominant-baseline': 'central', 'pointer-events': 'none' }, lblG); t.textContent = 'Stern'; }
+
+const outline = el('path', { fill: 'none', stroke: '#5fd6c6', 'stroke-width': 2.5, 'pointer-events': 'none', 'stroke-linejoin': 'round' }, mainG);
+const TURN = { 1: 'turn R1, the shell', 2: 'turn R2, the auditorium', 3: 'turn R3, the disc court', 4: 'turn R4, the pool', 5: 'turn R5, the river hall', 6: 'turn R6, the float room, the office and the service rooms' };
+function show(k) {
+  const R_ = ROOMS[k], b = BOX[k];
+  let d = '';
+  for (let j = b.j0; j <= b.j1; j++) for (let i = b.i0; i <= b.i1; i++) {
+    if (at(i, j) !== k) continue;
+    if (at(i, j - 1) !== k) d += `M${i * S},${j * S}h${S}`;
+    if (at(i, j + 1) !== k) d += `M${i * S},${(j + 1) * S}h${S}`;
+    if (at(i - 1, j) !== k) d += `M${i * S},${j * S}v${S}`;
+    if (at(i + 1, j) !== k) d += `M${(i + 1) * S},${j * S}v${S}`;
+  }
+  outline.setAttribute('d', d);
+  const size = CORR.has(k) ? `${b.n} tiles` : `${b.i1 - b.i0 + 1} × ${b.j1 - b.j0 + 1} tiles`;
+  const when = R_.turn ? 'Built in ' + TURN[R_.turn] + '.' : 'Built with the shell in turn R1.';
+  document.getElementById('card').innerHTML = `<b>${R_.name}</b><span>${R_.x}</span><span class="meta">${KIND[R_.kind].name}. ${size}. ${when}</span>`;
+}
+
+const lg = document.getElementById('legend');
+for (const k of ['show', 'court', 'water', 'float', 'kit', 'staff', 'wash', 'corr', 'lobby', 'serv']) {
+  const s = document.createElement('span'); s.innerHTML = `<i style="background:${KIND[k].c}"></i>${KIND[k].name}`; lg.appendChild(s);
+}
+for (const [c, t] of [[WINC, 'Window or glass wall'], [DOORC.door, 'Door'], [DOORC.lift, 'Lift doors'], ['#c58b4a', 'Kit hire counter'], ['#e9c46a', 'Service hatch']]) {
+  const s = document.createElement('span'); s.innerHTML = `<i style="background:${c};height:3px;vertical-align:3px"></i>${t}`; lg.appendChild(s);
+}
+{ const s = document.createElement('span'); s.textContent = `${SEATS.length} auditorium seats drawn`; lg.appendChild(s); }
+
+let z = 1;
+const fit = () => { const w = document.getElementById('wrap').clientWidth - 20; svg.style.width = (w * z) + 'px'; svg.style.height = (w * z * PH / PW) + 'px'; };
+document.getElementById('zin').onclick = () => { z = Math.min(3, z * 1.4); fit(); };
+document.getElementById('zout').onclick = () => { z = Math.max(1, z / 1.4); fit(); };
+const gb = document.getElementById('grid');
+gb.onclick = () => { const on = gb.getAttribute('aria-pressed') !== 'true'; gb.setAttribute('aria-pressed', on); gridG.style.display = on ? '' : 'none'; };
+const tb = document.getElementById('turns'); let step = 0;
+tb.onclick = () => {
+  step = (step + 1) % 7; tb.setAttribute('aria-pressed', step > 0); tb.textContent = step ? `Turn R${step} of R6` : 'Build turns';
+  for (const [k, g] of Object.entries(roomEls)) { const t = ROOMS[k].turn || (SPINE.has(k) ? 1 : 9); g.classList.toggle('sealed', step > 0 && t > step); }
+};
+addEventListener('resize', () => { if ((innerHeight > innerWidth * 1.15) !== PORTRAIT) location.reload(); else fit(); }); fit();
+</script>
+
+<main class="doc">
+
+<h2>1. Where it fits</h2>
+<ul>
+  <li><b>Between Deck 4 (Quarters) and Deck 5 (Operations).</b> The hull narrows from Deck 4's 50 × 20 to Deck 5's 44 × 16, and the rec dec sits in between at <b>46 × 18</b>. It's on the daily path (sleep on 4, work from 5), so crew drop in after shift without a long ride.</li>
+  <li><b>No renumbering.</b> Decks 5 and 6 keep their numbers. The lift panel shows an <b>R</b> button between 4 and 5; the lift says "Rec deck" and crew say "the rec dec". In-world, the Wren was refitted with it between two of its old decks (a line or two of crew lore, see section 9).</li>
+  <li><b>Double height.</b> The auditorium's rake, the climbing wall, the pool's hull windows and the scoreboard want the height. The whole deck gets taller walls (about 1.6 × the usual); the small rooms (changing, office, washroom, booth) have a dropped ceiling line, drawn as a header band, so they still read as small rooms.</li>
+  <li><b>The spine lines up.</b> Lift at <code>[20, 9]</code>: car on columns 19-20, rows 7-9, on the deck's centre line, trunks behind glass on row 6 and the ladder on row 10, at the same world spot as every deck.</li>
+  <li><b>Lighting mood:</b> the most colourful deck aboard. Each room has its own colour (below), joined by the concourse's neon stripes, cyan to port and magenta to starboard.</li>
+</ul>
+
+<h2>2. Colour and the "wow"</h2>
+<div class="grid">
+  <div class="cardx"><b>Auditorium</b>Deep violet seats with gold numbers, a warm gold truss, the stage against the bow windows and the stars. The house lights dim and the stage lights come up when a show starts.</div>
+  <div class="cardx"><b>Disc court</b>Black floor, glowing cyan and orange lines, a shimmering white force-field net, side walls that flash where the disc hits, the giant scoreboard on the stern wall.</div>
+  <div class="cardx"><b>River hall</b>Turquoise water with white foam on the fast run, grey-green rock banks and ferns, bright kayaks, an ochre and rust climbing wall with holds in four colours and a brass bell at the top.</div>
+  <div class="cardx"><b>Pool</b>Aqua water with soft moving caustic light on the tiles, the Wren mosaic on the floor, orange lane ropes, the stars through the hull windows.</div>
+  <div class="cardx"><b>Float room</b>Soft coral and pink padding, slow-drifting light orbs, people tumbling in slow motion behind the lobby glass.</div>
+  <div class="cardx"><b>Concourse and foyer</b>Charcoal sports floor, the two neon stripes, and the pink REC DEC neon over the auditorium doors.</div>
+</div>
+
+<h2>3. The rooms</h2>
+<div class="tw"><table>
+<tr><th>Room</th><th>Size</th><th>What's in it</th><th>Who's there</th></tr>
+<tr><td>Auditorium (A)</td><td>12 × 18, the bow</td><td>76 seats in six raked rows, three blocks, two aisles; back cross aisle with standing room; curved stage with the bow windows behind; film screen that lowers; lighting truss; lectern; grand piano; the booth's window.</td><td>Empty most days. Full for the all-hands, big film night and talent night. A few rehearse on the stage on talent-night weeks.</td></tr>
+<tr><td>Foyer (f)</td><td>4 × 4</td><td>Poster frame, talent night sign-up sheet, the Wren League table in lights, the REC DEC neon.</td><td>The crowd before a show.</td></tr>
+<tr><td>Light and sound booth (b)</td><td>5 × 3, service</td><td>Lighting desk, dimmer racks, sound rack, projector, seat spares; window and stage door into the auditorium.</td><td>Hamid at shows; Works.</td></tr>
+<tr><td>Disc court (C)</td><td>13 × 5</td><td>Neon lines, force-field net and side walls, two baselines, the stern-wall scoreboard.</td><td>Pick-up games every evening; the Wren League on Wednesdays.</td></tr>
+<tr><td>Stands (T)</td><td>13 × 2</td><td>Three stepped benches, about 30 seats, a rail and a gate; department banners on league nights.</td><td>Spectators.</td></tr>
+<tr><td>River hall (K)</td><td>16 × 7</td><td>Fast white-water run along the windows, slow return channel, wave gate, pebble beach, kayak dock and rack; the climbing wall (four routes, four auto-belays, the bell) at the stern.</td><td>Kayakers and climbers in the evening; the regatta and the climbing challenge.</td></tr>
+<tr><td>Pool (P)</td><td>9 × 7</td><td>Raised pool, three short lanes and a stepped shallow end, the Wren mosaic, lifeguard chair, loungers.</td><td>Early swimmers from 07:00, evening swimmers, Bilal on the chair.</td></tr>
+<tr><td>Changing rooms (w)</td><td>6 × 4</td><td>Lockers, benches, two showers, lost property; doors to the river hall and the pool.</td><td>Everyone going in the water or up the wall.</td></tr>
+<tr><td>Kit hire (k)</td><td>6 × 2</td><td>Counter onto the lobby: swim kit, towels, helmets, vests, paddles, climbing shoes and harnesses, disc gloves, grip socks.</td><td>Hamid by day; a self-serve shelf after hours.</td></tr>
+<tr><td>Float room (F)</td><td>8 × 6</td><td>Padded walls and floor, light orbs, gravity turned down to about a fifth.</td><td>Off-duty crew bouncing; the Counsellor sends people here to unwind.</td></tr>
+<tr><td>Rec office (o)</td><td>4 × 4</td><td>Hamid's desk, first-aid locker, booking board, kettle, trophy shelf; glass onto the float room.</td><td>Hamid, Bilal on breaks.</td></tr>
+<tr><td>Washroom (u)</td><td>4 × 3</td><td>Toilets and basins.</td><td>Crowds.</td></tr>
+<tr><td>Service rooms</td><td>r 3 × 4, p 2 × 7, e 3 × 7, G 5 × 4</td><td>River pumps, pool plant, court emitters, gravity plant (section 6).</td><td>Works.</td></tr>
+</table></div>
+<p><b>Building notes for the deck architect.</b> <b>No holes in the floor:</b> the pool and the rivers are raised, with a rim or bank about 0.4 m high and the water surface just under the rim, so nothing has to be cut out of the deck's floor and nothing sits on the floor's plane (no coplanar surfaces). The auditorium's rake is a stack of steps, each a solid box. Walls are taller deck-wide; check the cutaway still clears the camera at the widest zoom.</p>
+
+<h2>4. The disc game</h2>
+<p>Working name <b>Lightdisc</b> (crew just say "disc"; the name is an open question). A Tron-style disc and tennis game that plays like Pong: two players, one at each end of the court, return a glowing disc to each other. You only move; you hit back automatically.</p>
+<div class="grid">
+<div class="cardx court"><b>The court, as you see it while playing</b>
+<svg viewBox="0 0 200 330" width="200" height="330" role="img" aria-label="Disc court seen from above: your player at the bottom, the opponent at the top, the net across the middle">
+  <rect x="10" y="10" width="180" height="310" rx="6" fill="#0b0f18" stroke="#50e6ff" stroke-width="2"/>
+  <line x1="10" y1="165" x2="190" y2="165" stroke="#fff" stroke-width="3" stroke-dasharray="5 4" opacity=".9"/>
+  <line x1="10" y1="44" x2="190" y2="44" stroke="#ffa03c" stroke-width="1.5"/>
+  <line x1="10" y1="286" x2="190" y2="286" stroke="#50e6ff" stroke-width="1.5"/>
+  <rect x="10" y="250" width="180" height="70" fill="rgba(80,230,255,.08)"/>
+  <circle cx="130" cy="30" r="10" fill="#ffa03c"/>
+  <circle cx="70" cy="296" r="10" fill="#50e6ff"/>
+  <rect x="48" y="300" width="44" height="5" rx="2" fill="#50e6ff" opacity=".7"/>
+  <path d="M70 286 L 190 200 L 120 120 L 130 40" fill="none" stroke="#fff" stroke-width="1.5" stroke-dasharray="4 3" opacity=".7"/>
+  <circle cx="120" cy="120" r="5" fill="#fff"/>
+  <text x="100" y="236" fill="#9fe3ff" font-size="10" text-anchor="middle">drag anywhere here</text>
+  <text x="100" y="25" fill="#ffd2a0" font-size="9" text-anchor="middle">Pell</text>
+  <text x="182" y="198" fill="#cfd9dc" font-size="8" text-anchor="end">wall bounce</text>
+  <text x="100" y="178" fill="#cfd9dc" font-size="8" text-anchor="middle">the net</text>
+  <text x="100" y="316" fill="#9fe3ff" font-size="9" text-anchor="middle">You</text>
+</svg></div>
+<div class="cardx"><b>Rules</b>
+<ul>
+<li><b>The point:</b> get the disc past the other player's back line. It bounces off the force-field side walls with a flash; it passes through the net (the net only glows and counts returns).</li>
+<li><b>First to 7,</b> win by 2 (at 6-6, play on to two clear). A quick game is first to 5; league matches are quick games.</li>
+<li><b>Serving:</b> whoever lost the last point serves; the disc launches on its own after a one-second count, at an angle from the game's own random stream (seeded per game, so a game replays the same).</li>
+<li><b>Speed:</b> the disc starts slow and gets about 5% faster with every return in a rally, up to a cap, then resets for the next point. Long rallies get frantic.</li>
+<li><b>Where it hits you:</b> as in Pong, a disc that meets you off-centre goes back at a steeper angle (up to 60°); dead centre goes straight back.</li>
+<li><b>Curve:</b> if you're moving when it meets you, the disc curves the way you were moving. Swerving into a return is how you beat someone.</li>
+<li><b>Charged shot:</b> after three returns in a row your next return glows and goes a third faster. It's automatic: just keep the rally going.</li>
+</ul></div>
+<div class="cardx"><b>Controls</b>
+<ul>
+<li><b>Phone:</b> put your thumb anywhere on your half of the screen and drag. Your player follows your finger across the court, and a little forward and back inside your zone (the shaded strip by your back line). Lift your thumb and you stop.</li>
+<li><b>Desktop:</b> the mouse the same way, or the arrow keys / A and D (W and S for forward and back).</li>
+<li><b>Hitting:</b> none. When the disc comes within reach, your player swings and returns it. Miss it only by being in the wrong place.</li>
+<li><b>Leave game</b> under the court, as in Tiles.</li>
+</ul></div>
+</div>
+<h3>How it fits the game</h3>
+<ul>
+<li><b>Seen like Tiles:</b> a panel over the game, the court drawn top-down in neon on a 2D canvas, your end at the bottom. Behind it, the two players stand on the real court in 3D in their ready poses. (Cheaper on phones than a live 3D game; a 3D version is an open question.)</li>
+<li><b>Finding someone to play:</b> exactly the Tiles way. Tap the court and you step onto your baseline; someone already waiting plays you at once, otherwise a free crew member on the deck (likes disc or has played you first, then a friend, then the nearest) walks over. Nobody free, or after 21:45: "Nobody's around to play right now."</li>
+<li><b>Playing stops time,</b> as in Tiles; the social comes in one go at the end (full for your first game with someone each day, a quarter after). A game also costs a little energy and gives leisure.</li>
+<li><b>Crew levels:</b> easy, steady and sharp, with a personality each: how fast they react (a quarter to half a second), how fast they move, how often they misjudge, and whether they like to curve. Pell swerves everything; Chief Holt plays straight and safe and never gives up a point; Commander Vance hits charged shots and talks while he does it; Rina is annoyingly good.</li>
+<li><b>How to play:</b> four short steps on your first game (move, the auto return, the curve, the charged shot), each moving on when you do it, with Next and Skip, under 62 characters a step.</li>
+<li><b>Results:</b> the scoreboard on the stern wall shows the score live; your record with each person is kept, and the crew talk about a good win.</li>
+<li><b>Check:</b> a new <code>disc_check.py</code> plays many seeded games at each level (balance: easy wins about a quarter of the time against a steady player, and so on), and checks the replay, the timing, the social and the save.</li>
+</ul>
+
+<h2>5. Traditions</h2>
+<p>All six the user picked. Days and times fit round the existing calendar: Wednesday evening was free; Sunday afternoons have nothing on Deck R; the yearly ones avoid days 100 and 300. No two share a room at once (events_check's rule).</p>
+<div class="tw"><table>
+<tr><th>Tradition</th><th>When</th><th>Where</th><th>What happens</th><th>You</th></tr>
+<tr><td><b>The Wren League</b></td><td>Wednesdays 19:30-21:00, all through each season</td><td>Court and stands</td><td>Six department teams: Bridge (command, helm, comms), Works, Watch, Survey, Commons (galley, store, garden) and Infirmary. Each league night every team plays one match: three singles quick games, best of three. Weeks 1-10 a double round of fixtures, week 11 the semi-finals, week 13 (the season's last Wednesday) the final for the Wren Cup, with nearly the whole day shift in the stands. The season table glows in the foyer and on the scoreboard; results go in Mail on Thursday morning. Banners over the stands; the cup on the office's trophy shelf.</td><td>Watch or play. After your first disc game, Pell asks you onto the Works team. On a league night you're picked for one game in some weeks; you play it in the disc panel, the other games are played out on paper from each person's skill (seeded, so a night always comes out the same).</td></tr>
+<tr><td><b>River regatta</b></td><td>Every four weeks, Sunday 14:00-15:30</td><td>River hall</td><td>Kayak heats of four, three laps of the loop through the wave gate; the winners race a final. Crew line the banks and the concourse glass; Hamid starts each heat with a horn. A pennant for the winner goes up over the dock.</td><td>Watch, or enter: your time comes from how often you've been kayaking (each visit makes you a little better), with one choice per heat (go hard through the wave gate, or play it safe).</td></tr>
+<tr><td><b>Climbing challenge</b></td><td>Every four weeks, two weeks after each regatta, Sunday 14:00-15:00</td><td>The climbing wall</td><td>Fastest to the top bell, one climber per route at a time; the bell rings for every finish; a chalkboard leaderboard by the wall, kept for the season.</td><td>Watch, or climb: your time comes from your climbing practice, like the regatta.</td></tr>
+<tr><td><b>Big film night</b></td><td>Every four weeks, Saturday 20:00-22:15</td><td>Auditorium</td><td>That week's Saturday film night moves from the junior common room to the big screen (the rarer one wins). The screen comes down over the windows, the house lights go down, popcorn from the galley.</td><td>Be in a seat. Social and leisure for the evening.</td></tr>
+<tr><td><b>Talent night</b></td><td>Once a year, day 182 (the last day of Greening), 19:30-21:30</td><td>Auditorium</td><td>The user's once-a-year show. Hamid hosts. About eight acts from the crew (the musicians first: songs, the piano, a duet, a juggling Works tech, a Veyli poem from Envoy Saruth if you know them well enough), each a short scene on the stage while the crowd claps. The sign-up sheet goes up in the foyer a week before.</td><td>Watch, or sign up and do an act: pick one of a few (play a tune, tell a ship joke, a Works trick) on a choice card. No failing; the crowd cheers either way, and people mention it for days.</td></tr>
+<tr><td><b>Captain's all-hands</b></td><td>First Monday of each season, 17:20-17:45 (after the day shift, before dinner); and every Captain's address during a ship-wide event</td><td>Auditorium</td><td>Captain Marrow at the lectern: the season ahead, thanks, a few names called out, then everyone heads to dinner. Commander Vance on the stage behind her. The night shift sleeps and gets it in Mail. Event addresses (the ion storm's all-clear, the others) move here from where they are now.</td><td>Turn up. Being named in an address (after a good event) is one of the moments of trust.</td></tr>
+</table></div>
+<p>As with every tradition: announced in Mail the evening before, on the Calendar with a reminder, mentioned in chat ("Coming to the league tonight?"), and remembered afterwards as a ship note. Written as plain text files in <code>content/traditions/</code> where the format allows.</p>
+
+<h2>6. Works jobs: the deck's machines</h2>
+<p>Every machine gets a <code>machines</code> entry in <code>DECKS[7]</code> (<code>{ id, kind, at, room, face, panel }</code>), a panel tile and a <code>work:works</code> place, as on the other decks. Kinds and faults are proposals for the systems engineer, in the shape of the existing fault tables.</p>
+<div class="tw"><table>
+<tr><th>Machine</th><th>Where</th><th>Tier</th><th>Faults (shows / sign)</th><th>What crew notice</th></tr>
+<tr><td><code>7-pool-filter-1</code>, <code>-2</code> (filter)</td><td>Pool plant</td><td>1</td><td>clogged cartridge / the pool goes cloudy; worn seal / a drip under the housing</td><td>Cloudy water: swimmers grumble, fewer swim. A routine filter change every couple of weeks.</td></tr>
+<tr><td><code>7-pool-dosing</code> (doser: water balance)</td><td>Pool plant</td><td>2</td><td>sensor drift / stinging eyes, a green tinge; pump relay / the dose stops</td><td>Red-eyed swimmers in the mess. Connected: the top-up water comes from Deck 3's recycler.</td></tr>
+<tr><td><code>7-pool-heat</code> (heat exchanger)</td><td>Pool plant</td><td>2</td><td>valve / the pool runs cold</td><td>"It's like swimming in the cold store." Connected to Deck 4's heating plant.</td></tr>
+<tr><td><code>7-river-pump-1</code>, <code>-2</code> (pump)</td><td>River pump room</td><td>2</td><td>bearing / a rumble, the current pulses; impeller / the fast run goes slack</td><td>Kayaks drift; the regatta is slower. Water from the recycler, so a fault can start upstream.</td></tr>
+<tr><td><code>7-wave-gate</code> (wave machine)</td><td>River hall, bow end</td><td>2</td><td>actuator / no standing wave; hydraulic leak / a slick on the bank</td><td>The white water goes flat; the regatta's wave gate choice disappears.</td></tr>
+<tr><td><code>7-wall-holds</code> (chore: route setting)</td><td>Climbing wall</td><td>1</td><td>loose hold / a hold spins under a foot (a chore: tighten and reset a route)</td><td>A route roped off with tape until it's done.</td></tr>
+<tr><td><code>7-belay-1</code> to <code>-4</code> (auto-belay)</td><td>Top of each route</td><td>2</td><td>brake wear / it lowers too fast; inspection due / the tag runs out (a safety check that must be done, a routine job)</td><td>That route is closed until it's checked. Bilal won't open it, whoever asks.</td></tr>
+<tr><td><code>7-aud-lights</code> (lighting rig)</td><td>Booth (dimmer racks)</td><td>1-2</td><td>lamp / one stage light out (tier 1); dimmer relay / the whole rig flickers (tier 2)</td><td>A gloomy show. A job the day before a show is urgent.</td></tr>
+<tr><td><code>7-aud-sound</code> (sound rack)</td><td>Booth</td><td>2</td><td>amp / a hum; cable / the lectern mic cuts out</td><td>The Captain taps the mic. Everyone notices.</td></tr>
+<tr><td><code>7-aud-seats</code> (chore: seat hinges)</td><td>Auditorium</td><td>1</td><td>a seat that won't fold, a squeak (a chore, a few seats at a time, parts from the booth's shelves)</td><td>Someone sits on the steps.</td></tr>
+<tr><td><code>7-court-net</code> (force-field emitter)</td><td>Emitter room</td><td>3</td><td>emitter coil / the net flickers, then drops; power unit / the side walls fade</td><td>No disc games until it's fixed. The day before league night, it's the most popular job aboard.</td></tr>
+<tr><td><code>7-court-board</code> (scoreboard)</td><td>Emitter room (driver), stern wall</td><td>1-2</td><td>panel / dead pixels in the scores (tier 1); driver / the board shows nonsense (tier 2)</td><td>"Works 11, Survey banana."</td></tr>
+<tr><td><code>7-grav-plates</code> (gravity plates) <span class="pill">not in the picks</span></td><td>Gravity plant</td><td>3</td><td>controller / gravity creeps back up; cooling / the room closes itself</td><td>The float room shuts. Suggested because the float room needs a machine; see open questions.</td></tr>
+</table></div>
+<p><b>A Works story for tracing (tier 2):</b> the pool sits above Deck 5's storage, so a slow leak in the pool plant shows first as a drip in a Deck 5 storage aisle. You trace it up through the ladder to the pool plant.</p>
+
+<h2>7. Who works there</h2>
+<p>No roster growth: two juniors are retitled, and one Works tech takes the deck as her round. The crew designer confirms the choices.</p>
+<div class="tw"><table>
+<tr><th>Who</th><th>Now</th><th>Becomes</th><th>Why them</th><th>Hours</th></tr>
+<tr><td><b>Hamid Larsen</b> (<code>larsen-hamid</code>)</td><td>Infirmary aide, Deck 3</td><td><b>Rec steward</b>, Infirmary department (under Counsellor Oduya): kit hire, bookings, the shows, the traditions</td><td>A night owl and a musician: the natural host for talent night and big film night. Wellbeing sits with the Infirmary.</td><td>10:00-19:00 at the kit desk and the office; late on show nights (in the booth)</td></tr>
+<tr><td><b>Bilal Nakamura</b> (<code>nakamura-bilal</code>)</td><td>Watch rating, Deck 2</td><td><b>Watch rating, lifeguard</b>: still Watch, posted to the rec dec</td><td>A runner; safety is the Watch's job.</td><td>12:00-21:00 on the pool chair (the morning swim, 07:00-12:00, is covered by a second Watch rating on rota)</td></tr>
+<tr><td><b>Maeve Volkov</b> (<code>volkov-maeve</code>)</td><td>Works technician</td><td>Unchanged title; the rec dec's machines are her usual round, and the crew mention "Maeve's deck"</td><td>A runner, often down there anyway.</td><td>Works day shift</td></tr>
+</table></div>
+<p>The infirmary keeps Rina and Thea Grieve (Thea leaves on day 203; the crew designer's rotation brings in a replacement aide). The Watch keeps six day ratings.</p>
+
+<h2>8. New animations</h2>
+<div class="tw"><table>
+<tr><th>Pose</th><th>Where</th><th>What it looks like</th><th>Props</th></tr>
+<tr><td>swim</td><td>Pool lanes</td><td>Lying in the water, front crawl, head turning to breathe, moving along a lane and turning at the end; the body below the water surface is hidden by the water's colour.</td><td>Swim cap (optional)</td></tr>
+<tr><td>tread / wade</td><td>Pool shallow end, river beach</td><td>Standing chest-deep, arms sculling; chatting.</td><td>—</td></tr>
+<tr><td>kayak</td><td>The rivers</td><td>Sitting in a kayak, a double paddle dipping side to side, following the channel's path; bobbing in the white water.</td><td>Kayak, paddle, helmet</td></tr>
+<tr><td>climb</td><td>The wall</td><td>Hands reaching up in turn, feet pushing, moving up the wall; at the top, rings the bell (in the challenge) and is lowered by the auto-belay, feet on the wall.</td><td>Harness, belay rope (one line)</td></tr>
+<tr><td>disc ready / side-step / return</td><td>Court</td><td>Low ready stance, quick side steps, a backhand or forehand throw when the disc comes; a fist pump on a point.</td><td>Disc glove; the disc (one glowing mesh)</td></tr>
+<tr><td>float</td><td>Float room</td><td>Slow bounces and drifting somersaults, a star shape at the top, hair floating.</td><td>Grip socks</td></tr>
+<tr><td>cheer / clap</td><td>Stands, auditorium seats</td><td>Arms up on a point, clapping after an act; a seated clap.</td><td>—</td></tr>
+<tr><td>perform</td><td>Stage</td><td>Sing at a mic stand, play the piano (the music room's pose), juggle, bow.</td><td>Mic stand, juggling balls</td></tr>
+<tr><td>address</td><td>Lectern</td><td>The Captain speaking, hands on the lectern, a look round the room.</td><td>—</td></tr>
+<tr><td>lifeguard</td><td>Pool chair</td><td>Sitting high, watching the lanes, standing to blow a whistle now and then.</td><td>Whistle</td></tr>
+<tr><td>towel walk</td><td>Changing rooms to the lift</td><td>Walking with a towel over the shoulder, hair wet (for a while after swimming).</td><td>Towel</td></tr>
+</table></div>
+<p>Swimming, kayaking and climbing need people above or below the floor (in the water, up the wall): the performance engineer confirms the crowd's skinned meshes can be raised and lowered and tilted. Swim kit is a new outfit (open question: show it on crew, or keep uniforms and fake it).</p>
+
+<h2>9. Everyday life and references across the ship</h2>
+<h3>Crew habits (for the crew designer)</h3>
+<ul>
+<li>New habits: <code>swimmer</code> (morning or evening lengths), <code>kayaker</code>, <code>climber</code>, <code>disc-player</code> (a pick-up game after shift), <code>floater</code> (the float room to unwind), <code>film-buff</code>. About a third of the crew pick up one each; some <code>gym-regular</code> and <code>runner</code> crew swap. Expect 8-20 people on the deck on an ordinary evening, and almost nobody after 22:30 (the deck sits under Deck 4's officers' corridor, so it's quiet after then).</li>
+<li>Commander Vance's leaderboards: the climbing challenge's chalkboard is his new obsession.</li>
+<li>The Counsellor prescribes the float room ("Twenty minutes. Counsellor's orders.").</li>
+</ul>
+<h3>For you</h3>
+<ul>
+<li>Activities you can do: swim (energy cost, a big hygiene and leisure lift after the shower), kayak, climb, float, watch a game, sit in the stands. Each gives leisure; the water and the wall get better with practice. Tapping the kit hire desk gets you kit (and later, the changing room puts you in it).</li>
+<li>The job board and the goal arrow know the deck (R on the lift panel's arrow).</li>
+</ul>
+<h3>Dialogue and reference hooks (for the dialogue and writing teams)</h3>
+<ul>
+<li><b>The lift:</b> the R button: "Recreation Deck. Auditorium, court, pool, rivers." Crew in the lift: <span class="say">"Rec dec, is it?"</span></li>
+<li><b>Chat across the ship:</b> <span class="say">"Coming down the rec dec after shift?"</span> · <span class="say">"My arms are dead. Climbing."</span> · <span class="say">"Who left the float room on 'moon'?"</span> · Chef Brennan: <span class="say">"If one more person drips pool water through my mess hall..."</span> · Chief Holt: <span class="say">"The float room is not a toy." (He's been in it twice this week.)</span> · Pell: <span class="say">"Works hasn't won the cup in three seasons. That changes now. You're on the team."</span> · Tomas: new quiz questions about the deck (<span class="say">"How many seats in the auditorium?"</span>).</li>
+<li><b>Works:</b> Chief Calder on the pool filters: <span class="say">"Seventy-five people and they all shed."</span> · the leak that drips into Deck 5 storage · the net emitter on a league day.</li>
+<li><b>Deck 4 above:</b> the music room sits right over the auditorium; talent night rehearsals start upstairs. Officers hear the regatta horn through the floor.</li>
+<li><b>Lore:</b> the rec dec was put in at the Wren's last refit, between two old decks, which is why the lift says R and not a number (<span class="say">"They ran out of numbers."</span>).</li>
+<li><b>Mail and news:</b> the night before each tradition; league results on Thursday mornings; the regatta and challenge winners; the all-hands for the night shift.</li>
+<li><b>Calls home:</b> Gran wants to know if you've been swimming; Sam wants the league table.</li>
+<li><b>Story crew:</b> a beat or two in the coming arcs (Rina's annoyingly good at disc; Pell's league season).</li>
+</ul>
+
+<h2>10. Draw calls and phones</h2>
+<p>Budget 450 draw calls on any view (day_check). Targets: under 300 by the lift on an ordinary evening, under 400 over the full auditorium at the all-hands (about 65 people on the deck; Deck 3's party measured 291 with 64).</p>
+<div class="tw"><table>
+<tr><th>Part</th><th>Estimate</th><th>How</th></tr>
+<tr><td>Shell (floor, walls, hull, doors, lift, spine)</td><td>70-90</td><td><code>hull.byFace</code>, packed walls, as Decks 1, 2 and 6.</td></tr>
+<tr><td>Auditorium</td><td>25-35</td><td>The 76 seats as one InstancedMesh per material (2); rake steps merged (2); stage, truss and lights merged; the piano kit; the screen 1.</td></tr>
+<tr><td>Disc court and stands</td><td>10-14</td><td>Court lines in one canvas texture drawn at load (no <code>R()</code>); net and side walls one shared additive material; benches instanced; scoreboard 1-2.</td></tr>
+<tr><td>River hall and wall</td><td>14-20</td><td>Both channels one water mesh (1); banks merged; the holds one InstancedMesh with instance colours; kayaks instanced; ropes 1.</td></tr>
+<tr><td>Pool</td><td>10-14</td><td>Water 1; basin and rim merged; lane ropes instanced; chair, loungers.</td></tr>
+<tr><td>Float room, foyer, small rooms</td><td>30-45</td><td>Existing kit (lockers, benches, desks, basins).</td></tr>
+<tr><td>Service rooms' machines</td><td>25-35</td><td>As on the other decks; <code>machineFx</code> at most 4.</td></tr>
+<tr><td>Crowd</td><td>as Deck 3</td><td>Coarse detail kicks in above 40 on the deck at gatherings (<code>CROWD_GATHER</code>).</td></tr>
+</table></div>
+<ul>
+<li><b>Water:</b> one small shared shader (moving caustics and foam; colours through <code>col()</code> as uniforms; no texture, no <code>R()</code>), with time from the frame clock. Off-screen water skips its update.</li>
+<li><b>No coplanar surfaces:</b> water just under the rim, lines and the mosaic offset or baked into one texture, seat numbers on the seat backs not floating.</li>
+<li><b>Memory:</b> one 4096 × 2048 floor texture as on every deck; the court and scoreboard canvases small (512 wide). deck_check's round trips must stay flat.</li>
+<li><b>Determinism:</b> shared kit at load never calls <code>R()</code>; the deck's own seed; the disc game's own seeded stream, so nothing else on the ship shifts.</li>
+<li><b>Regressions:</b> adding the deck changes nothing on Decks 1-6, which must stay pixel-identical (only the lift panel and maps gain the R).</li>
+</ul>
+
+<h2>11. Fitting it into the code</h2>
+<ul>
+<li><b>Internal key 7</b> (<code>DECKS[7]</code>, <code>num: 7</code>, <code>label: 'R'</code>, <code>order: 4.5</code>). Place ids start <code>7-</code> and room keys <code>7|A</code>, like every deck. Numbers 5 and 6 stay, so no saves, places or lines change.</li>
+<li><b>One helper, <code>deckLabel(n)</code></b> ('R' for 7, the number otherwise) and <b><code>DECK_ORDER</code></b> (<code>[1, 2, 3, 4, 7, 5, 6]</code>) for the places that show or loop over decks: the lift panel (today a loop of 1 to 6), the device's Maps app and appointment places (<code>'Deck ' + n</code>), and any ride time worked out from deck numbers. Lines that say "Deck 7" would be wrong: the dialogue engineer greps for them.</li>
+<li><b>Checks:</b> deck_check, day_check and the others that loop over decks 1-6 take the new deck; a new <code>disc_check.py</code>; events_check gets the six traditions; machine_check the new machines.</li>
+<li><b>Venues</b> for gatherings: <code>auditorium</code>, <code>court-stands</code>, <code>river-banks</code>, <code>climbing-wall</code>, each with its spots.</li>
+</ul>
+
+<h2>12. Build order, in turns</h2>
+<p>One deck at a time, then review, as always. R1-R6 build the deck; R7-R12 bring it to life; each turn bumps the build number, adds a DEV_NOTES row, runs the tests, commits and pushes.</p>
+<div class="tw"><table>
+<tr><th>Turn</th><th>Who</th><th>What</th><th>Checks</th></tr>
+<tr><td>R1</td><td>Deck architect</td><td>The shell: <code>DECKS[7]</code> from this map, hull, doors, taller walls, lift R button, <code>deckLabel</code> and <code>DECK_ORDER</code>, directory, sealed rooms with tap text; concourse, lobby, kit hire, changing, washroom.</td><td>Decks 1-6 pixel-identical; deck_check reaches the deck.</td></tr>
+<tr><td>R2</td><td>Deck architect</td><td>Auditorium and foyer: rake, 76 seats (places), stage, windows, screen, truss, lectern, piano, neon.</td><td>Draw calls over the seats.</td></tr>
+<tr><td>R3</td><td>Deck architect</td><td>Disc court and stands: lines, net, side walls, scoreboard (static), benches.</td><td>—</td></tr>
+<tr><td>R4</td><td>Deck architect + performance engineer</td><td>The pool, with the water shader.</td><td>Phone frame time; no shimmer.</td></tr>
+<tr><td>R5</td><td>Deck architect</td><td>River hall: channels, banks, wave gate, dock, kayaks, climbing wall, belays, bell.</td><td>—</td></tr>
+<tr><td>R6</td><td>Deck architect</td><td>Float room, rec office, booth, and the service rooms' insides with their machine entries.</td><td>Deck review: artifact, screenshots, summary to the user.</td></tr>
+<tr><td>R7</td><td>Crew designer + sim engineer</td><td>Hamid, Bilal, Maeve; new habits; places for swim, kayak, climb, float, stands, seats; the deck in day plans.</td><td>day_check (nobody stuck, draw calls).</td></tr>
+<tr><td>R8</td><td>Performance engineer</td><td>The new poses and props (section 8).</td><td>cadet_test unchanged on other decks.</td></tr>
+<tr><td>R9</td><td>Mini-game engineer (the Tiles role)</td><td>The disc game: panel, rules, crew levels, finding a player, frozen time, How to play, save.</td><td>New disc_check; player_check.</td></tr>
+<tr><td>R10</td><td>Systems engineer</td><td>Machines, faults, jobs, the leak trace, the job board.</td><td>machine_check.</td></tr>
+<tr><td>R11</td><td>Events engineer</td><td>The six traditions, the Wren League table and fixtures, the all-hands move.</td><td>events_check.</td></tr>
+<tr><td>R12</td><td>Dialogue engineer + writers, interactions engineer</td><td>Lines and references across the ship, Mail, quiz questions; the player's activities and the kit desk.</td><td>interactions_check; all checks; final review.</td></tr>
+</table></div>
+
+<h2>13. Open questions for the user</h2>
+<ol class="q">
+<li><b>The disc game's name.</b> "Lightdisc" for now. Other ideas: Glowdisc, Ricochet, Arc.</li>
+<li><b>How the disc game is shown:</b> a flat neon panel over the game, like Tiles (recommended: cheaper on phones, clearer to play), or played live on the 3D court with the camera over it?</li>
+<li><b>The lift button:</b> R (recommended), or a number like "4A"?</li>
+<li><b>When it opens:</b> from day 1, or after your first week (a tour by Hamid on your first Wednesday, the league night)?</li>
+<li><b>The float room's gravity plates</b> as a Works job (tier 3)? It wasn't in the picks, but the room needs a machine.</li>
+<li><b>Swim kit:</b> do crew visibly change into swimwear in the pool and rivers (more work: a new outfit for everyone), or stay in a simple "rec kit" look?</li>
+<li><b>Big film night:</b> every four weeks in the auditorium (recommended), or every Saturday film night moves there?</li>
+<li><b>Talent night's day:</b> day 182, the end of Greening, OK?</li>
+<li><b>The all-hands:</b> once a season plus the event addresses, OK? Or monthly?</li>
+<li><b>The regatta and climbing challenge for you:</b> a time from your practice plus one choice (recommended), or a small mini-game of their own later?</li>
+<li><b>The Wren League:</b> are you on the Works team after your first game (Pell asks), or only once you've won a few?</li>
+<li><b>Staff:</b> Hamid Larsen as rec steward and Bilal Nakamura as lifeguard, OK? (The infirmary goes from three aides to two.)</li>
+<li><b>Quiet hours:</b> the deck closes for noise at 22:30 because it's under the officers' corridor. OK?</li>
+</ol>
+</main>
+</body>
+</html>
