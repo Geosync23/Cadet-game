@@ -548,3 +548,4 @@ Read: CLAUDE.md, TEAM.md (session chain rule + overnight exception), plans/brief
 - ~11:19 H 5a4d362 (0.55.12 title fixed; puzzle_check OK on S+P+C combine; cadet_test identical). Remaining career/mech FAILs = C's scripted test players stuck on Day 5 case; fix sent to C.
 - ~11:24 C join green: 88f71b7 (0.44.10) + H 171f901 (career/puzzle OK, cadet_test identical; bands [0,8,18,30,40]). Residual machine_check fails covered by S 78bf1c2. Told BM4 combine 0.63.0 = ce26fb2 + S 78bf1c2 + P + C 88f71b7 + H + A + W; R to prioritise Step 1 reviews.
 - ~11:25 R PASS: H 5a4d362, P cfce34e, C d518673, C 88f71b7 change. S 78bf1c2 verdict ~30-40 min. P 0.28.73 not sent yet.
+- ~11:28 M1 8a6cea8 (0.45.0 rounds + drill/inspection; mech_check OK, cadet_test identical, intro parts 0-9,11 OK). Next 0.45.1 hauling. Step 2.
