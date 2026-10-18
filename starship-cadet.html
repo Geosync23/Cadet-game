@@ -252,7 +252,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.44.16
+   STARSHIP CADET: CSV Wren                           build 0.63.2
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -2403,7 +2403,7 @@ const WALL_KIT = {
     const t = tex(320, 200, (c, w, h) => {
       c.fillStyle = '#1d2a2a'; c.fillRect(0, 0, w, h);
       c.fillStyle = '#e8c06a'; c.font = '700 24px system-ui,sans-serif'; c.fillText('MESS', 18, 34);
-      c.fillStyle = '#9fd9cf'; c.font = '600 15px system-ui,sans-serif'; c.fillText('Breakfast  06:00 - 08:00', 18, 66); c.fillText('Dinner  17:00 - 20:30', 18, 90);
+      c.fillStyle = '#9fd9cf'; c.font = '600 15px system-ui,sans-serif'; c.fillText('Breakfast  06:00 - 09:00', 18, 66); c.fillText('Dinner  17:00 - 20:30', 18, 90);
       c.fillStyle = '#e8eef0'; c.font = '500 15px system-ui,sans-serif';
       ['Today: Brennan\'s spiced lentils', 'Fresh rolls, garden greens', 'Grab & go by the line'].forEach((l, k) => c.fillText(l, 18, 126 + k * 24));
       c.fillStyle = '#c86b4a'; c.fillRect(18, 186, 60, 3);
@@ -5233,12 +5233,12 @@ DECKS[3] = {
     place('M', 'drinksStation', 11.6, 1.0, 'e', { it: IT('Drinks station', 'Three juices, a tea urn that is never allowed to run dry, and a stack of mugs. Someone has labelled the orange one "probably orange".') });
     // 0.38.25 (the user's): no tray return; diners leave their trays on the table and the galley crew clear them (kit trayReturn kept, unused)
     place('M', 'trayStack', 11.65, 3.5, 'e', { it: IT('Trays and cutlery', 'The start of the line. Take a tray, take a fork, keep moving.') });
-    place('M', 'servery', 11.45, 5.5, 'e', { it: IT('Servery', 'The hot line, under heat lamps. Breakfast from 06:00 to 08:00, dinner from 17:00 to 20:30. The galley hands it through the counter behind.') });
+    place('M', 'servery', 11.45, 5.5, 'e', { it: IT('Servery', 'The hot line, under heat lamps. Breakfast from 06:00 to 09:00, dinner from 17:00 to 20:30. The galley hands it through the counter behind.') });
     place('M', 'grabShelf', 11.6, 7.5, 'e', { live: true, it: IT('Grab and go', 'Rolls, fruit and juice, chilled, for anyone running late. It empties fast at 07:55.') });
     wallFixed('=', 'valvePanel', 'n', VALVE_PANELS[3].along, { hitW: 1.5, it: { ...IT('Pipe valves', 'Three valves on the Commons\' water line, numbered from upstream. Close the one before a leak.'), valves: 3 } });   // 0.47.0: incidents (m6)
     wallFixed('K', 'alarmPanel', 'w', 4.5, { hitW: .7, it: { ...IT('Extractor alarm', 'The galley extractor\'s alarm and, beside it, the switch that opens the vents. Brennan has views on how often it goes off.'), alarm: true, vent: true } });
     placeWall('M', 'spiceShelf', 'e', SPICES.along, { hitW: 1.3, it: IT('Spice shelf', 'A shelf over the drinks for spices brought from home. Brennan says it will fill up. Brennan is patient.') });   // 0.38.31
-    placeWall('M', 'menuBoard', 'e', 3.5, { hitW: 1.2, it: IT('Menu board', 'Two meals a day: breakfast 06:00 to 08:00, dinner 17:00 to 20:30. Today: Brennan\'s spiced lentils.') });
+    placeWall('M', 'menuBoard', 'e', 3.5, { hitW: 1.2, it: IT('Menu board', 'Two meals a day: breakfast 06:00 to 09:00, dinner 17:00 to 20:30. Today: Brennan\'s spiced lentils.') });
     placeWall('M', 'notices', 'w', 4.5, { hitW: 1.0, it: IT('Mess notices', 'This week\'s birthdays, the galley rota, and a polite note about taking mugs back to the mess.') });
     for (const x of [.45, 5.0]) place('M', 'plant', x, .45, 'n', { band: '#c86b4a' });   // under the windows, out of the aisles
 
@@ -7922,7 +7922,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.44.16';                           // keep in step with the header's build line
+const GAME_BUILD = '0.63.2';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -8186,8 +8186,8 @@ if (!DEBUG) document.getElementById('light').style.display = 'none';
 // calls R() or draws anything.
 // =====================================================================
 const SCHED_COMMUTE = 2;                                 // a lift ride, ship minutes; you're on the new deck after it
-const MEALS = { breakfast: [360, 480], dinner: [1020, 1230] };
-const SHIFTS = { day: [480, 1020], night: [1260, 360] }; // 08:00-17:00, 21:00-06:00 (into the next day)
+const MEALS = { breakfast: [360, 540], dinner: [1020, 1230] };   // breakfast to 09:00 since the day shift starts then (0.71.1; was to 08:00)
+const SHIFTS = { day: [540, 1020], night: [1260, 360] }; // 09:00-17:00 (the user's playtest answer, 0.71.1; was 08:00), 21:00-06:00 (into the next day)
 // the shape of each weekday (0 = Monday)
 const WEEK_SHAPE = [
   { early: 10 },                                         // Monday: all-hands briefing, the day shift starts 10 minutes early
@@ -8218,6 +8218,12 @@ const SOCIAL_TYPES = new Set(['mess-seat', 'lounge-seat', 'common-room', 'music'
 // Infinity: no cap (about 64-73 at the peak). Set it to what the crowd can draw there.
 const DECK3_EVENING_MAX = Infinity;
 const LINE_WALK = [4, .55, [33, 4]];                    // the walk to the servery line (0.26.30): ship minutes for serving and getting to a seat, a tile's walk (CREW_SPEED), the line
+// the Works crew's tea and biscuits (the user's playtest answer, 0.71.1; it replaces their random 10:00-14:00 tea and the
+// "half ten" tea): from 13:00 in the Deck 5 tea corner (its lounge seats, 5-tea-1..3), a slot of `dur` minutes starting
+// at 13:00, 13:15, 13:30 or 13:45 (seeded per person and day), waiting up to `wait` for a place. Most go (odds; the
+// tea-break habit always; workaholics now and then). For others: tea is out from WORKS_TEA.at to WORKS_TEA.until
+const WORKS_TEA = { at: 780, until: 840, step: 15, slots: 4, dur: 15, wait: 8, odds: .75, busy: .3 };
+const worksTeaOn = t => { const m = ((t % 1440) + 1440) % 1440; return m >= WORKS_TEA.at && m < WORKS_TEA.until; };   // t: absolute ship minutes (any day: the caller checks it's a workday)
 const STOPS = new Set(['queue', 'grab', 'drill', 'inspection', 'tea', 'toilet', 'hands', 'lift', 'pay', 'break']);   // short stops that never stretch to fill time
 const RANK_ORDER = ['captain', 'xo', 'chief', 'senior', 'officer', 'junior', 'guest'];
 
@@ -8731,7 +8737,7 @@ function schedFrame(p, d) {
   bed = Math.round(Math.min(1430, bed));
   const f = { U, H, shape, works, bed, night: p.shift === 'night' };
   if (f.night) { f.workStart = 1260 - (wa ? Math.round(15 + 15 * U(7)) : 0); f.workEnd = 360 + (wa ? Math.round(15 + 15 * U(8)) : 0); }
-  else { f.workStart = 480 - (shape.early || 0) - (wa ? Math.round(15 + 15 * U(7)) : 0); f.workEnd = 1020 + (wa ? Math.round(15 + 15 * U(8)) : 0); }
+  else { f.workStart = SHIFTS.day[0] - (shape.early || 0) - (wa ? Math.round(15 + 15 * U(7)) : 0); f.workEnd = SHIFTS.day[1] + (wa ? Math.round(5 + 10 * U(8)) : 0); }   // workaholics stay on to 17:05-17:15 (was to 17:30; the user's 'make the crew finish work on time', 0.71.1)
   if (works && p.work && evRule(f.night ? d * 1440 + 360 : (d - 1) * 1440 + f.workEnd, 'doubleShift', p)) {   // a ship-wide event's double shift (C7)
     f.double = true; f.workEnd = f.night ? Math.max(f.workEnd, 435) : Math.max(f.workEnd, Math.min(1230, bed - 45));   // the gaps closed, never past the other shift's start (desks are shared)
   }
@@ -8898,12 +8904,15 @@ function schedBuild(p, d, occ, S) {
     return true;
   };
   // the shift from now to `to`, with its breaks: tea (the habit, or about one day in three for anyone) on a seat
-  // or bench on the work deck, and a toilet break most days
+  // or bench on the work deck, and a toilet break most days. The Works crew on Deck 5 have no random tea: the 13:00
+  // tea and biscuits in the tea corner instead (WORKS_TEA, 0.71.1), most of them, a quarter of an hour each, staggered
   const clocks = p.dept === 'works' && wd === 5 && p.shift !== 'night' && (S.shared.get('5|timeclock') || []).length > 0;   // the Works crew clock in and out (the career engineer, 0.61.13)
   const shiftWithBreaks = to => {
     const br = [];
     if (clocks) take('work', [[5, 'timeclock']], 1, { wait: 6, min: 1, tag: 'clock' });   // a short queue at the clock
-    if (H.has('tea-break') || U(31) < .35) br.push([600 + Math.round(240 * U(30)), 'tea']);
+    const wt = p.dept === 'works' && wd === 5 && p.shift !== 'night';
+    if (wt) { if (H.has('tea-break') || U(31) < (H.has('workaholic') ? WORKS_TEA.busy : WORKS_TEA.odds)) br.push([WORKS_TEA.at + WORKS_TEA.step * Math.floor(WORKS_TEA.slots * U(30)), 'wtea']); }
+    else if (H.has('tea-break') || U(31) < .35) br.push([600 + Math.round(240 * U(30)), 'tea']);
     if (U(32) < .6) br.push([540 + Math.round(400 * U(33)), 'toilet']);
     if (F.double) br.push([1050 + Math.round(30 * U(36)), 'staff']);   // a double shift (C7): dinner at the station
     const ru = EVD && evRule(B + 600, 'rush'), ra = ru && (ru.at || [600, 1080]);
@@ -8912,6 +8921,7 @@ function schedBuild(p, d, occ, S) {
       if (bt <= t + 10 || bt >= to - 25) continue;
       work(bt);
       if (kind === 'tea') { if (!take('leisure', [[wd, 'lounge-seat'], [wd, 'bench']], 15, { tag: 'tea' })) work(t + 15); }
+      else if (kind === 'wtea') { if (!take('leisure', [[5, 'lounge-seat']], WORKS_TEA.dur, { tag: 'tea', wait: WORKS_TEA.wait, min: 8, anim: 'drink' })) work(t + 5); }   // the tea corner full: back to the job
       else if (kind === 'staff') seg('dinner', t + 20, wtype, desk, { tag: 'staff' });
       else if (kind === 'call') {                       // to the booths and back on the shift's time (tag 'rush')
         called = true; const n0 = segs.length;
@@ -9501,7 +9511,7 @@ function dayReport(day) {
     if (meals.size < 2) rep.meals.push(p.id + ' ' + [...meals]);
     const gp = shiftBlocks(p, day), gb = gp && gp.blocks;
     if (gb || (isWorkDay(p, day) && !(galleyRotaOn() && p.dept === 'galley'))) {   // the whole shift worked (breaks and a galley staff meal count)
-      const iv = gb ? gb.map(([a, b]) => [B + a, B + Math.min(b, 1440)]) : [p.shift === 'night' ? [B + 1260, B + 1440 + 360] : [B + 480, B + 1020]];
+      const iv = gb ? gb.map(([a, b]) => [B + a, B + Math.min(b, 1440)]) : [p.shift === 'night' ? [B + 1260, B + 1440 + 360] : [B + SHIFTS.day[0], B + SHIFTS.day[1]]];
       const both = planDay(p, day).concat(planDay(p, day + 1)).filter(s => s.act === 'work' || ['tea', 'toilet', 'hands', 'staff', 'patrol', 'rush'].includes(s.tag) || /^intro/.test(s.tag || ''));   // an intro beat on shift is work too
       for (const [a, b] of iv) {
         const worked = both.reduce((n, s) => n + Math.max(0, Math.min(s.to, b) - Math.max(s.from, a)), 0);
@@ -10959,7 +10969,7 @@ const taskMins = mins => Math.max(1, Math.round(mins / needEffects().task));   /
 const NEED_SAY = {
   energy: ['You feel sluggish: get some sleep. Your bunk is in Bunk 1 on Deck 4.', 'You\'re getting tired.'],
   fitness: ['You\'re out of shape and slow on your feet: work out at the gym on Deck 3.', 'You could do with some exercise.'],
-  hunger: ['You\'re hungry. The mess serves breakfast 06:00-08:00 and dinner 17:00-20:30; the grab shelf is always open.', 'You\'re getting peckish.'],
+  hunger: ['You\'re hungry. The mess serves breakfast 06:00-09:00 and dinner 17:00-20:30; the grab shelf is always open.', 'You\'re getting peckish.'],
   hygiene: ['You need a shower. The washrooms are at the ends of the junior wing on Deck 4.', 'A shower would be nice.'],
   social: ['You miss home. The call-home booths are on Deck 3.', 'You\'d like to hear from home.'],
   bathroom: ['You really need the toilet. The washrooms are at the ends of the junior wing on Deck 4.', 'You could do with a trip to the toilet.'],
@@ -10992,7 +11002,7 @@ function popupWatch(now) {
 // Tips setting's (they're about you, not teaching). At 0 nothing more happens (no fail state) except bathroom's '+go'.
 const WARN_AT = [NEED_LOW, 10], WARN_REARM = 40, WARN_GAP = 8000;
 const NEED_WARN = {   // need: [[title, text] under 25, [title, text] under 10] (text: head writer 3)
-  hunger: [['Hungry', 'Getting peckish. Mess on Deck 3: breakfast 06:00-08:00, dinner 17:00-20:30. The grab shelf never closes.'],
+  hunger: [['Hungry', 'Getting peckish. Mess on Deck 3: breakfast 06:00-09:00, dinner 17:00-20:30. The grab shelf never closes.'],
     ['Very hungry', 'Starving: tasks are 15% slower. Eat something. The grab shelf in the mess, Deck 3, is always open.']],
   energy: [['Tired', 'You\'re tired, so you\'re walking slower. Your bunk\'s in Bunk 1, Deck 4, from 20:00. By day, sit down a while.'],
     ['Exhausted', 'Exhausted. Get to your bunk, Bunk 1 on Deck 4, and sleep it off.']],
@@ -11060,7 +11070,7 @@ function needPop(k) {
 const TEACH_GAP = 180000, TEACH_QUIET = 60000, TEACH_TOAST = 6000;
 let TEACH_CK = -1e9, TEACH_ST = null;
 const teachRecent = (at, c, ms = 120000) => at !== undefined && c.now - at < ms;
-const teachMeal = m => m >= 360 && m < 480 || m >= 1020 && m < 1230;   // breakfast and dinner at the servery
+const teachMeal = m => m >= MEALS.breakfast[0] && m < MEALS.breakfast[1] || m >= MEALS.dinner[0] && m < MEALS.dinner[1];   // breakfast and dinner at the servery
 const TEACH = [   // text: head writer 3. A 4th element { sure: true }: shown when due whatever the 3-minute and 60 s pacing says
   ['t:rep', c => c.d >= 1 && (c.S.turnin !== undefined && shipNow() - c.S.turnin >= 30 || c.min >= 1020 || c.d >= 2), 'Not just jobs: kindness and joining in count too. Each department has its own view of you, and so does the ship.', { sure: true }],   // the user's: on the 2nd day (Monday), after your first job's turned in or at the shift's end; half an hour after the turn-in, so Zeke says his part first (0.28.50)
   // free time (0.28.63, the 0.60.7 plan's "Tips for your first evenings"; the plan's approved words): off shift, then one an evening, Days 1-4
@@ -11436,9 +11446,9 @@ function foodFrom(where, peek) {
   }
   if (where === 'grab') return { ok: true, dish: 'a roll and an apple' };
   const m = SHIP.time.min;
-  if (m >= 360 && m < 480) return { ok: true, dish: 'breakfast' };
+  if (m >= MEALS.breakfast[0] && m < MEALS.breakfast[1]) return { ok: true, dish: 'breakfast' };
   if (m >= 1020 && m < 1230) return { ok: true, dish: 'dinner' };
-  return { ok: false, why: 'The servery is closed. Breakfast is 06:00 to 08:00, dinner 17:00 to 20:30. The grab-and-go shelf is always open.' };
+  return { ok: false, why: 'The servery is closed. Breakfast is 06:00 to 09:00, dinner 17:00 to 20:30. The grab-and-go shelf is always open.' };
 }
 // a gift from the garden (0.28.25, the galley engineer's notes): on a harvest day (section 16's gardenHarvestDay), once
 // your garden run (section 17's chore 'garden', id 'garden@<minute>') has its pickup ticked off, a sprig of herbs and/or
@@ -13470,8 +13480,8 @@ const GALLEY_NEXT = { cook: 'prep', bake: 'prep', serve: 'wash', wash: 'clean', 
 // each role's day, in minutes of the day: [from, to, task]. 'line' is serving and washing up by turns;
 // 'breakfast' and 'dinner' are the staff's own meals
 const GALLEY_SHIFTS = {
-  chef: { wake: 270, plan: [[290, 480, 'cook'], [480, 500, 'breakfast'], [500, 570, 'clean'], [870, 990, 'cook'], [990, 1010, 'dinner'], [1010, 1230, 'cook'], [1230, 1245, 'tea']] },
-  early: { wake: 305, plan: [[330, 360, 'bake'], [360, 480, 'line'], [480, 500, 'breakfast'], [500, 570, 'wash'], [570, 630, 'bake'], [630, 780, 'prep'], [780, 810, 'clean']] },
+  chef: { wake: 270, plan: [[290, 540, 'cook'], [540, 560, 'breakfast'], [560, 630, 'clean'], [870, 990, 'cook'], [990, 1010, 'dinner'], [1010, 1230, 'cook'], [1230, 1245, 'tea']] },
+  early: { wake: 305, plan: [[330, 360, 'bake'], [360, 540, 'line'], [540, 560, 'breakfast'], [560, 630, 'wash'], [630, 690, 'bake'], [690, 780, 'prep'], [780, 810, 'clean']] },   // breakfast served to 09:00 (0.71.1)
   late: { wake: null, plan: [[780, 870, 'prep'], [870, 990, 'cook'], [990, 1010, 'dinner'], [1010, 1230, 'line'], [1230, 1275, 'wash']] },
   bar: { wake: null, plan: [[900, 1020, 'prep'], [1020, 1045, 'dinner'], [1050, 1380, 'bar']] },   // bar duty 17:30-23:00 (plan-0607), ended in time for an early start
 };
@@ -13559,9 +13569,9 @@ const FOOD = {
                                           // top-up stays on until cartClaim exists, so a build without section 17 still eats)
   plates: 110, washRate: 3,               // plates aboard; plates a minute through the dish machine
   open: { breakfast: 360, dinner: 1020 }, // the serving windows open (section 14's MEALS)...
-  serveTo: { breakfast: 480, dinner: 1230 }, // ...and end (a tradition's `until` can keep breakfast going: galleyServeEnd)
+  serveTo: { breakfast: 540, dinner: 1230 }, // ...and end (a tradition's `until` can keep breakfast going: galleyServeEnd)
   lead: 70,                               // ...and hot pots start at most this long before
-  close: { breakfast: 510, dinner: 1245 },// leftovers go to the grab shelf (the rest is wasted); later by as much as serving runs on
+  close: { breakfast: 570, dinner: 1245 },// leftovers go to the grab shelf (the rest is wasted); later by as much as serving runs on
   slack: 3, grabSlack: 4,                 // a few more than the plans need (you, for one)
   giveUp: 30,                             // minutes after the close that anyone still waiting gives up
   spoilDay: .25,                          // the share of the cold store that goes off in a day with its chiller broken (without chillerAt)
@@ -13630,9 +13640,9 @@ const galleyClose = (d, meal) => FOOD.close[meal] + galleyServeEnd(d, meal) - FO
 function galleyPlan(role, d) {
   const P = GALLEY_SHIFTS[role].plan, x = galleyServeEnd(d, 'breakfast') - FOOD.serveTo.breakfast;
   if (!x || (role !== 'chef' && role !== 'early')) return P;
-  const head = role === 'chef' ? [[290, 450 + x, 'cook'], [450 + x, 470 + x, 'breakfast'], [470 + x, 540 + x, 'clean']] : [[330, 360, 'bake'], [360, 480 + x, 'line'], [480 + x, 500 + x, 'breakfast'], [500 + x, 570 + x, 'wash']];
+  const head = role === 'chef' ? [[290, 510 + x, 'cook'], [510 + x, 530 + x, 'breakfast'], [530 + x, 600 + x, 'clean']] : [[330, 360, 'bake'], [360, 540 + x, 'line'], [540 + x, 560 + x, 'breakfast'], [560 + x, 630 + x, 'wash']];
   const end = head[head.length - 1][1];
-  return head.concat(P.filter(b => b[1] > end && b[0] >= (role === 'chef' ? 600 : 0)).map(b => [Math.max(b[0], end), b[1], b[2]]));
+  return head.concat(P.filter(b => b[1] > end && b[0] >= (role === 'chef' ? 660 : 0)).map(b => [Math.max(b[0], end), b[1], b[2]]));
 }
 // Brennan's tasting table (a dinner tie with extra: 'tasting', Wednesdays 18:15): two tastes for each taster coming (at least the tie's `batch`, 20) of two small
 // dishes, cooked from an hour before (the garden's produce first) and set out at the servery's end while it runs. The
@@ -32663,7 +32673,8 @@ function newsAdd({ id, about = null, lines, weight = .6, seed = [], born = Math.
   seed = [...new Set(seed.flatMap(s => s === 'all' ? SOC.crew.map(p => p.id) : /^dept:/.test(s) ? SOC.crew.filter(p => p.dept === s.slice(5)).map(p => p.id) : [s]))];
   const it = { id, about, lines: lines.slice(), weight, seed: seed.filter(s => SOC.idx.has(s) && socAboard(SOC.crew[SOC.idx.get(s)])), born, kind, event, life };
   NEWS.push(it); SHIP.knows[id] = new Set(it.seed);
-  while (NEWS.length > NEWS_MAX) { let k = 0; for (let i = 1; i < NEWS.length; i++) if (NEWS[i].born < NEWS[k].born || (NEWS[i].born === NEWS[k].born && NEWS[i].id < NEWS[k].id)) k = i; delete SHIP.knows[NEWS[k].id]; NEWS.splice(k, 1); }   // a hard cap: the oldest goes
+  const wt = n => +n.weight || 0;                        // a hard cap: the least of it goes first (a tradition's chatter, then a fault), the oldest of those, never the one just added (0.71.1: an arrival's news, weight .6, fell off behind a run of faults)
+  while (NEWS.length > NEWS_MAX) { let k = NEWS[0] === it ? 1 : 0; for (let i = k + 1; i < NEWS.length; i++) if (NEWS[i] !== it) if (wt(NEWS[i]) < wt(NEWS[k]) || wt(NEWS[i]) === wt(NEWS[k]) && (NEWS[i].born < NEWS[k].born || (NEWS[i].born === NEWS[k].born && NEWS[i].id < NEWS[k].id))) k = i; delete SHIP.knows[NEWS[k].id]; NEWS.splice(k, 1); }
   return it;
 }
 function newsKnownBy(p, t = shipNow()) {
@@ -32875,9 +32886,24 @@ function socialChatter(m) {
 // friends come and find you (0.36.4): a friend (tier 3+) in their free time on your deck, within SEEK_NEAR tiles,
 // now and then (SEEK_ODDS a ship minute, schedU k 633) waves you over: a small prompt at the screen's edge, never one
 // you must answer. Tap it for the chat card; it goes on its own after SEEK_SECS real seconds or when they go. Once a
-// friend a ship day (rel.seekDay), one prompt at a time, none while a card is open
-const SEEK_NEAR = 10, SEEK_ODDS = .06, SEEK_SECS = 25;
-let SEEK = null;                                          // { p, el, until }
+// friend a ship day (rel.seekDay), one prompt at a time, none while a card is open.
+// 0.71.0 (the user's playtest note): nobody calls out across the room any more. They walk up (section 10's seekStep,
+// SEEK_COME while on the way, at most SEEK_COME_SECS real seconds), stop beside you facing you, and say their opener
+// (section 22's kind 'seek', addressed to you) in a bubble and the chip; they stay by you while the chip is up. When it
+// happens is seeded per save (seekSalt: the career's game seed gs), so it differs between new games, same for one save
+const SEEK_NEAR = 10, SEEK_ODDS = .06, SEEK_SECS = 25, SEEK_COME_SECS = 30, SEEK_BESIDE = 1.3;
+let SEEK = null, SEEK_COME = null;                        // { p, el, until, line, come }; { p, m, why, until } on the way
+const seekSalt = () => SHIP.career && SHIP.career.gs | 0 || 0;
+const SEEK_PRIVATE = new Set(['bathroom', 'shower', 'toilet', 'wash', 'hands']);   // reviewer 2's LOW on 0.71.0: nobody walks up while you wash, or in a washroom
+const seekPrivate = () => { if (typeof ACT !== 'undefined' && ACT && SEEK_PRIVATE.has(ACT.kind)) return true; try { const r = (deckDef.rooms || {})[roomAt(...player.here())]; return !!r && /washroom|shower|toilet/i.test(r.name || ''); } catch (e) { return false; } };
+const seekBusy = p => typeof TJ_WALK !== 'undefined' && !!TJ_WALK && !!TJ_WALK.roles && TJ_WALK.roles.has(p.id);   // in a tradition's walk with you (section 18's tap to join): not taken off it
+const seekWho = p => !seekBusy(p) && !!(SEEK_COME && SEEK_COME.p === p || SEEK && SEEK.come && SEEK.p === p && !CHAT);
+const SEEK_OPEN = ['Got a minute? I was hoping I\'d catch you.', 'There you are. Have you got a moment?', 'Oh good, it\'s you. Come and talk to me a minute.', 'Hey, you. Got a second for me?'];   // until section 22 has 'seek' lines
+function seekCome(p, a, m, why) {                         // a: their agent on this deck; none (not here): the chip as before
+  if (!a) { seekShow(p, m, why); return; }
+  SEEK_COME = { p, m, why: why || null, until: simNow() + SEEK_COME_SECS * 1000 };
+}
+function seekArrive(a) { const c = SEEK_COME; SEEK_COME = null; if (c && !CHAT && !SEEK) seekShow(c.p, c.m, c.why, a); }
 function seekEl() {
   let el = document.getElementById('seek'); if (el) return el;
   const st = document.createElement('style');
@@ -32887,13 +32913,18 @@ function seekEl() {
   el.onclick = () => { if (SEEK && SEEK.visit) { visitIn(); return; } const s = SEEK; seekEnd(); if (s) { const a = DECK_CREW.find(x => x.p === s.p); if (a) { a.talking = 6; player.stop(); player.face = Math.atan2(a.x - player.obj.position.x, a.z - player.obj.position.z); } chatOpen(s.p, !s.line, s.line || undefined); } };
   return el;
 }
-function seekShow(p, m, why) {                          // the chip: '<name> waves you over.' (why: an ask's, for its line: the career engineer's worried friends and goodbyes, 0.61.0)
-  const el = seekEl(), U = k => schedU(p.seed, m, k);
+function seekShow(p, m, why, a) {                       // the chip (why: an ask's, for its line: the career engineer's worried friends and goodbyes, 0.61.0); a: they've walked up (0.71.0)
+  if (!p) return;
+  const el = seekEl(), U = k => schedU(p.seed ^ seekSalt(), m, k);
+  let line = why && typeof careerSeekLine === 'function' ? careerSeekLine(p, why) : null;
+  if (!line && a) { const l = chatLine(p, shipNow(), true); if (l && TALK_KEEP.has(l.kind)) line = l; }   // something that matters (a goodbye, a missed appointment): that's what they came to say
+  if (!line) { const l = socLine(p, 'seek', { t: shipNow(), tier: relTier(p.id), warmth: warmth(p.id) }); line = { text: l ? l.text : SEEK_OPEN[Math.floor(U(634) * SEEK_OPEN.length)], kind: 'seek', say: true }; }
   el.innerHTML = ''; const b = document.createElement('b'); b.textContent = shortName(p); el.appendChild(b);
-  el.appendChild(document.createTextNode(' ' + ['waves you over.', 'spots you and smiles.', 'calls out: "Got a minute?"', 'beckons you over.'][Math.floor(U(634) * 4)]));
-  el.hidden = false; SEEK = { p, until: simNow() + SEEK_SECS * 1000, line: why && typeof careerSeekLine === 'function' ? careerSeekLine(p, why) : null };
+  el.appendChild(document.createTextNode(a ? ': "' + line.text + '"' : ' would like a word: "' + line.text + '"'));
+  if (a) bubbleSay(a.h, line.text, 6);
+  el.hidden = false; SEEK = { p, until: simNow() + SEEK_SECS * 1000, line, come: !!a };
 }
-function seekEnd() { SEEK = null; const el = document.getElementById('seek'); if (el) el.hidden = true; }
+function seekEnd() { SEEK = null; SEEK_COME = null; const el = document.getElementById('seek'); if (el) el.hidden = true; }
 // socialSeekAsk(id, { from, until, why }) (0.36.58, for section 21's first week): between from and until (absolute ship
 // minutes), when that person is on your deck, near you and free (not at work, asleep or washing), they wave you over
 // once, whatever your tier and the odds. A why with 'favour' in it also has them offer a favour that day. SHIP.social.seekAsks (saved)
@@ -32920,15 +32951,16 @@ function socialSeekAsks(m) {
     const p = SOC.crew[SOC.idx.get(ask.id)], w = whereIs(p, t);
     if (!w || w.moving || ['work', 'sleep', 'wash'].includes(w.act)) { ask.next = t + 5; continue; }
     const a = DECK_CREW.find(x => x.p === p);
-    if (a && Math.hypot(a.x - P.x, a.z - P.z) <= SEEK_NEAR) { if (CHAT || SEEK || sleeping) continue; ask.done = true; relGet(p.id).seekDay = SHIP.time.day; seekShow(p, m, ask.why); return true; }
+    if (a && Math.hypot(a.x - P.x, a.z - P.z) <= SEEK_NEAR) { if (CHAT || SEEK || SEEK_COME || sleeping) continue; ask.done = true; relGet(p.id).seekDay = SHIP.time.day; seekCome(p, a, m, ask.why); return true; }
     if (typeof crewComeTo !== 'function') continue;
     const pl = seekSpot(); if (!pl) continue;
     ask.walking = true; ask.walkUntil = t + SEEK_WALK;
     try {
-      ask.stop = crewComeTo(p, pl.id, () => {
+      ask.stop = crewComeTo(p, pl.id, ag => {
         ask.walking = false;
-        if (CHAT || SEEK || sleeping) { ask.next = shipNow() + 5; return; }
-        ask.done = true; relGet(p.id).seekDay = SHIP.time.day; seekShow(p, Math.floor(shipNow()), ask.why);
+        if (CHAT || SEEK || SEEK_COME || sleeping) { ask.next = shipNow() + 5; return; }
+        if (ask.stop) { try { ask.stop(); } catch (e) { } }   // the visit's done its job: the last few steps are the walk-up's
+        ask.done = true; relGet(p.id).seekDay = SHIP.time.day; seekCome(p, ag || DECK_CREW.find(x => x.p === p), Math.floor(shipNow()), ask.why);
       }, { until: t + SEEK_WALK });
     } catch (e) { ask.walking = false; ask.next = t + SEEK_RETRY; }
     if (ask.done) return true;                            // they were already there: the chip is up
@@ -32946,19 +32978,21 @@ function seekSpot() {                                    // somewhere by you for
 }
 function socialSeek(m) {
   if (typeof DECK_CREW === 'undefined') return;
+  if (SEEK_COME) { const a = DECK_CREW.find(x => x.p === SEEK_COME.p); if (!a || CHAT || SEEK || sleeping || seekPrivate() || simNow() > SEEK_COME.until) SEEK_COME = null; return; }   // on their way over (0.71.0); you went to wash: they leave it
+  if (!SEEK && seekPrivate()) return;                    // none starts while you wash (0.71.1)
   if (!SEEK && socialSeekAsks(m)) return;
   const near = a => Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) <= SEEK_NEAR;
-  if (SEEK) { if (SEEK.visit) return; const a = DECK_CREW.find(x => x.p === SEEK.p); if (!a || !near(a) || simNow() > SEEK.until || CHAT) seekEnd(); return; }
+  if (SEEK) { if (SEEK.visit) return; const a = DECK_CREW.find(x => x.p === SEEK.p); if (!a || !near(a) || simNow() > SEEK.until || CHAT || SEEK.come && seekPrivate()) seekEnd(); return; }
   if (CHAT || sleeping) return;
   const day = SHIP.time.day;
   for (const a of DECK_CREW) {
     const p = a.p, mentor = socIntroOn() && p.id === SHIP.social.mentor && SHIP.time.min >= 1080 && SHIP.time.min < 1290;   // week 1: the escort checks in each evening
     const bye = relTier(p.id) >= 1 && (leavingSoon(p) ?? 99) <= 2 && !(SHIP.rel[p.id] && SHIP.rel[p.id].bye >= day - 1);   // leaving soon: they come to say goodbye
-    if (seekAskFor(p.id, shipNow())) continue;              // an asked-for wave: socialSeekAsks brings them
+    if (seekAskFor(p.id, shipNow()) || seekBusy(p)) continue;   // an asked-for wave: socialSeekAsks brings them
     if (!SOC.idx.has(p.id) || !near(a) || !(mentor || bye || (relTier(p.id) >= 3 && socGate('d3')))) continue;
-    const r = relGet(p.id); if (r.seekDay === day || schedU(p.seed, m, 633) >= (mentor || bye ? .25 : SEEK_ODDS)) continue;
+    const r = relGet(p.id); if (r.seekDay === day || schedU(p.seed ^ seekSalt(), m, 633) >= (mentor || bye ? .25 : SEEK_ODDS)) continue;
     const w = whereIs(p, shipNow()); if (!w || !(w.act === 'leisure' || w.act === 'off') || w.tag === 'tea') continue;
-    r.seekDay = day; seekShow(p, m);
+    r.seekDay = day; seekCome(p, a, m);
     return;
   }
 }
@@ -39531,7 +39565,7 @@ const ROSTER = [
   {"id": "achterberg-lars", "name": "Lars Achterberg", "rank": "officer", "dept": "watch", "uniform": "watch", "role": "Watch officer", "shift": "night", "rota": {"offDays": [1, 2]}, "bed": "4-19", "work": {"deck": 2, "place": "work:watch"}, "habits": ["lingers-at-meals", "calls-home", "bar-regular"], "traits": ["reliable", "dry humour"], "looks": {"skin": 0, "hair": "bald", "hairColor": "auburn", "height": 1.07, "build": "average", "acc": ["glasses"]}, "bio": "Calm in a crisis, fussy about paperwork.", "life": ["Knows the lyrics to every song in the record cabinet.", "Reads mystery novels and guesses the ending too early."], "seed": 464758, "birthday": 340, "plate": {"rank": "Officer", "name": "Lars Achterberg"}, "habitShifts": [{"add": "stargazer", "why": "Lars's name is on the observatory-night list now."}], "tpl": "dry", "openness": "normal", "needs": "cheer", "loves": ["book", "sweet"], "likes": ["made", "game"], "joy": "mystery novels", "thread": "family", "keepsake": "a battered paperback with notes in the margins", "home": "Kesh", "family": "two older sisters", "about": [{"tier": 0, "topic": "work", "text": "Will tell you which corner of the Watch office is the warmest."}, {"tier": 1, "topic": "hobby", "text": "Lights up when anyone mentions mystery novels."}, {"tier": 1, "topic": "home", "text": "Still calls Kesh home."}, {"tier": 2, "topic": "home", "text": "Writes to two older sisters more often than they write back."}, {"tier": 2, "topic": "work", "text": "Thinks the coffee on Deck 5 is the best on the ship, and says so loudly."}, {"tier": 3, "topic": "home", "text": "Someone in the family has been unwell, and the news comes slowly."}, {"tier": 4, "topic": "secret", "text": "Thinks about going home for good, and hasn't decided."}], "mentors": false, "transferTo": "the Meridian", "aboard": [null, 245], "hobby": "reading mystery novels", "since": "three years", "kin": "my big sister", "lost": "", "hobbyNoun": "reading"},
   {"id": "dahl-mira", "name": "Mira Dahl", "rank": "officer", "dept": "watch", "uniform": "watch", "role": "Watch officer", "shift": "day", "rota": {"offDays": [5, 6]}, "bed": "4-17", "work": {"deck": 2, "place": "work:watch"}, "habits": ["night-owl", "late-diner", "musician"], "traits": ["practical", "thoughtful"], "looks": {"skin": 2, "hair": "bald", "hairColor": "blonde", "height": 1.01, "build": "average", "acc": ["headband"]}, "bio": "Calm in a crisis, fussy about paperwork.", "life": ["Knits scarves for anyone who stands still long enough.", "Has a parent who served on the Wren years ago."], "seed": 598747, "birthday": 220, "plate": {"rank": "Officer", "name": "Mira Dahl"}, "habitShifts": [{"add": "bar-regular", "why": "Mira has become a regular at the lounge bar."}, {"drop": "night-owl", "why": "Mira has started going to bed on time."}], "tpl": "brisk", "openness": "normal", "needs": "practical", "loves": ["made"], "likes": ["music", "plant"], "joy": "knitting scarves", "thread": "startover", "keepsake": "something they made: a little gear on a chain", "home": "New Aberdeen", "family": "big, noisy family", "about": [{"tier": 0, "topic": "work", "text": "Has opinions about how the Watch office should be run."}, {"tier": 1, "topic": "hobby", "text": "Will talk about knitting scarves for as long as you let them."}, {"tier": 1, "topic": "home", "text": "Comes from New Aberdeen, and says it like a boast."}, {"tier": 2, "topic": "home", "text": "Has a big, noisy family, and misses them more than they let on."}, {"tier": 2, "topic": "work", "text": "Thinks the lift on Deck 5 has a personality."}, {"tier": 3, "topic": "past", "text": "Is vague about what they did before the Wren."}, {"tier": 4, "topic": "secret", "text": "Came aboard to start over after something went wrong at home, and is glad they did."}], "mentors": false, "transferTo": "the Meridian", "aboard": null, "hobby": "knitting scarves", "since": "five years", "kin": "my dad", "lost": "", "hobbyNoun": "knitting"},
   {"id": "ibarra-rafael", "name": "Rafael Ibarra", "rank": "officer", "dept": "survey", "uniform": "survey", "role": "Survey officer", "shift": "night", "rota": {"offDays": [4, 5]}, "bed": "4-20", "work": {"deck": 2, "place": "work:survey"}, "habits": ["lounge-regular", "early-to-bed"], "traits": ["forgetful", "sarcastic"], "looks": {"skin": 2, "hair": "bun", "hairColor": "black", "height": 1.02, "build": "average", "acc": []}, "bio": "Lives for the next sensor sweep.", "life": ["Keeps a tin of good biscuits and tells no one.", "Plays Tiles, and loses gracefully."], "seed": 109188, "birthday": 219, "plate": {"rank": "Officer", "name": "Rafael Ibarra"}, "habitShifts": [{"add": "runner", "why": "Rafael has taken up running on the treadmills."}], "tpl": "dry", "openness": "normal", "needs": "cheer", "loves": ["tea"], "likes": ["made", "game"], "joy": "evenings in the bow lounge", "thread": "talent", "keepsake": "a little tin of their own tea blend", "home": "New Aberdeen", "family": "grandmother, who raised me", "about": [{"tier": 0, "topic": "work", "text": "Is usually the first in the Survey labs and the last out."}, {"tier": 1, "topic": "hobby", "text": "Will talk about evenings in the bow lounge for as long as you let them."}, {"tier": 1, "topic": "home", "text": "Grew up on New Aberdeen."}, {"tier": 2, "topic": "home", "text": "Writes to a grandmother who raised them more often than they write back."}, {"tier": 2, "topic": "work", "text": "Thinks the lift on Deck 5 has a personality."}, {"tier": 3, "topic": "hobby", "text": "Hums, sketches, or scribbles when they think nobody's watching."}, {"tier": 4, "topic": "secret", "text": "Is good at it, really good, and too shy to show anyone."}], "mentors": false, "transferTo": "the Corvid", "aboard": null, "hobby": "doing crosswords in the bow lounge", "since": "four years", "kin": "my gran", "lost": "", "hobbyNoun": "crossword setting"},
-  {"id": "cruz-tove", "name": "Tove Cruz", "rank": "officer", "dept": "garden", "uniform": "survey", "role": "Senior gardener", "shift": "day", "rota": {"offDays": [5, 6], "hours": [[480, 1020]], "team": "senior", "hoursOn": [{"days": [0, 1], "hours": [[360, 840]]}, {"days": [2, 3], "hours": [[780, 1260]]}]}, "bed": "4-18", "work": {"deck": 3, "place": "work:garden"}, "habits": ["night-owl", "lingers-at-meals", "gardener"], "traits": ["messy", "shy"], "looks": {"skin": 5, "hair": "short", "hairColor": "auburn", "height": 0.92, "build": "broad", "acc": ["beard", "headband"]}, "bio": "Runs the hydroponics garden, and knows every plant by the week it was sown.", "life": ["Is secretly afraid of the lift.", "Keeps a cactus called Gerald on the windowsill."], "seed": 168991, "birthday": 61, "plate": {"rank": "Officer", "name": "Tove Cruz"}, "habitShifts": [{"add": "evening-shower", "why": "Tove has switched to showering at night."}, {"add": "early-to-bed", "drop": "night-owl", "why": "Tove has started going to bed early."}], "tpl": "shy", "openness": "guarded", "needs": "listen", "loves": ["plant", "sweet"], "likes": ["garden", "music"], "joy": "looking after a cactus called Gerald", "thread": "lonely", "keepsake": "a cutting in a jar", "home": "the Ostrander colonies", "family": "parents on a mining station", "about": [{"tier": 0, "topic": "work", "text": "Is usually the first in the hydroponics garden and the last out."}, {"tier": 1, "topic": "hobby", "text": "Will talk about looking after a cactus called Gerald for as long as you let them."}, {"tier": 1, "topic": "home", "text": "Comes from the Ostrander colonies, and says it like a boast."}, {"tier": 2, "topic": "home", "text": "Has parents on a mining station, and keeps a photo of them by the bunk."}, {"tier": 2, "topic": "work", "text": "Thinks the coffee on Deck 5 is the best on the ship, and says so loudly."}, {"tier": 3, "topic": "past", "text": "Has never been good at joining in, and eats alone more than they'd like."}, {"tier": 4, "topic": "secret", "text": "Would love to be asked to a Tiles night, and would never ask."}], "mentors": false, "transferTo": "the Meridian", "aboard": null, "hobby": "looking after a cactus called Gerald", "since": "eighteen months", "kin": "my dad", "lost": "", "hobbyNoun": "cactus care"},
+  {"id": "cruz-tove", "name": "Tove Cruz", "rank": "officer", "dept": "garden", "uniform": "survey", "role": "Senior gardener", "shift": "day", "rota": {"offDays": [5, 6], "hours": [[540, 1020]], "team": "senior", "hoursOn": [{"days": [0, 1], "hours": [[360, 840]]}, {"days": [2, 3], "hours": [[780, 1260]]}]}, "bed": "4-18", "work": {"deck": 3, "place": "work:garden"}, "habits": ["night-owl", "lingers-at-meals", "gardener"], "traits": ["messy", "shy"], "looks": {"skin": 5, "hair": "short", "hairColor": "auburn", "height": 0.92, "build": "broad", "acc": ["beard", "headband"]}, "bio": "Runs the hydroponics garden, and knows every plant by the week it was sown.", "life": ["Is secretly afraid of the lift.", "Keeps a cactus called Gerald on the windowsill."], "seed": 168991, "birthday": 61, "plate": {"rank": "Officer", "name": "Tove Cruz"}, "habitShifts": [{"add": "evening-shower", "why": "Tove has switched to showering at night."}, {"add": "early-to-bed", "drop": "night-owl", "why": "Tove has started going to bed early."}], "tpl": "shy", "openness": "guarded", "needs": "listen", "loves": ["plant", "sweet"], "likes": ["garden", "music"], "joy": "looking after a cactus called Gerald", "thread": "lonely", "keepsake": "a cutting in a jar", "home": "the Ostrander colonies", "family": "parents on a mining station", "about": [{"tier": 0, "topic": "work", "text": "Is usually the first in the hydroponics garden and the last out."}, {"tier": 1, "topic": "hobby", "text": "Will talk about looking after a cactus called Gerald for as long as you let them."}, {"tier": 1, "topic": "home", "text": "Comes from the Ostrander colonies, and says it like a boast."}, {"tier": 2, "topic": "home", "text": "Has parents on a mining station, and keeps a photo of them by the bunk."}, {"tier": 2, "topic": "work", "text": "Thinks the coffee on Deck 5 is the best on the ship, and says so loudly."}, {"tier": 3, "topic": "past", "text": "Has never been good at joining in, and eats alone more than they'd like."}, {"tier": 4, "topic": "secret", "text": "Would love to be asked to a Tiles night, and would never ask."}], "mentors": false, "transferTo": "the Meridian", "aboard": null, "hobby": "looking after a cactus called Gerald", "since": "eighteen months", "kin": "my dad", "lost": "", "hobbyNoun": "cactus care"},
   {"id": "zamora-quinn", "name": "Quinn Zamora", "rank": "officer", "dept": "survey", "uniform": "survey", "role": "Survey officer", "shift": "day", "rota": {"offDays": [5, 6]}, "bed": "4-21", "work": {"deck": 2, "place": "work:survey"}, "habits": ["late-diner", "night-owl", "runner"], "traits": ["meticulous", "quiet"], "looks": {"skin": 1, "hair": "short", "hairColor": "blonde", "height": 1.09, "build": "slim", "acc": []}, "bio": "Can name every star in the chart room, and argues about the rest.", "life": ["Brought a telescope from home.", "Sings in the shower; the whole washroom knows."], "seed": 379086, "birthday": 94, "plate": {"rank": "Officer", "name": "Quinn Zamora"}, "habitShifts": [{"drop": "runner", "why": "Quinn has given up running for now."}], "tpl": "shy", "openness": "guarded", "needs": "listen", "loves": ["sweet"], "likes": ["game", "plant"], "joy": "running on the treadmill", "thread": "lonely", "keepsake": "a recipe card in their handwriting", "home": "Lisk", "family": "father, who grows apples", "about": [{"tier": 0, "topic": "work", "text": "Is usually the first in the Survey labs and the last out."}, {"tier": 1, "topic": "hobby", "text": "Lights up when anyone mentions running on the treadmill."}, {"tier": 1, "topic": "home", "text": "Grew up on Lisk."}, {"tier": 2, "topic": "home", "text": "Writes to a father who grows apples more often than they write back."}, {"tier": 2, "topic": "work", "text": "Has a running bet with someone in another department that nobody else knows about."}, {"tier": 3, "topic": "past", "text": "Has never been good at joining in, and eats alone more than they'd like."}, {"tier": 4, "topic": "secret", "text": "Would love to be asked to a Tiles night, and would never ask."}], "mentors": false, "transferTo": "the Corvid", "aboard": [null, 161], "hobby": "running", "since": "four years", "kin": "my dad", "lost": "", "hobbyNoun": "running"},
   {"id": "yoon-elif", "name": "Elif Yoon", "rank": "officer", "dept": "infirmary", "uniform": "infirmary", "role": "Doctor", "shift": "night", "rota": {"offDays": [2, 3]}, "bed": "4-22", "work": {"deck": 3, "place": "work:infirmary"}, "habits": ["calls-home", "tea-break", "lounge-regular", "bar-regular"], "traits": ["nervous", "patient"], "looks": {"skin": 4, "hair": "short", "hairColor": "dark", "height": 0.93, "build": "average", "acc": []}, "bio": "Night doctor. Steady hands and a soft voice at three in the morning.", "life": ["Tells terrible jokes at breakfast.", "Is the best at fixing the coffee machine."], "seed": 951856, "birthday": 151, "plate": {"rank": "Officer", "name": "Elif Yoon"}, "habitShifts": [{"add": "musician", "why": "Elif has dusted off an old instrument and plays in the music room now."}], "tpl": "shy", "openness": "guarded", "needs": "listen", "loves": ["game", "made"], "likes": ["tea", "sweet"], "joy": "telling terrible jokes", "thread": "loss", "keepsake": "a Tiles piece, chipped at one corner", "home": "the Ostrander colonies", "family": "aunt, who was a pilot", "about": [{"tier": 0, "topic": "work", "text": "Is usually the first in the infirmary and the last out."}, {"tier": 1, "topic": "hobby", "text": "Will talk about telling terrible jokes for as long as you let them."}, {"tier": 1, "topic": "home", "text": "Grew up on the Ostrander colonies."}, {"tier": 2, "topic": "home", "text": "Has an aunt who was a pilot, and keeps a photo of them by the bunk."}, {"tier": 2, "topic": "work", "text": "Thinks the coffee on Deck 5 is the best on the ship, and says so loudly."}, {"tier": 3, "topic": "past", "text": "Goes quiet on one day each year, and doesn't say why."}, {"tier": 4, "topic": "secret", "text": "Lost someone close a few years ago, and keeps something of theirs in the bunk."}], "mentors": true, "transferTo": "the Calypso", "aboard": null, "partner": "navarro-mateo", "hobby": "telling terrible jokes", "since": "eighteen months", "kin": "my aunt", "lost": "my grandad", "hobbyNoun": "comedy"},
   {"id": "bakshi-sol", "name": "Sol Bakshi", "rank": "junior", "dept": "helm", "uniform": "command", "role": "Helm rating", "shift": "night", "rota": {"offDays": [5, 6]}, "bed": "4-B8-1", "work": {"deck": 1, "place": "work:helm"}, "habits": ["lounge-regular", "common-room", "early-riser", "shopper"], "traits": ["easygoing", "gentle"], "looks": {"skin": 5, "hair": "buzz", "hairColor": "dark", "height": 1.01, "build": "average", "acc": []}, "bio": "Plots courses for fun on rest days.", "life": ["Paints tiny portraits of the crew.", "Grew up on Lisk, and misses the rain."], "seed": 224075, "birthday": 66, "habitShifts": [{"drop": "shopper", "why": "Sol is saving up, and has stopped browsing the store."}], "tpl": "warm", "openness": "open", "needs": "share", "loves": ["made", "tea"], "likes": ["game", "sweet"], "joy": "painting tiny portraits of the crew", "thread": "loss", "keepsake": "something they made: a little gear on a chain", "home": "Lisk", "family": "twin", "about": [{"tier": 0, "topic": "work", "text": "Keeps a mug at the helm, on the bridge that nobody else is allowed to use."}, {"tier": 1, "topic": "hobby", "text": "Spends free evenings painting tiny portraits of the crew."}, {"tier": 1, "topic": "home", "text": "Grew up on Lisk."}, {"tier": 2, "topic": "home", "text": "Has a twin, and misses them more than they let on."}, {"tier": 2, "topic": "work", "text": "Has a running bet with someone in another department that nobody else knows about."}, {"tier": 3, "topic": "past", "text": "Goes quiet on one day each year, and doesn't say why."}, {"tier": 4, "topic": "secret", "text": "Lost someone close a few years ago, and keeps something of theirs in the bunk."}], "mentors": true, "transferTo": "the Heron", "aboard": null, "hobby": "painting tiny portraits of the crew", "since": "eight months", "kin": "my twin", "lost": "my grandad", "hobbyNoun": "painting"},
@@ -40007,7 +40041,8 @@ function sharedTile(t) {
 }
 function crewWayOn(now) {
   for (const [k, u] of CREW_WAY) if (u <= now) CREW_WAY.delete(k);
-  const you = [player.path.length && player.goal, PLAYER_PLACE && placeSpot(PLAYER_PLACE) && placeSpot(PLAYER_PLACE).walk].filter(t => t && sharedTile(t));
+  const ps = PLAYER_PLACE && placeSpot(PLAYER_PLACE);   // your place's walk-to tile only while you stand on it (a station): sat in a mess seat you're off it, and the diner next to you needs it to sit down (0.71.0)
+  const you = [player.path.length && player.goal, ps && ps.onTile && ps.walk].filter(t => t && sharedTile(t));
   if (!you.length) return CREW_WAY.size ? CREW_WAY : null;
   const out = new Map(CREW_WAY); for (const t of you) out.set(K(t), now + 1); return out;
 }
@@ -40053,6 +40088,7 @@ class CrewAgent {
     const w = whereIs(this.p, now);
     if (w && w.escort && !(w.escort.mode === 'wait' && w.placeId)) return this.escortStep(dt, w.escort);   // section 21's escort: lead, follow or wait, with you (waiting at a place: they sit or stand there, below)
     this.esc = null;
+    if (seekWho(this.p)) return this.seekStep(dt);         // section 20's walk-up: coming over for a word, then standing by you (0.71.0)
     if (w && w.visit && !w.visit.arrived && this.spot && (this.spot.id === w.visit.placeId || this.alt && this.alt[0] === w.visit.placeId && this.spot.id === this.alt[1]) && this.settled) {   // a visit: there (or at the next seat, when theirs was taken)
       w.visit.arrived = true; if (w.visit.onArrive) { try { w.visit.onArrive(this); } catch (e) { /* the caller's problem */ } }
     }
@@ -40189,6 +40225,29 @@ class CrewAgent {
       this.pose = 'walk';
     } else { this.pose = 'stand'; this.face = Math.atan2(pp.x - this.x, pp.z - this.z); }   // waiting: look at you
     this.y = 0; this.stuck = 0; this.tag = 'escort';
+    this.h.set({ x: this.x, y: this.y, z: this.z }, this.face, heldPose(this));
+    return true;
+  }
+  // section 20's walk-up (0.71.0): over to you (re-aimed as you move), then standing by you, facing you, while the chip is up
+  seekStep(dt) {
+    const pp = player.obj.position, dist = Math.hypot(pp.x - this.x, pp.z - this.z);
+    if (this.goalId !== '@seek') { this.retarget(null); this.goalId = '@seek'; this.seekKey = null; this.seekNear = false; }   // up from a seat first
+    this.seekT = (this.seekT || 0) - dt;
+    const go = dist > SEEK_BESIDE + (this.seekNear ? .8 : 0); this.seekNear = !go;
+    if (go) {
+      const you = cellAt(pp.x, pp.z), goal = free(...you) ? you : nearestOpen(pp.x, pp.z, null), key = goal ? K(goal) : '-';
+      if (goal && key !== this.seekKey && (this.seekT <= 0 || !this.path.length)) {
+        this.seekKey = key; this.seekT = .5; let from = this.here(); if (!free(...from)) from = nearestOpen(this.x, this.z, null) || from;
+        this.path = crewPath(from, goal, new Set([...this.rooms, roomAt(...from), roomAt(...goal)]), this) || [];
+      }
+    } else { this.path = []; this.seekKey = null; }
+    if (this.path.length) {
+      const c = cellPos(...this.path[0]), dx = c.x - this.x, dz = c.z - this.z, d = Math.hypot(dx, dz), st = CREW_SPEED * dt;
+      if (d <= st) { this.x = c.x; this.z = c.z; this.path.shift(); } else { this.x += dx / d * st; this.z += dz / d * st; this.face = Math.atan2(dx, dz); }
+      this.pose = 'walk';
+    } else { this.pose = 'stand'; this.face = Math.atan2(pp.x - this.x, pp.z - this.z); }
+    if (!go && SEEK_COME && SEEK_COME.p === this.p) seekArrive(this);
+    this.y = 0; this.stuck = 0; this.settled = false; this.tag = null;
     this.h.set({ x: this.x, y: this.y, z: this.z }, this.face, heldPose(this));
     return true;
   }
