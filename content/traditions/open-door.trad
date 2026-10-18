@@ -4,7 +4,7 @@
 k: 445
 title: Open door
 when: weekly wednesday
-at: 16:40-18:00
+at: 16:40-17:45
 min: 15
 after-shift: yes
 where: 5 room Tea corner: lounge-seat
