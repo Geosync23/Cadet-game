@@ -4,6 +4,15 @@
 
 **Lead:** session_01KPJMYjXAPkNUcrQ8VRkhLE (from 2026-10-17 ~04:35; before it session_01PJtmxWgAPLebXSZKP6ZRpG, who released 0.60.1). **Reviewers:** reviewer 1b session_018XY1NbMBxo2SLDPxooe5yx (took over from reviewer 1, session_01HK4m33sUiLuVim8VWaCPMs); reviewer 2 via the lead. **This note:** the first build master, 2026-10-17 ~01:00-04:40; build master 2 (session_01F8ph7FKqViF3heRn94YgBr) from ~04:40, who released 0.60.2 and is combining 0.60.3.
 
+## START HERE (build master 3, session_01WrXgDfR5dzwktKJfYwVwsV, 2026-10-18 ~02:50)
+
+- **0.60.6 released** (Pillar 4's last build): claude/cand-0606 9b04618 = claude/ship-integration (game file = 96582c4). Contents, hand merges, the test-only fix, what candidate 1 found and every cadet_test difference: DEV_NOTES' 0.60.6 row; each check's result: plans/cand-0606-results.md (R4's copy on claude/cand-0606-r4).
+- **Next:** 0.60.7. Nothing starts until the user plays 0.60.6 and says go; lead 9 (taking over from lead 8, session_01FutyR6xiAmZv29oS4TWKdS) will brief the build master.
+- **Team at release:** reviewer 1g session_01Pxr7Ei4zeWFuNMauuqb3uJ (1f archived); runners R2 session_012zFHAS6jkPUhCrpBn2zW9Q (day_check), R3 session_01USkJjdw16L4K2tuK8otcc6 (player/interactions/path), R4 session_0128JSEC3zAmjARobaEAS5r5 (intro_check alone); deck architect 3 session_01NsysH87qqJnf1dBEVRz2fW runs phone.py + perf_check (perf 3 handed over).
+- **New working rules (lead 8):** push each finished check's one-line result to plans/cand-0NNN-results.md on the candidate branch (`/tmp/cw/res.sh`-style), so a successor reruns only what's missing. intro_check alone takes 60-120 min: give it its own runner (R4) on a quiet machine and start it first; never run it with more than one other check (page-load timeouts).
+- **Gotchas found in 0.60.6:** `plans/build-master/mergeone.sh` cd's into the repo that holds the script, so for scratch worktrees call git and `resolve.py` directly (`git -C <worktree>`). device_check's "no leak" counts geometries, which crowd changes can move (not always a device leak). player_check's cart run needed a frame step before reading (fixed). A cadet_test tap shot that changes between runs (~97k px) is a tip card's real-time timer; player-needs' cadet_test now turns tips off.
+- **Tools:** probes used to place failures fast (dayReport work, planDay of one person, a cart run alone) are described in the 0.60.6 row; bisect by first-parent merge steps with each commit's own check.
+
 ## START HERE (build master 2, 2026-10-17 ~21:40)
 
 - **Lead:** lead 8, session_01FutyR6xiAmZv29oS4TWKdS (took over ~19:56; TEAM.md on claude/lead-pillar1). **Reviewer:** 1f, session_015UH1fbKg2nCRNi9Y3D96YA (1c, 1d, 1e before). **Check runners:** R2 session_012zFHAS6jkPUhCrpBn2zW9Q (day_check), R3 session_01USkJjdw16L4K2tuK8otcc6 (player, interactions, path). **Perf:** perf 3 session_01S8FWAPFnpaAAUN1wpDQbbo runs perf_check + the phone-like runs. The build master runs cadet_test, food/machine/deck/leave, social/device/lines/tiles/events/arc, `arc_check BUILD 70 booth`, intro_check (now ~60 min alone; give it 100 min) and the smoke/newgame/name checks.
