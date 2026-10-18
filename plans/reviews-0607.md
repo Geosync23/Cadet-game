@@ -9,6 +9,12 @@
 
 ## Verdicts
 
+### Social (sim items) 0.36.85-0.36.90, claude/social-0607 d3d5b4d (in depth): PASS
+Sections 10/14/16: trays go with the meal (`TRAY_AT`/`trayBack` gone); `morning()` takes a gathering before breakfast; `spotTaken`/`arriveNear` when crew arrive part way (the day-100 fix); the galley's `bar` role; `crewHobby` and the hobby bias in `crewPose`. DA4's 031c0e4 is merged in.
+- **Checks I ran:** **food_check: FOOD CHECK OK** (the rota with the bar role, galley staff at their stations, no errors). The builder reports day_check, events_check (the day-100 Founding Day walk: 0 shared, 47 of 47 reached) and, on a scratch merge with traditions d27980f, their events_check OK. cadet_test differs only because a Day 1 galley hand now has the bar role and sleeps later; a copy without the bar role is ALL IDENTICAL.
+- **Code:** the tray simply goes when the meal's key changes (`LINE_LOG.returned` still counts it), so nothing walks to the removed rack. This closes the LOW from my deck 031c0e4 review. `arriveNear` is only reached with a non-empty path in both places: `crewArrive` returns early on `!a.path.length`, and `lineCatchUp` checks `a.path.length`. They then stand on the walk-to tile and the normal settle finds another seat. The bar role goes to a spare hand only (a late one if there are two, else an early one; by turns, `d % c.length`); it's shut with no spare, and capped 25 minutes before `bedBy` before an early start. `pre` (a gathering ending 25+ minutes before breakfast) skips the linger so the gathering's segment isn't stretched. All pure, nothing saved, no `R()`.
+- **LOW:** `crewPose` shows knitters, artists and puzzlers with the `read` animation (no knit/draw poses yet), as the builder says. Fine for now; worth a line in the plan for 0.60.8.
+
 ### Deck architect 4, 0.38.28-0.38.34, claude/deck-0607 1f07f99 (skim for kit; the gym's plan change looked at): PASS
 The gym (a 4th treadmill, 2 exercise bikes, the `cycle` pose), the Wednesday delivery crates, the name beam, the spice shelf, the post box and writing ledge, the lap/stretch/cook-along places, a sleeker Tern, and a Tiles board on Deck 4's table.
 - **Colours and determinism:** every new material goes through `std()`/`dressMat()`, which call `col()`. Canvas fills are texture paint, as everywhere else. The new kit says "no R()", and I found no new `R()` or `Math.random` in the diff. The Deck 4 card table still draws `R()` nine times when it shows the Tiles board, so the rest of Deck 4 stays the same (the builder reports cadet_test differs only on the table).
