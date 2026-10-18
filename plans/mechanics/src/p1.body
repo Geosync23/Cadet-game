@@ -1,0 +1,61 @@
+TITLE:When Does It Happen Spec
+H1:P1 · When does it happen? (Day 12, a word from Calder) <span class="draft">spec for approval</span>
+SUB:A fault that only shows at some times. Machines' logs show how hard they worked each hour; the pattern tells the causes apart. A small new thing on Day 12 (the day of tracing), on the case engine (<code>case-engine.html</code>), seat H. Plan Part 4, P1.
+NAV:plain=In plain words|first=Your first P1|screen=On the device|grow=How it grows|b=Builder|tests=Tests|faq=FAQ
+
+<section id="plain">
+  <h2>In plain words</h2>
+  <ul>
+    <li>"Showers weak on Deck 4, but only in the evening." A fault that comes and goes.</li>
+    <li>Each machine on the way keeps a <b>log</b> at its panel: how it ran each hour of the day. Read the logs: a cause that would be bad all day can't be it if the log is fine in the morning; one that only fails under the evening load can.</li>
+    <li>The Chief's notes, new page: "Bad all day: something's worn. Bad at the busy hours: something can't keep up."</li>
+  </ul>
+</section>
+
+<section id="first">
+  <h2>Your first P1 (Day 12, Friday, or the next work day with a fitting fault)</h2>
+  <p>Calder, after your tracing lesson: "Here's one the pipe kit won't settle. When does it happen? That's the question." The case: <b>"Showers weak on Deck 4 after 18:00."</b> Suspects (the water line, Tier 2): the recycler's membrane, the filter bank, the Deck 3 pump, the Deck 4-6 branch valve.</p>
+  <div class="tablewrap"><table>
+    <tr><th>Clue (where)</th><th>What it shows</th><th>Crosses out</th></tr>
+    <tr><td>The filter bank's log (<code>3-filter-1</code>'s panel)</td><td>full flow all day, evenings too</td><td>the filter (a clogged filter is weak all day)</td></tr>
+    <tr><td>The recycler's log (<code>3-recycler-1</code>)</td><td>steady output all day</td><td>the membrane</td></tr>
+    <tr><td>The branch valve's log (<code>5-valve-2</code>)</td><td>passes its share at every hour</td><td>the valve</td></tr>
+  </table></div>
+  <p><b>It's the Deck 3 pump (<code>3-pump-1</code>):</b> it can't keep up at the evening peak, when everyone showers after shift. Three clues, each crossing one out; none alone settles it. Fix: a pump from the Plumbing shelf.</p>
+</section>
+
+<section id="screen">
+  <h2>On the device: the day strip</h2>
+  <p>The case shows a <b>day strip</b> (00 to 24) per machine you've read: a small bar per hour of how it ran, your clues pinned at their times. Tap only; bars at least 12 px wide; scrolls sideways on a phone.</p>
+</section>
+
+<section id="grow">
+  <h2>How it grows (bands)</h2>
+  <ul>
+    <li><b>T2</b> (Officer): one line, 4 suspects, 3 clues, logs only.</li>
+    <li><b>T2+</b>: two machines share the time (the oven cool at dinner because the range and extractor pull on the same junction: the cause is a <i>load</i>, and the answer is "book it for the senior techs", a report, not a part).</li>
+    <li><b>With the logger</b> (Step 5, a tool): clip it on, come back tomorrow, read a full day's trace where there's no log.</li>
+    <li><b>Tier 4</b>: a drive coil that only stutters at full drive.</li>
+  </ul>
+</section>
+
+<section id="b" class="builder">
+  <h2>For the builder (seat H, the P1 kind in 24k)</h2>
+  <ul>
+    <li><code>CASE_KINDS.p1 = { ladder: 'p1', fits: causes of the kind (or of the machines on its <code>MACHINE_LINKS</code> line) that differ in <code>when</code> (always vs peak / after-use / time), suspects: the cause + 2-3 decoys with a different <code>when</code>, clues: one <code>log</code> per decoy machine (or per decoy cause on the same machine) }</code>.</li>
+    <li><b>Logs are real:</b> a log is the machine's hour-by-hour <code>machWorks</code> for the day before (from <code>MACH_HIST</code>), shaped by the cause: a <code>peak</code> cause drops only in the hours when its use counter is in its top quarter (<code>machUseDay</code>, normalised by <code>machNorm</code>), an <code>always</code> cause drops every hour. A decoy's log is its own true log, which is fine at peak, so it kills that decoy.</li>
+    <li><b>The ladder:</b> row <code>p1</code> (Day 12, small, Officer, <code>by: ['calder', 'halloran-emeka']</code>); its first case is the training case on the water line with cause <code>3-pump-1</code> at peak (fault set at 16:00 Day 11, posted Day 12 after the tracing lesson); if <code>3-pump-1</code> is busy, the first real-fault P1 that fits.</li>
+    <li><b>The day strip</b> is a new device block <code>{ kind: 'strip', rows: [{ label, hours: [0-1 × 24], pins: [hour] }] }</code>, built by H with a <code>list</code> fallback ("Fine 06-18, low 18-22").</li>
+    <li><b>Keys:</b> 892 (which peak hours, on ties).</li>
+  </ul>
+</section>
+
+<section id="tests" class="builder">
+  <h2>Tests</h2>
+  <ul><li><b><code>puzzle_check</code></b> (P1): each log matches the machine's real hours; exactly one suspect is left; no single log solves it at T2 (three needed); the training case is <code>3-pump-1</code>; logs the same twice.</li></ul>
+</section>
+
+<section id="faq">
+  <h2>Builders' questions</h2>
+  <p class="note">None yet.</p>
+</section>

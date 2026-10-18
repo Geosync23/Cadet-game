@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Who Saw What Spec</title>
+<style>
+:root{--ink:#e8eef0;--muted:#93a6ae;--teal:#4cc3b5;--gold:#e9c46a;--rose:#e58f7a;--glass:rgba(13,21,33,.78);--line:rgba(150,200,196,.22);--chip:rgba(76,195,181,.14)}
+*{box-sizing:border-box}
+html,body{margin:0;background:#121a27;color:var(--ink);font-family:"Avenir Next","Segoe UI",system-ui,sans-serif}
+body{background:radial-gradient(ellipse at 50% 20%,#22304a 0%,#141c2b 60%,#0c111b 100%) fixed;line-height:1.5}
+header{padding:18px 16px 4px;max-width:1100px;margin:0 auto}
+h1{font-size:21px;font-weight:600;margin:0}
+h2{font-size:17px;font-weight:600;margin:0 0 8px;color:#bdeee6}
+h3{font-size:14.5px;font-weight:600;margin:12px 0 4px;color:#d9eeea}
+.sub{font-size:13.5px;color:var(--muted);margin-top:4px}
+.draft{display:inline-block;font-size:11.5px;color:#14202a;background:var(--gold);border-radius:999px;padding:2px 9px;margin-left:6px;vertical-align:2px}
+nav{position:sticky;top:0;z-index:5;background:rgba(14,20,31,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+nav div{display:flex;gap:6px;overflow-x:auto;padding:8px 16px;max-width:1100px;margin:0 auto;-webkit-overflow-scrolling:touch}
+nav a{flex:none;text-decoration:none;border:1px solid var(--line);background:var(--glass);color:var(--ink);font-size:13px;padding:6px 11px;border-radius:999px}
+nav a:focus-visible,nav a:hover{border-color:var(--teal);color:#bdeee6;outline:none}
+main{max-width:1100px;margin:0 auto;padding:6px 16px 40px}
+section{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:14px 0;scroll-margin-top:56px}
+p{margin:6px 0;font-size:14px;color:#d6e0e3}
+ul{margin:6px 0;padding-left:20px;font-size:14px;color:#d6e0e3}
+li{margin:3px 0}
+.note{font-size:12.5px;color:var(--muted)}
+.grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.card{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.025)}
+.card b{display:block;color:#bdeee6;font-size:14px;margin-bottom:2px}
+.card span{font-size:13px;color:#cfd9dc}
+.card .meta{display:block;font-size:12px;color:var(--muted);margin-top:4px}
+.tag{display:inline-block;font-size:11.5px;border-radius:999px;padding:1px 8px;margin:2px 4px 0 0;background:var(--chip);color:#bdeee6;border:1px solid var(--line)}
+.tag.new{background:rgba(233,196,106,.16);color:#f1dca0}
+.tag.old{opacity:.75}
+.steps{list-style:none;padding:0;margin:8px 0;counter-reset:s}
+.steps li{position:relative;padding:8px 10px 8px 46px;border-left:2px solid rgba(76,195,181,.35);margin:0 0 0 14px}
+.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:-15px;top:8px;width:28px;height:28px;border-radius:50%;background:#183040;border:1px solid var(--teal);color:#bdeee6;font-size:12.5px;display:flex;align-items:center;justify-content:center}
+.steps time{display:block;font-size:12px;color:var(--gold)}
+.steps b{color:#e4f3f0;font-weight:600}
+.steps span{display:block;font-size:13.5px;color:#cfd9dc}
+.week{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.day{border:1px solid var(--line);border-radius:12px;padding:9px 10px;background:rgba(255,255,255,.02)}
+.day h4{margin:0 0 4px;font-size:13.5px;color:var(--gold);font-weight:600}
+.day p{font-size:12.5px;margin:4px 0;color:#cfd9dc}
+.day .who{color:#bdeee6;font-weight:600}
+.lines{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;background:#0b141c;border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:#9fe7dc;white-space:pre-wrap;overflow-x:auto;margin:8px 0}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0}
+.flow .box{border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:13px;background:rgba(255,255,255,.03)}
+.flow .arrow{color:var(--teal)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:12px}
+.tablewrap{overflow-x:auto}
+.waves{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+.wave{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.025)}
+.wave b{color:var(--gold);display:block}
+.wave .ci{display:block;margin-top:6px;font-size:12.5px;color:#f1dca0}
+ol.q{padding-left:22px;font-size:14px;color:#d6e0e3}
+ol.q li{margin:6px 0}
+ol.q em{color:var(--muted);font-style:normal;font-size:12.5px}
+svg text{font-family:inherit}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;color:#9fe7dc;background:rgba(0,0,0,.25);padding:0 4px;border-radius:4px;word-break:break-word}
+section.builder{border-color:rgba(233,196,106,.45)}
+section.builder h2{color:var(--gold)}
+.status{display:inline-block;font-size:11.5px;color:#14202a;background:var(--teal);border-radius:999px;padding:2px 9px;margin-left:6px;vertical-align:2px}
+td code{white-space:normal}
+</style>
+</head>
+<body>
+<header>
+  <h1>P2 · Who saw what? (Day 15, a word from Tomas) <span class="draft">spec for approval</span></h1>
+  <div class="sub">The crew noticed the fault; you didn't. Ask the people who were there when it happened, and when. One of them may be honestly mixed up. A small new thing on Day 15, on the case engine, seat H. Plan Part 4, P2.</div>
+</header>
+<nav><div><a href="#plain">In plain words</a><a href="#first">Your first P2</a><a href="#rules">How witnesses work</a><a href="#grow">How it grows</a><a href="#b">Builder</a><a href="#tests">Tests</a><a href="#faq">FAQ</a></div></nav>
+<main>
+
+<section id="plain">
+  <h2>In plain words</h2>
+  <ul>
+    <li>A new button on a person's chat card: <b>Ask about the fault</b>. They say where they were, when, and what they noticed ("It rattled when I went to bed, about 22:00").</li>
+    <li>What people noticed at a time crosses out the causes that couldn't show then. <b>Nobody lies</b>, but someone may be mixed up: their schedule (the Roster) had them somewhere else, so they mean a different machine. Spotting that is part of it.</li>
+    <li>The Chief's notes, new page: "Ask who was there, and check they were."</li>
+  </ul>
+</section>
+
+<section id="first">
+  <h2>Your first P2 (Day 15, Monday)</h2>
+  <p>Tomas, at breakfast (he's off on Mondays): "You're asking around about the scrubber? Ask who sleeps near it. And check they were in." The case: <b>"Scrubber 2 on Deck 4 rattles now and then."</b> Suspects: the <b>filter</b> (clogged: rattles all the time), the <b>fan bearing</b> (rattles once it's run for hours: evenings), a <b>loose housing panel</b> (rattles when the door by it slams).</p>
+  <div class="tablewrap"><table>
+    <tr><th>Who (ask anywhere)</th><th>What they say</th><th>Crosses out</th></tr>
+    <tr><td>Pell</td><td>"Quiet as anything at breakfast."</td><td>the filter (it would rattle all day)</td></tr>
+    <tr><td>Rina</td><td>"Rattling at 19:30 while I sat in the common room. Nobody came or went; the door never moved."</td><td>the loose panel (it needs the door)</td></tr>
+    <tr><td>Kovac</td><td>"It rattled at 13:00!" Her schedule had her on Deck 5 then: she means Deck 5's scrubber. An honest mix-up.</td><td>nothing (once you see the mix-up)</td></tr>
+  </table></div>
+  <p><b>It's the fan bearing.</b> Two witnesses, each crossing out one suspect; neither settles it alone. Fix: a Tier 2 repair, a bearing from the Galley parts shelf. The names are examples: the real witnesses are whoever was really there.</p>
+</section>
+
+<section id="rules">
+  <h2>How witnesses work</h2>
+  <ul>
+    <li><b>Who knows:</b> crew whose real plan had them near the machine (same room or the next) during the fault's window; they're found by Roster as now.</li>
+    <li><b>What they say:</b> at the time they were there, the machine was showing or not (from the cause's <code>when</code>); "showing at t" crosses out causes that can't show at t; "quiet at t" crosses out causes that would show at t.</li>
+    <li><b>A mix-up</b> is a person whose plan had them elsewhere; their line is about the machine where they really were. It crosses out nothing, and the case must be solvable without it.</li>
+  </ul>
+</section>
+
+<section id="grow">
+  <h2>How it grows (bands)</h2>
+  <ul>
+    <li><b>T2</b>: 3-4 suspects, 2-3 witnesses plus at most one mix-up, one deck.</li>
+    <li><b>T2+</b>: a witness on another shift (find them on the Roster, maybe at night), witnesses on two decks.</li>
+    <li><b>T3</b>: two stories both true, pointing to two faults.</li>
+  </ul>
+</section>
+
+<section id="b" class="builder">
+  <h2>For the builder (seat H, the P2 kind in 24k)</h2>
+  <ul>
+    <li><code>CASE_KINDS.p2 = { ladder: 'p2', fits: causes differing in <code>when</code>, suspects: cause + decoys, clues: one <code>person</code> clue per chosen witness: { who, at, saw: true|false, kills } }</code>.</li>
+    <li><b>Witnesses from the sim:</b> <code>planWhere(p, t)</code> over the fault's window (the 24 hours before posting); candidates are crew whose place was in the machine's room or an adjoining room; their minute is the middle of their stay; what they saw is the cause's real <code>when</code> at that minute. A mix-up is picked from crew on the Roster whose plan had them elsewhere (the same kind of machine on another deck), at most one per case, never needed.</li>
+    <li><b>The Ask button</b> on the chat card (<code>chatOpen</code>, section 20): one line, typeof-guarded, shown only while a P2 case is open and the person is a witness or a mix-up; the answer is their line from <code>content/cases/p2.lines</code>; collecting it is <code>caseClue</code>.</li>
+    <li><b>The ladder:</b> row <code>p2</code> (Day 15, small, Officer, <code>by: ['tomas', 'torres-zeke']</code>; it's a word, not a lesson, so an off-duty teacher counts if they're aboard and awake). First case: <code>4-scrubber-2</code>, cause <code>bearing</code> (when: warm), suspects filter (always), bearing, panel (touched; a new Tier 2 cause for the scrubber's table, part <code>seal</code>, sign "the housing buzzes when the door goes"); if <code>4-scrubber-2</code> is busy, <code>4-scrubber-1</code>.</li>
+    <li><b>Keys:</b> 893 (witness choice), 894 (the mix-up).</li>
+  </ul>
+</section>
+
+<section id="tests" class="builder">
+  <h2>Tests</h2>
+  <ul><li><b><code>puzzle_check</code></b> (P2): every witness really was there at their minute (<code>planWhere</code>); every mix-up really was elsewhere; the case solves without the mix-up; no single witness solves it; the same twice.</li></ul>
+</section>
+
+<section id="faq">
+  <h2>Builders' questions</h2>
+  <p class="note">None yet.</p>
+</section>
+
+</main>
+</body>
+</html>
