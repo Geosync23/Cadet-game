@@ -8,10 +8,15 @@
 (empty)
 
 ## Passing tips (for BM3)
-writer 0cc4cdf · arrival-0607b 5ce084d (includes arrival e2cd435 and PE6 52839a6) · systems f351cc3 · social 9c8ea6c · PE6 a0d4b43 (= 4a7673c + handover) · deck 55fca8d · traditions 1848e5f.
+writer 0cc4cdf · arrival-0607b 5ce084d (includes arrival e2cd435 and PE6 52839a6) · systems f351cc3 · social 9c8ea6c · PE6 a0d4b43 (= 4a7673c + handover) · deck 55fca8d · traditions 5de2087.
 events_check's day-100/day-231 seat clashes: OK on BM3's combine with social d3d5b4d. The bar needs PE6 and social together.
 
 ## Verdicts
+
+### Traditions 0.34.54, claude/trad-0607 5de2087 (behaviour, looked at): PASS
+BM3's food_check FAIL (no shift-change dinner queue on day 1) fixed by moving people off the edge of 17:00: Name on the beam ends 17:40 (was 18:00), uses the Works bay's crowd spots, and Zeke hosts; Open door ends 17:45; after-shift arrivals come at `workEnd + 10` (was 15), and a host needs only 5 minutes left (`evArrive`), with their `eventPlan` entry's `min` cut to what's left. food_check's rush probe steps a minute at a time (the 5-minute step skipped short queues).
+- Small, pure changes to timings. The builder reports FOOD CHECK OK and day_check 1 OK. The beam still ends before Day 1's 18:00 intro dinner.
+- **For BM3:** the let-offs for Sunrise stretch and Pick-your-own are gone from events_check and device_check, so on this branch alone those two checks would fail. They pass only with social's `morning()` (d3d5b4d and later) merged. Merge order: social before running traditions' checks.
 
 ### Social 0.36.91, claude/social-0607 9c8ea6c (in depth): PASS
 The named bartender (Ivo Madsen, ROSTER `rota.team: 'bar'`; relief Tamsin Haddad, `rota.relief: 'bar'`, who works the bar after her own shift on Ivo's days off); the shower queue (section 14 `showerQueue`, section 10 `showerQSpot`/`washDoorTiles`/`@wq-` spots, DA4's `shower-queue` places when there are any); a last-step seat guard in `CrewAgent.update`; `seatsBeside` counts a served diner's `meal.next` as busy; `STAFF_ONLY` keeps intro beats off `bar-staff` places.
