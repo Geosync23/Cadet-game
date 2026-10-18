@@ -127,7 +127,8 @@ DATA = r"""(() => {
   for (const s of SETTLE) {
     if (!ids.has(s.teacher)) bad.push('Settling in, ' + s.id + ': nobody called ' + s.teacher);
     if (s.place && !room(s.place.deck, s.place.room)) bad.push('Settling in, ' + s.id + ': no ' + s.place.room + ' on Deck ' + s.place.deck);
-    if (!INTRO_WEEK.some(b => b.settle === s.id) && s.id !== 'laundry') bad.push('Settling in, ' + s.id + ': nobody teaches it in the week');
+    const taught = INTRO_WEEK.some(b => b.settle === s.id) || typeof CLOTHES_BEATS !== 'undefined' && CLOTHES_BEATS.some(b => b.settle === s.id);   // 0.42.45: section 21b's beats teach clothes (Zeke at dinner) and hobby (his knitting offer)
+    if (!taught && s.id !== 'laundry') bad.push('Settling in, ' + s.id + ': nobody teaches it in the week');
   }
   for (const m in INTRO_MEETINGS) for (const w of INTRO_MEETINGS[m].cast) if (!/^works:/.test(w) && !ids.has(w)) bad.push(m + ': nobody called ' + w);
   const off = id => { const p = ROSTER.find(x => x.id === id); return p && p.rota ? (p.rota.offDays || []).slice().sort().join(',') : '?'; };
@@ -142,7 +143,8 @@ SETTLE_NOTES = r"""(() => {
     lead: ['job', { step: 'turnin', reserved: 2 }], eat: ['act', { act: 'eat', with: 2 }], solo: ['job', { step: 'turnin' }],
     health: ['apptKept', { id: 'intro-health' }], call: ['act', { act: 'call' }], take: ['job', { step: 'take' }], buy: ['act', { act: 'buy' }],
     friend: ['tierUp', { id: 'pell', tier: 1 }], favour: ['favour', { who: 'kovac-zainab' }], laundry: ['act', { act: 'laundry' }],
-    tradition: ['tradition', { id: 'quiz', you: true }], dayoff: ['introStep', { step: 'd6-sowing' }] };
+    tradition: ['tradition', { id: 'quiz', you: true }], dayoff: ['introStep', { step: 'd6-sowing' }],
+    clothes: ['act', { act: 'clothes' }], hobby: ['act', { act: 'hobby' }], talk: ['talk', { id: 'pell', mins: 10 }] };   // 0.60.7: section 21b's wardrobe, section 15's hobbies, social's Talk a while
   const NOISE = [['act', { act: 'eat', with: 0 }], ['tierUp', { id: INTRO_ESCORT, tier: 1 }], ['tierUp', { id: 'tomas', tier: 1 }], ['tradition', { id: 'quiz', you: false }],
     ['job', { step: 'take', reserved: 1 }], ['introStep', { step: 'hello' }], ['apptKept', { id: 'other' }]];
   const bad = [];
