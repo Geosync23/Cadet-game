@@ -57,6 +57,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 .lift .stay{margin:10px auto 0;padding:7px 16px}
 .devbtn{position:fixed;left:14px;top:86px;z-index:2;padding:6px 11px;font-size:12.5px}
 .devbtn b{min-width:16px;padding:0 4px;border-radius:8px;background:var(--teal);color:#08201d;font-size:11px;line-height:16px;margin-left:2px}
+.devbtn.compact span{display:none}                        /* 0.28.59: the narrowest phones, so Pause fits beside it (its aria-label still says Device) */
 .devbtn.low::after{content:"";width:7px;height:7px;border-radius:50%;background:#e8a04c;margin-left:2px}
 /* 19. the device's skin (0.35.1): an old-school phosphor screen in a bezel. CSS and DOM only: no canvas, blur or backdrop-filter. */
 .device,.devtip,.devhu,.devdlg,.devaddr,#chat.devchat,body #seek{--crt-ink:#6ff0dc;--crt-dim:#4ab1a3;--crt-bg:#03141a;--crt-hot:#e8fffb;--crt-glow:rgba(95,227,208,.45);--crt-scan:rgba(0,0,0,.2);--crt-radius:18px;--crt-font:ui-monospace,"Cascadia Mono",Menlo,Consolas,monospace;--crt-size:17px;--bezel:#1b1f24}
@@ -241,7 +242,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.28.58
+   STARSHIP CADET: CSV Wren                           build 0.28.59
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7591,7 +7592,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.28.58';                           // keep in step with the header's build line
+const GAME_BUILD = '0.28.59';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -9645,7 +9646,7 @@ const DEVICE_SKIN = (() => {
       btn.classList.toggle('low', low);
       let un = 0; try { un = mailUnread(); } catch (e) { /* before section 15 */ }
       if (devLocked()) un = 0;                          // no mail badge on a device you haven't got yet
-      if (badge) { badge.hidden = !un; badge.textContent = un; }
+      if (badge && (badge.hidden !== !un || badge.textContent !== String(un))) { badge.hidden = !un; badge.textContent = un; if (typeof pausePlace === 'function') pausePlace(); }   // Pause sits beside the button (0.28.59)
       led.classList.toggle('on', un > 0); led.classList.toggle('blink', un > 0);   // the power light blinks for new mail
     },
     draw(id, v) {
@@ -10843,7 +10844,10 @@ function pauseShift(d) {
 function pausePlace() {
   const b = document.getElementById('pauseBtn'), d = document.getElementById('devBtn'); if (!b || !d) return;
   if (!matchMedia('(max-width:720px),(max-height:500px)').matches) { b.style.left = b.style.top = b.style.height = ''; return; }
-  const r = d.getBoundingClientRect(); b.style.left = Math.round(r.right + 8) + 'px'; b.style.top = Math.round(r.top) + 'px'; b.style.height = Math.round(r.height) + 'px';
+  const put = () => { const r = d.getBoundingClientRect(); b.style.left = Math.round(r.right + 8) + 'px'; b.style.top = Math.round(r.top) + 'px'; b.style.height = Math.round(r.height) + 'px'; };
+  const hits = () => { const q = b.getBoundingClientRect(); return [...document.querySelectorAll('.controls button')].some(o => { if (o === b || !o.offsetWidth) return false; const r = o.getBoundingClientRect(); return r.left < q.right + 4 && q.left < r.right && r.top < q.bottom && q.top < r.bottom; }); };
+  d.classList.remove('compact'); put();
+  if (hits()) { d.classList.add('compact'); put(); }       // the narrowest phones (0.28.59; 320 px): the Device button drops its word so Pause clears the round buttons
 }
 addEventListener('resize', pausePlace); setTimeout(pausePlace, 0);
 if (typeof ResizeObserver === 'function') new ResizeObserver(() => pausePlace()).observe(document.getElementById('devBtn'));   // the mail count widens it
@@ -11473,6 +11477,7 @@ function needStrip() {
   el.querySelector('.nsFold').onclick = e => { e.stopPropagation(); stripFold(true); };
   document.body.appendChild(el);
   if (SHIP.player.stripFold) el.classList.add('fold');
+  try { hudBelow(); } catch (e) { /* section 11 not run yet: its next clock tick lines it up */ }   // under a tall HUD (0.28.59)
   return el;
 }
 function stripRise(k, v) {                               // a rise beside its icon; a new one while it shows adds to it
@@ -34611,15 +34616,32 @@ function updateClock() {
   hudFit();
   // too long for its line (0.35.36; 0.28.57, the user's "the clock is cut off" on a phone): a phone always gets the short
   // form, "Day 3 · Wed 06:00"; anything still too long drops to "D3 · Wed 06:00", then "Wed 06:00"
-  const wd = WEEKDAYS[weekday(SHIP.time.day)].slice(0, 3), tm = hhmm(SHIP.time.min), over = () => clockEl.scrollWidth > clockEl.clientWidth + 1;
+  const wd = WEEKDAYS[weekday(SHIP.time.day)].slice(0, 3), tm = hhmm(SHIP.time.min), rg = document.createRange();
+  const hs = getComputedStyle(hudEl), room = parseFloat(hs.maxWidth) - parseFloat(hs.paddingLeft) - parseFloat(hs.paddingRight) - parseFloat(hs.borderLeftWidth) - parseFloat(hs.borderRightWidth);
+  const over = () => { rg.selectNodeContents(clockEl); return isFinite(room) ? rg.getBoundingClientRect().width > room - 1 : clockEl.scrollWidth > clockEl.clientWidth + 1; };   // the text's exact width against the widest the box may grow, a pixel to spare (0.28.59: scrollWidth rounds, so a cut-off by a fraction of a pixel read as a fit)
   const phone = typeof matchMedia === 'function' && matchMedia('(max-width:720px),(max-height:500px)').matches;
-  for (const t of ['Day ' + SHIP.time.day + ' · ' + wd + ' ' + tm, 'D' + SHIP.time.day + ' · ' + wd + ' ' + tm, wd + ' ' + tm]) { if (!phone && !over()) break; clockEl.textContent = t; if (!over()) break; }
+  // (0.28.59: a larger system font, Android's text size in the Claude app) a slightly smaller clock before the day goes
+  clockEl.style.fontSize = '';
+  const D = SHIP.time.day, steps = [['Day ' + D + ' · ' + wd + ' ' + tm], ['D' + D + ' · ' + wd + ' ' + tm], ['D' + D + ' · ' + wd + ' ' + tm, '11px'], [wd + ' ' + tm, '11px']];
+  for (const [t, f] of steps) { if (!phone && !over()) break; clockEl.textContent = t; if (f) clockEl.style.fontSize = f; if (!over()) break; }
+  hudBelow();
   lightBtn.querySelector('span').textContent = night ? 'Day' : 'Night';
   lightBtn.setAttribute('aria-label', night ? 'Debug: sleep until 07:40' : 'Debug: skip to 21:40');
 }
 // 0.35.39 (reviewer 2b): the place and clock may use all the room up to the nearest button beside them (8px clear),
 // measured on resize and each minute; the CSS caps stay as the fallback
 const hudEl = document.querySelector('.hud');
+// the Device button, Pause and the needs strip sit under the place-and-clock box (0.28.59): when a large system font makes
+// the box taller than usual, they move down with it (at the usual sizes nothing moves)
+function hudBelow() {
+  const db = document.getElementById('devBtn'); if (!hudEl || !db) return;
+  db.style.top = ''; const ns = document.getElementById('needStrip'); if (ns) ns.style.top = '';
+  const gap = hudEl.getBoundingClientRect().bottom + 6 - db.getBoundingClientRect().top;
+  if (gap > 0) db.style.top = Math.ceil(db.getBoundingClientRect().top + gap) + 'px';
+  const ng = ns ? db.getBoundingClientRect().bottom + 8 - ns.getBoundingClientRect().top : 0;   // and the strip under a taller Device button
+  if (ng > 0) ns.style.top = Math.ceil(ns.getBoundingClientRect().top + ng) + 'px';
+  if (typeof pausePlace === 'function') pausePlace();
+}
 function hudFit() {
   if (!hudEl) return; hudEl.style.maxWidth = '';
   const h = hudEl.getBoundingClientRect(); let right = innerWidth - 12;
