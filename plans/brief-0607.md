@@ -15,7 +15,7 @@ The user said go for 0.60.7. Every seat reads, in order: CLAUDE.md, this brief, 
 ## Phases
 1. **Hooks (about 45 min):** the shared pieces first: PE6 the leisure need (the 7th need) and the Hobby button frame; the deck architect the new places' names (bar, gym machines, wardrobes, shelves, crates, Tiles table, second lift panel), pushed as one early commit so others can use them; the head writer the line-key names. Each pushes its hook early and tells the lead, who forwards to everyone.
 2. **Everyone at once (2.5 to 3 h).**
-3. **Combine and test (BM3, `claude/cand-0607`):** merge order PE6, deck, sim, systems, social, traditions, onboarding, writer; check runners spread the full set.
+3. **Combine and test (BM3, `claude/cand-0607`):** merge order PE6, deck, sim, systems, social, traditions, onboarding 3, onboarding 4, writer. BM3 builds candidates on claude/cand-0606 (its only push branch); the lead starts check runners when the first candidate is ~30 min away. Every seat sends hashes and verdicts to BM3 directly too; check runners spread the full set.
 
 ## Seats and branches
 | Seat | Session | Branch | Plan items + the user's 0.60.6 notes |
@@ -27,6 +27,7 @@ The user said go for 0.60.7. Every seat reads, in order: CLAUDE.md, this brief, 
 | Sim engineer (new) | session_01F7zv2wjhyPPuoHxM8hFzzy | claude/sim-0607 | Plan list. Plus: **no tray return**: crew stop walking trays to it; the default (lead's call, the user can change it) is that diners leave trays on the table and the galley crew clear them, so nothing breaks in the galley/dish pit flow. Check food_check. |
 | Systems engineer (new) | session_016Mv2wxrtkGgAwcst4GWADY | claude/systems-0607 | Plan list, plus the shelf taps (right part from the right shelf, the glow). |
 | Onboarding engineer 3 | session_016TRcnsFqFB1q5zZp6vjGBn | claude/arrival | Plan list. Plus Zeke on Day 0/1: **not already in the mess hall** when you ride up to dinner on arrival night (he arrives with you); **always with you after the first lift ride down to Deck 4**; **the shuffle-aside (moving past people) works for him while he follows you**; **he stays with you between jobs** (doesn't stop when one ends and restart when the next is picked); **he acts as a trainer on Day 1**, saying more about each job (the head writer writes the lines; a sample is pitched to the user first). |
+| Onboarding engineer 4 (new, split from onboarding 3) | session_01MeEsh5sp4RyuD7KwdQEbLC | claude/arrival-0607b | Clothes and laundry (Day 2, Zeke warns you; agree the hook with onboarding 3), your first delivery on Day 3. Builds 0.42.40+ (onboarding 3 keeps 0.42.31-0.42.39). |
 | Head writer (new) | session_013DdpJv4AKFJcvuBBqjSXms | claude/writer-0607 | Plan list (~500 lines). Plus: Zeke's trainer lines (pitch ~10 first), the low-need pop-up texts, the time clock screen's words. |
 | Build master 3 | session_01WrXgDfR5dzwktKJfYwVwsV | claude/cand-0607 | Combine, check runners, results to `plans/cand-0607-results.md`. |
 | Reviewer 0607 (new) | session_01BusfBzBamabWrCsrwQeABh | claude/reviews-0607 | Reviews each piece as it lands. |
