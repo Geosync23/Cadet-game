@@ -6,7 +6,8 @@ Started by lead 12 (session_01GjWhU9Z9V8RNoR8yyELA9V) at ~11:28 for every Step 2
 Spec: plans/brief-playtest1.md on claude/lead-pillar1 (12b1b87); the user's answers in it are binding. Seats: T traditions session_01X4SZJFeHprDF21NZqU5fGi (claude/traditions-pt1, 0.70.x), X crew sim session_01SNaWA6X5E9i2ZKfMnPTHJf (claude/crew-pt1, 0.71.x), U HUD session_01FcMPTX7mMTHkyr4pxDfNcS (claude/hud-pt1, 0.72.x), C2 works career session_014yREkgPvuwMyxBtoqB1P14 (claude/works-career, 0.44.x), O4 (claude/onboard-pt1), W, P, A5 session_01CHRbUTZc18m7eBck8eWhXj (claude/deck-pt1). Verdicts go to the seat, BM5 and lead 13 (finished reviews, blockers, design calls). Behaviour and saves in depth; lines and tests skimmed. The base is 0.63.1 (claude/p5-cand-s2).
 
 ## Passing tips
-- T claude/traditions-pt1 **2a6fa43** (0.70.0-0.70.4, playtest 1 package T; 1 LOW: Cook-along's leader)
+- T claude/traditions-pt1 **574da73** (0.70.0-0.70.6, playtest 1 package T; the LOW closed in 0.70.5; contains a9fad20)
+- U claude/hud-pt1 **55b2499** (0.72.1, Watch a film; contains 73b40cb)
 - W claude/writer-p5 **97fa9ae** (Watch a film hobby lines, text; contains 6a00d9c)
 - A5 claude/deck-pt1 **ff26b6d** (0.47.4-0.47.8, playtest 1 package complete; the beam item fixed in 56db3dc)
 - P claude/player-p5 **587a2cd** (0.28.74, playtest 1 package P)
@@ -29,6 +30,13 @@ Spec: plans/brief-playtest1.md on claude/lead-pillar1 (12b1b87); the user's answ
 - O5 claude/onboard-pt1 **e4fe793** (0.42.60-0.42.62): one item (the servery arrow holds the evening; intro_check --evening FAILS)
 
 ## Verdicts
+
+### U fc8c678 + 55b2499 (0.72.1): Watch a film, a device hobby like reading — PASS (R3)
+- `HOBBIES.film` (reading's pose and rules, `label` 'Watch a film' as the button until W's hobby.name.film, which 97fa9ae adds), the Hobbies app's device list, the two hobby tips. Saves: hobbies.done/last already take any HOBBIES id; interactions_check has a round trip and an old-save case. No R(), no 3D.
+- Checks (my runs on 55b2499): **interactions_check OK**; player_check's one FAIL (job loop: the new-job notice) is the same on 0.72.0 73b40cb in my run (U: and on 0.63.1 cb7d30a), so not this piece: it's the 08:00/09:00 mismatch on branches without C2's shift (X's 0.71.1 row: player_check OK with C2 bb4423c merged).
+
+### T ae7c877 (0.70.5) + 9a54c38 + 574da73 (0.70.6): the host on duty leads; everyone at a walk walks; 0.63.1 final merged — PASS (R3, read; T's join_check)
+- 0.70.5 (my LOW): `tradJoinMinute` makes the host the leader when he's on the deck within 6 m of one of its spots, even when his plan has him on duty (Lukas at the pass: "Tap Lukas to cook along"), and `tradJoin` uses TJ_NOW's leader. 0.70.6: `TJ_LINE` 24, so nobody at a walk is left standing on the loop's tiles in your way (X's finding); the rest of the diff is M1's 0.45.6 drill close from a9fad20 (passed by R2). T reports join_check OK.
 
 ### W 0656925 + 97fa9ae: the handover note; Watch a film hobby lines — PASS (R3, text skim)
 - banks/hobby.lines: hobby.name/start/done/record/share.film for seat U, and films in tip.hobby / tip.eve.hobby. No game code. My content_gen + lines_check on 97fa9ae: **PASS** (0 errors, the 2 old "(Say nothing)" warnings).
