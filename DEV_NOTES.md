@@ -2187,7 +2187,7 @@ They checked:
 
 **device_check.py** (0.35.0): the device's apps and skin (section 19); see "Your device". Run it whenever section 19 or the apps' data change.
 
-**puzzle_check.py** (0.55.0, seat H): `CADET_CHROME=/opt/pw-browsers/chromium python3 puzzle_check.py BUILD.html` checks the head-scratchers (section 24k, plans/mechanics/case-engine.html). The device's chips block and its buttons fallback; the case engine with a stand-in kind (a sweep of cases through every band, the rate roll, a case in play, the save); about 2 minutes. Run it whenever section 24k, the chips block or the fault tables change.
+**puzzle_check.py** (0.55.0, seat H): `CADET_CHROME=/opt/pw-browsers/chromium python3 puzzle_check.py BUILD.html` checks the head-scratchers (section 24k, plans/mechanics/case-engine.html). The device's chips block and its buttons fallback; the case engine with a stand-in kind (a sweep of cases through every band, the rate roll, a case in play, the save); about 2 minutes. With 24 core in the build it opens Fault notes as the Works app's tab (checked on a trial combine with C's 2ea7ab2: puzzle_check and device_check OK). Run it whenever section 24k, the chips block or the fault tables change.
 
 **interactions_check.py** (0.37.0): the player's extra interactions, the job board and the goal pointer (section 15b); see "Player interactions". Run it with player_check whenever sections 15, 15b or the places change.
 
