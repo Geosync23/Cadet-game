@@ -1,0 +1,23 @@
+@bank all
+// Pillar 5 (head writer, seat W): crew remarks for Step 2 (bubbles or card lines, 60 characters).
+// clothes.grubby: someone notices your grubby uniform (seat M1 sets flag:clothes.grubby). Friends kindly.
+// inc.thanks: the crew member you helped out of the stuck lift (said to you for a few days; seat M2).
+// haul.thanks: whoever receives a manifest crate at their stop (Rina at the infirmary, Yara at the store).
+
+== clothes.grubby
+? flag:clothes.grubby
+- Been wrestling an oven? You've got it all down you.   #funny
+- Bit of oil there. And there. And, well, everywhere.   #funny
+- Busy morning? The wardrobe's calling you.
+? flag:clothes.grubby tier>=friend
+- Change before Calder sees you. Trust me.   #warm
+
+== inc.thanks
+- You got me out of the lift. I owe you a tea. Several.   #warm
+- Still thinking about that lift. Thanks for coming.
+- I'll take the ladder for a bit. No offence to the lift.   #funny
+
+== haul.thanks
+- Oh, lovely. Just where I wanted it.
+- Delivery! You're a star. Put it there, by the wall.
+- That's this week's lot. Thank you.

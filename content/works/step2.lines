@@ -1,0 +1,168 @@
+@bank all
+// Pillar 5 (head writer, seat W): Step 2 texts (seats M1, M2). TEXTS unless marked. Keys in keys-p5.md.
+
+// ---- M1 rounds (24a)
+== round.title
+- Morning round, Deck {deck}
+== round.mark.fine
+- Fine
+== round.mark.worn
+- Worn
+== round.mark.off
+- Something's off
+== round.okay
+- Looks all right to me.
+== round.found
+- Found by you: {machine}.
+== round.done
+- Round done. Anything worn is on the board, found by you.
+== round.pick
+- Pick five to look at today.
+== round.nose
+- You've got a nose for it.
+
+// ---- M4 hauling (24d)
+== haul.title
+- Manifest run: {n} crates
+== haul.manifest
+- Manifest
+== haul.crate.laundry
+- Linen
+== haul.crate.infirmary
+- Medical supplies
+== haul.crate.store
+- Crew store stock
+== haul.crate.galley
+- Dry goods
+== haul.crate.bridge
+- Bridge spares
+== haul.stop.laundry
+- the laundry, Deck 4
+== haul.stop.infirmary
+- the infirmary, Deck 3
+== haul.stop.store
+- the crew store, Deck 3
+== haul.stop.galley
+- the galley, Deck 3
+== haul.stop.bridge
+- the bridge, Deck 1
+== haul.load
+- Load the cart
+== haul.drop
+- Drop it off
+== haul.done
+- Manifest done. Every crate where it belongs.
+== haul.order
+- Which stop next?
+== haul.goodroute.note
+- a good route
+== stock.title
+- Stocktake
+== stock.look
+- Shelf checked. All in order.
+== stock.wrong
+- A {part} on the {shelf} shelf? That's not where it lives.
+== stock.move
+- Move it
+== stock.moved
+- Back on its own shelf. A job won't go looking for it now.
+
+// ---- M3 the drill and the inspection (24c)
+== drill.kind.fire
+- Fire drill
+== drill.kind.pressure
+- Pressure drill
+== drill.kind.power
+- Power drill
+== drill.cal
+- Drill at 15:00: {drill}
+== drill.toast
+- Drill in ten minutes. Muster at the Works bay.
+== drill.job.fire
+- Take the extinguisher. Stand by the hatch.
+== drill.job.pressure
+- Close and dog the bulkhead door. Stand by.
+== drill.job.power
+- Stand by the breaker cabinet. Switch the junior wing to reserve at the call.
+== drill.allclear
+- All clear. Drill over.
+== drill.offduty
+- Day off: muster by the lift with the off-duty crew.
+== inspect.bed.button
+- Make the bed
+== inspect.locker.button
+- Tidy up
+== inspect.bed.done
+- Bed made. Corners and all.
+== inspect.locker.done
+- Locker tidy. Nothing loose.
+== inspect.reminder
+- Inspection at 06:30: clean uniform, bed made, locker tidy.
+== inspect.mail.subject
+- This morning's inspection
+
+// ---- M5 tuning (24e)
+== tune.title
+- Tune: {machine}
+== tune.minus
+- −
+== tune.plus
+- +
+== tune.hot
+- running hot
+== tune.warm
+- a little hot
+== tune.steady
+- steady
+== tune.cool
+- a little cool
+== tune.cold
+- cold
+== tune.done
+- Settled.
+
+// ---- M6 incidents (24f)
+== inc.card.burst
+- ! Burst pipe, {room}
+== inc.card.lift
+- ! The lift is stuck
+== inc.card.alarm
+- ! Galley alarm
+== inc.toast.burst
+- Burst pipe on Deck {deck}. Make it safe.
+== inc.toast.lift
+- The lift's stuck between decks. Someone's inside.
+== inc.toast.alarm
+- The galley alarm's going. Smoke in the kitchen.
+== inc.step.safe
+- Make it safe
+== inc.step.clean
+- Clean up
+== inc.step.fix
+- Fix the cause
+== inc.wrong.valve
+- Still running. That one's downstream.
+== inc.safe.burst
+- Valve closed. The water's stopped.
+== inc.safe.lift
+- Brake released. The car's moving.
+== inc.safe.alarm
+- Alarm reset. Quiet at last.
+== inc.clean.burst
+- Mopped. Dry enough to walk on.
+== inc.clean.lift
+- Out safe. Nobody hurt.
+== inc.clean.alarm
+- Vents open. The air's clearing.
+== inc.done
+- Safe, clean, fixed.
+== inc.missed
+- The crew dealt with it. You'll hear about it at dinner.
+
+// ---- M2 your work uniform (24b)
+== uniform.rule
+- Your uniform: change after oily jobs.
+== uniform.grubby
+- Your uniform's grubby. Change at your wardrobe.
+== uniform.wait
+- While you wait: service {machine}

@@ -542,3 +542,17 @@
 - The grab shelf's for emergencies. And Pell.   #funny
 ? flag:beat.d1-dinner.5
 - Eat properly, love. I'll know if you don't.
+
+// ---- Pillar 5 (head writer, seat W): tuning day (M5, Day 4) and the galley alarm (M6).
+== work
+// breakfast: her oven ran hot (seat M2 sets the flag at breakfast on Day 4)
+? flag:train.m5.grumble
+- Burnt the edges of forty rolls. Forty! That oven's got a temper.
+// you settled Oven 2
+? flag:train.m5.follow.done
+- There. Steady as anything. Here, have a biscuit, love.   #warm
+// the galley alarm incident: she's embarrassed
+== inc.alarm
+- Don't. Don't say it. One pan. One.   #funny
+- Sorry, love. I turned my back for a second.
+- That alarm's louder than me. Nobody's louder than me.   #funny
