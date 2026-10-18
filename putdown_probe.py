@@ -88,9 +88,12 @@ with sync_playwright() as pw:
         check(not g.ev("SHIP.player.crate") and g.ev("player.holding") == 'carry', f'a tap on the crate picks it up ({xy}, {g.ev(TOAST)[:80]})')
         # left overnight: the crew take it back to the pickup
         g.page.click('#putDown'); g.step(3)
-        g.ev("SHIP.player.crate.at -= 1440"); g.step(5)    # set down yesterday (a real night's time skip can lapse the test job)
+        g.step(5); check(g.ev("!!SHIP.player.crate"), 'set down this morning: still there (the tidy is tomorrow 05:00)')
+        check(g.ev("[putTidyAt(1440 * 3 + 23 * 60 + 55), 1440 * 4 + 10 < putTidyAt(1440 * 3 + 23 * 60 + 55), putTidyAt(1440 * 3 + 180), putTidyAt(1440 * 3 + 300)]") == [1440 * 4 + 300, True, 1440 * 3 + 300, 1440 * 4 + 300],
+              'the tidy is the first 05:00 after: 23:55 is still down at 00:10, gone at 05:00')
+        g.ev("SHIP.player.crate.at = Math.floor(shipNow() / 1440) * 1440 - 1440 + 600"); g.step(5)   # set down yesterday morning: past this 05:00
         t = g.ev(TOAST)
-        check(not g.ev("SHIP.player.crate") and not g.ev(f"jobStops(myJob())[{pick}].done") and 'overnight' in t, f'overnight the crew take it back; pickup open again ({t[:90]})')
+        check(not g.ev("SHIP.player.crate") and not g.ev(f"jobStops(myJob())[{pick}].done") and 'night tidy' in t, f'at 05:00 the crew take it back; pickup open again ({t[:90]})')
         check(not g.ev("PUT_CRATE.visible"), 'gone from the floor')
         # saved
         g.ev(f"jobStepDone(myJob().id, {pick})"); g.step(2); g.page.click('#putDown'); g.step(2)
@@ -98,6 +101,15 @@ with sync_playwright() as pw:
         check(sv and sv['job'] == 'pd-del@1', f'the set-down crate is saved ({sv})')
         g.ev("dropJob(myJob().id)"); g.step(3)
         check(not g.ev("SHIP.player.crate"), 'job dropped: the crew take the crate back')
+    # never mid lift ride (reviewer 1g's LOW): hidden, and putDown refuses
+    g.ev("SHIP.player.tray = null; SHIP.player.carry.push('filter')"); g.step(3)
+    g.ev("startRide(deckDef.num === 4 ? 5 : 4)"); g.step(3)
+    check(g.ev("!!ride") and not vis() and g.ev("putDown()") is False and g.ev("SHIP.player.carry.length") == 1, 'hidden mid lift ride, and putDown does nothing')
+    for k in range(40):
+        g.step(15)
+        if not g.ev("!!ride"): break
+    check(vis(), 'back after the ride')
+    g.ev("SHIP.player.carry.length = 0"); g.step(3)
     # a gift alone and the kit bag alone don't show the button
     g.ev("SHIP.player.carry.push(KIT_BAG)"); g.step(3); check(not vis(), 'not for the kit bag (your locker)')
     g.ev("SHIP.player.carry.length = 0"); g.step(2)
