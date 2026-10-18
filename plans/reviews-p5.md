@@ -6,10 +6,14 @@ How: behaviour, save and schedule changes in depth (against the piece's approved
 
 ## Passing tips
 - A claude/deck-0607 **6cc826b** (0.47.2, contains c20f91f and ad5e704; no LOWs open)
-- H claude/mech-cases **a07692b** (0.55.8, contains everything from eece4d4; no LOWs open)
+- H claude/mech-cases **9cb6425** (0.55.9, contains everything from eece4d4; no LOWs open)
 - W claude/writer-p5 **0d179ac** (0.48.86, text; contains 843bac9 and 76fc413; no LOWs open)
 
 ## Verdicts
+
+### H 9cb6425 (0.55.9): fallback when S's jobSetPart refuses — PASS (read; H's checks)
+- caseCall, scanPick and scanFitted now set j.parts themselves when section 17's jobSetPart returns false. That happens on a job whose parts are empty, which a case's job is after caseShow. Without it the call set no part on S's real build. Three one-line edits, correct.
+- H's checks: cadet_test vs d3d720b ALL IDENTICAL; on a trial combine with S 96cf5cb + C 2ea7ab2, puzzle_check (no stand-ins) and machine_check OK. Not re-run by me (my browser queue is on P and S).
 
 ### H a07692b (0.55.8): batch 2's LOWs — PASS
 - One P3 note on the job, the rest on the machine's panel (`at: i && pp`): LOW 1 closed. Day 5 skips Washer 2 only if your own wash is in it (SHIP.clothes.hamper at that washer), as well as a job you've claimed there: LOW 2 closed. j.scanWorn dropped (an old save's leftover is ignored).
