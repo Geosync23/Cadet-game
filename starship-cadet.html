@@ -34596,7 +34596,7 @@ function introNewGame(arriving) { try { introUiReset(); } catch (e) {} if (arriv
 // the Chief never came to your table); an arrow of its own (Torres's, your bunk's) goes too
 const INTRO_BED_GOAL = 'Head to your bunk when you\'re done looking around';   // a suggestion, not an order (the user, 0.60.5a)
 function introUiReset() {
-  const U = INTRO_UI; (U.said || []).forEach(simClear); U.night = null; U.chiefD = null;
+  const U = INTRO_UI; (U.said || []).forEach(simClear); U.night = null; U.chiefD = null; U.holdT = 0; U.holdAt = undefined;   // (the clock hold, 0.42.47)
   const own = typeof IX_GOAL !== 'undefined' && IX_GOAL && (IX_GOAL.label === INTRO_BED_GOAL || IX_GOAL.label === 'Zeke Torres');
   if (own && typeof clearGoal === 'function') clearGoal();
   Object.assign(U, { min: null, step: undefined, said: [], callAt: 0, goal: false, goalKey: '', meet: [], next: 0, still: 0, stillAt: null, more: 0, bed: false, tour: [], pause: null, calder: false, calls: 0, beat: null, sow: false });
@@ -34798,7 +34798,14 @@ const introSayMs = text => Math.max(INTRO_TOUR_GAP, 1400 + 55 * String(text || '
 function introSayTo(a, text) {
   if (!a || !text || typeof bubbleSay !== 'function') return 0;
   const ms = introSayMs(text); a.talking = Math.max(a.talking || 0, ms / 1000); bubbleSay(a.h, text, ms / 1000 + .5); INTRO_UI.next = simNow() + ms;
+  if (introClockHeld(a)) { if (!(INTRO_UI.holdT > simNow())) INTRO_UI.holdAt = shipNow(); INTRO_UI.holdT = Math.max(INTRO_UI.holdT || 0, simNow() + ms); }   // lead 13's call A: Day 0's clock waits while he talks
   return ms;
+}
+// the clock holds while he talks to you on Day 0 before dinner (lead 13's call A, 0.42.47; like the manifest's 17:30): only
+// while a line of his is up and he's stopped beside you (introTick puts the clock back each frame till INTRO_UI.holdT); walking counts
+function introClockHeld(a) {
+  const I = SHIP.intro, st = introStep(); if (!introOn() || !st || st.day !== 0 || !a || !a.p || a.p.id !== I.escort) return false;
+  return INTRO_STEPS.indexOf(st) >= 0 && INTRO_STEPS.indexOf(st) < INTRO_STEPS.findIndex(x => x.id === 'table') && introClose(a);
 }
 const introClose = a => !!a && typeof player !== 'undefined' && Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) <= INTRO_CLOSE;
 const INTRO_TOUR = [
@@ -35101,6 +35108,7 @@ function introTick() {
   if (!introOn() || typeof player === 'undefined') return;
   const I = SHIP.intro;
   if (I.step === 'manifest') { SHIP.time.day = INTRO_START.day; SHIP.time.min = INTRO_START.min; if (typeof ternRamp === 'function') ternRamp(false, 0); introManifest(); return; }
+  if (INTRO_UI.holdT > simNow() && INTRO_UI.holdAt !== undefined) { const h = INTRO_UI.holdAt; SHIP.time.day = Math.floor(h / 1440) + 1; SHIP.time.min = h - (SHIP.time.day - 1) * 1440; }   // Zeke's line is up (introClockHeld)
   const now = Math.floor(shipNow());
   if (now !== INTRO_UI.min) {
     INTRO_UI.min = now;
