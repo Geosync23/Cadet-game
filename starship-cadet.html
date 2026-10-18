@@ -252,7 +252,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.80.8
+   STARSHIP CADET: CSV Wren                           build 0.80.9
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8262,13 +8262,12 @@ Object.assign(WALL_KIT, {
     const p = new THREE.Mesh(new THREE.PlaneGeometry(W_, Hh), new THREE.MeshBasicMaterial({ map: t, toneMapped: false })); p.position.set(o.off || 0, o.y || 2.45, .03); g.add(p);
   },
 });
-// the concourse's floor art (0.80.8): running lanes in coral and white, and a big REC DEC roundel aft and a star forward
+// the concourse's floor art (0.80.8; calmer in 0.80.9): running lanes in coral and white, and a big REC DEC roundel aft
 function recFloorArt(g, PX) {
   const P = v => v * PX;
   for (const [x0, x1] of [[4, 17], [23, 30]]) {
     g.fillStyle = 'rgba(255,111,97,.75)'; for (const z of [8, 10]) g.fillRect(P(x0), P(z) - 3, P(x1 - x0), 6);
     g.fillStyle = 'rgba(255,255,255,.55)'; for (let x = x0; x < x1; x += .8) g.fillRect(P(x), P(9) - 2, P(.45), 4);
-    g.fillStyle = 'rgba(255,210,63,.6)'; for (let x = x0 + .4; x < x1 - .5; x += 2) { g.beginPath(); g.moveTo(P(x), P(7.45)); g.lineTo(P(x + .35), P(7.6)); g.lineTo(P(x), P(7.75)); g.closePath(); g.fill(); }   // chevrons toward the bow
   }
   const roundel = (cx, cz, r) => {
     g.beginPath(); g.arc(P(cx), P(cz), P(r), 0, Math.PI * 2); g.fillStyle = '#ff6f61'; g.fill();
@@ -8276,8 +8275,6 @@ function recFloorArt(g, PX) {
     g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#ffd23f'; g.font = `900 ${Math.round(P(.42))}px system-ui,sans-serif`; g.fillText('REC DEC', P(cx), P(cz));
   };
   roundel(10.5, 9, 1.3);
-  const star = (cx, cz, r) => { g.beginPath(); for (let k = 0; k < 10; k++) { const a = -Math.PI / 2 + k * Math.PI / 5, rr = k % 2 ? r * .45 : r; g.lineTo(P(cx + Math.cos(a) * rr), P(cz + Math.sin(a) * rr)); } g.closePath(); g.fillStyle = '#ffd23f'; g.fill(); g.lineWidth = 6; g.strokeStyle = '#ff4fd8'; g.stroke(); };
-  star(26.5, 9, 1.1);
 }
 DECKS[7] = {
   num: 7, name: 'Recreation', seed: 70771, tall: 1.3, playerOnly: true, open: [6, 24],
@@ -8389,15 +8386,13 @@ DECKS[7] = {
     // 0.80.8 (the user's: livelier, busier): the REC DEC gantry sign by the lift, bunting, murals, beanbags, plants, benches,
     // a water station and a drinks fridge, a trophy case, a signpost; all along the edges, clear of every door and the lanes' middle
     place('=', 'recBigSign', 12.3, 2.0, 'n', { span: 3.8, it: IT('REC DEC', 'A gantry across the concourse with REC DEC in pink neon, two storeys up. You can see it the moment the lift doors open.') });
-    for (const x of [3.0, 8.5, 21.5]) place('=', 'recBunting', x, 2.0, 'n', { span: 3.8 });
-    for (const [x, z, f] of [[1.5, .5, RK.padA], [2.6, .6, RK.kayak[1]], [19.5, 4.5, RK.kayak[2]], [20.5, 4.5, RK.padB]]) place('=', 'beanbag', x, z, 'n', { fab: f, it: IT('Beanbag', 'A big squashy beanbag, still warm. Someone is always about to get up from it.') });
-    for (const [x, z] of [[.4, .35], [11.6, .35], [19.4, .35], [25.6, .35]]) place('=', 'plant', x, z, 'n');
-    for (const x of [4.0, 8.5]) place('=', 'bench', x, 3.6, 's', { w: 1.8, snug: true, it: IT('Bench', 'Facing the river glass. People sit here to watch the white water and pretend they aren\'t waiting for someone.') });
+    place('=', 'recBunting', 8.5, 2.0, 'n', { span: 3.8 });   // 0.80.9 (the user's: a little too busy): one string, and fewer things below
+    for (const [x, z, f] of [[1.5, .5, RK.padA], [2.6, .6, RK.kayak[1]]]) place('=', 'beanbag', x, z, 'n', { fab: f, it: IT('Beanbag', 'A big squashy beanbag, still warm. Someone is always about to get up from it.') });
+    for (const [x, z] of [[.4, .35], [25.6, .35]]) place('=', 'plant', x, z, 'n');
     place('=', 'dispenser', 11.5, 3.65, 's', { it: IT('Water station', 'Cold water and a stack of cups. A sign says DRINK BEFORE YOU CLIMB.') });
     place('=', 'drinksFridge', 25.5, 3.6, 's', { it: IT('Drinks fridge', 'Fizzy lime, cold tea and something blue called RIPTIDE.') });
     place('=', 'recTrophyCase', 23.9, 3.7, 's', { w: 1.4, it: IT('Trophy case', 'Three gold cups and an empty shelf, waiting for this season\'s winners.') });
     placeOnEdge('recMural', 'v,4,9', 'e', { w: 1.9, off: -.5, text: 'SWIM · PADDLE · CLIMB', it: IT('Mural', 'A bold mural in teal, coral and neon: SWIM, PADDLE, CLIMB.') });
-    placeOnEdge('recMural', 'h,28,11', 'n', { w: 1.9, off: -.5, text: 'FLOAT · PLAY · CHEER', it: IT('Mural', 'Diagonal bands in the deck\'s colours: FLOAT, PLAY, CHEER.') });
     place('+', 'recSignpost', 5.6, 5.5, 'n', { it: IT('Signpost', 'Pool and auditorium forward, rivers, wall and court aft, the float room through the glass.') });
     place('=', 'hamper', 12.4, .45, 'n', { snug: true, it: IT('Towel bin', 'For wet towels from the river hall. It smells of chlorine and good intentions.') });
     // the auditorium (0.80.1, R2): the rake and its 76 seats, the stage against the bow windows, the truss, lectern, piano and screen
@@ -8475,8 +8470,8 @@ function recMats() {
     standStep: std('#3a404a', .85), bench: std('#c9783a', .6),
     rim: std('#d8e6e4', .45), coping: std('#f2f0ea', .4), poolSide: std('#6fc3c9', .4), mosaic: new THREE.MeshStandardMaterial({ map: recMosaic(), roughness: .4 }),
     poolWater: recWater('#1f8fa6', '#4fd0dc', { alpha: .8 }), ropeOrange: std('#ff8a3a', .5), ropeWhite: std('#f4f4f0', .5),
-    rock: std('#6f8a7c', .9), rockDark: std('#4f6559', .9), riverBed: std('#1d3b40', .8), fern: std('#3f8a4a', .8),
-    riverFast: recWater('#1a7f8f', '#58d6cf', { foam: .9, flow: 1.4, alpha: .88 }), riverSlow: recWater('#1f8a96', '#3fc4c4', { flow: .35, alpha: .86 }),
+    rock: std('#6f8a7c', .9), rockDark: std('#4f6559', .9), riverBed: std('#6fc3c9', .4), fern: std('#3f8a4a', .8),
+    riverFast: recWater('#1f8fa6', '#4fd0dc', { foam: .9, flow: 1.4, alpha: .8 }), riverSlow: recWater('#1f8fa6', '#4fd0dc', { flow: .35, alpha: .8 }),   // 0.80.9: the pool's water (the user's: they didn't match)
     steel: std('#8a959c', .4, .6), gateLight: new THREE.MeshBasicMaterial({ color: col('#50e6ff'), toneMapped: false }), dock: std('#a0703f', .7), dockDark: std('#5a3d22', .8),
     kayak: ['#e0412f', '#f2c230', '#2f6fe0', '#3fbf5a'].map(c => std(c, .45, .1)), paddle: std('#2a2f36', .5, .3),
     wallOchre: std('#c08a3e', .95), wallRust: std('#9a4a28', .95), hold: std('#ffffff', .6), holdC: ['#ff4f6d', '#ffd23f', '#3fa9ff', '#5ee06a'].map(col),
@@ -8551,7 +8546,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.80.8';                           // keep in step with the header's build line
+const GAME_BUILD = '0.80.9';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -41080,8 +41075,8 @@ Object.assign(PROP_KIT, {
     part(p, torG(.21, .03), '#2b2f33', 0, .79, .02, 1, 1.3, 1, Math.PI / 2);
   },
   paddle(p) {                                            // on the chest: the shaft across the hands, a blade each end; and the helmet
-    part(p, GEO.box, '#2b2f33', 0, .1, .4, 2.0, .028, .028);
-    for (const x of [-1, 1]) part(p, GEO.sph, '#e9c46a', x * 1.05, .1, .4, .2, .09, .02, 0, x * .5, 0);
+    part(p, GEO.box, '#2b2f33', 0, .1, .4, 1.3, .024, .024);   // 0.80.9 (the user's: too big for the kayak): 1.3 long, was 2.0
+    for (const x of [-1, 1]) part(p, GEO.sph, '#e9c46a', x * .69, .1, .4, .13, .065, .02, 0, x * .5, 0);
     part(p, capG(.19, Math.PI * .56), '#d8432f', 0, .535, -.01, 1, 1.02, 1.05, -.2);
     part(p, GEO.box, '#2b2f33', 0, .6, .17, .2, .02, .06, .3);
   },
