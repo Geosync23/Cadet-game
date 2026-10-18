@@ -192,3 +192,16 @@
 - The new ship's lovely. Mostly. Nobody here knows the words to anything. I've started teaching them. Badly.
 ? tier>=friend
 - I played the chord. The hard one. It came out right, all on its own, on a Tuesday. I wanted you to know first.
+
+// Head writer 0607: Tamsin on bar relief (social 0607: Mon and Tue evenings at the bow lounge bar, covering for Ivo).
+== bar.ask
+- {hi}! I'm on the bar tonight. What'll it be?
+- What can I get you? I'll get it right. I think.   #funny
+- Evening! Ivo's off, so it's me. Tea? Cocoa?
+== bar.usual
+- It's {drink}, isn't it? Ivo left a note. He leaves notes.   #funny
+== bar.serve
+- One {drink}. Oh, I didn't spill it. Good.   #funny
+- There you are. One {drink}. Enjoy it.
+== bar.broke
+- Oh, not quite enough. Sorry. Next time?

@@ -1,0 +1,463 @@
+@bank all
+// Head writer 0607: Say hello and Talk a while (the social engineer's, plan-0607 "Talking"). Keys in content/keys-0607.md.
+// hello: their answer when you Say hello (the quick corridor nod; once a day). talk.*: Talk a while, 15 ship minutes:
+// a start line, then a topic (open, a few "more" lines every few seconds, an ask, your three replies, their answer),
+// filler when a topic runs dry, and an end or stop line. talk.go.*: they really have to be somewhere.
+// Replies (talk.<topic>.reply.*) are TEXTS: your words on the buttons, no voice tokens. listen = curious, share =
+// about you, cheer = light. The one that matches their voice card's needs: gives +2. None is wrong, so every answer
+// is glad of the reply. {hobby} is the roster's phrase ("reading old paper novels"); {home} their home ("Marra Station").
+
+// ---------------------------------------------------------------- Say hello
+== hello
+? tier=stranger
+- {hi}. You're the new one, aren't you? Welcome aboard.
+- {hi}. Settling in all right?
+- Oh, {hi}. I've seen you about. Nice to meet you properly.
+- {hi}. Don't worry, nobody knows where anything is for a week.   #funny
+- Hello, new face. You'll be fine. Everyone's friendly here.
+- {hi}. If you get lost, follow the smell of toast to the mess.   #funny
+? tier=acquaintance
+- {hi}, {nick}. Getting the hang of the place?
+- Oh, {hi}. Good to see you again.
+- {hi}. Still finding your way? You're doing well.
+- {hi}, {nick}. Busy day?
+- Hey, it's you. How's the Wren treating you?
+- {hi}. Found the good tea yet? Lounge, top shelf.
+? tier=colleague
+- {hi}, {nick}. Same time tomorrow?
+- There you are. {hi}.
+- {hi}. You look like you know where you're going today.   #funny
+- {hi}, {nick}. Good shift?
+- Oh, {hi}. I was just thinking I hadn't seen you.
+- {hi}. Off anywhere nice?
+? tier=friend
+- {hi}, {nick}. Made my day, that.   #warm
+- Oh good, it's you. {hi}.
+- {hi}! Come and find me later. I've got news.
+- {nick}! I was hoping I'd see you.   #warm
+- {hi}. You look well. The Wren suits you.
+- There's my favourite new hand. {hi}.   #funny
+? tier=close
+- {hi}, {nick}. Always good to see your face.   #warm
+- Oh, it's you. Everything's better already.   #warm
+- {nick}! Sit with me at dinner?
+- {hi}. Don't go far. I want a proper catch-up.   #warm
+? time:morning
+- Morning. Don't talk to me till tea. Kidding. {hi}.   #funny
+- {hi}. Early one, isn't it?
+? time:evening
+- {hi}. Shift's done. Best part of the day, this.
+- Evening, {nick}. Doing anything nice tonight?
+? time:night
+- {hi}. Shouldn't you be asleep? Shouldn't I?   #funny
+
+// ---------------------------------------------------------------- Talk a while: starting and stopping
+== talk.start
+- Got a few minutes? Go on, then.
+- Oh, a proper chat. Lovely. I've got time.
+- Sure. Pull up a bit of wall.   #funny
+- I'd like that. Go on, what's new?
+- Talk? Always. Tell me everything.
+- Course. I was hoping someone would stop.   #warm
+? tier>=friend
+- For you? I've always got time.   #warm
+- Oh good. I've been saving things up to tell you.
+
+== talk.sit
+- Sit down, sit down. There's room.
+- Grab a seat. This one's comfy, I checked.   #funny
+- Oh, have a seat. I was getting bored of me.   #funny
+- Sit. Get comfy. I'm not going anywhere.
+
+== talk.filler
+- Anyway. What was I saying? Oh, never mind. It's nice, this.
+- Funny how quiet it gets in here at this time.
+- I like a chat. People don't stop enough.
+- Is it me, or does the ship hum louder in the evening?
+- You're easy to talk to. Has anyone told you that?   #warm
+- Mm. Where was I? Doesn't matter.
+- I could do this all evening. Shame about bedtime.   #funny
+- You've got a good laugh. Use it more.   #warm
+- Sorry, I'm rambling. Stop me if I ramble.   #funny
+- Tea would make this perfect. Next time, tea.
+
+== talk.end
+- That was nice. Let's do it again soon.   #warm
+- Right, I've talked your ear off. Thanks for listening.
+- Good chat. I feel better for that.   #warm
+- Same time tomorrow? Only half joking.   #funny
+- That's the best part of my day sorted. Off you go.   #warm
+- Thanks, {nick}. I needed that.
+? tier>=friend
+- You're good company, you know that? Go on, scoot.   #warm
+
+== talk.stop
+- Oh, off you go? Catch you later.
+- Another time, then. No rush.
+- Right you are. Finish this another day.
+- Go on, I'll keep the rest for next time.
+- No worries. I'll be here. Probably.   #funny
+
+== talk.go.shift
+- Shift in five. Catch me later?
+- Oh, look at the time. I'm on soon. Sorry.
+- I'd love to, but my shift's starting. Another time?
+- Can't stop, shift's calling. Later, yes?
+- Got to go, I'm on in ten. Find me after?
+
+== talk.go.bed
+- I'm off to bed. Tomorrow, though?
+- Can't keep my eyes open. Talk tomorrow?
+- Bedtime for me. Night, {nick}.
+- I'd only yawn at you. Tomorrow, I promise.   #funny
+
+== talk.go.trad
+- I'm running {trad} in a minute. Come along?
+- Can't stop, {trad}'s on and it's mine to start.
+- Sorry, {trad}. I'm the one who opens it. Come with me?
+
+== talk.go.call
+- I've a call home booked. Another time?
+- Booth's booked for me in a minute. Sorry, {nick}.
+
+// ---------------------------------------------------------------- the card's words (texts)
+== talk.button.hello
+- Say hello
+
+== talk.button.talk
+- Talk a while
+
+== talk.button.stop
+- Stop
+
+== talk.done.hello
+- Said hello today
+
+== talk.done.talk
+- Talked today
+
+== roster.tab.all
+- Everyone
+
+== roster.tab.known
+- People I know
+
+== roster.friends
+- Friends ({n})
+
+== roster.acq
+- Acquaintances ({n})
+
+== roster.met
+- Met ({n})
+
+== roster.none
+- Nobody yet. Say hello to someone.
+
+// ---------------------------------------------------------------- topic: hobby
+== talk.hobby.open
+- I've been {hobby} again. Can't stop, honestly.
+- Did you know I'm into {hobby}? Well, now you do.   #funny
+- I spent all last night {hobby}. Worth it.
+- People think {hobby} is boring. People are wrong.   #funny
+== talk.hobby.more
+- It's the one hour where my head goes quiet.
+- I started it to pass the time. Now I make time for it.
+- My bunkmates have stopped asking. That's how you know it's serious.   #funny
+- I'm not even good at it. That's not the point.
+- There's always one more thing to try. That's the hook.
+- Best part of the evening, that. Nobody needs anything from me.
+== talk.hobby.ask
+- Have you got a thing? Something you do just because?
+- What do you do when your shift's done?
+== talk.hobby.reply.listen
+- How did you get into it?
+== talk.hobby.reply.share
+- I'm still finding mine. I might try a few.
+== talk.hobby.reply.cheer
+- Teach me. I'll be terrible.
+== talk.hobby.ans.listen
+- Someone showed me, years back. Now I can't put it down.   #warm
+- Bored on a long trip, mostly. Best boredom I ever had.
+== talk.hobby.ans.share
+- Try a few. Drawing, puzzles, the stars. One will stick.
+- Good. Take your time. It finds you, usually.   #warm
+== talk.hobby.ans.cheer
+- Terrible's how everyone starts. I'll hold you to it.   #funny
+- Deal. Bring patience. And snacks.   #funny
+
+// ---------------------------------------------------------------- topic: home
+== talk.home.open
+- I was thinking about {home} today. No reason.
+- Something in the mess smelt like {home}. Took me right back.
+- Got a letter from {home}. Nothing much in it. Read it three times.   #warm
+- Have you ever been to {home}? You'd like it. Probably.
+== talk.home.more
+- It's the sky I miss. Silly, out here with all these stars.
+- You don't notice the little things till you're gone.
+- My street had a bakery on the corner. I could find it blindfold.
+- It's funny. I wanted to leave so much. Now I talk about it all the time.   #funny
+- The Wren's home too, now. Both at once. Is that odd?
+- I'll go back on leave one day. It'll all be smaller.
+== talk.home.ask
+- Where's home for you, then? What's it like?
+- Do you miss home yet? Be honest.
+== talk.home.reply.listen
+- What do you miss most about it?
+== talk.home.reply.share
+- I miss it. More than I thought I would.
+== talk.home.reply.cheer
+- Better bakeries than the Wren?
+== talk.home.ans.listen
+- The noise, oddly. Doors, voices, rain. The ship's too polite.
+- The people, mostly. And the bread. Mostly the bread.   #funny
+== talk.home.ans.share
+- That's normal. It gets softer. Never quite goes.   #warm
+- Me too, at first. Call home. It really helps.
+== talk.home.ans.cheer
+- Don't let Brennan hear you. But yes. Much better.   #funny
+- Nobody beats Brennan. Don't tell home I said that.   #funny
+
+// ---------------------------------------------------------------- topic: day
+== talk.day.open
+- What a day. I'll tell you about it if you've got the patience.   #funny
+- Today was one of the good ones. Everything just worked.
+- I've had a funny sort of day. Not bad. Funny.
+- Long day. Better now I've sat down.
+== talk.day.more
+- Started with cold tea. Should've known.   #funny
+- Someone said thank you, out of nowhere. Kept me going all afternoon.   #warm
+- I fixed one thing and three more broke. Typical.   #funny
+- Dinner was good, though. Dinner's always good.
+- I ran about all morning, then sat still all afternoon.
+- Nothing went wrong. Strangely tiring, that.
+== talk.day.ask
+- What about you? How was yours?
+- Go on, your turn. Good day or bad day?
+== talk.day.reply.listen
+- What was the best bit?
+== talk.day.reply.share
+- Mine was busy. I learned a lot, though.
+== talk.day.reply.cheer
+- At least it's over. Dinner time.
+== talk.day.ans.listen
+- This, honestly. Sitting down with someone nice.   #warm
+- Dinner. It's always dinner. I'm simple like that.   #funny
+== talk.day.ans.share
+- That's the best kind. You'll be teaching us soon.
+- Busy and learning. That's a good day, that is.
+== talk.day.ans.cheer
+- Exactly. Dinner fixes most things.   #funny
+- Right. Whatever's on, I'm having two.   #funny
+
+// ---------------------------------------------------------------- topic: work
+== talk.work.open
+- Work's been odd this week. Good odd, mostly.
+- I'm getting better at my job. Don't tell anyone, they'll give me more.   #funny
+- There's a thing at work I can't stop thinking about.
+- My boss said "well done" today. I'm still floating.   #warm
+== talk.work.more
+- Everyone here's good at what they do. Makes you want to keep up.
+- Some days it's all small jobs. I like those, secretly.
+- The trick is to ask. Nobody minds. They just like being asked.
+- I made a mistake last month. Fixed it. Nobody shouted. That's the Wren.
+- One day I'll run the place. Or a bit of it. A corner.   #funny
+== talk.work.ask
+- How's Works treating you? Calder working you hard?
+- Are you liking the job so far?
+== talk.work.reply.listen
+- What's the best part of your job?
+== talk.work.reply.share
+- I like it. Still learning where everything goes.
+== talk.work.reply.cheer
+- I've fixed a lamp. I'm basically an expert.
+== talk.work.ans.listen
+- When it all runs and nobody notices. That's the job, really.
+- The people. And the days when something hard finally works.
+== talk.work.ans.share
+- Everyone's still learning that. Even the old hands.
+- You'll know it by heart soon. Then it gets fun.
+== talk.work.ans.cheer
+- An expert! I'll send all my lamps your way.   #funny
+- Lamp expert. Put it on your door.   #funny
+
+// ---------------------------------------------------------------- topic: food
+== talk.food.open
+- Did you have the {dish}? I'm still thinking about it.
+- I'd do anything for a proper bun right now. Anything.   #funny
+- Brennan's cooking something new. I can smell it from here.
+- What's your favourite thing from the mess so far?
+== talk.food.more
+- I always go back for seconds. Brennan pretends not to see.   #funny
+- Soup day is the best day. That's not up for debate.
+- Home cooking was better. Don't tell Brennan.   #funny
+- I tried to cook once, on leave. Never again.   #funny
+- The garden lot bring fresh herbs up. You can taste it.
+== talk.food.ask
+- What do you miss eating most?
+- Would you rather breakfast or dinner? Forever.
+== talk.food.reply.listen
+- What's the best thing you've eaten aboard?
+== talk.food.reply.share
+- I miss proper bread. Fresh from the oven.
+== talk.food.reply.cheer
+- Breakfast. Forever. Toast is life.
+== talk.food.ans.listen
+- Brennan's stew on a cold night. Changed my life.   #warm
+- Harvest supper. The whole ship eats together. Wait till you see it.
+== talk.food.ans.share
+- Brennan bakes on Saturdays. Get there early. Trust me.
+- Fresh bread. Oh, you've done it now. I'm hungry.   #funny
+== talk.food.ans.cheer
+- Toast is life. Finally, someone gets it.   #funny
+- Bold. Correct, but bold.   #funny
+
+// ---------------------------------------------------------------- topic: news (ship news)
+== talk.news.open
+- Have you heard? There's always something going round.
+- Bit of news from the ship. Want to hear it?
+- Something's going round the mess. Don't know if it's true.
+== talk.news.more
+- News moves faster than the lift on this ship.   #funny
+- Half of it's true. The other half's more fun.   #funny
+- I heard it in the tea queue, so it's half made up.   #funny
+- Check your Mail. The good stuff's in there.
+- Someone always knows before the notice goes up.
+== talk.news.ask
+- What have you heard, then? Anything good?
+- Do you read the news on your device?
+== talk.news.reply.listen
+- Go on, what's the latest?
+== talk.news.reply.share
+- I don't know anything yet. Still the new one.
+== talk.news.reply.cheer
+- I only listen to rumours. Much more fun.
+== talk.news.ans.listen
+- Nothing big. Someone's moving bunks. Big news, here.   #funny
+- The delivery's due Wednesday. That's about it. Thrilling, I know.   #funny
+== talk.news.ans.share
+- Stick with me. You'll know everything by Friday.
+- You'll be telling me things by next week.
+== talk.news.ans.cheer
+- Me too. Truth is so boring.   #funny
+- A rumour's just news that hasn't happened yet.   #funny
+
+// ---------------------------------------------------------------- topic: tradition
+== talk.tradition.open
+- Are you going to {trad}? I'm going.
+- {trad}'s coming up. It's one of my favourites.
+- I never miss {trad}. Well, almost never.
+== talk.tradition.more
+- That's the thing about the Wren. There's always something on.
+- You don't have to go to everything. Pick the ones you like.
+- My first week, I went to all of them. I was so tired.   #funny
+- Best way to meet people, honestly. Just turn up.
+- Some nights there are two at once. You just pick one.
+== talk.tradition.ask
+- Have you been to any yet? Which one?
+- Which ones are you going to try?
+== talk.tradition.reply.listen
+- Which one's your favourite?
+== talk.tradition.reply.share
+- Not yet. I'm a bit nervous, honestly.
+== talk.tradition.reply.cheer
+- All of them. I'll sleep next week.
+== talk.tradition.ans.listen
+- Observatory night. Lying on the floor looking up. Can't beat it.   #warm
+- Tiles night. I'm not good, but I'm loud.   #funny
+== talk.tradition.ans.share
+- Come with me, then. I'll introduce you round.   #warm
+- Don't be. Nobody minds a new face. They like it.
+== talk.tradition.ans.cheer
+- That's the spirit. Then the tiredness. Then the spirit again.   #funny
+- Good plan. Bad plan. Do it anyway.   #funny
+
+// ---------------------------------------------------------------- topic: crew (a crewmate)
+== talk.crew.open
+- Do you know {friend}? You'd get on.
+- {friend} did the funniest thing this morning.   #funny
+- Have you met {friend} yet? You should.
+== talk.crew.more
+- {friend} looked after me when I was new. I owe them one.
+- We sit together most dinners. Come and join us.
+- Everyone's got a story on this ship. Ask and you'll see.
+- People look out for each other here. It's nice.
+- I knew nobody when I came. Now look.
+== talk.crew.ask
+- Who've you got to know so far?
+- Have you made any friends yet? Apart from me.   #funny
+== talk.crew.reply.listen
+- How did you two meet?
+== talk.crew.reply.share
+- A few people. Everyone's been kind.
+== talk.crew.reply.cheer
+- You. You're my only friend. No pressure.
+== talk.crew.ans.listen
+- Same bunk room, first week. Never looked back.   #warm
+- We both got lost on Deck 2 once. Bonded over it.   #funny
+== talk.crew.ans.share
+- Kind's the Wren's whole thing. You'll fit right in.   #warm
+- Good. Keep going. Everyone here's worth knowing.
+== talk.crew.ans.cheer
+- An honour. I'll try to be worth it.   #funny
+- Ha! I'll share you round. You'll have ten by Friday.   #funny
+
+// ---------------------------------------------------------------- topic: ship (the Wren herself)
+== talk.ship.open
+- I love this old ship. Don't tell her, she'll get big-headed.   #funny
+- Have you been up to the observatory yet? You must.
+- Listen. You hear that hum? That's the Wren, thinking.
+== talk.ship.more
+- She creaks at night. You stop hearing it after a week.
+- There's a window on Deck 3 where the stars just pour past.
+- Every deck smells different. Five is oil. Three is toast.   #funny
+- I still find corners I've never seen. After all this time.
+- She's old, but she's kind. Like a good boot.   #funny
+== talk.ship.ask
+- What do you think of her so far? The Wren?
+- Found a favourite spot aboard yet?
+== talk.ship.reply.listen
+- Where's your favourite spot?
+== talk.ship.reply.share
+- I like her. She feels lived in.
+== talk.ship.reply.cheer
+- She's lovely. Bit far from the shops.   #funny
+== talk.ship.ans.listen
+- The lounge windows, late. Just me and the stars.   #warm
+- The garden. It smells like rain in there.
+== talk.ship.ans.share
+- Lived in. That's it exactly. She's a home.   #warm
+- She is. Everyone leaves a little bit of themselves.
+== talk.ship.ans.cheer
+- The crew store's a shop! Sort of. It has socks.   #funny
+- No shops. Fewer things to buy. More money for drinks.   #funny
+
+// ---------------------------------------------------------------- topic: plans (the future, small)
+== talk.plans.open
+- I've been thinking about what I'll do next year.
+- I've got a plan. A small one. Want to hear it?
+- One day I'd like to see the bridge. Just once. Properly.
+== talk.plans.more
+- Maybe a course. Maybe nothing. It's nice to think about.
+- First, though, I want to finish this scarf. Long-term goal.   #funny
+- I keep a list. It's mostly food I want to try.   #funny
+- Small steps, my gran said. She was usually right.
+- I'm in no rush. The Wren's a good place to be for now.
+== talk.plans.ask
+- What about you? Where do you see yourself in a year?
+- Got any plans, big or small?
+== talk.plans.reply.listen
+- What's the dream, then?
+== talk.plans.reply.share
+- I want to be good at this job. Really good.
+== talk.plans.reply.cheer
+- Plans? I'm planning dinner.
+== talk.plans.ans.listen
+- Running my own section. Or my own kettle. Either.   #funny
+- Something of my own. Small, but mine.   #warm
+== talk.plans.ans.share
+- You will be. I can tell already.   #warm
+- That's a good one. Stick with it.
+== talk.plans.ans.cheer
+- Now that's a plan I can get behind.   #funny
+- Best plan on the ship. What's on tonight?

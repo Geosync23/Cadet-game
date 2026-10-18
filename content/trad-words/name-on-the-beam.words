@@ -1,0 +1,18 @@
+@tradition name-on-the-beam
+// First Monday, 17:05, the Works bay cross beam (Deck 5). Host Calder. Every new hand paints their name beside everyone
+// who has served there; Zeke hands you the pen (his lines: torres-zeke.lines, flag:trad.beam.<n>).
+== mail
+- After shift today, stay in the bay a minute. There's a beam with a lot of names on it, and room for one more.
+== ask
+- Stay after shift. The beam's waiting for your name.
+- Don't run off at five. Works has a thing. You'll like it.
+== here
+- There's mine. Wobbly letters. I was nervous.   #funny
+- Every name up there fixed something on this ship.
+- Go on. Big letters. Make it last.
+== thanks
+- Under the cross beam, the Works crew gather round. Zeke hands you the pen, and you add your name to all the others.   #warm
+== chatter
+- New hand's name goes on the beam tonight.
+- I still look for my name on the beam, some days.   #warm
+- Running out of beam, soon. Someone get a ladder.   #funny

@@ -189,8 +189,8 @@
 - A ship tradition today: {trad}. Turn up and join in. That's all it takes.
 - It's {trad} today. Your device has the time and place. See you there.
 ? trad:running
-- Running club tonight in the gym. All speeds welcome. Vance is not a speed. He's a warning.
-- Running club ran 400 laps between them last week. This week? More, says Vance.
+- Gym club tonight in the gym. All speeds welcome. Vance is not a speed. He's a warning.
+- Gym club ran 400 laps between them last week. This week? More, says Vance.
 ? trad:quiz
 - Quiz night tonight in the bow lounge. Teams of four. The Survey team will win. Again.
 - Quiz night: the Survey team won again. An inquiry has been demanded.
@@ -223,13 +223,13 @@
 ? trad:birthday
 - Birthday today aboard. There's cake at dinner. Sing loudly. Sing badly. Sing.
 ? weekday:sun
-- This week: running club Monday, quiz Thursday, jam and Works tea Friday, film Saturday.
+- This week: Gym club Monday, quiz Thursday, jam and Works tea Friday, film Saturday.
 ? weekday:sat
 - Tonight: film night in the junior common room, or the observatory on Deck 2. Or both.
 ? weekday:thu
 - Quiz night tonight. Teams forming now. The Survey team is "very relaxed". They are not.
 ? weekday:mon
-- Running club tonight. The gym, after dinner. You don't have to be fast. You have to come.
+- Gym club tonight. The gym, after dinner. You don't have to be fast. You have to come.
 
 == news.crew
 ? birthday:me
@@ -334,7 +334,7 @@
 - Offered: knitting lessons from the knitting circle. Perfect, practical or Torres. Pick.
 - Offered: help with your star charts. Ask anyone in Survey. They love to be asked.
 - Offered: one free hour of listening. Matthias Oduya, the counsellor. Any afternoon.
-- Wanted: a runner to beat the Commander. Running club, Mondays. Hope springs eternal.
+- Wanted: a runner to beat the Commander. Gym club, Mondays. Hope springs eternal.
 - Thank you to whoever fixed the junior common room heater. It's lovely now. Lovely.
 - Thank you to whoever left flowers at the tea corner. Works is quite overcome.
 - Thank you, night shift. You keep the ship going while we sleep. We see you.
@@ -417,7 +417,7 @@
 
 == news.trad
 ? trad:running
-- Running club: Vance did twelve laps and complained about the eleventh. Join them.
+- Gym club: Vance did twelve laps and complained about the eleventh. Join them.
 ? trad:quiz
 - Tonight's quiz has a round on the Wren. Know your decks. Know your cacti.
 ? trad:film

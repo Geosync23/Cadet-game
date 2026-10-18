@@ -110,7 +110,7 @@
 ? told:fixed.lights
 - Lights on Deck 3 are steady. Was that you? Thought so. You've got the look.
 ? told:came.running
-- Saw you at running club. You'll want better socks. I've got some.   #funny
+- Saw you at Gym club. You'll want better socks. I've got some.   #funny
 ? told:gift.star
 - That's going in my star journal. Page of its own. Thank you.   #warm
 ? told:bday
@@ -194,3 +194,13 @@
 - New store. They've never heard of Gerald. I've fixed that. Star four hundred and something, last night.
 ? tier>=friend
 - Bought a tin of good biscuits today and thought: someone on the Wren would have wanted these. You, probably. Hello.
+
+// Head writer 0607: Day 3, your first Wednesday: Yara mentions the delivery (the systems engineer's flag
+// delivery.first). Offered, never forced. Card lines, said in order.
+== stores.delivery
+? flag:delivery.first
+- Wednesday. Delivery day. There's a stack of crates in the hold.
+- Fancy unloading it? Cart, crates, shelves. It's on the board.
+- No pressure. If it's still there at two, someone else gets it.
+?
+- Crates are in the hold if you want them. I'll put the kettle on.

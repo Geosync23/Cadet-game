@@ -98,7 +98,7 @@
 
 == invite
 ? trad:running tier>=acquaintance
-- Running club tonight. Come on. I'll pace you. Then I'll leave you behind. Fond memories.   #funny
+- Gym club tonight. Come on. I'll pace you. Then I'll leave you behind. Fond memories.   #funny
 ? trad:quiz tier>=colleague
 - Quiz tonight? I know all the gossip questions. Not from the post. From the bar.
 ? tier>=colleague time:morning
@@ -171,7 +171,7 @@
 ? told:fixed.databus
 - Comms board's quick again. Was that you? I'll put in a good word. Several.
 ? told:came.running
-- You came to running club! Vance looked worried. That was us. Good work.   #funny
+- You came to Gym club! Vance looked worried. That was us. Good work.   #funny
 ? told:gift.game
 - That game you gave me? I've won it eleven times. Rina's asked for a go. No.   #funny
 ? told:bday
