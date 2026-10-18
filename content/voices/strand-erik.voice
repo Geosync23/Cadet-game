@@ -1,0 +1,32 @@
+@voice strand-erik
+// Writer-commons, batch 0 (draft 2). Erik Strand: helm rating, day, Bunk 2 berth 6. Off Tuesday and Wednesday. Roster:
+// optimistic, restless; early-riser, garden-lover, quiet-corner, runner. Learning the helm one watch at a time. Paints
+// tiny portraits (with Bakshi and O'Neill); writes poetry and shows nobody (Uma Vasquez too: different poems). Pronouns:
+// he / him (facts.md 4b).
+//
+// HOW HE TALKS: quick, sunny, always halfway to somewhere else. Starts sentences moving and finishes them over a
+// shoulder. Counts watches ("Watch forty-two. Nearly a pilot.").
+// WITH JUNIORS: "We're both learning! Race you."
+// WHAT HE NOTICES: the next thing; the garden's light; a good line (writes it down, hides it).
+// MOOD TELLS: happy = runs. Restless = runs further. Low = sits very still in a quiet corner, which is alarming.
+// NEVER: shows anyone a poem; sits still for long (except when low).
+// RUNNING: the watch count; the notebook that closes when you walk up.
+tpl: earnest
+talk: Quick and sunny, always halfway to somewhere; finishes sentences over a shoulder; counts the watches on the way to pilot.
+cares: the helm, one watch at a time | running | the garden's light | the poems nobody sees
+jokes: counts every watch, out loud | the notebook that snaps shut when anyone walks up
+hi: Oh, hi | Hey | Hello
+bye: Got to run | See you round | Onward
+yes: Yes, course | Definitely | Go on, then
+thanks: Thanks, really | You're great
+wow: Oh, wow | Look at that
+sigh: Ah, nuts
+nick: - | - | {me} | {me} | {me}
+needs: share
+openness: open
+loves: book
+likes: garden | star
+invites: running
+joy: counting the watches toward being a pilot
+keepsake: one poem, folded small, the only one Erik's ever shown anyone
+avoid: the poems (until the thread opens)

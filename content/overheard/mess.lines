@@ -1,0 +1,44 @@
+@overheard mess
+// Writer-commons, overheard batch 1. Two crew at a table or in the queue. Bubbles: 60 characters at most.
+
+== overheard
+? pair:any+any act:meal
+A: Is that the last of the pudding?
+B: It was.   #funny
+
+? pair:friend act:meal
+A: You're eating that slowly.
+B: I'm savouring it.
+A: You're guarding it.   #funny
+
+? pair:any+galley act:meal
+A: What's this one called?
+B: Tuesday.
+A: That's not a dish.
+B: It is in here.   #funny
+
+? pair:any+any act:breakfast
+A: Is the coffee machine speaking to anyone?
+B: Only to Dr. Yoon. And not kindly.   #funny
+
+? pair:same act:dinner
+A: Long day?
+B: Long enough. You?
+A: Same. Pass the bread.
+
+? pair:junior+any act:meal
+A: Do you think Brennan remembers my favourite?
+B: Brennan remembers everyone's favourite.
+A: Even mine?
+B: Especially yours.   #warm
+
+? pair:friend act:dinner
+A: Sit with me tomorrow?
+B: I sit with you every day.
+A: I know. I'm just checking.   #warm
+
+? pair:any+any act:dinner
+A: Who made the soup tonight?
+B: Walsh. You can tell by the carrots.
+A: Perfect little squares.
+B: Every one.

@@ -1,0 +1,33 @@
+@voice teague-theo
+// Works writer. Theo Teague (he/him): Works technician, junior, day shift, Bunk 7. Restless, blunt. "New to Works,
+// eager, and already covered in grease." Tea break, bar regular. Draws comics about life aboard for the comics wall in
+// the junior common room (with Hart and Abara). Makes a playlist for every week of the tour (rival playlists with
+// O'Neill at the Friday jam).
+//
+// HOW HE TALKS: blunt and quick; says the thing everyone was thinking, early. Talks in comic-strip beats: set-up,
+// pause, punchline. Never mean.
+// WITH JUNIORS: treats you as a fellow new hand straight away. Will put you in a comic (a kind one).
+// WHAT HE NOTICES: faces, funny moments, what would make a good panel.
+// MOOD TELLS: low = no new comic on the wall this week; high = the playlist is loud.
+// NEVER: draws anyone cruelly; sits still for long.
+// RUNNING: everyone ends up in a comic (Calder is drawn as a very tidy cloud); the weekly playlist, always one song
+// too long; the rivalry with O'Neill's playlist.
+tpl: playful
+talk: Blunt and quick; says what everyone was thinking; jokes in comic-strip beats; never mean.
+cares: this week's comic | this week's playlist | getting good at Works, fast | not being bored
+jokes: everyone ends up in a comic, and Calder is a very tidy cloud | the playlist is always one song too long | O'Neill's playlist is wrong
+hi: Oi | Hey | All right
+bye: Laters | Off you go | Don't do anything I'd draw
+yes: Yeah, go on | Easy | Done
+thanks: Cheers | Nice one
+wow: No way | Ha, look at that
+sigh: Ugh | Typical
+nick: - | new hand | {me} | {me} | {me}
+needs: cheer
+openness: open
+loves: made | music
+likes: tea | game
+invites: quiz | jam
+joy: the weekly comic on the common room wall
+keepsake: the comic you're in, signed
+avoid: drawing anyone unkindly | the transfer lists (until his thread opens)

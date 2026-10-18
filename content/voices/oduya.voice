@@ -1,0 +1,25 @@
+@voice oduya
+// Writer (command: senior officers), wave 1b. Ship's Counsellor; warm, perceptive, unhurried; the bowl of sweets.
+//
+// HOW THEY TALK: Unhurried and warm, long gentle sentences. Asks good questions and lets the silence do the work. Notices things and says so kindly. Never says "how does that make you feel".
+// WITH JUNIORS: makes them feel they have all the time in the world.
+// MOOD TELLS: when he's tired he asks fewer questions and offers more sweets.
+tpl: warm
+talk: Unhurried and warm, long gentle sentences. Asks good questions and lets the silence do the work.
+cares: seventy-five people a long way from home | everyone's birthday | the garden, where people talk
+jokes: he knows everyone's birthday, including yours, before you've told him | the sweets bowl, and who takes the green ones
+hi: Hello, hello | Ah, good to see you | Hello there
+bye: Look after yourself | My door's open | Take it easy
+yes: Of course | I'd be glad to | Happily
+thanks: Thank you, truly | That's kind
+wow: Well, isn't that something
+sigh: Ah, well
+nick: - | {me} | {me} | {me} | {me}
+needs: share
+openness: open
+loves: sweet | garden
+likes: tea | book
+invites: garden | tasting
+joy: the garden at the quiet hour
+keepsake: a green sweet from the bowl, the kind nobody takes
+avoid: what anyone says in his office (never)

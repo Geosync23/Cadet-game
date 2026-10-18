@@ -1,0 +1,852 @@
+@crew torres-zeke
+// Zeke Torres: the Works writer, batch 1 (for the Voices sampler). From the head writer's card.
+// Before his arc opens (after week1.done): no father, no Engine Specialist list. The scarf joke only after
+// beat 1 ("The scarf", mem:moment.torres.scarf).
+
+== greet
+? tier=stranger
+- {hi}. You'll be the new hand. Zeke Torres, engines. Ask me anything.
+- {hi}. Lost? The lift's in the middle of the ship. Everything starts there.
+? tier>=acquaintance time:morning
+- {hi}, {nick}. Coil three's sulking. Don't take it personally.   #funny
+? tier>=acquaintance
+- {hi}, {nick}. What did you fix today? Go on, tell me properly.
+? tier>=friend
+- {nick}! Good. I saved you the last biscuit. Mostly saved it.   #warm
+? mem:moment.torres.scarf
+- Hold still. Arms out. I need to know how long you are, for the scarf.   #funny
+
+== feel
+? mood:high
+- All three coils humming in tune today. You can hear it from the overlook.
+? mood:low
+- Quiet one. Coil three's tired. Or I am. One of us is.
+
+== near
+? act:work
+- Hear that tick? That's coil two thinking. Give her a minute.
+? act:dinner
+- {dish} tonight. I'd queue twice if Brennan let me. She won't.   #funny
+
+== life
+? tier>=acquaintance
+- I know the words to every song in the record cabinet. So do four other people. Wrongly.   #funny
+? tier>=colleague
+- Reyes leaves me notes about coil three. Says she's shy. She isn't shy. She sulks.
+
+== joy
+? tier>=acquaintance
+- Kovac's teaching me to knit. Properly, she says. I'm on my third go at properly.
+
+== greet
+? tier>=acquaintance time:evening
+- {hi}, {nick}. Long day? Mine too. Good long, though. The coils behaved.
+? tier>=acquaintance warmth:cold
+- There you are. Thought the lift had eaten you. Where've you been hiding?   #funny
+? tier>=colleague time:morning
+- Morning! Last in to breakfast again. Coils. Don't tell Brennan.   #funny
+? tier>=colleague
+- {hi}, {nick}. Come down to Deck 6 one day. I'll introduce you to the coils.
+? tier>=close
+- {nick}. Good. Sit. Tell me one thing that went right today. Then I'll tell you mine.   #warm
+
+== bye
+- Right, onward. Mind how you go.
+- {bye}. Ask me anything, any time. I mean it.
+? act:work
+- Off you go, then. Coil three's calling. Well, sulking. Same thing.   #funny
+? time:evening
+- {bye}. Hot water till ten, remember. After that it's character-building.   #funny
+
+== feel
+? mood:ok
+- Middling. Coil two's thinking too hard. So am I. We'll both get there.
+? mood:high tier>=colleague
+- I'm in a singing mood. You've been warned. Something about a lighthouse.   #funny
+
+== near
+? act:breakfast
+- Just here for the tea. Breakfast is for people without coils.   #funny
+? act:gym
+- I don't really do the gym. I do the stairs to the overlook, very fast, twice.
+? act:leisure
+- Music room's free. I'm going to sing something badly. You're welcome to join.   #funny
+? place:overlook
+- Look down there. All three coils. People think engines are noise. They're a choir.
+
+== life
+? tier>=acquaintance
+- I'm in cabin 14 on Deck 4. You'll know it. There's always music.
+? tier>=colleague
+- Reyes and I swap notes at shift change. Half coils, half arguments about coil three.   #funny
+- Calder trusts my hands. Not my patience. She's right on both.
+? tier>=friend
+- Every new hand asks where the lift is. Then where the tea is. You'll fit right in.   #warm
+
+== invite
+? trad:today
+- {trad} tonight. Come with me? I'll save you a seat. I really will, this time.
+- {trad} later. You coming? Go on. You'll like it. I'll make sure you do.
+? tier>=colleague
+- Friday jam in the music room. I'll be singing. Come and stop me.   #funny
+- Observatory night? Stars, tea, and Rossi's tiny telescope. Come on.
+
+== accept
+- Course! Happy to. I'll be there early. I'm always early.
+- Yes. Brilliant. Right, onward, then. Lead the way.
+? tier>=friend
+- Yes! Brilliant. I'll bring biscuits. The good ones, from Soto's tin.   #warm
+
+== decline
+- Ah, I can't tonight. Coil three needs a sit with. Ask me again? Please do.
+- Not tonight. I'm on call for the coils. Next time, promise.
+? weekday:thu|fri
+- It's my day off and I'm going to sit still for once. Tomorrow? Ask me tomorrow.   #funny
+
+== missed
+- Missed you earlier. No harm done. The coils kept me company. Next time?
+- I waited a bit. Then I knitted a bit. Then I gave up. Are you all right?
+? tier>=friend
+- You missed it. That's fine. I just like knowing you're all right. Are you?   #warm
+
+== hint
+- Got a minute? Properly, I mean. Not a coil minute. A real one.
+- Have you got a bit of time later? There's something I want to say. Nothing bad.
+
+== birthday
+? birthday:you
+- Happy birthday! I'd have knitted you something, but you know what that's like.   #funny
+- It's your birthday? Nobody told me. Right. Tea's on me. All day.
+? birthday:me
+- My birthday. I'm not making a fuss. A small fuss. There's cake in the tea corner.   #funny
+- Reyes left a note: "Happy birthday. Coil three says so too." She never says a thing.   #funny
+
+// ---- week 1: Torres is your trainer (his mentor role; the confident side of him) ----
+== week1
+? week1:true mem:intro.shadowShift
+- You did the turn-in yourself. Good. That's the bit everyone forgets.
+? week1:true
+- How's the first week? Honestly, mind. I'll know if you're being polite.
+? week1:true weekday:mon
+- First day. You don't need to know everything. You need to know who to ask. Me. Ask me.
+- Board, part, machine, turn-in. That's the whole job. The rest is practice.
+? week1:true weekday:tue
+- Calder's giving you your first solo job today. You'll be fine. Read the card twice.
+- Rina's got you for a health check this afternoon. Don't touch anything blue.   #funny
+? week1:true weekday:wed
+- Your pick today. Choose a job off the board yourself. I'm on Deck 6 if you get stuck.
+? week1:true weekday:thu|fri
+- My day off. You're on your own at the board. You're ready. Don't break anything big.   #funny
+? week1:true weekday:sat
+- Day off for you! The board's open if you're bored. Nobody expects you there, though.
+? week1:true weekday:sun
+- One week aboard. Look at you. You know where the tea is and everything.   #warm
+
+// ---- Day 0: his walking lines, replacing section 21's INTRO_LINES and INTRO_CALL ----
+// Each step's lines are gated by flag:walk.<step>, which nothing sets yet, so they're never said as ordinary week-1
+// chat (the head writer). The onboarding engineer's hook will ask for them by step. Bubbles: 60 characters or fewer.
+// (0.48.22: hello, haulway, works, lift, wing, servery and call moved to the arrival tour below: walk.<point>.<n>.)
+// step: toMess
+? flag:walk.toMess
+- Dinner. Mess is on Deck 3. You know the lift now.
+- Brennan's cooking. Trust me, you want to be early.
+// step: goodnight (0.48.57, the user's note): his goodnight when he lets you go after the arrival dinner (the
+// 'free' step, or you leave the table after introChief); then the first-night bed arrow. Sim engineer 5's key; said IN
+// ORDER, one flag key per line. Replaces walk.free (removed 0.48.58).
+? flag:walk.goodnight.1
+- Right, that's me. Evening's yours. Have a wander, explore.
+? flag:walk.goodnight.2
+- Shift's at nine tomorrow. Get some sleep soon.   #warm
+
+// ---- Day 1: his talk-through on the shadow job (said as bubbles while you work; replaces INTRO_JOB_LINES on
+// claude/arrival). Each step is gated by flag:walk.job.<step>, which the onboarding hook sets. 60 characters or fewer.
+// The job is a real Tier 1 fault, so it stays generic: "the housing", "the part".
+== week1
+// step: take (you take the job at the board)
+? flag:walk.job.take
+- Every fault on the ship lands on that board. Pick one.
+- Glass office is the Chief's. She sees the whole bay.
+- That one's ours. It's on your device now, under Jobs.
+- Follow the arrow. I'm right behind you. Promise.
+// step: fetch (main storage)
+? flag:walk.job.fetch
+- Storage. Find the part number on the card, then the shelf.
+- Check the number twice. Shelves lie. Cards don't.   #funny
+// step: make (the machine shop)
+? flag:walk.job.make
+- We make this bit. Slow and steady. Mind your fingers.
+- Let the machine do the work. You just keep it honest.
+// step: panel (at the machine: inspect and repair)
+? flag:walk.job.panel
+- Panel off. Have a look first. What's she telling you?
+- Old part out, new one in. Hold it till it clicks.
+- Hear that click? That's the sound of doing it properly.
+// step: done (the repair is finished)
+? flag:walk.job.done
+- Listen. Nothing. That's the sound of it working.
+- Not done till it's turned in, though. Back to the board.
+// step: turnin (at the board)
+? flag:walk.job.turnin
+- Tool wall. Every tool has its outline. Back in it, after.
+- Tea corner's behind the racks. One o'clock. It's sacred.   #funny
+// Head writer 5 (the user's request): reputation, in order, after the first turn-in.
+- Turned in. A job done well nudges your reputation up.
+- Have a look. Device, then Record. It's under Reputation.
+- That's how you rank up. Better jobs. Trickier ones.   #warm
+- Next one's yours to lead. I'll just follow.   #warm
+
+// ---- Writer 2: job 2 (Day 1 afternoon: you lead, he follows) and job 3 (Tuesday: Calder's solo job).
+// Gated by flag:walk.job2.<step> and flag:walk.job3.<step>, which the onboarding hook sets. 60 characters or fewer.
+// Job 2: one line a step, only "if you're stuck" nudges, then a proud turn-in. From onboarding 0.42.30 EVERY line
+// under a walk.job*/job2/job3 step plays, in file order, ~4.8 s apart: write each step as a sequence, not alternatives.
+== week1
+? flag:walk.job2.take
+- Your pick. Your lead. I'm just the shadow. A chatty one.   #funny
+? flag:walk.job2.fetch
+- Stuck? Part number's on the card. The shelf's yours to find.
+? flag:walk.job2.make
+- Not saying a word. Well. Mind your fingers.   #funny
+? flag:walk.job2.panel
+- Look before you touch. You know this bit.
+? flag:walk.job2.done
+- Quiet as anything. Hear that? That's you.   #warm
+? flag:walk.job2.turnin
+- Two in one day. Start to end, all yours.   #warm
+- I barely spoke. Calder will never believe it.   #funny
+// Job 3: his one check-in at the tea break, and the turn-in.
+? flag:walk.job3.tea
+- How's the solo going? Don't tell me. No, tell me.   #funny
+- Calder gave you a real one, then. Good. You're ready.
+- Stuck on anything? Ask. Asking isn't failing.
+? flag:walk.job3.turnin
+- Solo, and turned in. Look at you. Right, onward.   #warm
+- Saw it on the board. I didn't help once. Proud of us both.   #funny
+
+// ---- Day 0: the arrival tour (head writer 3, 0.48.22; the pre-lift part rewritten by head writer 4, 0.48.70).
+// The user (0.60.5): Zeke stopped too much on Deck 5 and said next-day things there; "all his dialogue once in the
+// elevator is great"; "Zeke should stop and welcome you"). So: a stop at the Tern's ramp, walk.shuttle.1-5 as shipped, then
+// walk.up.1-8 (measured: about 3 heard at Zeke's stroll, so the best come first; the rest are for dawdlers),
+// walk-and-talk across Deck 5 to the
+// lift (IN ORDER, a line every few seconds while you walk with him, not tied to places; any left unsaid when you
+// reach the lift are skipped), and walk.works.1-2 as you pass the Works bay (no stop). The Deck 5 points bay, haulway
+// and stores are retired; their job material (the
+// board, the Chief's office, the tool wall, tea) is on Monday's walk.job.take/turnin. From the lift on, unchanged:
+// each point plays walk.<point>.1, .2, ... IN ORDER when you and Torres are near it; one flag key per line. Points:
+// lift, wing, officers, deck3, servery. walk.call.<n>: his "this way" when you lag. walk.more.<n>: linger lines about
+// himself, in order, never repeated. No scarf (beat 1), no father, no list. introDinner and introAsk are meetings.
+// Bubbles: 60 characters or fewer.
+== week1
+// at the ramp: a stop (the user: "Zeke should stop and welcome you"); the 0.60.5 lines as shipped
+? flag:walk.shuttle.1
+- Hello, {me}. I'm Zeke Torres. Welcome aboard.
+? flag:walk.shuttle.2
+- I'm from the Works Department. So are you, now.   #warm
+? flag:walk.shuttle.3
+- That's the Tern behind you. She brought you the whole way.
+? flag:walk.shuttle.4
+- Long trip? I bet. Tell me all about it at dinner.
+? flag:walk.shuttle.5
+- Bag all right? Right, onward. Stay close. She's big.
+// walking across Deck 5 to the lift
+? flag:walk.up.1
+- Don't learn it all tonight. Nobody does. I didn't.
+? flag:walk.up.2
+- Honestly? We've all been waiting on you. Me most.   #warm
+? flag:walk.up.3
+- Lost? Ask anyone. I got lost in a cupboard. An hour.   #funny
+? flag:walk.up.4
+- You'll pick it all up in a week. Promise.   #warm
+? flag:walk.up.5
+- Say hello to anyone. They'll say it back. Honest.
+? flag:walk.up.6
+- Evenings? Tea, Tiles, someone humming. Lovely, really.
+? flag:walk.up.7
+- After dinner it's the lounge. Bring a jumper. Trust me.   #funny
+? flag:walk.up.8
+- Weekends are yours. I spend mine with the coils. Don't.   #funny
+// passing the Works bay (said as you walk past; no stop)
+? flag:walk.works.1
+- And that's us. The Works Department. You and me, {me}.
+? flag:walk.works.2
+- This is where we'll be most days. You'll love it. I do.   #warm
+// point: lift
+? flag:walk.lift.1
+- The lift. Runs right up the spine of the ship.
+? flag:walk.lift.2
+- Six decks. Bridge at the top, engines at the bottom.
+? flag:walk.lift.3
+- Four, please. Go on, the panel's all yours.
+? flag:walk.lift.4
+- Two's Survey and the seniors. Three's food. Important.   #funny
+? flag:walk.lift.5
+- The ladder's behind the glass. Maintenance only. Thirty-one rungs.
+// point: wing
+? flag:walk.wing.1
+- Deck 4. Quarters. The junior wing's this way.
+? flag:walk.wing.2
+- Eight bunk rooms. You're in One. Good room, One.
+? flag:walk.wing.3
+- Washrooms. Hot water till ten, then it's character-building.   #funny
+? flag:walk.wing.4
+- Common room's at the end, by the windows. Tiles, mostly.
+? flag:walk.wing.5
+- Don't play Rina at Tiles. Or do. Just don't expect to win.   #funny
+? flag:walk.wing.6
+- Laundry there. Put your name in everything. Trust me.   #funny
+// point: officers
+? flag:walk.officers.1
+- Officers' corridor. Cabins, all the way along.
+? flag:walk.officers.2
+- Fourteen's mine. The one with the music. Sorry in advance.   #funny
+? flag:walk.officers.3
+- Need anything, knock on fourteen. I mean it.   #warm
+? flag:walk.officers.4
+- Music room's at the end. The record cabinet lives there.
+? flag:walk.officers.5
+- I know every song in it. So do four others. We disagree.   #funny
+? flag:walk.officers.6
+- The Captain plays the piano in there. Late Thursdays.
+// point: deck3
+? flag:walk.deck3.1
+- Deck 3. Commons. Everyone ends up here sooner or later.
+? flag:walk.deck3.2
+- And the mess. Smell that? That's Brennan. Hurry.   #funny
+? flag:walk.deck3.3
+- Booths down there. That's where you call home.
+? flag:walk.deck3.4
+- Garden's that way. One big tree. Don't ask who climbs it.   #funny
+? flag:walk.deck3.5
+- Gym. Vance's leaderboards. Don't look at them too long.   #funny
+? flag:walk.deck3.6
+- Crew store. Snacks, socks, small things. Bring credits.
+? flag:walk.deck3.7
+- Infirmary. Dr. Nandakumar. She'll tell you to drink water.
+? flag:walk.deck3.8
+- Lounge at the bow. Big curved windows. Best seats aboard.
+// point: servery
+? flag:walk.servery.1
+- Tray first, then the servery. Take what smells best.
+? flag:walk.servery.2
+- That's Chef Brennan. Thank her on the way past. It matters.
+? flag:walk.servery.3
+- I'll find us a table. Window side, if it's free.
+? flag:walk.servery.4
+- She keeps a book of everyone's favourite dish. Think hard.
+? flag:walk.servery.5
+- Sunday's bread day. She lets juniors knead, if you're early.
+? flag:walk.servery.6
+- Grab shelf. Covered plates. For emergencies, and Pell.   #funny
+// point: call
+? flag:walk.call.1
+- This way! Over here.
+? flag:walk.call.2
+- Over here, {me}. She's bigger than she looks.
+? flag:walk.call.3
+- I'll wait. No rush. Well, a bit of rush.   #funny
+? flag:walk.call.4
+- Lost me? Follow the beard.   #funny
+? flag:walk.call.5
+- Keep up! The tour's free, but it doesn't wait.   #funny
+// linger: walk.more.<n>
+? flag:walk.more.1
+- Engines, me. I came aboard a junior, same as you.
+? flag:walk.more.2
+- First month, Calder had me on scrubbers. Every single one.   #funny
+? flag:walk.more.3
+- Ask me anything, by the way. Tap me. Questions are the best bit.
+? flag:walk.more.4
+- I talk to the coils. Out loud. You'll get used to it.   #funny
+? flag:walk.more.5
+- Coil three sulks. Reyes, on nights, says she's just shy.   #funny
+? flag:walk.more.6
+- Reyes and I leave each other notes about them. Every shift.
+? flag:walk.more.7
+- I'm last in to breakfast most days. Ten more minutes with the coils.
+? flag:walk.more.8
+- Never skip tea, though. That's a rule. My rule.   #funny
+? flag:walk.more.9
+- I knit. Badly. Ask Kovac. She's honest about it.   #funny
+? flag:walk.more.10
+- Where are you from, then? Tell me at dinner. Properly.
+? flag:walk.more.11
+- Bit of a talker, me. Say if I'm too much. Nobody has yet.   #funny
+
+// ---- Writer 2, batch 6: bubbles (smalltalk, rumour), at most one in five about work. 60 characters.
+== smalltalk
+- Ten more minutes with the coils. Breakfast in five.
+? mem:moment.torres.scarf
+- Row forty-two of the scarf. It's getting long.   #funny
+?
+? time:evening
+- Hot water's gone. Character-building, that.   #funny
+? trad:jam
+- Friday jam. I know every word. Every one.   #funny
+? act:meal
+- Is that {dish}? Brilliant. Seconds, please.
+?
+
+== rumour
+- Right. You'll want to hear this.
+- Don't tell Calder I told you. Well. Do.   #funny
+
+// Writer 4, batch 6: Zeke's ordinary weeks, after week one. Mostly not work: music and the record cabinet, the
+// lyric argument, knitting badly with Kovac and Dahl, tea, sweet things, late breakfasts, the gym after shift
+// (new), the observatory, Reyes's notes. Card gates kept: no father, no Engine Specialist list; no scarf here.
+
+== greet
+? tier>=acquaintance !week1:true
+- {hi}, {nick}! How's the week treating you? Properly, I mean.
+- {hi}, {nick}. Song stuck in my head since breakfast. Well, since not-breakfast.   #funny
+? tier>=acquaintance !week1:true weekday:mon
+- Monday! Fresh week. Fresh tea. What are you up to this week?
+? tier>=acquaintance !week1:true weekday:fri
+- {hi}, {nick}. Friday. Music night. You've no excuse, you know.   #funny
+? tier>=colleague !week1:true
+- {nick}! Perfect timing. I was just about to open the biscuits.   #funny
+- {hi}, {nick}. Sit a minute? Tell me something that isn't about work.
+? tier>=friend !week1:true
+- {nick}. Good. I've got tea and nothing to fix. Stay?   #warm
+- There's my shipmate. What's new? Anything? Tell me anyway.   #warm
+? tier>=close !week1:true
+- {nick}. Good. Kettle's just boiled. Sit, tell me your week.   #warm
+
+== chat
+? tier>=acquaintance !week1:true
+- Achterberg says the second verse is about a boat. It's a lighthouse. I'd bet my tea.   #funny
+- Farouk and I had the lyric argument again. We both lost. Takahashi won. As always.   #funny
+- Haddad hums the right tune with the wrong words. It's lovely. Don't tell her I said wrong.   #funny
+- I've started the gym after shift. Ten minutes. Then twelve. Don't laugh. Well, a bit.   #funny
+- Holt's at the gym after shift too. He nods at me. I nod back. It's a whole friendship.   #funny
+- What are you reading? I'm on a book about lighthouses. Long story. Good story.
+- Did you try Brennan's pudding last night? I went back. Twice. She saw.   #funny
+? tier>=colleague !week1:true
+- Kovac says my knitting has "personality". Dahl says it has holes. They're both right.   #funny
+- Knitting circle tonight. Kovac does it perfectly. Dahl does it sensibly. I do it loudly.   #funny
+- I put a record on and the whole corridor sang along. Badly. All of us. Best night.   #warm
+- I left Reyes a note with a doodle of coil three in a hat. He drew a scarf on it.   #funny
+- What do you do on your days off? Properly off, I mean. I'm collecting ideas.
+- Observatory later. Rossi lets me use the tiny telescope. Tiny stars. Lovely.   #funny
+- Favourite song in the record cabinet? Go on. Then tell me the words. Then we'll argue.   #funny
+? tier>=friend !week1:true
+- You always ask the next question. Most people stop at one. Keep doing that.   #warm
+- I used to think a good day was the coils behaving. Now it's tea with people. Bit of both.   #warm
+- Sometimes I sit at the overlook with tea and just listen. Is that odd? It's not odd.
+? tier>=close !week1:true
+- Glad you came out here, you know. To the Wren. The bay's better for it.   #warm
+- If I ever get serious, tell me to put a record on. It works. Every time.   #funny
+
+== near
+? act:breakfast !week1:true
+- Tea. Just tea. Toast is for people with time. I'll be hungry by ten.   #funny
+? act:gym !week1:true
+- New habit! Gym after shift. I'm on the bike. The bike's winning.   #funny
+? act:dinner !week1:true
+- Pudding first, then I'll think about dinner. Don't tell Brennan the order.   #funny
+? act:leisure !week1:true
+- Off to the music room. There's a record I've not argued about yet.   #funny
+? place:musicroom
+- Side two, track one. I know every word. I'll prove it. Don't check.   #funny
+? place:teacorner !week1:true
+- Tea corner's the best room on Deck 5. Kettle, biscuits, and nobody in a hurry.
+? place:lounge !week1:true
+- Lounge window. Tea. Somebody playing Tiles badly. That's me. I'm playing badly.   #funny
+? trad:observatory-night
+- Observatory night! Tea flask, two biscuits, and a lot of looking up.
+
+== feel
+? mood:high !week1:true
+- Good mood. Singing mood. Knitting-fast mood. You've been warned.   #funny
+? mood:ok !week1:true
+- Fine. Steady. A cup of tea and I'll be better than fine.
+? mood:low tier>=friend !week1:true
+- Bit quiet today. Checked a valve three times. Fine all three. That's how I know.
+
+== life
+? tier>=acquaintance !week1:true
+- There's a stack of records on my cabin floor. I'll shelve them. They like the floor.   #funny
+- I make tea in a pot. Properly. Warm the pot first. It takes ages. Worth it.
+? tier>=colleague !week1:true
+- I write the lyrics down after every jam. Then I lose the paper. Then we argue again.   #funny
+- Reyes and I are never awake at the same time. I'd know his handwriting anywhere.
+? tier>=friend !week1:true
+- Kovac taught me to cast on. Dahl taught me to fix it. Nobody can teach me to stop.   #funny
+
+== joy
+? tier>=acquaintance !week1:true
+- A whole corridor singing the wrong words together. Nothing better. Honestly.   #warm
+- First cup of tea after shift. The one where you sit down. That one.
+? tier>=colleague !week1:true
+- Finishing a row without dropping a stitch. Happens once a week. I cheer every time.   #funny
+
+== bye
+? !week1:true
+- Right, onward. Come to the jam on Friday. I'll keep you a seat.
+- {bye}. Drink some tea. Do one nice thing. Properly.   #warm
+- Off you go, then. I'm off to argue about lyrics. Wish me luck.   #funny
+
+== callback
+? told:intro.arrival tier>=acquaintance !week1:true
+- Remember the Tern landing? You held on to your bag like it was going to run off.   #funny
+? told:intro.arrival tier>=friend
+- Funny. Feels like years since I met you off the Tern. It's not been long at all.   #warm
+? told:intro.shadowShift tier>=acquaintance !week1:true
+- Your shadow shift. You asked why three times. Best questions I'd had all month.   #warm
+? told:intro.shadowShift tier>=colleague
+- Day one, you held the spanner upside down. Then you didn't. I noticed.   #warm
+? told:intro.dinner.stars tier>=acquaintance !week1:true
+- You came for the stars, you said. Have you had your window seat yet? Properly?   #warm
+? told:intro.dinner.stars tier>=friend
+- Observatory night's coming. You said stars, that first dinner. I remembered.   #warm
+? told:intro.dinner.fixing tier>=acquaintance !week1:true
+- You said you liked fixing things. Still true? Is the bay being kind to you?
+? told:intro.dinner.fixing tier>=friend
+- First dinner, you said fixing things. You're good at it. Told you you'd fit.   #warm
+? told:intro.dinner.unsure tier>=acquaintance !week1:true
+- First night you said you weren't sure why you came. Any closer? No rush.
+? told:intro.dinner.unsure tier>=friend
+- You said you weren't sure, that first dinner. You look sure now. A bit. I'm glad.   #warm
+
+// Writer 5, batch 5: if they are ever transferred (goodbye with leaving:you, also the "Sorry I missed you at the
+// shuttle" Mail; packing as feel with leaving:soon; letters after). Nothing of his arc: no Specialist list, no father.
+
+== feel
+? leaving:soon
+- Packing! Ten days. I said goodbye to coil three. It sulked. Course it did.   #funny
+- New ship, new coils. I'll have to learn all their moods. Right, onward. Sort of.
+? leaving:soon tier>=friend
+- Bit strange, going. I've knitted three rows and unpicked them. That's how you can tell.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Off to a new ship. Talk to coil three for me. It likes being asked how it is.
+? leaving:you tier>=colleague mem:moment.torres.scarf
+- Your scarf's not finished. It's never finished. Take it anyway. Keep it growing.   #warm
+? leaving:you tier>=friend
+- You'll be brilliant, {nick}. You already are. I just got to see it first.   #warm
+
+== letter
+- New engine room. Their coils don't sulk, they grumble. Different thing altogether. Tell Reyes. Tell coil three I said hello.   #funny
+- Found a record cabinet here. I don't know a single song in it. Not one! I'm learning the words. Wrongly, Takahashi would say.   #funny
+? tier>=friend mem:moment.torres.scarf
+- Started a scarf for someone here. Nowhere near as long as yours. How's the bay? Has Calder said "Fine" to you yet? She will.   #warm
+
+// Writer 5, batch 6: seasons and traditions (the game's ids: running Mon, quiz Thu, works-tea and jam Fri, film and
+// observatory-night Sat, market (the swap meet) Sun, harvest (harvest morning), hull-lights, founding (day 100),
+// quiet-watch (day 300)), plus trad:today. Gaps filled only; arc gates kept.
+
+== greet
+? season:sowing tier>=acquaintance !week1:true
+- {hi}! Sowing! New year, new seedlings. Coil three's not impressed. It never is.   #funny
+? season:greening tier>=acquaintance
+- {hi}. Greening! The garden's bursting. I keep finding leaves in my toolbag.   #funny
+? season:harvest tier>=acquaintance
+- Harvest! Brennan wants hands for the crates. I've volunteered both of mine.
+? season:lanterns tier>=acquaintance
+- {hi}! Lanterns. I've knitted a cover for every lantern in the bay. Well, three.   #funny
+
+== near
+? trad:works-tea
+- Friday tea! Halloran's got the biscuits. Grab your mug off the hook before Pell does.   #funny
+? trad:quiz
+- Quiz night. The music round's mine. Takahashi says it's theirs. We'll see.   #funny
+? trad:running
+- Gym club! I run like I talk. Fast, then out of breath, then fast again.   #funny
+? trad:film
+- Film night! I knit right through it. I've never seen the end of anything.   #funny
+? trad:market
+- Swap meet! I'm trading a scarf for wool. Then I'll knit the wool into a scarf.   #funny
+? trad:harvest
+- Harvest morning! Garden's full. Mind the bean trellis. I didn't. Twice.   #funny
+? trad:hull-lights
+- Hull lights tonight. Find a window. The whole Wren glows. Best sight in the Service.   #warm
+? trad:founding
+- Founding Day! Cake, and the Captain says a few words. I always well up. Every year.   #funny
+? trad:quiet-watch tier>=friend
+- The quiet watch. Find a window. Think of someone far off. That's all. It's enough.   #warm
+
+== smalltalk
+? trad:today
+- Something on tonight! I love a something.   #funny
+? season:lanterns
+- Lanterns! Every corridor's a story.
+? trad:works-tea
+- Tea! Mugs off the hook, everyone!
+
+// Writer 5, batch 9: week-1 beats for the onboarding hook (onboarding seat 1's list, 2026-10-17). One flag key per
+// line, beat.<beatId>.<n>, said in order as bubbles while you are in the beat's room in its window; best first
+// (onboarding drops the rest when you leave). Mail texts: mail.<beatId>, one line "Subject | body", unsigned. Torres's planned days off are Thu-Fri (facts 3), hence the Thursday Mail.
+
+== week1
+// beat d3-pick: Wednesday 09:00, the Works bay
+? flag:beat.d3-pick.1
+- Your pick today. Board's there. Choose one you like.
+? flag:beat.d3-pick.2
+- Start small. A scrubber, a fan. Nothing that hisses.   #funny
+? flag:beat.d3-pick.3
+- I'm on Deck 6 all morning. Find me on the Roster.
+? flag:beat.d3-pick.4
+- Stuck? Tap my name on the Roster. I'll come up.
+? flag:beat.d3-pick.5
+- Right, onward. You've got this.
+// mail d4-mail: Thursday 07:00, his day off
+? flag:mail.d4-mail
+- On your own today | My day off. The board's yours. You're ready. Don't break anything big.
+
+// ---- Head writer 0607 (plan-0607): Zeke's new Day 1-2 lines. Onboarding engineer 3's flags (content/keys-0607.md);
+// every line under a flag plays IN ORDER, one flag key per line where the key ends in a number. Bubbles, 60 or fewer.
+== week1
+// Day 1: he points out a crew member at work (the systems engineer places one on Days 1 and 2)
+? flag:walk.crew.vent
+- That's Bea on the vent. You'll do those by Wednesday.
+- See her check the draught after? Everyone skips that.
+? flag:walk.crew.delivery
+- Delivery coming through. We share the small jobs out.
+- Some days you'll carry. Some days you'll get carried for.   #funny
+// Day 1 dinner: evenings are yours (the plan's words, split into bubbles)
+? flag:walk.dinner.eve.1
+- Evenings are yours. Most of us have a thing.
+? flag:walk.dinner.eve.2
+- I knit. Don't laugh. Pell reads.   #funny
+? flag:walk.dinner.eve.3
+- Find yours. There's no wrong answer.   #warm
+// Day 1 dinner: the laundry warning (onboarding engineer 4's keys, claude/arrival-0607b; the plan's words in two bubbles)
+? flag:beat.d1-clothes.1
+- One change of clothes? Laundry's past the junior washrooms.
+? flag:beat.d1-clothes.2
+- Do it tomorrow after shift, or you'll wear that Wednesday.   #funny
+// Day 2, just after shift: a nudge while the washers are free (17:00-18:00)
+? flag:beat.d2-laundry.1
+- Shift's done. Laundry now, while the washers are free.
+? flag:beat.d2-laundry.2
+- Load it, leave it, go and eat. It'll be done.
+// he offers to teach you to knit (it's his hobby)
+? flag:walk.knit.1
+- Want to learn to knit? I've got spare needles.
+? flag:walk.knit.2
+- I'll teach you. Kovac taught me. She despairs.   #funny
+? flag:walk.knit.3
+- Knit and natter, Tuesdays. Bring nothing. I've got wool.   #warm
+
+// ---- Head writer 0607: ZEKE THE TRAINER (the user approved the pitch, with additions, via lead 10). Onboarding
+// engineer 3's keys (0.42.31): while he's with you on Day 1, each step of any job adds walk.train.<job>.<step> after
+// the slot lines. <job>: the board's kind (lamp, vent, calibrate, delivery, fault, filter, seal; a cart run 'cart', an
+// inspection round 'round'). <step>: take, fetch, make, at, done, turnin. Every line plays IN ORDER; 1-2 a step.
+== week1
+? flag:walk.train.lamp.take
+- Lamps. Easiest job going, and everyone sees it.
+? flag:walk.train.lamp.fetch
+- Lamps live on the Lights shelf. Funny, that.   #funny
+? flag:walk.train.lamp.at
+- Power off at the fitting first. Then twist, don't pull.
+? flag:walk.train.lamp.done
+- Light's back. Nobody will thank you. That's how you know.   #funny
+? flag:walk.train.vent.take
+- Vents. Fluff, mostly. And the odd sock. Don't ask.   #funny
+? flag:walk.train.vent.at
+- Brush it out, then feel for the draught.
+? flag:walk.train.vent.done
+- Feel that? Air moving. Someone sleeps better tonight.   #warm
+? flag:walk.train.calibrate.take
+- Calibrating. Machines drift. We nudge them back.
+? flag:walk.train.calibrate.at
+- It's just listening. Nudge it till the hum goes flat.
+? flag:walk.train.calibrate.done
+- Hear that? Steady. That's a happy machine.
+? flag:walk.train.delivery.take
+- Deliveries are walks with a box. Say hello on the way.
+? flag:walk.train.delivery.fetch
+- Pick it up from storage. Label says where it's going.
+? flag:walk.train.delivery.done
+- Delivered. Someone's day just got easier.
+? flag:walk.train.round.take
+- Inspection round. Look, listen, sniff. Note anything odd.
+? flag:walk.train.round.at
+- Smell that? Nothing. Good. Nothing's the best smell.   #funny
+? flag:walk.train.round.done
+- Round done. Spotting it early beats fixing it late.
+? flag:walk.train.fault.take
+- Small fault. Could be anything. That's the fun part.
+? flag:walk.train.fault.fetch
+- Each part lives on one shelf. The card says which.
+- Tap a shelf to see what's left. Low ones get marked.
+? flag:walk.train.fault.make
+- Shelf empty? The shop makes it. The stock comes Wednesdays.
+? flag:walk.train.fault.at
+- Read the panel first. It tells you what's sulking.
+- Power off, cover off, then look. Always that order.
+? flag:walk.train.fault.done
+- Run it once and listen. Quiet means happy.
+? flag:walk.train.fault.turnin
+- Ship health ticks up when we fix things. Board on Five.
+? flag:walk.train.cart.take
+- Hover cart. It floats. It won't float into walls. Mostly.   #funny
+? flag:walk.train.cart.done
+- Park it in the bay after. Somebody always forgets.
+? flag:walk.train.filter.take
+- Filters are officer work, really. Watch and learn.
+? flag:walk.train.seal.take
+- Pressure seals. Officer job. One day, that's you.   #warm
+
+// Walk and talk (onboarding 0.42.31's walk.follow.<n>): while he walks with you between jobs on Day 1, one now and
+// then, IN ORDER, never repeated. Mixed on purpose: how things work, life aboard, what's ahead (rank, events: teased,
+// never promised), and the traditions.
+? flag:walk.follow.1
+- Right. Walk and talk. That's half this job, honestly.
+? flag:walk.follow.2
+- The board fills itself. Machines wear, faults pop up.
+? flag:walk.follow.3
+- Small jobs stay up for you. The crew take the rest.
+? flag:walk.follow.4
+- Shift's nine till five. Clock in by the tea corner.
+? flag:walk.follow.5
+- Forget to clock out and it does it at five. It's kind.   #funny
+? flag:walk.follow.6
+- Dinner's from five, in the mess. Brennan notices skippers.   #funny
+? flag:walk.follow.7
+- Keep an eye on your needs. Eat, sleep, wash. Have fun.
+? flag:walk.follow.8
+- Run yourself down and you work slower. Trust me.   #funny
+? flag:walk.follow.9
+- Weekends are yours. Saturday and Sunday. No board.
+? flag:walk.follow.10
+- Bunks for juniors. Officers get a cabin. A door. Imagine.   #funny
+? flag:walk.follow.11
+- Do well and Calder signs you up for a qualifying job.
+? flag:walk.follow.12
+- Pass it and you're an officer. New systems. Air, water.
+? flag:walk.follow.13
+- Faults that start upstream. You trace them back. Fun.
+? flag:walk.follow.14
+- Engines are the top. That's years away. Dream big, though.   #warm
+? flag:walk.follow.15
+- Most days are like this. Quiet, steady, tea at one.
+? flag:walk.follow.16
+- But now and then the ship gets lively. You'll see.
+? flag:walk.follow.17
+- When the lights flicker on every deck, it's all hands.
+? flag:walk.follow.18
+- Space does odd things. The old hands have stories.
+? flag:walk.follow.19
+- Ask Calder about storms. Actually, wait till she asks you.   #funny
+? flag:walk.follow.20
+- Always something on in the evening. Check your Calendar.
+? flag:walk.follow.21
+- After your first shift there's the beam. You'll see.   #warm
+? flag:walk.follow.22
+- Tuesday's Tiles or my knitting circle. No pressure. Knit.   #funny
+? flag:walk.follow.23
+- Lap of the Wren's Sundays. Just walking. My kind of sport.   #funny
+? flag:walk.follow.24
+- Everyone here's friendly. Say hello. Talk a while.
+? flag:walk.follow.25
+- Your device has the lot. Jobs, Mail, Calendar, people.
+? flag:walk.follow.26
+- Your Record keeps what you've done. It adds up, honestly.
+? flag:walk.follow.27
+- Get stuck, ask anyone. Asking isn't failing.   #warm
+? flag:walk.follow.28
+- You're quicker than I was. Don't let it go to your head.   #funny
+? flag:walk.follow.29
+- You're doing well, you know. Really well.   #warm
+
+// ---- Pillar 5 (head writer, seat W): Zeke teaching (kind 'work'; seat C's flags train.<id>.lead|follow.<step>).
+// M7 and P3 only when he's the one teaching (a save where the row opens on a day he's on shift). Bubbles, 60 or fewer.
+== work
+? flag:train.m7.lead.hold
+- Watch. Panel, scanner, and a little patience.
+- That one's at twenty. Sulking badly. There's our part.
+? flag:train.m7.lead.done
+- Fixed. Your go next. I'll be the one humming.
+? flag:train.m7.follow.hold
+- Look first, then scan. What's it telling you?
+? flag:train.m7.follow.choose
+- Your call. I'm not even looking. I'm looking a bit.   #funny
+? flag:train.m7.follow.done
+- Right first time. My old scanner likes you.   #warm
+? flag:train.p3.follow.hold
+- Second note's on the panel. What does it say?
+? flag:train.p3.follow.choose
+- One suspect left. Go on, say it.
+? flag:train.p3.follow.done
+- Solved! Calder will pretend she isn't impressed.   #funny
+? flag:train.p3.hint.2
+- Have you read every note? One's hiding.
+? flag:train.p3.hint.3
+- Try the machine's panel. Notes love a panel.
+// M1 rounds (Day 2): he looks at the first two stops (lead), then you look and mark (follow).
+? flag:train.m1.lead.look
+- Hear that? End of the spin. Bearing's going. Worn.
+- Low, even hum. That's a happy one. Fine.
+? flag:train.m1.follow.look
+- Your turn. Stand still a sec. Listen first.
+? flag:train.m1.mark.right
+- Good eye.
+- That's it. You're a natural. Don't tell Calder.   #funny
+? flag:train.m1.mark.wrong
+- Mm. Listen again.
+? flag:train.m1.mark.okay
+- Looks all right to me. Better safe, though.
+? flag:train.m1.follow.done
+- That's a round. Anything worn's on the board now. Yours.   #warm
+
+// ---- Head writer W (playtest 1, 0.63.2; the user's notes via lead 13): onboarding seat O4's keys. Bubbles, said in
+// order, one flag key per line. Zeke stops and faces you while he says these (O4's pacing).
+== week1
+// Day 1: the training-day opener at the briefing's end
+? flag:walk.train.open.1
+- Morning! It's a training day today. I'm with you all day.
+? flag:walk.train.open.2
+- Anything you're not sure of, ask. That's what I'm here for.   #warm
+? flag:walk.train.open.3
+- First, clock in. The time clock's by the tea corner.
+// Day 1 dinner: you can't do every tradition (after walk.dinner.eve.1-3)
+? flag:walk.eve.choose.1
+- You can't do every tradition in a day. Nobody can.
+? flag:walk.eve.choose.2
+- So pick the one you fancy. There's always next week.
+// after your first Day 1 job's turn-in
+? flag:walk.train.better.1
+- Small stuff today. Don't worry. Jobs get better as you go.
+// the arrival evening: at your wardrobe after the bunk meeting
+? flag:walk.cabin.wardrobe.1
+- That's your wardrobe. It's where you get clean clothes.
+? flag:walk.cabin.wardrobe.2
+- Change every morning. When it's empty, laundry's on this deck.
+// Day 1: tea and biscuits at 13:00 (it replaced the half-ten tea). He explains it, walks you there after your job,
+// then work goes on with him following.
+? flag:walk.tea.explain.1
+- One o'clock's tea and biscuits, in the tea corner.
+? flag:walk.tea.explain.2
+- Most of Works goes, a few at a time. Fills a gap, too.
+? flag:walk.tea.explain.3
+- Finish this job, then I'll take you. Biscuits await.   #funny
+? flag:walk.tea.go.1
+- Tea time. This way. The tea corner, behind the racks.
+? flag:walk.tea.go.2
+- Grab a mug off the hook. Any mug but the blue one.   #funny
+? flag:walk.tea.at.1
+- Tea, a biscuit, and five minutes of nothing. Lovely.   #warm
+? flag:walk.tea.at.2
+- Have two biscuits. Nobody's counting. Pell is.   #funny
+? flag:walk.tea.at.3
+- Whenever you're ready, the board's waiting. No rush.
+? flag:walk.tea.back.1
+- Right, back to it. Pick your next job.
+? flag:walk.tea.back.2
+- I'll tag along behind. Pretend I'm not here.   #funny
+
+// Zeke's welcome Mail on your device (the arrival evening: he tells you to open it). "Subject | body", unsigned.
+== mail.zeke.cabin
+- Everything I didn't say | Your device has the lot: Mail, Schedule, Calendar, the Map and your Needs. Breakfast's from six till nine. Shift starts at nine in the Works bay; Calder's briefing is at ten to nine. Clean clothes live in your wardrobe: change each morning, and do your laundry on Deck 4 when they run out. Tea and biscuits at one. Ask me anything, any time.
+
+// Name on the beam (first Monday after shift, the Works bay cross beam; seat T's flags trad.beam.<n>, in order).
+// Restored in playtest 1: 2799442 (0.48.82) cut these by mistake. He hands you the pen and tells you to tap the beam.
+== week1
+? flag:trad.beam.1
+- Right. Everyone stay put. New hand's turn.
+? flag:trad.beam.2
+- Here. The pen. It's the same one we all used.   #warm
+? flag:trad.beam.3
+- Tap the beam where you want it. Next to mine, if you like.   #warm
+? flag:trad.beam.4
+- There. You're part of the bay now. Properly.   #warm

@@ -1,0 +1,189 @@
+@crew bakshi-sol
+// Writer-commons, batch 3: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- {hi}. Bakshi. Helm, nights. Hold still a second. No reason. Well, a small reason.
+? tier>=acquaintance
+- {hi}, {me}. Turn left at that last star and we'd be somewhere warm by now.
+- {hi}. Hold still. No, the other side. Thanks. That's your nose done.   #funny
+? tier>=friend
+- {hi}, {me}. I plotted a course to your home. Just to see. It's a nice route.   #warm
+
+== feel
+? mood:high
+- Good night at the helm. The stars went past very politely.
+? mood:low
+- Bit grey today. I painted rain. Didn't help. Nice painting, though.
+
+== near
+? act:work
+- Course steady. I've a second one plotted for fun. It goes nowhere. It's lovely.
+? act:leisure
+- Common room's quiet. Good light in here for painting. Very small paintings.
+
+== life
+? tier>=acquaintance
+- I grew up on Lisk. It rained every day. I complained every day. Now I miss it.
+? tier>=colleague
+- Tiny portraits keep turning up on bunks. Some are mine. I'm not saying which.   #funny
+
+== joy
+? tier>=acquaintance
+- On rest days I plot courses to places we'll never go. Want to pick one?
+
+== about
+? aff:dlamini-lukas:friend
+- Lukas and I stand in the garden when the misters run. It smells like home. Both our homes.   #warm
+
+// Writer-commons, batch 6: towards about 30 own lines.
+
+== greet
+? tier>=acquaintance time:morning
+- Oh, morning. I'm going to bed. Or I'm going to paint. One of those.
+? tier>=acquaintance time:evening
+- {hi}. Off to the helm soon. Want me to steer us somewhere nice tonight?
+? tier>=colleague warmth:cold
+- There you are. I painted you from memory. Your nose came out a bit wrong.   #funny
+
+== bye
+? tier>=acquaintance
+- {bye}. Go gently.
+? tier>=friend
+- Thanks for the talk. It'll go in a painting somehow. They always do.   #warm
+
+== feel
+? mood:ok
+- All right. Drifty. Nice drifty.
+
+== near
+? act:work time:night
+- Quiet watch. The stars go by. I count the blue ones. There are a lot.
+? deck:3 act:leisure
+- Lounge. Good light here in the evening. Perfect for very small paintings.
+
+== life
+? tier>=colleague
+- Lisk rains every day. I used to paint the rain. Now I paint it from memory.
+? tier>=friend
+- I'm saving up. For what, I'm not saying yet. Something with a lot of rain in it.
+
+== invite
+? trad:observatory-night tier>=acquaintance
+- Observatory night? I'll show you where I'd go, if I could steer anywhere.
+
+== accept
+- Sure. Why not. I'll be there.
+== decline
+- Can't tonight. Night watch. Another evening?
+== missed
+- You didn't come. That's all right. I painted the empty chair. It's quite good.   #funny
+== birthday
+? birthday:me
+- It's my birthday. I'm painting myself, tiny. It's very hard. I keep looking away.   #funny
+? birthday:you
+- Happy birthday. A tiny portrait. Of you. Don't look at the nose.   #warm
+== hint
+- Got a minute? Sit. Hold still. Not for a painting. Just to talk.
+
+// Writer 3, batch 4: bubbles (smalltalk and rumour, 60 characters, said to no one in particular).
+
+== smalltalk
+- Hold still. No, you moved.   #funny
+- Course to nowhere, plotted. Lovely.
+- Ah, well. Where was I? Oh, yes.
+- Rain on a window. I miss that.
+? act:work
+- Steady. Drifting. Steady. Fine.
+
+== rumour
+- Heard something. Or dreamt it. Hm.
+- Someone said a thing. Ages ago. Today.
+
+// Writer 3, batch 5: callbacks (told: said once).
+
+== callback
+? told:fav.fetch
+- You fetched it. Oh, lovely. Where was I? Thanking you. Thank you.   #funny
+? told:fav.lamp
+- My lamp works. I can paint at night now. Tiny portraits, nice light. Thank you.   #warm
+? told:came.observatory-night
+- You came up to the observatory. I plotted a course while you looked. To that one.
+? told:gift.star
+- Your present's beside my charts. I keep looking at it. Ah, well. Thank you.   #warm
+? told:bday
+- My birthday. You remembered. I'll paint you something. Hold still. Later.   #warm
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- The night shift likes you. I'd paint you, if you held still. Ah, well.   #funny
+? you:kind
+- They say you're kind. I've been meaning to paint that. It's a hard thing to paint.
+
+// Writer 3, batch 8: thanks for a gift (gift: loved | liked | polite, or the gift's tag; dialogue 0.43.10).
+
+== gift
+? gift:loved
+- Oh, lovely. I'll paint it. Tiny. Then I'll paint you holding it. Hold still.   #warm
+? gift:liked
+- Thank you. That's nice. Where was I? Oh, yes. Thank you.
+? gift:polite
+- Ah, well. Thank you. I'll keep it near the charts. It'll find its course.
+
+// Writer 4, batch 2: everyday chatter, not about work (meals, rest days, home, hobbies, seasons, traditions).
+== smalltalk
+? act:meal
+- Toast. Or... yes. Toast.
+- This soup tastes like rain. Good rain.
+? act:off
+- Rest day. Painting. Hold still. No, not you. Yes, you.   #funny
+- Plotted a course to a planet made of jam.   #funny
+- Went to the store for paint. Bought a tiny brush.
+? time:evening
+- Lisk'll be raining now. Probably. Always.
+- I was going to say something. It'll come back.
+? time:night
+- Night's soft. You can hear the ship think.
+? season:greening
+- The garden's so green. I need more green paint.
+? season:lanterns
+- Painting a tiny lantern on a tiny portrait.
+? place:lounge
+- That window. If you squint, it's rain.
+? place:commons
+- Somebody's left a little portrait. Not mine. Maybe.   #funny
+? trad:observatory-night
+- Observatory night. I'll paint a star. A small one.
+
+== rumour
+- Oh, did you hear? I've... yes. Here it is.
+- Heard a thing. Drifted off. It's back. Listen.   #funny
+
+// Writer 4, batch 4: Tiles talk.
+== tiles.start
+- Oh, a game. Lovely. Where was I? Your move.
+== tiles.dock
+- Three. I think. Is that three? Yes. Three.
+== tiles.win
+- I won? I was thinking about rain. Good game.   #funny
+== tiles.lose
+- Well played. Hold still. That face. I'm painting it.   #funny
+
+// Writer 4, batch 7: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Oh, I'm packing. I think. Where was I? Packing.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm off, you know. Soon. Hold still a moment. There. Now I'll remember.
+? leaving:you tier>=friend
+- I painted you, tiny. It's on your bunk. Or it will be. You'll know it. Thank you.   #warm
+
+== letter
+- It rained here. Properly. On a window. I stood there an hour. Then I painted it, tiny. I'll post it.
+? tier>=friend
+- Plotted a course from here to the Wren. Just for fun. It's not far, on paper. Hello from the end of it.

@@ -1,0 +1,109 @@
+@crew farouk-olu
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Hello. Farouk, comms. I'll know your voice on the channel before long.
+? tier>=acquaintance
+- Oh, hello, {me}. Heard you on the board this morning. Clear. Good.
+- Hi there, {me}. That song you're humming. The second line's wrong. Sorry.   #funny
+? tier>=friend
+- Hello, {me}. Your voice is one of the ones I listen for. I like hearing it.   #warm
+== feel
+? mood:high
+- Clear channels all day. Every voice came through like you were in the room.
+? mood:low
+- Long shift. So many tired voices. Mine too. Early to bed tonight.
+== near
+? habit:tea-break
+- Tea break. Five minutes of nobody talking in my ear. It's lovely.
+? act:leisure
+- The record cabinet. I know every song in it. Quietly. Unlike some.   #funny
+== life
+? tier>=acquaintance
+- I ran a market stall on Lisk. Fair trades only. A good message is a fair trade, too.
+== joy
+? tier>=colleague
+- The record cabinet's songs. With the right words. I'll sing you one, quietly.
+
+// ---- Writer 2, batch 3: to ~30 (greet by time and warmth, bye, near, invite, accept, decline, missed, birthday, cue, hint, about, life)
+== greet
+? tier>=acquaintance time:morning
+- Morning, {me}. Channels are quiet. Everyone's still on their first tea.
+? tier>=acquaintance warmth:cold
+- Oh, hello, {me}. It's been a while. All well? Good.
+
+== bye
+- Bye, then. Early to bed for me. Earlier than you'd think.   #funny
+
+== near
+? habit:tea-break
+- Tea break. Headset off. Five quiet minutes. Lovely.
+? place:musicroom
+- The record cabinet. I'm checking a lyric. Quietly. Torres had it wrong again.   #funny
+
+== invite
+- Friday jam? I'll sing the right words. Quietly. Somebody should.   #funny
+
+== accept
+- Yes. A fair trade: I come, you sing. Joking. Yes.   #funny
+- Thank you. I'd like that.
+
+== decline
+- Not tonight. Early bed. Very early. Another time?
+? weekday:sat|sun
+- Rest day. I'm sorting the record cabinet. Nobody asked. Monday?
+
+== missed
+- You didn't come. That's all right. I listened to a record. A good one.
+
+== birthday
+? birthday:you
+- Happy birthday, {me}. I'll hum you a song. With the right words, of course.   #warm
+? birthday:me
+- My birthday. Four people sang to me. Four different sets of words. Lovely, all of them.   #funny
+
+== cue
+? cue:event.ionStorm.onset
+- Storm's in. The channels will be busy. I'll be listening. All night, if need be.
+
+== hint
+- {me}. Have you a minute later? I'd like to say something. Quietly.
+
+== about
+? aff:achterberg-lars:friend
+- Achterberg knows every song too. He sings them flat. We're very good friends.   #funny
+
+== life
+? tier>=friend
+- On Lisk the market was loud all day. I think that's why I like quiet so much now.
+
+// ---- Writer 2, batch 6: bubbles (smalltalk, rumour), at most one in five about work. 60 characters.
+== smalltalk
+- Second line's wrong. Sorry.   #funny
+- Tea break. Headset off.
+- A fair trade. Always.
+- Every song. Quietly.
+? time:evening
+- Early bed. Very early.
+?
+
+== rumour
+- Quietly, then. I heard this.
+- Not from the channels. Never those.
+
+// Writer 4, batch 12: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. Quietly. A fair trade: one ship for another.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm leaving soon. Goodbye. Goodbye, you said? Yes. Goodbye.
+? leaving:you tier>=friend
+- You listened. Every time. That's a fair trade for a lot of things. Thank you.   #warm
+
+== letter
+- New ship. They sing the second verse wrong too. I hum the right one. Quietly.
+? tier>=friend
+- A market here sells the same tea as Lisk. Bought two. Fair trade. Hello.

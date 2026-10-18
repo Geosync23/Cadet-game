@@ -1,0 +1,38 @@
+@tradition one-week-aboard
+// One week aboard: day 7, your first Sunday. Calder's Mail the evening before, then a tea in the bow lounge with Zeke
+// Torres (your escort) straight after his shift, before the Sunday table at 18:00: it ends before 18:00, so it never
+// counts towards an evening's two traditions (17:15: the host comes 5 minutes early, and Zeke is free from about 17:10). Pell and Tomas are on shift on day 7 (reviewer 2), so it's Zeke's tea, with
+// whoever's off. 17:15 since 0.60.1's roster: Zeke works day 7 until 17:00 (the lead, 0.34.39; was 15:30).
+// Design note: plans/trad-notes-seasons.md.
+k: 481
+title: One week aboard
+when: arrival +7
+at: 17:15-17:55
+min: 20
+prio: 1
+where: 3 room Bow lounge: lounge-seat
+where: 3 room Mess hall: mess-seat
+hold: 1
+who: torres-zeke always, works+juniors 25%
+anim: drink
+host: torres-zeke
+from: calder
+invite: host=torres-zeke odds=60% line="A week aboard! Tea's on me, bow lounge, straight after shift. No arguing."
+
+== mail
+- One week aboard tomorrow. Zeke tells me you haven't broken anything yet. Well done. He'll buy you a tea in the bow lounge at {time}.
+
+== ask
+- A whole week. Tea after shift, bow lounge. Zeke's buying.
+- One week down! You'll be telling us where things are soon.   #funny
+
+== here
+- To week one. The hardest one, everyone says.   #warm
+- You found the mess on your own by Tuesday. I was impressed.   #funny
+- Any questions you didn't want to ask the Chief? Now's the time.
+
+== thanks
+- You share a tea with Zeke, who showed you round. A week ago this was all new.   #warm
+
+== chatter
+- The new hand's been aboard a week. Feels like longer, in a good way.

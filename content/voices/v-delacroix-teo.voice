@@ -1,0 +1,12 @@
+@voice v-delacroix-teo
+// Writer 4, batch 5: a short card for a short-stay visitor (GUESTS in section 9). No pronouns (not in facts.md).
+tpl: earnest
+talk: Eager and precise; counts doors out loud; keeps a hand-drawn map of the Wren and asks you to check it.
+hi: Hi | Hello
+bye: Must get mapping | See you
+yes: Yes | Right
+thanks: Thanks | Brilliant
+wow: Wow
+sigh: Oh dear
+likes: book | garden | star
+nick: - | {me} | {me} | {me} | {me}

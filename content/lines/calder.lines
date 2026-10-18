@@ -1,0 +1,539 @@
+@crew calder
+// Chief Ines Calder: the Works writer, batch 1 (for the Voices sampler). From the head writer's card.
+// Never "well done" (her arc's payoff, beat 5). No exclamation marks. Nothing about the toolbox's owner.
+
+== greet
+? tier=stranger
+- Cadet. The board's behind you. Urgent jobs first. Then the rest.
+? tier>=acquaintance time:morning
+- Morning. Board's at fourteen. It was twelve at six. Pick one.
+? tier>=acquaintance
+- Good. You're here. Fan on Deck 4. The bearing's going. Hear it?
+? tier>=colleague time:evening
+- Still here. So am I. Neither of us mentions it.   #funny
+? tier>=friend
+- Sit. Not for long. There's tea in the pot. It's for whoever.   #warm
+
+== feel
+? mood:high
+- The air's nominal on every deck. Nobody's noticed. Good.
+? mood:low
+- Nineteen jobs today. Eighteen done. It's the nineteenth I'm thinking about.
+
+== near
+? act:work
+- Scrubber on Deck 4's at sixty-one. Not sixty. Sixty-one. Look at it after lunch.
+? act:dinner
+- I eat. Then I go back. The board doesn't stop for {dish}.   #funny
+
+== life
+? tier>=acquaintance
+- People ask what's on my mug. Nothing. It's a mug.   #funny
+? tier>=colleague
+- I keep a note on every tech I've certified. Yours is blank. For now.
+- I know the serial number of every pump aboard. Not one birthday. It's a choice.   #funny
+
+== joy
+? tier>=acquaintance
+- Listen. Nothing. Every fan on this deck running right. Best sound there is.
+
+== greet
+? tier>=acquaintance warmth:cold
+- You've been scarce. The board noticed. So did I.
+? tier>=acquaintance time:afternoon
+- Afternoon. Three jobs closed on the board. Two of them yours. Keep going.
+? tier>=colleague time:morning
+- Morning. Tea's made. Not by me. I don't take a break. Have mine.
+? tier>=colleague
+- {me}. Good. I need someone who listens before they lift a spanner.
+? tier>=close
+- {me}. Sit. Five minutes. The board can wait five minutes. Don't tell it.   #warm
+
+== bye
+- Back to it.
+? tier>=friend
+- Go on. Good work today. Same again tomorrow.   #warm
+?
+- Carry on. Finish what you started.
+? act:work
+- Board's there. Pick the next one.
+? time:evening
+- Go and eat. Then sleep. In that order.
+
+== feel
+? mood:high tier>=colleague
+- Every fan on Deck 5 at the right pitch. I stood and listened. Two whole minutes.
+? mood:ok
+- Board's at eleven. Nothing loud. Nothing quiet that should be loud.
+? mood:low tier>=colleague
+- Long one. I'll sleep on it. Then I'll fix it.
+
+== near
+? act:work tier>=acquaintance
+- Seal kit's on the left of the bench. Always the left. Put it back there.
+? act:dinner tier>=colleague
+- Sit. You eat, I'll read the logs. That counts as company.   #funny
+? act:breakfast
+- Tea. Toast. Board. In that order, every day.
+? act:gym
+- I walk. Every deck, every vent. That's my gym.
+? place:worksbay
+- Hear that pump? It's fine. I like to listen anyway. You should too.
+? act:leisure
+- I'm not working. I'm reading the maintenance logs. That's different.   #funny
+
+== life
+? tier>=acquaintance
+- Every machine on the Wren has a serial number. I know them. Ask me one.
+? tier>=colleague
+- Torres has good hands. I've told him. Once. That's plenty.
+- Nobody thanks the air. That's how you know it's working. Remember that one.
+? tier>=friend
+- I gave up tea breaks. There's always one more job on the board. Don't copy me.
+
+== invite
+? tier>=colleague
+- Works tea on Friday. You'll be there. That's not a question.
+? trad:today tier>=colleague
+- {trad} tonight. I'll look in for ten minutes. You can find me there.
+
+== accept
+- Fine. Ten minutes.
+- Agreed. I'll be there on time. Be early.
+? tier>=friend
+- Yes. I'd like that. Don't make it a thing.   #warm
+
+== decline
+- Not tonight. Board's at fourteen.
+- Can't. Ask me next week. I'll mean it.
+? weekday:sat|sun
+- It's my day off. I'm going to listen to a fan for an hour. Alone.   #funny
+
+== missed
+- You missed our time. Book another. I'll keep it.
+- Ten minutes I waited. That's fine once. Book another.
+? tier>=friend
+- You missed it. Is everything all right? Say if it isn't.
+
+== hint
+- Have you got ten minutes? Off the board. Not about work.
+- When you're done, come and find me. It isn't a job.
+
+== birthday
+? birthday:you
+- Someone said it's your birthday. I've written it down. I won't remember.   #funny
+- Your birthday. Fine. Take the easy job. Just today.
+? birthday:me
+- It's not my birthday. Who told you. Kovac. It was Kovac.   #funny
+- A card on my desk. Signed by Works. I'm keeping it. Don't tell them.   #warm
+
+== week1
+? week1:true
+- First week. Nobody expects you to be fast. I expect you to be right.
+? week1:true mem:intro.dinner
+- You ate something on Sunday. Good. Keep doing that.   #funny
+? week1:true weekday:mon
+- Briefing's done. You're with Torres. Watch his hands, not his mouth.
+? week1:true weekday:tue
+- Your first job's mine. Glass office, quarter to nine. I'll pick it. You'll do it.
+- Rina has you at two. Health check. Go. It isn't optional.
+? week1:true weekday:wed
+- Pick your own job today. Read the whole card. Then pick.
+? week1:true weekday:thu
+- Torres is off. Board's yours. Questions come to me.
+? week1:true weekday:fri
+- Works tea at one. Bring your hands. There's a mug for you.
+
+// ---- Writer 2, batch 4: Calder toward ~100. Seasons, places, rep/you greets, callbacks on her arc memories, gifts,
+// cues, visits and notes (friend+), bubbles. No exclamation marks; never "well done"; the box's owner only from beat 3.
+== greet
+? tier>=acquaintance season:sowing
+- Sowing. Garden pumps run double. Check them before anything else.
+? tier>=acquaintance season:greening
+- Greening. The air's two points wetter. Filters clog faster. You know what to do.
+? tier>=acquaintance season:harvest
+- Harvest. The garden's chiller works twice as hard. So do we.
+? tier>=acquaintance season:lanterns
+- Lanterns. Someone always strings them across a vent. Find out who. Politely.   #funny
+? tier>=acquaintance place:mess
+- Eat. The board can wait twenty minutes. I've timed it.   #funny
+? rep:well
+- Works speaks well of you. Quietly. That's the only way Works speaks.
+? you:reliable
+- The board says you finish what you start. The board's rarely wrong.
+? rep:theirs tier>=colleague
+- You're Works now. Not new. Works. Act like it. You already do.   #warm
+
+== feel
+? mood:low tier>=friend
+- Bad day. A seal I passed last week failed today. I'll go over it again. And again.
+? mood:high tier>=friend
+- Board's at four. Four. I don't know what to do with my hands.   #funny
+
+== near
+? place:teacorner beat:calder.1
+- I don't take a break. I'm standing near the tea. It's different.   #funny
+? act:work tier>=colleague
+- Hold the torch. Lower. There. See the scoring? That's three months of bad air.
+? deck:6
+- Torres talks to the coils. I listen to them. We hear the same thing.
+
+== life
+? tier>=colleague beat:calder.1
+- Swarf still tells me things. Left of the lathe means out of true. Every time.
+? tier>=friend
+- I write one line on every tech I certify. One line. It takes me a week.
+? beat:calder.2 !beat:calder.3
+- The box on my shelf isn't mine. I've said that. I'll say more one day. Not today.
+
+== joy
+? tier>=colleague
+- A pump that's coughed for a week. Then doesn't. That's the whole job, really.
+
+== callback
+? told:moment.calder.sweep
+- You swept left of the lathe. You found the out-of-true bit. Good. Clean work.
+? told:moment.calder.taught
+- You asked what the swarf taught me. Nobody had. I've thought about it since.
+? told:moment.calder.mad
+- Two years of swarf. You said you'd go mad. You wouldn't. You'd count it.   #funny
+? told:moment.calder.bracket
+- That shelf bracket's at five turns. It's held. So has everything on it.
+? told:moment.calder.onesentence !beat:calder.5
+- One true sentence. I've written it. I haven't sent it. Yet.
+? told:moment.calder.samething !beat:calder.5
+- Your letter. The one you haven't answered. Have you? Neither have I. We're even.
+? told:moment.calder.honest
+- "Sometimes." I've thought about that. Less hard. Not soft. Less hard.
+? told:moment.calder.stillwrite
+- You write to your old teacher. Keep doing it. I'd bet they read every one.
+? told:moment.calder.lookafter
+- The toolbox. Every tool back in its place. I checked. Of course I checked.   #warm
+? told:moment.calder.onlyone
+- "Thirty years. You only took one." I keep hearing that. Don't let it go to your head.   #funny
+? told:moment.calder.thanked
+- You said it meant a lot. It meant a lot to say. That's all. Back to it.   #warm
+? told:fixed.
+- Saw your repair in the log. Signed, dated, numbers right. That's all I ask.
+? told:fav.
+- You took the job I mentioned. Done properly. Noted. Thank you.
+? told:came.
+- You came. Ten minutes, I said. I stayed twenty. Don't tell Works.   #funny
+? told:bday
+- Someone remembered my birthday. You. I don't know how. I'm not asking.   #warm
+
+== gift
+? gift:loved
+- For me. Hm. It's going on the good shelf. Next to the box.   #warm
+? gift:liked
+- Thank you. It's useful. That's the best thing a thing can be.
+? gift:polite
+- Noted. Thank you. I'll find a place for it.
+? gift:book
+- A book. I'll read it on my day off. Cover to cover. Then again, slower.
+? gift:made
+- You made this. The joins are clean. I looked. Thank you.   #warm
+
+== cue
+? cue:repair.you@dept
+- Your job's closed. Numbers right. Card signed. Good.
+? cue:event.ionStorm.warning
+- Storm's coming. Strap the loose racks. Count the spare filters. Then wait.
+? cue:event.ionStorm.onset
+- It's here. Nobody runs. Nobody shouts. Take the board in order.
+? cue:event.ionStorm.resolution
+- It's passing. Don't stand down yet. The last hour breaks the most fans.
+? cue:event.ionStorm.afterglow
+- Storm's done. Twenty-three jobs, all closed. Go and sleep. That's an order.
+? cue:tradition.harvest
+- Harvest's in. The garden's chiller held. Nobody noticed. Good.
+? cue:lateMeal
+- You ate late. Grab shelf? Fine. Once. Don't make it a habit. Pell already has.   #funny
+
+== visit
+? tier>=friend
+- I was passing. I wasn't. I brought the logs. We can read them. Or not.   #funny
+- Your vent's at the wrong pitch. One minute. Then I'll go.
+
+== note
+? tier>=friend
+- Your bench was untidy. It isn't now. Don't thank me.
+- Scrubber on Deck 4. Tomorrow, first thing. You'll like it. It's a puzzle.
+- Tea in your mug. It'll be cold by now. It's the thought.   #funny
+
+== smalltalk
+- Board's at fourteen.
+- Hear that? Bearing. Deck 4.
+- It's a mug.   #funny
+? act:work
+- Left of the bench. Always the left.
+
+== rumour
+- Not gossip. Facts. There's a difference.
+- I don't pass things on. Except this. Just this.   #funny
+
+// Writer 4, batch 17: Calder's ordinary weeks, after week one. Mostly not work: off duty she's warmer and slightly
+// embarrassed about it. Toast, tea she won't take a break for, books, listening to fans for pleasure, the mug.
+// Gates kept: the toolbox only as "not mine" before beat:calder.3; no Fenn; no birthdays known; no exclamation marks.
+
+== greet
+? tier>=acquaintance !week1:true
+- Cadet. Eaten. Good. I can tell. You're not looking at the board like it's food.   #funny
+- Right. You. Sit if you're sitting. I'm reading.
+? tier>=acquaintance !week1:true act:off
+- Day off. I'm not here. You didn't see me. Hello.   #funny
+? tier>=colleague !week1:true
+- {me}. Tea's in the pot. It's for whoever. Today that's you.
+- {me}. Good. Tell me something that isn't a fault. One thing.
+? tier>=friend !week1:true
+- {me}. Sit. I'm off. Officially. Don't tell the board.   #warm
+- There you are. I kept the good chair. By accident. Mostly.   #funny
+? tier>=close !week1:true
+- {me}. Good. Sit. Tea. Talk if you want. Or don't. Both fine.   #warm
+
+== chat
+? tier>=acquaintance !week1:true
+- I read on my days off. Shipyard histories. Engines, mostly. Some people. Fewer people.   #funny
+- Torres asked what I do for fun. I said "listen to fans". He laughed. I wasn't joking.   #funny
+- Brennan's toast. Three minutes a side. I timed it once. She saw. We don't discuss it.   #funny
+- Somebody wrote "Calder is the clock" on the bay wall. I've left it. It's accurate.   #funny
+- I drink my tea standing. It's quicker. Halloran says it's tragic. It's efficient.   #funny
+- Quiz night. Engine round. I got them all. Nobody was surprised. I was, a little.   #funny
+? tier>=colleague !week1:true
+- I went to the garden. Sat. Twenty minutes. Didn't fix anything. Odd feeling.
+- The tea corner's kettle has a whine at the top. I like it. Don't let anyone fix it.   #funny
+- I eat the same thing on Mondays. Soup. Bread. Brennan knows not to ask.   #funny
+- Kovac knitted a cover for my mug. I use it. It's still just a mug.   #funny
+- Mensah told me a joke. I laughed. A day later. In the lift. Alone.   #funny
+- The Captain asked what I'd change aboard. I said nothing. Then I gave her a list.   #funny
+- Teague's comic has me as a cloud. A tidy one. It's fair.   #funny
+? tier>=friend !week1:true
+- Off duty I'm told I'm funnier. Don't spread it. I'll deny it. Exactly.   #funny
+- I used to sweep swarf in a shipyard. I still like a swept floor. Some things stay.
+- The toolbox on my shelf isn't mine. That's all. I'm not ready for the rest.
+? tier>=close !week1:true
+- You're good company. I don't say it. I've said it. Noted.   #warm
+- Some nights I sit in the bay with the lights low. Just listening. It's like the sea.
+
+== near
+? act:breakfast !week1:true
+- Tea. Toast. Then the board. In that order, every day.
+? act:dinner !week1:true
+- Dinner. Ten minutes. Fifteen if it's soup. It's soup.   #funny
+? act:off
+- Day off. A book and a fan I can hear from my cabin. It's running right. Good.
+? place:hydroponics_garden
+- The garden. Nothing's broken here. I find that restful. Mostly.
+? place:lounge !week1:true
+- Lounge. Hm. Halloran made me come. I'm sitting very still. So nobody notices.   #funny
+? place:teacorner
+- Tea corner. I don't take a break. I'm standing. Standing isn't a break.   #funny
+? trad:jam
+- Music night. I'll stay for one song. Two if it's in time.   #funny
+
+== feel
+? mood:high !week1:true
+- Good day. Good. That's twice. Write it down.   #funny
+? mood:ok !week1:true
+- Nominal. Like the air. That's a good report.
+? mood:low tier>=friend !week1:true
+- Tired. I'll listen to the fans for a bit. Then sleep. It works.
+
+== life
+? tier>=acquaintance !week1:true
+- My cabin has one chair, one lamp and a lot of manuals. It's enough.
+? tier>=colleague !week1:true
+- I learnt to cook from a shipyard galley. Badly. Eggs, mostly. I still do the eggs.
+- I keep my boots by the door, laces in. Never been late once. Not once.
+? tier>=friend !week1:true
+- I write letters on my days off. Short ones. Numbers in them, mostly. People like numbers.   #funny
+
+== joy
+? tier>=acquaintance !week1:true
+- A whole deck where every fan sounds right. I stand there. Two minutes. Sometimes three.
+? tier>=colleague !week1:true
+- Somebody I certified fixing a thing I never taught them. Quietly. That one.   #warm
+
+== bye
+? !week1:true
+- Back to it. Eat something first.
+- Carry on, {me}. Sleep tonight. Properly.   #warm
+- Board's there. It'll be there tomorrow too. Go and rest.
+
+== callback
+? told:intro.dinner tier>=acquaintance !week1:true
+- Your first night. I wasn't there. Day off. You remember.   #funny
+? told:intro.dinner tier>=friend
+- First dinner, you sat up straight when I came over. Torres told you to. I could tell.   #funny
+? told:fixed. tier>=acquaintance !week1:true
+- Your repairs. The first one, that Tuesday. Clean work. I didn't say. Saying now.   #warm
+? told:fixed. tier>=colleague
+- {thing}. Your repair. I listened to it after. It sounded right. Good.
+? told:came.quiz tier>=acquaintance
+- Quiz night. You got the serial number question. I noticed. Not bad.   #funny
+? told:came.jam tier>=acquaintance
+- Music night. You stayed past the second song. So did I. Neither of us mentions it.   #funny
+? told:bday tier>=acquaintance
+- Someone told me your birthday. I wrote it down. It's on the list. With the pumps.   #funny
+? told:came.observatory tier>=acquaintance
+- Observatory night. You found the array from the window. Most can't. Good eyes.
+
+// Writer 5, batch 5: if they are ever transferred (goodbye with leaving:you, also the "Sorry I missed you at the
+// shuttle" Mail; packing as feel with leaving:soon; letters after). Nothing of her arc: no Fenn, no toolbox's story, no junior on the Halcyon.
+
+== feel
+? leaving:soon
+- Ten days. The board's handed over. Every job. Every note.
+- Packing. One bag. The mug comes. It's a mug.   #funny
+? leaving:soon tier>=friend
+- Walked the bay twice tonight. Listening. The fans are all right. Good.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm leaving the Wren. The board's in good hands. Do the jobs on it.
+? leaving:you tier>=colleague
+- You do clean work, {me}. Keep doing it. That's all.
+? leaving:you tier>=friend
+- I keep a list of every tech I've certified. You'll be on it one day. Note's written.   #warm
+
+== letter
+- New ship. Their fans are loud and nobody's noticed. I've noticed. Keep the Wren's board short.
+- The board here is longer than ours. I've started on it. Tell Torres to be patient. He won't be.   #funny
+? tier>=friend
+- Nobody thanks the air. I've been thinking about the Wren's, though. Still working, I expect. That's you lot. Carry on.   #warm
+
+// Writer 5, batch 6: seasons and traditions (the game's ids: running Mon, quiz Thu, works-tea and jam Fri, film and
+// observatory-night Sat, market (the swap meet) Sun, harvest (harvest morning), hull-lights, founding (day 100),
+// quiet-watch (day 300)), plus trad:today. Gaps filled only; arc gates kept.
+
+== near
+? trad:works-tea
+- Friday tea. Ten minutes. Then the board. It's always the board.
+? trad:quiz
+- Quiz. I do the numbers round. Nobody argues with me in the numbers round.   #funny
+? trad:market
+- Swap meet. I'm after a particular spanner. They never have it. I keep looking.
+? trad:running
+- Gym club. I don't run. I walk the bay. It's further than you'd think.   #funny
+? trad:film
+- Film night. I came once. I spent it listening to the screen's cooling fan.   #funny
+? trad:observatory-night
+- Observatory. Torres says look up. I check the dome seals. Then I look up. Briefly.   #funny
+? trad:harvest
+- Harvest morning. The irrigation pumps are on full. I can hear them from here. Good.
+? trad:hull-lights
+- Hull lights tonight. Every lamp working. I checked them myself. Then I'll look.
+? trad:founding
+- Founding Day. Cake. The Captain speaks. I stand at the back, near the door.
+? trad:quiet-watch tier>=friend
+- The quiet watch. I stand at the bay window. I don't say who for. That's the point.
+
+== smalltalk
+? trad:today
+- Something on tonight. The board can wait. An hour.   #funny
+? trad:works-tea
+- Ten minutes. Then back to it.
+
+// Writer 5, batch 9: week-1 beats for the onboarding hook (onboarding seat 1's list, 2026-10-17). One flag key per
+// line, beat.<beatId>.<n>, said in order as bubbles while you are in the beat's room in its window; best first
+// (onboarding drops the rest when you leave). Mail texts: mail.<beatId>, one line "Subject | body", unsigned.
+
+== week1
+// mail d7-calder: Sunday 18:00
+? flag:mail.d7-calder
+- One week | One week. You'll do. The board's there on Monday.
+// mail settled: everything on your week-1 list done
+? flag:mail.settled
+- Settled | Everything on your list, done. Good. Carry on.
+
+// Head writer 0607: Name on the beam (first Monday, 17:05, the Works bay). The Chief's one line, after your name goes
+// up (the traditions engineer's flag trad.beam.chief).
+== week1
+? flag:trad.beam.chief
+- Every name on that beam kept this ship flying. Now yours does too.   #warm
+
+// ---- Pillar 5 (head writer, seat W): Calder teaching. Kind 'work', flags set by seat C's training (24.2) and the
+// head-scratcher engine (24k): train.<id>.lead.<step> while she does the job and you watch, train.<id>.follow.<step>
+// while you lead. Every line under a flag plays in order. Bubbles, 60 characters or fewer. Exact, few words.
+== work
+// M7, the scanner: she reads the first one (lead)
+? flag:train.m7.lead.take
+- Held for you. Read the card. What's it doing?
+? flag:train.m7.lead.hold
+- Watch. Panel, scanner, wait.
+- That one's at twenty. There's your problem.
+- The rest read good. Leave them.
+? flag:train.m7.lead.fetch
+- Right shelf. One part, not two.
+? flag:train.m7.lead.hold
+- Old one out. New one seated. Check it twice.
+? flag:train.m7.lead.done
+- Done. Your turn next.
+// M7: you read one, she follows
+? flag:train.m7.follow.take
+- Yours. I'm only watching. Mostly.
+? flag:train.m7.follow.hold
+- Look first. Then scan. Then think.
+- Read me the lowest. Out loud.
+? flag:train.m7.follow.choose
+- Your pick. I won't nod. Choose.
+? flag:train.m7.follow.fetch
+- Right shelf. Good.
+? flag:train.m7.follow.done
+- Right part, first time. Noted.
+? flag:train.m7.follow.turnin
+- Turn it in. Then the board. Something's come up.
+// P3, the first head-scratcher: she follows you to the washer and back
+? flag:train.p3.follow.hold
+- There's the other note. Taped to the panel. Read it.
+- Swapped the drain valve. Still leaks. So?
+? flag:train.p3.follow.choose
+- Two crossed off. One left. Call it.
+? flag:train.p3.follow.fetch
+- Pump. Plumbing shelf.
+? flag:train.p3.follow.hold
+- The scanner sees what's worn. The notes see what's been tried.
+? flag:train.p3.follow.done
+- Floor's dry. Right first time.
+- Torres will be sorry he missed that.
+? flag:train.p3.hint.2
+- Read every note. One isn't on the card.
+? flag:train.p3.hint.3
+- The washer's panel. Second note. Go and look.
+// M5 tuning (Day 4): she does Oven 1 (lead), you do Oven 2 (follow).
+? flag:train.m5.lead.turn
+- One down. Watch it.
+- Another. Steady now. Done.
+? flag:train.m5.follow.turn
+- The glow. Not the card. Watch the glow.
+- Too far. It's dimming. Back one.
+? flag:train.m5.follow.done
+- Settled. That's tuning.
+// M6 incidents (Day 8): you lead every step; she follows.
+? flag:train.m6.follow.choose
+- Which valve? Follow the pipe.
+? flag:train.m6.follow.wrong
+- Still running. That one's downstream. Again.
+? flag:train.m6.follow.clean
+- Water's off. Mop. Plenty of it.
+? flag:train.m6.follow.fetch
+- One seal. Stores. Then the joint.
+? flag:train.m6.follow.done
+- Safe, clean, fixed. In that order. Good.
+
+// M3 the drill: her line at the end, from how long the Works team took (seat M1's fast / ok / slow)
+== drill.time.fast
+- Two minutes ten. Better.
+- Quick. Friday tea will hear about it.
+== drill.time.ok
+- Three minutes. Fine. We'll do better.
+- Not bad. Not good either. Next week.
+== drill.time.slow
+- Four and a half minutes. We'll talk about it.
+- Slow. Somebody stopped for tea. I know who.   #funny
+
+// M2: grubby uniform, briefly
+== clothes.grubby
+? flag:clothes.grubby
+- Change before you go near the galley.
+- Uniform. Wardrobe. Today.

@@ -1,0 +1,593 @@
+@crew pell
+// Writer-commons, batch 1 (for the Voices sampler). Pell's card is the head writer's. Nothing about his mum's shop
+// before tier friend; the music boxes are told from beat 1 (acquaintance), so the screw tin is safe there.
+
+== greet
+? tier=stranger
+- {hi}. New hand? Pell, Works. If it's broken, I've probably fixed it once.
+? tier>=acquaintance time:morning
+- {hi}, {nick}. Is it morning? It feels like it shouldn't be morning.   #funny
+? tier>=acquaintance
+- {hi}, {nick}. Grab shelf's just been restocked. Act natural.
+? tier>=colleague
+- Calder looked at my weld and said "Fine." I'm having it framed.   #funny
+? tier>=friend
+- {nick}! Sit down. I saved you a biscuit. Well, half. It was a long walk.   #warm
+
+== feel
+? mood:high
+- Good day. Fixed a pump, ate twice, and nobody caught me napping.
+? mood:low
+- I'm fine. I'm fine. Just tired. Ask me again after a nap.
+
+== near
+? act:work
+- Hold this. No, the other end. Perfect. You're a natural, {nick}.
+? act:meal
+- Is that pudding? Are you going to eat all of that pudding?   #funny
+
+== life
+? tier>=acquaintance
+- Taught myself engines from an old manual. Half the pages were missing. Worked it out.
+? tier>=colleague
+- I talk in my sleep. About engines. Rina's taken notes. They're not flattering.   #funny
+
+== joy
+? tier>=acquaintance
+- Every screw in this tin's from a ship I've fixed. One day they'll play a whole tune.
+
+== week1
+// The arrival evening, steps A9-A10: Pell joins your table in the mess (if he's there), before Calder stops by.
+// Day 0 only: Sunday, before the week1.d2 flag. The head writer and onboarding may want an intro-step condition.
+? week1:true weekday:sun time:evening !flag:week1.d2
+- Oi oi. Mind if I sit? I'm Pell. Works. Bunk 2, next door to yours.
+- You're the new hand! Brilliant. Has Torres talked your ear off yet? Give him time.   #funny
+- A tip: the grab shelf. It's for emergencies. And me.   #funny
+- Another tip: a panel on Deck 5 sticks. I'll show you which. Don't tell Calder.
+- Eat the pudding first. Brennan's pudding goes fast and life's short.
+- Welcome aboard, honestly. It's a good ship. Good people. You'll see.   #warm
+? week1:true weekday:sun time:evening !flag:week1.d2 act:dinner
+- Quick tip: the Chief's coming over. Sit up. Not that straight. Just normal straight.   #funny
+
+// Writer-commons, batch 4: up to about 60. His mum's shop only from tier friend; the practical from beat:pell.5.
+
+== greet
+? tier>=acquaintance time:evening
+- {hi}, {nick}. Dinner was good. I had two. Don't tell Brennan. She knows.   #funny
+? tier>=acquaintance time:afternoon
+- {hi}. Afternoon's the worst bit. Too late for a nap, too early for dinner.
+? tier>=colleague warmth:cold
+- There you are! I was about to send a search party. Of one. Me. After lunch.   #funny
+? tier>=colleague place:calm
+- {hi}, {nick}. Pull up a seat. This one's warm. I've been warming it.
+? tier>=close
+- {nick}! Best person on the ship. Don't tell the others. Tell the others.   #warm
+
+== bye
+? tier>=acquaintance
+- Right, I'm off. Things to fix. Things to eat. Mostly eat.   #funny
+- {bye}. Mind the Deck 5 panel. It bites.
+? tier>=colleague time:night
+- Night, {nick}. If you hear engine noises, that's me asleep. Ignore it.   #funny
+? tier>=friend
+- Cheers for this. You're a good one, {nick}. I mean it.   #warm
+
+== feel
+? mood:ok
+- Fine. Fed. Mostly awake. Can't ask for more.
+? mood:low tier>=friend
+- Bit flat. Mum's messages again. I'll be all right. Sit with me a minute?
+
+== near
+? act:leisure
+- Screw tin's out. New music box. This one plays a sea shanty. Eventually.
+? act:gym
+- Gym. My idea. I regret it. I'll regret it less after lunch.   #funny
+? deck:5
+- Know which panel sticks? That one. Hip-height kick. Gently. Like a friend.
+
+== life
+? tier>=colleague
+- I can sleep anywhere. Except my bunk, at night. Science can't explain it.   #funny
+? tier>=friend
+- Mum runs a mending shop back home. Kettles, radios, coats. That's where I learnt.
+? beat:pell.5
+- Calder's practical. Every time I think of it, I need a biscuit. I've had a lot.   #funny
+
+== invite
+? trad:quiz tier>=acquaintance
+- Quiz tonight. We need someone who knows the engines. And someone to eat my crisps. You in?
+? trad:jam tier>=acquaintance
+- Music jam tonight. I'm bringing a music box. Don't laugh. Laugh a bit.
+? tier>=colleague time:evening
+- Tea corner? I've got biscuits nobody's supposed to know about.
+
+== accept
+- Go on, then! I'll bring snacks. I always bring snacks.
+- You bet. Wouldn't miss it. Unless I fall asleep. I won't. Probably.   #funny
+
+== decline
+- Ah, nuts. Can't. Calder's got me on a pump. Another time? Promise?
+- Not tonight. I'm asleep. Well, I will be. Planning ahead.   #funny
+
+== missed
+- You weren't there! I ate your share. As a lesson. A delicious lesson.   #funny
+- Missed you earlier. No harm done. Next time, eh?
+
+== birthday
+? birthday:me
+- It's my birthday. I've told everyone. Twice. Is there cake? There's always cake.   #funny
+? birthday:you
+- Happy birthday, {nick}! I made you something. Three notes. The fourth's coming.   #warm
+
+== hint
+- Got a minute? A proper one. Not a Pell minute. Those are long.
+
+== week1
+? week1:true weekday:mon time:morning
+- Morning, new hand! Tea break's at one. That's the important bit. The rest is work.
+? week1:true weekday:wed tier<=acquaintance
+- There you are. Settling in? Come and chat. Quiz is tomorrow. You're on my team now.
+? week1:true weekday:thu time:evening
+- Quiz night! Sit there. Know anything about engines? Good. Food? Even better.
+
+== greet
+? tier>=acquaintance deck:4 time:night
+- {hi}. Can't sleep. Classic Pell. I'll sleep at lunch. In a cupboard. Possibly.   #funny
+? tier>=acquaintance act:work
+- {hi}, {nick}. Hand me that. No, that. Thanks. You're hired.
+
+== near
+? act:breakfast
+- I'm awake. I'm awake! Is there toast? There's toast. Good. Now I'm awake.   #funny
+? act:work
+- Listen. Hear that? The bearing's going. Week, maybe. I'll put it on the board.
+
+== life
+? tier>=acquaintance
+- I nearly didn't come to the Wren. Best decision I nearly didn't make.
+? tier>=colleague
+- Found both secret biscuit tins aboard. Told nobody. I'm a vault. A hungry vault.   #funny
+
+== feel
+? mood:high tier>=colleague
+- Good day! Fixed a fan, found a biscuit, had a nap. In that order. Perfect.
+
+== about
+? aff:rina:friend
+- Rina? Two years of insults. Best friend I've got. Don't tell her. She knows.   #warm
+? bond:friends
+- {friend}'s all right. Saved me pudding when I was late. Twice. In one day.   #funny
+
+// Writer 3, batch 1: callbacks, visits and notes (the game adds his name to a note). Moment memories are
+// moment.pell.<word> from beats 5-8. The handover's loose end: if you timed him (mem:moment.pell.timed), he says so
+// once he's passed (beat 7).
+
+== callback
+? told:moment.pell.timed beat:pell.7
+- You timed me every night. Then I passed. Those two things are related. I've checked.   #warm
+? mem:moment.pell.timed !beat:pell.7
+- Machine shop after shift? You bring the watch. I'll bring the nerves. And biscuits.
+? told:moment.pell.cheered
+- "A pump's nothing." I've been saying it to myself. Out loud. Halloran's worried.   #funny
+? told:moment.pell.listened
+- Cheers for sitting with me. For the messages. I slept after. At night! A first.   #warm
+? told:moment.pell.mechanic
+- "Raised a mechanic in a scrapyard." I told Mum you said that. She's chuffed to bits.   #warm
+? told:moment.pell.help
+- That lad two doors down? I've sent him three lessons. He's hopeless. He's getting better.   #funny
+? told:moment.pell.knew
+- You knew I'd pass. You were right. Don't let it go to your head. Let it go a bit.   #funny
+? told:moment.pell.glad
+- Still here. Still glad. Don't go soppy on me. Have a biscuit.   #warm
+? told:moment.pell.why
+- Pudding and a pump. That's what kept me. I told Brennan. She gave me more pudding.   #funny
+? told:moment.pell.shared
+- Still unpacked? Good. I'll know if you pack. I know everything in the junior wing.   #funny
+? told:show.pell-show
+- You came to the music boxes. I saw you. The waltz went better because of it.   #warm
+? told:came.quiz
+- You came to quiz! We came fourth. Out of five. That's nearly a medal.   #funny
+? told:came.jam
+- Cheers for coming to the jam. The music box went down a storm. Well. Nobody left.   #funny
+? told:fav.fetch
+- You fetched it! I'd have fetched it after a nap. A long nap. You're a legend.   #funny
+? told:fav.lamp
+- My lamp's fixed. I can see my screws now. Turns out half of them are bolts.   #funny
+? told:fav.job
+- You did my job! Calder thinks it was me. I'll tell her. Tomorrow. Cheers, {nick}.   #funny
+? told:gift.sweet
+- Those sweets lasted a whole day. A record. Well, an afternoon. Cheers.   #funny
+? told:gift.tea
+- Your tea's in my locker. I make it when I can't sleep. So, every night.   #funny
+? told:gift.made
+- The thing you made me's on the shelf, next to the screw tin. Pride of place.   #warm
+? told:gift.music
+- Played your music all through my shift. Calder hummed. I swear she hummed.   #funny
+? told:fixed.pump
+- You sorted the pumps? Clean work. That's what Calder says. Now I'm saying it.
+? told:bday
+- You remembered my birthday! And you didn't even make me share the cake. Legend.   #funny
+? told:grubby
+- You were grubbier than me yesterday. Never thought I'd see the day. Respect.   #funny
+? told:heard.moment.rina
+- Rina rates you. She won't say. She's stopped counting your losses out loud. Huge.   #funny
+? told:heard.moment.tomas
+- Tomas reckons you're the best bunkmate on the Wren. After the star map. Close second.   #warm
+
+== visit
+- Oi oi. Brought snacks. Don't ask from where. Shove up.   #funny
+- Couldn't sleep. Course I couldn't, it's night. Fancy a natter?   #funny
+- New music box. Three notes. Listen. No, that was two. Hang on.
+- Right, so. I was passing. I wasn't. I came on purpose. Biscuit?   #warm
+- Tomas let me in. He said you'd be glad. Are you glad? Say yes.   #funny
+
+== note
+- Came by. You were out. I ate one of your biscuits and left you the other. Fair's fair.   #funny
+- Found a good spanner. It's on your pillow. Don't tell Calder where I found it.   #funny
+- Grab shelf's just been restocked. Act natural. You didn't hear it from me.
+- Knocked, nobody home. Tea corner tomorrow? I'll bring the nice biscuits.
+- Waited ages. Fell asleep in the doorway. Tomas stepped over me. Sorry.   #funny
+
+// Writer 3, batch 3: towards 120. Seasons, places, bubbles, cues. Rest days Tue, Wed (the game's roster); rest-day
+// lines use act:off. His mum only from tier friend.
+
+== greet
+? tier>=acquaintance place:mess
+- {hi}. Grab shelf's looking healthy today. I've checked. Twice.   #funny
+? tier>=colleague act:off
+- Day off! I'm sleeping in. It's already eleven. I'm sleeping in more.   #funny
+? tier>=friend time:morning
+- Morning, {nick}. I'm up. Before tea. Write it down somewhere.   #funny
+? tier>=acquaintance season:harvest
+- Harvest! More food. I support this season. Fully.   #funny
+? tier>=acquaintance season:lanterns
+- Lanterns are up. I wired half of them. Don't look at the wonky one.   #funny
+? tier>=acquaintance season:sowing
+- Sowing. Garden's all seedlings. Don't tread on mine. It's the leaning one.
+
+== bye
+? tier>=acquaintance time:evening
+- Off to dinner. Second dinner. First dinner was a test run.   #funny
+? tier>=close
+- Laters, {nick}. You're a good one. Don't tell the grab shelf.   #warm
+
+== feel
+? mood:low tier>=colleague
+- I'm fine. I'm fine. Bit tired. Bit hungry. Same as ever, really.
+? mood:high tier>=acquaintance
+- Calder said "Hm" at my work. A good "Hm". You can tell by the eyebrows.   #funny
+
+== near
+? place:teacorner
+- Tea corner. Best room on the ship. It's not a room. Still the best.   #funny
+? act:dinner
+- {dish}! Second helping's mine. Third's up for discussion.   #funny
+? place:musicroom
+- Wound up a music box in here once. Vance shushed it. In the music room.   #funny
+? deck:6
+- Down below. Hear the coils? Torres says three's sulking. I say three's thinking.
+? act:wash
+- Is the hot water still on? Don't tell me. I'll find out the hard way.   #funny
+
+== life
+? tier>=acquaintance
+- Spare screws from every ship I've worked on. Seven ships. One tin. Very heavy tin.
+? tier>=colleague
+- Calder knows I nap in the parts store. She's never said. That's how I know she knows.   #funny
+? tier>=friend
+- Mum mends coats too. Proper stitching. Mine always looks a bit scared.   #funny
+? tier>=friend
+- Mum sends "eat, sleep, call" every week. I eat. I'm working on the other two.   #funny
+
+== joy
+? tier>=colleague
+- Best feeling? Something was broken, now it isn't, and nobody noticed. Perfect.
+
+== invite
+? tier>=acquaintance time:afternoon
+- Tea break? I've found the good biscuits. Don't ask where. Come on.
+? trad:film tier>=acquaintance
+- Film night! Bring snacks. I'll bring more snacks. We'll share. Some.   #funny
+
+== about
+? aff:brennan:friend
+- Brennan's the best. She feeds me. That's not why. Well. It's a bit why.   #funny
+? aff:calder:friend
+- Calder? Toughest chief on the Wren. Fairest, too. I'd fix anything she asked.   #warm
+
+== smalltalk
+- Is that toast? Someone's got toast.   #funny
+- That panel's going to stick. I can feel it.
+- Nap at lunch. That's the plan.   #funny
+- Hear that? Bearing. I'll put it on the board.
+? act:work
+- Hold this. Ta. No, the other end.
+
+== rumour
+- Right, so. You didn't hear this from me.
+- Heard it at the grab shelf. Very reliable source.   #funny
+
+== cue
+? cue:event.ionStorm.onset
+- Storm's here. Grab shelf's stocked. I checked first. Priorities.   #funny
+? cue:event.ionStorm.resolution
+- Storm's done. Everything held. Told you she's a good ship.   #warm
+? cue:lateMeal
+- Late plate? Welcome to my world. The grab shelf's a way of life.   #funny
+? cue:tradition.quiz.you
+- You were brilliant at quiz! The engine round. I nearly cried.   #warm
+? cue:repair.you@dept
+- Saw your job on the board. Clean. Calder'll say "Fine." That's a medal.   #warm
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- Calder put your name on the good jobs list. Don't tell her I peeked. I peeked.   #funny
+? rep:theirs
+- You're Works now, {nick}. Properly. The tea corner's got your mug on the good hook.   #warm
+? you:reliable
+- Word in the bay is you finish what you start. Rarest thing aboard. After biscuits.   #funny
+? you:chatty
+- Everyone knows you. You chat more than me. I'm impressed. Bit worried, but impressed.   #funny
+
+// Writer 3, batch 8: thanks for a gift (gift: loved | liked | polite, or the gift's tag; dialogue 0.43.10).
+
+== gift
+? gift:sweet
+- Is this for me? All of it? Don't answer. I've started. You're a legend, {nick}.   #funny
+? gift:loved
+- Get in! This is brilliant. You know me too well. Worryingly well.   #warm
+? gift:liked
+- Cheers, {nick}! Very kind. It's going next to the screw tin. Pride of place. Nearly.
+? gift:polite
+- Oh! Cheers. I'll find a use for it. I find a use for everything. Eventually.   #funny
+
+// Writer 3, batch 9: asking after your people back home (the home flags; only the big news you'd have told them).
+
+== greet
+? flag:home.mum.mug tier>=colleague
+- Your mum's mug. Bring it to Works tea. It leans? Good. So does the hook.   #warm
+? flag:home.jo.launched tier>=colleague
+- Your Jo built a whole boat? By hand? Respect. Tell them I want a go. I'll fix the oars.   #funny
+
+// Writer 4, batch 4: Tiles talk (lineFor(who, 'tiles.<kind>')).
+== tiles.start
+- Oi oi. Tiles. Loser fetches the biscuits.   #funny
+- Go on, you first. I'm just waking up.   #funny
+- I play like I fix things. Badly, then brilliantly.   #funny
+== tiles.dock
+- Docked! Click, like a panel. Lovely.
+- Three. Did you see that? Tell Rina.   #funny
+- Snug as a screw in a tin.   #funny
+== tiles.miss
+- Ooh, you missed one. Just there. By the corner.
+- That's a three, that is. Was. Gone now.   #funny
+== tiles.win
+- I won? Write it down. Show Rina.   #funny
+- Good game. Biscuits are on you.   #funny
+- Close one. I nearly dozed off and still won.   #funny
+== tiles.lose
+- Fair. You got me. Biscuits are on me.   #funny
+- Beaten. Lovely. I'm going for a nap.   #funny
+- Well played. Don't tell Rina. She'll be thrilled.   #funny
+
+// Writer 4, batch 10: Pell on a repair you did (cue:repair.you), in his own words.
+== cue
+? cue:repair.you tier>=acquaintance
+- Oi oi! Heard you fixed a thing. Was it the panel? It's never the panel.   #funny
+- Nice one! Did it fight you? They always fight me. Then I win. Usually.   #funny
+- You fixed it? Brilliant. I'd have napped first, then fixed it. Same result.   #funny
+- Heard about your job. Proper. Calder'll pretend she didn't notice. She noticed.
+? cue:repair.you@dept
+- That was on the board for ages. I was saving it. For you. Obviously.   #funny
+- Look at you, clearing the board. I'll have nothing to do. Lovely. Nap.   #funny
+- Good job. Want a screw from my tin? To remember it by. From the Wren pile.   #warm
+? cue:repair.you tier>=friend
+- Mate. That was good work. I'm not even joking. Bit proud, me.   #warm
+- You're getting better than me. Don't tell anyone. Don't tell Rina.   #funny
+? cue:repair.you mood:low
+- Nice fix. Honestly. Glad someone's on form today. It's not me.
+
+// Writer 5, batch 2: Pell's ordinary weeks, after week one. Mostly not work: food, naps, rest days Tue-Wed, the
+// swap meet, music boxes, the gym (his idea, every time), laundry, Bunk 2 (Rina's count, Tariq and Lukas's onions,
+// Erik's races), Tomas next door. Gates kept: his mum's shop only from tier friend; nothing of the practical, the
+// fourth message, her hands or his first month (beats 5-8, close).
+
+== greet
+? tier>=acquaintance !week1:true
+- {hi}, {nick}. Have you eaten? I have. Twice. Just checking on you.   #funny
+- {hi}. I'm on my way to a nap. Walk me halfway. Keep me awake.   #funny
+? tier>=acquaintance !week1:true time:morning
+- Morning. I'm here in body. The rest of me's still in bed.   #funny
+? tier>=colleague !week1:true act:off weekday:tue
+- Day off! Tuesday. Everyone's at work but me. Best feeling there is.   #funny
+? tier>=colleague !week1:true
+- {hi}, {nick}. Tell me something good. Food counts.
+? tier>=friend !week1:true
+- {nick}! Just the person. I need a second opinion on a sandwich.   #funny
+- There you are. Sit. I've got crumbs and news. Mostly crumbs.   #funny
+? tier>=close !week1:true
+- {nick}! Sit. Tell me everything. Skip the boring bits. Keep the food bits.   #warm
+
+== chat
+? tier>=acquaintance !week1:true
+- Rina says I snore in tune. I'm taking that as praise.   #funny
+- Swap meet's the best day aboard. I traded a bolt for a better bolt. Very proud.   #funny
+- Ivo's carried trays for three years. Never dropped one. I drop spoons just watching.   #funny
+- Brennan's sponge pudding. I plan my week round it. Badly, but round it.   #funny
+- The gym's my idea every time. Every time I'm wrong. I keep going anyway.   #funny
+- Tomas next door counts windows. I count biscuits. We both lose count.   #funny
+? tier>=colleague !week1:true
+- Rest days I sleep till ten, eat, nap, eat. It's a system. It works.   #funny
+- I'm building a music box that plays the mess bell. Brennan's asked me not to.   #funny
+- Tariq and Lukas race at chopping onions. I'm the judge. I'm paid in onions. Bad deal.   #funny
+- Laundry day, I wear the shirt with the fewest holes. It's a short list.   #funny
+- Quiz night I do the engines round. And the pudding round. There's no pudding round. Yet.   #funny
+- Tomas asked how I sleep anywhere. I said practice. He's been practising. Badly.   #funny
+- Erik says he's the fastest in Bunk 2. Tariq says otherwise. I stay out of it. With snacks.   #funny
+- Rina and me: two years of insults. She's ahead. She keeps count. Course she does.   #funny
+? tier>=friend !week1:true
+- Mum taught me to darn a sock. I darn everything now. Even things that aren't socks.   #funny
+- The shop had a radio that only got one station. Mum liked it that way. So did I.
+- Every ship, I find the warmest spot in my first week. Here it's the tea corner.
+- Some evenings I wind all the music boxes at once. Sounds like rain on the shop roof.
+? tier>=close !week1:true
+- Know what I like here? Nobody minds a nap. Well, Calder. But quietly.   #funny
+
+== near
+? act:breakfast !week1:true
+- Toast, tea, toast. I'm awake by the second toast. Mostly.   #funny
+? act:off !week1:true
+- Rest day. Nap's booked for eleven. Lunch at twelve. Nap at one. Busy.   #funny
+? act:gym
+- Weights. Three. Then a sit-down. The sit-down's the important bit.   #funny
+? place:laundry
+- Laundry's warm. If I'm not back in an hour, I'm asleep on the dryer.   #funny
+? place:junior_common_room !week1:true
+- Rina's at the Tiles table. Don't sit opposite her. Learn from my mistakes.   #funny
+? place:hydroponics_garden
+- Cruz lets me sit by the big tree if I don't touch anything. I touch nothing.
+? trad:market
+- Swap meet! I've brought three bolts. Very good bolts. Nearly round.   #funny
+
+== feel
+? mood:high !week1:true
+- Good day. Slept, ate, wound a music box. It played every note in order. Get in.
+? mood:ok !week1:true
+- Fine, ta. Bit full. Bit sleepy. Classic.
+? mood:low tier>=friend !week1:true
+- I'm fine. I'm fine. Bit homesick for the smell of solder and Mum's tea.
+
+== life
+? tier>=acquaintance !week1:true
+- I've got one good jumper and one bad jumper. The bad one's warmer.   #funny
+? tier>=colleague !week1:true
+- I can cook one thing: beans on toast. I've perfected it. Brennan disagrees.   #funny
+? tier>=friend !week1:true
+- A dog lived in the scrapyard behind Mum's shop. Not ours. It came for the sandwiches.   #funny
+
+== joy
+? tier>=acquaintance !week1:true
+- Winding a new music box for the first time. You never know what it'll play.
+? tier>=colleague !week1:true
+- A hot plate from the grab shelf at midnight. That's joy, that is.   #funny
+
+== invite
+? tier>=acquaintance !week1:true act:off
+- Day off? Come to the mess. Second breakfast. It's a real thing. I've made it real.   #funny
+? trad:running tier>=colleague
+- Gym club? I'll come. I'll walk most of it. Moral support.   #funny
+? trad:market tier>=acquaintance
+- Swap meet! Bring something. Anything. I'll trade you a screw for it.   #funny
+
+== bye
+? tier>=acquaintance !week1:true
+- Right, so. Lunch. Then the thing after lunch. Also lunch.   #funny
+? tier>=friend !week1:true
+- {bye}, {nick}. Eat something. Mum says it to me, so I'm saying it to you.   #warm
+
+== smalltalk
+? !week1:true
+- Biscuit o'clock. It's always biscuit o'clock.   #funny
+- Is it lunch yet? It's nearly lunch.
+- I could sleep right here. I might.   #funny
+? act:off
+- Day off. Nap first. Then a bigger nap.   #funny
+? place:laundry
+- Warm towels. Best thing aboard.
+
+== rumour
+? !week1:true
+- Grab shelf gossip. Very fresh. Still warm.   #funny
+- Heard it in the laundry. The dryers know everything.   #funny
+
+== callback
+? told:intro.dinner !week1:true
+- Your first night, I sat at your table without asking. Got a pudding and a mate. Good move.   #warm
+? told:came.market
+- You came to the swap meet! You traded better than me. I got a bolt. You got a story.   #funny
+? told:came.harvest
+- Harvest! You carried crates. I carried one thing. A plate. A very full plate.   #funny
+? told:came.film
+- Film night! You stayed awake for the ending. I didn't. How did it end?   #funny
+? told:came.running
+- You went to Gym club. I watched from a bench. Very supportive bench.   #funny
+? told:came.works-tea !week1:true
+- Works tea! You took the last biscuit. I let you. I'll remember that forever.   #funny
+? told:gift.game
+- That game you gave me? Rina's beaten me at it already. Twice. Cheers, really.   #funny
+? told:fixed.oven
+- You fixed the oven? That's pudding saved. That's lives saved, basically. Legend.   #warm
+
+// Writer 5, batch 4: if Pell is ever transferred (goodbye leaving:you, packing as feel leaving:soon, letters after;
+// the goodbye also goes into the "Sorry I missed you at the shuttle" Mail). Nothing of his arc: no practical, no
+// shop, no first month. "Eat, sleep, write" is his mum's three messages turned round, and safe from tier friend.
+
+== feel
+? leaving:soon
+- Packing. Screw tin's packed. Then I needed a screw. Packed it again.   #funny
+- New ship in ten days. I asked about their grab shelf. They haven't got one. Worrying.   #funny
+? leaving:soon tier>=friend
+- Bit odd, going. I know which panel sticks here. Now I've got to learn a whole new one.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Off to a new ship, me. Mind the Deck 5 panel. Kick it gently. Like a friend.
+? leaving:you tier>=colleague
+- Take a screw from the tin. The Wren pile. So there's a bit of Bunk 2 in your toolbox.   #warm
+? leaving:you tier>=friend
+- You're a good one, {nick}. Eat. Sleep. Write. That's three messages. Answer them.   #warm
+
+== letter
+- New ship's all right. Their biscuits are hidden badly. Found the tin on day two. Told nobody. Some things don't change. Hello to Bunk 2.   #funny
+- The bay here hums in a different key. I'm getting used to it. Tell Calder their job board's longer than ours. She'll pretend she doesn't care.
+? tier>=friend
+- Built a music box out of this ship's spares. Three notes. Wound it up and thought of the Wren. Eat something. Sleep. Write back.   #warm
+
+// Writer 5, batch 6: seasons and traditions (the game's ids: running Mon, quiz Thu, works-tea and jam Fri, film and
+// observatory-night Sat, market (the swap meet) Sun, harvest (harvest morning), hull-lights, founding (day 100),
+// quiet-watch (day 300)), plus trad:today. Gaps filled only; arc gates kept.
+
+== greet
+? season:greening tier>=acquaintance
+- {hi}. Greening. Everything's growing. Including my appetite. Mostly my appetite.   #funny
+
+== near
+? trad:works-tea
+- Friday tea! Real biscuits. Halloran's not allowed to choose this week.   #funny
+? trad:observatory-night
+- Observatory. I'll look at the stars. Then I'll have a little nap under them.   #funny
+? trad:harvest
+- Harvest morning! I'm on tasting. Nobody gave me that job. I took it.   #funny
+? trad:hull-lights
+- Hull lights. I wired some of those. Every one's on. Get in.
+? trad:founding
+- Founding Day cake! I told Brennan I'd help. She told me I wouldn't.   #funny
+? trad:quiet-watch tier>=friend
+- Quiet watch. I'll think of Mum's shop. Kettle on, radio going. Don't mind me.   #warm
+
+== smalltalk
+? trad:today
+- Something's on. Will there be snacks?   #funny
+? trad:works-tea
+- Friday tea! Biscuits!
+
+// Writer 5, batch 9: week-1 beats for the onboarding hook (onboarding seat 1's list, 2026-10-17). One flag key per
+// line, beat.<beatId>.<n>, said in order as bubbles while you are in the beat's room in its window; best first
+// (onboarding drops the rest when you leave). Mail texts: mail.<beatId>, one line "Subject | body", unsigned.
+
+== week1
+// beat d4-quiz: Thursday 20:00, the bow lounge
+? flag:beat.d4-quiz.1
+- Oi oi! Quiz night. You're on my team. No arguments.
+? flag:beat.d4-quiz.2
+- Teams of four. We need a sensible one. That's you.   #funny
+? flag:beat.d4-quiz.3
+- There's no food round. There should be.   #funny
+? flag:beat.d4-quiz.4
+- Grab a seat. Snacks are mine. Mostly.   #funny
+? flag:beat.d4-quiz.5
+- Win or lose, there's biscuits after. I made sure.

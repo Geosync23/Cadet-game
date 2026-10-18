@@ -1,0 +1,123 @@
+@crew reyes-alejandro
+// Alejandro Reyes (he/him), engine officer, nights. The Works writer, batch 2. Fast, looping; "anyway".
+
+== greet
+? tier=stranger
+- Oh! Hi. Reyes, nights, engines. If the coils hum funny after ten, that's me. Anyway.
+- Hello, hi. You're the new one. Engine room's on Deck 6. Don't touch the reactor door.
+? tier>=acquaintance time:evening
+- {hi}, {me}. Torres left me a note. It's mostly about coil three.   #funny
+? tier>=acquaintance
+- {hi}! Did I tell you about the cat? I did. I'll tell you again. Anyway, hi.   #funny
+? tier>=colleague
+- {me}! Good. Sit. Tell me something that isn't about coils. Please.
+? tier>=friend
+- Oh, it's you. Good. You're the only one who lets me finish a story. Anyway.   #warm
+
+== bye
+- {bye}. Sorry, I talked a lot. I always talk a lot.
+- Right, anyway. Coils won't tend themselves. Well, they would, but badly.
+
+== feel
+? mood:low
+- Long watch. Coil three was shy all night. I sat with her. That's allowed.
+? mood:high
+- Coils sang all night. All three. I played along on the table. Sorry, Petra.   #funny
+
+== near
+? act:work
+- Listen. Coil three's quieter than coil two. Not sulking. Shy. Torres is wrong.   #funny
+? act:dinner
+- I'll stay a bit. I like it when the mess empties. You can hear the cups.
+
+== life
+? tier>=acquaintance
+- My cat back home is furious about the tour. My neighbour writes to tell me. Often.   #funny
+? tier>=colleague
+- I write home to Lisk every rest day. On paper. The letters are always a page too long.
+
+== joy
+? tier>=acquaintance
+- I play in the music room after shift. Nobody's awake to mind. Ideal.
+
+// ---- Writer 2, batch 1: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue)
+== greet
+? tier>=acquaintance time:night
+- Oh, you're up. Me too. Obviously, I'm on. Coils are calm. For now. Anyway.
+? tier>=acquaintance warmth:cold
+- {me}! Where've you been? I worried a bit. Not a lot. A normal amount. Anyway.   #funny
+
+== near
+? place:mess
+- Last one in the mess again. I like the cups after. All stacked. Very calm.
+? habit:stargazer
+- I'm on the observatory list now. Rossi lent me a telescope. I'm scared of it.   #funny
+
+== invite
+? tier>=colleague
+- Friday jam? I'll drum on a table. It's allowed there. It's better with people.
+- Film night? I'll talk through it. Sorry in advance. Anyway, come.   #funny
+
+== accept
+- Yes! Oh. Yes. Good. I'll be early. Then nervous. Then fine.   #funny
+- Yes, please. Thank you for asking. People forget to ask the night shift.   #warm
+
+== decline
+- I can't, I'm on the coils. Next time? Ask again. Please ask again.
+? weekday:tue|wed
+- It's my rest day. I'm writing to Lisk. It's two pages already. Another time?   #funny
+
+== missed
+- I waited. I told coil three about it. She was very understanding. Anyway.   #funny
+
+== birthday
+? birthday:you
+- Happy birthday! It's going in my letter home. My neighbour will tell the cat.   #funny
+? birthday:me
+- My birthday. Torres left a note on the coils. Coil three signed it. Sort of.   #funny
+
+== cue
+? cue:event.ionStorm.onset
+- Storm's in. The coils hate it. I'll sit with them. You stay where it's warm.
+? cue:repair.you@dept
+- You fixed that? Good! I'll put it in the notes for Torres. He'll say he knew.   #funny
+
+// ---- Writer 2, batch 1b: a hint (a moment is ready) and an about line for a named friend
+== hint
+- Have you got a minute? A real one? I'll try not to talk too much. Anyway.
+
+== about
+? aff:torres-zeke:friend
+- Torres leaves me a note every shift. He's wrong about coil three. He's a good friend.   #warm
+
+// ---- Writer 2, batch 6: bubbles (smalltalk, rumour), at most one in five about work. 60 characters.
+== smalltalk
+- My cat's written again. Well, my neighbour has.   #funny
+- Two pages in and I haven't started the letter.   #funny
+? act:meal
+- I'll stay a bit. I like the mess emptying.
+? act:work
+- Coil three's shy, not sulking. Anyway.   #funny
+? time:night
+- Music room's empty. Perfect. Anyway.
+?
+
+== rumour
+- Oh, did you hear? Sorry. Anyway. So.
+- Torres's note says this. Well, sort of.
+
+// Writer 4, batch 11: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing! Sorry, packing. The notes for the coils go in first. Anyway.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Oh! I'm leaving. Soon. Sorry. Look after coil three. Anyway.
+? leaving:you tier>=friend
+- You never minded me talking. About the cat. Or the coils. Thank you. Anyway. Thank you.   #warm
+
+== letter
+- New ship. New coils. One of them's shy. Obviously. My neighbour says the cat's well. Anyway, hello.
+? tier>=friend
+- I still leave notes at shift change. Nobody here writes back yet. Tell Zeke coil three was always shy. Anyway.

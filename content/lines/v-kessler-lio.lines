@@ -1,0 +1,28 @@
+@crew v-kessler-lio
+// Writer 4, batch 5: a short-stay visitor. Mostly not about work.
+
+== greet
+? tier=stranger
+- Hi! Lio Kessler. Student. On placement. Can I ask you something? Everything?
+- Oh, hi. Are you a junior? Can I follow you around for a bit?   #funny
+? tier>=acquaintance
+- {hi}, {me}! I wrote down what you told me. All of it. Is that weird?
+?
+
+== chat
+- How do you sleep in a bunk? I keep thinking I'll roll off. Is that normal?
+- What's the best thing about the Wren? I'm asking everyone. It's for my notes.
+
+== near
+? place:lounge
+- Is it all right if I sit here? I'm learning how to be crew.
+? time:night
+- I should be asleep. I'm writing up my notes. And talking.
+?
+
+== bye
+- {bye}. Thanks! I'll have more questions tomorrow. Sorry. Lots more.   #funny
+
+== smalltalk
+- Is that normal? Writing it down.
+- Oh! Tiles!

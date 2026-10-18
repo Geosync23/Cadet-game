@@ -1,0 +1,182 @@
+@crew yoon-elif
+// Writer-commons, batch 3: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Oh, hello. Dr. Yoon. Nights. If you come in at three, I'll be the one awake.
+? tier>=acquaintance
+- Hello, {me}. Want a joke? It's a bad one. Sorry. They're all bad ones.   #funny
+- Oh, hello. Is it morning? For you? I'm just having my dinner. Or breakfast.
+? tier>=friend
+- Oh, it's you, {me}. Sit down. You look like you could use a cup of tea.   #warm
+
+== feel
+? mood:high
+- A quiet night. Everyone slept. That's my favourite kind of night.
+? mood:low
+- Long night. I'm all right. A cup of tea, and I'll be all right.
+
+== near
+? act:work
+- Breathe in. And out. Good. Nothing to worry about. Really. I'd tell you.
+? act:breakfast
+- What do you call a doctor with no patience? Me, before tea. Sorry.   #funny
+
+== life
+? tier>=acquaintance
+- The coffee machine works for me. Volkov and Shah say it works for them. We disagree.   #funny
+? tier>=colleague
+- I call home after my shift. It's afternoon there. They're always eating something.
+
+== joy
+? tier>=acquaintance
+- I collect terrible jokes. Halloran's are worse than mine. Say mine are better.   #funny
+
+== about
+? bond:friends
+- {friend} laughs at my jokes. Even the bad ones. They're all bad ones.   #funny
+
+// Writer-commons, batch 6: towards about 30 own lines.
+
+== greet
+? tier>=acquaintance time:morning
+- Oh, good morning. Well, good night, for me. Breakfast is my supper. Isn't that strange?
+? tier>=acquaintance time:night
+- Hello. You're up late. Is everything all right? Not as a doctor. Just asking.
+? tier>=colleague warmth:cold
+- Oh, there you are. I'd noticed you hadn't been by. Not in a doctor way. In a nice way.
+
+== bye
+? tier>=acquaintance
+- Take care. Sleep well, whenever you do.
+? tier>=friend
+- Thank you for the company. The nights are long. That helped.   #warm
+
+== feel
+? mood:ok
+- All right, thank you. Quiet night. A cup of tea, and all's well.
+
+== near
+? act:leisure deck:3
+- The lounge before bed. My bed's at nine in the morning. It's very confusing.   #funny
+? act:work time:night
+- Shh. Someone's sleeping in bed two. Nothing serious. Just tired. Like all of us.
+
+== life
+? tier>=colleague
+- I'm nervous with people. Not with patients. Patients I understand. People, less so.
+? tier>=friend
+- I worry I miss things. On nights, alone. I check twice. Then three times. Then I'm fine.
+
+== invite
+? trad:quiz tier>=acquaintance
+- Quiz night? Before my shift? I'd like that. I'm terrible at the sport questions.
+
+== accept
+- Oh, yes. I'd like that. Thank you for asking.
+== decline
+- I'm sorry, I'm on nights. Can we do a morning? My evening? You know what I mean.
+== missed
+- I waited. It's all right. I'm used to waiting. It's half the job.
+== birthday
+? birthday:me
+- It's my birthday. I've told one terrible joke for every year. Nobody laughed. Perfect.   #funny
+? birthday:you
+- Happy birthday. Here's a joke as a present. No, wait, here's a biscuit instead. Better.   #funny
+== hint
+- Could you sit with me a moment? No hurry.
+
+// Writer 3, batch 4: bubbles (smalltalk and rumour, 60 characters, said to no one in particular).
+
+== smalltalk
+- Oh dear. Sorry. Was that me?
+- Coffee machine's fine. For me.   #funny
+- Why did the scrubber... no. Sorry.   #funny
+- Quiet night. Don't say it.
+? act:work
+- Steady. You're all right. Breathe.
+
+== rumour
+- I heard something. Oh dear. Sorry.
+- Nights hear things. Very quietly.
+
+// Writer 3, batch 5: callbacks (told: said once).
+
+== callback
+? told:fav.fetch
+- You fetched it. Oh, thank you. Sorry I needed it. Thank you.   #warm
+? told:fav.job
+- You did my job. I don't know what to say. Thank you. That's what to say.   #warm
+? told:fixed.uv
+- The steriliser's fixed. Oh, good. Nights are calmer when it's working.
+? told:came.quiz
+- You came to quiz! I told a joke in the break. You laughed. Oh, thank you.   #funny
+? told:gift.tea
+- Your tea's my night tea now. Two in the morning. It helps.   #warm
+? told:bday
+- You remembered my birthday. Oh dear. Thank you. I've no joke ready.   #warm
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- Nights speak well of you. Quietly. Nights speak quietly about everything.
+? you:kind
+- They say you're kind. Oh, good. I'd hoped. Sorry. I mean, good.   #warm
+
+// Writer 3, batch 8: thanks for a gift (gift: loved | liked | polite, or the gift's tag; dialogue 0.43.10).
+
+== gift
+? gift:tea
+- Tea. Oh, thank you. Two in the morning won't know what's hit it.   #warm
+? gift:loved
+- Oh. Oh, thank you. That's so kind. Sorry. I mean, thank you.   #warm
+? gift:liked
+- Thank you. That's lovely. Really.
+? gift:polite
+- Oh dear. Thank you. You shouldn't have. I mean that nicely.
+
+// Writer 4, batch 2: everyday chatter, not about work (meals, rest days, home, hobbies, seasons, traditions).
+== smalltalk
+? act:meal
+- Why did the toast go to the doctor? Crumbs. Sorry.   #funny
+- Is this breakfast or dinner? Nights are odd.   #funny
+- Sorry, is that your seat? I'll move. Sorry.
+? act:off
+- Rest day. I called home. Everyone's well.
+- I'm going to sleep in the day. Properly.
+? time:morning
+- Good morning. Or good night. Both, for me.   #funny
+? time:evening
+- Coffee, then the night. The machine likes me.
+- Just a cup of tea at the bar. Nothing fancy.
+? time:night
+- The ship's so quiet now. I like it like this.
+- Why are vents good listeners? They're all ears. Sorry.   #funny
+? season:lanterns
+- The lanterns look lovely from the night side.
+? trad:quiz
+- I'm on a team. I'll mostly cheer. Quietly.
+? place:lounge
+- I like the lounge late. The stars feel nearer.
+
+== rumour
+- Oh, I heard something. Is it all right to say?
+- Sorry. Have you heard? It's good, I promise.
+
+// Writer 4, batch 7: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Sorry, I'm packing. Sorry. It's very real now.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Oh, I'm leaving soon. Sorry. It was lovely. Sorry. Bye.
+? leaving:you tier>=friend
+- You laughed at my jokes. Even the bad ones. They were all bad ones. Thank you.   #warm
+
+== letter
+- Why did the doctor change ships? For a change of pace. Sorry. The night shift here is quiet. I miss ours.
+? tier>=friend
+- The coffee machine here doesn't like me. I'm working on it. Tell the Wren's machine I said hello. And you.

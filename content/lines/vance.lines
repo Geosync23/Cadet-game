@@ -1,0 +1,436 @@
+@crew vance
+// Writer (command), batch 1: Commander Vance, for the Voices sampler. Precise, lists in threes, then a flash of dry humour.
+
+== greet
+? tier=stranger
+- {hi}. Uniform straight, on time, and you found the right deck. Three for three.
+- Cadet. A nod will do aboard; we don't salute. Regulation two, section four.
+? tier>=acquaintance time:morning
+- {nick}. Ninety seconds early. Noted.   #funny
+? tier>=acquaintance
+- {nick}. Clean, quick and on time, I trust. And cheerful. That's a fourth. Allow it.
+? tier>=friend
+- {nick}. Good. I'd hoped to see you. That stays between us.   #warm
+
+== feel
+? mood:high
+- A good day. Board clear, drills on time, and my name top of the treadmill.
+? mood:low
+- A long day. I've run four kilometres about it. It hasn't helped yet.
+
+== near
+? act:gym
+- The treadmill leaderboard. Fresh paper, fresh tape, one name so far. Mine.   #funny
+? act:leisure|off tier>=acquaintance
+- I left the bridge on time today. The counsellor's advice. I don't care for it.   #funny
+
+== life
+? tier>=acquaintance
+- I keep the waiting list for the good records. You're ninth. Waiting builds character.   #funny
+- Did you read Gull this week? A rhyme for "airlock" ought to be against regulations.   #funny
+
+== joy
+? tier>=colleague
+- Rowing, at the academy. Six of us, one boat, nobody late. The best thing I've ever done.
+
+// ---- batch 3: greet by time, bye, invite, accept, decline, missed, birthday, hint, near by place ----
+
+== greet
+? tier=stranger time:morning
+- Morning, cadet. Breakfast, shift, board. In that order. Carry on.
+? tier=stranger time:evening
+- Cadet. Off shift. Correct. Rest is in the regulations too.
+? tier=stranger deck:1
+- Cadet. You're on the bridge. State your business, briefly, and well.
+? tier>=acquaintance time:morning
+- {nick}. Up, dressed, on time. A good start. Three for three.
+- {nick}. Morning. I've already been on the treadmill. Don't ask my time. Ask, actually.   #funny
+? tier>=acquaintance time:afternoon
+- {nick}. Afternoon. Half the shift done, half to go. Pace yourself.
+? tier>=acquaintance time:evening
+- {nick}. Evening. I left the bridge at 17:00 exactly. Under protest.   #funny
+? tier>=acquaintance time:night
+- {nick}. It's late. Regulation nine: rest. I wrote that one down for myself.   #funny
+? tier>=acquaintance warmth:cold
+- {nick}. I haven't seen you in days. Noted. Not a complaint. An observation.
+? tier>=colleague
+- {nick}. Your name came up on the board today. In a good way. Carry on.
+? tier>=friend time:morning
+- {nick}. Join me for breakfast. Table by the door. Punctual people sit there.   #warm
+
+== bye
+? tier=stranger
+- Carry on, cadet.
+- Dismissed. Kindly.
+? tier>=acquaintance
+- Carry on, {nick}. On time, and tidy.
+- As you were. Do try to be as you were tomorrow too.   #funny
+? tier>=friend
+- Carry on, {nick}. And thank you. Noted, and meant.   #warm
+
+== invite
+? trad:running tier>=acquaintance
+- Gym club tonight. Treadmills, Deck 3. I'll set the pace. Gently. For you.   #funny
+? act:gym tier>=colleague
+- Ten minutes on the rowing machine. Let's see where you'd sit on the board.
+? trad:today tier>=colleague
+- {trad} today. Attendance isn't required. It's encouraged. Strongly.   #funny
+
+== accept
+? tier>=acquaintance
+- Agreed. I'll be there. Early.
+- Very well. Put it in your calendar. I already have.
+
+== decline
+? tier>=acquaintance
+- I can't. Duty roster. But it was a good idea, correctly put.
+- Not tonight. Ask me again on my rest day. That's Tuesday.
+
+== missed
+? tier>=acquaintance
+- You missed our appointment. Noted. Things happen. Don't make it a habit.
+? tier>=friend
+- I waited ten minutes. Then I went running. It wasn't wasted. Next time?
+
+== birthday
+? birthday:you tier>=acquaintance
+- Happy birthday, {nick}. Regulations don't cover cake. I checked. Enjoy it.   #funny
+? birthday:you tier=stranger
+- Cadet. Happy birthday. That's on the roster, so I'm saying it. And I mean it.
+? birthday:me tier>=acquaintance
+- Yes. My birthday. One cake, one candle, one speech. Short. Mine.   #funny
+
+== hint
+? tier>=friend
+- {nick}. A word. Not about work. When you've a moment.
+
+== near
+? deck:1
+- The bridge runs on three things: procedure, coffee and the Captain. In that order.   #funny
+? deck:3 act:gym
+- The rowing machine still has my name on top. I check on the way past. Daily.   #funny
+? deck:4 time:evening
+- The good records. There's a list. You're on it. I'm the list.   #funny
+? act:meal
+- Breakfast at 06:05. Not 06:00, there's a queue. Not 06:10, that's late.
+? place:calm tier>=colleague
+- Sit. I'm off duty. Officially. I've told the bridge where I am anyway.
+
+== feel
+? mood:high tier>=acquaintance
+- A good day. A junior I recommended was promoted. That's another name on my list.   #warm
+? mood:ok
+- An ordinary day. Everything correct. That's harder than it looks.
+
+== life
+? tier>=colleague
+- I keep a list of every junior I've recommended. It's a long list. I'm proud of it.
+- Lindqvist thinks I moved to the treadmill out of fear. I moved for a fresh board.   #funny
+
+== joy
+? tier>=acquaintance
+- A new leaderboard. Clean paper, straight tape. All those empty lines, waiting.   #funny
+
+== chat
+? tier=stranger
+- Questions, cadet? Ask them. Unasked questions cause most of the trouble aboard.
+? tier>=acquaintance
+- Have you read the regulations yet? Not all. The first ten. They're the good ones.   #funny
+- Status report, {nick}. Unofficial. How's the week? Short version.
+? tier>=colleague
+- You've the makings of a good officer. Don't let it go to your head. Your boots, maybe.   #funny
+
+== smalltalk
+- Clean, quick and on time.
+- Ninety seconds early. Good.   #funny
+- Someone has moved my tape.   #funny
+
+== rumour
+- Not gossip. A briefing. Informal. Listen.   #funny
+
+== near
+? deck:3 act:gym
+- Treadmill board's filling up. Tomas is fourth. Don't tell him he's fourth.   #funny
+? deck:2
+- The senior corridor. Shoes off in the cabins, on in the corridor. Regulation six.
+
+// ---- Writer 2, batch 5: Vance toward ~100. Gull's poems: anyone, any time; that he is Gull only from beat:vance.5.
+// His father only from beat:vance.3 (and what the message said from beat 4). Rest days Tue, Wed.
+== greet
+? tier>=acquaintance season:sowing
+- {nick}. Sowing. New season, new leaderboard. Clean paper. Wonderful.   #funny
+? tier>=acquaintance season:greening
+- {nick}. Greening. Founding Day drills soon. I've already drafted the timings.
+? tier>=acquaintance season:harvest
+- {nick}. Harvest. The garden's ahead of schedule. I find that very satisfying.
+? tier>=acquaintance season:lanterns
+- {nick}. Lanterns. Nothing hung across a hatch, by regulation. Otherwise, enjoy.
+? rep:well
+- {nick}. The bridge speaks well of you. Briefly. That's how the bridge speaks.
+? you:reliable
+- {nick}. "Reliable," they say. My favourite word. After "punctual".   #funny
+
+== feel
+? mood:low tier>=friend
+- A heavy day. Not the work. Just heavy. I'll run it off. Eventually.
+? mood:high tier>=friend
+- A good day. Tomas beat his time. I pretended not to watch. I watched.   #warm
+
+== near
+? place:musicroom
+- The record cabinet. Waiting list, page one. You're still ninth. Patience.   #funny
+? habit:runner
+- Ring corridor, eight laps. It's not on a leaderboard. I'm considering it.   #funny
+
+== life
+? tier>=colleague
+- Twenty-two years since the academy. I can still tell you who was late, and by how much.   #funny
+? beat:vance.4 tier>=friend
+- My father kept every report of mine. Every one. I'm still getting used to that.
+? beat:vance.5
+- Gull's next poem is about the rowing machine. Keep that to yourself.   #funny
+
+== joy
+? tier>=friend
+- The first five minutes of a shift. Everyone in place. Then it gets interesting.
+
+== decline
+? weekday:wed|thu
+- Rest day. I'm resting. Correctly. It's harder than it looks. Friday?   #funny
+
+== callback
+? told:moment.vance.suspect !beat:vance.5
+- You said I knew Gull's poem well. I read the newsletter thoroughly. That's all.   #funny
+? told:moment.vance.fixed
+- Your fix for Gull's line two. Ten beats. I counted. Gull should take notes.   #funny
+? told:moment.vance.likeit
+- You said you liked Gull's poem. Hm. Someone should. Correct of you.   #funny
+? told:moment.vance.timed
+- You held the stopwatch steady. Lindqvist says it was wrong. It wasn't.   #funny
+? told:moment.vance.cheered
+- You cheered. Loudly. Against regulations, possibly. I'll allow it.   #funny
+? told:moment.vance.lindqvist
+- You asked if it was about Lindqvist. It was. It still is. Carry on.   #funny
+? told:moment.vance.sitwith !beat:vance.4
+- You offered to sit with me while I open them. I haven't forgotten.   #warm
+? told:moment.vance.listened
+- Thank you for listening, the other night. Noted, and meant.   #warm
+? told:moment.vance.shared
+- You said your family doesn't always talk either. It helped. More than I said.   #warm
+? told:moment.vance.leave
+- I requested the leave. Eleven, section two. The Captain signed it in a minute.   #warm
+? told:moment.vance.again
+- You let me read it twice. I read it four times, after. Thank you.   #warm
+? told:moment.vance.likehim
+- "Like your list of juniors." I hadn't seen it. You did. Thank you.   #warm
+? told:moment.vance.knew
+- The scansion gave me away. Gull is taking lessons. Privately.   #funny
+? told:moment.vance.proud
+- You said you were proud. I've added it to a list. A short one. Very short.   #warm
+? told:moment.vance.safe
+- Your word on Gull. I trust it. I'd trust it with the bridge.   #warm
+? told:fixed.
+- Your entry in the repair log. Signed, timed, legible. Exemplary.
+? told:came.running
+- You came to Gym club. Your pace was correct. Next week, faster.   #funny
+? told:came.
+- You came. Attendance noted. Warmly noted.   #warm
+? told:bday
+- You remembered my birthday. It's on the roster, I know. You still remembered.   #warm
+
+== gift
+? gift:loved
+- For me? That's. Thank you. It's going on my desk. Square to the edge.   #warm
+? gift:liked
+- Thank you, {nick}. Most kind. Correctly wrapped, too.   #funny
+? gift:polite
+- Thank you. Noted. Kindly.
+? gift:music
+- Music. It's going on the waiting list. At the top. I've jumped my own queue.   #funny
+
+== cue
+? cue:event.ionStorm.warning
+- Storm warning. Stations in ten minutes. Calmly. Briskly. Both.
+? cue:event.ionStorm.onset
+- Storm. Everyone at their post. Including you. Go.
+? cue:event.ionStorm.afterglow
+- Storm's passed. Drill times were excellent. I've already written the report.
+? cue:tradition.running.you
+- You ran. On time, in order, no shortcuts. I'd put you on the board.
+
+== visit
+? tier>=friend
+- {nick}. Evening. I won't stay. Regulation six: my shoes are at the door.   #funny
+- I was passing. Correction: I came by. Is this a good time? Be honest.
+
+== note
+? tier>=friend
+- Called by. You were out. Correctly: it's your evening. See you at 06:05.
+- The waiting list moved. You're eighth. Don't let it go to your head.   #funny
+
+== smalltalk
+- Regulation two, section four.
+- Tape's straight. Good.
+
+== rumour
+- For your information only.
+
+// Writer 4, batch 14: Vance's ordinary weeks, after week one. Mostly not work: the treadmill and rowing boards, the
+// good records and their waiting list, books, sweets, tea at 06:05, Gull (only as a reader with opinions), juniors.
+// Gates kept: no father or messages before beat:vance.3; never admits Gull before beat:vance.5; never late; no swearing.
+
+== greet
+? tier>=acquaintance !week1:true
+- Cadet. Fed, rested and dressed. Two out of three would do. Three is better.
+- Cadet. You're early. I'm earlier. We're both correct.   #funny
+? tier>=acquaintance !week1:true weekday:wed|thu
+- Cadet. My rest day. I'm not on duty. I'm merely observing.   #funny
+? tier>=colleague !week1:true
+- {nick}. Good. I've a record playing in my head and nobody to tell. Sit.   #funny
+- {nick}. A question, informal: pudding or the treadmill first? I've done both.   #funny
+? tier>=friend !week1:true
+- {nick}. Good to see you. Sit. Tea's poured. Milk, no sugar. Correct?   #warm
+- {nick}. I saved you the seat by the door. Punctual people deserve it.   #warm
+? tier>=close !week1:true
+- {nick}. Off duty. Both of us. Let's be bad at it together.   #funny
+
+== chat
+? tier>=acquaintance !week1:true
+- Did you read Gull this week? "Oh corridor, thou long and grey." Two errors of metre.   #funny
+- The good records. A waiting list exists for a reason. The reason is me.   #funny
+- Breakfast at 06:05. Porridge, toast, a small biscuit. The biscuit is not regulation.   #funny
+- I read on my rest days. Old naval histories. And, once, a mystery. Don't tell Achterberg.   #funny
+- Lindqvist set a treadmill time yesterday. I've studied it. Respectfully. Closely.   #funny
+- Rest day tomorrow. I've planned it to the minute. Most minutes say "nothing".   #funny
+? tier>=colleague !week1:true
+- Tea, properly made: warm the pot, three minutes, no more. Torres agrees. A rare alliance.   #funny
+- The Captain plays on Thursdays. I don't listen at the door. I happen to pass. Slowly.
+- Brennan's shortbread. Three pieces. A personal limit. I've never once kept it.   #funny
+- Tomas runs better when nobody's watching. So I watch from the corner. Discreetly.   #warm
+- Gull rhymed "Wren" with "again" this week. Lazy. Also, I admit, rather moving.
+- I rowed six to a boat at the academy. Now I run alone. Different. Still good.
+- I had a cup of the Envoy's tea once. Formally. It was correct.
+? tier>=friend !week1:true
+- The Counsellor says I should have a hobby that isn't a list. I'm making a list of options.   #funny
+- I like a well-made record. Clean, warm and on time. Like a good watch.
+- The juniors I've recommended write to me. Not often. Enough. I keep every one.   #warm
+? tier>=close !week1:true
+- I used to think a day off was a day wasted. I've revised that. Regulation nine, my edit.   #funny
+- You're on my list, you know. The good one. It's not a leaderboard. It's better.   #warm
+
+== near
+? act:breakfast !week1:true
+- 06:05. Porridge. The biscuit. Don't look at the biscuit.   #funny
+? act:gym !week1:true
+- Treadmill. Five kilometres. Then I'll pretend not to look at the board.   #funny
+? act:dinner !week1:true
+- Dinner at 18:00. On time. Pudding at 18:20. Also on time.   #funny
+? act:off
+- Rest day. A book, a long walk, a record. A fourth thing: tea. Allow it.   #funny
+? place:musicroom
+- The good records live here. I'm only checking the list. And listening. Briefly.
+? place:lounge !week1:true
+- The lounge. Off duty. I'm sitting very casually. Observe.   #funny
+? trad:running
+- Gym club. I'll set the pace. Then I'll quietly lower it.   #warm
+
+== feel
+? mood:high !week1:true
+- Excellent day. Board clear, record on, pudding, and a fourth thing. I forget. Allow it.   #funny
+? mood:ok !week1:true
+- Correct. Steady. Nothing to report. That's a good report.
+? mood:low tier>=friend !week1:true
+- Quieter today. I ran an extra kilometre. It didn't help. It usually does.
+
+== life
+? tier>=acquaintance !week1:true
+- I iron my uniform on Sundays. All seven. Yes, seven. Don't ask about the eighth.   #funny
+? tier>=colleague !week1:true
+- I keep the rowing pin from the academy in my desk. I look at it when the board's quiet.
+- My cabin has one shelf of regulations and one shelf of novels. The novels are winning.   #funny
+? tier>=friend !week1:true
+- I baked once. Shortbread, for a junior's leaving do. Brennan inspected it. Passed.
+
+== joy
+? tier>=acquaintance !week1:true
+- A fresh sheet of paper on a new leaderboard. All those empty lines. Splendid.   #funny
+? tier>=colleague !week1:true
+- A record that starts exactly when you lower the needle. Small things. Correct things.
+
+== bye
+? !week1:true
+- Carry on. Eat something. Rest a little. In that order.
+- Dismissed, {nick}. Kindly. Very kindly, today.   #warm
+- As you were. On time tomorrow. I'll know.   #funny
+
+== callback
+? told:came.running tier>=acquaintance
+- Gym club. You kept a steady pace. I noted it. On paper. In ink.   #funny
+? told:came.quiz tier>=acquaintance
+- Quiz night. You knew regulation six. I may have nodded. Visibly.   #funny
+? told:moment.vance.gull tier>=colleague
+- You read Gull with me. You laughed in the right places. There are few right places.   #funny
+? told:moment.vance.board tier>=colleague
+- You held the stopwatch. Accurately. I've told no one my time. You know it. Keep it.   #funny
+? told:bday tier>=acquaintance
+- Your birthday. On the roster. I said it out loud. I'll say it again: happy birthday.
+? told:fixed. tier>=acquaintance
+- Your repair. {thing}. Done correctly, on time and tidily. Three for three.
+? told:intro.arrival tier>=acquaintance !week1:true
+- I logged your arrival, the Sunday you came. On time. The Tern wasn't. You were.   #funny
+? told:came.observatory tier>=acquaintance
+- Observatory night. You were early. So was I. We waited correctly.   #funny
+
+// Writer 5, batch 5: if they are ever transferred (goodbye with leaving:you, also the "Sorry I missed you at the
+// shuttle" Mail; packing as feel with leaving:soon; letters after). Nothing of his arc: no messages from home, no father, no rule, no Gull.
+
+== feel
+? leaving:soon
+- Ten days. Three lists to hand on: the treadmill board, the record list, the rota.
+- Regulation eleven, section two, does not cover this. I have checked. Twice.   #funny
+? leaving:soon tier>=friend
+- I have left the bridge on time every day this week. Partly advice. Partly goodbyes.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm transferring, Cadet. Carry on as you are. That is an order. A kind one.
+? leaving:you tier>=colleague
+- You are on my list of juniors I would recommend. In ink. Carry on, {nick}.   #warm
+? leaving:you tier>=friend
+- Three things, {nick}. Eat. Rest. Read regulation nine. It is the one about rest.   #funny
+
+== letter
+- New ship. Their treadmill board was empty. I have corrected this. I am also on it. Carry on.   #funny
+- Please tell whoever is next on the record list that it moves up one. Fairly. In order. Thank you.
+? tier>=friend
+- There was no rowing board here. I have taped one up. Tell Lindqvist the Wren's is his to chase. Tell him I said so. Carry on.
+
+// Writer 5, batch 6: seasons and traditions (the game's ids: running Mon, quiz Thu, works-tea and jam Fri, film and
+// observatory-night Sat, market (the swap meet) Sun, harvest (harvest morning), hull-lights, founding (day 100),
+// quiet-watch (day 300)), plus trad:today. Gaps filled only; arc gates kept. Nothing of the messages from home, his father, the rule, or Gull being his.
+
+== near
+? trad:quiz
+- Quiz night. I take the regulations round. There is no regulations round. There should be.   #funny
+? trad:jam
+- Music jam. I keep the list of who plays when. In order. It helps. Mostly.
+? trad:film
+- Film night. Two hours and four minutes. I have checked. Bring a cushion.   #funny
+? trad:market
+- Swap meet. I am not trading. I am observing. And possibly acquiring a stopwatch.   #funny
+? trad:observatory-night
+- Observatory night. Regulation nine says rest. Looking up counts. I've checked.   #funny
+? trad:harvest
+- Harvest morning. Three crates, two trolleys, one queue. I have drawn a diagram.   #funny
+? trad:hull-lights
+- Hull lights. Twenty-one hundred, every four weeks. Never late. A fine tradition.
+? trad:founding
+- Founding Day. The Captain speaks first. Then cake. In that order. Always.
+? trad:quiet-watch tier>=friend
+- The quiet watch. I will be at a window. Not on the bridge. On advice.
+
+== smalltalk
+? trad:today
+- Something on tonight. Be punctual.
+? trad:hull-lights
+- Twenty-one hundred. On time. Good.

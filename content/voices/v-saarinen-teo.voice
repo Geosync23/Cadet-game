@@ -1,0 +1,12 @@
+@voice v-saarinen-teo
+// Writer 2, batch 8: a short card for a short-stay visitor (GUESTS in section 9). No pronouns (not in facts.md).
+tpl: shy
+talk: Quiet and careful; carries a lens the size of a dinner plate; names stars after cafés, shyly.
+hi: Oh, hello | Hi
+bye: Bye, then | See you
+yes: Okay | Yes, all right
+thanks: Thanks | Oh, thank you
+wow: Oh
+sigh: Oh, well
+likes: star | book
+nick: - | {me} | {me} | {me} | {me}

@@ -1,0 +1,122 @@
+@crew raman
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- {hi}, cadet. Raman, helm. If the deck tips, it wasn't me.   #funny
+? tier>=acquaintance
+- {hi}, {me}. Smooth night. Not a cup spilt on Deck 3.
+- {me}. Good to see you. Steady day?
+? tier>=friend
+- {hi}, {me}. I always fly a bit gentler when I know who's aboard.   #warm
+== feel
+? mood:high
+- Clean turn today. You'd not have felt it with a full mug in your hand.
+? mood:low
+- A bumpy patch. Nobody noticed. I noticed.
+== near
+? act:breakfast
+- Early breakfast. Best table by the window, before the rush. Twenty years of habit.
+? act:leisure
+- I dust the model ship more than my cabin. Don't tell anyone.   #funny
+== life
+? tier>=acquaintance
+- I've flown survey ships for twenty years. The Wren's the gentlest of them.
+== joy
+? tier>=colleague
+- My model of the Wren. Every hull plate. I'll show you the bridge one day. Gently.
+
+// ---- Writer 2, batch 2: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue, hint, about)
+== greet
+? tier>=acquaintance time:morning
+- {hi}, {me}. Window table again. The view's slow out there. I like slow.
+? tier>=acquaintance warmth:cold
+- {me}. I haven't seen you in a while. I hope it's been a smooth stretch.
+
+== near
+? habit:musician
+- I play a little in the music room now. Gently. Like a docking.
+? deck:1
+- Bridge is calm. Hands light on the helm. That's the whole secret.
+
+== invite
+- Observatory night? I'll point out where we're going. Slowly. It's a long way.
+? tier>=colleague
+- Friday jam? I play a little now. Very quietly. Come and drown out the wrong notes.   #funny
+
+== accept
+- {yes}. I'll be there early, at the window end.
+- That's kind. Yes. I'll come.
+
+== decline
+- Not tonight. A long turn tomorrow. I like to sleep before a long turn.
+? weekday:sat|sun
+- Rest day. The model ship needs a new mast. Ask me Monday?
+
+== missed
+- You didn't come. No matter. I kept the window seat. It was very peaceful.
+
+== birthday
+? birthday:you
+- Happy birthday, {me}. I'll fly extra gently today. Not a cup spilt. My present.   #warm
+? birthday:me
+- My birthday. Brennan made a cake shaped like the Wren. I flew it straight to my plate.   #funny
+
+== cue
+? cue:event.ionStorm.onset
+- Storm's in. Hold on to your mug. I'll hold on to the rest.
+
+== hint
+- Have you a minute later, {me}? There's something I'd like to tell you.
+
+== about
+? aff:marrow:friend
+- Six years with the Captain. She's never once grabbed the rail. Highest praise.   #warm
+
+// ---- Writer 2, batch 2: top-up (bye, greet by time, life at friend tier)
+== bye
+- {bye}. Walk gently. I'm flying gently, so it's only fair.   #funny
+== greet
+? tier>=acquaintance time:afternoon
+- {hi}, {me}. Afternoon watch. She's flying like a cup of tea on a tray.
+== life
+? tier>=friend
+- I learnt to fly on a cargo hauler. Noisy old thing. I still miss her a little.
+- Twenty years, and I still check the model before every long turn. For luck.   #funny
+
+// ---- Writer 2, batch 6: bubbles (smalltalk, rumour), at most one in five about work. 60 characters.
+== smalltalk
+- Not a cup spilt. Good.
+- Dusted the model again. Just a bit.   #funny
+- Music room tonight. Gently.
+? act:breakfast
+- Window table. Before the rush.
+? deck:1
+- She's flying like soup on a tray.
+?
+
+== rumour
+- Gently, now. Here's the news.
+- Told smoothly, then. I heard this.
+
+// Writer 4, batch 12: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. The model Wren goes in my hand luggage.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Ah, hello. I'm retiring. Twenty years of flying. Time to sit still.
+? leaving:you tier>=friend
+- You carried yourself steady aboard. Like soup, carefully. I noticed. Thank you.   #warm
+
+== letter
+- Being retired is very still. I've put the model Wren by my window. I check it before every long walk.
+? tier>=friend
+- Heard the Wren made a long turn this week. Smoothly, they said. I was very proud. Hello.
+
+// ---- Day 0: the Tern's pilot as the ramp opens (head writer 3, 0.48.40; the onboarding engineer's hook, flag:pilot.ramp).
+// Raman flies the Tern in on Sunday (his days off are Fri-Sat). One bubble, 60 characters or fewer.
+== week1
+? flag:pilot.ramp
+- Down gently. Ramp's opening. Welcome to the Wren.

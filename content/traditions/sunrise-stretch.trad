@@ -1,0 +1,38 @@
+@tradition sunrise-stretch
+// Sunrise stretch (0.60.7, the user's pick): a gentle group stretch along the promenade windows before breakfast,
+// Mondays, Wednesdays and Fridays. Anyone can join. wake: 15 (most traditions need an hour after waking).
+// 0.70.1 (playtest 1, the user): in the hydroponics garden, led by Rina: the deck architect's 3-stretchg-1..8 (event
+// 'stretch-garden', 0.47.6; 3-stretchg-1 is the leader's), then the garden's own places. Words: the head writer's.
+k: 448
+title: Sunrise stretch
+when: weekly monday,wednesday,friday
+at: 06:30-07:00
+min: 15
+wake: 15
+where: 3 pool @stretch-garden
+where: 3 pool garden
+hold: none
+who: rina always, early-riser 55%, runner 40%, gym-regular 35%, everyone 8%
+host: rina
+from: rina
+
+
+== mail
+- Sunrise stretch at {time}, in the garden. Gentle, slow, done before breakfast. Come in what you slept in.
+
+== ask
+- Sunrise stretch in the morning? Gentle. I promise.
+- Stretch before breakfast? Wakes you up better than tea.
+
+== here
+- Reach up. And down. And groan quietly.   #funny
+- Breathe in. Smell that? Tomatoes. Lovely start.
+- My knees say no. My knees are outvoted.   #funny
+
+== thanks
+- You stretch among the garden beds with a few early risers while the grow lights warm up. Breakfast tastes better after.
+
+== chatter
+- Sunrise stretch tomorrow. Set an alarm.
+- I go to sunrise stretch for the garden smell, honestly.   #warm
+- My back's better since I started the stretch.

@@ -1,0 +1,117 @@
+@crew mensah
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- {hi}, cadet. Mensah, night Watch. If you're up past midnight, I'll see you.
+? tier>=acquaintance
+- {hi}, {me}! Up late? Me too. It's my job, though.   #funny
+- {me}. She's quiet tonight. I like her quiet.
+? tier>=friend
+- {hi}, {me}! Good. Walk a deck with me? I could use the company.   #warm
+== feel
+? mood:high
+- Made the Chief laugh twice today. Twice! I'm writing it down.   #funny
+? mood:low
+- Long night round. Every deck, every door. My feet have opinions.
+== near
+? time:night
+- Good night, Deck 4. That's the whole of my Deck 4 speech.   #funny
+? act:gym
+- Treadmill's mine at this hour. No leaderboard. No Commander. Bliss.
+== life
+? tier>=acquaintance
+- I walk the whole ship once a night, deck by deck. You learn her sounds.
+== joy
+? tier>=colleague
+- Getting a laugh out of Holt. It's like fishing. Patience, and the right line.
+
+// ---- Writer 2, batch 2: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue, hint, about)
+== greet
+? tier>=acquaintance time:morning
+- Morning, {me}! I'm off to bed. She's all yours for the day. Look after her.
+? tier>=acquaintance warmth:cold
+- {me}! There you are. I looked for you on my rounds. Every deck. Nothing.   #funny
+
+== near
+? habit:runner
+- Twelve laps of the ring corridor before my shift. She's a good track.
+? deck:2 time:night
+- Senior corridor, all quiet. Even the Chief's door sounds stern.   #funny
+
+== invite
+- A run before my shift? Ring corridor, easy pace. I talk the whole way. Fair warning.   #funny
+? tier>=acquaintance
+- Tiles tonight? I'll lose. I always lose. I just like the noise of the pieces.
+
+== accept
+- Ha! Yes. Good. I'll be there.
+- Yes, I'll come. I might even bring the Chief, if he's in the mood.   #funny
+
+== decline
+- Can't, I'm on the night round. Every deck. Another time?
+? weekday:sat|sun
+- Rest day. I'm sleeping like a stone. Ask me Monday.
+
+== missed
+- You missed it! No harm. I told your empty chair a story. It laughed.   #funny
+
+== birthday
+? birthday:you
+- Happy birthday! I'll say it to every deck on my round. Deck 4 gets it twice.   #warm
+? birthday:me
+- My birthday. The Chief said "Many happy returns." Then nearly smiled. Best present going.   #funny
+
+== cue
+? cue:event.ionStorm.onset
+- Storm's on. I'll walk every deck twice tonight. You stay put and sleep.
+
+== hint
+- {me}. Have you a minute later? I've something on my mind. Not a joke, for once.
+
+== about
+? aff:holt:friend
+- Holt's the best Chief I've had. Don't tell him. He'd only frown about it.   #warm
+
+// ---- Writer 2, batch 2: top-up (bye, greet by time, life at friend tier)
+== bye
+- {bye}! Sleep well. I'll keep an eye on her.
+== greet
+? tier>=acquaintance time:night
+- {hi}, {me}! Past midnight. I'll pretend I didn't see you. Bed!   #funny
+== life
+? tier>=friend
+- I say good night to every deck by name. Deck 5's my favourite. Don't tell the others.   #funny
+- The trick with the Chief is timing. Wait for the pause. Then one line. Never two.
+
+// ---- Writer 2, batch 6: bubbles (smalltalk, rumour), at most one in five about work. 60 characters.
+== smalltalk
+- Made the Chief laugh. Counting it.   #funny
+- Tiles later? I'll lose.
+? time:night
+- Good night, Deck 4.   #funny
+? act:gym
+- Treadmill, no board. Bliss.
+? time:morning
+- She was quiet all night. Lovely.
+?
+
+== rumour
+- Ha. Wait. You'll like this.
+- Heard it on my rounds. Deck 3.
+
+// Writer 4, batch 12: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. Last walk round the ship tonight. Every deck.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Hey, hey. I'm off. Keep Holt laughing for me. Somebody has to.
+? leaving:you tier>=friend
+- You were good on the late rounds. Good eyes. Good company. Thanks.   #warm
+
+== letter
+- New posting. Walked the whole ship the first night. Smaller. Tidy. She's a good one. Not the Wren.
+? tier>=friend
+- Told my airlock joke on the new ship. Nobody laughed. Tell Holt he's still the only one.

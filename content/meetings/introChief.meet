@@ -1,0 +1,24 @@
+@meeting introChief
+// The arrival evening, step A10: Chief Calder stops by your table at dinner, on her day off, for exactly one minute.
+// Torres is at the table. One reply, a point or two either way; no wrong answer. The head writer's lines (the three
+// replies are the onboarding engineer's stand-ins, kept: they were already right).
+title: The Chief stops by
+from: Chief Ines Calder
+gist: Chief Calder: Torres has you on Monday, ten to nine in the Works bay. Your first job on Tuesday is hers.
+== lines
+torres-zeke: Chief. Didn't think we'd see you tonight.
+calder: You haven't. I'm not here. Day off.   [nod]
+calder > you: Calder. Works is mine. Welcome aboard.
+calder: Tomorrow you're with Torres. Ten to nine, the Works bay. Not nine. Ten to.
+calder: Tuesday, your first job's mine. I'll pick it. You'll do it.
+? choice
+* Looking forward to it.   rel:calder+1
+  calder: Good.
+* What should I read up on?   rel:calder+2
+  calder: The scrubber manual. Chapter three. Nobody reads chapter three.
+* (Say nothing)
+  calder: Quiet. Good. The ship's loud enough.
+calder: One thing. Nobody thanks the air. That's how you know it's working.
+torres-zeke: She tells everyone that.
+calder: It's true for everyone.   [nod]
+calder > you: Eat something. That's an order, and I'm not even here.

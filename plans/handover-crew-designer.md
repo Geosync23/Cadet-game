@@ -1,11 +1,11 @@
 # Handover: the crew designer
 
-Written at the end of Pillar 2 (combined build 0.40.8), so a fresh session can take over the crew.
+Written at the end of Pillar 2 (combined build 0.40.8) and brought up to date in Pillar 4 (0.16.21), so a fresh session can take over the crew.
 
 ## The role
 
 - **Branch:** `claude/deck-plans-1-2-6`.
-- **Builds:** 0.16.x (0.16.1 to 0.16.5 so far). The lead merges them onto `claude/ship-integration`.
+- **Builds:** 0.16.x (0.16.1 to 0.16.21 so far; the next is 0.16.22). The lead merges them onto `claude/ship-integration`.
 - **What I own:**
   - section 9 of `starship-cadet.html` (`// 9. CREW DATA`): the generated ROSTER block and the two lines after it;
   - `plans/crew-roster-gen.py`;
@@ -37,7 +37,7 @@ Everything sits between the markers `// ---- BEGIN ROSTER` and `// ---- END ROST
   - Notes on these:
     - `uniform` is the makeCharacter department key: command | works | watch | survey | infirmary.
     - `bed` ids look like `4-B<room>-<berth>`, `4-01`..`4-24` (cabins) and `2-<letter>` (Deck 2 rooms).
-- **`ROSTER_GUESTS`:** Envoy Saruth (rank `guest`). She's outside the 75.
+- **`ROSTER_GUESTS`:** Envoy Saruth (rank `guest`), who is outside the 75.
 - **`ROSTER_PLAYER`:** you. You're a Works junior, bed `4-B1-4` (the top berth of the second bunk in Bunk 1, which matches the bunk's text), off Sat and Sun. You aren't scheduled.
 - **After the END marker:** `ROSTER_RANK` and `rosterSpec(p)`, which turns an entry into a makeCharacter spec. The crowd (8b) and full rigs (10) use it.
 
@@ -56,6 +56,34 @@ Everything sits between the markers `// ---- BEGIN ROSTER` and `// ---- END ROST
   - The generator asserts there's a chef plus at least one early and one late hand every day.
   - Section 16 also still accepts an older `galley: chef|cook|hand` field, but nothing sets it now.
 - **The story crew** (Marrow, Vance, Sato, Holt, Pell, Rina, Brennan, Tomas) have looks and bios copied exactly from `CREW` and must stay identical. Section 14 and the crowd rely on their ids.
+
+### Added since (0.16.6 to 0.16.21)
+
+DEV_NOTES' crew roster section has every detail; in short:
+- **Birthdays and door plates (0.16.6):** `birthday` (a ship day of the year, 1–364) on everyone; `plate: { rank, name }` on everyone with a cabin.
+- **Habit changes (0.16.7):** `habitShifts: [{ add?, drop?, why }]`; the sim's `habitWeek` applies them.
+- **Visitors (0.16.8–0.16.10):** `GUESTS` (60: event guests and 52 everyday visitors) and `GUEST_TEMPLATES`, after `ROSTER_PLAYER`; `rosterSpec` returns a plain-clothes guest's own `spec`.
+- **Gardeners (0.16.11):** Tove Cruz (senior), Ravi Hart (early) and Imani O'Neill (late), dept `garden`, with `rota.hoursOn` for Tove's cover days.
+- **Pillar 4, seat 9 (0.16.12–0.16.13):**
+  - varied days off (`days_off`), with fixed days for Torres, Halloran and Calder;
+  - the social fields on everyone (`tpl`, `openness`, `needs`, `loves`, `likes`, `joy`, `thread`, `keepsake`, `home`, `family`, `mentors`, 6 or more `about`); thread spellings are frozen with social B;
+  - four couples (`partner`, sharing a day off and a `transferTo`);
+  - `stays` and `transferTo`;
+  - `ROSTER_RESERVE` (12, four cadets, each `replaces` a same-role leaver and copies their bed, work, shift and rota) and `ROSTER_ROTATIONS` (six Sundays, `out` and `in` ids). Leavers have `aboard: [null, day]`.
+- **Hobby, since and family "after my" (0.16.14,** for social A and the head writer's moment lines `{hobby}`, `{since}`, `my {family}`):
+  - `hobby`: an -ing phrase; `since`: time aboard the Wren, a duration phrase (Tomas "one week"; the reserve counts from arrival: cadets "one week", others "two weeks"). Both on all crew, Saruth and the reserve, added last by `hobby_since()` with no random draws (hand tables `HOBBY_HAND`, `SINCE_HAND`; the rest by rule and `stable(id)`).
+  - `family` reads after "my" (no article, no he/she/him/her/they); `hobby_since` asserts it. `FAMILY` holds (about form, my form) pairs: the about templates still say "Has a twin", through `FAMILY_HAS`, so no `about` text moved.
+  - A new person needs a `since` that agrees with their bio and about lines; check any "years"/"months"/"New to" wording.
+- **Kin, lost and hobbyNoun (0.16.15,** a HIGH from reviewer 2's dialogue review: the theme .arc lines said "the day we lost parents, who run a repair shop"):
+  - `kin`: one living relative with "my" ("my gran"), never a partner or anyone dead; "" for Sato, Holt, Calder, Brennan, Oduya, Saruth.
+  - `lost`: only where existing text has a death (lead's ruling: no new deaths): Oduya "my wife"; loss-theme crew (secret "Lost someone close") get "my grandad"/"my best friend"/"my uncle", never their kin. "" for the rest.
+  - `hobbyNoun`: a bare activity noun ("knitting", "piano", "Tiles") for "a bit of X" / "teaching X" (test a new one in both frames: bare "collecting" failed, 0.16.19). Talent-thread people get a secret craft from `TALENT_NOUN` instead (0.16.20; the generator fails if one is missing); `hobby` stays the -ing phrase.
+  - Added last by `kin_lost`, no random draws. A new hobby phrase needs a `HOBBY_NOUN` entry, a new family phrase a `KIN_OF` entry (the generator fails otherwise).
+  - Readers: head writer 3 switches family/loss/talent .arc to {kin}/{lost}/{hobbyNoun} and adds `needs: lost`; social A exposes them in socialFill ("" = missing).
+- **Threads (0.16.16):** the roster's `thread` wins for themes, the writers' voice files only for `arc:` threads (agreed with head writer 3 and social B2). Sato is `notgood` (facts 11); Kovac is `arc:kovac` with all seven about details from canon (head writer 3's wording, 0.16.17; the 112 bolts stay out, they're beat 3's reveal; her home is Marra Station via `ARC_FIELDS`, 0.16.18; the lead ruled the writing follows the game, so she rides the lift holding the rail and bolts breakfast, 0.16.21), set last by `arc_fixes`/`ARC_OVERRIDE`. A new writer-owned arc goes in `ARC_OVERRIDE`, not in the draws.
+- **cadet_test noise:** g_nocrew can differ by about 1921 px even comparing a build with itself; re-run before chasing it.
+
+- **Every later pass runs at the end of the generator,** on its own random stream (`NEW_R`, `BDAY_R`, `SHIFT_R`, `VIS_R`, `P4_R`). Keep it that way, so nobody already written moves.
 
 ## How to regenerate
 
@@ -109,6 +137,8 @@ Keep doing it that way. To check, compare ROSTER before and after with a short s
 
 ## Gotchas
 
+- **Test setup in a fresh container:** `pip install playwright`, then fetch three.js as DEV_NOTES "Testing" says (`npm pack three@0.128.0` into `/tmp/cadet-work/three`). cadet_test's f_noshadow can differ once by about 1934 px in the "+69 Energy" note (a timing flake); re-run before chasing it. To run two cadet_tests at once give the second its own `CADET_WORK`.
+
 - `ROSTER_PLAYER` is read by the sleep code (`playerBed()`). Moving your bed moves where Sleep works.
 - `uniform` must be a real makeCharacter DEPT key: `store` and `galley` map to `works`.
 - `rank` maps to makeCharacter's 0–4 through `ROSTER_RANK`. A new rank needs a row there.
@@ -116,7 +146,7 @@ Keep doing it that way. To check, compare ROSTER before and after with a short s
 
 ## How to test
 
-Run each check on its own, about 1–4 minutes each:
+Run each check on its own, about 1–4 minutes each. A fresh container needs `pip install playwright` and three r128 unpacked into /tmp/cadet-work/three (DEV_NOTES "Testing"):
 
 ```
 CADET_CHROME=/opt/pw-browsers/chromium python3 cadet_test.py BASE.html starship-cadet.html
@@ -129,6 +159,8 @@ CADET_CHROME=/opt/pw-browsers/chromium python3 day_check.py starship-cadet.html 
 - Also run `node --check` on the extracted script after any generator change. A broken block breaks the whole game.
 
 ## Ideas and questions for the user
+
+- Loose end from 0.16.14: one reserve arrival, Priya Kowal, has the generated detail "an old rivalry with someone aboard that goes back years" though she is new aboard (from before the Wren, at a stretch). The reserve's `since` is fixed text from arrival; a reader that wants it to grow could work it out from `aboard[0]` instead.
 
 - The user said no to a store open every day (answers pass, row 19).
 - Birthdays: built in 0.16.6 (`birthday`, ship day of the year 1–364, about one a week). The galley bakes the cake and the sim engineer gathers the mess.

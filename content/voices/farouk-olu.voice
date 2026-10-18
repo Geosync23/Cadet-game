@@ -1,0 +1,31 @@
+@voice farouk-olu
+// Writer (command: comms), from the roster. Olu Farouk (they/them), comms officer, days. Hears every voice on the ship's
+// channels, and remembers most of them.
+//
+// HOW THEY TALK: quiet and kind; soft, short sentences; a good listener who repeats your words back to check them, the
+// way they would a message. Ran a market stall on Lisk and still calls things "a fair trade".
+// WITH JUNIORS: gentle, remembers their voices on the channel, says "Heard you on the board this morning. Clear."
+// WHAT THEY NOTICE: voices: who sounds tired, who sounds homesick; lyrics, which they'll correct, quietly.
+// MOOD TELLS: happy = hums a song from the record cabinet (with the right words). Tired = early to bed, earlier still.
+// NEVER: repeats what they heard on a channel; raises their voice.
+// RUNNING: one of five who say they know every song in the record cabinet; Olu is the only one who's quiet about it, and
+// the only one who's right.
+tpl: warm
+talk: Quiet and kind; soft short sentences; repeats your words back to check them; "a fair trade"; hums the right lyrics.
+cares: voices on the channels | the record cabinet's songs, with the right words | a fair trade
+jokes: one of five who know every song in the record cabinet, and the only one quiet about it | they recognise you by voice before they see you
+hi: Hello | Oh, hello | Hi there
+bye: Take care | Sleep well | Bye now
+yes: Of course | Gladly | Yes
+thanks: Thank you | That's kind
+wow: Oh, lovely
+sigh: Ah
+nick: - | - | {me} | {me} | {me}
+needs: listen
+openness: normal
+loves: music | tea
+likes: book | sweet
+invites: jam
+joy: the songs in the record cabinet
+keepsake: a list of songs, the right words written out small
+avoid: anything they heard on the channels

@@ -1,0 +1,43 @@
+@reactions gift
+// Writer-commons, reactions. The day after you gave someone a gift (social's cue gift.<tag>, one day; .you, @me: the
+// person who got it). The thank-you on the day is the `gift` line kind; this is the next day's mention.
+
+? cue:gift.tea.you@me
+- I've had three cups of that tea already. Don't tell anyone. They'll want some.   #funny
+- That tea you gave me. Perfect for the night shift. Or any shift. {thanks}.
+? cue:gift.sweet.you@me
+- The biscuits are gone. All of them. I regret nothing.   #funny
+- I shared your biscuits. Well, one. The rest I guarded. {thanks}.   #funny
+? cue:gift.star.you@me
+- I put the star chart up by my bunk. I look at it every night.   #warm
+? cue:gift.plant.you@me
+- The plant's doing well. I've named it. Not Gerald. Well. Gerald.   #funny
+- Your little plant's put out a new leaf. I was ridiculously pleased.   #warm
+? cue:gift.book.you@me
+- I stayed up reading the book you gave me. Chapter nine. Don't tell me anything.
+? cue:gift.garden.you@me
+- Those herbs made my dinner. Brennan was jealous. Brennan's never jealous.   #funny
+? cue:gift.made.you@me
+- That thing you made me is on my shelf. Made in the machine shop! I show everyone.   #warm
+? cue:gift.music.you@me
+- I've played the music you gave me four times. Five. It's very good.
+? cue:gift.game.you@me
+- That puzzle! I solved it at two in the morning and woke half the bunk shouting.   #funny
+? cue:gift.you@me tier>=friend
+- Still thinking about that present. You didn't have to. I'm glad you did.   #warm
+
+? cue:gift.you !cue:gift.you@me tier>=acquaintance
+- I hear you've been giving presents. Very kind. Very suspicious.   #funny
+- Someone's walking round very pleased with a gift. I heard it was from you.
+
+// Writer 4, batch 9: more gifts (said by people who heard).
+? cue:gift.you !cue:gift.you@me
+- I hear you gave someone a present. That's lovely.   #warm
+- Heard about your gift. You've got a good eye.
+- Word is you gave someone something nice. Good.
+? cue:gift.you !cue:gift.you@me dept:store
+- I saw what you bought. I'll never tell who it was for.   #funny
+? cue:gift.you !cue:gift.you@me tier>=friend
+- A present! You're a soft one, really.   #warm
+? cue:gift.you !cue:gift.you@me rank:junior
+- Whole bunk heard about your present. In a good way.

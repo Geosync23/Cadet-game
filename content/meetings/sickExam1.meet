@@ -1,0 +1,18 @@
+@meeting sickExam1
+// Head writer 4: being ill. Rina examines you in the infirmary (Deck 3); the medicine is the last beat. Dry, brisk,
+// then one kind sentence. A ship cold, never anything serious.
+title: The infirmary
+from: Rina Deshi
+gist: Rina in the infirmary: a ship cold, some medicine, and orders to drink water.
+== lines
+rina: Sit. On the bed, not the stool. The stool's mine.   [gesture]
+rina > you: Open. Say "ah". Longer. Fine, that'll do.
+rina: Your temperature's up. Your throat's red. You've got a ship cold. Everyone gets one. Recycled air.
+rina: It's not serious. It's just rubbish. I've had three this year.
+rina > you: Two of these, with water. All the water. The whole cup.   [nod]
+? choice
+* Thanks, Rina.   rel:rina+1
+  rina: Don't thank me. Drink the water.
+* Do I have to go back to shift?   rel:rina+1
+  rina: You're excused. It's on the board. Calder knows. She said "Fine." Twice.
+rina: You'll feel better in an hour. If you don't, come back and I'll be smug about something else.

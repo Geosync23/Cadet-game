@@ -1,6 +1,6 @@
 # Handover: the systems engineer (Pillar 2, Half B)
 
-Written 2026-10-16 at combined build 0.40.8 (`claude/ship-integration` 980e6a9) by the systems engineer session (session_0134zewqwGV9hdGK6PqsaZ36). Read it with `DEV_NOTES.md`, which has the full detail under "Machines and wear (section 17)" and "The job list and supplies, on paper", and `plans/pillar2-plan.md` ("Machines and jobs").
+Updated 2026-10-16 at 0.33.31 (final for this session) (claude/ship-systems; the predecessor's note below, then this session's additions). First written 2026-10-16 at combined build 0.40.8 (`claude/ship-integration` 980e6a9) by the systems engineer session (session_0134zewqwGV9hdGK6PqsaZ36). Read it with `DEV_NOTES.md`, which has the full detail under "Machines and wear (section 17)" and "The job list and supplies, on paper", and `plans/pillar2-plan.md` ("Machines and jobs").
 
 ## Role, branch, builds
 
@@ -88,7 +88,53 @@ The user's answers 1–8 and 22 (`plans/answers-pass-plan.md`), all in section 1
 
   Leads: session_01WHXNp9A1WHAD2EHJw384Qp, since 2026-10-16 04:20.
 
-**Known outside section 17:** player_check's job loop fails since 0.33.16. The galley plant's panel on Deck 3 (tile 39,1) can only be reached through Brennan's station tile 39,4 (`3-galley-2`). It's a layout or player-walking fix, reported to the lead.
+- **0.33.20–0.33.22:** the food-cart fixes.
+    - `cartWaiting` is true only for your own run;
+    - a run that has already arrived when it reaches the list is history;
+    - the galley alone counts the meals on their way (the lead's decision);
+    - machine_check 5f proves the crew take every food run in live play.
+- **0.33.23:** handing jobs in at the board: `jobStepDone`, `turnInJob`, `j.workDone`, `jobStops` done marks, and `TURN_IN` (switched on by the interactions engineer's 0.37.3).
+- **Pillar 3, C7 (0.33.24–0.33.27):**
+    - event wear by system and machine kind (`eventWear`);
+    - event jobs from section 18's `eventMod('jobs')` (`eventStopOf`, `postEventJob`); finishing one yourself calls `eventMine('jobs')`;
+    - favours for the social engineer (`favourPost`, `favourAccept`, `favourDecline`, `favourTurnIn`, `favoursOf`, `myFavours`);
+    - `cartTrays` for the galley's event trays;
+    - storm blackouts (`blackoutHour`, `blackoutAt`, `deckLook().dark`, scored as `eventScore('blackout', minutes)`).
+
+  The storm's own `stormTrays` is dropped in the events engineer's 0.34.12 (the lead's decision): the galley's `cartTrays` is the one tray run.
+- **0.33.28:** `traysArrivedAt(day, to)` for the galley's bridgeHungry score:
+    - a crew run gives its drop-off end;
+    - yours gives `j.dropAt`, recorded by `jobStepDone` on a `drop` step.
+- **0.33.29:** event jobs carry `eventJob: <spec id>` for section 18's `eventTakeJob`. One the player volunteered for at a meeting (`SHIP.event.mine['wants:<id>']`) is claimed for 'you' as it's posted. It's claimed directly, since `claimJob` would re-enter `jobsHour`.
+
+- **0.33.30:** machine_check's runs measure ordinary wear with events off (`events: True` to opt in). New case 4c runs with the ion storm on: comms wear harder, and the real crew keep the sensor array from getting past faulty.
+- **0.33.31:** the diplomatic visit's `coldCabins` thread (`coldCabinsHour`).
+    - **Assumption to confirm:** guests aboard is read as `eventMod('effect', 'guests')`. That's my proposal; the events engineer hadn't confirmed it at handover. If they signal guests differently, it's the one line in `coldCabinsHour`.
+
+**Final state (this session's end, 0.33.31):** everything in section 17 is pushed and reported, and all checks pass. Open items:
+- confirm the guests signal above with the events engineer (session_01GW9QtevJxaMQzzCGPBHaxb);
+- otherwise nothing.
+
+Leads during this session, in order: session_0158BCCswtdujm3t5d2LXsFz, session_01WHXNp9A1WHAD2EHJw384Qp, session_015QoyPWBdMPM4ywf5W2jMMs (current).
+
+Other sessions I worked with:
+- galley engineer: session_01AVGVnj4Q1jFmVoD6xi5asT;
+- interactions engineer: session_01GGbtSiy4tDygCzrSUBDMYa;
+- social engineer: session_01DzZ669spGpdSdVMYzUog2N;
+- events engineer: session_01GW9QtevJxaMQzzCGPBHaxb.
+
+**Gotchas from this session:**
+- `jobsHour` must never call anything that runs `machinesNow` (`claimJob`, `jobsBoard`, `openJobs`): that re-enters the hour loop.
+- `deckLook` is cached on `MACH_REV`, so anything that changes within an hour (blackouts) must be in its cache key.
+- machine_check's stand-in events: `eventNow` must count the day on, as section 18's does, or event job keys (which hold the event's start day) repost daily. `SHIP_EVENTS` is keyed by id from 0.41.5; the test handles a list or an object.
+- A job the player holds lapses after 12 ship hours with no progress. Tests that jump a day must check before that.
+- With `TURN_IN` on (from the interactions engineer's 0.37.3), `finishJob` only does the work. machine_check turns it off at the start; 5g turns it on itself.
+
+**Test files I own:** machine_check.py. Sections 5c–5h cover cart runs, looks, tapping machines and Mail, chores and `openJobs`, live food runs, turning jobs in, and events and favours. Run every check one at a time. day_check takes about 4 minutes; the rest take 1–2 minutes each.
+
+  Leads: session_015QoyPWBdMPM4ywf5W2jMMs since 2026-10-16 15:15.
+
+**Known outside section 17:** the galley-plant reach problem (from 0.33.16) was fixed by the player engineer's squeeze-past (0.28.12). player_check is all OK from 0.41.4 on.
 
 ## State at 0.40.8: loose ends and weak spots
 
@@ -138,3 +184,41 @@ Also run every turn: `cadet_test.py` (ALL IDENTICAL, since section 17 draws noth
 3. **Help with cart runs** as a player job: push the food cart yourself. It was designed and is simple to add.
 4. **Supplies running short as a story beat** (a late shuttle, filters rationed)? The stock and delivery numbers are easy to change.
 5. **Should ship health and faults affect crew mood visibly** (grumbling, chatter) once Pillar 3 (social) starts? The `mood` numbers are already there to read.
+
+## This session (2026-10-16/17, session_01TqLepvhqDZRwFj7ZuLb6Xa): 0.33.32-0.33.39
+
+Leads: session_015QoyPWBdMPM4ywf5W2jMMs, then session_01PxXKwc5mkC7tV5MPi3p7PP (current; report to them after each push: files, what changed, checks, memory %). Build master: session_012K7RZ3oSX2vpBb1rR66MBh. Social A (reputation, reads repair / jobAbandoned / jobUnclaimed): session_012pK2XVi5UhqEd28fakYk68. Reviewer 1: session_01HK4m33sUiLuVim8VWaCPMs (reviewed ae58e43: PASS, plans/reviews/ship-systems-ae58e43.md on claude/reviews; reviewing f211129). Section 15 has a new owner (player engineer 3, via the lead).
+
+- **0.33.32-33, the user's bug "the job board never has any jobs":** `CREW_LEAVE` (3 ship hours) was only 5 real minutes. Now `leaveEnd` holds a small job to the end of the shift its wait runs out in, at most `HOLD_MAX` (6) at once (`j.released` for the ones let go), and nothing on the player's days off (`playerShiftOn(d)`, Sat/Sun, the sim engineer's). Day 1's first two chores post at 06:00. machine_check 5i: a week, weekday shifts ~4.4 jobs for you, no empty hour, nothing held Sat/Sun.
+- **0.33.34-35, the working garden (with the galley engineer):** machine kind `growlight` (real `3-growlight-1/2` with panels from decks 0.38.6); `gardenAt(t)` -> { water, feed, light } 0-1, pure, 1 at worn or better (`min(1, machWorks/85)`); `gardenCarry({ at, crates, title })` -> 'garden@<min>', `carryWaiting(id, t)`, `carryArrivedAt(id)`; your drop calls the galley's `galleyCarryLand(id)` once. Pickup `3-crates-1`. machine_check 5j.
+- **0.33.36-37, Pillar 4 for onboarding (session_01KaHzfqSqF8B4bkNFrH1tsx):** `jobReserve(kind, day, at, slot, { until })`, `jobReserved(slot)`, `jobRelease(slot?)`; `heldForYou(j)`; reserved jobs have a `make` stop (`RESERVE_MAKE` 'bracket', `makeMins` 30, the player engineer's 0.28.24 does the make step). Slots: 1 Mon 08:00 shadow, 2 Mon 13:00, 3 Tue 07:45; onboarding calls them from `introBegin`, `jobRelease()` from `introEnd`. `simNote('job', { id, step, reserved, ... })`: take / stop (k, tag) / done / turnin / drop / lapse.
+- **0.33.38:** merged decks 0.38.8 (real washers `4-washer-1..4`). Fixed crew "two jobs at once": busy until a job's route ends (`j.end > t`), not just while claimed.
+- **0.33.39, for social A:** `simNote('repair', { who, machine, state, ... })`, `simNote('jobAbandoned', { machine, dept: null })`, `simNote('jobUnclaimed', { machine, dept: null })`. All section 17 notes queue in `SIM_Q` and go out via `simFlush()` after `machinesNow`'s hours or at the end of a player action, never inside `jobsHour` (social's handlers read the schedules).
+
+**Open / known:**
+- player_check fails one line on decks 0.38.8 and later: "a washer tap should find its stub machine" (section 15's test assumes stand-in washers). Told the player engineer (session_012J4ctzJgFRBaUFU5sJvega).
+- Still on call for Pillar 4: the "asked for you" mark for reputation beyond reserved jobs (social A has `repAskedFor(dept)`; the board could show it on jobs for departments that think well of you). Not asked yet.
+- `jobUnclaimed` fires when a held job's wait ends, even if the crew are too busy to take it that hour.
+
+**Gotchas added:** machine_check runs must only move the clock forward inside one case (going back = New game, which wipes the jobs). Run player_check with a timeout of 20 minutes (it takes ~10). A `pkill -f` pattern can match your own shell command and kill it.
+
+## 0.60.7 session (2026-10-18, session_016Mv2wxrtkGgAwcst4GWADY): 0.33.40-0.33.42
+
+Lead 10: session_014hkEBULoSV9EKZZSwMWyPd. Branch `claude/systems-0607` (from live 0.60.6a, c8685cf). Brief: `plans/brief-0607.md` on `claude/lead-pillar1`; plan: `plans/plan-0607.html` on `claude/plan-0607` ("Around the ship", "Stores and the lift").
+
+- **0.33.40, the Works crew at work:** `HOLD_MAX` 3; `shareOut` (every third new small job by id hash to the crew at once while `SHARE_KEEP` 2 others are held; `SHARE_ON` for tests); `placeFreeFor` (chore stops at real places when nobody's plan or job is there); deliveries carried (`hold: 'carry'` from pickup through the drop); `SHOW_JOBS` (Day 1 08:00 Bea's vent at `4-lift-1`, Day 2 13:00 her box of tools from `5-hold-1` to `5-bench-1`; `j.crew`); `showJob(day)` for onboarding. machine_check 5l.
+- **0.33.41, the right shelf:** `SHELF_NAME`, `shelfOf`, `shelfStock`, `shelfLine`, `shelfTapped`, `shelfNeed`/`shelfWant`, `shelfWrong`, `shelfGlowTick` (one amber box, Deck 5, made on first use); the machine shop's 15:00 top-up. Small edits in section 15 (`jobTap`: stock card with no job at all, `shelfWrong` before fetching) and 15b (`ixChoreTap`'s fetch, `ixShelf` for the arrow and label). player_check and interactions_check tap the part's own shelf now.
+- **0.33.42, the Wednesday delivery:** no late delivery in week 1; crates (`CRATE_PARTS` 8, `CART_CRATES` 4); held for you till 14:00 (`DELIVERY_KEEP`); `cartLoadHold`/`cartUnloadShelves` (`j.onCart`); `holdCratesLive(group, k)` for the deck architect's crates (asked of them through the lead); section 15's `cartEnd` for the delivery (second trip, 10-minute unload). machine_check 5m; player_check's cart run checks the shelves after the unload.
+
+- **0.33.43:** Bea's Day 1 vent 09:00-10:17 (reviewer's LOW); the delivery loads at `5-delivery-1` (DA4's crates, which call `holdCratesLive`; checked on a scratch merge with deck-0607 55fca8d). Onboarding 4 (session_01MeEsh5sp4RyuD7KwdQEbLC) has the delivery and `showJob` hooks; the sim items lead 10 first gave me went to the social engineer. Lead 11: session_01YKC3CGA9VS4b7wuqLbPT7V.
+
+**Gotchas:** a chore's pickup can be at a shelf place (`5-parts-1`), so the shelf's stock card only shows with no job at all. Don't run two player_checks writing to the same file (a killed run keeps writing into it). Under load player_check takes over 30 minutes; run it alone. day_check day 3 fails on live 0.60.6a too (two diners in one mess seat), not section 17.
+
+## Pillar 5, Steps 1-2 (seat S, session_01KxfsfBWkCGcncuuH2n1hFB, 2026-10-18, builds 0.33.44-0.33.54)
+
+Branch `claude/ship-systems`, reset to `claude/cand-0607` d3d720b at the start (the old branch was stale). Head **b676814**, reviewed PASS by R (Step 1) and R2 (Step 2). Leads: 11, then 12 (session_01GjWhU9Z9V8RNoR8yyELA9V). Every build is a row in DEV_NOTES; every name in the hook register under "Pillar 5, section 17".
+
+- **Step 1 (foundation 17.1-17.6):** `playerTier()`, ranks (`rankOk`, `j.junior`, `j.only`), the held order by `worksBand()`, `ladderTick(h)` at the end of `jobsHour` (machinesNow is re-entry safe: `MACH_IN`), real faults (`REAL_SHARE` .45 of worn machines found already faulty from Day 2 on shift days; the lead approved this over the page's FIND_LATE), `FAULT_CAUSES` (Tier 1) and `j.cause`, `jobKindAdd`/`JOB_KINDS` (stops with `how`/`opts`/`hold`, `jobStepDone(id, k, res)` → `say`, `retry` with `def.veto`, `def.side`), `machineFound`, 24k's hooks (`caseOffer`, `caseHeld`, `caseFitted`, `caseHidden`), `jobReserve` `{ tier, train, until, cause }`, `jobSetPart`, `machineTitle`; the main lift is `5-mainlift-1`.
+- **Step 2:** drift (m5; only while 24e's 'tune' kind is registered; `TUNE_LEAVE` 120), incidents' machine side (m6: `machineFault`, `liftStuck`, `jointJobPost`), hauling (m4: `SHIP.manifest` — not the page's `SHIP.hold.manifest` — and `SHIP.misplaced`; only while 24d's 'haul' kind is in), mechanic jobs held for you count inside `HOLD_MAX` (0.33.53, lead 12) so the steady player stays 3-6 a day.
+- **Gotchas:** a function declared in the game beats a `window.x` stand-in: machine_check swaps stand-ins through `window.__sc` (5n, 5q) and keeps the real one running. `pkill -f` on a pattern your own command line contains kills your shell. intro_check takes over 2 hours here; BM runs it on candidates (lead 12). One browser check at a time; quick single-case runners (`one.py`-style: exec cadet_test's Game, run one case's JS) save a lot of time.
+- **Loose ends:** none open. R2's nit (tunePost's found delay shares key 869's arguments with the drift size) left as is, agreed. Step 3+ S work (team jobs, the pipe graph, Tier 3-4 machines) not started.

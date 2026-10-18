@@ -1,0 +1,68 @@
+@bank all
+// Head writer 0607: clothes and laundry (the onboarding engineer's, plan-0607 "Clothes and laundry"). TEXTS, except
+// clothes.remark (crew, a bubble or card line, gated on flag:clothes.stale: you're in yesterday's clothes after 10:00;
+// gentle, never mean). {n} a count, {time} a clock time, plus the washer's number as {n} in laundry.busy.
+
+== clothes.change
+- Change clothes
+
+== clothes.changed
+- Fresh clothes. You feel ready for the day.
+- Clean clothes on. Much better.
+
+== clothes.left
+- {n} clean outfits left.
+
+== clothes.spare
+- Your one spare outfit. The rest of your kit comes up from stores.
+
+== clothes.stale
+- You're in yesterday's clothes.
+
+== clothes.empty
+- No clean clothes left. Take the hamper to the laundry on Deck 4.
+
+== clothes.hamper
+- Take the hamper
+
+== clothes.putaway
+- Put the clothes away
+
+== clothes.remark
+? flag:clothes.stale
+- Same shirt as yesterday? No judgement. Bit of judgement.   #funny
+- Laundry's on Deck 4, if you're looking for it.
+- Long night? You look like you slept in that.   #funny
+- Hamper full? The washers are past the washrooms.
+- I did that my first week too. The laundry's not scary.
+
+== tip.laundry
+- Out of clean clothes. Carry the hamper to the laundry on Deck 4, past the washrooms in the junior wing. Load a washer, and come back when it's done.
+
+== laundry.load
+- Load the washer
+
+== laundry.running
+- Washing. Done at {time}. You can leave it.
+
+== laundry.busy
+- All four washers are going. Number {n} finishes first, at {time}.
+
+== laundry.done
+- Your washing's done. Collect it from the laundry on Deck 4.
+
+== laundry.collect
+- Take out the washing
+
+== laundry.fold
+- Fold it first? Neat clothes, neat mind.
+
+== laundry.away
+- All put away. Five clean outfits.
+
+== laundry.kit
+- The rest of your kit has arrived from stores. Five outfits in your wardrobe now.
+
+// Day 1 (playtest 1, O4): the clothes tip
+== tip.clothes
+- Fresh clothes are in your wardrobe: change each morning. When you run out, do your laundry on Deck 4.

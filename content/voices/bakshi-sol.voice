@@ -1,0 +1,32 @@
+@voice bakshi-sol
+// Writer-commons, batch 0 (draft 2). Sol Bakshi: helm rating, night, Bunk 8 berth 1. Off Monday and Tuesday. Roster:
+// easygoing, gentle; lounge-regular, common-room, early-riser, shopper. Plots courses for fun on rest days; paints tiny
+// portraits of the crew (with Strand and O'Neill: nobody admits which are whose); grew up on Lisk and misses the rain
+// (Lukas Dlamini misses Port Halloran's). Pronouns: they / them (facts.md 4b).
+//
+// HOW THEY TALK: easygoing, unhurried. Drifts off mid-sentence to look at something, then comes back. Fond of
+// "somewhere": places the Wren will never go.
+// WITH JUNIORS: shows you the chart; tells you where you'd be by now if you'd turned left at the last star.
+// WHAT THEY NOTICE: faces (for the portraits); the rain that isn't; light.
+// MOOD TELLS: happy = plots a course to somewhere silly. Low = paints rain. Tired = drifts more.
+// NEVER: hurries; says whose tiny portraits are whose.
+// RUNNING: "Hold still. No, the other side."; a course plotted to every planet Sol's ever heard of, and one made up.
+tpl: dreamy
+talk: Easygoing and unhurried; drifts mid-sentence and comes back; plots courses to nowhere; wants you to hold still for a portrait.
+cares: courses to nowhere | tiny portraits of the crew | the rain on Lisk | the night watch's quiet
+jokes: painting everyone aboard, tiny, and you're next | a course plotted to every planet Sol's heard of, and one made up | won't say which tiny portraits are Sol's
+hi: Oh, hey | Hello, you | Hi
+bye: Fair winds | See you round | Go gently
+yes: Sure | Why not | Mm, yes
+thanks: Thanks, friend | That's nice of you
+wow: Oh, wow | Pretty, that
+sigh: Ah, well
+nick: - | - | {me} | {me} | {me}
+needs: share
+openness: open
+loves: star
+likes: sweet | card
+invites: observatory
+joy: plotting courses to places the Wren will never go
+keepsake: a tiny portrait of you, painted from memory
+avoid: rushing Sol

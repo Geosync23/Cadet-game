@@ -1,0 +1,112 @@
+@crew nandakumar
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- {hi}. Cadet. Infirmary's on Deck 3. You'll find me there, or in the garden.
+? tier>=acquaintance
+- {hi}, {me}. Have you had water today? Don't guess. Have some.   #funny
+- {me}. Sleeping all right? Good. Keep at it.
+? tier>=friend
+- {hi}, {me}. You look well. I'm allowed to say that; it's my job.   #warm
+== feel
+? mood:high
+- Quiet morning. Nobody bleeding, two chillies ripe. A good day.
+? mood:low
+- Long clinic. Everyone had a cough. Drink some water, before you ask.   #funny
+== near
+? act:gym
+- Running before breakfast. I recommend it to everyone. They pretend not to hear.   #funny
+? deck:3 act:free
+- The chillies are coming on. Brennan says they're too hot. Brennan is wrong.   #funny
+== life
+? tier>=acquaintance
+- The sign on my door says it all. If you're bleeding, Deck 3. If not, knock.
+== joy
+? tier>=colleague
+- My chillies. Same seeds my mother grew. They don't care which way is down.   #warm
+
+// ---- Writer 2, batch 3: to ~30 (greet by time and warmth, bye, near, invite, accept, decline, missed, birthday, cue, hint, about, life)
+== greet
+? tier>=acquaintance time:morning
+- Morning, {me}. Run done, chillies watered. Have you had water? Thought not.   #funny
+? tier>=acquaintance warmth:cold
+- {me}. Not seen you in a while. Not in my infirmary either. Good. Keep it that way.
+
+== bye
+- {bye}. Water. You know the rest.   #funny
+
+== near
+? habit:gardener
+- The garden. My corner. Chillies, a stool, and nobody bleeding. Bliss.
+? deck:3 act:work
+- Clinic's open. Sit there. Don't touch anything. Tell me the truth.
+
+== invite
+- Garden after shift? I'll show you the chillies. Don't touch. Then wash your hands.   #funny
+? tier>=acquaintance
+- A morning run? Ring corridor, six sharp. Bring water. Obviously.
+
+== accept
+- Yes. I'll be there. On time. With water.
+- Good. Yes. Bring water.   #funny
+
+== decline
+- Not tonight. Clinic notes. Another time.
+? weekday:tue|wed
+- Rest day. Garden, book, early night. Thursday?
+
+== missed
+- You didn't come. That's all right. I hope you slept instead. Did you?
+
+== birthday
+? birthday:you
+- Happy birthday, {me}. One chilli, mild. A doctor's gift. Drink some water after.   #funny
+? birthday:me
+- My birthday. Brennan put my chillies in a cake. Revenge, I think. It was lovely.   #funny
+
+== cue
+? cue:event.ionStorm.afterglow
+- Storm's over. Three bumps, one sprain, everyone fine. Drink some water.
+
+== hint
+- {me}. Have you a minute later? I'd like a word. Not a medical one.
+
+== about
+? aff:brennan:friend
+- Brennan says my chillies are too hot. Brennan uses every one. That's friendship.   #warm
+
+== life
+? tier>=friend
+- Off duty, I never take my own advice. Don't tell anyone. Drink some water.   #funny
+
+// ---- Writer 2, batch 6: bubbles (smalltalk, rumour), at most one in five about work. 60 characters.
+== smalltalk
+- Drink some water.   #funny
+- Two chillies ripe today.
+- If you're bleeding: Deck 3.
+? time:morning
+- Run done. Water had.
+? act:off
+- Garden. Stool. Chillies.
+?
+
+== rumour
+- Calmly: here's the news.
+- No names. Never names. But.
+
+// Writer 4, batch 12: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. The chillies are going in a box with holes. Drink some water.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm leaving. A station hospital. Look after yourself. Drink some water.
+? leaving:you tier>=friend
+- You looked after people. I noticed. That's the job, really. Thank you.   #warm
+
+== letter
+- The station hospital is large and calm. I've grown chillies on the windowsill. My mother's seeds. Drink water.
+? tier>=friend
+- Put my sign on the new door. IF YOU ARE BLEEDING. They laughed. Then they listened. Hello.

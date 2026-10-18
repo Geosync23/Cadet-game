@@ -1,0 +1,25 @@
+@meeting introDinner
+// The arrival evening, at the table before Calder (head writer 3, 0.48.22; the onboarding engineer's hook, arrival
+// 0.42.20+). Torres about himself (the coils, Reyes's notes, coil three) and how a ship day runs, then a question back.
+// No wrong answer. It ends on him seeing Calder coming, so introChief can cut in ("Chief. Didn't think we'd see you").
+// No scarf (beat 1), no father, no Engine Specialist list.
+title: Dinner with Zeke
+from: Zeke Torres
+gist: Dinner with Zeke Torres: the drive coils, how a ship day runs, and what brought you out here.
+== lines
+torres-zeke: Sit, sit. Eat while it's hot. Brennan notices.   [gesture]
+torres-zeke > you: So. Engines, that's me. Three drive coils on Deck 6. I mind them on days.
+torres-zeke: Reyes has them on nights. We leave each other notes at shift change. Mostly about coil three.
+torres-zeke: She sulks, coil three. Reyes says she's shy. One of us is wrong, and it isn't me.   [laugh]
+torres-zeke > you: How a day runs, then. Breakfast from six. Shift at nine. Tea and biscuits at one.
+torres-zeke: Off at five. Dinner from five till half eight. Then the evening's yours. Gym, lounge, Tiles, bed.
+torres-zeke: Two days off in a row each week. Yours are the weekend, like most of Works.
+torres-zeke > you: Right. Your turn. What brought you all the way out here, {me}?   [listen]
+? choice
+* I wanted to see the stars.   rel:torres-zeke+1 flavour:share mem:intro.dinner.stars
+  torres-zeke: Best reason there is. Get a window seat, then. Every time.   [nod]
+* I like fixing things.   rel:torres-zeke+1 flavour:practical mem:intro.dinner.fixing
+  torres-zeke: Then you're in the right bay. She's got plenty for you. Lovingly.   [laugh]
+* I'm not sure yet.   rel:torres-zeke+1 flavour:listen mem:intro.dinner.unsure
+  torres-zeke: That's allowed. Most of us found out once we got here. Me included.   [nod]
+torres-zeke: Oh. Look who's coming over. Sit up straight.   [gesture]

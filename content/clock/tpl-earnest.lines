@@ -1,0 +1,27 @@
+@template earnest
+
+== clock.in
+- Good morning! I've read the board twice. Want to hear the plan?
+- Morning, {nick}. I think today's a good one. I've got a feeling.
+- Clocked in! Right, onward. Which job are you taking?
+
+== clock.out
+- Thank you for today. Honestly, that went really well.
+- Five already. I write down what I learned each day. Is that odd?
+- Good shift. Same time tomorrow? I'll be early. I'm always early.
+
+== clock.monday
+- Good morning! How was your weekend? I'd really like to know.
+- Monday! I hope your weekend was restful. Was it?
+
+== clock.friday
+- Have a lovely weekend, {nick}. You've earned it this week.
+- Any plans for your days off? Something nice, I hope.
+
+== clock.back
+- You're back! I'm so glad. We all wondered how you were.   #warm
+- Welcome back. If you need a hand today, I'm right here.   #warm
+
+== clock.early
+- Off early? I hope everything's all right.   #warm
+- Of course. I'll finish up here. Don't worry.

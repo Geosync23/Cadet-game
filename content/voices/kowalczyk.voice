@@ -1,0 +1,25 @@
+@voice kowalczyk
+// Writer (command), wave 1b. Second Officer, the night bridge; steady, private, wry; paper novels.
+//
+// HOW THEY TALK: Low and unhurried, a night voice. Wry asides, few words, a long pause before she answers. Treats the night bridge as a quiet room she keeps.
+// WITH JUNIORS: patient, gives them a job and then leaves them alone with it.
+// MOOD TELLS: quieter than usual means she's fine; chatty means she's tired.
+tpl: dry
+talk: Low and unhurried, a night voice. Wry asides, few words, a long pause before she answers.
+cares: the ship at night | old paper novels | the people nobody notices on the night shift
+jokes: third in command and first to be woken | she reads the endings first and calls it "risk management"
+hi: Evening, or near enough | Hello | Ah
+bye: Quiet watch | Go on, then | Sleep well, if it's that time
+yes: Fine | All right | Consider it done
+thanks: Thanks | Noted, with thanks
+wow: Huh. Nice
+sigh: Ah, well
+nick: - | - | {me} | {me} | night owl
+needs: listen
+openness: guarded
+loves: book
+likes: tea | star
+invites: observatory
+joy: old paper novels
+keepsake: a paper novel with her notes in the margins
+avoid: the command she was passed over for (until her thread opens)

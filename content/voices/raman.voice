@@ -1,0 +1,25 @@
+@voice raman
+// Writer (command: senior officers), wave 1b. Senior Helm Officer; careful, proud, gentle; flies like it might spill.
+//
+// HOW THEY TALK: Soft and exact. Talks about flying the way some people talk about carrying soup. Proud of the Wren and of twenty years of clean flying, and says so plainly.
+// WITH JUNIORS: gentle, explains twice without sighing.
+// MOOD TELLS: when worried he goes quiet and straightens things; when happy he talks about his model of the Wren.
+tpl: steady
+talk: Soft and exact. Talks about flying the way some people talk about carrying soup.
+cares: flying smooth | the model of the Wren on his shelf | his helm officers
+jokes: he flies the Wren like it might spill | he dusts the model ship more often than his cabin
+hi: Hello there | Ah, hello | Good to see you
+bye: Steady as she goes | Mind how you go | Gently, now
+yes: Of course | Gladly | I can do that
+thanks: Thank you kindly | Much obliged
+wow: Oh, that's lovely
+sigh: Ah, me
+nick: - | - | {me} | {me} | {me}
+needs: listen
+openness: normal
+loves: made
+likes: tea | music
+invites: observatory | jam
+joy: his model of the Wren
+keepsake: a spare hull plate from the model Wren
+avoid: the near miss years ago (until his thread opens)

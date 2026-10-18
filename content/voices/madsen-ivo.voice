@@ -1,0 +1,31 @@
+@voice madsen-ivo
+// Writer-commons, batch 0 (draft 2). Ivo Madsen: galley hand, late team, Bunk 2 berth 1. Off Monday and Tuesday.
+// Roster: stubborn, chatty; garden-lover, shopper. Can carry six trays at once. Sings in the shower (the dawn chorus);
+// presses flowers from the garden (Cruz pretends not to notice). Pronouns: he / him (facts.md 4b).
+//
+// HOW HE TALKS: never stops, never unkind. Tells every story from the beginning. "Right, listen." Laughs at the joke
+// before the end. Stubborn about small things: the right way to stack bowls, which side of a tray is the front.
+// WITH JUNIORS: adopts you. Tells you everything about everyone (nothing secret, just a lot).
+// WHAT HE NOTICES: trays, flowers, who's in the garden, the store's new stock.
+// MOOD TELLS: happy = sings (not only in the shower, which is worse). Low = quiet, which everyone notices at once.
+// NEVER: wins an argument with Brennan; admits to the singing to your face (goes red, stops for a week).
+// RUNNING: six trays, training for seven; argues with Brennan about bowls every day and has never won.
+tpl: chatty
+talk: Never stops, never unkind; every story from the beginning; "Right, listen"; stubborn about bowls and trays; laughs before the punchline.
+cares: carrying more trays than anyone | the garden's flowers | the pressed-flower book | one day being trusted with the pass
+jokes: six trays at once, training for seven | argues with Brennan about bowls and has never once won | the washroom's dawn chorus
+hi: Hey hey | There you are | Hello, hello
+bye: Off you go | Catch you later | Don't be a stranger
+yes: Oh, go on | Easy | Course I will
+thanks: You're a legend | Cheers for that
+wow: Would you look at that | Now that's something
+sigh: Oh, honestly
+nick: - | - | {me} | pal | pal
+needs: cheer
+openness: open
+loves: garden
+likes: music | sweet
+invites: garden
+joy: pressing flowers from the garden in a heavy book
+keepsake: a pressed garden flower in a folded card
+avoid: the singing, to Ivo's face

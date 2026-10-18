@@ -1,0 +1,43 @@
+@tradition tiles-night
+// Tiles night (weekly, seat 15). Tuesday is the one evening with no other tradition, so Tiles has it to itself.
+// The game itself is the Tiles engineer's (plans/tiles-plan.html, section 23); this file is only the gathering: who
+// comes, where they sit, the boards on the tables, and the words. Design note: plans/trad-notes-weekly.md.
+k: 435
+title: Tiles night
+when: weekly tuesday
+at: 20:00-21:30
+min: 25
+jitter: 15
+where: 3 room Bow lounge: lounge-seat
+hold: 1
+who: rina always, lounge-regular 60%, bar-regular 45%, juniors 35%, everyone 12%
+anim: play
+host: rina
+from: rina
+ties: decor tilesNight
+invite: host=rina odds=40% line="Tiles tonight in the lounge. Come and lose to me. It's educational."
+
+== mail
+- Tiles night tomorrow, {time} in the bow lounge. A board on every table. Beginners welcome; my title is not up for discussion.
+
+== ask
+- Tiles night later. I've been practising my losing face. Haven't needed it yet.   #funny
+- Coming to Tiles tonight? There's a board with your name on it.
+- Tiles at eight. Rina says it's a friendly game. Rina is lying.   #funny
+- I'm playing Tiles tonight. Last week I nearly won. Nearly.
+
+== here
+- Your move. Take your time. No, really, take your time.   #funny
+- Hang on, that tile goes there? Since when?
+- One more game. Then bed. Probably.
+- Good move. I hate it.   #funny
+
+== thanks
+- You pull up a chair at a Tiles board. The tiles click, the lounge hums, and someone groans at a good move.
+- You join Tiles night. Rina looks up from the board and cracks her knuckles.   #funny
+
+== chatter
+- Has anyone actually beaten Rina at Tiles? Ever?   #funny
+- I dreamt in Tiles last night. Little hexes everywhere.   #funny
+- Tiles is easy to learn. That's the trap.
+- Tuesday's the best night aboard. Tiles, tea, and nobody talking about work.   #warm

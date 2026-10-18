@@ -1,0 +1,29 @@
+@template chatty
+
+== career.missed
+? tier>=colleague
+- There you are! Everyone was asking where you'd got to. You all right? Honestly?
+
+== worried.chief
+? tier>=friend
+- You saw Calder? Oh, {nick}. Tell me everything. Then I'll knock for you every morning.
+
+== worried.captain
+? tier>=friend
+- The ready room! Look, whatever's going on, talk to me. I'm a good listener. Sometimes.   #serious
+
+== worried.last
+? tier>=friend
+- I'm worried, {nick}. Properly. I'll knock for you in the morning. Every morning.   #serious
+
+== career.up
+? tier>=friend
+- You were on shift! I told everyone. Well, three people. It's a start.   #funny
+
+== farewell.eve
+? tier>=friend
+- I don't even know what to say, and I always know what to say. I'm so sorry.   #serious
+
+== farewell.day
+? tier>=friend
+- Write. Every week. Long ones. I'll write back longer. You know I will.   #warm

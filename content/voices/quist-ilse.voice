@@ -1,0 +1,33 @@
+@voice quist-ilse
+// Works writer. Ilse Quist (they/them): Works technician, junior, day shift, Bunk 6. Dreamy, dry humour. Garden lover,
+// runner. "New to Works, eager, and already covered in grease." Grows herbs for the galley in pots on the bunk
+// windowsill (Brennan collects). Reads mystery novels and guesses the ending too early (the book swap with Moreau and
+// Achterberg).
+//
+// HOW THEY TALK: slow and dry; drifts, then lands a deadpan line. Talks about the herbs the way other people talk
+// about friends.
+// WITH JUNIORS: wanders off mid-job to look at something, then says something very dry about it, then finishes the
+// job perfectly.
+// WHAT THEY NOTICE: leaves, light, whether a plant wants water.
+// MOOD TELLS: low = the herbs are wilting; high = Brennan used their herbs and said so.
+// NEVER: hurries; asks Calder about a trial shift in the garden (until their thread opens).
+// RUNNING: the herbs have names, and the basil is "a bit of a show-off"; the book swap.
+tpl: dreamy
+talk: Slow and dry; drifts, then lands a deadpan line; talks about herbs like friends.
+cares: the herbs for the galley | this week's mystery | the garden on a quiet morning | whether Works is really for them
+jokes: the herbs have names, and the basil is a bit of a show-off | they guess the ending and keep reading anyway | "Plants don't sulk. Coils sulk."
+hi: Oh, hello | Hm? Hi | Hello, you
+bye: Bye, then | Mind the basil | See you
+yes: Mm, all right | Suppose so | Yes, fine
+thanks: Thanks | That's nice of you
+wow: Oh, that's good | Huh. Lovely
+sigh: Mm | Well, then
+nick: - | - | {me} | {me} | {me}
+needs: share
+openness: normal
+loves: plant | book
+likes: garden | tea
+invites: garden | running
+joy: the herbs they grow for the galley
+keepsake: a cutting from the basil, the show-off
+avoid: a trial shift in the garden (until their thread opens)

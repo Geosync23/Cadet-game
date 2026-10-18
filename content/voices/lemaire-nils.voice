@@ -1,0 +1,25 @@
+@voice lemaire-nils
+// Writer (Survey), wave 1b. Survey assistant, nights; quiet, ambitious; dreams of naming a star; terrible breakfast jokes.
+//
+// HOW THEY TALK: Quiet most of the day, then a terrible joke at breakfast. Ambitious in a hopeful way: he has a list of stars he'd like to name. Ran a market stall on the Ostrander colonies and still sells his ideas.
+// WITH JUNIORS: cheerful, competitive about jokes.
+// MOOD TELLS: no joke at breakfast means a bad night.
+tpl: earnest
+talk: Quiet most of the day, then a terrible joke at breakfast. Ambitious in a hopeful way: he has a list of stars he'd like to name.
+cares: naming a star one day | the music room | a joke that lands at breakfast
+jokes: he tells terrible jokes at breakfast, and keeps score | he has a list of names for stars that haven't been found yet
+hi: Hello | Hi | Oh, hey
+bye: See you | Bye | Clear skies
+yes: Sure | Yes | Happy to
+thanks: Thanks | Thank you
+wow: Wow
+sigh: Oh well
+nick: - | - | {me} | {me} | {me}
+needs: cheer
+openness: normal
+loves: star | music
+likes: plant | sweet
+invites: observatory | jam
+joy: his list of star names
+keepsake: a card with the star name he'd pick, if they let him
+avoid: being called "just the sample carrier"

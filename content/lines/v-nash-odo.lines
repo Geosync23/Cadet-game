@@ -1,0 +1,29 @@
+@crew v-nash-odo
+// Writer 2, batch 8: a short-stay visitor. Mostly not about work.
+
+== greet
+? tier=stranger
+- Oh, hello. Odo. I play things. Mostly at night. Mostly softly.
+? tier>=acquaintance
+- Mm, {me}. The garden's got good acoustics. Nobody tells you that.
+? time:evening
+- Evening. There's a tune in the vents tonight. Can you hear it?
+?
+
+== chat
+- I hum to the tomatoes. They seem to like it. Hard to tell with tomatoes.   #funny
+- Every station has a song. I'm still learning this one.
+
+== near
+? habit:garden-lover
+- The garden's my green room. Is that a joke? It's a bit of one.   #funny
+? habit:bar-regular
+- One drink, one song. Then maybe one more song.
+?
+
+== bye
+- {bye}. Hum something on the way. It helps.
+
+== smalltalk
+- Good acoustics, gardens.
+- One more song. Just one.   #funny

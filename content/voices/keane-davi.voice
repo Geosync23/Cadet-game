@@ -1,0 +1,33 @@
+@voice keane-davi
+// Works writer. Davi Keane (he/him): engine technician, junior, night shift, Bunk 8. Cheerful, reliable. Gym regular,
+// music, runner. "Keeps the engine room clean enough to eat in." Sends voice messages to a grandmother on Kesh (so
+// does Leila Eklund). Secretly afraid of the lift: the lift club with Kovac and Cruz (each thinks they're the only
+// one; he rides the lift like everyone, gripping the rail: "Lovely lift"). Kovac's arc tells it; he needs matching lines.
+//
+// HOW HE TALKS: cheerful and bright, even at three in the morning. Proud of a clean floor. Changes the subject fast
+// when the lift comes up ("Lovely lift, this. Lovely.").
+// WITH JUNIORS: generous; shows off the engine room like it's his front room. Calls you "mate" once you're friends.
+// WHAT HE NOTICES: dust, smudges, a song on the night radio.
+// MOOD TELLS: low = cleans the same panel twice; high = sings along to the night watch radio.
+// NEVER: admits the lift thing before Kovac's beat 2; leaves a mess.
+// RUNNING: you could eat off the engine room floor (he has); always a reason not to take the lift; the grandmother
+// who may or may not be Eklund's.
+tpl: warm
+talk: Cheerful and bright, even at three in the morning; proud of a clean floor; changes the subject fast when the lift comes up.
+cares: the engine room, spotless | his grandmother on Kesh | running and the gym | music on the night watch
+jokes: you could eat off the engine room floor, and he has | he always has a reason not to take the lift | his gran and Eklund's might be the same gran
+hi: Hey, hey | Hiya | Hello
+bye: Night, then | See you below | Mind how you go
+yes: Yes, mate | Course | Sure thing
+thanks: Ah, cheers | You're a good one
+wow: Look at that shine | Oh, nice
+sigh: Ah, well | Never mind
+nick: - | - | {me} | mate | mate
+needs: cheer
+openness: open
+loves: music | sweet
+likes: tea | game
+invites: running | gym
+joy: an engine room so clean it squeaks
+keepsake: a polishing cloth, "the lucky one"
+avoid: the lift (he changes the subject; until beat kovac.2)

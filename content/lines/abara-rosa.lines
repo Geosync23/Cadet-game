@@ -1,0 +1,109 @@
+@crew abara-rosa
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Oh, hi. Abara, Survey. The comics in the common room? Some of those are mine.
+? tier>=acquaintance
+- Hello, {me}. You might be in the next one. Drawn kindly. Mostly.   #funny
+- Hi, {me}. Scanner's free if you need it. I'm just labelling.
+? tier>=friend
+- Hey, {me}. I drew you. Holding a spanner. Looking heroic. Don't make it weird.   #warm
+== feel
+? mood:high
+- Good day. New comic up. Three people laughed in front of it.
+? mood:low
+- Couldn't draw today. That's how I know it's a bad day.
+== near
+? habit:common-room
+- The comics wall. Mine's the one with the lift that sulks.   #funny
+? act:meal
+- Our family stall on Valo did soup like this. Not as good. Don't tell Brennan.
+== life
+? tier>=acquaintance
+- I ran a market stall on Valo. All day, shouting prices. Now I whisper.   #funny
+== joy
+? tier>=colleague
+- My comics. Little squares of life aboard. People find themselves in them, and smile.
+
+// ---- Writer 2, batch 3: to ~30 (greet by time and warmth, bye, near, invite, accept, decline, missed, birthday, cue, hint, about, life)
+== greet
+? tier>=acquaintance time:morning
+- Morning, {me}. I'm sketching the breakfast queue. You're in it. Small, at the back.   #funny
+? tier>=acquaintance warmth:cold
+- Oh. Hi, {me}. It's been a while. The comics wall's been short of good material.   #funny
+
+== bye
+- Bye. Mind how you go. If you trip, I might draw it.   #funny
+
+== near
+? habit:common-room
+- The comics wall. Hart's got a new one up. Teague's sulking. Good week.   #funny
+? habit:lingers-at-meals
+- I stay after meals. People are funnier when they're full.
+
+== invite
+- Swap table tonight? I'm swapping comics for pencils. Bring something small.
+
+== accept
+- Yes. Okay. I'll bring my sketchbook.
+- Yes. I'll come. I won't draw you. Probably.   #funny
+
+== decline
+- Not tonight. I've a comic to finish. Another time?
+? weekday:sun|mon
+- Rest day. Pencils, common room, quiet. Tuesday?
+
+== missed
+- You didn't come. That's fine. I drew the empty chair. It's very moving.   #funny
+
+== birthday
+? birthday:you
+- Happy birthday. There's a little comic on the wall. Third row. It's about you.   #warm
+? birthday:me
+- My birthday. Teague and Hart drew me a comic. Two styles. One very confused me.   #funny
+
+== cue
+? cue:event.ionStorm.onset
+- Storm's in. I'll draw it after. Everyone holding on to their mugs.
+
+== hint
+- {me}. Have you a minute later? I've something to say. Out loud, not drawn.
+
+== about
+? aff:teague-theo:friend
+- Teague and I share the comics wall. He's louder. I'm neater. It works.   #funny
+
+== life
+? tier>=friend
+- On Valo I shouted prices all day. Drawing's quieter. I say more with it.
+
+// ---- Writer 2, batch 6: bubbles (smalltalk, rumour), at most one in five about work. 60 characters.
+== smalltalk
+- That's a comic. Sketching.
+- People are funnier after meals.
+- Comics for pencils. A fair swap.
+- Don't explain the comic.   #funny
+? act:off
+- Common room. Pencils. Quiet.
+?
+
+== rumour
+- Out loud, not drawn: news.
+- It'll be a comic. You hear it first.
+
+// Writer 4, batch 12: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. The comics come down last.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Oh, hi. I'm leaving. The comics wall's yours now. Sort of.
+? leaving:you tier>=friend
+- You laughed at my comics. Quietly, so I'd hear. Thank you.   #warm
+
+== letter
+- New ship. Pinned up one comic. Somebody laughed. I hid. Hello.
+? tier>=friend
+- Drew a comic of the Wren's mess at dinner. Everyone's in it. Even the gravy. Hello.

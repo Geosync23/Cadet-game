@@ -1,0 +1,12 @@
+@meeting train.m6.calder
+// Pillar 5, M6 making it safe (Day 8, Monday ~10:30): your first incident, a burst pipe in the junior wing. Calder
+// meets you at the Works bay door. Short: it's urgent. Head writer, seat W.
+title: Burst pipe
+from: Chief Ines Calder
+gist: Calder showed you how to handle an incident: make it safe, clean up, then fix the cause. Always in that order.
+== lines
+calder: Burst pipe. Junior wing. With me.   [gesture]
+calder > you: Three steps. Safe. Clean. Fix. Never in another order.
+calder: Safe means shut it off upstream. Follow the pipe back from the wet.
+calder: Nobody's hurt. Nobody will be. Walk, don't run.
+calder: Go.

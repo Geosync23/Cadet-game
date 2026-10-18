@@ -1,0 +1,436 @@
+@crew holt
+// Writer (command), batch 1: Chief Holt, for the Voices sampler. Gruff, statements, "Hm."; tests you; dry by accident.
+
+== greet
+? tier=stranger
+- {hi}. Nearest suit locker. Don't look. Point.
+- Cadet. The new one in Bunk 1. I know. I know where everyone is.
+? tier>=acquaintance time:morning
+- Walked every deck already. The long way. You were still asleep.   #funny
+? tier>=acquaintance
+- {hi}. Nearest airlock? Hm. Right first time. Adequate.
+? tier>=friend
+- {nick}. Hm. Good. Thought I'd see you about.   #warm
+
+== feel
+? mood:high
+- Quiet decks, doors shut, nobody where they shouldn't be. Good day.
+? mood:low
+- Long shift. Mensah tried a joke on me. It nearly worked.   #funny
+
+== near
+? act:gym
+- I'm not discussing the gym. Move along.   #funny
+? deck:2 tier>=acquaintance
+- The Envoy keeps tea at the same hour, every day. I keep an eye on the same door.
+
+== life
+? tier>=acquaintance
+- Border patrol, before the Wren. Long nights. This ship's easier. Mostly.
+? tier>=colleague
+- Mensah keeps count of the times he's made me laugh. His count's wrong. It's lower.   #funny
+
+== joy
+? tier>=colleague
+- Five in the morning, every door where it should be. Nothing better aboard.   #warm
+
+// ---- batch 3: greet by time, bye, invite, accept, decline, missed, birthday, hint, near by place ----
+
+== greet
+? tier=stranger time:morning
+- Cadet. Up. Good. I've walked five decks already.
+? tier=stranger time:night
+- Cadet. It's late. Where are you going? Hm. Fine. Go there.
+? tier=stranger deck:2
+- Cadet. Watch office is that way. Don't knock twice. Once is plenty.
+? tier>=acquaintance time:morning
+- Hm. You. Deck 4 smells of toast. You'll be wanting that.
+- Morning. Every door on Deck 3 shut properly. Yours too. Good.
+? tier>=acquaintance time:afternoon
+- Cadet. Nearest fire point? Behind you. Don't turn round. Just know.
+? tier>=acquaintance time:evening
+- Evening. Off shift? Then sit down somewhere. Don't wander. I'll know.   #funny
+? tier>=acquaintance time:night
+- Cadet. Up late. Hm. Mensah's on. He'll walk you back if you look lost.
+? tier>=acquaintance warmth:cold
+- There you are. Haven't seen you on my rounds. Noticed. That's my job.
+? tier>=colleague
+- Hm. Cadet. You did the drill right on Tuesday. Didn't say. Saying now.
+? tier>=friend time:morning
+- {nick}. Walked the long way this morning. Thought you'd be up. You weren't.   #funny
+
+== bye
+? tier=stranger
+- Right. Off you go.
+- As you were, cadet.
+? tier>=acquaintance
+- Off with you. Mind the hatch on Deck 4. It sticks.
+- Right. Back to it. Both of us.
+? tier>=friend
+- Off you go, {nick}. Hm. Good talk. Don't tell anyone.   #warm
+
+== invite
+? tier>=colleague time:morning
+- Walking the decks before breakfast. Long way round. Come, if you're up.
+? trad:running tier>=acquaintance
+- Gym club. Vance'll be there. Someone has to keep him honest.   #funny
+? trad:today tier>=colleague
+- {trad} today. I'll be at the door. Watching it. Come and stand near.   #funny
+
+== accept
+? tier>=acquaintance
+- Fine. I'll be there. On time. Early, more likely.
+- Hm. Yes. All right.
+
+== decline
+? tier>=acquaintance
+- Can't. Rounds. Another day.
+- No. Not that one. But ask again. I mean that.
+
+== missed
+? tier>=acquaintance
+- You didn't turn up. I noticed. I notice everything. Next time, then.
+? tier>=friend
+- Waited by the lift. Mensah asked if I was lost. I am never lost. Hm.   #funny
+
+== birthday
+? birthday:you tier>=acquaintance
+- Happy birthday, cadet. That's all. Hm. Enjoy the cake.   #warm
+? birthday:you tier=stranger
+- Your birthday, I'm told. Happy birthday. Stay out of trouble today.
+? birthday:me tier>=acquaintance
+- Who told you? Mensah. Of course. Hm. Thank you.   #funny
+
+== hint
+? tier>=friend
+- Cadet. Walk with me. One deck. Not about work.
+
+== near
+? deck:2
+- Watch office. Best view of the lift on the ship. Tomas is right about that.
+? deck:5
+- Shuttle bay doors. I check them twice a day. Once is luck. Twice is the job.
+? deck:3 act:gym
+- I'm here for the weights. Not discussing it further.   #funny
+? act:meal
+- Late dinner. The mess is quieter. I can see every door from this seat.
+? place:calm tier>=colleague
+- Sit. Hm. Five minutes. I'm off duty. My eyes aren't.   #funny
+
+== feel
+? mood:high tier>=acquaintance
+- Drill went well. Every junior to their post in under two minutes. Adequate.   #funny
+? mood:ok
+- Ordinary day. Doors shut, people safe. That's what ordinary is for.
+
+== life
+? tier>=colleague
+- My juniors call it "learning the Watch from Holt, one lecture at a time". It's fair.   #funny
+- I asked for the cabin next to the Envoy's. To keep an eye out. That's all it is.
+
+== joy
+? tier>=acquaintance
+- A deck at five in the morning. Lights low, doors shut, the ship breathing. Good.
+
+== chat
+? tier=stranger
+- Questions? Ask now. In an emergency, there isn't time.
+? tier>=acquaintance
+- Where's the nearest suit locker from your bunk? Good. Now from the mess? Hm. Learn it.
+- Watch is easy. Know where everyone is, and stay calm. The second bit's harder.
+? tier>=colleague
+- Mensah says I should smile more at juniors. This is me smiling. Hm.   #funny
+
+== smalltalk
+- Hm.
+- Door's not shut. Fix that.
+- Long way round. Always.
+
+== rumour
+- Heard something. Don't repeat it.
+
+== near
+? deck:4 time:night
+- Junior wing, lights out. Quiet. Except Pell. Pell talks in his sleep.   #funny
+? deck:2 tier>=colleague
+- The Envoy's door. New knot this month. Hm. I counted. Don't ask why.
+
+// ---- Writer 2, batch 5: Holt toward ~100. His distrust is his own, argued with, never about the Veyli as a people.
+// Rook and the bad day only from beat:holt.3; tea with the Envoy only from beat:holt.5. Rest days Thu, Fri.
+== greet
+? tier>=acquaintance season:sowing
+- Sowing. New season, same doors. Shut them.
+? tier>=acquaintance season:greening
+- Greening. Founding Day's coming. Drills first. Bunting after.
+? tier>=acquaintance season:harvest
+- Harvest. The garden's open late. More doors to check. Fine.
+? tier>=acquaintance season:lanterns
+- Lanterns. Somebody always hangs one on a hatch wheel. Not you. Good.
+? rep:well
+- Cadet. Watch speaks well of you. Vasquez quoted you. To me. Hm.   #funny
+? you:reliable
+- Hm. Reliable, they say. I don't say things like that. I'm nodding.   #funny
+
+== feel
+? mood:low tier>=friend beat:holt.3
+- Bad night. Old dreams. Gone by breakfast. Usually.
+? mood:high tier>=friend
+- Good day. Mensah made me laugh. Once. He's insufferable.   #funny
+
+== near
+? habit:gym-regular
+- Weights. After shift. That's all you need to know.   #funny
+? place:mess time:morning
+- Breakfast after the rounds. Every deck. Long way. Earned it.
+
+== life
+? tier>=friend
+- Border patrol taught me to count exits. I still do it. In the mess. In the gym. Here.
+? tier>=colleague !beat:holt.3
+- I don't trust easily. The Veyli least of all. Mensah says that's my problem. He's right.
+? beat:holt.3
+- I wrote to Rook. About the Wren. Short letter. She'll laugh at it.
+? beat:holt.5
+- Tea with the Envoy, every tenth day. Don't make a thing of it. Mensah has.   #funny
+
+== joy
+? tier>=friend
+- Rounds done before anyone's up. Every door, every deck. Then tea. Hm.
+
+== decline
+? weekday:sat|sun
+- Rest day. I'll walk the decks anyway. Slower. Monday?   #funny
+
+== callback
+? told:moment.holt.locker
+- Behind the second door, on the left. You knew. Good. Now learn the rest.
+? told:moment.holt.noidea
+- "No idea, Chief." Honest. Now you know. Second door. Left.
+? told:moment.holt.test
+- Yes. It was a test. You passed. Don't tell Mensah.   #funny
+? told:moment.holt.learnt
+- Under, over, through, and back. You saw I'd learnt it. Keep seeing things.
+? told:moment.holt.fetch
+- You offered to fetch the Envoy. I'd have had to explain myself. Thank you for not.   #funny
+? told:moment.holt.secret
+- The knot. Our secret. Mensah suspects. He suspects everything. My fault.   #funny
+? told:moment.holt.listened
+- The other night. You listened. That's rarer than courage. Thank you.   #warm
+? told:moment.holt.help
+- You asked what would help. Asking helped. I didn't say so. Saying now.   #warm
+? told:moment.holt.knowing
+- A rite. Six hours. Knowing helps. A bit. More than I thought.
+? told:moment.holt.carried
+- You carried the invitation. I went in. I'll not forget that.   #warm
+? told:moment.holt.onlytea
+- "It's only tea." You were right. It was only tea. It was very good tea.   #funny
+? told:moment.holt.stood
+- You stood at that door with me. Some time, it was. Thank you.   #warm
+? told:moment.holt.glad
+- You said you were glad. So am I. Hm. Don't spread it about.   #warm
+? told:moment.holt.knot
+- Three knots. You've learnt one. Badly. Practise.   #funny
+? told:moment.holt.mensah
+- Mensah is unbearable. You were right. He's bought me a cup with a knot on it.   #funny
+? told:fixed.
+- Saw your repair. That hatch shuts properly now. Hm. Good.
+? told:came.
+- You came. I saw you. I see everyone. Still. Good.
+? told:bday
+- Someone remembered my birthday. You. Mensah's doing, I expect. Hm. Thank you.   #warm
+
+== gift
+? gift:loved
+- For me. Hm. That's. Hm. Thank you, {nick}. Really.   #warm
+? gift:liked
+- Hm. Useful. Thank you.
+? gift:polite
+- Thank you. I'll find a shelf.
+? gift:tea beat:holt.5
+- Tea. Hm. I know someone who'll want to try that. Don't ask who.   #funny
+
+== cue
+? cue:event.ionStorm.warning
+- Storm coming. Everyone to their post. Don't run. Walk fast.
+? cue:event.ionStorm.onset
+- It's here. Count your exits. I've counted mine.
+? cue:event.ionStorm.afterglow
+- Storm's done. Every door held. Every person accounted for. Good.
+? cue:event.diplomatic.onset
+- Veyli delegation aboard. I'll be at the door. Being polite. Watch me.   #funny
+
+== visit
+? tier>=friend
+- Rounds. Your door's on them. Everything all right in here? Hm. Good.
+
+== note
+? tier>=friend
+- Your door didn't shut properly. It does now. That's all.
+- Long way round tomorrow, before breakfast. If you're up.
+
+== smalltalk
+- Count your exits.
+- Shut that.   #funny
+
+== rumour
+- You didn't hear this from the Watch.
+
+// Writer 4, batch 13: Holt's ordinary weeks, after week one. Mostly not work: breakfast after the rounds, a sweet
+// tooth he denies, books, the gym (not discussed), Mensah, his juniors, rest days, tea he "doesn't care for".
+// Gates kept: no bad day, no Rook, nothing of the six hours before beat:holt.3; nothing against the Captain.
+
+== greet
+? tier>=acquaintance !week1:true
+- Cadet. Eaten? Hm. Eat. Then talk.
+- Hm. You. Sleep well? Good. Somebody should.   #funny
+? tier>=acquaintance !week1:true time:evening
+- Evening, cadet. Off shift. Both of us. Act like it.   #funny
+? tier>=colleague !week1:true
+- Hm. {nick}. Sit, if you're sitting. Don't hover.
+- {nick}. Mensah says I'm to ask how your week was. How was your week?   #funny
+? tier>=friend !week1:true
+- {nick}. Good. There's a seat with a view of the door. Take the other one.   #funny
+- There you are. I've a biscuit going spare. Don't tell anyone I had two.   #funny
+? tier>=close !week1:true
+- Kid. Sit down. Tell me something ordinary. I like ordinary.   #warm
+
+== chat
+? tier>=acquaintance !week1:true
+- Breakfast after the rounds. Eggs. Toast. Same table. Never changes. Good.
+- Vance runs on the treadmill like it owes him money. I lift. Quietly. Not discussing it.   #funny
+- Mensah told me a joke at breakfast. I didn't laugh. Inside, I laughed a little.   #funny
+- The juniors think I don't know about "one lecture at a time". I named it.   #funny
+- I don't care for tea. I drink it because it's there. That's all.
+- Rest day tomorrow. I'll walk the decks anyway. Slower. With a book after.
+? tier>=colleague !week1:true
+- I read on rest days. Old stories. Ships, storms, people getting home. Simple stuff.
+- Brennan's pudding is adequate. I've had it four times this week. Adequate.   #funny
+- Tomas asked me about my first posting. I told him. Took an hour. He took notes.   #funny
+- Vasquez quoted me back at me. Correctly. I've never been so proud and so annoyed.   #funny
+- The Captain asked my opinion at breakfast. Then took it. Good Captain.
+- Nakamura grows herbs on his windowsill. Brought me some mint. For the tea I don't drink.   #funny
+- Quiz night. I'm on Mensah's team. I know the answers. I don't shout them. Vance shouts.   #funny
+? tier>=friend !week1:true
+- I like a quiet corner and a full plate. Most of what I want, that is.
+- All these years of watches. I still check under my bunk. Old habit. Hm. Don't laugh.   #funny
+- The Envoy keeps the same hour every day. So do I. We've that in common. Not much else.
+? tier>=close !week1:true
+- You know what I worry about? Nothing, most days. You lot made that true. Hm.   #warm
+- If I ever retire, I'll want a window and a door I can see. And a biscuit tin.   #funny
+
+== near
+? act:breakfast !week1:true
+- Rounds done. Now breakfast. Same seat. Back to the wall.
+? act:dinner !week1:true
+- Late dinner. Quieter. Pudding's still on. Good.
+? act:gym
+- I'm here for the weights. We've discussed this. We have not discussed this.   #funny
+? act:off
+- Rest day. Book, walk, book. No drills. Don't tempt me.   #funny
+? place:lounge
+- Lounge. Hm. Mensah dragged me. I'm sitting by the door. Naturally.   #funny
+? place:mess !week1:true
+- Mess. Every seat's taken but one. It faces the door. Mine.   #funny
+? trad:quiz
+- Quiz night. Team's called something Mensah chose. I won't say it.   #funny
+
+== feel
+? mood:high !week1:true
+- Good day. Mensah made me laugh twice. I'll deny the second.   #funny
+? mood:ok !week1:true
+- Fine. Doors shut. People fed. Fine is a good day.
+? mood:low tier>=friend !week1:true
+- Tired. Long night. Walked an extra deck. Helps. Usually.
+
+== life
+? tier>=acquaintance !week1:true
+- I keep a tin of mints in my desk. For the juniors. Mostly for the juniors.   #funny
+? tier>=colleague !week1:true
+- Still got my first patrol boots. Resoled twice. They'll see me out.
+- Mensah and I've worked together years. He talks, I listen. It's a fair split.
+? tier>=friend !week1:true
+- I've a book I read every Lanterns. Same one. A ship gets home in the end.
+
+== joy
+? tier>=acquaintance !week1:true
+- The first cup of something hot after rounds. Whatever it is. Not tea. Hm. Tea.   #funny
+? tier>=colleague !week1:true
+- A junior doing the right thing without being told. I don't say it. I notice it.   #warm
+
+== bye
+? !week1:true
+- Right. Go and eat something. That's an order. Not really. Mostly.   #funny
+- As you were, {nick}. Get some sleep.
+- Off with you. Mind the hatch. And yourself.   #warm
+
+== callback
+? told:intro.arrival tier>=acquaintance !week1:true
+- First night you came aboard, I clocked you at the lift. Lost. Took the right turn anyway.
+? told:intro.arrival tier>=friend
+- Your first night, I watched the Tern land. Always do. A good one got off. Hm.   #warm
+? told:came.quiz tier>=acquaintance
+- Quiz night. You knew the airlock question. I saw. Adequate.   #funny
+? told:came.running tier>=acquaintance
+- Gym club. You kept pace with Vance. Don't tell him. He'll start a board.   #funny
+? told:moment.holt.walk tier>=colleague
+- You came on the long walk. Five in the morning. Most don't. Hm. Again sometime.   #warm
+? told:fixed. tier>=acquaintance
+- Saw your name on a job sheet. {thing}. Done properly. Noted.
+? told:bday tier>=colleague
+- Your birthday. Mensah reminded me. I'd remembered. Hm. Mostly.   #funny
+? told:came.observatory tier>=acquaintance
+- Observatory night. You stood by the door. Good habit. Look up, too, though.   #funny
+
+// Writer 5, batch 5: if they are ever transferred (goodbye with leaving:you, also the "Sorry I missed you at the
+// shuttle" Mail; packing as feel with leaving:soon; letters after). Nothing of his arc: no bad day, no Rook, no six hours; nothing against the Captain.
+
+== feel
+? leaving:soon
+- Ten days. Walked every deck this morning. The long way. Twice.
+- Packing. Boots, books, a tin of mints. Mensah keeps the rest. The rest is jokes.   #funny
+? leaving:soon tier>=friend
+- Hm. I'll miss the rounds here. The doors. The people behind them. Don't repeat that.   #warm
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm off, cadet. Mind the hatches. Mind each other.
+? leaving:you tier>=colleague
+- You did the job properly. Every time I checked. I checked a lot. Hm.   #funny
+? leaving:you tier>=friend
+- {nick}. Adequate. More than. That's all I'm saying. It's a lot, from me.   #warm
+? leaving:you tier>=close
+- Kid. Look after Mensah. He'll say he's fine. He needs someone to tell jokes to.   #warm
+
+== letter
+- New ship. Walked every deck. Took four hours. The long way. Tell Mensah one of his jokes landed here. Once.   #funny
+- They keep the doors wrong here. I've said. Politely. Hm. Hello to the Wren. Eat something.
+? tier>=friend
+- Still check under my bunk. Old habit. Then I think of the Wren and sleep fine. Hm. Write, if you like.
+
+// Writer 5, batch 6: seasons and traditions (the game's ids: running Mon, quiz Thu, works-tea and jam Fri, film and
+// observatory-night Sat, market (the swap meet) Sun, harvest (harvest morning), hull-lights, founding (day 100),
+// quiet-watch (day 300)), plus trad:today. Gaps filled only; arc gates kept. Nothing of the bad day, Rook or the six hours.
+
+== near
+? trad:jam
+- The jam. I stand at the back. I tapped a foot. Once. Mensah saw.   #funny
+? trad:film
+- Film night. I sit by the door. I watch the film. Mostly I watch the door.   #funny
+? trad:market
+- Swap meet. I check the stalls. Habit. Then I buy mints. Also habit.   #funny
+? trad:observatory-night
+- Observatory night. Hm. Lot of sky. Doors are fine. Sky's fine. Good.   #funny
+? trad:harvest
+- Harvest morning. Garden's crowded. I count heads. Everyone's there. Good.
+? trad:hull-lights
+- Hull lights. I walk the decks while they're on. Best rounds of the month.
+? trad:founding
+- Founding Day. I listen to every word the Captain says. Then cake. Adequate cake.   #funny
+? trad:quiet-watch tier>=friend
+- The quiet watch. I'll be at a window. Don't ask who for. Hm. Ask after.
+
+== smalltalk
+? trad:today
+- Something on. Doors open. Watch posted.
+? trad:hull-lights
+- Hm. Lights. Good.

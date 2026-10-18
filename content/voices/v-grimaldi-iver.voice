@@ -1,0 +1,12 @@
+@voice v-grimaldi-iver
+// Writer 4, batch 5: a short card for a short-stay visitor (GUESTS in section 9). No pronouns (not in facts.md).
+tpl: playful
+talk: Loud and cheerful; talks to the tomatoes and expects answers; up before anyone, and delighted about it.
+hi: Morning | Hello hello
+bye: Back to the tomatoes | Cheerio
+yes: Yes, yes | Why not
+thanks: Thanks | Lovely
+wow: Oh, bravo
+sigh: Ah well
+likes: plant | garden | sweet
+nick: - | {me} | {me} | {me} | {me}

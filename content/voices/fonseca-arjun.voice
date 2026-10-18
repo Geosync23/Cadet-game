@@ -1,0 +1,25 @@
+@voice fonseca-arjun
+// Writer (Survey), wave 1b. Survey assistant; sarcastic, competitive; labels everything twice; the lost-property box; pressed flowers.
+//
+// HOW THEY TALK: Sarcastic and quick, competitive about small things. Labels everything twice and sees no joke in it. Quietly in charge of the lost-property box and very proud of its system. Presses flowers from the garden, which he doesn't advertise.
+// WITH JUNIORS: sharp, then helpful.
+// MOOD TELLS: when lonely he gets more sarcastic; when happy he shows you a flower.
+tpl: dry
+talk: Sarcastic and quick, competitive about small things. Labels everything twice and sees no joke in it.
+cares: the lost-property box | pressed flowers | winning (at anything)
+jokes: he labels everything twice | the lost-property box has a filing system, and he will explain it
+hi: Oh, hey | Hi | You again
+bye: Later | Don't lose anything | Off you go
+yes: Fine | Sure | Obviously
+thanks: Cheers | Ta
+wow: Huh. Not bad
+sigh: Typical
+nick: - | - | {me} | {me} | {me}
+needs: share
+openness: guarded
+loves: garden | game
+likes: book | sweet
+invites: tiles | garden
+joy: pressed flowers
+keepsake: a pressed flower from the garden, labelled twice
+avoid: the common-room crowd (they drifted)

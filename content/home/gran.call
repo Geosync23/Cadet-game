@@ -1,0 +1,373 @@
+@arc home.gran
+who: home:gran
+name: Gran
+// Writer 3's arc, rewritten as ONE-SIDED CALLS by head writer 4 (the user, 2026-10-17 evening: one call a day, you
+// choose who; only they speak; no Letters night). Gran learns to record a message, an allotment rivalry with a
+// neighbour, a fall and a new hip (the serious one, plainly told, she recovers), back on the allotment, and she wins
+// the show with a marrow she has named "the Captain". Home stays unnamed.
+//
+// HOW SHE TALKS: loud, short, cheeky; says what she thinks and then laughs at it. Talks to the recorder as if it's a
+//   person ("Is the light on? Light. Are you on?"). Calls you {me} or "petal". Proud of you and says so, bluntly.
+//   One-sided suits her: she never waited for anyone to answer anyway.
+// NEVER: frail or pitiful (even after the fall she's cross, not sad); guilt-trips; genders you.
+// LIVES with Mum (Gran is Mum's mum): sits in your chair, heckles Mum's calls. Mum's pottery "hat" only behind
+//   beat:home.mum.2. The allotment was Grandad's plot first (he died years ago; gentle, never a scene); the rival is
+//   "Number Fourteen" (only ever the house number; no name, no pronoun); the village show; the marrow, the Captain.
+// RUNNING: "Is the light on?"; Number Fourteen; the allotment; the Captain (the marrow, from beat 4).
+
+// ---- the arc ----
+== beat 1
+tone: light
+mem: firstcall
+flag: home.gran.called
+them: Is the light on? Your mum says the light's on. Light. Are you on? Hello? It's Gran.   [laugh]
+them: I'm talking into a box. Like a newsreader. Your mum showed me twice and I still don't trust it.
+them: She says you can hear me but I can't hear you. Suits me. I've never let anyone get a word in.
+them: So. Are they feeding you up there? Is it up? Out? Wherever it is.
+them: I've been up the allotment. Beans are in. Spuds are in. I'm in, mostly. Back's out.
+them: Proud of you, petal. Said it. There.
+them: Right. How do I stop it? Which one stops it? Is this one stop? I've no idea. Bye!
+
+== beat 2
+tone: light
+when: beat:home.gran.1
+mem: fourteen
+flag: home.gran.fourteen
+them: Light's on. I'm getting good at this. Listen. Number Fourteen's put a fence up. Round the allotment.
+them: A fence! Round runner beans! Who's going to steal runner beans? Me, that's who. If they're any good.   [laugh]
+them: Theirs came up first. I'm not saying it was the fence. I'm saying the fence didn't help me.
+them: I've been watching them. Over the top. With a cup of tea. Very casual. Very innocent.
+them: They waved. I waved. Nobody meant it.
+them: Your mum says stop shouting into the box. I'm not shouting. This is my voice. Bye, petal!
+
+== beat 3
+tone: heartfelt
+when: beat:home.gran.2
+mem: grandad
+flag: home.gran.grandad
+them: Is it on? Good. I'll keep this one short. Short for me.
+them: I was up the allotment today. Your grandad's plot. It was his first, you know. Before it was mine.   [sigh]
+them: He used to sing to the onions. Badly. They came up anyway. Out of pity, I always said.
+them: He'd have hated that fence. He'd have hated the beans more. I keep it going because it's still a bit of him.
+them: Don't go soft on me. It's a nice thing, not a sad one. Mostly a nice thing.
+them: There. That's my serious minute. Back to normal. Bye, petal.
+
+== beat 4
+tone: light
+when: beat:home.gran.3
+mem: captain
+flag: home.gran.captain
+them: Light's on. Big news. I've a marrow. A proper one. Coming on lovely. I've given it a name.
+them: It's called the Captain. After your captain. I don't know her. I've decided she's very good.   [laugh]
+them: Number Fourteen came to look. Said nothing. Nothing! That's how you know it's a good marrow.
+them: I talk to it every morning. Your mum says that's daft. Your mum talks to clay.
+them: The village show's at the end of the season. I'm not saying anything. I'm just saying the Captain's ready.
+them: Bye, petal. Salute your captain for me. The real one.
+
+== beat 5
+tone: serious
+when: beat:home.gran.4
+mem: hip
+flag: home.gran.hip
+hint: Gran's message sounds different. She's calling from her bed.
+them: Now don't panic. I had a fall. At the allotment, by the water butt. I'm all right. I'm saying it first.   [sigh]
+them: I've a new hip. A whole new one. The doctors say I did well. I said I always do well.
+them: It hurts. I'll not pretend it doesn't. And I can't get up the allotment. That's the worst bit, if you want to know.
+them: Your mum's been marvellous. Jo's been round every night. Don't tell them I said marvellous.
+them: Jo's watering the Captain. Jo doesn't know anything about marrows. I've written instructions. Four pages.
+them: Right. The nurse is giving me a look. I'll get better. I've said so, so it's decided.
+
+== beat 6
+tone: resolution
+when: beat:home.gran.5
+mem: show
+flag: home.gran.won
+keepsake: a packet of seeds from the Captain
+learn: Gran fell and had a new hip. She's back on the allotment, and her marrow, the Captain, won the village show.
+mail: 2880 | From Gran | A packet in the post bag, Gran's writing on it in thick pencil: "Seeds from the Captain. Grow one up there. Beat somebody. Gran."
+them: Is it on? It's on. Guess. No, I'll tell you. First prize. The Captain. First prize!   [laugh]
+them: I walked up the allotment on my new hip to see it weighed. With a stick. I'll not use the stick. I used the stick.
+them: Number Fourteen came second. They shook my hand. I said thank you. I meant it. A bit.
+them: Then they said "Your grandad would be pleased." And I had to go and sit in the tea tent for a while.
+them: I've saved you seeds. They're in the post. Grow one up there. Beat somebody.
+them: Proud of you, petal. Said it again. I'll keep saying it. Bye!
+
+// ---- ordinary calls ----
+== chat
+// any time
+them: Light's on? Light's on. Petal, I've had a day. The post office has moved the queue.
+them: It used to go left. Now it goes right. Nobody told me. I stood in the wrong queue for ten minutes.
+them: The man in front was in the wrong queue too. We had a lovely chat. The wrong queue's friendlier.
+them: Then I just went to the front. Nobody said anything. That's the trick, at my age.   [laugh]
+them: I only wanted one stamp. One! I came out with a stamp and a raffle ticket. Don't ask.
+them: Are you behaving? Don't. Not too much. Bye!
+--
+them: Is it on? It's on. I've got my feet in a bowl of hot water. Don't picture it.
+them: You pictured it. I can tell. Stop it.   [laugh]
+them: Your mum's on the bus. I'm in charge of the house. I've eaten the good biscuits.
+them: She'll know. She counts them. I've rearranged the rest so it looks like more.
+them: If she asks, it was the cat next door. It's a big cat. Very sneaky. Likes a chocolate one.
+them: That's your gran, that is. Cunning. Remember it. Bye, petal.
+--
+them: Hello, petal. Light's on. Is it raining up there? It's raining here. It's always raining here.
+them: Good for the beans. Bad for my knees. Swings and roundabouts.
+them: I watched a programme about stars last night. Fell asleep halfway. Woke up at the bit with the moon.
+them: Didn't see you on it. You weren't waving. Wave next time.   [laugh]
+them: Bye!
+--
+them: Light. On. Good. Listen, I need your advice. No, I don't, you can't answer. I'll give myself advice.
+them: The woman at the shop called me "dear". I'm not a dear. I'm a gran with an allotment.
+them: Dear! I've grown three rows of spuds this year. Dears don't grow spuds.
+them: I said "Thank you, dear" back. She didn't like it. Good.
+them: I'll go back tomorrow. I'll call her "petal". No, that's yours. I'll think of something worse.   [laugh]
+them: That's my advice. Bye, petal.
+--
+them: Is it on? Your mum says you're busy. I said too busy for their gran? Never.
+them: I've been knitting. A scarf. It's very long. I've lost count. It might be a road.
+them: Your mum tripped on it on the stairs. She says it's a hazard. I say it's a scarf with plans.
+them: It's for you. It's orange. I had orange. You can wear it on the ship. Make them jealous.
+them: Is it cold up there? Wrap it round twice. Three times. Ten. There's plenty.
+them: I'll send it when it stops. If it stops. Bye!   [laugh]
+--
+them: Light's on. Petal, a pigeon came in the kitchen window. Walked round. Looked at the bread. Left.
+them: Didn't even take any. Rude. If you're going to come in, at least steal something.
+them: It came back after lunch. Same pigeon. I know it by its walk. Struts like it pays the rent.
+them: Your mum screamed. I didn't. I've seen worse. I've seen your grandad's cooking.
+them: I've given it a name. I won't tell you what. Your mum says it's not a nice name. It's not a nice pigeon.   [laugh]
+them: Bye, petal. Mind the pigeons up there.
+--
+when: time:morning
+them: Morning! Is it morning? It's morning here. I'm up. I'm always up. Six o'clock, every day, since forever.
+them: Your mum lies in till seven. Lazy. I've done the crossword. Most of it. All of it but the hard ones.
+them: Seven down: "a long way off". Four letters. I put "you". It doesn't fit. I left it.
+them: Your mum says I should go back to bed. Back to bed! At six! I'd miss the whole day.
+them: I've had my toast. Two slices. Marmalade. The thick sort, with bits. Bits are the point.
+them: Bye, petal. Eat a breakfast.
+--
+when: beat:home.sam.2
+them: Light's on. I went to the library. Sam was there. Your Sam. Reshelving. Gave me a wave.
+them: Asked after you. I said you're on a starship and you're doing brilliant. Sam said "I know."
+them: Then Sam found me a big-print book. About gardens. Without me asking. That's manners, that is.
+them: Nice, Sam. Always was. Even when the two of you broke my garden gate.
+them: I never did get that gate fixed. It squeaks now. Every time it squeaks, I think of you two.
+them: Bye, petal!   [laugh]
+--
+them: Is it on? It's on. I've been to the doctor. Just a check. I'm fine. I'm always fine.
+them: He said I've the heart of a woman half my age. I said where is she, I'll have her knees too.
+them: He took my blood pressure. Twice. He said the first one couldn't be right. It was right. I'm just good.
+them: He didn't laugh. They never laugh. I laughed. That's enough laughing for one room.
+them: Then he gave me a lolly. For being brave. I'm a grown woman. I had the lolly.   [laugh]
+them: Bye, petal.
+--
+them: Light's on. Petal, what do you eat up there? Tubes? Your mum says not tubes. I've seen films.
+them: I'd want proper food. Gravy. You can't have gravy in space, I'd have thought. It'd float off.
+them: Imagine. Gravy, floating. I'd chase it.   [laugh]
+them: Your mum says there's a proper kitchen. A galley, she calls it. Is the food any good? Do they do a pudding?
+them: If they don't do a pudding, I'll post you one. Wrapped in that scarf. It'll arrive warm.
+them: Tell them from me: more gravy. Always more gravy. That's the whole secret of cooking.
+them: Bye!
+--
+when: weekday:sun
+them: Sunday. I'm doing the roast. Your mum's not allowed in the kitchen. She overthinks the potatoes.
+them: Roast potatoes don't want thinking. They want fat and a hot oven and leaving alone. Like me.
+them: Your mum does the gravy. I let her. I stand behind her and breathe. She loves it.   [laugh]
+them: We put the salt where you sit. It's the salt's place now. Till you're home.
+them: Nobody nicks the crispy bits now. I've had to nick them myself. It's hard work, but I manage.
+them: Bye, petal. Eat something hot.
+--
+them: Is it on? Light. Good. I've no news. None. Nothing's happened. I'm calling anyway.
+them: That's allowed. You can call with nothing. That's what grans are for.
+them: Well. The kettle broke. That's news. Your mum bought a new one. It's very loud. I like it.
+them: It whistles like a train. I make tea I don't want, just to hear it go.
+them: Oh, and the milkman's late. Twice this week. I've written it down. I'm keeping a list.
+them: There. That's the news. Bye, petal.
+
+// after beat 1: still learning the box
+--
+when: beat=home.gran.1
+them: Is the light on? It's not on. It's on now. Wait. Is it? Petal, I've been talking for a minute to nobody.
+them: I said lovely things, too. Gone. Into the air. You'll have to imagine them.
+them: They were very good. You'd have cried.   [laugh]
+them: Right. Again. You're doing so well, petal. I'm so proud. Something about stars. There. Close enough.
+them: Your mum says it's on now. She's pointing at it. I can see it, thank you. I'm not blind. Just busy.
+them: Bye!
+--
+when: beat=home.gran.1
+them: Light's on. Your mum's written the buttons on a card. Green for go. Red for stop.
+them: I've stuck it to the box with a plaster. It's my box now. Nobody touches it.
+them: Red's right next to green. That's the problem. Who put them so close? Somebody who's never been a gran.
+them: I've been practising. On the cat next door. It doesn't say much either.
+them: It sat and listened, though. Better than your mum. She does the dishes while I'm talking.   [laugh]
+them: Bye, petal!
+--
+when: beat=home.gran.1
+them: Is it on? Good. The allotment. Spuds are coming. Beans are thinking about it.
+them: I dug for two hours. My back's sulking. My back can sulk. The spuds don't care.
+them: There's a new plot next door. Number Fourteen's got it. From down the road. Very neat. Too neat.
+them: Labels on everything. Who labels a cabbage? You can see it's a cabbage. It's a cabbage.
+them: They said "Morning" across the path. I said "Morning." That's all. You can say a lot with "Morning".
+them: I'm keeping an eye. Bye, petal.
+
+// after beat 2: the fence, the rivalry
+--
+when: beat=home.gran.2
+them: Light's on. Update. Number Fourteen's beans are taller than mine. By an inch. I measured.
+them: At night. With a torch. Your mum says that's not normal. Your mum talks to the bus.
+them: I took a ruler. Then a second ruler, to check the first one. Both said an inch. Both rulers are traitors.   [laugh]
+them: I've given mine a talking to. They'll come on. They know what's good for them.
+them: I've been feeding them tea leaves. An old trick. Don't tell Number Fourteen.
+them: Bye, petal!
+--
+when: beat=home.gran.2
+them: Is it on? I've bought a hat for the allotment. Straw. Very glamorous.
+them: It's got a ribbon. Yellow. Your mum says I look like a cake. A cake that wins things.
+them: Number Fourteen's got a hat too. Bigger. I saw it. I'm not saying it's a competition.
+them: Theirs has a brim you could keep a bus dry under. Mine has style. Style beats brim.
+them: I wore mine up the allotment today. They looked. I saw them look. That's one to me.
+them: It's a competition. Bye, petal.   [laugh]
+--
+when: beat=home.gran.2
+them: Light's on. Petal, they offered me some of their lettuce. Number Fourteen. Over the fence.
+them: I said no thank you. Very polite. Then I took it. It was lovely. Don't tell anyone.
+them: Crisp. Sweet. Annoying. The best lettuce I've had in years, and it came over a fence.
+them: I'll give them a jar of my chutney. That'll show them. My chutney's famous. In this house.
+them: I'm putting extra pepper in. Not to be nasty. Just so they remember it.   [laugh]
+them: Bye!
+
+// after beat 3: gentler, Grandad close
+--
+when: beat=home.gran.3
+them: Is it on? Good. I found your grandad's trowel in the shed. The one with the tape on the handle.
+them: I've been using it. Fits my hand like it was made for me. Well. It was made for him. Same thing, now.
+them: There's still a bit of his green string tied round it. I've left it on.
+them: I told the onions. They took it well.
+them: They're coming on lovely, the onions. Fat as anything. He'd have taken all the credit.   [laugh]
+them: Bye, petal.
+--
+when: beat=home.gran.3
+them: Light's on. I sang to the onions today. Like your grandad. Badly. Number Fourteen heard.
+them: They didn't say anything. Just took their hat off for a minute. Then put it back on.
+them: Maybe they're all right. Maybe. Don't quote me.
+them: I sang a bit louder after that. Just to be sure. The onions didn't complain.   [laugh]
+them: Your mum says I've a lovely voice. Your mum's a terrible liar. I'll keep singing anyway.
+them: Bye, petal.
+--
+when: beat=home.gran.3
+them: Is it on? I've planted something special. I'm not telling you what. It's a secret. It's a seed.
+them: I put it at the back. In the sunny corner. Number Fourteen can't see it from there. I checked.
+them: Your grandad always said plant one thing a year you're not sure about. So I have.
+them: I water it every morning. I've told it it's special. Seeds like to be told.
+them: Your mum says I'm being daft. I said she's being nosy. We're both right.   [laugh]
+them: Could be anything. Could be a marrow. Could be nothing. We'll see. Bye!
+
+// after beat 4: the Captain grows
+--
+when: beat=home.gran.4
+them: Light's on. The Captain's doing well. I've given it a blanket. For the nights. It's a marrow, I know.
+them: It's my marrow. It gets a blanket.   [laugh]
+them: The tartan one off the settee. Your mum wants it back. She can wait till after the show.
+them: I go up at dusk and tuck it in. Number Fourteen saw me. I said good night to it anyway.
+them: It's the size of a sleeping cat now. A big cat. A cat that's had its dinner.
+them: Bye, petal. Sleep well. The Captain will.
+--
+when: beat=home.gran.4
+them: Is it on? Report on the Captain. Longer than my arm now. Your mum's arm, not mine. Mine's short.
+them: Number Fourteen's got a marrow too. Smaller. I'm not gloating. I'm stating facts.
+them: It's a nice marrow. For a small one. I said so. Very kind of me. They didn't think so.   [laugh]
+them: I've written to the show. Put the Captain's name down. Category: marrow, large. Very large.
+them: The form asked for the grower. I put my name. Then I put "and the Captain". In capitals.
+them: Bye, petal!
+--
+when: beat=home.gran.4
+them: Light's on. Petal, does your captain know there's a marrow named after her? You could tell her.
+them: Or don't. It might go to her head. Or the marrow's.
+them: I salute it every morning. Your mum's seen me. She's stopped asking.
+them: The postman saw me too. Now he salutes it on his way past. That's discipline, that is.
+them: Number Fourteen won't salute it. Pretends not to see. I saw them nearly do it, though. Nearly.
+them: Bye!   [laugh]
+
+// after beat 5: the new hip, cross and getting better
+--
+when: beat=home.gran.5
+them: Is it on? I'm on the settee. Not allowed off it. Your mum's put a bell by me. A little bell.
+them: I ring it every ten minutes. She's regretting the bell.   [laugh]
+them: Mostly for tea. Once for a biscuit. Once just to see if she'd come. She came. She passed.
+them: The hip's healing. The nurse says. I'd know. I'm the one with it.
+them: I've exercises. Lift the leg. Put it down. Lift it. Thrilling. I did forty, to spite the nurse.
+them: Bye, petal. Don't worry. I'm worrying them instead.
+--
+when: beat=home.gran.5
+them: Light's on. Jo's been up the allotment. Watered the Captain. Followed all four pages.
+them: Jo sent me a drawing. Of the Captain. Very good. Jo's good with their hands. Always was.
+them: It's on the fridge. Next to my list of things to do when I'm up. The Captain's at the top.
+them: Number Fourteen's been watering it too. Jo saw them. Over the fence. Didn't say a word.
+them: I don't know what to do with that. Maybe I'll say thank you. Out loud. Harder than the hip, that.   [laugh]
+them: I'll think about it. Bye, petal.
+--
+when: beat=home.gran.5
+them: Is it on? I walked to the kitchen today. On my own. With the frame. Ten steps.
+them: Your mum cried. I said it's ten steps, not the moon. She said it's better than the moon.
+them: The frame squeaks. I've told it to stop. It hasn't. We're not friends yet.
+them: Tomorrow, twelve. Then the front door. Then the allotment. You watch.
+them: I'm not cross about the hip any more. I'm cross about the frame. The nurse says that's progress.   [laugh]
+them: Bye, petal.
+
+// after beat 6: back on top
+--
+when: beat=home.gran.6
+them: Light's on! The rosette's on the mantelpiece. Red. First. Your mum's dusting round it like it's the crown jewels.
+them: I've had people round to see it. Neighbours. The postman. Number Fourteen came. With a cake.
+them: Lemon. Very good. I had two bits. I told them it was nearly as good as my chutney.   [laugh]
+them: We had a cup of tea. We're friends now, I think. Don't tell anyone I said so.
+them: They're helping with the heavy digging. Just till the hip's right. I let them. It's good for them.
+them: Bye, petal!
+--
+when: beat=home.gran.6
+them: Is it on? Did the seeds come? Plant them somewhere warm. Sing to them. Badly. That's the trick.
+them: Not too much water. They sulk if you drown them. Like your mum in the rain.
+them: If they come up, name it after somebody. Somebody who deserves a marrow.
+them: Not me. I've had a marrow. Once is plenty. Well. Once a year.   [laugh]
+them: Your mum says you'll be too busy for marrows. Nobody's too busy for a marrow, petal.
+them: Bye, petal. Grow something.
+--
+when: beat=home.gran.6
+them: Light's on. I'm back up the allotment. Every day. Stick in one hand. Trowel in the other.
+them: The stick's for show now. Mostly. I wave it at the pigeons.   [laugh]
+them: Number Fourteen saves me the bench by the water butt. I sit. They dig. Best deal I've ever had.
+them: I'm planning next year. Two marrows. A Captain and a Commander. Who's your commander? I'll name it.
+them: Your grandad's onions are in again. Same rows. Same bad singing. Mine, now.
+them: Proud of you, petal. Said it. Bye!
+
+// news: she's heard it in your messages
+--
+when: flag:intro.soloJob
+them: Is it on? Your mum read me your message. A job! On your own! Start to finish!
+them: I made her read it again. Then again. She's gone hoarse. Worth it.   [laugh]
+them: I knew you would. I said to her, that one's got hands. Like their grandad.
+them: Did you get it right first go? Doesn't matter. Your grandad never did. He got there.
+them: I'm telling everyone. The shop. The library. The man at the bus stop. He didn't ask. He knows now.
+them: Bye, petal. Proud of you. Said it.
+--
+when: cue:event.ionStorm.afterglow
+them: Light's on. A storm! In space! I've been through worse. The winter of the big snow. Ask your mum.
+them: No power for three days. I made toast on the fire. Best toast I ever had.
+them: You hold on to something solid. And you keep your feet warm. That's all storms want.
+them: Your mum went white when she heard. I said, our {me}? Our {me}'s tougher than any storm.
+them: Did you see anything pretty after? Lights in the sky? I'd want a look. Tell me. Well. Tell your mum.
+them: Bye, petal. Feet warm.
+--
+when: came:any
+them: Is it on? You went to the {trad}! Your mum read me that bit twice.
+them: Was there food? There's always food at a good do. That's how you know it's a good do.
+them: Did you join in? Join in. Badly is fine. Badly is best. Nobody remembers the ones who did it right.
+them: I went to the summer fair once and won a goldfish. I didn't want a goldfish. It lived eleven years.
+them: Good. Go to things. People who go to things are happy. People who don't are Number Fourteen.
+them: Well. Number Fourteen used to be. Bye, petal!   [laugh]
+--
+when: friend:any
+them: Light's on. You've a friend. {friend}. Good name. I'll remember it. I won't. Your mum will.
+them: Is {friend} nice? Course they are. You'd not pick a bad one. You get that from me.
+them: Bring them home one day. I'll make my chutney. That'll test them.
+them: If they like it, they're a keeper. If they don't, be kind. Not everybody has taste.   [laugh]
+them: Eat together, you two. Friends who eat together stay friends. That's a fact. I made it up, but it's a fact.
+them: Bye, petal. Love to {friend}. And to you. Mostly to you.

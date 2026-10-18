@@ -1,0 +1,12 @@
+@voice v-dunmore-rhea
+// Writer 4, batch 5: a short card for a short-stay visitor (GUESTS in section 9). No pronouns (not in facts.md).
+tpl: playful
+talk: A musician on tour; up with the early shift, in the lounge by evening; plays anything you hum, and makes you hum.
+hi: Hey | Morning
+bye: Off to tune up | Keep humming
+yes: Go on, then | Sure
+thanks: Ta | Cheers
+wow: Ooh, nice
+sigh: Ah well
+likes: music | sweet | tea
+nick: - | {me} | {me} | {me} | {me}

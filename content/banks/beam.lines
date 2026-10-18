@@ -1,0 +1,18 @@
+@bank dept:works
+// Head writer W (playtest 1, 0.63.2; seat T's Name on the Beam). Works crew round the beam. beam.congrats: said to
+// you after your name goes up (a bubble or card, 60 characters). beam.cheer: for another new Works member whose name
+// just went up (a rotation arrival; {other} is them). Then everyone disbands.
+
+== beam.congrats
+- Welcome to Works, {me}. Properly, now.   #warm
+- Lovely letters. That's there for good.
+- Another name on the beam! Welcome aboard.   #warm
+- You're one of us now. No take-backs.   #funny
+- Good name. Good spot. Welcome, {me}.
+- Ha! Neater than mine. Welcome to the bay.   #funny
+
+== beam.cheer
+- Welcome to Works, {other}!   #warm
+- Another name on the beam. Welcome aboard.
+- Good letters, {other}. Welcome to the bay.
+- That's you up there now. No take-backs.   #funny

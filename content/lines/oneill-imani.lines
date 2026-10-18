@@ -1,0 +1,184 @@
+@crew oneill-imani
+// Writer-commons, batch 3: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- {hi}. O'Neill, garden, late shift. I pick tomorrow's herbs. You're welcome.
+? tier>=acquaintance
+- {hi}, {me}. This is a week-thirty song. You'll see why.
+- {hi}. Teague's playlist is on in the bay. I'm so sorry for your ears.   #funny
+? tier>=friend
+- {hi}, {me}. Track six is called "New Hand". Not about you. A bit about you.   #warm
+
+== feel
+? mood:high
+- Good day. Great playlist. Teague's was worse. That's two good things.   #funny
+? mood:low
+- Same song on repeat today. Don't read into it. Do, a bit.
+
+== near
+? act:work
+- Basil, thyme, a little mint. Brennan's tomorrow, on a tray. Very satisfying.
+? act:leisure
+- Quiet corner, good song. That's the whole evening sorted.
+
+== life
+? tier>=acquaintance
+- I make a playlist for every week of the tour. Sixty-something so far. All excellent.
+? tier>=colleague
+- I paint tiny portraits. So do Strand and Bakshi. Nobody owns up to theirs. Tradition.
+
+== joy
+? tier>=acquaintance
+- Want to hear this week's playlist? Track four's the one. Trust me.
+
+== about
+? bond:friends
+- {friend} gets a song on every playlist. That's the highest honour I give.
+
+// Writer-commons, batch 6: towards about 30 own lines.
+
+== greet
+? tier>=acquaintance time:afternoon
+- {hi}. Just started. Herbs to pick, songs to play. Best shift on the ship.
+? tier>=acquaintance time:evening
+- {hi}, {me}. Garden's quiet. Late shift gets the good songs.
+? tier>=colleague warmth:cold
+- Oh, look. You're alive. I put a "missing person" song on the playlist. Took it off now.   #funny
+
+== bye
+? tier>=acquaintance
+- Laters. Stay tuned.
+? tier>=friend
+- Night, {me}. Track two's about the night shift. You'll see why. Sleep well.   #warm
+
+== feel
+? mood:ok
+- Fine. Week twenty-nine. Middling week. Good songs, though.
+
+== near
+? deck:4 act:leisure
+- Quiet corner. Headphones. Me time. You can stay. Quiet you is fine.
+? act:work
+- Basil, chives, mint. Brennan wants a lot of mint. Something's happening with mint.   #funny
+
+== life
+? tier>=colleague
+- Teague and I have rival playlists. Mine's better. Ask anyone. Except Teague.   #funny
+? tier>=friend
+- I call home on my day off. They put me on speaker. Everyone talks at once. It's lovely.   #warm
+
+== invite
+? trad:jam tier>=acquaintance
+- Music jam tonight. I'm doing the playlist between sets. Come and judge it. Kindly.
+
+== accept
+- Yep. I'll be there. With music.
+== decline
+- Can't. Late shift. Next time, sure thing.
+== missed
+- You missed it. The playlist was brilliant. I'll play it you later.
+== birthday
+? birthday:me
+- It's my birthday. This week's playlist is all songs about me. There are three.   #funny
+? birthday:you
+- Happy birthday! I made you a playlist. Track one's the best. Obviously.   #warm
+== hint
+- Got a minute? Turn the music down. I'll talk.
+
+// Writer 3, batch 4: bubbles (smalltalk and rumour, 60 characters, said to no one in particular).
+
+== smalltalk
+- This is a track-three moment.   #funny
+- Week of the tour? Playlist forty.
+- Good news. Nothing died.   #funny
+- Teague's playlist is wrong again.   #funny
+? act:work
+- Water, light, music. In that order.
+
+== rumour
+- Headline: news. Details: hold on.
+- Good news. Delivered flat. As usual.
+
+// Writer 3, batch 5: callbacks (told: said once).
+
+== callback
+? told:fav.fetch
+- You fetched it. Good news: thanks. That's the whole news.   #funny
+? told:fav.job
+- You did my job. Playlist forty-one is named after you now.   #funny
+? told:fixed.nutrient
+- Nutrient feed's running. Plants are thrilled. Very quietly.   #funny
+? told:came.jam
+- You came to the jam! Track five was me showing off. You clapped. That counts.   #funny
+? told:gift.music
+- Your music's on this week's playlist. Top spot. Teague's furious.   #funny
+? told:bday
+- You remembered my birthday. Good news. Delivered flat. Thank you.   #warm
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- Good news: the garden rates you. Delivered flat. But it's good.   #funny
+? you:chatty
+- You chat to everyone. You'd be a whole playlist. A long one.   #funny
+
+// Writer 3, batch 8: thanks for a gift (gift: loved | liked | polite, or the gift's tag; dialogue 0.43.10).
+
+== gift
+? gift:music
+- Music. Track one of next week's playlist. Teague won't know what hit him.   #funny
+? gift:loved
+- Good news: I love it. Delivered flat, but I mean it. I really do.   #warm
+? gift:liked
+- Nice. Thanks. That's a good-week song, this.
+? gift:polite
+- Oh, well. Thank you. It's going on a playlist somewhere. A quiet one.
+
+// Writer 4, batch 2: everyday chatter, not about work (meals, rest days, home, hobbies, seasons, traditions).
+== smalltalk
+? act:meal
+- Breakfast has a theme song. It's slow.   #funny
+- This pudding is a ballad. A sad one. It's gone.   #funny
+? act:off
+- Rest day. Playlist forty-something, side two.
+- Painted a tiny portrait. Won't say whose.
+? time:evening
+- Teague's playlist was fine. Fine. That's all.   #funny
+- Quiet garden after dinner. Best song there is.
+? time:night
+- Night owl playlist. All slow. All good.
+? trad:jam
+- Music night. Teague's going down. Nicely.   #funny
+? season:greening
+- Greening has a sound. It's sort of a hum.
+? season:lanterns
+- Lanterns playlist is done. It's mostly bells.
+? place:commons
+- Who moved the comics wall? Oh, it's grown.
+? trad:quiz
+- Music round. Hand on heart, I'll win it.
+? weekday:fri
+- Friday. Big playlist day. Don't touch the dial.   #funny
+
+== rumour
+- Great news, said very flatly: it's great news.   #funny
+- Heard it. Got a song for it. Here's the news.
+
+// Writer 4, batch 7: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. To a playlist, obviously. It's mostly slow ones.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm off. Here's the news, said flatly: I'm sad. Bye.
+? leaving:you tier>=friend
+- Playlist number last-on-the-Wren is for you. Mostly slow. One fast one. You'll know.   #warm
+
+== letter
+- New ship. They have no playlist war. I've started one. It's going well. For me.
+? tier>=friend
+- Made a playlist for the Wren today. It's very long. Tell Teague I said his was fine. Fine.

@@ -1,0 +1,28 @@
+@crew v-ekwueme-celeste
+// Writer 4, batch 5: a short-stay visitor. Mostly not about work.
+
+== greet
+? tier=stranger
+- Morning. Celeste Ekwueme. I draw charts. And, this week, your garden.
+- Hello. I'm up early. The garden's empty at six. It's lovely.
+? tier>=acquaintance
+- {hi}, {me}. I drew the big tree today. Somebody was in it.   #funny
+?
+
+== chat
+- A pencil behind each ear. One for lines, one for leaves.
+- I'll leave a drawing of the garden for the crew. Somewhere you'll find it.
+
+== near
+? place:hydroponics_garden
+- Early light through the leaves. Hold still. Not you. The light.   #funny
+? time:morning
+- First tea of the day. Then the pencils.
+?
+
+== bye
+- {bye}. The garden's best at six. Come and see, once.
+
+== smalltalk
+- One for lines. One for leaves.
+- Lovely light.

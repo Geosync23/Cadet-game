@@ -1,0 +1,135 @@
+@crew keane-davi
+// Davi Keane (he/him), engine technician, nights. The Works writer, batch 2. Cheerful; spotless floors; never the lift.
+// Before beat kovac.2: the lift is only ever "Lovely lift" (he rides it like everyone, gripping the rail).
+
+== greet
+? tier=stranger
+- Hey, hey! New? Engine room's Deck 6. Wipe your boots. I've just done the floor.
+- Hiya! Davi, nights. If you see the engine room shine, that's me. You're welcome.   #funny
+? tier>=acquaintance time:night
+- Hiya, {me}! Three in the morning and the floor's spotless. Life's good.
+? tier>=acquaintance
+- Hello! Lovely lift this morning. Lovely. Held the rail. Great rail.   #funny
+? tier>=colleague
+- {me}! Come and see the panels. I polished them. You can see your face. Look.
+? tier>=friend
+- {nick}! Good. I was hoping you'd come by. Nights go quicker with a friend about.   #warm
+
+== bye
+- Night, then! Mind the floor. It's wet. In a good way.
+- See you below, {nick}.
+
+== feel
+? mood:low
+- Bit flat. I've cleaned this panel twice. It was clean the first time.
+? mood:high
+- Good night on the coils, good song on the radio. Can't ask for more.
+
+== near
+? act:work
+- Engine room's clean enough to eat in. I have. Don't tell Brennan.   #funny
+? act:gym
+- Morning run's done. Well, my morning. It's your evening. Same run.
+
+== life
+? tier>=acquaintance
+- I send voice messages to my gran on Kesh. Eklund does too. Maybe the same gran. Imagine.   #funny
+? tier>=colleague
+- Salo does days, I do nights. Cleanest engine room in the whole Service. Ask anyone.
+
+== joy
+? tier>=acquaintance
+- Fresh polish on the coil rails. Under the lights it glows. I could stand there all night.
+
+// ---- the lift club (Kovac's arc, content/arcs/kovac.arc): he rides the lift like everyone, gripping the rail;
+// "Lovely lift" is the whole cover story; after beat 4 he's in the lift club. He never says "afraid" himself.
+== near
+? !beat:kovac.1 tier>=acquaintance
+- Lift? Course. Lovely lift. I'll just hold this rail. Steady.   #funny
+? beat:kovac.1
+- Saw you in the lift. Lovely lift, isn't it? Lovely. Same.   #funny
+? beat:kovac.2 !beat:kovac.4
+- Kovac and Cruz were in the lift again. We all held the rail. Very calm, the three of us.   #funny
+
+== life
+? beat:kovac.4
+- Rode the lift today with Kovac and Cruz. Deck 4 to 6. We held the rail. Very brave.   #funny
+? beat:kovac.4 tier>=colleague
+- Kovac says you sat with her about the lift. Thanks, {nick}. From the whole club.   #warm
+
+// ---- Writer 2, batch 1: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue)
+// Keane never says "afraid"; the lift is always changed fast into something else.
+== greet
+? tier>=acquaintance warmth:cold
+- {me}! There you are! I was going to send the floor polisher to find you.   #funny
+
+== near
+? habit:lounge-regular
+- Bow lounge before shift. Curved windows, cup of tea. Then down to the floor.
+
+== invite
+- Running before my shift? Deck 3, three laps. I'll go easy. I won't. I'll try.   #funny
+? tier>=acquaintance
+- Gym at seven? Night shift's warm-up. Come and lift something heavy. I'll spot you.
+
+== accept
+- Yes! Brilliant. I'll be there. Early, probably. I'm always up.
+- Course, {nick}. Wouldn't miss it.
+
+== decline
+- Can't, I'm on the coils tonight. Tomorrow? I'll be bright as a button.
+? weekday:fri|sat
+- Rest day. I'm sending Gran a long one. A really long one. Next time?
+
+== missed
+- You missed it! No harm. I polished something. Feel better already.   #funny
+
+== birthday
+? birthday:you
+- Happy birthday! I cleaned a whole panel in your honour. Go and look. It shines.   #funny
+? birthday:me
+- My birthday! Gran sent a song. Eklund says her gran sent the same one. Hm.   #funny
+
+== cue
+? cue:repair.you@dept
+- Saw your job. Tidy work, and you swept up after. That's a friend for life, that is.   #warm
+
+// ---- Writer 2, batch 1b: a hint (a moment is ready) and an about line for a named friend
+== hint
+- Got a minute later, {nick}? Not about the floor. Something else.
+
+== about
+? aff:eklund-leila:friend
+- Eklund and I might share a gran. She says don't check. I'd love to check.   #funny
+
+// ---- Writer 2, batch 6: bubbles (smalltalk, rumour), at most one in five about work. 60 characters.
+== smalltalk
+- Gran sent a song. Possibly Eklund's gran.   #funny
+- Lift? Lovely. Rail's right here.   #funny
+? act:work
+- Floor's spotless. Life's good.
+? time:night
+- Night radio's playing a good one.
+? act:gym
+- Three laps. Then breakfast. My breakfast.
+?
+
+== rumour
+- Oh, you'll like this one.
+- Heard it at three in the morning. Still true.   #funny
+
+// Writer 4, batch 11: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing, mate! Cleanest bag in the whole Service.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Off soon! Keep the engine room clean for me. Cleanest in the Service.
+? leaving:you tier>=friend
+- You were brilliant company on the late jobs. Honestly. Cheers, mate.   #warm
+
+== letter
+- New engine room. Not as clean. Yet. Give me a week. Sent Gran a message. She says I sound happy.
+? tier>=friend
+- New ship's lift is very quiet. I still hold the rail. Don't tell anyone. Cheers, mate.

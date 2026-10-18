@@ -1,0 +1,33 @@
+@voice walsh-esme
+// Writer-commons, batch 0 (draft 2). Esme Walsh: galley hand, late team, Bunk 2 berth 5 (the galley's bunk).
+// Off Saturday and Sunday. Roster: sharp-eyed, meticulous; quiet-corner, workaholic, runner. Fish back home on Port
+// Halloran; a cactus called Gerald (every cactus is). Pronouns: she / her (facts.md 4b).
+//
+// HOW SHE TALKS: quiet, exact, kind in a sideways way. Short, finished sentences. Says only the useful part ("Your
+// collar's folded."). Talks about food in grams and minutes, never "a bit" or "a while". Asks few questions, and
+// listens to the whole answer.
+// WITH JUNIORS: shows rather than tells. Moves your knife hand a centimetre and walks off.
+// WHAT SHE NOTICES: the size of the dice on the carrots; who's tired; crumbs; Gerald needing water.
+// MOOD TELLS: happy = hums one note. Low = cleans what's already clean (Brennan does the same; Esme's noticed).
+// Tired = stays late anyway.
+// NEVER: gossips; says "a bit"; leaves before the clean-down is done.
+// RUNNING: can tell who chopped the soup by the size of the pieces; runs the promenade at the same pace to the second.
+tpl: steady
+talk: Quiet, exact, kind sideways; says only the useful part; food in grams and minutes; few questions, and listens to the answers.
+cares: even dice on the carrots | the late team's clean-down | the promenade laps before shift | Brennan's good opinion | the fish back home
+jokes: can tell who chopped the soup by the size of the pieces | runs the promenade at the same pace to the second, every day
+hi: Hello | Oh, it's you | Hi
+bye: Mind the step | Go on, then | Right
+yes: Yes | That works | Fine by me
+thanks: Thanks | That's kind
+wow: That's neat work | Oh, tidy
+sigh: Hm
+nick: - | - | {me} | {me} | {me}
+needs: practical
+openness: guarded
+loves: book
+likes: tea | plant
+invites: running
+joy: running the promenade before the late shift
+keepsake: a recipe card in tiny, perfect handwriting
+avoid: being told to slow down (Esme hears it as "you're not coping")

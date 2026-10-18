@@ -1,0 +1,109 @@
+@crew kim-yusuf
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Oh, hi. Kim, Survey. I fix headphones too. If you've got broken ones.
+? tier>=acquaintance
+- Hello, {me}. Marra Station had a corridor that went nowhere. I've got the map.
+- Hi, {me}. Quiet day. Scanners humming.
+? tier>=friend
+- Hey, {me}. I'm glad you sat here. I don't say that much. I mean it, though.   #warm
+== feel
+? mood:high
+- Fixed two pairs of headphones. Both owners did a little dance.   #funny
+? mood:low
+- Bit homesick. I unfolded the old map. It didn't help. It never does.
+== near
+? habit:quiet-corner
+- I like this corner. You can hear the ship thinking.
+? act:work
+- Scanner's done. I've labelled it twice, like Fonseca says. Habit now.
+== life
+? tier>=acquaintance
+- I collect old maps of Marra Station. It's been rebuilt twice. I love them anyway.
+== joy
+? tier>=colleague
+- My old maps. Every corridor that isn't there any more. It's like a secret station.
+
+// ---- Writer 2, batch 3: to ~30 (greet by time and warmth, bye, near, invite, accept, decline, missed, birthday, cue, hint, about, life)
+== greet
+? tier>=acquaintance time:morning
+- Morning, {me}. Marra Station once had two mess halls. I've got the map.
+? tier>=acquaintance warmth:cold
+- Oh, hi, {me}. It's been a while. Headphones all right?
+
+== bye
+- Bye, {me}. Mind the corridor. At least ours are all still there.   #funny
+
+== near
+? habit:garden-lover
+- The garden. Quieter than the lab. The pumps sound like a corridor at night.
+? habit:bar-regular
+- One drink in the corner. I like watching the room. Is that strange?
+
+== invite
+- Garden after shift? Cruz is trying a new bed. I'd like to see. Come along?
+
+== accept
+- Oh. Yes. Thank you. I'd like that.
+- Yes. I'll bring a map. Just in case.   #funny
+
+== decline
+- Not tonight. Three pairs of headphones waiting. Another time?
+? weekday:mon|tue
+- Rest day. I'm unfolding maps. All of them. Wednesday?
+
+== missed
+- You didn't come. That's all right. I fixed some headphones. They're happy.
+
+== birthday
+? birthday:you
+- Happy birthday. An old map of Marra Station. The corridor's gone. The map isn't.   #warm
+? birthday:me
+- My birthday. Garcia sent a card that plays a tune. I taught her that.   #funny
+
+== cue
+? cue:event.ionStorm.onset
+- Storm's in. Everyone wants headphones so they can't hear it. I'll be busy.
+
+== hint
+- {me}. Can I ask you something later? Well. Tell you something.
+
+== about
+? aff:garcia-greta:friend
+- Garcia does the night shift's headphones. I do the day's. We trade spare parts.   #warm
+
+== life
+? tier>=friend
+- Marra Station's been rebuilt twice. My maps are of the first one. That's the one I miss.
+
+// ---- Writer 2, batch 6: bubbles (smalltalk, rumour), at most one in five about work. 60 characters.
+== smalltalk
+- Marra had a corridor to nowhere.
+- Headphones? I'll fix them.
+- I like this corner.
+- Map's out. Bit homesick.
+? act:meal
+- Marra had two mess halls, once.
+?
+
+== rumour
+- Small question. Big news.
+- Quietly: did you know?
+
+// Writer 4, batch 12: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing the maps. Carefully. Marra Station in a tube.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Oh, hi. I'm leaving. Can I ask you something small? Will you write?
+? leaving:you tier>=friend
+- You always answered my little questions. Even the big little ones. Thank you.   #warm
+
+== letter
+- New ship. Fixed four pairs of headphones already. Tell Greta it's a race now.
+? tier>=friend
+- Found an old map of a corridor that isn't there any more. Thought of the Wren's. Hello.

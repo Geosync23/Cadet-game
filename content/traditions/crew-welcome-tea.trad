@@ -1,0 +1,35 @@
+@tradition crew-welcome-tea
+// New hand's tea for new crew (seasons designer, k 484; baked since 0.34.43): the first Friday after a crew rotation
+// (when: rotation friday); its honorees are that shuttle's arrivals ({names}, {first}), with dept-of-honoree and
+// bunk-of-honoree. Design note: plans/trad-notes-seasons.md.
+k: 484
+title: New hand's tea
+when: rotation friday
+at: 18:40-19:30
+min: 20
+prio: 2
+early: 5
+cake: yes
+where: 3 room Mess hall: mess-seat
+hold: 1
+who: honoree always, dept-of-honoree 80%, bunk-of-honoree 60%, everyone 10%
+anim: drink
+from: The Wren
+
+== mail
+- {names} came aboard on Sunday's shuttle. New hand's tea tomorrow at {time}, in the mess. Come and say hello.
+
+== ask
+- New hand's tea for {first} tonight. Be friendly. You remember your first week.   #warm
+- Tea for the new hand after dinner. I'm bringing biscuits.
+
+== here
+- Welcome aboard, {first}.   #warm
+- You'll know your way round by next week. Promise.
+- There's cake. The galley always finds cake for a new face.   #funny
+
+== thanks
+- You join the tea for {names}. Somebody asks you how your first week went, and you've got stories now.   #warm
+
+== chatter
+- Have you met {first} yet? Came aboard on Sunday.

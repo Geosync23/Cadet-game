@@ -1,0 +1,100 @@
+@bank all
+// Writer 3, batch 10. Everyday chatter for anyone aboard, NOT about work (the user: ship chatter was mostly repairs).
+// Food, days off, home and letters, the circles (facts.md 5), seasons, film/quiz/jam nights, the vents and misters,
+// sleep, the hot water, Gerald. Neutral in voice; specific in situation by conditions. Bubbles: 60 characters.
+
+== smalltalk
+? act:meal
+- {dish} again? Good. I like {dish}.
+- Is there pudding? There's always pudding.
+- Brennan's humming. That means seconds.
+- Save me a seat by the window.
+- The grab shelf's full. For now.   #funny
+? act:breakfast
+- Toast first. Then thinking.
+- Has anyone seen the good jam?
+- Porridge or toast? Both. Obviously.   #funny
+? act:dinner
+- Smells like {dish}. Smells like a good day.
+- Who's taking the last roll? Go on, then.
+? time:morning
+- Is it morning already? It feels early.
+- Slept like a stone. A happy stone.
+- The washroom choir's on again.   #funny
+? time:evening
+- Long day. Good day. Both.
+- Tea, a chair, and nothing to fix. Lovely.
+? time:night
+- Can't sleep. The vents sound like rain.
+- Hot water's gone. Character-building time.   #funny
+? act:off
+- Day off. I've done nothing. Perfect.
+- Lie-in, then laundry. Living the dream.   #funny
+- Writing letters home. Three pages so far.
+- I'm going to read till dinner. Don't stop me.
+? act:off weekday:sat|sun
+- Weekend at last. I'm not getting up till ten.
+- Sunday bread smells. Brennan's at it.
+? act:wash
+- Hot water's still on! Quick!
+- Who's singing? Lovely. Mostly.   #funny
+? act:gym
+- One more lap. Then biscuits.   #funny
+- Vance's name is still top of the board.
+? act:leisure
+- Someone's Gerald has a new spine. Big news.   #funny
+- Letter from home came. Read it twice.
+- The misters are on. Smells like a garden.
+? trad:quiz
+- Quiz tonight. I know nothing. Count me in.   #funny
+? trad:film
+- Film night! Not the seat by the speaker.
+? trad:jam
+- Jam tonight. Someone'll sing the wrong words.   #funny
+? trad:observatory-night
+- Observatory's open tonight. Wrap up warm.
+? trad:running
+- Gym club tonight. I'm walking it.   #funny
+? trad:market
+- Swap meet's on. I've brought my old socks.   #funny
+? season:sowing
+- Sowing. Everything in the garden's tiny.
+- New season. New seedling on my sill.
+? season:greening
+- Greening. The garden smells amazing.
+- Everything's green. Even the soup.   #funny
+? season:harvest
+- Harvest's coming. Brennan's sharpening knives.
+- Tomatoes everywhere. I'm not complaining.
+? season:lanterns
+- Lanterns up. The corridors look cosy.
+- Lanterns season. Soup season. Same thing.   #funny
+
+? act:leisure !who:rina
+- Tiles later? Not against Rina, mind.   #funny
+
+? time:afternoon
+- Afternoon slump. Is it tea time? It's tea time.
+- Biscuit o'clock. Nearly.   #funny
+? act:off
+- Booked a booth for later. Calling home.
+- Sat in the garden for an hour. Bliss.
+? place:lounge
+- Look at those stars through the bow windows.
+? place:commons
+- New comic on the wall. Someone's in it.   #funny
+
+== rumour
+? act:meal
+- Heard Brennan's trying a new pudding.
+- Word is there's cake on Friday. Don't spread it.   #funny
+? act:off
+- Heard the post bag's due. Fingers crossed.
+- Someone's got a new Gerald. Very small.
+?
+- Heard the hot water's lasting longer. Lies.   #funny
+- They say the knitters are on scarf number nine.
+- Heard someone's planning a surprise. Shh.
+- Word is the music room's got a new record.
+? !who:rina
+- Heard someone beat Rina at Tiles. I don't believe it.   #funny

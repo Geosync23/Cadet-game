@@ -1,0 +1,120 @@
+@crew volkov-maeve
+// Maeve Volkov (she/her), Works technician, days. The Works writer, batch 2. Light, teasing; times things for fun.
+
+== greet
+? tier=stranger
+- Hiya. You're new. Coffee machine's in the tea corner. If it beeps twice, come and get me.
+- Ooh, hello. Scrubber jobs are quick. Ten minutes, if you're me. Twenty if you're not.   #funny
+? tier>=acquaintance time:morning
+- Hiya, {me}. Coffee's on. I fixed it. Again. It loves me really.   #funny
+? tier>=acquaintance
+- Hey, you. Bet you can't get to the board in under a minute. Go.
+? tier>=colleague
+- Ooh, {me}. Rematch with Kovac on Friday. Scrubbers. Bring a stopwatch.
+? tier>=friend
+- Hey, you. I pressed you a flower. Don't sit on it.   #warm
+
+== bye
+- Ta-ra. Run along.
+- See you. And if the coffee machine beeps, you know who to call.
+
+== feel
+? mood:low
+- Bit tired. I'll get dinner late, I think. When it's quiet.
+? mood:high
+- Nine minutes fifty on a scrubber. Don't tell Kovac. Tell Kovac.   #funny
+
+== near
+? act:work
+- Ready? Panel off. Filter out. Seal. Go. Ooh, not bad. Again?
+? act:gym
+- Two laps, then I'll race you. Fine. One lap.
+
+== life
+? tier>=acquaintance
+- I press flowers from the garden. Cruz hasn't noticed. Cruz has definitely noticed.   #funny
+? tier>=colleague
+- Yoon and Shah both say they're best at the coffee machine. They're very brave.   #funny
+
+== joy
+? tier>=acquaintance
+- Press a flower right and it keeps its colour for years. Look. This one's from Sowing.
+
+// ---- Writer 2, batch 1: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue)
+== greet
+? tier>=acquaintance time:evening
+- Hiya. Just off for a late dinner. The mess is lovely when it's empty. Promise.
+? tier>=acquaintance warmth:cold
+- Ooh, look who's back. I nearly sent a search party. A small one. Just me.   #funny
+
+== near
+? habit:gym-regular
+- Gym crowd after shift now. Bet I can do more laps than you. Prove me wrong.
+? place:teacorner
+- Coffee machine's purring. That's me. You're welcome.   #funny
+
+== invite
+- Fancy a run? Two laps of the deck. Loser gets the coffees. That's me, usually.   #funny
+? tier>=acquaintance
+- Garden after shift? Help me find a flower worth pressing. Cruz won't see. Probably.
+
+== accept
+- Ooh, yes. I'll be there first. Bet you.
+- Yes, lovely. I'll bring a stopwatch, just in case.   #funny
+
+== decline
+- Not tonight, I'm shattered. Rain check? Do we say that here? We do now.
+? weekday:fri|sat
+- Rest day. I'm pressing flowers and doing nothing else. Another time?
+
+== missed
+- You missed it. That's fine. I won anyway. It's easy, when it's only you.   #funny
+
+== birthday
+? birthday:you
+- Happy birthday! I pressed you a flower. Garden green. Don't sit on it.   #warm
+? birthday:me
+- My birthday. Kovac's challenged me to a scrubber race. Best present yet.   #funny
+
+== cue
+? cue:repair.you@dept
+- Was that your job? How long? Don't tell me. It was faster than mine. Was it?   #funny
+
+// ---- Writer 2, batch 1b: a hint (a moment is ready) and an about line for a named friend
+== hint
+- Fancy a cuppa later? No races. Promise. I've something to tell you.
+
+== about
+? aff:kovac-zainab:friend
+- Kovac says our scrubber races don't matter. She times every one. I love that.   #warm
+
+// ---- Writer 2, batch 6: bubbles (smalltalk, rumour), at most one in five about work. 60 characters.
+== smalltalk
+- Coffee machine's purring. That's me.   #funny
+- Pressed a flower. Cruz didn't see.   #funny
+- Two laps. Bet I win.
+? time:evening
+- Late dinner. Empty mess. Lovely.
+? act:work
+- Nine fifty on a scrubber. Ooh.
+?
+
+== rumour
+- Ooh, wait till you hear this.
+- Bet you didn't know this. Bet you.   #funny
+
+// Writer 4, batch 11: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing! Timing it. Eleven minutes so far. Personal best.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Ooh, I'm leaving soon. Race you to the coffee machine one last time?
+? leaving:you tier>=friend
+- You always played along. With the timing. And the games. Thanks for that. Really.   #warm
+
+== letter
+- New ship's coffee machine is a mystery. I've cracked it. Four minutes. Pressed a flower from their garden. Small one.
+? tier>=friend
+- Timed the walk from my bunk to the mess here. Two minutes longer than the Wren. I miss the shortcut. Hello.

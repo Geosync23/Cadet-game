@@ -1,0 +1,12 @@
+@voice v-ekwueme-celeste
+// Writer 4, batch 5: a short card for a short-stay visitor (GUESTS in section 9). No pronouns (not in facts.md).
+tpl: steady
+talk: Calm early riser; draws in the garden at dawn; short, kind sentences; two pencils, used in turn.
+hi: Morning | Hello
+bye: Off to draw | Go well
+yes: Yes | Of course
+thanks: Thank you | Kind of you
+wow: How lovely
+sigh: Ah
+likes: garden | plant | tea
+nick: - | {me} | {me} | {me} | {me}

@@ -1,0 +1,110 @@
+@reactions repair
+// Writer 4, batch 10. Reactions to the Works side's repairs: who notices are Works techs and the people who use the
+// thing. .you by tier; @dept for "a repair in my department". Calder's are dry and rare; Torres's warm.
+
+// ---- the scrubbers ----
+? cue:repair.scrubber !cue:repair.scrubber.you
+- Air tastes cleaner today. Someone did the scrubber.
+- Scrubber's quiet. That's how you know it's right.
+? cue:repair.scrubber.you tier>=friend
+- You stripped a scrubber? Kovac will be proud. Well, quietly.   #warm
+? cue:repair.scrubber.you@dept dept:works
+- Scrubber off the board. Good work. Clean seals, I hear.
+? cue:repair.scrubber.you who:calder
+- Scrubber. Logged. Good.
+? cue:repair.scrubber.you who:kovac-zainab
+- Your scrubber. I looked. It's... yes. Good.   #warm
+
+// ---- the fans ----
+? cue:repair.fan !cue:repair.fan.you
+- The fan's stopped rattling. Peace at last.   #funny
+- Someone sorted the fan. I can hear myself think.
+? cue:repair.fan.you tier>=acquaintance
+- That fan was you? {thanks}. It sang at me for days.   #funny
+? cue:repair.fan.you@dept dept:works
+- Fan's balanced. Calder heard it from the office. That's a compliment.
+? cue:repair.fan.you who:calder
+- The fan on Deck 4. It sounds right now. Fair.
+? cue:repair.fan.you who:torres-zeke
+- Heard the fan purring. You did that. Properly. Right, onward!   #warm
+
+// ---- the junctions ----
+? cue:repair.junction !cue:repair.junction.you
+- The power's steady again. Someone did the junction.
+? cue:repair.junction.you tier>=acquaintance
+- No more flicker on Deck 3. Was that you? Good.
+? cue:repair.junction.you tier>=friend
+- A junction! Look at you, doing the fiddly ones.   #warm
+? cue:repair.junction.you@dept dept:works
+- Junction's clean. Labels and all. Somebody taught you right.
+? cue:repair.junction.you who:calder
+- Junction box. Labelled. Logged. Good.
+? cue:repair.junction.you dept:comms
+- The relay stopped humming. Thank you. Clean signal.
+
+// ---- the heat pumps ----
+? cue:repair.heatpump !cue:repair.heatpump.you
+- Warm again. The heat pump's back.
+- Somebody fixed the heat pump. My toes are grateful.   #funny
+? cue:repair.heatpump.you tier>=acquaintance
+- Heat pump was you? {thanks}. I've taken off one jumper.   #funny
+? cue:repair.heatpump.you@dept dept:works
+- Heat pump's running sweet. Good job on that.
+? cue:repair.heatpump.you who:torres-zeke
+- You did the heat pump? On your own? I'm so pleased. Tea!   #warm
+? cue:repair.heatpump.you rank:junior deck:4
+- The bunks are warm again. That was you? Hero of Deck 4.   #funny
+
+// ---- the air plant ----
+? cue:repair.airplant !cue:repair.airplant.you
+- The air plant's humming right. Breathe easy, everyone.
+? cue:repair.airplant.you tier>=acquaintance
+- That big air job was you? {thanks}. Nobody thanks the air. I will.   #warm
+? cue:repair.airplant.you tier>=friend
+- The air plant! That's a proper job. I'm impressed. Honestly.
+? cue:repair.airplant.you@dept dept:works
+- Air plant's off the board. Calder looked twice. That's a good sign.   #funny
+? cue:repair.airplant.you who:calder
+- The air plant. Nobody thanks the air. So: noted.
+? cue:repair.airplant.you dept:infirmary
+- Air's clean in here again. Thank you. The patients breathe easier.
+
+// ---- the recyclers ----
+? cue:repair.recycler !cue:repair.recycler.you
+- The recycler's back. Water tastes like water again.
+- Somebody fixed the recycler. Not glamorous. Very important.
+? cue:repair.recycler.you tier>=acquaintance
+- The recycler was you? {thanks}. Clean water. Big deal, that.
+? cue:repair.recycler.you@dept dept:works
+- Recycler job done. Messy one. Good on you.   #funny
+? cue:repair.recycler.you dept:galley
+- The water's sweet again. Tea tastes right. Thank you.   #warm
+? cue:repair.recycler.you dept:garden
+- Mm. Clean water. The beds can tell. Thank you.
+
+// ---- the drive coils ----
+? cue:repair.coil !cue:repair.coil.you
+- All three coils in tune again, I hear.
+? cue:repair.coil.you tier>=friend
+- You on the coils! Down in the deep ship. Look at you.   #warm
+? cue:repair.coil.you@dept dept:works
+- Coil job off the board. Torres is telling everyone. Loudly.   #funny
+? cue:repair.coil.you who:torres-zeke
+- You helped coil three! She sulked less. Well. A bit less. Proud of you.   #warm
+? cue:repair.coil.you who:reyes-alejandro
+- Coil three's calm tonight. Your work? Thank you. She's not shy now.   #funny
+? cue:repair.coil.you who:calder
+- The coils. Torres says you were careful. Good.
+
+// ---- the lift ----
+? cue:repair.lift !cue:repair.lift.you
+- Lift's running smooth. No more clunk at Deck 4.
+- Somebody fixed the lift. Three people I know just breathed out.   #funny
+? cue:repair.lift.you tier>=acquaintance
+- The lift was you? {thanks}. Four, please. Smoothly.   #funny
+? cue:repair.lift.you@dept dept:works
+- Lift's off the board. Everyone on the ship noticed. Nice.
+? cue:repair.lift.you who:kovac-zainab|cruz-tove|keane-davi
+- The lift's better. Good. Not that I use it. Much.   #funny
+? cue:repair.lift.you dept:galley
+- Trays up and down again, on time. Thank you.

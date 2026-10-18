@@ -1,0 +1,12 @@
+@voice v-thorne-kaito
+// Writer 2, batch 8: a short card for a short-stay visitor (GUESTS in section 9). No pronouns (not in facts.md).
+tpl: earnest
+talk: Eager and careful; on loan from the charts office; keeps asking which way is forward.
+hi: Hello | Oh, hi
+bye: Back to the charts | See you
+yes: Of course | Yes, please
+thanks: Thank you | Thanks so much
+wow: Oh, wow
+sigh: Oh dear
+likes: book | garden
+nick: - | {me} | {me} | {me} | {me}

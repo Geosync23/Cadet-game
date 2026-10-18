@@ -1,0 +1,187 @@
+@crew strand-erik
+// Writer-commons, batch 3: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- {hi}! Strand, helm. Learning, really. One watch at a time. Race you to the lift.
+? tier>=acquaintance
+- {hi}, {me}! Watch forty-two today. Nearly a pilot. Not really. A bit.
+- {hi}! Can't stop. Well, I can. I'm stopping. What's new?
+? tier>=friend
+- {hi}, {me}! Run with me tomorrow? It's better with someone. I'll go slow. Ish.   #warm
+
+== feel
+? mood:high
+- Good day! Raman let me hold the course for an hour. An hour! Didn't wobble once.
+? mood:low
+- Sitting still today. Don't worry. Just thinking. It happens sometimes.
+
+== near
+? act:work
+- Hand steady, eyes on the board. Raman says I'm getting there. I'm getting there!
+? act:gym
+- Five laps. Then five more. Then I'll stop. Probably.   #funny
+
+== life
+? tier>=acquaintance
+- That notebook? It's nothing. Just notes. Helm notes. Very boring. Don't look.   #funny
+? tier>=colleague
+- I paint tiny portraits sometimes. They end up on bunks. Shh.
+
+== joy
+? tier>=acquaintance
+- Counting the watches. Every one's a step closer to flying her properly.
+
+== about
+? bond:friends
+- {friend} runs with me. Can't keep up. Doesn't care. Best kind of friend.   #funny
+
+// Writer-commons, batch 6: towards about 30 own lines.
+
+== greet
+? tier>=acquaintance time:morning
+- {hi}! Up and running! Literally. Five laps already. Morning!   #funny
+? tier>=acquaintance time:evening
+- {hi}, {me}! Watch forty-five. Nearly fifty. Fifty's a nice round number.
+? tier>=colleague warmth:cold
+- There you are! I ran past your bunk twice. Not on purpose. Mostly not.   #funny
+
+== bye
+? tier>=acquaintance
+- Onward! See you!
+? tier>=friend
+- Thanks, {me}. You slow me down. In a good way. I needed slowing down.   #warm
+
+== feel
+? mood:ok
+- Good! Fine! Bit restless. Always a bit restless.
+
+== near
+? act:leisure deck:3
+- Quiet corner. Notebook. Nothing. Just writing nothing. In a notebook.   #funny
+? deck:1
+- The bridge. Isn't it brilliant? One day. One day I'll be on it for real.
+
+== life
+? tier>=colleague
+- Raman's teaching me the helm. He's very patient. I'm very not. We balance out.   #funny
+? tier>=friend
+- I can't sit still. Even when I want to. Especially when I want to.
+
+== invite
+? trad:running tier>=acquaintance
+- Gym club tonight! Come on. Last one round buys tea. That'll be you. I'll buy anyway.   #funny
+
+== accept
+- Yes! Great! I'll be there! Early! Sorry, I'm always early.
+== decline
+- Can't, I'm on watch. Next time? Definitely next time.
+== missed
+- You didn't come! I ran an extra lap for you. It was hard. You owe me.   #funny
+== birthday
+? birthday:me
+- It's my birthday! I'm going to run one lap for every year. That's a lot of laps.   #funny
+? birthday:you
+- Happy birthday! I made you a card. There's a ship on it. A very fast ship.   #warm
+== hint
+- Got a minute? I'll sit still. I promise. For a minute.
+
+// Writer 3, batch 4: bubbles (smalltalk and rumour, 60 characters, said to no one in particular).
+
+== smalltalk
+- Watch three hundred and ten!
+- Can't stop. Halfway somewhere.
+- Ah, nuts. Wrong deck.   #funny
+- Nothing. Just a notebook. Nothing.   #funny
+? act:work
+- Course in. Watch logged. Next!
+
+== rumour
+- Quick one. Heard it on the way past.
+- Back in a minute with the rest.
+
+// Writer 3, batch 5: callbacks (told: said once).
+
+== callback
+? told:fav.fetch
+- You fetched it! Can't stop. Thanks! Back in a minute. Thanks!   #funny
+? told:fav.job
+- You did my job! I logged an extra watch. Don't tell. Thanks!   #funny
+? told:came.running
+- You came running! Varga says he won. Varga's wrong. I won by a nose.   #funny
+? told:gift.book
+- Read your book. It's in the notebook now. No, you can't see. Thanks.   #funny
+? told:bday
+- You remembered my birthday! I've written it in the notebook. A good entry.   #warm
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- The helm crew knows your name! I told them. Twice. Can't stop. Bye!   #funny
+? you:reliable
+- They say you're reliable. Like a good watch. I count those. You'd count.
+
+// Writer 3, batch 8: thanks for a gift (gift: loved | liked | polite, or the gift's tag; dialogue 0.43.10).
+
+== gift
+? gift:book
+- A book! I'll read it on the way to somewhere. Thanks! Can't stop!   #funny
+? gift:loved
+- This is brilliant. Thanks! It's going in the notebook. A good entry.   #warm
+? gift:liked
+- Thanks! Nice one. Back in a minute.
+? gift:polite
+- Ah, nuts, you didn't have to. Thanks! Really.
+
+// Writer 3, batch 9: asking after your people back home (the home flags; only the big news you'd have told them).
+
+== greet
+? flag:home.jo.launched tier>=colleague
+- Your Jo's boat! The Little Wren! Can't stop. Tell them it's a great name. Bye!   #funny
+
+// Writer 4, batch 2: everyday chatter, not about work (meals, rest days, home, hobbies, seasons, traditions).
+== smalltalk
+? act:meal
+- Can't stop! Toast on the run.   #funny
+- Breakfast, then a run, then the garden. Go!
+? act:off
+- Rest day! Ran the promenade twice. Again?
+- Painting a tiny portrait. Shh. Not of you.
+- Garden's best before nine. I'm off there.
+? time:evening
+- Beat Tariq in a race once. He's still upset.   #funny
+- Writing. No, nothing. A list. Go away. Sorry!   #funny
+? time:morning
+- Up at six! Already ran! Morning!
+? trad:running
+- Gym club! I'll pace you. Too fast.   #funny
+? season:greening
+- Greening! Everything's growing. Me too, probably.
+? season:sowing
+- Sowing. I planted mine in a hurry. It came up.
+? place:hydroponics_garden
+- Light's lovely in here. Can't stay. Just a minute.
+? trad:observatory-night
+- Stars! Nine new ones tonight. I'm counting.
+
+== rumour
+- Quick, did you hear? Can't stop. Here's the news.
+- Heard it on the way. Telling you on the way.   #funny
+
+// Writer 4, batch 7: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing! Quick! Can't stop! Well. Can stop a bit.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Off soon! Keep running for me. Well. A jog's fine.
+? leaving:you tier>=friend
+- I wrote the whole deck a goodbye poem. Nobody's seeing it. It says thanks.   #warm
+
+== letter
+- New ship! The garden's tiny but the running track's long. I'm counting watches again. Nearly there.
+? tier>=friend
+- Wrote a poem about the Wren. Nobody's seen it. One line's about Bunk 2. A good line. That's all you're getting.

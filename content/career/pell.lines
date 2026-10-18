@@ -1,0 +1,39 @@
+@crew pell
+// Head writer 4: career lines. Pell nearly left in his first month; he knows the feeling from the inside.
+
+== career.missed
+? tier>=acquaintance
+- Took your scrubber job this morning. No bother. Just... you all right, {nick}?
+
+== worried.chief
+? tier>=colleague
+- Had the Chief's talk? Me too, my first month. Felt like the floor went. It didn't.   #warm
+
+== worried.captain
+? tier>=friend
+- I nearly left too, my first month. Glad every day I didn't. Don't you go either.   #serious
+
+== worried.last
+? tier>=friend
+- I'll sleep at night for once. Swear. Then I'll wake you. Shift, tomorrow. Yeah?   #serious
+
+== career.up
+? tier>=acquaintance
+- Back on the board! The bay sounds right again.
+
+== farewell.eve
+? tier>=friend
+- Tomorrow? Oh, {nick}. I didn't think. I really didn't think it'd go this far.   #serious
+
+== farewell.day
+? tier>=acquaintance
+- Today, eh. I'll be at the Tern. Bringing you something. Don't guess.   #warm
+- Every ship I've fixed is in my tin. You're in there now too.   #warm
+
+== career.leave.booked
+?
+- Leave? Nice. Sleep all day. That's what I'd do. That's what I do anyway.   #funny
+
+== career.back
+?
+- You're back! I did your rounds. The Deck 5 panel still sticks. Some things never change.

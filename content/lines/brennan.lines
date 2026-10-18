@@ -1,0 +1,558 @@
+@crew brennan
+// Writer-commons, batch 1 (for the Voices sampler). Brennan's card is the head writer's. Nothing of the fire, Nell
+// Arrowby or blue sage before their beats.
+
+== greet
+? tier=stranger
+- {hi}. You're new. Have you eaten? Mess is through there. Trays on the left.
+? tier>=acquaintance time:morning
+- Morning, {nick}. Breakfast's on till eight, and I'm counting heads.
+? tier>=acquaintance
+- {hi}. Have you eaten? Don't answer. I can see you haven't. Sit.   #funny
+? tier>=colleague
+- There you are, {nick}. Biscuits went down to the junior wing. Did you get one? Good.
+? tier>=friend
+- Oh, there's my favourite. Don't tell the others. I tell them all that, mind.   #warm
+
+== feel
+? mood:high
+- Good day, love. The pans sang all through lunch. Not one of them caught.
+? mood:low
+- Cold store ran warm again. Two degrees. I've been very polite to it all day.   #funny
+
+== near
+? place:galley act:work
+- Hear that? That's three minutes from done. Now two. Now it's done.
+? act:meal
+- Eat your greens, love. Nandakumar's chillies are in the sauce, so go gently.
+
+== life
+? tier>=acquaintance
+- I keep a book of everyone's favourite dish. Everyone aboard. I'll find out yours.
+? tier>=colleague
+- I called the Captain "love" once. By accident. I've never lived it down.   #funny
+
+== joy
+? tier>=acquaintance
+- Best sound on the ship? A pan telling you it's ready. Listen. There. Hear it?
+
+// Writer-commons, batch 4: up to about 60. Blue sage from beat:brennan.2; the fire and Nell only from beat:brennan.3.
+// Off Friday and Saturday (Lukas covers).
+
+== greet
+? tier>=acquaintance time:evening
+- Evening, {nick}. Dinner's on. You've not eaten. Don't argue. Tray.
+? tier>=acquaintance time:afternoon
+- {hi}. Lunch is done, dinner's not started. This is my quiet hour. Come in anyway.
+? tier>=colleague warmth:cold
+- Where've you been, love? You've not been eating. I can tell. Sit.
+? tier>=colleague time:morning
+- Morning, {nick}. Porridge, toast, or both? Both. I've decided.   #funny
+? tier>=close
+- There you are, {nick}. I kept your favourite back. In the warm. Don't tell a soul.   #warm
+? tier>=acquaintance weekday:sun
+- Sunday, love. Slow breakfast. Sit as long as you like. Nobody's rushing anyone.
+
+== bye
+? tier>=acquaintance
+- {bye}. Take a biscuit for later.
+- Go on, love. And eat something before bed. A biscuit counts. Just.
+? tier>=colleague
+- Off you go. Mind the floor, it's wet. It's always wet. It's a galley.   #funny
+? tier>=friend
+- Thank you, love. You're good company. Come back soon.   #warm
+
+== feel
+? mood:ok
+- All right, love. Busy. Busy's good. Busy's how I like it.
+? mood:low tier>=friend
+- Bit tired, love. I've cleaned a clean galley twice. That's how you can tell.
+
+== near
+? place:galley act:work
+- Out of my kitchen, love. No, stay. No, out. Pass me that spoon first.   #funny
+? act:meal
+- How is it? Honestly. If it's bad, say. It won't be. Say anyway.
+? place:galley
+- That's the cold store. Don't touch the door. It's moody. So am I, about it.   #funny
+
+== life
+? tier>=acquaintance
+- I send biscuits down to the junior wing. Juniors run on biscuits. It's science.   #funny
+? tier>=colleague
+- Nandakumar grows me chillies. Far too hot. I use every one. Don't tell her.   #funny
+? beat:brennan.2 tier>=colleague
+- Still no blue sage. I've lost count of the tries at that soup. Nearly.
+? beat:brennan.3 tier>=friend
+- I think about Port Halloran sometimes. The window. The harbour. Not the fire.
+
+== invite
+? tier>=colleague time:afternoon
+- Come by after the rush tonight, love. I'm trying something. I need a taster.
+? tier>=friend
+- Help me with the bread on Sunday? You knead, I'll talk. Fair trade.
+
+== accept
+- Oh, lovely. I'll put a plate by.
+- Course, love. I'll be there. I'll bring something. I always bring something.
+
+== decline
+- Can't, love. Seventy-five dinners won't cook themselves. Another night?
+- Not tonight, love. It's early to bed for me. Ask me again?
+
+== missed
+- You missed me earlier, love. I kept a plate warm. It's a bit dry now. Eat it anyway.
+- No harm done. But you'll eat with me next time. That's not a question.
+
+== birthday
+? birthday:me
+- Is it my birthday? Who told? I'm not making my own cake. Well. Just a small one.   #funny
+? birthday:you
+- Happy birthday, love! There's a cake. Of course there's a cake. Your favourite, too.   #warm
+
+== hint
+- Stay a minute, love. Sit. I've got something to ask you.
+
+== week1
+? week1:true weekday:mon act:dinner
+- Dinner's five till half eight, love. Tray, servery, then sit with someone. Anyone.
+? week1:true weekday:mon act:dinner tier<=acquaintance
+- See that shelf? The grab shelf. For emergencies. And Pell.   #funny
+
+== greet
+? tier=stranger time:evening
+- {hi}. New, are you? Dinner's till eight. Don't make me come and find you.
+? tier>=acquaintance act:work
+- {hi}, love. Can't stop. Pans. Say hello to the pans. They like it.   #funny
+? tier>=friend time:night
+- What are you doing up, love? Warm milk. No arguments. Sit.   #warm
+
+== feel
+? mood:high tier>=colleague
+- Good day, love. The bread rose, the soup sang, and the cold store behaved. All three!
+
+== near
+? act:breakfast
+- Eat your breakfast. All of it. Breakfast is the one you can't make up for later.
+? place:galley time:evening
+- Hear that? The pans settling. That's the galley saying goodnight.   #warm
+
+== life
+? tier>=acquaintance
+- Seventy-five people aboard. I know what every one of them likes. Ask me. Go on.
+? tier>=friend
+- My mother taught me to cook by ear. I still hear her. "That's done, Auda. Take it off."   #warm
+
+== bye
+? tier>=acquaintance time:night
+- Bed, love. You've an early start. I'll have the porridge on.
+
+== decline
+- Oh, love, I can't. The cold store's playing up. I've to be very polite to it.   #funny
+
+== near
+? act:dinner
+- Plates back on the rack, love. Thank you. You'd be amazed how many people don't.
+? deck:3 act:leisure weekday:fri|sat
+- My day off and here I am, in the mess. Don't tell Lukas. He'll shoo me out.   #funny
+
+== invite
+? tier>=colleague weekday:sun
+- Sunday bread, love. Come and knead. It's good for the soul. And the arms.
+
+== life
+? tier>=colleague
+- The cold store and I have an understanding. It stays cold. I stay calm. It never lasts.   #funny
+
+== about
+? aff:nandakumar:friend
+- Priya grows me chillies. Far too hot. I'd be lost without her.   #warm
+? bond:friends
+- {friend}? Lovely. Eats everything I put down and says thank you. Treasure.   #warm
+
+// Writer 3, batch 1: callbacks, visits and notes (the game adds her name to a note). Moment memories are
+// moment.brennan.<word> from beats 1-5. The fire only behind beat 3's memories.
+
+== callback
+? told:moment.brennan.home
+- I've found out how they make your home dish, love. Don't ask how. I have ways.   #funny
+? told:moment.brennan.tonight
+- "Whatever you're cooking tonight." You flatterer. Here, have a bigger spoon.   #funny
+? told:moment.brennan.why
+- A plate's the quickest way home, love. I'm still right. Eat up.   #warm
+? told:moment.brennan.askedcruz !beat:brennan.5
+- Tove's got a pot on the go! For the sage. Won't let me near it. Quite right.   #funny
+? told:moment.brennan.mother
+- I sang to a pan today, love. Don't laugh. It came out lovely. The pan, not the singing.   #funny
+? told:moment.brennan.counted
+- Seventy-five, every dinner. I counted you twice tonight, love. Habit.   #warm
+? told:moment.brennan.restaurant
+- My restaurant with trays. Best one I've had, love. Don't tell the harbour.   #funny
+? told:moment.brennan.shared
+- Thanks for your story the other night, love. I keep thinking about it. Kettle's on.   #warm
+? told:moment.brennan.goodbye
+- "Tastes a bit like goodbye." You were right, love. I think of it every time I taste it.   #warm
+? told:moment.brennan.seconds
+- Seconds again? Course. Still the only verdict I want.   #funny
+? told:moment.brennan.family
+- I made your family's dish. Badly. Next week, better. Cooks are thieves, love.   #funny
+? mem:moment.brennan.staying
+- Still here, love. Still at the pans. Where else would I be?   #warm
+? told:moment.brennan.teach
+- Lesson one tonight, love. By ear. Bring your ears. And an apron.   #funny
+? told:came.harvest
+- You came to the harvest supper! Did you have the pie? Course you did. I watched.   #funny
+? told:came.market
+- Saw you at the market, love. Did you buy anything to eat? That's all I need to know.   #funny
+? told:fav.fetch
+- Bless you for fetching that, love. My legs have done three dinners today.   #warm
+? told:fav.lamp
+- You fixed my lamp, love. I can read my book at night now. Every dish, lit up.   #warm
+? told:fav.job
+- You did my job, love. There's a plate by for you. Don't argue.   #warm
+? told:fixed.oven
+- You fixed my oven! It's singing again. Come here, there's bread in it for you.   #warm
+? told:fixed.range
+- The range lights first time now. Was that you, love? There's pudding in it for you.   #warm
+? told:fixed.chiller
+- You fixed the chiller? The cold store's behaving. First time all month. Bless you.   #funny
+? told:fixed.extractor
+- Extractor's pulling again, love. I can see my own pans. Thank you.
+? told:gift.plant
+- Your plant's on my windowsill, love. I talk to it. It's a good listener.   #warm
+? told:gift.garden
+- Fresh from the garden! You know me too well, love. It's going in tonight's soup.   #warm
+? told:gift.tea
+- Your tea's in my good tin, love. Only for the quiet hour. Thank you.   #warm
+? told:bday
+- You came to see me on my birthday, love. That's the best present. That and cake.   #warm
+? told:grubby
+- You were in a state yesterday, love. Wash before you eat. I'll check.   #funny
+? told:heard.moment.pell
+- Pell says you've been a good friend to him. Best thing anyone's said in my mess.   #warm
+
+== visit
+- Brought you a plate, love. You weren't at dinner. Don't argue. Eat.   #warm
+- Hello, love. I was bringing biscuits down anyway. These ones are yours. Just yours.   #warm
+- Five minutes, love. My feet need a sit, and your bunk's on the way.   #funny
+- I've a new dish in my head, love. Tell me if it sounds good. Then tell me honestly.
+- Look at this bunk. Do you eat in here? Don't. Crumbs. I'll know.   #funny
+
+== note
+- You weren't in, love. There's a biscuit under the cloth. Eat it today, not tomorrow.
+- Missed you at dinner. There's a plate on the grab shelf with your name on it.   #warm
+- Popped down with biscuits. You were out. Tomas has been told they're yours. Firmly.   #funny
+- Called by to see if you'd eaten. You weren't here to ask. Eat something, love.
+? weekday:sat
+- Sunday bread in the morning, love. Come and knead. Bring your arms.
+
+// Writer 3, batch 3: towards 120. Seasons, places, bubbles, cues. Rest days Fri, Sat (the game's roster; Lukas
+// covers).
+
+== greet
+? tier>=colleague place:lounge
+- Out of the galley, love. Feels odd. My hands keep looking for a spoon.   #funny
+? tier>=acquaintance season:harvest
+- Harvest, love! Tove's sending me baskets. I've never been happier.
+? tier>=acquaintance season:lanterns
+- Lanterns, love. Soup season. It's always soup season, but more so.   #funny
+? tier>=acquaintance season:sowing
+- Sowing, love. New season, new dishes. I've a list as long as my arm.
+? tier>=acquaintance season:greening
+- Greening, love. Fresh leaves from the garden every day. I'm spoilt.
+
+== feel
+? mood:high tier>=colleague
+- Good day, love. Not one plate came back with anything on it.
+? mood:low tier>=friend
+- Bit low, love. Thinking of my mother's kitchen. I'll stir something. It helps.
+
+== near
+? place:hydroponics_garden
+- Come to see what's ready. Don't tell Tove I squeezed the tomatoes.   #funny
+? act:dinner
+- {dish} tonight, love. Go back for seconds. I'll be hurt if you don't.   #funny
+
+== life
+? tier>=colleague
+- Lukas runs my galley two days a week. Runs it well. Moves my spoons. I forgive him.   #funny
+? tier>=friend
+- My mother posts me recipes. Half of them say "until it sounds right".   #funny
+
+== joy
+? tier>=colleague
+- Sunday bread, love. Flour everywhere, juniors kneading, everyone talking. Bliss.
+
+== invite
+? tier>=colleague time:afternoon
+- Come and taste, love. Quiet hour. I've a sauce that's arguing with me.   #funny
+? trad:harvest tier>=acquaintance
+- Harvest morning, love. Come and carry baskets. There's a big breakfast after.
+
+== about
+? aff:cruz-tove:friend
+- Tove grows me anything I ask. Then says sorry for the soil. Lovely soul.   #warm
+? aff:pell:friend
+- Pell? Bottomless, that boy. I'd never tell him I'm fond of him. He'd want pudding.   #funny
+
+== smalltalk
+- Hear that? Three minutes. Two.
+- Who's not eaten? Someone's not eaten.
+- Cold store's behaving. For now.   #funny
+- Mind the floor, love. It's wet.
+
+== rumour
+- Heard it at the servery, love. Everyone talks there.
+
+== cue
+? cue:event.ionStorm.onset
+- Storm, love. Soup's on. Storms always want soup.   #warm
+? cue:lateMeal
+- Late, love? Here. I kept it warm. Don't make a habit of it. Do, if you must.   #warm
+? cue:harvest
+- The harvest's in, love! Everything's going in a pie. Everything.   #funny
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- The galley likes you, love. Lukas says you stack your tray right. High praise.   #funny
+? rep:theirs
+- You're galley family now, love. That means you eat first and argue never.   #warm
+? you:kind
+- Everyone says you're a kind one, love. I could've told them. I watch who clears plates.   #warm
+? you:chatty
+- You talk to everyone in my mess, love. Good. Nobody should eat alone.   #warm
+
+// Writer 3, batch 8: thanks for a gift (gift: loved | liked | polite, or the gift's tag; dialogue 0.43.10).
+
+== gift
+? gift:plant
+- Oh, love. Look at it. It's going on my windowsill. I'll talk to it every morning.   #warm
+? gift:loved
+- Oh, love. You shouldn't have. You should have. Come here, there's cake for this.   #warm
+? gift:liked
+- Bless you, love. That's very kind. Sit down, I'll find you a biscuit to say thanks.
+? gift:polite
+- Thank you, love. It's the thinking that counts. You think lovely things.   #warm
+
+// Writer 3, batch 9: asking after your people back home (the home flags; only the big news you'd have told them).
+
+== greet
+? flag:home.gran.won tier>=acquaintance
+- A marrow called the Captain, first prize! Tell your gran I want the recipe. And the seeds.   #funny
+? flag:home.mum.mug tier>=colleague
+- Your mum made you a mug, love? Bring it to breakfast. I'll fill it first. Every time.   #warm
+
+// Writer 4, batch 10: Brennan on a repair you did (cue:repair.you), in her own words.
+== cue
+? cue:repair.you tier>=acquaintance
+- I hear you fixed something. Good. Sit. Eat. You've earned it, love.   #warm
+- Fixing things on an empty stomach? Not in my mess. Plate.   #funny
+- They told me it was you. I'll put a little extra in your bowl tonight.   #warm
+- Good hands, you've got. My mother would have said so. I'm saying so.   #warm
+? cue:repair.you@dept
+- My galley sings again. Thank you, love. Properly.   #warm
+- My kitchen's not purred like that in a month. Come here. Biscuit.   #warm
+- I listened. It sounds right now. You've got an ear for it.
+? cue:repair.you tier>=friend
+- You fix my galley, I feed you. That's the deal. It's a good deal.   #funny
+- Every time something's fixed, I check who. It's been you a lot. I've noticed.   #warm
+? cue:repair.you warmth:cold
+- I hear you've been fixing things. Not eating, though. Sit down.   #funny
+
+// Writer 4, batch 18: Brennan off duty, after week one. Sunday bread, her mother's phrases, the book of favourite
+// dishes, Nandakumar's chillies, the galley crew she mothers, her Fri-Sat days off. Gates kept: no fire, nothing of the
+// old restaurant or Nell Arrowby before beat:brennan.3; no blue sage before beat:brennan.2.
+
+== greet
+? tier>=acquaintance !week1:true
+- {hi}. Eaten? Don't answer. I can see. Sit down, I've a bowl going.
+- There you are, love. You look like a person who needs a biscuit.   #funny
+? tier>=acquaintance !week1:true weekday:fri|sat
+- My day off, love. I'm not cooking. I'm just... watching Lukas cook. Closely.   #funny
+? tier>=colleague !week1:true
+- {me}! Good. Come and tell me what you had for lunch. All of it.   #funny
+- Hello, love. Sit. I'm off for ten minutes. Keep me company.   #warm
+? tier>=friend !week1:true
+- {me}. Good. Kettle's on. I've been saving a scone. Don't tell the juniors.   #warm
+? tier>=close !week1:true
+- There you are, love. My favourite kind of evening: pans clean, and company.   #warm
+
+== chat
+? tier>=acquaintance !week1:true
+- My mother posts me recipes. "Until it sounds right," she writes. That's the whole method.   #funny
+- Sunday bread tomorrow. The juniors knead. I talk. The dough listens to both of us.   #funny
+- Nandakumar's chillies again. I said "too hot". She said "use fewer". I used them all.   #funny
+- The book of favourite dishes has a new page. Somebody's mum's stew. I'll get it right.
+- Days off, I walk the garden. Smell everything. Write down what's ripe. Can't help it.   #funny
+- I sing to the pans. Mother did too. They don't mind. Lukas minds.   #funny
+? tier>=colleague !week1:true
+- Esme cuts carrots like a ruler. Ivo cuts them like a story. I love them both.   #warm
+- Tamsin hums when she stirs. She stops when I look. I've stopped looking.   #warm
+- Tariq leads Lukas at onions. I'm not supposed to know. I keep the tally.   #funny
+- Lukas runs my galley on my days off. "Runs itself," he says. It doesn't. He does.   #warm
+- Halloran bakes in my oven on rest days. I inspect. He passed. Once. Don't tell him.   #funny
+- I had a whole day off and read a book. A cookery book. I know. I know.   #funny
+- I made the Captain's favourite on Thursday. She didn't say. She had seconds.   #warm
+? tier>=friend !week1:true
+- Mother taught me by ear. "That's done, Auda. Take it off." I still hear it. Every pan.   #warm
+- I keep a tin of good biscuits for whoever looks sad. It's always empty. Says a lot.
+- Some days I'm in the galley before anyone's up, just listening. It's my quiet bit.
+? tier>=close !week1:true
+- Feeding people's the only thing I've ever been sure of. That, and you lot.   #warm
+- You've got a page in my book now, love. I'm still working out the dish. Soon.   #warm
+
+== near
+? act:breakfast !week1:true
+- Porridge. Mine. With a spoon of jam. Chef's privilege.   #funny
+? act:dinner !week1:true
+- I eat last. Always have. Then I know everyone's had theirs.
+? act:off
+- Day off. Garden, a long sit, then the mess to check on Lukas. Just to look.   #funny
+? place:hydroponics_garden
+- The herbs. Smell that. That's tomorrow's soup, that is.
+? place:lounge !week1:true
+- The lounge. Feet up. Somebody bring me a cup of tea. Not one I made, for once.   #funny
+? trad:jam
+- Music night. I'll bring biscuits. And sing. Loudly. Badly. Happily.   #funny
+? weekday:sun
+- Sunday. Bread smells all down the corridor. That's how a ship should smell.   #warm
+
+== feel
+? mood:high !week1:true
+- Happy, love. Bread rose, soup sang, nobody left hungry. What more is there?
+? mood:ok !week1:true
+- Fine, love. Busy. Fed. Everyone fed. That's fine.
+? mood:low tier>=friend !week1:true
+- Bit low, love. I've polished every pan. Some twice. It'll pass. Have a scone.
+
+== life
+? tier>=acquaintance !week1:true
+- I've an apron for every day of the week. Sunday's has flour on it from three years ago.   #funny
+? tier>=colleague !week1:true
+- I sleep early and rise early. The ovens like the morning. So do I.
+- My mother still sings to her pans. She's older than the pans. Just.   #funny
+? tier>=friend !week1:true
+- The galley crew are my lot. Esme, Ivo, Tariq, Tamsin, Lukas. I'd feed them to the end.   #warm
+
+== joy
+? tier>=acquaintance !week1:true
+- A full mess and empty plates coming back. That noise. Best sound there is.
+? tier>=colleague !week1:true
+- Somebody tasting a dish from home and going quiet. That's the one.   #warm
+
+== bye
+? !week1:true
+- Off you go, love. Eat something before bed. A biscuit counts. Two count more.   #funny
+- Take care, love. Bread on Sunday. You're kneading.
+- {bye}. Come back hungry. That's an order.   #warm
+
+== callback
+? told:intro.dinner tier>=acquaintance !week1:true
+- Your first night, you finished your plate. Every bit. I noticed. I always notice.   #warm
+? told:moment.brennan.book tier>=colleague
+- Your page in my book's filling up. You said a dish. I've tried it three times. Close.   #warm
+? told:came.harvest tier>=acquaintance
+- You helped with the harvest. Those beans went in the stew. You could taste the care.   #warm
+? told:gift.sweet tier>=acquaintance
+- The sweets you gave me. Shared them with the galley. Ivo ate most. Thank you, love.   #funny
+? told:came.jam tier>=acquaintance
+- Music night. You ate four biscuits. I counted. I'm proud.   #funny
+? told:bday tier>=acquaintance
+- Your birthday cake. Did I get it right? I'll get it righter next year.   #warm
+? told:fixed.oven tier>=acquaintance
+- My oven still purrs. Every time I light it, I think: that was a good fix.
+? told:came.observatory tier>=acquaintance
+- Observatory night. I sent a flask up with you. Did you share it? Good.   #warm
+
+// Writer 5, batch 4: if Brennan is ever transferred (goodbye leaving:you, packing as feel leaving:soon, letters
+// after; the goodbye also goes into the "Sorry I missed you at the shuttle" Mail). A new galley on a new ship: no
+// restaurant, no Nell, no fire, nothing of her arc. Lukas covers the galley, so he keeps the book.
+
+== feel
+? leaving:soon
+- Packing, love. Twelve knives, three aprons, one good pan. The book stays with Lukas.
+- Ten days. Lukas has the galley. He's ready. I've told him. Twice. He's ready.   #funny
+? leaving:soon tier>=friend
+- I keep stopping to listen to the pans. Saying goodbye, I suppose. Don't fuss.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Off you go, love. No, wait. I'm the one going. Eat your dinner anyway.   #funny
+? leaving:you tier>=colleague
+- Your favourite's in the book. Lukas has the book. He'll do it right. I've checked.   #warm
+? leaving:you tier>=friend
+- Look after yourself, love. Eat properly. I'll know if you don't. I always know.   #warm
+
+== letter
+- New galley. The ovens run hot and the stew's too shy. I'm fixing both. Eat something, love.   #funny
+- They don't listen to the pans here. I'm teaching them. Slowly. Tell Lukas the bread rose better on the Wren. Tell him it's the ovens, not him.
+? tier>=friend
+- Made the Wren's Sunday bread here. Didn't taste the same. It's the company, love. Write and tell me what you're eating. Properly, mind.   #warm
+
+// Writer 5, batch 6: seasons and traditions (the game's ids: running Mon, quiz Thu, works-tea and jam Fri, film and
+// observatory-night Sat, market (the swap meet) Sun, harvest (harvest morning), hull-lights, founding (day 100),
+// quiet-watch (day 300)), plus trad:today. Gaps filled only; arc gates kept.
+
+== greet
+? trad:today tier>=acquaintance !week1:true
+- {hi}. Something on tonight. There'll be food. There's always food.
+
+== near
+? trad:quiz
+- Quiz night. I've done sandwiches. Brain food, love. Eat one before the music round.
+? trad:film
+- Film night. There's popcorn. Well, there's a big pan of it. Help yourself, love.
+? trad:market
+- Swap meet. I bring a tin of biscuits to trade. Nobody trades. They just eat them.   #funny
+? trad:observatory-night
+- Observatory night. I've sent up a flask of cocoa. It's cold up there, love.
+? trad:running
+- Gym club. There's soup when you're done. Run, then soup. That's the rule.   #funny
+? trad:harvest
+- Harvest morning! Bring me the greens, love. They'll be on plates by dinner.
+? trad:founding
+- Founding Day cake. Three layers. The Captain gets the first slice. Then everyone.   #warm
+? trad:hull-lights
+- Hull lights tonight. I'll stop the pans for that. Five minutes. Then back to it.
+? trad:quiet-watch tier>=friend
+- The quiet watch. I'll be at the galley porthole. Thinking of my mother, and her pans.   #warm
+
+== smalltalk
+? trad:today
+- Something's on. I've baked.
+? trad:founding
+- Cake's out! Three layers!
+
+// Writer 5, batch 9: week-1 beats for the onboarding hook (onboarding seat 1's list, 2026-10-17). One flag key per
+// line, beat.<beatId>.<n>, said in order as bubbles while you are in the beat's room in its window; best first
+// (onboarding drops the rest when you leave). Mail texts: mail.<beatId>, one line "Subject | body", unsigned.
+
+== week1
+// beat d1-dinner: Monday 18:00, the mess
+? flag:beat.d1-dinner.1
+- Dinner's on, love. Grab a tray, then a plate.
+? flag:beat.d1-dinner.2
+- Sit with someone. Food's better with company.
+? flag:beat.d1-dinner.3
+- Miss dinner? Covered plates on the grab shelf.
+? flag:beat.d1-dinner.4
+- The grab shelf's for emergencies. And Pell.   #funny
+? flag:beat.d1-dinner.5
+- Eat properly, love. I'll know if you don't.
+
+// ---- Pillar 5 (head writer, seat W): tuning day (M5, Day 4) and the galley alarm (M6).
+== work
+// breakfast: her oven ran hot (seat M2 sets the flag at breakfast on Day 4)
+? flag:train.m5.grumble
+- Burnt the edges of forty rolls. Forty! That oven's got a temper.
+// you settled Oven 2
+? flag:train.m5.follow.done
+- There. Steady as anything. Here, have a biscuit, love.   #warm
+// the galley alarm incident: she's embarrassed
+== inc.alarm
+- Don't. Don't say it. One pan. One.   #funny
+- Sorry, love. I turned my back for a second.
+- That alarm's louder than me. Nobody's louder than me.   #funny

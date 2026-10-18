@@ -1,0 +1,115 @@
+@crew nakamura-bilal
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Hello. Nakamura, Watch. Learning the Watch from Holt, one lecture at a time.
+? tier>=acquaintance
+- Hello, {me}. The basil's coming on. I wasn't worried. I was a little worried.
+- {me}. Letter from my twin. On the Halcyon. Doing better than me, apparently.   #funny
+? tier>=friend
+- {hi}, {me}. Have some mint. I don't give the mint to just anyone.   #warm
+== feel
+? mood:high
+- Good day. Clean patrol, and Brennan took my thyme. She called it "decent".
+? mood:low
+- My twin got a commendation. I'm pleased for them. I'm going for a run.
+== near
+? habit:runner
+- Running clears the head. And it's one thing my twin can't do better by letter.   #funny
+? deck:3 act:free
+- These are my herbs. Please ask before you pick. The mint has opinions.   #funny
+== life
+? tier>=acquaintance
+- I grow herbs for the galley. Window pots, mostly. Brennan collects on Fridays.
+== joy
+? tier>=colleague
+- My herbs. You plant a seed and a week later it smells of home. It still amazes me.
+
+// ---- Writer 2, batch 2: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue, hint, about)
+== greet
+? tier>=acquaintance time:morning
+- Morning, {me}. Breakfast standing up, then a run. My twin ran further. By letter.   #funny
+? tier>=acquaintance warmth:cold
+- {me}. It's been a while. The basil's grown two inches. You've missed a lot.   #funny
+
+== near
+? habit:musician
+- Music room. I'm learning a song my twin can't play. Finally, one thing.   #funny
+? place:mess
+- Is that my thyme in the stew? It is. Brennan said "decent". I'll take decent.
+
+== invite
+- A run round Deck 3? I'll set a fair pace. Fair to me.   #funny
+? tier>=acquaintance
+- Garden after shift? I'll show you the mint. From a safe distance.   #funny
+
+== accept
+- Good. Yes. I'll be there.
+- Yes. Thank you. I'll bring mint.
+
+== decline
+- Not tonight. The herbs need potting. They're very particular this week.
+? weekday:tue|wed
+- Rest day. I'm writing to my twin. I have news. Finally. Thursday?
+
+== missed
+- You didn't come. That's all right. I potted the basil. It listened.
+
+== birthday
+? birthday:you
+- Happy birthday, {me}. I've told Brennan. My best basil's going in your soup.   #warm
+? birthday:me
+- My birthday. And my twin's. They sent their card first. Of course they did.   #funny
+
+== cue
+? cue:event.ionStorm.onset
+- Storm's on. I've brought the herbs in from the window. Now my rounds.
+
+== hint
+- {me}. Have you a minute later? There's something I'd like to say. Properly.
+
+== about
+? aff:garcia-greta:friend
+- Garcia and I argue about planters. Hers are fine. Mine are better. We're friends.   #funny
+
+// ---- Writer 2, batch 2: top-up (bye, greet by time, life at friend tier)
+== bye
+- {bye}. Don't touch the mint on your way out.   #funny
+- See you. The Chief's lecture is at four. I'm early. Always.
+== greet
+? tier>=acquaintance time:afternoon
+- Afternoon, {me}. The Chief's done hatches today. Twice. I took notes. Twice.   #funny
+== life
+? tier>=friend
+- My twin's ahead by letter. I'm ahead in herbs. It's balanced, I've decided.
+
+// ---- Writer 2, batch 6: bubbles (smalltalk, rumour), at most one in five about work. 60 characters.
+== smalltalk
+- The basil's coming on.
+- Ask before you pick the mint.   #funny
+- My twin's ahead. By letter.   #funny
+- Brennan said "decent". I'll take it.
+? act:gym
+- Run done. My twin can't beat that.
+?
+
+== rumour
+- Patiently: here's what happened.
+- My twin heard this first. Of course.   #funny
+
+// Writer 4, batch 11: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. Patiently. The herbs go in a box with holes.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm leaving soon. As Holt says: do it properly. Goodbye, properly.
+? leaving:you tier>=friend
+- You learnt the Wren the patient way. I noticed. I'm proud of that. Of you, a bit.   #warm
+
+== letter
+- The Halcyon. My twin's here. The crew call us the set. My herbs are on a new windowsill.
+? tier>=friend
+- Grew the first parsley on the Halcyon. Sent some to the galley. Brennan would've inspected it. Hello.

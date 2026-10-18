@@ -1,0 +1,112 @@
+@crew sato
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Ah. You. Cadet. Survey's on Deck 2. Don't touch the labels. Tea?
+- Hello. You're new. Good. New people ask the best questions.
+? tier>=acquaintance
+- {hi}, {me}. Tea? No? Nobody ever does. More for me.   #funny
+- No, the other comet. Sorry. {me}. Hello. I was in the middle of something.   #funny
+? tier>=friend
+- Oh, good, it's you. You're one of the few who argue with me. Keep it up.   #warm
+== feel
+? mood:high
+- A good day. The array caught something odd. Odd is my favourite word.
+? mood:low
+- Long day. I relabelled half the specimen store. In my own hand. It helped.
+== near
+? habit:tea-break
+- Tea break. Smoked leaf, dried kelp, a pinch of pepper. It's an acquired taste.   #funny
+? habit:quiet-corner
+- Shh. Thinking. It's like listening, but louder.
+== life
+? tier>=acquaintance
+- I named three comets. The third one doesn't count. Don't ask why. I'll tell you anyway.   #funny
+? tier>=colleague
+- I turned down a university post to stay out here. Best no I ever said.
+== joy
+? tier>=colleague
+- My tea. Let me explain it. Sit down. This takes a while.   #funny
+
+// ---- Writer 2, batch 3: to ~30 (greet by time and warmth, bye, near, invite, accept, decline, missed, birthday, cue, hint, about, life)
+== greet
+? tier>=acquaintance time:morning
+- Morning. Is it? Yes. I've been up since the array pinged. Tea?   #funny
+? tier>=acquaintance warmth:cold
+- {me}. Where have you... never mind. You're here. I had a question. I've lost it.   #funny
+
+== bye
+- Go on. I'm thinking. No, stay. No, go. Sorry. Bye.   #funny
+
+== near
+? habit:gardener
+- I help in the garden now. Cruz says I water the labels. I don't. Often.   #funny
+? place:chartroom
+- Look at this. No, this. The pattern. Mori sees it too. Mori sees everything.
+
+== invite
+- Observatory night? Bring questions. Good ones. Bad ones are also fine.
+? tier>=acquaintance
+- Tasting night. I'm bringing my tea. Somebody has to be brave. Come and be brave.   #funny
+
+== accept
+- Yes. Good. Remind me. I'll forget. I won't. I might.   #funny
+- Yes. I'll bring the tea. Don't make that face.   #funny
+
+== decline
+- No. That's a full sentence, but I'm sorry anyway. The array needs me.
+? weekday:sat|sun
+- My rest day. I'm resting. In the lab. It's restful there. Monday?   #funny
+
+== missed
+- You weren't there. Or I wasn't. Mori would know. Next time.   #funny
+
+== birthday
+? birthday:you
+- Happy birthday. I've brewed you a tea. A special one. You needn't drink it.   #funny
+? birthday:me
+- My birthday. Mori remembered for me. Mori remembers everything for me.   #warm
+
+== cue
+? cue:tradition.observatory
+- Did you see it last night? The faint one, low down? No? Nobody did. I'll show you.
+
+== hint
+- {me}. A minute, later? I've something to say. Not about tea. Well. Not mostly.
+
+== about
+? aff:mori:friend
+- Mori runs the labs. I run everyone. Mori runs me too. Don't tell her I know.   #funny
+
+== life
+? tier>=friend
+- People think I'm brilliant. I'm stubborn. Out here, the two look almost the same.
+
+// ---- Writer 2, batch 6: bubbles (smalltalk, rumour), at most one in five about work. 60 characters.
+== smalltalk
+- Tea? No? More for me.   #funny
+- Odd is my favourite word.
+- Shh. Thinking. It's loud.   #funny
+- The third comet doesn't count.   #funny
+- Where's my mug? Mori?   #funny
+
+== rumour
+- Ah. Middle of the story. Here.
+- Interesting. Very odd. Listen.
+
+// Writer 4, batch 12: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. The samples are labelled. The tea is not negotiable.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Ah. You. I'm leaving. A post at a survey station. No. Don't make the tea.
+? leaving:you tier>=friend
+- You drank my tea once. Voluntarily. Nobody else has. I won't forget it.   #warm
+
+== letter
+- The station has a lab and a window. The tea here is weak. I've brought my own. Obviously.
+? tier>=friend
+- Found a good rock today. Labelled it in my own hand. Thought of the Wren's specimen store.

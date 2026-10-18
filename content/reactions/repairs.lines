@@ -1,0 +1,126 @@
+@reactions repair
+// Writer-commons, reactions batch 2. Repairs (social's cue repair.<machine kind>, two days). For each machine: lines for
+// "someone fixed it" (not to the person who did) and for "that was you" (.you), by who notices it most.
+
+? cue:repair.lights !cue:repair.lights.you
+- The lights are steady again. Someone deserves a biscuit.
+- No more blinking lights. My eyes thank whoever it was.
+? cue:repair.lights.you tier>=acquaintance
+- You fixed the lights? {thanks}. I'd stopped noticing them blink. Until they didn't.
+- That was you on the lights? Steady as anything now. Good work.   #warm
+
+? cue:repair.oven !cue:repair.oven.you
+- The oven's working again. Breakfast on time, for once.
+? cue:repair.oven !cue:repair.oven.you dept:galley
+- The oven's back. I could hug the panel. I won't. Hygiene.   #funny
+? cue:repair.oven.you
+- That was you on the oven? {thanks}. Breakfast was nearly late.
+? cue:repair.oven.you dept:galley
+- You fixed my oven. Come by the pass later. There's something warm with your name on it.   #warm
+
+? cue:repair.range !cue:repair.range.you dept:galley
+- All six rings lit at once this morning. First time in a week.
+? cue:repair.range.you dept:galley
+- The range is perfect. You've no idea. Six rings, all at once. {thanks}.   #warm
+
+? cue:repair.chiller !cue:repair.chiller.you
+- Cold store's cold again. I heard the cheering from the corridor.   #funny
+? cue:repair.chiller !cue:repair.chiller.you dept:galley
+- The chiller's fixed. Brennan's stopped being polite to it. Thank goodness.   #funny
+? cue:repair.chiller.you
+- You fixed the cold store? Brennan's going to feed you for a month.   #funny
+? cue:repair.chiller.you dept:galley
+- The chiller's holding at three. Three. Do you know what that means to us?   #warm
+
+? cue:repair.washer !cue:repair.washer.you
+- The washer's fixed. Clean socks for everyone.
+- The laundry's moving again. The queue was out the door.
+? cue:repair.washer.you tier>=acquaintance
+- That was you on the washer? My uniform thanks you. So do I.
+? cue:repair.washer.you deck:4
+- You fixed the washer! The whole junior wing smells better already.   #funny
+
+? cue:repair.lift !cue:repair.lift.you
+- The lift's running smooth again. No more clunk on Deck 3.
+- The lift's fixed. Lovely lift. I'll still hold the rail.   #funny
+? cue:repair.lift.you tier>=acquaintance
+- You fixed the lift? It didn't clunk once today. {thanks}.
+
+? cue:repair.scrubber !cue:repair.scrubber.you
+- The air's fresher. You notice it when it's back.
+? cue:repair.scrubber.you tier>=acquaintance
+- Was that you on the scrubber? Nobody thanks the air, they say. So, thanks.   #warm
+
+? cue:repair.growlight !cue:repair.growlight.you
+- Grow lights are back. The lettuces look relieved.   #funny
+? cue:repair.growlight.you dept:garden
+- You fixed the grow lights? The seedlings would thank you if they could. I will.   #warm
+? cue:repair.irrigation !cue:repair.irrigation.you dept:garden
+- The irrigation's running again. I can stop carrying watering cans. My arms are glad.
+? cue:repair.irrigation.you dept:garden
+- That was you on the pumps? {thanks}. I'd been watering by hand since Tuesday.
+
+? cue:repair.uv !cue:repair.uv.you dept:infirmary
+- The steriliser's working again. Good. I was boiling things like it was the old days.
+? cue:repair.uv.you dept:infirmary
+- You fixed the steriliser? {thanks}. Drink some water. You look like you've earned it.
+
+? cue:repair.recycler !cue:repair.recycler.you
+- Water tastes right again. I didn't know it tasted wrong until it didn't.
+? cue:repair.recycler.you tier>=acquaintance
+- That was you on the recycler? Showers are hot again. Hero.   #funny
+
+? cue:repair.heater !cue:repair.heater.you
+- The heating's back on. I've taken my second jumper off.
+? cue:repair.heater.you tier>=acquaintance
+- You fixed the heating? I could feel my toes by lunch. {thanks}.   #funny
+
+? cue:repair.extractor !cue:repair.extractor.you
+- The galley fan's working. The mess doesn't smell of onions any more. Mostly.   #funny
+? cue:repair.extractor.you dept:galley
+- You fixed the extractor? I can see across my own kitchen again. {thanks}.   #warm
+
+? cue:repair.galleyplant !cue:repair.galleyplant.you dept:galley
+- The galley plant's running sweet again. Hot water at the sinks. Bliss.
+? cue:repair.galleyplant.you dept:galley
+- That was you on the galley plant? The washing-up thanks you. So do I.
+
+? cue:repair.cartdock !cue:repair.cartdock.you
+- The cart dock's fixed. Food's coming up on time again.
+? cue:repair.cartdock.you dept:galley
+- You fixed the cart dock! Lunch arrived hot. Hot! {thanks}.   #funny
+
+? cue:repair.fan !cue:repair.fan.you
+- The main fan's quiet again. I'd stopped hearing the rattle. Now I miss it. No, I don't.   #funny
+? cue:repair.fan.you tier>=acquaintance
+- That was you on the main fan? Lovely and quiet now. {thanks}.
+
+? cue:repair.junction !cue:repair.junction.you
+- The power's steady again. The lights on Deck 4 stopped sulking.
+? cue:repair.junction.you tier>=acquaintance
+- You fixed the junction? No more dark corridors. Good.
+
+? cue:repair.filter !cue:repair.filter.you
+- The water's clear again. It's the little things.
+? cue:repair.filter.you dept:infirmary
+- You did the filters? Clean water's half my job. {thanks}.   #warm
+
+? cue:repair.airplant !cue:repair.airplant.you
+- The air plant's fixed. Deep breath. Ahh. Better.   #funny
+? cue:repair.airplant.you tier>=acquaintance
+- That was you on the air plant? Nobody thanks the air. I'm thanking you for it.   #warm
+
+? cue:repair.coil !cue:repair.coil.you
+- I hear the drive coils are happy again. Whatever happy means for a coil.   #funny
+? cue:repair.coil.you tier>=acquaintance
+- You worked on the drive coils? Deck 6? Look at you. Proper Works.   #warm
+
+? cue:repair.heatpump !cue:repair.heatpump.you
+- The heating pumps are humming. The cabins are warm again.
+? cue:repair.heatpump.you tier>=acquaintance
+- You fixed the heating pumps? My feet thank you personally.   #funny
+
+? cue:repair.nutrient !cue:repair.nutrient.you dept:garden
+- The nutrient dosing's right again. The lettuces have perked up.
+? cue:repair.nutrient.you dept:garden
+- You fixed the dosing? The whole garden looks greener. I'm not imagining it.   #warm

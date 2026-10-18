@@ -48,7 +48,9 @@ class Game:
         self.page.goto('file://' + str(tmp) + '?nosave&debug')
         # toasts fade on real-time timers and CSS transitions, not the virtual clock: keep them out of screenshots
         # (their text is still read from the DOM) so shots don't depend on how fast the machine runs
-        self.page.add_style_tag(content='#toast{opacity:0!important} *,*::before,*::after{transition:none!important;animation:none!important}')
+        # the player's floating "+N" need notes and the device button's glow (section 15, 0.28.20) came and went on real-time
+        # timers until 0.28.23: kept out too, so builds before and after compare (their text isn't compared)
+        self.page.add_style_tag(content='#toast,.nf{opacity:0!important} #needFx{display:none!important} #devHu{display:none!important} #needStrip{display:none!important} #devBtn{box-shadow:none!important} *,*::before,*::after{transition:none!important;animation:none!important}')
         try:
             self.page.wait_for_function('window.__sc !== undefined || window.__err', timeout=60000)
         except Exception:
@@ -106,6 +108,9 @@ def run(path, tag):
     shots = []
     with sync_playwright() as pw:
         g = Game(pw, path)
+        # tips off (0.28.48): a tip card closes on a real-time timer, so whether one is up (and holds back a need warning)
+        # depended on how fast the machine ran; builds without the setting ignore this. Only here: the other checks keep tips
+        g.page.evaluate("s => { try { window.__sc(s); } catch (e) {} }", "SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)")
         res['state'] = g.ev(STATE)
         res['paths'] = g.ev(PATHS)
         res['collide'] = g.ev(COLLIDE)

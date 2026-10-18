@@ -1,0 +1,358 @@
+@arc home.sam
+who: home:sam
+name: Sam
+pron: they
+// Writer 3's arc, rewritten as ONE-SIDED CALLS by head writer 4 (the user, 2026-10-17 evening: one call a day, you
+// choose who; only they speak; no Letters night). Sam (they / them), your best friend since school. Plainly platonic:
+// old friends, never a partner, no "I miss you" that could read romantic (they say "the bench is boring without
+// you", "the quiz team's useless"). Their calls get shorter across the distance; one beat where they say so; then a
+// standing "Sunday story": every Sunday, one story, however small.
+//
+// HOW THEY TALK: fast and funny at first, all in one breath, old jokes and nicknames for places; then shorter, flatter
+//   calls as the gap grows (stages 3-4); honest when it matters; full of life again after beat 5. Calls you {me}, or
+//   "you absolute idiot", fondly.
+// NEVER: romantic, jealous or possessive (they're glad you went); guilt-trips; genders you.
+// You met on the bench by the school gate at seven; the café quiz on Thursdays (your old team, "the Bench"); Sam
+//   works at the library, reshelving (from beat 2); the trolley with the wonky wheel; Mrs Abbot at the café.
+// RUNNING: the bench; the quiz team losing without you; the wonky wheel; the Sunday story (from beat 6).
+
+// ---- the arc ----
+== beat 1
+tone: light
+mem: firstcall
+flag: home.sam.called
+them: You absolute idiot, you actually went! Into space! I said you wouldn't. I owe the whole quiz team a cake.   [laugh]
+them: Your mum says you can hear me but I can't hear you. So this is a one-way call. Brilliant. I win every argument.
+them: Is there a window? Is there a bed? Do you float? I'm deciding you float a little. That's canon now.
+them: The Bench lost at quiz on Thursday. Third from last. Without you we knew nothing. We guessed "a goat" twice.
+them: You were lost in the school car park for two years. You'll be fine on a spaceship. Give it a week.
+them: The bench by the gate is still there. It's boring without you on it. That's all. Bye, idiot.
+
+== beat 2
+tone: light
+when: beat:home.sam.1
+mem: library
+flag: home.sam.library
+them: Busy week. Library's mad. Someone returned a book eleven years late and wanted a medal.   [laugh]
+them: Did I tell you I'm reshelving now? At the library. Full time. I push a trolley and I know where everything goes.
+them: The trolley's got a wonky wheel. I've named it. It doesn't come when it's called.
+them: Quiz was fine. We came fourth. Mrs Abbot gave us a biscuit for trying. A pity biscuit.
+them: Anyway. How's space? Still big? Bet it's still big.
+them: Write me something weird about the ship. One weird thing. Bye, {me}.
+
+== beat 3
+tone: heartfelt
+when: beat:home.sam.2
+mem: bench
+flag: home.sam.bench
+them: Hi. There's a hum on the line. Is that your ship? Hello, ship.
+them: I sat on the bench today. By the school gate. Where we met. We were seven and you had a plaster on your knee.
+them: You gave me half a biscuit. The bigger half. I've never forgotten that. Nobody gives away the bigger half.
+them: It's daft. Everything here feels too small to tell you. Library, quiz, bench. You've got stars. I've got a trolley.   [sigh]
+them: Same bench next week. I'll be on it, anyway. Bye, {me}.
+
+== beat 4
+tone: light
+when: beat:home.sam.3
+mem: short
+flag: home.sam.short
+them: Hi. Busy. Quiz Thursday. Lost. Wheel still wonky. You?   [laugh]
+them: That's... that's the whole call. I'm sorry. I had loads to say and it all sounded like a weather report.
+them: Hang on. Let me think. Library. Rain. Toast. No. Nothing.
+them: Oh. One thing. Mrs Abbot from the café says hello. She never says hello. To anyone.
+them: So that's big news. For here. Anyway.
+them: There. One thing. Bye, {me}.
+
+== beat 5
+tone: serious
+when: beat:home.sam.4
+mem: drifting
+flag: home.sam.drifting
+hint: Sam's calling, and they sound quieter than usual.
+them: Can I say something? We're getting shorter. These calls. I've been counting the minutes. That's how bad it is.   [sigh]
+them: I know it's the distance. It's nobody's fault. But we've been friends since the bench. I don't want us to fade out.
+them: I'm scared we'll end up as two people who used to be friends. Who send a card once a year. I'd hate that.
+them: So here's an idea. Every Sunday, I tell you one story. Any story. Even a boring one. Especially a boring one.
+them: And you write me one back. In your messages. One a week. That's all. That's a rule now. You love rules.
+them: Deal? I'm taking that silence as a deal. Bye, {me}.
+
+== beat 6
+tone: resolution
+when: beat:home.sam.5 weekday:sun
+mem: sunday
+flag: home.sam.sunday
+keepsake: Sam's first Sunday story, written on the back of a library card
+learn: Sam, your oldest friend, felt you drifting apart. Now you swap one story every Sunday, however small.
+mail: 2880 | From Sam | In the post bag: an old library card, written on the back in tiny letters. "Sunday story number one. The wonky wheel came off. I carried it home. It's on my windowsill now. Your turn. Sam"
+them: It's Sunday! Story time. I've got a good one. The trolley wheel came off, and I carried it home on the bus.   [laugh]
+them: Your mum was driving. She didn't ask. She just nodded at the wheel like it was a passenger.
+them: It's on my windowsill now. Like a trophy. A small, squeaky trophy. That's my story. That's the whole of it.
+them: I've written it down too. On a library card. It's in the post. So you've got it. Proof.
+them: This is working, isn't it? I look forward to Sundays now. Same time next Sunday. Even when there's nothing.
+
+// ---- ordinary calls ----
+== chat
+// any time
+them: {me}! Guess what's on the café menu. Go on. You can't. It's a "space sandwich". Mrs Abbot did it for you.
+them: It's a normal sandwich with the crusts cut into stars. It's three pence more. Everyone's buying it.
+them: I had two. For research. The stars are a bit wonky. One looked like a starfish having a bad day.
+them: She's written it on the board in chalk. With a little rocket next to it. It's lovely, actually.
+them: A man asked if it comes with a drink. She said "only in space". He still doesn't know what that means.
+them: You're a sandwich now. You're famous. Bye, idiot.   [laugh]
+--
+them: Hi. I'm on the bench. It's cold. I've got a flask. I'm doing a reading. Out loud. To you.
+them: "Chapter one. It was a dark and stormy night." That's it. That's as far as I got. It's a terrible book.
+them: It's not even stormy here. It's a bit damp. A pigeon's listening, though. So that's two of you.
+them: I peeked at chapter two. It's all about a horse. Nobody asked for the horse. The horse has no lines.
+them: I'm going to finish it anyway, so you don't have to. That's friendship. Bye, {me}.
+--
+them: Quiz report. We had a round on space. A whole round. About space. And you weren't there.
+them: We got two out of ten. One of them was "the moon". The other was a guess.
+them: One question was "how many moons has the biggest planet got?" I said "loads". They didn't accept "loads".
+them: I said my best friend lives in space, so we should get a bonus point. Mrs Abbot said no. Fair.
+them: The Bench is useless without you. That's not a complaint. That's a fact. Bye.
+--
+them: Hi, idiot. Remember the time we tried to dig to the other side of the world? Behind the shed?
+them: You had a plan. And a map. In crayon. The other side of the world was a big green blob.
+them: Your mum found us. Up to our knees. We'd got as far as a teaspoon and a lot of worms.
+them: She made us put the worms back. One by one. You said sorry to every single worm.
+them: You've done it now. The other side of the world. Bit further, actually. Show-off. Bye.   [laugh]
+--
+them: I bought a plant. It's in a pot on my windowsill. I've called it Gerald. Don't ask.
+them: Gerald's not doing well. He's leaning. I've turned him round. He's leaning the other way now.
+them: I've tried water. I've tried sun. I've tried talking to him. I told him about you. He leaned more.
+them: Gran says plants like music. So I sang to him. Gerald didn't like it. The neighbours didn't either.
+them: I think Gerald just leans. Some things lean. Bye, {me}.
+--
+them: Hi. It's raining. I'm in the library doorway, watching people run. A man's using a newspaper as a hat.
+them: It's not working. He's very wet. And very determined. I respect him.
+them: Now a lady's got a shopping bag on her head. That's working better. She's winning.
+them: Remember when we walked home in the rain and you said you were "basically a fish"? You got a cold.
+them: Bye, {me}. Stay dry. Is there rain up there? Don't tell me. I'll imagine.
+--
+them: {me}. Someone's moved into your old house on the corner. The one you said was haunted.
+them: They've painted the door yellow. Very cheerful. Very un-haunted. You were wrong for twelve years.
+them: You said a ghost lived in the attic. It was a window that rattled. I checked. Well, I looked up at it.
+them: They've got a cat now. It sits in the attic window. So there's a face up there after all. A furry one.
+them: Bye, idiot.   [laugh]
+--
+when: weekday:thu
+them: It's quiz night. I'm walking there now. Trying to remember capital cities. I know one.
+them: I'm not telling you which one. In case it's wrong. It's probably wrong.
+them: Mrs Abbot's put up a new sign. It says "no shouting answers". That's aimed at us. Well, at me.
+them: I've got a pen that works and a pencil for backup. That's more than last week. Last week we had a crayon.
+them: Wish us luck. We won't need it. We'll need answers. Bye.
+--
+them: Hi. Your mum's bus went past me this morning. She tooted. Twice. The whole street looked.
+them: I waved. Then she waved. Then a bin lorry tooted. Then everyone was tooting.
+them: A dog started barking along. A baby clapped. A man dropped his shopping. It was like a parade.
+them: Your mum just drove on. Like nothing happened. Very calm. Total legend.
+them: Your mum started that. Just so you know. Bye, {me}.
+--
+them: I've been thinking. You're probably doing something brilliant right now. Fixing something. With stars outside.
+them: And I'm eating toast. Standing up. In my coat. We've both got lives. Yours is just shinier.
+them: It's good toast, though. Proper butter. Right to the edges. You always said the edges matter.
+them: Do they have toast up there? I hope so. I'd worry about you without toast.
+them: Bye, {me}. Toast's getting cold.
+--
+when: time:night
+them: Can't sleep. Thought I'd ring. Not to say anything. Just to know the line's there.
+them: It's very quiet here. Just the fridge humming. And next door's clock. Tick, tick, tick.
+them: It's strange. You can't talk back, but it still feels like you're listening. Is that daft?
+them: I looked out of the window for your ship. I couldn't tell which star. I waved at all of them, to be safe.
+them: Right. Eyes shut. Counting sheep. One. Two. This isn't working. Night, {me}.
+--
+them: Quick one. I found our old school play programme in a drawer. You were a tree. I was a slightly different tree.
+them: You had one line. "Whoosh." You said it too early. Twice. The whole hall laughed.
+them: I had no lines. I just swayed. I was a very good swayer, though. Ask anyone.
+them: Mrs Abbot remembers it. She was in the front row, clapping at all the wrong bits.
+them: She says we haven't changed a bit. We have. We're taller trees now. So much for a quick one. Bye, idiot.   [laugh]
+
+// after beat 1: still fast, still funny
+--
+when: beat=home.sam.1
+them: Me again! I've made a list of everything you've missed. It's long. Here goes.
+them: Café's new chairs. Gerald, my plant. A dog in the park that can open gates. That's it. That's the long list.
+them: The chairs are blue. They squeak when you sit down. Everyone sounds rude. Mrs Abbot is mortified.
+them: And the dog opens the gate, walks out, then waits for someone to let it back in. Genius. Or not.
+them: I made it sound bigger in my head. Bye, idiot.
+--
+when: beat=home.sam.1
+them: {me}! The Bench needs a new member. We've had tryouts. One person. He knew what a "tributary" is.
+them: He's in. He's not you, though. He doesn't eat the crisps. Who doesn't eat the crisps?
+them: He brings his own pencil. Sharpened. He writes the answers in neat little letters. Very scary.
+them: We kept your chair, though. He has to sit on the stool. That's the rule. The stool is for new people.
+them: Bye. Come home and eat the crisps.   [laugh]
+--
+when: beat=home.sam.1
+them: Hi! I walked past the shuttle office in town. There's a poster of a ship. Not yours. Some other ship.
+them: It's very shiny. Too shiny. Like nobody's ever spilled a cup of tea on it.
+them: A lady inside asked if I wanted to book a trip. I said no thanks, my friend already went.
+them: Then I told her all about you. For quite a while. She gave me a free leaflet so I'd stop.
+them: I glared at the poster on the way out. Your ship's better. I haven't seen it, but I've decided. Bye!
+
+// after beat 2: the library, the trolley
+--
+when: beat=home.sam.2
+them: Library news. Someone left a sandwich in a cookbook. As a bookmark. A whole sandwich.
+them: Cheese and pickle. On the soup page. I think they were comparing.
+them: It had been there a while. The book smells of cheese now. Two of the pages are stuck together.
+them: I had to fill in a form. "Item found: one sandwich. Condition: tired." I'm very proud of it.
+them: I've put it in lost property. Someone will want it. Probably not. Bye, {me}.   [laugh]
+--
+when: beat=home.sam.2
+them: The trolley got stuck in the lift today. Just the trolley. I was outside. It went up without me.
+them: I pressed the button. Nothing. I pressed it again. Harder. Still nothing. The lift was ignoring me.
+them: I ran up the stairs. Four floors. It was waiting at the top. Smug. Wonky.
+them: A lady standing next to it said "is this yours?" Like it was a lost dog. I said yes. It is a bit.
+them: I wheeled it back to the shelves. It squeaked all the way. I think it was laughing. Bye, idiot.
+--
+when: beat=home.sam.2
+them: Hi. A kid came in asking for books about space. I gave her everything. Then I told her about you.
+them: She asked if you're an astronaut. I said yes. You're not, are you. You are now.
+them: She wanted to know what you eat in space. I said crisps, mostly. She was very jealous.
+them: She took out eleven books. She could barely carry them. She says she's going to space too. Next year.
+them: So that's two of you. I'll have to start a club. Bye, {me}.
+
+// after beat 3: quieter
+--
+when: beat=home.sam.3
+them: Hi. Bench again. Just sitting. There's a new plaque on it now. For someone's nan. "She loved this view."
+them: It's a car park. But fair enough.
+them: I suppose she sat here a lot. Like us. Watching people go to school. And come home again.
+them: Maybe one day there'll be a plaque for us. "Two idiots sat here." That'd do.
+them: Anyway. It's getting dark. Bye, {me}.
+--
+when: beat=home.sam.3
+them: Quiz. We lost. I don't really want to talk about it. Is that all right? You can't say no. Ha.
+them: Fine. I'll talk about it a bit. We came last. Below the team who only come for the chips.
+them: The new one knew the rivers. Nobody knew anything else. It was a long night.
+them: Mrs Abbot gave us a biscuit again. I didn't eat mine. I saved it. Don't know why.
+them: Bye, {me}.
+--
+when: beat=home.sam.3
+them: Hi. Not much to say. Library. Rain. Toast. Same as always.
+them: I walked the long way home today. Past the school. The gate's been painted. Green now.
+them: It looks nice. It looks different. I'm not sure I like different.
+them: I keep thinking I'll save things up to tell you. Then I forget them. Sorry.   [sigh]
+them: Bye.
+
+// after beat 4: short, flat
+--
+when: beat=home.sam.4
+them: Hi. Tired. Busy week. You?   [sigh]
+them: ...Right. Habit. You can't answer.
+them: Library's fine. Quiz is fine. Everything's fine.
+them: I had something to tell you. It was... no. It's gone.
+them: ...Sorry. Bye, {me}.
+--
+when: beat=home.sam.4
+them: Hi. Quiz Thursday. Wheel still wonky. Gerald's still leaning.
+them: Your mum says hello. She always says hello.
+them: Um. Anyway.
+them: Weather's been... weather.
+them: Right. That's it. Bye.
+--
+when: beat=home.sam.4
+them: Hi. I started telling you something and forgot what. It was about the café. Or the bus.
+them: Hang on.
+them: ...No. Gone.
+them: The bench is boring without you. That's not it either. It's just true.
+them: It'll come back. Probably. Bye, {me}.
+
+// after beat 5: the deal made, lighter
+--
+when: beat=home.sam.5
+them: Hi! It's not Sunday. I'm ringing anyway. Rules are rules, but this is extra. Extra's allowed.
+them: Gerald has a new leaf. A tiny one. Pointing straight up. He's stopped leaning. Growth.
+them: I measured it. It's the size of my little fingernail. I told everyone at work. They pretended to care.
+them: I think he heard us making our deal. He's trying too. Good lad, Gerald.
+them: Bye, idiot.   [laugh]
+--
+when: beat=home.sam.5
+them: I've been saving up things for Sunday all week. I've got a notebook. It says "Sunday" on the front.
+them: There's nine things in it. I'm only allowed one. This is torture.
+them: Number four is a duck. That's all I'll say. Number seven is also a duck. Different duck.
+them: I might have to have a vote. Me against me. I'll lose either way.
+them: Don't worry. You'll get the best one. Bye, {me}.
+--
+when: beat=home.sam.5
+them: {me}. Thanks for not letting us fade. Even though you couldn't say anything. You just kept answering the calls.
+them: That counts. That's the whole thing, actually.
+them: I told Gran we nearly drifted. She said friends are like plants. You keep watering them. Even when they lean.
+them: I said, "Like Gerald?" She said she's never met Gerald. Fair.
+them: Anyway. I'm glad. That's all. Bye.
+
+// after beat 6: Sunday stories, and life again
+--
+when: beat=home.sam.6 weekday:sun
+them: Sunday story! Mrs Abbot dropped a whole tray of scones. Nobody moved. Then everyone moved at once.
+them: Twelve people caught twelve scones. Like a team. The Bench got three.
+them: One went in a man's hood. He didn't notice. He walked out with it. He'll find it later. Lucky man.
+them: Mrs Abbot said it was the best catch the café's ever seen. She gave everyone jam. For bravery.
+them: That's my story. Your turn. Write it down. Bye, {me}.
+--
+when: beat=home.sam.6 weekday:sun
+them: Sunday story. A pigeon walked into the library. Went straight to the poetry section. Stayed an hour.
+them: It walked up and down the shelf. Very slowly. Like it was choosing.
+them: A lady tried to shoo it. It looked at her. She stopped. It had a very serious face.
+them: Then it walked out again. Didn't take anything. Didn't need to.
+them: I didn't stop it. Everyone should get an hour with poetry. Even pigeons. Your turn.
+--
+when: beat=home.sam.6 weekday:sun
+them: Sunday story. I sat on the bench and a little kid sat next to me. Plaster on her knee. Seven, maybe.
+them: She was waiting for her mum. Swinging her legs. They didn't reach the ground. Like ours didn't.
+them: She asked what I was doing. I said sitting. She said that's not a job. I said it is if you're good at it.
+them: She offered me half a biscuit. The bigger half. I nearly cried. Over a biscuit.
+them: I said she should keep the bigger half next time. She said no. Good kid. Your turn, {me}.
+--
+when: beat=home.sam.6 weekday:sun
+them: Sunday story. Nothing happened this week. Nothing at all. I counted the tiles on my kitchen floor. Ninety-two.
+them: Well. Ninety-one and a half. One's cut in half by the cooker. I counted it as a whole one.
+them: Then I counted again to check. Ninety-two. Then I made tea.
+them: I'd like to say the tea was exciting. It was not. It was tea.
+them: That's the story. Ninety-two. Especially a boring one, remember? Your turn.   [laugh]
+--
+when: beat=home.sam.6
+them: Hi! Midweek bonus. The Bench won quiz. Won! First place! The new one knew the rivers.
+them: We got a trophy. It's a mug. It says "quiz champions" and it's spelled wrong. It's perfect.
+them: Mrs Abbot rang a bell. She doesn't have a bell. She found one. Nobody knows where from.
+them: We did a lap of the café. A slow one. There's not much room. We knocked over a chair.
+them: I'm keeping the mug safe for you. You can hold it when you're home. Bye, idiot!
+--
+when: beat=home.sam.6
+them: I read your story out on the bench. Out loud. To nobody. A man stopped to listen. He liked it.
+them: He asked who wrote it. I said my best friend. In space. He said, "Of course."
+them: Like that's normal. Like everyone's got a friend in space. Nobody has. Just me.
+them: Then he sat down and waited for the next one. I had to tell him it's weekly.
+them: You've got a fan now. Bye, {me}.
+
+// news: they've heard it in your messages
+--
+when: flag:intro.soloJob
+them: You did a job on your own! Your mum told the whole bus. Then the bus told me. Then I told the café.
+them: Mrs Abbot made a cake. For you. We ate it. On your behalf. It was very good.
+them: It had your name in icing, spelt a bit wrong. We ate that bit first. To hide the evidence.
+them: The Bench raised their cups of tea to you. Someone made a speech. It was mostly about crisps.
+them: Well done, idiot. Really. I'm proud of you. Don't let it go to your head.
+--
+when: cue:event.ionStorm.afterglow
+them: A storm?! In space?! Your message said "it was loud". That's it? Loud? I need details, {me}!
+them: Was there lightning? Space lightning? Did the lights flicker? Did you hide under a table? I would have.
+them: You're fine, though. Good. That's the main thing.
+them: Then I'm allowed to say: that's the coolest thing that's ever happened to anyone I know.
+them: I told the Bench. I said "it was loud". They were very impressed. Bye!
+--
+when: came:any
+them: You went to the {trad}! You! At a thing! Voluntarily! I'm telling the Bench. They won't believe it.
+them: You once hid in the coats at a birthday party. For two hours. With a slice of cake. I found you.
+them: And now look at you. Out there. With people. Going to things.
+them: I hope there was food. There's always food at a good thing.
+them: I'm really glad. You were always braver than you thought. Bye, {me}.
+--
+when: friend:any
+them: {friend}, eh? Good. Tell {friend} they've got big shoes to fill. Bench-sized shoes.
+them: I'm glad you've got someone up there. Honestly.
+them: You were never any good at being on your own. You used to chat to the toaster.
+them: Tell {friend} you snore. They should know. It's only fair.
+them: Someone has to make sure you eat the crisps. Bye.   [laugh]

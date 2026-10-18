@@ -1,0 +1,26 @@
+@reactions lateMeal
+// Writer-commons, reactions. A late meal (social's cue lateMeal, one day): the galley kept something back. Kind,
+// never a telling-off. The galley notices most.
+
+? cue:lateMeal dept:galley
+- Late dinner last night? There's always a plate on the grab shelf. Don't make it a habit.
+- We keep a plate back. Every night. Somebody always needs it.   #warm
+? cue:lateMeal dept:galley tier>=acquaintance
+- If you're going to be late, tell me. I'll keep the good bit warm.   #warm
+? cue:lateMeal
+- Someone was eating in the mess at all hours last night. The galley never sleeps.
+? cue:lateMeal dept:infirmary
+- Late dinners are fine. Skipped dinners are not. That's the rule.
+
+// Writer 4, batch 9: more late meals.
+? cue:lateMeal dept:galley
+- The grab shelf had your name on it. Not really. Nearly.   #funny
+? cue:lateMeal tier>=acquaintance
+- Late dinner? Hope it was a good day, at least.
+- Eating at midnight again? Lovely and quiet, the mess, then.
+? cue:lateMeal rank:junior !who:pell
+- Saw you at the grab shelf last night. Pell's shelf.   #funny
+? cue:lateMeal dept:infirmary
+- A late plate's better than no plate. Eat early today, though.
+? cue:lateMeal
+- Someone had cold {dish} at all hours. Brave.   #funny

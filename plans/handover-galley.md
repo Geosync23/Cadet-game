@@ -58,6 +58,48 @@ Section 16 itself calls `cartClaim(t, cold, { replay })` (section 17) on the hou
   - **The player's queue spot is a fixed tile, [33, 2].** If Deck 3's furniture moves, check that it's still free (food_check checks it).
   - **The DEV_NOTES build table** has my rows in two places after the merges, so it could use a tidy.
 
+## The answers pass (2026-10-16 night, builds 0.29.11–0.29.17)
+
+All four of the galley's rows are built and shipped in combined 0.41.4 (claude/ship-integration c7598df). Details are in DEV_NOTES, section 16.
+
+- **Spoilage (row 7):** reads section 17's `chillerAt(t).spoil` (the share lost per hour), else `shipEffectsAt(3, t).spoil`. The 09:00 and 21:00 checks bin the spoiled food (bags by the dish pit) and send Mail.
+- **Menus (row 10):** `galleyMenu(day)`: a weekly cycle, a crew favourite on Wednesdays, a Friday treat with a pudding, and a Sunday dinner voted for by the crew. Shown on the menu board's canvas and in its tap text. A harvest morning (section 18) adds a garden salad.
+- **Queues (row 11):** `galleyBusy(day)`: a rush after the 17:00 shift change, and the odd slow oven. Waits stay within 25 minutes, only inside those windows.
+- **Cakes (row 17):** `galleyCake(day)`: ROSTER birthdays (the player's too), or section 18 events with `cake: true` (Founding Day). Baked at 15:00, on the servery from 19:30 to 21:30, with a noon Mail that gives the gathering time. There's one cake a day, the galley's; section 18 hides its own when ours is out.
+- **Your cart run:** carts are `[arriveAt, meals, hour]`. While section 17's `cartWaiting(hour)` is true (the run is claimed by 'you'), the meals wait. `galleyCartLand(hour)` lands them when you unload; a second call for the same hour returns 0.
+- **Who counts meals on their way:** only the galley (the lead's decision). When it asks `cartClaim`, it passes the cold store plus everything in `S.carts`. Without that, a held run set off a new run every hour (0.29.17). Section 17 takes that figure as given (0.33.22).
+- **food_check's live-vs-report test** runs with `cartWaiting` off, because the test doesn't run the job list.
+- **Still open on other sections:** crew don't claim meals runs (the systems engineer's). player_check had pre-existing failures on 0.41.4 (grab, sitting, the stores cart run; the player and systems engineers').
+
+## Pillar 3 and the working garden (builds 0.29.18–0.29.25)
+
+The full detail is in the DEV_NOTES build table, rows 0.29.18 to 0.29.25.
+
+- **Event hooks (C7).** Once an hour the galley reads section 18's `eventMod('galley', key, t)` into `S.ev` (it uses `eventModAt` first if that exists). Keys:
+  - `menu`: a dish id from `GALLEY_EV_DISH`, or a dish name.
+  - `cook`, `grab`, `extra`: multipliers and extra portions.
+  - `batch`: a number or `{ meals, label, at }`, a dinner away from the mess, from 15:00.
+  - `trays`: trays for the bridge at 18:00, sent through section 17's `cartTrays`.
+  - `herbs`: the batch takes 4 units of garden herbs.
+- **Threads scored** (live only, once per minute per thread, through `galleyScore`):
+  - `spoiled`: meals binned while an event runs.
+  - `bridgeHungry`: hours from 12:00 until `traysArrivedAt` says the trays reached the bridge (stops at 18:00 without it).
+  - `dinnersLate`: minutes a batch is late (150 minutes of cooking from 15:00, longer with worn ovens).
+  - `noHerbs`: a batch cooked without herbs.
+- **Test stand-ins.** `GALLEY_TEST` holds them: eventMod, cartTrays, traysArrivedAt, gardenAt, gardenDay, gardenCrew, gardenCarry, carryWaiting. Use it instead of reassigning other sections' functions, because some of those are consts.
+- **The garden.**
+  - Crops: `GARDEN_CROPS` (greens, herbs, beans, tomatoes, roots). Growth: `gardenCond(d)`, which is water × feed × light from section 17's `gardenAt` times tending hours from section 14's `gardenDay`.
+  - Picking: at 10:45 if `gardenCrew(d)` has someone on duty; harvest mornings pick everything ripe at 11:30.
+  - Carrying: each pick becomes one section 17 `gardenCarry` job. The crates are held while `carryWaiting` is true, and `galleyCarryLand(id)` lands them when the player unloads.
+  - Storage and cooking: produce sits in `S.cold.produce` and is used first, up to half of each pot. Cart claims count it.
+  - Mail and texts: a thin harvest sends a Mail; `galleyText('garden')`; fresh-produce lines at the servery and on the menu board.
+  - Numbers: about 28 meal units a day with the machines as new, about 23 with the real machines' wear.
+- **The other sections' garden pieces:** systems 0.33.34 (gardenAt, gardenCarry, growlights), the deck architect's 0.38.6 (3-gardenwork-1..5, 3-crates-1), the crew designer's 0.16.11 (three gardeners), sim 0.26.20 (gardenDay, gardenCrew).
+- **Possible next steps:**
+  - a garden view (crops on the beds), with the performance engineer;
+  - wiring galleyText('garden') to a tap in the garden (the player engineer);
+  - tuning yields once the user has played it.
+
 ## Gotchas
 
 - **`InstancedMesh.setColorAt` in r128** sizes the colour buffer from the mesh's *current* `count`. Set the colours before setting `count = 0`, or every instance is black (the fix in 0.29.0).
@@ -99,3 +141,24 @@ Also run cadet_test (Deck 4 must stay identical), deck_check, day_check (Deck 3 
 - **A job for the player:** should the player be able to help in the galley (wash up, carry a crate), or is the galley crew-only?
 - **Queues:** should queues happen more often? A slow oven or a big event (Envoy Saruth's formal dinner) would make the galley visibly busy.
 - **The grab shelf:** should it empty overnight (stale food binned), so the morning bake matters?
+
+## Pillar 4: the traditions' meals (builds 0.29.26–0.29.28, on 0.60.0)
+
+Full detail in the DEV_NOTES build table, rows 0.29.26 to 0.29.28. All inert until the traditions engineer's ties (claude/ship-events 0.34.29+) are combined; food_check stands in with `GALLEY_TEST.tradTies`.
+
+- **`galleyTies(d)`** folds section 18's `tradTies('galley', d)` by meal: `{ breakfast?, dinner? }`, each `{ ids, dish, until, side, extra, batch, honorees, taste }`.
+- **Long breakfast:** `until: '10:00'` -> `galleyServeEnd(d, meal)` and `galleyClose(d, meal)` replace the fixed 08:00/08:30; `galleyPlan(role, d)` keeps the chef and early hand on. Pancakes on Saturday (Tuesday got the spiced beans).
+- **Suppers:** first fruits on the tables; the harvest supper all from the garden, with a pie (`galleyCake(d).pie`); a farewell supper serves the first honoree's favourite. A cake whose tradition has decor `cake` (four weeks aboard) isn't the galley's.
+- **Tasting table:** the vote is section 18's tally (`tallyOf`, `tallyVote`; one vote engine, the lead's ruling in 0.29.29). `galleyTasting(d)` cooks and serves (the tasters from the plans' `ev-<id>` segments) and reads the tally; `galleyVote(choice)` is a thin call to `tallyVote`. 20 tastes, two each; Sunday's `side: 'tasting'` gets the winner. Two small plates on the tray slide.
+- **0.29.29 also:** `galleyFresh()` clears the day caches when `evSig()` changes; `galleyBirthdays` uses schedPeople + aboard() + birthdayOf; lateMeal has `dish`; the crossover supper's note.
+- **Late meals:** `simNote('lateMeal', { who, meal, late, how, deck: 3 })`, live only, once per person and meal a day (`galleyLate`, `galleyLateBy`, `LATE_WAIT`).
+- **Waiting on:** the sim engineer (do meal-tradition segments keep act 'dinner'/'breakfast'? if so the galley feeds them unchanged). The dialogue engineer agreed the lateMeal payload (+ dish); writers' cue keys `cue:lateMeal`, `cue:lateMeal.you`. Head writer 2 is session_01HNrh3xCtczeZM5NVFrE6pa.
+- **Trial merges** with claude/ship-events conflict only on the header build line and `GAME_BUILD`.
+- **Tests:** needs `pip install playwright`, three r128 in /tmp/cadet-work/three (see cadet_test.py's header), and `CADET_CHROME=/opt/pw-browsers/chromium`.
+
+## The food queue (builds 0.29.31-0.29.32, on 0.60.2)
+
+- **The user's report (0.60.1):** too slow, and a queue number that wasn't real. Fixed: "ahead" is the people really in the line; serving pace `GALLEY_SERVE` (0.6 ship min a person, a minute in a rush, yours a minute after the last ahead). No numbers on screen anywhere (sections 15 and 19 removed theirs).
+- **The live line is section 10's** (sim engineer 3, 0.26.30: `servLine`, `lineJoin`, `lineSpot`, `lineFront`, `lineLeave`); section 15 (player engineer 4, 0.28.34+) walks you up it. Section 16 gives `galleyServeMins(t)`, `galleyCanServe(t)`, `galleyLeave(who)`; `galleyJoin` / `galleyTurn` / `takePortion` use the line when it exists. Both section 15 and 16 call `lineJoin`/`lineLeave` for the player (idempotent); the reviewer asked the lead to name one owner.
+- **Open:** the tasting table has 25 tasters now and 20 tastes at two each (about 10 get one): ask whether it should be one each, or a bigger batch. The welcome tea for new crew (traditions engineer 2, 234a454) will get `cake: true`; next build: put a mess gathering's cake out at its start when that's before 19:30. galleyFresh misses one-off events and tradition flags (reviewer's low note).
+- **Latest:** 0.29.36 (a taste is a quarter of a meal unit, FOOD.tastes: the machine_check cart-run fix); 0.29.35 (day caches follow the day's events); before it 0.29.33 (welcome-tea cake, tasting batch by turnout) and 0.29.34 (FOOD.feastCap, galleyJoin peek). The Friday rush queue is deliberate (the lead, 2026-10-17). See the DEV_NOTES build table for hashes and tests.

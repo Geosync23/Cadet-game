@@ -1,0 +1,200 @@
+@crew ishikawa-orla
+// Writer-commons, batch 3: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- {hi}. Ishikawa, the store. I'm here till nine. Take your time choosing.
+? tier>=acquaintance
+- {hi}, {me}. How was the tea you bought? Was it the right one?
+- {hi}. The stars are bright from the window tonight. Have a look on your way out.
+? tier>=friend
+- {hi}, {me}. I was hoping you'd come in. The evenings are quiet in here.   #warm
+
+== feel
+? mood:high
+- The ledger balanced to the last credit. I know it's small. It's lovely.
+? mood:low
+- Quiet evening. Everyone's at dinner. I've counted the till twice.
+
+== near
+? act:work
+- Wallet there, tap here. That's all. I'll show you again if you like. I don't mind.
+? habit:window-seat act:leisure
+- I always sit here. You can see the stars go past if you're patient.
+
+== life
+? tier>=acquaintance
+- I grow herbs on my windowsill for the galley. Brennan comes and collects. Very politely.
+? tier>=colleague
+- I once stayed an hour late over one missing credit. I found it. Under the till. Worth it.   #funny
+
+== joy
+? tier>=acquaintance
+- Closing time, and the ledger comes out exact. Nothing in the world quite like it.
+
+== about
+? aff:esposito-yara:friend
+- Yara's the best storekeeper on any ship. I'd say so to anyone. I do say so.   #warm
+
+// Writer-commons, batch 6: towards about 30 own lines.
+
+== greet
+? tier>=acquaintance time:afternoon
+- {hi}. Just opened up. Yara left a note: "be nice to {me}". I always am.   #warm
+? tier>=acquaintance time:evening
+- {hi}, {me}. Quiet in here this late. I like it. Come in out of the corridor.
+? tier>=colleague warmth:cold
+- Oh, hello. I wondered where you'd got to. Your usual's still on the shelf.
+
+== bye
+? tier>=acquaintance
+- Take care now. Mind the step on the way out.
+? tier>=friend
+- Goodnight, {me}. Thank you for coming in. It was nice to talk.   #warm
+
+== feel
+? mood:ok
+- All right, thank you. The till's tidy. The ledger's tidy. I'm tidy.
+
+== near
+? deck:2 time:night
+- The observatory's lovely tonight. The stars don't need anything from you.
+? act:work time:evening
+- Last customer of the day. I'll count you as my favourite. Don't tell the others.   #funny
+
+== life
+? tier>=colleague
+- Yara and I leave each other notes at the changeover. Mine are longer. Hers are funnier.
+? tier>=friend
+- Evenings in the store can be quiet. When you come in, the evening goes quicker.   #warm
+
+== invite
+? trad:observatory-night tier>=acquaintance
+- Observatory night. Come up after I close? I'll point out the ones I know.
+
+== accept
+- Oh, lovely. I'll be there. I'll bring a flask.
+== decline
+- I'm sorry, I'm on till nine. Another night? I'd like that.
+== missed
+- I waited a little while. That's all right. Another time.
+== birthday
+? birthday:me
+- It's my birthday. I'm working, but the ledger balanced. Best present.   #funny
+? birthday:you
+- Happy birthday. I grew you a little basil. It's in the pot by the till.   #warm
+== hint
+- Have you a minute? Sit by the window with me.
+
+// Writer 3, batch 4: bubbles (smalltalk and rumour, 60 characters, said to no one in particular).
+
+== smalltalk
+- Ledger balances. To the credit.
+- Oh, look. Stars out the window.
+- Did those boots fit? Someone's boots.
+- One credit short. I'll find it.
+? act:work
+- Store's open till close. Take your time.
+
+== rumour
+- Oh dear. I probably shouldn't. Well.
+- It was in the ledger. Well, nearly.
+
+// Writer 3, batch 5: callbacks (told: said once).
+
+== callback
+? told:fav.fetch
+- Thank you for fetching that. I've written it in the ledger. Under kind things.   #warm
+? told:fav.job
+- You did my job. Oh dear, I'll owe you. I keep a careful note. You're on it.   #warm
+? told:fixed.lights
+- The lights are steady now. I can see out of the window properly. Thank you.
+? told:came.observatory-night
+- You came to the observatory! Did you see the cluster? Low and to the left.
+? told:gift.star
+- I've put your present by the window. It catches the light. Thank you.   #warm
+? told:bday
+- You remembered my birthday. Oh dear. I'm going to be soppy. Thank you.   #warm
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- The store speaks well of you. It's in the ledger. Well, not the ledger. In me.   #warm
+? you:reliable
+- They say you're reliable. I could have told them. The ledger agrees.
+
+// Writer 3, batch 8: thanks for a gift (gift: loved | liked | polite, or the gift's tag; dialogue 0.43.10).
+
+== gift
+? gift:loved
+- Oh. Oh, that's beautiful. I'll put it by the window, where the stars are.   #warm
+? gift:liked
+- Thank you. That's very kind. I'll remember it.
+? gift:polite
+- Oh dear, you didn't have to. Thank you. Really.
+
+// Writer 4, batch 2: everyday chatter, not about work (meals, rest days, home, hobbies, seasons, traditions).
+== smalltalk
+? act:meal
+- The basil in this is mine. From the windowsill.
+- Is that seat taken? I like the window side.
+? act:off
+- Rest day. I'm watering the herbs. Very slowly.
+- I sat at the window an hour. Forgot to read.
+? act:wash
+- Was that loud? I thought I was humming.   #funny
+? time:evening
+- Lovely out the window tonight. Lots of stars.
+- Yara and I are having tea. Come if you like.
+? time:night
+- Counted stars. Lost count. Started again.   #funny
+? season:greening
+- Greening. My mint's gone wild. Brennan's pleased.
+? season:lanterns
+- I hung my lantern in the window. Like at home.
+? trad:observatory-night
+- Observatory night. I'll find the bright one again.
+? place:lounge
+- The windows here are best. Don't tell the garden.
+? time:morning
+- The washroom choir was in fine voice today.   #funny
+- Good morning. The herbs say good morning too.
+
+== rumour
+- I wasn't listening. I just heard. Sorry.
+- Have you heard? I think it's true. It sounded true.
+
+// Writer 4, batch 7: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing the herbs. Carefully. They don't like moving.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm leaving soon. I'll think of the Wren's windows. Take care.
+? leaving:you tier>=friend
+- You always asked how things went. Nobody else did. Thank you for that.   #warm
+
+== letter
+- The view here is different. Fewer stars, more of a moon. The herbs made the trip. The basil sulked for a day.
+? tier>=friend
+- My ledger balanced again today. To the credit. I thought you'd like to know. Hello from my window seat.
+
+// Writer 5, batch 9: week-1 beats for the onboarding hook (onboarding seat 1's list, 2026-10-17). One flag key per
+// line, beat.<beatId>.<n>, said in order as bubbles while you are in the beat's room in its window; best first
+// (onboarding drops the rest when you leave). Mail texts: mail.<beatId>, one line "Subject | body", unsigned.
+
+== week1
+// beat d3-store: Wednesday 16:30, the crew store
+? flag:beat.d3-store.1
+- Oh, hello. First visit? Have a look round.
+? flag:beat.d3-store.2
+- It's all credits. Your wallet's on your device.
+? flag:beat.d3-store.3
+- What you buy goes in your locker. Safe and sound.
+? flag:beat.d3-store.4
+- Snacks for a little hunger. Small comforts too.
+? flag:beat.d3-store.5
+- I'll remember what you bought. Tell me how it went.

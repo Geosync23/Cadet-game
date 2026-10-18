@@ -91,9 +91,9 @@ with sync_playwright() as pw:
     if a != b: fail('the galley came out differently the second time')
     # (with section 17's cartWaiting off: here the machines and jobs don't run, so a run left on the board for you
     # would wait all day; holding it for you is checked in 4g)
-    live = g.ev(f"""(() => {{ const cw = typeof cartWaiting === 'function' ? cartWaiting : undefined; window.__cw = cw; window.__sc('cartWaiting = undefined');
+    live = g.ev(f"""(() => {{ const cw = typeof cartWaiting === 'function' ? cartWaiting : undefined; window.__cw = cw; window.__sc('cartWaiting = undefined'); GALLEY_TEST.gardenCarry = () => null;
       SHIP.galley = null; galleyAdvance(({DAY} - 1) * 1440); const S = galleyAdvance({DAY} * 1440 - 1); const out = {{ cold: S.cold.meals, servery: S.servery.portions, grab: S.grab.items, dirty: S.dirty, inUse: S.inUse, pots: S.pots.length, wait: S.wait.length }};
-      window.__sc('cartWaiting = window.__cw'); SHIP.galley = null; return out; }})()""")
+      window.__sc('cartWaiting = window.__cw'); GALLEY_TEST.gardenCarry = null; SHIP.galley = null; return out; }})()""")
     print('Live galley matches the report:', live == rep[0]['end'])
     if live != rep[0]['end']: fail(f"live {live} vs report {rep[0]['end']}")
 
@@ -111,7 +111,8 @@ with sync_playwright() as pw:
         if vis[name]['p'] > 0 and vis[name]['food'] != 5 or vis[name]['p'] == 0 and vis[name]['covers'] != 5: fail(f"{name}: pans don't match the servery")
     eat = g.ev(f"(() => {{ setShipNow({B} + 6 * 60 + 40); const a = galleyAdvance(shipNow()).servery.portions, ok = takePortion('player'); return [a, ok, SHIP.galley.servery.portions]; }})()")
     print('The player eats at 06:40:', eat)
-    q = g.ev(f"(() => {{ setShipNow({B} + 18 * 60); const j = galleyJoin('player'), early = galleyTurn('player'); setShipNow(j.turnAt + .01); const on = galleyTurn('player'), ate = takePortion('player'); return [j.ahead, early, on, ate, galleyTurn('player'), free(...j.at)]; }})()")
+    # with section 10's live line, those ahead are served first (here: taken out), then yours takes a serve
+    q = g.ev(f"(() => {{ setShipNow({B} + 18 * 60); const j = galleyJoin('player'), early = galleyTurn('player'); if (j.line) {{ for (const id of servLine().filter(x => x !== 'player')) lineLeave(id); galleyTurn('player'); setShipNow(shipNow() + GALLEY_SERVE.you + .01); }} else setShipNow(j.turnAt + .01); const on = galleyTurn('player'), ate = takePortion('player'); return [j.ahead, early, on, ate, galleyTurn('player'), free(...j.at)]; }})()")
     print('The player queues at 18:00 (ahead, turn too soon, turn, ate, turn after, spot free):', q)
     if q[1:] != [False, True, True, False, True]: fail(f"galleyJoin / galleyTurn: {q}")
     if not (eat[1] and eat[2] == eat[0] - 1): fail(f"takePortion: {eat}")
@@ -141,7 +142,7 @@ with sync_playwright() as pw:
       if (real) cartClaim = keep; else window.__sc("cartClaim = undefined"); FOOD.restock = was; return {{ real, week, missed }}; }})()""")
     print('Carts' + (' (section 17)' if carts['real'] else ' (stand-in rule)') + ':', ', '.join(f"day {DAY + k}: low {w['coldMin']}, in {w['delivered']}, wait {w['maxWait']}" for k, w in enumerate(carts['week'])))
     print('  no carts on days 2 and 3:', carts['missed'])
-    if any(w['coldOut'] or not wait_ok(w) or w['ready']['breakfast']['portions'] < READY_MIN or w['ready']['dinner']['portions'] < READY_MIN for w in carts['week']): fail('carts: the cold store ran short')
+    if any(w['coldOut'] or not wait_ok(w) or w['ready']['breakfast']['portions'] < READY_MIN or w['ready']['dinner']['portions'] < READY_MIN for w in carts['week']): fail('carts: the cold store ran out, or a wait over the limit, in the week with carts')
     if not any(m['coldOut'] for m in carts['missed']): fail('carts: two missed days should run the cold store dry')
 
     # 4c. spoilage: a broken chiller for a week, through a stand-in chillerAt (section 17's, 0.33.17: spoil 0.05 an hour
@@ -156,7 +157,7 @@ with sync_playwright() as pw:
     print('  at 09:30 on day', DAY + 1, '- bin', sp['bin'], 'bags', sp['bags'], '|', sp['text'])
     print('  mail:', sp['mail'][:2])
     if not all(w['spoiled'] > 0 for w in sp['week']): fail('spoilage: a broken chiller spoiled nothing on some day')
-    if any(w['coldOut'] or not wait_ok(w) for w in sp['week']): fail('spoilage: the cold store ran short with carts running')
+    if any(w['coldOut'] or not wait_ok(w) for w in sp['week']): fail('spoilage: the cold store ran out, or a wait over the limit, in the week with a broken chiller')
     if not sp['bin'] or sp['bags'] < 1: fail(f"spoilage: nothing in the bin by the dish pit at 09:30: {sp}")
     if not sp['mail'] or 'binned' not in sp['mail'][0]: fail('spoilage: no Mail about the binned food')
 
@@ -174,7 +175,7 @@ with sync_playwright() as pw:
     bd = g.ev(f"""(() => {{ setShipNow({B} + 18 * 60); goToDeck(3); galleyTick(); const mb = ITEMS.find(x => x.t === 'Menu board');
       return {{ text: galleyText('servery'), dinner: galleyMenu({DAY}).dinner, board: GV && GV.boardDay, tap: mb ? mb.x : '' }}; }})()""")
     print('Menu at 18:00:', bd['text'], '| board:', bd['tap'][:90])
-    if not bd['text'].startswith(('Serving: ' + bd['dinner'] + '.', 'The pans')) or bd['board'] != DAY or bd['dinner'] not in bd['tap']: fail(f"menu: servery or board: {bd}")
+    if not bd['text'].startswith(('Serving: ' + bd['dinner'] + '.', 'The pans')) or not str(bd['board']).startswith(f"{DAY}|") or bd['dinner'] not in bd['tap']: fail(f"menu: servery or board: {bd}")
 
     # 4e. busy windows over four weeks: queues only in them, nobody gives up, and rushes make queues
     bz = g.ev(f"""(() => {{ for (const E of GALLEY_EV.values()) E.k = 0;
@@ -187,12 +188,12 @@ with sync_playwright() as pw:
         if not wait_ok(x): fail(f"busy: day {x['day']} waits {x['mealMax']} with {x['busy']}")
         if x['missed']: fail(f"busy: day {x['day']}: {x['missed']} gave up")
     if not rush or not any(x['waited'] for x in rush): fail('busy: no rush made a queue')
-    # the first rush day: 17:00 to 18:30 in 5-minute steps, for a minute with a queue the servery's text mentions
+    # the first rush day: 17:00 to 18:30 a minute at a time (0.34.54: a 5-minute step missed a short queue the game shows), for a minute with a queue the servery's text mentions
     q = g.ev(f"""(() => {{ const d = [...Array(28)].map((_, k) => {DAY} + k).find(d => galleyBusy(d).some(b => b.kind === 'rush'));
       SHIP.galley = null; let hit = null, seen = 0;
-      for (let t = 17 * 60; t <= 18 * 60 + 30 && !hit; t += 5) {{ setShipNow((d - 1) * 1440 + t); galleyAdvance(shipNow()); const n = SHIP.galley.wait.length, x = galleyText('servery'); if (n) seen++; if (n && x.includes('waiting')) hit = [hhmm(t), n, x]; }}
+      for (let t = 17 * 60; t <= 18 * 60 + 30 && !hit; t += 1) {{ setShipNow((d - 1) * 1440 + t); galleyAdvance(shipNow()); const n = SHIP.galley.wait.length, x = galleyText('servery'); if (n) seen++; if (n && x.includes('waiting')) hit = [hhmm(t), n, x]; }}
       SHIP.galley = null; return [d, hit, seen]; }})()""")
-    print('A rush, 17:00-18:30 every 5 minutes (day, first queue the servery mentions, minutes with a queue):', q)
+    print('A rush, 17:00-18:30 every minute (day, first queue the servery mentions, minutes with a queue):', q)
     if not q[1]: fail(f"busy: no queue in the servery's text during a rush: {q}")
 
     # 4f. a birthday cake: the first birthday from DAY on (ROSTER's), else a stand-in on day DAY + 2 for the first crew member
@@ -216,7 +217,7 @@ with sync_playwright() as pw:
     ev = g.ev(f"""(() => {{ const real = typeof eventsOn === 'function', keep = real ? eventsOn : undefined, fd = {DAY} + 3, hv = {DAY} + 5;
       if (!real) window.__sc(`eventsOn = d => d === ${{fd}} ? [{{ id: 'founding', name: 'Founding Day', from: 1170, to: 1290, ev: {{ cake: true }}, honorees: [] }}] : d === ${{hv}} ? [{{ id: 'harvest', name: 'Harvest morning', from: 570, to: 690, ev: {{}}, honorees: [] }}] : []`);
       const days = real ? [...Array(364)].map((_, k) => {DAY} + k) : [fd, hv];
-      const f = days.find(d => !galleyBirthdays(d).length && eventsOn(d).some(e => e.cake || (e.ev && e.ev.cake))), h = days.find(d => eventsOn(d).some(e => e.id === 'harvest'));
+      const f = days.find(d => !galleyBirthdays(d).length && eventsOn(d).some(e => (e.cake || (e.ev && e.ev.cake)) && !(e.ev && ((e.ev.ties && e.ev.ties.decor === 'cake') || (Array.isArray(e.ev.where) && e.ev.where.length && e.ev.where.every(w => w.deck !== 3)))))), h = days.find(d => eventsOn(d).some(e => e.id === 'harvest'));
       GALLEY_MENU.clear(); for (const E of GALLEY_EV.values()) E.k = 0;
       const out = {{ real, f, h }};
       if (f) {{ out.cakes = galleyReport(f, 1)[0].cakes; out.board = galleyBoard(f); const mail = []; window.__keepMail = window.mailSend; window.__mailBox = mail; window.__sc("mailSend = x => window.__mailBox.push(x)");
@@ -231,12 +232,278 @@ with sync_playwright() as pw:
     if not ev['h'] or 'salad' not in (ev['salad'] or ''): fail(f"harvest salad: {ev}")
     if ev['real'] and ev['gather'] is None: fail('birthday gathering time not read from eventsOn')
 
+    # 4h. ship-wide events (C7, 0.29.18): section 18's eventModAt / eventMod('galley', key, t), read on the hour. Stand-ins
+    # through GALLEY_TEST (section 18's and 17's functions may be consts) for the ion storm's escalation on day DAY + 9 (storm stew, quicker pots, 1.5 x the grab shelf, 6 trays for
+    # the bridge) and a formal dinner on day DAY + 10 (a batch of 12, 8 extra portions). Inert with no event: the
+    # days above already ran with eventNow null (or no section 18)
+    evg = g.ev(f"""(() => {{
+      const storm = {DAY} + 9, dinner = {DAY} + 10, sent = []; window.__sent = sent;
+      window.__evs = {{ [storm]: {{ menu: 'stormStew', cook: .75, grab: 1.5, trays: 6 }}, [dinner]: {{ batch: {{ meals: 12, label: 'the Envoy’s dinner' }}, extra: 8 }} }};
+      GALLEY_TEST.eventMod = (kind, key, t) => {{ const e = window.__evs[Math.floor(t / 1440) + 1]; return kind === 'galley' && e && e[key] !== undefined ? e[key] : null; }};
+      GALLEY_TEST.cartTrays = o => window.__sent.push(o);
+      for (const E of GALLEY_EV.values()) E.k = 0;
+      const plain = galleyReport(storm - 1, 1)[0], rep = galleyReport(storm, 2);
+      SHIP.galley = null; setShipNow((storm - 1) * 1440 + 18 * 60 + 30); galleyAdvance(shipNow());
+      const out = {{ plainCooked: plain.cooked, plainBaked: plain.baked, storm: {{ cooked: rep[0].cooked, baked: rep[0].baked, trays: rep[0].trays, maxWait: rep[0].maxWait, missed: rep[0].missed.length }},
+        dinner: {{ batch: rep[1].batch, cooked: rep[1].cooked, maxWait: rep[1].maxWait }}, dish: SHIP.galley.servery.dish, text: galleyText('servery'), sent: sent.length ? sent[0] : null }};
+      setShipNow((dinner - 1) * 1440 + 16 * 60); galleyAdvance(shipNow()); out.batchText = galleyText('servery'); out.cold = SHIP.galley.cold.meals;
+      GALLEY_TEST.eventMod = GALLEY_TEST.cartTrays = null;
+      SHIP.galley = null; GALLEY_EV.clear(); return out; }})()""")
+    print('Events (stand-ins in GALLEY_TEST): storm', evg['storm'], 'dish', repr(evg['dish']), 'trays sent', evg['sent'])
+    print('  ', evg['text'][:150], '| formal dinner', evg['dinner'], '|', evg['batchText'][-80:])
+    if evg['dish'] != 'storm stew' or evg['storm']['trays'] != 6 or not evg['sent'] or evg['sent'].get('trays') != 6 or 'bridge' not in evg['text']: fail(f"storm: {evg}")
+    if evg['storm']['missed'] or evg['storm']['maxWait'] > BUSY_WAIT_MAX: fail(f"storm: waits {evg['storm']}")
+    if evg['dinner']['batch'] != 12 or 'Envoy' not in evg['batchText']: fail(f"formal dinner: {evg['dinner']} {evg['batchText']}")
+
+    # 4i. the storm's galley threads (0.29.21), with section 18: a real event started on day DAY + 20, its galley read
+    # through GALLEY_TEST (trays on that day, a broken chiller): spoiled meals and hours the bridge waits for trays are scored
+    if g.ev("typeof eventStart === 'function' && typeof eventScore === 'function' && typeof SHIP_EVENTS !== 'undefined' && !!SHIP_EVENTS.ionStorm"):
+        th = g.ev(f"""(() => {{ const d = {DAY} + 20, keep = SHIP.event; eventStart('ionStorm', d - 2);
+          GALLEY_TEST.eventMod = (kind, key, t) => kind === 'galley' && key === 'trays' && Math.floor(t / 1440) + 1 === d ? 6 : null;
+          window.__keepCh2 = typeof chillerAt === 'function' ? chillerAt : undefined; window.__sc("chillerAt = t => ({{ cond: 0, state: 'broken', spoil: .05 }})");
+          GALLEY_TEST.cartTrays = () => null;                  // no cart run, so no delivery report: the count stops at 18:00
+          SHIP.galley = null; setShipNow((d - 1) * 1440 + 22 * 60); galleyAdvance(shipNow()); const once = JSON.stringify(SHIP.event.threads);
+          SHIP.galley = null; galleyAdvance(shipNow()); const out = {{ threads: {{ ...SHIP.event.threads }}, again: JSON.stringify(SHIP.event.threads) === once }};
+          // with a run and its delivery report: the trays reach the bridge at 18:45, or never
+          const hungry = arrive => {{ eventStart('ionStorm', d - 2); GALLEY_SCORED.clear(); GALLEY_TEST.cartTrays = () => 'trays:bridge@test'; GALLEY_TEST.traysArrivedAt = () => arrive;
+            SHIP.galley = null; galleyAdvance(shipNow()); return SHIP.event.threads.bridgeHungry || 0; }};
+          out.late = hungry((d - 1) * 1440 + 18 * 60 + 45); out.never = hungry(null);
+          GALLEY_TEST.cartTrays = GALLEY_TEST.traysArrivedAt = null; GALLEY_SCORED.clear();
+          window.__sc("chillerAt = window.__keepCh2"); GALLEY_TEST.eventMod = null; SHIP.event = keep; SHIP.galley = null; return out; }})()""")
+        print('Storm threads scored by the galley on one day (spoiled meals, hours the bridge waited for trays; the same again after a fresh start):', th)
+        print('  bridgeHungry by 22:00 with a delivery report: trays at 18:45', th['late'], '| never', th['never'])
+        if not th['threads'].get('spoiled') or th['threads'].get('bridgeHungry') != 6 or not th['again'] or th['late'] != 7 or th['never'] != 11: fail(f"storm threads: {th}")
+    else: print('Storm threads: no section 18 with the ion storm in this build; skipped')
+
+    # 4j. the garden (0.29.23): four weeks with stand-ins through GALLEY_TEST: a good garden, a dry one (water .3), and
+    # one nobody tends (gardenDay gives no one hours). Produce is picked daily and on harvest mornings, used before stored
+    # meals, and a poor garden gives less while nobody goes hungry
+    gd = g.ev(f"""(() => {{ const run = (at, day) => {{ GALLEY_TEST.gardenAt = at; GALLEY_TEST.gardenDay = day; GARDEN_COND.clear(); for (const E of GALLEY_EV.values()) E.k = 0;
+        const r = galleyReport({DAY}, 28), sum = k => r.reduce((a, st) => a + st[k], 0);
+        return {{ picked: sum('picked'), fresh: sum('fresh'), binned: sum('produceBinned'), delivered: sum('delivered'), missed: r.reduce((a, st) => a + st.missed.length, 0), coldOut: sum('coldOut'),
+          harvest: r.filter(st => gardenHarvestDay(st.day)).map(st => st.picked), daily: r.filter(st => !gardenHarvestDay(st.day)).map(st => st.picked) }}; }};
+      const ok = () => ({{ water: 1, feed: 1, light: 1 }});   // the machines as new; the real gardenAt is shown alongside
+      const good = run(ok, null), dry = run(t => ({{ water: .3, feed: 1, light: 1 }}), null), alone = run(ok, () => null), real = run(null, null);
+      GALLEY_TEST.gardenAt = GALLEY_TEST.gardenDay = null; GARDEN_COND.clear(); return {{ good, dry, alone, real }}; }})()""")
+    for k in ('good', 'dry', 'alone', 'real'):
+        x = gd[k]; print(f"Garden, 28 days, {k}: picked {x['picked']} ({x['picked'] / 28:.1f} a day; harvest mornings {x['harvest']}), cooked fresh {x['fresh']}, binned {x['binned']}, cart meals in {x['delivered']}, missed {x['missed']}")
+    G0, Gd, Ga = gd['good'], gd['dry'], gd['alone']
+    if not (20 <= G0['picked'] / 28 <= 40) or G0['fresh'] < .9 * G0['picked'] or min(G0['harvest'] or [0]) < 100 or sum(1 for x in G0['daily'] if x) < .75 * len(G0['daily']): fail(f"garden, good: {G0}")
+    if Gd['picked'] > .5 * G0['picked'] or Ga['picked'] > .6 * G0['picked']: fail(f"garden: a poor garden should give much less: dry {Gd['picked']}, untended {Ga['picked']}, good {G0['picked']}")
+    if Gd['delivered'] <= G0['delivered']: fail(f"garden: a dry garden should need more meals by cart ({Gd['delivered']} vs {G0['delivered']})")
+    if any(x['missed'] or x['coldOut'] for x in (G0, Gd, Ga, gd['real'])): fail('garden: someone went without food')
+
+    # 4k. the garden's carry, crew and Mail (0.29.24): the crates wait while the carry job (a stand-in) says so and land
+    # when it's done or when you unload (galleyCarryLand); no gardener on duty means no daily pick; a dry harvest morning
+    # sends a Mail
+    gk = g.ev(f"""(() => {{ const d = {DAY} + 1, B = (d - 1) * 1440, posted = [], held = new Set(); const mail = []; window.__mailBox = mail; window.__keepMail = window.mailSend; window.__sc("mailSend = x => window.__mailBox.push(x)");
+      GALLEY_TEST.gardenCarry = o => {{ posted.push(o); const id = 'garden@' + o.at; held.add(id); return id; }}; GALLEY_TEST.carryWaiting = id => held.has(id);
+      SHIP.galley = null; setShipNow(B + 11 * 60); galleyAdvance(shipNow()); const out = {{ posted: posted.map(o => o.title), waiting: SHIP.galley.garden.crates.length, produce: produceMeals(SHIP.galley) }};
+      out.landed = galleyCarryLand(posted.length ? 'garden@' + posted[0].at : 'none'); out.again = galleyCarryLand(posted.length ? 'garden@' + posted[0].at : 'none'); out.text = galleyText('garden');
+      GALLEY_TEST.gardenCarry = GALLEY_TEST.carryWaiting = null; GALLEY_TEST.gardenCrew = () => [];
+      SHIP.galley = null; GARDEN_COND.clear(); galleyAdvance(shipNow()); out.noCrew = SHIP.galley.garden.crates.length + produceMeals(SHIP.galley);
+      GALLEY_TEST.gardenCrew = null; GALLEY_TEST.gardenAt = () => ({{ water: .2, feed: 1, light: 1 }}); GARDEN_COND.clear();
+      const h = [...Array(28)].map((_, k) => {DAY} + k).find(x => gardenHarvestDay(x) && x > {DAY} + 7);
+      SHIP.galley = null; setShipNow((h - 15) * 1440); galleyAdvance(shipNow()); setShipNow((h - 1) * 1440 + 12 * 60); galleyAdvance(shipNow()); out.thin = mail.filter(x => x.subject === 'A thin harvest').map(x => x.body);
+      GALLEY_TEST.gardenAt = null; GARDEN_COND.clear(); window.__sc("mailSend = window.__keepMail"); SHIP.galley = null; return out; }})()""")
+    print('Garden carry:', gk['posted'][:1], '| crates waiting', gk['waiting'], '| landed', gk['landed'], 'then', gk['again'], '| no gardener on duty:', gk['noCrew'])
+    print('  ', gk['text'], '| thin harvest Mail:', gk['thin'][:1])
+    if not gk['posted'] or not gk['waiting'] or gk['landed'] <= 0 or gk['again'] != 0 or gk['noCrew'] != 0 or not gk['thin']: fail(f"garden carry: {gk}")
+
+    # 4l. the diplomatic visit's formal dinner (0.29.25): herbs from the garden's stock, or 'noHerbs'; late minutes when
+    # worn ovens slow it ('dinnersLate'). A stand-in event through GALLEY_TEST, live, with a running event to score
+    if g.ev("typeof eventStart === 'function' && typeof SHIP_EVENTS !== 'undefined' && Object.keys(SHIP_EVENTS).length > 0"):
+        fd = g.ev(f"""(() => {{ const d = {DAY} + 30, keep = SHIP.event, id = Object.keys(SHIP_EVENTS)[0]; const run = (herbs, slow) => {{
+            eventStart(id, d - 1); SHIP.event.threads = {{}}; GALLEY_SCORED.clear();
+            GALLEY_TEST.eventMod = (kind, key, t) => kind === 'galley' && Math.floor(t / 1440) + 1 === d ? ({{ batch: {{ meals: 10, label: 'the Veyli dinner' }}, herbs: true }})[key] ?? null : null;
+            SHIP.galley = null; setShipNow((d - 1) * 1440 + 14 * 60); galleyAdvance(shipNow()); SHIP.galley.cold.produce = herbs ? [[1, 6, d]] : [];
+            if (slow) window.__keepFx3 = shipEffectsAt, window.__sc("shipEffectsAt = (deck, t) => ({{ ...window.__keepFx3(deck, t), cook: 2 }})");
+            setShipNow((d - 1) * 1440 + 16 * 60); galleyAdvance(shipNow()); if (slow) window.__sc("shipEffectsAt = window.__keepFx3");
+            return {{ threads: {{ ...SHIP.event.threads }}, batch: SHIP.galley.batch, text: galleyText('servery') }}; }};
+          const out = {{ fine: run(true, false), noHerbs: run(false, false), late: run(true, true) }};
+          GALLEY_TEST.eventMod = null; SHIP.event = keep; SHIP.galley = null; GALLEY_SCORED.clear(); return out; }})()""")
+        print('Formal dinner: with herbs', fd['fine']['threads'], '| without', fd['noHerbs']['threads'], '| worn ovens', fd['late']['threads'], '|', fd['late']['text'][-90:])
+        if fd['fine']['threads'].get('noHerbs') or fd['fine']['threads'].get('dinnersLate') or fd['noHerbs']['threads'].get('noHerbs') != 1 or fd['late']['threads'].get('dinnersLate', 0) <= 0: fail(f"formal dinner: {fd}")
+
+    # 4m. the traditions (0.29.26): section 18's tradTies('galley', d), here a stand-in through GALLEY_TEST. A long
+    # breakfast (pancakes, serving to 10:00, the morning rota runs on), a harvest supper (all from the garden), a
+    # farewell supper's favourite; with the real traditions (once combined) the same is shown, not stood in for
+    clr = "GALLEY_TIES.clear(); GALLEY_MENU.clear(); GALLEY_ROTA.clear(); GALLEY_EV.clear(); SHIP_DAYS.clear();"
+    tr = g.ev(f"""(() => {{ let sat = {DAY} + 50; while (weekday(sat) !== 5) sat++; const sup = sat + 2, fw = sat + 3, who = schedPeople().slice().sort((a, b) => a.id < b.id ? -1 : 1)[3];
+      GALLEY_TEST.tradTies = (kind, d) => kind !== 'galley' ? [] : d === sat ? [{{ id: 'long-breakfast', tie: {{ meal: 'breakfast', dish: 'pancakes', until: '10:00' }} }}]
+        : d === sup ? [{{ id: 'harvest-supper', tie: {{ meal: 'dinner', dish: 'harvest-supper', batch: 60 }} }}] : d === fw ? [{{ id: 'farewell-supper', honorees: [who], tie: {{ meal: 'dinner', dish: 'favourite' }} }}] : [];
+      {clr}
+      const M = galleyMenu(sat), rota = galleyRota(sat), roles = [...rota.values()].filter(x => x.role), blk = r => (roles.find(x => x.role === r) || {{ blocks: [] }}).blocks;
+      const cookTo = Math.max(...blk('chef').filter(b => b.from < 840 && (b.task === 'cook' || b.task === 'prep')).map(b => b.to)), lineTo = Math.max(...blk('early').filter(b => b.from < 600 && b.from >= 360 && (b.task === 'serve' || b.task === 'wash')).map(b => b.to));
+      const rep = galleyReport(sat, 4), at = (st, h) => st.hours.find(x => x[0] === h);
+      SHIP.galley = null; setShipNow((sat - 1) * 1440 + 9 * 60 + 15); const txt = galleyText('servery'), board = galleyBoard(sat);
+      const out = {{ sat, breakfast: M.breakfast, bnote: M.bnote, end: galleyServeEnd(sat, 'breakfast'), close: galleyClose(sat, 'breakfast'), endSun: galleyServeEnd(sat + 1, 'breakfast'), cookTo, lineTo,
+        at0915: at(rep[0], '09:00'), txt, board: board.slice(0, 120), supper: galleyMenu(sup), farewell: galleyMenu(fw), fav: galleyFav(who),
+        days: rep.map(st => ({{ day: st.day, ate: st.ate, got: st.eaten + st.grabbed, missed: st.missed.length, end: st.end, fresh: st.fresh, mealMax: st.mealMax, busy: st.busy }})) }};
+      GALLEY_TEST.tradTies = null; {clr} SHIP.galley = null;
+      out.real = typeof tradTies === 'function' ? [...Array(21)].map((_, k) => {DAY} + k).map(d => [d, Object.keys(galleyTies(d)).map(m => m + ':' + (galleyTies(d)[m].dish || galleyTies(d)[m].extra || '') + (galleyTies(d)[m].until ? '-' + galleyTies(d)[m].until : '')).join(' ')]).filter(x => x[1]) : null;
+      return out; }})()""")
+    print(f"Long breakfast (stand-in, day {tr['sat']}): {tr['breakfast']} ({tr['bnote']}); serving to {tr['end']}, leftovers at {tr['close']} (Sunday {tr['endSun']}); chef cooks to {tr['cookTo']}, early hand on the line to {tr['lineTo']}; 09:00 {tr['at0915']}")
+    print('  ', tr['txt'][:150], '|', tr['board'])
+    print(f"Harvest supper (stand-in): {tr['supper']['dinner']} ({tr['supper']['note']}) | farewell supper: {tr['farewell']['dinner']} ({tr['farewell']['note']}), favourite {tr['fav']}")
+    for x in tr['days']: print(f"   day {x['day']}: came {x['ate']}, got {x['got']}, missed {x['missed']}, fresh {x['fresh']}, longest {x['mealMax']}")
+    print('Real traditions with galley ties, 21 days:', tr['real'] if tr['real'] else 'none (section 18 has no galley ties yet)')
+    if tr['breakfast'] != 'pancakes, fruit and syrup' or tr['end'] != 600 or tr['close'] != 630 or tr['endSun'] != g.ev('FOOD.serveTo.breakfast') or tr['cookTo'] < 560 or tr['lineTo'] != 600: fail(f"long breakfast: {tr}")
+    if 'long breakfast' not in tr['txt'] or 'long breakfast' not in tr['board'] or not tr['at0915'] or tr['at0915'][2] + tr['at0915'][6] <= 0: fail(f"long breakfast texts or food at 09:00: {tr['txt']} | {tr['board']} | {tr['at0915']}")
+    if not tr['supper']['dinner'].startswith('the harvest supper') or not tr['supper'].get('supper') or tr['farewell']['dinner'] != tr['fav']: fail(f"suppers: {tr['supper']} {tr['farewell']}")
+    for x in tr['days']:
+        if x['missed'] or x['ate'] != x['got'] or x['end']['dirty'] or x['end']['inUse'] or x['end']['wait'] or not wait_ok(x, x['mealMax']): fail(f"traditions, day {x['day']}: {x}")
+
+    # 4n. Brennan's tasting table (0.29.27, the vote section 18's tally since 0.29.29): a stand-in Wednesday (tradTies
+    # 'galley' extra: 'tasting', and its 'tally') for the cooking: 20 tastes an hour before, two for each taster, the
+    # rest wasted, the week's two choices, the plates on Deck 3. With section 18's tallies (tallyOf) and a real tasting
+    # table: the galley shows the tally's dishes and votes, your token goes through tallyVote once, and Sunday's side
+    # is the tally's winner
+    ts = g.ev(f"""(() => {{ let wed = {DAY} + 60; while (weekday(wed) !== 2) wed++; const CH = ['herb-flatbread', 'pickled-beans', 'tomato-jam-oatcakes', 'root-crisps', 'miso-greens', 'bean-fritters', 'carrot-ginger-soup', 'chilli-lime-corn'];
+      GALLEY_TEST.tradTies = (kind, d) => d === wed ? (kind === 'galley' ? [{{ id: 'tasting-stand-in', from: 1095, to: 1155, tie: {{ meal: 'dinner', extra: 'tasting', batch: 20 }} }}] : kind === 'tally' ? [{{ id: 'tasting-stand-in', tie: {{ kind: 'tasting', choices: CH }} }}] : []) : [];
+      {clr} GALLEY_TASTE.clear();
+      const z0 = galleyTasting(wed), rep = galleyReport(wed, 1)[0], B = (wed - 1) * 1440, out = {{ wed, choices: z0.choices, voters: z0.voters.length, winner0: z0.winner, note: galleyMenu(wed).note,
+        rep: {{ tastes: rep.tastes, tasted: rep.tasted, missed: rep.missed.length, ate: rep.ate, got: rep.eaten + rep.grabbed }} }};
+      SHIP.galley = null; setShipNow(B + 17 * 60); galleyTick(); out.before = galleyText('tasting');
+      setShipNow(B + 18 * 60 + 20); galleyTick(); out.text = galleyText('servery'); out.plates = GV && GV.taste ? GV.taste.count : -1; out.left = SHIP.galley.tasting && SHIP.galley.tasting.left;
+      setShipNow(B + 19 * 60 + 40); galleyTick(); out.gone = SHIP.galley.tasting; out.plates3 = GV && GV.taste ? GV.taste.count : -1;
+      GALLEY_TEST.tradTies = null; {clr} GALLEY_TASTE.clear(); SHIP.galley = null;
+      if (typeof tallyOf === 'function') {{                  // the real one
+        const rw = [...Array(28)].map((_, k) => {DAY} + 7 + k).find(d => galleyTasting(d)), keepVotes = JSON.stringify(SHIP.events.votes || {{}});
+        if (rw) {{
+          const z = galleyTasting(rw), r = tallyOf(z.id, rw), RB = (rw - 1) * 1440;
+          out.real = {{ day: rw, choices: z.choices, votes: z.votes, tally: r && r.choices.map(c => r.counts[c]), tallyChoices: r && r.choices, winner: z.winner, voters: z.voters.length, n: r && r.n }};
+          setShipNow(RB + 18 * 60 + 20); galleyTick(); out.real.left = SHIP.galley.tasting && SHIP.galley.tasting.left;
+          out.real.vote = galleyVote(z.choices[1]); out.real.again = galleyVote(0); const z1 = galleyTasting(rw); out.real.you = z1.you; out.real.votes1 = z1.votes; out.real.after = SHIP.galley.tasting && SHIP.galley.tasting.left;
+          setShipNow(RB + 19 * 60 + 20); galleyTick(); out.real.result = galleyText('tasting');
+          const sun = rw + 4, tl = typeof tallyLast === 'function' ? tallyLast(z.id, sun) : null; out.real.sun = {{ side: galleyMenu(sun).side, note: galleyMenu(sun).note, tallyLast: tl && tl.winner, sideTie: !!(galleyTies(sun).dinner && galleyTies(sun).dinner.side) }};
+        }}
+        SHIP.events.votes = JSON.parse(keepVotes); GALLEY_MENU.clear(); SHIP.galley = null;
+      }}
+      return out; }})()""".replace('{clr}', clr))
+    print(f"Tasting table (stand-in, day {ts['wed']}): {ts['choices']}, {ts['voters']} tasters, winner {ts['winner0']}; report {ts['rep']}")
+    print(f"   menu note: {ts['note']} | 17:00 {ts['before']}")
+    print(f"   18:20: {ts['text'][-110:]} | plates {ts['plates']}, left {ts['left']} | 19:40 gone {ts['gone']}, plates {ts['plates3']}")
+    r = ts['rep']
+    if ts['choices'] != [c.replace('-', ' ') for c in ['herb-flatbread', 'pickled-beans', 'tomato-jam-oatcakes', 'root-crisps', 'miso-greens', 'bean-fritters', 'carrot-ginger-soup', 'chilli-lime-corn'][(2 * ((ts['wed'] - 1) // 7)) % 8:][:2]]: fail(f"tasting choices: {ts['choices']}")
+    if r['tastes'] != max(20, 2 * ts['voters']) or r['tasted'] != 2 * ts['voters'] or r['missed'] or r['ate'] != r['got']: fail(f"tasting report: {r}")
+    if 'tasting table' not in ts['note'] or ts['plates'] != 4 or ts['plates3'] != 0 or ts['gone'] is not None or ts['winner0'] is not None: fail(f"tasting table: {ts}")
+    R = ts.get('real')
+    if R:
+        print(f"   real (section 18's tally), day {R['day']}: {R['choices']}, votes {R['votes']} (tally {R['tallyChoices']} {R['tally']}, {R['n']} went; {R['voters']} came to taste) -> {R['winner']}")
+        print(f"   your vote {R['vote']}, again {R['again']}, you {R['you']}, votes {R['votes1']}, tastes {R['left']} -> {R['after']} | {R['result']} | Sunday {R['sun']}")
+        if [c.replace('-', ' ') for c in R['tallyChoices'][:2]] != R['choices'] or R['votes'] != R['tally'][:2] or not R['vote'] or R['again'] or R['you'] != 1 or R['votes1'][1] != R['votes'][1] + 1: fail(f"tasting with the tally: {R}")
+        if R['left'] is not None and R['after'] != max(0, R['left'] - 2): fail(f"your tastes: {R}")
+        if R['sun']['sideTie'] and (R['sun']['side'] != (R['sun']['tallyLast'] or '').replace('-', ' ') or "Wednesday's winner" not in R['sun']['note']): fail(f"Sunday's side: {R['sun']}")
+    else: print('   no section 18 tally with a tasting table in this build: the vote is not checked')
+
+    # 4o. late meals (0.29.28): simNote('lateMeal', { who, meal, late, how, deck }) live, once per person and meal; heard
+    # here with onSim. You: from the grab shelf after dinner's serving ended, and after a 15-minute queue. Crew: an
+    # empty cold store makes them give up ('missed'). The report counts what would be posted on ordinary days
+    if g.ev("typeof onSim === 'function' && typeof simNote === 'function'"):
+        lm = g.ev(f"""(() => {{ const heard = []; window.__late = heard; onSim('lateMeal', x => window.__late.push(x)); const d = {DAY} + 70, B = (d - 1) * 1440, out = {{}};
+          SHIP.galley = null; setShipNow(B + 20 * 60 + 45); galleyAdvance(shipNow()); SHIP.galley.grab.items = 5; SHIP.galley.servery.portions = 0; out.catchup = heard.length; heard.length = 0;
+          out.ate = takePortion('player'); out.again = takePortion('player'); out.grabNotes = heard.splice(0);
+          SHIP.galley = null; setShipNow(B + 1440 + 17 * 60 + 5); galleyAdvance(shipNow()); heard.length = 0; galleyJoin('player'); setShipNow(B + 1440 + 17 * 60 + 20); galleyAdvance(shipNow()); heard.length = 0; SHIP.galley.servery.portions = Math.max(1, SHIP.galley.servery.portions);
+          out.queued = takePortion('player'); out.queueNotes = heard.splice(0);
+          SHIP.galley = null; setShipNow(B + 2880 + 17 * 60 + 25); galleyAdvance(shipNow()); heard.length = 0; out.onTime = takePortion('player'); out.onTimeNotes = heard.splice(0);
+          SHIP.galley = null; setShipNow(B + 4 * 60); galleyAdvance(shipNow()); SHIP.galley.cold.meals = 0; SHIP.galley.cold.produce = []; SHIP.galley.carts = []; SHIP.galley.servery.portions = 0; SHIP.galley.grab.items = 0; heard.length = 0;
+          const keepClaim = typeof cartClaim === 'function'; FOOD.restock = 'none'; setShipNow(B + FOOD.close.breakfast + FOOD.giveUp + 30); galleyAdvance(shipNow()); FOOD.restock = 'carts';
+          out.crew = heard.splice(0); out.kinds = [...new Set(out.crew.map(x => x.how + ' ' + x.meal))];
+          window.__late = []; SHIP.galley = null; return out; }})()""")
+        print(f"Late meals: you at 20:45 from the shelf {lm['grabNotes']} (a second time: {len(lm['grabNotes']) == 1 and lm['again']}) | after a 15-minute queue {lm['queueNotes']} | on time {lm['onTimeNotes']}")
+        print(f"   crew with an empty galley: {len(lm['crew'])} notes, {lm['kinds']}, e.g. {lm['crew'][:2]}")
+        gn, qn = lm['grabNotes'], lm['queueNotes']
+        print(f"   a fresh galley's catch-up from midnight to 20:45 posted {lm['catchup']} (should be 0); your note's t {gn[0].get('t') if gn else None}")
+        if lm['catchup'] or (gn and gn[0].get('t') != (DAY + 69) * 1440 + 20 * 60 + 45): fail(f"late meals: catch-up {lm['catchup']}, t {gn[0].get('t') if gn else None}")
+        if len(gn) != 1 or {k: gn[0].get(k) for k in ('who', 'meal', 'late', 'how', 'deck')} != {'who': 'you', 'meal': 'dinner', 'late': 15, 'how': 'grab', 'deck': 3} or gn[0].get('dish', 0) is not None: fail(f"late meal from the shelf: {gn}")
+        if len(qn) != 1 or qn[0]['who'] != 'you' or qn[0]['late'] != 15 or qn[0]['how'] != 'servery' or not qn[0].get('dish') or lm['onTimeNotes']: fail(f"late meal after a queue: {qn} / on time {lm['onTimeNotes']}")
+        if not lm['crew'] or any(x['how'] != 'missed' or x['meal'] != 'breakfast' or x['who'] == 'you' for x in lm['crew']) or len({x['who'] for x in lm['crew']}) != len(lm['crew']): fail(f"crew late meals: {lm['crew'][:5]}")
+    else: print('Late meals: no simNote/onSim (section 13) in this build; skipped')
+    print('Late meals the report would post, by day:', [st['late'] for st in rep])
+
+    # 4p. your place in the queue (0.29.31, the user's report on 0.60.1): on Deck 3, "ahead of you" is the crew really
+    # standing at the queue spots (DECK_CREW), never people only planned to be there; your turn comes GALLEY_SERVE.you
+    # plus GALLEY_SERVE.each a person (a minute each in a rush). Played with frames: a normal dinner, then an empty
+    # galley where the waiters stand in the line
+    qq = []
+    g.ev("window.__sc('tickShip = window.__realTick')")   # ship time runs with the frames here
+    g.ev(f"setShipNow({B} + 17 * 60 + 8); SHIP.galley = null; goToDeck(3); (() => {{ const c = cellPos(32, 6); player.obj.position.copy(c); target.copy(c).setY(.7); }})(); deckCrewFill()")
+    probe = """(() => { const now = shipNow(), Q = new Set(GALLEY_QUEUE), d = Math.floor(now / 1440) + 1, md = Math.floor(now) - (d - 1) * 1440;
+      const standing = DECK_CREW.filter(a => a.spot && Q.has(a.spot.id) && Math.hypot(a.x - a.spot.x, a.z - a.spot.z) < GALLEY_SERVE.near).length;
+      const planned = schedPeople().filter(p => { const w = whereIs(p, now); return w.deck === 3 && w.tag === 'queue'; }).length;
+      const rush = galleyEvents(d).busy.some(b => b.kind === 'rush' && md >= b.from && md < b.to);
+      const line = typeof servLine === 'function' ? servLine().length : standing, ahead = galleyAhead(now, 'probe');
+      return [hhmm(md), line, planned, ahead, +(GALLEY_SERVE.you + ahead * galleyServeMins(now)).toFixed(2), rush, SHIP.galley.wait.length]; })()"""
+    for k in range(20):
+        g.step(30); qq.append(g.ev(probe))
+    g.ev(f"setShipNow({B} + 17 * 60 + 40); galleyAdvance(shipNow()); SHIP.galley.cold.meals = 0; SHIP.galley.cold.produce = []; SHIP.galley.servery.portions = 0; SHIP.galley.grab.items = 0; SHIP.galley.pots = []; SHIP.galley.carts = []; deckCrewFill()")
+    empty = []
+    for k in range(25):
+        g.step(30); empty.append(g.ev(probe))
+    # your own turn, played: join at 17:12 with frames running, until galleyTurn (without section 10's line; with it,
+    # player_check plays your turn in the real line)
+    if not g.ev("typeof servLine === 'function'"): g.ev(f"SHIP.galley = null; setShipNow({B} + 17 * 60 + 12); galleyAdvance(shipNow()); deckCrewFill(); window.__j = galleyJoin('tester')")
+    mine = None
+    if not g.ev("typeof servLine === 'function'"):
+        n = 0
+        while n < 300 and not g.ev("galleyTurn('tester')"): g.step(3); n += 3
+        mine = g.ev("[window.__j.ahead, +(shipNow() - window.__j.since).toFixed(2)]")
+        g.ev("galleyLeave('tester')")
+    g.ev("SHIP.galley = null; window.__sc('tickShip = () => {}')")
+    print('Queue at dinner (time, standing at the queue spots, planned in a queue stop, ahead shown, minutes to your turn, rush, galley waiting):', qq[::4])
+    print('  with an empty galley:', empty[::5])
+    if mine: print(f"  your turn, joining at 17:12: {mine[0]} ahead, served after {mine[1]} ship minutes ({mine[1] / 0.6:.1f} real seconds)")
+    print('  longest line seen:', max(r[1] for r in qq + empty))
+    for r in qq + empty:
+        if r[3] != r[1] or (r[1] > 4 and not g.ev("typeof servLine === 'function'")) or abs(r[4] - (1 + r[3] * (1 if r[5] else 0.6))) > .01: fail(f"queue: {r}")
+    if not any(r[1] for r in empty): print('  (nobody reached a queue spot in this run: the crew walking to the line is section 10\'s, being rebuilt by sim engineer 3)')
+    if mine and mine[1] > 1 + mine[0] * 1 + 0.2: fail(f"your turn: {mine}")
+
+    # 4q. section 10's live line (sim engineer 3's lineJoin / lineSpot / lineFront / lineLeave), stood in for here: you
+    # take the spot it gives, your turn comes GALLEY_SERVE.you after you reach the counter (never before), takePortion
+    # leaves the line; galleyServeMins / galleyCanServe for section 10's serving
+    ln = g.ev(f"""(() => {{ const real = typeof lineJoin === 'function', line = ['cook-a', 'cook-b']; window.__line = line;
+      if (!real) window.__sc("lineJoin = id => {{ if (!window.__line.includes(id)) window.__line.push(id); }}; servLine = () => window.__line.slice(); lineSpot = id => ({{ at: [33, 6 - window.__line.indexOf(id)], xy: [33.5, 6.5 - window.__line.indexOf(id)], face: 's' }}); lineFront = id => window.__line[0] === id; lineLeave = id => {{ const k = window.__line.indexOf(id); if (k >= 0) window.__line.splice(k, 1); }}");
+      SHIP.galley = null; const B = {B} + 1440 * 2; setShipNow(B + 17 * 60 + 30); galleyAdvance(shipNow()); SHIP.galley.servery.portions = Math.max(5, SHIP.galley.servery.portions);
+      const pk = galleyJoin('player', {{ peek: true }}), peekHeld = window.__line.includes('player') || (typeof servLine === 'function' && servLine().includes('player'));
+      const j = galleyJoin('player'), out = {{ real, peek: [pk.at, pk.peek, peekHeld], line: j.line, at: j.at, notYet: galleyTurn('player') }};
+      line.shift(); line.shift(); out.front = lineFront('player'); out.atFront = galleyTurn('player'); setShipNow(shipNow() + .6); out.soon = galleyTurn('player'); setShipNow(shipNow() + .45); out.served = galleyTurn('player');
+      out.ate = takePortion('player'); out.left = line.slice(); out.mins = galleyServeMins(); out.can = galleyCanServe();
+      SHIP.galley.servery.portions = 0; SHIP.galley.grab.items = 0; out.cannot = galleyCanServe();
+      if (!real) window.__sc("lineJoin = lineSpot = lineFront = lineLeave = servLine = undefined");
+      SHIP.galley = null; return out; }})()""")
+    print('Live line (stand-in for section 10' + ('; section 10 has its own' if ln['real'] else '') + '):', ln)
+    if not ln['real'] and (ln['peek'][2] or ln['peek'][0] != [33, 4] or not ln['line'] or ln['at'] != [33, 4] or ln['notYet'] or not ln['front'] or ln['atFront'] or ln['soon'] or not ln['served'] or not ln['ate'] or ln['left'] or ln['mins'] not in (0.6, 1) or not ln['can'] or ln['cannot']): fail(f"live line: {ln}")
+
+    # 4r. a cake for a gathering in the mess before 19:30 (0.29.33: the crew welcome tea, 18:40) is out from its start
+    ec = g.ev(f"""(() => {{ const d = [...Array(120)].map((_, k) => {DAY} + k).find(d => {{ const c = galleyCake(d); return c && c.out < CAKE.out; }}); if (!d) return null;
+      const c = galleyCake(d), B = (d - 1) * 1440; SHIP.galley = null; setShipNow(B + c.out - 1); galleyAdvance(shipNow()); const before = !!(SHIP.galley.cake && SHIP.galley.cake.out);
+      setShipNow(B + c.out + 1); galleyAdvance(shipNow()); const after = !!(SHIP.galley.cake && SHIP.galley.cake.out), text = galleyText('servery'); SHIP.galley = null;
+      return {{ d, name: c.name, out: hhmm(c.out), before, after, text: text.slice(-90) }}; }})()""")
+    print('An early cake (a mess gathering before 19:30):', ec if ec else 'none in these days (the welcome tea comes with section 18\'s rotations)')
+    if ec and (ec['before'] or not ec['after']): fail(f"early cake: {ec}")
+
+    # 4s. a day's events changing after the galley worked it out (0.29.35, reviewer 1's note: a one-off booked late, a
+    # tradition's flag set): the galley sees the new list (its day caches start again). A stand-in one-off through
+    # section 18's eventOneOff (one-offs carry no galley ties, so it's the cache that's checked), then removed
+    if g.ev("typeof eventOneOff === 'function'"):
+        oo = g.ev(f"""(() => {{ const d = Math.floor(shipNow() / 1440) + 4; galleyTies(d); const src0 = GALLEY_TIES.get(d).src;
+          const ok = eventOneOff({{ id: 'galley-test', name: 'Test gathering', day: d, at: [1080, 1140], where: [{{ deck: 3, room: '^Mess hall$', types: ['mess-seat'] }}] }});
+          galleyTies(d); const src1 = GALLEY_TIES.get(d).src;
+          SHIP.events.oneOffs = SHIP.events.oneOffs.filter(r => r.id !== 'galley-test'); EV_DAYS.clear(); SHIP_DAYS.clear(); SCHED_DATA = null; galleyTies(d);
+          return {{ d, ok, before: src0, after: src1, again: GALLEY_TIES.get(d).src }}; }})()""")
+        print('A one-off booked late:', oo)
+        if not oo['ok'] or 'galley-test' not in (oo['after'] or '') or 'galley-test' in (oo['again'] or '') or 'galley-test' in (oo['before'] or ''): fail(f"one-off: {oo}")
+    else: print('A one-off booked late: no eventOneOff in this build; not checked')
+
     # 4g. your cart run (0.29.13): while section 17's cartWaiting(hour) says the run is yours and not unloaded, its
     # meals wait past arriveAt; galleyCartLand(hour) lands them when you unload. A stand-in cartWaiting until it's there
     yc = g.ev(f"""(() => {{ const real = typeof cartWaiting === 'function', keep = real ? cartWaiting : null, mine = new Set();
       window.__mine = mine; window.__sc("cartWaiting = h => window.__mine.has(h)");
       const D0 = {B} + 40 * 1440; if (typeof CART_RUNS !== 'undefined') CART_RUNS.clear();   // a day no other test has asked about
-      setShipNow(D0); SHIP.galley = null; galleyAdvance(shipNow()); SHIP.galley.cold.meals = 200;
+      if (SHIP.hold) SHIP.hold.meals = 1200;                 // earlier live tests may have used the hold's meals
+      setShipNow(D0); SHIP.galley = null; galleyAdvance(shipNow()); SHIP.galley.cold.meals = 200; SHIP.galley.cold.produce = [];
       let h = null; for (let t = D0 + 9 * 60; t < D0 + 17 * 60 && h === null; t += 60) {{ setShipNow(t - 1); galleyAdvance(t - 1); mine.clear(); mine.add(t / 60); setShipNow(t); galleyAdvance(t); if (SHIP.galley.carts.some(c => c[2] === t / 60)) h = t / 60; }}
       if (h === null) return {{ real, h }};
       const c = SHIP.galley.carts.find(c => c[2] === h), meals = c[1];

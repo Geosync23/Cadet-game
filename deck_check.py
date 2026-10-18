@@ -54,8 +54,8 @@ CHECK = """(() => {
 # hatches for work:works places)
 PLACES = r"""(() => {
   const ps = deckDef.places; if (!ps) return null;
-  const TYPES = ['bed', 'shower', 'basin', 'toilet', 'mess-seat', 'servery-queue', 'grab-shelf', 'gym', 'lounge-seat', 'garden', 'callhome',
-    'music', 'bench', 'common-room', 'laundry', 'lift-wait', 'shop', 'storage', 'event'], POSES = ['sit', 'stand', 'lie', 'work'], FACES = ['n', 'e', 's', 'w'];
+  const TYPES = ['bed', 'timeclock', 'shower', 'basin', 'toilet', 'mess-seat', 'servery-queue', 'grab-shelf', 'gym', 'lounge-seat', 'garden', 'callhome',
+    'music', 'bench', 'common-room', 'laundry', 'lift-wait', 'shop', 'storage', 'event', 'patient-bed', 'bar-staff', 'bar-order', 'shower-queue'], POSES = ['sit', 'stand', 'lie', 'work'], FACES = ['n', 'e', 's', 'w'];
   const WORKS = { dept: 'works', tier: 3, rank: 'senior' };
   const passFor = who => (i, j, i2, j2) => { const e = EDGES.get(i2 !== i ? `v,${Math.max(i, i2)},${j}` : `h,${i},${Math.max(j, j2)}`); return !e || !edgeBlocks(e, who) || e.type === 'closed'; };
   const start = nearestOpen(LIFT_AT[0], LIFT_AT[1], null);
@@ -66,7 +66,7 @@ PLACES = r"""(() => {
   const seenAll = flood(passFor(null)), seenWorks = flood(passFor(WORKS));
   const bad = [], counts = {};
   for (const p of ps) {
-    const why = [], works = p.type === 'work:works' || p.type === 'storage', seen = works ? seenWorks : seenAll, pass = passFor(works ? WORKS : null);
+    const why = [], works = p.type === 'work:works' || p.type === 'storage' || p.works === true, seen = works ? seenWorks : seenAll, pass = passFor(works ? WORKS : null);
     if (typeof p.id !== 'string' || !p.id) why.push('no id');
     if (!(TYPES.includes(p.type) || /^work:[a-z-]+$/.test(p.type || ''))) why.push('type ' + p.type);
     if (!POSES.includes(p.pose)) why.push('pose ' + p.pose);

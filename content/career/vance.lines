@@ -1,0 +1,14 @@
+@crew vance
+// Head writer 4: career lines. Vance knows the regulations; eleven, section two, is leave.
+
+== career.missed
+? tier>=acquaintance
+- There's a regulation about reporting for duty. It's very short. Read it twice.
+
+== career.up
+? tier>=acquaintance
+- Good. Back on time. Regulations work best when people turn up for them.
+
+== career.leave.booked
+?
+- Leave booked properly, the evening before. Exactly right. Rare, too.

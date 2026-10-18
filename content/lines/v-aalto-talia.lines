@@ -1,0 +1,28 @@
+@crew v-aalto-talia
+// Writer 4, batch 5: a short-stay visitor. Mostly not about work.
+
+== greet
+? tier=stranger
+- Hey! Talia Aalto, charts office. I map people, really. Who's where. You?
+- Hello there! Is the lounge always this cosy? I'm moving in.   #funny
+? tier>=acquaintance
+- {hi}, {me}! You're on my map now. Deck 4, a bunk. Am I right?   #funny
+?
+
+== chat
+- I buy one thing from every ship's store. Here, it was a tiny tin of mints.
+- Lounges tell you everything about a ship. Yours says: tea, Tiles, and a good view.
+
+== near
+? place:crew_store
+- Souvenir hunting. One thing. Small. Ooh, that's nice.
+? place:lounge
+- Who's that by the bar? No, don't tell me. I'll guess. I'm good at this.   #funny
+?
+
+== bye
+- {bye}! Come and find me in the lounge. Everyone does.
+
+== smalltalk
+- Ooh, a new face.
+- One souvenir. Just one.   #funny

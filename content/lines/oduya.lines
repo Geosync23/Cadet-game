@@ -1,0 +1,115 @@
+@crew oduya
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- {hi}, cadet. Oduya, counsellor. Deck 3, sweets on the desk, just knock.
+? tier>=acquaintance
+- {hi}, {me}. How's the week treating you? Take your time, I'm not in a hurry.
+- {me}! I know when your birthday is. Don't look so worried.   #funny
+? tier>=friend
+- {hi}, {me}. You always leave a room a bit lighter. People notice.   #warm
+== feel
+? mood:high
+- A good day. Three people laughed in my office, and one of them was me.
+? mood:low
+- Busy week. Seventy-five people, a long way from home. I'll have a sweet.
+== near
+? habit:garden-lover
+- The garden at this hour. People talk more freely near growing things.
+? act:meal
+- I'm a slow eater. Sit down, you'll be here a while.   #funny
+== life
+? tier>=acquaintance
+- Nobody takes the green sweets. I keep buying them. It's an experiment.   #funny
+== joy
+? tier>=colleague
+- The garden, at the quiet hour. Just the pumps and the leaves. I'd live there if I could.
+
+// ---- Writer 2, batch 2: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue, hint, about)
+== greet
+? tier>=acquaintance time:evening
+- {hi}, {me}. Long day? You don't have to answer. Have a sweet.
+? tier>=acquaintance warmth:cold
+- {me}. It's been a while. No questions. Well, one. Are you eating?
+
+== near
+? habit:bar-regular
+- One drink at the bar after office hours. Listening is thirsty work.   #funny
+? place:mess
+- I'm in no hurry. Sit, if you like. The pudding's worth waiting for.
+
+== invite
+- The garden after shift? No talking needed. The plants do the work.
+? tier>=colleague
+- Tasting night? Brennan's trying a new dish. I've promised to be honest. Help me.   #funny
+
+== accept
+- I'd like that very much. I'll be there.
+- Yes. Thank you for asking. People don't often ask the counsellor.   #warm
+
+== decline
+- Not tonight. Office hours run late. Another evening?
+? weekday:sat|sun
+- My rest day. I'm sitting in the garden doing nothing. It's very hard work.   #funny
+
+== missed
+- You didn't make it. That's all right. I hope it was for a good reason.
+
+== birthday
+? birthday:you
+- Happy birthday, {me}. I knew. Of course I knew. There's a green sweet in it for you.   #funny
+? birthday:me
+- My birthday. Everyone thinks I'll notice if they forget. I do. I don't mind.   #funny
+
+== cue
+? cue:event.ionStorm.afterglow
+- Storm's over. My door's open all week, if anyone's rattled. Anyone at all.
+
+== hint
+- {me}. If you've a minute later, I'd like a word. Nothing's wrong. I promise.
+
+== about
+? aff:brennan:friend
+- Brennan feeds the ship and I listen to it. Between us we nearly cover everyone.   #warm
+
+// ---- Writer 2, batch 2: top-up (bye, greet by time, life at friend tier)
+== bye
+- {bye}. Take a sweet for the road. Not the green one. Unless you're brave.   #funny
+== greet
+? tier>=acquaintance time:morning
+- {hi}, {me}. Morning. Office is open. Sweets are out. No queue yet.
+== life
+? tier>=friend
+- I knew your birthday before you arrived. It's on the forms. People think it's magic.   #funny
+- I sit in the garden for ten minutes after office hours. It puts me back together.
+
+// ---- Writer 2, batch 6: bubbles (smalltalk, rumour), at most one in five about work. 60 characters.
+== smalltalk
+- Nobody takes the green ones.   #funny
+- The garden at the quiet hour. Lovely.
+- Somebody's birthday soon. I know who.   #funny
+- Long day. Have a sweet.
+? act:meal
+- I'm a slow eater. No hurry.
+?
+
+== rumour
+- Nothing private. Just nice news.
+- I hear things. Only the happy ones go further.
+
+// Writer 4, batch 12: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. Slowly. The sweets bowl goes last. Have one.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Hello, hello. I'm retiring. It's time. Come and have a sweet before I go.
+? leaving:you tier>=friend
+- Thank you for every conversation. You let the quiet do some of the talking. Rare.   #warm
+
+== letter
+- My retirement is a garden and a lot of tea. I still know everyone's birthday. Yours is coming.
+? tier>=friend
+- Sat in the garden today and thought about the Wren's. Gentle place. Gentle people. Hello from here.

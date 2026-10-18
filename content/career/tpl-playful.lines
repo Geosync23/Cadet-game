@@ -1,0 +1,29 @@
+@template playful
+
+== career.missed
+? tier>=colleague
+- Skiving, were we? Kidding. Mostly. You all right?
+
+== worried.chief
+? tier>=friend
+- Survived the Chief, then? Have a biscuit. Then a shift. In that order.   #warm
+
+== worried.captain
+? tier>=friend
+- No jokes this time, {nick}. The Captain's serious. So am I.   #serious
+
+== worried.last
+? tier>=friend
+- I'm not losing my favourite pest. Shift tomorrow. I'll drag you if I have to.   #serious
+
+== career.up
+? tier>=friend
+- Look who's on the board again! Gold star. I'll make you one.   #funny
+
+== farewell.eve
+? tier>=friend
+- I keep thinking of jokes and none of them are funny. I'm sorry.   #serious
+
+== farewell.day
+? tier>=friend
+- Go on, then. Find a ship that deserves you. Then tell me all about it.   #warm

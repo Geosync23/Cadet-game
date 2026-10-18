@@ -1,0 +1,25 @@
+@voice taavek
+// Writer (command: guests). Taavek (they/them), Veyli engineer (the Veyli vessel, 3 days). Works in the Works bay. Came
+// aboard with a crate of parts and no common words for most of them. Sketches every machine. Trades Veyli sweets for
+// coffee. Workaholic.
+// HOW THEY TALK: few common words, used with care; points, sketches, mimes; laughs easily at the gaps.
+// NEVER: gives up on a word; refuses coffee.
+tpl: playful
+talk: Few common words, carefully used; points and sketches the rest; laughs easily at the gaps.
+cares: the crate of parts | sketching every machine | coffee
+jokes: no common word for most of the parts, so everything is "the round one" | trades Veyli sweets for coffee
+hi: Hello! | Good day
+bye: Go well | Goodbye, yes
+yes: Yes, yes | Good
+thanks: Thank you | Good, thank you
+wow: Ah! Good machine
+sigh: Ah
+nick: - | - | {me} | {me} | {me}
+needs: practical
+openness: open
+loves: made | sweet
+likes: tea
+invites: works-tea
+joy: sketching a new machine
+keepsake: a sketch of your favourite machine, labelled in Veyli
+avoid: rushing

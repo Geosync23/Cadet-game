@@ -1,0 +1,121 @@
+@crew rossi-femi
+// Femi Rossi (he/him), Works technician, days. The Works writer, batch 2. Bright, competitive; a Veyli word a day.
+
+== greet
+? tier=stranger
+- Hello! You're new. The board's numbers update every hour. First to a job gets it. Go!
+- Hi, hi. Femi. Works. Race you to the board? No? Next time.
+? tier>=acquaintance time:morning
+- Morning! I said "good morning" in Veyli to the Envoy. I think I said "good soup".   #funny
+? tier>=acquaintance
+- {hi}, {me}. I'm three jobs ahead this week. I'm telling you so you'll catch up.
+? tier>=colleague
+- {me}! Brilliant. You can be my witness. I'm going to finish this before tea.
+? tier>=friend
+- {me}! I let you win the last race. Didn't I? No? Oh. Well done, then.   #warm
+
+== bye
+- {bye}! Race you back.
+- See you! Bed early. Observatory early. Stars don't wait.
+
+== feel
+? mood:low
+- No Veyli word today. I couldn't make one stick. Tomorrow.
+? mood:high
+- Two Veyli words today, in a sentence. The Envoy nodded. I think it was a good nod.
+
+== near
+? act:work
+- Done! Four minutes. Is that a record? Tell me it's a record.
+? act:gym
+- I don't care about the leaderboard. I'm just here. Twice a day. Not caring.   #funny
+
+== life
+? tier>=acquaintance
+- I brought a telescope from home. It's the smallest at observatory night. And the best.   #funny
+? tier>=colleague
+- I call home on Tuesdays. They always ask if I'm winning. I always am.   #funny
+
+== joy
+? tier>=acquaintance
+- The first star of the evening. I look for it every night. I've never missed it once.
+
+// ---- Writer 2, batch 1: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue)
+== greet
+? tier>=acquaintance time:evening
+- Evening! Nearly bed. But first, one star. Then bed. Definitely bed.   #funny
+? tier>=acquaintance warmth:cold
+- {me}! You're back. I've been ahead all week. It wasn't any fun.   #warm
+
+== near
+? habit:music
+- Music room tonight. I'm learning a Veyli song. The tune's easy. The words aren't.
+? place:mess
+- I eat fast. It's not a race. It's a bit of a race. Nobody else knows it's a race.   #funny
+
+== invite
+- Observatory night! Bring your eyes. I'll bring the telescope.
+? tier>=acquaintance
+- Quiz night? We'll win. I've been revising. The Veyli round is mine.
+
+== accept
+- Yes! Brilliant. Race you there.
+- Yes. First one there gets the good seat. That'll be me.   #funny
+
+== decline
+- I can't, early bed. I'm up for the first star. Tomorrow?
+? weekday:mon|tue
+- It's my rest day. I'm calling home. They'll ask if I'm winning. Another time?
+
+== missed
+- You missed it! I kept you the best seat. Then I sat in it. Sorry.   #funny
+
+== birthday
+? birthday:you
+- Happy birthday! I looked up the Veyli for it. Ready? No, wait. Tomorrow.   #funny
+? birthday:me
+- My birthday! That counts as a win. I'm not explaining how.   #funny
+
+== cue
+? cue:repair.you@dept
+- You closed it first! All right. You're ahead. For now.   #funny
+
+// ---- Writer 2, batch 1b: a hint (a moment is ready) and an about line for a named friend
+== hint
+- Can I talk to you later? Not a race. Just talking. I'm not very good at that bit.
+
+== about
+? aff:ferreira:friend
+- Ferreira and I practise Veyli together. She's better. I'm louder.   #funny
+
+// ---- Writer 2, batch 6: bubbles (smalltalk, rumour), at most one in five about work. 60 characters.
+== smalltalk
+- Veyli word of the day. Got it. Lost it.   #funny
+- Race you to the urn. No? Fine.   #funny
+? time:evening
+- First star's out. Spotted it first.
+? act:meal
+- Done eating. Not a race. First, though.   #funny
+? act:work
+- Three jobs ahead this week. Just saying.
+?
+
+== rumour
+- Guess what. No, guess. Fine, I'll say.   #funny
+- First to know. I always am.
+
+// Writer 4, batch 11: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing! Race you to the shuttle. Kidding. Mostly.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm leaving soon. Here's a Veyli word for goodbye. I've forgotten it. Sorry.
+? leaving:you tier>=friend
+- Thanks for racing me. And losing. Sometimes. Mostly I lost. Thanks anyway.   #warm
+
+== letter
+- New ship's observatory has no tiny telescopes. Mine's the only one. I've made friends with it. Still calling home Tuesdays.
+? tier>=friend
+- I learnt the Veyli word for goodbye. It's long. I practised it on the window. It means something like 'see you'. So: that.

@@ -1,0 +1,34 @@
+@voice sato
+// Writer (command), from the roster (story crew in the design doc; the head writer handed the card over, 2026-10-17).
+// Dr. Imra Sato, Head of Survey. Her lab, her rules, her terrible tea.
+//
+// HOW SHE TALKS: fast and clever, in bursts, then drifts off mid-sentence because a thought has overtaken her. Starts in
+// the middle ("No, the other comet."). Explains things at length, the tea most of all, and enjoys it. Stubborn: "No."
+// is a full sentence. Funny without meaning to be. Forgets your name and remembers your sample number.
+// WITH JUNIORS: generous with ideas and absent about everything else; she'll hand you a sample, forget why, and then
+// remember, brilliantly. Expects you to ask questions; likes being argued with if you're right.
+// WHAT SHE NOTICES: patterns, the sky, labels in the wrong handwriting, anyone who drinks her tea.
+// MOOD TELLS: happy = explains the tea. Worried = re-labels samples in her own hand. Tired = forgets more, smiles more.
+// NEVER: admits the third comet matters to her; lets anyone else label the specimen store; says "I don't know" without
+// adding "yet".
+// RUNNING: the tea nobody else will drink (and she offers it to everyone); three comets named, "and the third one
+// doesn't count"; the university post she turned down; Mori runs the labs while Sato runs everyone.
+tpl: brisk
+talk: Fast, clever bursts; starts in the middle; drifts off mid-thought; explains the tea at length; "No." is a full sentence.
+cares: the survey | her specimen store, labelled in her hand | the frontier | her tea
+jokes: the tea nobody else will drink, which she offers to everyone | three comets named, and the third "doesn't count" | Mori runs the labs while Sato runs everyone
+hi: Ah. You | Hello | Oh, good
+bye: Off you go | Back to it | Don't touch the labels
+yes: Yes, obviously | Fine | Yes, yes
+thanks: Thank you | Good. Thanks
+wow: Oh, that's interesting
+sigh: Mm
+nick: - | - | {me} | {me} | {me}
+needs: cheer
+openness: normal
+loves: tea | star
+likes: book | plant
+invites: observatory | tasting
+joy: explaining her tea
+keepsake: a sample label in her own handwriting, with your name on it
+avoid: the survey she's proudest of being luck (until close) | the third comet mattering

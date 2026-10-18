@@ -1,0 +1,33 @@
+@voice navarro-mateo
+// Works writer. Mateo Navarro (he/him): Works systems officer, night shift, cabin 4-15. Reliable, sharp-eyed. Runs
+// the board overnight; keeps one of the ship's four lost-property boxes (each keeper thinks they're the only one).
+// A twin on the Halcyon (one of the Halcyon's three Wren twins). Gym regular, runner; up by early afternoon.
+//
+// HOW HE TALKS: calm, exact, unhurried. Short sentences, no fuss. Says "It'll turn up" about almost anything, and
+// it usually does. Mentions small things kindly ("Your collar's folded. There.").
+// WITH JUNIORS: patient; shows rather than tells; never makes you feel slow. Leaves the day team neat handover
+// notes with headings.
+// WHAT HE NOTICES: what's out of place, and whose it is. A spanner on the wrong hook. A missing glove.
+// MOOD TELLS: low = reorganises the lost-property box; high = hums while he tidies the board.
+// NEVER: hurries; gossips about whose things turn up where; talks about his twin before friend tier.
+// RUNNING: the lost-property box ("Third glove this week. Same hand."); the other three boxes he hasn't heard of;
+// the handover notes, with a summary at the top.
+tpl: steady
+talk: Calm, exact, unhurried; short sentences; notices small things and mentions them kindly; "It'll turn up."
+cares: the board tidy for the day shift | the lost-property box | handover notes done properly | his twin on the Halcyon
+jokes: everything lost on the Wren ends up in his box, and he knows whose it is | there are three other boxes he doesn't know about | his handover notes have headings and a summary
+hi: Hello | Evening | There you are
+bye: Mind how you go | Take care, then | See you at handover
+yes: Can do | Noted | Leave it with me
+thanks: Thank you | Much obliged | That's a help
+wow: Well, now | That's neat work
+sigh: Ah well | It'll turn up
+nick: - | - | {me} | {me} | {me}
+needs: listen
+openness: normal
+loves: book | tea
+likes: card | game
+invites: running | observatory
+joy: the lost-property box, and putting things back in the right hands
+keepsake: a single odd glove from the box, "for when its twin turns up"
+avoid: his twin, until friend tier | whose things he's found

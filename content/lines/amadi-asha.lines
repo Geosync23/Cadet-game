@@ -1,0 +1,121 @@
+@crew amadi-asha
+// Asha Amadi (she/her), engine technician, days. The Works writer, batch 2. Sunny and dry; always by a window.
+// Never admits climbing the garden's big tree. Never sings on purpose where people can hear.
+
+== greet
+? tier=stranger
+- Hey. New hand? Best window on Deck 5 is in the shuttle bay. Don't tell anyone.
+- Oh, hello. Engines, days. If you need the overlook on Deck 6, it's past the coil rail.
+? tier>=acquaintance time:morning
+- Morning. Lovely day. Well, it's always the same day out there. Still lovely.   #funny
+? tier>=acquaintance
+- Hey, {me}. I was in the washroom earlier. You didn't hear anything. Good.   #funny
+? tier>=colleague
+- {me}. Come here. Look out there. Nothing. Miles of nothing. Isn't it great?
+? tier>=friend
+- Oh, it's you. I saved you the window side. Friends get the best side.   #warm
+
+== bye
+- See you round.
+- Bye! Find a window. Any window.
+
+== feel
+? mood:low
+- Bit grey today. I'll find a window. That usually does it.
+? mood:high
+- Sunny side up today. Coils behaving, window seat free. What more is there?
+
+== near
+? act:work
+- Coil two's lovely today. Look at the needle. Barely moving. Happy coil.
+? act:dinner
+- Late dinner, window seat, nobody in the queue. This is what winning looks like.   #funny
+
+== life
+? tier>=acquaintance
+- The whole washroom knows my songs. In order. I've stopped pretending they don't.   #funny
+? tier>=colleague
+- The big tree in the garden? Never climbed it. Why, is there a leaf in my hair?   #funny
+
+== joy
+? tier>=acquaintance
+- The best window aboard changes every week. This week it's the observatory.
+
+// ---- Writer 2, batch 1: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue)
+== greet
+? tier>=acquaintance time:evening
+- Evening. Late dinner for me. Mess is empty, window's free. Perfect.
+? tier>=acquaintance warmth:cold
+- Oh, there you are. I'd started checking windows for you. You weren't in any.   #funny
+
+== near
+? habit:music
+- Music room in the evenings now. I just listen. Only listen. Honest.   #funny
+? place:overlook
+- Coils from the overlook. Best view on Deck 6. Well, the only view on Deck 6.   #funny
+
+== invite
+- Observatory tonight? I'll show you the window seat. It's the best one this week.
+? tier>=colleague
+- Friday jam? I won't sing. I'll sit. You can sit too. Sitting's nice.
+
+== accept
+- Ooh, yes. I'll bag us a window.
+- Yes. Lovely. I'll be the one by the glass.
+
+== decline
+- Not tonight. Late dinner, window seat. It's booked. By me. Tomorrow?
+? weekday:sat|sun
+- Rest day. I'm doing a tour of every window on the ship. Another time?   #funny
+
+== missed
+- You missed it. That's all right. I had the window to myself. It was fine. Almost.
+
+== birthday
+? birthday:you
+- Happy birthday! I'll give you the window side all day. That's a big present, that.   #warm
+? birthday:me
+- My birthday. The washroom sang to me this morning. All of them. Badly. I loved it.   #funny
+
+== cue
+? cue:repair.you@dept
+- Was that your fix on Deck 6? The coils look happier. I'm telling everyone.
+
+// ---- Writer 2, batch 1b: a hint (a moment is ready) and an about line for a named friend
+== hint
+- Got a minute later? I've saved a window. Not for the view, this time.
+
+== about
+? aff:salo-saad:friend
+- Salo reads his twin's letters out at tea. I save him the window seat for it.
+
+// ---- Writer 2, batch 6: bubbles (smalltalk, rumour), at most one in five about work. 60 characters.
+== smalltalk
+- Best window's in the shuttle bay.
+- I wasn't singing. Nobody heard.   #funny
+- Never climbed the tree. Never.   #funny
+? time:evening
+- Late dinner, window seat. Winning.   #funny
+? act:work
+- Coil two's happy. Look at it.
+?
+
+== rumour
+- Bright side? Here's the bright side.
+- Don't tell anyone. Except everyone.   #funny
+
+// Writer 4, batch 11: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. Window seat on the shuttle's booked. Obviously.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm off. Look on the bright side: someone else gets my window.
+? leaving:you tier>=friend
+- You found the good windows too. Best company for looking out of them. Thanks.   #warm
+
+== letter
+- New ship. Found the best window on day one. It's in the cargo bay. Of course it is.
+? tier>=friend
+- There's a tree in the new garden. Small one. I haven't climbed it. Yet. Hello from near a window.

@@ -1,0 +1,12 @@
+@voice v-gunn-kaito
+// Writer 4, batch 5: a short card for a short-stay visitor (GUESTS in section 9). No pronouns (not in facts.md).
+tpl: brisk
+talk: A relief doctor on the eleventh ship; brisk and cheerful; rates every galley out of ten, honestly.
+hi: Morning | Hello
+bye: On my rounds | Right, off
+yes: Yes | Done
+thanks: Thanks | Good
+wow: Oh, nice
+sigh: Hm
+likes: sweet | tea | book
+nick: - | {me} | {me} | {me} | {me}

@@ -1,0 +1,241 @@
+@overheard dinner
+// Writer 4, batch 8. The mess at dinner (and some breakfasts), where you spend the most time. Every department,
+// mixed tables. The food, the days off, the weekend, home, tonight's tradition, the season, kind gossip. At most
+// one in five about work.
+
+== overheard
+// ---- the food ----
+? place:mess act:dinner pair:works+galley
+A: What is it tonight?
+B: {dish}.
+A: Is there more?
+B: There's always more. Take a plate.   #warm
+
+? place:mess act:dinner pair:any+any
+A: Is that {dish}?
+B: It is.
+A: Then it's a good day after all.   #warm
+
+? place:mess act:dinner pair:survey+watch
+A: Have you tried the pudding?
+B: Twice.
+A: You're only allowed once.
+B: I was very polite the second time.   #funny
+
+? place:mess act:dinner pair:friend
+A: Swap you my roll for your pudding.
+B: No.
+A: Two rolls.
+B: ...Still no. Nice try.   #funny
+
+? place:mess act:dinner pair:any+any
+A: Pass the salt?
+B: Brennan says it doesn't need salt.
+A: Brennan's not looking.
+B: She's always looking.   #funny
+
+? place:mess act:dinner pair:comms+helm
+A: Is this the same soup as Tuesday?
+B: Better. It's had two days to think.   #funny
+
+? place:mess act:dinner pair:infirmary+works
+A: Eat your greens.
+B: Is that doctor's orders?
+A: It's aide's orders. They're stricter.   #funny
+
+? place:mess act:dinner pair:any+any
+A: Who makes the gravy like this?
+B: Brennan. Her mum's way, I heard.
+A: Tell her mum thank you.   #warm
+
+? place:mess act:breakfast pair:any+any
+A: Toast or porridge?
+B: Yes.
+A: That's not an answer.
+B: It's the right answer.   #funny
+
+? place:mess act:breakfast pair:bunk
+A: You're up early.
+B: I smelt the bacon from Deck 4.
+A: There isn't any bacon.
+B: Then I dreamt it. Still worth getting up.   #funny
+
+// ---- days off and the weekend ----
+? place:mess act:dinner weekday:fri pair:works+any
+A: Weekend tomorrow?
+B: Two whole days. I've got nothing planned.
+A: Lovely.
+B: I'm going to do it very well.   #funny
+
+? place:mess act:dinner weekday:fri pair:friend
+A: Lie-in tomorrow?
+B: Till nine. Maybe ten.
+A: I'll save you a breakfast.
+B: You're a real friend.   #warm
+
+? place:mess act:dinner weekday:sun pair:any+any
+A: Back to it tomorrow.
+B: Don't.
+A: Sorry. Nice weekend, though?
+B: Lovely. Too short. Always too short.
+
+? place:mess act:dinner pair:bunk
+A: What are you doing on your day off?
+B: Garden. Book. Nap.
+A: In that order?
+B: In any order. That's the point.   #funny
+
+? place:mess act:breakfast weekday:sat|sun pair:any+any
+A: Nobody's rushing today.
+B: Weekend breakfast. Best breakfast.
+A: Another tea?
+B: Go on, then.   #warm
+
+// ---- home ----
+? place:mess act:dinner pair:friend
+A: Did you get through to home?
+B: Second try. Everyone's well.
+A: Good. That's good.
+B: My sister's got a new job. I'm proud.   #warm
+
+? place:mess act:dinner pair:any+any
+A: This tastes like my gran's cooking.
+B: Is that good?
+A: It's the best thing anyone could say.   #warm
+
+? place:mess act:dinner pair:survey+any
+A: What's it like at home this time of year?
+B: Cold. Windy. Lovely.
+A: You miss it.
+B: I miss the soup.   #funny
+
+? place:mess act:dinner who:silva-bea|soto-marta|jovanovic-petra with:silva-bea|soto-marta|jovanovic-petra
+A: What's your number tonight?
+B: Higher than yesterday. Yours?
+A: Same. Higher. Pass the bread.
+
+? place:mess act:dinner who:ueda-vera with:varga-tariq
+A: Did the post bag come?
+B: Next week, they say.
+A: Six weeks, every time.
+B: Makes the letters taste better.   #warm
+
+// ---- tonight's tradition ----
+? place:mess act:dinner trad:quiz pair:any+any
+A: Quiz after this. Are you on our team?
+B: Only if I'm not on the song round.
+A: You're on the song round.
+B: Then no.   #funny
+
+? place:mess act:dinner trad:jam pair:any+any
+A: Music night later.
+B: Are you singing?
+A: Everyone's singing. Nobody agrees on the words.   #funny
+
+? place:mess act:dinner trad:observatory-night pair:any+any
+A: Observatory after dinner?
+B: Bring a flask.
+A: And biscuits.
+B: Obviously biscuits.   #warm
+
+? place:mess act:dinner trad:film pair:friend
+A: Film night. Is it the long one?
+B: It's always the long one.
+A: I'll bring the big cushion.
+B: I'll bring the other big cushion.   #funny
+
+? place:mess act:dinner trad:running pair:any+any
+A: Gym club after this.
+B: After all this pudding?
+A: Especially after.
+B: Then I'll walk. Briskly.   #funny
+
+// ---- the seasons ----
+? place:mess act:dinner season:sowing pair:any+any
+A: Have you planted yours?
+B: Yesterday. In a pot on the windowsill.
+A: Mine's up already.
+B: Show-off.   #funny
+
+? place:mess act:dinner season:greening pair:garden+any
+A: Greens from the garden tonight.
+B: You can tell. It tastes greener.
+A: That's not a taste.
+B: It is now.   #funny
+
+? place:mess act:dinner season:harvest pair:any+any
+A: Is this the garden's squash?
+B: Grown upstairs. Well, downstairs. Deck 3.
+A: Tastes like it knows us.   #warm
+
+? place:mess act:dinner season:lanterns pair:friend
+A: Have you made your lantern yet?
+B: It's lopsided.
+A: They're meant to be.
+B: Then mine's perfect.   #funny
+
+// ---- kind gossip ----
+? place:mess act:dinner pair:comms+any
+A: Did you hear? Someone's got a birthday tomorrow.
+B: Who?
+A: I can't say. But there's a cake in the cold store.   #funny
+
+? place:mess act:dinner pair:friend
+A: Have you seen the new comic on the wall?
+B: The one with the coffee machine?
+A: It's got a face. A grumpy face.
+B: It's very accurate.   #funny
+
+? place:mess act:dinner who:santos-zofia with:tran-chloe
+A: Guess who beat the rowing board today.
+B: I don't gossip.
+A: ...
+B: Fine. Who?   #funny
+
+? place:mess act:dinner pair:any+any
+A: Someone left a thank-you cake for the galley.
+B: Who?
+A: Nobody knows. Brennan nearly smiled.   #warm
+
+? place:mess act:dinner who:dlamini-lukas with:esposito-yara|madsen-ivo|walsh-esme
+A: Two hundred and something.
+B: Days?
+A: Days.
+B: We'll miss you when it's zero. Pass the jug.   #warm
+
+// ---- named tables ----
+? place:mess act:dinner who:halloran-emeka with:yoon-elif|lemaire-nils|yilmaz-karin
+A: Why was the soup so cheerful?
+B: Go on.
+A: It was in high spirits.
+B: That's terrible. Save it for breakfast.   #funny
+
+? place:mess act:dinner who:mensah with:holt
+A: Good dinner, Chief.
+B: Hm. Adequate.
+A: You had seconds.
+B: Adequate seconds.   #funny
+
+? place:mess act:dinner who:kim-yusuf with:garcia-greta
+A: Your headphones working?
+B: You fixed them last week.
+A: Just checking. Mine aren't.
+B: Give them here. Eat your dinner.   #warm
+
+? place:mess act:dinner who:alvarez-luca with:mbeki-bo
+A: My sister sent a recipe.
+B: So did mine.
+A: Shall we ask Brennan?
+B: One at a time. She's got a face for two.   #funny
+
+// ---- work, once or twice ----
+? place:mess act:dinner pair:works+works
+A: Board was heavy today.
+B: Then it'll be light tomorrow.
+A: You always say that.
+B: And I'm always half right.   #funny
+
+? place:mess act:dinner pair:watch+survey
+A: Long shift?
+B: Long enough. Are those potatoes?
+A: Roast. Sit down. We'll talk after.   #warm

@@ -12,11 +12,11 @@
 #
 # Story crew and the senior names (approved by the user) are written out by hand below; only the other crew are generated.
 
-import json, random, hashlib, html, os
+import json, random, hashlib, html, os, re
 
 R = random.Random(20261015)
 DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-UNIFORM = {'command': 'command', 'helm': 'command', 'comms': 'command', 'works': 'works', 'galley': 'works', 'store': 'works',
+UNIFORM = {'command': 'command', 'helm': 'command', 'comms': 'command', 'works': 'works', 'galley': 'works', 'store': 'works', 'garden': 'survey',
            'watch': 'watch', 'survey': 'survey', 'infirmary': 'infirmary'}
 RANK_NUM = {'junior': 0, 'officer': 1, 'senior': 1, 'chief': 2, 'xo': 3, 'captain': 4}
 
@@ -50,13 +50,14 @@ WORK = {   # where each kind of job is done: deck and place type
     'command': (1, 'work:command'), 'helm': (1, 'work:helm'), 'ops': (1, 'work:ops'), 'comms-bridge': (1, 'work:comms'),
     'comms': (2, 'work:comms'), 'watch': (2, 'work:watch'), 'survey': (2, 'work:survey'),
     'galley': (3, 'work:galley'), 'infirmary': (3, 'work:infirmary'),
-    'works': (5, 'work:works'), 'engine': (6, 'work:engine'), 'store': (3, 'work:store'),
+    'works': (5, 'work:works'), 'engine': (6, 'work:engine'), 'store': (3, 'work:store'), 'garden': (3, 'work:garden'),
 }
 WORK_WORDS = {
     'work:command': 'the bridge', 'work:helm': 'the helm, on the bridge', 'work:ops': 'the ops console, on the bridge',
     'work:comms': 'comms', 'work:watch': 'the Watch office', 'work:survey': 'the Survey labs',
     'work:galley': 'the galley', 'work:infirmary': 'the infirmary', 'work:works': 'the Works bay', 'work:engine': 'the engine room',
     'work:store': 'the crew store',
+    'work:garden': 'the hydroponics garden',
 }
 
 # ---------------------------------------------------------------- story crew and senior names (by hand)
@@ -317,6 +318,15 @@ SHIFT_DROPS = {
 # the rank line on a door plate (the ranks of design-doc "The crew", as the game's RANK_NAME says them)
 PLATE_RANK = {'captain': 'Captain', 'xo': 'Executive Officer', 'chief': 'Department Chief', 'senior': 'Senior Officer',
               'officer': 'Officer', 'guest': 'Veyli Envoy'}
+# the gardeners (0.16.11): role, team, days off, hours, hours on other days ([{ days, hours }]: they replace hours
+# on those days), bio
+GARDENERS = {
+    'cruz-tove': ('Senior gardener', 'senior', [5, 6], [[480, 1020]],
+                  [{'days': [0, 1], 'hours': [[360, 840]]}, {'days': [2, 3], 'hours': [[780, 1260]]}],
+                  'Runs the hydroponics garden, and knows every plant by the week it was sown.'),
+    'hart-ravi': ('Gardener', 'early', [0, 1], [[360, 840]], None, 'Waters the garden at first light, before anyone else is up.'),
+    "oneill-imani": ('Gardener', 'late', [2, 3], [[780, 1260]], None, 'Tends the garden into the evening, and picks the galley\'s herbs for the next day.'),
+}
 # the galley staff: team and days off (0 = Monday)
 GALLEY_TEAMS = {'brennan': ('chef', [4, 5]), 'varga-tariq': ('early', [0, 1]), 'haddad-tamsin': ('early', [2, 3]),
                 'dlamini-lukas': ('early', [1, 2]), 'walsh-esme': ('late', [5, 6]), 'madsen-ivo': ('late', [0, 1])}
@@ -330,7 +340,605 @@ def looks():
                 height=round(R.uniform(.9, 1.1), 2), build=R.choice(['slim', 'average', 'average', 'broad']),
                 acc=sorted(R.sample(['glasses', 'beard', 'moustache', 'earrings', 'headband'], R.choice([0, 0, 1, 1, 2]))))
 
+# ---------------------------------------------------------------- what the story crew tell you (0.16.8-0.16.9, Pillar 3)
+# about: [{ tier, topic, text }]: things a story crew member tells you as you get to know them, for the social engineer's
+# chat lines ("Ask about...") and the Crew app's "what you know". tier is section 20's relationship tier (0 stranger,
+# 1 acquaintance, 2 colleague, 3 friend, 4 close friend, kept for a real confidence); topic is home, work, hobby, past or
+# secret. Third person, one sentence each; they add to the bio and life lines and never contradict them
+ABOUT = {
+    'tomas': [(0, 'work', 'Joined the Wren a week before you did, and still takes the long way round Deck 2.'),
+              (0, 'work', 'Thinks the Watch office has the best view of the lift, and therefore of everyone.'),
+              (1, 'home', 'Grew up on a farm moon where the sky was always the same grey.'),
+              (1, 'hobby', 'Taped the star map up so the first thing he sees each morning is somewhere he has never been.'),
+              (2, 'work', 'Failed the Watch exam once before passing, and hasn\'t told Chief Holt.'),
+              (3, 'home', 'Writes to his little brother every week and pretends the job is more exciting than it is.'),
+              (4, 'secret', 'Signed up because he was afraid of staying home for the rest of his life.')],
+    'pell': [(0, 'work', 'Has been in Works two years, and knows which panel on Deck 5 sticks.'),
+             (0, 'hobby', 'Can sleep anywhere, any time, except at night.'),
+             (1, 'hobby', 'Keeps a tin of spare screws from every ship he has fixed something on.'),
+             (1, 'home', 'His mum sends the same three messages every week: eat, sleep, call.'),
+             (2, 'work', 'Wants Chief Calder\'s certification more than anything, and is scared of the practical.'),
+             (3, 'past', 'Taught himself engines from an old manual he found in a scrapyard.'),
+             (4, 'secret', 'Nearly left the Wren in his first month, and is glad every day that he didn\'t.')],
+    'rina': [(0, 'work', 'Works in the infirmary, and will tell you to drink some water.'),
+             (0, 'hobby', 'Has never lost a game of Tiles in the junior common room, and keeps count.'),
+             (1, 'work', 'Studies for her medical exams in the evenings, with the journals she uses as a pillow.'),
+             (1, 'home', 'Her sister is a doctor on a station, and they argue about everything by message.'),
+             (2, 'work', 'Wants to be a ship\'s doctor one day, and quietly thinks she\'d be good at it.'),
+             (3, 'past', 'Learnt to play Tiles from her grandmother, who cheated.'),
+             (4, 'secret', 'Joined the Wren after a hard year at home, and the routine helped more than she expected.')],
+    'marrow': [(0, 'work', 'Asks every new junior one question about the ship, and remembers the answer.'),
+               (1, 'hobby', 'Learnt the piano as a girl and took it up again on her first command.'),
+               (3, 'home', 'Has a daughter at the Concord academy who doesn\'t write often enough.'),
+               (4, 'secret', 'Thinks about retiring, and can\'t imagine anyone else in the ready room.')],
+    'vance': [(0, 'work', 'Has read the ship\'s regulations cover to cover, twice.'),
+              (1, 'hobby', 'Rowed for his academy, and still checks the gym leaderboard every morning.'),
+              (2, 'work', 'Keeps a list of every junior he has recommended for promotion.'),
+              (4, 'past', 'Was a junior who broke every rule once, which is why he knows them all.')],
+    'sato': [(0, 'hobby', 'Will explain the tea to anyone, at length.'),
+             (1, 'work', 'Named three comets, and pretends not to care about the third.'),
+             (2, 'past', 'Turned down a university post to stay on the frontier.'),
+             (4, 'secret', 'Worries the survey she is proudest of was mostly luck.')],
+    'holt': [(0, 'work', 'Walks every deck before breakfast, the long way.'),
+             (1, 'past', 'Served on a border patrol before the Wren, and doesn\'t talk about it much.'),
+             (3, 'past', 'Distrusts the Veyli because of one bad day years ago, and knows it isn\'t fair.'),
+             (4, 'secret', 'Asked for the cabin next to the Envoy\'s so he could keep an eye out, and has started to like the Envoy.')],
+    'calder': [(0, 'work', 'Can tell you what\'s wrong with a fan by the sound.'),
+               (1, 'past', 'Started as a junior in a shipyard, sweeping up swarf.'),
+               (2, 'work', 'Keeps a list of every Works tech she has certified, with a note on each.'),
+               (4, 'past', 'The toolbox was her first chief\'s, who taught her everything and never said well done.')],
+    'brennan': [(0, 'work', 'Cooks by ear: she listens to the pans.'),
+                (1, 'past', 'Ran a restaurant on Port Halloran before the Wren.'),
+                (2, 'work', 'Keeps a book of every crew member\'s favourite dish.'),
+                (4, 'secret', 'Left the restaurant after a fire, and finds the galley\'s order comforting.')],
+    'saruth': [(0, 'home', 'Takes tea at the same hour every day, and will sometimes invite you.'),
+               (1, 'home', 'Ties a new knot in the cord on the cabin door for every month aboard.'),
+               (3, 'work', 'Finds humans exhausting and very kind, often at once.'),
+               (4, 'secret', 'Was sent to the Wren because no one at home expected the posting to work.')],
+}
+
+def looks_with(rng):                               # looks() from another random stream (visitors)
+    return dict(skin=rng.randrange(6), hair=rng.choice(['ponytail', 'short', 'bun', 'curls', 'buzz', 'long', 'short']),
+                hairColor=rng.choice(['black', 'dark', 'brown', 'brown', 'auburn', 'blonde', 'grey', 'teal']),
+                height=round(rng.uniform(.9, 1.1), 2), build=rng.choice(['slim', 'average', 'average', 'broad']),
+                acc=sorted(rng.sample(['glasses', 'beard', 'moustache', 'earrings', 'headband'], rng.choice([0, 0, 1, 1, 2]))))
+
+# ---------------------------------------------------------------- visitors (0.16.8, Pillar 3 C8)
+# GUESTS: people who stay a while and leave. Inert data: the sim engineer schedules them from GUEST_TEMPLATES
+# (section 14), the events engineer sets the day an event guest arrives. Same shape as roster entries (rank 'guest',
+# habits, bio, life, seed) plus template, cabin, arrive and leave (ship days of the year, 1-364, like birthdays),
+# and spec, ready for crowd.add / makeCharacter. Their own random stream (VIS_R), after everything else.
+VIS_R = random.Random(20261019)
+# what each kind of visitor does with a day: [deck, place type, weight] as in LEISURE (types with no places are
+# skipped); 'cabin' is their own cabin; 'work' is their entry's work place. The sim engineer turns these into days
+GUEST_TEMPLATES = {
+    'scientist': {'label': 'A visiting scientist or specialist: works by day, the observatory or the lounge in the evening',
+                  'day': [['work', 6], [2, 'work:survey', 2]], 'evening': [[2, 'observatory', 3], [3, 'lounge-seat', 2], [3, 'bar', 1], ['cabin', 2]],
+                  'meals': 'mess', 'wake': 390, 'bed': 1350},
+    'delegate': {'label': 'A member of a delegation: tours, formal dinners (the event decides), the observation room, their cabin',
+                 'day': [['cabin', 3], [1, 'common-room', 2], [3, 'garden', 2], [2, 'observatory', 1]], 'evening': [['cabin', 3], [3, 'lounge-seat', 1]],
+                 'meals': 'mess', 'formal': True, 'wake': 360, 'bed': 1320},
+    'passenger': {'label': 'A passenger or a transfer waiting for their ship: the lounge, the mess, the garden, the store',
+                  'day': [[3, 'lounge-seat', 3], [3, 'garden', 2], [3, 'shop', 1], [3, 'bench', 1], ['cabin', 1]],
+                  'evening': [[3, 'lounge-seat', 3], [3, 'bar', 2], [2, 'observatory', 1], ['cabin', 1]], 'meals': 'mess', 'wake': 450, 'bed': 1380},
+    'survivor': {'label': 'Rescued: the infirmary for the first days, then rest, the garden and the mess',
+                 'first': 2, 'firstDay': [[3, 'work:infirmary', 1]], 'day': [['cabin', 3], [3, 'garden', 2], [3, 'lounge-seat', 1]],
+                 'evening': [['cabin', 3], [3, 'lounge-seat', 1]], 'meals': 'mess', 'wake': 480, 'bed': 1260},
+}
+# the guest cabins: Deck 2's visitors' suite (2-B) and second visitors' cabin (2-U, for event visitors); Deck 4's
+# six guest cabins. Event guests use 2-U and 4-01..4-04 (one event at a time), everyday visitors 4-07 and 4-08 by turns,
+# so the two never meet
+EVERYDAY_CABINS = ['4-07', '4-08']
+# clothes: specialists wear their service's uniform (spec.dept a DEPT key); everyone else is spec.dept 'civilian' with
+# spec.outfit, the colour a civilian outfit should be. makeCharacter has no civilian outfit yet (unknown depts fall back to
+# the survey colour), so that's for whoever draws them
+VEYLI_LOOKS = lambda: dict(skin=VIS_R.choice([1, 2, 3]), hair=VIS_R.choice(['long', 'bun', 'ponytail']), hairColor=VIS_R.choice(['white', 'teal', 'grey']),
+                           height=round(VIS_R.uniform(1.04, 1.12), 2), build='slim', acc=['headband'])
+EVENT_GUESTS = [
+    # the diplomatic visit: a Veyli delegation of four; the leader on Deck 2, the others on Deck 4
+    dict(id='teshavi', name='Speaker Teshavi', role='Leader of the Veyli delegation', template='delegate', cabin='2-U', event='diplomatic', stay=5,
+         outfit='#6b4a8a', bio='Speaks for the Veyli council. Patient, precise, and fond of long silences.',
+         life=['Has known Envoy Saruth since they were both students of the cord.', 'Brought a gift for the Captain wrapped in seven knots.'],
+         habits=['quiet-corner', 'early-riser']),
+    dict(id='kesrin', name='Kesrin', role='Aide to the Speaker', template='delegate', cabin='4-01', event='diplomatic', stay=5,
+         outfit='#6b4a8a', bio='Carries the Speaker\'s schedule in their head and their tea set in a satchel.',
+         life=['Is secretly delighted by the vending machine on Deck 3.', 'Writes everything down, including the jokes.'],
+         habits=['window-seat']),
+    dict(id='moleth', name='Moleth', role='Veyli scholar', template='delegate', cabin='4-02', event='diplomatic', stay=5,
+         outfit='#7a5a3a', bio='Studies human ships, and asks the crew questions nobody has asked before.',
+         life=['Wants to see the engine room more than anything.', 'Has a list of forty questions for Chief Calder.'],
+         habits=['garden-lover', 'stargazer']),
+    dict(id='ithra', name='Ithra', role='Veyli pilot and guard', template='delegate', cabin='4-03', event='diplomatic', stay=5,
+         outfit='#3a4a5a', bio='Flies the delegation\'s shuttle and watches every door. Says very little.',
+         life=['Has asked Chief Holt about the Watch rota, twice.', 'Runs laps of the plaza at dawn.'],
+         habits=['early-riser', 'runner']),
+    # nebula drift: the visiting scientist who books the observatory
+    dict(id='lindgren', name='Dr. Soraya Lindgren', role='Visiting astrophysicist', template='scientist', cabin='4-04', event='nebula', stay=6,
+         outfit=None, dept='survey', work=dict(deck=2, place='work:survey'),
+         bio='Chases nebulae across the frontier, and has finally caught one.', life=['Gives a talk in the observation room before she leaves.', 'Lives on tea and star charts.'],
+         habits=['stargazer', 'night-owl']),
+    # a Veyli vessel needs help: one of their engineers comes aboard
+    dict(id='taavek', name='Taavek', role='Veyli engineer', template='scientist', cabin='4-04', event='veyliVessel', stay=3,
+         outfit='#3a4a5a', work=dict(deck=5, place='work:works'),
+         bio='Came aboard with a crate of parts and no common words for most of them.', life=['Sketches every machine in the Works bay.', 'Trades Veyli sweets for coffee.'],
+         habits=['workaholic']),
+    # salvage: two survivors from the derelict
+    dict(id='quill', name='Mara Quill', role='Survivor from the derelict', template='survivor', cabin='4-01', event='salvage', stay=7,
+         outfit='#8a8f9a', bio='Was the derelict\'s cook. Has not stopped thanking people.', life=['Wants to help in the galley as soon as Dr. Nandakumar lets her.', 'Lost everything but a photo of a dog.'],
+         habits=['early-riser']),
+    dict(id='petrie', name='Jonah Petrie', role='Survivor from the derelict', template='survivor', cabin='4-02', event='salvage', stay=7,
+         outfit='#8a8f9a', bio='Was the derelict\'s navigator. Quiet, and watches the stars from any window.', life=['Keeps asking what day it is.', 'Is good at cards, and better at losing on purpose.'],
+         habits=['window-seat', 'night-owl']),
+]
+# everyday visitors: [role, template, uniform or None (civilian), work (deck, place) or None, stay range, bios, life lines]
+EVERYDAY = [
+    ('Visiting astronomer', 'scientist', 'survey', (2, 'work:survey'), (5, 9), ['Here to borrow the observatory for a week of measurements.', 'Brought a telescope lens the size of a dinner plate.'], ['Asks everyone what they have seen out of the windows.', 'Has a habit of naming stars after cafes.']),
+    ('Concord hull inspector', 'scientist', 'works', (5, 'work:works'), (4, 7), ['Inspects survey ships for the Concord, clipboard first.', 'Knocks on bulkheads and listens.'], ['Says the Wren is the tidiest ship this quarter, and means it.', 'Collects mission patches.']),
+    ('Relief doctor', 'scientist', 'infirmary', (3, 'work:infirmary'), (6, 9), ['Covers the infirmary on rotation between ships.', 'A doctor on rotation, here to give Dr. Nandakumar a few days off.'], ['Has worked on eleven ships and remembers every galley.', 'Knits during quiet shifts.']),
+    ('Visiting botanist', 'scientist', 'survey', (2, 'work:survey'), (5, 8), ['Studies plants grown in space, and has opinions about the garden.', 'Here to test new seeds in the garden.'], ['Talks to the tomatoes.', 'Brought cuttings from a Kesh orchard.']),
+    ('Survey cartographer', 'scientist', 'survey', (2, 'work:survey'), (5, 8), ['Draws the charts other ships fly by.', 'On loan from the Concord charts office.'], ['Carries a pencil behind each ear.', 'Is trying to map the Wren\'s corridors by memory.']),
+    ('Transfer to Marra Station', 'passenger', 'works', None, (2, 5), ['A Works technician waiting for a ship to Marra Station.', 'Between postings, and itching for something to fix.'], ['Offers to help in the Works bay every morning.', 'Has never seen a nebula.']),
+    ('Retired captain', 'passenger', None, None, (3, 6), ['Commanded a freighter for thirty years, and is on the way home.', 'A retired captain hitching a ride to see family.'], ['Gives Captain Marrow advice she never asked for.', 'Tells stories in the lounge until late.']),
+    ('Trader\'s apprentice', 'passenger', None, None, (2, 4), ['Learning the trade, and trying to sell everyone a better kettle.', 'Travels with a case of samples and a big smile.'], ['Has already sold two kettles.', 'Misses home and calls every night.']),
+    ('Concord courier', 'passenger', None, None, (2, 3), ['Carries sealed pouches between ships, and says nothing about them.', 'A courier with a locked case and a tired face.'], ['Sleeps with the case.', 'Plays chess with anyone who asks.']),
+    ('Musician on tour', 'passenger', None, None, (3, 5), ['Plays the stations of the frontier, one lounge at a time.', 'A travelling musician on the way to the next station.'], ['Plays in the music room every evening.', 'Can play anything you hum.']),
+    ('Student on placement', 'passenger', 'survey', None, (4, 7), ['A student on a short placement, following the Survey team around.', 'Here to learn how a survey ship works.'], ['Asks the juniors for advice.', 'Keeps a notebook of everyone\'s names.']),
+    ('Chef on exchange', 'passenger', 'works', None, (3, 6), ['A chef from Port Halloran, here to trade recipes with Brennan.', 'Swapping recipes with the galley for a few days.'], ['Brennan let them near the ovens once.', 'Brought spices nobody can pronounce.']),
+]
+# visitors' names: their own pools, so they never run short and never share a surname with the crew
+VIS_FIRST = ['Adaeze', 'Alba', 'Aleksi', 'Amir', 'Anouk', 'Ari', 'Ayla', 'Bastian', 'Bryn', 'Cato', 'Celeste', 'Dario', 'Dilan', 'Edda', 'Elio', 'Esra',
+             'Fen', 'Florin', 'Gael', 'Hale', 'Idris', 'Ilka', 'Ines', 'Iver', 'Jora', 'Juno', 'Kaito', 'Keira', 'Lark', 'Lio', 'Mads', 'Maren',
+             'Milo', 'Nell', 'Nico', 'Nyla', 'Odo', 'Petra', 'Pim', 'Rhea', 'Ronan', 'Saoirse', 'Silas', 'Talia', 'Teo', 'Ulla', 'Vesna', 'Wilf', 'Yuki', 'Zora']
+VIS_LAST = ['Aalto', 'Abbas', 'Arden', 'Baptiste', 'Bjork', 'Calloway', 'Castro', 'Danek', 'Delacroix', 'Ekwueme', 'Fairweather', 'Ferro', 'Galloway',
+            'Grimaldi', 'Hadley', 'Hovland', 'Iwasaki', 'Jaramillo', 'Kalnins', 'Kessler', 'Laurent', 'Lindahl', 'Marsh', 'Mbatha', 'Novak', 'Oyelaran',
+            'Pacheco', 'Quinlan', 'Rasmussen', 'Rocha', 'Saarinen', 'Sandoval', 'Szabo', 'Tamura', 'Thorne', 'Upton', 'Valdez', 'Varela', 'Wexley', 'Whitlock',
+            'Adeyemi', 'Xu', 'Yarrow', 'Zaid', 'Zeller', 'Ashby', 'Brandt', 'Corwin', 'Dunmore', 'Ellery', 'Faraday', 'Gunn', 'Holm', 'Ingram', 'Royce',
+            'Kirby', 'Lowe', 'Mercer', 'Nash', 'Orme']
+CIVVIES = ['#7a6a5a', '#5a6a7a', '#6a7a5a', '#7a5a6a', '#5a5a5a', '#8a7a5a']
+
+def visitors(out):
+    used = {p['name'].split()[-1] for p in out} | {p['name'].split()[-1] for p in EVENT_GUESTS}
+    used_first = {p['name'].split()[0] for p in out}
+    res = []
+    for g in EVENT_GUESTS:
+        e = dict(id=g['id'], name=g['name'], rank='guest', dept='guest', uniform=g.get('dept'), role=g['role'], template=g['template'],
+                 cabin=g['cabin'], event=g['event'], stay=g['stay'], arrive=None, leave=None,
+                 work=g.get('work'), habits=g['habits'], bio=g['bio'], life=g['life'], seed=seed_of(g['id']))
+        lk = VEYLI_LOOKS() if g['outfit'] in ('#6b4a8a', '#7a5a3a', '#3a4a5a') else looks_with(VIS_R)
+        e['spec'] = dict(name=g['name'], dept=g.get('dept') or 'civilian', rank=0, bio=g['bio'], outfit=g['outfit'], **lk)
+        res.append(e)
+    free = {c: 0 for c in EVERYDAY_CABINS}             # the day each everyday cabin is free from
+    for w in range(52):
+        role, tpl, uni, work, (lo, hi), bios, lifes = VIS_R.choice(EVERYDAY)
+        f = VIS_R.choice([x for x in VIS_FIRST if x not in used_first])
+        l = VIS_R.choice([x for x in VIS_LAST if x not in used])
+        used.add(l)
+        arrive = w * 7 + VIS_R.randrange(7) + 1
+        cabin = min(EVERYDAY_CABINS, key=lambda c: (free[c], c))
+        arrive = max(arrive, free[cabin])
+        leave = min(364, arrive + VIS_R.randint(lo, hi))
+        free[cabin] = leave + 1
+        pid = 'v-' + l.lower().replace("'", '') + '-' + f.lower()
+        lk = looks_with(VIS_R)
+        bio = VIS_R.choice(bios)
+        e = dict(id=pid, name=f + ' ' + l, rank='guest', dept='guest', uniform=uni, role=role, template=tpl, cabin=cabin,
+                 arrive=arrive, leave=leave, work=dict(deck=work[0], place=work[1]) if work else None,
+                 habits=VIS_R.sample(['window-seat', 'lounge-regular', 'garden-lover', 'stargazer', 'bar-regular', 'shopper', 'early-riser', 'night-owl', 'calls-home'], 2),
+                 bio=bio, life=[VIS_R.choice(lifes)], seed=seed_of(pid))
+        e['spec'] = dict(name=e['name'], dept=uni or 'civilian', rank=0, bio=bio, outfit=None if uni else VIS_R.choice(CIVVIES), **lk)
+        res.append(e)
+    # checks: one guest per cabin at a time, every week has an everyday arrival, ids unique
+    every = [e for e in res if e['arrive']]
+    for c in EVERYDAY_CABINS:
+        st = sorted((e['arrive'], e['leave']) for e in every if e['cabin'] == c)
+        assert all(a[1] < b[0] for a, b in zip(st, st[1:])), c
+    assert len({(e['arrive'] - 1) // 7 for e in every}) >= 50
+    assert len({e['id'] for e in res}) == len(res) and not {e['id'] for e in res} & {p['id'] for p in out}
+    assert not {e['cabin'] for e in res} & {p['bed'] for p in out}, 'a guest in a crew bed'
+    for e in res:
+        if any(a in e['habits'] and b in e['habits'] for a, b in CLASH): e['habits'] = e['habits'][:1]
+    return res
+
+# ---------------------------------------------------------------- Pillar 4 (0.16.12): days off, the social fields, couples
+# and the reserve pool. All of it runs after everything above, from plain rules and its own random stream (P4_R), so
+# nobody's name, looks, bed, habits or birthday moves
+P4_R = random.Random(20261020)
+# ---- varied days off: two days in a row; about 40% of the day shift at the weekend, the rest spread across the week; the
+# night shift its own pattern; every department staffed every day. Fixed: these people, the galley, store and garden rotas
+DAYS_FIXED = {'torres-zeke': [3, 4], 'halloran-emeka': [5, 6], 'calder': [5, 6]}
+WEEKDAY_PAIRS = [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [6, 0]]
+NIGHT_PAIRS = [[1, 2], [3, 4], [5, 6], [0, 1], [2, 3], [4, 5], [6, 0]]
+def stable(s): return int(hashlib.md5(s.encode()).hexdigest()[:8], 16)
+def days_off(crew):
+    fixed = lambda p: p['id'] in DAYS_FIXED or p['dept'] in ('galley', 'store', 'garden')
+    for p in crew:
+        if p['id'] in DAYS_FIXED: p['rota'] = dict(p['rota'], offDays=DAYS_FIXED[p['id']])
+    day = [p for p in crew if p['shift'] == 'day']
+    for dept in sorted({p['dept'] for p in day}):
+        free = sorted([p for p in day if p['dept'] == dept and not fixed(p)], key=lambda p: stable(p['id']))
+        allin = [p for p in day if p['dept'] == dept]
+        wk = round(len(free) * .45)
+        if wk and wk + sum(1 for p in allin if fixed(p) and p['rota']['offDays'] == [5, 6]) >= len(allin): wk -= 1   # someone works weekends
+        off = stable(dept) % 6
+        for k, p in enumerate(free):
+            p['rota'] = dict(p['rota'], offDays=[5, 6] if k < wk else WEEKDAY_PAIRS[(off + k) % 6])
+    night = sorted([p for p in crew if p['shift'] == 'night'], key=lambda p: (p['dept'], p['id']))
+    for k, p in enumerate(night): p['rota'] = dict(p['rota'], offDays=NIGHT_PAIRS[k % 7])
+    # every department, on each shift, has someone on every day (where it has two or more on that shift); fix any gap by moving a free member's pair
+    for _ in range(50):
+        gaps = [(dept, sh, d) for sh in ('day', 'night') for dept in sorted({p['dept'] for p in crew if p['shift'] == sh})
+                if sum(1 for p in crew if p['dept'] == dept and p['shift'] == sh) > 1      # a lone night officer has days off like anyone
+                for d in range(7) if all(d in p['rota']['offDays'] for p in crew if p['dept'] == dept and p['shift'] == sh)]
+        if not gaps: break
+        dept, sh, d = gaps[0]
+        p = next(p for p in sorted(crew, key=lambda p: p['id']) if p['dept'] == dept and p['shift'] == sh and not fixed(p) and d in p['rota']['offDays'])
+        p['rota'] = dict(p['rota'], offDays=next(q for q in WEEKDAY_PAIRS + [[5, 6]] if d not in q and q != p['rota']['offDays']))
+    assert not gaps, gaps
+    for p in crew: o = p['rota']['offDays']; assert len(o) == 2 and o[1] == (o[0] + 1) % 7, p['id']
+# ---- voice templates, gifts, joys, threads (the social plan, Part 9)
+TPL_OF = [('warm', ['kind', 'warm', 'gentle', 'generous', 'sociable']), ('dry', ['dry humour', 'sarcastic', 'wry', 'dry', 'quietly funny']),
+          ('shy', ['shy', 'quiet', 'nervous', 'homesick', 'private']), ('brisk', ['practical', 'precise', 'organised', 'exacting', 'brisk', 'serious', 'tidy']),
+          ('chatty', ['chatty', 'cheerful', 'easy laugh']), ('earnest', ['earnest', 'ambitious', 'reliable', 'dependable', 'loyal', 'a little lost']),
+          ('gruff', ['blunt', 'stubborn', 'gruff', 'suspicious', 'proud']), ('dreamy', ['dreamy', 'absent-minded', 'forgetful', 'curious', 'thoughtful', 'messy']),
+          ('steady', ['steady', 'patient', 'calm', 'meticulous', 'careful', 'unhurried', 'watchful', 'handy']), ('playful', ['playful', 'competitive', 'restless', 'optimistic', 'quick', 'sharp-eyed'])]
+TPLS = [t for t, _ in TPL_OF]
+OPEN_OF = {'shy': 'guarded', 'gruff': 'guarded', 'chatty': 'open', 'warm': 'open', 'playful': 'open'}
+NEEDS_OF = {'warm': 'share', 'dry': 'cheer', 'shy': 'listen', 'brisk': 'practical', 'chatty': 'share', 'earnest': 'practical',
+            'gruff': 'practical', 'dreamy': 'share', 'steady': 'listen', 'playful': 'cheer'}
+MENTOR_TRAITS = ['patient', 'kind', 'steady', 'gentle', 'warm', 'calm', 'generous']   # who takes a newcomer under their wing (social B's mentor bonds)
+GIFT_TAGS = ['tea', 'sweet', 'plant', 'garden', 'made', 'book', 'music', 'star', 'game']
+TAGS_OF_HABIT = {'gardener': ['garden', 'plant'], 'garden-lover': ['plant', 'garden'], 'musician': ['music'], 'music': ['music'], 'stargazer': ['star'],
+                 'window-seat': ['star'], 'tea-break': ['tea'], 'lounge-regular': ['tea'], 'early-riser': ['tea'], 'shopper': ['sweet'], 'lingers-at-meals': ['sweet'],
+                 'late-sleeper': ['sweet'], 'quiet-corner': ['book'], 'common-room': ['game'], 'bar-regular': ['game'], 'workaholic': ['made'], 'calls-home': ['made'],
+                 'runner': ['sweet'], 'gym-regular': ['game']}
+LIFE_CLUES = [('guitar', 'music', 'learning the guitar, badly'), ('knit', 'made', 'knitting scarves'), ('cactus', 'plant', 'looking after a cactus called Gerald'),
+              ('flowers', 'plant', 'pressing flowers from the garden'), ('bake', 'sweet', 'baking on rest days'), ('paint', 'made', 'painting tiny portraits of the crew'),
+              ('journal', 'book', 'keeping a journal'), ('novel', 'book', 'mystery novels'), ('herbs', 'garden', 'growing herbs'), ('recipe', 'sweet', 'trying recipes from home'),
+              ('song', 'music', 'knowing every song in the record cabinet'), ('jokes', 'game', 'telling terrible jokes'), ('star', 'star', 'watching the stars'),
+              ('letters', 'made', 'writing letters home'), ('cat', 'made', 'talking about their cat'), ('chess', 'game', 'chess')]
+JOY_OF_HABIT = {'runner': 'running on the treadmill', 'gym-regular': 'the gym after shift', 'musician': 'playing in the music room', 'music': 'evenings in the music room',
+                'gardener': 'tending the garden', 'garden-lover': 'the garden benches', 'stargazer': 'observatory nights', 'bar-regular': 'a drink at the lounge bar',
+                'shopper': 'browsing the crew store', 'common-room': 'Tiles nights', 'calls-home': 'calls home', 'quiet-corner': 'a good book in a quiet corner',
+                'window-seat': 'a seat by the window', 'lounge-regular': 'evenings in the bow lounge', 'tea-break': 'a proper tea break'}
+THEMES = ['homesick', 'exams', 'family', 'stuck', 'notgood', 'lonely', 'loss', 'talent', 'burnout', 'leaving', 'rivalry', 'startover']
+THEME_OF_TRAIT = {'homesick': 'homesick', 'nervous': 'exams', 'ambitious': 'stuck', 'meticulous': 'notgood', 'shy': 'lonely', 'quiet': 'lonely',
+                  'restless': 'leaving', 'competitive': 'rivalry', 'blunt': 'rivalry', 'reliable': 'burnout', 'dreamy': 'talent', 'thoughtful': 'loss',
+                  'curious': 'startover', 'loyal': 'family', 'kind': 'family', 'stubborn': 'rivalry', 'gentle': 'loss', 'serious': 'notgood'}
+KEEPSAKE_OF = {'tea': 'a little tin of their own tea blend', 'sweet': 'a recipe card in their handwriting', 'plant': 'a cutting in a jar', 'garden': 'a packet of seeds from the garden',
+               'made': 'something they made: a little gear on a chain', 'book': 'a battered paperback with notes in the margins', 'music': 'a guitar pick, worn smooth',
+               'star': 'a hand-drawn star chart', 'game': 'a Tiles piece, chipped at one corner'}
+# family: (as the about lines say it, after "Has" or "Writes to"; the field itself, said by them after "my", 0.16.14)
+FAMILY = [('a younger brother', 'younger brother'), ('two older sisters', 'two older sisters'), ('parents who run a repair shop', 'parents, who run a repair shop'),
+          ('a grandmother who raised them', 'grandmother, who raised me'), ('a big, noisy family', 'big, noisy family'), ('a twin', 'twin'),
+          ('a mother who writes every week', 'mother, who writes every week'), ('a father who grows apples', 'father, who grows apples'),
+          ('three cousins they grew up with', 'three cousins, who I grew up with'), ('an aunt who was a pilot', 'aunt, who was a pilot'),
+          ('a little sister who wants to join up', 'little sister, who wants to join up'), ('parents on a mining station', 'parents on a mining station')]
+FAMILY_HAS = {my: has for has, my in FAMILY}
+SHIPS = ['the Kestrel', 'the Halcyon', 'the Osprey', 'the Meridian', 'the Calypso', 'the Heron', 'the Lark', 'the Corvid']
+# the about details for everyone without hand-written ones: { tier, topic, text }, text a sentence with {home}, {family}, {joy}, {work}
+ABOUT_WORK0 = ['Knows {work} better than anyone gives them credit for.', 'Will tell you which corner of {work} is the warmest.', 'Has opinions about how {work} should be run.',
+               'Is usually the first in {work} and the last out.', 'Keeps a mug at {work} that nobody else is allowed to use.']
+ABOUT_CADET0 = ['Is still learning where everything is in {work}, and asks a lot of questions.', 'Got lost on the way to {work} on the first morning, and laughs about it now.']
+ABOUT_HOBBY1 = ['Spends free evenings {joy}.', 'Lights up when anyone mentions {joy}.', 'Will talk about {joy} for as long as you let them.']
+ABOUT_HOME1 = ['Grew up on {home}.', 'Comes from {home}, and says it like a boast.', 'Still calls {home} home.']
+ABOUT_FAMILY2 = ['Has {family}, and keeps a photo of them by the bunk.', 'Writes to {family} more often than they write back.', 'Has {family}, and misses them more than they let on.']
+ABOUT_WORK2 = ['Thinks the Wren is the best-run ship they\'ve served on, and would never say so to Calder.', 'Thinks the coffee on Deck 5 is the best on the ship, and says so loudly.',
+               'Has a running bet with someone in another department that nobody else knows about.', 'Thinks the lift on Deck 5 has a personality.']
+ABOUT_THEME = {   # tier 3 (past or work, opens up) and tier 4 (secret) per struggle theme
+    'homesick': ('home', 'Misses the food on {home} more than the people, and feels bad about it.', 'secret', 'Has a ticket home saved up, just in case, and has never told anyone.'),
+    'exams': ('work', 'Is studying for a certification and is quietly terrified of the practical.', 'secret', 'Failed it once already, before the Wren.'),
+    'family': ('home', 'Someone in the family has been unwell, and the news comes slowly.', 'secret', 'Thinks about going home for good, and hasn\'t decided.'),
+    'stuck': ('work', 'Has done the same job for five years and wonders about another department.', 'secret', 'Has filled in a transfer request three times and never sent it.'),
+    'notgood': ('past', 'Still thinks about a mistake on an old ship, though nobody else remembers it.', 'secret', 'Checks their own work twice because once, years ago, they didn\'t.'),
+    'lonely': ('past', 'Has never been good at joining in, and eats alone more than they\'d like.', 'secret', 'Would love to be asked to a Tiles night, and would never ask.'),
+    'loss': ('past', 'Goes quiet on one day each year, and doesn\'t say why.', 'secret', 'Lost someone close a few years ago, and keeps something of theirs in the bunk.'),
+    'talent': ('hobby', 'Hums, sketches, or scribbles when they think nobody\'s watching.', 'secret', 'Is good at it, really good, and too shy to show anyone.'),
+    'burnout': ('work', 'Is always the last to leave, and can\'t say no to anyone.', 'secret', 'Is more tired than they let anyone see.'),
+    'leaving': ('work', 'Reads the transfer lists every week.', 'secret', 'Isn\'t sure whether to stay on the Wren, and changes their mind daily.'),
+    'rivalry': ('past', 'Has an old rivalry with someone aboard that goes back years.', 'secret', 'Can\'t remember how it started, and would quite like it to end.'),
+    'startover': ('past', 'Is vague about what they did before the Wren.', 'secret', 'Came aboard to start over after something went wrong at home, and is glad they did.'),
+}
+# hand-written for the hand-written crew: social fields, and about details added to theirs (to six or more each)
+SOCIAL_HAND = {
+    'marrow': dict(tpl='steady', openness='guarded', needs='listen', loves=['music'], likes=['tea', 'book'], joy='the piano on Thursday nights', thread='arc:marrow', keepsake='a page of sheet music she wrote', home='Port Halloran', family='daughter at the Concord academy'),
+    'vance': dict(tpl='brisk', openness='guarded', needs='practical', loves=['game'], likes=['made', 'tea'], joy='the rowing leaderboard', thread='arc:vance', keepsake='his old academy rowing medal', home='New Aberdeen', family='brother in the Concord navy'),
+    'sato': dict(tpl='dreamy', openness='normal', needs='share', loves=['tea', 'star'], likes=['book', 'plant'], joy='her terrible tea', thread='notgood', keepsake='a tin of the terrible tea', home='Lisk', family='partner on a research station'),
+    'holt': dict(tpl='gruff', openness='guarded', needs='practical', loves=['made'], likes=['tea', 'game'], joy='walking the decks before breakfast', thread='arc:holt', keepsake='his first Watch badge', home='Marra Station', family='old border-patrol crew, who I still write to'),
+    'calder': dict(tpl='brisk', openness='guarded', needs='practical', loves=['made'], likes=['tea', 'book'], joy='a fan that runs sweetly', thread='arc:calder', keepsake='a spanner from the battered toolbox', home='the Tevan belt shipyards', family='first chief, as near to family as I had'),
+    'pell': dict(tpl='chatty', openness='open', needs='cheer', loves=['music', 'sweet'], likes=['made', 'game'], joy='his tin of screws from every ship', thread='arc:pell', keepsake='his smallest music box', home='Coriel', family='mum, who messages every week'),
+    'rina': dict(tpl='dry', openness='guarded', needs='cheer', loves=['game', 'sweet'], likes=['tea', 'garden'], joy='Tiles', thread='arc:rina', keepsake='a Tiles piece, the cheating one', home='Kesh', family='sister, a station doctor, and my gran'),
+    'brennan': dict(tpl='warm', openness='normal', needs='share', loves=['garden', 'sweet'], likes=['tea', 'plant'], joy='a full mess hall', thread='arc:brennan', keepsake='a biscuit tin with a recipe taped inside', home='Port Halloran', family='old restaurant crew'),
+    'tomas': dict(tpl='earnest', openness='open', needs='listen', loves=['star'], likes=['book', 'sweet'], joy='his taped-up star map', thread='arc:tomas', keepsake='his spare star map', home='a farm moon with a grey sky', family='little brother, who I write to every week'),
+    'nandakumar': dict(tpl='brisk', openness='normal', needs='practical', loves=['garden', 'plant'], likes=['tea', 'book'], joy='her chillies in the garden', thread='burnout', keepsake='a dried chilli on a string', home='New Aberdeen', family='two grown sons'),
+    'kowalczyk': dict(tpl='dry', openness='guarded', needs='listen', loves=['book'], likes=['tea', 'star'], joy='old paper novels', thread='lonely', keepsake='a paper novel with her notes in it', home='Marra Station', family='father, who ran a lighthouse beacon'),
+    'raman': dict(tpl='steady', openness='normal', needs='share', loves=['made'], likes=['music', 'star'], joy='his model of the Wren', thread='leaving', keepsake='a tiny model shuttle he carved', home='Lisk', family='wife and two daughters on Lisk'),
+    'ferreira': dict(tpl='chatty', openness='open', needs='share', loves=['music'], likes=['tea', 'book'], joy='languages, Veyli most of all', thread='family', keepsake='a phrasebook in four languages', home='Coriel', family='big family, who all talk at once'),
+    'oduya': dict(tpl='warm', openness='open', needs='listen', loves=['sweet'], likes=['plant', 'book'], joy='a bowl of sweets on his desk', thread='loss', keepsake='a sweet from the bowl, the last of a kind', home='Kesh', family='late wife, who I still talk about'),
+    'mensah': dict(tpl='playful', openness='normal', needs='cheer', loves=['game'], likes=['sweet', 'music'], joy='making Holt laugh', thread='startover', keepsake='a lucky coin from his first patrol', home='Port Halloran', family='twin brother'),
+    'mori': dict(tpl='shy', openness='guarded', needs='listen', loves=['star'], likes=['book', 'tea'], joy='charting', thread='notgood', keepsake='a corner of her first chart', home='the Tevan belt', family='parents, who wanted me to stay home'),
+    'torres-zeke': dict(tpl='warm', openness='open', needs='share', loves=['music', 'made'], likes=['tea', 'sweet'], joy='knitting scarves and every song in the record cabinet', thread='arc:torres', keepsake='a scarf he knitted for you', home='Hesper Dock', family='grandmother, who taught me to knit'),
+    'saruth': dict(tpl='steady', openness='guarded', needs='listen', loves=['tea'], likes=['plant', 'made'], joy='the daily tea', thread='lonely', keepsake='a knot of Veyli cord', home='the Veyli homeworld', family='teacher of the cord, far away'),
+}
+ABOUT_HAND_MORE = {
+    'marrow': [(2, 'past', 'Commanded a freighter before the Wren, and hated every day of it.'), (3, 'hobby', 'Plays the piano best when she thinks the music room is empty.')],
+    'vance': [(1, 'home', 'Grew up in New Aberdeen, where his brother still teases him about the rules.'), (3, 'hobby', 'Rows at 05:00 so nobody sees him lose to the machine.')],
+    'sato': [(2, 'home', 'Has a partner on a research station, and they send each other comet photographs.'), (3, 'hobby', 'Grows a single tea plant in the garden, badly.')],
+    'holt': [(2, 'home', 'Writes to his old patrol crew every month, by hand.'), (3, 'work', 'Respects Kofi Mensah more than he has ever told him.')],
+    'calder': [(2, 'home', 'Grew up in the Tevan belt shipyards, with no family to speak of.'), (3, 'hobby', 'Fixes broken things nobody asked her to, late at night, to think.')],
+    'brennan': [(2, 'home', 'Still gets letters from the old restaurant crew on Port Halloran.'), (3, 'hobby', 'Grows her own herbs, and won\'t let anyone else pick them.')],
+    'saruth': [(2, 'past', 'Studied the cord for twenty years before the posting.'), (3, 'work', 'Finds Chief Holt\'s suspicion almost restful: at least it is honest.')],
+}
+ABOUT_HAND_NEW = {
+    'nandakumar': [(0, 'work', 'Runs the infirmary like a clock, and will tell you to drink some water.'), (1, 'hobby', 'Grows chillies in the garden that nobody else can eat.'),
+                   (1, 'home', 'Comes from New Aberdeen, and has two grown sons there.'), (2, 'work', 'Thinks Rina will make a fine doctor, and hasn\'t told her yet.'),
+                   (3, 'past', 'Worked in a big city hospital for years before choosing the frontier.'), (4, 'secret', 'Is more tired than she lets anyone see, and keeps saying yes.')],
+    'kowalczyk': [(0, 'work', 'Runs the bridge at night, and likes it quiet.'), (1, 'hobby', 'Reads old paper novels on quiet nights, and sniffs the pages.'),
+                  (1, 'home', 'Grew up on Marra Station, where her father kept a beacon.'), (2, 'work', 'Thinks the night shift is the real ship, and the day shift is visitors.'),
+                  (3, 'past', 'Has been on night shift so long she has forgotten what lunch is like.'), (4, 'secret', 'Sometimes goes a whole week without a real conversation, and minds more than she says.')],
+    'raman': [(0, 'work', 'Flies the Wren like it might spill.'), (1, 'hobby', 'Keeps a model of the Wren by his door, and adds a detail every month.'),
+              (1, 'home', 'Has a wife and two daughters on Lisk.'), (2, 'work', 'Has flown survey ships for twenty years, and still gets nervous docking.'),
+              (3, 'home', 'Misses his daughters growing up, one call at a time.'), (4, 'secret', 'Has been offered a desk job near home, and hasn\'t answered.')],
+    'ferreira': [(0, 'work', 'Every message home passes through her hands, and she never reads them.'), (1, 'hobby', 'Speaks four languages and some Veyli, and wants more.'),
+                 (1, 'home', 'Comes from a big family on Coriel who all talk at once.'), (2, 'work', 'Is learning Veyli from the Envoy, one word a day.'),
+                 (3, 'home', 'Her mother has been ill, and the news comes slowly.'), (4, 'secret', 'Reads the messages from home three times before she can answer.')],
+    'oduya': [(0, 'work', 'Keeps office hours on Deck 3 and a bowl of sweets on his desk.'), (1, 'hobby', 'Knows everyone\'s birthday, and their favourite sweet.'),
+              (1, 'home', 'Comes from Kesh, and still cooks its food badly.'), (2, 'work', 'Thinks most problems aboard are about sleep, and is usually right.'),
+              (3, 'past', 'Lost his wife some years ago, and talks about her easily now.'), (4, 'secret', 'Took the posting because their house was too quiet without her.')],
+    'mensah': [(0, 'work', 'Walks the whole ship once a night, deck by deck.'), (1, 'hobby', 'Is the only one who can make Chief Holt laugh, and works at it.'),
+               (1, 'home', 'Has a twin brother on Port Halloran.'), (2, 'work', 'Thinks the Watch is about kindness more than rules, and Holt half agrees.'),
+               (3, 'past', 'Was a very different man before he joined the Watch.'), (4, 'secret', 'Came aboard to start over, and the Wren worked.')],
+    'mori': [(0, 'work', 'Runs the labs while Sato runs everyone.'), (1, 'hobby', 'Maps the frontier one survey at a time, in the chart room.'),
+             (1, 'home', 'Comes from the Tevan belt, where her parents wanted her to stay.'), (2, 'work', 'Thinks Sato is a genius and a menace, in equal parts.'),
+             (3, 'past', 'Made a charting mistake years ago that nobody else remembers.'), (4, 'secret', 'Checks every chart three times because of it.')],
+    'torres-zeke': [(0, 'work', 'Knows every engine on the Wren by its sound.'), (1, 'hobby', 'Knits scarves for anyone who stands still long enough.'),
+                    (1, 'home', 'Grew up on Hesper Dock, where his grandmother taught him to knit.'), (2, 'work', 'Remembers his own first week aboard, and was terrible at it.'),
+                    (3, 'past', 'Nearly washed out of training, and someone gave him a second chance.'), (4, 'secret', 'Asked to be the one who meets the new cadets, because nobody met him.')],
+}
+# couples: established crew couples (never the player, never story crew), partner both ways
+COUPLES = 4
+def social_fields(out):
+    hand = set(SOCIAL_HAND)
+    for e in out:
+        if e.get('player') or e['rank'] == 'guest' and e['id'] not in hand: continue
+        if e['id'] in hand:
+            e.update(SOCIAL_HAND[e['id']])
+        else:
+            tr = e.get('traits', [])
+            e['tpl'] = next((t for t, words in TPL_OF if any(w in tr for w in words)), TPLS[stable(e['id']) % 10])
+            e['openness'] = OPEN_OF.get(e['tpl'], 'normal'); e['needs'] = NEEDS_OF[e['tpl']]
+            life = ' '.join(e.get('life', [])).lower()
+            clue = next(((tag, joy) for k, tag, joy in LIFE_CLUES if k in life), None)
+            tags = ([clue[0]] if clue else []) + [t for h in e['habits'] for t in TAGS_OF_HABIT.get(h, [])]
+            tags = list(dict.fromkeys(tags)) or [P4_R.choice(GIFT_TAGS)]
+            e['loves'] = tags[:1 + (len(tags) > 2)]
+            rest = [t for t in tags if t not in e['loves']] + P4_R.sample([t for t in GIFT_TAGS if t not in tags], 2)
+            e['likes'] = rest[:2]
+            e['joy'] = clue[1] if clue else next((JOY_OF_HABIT[h] for h in e['habits'] if h in JOY_OF_HABIT), 'a good cup of tea')
+            cand = [THEME_OF_TRAIT[t] for t in tr if t in THEME_OF_TRAIT] + (['burnout'] if 'workaholic' in e['habits'] else [])
+            e['thread'] = P4_R.choice(cand) if cand and P4_R.random() < .7 else P4_R.choice(THEMES)
+            e['keepsake'] = KEEPSAKE_OF[e['loves'][0]]
+            hm = next((pl for pl in PLACES if pl.lower() in life), None)
+            e['home'] = hm or P4_R.choice(PLACES); e['family'] = P4_R.choice(FAMILY)[1]
+        # about: hand-written where there are some; everyone ends with six or more, tiers 0-4, one tier-4 secret
+        if e['id'] in ABOUT_HAND_NEW: e['about'] = [dict(tier=t, topic=k, text=x) for t, k, x in ABOUT_HAND_NEW[e['id']]]
+        elif e['id'] in ABOUT_HAND_MORE: e['about'] = e['about'] + [dict(tier=t, topic=k, text=x) for t, k, x in ABOUT_HAND_MORE[e['id']]]
+        elif not e.get('about'):
+            work = WORK_WORDS[e['work']['place']] if e.get('work') else 'the ship'
+            f = lambda s: s.format(home=e['home'], family=FAMILY_HAS[e['family']], joy=e['joy'], work=work)
+            t3k, t3, t4k, t4 = ABOUT_THEME[e['thread']]
+            e['about'] = [dict(tier=0, topic='work', text=f(P4_R.choice(ABOUT_CADET0 if e.get('cadet') else ABOUT_WORK0))), dict(tier=1, topic='hobby', text=f(P4_R.choice(ABOUT_HOBBY1))),
+                          dict(tier=1, topic='home', text=f(P4_R.choice(ABOUT_HOME1))), dict(tier=2, topic='home', text=f(P4_R.choice(ABOUT_FAMILY2))),
+                          dict(tier=2, topic='work', text=f(P4_R.choice(ABOUT_WORK2))), dict(tier=3, topic=t3k, text=f(t3)), dict(tier=4, topic=t4k, text=f(t4))]
+        a = e['about']
+        assert len(a) >= 6 and sum(x['tier'] == 4 for x in a) >= 1 and all(x['tier'] in range(5) and x['topic'] in ('home', 'work', 'hobby', 'past', 'secret') for x in a), e['id']
+        for k in ('tpl', 'loves', 'likes', 'joy', 'thread', 'needs', 'openness', 'keepsake', 'home', 'family'): assert e.get(k), (e['id'], k)
+        assert e['thread'] in THEMES or e['thread'].startswith('arc:'), e['thread']      # spellings frozen with social B (DEV_NOTES, Social stories)
+        e['mentors'] = any(t in e.get('traits', []) for t in MENTOR_TRAITS) or e['id'] in ('torres-zeke', 'calder', 'oduya', 'brennan')
+# ---- who may be transferred (the social plan, Part 8b): never the Captain, the Chiefs, the escort, the story crew, Saruth
+STAYS = {'marrow', 'vance', 'sato', 'holt', 'calder', 'nandakumar', 'torres-zeke', 'tomas', 'pell', 'rina', 'brennan', 'saruth'}
+def couples_and_moves(out):
+    crew = [e for e in out if e['rank'] != 'guest' and not e.get('player')]
+    for e in crew:
+        if e['id'] in STAYS: e['stays'] = True
+        else: e['transferTo'] = SHIPS[stable(e['id']) % len(SHIPS)]
+        e['aboard'] = None
+    pool = sorted([e for e in crew if e['id'] not in HAND and e['id'] not in STAYS], key=lambda e: e['id'])
+    made = []
+    while len(made) < COUPLES:
+        a = P4_R.choice(pool)
+        cand = [b for b in pool if b is not a and b['shift'] == a['shift'] and b['dept'] != a['dept'] and abs(RANK_ORDER.index(a['rank']) - RANK_ORDER.index(b['rank'])) <= 1]
+        if not cand: continue
+        b = P4_R.choice(cand)
+        a['partner'], b['partner'] = b['id'], a['id']
+        if a['thread'] == 'lonely': a['thread'] = 'family'
+        if b['thread'] == 'lonely': b['thread'] = 'family'
+        b['transferTo'] = a['transferTo']             # a couple transfers together
+        made.append((a['id'], b['id'])); pool = [e for e in pool if e not in (a, b)]
+    # a couple shares at least one day off where the rotas allow: the partner who is free to move takes the other's
+    # days if department staffing still holds
+    fixed = lambda p: p['id'] in DAYS_FIXED or p['dept'] in ('galley', 'store', 'garden')
+    def staffed(p, off):
+        team = [q for q in crew if q['dept'] == p['dept'] and q['shift'] == p['shift'] and q is not p]
+        return not team or all(any(d not in q['rota']['offDays'] for q in team) or d not in off for d in range(7))
+    by = {e['id']: e for e in crew}
+    for x, y in made:
+        a, b = by[x], by[y]
+        if set(a['rota']['offDays']) & set(b['rota']['offDays']): continue
+        for p, q in ((b, a), (a, b)):
+            if not fixed(p) and p['shift'] == q['shift'] and staffed(p, q['rota']['offDays']):
+                p['rota'] = dict(p['rota'], offDays=list(q['rota']['offDays'])); break
+    return made
+# ---- the reserve pool: about 12 future crew, a third of them new cadets; and the rotation calendar
+RES_LAST = ['Achebe', 'Bramwell', 'Castellano', 'Dufresne', 'Eriksen', 'Fontaine', 'Gallagher', 'Haverford', 'Ishikawa-Lund', 'Juarez', 'Kowal', 'Lindgren-Bay',
+            'Mwangi', 'Nordqvist', 'Okonkwo', 'Pellegrini', 'Quaye', 'Rourke', 'Sorensen', 'Tavares']
+RES_FIRST = ['Agnes', 'Basil', 'Cora', 'Dmitri', 'Effie', 'Femi', 'Gwen', 'Hiro', 'Iona', 'Jem', 'Kofi', 'Lumi', 'Mara', 'Nell', 'Otto', 'Priya', 'Rafe', 'Sunny', 'Tam', 'Vida']
+RESERVE = [   # dept, rank, role, job, shift, cadet
+    ('works', 'junior', 'Works cadet', 'works', 'day', True), ('survey', 'junior', 'Survey cadet', 'survey', 'day', True),
+    ('watch', 'junior', 'Watch cadet', 'watch', 'day', True), ('galley', 'junior', 'Galley cadet', 'galley', 'day', True),
+    ('works', 'junior', 'Works technician', 'works', 'day', False), ('works', 'junior', 'Engine technician', 'engine', 'night', False),
+    ('helm', 'officer', 'Helm officer', 'helm', 'day', False), ('survey', 'officer', 'Survey officer', 'survey', 'day', False),
+    ('infirmary', 'junior', 'Infirmary aide', 'infirmary', 'day', False), ('comms', 'junior', 'Comms rating', 'comms', 'day', False),
+    ('watch', 'officer', 'Watch officer', 'watch', 'night', False), ('survey', 'junior', 'Survey assistant', 'survey', 'day', False),
+]
+RES_BIOS = {'cadet': ['Brand new, and trying very hard not to look it.', 'Fresh from the academy, with a kitbag that\'s far too heavy.', 'New aboard, and already lost twice.'],
+            'other': ['Transferred in from another survey ship, with stories.', 'Has served on three ships and likes this one already.', 'Arrives with a good reputation and a bad haircut.']}
+RES_LIFE = ['Has never seen a nebula.', 'Brought a plant from home that is not doing well.', 'Writes letters home every week.', 'Plays the harmonica, quietly.',
+            'Is trying to learn everyone\'s name in a week.', 'Has a cat back home, and talks about it a lot.', 'Collects mission patches.', 'Bakes on rest days.']
+ROTATION_DAYS = [35, 77, 119, 161, 203, 245]      # Sundays, every six ship weeks from week 5
+ROTATION_IN = [1, 2, 2, 3, 2, 2]                  # arrivals each time (the same number leave); the first brings a new cadet
+def reserve(out):
+    used_last = {e['name'].split()[-1] for e in out}; used_first = {e['name'].split()[0] for e in out}
+    taken = {e['birthday'] for e in out if e.get('birthday')}
+    res = []
+    order = [0, 4, 1, 6, 9, 2, 5, 7, 3, 8, 11, 10]  # arrival order: a new cadet first
+    for k in order:
+        dept, rank, role, job, shift, cadet = RESERVE[k]
+        f = P4_R.choice([x for x in RES_FIRST if x not in used_first]); l = P4_R.choice([x for x in RES_LAST if x not in used_last])
+        used_first.add(f); used_last.add(l)
+        pid = l.lower().replace("'", '') + '-' + f.lower()
+        deck, place = WORK[job]
+        bday = P4_R.choice([d for d in range(1, 365) if d not in taken]); taken.add(bday)
+        e = dict(id=pid, name=f + ' ' + l, reserve=True, cadet=cadet, rank=rank, dept=dept, uniform=UNIFORM[dept], role=role, shift=shift,
+                 rota={'offDays': ([[5, 6]] + WEEKDAY_PAIRS)[stable(pid) % 7] if shift == 'day' else NIGHT_PAIRS[stable(pid) % 7]}, bed=None,
+                 work=dict(deck=deck, place=place), habits=P4_R.sample(list(HABITS)[:18], 2), traits=P4_R.sample(TRAITS, 2), looks=looks_with(P4_R),
+                 bio=P4_R.choice(RES_BIOS['cadet' if cadet else 'other']), life=P4_R.sample(RES_LIFE, 2), seed=seed_of(pid), birthday=bday)
+        if any(a in e['habits'] and b in e['habits'] for a, b in CLASH): e['habits'] = e['habits'][:1]
+        if rank != 'junior': e['plate'] = {'rank': PLATE_RANK[rank], 'name': e['name']}
+        e['transferTo'] = None
+        res.append(e)
+    # each arrival replaces one leaver of the same role (the sim engineer's ask): they take the leaver's bed, work
+    # station, shift and rota, so nobody else's desk or bunk moves; leavers are never kept crew or half of a couple
+    base_role = {'Works cadet': 'Works technician', 'Survey cadet': 'Survey assistant', 'Watch cadet': 'Watch rating', 'Galley cadet': 'Galley hand'}
+    crew = sorted([e for e in out if e['rank'] != 'guest' and not e.get('player') and not e.get('stays') and not e.get('partner')], key=lambda e: e['id'])
+    gone = set()
+    for e in res:
+        want = base_role.get(e['role'], e['role'])
+        cand = [c for c in crew if c['role'] == want and c['shift'] == e['shift'] and c['id'] not in gone]
+        assert cand, e['role']
+        c = P4_R.choice(cand); gone.add(c['id'])
+        e['replaces'] = c['id']
+        e.update(bed=c['bed'], work=dict(c['work']), rota=json.loads(json.dumps(c['rota'])), dept=c['dept'], uniform=c['uniform'])
+    social_fields(res)
+    k = 0; rot = []
+    for day, n in zip(ROTATION_DAYS, ROTATION_IN):
+        arr = res[k:k + n]; k += n
+        for e in arr:
+            e['aboard'] = [day, None]
+            lv = next(c for c in out if c['id'] == e['replaces']); lv['aboard'] = [None, day]
+        rot.append(dict(day=day, out=[e['replaces'] for e in arr], **{'in': [e['id'] for e in arr]}))
+    assert k == len(res) and res[0]['cadet'] and all(d % 7 == 0 for d in ROTATION_DAYS)
+    return res, rot
+
+# ---- hobby and since (0.16.14, for social A's moments: "{hobby}", "{since}"). Both are plain rules on what each person
+# already has (joy, loves, life and bio lines, rank), with no random draws, so nobody moves. hobby: an -ing phrase;
+# since: how long they've been aboard the Wren, a duration phrase (the reserve: from the day they arrive)
+HOBBY_HAND = {'marrow': 'playing the piano', 'vance': 'rowing', 'sato': 'brewing terrible tea', 'holt': 'writing letters by hand',
+              'calder': 'fixing broken things', 'pell': 'collecting music boxes', 'rina': 'playing Tiles', 'brennan': 'growing herbs',
+              'tomas': 'mapping the stars', 'nandakumar': 'growing chillies', 'kowalczyk': 'reading old paper novels', 'raman': 'building a model of the Wren',
+              'ferreira': 'learning languages', 'oduya': 'trying sweets from every port', 'mensah': 'practising card tricks', 'mori': 'drawing charts',
+              'torres-zeke': 'knitting', 'saruth': 'tying cord knots'}
+SINCE_HAND = {'marrow': 'six years', 'vance': 'four years', 'sato': 'seven years', 'holt': 'eight years', 'calder': 'eleven years', 'pell': 'two years',
+              'rina': 'eighteen months', 'brennan': 'five years', 'tomas': 'one week', 'nandakumar': 'three years', 'kowalczyk': 'nine years',
+              'raman': 'four years', 'ferreira': 'six years', 'oduya': 'three years', 'mensah': 'five years', 'mori': 'six years',
+              'torres-zeke': 'twelve years', 'saruth': 'five months'}
+HOBBY_OF_LINE = [('comics', 'drawing comics'), ('harmonica', 'playing the harmonica'), ('patches', 'collecting mission patches'), ('playlist', 'making playlists')]
+HOBBY_OF_JOY = {'learning the guitar, badly': 'learning the guitar, badly', 'knitting scarves': 'knitting scarves', 'looking after a cactus called Gerald': 'looking after a cactus called Gerald',
+                'pressing flowers from the garden': 'pressing flowers', 'baking on rest days': 'baking', 'painting tiny portraits of the crew': 'painting tiny portraits of the crew',
+                'keeping a journal': 'keeping a journal', 'mystery novels': 'reading mystery novels', 'growing herbs': 'growing herbs', 'trying recipes from home': 'cooking recipes from home',
+                'knowing every song in the record cabinet': 'collecting old records', 'telling terrible jokes': 'telling terrible jokes', 'watching the stars': 'stargazing',
+                'writing letters home': 'writing letters home', 'talking about their cat': 'drawing pictures of the cat back home', 'chess': 'playing chess',
+                'running on the treadmill': 'running', 'the gym after shift': 'lifting weights', 'evenings in the music room': 'listening to old records',
+                'tending the garden': 'gardening', 'the garden benches': 'sketching in the garden', 'observatory nights': 'stargazing', 'a drink at the lounge bar': 'playing cards at the bar',
+                'browsing the crew store': 'collecting souvenirs', 'Tiles nights': 'playing Tiles', 'calls home': 'recording messages for home',
+                'a good book in a quiet corner': 'reading', 'a seat by the window': 'watching the stars go by', 'evenings in the bow lounge': 'doing crosswords in the bow lounge',
+                'a proper tea break': 'trying new teas'}
+HOBBY_PLAYS = ['playing the fiddle', 'playing the drums', 'playing the keyboard', 'singing']     # joy 'playing in the music room'
+HOBBY_OF_TAG = {'tea': 'trying new teas', 'sweet': 'baking', 'plant': 'growing cuttings', 'garden': 'gardening', 'made': 'making models', 'book': 'reading',
+                'music': 'listening to old records', 'star': 'stargazing', 'game': 'doing puzzles'}
+SINCE_OF = {'officer': ['eighteen months', 'two years', 'three years', 'four years', 'five years', 'six years', 'seven years'],
+            'junior': ['eight months', 'ten months', 'a year', 'fourteen months', 'eighteen months', 'two years', 'two and a half years', 'three years', 'four years']}
+SINCE_NEW = ['two months', 'three months', 'four months', 'five months']                      # bios that say "New to ..."
+NO_MY = re.compile(r"\b(he|she|him|her|his|hers|they|them|their)\b", re.I)
+def hobby_since(people):
+    for e in people:
+        lines = ' '.join([e.get('bio', '')] + e.get('life', [])).lower()
+        if e['id'] in HOBBY_HAND: e['hobby'] = HOBBY_HAND[e['id']]
+        else:
+            e['hobby'] = next((h for k, h in HOBBY_OF_LINE if k in lines), None) or HOBBY_OF_JOY.get(e['joy']) or \
+                         (HOBBY_PLAYS[stable(e['id']) % 4] if e['joy'] == 'playing in the music room' else HOBBY_OF_TAG[e['loves'][0]])
+        if e['id'] in SINCE_HAND: e['since'] = SINCE_HAND[e['id']]
+        elif e.get('reserve'): e['since'] = 'one week' if e.get('cadet') else 'two weeks'
+        elif 'same job for five years' in ' '.join(a['text'] for a in e.get('about', [])): e['since'] = 'five years'
+        elif e['bio'].startswith('New to'): e['since'] = SINCE_NEW[stable(e['id']) % 4]
+        else: e['since'] = SINCE_OF[e['rank']][stable(e['id']) % len(SINCE_OF[e['rank']])]
+        assert e['hobby'].split()[0].endswith('ing') and e['since'], e['id']
+        f = e['family']        # said after "my": a noun phrase, no article, no third person
+        assert not re.match(r'(a|an|the|my) ', f) and not NO_MY.search(f), (e['id'], f)
+
+# ---- kin, lost and hobbyNoun (0.16.15, short fill-ins for the writers' theme lines, after reviewer 2's dialogue review).
+# Plain rules on what each person already has, no random draws, so nobody moves.
+# kin: one living close relative, with "my", never a partner ("It's {kin}. Not well."); "" when their text has none.
+# lost: someone who has died, only where their text already says so (Oduya's wife; the loss secret "Lost someone close"),
+#       never anyone their other lines treat as alive; "" for everyone else.
+# hobbyNoun: the hobby as a short activity noun, for "a bit of X", "teaching X", "I've done X since I was small".
+KIN_HAND = {'marrow': 'my daughter', 'vance': 'my brother', 'sato': '', 'holt': '', 'calder': '', 'pell': 'my mum', 'rina': 'my gran',
+            'brennan': '', 'tomas': 'my little brother', 'nandakumar': 'my eldest son', 'kowalczyk': 'my dad', 'raman': 'my daughter',
+            'ferreira': 'my mum', 'oduya': '', 'mensah': 'my twin', 'mori': 'my mum', 'torres-zeke': 'my gran', 'saruth': ''}
+KIN_OF = {'younger brother': ['my younger brother'], 'two older sisters': ['my big sister'], 'parents, who run a repair shop': ['my mum', 'my dad'],
+          'grandmother, who raised me': ['my gran'], 'big, noisy family': ['my mum', 'my dad'], 'twin': ['my twin'], 'mother, who writes every week': ['my mum'],
+          'father, who grows apples': ['my dad'], 'three cousins, who I grew up with': ['my cousin'], 'aunt, who was a pilot': ['my aunt'],
+          'little sister, who wants to join up': ['my little sister'], 'parents on a mining station': ['my mum', 'my dad']}
+LOST_HAND = {'oduya': 'my wife'}
+LOST_OF = ['my grandad', 'my best friend', 'my uncle']        # nobody's kin or family, so no line treats them as alive
+HOBBY_NOUN = {'baking': 'baking', 'looking after a cactus called Gerald': 'cactus care', 'writing letters home': 'letter writing', 'learning the guitar, badly': 'guitar',
+              'reading': 'reading', 'growing herbs': 'herb growing', 'reading mystery novels': 'reading', 'trying new teas': 'tea tasting', 'drawing comics': 'drawing',
+              'pressing flowers': 'flower pressing', 'playing Tiles': 'Tiles', 'collecting souvenirs': 'souvenir collecting', 'keeping a journal': 'journalling',
+              'lifting weights': 'weightlifting', 'knitting scarves': 'knitting', 'running': 'running', 'telling terrible jokes': 'comedy',
+              'painting tiny portraits of the crew': 'painting', 'recording messages for home': 'recording', 'drawing pictures of the cat back home': 'drawing',
+              'playing the harmonica': 'harmonica', 'playing the piano': 'piano', 'rowing': 'rowing', 'brewing terrible tea': 'tea brewing',
+              'writing letters by hand': 'letter writing', 'fixing broken things': 'tinkering', 'collecting music boxes': 'music-box collecting', 'mapping the stars': 'star mapping',
+              'growing chillies': 'gardening', 'reading old paper novels': 'reading', 'building a model of the Wren': 'model making', 'learning languages': 'languages',
+              'trying sweets from every port': 'sweet tasting', 'practising card tricks': 'magic', 'drawing charts': 'drawing', 'collecting old records': 'record collecting',
+              'knitting': 'knitting', 'doing crosswords in the bow lounge': 'crosswords', 'making playlists': 'music mixing', 'watching the stars go by': 'stargazing',
+              'growing cuttings': 'gardening', 'gardening': 'gardening', 'cooking recipes from home': 'cooking', 'sketching in the garden': 'sketching',
+              'tying cord knots': 'knotwork', 'collecting mission patches': 'patch collecting', 'playing the fiddle': 'fiddle', 'playing the drums': 'drums',
+              'playing the keyboard': 'keyboard', 'singing': 'singing', 'stargazing': 'stargazing', 'playing chess': 'chess', 'listening to old records': 'record collecting',
+              'playing cards at the bar': 'cards', 'doing puzzles': 'puzzles', 'making models': 'model making'}
+# ---- story arcs the writers own (0.16.16, head writer 3 and social B2: the roster's thread wins for themes, the voice files
+# only for 'arc:' threads). Sato's thread is the notgood theme (facts 11; her own secret already fits it). Zainab Kovac has
+# the writers' four-beat arc (the lift club, facts 6; reworded in 0.16.21: everyone rides the lift and eats breakfast), so her thread is arc:kovac and all her generated details give way
+# to her canon ones. Applied last, with no random draws, so nobody moves.
+ARC_OVERRIDE = {'kovac-zainab': ('arc:kovac', [   # all her details from canon (facts 6 and 11), worded by head writer 3 (0.16.17)
+    (0, 'work', 'Can strip a scrubber in ten minutes flat.'), (0, 'hobby', 'Knits the neatest scarves in the knitting circle, without a single dropped stitch.'),
+    (1, 'hobby', 'Bolts breakfast to get to the garden; her beans are the tidiest rows there.'), (1, 'hobby', 'Browses the crew store for wool; never buys the first ball she likes.'),
+    (2, 'home', 'Writes to a big, noisy family more often than her family writes back.'),
+    (3, 'past', 'Holds the lift rail with both hands, and tells anyone who notices "Lovely lift."'),
+    (4, 'secret', 'Is afraid of the lift, and thinks she is the only one aboard who is.')])}
+ARC_FIELDS = {'kovac-zainab': {'home': 'Marra Station'}}      # her arc's beat 3: she grew up on Marra Station (0.16.18)
+def arc_fixes(people):
+    for e in people:
+        if e['id'] not in ARC_OVERRIDE: continue
+        th, lines = ARC_OVERRIDE[e['id']]
+        e['thread'] = th
+        e['about'] = [dict(tier=t, topic=k, text=x) for t, k, x in lines]
+        e.update(ARC_FIELDS.get(e['id'], {}))
+        assert len(e['about']) >= 6, e['id']
+
+# the talent theme ("I do a bit of X when nobody's looking", "Me, teaching X", "I made it for you") needs a secret craft, not a
+# public pastime, so talent-thread people get one hand-set from their hobby (0.16.20, reviewer 1c); the generator asserts it.
+TALENT_NOUN = {'ibarra-rafael': 'crossword setting', 'silva-bea': 'tea blending', 'quist-ilse': 'story writing', 'jovanovic-petra': 'tile carving',
+               'amadi-asha': 'star sketching', 'juarez-nell': 'patch sewing'}
+def kin_lost(people):
+    for e in people:
+        k = KIN_HAND[e['id']] if e['id'] in KIN_HAND else KIN_OF[e['family']][stable(e['id']) % len(KIN_OF[e['family']])]
+        lost = LOST_HAND.get(e['id']) or ('' if e['id'] in LOST_HAND or not any(a['text'].startswith('Lost someone close') for a in e.get('about', []))
+                                          else LOST_OF[stable(e['id']) % len(LOST_OF)])
+        e['kin'], e['lost'], e['hobbyNoun'] = k, lost, TALENT_NOUN[e['id']] if e['thread'] == 'talent' else HOBBY_NOUN[e['hobby']]
+        for v in (k, lost): assert v == '' or (v.startswith('my ') and len(v.split()) <= 3 and 'partner' not in v and 'wife' not in v or v == LOST_HAND.get(e['id'])), (e['id'], v)
+        assert (k != lost or not k) and not e['hobbyNoun'].startswith(('a ', 'my ', 'the ')), e['id']
+
 DROPPED = []
+COUPLED = []
 
 def main():
     used_names = {p['name'].split()[-1] for p in STORY + GUESTS}
@@ -403,6 +1011,20 @@ def main():
     for p, (hours, off, bio) in zip([p for p in crew if p['role'] == 'Works technician' and not p.get('story')][-2:], STOREKEEPERS):
         p.update(dept='store', role='Storekeeper', job='store', bio=bio)
         p['rota'] = {'offDays': off, 'hours': hours}
+    # ---- the garden (0.16.11): the three day crew with the gardener habit tend the working garden. Ravi Hart works
+    # early, Imani O'Neill late; Tove Cruz, the senior gardener, works days, and on their days off takes their hours
+    # (rota.hoursOn), so the garden has early and late cover every day. Their beds and habits stay; they work at the
+    # garden's work:garden stations (the deck architect's 0.38.6)
+    for p in crew:
+        if p['id'] in GARDENERS:
+            role, team, off, hours, on, bio = GARDENERS[p['id']]
+            p.update(dept='garden', role=role, job='garden', bio=bio)
+            p['rota'] = {'offDays': off, 'hours': hours, 'team': team}
+            if on: p['rota']['hoursOn'] = on
+    for d in range(7):
+        hrs = [h for p in crew if p['dept'] == 'garden' and d not in p['rota']['offDays']
+               for h in next((o['hours'] for o in p['rota'].get('hoursOn', []) if d in o['days']), p['rota']['hours'])]
+        assert any(a <= 360 for a, b in hrs) and any(b >= 1260 for a, b in hrs), ('garden cover', d)
     # ---- the galley staff's teams, agreed with the galley engineer (section 16 owns their hours, in GALLEY_SHIFTS; shift
     # stays 'day'). Days off give a chef and at least one early and one late hand every day; Lukas Dlamini, an early
     # hand, works the chef's shift on Brennan's days off (Fri and Sat)
@@ -414,6 +1036,7 @@ def main():
     for d in range(7):
         on = [p['rota']['team'] for p in crew if p['dept'] == 'galley' and d not in p['rota']['offDays'] and d not in p['rota'].get('cover', {}).get('days', [])]
         assert 'early' in on and 'late' in on, d
+    days_off(crew)                                      # Pillar 4: varied days off (after every rota above)
     # ---- work places, seeds, uniform
     out = []
     for p in crew + GUESTS + [PLAYER]:
@@ -470,6 +1093,10 @@ def main():
             e['habitShifts'] = [{k: o[k] for k in ('add', 'drop', 'why') if o.get(k)} for o in pick]
         assert e['habitShifts'] and all(ok(e, it) for it in e['habitShifts']), e['id']
         for it in e['habitShifts']: assert e['name'].split()[0] in it['why'] or e['name'] in it['why'] or e['id'] in it['why'].lower(), (e['id'], it['why'])
+    for e in out:
+        if e['id'] in ABOUT: e['about'] = [dict(tier=t, topic=k, text=x) for t, k, x in ABOUT[e['id']]]
+    assert all(a['tier'] in range(5) and a['topic'] in ('home', 'work', 'hobby', 'past', 'secret') for e in out for a in e.get('about', []))
+    social_fields(out); COUPLED.extend(couples_and_moves(out))   # Pillar 4: the social fields, couples, who may transfer
     ids = [p['id'] for p in out]
     assert len(ids) == len(set(ids)), 'duplicate ids'
     beds = [p['bed'] for p in out]
@@ -489,16 +1116,18 @@ GROUPS = [('command', 'Command', 'The bridge: the Captain, the Executive Officer
           ('infirmary', 'Infirmary', 'Crew health and rest, in the infirmary on Deck 3.'),
           ('galley', 'Galley', 'Two meals a day for seventy-five people, in the galley and mess hall on Deck 3.'),
           ('store', 'Crew store', 'The crew store on Deck 3: snacks, soap, socks and the odd luxury, from the counter by the till.'),
+          ('garden', 'Garden', 'The hydroponics garden on Deck 3: herbs and greens for the galley, from first light to late evening.'),
           ('guest', 'Guests', 'Not crew: visitors who live aboard.')]
 RANK_ORDER = ['captain', 'xo', 'chief', 'senior', 'officer', 'junior', 'guest']
 RANK_WORDS = {'captain': 'Captain', 'xo': 'Executive Officer', 'chief': 'Department Chief', 'senior': 'Senior Officer', 'officer': 'Officer', 'junior': 'Junior Officer', 'guest': 'Guest'}
 UNI_COL = {'command': '#b4453f', 'works': '#d6a53a', 'watch': '#d6a53a', 'survey': '#3f9a92', 'infirmary': '#3f9a92', None: '#8a8f9a'}
-DECK2_ROOM = {'C': "the Captain's quarters", 'E': "the Envoy's guest cabin"}
+DECK2_ROOM = {'C': "the Captain's quarters", 'E': "the Envoy's guest cabin", 'B': "the visitors' suite", 'U': "the second visitors' cabin"}
 
 def bed_words(b):
     if b.startswith('4-B'):
         room, berth = b[3:].split('-')
         return f'Deck 4, Bunk {room}, berth {berth}' + (' (the night-shift room)' if room == '8' else '')
+    if b in ('4-01', '4-02', '4-03', '4-04', '4-07', '4-08'): return f'Deck 4, guest cabin {b}'
     if b.startswith('4-'): return f'Deck 4, officer cabin {b}'
     if b.startswith('2-'): return 'Deck 2, ' + DECK2_ROOM.get(b[2:], 'senior quarters, room ' + b[2:])
     return b
@@ -542,6 +1171,7 @@ dd{margin:0;color:#cfd9dc}
 .more{margin:7px 0 0;color:var(--muted);font-size:12.5px}
 .tr{font-style:italic}
 dl .wide{grid-column:1/-1}
+.vis{width:100%;border-collapse:collapse;margin-top:12px;font-size:13px}.vis td,.vis th{border-top:1px solid var(--line);padding:5px 6px;text-align:left;vertical-align:top}.vis th{color:var(--muted);font-weight:500}
 .hide{display:none}
 footer{max-width:1100px;margin:24px auto;padding:0 16px;font-size:12px;color:var(--muted)}
 </style>
@@ -582,7 +1212,19 @@ assert set(HABIT_WORDS) == set(HABITS)
 def bday_words(d):
     return 'Day %d: the %s of week %d' % (d, ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][(d - 1) % 7], (d - 1) // 7 + 1)
 
-def page(entries):
+THEME_WORDS = {'homesick': 'homesick', 'exams': 'exam nerves', 'family': 'family worry', 'stuck': 'feeling stuck', 'notgood': 'not good enough',
+               'lonely': 'lonely in a crowd', 'loss': 'an old loss', 'talent': 'a secret talent', 'burnout': 'burning out', 'leaving': 'leaving soon?',
+               'rivalry': 'an old rivalry', 'startover': 'starting over'}
+def social_words(x, entries):
+    if not x.get('tpl'): return 'you'
+    th = x['thread']; th = THEME_WORDS.get(th, 'their own story')
+    w = '%s voice, %s; loves %s, likes %s; joy: %s; hobby: %s; from %s; family: my %s%s; aboard %s; struggle: %s; keepsake: %s' % (
+        x['tpl'], x['openness'], ' and '.join(x['loves']), ' and '.join(x['likes']), x['joy'], x.get('hobby', '-'), x['home'], x['family'], (' (lines: %s)' % ', '.join(v for v in (x.get('kin'), x.get('lost') and 'lost ' + x['lost'], x.get('hobbyNoun')) if v)) if x.get('hobbyNoun') else '',
+        x.get('since', '-') if not x.get('reserve') else x.get('since', '-') + ' (from arrival)', th, x['keepsake'])
+    if x.get('partner'): w += '. Partner: ' + next(y['name'] for y in entries if y['id'] == x['partner'])
+    return w + ('. Stays aboard.' if x.get('stays') else '. Could be posted to %s.' % x['transferTo'] if x.get('transferTo') else '.')
+
+def page(entries, visits=None, reserve=None, rotations=None):
     e = lambda s: html.escape(str(s))
     from collections import Counter
     crew = [x for x in entries if x['rank'] != 'guest']
@@ -604,18 +1246,50 @@ def page(entries):
                      (' <span class="b night">Night shift</span>' if x['shift'] == 'night' else '')
             off = ' and '.join(DAYS[d] for d in x['rota']['offDays']) or 'none'
             work = (WORK_WORDS[x['work']['place']] + ' (Deck %d)' % x['work']['deck']) if x['work'] else 'no ship duties'
-            shift = GALLEY_WORDS[x['rota']['team']] if x['rota'].get('team') else \
+            shift = GALLEY_WORDS[x['rota']['team']] if x['dept'] == 'galley' else \
                     ('Days, 08:00 to 17:00' if x['shift'] == 'day' else 'Nights, 21:00 to 06:00') if not x['rota'].get('hours') else \
                     ' and '.join('%02d:%02d to %02d:%02d' % (a // 60, a % 60, b // 60 % 24, b % 60) for a, b in x['rota']['hours'])
+            for o in x['rota'].get('hoursOn', []):
+                shift += '; %s: %s' % (' and '.join(DAYS[d] for d in o['days']), ' and '.join('%02d:%02d to %02d:%02d' % (a // 60, a % 60, b // 60 % 24, b % 60) for a, b in o['hours']))
             out.append('<article class="p" data-text="%s" data-shift="%s"><i class="dot" style="background:%s"></i>\n'
                        '  <div class="who"><b>%s</b>%s<span class="role">%s%s</span></div>\n'
                        '  <p class="bio">%s</p>\n'
-                       '  <dl><div><dt>Shift</dt><dd>%s</dd></div><div><dt>Days off</dt><dd>%s</dd></div><div><dt>Sleeps</dt><dd>%s</dd></div><div><dt>Works</dt><dd>%s</dd></div><div><dt>Birthday</dt><dd>%s</dd></div><div class="wide"><dt>Habits</dt><dd>%s</dd></div><div class="wide"><dt>Might change</dt><dd>%s</dd></div></dl>\n'
+                       '  <dl><div><dt>Shift</dt><dd>%s</dd></div><div><dt>Days off</dt><dd>%s</dd></div><div><dt>Sleeps</dt><dd>%s</dd></div><div><dt>Works</dt><dd>%s</dd></div><div><dt>Birthday</dt><dd>%s</dd></div><div class="wide"><dt>Habits</dt><dd>%s</dd></div><div class="wide"><dt>Might change</dt><dd>%s</dd></div><div class="wide"><dt>Social</dt><dd>%s</dd></div>%s</dl>\n'
                        '  <p class="more">%s <span class="tr">%s</span></p></article>\n'
                        % (e((x['name'] + ' ' + x['role'] + ' ' + x['bio'] + ' ' + ' '.join(x['habits'])).lower()), x['shift'], UNI_COL[x['uniform']], e(x['name']), badges,
-                          e(x['role'] + (', and cook on the chef\'s days off' if x['rota'].get('cover') else '')), (', ' + e(RANK_WORDS[x['rank']])) if RANK_WORDS[x['rank']].lower() not in x['role'].lower() else '', e(x['bio']), shift, off, e(bed_words(x['bed'])), e(work), e(bday_words(x['birthday'])), e(', '.join(HABIT_WORDS[h] for h in x['habits']).capitalize() or 'none yet'), e(' '.join(i['why'] for i in x.get('habitShifts', [])) or 'you decide'),
+                          e(x['role'] + (', and cook on the chef\'s days off' if x['rota'].get('cover') else '')), (', ' + e(RANK_WORDS[x['rank']])) if RANK_WORDS[x['rank']].lower() not in x['role'].lower() else '', e(x['bio']), shift, off, e(bed_words(x['bed'])), e(work), e(bday_words(x['birthday'])), e(', '.join(HABIT_WORDS[h] for h in x['habits']).capitalize() or 'none yet'), e(' '.join(i['why'] for i in x.get('habitShifts', [])) or 'you decide'), e(social_words(x, entries)),
+                          ''.join('<div class="wide"><dt>Tells %s</dt><dd>%s</dd></div>' % (['anyone', 'an acquaintance', 'a colleague', 'a friend', 'a close friend'][t], e(' '.join(a['text'] for a in x['about'] if a['tier'] == t))) for t in sorted({a['tier'] for a in x.get('about', [])})),
                           e(' '.join(x['life'])), e((', '.join(x['traits']).capitalize() + '.') if x['traits'] else '')))
         out.append('</div></section>\n')
+    if reserve:
+        out.append('<section class="dept" id="reserve"><h2>The reserve pool <span class="n">%d future crew</span></h2>'
+                   '<p class="blurb">Crew who will join the Wren on rotation days (a Sunday shuttle about every six ship weeks, from week 5); the same number leave. A third of them are new cadets, like you.</p><div class="grid">\n' % len(reserve))
+        for x in reserve:
+            out.append('<article class="p" data-text="%s" data-shift="%s"><i class="dot" style="background:%s"></i>\n'
+                       '  <div class="who"><b>%s</b>%s<span class="role">%s</span></div>\n  <p class="bio">%s</p>\n'
+                       '  <dl><div><dt>Arrives</dt><dd>Day %d</dd></div><div><dt>Birthday</dt><dd>%s</dd></div><div class="wide"><dt>Social</dt><dd>%s</dd></div>%s</dl>\n'
+                       '  <p class="more">%s</p></article>\n'
+                       % (e((x['name'] + ' ' + x['role']).lower()), x['shift'], UNI_COL[x['uniform']], e(x['name']), ' <span class="b you">New cadet</span>' if x['cadet'] else '',
+                          e(x['role']), e(x['bio']), x['aboard'][0], e(bday_words(x['birthday'])), e(social_words(x, entries + reserve)),
+                          ''.join('<div class="wide"><dt>Tells %s</dt><dd>%s</dd></div>' % (['anyone', 'an acquaintance', 'a colleague', 'a friend', 'a close friend'][t], e(' '.join(a['text'] for a in x['about'] if a['tier'] == t))) for t in sorted({a['tier'] for a in x['about']})),
+                          e(' '.join(x['life']))))
+        out.append('</div></section>\n')
+    if visits:
+        ev = [v for v in visits if v.get('event')]; every = [v for v in visits if not v.get('event')]
+        out.append('<section class="dept" id="visitors"><h2>Visitors <span class="n">%d event guests, %d everyday visitors a year</span></h2>'
+                   '<p class="blurb">Guests who stay a while and leave. Event guests come with a ship-wide event (the day is the event\'s); everyday visitors arrive about once a week. '
+                   'Deck 2\'s second visitors\' cabin is kept for event visitors; on Deck 4, event guests use cabins 4-01 to 4-04 and everyday visitors 4-07 and 4-08.</p><div class="grid">\n' % (len(ev), len(every)))
+        EVW = {'diplomatic': 'The diplomatic visit', 'nebula': 'Nebula drift', 'veyliVessel': 'A Veyli vessel needs help', 'salvage': 'Salvage'}
+        for x in ev:
+            out.append('<article class="p" data-text="%s" data-shift="day"><i class="dot" style="background:%s"></i>\n'
+                       '  <div class="who"><b>%s</b> <span class="b story">%s</span><span class="role">%s</span></div>\n  <p class="bio">%s</p>\n'
+                       '  <dl><div><dt>Stays</dt><dd>%d days, in %s</dd></div><div><dt>Kind</dt><dd>%s</dd></div><div class="wide"><dt>Habits</dt><dd>%s</dd></div></dl>\n'
+                       '  <p class="more">%s</p></article>\n'
+                       % (e((x['name'] + ' ' + x['role'] + ' ' + x['bio']).lower()), x['spec'].get('outfit') or UNI_COL[x['uniform']], e(x['name']), e(EVW[x['event']]), e(x['role']),
+                          e(x['bio']), x['stay'], e(bed_words(x['cabin'])), e(x['template']), e(', '.join(HABIT_WORDS[h] for h in x['habits']).capitalize()), e(' '.join(x['life']))))
+        out.append('</div><table class="vis"><tr><th>Arrives</th><th>Leaves</th><th>Who</th><th>Cabin</th></tr>\n' + ''.join(
+            '<tr><td>Day %d</td><td>Day %d</td><td><b>%s</b>, %s. %s</td><td>%s</td></tr>\n' % (x['arrive'], x['leave'], e(x['name']), e(x['role'].lower()), e(x['bio']), x['cabin'])
+            for x in every) + '</table></section>\n')
     out.append('</main>\n' + PAGE_TAIL)
     return ''.join(out)
 
@@ -628,14 +1302,26 @@ if __name__ == '__main__':
     rc = Counter(x['rank'] for x in crew + [you]); sc = Counter(x['shift'] for x in crew + [you])
     assert len(crew) == 74 and rc == {'captain': 1, 'xo': 1, 'chief': 4, 'senior': 6, 'officer': 16, 'junior': 47}, rc
     assert sc == {'day': 60, 'night': 15}, sc
+    visits = visitors(entries)
+    reserve_pool, rotations = reserve(entries + visits)
+    hobby_since(crew + [x for x in guests if x['id'] in SOCIAL_HAND] + reserve_pool)   # 0.16.14
+    kin_lost(crew + [x for x in guests if x['id'] in SOCIAL_HAND] + reserve_pool)      # 0.16.15
+    arc_fixes(crew)                                                                    # 0.16.16
     block = ('// ---- BEGIN ROSTER (generated by plans/crew-roster-gen.py: fixed data; to change the crew, edit the generator and re-run it) ----\n'
              'const HABITS = ' + json.dumps(HABITS, ensure_ascii=False, indent=2) + ';\n'
              'const ROSTER = [\n' + js(crew) + '\n];\n'
              'const ROSTER_GUESTS = [\n' + js(guests) + '\n];\n'
              'const ROSTER_PLAYER = ' + json.dumps(you, ensure_ascii=False, separators=(', ', ': ')) + ';\n'
+             '// visitors (Pillar 3, C8): inert data; the sim engineer schedules them, the events engineer sets event guests\' days\n'
+             'const GUEST_TEMPLATES = ' + json.dumps(GUEST_TEMPLATES, ensure_ascii=False, separators=(', ', ': ')) + ';\n'
+             'const GUESTS = [\n' + js(visits) + '\n];\n'
+             '// the reserve pool (Pillar 4): future crew, off the ship until their rotation day; aboard: [fromDay, toDay]\n'
+             'const ROSTER_RESERVE = [\n' + js(reserve_pool) + '\n];\n'
+             '// crew rotation days (Sundays): `out` crew leave (the sim picks who, 10 days ahead) and the reserve ids in `in` arrive\n'
+             'const ROSTER_ROTATIONS = ' + json.dumps(rotations, ensure_ascii=False, separators=(', ', ': ')) + ';\n'
              '// ---- END ROSTER ----\n')
     game = os.path.join(here, '..', 'starship-cadet.html'); g = open(game).read()
     a = g.index('// ---- BEGIN ROSTER'); b = g.index('// ---- END ROSTER ----\n') + len('// ---- END ROSTER ----\n')
     open(game, 'w').write(g[:a] + block + g[b:])
-    open(os.path.join(here, 'crew-roster.html'), 'w').write(page(entries))
+    open(os.path.join(here, 'crew-roster.html'), 'w').write(page(entries, visits, reserve_pool, rotations))
     print('74 crew + you = 75, + %d guest; ranks %s; shifts %s; made way for you: %s. Wrote section 9 of starship-cadet.html and plans/crew-roster.html' % (len(guests), dict(rc), dict(sc), DROPPED))

@@ -1,0 +1,114 @@
+@bank all
+// Head writer 4, for the career system (design-doc "Leave, missed shifts and being let go", 2026-10-17), on the
+// Career engineer's keys (claude/leave, 0.61.x). Friends' lines: worried.chief (after Calder's talk),
+// worried.captain (after the Captain's reprimand), worried.last (at the very bottom), farewell.eve (the day before
+// you leave), farewell.day (your last day and the shuttle-bay send-off). Extras the engine may use later:
+// career.missed, career.up, career.leave.booked, career.onleave, career.back.
+// TEXTS are shown by the game, said by nobody: no tokens but {me}. Mails and the card are "subject | body".
+// Keep them free of exact counts (the lead's defaults may change): "a few", "every few weeks".
+
+== career.tip.leave
+- Need a day? Book leave in Schedule on your device, by 08:30 that day at the latest.
+- You get a few leave days, and one more every few weeks. Cancel a booking to get it back.
+- Time in the infirmary when you're ill never uses up leave or counts as missed.
+
+== career.tip.late
+- Late for your shift. A little late is only a small dip. Be in the Works bay by 09:00.
+
+== career.tip.missed
+- You missed a shift without leave: a big hit to your work standing. Book leave instead.
+
+== career.tip.chief
+- Chief Calder has sent for you. To climb back: be on shift by 09:00 and turn in jobs.
+
+== career.tip.captain
+- The Captain has sent for you. One more step down and you're sent home. It's not too late.
+
+== career.tip.bottom
+- At the very bottom. A few days like this and you're let go. One good shift turns it round.
+
+== career.tip.notice
+- You've been let go. Tomorrow is your last day aboard. Friends will want to say goodbye.
+
+== career.tip.up
+- Your work standing is climbing. Keep turning up. People have noticed.
+
+== career.tip.clock
+- Clock in by the tea corner at shift start, out at the end. Leave and sick days need none.
+
+== clock.auto
+- The clock signed you out at 17:00. It does that.
+- 17:00. The clock signed you out for you. Go and eat.
+- Shift over: the clock signed you out at 17:00.
+
+== career.mail.chief
+- My office | Come to my office, Deck 5, today. Missed shifts. We'll talk it through.
+
+== career.mail.captain
+- Ready room | The Captain will see you in her ready room, Deck 1. Please be prompt.
+
+== career.mail.notice
+- Your last day | The Wren is letting you go. The Tern leaves tomorrow. I'm sorry.
+
+== career.card
+- The Wren sails on | Your time on the Wren is over, {me}. Thank you for it.
+- The Wren sails on | A scrubber hums. Nobody thanks the air. Thank you, {me}.
+
+// Crew who know you a little: the everyday lines. Friends (the ten voices) and the story crew have their own.
+== worried.chief
+? tier>=colleague
+- Heard the Chief had a word. She's fair. Do what she said and it's done.
+- Calder only says it once, plainly. That's a kindness, believe it or not.
+
+== worried.captain
+? tier>=colleague
+- Up to the ready room? {sigh}. The Captain's kind. Still, go to your shift.   #warm
+
+== worried.last
+? tier>=colleague
+- People are saying they'll send you home if this goes on. Please don't let them.   #warm
+
+== farewell.eve
+? tier>=acquaintance
+- I heard you're leaving tomorrow. I'm sorry. Look after yourself.
+- Tomorrow, is it? The Wren won't be the same. Safe trip.
+? tier>=colleague
+- Leaving tomorrow. I'm sorry it went this way. You were good company.   #warm
+
+== farewell.day
+? tier>=acquaintance
+- {bye}, {nick}. Safe trip on the Tern.
+- Off today, then. Good luck out there. I mean it.
+? tier>=colleague
+- Go well. Turn up wherever you land. The rest comes.   #warm
+? tier>=friend
+- Came to find you. Couldn't let today go without it.   #warm
+- Window seat. Promise me.   #warm
+- Write when you land. Proper Mail.   #warm
+
+== career.missed
+? tier>=acquaintance
+- {hi}. Didn't see you on shift today. All right?
+- Missed shift, I heard. Happens once. Just don't make it a habit.
+? tier>=colleague
+- If something's keeping you from shift, say. Someone here can help.   #warm
+
+== career.up
+? tier>=colleague
+- Saw you on shift this morning. Good. Keep that up.
+- Things looking up? You look more like yourself.
+
+== career.leave.booked
+? tier>=acquaintance
+- Day off tomorrow? Good for you. Sleep in.
+- Leave tomorrow! Anything planned, or just nothing at all?
+
+== career.onleave
+? tier>=acquaintance
+- Aren't you on leave? Go and do something nice.
+- On leave and you're still here? Fair. Where else would you go?   #funny
+
+== career.back
+? tier>=acquaintance
+- {hi}. Back from leave? You look rested.
+- Welcome back. The board missed you. Well, someone had to say it.   #funny

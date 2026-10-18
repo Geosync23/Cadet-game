@@ -1,0 +1,225 @@
+@bank rank:junior
+// Writer 4, batch 3. Everyday chatter for the junior crew on Deck 4: the bunks, mornings, the washrooms, the
+// laundry, the junior common room, weekends. Not about work. Neutral in voice; specific by conditions. A line
+// naming someone carries !who: so that person never says it. Bubbles: 60 characters.
+
+== smalltalk
+// ---- the bunks ----
+? place:bunk_1|bunk_2|bunk_3|bunk_4|bunk_5|bunk_6|bunk_7|bunk_8
+- Whose sock is this? It's been here a week.   #funny
+- Top bunk's warmer. Bottom bunk's nearer. Fair.
+- Someone's snoring. It's not me. It's never me.   #funny
+- Five minutes. I'm just resting my eyes.
+- Who's got the good pillow? I want the good pillow.
+- Hold the lift, please! Thank you.
+- Somebody tidied. Who tidied? I can't find anything.   #funny
+- I've got a letter to finish. Shh. Thinking.
+- Lights out soon. I'm reading one more page.
+- My bunk smells of oranges. I don't know why.   #funny
+- Don't sit on my bunk, it's made. It's made!   #funny
+- Is that the vent or someone humming?
+- Who's left a biscuit tin open? Is it the chef's?
+- I'll do my bunk tomorrow. It knows that.   #funny
+? place:bunk_1|bunk_2|bunk_3|bunk_4|bunk_5|bunk_6|bunk_7|bunk_8 time:night
+- Who's still awake? Me. Just me. Night.
+- Somebody's talking in their sleep again.   #funny
+- Can't sleep. Counting rivets on the ceiling.
+- Night, everyone. Night. No, really, night.   #funny
+? place:bunk_1|bunk_2|bunk_3|bunk_4|bunk_5|bunk_6|bunk_7|bunk_8 time:morning
+- Is it morning? It feels like the middle of the night.
+- Who took my other boot? This is the left one. Both are left.   #funny
+- Up, up. Breakfast's not going to eat itself.
+- I dreamt about cake. It wasn't a good cake.   #funny
+? place:bunk_1|bunk_2|bunk_3|bunk_4|bunk_5|bunk_6|bunk_7|bunk_8 act:off
+- Rest day. I'm not getting out of this bunk till ten.
+- Rest day. I tidied my shelf. That's enough for today.
+- Rest day. Reading under the blanket like I'm nine.   #funny
+? place:bunk_8
+- Shh. Day sleepers. Tiptoe, please.
+- Night shift's room. Quiet, even at noon.
+
+// ---- mornings and the washrooms ----
+? place:port_washroom|starboard_washroom
+- Who's singing? Lovely. Keep going. Mostly.   #funny
+- Has anyone seen my toothbrush? The blue one.
+- The mirror's all steamed. I look like a ghost.   #funny
+- Two minutes in the shower. I'm counting. Go.
+- The dawn chorus is in good voice today.   #funny
+- Who left a towel on the floor? Again?
+? place:port_washroom|starboard_washroom time:night
+- Hot water's gone. It's character-building time.   #funny
+- Cold shower. I'm awake now. Very awake.   #funny
+? place:port_washroom|starboard_washroom time:morning
+- Queue for the sinks. There's always a queue.
+- Hot water's lovely before seven. Remember that.
+? time:morning act:wash
+- Shower, teeth, breakfast. In that order.
+- Somebody's singing the quiz song. Badly.   #funny
+? time:morning
+- Is breakfast still on? Run!
+- Has anyone got a spare comb? Thanks.
+- Big yawn. Sorry. Long night.
+- Who's for porridge? I'm for porridge.
+- Good morning, Deck 4. Mostly good.   #funny
+
+// ---- the laundry ----
+? place:laundry
+- Whose is this jumper? It's very orange.   #funny
+- Everything I own is in that machine.
+- I've lost a sock. Again. The machine eats them.   #funny
+- I like the folding. Don't laugh.
+- Warm laundry. Best smell on the ship.   #warm
+- Somebody's washed a red shirt with the whites.   #funny
+- Whose turn on the dryer? I'll wait.
+- I fold my shirts in three. My mum folds in four.
+- Somebody left a note in a pocket. "Buy biscuits."   #funny
+? place:laundry act:off
+- Rest day laundry. Living the dream.   #funny
+- I'll sit here till it's done. It's warm.
+
+// ---- the junior common room ----
+? place:commons
+- Who's got the Tiles board? Fancy a game?
+- Comics wall's got a new one. Have you seen it?
+- That window. All those stars. Never gets old.
+- Somebody's left a jigsaw. Half a sky.
+- Cushion fort. Don't ask. It's for later.   #funny
+- Tea for anyone? I'm making a pot.
+- Who moved the good chair? It was by the window.
+- I'm going to read till dinner. Nobody talk.   #funny
+- There's a blanket on the sofa. Is it anyone's?
+- Somebody's drawn me on the comics wall. As a cloud.   #funny
+- Is the record player working? Somebody hum.   #funny
+- Swap you a biscuit for the window seat.
+? place:commons !who:rina
+- Who's playing Rina at Tiles? Brave.   #funny
+- Rina's on forty-something wins. Don't look at the book.   #funny
+- Has anyone beaten Rina yet? No. Course not.   #funny
+? place:commons time:evening
+- Film on later. Somebody bring a blanket.
+- Evening in the common room. Best room on the ship.   #warm
+- Tiles, tea, nobody needing anything. Lovely.
+? place:commons time:night
+- Last cup of tea, then bed. Promise.
+- The stars are brighter from here at night.
+? place:commons act:off
+- Rest day. Common room. Jigsaw. Done.
+- I've been on this sofa since breakfast. It's fine.   #funny
+
+// ---- weekends and rest days ----
+? act:off weekday:sat
+- Saturday. No alarm. I woke up at six anyway.   #funny
+- Saturday lie-in. Then a long breakfast.
+- It's Saturday. I'm wearing my good socks.   #funny
+- Saturday. Laundry, letters, nap. Perfect.
+? act:off weekday:sun
+- Sunday. Bread smells from the galley. Lovely.
+- Swap meet's on. I'm taking my old book.
+- Sunday call home. Then a long sit.
+- Sunday's a slow day. Good.
+? act:off
+- Rest day. I'm doing absolutely nothing. Watch me.   #funny
+- Rest day plan: tea, book, tea.
+- I slept till nine. I feel like a new person.
+- Rest day. I'm writing home. It's a long one.
+- Rest day. I fixed my bunk curtain. Proud.   #funny
+- Went to the garden. Sat by the pond. An hour went.
+- Rest day. Gym, then a nap. Balanced.   #funny
+- I'm going to the store. I don't need anything.   #funny
+- Rest day! I've no idea what day it is.   #funny
+- Spent the morning on the jigsaw. Still half a sky.
+? act:off time:evening
+- Back to it tomorrow. Today was nice, though.
+- Rest day done. I didn't waste it. Mostly.   #funny
+
+// ---- Deck 4 at large ----
+? deck:4
+- Lift's slow today. Take the long way.
+- Somebody's baking. Smell that?
+- The corridor smells of toast. Good sign.
+- Is the music room free? Somebody's on the piano.
+- Somebody's left a tiny portrait on my bunk.   #funny
+- There's a new Gerald on the windowsill. Small one.
+- Hot water's good till ten. Then it's character.   #funny
+? deck:4 !who:tran-chloe
+- Chloe says lights out at ten. Chloe means it.   #funny
+? deck:4 !who:torres-zeke
+- Torres has knitted another scarf. It's long.   #funny
+? deck:4 !who:tomas
+- Tomas is at the stern window again. Leave him be.
+? deck:4 time:evening
+- Who's for a film? Bring a cushion.
+- Somebody's playing guitar badly. Lovely.   #funny
+? deck:4 time:night
+- Quiet in the corridor. Just the vents.
+- Somebody's late back. Tiptoe!   #funny
+
+// ---- the seasons on Deck 4 ----
+? deck:4 season:sowing
+- Everyone's got a seedling on the windowsill.
+- My seedling's taller than yours. Just.   #funny
+? deck:4 season:greening
+- The garden smell's got all the way up here.
+? deck:4 season:harvest
+- Somebody's left a pumpkin in the common room.   #funny
+? deck:4 season:lanterns
+- Lanterns in every bunk window. It's lovely.
+- My lantern's wonky. It's still a lantern.   #funny
+
+// ---- the traditions ----
+? deck:4 trad:quiz
+- Quiz tonight. Our team's going to win. Probably not.   #funny
+? deck:4 trad:film
+- Film night. I'm bringing my blanket from the bunk.
+? deck:4 trad:jam
+- Music night. Is anyone borrowing my guitar? No? Good.
+? deck:4 trad:observatory-night
+- Observatory night. Wrap up warm. It isn't cold. Still.
+? deck:4 trad:market
+- Swap meet today. I'm swapping my old jumper.
+
+// ---- more of the everyday ----
+? deck:4 birthday:me
+- It's my birthday. Somebody's hidden a cake. I can smell it.   #warm
+- Birthday! I got a card from the whole bunk.   #warm
+? deck:4 act:off !who:tomas
+- Tomas showed me his star map. He knows every one.
+? place:musicroom
+- Somebody's put the good record on. Shh.
+- Is the piano free? I only know one tune.   #funny
+- I'm on the waiting list for the good records. Still.   #funny
+- The guitar book's missing a page. The hard page.   #funny
+? place:musicroom time:evening
+- Music room at night. Best place to sit and think.
+? deck:4 act:meal
+- Are you going up to dinner? Wait for me.
+- I've been thinking about pudding since lunch.   #funny
+? deck:4
+- Has anyone seen my mug? It's got a chip. That one.
+- Who's got a needle and thread? Button trouble.
+- I wrote my mum six pages. She'll write back one.   #funny
+- Somebody's put a plant in the corridor. Nice.
+- I've borrowed a book from the common room. Third time.
+- The stern windows are best before bed.
+- Somebody's leaving notes on the comics wall. Nice ones.
+- I love it when the whole bunk's asleep and it's quiet.   #warm
+- Biscuits from the galley! On the common room table!
+- Who's going to the gym? I'll come and watch.   #funny
+? deck:4 time:morning
+- Odd sock day. Nobody'll notice. Everyone will.   #funny
+- I made my bunk. Look. Corners and everything.
+? deck:4 time:evening
+- Letters tonight. Then bed. Then letters in my head.   #funny
+- Long day. I'm going to sit by the stern window.
+- Anyone for cocoa? I've got a tin.
+? deck:4 act:off weekday:sat|sun
+- Weekend. The whole deck's in socks.   #funny
+- Weekend breakfast. Nobody's rushing. Lovely.
+
+== rumour
+? deck:4
+- Heard it in the washroom queue. So it's true.   #funny
+- Bunk news: something's going on. Nice something.
+- Common room says it's true. The common room knows.
+- Somebody said it over Tiles. Here it is.
+- Laundry gossip's the best gossip. Listen.   #funny

@@ -1,0 +1,28 @@
+@crew v-abbas-nyla
+// Writer 4, batch 5: a short-stay visitor. Mostly not about work.
+
+== greet
+? tier=stranger
+- Hello. Dr. Nyla Abbas. I'm giving Dr. Nandakumar a few days off.
+- Evening. I'm only covering. Nobody be poorly, please.   #funny
+? tier>=acquaintance
+- {hi}, {me}. The chillies in the garden. I wasn't warned. My eyes still water.   #funny
+?
+
+== chat
+- Eleven ships, eleven galleys. This one's soup tastes like my aunt's.
+- I spend my evenings with a book and a quiet drink. Ships are good for reading.
+
+== near
+? place:hydroponics_garden
+- Lovely here. I'll sit by the pond. Call me if anyone's bleeding.   #funny
+? place:lounge
+- A book, a drink, a window. That's my whole evening plan.
+?
+
+== bye
+- {bye}. Get some sleep tonight. Proper sleep.
+
+== smalltalk
+- Be well.
+- Good book, this.

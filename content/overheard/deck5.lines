@@ -1,0 +1,74 @@
+@overheard deck5
+// Writer 5, batch 7. Deck 5 off duty: the tea corner at one, the Works bay after shift, main storage, the
+// shuttle bay window, the lift club. At most one in five about work. Lines naming a crew member keep that person out.
+
+== overheard
+? pair:works+works place:teacorner time:morning
+A: Ten twenty-nine.
+B: Kettle's ready.
+A: Ten thirty. Pour.   #funny
+
+? pair:any+any who:teague-theo with:halloran-emeka place:teacorner
+A: I've drawn the Chief as a cloud again.
+B: A tidy cloud?
+A: The tidiest. She says "Fair."   #funny
+
+? pair:any+any who:rahman-farah with:eklund-leila place:teacorner
+A: Star three hundred and ninety-nine.
+B: You're nearly there.
+A: I'm saving the four hundredth.
+
+? pair:any+any who:eklund-leila with:amadi-asha place:teacorner
+A: Gran sent the one about the goat again.
+B: The goat song?
+A: Four verses. The goat wins.   #funny
+
+? pair:any+any who:halloran-emeka place:teacorner
+A: Why did the spanner stop for tea?
+B: Don't.
+A: It needed a brake.   #funny
+
+? pair:works+works place:worksbay time:evening
+A: Shift's done. Why are we still here?
+B: It's warm. The chairs are good.
+A: There aren't any chairs.
+B: The crates are good.   #funny
+
+? pair:works+any place:worksbay time:evening !who:calder !with:calder
+A: Don't sit on the blue crate.
+B: Whose is it?
+A: Calder's. Nobody knows why.
+
+? pair:any+any who:rossi-femi with:silva-bea place:worksbay time:evening weekday:tue
+A: It's Tuesday. I've called home.
+B: How's everyone?
+A: Loud. All of them. Same as ever.   #funny
+
+? pair:any+any who:moreau-signe with:achterberg-lars deck:5 time:evening
+A: Lars, the last page is missing again.
+B: It's better that way.
+A: It's a mystery. I need the end.   #funny
+
+? pair:any+any place:main_storage
+A: Who keeps moving the good tape?
+B: Nobody. It walks.
+A: It's walked to Deck 3 twice.   #funny
+
+? pair:any+any who:quist-ilse with:pell place:main_storage time:afternoon
+A: Pell. You're asleep on the spare filters.
+B: Resting my eyes. On the filters.   #funny
+
+? pair:any+any who:amadi-asha place:shuttle_bay
+A: Best window on Deck 5, this.
+B: It looks at the Tern.
+A: Past the Tern. Look further.
+
+? pair:any+any place:shuttle_bay time:evening
+A: She looks small, the Tern.
+B: She felt big, coming in.
+A: Everything does, the first day.   #warm
+
+? pair:any+any deck:5 who:kovac-zainab|cruz-tove|keane-davi with:kovac-zainab|cruz-tove|keane-davi
+A: Lovely lift.
+B: Lovely lift.
+A: Lovely. Yes. Lovely.   #funny

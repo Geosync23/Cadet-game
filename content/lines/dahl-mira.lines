@@ -1,0 +1,115 @@
+@crew dahl-mira
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- {hi}. Dahl, Watch. Stand still too long and I'll measure you for a scarf.   #funny
+? tier>=acquaintance
+- {hi}, {me}. Busy? Then I'll be quick. How's the bunk?
+- {me}. Three rows done on my break. Watch is quiet; my needles aren't.
+? tier>=friend
+- {hi}, {me}. I started something in your colours. Don't ask yet.   #warm
+== feel
+? mood:high
+- Good day. Patrol was easy, and I finished a mitten. The left one.
+? mood:low
+- Long shift. I knitted faster than I should. That's how you can tell.
+== near
+? deck:4 time:evening
+- Music room's free. I play badly and knit worse while I do it. Want to hear?   #funny
+? act:leisure
+- Knitting circle tonight. Kovac's are perfect, mine are useful, Torres's are long.   #funny
+== life
+? tier>=acquaintance
+- My parent served on the Wren, years back. I check the gallery sometimes. Just to look.
+== joy
+? tier>=colleague
+- A practical scarf. Warm, plain, done by Friday. There's no better feeling.
+
+// ---- Writer 2, batch 2: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue, hint, about)
+== greet
+? tier>=acquaintance time:evening
+- {hi}, {me}. Late dinner for me. Eaten? Good. That's the useful question.
+? tier>=acquaintance warmth:cold
+- {hi}, {me}. You've been scarce. Busy, or tired? Both is allowed.
+
+== near
+? place:musicroom
+- The music room. Practical people need one impractical hobby. This is mine.
+? place:mess time:evening
+- Late dinner, mess half empty. Best time. Nobody stands still long enough for a scarf.   #funny
+
+== invite
+- Friday jam? I'll play. Badly. Come and make it sound better.
+? tier>=colleague
+- Knitting circle tonight, at the tea corner. Bring a question. We're good at questions.
+
+== accept
+- Yes. Good. I'll bring my needles.
+- Yes. What time? Never mind. I'll be early.
+
+== decline
+- Not tonight. Patrol report. It's long and it's mine. Another time?
+? weekday:sat|sun
+- Rest day. I'm finishing a scarf. Who for? Wait and see. Monday?
+
+== missed
+- You missed it. That's fine. I did nine rows. Not wasted.
+
+== birthday
+? birthday:you
+- Happy birthday, {me}. Something's coming. It's warm and plain and nearly done.   #warm
+? birthday:me
+- My birthday. Kovac knitted me socks. Perfect, of course. I'll never dare wear them.   #funny
+
+== cue
+? cue:event.ionStorm.onset
+- Storm's on. Check your bunk's strapped down. Then come and help. Useful hands welcome.
+
+== hint
+- {hi}, {me}. If you've a minute later, I'd like to tell you something.
+
+== about
+? aff:kovac-zainab:friend
+- Kovac knits the best scarves aboard. I knit the warmest. We don't argue about it.   #warm
+
+// ---- Writer 2, batch 2: top-up (bye, greet by time, life at friend tier)
+== bye
+- {bye}. Keep moving. You know why.   #funny
+== greet
+? tier>=acquaintance time:morning
+- Morning, {me}. Quick question: what's your favourite colour? No reason.
+== life
+? tier>=friend
+- Torres's scarves are long. Kovac's are perfect. Mine get worn. I win.   #funny
+- Plain stitches. Every row the same. It's how I think things through.
+
+// ---- Writer 2, batch 6: bubbles (smalltalk, rumour), at most one in five about work. 60 characters.
+== smalltalk
+- Stand still and you'll get a scarf.   #funny
+- Nine rows on my break.
+- Plain stitch. Thinking stitch.
+- Favourite colour? No reason.   #funny
+? time:evening
+- Late dinner, then music.
+?
+
+== rumour
+- Useful news first. Then the rest.
+- Better question: did you hear?
+
+// Writer 4, batch 11: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. What's the most useful thing to take? Tea. Then wool.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm off soon. What will you do with my seat at the knitting circle? Fill it.
+? leaving:you tier>=friend
+- You asked good questions. I liked answering them with better ones. Thank you for that.   #warm
+
+== letter
+- New ship. Started a knitting circle. Two people so far. Practical scarves only. Kovac would approve.
+? tier>=friend
+- Looked at a portrait gallery today. Not ours. Still looked for a familiar face. Habit. Hello.

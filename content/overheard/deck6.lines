@@ -1,0 +1,59 @@
+@overheard deck6
+// Writer 5, batch 7. Deck 6 off duty: the engine overlook at night, the engine watch room (two armchairs and a
+// kettle). Mostly not about work. Lines naming a crew member keep that person out.
+
+== overheard
+? pair:any+any place:overlook time:night !who:reyes-alejandro !with:reyes-alejandro
+A: Listen. That's coil three.
+B: Sulking?
+A: Thinking. Reyes says shy.
+
+? pair:any+any place:overlook time:evening
+A: Why come down here off shift?
+B: The hum. It's like rain on a roof.
+A: I'd never thought of that.
+
+? pair:any+any place:overlook time:night
+A: Can't sleep?
+B: Not a wink. You?
+A: Came to watch the coils. Works every time.
+
+? pair:any+any who:keane-davi with:jovanovic-petra place:overlook time:night
+A: Cleanest engine room in the Service.
+B: You say that every night.
+A: It's true every night.   #funny
+
+? pair:any+any place:engine_watch_room time:night
+A: Two armchairs, one kettle, eight hours.
+B: Best room on the ship.
+A: Don't tell the lounge.   #funny
+
+? pair:any+any who:jovanovic-petra with:keane-davi place:engine_watch_room time:night
+A: You've got the good armchair again.
+B: I got here first.
+A: You always get here first.   #funny
+
+? pair:any+any who:reyes-alejandro with:navarro-mateo place:engine_watch_room time:night
+A: My neighbour wrote. The cat's fine.
+B: Did the cat write too?
+A: Two pages. Mostly about fish.   #funny
+
+? pair:any+any who:navarro-mateo with:reyes-alejandro deck:6 time:night
+A: My twin says the Halcyon's coils are quieter.
+B: Quieter isn't better.
+A: That's what I said.
+
+? pair:any+any who:takahashi-wen with:keane-davi place:engine_watch_room time:night
+A: It's "the stars came home". Not "cars".
+B: I've always sung cars.
+A: I know. Everyone's heard.   #funny
+
+? pair:any+any who:salo-saad with:amadi-asha deck:6
+A: You've been up the big tree again.
+B: Who told you?
+A: There's a leaf in your hair.   #funny
+
+? pair:any+any who:mensah deck:6 time:night !with:holt
+A: Holt laughed today.
+B: Never.
+A: Twice. I'm saving the second one.   #funny

@@ -1,0 +1,116 @@
+@crew shah-dara
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Oh. Hi. Shah, Watch. Coffee machine's on Deck 3. If it's broken, I'm near.
+? tier>=acquaintance
+- Hey, {me}. Coffee's good this morning. You're welcome.   #funny
+- Hi. Quiet patrol. That's the good kind.
+? tier>=friend
+- Hey, {me}. You're easy to be around. That's rare. I mean it.   #warm
+== feel
+? mood:high
+- Machine purred all morning. Nobody queued. Good day.
+? mood:low
+- Long day. The machine and I aren't speaking.   #funny
+== near
+? act:breakfast
+- Don't. Not yet. I'm talking to the coffee machine. It's a private matter.   #funny
+? habit:shopper
+- Store's got new valves. Not for anything. Just in case.
+== life
+? tier>=acquaintance
+- My parent served on the Wren, a long time back. Watch, too. Big boots.
+== joy
+? tier>=colleague
+- A coffee machine that works. Sounds small. At six in the morning, it's everything.
+
+// ---- Writer 2, batch 2: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue, hint, about)
+== greet
+? tier>=acquaintance time:morning
+- Morning. Wait. Coffee first. There. Morning.   #funny
+? tier>=acquaintance warmth:cold
+- Oh. You. Haven't seen you. The coffee machine's missed you. Probably.   #funny
+
+== near
+? habit:music
+- Music room. I sit at the back. Nobody talks to me. It's ideal.
+? place:mess
+- The coffee machine's fine. Don't look at it. It's shy.   #funny
+
+== invite
+- Friday jam? I won't play. I'll sit near the coffee. Come and sit too.
+
+== accept
+- Okay. Yes. I'll come.
+- Yes. I'll make the coffee. It'll be good. It always is.   #funny
+
+== decline
+- Not tonight. Early bed. Patrol at eight. Another time.
+? weekday:sat|sun
+- Rest day. I'm in the store looking at valves. Don't ask. Monday?   #funny
+
+== missed
+- You didn't come. That's fine. I fixed the coffee machine. It needed me more.   #funny
+
+== birthday
+? birthday:you
+- Happy birthday. First coffee's yours. I've told the machine.   #warm
+? birthday:me
+- My birthday. Volkov fixed the coffee machine before I got there. Rude. Kind, but rude.   #funny
+
+== cue
+? cue:event.ionStorm.onset
+- Storm's on. First thing to break is always the coffee machine. I'll be ready.   #funny
+
+== hint
+- {me}. Got a minute later? There's something I'd like to say.
+
+== about
+? aff:volkov-maeve:friend
+- Volkov says she's best at the coffee machine. She's second. We're friends anyway.   #funny
+
+// ---- Writer 2, batch 2: top-up (bye, greet by time, life at friend tier)
+== bye
+- Bye. Mind the coffee. It's hot. I made it.
+- See you. Early bed. As always.
+== greet
+? tier>=acquaintance time:evening
+- Evening. Coffee machine's asleep. So am I, nearly.   #funny
+== life
+? tier>=friend
+- I fix the coffee and let others say they did. It's easier than being thanked.
+- The machine's older than me. It was here when my parent was. It still works. Mostly.
+
+// ---- Writer 2, batch 6: bubbles (smalltalk, rumour), at most one in five about work. 60 characters.
+== smalltalk
+- Machine purred all morning.
+- Music room. Back row.
+? act:breakfast
+- Coffee first.   #funny
+? act:off
+- Valves at the store. Just looking.
+? time:evening
+- Bed by ten.
+?
+
+== rumour
+- Quietly: this.
+- The coffee machine told me.   #funny
+
+// Writer 4, batch 11: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. The coffee machine will miss me. Not you. The machine.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Oh. Hi. I'm leaving. ...It was good. That's all.
+? leaving:you tier>=friend
+- You never minded the quiet. Good company, quiet. Thanks.   #warm
+
+== letter
+- New ship. Coffee machine works. Because of me. Took a day. Hello.
+? tier>=friend
+- Looked for my parent's name on the new ship's crew lists. Not there. Fine. Coffee's good. Hello.

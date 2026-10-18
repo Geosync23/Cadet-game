@@ -1,0 +1,51 @@
+@tradition harvest-supper
+// Harvest supper: Harvest, week 7, Sunday dinner (day 231 in the first year), the day after a harvest morning (day 230).
+// Long tables in the mess, everything from the garden. On that Sunday it takes the weekly Sunday dinner's place (the
+// weekly designer's Sunday roast, if it's built: same deck, same time, and the rarer one wins). A meal tradition: those
+// going eat dinner here (ties galley meal=dinner). The tally: crew vote for the best of the harvest with a token;
+// the garden plants more of the winner next season. Design note: plans/trad-notes-seasons.md.
+k: 476
+title: Harvest supper
+when: quarter week 7 sunday season harvest
+at: 18:00-19:30
+min: 30
+prio: 1
+jitter: 15
+where: 3 room Mess hall: mess-seat
+where: 3 room Mess hall: @long-table
+where: 3 pool mess-seat
+hold: none
+who: cruz-tove always, brennan always, garden always, gardener 95%, garden-lover 90%, everyone 70%
+anim: talk
+host: cruz-tove
+from: brennan
+cake: yes
+ties: galley meal=dinner dish=harvest-supper batch=60
+ties: tally harvest-best choices=tomatoes|beans|squash|herbs
+ties: decor harvestTables
+invite: host=brennan odds=35% line="Harvest supper tonight. Long tables, all from the garden. Sit by me and tell me what's best."
+
+meal: dinner
+== mail
+- Harvest supper tomorrow, {time}, in the mess: long tables and everything from the garden. Vote for the best of the harvest with your token. Pie after.
+
+== ask
+- Harvest supper tonight. I've saved room since breakfast.   #funny
+- Long tables in the mess tonight. Everything on them grew here.
+- Have you voted yet? I'm for the beans. The beans are underrated.   #funny
+- Harvest supper at six. Sit with us?   #warm
+
+== here
+- Pass the squash. No, the other squash.   #funny
+- Every bit of this grew a deck away from where you sleep.
+- To the garden, and to the people who keep it.   #warm
+- Leave room for the pie. Brennan made six.
+
+== thanks
+- You squeeze onto a long table for the harvest supper. Someone passes you a bowl, and then another.   #warm
+- You drop your token in the jar for the best of the harvest. The table argues about it all the way to pie.   #funny
+
+== chatter
+- The tomatoes won the harvest vote again. I'll never understand it.   #funny
+- Harvest supper is the one night the whole mess eats the same thing.
+- Tove doesn't sit down at the harvest supper until everyone has a plate.   #warm

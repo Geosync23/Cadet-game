@@ -1,0 +1,184 @@
+@crew grieve-thea
+// Writer-commons, batch 3: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Hello. Grieve, infirmary. If you're bleeding, it's Deck 3. If not, sit down anyway.
+? tier>=acquaintance
+- Hello, {me}. Have you lost anything? Only, I've a box. Of found things.
+- Hello. O positive. Sorry. That's yours. I say it instead of hello sometimes.   #funny
+? tier>=friend
+- Oh. Hello, {me}. I'm glad it's you. You make the infirmary less quiet.   #warm
+
+== feel
+? mood:high
+- Good day. I gave a glove back. Its owner had given up hope. So had I.
+? mood:low
+- Long shift. I worried all morning. Then I fixed it. Then I worried I hadn't.
+
+== near
+? act:work
+- Corners tucked. Sheets straight. Every bed. It matters if you're the one in it.
+? place:infirmary
+- Sit there. Don't touch anything blue. That's a rule, I didn't make it.
+
+== life
+? tier>=acquaintance
+- I keep fish back home on New Aberdeen. My sister sends me how they're doing. All well.
+? tier>=colleague
+- I'm studying for my nursing exams. In the evenings. Mostly worrying, some studying.
+
+== joy
+? tier>=acquaintance
+- The lost-property box. One odd sock's been there for months. I live in hope.
+
+== about
+? bond:friends
+- {friend} checks on me when I'm worrying. I worry less with {friend} about.
+
+// Writer-commons, batch 6: towards about 30 own lines.
+
+== greet
+? tier>=acquaintance time:morning
+- Good morning. Did you sleep? Properly? Seven hours is the minimum. I'm just saying.
+? tier>=acquaintance time:evening
+- Hello. Long day. I've made every bed twice. Nobody's in them. That's good news.
+? tier>=colleague warmth:cold
+- Oh. You're back. I was going to check the records. In case. I didn't. I nearly did.
+
+== bye
+? tier>=acquaintance
+- Goodbye. Drink some water. That's what Nandakumar would say. So I'm saying it.
+? tier>=friend
+- Thank you. I worry less when I've talked to you. I don't know why that is.   #warm
+
+== feel
+? mood:ok
+- Fine. All right. Nothing went wrong. Something might have. It didn't.
+
+== near
+? deck:2 time:night
+- The stars are steady. I like that about them. They're always exactly where they were.
+? act:meal
+- I stay a while after meals. It's calmer. Nobody needs a bed changed in the mess.
+
+== life
+? tier>=colleague
+- My fish back home are called One, Two and Three. My sister says they're doing well.
+? tier>=friend
+- I'm studying for my nursing exams. I'm very scared of them. Don't tell anyone.
+
+== invite
+? trad:observatory-night tier>=colleague
+- Observatory night? It's very calm. Nobody bleeds. Would you come?
+
+== accept
+- Yes. All right. Yes. I'll be there. I'll be early.
+== decline
+- I can't. I'm sorry. Late shift. Can we do another day? A specific day?
+== missed
+- You didn't come. I hope nothing's wrong. Is anything wrong? Good.
+== birthday
+? birthday:me
+- It's my birthday. I didn't tell anyone. Then I told you. That's fine.
+? birthday:you
+- Happy birthday. Your blood type's a lucky one. That's not a real thing. Happy birthday.   #funny
+== hint
+- Could we talk? Somewhere quiet. Not the infirmary.
+
+// Writer 3, batch 4: bubbles (smalltalk and rumour, 60 characters, said to no one in particular).
+
+== smalltalk
+- O negative. Someone's O negative.
+- Oh, no. Is that a sock? Lost property.
+- I've checked twice. I'll check again.
+- Have you washed your hands? Sorry.
+? act:work
+- Infirmary's open. Please don't need it.
+
+== rumour
+- I'm not sure I should say. I'm worried.
+- Someone said something. I've been fretting.
+
+// Writer 3, batch 5: callbacks (told: said once).
+
+== callback
+? told:fav.fetch
+- You brought it. Thank you. I was worried it wouldn't come. It came.   #warm
+? told:fav.job
+- You did my job for me. Thank you. I checked it. Twice. It was right.
+? told:fixed.uv
+- The steriliser's working again. Thank you. I've stopped checking it. Mostly.
+? told:came.observatory-night
+- You came up to the observatory. Most people don't, the first time. I'm glad.   #warm
+? told:gift.book
+- I'm reading your book. Slowly. I don't want it to end.   #warm
+? told:bday
+- You remembered my birthday. Oh, no, I'm going to cry. Happily. Sorry.   #warm
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- Dr. Nandakumar mentioned you. Kindly. I was worried she wouldn't. She did.   #warm
+? rep:theirs
+- The infirmary thinks of you as one of us. Please don't need us. But we're here.   #warm
+? you:kind
+- People say you're kind. I've found that to be true. I wrote it down.
+
+// Writer 3, batch 8: thanks for a gift (gift: loved | liked | polite, or the gift's tag; dialogue 0.43.10).
+
+== gift
+? gift:book
+- A book. Thank you. I'll read it carefully. Every page. Twice, probably.   #warm
+? gift:loved
+- Oh, no. I'm going to cry. In a good way. Thank you. Sorry.   #warm
+? gift:liked
+- Thank you. That was thoughtful. I'll look after it.
+? gift:polite
+- Thank you. I'm not sure what it is. I'm sure it's lovely. I'll find out.
+
+// Writer 4, batch 2: everyday chatter, not about work (meals, rest days, home, hobbies, seasons, traditions).
+== smalltalk
+? act:meal
+- Have you had water today? Have a glass. Please.
+- I'll stay for pudding. Pudding is important.
+- This soup is very good. I'm being serious.
+? act:off
+- My sister wrote. Three's still hiding in the castle.
+- Rest day. I'm revising. Well. I'm on the bed.
+- The lost-property box has a new hat in it.
+? time:evening
+- One, Two and Three are well. My sister checked.
+- I found the other sock. No, a different other sock.   #funny
+? time:night
+- I can't sleep. I'm going to look at the stars.
+? season:sowing
+- Sowing. The garden's careful this time of year. So am I.
+? trad:observatory-night
+- Observatory night. I'm taking a blanket. Two.
+? place:lounge
+- I like the corner seat. You can see the door.
+? trad:quiz
+- Quiz night. I'll know the body ones. Only those.
+
+== rumour
+- I don't like gossip. But this is nice. I think.
+- I'm not sure I should say. I'll say it carefully.
+
+// Writer 4, batch 7: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- I'm packing. I've made a list. Then another list.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm transferring soon. Please drink enough water. Please.
+? leaving:you tier>=friend
+- I worried about everything here. You made it less. I wanted you to know that.   #warm
+
+== letter
+- New infirmary. Very tidy. I found a lost-property box on my first day. Of course I did. One, Two and Three are well.
+? tier>=friend
+- I passed the exam. The one I worried about. I didn't tell anyone first. I'm telling you. Please write.

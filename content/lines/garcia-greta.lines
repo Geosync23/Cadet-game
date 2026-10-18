@@ -1,0 +1,114 @@
+@crew garcia-greta
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Oh, hey. Garcia, night Watch. Friendly on patrol, firm at the airlock. That's the job.
+? tier>=acquaintance
+- {hi}, {me}. Headphones broken? Give them here.
+- {me}. Ship's weather today: dry. Again. Shocking.   #funny
+? tier>=friend
+- {hi}, {me}. Glad it's you. You're good weather.   #warm
+== feel
+? mood:high
+- Fixed four pairs of headphones and the garden pump. Proper useful night.
+? mood:low
+- Missing the rain. Don't laugh. It used to sing on the roof at home.
+== near
+? habit:gardener
+- I mist the herbs by hand. It's the nearest thing to rain aboard.
+? act:meal
+- Pass the salt? Ta. Hesper Dock food was saltier. Everything was. The sea.
+== life
+? tier>=acquaintance
+- I fix everyone's headphones. Mine haven't worked in a month.   #funny
+== joy
+? tier>=colleague
+- Taking something broken and handing it back working. Best feeling there is.
+
+// ---- Writer 2, batch 2: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue, hint, about)
+== greet
+? tier>=acquaintance time:morning
+- Morning, {me}. I'm off to bed. Ship's all yours. Try not to break it.   #funny
+? tier>=acquaintance warmth:cold
+- Oh, look. It's you. I'd started to think you'd fallen off the ship. Good. You hadn't.   #funny
+
+== near
+? habit:lounge-regular
+- Bow lounge before shift. Big windows. No rain. Not that I'm checking.
+? act:work
+- Airlock seals checked. Firm at the airlock. Friendly everywhere else.
+
+== invite
+- Garden after shift? I'll show you the misting. It's practically weather.
+
+== accept
+- Fine. Yes. I'll come. Don't make it a whole thing.   #funny
+- Yes. Bring your headphones. I know they're broken.   #funny
+
+== decline
+- Can't. Patrol. Someone has to be friendly at the airlock. Next time.
+? weekday:thu|fri
+- Rest day. I'm doing nothing, loudly. Saturday?   #funny
+
+== missed
+- You didn't come. That's fine. I fixed someone's headphones instead. Riveting.   #funny
+
+== birthday
+? birthday:you
+- Happy birthday. I fixed your headphones. You didn't know they were broken. They were.   #warm
+? birthday:me
+- My birthday. Kim made me a card that plays a tune. Badly. I'll fix it later.   #funny
+
+== cue
+? cue:event.ionStorm.onset
+- Storm's on. Finally, some weather. Don't tell anyone I said that.   #funny
+
+== hint
+- Hey. {me}. Got a minute later? I've something to say. No jokes in it.
+
+== about
+? aff:kim-yusuf:friend
+- Kim does the day shift's headphones, I do the night's. Nobody aboard goes without.   #warm
+
+// ---- Writer 2, batch 2: top-up (bye, greet by time, life at friend tier)
+== bye
+- {bye}. Try not to break anything I'll have to fix.   #funny
+- Off you go. Mind the airlock. It's firmer than me.
+== greet
+? tier>=acquaintance time:evening
+- Evening, {me}. Ship's weather: dry, with a chance of more dry.   #funny
+== life
+? tier>=friend
+- On Hesper Dock the rain had a smell. I'd know it anywhere. That's all. Nothing sad.
+- Fixing things is easy. People are harder. You're one of the easy ones.
+
+// ---- Writer 2, batch 6: bubbles (smalltalk, rumour), at most one in five about work. 60 characters.
+== smalltalk
+- Ship's weather: dry. Again.   #funny
+- Headphones broken? Hand them here.
+- I miss the rain on Hesper Dock.
+- Garden misting. Practically weather.
+? time:morning
+- Bed. Finally.
+?
+
+== rumour
+- Shocking news. Not shocking.   #funny
+- Heard this at the airlock. Firmly.   #funny
+
+// Writer 4, batch 11: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. Try not to break your headphones while I'm gone.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Off soon. Who'll fix your headphones? Not my problem. Kidding. Mostly.
+? leaving:you tier>=friend
+- Look who it is. You. Every night shift worth having. Don't make it a thing. Thanks.   #warm
+
+== letter
+- New ship. Seven broken pairs of headphones by day three. I'm very popular. Tell Yusuf I'm winning.
+? tier>=friend
+- Played the musical card Yusuf made me. Still works. Annoyingly. Hello from the night side.

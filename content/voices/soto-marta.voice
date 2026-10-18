@@ -1,0 +1,31 @@
+@voice soto-marta
+// Works writer. Marta Soto (she/her): Works technician, junior, day shift, Bunk 7. Loyal, blunt. Quiet corner,
+// evening shower. "Fixes lamps, ovens and washers, and grumbles about all three." Keeps a tin of good biscuits and
+// tells no one (Pell has found it). Married just before the tour and counts the days (to someone back home).
+//
+// HOW SHE TALKS: gruff and blunt; short lines; grumbles as a kind of affection. A soft centre that only shows when
+// the biscuit tin comes out.
+// WITH JUNIORS: gruff, then the tin; the most loyal person in Works once you're in.
+// WHAT SHE NOTICES: what's about to break, who's had a rough day, whether Pell has been near the tin.
+// MOOD TELLS: low = grumbles about all three in one breath; high = grumbles with a grin.
+// NEVER: lets anyone else grumble about her people; talks about her quiet day each year (until her thread opens).
+// RUNNING: grumbles at every lamp, oven and washer, and every one works afterwards; the secret tin (Pell knows).
+tpl: gruff
+talk: Gruff and blunt; grumbles as affection; short lines; a soft centre that shows only with biscuits.
+cares: lamps, ovens and washers (and grumbling about them) | the secret biscuit tin | the people in Works | a quiet corner
+jokes: she grumbles at every lamp, oven and washer, and every one works afterwards | the biscuit tin nobody knows about (Pell knows) | "Not the washer. Anything but the washer."
+hi: Huh. You | Hm. Hello | Oh, it's you
+bye: Go on, then | Off | Mind yourself
+yes: Fine | S'pose | Yeah, all right
+thanks: Ta | Hm. Thanks
+wow: Well, I never | Huh, not bad
+sigh: Typical | Here we go
+nick: - | - | {me} | {me} | {me}
+needs: listen
+openness: guarded
+loves: sweet | tea
+likes: made | book
+invites: works-tea | tiles
+joy: the biscuit tin, opened only for the right people
+keepsake: the biscuit tin, empty, "for you to fill"
+avoid: her quiet day each year (until her thread opens) | where the tin is

@@ -1,0 +1,354 @@
+@arc home.jo
+who: home:jo
+name: Jo
+pron: they
+// Writer 3's arc, rewritten as ONE-SIDED CALLS by head writer 4 (the user, 2026-10-17 evening: one call a day, you
+// choose who; only they speak; no Letters night). Jo, your older sibling (they / them), stuck in a dull job, proud of
+// you and a bit envious, quits to apprentice at a boatyard, and launches their first boat.
+//
+// HOW THEY TALK: dry, teasing, big-sibling; short sentences, long pauses; calls you "kid" (always, at any age) or {me}.
+//   Jokes first, means it second. Says the honest thing late at night. One-sided suits them: "Don't interrupt. You
+//   can't. Brilliant."
+// NEVER: bitter at you (the envy is about them, not you, and they say so); guilt-trips; genders you.
+// The job is checking forms at the freight office ("the office"; Steve the stapler); the boatyard is down by the water
+//   at home (from beat 2); the old boatwright is "Wick" (they / them, from beat 4); the first boat is a small rowing
+//   boat Jo names the Little Wren (beat 6). Jo waters Gran's marrow after her fall: only behind beat:home.gran.5.
+// RUNNING: "kid"; Steve the stapler; sawdust everywhere; the Little Wren.
+
+// ---- the arc ----
+== beat 1
+tone: light
+mem: firstcall
+flag: home.jo.called
+them: Kid. It's Jo. Mum says you're on a spaceship. I said I'll believe it when it rings me.   [laugh]
+them: Then Mum said I have to ring you, because you can't ring us. So here I am. Believing it.
+them: So. How is it? Is it all buttons? I bet it's all buttons. Don't touch the red ones.
+them: Work is forms. Then more forms. Then lunch. Then forms about lunch. That's my news.
+them: Seriously, though. You did it. You actually went. I told everyone at work. Nobody at work cares. I told them anyway.
+them: Glad you went, kid. Someone in this family had to.
+them: Right. Mum's waving at me to give her the receiver. She's not even on this call. Bye, kid.
+
+== beat 2
+tone: light
+when: beat:home.jo.1
+mem: office
+flag: home.jo.office
+them: Kid. Day four hundred and something at the office. I've named my stapler. It's called Steve. Steve's my best mate.   [laugh]
+them: In my lunch hour I walk down to the water and watch them at the boatyard. They're building a boat. By hand.
+them: Plank by plank. Bent with steam. It takes months. I've watched for three weeks. I've seen about four planks.
+them: I've been carving a little one. On my desk. With a letter opener. It's terrible. It's very, very small.
+them: I used to make things, didn't I. Shelves. That treehouse. The go-kart Mum still won't talk about.
+them: Then I got a desk and stopped. Funny how that happens. Lunch is over. Back to Steve.
+
+== beat 3
+tone: heartfelt
+when: beat:home.jo.2
+mem: envy
+flag: home.jo.envy
+hint: Jo's calling late. It's the middle of the night where they are.
+them: Can't sleep. Thought I'd ring. Good thing about this: you can't tell me to go to bed.
+them: Can I say something stupid? I'm proud of you. And I'm a bit jealous. Both. At the same time.   [sigh]
+them: Not of you. Of the going. You got on a shuttle. I got on the number nine to the office. Every day.
+them: Mum drives it. She waves at me. I wave back. Then I sit down and do forms.
+them: It's not your fault. It's not anyone's. I just needed to say it to someone who wouldn't make it a thing.
+them: And you can't make it a thing. Because you can't talk. Perfect. Best listener I've got.   [laugh]
+them: Right. Bed. Forms tomorrow. Night, kid. Don't tell Mum I rang this late.
+
+== beat 4
+tone: light
+when: beat:home.jo.3
+mem: sawdust
+flag: home.jo.boatyard
+them: Kid. I went in. To the boatyard. I asked if I could help on Saturdays. For nothing. Just to learn.   [laugh]
+them: The old boatwright's called Wick. Wick looked at my hands and said "Those'll do." Best review I've ever had.
+them: I sanded a plank for six hours. Best six hours of my life. Don't tell Steve.
+them: We're building a rowing boat. Clinker-built. That means the planks overlap. I know words now. Boat words.
+them: I've sawdust in places I didn't know I had. Mum made me shake out on the step. Gran laughed for an hour.
+them: Monday tomorrow. Steve and I are not on speaking terms. I've moved on.
+
+== beat 5
+tone: serious
+when: beat:home.jo.4
+mem: quit
+flag: home.jo.quit
+hint: Jo's calling, and they sound like they've been pacing.
+them: Kid. Wick's offered me an apprenticeship. A proper one. Four years. The money's half what the office pays.   [sigh]
+them: I'd have to quit. Actually quit. With a letter. I've written the letter. It's in my pocket. It's been there a week.
+them: Mum says do what makes me happy. Gran says "about time". I needed someone who'd just listen.
+them: What if I'm too old? What if I'm no good at it? What if I quit and it's just... a different desk?
+them: Then I thought: what would I tell you? Go. I'd tell you go. I did tell you go. When the letter came for the Wren.
+them: That's not fair, kid. You didn't even say anything and you've won.   [laugh]
+them: Right. I'm handing it in tomorrow. Before I lose my nerve. I'll bring sandwiches. Like a proper apprentice.
+
+== beat 6
+tone: resolution
+when: beat:home.jo.5
+mem: launch
+flag: home.jo.launched
+keepsake: a curl of wood from Jo's first boat
+learn: Jo left the freight office to apprentice at the boatyard at home. Their first boat is called the Little Wren.
+mail: 2880 | From Jo | A small envelope in the post bag. Inside, one curl of pale wood and a note: "From the Little Wren. First plank. Don't lose it, kid. Jo."
+them: Kid. She floats. My first boat. In the water this morning. Wick let me push her off. She floats!   [laugh]
+them: Mum cried. Gran stood on the jetty and shouted "Go on!" at a rowing boat. Everyone stared.
+them: I named her. Don't laugh. The Little Wren. After your ship. Because you went first, and I followed. Sort of. Slowly.
+them: It's painted on. In gold. Slightly wonky gold. Wick says wonky is how you know a person made it.
+them: I've sent you a bit of her. A curl from the first plank. It's in the post bag. Don't lose it.
+them: Thanks, kid. For going first. That's the whole of it. Thanks.
+
+// ---- ordinary calls ----
+== chat
+// any time
+them: Kid. Quick one. I'm in the queue at the chip shop. It's a long queue. You're my entertainment.
+them: The man in front has ordered for his whole family. Nine. Nine portions. I've been counting.
+them: I've decided they're a rowing team. That's the only explanation.
+them: Or nine very hungry people. No. Rowing team. I'm sticking with it.
+them: The lady behind me is reading the menu like it's a mystery. It's chips, love. It's mostly chips.   [laugh]
+them: Oh, it's me. Bye, kid. Chips.
+--
+them: It's Jo. Mum's made me ring. Not made me. Suggested. Loudly. Over and over.
+them: Nothing's happened. I've got no news. I'll tell you about my socks. They're odd. Both of them.
+them: One's green. One's got a hole where the big toe lives. I call it the window.
+them: Steve's fine, before you ask. Still a stapler. Still my best mate.
+them: There. That's the call. Mum, I've rung. Happy? She's happy. Bye, kid.   [laugh]
+--
+them: Kid. I found your old bike in the shed. The blue one. With the bell that only rings sometimes.
+them: I've oiled it. I don't know why. You're in space. You're not going to ride it.
+them: I pumped the tyres too. And put new tape on the handles. Got a bit carried away.
+them: Remember when you rode it into the hedge? Mum's roses still haven't forgiven you.
+them: It's ready, though. When you're back. Bell still only rings sometimes. Some things you don't fix.
+them: Bye, kid.
+--
+them: Hello, kid. Rainy night. I'm on the windowsill with tea. Old habit. Your old habit, actually. I stole it.
+them: You used to sit here and say you could see the stars through the rain. You couldn't. Nobody could.
+them: I'd say "There's no stars, kid." You'd say "There are. You're not looking right." Every time.
+them: I'm looking right tonight. Still nothing. Just rain and the lamp across the road.
+them: Maybe you can see them now. Bye, kid.
+--
+them: Kid. Tell your ship I said hello. No, I mean it. Tell it. Mum talks to the bus. Gran talks to vegetables.
+them: It's a family thing. Talking to things that can't talk back. Like you, on this call. Ha.   [laugh]
+them: I talk to Steve. He's a good listener. Bit sharp. Bit quiet.
+them: So say hello to the ship from me. And say thanks. For keeping you warm and keeping the air in.
+them: That's a big job. Bigger than forms. Bye, kid.
+--
+them: It's Jo. I'm at Mum's for tea. Gran's telling a story. It's the one about the goat. You know the goat.
+them: She's changed the ending again. Now the goat wins. It never used to win.
+them: Mum asked what the goat won. Gran said "the argument". Nobody knows what the argument was.
+them: I've had three bits of cake while she tells it. It's a long story. It's a good cake.
+them: I'm holding the receiver out so you can hear. Hear that? That's the goat winning. Bye, kid.
+--
+them: Kid. Your old friend Sam waved at me in town. Asked if you're eating. Everyone asks if you're eating.
+them: I said you're probably eating better than us. They have a chef. We have Gran's crumble.
+them: Sam says hello. And that you still owe them a biscuit. From years ago. They've kept count.
+them: I said I'd pass it on. I've passed it on. You owe Sam a biscuit.
+them: Bye, kid. Eat the chef's food. All of it.
+--
+when: time:night
+them: Kid. It's late. Can't sleep. Not a big thing. Just one of those nights.
+them: The house makes noises at night. The pipes knock. The kettle ticks as it cools. I'm listening to all of it.
+them: I like ringing you on these nights. You don't tell me to count sheep. You don't tell me anything.
+them: I'm going to sit here a minute. You don't have to do anything. Just be on the line.
+them: Still there? Course you are. Good.
+them: ...Right. Better. Night, kid.
+--
+them: Kid. Something stupid. I saw a shooting star tonight. Over the gasworks. I made a wish.
+them: Not telling you what. That's the rules. But it was about you. Partly. Mostly about chips.   [laugh]
+them: Do you get shooting stars up there? Or are you too close? Do they just go past the window?
+them: If one goes past, make a wish. Make it a big one. Don't waste it on chips like me.
+them: Bye, kid.
+--
+them: It's Jo. Do you remember the den? Under the stairs? With the torch and the tin of biscuits?
+them: Mum's turned it into a cupboard. With actual things in it. Mop. Ironing board. The end of an era.
+them: We had rules in there. No grown-ups. No shoes. Password every time. It was "custard".
+them: I tried the password on Mum. She gave me a duster. Not the same.
+them: I've left one biscuit in there. Behind the mop. For tradition.
+them: Bye, kid.
+--
+when: weekday:fri
+them: Friday! The weekend's here. I'm going to do absolutely nothing. Professionally.
+them: I've got a plan. Sofa. Blanket. Tea. Maybe a second tea. Big plans.
+them: You get weekends up there? You must. Even space stops on a Saturday. Surely.
+them: If it doesn't, have a sit down anyway. Tell them your big sibling said so.   [laugh]
+them: Do nothing for me. Bye, kid.
+--
+them: Kid. I've been thinking about the first thing you said when you could talk. You said "Jo." First word.
+them: Mum says it was "more". Gran says it was "biscuit". It was "Jo". I was there. I'm sticking to it.
+them: You said it in the garden. You pointed at me and said it. Then you sat in a puddle.
+them: Mum wasn't looking. Gran was asleep. So I'm the only witness. Case closed.
+them: Bye, kid.   [laugh]
+
+// after beat 1: the office, the boatyard not yet
+--
+when: beat=home.jo.1
+them: Kid. Office update. Someone's moved my chair. Up. One notch. I've been sitting wrong all morning.
+them: I've told the whole office. Nobody's owned up. There's a culprit among us.
+them: I've got a list of suspects. It's everyone. Even the man who only comes in on Tuesdays.
+them: Steve saw it all, I reckon. He's not saying. Staplers never tell.
+them: This is my life now. Chair mysteries. You've got space. I've got a chair. Bye, kid.
+--
+when: beat=home.jo.1
+them: It's Jo. Lunch break. I've eaten my sandwich at my desk, like a sad person. Don't do that, up there.
+them: Crumbs all over my forms. One form now says "chees". I'll have to start it again.
+them: Eat with people. Sit at a table. Even if you don't know them. Especially then.
+them: That's how you make friends. And sometimes get pudding. Pudding's the main thing.
+them: That's big-sibling advice. Free of charge. Bye, kid.
+--
+when: beat=home.jo.1
+them: Kid. Form of the day: a man's sending a crate of pickled onions to his aunt. Four hundred jars.
+them: I checked it. All correct. Four hundred jars. I'd like to meet that aunt.
+them: Does she eat them? Does she sell them? Is she building something out of them?
+them: I'll never know. That's the job. You see the start of a story and never the end.
+them: That's the best thing that's happened all week. Think of me. Bye, kid.   [laugh]
+
+// after beat 2: watching the boatyard, carving
+--
+when: beat=home.jo.2
+them: Kid. The boat's got ribs now. Like a whale. You can see right through it to the water.
+them: They bend the ribs with steam. I don't know how. I want to know how. That's new.
+them: I stood there so long one of them waved. Then went back to work. I went back to Steve.
+them: Steve didn't ask where I'd been. Good old Steve. No questions.
+them: Bye, kid.
+--
+when: beat=home.jo.2
+them: It's Jo. My little desk boat's got a name. It's called Steve Two. Steve's jealous.
+them: My boss saw it. Said "What's that?" I said "A paperweight." He said "Good." Then he left.
+them: It's not a paperweight. It's a boat. A tiny, wonky boat.
+them: It doesn't float. I checked. In my tea. It sank and I drank the tea anyway.   [laugh]
+them: The next one floats. That's a promise. Bye, kid.
+--
+when: beat=home.jo.2
+them: Kid. Gran asked why I smell of the river. I said lunch. She said you don't eat the river.
+them: I said I watch it. She said "Ah." Very knowing. Gran knows everything. Don't tell her I said.
+them: Then she gave me the look. The one she gave you when you said you'd be a cadet.
+them: I don't know what it means. I think it means "go on". I'm not ready to go on.
+them: Bye, kid.
+
+// after beat 3: after the honest night
+--
+when: beat=home.jo.3
+them: Kid. Thanks for the other night. For listening. Well. For not being able to not listen.
+them: I feel lighter. I don't know why saying it out loud helps. It just does.
+them: Even Steve seems happier. That might be me. Staplers don't change much.
+them: I went past the boatyard again today. Didn't go in. Nearly did. Nearly's new.
+them: Bye, kid.
+--
+when: beat=home.jo.3
+them: It's Jo. I bought a book on boats. A proper one. With drawings. I read it at my desk.
+them: Behind a form. Like at school. Turns out I'm still very good at hiding books behind things.
+them: Chapter two is all wood. Which wood. Why that wood. I didn't know wood had so many opinions.
+them: Chapter four's about knots. I can do one. Badly.
+them: I tied my shoes with it this morning. Fell over at the bus stop. Worth it. Bye, kid.   [laugh]
+--
+when: beat=home.jo.3
+them: Kid. I'm writing a list. Things I'd do if I wasn't scared. It's short. It's got one thing on it.
+them: I wrote it on the back of a form. Then I hid it under Steve. He's keeping it safe.
+them: I keep taking it out and looking at it. Then putting it back.
+them: Not telling you what. You know what.
+them: Maybe Saturday. Maybe. Bye, kid.
+
+// after beat 4: Saturdays at the yard, Wick
+--
+when: beat=home.jo.4
+them: Kid. Wick taught me to steam a plank today. You put it in a box with steam and it goes soft. Like bread.
+them: Then you bend it. Quick. Before it remembers it's wood. I bent one. It stayed bent. I'm a genius.   [laugh]
+them: The second one snapped. Loud. Wick didn't even look up. Just said "Again."
+them: So I did it again. And again. The fourth one stayed. Wick nodded. A whole nod.
+them: Bye, kid.
+--
+when: beat=home.jo.4
+them: It's Jo. Wick doesn't talk much. Says three things a day. Today: "Good." "Again." and "Tea?"
+them: I said yes to the tea. Wick looked pleased. I think. Hard to tell with Wick.
+them: The tea's terrible. Stewed for hours. Black as a boot. I drank all of it.
+them: You don't say no to Wick's tea. That's the first rule. I made that rule. Wick doesn't know.
+them: I've never been happier with three words. Bye, kid.
+--
+when: beat=home.jo.4
+them: Kid. Steve's been moved to the drawer. I can't look at him. He knows what he did.
+them: He did nothing. That's the problem. Five days of nothing, then Saturday. Saturday's everything.
+them: I count down now. Monday's five. Tuesday's four. Wednesday's just long.
+them: Friday night I can't sleep. Like a kid before a birthday. Like you before the shuttle.
+them: Bye, kid.
+
+// after beat 5: an apprentice now
+--
+when: beat=home.jo.5
+them: Kid. I handed it in. The letter. My boss read it and said "Boats?" I said "Boats." He said "Fair."
+them: Then he shook my hand. First time in years. His hands are very soft. Mine won't be, soon.
+them: I took Steve. Nobody said I couldn't. He's on the windowsill at the yard now. Retired.
+them: He's got a view of the water. Better than my old view. My old view was Steve.
+them: Bye, kid. Apprentice Jo, signing off.
+--
+when: beat=home.jo.5
+them: It's Jo. First week as a proper apprentice. My hands are wrecked. I've never been so pleased about anything.
+them: Splinters. Blisters. A cut I don't remember getting. Mum keeps dabbing things on them.
+them: Wick calls me "Apprentice". Not Jo. Like it's a rank. I'll take it.
+them: I'm first in every morning. I sweep. Then I sweep again. Wick says sweeping is the first lesson.
+them: I think Wick just wants a clean floor. Bye, kid.   [laugh]
+--
+when: beat=home.jo.5
+them: Kid. I make sandwiches now. Every morning. Cheese and pickle. Mum's delighted. She thinks I've grown up.
+them: I haven't. I've just got less money. Same thing, Gran says.   [laugh]
+them: I make two. One for me. One for Wick. Wick never asks. Wick always eats it.
+them: We eat on the slipway with our feet over the water. Best lunch spot going.
+them: Bye, kid.
+
+// after beat 6: the Little Wren
+--
+when: beat=home.jo.6
+them: Kid. I rowed the Little Wren out to the buoy and back. On my own. The whole way.
+them: Halfway, I stopped and just sat. Water all round. Sky all round. Thought: this must be what it's like for you.
+them: Bit smaller. Bit wetter.
+them: A gull landed on the front. Sat there like it owned her. I let it. It looked tired.
+them: Rowed back with a passenger. Wick laughed. Wick never laughs. Bye, kid.   [laugh]
+--
+when: beat=home.jo.6
+them: It's Jo. Someone wants to buy a boat. Like the Little Wren. Wick says I can build it. Mostly me.
+them: An order. A real one. My name on the paper. I didn't even check the form. That's growth.
+them: I'm scared. The good kind. The kind before you jump in the sea in spring.
+them: Wick says I'll ruin four planks at least. Wick's put four spare planks by my bench.
+them: Bye, kid.
+--
+when: beat=home.jo.6
+them: Kid. Mum came out in the Little Wren. Gran wouldn't. Gran stood on the jetty and gave orders.
+them: Mum rowed. In circles. For an hour. She says it's like the number nine, only wetter.
+them: Gran shouted "Left! No, your other left!" The whole harbour heard.   [laugh]
+them: We got back in the end. Mum wants to go again. Gran wants another turn shouting.
+them: Best afternoon in years. Bye, kid.
+
+// Gran's fall (Gran's beat 5): Jo on marrow duty
+--
+when: beat:home.gran.5 !beat:home.gran.6
+them: Kid. I'm watering Gran's marrow. The Captain. Gran wrote me four pages. Four.
+them: Page one is water. Page two is more water. Page three is just "Talk to it. Kindly. It knows."
+them: So I talk to it. Kindly. It's a marrow. I told it about my week. It took it well.
+them: Gran's all right. Cross. Very cross. That's how you know she's all right.
+them: She rings me every morning to ask about the marrow. Not about me. The marrow. Bye, kid.
+
+// news: they've heard it in your messages
+--
+when: flag:intro.soloJob
+them: Kid. Mum read out your message at tea. Your first job on your own. She cried into the gravy.
+them: Gran said "Course they did it." Like she knew all along. She did. She always knows.
+them: I'm not crying. I'm just saying: well done. Properly. You fixed a spaceship. I fix forms.
+them: Mum's pinned your message up in the kitchen. Next to the bus times. Pride of place.
+them: Bye, kid. Show-off.
+--
+when: cue:event.ionStorm.afterglow
+them: Kid. A storm. In space. Mum's beside herself. I told her you're fine. You are fine?
+them: Your message said loud. Loud's fine. Loud's just weather shouting.
+them: Gran says storms are good for you. Clears the air. I don't think she meant space air.
+them: Mum's made a cake anyway. That's what she does when she's worried. It's a big cake.
+them: I'll save you a slice. It won't keep. I'll eat it for you. Bye, kid.   [laugh]
+--
+when: came:any
+them: Kid. You went to the {trad}. Look at you. Going to things. You used to hide in the coats at parties.
+them: Every party. The coat pile. We'd find you asleep under Gran's big brown one.
+them: And now you're going to things. On a spaceship. With people you've only just met.
+them: I'm proud. Don't tell anyone.
+them: Next time, stay to the end. Then tell Mum all of it. She'll tell me. Bye, kid.
+--
+when: friend:any
+them: Kid. {friend}, is it? Good. Tell {friend} I've got stories about you. Loads. They can have them cheap.
+them: The hedge one. The custard one. The one with the goat. No, not Gran's goat. A different goat.
+them: Mum says be nice. I am being nice. These are nice stories. Mostly.
+them: Glad you've got someone. Really. Everyone needs one person who laughs at their jokes.
+them: Bye, kid.   [laugh]
