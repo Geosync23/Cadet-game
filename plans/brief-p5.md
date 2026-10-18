@@ -23,6 +23,7 @@ The user said go for Pillar 5 Steps 1 (Foundation) and 2 (Junior days, Days 2-8)
 | S systems | claude/ship-systems | session_01KxfsfBWkCGcncuuH2n1hFB |
 | P player | claude/player-p5 | session_0153WUGRakJnNzUCNNHf1E8X |
 | H case engine + scanner + P3 | claude/mech-cases | session_013nqpqRFX4hh3cLPhhpZirJ |
+| R reviewer | claude/reviews-p5 | session_01MSLjUdmeVJetxFhh9PqzLt |
 | M1, M2, A | Step 2 | later |
 
 Merge order within a step: 17 (S), 15 (P), 24 core (C), mechanics in ladder order, head-scratchers (H), deck architect (A), writer.
