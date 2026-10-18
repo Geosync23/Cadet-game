@@ -11083,11 +11083,11 @@ const TEACH = [   // text: head writer 3. A 4th element { sure: true }: shown wh
   // free time (0.28.63, the 0.60.7 plan's "Tips for your first evenings"; the plan's approved words): off shift, then one an evening, Days 1-4
   ['t:offshift', c => c.d >= 1 && c.min >= 1020 && c.min < 1290, 'Off shift. Your evening is yours: call home from the booths on Deck 3, go to a ship tradition (Calendar), talk a while with someone, or try a hobby.', { sure: true }],
   ['t:eve-talk', c => c.d === 1 && c.min >= 1110 && c.min < 1320 && !!SHIP.device.tipsSeen['t:offshift'], 'Tap someone and choose Talk a while: a proper chat builds far more friendship than a quick hello.', { sure: true }],
-  ['t:eve-hobby', c => c.d === 2 && c.min >= 1050 && c.min < 1320, 'Hobbies fill your Leisure. Open Hobbies on your device to read, write or play a game, anywhere you sit or stand still.', { sure: true }],
+  ['t:eve-hobby', c => c.d === 2 && c.min >= 1050 && c.min < 1320, 'Hobbies fill your Leisure. Open Hobbies on your device to read, write, play a game or watch a film, anywhere you sit or stand still.', { sure: true }],
   ['t:eve-trad', c => c.d === 3 && c.min >= 1050 && c.min < 1260, 'Several traditions on tonight, and you can\'t go to them all. Pick one in the Calendar.', { sure: true }],
   ['t:eve-call', c => c.d === 4 && c.min >= 1050 && c.min < 1320, 'Missing home? The call-home booths on Deck 3 put you through to your people. One call a day.', { sure: true }],
   ['t:garden', c => c.deck === 3 && /garden/i.test(((deckDef.rooms || {})[roomAt(...player.here())] || {}).name || '') && !(c.work && c.min >= 480 && c.min < 1020), 'The garden\'s yours off shift too. Tending a bed counts as a hobby: it fills your leisure.', { sure: true }],   // the user's (0.28.65), the head writer's tip.garden
-  ['t:a-hobbies', c => c.app === 'hobbies', 'Hobbies fill your Leisure. Read, write or play games on your device anywhere. Drawing, knitting and puzzles need supplies from the crew store on Deck 3; Zeke might teach you to knit.'],
+  ['t:a-hobbies', c => c.app === 'hobbies', 'Hobbies fill your Leisure. Read, write, play games or watch a film on your device anywhere. Drawing, knitting and puzzles need supplies from the crew store on Deck 3; Zeke might teach you to knit.'],
   ['t:a-sched', c => c.app === 'schedule', 'Your day at a glance: meals, your shift, anything booked. Tap an entry and the marker shows the way.'],
   ['t:a-cal', c => c.app === 'calendar', 'The weeks ahead: days off, traditions, birthdays and appointments.'],
   ['t:a-maps', c => c.app === 'maps', 'Every deck, room by room. Tap a room to put the marker on it.'],
