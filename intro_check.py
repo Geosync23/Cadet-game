@@ -235,8 +235,11 @@ def firsts(g):
     g.ev("skipTo(introAbs(0, 18 * 60 + 40))"); g.ev("(() => { goToDeck(3); player.obj.position.copy(cellPos(28, 2)); })()"); g.step(5)
     g.ev("(() => { if (DIALOGUE) dialogueEnd(); INTRO_UI.chiefD = null; SHIP.intro.done['chief:met'] = SHIP.intro.done['chief:end'] = Math.floor(shipNow()); SHIP.player.tray = null; delete SHIP.intro.done['ate:last']; clearGoal(); })()"); g.step(20)
     eat = g.ev(G); card0 = g.ev("SHIP.intro.done['call:tip'] !== undefined")
-    g.ev("SHIP.player.tray = 'Stew'"); g.step(30)
-    eat2 = g.ev(G); card = g.ev("(() => { const c = document.getElementById('devDlg'); return c && !c.hidden ? c.textContent : ''; })()")
+    g.ev("SHIP.player.tray = 'Stew'"); g.step(10); eat2 = g.ev(G); card = ''
+    for i in range(10):
+        g.step(15); card = g.ev("(() => { const c = document.getElementById('devDlg'); return c && !c.hidden ? c.textContent : ''; })()")
+        if 'Call home' in card: break
+    if 'Call home' not in card: print('  (no card:', g.ev("({ dlg: DIALOGUE && DIALOGUE.id, choose: !!DEV.choose, panel: (document.getElementById('devDlg') || {}).hidden, keys: Object.keys(SHIP.intro.done).filter(k => /call|arrow|ate|chief/.test(k)).map(k => k + '=' + SHIP.intro.done[k]), arrow: INTRO_UI.arrow, chiefD: !!INTRO_UI.chiefD })"), ')')
     print(f"  the Chief says eat, no tray: arrow '{eat}', call card held back {not card0}; with a tray: arrow '{eat2}', call card {'up' if 'Call home' in card else 'not up'}")
     if eat != 'Get your dinner at the servery': fail(f'no servery arrow after the Chief told you to eat: {eat}')
     if eat2 == 'Get your dinner at the servery' or card0: fail(f'the servery arrow stayed with a tray in hand ({eat2}) or the call card came first ({card0})')
@@ -255,7 +258,11 @@ def firsts(g):
     if not g.ev("typeof teaOut === 'function'"):
         print('  tea: not yet (no teaOut, the player engineer\'s 0.28.74)'); return
     g.ev("(() => { const j = SHIP.jobs.find(x => x.reserved === 1); if (j) { jobStops(j).forEach((s, k) => jobStepDone(j.id, k)); j.workDone = true; turnInJob(j.id); } SHIP.intro.done['d1-shadow:job'] = SHIP.intro.done['d1-shadow:job'] || Math.floor(shipNow()); })()")
-    g.ev("skipTo(introAbs(1, 13 * 60 + 1))"); g.ev("(() => { SHIP.player.needs = { hunger: 80, energy: 80, hygiene: 80, fitness: 80, social: 80 }; clearGoal(); const a = DECK_CREW.find(x => x.p.id === INTRO_ESCORT); if (a) { const n = nearestOpen(a.x + 1, a.z, player); if (n) player.obj.position.copy(cellPos(...n)); } })()"); g.step(120)
+    g.ev("skipTo(introAbs(1, 13 * 60 + 1))"); g.ev("(() => { SHIP.player.needs = { hunger: 80, energy: 80, hygiene: 80, fitness: 80, social: 80 }; clearGoal(); const a = DECK_CREW.find(x => x.p.id === INTRO_ESCORT); if (a) { const n = nearestOpen(a.x + 1, a.z, player); if (n) player.obj.position.copy(cellPos(...n)); } })()")
+    for i in range(40):   # he starts once his turn-in talk is over, by 13:10 at the latest
+        g.step(30)
+        if g.ev("SHIP.intro.done['tea:go'] !== undefined || SHIP.intro.done['tea:end'] !== undefined"): break
+    g.step(30)
     Z = "(e => e && e.mode)(escortPlan(ROSTER.find(p => p.id === INTRO_ESCORT), shipNow()))"
     go = g.ev("({ go: SHIP.intro.done['tea:go'] !== undefined, told: SHIP.intro.done['tea:told'] !== undefined, g: " + G + ", mode: " + Z + ", lead: introTeaLead() })")
     g.ev('(() => { goToDeck(5); player.obj.position.copy(cellPos(22, 1)); })()'); g.step(30)
