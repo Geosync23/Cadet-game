@@ -572,3 +572,4 @@ Read: CLAUDE.md, TEAM.md (session chain rule + overnight exception), plans/brief
 - ~12:19 M2 c9b211a (0.51.1, R2 PASS on 0.51.0 + lows); M2 flags player_check 16 FAILs on base C+S+P (Step 1 content) → P asked to investigate; BM4 warned.
 - ~12:20 BM4: 0.63.0 player_check 11 FAILs (job loop parts/shelf/crate/fitted/save/done, reserved-part, announcement, hold stop, JOB_KINDS walk); all else OK so far; holding hash for P's fix. Details forwarded to P (try with 3373828 first).
 - ~12:23 S b676814 (0.33.54 tune jobs held 2 h then crew's; drift health cost 0.1; 5.7/day, 48% repairs; cadet_test identical).
+- ~12:37 M2 42e83cf (0.51.1 + S 0.33.53/54); player_check identical with/without M2 (16 base FAILs = job loop on C+S+P). M2 done, idle; told no Step 3.
