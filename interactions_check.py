@@ -354,5 +354,47 @@ if '--quick' not in sys.argv:
         check(not g.errors, f'no console errors ({g.errors[:3]})')
         g.close()
 
+# the Tracked button and panel (0.72.0, HUD U; the user's playtest notes): what's on and coming up, your job and the fixed
+# places, each tracked with the goal arrow on a tap and stopped on a second; the device's app labels on one line on a 320 px phone
+with sync_playwright() as pw:
+    g = Game(pw, sys.argv[1], 320, 640)
+    if g.ev("!!document.getElementById('trkBtn')"):
+        print('== tracked')
+        g.ev("typeof introSkip === 'function' && introSkip()"); g.step(3)
+        g.ev("skipTo(17 * 60 + 40)"); g.step(3)
+        job = g.ev("(() => { const o = openJobs('you'); return o.length && claimJob(o[0].id) ? myJob().id : null })()"); g.step(3)
+        ROWS = "JSON.stringify([...document.querySelectorAll('#trkList button')].map(b => [b.querySelector('b').textContent, b.classList.contains('goal'), b.disabled]))"
+        g.page.click('#trkBtn'); g.step(2)
+        rows = json.loads(g.ev(ROWS)); titles = [r[0] for r in rows]
+        check(g.ev("!document.getElementById('trkPanel').hidden"), 'the Tracked button opens the panel')
+        check(all(t in titles for t in ['The job board', 'Your bunk', 'The call booths']), f'the fixed places are listed ({titles})')
+        check(job is None or titles[0] == g.ev("myJob().title"), f'your job comes first ({titles[:1]})')
+        check(any(t in titles for t in ['Dinner', 'Gym club', 'Lap of the Wren']), f"the evening's items are listed ({titles})")
+        check(job is None or rows[0][1], 'your job, taken at the board, shows as Tracking')
+        g.page.click('#trkList button:has-text("Your bunk")'); g.step(3)
+        s = st()
+        check(g.ev("document.getElementById('trkPanel').hidden") and g.ev("IX_GOAL && IX_GOAL.trk") == 'place:bed' and s['goal'] == 'Your bunk', f'a tap tracks your bunk and closes the panel ({s["goal"]})')
+        g.page.click('#trkBtn'); g.step(2)
+        rows = json.loads(g.ev(ROWS)); on = [r[0] for r in rows if r[1]]
+        check(on == ['Your bunk'], f'only your bunk shows as Tracking now ({on})')
+        g.page.click('#trkList button:has-text("Your bunk")'); g.step(3)
+        check(g.ev("IX_GOAL") is None and g.ev("SHIP.player.track") is None, 'a second tap stops it (no arrow)')
+        if job:
+            g.page.click('#trkList button:has-text("Job")'); g.step(3)
+            check(g.ev("SHIP.player.track") == job and g.ev("IX_GOAL") is None, 'a tap on your job tracks it again')
+        g.page.click('#trkBtn'); g.step(2)
+        g.page.click('#trkList button:has-text("Dinner")') if 'Dinner' in titles else None; g.step(3)
+        check('Dinner' not in titles or (g.ev("IX_GOAL && IX_GOAL.deck") == 3 and 'Deck 3' in (st()['goal'] or '')), f'a meal tracks the mess ({st()["goal"]})')
+        g.page.click('#trkBtn'); g.step(2); g.page.mouse.click(160, 620); g.step(2)
+        check(g.ev("document.getElementById('trkPanel').hidden"), 'a tap outside closes the panel')
+        b = json.loads(g.ev("JSON.stringify(document.getElementById('trkBtn').getBoundingClientRect())"))
+        hit = g.ev(f"[...document.querySelectorAll('.controls button,#devBtn,#needStrip')].filter(o => o.offsetWidth).map(o => o.getBoundingClientRect()).some(r => r.left < {b['right']} && {b['left']} < r.right && r.top < {b['bottom']} && {b['top']} < r.bottom)")
+        check(not hit and b['right'] <= 320, f'the Tracked button clears the other HUD buttons on a 320 px phone ({b})')
+        g.page.click('#devBtn'); g.step(3)
+        wrap = g.ev("[...document.querySelectorAll('.device .app span')].filter(e => e.getClientRects().length > 1 || e.getBoundingClientRect().height > 24).map(e => e.textContent)")
+        check(g.ev("document.querySelectorAll('.device .app span').length") > 4 and not wrap, f'no device app label wraps at 320 px ({wrap})')
+        check(not g.errors, f'no console errors ({g.errors[:3]})')
+    g.close()
+
 print('INTERACTIONS CHECK OK' if ok else 'INTERACTIONS CHECK FAILED')
 sys.exit(0 if ok else 1)
