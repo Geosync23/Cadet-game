@@ -2,7 +2,7 @@
 
 The project lead session keeps this file current. A new lead session reads it first, together with CLAUDE.md and DEV_NOTES.md.
 
-**Lead:** lead 14 (being started by lead 13 ~18:55 UTC 2026-10-18; depth 4 — it writes its session id and check-in here on arrival). Brief: `plans/handover-lead.md` "HANDOVER TO LEAD 14". Lead 13 (session_015UkCGSS9FyGoBdkePhrKbC, depth 3) handed over at ~52% memory; its check-in trig_01GHYjtfmTPvXLc6JVF3DSfx is disabled once lead 14 has its own. Branch `claude/lead-pillar1`.
+**Lead:** lead 14, session_01RHtJv7GJDi4qosgU8Gb2b8, depth 4 (started ~18:52 UTC 2026-10-18), hourly check-in trig_019eHQTci9XVxtaeJueEa3rq (:53). Brief: `plans/handover-lead.md` "HANDOVER TO LEAD 14". Lead 13 (session_015UkCGSS9FyGoBdkePhrKbC, depth 3) handed over at ~52% memory; its check-in trig_01GHYjtfmTPvXLc6JVF3DSfx is disabled. Branch `claude/lead-pillar1`. Helpers now report to lead 14.
 
 **Pillar 5 Step 2 = 0.63.1** (claude/p5-cand-s2 a9fad20, all checks OK) published by lead 13 ~17:25 to the preview https://claude.ai/artifact/9UC4nQsLzKyo5fkPwWBahs version 3.
 
