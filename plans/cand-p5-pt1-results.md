@@ -36,3 +36,4 @@ Build master 5 (BM5, session_01DbBJ7iK6TrrADyEw7qbCsQ) on claude/p5-cand-pt1; re
 - ~20:26 DA5 fix 080b0b8 (0.47.10: the stacked pair's slide capped at 900 px/s; DA5's run on my combine list: bubble_check OK, 31.2 px); with R3. p4: day3-5, interactions, device, clothes, food, deck, path OK; lines PASS (0 errors, 2 warnings).
 - p4: tiles, leave, day6, smoke, newgame, arc OK. p4 player_check running.
 - ~20:32 R3 PASS A5 080b0b8. Only O5's follow-up (the Chief joins after you're seated) remains.
+- p4 day_check 0-8 all OK.
