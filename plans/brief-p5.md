@@ -25,7 +25,9 @@ The user said go for Pillar 5 Steps 1 (Foundation) and 2 (Junior days, Days 2-8)
 | H case engine + scanner + P3 | claude/mech-cases | session_013nqpqRFX4hh3cLPhhpZirJ |
 | R reviewer | claude/reviews-p5 | session_01MSLjUdmeVJetxFhh9PqzLt |
 | W writer (head writer) | claude/writer-p5 | session_013DdpJv4AKFJcvuBBqjSXms |
-| M1, M2, A | Step 2 | later |
+| M1 mechanics 1 (rounds, drill/inspection, hauling, uniform) | claude/mech-rounds | session_01PkbdtgrbpHymsmu5Pgazm7 |
+| A deck architect (DA4) | claude/decks-p5 | session_01P6DtVbtWZs9i82fJ4UzRuB |
+| M2 (tuning, incidents) | claude/mech-incidents | later (when P finishes) |
 
 Merge order within a step: 17 (S), 15 (P), 24 core (C), mechanics in ladder order, head-scratchers (H), deck architect (A), writer.
 Pillar 5 builds go to a NEW preview link; 0.60.7 stays on the main link.
