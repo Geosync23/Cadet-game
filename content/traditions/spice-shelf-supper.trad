@@ -14,25 +14,26 @@ anim: talk
 host: brennan
 from: brennan
 ties: galley meal=dinner
+trace: spiceJars
 meal: dinner
 
+
 == mail
-- Spice shelf supper tomorrow at dinner, from {time}. Three jars off the shelf this week. Guess whose they are.
+- Spice shelf supper tomorrow at {time}. I'm picking three jars from the shelf. Bring a guess, and an appetite.
 
 == ask
-- Spice shelf supper tonight. I hope she picks my jar.   #warm
-- Brennan's cooking from the spice shelf. Bring an appetite and a glass of water.   #funny
-- Supper from the spice shelf at quarter past six. Three jars, three homes.   #warm
+- Spice shelf supper tonight. Brennan picked three jars. Guess whose.
+- Supper's a mystery tonight. Three spices off the shelf.
 
 == here
-- That's my gran's pepper. I'd know it anywhere.   #warm
-- Whose is the smoky one? I need to know.
-- Too hot. Wonderful. Too hot.   #funny
+- That's mine! That warm one. That's from home.   #warm
+- Is that smoky one yours? It's lovely.
+- Brennan never says whose jar it is. We have to guess.
 
 == thanks
-- You eat from Brennan's spice shelf supper. Somebody tells you whose spice is in it, and where it came from.   #warm
+- Brennan sets out supper made with three jars from the spice shelf, and the whole mess tries to guess whose they are.   #warm
 
 == chatter
-- The spice shelf's three jars longer than last month.
-- One day I'll find out whose jar is the green one.   #funny
-- Every jar on that shelf came a long way.   #warm
+- Spice shelf supper tonight. Hope she picks my jar.
+- That shelf's got half the galaxy on it now.   #warm
+- Bring a spice from home next leave. Brennan will use it.

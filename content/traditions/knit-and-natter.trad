@@ -15,22 +15,23 @@ host: torres-zeke
 from: torres-zeke
 invite: host=torres-zeke odds=35% line="Knit and natter tonight, common room. Bring whatever you're making. Or just come and natter."
 
+
 == mail
-- Knit and natter tomorrow, {time}, junior common room. Bring a hobby: needles, a sketchbook, a book. Or nothing. Tea's on me.
+- Knit and natter tomorrow at {time}, junior common room. Bring any hobby, or none. I've got spare needles. Lots.
 
 == ask
-- Knit and natter tonight. Zeke's teaching me to purl. It's going badly.   #funny
-- Bring your sketchbook to the common room later. Nobody looks unless you want them to.   #warm
-- Knit and natter or Tiles tonight? Can't do both.
+- Knit and natter tonight. Bring anything. Or nothing.
+- Zeke's circle's on later. Even if you just sit and chat.
 
 == here
-- Hold it looser. The wool's not going anywhere.   #warm
-- That's a scarf. It's definitely a scarf.   #funny
-- Pass the blue, would you?
+- Hold it like this. No, like this. There you go.
+- Can I see your sketch? Oh, that's lovely.
+- Anyone seen the blue wool? Zeke's eaten it again.   #funny
 
 == thanks
-- You sit down in Zeke's circle. Needles click, pencils scratch, and the talk is easy.   #warm
+- You sit down with Zeke's circle in the junior common room: needles clicking, pencils scratching, and plenty of natter.   #warm
 
 == chatter
-- Zeke's knitted something for half the Works. Mostly socks.   #funny
-- I finished a whole sketchbook at knit and natter.   #warm
+- Knit and natter tonight. Or Tiles. Hard choice.
+- Zeke's making scarves for half the ship now.   #funny
+- I went to knit and natter for the tea and stayed for the people.   #warm

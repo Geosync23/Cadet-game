@@ -428,7 +428,7 @@ with sync_playwright() as pw:
     # every decor and trace id a tradition names is one the deck architect built (DECK_DRESS) or has announced, or one
     # a designer has asked for (it shows nothing until built); anything else is a typo
     ANNOUNCED = {'tilesNight', 'seedlingYours', 'tastingTable', 'lanternWalk', 'mugYours', 'longTables', 'harvestTables', 'cupBoard', 'talentStage', 'yearsEnd', 'openLab'}   # the deck architect, 0.38.10-0.38.14 and their list
-    ASKED = {'nameOnBeam'}                                # asked of the deck architect (0.34.51: your name on the Works bay's cross beam), not built yet
+    ASKED = {'nameYours', 'spiceJars'}                    # named by deck architect 4 (claude/deck-0607, "Places for 0.60.7"), not in this branch yet
     ids = g.ev("SHIP_TRADITIONS.flatMap(e => [e.ties && e.ties.decor, e.trace].filter(Boolean).map(x => [e.id, x]))")
     built = set(g.ev("typeof DECK_DRESS === 'undefined' ? [] : Object.keys(DECK_DRESS)"))
     waiting = sorted({x for _, x in ids if x not in built})

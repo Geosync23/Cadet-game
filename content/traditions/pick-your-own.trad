@@ -15,21 +15,23 @@ anim: water
 host: cruz-tove
 from: cruz-tove
 
+
 == mail
-- Pick-your-own breakfast tomorrow, {time}, in the garden. Baskets by the door. Take what's ripe, leave the rest.
+- Pick-your-own breakfast tomorrow at {time} in the garden. Baskets by the door. Take what's ripe and carry it up.
 
 == ask
-- Pick-your-own this morning. The strawberries are ready, Tove says.
-- Fruit straight off the racks before breakfast? Best start to a Wednesday.   #warm
+- Pick your own in the garden tomorrow. Fresh fruit for breakfast.
+- Baskets are out in the garden in the morning. Come early.
 
 == here
-- That one's ripe. Smell it.   #warm
-- Leave some for the late risers. A few.   #funny
-- Baskets back by the door when you're done.
+- This one's ripe. Smell it.
+- Only the ripe ones. The gardeners are watching.   #funny
+- Best breakfast of the week, this.
 
 == thanks
-- You pick a basket of fruit straight off the racks in the garden and carry it to breakfast.   #warm
+- In the garden you fill a basket with fruit straight off the racks and carry it up to breakfast.   #warm
 
 == chatter
-- Pick-your-own's the only time I get the good strawberries.   #funny
-- Wednesday fruit from the garden tastes better than anything from the store.   #warm
+- Pick your own tomorrow. Get there before the gym lot.   #funny
+- Fruit off the rack tastes different. Better.
+- The garden smells amazing on pick-your-own day.

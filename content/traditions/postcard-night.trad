@@ -15,22 +15,23 @@ host: eklund-leila
 from: eklund-leila
 invite: host=eklund-leila odds=30% line="Postcard night, by the booths. I've got spare cards. Write one home?"
 
+
 == mail
-- Postcard night tomorrow, {time}, by the call-home booths. Cards and pens on me. They go out with the next mail run.
+- Postcard night tomorrow at {time} by the booths. Cards on the table, pens in the pot. The mail run takes them Friday.
 
 == ask
-- Postcard night later. I never know what to write. I write it anyway.   #warm
-- Eklund's got new cards. One's got the Wren on it.
-- Write one home tonight? Your family would like a card.   #warm
+- Postcard night. Write one home. They'll love it.
+- Cards are out by the booths. Five minutes, a card home.
 
 == here
-- How do you spell "nebula"? Asking for my mum.   #funny
-- Short is fine. They just want to know you're well.   #warm
-- Leave room for a drawing. Everyone does a drawing.
+- What do I say? I always say the food's good.   #funny
+- Short is fine. They just want to hear from you.   #warm
+- Anyone got a pen that works?
 
 == thanks
-- You write a card home by the booths and drop it in Eklund's box. It goes out with the next mail run.   #warm
+- At booth row you write a card home, pin it in the mail box, and it goes out with the next mail run.   #warm
 
 == chatter
-- My gran keeps every card I send on her fridge. It's a big fridge.   #funny
-- Postcard night's quiet. Just pens, and people thinking about home.   #warm
+- Postcard night later. My gran keeps every one.   #warm
+- I write the same card every week. Nobody minds.   #funny
+- Mail run goes Friday. Get your card in tonight.

@@ -13,22 +13,23 @@ who: bar-regular 85%, lounge-regular 50%, night-owl 35%, everyone 18%
 anim: drink
 from: The bow lounge bar
 
+
 == mail
-- Tap night tomorrow from {time} at the bow lounge bar. A new drink of the week, and the good stools by the window.
+- Tap night tomorrow at {time} in the bow lounge. New drink of the week. Bring a friend and a guess what's in it.
 
 == ask
-- Tap night later. I hear the drink of the week is green.   #funny
-- Bar or jam tonight? Can't do both.
-- Tap night at eight. First round's on whoever's last in.   #funny
+- Tap night at the bar. There's a drink of the week.
+- Friday at the bar? Or the jam? Can't do both.
 
 == here
-- Try the drink of the week. Brave of you.   #funny
-- Busy tonight. Good.
-- Another round? Just a small one.
+- What's in it? Don't tell me. Yes, tell me.   #funny
+- Same again? Go on, it's Friday.
+- Best seats are by the window. Grab one.
 
 == thanks
-- You find a stool at the busy bar for tap night. The drink of the week is better than it looks.   #funny
+- The bow lounge bar is busy and bright. You try the drink of the week and lean on the counter with everyone else.
 
 == chatter
-- Tap night's drink of the week was a triumph. Or a warning. Hard to say.   #funny
-- Friday at the bar is the loudest the Wren gets.
+- Tap night later. Last week's drink was purple.   #funny
+- Friday at the bar. Best way to end a week.
+- Jam or tap night? I'm doing both. Somehow.   #funny

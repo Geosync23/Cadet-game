@@ -8,28 +8,29 @@ when: weekly monday,wednesday,friday
 at: 06:30-07:00
 min: 15
 wake: 15
-venue: plaza
 where: 3 room Promenade: bench
 where: 3 room Lift plaza: bench
 hold: none
 who: early-riser 55%, runner 40%, gym-regular 35%, everyone 8%
 from: The promenade
 
+
 == mail
-- Sunrise stretch tomorrow, {time}, along the promenade windows. Gentle, slow, before breakfast. Come in whatever you slept in.   #funny
+- Sunrise stretch at {time}, along the promenade windows. Gentle, slow, done before breakfast. Come in what you slept in.
 
 == ask
-- Sunrise stretch this morning. Gentle, I promise.
-- Stretch by the windows before breakfast? Wakes you up better than tea.   #warm
+- Sunrise stretch in the morning? Gentle. I promise.
+- Stretch before breakfast? Wakes you up better than tea.
 
 == here
-- Reach up. Hold it. And breathe.
-- My back says thank you. My knees have notes.   #funny
-- Look at the light on the hull.   #warm
+- Reach up. And down. And groan quietly.   #funny
+- Look out the window while you stretch. Lovely start.
+- My knees say no. My knees are outvoted.   #funny
 
 == thanks
-- You stretch with the early risers along the promenade windows. By breakfast you feel awake all the way through.   #warm
+- You stretch along the promenade windows with a few early risers while the stars slide past. Breakfast tastes better after.
 
 == chatter
-- Sunrise stretch is the only reason I'm awake before seven.   #funny
-- The promenade at half six is the quietest place aboard.   #warm
+- Sunrise stretch tomorrow. Set an alarm.
+- I go to sunrise stretch for the windows, honestly.   #warm
+- My back's better since I started the stretch.

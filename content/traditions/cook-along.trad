@@ -13,22 +13,23 @@ anim: talk
 host: dlamini-lukas
 from: dlamini-lukas
 
+
 == mail
-- Cook-along tomorrow, {time}, at the galley pass. One simple dish, start to finish. You stir, you taste, you take a portion home.
+- Cook-along tomorrow at {time} at the galley pass. One simple dish. You stir, you taste, you eat it. Aprons provided.
 
 == ask
-- Cook-along tonight. Lukas says it's dumplings. I can't fold a dumpling.   #funny
-- Learn a dish at the galley pass later? Lukas is a good teacher.   #warm
-- Cook-along after dinner. Bring an apron, or borrow one.
+- Cook-along tonight. You make it, you eat it.
+- Learn a dish at the galley pass later? It's easy.
 
 == here
-- Stir, don't splash. Stir.   #funny
-- A pinch. No, a smaller pinch.
-- Taste it now. Then taste it again in a minute. See?   #warm
+- Stir, don't splash. Well, splash a little.   #funny
+- Taste it. More salt? Less? You decide.
+- That's yours. You made that. Look at you.   #warm
 
 == thanks
-- Lukas shows you one simple dish at the galley pass. You stir, taste, and take away a warm portion of your own.   #warm
+- At the galley pass, {host} shows you one simple dish. You stir, taste, and walk away with a portion you made yourself.   #warm
 
 == chatter
-- I made Lukas's soup in my cabin's kettle. Don't tell Brennan.   #funny
-- Cook-along's dumplings were better than mine at home. Don't tell my mum.   #funny
+- Cook-along later. Last week I made soup. Proper soup.
+- I can cook three things now. Three!   #funny
+- Brennan peeks in at cook-along. Pretends she's not.   #funny
