@@ -7,7 +7,7 @@
 #   on the deck, minute by minute through each event (the CrewAgents, no drawing): attendees reach their places,
 #   nobody is stuck for more than 10 ship minutes, nobody shares a place; draw calls at the event under BUDGET;
 #   the Mail the evening before (18:00), once each; the ship note after each tradition (simNote, once, who came);
-#   the voice budget (at most two traditions an evening, never two at once on a deck) every day of a year; decor on the deck while it's on, and gone after;
+#   the voice budget (at most two traditions at once, never two at once in a room; 2+ every weekday) every day of a year; decor on the deck while it's on, and gone after;
 #   the player joining by being in the room (a little social, once); the tap line before it;
 #   a whole ship year on paper (Pillar 4): the new rhythms (every 2 or 4 weeks, by quarter, by year, from your arrival)
 #   due exactly when they should be, the four seasons, the baked traditions (content/traditions) loaded and filled;
@@ -20,6 +20,7 @@ from playwright.sync_api import sync_playwright
 
 DAYS = int(sys.argv[2]) if len(sys.argv) > 2 else 28
 BUDGET = 450
+MORNING_WAIT = set()                                      # was the two early ones (0.34.51), until social 0607's morning() (d3d5b4d) slots them
 STEP = 0.05                    # real seconds a step, as day_check
 
 # Pillar 4's rhythms, worked out forwards from each rhythm's first day (not with the game's evDue), for days lo..hi
@@ -65,6 +66,13 @@ PLANS = r"""(days => {
       const cap = new Set(e.ev.where.flatMap((w, i) => S.shared.get(w.deck + '|' + (w.room ? 'ev:' + e.id + ':' + i : w.pool)) || []).map(pl => pl.id)).size;
       if (!n) out.empty.push(d + ' ' + e.id + ': nobody went (' + want + ' meant to; the room was full)');
       row.ev.push({ id: e.id, names: e.names, at: hhmm(e.from) + '-' + hhmm(e.to), want, went: n, places: places[e.id] ? places[e.id].size : 0, cap });
+    }
+    // a tradition's held places (eventPlaces) are only for those going while it's on: nobody else (a meal, the gym, the
+    // bar) sits in one then (0.34.51, the user: no tradition shares a room or place with a meal or other use)
+    for (const e of on) {
+      const held = new Set(eventPlaces(e)), B = (d - 1) * 1440;
+      for (const p of schedPeople()) for (const s of planDay(p, d)) if (s.placeId && held.has(s.placeId) && s.from < B + e.to && B + e.from < s.to && tagId(s.tag || '') !== e.id)
+        out.bad.push(d + ' ' + p.id + ' in ' + s.placeId + ' (' + (s.tag || s.act) + ') ' + hhmm(s.from - B) + '-' + hhmm(s.to - B) + ', held for ' + e.id);
     }
     const r = dayReport(d);
     for (const k of ['short', 'meals', 'work', 'double', 'gaps']) if (r[k].length) out.bad.push(d + ' dayReport ' + k + ': ' + r[k].slice(0, 4).join(', '));
@@ -345,7 +353,8 @@ with sync_playwright() as pw:
     seen = {e['id'] for row in r['days'] for e in row['ev'] if e['went']}
     for x in r['empty']: print('  note:', x)
     for i in r['ids']:
-        if i not in seen: fail(f"{i} never happened (or nobody ever went) in the days checked")
+        if i not in seen and i in MORNING_WAIT: print(f"  WAITING: {i}: nobody goes until section 14's morning() slots a gathering before breakfast (asked of the sim engineer at 0.34.51); then drop it from MORNING_WAIT")
+        elif i not in seen: fail(f"{i} never happened (or nobody ever went) in the days checked")
     for b in r['bad'][:20]: fail(b)
     if len(r['bad']) > 20: print(f"  ... and {len(r['bad']) - 20} more")
     same = g.ev(f"({SAME})(4)")
@@ -364,13 +373,14 @@ with sync_playwright() as pw:
         for (const d of on) if (!due.has(d)) out.bad.push(ev.id + ' on day ' + d + ' but not due');
         out.count[ev.id] = [...on].sort((a, b) => a - b);
       }
-      // the voice budget, every day of the year: at most two traditions an evening (from 17:00), never two at once on a
-      // deck (birthdays aside), and what it left out
+      // the voice budget, every day of the year (0.34.51, 0.60.7): at most two traditions at once, never two at once in
+      // one room (birthdays aside), and what it left out; and every weekday (Monday to Friday) has 2 or more
       out.dropped = [];
       for (let d = 0; d <= 364; d++) {
         const t = eventsOn(d).filter(e => SHIP_TRADITIONS.includes(e.ev) && !e.ev.when.birthday);
-        if (t.filter(e => e.from >= 1020 && e.to > 1080).length > 2) out.bad.push('day ' + d + ': more than two traditions in the evening');
-        for (const a of t) for (const b of t) if (a !== b && a.from < b.to && b.from < a.to && a.ev.where.some(w => b.ev.where.some(x => x.deck === w.deck))) out.bad.push('day ' + d + ': ' + a.id + ' and ' + b.id + ' at once on one deck');
+        for (const x of t) if (t.filter(k => k.from <= x.from && x.from < k.to).length > 2) out.bad.push('day ' + d + ': more than two traditions at once at ' + x.from);
+        for (const a of t) for (const b of t) if (a !== b && a.from < b.to && b.from < a.to && evRooms(a.ev).some(r => evRooms(b.ev).includes(r))) out.bad.push('day ' + d + ': ' + a.id + ' and ' + b.id + ' at once in one room');
+        if (d >= 1 && weekday(d) < 5 && t.length < 2 && !eventOn(d)) out.bad.push('day ' + d + ' (a weekday) has ' + t.length + ' tradition(s), not 2-3');
         if (EV_DROPPED.get(d)) out.dropped.push(d + ':' + EV_DROPPED.get(d).join('+'));
       }
       for (const d of [0, 1, 91, 92, 182, 183, 273, 274, 364, 365]) out.seasons.push(d + ':' + season(d) + ':' + seasonOf(d).week);
@@ -425,7 +435,7 @@ with sync_playwright() as pw:
     # every decor and trace id a tradition names is one the deck architect built (DECK_DRESS) or has announced, or one
     # a designer has asked for (it shows nothing until built); anything else is a typo
     ANNOUNCED = {'tilesNight', 'seedlingYours', 'tastingTable', 'lanternWalk', 'mugYours', 'longTables', 'harvestTables', 'cupBoard', 'talentStage', 'yearsEnd', 'openLab'}   # the deck architect, 0.38.10-0.38.14 and their list
-    ASKED = set()                                         # asked for in plans/trad-notes-*.md, not yet named by the deck architect
+    ASKED = {'nameYours', 'spiceJars'}                    # named by deck architect 4 (claude/deck-0607, "Places for 0.60.7"), not in this branch yet
     ids = g.ev("SHIP_TRADITIONS.flatMap(e => [e.ties && e.ties.decor, e.trace].filter(Boolean).map(x => [e.id, x]))")
     built = set(g.ev("typeof DECK_DRESS === 'undefined' ? [] : Object.keys(DECK_DRESS)"))
     waiting = sorted({x for _, x in ids if x not in built})
@@ -694,6 +704,26 @@ with sync_playwright() as pw:
         for k, v in r.items():
             if k == 'day': continue
             if v.get('missing') or not v['hon'] or not v['mail'] or v['others'] < 2: fail(f"{k} for the rotation on day {r['day']}: {v}")
+
+    # 9e. Quiz night's mini-game (0.34.51): three questions from the pool (a stand-in pool here, unless the build has the
+    # head writer's), the same three for a day, different the next week; joining the quiz in the bow lounge opens it;
+    # a right and a wrong answer each get Tomas's remark, the score at the end
+    Q = g.ev("""(() => { const keep = {}, real = !!LINES['quiz.q3.text'];
+      if (!real) { const set = (k, v) => { keep[k] = LINES[k]; LINES[k] = [{ text: v }]; };
+        for (let i = 1; i <= 7; i++) { set('quiz.q' + i + '.text', 'Q' + i + '?'); set('quiz.q' + i + '.a1', 'R' + i); for (const k of [2, 3, 4]) set('quiz.q' + i + '.a' + k, 'W' + i + k); }
+        set('quiz.right', 'Right.'); set('quiz.wrong', 'It was {answer}.'); set('quiz.done', '{n} of 3.'); }
+      const d = 4, a = quizPick(d), out = { real, three: a.length === 3 && new Set(a.map(x => x.q)).size === 3, same: JSON.stringify(a) === JSON.stringify(quizPick(d)),
+        next: quizPick(d + 7).map(x => x.q).join() !== a.map(x => x.q).join(), oneRight: a.every(x => x.answers.includes(x.right) && x.answers.length >= 3 && x.answers.length <= 4) };
+      const was = DIALOGUE; if (was) dialogueClose();
+      out.start = quizStart(d, shipNow()); const seen = [];
+      for (let s = 0; s < 14 && DIALOGUE && DIALOGUE.id === 'moment:quiz'; s++) { const v = dialogueView(); if (!v) break;
+        if (v.choices) { const x = a[Math.floor(s / 3)], k = s < 3 ? v.choices.indexOf(x.right) : v.choices.findIndex(c => c !== x.right); seen.push('pick ' + v.choices[k]); dialogueChoose(k); }
+        else { seen.push(v.text); dialogueNext(); } }
+      out.seen = seen; out.score = QUIZ_LAST && QUIZ_LAST.score; out.closed = !DIALOGUE;
+      for (const k in keep) { if (keep[k] === undefined) delete LINES[k]; else LINES[k] = keep[k]; }
+      return out; })()""")
+    print('Quiz night game:', Q)
+    if not (Q['three'] and Q['same'] and Q['next'] and Q['oneRight'] and Q['start'] and Q['closed'] and Q['score'] is not None and 1 <= Q['score'] <= 3 and len(Q['seen']) >= 7): fail(f"the quiz game: {Q}")
 
     # 10. the bridge invite (0.34.35), last: it skips on to day 50
     I = g.ev(INVITE)

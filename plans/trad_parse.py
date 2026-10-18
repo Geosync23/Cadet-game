@@ -17,7 +17,7 @@ WEEKDAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 
 TONES = ('light', 'funny', 'warm', 'serious')
 TEXT_KINDS = ('mail', 'ask', 'here', 'thanks', 'chatter')
 KEY_ORDER = ('id', 'k', 'name', 'when', 'at', 'min', 'prio', 'jitter', 'early', 'where', 'hold', 'who', 'anim', 'host',
-             'from', 'cake', 'decor', 'ties', 'invite', 'trace', 'meal', 'flag', 'text')
+             'from', 'cake', 'decor', 'ties', 'invite', 'trace', 'meal', 'flag', 'wake', 'afterShift', 'spare', 'venue', 'text')
 
 
 class TradError(Exception):
@@ -182,7 +182,7 @@ def parse_field(tr, key, v, where):
     key, v = key.strip().lower(), v.strip()
     if key == 'title':
         tr['name'] = v
-    elif key in ('k', 'min', 'prio', 'jitter', 'early'):
+    elif key in ('k', 'min', 'prio', 'jitter', 'early', 'wake', 'spare'):
         if not v.isdigit():
             raise TradError(f'{where}: {key} is a whole number')
         tr[key] = int(v)
@@ -205,12 +205,14 @@ def parse_field(tr, key, v, where):
         if not re.fullmatch(r'[a-zA-Z0-9_.:-]+', v):
             raise TradError(f'{where}: flag is one flag name, e.g. bridge.invited')
         tr['flag'] = v
-    elif key in ('host', 'from', 'decor', 'trace'):
+    elif key in ('host', 'from', 'decor', 'trace', 'venue'):
         tr[key] = v
     elif key == 'meal':
         if v.lower() not in ('dinner', 'breakfast'):
             raise TradError(f'{where}: meal is dinner or breakfast (going to it IS that meal)')
         tr['meal'] = v.lower()
+    elif key == 'after-shift':
+        tr['afterShift'] = v.lower() in ('yes', 'true')
     elif key == 'cake':
         tr['cake'] = v.lower() in ('yes', 'true')
     elif key == 'ties':

@@ -1,0 +1,386 @@
+@bank all
+// Head writer 0607: quiz night's mini-game (the user's, via lead 10): three multiple-choice questions about the ship
+// a night, from this pool. All true to the game and learnable by playing (decks, crew, times, traditions, systems);
+// easy to medium; the wrong answers are a little silly. TEXTS: quiz.q<n>.text is the question, quiz.q<n>.a1 is ALWAYS
+// the right answer, a2-a4 the wrong ones (the game shuffles them). quiz.host.* are said by the quiz host (card or
+// bubble, Tomas). {n} a score, {answer} the right answer.
+
+== quiz.q1.text
+- What's the name of the shuttle that brought you aboard?
+== quiz.q1.a1
+- The Tern
+== quiz.q1.a2
+- The Halcyon
+== quiz.q1.a3
+- The Wren Junior
+== quiz.q1.a4
+- The big floaty one
+
+== quiz.q2.text
+- Which deck is the bridge on?
+== quiz.q2.a1
+- Deck 1
+== quiz.q2.a2
+- Deck 3
+== quiz.q2.a3
+- Deck 6
+== quiz.q2.a4
+- Wherever the Captain is
+
+== quiz.q3.text
+- Where will you find the mess and the galley?
+== quiz.q3.a1
+- Deck 3
+== quiz.q3.a2
+- Deck 5
+== quiz.q3.a3
+- Deck 2
+== quiz.q3.a4
+- Follow your nose. Any deck.
+
+== quiz.q4.text
+- How many drive coils are there in the engine room?
+== quiz.q4.a1
+- Three
+== quiz.q4.a2
+- One
+== quiz.q4.a3
+- Twelve
+== quiz.q4.a4
+- None. The Wren runs on tea.
+
+== quiz.q5.text
+- What time is tea break in the Works bay?
+== quiz.q5.a1
+- Half ten
+== quiz.q5.a2
+- Noon
+== quiz.q5.a3
+- Four o'clock
+== quiz.q5.a4
+- Whenever the kettle says so
+
+== quiz.q6.text
+- Who runs the galley?
+== quiz.q6.a1
+- Chef Brennan
+== quiz.q6.a2
+- Chief Calder
+== quiz.q6.a3
+- Commander Vance
+== quiz.q6.a4
+- The grab shelf
+
+== quiz.q7.text
+- Who is the Chief of Works?
+== quiz.q7.a1
+- Ines Calder
+== quiz.q7.a2
+- Auda Brennan
+== quiz.q7.a3
+- Zeke Torres
+== quiz.q7.a4
+- Coil three
+
+== quiz.q8.text
+- Who is the Captain of the Wren?
+== quiz.q8.a1
+- Captain Marrow
+== quiz.q8.a2
+- Captain Calder
+== quiz.q8.a3
+- Captain Tern
+== quiz.q8.a4
+- Captain Toast
+
+== quiz.q9.text
+- Which of these is NOT one of the ship's four seasons?
+== quiz.q9.a1
+- Snowing
+== quiz.q9.a2
+- Sowing
+== quiz.q9.a3
+- Harvest
+== quiz.q9.a4
+- Lanterns
+
+== quiz.q10.text
+- What do we call the ship's money?
+== quiz.q10.a1
+- Credits
+== quiz.q10.a2
+- Biscuits
+== quiz.q10.a3
+- Coins
+== quiz.q10.a4
+- Favours
+
+== quiz.q11.text
+- Where are the call-home booths?
+== quiz.q11.a1
+- Deck 3
+== quiz.q11.a2
+- Deck 1
+== quiz.q11.a3
+- Deck 6
+== quiz.q11.a4
+- In the lift, if you shout
+
+== quiz.q12.text
+- Where's the laundry for the junior wing?
+== quiz.q12.a1
+- Deck 4
+== quiz.q12.a2
+- Deck 2
+== quiz.q12.a3
+- The cargo hold
+== quiz.q12.a4
+- Under Pell's bunk
+
+== quiz.q13.text
+- When does the day shift start?
+== quiz.q13.a1
+- 08:00
+== quiz.q13.a2
+- 06:00
+== quiz.q13.a3
+- 10:30
+== quiz.q13.a4
+- After the second cup of tea
+
+== quiz.q14.text
+- When does dinner start in the mess?
+== quiz.q14.a1
+- 17:00
+== quiz.q14.a2
+- 12:00
+== quiz.q14.a3
+- 21:00
+== quiz.q14.a4
+- When Brennan says so
+
+== quiz.q15.text
+- Which deck has the Works bay and the job board?
+== quiz.q15.a1
+- Deck 5
+== quiz.q15.a2
+- Deck 3
+== quiz.q15.a3
+- Deck 1
+== quiz.q15.a4
+- The tea corner
+
+== quiz.q16.text
+- Where is the observatory?
+== quiz.q16.a1
+- Deck 2
+== quiz.q16.a2
+- Deck 5
+== quiz.q16.a3
+- Deck 4
+== quiz.q16.a4
+- Outside. Bring a coat.
+
+== quiz.q17.text
+- What's Zeke Torres's hobby?
+== quiz.q17.a1
+- Knitting
+== quiz.q17.a2
+- Rowing
+== quiz.q17.a3
+- Juggling spanners
+== quiz.q17.a4
+- Arguing with coil three
+
+== quiz.q18.text
+- What's the name of the ship's tile game?
+== quiz.q18.a1
+- Tiles
+== quiz.q18.a2
+- Hexes
+== quiz.q18.a3
+- Stars and ladders
+== quiz.q18.a4
+- Rina Always Wins
+
+== quiz.q19.text
+- Which day of the week is Day 1 of the ship's year?
+== quiz.q19.a1
+- Monday
+== quiz.q19.a2
+- Sunday
+== quiz.q19.a3
+- Friday
+== quiz.q19.a4
+- Soup day
+
+== quiz.q20.text
+- How many days are there in the ship's year?
+== quiz.q20.a1
+- 364
+== quiz.q20.a2
+- 365
+== quiz.q20.a3
+- 100
+== quiz.q20.a4
+- Too many Mondays
+
+== quiz.q21.text
+- Which day is Founding Day?
+== quiz.q21.a1
+- Day 100
+== quiz.q21.a2
+- Day 1
+== quiz.q21.a3
+- Day 300
+== quiz.q21.a4
+- Whenever there's cake
+
+== quiz.q22.text
+- Which is the strongest word you'll hear aboard?
+== quiz.q22.a1
+- Blast
+== quiz.q22.a2
+- Bother
+== quiz.q22.a3
+- Crumbs
+== quiz.q22.a4
+- Wednesday
+
+== quiz.q23.text
+- What does the grab shelf in the mess hold?
+== quiz.q23.a1
+- Food for anyone running late
+== quiz.q23.a2
+- Spare spanners
+== quiz.q23.a3
+- Lost socks
+== quiz.q23.a4
+- The Chief's secret biscuits
+
+== quiz.q24.text
+- What's the name of the Veyli envoy who lives aboard?
+== quiz.q24.a1
+- Saruth
+== quiz.q24.a2
+- Halcyon
+== quiz.q24.a3
+- Marra
+== quiz.q24.a4
+- Kettle
+
+== quiz.q25.text
+- Which room has the record cabinet?
+== quiz.q25.a1
+- The music room
+== quiz.q25.a2
+- The machine shop
+== quiz.q25.a3
+- The infirmary
+== quiz.q25.a4
+- The cold store
+
+== quiz.q26.text
+- Which day does the weekly delivery come in?
+== quiz.q26.a1
+- Wednesday
+== quiz.q26.a2
+- Monday
+== quiz.q26.a3
+- Saturday
+== quiz.q26.a4
+- When you least expect it
+
+== quiz.q27.text
+- The hydroponics garden has one very big what?
+== quiz.q27.a1
+- Tree
+== quiz.q27.a2
+- Pumpkin
+== quiz.q27.a3
+- Watering can
+== quiz.q27.a4
+- Very tall gardener
+
+== quiz.q28.text
+- What can you see from the Deck 6 overlook?
+== quiz.q28.a1
+- The drive coils
+== quiz.q28.a2
+- The garden
+== quiz.q28.a3
+- The bridge
+== quiz.q28.a4
+- A very long queue for tea
+
+== quiz.q29.text
+- Where do new hands paint their names after their first shift?
+== quiz.q29.a1
+- On the Works bay's cross beam
+== quiz.q29.a2
+- On the lift doors
+== quiz.q29.a3
+- On the Captain's desk
+== quiz.q29.a4
+- On Zeke's scarf
+
+== quiz.q30.text
+- How many shuttles does the Wren carry?
+== quiz.q30.a1
+- One: the Tern
+== quiz.q30.a2
+- Two
+== quiz.q30.a3
+- Five
+== quiz.q30.a4
+- A shuttle per bunk room
+
+== quiz.q31.text
+- Where is the junior common room?
+== quiz.q31.a1
+- Deck 4, in the junior wing
+== quiz.q31.a2
+- Deck 1, by the bridge
+== quiz.q31.a3
+- Deck 6, by the reactor
+== quiz.q31.a4
+- Wherever Pell is sitting
+
+== quiz.q32.text
+- What's the gym's weekly tradition called now?
+== quiz.q32.a1
+- Gym club
+== quiz.q32.a2
+- Running club
+== quiz.q32.a3
+- Sweat and soup
+== quiz.q32.a4
+- Soup and suffering
+
+// the host (Tomas is the question master: earnest, a little nervous, delighted when you get it right)
+// quiz.open: optional, as the card opens. quiz.right: a right answer. quiz.wrong: a wrong one ({answer} = the right
+// answer; never a fail). quiz.done: after the third ({n} = right answers, 0-3; reads right for any score).
+// quiz.done.perfect / quiz.done.zero: optional, for 3 and 0.
+== quiz.open
+- Right. Um. Three questions about the Wren. No looking at your device.
+- Quiz time! I wrote these myself. Be kind.   #funny
+- Three questions. I think they're easy. I think.
+== quiz.right
+- Correct! A point to the new hand.
+- Yes! That's it. I'm so pleased.
+- Right! Somebody's been paying attention.
+- Spot on. I had to look that one up.   #funny
+== quiz.wrong
+- Close. It's {answer}.
+- Not quite. It's {answer}. Good guess, though.
+- Ooh, no. {answer}. I'd have said the same, honestly.
+- It's {answer}. Next one's yours.
+== quiz.done
+- {n} out of 3. Thanks for playing. Same time next week?
+- That's {n} out of 3. I'll write harder ones. Or easier. Sort of.   #funny
+- {n} out of 3! You came, that's the main thing.   #warm
+== quiz.done.perfect
+- Three out of three! Have you been reading the walls?   #funny
+- A perfect round. I'm genuinely impressed.
+== quiz.done.zero
+- None this time. Still, you came. That's the best part.   #warm
