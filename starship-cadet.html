@@ -252,7 +252,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.70.5
+   STARSHIP CADET: CSV Wren                           build 0.70.6
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7922,7 +7922,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.70.5';                           // keep in step with the header's build line
+const GAME_BUILD = '0.70.6';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -30530,7 +30530,8 @@ function tradGoal(x) {
 // behind the one ahead: one line. Section 14's whereIs asks tradWhere (in play only) and section 10's escortStep walks
 // them ('lead' waits for you; 'follow' with `after` follows the person ahead). You walk on your own: tap anywhere or
 // steer and you drop out. One lap, then everyone goes back to their spots. TJ_WALK: { e, lead, path, k, n, roles, cb }
-const TJ_LINE = 6, TJ_OVER = 15, TJ_LOOP = Array.from({ length: 12 }, (_, k) => '3-lap-' + (k + 1));
+const TJ_LINE = 24, TJ_OVER = 15,   // 0.70.6: everyone at it walks (the user's 'everyone walks the lap'); left standing on the loop they blocked your way (X)
+      TJ_LOOP = Array.from({ length: 12 }, (_, k) => '3-lap-' + (k + 1));
 let TJ_WALK = null, TJ_WALK_T = 0;
 const TJ_DT = (() => { let t0 = performance.now(); return () => { const t = performance.now(), d = Math.min(.1, (t - t0) / 1000); t0 = t; return d; }; })();   // real seconds since the last frame
 function tradWalkStart(e, lead) {
