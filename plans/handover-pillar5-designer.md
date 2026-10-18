@@ -39,6 +39,8 @@ Done and sent: plan v10 (9e26a58: Step 2's optional stages into Step 4, the cold
 
 - 2c49900 (v1) and 69d076e (v2): `plans/events-plan.html` (src `plans/mechanics/src/events.body`, generated from a data script: edit the body directly now), the ship-wide events plan for lead 14 (session_01RHtJv7GJDi4qosgU8Gb2b8, the lead from 2026-10-18 ~23:20). v2 has the user's answers; its 7 open questions await the user.
 
+- c28ea3f: `plans/events-pitch-tng.html` (src `pitch.body`); 7034c2d: events plan v3 (nine events in Days 1-26; pitch re-timed). With the user for approval (9 questions). Lead 15 (session_01TfFnwP88RmL4MhCWAMdSGn) from 2026-10-18 ~23:57 passes on the answers. Edit `events.body` / `pitch.body` directly now (the scratchpad generator scripts are gone with the session).
+
 ## Next (in order)
 1. ~~**Finish the Tier 2 fault tables**~~ (done, adc12e2) (`fault-tables.html`, `src/ft.body`): each Tier 2 kind's causes in the Tier 1 format (card, up close, when, how common, still, from), parts from `STOCK` only, same card needs different signs. Needed by: M9's lines (water: recycler, filter, uv, pump, valve; heat: heater, heatpump, manifold), P1's first case (3-pump-1 `peak`; filter `always`; membrane; valve), P2's first case (scrubber: filter `always`, bearing `warm`, a new `panel` cause, part seal, `touched`). Air plant and main fan are stand-ins without panels (no tracing for air yet).
 2. Whatever the user sends back on the Step 3 pages (fix, re-push, one line to the lead each).
