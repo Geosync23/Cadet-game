@@ -8,10 +8,17 @@
 (empty)
 
 ## Passing tips (for BM3)
-writer 0cc4cdf · arrival-0607b 5ce084d (includes arrival e2cd435 and PE6 52839a6) · systems f351cc3 · social 9c8ea6c · PE6 4bd606c · deck 55fca8d · traditions 5de2087.
+writer 0cc4cdf · arrival-0607b 5ce084d (includes arrival e2cd435 and PE6 52839a6) · systems 1e9476c · social 9c8ea6c · PE6 4bd606c · deck 55fca8d · traditions 5de2087.
 events_check's day-100/day-231 seat clashes: OK on BM3's combine with social d3d5b4d. The bar needs PE6 and social together.
 
 ## Verdicts
+
+### Systems 0.33.41-0.33.42, claude/systems-0607 1e9476c (in depth): PASS
+The right part from the right shelf (`shelfOf`/`shelfStock`/`shelfLine`/`shelfWrong`, the amber glow, the machine shop's 15:00 top-up), and the Wednesday delivery as crates (`holdCrates`, `cartLoadHold`/`cartUnloadShelves`, `j.onCart`, held for you till 14:00 on shift days, never late in week 1, `holdCratesLive` for DA4's crate stack). Hooks in 15 (jobTap) and 15b (ixChoreTap, goal labels).
+- **Checks I ran:** **machine_check: MACHINE CHECK OK**, including the new 5m: every part has a shelf, the wrong shelf costs nothing, the shop tops up one makeable part and not a NO_MAKE one, the first-week delivery isn't late, 6 crates on Day 3 held till 14:00, two cart trips empty the hold, and the next week's is done by the crew. 5l (Works crew at work) is still OK.
+- **Determinism and save:** the top-up runs in `jobsHour` (live and replay alike). `cartLoadHold` takes parts in sorted key order. Parts on the cart ride on `j.onCart` (saved with the job), and go to the shelves if the job is dropped. `held` now leaves out every cargo job, so the delivery doesn't use one of the 3 HOLD_MAX slots. No `R()`; the glow's colour goes through `col()`.
+- **Phones:** one glow mesh (made on first need, padded so no shared planes, `depthWrite: false`), visible only on Deck 5 while you need a shelf. `holdCratesTick` does nothing unless the crate count changes. Both ticks call `machinesNow()`, whose common case returns at once.
+- **For the build master:** the edits in sections 15/15b (the jobTap shelf check, ixChoreTap, cartLoad/cartUnload toasts, goal labels) sit near PE6's 0.28.62-65 changes in the same functions. Expect a hand merge, then re-run player_check and interactions_check on the combine.
 
 ### PE6 0.28.65, claude/player-needs 4bd606c: PASS, my LOW 1 fixed
 - **LOW 1 fixed:** `careerClock` writes `clockLog[d] = h` (`c.co - c.ci`) on every clock-out, and the 17:00 auto clock-out writes `clockLog[cd]` too, so "This week" counts every day. The screen's button no longer writes its own copy.
