@@ -956,6 +956,49 @@ with sync_playwright() as pw:
             or jk['healthy'] is not None or jk['found'] != [True, False, True, 'you', 1, True]):
             fail('job kinds with steps, or machineFound')
 
+    # 5q. hooks for 24k and M1 (0.33.47): caseOffer is called for each posted fault with a cause; caseHeld keeps a job from the
+    # crew; caseFitted turns your last stop into a wrong fix (not done, the machine not put right); a side kind (def.side) is
+    # taken beside your board job and isn't myJob; an old save's main lift '5-lift-1' loads as '5-mainlift-1' with its wear
+    if g.ev("typeof jobSide === 'function'"):
+        hk = g.ev("""(() => {
+          const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min, out = {}, offered = [];
+          JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; SHIP.works = null; setShipNow(t0); machinesNow();
+          for (const j of SHIP.jobs) if (j.claimedBy === 'you') { j.claimedBy = null; j.status = 'open'; }
+          window.caseOffer = (j, h) => offered.push([j.id, j.cause, h]);
+          let held = null; window.caseHeld = j => j.id === held;
+          setShipNow(t0 + 5 * 1440); machinesNow();
+          out.offered = offered.length; out.offeredOk = offered.every(o => o[1] && SHIP.jobs.concat([]).length >= 0);
+          delete window.caseOffer;
+          const o = openJobs('you').find(x => x.kind === 'repair' || x.kind === 'service' || x.kind === 'calibrate' || x.kind === 'lamp') || openJobs('you')[0];
+          held = o && o.id; const J = SHIP.jobs.find(j => j.id === held);
+          if (J) { J.released = true; J.urgency = 1; }
+          setShipNow(shipNow() + 3 * 60); machinesNow(); out.crewTook = J ? !!(J.claimedBy && J.claimedBy !== 'you') : null;
+          out.claim = J ? claimJob(J.id) : null;
+          window.caseFitted = j => j.id === held;
+          const n = J ? jobStops(J).length : 0, mid = J && J.machine ? SHIP.machines[J.machine].cond : null; let r = null;
+          for (let k = 0; k < n; k++) r = jobStepDone(J.id, k);
+          out.wrong = r && r.wrong === true && r.done === false && !J.workDone; out.condSame = J && J.machine ? SHIP.machines[J.machine].cond <= mid + 1e-9 : true;
+          delete window.caseFitted; delete window.caseHeld; if (J) dropJob(J.id);
+          // a side kind
+          jobKindAdd('testside', { side: true, text: 'Side test', stops: () => [{ deck: 4, placeId: '4-lift-1', mins: 5, tag: 'hold' }], done: () => {}, crew: { can: () => false, mins: 5 } });
+          const b = openJobs('you').find(x => x.kind !== 'testside'); out.board = b ? claimJob(b.id) : null;
+          SHIP.jobs.push(jobMake('testside', { id: 'side@1', deck: 4, title: 'Side test' })); MACH_REV++;
+          out.side = claimJob('side@1'); out.myJob = myJob() && myJob().id === (b && b.id); out.sides = mySideJobs().map(j => j.id).join();
+          delete JOB_KINDS.testside; delete JOB_TYPES.testside; SHIP.jobs = SHIP.jobs.filter(j => j.id !== 'side@1');
+          for (const j of SHIP.jobs) if (j.claimedBy === 'you') { j.claimedBy = null; j.status = 'open'; }
+          // the lift's old id in a save
+          const sv = { player: { deck: 4, tile: [0, 0], facing: 0 }, ship: { decks: {} }, crew: {} }; SAVE_EXTRA.forEach(f => f(sv));
+          const lift = sv.ship.machines['5-mainlift-1']; out.hadNew = !!lift;
+          if (lift) { sv.ship.machines['5-lift-1'] = [33.5, lift[1]]; delete sv.ship.machines['5-mainlift-1']; }
+          MACH_HOUR = null; machinesLoad(JSON.parse(JSON.stringify(sv))); out.liftCond = SHIP.machines['5-mainlift-1'] && SHIP.machines['5-mainlift-1'].cond; out.noOld = !SHIP.machines['5-lift-1'];
+          setShipNow(t0);
+          return out;
+        })()""")
+        print(f"Hooks for 24k and M1 (0.33.47): caseOffer {hk['offered']} faults; a held case job: crew took it {hk['crewTook']}, you claimed {hk['claim']}, wrong fix {hk['wrong']} (machine not put right {hk['condSame']}); side job beside a board job {hk['side']} (board {hk['board']}, myJob the board's {hk['myJob']}, side jobs {hk['sides']}); old lift id read as the new {hk['liftCond']} (old gone {hk['noOld']})")
+        if (hk['offered'] < 1 or hk['crewTook'] is not False or not hk['claim'] or not hk['wrong'] or not hk['condSame'] or not hk['side'] or not hk['board'] or not hk['myJob'] or hk['sides'] != 'side@1'
+            or not hk['hadNew'] or hk['liftCond'] != 33.5 or not hk['noOld']):
+            fail('hooks for 24k and M1')
+
     # 6. the save
     rt = g.ev("""(() => {
       JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(6 * 1440 + 11 * 60 + 17); machinesNow();
