@@ -33,4 +33,4 @@ Inside, after (the lockers follow the taper; the engines from close up): ![](sho
 
 ## If approved
 
-One build (0.47.3) on `claude/deck-p5s3`: the `shuttle` kit only. Checks: deck_check (Deck 5 draw calls and reach), cadet_test (Deck 4 only, so no differences expected), a crew plan comparison, and the arrival scene's start.
+One build (the next 0.47.x) on `claude/deck-p5s3`: the `shuttle` kit only. Checks: deck_check (Deck 5 draw calls and reach), cadet_test (Deck 4 only, so no differences expected), a crew plan comparison, and the arrival scene's start.

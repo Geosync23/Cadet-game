@@ -252,7 +252,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.63.0
+   STARSHIP CADET: CSV Wren                           build 0.47.3
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -4355,7 +4355,7 @@ DECKS[5] = {
   },
   // which room each shut door or hatch leads into (its tap text is that room's 'tap')
   sealed: {
-    'v,13,1': 'o', 'h,8,13': 'b', 'v,34,7': 'F', 'h,2,12': 'd', 'h,38,5': 'F', 'h,38,11': 'F',
+    'v,13,1': 'o', 'h,8,13': 'b', 'v,34,7': 'F', 'h,2,12': 'd', 'h,38,11': 'F',
 
   },
   plates: [
@@ -4381,7 +4381,7 @@ DECKS[5] = {
     o: { name: 'Works Chief\'s office', floor: 'plate', tap: 'Glass on two sides, so the Chief can see the whole bay and the shuttle pad. Locked while the Chief is out.' },
     b: { name: 'Bay control booth', floor: 'plate', tap: 'Launch and landing controls, behind glass over the pad. Watch staff only.' },
     d: { name: 'Bay door gear', floor: 'grate', tap: 'Giant gears and hydraulic rams. When the bay opens, the doors slide into a pocket here. Watch the gears through the window.' },
-    F: { name: 'Fan hall', floor: 'grate', tap: 'The ship\'s lungs: one huge fan pushing air under the main corridor and up the spine to every deck. Tier 2 access. You can watch it through the window.' },
+    F: { name: 'Fan hall', floor: 'grate', tap: 'The ship\'s lungs: one huge fan pushing air under the main corridor and up the spine to every deck. Tier 2 access, through the hatch from the air plant. You can watch it through the corridor window too.' },
     // utility rooms (Pillar 2, 0.30.3): floors that draw no random numbers, so the rest of the deck is unchanged
     c: { name: 'Cargo hold', floor: 'steel', still: true },
     m: { name: 'Cart bay', floor: 'steel', still: true },
@@ -4396,11 +4396,12 @@ DECKS[5] = {
   closedDoors: {},
   hull: { sternX: 1, stern: 1.5, bowFrom: 34, bowLen: 9.6, byFace: true },   // one hull piece per facing (0.30.11)
   // service hatches into the utility rooms (0.30.3): the player and Works crew pass (see hatchPassable)
-  // (the air plant and manifold room open off the pipe galleries; their hatches into the locked Fan hall stay sealed)
+  // (the air plant and manifold room open off the pipe galleries; since 0.47.3 the air plant's hatch opens into the Fan hall, the manifold room's stays sealed)
   // (0.30.12) with a tier each: 1 closets, stores and the cargo hold, 2 plant rooms and pipe galleries, 3 batteries. The cargo hold's
   // shuttle-bay hatch (v,10,12) is open to the player and Works crew; everyone else still goes round by the haulway.
   service: [{ key: 'v,34,0', tier: 2 }, { key: 'v,34,15', tier: 2 }, { key: 'h,30,9', tier: 3 }, { key: 'h,19,10', tier: 1 }, { key: 'v,19,13', tier: 1 },
-    { key: 'h,32,1', tier: 2 }, { key: 'h,25,15', tier: 2 }, { key: 'v,10,12', tier: 1 }],   // air plant, manifold, batteries, closet, cart bay, galleries, hold
+    { key: 'h,32,1', tier: 2 }, { key: 'h,25,15', tier: 2 }, { key: 'v,10,12', tier: 1 },   // air plant, manifold, batteries, closet, cart bay, galleries, hold
+    { key: 'h,38,5', tier: 2 }],                         // 0.47.3 (Pillar 5 Step 3, the air line): the Fan hall, through the air plant
   // machines (Pillar 2; format as on Deck 4): wall-mounted ones have `at` on their panel tile
   machines: [
     { id: '5-o2-1', kind: 'o2cell', at: [35, 0], room: 'a', face: 's', panel: [35, 1], look: { lamp: [0.5, 1.2, 0.37], drip: [0.5, 0.9, 0.42] } },
@@ -4421,6 +4422,10 @@ DECKS[5] = {
     { id: '5-cartdock-2', kind: 'cartdock', at: [20, 15], room: 'm', face: 'w', panel: [19, 15], look: { lamp: [-0.5, 1.08, 0.51], drip: [-0.5, 0.9, 0.56] } },
     { id: '5-valve-1', kind: 'valve', at: [28, 0], room: 'g', face: 's', panel: [28, 0] },
     { id: '5-valve-2', kind: 'valve', at: [29, 15], room: 'h', face: 'n', panel: [29, 15] },
+    // 0.47.3 (Pillar 5 Step 3, plans/mechanics/architect-air-line.html): the air line's middle and its two branches
+    { id: '5-fan-1', kind: 'fan', at: [36, 8], room: 'F', face: 's', panel: [36, 9] },
+    { id: '5-damper-1', kind: 'damper', at: [34, 6], room: 'F', face: 'e', panel: [34, 6] },   // Upper decks, 1-3
+    { id: '5-damper-2', kind: 'damper', at: [34, 9], room: 'F', face: 'e', panel: [34, 9] },   // Lower decks, 4-6
   ],
   // places (Pillar 1): every spot where a crew member does something, for the schedules. Data only: nothing draws them.
   // { id, type, at: [col, row], face, pose, room }. Seats and beds sit on furniture tiles and are reached from the tile beside them;
@@ -4489,8 +4494,11 @@ DECKS[5] = {
     { id: '5-cartdock-2-svc', machine: '5-cartdock-2', type: 'work:works', at: [19, 15], face: 'e', pose: 'work', room: 'm' },
     { id: '5-valve-1-svc', machine: '5-valve-1', type: 'work:works', at: [28, 0], face: 'n', pose: 'work', room: 'g' },
     { id: '5-valve-2-svc', machine: '5-valve-2', type: 'work:works', at: [29, 15], face: 's', pose: 'work', room: 'h' },
+    { id: '5-fan-1-svc', machine: '5-fan-1', type: 'work:works', at: [36, 9], face: 'n', pose: 'work', room: 'F' },
+    { id: '5-damper-1-svc', machine: '5-damper-1', type: 'work:works', at: [34, 6], face: 'w', pose: 'work', room: 'F' },
+    { id: '5-damper-2-svc', machine: '5-damper-2', type: 'work:works', at: [34, 9], face: 'w', pose: 'work', room: 'F' },
   ],
-  markings: [[21, 10, 2, 3], [25, 9, 3, 2], [26, 11, 2, 2]],   // keep-clear outlines: lathe, fabricator, welding bench
+  markings: [[21, 10, 2, 3], [25, 9, 3, 2], [26, 11, 2, 2], [35, 7, 3, 2]],   // keep-clear outlines: lathe, fabricator, welding bench, the main fan (0.47.3)
   dress(d) {
     for (const [key, tw, text] of d.plates) placeOnEdge('plate', key, tw, { text });
     for (const [key, tw] of d.workLights) placeOnEdge('workLight', key, tw);
@@ -4561,7 +4569,7 @@ DECKS[5] = {
     // the spine: the ladder below the car, as on Deck 4. The trunks run behind the car's back wall here.
     NO_FADE.add('Z');
     place('Z', 'spineLadder', 1, .5, 'n', { it: SPINE_IT.ladder });
-    place('F', 'bigFan', 2.6, 3.0, 'n');                 // faces the default camera; the corridor window sees it side-on
+    place('F', 'bigFan', 2.6, 3.0, 'n', { block: [[1, 2], [2, 2], [3, 2], [1, 3], [2, 3], [3, 3]], it: IT('Main fan', 'The ship\'s lungs. Every deck\'s air comes through these five blades. Its panel is on the walkway in front.') });   // faces the default camera; the corridor window sees it side-on (0.47.3: you can walk in, so it blocks its tiles)
     // ---- utility rooms (Pillar 2, 0.30.3). Last in dress() and free of R(), so nothing above them changes ----
     // air plant: the electrolyser on the stern wall feeds two banks of oxygen cells on the port hull; two scrubber stacks on the Fan hall wall
     place('a', 'electrolyser', 1.02, 3.0, 'w', { it: IT('Electrolyser', 'Splits water into oxygen and hydrogen. The oxygen goes to the cells; the hydrogen goes somewhere you are told not to worry about.') });
@@ -4587,6 +4595,8 @@ DECKS[5] = {
     wallFixed('w', 'bulkheadWheel', 's', 8.5, { hitW: .5, it: { ...IT('Bulkhead wheel', 'Four turns closes and dogs the bulkhead door by the bay. You turn it for the pressure drill, and hope never for real.'), drill: 'door' } });
     wallFixed('u', 'liftBrake', 'w', .5, { hitW: .6, it: { ...IT('Lift brake', 'The main lift\'s manual brake release, by the ladder. Turn it to let a stuck car down to the next deck.'), brake: true } });   // 0.47.0: incidents (m6)
     wallFixed('=', 'valvePanel', 'n', VALVE_PANELS[5].along, { hitW: 1.5, it: { ...IT('Pipe valves', 'Three valves on the main water line, numbered from upstream. Close the one before a leak.'), valves: 5 } });
+    wallFixed('F', 'ductDamper', 'w', 1.5, { n: 1, hitW: .8, it: IT('Duct damper 1', 'Upper decks, 1-3. The flap that sends the fan\'s air up the spine to the decks above.') });   // 0.47.3: the air line (Step 3)
+    wallFixed('F', 'ductDamper', 'w', 4.5, { n: 2, hitW: .8, it: IT('Duct damper 2', 'Lower decks, 4-6. The flap that sends the fan\'s air down to the decks below.') });
     placeWall('u', 'relayBoard', 'n', 1.5, { it: IT('Light relays', 'Deck 5\'s lights. The shuttle bay floods have a relay to themselves.') });
     // cart bay: two docks with a cart charging on each
     for (const [z, n] of [[1.0, 1], [3.0, 2]]) place('m', 'cartDock', 1.45, z, 'e', { dock: n, it: IT('Cart dock ' + n, n === 1 ? 'A hover hand cart, charging. The sticker says I BRAKE FOR NOBODY.' : 'A hover hand cart, charging, with a crate strap still hooked on.') });
@@ -7478,6 +7488,13 @@ function wallFixed(rk, kind, wall, along, o = {}) {
   return g;
 }
 Object.assign(WALL_KIT, {                               // each stands on the floor against its wall, so it reads as furniture when the wall is lowered
+  ductDamper(g, o = {}) {                                // 0.47.3: a square duct section out of the wall on two legs, its flap lever, a plate with o.n red ticks
+    for (const x of [-.3, .3]) box(.06, 1.62, .06, M.slateDark, x, .81, .32, g);
+    box(.6, .6, .5, UT.duct, 0, 1.92, .25, g); box(.68, .68, .04, WM.steel, 0, 1.92, .51, g);   // the duct and its flange (proud of the duct's face)
+    cyl(.03, .03, .1, WM.steel, .38, 1.92, .3, g, 8).rotation.z = Math.PI / 2; box(.04, .34, .04, WM.red, .45, 1.8, .3, g).rotation.z = .35;   // the flap's spindle and lever
+    box(.66, .05, .05, M.slateDark, 0, 1.45, .32, g); box(.34, .12, .015, WM.steel, 0, 1.45, .353, g);   // a crossbar and its plate, standing off it
+    for (let t = 0; t < (o.n || 1); t++) box(.025, .08, .012, WM.red, (t - ((o.n || 1) - 1) / 2) * .045, 1.45, .364, g);
+  },
   extBracket(g) {                                        // an extinguisher stand: a post with a red sign, the extinguisher in its bracket
     box(.06, 1.42, .06, M.slateDark, 0, .71, .05, g); box(.3, .03, .2, M.slateDark, 0, .015, .1, g);
     box(.22, .04, .14, M.slateDark, 0, .62, .12, g); box(.24, .12, .02, WM.red, 0, 1.32, .09, g);
@@ -7922,7 +7939,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.63.0';                           // keep in step with the header's build line
+const GAME_BUILD = '0.47.3';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
