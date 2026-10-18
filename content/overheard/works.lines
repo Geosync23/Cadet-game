@@ -13,7 +13,7 @@ B: Nobody. It's in the lost-property box.
 A: How is a spanner lost property?   #funny
 
 ? pair:works+works time:morning
-A: Ten to eight. Calder's watching the clock.
+A: Ten to nine. Calder's watching the clock.
 B: Calder is the clock.   #funny
 
 ? pair:junior+works act:work
@@ -22,8 +22,8 @@ B: Ask it. She'll answer once. Write it down.
 
 ? pair:works+works place:teacorner
 A: Kettle's on.
-B: Is it half ten?
-A: It's half ten somewhere.   #funny
+B: Is it one yet?
+A: It's one somewhere.   #funny
 
 ? pair:works+works
 A: Whose turn is it to wash the mugs?

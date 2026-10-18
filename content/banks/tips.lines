@@ -1,0 +1,10 @@
+@bank all
+// Head writer W (playtest 1, O5): Day 0 tips with a "Track it" button. TEXTS.
+// tip.callhome: right after Calder's table visit on the arrival evening. .button: the button. .goal: the arrow's label.
+
+== tip.callhome
+- Call home tonight. The call booths are on Deck 3. Tell them you arrived safely.
+== tip.callhome.button
+- Track it
+== tip.callhome.goal
+- Call home from the booths

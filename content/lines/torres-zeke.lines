@@ -156,7 +156,7 @@
 ? flag:walk.goodnight.1
 - Right, that's me. Evening's yours. Have a wander, explore.
 ? flag:walk.goodnight.2
-- Early start, though. Ten to eight. Get some sleep soon.   #warm
+- Shift's at nine tomorrow. Get some sleep soon.   #warm
 
 // ---- Day 1: his talk-through on the shadow job (said as bubbles while you work; replaces INTRO_JOB_LINES on
 // claude/arrival). Each step is gated by flag:walk.job.<step>, which the onboarding hook sets. 60 characters or fewer.
@@ -188,7 +188,7 @@
 // step: turnin (at the board)
 ? flag:walk.job.turnin
 - Tool wall. Every tool has its outline. Back in it, after.
-- Tea corner's behind the racks. Half ten. It's sacred.   #funny
+- Tea corner's behind the racks. One o'clock. It's sacred.   #funny
 // Head writer 5 (the user's request): reputation, in order, after the first turn-in.
 - Turned in. A job done well nudges your reputation up.
 - Have a look. Device, then Record. It's under Reputation.
@@ -238,9 +238,9 @@
 == week1
 // at the ramp: a stop (the user: "Zeke should stop and welcome you"); the 0.60.5 lines as shipped
 ? flag:walk.shuttle.1
-- {me}? There you are. Zeke Torres. Works, engines.
+- Hello, {me}. I'm Zeke Torres. Welcome aboard.
 ? flag:walk.shuttle.2
-- Welcome to the Wren. She's glad you're here. So am I.   #warm
+- I'm from the Works Department. So are you, now.   #warm
 ? flag:walk.shuttle.3
 - That's the Tern behind you. She brought you the whole way.
 ? flag:walk.shuttle.4
@@ -266,7 +266,7 @@
 - Weekends are yours. I spend mine with the coils. Don't.   #funny
 // passing the Works bay (said as you walk past; no stop)
 ? flag:walk.works.1
-- And that's us. Works. You and me, {me}.
+- And that's us. The Works Department. You and me, {me}.
 ? flag:walk.works.2
 - This is where we'll be most days. You'll love it. I do.   #warm
 // point: lift
@@ -577,7 +577,7 @@
 // (onboarding drops the rest when you leave). Mail texts: mail.<beatId>, one line "Subject | body", unsigned. Torres's planned days off are Thu-Fri (facts 3), hence the Thursday Mail.
 
 == week1
-// beat d3-pick: Wednesday 08:00, the Works bay
+// beat d3-pick: Wednesday 09:00, the Works bay
 ? flag:beat.d3-pick.1
 - Your pick today. Board's there. Choose one you like.
 ? flag:beat.d3-pick.2
@@ -697,7 +697,7 @@
 ? flag:walk.follow.3
 - Small jobs stay up for you. The crew take the rest.
 ? flag:walk.follow.4
-- Shift's eight till five. Clock in by the tea corner.
+- Shift's nine till five. Clock in by the tea corner.
 ? flag:walk.follow.5
 - Forget to clock out and it does it at five. It's kind.   #funny
 ? flag:walk.follow.6
@@ -719,7 +719,7 @@
 ? flag:walk.follow.14
 - Engines are the top. That's years away. Dream big, though.   #warm
 ? flag:walk.follow.15
-- Most days are like this. Quiet, steady, tea at half ten.
+- Most days are like this. Quiet, steady, tea at one.
 ? flag:walk.follow.16
 - But now and then the ship gets lively. You'll see.
 ? flag:walk.follow.17
@@ -735,7 +735,7 @@
 ? flag:walk.follow.22
 - Tuesday's Tiles or my knitting circle. No pressure. Knit.   #funny
 ? flag:walk.follow.23
-- Lap of the Wren's Mondays. Just walking. My kind of sport.   #funny
+- Lap of the Wren's Sundays. Just walking. My kind of sport.   #funny
 ? flag:walk.follow.24
 - Everyone here's friendly. Say hello. Talk a while.
 ? flag:walk.follow.25
@@ -788,3 +788,65 @@
 - Looks all right to me. Better safe, though.
 ? flag:train.m1.follow.done
 - That's a round. Anything worn's on the board now. Yours.   #warm
+
+// ---- Head writer W (playtest 1, 0.63.2; the user's notes via lead 13): onboarding seat O4's keys. Bubbles, said in
+// order, one flag key per line. Zeke stops and faces you while he says these (O4's pacing).
+== week1
+// Day 1: the training-day opener at the briefing's end
+? flag:walk.train.open.1
+- Morning! It's a training day today. I'm with you all day.
+? flag:walk.train.open.2
+- Anything you're not sure of, ask. That's what I'm here for.   #warm
+? flag:walk.train.open.3
+- First, clock in. The time clock's by the tea corner.
+// Day 1 dinner: you can't do every tradition (after walk.dinner.eve.1-3)
+? flag:walk.eve.choose.1
+- You can't do every tradition in a day. Nobody can.
+? flag:walk.eve.choose.2
+- So pick the one you fancy. There's always next week.
+// after your first Day 1 job's turn-in
+? flag:walk.train.better.1
+- Small stuff today. Don't worry. Jobs get better as you go.
+// the arrival evening: at your wardrobe after the bunk meeting
+? flag:walk.cabin.wardrobe.1
+- That's your wardrobe. It's where you get clean clothes.
+? flag:walk.cabin.wardrobe.2
+- Change every morning. When it's empty, laundry's on this deck.
+// Day 1: tea and biscuits at 13:00 (it replaced the half-ten tea). He explains it, walks you there after your job,
+// then work goes on with him following.
+? flag:walk.tea.explain.1
+- One o'clock's tea and biscuits, in the tea corner.
+? flag:walk.tea.explain.2
+- Most of Works goes, a few at a time. Fills a gap, too.
+? flag:walk.tea.explain.3
+- Finish this job, then I'll take you. Biscuits await.   #funny
+? flag:walk.tea.go.1
+- Tea time. This way. The tea corner, behind the racks.
+? flag:walk.tea.go.2
+- Grab a mug off the hook. Any mug but the blue one.   #funny
+? flag:walk.tea.at.1
+- Tea, a biscuit, and five minutes of nothing. Lovely.   #warm
+? flag:walk.tea.at.2
+- Have two biscuits. Nobody's counting. Pell is.   #funny
+? flag:walk.tea.at.3
+- Whenever you're ready, the board's waiting. No rush.
+? flag:walk.tea.back.1
+- Right, back to it. Pick your next job.
+? flag:walk.tea.back.2
+- I'll tag along behind. Pretend I'm not here.   #funny
+
+// Zeke's welcome Mail on your device (the arrival evening: he tells you to open it). "Subject | body", unsigned.
+== mail.zeke.cabin
+- Everything I didn't say | Your device has the lot: Mail, Schedule, Calendar, the Map and your Needs. Breakfast's from six till nine. Shift starts at nine in the Works bay; Calder's briefing is at ten to nine. Clean clothes live in your wardrobe: change each morning, and do your laundry on Deck 4 when they run out. Tea and biscuits at one. Ask me anything, any time.
+
+// Name on the beam (first Monday after shift, the Works bay cross beam; seat T's flags trad.beam.<n>, in order).
+// Restored in playtest 1: 2799442 (0.48.82) cut these by mistake. He hands you the pen and tells you to tap the beam.
+== week1
+? flag:trad.beam.1
+- Right. Everyone stay put. New hand's turn.
+? flag:trad.beam.2
+- Here. The pen. It's the same one we all used.   #warm
+? flag:trad.beam.3
+- Tap the beam where you want it. Next to mine, if you like.   #warm
+? flag:trad.beam.4
+- There. You're part of the bay now. Properly.   #warm

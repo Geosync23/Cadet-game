@@ -97,3 +97,12 @@ reactions `train.m1.mark.right` (you marked worn/off on a worn/faulty machine), 
 | M2 tuning | `tune.title` ({machine}), `tune.minus`, `tune.plus`, `tune.hot/warm/steady/cool/cold`, `tune.done` |
 | M2 incidents | `inc.card.burst` ({room}), `.lift`, `.alarm`; `inc.toast.<id>` ({deck}); `inc.step.safe/clean/fix`; `inc.wrong.valve`; `inc.safe.<id>`, `inc.clean.<id>`; `inc.done`; `inc.missed`; `inc.thanks` (the rescued rider, `remarks.lines`); reactions `@reactions incident.burst|lift|alarm` (cue `incident.<id>`, `.you` when you handled it) |
 | M1 uniform | `uniform.rule`, `uniform.grubby`, `uniform.wait` ({machine}); crew `clothes.grubby` (`remarks.lines`, gated `flag:clothes.grubby`) |
+
+## Playtest 1 (0.63.2; lead 13's brief plans/brief-playtest1.md)
+
+| Seat | Keys |
+| --- | --- |
+| O4 onboarding | Zeke (torres-zeke.lines, kind `week1`): `walk.shuttle.1-5` (plain greeting, "Works Department"), `walk.works.1`, `walk.train.open.1-3` (training-day opener, at the briefing's end), `walk.train.better.1` (after the first job's turn-in), `walk.cabin.wardrobe.1-2` (at your wardrobe after the bunk meeting), `walk.eve.choose.1-2` (you can't do every tradition; after walk.dinner.eve), `walk.tea.explain.1-3`, `walk.tea.go.1-2`, `walk.tea.at.1-3`, `walk.tea.back.1-2` (O5's names) (13:00 tea and biscuits); `mail.zeke.cabin` ("Subject \| body", up to 400); meeting `introBunk` reworded (the middle top bunk, the wardrobe, the device and his Mail); `tip.clothes` (banks/clothes.lines) |
+| X crew | kind `seek` (banks/approach.lines): the opener when a crew member has walked up beside you, tiers 1-4, week-1 evening, leaving soon; 70 characters or fewer |
+| T traditions | `join.<id>.tip` ({name}, also the arrow label), `join.<id>.notice`, walks only `join.<id>.done` / `.left`, for T's 21 ids (banks/join.lines); `join.name-on-the-beam.tip/.tell/.paint/.notice`; crew `beam.congrats` (banks/beam.lines, Works bank); Zeke `trad.beam.1-4`, Calder `trad.beam.chief` |
+| everyone | the 09:00 shift and 13:00 tea and biscuits in every line (was 08:00 / ten to eight / half ten) |

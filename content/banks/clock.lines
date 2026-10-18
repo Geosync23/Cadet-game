@@ -3,15 +3,15 @@
 // Co-workers in the bay say one as you clock in or out. Keys (the Career engineer's, 2026-10-17):
 // clock.in (start of day), clock.out (end of day), clock.monday (clocking in on a Monday: your weekend),
 // clock.friday (clocking out on a Friday: weekend plans), clock.back (first shift back from leave or sick).
-// Shift 08:00-17:00, tea at 10:30, your days off are Sat-Sun. Not everyone in Works is off at the weekend, so shared
+// Shift 09:00-17:00 (playtest 1), tea and biscuits at 13:00, your days off are Sat-Sun. Not everyone in Works is off at the weekend, so shared
 // lines ask about YOUR weekend and never claim the speaker's. One short line each, readable on a phone.
 
 == clock.in
 - {hi}, {nick}. Board's full this morning. Pick a good one.
 - Morning. Kettle's on in the tea corner, if you're quick.
-- Eight o'clock. Somebody should do something about eight o'clock.   #funny
+- Nine o'clock. Somebody should do something about nine o'clock.   #funny
 - There's a scrubber on the board with your name on it. Not literally.
-- {hi}. Tea's at half ten. Hold on till then.
+- {hi}. Tea's at one. Hold on till then.
 - Clocked in? Good. The fans on Five are humming again.
 - Another day, another filter. {hi}, {nick}.
 - You look awake. How? Tell me how.   #funny
@@ -99,7 +99,7 @@
 - Missed you on the bay. Don't do that again. Well, do, if you need to.   #warm
 
 == clock.late
-// Gentle teasing when you clock in after 08:00.
+// Gentle teasing when you clock in after 09:00.
 - Afternoon! Oh, sorry. It just felt like afternoon.   #funny
 - There you are. The board ate two jobs while you were out.   #funny
 - Lie-in? Don't let the Chief see the clock.   #funny

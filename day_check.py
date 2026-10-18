@@ -108,6 +108,17 @@ with sync_playwright() as pw:
     b = g.ev(f"(() => {{ SHIP_DAYS.clear(); shipDay({DAY} + 3); shipDay({DAY} - 1); return JSON.stringify(schedPeople().map(p => planDay(p, {DAY}))); }})()")
     print('Plans the same twice:', a == b)
     if a != b: fail('plans differ between runs')
+    # the Works crew's 13:00 tea and biscuits (0.71.1, X): on Deck 5 only between WORKS_TEA.at and .until, at most the
+    # tea corner's seats at once, and nobody in Works on Deck 5 has a tea outside it; most of those at work go
+    wt = g.ev(f"""(() => {{ if (typeof WORKS_TEA === 'undefined') return null; const B = ({DAY} - 1) * 1440, out = {{ on: 0, went: 0, outside: [], peak: 0 }}, at = new Map();
+      for (const p of schedPeople().filter(p => p.dept === 'works' && p.shift !== 'night' && p.work && p.work.deck === 5)) {{
+        const segs = planDay(p, {DAY}); if (!segs.some(s => s.act === 'work')) continue; out.on++;
+        const tea = segs.filter(s => s.tag === 'tea' && s.deck === 5); if (tea.length) out.went++;   // posted to another deck that day: their own tea there
+        for (const s of tea) {{ if (s.from < B + WORKS_TEA.at || s.to > B + WORKS_TEA.until + WORKS_TEA.wait) out.outside.push(p.id + ' ' + hhmm(s.from - B)); for (let m = s.from; m < s.to; m++) at.set(m, (at.get(m) || 0) + 1); }}
+      }}
+      out.peak = Math.max(0, ...at.values()); return out; }})()""")
+    print('Works tea at 13:00:', wt)
+    if wt and (wt['outside'] or wt['peak'] > 3 or (wt['on'] and wt['went'] < wt['on'] // 3)): fail(f'Works tea wrong: {wt}')
 
     # 3. every deck through the day
     decks = g.ev("Object.keys(DECKS).map(Number)")

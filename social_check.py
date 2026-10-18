@@ -487,7 +487,7 @@ with sync_playwright() as pw:
       const real = typeof crewComeTo === 'function' ? crewComeTo : undefined; let walked = 0;
       crewComeTo = (p, id, cb) => { walked++; cb(); return () => {}; };   // section 10's walk, arriving at once
       const P0 = player.obj.position.clone(), lift = DECKS[deckDef.num].lift; player.obj.position.copy(cellPos(...lift));
-      socialSeek(Math.floor(t)); const o = { walked, chip: !!(SEEK && SEEK.p === tomas), done: SHIP.social.seekAsks[0].done };
+      socialSeek(Math.floor(t)); const o = { walked, chip: !!(SEEK && SEEK.p === tomas || SEEK_COME && SEEK_COME.p === tomas), done: SHIP.social.seekAsks[0].done };
       socialSeek(Math.floor(t) + 1); o.once = walked === 1;
       crewComeTo = real; seekEnd(); player.obj.position.copy(P0); setShipNow(t0); socLoad(JSON.parse(keep)); return o; })()""")
     print('An asked-for wave walks to you:', walk)

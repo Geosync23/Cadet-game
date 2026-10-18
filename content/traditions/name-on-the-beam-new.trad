@@ -1,0 +1,43 @@
+@tradition name-on-the-beam-new
+// Name on the beam for a new Works hand (0.70.0, playtest 1: the user, "you on arrival, and each new Works member
+// later"; the traditions engineer). The Monday after a crew rotation brings someone new to Works (when: rotation monday
+// dept works; ROSTER_ROTATIONS: days 35, 77, 161 so far), straight from shift: the Works crew gather under the bay's cross
+// beam and the newcomer paints their first name beside everyone else's. Same places as yours (the deck architect's
+// 5-beam-1..8, pool @name-beam). You just turn up (no tap): their name goes on the beam (section 18's beamNames).
+// Placeholder words by the traditions engineer until the head writer's.
+k: 485
+title: Name on the beam
+when: rotation monday dept works
+at: 17:05-17:40
+min: 15
+prio: 2
+after-shift: yes
+venue: works-bay
+where: 5 pool @name-beam
+where: 5 room Tea corner: lounge-seat
+hold: none
+who: honoree always, calder always, torres-zeke always, pell 95%, works 80%
+anim: talk
+host: torres-zeke
+from: calder
+
+
+== mail
+- {first} joins Works today. After shift, stay in the bay a minute: there's a name going on the beam.
+
+== ask
+- Stay after shift. {first}'s name goes on the beam.
+- New hand on the beam tonight. Come and cheer.
+
+== here
+- Big letters, {first}. Make it last.
+- That's the same pen we all used.   #warm
+- Welcome to Works! You're on the beam now.   #warm
+
+== thanks
+- Under the cross beam, the Works crew gather round while {first} paints their name beside everyone else's. Then a cheer, and back to the evening.   #warm
+
+== chatter
+- New name on the beam tonight.
+- Remember yours going up? I do.   #warm
+- More names than beam, soon. Someone get a ladder.   #funny
