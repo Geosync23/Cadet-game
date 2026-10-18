@@ -19,7 +19,7 @@
 #   work at that time, 2-12 hours on (or the next morning); the part comes off the shelf when tried; the case shows only
 #   then, inside your shift. Day 5's training case: 4-washer-2 leaking from Day 4 18:00 (the pump), the seal and the
 #   valve tried, hidden from the board till the p3 row opens, then shown with the teacher; solved with two notes,
-#   right first time; the scanner reads the pump failing and the new seal worn
+#   right first time; on a head-scratcher the scanner reads every suspect worn and doesn't depend on the cause
 # Setup and environment as for cadet_test.py.
 # Run:  python3 puzzle_check.py BUILD.html
 import sys, json
@@ -196,6 +196,9 @@ P3 = r"""(() => {
     setShipNow(s); caseTick(); r.shown = !c.wait && j.title === c.title && j.parts.length === 0 && !caseHidden(j);
     r.used = notes.map((k, i) => shelf[i] - SHIP.stores[caseSus(c, k.src.tried).part]);
     r.text = caseClueText(c, notes[0]);
+    { const tl = SHIP.works.tools; SHIP.works.tools = { scanner: [5, 0] }; delete j.scan; const a = JSON.stringify(scanRead(j.id)), cz = j.cause;
+      j.cause = c.sus.find(x => x !== cz); delete j.scan; const b = JSON.stringify(scanRead(j.id)); j.cause = cz; delete j.scan; SHIP.works.tools = tl;
+      r.scanBlind = a === b && a !== 'null'; }
     out.cases.push(r);
     for (const k of notes) SHIP.stores[caseSus(c, k.src.tried).part] += 1;
   }
@@ -220,7 +223,7 @@ FIRST = r"""(() => {
   setShipNow(d4 * 1440 + 600); machinesNow(); caseTick(); out.waitingNoRow = c.wait; out.faulty = SHIP.machines[j.machine].state;
   SHIP.works.op = { [d4 + 1]: ['m7', 'p3'] }; setShipNow(d4 * 1440 + 660); machinesNow(); caseTick();
   out.shown = !c.wait; out.title = j.title; out.by = c.by; out.notesText = c.clues.map(k => caseClueText(c, k));
-  // the scanner on it: the pump failing, the new seal worn
+  // the scanner on it: every suspect worn (0.55.6)
   const r = scanRead(j.id); out.scan = r;
   // solve it: take it (the first note comes with it), Where next?, cross both, call the pump, fit it
   claimJob(j.id); caseTick(); out.got = c.got.slice();
@@ -400,6 +403,7 @@ def run(path):
             check(all(k['crew'] and 120 <= k['dt'] <= 1440 + 600 for k in clues), f"{c['id']}: tries by Works crew at work, 2-12 hours on or the next morning: {[(k['by'], k['dt'], k['crew']) for k in clues]}")
             check(c['wait'] and c['hidden'] and c['parts'] != [] and not c['early'] and c['shown'], f"{c['id']}: hidden till the last try, then shown inside the shift: {c}")
             check(all(u == 1 for u in c['used']), f"{c['id']}: each try's part came off its shelf: {c['used']}")
+            check(c['scanBlind'], f"{c['id']}: the scanner's readings don't depend on the cause")
             check(' — ' in c['text'] and 'Still' in c['text'], f"{c['id']}: a note names who tried: {c['text']!r}")
         check(Q.get('waitEnds'), f"a case still waiting after three days is let go: {Q.get('waitEnds')}")
         F2 = g.ev(FIRST_M7)
@@ -414,7 +418,7 @@ def run(path):
             check(F['waitingNoRow'] and F['faulty'] in ('faulty', 'failing'), f"Friday morning: the washer faulty, the case waiting for the row: {F['waitingNoRow']} {F['faulty']}")
             check(F['shown'] and F['title'].startswith('Head-scratcher: Washer') and F['title'].endswith('leaks'), f"shown once the row opens: {F['title']!r}, with {F['by']}")
             sc = dict(F['scan'] or [])
-            check(sc.get('pump', 99) < 36 and 40 <= sc.get('seal', 0) < 61, f"the scanner: the pump failing, the new seal worn: {F['scan']}")
+            check(all(40 <= sc.get(p, 0) <= 60 for p in ('pump', 'seal', 'valve')) and all(v > 60 for p, v in sc.items() if p not in ('pump', 'seal', 'valve')), f"the scanner on a head-scratcher: every suspect worn, the rest good: {F['scan']}")
             check(len(F['got']) == 1 and F['goal'] == F['panel'], f"the first note with the job, Where next? to the panel: {F['got']} {F['goal']}")
             check(F['fixed'] and F['flags'] == [True, True] and F['closed'] and F['done'] == 6, f"called right first time, fixed and closed: {F}")
         P = g.ev(PLAY)
