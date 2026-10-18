@@ -127,6 +127,9 @@ html[data-ph="green"] body #seek,.devhu[data-ph="green"],.devaddr[data-ph="green
 .device .act{margin:8px 0 4px;text-transform:uppercase;letter-spacing:.08em}
 .device .btns{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}
 .device .btns .act.on{background:var(--crt-ink);color:var(--crt-bg);text-shadow:none}
+.device .chips{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}
+.device .chips .chip{min-height:48px;min-width:48px;padding:8px 14px;border-color:var(--crt-ink)}
+.device .chips .chip.off{color:var(--crt-dim);border-color:var(--crt-dim);border-style:dashed;text-decoration:line-through;text-decoration-thickness:2px}
 .device .tl{margin:2px 0 8px}
 .device .tl-row{position:relative;height:28px;margin:2px 0;border-left:2px solid var(--crt-dim);border-right:2px solid var(--crt-dim);background:linear-gradient(transparent 21px,rgba(255,255,255,.07) 21px)}
 .device .tl-blk{position:absolute;bottom:1px;height:6px;min-width:6px;background:var(--crt-ink);border-radius:1px;box-shadow:0 0 5px var(--crt-glow)}
@@ -9438,7 +9441,9 @@ SIM_ADVANCE.push((from, to) => { shipDay(Math.floor(to / 1440) + 1); });
 // render) stays as a shim: render(el) draws into a box, as before.
 // VIEW: { title, blocks: [ { kind: 'text', text, mark }, { kind: 'list', rows:
 //   [{ text, sub, mark, action, button }] }, { kind: 'bars', items: [{ label,
-//   value, mark, note, level }] }, { kind: 'buttons', items: [{ label, action }] } ] }
+//   value, mark, note, level }] }, { kind: 'buttons', items: [{ label, action }] },
+//   { kind: 'chips', items: [{ label, on, action }] } ] } (chips: big toggles, crossed out while on is false;
+//   build one with devChips(items), which falls back to buttons marked "✕ " on a skin without them)
 // action: { app, do, arg }. mark: 'up' | 'down' | 'new' | 'urgent' | 'hot' | 'big'.
 // Sits before 15 (after 14), so 15 and 17 can register at load; apps only read
 // other sections when drawn. Nothing here calls R() or makes 3D objects.
@@ -9834,6 +9839,11 @@ const DEVICE_SKIN = (() => {
       if (b.ticks) { const tk = mk('div', 'tl-ticks'); for (const s of b.ticks) tk.appendChild(mk('span', '', s)); box.appendChild(tk); }
       return box;
     },
+    chips(b) {                                 // 0.55.0 (the case engine's suspects): big toggles, crossed out while on is false
+      const box = mk('div', 'chips');
+      for (const it of b.items || []) { const x = act(mk('button', 'chip' + (it.on === false ? ' off' : ''), it.label), it.action); x.setAttribute('aria-pressed', it.on !== false); box.appendChild(x); }
+      return box;
+    },
     buttons(b) { const box = mk('div', 'btns'); for (const it of b.items || []) { const x = act(mk('button', 'act' + (it.on ? ' on' : ''), it.label), it.action); if (it.on != null) x.setAttribute('aria-pressed', !!it.on); box.appendChild(x); } return box; },
     map(b) {                                   // a deck plan as SVG (DOM, not a canvas): room runs, walls, you, the pick and the goal
       // 0.35.14 (the performance engineer's advice): the plan is kept while its deck, rooms, pick and goal stay the same,
@@ -9891,6 +9901,7 @@ const DEVICE_SKIN = (() => {
   const skin = {
     get ink() { return INK[SHIP.device.settings.phosphor] || INK.cyan; },
     wide: () => innerWidth > innerHeight * 1.15 && innerWidth >= 720,
+    has: kind => !!blocks[kind],               // 0.55.0: which VIEW blocks this skin draws (devChips asks)
     open() { back = document.activeElement; el.hidden = false; layout(); $('devClose').focus(); },
     close() { el.hidden = true; drawn = null; drawnKey = null; layout(); if (back && back.focus) back.focus(); },
     button() {
@@ -10010,6 +10021,12 @@ const DEVICE_SKIN = (() => {
   addEventListener('pointercancel', () => { swipe = null; }, true);
   return skin;
 })();
+
+// a chips block for an app's view (0.55.0); a skin without chips gets the same toggles as buttons, "✕ " on the crossed ones
+function devChips(items) {
+  if (DEVICE_SKIN.has && DEVICE_SKIN.has('chips')) return { kind: 'chips', items };
+  return { kind: 'buttons', items: items.map(it => ({ label: (it.on === false ? '✕ ' : '') + it.label, action: it.action })) };
+}
 
 // ---- the shim: the old device object. addSection(id, title, render) becomes an app drawn by render(el); an app
 // already registered with deviceApp keeps its id (the native one wins). show('status') is the home screen. ----
@@ -35287,6 +35304,595 @@ function worksCareerTick(now = shipNow()) {   // (not worksTick: that's section 
   if (typeof caseTick === 'function') caseTick();       // 24k's head-scratchers (seat H)
 }
 SIM_ADVANCE.push((from, to) => { for (let h = Math.floor(from / 60) + 1; h <= Math.floor(to / 60); h++) { const t = h * 60, m = t % 1440; if (m >= WORKS_ASK[0] && m <= WORKS_SMALL) ladderTick(h); if (t >= WORKS_START) for (const f of WORK_TICKS) try { f(t, true); } catch (e) { console.error(e); } } WORKS_TICK.h = Math.floor(to / 60); });
+
+// =====================================================================
+// 24g. THE SCANNER (M7, seat H, 0.55.x; plans/mechanics/m7-scanner.html on claude/p5-design)
+// Your first tool (Day 5, the ladder's m7 row). At a faulty machine's panel the look-over (section 15's) shows the
+// scanner's panel when you have it and the job has a cause (section 17's j.cause): the machine's 3-5 parts with a
+// reading each (a bar, a number and a word); you pick the part to fetch (scanPick). The readings are frozen on the
+// job (j.scan) at the first look. A wrong pick costs a walk back: when you fit it, the machine says so, the part goes
+// back on its shelf (Tier 1) and the job names the right part (scanFitted, through 24k's caseFitted). Nothing here
+// calls R() or makes 3D objects. Hash keys 874 (a worn decoy or not), 875 (the readings; the training job's cause).
+// =====================================================================
+const SCAN_WORDS = [[25, 'failing'], [40, 'low'], [66, 'worn'], [101, 'good']];
+const scanWord = v => (SCAN_WORDS.find(w => v < w[0]) || SCAN_WORDS[3])[1];
+const scanHave = () => typeof hasTool === 'function' && hasTool('scanner');
+const scanDay = j => Math.floor((j.posted || 0) / 1440) + 1;
+// a job's machine by name ("Washer 2"), without the symptom section 17's job card may add after it
+const caseMachName = j => { const m = j && j.machine && machineById(j.machine); if (!m) return jobCard(j)[0];
+  if (typeof machineTitle === 'function') { try { const t = machineTitle(m.id); if (t) return t; } catch (e) { /* our own below */ } }   // section 17's (0.33.52)
+  return MACHINE_KINDS[m.kind].name + (machineList().filter(x => x.kind === m.kind && x.deck === m.deck).length > 1 ? ' ' + m.id.split('-').pop() : ''); };
+// a kind's parts as the scanner sees them: section 17's scanParts(kind), else the part causes in its fault table
+function scanPartsOf(m) {
+  if (typeof scanParts === 'function') { try { const p = scanParts(m.kind); if (Array.isArray(p) && p.length) return p; } catch (e) { /* the table's own */ } }
+  const ps = [...new Set(caseCauses(m).filter(x => x.part).map(x => x.part))];
+  return ps.length ? ps.slice(0, 5) : [MACHINE_KINDS[m.kind].part];
+}
+// the readings: [[part, value], ...], frozen on the job at the first look. The cause's part reads 12-35; the others
+// 70-96, except (3 times in 10) one decoy with the same card and a different sign at 40-60, so what you see up close
+// tells them apart (or, on Day 5's training case, fixed readings). On a head-scratcher's job every suspect's part reads 40-60. null if there's nothing to read (no
+// scanner, no cause, no part cause)
+function scanRead(jobId) {
+  const j = SHIP.jobs.find(x => x.id === jobId); if (!j || !j.machine || !scanHave()) return null;
+  if (j.scan) return j.scan;
+  const m = machineById(j.machine), f = m && caseCauses(m).find(x => x.id === j.cause); if (!f || !f.part) return null;
+  const d = scanDay(j), seed = machSeed(m.id), parts = scanPartsOf(m); if (!parts.includes(f.part)) parts.unshift(f.part);
+  const dec = caseCauses(m).filter(x => x.part && x.part !== f.part && x.shows === f.shows && x.sign !== f.sign).map(x => x.part);
+  const worn = (dec.length && schedU(seed, d, 874) < .3 ? dec[Math.floor(schedU(seed, d, 875) * dec.length)] : null);
+  // a head-scratcher (the designer, 1d87fc6): every suspect's part reads worn (40-60), whatever the cause, and the rest
+  // good, so the scanner never gives the answer away; it isn't one of the case's clues
+  const sus = j.case && typeof caseOf === 'function' && caseOf(j), sp = sus ? new Set(sus.sus.map(x => caseSus(sus, x).part).filter(x => x)) : null;
+  const tr = sus && sus.train ? { [caseSus(sus, sus.cause).part]: 55 } : null;   // Day 5's training case: the cause never reads lowest (the designer), so the
+  if (tr) sus.sus.filter(x => x !== sus.cause).forEach((x, i) => { tr[caseSus(sus, x).part] = [44, 49, 52][i] || 50; });   // first puzzle doesn't teach "pick the lowest bar"
+  const val = (p, u) => tr && p in tr ? tr[p] : sp ? (sp.has(p) ? 40 + Math.round(u * 20) : 70 + Math.round(u * 26)) : p === f.part ? 12 + Math.round(u * 23) : p === worn ? 40 + Math.round(u * 20) : 70 + Math.round(u * 26);
+  j.scan = parts.slice(0, 5).map((p, i) => [p, val(p, schedU(seed ^ Math.imul(i + 1, 40503), d, 875))]);
+  if (typeof toolWear === 'function' && SHIP.works && SHIP.works.tools && SHIP.works.tools.scanner) SHIP.works.tools.scanner[1] = Math.min(1, SHIP.works.tools.scanner[1] + .01);
+  MACH_REV++;
+  return j.scan;
+}
+// the panel, as device blocks: one bar a part, then a Fetch button each (the job's case, if it has one, is called)
+function scanView(jobId) {
+  const j = SHIP.jobs.find(x => x.id === jobId), r = scanRead(jobId); if (!j || !r) return null;
+  const m = machineById(j.machine), f = caseCauses(m).find(x => x.id === j.cause), name = caseMachName(j), room = (DECKS[m.deck].rooms[m.room] || {}).name;
+  const B = [{ kind: 'text', text: 'Scanner · ' + name + (room ? ' (' + room + ')' : ''), mark: 'big' }, { kind: 'text', text: 'The job: ' + (f && f.shows || 'a fault') }];
+  B.push({ kind: 'bars', items: r.map(([p, v]) => ({ label: p.replace(/^./, x => x.toUpperCase()) + ' · ' + scanWord(v), value: v, level: v < 40 ? 'low' : v < 66 ? 'mid' : '' })) });
+  if (j.picked) B.push({ kind: 'text', text: 'Fetching: ' + j.picked + '.', mark: 'hot' });
+  B.push({ kind: 'buttons', items: r.map(([p]) => ({ label: 'Fetch: ' + p, on: j.picked === p, action: { app: 'scanner', do: 'pick', arg: j.id + '|' + p } })) });
+  return B;
+}
+// you pick the part to fetch: it goes on the job (or, on a head-scratcher, it's your call)
+function scanPick(jobId, part) {
+  const j = SHIP.jobs.find(x => x.id === jobId); if (!j || !j.scan || !j.scan.some(r => r[0] === part) || j.workDone) return false;
+  const c = typeof caseOf === 'function' ? caseOf(j) : null;
+  if (c) { const s = c.sus.find(x => caseSus(c, x).part === part); if (!s) return false; j.picked = part; return caseCall(c.id, s); }
+  j.picked = part;
+  if (!(typeof jobSetPart === 'function' && jobSetPart(j.id, part))) { j.parts = (j.parts || []).slice(); j.parts[0] = part; }
+  j.stepsDone = (j.stepsDone || []).filter(k => k !== 0);   // the fetch again, for the part you picked
+  MACH_REV++;
+  return true;
+}
+// at the last stop (24k's caseFitted asks for jobs that aren't cases): a wrong pick keeps the machine as it was -> true
+function scanFitted(j) {
+  if (!j.scan || !j.picked) return false;
+  const m = machineById(j.machine), f = caseCauses(m).find(x => x.id === j.cause); if (!f || !f.part) return false;
+  if (j.picked === f.part) {
+    j.rightFirst = !j.scanWrong;
+    if (typeof simNote === 'function') simNote('scanned', { machine: j.machine, right: !j.scanWrong });
+    if (typeof worksUse === 'function') worksUse('m7');
+    return false;
+  }
+  const wrong = j.picked, shows = f.shows || 'acts up';
+  if (!(CASE_SPENT.has(wrong) && jobTier(j) >= 2)) returnPart(wrong);   // Tier 1: back on its shelf unused
+  const key = 'fault.still.' + m.kind + '.' + (caseCauses(m).find(x => x.part === wrong) || {}).id;
+  const line = (typeof worksText === 'function' ? worksText(key, null) : null) || 'Fitted a new ' + wrong + '. Still ' + shows + ': it\'s the ' + f.part + '.';
+  j.scanWrong = true; j.picked = f.part;
+  if (!(typeof jobSetPart === 'function' && jobSetPart(j.id, f.part))) j.parts = [f.part];   // the job now names the right part
+  j.stepsDone = []; j.touched = shipNow();
+  if (typeof toast === 'function' && !SIM_AT) toast(caseMachName(j), line);
+  return true;
+}
+const SCAN_UI = { job: null };
+function scanOpen(jobId) {
+  if (!scanRead(jobId)) return false; SCAN_UI.job = jobId;
+  if (typeof caseTick === 'function') caseTick();       // Day 5: the reading on Washer 2 is where the teacher opens P3's case
+  if (typeof deviceShow === 'function') deviceShow('scanner'); return true;
+}
+deviceApp({ id: 'scanner', title: 'Scanner', short: 'Scanner', icon: 'wrench', order: 33, hidden: () => true,   // opened by the look-over (scanOpen), never from the grid
+  view: () => ({ title: 'Scanner', blocks: (SCAN_UI.job && scanView(SCAN_UI.job)) || [{ kind: 'text', text: 'Nothing to read. Look a faulty machine over at its panel.' }] }),
+  act(verb, arg) { if (verb !== 'pick') return; const [id, p] = String(arg).split('|'); if (scanPick(id, p) && typeof toast === 'function') toast('Scanner', 'A ' + p + ' from main storage, Deck 5. Follow the marker.'); } });
+// the training (the ladder's m7 row, 24 core's flow): the teacher's job, then yours, each a faulty Tier 1 machine on
+// Deck 3 or 4 with a part cause, reserved (24 core's slot); yours comes with the scanner, so you read it yourself
+function scanTrainMachine(d, not) {
+  const ok = m => (m.deck === 3 || m.deck === 4) && !m.stub && panelPlace(m.id) && (m.tier || MACHINE_KINDS[m.kind].tier) <= 1 && caseCauses(m).some(x => x.part)
+    && !not.has(m.id) && !SHIP.jobs.some(j => j.machine === m.id && j.status !== 'done');
+  const all = machineList().filter(ok); if (!all.length) return null;
+  return all[Math.floor(schedU(machSeed('m7'), d, 875) * all.length)];
+}
+const SCAN_TRAINED = new Set();                          // machines used for today's training (the teacher's first)
+function scanTrainReserve(d, at, slot, o) {
+    if (o && o.yours && typeof toolGive === 'function') toolGive('scanner');   // handed over at the board: yours to read with
+    if (o && o.yours) {                                  // Day 5 (the designer, 6fb5c49): your reading is on Washer 2 itself, P3's training case
+      const C = SHIP.works && caseState(), c = C && C.first && caseById(C.first), j = c && caseJob(c);
+      if (c && c.train && j && j.status !== 'done' && !j.claimedBy) {
+        c.m7 = true; MACH_REV++;
+        if (typeof worksEscortHold === 'function') worksEscortHold('m7');   // the teacher stays with you till the case is called (24 core ends it on caseCalled)
+        return j.id;
+      }
+    }
+    const m = scanTrainMachine(d, SCAN_TRAINED); if (!m) return null;
+    const cs = caseCauses(m).filter(x => x.part), f = cs[Math.floor(schedU(machSeed(m.id), d, 875) * cs.length)];
+    const id = jobReserve(m.id, d, at, slot, { train: 'm7', tier: 1, cause: f.id }), j = id && SHIP.jobs.find(x => x.id === id); if (!j) return null;
+    delete j.make; delete j.makeMins; j.cause = f.id; j.parts = [f.part]; SCAN_TRAINED.add(m.id);
+    return id;
+}
+if (typeof WORK_MECH !== 'undefined') WORK_MECH.m7 = { reserve: scanTrainReserve };
+
+// =====================================================================
+// 24k. CASES: head-scratchers (Pillar 5, seat H, 0.55.x; plans/mechanics/case-engine.html on claude/p5-design)
+// Some faults don't show their cause. A real fault at your tier may become a case when section 17 posts it
+// (caseOffer(j, h), one line there): its suspects are the cause and decoys from FAULT_CAUSES (section 17.4), its
+// clues come from what really happened on the ship, and each clue rules out (kills) some suspects. The solver
+// (caseSolve) checks there's exactly one answer, that it needs thinking and that every clue can be reached; then the
+// case is frozen in SHIP.works.cases and never checked again. Fault notes (a tab of 24 core's Works app, or its own
+// app until that exists) shows it; you collect clues by going to them (caseTick) and cross suspects out yourself;
+// Call it (caseCall) sets the job's part and the job's normal loop runs. A wrong call shows when you fit the part
+// (caseFitted, from section 17's jobStepDone); the job is held for you till your shift ends (caseHeld, from
+// heldForYou), then goes to the crew, who do it the long way. Puzzle kinds register in CASE_KINDS: { name, ladder,
+// fits(cause, m), suspects(j, seed, band), clues(j, cause, sus, seed, band), view(c), hint(c), text?(c, clue),
+// tick?(c, j) }; the engine knows none of them, and is inert until one is opened (its ladder row opened:
+// worksIsOpen(ladder)). Pure functions and state: nothing here calls R() or makes 3D objects.
+// Hash keys 880 (the rate roll), 881 (which kind), 882-889 (the eight sub-seeds), 892 (caseDecoys' order, for the
+// kinds), 893 (the order suspects are shown in); 890-891 are P3's.
+// =====================================================================
+const CASE_KINDS = {};
+const CASE_BANDS = {                                    // suspects, clues (reachable), the fewest clues that solve it, decks
+  T1: { sus: [3, 4], clues: [2, 3], fewest: 2, decks: 1 },    // Junior (Days 5-9)
+  T2: { sus: [3, 5], clues: [3, 4], fewest: 3, decks: 2 },    // Officer
+  T3: { sus: [5, 6], clues: [4, 6], fewest: 3, decks: 3 },    // Senior Officer
+  T4: { sus: [5, 6], clues: [4, 6], fewest: 3, decks: 3 } };  // Engine Specialist
+const CASE_RANK_BAND = { junior: 'T1', officer: 'T2', senior: 'T3', specialist: 'T4' };
+const CASE_RATE = { junior: .1, officer: .2, senior: .25, specialist: .33 }, CASE_MAX = { junior: 1, officer: 1, senior: 2, specialist: 2 };
+const CASE_WAIT_MAX = 3 * 1440;                         // a case still waiting (P3's tries) after three days is a plain repair
+const CASE_TRIES = 8, CASE_DONE_KEEP = 20, CASE_SPENT = new Set(['seal', 'cartridge']);   // from Tier 2 a wrong seal or cartridge is used up
+const CASE_STATS = { offered: 0, rolled: 0, posted: 0, fallback: 0, ms: 0, why: {} };   // for puzzle_check
+const caseRank = () => (SHIP.works && SHIP.works.rank) || 'junior';
+const caseBand = rank => CASE_RANK_BAND[rank] || 'T1';
+const caseRate = (rank, ownTier) => rank === 'senior' && ownTier >= 3 ? .33 : CASE_RATE[rank] || CASE_RATE.junior;
+const caseTier = () => typeof playerTier === 'function' ? playerTier() : PLAYER_TIER;
+const caseNow = () => SIM_AT != null ? SIM_AT : shipNow();   // inside section 17's hour, that hour
+const caseApp = () => typeof worksTabAdd === 'function' ? 'works' : 'faultnotes';
+const caseCauses = m => (typeof FAULT_CAUSES !== 'undefined' && m && FAULT_CAUSES[m.kind]) || [];
+// a kind is opened once its ladder row has opened (24 core's worksIsOpen, else SHIP.works.op lists it; not trained:
+// tr.p3 is only set once the training case is solved), or by its own open()
+const caseOpened = id => { const K = CASE_KINDS[id]; try { if (K.open) return !!K.open(); if (typeof worksIsOpen === 'function') return !!worksIsOpen(K.ladder);
+  return Object.values((SHIP.works && SHIP.works.op) || {}).some(ids => Array.isArray(ids) && ids.includes(K.ladder)); } catch (e) { return false; } };
+const caseKindsOpen = () => Object.keys(CASE_KINDS).sort().filter(caseOpened);
+// the cases (SHIP.works.cases = { open: [frozen case], done: [[id, day, flags]], n }), cleaned once the first time
+// they're asked for: from 24 core's copy, or the save's own (a cleaner there may drop keys it doesn't know)
+let CASE_SAVED = SAVED && SAVED.ship && SAVED.ship.works && SAVED.ship.works.cases || null, CASE_CLEAN = false;
+function caseState() {
+  const W = SHIP.works; if (!W || typeof W !== 'object') return null;
+  if (!CASE_CLEAN || !W.cases) { W.cases = caseClean(W.cases || CASE_SAVED); CASE_SAVED = null; CASE_CLEAN = true; }
+  return W.cases;
+}
+function caseClean(x) {
+  const out = { open: [], done: [], n: 0 }, o = x && typeof x === 'object' ? x : {}, ids = a => Array.isArray(a) ? a.filter(s => typeof s === 'string').slice(0, 8) : [];
+  out.n = Number.isInteger(o.n) && o.n >= 0 ? o.n : 0;
+  if (typeof o.first === 'string') out.first = o.first;  // Day 5's training case: its id once staged, 'none' if there won't be one
+  if (Array.isArray(o.done)) out.done = o.done.filter(d => Array.isArray(d) && typeof d[0] === 'string' && Number.isInteger(d[1]) && Number.isInteger(d[2])).slice(-CASE_DONE_KEEP);
+  for (const c of Array.isArray(o.open) ? o.open : []) {
+    if (!c || typeof c.id !== 'string' || typeof c.job !== 'string' || !CASE_KINDS[c.kind] || typeof c.cause !== 'string') continue;
+    const j = SHIP.jobs.find(y => y.id === c.job); if (!j || j.status === 'done') continue;   // the case's job is gone: so is the case
+    const clues = (Array.isArray(c.clues) ? c.clues : []).filter(k => k && typeof k.id === 'string' && typeof k.type === 'string')
+      .map(k => ({ id: k.id, type: k.type, src: k.src && typeof k.src === 'object' ? k.src : {}, at: typeof k.at === 'string' ? k.at : null, kills: ids(k.kills) }));
+    const sus = ids(c.sus); if (!sus.includes(c.cause) || !clues.length) continue;
+    const keep = a => ids(a).filter(s => sus.includes(s)), cl = clues.map(k => k.id);
+    out.open.push({ id: c.id, job: c.job, kind: c.kind, k: Number.isInteger(c.k) ? c.k : 0, band: CASE_BANDS[c.band] ? c.band : 'T1', cause: c.cause, sus,
+      fewest: Number.isInteger(c.fewest) ? c.fewest : 2, clues, got: ids(c.got).filter(s => cl.includes(s)), crossed: keep(c.crossed), known: keep(c.known), calls: keep(c.calls),
+      fits: Number.isInteger(c.fits) ? c.fits : 0, posted: isFinite(c.posted) ? +c.posted : 0, until: isFinite(c.until) ? +c.until : 0, by: typeof c.by === 'string' ? c.by : undefined, m7: c.m7 ? true : undefined, wait: !!c.wait, taken: !!c.taken, talk: !!c.talk, long: !!c.long, train: !!c.train, told: !!c.told, title: typeof c.title === 'string' ? c.title : '' });
+    if (!j.case) j.case = c.id;
+  }
+  return out;
+}
+SAVE_EXTRA.push(s => { const c = SHIP.works && SHIP.works.cases; if (c) (s.ship.works = s.ship.works || {}).cases = c; });
+onSim('newGame', () => { CASE_SAVED = null; CASE_CLEAN = false; CASE_UI.ask = null; CASE_UI.at = null; });
+const caseOf = j => { const C = j && j.case && SHIP.works && caseState(); return C ? C.open.find(c => c.id === j.case) || null : null; };
+const caseById = id => { const C = SHIP.works && caseState(); return C ? C.open.find(c => c.id === id) || null : null; };
+const caseJob = c => SHIP.jobs.find(j => j.id === c.job) || null;
+// a suspect in words: { id, label, part, still } from the machine's fault table, else the kind's own (a junction, a setting)
+function caseSus(c, id) {
+  const j = caseJob(c), m = j && machineById(j.machine), f = caseCauses(m).find(x => x.id === id), K = CASE_KINDS[c.kind];
+  const own = !f && K && K.sus ? K.sus(c, id) : null;
+  if (own) return { id, label: own.label || id, part: own.part || null, still: own.still || null };
+  return { id, label: f && (f.name || f.label) || (f && f.part) || id, part: f && f.part || null, still: f && f.still || null, shows: f && f.shows };
+}
+// decoys for a kind: the machine's other causes with the same card, in an order fixed by the seed (no R())
+function caseDecoys(m, cause, seed, ok) {
+  const all = caseCauses(m), c = all.find(x => x.id === cause); if (!c) return [];
+  return all.filter(x => x.id !== cause && x.shows === c.shows && (!ok || ok(x))).map((x, i) => [schedU(seed, i, 892), x.id]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
+}
+
+// ---- posting: section 17 calls caseOffer(j, h) where a repair or overhaul gets its j.cause ----
+function caseOffer(j, h) {
+  if (!j || !j.machine || j.case || j.reserved || (j.kind !== 'repair' && j.kind !== 'overhaul')) return;
+  const kinds = caseKindsOpen(); if (!kinds.length) return;
+  if (!SHIP.works && typeof worksInit === 'function') worksInit();
+  const C = caseState(); if (!C) return;
+  const old = C.open.find(c => c.job === j.id); if (old) { j.case = old.id; return; }   // the machines replayed from an earlier hour: the same job, the same case
+  const d = Math.floor(h / 24) + 1, hr = h % 24, m = machineById(j.machine), cause = caseCauses(m).find(x => x.id === j.cause);
+  if (!m || !cause || hr < 6 || hr >= 15 || !playerShiftOn(d) || (typeof eventDay === 'function' && eventDay(d))) return;
+  const rank = caseRank(), own = m.tier || MACHINE_KINDS[m.kind].tier;
+  if (jobTier(j) > caseTier() || C.open.length >= (CASE_MAX[rank] || 1)) return;
+  const fit = kinds.filter(id => { try { return !!CASE_KINDS[id].fits(cause, m); } catch (e) { return false; } });
+  if (!fit.length) return;
+  CASE_STATS.offered++;
+  if (schedU(machSeed(j.machine), d, 880) >= caseRate(rank, own)) return;
+  CASE_STATS.rolled++;
+  // which kind: the newest-opened one counts double for its first week
+  const opened = {}; for (const [dy, ids] of Object.entries((SHIP.works && SHIP.works.op) || {})) for (const x of Array.isArray(ids) ? ids : []) if (!(x in opened)) opened[x] = +dy;
+  const tr = opened, newest = Math.max(...fit.map(id => tr[CASE_KINDS[id].ladder] ?? -1));   // the day each row opened
+  const w = fit.map(id => { const t = tr[CASE_KINDS[id].ladder]; return t === newest && t >= 0 && d - t < 7 ? 2 : 1; }), sum = w.reduce((a, b) => a + b, 0);
+  let u = schedU(machSeed(j.machine), d, 881) * sum, kid = fit[fit.length - 1];
+  for (let i = 0; i < fit.length; i++) { if (u < w[i]) { kid = fit[i]; break; } u -= w[i]; }
+  const t0 = typeof performance !== 'undefined' ? performance.now() : 0;
+  let c = null;
+  for (let k = 0; k < CASE_TRIES && !c; k++) {
+    const r = caseMake(j, kid, k, d);
+    if (r.why) CASE_STATS.why[r.why] = (CASE_STATS.why[r.why] || 0) + 1; else c = r.c;
+  }
+  if (t0) CASE_STATS.ms = Math.max(CASE_STATS.ms, performance.now() - t0);
+  if (!c) { CASE_STATS.fallback++; return; }             // no fair case: a plain fault
+  CASE_STATS.posted++; C.n++;
+  C.open.push(c); j.case = c.id;
+  if (!c.wait) caseShow(c, j);
+}
+// one try at a case (k = 0..7, key 882 + k): suspects and clues from the kind, then the solver. -> { c } | { why }
+function caseMake(j, kid, k, d) {
+  const K = CASE_KINDS[kid], seed = schedU(machSeed(j.machine), d, 882 + k) * 4294967296 | 0, band = caseBand(caseRank()), cause = j.cause;
+  let sus, clues;
+  try { sus = K.suspects(j, seed, band); clues = K.clues(j, cause, sus, seed, band); } catch (e) { return { why: 'kind' }; }
+  if (!Array.isArray(sus) || !Array.isArray(clues)) return { why: 'kind' };
+  sus = sus.map((s, i) => [schedU(seed, i, 893), s]).sort((a, b) => a[0] - b[0]).map(x => x[1]);   // shown in an order that gives nothing away (key 893)
+  const r = caseSolve(sus, clues, band, cause);
+  if (r.why) return r;
+  const t = caseNow();
+  return { c: { id: 'c' + j.id, job: j.id, kind: kid, k, band, cause, sus: sus.slice(), fewest: r.fewest,
+    clues: clues.map(x => ({ id: x.id, type: x.type, src: x.src || {}, at: x.at || null, kills: x.kills.slice() })),
+    got: [], crossed: [], known: [], calls: [], posted: t, until: 0, wait: !!(K.wait && K.wait(j)), taken: false, talk: false, long: false, train: !!j.train, told: false, title: '' } };
+}
+// on the board: the head-scratcher card, held for you to the end of the shift it appears in
+function caseShow(c, j) {
+  const t = caseNow(), m = machineById(j.machine), f = caseCauses(m).find(x => x.id === c.cause);
+  c.wait = false; c.until = Math.floor(t / 1440) * 1440 + DAY_SHIFT[1]; c.posted = t;
+  j.parts = []; j.stepsDone = (j.stepsDone || []).filter(k => k !== 0);   // the part is yours to find
+  const shows = f && f.shows || 'acts up', fb = 'Head-scratcher: ' + caseMachName(j) + ' ' + shows;
+  c.title = (typeof worksText === 'function' && worksText('case.title', null) || '').replace('{machine}', caseMachName(j)).replace('{shows}', shows).replace(/\.$/, '') || fb;   // a card's title: no full stop
+  if (!/^Head-scratcher/.test(c.title)) c.title = 'Head-scratcher: ' + c.title;
+  j.title = c.title;
+}
+
+// ---- the solver: exactly one answer, needs thinking, every clue reachable, in its band. -> { fewest } | { why } ----
+function caseSolve(sus, clues, band, cause) {
+  const B = CASE_BANDS[band] || CASE_BANDS.T1, n = clues.length;
+  if (!sus.includes(cause) || new Set(sus).size !== sus.length || sus.length < B.sus[0] || sus.length > B.sus[1]) return { why: 'suspects' };
+  if (n < B.clues[0] || n > B.clues[1] || n > 6 || clues.some(c => !c || !Array.isArray(c.kills))) return { why: 'clues' };
+  if (clues.some(c => c.kills.includes(cause))) return { why: 'answer' };
+  const left = mask => { let k = 0; for (const s of sus) if (!clues.some((c, i) => (mask >> i & 1) && c.kills.includes(s))) k++; return k; };
+  if (left((1 << n) - 1) !== 1) return { why: 'answer' };
+  let fewest = 99;
+  for (let mask = 1; mask < 1 << n; mask++) if (left(mask) === 1) { let b = 0; for (let x = mask; x; x >>= 1) b += x & 1; fewest = Math.min(fewest, b); }
+  if (fewest < B.fewest) return { why: 'easy' };
+  if (new Set(clues.map(caseClueDeck).filter(x => x != null)).size > B.decks) return { why: 'decks' };
+  if (!clues.every(caseReachable)) return { why: 'reach' };
+  return { fewest };
+}
+// where a clue is: a place id (its deck counts), 'board' (taped to the job: the board doesn't count as a deck), or a person
+const caseClueDeck = c => { if (!c.at || c.at === 'board') return null; const p = placeById(c.at); return p ? p.deck : -1; };
+function caseReachable(c) {
+  if (c.at && c.at !== 'board') { const p = placeById(c.at); if (!p || placeTier(c.at) > caseTier()) return false; }
+  const by = c.src && c.src.ask;                         // a clue you ask someone for: they're aboard and on the roster
+  if (by && (!schedPeople().some(p => p.id === by) || (typeof movedOff === 'function' && movedOff(by)))) return false;
+  const tool = c.src && c.src.tool;
+  if (tool && !(typeof hasTool === 'function' && hasTool(tool))) return false;
+  return true;
+}
+
+// ---- held for you (section 17's heldForYou asks): till the shift it showed in ends, or you drop it ----
+function caseHeld(j) {
+  const c = caseOf(j); if (!c) return false;
+  if (c.wait) return true;
+  if (j.claimedBy === 'you') return caseNow() < c.until;   // yours till the shift ends; then the board's usual rules
+  if (c.taken || caseNow() >= c.until) { caseRelease(c, j); return false; }
+  return true;
+}
+// a case not ready yet (P3's tries under way) keeps its job off the board (section 17's board and openJobs ask)
+function caseHidden(j) { const c = caseOf(j); return !!(c && c.wait && !c.m7); }   // Day 5's washer is on the board as your scanner job
+// to the crew, who do it the long way (a part at a time, on paper): no remark
+function caseRelease(c, j) {
+  const parts = c.sus.filter(s => !c.known.includes(s)).map(s => caseSus(c, s).part).filter(p => p);
+  j.parts = parts.length ? parts : j.parts; delete j.title;
+  caseClose(c, 0, 'crew');
+}
+function caseClose(c, flags) {
+  const C = caseState(); if (!C) return;
+  C.open = C.open.filter(x => x !== c);
+  C.done.push([c.id, Math.floor(caseNow() / 1440) + 1, flags]); if (C.done.length > CASE_DONE_KEEP) C.done.splice(0, C.done.length - CASE_DONE_KEEP);
+  if (CASE_UI.at === c.id) CASE_UI.at = null;
+}
+// the work log's flags for a job: 2 right first time, 4 a clever fix; 0 if it wasn't a case (also on the job as
+// j.rightFirst and j.clever, which 24 core reads at turn-in)
+function caseFlags(jobId) { const C = SHIP.works && caseState(), d = C && C.done.find(x => x[0] === 'c' + jobId); return d ? d[2] : 0; }
+
+// ---- clues: collected where they are; a quiet toast and a badge on Fault notes ----
+function caseClue(caseId, clueId) {
+  const c = caseById(caseId), k = c && c.clues.find(x => x.id === clueId);
+  if (!k || c.wait || c.got.includes(clueId)) return false;
+  c.got.push(clueId);
+  const who = k.src && (k.src.by || k.src.ask), p = who && schedPeople().find(x => x.id === who);
+  const name = p ? p.name.split(' ').slice(-1)[0] : k.type === 'log' ? 'the log' : k.type;
+  if (typeof toast === 'function') toast('+ clue: ' + name);
+  if (typeof deviceNotify === 'function') deviceNotify({ app: caseApp(), text: '+ clue: ' + name });
+  MACH_REV++;
+  return true;
+}
+// asking someone about the fault (P2's chat step, later): their clue if they have one for this case
+function caseAsk(caseId, who) { const c = caseById(caseId), k = c && c.clues.find(x => x.src && x.src.ask === who && !c.got.includes(x.id)); return k ? caseClue(caseId, k.id) : false; }
+// a clue in words, built when you read it: the kind's own text (the Works writer's templates), else plain
+function caseClueText(c, k) {
+  const K = CASE_KINDS[c.kind]; try { const t = K.text && K.text(c, k); if (t) return t; } catch (e) { /* the plain words */ }
+  const p = k.src && k.src.by && schedPeople().find(x => x.id === k.src.by), s = k.src && k.src.tried && caseSus(c, k.src.tried);
+  if (k.type === 'note' && s) return (s.part ? 'New ' + s.part + ' in.' : 'Tried the ' + s.label + '.') + ' No change.' + (p ? ' — ' + p.name.split(' ').slice(-1)[0] : '');
+  return k.type === 'log' ? 'The machine\'s log.' : 'A clue.';
+}
+const CASE_MARK = { note: 'note', log: 'clock', person: 'person', gauge: 'gauge', calendar: 'calendar' };
+// once a ship minute (24 core's tick, else the clock's): taped clues when the job is yours, clues within reach, the
+// kind's own tick, and cases whose job finished
+function caseTick() {
+  const C = SHIP.works && caseState(); if (!C) return;
+  if (typeof p3Stage === 'function') p3Stage(C);        // Day 5's training case (P3, below)
+  if (!C.open.length) return;
+  for (const c of C.open.slice()) {
+    const j = caseJob(c), K = CASE_KINDS[c.kind];
+    if (!j) { caseClose(c, 0); continue; }
+    if (K && K.tick) { try { K.tick(c, j); } catch (e) { /* a kind's tick never stops the game */ } }
+    if (c.wait && (j.status === 'done' || (!c.train && shipNow() > c.posted + CASE_WAIT_MAX) || (c.train && j.until && shipNow() > j.until))) { caseClose(c, 0); continue; }   // never held for ever
+    if (c.wait) { if (j.claimedBy === 'you' && !c.train) caseClose(c, 0); continue; }   // you took it before the case was ready: a plain repair
+    if (!c.told) { c.told = true; if (typeof deviceNotify === 'function') deviceNotify({ app: caseApp(), text: c.title }); }   // shown inside section 17's hour: told here
+    if (j.status === 'done') { caseDone(c, j); continue; }
+    if (j.claimedBy === 'you') { c.taken = true; for (const k of c.clues) if (k.at === 'board') caseClue(c.id, k.id); }
+    if (!c.taken) continue;
+    for (const k of c.clues) if (k.at && k.at !== 'board' && !c.got.includes(k.id) && caseNear(k.at)) caseClue(c.id, k.id);
+  }
+}
+function caseNear(placeId) {
+  try {
+    const p = placeById(placeId); if (!p || deckDef.num !== p.deck || typeof placeSpot !== 'function') return false;
+    const s = placeSpot(placeId); if (!s) return false;
+    return Math.hypot(s.x - player.obj.position.x, s.z - player.obj.position.z) < JOB_REACH + .5;
+  } catch (e) { return false; }
+}
+// the job's finished: right first time (one call, the right one), a clever fix (and no talking it through, no more
+// clues than the fewest + 1); the work log asks caseFlags
+function caseDone(c, j) {
+  const you = j.doneBy === 'you', first = you && c.calls.length === 1 && c.calls[0] === c.cause && !c.long;
+  const clever = first && !c.talk && c.got.length <= c.fewest + 1;
+  caseClose(c, (first ? 2 : 0) | (clever ? 4 : 0));
+  if (you && typeof worksUse === 'function') worksUse(CASE_KINDS[c.kind] ? CASE_KINDS[c.kind].ladder : c.kind);   // a use of the row (a small row's first is its training)
+  if (clever && typeof simNote === 'function') simNote('cleverFix', { machine: j.machine, kind: c.kind });
+}
+
+// ---- calling it: the suspect's part goes on the job; the job's normal loop runs ----
+function caseCall(caseId, susId) {
+  const c = caseById(caseId), j = c && caseJob(c);
+  if (!c || !j || c.wait || !c.sus.includes(susId) || c.known.includes(susId)) return false;
+  const s = caseSus(c, susId);
+  if (c.calls.length > (c.fits || 0)) c.calls.pop();     // called again before fitting: it replaces the last call (it was never tried)
+  c.calls.push(susId);
+  if (typeof simNote === 'function') simNote('caseCalled', { id: c.id, job: j.id, train: !!c.train });   // 24 core's escort ends on the training case's call
+  if (!(typeof jobSetPart === 'function' && s.part && jobSetPart(j.id, s.part))) j.parts = s.part ? [s.part] : [];   // section 17's needs a part already there
+  j.stepsDone = (j.stepsDone || []).filter(k => k !== 0);   // the fetch again, now there's a part to fetch
+  MACH_REV++;
+  return true;
+}
+// section 17's jobStepDone asks at the last stop: a wrong call (or none yet) keeps the machine as it was -> true
+function caseFitted(j) {
+  const c = caseOf(j); if (!c) return typeof scanFitted === 'function' ? scanFitted(j) : false;   // not a case: the scanner's pick, if any (24g)
+  if (c.wait) return false;
+  const last = c.calls[c.calls.length - 1];
+  if (last) c.fits = c.calls.length;                     // this call has now been fitted
+  if (last === c.cause) {                               // right: the job finishes as any repair; 24 core's work log reads the flags at turn-in
+    j.rightFirst = c.calls.length === 1 && !c.long; j.clever = j.rightFirst && !c.talk && c.got.length <= c.fewest + 1;
+    return false;
+  }
+  const m = machineById(j.machine), f = caseCauses(m).find(x => x.id === c.cause), shows = f && f.shows || 'acts up';
+  let line = 'You look it over: it still ' + shows + '. Fault notes has the suspects.';
+  if (last) {
+    const s = caseSus(c, last);
+    if (!c.known.includes(last)) c.known.push(last);
+    if (!c.crossed.includes(last)) c.crossed.push(last);
+    if (s.part && !(CASE_SPENT.has(s.part) && jobTier(j) >= 2)) returnPart(s.part);   // Tier 1: back on its shelf unused
+    const said = s.still && typeof faultWords === 'function' ? faultWords(s.still) : null;
+    line = said || (s.part ? 'New ' + s.part + ' in.' : 'Done.') + ' Still ' + shows + '.';
+  }
+  j.stepsDone = []; j.parts = []; j.touched = shipNow();
+  if (typeof toast === 'function' && !SIM_AT) toast(caseMachName(j), line);
+  const wrong = c.calls.filter(x => x !== c.cause).length;
+  if (wrong === 2 && !c.talk && typeof toast === 'function' && !SIM_AT) toast('Fault notes', (c.by ? schedPeople().find(p => p.id === c.by) || { name: 'Calder' } : { name: 'Calder' }).name.split(' ')[0] + ' can talk it through with you: it\'s on Fault notes.');
+  if (c.long) caseLongNext(c);
+  return true;
+}
+// hints: the Chief's notes (always); a Works hand says which kind of clue you're missing; talking it through crosses
+// one decoy out with you (no clever fix); the long way fits each suspect in turn (always ends)
+function caseHint(caseId) {
+  const c = caseById(caseId); if (!c) return null; const K = CASE_KINDS[c.kind];
+  const miss = c.clues.find(k => !c.got.includes(k.id));
+  if (!miss) return 'You\'ve got every clue there is. Cross out what they rule out.';
+  try { const h = K.hint && K.hint(c); if (h) return h; } catch (e) { /* the plain words */ }
+  return { note: 'Have you read the notes on the job?', log: 'Have you looked at its log on the panel?', person: 'Ask around: someone saw it.', gauge: 'Have you read the gauge?', calendar: 'Check the calendar.' }[miss.type] || 'There\'s more to find.';
+}
+function caseTalk(caseId) {
+  const c = caseById(caseId); if (!c || c.talk) return false;
+  const d = c.sus.find(s => s !== c.cause && !c.crossed.includes(s)) || c.sus.find(s => s !== c.cause && !c.known.includes(s));
+  c.talk = true; if (d && !c.crossed.includes(d)) c.crossed.push(d); if (d && !c.known.includes(d)) c.known.push(d);
+  return true;
+}
+function caseLong(caseId) { const c = caseById(caseId); if (!c) return false; c.long = true; caseLongNext(c); return true; }
+function caseLongNext(c) { const s = c.sus.find(x => !c.known.includes(x)); if (s) caseCall(c.id, s); }
+
+// ---- Fault notes and the Chief's notes on the device ----
+// CHIEF_NOTES[kind] = { title, lines }: a page each, added when a kind opens (the Works writer's words); more lines
+// for machine kinds you know well later
+const CHIEF_NOTES = {};
+const CASE_UI = { at: null, ask: null, chief: false };
+function caseView() {
+  const C = SHIP.works && SHIP.works.cases && caseState(), open = C ? C.open.filter(c => !c.wait) : [];
+  const B = [];
+  if (CASE_UI.chief) {
+    B.push({ kind: 'text', text: 'The Chief\'s notes', mark: 'big' });
+    const pages = caseKindsOpen().map(id => CHIEF_NOTES[id]).filter(p => p);
+    if (!pages.length) B.push({ kind: 'text', text: 'Nothing here yet.' });
+    for (const p of pages) B.push({ kind: 'text', text: p.title, mark: 'hot' }, { kind: 'list', rows: p.lines.map((l, i) => ({ text: (p.key && typeof worksText === 'function' && worksText(p.key + '.' + (i + 1), null)) || l })) });   // the writer's chief.<kind>.N, else the stand-in
+    B.push({ kind: 'buttons', items: [{ label: 'Back to the fault', action: { app: caseApp(), do: 'case:chief', arg: 0 } }] });
+    return { title: 'Fault notes', blocks: B };
+  }
+  if (!open.length) {
+    B.push({ kind: 'text', text: 'No head-scratchers open. When the board has one, its notes are here.' },
+      { kind: 'buttons', items: [{ label: 'The Chief\'s notes', action: { app: caseApp(), do: 'case:chief', arg: 1 } }] });
+    return { title: 'Fault notes', blocks: B };
+  }
+  const c = open.find(x => x.id === CASE_UI.at) || open[0], K = CASE_KINDS[c.kind], A = (v, arg) => ({ app: caseApp(), do: 'case:' + v, arg: c.id + '|' + arg });
+  if (open.length > 1) B.push({ kind: 'buttons', items: open.map((x, i) => ({ label: 'Case ' + (i + 1), on: x === c, action: { app: caseApp(), do: 'case:at', arg: x.id } })) });
+  B.push({ kind: 'text', text: c.title.replace(/^Head-scratcher: /, ''), mark: 'big' }, { kind: 'text', text: 'Suspects (tap to cross out)' });
+  B.push(devChips(c.sus.map(s => ({ label: caseSus(c, s).label.replace(/^./, x => x.toUpperCase()), on: !c.crossed.includes(s), action: A('cross', s) }))));
+  try { const v = K.view && K.view(c); if (Array.isArray(v)) B.push(...v); } catch (e) { /* the kind's view is extra */ }
+  const got = c.clues.filter(k => c.got.includes(k.id)), left = c.clues.length - got.length;
+  B.push({ kind: 'text', text: 'Clues' }, { kind: 'list', rows: got.map(k => ({ text: caseClueText(c, k), sub: CASE_MARK[k.type] || k.type })).concat(left ? [{ text: left === 1 ? 'One more to find.' : 'More to find.', mark: 'new' }] : []) });
+  if (CASE_UI.ask && CASE_UI.ask.c === c.id) {
+    const s = CASE_UI.ask.s;
+    B.push({ kind: 'text', text: 'Call it: the ' + caseSus(c, s).label + '?', mark: 'hot' }, { kind: 'buttons', items: [{ label: 'Yes', action: A('yes', s) }, { label: 'Not yet', action: A('no', s) }] });
+  } else {
+    const items = [];
+    if (left) items.push({ label: 'Where next?', action: A('next', 0) });
+    const can = c.sus.filter(s => !c.crossed.includes(s) && !c.known.includes(s));
+    if (!c.long) for (const s of can) items.push({ label: 'Call it: ' + caseSus(c, s).label, action: A('call', s) });
+    B.push({ kind: 'buttons', items });
+  }
+  const last = c.calls[c.calls.length - 1];
+  if (last && !c.known.includes(last)) B.push({ kind: 'text', text: 'Called: the ' + caseSus(c, last).label + '. Fetch it and fit it.', mark: 'hot' });
+  const wrong = c.calls.filter(x => x !== c.cause).length, hints = [{ label: 'The Chief\'s notes', action: { app: caseApp(), do: 'case:chief', arg: 1 } }];
+  if (wrong >= 2 && !c.talk) hints.push({ label: 'Talk it through', action: A('talk', 0) });
+  if (!c.long) hints.push({ label: 'Fit them one by one', action: A('long', 0) });
+  B.push({ kind: 'buttons', items: hints });
+  return { title: 'Fault notes', blocks: B };
+}
+function caseAct(verb, arg) {
+  const v = String(verb).replace(/^case:/, ''), [id, s] = String(arg).split('|');
+  if (v === 'chief') { CASE_UI.chief = !!+arg; return; }
+  if (v === 'at') { CASE_UI.at = arg; CASE_UI.ask = null; return; }
+  const c = caseById(id); if (!c) return;
+  CASE_UI.at = c.id;
+  if (v === 'cross') { if (c.known.includes(s)) return; const i = c.crossed.indexOf(s); if (i < 0) c.crossed.push(s); else c.crossed.splice(i, 1); }
+  else if (v === 'call') CASE_UI.ask = { c: c.id, s };
+  else if (v === 'no') CASE_UI.ask = null;
+  else if (v === 'yes') { CASE_UI.ask = null; if (caseCall(c.id, s)) { const p = caseSus(c, s).part; if (p && typeof toast === 'function') toast('Called it', 'A ' + p + ' from main storage, Deck 5. Follow the marker.'); } }
+  else if (v === 'next') {
+    const k = c.clues.find(x => !c.got.includes(x.id)), p = k && k.at && k.at !== 'board' && placeById(k.at);
+    if (p && typeof setGoal === 'function') { SHIP.player.track = null; setGoal({ deck: p.deck, place: p.id, label: (roomName(p.deck, p.room) || 'The clue') + (p.deck !== deckDef.num ? ', Deck ' + p.deck : '') }); }
+    else if (k && k.at === 'board' && typeof setGoal === 'function') { SHIP.player.track = null; setGoal({ deck: 5, room: 'w', label: 'The job board, in the Works bay' }); }
+    else if (k && typeof toast === 'function') toast('Fault notes', caseHint(c.id));
+  }
+  else if (v === 'talk') caseTalk(c.id);
+  else if (v === 'long') caseLong(c.id);
+  MACH_REV++;
+}
+// a tab of 24 core's Works app when it has tabs (worksTabAdd), else its own app (faultnotes), hidden till a kind opens
+const CASE_BADGE = () => { const C = SHIP.works && SHIP.works.cases; return C && C.open.some(c => !c.wait && !c.got.length) ? 1 : null; };
+if (typeof worksTabAdd === 'function') worksTabAdd({ id: 'faults', verbs: 'case', title: 'Fault notes', order: 40, view: () => caseView().blocks, act: caseAct, badge: CASE_BADGE });
+else deviceApp({ id: 'faultnotes', title: 'Fault notes', short: 'Faults', icon: 'wrench', order: 32, hidden: () => !caseKindsOpen().length, badge: CASE_BADGE, view: caseView, act: caseAct });
+
+// ---- 24k P3. What's been tried? (Day 5; plans/mechanics/p3-whats-been-tried.html). The crew have had a go already:
+// one try per decoy, by a Works crew member really on shift, 2-12 ship hours after the fault is posted (keys 890 the
+// times, 891 who), each using the decoy's part off the shelf and leaving a note ("New door seal in. Still leaks. —
+// Kovac"). Each note rules out what was tried. The case shows when the last try is done, during your shift. The
+// first (Day 5's training case) is fixed: Washer 2 in the junior wing's laundry leaking from 18:00 on Day 4 (the
+// pump), a door seal and a drain valve tried overnight, shown once the ladder's p3 row opens, the teacher with you.
+// The tries are on paper here (who and when worked out at posting, the part off its shelf at that time); they become
+// the crew's real try jobs once section 17's jobKindAdd is in. ----
+const P3_NOTE = (c, k) => {
+  const j = caseJob(c), m = j && machineById(j.machine), s = caseSus(c, k.src.tried), f = m && caseCauses(m).find(x => x.id === c.cause), p = k.src.by && schedPeople().find(x => x.id === k.src.by);
+  const fb = (s.part ? 'New ' + s.part + ' in.' : 'Tried the ' + s.label + '.') + ' Still ' + (f && f.shows || 'acts up') + '.';
+  const t = (typeof worksText === 'function' && m ? worksText('fault.tried.' + m.kind + '.' + k.src.tried, fb) : fb) || fb;
+  return t + (p ? ' — ' + p.name.split(' ').slice(-1)[0] : '');
+};
+// who tries, and when: the times from 2 to 12 hours after `t`, in order; whoever of the Works crew is at work then
+// (key 891 if several); none on shift: the first Works hand at work the next morning, 06:00-08:00
+function p3Tries(j, decoys, seed, t) {
+  const crew = schedPeople().filter(p => jobCrew(p) === 'works').sort((a, b) => a.id < b.id ? -1 : 1), pp = panelPlace(j.machine);
+  const at = (p, x) => { try { return planWhere(p, x).act === 'work'; } catch (e) { return false; } };
+  const times = decoys.map((s, i) => t + 120 + Math.round(schedU(seed, i, 890) * 600)).sort((a, b) => a - b);
+  let last = t, prev = null;
+  return decoys.map((s, i) => {
+    let x = Math.max(times[i], last + 15), on = crew.filter(p => at(p, x));
+    if (!on.length) {                                    // nobody at work: the next morning from 06:00, a Works hand if one's in by 09:00, else whoever is
+      const m0 = (Math.floor(x / 1440) + (x % 1440 >= 360 ? 1 : 0)) * 1440 + 360, hand = y => crew.filter(p => at(p, y) && p.rank !== 'chief');
+      let y = m0; while (y <= m0 + 180 && !hand(y).length) y += 15;
+      if (y <= m0 + 180) { x = y; on = hand(y); } else { for (x = m0; x <= m0 + 180 && !(on = crew.filter(p => at(p, x))).length; x += 15); if (!on.length) x = m0; }
+    }
+    last = x;
+    const pref = on.filter(p => p.id !== prev && p.rank !== 'chief'), pool = pref.length ? pref : on;   // a Works hand, not the one before, if there's one
+    const by = pool.length ? pool[Math.floor(schedU(seed, i, 891) * pool.length)].id : null; prev = by;
+    return { id: 'n' + i, type: 'note', src: { by, t: x, tried: s, done: false }, at: i && pp ? pp : 'board', kills: [s] };   // the first on the job, the rest on the machine
+  });
+}
+// once a ship minute (24k's caseTick): the tries whose time has come are done (the part comes off its shelf); when all
+// are, the case shows on the board, inside your shift (a training case once its ladder row has opened)
+function p3Tick(c, j) {
+  if (!c.wait) return;
+  const now = shipNow();
+  for (const k of c.clues) if (!k.src.done && now >= k.src.t) {
+    k.src.done = true; const p = caseSus(c, k.src.tried).part;
+    if (p && SHIP.stores[p] > 0) { SHIP.stores[p]--; MACH_REV++; }
+  }
+  if (c.clues.some(k => !k.src.done)) return;
+  const d = Math.floor(now / 1440) + 1, mn = now % 1440;
+  const here = c.m7 && j.claimedBy === 'you' && !!j.scan;   // Day 5: you've read Washer 2 with the scanner, the teacher beside you
+  if (!here && (!playerShiftOn(d) || mn < DAY_SHIFT[0] || mn >= 900 || (c.train && !caseOpened('p3')))) return;
+  if (c.train) { const W = SHIP.works, row = typeof ladderRow === 'function' && ladderRow('p3'); c.by = (here && W && W.cur && W.cur.by) || (row && typeof ladderTeacher === 'function' && ladderTeacher(row, d)) || 'calder'; }
+  caseShow(c, j);
+  if (c.train && typeof worksSay === 'function') worksSay(c.by, (typeof worksText === 'function' && worksText('works.train.p3.start', null)) || 'Here\'s a funny one. ' + c.title + '. Open Fault notes: the first note\'s taped to the job.');
+}
+CASE_KINDS.p3 = { name: 'What\'s been tried?', ladder: 'p3',
+  fits: (cause, m) => !!cause.part && caseDecoys(m, cause.id, 0, x => !!x.part).length >= 2,
+  suspects: (j, seed) => { const d = caseDecoys(machineById(j.machine), j.cause, seed, x => !!x.part); return [j.cause].concat(d.slice(0, d.length >= 3 && schedU(seed, 0, 890) < .4 ? 3 : 2)); },
+  clues: (j, cause, sus, seed) => p3Tries(j, sus.filter(s => s !== cause), seed, caseNow()),
+  wait: () => true, tick: p3Tick, text: P3_NOTE, view: () => [],
+  hint: c => (typeof worksText === 'function' && worksText('case.hint.p3.1', null)) || 'Have you read every note? One\'s on the machine.' };
+CHIEF_NOTES.p3 = { title: 'What\'s been tried', key: 'chief.p3', lines: [
+  'If someone fitted it and it\'s still wrong, it isn\'t that.',
+  'Read every note. One\'s on the job; the others are on the machine.',
+  'What nobody has tried yet is your best bet.'] };
+if (typeof WORK_MECH !== 'undefined') WORK_MECH.p3 = { open() { /* the training case is already staged (p3Stage); it shows at the next tick */ } };
+// Day 5's training case, staged at 18:00 on Day 4 (or the first 18:00 from Day 4 the ship gets to without it): held
+// for you (24 core's slot 20) till the row opens, so it's never on the crew's board
+function p3Stage(C) {
+  if (C.first || !SHIP.works) return;
+  if (SHIP.works.tr && SHIP.works.tr.p3 !== undefined || caseOpened('p3')) { C.first = 'none'; return; }   // an older save past it
+  const now = shipNow(), t18 = Math.floor((now - 1080) / 1440) * 1440 + 1080, d = Math.floor(t18 / 1440) + 1;
+  if (now < 1080 || d < 4) return;
+  const mine = SHIP.clothes && SHIP.clothes.hamper, washing = id => !!(mine && mine.at === 'washer' && mine.washer === id);   // your own wash in it: the next one
+  const m = ['4-washer-2', '4-washer-3'].map(machineById).find(x => x && !washing(x.id) && !SHIP.jobs.some(j => j.machine === x.id && j.status !== 'done' && j.claimedBy === 'you'));
+  if (!m || !caseCauses(m).some(x => x.id === 'pump')) { C.first = 'none'; return; }
+  const id = jobReserve(m.id, d, 1080, 20, { train: 'p3', tier: 1, until: t18 + 7 * 1440, cause: 'pump' }), j = id && SHIP.jobs.find(x => x.id === id);
+  if (!j) return;
+  delete j.make; delete j.makeMins; j.cause = 'pump'; j.parts = ['pump']; j.train = 'p3';   // its suspects all read worn on the scanner
+  const sus = ['pump', 'seal', 'valve'].filter(s => caseCauses(m).some(x => x.id === s && x.part));
+  const clues = p3Tries(j, sus.filter(s => s !== 'pump'), machSeed('p3-first'), t18), r = caseSolve(sus, clues, 'T1', 'pump');
+  if (r.why) { C.first = 'none'; return; }
+  const c = { id: 'c' + j.id, job: j.id, kind: 'p3', k: 0, band: 'T1', cause: 'pump', sus, fewest: r.fewest, clues, got: [], crossed: [], known: [], calls: [], posted: t18, until: 0,
+    wait: true, taken: false, talk: false, long: false, train: true, told: false, title: '' };
+  C.open.push(c); j.case = c.id; C.first = c.id; C.n++;
+  MACH_REV++;
+}
 
 // =====================================================================
 // 6. CAMERA
