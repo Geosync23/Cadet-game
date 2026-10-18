@@ -43,7 +43,7 @@ NAV:plain=In plain words|day=Day 3|grow=How it grows|crew=The crew|b=Builder|sav
   <div class="tablewrap"><table>
     <tr><th>Section</th><th>What</th><th>Owner</th></tr>
     <tr><td>24d (new)</td><td>the manifest (which crates, which stops), the <code>haul</code> job kind, the training with Yara, stage 2's order, stage 3's stocktake</td><td>M1</td></tr>
-    <tr><td>17</td><td>the Wednesday delivery adds <code>SHIP.hold.manifest = [{ id, dest, n }]</code> (2-4 crates, from <code>DELIVERIES</code>' destinations, picked with <code>schedU(week, 0, 866)</code>); <code>holdCrates()</code> also counts them (drawn with the same instanced crate mesh); the misplaced part for the stocktake (<code>SHIP.misplaced = { part, on }</code>, at most one, Thursdays, <code>schedU(week, 0, 867)</code> < .5)</td><td>S</td></tr>
+    <tr><td>17</td><td>the Wednesday delivery adds <code>SHIP.manifest = [{ id, dest, n }]</code> (2-4 crates, from <code>DELIVERIES</code>' destinations, picked with <code>schedU(week, 0, 866)</code>); <code>holdCrates()</code> also counts them (drawn with the same instanced crate mesh); the misplaced part for the stocktake (<code>SHIP.misplaced = { part, on }</code>, at most one, Thursdays, <code>schedU(week, 0, 867)</code> < .5)</td><td>S</td></tr>
     <tr><td>15</td><td>nothing new: the cart run exists (<code>cartTap</code>, <code>cartStep</code>), with <code>carry</code> on the cart; each stop's drop is a tap within reach (15b's stop tap)</td><td>—</td></tr>
     <tr><td>DECKS[3], [4], [5], [1]</td><td>drop places: <code>4-laundry-drop</code>, <code>3-infirmary-drop</code>, <code>3-store-drop</code>, <code>3-galley-drop</code>, <code>1-bridge-drop</code> (by the doors, room for the cart); <code>5-stock-1..4</code> (a spot in front of each shelf for the stocktake, may reuse <code>5-parts-N</code>)</td><td>seat A</td></tr>
     <tr><td>content</td><td>Yara's lines (<code>train.m4</code>), the stop names, the stocktake's lines</td><td>W</td></tr>
@@ -79,4 +79,6 @@ NAV:plain=In plain words|day=Day 3|grow=How it grows|crew=The crew|b=Builder|sav
 <section id="faq">
   <h2>Builders' questions</h2>
   <p class="note">Questions from builders and the answers go here (ask the Pillar 5 designer through the lead). None yet.</p>
+  <h3>Where the manifest lives (seat S, 0.33.48)</h3>
+  <p>It's <code>SHIP.manifest</code>, not <code>SHIP.hold.manifest</code> (<code>SHIP.hold</code> is a parts count summed by the unload, the save and the restock job). It's only set while 24d's <code>haul</code> kind is in the build.</p>
 </section>
