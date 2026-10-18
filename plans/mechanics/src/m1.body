@@ -42,8 +42,8 @@ NAV:plain=In plain words|walk=Your first round|signs=What you see|grow=How it gr
   <h2>How it grows (only the first stage is on the main path)</h2>
   <div class="grid">
     <div class="card"><b>Stage 1 · A set route</b><span>Each morning the clipboard gives a route of 4-6 machines on one deck (the decks take turns: 4, 3, 5).</span><span class="meta"><span class="tag">Day 2</span></span></div>
-    <div class="card"><b>Stage 2 · Your own route</b><span>After 5 rounds you pick which machines to look at (5 of up to 9 on the deck). A well-picked round finds more; Torres notices ("You've got a nose for it").</span><span class="meta"><span class="tag">after 5 rounds</span><span class="tag new">optional</span></span></div>
-    <div class="card"><b>Stage 3 · From the doorway</b><span>With the scanner (Day 5), you can read a room's machines from its doorway on your round: one look covers the room.</span><span class="meta"><span class="tag">with the scanner</span><span class="tag new">optional</span></span></div>
+    <div class="card"><b>Stage 2 · Your own route</b><span>After 5 rounds you pick which machines to look at (5 of up to 9 on the deck). A well-picked round finds more; Torres notices ("You've got a nose for it"). <b>Built in Step 4 with the side jobs (the user, 2026-10-18).</b></span><span class="meta"><span class="tag">after 5 rounds</span><span class="tag new">optional</span></span></div>
+    <div class="card"><b>Stage 3 · From the doorway</b><span>With the scanner (Day 5), you can read a room's machines from its doorway on your round: one look covers the room. <b>Built in Step 4 with the side jobs (the user, 2026-10-18).</b></span><span class="meta"><span class="tag">with the scanner</span><span class="tag new">optional</span></span></div>
   </div>
   <p class="note">As you rise: as an Officer you choose any route (any deck you can enter); as a Senior Officer you also set the juniors' routes (the plan's job-by-rank map; built with Step 5).</p>
 </section>
