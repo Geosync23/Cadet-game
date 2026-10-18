@@ -15,7 +15,7 @@ The user played the Pillar 5 preview and sent 33 notes. The plan (8 packages) an
 ## The user's answers (binding)
 - **Work starts 09:00** for the whole day shift: 09:00–17:00 (was 08:00–17:00). Breakfast, the time clock window and Day 1's briefing move to fit.
 - **Tea:** the 13:00 tea and biscuits REPLACES the 10:30 Works tea (all lines and pages that say "half ten" change). Interactive: once tea is out, when you finish a job the arrow points to tea and biscuits; you can drink and eat (slight hunger help), or dismiss the arrow and keep working. Many Works crew go, staggered, not all at once. On Day 1 Zeke explains it, then leads you there after your job (tracked + arrow), then work goes on with Zeke following and chatting.
-- **Zeke "still walks and talks":** he must stop and face you while he speaks to you (greeting, tour lines, explanations); he walks only between stops. Each line stays up long enough to read, and his first lines wait until you've reached him.
+- **Zeke "still walks and talks":** he may walk and talk on the tour (the user, ~17:12, no clock pause), but stops and faces you for the greeting and the cabin hand-over, keeps you beside him. Each line stays up long enough to read, and his first lines wait until you've reached him.
 - **Bunk:** the game already gives the right bed (upper, middle of three = 2nd from left); only Zeke's words are wrong ("top bunk at the back").
 - **Cabin talk:** Zeke hands you the device ("This is yours…") and says a few lines; the rest becomes Mail from Zeke, which he tells you to open. Every "locker" in his talk/Mail becomes "wardrobe".
 - **Name on the Beam:** for you on arrival and for each new Works member who joins later (rotation arrivals).
