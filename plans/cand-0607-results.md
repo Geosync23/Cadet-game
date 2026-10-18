@@ -39,3 +39,4 @@ Built on claude/cand-0606 (from 0.60.6a c8685cf). One line per finished check (c
 - intro evidence (lead 11): onboarding 4 on 729f951+0.42.45 (= 3313db0/d3d720b's change) parts 0-11 no FAIL, part 12 clean to Day 3 16:31 (timeout)
 - cand 3 d3d720b (runner 2): interactions_check OK (draw-call peak 247)
 - cand 3 d3d720b (runner 2): path_check OK (6 decks x 3000 the same, a played day's 3436 calls the same). Runner 2's list all OK; logs on claude/runner-0607-2 runs/d3d720b/
+- cand 3 d3d720b (runner 1): intro_check parts 0-11 OK, 0 FAIL lines (1/7 clothes/hobby fix holds); part 12 heard every beat through d3-store (Day 3 16:31) then printed nothing for ~13 min until the runner's 2 h limit killed it (same place onboarding 4's run stopped). Investigating
