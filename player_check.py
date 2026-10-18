@@ -990,8 +990,8 @@ with sync_playwright() as pw:
             print('    taking the cart at dock', dock)
             g.ev(TAPS % json.dumps('Cart dock %d' % dock)); c1 = jrun(); c1 = json.loads(g.ev(CST)); steps.append(c1)
             hold_room = g.ev("placeRoom('5-hold-1')")
-            g.ev("playerGo(placeSpot('5-hold-2').walk)"); jrun(); g.step(90); jrun(); c2 = json.loads(g.ev(CST)); steps.append(c2)   # nothing to tap in the hold: stop there
-            g.ev(f"({IN_ROOM})('r')"); jrun(); c3 = json.loads(g.ev(CST)); steps.append(c3)
+            g.ev("playerGo(placeSpot('5-hold-2').walk)"); jrun(); g.step(90); jrun(); g.step(1); c2 = json.loads(g.ev(CST)); steps.append(c2)   # nothing to tap in the hold: stop there
+            g.ev(f"({IN_ROOM})('r')"); jrun(); g.step(1); c3 = json.loads(g.ev(CST)); steps.append(c3)   # g.step(1): the held cart follows the stage a frame later (playerUpdate sets player.holding before actUpdate ends the act)
             pre = g.ev("[SHIP.stores.filter || 0, SHIP.hold.filter || 0]")   # the hourly job list may have moved stock meanwhile: compare across the docking
             g.ev(TAPS % json.dumps('Cart dock %d' % dock)); jrun(); c4 = json.loads(g.ev(CST)); steps.append(c4)
             g.ev("(() => { const j = typeof turnInJob === 'function' && myJob(); if (j && j.workDone) turnInJob(j.id); })()")   # TURN_IN (0.37.3): finished jobs are turned in at the board
