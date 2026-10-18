@@ -110,3 +110,12 @@ The user (~05:20): the lead may approve or reject everything overnight; don't ho
 | Sleeker Tern pass 2 plan (DA5, deck-p5s3 f00759b: tapered tail, engine pods, shaped roof spine, rounded corners, lockers follow taper) | Yes, build it (~15:50) |
 | Tier 2 fault tables (p5-design adc12e2 + damper table) | Approved (~15:50) |
 | Step 3 timing | No Step 3 building until Step 2 is ready (~15:48) |
+
+## The user's answers, 2026-10-18 ~16:51 (playtest survey https://claude.ai/artifact/XpPc16Z2mB2fVHsraR6STk, db survey/playtest1)
+All 8 packages approved (Zeke: "all good except he still walks and talks" → he stops and faces you to talk). Work 09:00–17:00 for the whole day shift; 13:00 tea and biscuits replaces 10:30 tea, interactive (after a job the arrow points to tea; eat/drink or dismiss); bunk = wording only; cabin talk: device handed over + Mail from Zeke; Name on the Beam for you and later Works arrivals; Lap of the Wren moves off Monday; Sunrise stretch to the garden; brighter dimming/night; seated arm-waving everywhere but the mess; Spice supper stays 18:15, crew finish on time; talk while eating with one meter + a slight social bump sitting near people; Tracked button in this update; tap-to-join for every tradition where it makes sense, with arrow to the leader, marker and tip. **Holidays: on hold** ("serve this survey again later"). Spec: plans/brief-playtest1.md.
+| Time | Question | Decision (lead 13) | Why |
+|---|---|---|---|
+| ~17:00 | Build numbers for the playtest update | 0.63.2 = playtest update on 0.63.1; Step 3 becomes 0.63.3; new seats T 0.70.x, X 0.71.x, U 0.72.x | Keeps the preview series in order; unused series |
+| ~17:00 | "More random" crew conversations vs the no-R() rule | Seeded from the save's seed: different per new game, same for one save | Keeps saves and tests reproducible |
+| ~17:00 | Tern pass 2: which build? (user didn't pick) | Rides in 0.63.2 | Step 2 isn't delayed; it's in the very next preview |
+| ~17:00 | Staffing | New: traditions (T), crew sim + social (X), HUD (U), works career 2 (C2, replacing C at 63%). C, H, S (60%+) idle with handovers | No live seat owned traditions, sim, social or HUD |
