@@ -41,6 +41,7 @@ TRAIN = r"""((id) => {
   let teacher = null, yours = null;
   for (let m = 360; m < 1020; m += 10) {
     const t = (d - 1) * 1440 + m; setShipNow(t); machinesNow(); worksCareerTick(t);
+    if (typeof DIALOGUE !== 'undefined' && DIALOGUE && typeof dialogueEnd === 'function') dialogueEnd(true);   // read through
     const c = SHIP.works.cur;
     if (c) seen.push(c.st);
     if (c && c.st === 'meet') { const r = SHIP.occasions.find(x => x.key === c.occ); if (r && t >= r.at) { r.met = true; worksCareerTick(t + 1); } }
