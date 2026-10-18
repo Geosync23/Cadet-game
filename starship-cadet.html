@@ -35151,9 +35151,10 @@ function roundJob(day, at, o = {}) {
   const all = roundRoute(day, !!o.train), route = o.train ? (o.yours ? all.slice(2) : all.slice(0, 2)) : all;
   if (route.length < (o.train ? 1 : 4)) return null;
   const m0 = machineById(route[0]), n = m0.deck, t = (day - 1) * 1440 + at;
-  return { id: 'round' + (o.slot ? o.slot : '') + '-d' + n + '@' + Math.floor(t / 60) + (o.yours ? 'y' : ''), machine: null, deck: n, room: m0.room, kind: 'rounds', chore: 'rounds',
-           title: roundText('round.title', 'Morning round, Deck {deck}', { deck: n }), tier: 1, route, marks: {}, urgency: 0, posted: t, found: t, claimedBy: null, parts: [], status: 'open',
-           leave: o.slot ? null : ROUND_HELD, reserved: o.slot || undefined, until: o.slot ? (day - 1) * 1440 + DAY_SHIFT[1] : undefined };
+  const j = jobMake('rounds', { id: 'round' + (o.slot ? o.slot : '') + '-d' + n + '@' + Math.floor(t / 60) + (o.yours ? 'y' : ''), deck: n, room: m0.room, h: Math.floor(t / 60),
+    title: roundText('round.title', 'Morning round, Deck {deck}', { deck: n }), route, marks: {}, ...(o.slot ? { reserved: o.slot, until: (day - 1) * 1440 + DAY_SHIFT[1] } : { leave: ROUND_HELD }) });
+  j.posted = j.found = t;
+  return j;
 }
 if (typeof jobKindAdd === 'function') jobKindAdd('rounds', { tier: 1, junior: false, work: 0,
   post(h, jobs) {                                        // workdays at 07:00 once trained (not the day you're trained): one round, held for you to 11:00
