@@ -35199,7 +35199,7 @@ function introTeaTick(now) {
   if (D['tea:go'] === undefined) {
     if (D['tea:told'] === undefined && near && quiet && introFollowing() && typeof myJob === 'function' && myJob()) { D['tea:told'] = now; introSay(introTeaSay('explain')); return; }
     if (m >= 13 * 60 && !teaOut(now) || had) { end(-1); return; }   // tea's over (or you've had it) before your job was done
-    if (D['d1-shadow:job'] !== undefined && teaOut(now) && quiet) { const first = D['tea:told'] === undefined ? introTeaSay('explain') : []; D['tea:told'] = D['tea:told'] !== undefined ? D['tea:told'] : now; D['tea:go'] = now; introSay(first.concat(introTeaSay('go'))); }   // not explained yet (a quick job): both now
+    if (D['d1-shadow:job'] !== undefined && teaOut(now) && (quiet || m >= 13 * 60 + 10)) { const first = D['tea:told'] === undefined ? introTeaSay('explain') : []; D['tea:told'] = D['tea:told'] !== undefined ? D['tea:told'] : now; D['tea:go'] = now; introSay(first.concat(introTeaSay('go'))); }   // not explained yet (a quick job): both now
     return;
   }
   if (D['tea:at'] === undefined) {
