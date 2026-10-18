@@ -1,0 +1,21 @@
+@meeting train.m7.halloran-emeka
+// Pillar 5, M7 (Day 5, Friday): the main Day 5 version. Emeka Halloran (Works systems officer, he/him) teaches the
+// scanner at the board; Torres is off on Fridays and left his old scanner with a note. Head writer, seat W.
+title: Torres's old scanner
+from: Emeka Halloran
+gist: Emeka gave you Torres's old scanner. It reads a machine's parts, so you can choose which one to fetch.
+== lines
+halloran-emeka: Morning, morning. Have you eaten? Good. Zeke left you a present.   [gesture]
+halloran-emeka > you: His old scanner. With a note. He made me promise not to read it. I read it.   [laugh]
+halloran-emeka: Hold it to a panel and it reads every part. A bar and a word each.
+halloran-emeka: Good, worn, low, failing. Usually one's clearly off, and that's the part you fetch.
+halloran-emeka: Now and then two read low. Then you trust your eyes. What's the card say? What do you see?
+halloran-emeka: Pick the wrong one and you walk back. That's all. I've walked back more than anyone.
+? choice
+* Two low parts. How do I choose?   rel:halloran-emeka+2 flavour:practical
+  halloran-emeka: Look before you scan. Cool by the door is a seal. Cool all over, the element. Lovely.   [nod]
+* Zeke gave me his scanner?   rel:halloran-emeka+1 flavour:listen
+  halloran-emeka: He did. He'll say it was nothing. It wasn't. He's had it since his first week.
+* (Weigh it in your hand)
+  halloran-emeka: Older than you, he says. Still works, though. Like me. Mostly.   [laugh]
+halloran-emeka: Right. One's held for us. I'll read the first, you watch. Then the next is all yours.

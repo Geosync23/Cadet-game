@@ -204,3 +204,19 @@
 - No pressure. If it's still there at two, someone else gets it.
 ?
 - Crates are in the hold if you want them. I'll put the kettle on.
+
+// ---- Pillar 5 (head writer, seat W): Yara teaching hauling (M4, Day 3). Kind 'work', seat C's flags. Bubbles.
+== work
+? flag:train.m4.lead.load
+- One tap a crate. The cart does the lifting. Bless it.
+? flag:train.m4.follow.load
+- Your go. Two more. Mind the corners.
+? flag:train.m4.follow.drop
+- Laundry. Linen by the door, not on the floor.
+- You've got this. I'll see you back at the counter.
+? flag:train.m4.follow.done
+- All delivered? Nothing dropped? Lovely.
+// stage 2: you chose the order and it was a good one (fewer lift rides)
+== haul.goodroute
+- Good route. Fewer lifts. I'd have done it that way.
+- You found the short way round. I'm almost proud.   #funny

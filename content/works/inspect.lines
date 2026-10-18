@@ -1,0 +1,38 @@
+@bank all
+// Pillar 5 (head writer, seat W): the Thursday inspection (M3, 24c). Said by the duty officer at your berth (Calder on
+// your first, then an officer by rota). Kinds by result: inspect.nod (all three right), inspect.uniform / .bed / .locker
+// (only that one wrong), inspect.two (two wrong), inspect.none (all three wrong). Never a fail. Card lines.
+// inspect.mail.<result>: the same remark by Mail at 07:00 if you weren't there (TEXT, no voice tokens).
+
+== inspect.nod
+- Good. Carry on.
+- All in order. Thank you.
+- Corners and all. Well done.
+== inspect.uniform
+- Uniform's seen better days, cadet.
+- Bed's good. Locker's good. The uniform isn't.
+== inspect.bed
+- Make the bed before you go, please.
+- The bed looks slept in. It was. Make it anyway.
+== inspect.locker
+- Locker. Things go in it, not on it.
+- Tidy the locker, please. You'll thank yourself.
+== inspect.two
+- Two out of three. Let's get to three next week.
+- Not quite there. Uniform, bed, locker: all three.
+== inspect.none
+- Uniform, bed and locker. All three. Next Thursday, please.
+- We'll call this a practice. Next week counts.
+
+== inspect.mail.nod
+- Your berth was in good order this morning. Nothing to add.
+== inspect.mail.uniform
+- Your berth was tidy. Next time, a clean uniform, please.
+== inspect.mail.bed
+- Your locker and uniform were fine. Next time, make the bed, please.
+== inspect.mail.locker
+- Uniform and bed were fine. Next time, a tidy locker, please.
+== inspect.mail.two
+- Two of the three weren't right this morning. Uniform, bed, locker: all three next week.
+== inspect.mail.none
+- Your berth wasn't ready this morning. Uniform, bed, locker: next Thursday, please.
