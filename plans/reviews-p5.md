@@ -3,11 +3,16 @@
 How: behaviour, save and schedule changes in depth (against the piece's approved page in plans/mechanics/ on claude/p5-design, determinism, old saves load, phones first, cadet_test differences explained); content and test-only changes skimmed. Verdicts newest first.
 
 ## Passing tips
-- A claude/deck-0607 **ad5e704** (0.47.1, contains c20f91f; no LOWs open)
+- A claude/deck-0607 **6cc826b** (0.47.2, contains c20f91f and ad5e704; no LOWs open)
 - H claude/mech-cases **9200b70** (0.55.7, contains everything from eece4d4; 2 LOWs open)
 - W claude/writer-p5 **0d179ac** (0.48.86, text; contains 843bac9 and 76fc413; no LOWs open)
 
 ## Verdicts
+
+### A (DA4) 6cc826b (0.47.2): the kits merged into each deck's static geometry — PASS
+- wallFixed() builds the five kits into staticRoot in materials the decks already draw (M.slateDark, WM.steel, WM.red). There are no canvases and no P5KM. They stand on the floor (legs, posts, pedestals), so they don't hang in the air when the walls lower. Only the extinguisher is its own mesh (noMerge, for drillExtShow). Valve ticks at z .071 sit 6 mm proud of the strip (.065). The floor pads' undersides touch the floor but face down (culled), as elsewhere.
+- Draw calls by the lift vs d3d720b: Deck 3 226 (+0), Deck 4 186 (+0), Deck 5 179 (+1). Memory: Deck 4 steady at 373 geometries and 39 textures, the same as the base.
+- cadet_test vs d3d720b: 12 shots differ on Deck 4, all by the junior corridor's valve rack. It now stands on the floor where the near wall is cut away, so it shows in the opening views; I checked a_start by eye. It sits at x 5.15-6.85 on the corridor's north side, clear of the washroom door (column 3) and Bunk 1's door (column 8). i_tap3/i_tap4 differ by 5 px (renderer noise). State differs only by items, memory, calls and triangles. deck_check OK.
 
 ### H 18c5cee (0.55.6) + 9200b70 (0.55.7), with e46c8bb (test only): the scanner on head-scratchers — PASS with LOWs (item 1 closed)
 - Per designer 1d87fc6: on a job with a case, every suspect's part reads 40-60 and the rest 70-96, from the same hash with no link to the cause. puzzle_check swaps the cause and gets the same readings. Day 5's training case is fixed at pump 55, seal 44, valve 49, so the cause never reads lowest. j.scanWorn is gone. Non-case jobs keep m7's rule.
