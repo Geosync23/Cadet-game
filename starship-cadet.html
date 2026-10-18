@@ -249,7 +249,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.60.7
+   STARSHIP CADET: CSV Wren                           build 0.28.72
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7807,7 +7807,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.60.7';                           // keep in step with the header's build line
+const GAME_BUILD = '0.28.72';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -11537,6 +11537,7 @@ function actEnd(abort) {
     if (A.kind === 'ixGarden' && A.done >= A.def.mins && typeof hobbyCount === 'function') hobbyCount('garden');   // tending a bed is a hobby (0.28.65)
     if (act) simAct(act, act === 'eat' ? { with: A.o.company || 0 } : {});
   }
+  if (A.kind === 'workStep') workStepEnd(A, abort);       // a work step (Pillar 5): a look's marks, or a pause
   if (abort) return;
   player.face = player.obj.rotation.y = A.face;
   if (A.def.done) toast(A.def.title, A.def.done + (A.kind === 'eat' && A.o.company ? ' Good company, too.' : '') + (A.def.need ? ' ' + NEED_LABEL[A.def.need] + ' ' + Math.round(SHIP.player.needs[A.def.need]) + '.' : ''));
@@ -11919,7 +11920,7 @@ function playerUpdate(dt, t) {
     if (lay) n.energy = needClamp(n.energy + LIE_GAIN * dm);
     if (sat) n.social = needClamp(n.social + SIT_GAIN * sitCompany(A) * needEffects(n).socialGain * dm);
     if (A && A.phase === 'do') {
-      const dw = A.def.until ? dm : dm * needEffects(n).task;   // tasks go faster or slower with your needs (needEffects)
+      const dw = A.def.until || A.def.real ? dm : dm * needEffects(n).task;   // tasks go faster or slower with your needs (needEffects)
       const m = Math.max(0, Math.min(dw, A.def.mins - A.done)); A.done += dw;
       if (A.kind === 'job' && A.o.repair && SHIP.player.work) SHIP.player.work.done += m;   // repair time is kept if you walk away
       if (A.kind === 'make' && SHIP.player.work && SHIP.player.work.make) SHIP.player.work.make.done += m;   // and making a part
@@ -12054,7 +12055,7 @@ SIM_ADVANCE.push((from, to) => {
 });
 // New game (section 13): fresh needs, nothing in hand
 function playerNew() {
-  actEnd(true); basket = null; SHIP.player.needs = needsLoad(null); NEED_SEEN = null; SHIP.player.carry = []; SHIP.player.work = null; SHIP.player.tray = null; SHIP.player.crate = null; needsT = null; slowWas = {}; WARN_SAID = {}; TEACH_ST = null; POP.tip = -1e9; Object.assign(SHIP, { news: [], newsUsed: [], newsAt: null, newsRows: {} });
+  actEnd(true); basket = null; SHIP.player.needs = needsLoad(null); NEED_SEEN = null; SHIP.player.carry = []; SHIP.player.work = null; SHIP.player.wsteps = []; SHIP.player.tray = null; SHIP.player.crate = null; needsT = null; slowWas = {}; WARN_SAID = {}; TEACH_ST = null; POP.tip = -1e9; Object.assign(SHIP, { news: [], newsUsed: [], newsAt: null, newsRows: {} });
   Object.assign(SHIP.player, walletLoad(null)); SHIP.player.bought = 0; SHIP.player.cart = null; SHIP.player.name = null; SHIP.mail = []; mailWelcome(); device.refresh();
   DINNER_SAT = false; DINNER_TRY = -1;                   // a new arrival dinner seats you again (reviewer 1, 0.28.37)
 }
@@ -12099,7 +12100,15 @@ function workLoad(s) {
 SHIP.player.carry = carryLoad(SAVED); SHIP.player.work = workLoad(SAVED);
 if (!SAVED) setTimeout(() => { if (!SHIP.mail.length) mailWelcome(); }, 0);   // a fresh start (after the device exists, below)
 const jobsOn = () => typeof myJob === 'function' && typeof finishJob === 'function' && typeof takePart === 'function' && typeof machineById === 'function';
-const jobMins = j => JOB_TYPES[j.kind].work * (1 + .25 * ((typeof jobTier === 'function' ? jobTier(j) : 1) - 1));
+// getting quicker (Pillar 5, foundation 15.2): your repair minutes on a machine kind shrink with the jobs on that kind
+// you've turned in (SHIP.works.sk[kind], counted by section 24 core): 1 for 0-4, .8 from 5, .65 from 15. Words only
+// on screen (24 core's skillWord). No SHIP.works: always 1
+function careerSpeed(kind) {
+  const n = typeof SHIP !== 'undefined' && SHIP.works && SHIP.works.sk && +SHIP.works.sk[kind] || 0;
+  return n >= 15 ? .65 : n >= 5 ? .8 : 1;
+}
+const jobKindOfMachine = j => j && j.machine && typeof machineById === 'function' ? (machineById(j.machine) || {}).kind || null : null;
+const jobMins = j => JOB_TYPES[j.kind].work * (1 + .25 * ((typeof jobTier === 'function' ? jobTier(j) : 1) - 1)) * careerSpeed(jobKindOfMachine(j));
 function myWork() {                                      // the job you hold, and how far you've got with it (null: none)
   const j = jobsOn() ? myJob() : null, P = SHIP.player;
   if (!j || !j.machine) { P.work = null; return null; }
@@ -12477,6 +12486,8 @@ function jobBegin(A) {
   if (fit.length) jobTouch(true);
   const need = jobNeeds(j, w), name = machineName(machineById(j.machine)), fitted = fit.length ? 'You fit ' + partList(fit) + '. ' : '';
   if (!need.length) {
+    const ks = typeof jobStops === 'function' ? jobStops(j).findIndex(x => x.step === 'job') : -1, ss = ks >= 0 ? jobStops(j)[ks] : null;
+    if (ss && wsHow(ss) !== 'hold') { ACT = null; if (fit.length) toast(A.o.title, fitted); workStep(j, ss, ks, A.spot); return false; }   // the panel's own work step (Pillar 5)
     const left = Math.max(1, jobMins(j) - w.done);
     A.def = { mins: left, pose: 'work', title: 'Repairing' }; A.o.repair = true; w.seen = true;
     A.o.after = fitted + (w.done ? 'Back to the ' + name + ': about ' + taskMins(left) + ' minutes to go.' : 'You set to work on the ' + name + ': about ' + taskMins(left) + ' minutes.') + ' Walk away to pause.';
@@ -12521,6 +12532,99 @@ function jobEnd(A) {
   }
   device.refresh();
 }
+
+// ---- the work steps (Pillar 5, foundation 15.1; DEV_NOTES "The work steps"): one runner for a stop whose `how` isn't
+// 'hold' (look, choose, turn, wait; 'carry' is the cart and your hands, as before). Started where a stop starts today
+// (15b's ixChoreTap, 15's jobBegin); each ends with section 17's jobStepDone(job.id, k, res). A step under way is
+// SHIP.player.wsteps = [{ job, k, how, v, at, done }] (saved; one per stop under way, so a wait runs on while you do
+// the next stop): walking away pauses a step, coming back carries on ----
+const WS_HOW = new Set(['look', 'choose', 'turn', 'wait']);
+const WS_POSE = (want, fb) => typeof ACTS !== 'undefined' && ACTS[want] || typeof BASES !== 'undefined' && BASES.has(want) ? want : fb;   // the page's poses, until 8b has them
+Object.assign(PLAYER_ACTS, { workStep: { mins: 1, pose: 'work', title: 'Your job' } });
+const wsHow = st => st && WS_HOW.has(st.how) ? st.how : 'hold';
+const wsFind = (id, k) => SHIP.player.wsteps.find(w => w.job === id && w.k === k) || null;
+function wsOf(j, k, how) {                               // the step under way on this stop, or a fresh one (other jobs' go)
+  const P = SHIP.player, w = wsFind(j.id, k); if (w && w.how === how) return w;
+  P.wsteps = P.wsteps.filter(x => x.job === j.id && x.k !== k).slice(-7);
+  const n = { job: j.id, k, how, v: null, at: null, done: 0 }; P.wsteps.push(n); return n;
+}
+const wsUntil = (w, o) => Number.isFinite(o.until) ? o.until : w.at + (Number.isFinite(o.mins) && o.mins > 0 ? o.mins : 30);
+function workWaitAt(id) {                               // the job card's "ready at": the soonest wait of this job under way, or null
+  const j = SHIP.jobs.find(x => x.id === id), at = j && typeof jobStops === 'function' ? SHIP.player.wsteps.filter(w => w.job === id && w.how === 'wait' && w.at !== null).map(w => { const st = jobStops(j)[w.k]; return st ? wsUntil(w, st.opts || {}) : null; }).filter(Number.isFinite) : [];
+  return at.length ? Math.min(...at) : null;
+}
+// workStep(job, stop, k, spot?) -> true when it took the tap (false: a 'hold' or 'carry' stop, today's path)
+function workStep(j, st, k, spot) {
+  const how = wsHow(st); if (how === 'hold' || !j || typeof jobStepDone !== 'function') return false;
+  const o = st.opts || {}, w = wsOf(j, k, how), title = o.title || j.title || 'Your job';
+  if (!spot) { const pid = st.places && st.places[0]; spot = pid && PLACE_OF.has(pid) ? placeSpot(pid) : null; }
+  if (how === 'wait') {                                  // start it, leave, come back
+    if (w.at === null) { w.at = shipNow(); toast(title, (o.text || 'Started.') + ' Ready at ' + hhmm(wsUntil(w, o)) + '; come back then.'); device.refresh(); return true; }
+    const at = wsUntil(w, o); if (shipNow() < at) { toast(title, 'Not ready yet: ready at ' + hhmm(at) + '.'); return true; }
+    wsFinish(j, k, {}, title); return true;
+  }
+  const secs = Number.isFinite(o.secs) && o.secs > 0 ? o.secs : 4, mins = how === 'look' ? secs * SHIP_RATE : 1;
+  actStart('workStep', null, { title, job: j.id, ws: k, how, pose: how === 'look' ? WS_POSE('look', 'stand') : how === 'turn' ? WS_POSE('tune', 'work') : 'work',
+    spot: spot ? { ...spot, id: null, pose: 'stand' } : null, after: o.text || (how === 'look' ? 'You stand and look it over.' : '') });
+  if (ACT && ACT.kind === 'workStep') {
+    ACT.def.title = how === 'look' ? 'Looking' : title;
+    if (how === 'look') { ACT.def.mins = Math.max(.05, mins - Math.min(w.done, mins * .95)); ACT.def.real = true; }   // real seconds: needs don't speed a look
+    else ACT.def.until = A => wsCard(A);                 // choose / turn: you stay at it until the card is answered
+  }
+  return true;
+}
+// choose / turn: the card in the device's style (deviceChoose: 44 px+ buttons), opened once you're there
+function wsCard(A) {
+  if (A.o.fin) return true; if (A.o.open || ACT !== A) return false;
+  const j = myJobAny(A.o.job), st = j && jobStops(j)[A.o.ws]; if (!st) { A.o.fin = true; return true; }
+  const o = st.opts || {}, w = wsOf(j, A.o.ws, A.o.how), opts = Array.isArray(o.options) ? o.options.slice(0, 6) : [];
+  const close = () => { A.o.open = false; A.o.fin = true; };
+  if (A.o.how === 'choose') {
+    A.o.open = deviceChoose({ title: o.title || A.o.title, text: o.text || 'Which one?', choices: opts.map(x => x.label) }, i => { close(); if (opts[i]) wsFinish(j, A.o.ws, { pick: opts[i].id }, A.o.title); });
+  } else {
+    if (w.v === null) w.v = Number.isFinite(o.v) ? o.v : 0;
+    const by = Number.isFinite(o.by) && o.by > 0 ? o.by : 1, lo = Number.isFinite(o.min) ? o.min : -Infinity, hi = Number.isFinite(o.max) ? o.max : Infinity;
+    const ask = said => {
+      const g = typeof o.gauge === 'function' ? o.gauge(w.v) : null;
+      A.o.open = deviceChoose({ title: o.label || 'The setting', text: [said, g].filter(Boolean).join(' ') || 'A step at a time; watch the machine.', choices: ['−', '+'], cancel: 'Step back' }, i => {
+        A.o.open = false; if (i < 0 || ACT !== A) { close(); return; }
+        w.v = Math.max(lo, Math.min(hi, w.v + (i ? by : -by)));
+        const t = typeof o.onTurn === 'function' ? o.onTurn(w.v) : null;
+        if (typeof o.ok === 'function' && o.ok(w.v)) { close(); wsFinish(j, A.o.ws, { value: w.v }, A.o.title, t); } else ask(t);
+      });
+    };
+    ask(null);
+  }
+  if (!A.o.open) { close(); toast(A.o.title, 'Your device is busy; try again in a moment.'); }
+  return A.o.fin;
+}
+const myJobAny = id => SHIP.jobs.find(x => x.id === id && x.claimedBy === 'you' && x.status === 'claimed') || null;
+// a step's activity is over (actEnd): a look that ran its seconds gives its marks card, or is done; anything else is a pause
+function workStepEnd(A, abort) {
+  const j = myJobAny(A.o.job), w = j && wsFind(j.id, A.o.ws);
+  if (A.o.how !== 'look') { if (A.o.open && typeof devChosen === 'function' && DEV.choose) devChosen(-1); return; }   // walked away from a card: it goes
+  if (!w) return;
+  w.done += Math.min(A.done, A.def.mins);
+  if (abort && A.done < A.def.mins) return;              // walked away: the look so far is kept
+  const st = jobStops(j)[A.o.ws], marks = st && st.opts && Array.isArray(st.opts.marks) ? st.opts.marks.slice(0, 6) : null;
+  if (!marks || !marks.length) { wsFinish(j, A.o.ws, {}, A.o.title); return; }
+  if (!deviceChoose({ title: st.opts.title || A.o.title, text: st.opts.ask || 'How does it look?', choices: marks.map(x => x.label) }, i => { if (marks[i]) wsFinish(j, A.o.ws, { pick: marks[i].id }, A.o.title); })) toast(A.o.title, 'Your device is busy; tap it again to mark it.');
+}
+// the stop is done: section 17 marks it (with the result), and you hear what's next, as for a chore's stop
+function wsFinish(j, k, res, title, said) {
+  const P = SHIP.player; P.wsteps = P.wsteps.filter(w => !(w.job === j.id && w.k === k));
+  const r = jobStepDone(j.id, k, res); if (typeof ixGoalAt !== 'undefined') ixGoalAt = -1;
+  if (!r || !r.ok) { toast('Your job', 'The job isn\'t yours any more.'); return; }
+  toast(r.done ? 'Work done' : title, [said, r.done ? j.title + ': done. Turn it in at the job board in the Works bay, Deck 5.' : 'Done here. ' + r.left + (r.left === 1 ? ' stop' : ' stops') + ' to go: follow the marker.'].filter(Boolean).join(' '));
+  device.refresh();
+}
+function wstepsLoad(s) {                                // junk, or a step of no job, is dropped; at most 8
+  const a = s && s.player && s.player.wsteps; if (!Array.isArray(a)) return [];
+  return a.filter(w => w && (typeof w.job === 'string' || typeof w.job === 'number') && WS_HOW.has(w.how) && Number.isInteger(w.k) && w.k >= 0 && w.k < 64).slice(-8)
+    .map(w => ({ job: w.job, k: w.k, how: w.how, v: Number.isFinite(w.v) ? +w.v : null, at: Number.isFinite(w.at) ? +w.at : null, done: Number.isFinite(w.done) && w.done > 0 ? Math.min(+w.done, 600) : 0 }));
+}
+SHIP.player.wsteps = wstepsLoad(SAVED);
+SAVE_EXTRA.push(s => { const p = s.player || (s.player = {}); p.wsteps = SHIP.player.wsteps.filter(w => myJobAny(w.job)).map(w => ({ ...w })); });
 
 // ---- the cart run (0.28.11, answer 8): a restock job (section 17's kind 'restock', taken on the device) is a hover
 // cart you push yourself, the same steps as the crew's jobRun: take a cart from its dock in the Cart bay (Deck 5),
@@ -12712,7 +12816,7 @@ function ixTheirs(it, at) {
 const IX_STOP = { lamp: ['Replacing the lamp', 'work'], vent: ['Cleaning the vent', 'work'], pickup: ['Picking it up', 'browse'], drop: ['Dropping it off', 'browse'],
   inspect: ['Inspecting', 'work'], fault: ['Clearing the fault', 'work'], fetch: ['Main storage', 'browse'] };
 Object.assign(PLAYER_ACTS, { ixStop: { mins: 10, pose: 'work', title: 'Your job' } });
-const ixChore = () => { const j = typeof myJob === 'function' && typeof jobStepDone === 'function' && typeof jobStops === 'function' ? myJob() : null; return j && j.kind === 'chore' && !j.machine ? j : null; };
+const ixChore = () => { const j = typeof myJob === 'function' && typeof jobStepDone === 'function' && typeof jobStops === 'function' ? myJob() : null; return j && (j.kind === 'chore' || typeof JOB_KINDS === 'object' && JOB_KINDS && JOB_KINDS[j.kind]) && !j.machine ? j : null; };   // a registered kind (17's jobKindAdd) walks like a chore (Pillar 5)
 function ixNextStop(j) { const st = jobStops(j), k = st.findIndex(x => !x.done); return k < 0 ? null : { k, s: st[k] }; }
 // first tips (Pillar 3, C13: 15b says when, the device draws them): tipShow(id, text) shows each once, when it's there
 function ixTip(id, text) { if (typeof tipShow === 'function') { try { tipShow(id, text); } catch (e) { /* the tips aren't ours */ } } }
@@ -12742,10 +12846,11 @@ function ixChoreTap(it, at) {
   const pid = st.places[0], spot = pid && PLACE_OF.has(pid) ? placeSpot(pid) : null;
   if (!spot || !(it.hit ? ixDist(it, spot) < IX_NEAR + .6 : Math.hypot(spot.x - at.x, spot.z - at.z) < JOB_REACH) && PLACE_OF.get(pid).room !== room) return false;   // no thing (jobHere, 0.28.52): from the point
   if (st.step === 'drop' && crateDown(j)) { toast(it.t, 'The crate is where you set it down, on Deck ' + SHIP.player.crate.deck + '. Pick it up first: follow the marker.'); return true; }   // Put down (0.28.60)
+  if (typeof workStep === 'function' && workStep(j, st, k, spot)) return true;   // look, choose, turn, wait (section 15, Pillar 5)
   const [title, pose] = IX_STOP[st.step] || ['Your job', 'work'];
   // the stop's spot, not the place: a lamp over the lift queue is yours to change even with someone waiting there
   actStart('ixStop', null, { ...o, pose, spot: { ...spot, id: null, pose: 'stand' }, after: j.title + ': about ' + Math.ceil(st.mins || 10) + ' minutes. Walk away to pause.' });
-  if (ACT && ACT.kind === 'ixStop') { ACT.def.mins = st.mins || 10; ACT.def.title = title; }
+  if (ACT && ACT.kind === 'ixStop') { ACT.def.mins = (st.mins || 10) * (typeof careerSpeed === 'function' ? careerSpeed(jobKindOfMachine(j)) : 1); ACT.def.title = title; }
   return true;
 }
 // what you carry for your job between stops (section 15 asks, for the held prop: 8b's '+toolbox', '+carry'), after its own
