@@ -221,6 +221,53 @@ def week(g):
             print(f'  Sowing: Tomas brought to the garden {sow}')
             if not sow['sow']: fail('Tomas was never brought to the garden for Sowing')
 
+# part 13, also on its own: python3 intro_check.py BUILD.html --firsts (onboarding 5, 0.42.60-0.42.62, the 0.63.2 playtest):
+# the first-time arrows (the servery after the Chief's "Eat something", the time clock after Day 1's opener, the job
+# board once clocked in, gone once a job's taken), the first night's call-home card and its Track it arrow, and Zeke's
+# Day 1 tea (he explains it, leads you to the Tea corner once your first job's turned in, waits for your tea, follows again)
+def firsts(g):
+    print('13. First-time arrows, calling home, Zeke\'s Day 1 tea')
+    if not g.ev("typeof introArrowTick === 'function'"):
+        print('  not yet: no introArrowTick'); return
+    G = "(typeof IX_GOAL !== 'undefined' && IX_GOAL ? IX_GOAL.label : null)"
+    g.ev('localStorage.clear()'); g.ev('newGameStart(true)'); g.step(5)
+    g.page.fill('form input[maxlength="24"]', 'Sam'); g.page.click('form button'); g.step(5)
+    g.ev("skipTo(introAbs(0, 18 * 60 + 40))"); g.ev("(() => { goToDeck(3); player.obj.position.copy(cellPos(28, 2)); })()"); g.step(5)
+    g.ev("(() => { if (DIALOGUE) dialogueEnd(); INTRO_UI.chiefD = null; SHIP.intro.done['chief:met'] = SHIP.intro.done['chief:end'] = Math.floor(shipNow()); SHIP.player.tray = null; delete SHIP.intro.done['ate:last']; clearGoal(); })()"); g.step(20)
+    eat = g.ev(G); card0 = g.ev("SHIP.intro.done['call:tip'] !== undefined")
+    g.ev("SHIP.player.tray = 'Stew'"); g.step(30)
+    eat2 = g.ev(G); card = g.ev("(() => { const c = document.getElementById('devDlg'); return c && !c.hidden ? c.textContent : ''; })()")
+    print(f"  the Chief says eat, no tray: arrow '{eat}', call card held back {not card0}; with a tray: arrow '{eat2}', call card {'up' if 'Call home' in card else 'not up'}")
+    if eat != 'Get your dinner at the servery': fail(f'no servery arrow after the Chief told you to eat: {eat}')
+    if eat2 == 'Get your dinner at the servery' or card0: fail(f'the servery arrow stayed with a tray in hand ({eat2}) or the call card came first ({card0})')
+    if 'Call home' not in card: fail('no call-home card after the Chief\'s visit')
+    else:
+        g.ev("devChosen(0)"); g.step(20); tr = g.ev(G)
+        g.ev("(() => { player.obj.position.copy(cellPos(37, 19)); })()"); g.step(20)
+        end = g.ev("({ g: " + G + ", end: SHIP.intro.done['call:end'] !== undefined })")
+        print(f"  Track it: arrow '{tr}'; in the booths: arrow {end['g']}, done {end['end']}")
+        if not tr or 'booth' not in tr.lower() or end['g'] or not end['end']: fail(f'the call-home arrow went wrong: {tr}, {end}')
+    g.ev("(() => { const b = INTRO_WEEK.find(x => x.id === 'd1-briefing'); SHIP.intro.done['d1-briefing:met'] = introAbs(1, b.at); skipTo(introAbs(1, b.until + 6)); goToDeck(5); player.obj.position.copy(cellPos(15, 3)); clearGoal(); })()"); g.step(20)
+    c1 = g.ev(G); g.ev('careerClock()'); g.step(20); c2 = g.ev(G)
+    took = g.ev("(() => { const j = SHIP.jobs.find(x => x.reserved === 1) || SHIP.jobs.find(x => !x.by); return !!j && claimJob(j.id); })()"); g.step(20); c3 = g.ev(G)
+    print(f"  Day 1 after the briefing: '{c1}'; clocked in: '{c2}'; job taken {took}: {c3}")
+    if c1 != 'Clock in at the time clock' or c2 != 'Take a job at the job board' or c3 in ('Clock in at the time clock', 'Take a job at the job board'): fail(f'the Day 1 arrows went wrong: {c1}, {c2}, {c3}')
+    if not g.ev("typeof teaOut === 'function'"):
+        print('  tea: not yet (no teaOut, the player engineer\'s 0.28.74)'); return
+    g.ev("(() => { const j = SHIP.jobs.find(x => x.reserved === 1); if (j) { jobStops(j).forEach((s, k) => jobStepDone(j.id, k)); j.workDone = true; turnInJob(j.id); } SHIP.intro.done['d1-shadow:job'] = SHIP.intro.done['d1-shadow:job'] || Math.floor(shipNow()); })()")
+    g.ev("skipTo(introAbs(1, 13 * 60 + 1))"); g.ev("(() => { SHIP.player.needs = { hunger: 80, energy: 80, hygiene: 80, fitness: 80, social: 80 }; clearGoal(); const a = DECK_CREW.find(x => x.p.id === INTRO_ESCORT); if (a) { const n = nearestOpen(a.x + 1, a.z, player); if (n) player.obj.position.copy(cellPos(...n)); } })()"); g.step(120)
+    Z = "(e => e && e.mode)(escortPlan(ROSTER.find(p => p.id === INTRO_ESCORT), shipNow()))"
+    go = g.ev("({ go: SHIP.intro.done['tea:go'] !== undefined, told: SHIP.intro.done['tea:told'] !== undefined, g: " + G + ", mode: " + Z + ", lead: introTeaLead() })")
+    g.ev('(() => { goToDeck(5); player.obj.position.copy(cellPos(22, 1)); })()'); g.step(30)
+    at = g.ev("({ at: SHIP.intro.done['tea:at'] !== undefined, g: " + G + ", mode: " + Z + " })")
+    g.ev("SHIP.player.teaDay = 1"); g.step(60)
+    after = g.ev("({ end: SHIP.intro.done['tea:end'], mode: " + Z + " })")
+    print(f"  13:01, first job done: {go}; in the Tea corner: {at}; after your tea: {after}")
+    if not (go['go'] and go['told'] and go['mode'] == 'lead' and go['g'] == 'Tea and biscuits with Zeke' and go['lead']): fail(f'Zeke did not lead you to tea: {go}')
+    if not (at['at'] and at['mode'] == 'wait' and not at['g']): fail(f'tea at the Tea corner went wrong: {at}')
+    if after['end'] is None or after['end'] < 0 or after['mode'] == 'lead' or after['mode'] == 'wait': fail(f'the tea walk did not end after your tea: {after}')
+
+FIRSTS_ONLY = '--firsts' in sys.argv
 WEEK_ONLY = '--week' in sys.argv
 EVENING_ONLY = '--evening' in sys.argv or '--dawdle' in sys.argv
 DAWDLE = '--dawdle' in sys.argv   # 0.42.31 (the user on 0.60.6): part 8 lingers ~40 s by the Deck 5 lift and again after the bunk; Torres must still ride with you   # part 8 alone: the evening walked in the real game (the tour's quick check)
@@ -228,6 +275,10 @@ with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     if not g.ev("typeof INTRO_STEPS !== 'undefined'"):
         print('No section 21 in this build.'); sys.exit(1)
+    if FIRSTS_ONLY:
+        firsts(g)
+        if g.errors: fail('page errors: ' + ' | '.join(g.errors[:6]))
+        g.close(); print('OK' if ok else 'FAILED'); sys.exit(0 if ok else 1)
     if WEEK_ONLY:
         week(g)
         if g.errors: fail('page errors: ' + ' | '.join(g.errors[:6]))
@@ -564,6 +615,7 @@ with sync_playwright() as pw:
             pm = g.ev("(() => { const ask = ((SHIP.social && SHIP.social.seekAsks) || []).find(a => a.id === 'pell'); return { done: ask ? ask.done : null, mail: (SHIP.mail.find(m => m.from === 'Mira Pell' || /Pell/.test(m.from)) || {}).subject || null, seek: SHIP.intro.done['d3-pell:seek'] }; })()")
             print(f"  Pell's Wednesday ask (you were away): {pm}")
             if pm['seek'] is None or (not pm['done'] and not pm['mail']): fail(f'no Mail when Pell never found you: {pm}')
+    firsts(g)
     week(g)
     if g.errors: fail('page errors: ' + ' | '.join(g.errors[:6]))
     g.close()
