@@ -26959,7 +26959,7 @@ function evArrive(p, d, e) {
   if (eventFree(p, d, e.from, e.to, ev.wake)) return e.from;
   if (!ev.afterShift) return null;
   const F = schedFrame(p, d), gp = shiftBlocks(p, d);
-  const host = p.id === ev.host, need = host ? 5 : ev.min || 20, at = F.workEnd + (host ? 15 : 2);   // a host comes even for the last few minutes (Calder works late some days), after the whole end of shift
+  const host = p.id === ev.host, need = host ? 5 : ev.min || 20, at = Math.max(e.from, F.workEnd + (host ? 15 : 2));   // a host comes even for the last few minutes (Calder works late some days), after the whole end of shift
   if (F.night || !F.works || gp && gp.blocks || F.workEnd <= e.from - 15 || at + need > e.to || e.to > F.bed - 20) return null;
   return at;
 }
