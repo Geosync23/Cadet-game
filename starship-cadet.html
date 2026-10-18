@@ -249,7 +249,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.44.4
+   STARSHIP CADET: CSV Wren                           build 0.44.5
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7808,7 +7808,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.44.4';                           // keep in step with the header's build line
+const GAME_BUILD = '0.44.5';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -34729,6 +34729,12 @@ function worksLockerText() {                             // section 15b's locker
   const W = SHIP.works, ts = W ? Object.keys(W.tools).filter(k => !WORK_TOOLS[k].bench) : [];
   return ts.length ? worksText('works.locker', 'Your tools: {tools}.', { tools: ts.map(toolName).join(', ') }) : null;
 }
+// your locker (0.44.5): the Kit lockers in the Works bay ("Yours has your name on a strip of tape") say what tools are in
+// yours, through section 15's PLAYER_TAPS (first in line, only once you have a tool). Bunk 1's wardrobe is section 21b's tap.
+if (typeof PLAYER_TAPS !== 'undefined') PLAYER_TAPS.unshift((it, at) => {
+  if (!it || it.t !== 'Kit lockers' || !worksLockerText() || typeof approach !== 'function') return false;
+  approach(at.clone(), it.front, it.depth, () => toast(it.t, it.x + ' ' + worksLockerText())); return true;
+});
 // ---- skill in words (section 15's careerSpeed reads SHIP.works.sk; this counts and words it) ----
 function skillWord(kind) { const n = SHIP.works && SHIP.works.sk[kind] || 0; return n >= 15 ? worksText('works.skill.know', 'you know these well') : n >= 5 ? worksText('works.skill.hang', 'getting the hang of these') : worksText('works.skill.new', 'new to you'); }
 // ---- your Works reputation in your rank ----
