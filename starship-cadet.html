@@ -34518,10 +34518,10 @@ function introTrainLines(n, key) {
 }
 function introFollowTick() {
   if (!introFollowing() || DIALOGUE || simNow() < (INTRO_UI.sayEnd || 0) || simNow() < INTRO_UI.next) return;   // simNow: the pause-aware clock, like the tour's (reviewer 0607's LOW)
-  const a = introWalker(), now = simNow(); if (!a || !introClose(a) || player.path.length || player.steer) return;   // 0.42.47: when you've stopped and he's by you (he stops to talk, not walk-and-talk)
+  const a = introWalker(), now = simNow(); if (!a || a.pose !== 'walk' || Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) > 4) return;   // walking together
   if (now - (INTRO_UI.followAt || 0) < INTRO_FOLLOW_GAP) return;
   INTRO_UI.followAt = now; const k = (SHIP.intro.done['follow:n'] || 0) + 1, l = introWriterLine('walk.follow.' + k);
-  if (l && typeof bubbleSay === 'function') { SHIP.intro.done['follow:n'] = k; introSayTo(a, l[0]); }
+  if (l && typeof bubbleSay === 'function') { SHIP.intro.done['follow:n'] = k; introSayTo(a, l[0], false); }
 }
 function introJobNote(n) {
   if (!introOn() || !n) return;
@@ -34596,7 +34596,7 @@ function introNewGame(arriving) { try { introUiReset(); } catch (e) {} if (arriv
 // the Chief never came to your table); an arrow of its own (Torres's, your bunk's) goes too
 const INTRO_BED_GOAL = 'Head to your bunk when you\'re done looking around';   // a suggestion, not an order (the user, 0.60.5a)
 function introUiReset() {
-  const U = INTRO_UI; (U.said || []).forEach(simClear); U.night = null; U.chiefD = null; U.holdT = 0; U.holdAt = undefined;   // (the clock hold, 0.42.47)
+  const U = INTRO_UI; (U.said || []).forEach(simClear); U.night = null; U.chiefD = null;
   const own = typeof IX_GOAL !== 'undefined' && IX_GOAL && (IX_GOAL.label === INTRO_BED_GOAL || IX_GOAL.label === 'Zeke Torres');
   if (own && typeof clearGoal === 'function') clearGoal();
   Object.assign(U, { min: null, step: undefined, said: [], callAt: 0, goal: false, goalKey: '', meet: [], next: 0, still: 0, stillAt: null, more: 0, bed: false, tour: [], pause: null, calder: false, calls: 0, beat: null, sow: false });
@@ -34789,23 +34789,16 @@ if (!MEETING_SCRIPTS.introDinner) MEETING_SCRIPTS.introDinner = { ...INTRO_STUB_
 // a walking step with the tour quiet gives the next walk.more.<n> line.
 const INTRO_STROLL = 0.5;                                 // his pace on the walk to the lift (x CREW_SPEED): time for the welcome talk
 const INTRO_TOUR_GAP = 3600;                              // real ms between his tour lines (a 60-character bubble reads in about 3 s)
-// he stops, faces you and talks (the user on 0.63.1: "he must stop and face you while he speaks to you; he walks only between
-// stops; each line stays up long enough to read; his first lines wait until you've reached him", 0.42.47): introSayTo(a, text)
-// says one line as a bubble for introSayMs(text) (longer lines longer, never under INTRO_TOUR_GAP) and stops him for it (a.talking,
-// which section 10 honours for an escort too); his lines start only within INTRO_CLOSE m of you
+// readable lines (the user on 0.63.1, as settled by lead 13, 0.42.47): introSayTo(a, text, stop) says one line as a bubble for
+// introSayMs(text) (longer lines longer, never under INTRO_TOUR_GAP); with stop he stops and faces you for it (a.talking, which
+// section 10 honours for an escort too): only the greeting at the ramp, the cabin and the week's beats; on the walk he talks
+// as he goes. His tour lines start only within INTRO_CLOSE m of you (he waits for you as a lead escort does)
 const INTRO_CLOSE = 3.5;
 const introSayMs = text => Math.max(INTRO_TOUR_GAP, 1400 + 55 * String(text || '').length);
-function introSayTo(a, text) {
+function introSayTo(a, text, stop = true) {
   if (!a || !text || typeof bubbleSay !== 'function') return 0;
-  const ms = introSayMs(text); a.talking = Math.max(a.talking || 0, ms / 1000); bubbleSay(a.h, text, ms / 1000 + .5); INTRO_UI.next = simNow() + ms;
-  if (introClockHeld(a)) { if (!(INTRO_UI.holdT > simNow())) INTRO_UI.holdAt = shipNow(); INTRO_UI.holdT = Math.max(INTRO_UI.holdT || 0, simNow() + ms); }   // lead 13's call A: Day 0's clock waits while he talks
+  const ms = introSayMs(text); if (stop) a.talking = Math.max(a.talking || 0, ms / 1000); bubbleSay(a.h, text, ms / 1000 + .5); INTRO_UI.next = simNow() + ms;
   return ms;
-}
-// the clock holds while he talks to you on Day 0 before dinner (lead 13's call A, 0.42.47; like the manifest's 17:30): only
-// while a line of his is up and he's stopped beside you (introTick puts the clock back each frame till INTRO_UI.holdT); walking counts
-function introClockHeld(a) {
-  const I = SHIP.intro, st = introStep(); if (!introOn() || !st || st.day !== 0 || !a || !a.p || a.p.id !== I.escort) return false;
-  return INTRO_STEPS.indexOf(st) >= 0 && INTRO_STEPS.indexOf(st) < INTRO_STEPS.findIndex(x => x.id === 'table') && introClose(a);
 }
 const introClose = a => !!a && typeof player !== 'undefined' && Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) <= INTRO_CLOSE;
 const INTRO_TOUR = [
@@ -34846,7 +34839,7 @@ function introTourTick() {
     Q.forEach(q => { q.extra.length = 0; }); INTRO_UI.pause = null;   // lines left finish first (the dinner chat waits for them, introTick)
     for (const x of INTRO_TOUR) if (I.done['tour:' + x.id] === undefined) I.done['tour:' + x.id] = -1;
     while (Q.length && !Q[0].core.length) Q.shift();
-    if (Q.length && !DIALOGUE && a && introClose(a) && now >= INTRO_UI.next) introSayTo(a, Q[0].core.shift());
+    if (Q.length && !DIALOGUE && a && introClose(a) && now >= INTRO_UI.next) introSayTo(a, Q[0].core.shift(), false);
     return;
   }
   // a place whose core lines are done goes once the next is waiting or you've left it (its extras dropped); one on a
@@ -34855,7 +34848,7 @@ function introTourTick() {
   const head = Q[0], near = a && Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) <= 5;
   // he pauses where he is while core lines are waiting and you're with him (at the ramp and from the lift on: never on the walk between, the `walk` places), never longer in all than a place's lines take
   // (only the time he's actually held counts: not meetings, not the lift)
-  const hold = head && head.core.length && near && !DIALOGUE && head.held < head.cap;   // (0.42.47: on the walk too: he stops to talk, then walks on)
+  const hold = head && head.core.length && Q.some(q => !q.t.walk) && near && !DIALOGUE && head.held < head.cap;
   if (hold) head.held += Math.min(250, now - (INTRO_UI.tickAt || now));
   INTRO_UI.tickAt = now;
   if (hold && !INTRO_UI.pause) INTRO_UI.pause = cellAt(a.x, a.z); else if (!hold) INTRO_UI.pause = null;   // his tile on this deck (the queue holds only this deck's places)
@@ -34863,7 +34856,7 @@ function introTourTick() {
   if (head) {
     if (now >= INTRO_UI.next && introClose(a)) {                 // not until you've reached him
       const text = head.core.length ? head.core.shift() : head.extra.shift();
-      if (!head.at) head.at = now; introSayTo(a, text); INTRO_UI.still = now;
+      if (!head.at) head.at = now; introSayTo(a, text, head.t.id === 'shuttle'); INTRO_UI.still = now;   // he stops for his greeting only
     }
     return;
   }
@@ -34871,7 +34864,7 @@ function introTourTick() {
   const key = here.join(','); if (key !== INTRO_UI.stillAt) { INTRO_UI.stillAt = key; INTRO_UI.still = now; return; }
   if (now - INTRO_UI.still > 8000 && now >= INTRO_UI.next && st.mode !== 'meet' && Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) <= 3) {
     const l = introWriterLine('walk.more.' + (INTRO_UI.more + 1)); INTRO_UI.still = now;
-    if (l) { INTRO_UI.more++; introSayTo(a, l[0]); }
+    if (l) { INTRO_UI.more++; introSayTo(a, l[0], false); }
   }
 }
 // the first night (the user): after Torres lets you go on Sunday, and on Monday evening if you never found it, the
@@ -34921,8 +34914,8 @@ function introLines(step) {
 }
 function introSay(lines) {                                // his lines, one now and the rest a few seconds apart
   INTRO_UI.said.forEach(simClear); INTRO_UI.said = [];
-  let at = 0;                                            // each line as long as it takes to read (introSayMs), and he stops for it (0.42.47)
-  (lines || []).forEach(text => { INTRO_UI.said.push(simTimeout(() => introSayTo(introWalker(), text), at)); at += introSayMs(text) + 400; });
+  let at = 0;                                            // each line as long as it takes to read (introSayMs, 0.42.47); he talks as he goes
+  (lines || []).forEach(text => { INTRO_UI.said.push(simTimeout(() => introSayTo(introWalker(), text, false), at)); at += introSayMs(text) + 400; });
   INTRO_UI.sayEnd = simNow() + at + 3000;                // (introFollowTick waits for them)
 }
 // A0: the shuttle's manifest, before the fade-in. The ship's clock holds at 17:30 (INTRO_START) until you've typed your name.
@@ -35108,7 +35101,6 @@ function introTick() {
   if (!introOn() || typeof player === 'undefined') return;
   const I = SHIP.intro;
   if (I.step === 'manifest') { SHIP.time.day = INTRO_START.day; SHIP.time.min = INTRO_START.min; if (typeof ternRamp === 'function') ternRamp(false, 0); introManifest(); return; }
-  if (INTRO_UI.holdT > simNow() && INTRO_UI.holdAt !== undefined) { const h = INTRO_UI.holdAt; SHIP.time.day = Math.floor(h / 1440) + 1; SHIP.time.min = h - (SHIP.time.day - 1) * 1440; }   // Zeke's line is up (introClockHeld)
   const now = Math.floor(shipNow());
   if (now !== INTRO_UI.min) {
     INTRO_UI.min = now;
