@@ -4,10 +4,19 @@ How: behaviour, save and schedule changes in depth (against the piece's approved
 
 ## Passing tips
 - A claude/deck-0607 **ad5e704** (0.47.1, contains c20f91f; no LOWs open)
-- H claude/mech-cases **8c76b69** (0.55.2, contains eece4d4 and df7d356; LOWs open)
+- H claude/mech-cases **8c76b69** (0.55.2, contains eece4d4 and df7d356). 0.55.3-0.55.5 (2d7c239..47fc193) FAIL, 1 item.
 - W claude/writer-p5 **0d179ac** (0.48.86, text; contains 843bac9 and 76fc413; no LOWs open)
 
 ## Verdicts
+
+### H 2d7c239 (0.55.3), a2e2ac6 + b5b9e52 (0.55.4), 47fc193 (0.55.5): scanner 24g, P3 and Day 5's case, LOW fixes — FAIL, one item (in depth)
+- **Item 1 (blocking; the designer's ruling 1d87fc6, after these commits):** on a job with `j.case` set, scanRead still uses m7's normal rule. The cause reads 12-35 and a worn decoy 40-60, so the lowest bar always names the answer and the scanner settles every head-scratcher. puzzle_check even checks it: Day 5's case reads "pump failing, seal worn". Build 1d87fc6's rule: on a case job every suspect's part reads 40-60 ("worn"), hashed from schedU(machSeed, day, 875) with no link to the cause; non-suspects read good; the reading is not a clue for the solver. Day 5: pump, door seal and drain valve all read worn (j.scanWorn goes). Change puzzle_check's Day 5 arm to match, and add an arm: on a case job no reading tells the cause apart.
+- Otherwise to the pages. Scanner: 3-5 parts, frozen j.scan, worn decoy only with the same card and a different sign, wrong pick → the part back on its shelf (Tier 1), the job names the right part, tool wear +.01 a reading, keys 874/875. P3: one try per decoy by Works crew really at work 2-12 h after posting (else a hand next morning 06:00-09:00), the part off its shelf, notes killing only their decoy, shown inside your shift. Day 5: staged 18:00 Day 4 on 4-washer-2 (pump), held in slot 20, and per 6fb5c49 your m7 reading on Washer 2 opens it with the teacher beside you (c.m7, caseCalled note for 24 core's escort).
+- Batch-1 LOWs, all handled. Re-call before fitting replaces the call (c.fits). Waiting cases end (3 days; a training case at the reserve's until; taken early → a plain repair). The talk toast names c.by. case.title, chief.p3.N and fault.tried come through worksText with stand-ins. The stand-in app is `faultnotes`. LOW 4's carried part is left to P's shelves (agreed).
+- Checks (my run on b5b9e52): cadet_test vs d3d720b ALL IDENTICAL; puzzle_check OK; device_check OK; machine_check OK; player_check running (H reports OK on 0.55.3). H reports 47fc193 cadet_test ALL IDENTICAL, puzzle_check and device_check OK.
+- LOW 1: with three decoys p3Tries puts notes 0 and 2 on the board (`i % 2`), but the Chief's note says "One's on the job; the others are on the machine". Put only the first on the board.
+- LOW 2: p3Stage moves to Washer 3 when you have a job claimed on Washer 2. The page means your own wash in it (`SHIP.clothes.hamper.at === 'washer' && .washer === id`, as washerBusyUntil reads).
+- Nit: the readings' key 875 is used with the same (machSeed(m.id), d) for both the training cause pick and the worn-decoy pick, so the two are correlated. Harmless.
 
 ### A (DA4) ad5e704 (0.47.1): shared kit materials, the valve strip moved — PASS
 - P5KM: the kits' materials and two painted labels, made once at load (line 7460, before the first buildDeck, no R()). Their ids are below every deckMark, so unloadDeck leaves them alone (no blank labels on a revisit). Deck 4's memory holds steady over round trips (373 geometries, 41 textures).
