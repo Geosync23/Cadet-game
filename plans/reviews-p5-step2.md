@@ -9,6 +9,7 @@ Spec: plans/brief-playtest1.md on claude/lead-pillar1 (12b1b87); the user's answ
 - A5 claude/deck-pt1 **ff26b6d** (0.47.4-0.47.8, playtest 1 package complete; the beam item fixed in 56db3dc)
 - P claude/player-p5 **587a2cd** (0.28.74, playtest 1 package P)
 - O4 claude/arrival-0607b **7a2bc5d** (0.42.48, playtest 1 part (a)+(b); no nits)
+- C2 claude/works-career **bb4423c** (puzzle_check after the 09:00 shift; contains a5d5c4c)
 - C2 claude/works-career **a5d5c4c** (0.44.14-0.44.16 + the DEV_NOTES note; no LOWs)
 - U claude/hud-pt1 **73b40cb** (0.72.0 ebfdb2f + screenshots; no LOWs)
 - X claude/crew-pt1 **2223cb7** (0.71.0, walk-ups and the mess fix; 1 LOW)
@@ -26,6 +27,9 @@ Spec: plans/brief-playtest1.md on claude/lead-pillar1 (12b1b87); the user's answ
 - T claude/traditions-pt1 **807c071** (0.70.0-0.70.2): one item (the leader's name in the tip and marker) and one question (Sunday dinner's extra tables)
 
 ## Verdicts
+
+### C2 bb4423c: puzzle_check after the 09:00 shift — PASS (R3, test only)
+- One line in puzzle_check: the case shows inside the shift from `DAY_SHIFT[0]` instead of a literal 480, matching the game's own window (37454: `mn < DAY_SHIFT[0] || mn >= 900`). No game code changed. My run on bb4423c: **PUZZLE CHECK OK**.
 
 ### T 1e254bd + 418bca2 + 807c071 (0.70.0-0.70.2): tap to join, the Lap to Sundays, Sunrise stretch to the garden, the newcomers' beam, tradGoal, the 09:15 storm briefing — FAIL, one item (R3, in depth)
 - **Item 1 (blocking, what the player reads): the leader's name.** `tjFirst(id)` takes the second-last word of the name, so titled crew get their given name: Dr. Imra Sato (observatory night's host) is "Imra", Chief Ines Calder (Works tea) "Ines", Chef Auda Brennan (harvest) "Auda", in the tip ("Tap Imra to stargaze with them"), the marker over her head ("★ Imra"), the join notice and W's `{name}` lines. Everyone else in the game calls them Dr. Sato, Chief Calder, Brennan. **Fix:** use the game's own `shortName` (section 14, 9207): `const tjFirst = id => { const p = schedPeople().find(q => q.id === id); return p ? shortName(p) : id; };` (Tomas, Rina, Zeke stay as they are). The beam's names (beamNew, first names) are a different thing and stay.
