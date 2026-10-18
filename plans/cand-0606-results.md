@@ -27,3 +27,4 @@ One line per finished check (check, game commit, OK/FAIL, key numbers). A new bu
 - 2757963 day_check (R2) days 0, 1 OK (peak D3 277)
 - 0d8072c intro_check (busy machine): parts 0-11 OK, part 12 OK through d3-store, then stopped at the 2 h limit (slowness, 0 FAILs). Final intro = R4 alone on the final candidate.
 - 2757963 (R3): player OK (cart fix works) · interactions OK · path OK (3008/3008)
+- FINAL CANDIDATE 96582c4 (+ shuffle ec6e8a0). Final run started 00:50: R4 intro, R2 days 0/1/6/7/35, R3 player/interactions/path, DA3 phone+perf, BM3 the rest.
