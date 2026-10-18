@@ -12099,7 +12099,15 @@ function workLoad(s) {
 SHIP.player.carry = carryLoad(SAVED); SHIP.player.work = workLoad(SAVED);
 if (!SAVED) setTimeout(() => { if (!SHIP.mail.length) mailWelcome(); }, 0);   // a fresh start (after the device exists, below)
 const jobsOn = () => typeof myJob === 'function' && typeof finishJob === 'function' && typeof takePart === 'function' && typeof machineById === 'function';
-const jobMins = j => JOB_TYPES[j.kind].work * (1 + .25 * ((typeof jobTier === 'function' ? jobTier(j) : 1) - 1));
+// getting quicker (Pillar 5, foundation 15.2): your repair minutes on a machine kind shrink with the jobs on that kind
+// you've turned in (SHIP.works.sk[kind], counted by section 24 core): 1 for 0-4, .8 from 5, .65 from 15. Words only
+// on screen (24 core's skillWord). No SHIP.works: always 1
+function careerSpeed(kind) {
+  const n = typeof SHIP !== 'undefined' && SHIP.works && SHIP.works.sk && +SHIP.works.sk[kind] || 0;
+  return n >= 15 ? .65 : n >= 5 ? .8 : 1;
+}
+const jobKindOfMachine = j => j && j.machine && typeof machineById === 'function' ? (machineById(j.machine) || {}).kind || null : null;
+const jobMins = j => JOB_TYPES[j.kind].work * (1 + .25 * ((typeof jobTier === 'function' ? jobTier(j) : 1) - 1)) * careerSpeed(jobKindOfMachine(j));
 function myWork() {                                      // the job you hold, and how far you've got with it (null: none)
   const j = jobsOn() ? myJob() : null, P = SHIP.player;
   if (!j || !j.machine) { P.work = null; return null; }
