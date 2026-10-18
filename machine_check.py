@@ -1075,6 +1075,38 @@ with sync_playwright() as pw:
             or not inc['joint'] or inc['joint'][:3] != [1, 'seal', '20@4-lift-1'] or not inc['onBoard'] or inc['crew'] not in ('claimed', 'done')):
             fail("incidents' machine side")
 
+    # 5t. hauling's section 17 part (m4-hauling, 0.33.50), with a stand-in 'haul' kind: without the kind no manifest and no
+    # misplaced part; with it each Wednesday delivery brings 2-4 manifest crates to real drop places, counted by holdCrates
+    # but not by the unload (partsCrates); manifestTake loads one; on Thursdays about one week in two a part sits on a
+    # shelf not its own until a fetch or misplacedFix; the save keeps both; the same twice
+    if g.ev("typeof manifestFor === 'function'"):
+        HL = r"""((stand) => {
+          const own = JOB_KINDS.haul;
+          if (stand && !own) jobKindAdd('haul', { junior: true, text: 'Haul', stops: () => [], done: () => {}, crew: { can: () => false, mins: 30 } });
+          if (!stand && own) delete JOB_KINDS.haul;
+          const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min, out = { weeks: [], thursdays: 0, misplaced: [], badDest: [] };
+          JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t0); machinesNow();
+          for (let w = 0; w < 4; w++) {
+            setShipNow(t0 + (w * 7 + 2) * 1440 + 255); machinesNow();          // Wednesday 10:15
+            const M = (SHIP.manifest || []).map(c => c.id + '>' + c.dest); out.weeks.push(M.join(' '));
+            for (const c of SHIP.manifest || []) if (!placeById(c.dest)) out.badDest.push(c.dest);
+            if (w === 0) { out.crates = [holdCrates(), partsCrates(), manifestCrates()]; const c0 = (SHIP.manifest || [])[0]; out.take = c0 ? JSON.stringify(manifestTake(c0.id)) : null; out.after = manifestCrates(); }
+            setShipNow(t0 + (w * 7 + 3) * 1440 + 120); machinesNow();          // Thursday 08:00
+            out.thursdays++; if (SHIP.misplaced) { const x = SHIP.misplaced; out.misplaced.push(x.part + '@' + x.on); if (x.on === shelfOf(x.part)) out.badDest.push('own shelf ' + x.part); }
+            if (out.saved === undefined && SHIP.misplaced) { const s = { player: { deck: 4, tile: [0, 0], facing: 0 }, ship: { decks: {} }, crew: {} }; SAVE_EXTRA.forEach(f => f(s)); const was = JSON.stringify([SHIP.manifest, SHIP.misplaced]); MACH_HOUR = null; machinesLoad(JSON.parse(JSON.stringify(s))); out.saved = JSON.stringify([SHIP.manifest, SHIP.misplaced]) === was; const p = SHIP.misplaced.part; out.fetchFixes = takePart(p) && !SHIP.misplaced; returnPart(p); }
+          }
+          if (stand && !own) { delete JOB_KINDS.haul; delete JOB_TYPES.haul; } else if (!stand && own) JOB_KINDS.haul = own;
+          SHIP.manifest = []; SHIP.misplaced = null; setShipNow(t0);
+          return out;
+        })"""
+        h0 = g.ev(HL + "(false)"); h1 = g.ev(HL + "(true)"); h2 = g.ev(HL + "(true)")
+        print(f"Hauling (0.33.50): without the haul kind manifests {[w for w in h0['weeks'] if w]}, misplaced {h0['misplaced']}; with a stand-in: {h1['weeks']}")
+        print(f"  week 1 crates [all, parts, manifest] {h1.get('crates')}, took {h1.get('take')}, then {h1.get('after')}; misplaced on {len(h1['misplaced'])} of {h1['thursdays']} Thursdays {h1['misplaced']}; bad {h1['badDest']}; save keeps them {h1.get('saved')}, a fetch puts it right {h1.get('fetchFixes')}; the same twice {h1 == h2}")
+        sizes = [len(w.split()) for w in h1['weeks']]
+        if (any(h0['weeks']) or h0['misplaced'] or not all(2 <= n <= 4 for n in sizes) or h1['badDest'] or not h1.get('crates') or h1['crates'][0] != h1['crates'][1] + h1['crates'][2]
+            or not h1.get('take') or h1['after'] != h1['crates'][2] - 1 or not (1 <= len(h1['misplaced']) <= 3) or h1 != h2 or h1.get('saved') is not True or h1.get('fetchFixes') is not True):
+            fail('hauling: the manifest and the misplaced part')
+
     # 6. the save
     rt = g.ev("""(() => {
       JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(6 * 1440 + 11 * 60 + 17); machinesNow();
