@@ -34388,7 +34388,7 @@ const INTRO_STEPS = [
   { id: 'chief', day: 0, at: 18 * 60 + 20, who: 'calder', mode: 'meet', where: 'your table in the mess', meeting: 'introChief',
     checkpoint: { deck: 3, tile: [28, 1], room: 'Mess hall' }, rel: { calder: 3 }, flags: ['met.calder'],
     seats: { you: '3-mess-10', [INTRO_ESCORT]: '3-mess-12', calder: '3-mess-9' },   // you, Torres beside you, the Chief across
-    fallback: { until: 19 * 60 + 30, later: 'free', mail: { from: 'I. Calder', subject: 'Tomorrow', body: 'Missed you at dinner. Torres has you tomorrow; ten to eight, the Works bay. — I. Calder' } } },
+    fallback: { until: 19 * 60 + 30, later: 'free', mail: { from: 'I. Calder', subject: 'Tomorrow', body: 'Missed you at dinner. Torres has you tomorrow; ten to nine, the Works bay.' } } },
   { id: 'free', day: 0, at: 19 * 60 + 30, who: INTRO_ESCORT, mode: 'free', where: 'the mess', rel: { [INTRO_ESCORT]: 3 } },   // he lets you go after his goodnight (introNightTick), 19:30 at the latest (reviewer 1c: no fixed 19:00)
   { id: 'tomas', day: 0, at: 19 * 60 + 30, who: 'tomas', mode: 'free', where: 'the junior common room or Bunk 1', teaches: 'Chat and Ask about', seek: 22 * 60 },
   { id: 'night', day: 0, at: 20 * 60, who: null, mode: 'free', where: 'your bunk', teaches: 'sleep' },
@@ -34734,7 +34734,7 @@ function introBeats(id, d) {
 const INTRO_LINES = {
   hello: ['You must be the new hand. Zeke Torres, Works. Welcome to the Wren.', 'Right, onward. Stay close.'],
   haulway: ['Cargo hold on the left, Cart bay on the right.', 'Mind the carts. They don\'t mind you.'],
-  works: ['That\'s us. The board, the tea corner, the Chief\'s glass office.', 'Tomorrow, ten to eight. Right here.'],
+  works: ['That\'s us. The board, the tea corner, the Chief\'s glass office.', 'Tomorrow, ten to nine. Right here.'],
   lift: ['Four, please. Panel\'s all yours.'],
   wing: ['Washrooms. Hot water till ten, then it\'s character-building.', 'Laundry, common room. Nearly there.'],
   toMess: ['Dinner. Mess is on Three.'],
@@ -35180,7 +35180,8 @@ function clothesLoad(s) {
 }
 SHIP.clothes = clothesLoad(SAVED);
 SAVE_EXTRA.push(s => { s.clothes = JSON.parse(JSON.stringify(SHIP.clothes)); s.clothes.grime = grimeRound(SHIP.clothes.grime); });
-onSim('newGame', n => { SHIP.clothes = clothesBlank(!n.arrival); });   // by shuttle: one spare outfit; on Monday: the full kit
+onSim('newGame', n => { SHIP.clothes = clothesBlank(!n.arrival); });
+onSim('job', n => { if (n.step === 'turnin' && SHIP.time.day === 1 && SHIP.clothes.said['d1:turnin'] === undefined) SHIP.clothes.said['d1:turnin'] = Math.floor(shipNow()); });   // Day 1's first turn-in (d1-better)   // by shuttle: one spare outfit; on Monday: the full kit
 const hamperHeld = () => CLOTHES_ON && !!SHIP.clothes.hamper && SHIP.clothes.hamper.at === 'hands';
 const clothesYesterday = () => CLOTHES_ON && SHIP.clothes.changed < SHIP.time.day && SHIP.time.min >= CLOTHES_LATE && SHIP.time.min < CLOTHES_NIGHT;
 // your uniform's grime (0.42.46, Pillar 5's m2 "uniform" page, for the mechanic seat's 24b): SHIP.clothes.grime 0-1 (saved, two
@@ -35346,9 +35347,16 @@ const CLOTHES_BEATS = [
   { id: 'd0-wardrobe', day: 0, at: 17 * 60 + 40, till: 19 * 60, who: INTRO_ESCORT, where: { deck: 4, room: 'Bunk 1' }, when: () => SHIP.intro.done.bunk !== undefined,
     keys: () => ['walk.cabin.wardrobe'], lines: () => ['That locker by the door is your wardrobe. It\'s where you get clean clothes.'], first: () => clothesCabinMail() },
   { id: 'd1-dinner-zeke', day: 1, at: 18 * 60, till: 20 * 60, who: INTRO_ESCORT, where: { deck: 3, room: 'Mess hall' }, when: () => true, settle: 'clothes',   // settle: the Settling-in item it teaches (as INTRO_WEEK's; intro_check reads both)
-    keys: C => ['walk.dinner.eve', ...(C.kit ? [] : [['beat.d1-clothes', 'walk.dinner.laundry']])],   // the head writer's 5b57aa1 names first
+    keys: C => ['walk.dinner.eve', 'walk.eve.choose', ...(C.kit ? [] : [['beat.d1-clothes', 'walk.dinner.laundry']])],   // walk.eve.choose (0.42.48): you can't do every tradition, you choose
     lines: C => ['Evenings are yours. Most of us have a thing. I knit, don\'t laugh. Pell reads. Find yours.',
       ...(C.kit ? [] : ['One change of clothes? The laundry\'s past the washrooms in the junior wing.', 'Do it tomorrow after shift, or you\'ll be wearing that on Wednesday.'])] },
+  // Day 1's training (the user on 0.63.1, 0.42.48): when the Monday briefing is over, Zeke's opener (walk.train.open: "training
+  // day, I'm with you all day"; sets SHIP.intro.done['d1-opener'] for O5's clock arrow); after your first job's turn-in, "jobs
+  // get better as you go" (walk.train.better)
+  { id: 'd1-opener', day: 1, at: (INTRO_WEEK.find(b => b.id === 'd1-briefing') || { until: 9 * 60 }).until, till: 12 * 60, who: INTRO_ESCORT, where: 'seek', when: () => true,
+    keys: () => ['walk.train.open'], lines: () => ['Training day today. I\'m with you all day to help.'], then: () => { SHIP.intro.done['d1-opener'] = Math.floor(shipNow()); } },
+  { id: 'd1-better', day: 1, at: 8 * 60, till: 17 * 60, who: INTRO_ESCORT, where: 'seek', when: C => C.said['d1:turnin'] !== undefined,
+    keys: () => ['walk.train.better'], lines: () => ['Don\'t worry. The jobs get better as you go.'] },
   { id: 'd2-laundry', day: 2, at: 16 * 60 + 45, till: 18 * 60, who: INTRO_ESCORT, where: 'seek', when: C => !C.kit && !(C.hamper && C.hamper.state !== 'dirty'),
     keys: () => [['beat.d2-laundry', 'walk.laundry']], lines: () => ['Laundry today, remember? After shift\'s quietest.'] },
   { id: 'd2-knit', day: 2, at: 18 * 60 + 30, till: 21 * 60, who: INTRO_ESCORT, where: 'seek', seek: true, settle: 'hobby', when: () => typeof hobbyHas !== 'function' || !hobbyHas('knit'),
@@ -35457,30 +35465,10 @@ function clothesFrame() {
   if (here && !HAMPER_LOOK) HAMPER_LOOK = hamperLook();
   if (HAMPER_LOOK) { HAMPER_LOOK.visible = here; if (here) HAMPER_LOOK.position.set(h.x, 0, h.z); }
   if (simNow() < CLOTHES_SCAN) return; CLOTHES_SCAN = simNow() + 250;   // the beats, the crew-at-work look-up and the remark scan: four times a second, not every frame (reviewer's LOW)
-  clothesBeatTick(); clothesDay1Arrows();
+  clothesBeatTick();
   if (stale && C.said.remark !== SHIP.time.day) clothesRemark(C);
 }
 requestAnimationFrame(clothesFrame);
-// Day 1's arrows (the user on 0.63.1, 0.42.48), during the arrival only: to the time clock once the Monday briefing is over
-// and you haven't clocked in; to the job board once you have, until you take a job; to the servery queue once the cook has
-// told you to eat (d1-dinner's lines heard) until you have a tray or have eaten. Never over another section's arrow (only
-// when the goal arrow is free or ours), each ends by itself, and none outlives Day 1
-const D1_ARROWS = [
-  { id: 'clock', goal: { deck: 5, at: [20, 0], label: 'Time clock' }, want: () => SHIP.intro.done['d1-briefing'] !== undefined && !DIALOGUE && SHIP.time.min < 12 * 60 && typeof careerClockedIn === 'function' && !careerClockedIn() },
-  { id: 'board', goal: { deck: 5, at: [15, 1], label: 'Job board' }, want: () => typeof careerClockedIn === 'function' && careerClockedIn() && SHIP.time.min < 12 * 60 && !(typeof myJob === 'function' && jobsOn() && myJob()) && SHIP.clothes.said['d1:took'] === undefined },
-  { id: 'food', goal: { deck: 3, at: [33, 3], label: 'Servery' }, want: () => SHIP.intro.done['d1-dinner:said'] !== undefined && !SHIP.player.tray && SHIP.clothes.said['d1:ate'] === undefined && SHIP.time.min < 20 * 60 },
-];
-let D1_ARROW = null;
-onSim('job', n => { if (n.step === 'take' && SHIP.time.day === 1) SHIP.clothes.said['d1:took'] = Math.floor(shipNow()); });
-onSim('act', n => { if (n.act === 'eat' && SHIP.time.day === 1) SHIP.clothes.said['d1:ate'] = Math.floor(shipNow()); });
-function clothesDay1Arrows() {
-  if (typeof setGoal !== 'function' || typeof introOn !== 'function') return;
-  const on = introOn() && SHIP.time.day === 1, free = typeof IX_GOAL === 'undefined' || !IX_GOAL || D1_ARROW && IX_GOAL.label === D1_ARROW.goal.label;
-  const pick = on && free ? D1_ARROWS.find(x => x.want()) : null;
-  if (pick === D1_ARROW) return;
-  if (D1_ARROW && typeof IX_GOAL !== 'undefined' && IX_GOAL && IX_GOAL.label === D1_ARROW.goal.label) clearGoal();
-  D1_ARROW = pick; if (pick) setGoal(pick.goal);
-}
 // someone notices (the plan: "people may remark on it"): once a day at most, the first crew member who passes within
 // REMARK_NEAR m while you're in yesterday's clothes says one of the writers' clothes.remark lines (none: nobody does)
 const REMARK_NEAR = 2.2;
