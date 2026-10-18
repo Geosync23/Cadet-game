@@ -54,7 +54,7 @@ svg{display:block}
 <body>
 <header>
   <h1>The rec dec: the Recreation Deck (lift button R, between Decks 4 and 5)</h1>
-  <div class="sub">Plan v3: the user approved v2 with a last set of answers (via lead 13, 2026-10-18), folded in here. Officially "the Recreation Deck"; everyone aboard calls it "the rec dec". Bow points right, port is at the top (on a phone held upright the bow points up). A double-height deck of play: the auditorium fills the bow, the Lightdisc court and the river hall share the stern, the pool and the low-gravity float room sit either side of the lift. Tap any room. Every room here is new, so there are no gold rings. Phase 1 note and the user's picks came through lead 13.</div>
+  <div class="sub">Plan v4: v3 plus the user's capacities and busyness (via lead 14, 2026-10-18). Officially "the Recreation Deck"; everyone aboard calls it "the rec dec". Bow points right, port is at the top (on a phone held upright the bow points up). A double-height deck of play: the auditorium fills the bow, the Lightdisc court and the river hall share the stern, the pool and the low-gravity float room sit either side of the lift. Tap any room. Every room here is new, so there are no gold rings. Phase 1 note and the user's picks came through lead 13.</div>
 </header>
 <div class="bar">
   <button id="zin" aria-label="Zoom in">Zoom in</button>
@@ -148,12 +148,12 @@ const ROOMS = {
   C: { kind: 'court', name: 'Lightdisc court', label: 'Lightdisc court', turn: 3, x: 'A black court, 13 × 5, with glowing lines (cyan for one end, orange for the other) and a shimmering force-field net across the middle. The side walls are force fields too: the disc bounces off them with a flash. Two players, one at each end, return a glowing disc to each other. The scoreboard fills the stern wall above the court, two storeys tall. Home of Lightdisc and of Winner Stays On on Sunday afternoons.' },
   T: { kind: 'court', name: 'Stands', label: 'Stands', turn: 3, x: 'Three stepped benches along the court\'s inboard side, about 30 seats, behind a low rail with one gate onto the court. Full on Sunday afternoons. Glass behind, onto the concourse.' },
   e: { kind: 'serv', name: 'Emitter room', label: 'Emitters', turn: 6, x: 'The court\'s force-field emitters (net and side walls), their power unit, and the scoreboard\'s driver. Through a hatch at the court\'s stern end. Tier 2 for the scoreboard and the side walls, tier 3 for the net emitter.' },
-  K: { kind: 'water', name: 'River hall', label: 'River hall', turn: 5, win: true, x: 'Double height, the green room of the deck: two artificial rivers in one loop, a fast white-water run along the port windows and a slow, wide return channel on the inboard side, with a wave gate at the bow end that kicks up standing waves. Raised banks of grey-green fake rock with ferns, a pebble beach and a kayak dock by the door, a rack of bright kayaks (red, yellow, blue, green). At the stern end, the climbing wall: ochre and rust rock from the floor to the roof, four routes in coloured holds, each with an auto-belay at the top, and a brass bell at the very top that everyone rings. Viewing glass on the concourse.' },
+  K: { kind: 'water', name: 'River hall', label: 'River hall', turn: 5, win: true, x: 'Double height, the green room of the deck: two artificial rivers in one loop, a fast white-water run along the port windows and a slow, wide return channel on the inboard side, with a wave gate at the bow end that kicks up standing waves. Raised banks of grey-green fake rock with ferns, a pebble beach and a kayak dock by the door, a rack of bright kayaks (red, yellow, blue, green). At the stern end, the climbing wall: ochre and rust rock from the floor to the roof, four routes in coloured holds and two auto-belays on rails at the top (so two people climb at once), and a brass bell at the very top that everyone rings. Viewing glass on the concourse.' },
   r: { kind: 'serv', name: 'River pump room', label: 'Pumps', turn: 6, x: 'Two big current pumps, the wave gate\'s drive and the river\'s filter, through a hatch at the concourse\'s aft end. Tier 2: the rivers draw on the Deck 3 recycler\'s water, so a fault can start upstream.' },
   w: { kind: 'kit', name: 'Changing rooms', label: 'Changing', turn: 1, x: 'Lockers, benches, two showers, a hair dryer that sounds like a shuttle, and a lost-property box. Doors at both ends: through to the river hall (aft) and onto the pool deck (forward), so wet feet never cross the concourse. In from the lobby through the kit hire room.' },
   k: { kind: 'kit', name: 'Kit hire', label: 'Kit hire', turn: 1, x: 'A counter onto the lobby: rec kit, towels, helmets, buoyancy vests, paddles, climbing shoes and harnesses, disc gloves, grip socks for the float room. There are no staff: it\'s self-serve, with shelves and hooks, a returns bin and a sign that says PUT IT BACK. Through to the changing rooms.' },
   F: { kind: 'float', name: 'Float room', label: 'Float room', turn: 6, x: 'A padded room in soft coral and pink, with floating light orbs, where the gravity plates are turned down to about a fifth. You bounce, drift and tumble in slow motion. Glass onto the lobby, so the whole deck watches. Its gravity is run from the rec utility room. Someone always tries a triple somersault.' },
-  P: { kind: 'water', name: 'Pool', label: 'Pool', turn: 4, win: true, x: 'A raised pool under the port hull windows: three short lanes and a shallow end with steps, aqua tiles with a mosaic of the Wren on the floor, lane ropes in orange and white, so you swim lengths beside the stars. No lifeguard: a first-aid point with an alarm button, loungers along the inboard side, a gallery door from the concourse for spectators, and the wet way in from the changing rooms, which is the only way in for swimmers. Open whenever the deck is (06:00 to midnight).' },
+  P: { kind: 'water', name: 'Pool', label: 'Pool', turn: 4, win: true, x: 'A raised pool under the port hull windows: four short lanes (one swimmer each) and a shallow end with steps, aqua tiles with a mosaic of the Wren on the floor, lane ropes in orange and white, so you swim lengths beside the stars. No lifeguard: a first-aid point with an alarm button, loungers along the inboard side, a gallery door from the concourse for spectators, and the wet way in from the changing rooms, which is the only way in for swimmers. Open whenever the deck is (06:00 to midnight).' },
   p: { kind: 'serv', name: 'Pool plant', label: 'Pool plant', turn: 6, x: 'Two sand filters, the water balance doser and the heat exchanger (fed from the Deck 4 heating plant above), through a hatch on the pool deck. Tier 1 for filter changes, tier 2 for the doser and the heat exchanger.' },
   u: { kind: 'wash', name: 'Washroom', label: 'Washroom', turn: 1, x: 'Toilets and basins for the auditorium crowd and the court, off the concourse, with a row of stalls long enough for the interval queue.' },
 };
@@ -247,7 +247,7 @@ for (let k = 0; k < 18; k++) deco('circle', { cx: (1.5 + (k * 37 % 10) / 10) * S
 deco('circle', { cx: 2.2 * S, cy: .95 * S, r: 4, fill: '#e9c46a', stroke: '#fff', 'stroke-width': 1 });   // the bell
 // pool: the raised basin, three lanes, the shallow end's steps, the first-aid point
 deco('rect', { x: 23.8 * S, y: .9 * S, width: 7.4 * S, height: 3.6 * S, rx: 4, fill: '#56d0e8', stroke: '#e8f7fb', 'stroke-width': 2 });
-for (const y of [2.1, 3.3]) deco('line', { x1: 24 * S, y1: y * S, x2: 31 * S, y2: y * S, stroke: '#ff8c42', 'stroke-width': 1.6, 'stroke-dasharray': '4 3' });
+for (const y of [1.8, 2.7, 3.6]) deco('line', { x1: 24 * S, y1: y * S, x2: 31 * S, y2: y * S, stroke: '#ff8c42', 'stroke-width': 1.6, 'stroke-dasharray': '4 3' });
 for (let k = 0; k < 3; k++) deco('rect', { x: (24 + k * .3) * S, y: 3.6 * S, width: .25 * S, height: .8 * S, fill: 'rgba(255,255,255,.5)' });
 deco('rect', { x: 29.4 * S, y: 4.95 * S, width: .7 * S, height: .7 * S, rx: 2, fill: '#e63946' });
 for (const x of [24.4, 25.9, 27.4]) deco('rect', { x: x * S, y: 5.3 * S, width: 1.2 * S, height: .5 * S, rx: 3, fill: '#f4e3c1' });
@@ -366,6 +366,11 @@ addEventListener('resize', () => { if ((innerHeight > innerWidth * 1.15) !== POR
 
 <main class="doc">
 
+<h2>What changed in v4</h2>
+<ul>
+  <li><b>The pool has four lanes,</b> one swimmer per lane. The climbing wall has two auto-belays, so two people climb at once.</li>
+  <li><b>Capacities and busyness</b> for when crew use the deck (section 9): quiet weekday daytimes; busy evenings and weekends with 15-30 people; queues, watching and 20-40 minute turns when it's full; good activity kept on every deck.</li>
+</ul>
 <h2>What changed in v3</h2>
 <ul>
   <li><b>No staff.</b> Crew use the deck freely: no rec steward and no lifeguards. The kit desk is self-serve. Comms Chief Lucia Ferreira hosts talent night, Chief Holt starts the regatta, Commander Vance counts the bell-ringers, Pell keeps the Winner Stays On board, and Maeve Volkov (Works) keeps the machines and runs the lights at talent night.</li>
@@ -411,8 +416,8 @@ addEventListener('resize', () => { if ((innerHeight > innerWidth * 1.15) !== POR
 <tr><td>Foyer (f)</td><td>4 × 4</td><td>Poster frame (this Saturday's film), the talent night sign-up sheet, the Winner Stays On chalkboard and the season's bell-ringers, a shelf of regatta pennants, the REC DEC neon.</td><td>The crowd before a show.</td></tr>
 <tr><td>Lightdisc court (C)</td><td>13 × 5</td><td>Neon lines, force-field net and side walls, two baselines, the stern-wall scoreboard.</td><td>Pick-up games every evening; Winner Stays On on Sundays.</td></tr>
 <tr><td>Stands (T)</td><td>13 × 2</td><td>Three stepped benches, about 30 seats, a rail and a gate.</td><td>Spectators.</td></tr>
-<tr><td>River hall (K)</td><td>16 × 7</td><td>Fast white-water run along the windows, slow return channel, wave gate, pebble beach, kayak dock and rack; the climbing wall (four routes, four auto-belays, the bell) at the stern.</td><td>Kayakers and climbers in the evening; the regatta and Ring the bell.</td></tr>
-<tr><td>Pool (P)</td><td>9 × 7</td><td>Raised pool, three short lanes and a stepped shallow end, the Wren mosaic, a first-aid point, loungers.</td><td>Early swimmers from 06:00, evening swimmers.</td></tr>
+<tr><td>River hall (K)</td><td>16 × 7</td><td>Fast white-water run along the windows, slow return channel, wave gate, pebble beach, kayak dock and rack; the climbing wall (four routes, two auto-belays, the bell) at the stern.</td><td>Kayakers and climbers in the evening; the regatta and Ring the bell.</td></tr>
+<tr><td>Pool (P)</td><td>9 × 7</td><td>Raised pool, four short lanes (one swimmer each) and a stepped shallow end, the Wren mosaic, a first-aid point, loungers.</td><td>Early swimmers from 06:00, evening swimmers.</td></tr>
 <tr><td>Changing rooms (w)</td><td>6 × 4</td><td>Lockers, benches, two showers, lost property; doors to the river hall and the pool.</td><td>Everyone going in the water or up the wall.</td></tr>
 <tr><td>Kit hire (k)</td><td>6 × 2</td><td>Counter onto the lobby: rec kit, towels, helmets, vests, paddles, climbing shoes and harnesses, disc gloves, grip socks.</td><td>Self-serve: nobody staffs it.</td></tr>
 <tr><td>Float room (F)</td><td>8 × 6</td><td>Padded walls and floor, light orbs, gravity turned down to about a fifth.</td><td>Off-duty crew bouncing; the Counsellor sends people here to unwind.</td></tr>
@@ -508,7 +513,7 @@ addEventListener('resize', () => { if ((innerHeight > innerWidth * 1.15) !== POR
 <tr><td><code>7-river-pump-1</code>, <code>-2</code> (pump)</td><td>River pump room</td><td>2</td><td>bearing / a rumble, the current pulses; impeller / the fast run goes slack</td><td>Kayaks drift. Water from the recycler, so a fault can start upstream.</td></tr>
 <tr><td><code>7-wave-gate</code> (wave machine)</td><td>River hall, bow end</td><td>2</td><td>actuator / no standing wave; hydraulic leak / a slick on the bank</td><td>The white water goes flat.</td></tr>
 <tr><td><code>7-wall-holds</code> (chore: route setting)</td><td>Climbing wall</td><td>1</td><td>loose hold / a hold spins under a foot (a chore: tighten and reset a route)</td><td>A route roped off with tape until it's done.</td></tr>
-<tr><td><code>7-belay-1</code> to <code>-4</code> (auto-belay)</td><td>Top of each route</td><td>2</td><td>brake wear / it lowers too fast; inspection due / the tag runs out (a routine safety check that must be done)</td><td>That route is closed with a red tag until it's checked, whoever asks.</td></tr>
+<tr><td><code>7-belay-1</code>, <code>-2</code> (auto-belay, on a rail across the routes)</td><td>Top of each route</td><td>2</td><td>brake wear / it lowers too fast; inspection due / the tag runs out (a routine safety check that must be done)</td><td>That route is closed with a red tag until it's checked, whoever asks.</td></tr>
 <tr><td><code>7-aud-lights</code> (lighting rig)</td><td>Rec utility room (dimmer racks), the truss</td><td>1-2</td><td>lamp / one stage light out (tier 1); dimmer relay / the whole rig flickers (tier 2)</td><td>A gloomy show. A job on a Saturday is urgent.</td></tr>
 <tr><td><code>7-aud-sound</code> (sound rack)</td><td>Rec utility room</td><td>2</td><td>amp / a hum; cable / the lectern mic cuts out</td><td>The Captain taps the mic. Everyone notices.</td></tr>
 <tr><td><code>7-aud-seats</code> (chore: seat hinges)</td><td>Auditorium</td><td>1</td><td>a seat that won't fold, a squeak (a chore, a few seats at a time, parts from the utility room's shelves)</td><td>Someone sits on the steps.</td></tr>
@@ -551,9 +556,25 @@ addEventListener('resize', () => { if ((innerHeight > innerWidth * 1.15) !== POR
 <h2>9. Everyday life and references across the ship</h2>
 <h3>Crew habits (for the crew designer)</h3>
 <ul>
-<li>New habits: <code>swimmer</code> (morning or evening lengths), <code>kayaker</code>, <code>climber</code>, <code>disc-player</code> (a pick-up game after shift), <code>floater</code> (the float room to unwind), <code>film-buff</code>. About a third of the crew pick one up; some <code>gym-regular</code> and <code>runner</code> crew swap. Expect 8-20 people on the deck on an ordinary evening, thinning out after 22:30, and nobody after midnight.</li>
+<li>New habits: <code>swimmer</code> (morning or evening lengths), <code>kayaker</code>, <code>climber</code>, <code>disc-player</code> (a pick-up game after shift), <code>floater</code> (the float room to unwind), <code>film-buff</code>. About a third of the crew pick one up; some <code>gym-regular</code> and <code>runner</code> crew swap. See the capacity and busyness section below.</li>
 <li>Commander Vance has rung the bell more than anyone, and counts.</li>
 <li>The Counsellor prescribes the float room ("Twenty minutes. Counsellor's orders.").</li>
+</ul>
+<h3>Capacity and busyness (the user, via lead 14; for phase 2, when crew use the deck)</h3>
+<div class="tw"><table>
+<tr><th>Activity</th><th>At once</th><th>When it's full</th></tr>
+<tr><td>Lightdisc court</td><td>2 players (stands about 30)</td><td>Wait on the stands' gate bench and watch; the winner of a pick-up game stays on for one more, then gives up the court.</td></tr>
+<tr><td>Climbing wall</td><td>2 climbers</td><td>Wait on the pebble beach and watch; a turn is a climb or two.</td></tr>
+<tr><td>Pool</td><td>4 swimmers, one per lane</td><td>Lounge on the loungers or sit on the edge with feet in, until a lane is free.</td></tr>
+<tr><td>Rivers (kayaks)</td><td>3-4 kayaks on the loop</td><td>Wait on the beach by the dock.</td></tr>
+<tr><td>Float room</td><td>about 6</td><td>Watch through the lobby glass.</td></tr>
+<tr><td>Auditorium, stands</td><td>76 seats, about 30 benches</td><td>Standing room at the back.</td></tr>
+</table></div>
+<ul>
+<li><b>Weekday daytime is quiet:</b> only crew on their days off (a handful at a time).</li>
+<li><b>Evenings and weekends are busy:</b> crew love the deck and use it often, alongside the traditions. A busy evening has about 15-30 people on the deck.</li>
+<li><b>Turns are time-boxed</b> at 20-40 ship minutes, so a queue moves. Someone waiting watches, lounges or chats nearby; if the wait would be long, they go somewhere else instead (another activity on the deck, or another deck).</li>
+<li><b>Good activity on every deck:</b> the rec dec must not empty the rest of the ship. The sim caps it at about 30 (outside gatherings), and plenty of evening crew stay with the lounge, the gym, the garden, the music room and the observatory. day_check reports each deck's evening count, so we can see the balance.</li>
 </ul>
 <h3>For you: tap and do</h3>
 <ul>
@@ -617,7 +638,7 @@ addEventListener('resize', () => { if ((innerHeight > innerWidth * 1.15) !== POR
 <tr><td>R4</td><td>Deck architect + performance engineer</td><td>The pool, with the water shader.</td><td>Phone frame time; no shimmer.</td></tr>
 <tr><td>R5</td><td>Deck architect</td><td>River hall: channels, banks, wave gate, dock, kayaks, climbing wall, belays, bell.</td><td>—</td></tr>
 <tr><td>R6</td><td>Deck architect</td><td>Float room, and the insides of the rec utility room and the three service rooms, with their machine entries.</td><td>Deck review: artifact, screenshots, summary to the user.</td></tr>
-<tr><td>R7</td><td>Crew designer + sim engineer</td><td>Maeve's round; new habits; places for swimming, kayaking, climbing, floating, the stands and the seats; the deck in day plans; opening hours.</td><td>day_check (nobody stuck, draw calls).</td></tr>
+<tr><td>R7</td><td>Crew designer + sim engineer</td><td>Maeve's round; new habits; places for swimming (4 lanes), kayaking, climbing (2), floating (6), the stands and the seats; capacities, queues and time-boxed turns; quiet weekday daytimes, busy evenings and weekends, with the deck capped so the other decks stay lively; opening hours.</td><td>day_check (nobody stuck, draw calls).</td></tr>
 <tr><td>R8</td><td>Performance engineer</td><td>The new poses and props, rec kit (section 8).</td><td>cadet_test unchanged on other decks.</td></tr>
 <tr><td>R9</td><td>Mini-game engineer (the Tiles role) + performance engineer</td><td>Lightdisc: the game view camera, rules, controls, crew levels, crew against crew, finding a player, frozen clock, How to play, save.</td><td>New disc_check; player_check; draw calls in the game view.</td></tr>
 <tr><td>R10</td><td>Systems engineer</td><td>Machines, faults, jobs, the leak trace, the job board.</td><td>machine_check.</td></tr>
@@ -626,6 +647,7 @@ addEventListener('resize', () => { if ((innerHeight > innerWidth * 1.15) !== POR
 </table></div>
 
 <h2>13. Open questions for the user</h2>
+<p><b>Answered in v4</b> (via lead 14): four pool lanes; capacities (court 2, wall 2, pool 4, rivers 3-4, float room about 6); busy evenings and weekends, quiet weekday daytimes, time-boxed turns, and good activity on every deck.</p>
 <p><b>Answered in v3</b> (via lead 13): the first all-hands comes with the first ship-wide event, and the auditorium has no film night before it; the junior common room becomes a quiet Saturday hangout; you walk through the changing rooms, with a tip; the regatta and Ring the bell stay; no staff; talent night every four weeks from Day 14; Winner Stays On on Sundays 11:30-16:30.</p>
 <p><b>Answered in v2:</b> the name is Lightdisc, played live in 3D; the lift button is R; the deck opens on Day 1, 06:00 to midnight; the gravity plates are a Works job; rec kit; no Wren League; one-tap pool, kayaks and wall; one utility room.</p>
 <p>No open questions left for the user. The rest (who hosts what, exact times) are calls for the lead and the builders, made above.</p>
