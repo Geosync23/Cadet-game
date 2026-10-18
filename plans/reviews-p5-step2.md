@@ -5,7 +5,7 @@ Started by lead 12 (session_01GjWhU9Z9V8RNoR8yyELA9V) at ~11:28 for every Step 2
 ## Passing tips
 - P claude/player-p5 **3373828** (0.28.73, contains cfce34e; 1 LOW)
 - M2 claude/mech-incidents **c9b211a** (0.51.1; LOWs 1-2 closed, LOW 3 for Step 3)
-- M1 claude/mech-rounds **c7c55cf** (0.45.5, contains 740234d; was 740234d (0.45.4, contains 8a6cea8..8f5783f and Onboarding 4's 96649fe; items 1-2 closed; LOWs closed or out by the lead)
+- M1 claude/mech-rounds **c7c55cf** (0.45.5, contains 8a6cea8..740234d and Onboarding 4's 96649fe; items 1-2 closed; LOWs closed or out by the lead)
 - S claude/ship-systems **b676814** (0.33.54, contains 01a3a3b and 78bf1c2)
 - Onboarding 4 claude/arrival-0607b **96649fe** (0.42.46, 21b's uniform grime for m2; 1 LOW, the page's field names)
 - S claude/ship-systems **03340c5** (0.33.48-0.33.51, Step 2 parts; also inside 78bf1c2, which R reviews for Step 1; 1 nit)
