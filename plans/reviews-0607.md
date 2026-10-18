@@ -8,10 +8,16 @@
 (empty)
 
 ## Passing tips (for BM3)
-writer 0cc4cdf · arrival-0607b 5ce084d (includes arrival e2cd435 and PE6 52839a6) · systems f351cc3 · social d3d5b4d · PE6 a0d4b43 (= 4a7673c + handover) · deck 55fca8d · traditions 1848e5f.
+writer 0cc4cdf · arrival-0607b 5ce084d (includes arrival e2cd435 and PE6 52839a6) · systems f351cc3 · social 9c8ea6c · PE6 a0d4b43 (= 4a7673c + handover) · deck 55fca8d · traditions 1848e5f.
 events_check's day-100/day-231 seat clashes: OK on BM3's combine with social d3d5b4d. The bar needs PE6 and social together.
 
 ## Verdicts
+
+### Social 0.36.91, claude/social-0607 9c8ea6c (in depth): PASS
+The named bartender (Ivo Madsen, ROSTER `rota.team: 'bar'`; relief Tamsin Haddad, `rota.relief: 'bar'`, who works the bar after her own shift on Ivo's days off); the shower queue (section 14 `showerQueue`, section 10 `showerQSpot`/`washDoorTiles`/`@wq-` spots, DA4's `shower-queue` places when there are any); a last-step seat guard in `CrewAgent.update`; `seatsBeside` counts a served diner's `meal.next` as busy; `STAFF_ONLY` keeps intro beats off `bar-staff` places.
+- **Checks I ran:** **day_check day 2: DAY CHECK OK.** No sleep, meal, shift, double-booking or gap problems, plans the same twice, worst stuck 0.3 ship minutes (Deck 4, 06:44: the shower rush), servery 128 joined and 128 served, every tray gone with its meal, peaks 221/205/253/248/222/166. The builder reports day_check days 1 and 3, food, events and social OK.
+- **Code:** the relief's bar segment (17:30-23:00 after her shift) is capped at `bedBy - 25` before an early start, as before. `galleyPlan(role, d).slice()` keeps the shared plan clean. With Ivo moved off 'late', a day with no late hand turns the last early hand late, so the evening service is still covered (food_check per the builder). `showerQueue` only rewrites the plan's own segments, and holds a queue place through the plan's `hold`/`isFree`: pure and deterministic. The new `spotTaken` test runs only on the last step (path empty, not settled), so it adds no per-frame cost while walking. `washDoorTiles` is cached per deck and room.
+- **LOW:** queuers with no DA4 place pick `@wq-<room>-<idHash % n>`, so two people waiting at once can be given the same tile and stand inside each other for a few minutes. Cosmetic: DA4's `shower-queue` places on Deck 4 (55fca8d) cover the junior washrooms once combined.
 
 ### Re-check: head writer 0cc4cdf: PASS, the {drink} LOW is fixed
 6 lines reworded (Ivo 3, Tamsin 1, banks/bar.lines 2). No line in content/ now opens with `{drink}`. lines_check PASS once baked.
