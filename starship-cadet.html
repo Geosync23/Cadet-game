@@ -35264,6 +35264,303 @@ function worksCareerTick(now = shipNow()) {   // (not worksTick: that's section 
 }
 SIM_ADVANCE.push((from, to) => { for (let h = Math.floor(from / 60) + 1; h <= Math.floor(to / 60); h++) { const t = h * 60, m = t % 1440; if (m >= WORKS_ASK[0] && m <= WORKS_SMALL) ladderTick(h); if (t >= WORKS_START) for (const f of WORK_TICKS) try { f(t, true); } catch (e) { console.error(e); } } WORKS_TICK.h = Math.floor(to / 60); });
 
+// ---------------------------------------------------------------------
+// 24e TUNING (M5, seat M2, 0.51.x; plans/mechanics/m5-tuning.html). Some faults are a machine out of adjustment: an
+// oven running hot, a light relay chattering, a cart dock charging slow. Section 17 (seat S) keeps the drift
+// (SHIP.machines[id].drift, -3..+3, 0 settled; machineDrift(id), tuneSet(id, v)) and posts a 'tune' job for a drift of
+// 2+; this block is the job: at the machine's panel a `turn` step (section 15) with − and +, each press moving the real
+// setting one step so the machine's look answers on the deck (flicker, dim, blink); settled (0) and it's done. The card
+// shows words only. Taught on Day 4 (ladder row m5): the row's opening drifts both ovens two steps hot; the teacher
+// tunes Oven 1 while you watch, then Oven 2 is yours. The crew tune what you leave (section 17's crew walk, 15 minutes).
+// Removable: without this block (or without section 17's tuneSet) no tune job is ever made and m5 never opens.
+// Saved: nothing of its own (the drift is section 17's, the job in ship.jobs, the uses in ship.works.use.m5). No R().
+// Stage 2 (a scrubber's two settings, Officer) and stage 3 (the scanner) come with Step 3.
+const TUNE_STEPS = [-3, 3];
+const TUNE_WORD = {                                      // words on the card, by kind (the writer's tune.word.<kind>.<n> win)
+  oven: ['cold', 'a little cool', 'steady', 'a little hot', 'running hot'], range: ['cold', 'a little cool', 'steady', 'a little hot', 'running hot'],
+  lights: ['dim', 'a little dim', 'steady', 'flickering a little', 'flickering fast'], cartdock: ['charging slow', 'a little slow', 'steady', 'blinking a little', 'blinking fast'] };
+const tuneDrift = id => typeof machineDrift === 'function' ? machineDrift(id) || 0 : 0;
+function tuneWord(kind, v) {
+  const k = Math.max(0, Math.min(4, v + 2)), w = (TUNE_WORD[kind] || TUNE_WORD.oven)[k];
+  return worksText('tune.word.' + kind + '.' + (v > 0 ? '+' : '') + Math.max(-2, Math.min(2, v)), w);
+}
+// the job's one stop: the machine's panel, a turn from the real drift; each press sets the machine at once
+function tuneStops(j) {
+  const m = machineById(j.machine); if (!m) return [];
+  const label = machineLabel(m).split(',')[0];
+  return [{ deck: m.deck, placeId: panelPlace(m.id), mins: 1, tag: 'job', how: 'turn',
+    opts: { label, v: tuneDrift(m.id), min: TUNE_STEPS[0], max: TUNE_STEPS[1], by: 1,
+      text: worksText('tune.card', 'Watch the machine, not the dial. It\'s {word}.', { word: tuneWord(m.kind, tuneDrift(m.id)) }),
+      onTurn: v => { if (typeof tuneSet === 'function') tuneSet(m.id, v); return label + ': ' + tuneWord(m.kind, v) + '.'; },
+      ok: v => v === 0, gauge: null } }];
+}
+// finished: the crew's (or the teacher's) settle it; yours counts as a use (the training's too)
+function tuneDone(j, t, by) {
+  if (by !== 'you') { if (typeof tuneSet === 'function') tuneSet(j.machine, 0); return; }
+  worksUse('m5');
+  const c = SHIP.works && SHIP.works.cur;
+  if (j.train === 'm5' && c && c.id === 'm5') worksTeach('m5', 'brennan', 'do.done', ['There. That\'s my oven back.', 'Here. Have a biscuit, you\'ve earned it.']);
+}
+// a tune job, ready to push (section 17 posts its own with jobMake('tune', { machine, deck, room, h, found }))
+function tuneJob(id, t, o = {}) {
+  const m = machineById(id); if (!m) return null;
+  const j = jobMake('tune', { id: 'tune' + (o.slot || '') + ':' + id + '@' + Math.floor(t / 60), machine: id, deck: m.deck, room: m.room, h: Math.floor(t / 60),
+    title: worksText('tune.title', 'Tune: {machine} ({word})', { machine: machineLabel(m).split(',')[0], word: tuneWord(m.kind, tuneDrift(id)) }), tier: MACHINE_KINDS[m.kind].tier || 1,
+    ...(o.slot ? { reserved: o.slot, until: (worksDay(t) - 1) * 1440 + DAY_SHIFT[1] } : {}), ...(o.train ? { train: o.train } : {}) });
+  j.posted = j.found = t;
+  return j;
+}
+if (typeof jobKindAdd === 'function' && typeof tuneSet === 'function') jobKindAdd('tune', { tier: 1, work: 0, text: 'Tune',
+  stops: tuneStops, done: tuneDone,
+  crew: { can: p => !!p.work && p.work.place === 'work:works', mins: 15 } });
+// the ladder row (m5): opening it drifts both ovens two steps hot (Brennan's "runs hot"); the training's two jobs are
+// this block's own, held in the teacher's slot: Oven 1 the teacher's, Oven 2 yours
+const TUNE_TRAIN = ['3-oven-1', '3-oven-2'];
+if (JOB_KINDS.tune) WORK_MECH.m5 = {
+  open() { for (const id of TUNE_TRAIN) if (machineById(id) && Math.abs(tuneDrift(id)) < 2) tuneSet(id, 2); },
+  reserve(d, at, slot, o = {}) {
+    const id = TUNE_TRAIN[o.yours ? 1 : 0], t = (d - 1) * 1440 + at; if (!machineById(id)) return null;
+    if (!tuneDrift(id)) tuneSet(id, 2);                  // (a reload, or the crew got there first: drifted again for the lesson)
+    SHIP.jobs = SHIP.jobs.filter(x => !(x.reserved === slot && heldForYou(x) && !x.claimedBy) && !(x.kind === 'tune' && x.machine === id && !x.claimedBy && x.status !== 'done'));
+    const j = tuneJob(id, t, { slot, train: o.train || 'm5' }); if (!j) return null;
+    SHIP.jobs.push(j); if (typeof MACH_REV !== 'undefined') MACH_REV++;
+    return j.id;
+  },
+  watch: 10,                                             // ship minutes watching the teacher settle Oven 1
+};
+
+// ---------------------------------------------------------------------
+// 24f INCIDENTS (M6, seat M2, 0.51.x; plans/mechanics/m6-incidents.html). About once a week, a small incident from
+// the machines, an hour or two on one deck: make it safe (a valve chosen from the pipe, the lift's brake turned, the
+// galley plant's alarm held), clean up (mop the puddle, check the car, clear the air), then fix the cause (an ordinary
+// job: a joint at the burst, or the lift's or the galley plant's repair, found by whoever cleared it). Your first is
+// the training (ladder row m6, Day 8, a burst pipe on Deck 4 at 10:30, Calder: an urgent call, not a Mail
+// appointment; she walks you to the pipe, then it's yours, and you're trained when the joint is fitted). After that
+// the week's incident (workdays 09:00-15:30, never an event day, the morning on a tradition evening's day, never a
+// test-job day) is on the board, held for you 30 minutes when you're on shift, then the crew's (25-40 minutes). The
+// stuck lift is the fallback from the page (the lead's call): the lift stalls, nobody inside; "check the car".
+// Section 17's machine side (seat S): machineFault(id, cond), liftStuck(on), jointJobPost({ deck, placeId }).
+// Drawn: a puddle (two flat discs, one instanced draw call) and a smoke wisp (instanced quads, one draw call), only
+// during an incident on your deck. Saved: SHIP.works.inc = { plan: { week: [kind, day, minute, deck, done] },
+// open: null | { kind, deck, at, train, safe, j } } (ship.works.inc; old weeks dropped). Hash keys 870-873. No R().
+const INC_KINDS = ['burst', 'lift', 'alarm'];
+const INC_FIRST = { day: 8, at: 630, kind: 'burst', deck: 4 };   // your first: Day 8 (a Monday), 10:30, Deck 4
+const INC_WIN = [540, 930], INC_MORNING = 690;           // 09:00-15:30; before 11:30 on a tradition evening's day
+const INC_HELD = 30, INC_LIFT = 20;                      // held for you 30 minutes; the lift stays stuck at most 20
+const INC_LIFT_M = '5-mainlift-1', INC_ALARM_M = '3-galleyplant-1';
+const INC_TITLE = { burst: 'Burst pipe, Deck {deck}', lift: 'The main lift is stuck', alarm: 'Galley alarm' };
+const incWorks = p => !!p.work && p.work.place === 'work:works';
+const incWeek = d => Math.floor((d - 1) / 7);
+const incPlace = ids => [].concat(ids).find(id => placeById(id)) || null;
+const incAlarmAt = () => incPlace(['3-galleyplant-alarm', '3-extractor-alarm']);
+function incState() {
+  const W = SHIP.works; if (!W) return null;
+  if (!W.inc || typeof W.inc !== 'object') W.inc = { plan: {}, open: null };
+  return W.inc;
+}
+// a save's inc read back (24 core's worksClean keeps only its own keys, so this block reads its part itself)
+function incClean(s, d = worksDay(shipNow())) {
+  const out = { plan: {}, open: null }; if (!s || typeof s !== 'object') return out;
+  if (s.plan && typeof s.plan === 'object') for (const w in s.plan) { const e = s.plan[w]; if (/^\d{1,4}$/.test(w) && +w >= incWeek(d) && Array.isArray(e) && (e.length === 0 || INC_KINDS.includes(e[0]) && Number.isInteger(e[1]) && Number.isInteger(e[2]) && [3, 4, 5].includes(e[3]))) out.plan[w] = e.length ? [e[0], e[1], e[2], e[3], e[4] ? 1 : 0] : []; }
+  const o = s.open; if (o && typeof o === 'object' && INC_KINDS.includes(o.kind) && [3, 4, 5].includes(o.deck) && Number.isFinite(o.at))
+    out.open = { kind: o.kind, deck: o.deck, at: o.at, train: !!o.train, safe: !!o.safe, j: typeof o.j === 'string' ? o.j : null };
+  return out;
+}
+(() => { const s = SAVED && SAVED.ship && SAVED.ship.works; if (SHIP.works && s && s.inc) SHIP.works.inc = incClean(s.inc); })();
+// is a day out: a ship-wide event (not a tradition), your day off, a test job's day
+const incShipEvent = d => { try { return eventsOn(d).some(e => e.ev && e.ev.when && e.ev.when.ship); } catch (e) { return false; } };
+const incEvening = d => { try { return eventsOn(d).some(e => Array.isArray(e.at) && e.at[0] >= 1020); } catch (e) { return false; } };
+const incDayOk = (d, W) => weekday(d) < 5 && playerShiftOn(d) && !incShipEvent(d) && !(W.test && W.test.day === d);
+const incWear = id => { const s = SHIP.machines[id]; return s ? (100 - s.cond) / 100 : 0; };
+function incWeights() {                                  // by the machines' wear: the pipe valves, the lift, the galley plant
+  const vs = machineList().filter(m => m.kind === 'valve'), v = vs.length ? vs.reduce((a, m) => a + incWear(m.id), 0) / vs.length : 0;
+  return { burst: 1 + v, lift: 1 + incWear(INC_LIFT_M), alarm: 1 + incWear(INC_ALARM_M) };
+}
+// the week's incident, planned once (the first time it's asked in that week) and saved: [kind, day, minute, deck, done]
+// or [] (none that week). Week 1 (Days 8-14) has your first, the training's, so no other
+function incPlan(w) {
+  const I = incState(); if (!I) return null;
+  if (I.plan[w]) return I.plan[w];
+  const W = SHIP.works, days = [0, 1, 2, 3, 4].map(k => w * 7 + 1 + k).filter(d => incDayOk(d, W));
+  if (w < 2 || !days.length) return I.plan[w] = [];
+  const seed = machSeed('incident'), d = days[Math.floor(schedU(seed, w, 870) * days.length) % days.length];
+  const hi = incEvening(d) ? INC_MORNING : INC_WIN[1], at = INC_WIN[0] + Math.floor(schedU(seed, w * 7 + 1, 870) * ((hi - INC_WIN[0]) / 10 + 1)) * 10;
+  const wt = incWeights(), sum = INC_KINDS.reduce((a, k) => a + wt[k], 0); let u = schedU(seed, w, 871) * sum, kind = INC_KINDS[0];
+  for (const k of INC_KINDS) { if (u < wt[k]) { kind = k; break; } u -= wt[k]; }
+  const deck = kind === 'burst' ? [3, 4, 5][Math.floor(schedU(seed, w, 872) * 3) % 3] : kind === 'lift' ? 5 : 3;
+  return I.plan[w] = [kind, d, Math.min(at, hi), deck, 0];
+}
+// the incident's stops: make it safe, clean up (the burst's fix is posted at the end; the alarm's hood looked at)
+function incStops(j) {
+  const n = j.deck, wet = (DECKS[n] && DECKS[n].wet) || [n + '-wet-1', n + '-wet-2'];
+  if (j.walk) return [{ deck: n, placeId: incPlace(n + '-valve-panel'), mins: 1, tag: 'walk', how: 'look', opts: { secs: 3, text: worksText('inc.walk', 'Water across the corridor floor. The pipe runs along the wall to the valves.') } }];
+  if (j.inc === 'burst') {
+    const line = (DECKS[n] && DECKS[n].valveLine) || [1, 2, 3].map(k => n + '-valve-' + k);
+    return [{ deck: n, placeId: incPlace(n + '-valve-panel'), mins: 1, tag: 'safe', how: 'choose', opts: { title: worksText('inc.burst.safe.title', 'Which valve?'),
+        text: worksText('inc.burst.safe', 'The pipe runs from valve 1 to valve {n}, then on down the corridor to the wet. Close one.', { n: line.length }),
+        options: line.map((id, k) => ({ id, label: worksText('inc.valve', 'Valve {k}', { k: k + 1 }) })) } },
+      ...wet.filter(id => placeById(id)).map(id => ({ deck: n, placeId: id, mins: 3, tag: 'clean', how: 'hold' }))];
+  }
+  if (j.inc === 'lift') return [{ deck: 5, placeId: incPlace('5-lift-brake'), mins: 1, tag: 'safe', how: 'turn', opts: { label: worksText('inc.lift.brake', 'Brake release'), v: 0, min: 0, max: 3, by: 1,
+        onTurn: v => v >= 3 ? worksText('inc.lift.free', 'The brake lets go. The car settles to Deck 4.') : v > 0 ? worksText('inc.lift.turning', 'The wheel turns. Keep going.') : null, ok: v => v >= 3, gauge: null } },
+      { deck: 4, placeId: incPlace(['4-lift-1', '4-lift-2']), mins: 2, tag: 'clean', how: 'hold' }];
+  return [{ deck: 3, placeId: incAlarmAt(), mins: 1, tag: 'safe', how: 'hold' },
+    { deck: 3, placeId: incPlace('3-vent-1'), mins: 1, tag: 'clean', how: 'wait', opts: { mins: 5, label: worksText('inc.alarm.vent', 'Vents open: the air clears in a few minutes') } },
+    { deck: 3, placeId: incPlace(['3-vent-1']), mins: 1, tag: 'clean', how: 'look', opts: { secs: 3, text: worksText('inc.alarm.hood', 'The hood\'s scorched but sound. The galley plant\'s filter is choked.') } }];
+}
+// a step of yours: the right valve (the nearest upstream of the wet: the last on the line); a wrong one leaves it
+// running (section 17's def.veto: the stop stays undone) and you pick again
+function incStepDone(j, k, res) {
+  const st = incStops(j)[k], I = incState(), O = I && I.open; if (!st) return true;
+  if (st.tag === 'safe' && j.inc === 'burst') {
+    const line = (DECKS[j.deck] && DECKS[j.deck].valveLine) || [], pick = res && res.pick, right = pick === line[line.length - 1];
+    const say = right ? null : line.includes(pick) ? ['safe.wrong', 'Still running. That one shuts the whole wing. Follow the pipe: the closest one upstream of the wet.'] : null;
+    if (say) { const c = SHIP.works.cur; if (j.train && c && c.id === 'm6') worksTeach('m6', c.by, say[0], say[1]); else try { toast(j.title, worksText('inc.burst.' + say[0], say[1])); } catch (e) { /* no UI */ } return false; }
+  }
+  if (st.tag === 'safe' && O && O.j === j.id) { O.safe = true; if (j.inc === 'lift' && typeof liftStuck === 'function') liftStuck(false); simNote('incident', { id: j.inc, step: 'safe', by: 'you' }); worksXp(j.train ? 0 : 2); }   // first on the scene: +2
+  if (st.tag === 'safe' && j.train) worksTeach('m6', SHIP.works.cur && SHIP.works.cur.by || 'calder', 'do.safe', ['Good. That\'s it off. Now the mop.']);
+  return true;
+}
+// the incident cleared (by you or the crew): the puddle and the smoke go, the lift runs, the fix is posted
+function incDone(j, t, by) {
+  const I = incState(); if (j.walk || !I) return;
+  const O = I.open && I.open.j === j.id ? I.open : null; I.open = O ? null : I.open;
+  if (typeof liftStuck === 'function' && j.inc === 'lift') liftStuck(false);
+  simNote('incident', { id: j.inc, step: 'clean', by });
+  let fix = null;
+  if (j.inc === 'burst') { const wet = incPlace((DECKS[j.deck] && DECKS[j.deck].wet) || [j.deck + '-wet-1']); fix = typeof jointJobPost === 'function' && wet ? jointJobPost({ deck: j.deck, placeId: wet, at: t }) : null; }
+  else { const f = typeof machineFound === 'function' ? machineFound(j.inc === 'lift' ? INC_LIFT_M : INC_ALARM_M, by) : null; fix = f && f.id; }
+  if (by === 'you') {
+    worksUse('m6');
+    const F = fix && SHIP.jobs.find(x => x.id === fix), c = SHIP.works.cur;
+    if (F) { F.leave = Math.max(INC_HELD, (worksDay(t) - 1) * 1440 + DAY_SHIFT[1] - t); F.incFix = j.inc; }
+    if (F && j.train && c && c.id === 'm6' && c.j === j.id) { F.reserved = j.reserved; F.until = j.until; F.train = 'm6'; c.j = F.id;   // the training ends at the fix: trained when it's turned in
+      worksTeach('m6', c.by, 'do.fix', ['Now the cause. A seal from stores, and fit it at the burst. I\'ll watch.']); }
+  }
+  if (typeof MACH_REV !== 'undefined') MACH_REV++;
+  incFx();
+}
+// an incident's job, ready to push: { kind: 'incident', inc, deck, first?, walk? } (o.slot: held in the training's slot)
+function incJob(kind, deck, t, o = {}) {
+  const j = jobMake('incident', { id: 'incident' + (o.slot || '') + ':' + kind + deck + (o.walk ? 'w' : '') + '@' + Math.floor(t / 60), inc: kind, deck, room: null, h: Math.floor(t / 60), urgency: 2,
+    title: '! ' + worksText('inc.title.' + kind, INC_TITLE[kind], { deck }) + (o.walk ? ': ' + worksText('inc.with', 'with {name}', { name: worksFirst(o.by || 'calder') }) : ''),
+    ...(o.walk ? { walk: true } : {}), ...(o.slot ? { reserved: o.slot, until: (worksDay(t) - 1) * 1440 + DAY_SHIFT[1] } : { leave: o.held ? INC_HELD : 1 }), ...(o.train ? { train: o.train } : {}) });
+  j.posted = j.found = t;
+  const P = placeById(jobStops(j).map(s => s.places && s.places[0]).find(Boolean)); if (P) j.room = P.room;
+  return j;
+}
+// an incident starts: the machine side, the look, and (unless it's the training's, which holds its own) the job on the
+// board, held for you if you're trained and on shift (the toast, the top card), else the crew's
+function incStart(kind, deck, t, train) {
+  const I = incState(); if (!I || I.open) return null;
+  I.open = { kind, deck, at: t, train: !!train, safe: false, j: null };
+  if (kind === 'lift') { if (typeof machineFault === 'function') machineFault(INC_LIFT_M, 40); if (typeof liftStuck === 'function') liftStuck(true); }
+  if (kind === 'alarm' && typeof machineFault === 'function') machineFault(INC_ALARM_M, 40);
+  simNote('incident', { id: kind, step: 'start', deck, by: null });
+  if (!train) incPost(t);
+  if (typeof MACH_REV !== 'undefined') MACH_REV++;
+  incFx(); return I.open;
+}
+function incPost(t, by) {                                // the open incident's job on the board
+  const I = incState(), O = I && I.open; if (!O || O.j) return null;
+  const W = SHIP.works, d = worksDay(t), mine = W.tr.m6 !== undefined && playerShiftOn(d) && t - (d - 1) * 1440 < DAY_SHIFT[1];
+  const j = incJob(O.kind, O.deck, t, { held: mine });
+  SHIP.jobs.push(j); O.j = j.id;
+  if (mine && t >= shipNow() - 1) try { toast(j.title, worksText('inc.call.' + O.kind, 'It\'s on the board, top of the list.')); } catch (e) { /* no UI */ }
+  return j.id;
+}
+if (typeof jobKindAdd === 'function') jobKindAdd('incident', { tier: 1, work: 0, text: 'Incident',
+  stops: incStops, stepDone: incStepDone, done: incDone, veto: true,
+  crew: { can: incWorks, mins: j => j.walk ? 5 : 25 + Math.floor(schedU(machSeed(j.id), worksDay(j.posted), 873) * 16) } });
+// the ladder row (m6): the training is an urgent call, not an appointment by Mail: offer (24 core's hook) makes the
+// meeting at the incident's minute with no Mail; then reserve gives the teacher's walk to the pipe (watch 1 minute
+// there), then the incident's job, yours
+function incOffer(row, c, d, t) {
+  const m = t - (d - 1) * 1440, by = ladderTeacher(row, d); if (!by) return false;
+  const at = m <= INC_FIRST.at - 10 ? INC_FIRST.at : Math.min(INC_WIN[1], m + 10), o = trainSetup(row);
+  o.by = by; o.script = trainScript(row, by);
+  const r = occasionAdd('works.' + row.id, (d - 1) * 1440 + at, true, 15); if (!r) return false;
+  c.by = by; c.d = d; c.w = 0; c.st = 'meet'; c.occ = r.key;
+  return true;
+}
+if (JOB_KINDS.incident) WORK_MECH.m6 = {
+  offer: incOffer,
+  reserve(d, at, slot, o = {}) {
+    const t = (d - 1) * 1440 + at, I = incState(); if (!I) return null;
+    if (!I.open) incStart(INC_FIRST.kind, INC_FIRST.deck, t, true);
+    const O = I.open; if (!O || !O.train) return null;
+    SHIP.jobs = SHIP.jobs.filter(x => !(x.reserved === slot && heldForYou(x) && !x.claimedBy));
+    const c = SHIP.works.cur, j = incJob(O.kind, O.deck, t, { slot, train: o.train || 'm6', walk: !o.yours, by: c && c.by });
+    if (o.yours) O.j = j.id;
+    SHIP.jobs.push(j); if (typeof MACH_REV !== 'undefined') MACH_REV++;
+    return j.id;
+  },
+  watch: 1,                                              // a minute at the pipe with Calder, then it's yours
+};
+// until 24 core's trainOffer asks WORK_MECH[id].offer itself: the same, from here (removed once the core's hook is in)
+if (WORK_MECH.m6 && !/\.offer\b/.test(String(trainOffer))) { const base = trainOffer; trainOffer = (row, c, d, t) => row.id === 'm6' && c.st !== 'again' ? incOffer(row, c, d, t) : base(row, c, d, t); }
+// the clock: the training's call at its minute; the week's incident at its minute; the stuck lift lets go after 20
+// minutes; a training incident nobody's coming to goes to the crew. After a skip or a sleep, an incident in the hours
+// skipped happened and the crew cleared it
+if (WORK_MECH.m6) WORK_TICKS.push((now, skip) => {
+  const I = incState(); if (!I) return;
+  const d = worksDay(now), m = now - (d - 1) * 1440, c = SHIP.works.cur, O = I.open;
+  const R0 = c && c.id === 'm6' && c.st === 'meet' ? SHIP.occasions.find(x => x.key === c.occ) : null;   // the call at the meeting's minute
+  if (R0 && now >= R0.at && now < R0.at + 60 && !O && !skip) {
+    incStart(INC_FIRST.kind, INC_FIRST.deck, now, true);
+    const line = worksTeach('m6', c.by, 'call', ['Burst pipe, junior wing. With me.']);
+    if (typeof setGoal === 'function') { const o = OCCASIONS['works.m6']; if (o) setGoal({ deck: o.deck, room: o.room, label: worksText('inc.goal', 'Meet {name}', { name: worksFirst(c.by) }) }); }
+    if (!line) try { toast(worksName(c.by), 'Burst pipe, junior wing. With me.'); } catch (e) { /* no UI */ }
+  }
+  if (O) {
+    if (O.kind === 'lift' && !O.safe && now >= O.at + INC_LIFT && typeof liftStuck === 'function') { O.safe = true; liftStuck(false); }
+    const busy = O.train && c && c.id === 'm6' && /^(meet|watch|do)$/.test(c.st);
+    if (!O.j && !busy && now >= O.at + 5) incPost(now);
+    const j = O.j && SHIP.jobs.find(x => x.id === O.j); if (O.j && (!j || j.status === 'done') && I.open === O) { I.open = null; incFx(); }
+    return;
+  }
+  const w = incWeek(d), P = w >= 2 ? incPlan(w) : null;
+  if (!P || !P.length || P[4] || P[1] !== d || m < P[2]) return;
+  P[4] = 1;
+  const S = incStart(P[0], P[3], now, false);
+  if (S && skip) { const j = SHIP.jobs.find(x => x.id === S.j); if (j) jobFinish(j, now, 'crew'); }
+});
+// a reload with the lift stuck: section 17 doesn't save it, so it's set again here
+WORK_TICKS.push(() => { const I = SHIP.works && SHIP.works.inc, O = I && I.open; if (O && O.kind === 'lift' && !O.safe && !INC_FX.lift && typeof liftStuck === 'function') { liftStuck(true); INC_FX.lift = true; } });
+// ---- the look: a puddle on the wet corridor (two flat discs 1.2 cm off the floor, never coplanar) and a smoke wisp by
+// the galley's vent (six soft quads), each one instanced draw call, made the first time they're needed on a deck (in
+// deckRoot, so the deck's unload frees them), shown only during an incident on your deck ----
+const INC_FX = { root: null, wet: null, smoke: null, lift: false };
+function incFx() {
+  try {
+    if (typeof deckRoot === 'undefined' || !deckRoot || !deckDef) return;
+    const O = SHIP.works && SHIP.works.inc && SHIP.works.inc.open, here = O && O.deck === deckDef.num;
+    if (INC_FX.root !== deckRoot) { INC_FX.root = deckRoot; INC_FX.wet = INC_FX.smoke = null; }
+    const wetOn = !!here && O.kind === 'burst', smokeOn = !!here && O.kind === 'alarm';
+    if (wetOn && !INC_FX.wet) {
+      const ids = (DECKS[O.deck].wet || []).filter(id => placeById(id));
+      if (ids.length) {
+        const g = new THREE.CircleGeometry(.62, 18); g.rotateX(-Math.PI / 2);
+        const im = new THREE.InstancedMesh(g, new THREE.MeshBasicMaterial({ color: col('#4f86a8'), transparent: true, opacity: .55, depthWrite: false }), ids.length), M4 = new THREE.Matrix4();
+        ids.forEach((id, k) => { const p = placeById(id); M4.makeScale(k ? .8 : 1.15, 1, k ? .9 : 1); M4.setPosition(X0(p.xy[0]), .012, Z0(p.xy[1])); im.setMatrixAt(k, M4); });
+        im.userData.noMerge = true; deckRoot.add(im); INC_FX.wet = im;
+      }
+    }
+    if (smokeOn && !INC_FX.smoke) {
+      const p = placeById('3-vent-1');
+      if (p) {
+        const g = new THREE.PlaneGeometry(.7, .7), im = new THREE.InstancedMesh(g, new THREE.MeshBasicMaterial({ color: col('#b8b4ae'), transparent: true, opacity: .28, depthWrite: false, side: THREE.DoubleSide }), 6), M4 = new THREE.Matrix4(), Q = new THREE.Quaternion(), E = new THREE.Euler();
+        for (let k = 0; k < 6; k++) { E.set(0, k * Math.PI / 3, 0); Q.setFromEuler(E); const s = .8 + .12 * (k % 3); M4.compose(new THREE.Vector3(X0(p.xy[0]) - .3 - .08 * k, 1.5 + .22 * k, Z0(p.xy[1]) + .05 * (k % 2)), Q, new THREE.Vector3(s, s, s)); im.setMatrixAt(k, M4); }
+        im.userData.noMerge = true; deckRoot.add(im); INC_FX.smoke = im;
+      }
+    }
+    if (INC_FX.wet) INC_FX.wet.visible = wetOn;
+    if (INC_FX.smoke) INC_FX.smoke.visible = smokeOn;
+  } catch (e) { console.error(e); }
+}
+WORK_TICKS.push((now, skip) => { if (!skip) incFx(); });
+
+
 // =====================================================================
 // 6. CAMERA
 // =====================================================================
