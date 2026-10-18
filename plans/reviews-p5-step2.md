@@ -6,7 +6,7 @@ Started by lead 12 (session_01GjWhU9Z9V8RNoR8yyELA9V) at ~11:28 for every Step 2
 Spec: plans/brief-playtest1.md on claude/lead-pillar1 (12b1b87); the user's answers in it are binding. Seats: T traditions session_01X4SZJFeHprDF21NZqU5fGi (claude/traditions-pt1, 0.70.x), X crew sim session_01SNaWA6X5E9i2ZKfMnPTHJf (claude/crew-pt1, 0.71.x), U HUD session_01FcMPTX7mMTHkyr4pxDfNcS (claude/hud-pt1, 0.72.x), C2 works career session_014yREkgPvuwMyxBtoqB1P14 (claude/works-career, 0.44.x), O4 (claude/onboard-pt1), W, P, A5 session_01CHRbUTZc18m7eBck8eWhXj (claude/deck-pt1). Verdicts go to the seat, BM5 and lead 13 (finished reviews, blockers, design calls). Behaviour and saves in depth; lines and tests skimmed. The base is 0.63.1 (claude/p5-cand-s2).
 
 ## Passing tips
-- W claude/writer-p5 **c9a532f** (0.48.89 + the 'seek' rename, playtest 1 lines, text; 2 LOWs)
+- W claude/writer-p5 **d47b63d** (0.48.89 + 'seek' + tea keys, playtest 1 lines, text; LOW 1 waits on X/C2's breakfast window)
 - W claude/writer-p5 **ac60c8d** (0.48.88, text; contains 0d179ac)
 - C claude/works-career **8cc07a5** (0.44.13, the old-save catch-up; for 0.63.0a / Step 2)
 - P claude/player-p5 **f2156f1** (0.28.73 + the LOW fix 391c88e + player_check fixes f00ac1e, d6f321d, 642b511, ad9ff57, 1830f2d, f2156f1; no LOWs open)
@@ -20,6 +20,9 @@ Spec: plans/brief-playtest1.md on claude/lead-pillar1 (12b1b87); the user's answ
 - (none)
 
 ## Verdicts
+
+### W d47b63d: Zeke's tea keys on O5's names, facts.md times — PASS (skimmed: content only)
+- Zeke's tea lines are under walk.tea.explain / go / at / back (O5's keys); facts.md says the 09:00 shift, the briefing at ten to nine and the 13:00 tea, which closes LOW 2. LOW 1 (news breakfast hours) waits on X/C2's breakfast window. content_gen bakes clean; lines_check PASS.
 
 ### W c9a532f: the walk-up lines as X's kind 'seek' — PASS (skimmed: content only)
 - approach.lines' kind is now `seek` (seat X's name): openers of 70 characters or fewer, addressed to you, tiers 1-4 (strangers don't walk up), plus a week-1 evening check-in and someone leaving soon. keys-p5.md and the DEV_NOTES row are updated to match. content_gen bakes clean; lines_check PASS (0 errors, the 2 old warnings). 7709e4c's two LOWs stand.
