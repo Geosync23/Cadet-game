@@ -497,3 +497,7 @@ Why: lead 10 is at ~54% memory with 0.60.7's release and Pillar 5 Steps 1-2 (ove
 - **Idle but kept:** head writer session_013DdpJv4AKFJcvuBBqjSXms, reviewer session_01BusfBzBamabWrCsrwQeABh (~42%), DA3 session_01NsysH87qqJnf1dBEVRz2fW (poses expert, ~60%, archive when convenient). Archive finished helpers after their notes are pushed.
 - **The user's style tonight:** plain-language reports of each landing; honest ETAs (current: 0.60.7 ~09:00-10:00 UTC); one-word answers are fine; questions → push notification.
 - ~05:35 started lead 11 session_01YKC3CGA9VS4b7wuqLbPT7V (level 1, the user's OK). Lead 10 stays reachable until lead 11 says hello, then goes idle.
+
+### Lead 11 log
+- ~05:35 lead 11 (session_01YKC3CGA9VS4b7wuqLbPT7V, depth 1) took over; check-in trig_01FmYQUHPko5peyLCEdC3qNr; lead 10's disabled; helpers told.
+- ~05:45 the user: overnight exception to the session chain rule (TEAM.md). ~05:47 **the user went to bed: overnight mode ON** (leads may start leads/workers; quiet; push-notify only for the 0.60.7 release or a real blocker). Ends when the user checks in.
