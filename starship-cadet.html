@@ -249,7 +249,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.33.50
+   STARSHIP CADET: CSV Wren                           build 0.33.51
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7807,7 +7807,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.33.50';                           // keep in step with the header's build line
+const GAME_BUILD = '0.33.51';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -14840,7 +14840,7 @@ function jobKindAdd(kind, def) {
 const jobKindOf = j => j && JOB_KINDS[j.kind] || null;
 const jobByStops = j => !!j && (j.kind === 'chore' || j.kind === 'favour' || !!JOB_KINDS[j.kind]);
 const jobSide = j => !!(JOB_KINDS[j.kind] && JOB_KINDS[j.kind].side);   // def.side: taken beside your board job, never lapses (the drill; M1's ask)
-const plainStop = x => ({ deck: x.deck, placeId: x.placeId || null, mins: x.mins || 0, tag: x.tag || 'job', ...(x.how ? { how: x.how } : {}) });
+const plainStop = x => ({ deck: x.deck, placeId: x.placeId || null, mins: x.mins || 0, tag: x.tag || 'job', ...(x.how ? { how: x.how } : {}), ...(x.hold ? { hold: x.hold } : {}) });
 function kindStops(j) { const K = jobKindOf(j); if (!K) return j.stops || []; try { return K.stops(j) || []; } catch (e) { return j.stops || []; } }
 // a registered kind's job, ready to push: jobMake(kind, { id?, machine?, deck, room?, title, h (the hour), urgency?, ... })
 function jobMake(kind, o = {}) {
@@ -15095,7 +15095,7 @@ function jobRun(p, j, t, makeMin) {
     const K = jobKindOf(j), sts = kindStops(j), mins = typeof K.crew.mins === 'function' ? K.crew.mins(j) : K.crew.mins || sts.reduce((a, x) => a + (x.mins || 0), 0) || 15;
     const of = sts.reduce((a, x) => a + (x.mins || 1), 0) || 1;
     if (j.parts.length) { go(5); at(JOB_FETCH, 'fetch', storagePlace(shelvesFor(j.parts[0]), c, c + JOB_FETCH)); if (makeMin) at(makeMin, 'make', storagePlace(MAKE_AT, c, c + makeMin)); }
-    for (const st of sts) { const pl = placeById(st.placeId), n = Math.max(1, Math.round(mins * (st.mins || 1) / of)); go(st.deck); at(n, st.tag || 'job', pl && (pl.machine ? st.placeId : pl.type === 'storage' ? storagePlace([st.placeId], c, c + n) : placeFreeFor(st.placeId, c, c + n) ? st.placeId : null)); }
+    for (const st of sts) { const pl = placeById(st.placeId), n = Math.max(1, Math.round(mins * (st.mins || 1) / of)), s0 = segs.length; go(st.deck); at(n, st.tag || 'job', pl && (pl.machine ? st.placeId : pl.type === 'storage' ? storagePlace([st.placeId], c, c + n) : placeFreeFor(st.placeId, c, c + n) ? st.placeId : null)); if (st.hold) for (let i = s0; i < segs.length; i++) segs[i].hold = st.hold; }   // stop.hold: what's in their hands on the way and there (M1's carts)
   } else if (j.kind === 'chore') {
     // a chore: parts from storage if it needs any, then its stops in order (a delivery picks up, then drops off)
     if (j.parts.length) { go(5); at(JOB_FETCH, 'fetch', storagePlace(shelvesFor(j.parts[0]), c, c + JOB_FETCH)); if (makeMin) at(makeMin, 'make', storagePlace(MAKE_AT, c, c + makeMin)); }

@@ -912,7 +912,7 @@ with sync_playwright() as pw:
           const H0 = Math.floor(shipNow() / 60) + 1, room = (placeById('4-lift-1') || {}).room;
           out.overBuiltIn = jobKindAdd('repair', { stops: () => [], done: () => {} });
           out.added = jobKindAdd('testkind', { tier: 1, work: 20, text: 'Test run',
-            stops: j => [{ deck: 4, placeId: '4-lift-1', mins: 10, tag: 'look', how: 'look', opts: { marks: ['fine', 'worn'] } }, { deck: 4, placeId: '4-laundry-1', mins: 10, tag: 'pick', how: 'choose', opts: { options: ['a', 'b'] } }],
+            stops: j => [{ deck: 4, placeId: '4-lift-1', mins: 10, tag: 'look', how: 'look', hold: 'cart', opts: { marks: ['fine', 'worn'] } }, { deck: 4, placeId: '4-laundry-1', mins: 10, tag: 'pick', how: 'choose', opts: { options: ['a', 'b'] } }],
             post: (h, jobs) => { if ((h === H0 || h === H0 + 1) && !jobs.some(x => x.id === 'tk@' + h)) jobs.push(jobMake('testkind', { h, id: 'tk@' + h, deck: 4, room, title: 'Test run: Deck 4', ...(h === H0 ? { released: true } : {}) })); },
             done: (j, t, by) => done.push([j.id, by, JSON.stringify(j.res || {})]), stepDone: (j, k, res) => steps.push([j.id, k, res && res.pick]),
             crew: { can: p => jobCrew(p) === 'works', mins: 30 } });
@@ -920,6 +920,7 @@ with sync_playwright() as pw:
           const m0 = shipNow(); for (let m = m0 + 60; m <= m0 + 4 * 60; m += 60) { setShipNow(m); machinesNow(); }
           const A = SHIP.jobs.find(j => j.id === 'tk@' + H0), B = SHIP.jobs.find(j => j.id === 'tk@' + (H0 + 1));
           out.posted = [!!A, !!B]; out.aBy = A && A.claimedBy; out.aSegs = A && A.segs ? A.segs.filter(x => x.type === 'job').map(x => x.tag + '@' + x.placeId).join(' ') : null;
+          out.aHold = A && A.segs ? A.segs.filter(x => x.hold).map(x => x.tag + ':' + x.hold).join(' ') : null;
           out.aMins = A && A.segs ? A.segs.filter(x => x.type === 'job').reduce((a, x) => a + x.to - x.from, 0) : null;
           out.aDone = done.filter(d => d[0] === (A && A.id)).map(d => d[1] === A.claimedBy).join();
           out.bHeld = B && !B.claimedBy; out.card = B ? jobCard(B).join(' / ') : null; out.open = B ? openJobs('you').some(x => x.id === B.id) : null;
@@ -947,10 +948,10 @@ with sync_playwright() as pw:
           setShipNow(t0);
           return out;
         })()""")
-        print(f"Job kinds (0.33.47): registered {jk['added']} (over a built-in {jk['overBuiltIn']}), posted {jk['posted']}; untaken: {jk['aBy']} at {jk['aSegs']} ({jk['aMins']} min), done by them {jk['aDone']}")
+        print(f"Job kinds (0.33.47): registered {jk['added']} (over a built-in {jk['overBuiltIn']}), posted {jk['posted']}; untaken: {jk['aBy']} at {jk['aSegs']} ({jk['aMins']} min, held {jk['aHold']}), done by them {jk['aDone']}")
         print(f"  yours: held {jk['bHeld']}, card '{jk['card']}', on your board {jk['open']}, claimed {jk['claim']}, stops '{jk['stops']}', other jobs' steps {jk['otherHow']}; done {jk['workDone']}, results {jk['res']}, done for you '{jk['youDone']}', stepDone '{jk['steps']}'")
         print(f"  save keeps it {jk['saveKeeps']}, drops an unknown kind {jk['saveDrops']}; machineFound: healthy {jk['healthy']}, [fresh, again, found now, by, notes, note ok] {jk['found']}")
-        if (not jk['added'] or jk['overBuiltIn'] or jk['posted'] != [True, True] or not jk['aBy'] or jk['aBy'] == 'you' or not jk['aSegs'] or '4-lift-1' not in (jk['aSegs'] or '') or jk['aMins'] != 30 or jk['aDone'] != 'true'
+        if (not jk['added'] or jk['overBuiltIn'] or jk['posted'] != [True, True] or not jk['aBy'] or jk['aBy'] == 'you' or not jk['aSegs'] or '4-lift-1' not in (jk['aSegs'] or '') or jk['aMins'] != 30 or jk['aDone'] != 'true' or 'look:cart' not in (jk['aHold'] or '') or 'pick:' in (jk['aHold'] or '')
             or not jk['bHeld'] or not jk['open'] or not jk['claim'] or jk['stops'] != 'look:look+opts pick:choose+opts' or jk['otherHow'] != 'hold' or not jk['workDone']
             or jk['res'] != '{"0":{"pick":"worn"},"1":{"pick":"b"}}' or not jk['youDone'].startswith('you {') or jk['steps'] != '0:worn 1:b' or not jk['saveKeeps'] or not jk['saveDrops']
             or jk['healthy'] is not None or jk['found'] != [True, False, True, 'you', 1, True]):
