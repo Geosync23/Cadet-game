@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Work Uniform Spec</title>
+<style>
+:root{--ink:#e8eef0;--muted:#93a6ae;--teal:#4cc3b5;--gold:#e9c46a;--rose:#e58f7a;--glass:rgba(13,21,33,.78);--line:rgba(150,200,196,.22);--chip:rgba(76,195,181,.14)}
+*{box-sizing:border-box}
+html,body{margin:0;background:#121a27;color:var(--ink);font-family:"Avenir Next","Segoe UI",system-ui,sans-serif}
+body{background:radial-gradient(ellipse at 50% 20%,#22304a 0%,#141c2b 60%,#0c111b 100%) fixed;line-height:1.5}
+header{padding:18px 16px 4px;max-width:1100px;margin:0 auto}
+h1{font-size:21px;font-weight:600;margin:0}
+h2{font-size:17px;font-weight:600;margin:0 0 8px;color:#bdeee6}
+h3{font-size:14.5px;font-weight:600;margin:12px 0 4px;color:#d9eeea}
+.sub{font-size:13.5px;color:var(--muted);margin-top:4px}
+.draft{display:inline-block;font-size:11.5px;color:#14202a;background:var(--gold);border-radius:999px;padding:2px 9px;margin-left:6px;vertical-align:2px}
+nav{position:sticky;top:0;z-index:5;background:rgba(14,20,31,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+nav div{display:flex;gap:6px;overflow-x:auto;padding:8px 16px;max-width:1100px;margin:0 auto;-webkit-overflow-scrolling:touch}
+nav a{flex:none;text-decoration:none;border:1px solid var(--line);background:var(--glass);color:var(--ink);font-size:13px;padding:6px 11px;border-radius:999px}
+nav a:focus-visible,nav a:hover{border-color:var(--teal);color:#bdeee6;outline:none}
+main{max-width:1100px;margin:0 auto;padding:6px 16px 40px}
+section{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:14px 0;scroll-margin-top:56px}
+p{margin:6px 0;font-size:14px;color:#d6e0e3}
+ul{margin:6px 0;padding-left:20px;font-size:14px;color:#d6e0e3}
+li{margin:3px 0}
+.note{font-size:12.5px;color:var(--muted)}
+.grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.card{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.025)}
+.card b{display:block;color:#bdeee6;font-size:14px;margin-bottom:2px}
+.card span{font-size:13px;color:#cfd9dc}
+.card .meta{display:block;font-size:12px;color:var(--muted);margin-top:4px}
+.tag{display:inline-block;font-size:11.5px;border-radius:999px;padding:1px 8px;margin:2px 4px 0 0;background:var(--chip);color:#bdeee6;border:1px solid var(--line)}
+.tag.new{background:rgba(233,196,106,.16);color:#f1dca0}
+.tag.old{opacity:.75}
+.steps{list-style:none;padding:0;margin:8px 0;counter-reset:s}
+.steps li{position:relative;padding:8px 10px 8px 46px;border-left:2px solid rgba(76,195,181,.35);margin:0 0 0 14px}
+.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:-15px;top:8px;width:28px;height:28px;border-radius:50%;background:#183040;border:1px solid var(--teal);color:#bdeee6;font-size:12.5px;display:flex;align-items:center;justify-content:center}
+.steps time{display:block;font-size:12px;color:var(--gold)}
+.steps b{color:#e4f3f0;font-weight:600}
+.steps span{display:block;font-size:13.5px;color:#cfd9dc}
+.week{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.day{border:1px solid var(--line);border-radius:12px;padding:9px 10px;background:rgba(255,255,255,.02)}
+.day h4{margin:0 0 4px;font-size:13.5px;color:var(--gold);font-weight:600}
+.day p{font-size:12.5px;margin:4px 0;color:#cfd9dc}
+.day .who{color:#bdeee6;font-weight:600}
+.lines{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;background:#0b141c;border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:#9fe7dc;white-space:pre-wrap;overflow-x:auto;margin:8px 0}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0}
+.flow .box{border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:13px;background:rgba(255,255,255,.03)}
+.flow .arrow{color:var(--teal)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:12px}
+.tablewrap{overflow-x:auto}
+.waves{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+.wave{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.025)}
+.wave b{color:var(--gold);display:block}
+.wave .ci{display:block;margin-top:6px;font-size:12.5px;color:#f1dca0}
+ol.q{padding-left:22px;font-size:14px;color:#d6e0e3}
+ol.q li{margin:6px 0}
+ol.q em{color:var(--muted);font-style:normal;font-size:12.5px}
+svg text{font-family:inherit}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;color:#9fe7dc;background:rgba(0,0,0,.25);padding:0 4px;border-radius:4px;word-break:break-word}
+section.builder{border-color:rgba(233,196,106,.45)}
+section.builder h2{color:var(--gold)}
+.status{display:inline-block;font-size:11.5px;color:#14202a;background:var(--teal);border-radius:999px;padding:2px 9px;margin-left:6px;vertical-align:2px}
+td code{white-space:normal}
+</style>
+</head>
+<body>
+<header>
+  <h1>M2 · Your work uniform (Day 8, Torres) <span class="draft">spec for approval</span></h1>
+  <div class="sub">Oily jobs make your uniform grubby faster; it looks a shade duller until you change at your wardrobe. Your own laundry is 0.60.7's (the wardrobe, the hamper, the washers); this adds only what grows from the job. Moved from Day 5 to Day 8 (the user's "puzzles earlier" change). Step 2, sub-block 24b. Plan Part 2, M2.</div>
+</header>
+<nav><div><a href="#plain">In plain words</a><a href="#day">Day 8</a><a href="#why">Why it matters</a><a href="#grow">How it grows</a><a href="#b">Builder</a><a href="#save">Save</a><a href="#tests">Tests</a><a href="#ranges">Builds and keys</a></div></nav>
+<main>
+
+<section id="plain">
+  <h2>In plain words</h2>
+  <ul>
+    <li><b>Already in 0.60.7:</b> you change every morning at your wardrobe; after 5 days you take the hamper to a washer and back; if you don't change by 10:00 you're "in yesterday's clothes". No laundry duty.</li>
+    <li><b>New:</b> some jobs are <b>oily</b> (ovens, the range, the extractor, the galley plant, cart docks, the lift, pumps, the main fan). After a couple of them your uniform is <b>grubby</b>: it looks a shade duller (a tint, nothing new drawn), and people notice.</li>
+    <li><b>A shower doesn't clean it; a change does</b>: tap your wardrobe and change (it uses a clean outfit, even if you already changed today).</li>
+    <li><b>Never a fail:</b> grubby costs a little hygiene and a remark or two, and matters on inspection mornings and at the officer ceremony.</li>
+  </ul>
+</section>
+
+<section id="day">
+  <h2>Day 8, Monday</h2>
+  <p>Your first oily job turned in on Day 8 or later (from Day 8, oily jobs make you grubby): Torres catches you at the board or the tea corner. "You've got half the galley plant on you. Change before tea. Calder notices." A line on the Training page: "Your uniform: change after oily jobs."</p>
+  <p class="note">Day 8's big new thing is your first incident with Calder (M6); this is its small one.</p>
+</section>
+
+<section id="why">
+  <h2>Why it matters</h2>
+  <ul>
+    <li><b>Hygiene:</b> grubby drains hygiene 1.5× (the same as "yesterday's clothes"; they don't add up).</li>
+    <li><b>Remarks:</b> crew may say something (the existing path, <code>simNote('uniform')</code>), friends kindly, Calder briefly.</li>
+    <li><b>The Thursday inspection</b> (M3) checks a clean uniform; <b>the officer ceremony</b> (Day 11, Step 3) does too.</li>
+    <li><b>The washers wear with your loads</b>, as with the crew's, so you see their faults coming (and, later, service them).</li>
+  </ul>
+</section>
+
+<section id="grow">
+  <h2>How it grows</h2>
+  <div class="grid">
+    <div class="card"><b>Stage 1 · Grubby on oily jobs</b><span>As above.</span><span class="meta"><span class="tag">Day 8</span></span></div>
+    <div class="card"><b>Stage 2 · Service the washers</b><span>While your wash runs (30 ship minutes), a worn washer's service job is held for you right there: "While you wait." The washers are already real machines with panels.</span><span class="meta"><span class="tag">after 2 washes</span><span class="tag new">optional</span></span></div>
+  </div>
+  <p class="note">From the Deck 2 suite (Senior Officer) your laundry is collected (0.60.7); your uniform is still yours to change.</p>
+</section>
+
+<section id="b" class="builder">
+  <h2>For the builder (seat M1, sub-block 24b)</h2>
+  <div class="tablewrap"><table>
+    <tr><th>Section</th><th>What</th><th>Owner</th></tr>
+    <tr><td>15c clothes (0.60.7)</td><td><code>SHIP.player.clothes.grime</code> (0-1); <code>uniformState()</code> → <code>'clean' | 'yesterday' | 'grubby'</code>; a change while grubby always uses an outfit and sets grime 0; grubby drains hygiene like yesterday's clothes (max, not product)</td><td>the onboarding engineer (15c's owner, on call) or P with the lead's OK</td></tr>
+    <tr><td>24b (new)</td><td>grime from jobs; the Day 8 moment; stage 2's held washer service</td><td>M1</td></tr>
+    <tr><td>8 / 8b</td><td>the player's uniform tint: <code>playerUniformTint(k)</code>, k 0-1, multiplies the uniform's material colour toward grey (k = 1: 12% darker, 20% less saturated), through <code>col()</code>; the player only, no new material per frame (two cached materials, swapped)</td><td>performance (on call)</td></tr>
+    <tr><td>17</td><td>nothing (the washers wear from <code>loads</code>, and your load already adds wear via <code>machineUse</code>)</td><td>—</td></tr>
+    <tr><td>content</td><td>Torres's line (<code>train.m2</code>), remarks on <code>uniform: grubby</code></td><td>W</td></tr>
+  </table></div>
+  <ul>
+    <li><b>Grime:</b> on <code>simNote('job', { step: 'turnin' })</code> for your job, from Day 8 (<code>SHIP.works.tr.m2</code> or the ladder's day): <code>OILY = new Set(['oven', 'range', 'extractor', 'galleyplant', 'cartdock', 'lift', 'pump', 'heatpump', 'fan', 'irrigation'])</code>; an oily repair or overhaul +.35, an oily service +.2, anything else +.05; grubby from .6 (so two oily repairs). Saved in 15c's <code>clothes</code>.</li>
+    <li><b>The look:</b> <code>playerUniformTint(grime &gt;= .6 ? 1 : 0)</code> when the state changes (not every frame); <code>simNote('uniform', { state })</code> on each change of <code>uniformState()</code>.</li>
+    <li><b>The Day 8 moment:</b> the ladder's small row <code>m2</code> (needs: an oily job turned in on Day 8+); Torres's line through a one-line meeting where he is (at the board or the tea corner within the next 90 ship minutes; else by Mail).</li>
+    <li><b>Stage 2:</b> when you load a washer and another washer is worn (<code>machineState</code>), its service job is held for you (<code>j.until</code> = your wash's end + 10 minutes) with the title "While you wait: service Washer 3". Opens after 2 washes (<code>use.m2</code> counts washes from 15c's <code>simNote</code> or a 24b hook on "Take out").</li>
+  </ul>
+</section>
+
+<section id="save" class="builder">
+  <h2>Save</h2>
+  <ul><li><code>player.clothes.grime</code> (a number, 2 decimals; 15c reads it defensively, 0 if missing). <code>ship.works.use.m2</code>, <code>tr.m2</code>.</li></ul>
+</section>
+
+<section id="tests" class="builder">
+  <h2>Tests</h2>
+  <ul>
+    <li><b><code>mech_check</code></b> (24b): grime rises faster on oily jobs; two oily repairs make you grubby; a shower doesn't clear it, a change does (and uses an outfit); nothing before Day 8; stage 2's washer job held during your wash and released after.</li>
+    <li><b><code>player_check</code></b>: hygiene drain grubby = yesterday's, not more; 0.60.7's clothes checks unchanged; the save of grime.</li>
+    <li><b><code>intro_check</code></b>: the first week's laundry unchanged (nothing grubby before Day 8).</li>
+    <li><b><code>cadet_test</code></b>: identical while clean (the tint only applies when grubby).</li>
+  </ul>
+</section>
+
+<section id="ranges" class="builder">
+  <h2>Builds and keys</h2>
+  <ul>
+    <li>Seat <b>M1</b>, branch <code>claude/mech-rounds</code>, builds <b>0.45.x</b>. Hash keys <b>862-863</b> (set aside; grime is deterministic and needs none today).</li>
+    <li>Needs 0.60.7's 15c clothes in the base build.</li>
+  </ul>
+</section>
+
+</main>
+</body>
+</html>
