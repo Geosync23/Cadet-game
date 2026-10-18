@@ -59,6 +59,17 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 .devbtn b{min-width:16px;padding:0 4px;border-radius:8px;background:var(--teal);color:#08201d;font-size:11px;line-height:16px;margin-left:2px}
 .devbtn.compact span{display:none}                        /* 0.28.59: the narrowest phones, so Pause fits beside it (its aria-label still says Device) */
 .devbtn.low::after{content:"";width:7px;height:7px;border-radius:50%;background:#e8a04c;margin-left:2px}
+/* 0.72.0 (HUD U): the Tracked button, in the Device button's row (section 15b's trkPlace lines it up), and its panel */
+.trkbtn{position:fixed;left:140px;top:86px;z-index:2;padding:6px 11px;font-size:12.5px}
+.trkbtn.compact span{display:none}
+.trkbtn.on{border-color:#e8c06a}
+.trkbtn.on::after{content:"";width:7px;height:7px;border-radius:50%;background:#e8c06a;margin-left:2px}
+.trkbtn::before{content:"";position:absolute;inset:-7px -3px}  /* a 44px tap target */
+#trkPanel{max-height:calc(100% - 28px);overflow-y:auto;overscroll-behavior:contain}
+#trkPanel h3{margin:10px 2px 5px;font-size:11.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+#trkPanel .deckbtn i{width:auto;min-width:26px;padding:0 6px;border-radius:13px;font-size:12px}
+#trkPanel .deckbtn span{min-width:0;flex:1}
+#trkPanel .deckbtn b,#trkPanel .deckbtn small{overflow-wrap:anywhere}
 /* 19. the device's skin (0.35.1): an old-school phosphor screen in a bezel. CSS and DOM only: no canvas, blur or backdrop-filter. */
 .device,.devtip,.devhu,.devdlg,.devaddr,#chat.devchat,body #seek{--crt-ink:#6ff0dc;--crt-dim:#4ab1a3;--crt-bg:#03141a;--crt-hot:#e8fffb;--crt-glow:rgba(95,227,208,.45);--crt-scan:rgba(0,0,0,.2);--crt-radius:18px;--crt-font:ui-monospace,"Cascadia Mono",Menlo,Consolas,monospace;--crt-size:17px;--bezel:#1b1f24}
 html[data-ph="amber"] body #seek,.devhu[data-ph="amber"],.devaddr[data-ph="amber"],.devdlg[data-ph="amber"],#chat.devchat[data-ph="amber"],.devtip[data-ph="amber"],.device[data-ph="amber"]{--crt-ink:#ffb347;--crt-dim:#d09142;--crt-bg:#140c03;--crt-hot:#fff1d6;--crt-glow:rgba(255,170,60,.5)}
@@ -153,7 +164,7 @@ html[data-ph="green"] body #seek,.devhu[data-ph="green"],.devaddr[data-ph="green
 .device .need.tint.pulse b{background:var(--nc);box-shadow:0 0 12px var(--nc)}
 .device .need em{font-style:normal;font-size:15px;margin-left:6px;color:var(--crt-hot)}
 .device .apps{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px;margin-top:14px}
-.device .app{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:76px;padding:8px 4px;font-size:15px;text-transform:uppercase;letter-spacing:.05em}
+.device .app{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:76px;padding:8px 4px;font-size:13px;text-transform:uppercase;letter-spacing:.03em}   /* 0.72.0 (the user's playtest): a little smaller (was 15px, .05em), so Schedule, Calendar, Settings and Settling never wrap
 .device .app i{font-style:normal;font-size:26px;line-height:1;color:var(--crt-hot)}
 .device .app span{max-width:100%;text-align:center;overflow-wrap:anywhere;line-height:1.15}   /* 0.28.57: a long label wraps inside its tile, never over the next */
 .device .app b{position:absolute;top:3px;right:4px;min-width:22px;padding:0 5px;border-radius:4px;background:var(--crt-hot);color:var(--crt-bg);font-size:15px;line-height:22px;text-shadow:none}
@@ -241,6 +252,12 @@ body.dlgon .devhu{display:none}
   <button class="stay" id="sleepNo">Not yet</button>
 </div>
 <button class="devbtn" id="devBtn" aria-label="Your device: the time and your needs"><svg viewBox="0 0 24 24"><rect x="6" y="3" width="12" height="18" rx="2.5"/><path d="M10 17.5h4"/></svg><span>Device</span><b id="devMail" hidden></b></button>
+<button class="trkbtn" id="trkBtn" aria-label="Tracked: what's on and coming up, and where to go" aria-haspopup="dialog"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="2.5"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3"/></svg><span>Tracked</span></button>
+<div class="lift" id="trkPanel" role="dialog" aria-labelledby="trkT" hidden>
+  <h2 id="trkT">Tracked</h2><p>Tap one to follow the arrow there. Tap it again to stop.</p>
+  <div id="trkList"></div>
+  <button class="stay" id="trkClose">Close</button>
+</div>
 <div class="device" id="device" role="dialog" aria-labelledby="devT" data-ph="cyan" hidden>
   <div class="bez" id="devBez"><span class="led" id="devLed" title="New mail"></span><span>CSV WREN · CREW PDA</span><span class="grip"></span></div>
   <div class="crt"><div class="devhead"><h2 id="devT">Your device</h2></div><div id="devBody"></div></div>
@@ -10110,7 +10127,7 @@ const DEVICE_SKIN = (() => {
       const tx = mk('span', '', ''); tx.append(mk('b', '', h.text), mk('small', '', h.where || '')); c.appendChild(tx);
       if (h.go) { const g = mk('button', 'act', 'Go there'); g.type = 'button'; g.onclick = e => { e.stopPropagation(); devHeadsDo('go'); }; c.appendChild(g); }
       c.style.top = ''; const me = c.getBoundingClientRect(); let top = me.top;   // 0.35.31: below section 15's needs strip and activity bar when they'd overlap (a phone)
-      for (const id of ['needStrip', 'actBar']) { const e = document.getElementById(id); if (!e || e.hidden || !e.offsetWidth) continue;
+      for (const id of ['needStrip', 'actBar', 'trkBtn']) { const e = document.getElementById(id); if (!e || e.hidden || !e.offsetWidth) continue;   // 0.72.0: and the Tracked button
         const r = e.getBoundingClientRect(); if (r.right > me.left && r.left < me.right && r.bottom + 8 > top) top = r.bottom + 8; }
       if (top !== me.top) c.style.top = Math.round(top) + 'px';
       c._t = simTimeout(() => devHeadsDo('done'), h.soft ? 6000 : 9000);
@@ -11078,11 +11095,11 @@ const TEACH = [   // text: head writer 3. A 4th element { sure: true }: shown wh
   // free time (0.28.63, the 0.60.7 plan's "Tips for your first evenings"; the plan's approved words): off shift, then one an evening, Days 1-4
   ['t:offshift', c => c.d >= 1 && c.min >= 1020 && c.min < 1290, 'Off shift. Your evening is yours: call home from the booths on Deck 3, go to a ship tradition (Calendar), talk a while with someone, or try a hobby.', { sure: true }],
   ['t:eve-talk', c => c.d === 1 && c.min >= 1110 && c.min < 1320 && !!SHIP.device.tipsSeen['t:offshift'], 'Tap someone and choose Talk a while: a proper chat builds far more friendship than a quick hello.', { sure: true }],
-  ['t:eve-hobby', c => c.d === 2 && c.min >= 1050 && c.min < 1320, 'Hobbies fill your Leisure. Open Hobbies on your device to read, write or play a game, anywhere you sit or stand still.', { sure: true }],
+  ['t:eve-hobby', c => c.d === 2 && c.min >= 1050 && c.min < 1320, 'Hobbies fill your Leisure. Open Hobbies on your device to read, write, play a game or watch a film, anywhere you sit or stand still.', { sure: true }],
   ['t:eve-trad', c => c.d === 3 && c.min >= 1050 && c.min < 1260, 'Several traditions on tonight, and you can\'t go to them all. Pick one in the Calendar.', { sure: true }],
   ['t:eve-call', c => c.d === 4 && c.min >= 1050 && c.min < 1320, 'Missing home? The call-home booths on Deck 3 put you through to your people. One call a day.', { sure: true }],
   ['t:garden', c => c.deck === 3 && /garden/i.test(((deckDef.rooms || {})[roomAt(...player.here())] || {}).name || '') && !(c.work && c.min >= 480 && c.min < 1020), 'The garden\'s yours off shift too. Tending a bed counts as a hobby: it fills your leisure.', { sure: true }],   // the user's (0.28.65), the head writer's tip.garden
-  ['t:a-hobbies', c => c.app === 'hobbies', 'Hobbies fill your Leisure. Read, write or play games on your device anywhere. Drawing, knitting and puzzles need supplies from the crew store on Deck 3; Zeke might teach you to knit.'],
+  ['t:a-hobbies', c => c.app === 'hobbies', 'Hobbies fill your Leisure. Read, write, play games or watch a film on your device anywhere. Drawing, knitting and puzzles need supplies from the crew store on Deck 3; Zeke might teach you to knit.'],
   ['t:a-sched', c => c.app === 'schedule', 'Your day at a glance: meals, your shift, anything booked. Tap an entry and the marker shows the way.'],
   ['t:a-cal', c => c.app === 'calendar', 'The weeks ahead: days off, traditions, birthdays and appointments.'],
   ['t:a-maps', c => c.app === 'maps', 'Every deck, room by room. Tap a room to put the marker on it.'],
@@ -12478,6 +12495,7 @@ const HOBBIES = {
   read:   { dev: true, name: 'Reading', doing: 'Reading', pose: 'sit:read', stand: 'stand+device' },
   write:  { dev: true, name: 'Writing', doing: 'Writing', pose: 'sit:read', stand: 'stand+device' },
   games:  { dev: true, name: 'Playing games', doing: 'Playing a game', pose: 'sit:read', stand: 'stand+device' },
+  film:   { dev: true, name: 'Watching films', doing: 'Watching a film', pose: 'sit:read', stand: 'stand+device', label: 'Watch a film' },   // the user's (0.72.1, HUD U): reading's pose and rules; label: the button until the head writer's hobby.name.film
   draw:   { prop: 'a sketchpad', name: 'Drawing', doing: 'Drawing', pose: 'sit:read', price: 15 },
   knit:   { prop: 'needles and wool', name: 'Knitting', doing: 'Knitting', pose: 'sit:read', price: 12 },
   puzzle: { prop: 'a puzzle book', name: 'Puzzles', doing: 'Doing a puzzle', pose: 'sit:read', price: 10 },
@@ -12545,7 +12563,7 @@ function hobbyHere() {
 // start one: sitting, it takes over the seat (and you sit on after); standing, a device hobby is done where you stand
 function hobbyStart(id) {
   const h = HOBBIES[id]; if (!h || !hobbyHere().includes(id)) return false;
-  const A = ACT, title = hobbyText('hobby.name.' + id, h.name), start = hobbyText('hobby.start.' + id, h.doing + '...');
+  const A = ACT, title = hobbyText('hobby.name.' + id, h.label || h.name), start = hobbyText('hobby.start.' + id, h.doing + '...');
   if (A && A.kind === 'sit' && A.phase === 'do') {
     A.kind = 'hobby'; A.def = { ...PLAYER_ACTS.hobby, title }; A.done = 0; A.pose = h.pose; A.o.hobby = id; A.o.sat = true; A.o.shared = hobbyShare(id);
     toast(title, start + ' About ' + taskMins(A.def.mins) + ' minutes; walk away to stop.');
@@ -12621,13 +12639,13 @@ function ideasTonight() {
   out.push(T('ideas.booth', 'Call home from the booths on Deck 3.'));
   return out.length > 1 ? out : [out[0], T('ideas.none', 'A quiet evening. Sit somewhere nice and try a hobby.')];
 }
-// the Hobbies app (0.28.63): Read, Write and Play games on your device, anywhere you're still; the prop hobbies you have
+// the Hobbies app (0.28.63): Read, Write, Play games and (0.72.1) Watch a film on your device, anywhere you're still; the prop hobbies you have
 // and how to get the rest. A first-time tooltip (tip.hobby) explains it
 deviceApp({ id: 'hobbies', title: 'Hobbies', icon: 'hobby', order: 46,
   view: () => {
-    const here = hobbyHere(), dev = ['read', 'write', 'games'], B = [];
+    const here = hobbyHere(), dev = ['read', 'write', 'games', 'film'], B = [];
     B.push({ kind: 'text', text: 'Hobbies fill your Leisure: about 30 minutes for a good boost. Walk away to stop; you keep what you got.' });
-    B.push({ kind: 'buttons', items: dev.map(id => ({ label: hobbyText('hobby.name.' + id, HOBBIES[id].name), action: { app: 'hobbies', do: 'start', arg: id } })) });
+    B.push({ kind: 'buttons', items: dev.map(id => ({ label: hobbyText('hobby.name.' + id, HOBBIES[id].label || HOBBIES[id].name), action: { app: 'hobbies', do: 'start', arg: id } })) });
     if (!here.length) B.push({ kind: 'text', text: 'Stand still or sit down to start one.', mark: 'down' });
     const props = ['draw', 'knit', 'puzzle', 'stars', 'garden'].map(id => ({ text: hobbyText('hobby.name.' + id, HOBBIES[id].name), sub: id === 'garden' ? 'Tap a bed in the garden on Deck 3, off shift.' : id === 'stars' ? 'Sit at a big window, or in the observatory, and tap Hobby.' : hobbyHas(id) ? 'Yours. Sit anywhere and tap Hobby.' : id === 'knit' ? 'Needles and wool at the crew store, Deck 3. Zeke might teach you.' : HOBBIES[id].prop[0].toUpperCase() + HOBBIES[id].prop.slice(1) + ' at the crew store, Deck 3 (' + HOBBIES[id].price + ' credits).' }));
     B.push({ kind: 'text', text: 'With your own things', mark: 'head' }); B.push({ kind: 'list', rows: props });
@@ -13521,6 +13539,96 @@ function ixFrame() {
   if (label !== ixLast) { lab.textContent = ixLast = label; }
 }
 requestAnimationFrame(ixFrame);
+// ---- the Tracked button and panel (0.72.0, HUD U; the user's playtest note): everything on or coming up (the rest of
+// today and tomorrow morning from the Schedule's devDay: traditions, appointments, meals, your shift, ship items), your
+// job, and a few fixed places (the job board, your bunk, the call booths). A tap tracks one with the goal arrow
+// (setGoal, the goal carrying trk, its key, so the panel knows it's on; your job with SHIP.player.track, as the Jobs app
+// does); a tap on the one being tracked stops it. A tradition asks tradGoal(x) first when there is one (the traditions
+// seat: the arrow to the leader for tap-to-join), else the Schedule's devItemGoal (its room). Nothing here is saved. ----
+const TRK_PLACES = [
+  { key: 'place:board', title: 'The job board', sub: 'The Works bay, Deck 5', goal: () => ({ deck: 5, item: /job board/i, room: 'w', label: 'The job board' }) },
+  { key: 'place:bed', title: 'Your bunk', sub: 'Your bed, Deck 4', goal: () => ({ deck: 4, place: playerBed(), label: 'Your bunk' }) },
+  { key: 'place:calls', title: 'The call booths', sub: 'Call home, Deck 3', goal: () => ({ deck: 3, place: '3-callhome-1', room: 'B', label: 'The call booths' }) },
+];
+function trkGoalOf(x) {
+  if (x.kind === 'tradition' && typeof tradGoal === 'function') { try { const g = tradGoal(x); if (g && g.deck) return g; } catch (e) { /* the room instead */ } }
+  try { return devItemGoal(x); } catch (e) { return null; }
+}
+function trkItems() {
+  const d = SHIP.time.day, m = SHIP.time.min, out = [], j = typeof myJob === 'function' ? myJob() : null;
+  if (j) { let st = null; try { st = ixJobStep(); } catch (e) { /* no step */ }
+    out.push({ sec: 'job', key: 'job:' + j.id, job: j.id, title: j.title || 'Your job', sub: st ? st.label : 'Your job', tag: 'Job' }); }
+  for (const [day, upto] of [[d, 1440], [d + 1, 720]]) {   // the rest of today, and tomorrow until noon
+    let list = []; try { list = devDay(day); } catch (e) { /* none */ }
+    for (const x of list) {
+      if (x.kind === 'off' || x.from >= upto || (day === d && x.to <= m)) continue;
+      out.push({ sec: 'on', key: x.kind + ':' + day + ':' + x.from + ':' + x.title, title: x.title, sub: (day === d ? '' : 'Tomorrow · ') + x.where,
+        tag: day === d && x.from <= m ? 'Now' : hhmm(x.from), goal: trkGoalOf(x) });
+    }
+  }
+  for (const q of TRK_PLACES) out.push({ sec: 'place', key: q.key, title: q.title, sub: q.sub, tag: '', goal: q.goal() });
+  return out;
+}
+const trkOn = it => { if (!it.job) return !!(IX_GOAL && IX_GOAL.trk === it.key); const j = typeof myJob === 'function' ? myJob() : null; return !IX_GOAL && SHIP.player.track !== null && !!j && j.id === it.job; };
+const trkEl = document.getElementById('trkPanel'), trkList = document.getElementById('trkList'), trkBtn = document.getElementById('trkBtn');
+const trkKey = () => Math.floor(shipNow()) + '|' + (IX_GOAL ? IX_GOAL.trk || IX_GOAL.label : '') + '|' + SHIP.player.track;
+let trkSig = '';
+function trkTap(it) {
+  if (trkOn(it)) { if (it.job) SHIP.player.track = null; else clearGoal(); trkDraw(); return; }   // tap again: stop
+  if (it.job) { SHIP.player.track = it.job; clearGoal(); }
+  else if (it.goal) { SHIP.player.track = null; setGoal({ ...it.goal, trk: it.key }); }
+  else return;
+  trkClose();                                            // on its way: the arrow shows
+}
+function trkDraw() {
+  const items = trkItems(); trkList.textContent = ''; trkSig = trkKey();
+  for (const [sec, head] of [['job', 'Your job'], ['on', 'On and coming up'], ['place', 'Places']]) {
+    const rows = items.filter(x => x.sec === sec); if (!rows.length) continue;
+    const h = document.createElement('h3'), box = document.createElement('div'); h.textContent = head; box.className = 'decks'; trkList.append(h, box);
+    for (const it of rows) {
+      const on = trkOn(it), b = document.createElement('button'), sp = document.createElement('span'), t = document.createElement('b'), sm = document.createElement('small');
+      b.type = 'button'; b.className = 'deckbtn' + (on ? ' goal' : ''); b.disabled = !on && !it.job && !it.goal; b.setAttribute('aria-pressed', String(on));
+      if (it.tag) { const i = document.createElement('i'); i.textContent = it.tag; b.appendChild(i); }
+      t.textContent = it.title; sm.textContent = it.sub + (b.disabled ? ' · no arrow for this one' : ''); sp.append(t, sm); b.appendChild(sp);
+      if (on) { const e = document.createElement('em'); e.textContent = 'Tracking'; b.appendChild(e); }
+      b.onclick = e => { e.stopPropagation(); trkTap(it); };
+      box.appendChild(b);
+    }
+  }
+}
+function trkOpen() { if (!trkEl.hidden) return trkClose(); trkDraw(); trkEl.hidden = false; trkBtn.setAttribute('aria-expanded', 'true');
+  try { (trkList.querySelector('button.goal') || trkList.querySelector('button:not(:disabled)') || document.getElementById('trkClose')).focus({ preventScroll: true }); } catch (e) { /* no focus */ } }
+function trkClose() { trkEl.hidden = true; trkBtn.setAttribute('aria-expanded', 'false'); }
+trkBtn.addEventListener('pointerdown', e => e.stopPropagation());
+trkBtn.onclick = e => { e.stopPropagation(); trkOpen(); };
+document.getElementById('trkClose').onclick = trkClose;
+addEventListener('keydown', e => { if (e.key === 'Escape' && !trkEl.hidden) trkClose(); });
+addEventListener('pointerdown', e => { if (!trkEl.hidden && !trkEl.contains(e.target) && !trkBtn.contains(e.target)) { e.stopPropagation(); e.preventDefault(); trkClose(); } }, true);   // a tap outside closes it, and goes no further
+// where it sits: on phones (narrow or short, section 15's pausePlace's test) under the needs strip's right end, clear of
+// the activity bar under its left end, so it stays put as the Device button grows (mail, a low need) and Pause moves;
+// elsewhere, or with no needs strip, in the Device button's row after Device (or Pause beside it), without its word
+// when it would touch the round buttons
+function trkPlace() {
+  const d = document.getElementById('devBtn'), pb = document.getElementById('pauseBtn'), ns = document.getElementById('needStrip'); if (!d) return;
+  const dr = d.getBoundingClientRect();
+  trkBtn.classList.remove('compact'); trkBtn.style.height = Math.round(dr.height) + 'px';
+  if (matchMedia('(max-width:720px),(max-height:500px)').matches && ns && !ns.hidden && ns.offsetWidth) {
+    const r = ns.getBoundingClientRect(); trkBtn.style.left = Math.round(Math.min(r.right, innerWidth - 12) - trkBtn.offsetWidth) + 'px'; trkBtn.style.top = Math.round(r.bottom + 8) + 'px'; return;
+  }
+  const pr = pb && pb.style.left ? pb.getBoundingClientRect() : null, anchor = pr && Math.abs(pr.top - dr.top) < 4 ? pr : dr;
+  const put = () => { trkBtn.style.left = Math.round(anchor.right + 8) + 'px'; trkBtn.style.top = Math.round(dr.top) + 'px'; };
+  const hits = () => { const q = trkBtn.getBoundingClientRect(); return q.right > innerWidth - 8 || [...document.querySelectorAll('.controls button')].some(o => { if (o === pb || !o.offsetWidth) return false; const r = o.getBoundingClientRect(); return r.left < q.right + 4 && q.left < r.right && r.top < q.bottom && q.top < r.bottom; }); };
+  put(); if (hits()) { trkBtn.classList.add('compact'); put(); }
+}
+addEventListener('resize', trkPlace); setTimeout(trkPlace, 0);
+let trkAt = 0;
+(function trkFrame() {                                   // the button's dot while an arrow's up; its place (the Device button and Pause move); the panel kept current while open
+  requestAnimationFrame(trkFrame);
+  const now = performance.now(); if (now - trkAt < 400) return; trkAt = now;
+  const on = typeof goalNow === 'function' && !!goalNow(); if (trkBtn.classList.contains('on') !== on) trkBtn.classList.toggle('on', on);
+  trkPlace();
+  if (!trkEl.hidden && trkSig !== trkKey()) trkDraw();
+})();
 
 // =====================================================================
 // 16. GALLEY & FOOD
