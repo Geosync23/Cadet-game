@@ -112,6 +112,57 @@ def m1_part(g):
     check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'm1: the round differs the second time')
 PARTS['m1'] = m1_part
 
+# 24c the drill (seat M1): Wednesdays 14:50-15:15, the week's kind (fire Day 3, pressure Day 10, power Day 17): the job
+# is yours at 14:50, its stops at the deck architect's places (skipped if they aren't in the build), done by you, over
+# at 15:15 (the all-clear) with the note and the row's use; the same twice
+M3D_RUN = r"""((kindDay) => {
+  SHIP.works = null; SHIP.occasions.length = 0; SHIP.notes = []; SHIP.flags = {}; SHIP.jobs = []; SHIP.mail = [];
+  MACH_HOUR = null; MACH_SEEN = -1; WORKS_TICK.m = WORKS_TICK.h = -1;
+  const run = (from, to, f) => { for (let m = from; m <= to; m++) { setShipNow(m); machinesNow(); worksCareerTick(m); if (f) f(m); } };
+  setShipNow(1440 + 300); machinesNow(); const W = worksInit(); W.tr.m1 = 2; W.use.m1 = 1; W.use.m4 = 1; W.op[1] = ['m1'];
+  const d = kindDay, t0 = (d - 1) * 1440, out = { kind: drillKind(d) };
+  run(t0 + 360, t0 + 880);
+  out.opened = worksOpened(W).has('m3d'); const j = drillJobOf(d); out.posted = !!j;
+  if (!j) return out;
+  out.stops = jobStops(j).map(s => [s.step, s.how || 'hold', s.places[0] || null]);
+  run(t0 + 881, t0 + 892); out.mine = j.claimedBy;
+  run(t0 + 893, t0 + 902, m => { if (m === t0 + 902) jobStops(j).forEach((s, k) => jobStepDone(j.id, k, s.how === 'turn' ? { value: 4 } : {})); });
+  out.reached = j.reached; out.workDone = !!j.workDone;
+  run(t0 + 903, t0 + 920);
+  out.status = [j.status, j.doneBy]; out.note = simNotes('drill', t0).map(n => [n.kind, n.mins, n.you]); out.tr = W.tr.m3d; out.use = W.use.m3d; out.xp = W.xp;
+  return out;
+})"""
+def m3d_part(g):
+    want = {3: 'fire', 10: 'pressure', 17: 'power'}
+    places = g.ev("!!(DECKS[5].drill && placeById(DECKS[5].drill.ext))")
+    for d, kind in want.items():
+        a = g.ev(f"({M3D_RUN})({d})"); b = g.ev(f"({M3D_RUN})({d})")
+        print(f'  24c drill Day {d}:', json.dumps(a))
+        check(a['kind'] == kind and a['posted'] and a['mine'] == 'you', f"m3d Day {d}: {a['kind']} posted {a['posted']} yours {a.get('mine')}")
+        if places: check(a['workDone'] and a['status'] == ['done', 'you'] and a['use'] == 1, f"m3d Day {d}: done {a.get('status')} use {a.get('use')}")
+        else: print('  (the drill places are not in this build: stops skipped)')
+        check(a.get('status', [None])[0] == 'done', f"m3d Day {d}: not over at 15:15")
+        check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), f'm3d Day {d}: differs the second time')
+PARTS['m3d'] = m3d_part
+
+# 24c the inspection (seat M1): Thursday 06:30. Each set of items gives its remark (nod, one, two, none); in the bunk
+# room it's said, away it's Mail at 07:00; turning up (or a nod while out) is the row's use; none on a day off
+M3I_RUN = r"""((items, here) => {
+  SHIP.works = null; SHIP.notes = []; SHIP.mail = []; WORKS_TICK.m = WORKS_TICK.h = -1;
+  setShipNow(3 * 1440 + 300); const W = worksInit(); W.op[1] = ['m1']; W.op[4] = ['m3i'];
+  SHIP.clothes.changed = items.uniform ? 4 : 3; SHIP.player.bedMade = items.bed ? 4 : null;
+  const res = inspectRun(4, here), mail = SHIP.mail.filter(m => m.at === 3 * 1440 + INSPECT_MAIL).length;
+  return { res, mail, use: W.use.m3i || 0, off: inspectDue(6) || inspectDue(7) };
+})"""
+def m3i_part(g):
+    cases = [({'uniform': 1, 'bed': 1}, True, 'nod', 1), ({'uniform': 0, 'bed': 1}, True, 'uniform', 1), ({'uniform': 1, 'bed': 0}, False, 'bed', 0),
+             ({'uniform': 0, 'bed': 0}, False, 'two', 0), ({'uniform': 1, 'bed': 1}, False, 'nod', 1)]
+    for items, here, want, use in cases:
+        a = g.ev(f"({M3I_RUN})({json.dumps(items)}, {'true' if here else 'false'})")
+        print('  24c inspection', items, 'here' if here else 'away', json.dumps(a))
+        check(a['res'] == want and a['use'] == use and a['mail'] == (0 if here else 1) and not a['off'], f"m3i {items} {here}: {a}")
+PARTS['m3i'] = m3i_part
+
 only = set(sys.argv[2:])
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
