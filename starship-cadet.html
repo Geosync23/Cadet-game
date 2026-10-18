@@ -35146,7 +35146,8 @@ function introTick() {
 const CLOTHES_FULL = 5, CLOTHES_SPARE = 1, CLOTHES_LATE = 10 * 60, CLOTHES_NIGHT = 22 * 60, CLOTHES_DRAIN = 1.6, WASH_MINS = 30;
 const HAMPER_NEAR = .6, WARDROBE_NEAR = .6;
 let CLOTHES_ON = !NOSAVE || URL_FLAGS.has('clothes');
-const clothesBlank = full => ({ clean: full ? CLOTHES_FULL : CLOTHES_SPARE, changed: full ? -1 : 0, kit: !!full, hamper: null, said: {}, told: -1 });
+const clothesBlank = full => ({ clean: full ? CLOTHES_FULL : CLOTHES_SPARE, changed: full ? -1 : 0, kit: !!full, hamper: null, said: {}, told: -1, grime: 0 });
+const grimeRound = g => Math.round(Math.max(0, Math.min(1, +g || 0)) * 100) / 100;   // 0-1, two decimals (0.42.46)
 function clothesLoad(s) {
   const x = s && s.clothes, C = clothesBlank(true);
   if (!x || typeof x !== 'object') { C.changed = SHIP.time.day; return C; }   // an older save: the full kit, and already changed today
@@ -35154,6 +35155,7 @@ function clothesLoad(s) {
   if (Number.isInteger(x.changed)) C.changed = x.changed;
   if (Number.isInteger(x.told)) C.told = x.told;
   C.kit = x.kit !== false;
+  C.grime = isFinite(x.grime) ? grimeRound(x.grime) : 0;   // an older save: clean (0.42.46)
   if (x.said && typeof x.said === 'object') for (const k in x.said) if (isFinite(x.said[k])) C.said[k] = +x.said[k];
   const h = x.hamper;
   if (h && ['dirty', 'washing', 'clean'].includes(h.state) && ['hands', 'floor', 'washer'].includes(h.at)) {
@@ -35163,13 +35165,27 @@ function clothesLoad(s) {
   return C;
 }
 SHIP.clothes = clothesLoad(SAVED);
-SAVE_EXTRA.push(s => { s.clothes = JSON.parse(JSON.stringify(SHIP.clothes)); });
+SAVE_EXTRA.push(s => { s.clothes = JSON.parse(JSON.stringify(SHIP.clothes)); s.clothes.grime = grimeRound(SHIP.clothes.grime); });
 onSim('newGame', n => { SHIP.clothes = clothesBlank(!n.arrival); });   // by shuttle: one spare outfit; on Monday: the full kit
 const hamperHeld = () => CLOTHES_ON && !!SHIP.clothes.hamper && SHIP.clothes.hamper.at === 'hands';
 const clothesYesterday = () => CLOTHES_ON && SHIP.clothes.changed < SHIP.time.day && SHIP.time.min >= CLOTHES_LATE && SHIP.time.min < CLOTHES_NIGHT;
-function clothesFx(fx) {                                 // section 15's playerFx: hygiene drains faster in yesterday's clothes
-  if (!clothesYesterday()) return fx;
-  return { ...fx, drain: { ...(fx.drain || {}), hygiene: fxD(fx, 'hygiene') * CLOTHES_DRAIN }, notes: [{ text: 'In yesterday\'s clothes' }, ...(fx.notes || [])] };
+// your uniform's grime (0.42.46, Pillar 5's m2 "uniform" page, for the mechanic seat's 24b): SHIP.clothes.grime 0-1 (saved, two
+// decimals). Oily jobs add to it through clothesGrime(add); a change at your wardrobe while grubby always takes a clean
+// outfit (even if you've changed today) and sets it to 0; a shower leaves it. uniformState(): 'grubby' (grime >= GRIME_GRUBBY),
+// else 'yesterday' (clothesYesterday), else 'clean'. Grubby drains hygiene as yesterday's clothes do (one CLOTHES_DRAIN,
+// never both). simNote('uniform', { state }) on each change (uniformWatch). Off at test URLs: 'clean', and clothesGrime is null.
+const GRIME_GRUBBY = .6;
+const uniformState = () => !CLOTHES_ON ? 'clean' : SHIP.clothes.grime >= GRIME_GRUBBY ? 'grubby' : clothesYesterday() ? 'yesterday' : 'clean';
+function clothesGrime(add) {
+  if (!CLOTHES_ON || !isFinite(add)) return null;
+  SHIP.clothes.grime = grimeRound(SHIP.clothes.grime + add); uniformWatch();
+  return SHIP.clothes.grime;
+}
+let UNIFORM_SEEN = null;
+function uniformWatch() { const u = uniformState(); if (u !== UNIFORM_SEEN) { const was = UNIFORM_SEEN; UNIFORM_SEEN = u; if (was !== null) simNote('uniform', { state: u }); } }
+function clothesFx(fx) {                                 // section 15's playerFx: hygiene drains faster in yesterday's clothes, or a grubby uniform
+  const u = uniformState(); if (u === 'clean') return fx;
+  return { ...fx, drain: { ...(fx.drain || {}), hygiene: fxD(fx, 'hygiene') * CLOTHES_DRAIN }, notes: [{ text: u === 'grubby' ? 'Your uniform is grubby' : 'In yesterday\'s clothes' }, ...(fx.notes || [])] };
 }
 Object.assign(PLAYER_ACTS, { clothes: { mins: 1, pose: 'browse', title: 'Changing' } });
 const clothesHandsFull = () => { const P = SHIP.player; return P.carry.length > 0 || !!P.tray || !!P.cart || hamperHeld(); };
@@ -35228,16 +35244,16 @@ function wardrobeUse() {
   if (h && h.at === 'hands' && h.state === 'clean') {   // put the clean washing away (and change, if you haven't today)
     const first = !C.kit; C.kit = true; C.clean = CLOTHES_FULL; C.hamper = null; clothesGoal(null);
     let say = first ? clothesText('laundry.kit', {}, 'Your full kit has come up from stores while you were out: you put it away with your clean washing. Five outfits.') : clothesText('laundry.away', {}, 'You put your clean washing away. Five outfits.');
-    if (C.changed < today) { C.clean--; C.changed = today; simAct('clothes'); say += ' You change into a fresh set. ' + clothesText('clothes.left', { n: C.clean }, clothesLeft(C.clean)[0].toUpperCase() + clothesLeft(C.clean).slice(1) + '.'); }
+    if (C.changed < today || C.grime >= GRIME_GRUBBY) { C.clean--; C.changed = today; C.grime = 0; uniformWatch(); simAct('clothes'); say += ' You change into a fresh set. ' + clothesText('clothes.left', { n: C.clean }, clothesLeft(C.clean)[0].toUpperCase() + clothesLeft(C.clean).slice(1) + '.'); }
     actStart('clothes', null, { title: 'Wardrobe', after: say });
     return;
   }
   if (h && h.at === 'hands') { toast('Wardrobe', 'Your hamper\'s full of dirty washing. Take it to a free washer in the laundry, past the washrooms in the junior wing.'); clothesGoal('washer'); return; }
   if (h && h.at === 'washer') { toast('Wardrobe', 'Your washing is in ' + washerName(h.washer) + ' in the laundry' + (h.done || shipNow() >= h.until ? ': it\'s done, take it out.' : ', done at ' + hhmm(h.until) + '.')); return; }
   if (h && h.at === 'floor') { toast('Wardrobe', 'Your laundry hamper is where you set it down' + (h.deck !== deckDef.num ? ', on Deck ' + h.deck : '') + '. Pick it up again when you\'re ready.'); return; }
-  if (C.clean > 0 && C.changed >= today) { toast('Wardrobe', 'You\'re in clean clothes today. ' + clothesLeft(C.clean)[0].toUpperCase() + clothesLeft(C.clean).slice(1) + ' in here.'); return; }
-  if (C.clean > 0) {
-    C.clean--; C.changed = today; simAct('clothes');
+  if (C.clean > 0 && C.changed >= today && C.grime < GRIME_GRUBBY) { toast('Wardrobe', 'You\'re in clean clothes today. ' + clothesLeft(C.clean)[0].toUpperCase() + clothesLeft(C.clean).slice(1) + ' in here.'); return; }
+  if (C.clean > 0) {                                     // (grubby: always, even if you changed today)
+    C.clean--; C.changed = today; C.grime = 0; uniformWatch(); simAct('clothes');
     const fresh = clothesText('clothes.changed', {}, 'You change into clean clothes.'), spare = !C.kit && !C.clean;
     actStart('clothes', null, { title: 'Wardrobe', after: fresh + ' ' + (spare ? clothesText('clothes.spare', {}, 'Your one spare outfit. The rest of your kit comes up from stores.')
       : C.clean ? clothesText('clothes.left', { n: C.clean }, clothesLeft(C.clean)[0].toUpperCase() + clothesLeft(C.clean).slice(1) + '.') : 'That was your last clean set.') + (C.clean ? '' : ' Do your laundry before tomorrow: tap the wardrobe again for your hamper.') });
@@ -35400,6 +35416,7 @@ function clothesFrame() {
   requestAnimationFrame(clothesFrame);
   if (!CLOTHES_ON || typeof deckDef === 'undefined' || !deckDef || typeof player === 'undefined') return;
   const C = SHIP.clothes, h = C.hamper, now = shipNow();
+  uniformWatch();                                        // simNote('uniform') when it turns grubby, yesterday's or clean (10:00, 22:00, a change)
   if (h && h.at === 'washer' && !h.done && now >= h.until) { h.done = true; toast('Laundry', clothesText('laundry.done', {}, 'Your washing\'s done. Collect it from the laundry on Deck 4.') + ' It\'s in ' + washerName(h.washer) + '.'); }
   if (C.changed < SHIP.time.day && C.clean > 0 && SHIP.time.min >= 6 * 60 && SHIP.time.min < CLOTHES_LATE && deckDef.num === 4 && typeof ixTip === 'function' && !ACT)
     ixTip('clothes', 'Your wardrobe is the locker by the door in Bunk 1. Change into clean clothes there every morning: by 10:00 you\'re in yesterday\'s clothes.');   // once (the device's tips)
