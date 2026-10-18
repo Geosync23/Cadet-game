@@ -252,7 +252,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.55.7
+   STARSHIP CADET: CSV Wren                           build 0.55.8
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7810,7 +7810,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.55.7';                           // keep in step with the header's build line
+const GAME_BUILD = '0.55.8';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -34467,7 +34467,7 @@ function scanPartsOf(m) {
 }
 // the readings: [[part, value], ...], frozen on the job at the first look. The cause's part reads 12-35; the others
 // 70-96, except (3 times in 10) one decoy with the same card and a different sign at 40-60, so what you see up close
-// tells them apart. On a head-scratcher's job every suspect's part reads 40-60. null if there's nothing to read (no
+// tells them apart (or, on Day 5's training case, fixed readings). On a head-scratcher's job every suspect's part reads 40-60. null if there's nothing to read (no
 // scanner, no cause, no part cause)
 function scanRead(jobId) {
   const j = SHIP.jobs.find(x => x.id === jobId); if (!j || !j.machine || !scanHave()) return null;
@@ -34475,7 +34475,7 @@ function scanRead(jobId) {
   const m = machineById(j.machine), f = m && caseCauses(m).find(x => x.id === j.cause); if (!f || !f.part) return null;
   const d = scanDay(j), seed = machSeed(m.id), parts = scanPartsOf(m); if (!parts.includes(f.part)) parts.unshift(f.part);
   const dec = caseCauses(m).filter(x => x.part && x.part !== f.part && x.shows === f.shows && x.sign !== f.sign).map(x => x.part);
-  const worn = j.scanWorn || (dec.length && schedU(seed, d, 874) < .3 ? dec[Math.floor(schedU(seed, d, 875) * dec.length)] : null);
+  const worn = (dec.length && schedU(seed, d, 874) < .3 ? dec[Math.floor(schedU(seed, d, 875) * dec.length)] : null);
   // a head-scratcher (the designer, 1d87fc6): every suspect's part reads worn (40-60), whatever the cause, and the rest
   // good, so the scanner never gives the answer away; it isn't one of the case's clues
   const sus = j.case && typeof caseOf === 'function' && caseOf(j), sp = sus ? new Set(sus.sus.map(x => caseSus(sus, x).part).filter(x => x)) : null;
@@ -34974,7 +34974,7 @@ function p3Tries(j, decoys, seed, t) {
     last = x;
     const pref = on.filter(p => p.id !== prev && p.rank !== 'chief'), pool = pref.length ? pref : on;   // a Works hand, not the one before, if there's one
     const by = pool.length ? pool[Math.floor(schedU(seed, i, 891) * pool.length)].id : null; prev = by;
-    return { id: 'n' + i, type: 'note', src: { by, t: x, tried: s, done: false }, at: i % 2 && pp ? pp : 'board', kills: [s] };
+    return { id: 'n' + i, type: 'note', src: { by, t: x, tried: s, done: false }, at: i && pp ? pp : 'board', kills: [s] };   // the first on the job, the rest on the machine
   });
 }
 // once a ship minute (24k's caseTick): the tries whose time has come are done (the part comes off its shelf); when all
@@ -35012,7 +35012,8 @@ function p3Stage(C) {
   if (SHIP.works.tr && SHIP.works.tr.p3 !== undefined || caseOpened('p3')) { C.first = 'none'; return; }   // an older save past it
   const now = shipNow(), t18 = Math.floor((now - 1080) / 1440) * 1440 + 1080, d = Math.floor(t18 / 1440) + 1;
   if (now < 1080 || d < 4) return;
-  const m = ['4-washer-2', '4-washer-3'].map(machineById).find(x => x && !SHIP.jobs.some(j => j.machine === x.id && j.status !== 'done' && j.claimedBy === 'you'));
+  const mine = SHIP.clothes && SHIP.clothes.hamper, washing = id => !!(mine && mine.at === 'washer' && mine.washer === id);   // your own wash in it: the next one
+  const m = ['4-washer-2', '4-washer-3'].map(machineById).find(x => x && !washing(x.id) && !SHIP.jobs.some(j => j.machine === x.id && j.status !== 'done' && j.claimedBy === 'you'));
   if (!m || !caseCauses(m).some(x => x.id === 'pump')) { C.first = 'none'; return; }
   const id = jobReserve(m.id, d, 1080, 20, { train: 'p3', tier: 1, until: t18 + 7 * 1440, cause: 'pump' }), j = id && SHIP.jobs.find(x => x.id === id);
   if (!j) return;

@@ -403,6 +403,7 @@ def run(path):
             check(all(k['crew'] and 120 <= k['dt'] <= 1440 + 600 for k in clues), f"{c['id']}: tries by Works crew at work, 2-12 hours on or the next morning: {[(k['by'], k['dt'], k['crew']) for k in clues]}")
             check(c['wait'] and c['hidden'] and c['parts'] != [] and not c['early'] and c['shown'], f"{c['id']}: hidden till the last try, then shown inside the shift: {c}")
             check(all(u == 1 for u in c['used']), f"{c['id']}: each try's part came off its shelf: {c['used']}")
+            check(sum(1 for k in clues if k['at'] == 'board') == 1, f"{c['id']}: one note on the job, the rest on the machine: {[k['at'] for k in clues]}")
             check(c['scanBlind'], f"{c['id']}: the scanner's readings don't depend on the cause")
             check(' — ' in c['text'] and 'Still' in c['text'], f"{c['id']}: a note names who tried: {c['text']!r}")
         check(Q.get('waitEnds'), f"a case still waiting after three days is let go: {Q.get('waitEnds')}")
