@@ -20,7 +20,7 @@ from playwright.sync_api import sync_playwright
 
 DAYS = int(sys.argv[2]) if len(sys.argv) > 2 else 28
 BUDGET = 450
-MORNING_WAIT = {'sunrise-stretch', 'pick-your-own'}       # the early ones (06:15, 06:30) wait for section 14 (0.34.51)
+MORNING_WAIT = set()                                      # was the two early ones (0.34.51), until social 0607's morning() (d3d5b4d) slots them
 STEP = 0.05                    # real seconds a step, as day_check
 
 # Pillar 4's rhythms, worked out forwards from each rhythm's first day (not with the game's evDue), for days lo..hi

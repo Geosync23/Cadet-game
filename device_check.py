@@ -372,9 +372,9 @@ def run(path):
                 for (let k = 0; k <= 45; k += 5) { let n = 0; const t = (d - 1) * 1440 + x.from + k;
                   for (const p of S.people) { let w = null; try { w = whereIs(p, t); } catch (e) {} if (w && w.tag && /^(ev-|drill$|inspection$)/.test(w.tag) && (!deck || w.deck === deck || x.kind === 'ship')) n++; }
                   best = Math.max(best, n); }
-                seen.push(x.title); if (best < 2 && !/^(Sunrise stretch|Pick-your-own breakfast)$/.test(x.title)) bad.push(d + ' ' + hhmm(x.from) + ' ' + x.title + ' (' + best + ')'); }
+                seen.push(x.title); if (best < 2) bad.push(d + ' ' + hhmm(x.from) + ' ' + x.title + ' (' + best + ')'); }
               return [seen.length, bad, seen.some(t => /briefing/i.test(t))]; })()""")
-            print('  schedule items checked:', sh[0], 'not happening:', sh[1], '(WAITING: Sunrise stretch and Pick-your-own breakfast are let off until section 14\'s morning() slots a gathering before breakfast, asked at 0.34.51)')
+            print('  schedule items checked:', sh[0], 'not happening:', sh[1])
             check(sh[0] >= 5 and not sh[1] and not sh[2], f'the Schedule lists only what really happens: {sh}')
             # days off (0.35.17): section 14's playerShiftOn(d) (a stand-in here: Saturday and Sunday off) shows "Day off" in
             # Schedule, the strip and the Calendar, with no shift that day
