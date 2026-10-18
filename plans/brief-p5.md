@@ -26,7 +26,7 @@ The user said go for Pillar 5 Steps 1 (Foundation) and 2 (Junior days, Days 2-8)
 | R reviewer | claude/reviews-p5 | session_01MSLjUdmeVJetxFhh9PqzLt |
 | W writer (head writer) | claude/writer-p5 | session_013DdpJv4AKFJcvuBBqjSXms |
 | M1 mechanics 1 (rounds, drill/inspection, hauling, uniform) | claude/mech-rounds | session_01PkbdtgrbpHymsmu5Pgazm7 |
-| A deck architect (DA4) | claude/decks-p5 | session_01P6DtVbtWZs9i82fJ4UzRuB |
+| A deck architect (DA4) | claude/deck-0607 (its only push branch; fast-forwarded to d3d720b) | session_01P6DtVbtWZs9i82fJ4UzRuB |
 | M2 (tuning, incidents) | claude/mech-incidents | later (when P finishes) |
 
 Merge order within a step: 17 (S), 15 (P), 24 core (C), mechanics in ladder order, head-scratchers (H), deck architect (A), writer.
