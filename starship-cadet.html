@@ -57,6 +57,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 .lift .stay{margin:10px auto 0;padding:7px 16px}
 .devbtn{position:fixed;left:14px;top:86px;z-index:2;padding:6px 11px;font-size:12.5px}
 .devbtn b{min-width:16px;padding:0 4px;border-radius:8px;background:var(--teal);color:#08201d;font-size:11px;line-height:16px;margin-left:2px}
+.devbtn.compact span{display:none}                        /* 0.28.59: the narrowest phones, so Pause fits beside it (its aria-label still says Device) */
 .devbtn.low::after{content:"";width:7px;height:7px;border-radius:50%;background:#e8a04c;margin-left:2px}
 /* 19. the device's skin (0.35.1): an old-school phosphor screen in a bezel. CSS and DOM only: no canvas, blur or backdrop-filter. */
 .device,.devtip,.devhu,.devdlg,.devaddr,#chat.devchat,body #seek{--crt-ink:#6ff0dc;--crt-dim:#4ab1a3;--crt-bg:#03141a;--crt-hot:#e8fffb;--crt-glow:rgba(95,227,208,.45);--crt-scan:rgba(0,0,0,.2);--crt-radius:18px;--crt-font:ui-monospace,"Cascadia Mono",Menlo,Consolas,monospace;--crt-size:17px;--bezel:#1b1f24}
@@ -9645,7 +9646,7 @@ const DEVICE_SKIN = (() => {
       btn.classList.toggle('low', low);
       let un = 0; try { un = mailUnread(); } catch (e) { /* before section 15 */ }
       if (devLocked()) un = 0;                          // no mail badge on a device you haven't got yet
-      if (badge) { badge.hidden = !un; badge.textContent = un; }
+      if (badge && (badge.hidden !== !un || badge.textContent !== String(un))) { badge.hidden = !un; badge.textContent = un; if (typeof pausePlace === 'function') pausePlace(); }   // Pause sits beside the button (0.28.59)
       led.classList.toggle('on', un > 0); led.classList.toggle('blink', un > 0);   // the power light blinks for new mail
     },
     draw(id, v) {
@@ -10452,17 +10453,19 @@ deviceApp({ id: 'wallet', title: 'Wallet', icon: 'wallet', order: 90, view: () =
 // crew tap (10: playerChat), Walker.update's pose (10: holding, crouch),
 // playerUpdate in the main loop (12), the device's HTML and CSS.
 // =====================================================================
-const NEED_KEYS = ['hunger', 'energy', 'hygiene', 'fitness', 'social', 'bathroom'];   // the plan's NEEDS (section 14 has it too, as NEEDS); bathroom: the user's, 0.28.19
-const NEED_LABEL = { hunger: 'Food', energy: 'Energy', hygiene: 'Hygiene', fitness: 'Fitness', social: 'Social', bathroom: 'Bathroom' };
+const NEED_KEYS = ['hunger', 'energy', 'hygiene', 'fitness', 'social', 'bathroom', 'leisure'];   // the plan's NEEDS (section 14 has it too, as NEEDS); bathroom: the user's, 0.28.19; leisure: 0.60.7's (0.28.61)
+const NEED_LABEL = { hunger: 'Food', energy: 'Energy', hygiene: 'Hygiene', fitness: 'Fitness', social: 'Social', bathroom: 'Bathroom', leisure: 'Leisure' };
 // drain per ship hour (so they hold whatever SHIP_RATE is): [awake, asleep]. A normal day (breakfast, dinner, a
 // shower, a night's sleep) keeps food, hygiene and fitness above 40; the gym every two or three days keeps fitness
 // up; a call home every two days keeps social up. Energy (0.28.9, the user's long days): 4.4 an hour takes a rested
 // player from 100 to the tired line (25) in 17 ship hours at average fitness, about 18 when fit and 16 when not
 // (needEffects' drain, below). Bathroom (0.28.19, the user's): 12 an hour awake, from a visit to the low line in
 // about six hours, so it comes up three or four times a day (on waking, midday, dinner, bedtime); 3 asleep.
-const NEED_DRAIN = { hunger: [4, 2], energy: [4.4, 0], hygiene: [2.5, 1], fitness: [.6, .3], social: [1, .25], bathroom: [12, 3] };
+// Leisure (0.28.61, the 0.60.7 plan): 0.8 an hour awake, none asleep, so about 6 ship days from full to the low line;
+// hobbies, traditions, Tiles, the bar, a full talk, calling home and a few places fill it (leisureAdd, below)
+const NEED_DRAIN = { hunger: [4, 2], energy: [4.4, 0], hygiene: [2.5, 1], fitness: [.6, .3], social: [1, .25], bathroom: [12, 3], leisure: [.8, 0] };
 const SLEEP_GAIN = 12.5;                                 // energy per ship hour asleep: 8 hours fills it
-const NEEDS_FRESH = { hunger: 60, energy: 100, hygiene: 60, fitness: 70, social: 70, bathroom: 60 };   // a new game: just woken, before breakfast
+const NEEDS_FRESH = { hunger: 60, energy: 100, hygiene: 60, fitness: 70, social: 70, bathroom: 60, leisure: 70 };   // a new game: just woken, before breakfast
 const NEEDS_OLD = 80;                                    // a v 1 save had no needs: start them here
 const SLOW_BELOW = 25, SLOW_SPEED = .8;                  // fitness or energy under this: walk at this speed (each one counts)
 const needClamp = v => Math.max(0, Math.min(100, v));
@@ -10479,9 +10482,10 @@ const NEED_FX = {   // need: { hi: [effects, reason], lo: [effects, reason] }
   hygiene: { hi: [{ socialGain: 1.5 }, 'Fresh and clean: chatting does you more good.'], lo: [{ socialGain: .5 }, 'You could do with a wash: chatting does half the good.'] },
   social:  { hi: [{ task: 1.1 }, 'In good spirits: tasks go 10% faster.'], lo: [{ drain: 1.05 }, 'Lonely: you tire a little sooner.'] },
   bathroom: { hi: [{ task: 1.05 }, 'Comfortable: tasks go 5% faster.'], lo: [{ task: .9 }, 'You need the toilet: it\'s hard to concentrate, tasks go 10% slower.'] },
+  leisure: { hi: [{ friendGain: 1.25 }, 'In good spirits: talking makes friends 25% faster.'], lo: [{ task: .9 }, 'Restless: tasks go 10% slower.'] },   // 0.28.61; friendGain: section 20's Talk a while
 };
 function needEffects(n = SHIP.player.needs) {             // -> { walk, task, drain, socialGain, notes: [reason], marks: { need: ['up' | 'down', reason] } }
-  const e = { walk: 1, task: 1, drain: 1, socialGain: 1, notes: [], marks: {} };
+  const e = { walk: 1, task: 1, drain: 1, socialGain: 1, friendGain: 1, notes: [], marks: {} };
   for (const k of NEED_KEYS) {
     const side = n[k] >= NEED_HIGH ? 'hi' : n[k] < NEED_LOW ? 'lo' : null, fx = side && NEED_FX[k][side]; if (!fx) continue;
     for (const f in fx[0]) e[f] *= fx[0][f];
@@ -10496,7 +10500,7 @@ function needEffects(n = SHIP.player.needs) {             // -> { walk, task, dr
 }
 function needsLoad(s) {                                  // from the save (section 13): v 2 has needs; v 1, none
   const src = s && s.v >= 2 && s.player && s.player.needs, out = {};
-  for (const k of NEED_KEYS) { const v = src && src[k]; out[k] = !s ? NEEDS_FRESH[k] : typeof v === 'number' && isFinite(v) ? needClamp(v) : NEEDS_OLD; }
+  for (const k of NEED_KEYS) { const v = src && src[k]; out[k] = !s ? NEEDS_FRESH[k] : typeof v === 'number' && isFinite(v) ? needClamp(v) : k === 'leisure' ? NEEDS_FRESH.leisure : NEEDS_OLD; }   // a save from before leisure: 70, as a new game
   return out;
 }
 SHIP.player = { needs: needsLoad(SAVED), carry: [], work: null };   // carry and work come from the save below (the job loop)
@@ -10556,6 +10560,7 @@ const NEED_SAY = {
   hygiene: ['You need a shower. The washrooms are at the ends of the junior wing on Deck 4.', 'A shower would be nice.'],
   social: ['You miss home. The call-home booths are on Deck 3.', 'You\'d like to hear from home.'],
   bathroom: ['You really need the toilet. The washrooms are at the ends of the junior wing on Deck 4.', 'You could do with a trip to the toilet.'],
+  leisure: ['You\'re restless. Try a hobby (the Hobbies app on your device), a tradition, or a game of Tiles.', 'You could do with some time to yourself.'],
 };
 function needsLine() {
   const n = SHIP.player.needs, k = NEED_KEYS.slice().sort((a, b) => n[a] - n[b])[0];
@@ -10596,7 +10601,16 @@ const NEED_WARN = {   // need: [[title, text] under 25, [title, text] under 10] 
     ['Missing people', 'Really missing people. Find a friendly face, or call home from the booths on Deck 3.']],
   bathroom: [['Need the toilet', 'You need the toilet. Public washrooms are in the junior wing on Deck 4, and on Deck 3.'],
     ['Bursting', 'You really need the toilet, now! Deck 4 or Deck 3. Hold on, or you\'ll be hopping.']],
+  leisure: [['Restless', 'All work lately. Try a hobby on your device, go to a tradition, or play a game of Tiles.'],
+    ['Very restless', 'You really need some time to yourself: tasks are 10% slower. A hobby, a tradition or a game of Tiles will help.']],
 };
+// leisureAdd(n, why) (0.28.61, for every section: section 18's traditions, 20's Talk a while, the bar, calling home):
+// adds n leisure (times the ship's restore, like any gain) and returns what it added. why is a short word for the notes
+function leisureAdd(n, why) {
+  const N = SHIP.player && SHIP.player.needs; if (!N || !(n > 0)) return 0;
+  const b = N.leisure; N.leisure = needClamp(N.leisure + n * fxR(playerFx(), 'leisure'));
+  return N.leisure - b;
+}
 let WARN_SAID = {};                                      // need -> 0 armed, 1 the gentle one said, 2 the firm one said
 function needWarnTick(now) {
   const n = SHIP.player.needs; let pick = null, lvl = 0;
@@ -10844,7 +10858,10 @@ function pauseShift(d) {
 function pausePlace() {
   const b = document.getElementById('pauseBtn'), d = document.getElementById('devBtn'); if (!b || !d) return;
   if (!matchMedia('(max-width:720px),(max-height:500px)').matches) { b.style.left = b.style.top = b.style.height = ''; return; }
-  const r = d.getBoundingClientRect(); b.style.left = Math.round(r.right + 8) + 'px'; b.style.top = Math.round(r.top) + 'px'; b.style.height = Math.round(r.height) + 'px';
+  const put = () => { const r = d.getBoundingClientRect(); b.style.left = Math.round(r.right + 8) + 'px'; b.style.top = Math.round(r.top) + 'px'; b.style.height = Math.round(r.height) + 'px'; };
+  const hits = () => { const q = b.getBoundingClientRect(); return [...document.querySelectorAll('.controls button')].some(o => { if (o === b || !o.offsetWidth) return false; const r = o.getBoundingClientRect(); return r.left < q.right + 4 && q.left < r.right && r.top < q.bottom && q.top < r.bottom; }); };
+  d.classList.remove('compact'); put();
+  if (hits()) { d.classList.add('compact'); put(); }       // the narrowest phones (0.28.59; 320 px): the Device button drops its word so Pause clears the round buttons
 }
 addEventListener('resize', pausePlace); setTimeout(pausePlace, 0);
 if (typeof ResizeObserver === 'function') new ResizeObserver(() => pausePlace()).observe(document.getElementById('devBtn'));   // the mail count widens it
@@ -10916,6 +10933,7 @@ const PLAYER_ACTS = {   // need and gain over mins ship minutes; pose: the crowd
   make:   { mins: 60, pose: 'work', title: 'Machine shop' },   // section 17's JOB_MAKE: an hour a part, like the crew
   craft:  { mins: 15, pose: 'work', title: 'Machine shop' },   // a small gift, no job (0.28.25: section 20's GIFT_MAKES sets the minutes)
   sit:    { mins: 1, pose: 'sit', title: 'Sitting', until: () => false },   // sit anywhere (0.28.12): until you get up
+  hobby:  { need: 'leisure', gain: 25, mins: 30, pose: 'sit:read', title: 'Hobby', done: 'You put it away.', until: A => hobbyUntil(A) },   // a hobby (0.28.61): see HOBBIES
   lie:    { mins: 1, pose: 'lie', title: 'Your bunk', until: () => false },   // lying in your bunk (0.28.29): until you get up
   cartTake: { mins: 2, pose: 'stand', title: 'Cart bay' },     // the cart run (0.28.11): the crew's own times (section 17's jobRun)
   cartLoad: { mins: 10, pose: 'work+cart', title: 'Cargo hold' },
@@ -11435,12 +11453,13 @@ function deviceLockLook() {
 // clock in floatsTick, like the notes (0.28.23).
 const RISE_SECS = 2.2;                                   // NEED_LOW (25) is the needs' own line, above
 const cssCol = h => '#' + col(h).convertLinearToSRGB().getHexString();
-const NEED_COL = { hunger: cssCol('#f07f6e'), energy: cssCol('#e9d36b'), hygiene: cssCol('#6cc4e4'), fitness: cssCol('#79d08a'), social: cssCol('#c69be6'), bathroom: cssCol('#9bb7cc') };
+const NEED_COL = { hunger: cssCol('#f07f6e'), energy: cssCol('#e9d36b'), hygiene: cssCol('#6cc4e4'), fitness: cssCol('#79d08a'), social: cssCol('#c69be6'), bathroom: cssCol('#9bb7cc'), leisure: cssCol('#f2a6c8') };
 const NEED_AMBER = cssCol('#ff9a3c');
 const NEED_ICON = {                                       // 24-unit stroke icons: fork and knife, bolt, droplet, dumbbell, two people, door
   hunger: 'M7 3v7M5 3v4a2 2 0 0 0 4 0V3M7 10v11M17 3c-2 1-3 4-3 8h3v10', energy: 'M13 2 5 13h6l-1 9 8-12h-6z',
   hygiene: 'M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z', fitness: 'M3 10v4M6.5 7v10M17.5 7v10M21 10v4M6.5 12h11',
-  social: 'M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM3 20c0-3 3-5 6-5s6 2 6 5M16 5.5a2.5 2.5 0 0 1 0 5M17 15c2.5.3 4 2.2 4 5', bathroom: 'M6 21V3h12v18M4 21h16M14 12h1' };
+  social: 'M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM3 20c0-3 3-5 6-5s6 2 6 5M16 5.5a2.5 2.5 0 0 1 0 5M17 15c2.5.3 4 2.2 4 5', bathroom: 'M6 21V3h12v18M4 21h16M14 12h1',
+  leisure: 'M12 3l2.4 5.2 5.6.6-4.2 3.8 1.2 5.6L12 15.4 7 18.2l1.2-5.6L4 8.8l5.6-.6z' };   // leisure (0.28.61): a star
 const RISES = {};                                         // need -> { v, at }: the "+N" showing beside its icon
 // folding it away (0.28.33, the user's "you should be able to collapse the needs window"): the little chevron at its end
 // folds the strip (and its names panel) to one heart icon, amber while any need is low; a tap on that opens it again.
@@ -11475,6 +11494,7 @@ function needStrip() {
   el.querySelector('.nsFold').onclick = e => { e.stopPropagation(); stripFold(true); };
   document.body.appendChild(el);
   if (SHIP.player.stripFold) el.classList.add('fold');
+  try { hudBelow(); } catch (e) { /* section 11 not run yet: its next clock tick lines it up */ }   // under a tall HUD (0.28.59)
   return el;
 }
 function stripRise(k, v) {                               // a rise beside its icon; a new one while it shows adds to it
@@ -11944,11 +11964,70 @@ function handEl() {
     + '#repairBtn{border-color:#e8c06a;color:#f2e3bf}body.dlgon #handBtns{display:none}';
   document.head.appendChild(st);
   el = document.createElement('div'); el.id = 'handBtns';
-  el.innerHTML = '<button type="button" id="repairBtn" hidden aria-label="Repair: start the work here"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.1L4 16.7 7.3 20l5.3-5.3a4 4 0 0 0 5.1-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg><span>Repair</span></button>';
+  el.innerHTML = '<button type="button" id="hobbyBtn" hidden aria-label="Hobby: something to do while you sit"><svg viewBox="0 0 24 24"><path d="' + NEED_ICON.leisure + '"/></svg><span>Hobby</span></button>'   // 0.28.61
+    + '<button type="button" id="repairBtn" hidden aria-label="Repair: start the work here"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.1L4 16.7 7.3 20l5.3-5.3a4 4 0 0 0 5.1-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg><span>Repair</span></button>';
   document.body.appendChild(el);
   for (const b of el.querySelectorAll('button')) b.addEventListener('pointerdown', e => e.stopPropagation());   // never a tap on the deck behind
   document.getElementById('repairBtn').onclick = e => { e.stopPropagation(); const h = handRepair(); if (h) h.go(); handTick(true); };
+  document.getElementById('hobbyBtn').onclick = e => { e.stopPropagation(); hobbyPick(); handTick(true); };
   return el;
+}
+// ---- hobbies (0.28.61, the 0.60.7 plan's "Hobbies"): seven, each 30 ship minutes for +25 leisure, a meter like a
+// meal's. On your device (dev): read, write, play games, anywhere you sit, lie or stand still (the Hobbies app). With a
+// prop (prop): drawing (a sketchpad), knitting (needles and wool), puzzles (a puzzle book), from the crew store or (knitting)
+// Zeke; stargazing needs only a big window (win). Sitting with a prop hobby or at a window, a Hobby button comes up
+// beside Repair. Supplies last for good. SHIP.player.hobbies = { has: [prop ids], done: { id: count }, last: { id: day } },
+// saved. Section 20 (social) and the store call hobbyGive(id); hobbyHas(id) and hobbyDone() are for the Record and lines.
+const HOBBIES = {
+  read:   { dev: true, name: 'Reading', doing: 'Reading', pose: 'sit:read', stand: 'stand+device' },
+  write:  { dev: true, name: 'Writing', doing: 'Writing', pose: 'sit:read', stand: 'stand+device' },
+  games:  { dev: true, name: 'Playing games', doing: 'Playing a game', pose: 'sit:read', stand: 'stand+device' },
+  draw:   { prop: 'a sketchpad', name: 'Drawing', doing: 'Drawing', pose: 'sit:read', price: 15 },
+  knit:   { prop: 'needles and wool', name: 'Knitting', doing: 'Knitting', pose: 'sit:read', price: 12 },
+  puzzle: { prop: 'a puzzle book', name: 'Puzzles', doing: 'Doing a puzzle', pose: 'sit:read', price: 10 },
+  stars:  { win: true, name: 'Stargazing', doing: 'Stargazing', pose: 'sit' },
+};
+const hobbyText = (key, fb, ctx) => { let t = null; try { t = careerText(key); } catch (e) { t = null; } t = t || fb; if (ctx) for (const k in ctx) t = t.split('{' + k + '}').join(ctx[k]); return t; };   // the head writer's hobby.* texts, else the stand-in
+function hobbiesLoad(s) {
+  const h = s && s.player && s.player.hobbies, out = { has: [], done: {}, last: {} };
+  if (h && typeof h === 'object') {
+    if (Array.isArray(h.has)) out.has = [...new Set(h.has.filter(id => HOBBIES[id] && HOBBIES[id].prop))];
+    for (const k of ['done', 'last']) if (h[k] && typeof h[k] === 'object') for (const id in h[k]) if (HOBBIES[id] && Number.isFinite(h[k][id])) out[k][id] = Math.max(0, Math.floor(h[k][id]));
+  }
+  return out;
+}
+SHIP.player.hobbies = hobbiesLoad(SAVED);
+SAVE_EXTRA.push(s => { (s.player || (s.player = {})).hobbies = JSON.parse(JSON.stringify(SHIP.player.hobbies)); });
+const hobbyHas = id => !!HOBBIES[id] && (!HOBBIES[id].prop || SHIP.player.hobbies.has.includes(id));
+function hobbyGive(id) { const H = SHIP.player.hobbies; if (!HOBBIES[id] || !HOBBIES[id].prop || H.has.includes(id)) return false; H.has.push(id); return true; }
+// what you can do where you are: the device hobbies anywhere you're still; prop hobbies and stargazing only sitting (a
+// window seat, the observatory or a lounge window for the stars)
+function hobbyHere() {
+  const A = ACT, sat = A && A.kind === 'sit' && A.phase === 'do', pl = sat && A.placeId && PLACE_OF.get(A.placeId);
+  const still = !A ? !player.path.length && !player.steer : sat;
+  if (!still) return [];
+  return Object.keys(HOBBIES).filter(id => { const h = HOBBIES[id]; return h.dev ? true : !sat ? false : h.win ? !!(pl && (pl.window || pl.type === 'observatory')) : hobbyHas(id); });
+}
+// start one: sitting, it takes over the seat (and you sit on after); standing, a device hobby is done where you stand
+function hobbyStart(id) {
+  const h = HOBBIES[id]; if (!h || !hobbyHere().includes(id)) return false;
+  const A = ACT, title = hobbyText('hobby.name.' + id, h.name), start = hobbyText('hobby.start.' + id, h.doing + '...');
+  if (A && A.kind === 'sit' && A.phase === 'do') {
+    A.kind = 'hobby'; A.def = { ...PLAYER_ACTS.hobby, title }; A.done = 0; A.pose = h.pose; A.o.hobby = id; A.o.sat = true;
+    toast(title, start + ' About ' + taskMins(A.def.mins) + ' minutes; walk away to stop.');
+  } else actStart('hobby', null, { hobby: id, title, pose: h.stand || h.pose, flavour: start });
+  return true;
+}
+function hobbyUntil(A) {   // the meter's full: counted for the Record; sitting, you sit on
+  if (A.done < A.def.mins) return false;
+  const id = A.o.hobby, H = SHIP.player.hobbies;
+  if (id && !A.o.counted) {
+    A.o.counted = true; H.done[id] = (H.done[id] || 0) + 1; H.last[id] = SHIP.time.day;
+    const t = hobbyText('hobby.done.' + id, 'That was nice.');
+    if (A.o.sat) toast(A.def.title, t + ' Leisure ' + Math.round(SHIP.player.needs.leisure) + '.'); else A.def.done = t;   // standing, actEnd says it as you put the device away
+  }
+  if (A.o.sat) { A.kind = 'sit'; A.def = { ...PLAYER_ACTS.sit }; A.pose = 'sit'; A.done = 0; return false; }
+  return true;
 }
 // your job's work at your feet with its parts in hand, while you're free to start it (null: no Repair button)
 function handRepair() {
@@ -11957,15 +12036,23 @@ function handRepair() {
 }
 function handTick(now) {
   const t = performance.now(); if (!now && t - HAND.at < 250) return; HAND.at = t;
-  const el = handEl(), r = document.getElementById('repairBtn'), h = handRepair();
+  const el = handEl(), r = document.getElementById('repairBtn'), h = handRepair(), hb = document.getElementById('hobbyBtn');
+  const hob = !h && !PAUSE.on && ACT && ACT.kind === 'sit' && ACT.phase === 'do' && hobbyHere().some(id => !HOBBIES[id].dev);   // the Hobby button (0.28.61): sitting, with a prop hobby or a window
+  if (hb.hidden !== !hob) hb.hidden = !hob;
   HAND.repair = !!h; if (r.hidden !== !h) r.hidden = !h;
-  if (!h) return;
+  if (!h && !hob) return;
   // never over Put down (player engineer 8's #putDown, below us, lifts above a toast on phones) or a toast (0.28.55)
   const tops = [innerHeight - 76], pd = document.getElementById('putDown'), tt = document.getElementById('toast');
   if (pd && !pd.hidden) tops.push(pd.getBoundingClientRect().top - 10);
   if (tt && tt.classList.contains('show') && innerWidth <= 720) tops.push(tt.getBoundingClientRect().top - 10 - (pd && !pd.hidden ? 58 : 0));
   const b = Math.round(innerHeight - Math.min(...tops)), key = b + 'px';
   if (HAND.bottom !== key) { HAND.bottom = key; el.style.bottom = b > 76 ? b + 'px' : ''; }   // measured: the safe area is already in it
+}
+// the Hobby button: the one hobby here, or a choice of them (the device's chooser, in its style)
+function hobbyPick() {
+  const ids = hobbyHere().filter(id => !HOBBIES[id].dev);
+  if (ids.length === 1 || typeof deviceChoose !== 'function') { if (ids[0]) hobbyStart(ids[0]); return; }
+  deviceChoose({ title: hobbyText('hobby.button', 'Hobby'), text: 'What would you like to do?', choices: ids.map(id => hobbyText('hobby.name.' + id, HOBBIES[id].name)) }, i => { if (ids[i]) hobbyStart(ids[i]); });
 }
 // at the panel (actBegin): fit the parts you carry, then repair if they're all in, else look it over the first time
 function jobBegin(A) {
@@ -34935,15 +35022,32 @@ function updateClock() {
   hudFit();
   // too long for its line (0.35.36; 0.28.57, the user's "the clock is cut off" on a phone): a phone always gets the short
   // form, "Day 3 · Wed 06:00"; anything still too long drops to "D3 · Wed 06:00", then "Wed 06:00"
-  const wd = WEEKDAYS[weekday(SHIP.time.day)].slice(0, 3), tm = hhmm(SHIP.time.min), over = () => clockEl.scrollWidth > clockEl.clientWidth + 1;
+  const wd = WEEKDAYS[weekday(SHIP.time.day)].slice(0, 3), tm = hhmm(SHIP.time.min), rg = document.createRange();
+  const hs = getComputedStyle(hudEl), room = parseFloat(hs.maxWidth) - parseFloat(hs.paddingLeft) - parseFloat(hs.paddingRight) - parseFloat(hs.borderLeftWidth) - parseFloat(hs.borderRightWidth);
+  const over = () => { rg.selectNodeContents(clockEl); return isFinite(room) ? rg.getBoundingClientRect().width > room - 1 : clockEl.scrollWidth > clockEl.clientWidth + 1; };   // the text's exact width against the widest the box may grow, a pixel to spare (0.28.59: scrollWidth rounds, so a cut-off by a fraction of a pixel read as a fit)
   const phone = typeof matchMedia === 'function' && matchMedia('(max-width:720px),(max-height:500px)').matches;
-  for (const t of ['Day ' + SHIP.time.day + ' · ' + wd + ' ' + tm, 'D' + SHIP.time.day + ' · ' + wd + ' ' + tm, wd + ' ' + tm]) { if (!phone && !over()) break; clockEl.textContent = t; if (!over()) break; }
+  // (0.28.59: a larger system font, Android's text size in the Claude app) a slightly smaller clock before the day goes
+  clockEl.style.fontSize = '';
+  const D = SHIP.time.day, steps = [['Day ' + D + ' · ' + wd + ' ' + tm], ['D' + D + ' · ' + wd + ' ' + tm], ['D' + D + ' · ' + wd + ' ' + tm, '11px'], [wd + ' ' + tm, '11px']];
+  for (const [t, f] of steps) { if (!phone && !over()) break; clockEl.textContent = t; if (f) clockEl.style.fontSize = f; if (!over()) break; }
+  hudBelow();
   lightBtn.querySelector('span').textContent = night ? 'Day' : 'Night';
   lightBtn.setAttribute('aria-label', night ? 'Debug: sleep until 07:40' : 'Debug: skip to 21:40');
 }
 // 0.35.39 (reviewer 2b): the place and clock may use all the room up to the nearest button beside them (8px clear),
 // measured on resize and each minute; the CSS caps stay as the fallback
 const hudEl = document.querySelector('.hud');
+// the Device button, Pause and the needs strip sit under the place-and-clock box (0.28.59): when a large system font makes
+// the box taller than usual, they move down with it (at the usual sizes nothing moves)
+function hudBelow() {
+  const db = document.getElementById('devBtn'); if (!hudEl || !db) return;
+  db.style.top = ''; const ns = document.getElementById('needStrip'); if (ns) ns.style.top = '';
+  const gap = hudEl.getBoundingClientRect().bottom + 6 - db.getBoundingClientRect().top;
+  if (gap > 0) db.style.top = Math.ceil(db.getBoundingClientRect().top + gap) + 'px';
+  const ng = ns ? db.getBoundingClientRect().bottom + 8 - ns.getBoundingClientRect().top : 0;   // and the strip under a taller Device button
+  if (ng > 0) ns.style.top = Math.ceil(ns.getBoundingClientRect().top + ng) + 'px';
+  if (typeof pausePlace === 'function') pausePlace();
+}
 function hudFit() {
   if (!hudEl) return; hudEl.style.maxWidth = '';
   const h = hudEl.getBoundingClientRect(); let right = innerWidth - 12;
