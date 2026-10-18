@@ -249,7 +249,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.44.3
+   STARSHIP CADET: CSV Wren                           build 0.44.4
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7808,7 +7808,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.44.3';                           // keep in step with the header's build line
+const GAME_BUILD = '0.44.4';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -10389,7 +10389,7 @@ deviceApp({ id: 'ship', title: 'News feed', icon: 'news', order: 60, view: () =>
 // Record (0.35.4): your Works record, where progression shows. Certification and the Chief's comments come later.
 deviceApp({ id: 'record', title: 'Record', icon: 'record', order: 70, view: () => {
   const mine = (SHIP.jobs || []).filter(j => j.doneBy === 'you'), B = [];
-  B.push({ kind: 'text', text: 'Works technician, tier ' + (typeof PLAYER_TIER !== 'undefined' ? PLAYER_TIER : 1) + '.', mark: 'hot' });
+  B.push(typeof worksRecordHead === 'function' ? worksRecordHead() : { kind: 'text', text: 'Works technician, tier ' + (typeof PLAYER_TIER !== 'undefined' ? PLAYER_TIER : 1) + '.', mark: 'hot' });   // section 24 (0.44.4): rank, Works reputation, What's next
   B.push({ kind: 'text', text: mine.length ? 'Jobs on the recent record: ' + mine.length + '.' : 'No jobs on your record yet. Take one at the job board in the Works bay.' });
   if (mine.length) B.push({ kind: 'list', rows: mine.slice(-6).reverse().map(j => { const [title, where] = jobCard(j); return { text: title, sub: where + ', Day ' + (Math.floor(j.doneAt / 1440) + 1) }; }) });
   // reputation (0.35.22, Pillar 4): section 20's repView(), words only, never numbers
