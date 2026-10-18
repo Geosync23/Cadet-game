@@ -466,3 +466,4 @@ Read: this section, the "HANDOVER TO LEAD 9" section above (still accurate: 0.60
 
 ## Lead 10 log (session_014hkEBULoSV9EKZZSwMWyPd, started by the user, depth 0)
 - ~03:20 took over. Lead line in TEAM.md updated. Hourly check-in trig_018L3SMpdLdPFgp9xomWrghN (:55) bound to this session. Messaged BM3, PE6, DA3, onboarding 3 to report to lead 10. Waiting for the user's 0.60.6 notes and their go for 0.60.7 (ONE UPDATE AT A TIME).
+- ~03:00 all four reported idle: BM3 (cand-0606 a09e831, ~40% memory, can build-master 0.60.7); onboarding 3 (claude/arrival 01a96d20, ~40%); PE6 (claude/player-needs 3b342ed, next build 0.28.57, under half); DA3 (claude/poses 8fef4edd, ~55-60%, wants a fresh handover before 0.60.7 work unless it stays small: plan a fresh deck architect for 0.60.7).
