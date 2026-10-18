@@ -10,6 +10,7 @@ Spec: plans/brief-playtest1.md on claude/lead-pillar1 (12b1b87); the user's answ
 - T claude/traditions-pt1 **574da73** (0.70.0-0.70.6, playtest 1 package T; the LOW closed in 0.70.5; contains a9fad20)
 - U claude/hud-pt1 **55b2499** (0.72.1, Watch a film; contains 73b40cb)
 - W claude/writer-p5 **97fa9ae** (Watch a film hobby lines, text; contains 6a00d9c)
+- A5 claude/deck-pt1 **080b0b8** (0.47.10, the bubbles' slide capped; contains e55cf31)
 - A5 claude/deck-pt1 **e55cf31** (0.47.9, the bubbles' shake; contains ff26b6d)
 - A5 claude/deck-pt1 **ff26b6d** (0.47.4-0.47.8, playtest 1 package complete; the beam item fixed in 56db3dc)
 - P claude/player-p5 **587a2cd** (0.28.74, playtest 1 package P)
@@ -32,6 +33,10 @@ Spec: plans/brief-playtest1.md on claude/lead-pillar1 (12b1b87); the user's answ
 ## Failing / waiting on a fix
 
 ## Verdicts
+
+### A5 080b0b8 (0.47.10): a bubble's layout slide capped at 900 px a second — PASS (R3)
+- BM6's combine failed bubble_check (a 63.6 px first step when a stacked pair comes apart). In `bubbles.place()` the eased offset now moves at most `900 * dts` px a frame (dts from performance.now, capped at 0.1 s; the first frame snaps as before). Display only.
+- Checks (my runs on 080b0b8): **bubble_check OK**; cadet_test vs 0.47.9 **ALL IDENTICAL**. A5 reports bubble_check OK on the combine (31.2 px).
 
 ### O5 ea0685e..2d213b1 (0.42.63): the servery arrow's time limit; "Board at nine"; the Day 0 auto-sit during the dinner chat — PASS (R3)
 - Item 1 closed: `INTRO_EAT_MINS` 30, `now >= at + INTRO_EAT_MINS` ends the servery arrow, so the call card and then the bunk arrow follow. The nit: "Board at nine". New (lead's ask): `dinnerTick`'s `yours` includes `I.step === 'table'`, so the game sits you in your seat during the Day 0 dinner chat with Zeke too; intro_check part 8 asserts it while introDinner is up.
