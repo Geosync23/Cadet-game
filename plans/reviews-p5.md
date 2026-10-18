@@ -5,12 +5,17 @@ Who gets verdicts (lead 11, 09:27; kept by lead 12, session_01GjWhU9Z9V8RNoR8yyE
 How: behaviour, save and schedule changes in depth (against the piece's approved page in plans/mechanics/ on claude/p5-design, determinism, old saves load, phones first, cadet_test differences explained); content and test-only changes skimmed. Verdicts newest first.
 
 ## Passing tips
-- C claude/works-career: none yet (87df8f5 / ae6598a FAIL, 1 item)
+- C claude/works-career **d518673** (0.44.9, contains 87df8f5..ae6598a; 1 LOW open)
 - A claude/deck-0607 **6cc826b** (0.47.2, contains c20f91f and ad5e704; no LOWs open)
 - H claude/mech-cases **171f901** (0.55.11, contains everything from eece4d4; no LOWs open)
 - W claude/writer-p5 **0d179ac** (0.48.86, text; contains 843bac9 and 76fc413; no LOWs open)
 
 ## Verdicts
+
+### C a8dd78e (0.44.8) + d518673 (0.44.9): fixes for item 1 and the LOWs — PASS with a LOW (read; C's checks)
+- Item 1 closed: trainOffer sets cur.told = false and tells at once in play (trainTell: a toast and the goal arrow). Asked while you slept, trainTick tells you the first minute you're up, while the meeting is still ahead. `told` is cleaned on load. LOW 2: a 'held' cur from an earlier day ends (trained) at the next workday's ladderTick. LOW 3: act('open') takes a tab, plus worksTabShow(id). LOW 4: no sub-block reserve and no machine kind → trained at the meeting, with no stand-in fault. Nits done (851 documented; the sub-block data rule; small rows train only once opened; WORKS_TAB reset). a8dd78e: WORK_MECH[id].at(day), a meeting's earliest minute (M1's m4 after the unload), capped sensibly.
+- LOW (new): trainTell's toast text is "a Mail from the same sender within a day". On Day 5 that can be Halloran's 08:05 "Board, when you're in" Mail rather than the training ask. Match the Mail by its subject, or keep its id on cur.
+- C's checks: career_check OK (asked during skipTo → told false; first tick → told true, goal set), mech_check OK, cadet_test ALL IDENTICAL. Not re-run by me (my browser queue is on P and S).
 
 ### H 171f901 (0.55.11): `verbs: 'case'` on the Fault notes tab — PASS (read; H's checks)
 - One field on the worksTabAdd call, so C's `split(':')[0]` routing sends 'case:*' to the tab whichever tab is on show. H's checks: puzzle_check OK, cadet_test ALL IDENTICAL.
