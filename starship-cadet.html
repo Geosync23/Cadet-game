@@ -249,7 +249,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.33.47
+   STARSHIP CADET: CSV Wren                           build 0.33.48
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7807,7 +7807,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.33.47';                           // keep in step with the header's build line
+const GAME_BUILD = '0.33.48';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -14433,8 +14433,9 @@ function machinesNow() {
     if (JOBS_ON) jobsHour(MACH_HOUR);
     for (const m of list) {
       const s = SHIP.machines[m.id];
-      s.cond = Math.max(0, s.cond - machWear(m, MACH_HOUR, s.cond) - (MACH_EXTRA[m.id] || 0));
+      s.cond = Math.max(0, s.cond - machWear(m, MACH_HOUR, s.cond) * (1 + .1 * Math.abs(s.drift || 0)) - (MACH_EXTRA[m.id] || 0));
       s.state = machineState(s.cond);
+      driftHour(m, s, MACH_HOUR);
     }
     machRecord(MACH_HOUR);
     for (const k in MACH_EXTRA) delete MACH_EXTRA[k];
@@ -14459,8 +14460,33 @@ function machWorks(c) {
   for (let i = 1; i < MACH_WORKS.length; i++) { const [a, x] = MACH_WORKS[i - 1], [b, y] = MACH_WORKS[i]; if (c <= b) return x + (y - x) * (c - a) / (b - a); }
   return 100;
 }
-// the conditions now, as { id: cond } (the systems and effects are worked out from one of these)
-function machConds() { const st = machinesNow(), c = {}; for (const id in st) c[id] = st[id].cond; return c; }
+// drift (0.33.48, plans/mechanics/m5-tuning.html): a tunable machine's setting wanders. SHIP.machines[id].drift, -3..+3 (0 or
+// missing: settled). From TUNE_FROM (Day 4 06:00), and only once section 24e's 'tune' job kind is in the build (with
+// no way to settle it, a drift would stay for ever), each ship hour a settled one drifts when schedU(seed, hour, 868) <
+// TUNE_P (about one a day ship-wide over the ten tunable machines) by 1-3 either way (key 869). A drift of 2 or more posts
+// a 'tune' job (found 1-6 hours later); a calibrate chore on any drifted machine becomes its tune job. A drifted machine
+// works DRIFT_COND condition points lower per step (machEff: the systems, effects and the hour's record) and wears 10%
+// faster per step; its look: high flickers (blinks, a cart dock), low dims. tuneSet(id, v) sets it (clamped; MACH_REV++;
+// simNote('tuned', { machine }) when it settles); machineDrift(id)
+const TUNABLE = new Set(['oven', 'range', 'lights', 'cartdock']), TUNE_FROM = 3 * 1440 + 360, TUNE_P = .007, DRIFT_COND = 8;
+const driftOn = () => !!JOB_KINDS.tune;
+const machEff = s => Math.max(0, s.cond - DRIFT_COND * Math.abs(s.drift || 0));
+const machineDrift = id => { const s = SHIP.machines[id]; return s && s.drift || 0; };
+function tuneSet(id, v) {
+  const s = SHIP.machines[id], m = machineById(id); if (!s || !m || !TUNABLE.has(m.kind) || !Number.isFinite(v)) return false;
+  const was = s.drift || 0, d = Math.max(-3, Math.min(3, Math.round(v)));
+  if (d) s.drift = d; else delete s.drift;
+  MACH_REV++; if (MACH_HOUR !== null) machRecord(MACH_HOUR - 1);   // the effects follow at once
+  if (was && !d && typeof simNote === 'function') simNote('tuned', { machine: id, t: shipNow() });
+  return true;
+}
+// one hour's drift for a machine (in the hour loop, after its wear)
+function driftHour(m, s, h) {
+  if (s.drift || !TUNABLE.has(m.kind) || h * 60 < TUNE_FROM || !driftOn() || schedU(m.seed, h, 868) >= TUNE_P) return;
+  const u = schedU(m.seed, h, 869); s.drift = (u < .5 ? -1 : 1) * (1 + Math.floor((u * 2 % 1) * 3));
+}
+// the conditions now, as { id: cond } (the systems and effects are worked out from one of these); a drifted machine counts lower (0.33.48)
+function machConds() { const st = machinesNow(), c = {}; for (const id in st) c[id] = machEff(st[id]); return c; }
 // a system's own score: how well its machines work, weighted, pulled toward the worst of them
 function systemOwn(sys, c) {
   const ms = machineList().filter(m => MACHINE_KINDS[m.kind].sys === sys);
@@ -14572,7 +14598,7 @@ function shipEffects(deck) {
 const MACH_HIST = new Map(), MACH_HIST_DAYS = 8;          // hour -> { id: cond } once that hour has run
 let FX_AT = new Map(), FX_AT_REV = -1;
 function machRecord(h) {
-  const c = {}; for (const id in SHIP.machines) c[id] = SHIP.machines[id].cond;
+  const c = {}; for (const id in SHIP.machines) c[id] = machEff(SHIP.machines[id]);
   MACH_HIST.set(h, c);
   for (const k of MACH_HIST.keys()) if (k < h - MACH_HIST_DAYS * 24) MACH_HIST.delete(k); else break;
 }
@@ -14618,6 +14644,8 @@ function machineLook(id) {
   const state = LOOK_OF[st.state], bad = state === 'poor' ? .35 : state === 'failing' ? (st.state === 'broken' ? 1 : .7) : 0;
   const look = { state, blink: state === 'failing', dim: LOOK_DIM[state], drip: LOOK_WET.has(m.kind) && bad > 0 || (m.kind === 'valve' && state === 'worn'),
                  flicker: Math.round((LOOK_LIT[m.kind] || 0) * bad * 100) / 100, running, cond: Math.round(st.cond), kind: m.kind };
+  const dr = st.drift || 0;                              // a drifted setting shows (0.33.48): high flickers (a dock blinks), low dims
+  if (dr) { look.drift = dr; if (dr > 0 && m.kind === 'cartdock') look.blink = true; else if (dr > 0) look.flicker = Math.max(look.flicker, Math.round(.2 * dr * 100) / 100); else look.dim = Math.max(look.dim, .12 * -dr); }
   LOOKS.set(key, look); return look;
 }
 function deckLook(deck) {
@@ -15131,6 +15159,7 @@ function jobsHour(h) {
   }
   const restock = (cargo, deck) => { if (!open.has('restock:' + cargo)) jobs.push({ id: 'restock-' + cargo + '@' + h, machine: null, deck, kind: 'restock', cargo, urgency: 1, posted: t, found: t, claimedBy: null, parts: [], status: 'open' }); };
   if (Object.keys(SHIP.hold).some(k => k !== 'meals' && SHIP.hold[k] > 0)) restock('stores', 5);
+  if (driftOn()) for (const m of machineList()) if (Math.abs(machineDrift(m.id)) >= 2) tunePost(m, h, jobs, t + 60 * (1 + Math.floor(6 * schedU(m.seed, h, 869))));   // drift: a tune job (0.33.48)
   // (food runs come from cartClaim, the one rule the galley and the job list share: see cartPost)
   choresHour(h, jobs);
   for (const k in JOB_KINDS) if (JOB_KINDS[k].post) { try { JOB_KINDS[k].post(h, jobs); } catch (e) { console.warn('job kind ' + k, e); } }   // registered kinds post their own (0.33.47)
@@ -15238,10 +15267,19 @@ function choresOfDay(d) {
   CHORE_DAYS.set(d, out); for (const k of CHORE_DAYS.keys()) if (k < d - 2) CHORE_DAYS.delete(k);
   return out;
 }
+// a drifted machine's tune job (section 24e's kind), once: "Tune: Oven 2 (runs hot)"
+function tunePost(m, h, jobs, found) {
+  if (jobs.some(x => x.kind === 'tune' && x.machine === m.id && x.status !== 'done')) return null;
+  const d = machineDrift(m.id), dc = (FAULT_CAUSES[m.kind] || []).find(c => c.setting), w = dc ? dc.shows.split('|') : [], word = d > 0 ? w[0] : w[w.length - 1];
+  const n = machineList().filter(x => x.kind === m.kind && x.deck === m.deck).length > 1 ? ' ' + m.id.split('-').pop() : '';
+  const j = jobMake('tune', { id: 'tune:' + m.id + '@' + h, machine: m.id, deck: m.deck, room: m.room, h, found, tier: jobTier({ machine: m.id }), title: 'Tune: ' + MACHINE_KINDS[m.kind].name + n + (word ? ' (' + word + ')' : '') });
+  jobs.push(j); return j;
+}
 function choresHour(h, jobs) {
   const d = Math.floor(h / 24) + 1, t = h * 60;
   for (const c of choresOfDay(d)) if (c.hour === (h % 24 + 24) % 24) {   // (day 0's hours are negative)
     const C = CHORES[c.kind], key = c.kind + ':' + c.cand.key;
+    if (c.kind === 'calibrate' && c.cand.machine && machineDrift(c.cand.machine) && driftOn()) { tunePost(machineById(c.cand.machine), h, jobs, t); continue; }   // a drifted machine's calibration is its tuning (0.33.48)
     if (jobs.some(j => j.kind === 'chore' && j.status !== 'done' && j.chore + ':' + j.target === key)) continue;
     if (C.parts.some(k => (SHIP.stores[k] || 0) < STOCK[k] / 2)) continue;   // not while its parts run low: repairs come first
     jobs.push({ id: 'chore-' + key + '@' + h, machine: c.cand.machine || null, deck: c.cand.deck, room: c.cand.room, kind: 'chore', chore: c.kind, target: c.cand.key,
@@ -15292,6 +15330,7 @@ function shareOut(t, jobs) {
 function choreDone(j, t) {
   const C = CHORES[j.chore] || {}, H = C.helps, bump = (id, by) => { const s = SHIP.machines[id]; if (s) { s.cond = Math.min(100, s.cond + by); s.state = machineState(s.cond); s.lastService = t; } };
   if (H && H.self && j.machine) bump(j.machine, H.self);
+  if (j.chore === 'calibrate' && j.machine && SHIP.machines[j.machine]) delete SHIP.machines[j.machine].drift;   // calibrating settles a drift (0.33.48)
   if (H && H.kinds) for (const m of machineList()) if (H.kinds.includes(m.kind) && m.deck === j.deck) bump(m.id, H.by);
   if (C.finds) for (const x of SHIP.jobs) if (x.status !== 'done' && x.found > t && x.machine && (machineById(x.machine) || {}).deck === j.deck) x.found = t;
 }
@@ -15959,7 +15998,7 @@ function cartsOut(t) {
 // ---- saving: the save's ship.machines = { id: [cond, lastService] }, ship.machineHour, ship.jobs, ship.stores, ship.hold ----
 SAVE_EXTRA.push(s => {
   const st = machinesNow(), out = {};
-  for (const id in st) out[id] = [st[id].cond, st[id].lastService];   // in full, so a reload wears on exactly as before
+  for (const id in st) out[id] = st[id].drift ? [st[id].cond, st[id].lastService, st[id].drift] : [st[id].cond, st[id].lastService];   // in full, so a reload wears on exactly as before; a drift third (0.33.48)
   s.ship.machines = out; s.ship.machineHour = MACH_HOUR;
   if (MACH_NORM) s.ship.machineNorm = { build: GAME_BUILD, norm: MACH_NORM };   // the average day, so a reload needn't work it out
   s.ship.jobs = SHIP.jobs; s.ship.stores = SHIP.stores; s.ship.hold = SHIP.hold;
@@ -15978,6 +16017,7 @@ function machinesLoad(s) {
     const id = MACH_RENAMED[id0] && !(MACH_RENAMED[id0] in sh.machines) ? MACH_RENAMED[id0] : id0;
     if (!SHIP.machines[id] || !Array.isArray(v) || !(v[0] >= 0 && v[0] <= 100)) continue;
     SHIP.machines[id] = { cond: v[0], state: machineState(v[0]), lastService: Number.isFinite(v[1]) ? v[1] : null };
+    const dr = Number.isFinite(v[2]) ? Math.max(-3, Math.min(3, Math.round(v[2]))) : 0; if (dr) SHIP.machines[id].drift = dr;   // a drift (0.33.48); an older save: settled
   }
   // jobs and supplies (0.33.1): a save before them starts with an empty list and full shelves
   const obj = o => o && typeof o === 'object' && !Array.isArray(o);
