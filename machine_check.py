@@ -966,22 +966,25 @@ with sync_playwright() as pw:
           const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min, out = {}, offered = [];
           JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; SHIP.works = null; setShipNow(t0); machinesNow();
           for (const j of SHIP.jobs) if (j.claimedBy === 'you') { j.claimedBy = null; j.status = 'open'; }
-          window.caseOffer = (j, h) => offered.push([j.id, j.cause, h]);
-          let held = null; window.caseHeld = j => j.id === held;
+          // stand-ins swapped in through the game's scope (24k's own, if it's in, is kept and put back after)
+          const swap = (name, fn) => { window['__f_' + name] = fn; window.__sc("window.__o_" + name + " = typeof " + name + " === 'function' ? " + name + " : undefined; " + name + " = (...a) => window.__f_" + name + "(...a)"); };
+          const unswap = name => window.__sc("if (window.__o_" + name + ") " + name + " = window.__o_" + name + "; else " + name + " = undefined");
+          swap('caseOffer', (j, h) => offered.push([j.id, j.cause, h]));
+          let held = null; swap('caseHeld', j => j.id === held); swap('caseHidden', () => false);
           setShipNow(t0 + 5 * 1440); machinesNow();
           out.offered = offered.length; out.offeredOk = offered.every(o => o[1] && SHIP.jobs.concat([]).length >= 0);
-          delete window.caseOffer;
+          unswap('caseOffer');
           const tt = shipNow(), mk = id => { const j = { id, machine: null, deck: 4, room: (placeById('4-lift-1') || {}).room, kind: 'chore', chore: 'vent', target: id, title: 'Clean a vent: test', tier: 1,
             stops: [{ deck: 4, placeId: '4-lift-1', mins: 10, tag: 'vent' }], urgency: 0, leave: null, posted: tt, found: tt, claimedBy: null, parts: [], status: 'open', shareSeen: true }; SHIP.jobs.push(j); MACH_REV++; return j; };
           held = mk('test-case').id; const J = SHIP.jobs.find(j => j.id === held);
           if (J) { J.released = true; J.urgency = 1; }
           setShipNow(shipNow() + 3 * 60); machinesNow(); out.crewTook = J ? !!(J.claimedBy && J.claimedBy !== 'you') : null;
           out.claim = J ? claimJob(J.id) : null;
-          window.caseFitted = j => j.id === held;
+          swap('caseFitted', j => j.id === held);
           const n = J ? jobStops(J).length : 0, mid = J && J.machine ? SHIP.machines[J.machine].cond : null; let r = null;
           for (let k = 0; k < n; k++) r = jobStepDone(J.id, k);
           out.wrong = r && r.wrong === true && r.done === false && !J.workDone; out.condSame = J && J.machine ? SHIP.machines[J.machine].cond <= mid + 1e-9 : true;
-          delete window.caseFitted; delete window.caseHeld; if (J) dropJob(J.id);
+          unswap('caseFitted'); unswap('caseHeld'); unswap('caseHidden'); if (J) dropJob(J.id);
           // a side kind
           jobKindAdd('testside', { side: true, text: 'Side test', stops: () => [{ deck: 4, placeId: '4-lift-1', mins: 5, tag: 'hold' }], done: () => {}, crew: { can: () => false, mins: 5 } });
           const b = mk('test-board'); out.board = claimJob(b.id);
