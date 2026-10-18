@@ -252,7 +252,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.55.8
+   STARSHIP CADET: CSV Wren                           build 0.55.9
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7810,7 +7810,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.55.8';                           // keep in step with the header's build line
+const GAME_BUILD = '0.55.9';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -34503,7 +34503,7 @@ function scanPick(jobId, part) {
   const c = typeof caseOf === 'function' ? caseOf(j) : null;
   if (c) { const s = c.sus.find(x => caseSus(c, x).part === part); if (!s) return false; j.picked = part; return caseCall(c.id, s); }
   j.picked = part;
-  if (typeof jobSetPart === 'function') jobSetPart(j.id, part); else { j.parts = (j.parts || []).slice(); j.parts[0] = part; }
+  if (!(typeof jobSetPart === 'function' && jobSetPart(j.id, part))) { j.parts = (j.parts || []).slice(); j.parts[0] = part; }
   j.stepsDone = (j.stepsDone || []).filter(k => k !== 0);   // the fetch again, for the part you picked
   MACH_REV++;
   return true;
@@ -34523,7 +34523,7 @@ function scanFitted(j) {
   const key = 'fault.still.' + m.kind + '.' + (caseCauses(m).find(x => x.part === wrong) || {}).id;
   const line = (typeof worksText === 'function' ? worksText(key, null) : null) || 'Fitted a new ' + wrong + '. Still ' + shows + ': it\'s the ' + f.part + '.';
   j.scanWrong = true; j.picked = f.part;
-  if (typeof jobSetPart === 'function') jobSetPart(j.id, f.part); else j.parts = [f.part];   // the job now names the right part
+  if (!(typeof jobSetPart === 'function' && jobSetPart(j.id, f.part))) j.parts = [f.part];   // the job now names the right part
   j.stepsDone = []; j.touched = shipNow();
   if (typeof toast === 'function' && !SIM_AT) toast(jobCard(j)[0], line);
   return true;
@@ -34822,7 +34822,7 @@ function caseCall(caseId, susId) {
   if (c.calls.length > (c.fits || 0)) c.calls.pop();     // called again before fitting: it replaces the last call (it was never tried)
   c.calls.push(susId);
   if (typeof simNote === 'function') simNote('caseCalled', { id: c.id, job: j.id, train: !!c.train });   // 24 core's escort ends on the training case's call
-  if (typeof jobSetPart === 'function' && s.part) jobSetPart(j.id, s.part); else j.parts = s.part ? [s.part] : [];
+  if (!(typeof jobSetPart === 'function' && s.part && jobSetPart(j.id, s.part))) j.parts = s.part ? [s.part] : [];   // section 17's needs a part already there
   j.stepsDone = (j.stepsDone || []).filter(k => k !== 0);   // the fetch again, now there's a part to fetch
   MACH_REV++;
   return true;
