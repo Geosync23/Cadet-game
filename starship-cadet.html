@@ -252,7 +252,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.42.47
+   STARSHIP CADET: CSV Wren                           build 0.42.48
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7922,7 +7922,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.42.47';                           // keep in step with the header's build line
+const GAME_BUILD = '0.42.48';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -35336,7 +35336,7 @@ const CLOTHES_BEATS = [
   // the cabin (the user on 0.63.1, 0.42.48): after the bunk meeting Zeke shows you your wardrobe ("this is where you get clean
   // clothes"), and the rest of his bunk talk comes as Mail from him (the meeting tells you to open it; clothesCabinMail)
   { id: 'd0-wardrobe', day: 0, at: 17 * 60 + 40, till: 19 * 60, who: INTRO_ESCORT, where: { deck: 4, room: 'Bunk 1' }, when: () => SHIP.intro.done.bunk !== undefined,
-    keys: () => ['walk.cabin.wardrobe'], lines: () => ['That locker by the door is your wardrobe. It\'s where you get clean clothes.'], first: () => clothesCabinMail() },
+    keys: () => ['walk.cabin.wardrobe'], lines: () => ['That\'s your wardrobe, by the door. It\'s where you get clean clothes.'], first: () => clothesCabinMail() },
   { id: 'd1-dinner-zeke', day: 1, at: 18 * 60, till: 20 * 60, who: INTRO_ESCORT, where: { deck: 3, room: 'Mess hall' }, when: () => true, settle: 'clothes',   // settle: the Settling-in item it teaches (as INTRO_WEEK's; intro_check reads both)
     keys: C => ['walk.dinner.eve', 'walk.eve.choose', ...(C.kit ? [] : [['beat.d1-clothes', 'walk.dinner.laundry']])],   // walk.eve.choose (0.42.48): you can't do every tradition, you choose
     lines: C => ['Evenings are yours. Most of us have a thing. I knit, don\'t laugh. Pell reads. Find yours.',
@@ -35445,7 +35445,7 @@ function clothesFrame() {
   uniformWatch();                                        // simNote('uniform') when it turns grubby, yesterday's or clean (10:00, 22:00, a change)
   if (h && h.at === 'washer' && !h.done && now >= h.until) { h.done = true; toast('Laundry', clothesText('laundry.done', {}, 'Your washing\'s done. Collect it from the laundry on Deck 4.') + ' It\'s in ' + washerName(h.washer) + '.'); }
   if (C.changed < SHIP.time.day && C.clean > 0 && SHIP.time.min >= 6 * 60 && SHIP.time.min < CLOTHES_LATE && deckDef.num === 4 && typeof ixTip === 'function' && !ACT)
-    ixTip('clothes', clothesText('tip.clothes', {}, 'Fresh clothes every morning from your wardrobe, the locker by the door in Bunk 1 (by 10:00 you\'re in yesterday\'s clothes). When they run out, do your laundry when you can.'));   // once (the device's tips)
+    ixTip('clothes', clothesText('tip.clothes', {}, 'Fresh clothes every morning from your wardrobe, by the door in Bunk 1 (by 10:00 you\'re in yesterday\'s clothes). When they run out, do your laundry when you can.'));   // once (the device's tips)
   if (C.told !== SHIP.time.day && clothesYesterday()) {
     C.told = SHIP.time.day;
     toast('Yesterday\'s clothes', clothesText('clothes.stale', {}, 'You\'re in yesterday\'s clothes.') + (C.clean > 0 || h && h.state === 'clean' ? ' Change at your wardrobe in Bunk 1; till then you\'ll feel grubby sooner.' : ' And there are no clean ones left: your hamper\'s in your wardrobe. Do your laundry.'));
