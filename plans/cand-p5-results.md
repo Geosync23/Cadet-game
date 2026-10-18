@@ -15,3 +15,4 @@ Built on claude/p5-cand (base: 0.60.7 = ce26fb2). Build numbers (lead 12): Step 
 - R: Step 1 join p5-join 6e730b1 PASS (cadet identical, machine/career/mech/day 3 OK). Step 1 passing tips: S 78bf1c2, P cfce34e, C 2865a21, H 5a4d362, A 6cc826b, W 0d179ac
 - cand 0.63.0 67b15b0: day_check 0/1/3/5/7 OK; player_check FAILs (11 so far, still running): job loop (should carry ['pump'], carries []; shelf; crate; fitted/repair; save; done), reserved job, new job announce, work steps (hold stop; a JOB_KINDS kind walked like a chore). Same as M2 saw on S 78bf1c2 + P cfce34e + C; P investigating
 - cand 0.63.0 67b15b0: player_check FAILED, 11 FAILs total (the list above; P's)
+- cand 0.63.0 67b15b0 full set: interactions, food, deck, leave, device, tiles, events, clothes, arc OK; lines PASS (0 err, 2 warn); intro_check --week OK (every beat, Sowing True); FAIL player_check (11, P's) and social_check 'cues wrong: [T,T,T,F,T,F]' (re-running alone)
