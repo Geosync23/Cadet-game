@@ -6,6 +6,7 @@ Started by lead 12 (session_01GjWhU9Z9V8RNoR8yyELA9V) at ~11:28 for every Step 2
 Spec: plans/brief-playtest1.md on claude/lead-pillar1 (12b1b87); the user's answers in it are binding. Seats: T traditions session_01X4SZJFeHprDF21NZqU5fGi (claude/traditions-pt1, 0.70.x), X crew sim session_01SNaWA6X5E9i2ZKfMnPTHJf (claude/crew-pt1, 0.71.x), U HUD session_01FcMPTX7mMTHkyr4pxDfNcS (claude/hud-pt1, 0.72.x), C2 works career session_014yREkgPvuwMyxBtoqB1P14 (claude/works-career, 0.44.x), O4 (claude/onboard-pt1), W, P, A5 session_01CHRbUTZc18m7eBck8eWhXj (claude/deck-pt1). Verdicts go to the seat, BM5 and lead 13 (finished reviews, blockers, design calls). Behaviour and saves in depth; lines and tests skimmed. The base is 0.63.1 (claude/p5-cand-s2).
 
 ## Passing tips
+- W claude/writer-p5 **7709e4c** (0.48.89, playtest 1 lines, text; 2 LOWs)
 - W claude/writer-p5 **ac60c8d** (0.48.88, text; contains 0d179ac)
 - C claude/works-career **8cc07a5** (0.44.13, the old-save catch-up; for 0.63.0a / Step 2)
 - P claude/player-p5 **f2156f1** (0.28.73 + the LOW fix 391c88e + player_check fixes f00ac1e, d6f321d, 642b511, ad9ff57, 1830f2d, f2156f1; no LOWs open)
@@ -19,6 +20,12 @@ Spec: plans/brief-playtest1.md on claude/lead-pillar1 (12b1b87); the user's answ
 - (none)
 
 ## Verdicts
+
+### W 7709e4c (0.48.89): playtest 1 lines — PASS with LOWs (skimmed: content only)
+- W's own commit on a merge of 0.63.1 (cb7d30a). 35 content files plus keys-p5.md "Playtest 1" and lines_check's new kinds ('host'; join.* and mail.* lengths). New banks: approach (crew walk-up lines), join (tap-to-join tips and notices), beam (Name on the Beam). 09:00 / "nine till five" and the 13:00 tea and biscuits across clock, career, works, overheard and meetings. Zeke: introBunk now says "the top bunk in the middle" (the brief: upper, middle of three) and "your wardrobe… where you get clean clothes"; he hands over the device and says he's sent a Mail; no "locker" is left in his content.
+- Checks (my run on 7709e4c): content_gen bakes clean (30 meetings, 34 traditions); lines_check PASS (0 errors, the 2 old warnings).
+- LOW 1: breakfast hours are still "06:00 to 08:00" in news.lines (lines 58 and 383). The brief says breakfast moves to fit the 09:00 start; once X/C2 set the new window, match these lines to it.
+- LOW 2: content/facts.md (the writers' reference) still says an 08:00 shift and tea at 10:30 in Works. Update it so later batches don't bring the old times back.
 
 ### P f2156f1: player_check's notice arm picks a job the board shows (test only) — PASS (read)
 - The arm takes an unclaimed job from `jobsBoard()` (Step 2 keeps held and side jobs off the board), or one the board shows, and gives your jobs back if there's none. No game change. P reports a full player_check on 0.63.1 (p5-cand-s2 37d2b1e): OK, 0 FAIL.
