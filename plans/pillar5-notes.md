@@ -128,3 +128,8 @@ N1: the puzzles start in your first days as an Officer (not Day 13). **N2: short
 `plans/pillar5-plan.md` and `.html` are rewritten as **the final plan**: one timeline of about 33 ship days (about 12-13 real hours, Pillar 4's first week included; a ship day plays in about 25 real minutes with the night skipped), a "what changed because of 10-15 hours" box (at most one big and one small new thing per workday; Officer Day 16, Senior Officer Day 23, Engine Specialist Day 30; puzzles from Day 17; two night shifts; mentoring one day; the seven extras, the workshop, grades, favours and the cold-case board as optional side paths; later mechanic stages off the main path), the job-by-rank map, and six steps with check-ins (at most about 6 helpers). One open question: the night shift on the weekend.
 
 **The final plan was approved by the user (2026-10-17 ~21:15, through lead 8):** the night shift on the weekend as suggested; no hiring and no production yet.
+
+## Change from the user (2026-10-18 ~04:20 UTC, through lead 10)
+> "Something to change in pillar 5's plan: need new job types by day 2. Then the cadence discussed kicks in."
+
+New kinds of work start on **Day 2** (not Day 8, after Pillar 4's first week); from there the agreed cadence applies (at most one big and one small new thing per workday, nothing new on days off, the next thing waits if you're slow). Open for the user: does the rest of the timeline move earlier with it (Officer about Day 10, about 27 ship days, ~10-11 hours), or do the promotions stay where they are with the extra days used for practice and side paths? The plan's timeline (Part 0) and the job-by-rank map get rewritten once answered; Pillar 4's Day 2-3 content (laundry, the first delivery, Zeke's Day 2) has to fit alongside.
