@@ -97,7 +97,8 @@ with sync_playwright() as pw:
         jumpA = r"""((jump) => { newGameStart(true); socInit(); const t0 = Math.floor(shipNow() / 60) * 60;   // from the arrival: two days in one jump against hour by hour
           if (!window.__busLog && typeof onSim === 'function') { window.__busLog = []; for (const k of SOC_HEARS) onSim(k, d => window.__busLog.push(k + ' ' + (d.id || d.machine || '') + ' ' + d.t)); }
           if (window.__busLog) window.__busLog.length = 0;
-          if (jump) { setShipNow(t0 + 2 * 1440); socialTo(t0 + 2 * 1440); } else for (let t = t0 + 60; t <= t0 + 2 * 1440; t += 60) { setShipNow(t); socialTo(t); }
+          const mn = () => { if (typeof machinesNow === 'function') machinesNow(); };   // as the game's clock does each tick (sim engineer 5, claude/social 068b8db: else the hour-by-hour arm never runs the last hour's machines)
+          if (jump) { setShipNow(t0 + 2 * 1440); mn(); socialTo(t0 + 2 * 1440); } else for (let t = t0 + 60; t <= t0 + 2 * 1440; t += 60) { setShipNow(t); mn(); socialTo(t); }
           return [JSON.stringify(socSave()), (window.__busLog || []).slice().sort()]; })"""
         (ha, hb), (ja, jb) = g.ev(jumpA + "(false)"), g.ev(jumpA + "(true)")
         print('From the arrival, two days in one jump the same as hour by hour:', ha == ja)
