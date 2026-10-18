@@ -3,7 +3,7 @@
 Started by lead 12 (session_01GjWhU9Z9V8RNoR8yyELA9V) at ~11:28 for every Step 2 piece; R (claude/reviews-p5) keeps Step 1. Who gets verdicts: the seat and BM4 (session_013h22isZZqmJJSEKSbrwabf) get each one line; FAILs and design clashes also go to the lead. Format and standards as plans/reviews-p5.md: behaviour, save and schedule changes in depth against the piece's approved page (plans/mechanics/ on claude/p5-design), determinism, old saves load, phones first, cadet_test differences explained; content and test-only changes skimmed. Verdicts newest first.
 
 ## Passing tips
-- M1 claude/mech-rounds **8f5783f** (0.45.3, contains 8a6cea8..f65c929; items 1-2 closed; LOWs closed or out by the lead)
+- M1 claude/mech-rounds **740234d** (0.45.4, contains 8a6cea8..8f5783f and Onboarding 4's 96649fe; items 1-2 closed; LOWs closed or out by the lead)
 - S claude/ship-systems **01a3a3b** (machine_check only: 5o/5t cope with 24d; contains 78bf1c2)
 - Onboarding 4 claude/arrival-0607b **96649fe** (0.42.46, 21b's uniform grime for m2; 1 LOW, the page's field names)
 - S claude/ship-systems **03340c5** (0.33.48-0.33.51, Step 2 parts; also inside 78bf1c2, which R reviews for Step 1; 1 nit)
@@ -12,6 +12,10 @@ Started by lead 12 (session_01GjWhU9Z9V8RNoR8yyELA9V) at ~11:28 for every Step 2
 - (none)
 
 ## Verdicts
+
+### M1 740234d (0.45.4): 24b on Onboarding 4's grime (merge of 96649fe), mech_check m2 — PASS
+- Game code: only the merge of 96649fe (passed above) and the build number. 24b itself was read in the 0.45.2 verdict, and it now registers because uniformState exists. The merge also brings arrival-0607b's 0.60.7 documents (design-doc, the results file), which are text only.
+- Checks (my runs on 740234d): cadet_test vs d3d720b **ALL IDENTICAL** (21b is off at test URLs, so no tint); **mech_check OK** (m2: opened and trained Day 8; grime .05 then .40 then .60 grubby; flag works.oily on Day 8; tint on 16 body meshes, none left after a change); clothes_check **ALL OK**.
 
 ### M1 8f5783f (0.45.3): item 2 fixed — PASS (M1's tip now passes)
 - The haul kind's `done` skips haulTake for Yara's load-only run, so her crate stays on SHIP.manifest and comes in your run. You load and deliver it (noted in DEV_NOTES). mech_check m4's new arm: Yara's run 1 crate, yours 3, linen, store and bridge all delivered, none left.
