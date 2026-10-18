@@ -46,3 +46,6 @@ The user said go for 0.60.7. Every seat reads, in order: CLAUDE.md, this brief, 
 
 ## Rebalance (lead, ~04:42)
 Systems was the long pole. The old sim items move to the social engineer (finished and idle): trays, morning() slotting for the morning traditions, the day-100 seat share at 3-mess-12, bartender rota, shower queue, crew hobbies (in that order), on claude/social-0607 from 0.36.85. Systems keeps shelves (0.33.41), the Wednesday delivery (0.33.42) and moving Bea's Day 1 vent later.
+
+## PE6's list split (lead, ~05:08)
+PE6 keeps: Hobbies app, time clock pop-up, bathroom rate + toilet icon, tray text, player_check one-liner. Moved: Gym club member + Tiles table any time → traditions; the bar order → social; low-need pop-ups + first-evening tips + Ideas card + Settling-in items → onboarding 4. All build on PE6's hook 52839a6.
