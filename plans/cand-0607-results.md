@@ -10,3 +10,4 @@ Built on claude/cand-0606 (from 0.60.6a c8685cf). One line per finished check (c
 - trial: deck hook + systems f351cc3 (0.33.40) + arrival e2cd435e + writer 2729ce1: build lines only, NAMES OK, machine OK, smoke OK
 - trial (PE6 52839a6, deck hook, systems f351cc3, social 80116c5, arrival e2cd435e, writer 2729ce1): verify_merge 0, NAMES OK, smoke, social, device, interactions OK; cadet_test vs 0.60.6a: only i_tap0 2978 px (to explain on the full candidate)
 - trial + deck 031c0e4 (0.38.24-27, tray return removed) + writer 5b57aa1: verify_merge 0, NAMES OK, bake 8091, food OK, day_check day 1 OK (deck alone doesn't break the tray walk)
+- trial + traditions 317e24d (0.34.51): verify_merge 0 (all 7), bake 8091 lines / 34 traditions, NAMES OK, device OK; events FAIL only the known one: day 100 founding, 3-mess-12 shared jovanovic-petra/mbeki-bo 19:00
