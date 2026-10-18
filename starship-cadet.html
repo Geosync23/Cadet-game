@@ -252,7 +252,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.63.1
+   STARSHIP CADET: CSV Wren                           build 0.80.0
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -288,7 +288,7 @@ body.dlgon .devhu{display:none}
 // 1. SETUP
 // =====================================================================
 let W = 0, D = 0, OX = 0, OZ = 0;         // the current deck's size in tiles, and where its tile (0,0) sits in the world (set by buildDeck)
-const H = 2.8, T = 0.2;                   // wall height and thickness
+let H = 2.8, WALL_K = 1; const T = 0.2;   // wall height and thickness; H is 2.8 × the deck's `tall` (the rec deck's double-height walls, 0.80.0), set by buildDeck
 const col = h => new THREE.Color(h).convertSRGBToLinear();
 const small = Math.min(innerWidth, innerHeight) < 700;
 
@@ -550,6 +550,11 @@ function glow(c, size, x, y, z, p = scene, op = .8) {
 // =====================================================================
 const SHIP = { decks: {} };
 const shipDeck = n => SHIP.decks[n] || (SHIP.decks[n] = { open: new Set() });
+// the rec deck (0.80.0, plans/recdeck-plan.html section 11): internal key 7, shown as R, between Decks 4 and 5. Lists that show
+// or loop over decks for the player go in DECK_ORDER; a deck's name on screen comes from deckWord (never "Deck 7")
+const DECK_ORDER = [1, 2, 3, 4, 7, 5, 6];
+const deckLabel = n => +n === 7 ? 'R' : String(n);
+const deckWord = n => +n === 7 ? 'Rec deck' : 'Deck ' + n;
 
 // =====================================================================
 // 4a. THE CURRENT DECK
@@ -884,10 +889,12 @@ function setInst(im, k, x, y, z, rot, sy, sx = 1) {
   _qy.setFromAxisAngle(_up, rot); _mx.compose(_pos.set(x, y, z), _qy, _scl.set(gone ? 0 : sx, gone ? 0 : sy, gone ? 0 : 1)); im.setMatrixAt(k, _mx);
 }
 function writeWalls() {
-  for (const e of wallEdges) setInst(wallIM, e.inst, e.wx, 0, e.wz, e.horiz ? 0 : Math.PI / 2, e.s, e.sx);
-  for (const e of frameEdges) { const k = THREE.MathUtils.clamp((e.s - .5) / .5, 0, 1); setInst(hdrIM, e.hinst, e.cx, 2.2 + HDR / 2, e.cz, e.horiz ? 0 : Math.PI / 2, k); }
-  fullPosts.forEach((p, k) => setInst(postIM, k, p.cx, 0, p.cz, 0, p.s));
-  hdrPosts.forEach((p, k) => { const s = THREE.MathUtils.clamp((p.s - .5) / .5, 0, 1); setInst(hpostIM, k, p.cx, 2.2 + HDR / 2, p.cz, 0, s); });
+  // a tall deck (0.80.0): walls and headers stretch to H when up, and come down to the usual low wall when cut away
+  const ts = s => WALL_K === 1 ? s : s * (1 + (WALL_K - 1) * Math.max(0, (s - .12) / .88)), HK = WALL_K === 1 ? 1 : (H - 2.2) / HDR;
+  for (const e of wallEdges) setInst(wallIM, e.inst, e.wx, 0, e.wz, e.horiz ? 0 : Math.PI / 2, ts(e.s), e.sx);
+  for (const e of frameEdges) { const k = THREE.MathUtils.clamp((e.s - .5) / .5, 0, 1); setInst(hdrIM, e.hinst, e.cx, 2.2 + HDR * HK / 2, e.cz, e.horiz ? 0 : Math.PI / 2, k * HK); }
+  fullPosts.forEach((p, k) => setInst(postIM, k, p.cx, 0, p.cz, 0, ts(p.s)));
+  hdrPosts.forEach((p, k) => { const s = THREE.MathUtils.clamp((p.s - .5) / .5, 0, 1); setInst(hpostIM, k, p.cx, 2.2 + HDR * HK / 2, p.cz, 0, s * HK); });
   for (const im of [wallIM, hdrIM, postIM, hpostIM]) im.instanceMatrix.needsUpdate = true;
   if (sillIM) {
     for (const e of glassEdges) {
@@ -3025,7 +3032,7 @@ function buildDeck(def) {
   ROOMS = def.rooms; WINDOWS = def.windows; HULL = def.hull;
   DOORS = Object.assign({}, def.doors); CLOSED_DOORS = Object.assign({}, def.closedDoors);
   for (const key of shipDeck(def.num).open) if (DOORS[key] === 'closed' || DOORS[key] === 'hatch') { DOORS[key] = 'door'; delete CLOSED_DOORS[key]; }   // unlocked since
-  W = def.map[0].length; D = def.map.length;
+  W = def.map[0].length; D = def.map.length; WALL_K = def.tall || 1; H = 2.8 * WALL_K;
   OX = def.lift[0] - LIFT_AT[0]; OZ = def.lift[1] - LIFT_AT[1];
   LAMPS = []; STEAM = []; DUST = []; glows.length = 0;
 
@@ -3076,6 +3083,7 @@ function buildDeck(def) {
       if (def.floorSeeds && i === def.floorSeeds.col && j < def.floorSeeds.rows.length) seed = def.floorSeeds.rows[j];   // a deck whose floor changed west of this column keeps its old grain (and its later random sequence) east of it
       if (!r) continue;
       if (st.void) { g.fillStyle = '#23272d'; g.fillRect(x, y, PX, PX); continue; }
+      if (st.rec) { recFloor(g, st.floor, i, j, x, y, PX); continue; }   // the rec deck's floors (0.80.0): no R()
       const v = st.floor === 'lift' || st.spine || st.still ? 0 : (R() - .5) * 8;   // the lift car (and `still` floors, such as utility rooms built later) draw nothing from the deck's random sequence, so the rest of the deck is unchanged
       if (st.floor === 'warm') {
         if ((i % 2 === 0) && (j % 2 === 0)) { g.fillStyle = '#4a413a'; g.fillRect(x, y, PX * 2, PX * 2); }
@@ -7864,6 +7872,164 @@ function dressShow(list) {
 const dressingOn = () => [...DRESS.on.keys()];
 
 // =====================================================================
+// 4e. THE REC DECK (DECKS[7], shown as R; the rec deck architect, 0.80.x; plans/recdeck-plan.html v3)
+// Phase 1 (the user's rule): the deck and its animations for the player only. `playerOnly` keeps it out of the crew's
+// schedules, the blackouts and the meeting places until crew are let in. Every floor here draws no R() (recFloor),
+// and its kit makes its materials when the deck is built (recMats), so nothing at load changes and the deck is
+// freed whole when you leave.
+// =====================================================================
+const recHash = (i, j, k) => { const x = Math.sin(i * 127.1 + j * 311.7 + k * 74.7) * 43758.5453; return x - Math.floor(x); };
+function recFloor(g, kind, i, j, x, y, PX) {
+  const hall = (a, b) => { const r2 = roomAt(a, b); return r2 && ROOMS[r2].hall; }, sameRoom = (a, b) => roomAt(a, b) === roomAt(i, j);
+  const edge = (a, b) => ROOMS[roomAt(i, j)].hall ? !hall(a, b) : !sameRoom(a, b);   // a stripe where the floor meets a wall
+  const fleck = (n, cs) => { for (let k = 0; k < n; k++) { g.fillStyle = cs[k % cs.length]; g.fillRect(x + recHash(i, j, k) * (PX - 2), y + recHash(i, j, k + 31) * (PX - 2), 2, 2); } };
+  if (kind === 'sport') {                                // charcoal sports floor; the neon stripes, cyan to port and magenta to starboard
+    g.fillStyle = '#2a2e35'; g.fillRect(x, y, PX, PX);
+    fleck(8, ['rgba(80,230,255,.16)', 'rgba(255,90,200,.14)', 'rgba(220,225,230,.12)']);
+    if (i % 4 === 0) { g.fillStyle = 'rgba(0,0,0,.2)'; g.fillRect(x, y, 2, PX); }
+    if (edge(i, j - 1)) { g.fillStyle = 'rgba(80,230,255,.9)'; g.fillRect(x, y + 9, PX, 4); g.fillStyle = 'rgba(80,230,255,.25)'; g.fillRect(x, y + 6, PX, 10); }
+    if (edge(i, j + 1)) { g.fillStyle = 'rgba(255,79,216,.9)'; g.fillRect(x, y + PX - 13, PX, 4); g.fillStyle = 'rgba(255,79,216,.25)'; g.fillRect(x, y + PX - 16, PX, 10); }
+  } else if (kind === 'tile' || kind === 'pooltile') {   // small glazed tiles: pale aqua on the pool deck, pale grey-green in the changing rooms and washroom
+    const pool = kind === 'pooltile';
+    g.fillStyle = pool ? '#6f9aa0' : '#7f8c8a'; g.fillRect(x, y, PX, PX);
+    for (let a = 0; a < 4; a++) for (let b = 0; b < 4; b++) {
+      const t = (recHash(i * 4 + a, j * 4 + b, 3) - .5) * 12;
+      g.fillStyle = pool ? `rgb(${170 + t},${214 + t},${216 + t})` : `rgb(${196 + t},${206 + t},${200 + t})`; g.fillRect(x + a * 16 + 1, y + b * 16 + 1, 14, 14);
+    }
+  } else if (kind === 'court') {                         // the Lightdisc court's black floor (its lines come with the court, 0.80.2)
+    g.fillStyle = '#0c0f14'; g.fillRect(x, y, PX, PX);
+    g.fillStyle = 'rgba(120,160,200,.06)'; g.fillRect(x, y, PX, 1); g.fillRect(x, y, 1, PX);
+  } else if (kind === 'stand') {
+    g.fillStyle = '#2e333b'; g.fillRect(x, y, PX, PX); fleck(5, ['rgba(255,255,255,.08)']);
+  } else if (kind === 'violet') {                        // the auditorium's deep violet carpet with small gold diamonds
+    g.fillStyle = '#33264f'; g.fillRect(x, y, PX, PX);
+    g.fillStyle = 'rgba(233,196,106,.16)'; g.beginPath(); g.moveTo(x + 32, y + 24); g.lineTo(x + 40, y + 32); g.lineTo(x + 32, y + 40); g.lineTo(x + 24, y + 32); g.closePath(); g.fill();
+  } else if (kind === 'pad') {                           // the float room's soft coral padding, in squares
+    g.fillStyle = '#b8665c'; g.fillRect(x, y, PX, PX);
+    for (let a = 0; a < 2; a++) for (let b = 0; b < 2; b++) { g.fillStyle = (a + b + i + j) % 2 ? '#e3907f' : '#eaa093'; g.fillRect(x + a * 32 + 2, y + b * 32 + 2, 28, 28); }
+  } else if (kind === 'river') {                         // the river hall's slate floor, under the banks (0.80.4)
+    g.fillStyle = '#4a5654'; g.fillRect(x, y, PX, PX); fleck(10, ['rgba(160,190,170,.18)', 'rgba(20,30,28,.25)']);
+  } else {                                               // 'svc': service rooms, plain steel plate
+    g.fillStyle = '#353b42'; g.fillRect(x, y, PX, PX);
+    g.fillStyle = '#5d666e'; g.fillRect(x + 2, y + 2, PX - 4, PX - 4);
+    g.fillStyle = 'rgba(0,0,0,.08)'; for (let a = 10; a < PX - 8; a += 14) for (let b = 10; b < PX - 8; b += 14) g.fillRect(x + a, y + b, 6, 2);
+  }
+  if (kind !== 'sport' && !sameRoom(i, j - 1) && !hall(i, j - 1) && (kind === 'pooltile' || kind === 'pad')) { g.fillStyle = 'rgba(80,230,255,.5)'; g.fillRect(x, y + 4, PX, 3); }   // the cyan stripe runs on into the port rooms
+}
+DECKS[7] = {
+  num: 7, name: 'Recreation', seed: 70771, tall: 1.6, playerOnly: true, open: [6, 24],
+  blurb: 'Auditorium, court, pool, rivers', arrive: 'The concourse runs stern to bow: the rivers and the court aft, the pool and the auditorium forward.',
+  lift: [20, 9],
+  // car on columns 19-20, rows 7-9; trunks behind glass on row 6, the ladder on row 10: the same world spot as every deck
+  map: [
+    '..KKKKKKKKKKKKKKKwwwwwwPPPPPPPPPppAAAA........',
+    '.KKKKKKKKKKKKKKKKwwwwwwPPPPPPPPPppAAAAAA......',
+    '.KKKKKKKKKKKKKKKKwwwwwwPPPPPPPPPppAAAAAAAA....',
+    '.KKKKKKKKKKKKKKKKwwwwwwPPPPPPPPPppAAAAAAAAA...',
+    '.KKKKKKKKKKKKKKKKkkkkkkPPPPPPPPPppAAAAAAAAAA..',
+    '.KKKKKKKKKKKKKKKKkkkkkkPPPPPPPPPppAAAAAAAAAAA.',
+    '.KKKKKKKKKKKKKKKK++YY++PPPPPPPPPppAAAAAAAAAAA.',
+    '.rrr=============++@@++=======ffffAAAAAAAAAAA.',
+    '.rrr=============++@@++=======ffffAAAAAAAAAAAA',
+    '.rrr=============++@@++=======ffffAAAAAAAAAAAA',
+    '.rrr=============++ZZ++=======ffffAAAAAAAAAAA.',
+    '.eeeTTTTTTTTTTTTT++++++==uuubbbbbbAAAAAAAAAAA.',
+    '.eeeTTTTTTTTTTTTTFFFFFFFFuuubbbbbbAAAAAAAAAAA.',
+    '.eeeCCCCCCCCCCCCCFFFFFFFFuuubbbbbbAAAAAAAAAA..',
+    '.eeeCCCCCCCCCCCCCFFFFFFFFuuubbbbbbAAAAAAAAA...',
+    '.eeeCCCCCCCCCCCCCFFFFFFFFuuubbbbbbAAAAAAAA....',
+    '.eeeCCCCCCCCCCCCCFFFFFFFFuuubbbbbbAAAAAA......',
+    '..eeCCCCCCCCCCCCCFFFFFFFFuuubbbbbbAAAA........',
+  ],
+  // the plan's DOORSR. One change: v,19,10 and v,21,10 are solid wall (not glass), so the lift's call panels sit beside
+  // the doors as on every deck. pass: a counter opening (the kit hire desk) or a rail with no pane (the court's).
+  doors: {
+    'v,19,7': 'lift', 'v,19,8': 'lift', 'v,19,9': 'lift', 'v,21,7': 'lift', 'v,21,8': 'lift', 'v,21,9': 'lift',   // one wide door each side
+    'v,19,6': 'glass', 'v,21,6': 'glass',                    // the trunks, behind glass above the car
+    'h,19,11': 'glass', 'h,20,11': 'hatch',                  // the ladder, with its hatch
+    'h,17,6': 'pass', 'h,18,6': 'pass', 'h,22,6': 'door',    // kit hire: the counter onto the lobby, and its door
+    'h,21,4': 'door',                                        // kit hire through to the changing rooms
+    'v,17,1': 'door', 'v,17,2': 'glass',                     // changing rooms to the river hall (the wet way)
+    'v,23,2': 'door', 'v,23,1': 'glass',                     // changing rooms to the pool (the wet way)
+    'h,9,7': 'door', 'h,10,7': 'door', 'h,5,7': 'glass', 'h,6,7': 'glass', 'h,7,7': 'glass', 'h,8,7': 'glass',
+    'h,11,7': 'glass', 'h,12,7': 'glass', 'h,13,7': 'glass', 'h,14,7': 'glass', 'h,15,7': 'glass',   // the river hall's viewing glass
+    'v,4,8': 'hatch',                                        // river pump room, off the concourse's aft end
+    'h,6,11': 'door', 'h,14,11': 'door', 'h,7,11': 'glass', 'h,8,11': 'glass', 'h,9,11': 'glass', 'h,10,11': 'glass',
+    'h,11,11': 'glass', 'h,12,11': 'glass', 'h,13,11': 'glass', 'h,15,11': 'glass',   // the stands, behind glass on the concourse
+    'h,10,13': 'door', 'h,4,13': 'pass', 'h,5,13': 'pass', 'h,6,13': 'pass', 'h,7,13': 'pass', 'h,8,13': 'pass', 'h,9,13': 'pass',
+    'h,11,13': 'pass', 'h,12,13': 'pass', 'h,13,13': 'pass', 'h,14,13': 'pass', 'h,15,13': 'pass', 'h,16,13': 'pass',   // the court's rail and its gate
+    'v,4,15': 'hatch',                                       // the court's emitter room
+    'h,26,7': 'door', 'h,23,7': 'glass', 'h,24,7': 'glass', 'h,25,7': 'glass', 'h,27,7': 'glass', 'h,28,7': 'glass', 'h,29,7': 'glass',   // the pool's gallery
+    'v,32,3': 'hatch',                                       // pool plant, from the pool deck
+    'v,34,7': 'door', 'v,34,8': 'door', 'v,34,9': 'door', 'v,34,10': 'door',   // foyer into the auditorium: four wide doors
+    'h,26,11': 'door',                                       // washroom
+    'h,18,12': 'door', 'h,17,12': 'glass', 'h,21,12': 'glass', 'h,22,12': 'glass', 'h,23,12': 'glass', 'h,24,12': 'glass',   // float room
+    'h,31,11': 'hatch', 'v,34,12': 'glass', 'v,34,11': 'hatch',   // rec utility room: from the foyer, the booth window and the stage door
+  },
+  plates: [['h,21,6', 's', 'Recreation Deck'], ['h,22,4', 's', 'Changing rooms'], ['h,16,7', 's', 'River hall'], ['h,5,11', 'n', 'Stands'],
+    ['h,30,7', 's', 'Pool gallery'], ['h,25,11', 'n', 'Washroom'], ['h,19,12', 'n', 'Float room']],
+  rooms: {
+    '=': { name: 'Concourse', floor: 'sport', hall: true, rec: true },
+    '+': { name: 'Lift lobby', floor: 'sport', hall: true, rec: true },
+    f: { name: 'Foyer', floor: 'sport', hall: true, rec: true },
+    '@': { name: 'Main lift', floor: 'lift' },
+    Y: { name: 'Spine trunks', floor: 'grate', spine: true }, Z: { name: 'Spine ladder', floor: 'grate', spine: true },
+    A: { name: 'Auditorium', floor: 'violet', rec: true },
+    C: { name: 'Lightdisc court', floor: 'court', rec: true },
+    T: { name: 'Stands', floor: 'stand', rec: true },
+    K: { name: 'River hall', floor: 'river', rec: true },
+    P: { name: 'Pool', floor: 'pooltile', rec: true },
+    F: { name: 'Float room', floor: 'pad', rec: true },
+    w: { name: 'Changing rooms', floor: 'tile', rec: true },
+    k: { name: 'Kit hire', floor: 'sport', rec: true },
+    u: { name: 'Washroom', floor: 'tile', rec: true },
+    // service rooms: Works and you, through hatches (their machines come with the systems engineer; section 6 of the plan)
+    b: { name: 'Rec utility room', floor: 'svc', rec: true, still: true },
+    r: { name: 'River pump room', floor: 'svc', rec: true, still: true },
+    p: { name: 'Pool plant', floor: 'svc', rec: true, still: true },
+    e: { name: 'Emitter room', floor: 'svc', rec: true, still: true },
+  },
+  windows: ['P', 'K', 'A'].map(room => ({ room })),
+  closedDoors: {
+    'h,20,11': { t: 'Spine ladder', x: 'The maintenance ladder, up to Quarters and down to Operations, through the rec dec on the way. Tier 2 access.' },
+  },
+  hull: { sternX: 1, stern: 2, bowFrom: 34, bowLen: 11.6, byFace: true },
+  service: [{ key: 'v,4,8', tier: 2 }, { key: 'v,4,15', tier: 2 }, { key: 'v,32,3', tier: 1 }, { key: 'h,31,11', tier: 1 }, { key: 'v,34,11', tier: 1 }],
+  machines: [],                                          // TODO (phase 2, the systems engineer): the plan's section 6 machines
+  places: [],
+  dress(d) {
+    recMats();
+    for (const [key, tw, text] of d.plates) placeOnEdge('plate', key, tw, { text });
+    for (const [key, tw] of [['v,19,10', 'w'], ['v,21,10', 'e']]) placeOnEdge('liftPanel', key, tw);
+    placeOnEdge('deckDirectory', 'h,20,12', 'n', { it: IT('Deck directory', 'Seven decks, top to bottom. Bridge, Command & Science, Commons, Quarters, the Recreation Deck (R), Operations, Engineering. You are here: the rec dec, between Quarters and Operations.') });
+    for (const r of ['Y', 'Z']) NO_FADE.add(r);
+    place('Y', 'spineTrunks', 1, .5, 'n', { it: SPINE_IT.trunks });
+    place('Z', 'spineLadder', 1, .5, 'n', { it: { t: 'Spine ladder', x: 'The maintenance ladder, passing through on its way from Quarters down to Operations.', see: true } });
+    // kit hire (6 x 2): self-serve shelves on the back wall, the counter at the lobby's opening, a returns bin and the sign
+    for (const x of [.7, 1.95, 3.2]) place('k', 'shelving', x, .33, 'n', { it: IT('Kit shelves', 'Rec kit in every size, towels, helmets, buoyancy vests, paddles, climbing shoes and harnesses, disc gloves and grip socks. Nobody staffs it: take what you need.') });
+    place('k', 'counter', 1.0, 1.62, 's', { it: IT('Kit hire', 'A self-serve counter onto the lobby. Someone has left a single flipper on it.') });
+    place('k', 'hamper', 5.45, .4, 'n', { snug: true, it: IT('Returns bin', 'Wet towels and used kit go in here. It is always fuller than it should be.') });
+    placeWall('k', 'plate', 'e', .5, { text: 'PUT IT BACK' });
+    // changing rooms (6 x 4): lockers on the hull wall, a bench down the middle, two showers in the aft corner, lost property
+    for (const x of [1.0, 2.35, 3.7]) place('w', 'locker', x, .42, 'n', { it: IT('Lockers', 'Rec dec lockers. Yours is whichever one is free; the keys are on stretchy wristbands.') });
+    place('w', 'bench', 2.6, 2.5, 'n', { w: 2.2, snug: true, it: IT('Bench', 'Wet, always. Someone has written SIT HERE on a towel.') });
+    for (const x of [.65, 1.9]) place('w', 'showerStall', x, 3.38, 's', { it: IT('Shower', 'A quick rinse before the pool and after it. The hot water takes a moment to remember.') });
+    place('w', 'footlocker', 5.35, .32, 'n', { it: IT('Lost property', 'Odd socks, a single earring, three water bottles, and a goggle strap with no goggles.') });
+    // washroom (3 x 7): four stalls on the bow side, a row of basins opposite
+    for (const z of [1.9, 3.1, 4.3, 5.5]) place('u', 'toiletStall', 2.45, z, 'e');
+    place('u', 'basinCounter', .38, 3.5, 'w', { w: 2.6, it: IT('Basins', 'A long row of basins for the interval queue.') });
+    // the concourse: benches against the stands' glass, facing the rivers; a towel bin by the lobby
+    for (const x of [3.5, 8.0]) place('=', 'bench', x, 3.55, 's', { w: 1.6, snug: true, it: IT('Bench', 'Facing the river glass. People sit here to watch the white water and pretend they aren\'t waiting for someone.') });
+    place('=', 'hamper', 12.4, .45, 'n', { snug: true, it: IT('Towel bin', 'For wet towels from the river hall. It smells of chlorine and good intentions.') });
+  },
+};
+// the rec deck's materials, made when the deck is built (so they are freed with it)
+let RK = null;
+function recMats() {
+  RK = {};
+}
+
+// =====================================================================
 // 5. LIGHTING
 // The sun casts all shadows and follows the camera, snapped to shadow
 // texels so edges don't shimmer. Lamps come up at night.
@@ -7922,7 +8088,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.63.1';                           // keep in step with the header's build line
+const GAME_BUILD = '0.80.0';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -8232,7 +8398,7 @@ function schedData() {
   // below; those only for an event (type 'event', or Deck 1's handover and walk) are kept out of everyday use, while
   // everyday seats an event also uses (the observatory's window seats) stay in it
   const EVENT_ONLY = new Set(['handover', 'walk']), evPlaces = [];
-  for (const n of Object.keys(DECKS).map(Number)) for (const p of (DECKS[n].places || [])) if (!p.machine) (p.event && (p.type === 'event' || EVENT_ONLY.has(p.event)) ? evPlaces : places).push({ ...p, deck: n });
+  for (const n of Object.keys(DECKS).map(Number)) if (!DECKS[n].playerOnly) for (const p of (DECKS[n].places || [])) if (!p.machine) (p.event && (p.type === 'event' || EVENT_ONLY.has(p.event)) ? evPlaces : places).push({ ...p, deck: n });
   const byId = new Map(places.concat(evPlaces).map(p => [p.id, p]));
   // private places: one named after a bed ('4-05-wash') belongs to whoever sleeps there, and so does any place
   // in a room with a bed place in it (an en-suite, a desk, an armchair). In a room of several beds (a bunk room)
@@ -10355,8 +10521,8 @@ deviceApp({ id: 'maps', title: 'Maps', icon: 'map', order: 25,
     }
     const you = n === deckDef.num && typeof player !== 'undefined' ? player.here() : null;
     const g = typeof IX_GOAL !== 'undefined' && IX_GOAL && IX_GOAL.deck === n ? IX_GOAL : null;
-    const B = [{ kind: 'text', text: 'Deck' }, { kind: 'buttons', items: Object.keys(DECKS).map(Number).sort((a, b) => a - b).map(d => ({ label: String(d), on: d === n, action: { app: 'maps', do: 'deck', arg: d } })) },
-      { kind: 'text', text: 'Deck ' + n + ': ' + def.name + (n === deckDef.num ? ' (you are here)' : ''), mark: 'head' },
+    const B = [{ kind: 'text', text: 'Deck' }, { kind: 'buttons', items: DECK_ORDER.filter(d => DECKS[d]).map(d => ({ label: deckLabel(d), on: d === n, action: { app: 'maps', do: 'deck', arg: d } })) },
+      { kind: 'text', text: deckWord(n) + ': ' + def.name + (n === deckDef.num ? ' (you are here)' : ''), mark: 'head' },
       { kind: 'map', grid: def.map, rooms, you, pick: mapPick, goal: g ? (g.room && typeof g.room === 'string' ? g.room : null) : null, action: { app: 'maps', do: 'pick' } }];
     if (mapFor === 'appointments') {
       if (!apptDraft) mapFor = null;
@@ -10551,7 +10717,7 @@ function apptPlaces() {                                  // [{ id, name, deck }]
   if (apptPlacesCache) return apptPlacesCache;
   const out = [];
   for (const n of Object.keys(DECKS).map(Number).sort((a, b) => a - b)) {
-    const def = DECKS[n], rooms = def.rooms || {}, seen = new Set();
+    const def = DECKS[n], rooms = def.rooms || {}, seen = new Set(); if (def.playerOnly) continue;
     for (const pl of def.places || []) {
       const r = rooms[pl.room]; if (!r || seen.has(pl.room) || !APPT_PLACE_ROOMS.test(r.name || '') || mapLocked(n, pl.room)) continue;
       if (!APPT_SEATS.includes(pl.type) && !/office|infirmary/i.test(r.name)) continue;
@@ -13414,7 +13580,7 @@ function ixFrame() {
   if (typeof actProgress === 'function' && actProgress(ACT)) { if (!el.hidden) el.hidden = true; return; }   // section 15's progress bar is up over you: it says it all
   const here = deckDef.num === g.deck, w = here ? ixGoalWorld(g) : { x: LIFT_AT[0], z: LIFT_AT[1] };
   if (!w) { el.hidden = true; return; }
-  const label = here ? g.label : 'Take the lift to Deck ' + g.deck + (g.label ? ': ' + g.label.charAt(0).toLowerCase() + g.label.slice(1) : '');
+  const label = here ? g.label : 'Take the lift to ' + (g.deck === 7 ? 'the rec deck' : 'Deck ' + g.deck) + (g.label ? ': ' + g.label.charAt(0).toLowerCase() + g.label.slice(1) : '');
   ixV.set(w.x, 1.2, w.z).project(camera);
   // the arrow keeps inside a frame clear of the HUD at the top and the toast at the bottom
   const W2 = innerWidth / 2, H2 = innerHeight / 2, sx = (ixV.x + 1) * W2, sy = (1 - ixV.y) * H2, L0 = 30, R0 = innerWidth - 30, T0 = 130, B0 = innerHeight - 110;
@@ -15508,7 +15674,7 @@ function jobsHour(h) {
 // hour (07:00-18:00), one open at a time per place; small ones at your tier wait for you like any other (leaveEnd;
 // a type may set its own `leave`, in minutes of the day shift). Finishing one does what it says (choreDone): a
 // calibration or a filter swap helps its machine, a vent helps the deck's air, a round finds worn machines early.
-const placesOf = (types, decks) => Object.keys(DECKS).filter(n => !decks || decks.includes(+n)).flatMap(n => (DECKS[n].places || []).filter(p => types.includes(p.type) && !p.machine).map(p => ({ ...p, deck: +n })));
+const placesOf = (types, decks) => Object.keys(DECKS).filter(n => (!decks || decks.includes(+n)) && !DECKS[n].playerOnly).flatMap(n => (DECKS[n].places || []).filter(p => types.includes(p.type) && !p.machine).map(p => ({ ...p, deck: +n })));
 const roomName = (n, r) => ((DECKS[n].rooms[r] || {}).name || '').toLowerCase();
 const panelStop = (m, mins, tag) => ({ deck: m.deck, placeId: panelPlace(m.id), mins, tag });
 const choreMachines = kinds => machineList().filter(m => kinds.includes(m.kind) && panelPlace(m.id));
@@ -15802,7 +15968,7 @@ function eventStop(spec) {
   const pl = spec.place && placeById(spec.place); if (pl) return { deck: pl.deck, placeId: pl.id, room: pl.room };
   const m = spec.machine && machineById(spec.machine); if (m) return { deck: m.deck, placeId: panelPlace(m.id), room: m.room, machine: m.id, at: m.panel.slice() };
   const w = String(spec.where || '').toLowerCase(); if (!w) return null;
-  for (const n of Object.keys(DECKS).map(Number).filter(n => !spec.deck || n === spec.deck)) {
+  for (const n of Object.keys(DECKS).map(Number).filter(n => (!spec.deck || n === spec.deck) && !DECKS[n].playerOnly)) {
     const D = DECKS[n], rooms = Object.keys(D.rooms).filter(r => (D.rooms[r].name || '').toLowerCase().includes(w));
     const ps = (D.places || []).filter(p => !p.machine && (rooms.includes(p.room) || p.type === w));
     const stand = ps.find(p => /lift-wait|storage|laundry|garden|shop/.test(p.type)) || ps[0];
@@ -15869,7 +16035,7 @@ function blackoutHour(h) {
   if (typeof eventMod !== 'function' || eventMod('effect', 'blackouts', h * 60) !== true) return null;
   const c = MACH_HIST.get(histHour((h - 1) * 60)), power = c ? systemsFrom(c).power : 100, u = k => schedU(BLACKOUT_SEED, h, k);
   if (u(1) >= .15 + .45 * (1 - power / 100)) return null;
-  const decks = Object.keys(DECKS).map(Number).sort(), deck = decks[Math.floor(u(2) * decks.length)], len = 15 + Math.floor(46 * u(3));
+  const decks = Object.keys(DECKS).map(Number).filter(n => !DECKS[n].playerOnly).sort(), deck = decks[Math.floor(u(2) * decks.length)], len = 15 + Math.floor(46 * u(3));
   const from = h * 60 + Math.floor(u(4) * (61 - len));
   return { deck, from, to: from + len };
 }
@@ -40403,8 +40569,8 @@ function toast(t, x) {
   document.getElementById('tt').textContent = t; document.getElementById('tx').textContent = x;
   toastEl.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => toastEl.classList.remove('show'), 5600);
 }
-document.getElementById('deck').textContent = 'Deck ' + deckDef.num + ', CSV Wren';
-if (SAVED) toast('Deck ' + deckDef.num + ', CSV Wren', welcomeBack());
+document.getElementById('deck').textContent = deckWord(deckDef.num) + ', CSV Wren';
+if (SAVED) toast(deckWord(deckDef.num) + ', CSV Wren', welcomeBack());
 else toast('Deck 4, CSV Wren', 'You wake in Bunk 1, in the junior wing. Tap to walk somewhere, or press and hold to walk toward your finger. Tap anything or anyone to look closer.');
 
 const marker = new THREE.Mesh(new THREE.RingGeometry(.22, .28, 32), new THREE.MeshBasicMaterial({ color: col('#5fd6c6'), transparent: true, opacity: 0, depthWrite: false, toneMapped: false }));
@@ -40597,14 +40763,14 @@ function goToDeck(n, at) {
   for (const w of crew) if (w.deck === n && crewOn) w.setActive(true);
   deckCrewFill();                                        // section 10: the scheduled crew on this deck
   target.copy(player.obj.position).setY(.7);
-  refreshPickables(); deckEl.textContent = 'Deck ' + n + ', CSV Wren'; lastRoom = null;
+  refreshPickables(); deckEl.textContent = deckWord(n) + ', CSV Wren'; lastRoom = null;
   marker.material.opacity = 0; applyLight(nightT);
   saveGame();                                            // section 13: save on every deck change
 }
 
 // ---- the main lift: tap a lift door for the deck panel. A ride opens the doors, you step in, they close,
 // the view fades, the new deck is built behind the black, and the doors open on it. Timed by the game clock. ----
-const DECK_NAMES = { 1: 'Bridge', 2: 'Command & Science', 3: 'Commons', 4: 'Quarters', 5: 'Operations', 6: 'Engineering' };
+const DECK_NAMES = { 1: 'Bridge', 2: 'Command & Science', 3: 'Commons', 4: 'Quarters', 5: 'Operations', 6: 'Engineering', 7: 'Recreation' };
 const liftEl = document.getElementById('lift'), liftList = document.getElementById('liftList'), fadeEl = document.getElementById('fade');
 let ride = null, liftReturn = null;
 const inLift = () => roomAt(...player.here()) === '@';
@@ -40642,15 +40808,15 @@ function pressPanel(n) {
 }
 function openLiftPanel() {
   liftReturn = document.activeElement; liftList.textContent = '';
-  for (let n = 1; n <= 6; n++) {
+  for (const n of DECK_ORDER) {                         // R (the rec deck) between 4 and 5 (0.80.0)
     const here = n === deckDef.num, built = !!DECKS[n], b = document.createElement('button');
     b.className = 'deckbtn' + (here ? ' here' : ''); b.disabled = here || !built;
     const i = document.createElement('i'), sp = document.createElement('span'), t = document.createElement('b'), sm = document.createElement('small');
-    i.textContent = n; t.textContent = DECK_NAMES[n]; sm.textContent = here ? 'You are here' : built ? DECKS[n].blurb : 'Not built yet';
+    i.textContent = deckLabel(n); t.textContent = DECK_NAMES[n]; sm.textContent = here ? 'You are here' : built ? DECKS[n].blurb : 'Not built yet';
     sp.append(t, sm); b.append(i, sp);
     const gl = typeof goalNow === 'function' ? goalNow() : null, goal = !!(gl && gl.deck === n && !here && built);   // 0.28.58 (0.60.6a, the user's): the deck your goal arrow wants
     if (goal) { b.classList.add('goal'); const g = document.createElement('em'); g.textContent = '→ Goal'; b.appendChild(g); }
-    b.setAttribute('aria-label', `Deck ${n}, ${DECK_NAMES[n]}: ${sm.textContent}` + (goal ? '. Your goal is here' + (gl.label ? ': ' + gl.label : '') : ''));
+    b.setAttribute('aria-label', `${deckWord(n)}, ${DECK_NAMES[n]}: ${sm.textContent}` + (goal ? '. Your goal is here' + (gl.label ? ': ' + gl.label : '') : ''));
       b.onclick = () => { closeLiftPanel(); pressPanel(n); };
     liftList.appendChild(b);
   }
@@ -40682,7 +40848,7 @@ function updateRide(dt) {
     if (T_ >= RIDE.done) {
       for (const d of liftDoors()) delete d.force;      // back to opening for whoever's near
       fadeEl.style.opacity = 0; ride = null;
-      toast('Deck ' + deckDef.num + ', ' + deckDef.name, deckDef.arrive || '');
+      toast(deckWord(deckDef.num) + ', ' + deckDef.name, deckDef.arrive || '');
     }
   }
 }
