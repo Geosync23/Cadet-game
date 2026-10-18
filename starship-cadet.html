@@ -242,7 +242,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.42.43
+   STARSHIP CADET: CSV Wren                           build 0.42.44
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7592,7 +7592,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.42.43';                           // keep in step with the header's build line
+const GAME_BUILD = '0.42.44';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -31786,7 +31786,25 @@ const CLOTHES_BEATS = [
   { id: 'd2-knit', day: 2, at: 18 * 60 + 30, till: 21 * 60, who: INTRO_ESCORT, where: 'seek', seek: true, when: () => typeof hobbyHas !== 'function' || !hobbyHas('knit'),
     keys: () => ['walk.knit'], lines: () => ['Want to learn to knit? I\'ve got spare needles.'],
     then: () => { if (typeof hobbyGive === 'function' && hobbyGive('knit')) toast('Knitting', 'Zeke gives you a pair of spare needles and some wool. Knitting is one of your hobbies now: sit down and tap Hobby.'); } },
+  // your first delivery (plan-0607 "Stores and the lift": Day 3, your first Wednesday, Yara Esposito mentions it; offered,
+  // never forced): while section 17's Wednesday delivery is on the board and nobody has it (held for you till 14:00),
+  // she comes and finds you and says the writers' stores.delivery card lines (gate flag delivery.first)
+  { id: 'd3-delivery', day: 3, at: 10 * 60, till: 13 * 60 + 30, who: 'esposito-yara', where: 'seek', seek: true, when: () => !!clothesDelivery(),
+    own: () => clothesVoice('esposito-yara', 'stores.delivery', 'delivery.first'),
+    lines: () => ['Wednesday. Delivery day. There\'s a stack of crates in the hold.', 'Fancy unloading it? Cart, crates, shelves. It\'s on the board.', 'No pressure. If it\'s still there at two, someone else gets it.'],
+    first: () => introFlagSet('delivery.first'),
+    then: () => { if (clothesDelivery()) toast('The Wednesday delivery', 'It\'s on the job board in the Works bay, Deck 5, until 14:00: take it there if you\'d like to. A hover cart from the Cart bay, the crates in the cargo hold, then tap any shelf in main storage.'); } },
 ];
+// this week's delivery job while it's still open and nobody has it (section 17: a stores restock found today), or null
+const clothesDelivery = () => (SHIP.jobs || []).find(j => j.kind === 'restock' && j.cargo === 'stores' && j.status !== 'done' && !j.claimedBy && Math.floor(j.found / 1440) + 1 === SHIP.time.day && j.found <= shipNow()) || null;
+// one person's lines of one kind under a flag (the voice cards: VOICE[id].lines[kind], entries with that flag), filled, or null
+function clothesVoice(id, kind, flagKey) {
+  try {
+    const v = typeof VOICE !== 'undefined' && VOICE[id], L = (v && v.lines && v.lines[kind] || []).filter(e => e.flag === flagKey); if (!L.length) return null;
+    const who = typeof linesWho === 'function' ? linesWho(id) : null;
+    return L.map(e => who && typeof linesFill === 'function' ? linesFill(e.text, who, { t: shipNow(), flags: { [flagKey]: true } }) : e.text).filter(Boolean);
+  } catch (e) { return null; }
+}
 function clothesBeatLines(b, C) {                        // the writers' lines for a beat, in order, or the stand-ins
   const out = [];
   const said = k => {                                    // one key: its exact lines, else k.1, k.2, ... in order
@@ -31794,7 +31812,8 @@ function clothesBeatLines(b, C) {                        // the writers' lines f
     for (let n = 1; !got.length || n <= 12; n++) { const l = W(k + '.' + n); if (!l) break; got.push(...l); }
     return got;
   };
-  for (const k of b.keys(C)) { for (const alt of [].concat(k)) { const l = said(alt); if (l.length) { out.push(...l); break; } } }   // an array: the first name that has lines
+  for (const k of (b.keys ? b.keys(C) : [])) { for (const alt of [].concat(k)) { const l = said(alt); if (l.length) { out.push(...l); break; } } }   // an array: the first name that has lines
+  const own = b.own && b.own(C); if (own && own.length) return own.slice();
   return out.length ? out : b.lines(C).slice();
 }
 let CLOTHES_BEAT = null;
@@ -31816,7 +31835,7 @@ function clothesBeatTick() {
     const from = introAbs(b.day, b.at), until = introAbs(b.day, b.till);
     if (b.seek && now >= from && now < until && typeof socialSeekAsk === 'function') socialSeekAsk(b.who, { from, until, why: 'intro:' + b.id });
     if (now < from || now >= until || !introBeatHere(b, crew(b.who))) continue;
-    C.said[b.id] = Math.floor(now); CLOTHES_BEAT = { b, lines: clothesBeatLines(b, C) }; return;
+    C.said[b.id] = Math.floor(now); if (b.first) b.first(C); CLOTHES_BEAT = { b, lines: clothesBeatLines(b, C) }; return;
   }
   clothesCrewTick(C, now, crew);
 }
