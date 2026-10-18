@@ -252,7 +252,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.55.4
+   STARSHIP CADET: CSV Wren                           build 0.55.5
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7810,7 +7810,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.55.4';                           // keep in step with the header's build line
+const GAME_BUILD = '0.55.5';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -34522,7 +34522,11 @@ function scanFitted(j) {
   return true;
 }
 const SCAN_UI = { job: null };
-function scanOpen(jobId) { if (!scanRead(jobId)) return false; SCAN_UI.job = jobId; if (typeof deviceShow === 'function') deviceShow('scanner'); return true; }
+function scanOpen(jobId) {
+  if (!scanRead(jobId)) return false; SCAN_UI.job = jobId;
+  if (typeof caseTick === 'function') caseTick();       // Day 5: the reading on Washer 2 is where the teacher opens P3's case
+  if (typeof deviceShow === 'function') deviceShow('scanner'); return true;
+}
 deviceApp({ id: 'scanner', title: 'Scanner', short: 'Scanner', icon: 'wrench', order: 33, hidden: () => true,   // opened by the look-over (scanOpen), never from the grid
   view: () => ({ title: 'Scanner', blocks: (SCAN_UI.job && scanView(SCAN_UI.job)) || [{ kind: 'text', text: 'Nothing to read. Look a faulty machine over at its panel.' }] }),
   act(verb, arg) { if (verb !== 'pick') return; const [id, p] = String(arg).split('|'); if (scanPick(id, p) && typeof toast === 'function') toast('Scanner', 'A ' + p + ' from main storage, Deck 5. Follow the marker.'); } });
@@ -34535,15 +34539,20 @@ function scanTrainMachine(d, not) {
   return all[Math.floor(schedU(machSeed('m7'), d, 875) * all.length)];
 }
 const SCAN_TRAINED = new Set();                          // machines used for today's training (the teacher's first)
-if (typeof WORK_MECH !== 'undefined') WORK_MECH.m7 = {
-  reserve(d, at, slot, o) {
+function scanTrainReserve(d, at, slot, o) {
     if (o && o.yours && typeof toolGive === 'function') toolGive('scanner');   // handed over at the board: yours to read with
+    if (o && o.yours) {                                  // Day 5 (the designer, 6fb5c49): your reading is on Washer 2 itself, P3's training case
+      const C = SHIP.works && caseState(), c = C && C.first && caseById(C.first), j = c && caseJob(c);
+      if (c && c.train && j && j.status !== 'done' && !j.claimedBy) { c.m7 = true; MACH_REV++; return j.id; }
+    }
     const m = scanTrainMachine(d, SCAN_TRAINED); if (!m) return null;
     const cs = caseCauses(m).filter(x => x.part), f = cs[Math.floor(schedU(machSeed(m.id), d, 875) * cs.length)];
     const id = jobReserve(m.id, d, at, slot, { train: 'm7', tier: 1, cause: f.id }), j = id && SHIP.jobs.find(x => x.id === id); if (!j) return null;
     delete j.make; delete j.makeMins; j.cause = f.id; j.parts = [f.part]; SCAN_TRAINED.add(m.id);
     return id;
-  } };
+}
+if (typeof WORK_MECH !== 'undefined') WORK_MECH.m7 = { reserve: scanTrainReserve };
+
 // =====================================================================
 // 24k. CASES: head-scratchers (Pillar 5, seat H, 0.55.x; plans/mechanics/case-engine.html on claude/p5-design)
 // Some faults don't show their cause. A real fault at your tier may become a case when section 17 posts it
@@ -34606,7 +34615,7 @@ function caseClean(x) {
     const keep = a => ids(a).filter(s => sus.includes(s)), cl = clues.map(k => k.id);
     out.open.push({ id: c.id, job: c.job, kind: c.kind, k: Number.isInteger(c.k) ? c.k : 0, band: CASE_BANDS[c.band] ? c.band : 'T1', cause: c.cause, sus,
       fewest: Number.isInteger(c.fewest) ? c.fewest : 2, clues, got: ids(c.got).filter(s => cl.includes(s)), crossed: keep(c.crossed), known: keep(c.known), calls: keep(c.calls),
-      fits: Number.isInteger(c.fits) ? c.fits : 0, posted: isFinite(c.posted) ? +c.posted : 0, until: isFinite(c.until) ? +c.until : 0, by: typeof c.by === 'string' ? c.by : undefined, wait: !!c.wait, taken: !!c.taken, talk: !!c.talk, long: !!c.long, train: !!c.train, told: !!c.told, title: typeof c.title === 'string' ? c.title : '' });
+      fits: Number.isInteger(c.fits) ? c.fits : 0, posted: isFinite(c.posted) ? +c.posted : 0, until: isFinite(c.until) ? +c.until : 0, by: typeof c.by === 'string' ? c.by : undefined, m7: c.m7 ? true : undefined, wait: !!c.wait, taken: !!c.taken, talk: !!c.talk, long: !!c.long, train: !!c.train, told: !!c.told, title: typeof c.title === 'string' ? c.title : '' });
     if (!j.case) j.case = c.id;
   }
   return out;
@@ -34723,7 +34732,7 @@ function caseHeld(j) {
   return true;
 }
 // a case not ready yet (P3's tries under way) keeps its job off the board (section 17's board and openJobs ask)
-function caseHidden(j) { const c = caseOf(j); return !!(c && c.wait); }
+function caseHidden(j) { const c = caseOf(j); return !!(c && c.wait && !c.m7); }   // Day 5's washer is on the board as your scanner job
 // to the crew, who do it the long way (a part at a time, on paper): no remark
 function caseRelease(c, j) {
   const parts = c.sus.filter(s => !c.known.includes(s)).map(s => caseSus(c, s).part).filter(p => p);
@@ -34805,6 +34814,7 @@ function caseCall(caseId, susId) {
   const s = caseSus(c, susId);
   if (c.calls.length > (c.fits || 0)) c.calls.pop();     // called again before fitting: it replaces the last call (it was never tried)
   c.calls.push(susId);
+  if (typeof simNote === 'function') simNote('caseCalled', { id: c.id, job: j.id, train: !!c.train });   // 24 core's escort ends on the training case's call
   if (typeof jobSetPart === 'function' && s.part) jobSetPart(j.id, s.part); else j.parts = s.part ? [s.part] : [];
   j.stepsDone = (j.stepsDone || []).filter(k => k !== 0);   // the fetch again, now there's a part to fetch
   MACH_REV++;
@@ -34971,8 +34981,9 @@ function p3Tick(c, j) {
   }
   if (c.clues.some(k => !k.src.done)) return;
   const d = Math.floor(now / 1440) + 1, mn = now % 1440;
-  if (!playerShiftOn(d) || mn < DAY_SHIFT[0] || mn >= 900 || (c.train && !caseOpened('p3'))) return;
-  if (c.train) { const row = typeof ladderRow === 'function' && ladderRow('p3'); c.by = (row && typeof ladderTeacher === 'function' && ladderTeacher(row, d)) || 'calder'; }
+  const here = c.m7 && j.claimedBy === 'you' && !!j.scan;   // Day 5: you've read Washer 2 with the scanner, the teacher beside you
+  if (!here && (!playerShiftOn(d) || mn < DAY_SHIFT[0] || mn >= 900 || (c.train && !caseOpened('p3')))) return;
+  if (c.train) { const W = SHIP.works, row = typeof ladderRow === 'function' && ladderRow('p3'); c.by = (here && W && W.cur && W.cur.by) || (row && typeof ladderTeacher === 'function' && ladderTeacher(row, d)) || 'calder'; }
   caseShow(c, j);
   if (c.train && typeof worksSay === 'function') worksSay(c.by, (typeof worksText === 'function' && worksText('works.train.p3.start', null)) || 'Here\'s a funny one. ' + c.title + '. Open Fault notes: the first note\'s taped to the job.');
 }

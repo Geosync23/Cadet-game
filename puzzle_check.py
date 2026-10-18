@@ -235,6 +235,22 @@ FIRST = r"""(() => {
   return out;
 })()"""
 
+FIRST_M7 = r"""(() => {
+  const out = {}, C = caseState(), op = SHIP.works.op; C.open = []; C.done = []; delete C.first; SHIP.works.op = {}; SHIP.works.tr = {}; SHIP.works.tools = {};
+  let d4 = 4; while (weekday(d4) !== 3) d4++;
+  MACH_HOUR = null; MACH_SEEN = -1; setShipNow((d4 - 1) * 1440 + 1090); machinesNow(); caseTick();
+  const c = caseById(C.first), j = c && caseJob(c); if (!c) return out;
+  setShipNow(d4 * 1440 + 600); machinesNow(); caseTick(); out.waiting = c.wait;
+  SHIP.works.tools = { scanner: [5, 0] };
+  out.id = scanTrainReserve(d4 + 1, 600, 15, { train: 'm7', yours: true }); out.job = j.id; out.m7 = c.m7; out.hidden = caseHidden(j);
+  claimJob(j.id); out.waitAfterClaim = c.wait;
+  window.__notes = []; onSim('caseCalled', d => __notes.push(d));
+  scanOpen(j.id); out.shownAtReading = !c.wait; out.got = c.got.slice(); deviceClose();
+  caseCall(c.id, 'pump'); simFlush && simFlush(); out.calledNote = __notes.some(x => x.id === c.id && x.train);
+  SHIP.works.op = op; C.open = []; delete C.first; SHIP.jobs = SHIP.jobs.filter(x => x !== j);
+  return out;
+})()"""
+
 # a case in play, on a weekday's shift: a washer's leak (pump), held for you
 PLAY = r"""(() => {
   const out = {}, C = caseState(); C.open = []; C.done = [];
@@ -271,7 +287,7 @@ PLAY = r"""(() => {
   const sv = { ship: {} }; for (const f of SAVE_EXTRA) { try { f(sv); } catch (e) {} }
   const canon = o => JSON.stringify(o, Object.keys(o).sort().concat(['id', 'type', 'src', 'at', 'kills', 'by', 't', 'tried', 'done']));   // key order doesn't matter
   const before = canon(c); CASE_SAVED = JSON.parse(JSON.stringify(sv.ship.works.cases)); delete SHIP.works.cases; CASE_CLEAN = false;
-  const c2 = caseOf(j); out.saveSame = !!c2 && canon(c2) === before; out.saveBytes = JSON.stringify(sv.ship.works.cases).length;
+  const c2 = caseOf(j); out.saveSame = !!c2 && canon(c2) === before; if (!out.saveSame) out.saveDiff = [before, c2 && canon(c2)]; out.saveBytes = JSON.stringify(sv.ship.works.cases).length;
   // the right call: the machine put right, right first time is lost (one wrong call), flags 0
   caseAct('case:call', c2.id + '|' + c2.cause); caseAct('case:yes', c2.id + '|' + c2.cause);
   for (let k = 0; k < n; k++) jobStepDone(j.id, k);
@@ -386,6 +402,10 @@ def run(path):
             check(all(u == 1 for u in c['used']), f"{c['id']}: each try's part came off its shelf: {c['used']}")
             check(' — ' in c['text'] and 'Still' in c['text'], f"{c['id']}: a note names who tried: {c['text']!r}")
         check(Q.get('waitEnds'), f"a case still waiting after three days is let go: {Q.get('waitEnds')}")
+        F2 = g.ev(FIRST_M7)
+        print('first case through m7:', F2)
+        check(F2.get('id') == F2.get('job') and F2.get('m7') and not F2.get('hidden'), f"Day 5: your scanner job is Washer 2 itself, on the board for you: {F2}")
+        check(F2.get('shownAtReading') and len(F2.get('got', [])) == 1 and F2.get('calledNote'), f"reading it opens P3's case there, the first note with the job; the call sends caseCalled: {F2}")
         F = g.ev(FIRST)
         print('first case:', F)
         check(not F.get('before') and F.get('staged') and F.get('machine') in ('4-washer-2', '4-washer-3') and F.get('cause') == 'pump' and F.get('sus') == ['pump', 'seal', 'valve'] and F.get('train'), f"Day 4 18:00: Washer 2 leaking, the pump, three suspects, a training case: {F}")
