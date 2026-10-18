@@ -35541,7 +35541,7 @@ if (typeof jobKindAdd === 'function') jobKindAdd('drill', { tier: 1, work: 0, si
     const d = Math.floor(h / 24) + 1; if ((h % 24 + 24) % 24 !== 14 || !drillDue(d) || jobs.some(x => x.kind === 'drill' && Math.floor(x.posted / 1440) + 1 === d)) return;
     const kind = drillKind(d), t = (d - 1) * 1440 + DRILL_TOAST, j = jobMake('drill', { id: 'drill-' + kind + '@' + d, deck: 5, room: 'w', h, title: worksText('drill.kind.' + kind, kind.charAt(0).toUpperCase() + kind.slice(1) + ' drill'),
       drill: kind, reserved: true, until: (d - 1) * 1440 + DRILL_END });
-    j.posted = j.found = t; jobs.push(j);
+    j.posted = j.found = t; j.claimedBy = 'you'; j.status = 'claimed'; j.start = t; jobs.push(j);   // yours from the start: never on the board for anyone to take (BM5's trial: claimJob took it beside a board job)
   },
   stops: j => drillStops(j.drill).filter(x => x.placeId),
   stepDone(j, k, res, t) {
@@ -35558,7 +35558,7 @@ function drillSay(key, fb) { try { const l = typeof lineFor === 'function' ? lin
 WORK_TICKS.push((now, skip) => {
   const d = worksDay(now), m = now - (d - 1) * 1440, j = weekday(d) === 2 ? drillJobOf(d) : null; if (!j) return;
   if (!skip && m >= DRILL_TOAST && m < DRILL_END && !j.told) {   // 14:50: the toast, the job yours, the arrow
-    j.told = true; if (!j.claimedBy && j.status === 'open') { j.claimedBy = 'you'; j.status = 'claimed'; j.start = now; if (typeof MACH_REV !== 'undefined') MACH_REV++; }
+    j.told = true;
     try { toast(worksName('calder'), worksText('drill.toast', 'Drill in ten minutes. Muster at the Works bay.') + ' ' + worksText('drill.job.' + j.drill, '')); } catch (e) { /* no UI */ }
     if (typeof setGoal === 'function') setGoal({ deck: 5, room: 'w', label: worksText('drill.kind.' + j.drill, 'Drill') + ', 15:00' });
   }
