@@ -19,6 +19,7 @@ A cozy starship-life sim: a single-file three.js game (`starship-cadet.html`) se
 - `machine_check.py`: runs the ship's machines on paper and checks wear, faults, repairs, the jobs left for the player and ship health.
 - `clothes_check.py`: checks changing at your wardrobe, yesterday's clothes, the laundry hamper, the washers and saving mid-wash.
 - `interactions_check.py`: checks the places you can use, the job board and the goal pointer.
+- `bubble_check.py`: speech bubbles at phone size with uneven frames: they follow their speaker without shaking, jumping or swapping sides.
 - `plans/`: deck plan pages, pillar plans, and `handover-<role>.md` notes for each role.
 
 ## How we work

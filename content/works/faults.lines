@@ -1,0 +1,440 @@
+@bank all
+// Pillar 5 (head writer, seat W): the fault tables' words (plans/mechanics/fault-tables.html), for section 17's
+// FAULT_CAUSES (seat S), the scanner (H) and head-scratchers (H). TEXTS. Keys: fault.<what>.<kind>.<cause>.
+// name: the cause in plain words. shows: the job card's symptom. sign: what you see up close. still: the machine's
+// line when you FIT this cause's part and it wasn't the problem (never names the real cause). tried: a crew note
+// in a head-scratcher when someone fitted this cause's part (the game adds the name). Settings and loads have no
+// part, so no still or tried. Cause ids (proposed; tell the writer if S's differ): the part's short name, 'drift' for
+// a setting, 'junction' for the galley load.
+
+// oven · element
+== fault.name.oven.element
+- The element is failing
+== fault.shows.oven.element
+- runs cool
+== fault.sign.oven.element
+- Cool all over, slow to heat.
+== fault.still.oven.element
+- Fitted a new element. It still runs cool.
+== fault.tried.oven.element
+- New element in. Still runs cool.
+
+// oven · seal
+== fault.name.oven.seal
+- The door seal is worn
+== fault.shows.oven.seal
+- runs cool
+== fault.sign.oven.seal
+- Cool by the door. You feel heat at the gap.
+== fault.still.oven.seal
+- New door seal in. No change: it still runs cool.
+== fault.tried.oven.seal
+- Swapped the door seal. Still runs cool.
+
+// oven · belt
+== fault.name.oven.belt
+- The fan's belt is slipping
+== fault.shows.oven.belt
+- runs cool
+== fault.sign.oven.belt
+- Hot at the back, cool at the front. A squeal at start.
+== fault.still.oven.belt
+- Fitted a new fan belt. It still runs cool.
+== fault.tried.oven.belt
+- Fitted a fresh fan belt. Still runs cool.
+
+// oven · drift
+== fault.name.oven.drift
+- Its setting has drifted
+== fault.shows.oven.drift
+- runs hot
+== fault.sign.oven.drift
+- The glow stutters.
+
+// oven · junction
+== fault.name.oven.junction
+- The galley's power junction sags under load
+== fault.shows.oven.junction
+- runs cool
+== fault.sign.oven.junction
+- Fine at breakfast, cool at dinner.
+
+// range · element
+== fault.name.range.element
+- A ring's element is failing
+== fault.shows.range.element
+- a ring is weak
+== fault.sign.range.element
+- One ring slow, the others fine.
+== fault.still.range.element
+- New element in. No change: it still has a weak ring.
+== fault.tried.range.element
+- Fitted a fresh element. Still has a weak ring.
+
+// range · relay
+== fault.name.range.relay
+- A ring's switch relay is sticking
+== fault.shows.range.relay
+- a ring is weak
+== fault.sign.range.relay
+- It clicks, but sometimes won't heat.
+== fault.still.range.relay
+- Fitted a new relay. It still has a weak ring.
+== fault.tried.range.relay
+- New relay in. Still has a weak ring.
+
+// range · drift
+== fault.name.range.drift
+- Its setting has drifted
+== fault.shows.range.drift
+- runs hot
+== fault.sign.range.drift
+- Every ring too fierce. Brennan has noticed.
+
+// galleyplant · belt
+== fault.name.galleyplant.belt
+- The fan belt is worn
+== fault.shows.galleyplant.belt
+- weak draw
+== fault.sign.galleyplant.belt
+- A squeal. The belt is shiny.
+== fault.still.galleyplant.belt
+- Fitted a new fan belt. It still draws weakly.
+== fault.tried.galleyplant.belt
+- Fitted a fresh fan belt. Still draws weakly.
+
+// galleyplant · filter
+== fault.name.galleyplant.filter
+- The grease filter is clogged
+== fault.shows.galleyplant.filter
+- weak draw
+== fault.sign.galleyplant.filter
+- Grease on the grille. The fan runs quiet.
+== fault.still.galleyplant.filter
+- New filter in. No change: it still draws weakly.
+== fault.tried.galleyplant.filter
+- New filter in. Still draws weakly.
+
+// galleyplant · bearing
+== fault.name.galleyplant.bearing
+- The fan bearing is going
+== fault.shows.galleyplant.bearing
+- noisy
+== fault.sign.galleyplant.bearing
+- A grinding hum.
+== fault.still.galleyplant.bearing
+- Fitted a new bearing. It still grinds.
+== fault.tried.galleyplant.bearing
+- Swapped the bearing. Still grinds.
+
+// extractor · belt
+== fault.name.extractor.belt
+- The fan belt is slipping
+== fault.shows.extractor.belt
+- weak draw
+== fault.sign.extractor.belt
+- A squeal at start. Smoke lingers.
+== fault.still.extractor.belt
+- New fan belt in. No change: it still draws weakly.
+== fault.tried.extractor.belt
+- Fitted a fresh fan belt. Still draws weakly.
+
+// extractor · filter
+== fault.name.extractor.filter
+- The hood filter is clogged
+== fault.shows.extractor.filter
+- weak draw
+== fault.sign.extractor.filter
+- Grease dripping at the hood's edge.
+== fault.still.extractor.filter
+- Fitted a new filter. It still draws weakly.
+== fault.tried.extractor.filter
+- New filter in. Still draws weakly.
+
+// extractor · relay
+== fault.name.extractor.relay
+- The motor relay is sticking
+== fault.shows.extractor.relay
+- stops and starts
+== fault.sign.extractor.relay
+- It clicks, runs, stops.
+== fault.still.extractor.relay
+- New relay in. No change: it still stops and starts.
+== fault.tried.extractor.relay
+- Swapped the relay. Still stops and starts.
+
+// chiller · compressor
+== fault.name.chiller.compressor
+- The compressor is labouring
+== fault.shows.chiller.compressor
+- runs warm
+== fault.sign.chiller.compressor
+- A laboured hum that never stops.
+== fault.still.chiller.compressor
+- Fitted a new compressor. It still runs warm.
+== fault.tried.chiller.compressor
+- Fitted a fresh compressor. Still runs warm.
+
+// chiller · seal
+== fault.name.chiller.seal
+- The door seal is worn
+== fault.shows.chiller.seal
+- runs warm
+== fault.sign.chiller.seal
+- Frost round the door frame.
+== fault.still.chiller.seal
+- New door seal in. No change: it still runs warm.
+== fault.tried.chiller.seal
+- New door seal in. Still runs warm.
+
+// chiller · bearing
+== fault.name.chiller.bearing
+- The fan bearing is going
+== fault.shows.chiller.bearing
+- runs warm
+== fault.sign.chiller.bearing
+- Warm at the back shelves. A rattle.
+== fault.still.chiller.bearing
+- Fitted a new bearing. It still runs warm.
+== fault.tried.chiller.bearing
+- Swapped the bearing. Still runs warm.
+
+// chiller · sensor
+== fault.name.chiller.sensor
+- The temperature sensor reads wrong
+== fault.shows.chiller.sensor
+- milk going off
+== fault.sign.chiller.sensor
+- The display says 3°. The back shelf feels warmer.
+== fault.still.chiller.sensor
+- New signal card in. No change: it still runs warm at the back.
+== fault.tried.chiller.sensor
+- Fitted a fresh signal card. Still runs warm at the back.
+
+// washer · pump
+== fault.name.washer.pump
+- The pump is failing
+== fault.shows.washer.pump
+- leaks
+== fault.sign.washer.pump
+- A puddle under it. The pump housing is damp.
+== fault.still.washer.pump
+- Fitted a new pump. It still leaks.
+== fault.tried.washer.pump
+- New pump in. Still leaks.
+
+// washer · seal
+== fault.name.washer.seal
+- The door seal is worn
+== fault.shows.washer.seal
+- leaks
+== fault.sign.washer.seal
+- Drips at the door during the spin.
+== fault.still.washer.seal
+- New door seal in. No change: it still leaks.
+== fault.tried.washer.seal
+- New door seal in. Still leaks.
+
+// washer · valve
+== fault.name.washer.valve
+- The drain valve is sticking
+== fault.shows.washer.valve
+- leaks
+== fault.sign.washer.valve
+- Water left in the drum after the cycle.
+== fault.still.washer.valve
+- Fitted a new drain valve. It still leaks.
+== fault.tried.washer.valve
+- Swapped the drain valve. Still leaks.
+
+// washer · bearing
+== fault.name.washer.bearing
+- The drum bearing is going
+== fault.shows.washer.bearing
+- loud spin
+== fault.sign.washer.bearing
+- A rumble. The machine walks across the floor.
+== fault.still.washer.bearing
+- New bearing in. No change: it still rumbles on the spin.
+== fault.tried.washer.bearing
+- New bearing in. Still rumbles on the spin.
+
+// washer · relay
+== fault.name.washer.relay
+- The control relay is sticking
+== fault.shows.washer.relay
+- stops mid-cycle
+== fault.sign.washer.relay
+- It stops, clicks, starts again.
+== fault.still.washer.relay
+- Fitted a new relay. It still stops mid-cycle.
+== fault.tried.washer.relay
+- Swapped the relay. Still stops mid-cycle.
+
+// lift · relay
+== fault.name.lift.relay
+- The control relay is sticking
+== fault.shows.lift.relay
+- slow, stops at decks
+== fault.sign.lift.relay
+- It pauses before the doors open.
+== fault.still.lift.relay
+- New relay in. No change: it still pauses at the doors.
+== fault.tried.lift.relay
+- Fitted a fresh relay. Still pauses at the doors.
+
+// lift · bearing
+== fault.name.lift.bearing
+- A guide bearing is worn
+== fault.shows.lift.bearing
+- judders
+== fault.sign.lift.bearing
+- A grinding in the shaft between decks.
+== fault.still.lift.bearing
+- Fitted a new bearing. It still judders.
+== fault.tried.lift.bearing
+- New bearing in. Still judders.
+
+// lift · breaker
+== fault.name.lift.breaker
+- Its breaker trips
+== fault.shows.lift.breaker
+- stops between decks
+== fault.sign.lift.breaker
+- It stalls, then the breaker light comes on.
+== fault.still.lift.breaker
+- New breaker in. No change: it still stalls between decks.
+== fault.tried.lift.breaker
+- Swapped the breaker. Still stalls between decks.
+
+// lights · relay
+== fault.name.lights.relay
+- A relay sticks when warm
+== fault.shows.lights.relay
+- lights flicker
+== fault.sign.lights.relay
+- The whole room's lights. Worse after an hour.
+== fault.still.lights.relay
+- Fitted a new relay. It still flickers.
+== fault.tried.lights.relay
+- Fitted a fresh relay. Still flickers.
+
+// lights · lamp
+== fault.name.lights.lamp
+- A lamp is at its end
+== fault.shows.lights.lamp
+- lights flicker
+== fault.sign.lights.lamp
+- One lamp only.
+== fault.still.lights.lamp
+- New lamp in. No change: it still flickers.
+== fault.tried.lights.lamp
+- New lamp in. Still flickers.
+
+// lights · breaker
+== fault.name.lights.breaker
+- A breaker trips
+== fault.shows.lights.breaker
+- lights out
+== fault.sign.lights.breaker
+- A whole run dark. The breaker's lamp is lit.
+== fault.still.lights.breaker
+- Fitted a new breaker. It still goes dark.
+== fault.tried.lights.breaker
+- Swapped the breaker. Still goes dark.
+
+// lights · cable
+== fault.name.lights.cable
+- Wiring loose behind the panel
+== fault.shows.lights.cable
+- lights flicker
+== fault.sign.lights.cable
+- Flickers when the door slams.
+== fault.still.lights.cable
+- New cable in. No change: it still flickers.
+== fault.tried.lights.cable
+- Fitted a fresh cable. Still flickers.
+
+// lights · drift
+== fault.name.lights.drift
+- Its setting has drifted
+== fault.shows.lights.drift
+- lights flicker
+== fault.sign.lights.drift
+- A fast flicker everywhere.
+
+// cartdock · relay
+== fault.name.cartdock.relay
+- The charge relay is sticking
+== fault.shows.cartdock.relay
+- charges slow
+== fault.sign.cartdock.relay
+- The lamp blinks, then holds.
+== fault.still.cartdock.relay
+- New relay in. No change: it still charges slowly.
+== fault.tried.cartdock.relay
+- Swapped the relay. Still charges slowly.
+
+// cartdock · cell
+== fault.name.cartdock.cell
+- The dock's cell is tired
+== fault.shows.cartdock.cell
+- charges slow
+== fault.sign.cartdock.cell
+- The cart's gauge never gets past three quarters.
+== fault.still.cartdock.cell
+- Fitted a new cell. It still charges slowly.
+== fault.tried.cartdock.cell
+- Fitted a fresh cell. Still charges slowly.
+
+// cartdock · cable
+== fault.name.cartdock.cable
+- The charge cable is worn
+== fault.shows.cartdock.cable
+- won't charge
+== fault.sign.cartdock.cable
+- Charges only if you jiggle the plug.
+== fault.still.cartdock.cable
+- New cable in. No change: it still won't charge.
+== fault.tried.cartdock.cable
+- New cable in. Still won't charge.
+
+// cartdock · drift
+== fault.name.cartdock.drift
+- Its setting has drifted
+== fault.shows.cartdock.drift
+- charges slow
+== fault.sign.cartdock.drift
+- The screen dims.
+
+// growlight · lamp
+== fault.name.growlight.lamp
+- Lamps at their end
+== fault.shows.growlight.lamp
+- a rack is dim
+== fault.sign.growlight.lamp
+- A row of pink lamps gone pale.
+== fault.still.growlight.lamp
+- New lamp in. No change: it still is dim.
+== fault.tried.growlight.lamp
+- Fitted a fresh lamp. Still is dim.
+
+// growlight · relay
+== fault.name.growlight.relay
+- The rack's relay is sticking
+== fault.shows.growlight.relay
+- a rack is dim
+== fault.sign.growlight.relay
+- The whole rack flickers off and on.
+== fault.still.growlight.relay
+- Fitted a new relay. It still is dim.
+== fault.tried.growlight.relay
+- New relay in. Still is dim.
+
+// growlight · drift
+== fault.name.growlight.drift
+- Its timer setting has drifted
+== fault.shows.growlight.drift
+- lights at the wrong hours
+== fault.sign.growlight.drift
+- On at night, off at noon.

@@ -114,7 +114,7 @@
 - Hobby
 
 == tip.hobby
-- Hobbies fill your leisure. Read, write or play games on your device anywhere. Drawing, knitting and puzzles need supplies from the crew store on Deck 3; Zeke might teach you to knit.
+- Hobbies fill your leisure. Read, write, play games or watch a film on your device anywhere. Drawing, knitting and puzzles need supplies from the crew store on Deck 3; Zeke might teach you to knit.
 
 == tip.offshift
 - Off shift. Your evening is yours: call home from the booths on Deck 3, go to a ship tradition (Calendar), talk a while with someone, or try a hobby.
@@ -123,7 +123,7 @@
 - Tap someone and choose Talk a while. A proper chat builds friendship much faster than a hello.
 
 == tip.eve.hobby
-- Try a hobby tonight: your device has Read, Write and Play games. Anywhere you can sit or stand still.
+- Try a hobby tonight: your device has Read, Write, Play games and Watch a film. Anywhere you can sit or stand still.
 
 == tip.eve.trad
 - {n} traditions on tonight. You can't go to them all, so pick one. They're on your Calendar.
@@ -174,3 +174,17 @@
 - Grab a trowel. That bed's been waiting for you.
 - You garden too? The beans like a chat, I swear.   #funny
 - Gently with the roots. There you go. Lovely.
+
+// Watch a film on your device (playtest 1, seat U; the user's ask via lead 13): hobby id 'film', like reading.
+== hobby.name.film
+- Watch a film
+== hobby.start.film
+- Watching a film...
+== hobby.done.film
+- The credits roll. That was nice.
+- Good film. You'd watch it again.
+== hobby.record.film
+- You enjoy a film now and then.
+== hobby.share.film
+- What are you watching? Is it the one with the ship?
+- Ooh, I love that one. No spoilers. I mean, I know it.   #funny

@@ -1,0 +1,8 @@
+@reactions incident.alarm
+// Pillar 5 (head writer, seat W): the galley alarm (M6). Cue incident.alarm; .you when you handled it.
+? cue:incident.alarm.you
+- You cleared the galley? The smell's nearly gone.
+- Thanks for the alarm. I mean, for stopping it.   #funny
+? !who:brennan
+- Did the galley alarm go? Don't mention it to Brennan.   #funny
+- Smelt toast from Deck 4. Very, very done toast.   #funny

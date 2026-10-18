@@ -24,7 +24,8 @@ TOKENS = {'hi', 'bye', 'yes', 'thanks', 'wow', 'sigh', 'nick'}
 PLACEHOLDERS = {'me', 'name', 'first', 'friend', 'best', 'rival', 'partner', 'mentor', 'mentee', 'boss', 'thing', 'trad',
                 'machine', 'room', 'deck', 'dish', 'weekday', 'home', 'family', 'hobby', 'since', 'other',
                 'kin', 'lost', 'hobbyNoun', 'missed',
-                'time', 'hours', 'n', 'max', 'part', 'shelf', 'drink', 'answer'}   # 0.60.7 texts (keys-0607.md): the engineer fills these   # kin, lost: "my gran", "my wife" (with the my); hobbyNoun: "knitting", "the piano"
+                'time', 'hours', 'n', 'max', 'part', 'shelf', 'drink', 'answer',
+                'mech', 'job', 'tools', 'skill', 'title', 'rank', 'band', 'next', 'shows', 'drill', 'host'}   # Pillar 5 texts (content/works/keys-p5.md)   # 0.60.7 texts (keys-0607.md): the engineer fills these   # kin, lost: "my gran", "my wife" (with the my); hobbyNoun: "knitting", "the piano"
 PAIR_WORDS = {'same', 'bunk', 'friend', 'rival', 'senior', 'couple', 'best', 'mentor', 'mentee'}   # section 22's linePair
 NEEDS = {'home', 'family', 'hobby', 'since', 'kin', 'lost', 'hobbyNoun'}   # what a theme beat's needs: can name
 TRAD_PLACEHOLDERS = {'trad', 'host', 'names', 'first', 'season', 'weekday', 'time'}   # tradition texts: only these (plans/trad-format.md, tradFill)
@@ -41,7 +42,7 @@ VALUES = {
     'act': {'work', 'breakfast', 'dinner', 'meal', 'gym', 'wash', 'sleep', 'leisure', 'off', 'free', 'event', 'shop', 'call'},
 }
 BUBBLE_KINDS = {'smalltalk', 'rumour', 'overheard'}        # spoken over heads: 60 characters (90 at most)
-LONG_KINDS = ('story', 'arc', 'moment', 'note', 'trad', 'career')    # chat lines, moments, Mail: 140
+LONG_KINDS = ('story', 'arc', 'moment', 'note', 'trad', 'career', 'works.ask', 'inspect.mail')    # chat lines, moments, Mail: 140
 CARD = 90
 HOME_IDS = {'mum', 'gran', 'jo', 'sam'}                  # your people back home (content/home/<id>.call)
 NAME_W = 9                                                 # a filled-in name counts as this many characters
@@ -319,7 +320,7 @@ def main(argv):
                             errors.append(f'{tag}: beat is like beat:tomas.3 (arc id, a dot, beats told)')
         # length, with names filled in
         n = len(re.sub(r'\{[^}]*\}', 'x' * NAME_W, t))
-        lim = 90 if kind in ('trad.chatter', 'trad.ask', 'trad.here') else 200 if kind in ('trad.mail', 'trad.thanks') or kind.startswith('tip.') else 400 if kind == 'letter' else 60 if kind in BUBBLE_KINDS else 140 if kind.startswith(LONG_KINDS) else CARD
+        lim = 90 if kind in ('trad.chatter', 'trad.ask', 'trad.here') else 200 if kind in ('trad.mail', 'trad.thanks') or kind.startswith(('tip.', 'join.')) else 400 if kind == 'letter' or kind.startswith('mail.') else 60 if kind in BUBBLE_KINDS else 140 if kind.startswith(LONG_KINDS) else CARD
         if not e.get('old'):
             if n > (90 if kind in BUBBLE_KINDS else lim):
                 errors.append(f'{tag}: {n} characters (at most {lim})')
