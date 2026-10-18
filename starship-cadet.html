@@ -252,7 +252,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.63.1
+   STARSHIP CADET: CSV Wren                           build 0.71.0
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7922,7 +7922,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.63.1';                           // keep in step with the header's build line
+const GAME_BUILD = '0.71.0';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -32874,9 +32874,21 @@ function socialChatter(m) {
 // friends come and find you (0.36.4): a friend (tier 3+) in their free time on your deck, within SEEK_NEAR tiles,
 // now and then (SEEK_ODDS a ship minute, schedU k 633) waves you over: a small prompt at the screen's edge, never one
 // you must answer. Tap it for the chat card; it goes on its own after SEEK_SECS real seconds or when they go. Once a
-// friend a ship day (rel.seekDay), one prompt at a time, none while a card is open
-const SEEK_NEAR = 10, SEEK_ODDS = .06, SEEK_SECS = 25;
-let SEEK = null;                                          // { p, el, until }
+// friend a ship day (rel.seekDay), one prompt at a time, none while a card is open.
+// 0.71.0 (the user's playtest note): nobody calls out across the room any more. They walk up (section 10's seekStep,
+// SEEK_COME while on the way, at most SEEK_COME_SECS real seconds), stop beside you facing you, and say their opener
+// (section 22's kind 'seek', addressed to you) in a bubble and the chip; they stay by you while the chip is up. When it
+// happens is seeded per save (seekSalt: the career's game seed gs), so it differs between new games, same for one save
+const SEEK_NEAR = 10, SEEK_ODDS = .06, SEEK_SECS = 25, SEEK_COME_SECS = 30, SEEK_BESIDE = 1.3;
+let SEEK = null, SEEK_COME = null;                        // { p, el, until, line, come }; { p, m, why, until } on the way
+const seekSalt = () => SHIP.career && SHIP.career.gs | 0 || 0;
+const seekWho = p => !!(SEEK_COME && SEEK_COME.p === p || SEEK && SEEK.come && SEEK.p === p && !CHAT);
+const SEEK_OPEN = ['Got a minute? I was hoping I\'d catch you.', 'There you are. Have you got a moment?', 'Oh good, it\'s you. Come and talk to me a minute.', 'Hey, you. Got a second for me?'];   // until section 22 has 'seek' lines
+function seekCome(p, a, m, why) {                         // a: their agent on this deck; none (not here): the chip as before
+  if (!a) { seekShow(p, m, why); return; }
+  SEEK_COME = { p, m, why: why || null, until: simNow() + SEEK_COME_SECS * 1000 };
+}
+function seekArrive(a) { const c = SEEK_COME; SEEK_COME = null; if (c && !CHAT && !SEEK) seekShow(c.p, c.m, c.why, a); }
 function seekEl() {
   let el = document.getElementById('seek'); if (el) return el;
   const st = document.createElement('style');
@@ -32886,13 +32898,18 @@ function seekEl() {
   el.onclick = () => { if (SEEK && SEEK.visit) { visitIn(); return; } const s = SEEK; seekEnd(); if (s) { const a = DECK_CREW.find(x => x.p === s.p); if (a) { a.talking = 6; player.stop(); player.face = Math.atan2(a.x - player.obj.position.x, a.z - player.obj.position.z); } chatOpen(s.p, !s.line, s.line || undefined); } };
   return el;
 }
-function seekShow(p, m, why) {                          // the chip: '<name> waves you over.' (why: an ask's, for its line: the career engineer's worried friends and goodbyes, 0.61.0)
-  const el = seekEl(), U = k => schedU(p.seed, m, k);
+function seekShow(p, m, why, a) {                       // the chip (why: an ask's, for its line: the career engineer's worried friends and goodbyes, 0.61.0); a: they've walked up (0.71.0)
+  if (!p) return;
+  const el = seekEl(), U = k => schedU(p.seed ^ seekSalt(), m, k);
+  let line = why && typeof careerSeekLine === 'function' ? careerSeekLine(p, why) : null;
+  if (!line && a) { const l = chatLine(p, shipNow(), true); if (l && TALK_KEEP.has(l.kind)) line = l; }   // something that matters (a goodbye, a missed appointment): that's what they came to say
+  if (!line) { const l = socLine(p, 'seek', { t: shipNow(), tier: relTier(p.id), warmth: warmth(p.id) }); line = { text: l ? l.text : SEEK_OPEN[Math.floor(U(634) * SEEK_OPEN.length)], kind: 'seek', say: true }; }
   el.innerHTML = ''; const b = document.createElement('b'); b.textContent = shortName(p); el.appendChild(b);
-  el.appendChild(document.createTextNode(' ' + ['waves you over.', 'spots you and smiles.', 'calls out: "Got a minute?"', 'beckons you over.'][Math.floor(U(634) * 4)]));
-  el.hidden = false; SEEK = { p, until: simNow() + SEEK_SECS * 1000, line: why && typeof careerSeekLine === 'function' ? careerSeekLine(p, why) : null };
+  el.appendChild(document.createTextNode(a ? ': "' + line.text + '"' : ' would like a word: "' + line.text + '"'));
+  if (a) bubbleSay(a.h, line.text, 6);
+  el.hidden = false; SEEK = { p, until: simNow() + SEEK_SECS * 1000, line, come: !!a };
 }
-function seekEnd() { SEEK = null; const el = document.getElementById('seek'); if (el) el.hidden = true; }
+function seekEnd() { SEEK = null; SEEK_COME = null; const el = document.getElementById('seek'); if (el) el.hidden = true; }
 // socialSeekAsk(id, { from, until, why }) (0.36.58, for section 21's first week): between from and until (absolute ship
 // minutes), when that person is on your deck, near you and free (not at work, asleep or washing), they wave you over
 // once, whatever your tier and the odds. A why with 'favour' in it also has them offer a favour that day. SHIP.social.seekAsks (saved)
@@ -32919,15 +32936,16 @@ function socialSeekAsks(m) {
     const p = SOC.crew[SOC.idx.get(ask.id)], w = whereIs(p, t);
     if (!w || w.moving || ['work', 'sleep', 'wash'].includes(w.act)) { ask.next = t + 5; continue; }
     const a = DECK_CREW.find(x => x.p === p);
-    if (a && Math.hypot(a.x - P.x, a.z - P.z) <= SEEK_NEAR) { if (CHAT || SEEK || sleeping) continue; ask.done = true; relGet(p.id).seekDay = SHIP.time.day; seekShow(p, m, ask.why); return true; }
+    if (a && Math.hypot(a.x - P.x, a.z - P.z) <= SEEK_NEAR) { if (CHAT || SEEK || SEEK_COME || sleeping) continue; ask.done = true; relGet(p.id).seekDay = SHIP.time.day; seekCome(p, a, m, ask.why); return true; }
     if (typeof crewComeTo !== 'function') continue;
     const pl = seekSpot(); if (!pl) continue;
     ask.walking = true; ask.walkUntil = t + SEEK_WALK;
     try {
-      ask.stop = crewComeTo(p, pl.id, () => {
+      ask.stop = crewComeTo(p, pl.id, ag => {
         ask.walking = false;
-        if (CHAT || SEEK || sleeping) { ask.next = shipNow() + 5; return; }
-        ask.done = true; relGet(p.id).seekDay = SHIP.time.day; seekShow(p, Math.floor(shipNow()), ask.why);
+        if (CHAT || SEEK || SEEK_COME || sleeping) { ask.next = shipNow() + 5; return; }
+        if (ask.stop) { try { ask.stop(); } catch (e) { } }   // the visit's done its job: the last few steps are the walk-up's
+        ask.done = true; relGet(p.id).seekDay = SHIP.time.day; seekCome(p, ag || DECK_CREW.find(x => x.p === p), Math.floor(shipNow()), ask.why);
       }, { until: t + SEEK_WALK });
     } catch (e) { ask.walking = false; ask.next = t + SEEK_RETRY; }
     if (ask.done) return true;                            // they were already there: the chip is up
@@ -32945,6 +32963,7 @@ function seekSpot() {                                    // somewhere by you for
 }
 function socialSeek(m) {
   if (typeof DECK_CREW === 'undefined') return;
+  if (SEEK_COME) { const a = DECK_CREW.find(x => x.p === SEEK_COME.p); if (!a || CHAT || SEEK || sleeping || simNow() > SEEK_COME.until) SEEK_COME = null; return; }   // on their way over (0.71.0)
   if (!SEEK && socialSeekAsks(m)) return;
   const near = a => Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) <= SEEK_NEAR;
   if (SEEK) { if (SEEK.visit) return; const a = DECK_CREW.find(x => x.p === SEEK.p); if (!a || !near(a) || simNow() > SEEK.until || CHAT) seekEnd(); return; }
@@ -32955,9 +32974,9 @@ function socialSeek(m) {
     const bye = relTier(p.id) >= 1 && (leavingSoon(p) ?? 99) <= 2 && !(SHIP.rel[p.id] && SHIP.rel[p.id].bye >= day - 1);   // leaving soon: they come to say goodbye
     if (seekAskFor(p.id, shipNow())) continue;              // an asked-for wave: socialSeekAsks brings them
     if (!SOC.idx.has(p.id) || !near(a) || !(mentor || bye || (relTier(p.id) >= 3 && socGate('d3')))) continue;
-    const r = relGet(p.id); if (r.seekDay === day || schedU(p.seed, m, 633) >= (mentor || bye ? .25 : SEEK_ODDS)) continue;
+    const r = relGet(p.id); if (r.seekDay === day || schedU(p.seed ^ seekSalt(), m, 633) >= (mentor || bye ? .25 : SEEK_ODDS)) continue;
     const w = whereIs(p, shipNow()); if (!w || !(w.act === 'leisure' || w.act === 'off') || w.tag === 'tea') continue;
-    r.seekDay = day; seekShow(p, m);
+    r.seekDay = day; seekCome(p, a, m);
     return;
   }
 }
@@ -40000,7 +40019,8 @@ function sharedTile(t) {
 }
 function crewWayOn(now) {
   for (const [k, u] of CREW_WAY) if (u <= now) CREW_WAY.delete(k);
-  const you = [player.path.length && player.goal, PLAYER_PLACE && placeSpot(PLAYER_PLACE) && placeSpot(PLAYER_PLACE).walk].filter(t => t && sharedTile(t));
+  const ps = PLAYER_PLACE && placeSpot(PLAYER_PLACE);   // your place's walk-to tile only while you stand on it (a station): sat in a mess seat you're off it, and the diner next to you needs it to sit down (0.71.0)
+  const you = [player.path.length && player.goal, ps && ps.onTile && ps.walk].filter(t => t && sharedTile(t));
   if (!you.length) return CREW_WAY.size ? CREW_WAY : null;
   const out = new Map(CREW_WAY); for (const t of you) out.set(K(t), now + 1); return out;
 }
@@ -40046,6 +40066,7 @@ class CrewAgent {
     const w = whereIs(this.p, now);
     if (w && w.escort && !(w.escort.mode === 'wait' && w.placeId)) return this.escortStep(dt, w.escort);   // section 21's escort: lead, follow or wait, with you (waiting at a place: they sit or stand there, below)
     this.esc = null;
+    if (seekWho(this.p)) return this.seekStep(dt);         // section 20's walk-up: coming over for a word, then standing by you (0.71.0)
     if (w && w.visit && !w.visit.arrived && this.spot && (this.spot.id === w.visit.placeId || this.alt && this.alt[0] === w.visit.placeId && this.spot.id === this.alt[1]) && this.settled) {   // a visit: there (or at the next seat, when theirs was taken)
       w.visit.arrived = true; if (w.visit.onArrive) { try { w.visit.onArrive(this); } catch (e) { /* the caller's problem */ } }
     }
@@ -40182,6 +40203,29 @@ class CrewAgent {
       this.pose = 'walk';
     } else { this.pose = 'stand'; this.face = Math.atan2(pp.x - this.x, pp.z - this.z); }   // waiting: look at you
     this.y = 0; this.stuck = 0; this.tag = 'escort';
+    this.h.set({ x: this.x, y: this.y, z: this.z }, this.face, heldPose(this));
+    return true;
+  }
+  // section 20's walk-up (0.71.0): over to you (re-aimed as you move), then standing by you, facing you, while the chip is up
+  seekStep(dt) {
+    const pp = player.obj.position, dist = Math.hypot(pp.x - this.x, pp.z - this.z);
+    if (this.goalId !== '@seek') { this.retarget(null); this.goalId = '@seek'; this.seekKey = null; this.seekNear = false; }   // up from a seat first
+    this.seekT = (this.seekT || 0) - dt;
+    const go = dist > SEEK_BESIDE + (this.seekNear ? .8 : 0); this.seekNear = !go;
+    if (go) {
+      const you = cellAt(pp.x, pp.z), goal = free(...you) ? you : nearestOpen(pp.x, pp.z, null), key = goal ? K(goal) : '-';
+      if (goal && key !== this.seekKey && (this.seekT <= 0 || !this.path.length)) {
+        this.seekKey = key; this.seekT = .5; let from = this.here(); if (!free(...from)) from = nearestOpen(this.x, this.z, null) || from;
+        this.path = crewPath(from, goal, new Set([...this.rooms, roomAt(...from), roomAt(...goal)]), this) || [];
+      }
+    } else { this.path = []; this.seekKey = null; }
+    if (this.path.length) {
+      const c = cellPos(...this.path[0]), dx = c.x - this.x, dz = c.z - this.z, d = Math.hypot(dx, dz), st = CREW_SPEED * dt;
+      if (d <= st) { this.x = c.x; this.z = c.z; this.path.shift(); } else { this.x += dx / d * st; this.z += dz / d * st; this.face = Math.atan2(dx, dz); }
+      this.pose = 'walk';
+    } else { this.pose = 'stand'; this.face = Math.atan2(pp.x - this.x, pp.z - this.z); }
+    if (!go && SEEK_COME && SEEK_COME.p === this.p) seekArrive(this);
+    this.y = 0; this.stuck = 0; this.settled = false; this.tag = null;
     this.h.set({ x: this.x, y: this.y, z: this.z }, this.face, heldPose(this));
     return true;
   }
