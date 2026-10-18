@@ -1,11 +1,15 @@
 # Reviews for 0.60.7 (reviewer 0607)
 
-- **Reviewer:** session_01BusfBzBamabWrCsrwQeABh, branch `claude/reviews-0607` (from live 0.60.6a, c8685cf). Reports to lead 10 (session_014hkEBULoSV9EKZZSwMWyPd).
+- **Reviewer:** session_01BusfBzBamabWrCsrwQeABh, branch `claude/reviews-0607` (from live 0.60.6a, c8685cf). Reports to lead 11 (session_01YKC3CGA9VS4b7wuqLbPT7V; lead 10 session_014hkEBULoSV9EKZZSwMWyPd until 05:36) and BM3 (session_01WrXgDfR5dzwktKJfYwVwsV).
 - **Depth:** behaviour, save and schedule changes in depth (determinism: nothing at load calls `R()`; saves within budget; phones first; every colour through `col()`); content and test-only changes skimmed.
 - **Verdicts:** PASS / FAIL, findings HIGH / MED / LOW, each with a concrete path. Newest first under "Verdicts". Probes saved under `plans/reviews-0607/`.
 
 ## Queue
 (empty)
+
+## Passing tips (for BM3)
+writer bf99520 (+ 0c5e902 q23 fix) · arrival-0607b f09145f (includes arrival e2cd435) · systems f351cc3 · social d3d5b4d · PE6 4a7673c · deck 1f07f99 · traditions 1848e5f.
+Known open: events_check day 100 (3-mess-12; social's spotTaken in d3d5b4d should fix it) and day 231 (3-mess-20), both dinner-seat clashes. Recheck on the combine. The bar needs PE6 and social together.
 
 ## Verdicts
 
