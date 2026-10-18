@@ -35174,7 +35174,7 @@ function introCallTick(now) {
 // introTeaLead() is true); there he waits with you (walk.tea.at.<n>) until you've had tea, 20 minutes, or you leave,
 // then says walk.tea.back.<n> and follows you again (the week's d1-lead). Saved in SHIP.intro.done: 'tea:told', 'tea:go',
 // 'tea:at', 'tea:end' (-1: tea came and went without the walk). Tea that's over before your job is done: no walk.
-const INTRO_TEA_AT = [22, 2], INTRO_TEA_STAY = 20;      // where he stands in the Tea corner; minutes he stays at most
+const INTRO_TEA_AT = [23, 2], INTRO_TEA_STAY = 20;      // where he stands in the Tea corner (a free tile by the tea table, clear of the crew's three seats); minutes he stays at most
 const INTRO_TEA_LINES = {                                 // stand-ins (the head writer's d47b63d), used only while the writers' lines are missing
   explain: ['One o\'clock\'s tea and biscuits, in the tea corner.', 'Most of Works goes, a few at a time. Fills a gap, too.', 'Finish this job, then I\'ll take you. Biscuits await.'],
   go: ['Job done. Tea\'s out. Come on.'], at: ['Mug off the hook. Biscuits in the tin.'], back: ['Right. Back to it. I\'m right behind you.'],
