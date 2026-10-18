@@ -252,7 +252,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.80.4
+   STARSHIP CADET: CSV Wren                           build 0.80.5
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8177,6 +8177,23 @@ function recKayak(g, x, y, z, rot, m) {                  // a kayak: a long poin
   const k = new THREE.Group(); k.position.set(x, y, z); k.rotation.y = rot; g.add(k);
   soft(m, 0, 0, 0, .3, .13, 1.3, k); cyl(.17, .17, .05, RK.black, 0, .1, .1, k, 14);
 }
+Object.assign(KIT, {
+  // the float room (0.80.5, R6): soft coral padding on its walls and slow light orbs drifting round the room (one
+  // instanced mesh in a group that turns, via SPINS). Room-local, 8 x 6; the lobby's glass is the north side
+  recFloatRoom(g) {
+    for (const [x, z, w, d] of [[4, 5.83, 7.7, .14], [.17, 3.1, .14, 5.5], [7.83, 3.1, .14, 5.5]]) for (let k = 0; k < 2; k++)
+      box(w, .44, d, k % 2 ? RK.padA : RK.padB, x, .24 + k * .46, z, g);                        // padded panels, waist high (taller ones hid the room from the camera)
+    const orbs = new THREE.Group(); orbs.position.set(4, 0, 3); g.add(orbs);
+    const im = new THREE.InstancedMesh(new THREE.SphereGeometry(.13, 12, 8), RK.orb, 9), m4 = new THREE.Matrix4();
+    for (let k = 0; k < 9; k++) { const a = k * .698, r = 1.2 + recHash(k, 2, 17) * 1.4; m4.makeTranslation(Math.cos(a) * r, 1.1 + recHash(k, 3, 17) * 2.4, Math.sin(a) * r * .7); im.setMatrixAt(k, m4); }
+    im.userData.noMerge = true; im.castShadow = false; orbs.add(im); SPINS.push({ o: orbs, ax: 'y', w: .12 });
+    return { w: .1, d: .1, noBlock: true };
+  },
+  recProjector(g) {
+    box(.08, .9, .08, RK.black, 0, .45, 0, g); box(.5, .28, .4, RK.black, 0, 1.04, 0, g); cyl(.08, .09, .1, RK.steel, 0, 1.06, .24, g, 14).rotation.x = Math.PI / 2;
+    return { w: .5, d: .4 };
+  },
+});
 DECKS[7] = {
   num: 7, name: 'Recreation', seed: 70771, tall: 1.6, playerOnly: true, open: [6, 24],
   blurb: 'Auditorium, court, pool, rivers', arrive: 'The concourse runs stern to bow: the rivers and the court aft, the pool and the auditorium forward.',
@@ -8321,6 +8338,31 @@ DECKS[7] = {
     place('K', 'recKayakRack', 15.6, 3.7, 'n', { it: IT('Kayak rack', 'Red, yellow and blue kayaks on the rack, paddles and helmets alongside. The green one is always out.') });
     place('K', 'recClimbWall', 0, 0, 'n', { block: [2, 3, 4, 5, 6].map(z => [0, z]) });
     place('K', 'recHit', .55, 4.3, 'n', { w: .6, d: 4.6, hitH: 2.4, it: IT('Climbing wall', 'Ochre and rust rock from the floor to the roof: four routes in red, yellow, blue and green holds, an auto-belay at the top of each, and the brass bell at the very top.') });
+    // the float room (0.80.5, R6): padding, drifting light orbs, the gravity sign
+    place('F', 'recFloatRoom', 0, 0, 'n');
+    place('F', 'recHit', 4, 3, 'n', { w: 7.4, d: 5.4, hitH: .4, it: IT('Float room', 'Soft coral padding, slow light orbs, and the gravity turned down to about a fifth. Everyone who goes in comes out grinning.') });
+    placeOnEdge('plate', 'h,19,12', 's', { text: 'GRAVITY 0.2 g' });
+    // the service rooms (0.80.5, R6), Works and you through their hatches. TODO (phase 2, the systems engineer): their
+    // machines entries (the plan's section 6: 7-river-pump-1/-2, 7-pool-filter-1/-2, 7-pool-dosing, 7-pool-heat, 7-court-net,
+    // 7-court-board, 7-aud-lights, 7-aud-sound, 7-grav-plates...) with panel tiles and work:works places
+    for (const z of [.95, 3.05]) place('r', 'pumpSkid', .7, z, 'w', { it: IT('River pump', 'One of two big current pumps that drive the rivers round. The fast run needs both.') });
+    place('r', 'utilShelf', 2.2, .25, 'n', { it: IT('Pump spares', 'Impellers, seals and a bearing in its box, labelled in Maeve\'s capitals.') });
+    placeWall('r', 'workLight', 'e', 3.5);
+    for (const z of [1.2, 5.6]) place('p', 'filterBank', 1.5, z, 'e', { it: IT('Pool filter', 'A sand filter for the pool. Seventy-five people, and they all shed.') });
+    place('p', 'circPump', 1.55, 3.5, 'e', { it: IT('Water balance', 'The pool\'s doser and its heat exchanger\'s pump, side by side. The top-up water comes down from the recycler.') });
+    for (const z of [1.0, 2.0]) place('e', 'powerCabinet', .3, z, 'w', { it: IT('Emitter power', 'The court\'s force-field power units, humming a little higher than anything else aboard.') });
+    place('e', 'relayBank', .35, 3.6, 'w', { w: 1.6, it: IT('Emitters', 'The net and side-wall emitters\' controls, and the scoreboard\'s driver.') });
+    placeWall('e', 'workLight', 'e', 1.5);
+    place('b', 'controlBoard', 5.55, 1.6, 'e', { w: 1.6, it: IT('Lighting desk', 'The booth\'s lighting desk, under the window onto the stage. Every fader is labelled; two are labelled DON\'T.') });
+    place('b', 'chair', 4.85, 1.6, 'w');
+    place('b', 'recProjector', 5.4, 3.0, 'e', { it: IT('Projector', 'The auditorium\'s projector, aimed through the booth window at the screen over the stage.') });
+    place('b', 'relayBank', .35, 2.5, 'w', { w: 2.0, it: IT('Dimmer racks', 'The stage lights\' dimmers, rack after rack.') });
+    for (const z of [4.3, 5.3]) place('b', 'powerCabinet', .3, z, 'w', { it: IT('Sound rack', 'Amplifiers and the lectern microphone\'s receiver.') });
+    placeWall('b', 'relayBoard', 's', 2.0, { it: IT('Gravity plates', 'The float room\'s gravity plate controller, set to 0.2 g, with its cooling beside it.') });
+    place('b', 'expansionTank', 3.5, 6.55, 's');
+    place('b', 'dispenser', 4.55, 6.6, 's', { it: IT('Kettle', 'A kettle and a tin of tea for whoever runs the lights.') });
+    place('b', 'medCabinet', 5.5, 6.6, 's', { it: IT('First-aid locker', 'Plasters, cold packs and a sign: FLOAT ROOM BUMPS GO IN THE BOOK.') });
+    place('b', 'utilShelf', 5.6, 4.6, 'e', { it: IT('Seat spares', 'Hinges, springs and a box of gold seat numbers.') });
     REC_STANDS.forEach(([c0, c1], b) => place('T', 'recHit', (c0 + c1) / 2 - 4, 1, 'n', { w: c1 - c0, d: 2, hitH: 1.3, it: IT('Stands', ['Three stepped benches at the stern end, by the scoreboard.', 'The middle of the stands: three stepped benches, right on the net. The best seats for a close game.', 'Three stepped benches at the bow end, by the gate onto the court.'][b]) }));
   },
 };
@@ -8339,7 +8381,8 @@ function recMats() {
     kayak: ['#e0412f', '#f2c230', '#2f6fe0', '#3fbf5a'].map(c => std(c, .45, .1)), paddle: std('#2a2f36', .5, .3),
     wallOchre: std('#c08a3e', .95), wallRust: std('#9a4a28', .95), hold: std('#ffffff', .6), holdC: ['#ff4f6d', '#ffd23f', '#3fa9ff', '#5ee06a'].map(col),
     belay: std('#30363d', .5, .4), rope: std('#ff8a3a', .7), brass: std('#d9a441', .3, .8),
-    loungerFrame: std('#e8e8e2', .4, .3), loungerPad: std('#2f9fb0', .8), aidWhite: std('#f2f2ee', .5), aidRed: std('#d8322e', .5),
+    loungerFrame: std('#e8e8e2', .4, .3), padA: std('#e3907f', .95), padB: std('#d77f73', .95),
+    orb: new THREE.MeshBasicMaterial({ color: col('#ffd0e4'), toneMapped: false }), loungerPad: std('#2f9fb0', .8), aidWhite: std('#f2f2ee', .5), aidRed: std('#d8322e', .5),
     lineOrange: new THREE.MeshBasicMaterial({ color: col('#ff9a3c'), toneMapped: false }), lineCyan: new THREE.MeshBasicMaterial({ color: col('#50e6ff'), toneMapped: false }),
     lineWhite: new THREE.MeshBasicMaterial({ color: col('#e8eef0'), toneMapped: false }),
     net: new THREE.MeshBasicMaterial({ color: col('#bfe6ff'), transparent: true, opacity: .2, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, toneMapped: false }),
@@ -8407,7 +8450,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.80.4';                           // keep in step with the header's build line
+const GAME_BUILD = '0.80.5';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
