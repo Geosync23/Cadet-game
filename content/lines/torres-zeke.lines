@@ -609,19 +609,15 @@
 - I knit. Don't laugh. Pell reads.   #funny
 ? flag:walk.dinner.eve.3
 - Find yours. There's no wrong answer.   #warm
-// Day 1 dinner: the laundry warning (you came with one spare outfit)
-? flag:walk.dinner.laundry.1
-- One change of clothes? That won't last.
-? flag:walk.dinner.laundry.2
-- The laundry's past the washrooms in the junior wing.
-? flag:walk.dinner.laundry.3
-- Do it tomorrow after shift.
-? flag:walk.dinner.laundry.4
-- Or you'll be wearing that on Wednesday.   #funny
-// Day 2: the wardrobe is empty; he suggests after shift (before works too)
-? flag:walk.laundry.1
-- Laundry today, remember? After shift's quietest.
-? flag:walk.laundry.2
+// Day 1 dinner: the laundry warning (onboarding engineer 4's keys, claude/arrival-0607b; the plan's words in two bubbles)
+? flag:beat.d1-clothes.1
+- One change of clothes? Laundry's past the junior washrooms.
+? flag:beat.d1-clothes.2
+- Do it tomorrow after shift, or you'll wear that Wednesday.   #funny
+// Day 2, just after shift: a nudge while the washers are free (17:00-18:00)
+? flag:beat.d2-laundry.1
+- Shift's done. Laundry now, while the washers are free.
+? flag:beat.d2-laundry.2
 - Load it, leave it, go and eat. It'll be done.
 // he offers to teach you to knit (it's his hobby)
 ? flag:walk.knit.1
