@@ -1,10 +1,12 @@
 @meeting train.m5.calder
-// Pillar 5, M5 tuning (Day 4, Thursday 10:15, the galley, Oven 1's panel). Brennan watches. Head writer, seat W.
+// Pillar 5, M5 tuning (Day 4, Thursday 10:15, the galley, Oven 1's panel). Calder only in the cast (the training
+// meeting waits for its cast; Brennan's words are her own 'work' lines: the breakfast grumble and the biscuit).
+// Head writer, seat W.
 title: Tuning
 from: Chief Ines Calder
 gist: Calder showed you tuning: turn a setting a step at a time and watch the machine answer. Settle it and it's done.
 == lines
-brennan: Forty rolls, love. Burnt edges. Forty.   [sigh]
+calder: Brennan's oven runs hot. Forty rolls, burnt edges. She's told everyone.
 calder: Nothing's broken. It's drifted. Machines drift.
 calder > you: Watch the glow, not the dial.   [gesture]
 calder: One step down. Watch. It stutters less. Another. Steady. Done.
@@ -14,6 +16,6 @@ calder: Overshoot and it shows the other way. Turn it back. That's all.
   calder: The machine tells you. Dim is too far. Steady is right.   [nod]
 * Why do they drift?   rel:calder+1 flavour:listen
   calder: Heat. Use. Time. Same reasons people do.
-* Sorry about the rolls, Chef.   rel:brennan+1 flavour:cheer
-  brennan: Not your fault, love. Fix the other one and you're forgiven.   [laugh]
+* (Look at the burnt rolls)
+  calder: Brennan's keeping them. As evidence.
 calder: Oven 2 is doing the same. Your turn.
