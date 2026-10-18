@@ -414,7 +414,7 @@
 ? trad:market
 - Swap meet. I'm after a particular spanner. They never have it. I keep looking.
 ? trad:running
-- Running club. I don't run. I walk the bay. It's further than you'd think.   #funny
+- Gym club. I don't run. I walk the bay. It's further than you'd think.   #funny
 ? trad:film
 - Film night. I came once. I spent it listening to the screen's cooling fan.   #funny
 ? trad:observatory-night
@@ -445,3 +445,9 @@
 // mail settled: everything on your week-1 list done
 ? flag:mail.settled
 - Settled | Everything on your list, done. Good. Carry on.
+
+// Head writer 0607: Name on the beam (first Monday, 17:05, the Works bay). The Chief's one line, after your name goes
+// up (the traditions engineer's flag trad.beam.chief).
+== week1
+? flag:trad.beam.chief
+- Every name on that beam kept this ship flying. Now yours does too.   #warm

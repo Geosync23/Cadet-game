@@ -1,0 +1,176 @@
+@bank all
+// Head writer 0607: hobbies, leisure tips and the "Ideas for tonight" card (player engineer 6's, plan-0607 "Free time").
+// hobby.share.<h> is said by crew near you who share the hobby (a bubble, 60 characters). Everything else is TEXT.
+// Hobby ids: read, write, games, draw, knit, puzzle, stars.
+
+== hobby.name.read
+- Read
+== hobby.name.write
+- Write
+== hobby.name.games
+- Play games
+== hobby.name.draw
+- Draw
+== hobby.name.knit
+- Knit
+== hobby.name.puzzle
+- Puzzles
+== hobby.name.stars
+- Stargaze
+
+== hobby.start.read
+- Reading...
+== hobby.start.write
+- Writing...
+== hobby.start.games
+- Playing a game...
+== hobby.start.draw
+- Sketching...
+== hobby.start.knit
+- Knitting...
+== hobby.start.puzzle
+- Puzzling...
+== hobby.start.stars
+- Watching the stars...
+
+== hobby.done.read
+- You finish a chapter. That was nice.
+- You read till the end of the chapter. Just one more? No. Maybe.
+== hobby.done.write
+- You write a page. Your head feels tidier.
+- A few lines in your journal. Today's down on paper now.
+== hobby.done.games
+- Game over. You nearly had it. Next time.
+- You win one, lose one. Fair enough.
+== hobby.done.draw
+- A sketch you're quietly pleased with.
+- Not bad. Not bad at all.
+== hobby.done.knit
+- A few more rows. It's starting to look like something.
+- Knit, purl, done. It's getting longer.
+== hobby.done.puzzle
+- Solved. You feel very clever.
+- One puzzle done. The next one looks harder.
+== hobby.done.stars
+- The stars drift past. You feel calm.
+- You spot a bright one you haven't seen before.
+
+// drawing at a nice view: what you drew ({room} is where you are)
+== hobby.drew
+- You sketch the view from the {room}. The stars came out well.
+- A quick drawing of the {room}. You got the light just right.
+- You draw the {room} as it is tonight. Something to keep.
+
+// the Record, in words (no levels or points)
+== hobby.record.read
+- You read most evenings.
+== hobby.record.write
+- You keep a journal.
+== hobby.record.games
+- You like a game on your device.
+== hobby.record.draw
+- You sketch the ship.
+== hobby.record.knit
+- You knit. Zeke is very proud.
+== hobby.record.puzzle
+- You never leave a puzzle unfinished.
+== hobby.record.stars
+- You often watch the stars.
+
+// the crew store's shelf
+== hobby.store.draw
+- Sketchpad and pencils · 15 credits
+== hobby.store.knit
+- Needles and wool · 12 credits
+== hobby.store.puzzle
+- Puzzle book · 10 credits
+
+// crew near you who share the hobby (bubbles)
+== hobby.share.read
+- What are you reading? Any good?
+- Oh, a fellow reader. Swap when you're done?
+- Is that a good one? You're smiling at it.
+== hobby.share.write
+- Writing home? I owe my lot a letter.
+- Journal? Me too. Every night, nearly.
+== hobby.share.games
+- What are you playing? Is it the one with the blocks?
+- I'm stuck on level nine. Don't tell me.   #funny
+== hobby.share.draw
+- Can I see? Oh, that's good. Really good.
+- You draw too? We should sketch the garden sometime.
+== hobby.share.knit
+- You knit too? Show me that stitch.
+- Ooh, what are you making? Lovely colour.
+- Another knitter. Zeke will be thrilled.   #funny
+== hobby.share.puzzle
+- Stuck? Seven across is "orbit". Sorry, sorry.   #funny
+- Puzzle book? Which page are you on?
+== hobby.share.stars
+- That bright one? A whole cluster. Pretty, isn't it?
+- Best seat on the ship, this. Mind if I join you?
+
+== hobby.button
+- Hobby
+
+== tip.hobby
+- Hobbies fill your leisure. Read, write or play games on your device anywhere. Drawing, knitting and puzzles need supplies from the crew store on Deck 3; Zeke might teach you to knit.
+
+== tip.offshift
+- Off shift. Your evening is yours: call home from the booths on Deck 3, go to a ship tradition (Calendar), talk a while with someone, or try a hobby.
+
+== tip.eve.talk
+- Tap someone and choose Talk a while. A proper chat builds friendship much faster than a hello.
+
+== tip.eve.hobby
+- Try a hobby tonight: your device has Read, Write and Play games. Anywhere you can sit or stand still.
+
+== tip.eve.trad
+- {n} traditions on tonight. You can't go to them all, so pick one. They're on your Calendar.
+
+== tip.eve.call
+- Your people at home would love to hear from you. The call booths are on Deck 3.
+
+== ideas.title
+- Ideas for tonight
+
+== ideas.trad
+- {trad} at {time}
+
+== ideas.friend
+- {name} is in the {room}. Say hello?
+
+== ideas.hobby
+- Try a hobby: {hobby}
+
+== ideas.booth
+- A call booth is free on Deck 3
+
+== ideas.none
+- A quiet one. Read a bit, or get an early night.
+
+== settle.clothes
+- Change your clothes
+== settle.hobby
+- Try a hobby
+== settle.talk
+- Talk a while with someone
+
+// Gardening as a hobby (the user's, via lead 10): hobby id 'garden', tending a bed in the hydroponics garden (Deck 3).
+// Same keys as the other hobbies.
+== tip.garden
+- The garden's yours off shift too. Tending a bed counts as a hobby: it fills your leisure.
+== hobby.name.garden
+- Tend a bed
+== hobby.start.garden
+- Tending the bed...
+- Watering, weeding, humming...
+== hobby.done.garden
+- The bed looks tidier. The leaves look happier.
+- Your hands smell of soil and mint. Lovely.
+== hobby.record.garden
+- You tend the garden.
+== hobby.share.garden
+- Grab a trowel. That bed's been waiting for you.
+- You garden too? The beans like a chat, I swear.   #funny
+- Gently with the roots. There you go. Lovely.

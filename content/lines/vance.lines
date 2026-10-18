@@ -70,7 +70,7 @@
 
 == invite
 ? trad:running tier>=acquaintance
-- Running club tonight. Treadmills, Deck 3. I'll set the pace. Gently. For you.   #funny
+- Gym club tonight. Treadmills, Deck 3. I'll set the pace. Gently. For you.   #funny
 ? act:gym tier>=colleague
 - Ten minutes on the rowing machine. Let's see where you'd sit on the board.
 ? trad:today tier>=colleague
@@ -232,7 +232,7 @@
 ? told:fixed.
 - Your entry in the repair log. Signed, timed, legible. Exemplary.
 ? told:came.running
-- You came to running club. Your pace was correct. Next week, faster.   #funny
+- You came to Gym club. Your pace was correct. Next week, faster.   #funny
 ? told:came.
 - You came. Attendance noted. Warmly noted.   #warm
 ? told:bday
@@ -332,7 +332,7 @@
 ? place:lounge !week1:true
 - The lounge. Off duty. I'm sitting very casually. Observe.   #funny
 ? trad:running
-- Running club. I'll set the pace. Then I'll quietly lower it.   #warm
+- Gym club. I'll set the pace. Then I'll quietly lower it.   #warm
 
 == feel
 ? mood:high !week1:true
@@ -365,7 +365,7 @@
 
 == callback
 ? told:came.running tier>=acquaintance
-- Running club. You kept a steady pace. I noted it. On paper. In ink.   #funny
+- Gym club. You kept a steady pace. I noted it. On paper. In ink.   #funny
 ? told:came.quiz tier>=acquaintance
 - Quiz night. You knew regulation six. I may have nodded. Visibly.   #funny
 ? told:moment.vance.gull tier>=colleague

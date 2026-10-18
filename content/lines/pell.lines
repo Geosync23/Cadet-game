@@ -479,7 +479,7 @@
 ? tier>=acquaintance !week1:true act:off
 - Day off? Come to the mess. Second breakfast. It's a real thing. I've made it real.   #funny
 ? trad:running tier>=colleague
-- Running club? I'll come. I'll walk most of it. Moral support.   #funny
+- Gym club? I'll come. I'll walk most of it. Moral support.   #funny
 ? trad:market tier>=acquaintance
 - Swap meet! Bring something. Anything. I'll trade you a screw for it.   #funny
 
@@ -514,7 +514,7 @@
 ? told:came.film
 - Film night! You stayed awake for the ending. I didn't. How did it end?   #funny
 ? told:came.running
-- You went to running club. I watched from a bench. Very supportive bench.   #funny
+- You went to Gym club. I watched from a bench. Very supportive bench.   #funny
 ? told:came.works-tea !week1:true
 - Works tea! You took the last biscuit. I let you. I'll remember that forever.   #funny
 ? told:gift.game

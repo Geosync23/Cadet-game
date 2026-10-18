@@ -73,7 +73,7 @@
 ? tier>=colleague time:morning
 - Walking the decks before breakfast. Long way round. Come, if you're up.
 ? trad:running tier>=acquaintance
-- Running club. Vance'll be there. Someone has to keep him honest.   #funny
+- Gym club. Vance'll be there. Someone has to keep him honest.   #funny
 ? trad:today tier>=colleague
 - {trad} today. I'll be at the door. Watching it. Come and stand near.   #funny
 
@@ -371,7 +371,7 @@
 ? told:came.quiz tier>=acquaintance
 - Quiz night. You knew the airlock question. I saw. Adequate.   #funny
 ? told:came.running tier>=acquaintance
-- Running club. You kept pace with Vance. Don't tell him. He'll start a board.   #funny
+- Gym club. You kept pace with Vance. Don't tell him. He'll start a board.   #funny
 ? told:moment.holt.walk tier>=colleague
 - You came on the long walk. Five in the morning. Most don't. Hm. Again sometime.   #warm
 ? told:fixed. tier>=acquaintance

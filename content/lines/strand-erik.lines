@@ -70,7 +70,7 @@
 
 == invite
 ? trad:running tier>=acquaintance
-- Running club tonight! Come on. Last one round buys tea. That'll be you. I'll buy anyway.   #funny
+- Gym club tonight! Come on. Last one round buys tea. That'll be you. I'll buy anyway.   #funny
 
 == accept
 - Yes! Great! I'll be there! Early! Sorry, I'm always early.
@@ -156,7 +156,7 @@
 ? time:morning
 - Up at six! Already ran! Morning!
 ? trad:running
-- Running club! I'll pace you. Too fast.   #funny
+- Gym club! I'll pace you. Too fast.   #funny
 ? season:greening
 - Greening! Everything's growing. Me too, probably.
 ? season:sowing
