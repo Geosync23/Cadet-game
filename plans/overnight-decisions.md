@@ -119,3 +119,4 @@ All 8 packages approved (Zeke: "all good except he still walks and talks" → he
 | ~17:00 | "More random" crew conversations vs the no-R() rule | Seeded from the save's seed: different per new game, same for one save | Keeps saves and tests reproducible |
 | ~17:00 | Tern pass 2: which build? (user didn't pick) | Rides in 0.63.2 | Step 2 isn't delayed; it's in the very next preview |
 | ~17:00 | Staffing | New: traditions (T), crew sim + social (X), HUD (U), works career 2 (C2, replacing C at 63%). C, H, S (60%+) idle with handovers | No live seat owned traditions, sim, social or HUD |
+| ~17:10 (lead 13) | Zeke now stops to talk (the user's note), which made the Day 0 ramp-to-Works walk take 34 ship minutes and pushed dinner late | Hold the ship clock while Zeke is talking to you on Day 0 before dinner (like the 17:30 manifest hold); walking still takes time | Keeps the readable pacing the user asked for without moving the evening |
