@@ -17,9 +17,15 @@ Spec: plans/brief-playtest1.md on claude/lead-pillar1 (12b1b87); the user's answ
 - S claude/ship-systems **03340c5** (0.33.48-0.33.51, Step 2 parts; also inside 78bf1c2, which R reviews for Step 1; 1 nit)
 
 ## Failing / waiting on a fix
+- C2 claude/works-career **fd26e15** (0.44.14): read and right; mech_check m1 and leave_check fail until C2's announced 0.44.15 (the round's 11:00, leave_check's times)
 - (none)
 
 ## Verdicts
+
+### C2 fd26e15 (0.44.14): the day shift 09:00-17:00 in the career, clock and jobs code — waiting on 0.44.15 (read in depth)
+- DAY_SHIFT [540, 1020] (section 17: jobs held count shift minutes from 09:00; the board's day/night label). DEV_SHIFT.from 540 (the Schedule; a literal, since DAY_SHIFT comes later in the file). shiftTick's late from DAY_SHIFT[0], read at run time, so no load-order trouble. The time clock opens at 08:00 (CAREER.clockIn, was 07:00) for clocking, careerStarted, the reminder and the first tip: late after 09:00, still missed by 12:30, leave booked by 08:30 (bookBy 510). Day 1-3: INTRO_JOBS an hour later; the briefing 08:50-09:05, the shadow from 09:05, Day 2's word 08:45, Day 3's pick 09:00. Bea's Day 1 vent stays at 09:00. Tip t:shift at 08:30-09:00. The crew's SHIFTS/MEALS and breakfast are X's.
+- Checks (my runs on fd26e15): **career_check OK**, **machine_check OK**. cadet_test vs 0.63.1 (cb7d30a): screenshots and state identical; only tap1's toast differs, "Very hungry" → "Bursting". I probed it: the needs after the night skip and the morning are the same in both (hunger 0 and bathroom 0), so the first tap names the other empty need. The likely cause is that the t:shift tip now fires at 08:30, not 07:30, so the warnings rotate differently. Explained; not a bug.
+- **mech_check FAILS: "m1: held for you to 11:00 (ends 720)".** The round's `leave: 180` now counts from 09:00, so it's held to 12:00 and the m1 page says 11:00. **leave_check FAILS** on its old times (booking closes 07:30, cancel after 07:30, a leave-day job held, the 11:30 clock-in note expecting late 210 from 08:00). C2 has said 0.44.15 brings both (the round still held to 11:00; leave_check's times). Re-review on that.
 
 ### W ff81441: the Day 0 call-home tip (banks/tips.lines) — PASS (skimmed)
 - tip.callhome ("Call home tonight. The call booths are on Deck 3…"; the booths are Deck 3's, turn 4), tip.callhome.button "Track it", tip.callhome.goal. For O5. content_gen clean; lines_check PASS.
