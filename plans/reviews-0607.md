@@ -9,6 +9,10 @@
 
 ## Verdicts
 
+### Re-check: onboarding 4, 0.42.42-0.42.43, claude/arrival-0607b f09145f: PASS, both LOWs fixed
+- 0.42.42 (22d88d3) only renames the laundry keys (checked with the writer's quiz note below).
+- 0.42.43: the beats, the crew-at-work look-up and the remark scan now run every 250 ms of `simNow` (pause-aware). Beat pacing still uses `U.next`, so lines aren't bunched. The wardrobe tap takes only your tagged wardrobe (`it.wardrobe === playerBed()`), or an untagged item titled "wardrobe" within .6 m. Plain lockers no longer match.
+
 ### Head writer 0.48.83 (quiz pool) bf99520, plus 5b57aa1 and onboarding 4's 22d88d3 (skim): PASS, one MED (a wrong "right" answer)
 - **lines_check:** PASS once baked (0 errors, the same 2 old warnings; 8268 lines).
 - **Laundry keys:** the writer's `beat.d1-clothes.1-2` / `beat.d2-laundry.1-2` (5b57aa1) are read by onboarding 4's 22d88d3, which tries each name in a list in turn (`['beat.d1-clothes', 'walk.dinner.laundry']`). The new `said()` loop ends correctly (it stops at the first missing `.n` when there are no exact lines, and caps at 12). Matched.
