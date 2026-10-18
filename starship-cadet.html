@@ -12884,7 +12884,8 @@ function ixHold() {
     return pick >= 0 && st[pick].done && !(drop >= 0 && st[drop].done) && !crateDown(j) ? 'carry' : null;   // not while it's set down (Put down, 0.28.60)
   }
   const kd = typeof JOB_KINDS === 'object' && JOB_KINDS && JOB_KINDS[j.kind];   // a registered kind's own (17's jobKindAdd def.hold: 'datapad' for a round, Pillar 5)
-  return kd && typeof kd.hold === 'string' && typeof HOLDS !== 'undefined' && HOLDS[kd.hold] ? kd.hold : 'toolbox';
+  let h = null; try { h = kd ? typeof kd.hold === 'function' ? kd.hold(j) : kd.hold : null; } catch (e) { h = null; }   // or of the job (a haul: 'cart', then 'cartfull')
+  return typeof h === 'string' && typeof HOLDS !== 'undefined' && HOLDS[h] ? h : h === null && kd && 'hold' in kd ? null : 'toolbox';
 }
 // a stop's minutes are done (ixFrame sees the activity step out): mark it with section 17, and say what's next
 function ixStopDone(A) {
