@@ -14686,6 +14686,7 @@ function machWorks(c) {
 // faster per step; its look: high flickers (blinks, a cart dock), low dims. tuneSet(id, v) sets it (clamped; MACH_REV++;
 // simNote('tuned', { machine }) when it settles); machineDrift(id)
 const TUNABLE = new Set(['oven', 'range', 'lights', 'cartdock']), TUNE_FROM = 3 * 1440 + 360, TUNE_P = .007, DRIFT_COND = 8;
+const TUNE_LEAVE = 120;                                 // a tune job is held for you two hours of the shift, then the crew's (0.33.54, M2: "a drifted machine never waits on you")
 const driftOn = () => !!JOB_KINDS.tune;
 const machEff = s => Math.max(0, s.cond - DRIFT_COND * Math.abs(s.drift || 0));
 const machineDrift = id => { const s = SHIP.machines[id]; return s && s.drift || 0; };
@@ -15519,7 +15520,7 @@ function choresOfDay(d) {
 function tunePost(m, h, jobs, found) {
   if (jobs.some(x => x.kind === 'tune' && x.machine === m.id && x.status !== 'done')) return null;
   const d = machineDrift(m.id), dc = (FAULT_CAUSES[m.kind] || []).find(c => c.setting), w = dc ? dc.shows.split('|') : [], word = d > 0 ? w[0] : w[w.length - 1];
-  const j = jobMake('tune', { id: 'tune:' + m.id + '@' + h, machine: m.id, deck: m.deck, room: m.room, h, found, tier: jobTier({ machine: m.id }), title: 'Tune: ' + machineTitle(m.id) + (word ? ' (' + word + ')' : '') });
+  const j = jobMake('tune', { id: 'tune:' + m.id + '@' + h, machine: m.id, deck: m.deck, room: m.room, h, found, leave: TUNE_LEAVE, tier: jobTier({ machine: m.id }), title: 'Tune: ' + machineTitle(m.id) + (word ? ' (' + word + ')' : '') });
   jobs.push(j); return j;
 }
 function choresHour(h, jobs) {

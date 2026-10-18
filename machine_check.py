@@ -1013,10 +1013,10 @@ with sync_playwright() as pw:
         DR = r"""((stand, mode) => {
           window.__sc("window.__evD = [typeof eventNow === 'function' ? eventNow : undefined, typeof eventMod === 'function' ? eventMod : undefined]; if (window.__evD[0]) eventNow = () => null; if (window.__evD[1]) eventMod = () => null");
           const own = JOB_KINDS.tune;
-          // section 17's part alone: always the stand-in (24e's own kind, if it's in, is swapped out for the arm and put back; mech_check covers it)
+          // a stand-in 'tune' kind when 24e's isn't in the build
           const standIn = { text: 'Tune', stops: j => [{ deck: j.deck, placeId: panelPlace(j.machine), mins: 15, tag: 'tune', how: 'turn' }], done: (j, t, by) => tuneSet(j.machine, 0), crew: { can: p => jobCrew(p) === 'works', mins: 15 } };
-          if (own) delete JOB_KINDS.tune;
-          if (stand) { JOB_KINDS.tune = standIn; JOB_TYPES.tune = JOB_TYPES.tune || { work: 15, restore: 0, parts: 0 }; }
+          if (own && !stand) delete JOB_KINDS.tune;           // 24e's own kind, when it's in, is the one measured (M2)
+          if (stand && !own) { JOB_KINDS.tune = standIn; JOB_TYPES.tune = JOB_TYPES.tune || { work: 15, restore: 0, parts: 0 }; }
           const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min, out = { first: null, starts: 0, minHealth: 100, tunes: 0, tunedByCrew: 0, sig: [] };
           JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; SHIP.works = null; setShipNow(t0); machinesNow();
           const prev = {};
