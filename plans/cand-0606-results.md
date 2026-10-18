@@ -32,3 +32,4 @@ One line per finished check (check, game commit, OK/FAIL, key numbers). A new bu
 - 96582c4 day_check (R2) days 0/1/6/7/35 ALL OK: shift short 0, stuck 0.0, peak D3 279 (budget 450), servery all served
 - 96582c4 perf (DA3): PERF CHECK OK (calls within a few of 0.60.5b, heap 150 flat, load same, file 3.74 MB); phone.py dinner/breakfast within target (<50 slow frames/h), seat-ray stutter gone; side order being confirmed
 - 96582c4 phone.py (DA3, 0.60.5b → 0.60.6): dinner 3.5-3.8 → 4.0-4.1 ms, >16.7 ms 3-5 → 13-14 an hour (target < ~50), worst 39 → 51 ms; breakfast the same. Seat-ray stutter (279) gone.
+- 96582c4 (R3): player OK · interactions OK · path OK (3008/3008)
