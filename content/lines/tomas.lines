@@ -100,7 +100,7 @@
 ? trad:film tier>=acquaintance
 - Film night! I'll save you a seat. Not the one by the speaker. Trust me.
 ? trad:running tier>=colleague
-- Running club? Vance will be there. Come and stand between us.   #funny
+- Gym club? Vance will be there. Come and stand between us.   #funny
 
 == accept
 - {yes}! I'll be there. I'll probably be early. I'm always early. It's a nerves thing.
@@ -373,7 +373,7 @@
 - Good game. I'll practise. On my own. With the board.   #funny
 
 // Writer 5, batch 1: Tomas's ordinary weeks, after week one. Mostly not work: letters to his brother, the stars,
-// toast, running club at the back, film night, the window seat, the bunk (Chloe's lights out, Lukas up early), rest
+// toast, Gym club at the back, film night, the window seat, the bunk (Chloe's lights out, Lukas up early), rest
 // days (now Mon-Tue), the farm moon, counting windows. Gates kept: the exam only from beat:tomas.5, the transfer list only
 // from beat:tomas.6, why he left home only at close; his brother's star map only from beat:tomas.4.
 
@@ -399,7 +399,7 @@
 - My brother asked what we eat. I said "Brennan's food". He says that's not an answer.   #funny
 - The toast here is better than home. Don't tell home.   #funny
 - I'm on chapter three of a book about old ships. It's taken a month. Long chapters.   #funny
-- Running club's all right. I run at the back. You can see everyone from the back.
+- Gym club's all right. I run at the back. You can see everyone from the back.
 - Film night was the one with the lighthouse. Seen it twice. Still don't get the ending.   #funny
 - I'm counting every window on the Wren. I'm on twenty-two. Some are portholes.
 ? tier>=colleague !week1:true
@@ -424,7 +424,7 @@
 ? act:breakfast !week1:true
 - Toast, tea, window. That's breakfast. I can't start a day without the window.
 ? act:dinner !week1:true
-- Seconds, if there are any. Running club makes me hungry. Vance never seems hungry.   #funny
+- Seconds, if there are any. Gym club makes me hungry. Vance never seems hungry.   #funny
 ? act:off !week1:true
 - Rest day. Letter first. Then the window seat. Then I'll see. The window seat.   #funny
 ? act:gym

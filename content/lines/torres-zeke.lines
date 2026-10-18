@@ -550,7 +550,7 @@
 ? trad:quiz
 - Quiz night. The music round's mine. Takahashi says it's theirs. We'll see.   #funny
 ? trad:running
-- Running club! I run like I talk. Fast, then out of breath, then fast again.   #funny
+- Gym club! I run like I talk. Fast, then out of breath, then fast again.   #funny
 ? trad:film
 - Film night! I knit right through it. I've never seen the end of anything.   #funny
 ? trad:market
@@ -645,3 +645,12 @@
 - After lunch you lead. I'll be the one humming.
 ? flag:walk.follow.7
 - Nearly home time. You've done well today.   #warm
+// Name on the beam (first Monday, 17:05, the Works bay cross beam): Zeke hands you the pen. In order.
+? flag:trad.beam.1
+- Right. Everyone stay put. New hand's turn.
+? flag:trad.beam.2
+- Here. The pen. It's the same one we all used.   #warm
+? flag:trad.beam.3
+- Anywhere you like. Next to mine, if you want.   #warm
+? flag:trad.beam.4
+- There. You're part of the bay now. Properly.   #warm
