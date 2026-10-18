@@ -586,3 +586,4 @@ Read: CLAUDE.md, TEAM.md (session chain rule + overnight exception), plans/brief
 - ~14:44 D plan v10 9e26a58 (extras → Step 4, cold-case → Step 5; m1/m4 pages marked). design-doc unchanged (doesn't name steps). D starting Step 3 pages: promotion first.
 - ~14:44 H handover written: claude/mech-cases 8a26cae plans/handover-puzzles.md. H on call for Step 2.
 - ~14:50 THE USER: leads may start leads and workers (awake or not); at depth 6 or 7 notify the user, who starts a new level-0 lead. Recorded in TEAM.md (session chain update). Lead 12 = depth 2, so its helpers/successor are depth 3.
+- ~14:46 D Step 3 page 1: plans/mechanics/promotion-officer.html bc1171c (test job Day 9 Deck 4 scrubber, summons, office, crew, 4-23 move, Day 11 ceremony; needs sim playerBed()). Batching pages for one user survey. Next M8, M9.
