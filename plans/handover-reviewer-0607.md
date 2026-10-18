@@ -5,7 +5,7 @@
 - **Never changed game code, and never contacted the user.**
 
 ## Passing tips at handover (all 0.60.7 seats)
-writer 0cc4cdf · arrival-0607b 79d8244 (contains arrival e2cd435, PE6 52839a6, systems 1e9476c) · systems 521742a · social 9c8ea6c · PE6 4bd606c · deck 55fca8d · traditions 8be5030.
+writer 0cc4cdf · arrival-0607b 79d8244 (contains arrival e2cd435, PE6 52839a6, systems 1e9476c) · systems 521742a · social 9c8ea6c · PE6 4bd606c · deck 55fca8d · traditions 8a512b5.
 
 ## Combine notes (for whoever reviews the candidate)
 - traditions 5de2087's events_check/device_check pass only with social's `morning()` (d3d5b4d and later) merged: the early-morning let-offs were removed.
