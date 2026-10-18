@@ -8,7 +8,7 @@ Started by lead 12 (session_01GjWhU9Z9V8RNoR8yyELA9V) at ~11:28 for every Step 2
 - P claude/player-p5 **3373828** (0.28.73, contains cfce34e; 1 LOW)
 - M2 claude/mech-incidents **c9b211a** (0.51.1; LOWs 1-2 closed, LOW 3 for Step 3)
 - M1 claude/mech-rounds **c7c55cf** (0.45.5, contains 8a6cea8..740234d and Onboarding 4's 96649fe; items 1-2 closed; LOWs closed or out by the lead)
-- S claude/ship-systems **b676814** (0.33.54, contains 01a3a3b and 78bf1c2)
+- S claude/ship-systems **0e18118** (0.33.54 + social_check fix and handover note; contains b676814)
 - Onboarding 4 claude/arrival-0607b **96649fe** (0.42.46, 21b's uniform grime for m2; 1 LOW, the page's field names)
 - S claude/ship-systems **03340c5** (0.33.48-0.33.51, Step 2 parts; also inside 78bf1c2, which R reviews for Step 1; 1 nit)
 
@@ -16,6 +16,9 @@ Started by lead 12 (session_01GjWhU9Z9V8RNoR8yyELA9V) at ~11:28 for every Step 2
 - (none)
 
 ## Verdicts
+
+### S 140899a + 0e18118: S's handover note, social_check's cue arm (test only) — PASS (read)
+- social_check's cue arm empties SHIP.social.cues before its two test notes, since Pillar 5's real faults now give a real Day 2 lift repair cue. One line; no game change. S reports SOCIAL CHECK OK. The handover note is text only.
 
 ### C 8cc07a5 (0.44.13): ladderTick opens nothing for a day already past — PASS (read; my quick checks)
 - One condition: `d < worksDay(shipNow())` returns early. Section 17's catch-up after loading an old save runs jobsHour, and so ladderTick, for every hour since the save's machine hour, which opened the drill and the inspection on long-gone days (M1 / BM5's finding). A sleep's hours on the same day (the 06:00 ask while you sleep) are unaffected. Hours skipped on an earlier day (a long skip) open nothing; the row opens on your next workday instead, which matches 24 core's "offered later, none lost". Test-only: career_check and mech_check's scripted player reads a meeting through (dialogueEnd), and career_check counts Mail from the training's own ask.
