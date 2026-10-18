@@ -2,9 +2,12 @@
 
 Reviewer 1g, 2026-10-17. In-depth review, because it changes behaviour and the save (`SHIP.player.crate`). The probes are `putdown-40c1f76-probe.py` (a real save and reload, a lift ride, New game) and `putdown-40c1f76-ride-probe.py` (what a tap mid-ride does). Run them next to a `cadet_test.py`.
 
-## Verdict: PASS WITH FIXES
+## Verdict: PASS WITH FIXES on 40c1f76; PASS on 1117454 (re-check below)
 
 The button, parts, tray, crate, pointer, drop guard, tap to pick up, overnight return and save all work. One LOW: the button stays up during a lift ride, and a tap there leaves the crate in the lift car on the deck you left. The fix is one line and doesn't block the merge.
+
+## Re-check: 1117454 (0.28.60 review): PASS
+The lift-ride LOW is fixed: `putFrame`'s `busy` and `putDown()` both check `ride`. The probe on 1117454: button hidden mid-ride, and a click during the ride sets nothing down. Also new: the crate goes back in a 05:00 night tidy (`putTidyAt`: the first 05:00 after it was set down; set down at 05:00 goes next day, at 23:55 goes at 05:00), and `playerNew()` clears it. The save and reload, New game, and console checks: all ok again (`putdown-40c1f76-probe.py`: 1G PROBE OK). In between, 1116be4 brought in 0.28.49 and the feed-names change, which reviewer 1f passed.
 
 ## Checks (on 40c1f76)
 | Check | Result |
