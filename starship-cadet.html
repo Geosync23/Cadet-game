@@ -11355,8 +11355,7 @@ const PLAYER_ACTS = {   // need and gain over mins ship minutes; pose: the crowd
   browse: { mins: 8, pose: 'browse', title: 'Browsing' },
   pay:    { mins: 2, pose: 'pay', title: 'Paying' },
   shower: { need: 'hygiene', gain: 80, mins: 10, pose: 'stand', title: 'Showering', done: 'Clean, and smelling of the ship\'s one soap.' },
-  toilet: { need: 'bathroom', gain: 100, mins: 3, pose: 'sit', cost: { hygiene: 3 }, title: 'Toilet', done: 'Now wash your hands at the basins.' },   // any public toilet (0.28.19); a little hygiene, back at the basins (playtest 1)
-  wash:   { need: 'hygiene', gain: 5, mins: 1, pose: 'stand', title: 'Washing your hands', done: 'Clean hands.' },   // the washrooms' basins (playtest 1)
+  toilet: { need: 'bathroom', gain: 100, mins: 3, pose: 'sit', cost: { hygiene: 3 }, title: 'Toilet', done: 'Now wash your hands at the basins.' },   // any public toilet (0.28.19); a little hygiene, back at the basins (15b's ixBasin, playtest 1)
   tray:   { mins: 1, pose: 'stand', title: 'At the servery' },
   queue:  { mins: 1, pose: 'stand', title: 'In the queue', until: A => {   // the servery's queue (section 16): wait for your turn, then take a tray
     if (!galleyTurn('player')) return false;
@@ -11408,7 +11407,6 @@ const ACT_TAP = [   // what you tapped (its title), the place types it leads to,
   [/table/i, ['mess-seat'], 'eat'],
   [/^shower$/i, ['shower'], 'shower'],
   [/^toilet$/i, ['toilet'], 'toilet'],
-  [/^basins?$/i, ['basin'], 'wash'],
 ];
 const PRIVATE_TYPES = new Set(['shower', 'toilet']);     // someone's own (privatePlace) is never offered: wash pods, cabins' toilets
 const ACT_NEAR = 2.4;

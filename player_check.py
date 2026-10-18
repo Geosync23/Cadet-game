@@ -1222,7 +1222,7 @@ with sync_playwright() as pw:
                 if not g.ev("!!ACT"): break
             wh2 = g.ev("[Math.round(SHIP.player.needs.hygiene * 10) / 10, document.getElementById('tx').textContent]")
             print('  basins [tapped, the toilet\'s hygiene cost]:', wh, '| hygiene 50 ->', wh2)
-            check(wh[0] is True and wh[1] == 3 and wh2[0] > 52, f'playtest: washing your hands at the basins puts hygiene back ({wh}, {wh2})')
+            check(wh[0] is True and wh[1] == 3 and wh2[0] > 52, f'playtest: washing at the basins (15b\'s ixBasin) puts hygiene back ({wh}, {wh2})')
             ng = json.loads(g.ev("""(() => { clearGoal(); NEED_GOAL = null; const P = SHIP.player, h = P.needs.hunger; P.needs.hunger = 5; const r = needGoal('hunger'), a = IX_GOAL && [IX_GOAL.label, IX_GOAL.deck, IX_GOAL.place];
               setGoal({ deck: 5, room: 'w', label: 'Someone else' }); const b = needGoal('energy'), c = IX_GOAL.label; clearGoal(); needGoal('hunger'); P.needs.hunger = 60; needGoalTick(); const d = IX_GOAL; P.needs.hunger = h; return JSON.stringify([r, a, b, c, d]); })()"""))
             print('  a very low need\'s marker [set, goal, over another arrow, still theirs, after eating]:', ng)
