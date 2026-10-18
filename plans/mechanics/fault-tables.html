@@ -69,13 +69,13 @@ td code{white-space:normal}
 </head>
 <body>
 <header>
-  <h1>The fault tables: what can go wrong with each machine <span class="draft">for approval</span></h1>
+  <h1>The fault tables: what can go wrong with each machine <span class="draft">approved</span></h1>
   <div class="sub">For each kind of machine, its causes in plain words: what's wrong, what the job card says, what you see up close, when it shows, and what you hear when the wrong part goes in. Real faults (from Day 2) pick their cause from here; the scanner (Day 5) reads these parts; head-scratchers pick their suspects and clues from here. Tier 1 kinds first; then the Tier 2 kinds (Step 3), with the lines for tracing (M9) and the cases P1 and P2. Data for section 17's <code>FAULT_CAUSES</code> (foundation 17.4).</div>
 </header>
 <nav><div><a href="#plain">In plain words</a><a href="#rules">How to read them</a><a href="#t1">Tier 1</a><a href="#t2">Tier 2</a><a href="#b">Builder</a><a href="#check">Checks</a><a href="#faq">FAQ</a></div></nav>
 <main>
 
-<p class="note"><b>Tier 1 approved by the lead (2026-10-18, overnight authority).</b> Tier 2 (Step 3) is for the user's approval.</p>
+<p class="note"><b>Tier 1 approved by the lead (2026-10-18, overnight authority).</b> <b>Tier 2 approved by the user 2026-10-18</b> (with the damper table).</p>
 <section id="plain">
   <h2>In plain words</h2>
   <ul>
@@ -195,7 +195,7 @@ td code{white-space:normal}
 </section>
 
 <section id="t2">
-  <h2>Tier 2 machines (complete, for approval)</h2>
+  <h2>Tier 2 machines (approved by the user 2026-10-18)</h2>
   <p class="note">The same columns as Tier 1, plus <b>Line</b>: a cause marked <i>water</i>, <i>heat</i> or <i>air</i> cuts the flow on that line (M9's <code>MACHINE_LINKS</code>), so it can be a <b>traced fault</b> (the card names the symptom at the end of the line, "Showers weak on Deck 4", "Cold cabins on Deck 2" or "Stuffy air on Deck 4", not the machine) and a suspect in a traced case (P1). A cause marked — only ever posts on its own machine. All Tier 2 causes are <b>From: Officer</b> (Day 10), except the load (T2+, P1's later form). <b>Warm</b>, on a machine that runs all day, means after hours of busy use: in the evening.</p>
 
   <h3>Air scrubber <span class="tag">scrubber · Decks 4 and 2 (<code>4-scrubber-1</code>, <code>-2</code>, <code>2-extractor-1</code>) · part: filter</span></h3>
