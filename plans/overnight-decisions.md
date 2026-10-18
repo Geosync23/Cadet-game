@@ -107,3 +107,6 @@ The user (~05:20): the lead may approve or reject everything overnight; don't ho
 | Team jobs stage 2 (fetch parts for the team) | Step 4 with the other extras |
 | Spare parts running short | Keep as is |
 | Sleeker Tern second pass | Do it now |
+| Sleeker Tern pass 2 plan (DA5, deck-p5s3 f00759b: tapered tail, engine pods, shaped roof spine, rounded corners, lockers follow taper) | Yes, build it (~15:50) |
+| Tier 2 fault tables (p5-design adc12e2 + damper table) | Approved (~15:50) |
+| Step 3 timing | No Step 3 building until Step 2 is ready (~15:48) |
