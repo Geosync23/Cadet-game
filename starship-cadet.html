@@ -30282,7 +30282,7 @@ function tilesStyle(p) {
 // ---- the board on your device (0.46.1): the Tiles app. A game in play draws as a 6 x 6 board in the device's
 // phosphor screen; tap a tile, then where it goes (legal squares glow, a square that docks shows a spark); tap your
 // hold to launch. The crew member answers a moment later. No timers on you, no drag, words for every move.
-SHIP.tiles = { played: 0, won: 0, lost: 0, vs: {}, first: {}, relDay: {}, firstWin: null, beatRina: null, night: { last: null, rina: 0, games: [] } };   // read from save.tiles below
+SHIP.tiles = { played: 0, won: 0, lost: 0, taught: false, vs: {}, first: {}, relDay: {}, firstWin: null, beatRina: null, night: { last: null, rina: 0, games: [] } };   // read from save.tiles below
 let TL_GAME = null;   // { s, opp, name, style, rng, where, teach, hint, sel, log: [lines], fx, timer }
 const TL_TALK = {   // stand-ins until the writers' lines (lineFor(who, 'tiles.<kind>')) arrive
   start: { rina: ['Best of one. Try to keep up.'], chatty: ['Oh good, a game. Did I tell you about the hydroponics leak?', 'Go easy on me. Or don\'t, I\'ll learn more.'], any: ['Your move.', 'Let\'s see what you\'ve got.'] },
@@ -30291,6 +30291,24 @@ const TL_TALK = {   // stand-ins until the writers' lines (lineFor(who, 'tiles.<
   win:   { rina: ['Good game. Again?'], chatty: ['I won? I never win! Well, sometimes.'], any: ['Good game.', 'Close one.'] },
   lose:  { rina: ['...Again. Now.'], chatty: ['You\'re a natural! I knew it.'], any: ['Well played.', 'You got me.'] },
 };
+// How to play (0.28.51, the user's "we also need a tiles tutorial"): short steps in a card above the board, on your first
+// game (with the teaching layout) and whenever you press How to play. A step with `wait` moves on by itself when you do
+// it (select a tile, step, jump, launch, dock); every step has Next and Skip, so it never holds you up.
+// t(name, mode) -> its text, a line or two on a phone.
+const TL_TUT = [
+  { t: n => 'Yours are the solid tiles. ' + n + '’s are dashed.' },
+  { t: () => 'Marks: ● ▲ ★. Three of one touching DOCK: a point each.' },
+  { t: () => 'Tap one of your tiles to see where it can go.', wait: 'sel' },
+  { t: () => 'STEP: tap a lit square, one diagonal forward.', wait: 's' },
+  { t: n => 'JUMP over ' + n + '’s tile to take it into your hold.', wait: 'j' },
+  { t: () => 'LAUNCH: tap your hold, then a free home square.', wait: 'l' },
+  { t: () => 'A spark on a square means it docks. Go for it!', wait: 'dock' },
+  { t: (n, R) => 'First to ' + R.target + ' wins, or most after ' + R.turns + ' turns. Have fun!' },
+];
+function tilesTut(did) {   // something happened: the step waiting for it moves on
+  const G = TL_GAME; if (!G || G.tut < 0) return;
+  const st = TL_TUT[G.tut]; if (st && st.wait === did) G.tut = G.tut + 1 >= TL_TUT.length ? -1 : G.tut + 1;
+}
 function tilesTalk(kind) {
   const G = TL_GAME; if (!G) return null;
   if (typeof lineFor === 'function') { try { const l = lineFor(G.opp, 'tiles.' + kind, {}); if (l && l.text) return l.text; } catch (e) { /* no line yet */ } }
@@ -30301,18 +30319,30 @@ function tilesTalk(kind) {
 const tlName = (t, mine) => (mine ? 'your ' : 'their ') + TL_MARKS[tlM(t)];
 function tilesSay(text) { const G = TL_GAME; if (!G || !text) return; G.log.push(text); if (G.log.length > 3) G.log.shift(); }
 // start a game: opponentId (a crew id), where (a place id or null), mode 'full' | 'quick'
-function tilesPlay(opponentId, where, mode) {
+// the opponent stays in their seat while you play (0.46.6, folded into 0.28.51): section 10's crewHold(p, placeId) (sim engineer 3) keeps a
+// walker at its place until the release it returns is called: when you press Done, walk off, start again or a new game
+function tilesUnhold(G) { if (G && G.hold) { const f = G.hold; G.hold = null; try { f(); } catch (e) { /* the walker's gone */ } } }
+function tilesHold(G, p) {
+  if (typeof crewHold !== 'function' || typeof DECK_CREW === 'undefined') return;
+  const a = DECK_CREW.find(x => x.p && x.p.id === p.id); if (a && a.goalId) G.hold = crewHold(p, a.goalId);
+}
+function tilesPlay(opponentId, where, mode, tut) {   // tut: run the How to play steps (0.28.51; your first game always does)
   if (TL_GAME && TL_GAME.timer) clearTimeout(TL_GAME.timer);
+  tilesUnhold(TL_GAME);
   const T = SHIP.tiles, p = (typeof ROSTER !== 'undefined' && ROSTER.find(x => x.id === opponentId)) || { id: opponentId || 'tomas', name: 'Tomas Lind', seed: 7 };
   const teach = !T.played, style = teach ? Object.assign({}, tilesStyle(p), { level: 'easy' }) : tilesStyle(p);
   const seed = Math.floor(schedU((p.seed | 0) ^ (T.played * 7919), SHIP.time.day, 800) * 4294967296);
   const rng = tilesRng(seed), first = teach ? 0 : (T.first[p.id] | 0);   // you go first in your first game, then turn about with each opponent (saved)
   const talk = tilesRng(Math.floor(schedU((p.seed | 0) ^ (T.played * 7919), SHIP.time.day, 807) * 4294967296));   // its own stream: lines never shift the moves
   TL_GAME = { s: tilesNew(mode === 'quick' ? 'quick' : 'full', rng, teach, first), opp: p.id, name: (p.name || p.id).split(' ')[0], style, rng, talk, where: where || null,
-              teach, hint: teach, sel: null, log: [], fx: null, timer: 0, done: false };
+              teach, hint: teach, sel: null, log: [], fx: null, timer: 0, done: false, hold: null, tut: tut || TL_UI.teachNext || (!T.played && !T.taught) ? 0 : -1 };   // TL_UI.teachNext: the Tiles app's How to play
+  TL_UI.teachNext = false;
+  if (TL_GAME.tut === 0) T.taught = true;
+  tilesHold(TL_GAME, p);
   tilesSay(TL_GAME.name + ': ' + (tilesTalk('start') || 'Your move.'));
   if (first) tilesCrewSoon();
   deviceShow('tiles');
+  try { while (TIP_Q.length) tipDone(); if (DEV.hu) devHeadsDo('done'); } catch (e) { /* no device yet */ }   // nothing left frozen on top of the board (0.28.51)
   return TL_GAME;
 }
 function tilesCrewSoon() {
@@ -30345,6 +30375,7 @@ function tilesDo(mv) {
   if (!mine && r.pts) { const l = tilesTalk('dock'); if (l) tilesSay(G.name + ': ' + l); }
   if (mine && G.missLater) { tilesSay(G.name + ': ' + G.missLater); G.missLater = null; }
   if (G.hint && mv.k === 'j' && mine) G.hint = false;
+  if (mine) { tilesTut(mv.k); if (r.pts) tilesTut('dock'); }
   setTimeout(() => { if (TL_GAME === G && G.fx && G.fx.to === mv.to) { G.fx = null; tilesDraw(); } }, 520);
   if (G.s.over) tilesOver(); else tilesCrewSoon();
   tilesDraw();
@@ -30364,13 +30395,14 @@ function tilesOver() {   // the end of a game: the words, the tally, what it giv
 function tilesTap(c) {   // a tap on square c (0-35), or on the hold ('h' + mark)
   const G = TL_GAME; if (!G || G.s.over || G.s.p !== 0 || tilesLeft()) return;
   const ms = tilesMoves(G.s, 0);
-  if (typeof c === 'string') { const m = +c.slice(1); G.sel = G.sel && G.sel.h === m ? null : { h: m }; tilesDraw(); return; }
+  if (typeof c === 'string') { const m = +c.slice(1); G.sel = G.sel && G.sel.h === m ? null : { h: m }; if (G.sel) tilesTut('sel'); tilesDraw(); return; }
   if (G.sel) {
     const mv = ms.find(m => m.to === c && (G.sel.h !== undefined ? m.k === 'l' && m.m === G.sel.h : m.from === G.sel.c));
     if (mv) { tilesDo(mv); return; }
   }
   const t = G.s.b[c];
   G.sel = t && tlO(t) === 0 && ms.some(m => m.from === c) && !(G.sel && G.sel.c === c) ? { c } : null;
+  if (G.sel) tilesTut('sel');
   tilesDraw();
 }
 const TL_CSS = `
@@ -30405,6 +30437,14 @@ const TL_CSS = `
 .tlx .tl-log{margin:4px 0;color:var(--crt-dim)}
 .tlx .tl-log p{margin:2px 0}
 .tlx .tl-card{color:var(--crt-dim);margin:6px 0}
+.tlx .tl-tut{display:flex;align-items:center;gap:8px;border:2px solid var(--crt-ink);border-radius:8px;padding:6px 8px;margin:0 0 6px;box-shadow:0 0 8px var(--crt-glow)}
+.tlx .tl-tut[hidden]{display:none}
+.tlx .tl-tut p{flex:1;min-width:0;margin:0;color:var(--crt-hot)}
+.tlx .tl-tut .btns{flex:none;flex-direction:column;gap:6px}
+.tlx .tl-tut p b{color:var(--crt-dim);font-weight:400;margin-right:6px}
+.tlx.tut .tl-bd{width:min(100%,336px,max(264px,calc(66vh - 300px)))}
+.tlx .tl-tut .btns,.tlx .tl-end,.tlx .tl-play{display:flex;flex-wrap:wrap;gap:8px}
+.tlx .tl-play{margin:6px 0}
 @keyframes tlin{from{transform:scale(.6);opacity:.4}to{transform:none;opacity:1}}
 @keyframes tldock{0%{transform:none;opacity:1;box-shadow:0 0 0 0 var(--crt-glow)}100%{transform:translateY(-30%) scale(1.15);opacity:0;box-shadow:0 0 0 12px transparent}}
 @keyframes tldock2{0%{transform:none;opacity:1;box-shadow:0 0 0 0 var(--crt-glow),0 0 0 0 var(--crt-glow)}100%{transform:translateY(-40%) scale(1.25);opacity:0;box-shadow:0 0 0 10px transparent,0 0 0 20px transparent}}
@@ -30418,7 +30458,7 @@ function tilesDraw() {   // draw the game into its persistent element (the devic
   if (!TL_UI.root) {
     const st = document.createElement('style'); st.textContent = TL_CSS; document.head.appendChild(st);
     const root = document.createElement('div'); root.className = 'tlx';
-    root.innerHTML = '<p class="tl-sc"></p><p class="tl-now hot" aria-live="polite"></p><div class="btns tl-end"></div><div class="tl-bd" role="grid" aria-label="Tiles board"></div><div class="tl-hd"></div><div class="tl-log"></div><p class="tl-card">STEP diagonally forward · JUMP to take a tile · LAUNCH from your hold · 3 of a mark touching = DOCK. First to <span></span>.</p>';
+    root.innerHTML = '<p class="tl-sc"></p><p class="tl-now hot" aria-live="polite"></p><div class="btns tl-end"></div><div class="tl-bd" role="grid" aria-label="Tiles board"></div><div class="tl-tut" role="status" aria-live="polite" aria-label="How to play" hidden></div><div class="tl-hd"></div><div class="tl-log"></div><div class="btns tl-play"></div><p class="tl-card">STEP diagonally forward · JUMP to take a tile · LAUNCH from your hold · 3 of a mark touching = DOCK. First to <span></span>.</p>';
     const bd = root.querySelector('.tl-bd');
     for (let y = 5; y >= 0; y--) for (let x = 0; x < 6; x++) {
       const c = y * 6 + x, b = document.createElement('button'); b.type = 'button'; b.className = 'tl-c' + ((x + y) % 2 ? '' : ' dk') + (y < 2 ? ' home' : '');
@@ -30468,25 +30508,38 @@ function tilesDraw() {   // draw the game into its persistent element (the devic
   const lg = root.querySelector('.tl-log'); lg.textContent = '';   // the latest line above the board, the two before it below
   const lines = G.hint && hintC !== undefined ? G.log.concat(['Jump their tile to take it. It’s yours now.']) : G.log;
   root.querySelector('.tl-now').textContent = lines[lines.length - 1] || '';
-  for (const l of lines.slice(0, -1).reverse()) lg.appendChild(Object.assign(document.createElement('p'), { textContent: l }));
+  const tutOn = G.tut >= 0 && !s.over; root.querySelector('.tl-now').hidden = tutOn; root.classList.toggle('tut', tutOn);   // a How to play step stands in for it (the line shows below)
+  for (const l of (tutOn ? lines : lines.slice(0, -1)).reverse()) lg.appendChild(Object.assign(document.createElement('p'), { textContent: l }));
   root.querySelector('.tl-card').hidden = SHIP.tiles.played >= 3 && !G.teach;
   root.querySelector('.tl-card span').textContent = R.target;
   const end = root.querySelector('.tl-end'); end.textContent = '';
-  if (s.over) for (const [k, label] of [['full', 'Again'], ['quick', 'Quick game (to 5)'], ['done', 'Done']]) {
-    const b = document.createElement('button'); b.type = 'button'; b.className = 'act'; b.dataset.end = k; b.textContent = label; end.appendChild(b);
+  const btn = (box, k, label) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'act'; b.dataset.end = k; b.textContent = label; box.appendChild(b); };
+  if (s.over) for (const [k, label] of [['full', 'Again'], ['quick', 'Quick game (to 5)'], ['done', 'Done']]) btn(end, k, label);
+  const pb = root.querySelector('.tl-play'); pb.textContent = '';
+  if (!s.over) { if (G.tut < 0) btn(pb, 'teach', 'How to play'); btn(pb, 'leave', 'Leave game'); }   // 0.28.51, under the board: the steps again; get up mid-game (not counted)
+  const tu = root.querySelector('.tl-tut'), st = G.tut >= 0 && TL_TUT[G.tut];   // How to play (0.28.51)
+  tu.hidden = !st || s.over; tu.textContent = '';
+  if (st && !s.over) {
+    const tp = document.createElement('p'); tp.append(Object.assign(document.createElement('b'), { textContent: (G.tut + 1) + '/' + TL_TUT.length }), st.t(G.name, R)); tu.appendChild(tp);
+    const bx = document.createElement('div'); bx.className = 'btns'; btn(bx, 'tnext', G.tut + 1 < TL_TUT.length ? 'Next ▸' : 'Got it'); if (G.tut + 1 < TL_TUT.length) btn(bx, 'tskip', 'Skip'); tu.appendChild(bx);
+    if (G.tutSeen !== G.tut) { G.tutSeen = G.tut; requestAnimationFrame(() => { try { if (!tu.hidden && tu.isConnected) tu.scrollIntoView({ block: 'nearest' }); } catch (e) { /* old browser */ } }); }   // the step, with your rows above it
   }
   return root;
 }
 function tilesEnd(k) {
   const G = TL_GAME; if (!G) return;
-  if (k === 'done') { TL_GAME = null; deviceRefresh(); return; }
+  if (k === 'done') { tilesUnhold(G); TL_GAME = null; deviceRefresh(); return; }
+  if (k === 'leave') { if (G.timer) clearTimeout(G.timer); tilesUnhold(G); TL_GAME = null; toast('Tiles', 'You leave the game. ' + G.name + ' tidies the tiles away.'); deviceRefresh(); return; }   // mid-game (0.28.51): not counted
+  if (k === 'teach') { G.tut = 0; SHIP.tiles.taught = true; tilesDraw(); return; }
+  if (k === 'tnext' || k === 'tskip') { G.tut = k === 'tskip' || G.tut + 1 >= TL_TUT.length ? -1 : G.tut + 1; tilesDraw(); return; }
   tilesPlay(G.opp, G.where, k);
 }
 deviceApp({ id: 'tiles', title: 'Tiles', short: 'Tiles', icon: 'dot', order: 75,
   view: () => {
     tilesLeft();
     if (TL_GAME) return { title: 'Tiles with ' + TL_GAME.name, blocks: [{ kind: 'dom', render: box => { const r = tilesDraw(); if (r) box.appendChild(r); } }] };
-    const T = SHIP.tiles, blocks = [{ kind: 'text', text: 'Sit at a Tiles table or the Tiles station in the bow lounge to play whoever’s there.' }];
+    const T = SHIP.tiles, blocks = [{ kind: 'text', text: 'Sit at the Tiles station in the bow lounge (or a Tiles table on Tiles night) and whoever’s free comes over to play. While you play, the ship waits.' }];
+    blocks.push({ kind: 'buttons', items: [{ label: TL_UI.teachNext ? 'How to play: next game' : 'How to play', action: { app: 'tiles', do: 'teach' } }] });   // 0.28.51: the steps again, at your next game
     blocks.push({ kind: 'text', text: T.played ? 'Played ' + T.played + ', won ' + T.won + ', lost ' + T.lost + '.' : 'You haven’t played yet.' });
     const vs = Object.keys(T.vs).filter(k => T.vs[k][0] + T.vs[k][1]).map(k => { let p = null; try { p = ROSTER.find(x => x.id === k); } catch (e) { /* before section 9 loads */ } return (p ? p.name.split(' ')[0] : k) + ' ' + T.vs[k][0] + '-' + T.vs[k][1]; });
     if (vs.length) blocks.push({ kind: 'text', text: 'Against: ' + vs.join(', ') + '.' });
@@ -30499,18 +30552,76 @@ deviceApp({ id: 'tiles', title: 'Tiles', short: 'Tiles', icon: 'dot', order: 75,
       if (T.beatRina === null && T.night.rina > 1) blocks.push({ kind: 'text', text: 'Rina hasn’t lost in ' + T.night.rina + ' Tuesdays.' });
     }
     return { title: 'Tiles', blocks };
-  } });
-// ---- sitting down to play (0.46.2): tap a Tiles table, station or board; you take a free seat at it and play whoever
-// is sitting there (or, failing that, anyone settled in the room). The game is the 'tiles' activity (sit:play pose):
-// it begins as you sit, lasts until you press Done, and walking away leaves the game.
-const TL_ITEM = /^Tiles (table|station|board)\b/i, TL_NEAR = 2.4;
-Object.assign(PLAYER_ACTS, { tiles: { need: 'social', gain: 12, mins: 20, pose: 'sit:play', title: 'Playing Tiles', done: 'You get up from the board.',
-  until: A => { if (!A.o.tl) { A.o.tl = true; tilesPlay(A.o.opp, A.placeId, A.o.mode); } return !TL_GAME || TL_GAME.where !== A.placeId; } } });
+  },
+  act: verb => { if (verb === 'teach') { if (TL_GAME) tilesEnd('teach'); else { TL_UI.teachNext = !TL_UI.teachNext; toast('Tiles', TL_UI.teachNext ? 'How to play will run at your next game.' : 'No walkthrough next game.'); } deviceRefresh(); } } });
+// ---- sitting down to play (0.46.2; 0.28.51, the user's "You sit down and someone will come up if available. If not,
+// the game tells you no one can play"): tap a Tiles table, station or board and you sit at a free seat. Someone already
+// sitting at the board plays you; otherwise the best free crew member on the deck (tilesFind: off duty or at leisure,
+// not asleep, eating, on an appointment, escorting or visiting; someone who likes Tiles or has played you, then a
+// friend, then whoever's nearest) walks over (section 14's crewComeTo) and sits opposite, and the game opens as they
+// sit. Nobody free: a toast says so and you just sit. The game is the 'tiles' activity (sit:play pose): it lasts until
+// you press Done or Leave game, and walking away leaves the game.
+// Playing stops time (the user's "Playing tiles stops time"): while a game is on (not yet over) PAUSE.tiles freezes the
+// ship like Pause, without the overlay; it runs again on the result screen. No ship minutes pass while you play, so the
+// game's social comes in one go at its end (TL_GAIN, by your bond with them, like the other activities).
+const TL_ITEM = /^Tiles (table|station|board)\b/i, TL_NEAR = 2.4, TL_FAR = 40, TL_WAIT = 30, TL_GAIN = 12;   // TL_FAR metres on the deck; TL_WAIT ship minutes for them to come
+const tlSecond = id => { try { const p = ROSTER.find(x => x.id === id); return p ? p.name.split(' ')[0] : id; } catch (e) { return id; } };
+Object.assign(PLAYER_ACTS, { tiles: { need: null, mins: 20, pose: 'sit:play', title: 'Playing Tiles', done: 'You get up from the board.',
+  until: A => tilesSeatTick(A) } });
+function tilesSeatTick(A) {   // the 'tiles' activity while you sit: find someone, wait for them, play; true ends it
+  const o = A.o;
+  if (o.st === 'play') return !TL_GAME || TL_GAME.where !== A.placeId;
+  const seats = (o.board || []).filter(id => id !== A.placeId), here = a => a && a.settled && a.p && a.p.id && ROSTER.some(x => x.id === a.p.id);
+  if (!o.st) {
+    const sat = seats.map(id => heldBy(id)).find(here);   // someone already at the board
+    if (sat) return tilesBegin(A, sat.p.id);
+    const seat = seats.filter(id => !heldBy(id)).map(id => [id, placeSpot(id)]).filter(x => x[1])
+      .sort((m, n) => Math.hypot(n[1].x - A.spot.x, n[1].z - A.spot.z) - Math.hypot(m[1].x - A.spot.x, m[1].z - A.spot.z))[0];   // the seat across from you: the farthest free one
+    const a = seat && tilesFind(seat[1]);
+    if (!a) { tilesNobody(A); return false; }
+    o.st = 'wait'; o.opp = a.p.id; o.seat = seat[0]; o.since = shipNow(); o.here = false;
+    const go = crewComeTo(a.p, seat[0], () => { o.here = true; }, { until: shipNow() + TL_WAIT + 30 }), prev = A.release;
+    A.release = () => { if (prev) prev(); go(); };     // actEnd lets them go back to their own plans
+    toast('Tiles', shortName(a.p) + ' sees you at the board and comes over to play.');
+    return false;
+  }
+  if (o.st === 'wait') {
+    const a = DECK_CREW.find(x => x.p && x.p.id === o.opp), sp = placeSpot(o.seat);
+    const there = a && a.settled && (o.here || sp && Math.hypot(a.x - sp.x, a.z - sp.z) < .6);
+    if (there) return tilesBegin(A, o.opp);
+    if (!a || shipNow() - o.since > TL_WAIT) { if (A.release) A.release(); A.release = null; tilesNobody(A, tlSecond(o.opp) + ' couldn’t make it after all.'); }
+  }
+  return false;
+}
+function tilesBegin(A, id) { A.o.st = 'play'; A.o.opp = id; tilesPlay(id, A.placeId, A.o.mode); return false; }
+function tilesNobody(A, why) {   // nobody to play: you stay sat, as on any seat
+  toast('Tiles', (why ? why + ' ' : '') + 'Nobody’s around to play right now. Try in the evening, or on a day off.');
+  A.kind = 'sit'; A.def = { ...PLAYER_ACTS.sit }; A.o.st = 'none';
+}
+// who'd come and play: free now (whereIs), on this deck, not already wanted elsewhere; quiet hours (21:45-06:00) nobody
+function tilesFind(at) {
+  const now = shipNow(), m = ((now % 1440) + 1440) % 1440; if (m >= 1305 || m < 360) return null;
+  const T = SHIP.tiles; let best = null, bs = -1e9;
+  for (const a of DECK_CREW) {
+    const p = a.p; if (!p || !p.id || !ROSTER.some(x => x.id === p.id)) continue;
+    if (typeof CHAT !== 'undefined' && CHAT && CHAT.p === p || COME_TO.has(p.id) || CREW_HELD.has(p.id)) continue;
+    let w = null; try { w = whereIs(p, now); } catch (e) { w = null; }
+    if (!w || (w.act !== 'off' && w.act !== 'leisure') || w.deck !== deckDef.num) continue;
+    const d = Math.hypot(a.x - at.x, a.z - at.z); if (d > TL_FAR) continue;
+    const v = typeof VOICE !== 'undefined' && VOICE[p.id], plays = !!(v && Array.isArray(v.invites) && v.invites.includes('tiles')) || !!T.vs[p.id];
+    let tier = 0; try { tier = typeof relTier === 'function' ? relTier(p.id) : 0; } catch (e) { tier = 0; }
+    const sc = (plays ? 30 : 0) + tier * 8 - d;
+    if (sc > bs || sc === bs && best && p.id < best.p.id) { bs = sc; best = a; }
+  }
+  return best;
+}
+PAUSE.tiles = () => !!(TL_GAME && !TL_GAME.s.over && tilesSeated());   // section 13: a game on stops the ship
+PAUSE.tilesTap = () => { if (!TL_GAME) return; deviceShow('tiles'); toast('Tiles', 'Your game with ' + TL_GAME.name + ' is waiting. Leave game on the board gets you up.'); };
 const tilesSeated = () => !!(TL_GAME && (!TL_GAME.where || (ACT && ACT.kind === 'tiles' && ACT.placeId === TL_GAME.where)));
 function tilesLeft() {   // you walked away mid-game: the game is left as it was, not counted
   const G = TL_GAME; if (!G || tilesSeated()) return false;
   if (G.timer) clearTimeout(G.timer);
-  TL_GAME = null; if (!G.s.over) toast('Tiles', 'You leave the game. ' + G.name + ' tidies the tiles away.');
+  tilesUnhold(G); TL_GAME = null; if (!G.s.over) toast('Tiles', 'You leave the game. ' + G.name + ' tidies the tiles away.');
   return true;
 }
 // the Tiles station is always open; tables and boards are for Tiles night (the lead, 0.46.4), and are plain seats otherwise
@@ -30526,13 +30637,10 @@ function tilesWorldTap(it, at, point) {
   const seats = [...PLACE_OF.values()].map(pl => [pl, placeSpot(pl.id)])
     .filter(([pl, s]) => s && (!room || pl.room === room) && (s.pose || pl.pose) === 'sit' && !privatePlace(pl) && ixDist(it, s) < TL_NEAR);
   if (!seats.length) return false;
-  const here = a => a && a.settled && a.p && a.p.id && ROSTER.some(x => x.id === a.p.id);
-  let opp = seats.map(([pl]) => heldBy(pl.id)).find(here);   // someone sitting at the board
-  if (!opp) opp = DECK_CREW.find(a => here(a) && PLACE_OF.get(a.goalId) && PLACE_OF.get(a.goalId).room === room);   // or anyone settled in the room
-  if (!opp) { tipShow('tiles-nobody', 'Nobody to play Tiles with just now. Someone’s usually at the table of an evening, or ask a friend to meet you there.'); return false; }   // sit as before (15b)
   const free = seats.filter(([pl]) => !heldBy(pl.id)).sort((m, n) => Math.hypot(m[1].x - point.x, m[1].z - point.z) - Math.hypot(n[1].x - point.x, n[1].z - point.z))[0];
   if (!free) { toast(it.t, 'Every seat at the board is taken.'); return true; }
-  actStart('tiles', free[0].id, { pose: 'sit:play', title: 'Tiles', flavour: 'You sit down across from ' + opp.p.name.split(' ')[0] + '.', opp: opp.p.id, mode: 'full' });
+  const sat = seats.map(([pl]) => heldBy(pl.id)).find(a => a && a.p && a.p.id && ROSTER.some(x => x.id === a.p.id));
+  actStart('tiles', free[0].id, { pose: 'sit:play', title: 'Tiles', flavour: sat ? 'You sit down across from ' + shortName(sat.p) + '.' : 'You sit down at the board.', board: seats.map(([pl]) => pl.id), mode: 'full' });   // then tilesSeatTick finds you someone (0.28.51)
   return true;
 }
 PLAYER_TAPS.unshift(tilesWorldTap);   // ahead of section 15b's ixTap, which would make the table's stools a plain sit
@@ -30540,6 +30648,10 @@ PLAYER_TAPS.unshift(tilesWorldTap);   // ahead of section 15b's ixTap, which wou
 // Tiles record; beating Rina is news ("Rina lost! To the new hand!"), a big memory for her, and the day is kept
 function tilesReward(G, you) {
   const T = SHIP.tiles, day = SHIP.time.day, first = G.name;
+  try {   // the game's social (0.28.51): in one go, as no ship minutes passed while you played; by your bond, with your needs' effects
+    const N = SHIP.player.needs, fx = typeof playerFx === 'function' ? playerFx() : null, bm = typeof bondMult === 'function' ? bondMult(G.opp) : 1;
+    N.social = needClamp(N.social + TL_GAIN * (fx && typeof fxR === 'function' ? fxR(fx, 'social') : 1) * bm);
+  } catch (e) { /* needs not there (tests on paper) */ }
   if (T.relDay[G.opp] !== day) {   // friendship and the memory once a ship day per opponent, like a chat; later games still count
     T.relDay[G.opp] = day;
     if (typeof relAdd === 'function') relAdd(G.opp, 'tiles', typeof REL_PTS !== 'undefined' && REL_PTS.chat || 2);
@@ -30565,11 +30677,11 @@ function tilesLoad(s) {   // save.tiles, read defensively
   const first = {}, relDay = {};
   if (d.first && typeof d.first === 'object') for (const k in d.first) if (k.length < 40 && (d.first[k] === 0 || d.first[k] === 1)) first[k] = d.first[k];
   if (d.relDay && typeof d.relDay === 'object') for (const k in d.relDay) if (k.length < 40 && Number.isFinite(d.relDay[k])) relDay[k] = Math.floor(d.relDay[k]);
-  return { played: n('played'), won: n('won'), lost: n('lost'), vs, first, relDay, firstWin: day('firstWin'), beatRina: day('beatRina'), night };
+  return { played: n('played'), won: n('won'), lost: n('lost'), taught: d.taught === true, vs, first, relDay, firstWin: day('firstWin'), beatRina: day('beatRina'), night };
 }
 SHIP.tiles = tilesLoad(SAVED);
 SAVE_EXTRA.push(s => { s.tiles = JSON.parse(JSON.stringify(SHIP.tiles)); });
-onSim('newGame', () => { SHIP.tiles = tilesLoad(null); if (TL_GAME && TL_GAME.timer) clearTimeout(TL_GAME.timer); TL_GAME = null; });
+onSim('newGame', () => { SHIP.tiles = tilesLoad(null); if (TL_GAME && TL_GAME.timer) clearTimeout(TL_GAME.timer); tilesUnhold(TL_GAME); TL_GAME = null; });
 // ---- Tiles night on paper (0.46.3): when the tradition ends (section 18's simNote('tradition'), id tilesNight), the
 // crew who came are paired (seeded by the day, key 801) and each pairing is settled by a seeded roll (key 802) from
 // their levels: the same level is even, Hard beats Medium 68%, Medium beats Easy 70%, Hard beats Easy 83% (tiles_check's
