@@ -494,7 +494,7 @@ with sync_playwright() as pw:
             print(f'  his goodnight at {gn[0]} (ship minute; None: not with you), last lines said: {gn[1]}')
             if g.ev('SHIP.intro.done.goodnight === undefined'): fail('Torres never said goodnight (or the fallback never ran)')
             elif bunkAt and gn[0] is not None and int(bunkAt.split()[-1][:2]) * 60 + int(bunkAt.split()[-1][3:]) - 1440 < gn[0]: fail(f'the bunk arrow came before his goodnight ({bunkAt})')
-        if simnow and (not seats or seats['you'][1] or seats['you'][2] != seats['you'][0] or seats['torres'][1] != INTRO_ESC_ID or seats['calder'][1] != 'calder'): fail(f'the dinner seats are wrong (place, held by): {seats}')
+        if simnow and (not seats or seats['you'][1] or seats['you'][2] != seats['you'][0] or seats['torres'][1] != INTRO_ESC_ID or (seats['calder'][1] not in ('calder', None) or seats['calder'][1] is None and not chiefAt)): fail(f'the dinner seats are wrong (place, held by): {seats}')   # (0.42.64: the Chief may still be on her way over then; the welcome check below has her sat)
         w = g.ev("({ missed: SHIP.intro.missed, done: Object.keys(SHIP.intro.done), device: introFlag('intro.device'), calder: introFlag('met.calder') })")
         print(f'  draw-call peaks by deck {peak}; Torres led you for {led} looks')
         if w['missed']: fail('the real walk missed ' + ', '.join(w['missed']))
