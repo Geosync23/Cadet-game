@@ -252,7 +252,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.47.9
+   STARSHIP CADET: CSV Wren                           build 0.47.10
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7968,7 +7968,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.47.9';                           // keep in step with the header's build line
+const GAME_BUILD = '0.47.10';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -39302,7 +39302,7 @@ const bubbles = { list: [], hidden: false, el: null, v: new THREE.Vector3(), on:
   },
   place() {
     if (!this.list.length) { this.pair = null; return; }
-    const on = this.on, now = performance.now(), ease = this.at ? Math.min(1, (now - this.at) / 1000 * 10) : 1; on.length = 0; this.at = now;
+    const on = this.on, now = performance.now(), dts = this.at ? Math.min(.1, (now - this.at) / 1000) : 1, ease = Math.min(1, dts * 10), lim = 900 * dts; on.length = 0; this.at = now;   // lim: a slide never goes faster than 900 px a second (0.47.10)
     for (const b of this.list) {
       const w = b.who, p = w.pos || (w.obj && w.obj.position) || w, h = w.h || 1;
       const seat = w.pos && w.pos.y >= .3 ? w.pos.y : 0;   // seated: above the head on the seat; standing: above a standing head
@@ -39332,7 +39332,7 @@ const bubbles = { list: [], hidden: false, el: null, v: new THREE.Vector3(), on:
       this.pair = { l: a, r: c, stack };
     } else this.pair = null;
     for (const b of on) {                                // a change of layout (side by side, stacked) slides in over a few frames; the speaker is followed exactly
-      const ox = b.x - b.ax, oy = b.y - b.ay; b.ox = b.ox === undefined ? ox : b.ox + (ox - b.ox) * ease; b.oy = b.oy === undefined ? oy : b.oy + (oy - b.oy) * ease;
+      const ox = b.x - b.ax, oy = b.y - b.ay, step = d => Math.max(-lim, Math.min(lim, d * ease)); b.ox = b.ox === undefined ? ox : b.ox + step(ox - b.ox); b.oy = b.oy === undefined ? oy : b.oy + step(oy - b.oy);
       const hw = b.w / 2 + 8; b.x = Math.min(innerWidth - hw, Math.max(hw, b.ax + b.ox)); b.y = b.ay + b.oy;
     }
     for (const b of on) {

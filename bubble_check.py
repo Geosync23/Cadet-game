@@ -6,7 +6,8 @@
 #      head projected with the camera the frame was drawn with, within 0.5 px (before 0.47.9 the bubbles were placed with the
 #      previous frame's camera, so they lagged by however far the camera moved, and that changed with every uneven frame)
 #   2. no shake: a bubble never moves one way and straight back on the next frame by more than 3 px beyond what its speaker's
-#      head did, and never jumps more than 45 px beyond it in one frame (a change of layout slides in over a few frames)
+#      head did, and never jumps more than 45 px beyond it in one frame (a change of layout slides in, at most 900 px a second:
+#      30 px on a 33 ms frame)
 #   3. no bubble is hidden and shown again within 30 frames (a re-show replays its pop-in)
 #   4. two bubbles that overlap never swap sides or stacking from one frame to the next more than once a second
 # Setup and environment as for cadet_test.py.  Run:  python3 bubble_check.py BUILD.html
