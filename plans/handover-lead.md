@@ -568,3 +568,4 @@ Read: CLAUDE.md, TEAM.md (session chain rule + overnight exception), plans/brief
 - ~11:59 R2: M1 740234d (0.45.4) PASS, all items closed. R2 owns P 0.28.73, 0.63.0a, M2.
 - ~12:08 P 3373828 (0.28.73: scanOpen, r.say, ixHold, Thursday bunk Make bed/Tidy locker saved; player/interactions OK, cadet_test identical). P done, idle.
 - ~12:09 M2 0bbb93d (0.51.0 tuning + incidents; mech m5/m6 OK, cadet_test identical, machine/interactions/career 0 FAILs); combined with M1 steady player 6.2 jobs/day → S to count mechanic jobs inside 3-6 (logged).
+- ~12:17 S 66b4ebb (0.33.53 mechanic jobs inside 3-6: 5.7/day on full combine, 52% repairs; cadet_test identical); to M1, M2, BM5, R2.
