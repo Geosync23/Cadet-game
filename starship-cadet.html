@@ -14419,7 +14419,9 @@ function machinesNew() {
 }
 // run the ship's hours up to and including this one: each hour, the jobs (jobsHour), then that hour's wear.
 // A clock earlier than the machines' (New game) starts afresh
+let MACH_IN = false;                                     // inside the hour loop: a call from jobsHour's hooks (ladderTick) reads as it stands (0.33.45)
 function machinesNow() {
+  if (MACH_IN) return SHIP.machines;
   const t = shipNow();
   if (CART_PENDING.length && MACH_HOUR !== null && MACH_HOUR * 60 > t) cartPost();
   if (MACH_HOUR !== null && t >= MACH_SEEN && MACH_HOUR * 60 > t) { MACH_SEEN = t; return SHIP.machines; }   // up to date: the common case
@@ -14429,7 +14431,8 @@ function machinesNow() {
   const list = machineList();
   for (const m of list) if (!SHIP.machines[m.id]) { const c = machFresh(m); SHIP.machines[m.id] = { cond: c, state: machineState(c), lastService: null }; }
   if (now >= MACH_HOUR) MACH_REV++;
-  for (; MACH_HOUR <= now; MACH_HOUR++) {
+  MACH_IN = true;
+  try { for (; MACH_HOUR <= now; MACH_HOUR++) {
     SIM_AT = MACH_HOUR * 60;                             // notes from this hour say so, however late they go out
     if (JOBS_ON) jobsHour(MACH_HOUR);
     for (const m of list) {
@@ -14439,7 +14442,7 @@ function machinesNow() {
     }
     machRecord(MACH_HOUR);
     for (const k in MACH_EXTRA) delete MACH_EXTRA[k];
-  }
+  } } finally { MACH_IN = false; }
   SIM_AT = null;
   if (CART_PENDING.length) cartPost();
   simFlush();
@@ -14772,13 +14775,108 @@ const JOB_TYPES = {                                      // work: minutes at the
   chore:    { work: 15, restore: 0,   parts: 0 },        // chores (0.33.19): their own stops and minutes; this is for readers of a job's work
 };
 const JOB_FOR = { worn: 'service', faulty: 'repair', failing: 'repair', broken: 'overhaul' };
+// what can go wrong with each machine (0.33.46, foundation 17.4; plans/mechanics/fault-tables.html, Tier 1, approved by
+// the lead). FAULT_CAUSES[kind] = [{ id, part | setting | load, w, shows, sign, when, still, from?, band? }]: part: the
+// part that fixes it (every one is in STOCK); setting: fixed by tuning (M5; until it's in, the kind's own part); load:
+// the machine is fine and something else pulls on it (head-scratchers only: never a real fault's cause); w: how common
+// (3 often, 2 sometimes, 1 rarely); shows: the job card's symptom; sign: what you see up close; when: 'always' | 'peak' |
+// 'warm' | 'after-use' | 'touched' | 'at-time'; still: the machine's line when the wrong part goes in; from: the first ship
+// day it can be the cause (settings: Day 4); band: the first tier it can be the cause in (2: Officer, 3: Senior Officer).
+// The words are the first drafts of the Works writer's content/works/faults.lines (key: kind + '.' + id). A kind with no
+// table behaves as before (its own part, no cause)
+const FAULT_CAUSES = {
+  oven: [
+    { id: 'element', part: 'element', w: 3, shows: 'runs cool', sign: 'cool all over, slow to heat', when: 'always', still: 'New element in. Still cool by the door.' },
+    { id: 'seal', part: 'seal', w: 2, shows: 'runs cool', sign: 'cool by the door; you feel heat at the gap', when: 'always', still: 'Fresh seal. Still slow to heat all over.' },
+    { id: 'belt', part: 'fan belt', w: 1, shows: 'runs cool', sign: 'hot at the back, cool at the front; a squeal at start', when: 'after-use', still: 'New belt. Still cool.' },
+    { id: 'drift', setting: true, w: 2, shows: 'runs hot|runs cool', sign: 'the glow stutters (hot) or the screen dims (cool)', when: 'always', from: 4 },
+    { id: 'junction', load: '3-junction', w: 1, shows: 'runs cool', sign: 'fine at breakfast, cool at dinner', when: 'peak', band: 2 } ],
+  range: [
+    { id: 'element', part: 'element', w: 3, shows: 'a ring is weak', sign: 'one ring slow, the others fine', when: 'always', still: 'New element. That ring\'s still weak: it clicks, no heat.' },
+    { id: 'relay', part: 'relay', w: 2, shows: 'a ring is weak', sign: 'it clicks but sometimes won\'t heat', when: 'touched', still: 'New relay. Still slow to heat.' },
+    { id: 'drift', setting: true, w: 2, shows: 'runs hot', sign: 'every ring too fierce; Brennan complains', when: 'always', from: 4 } ],
+  galleyplant: [
+    { id: 'belt', part: 'fan belt', w: 3, shows: 'weak draw', sign: 'a squeal, the belt shiny', when: 'after-use', still: 'New belt. Still weak: the grille\'s caked.' },
+    { id: 'filter', part: 'filter', w: 2, shows: 'weak draw', sign: 'grease on the grille, quiet fan', when: 'always', still: 'Clean filter. Still weak, and it squeals.' },
+    { id: 'bearing', part: 'bearing', w: 1, shows: 'noisy', sign: 'a grinding hum', when: 'always', still: 'New belt. Still grinding.' } ],
+  extractor: [
+    { id: 'belt', part: 'fan belt', w: 3, shows: 'weak draw', sign: 'a squeal at start, smoke lingers', when: 'after-use', still: 'New belt. Still weak: the hood\'s filter\'s black.' },
+    { id: 'filter', part: 'filter', w: 2, shows: 'weak draw', sign: 'grease dripping at the hood\'s edge', when: 'always', still: 'Clean filter. Still weak, and it squeals.' },
+    { id: 'relay', part: 'relay', w: 1, shows: 'stops and starts', sign: 'clicks, runs, stops', when: 'warm', still: 'New belt. Still stops and starts.' } ],
+  chiller: [
+    { id: 'compressor', part: 'compressor', w: 2, shows: 'runs warm', sign: 'a laboured hum that never stops', when: 'always', still: 'New compressor. Still warm: frost round the door.' },
+    { id: 'seal', part: 'seal', w: 3, shows: 'runs warm', sign: 'frost round the door frame', when: 'after-use', still: 'Fresh seal. Still warm, and it hums all night.' },
+    { id: 'bearing', part: 'bearing', w: 1, shows: 'runs warm', sign: 'warm at the back shelves, a rattle', when: 'always', still: 'New bearing. Still warm by the door.' },
+    { id: 'sensor', part: 'signal card', w: 1, shows: 'milk going off', sign: 'the display says 3°, the back shelf feels warmer', when: 'always', still: 'New compressor. Display still says 3°; still warm.', band: 3 } ],
+  washer: [
+    { id: 'pump', part: 'pump', w: 3, shows: 'leaks', sign: 'a puddle under it, the pump housing damp', when: 'after-use', still: 'New pump. Still drips at the door.' },
+    { id: 'seal', part: 'seal', w: 2, shows: 'leaks', sign: 'drips at the door during the spin', when: 'after-use', still: 'Fresh seal. Still a puddle under it.' },
+    { id: 'valve', part: 'valve', w: 2, shows: 'leaks', sign: 'water left in the drum after the cycle', when: 'after-use', still: 'New valve. Still a puddle under it.' },
+    { id: 'bearing', part: 'bearing', w: 1, shows: 'loud spin', sign: 'a rumble, the machine walks on the floor', when: 'after-use', still: 'New pump. Still rumbles.' },
+    { id: 'relay', part: 'relay', w: 1, shows: 'stops mid-cycle', sign: 'stops, clicks, starts again', when: 'warm', still: 'New pump. Still stops mid-cycle.' } ],
+  lift: [
+    { id: 'relay', part: 'relay', w: 3, shows: 'slow, stops at decks', sign: 'pauses before the doors open', when: 'warm', still: 'New bearing. Still pauses at the doors.' },
+    { id: 'bearing', part: 'bearing', w: 2, shows: 'judders', sign: 'a grinding in the shaft between decks', when: 'always', still: 'New relay. Still judders between decks.' },
+    { id: 'breaker', part: 'breaker', w: 1, shows: 'stops between decks', sign: 'stalls, then the breaker light', when: 'peak', still: 'New relay. It still stalls at shift change.' } ],
+  lights: [
+    { id: 'relay', part: 'relay', w: 3, shows: 'lights flicker', sign: 'the whole room\'s lights, worse after an hour', when: 'warm', still: 'New lamp. Still flickers, the whole room.' },
+    { id: 'lamp', part: 'lamp', w: 2, shows: 'lights flicker', sign: 'one lamp only', when: 'always', still: 'New relay. That one lamp still flickers.' },
+    { id: 'breaker', part: 'breaker', w: 1, shows: 'lights out', sign: 'a whole run dark; the breaker\'s lamp lit', when: 'peak', still: 'New relay. Dark again at dinner.' },
+    { id: 'cable', part: 'cable', w: 1, shows: 'lights flicker', sign: 'flickers when the door slams', when: 'touched', still: 'New relay. Still flickers when the door goes.', band: 2 },
+    { id: 'drift', setting: true, w: 2, shows: 'lights flicker|lights dim', sign: 'fast flicker everywhere (high) or a sag (low)', when: 'always', from: 4 } ],
+  cartdock: [
+    { id: 'relay', part: 'relay', w: 2, shows: 'charges slow', sign: 'the lamp blinks, then holds', when: 'warm', still: 'New cell. Still blinks before it charges.' },
+    { id: 'cell', part: 'cell', w: 2, shows: 'charges slow', sign: 'the cart\'s gauge never gets past three quarters', when: 'always', still: 'New relay. Still stops at three quarters.' },
+    { id: 'cable', part: 'cable', w: 1, shows: 'won\'t charge', sign: 'charges only if you jiggle the plug', when: 'touched', still: 'New relay. Still only if you jiggle it.' },
+    { id: 'drift', setting: true, w: 2, shows: 'charges slow', sign: 'the screen dims', when: 'always', from: 4 } ],
+  growlight: [
+    { id: 'lamp', part: 'lamp', w: 3, shows: 'a rack is dim', sign: 'a row of pink lamps gone pale', when: 'always', still: 'New relay. Still pale along that row.' },
+    { id: 'relay', part: 'relay', w: 2, shows: 'a rack is dim', sign: 'the whole rack flickers off and on', when: 'warm', still: 'New lamps. The rack still cuts out.' },
+    { id: 'drift', setting: true, w: 1, shows: 'lights at the wrong hours', sign: 'on at night, off at noon', when: 'at-time', from: 4 } ],
+};
+// a real fault's cause (17.4): picked when its repair or overhaul is posted (from Day 2), from the causes allowed that day
+// (a setting from its `from` day, a band from that tier; never a load), weighted by w; schedU key 855. faultCause(j) -> the
+// cause or null; faultShows(j) -> the job card's symptom (one of a setting's two, by the job)
+function faultPick(m, h) {
+  const C = FAULT_CAUSES[m.kind], d = Math.floor(h / 24) + 1; if (!C || d < WORKS_REAL_FROM) return null;
+  const ok = C.filter(c => !c.load && (!c.from || d >= c.from) && (!c.band || playerTier() >= c.band)), sum = ok.reduce((a, c) => a + c.w, 0);
+  if (!sum) return null;
+  let u = schedU(m.seed, h, 855) * sum; for (const c of ok) if ((u -= c.w) < 0) return c;
+  return ok[ok.length - 1];
+}
+const faultCause = j => j && j.cause && j.machine && (FAULT_CAUSES[(machineById(j.machine) || {}).kind] || []).find(c => c.id === j.cause) || null;
+const faultShows = j => { const c = faultCause(j); if (!c) return null; const xs = c.shows.split('|'); return xs[(machSeed(j.id) >>> 0) % xs.length]; };
+// a machine job's parts: the kind's own, the first one the cause's part (a setting fixed by the kind's part until tuning, M5, is in)
+const faultParts = (m, kind, c) => { const ps = Array(JOB_TYPES[kind].parts).fill(MACHINE_KINDS[m.kind].part); if (c && c.part) ps[0] = c.part; return ps; };
 const JOB_URGENCY = { worn: 0, faulty: 1, failing: 2, broken: 3 };
 const CREW_TIER = { junior: 2, officer: 3, senior: 3, chief: 4, xo: 4, captain: 4 };   // what Works crew may work on
 const ENGINE_KINDS = new Set(['reactor', 'coil']);      // the engine crew's, at any tier; nobody else's
 const PLAYER_TIER = 1;                                  // you, for now (design doc, "Works progression")
 // your tier (0.33.44, Pillar 5 foundation 17.1): section 24's SHIP.works.tier once there is one, else PLAYER_TIER
 const playerTier = () => (SHIP.works && SHIP.works.tier) || PLAYER_TIER;
+// ranks (0.33.45, foundation 17.2): a job may be a junior job (j.junior: the food cart, hauling, the bunk inspection) or kept
+// for a rank (j.only: 'senior' | 'specialist'; saved on the job). You're SHIP.works.rank (section 24; 'junior' till then), the
+// crew their roster rank (chief, xo and captain count as senior, the engine crew as specialist). rankOk(who, j): who
+// ('you', a person or a crew id) may do j. A junior job is held for you only while you're a junior (forYou)
+const RANKS = ['junior', 'officer', 'senior', 'specialist'];
+const playerRank = () => (SHIP.works && RANKS.includes(SHIP.works.rank) && SHIP.works.rank) || 'junior';
+const crewRank = p => jobCrew(p) === 'engine' ? 'specialist' : ['senior', 'chief', 'xo', 'captain'].includes(p.rank) ? 'senior' : p.rank === 'officer' ? 'officer' : 'junior';
+function rankOf(who) {
+  if (who === 'you' || who === 'player' || (who && who.isPlayer)) return playerRank();
+  const p = typeof who === 'string' ? schedPeople().find(x => x.id === who) : who && (who.p || who);
+  return p ? crewRank(p) : 'junior';
+}
+const rankOk = (who, j) => !j.only || RANKS.indexOf(rankOf(who)) >= RANKS.indexOf(j.only);
 const CREW_LEAVE = 180;                                 // crew leave easy, routine jobs this long for you before taking them
+// more real faults (0.33.46, foundation 17.3): from Day 2 on your shift days, for machines at your tier, REAL_SHARE of the
+// worn machines (schedU key 856, by machine and hour) wore on unseen: their job is found (2-24 hours later, as a service's
+// would be, plus FIND_LATE) as a fault, the machine at the top of faulty, its cause picked then. (Delaying the services
+// alone, the page's first knob, left the first week's board thin and no faults before Day 5: machine_check 5o, the lead.)
+// A repair below urgent is held for you FAULT_LEAVE minutes of the day shift (not CREW_LEAVE) and never shared out
+// (shareOut). Days 0-1, your days off and the arrival's jobs are as before
+const WORKS_REAL_FROM = 2, FIND_LATE = 0, FAULT_LEAVE = 240, REAL_SHARE = .5;
+const realFor = (m, d) => d >= WORKS_REAL_FROM && playerShiftOn(d) && !ENGINE_KINDS.has(m.kind) && jobTier({ machine: m.id }) <= playerTier();
+const realRepair = j => j.kind === 'repair' && j.urgency === 1 && !!j.machine && !j.reserved && realFor(machineById(j.machine), Math.floor(j.found / 1440) + 1);
 const YOU_KEEP = 720;                                   // a job you take goes back on the board after 12 ship hours with no progress (touchJob)
 const JOB_FETCH = 10, JOB_MAKE = 60, JOB_RIDE = 2;       // minutes: fetching parts; making one in the machine shop; a lift ride
 // supplies (B3): what main storage keeps of each part (topped up by the weekly delivery), and the parts nobody can
@@ -14852,12 +14950,12 @@ const HOLD_MAX = 3;                                      // small jobs held for 
 // SHARE_KEEP held on the board: so you see the Works crew doing the jobs you do ("Bea on it")
 const SHARE_EVERY = 3, SHARE_KEEP = 2;
 let SHARE_ON = true;                                    // machine_check turns it off where it needs a job left for you
-const forYou = j => j.urgency < 2 && jobTier(j) <= playerTier() && !(j.machine && ENGINE_KINDS.has(machineById(j.machine).kind));
+const forYou = j => j.urgency < 2 && jobTier(j) <= playerTier() && !(j.machine && ENGINE_KINDS.has(machineById(j.machine).kind)) && rankOk('you', j) && (!j.junior || playerRank() === 'junior');
 function leaveEnd(j) {
   if (!forYou(j) || j.released) return j.found;
   if (j.cargo === 'meals') return j.found + 60;
   if (j.cargo === 'stores') { const d0 = Math.floor(j.found / 1440) * 1440; return playerShiftOn(d0 / 1440 + 1) && j.found < d0 + DELIVERY_KEEP ? d0 + DELIVERY_KEEP : j.found; }   // the delivery (0.33.42)
-  let t = j.found, left = j.leave || CREW_LEAVE;
+  let t = j.found, left = j.leave || (realRepair(j) ? FAULT_LEAVE : CREW_LEAVE);
   for (let k = 0; k < 14 && left > 0; k++) {
     const d0 = Math.floor(t / 1440) * 1440;
     if (!playerShiftOn(d0 / 1440 + 1)) return t;         // your day off: the crew take it
@@ -14984,12 +15082,19 @@ function jobsHour(h) {
     if (j && (j.status === 'claimed' || heldForYou(j))) continue;
     if (!kind) { if (j) jobFinish(j, t, null); continue; }   // put right some other way: the job goes
     if (j) {
-      if (JOB_URGENCY[st] > j.urgency) { j.kind = kind; j.urgency = JOB_URGENCY[st]; j.parts = Array(JOB_TYPES[kind].parts).fill(MACHINE_KINDS[m.kind].part); j.found = Math.min(j.found, t); }
+      if (JOB_URGENCY[st] > j.urgency) {
+        if (kind !== 'service' && !j.cause) { const c = faultPick(m, h); if (c) j.cause = c.id; }   // a service gone on to a fault: its cause now (0.33.46)
+        j.kind = kind; j.urgency = JOB_URGENCY[st]; j.parts = faultParts(m, kind, faultCause(j)); j.found = Math.min(j.found, t);
+      }
       continue;
     }
-    const found = kind === 'service' ? t + 60 * Math.round(2 + 22 * schedU(m.seed, h, 9)) : t;
-    jobs.push({ id: m.id + '@' + h, machine: m.id, deck: m.deck, kind, urgency: JOB_URGENCY[st], posted: t, found, claimedBy: null,
-                parts: Array(JOB_TYPES[kind].parts).fill(MACHINE_KINDS[m.kind].part), status: 'open' });
+    const found = kind === 'service' ? t + 60 * Math.round(2 + 22 * schedU(m.seed, h, 9)) + (realFor(m, d) ? FIND_LATE : 0) : t;
+    // REAL_SHARE of them wore on unseen: found as a fault (the machine at the top of faulty), its cause picked now
+    const late = kind === 'service' && realFor(m, d) && schedU(m.seed, h, 856) < REAL_SHARE;
+    if (late) { const s = SHIP.machines[m.id]; s.cond = Math.min(s.cond, 49); s.state = machineState(s.cond); }
+    const kd = late ? 'repair' : kind, cause = kd === 'service' ? null : faultPick(m, h);
+    jobs.push({ id: m.id + '@' + h, machine: m.id, deck: m.deck, kind: kd, urgency: JOB_URGENCY[late ? 'faulty' : st], posted: t, found, claimedBy: null,
+                parts: faultParts(m, kd, cause), status: 'open', ...(cause ? { cause: cause.id } : {}), ...(late ? { late: true } : {}) });
   }
   const restock = (cargo, deck) => { if (!open.has('restock:' + cargo)) jobs.push({ id: 'restock-' + cargo + '@' + h, machine: null, deck, kind: 'restock', cargo, urgency: 1, posted: t, found: t, claimedBy: null, parts: [], status: 'open' }); };
   if (Object.keys(SHIP.hold).some(k => k !== 'meals' && SHIP.hold[k] > 0)) restock('stores', 5);
@@ -15006,8 +15111,11 @@ function jobsHour(h) {
   showHour(h, jobs);
   shareOut(t, jobs);
   // at most HOLD_MAX small jobs held for you: past that, the oldest go to the crew now (0.33.32)
+  // which are kept (0.33.45, foundation 24.4): section 24's worksBand() puts services first at New and Steady, repairs first at
+  // Trusted and Relied on; without it (or at Reliable), the newest first as before
+  const band = typeof worksBand === 'function' ? worksBand() : null, pref = band === 'new' || band === 'steady' ? 'service' : band === 'trusted' || band === 'relied' ? 'repair' : null;
   const held = jobs.filter(j => j.status === 'open' && !j.claimedBy && !j.leave && !j.cargo && j.found <= t && t < leaveEnd(j))
-    .sort((a, b) => b.found - a.found || (a.id < b.id ? -1 : 1));
+    .sort((a, b) => (pref ? (b.kind === pref) - (a.kind === pref) : 0) || b.found - a.found || (a.id < b.id ? -1 : 1));
   for (const j of held.slice(HOLD_MAX)) j.released = true;
   const todo = jobs.filter(j => (j.status === 'open' || j.status === 'waiting') && !j.claimedBy && j.found <= t && t >= leaveEnd(j) && !heldForYou(j))
     .sort((a, b) => b.urgency - a.urgency || a.found - b.found || (a.id < b.id ? -1 : 1));
@@ -15020,7 +15128,7 @@ function jobsHour(h) {
     const engine = j.machine && ENGINE_KINDS.has(machineById(j.machine).kind), tier = jobTier(j);
     for (const p of crew) {
       if (j.crew && p.id !== j.crew && t < j.found + 60) continue;   // a job placed for someone (SHOW_JOBS): theirs for its first hour
-      if ((busy.get(p.id) || 0) > t || jobCrew(p) !== (engine ? 'engine' : 'works') || (!engine && (CREW_TIER[p.rank] || 0) < tier)) continue;
+      if ((busy.get(p.id) || 0) > t || jobCrew(p) !== (engine ? 'engine' : 'works') || (!engine && (CREW_TIER[p.rank] || 0) < tier) || !rankOk(p, j)) continue;   // a job kept for a rank waits for one (0.33.45)
       const run = jobRun(p, j, t, missing.length * JOB_MAKE);
       if (!run) continue;
       for (const k of j.parts) if (SHIP.stores[k] > 0) SHIP.stores[k]--;
@@ -15034,6 +15142,7 @@ function jobsHour(h) {
   if (typeof eventScore === 'function' && coldCabinsHour(h)) eventScore('coldCabins', 1);
   // done jobs are kept two days, for the board's history
   SHIP.jobs = jobs.filter(j => j.status !== 'done' || j.doneAt > t - 2880);
+  if (typeof ladderTick === 'function') ladderTick(h);   // section 24's ladder, once a ship hour (0.33.45): it may reserve jobs (machinesNow is re-entry safe)
 }
 // ---- chores (0.33.19, the user's "more jobs for the job board") ----
 // Small jobs that don't wait for a machine to wear: lamps, vents, calibrations, deliveries between decks,
@@ -15137,7 +15246,7 @@ function showJob(day) {
 function shareOut(t, jobs) {
   const heldNow = j => j.status === 'open' && !j.claimedBy && !j.released && !j.cargo && !heldForYou(j) && forYou(j) && j.found <= t && t < leaveEnd(j);
   for (const j of jobs) {
-    if (j.shareSeen || j.status !== 'open' || j.claimedBy || j.found > t || j.cargo || heldForYou(j) || !forYou(j)) continue;
+    if (j.shareSeen || j.status !== 'open' || j.claimedBy || j.found > t || j.cargo || heldForYou(j) || !forYou(j) || realRepair(j)) continue;
     j.shareSeen = true;
     if (!SHARE_ON || j.released || ((machSeed(j.id) >>> 0) % SHARE_EVERY)) continue;
     const n = jobs.filter(x => x !== j && heldNow(x)).length;
@@ -15243,7 +15352,7 @@ function jobNote(j, step, o) { if (j.kind !== 'favour') simLater('job', { id: j.
 const abandonNote = j => { if (j.kind !== 'favour' && !j.workDone) simLater('jobAbandoned', { machine: j.machine || null, dept: null, id: j.id }); };
 function claimJob(id) {
   const j = jobsBoard().find(x => x.id === id);
-  if (!j || j.claimedBy || SHIP.jobs.some(x => x.claimedBy === 'you' && x.status === 'claimed' && x.kind !== 'favour') || playerTier() < jobTier(j) || (j.machine && ENGINE_KINDS.has(machineById(j.machine).kind))) return false;
+  if (!j || j.claimedBy || SHIP.jobs.some(x => x.claimedBy === 'you' && x.status === 'claimed' && x.kind !== 'favour') || (playerTier() < jobTier(j) && !heldForYou(j)) || !rankOk('you', j) || (j.machine && ENGINE_KINDS.has(machineById(j.machine).kind))) return false;
   j.claimedBy = 'you'; j.status = 'claimed'; j.start = shipNow(); delete j.segs; delete j.done; delete j.end; MACH_REV++; jobNote(j, 'take'); simFlush(); return true;   // no crew route left on it
 }
 function dropJob(id) {
@@ -15496,7 +15605,7 @@ function jobReserve(kind, day, at, slot = 1, o = {}) {
   if (old && old.claimedBy) return old.id;
   if (old) SHIP.jobs = SHIP.jobs.filter(j => j !== old);
   const busy = new Set(SHIP.jobs.filter(heldForYou).map(j => j.machine)), byId = machineById(kind);
-  const ok = m => !m.stub && panelPlace(m.id) && jobTier({ machine: m.id }) <= playerTier() && !ENGINE_KINDS.has(m.kind);
+  const ok = m => !m.stub && panelPlace(m.id) && jobTier({ machine: m.id }) <= (o.tier || playerTier()) && !ENGINE_KINDS.has(m.kind);   // o.tier: a test job's machine may be above yours (0.33.45)
   const all = machineList().filter(ok).sort((a, b) => (a.deck === 4 ? 0 : 1) - (b.deck === 4 ? 0 : 1) || (a.id < b.id ? -1 : 1));
   const d4 = all.filter(m => m.deck === 4), free = xs => xs.find(m => !busy.has(m.id));   // Deck 4 first, a free one first, the kind asked for first
   const pick = byId && ok(byId) ? byId : free(d4.filter(m => m.kind === kind)) || free(d4) || d4.find(m => m.kind === kind) || d4[0] || free(all.filter(m => m.kind === kind)) || free(all) || all[0];
@@ -15504,7 +15613,7 @@ function jobReserve(kind, day, at, slot = 1, o = {}) {
   SHIP.jobs = SHIP.jobs.filter(j => !(j.machine === pick.id && j.status === 'open' && !j.claimedBy && !j.reserved));   // its own ordinary job, if any: this one stands for it
   const id = 'reserve' + slot + ':' + pick.id + '@' + due;
   SHIP.jobs.push({ id, machine: pick.id, deck: pick.deck, kind: 'repair', urgency: 1, posted: due, found: due, until, reserved: slot, make: RESERVE_MAKE, makeMins: RESERVE_MAKE_MINS,
-                   claimedBy: null, parts: [MACHINE_KINDS[pick.kind].part, RESERVE_MAKE], status: 'open' });
+                   claimedBy: null, parts: [MACHINE_KINDS[pick.kind].part, RESERVE_MAKE], status: 'open', ...(o.train ? { train: o.train } : {}) });
   MACH_REV++; return id;
 }
 function jobReserved(slot) { const j = SHIP.jobs.find(x => x.reserved === slot && x.status !== 'done'); return j ? j.id : null; }
@@ -15602,7 +15711,7 @@ if (typeof device !== 'undefined' && device.addSection) device.addSection('jobs'
 // its place id or null. Take one with claimJob(id); finish it with finishJob(id); jobStops(job) gives the way there.
 function openJobs(forWho = 'you') {
   const you = forWho === 'you', tier = you ? playerTier() : hatchTier(forWho);
-  return jobsBoard().filter(j => !j.claimedBy && j.status !== 'waiting' && jobTier(j) <= tier && !(you && j.machine && ENGINE_KINDS.has(machineById(j.machine).kind)) && (you || !heldForYou(j))).map(j => {
+  return jobsBoard().filter(j => !j.claimedBy && j.status !== 'waiting' && (jobTier(j) <= tier || (you && heldForYou(j))) && rankOk(forWho, j) && !(you && j.machine && ENGINE_KINDS.has(machineById(j.machine).kind)) && (you || !heldForYou(j))).map(j => {
     const [title, where, state] = jobCard(j), m = j.machine && machineById(j.machine);
     const stops = jobStops(j).filter(x => x.step !== 'fetch'), main = j.kind === 'chore' ? stops[stops.length - 1] : j.kind === 'restock' ? stops[2] : stops[0];
     const place = main && main.places[0] || null, pl = placeById(place);
@@ -15721,7 +15830,7 @@ function jobCard(j) {
   const m = machineById(j.machine), K = MACHINE_KINDS[m.kind], room = (DECKS[m.deck].rooms[m.room] || {}).name;
   const n = machineList().filter(x => x.kind === m.kind && x.deck === m.deck).length > 1 ? ' ' + m.id.split('-').pop() : '';
   const state = j.status === 'waiting' ? j.why : (j.urgency === 2 ? 'failing: urgent' : JOB_WORD[j.kind]) + (who ? ', ' + who + ' on it' : heldForYou(j) ? ', asked for you' : '');
-  return [K.name + n, 'Deck ' + m.deck + (room ? ' · ' + room.toLowerCase() : ''), state, JOB_PRI[j.urgency]];
+  return [K.name + n + (faultShows(j) ? ' (' + faultShows(j) + ')' : ''), 'Deck ' + m.deck + (room ? ' · ' + room.toLowerCase() : ''), state, JOB_PRI[j.urgency]];   // a real fault says what everyone notices (0.33.46)
 }
 function drawJobBoard(t) {
   const { g: c, c: cv } = t.userData, w = cv.width, h = cv.height, now = shipNow() % 1440;
