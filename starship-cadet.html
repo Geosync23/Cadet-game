@@ -34776,7 +34776,7 @@ INTRO_STUB_SCRIPTS.introDinner = { title: 'Dinner with Torres', from: 'Zeke Torr
   { who: INTRO_ESCORT, text: 'Two years aboard. Day shift, tea and biscuits at one. Works never misses tea.' },
   { choice: [
     { text: 'Why coil three?', rel: { [INTRO_ESCORT]: 1 }, reply: { who: INTRO_ESCORT, text: 'She hums a half-step flat. Like she\'s thinking about something.' } },
-    { text: 'What\'s a normal day?', reply: { who: INTRO_ESCORT, text: 'Board at eight, jobs, tea, jobs, dinner. Then the ship\'s yours till ten.' } }] },
+    { text: 'What\'s a normal day?', reply: { who: INTRO_ESCORT, text: 'Board at nine, jobs, tea, jobs, dinner. Then the ship\'s yours till ten.' } }] },
   { who: INTRO_ESCORT, text: 'Ah. Here\'s the Chief. Sit up straight.' }] };
 if (!MEETING_SCRIPTS.introDinner) MEETING_SCRIPTS.introDinner = { ...INTRO_STUB_SCRIPTS.introDinner, gist: INTRO_MEETINGS.introDinner.gist };
 // Torres's tour (0.42.20, the user: "a proper introduction to the ship and to himself, the whole way"; paced in 0.42.21b,
@@ -35100,6 +35100,7 @@ const INTRO_ARROWS = {
   call: { deck: 3, room: 'B', label: 'Call home from the booths' },   // Day 0's call-home card, when you tap Track it (introCallTick)
 };
 INTRO_ARROWS.call.label = (typeof LINES !== 'undefined' && Array.isArray(LINES['tip.callhome.goal']) && LINES['tip.callhome.goal'][0] && LINES['tip.callhome.goal'][0].text) || INTRO_ARROWS.call.label;
+const INTRO_EAT_MINS = 30;                                 // the servery arrow stays up this long after you're told to eat, at most (R3: never over the whole evening's bunk arrow and call card)
 const INTRO_ARROW_LABELS = new Set(Object.values(INTRO_ARROWS).map(a => a.label));
 function introArrowTold(id) { if (introOn() && INTRO_ARROWS[id] && SHIP.intro.done['told:' + id] === undefined) SHIP.intro.done['told:' + id] = Math.floor(shipNow()); }
 function introArrowClear() {
@@ -35115,7 +35116,7 @@ function introArrowWant(now) {
   if (P.tray || ACT && (ACT.kind === 'queue' || ACT.kind === 'eat')) I.done['ate:last'] = Math.floor(now);   // the last minute you had food in hand (or were queueing, eating)
   if (I.done['arrow:eat'] === undefined) {
     const at = typeof I.done['chief:end'] === 'number' ? I.done['chief:end'] : I.done['d1-dinner:said'];   // told to eat (null: walked away from the Chief)
-    if (typeof at === 'number') { if (late || d > 1 || I.done['ate:last'] !== undefined && I.done['ate:last'] >= at - 60) fin('eat'); else return 'eat'; }
+    if (typeof at === 'number') { if (late || d > 1 || now >= at + INTRO_EAT_MINS || I.done['ate:last'] !== undefined && I.done['ate:last'] >= at - 60) fin('eat'); else return 'eat'; }
     else if (d > 1 || d === 1 && late) fin('eat');
   }
   if (d > 1 || typeof careerClockedIn !== 'function') { fin('clock'); fin('board'); return null; }
