@@ -29,3 +29,4 @@ Build master 5 (BM5, session_01DbBJ7iK6TrrADyEw7qbCsQ) on claude/p5-cand-pt1; re
 - trial p4 (BM6 scratch aae6378, the expected final) = 0.63.1 + C2 bb4423c + X 98e93bf + P 587a2cd + O4 7a2bc5d + O5 2d213b1 (0.42.63, with R3) + T 574da73 + U 55b2499 + A5 e55cf31 (0.47.9 bubbles, with R3) + W 97fa9ae: merges clean, verify_merge 0 problems, bake 9022 lines / 35 traditions, NAMES OK.
 - ~19:44 lead 14: hold the final full run for O5's follow-up (the Chief walks up and joins after you're auto-seated at the Day 0 table). Meanwhile p4 runs (p3's day_check stopped after day 2; p3 player_check finishing).
 - p4 cadet_test vs 0.63.1: as p3 (all explained above) except b_wander10s, i_tap0, j_steer1, which differ from p3 only inside the speech bubble's box (e.g. 263-541 x 518-624) = A5 0.47.9's bubble placement (placed after the camera moves). Explained.
+- p3 player_check OK (1883 s; X 0.71.1 + C2's 09:00: the job-loop FAIL U saw on cb7d30a is not there).
