@@ -1,5 +1,7 @@
 # Pillar 5 reviews (reviewer R, session_01MSLjUdmeVJetxFhh9PqzLt)
 
+Who gets verdicts (lead 11, 09:27): PASS → the seat and BM4 only; FAILs and design clashes → also the lead.
+
 How: behaviour, save and schedule changes in depth (against the piece's approved page in plans/mechanics/ on claude/p5-design, determinism, old saves load, phones first, cadet_test differences explained); content and test-only changes skimmed. Verdicts newest first.
 
 ## Passing tips
