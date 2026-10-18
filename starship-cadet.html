@@ -252,7 +252,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.47.5
+   STARSHIP CADET: CSV Wren                           build 0.47.6
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7337,17 +7337,21 @@ DECKS[5].places.push({ id: '5-delivery-1', type: 'event', event: 'delivery', at:
 // shown by the trace { id: 'nameYours', day }. 5-beam-1: where you paint (under the west end, facing it); 5-beam-2..8: the
 // Works crew watching, facing the same spot. All type 'event', event 'name-beam'.
 const BEAM = { room: 'w', along: 7.0, len: 7.8, y: 2.42, yours: 3.6,   // the bay's hull wall runs from along 3 (the Chief's office) to 11
-  past: ['Okafor', 'Lindgren', 'Baptiste', 'Hale', 'Moreau', 'Iversen', 'Quill', 'Abara', 'Novak', 'Reyes', 'Kaur', 'Dunmore', 'Pike', 'Vasquez', 'Ito', 'Brandt'] };
+  past: ['Ada', 'Lars', 'Mireille', 'Tom', 'Celine', 'Ivar', 'Juno', 'Kemi', 'Petra', 'Luis', 'Harpreet', 'Gil', 'Rosa', 'Mateo', 'Yuki', 'Otto'],   // 0.47.6 (playtest): first names, all of them
+  // 0.47.6 (playtest): the west end (the first 2.5 m, 650 of the canvas's 2048 px) is kept for the four newest, a 2 x 2 grid: slot 0 is
+  // yours (DECK_DRESS.nameYours), slots 1-3 the Works hands who join later (DECK_DRESS.nameNew, the traces { id: 'nameNew', day, name })
+  slots: [[3.72, .085], [4.98, .085], [3.72, -.085], [4.98, -.085]], clear: 650 };
+const firstName = n => String(n || '').trim().split(/\s+/)[0] || 'Cadet';
 Object.assign(WALL_KIT, {
   nameBeam(g) {
-    const names = BEAM.past.slice(0, 8).concat(dressNames('works', 14), BEAM.past.slice(8)), C = ['#f4efe2', '#e8c06a', '#7fd6c8', '#f0a37a'];
+    const names = BEAM.past.slice(0, 8).concat((typeof ROSTER === 'undefined' ? [] : ROSTER.filter(p => !p.player && p.dept === 'works').slice(0, 14).map(p => firstName(p.name))), BEAM.past.slice(8)), C = ['#f4efe2', '#e8c06a', '#7fd6c8', '#f0a37a'];
     const t = tex(2048, 128, (c, w, h) => {
       c.fillStyle = '#3a4248'; c.fillRect(0, 0, w, h);
       c.fillStyle = 'rgba(0,0,0,.18)'; for (let x = 0; x < w; x += 196) c.fillRect(x, 0, 3, h);   // the plate seams
-      let x = 260, row = 0;                              // the west end is left clear for the newest names (yours)
+      let x = BEAM.clear, row = 0;                       // the west end is left clear for the newest names (yours, and later hands')
       names.forEach((n, k) => {
         c.font = (k % 3 ? 'italic 600 ' : '700 ') + (row ? 40 : 42) + 'px Georgia,serif'; const tw = c.measureText(n).width;
-        if (x + tw > w - 20) { row++; x = 260 + (row % 2) * 60; }
+        if (x + tw > w - 20) { row++; x = BEAM.clear + (row % 2) * 60; }
         if (row > 1) return;
         c.fillStyle = C[k % 4]; c.fillText(n, x, row ? 108 : 52); x += tw + 36 + (k * 7) % 23;
       });
@@ -7361,6 +7365,14 @@ DECKS[5].places.push(
   { id: '5-beam-1', type: 'event', event: 'name-beam', at: [13, 0], xy: [13.6, .75], face: 180, pose: 'stand', anim: 'work', room: 'w' },
   ...[[14, 1], [15, 1], [16, 1], [17, 1], [13, 2], [12, 3], [13, 3]].map(([c, r], k) => ({ id: '5-beam-' + (k + 2), type: 'event', event: 'name-beam', at: [c, r], xy: [c + .5, r + .5],
     face: Math.round(Math.atan2(13.6 - c - .5, .75 - r - .5) * 180 / Math.PI), pose: 'stand', anim: 'talk', room: 'w' })),
+);
+// 0.47.6 (playtest): Sunrise stretch moves to the garden: 3-stretchg-1 is the leader's, on the east side facing the group; 3-stretchg-2..8
+// stand in two loose rows across the open floor between the beds (rows 7-9), facing the leader. Type 'event', event 'stretch-garden' (its own tag, so they stay unused until the traditions
+// engineer points Sunrise stretch at them: the tradition fills its spots from every place tagged 'sunrise-stretch', the old 3-stretch-*)
+DECKS[3].places.push(
+  { id: '3-stretchg-1', type: 'event', event: 'stretch-garden', at: [11, 8], xy: [11.35, 8.5], face: 'w', pose: 'stand', anim: 'stretch', room: 'G' },
+  ...[[9, 7], [8, 7], [7, 7], [8, 8], [9, 9], [8, 9], [7, 9]].map(([c, r], k) => ({ id: '3-stretchg-' + (k + 2), type: 'event', event: 'stretch-garden', at: [c, r],
+    xy: [c + .5 + (r === 8 ? .2 : 0), r + .5], face: Math.round(Math.atan2(11.35 - c - .5, 8.5 - r - .5) * 180 / Math.PI), pose: 'stand', anim: 'stretch', room: 'G' })),
 );
 // 0.38.31: the spice shelf (Spice shelf supper): a plank on the mess hall's galley wall over the drinks station, its jars
 // drawn by DECK_DRESS.spiceJars (SPICES.slots: x along the shelf, up to 12). The postcard box and a writing ledge (Postcard
@@ -7817,10 +7829,21 @@ const DECK_DRESS = {
   } },
   // 0.38.30: nameYours: a lasting trace from Name on the beam: your name, freshly painted at the beam's west end. 1 draw call
   nameYours: { deck: 5, what: 'your name, freshly painted on the Works bay\'s beam', make(g) {
-    const s = dressAt(g, BEAM.room, 'n', BEAM.yours), name = (SHIP.player && SHIP.player.name) || 'Cadet';
-    const t = tex(256, 64, (c, w, h) => { c.fillStyle = '#f8f4ea'; c.font = '700 40px Georgia,serif'; const tw = Math.min(w - 8, c.measureText(name).width); c.fillText(name, (w - tw) / 2, 46, w - 8); });
-    const p = new THREE.Mesh(new THREE.PlaneGeometry(1.0, .25), new THREE.MeshBasicMaterial({ map: t, transparent: true, toneMapped: false })); p.position.set(0, BEAM.y, .132); s.add(p);
-    return { t: 'Your name', x: 'Your name on the beam, the paint still bright, at the end of the row. Every new hand gets one. Yours will fade like the others, slowly, and somebody will touch it up.', wall: [BEAM.room, 'n', BEAM.yours], y: BEAM.y, w: 1.0, h: .4 };
+    const [sa, sy] = BEAM.slots[0], s = dressAt(g, BEAM.room, 'n', sa), name = firstName(SHIP.player && SHIP.player.name);   // 0.47.6: your first name, in slot 0
+    const t = tex(256, 40, (c, w, h) => { c.fillStyle = '#f8f4ea'; c.font = '700 32px Georgia,serif'; const tw = Math.min(w - 8, c.measureText(name).width); c.fillText(name, (w - tw) / 2, 30, w - 8); });
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(1.2, .1875), new THREE.MeshBasicMaterial({ map: t, transparent: true, toneMapped: false })); p.position.set(0, BEAM.y + sy, .132); s.add(p);
+    return { t: 'Your name', x: 'Your name on the beam, the paint still bright, at the end of the row. Every new hand gets one. Yours will fade like the others, slowly, and somebody will touch it up.', wall: [BEAM.room, 'n', sa], y: BEAM.y + sy, w: 1.2, h: .2 };
+  } },
+  // 0.47.6 (playtest): nameNew: the Works hands who joined after you, painted beside your name (slots 1-3, the newest three, in the
+  // order they came). Every { id: 'nameNew', day, name } in SHIP.traces, on one canvas: 1 draw call
+  nameNew: { deck: 5, what: 'the newest Works hands\' names, painted on the beam beside yours', make(g) {
+    const list = (SHIP.traces || []).filter(x => x && x.id === 'nameNew' && x.name).slice(-3), [a0] = BEAM.slots[1], [a1] = BEAM.slots[2], mid = (a0 + a1) / 2;
+    const s = dressAt(g, BEAM.room, 'n', mid), span = a0 - a1 + 1.2;   // one plane over slots 1-3 (slot 0's corner stays clear)
+    const t = tex(512, 80, (c, w, h) => { c.font = '700 32px Georgia,serif'; list.forEach((x, k) => { const [sa, sy] = BEAM.slots[k + 1], n = firstName(x.name);
+      const cx = (sa - mid + span / 2) / span * w, tw = Math.min(w * 1.2 / span - 8, c.measureText(n).width); c.fillStyle = ['#f8f4ea', '#e8c06a', '#7fd6c8'][k];
+      c.fillText(n, cx - tw / 2, sy > 0 ? 30 : 70, w * 1.2 / span - 8); }); });
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(span, .375), new THREE.MeshBasicMaterial({ map: t, transparent: true, toneMapped: false })); p.position.set(0, BEAM.y, .129); s.add(p);   // 3 mm behind your name's plane
+    return { t: 'New names', x: 'The newest names on the beam, beside yours: ' + list.map(x => firstName(x.name)).join(', ') + '. The paint is still bright.', wall: [BEAM.room, 'n', mid], y: BEAM.y, w: span, h: .4 };
   } },
   partyLounge: { deck: 3, what: 'party decorations in the bow lounge: bunting, balloons and a banner', make(g, o) {
     const s = dressAt(g, 'L', 'floor', 0, 0), C = ['#c45a3f', '#e8c06a', '#5fd6c6'], y = 2.2;
@@ -7945,7 +7968,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.47.5';                           // keep in step with the header's build line
+const GAME_BUILD = '0.47.6';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
