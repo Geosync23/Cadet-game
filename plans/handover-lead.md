@@ -678,4 +678,4 @@ Read: CLAUDE.md, TEAM.md (Lead line, "Released" and "Step 3" lines), plans/brief
 - **Ship-wide events plan (plan only, nothing built):** v3 https://claude.ai/artifact/5fAouaAV1K1qptqPYez9rt (claude/p5-design 7034c2d plans/events-plan.html + events-pitch-tng.html published as a file in the same artifact). 20 events once each; 9 inside Days 1-26. Waiting on the user's approval + 9 open questions at the bottom. Designer D2 session_01VAVLL8kQNeQwiZ7TJZ6GMF (~45%).
 - **Step 3 additions already in brief-p5s3.md:** bridge room locked until invited; ship health ~75 at start; jobs raise one or more meters; turn-in shows rep + meter points; Tiles paused notice. NB the events plan moves the bridge invite to "the morning after the first event you helped in" (Pillar 6) — Step 3's placeholder trigger stands until then.
 - **Weekly allowance:** 'allowed_warning' (resets ~Oct 22). Keep seats lean; idle seats cost nothing but archive finished ones.
-- ~00:15 lead 14 starting lead 15 (depth 5).
+- ~00:15 lead 14 started lead 15 session_01TfFnwP88RmL4MhCWAMdSGn (depth 5). Lead 14 stays reachable until lead 15 says hello.
