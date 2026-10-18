@@ -11990,7 +11990,7 @@ function squeezeStep() {                                 // each frame: slow dow
 const SHUFFLE_STEP = .5, SHUFFLE_SHORT = .25, SHUFFLE_V = 2, SHUFFLE_NEAR = .45, SHUFFLE_SAY = 60000, SHUFFLE_COOL = 1500;
 const SHUFFLE_WORDS = ['Oh, sorry.', 'After you.', 'Excuse me.', 'Oops, mind out.', 'Sorry, go ahead.'];
 const SHUFFLE = new Map(), SHUFFLE_SAID = new Map(), SHUFFLE_DONE = new Map();   // crew agent -> { x, z, left } (the step still to take); person id -> when they last said it; crew agent -> when their step ended
-const shuffleable = a => !!a && !a.settled && !a.esc && !(a.talking > 0) && !(a.p && a.p.player) && a.pose !== 'sit' && a.pose !== 'lie';
+const shuffleable = a => !!a && !a.settled && !(a.esc && !/^follow\|/.test(a.esc)) && !(a.talking > 0) && !(a.p && a.p.player) && a.pose !== 'sit' && a.pose !== 'lie';
 const shuffleStep = (b, c) => {                           // from tile b to the next tile c: no wall between (a diagonal: open round one corner)
   const di = c[0] - b[0], dj = c[1] - b[1]; if (Math.abs(di) > 1 || Math.abs(dj) > 1) return false;
   if (!di || !dj) return edgeOpen(b[0], b[1], c[0], c[1], null);
@@ -31917,7 +31917,7 @@ const INTRO_WEEK = [
   { id: 'd1-wash', day: 1, at: 6 * 60, until: 6 * 60 + 30, who: 'tomas', where: { deck: 4, room: 'Bunk 1' }, settle: 'washed' },
   { id: 'd1-briefing', day: 1, at: 7 * 60 + 50, until: 8 * 60 + 5, who: 'calder', also: [INTRO_ESCORT], where: { deck: 5, room: 'Works bay' }, meeting: 'introBriefing', settle: 'team',
     flags: ['intro.device', 'met.calder'] },   // if you missed them on Sunday, Torres hands you the device here
-  { id: 'd1-shadow', day: 1, at: 8 * 60 + 5, until: 12 * 60, who: INTRO_ESCORT, where: { deck: 5, room: 'Works bay' }, escort: 'follow', job: 'reserved:1', settle: 'shadow' },   // he stays at your side and talks you through it (introJobLines); the arrow shows the way
+  { id: 'd1-shadow', day: 1, at: 8 * 60 + 5, until: 13 * 60, who: INTRO_ESCORT, where: { deck: 5, room: 'Works bay' }, escort: 'follow', job: 'reserved:1', settle: 'shadow' },   // he stays at your side and talks you through it (introJobLines); the arrow shows the way
   { id: 'd1-lead', day: 1, at: 13 * 60, until: 16 * 60 + 30, who: INTRO_ESCORT, where: { deck: 5, room: 'Works bay' }, escort: 'follow', job: 'reserved:2', settle: 'lead' },
   { id: 'd1-dinner', day: 1, at: 18 * 60, until: 19 * 60, who: 'brennan', where: { deck: 3, room: 'Mess hall' }, settle: 'eat' },
   { id: 'd2-solo', day: 2, at: 7 * 60 + 45, until: 8 * 60, who: 'calder', where: { deck: 5, room: 'Works Chief\'s office' }, meeting: 'introSoloJob', settle: 'solo' },
@@ -32006,14 +32006,37 @@ function introWriterLines(flagKey, id = SHIP.intro.escort) {
     return out.length ? out : null;
   } catch (e) { return null; }
 }
+// Zeke the trainer (0.42.31-0.42.32, the lead; head writer 0607's lines on these keys, a76e232): while he follows you
+// (Day 1), each step of any job adds walk.train.<job>.<step> (job: the board's chore or kind through INTRO_TRAIN_JOB, so
+// Day 1's held repairs are 'fault'; step: take, fetch, make, at (the panel), done, turnin); and walking together, between
+// steps and between jobs, walk.follow.<n> in order, one every INTRO_FOLLOW_GAP, never repeated (the count is saved)
+const INTRO_TRAIN_JOB = { repair: 'fault', restock: 'cart', inspect: 'round' }, INTRO_TRAIN_STEP = { take: 'take', 'stop.fetch': 'fetch', 'stop.make': 'make', 'stop.job': 'at', done: 'done', turnin: 'turnin' };
+const INTRO_FOLLOW_GAP = 8000;                            // real ms between them
+function introFollowing() {
+  if (!introOn() || typeof ROSTER === 'undefined') return false;
+  const p = ROSTER.find(x => x.id === SHIP.intro.escort), e = p && escortPlan(p, shipNow()); return !!e && e.mode === 'follow';
+}
+function introTrainLines(n, key) {
+  const step = INTRO_TRAIN_STEP[key]; if (!step || !n.job || !introFollowing()) return null;
+  return introWriterLines('walk.train.' + (INTRO_TRAIN_JOB[n.job] || n.job) + '.' + step);
+}
+function introFollowTick() {
+  if (!introFollowing() || DIALOGUE || performance.now() < (INTRO_UI.sayEnd || 0) || performance.now() < INTRO_UI.next) return;
+  const a = introWalker(), now = performance.now(); if (!a || a.pose !== 'walk' || Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) > 4) return;   // walking together
+  if (now - (INTRO_UI.followAt || 0) < INTRO_FOLLOW_GAP) return;
+  INTRO_UI.followAt = now; const k = (SHIP.intro.done['follow:n'] || 0) + 1, l = introWriterLine('walk.follow.' + k);
+  if (l && typeof bubbleSay === 'function') { SHIP.intro.done['follow:n'] = k; bubbleSay(a.h, l[0], 4.5); INTRO_UI.next = now + INTRO_TOUR_GAP; }
+}
 function introJobNote(n) {
   if (!introOn() || !n) return;
   const key = n.step === 'stop' ? 'stop.' + n.tag : n.step;
   // the writers' first (kind week1, flag walk.job.<step> for slot 1, walk.job2.<step> and walk.job3.<step> for the
   // others; step: take, fetch, make, panel, done, turnin), else the stand-ins, else nothing
   let say = null;
-  if (n.reserved >= 1 && n.reserved <= 3) say = introWriterLines('walk.job' + (n.reserved === 1 ? '' : n.reserved) + '.' + ({ 'stop.job': 'panel' }[key] || key.replace('stop.', '')));
+  const fk = 'walk.job' + (n.reserved === 1 ? '' : n.reserved) + '.' + ({ 'stop.job': 'panel' }[key] || key.replace('stop.', ''));   // walk.job<slot>.<step>
+  if (n.reserved >= 1 && n.reserved <= 3) say = introWriterLines(fk);
   if (!say) say = INTRO_JOB_LINES[n.reserved] && INTRO_JOB_LINES[n.reserved][key];
+  const tr = introTrainLines(n, key); if (tr) say = (say || []).concat(tr);   // (0.42.31) Zeke the trainer: on any job while he's with you
   if (say && typeof introSay === 'function') introSay(say);
   if (n.reserved === 1 && n.step === 'take' && SHIP.device && SHIP.device.tipsSeen) for (const k of ['board', 'machine', 'turnin']) { if (typeof tipSeen === 'function') tipSeen(k); else SHIP.device.tipsSeen[k] = true; }   // Torres teaches these (section 19's tipSeen when it's there)
   if (n.step !== 'turnin' || !(n.reserved === 1 || n.reserved === 2)) return;
@@ -32100,15 +32123,25 @@ function introDone(id, at = Math.floor(shipNow())) {
 }
 // the steps move on at minute t: here = { deck, tile } (the player), or null when the player isn't anywhere useful.
 // On paper the tests pass `here` themselves; wave 2's frame tick passes the player's.
+const INTRO_WITH = 10;                                   // tiles: he's with you
+function introWithEscort(here) {                         // the real game only: the escort on your deck, near you
+  const a = typeof introWalker === 'function' ? introWalker() : null;
+  return !!(a && here && typeof deckDef !== 'undefined' && here.deck === deckDef.num && Math.max(Math.abs(cellAt(a.x, a.z)[0] - here.tile[0]), Math.abs(cellAt(a.x, a.z)[1] - here.tile[1])) <= INTRO_WITH);
+}
 function introAdvance(t, here) {
   const I = SHIP.intro; if (!introOn()) return;
   for (let guard = 0; guard < 40 && I.step; guard++) {    // the evening, one step at a time
     const st = introStepById(I.step), at = introAbs(st.day, st.at);
     if (t < at) break;
     const cp = st.checkpoint, f = st.fallback || {};
+    const nx = INTRO_STEPS[INTRO_STEPS.indexOf(st) + 1];   // (0.42.31) a lead step on a deck you've ridden on from, to the next step's deck: done (the lift's, passed between two of its minutes)
     const there = !cp || here && here.deck === cp.deck && introRoomAt(here.deck, here.tile) === cp.room
-      && Math.max(Math.abs(here.tile[0] - cp.tile[0]), Math.abs(here.tile[1] - cp.tile[1])) <= INTRO_REACH;
+      && Math.max(Math.abs(here.tile[0] - cp.tile[0]), Math.abs(here.tile[1] - cp.tile[1])) <= INTRO_REACH
+      || !!(cp && here && st.mode === 'lead' && here.deck !== cp.deck && nx && nx.checkpoint && nx.checkpoint.deck === here.deck);
     if (there) { introDone(st.id, Math.max(at, Math.floor(t))); continue; }
+    // (0.42.31, the user on 0.60.6: Zeke already in the mess, not with you off the lift) his own steps never time out while
+    // he's with you (on your deck, within INTRO_WITH tiles): you're lingering together; until 19:00, then as before
+    if (st.who === I.escort && f.until === undefined && t < introAbs(0, 19 * 60) && introWithEscort(here)) { I.near = [I.near ? I.near[0] : 99, Math.floor(t)]; break; }
     // the wait counts from when the step became yours, or from the last minute you got nearer to it than the minute
     // before, on its deck (so nobody on their way loses a step); once you've missed one, he waits only 5 minutes at
     // each until you catch up (so the evening still ends by 20:00 if you never come)
@@ -32373,6 +32406,7 @@ function introLines(step) {
 }
 function introSay(lines) {                                // his lines, one now and the rest a few seconds apart
   INTRO_UI.said.forEach(simClear); INTRO_UI.said = [];
+  INTRO_UI.sayEnd = performance.now() + (lines || []).length * 4800 + 3000;   // (introFollowTick waits for them)
   (lines || []).forEach((text, i) => INTRO_UI.said.push(simTimeout(() => { const a = introWalker(); if (a && typeof bubbleSay === 'function') bubbleSay(a.h, text, 4.5); }, i * 4800)));
 }
 // A0: the shuttle's manifest, before the fade-in. The ship's clock holds at 17:30 (INTRO_START) until you've typed your name.
@@ -32584,7 +32618,7 @@ function introTick() {
   // his lines for a step once its time has come and no meeting is on ("I'm on Four if you need me" waits for 19:00)
   const cur = introStepById(I.step);
   if (I.step !== INTRO_UI.step && !DIALOGUE && (!cur || Math.floor(shipNow()) >= introAbs(cur.day, cur.at))) { INTRO_UI.step = I.step; }   // ('free' said walk.free here until 0.42.27: his goodnight, introNightTick, says it now)
-  introTourTick(); introNightTick(); introBedTick(); introTernTick(); introBeatTick();
+  introTourTick(); introNightTick(); introBedTick(); introTernTick(); introBeatTick(); introFollowTick();
   // the goal arrow points at him while he's leading you (section 15b's setGoal), and is cleared when he lets you go
   const st = introStep(), lead = !DIALOGUE && introEscorting(st);   // while he's yours, not over a meeting
   if (lead) {
