@@ -156,7 +156,16 @@ def m3d_part(g):
         else: print('  (the drill places are not in this build: stops skipped)')
         check(a.get('status', [None])[0] == 'done', f"m3d Day {d}: not over at 15:15")
         check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), f'm3d Day {d}: differs the second time')
-PARTS['m3d'] = m3d_part
+def m3d_jump(g):
+    # a drill you never came to, then a jump to a later day (a test skip, a long sleep): closed on the next tick, quietly
+    r = g.ev(f"""(() => {{ ({M3D_RUN.replace('run(t0 + 893', 'false && run(t0 + 893').replace('run(t0 + 903, t0 + 920);', '')})(3); const j = drillJobOf(3); const before = j && j.status;
+      setShipNow(10 * 1440 + 780); for (const f of WORK_TICKS) try {{ f(shipNow(), false); }} catch (e) {{}}
+      return [before, j && j.status, SHIP.jobs.filter(x => x.kind === 'drill' && x.status !== 'done').length]; }})()""")
+    print('  24c drill, missed then a jump to Day 11:', r)
+    check(r[0] == 'claimed' and r[1] == 'done' and r[2] == 0, f"m3d: a missed drill is closed after a jump {r}")
+def m3d_both(g):
+    m3d_part(g); m3d_jump(g)
+PARTS['m3d'] = m3d_both
 
 # 24c the inspection (seat M1): Thursday 06:30. Each set of items gives its remark (nod, one, two, none); in the bunk
 # room it's said, away it's Mail at 07:00; turning up (or a nod while out) is the row's use; none on a day off
