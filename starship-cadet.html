@@ -241,7 +241,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.36.82
+   STARSHIP CADET: CSV Wren                           build 0.36.83
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7591,7 +7591,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.36.82';                           // keep in step with the header's build line
+const GAME_BUILD = '0.36.83';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -29722,9 +29722,9 @@ function socMustGo(p, t = shipNow()) {                   // -> { why: 'shift' | 
   if (typeof planDay !== 'function') return null;
   const d = Math.floor(t / 1440) + 1, m = t - (d - 1) * 1440, w = typeof whereIs === 'function' ? whereIs(p, t) : null;
   if (!w || w.escort || w.visit) return null;            // with you (section 21's escort) or on a visit: not going anywhere
-  const segs = planDay(p, d).concat(m > 1440 - TALK_GO ? planDay(p, d + 1).map(s => ({ ...s, from: s.from + 1440 })) : []);
+  const segs = planDay(p, d).concat(m > 1440 - TALK_GO ? planDay(p, d + 1) : []);   // plan times are ship minutes (eventPlan's are from midnight)
   for (const s of segs) {
-    if (s.from <= m || s.from > m + TALK_GO) continue;
+    if (s.from <= t || s.from > t + TALK_GO) continue;
     if (s.act === 'work' && w.act !== 'work' && !['tea', 'toilet', 'hands'].includes(s.tag)) return { why: 'shift' };
     if (s.act === 'sleep' && w.act !== 'sleep') return { why: 'bed' };
   }
