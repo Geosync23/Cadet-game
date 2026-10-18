@@ -35120,7 +35120,7 @@ function trainTick(now) {                                // once a ship minute i
     }
     return;
   }
-  if (c.st === 'held') return;                          // waiting on worksEscortEnd (the teacher stays with you)
+  if (c.st === 'held') { if (!worksCaseOpen(c.j)) worksEscortEnd(c.id); return; }   // waiting on worksEscortEnd (the teacher stays with you), or its case closing
   if (j && j.status === 'done' && j.doneBy === 'you') { worksDone(row.id, now); return; }
   if (!j || j.status === 'done' || (!heldForYou(j) && j.claimedBy !== 'you')) c.st = 'again';
 }
@@ -35138,7 +35138,8 @@ function worksTrained(id, t = shipNow()) {               // trained: the Trainin
 }
 // your training job turned in: trained, unless something holds the teacher with you (worksEscortHold: the designer's
 // Day 5, where Torres's scanner lesson runs on into the P3 training case); worksEscortEnd(id) then trains you
-function worksDone(id, t) { const c = SHIP.works && SHIP.works.cur; if (c && c.id === id && c.hold) { c.st = 'held'; return; } worksTrained(id, t); }
+const worksCaseOpen = jobId => { const C = SHIP.works && SHIP.works.cases; return !!(C && Array.isArray(C.open) && C.open.some(x => x && x.job === jobId)); };   // 24k's case on that job still open
+function worksDone(id, t) { const c = SHIP.works && SHIP.works.cur; if (c && c.id === id && c.hold && worksCaseOpen(c.j)) { c.st = 'held'; return; } worksTrained(id, t); }   // held only while its case is still open
 function worksEscortHold(id) { const c = SHIP.works && SHIP.works.cur; if (!c || c.id !== id || !/^(watch|do|meet|ask|again)$/.test(c.st)) return false; c.hold = true; return true; }
 function worksEscortEnd(id) {
   const c = SHIP.works && SHIP.works.cur; if (!c || c.id !== id) return false;

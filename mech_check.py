@@ -34,7 +34,10 @@ TRAIN = r"""((id) => {
   W.log.push(['earlier', 1, 0, 'service']);                 // a job of yours already turned in (Day 1's shadow shift, for m1)
   for (const r of CAREER_LADDER.slice(0, CAREER_LADDER.indexOf(row))) { W.tr[r.id] = 1; W.use[r.id] = 9; (W.op[1] = W.op[1] || []).push(r.id); }   // everything before it, done
   if (row.needs) for (const n of [].concat(row.needs)) { if (n.flag) flagSet(n.flag, 1); if (n.rep) W.xp = 999; }
-  const seen = [], doJob = jid => { if (!claimJob(jid)) return false; const j = SHIP.jobs.find(x => x.id === jid); jobStops(j).forEach((s, k) => jobStepDone(jid, k)); return turnInJob(jid); };
+  const seen = [], doJob = jid => { if (!claimJob(jid)) return false; const j = SHIP.jobs.find(x => x.id === jid);
+    const cs = SHIP.works && SHIP.works.cases && (SHIP.works.cases.open || []).find(c => c.job === jid);   // a head-scratcher (24k): call it right first
+    if (cs && typeof caseCall === 'function') caseCall(cs.id, cs.cause);
+    jobStops(j).forEach((s, k) => jobStepDone(jid, k)); return turnInJob(jid); };
   let teacher = null, yours = null;
   for (let m = 360; m < 1020; m += 10) {
     const t = (d - 1) * 1440 + m; setShipNow(t); machinesNow(); worksCareerTick(t);
