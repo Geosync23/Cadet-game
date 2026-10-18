@@ -2,7 +2,7 @@
 # Checks leave, missed shifts and being let go (the career engineer, 0.61.x; design-doc "Leave, missed shifts and
 # being let go"), on paper: each scenario steps ship days, calling the game's own functions at the hours they'd run
 # (careerTick, the shift's start note, repairs as section 20 scores them, Sunday's repWeek), with no walking.
-#   leave: 3 days to start, one more every 4 ship weeks, at most 5; booking by 07:30 that day, cancelling gives it back;
+#   leave: 3 days to start, one more every 4 ship weeks, at most 5; booking by 08:30 that day (07:30 before the 09:00 shift, 0.44.14), cancelling gives it back;
 #     a leave day is a day off to playerShiftOn (so to the shift and the held jobs)
 #   (a) a diligent player, and a casual one (late twice a week, a missed day a fortnight), never get a summons
 #   (b) a player taking all their leave, and sick days, never drops on those days and never gets a summons
@@ -98,9 +98,9 @@ with sync_playwright() as pw:
     r = ev("""(() => { SHIP.career = null; const at = (d, m) => { SHIP.time.day = d; SHIP.time.min = m; return (d - 1) * 1440 + m; };
       careerTick(at(1, 600)); const c = SHIP.career, out = { start: c.l };
       out.book = careerBook(3, at(2, 1200)); out.after = c.l; out.offOn3 = !playerShiftOn(3); out.weekend = careerCanBook(6, at(2, 1200));
-      out.late = careerCanBook(4, at(4, 451)); out.early = careerCanBook(4, at(4, 449));
+      out.late = careerCanBook(4, at(4, 511)); out.early = careerCanBook(4, at(4, 509));
       out.cancel = careerBook(3, at(3, 400)); out.back = c.l; out.onAgain = playerShiftOn(3);
-      careerBook(5, at(4, 1200)); out.tooLateCancel = careerBook(5, at(5, 460));
+      careerBook(5, at(4, 1200)); out.tooLateCancel = careerBook(5, at(5, 520));
       out.heldEnd = (() => { const j = { found: at(5, 300), urgency: 0, kind: 'wear', tier: 1 }; try { return leaveEnd(j) === j.found; } catch (e) { return 'n/a'; } })();
       for (const d of [29, 57, 85, 113]) { c.e = c.z = d - 1; careerTick(at(d, 10)); } out.grants = c.l;   // no misses in between: just the grants
       return out; })()""")
@@ -108,9 +108,9 @@ with sync_playwright() as pw:
     check(r['start'] == 3, f"leave to start {r['start']}, not 3")
     check(r['book'] and r['after'] == 2 and r['offOn3'], 'booking a workday: one fewer held and no shift that day')
     check(r['weekend'] is None, 'a Saturday can be booked as leave')
-    check(r['late'] is None and r['early'] == 'book', 'booking closes at 07:30 on the day')
+    check(r['late'] is None and r['early'] == 'book', 'booking closes at 08:30 on the day')
     check(r['cancel'] and r['back'] == 2 + 1 and r['onAgain'], 'cancelling gives the day back and the shift returns')
-    check(not r['tooLateCancel'], 'a leave day can be cancelled after 07:30 that day')
+    check(not r['tooLateCancel'], 'a leave day can be cancelled after 08:30 that day')
     check(r['heldEnd'] in (True, 'n/a'), 'a job found on a leave day is still held for you')
     check(r['grants'] == 5, f"leave after four 4-week grants: {r['grants']} (at most 5)")
 
@@ -248,7 +248,7 @@ with sync_playwright() as pw:
     check(r['early'] is None, 'the clock let you clock in at 03:00')
     check(r['earlyDip'] > 0 and r['shortKeepsRun'], f"a short shift (out at 10:00): dip {r['earlyDip']}, run kept and no miss: {r['shortKeepsRun']}")
     check(r['fullEndsRun'], 'a full shift (out at 16:00) did not end the run of missed shifts')
-    check(r['lateNote'] == [[210, False]], f"clocking in at 11:30: the shift's start note was {r['lateNote']} (late 210, not missed, wanted)")
+    check(r['lateNote'] == [[150, False]], f"clocking in at 11:30: the shift's start note was {r['lateNote']} (late 150 after 09:00, not missed, wanted)")
     check(r['place'] and r['crew'] and min(r['crew']) >= 1 and sum(1 for n in r['crew'] if n >= 2) >= len(r['crew']) * 3 // 4, f"the Works crew don't use the clock: {r['crew']}")
 
     print('Reputation you can see (0.61.15): a chip on turning a job in, one at a time, and a small gain:')
