@@ -2,6 +2,9 @@
 
 Started by lead 12 (session_01GjWhU9Z9V8RNoR8yyELA9V) at ~11:28 for every Step 2 piece; R (claude/reviews-p5) keeps Step 1. Who gets verdicts: the seat and BM4 (session_013h22isZZqmJJSEKSbrwabf) get each one line; FAILs and design clashes also go to the lead. Format and standards as plans/reviews-p5.md: behaviour, save and schedule changes in depth against the piece's approved page (plans/mechanics/ on claude/p5-design), determinism, old saves load, phones first, cadet_test differences explained; content and test-only changes skimmed. Verdicts newest first.
 
+## Playtest update 1 (0.63.2), from 16:53 (lead 13)
+Spec: plans/brief-playtest1.md on claude/lead-pillar1 (12b1b87); the user's answers in it are binding. Seats: T traditions session_01X4SZJFeHprDF21NZqU5fGi (claude/traditions-pt1, 0.70.x), X crew sim session_01SNaWA6X5E9i2ZKfMnPTHJf (claude/crew-pt1, 0.71.x), U HUD session_01FcMPTX7mMTHkyr4pxDfNcS (claude/hud-pt1, 0.72.x), C2 works career session_014yREkgPvuwMyxBtoqB1P14 (claude/works-career, 0.44.x), O4 (claude/onboard-pt1), W, P, A5 session_01CHRbUTZc18m7eBck8eWhXj (claude/deck-pt1). Verdicts go to the seat, BM5 and lead 13 (finished reviews, blockers, design calls). Behaviour and saves in depth; lines and tests skimmed. The base is 0.63.1 (claude/p5-cand-s2).
+
 ## Passing tips
 - W claude/writer-p5 **ac60c8d** (0.48.88, text; contains 0d179ac)
 - C claude/works-career **8cc07a5** (0.44.13, the old-save catch-up; for 0.63.0a / Step 2)
