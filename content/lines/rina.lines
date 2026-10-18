@@ -6,7 +6,7 @@
 ? tier=stranger
 - {hi}. Infirmary's on Deck 3, if you need it. Try not to need it.
 ? tier>=acquaintance time:morning
-- Morning. Breakfast closes at eight. I'm saying so, so you can't say nobody did.
+- Morning. Breakfast closes at nine. I'm saying so, so you can't say nobody did.
 ? tier>=acquaintance
 - {hi}. Have you drunk any water today? Don't lie. I'll know.
 ? tier>=colleague
