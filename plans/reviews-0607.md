@@ -8,10 +8,15 @@
 (empty)
 
 ## Passing tips (for BM3)
-writer 0cc4cdf · arrival-0607b 5ce084d (includes arrival e2cd435 and PE6 52839a6) · systems f351cc3 · social 9c8ea6c · PE6 a0d4b43 (= 4a7673c + handover) · deck 55fca8d · traditions 5de2087.
+writer 0cc4cdf · arrival-0607b 5ce084d (includes arrival e2cd435 and PE6 52839a6) · systems f351cc3 · social 9c8ea6c · PE6 4bd606c · deck 55fca8d · traditions 5de2087.
 events_check's day-100/day-231 seat clashes: OK on BM3's combine with social d3d5b4d. The bar needs PE6 and social together.
 
 ## Verdicts
+
+### PE6 0.28.65, claude/player-needs 4bd606c: PASS, my LOW 1 fixed
+- **LOW 1 fixed:** `careerClock` writes `clockLog[d] = h` (`c.co - c.ci`) on every clock-out, and the 17:00 auto clock-out writes `clockLog[cd]` too, so "This week" counts every day. The screen's button no longer writes its own copy.
+- **Gardening as a hobby:** 15b's `ixGarden` is now 30 minutes for +25 leisure (social 4, fitness 2 on the side). `hobbyCount('garden')` runs once, in `actEnd`, only for a full session. `HOBBIES.garden` never appears on the Hobby button (`hobbyHere` skips `h.garden`), and the Hobbies app says where to go. There's a `t:garden` tip off shift. Tray texts now say the tray is left for clearing.
+- Small and pure; nothing new is saved (`hobbies.done/last` take the `garden` key). The builder reports player_check and interactions_check OK.
 
 ### Traditions 0.34.54, claude/trad-0607 5de2087 (behaviour, looked at): PASS
 BM3's food_check FAIL (no shift-change dinner queue on day 1) fixed by moving people off the edge of 17:00: Name on the beam ends 17:40 (was 18:00), uses the Works bay's crowd spots, and Zeke hosts; Open door ends 17:45; after-shift arrivals come at `workEnd + 10` (was 15), and a host needs only 5 minutes left (`evArrive`), with their `eventPlan` entry's `min` cut to what's left. food_check's rush probe steps a minute at a time (the 5-minute step skipped short queues).
