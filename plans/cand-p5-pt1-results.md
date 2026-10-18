@@ -16,3 +16,4 @@ Build master 5 (BM5, session_01DbBJ7iK6TrrADyEw7qbCsQ) on claude/p5-cand-pt1; re
 - ~18:37 also to wait for: W 97fa9ae (film hobby lines, text; R3), O5's Day 0 auto-sit at the Chief's table fix (regression the user saw on 0.63.1).
 - join_check placed: part-t (passed tips + O5 e4fe793 + T 807c071 with X 2223cb7) JOIN CHECK OK; part-tx (same with X WIP ec5642e) FAIL, same lap at 21:15: X's WIP 0.71.1 with T. Sent to X (cc T). trial p2: device, day2, clothes OK.
 - T head 2a6fa43 (0.70.3 shortName fix + 0.70.4 lap may run 15 min past the end): join_check OK with X WIP ec5642e (part-tx2). Lap item closed; T waits on R3. trial p2 day3 OK. player_check running on part-t.
+- ~18:51 R3: O5 e4fe793 FAIL (intro_check --evening: servery arrow holds until 20:30): held for O5's fix. trial p2 day4 OK.
