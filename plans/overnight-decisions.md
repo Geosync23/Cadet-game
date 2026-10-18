@@ -182,3 +182,9 @@ All 8 packages approved (Zeke: "all good except he still walks and talks" → he
 | Cozy or danger? | Both |
 | Storm vs promotion clash (Days 10-11) | Already covered by moving the storm to Day 4-5 |
 | (lead) Next step | The designer D2 writes an events plan page (all events, order, days, beats, tier roles, links to bridge invite / first all-hands / film night) for the user to approve |
+| ~23:40 (the user, events plan v1 https://claude.ai/artifact/5fAouaAV1K1qptqPYez9rt, claude/p5-design 2c49900) | Storm vs Day 4-5 lessons | Keep the lessons going |
+| | Bridge hour | Keep the first bridge hour on Day 23 (invite after the storm; the later visit stays special) |
+| | Pip the stowaway | Always leaves (a letter later) |
+| | Danger | Minor injuries OK (a day or two in the infirmary); nobody dies |
+| | Spacing | "Events shouldn't be so far apart": re-space every few days, mostly Days 4-40; at least the distress call inside the career arc |
+| | More events | Add Stuck Together, Space Creature, Visiting Inspector, Echo Signal (TNG-inspired). D2 writes v2 |
