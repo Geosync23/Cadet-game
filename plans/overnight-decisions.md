@@ -130,3 +130,11 @@ All 8 packages approved (Zeke: "all good except he still walks and talks" → he
 | Finding an opponent in the real game | Like Tiles you need an opponent: a button by the court to ask someone to play; they come down to the rec dec |
 | Does time pause while playing? | Yes, and the game must tell you it's paused. Same for Tiles |
 | (lead call) Tiles "time is paused" notice | Goes into the next main build (Step 3, 0.63.3), not 0.63.2, to keep 0.63.2's final run on track |
+
+## The user, 2026-10-18 ~18:55 (rec deck busyness, told to lead 13)
+| Question | The user's answer |
+|---|---|
+| How busy is the rec deck? | Weekday daytime quiet (only crew on days off); evenings and weekends busy, crew love it and use it often, alongside traditions. Goal: good activity on all decks |
+| Capacities | Court 2, climbing wall 2, pool 4 (4 LANES, one per lane; plan v3 had 3 → planner updates to v4, DA6 builds 4), lazy river ~3-4, float room ~6 |
+| (lead 13 suggestion, phase 2) When full | Crew queue/watch/lounge, time-boxed turns (20-40 min), spill to other decks; ~15-30 on the deck on a busy evening |
+| Population 75 → 100? | The user is considering it. Lead view: doable as its own planned change after Pillar 5, starting with a feasibility study. Lead 14 asked the user whether to start that study |
