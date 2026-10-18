@@ -723,7 +723,7 @@ with sync_playwright() as pw:
       for (const k in keep) { if (keep[k] === undefined) delete LINES[k]; else LINES[k] = keep[k]; }
       return out; })()""")
     print('Quiz night game:', Q)
-    if not (Q['three'] and Q['same'] and Q['next'] and Q['oneRight'] and Q['start'] and Q['closed'] and Q['score'] is not None and 1 <= Q['score'] <= 3 and len(Q['seen']) >= 9): fail(f"the quiz game: {Q}")
+    if not (Q['three'] and Q['same'] and Q['next'] and Q['oneRight'] and Q['start'] and Q['closed'] and Q['score'] is not None and 1 <= Q['score'] <= 3 and len(Q['seen']) >= 7): fail(f"the quiz game: {Q}")
 
     # 10. the bridge invite (0.34.35), last: it skips on to day 50
     I = g.ev(INVITE)

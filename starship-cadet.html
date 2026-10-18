@@ -27169,8 +27169,7 @@ function quizStart(d, now) {
   const lines = [], open = quizText('quiz.open', d);
   if (open) lines.push({ who: 'tomas', text: open });
   qs.forEach((x, i) => {
-    lines.push({ who: 'tomas', text: x.q });
-    lines.push({ choice: x.answers.map(a => {
+    lines.push({ who: 'tomas', prompt: x.q, choice: x.answers.map(a => {
       const ok = a === x.right, r = quizText(ok ? 'quiz.right' : 'quiz.wrong', d + i, { answer: x.right });
       return { text: a, ok, last: i === qs.length - 1, reply: r ? { who: 'tomas', text: r } : null };
     }) });
@@ -27717,7 +27716,8 @@ function dialogueShow(scriptId, m) {
 }
 function dialogueView() {
   const D = DIALOGUE, sc = MEETING_SCRIPTS[D.id], l = D.queue[D.i]; if (!l) return null;
-  if (l.choice) return { title: sc.title, name: D.ctx.you, who: D.ctx.you, id: 'you', role: '', text: '', choices: l.choice.map(c => c.text), i: D.i, n: D.queue.length };
+  if (l.choice) return l.prompt ? { title: sc.title, name: castName(D, l.who), who: castName(D, l.who), id: l.who, role: '', text: evText(l.prompt, D.ctx), choices: l.choice.map(c => c.text), i: D.i, n: D.queue.length }   // a question asked with its answers (the quiz, 0.34.51)
+    : { title: sc.title, name: D.ctx.you, who: D.ctx.you, id: 'you', role: '', text: '', choices: l.choice.map(c => c.text), i: D.i, n: D.queue.length };
   const p = D.cast[l.who] || evPerson(l.who);
   return { title: sc.title, name: castName(D, l.who), who: castName(D, l.who), id: p ? p.id : l.who, role: p ? p.role || '' : '', text: evText(l.text, D.ctx), to: evText(l.to, D.ctx) || null, pose: l.pose || null, choices: null, i: D.i, n: D.queue.length };
 }
