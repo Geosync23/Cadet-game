@@ -6,6 +6,7 @@ Started by lead 12 (session_01GjWhU9Z9V8RNoR8yyELA9V) at ~11:28 for every Step 2
 Spec: plans/brief-playtest1.md on claude/lead-pillar1 (12b1b87); the user's answers in it are binding. Seats: T traditions session_01X4SZJFeHprDF21NZqU5fGi (claude/traditions-pt1, 0.70.x), X crew sim session_01SNaWA6X5E9i2ZKfMnPTHJf (claude/crew-pt1, 0.71.x), U HUD session_01FcMPTX7mMTHkyr4pxDfNcS (claude/hud-pt1, 0.72.x), C2 works career session_014yREkgPvuwMyxBtoqB1P14 (claude/works-career, 0.44.x), O4 (claude/onboard-pt1), W, P, A5 session_01CHRbUTZc18m7eBck8eWhXj (claude/deck-pt1). Verdicts go to the seat, BM5 and lead 13 (finished reviews, blockers, design calls). Behaviour and saves in depth; lines and tests skimmed. The base is 0.63.1 (claude/p5-cand-s2).
 
 ## Passing tips
+- X claude/crew-pt1 **2223cb7** (0.71.0, walk-ups and the mess fix; 1 LOW)
 - W claude/writer-p5 **6a00d9c** (0.48.91, playtest 1 package complete: time lines, breakfast 06:00-09:00, call-home tip; no LOWs open; 0.48.89 + 'seek' + key renames, playtest 1 lines, text; LOW 1 waits on X/C2's breakfast window)
 - W claude/writer-p5 **ac60c8d** (0.48.88, text; contains 0d179ac)
 - C claude/works-career **8cc07a5** (0.44.13, the old-save catch-up; for 0.63.0a / Step 2)
@@ -21,6 +22,12 @@ Spec: plans/brief-playtest1.md on claude/lead-pillar1 (12b1b87); the user's answ
 - (none)
 
 ## Verdicts
+
+### X 2223cb7 (0.71.0): crew walk up to start a conversation; crew no longer stuck by you seated in the mess — PASS with a LOW (in depth)
+- Walk-ups (section 20 plus section 10's seekStep): socialSeek and the asked-for waves call `seekCome`. The friend walks over (`SEEK_COME`, re-aimed every 0.5 s, at most 30 real seconds; escorts come first), stops within 1.3 tiles facing you, says the opener in a bubble and the chip, and stays beside you while the chip is up (25 s), then back to their plan. They only come when their own act is leisure or off, not at work or tea. The opener: a career ask's line, else a chatLine that matters (TALK_KEEP), else section 22's kind 'seek' (W's c9a532f), else SEEK_OPEN. Someone off your deck still gets the chip. The odds (k 633) and the opener (k 634) are seeded with `p.seed ^ seekSalt()` (the career's gs; 0 under ?nosave, so checks are unchanged). Nothing saved.
+- The mess fix: `crewWayOn` keeps your place's walk-to tile clear only for a place you stand on (`onTile`), so a diner going to the seat next to yours isn't sent aside every frame.
+- Checks (my runs on 2223cb7): cadet_test vs 0.63.1 cb7d30a **ALL IDENTICAL** (renderer noise only); **social_check OK**; **day_check 2 OK** (worst stuck 0.0 ship minutes on every deck, peak calls 269).
+- LOW: nothing stops a walk-up while you're in a washroom, toilet stall or shower (or mid-activity there). seekStep paths to your tile with your room added to their allowed rooms, so a friend can walk into the stall or shower with you to chat. Hold socialSeek's start, and pause SEEK_COME, while ACT is a toilet/shower/wash activity or you're in a private room.
 
 ### W 79fbd5e + 6a00d9c (0.48.91): tap-to-join texts on T's keys, the lap on Sundays — PASS (skimmed); W's playtest 1 package complete
 - banks/join.lines on seat T's keys: join.<id>.tip / .notice for 21 traditions (what it is, what you do, what it gives), .done / .left for the two walks, and join.name-on-the-beam.tip / .tell / .paint / .notice. Zeke's lap line says Sundays. trad-words (not baked; for T to paste): the lap on Sundays, Sunrise stretch in the garden, the new Works hand's beam. content_gen clean (9015 lines); lines_check PASS.
