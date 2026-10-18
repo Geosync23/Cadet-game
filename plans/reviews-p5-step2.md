@@ -6,6 +6,7 @@ Started by lead 12 (session_01GjWhU9Z9V8RNoR8yyELA9V) at ~11:28 for every Step 2
 Spec: plans/brief-playtest1.md on claude/lead-pillar1 (12b1b87); the user's answers in it are binding. Seats: T traditions session_01X4SZJFeHprDF21NZqU5fGi (claude/traditions-pt1, 0.70.x), X crew sim session_01SNaWA6X5E9i2ZKfMnPTHJf (claude/crew-pt1, 0.71.x), U HUD session_01FcMPTX7mMTHkyr4pxDfNcS (claude/hud-pt1, 0.72.x), C2 works career session_014yREkgPvuwMyxBtoqB1P14 (claude/works-career, 0.44.x), O4 (claude/onboard-pt1), W, P, A5 session_01CHRbUTZc18m7eBck8eWhXj (claude/deck-pt1). Verdicts go to the seat, BM5 and lead 13 (finished reviews, blockers, design calls). Behaviour and saves in depth; lines and tests skimmed. The base is 0.63.1 (claude/p5-cand-s2).
 
 ## Passing tips
+- C2 claude/works-career **a5d5c4c** (0.44.14-0.44.16 + the DEV_NOTES note; no LOWs)
 - U claude/hud-pt1 **73b40cb** (0.72.0 ebfdb2f + screenshots; no LOWs)
 - X claude/crew-pt1 **2223cb7** (0.71.0, walk-ups and the mess fix; 1 LOW)
 - W claude/writer-p5 **6a00d9c** (0.48.91, playtest 1 package complete: time lines, breakfast 06:00-09:00, call-home tip; no LOWs open; 0.48.89 + 'seek' + key renames, playtest 1 lines, text; LOW 1 waits on X/C2's breakfast window)
@@ -19,10 +20,13 @@ Spec: plans/brief-playtest1.md on claude/lead-pillar1 (12b1b87); the user's answ
 - S claude/ship-systems **03340c5** (0.33.48-0.33.51, Step 2 parts; also inside 78bf1c2, which R reviews for Step 1; 1 nit)
 
 ## Failing / waiting on a fix
-- C2 claude/works-career **fd26e15** (0.44.14): read and right; mech_check m1 and leave_check fail until C2's announced 0.44.15 (the round's 11:00, leave_check's times)
 - (none)
 
 ## Verdicts
+
+### C2 f738cb0 (0.44.15) + 23ef73c (0.44.16) + a5d5c4c: the round to 11:00, leave_check, a few more jobs — PASS (C2's tip passes)
+- 0.44.15: ROUND_HELD 120 (from 09:00, so still to 11:00, as the m1 page says); leave_check reads the new times. 0.44.16 (the brief's "a few more jobs on the board"): CHORES per a day raised (lamp .6, vent .5, calibrate .8, delivery .6, fault .4; the crew-tier filter 1.4 and seal 1.0) and HOLD_MAX 4. C2 measured the board at 5.7 → 6.5 a shift, yours to take 2.8 → 3.5: still the brief's 3-6. a5d5c4c: the 0.44.14 row explains tap1's toast (DEV_SHIFT alone; a copy with DEV_SHIFT.from back at 480 is ALL IDENTICAL vs 0.63.1). No new saved fields.
+- Checks (my runs on 23ef73c): cadet_test vs 0.63.1: only tap1's toast, as explained; **career_check OK**, **leave_check OK**, **machine_check OK**, **mech_check OK**. fd26e15's waiting items are closed.
 
 ### U ebfdb2f / 73b40cb (0.72.0): the Tracked button and panel, smaller device app labels — PASS (in depth)
 - The Tracked button sits in the Device button's row; on phones it goes under the needs strip, losing its word if it would touch the round buttons; it has a 44 px target. It shows a dot while an arrow is up. The panel lists your job (SHIP.player.track, as the Jobs app does), the rest of today and tomorrow until noon from the Schedule's devDay (traditions, appointments, meals, the shift), and fixed places (the job board, your bunk, the call booths `3-callhome-1`, which exists). A tap tracks it (setGoal with a `trk` key); a tap on the tracked one stops it; a tap outside or Escape closes the panel. Device app labels are 13 px. DOM only, nothing saved, no R(). 73b40cb only adds screenshots.
