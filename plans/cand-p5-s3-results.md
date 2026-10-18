@@ -1,0 +1,5 @@
+# Pillar 5 Step 3 (0.63.3) check results
+
+Build master 6 (BM6, session_01F8k6hqdBRoxDJMzqAuiHqR) on claude/p5-cand-pt1 (this session's only push branch; lead 14 asked for claude/p5-cand-s3: the green hash gets copied there). Reports to lead 14 (session_01RHtJv7GJDi4qosgU8Gb2b8); reviewer R3 (session_01AR6tGFiSZF7hL1LfVpWgng). Spec: plans/brief-p5s3.md on claude/lead-pillar1. Base: 0.63.2 = 86dcda1. Merge order: S2 claude/ship-systems → (P) → C2 claude/works-career → M2 claude/mech-incidents → M3 claude/mech-diagnose → H2 claude/mech-cases → DA5 claude/deck-p5s3 → X claude/crew-pt1 → U claude/hud-pt1 → W2 claude/writer-p5. R3-passed tips only. Full set: cadet_test vs 0.63.2, career, mech, machine, puzzle, social, join, bubble, smoke, newgame, food, deck, leave, device, tiles, events, clothes, arc, interactions, path, lines, player, day_check 0-8, intro_check --week (alone). One line per finished check.
+
+- ~23:10 Step 3 GO (lead 14). Tools as for 0.63.2 (/tmp/cw rebuilt from plans/build-master/, build number 0.63.3).
