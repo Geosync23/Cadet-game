@@ -6,7 +6,8 @@
 #   Lap of the Wren: on Sundays (not Mondays), Tomas leads, the walk forms a line (leader, you, followers), goes round
 #   and finishes; tapping elsewhere drops you out;
 #   Name on the beam: tapping crew tells you to tap the beam; the beam's tap paints your name (trace nameYours, joined),
-#   the crowd breaks up after; the newcomer's version only for new Works hands (beamNew); no page errors.
+#   the crowd breaks up after; the newcomer's version only for new Works hands (beamNew), their nameNew traces through a
+#   real save and reload; no page errors.
 # Setup and environment as for cadet_test.py.   Run:  python3 join_check.py BUILD.html    (about 3 minutes)
 import sys
 exec(open(__file__.replace('join_check.py', 'cadet_test.py')).read().split("a, shots = run(")[0])
@@ -56,10 +57,10 @@ with sync_playwright() as pw:
     print('Birthday (turn up):', b)
     if not b['joined'] or b['tj']: fail(f"the birthday should join by being there: {b}")
     # Lap of the Wren: Sundays, Tomas, a line that goes round and finishes
-    lap = g.ev("""(() => { const days = [...Array(28).keys()].map(x => x + 1).filter(x => eventsOn(x).some(e => e.id === 'lap-of-the-wren'));
+    lap = g.ev("""(() => { const days = [...Array(29).keys()].filter(x => eventsOn(x).some(e => e.id === 'lap-of-the-wren'));   // from day 0: not the Sunday you arrive
       return { days, wd: [...new Set(days.map(d => weekday(d)))] }; })()""")
     print('Lap of the Wren on days', lap['days'], 'weekdays', lap['wd'])
-    if lap['wd'] != [6]: fail(f"Lap of the Wren should be on Sundays only: {lap}")
+    if lap['wd'] != [6] or lap['days'][:1] != [7]: fail(f"Lap of the Wren should be on Sundays only: {lap}")
     g.ev("""(() => { const d = 7, e = eventsOn(d).find(x => x.id === 'lap-of-the-wren'); goToDeck(3); actEnd(true); clearGoal();
       setShipNow((d - 1) * 1440 + e.from + 8); deckCrewFill(); const sp = placeSpot('3-lap-3'); player.obj.position.set(sp.x, 0, sp.z + 1); player.stop();
       SHIP.events.joined = []; EV_MIN = -1; eventsTick(); window.__lap = { lead: TJ_NOW && TJ_NOW.lead, ok: TJ_NOW && tradJoinTap(TJ_NOW.agent), n: TJ_WALK ? TJ_WALK.roles.size : 0, max: 0 }; })()""")
@@ -90,6 +91,15 @@ with sync_playwright() as pw:
       depts: [...Array(200).keys()].map(x => x + 1).flatMap(d => (eventsOn(d).find(e => e.id === 'name-on-the-beam-new') || { honorees: [] }).honorees.map(p => p.dept)) }))()""")
     print('New Works hands on the beam:', nw)
     if not nw['names'] or set(nw['depts']) != {'works'} or len(nw['on']) != len(nw['names']): fail(f"newcomers' Name on the beam: {nw}")
+    # the save (0.70.1): nameNew traces come back after a real reload (a page without ?nosave)
+    url = g.page.url.split('?')[0]
+    g.page.goto(url + '?debug'); g.page.wait_for_function('window.__sc !== undefined', timeout=60000)
+    g.ev("(() => { SHIP.traces.length = 0; skipTo(100 * 1440); saveGame(); })()")
+    g.page.reload(); g.page.wait_for_function('window.__sc !== undefined', timeout=60000)
+    rt = g.ev("SHIP.traces.filter(t => t && t.id === 'nameNew').map(t => t.name + '@' + t.day)")
+    g.ev("localStorage.clear()")
+    print('nameNew traces after a reload at day 100:', rt)
+    if rt != ['Basil@36', 'Rafe@78']: fail(f"nameNew traces through the save: {rt}")
     for e in g.errors: fail('page: ' + e)
     g.close()
 print('JOIN CHECK ' + ('FAILED' if FAILS else 'OK'))

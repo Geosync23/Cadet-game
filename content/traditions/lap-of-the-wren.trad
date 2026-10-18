@@ -1,11 +1,11 @@
 @tradition lap-of-the-wren
 // Lap of the Wren (0.60.7): a slow walk round the promenade together, chatting. The easiest tradition to join.
 // Lantern walk (once a year, a Monday evening, the same promenade) is rarer. 0.70.0 (playtest 1, the user): off Monday,
-// where it clashed with Gym club, to Sunday evening, the quietest (the Sunday table ends at 19:00); Tomas leads it, and
+// where it clashed with Gym club, to Sunday evening (from Day 7: not the evening you arrive, the user), the quietest (the Sunday table ends at 19:00); Tomas leads it, and
 // tapping him or anyone on it walks you round in one line with them (section 18's tap to join).
 k: 442
 title: Lap of the Wren
-when: weekly sunday
+when: weekly sunday from day 1
 at: 20:30-21:15
 min: 20
 jitter: 10
@@ -15,7 +15,7 @@ hold: none
 who: tomas always, window-seat 50%, lingers-at-meals 35%, early-to-bed 10%, everyone 22%
 anim: talk
 host: tomas
-from: The promenade
+from: tomas
 
 
 == mail
@@ -34,6 +34,6 @@ from: The promenade
 - You join the slow walk round the promenade. People fall into step, chat, and drift between groups as the stars slide past.
 
 == chatter
-- Lap of the Wren's the best bit of a Monday.
+- Lap of the Wren's the best bit of a Sunday.
 - I walk the lap to stretch my legs and my ears.   #funny
-- Monday lap tonight. Bring someone new.
+- Sunday lap tonight. Bring someone new.
