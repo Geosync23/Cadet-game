@@ -741,7 +741,7 @@ Done so far:
 - How does diagnosing a fault look on screen: a simple panel with labelled components, or something more hands-on? Prototype it in Pillar 2.
 - Beyond the name you type on the shuttle, should the player ever choose their look? (No choice of look for now, the user, 2026-10-16.)
 - Does the diplomacy-and-story starship game become its own future project?
-- Tracing an air line: the Deck 5 air plants (`5-scrubber-1`, `-2`) already have service panels in the game, so Tier 2 tracing could cover air as well as water and heat now, rather than waiting for the main fan and ducts (see `plans/mechanics/fault-tables.html`, Tier 2).
+- Tracing an air line: the Deck 5 air plants (`5-scrubber-1`, `-2`) already have service panels in the game, as do the oxygen cells, the electrolyser and the deck scrubbers; only the main fan has none (its stand-in sits inside the locked Fan hall's fan). Ship air tracing in Step 3 on a short line without the fan, or wait for the deck architect to give the fan a reachable panel (see `plans/mechanics/fault-tables.html`, Tier 2)?
 
 **The decks:**
 
