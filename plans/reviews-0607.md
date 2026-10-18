@@ -8,10 +8,13 @@
 (empty)
 
 ## Passing tips (for BM3)
-writer 0cc4cdf · arrival-0607b 82d573e (includes arrival e2cd435, PE6 52839a6, systems 1e9476c) · systems 521742a · social 9c8ea6c · PE6 4bd606c · deck 55fca8d · traditions 5de2087.
+writer 0cc4cdf · arrival-0607b 82d573e (includes arrival e2cd435, PE6 52839a6, systems 1e9476c) · systems 521742a · social 9c8ea6c · PE6 4bd606c · deck 55fca8d · traditions 8be5030.
 events_check's day-100/day-231 seat clashes: OK on BM3's combine with social d3d5b4d. The bar needs PE6 and social together.
 
 ## Verdicts
+
+### Traditions 0.34.55, claude/trad-0607 8be5030 (behaviour, small): PASS
+For BM4's leave_check FAIL (after-shift goers waiting at the one time clock and blocking it): `evArrive` now sets off non-hosts at `max(e.from, workEnd + 2)`, inside section 14's 10-minute join window (so the clock, a wash and the toilet still fit), and the host at `workEnd + 15` with 5 minutes left. Never before the tradition starts (f2318ef). Open door ends 17:50. Pure and small. The builder reports leave_check, food_check and day_check 1 OK. events_check fails only on the three items social's `morning()` fixes in the combine.
 
 ### Systems 0.33.43 521742a, and onboarding 4 0.42.44 82d573e: both PASS
 - **Systems 521742a:** Bea's Day 1 vent moves to 09:00-10:15 (75 minutes) at `4-lift-1`, after the briefing, when you and Zeke come down. That answers my LOW 1 on f351cc3. The delivery's load stop is DA4's `5-delivery-1` first (`loadAt`), then the hold's usual spots: `storagePlace` only takes known places, so it falls back cleanly without DA4's place. player_check and interactions_check tap the part's own shelf. Small and pure.
