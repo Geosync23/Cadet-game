@@ -540,3 +540,4 @@ Read: CLAUDE.md, TEAM.md (session chain rule + overnight exception), plans/brief
 - ~11:05 C ae6598a (0.44.7: WORK_MECH.offer for M2 m6, .hold for H m7, m5 Calder-first; career/mech OK, cadet_test identical). C ~37%.
 - ~11:07 C a8dd78e (0.44.8 WORK_MECH.at(day); career OK, cadet_test identical).
 - ~11:08 H 55343c6 (0.55.10 Day 5 escort holds until caseCalled; puzzle_check OK, cadet_test identical). H done.
+- ~11:09 R: C 87df8f5+ae6598a FAIL (1): big-row asks open at 06:00 inside sleep skip → silent Mail, no toast/pointer; fix sent to C; 4 LOWs.
