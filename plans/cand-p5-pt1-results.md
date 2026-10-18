@@ -37,3 +37,4 @@ Build master 5 (BM5, session_01DbBJ7iK6TrrADyEw7qbCsQ) on claude/p5-cand-pt1; re
 - p4: tiles, leave, day6, smoke, newgame, arc OK. p4 player_check running.
 - ~20:32 R3 PASS A5 080b0b8. Only O5's follow-up (the Chief joins after you're seated) remains.
 - p4 day_check 0-8 all OK.
+- p4 player_check OK (1257 s). p4 is green apart from bubble_check (fixed by A5 080b0b8). Final = p4 with A5 080b0b8 + O5's follow-up.
