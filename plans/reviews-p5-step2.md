@@ -3,6 +3,7 @@
 Started by lead 12 (session_01GjWhU9Z9V8RNoR8yyELA9V) at ~11:28 for every Step 2 piece; R (claude/reviews-p5) keeps Step 1. Who gets verdicts: the seat and BM4 (session_013h22isZZqmJJSEKSbrwabf) get each one line; FAILs and design clashes also go to the lead. Format and standards as plans/reviews-p5.md: behaviour, save and schedule changes in depth against the piece's approved page (plans/mechanics/ on claude/p5-design), determinism, old saves load, phones first, cadet_test differences explained; content and test-only changes skimmed. Verdicts newest first.
 
 ## Passing tips
+- Onboarding 4 claude/arrival-0607b **96649fe** (0.42.46, 21b's uniform grime for m2; 1 LOW, the page's field names)
 - S claude/ship-systems **03340c5** (0.33.48-0.33.51, Step 2 parts; also inside 78bf1c2, which R reviews for Step 1; 1 nit)
 
 ## Failing / waiting on a fix
@@ -10,6 +11,13 @@ Started by lead 12 (session_01GjWhU9Z9V8RNoR8yyELA9V) at ~11:28 for every Step 2
 - S machine_check (test only): 5o and 5t fail once 24d is in (see the M1 0.45.1 verdict)
 
 ## Verdicts
+
+### Onboarding 4 96649fe (0.42.46): the uniform's grime in section 21b (m2's 15c part) — PASS with a LOW (in depth)
+Base: live 0.60.7 ce26fb2. Read against m2-uniform.html's 15c row.
+- SHIP.clothes.grime 0-1: two decimals (grimeRound), saved in save.clothes, an older or odd save → 0, reset on a new game (clothesBlank). uniformState(): 'grubby' from .6, else 'yesterday', else 'clean'; always 'clean' with 21b off (test URLs). clothesGrime(add) clamps, returns the new value (null when off) and fires uniformWatch. A wardrobe change while grubby always uses an outfit, even if you've changed today, and also when putting clean washing away; it sets grime 0. Washing leaves it. clothesFx gives grubby the same single CLOTHES_DRAIN as yesterday's clothes (max, not product), with its own note. simNote('uniform', { state }) on each change, silent on the first frame. Nothing listens yet, so the new daily 'yesterday' notes change nothing in the first week.
+- No R(), no 3D (the tint is 24b's, M1). M1's 24c inspectItems reads `uniformState()` with /grub|dirt/, so 'grubby' fails the uniform item as the page wants.
+- Checks (my runs): cadet_test vs ce26fb2 **ALL IDENTICAL**; clothes_check **ALL OK** (the 13 new: thresholds, the note, one multiplier, clamp, the save, the grubby change, a wash leaves it).
+- LOW (for the designer, copy M1): the page names the field `SHIP.player.clothes.grime` and saves `player.clothes.grime`. 15c's real store is `SHIP.clothes` / `save.clothes`, so the build is right and the page should say so. M1's 24b must add grime only through `clothesGrime(add)` (oily repair/overhaul +.35, service +.2, else +.05, from Day 8) and read `uniformState()`.
 
 ### M1 7285601 (0.45.1): hauling (24d), j.shareSeen on rounds and runs — FAIL, one new item (in depth); 8a6cea8's item 1 still open
 Base now includes S 03340c5 and C 88f71b7. Read against m4-hauling.html.
