@@ -3,10 +3,18 @@
 How: behaviour, save and schedule changes in depth (against the piece's approved page in plans/mechanics/ on claude/p5-design, determinism, old saves load, phones first, cadet_test differences explained); content and test-only changes skimmed. Verdicts newest first.
 
 ## Passing tips
+- A claude/deck-0607 **c20f91f** (0.47.0; LOWs open)
 - H claude/mech-cases **8c76b69** (0.55.2, contains eece4d4 and df7d356; LOWs open)
 - W claude/writer-p5 **0d179ac** (0.48.86, text; contains 843bac9 and 76fc413; no LOWs open)
 
 ## Verdicts
+
+### A (DA4) c20f91f (0.47.0): the Steps 1-2 places and five wall kits — PASS with LOWs (in depth: geometry)
+- Places: drill (5-drill-*, 5-muster-1..6, DECKS[5].drill), inspection (4-inspect-a..h), hauling (HAUL_DROPS, 5-stock-1..4), incidents (n-valve-panel / -valve-1..3 / -wet-1..2 on Decks 3-5 with DECKS[n].valveLine and .wet, 5-lift-brake, 3-extractor-alarm, 3-vent-1). All type `event` with an event tag, so they're inert: nobody's plans change. Wall kits: extBracket, bulkheadWheel, valvePanel, liftBrake, alarmPanel. They're made per deck build with no R(), colours through std()/col(), and only the extinguisher is noMerge (drillExtShow hides it).
+- Checks (my run): cadet_test vs d3d720b: every shot identical. State differs only in items, wallDecor, memory, calls and triangles: Deck 4's valve panel, +10 geometries and +1 texture. deck_check OK (all new places reached; the two closet places via `works: true`).
+- LOW 1 (phones first): draw calls by the lift go up on Deck 3 (226 → 235, +9: the valve panel and the alarm panel) and Deck 5 (178 → 186, +8: bracket, wheel, brake, valve panel). The DEV_NOTES row explains only Deck 4's change. These are well under budget (Deck 3's check is "under 450"), but please say so in the row. Shared materials (M.* or one std per colour) would merge more of the toruses and parts.
+- LOW 2: the valve panel's number strip (PlaneGeometry at z .032) is 2 mm in front of its backing plate (front face at .03). Other wall signs sit about 5 mm out. On a phone's depth buffer 2 mm can shimmer at a distance, so move it to about .035.
+- Note for the mechanics seats: `works: true` is a new place field; deck_check treats it as Works-only. Whoever routes to 5-drill-breaker or 5-lift-brake must path with Works access (the hatch).
 
 ### H df7d356 (0.55.1) + 8c76b69 (0.55.2): the case engine, section 24k — PASS with LOWs (in depth)
 - Against case-engine.html: posting conditions (on shift, not an event day, 06:00-15:00, jobTier <= your tier, under the open limit, a kind fits, roll key 880 < rate; senior .33 on Tier 3 machines), kind choice (881, newest-opened kind doubled for a week), eight sub-seeds (882-889), solver (exactly one left, cause never killed, fewest within the band, decks per band, every clue reachable), frozen once posted, held till shift end then released to the crew the long way, calls, wrong calls (Tier 1 part back on the shelf, Tier 2 seal/cartridge spent), talk it through after two wrong, the long way, Fault notes view (chips, clues, Where next?, Call it with Yes / Not yet), save in ship.works.cases with a cleaner. Keys 880-893 inside H's 880-894. 8c76b69: a kind opens with its ladder row (worksIsOpen, else SHIP.works.op), per the designer's FAQ.
