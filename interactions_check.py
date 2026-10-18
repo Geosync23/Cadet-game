@@ -39,7 +39,7 @@ PARITY = [
     (3, 'The bar', 'ixDrink', 'hunger'), (3, 'Sofa', None, 'social'), (3, 'Herb bed', 'ixGarden', 'social'),
     (3, 'Water', 'ixWater', 'hunger'), (3, 'Telescope', 'ixStars', 'energy'),
     (4, 'Folding table', 'ixFold', 'hygiene'), (4, 'Grand piano', 'ixMusic', 'social'), (4, 'Kettle', 'ixTea', 'hunger'),
-    (4, 'Basins', 'ixBasin', 'hygiene'), (4, 'Tiles table', 'ixLounge', 'social'),
+    (4, 'Basins', 'ixBasin', 'hygiene'),   # the junior common room's Tiles table plays any time since 0.28.62 (tiles_check)
     (5, 'Armchair', None, None), (5, 'Hot water', 'ixTea', 'hunger'), (1, 'Window seat', None, None),
 ]
 
@@ -55,6 +55,10 @@ with sync_playwright() as pw:
     for deck, title, kind, need in PARITY:
         g.ev(f"goToDeck({deck})"); g.step(3)
         g.ev("for (const k of NEED_KEYS) SHIP.player.needs[k] = 50")
+        if title == 'The bar':                         # a stool is a drink only with one from the bar (section 15's barTap, 0.28.62); by day the bar is shut
+            g.ev("SHIP.player.drink = null"); shut = tap(title); g.step(1)
+            check(shut is True and 'Back at 17:30' in st()['toast'] and not g.ev("SHIP.player.drink"), f'the bar by day: "Back at 17:30" ({st()["toast"][:60]})')
+            g.ev("SHIP.player.drink = 'tea'")
         r = tap(title); g.step(2); s0 = st()
         if not check(r is True and s0['act'], f'Deck {deck} {title}: an activity starts ({r}, {s0["toast"][:80]})'): continue
         if kind: check(s0['act'][0] == kind, f'Deck {deck} {title}: {kind}, got {s0["act"][0]}')
@@ -74,7 +78,7 @@ with sync_playwright() as pw:
     print('== held, private and other taps')
     g.ev("goToDeck(3)"); g.step(3)
     g.ev("window.__busy = [...PLACE_OF.keys()]; for (const id of __busy) BUSY.add(id)")
-    tap('The bar'); s = st()
+    g.ev("SHIP.player.drink = 'tea'"); tap('The bar'); s = st(); g.ev("SHIP.player.drink = null")   # with a drink, a tap on the bar is a tap on its stools (0.28.62)
     g.ev("for (const id of __busy) BUSY.delete(id)")
     check(not s['act'] and s['toast'].split(': ', 1)[1].startswith('In use'), f'every bar stool held: "In use" ({s["toast"][:70]})')
     tap('Treadmills'); g.step(2); s = st()

@@ -192,7 +192,7 @@ def seat(pw, path):
     gg = Game(pw, path, 390, 844); gg.step(3)
     r = gg.ev(SEAT + "('rina')")
     if r.get('none'): check(False, 'the Deck 4 Tiles table is there'); gg.close(); return
-    check(not r['act'] or r['act'][0] != 'tiles', f'outside Tiles night the Deck 4 table is a plain seat (15b): {r}')
+    check(r['act'] and r['act'][0] == 'tiles', f'the junior common room\'s Tiles table plays any time, not only on Tiles night (0.28.62): {r}')
     gg.ev("actEnd(true); tilesNightNow = () => true")   # Tiles night from here on (stand-in for section 18's tradition)
     # 0.28.51: you sit down, and a free crew member walks over and sits opposite (the user's "You sit down and someone will come up if available")
     gg.ev("setShipNow((SHIP.time.day - 1) * 1440 + 19 * 60); for (const a of DECK_CREW) a.settled = false"); gg.step(60)

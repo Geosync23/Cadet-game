@@ -65,8 +65,8 @@ PAPER = r"""(({ normal }) => {
       act('toilet'); awake(57); act('shower'); awake(5); act('eat'); awake(25);   // 06:00-08:00 (the toilet: 0.28.19)
       awake(4 * 60); act('toilet'); awake(5 * 60 - 3);                            // the shift, 08:00-17:00, with a break at noon
       awake(30); act('eat'); act('toilet'); awake(37);                            // dinner about 17:30
-      if (day % 2) act('gym'); else act('call');
-      awake(22 * 60 - (18 * 60 + 30) - (day % 2 ? 30 : 15) - 3); act('toilet');   // to 22:00, and before bed
+      if (day % 2) act('gym'); else { act('call'); act('hobby'); }                // a hobby every other evening keeps leisure up (0.28.63)
+      awake(22 * 60 - (18 * 60 + 30) - (day % 2 ? 30 : 45) - 3); act('toilet');   // to 22:00, and before bed
       sleep(8 * 60);
     } else { awake(16 * 60); sleep(8 * 60); }                                     // no meals, no shower, no gym, no calls
   }
@@ -281,7 +281,7 @@ with sync_playwright() as pw:
     wn = json.loads(g.ev(r"""(() => { const n = SHIP.player.needs, out = [], te = document.getElementById('toast');
       let t = performance.now() + 1e6;
       const quiet = () => { POP.toast = POP.card = POP.warn = -1e9; POP.busy = false; te.classList.remove('show'); TOAST_AT = -1e9; };
-      const tick = (gap = true) => { if (gap) quiet(); t += 1000; const k = needWarnTick(t); return k ? [k, document.getElementById('tt').textContent] : null; };
+      const tick = (gap = true) => { if (gap) quiet(); t += 1000; const k = needWarnTick(t); return k ? [k, WARN_SAID[k] === 1 ? document.getElementById('needPop').textContent : document.getElementById('tt').textContent] : null; };   // the gentle one is a pop-up in plain words (0.28.62)
       deviceClose(); TIP_Q.length = 0; DEVICE_SKIN.tip(null); WARN_SAID = {}; Object.assign(n, { hunger: 60, energy: 60, hygiene: 60, fitness: 60, social: 60, bathroom: 60 });
       out.push(tick());                                      // 0 nothing low
       n.hunger = 24; out.push(tick(), tick(false), tick());  // 1 the gentle one, 2 not again at once, 3 nor later
@@ -296,15 +296,16 @@ with sync_playwright() as pw:
       out.push(tick());                                      // 16 energy now
       WARN_SAID = {}; Object.assign(n, NEEDS_FRESH); return JSON.stringify(out); })()"""))
     for i, x in enumerate(wn): print('   ', i, x)
-    check(wn[0] is None and wn[1] == ['hunger', 'Hungry'] and wn[2] is None and wn[3] is None, f'a gentle warning once when food drops under 25: {wn[:4]}')
-    check(wn[4] == ['hunger', 'Very hungry'] and wn[5] is None and wn[6] == ['hunger', 'Hungry'], f'a firmer one under 10; re-armed only at 40+: {wn[4:7]}')
-    check(wn[7] == ['bathroom', 'Bursting'] and wn[8] is None and wn[9] == ['social', 'A bit lonely'] and wn[10] is None, f'the lowest need first, one at a time, after a gap: {wn[7:11]}')
-    check(wn[11] is None and wn[12] is None and wn[13] is True and wn[14] is False and wn[16] == ['energy', 'Tired'], f'never with the device open, while busy or asleep: {wn[11:]}')
+    NEED_LOW = json.loads(g.ev("JSON.stringify(Object.fromEntries(NEED_KEYS.map(k => [k, (() => { let t = null; try { t = careerText('need.low.' + k); } catch (e) {} return t || NEED_LOW_SAY[k]; })()])))"))
+    check(wn[0] is None and wn[1] == ['hunger', NEED_LOW['hunger']] and wn[2] is None and wn[3] is None, f'a gentle warning (a pop-up in plain words, 0.28.62) once when food drops under 25: {wn[:4]}')
+    check(wn[4] == ['hunger', 'Very hungry'] and wn[5] is None and wn[6] == ['hunger', NEED_LOW['hunger']], f'a firmer one under 10; re-armed only at 40+: {wn[4:7]}')
+    check(wn[7] == ['bathroom', 'Bursting'] and wn[8] is None and wn[9] == ['social', NEED_LOW['social']] and wn[10] is None, f'the lowest need first, one at a time, after a gap: {wn[7:11]}')
+    check(wn[11] is None and wn[12] is None and wn[13] is True and wn[14] is False and wn[16] == ['energy', NEED_LOW['energy']], f'never with the device open, while busy or asleep: {wn[11:]}')
     # and in the running game: food under 25 says so within a few seconds once the screen is quiet
     g.ev("WARN_SAID = {}; POP.toast = POP.card = POP.warn = -1e9; document.getElementById('toast').classList.remove('show'); TOAST_AT = -1e9; deviceClose(); TIP_Q.length = 0; DEVICE_SKIN.tip(null); Object.assign(SHIP.player.needs, { hunger: 20, energy: 60, hygiene: 60, fitness: 60, social: 60, bathroom: 60 })")
     g.step(30)
-    wl = json.loads(g.ev("JSON.stringify([WARN_SAID.hunger || 0, document.getElementById('tt').textContent])")); print('  in the game:', wl)
-    check(wl == [1, 'Hungry'], f'the warning shows in the running game: {wl}')
+    wl = json.loads(g.ev("JSON.stringify([WARN_SAID.hunger || 0, document.getElementById('needPop') && !document.getElementById('needPop').hidden ? document.getElementById('needPop').textContent : document.getElementById('tt').textContent])")); print('  in the game:', wl)
+    check(wl == [1, NEED_LOW['hunger']], f'the warning shows in the running game: {wl}')
     g.ev("WARN_SAID = {}; Object.assign(SHIP.player.needs, NEEDS_FRESH)")
 
     print('Teaching tips (0.28.42):')
@@ -315,7 +316,7 @@ with sync_playwright() as pw:
       const quiet = () => { clear(); Object.assign(POP, { toast: -1e9, card: -1e9, warn: -1e9, tip: -1e9, busy: false, panels: false }); document.getElementById('toast').classList.remove('show'); TOAST_AT = -1e9; };
       const tick = () => { t += 1000; POP.busy = false; return teachTick(t); };
       if (SHIP.intro) SHIP.intro.ended = true; deviceClose(); D.settings.tips = true;
-      for (const id of ids) delete D.tipsSeen[id];
+      for (const id of ids) delete D.tipsSeen[id]; for (const id of ['t:offshift', 't:eve-talk', 't:eve-hobby', 't:eve-trad', 't:eve-call']) D.tipsSeen[id] = true;   // the free-time tips (0.28.63) have their own timing
       Object.assign(SHIP.player.needs, { hunger: 40, energy: 60, hygiene: 60, fitness: 60, social: 60, bathroom: 60 });
       quiet(); const a = tick(); out.first = [a, !!D.tipsSeen[a], TIP_Q.length && TIP_Q[0].id, document.getElementById('devTip') && !document.getElementById('devTip').hidden];
       quiet(); POP.tip = t; out.gap = [tick()];                              // 3 minutes between tips
@@ -326,7 +327,7 @@ with sync_playwright() as pw:
       if (SHIP.intro) { SHIP.intro.on = true; SHIP.intro.ended = false; SHIP.intro.step = 'chief'; quiet(); out.intro = tick(); SHIP.intro.step = null; SHIP.intro.ended = true; }
       for (const id of ids) D.tipsSeen[id] = true; delete D.tipsSeen['t:rep']; quiet(); POP.tip = t; TEACH_ST.turnin = undefined; const m0 = SHIP.time.min, d0 = SHIP.time.day; SHIP.time.day = 1; SHIP.time.min = 600;
       out.rep = [SHIP.time.day, tick()]; TEACH_ST.turnin = shipNow() - 10; out.rep.push(tick() || 'not yet'); TEACH_ST.turnin = shipNow() - 40; out.rep.push(tick()); delete D.tipsSeen['t:rep']; TEACH_ST.turnin = undefined; SHIP.time.min = 1030; quiet(); POP.tip = t; out.rep.push(tick()); SHIP.time.min = m0; SHIP.time.day = d0;
-      for (const id of ids) delete D.tipsSeen[id];
+      for (const id of ids) delete D.tipsSeen[id]; for (const id of ['t:offshift', 't:eve-talk', 't:eve-hobby', 't:eve-trad', 't:eve-call']) D.tipsSeen[id] = true;   // the free-time tips (0.28.63) have their own timing
       quiet(); DEV.open = true; DEV.app = 'home'; out.dev = [tick()]; DEV.app = 'needs'; quiet(); out.dev.push(tick()); DEV.open = false; DEV.app = 'home';
       for (const id of ids) D.tipsSeen[id] = true; delete D.tipsSeen['t:queue']; delete D.tipsSeen['t:needs'];
       const was = ACT; ACT = { kind: 'queue', o: {}, def: {} }; quiet(); out.prio = [tick()]; ACT = was; quiet(); out.prio.push(tick());
@@ -625,7 +626,7 @@ with sync_playwright() as pw:
         g.ev("delete window.takePortion; delete window.galleyText; delete window.galleyJoin; delete window.galleyTurn; delete window.joined; delete window.portions")
 
     print('The store (credits, snacks, comforts):')
-    sh = g.ev(r"""(() => { const P = SHIP.player, n = P.needs; P.credits = 20; P.locker = []; n.social = 50; n.hunger = 50;
+    sh = g.ev(r"""(() => { const P = SHIP.player, n = P.needs; P.credits = 20; P.locker = []; n.social = 50; n.hunger = 50; for (const h of ['draw', 'puzzle', 'knit']) hobbyGive(h);   // the display offers hobby supplies first (0.28.63)
       basket = { ...storePick('comfort'), gift: null }; ACT = { kind: 'pay', def: PLAYER_ACTS.pay, o: {}, face: 0 }; actEnd(false); const a = [P.credits, P.locker.slice(), Math.round(n.social), basket];   // not a gift (0.28.25)
       basket = { ...storePick('snack'), gift: null }; ACT = { kind: 'pay', def: PLAYER_ACTS.pay, o: {}, face: 0 }; actEnd(false); const b = [P.credits, P.locker.length, Math.round(n.hunger)];
       P.credits = 1; basket = storePick('comfort'); const it = ITEMS.find(i => i.t === 'Counter'); it.hit.getWorldPosition(_wp); const r = playerTap(it, _wp.clone(), _wp.clone());
@@ -862,7 +863,7 @@ with sync_playwright() as pw:
     check(st['note'], 'the ship notes should show on the device')
     check(st['shower'] == 50, f"a weak shower (restore x0.5) should give half: 10 -> {st['shower']}")
     if real[2]:
-        live = g.ev("(() => { FX_MIN = -1; const f = playerFx(), r = shipEffects(deckDef.num); return f === r && NEED_KEYS.every(k => k === 'bathroom' ? !(k in f.restore) || isFinite(f.restore[k]) && isFinite(f.drain[k]) : isFinite(f.restore[k]) && isFinite(f.drain[k])); })()   // section 17 knows the first five needs (bathroom, 0.28.19: 1 when left out)")
+        live = g.ev("(() => { FX_MIN = -1; const f = playerFx(), r = shipEffects(deckDef.num); return f === r && NEED_KEYS.every(k => k === 'bathroom' || k === 'leisure' ? !(k in f.restore) || isFinite(f.restore[k]) && isFinite(f.drain[k]) : isFinite(f.restore[k]) && isFinite(f.drain[k])); })()   // section 17 knows the first five needs (bathroom, 0.28.19: 1 when left out)")
         print('  playerFx is the real shipEffects for this deck:', live)
         check(live, 'playerFx should read the real shipEffects')
     if not real[0]:                                   # the galley's food on its own, with stand-ins (a combined build tests the real one above)
@@ -1080,10 +1081,10 @@ with sync_playwright() as pw:
     ev("localStorage.setItem(SAVE_KEY, JSON.stringify({ v: 1, build: '0.25.2', time: { day: 2, min: 600 }, player: { deck: 4, tile: [7, 3], facing: 0 }, ship: { decks: {} }, crew: {} })); Storage.prototype.setItem = () => {}")
     ev = load()
     v1 = json.loads(ev("JSON.stringify([SHIP.time.day, SHIP.player.needs])")); print('  v 1 save:', v1)
-    check(v1[0] == 2 and all(v == 80 for v in v1[1].values()), 'a v 1 save should load with needs at 80')
+    check(v1[0] == 2 and all(v == (70 if k == 'leisure' else 80) for k, v in v1[1].items()), f'a v 1 save should load with needs at 80 (leisure 70, as new): {v1}')
     ev("Object.assign(SHIP.player.needs, { hunger: 11, energy: 22, hygiene: 33, fitness: 44, social: 55, bathroom: 66 }); saveGame()")
     raw = json.loads(ev("localStorage.getItem(SAVE_KEY)")); print('  saved:', raw['v'], raw['player'].get('needs'))
-    check(raw['v'] == 2 and raw['player']['needs'] == {'hunger': 11, 'energy': 22, 'hygiene': 33, 'fitness': 44, 'social': 55, 'bathroom': 66}, 'v 2 save should hold the needs')
+    check(raw['v'] == 2 and {k: v for k, v in raw['player']['needs'].items() if k != 'leisure'} == {'hunger': 11, 'energy': 22, 'hygiene': 33, 'fitness': 44, 'social': 55, 'bathroom': 66}, f"v 2 save should hold the needs: {raw['player']['needs']}")
     ev = load()
     v2 = json.loads(ev("JSON.stringify(SHIP.player.needs)")); print('  v 2 save:', v2)
     ev("mailSend({ from: 'Test', subject: 'Kept', body: 'b', play: 'home:gran' }); SHIP.player.credits = 77; SHIP.player.locker = ['a deck of cards']; SHIP.player.chats = { x: SHIP.time.day }; playerNameSet('Ada'); stripFold(true); saveGame()")
@@ -1093,17 +1094,17 @@ with sync_playwright() as pw:
     print('  the needs strip folded, kept, tapped open, folded again (0.28.33):', fold)
     check(fold == [True, True, False, False, True], f'the needs strip folds away, stays folded after a reload and a tap opens it: {fold}')
     check(kept == [['Kept|home:gran'], 77, ['a deck of cards'], ['x'], 'Ada'], f'the save should keep mail, credits, locker, chats and your name: {kept}')
-    check(v2 == {'hunger': 11, 'energy': 22, 'hygiene': 33, 'fitness': 44, 'social': 55, 'bathroom': 66}, 'a v 2 save should load its needs')
+    check({k: v for k, v in v2.items() if k != 'leisure'} == {'hunger': 11, 'energy': 22, 'hygiene': 33, 'fitness': 44, 'social': 55, 'bathroom': 66}, f'a v 2 save should load its needs: {v2}')
     ev("localStorage.setItem(SAVE_KEY, JSON.stringify({ v: 2, build: 'x', time: { day: 2, min: 600 }, player: { deck: 4, tile: [7, 3], facing: 0, needs: { hunger: 'x', energy: 500 }, name: { x: 1 } }, ship: { decks: {} }, crew: {} })); Storage.prototype.setItem = () => {}")
     ev = load()
     bad = json.loads(ev("Storage.prototype.setItem = () => {}; JSON.stringify(SHIP.player.needs)")); print('  junk needs:', bad)
     check(ev("SHIP.player.name") is None, 'a junk name in the save should load as no name')
-    check(bad == {'hunger': 80, 'energy': 100, 'hygiene': 80, 'fitness': 80, 'social': 80, 'bathroom': 80}, 'junk needs should be clamped or filled at 80')
+    check(bad == {'hunger': 80, 'energy': 100, 'hygiene': 80, 'fitness': 80, 'social': 80, 'bathroom': 80, 'leisure': 70}, f'junk needs should be clamped or filled at 80 (leisure 70): {bad}')
     raw0 = ev("localStorage.getItem(SAVE_KEY)")
     ev = load('?nosave')
     ns = json.loads(ev("const n0 = NEED_KEYS.map(k => SHIP.player.needs[k]); SHIP.player.needs.hunger = 1; saveGame(); JSON.stringify([n0, localStorage.getItem(SAVE_KEY)])"))
     print('  ?nosave:', ns[0])
-    check(ns[0] == [60, 100, 60, 70, 70, 60], f'?nosave should start fresh: {ns[0]}')
+    check(ns[0] == [60, 100, 60, 70, 70, 60, 70], f'?nosave should start fresh: {ns[0]}')
     wl = json.loads(ev("JSON.stringify([SHIP.mail.map(m => [m.from, m.subject, m.read]), SHIP.player.credits])")); print('  a fresh start: mail', wl[0], 'credits', wl[1])
     check(len(wl[0]) == 1 and wl[0][0][1].startswith('Welcome') and wl[0][0][2] is False and wl[1] == 40, f'a fresh start should have the welcome mail and 40 credits: {wl}')
     check(ns[1] == raw0, '?nosave should not write the save')
