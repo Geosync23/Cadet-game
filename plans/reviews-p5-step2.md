@@ -6,7 +6,7 @@ Started by lead 12 (session_01GjWhU9Z9V8RNoR8yyELA9V) at ~11:28 for every Step 2
 Spec: plans/brief-playtest1.md on claude/lead-pillar1 (12b1b87); the user's answers in it are binding. Seats: T traditions session_01X4SZJFeHprDF21NZqU5fGi (claude/traditions-pt1, 0.70.x), X crew sim session_01SNaWA6X5E9i2ZKfMnPTHJf (claude/crew-pt1, 0.71.x), U HUD session_01FcMPTX7mMTHkyr4pxDfNcS (claude/hud-pt1, 0.72.x), C2 works career session_014yREkgPvuwMyxBtoqB1P14 (claude/works-career, 0.44.x), O4 (claude/onboard-pt1), W, P, A5 session_01CHRbUTZc18m7eBck8eWhXj (claude/deck-pt1). Verdicts go to the seat, BM5 and lead 13 (finished reviews, blockers, design calls). Behaviour and saves in depth; lines and tests skimmed. The base is 0.63.1 (claude/p5-cand-s2).
 
 ## Passing tips
-- W claude/writer-p5 **840ced2** (0.48.90 + two time lines: 0.48.89 + 'seek' + key renames, playtest 1 lines, text; LOW 1 waits on X/C2's breakfast window)
+- W claude/writer-p5 **5c9ac79** (0.48.90 + time lines, breakfast 07:00-09:00; no LOWs open; 0.48.89 + 'seek' + key renames, playtest 1 lines, text; LOW 1 waits on X/C2's breakfast window)
 - W claude/writer-p5 **ac60c8d** (0.48.88, text; contains 0d179ac)
 - C claude/works-career **8cc07a5** (0.44.13, the old-save catch-up; for 0.63.0a / Step 2)
 - P claude/player-p5 **f2156f1** (0.28.73 + the LOW fix 391c88e + player_check fixes f00ac1e, d6f321d, 642b511, ad9ff57, 1830f2d, f2156f1; no LOWs open)
@@ -20,6 +20,10 @@ Spec: plans/brief-playtest1.md on claude/lead-pillar1 (12b1b87); the user's answ
 - (none)
 
 ## Verdicts
+
+### W 5c9ac79: breakfast 07:00-09:00 in the lines — PASS (skimmed); LOW 1 closed
+- X and C2's agreed window everywhere it's named: news.lines 58 and 383, Rina "closes at nine", Zeke's cabin Mail and introDinner "from seven", Chloe's, Tariq's and Vance's breakfast lines, facts.md. content_gen clean; lines_check PASS.
+- Note for X / C2 (game code, not W's): the build still says 06:00-08:00 in four places. These are the mess hall's menu-board canvas (~line 2403, `'Breakfast  06:00 - 08:00'`), the Servery and Menu board item texts (~5228, ~5231), and the servery-closed message (~11313). Whoever moves the breakfast window should change these too. The canvas one changes Deck 3's pixels, so explain it in cadet_test.
 
 ### W 840ced2: two time lines for C2's 0.44.14 — PASS (skimmed)
 - Calder's first-job line is now "quarter to nine" and career.tip.leave says leave is booked "by 08:30" (an hour later, with the shift). content_gen clean; lines_check PASS.
