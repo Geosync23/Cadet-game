@@ -418,6 +418,7 @@ def run(path):
             check(F['waitingNoRow'] and F['faulty'] in ('faulty', 'failing'), f"Friday morning: the washer faulty, the case waiting for the row: {F['waitingNoRow']} {F['faulty']}")
             check(F['shown'] and F['title'].startswith('Head-scratcher: Washer') and F['title'].endswith('leaks'), f"shown once the row opens: {F['title']!r}, with {F['by']}")
             sc = dict(F['scan'] or [])
+            check(sc.get('pump') == 55 and sc.get('seal') == 44 and sc.get('valve') == 49, f"Day 5's reading is fixed so the cause isn't lowest: {F['scan']}")
             check(all(40 <= sc.get(p, 0) <= 60 for p in ('pump', 'seal', 'valve')) and all(v > 60 for p, v in sc.items() if p not in ('pump', 'seal', 'valve')), f"the scanner on a head-scratcher: every suspect worn, the rest good: {F['scan']}")
             check(len(F['got']) == 1 and F['goal'] == F['panel'], f"the first note with the job, Where next? to the panel: {F['got']} {F['goal']}")
             check(F['fixed'] and F['flags'] == [True, True] and F['closed'] and F['done'] == 6, f"called right first time, fixed and closed: {F}")
