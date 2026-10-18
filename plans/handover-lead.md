@@ -545,3 +545,4 @@ Read: CLAUDE.md, TEAM.md (session chain rule + overnight exception), plans/brief
 - ~11:13 C d518673 (0.44.9: R's FAIL + 4 LOWs fixed; career/mech OK, cadet_test identical); to R + BM4. Join fix still to do.
 - ~11:15 BM4: retrial with latest tips still fails (same + Record app hand merge). C confirmed owner of the join on claude/p5-join (S 96cf5cb + P + C d518673 + H 55343c6); S + H told to answer C fast; BM4 combines 0.63.0 from join + A + W.
 - ~11:17 S 78bf1c2 (0.33.52 join fixes; machine_check OK on S+P+C+H combine, cadet_test identical). Step 1 now uses it (Step 2 S parts inert) (logged).
+- ~11:19 H 5a4d362 (0.55.12 title fixed; puzzle_check OK on S+P+C combine; cadet_test identical). Remaining career/mech FAILs = C's scripted test players stuck on Day 5 case; fix sent to C.
