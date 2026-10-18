@@ -647,3 +647,4 @@ Read: CLAUDE.md, TEAM.md (Lead line + "Playtest update 1" paragraph), plans/brie
 - **Other open items for the user:** Zeke's Day 1 trainer sample (old, low priority); controller support and a PC .exe were discussed (both "after Pillar 5" if wanted, not started).
 - **Weekly allowance:** 'allowed_warning' all day. Keep seat count in check; archive idle seats whose work is pushed.
 - ~18:52 started lead 14 session_01RHtJv7GJDi4qosgU8Gb2b8 (depth 4). Lead 13 stays reachable until lead 14 says hello. Last sweep: O4 60%, W 67% (both done).
+- ~18:54 lead 14: took over (check-in trig_019eHQTci9XVxtaeJueEa3rq). R3 passed T's package 2a6fa43 + W 97fa9ae (film lines). LOW for Step 3: Cook-along's leader marker lands on a random goer, not Lukas (T). Pending for 0.63.2: X 0.71.1, O5 (servery arrow + Day 0 auto-sit), U film hobby, DA5 bubble flicker.
