@@ -395,6 +395,18 @@ with sync_playwright() as pw:
         g.page.click('#devBtn'); g.step(3)
         wrap = g.ev("[...document.querySelectorAll('.device .app span')].filter(e => e.getClientRects().length > 1 || e.getBoundingClientRect().height > 24).map(e => e.textContent)")
         check(g.ev("document.querySelectorAll('.device .app span').length") > 4 and not wrap, f'no device app label wraps at 320 px ({wrap})')
+        if g.ev("typeof HOBBIES !== 'undefined' && !!HOBBIES.film"):   # Watch a film (0.72.1, the user's): a device hobby exactly like reading
+            g.ev("deviceShow('hobbies')"); g.step(2)
+            btns = g.ev("[...document.querySelectorAll('#devBody button')].map(b => b.textContent)")
+            check('Watch a film' in btns, f'the Hobbies app has a Watch a film button ({btns})')
+            g.ev("deviceClose(); actEnd && ACT && actEnd(true); player.stop()"); g.step(2)
+            f = g.ev("(() => { SHIP.player.needs.leisure = 20; const ok = hobbyStart('film'); return { ok, kind: ACT && ACT.kind, hobby: ACT && ACT.o.hobby, pose: ACT && ACT.pose, readPose: HOBBIES.read.stand } })()")
+            check(f['ok'] and f['kind'] == 'hobby' and f['hobby'] == 'film' and f['pose'] == f['readPose'], f'Watch a film starts standing, with reading\'s pose ({f})')
+            g.step(30 * 60)                               # half an hour of play: plenty of ship minutes
+            r = g.ev("({ leisure: Math.round(SHIP.player.needs.leisure), done: SHIP.player.hobbies.done.film || 0, act: ACT && ACT.kind })")
+            check(r['done'] >= 1 and r['leisure'] > 20, f'it finishes, counts and fills Leisure ({r})')
+            rt = g.ev("JSON.stringify(hobbiesLoad({ player: { hobbies: JSON.parse(JSON.stringify(SHIP.player.hobbies)) } }).done.film) + '|' + JSON.stringify(hobbiesLoad({ player: { hobbies: { has: [], done: { read: 2 }, last: {} } } }))")
+            check(rt.split('|')[0] == str(r['done']) and '"done":{"read":2}' in rt, f'film counts save and load; an old save loads unchanged ({rt})')
         check(not g.errors, f'no console errors ({g.errors[:3]})')
     g.close()
 
