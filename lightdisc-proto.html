@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Lightdisc Prototype</title>
+<!--
+  Lightdisc prototype for Starship Cadet. A standalone test page, NOT part of the game file.
+  Follows plans/recdeck-plan.html section 4: the 3D game view ~55° behind and above your
+  baseline, thumb-below-you framing, auto returns, curve, charged shot, speed-up, first to 7
+  win by 2 (quick game to 5), fixed 60 Hz steps, a seeded stream per game, crew levels.
+  Rules from the game kept here: no coplanar surfaces, every colour through col().
+  Test hooks: window.LD (start, steps, state, calls). ?seed=N sets the default seed.
+-->
+<style>
+  :root { --cy: #50e6ff; --or: #ffa03c; --ink: #e8f2f5; --dim: #9fb2b8; --panel: rgba(8, 12, 20, .9); --line: rgba(255,255,255,.14); }
+  html, body { margin: 0; height: 100%; background: #05070d; color: var(--ink); font: 15px/1.35 system-ui, -apple-system, "Segoe UI", sans-serif; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; }
+  canvas { display: block; }
+  .hide { display: none !important; }
+  button { font: inherit; color: var(--ink); background: rgba(255,255,255,.08); border: 1px solid var(--line); border-radius: 999px; padding: 8px 16px; cursor: pointer; }
+  button:active { transform: scale(.97); }
+  button.go { background: #0f3440; border-color: var(--cy); color: #dffaff; font-weight: 600; }
+  #hud { position: fixed; left: 0; right: 0; top: 0; display: flex; justify-content: center; padding: calc(env(safe-area-inset-top) + 8px) 12px 0; pointer-events: none; }
+  #score { background: rgba(5,8,14,.7); border: 1px solid var(--line); border-radius: 999px; padding: 4px 14px; font-weight: 600; letter-spacing: .02em; font-variant-numeric: tabular-nums; }
+  #score .a { color: var(--cy); } #score .b { color: var(--or); }
+  #leave { position: fixed; right: 12px; bottom: calc(env(safe-area-inset-bottom) + 12px); font-size: 13px; padding: 6px 14px; background: rgba(5,8,14,.6); }
+  #call { position: fixed; left: 0; right: 0; top: 34%; text-align: center; font-size: 22px; font-weight: 700; text-shadow: 0 0 12px rgba(0,0,0,.9); pointer-events: none; }
+  .tag { position: fixed; transform: translate(-50%, -100%); font-size: 12px; font-weight: 600; padding: 1px 7px; border-radius: 6px; background: rgba(5,8,14,.55); pointer-events: none; white-space: nowrap; }
+  .say { position: fixed; transform: translate(-50%, -100%); font-size: 13px; padding: 4px 9px; border-radius: 10px; background: #f3efe4; color: #1b1f24; pointer-events: none; white-space: nowrap; }
+  #how { position: fixed; left: 10px; right: 10px; bottom: calc(env(safe-area-inset-bottom) + 50px); display: flex; align-items: center; gap: 8px; background: var(--panel); border: 1px solid var(--cy); border-radius: 14px; padding: 9px 10px 9px 14px; pointer-events: none; max-width: 520px; margin: 0 auto; }
+  #how .t { flex: 1; } #how .n { color: var(--cy); font-size: 12px; display: block; } #how button { pointer-events: auto; padding: 6px 12px; font-size: 13px; }
+  .over { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; padding: 16px; overflow-y: auto; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 18px; width: 100%; max-width: 440px; box-sizing: border-box; }
+  h1 { margin: 0 0 2px; font-size: 30px; letter-spacing: .06em; background: linear-gradient(90deg, var(--cy), #fff 50%, var(--or)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .sub { color: var(--dim); font-size: 13px; margin-bottom: 12px; }
+  .opps { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .opp { text-align: left; border-radius: 12px; padding: 9px 10px; }
+  .opp b { display: block; } .opp small { color: var(--dim); display: block; font-size: 12px; margin-top: 2px; }
+  .lv { font-size: 11px; padding: 0 6px; border-radius: 6px; margin-left: 4px; font-weight: 600; }
+  .lv.easy { background: #1f4a2c; color: #a5f0b8; } .lv.steady { background: #4a3d1a; color: #ffd98a; } .lv.sharp { background: #4f1f2a; color: #ffadc0; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; margin-top: 12px; font-size: 13px; color: var(--dim); }
+  .row label { display: flex; gap: 6px; align-items: center; }
+  .row input[type=number] { width: 64px; background: #0b111b; color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 4px 6px; font: inherit; }
+  select { background: #0b111b; color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 5px; font: inherit; }
+  h2 { font-size: 14px; margin: 14px 0 6px; color: var(--ink); }
+  .res h2 { font-size: 24px; margin: 0 0 4px; }
+  .btns { display: flex; gap: 10px; margin-top: 14px; }
+  #dbg { position: fixed; left: 8px; bottom: 6px; font: 11px monospace; color: #6f8a92; pointer-events: none; }
+</style>
+</head>
+<body>
+<div id="hud" class="hide"><div id="score"></div></div>
+<div id="call" class="hide"></div>
+<button id="leave" class="hide">Leave</button>
+<div id="how" class="hide"><div class="t"><span class="n"></span><span class="x"></span></div><button id="howNext">Next</button><button id="howSkip">Skip</button></div>
+
+<div id="menu" class="over">
+  <div class="card">
+    <h1>LIGHTDISC</h1>
+    <div class="sub">Rec dec court, CSV Wren. A prototype to feel the game: you only move; returns are automatic.</div>
+    <h2>Who do you want to play?</h2>
+    <div class="opps" id="opps"></div>
+    <div class="row">
+      <label><input type="checkbox" id="quick"> Quick game (first to 5)</label>
+      <label><input type="checkbox" id="howOn" checked> How to play</label>
+      <label><input type="checkbox" id="rm"> Reduced motion</label>
+      <label><input type="checkbox" id="snd" checked> Sound</label>
+      <label>Seed <input type="number" id="seed" value="1" min="1"></label>
+    </div>
+    <h2>Watch crew against crew</h2>
+    <div class="row" style="margin-top:0">
+      <select id="wa"></select> v <select id="wb"></select>
+      <button id="watch">Watch</button>
+    </div>
+    <div class="row" id="rec"></div>
+  </div>
+</div>
+
+<div id="result" class="over hide">
+  <div class="card res">
+    <h2 id="resT"></h2>
+    <div class="sub" id="resS"></div>
+    <div class="btns"><button class="go" id="again">Again</button><button id="done">Leave</button></div>
+  </div>
+</div>
+<div id="dbg"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+'use strict';
+// =====================================================================
+// 1. SETUP (the game's conventions: sRGB colours through col(), 1 unit = 1 tile)
+// =====================================================================
+const col = h => new THREE.Color(h).convertSRGBToLinear();
+const Q = new URLSearchParams(location.search);
+const DEBUG = Q.has('debug');
+const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+document.body.prepend(renderer.domElement);
+const scene = new THREE.Scene();
+scene.background = col('#05070d');
+scene.fog = new THREE.Fog(col('#05070d'), 26, 48);
+const camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, .1, 100);
+scene.add(new THREE.HemisphereLight(col('#9fb8d8'), col('#151018'), .75));
+const sun = new THREE.DirectionalLight(col('#ffffff'), .7); sun.position.set(-4, 10, 6); scene.add(sun);
+
+// Court: 13 long (z, bow +z where you stand) by 5 wide (x).
+const CL = 13, CW = 5, HX = CW / 2, HZ = CL / 2;
+const BASE = HZ - .3;          // where a player stands by default (just in front of the back line)
+const ZONE = 1.6;              // depth of your zone (the shaded strip by your baseline)
+const OUT = HZ + .45;          // past this line the point is lost
+const DISC_R = .2, DISC_Y = .9;
+const CY = '#50e6ff', OR = '#ffa03c';
+
+// --- small helpers: merged vertex-coloured meshes (one draw call each) ---
+function partsToGeo(parts) {
+  const P = [], N = [], C = [];
+  for (const p of parts) {
+    const g = (p.g.index ? p.g.toNonIndexed() : p.g.clone()).applyMatrix4(p.m);
+    const c = col(p.c), pa = g.attributes.position.array, na = g.attributes.normal.array;
+    for (let i = 0; i < pa.length; i += 3) { P.push(pa[i], pa[i + 1], pa[i + 2]); N.push(na[i], na[i + 1], na[i + 2]); C.push(c.r, c.g, c.b); }
+    g.dispose();
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(P, 3));
+  geo.setAttribute('normal', new THREE.Float32BufferAttribute(N, 3));
+  geo.setAttribute('color', new THREE.Float32BufferAttribute(C, 3));
+  geo.computeBoundingSphere();
+  return geo;
+}
+const M4 = (x, y, z, sx = 1, sy = 1, sz = 1, rx = 0, ry = 0, rz = 0) => new THREE.Matrix4().compose(new THREE.Vector3(x, y, z), new THREE.Quaternion().setFromEuler(new THREE.Euler(rx, ry, rz)), new THREE.Vector3(sx, sy, sz));
+const BOX = new THREE.BoxGeometry(1, 1, 1);
+const cyl = (rt, rb, h, s = 10) => new THREE.CylinderGeometry(rt, rb, h, s);
+const SPH = new THREE.SphereGeometry(1, 12, 8);
+const LAMB = new THREE.MeshLambertMaterial({ vertexColors: true });
+const GLOWV = new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false });
+
+// A radial glow texture made at load (no randomness).
+function glowTex(ring) {
+  const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d');
+  const r = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+  if (ring) { r.addColorStop(0, 'rgba(255,255,255,0)'); r.addColorStop(.62, 'rgba(255,255,255,0)'); r.addColorStop(.8, 'rgba(255,255,255,1)'); r.addColorStop(1, 'rgba(255,255,255,0)'); }
+  else { r.addColorStop(0, 'rgba(255,255,255,1)'); r.addColorStop(.25, 'rgba(255,255,255,.55)'); r.addColorStop(1, 'rgba(255,255,255,0)'); }
+  g.fillStyle = r; g.fillRect(0, 0, 64, 64); return new THREE.CanvasTexture(c);
+}
+const GLOW = glowTex(false), RING = glowTex(true);
+
+// =====================================================================
+// 2. THE COURT AND THE ROOM
+// =====================================================================
+// Court floor: one box whose top carries the lines (drawn once on a canvas).
+(function court() {
+  const S = 48, c = document.createElement('canvas'); c.width = CW * S; c.height = CL * S; const g = c.getContext('2d');
+  g.fillStyle = '#020306'; g.fillRect(0, 0, c.width, c.height);
+  g.strokeStyle = 'rgba(120,160,200,.08)'; g.lineWidth = 1;
+  for (let i = 1; i < CW; i++) { g.beginPath(); g.moveTo(i * S, 0); g.lineTo(i * S, c.height); g.stroke(); }
+  for (let i = 1; i < CL; i++) { g.beginPath(); g.moveTo(0, i * S); g.lineTo(c.width, i * S); g.stroke(); }
+  // zones (top of canvas = stern = -z)
+  const zg = (y0, y1, cc) => { const gr = g.createLinearGradient(0, y0, 0, y1); gr.addColorStop(0, cc + '00'); gr.addColorStop(1, cc + '30'); g.fillStyle = gr; g.fillRect(0, Math.min(y0, y1), c.width, Math.abs(y1 - y0)); };
+  zg((CL - ZONE - .2) * S, (CL - .1) * S, CY); zg((ZONE + .2) * S, .1 * S, OR);
+  const neon = (cc, w, f) => { g.shadowColor = cc; g.shadowBlur = 14; g.strokeStyle = cc; g.lineWidth = w; f(); g.shadowBlur = 0; g.strokeStyle = '#ffffff'; g.lineWidth = w * .35; f(); };
+  const L = (x0, y0, x1, y1) => () => { g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1); g.stroke(); };
+  const m = 5, H2 = c.height / 2;
+  neon(CY, 6, L(m, H2, m, c.height - m)); neon(CY, 6, L(c.width - m, H2, c.width - m, c.height - m)); neon(CY, 7, L(m, c.height - m, c.width - m, c.height - m));
+  neon(OR, 6, L(m, m, m, H2)); neon(OR, 6, L(c.width - m, m, c.width - m, H2)); neon(OR, 7, L(m, m, c.width - m, m));
+  neon('#cfefff', 3, L(m, (CL - ZONE) * S, c.width - m, (CL - ZONE) * S)); neon('#ffd9b0', 3, L(m, ZONE * S, c.width - m, ZONE * S));
+  g.setLineDash([10, 8]); neon('#ffffff', 3, L(m, H2, c.width - m, H2)); g.setLineDash([]);
+  g.globalAlpha = .7; g.beginPath(); g.arc(c.width / 2, H2, S * .9, 0, 7); g.strokeStyle = '#9fdcff'; g.lineWidth = 2; g.stroke();
+  const tex = new THREE.CanvasTexture(c); tex.encoding = THREE.sRGBEncoding; tex.anisotropy = 4;
+  const mats = [0, 0, 1, 0, 0, 0].map(i => i ? new THREE.MeshBasicMaterial({ map: tex, toneMapped: false }) : new THREE.MeshBasicMaterial({ color: col('#020306') }));
+  const floor = new THREE.Mesh(new THREE.BoxGeometry(CW + .3, .1, CL + .3), mats); floor.position.y = -.05; scene.add(floor);
+  // canvas maps +z (bow) to the bottom of the canvas: BoxGeometry's top face has v up toward -z, which matches.
+})();
+
+// The room: floor around the court, the stern wall, starboard wall, the stands (port). One merged lit mesh.
+const roomParts = [];
+const rbox = (c, x, y, z, sx, sy, sz) => roomParts.push({ g: BOX, c, m: M4(x, y, z, sx, sy, sz) });
+rbox('#15181e', 0, -.16, -1, 26, .3, 30);                 // deck floor (top at -0.01, below the court's top at 0)
+rbox('#1c2230', 0, 4.5, -11.2, 26, 9.4, .4);              // stern wall
+rbox('#141a24', 8.6, 2.5, -1, .4, 5.4, 22);               // starboard wall
+rbox('#141a24', -10.5, 2.5, -1, .4, 5.4, 22);             // port wall behind the stands
+rbox('#0b0e14', 0, 8.9, -11, 26, .6, 1);                  // stern wall top lip
+// emitter rails along the court sides (the force-field side walls rise from these)
+rbox('#2a3140', HX + .22, .08, 0, .18, .18, CL + .4); rbox('#2a3140', -HX - .22, .08, 0, .18, .18, CL + .4);
+rbox('#2a3140', 0, .08, 0, CW + .5, .16, .14);            // net emitter strip across the middle
+// net posts
+rbox('#39424f', HX + .22, .75, 0, .16, 1.5, .16); rbox('#39424f', -HX - .22, .75, 0, .16, 1.5, .16);
+// the stands: three stepped benches with a rail and a gate (port side)
+for (let i = 0; i < 3; i++) {
+  const x = -4.0 - i * 1.05, h = .38 + i * .42;
+  rbox('#232a38', x, h / 2, -.5, 1.05, h, 12.6);          // step
+  rbox('#3b4a66', x + .15, h + .05, -.5, .5, .1, 12.4);   // seat pad
+}
+rbox('#5a6578', -3.35, .55, -.5, .06, .06, 12.6); rbox('#5a6578', -3.35, .28, -6.8, .06, .56, .06); rbox('#5a6578', -3.35, .28, 5.8, .06, .56, .06);
+rbox('#2e3546', 8.3, .5, 4, .3, 1, 2);                     // kit bin by the starboard wall
+scene.add(new THREE.Mesh(partsToGeo(roomParts), LAMB));
+// neon trim on the room (unlit, one mesh)
+const neonParts = [];
+const nbox = (c, x, y, z, sx, sy, sz) => neonParts.push({ g: BOX, c, m: M4(x, y, z, sx, sy, sz) });
+nbox(CY, 8.38, 1.2, -1, .04, .05, 21); nbox(OR, 8.38, 3.6, -1, .04, .05, 21);
+nbox(CY, -10.28, 3.2, -1, .04, .05, 21);
+nbox('#ffd166', 0, 6.75, -10.98, 13, .06, .04); nbox('#ffd166', 0, 1.45, -10.98, 13, .06, .04);
+nbox('#ff5fa2', -6.6, 2.9, -10.98, 2.4, .05, .04);
+scene.add(new THREE.Mesh(partsToGeo(neonParts), GLOWV));
+
+// The force fields: the net and the two side walls, one shared additive shader. Flashes are world-space points.
+const FLASHN = 6;
+const FIELD = new THREE.ShaderMaterial({
+  transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
+  uniforms: { uT: { value: 0 }, uF: { value: Array.from({ length: FLASHN }, () => new THREE.Vector4(0, -9, 0, 0)) }, uFade: { value: 1 } },
+  vertexShader: 'varying vec3 vW; varying vec2 vUv; void main(){ vec4 w = modelMatrix * vec4(position, 1.); vW = w.xyz; vUv = uv; gl_Position = projectionMatrix * viewMatrix * w; }',
+  fragmentShader: `uniform float uT; uniform vec4 uF[${FLASHN}]; uniform float uFade; varying vec3 vW; varying vec2 vUv;
+    void main(){
+      vec3 c = mix(vec3(1., .5, .15), vec3(.25, .85, 1.), smoothstep(-2.5, 2.5, vW.z));
+      c = mix(c, vec3(.92, .96, 1.), exp(-vW.z * vW.z * 6.));
+      float sh = .5 + .5 * sin(vW.y * 24. + uT * 3. + 2. * sin(vW.x * 2.7 + vW.z * 2.3 + uT * 1.3));
+      float hx = .5 + .5 * sin((vW.x + vW.z) * 9. - uT * 2.);
+      float edge = smoothstep(.86, 1., vUv.y) * .9 + smoothstep(.12, 0., vUv.y) * .45;
+      float a = (.05 + .07 * sh + .03 * hx + edge * .55) * (1. - .6 * smoothstep(.0, 1., vUv.y) * (1. - edge));
+      float f = 0.;
+      for (int i = 0; i < ${FLASHN}; i++) { vec3 d = vW - uF[i].xyz; f += uF[i].w * exp(-dot(d, d) * 2.5); }
+      gl_FragColor = vec4(c * a * uFade + vec3(1.) * f, 1.);
+    }`,
+});
+const net = new THREE.Mesh(new THREE.PlaneGeometry(CW + .3, 1.3), FIELD); net.position.set(0, .68, 0); scene.add(net);
+for (const s of [1, -1]) { const w = new THREE.Mesh(new THREE.PlaneGeometry(CL + .2, 1.15), FIELD); w.rotation.y = Math.PI / 2; w.position.set(s * (HX + .22), .6, 0); scene.add(w); }
+let flashI = 0;
+function flash(x, y, z, k = 1) { if (RM) return; const f = FIELD.uniforms.uF.value[flashI++ % FLASHN]; f.set(x, y, z, 1.6 * k); }
+
+// The scoreboard, two storeys up the stern wall (a canvas redrawn on each point).
+const sbC = document.createElement('canvas'); sbC.width = 1024; sbC.height = 440;
+const sbTex = new THREE.CanvasTexture(sbC); sbTex.encoding = THREE.sRGBEncoding;
+const board = new THREE.Mesh(new THREE.PlaneGeometry(11, 4.73), new THREE.MeshBasicMaterial({ map: sbTex, toneMapped: false }));
+board.position.set(0, 4.1, -10.97); scene.add(board);
+function drawBoard(a, b, na, nb, note) {
+  const g = sbC.getContext('2d'); g.fillStyle = '#07090f'; g.fillRect(0, 0, 1024, 440);
+  g.strokeStyle = '#ffd166'; g.lineWidth = 6; g.strokeRect(10, 10, 1004, 420);
+  g.textAlign = 'center'; g.font = 'bold 54px system-ui, sans-serif';
+  g.fillStyle = CY; g.fillText(na.toUpperCase(), 256, 92); g.fillStyle = OR; g.fillText(nb.toUpperCase(), 768, 92);
+  g.font = 'bold 230px ui-monospace, Menlo, monospace'; g.shadowBlur = 24;
+  g.shadowColor = CY; g.fillStyle = '#c8f6ff'; g.fillText(a, 256, 320);
+  g.shadowColor = OR; g.fillStyle = '#ffe0c0'; g.fillText(b, 768, 320); g.shadowBlur = 0;
+  g.fillStyle = '#ffd166'; g.fillText(':', 512, 300);
+  g.font = '34px system-ui, sans-serif'; g.fillStyle = '#9fb2b8'; g.fillText(note || 'LIGHTDISC  ·  REC DEC', 512, 400);
+  sbTex.needsUpdate = true;
+}
+drawBoard(0, 0, 'Home', 'Away');
+
+// =====================================================================
+// 3. PEOPLE (simple low-poly figures in the game's colours)
+// =====================================================================
+const SKIN = ['#f3cfae', '#e3b08a', '#c98f66', '#a46c4b', '#7d4f35', '#573626'];
+const HAIR = { black: '#1d1917', dark: '#3a2820', brown: '#6b4a2f', auburn: '#8c3f22', grey: '#9f9a93' };
+const DEPT = { command: '#b8433a', works: '#d9a441', watch: '#d9a441', survey: '#2f8e98', infirmary: '#2f8e98' };
+
+// The crew you can play. Levels and personalities from the plan (section 4, crew levels).
+const CREW = {
+  pell:  { name: 'Pell', full: 'Pell Okafor', lvl: 'easy', blurb: 'Swerves everything. Some of it on purpose.', look: { dept: 'works', skin: 5, hair: 'buzz', hc: 'black', h: 1.1, bw: 1.15, beard: 1 },
+           react: .5, speed: 4.2, miss: .3, missAmt: .9, curve: .85, aim: [0, .5], aimRand: 1,
+           lines: { curve: ['Swerve!', 'Did you see that curve?', 'Where\'s it going? Who knows.'], lose: ['Not my best.', 'Ha, fair.'], win: ['Pell takes it!'] } },
+  holt:  { name: 'Holt', full: 'Chief Bram Holt', lvl: 'steady', blurb: 'Plays it straight and safe. Never rattled.', look: { dept: 'watch', skin: 2, hair: 'bald', hc: 'grey', h: 1.05, bw: 1.18, tache: 1 },
+           react: .38, speed: 5.0, miss: .14, missAmt: .6, curve: 0, aim: [0, .15],
+           lines: { point: ['Steady.', 'Hm.', 'Straight and simple.'], win: ['Good game, Cadet.'] } },
+  vance: { name: 'Vance', full: 'Commander Teo Vance', lvl: 'sharp', blurb: 'Hits charged shots, and talks while he does.', look: { dept: 'command', skin: 1, hair: 'short', hc: 'black', h: 1.08, bw: 1 },
+           react: .27, speed: 6.0, miss: .09, missAmt: .5, curve: .25, aim: [.3, .6],
+           lines: { charged: ['By the book, Cadet.', 'Page forty: the charged return.', 'Keep up.', 'Textbook.', 'Watch the angle.'], win: ['Regulation result.'] } },
+  rina:  { name: 'Rina', full: 'Rina Deshi', lvl: 'sharp', blurb: 'Annoyingly good. Says "fine" a lot.', look: { dept: 'infirmary', skin: 3, hair: 'curls', hc: 'black', h: .95, bw: 1, band: 1 },
+           react: .24, speed: 6.4, miss: .065, missAmt: .4, curve: .45, aim: [.45, .8],
+           lines: { point: ['Fine.', 'Again?', 'You\'ll get there.', 'Mm.'], win: ['That\'s the game. Fine.'] } },
+};
+const YOU = { name: 'You', full: 'You', look: { dept: 'works', skin: 2, hair: 'short', hc: 'brown', h: 1, bw: 1 } };
+const AUTO = { react: .3, speed: 5.6, miss: .1, missAmt: .5, curve: .3, aim: [.2, .6] };   // the test autopilot for your side
+
+function makeFigure(look, team) {
+  const bw = look.bw || 1, uni = DEPT[look.dept], suit = '#27313a', pants = '#3a4653', boot = '#16191d', skin = SKIN[look.skin], hc = HAIR[look.hc] || '#222';
+  const P = [];
+  const add = (g, c, m) => P.push({ g, c, m });
+  for (const s of [1, -1]) {
+    add(cyl(.075 * bw, .06 * bw, .78), pants, M4(s * .1 * bw, .47, 0));
+    add(BOX, boot, M4(s * .1 * bw, .06, .04, .13 * bw, .12, .26));
+  }
+  add(SPH, pants, M4(0, .86, 0, .17 * bw, .1, .12 * bw));
+  add(cyl(.19 * bw, .16 * bw, .56), suit, M4(0, 1.12, 0));
+  add(cyl(.2 * bw, .195 * bw, .2), uni, M4(0, 1.3, 0));
+  add(cyl(.205 * bw, .205 * bw, .05), team, M4(0, .9, 0));
+  add(SPH, uni, M4(0, 1.4, 0, .21 * bw, .08, .15 * bw));
+  add(cyl(.06, .07, .1), skin, M4(0, 1.47, 0));
+  add(SPH, skin, M4(0, 1.62, 0, .14, .15, .14));
+  if (look.hair === 'short') add(SPH, hc, M4(0, 1.66, -.015, .148, .12, .148));
+  if (look.hair === 'buzz') add(SPH, hc, M4(0, 1.645, -.01, .144, .13, .145));
+  if (look.hair === 'curls') { add(SPH, hc, M4(0, 1.67, -.02, .17, .14, .17)); for (const s of [1, -1]) add(SPH, hc, M4(s * .12, 1.6, -.04, .08, .1, .08)); }
+  if (look.band) add(cyl(.152, .152, .035, 14), '#f3efe4', M4(0, 1.69, -.005, 1, 1, 1, -.15));
+  if (look.beard) add(SPH, hc, M4(0, 1.54, .07, .1, .07, .07));
+  if (look.tache) add(BOX, '#9f9a93', M4(0, 1.585, .135, .11, .025, .03));
+  const root = new THREE.Group();
+  const body = new THREE.Mesh(partsToGeo(P), LAMB); root.add(body);
+  const armGeo = partsToGeo([{ g: cyl(.06, .05, .58), c: uni, m: M4(0, -.29, 0) }, { g: SPH, c: '#e8eef0', m: M4(0, -.62, 0, .07, .075, .07) }]);
+  root.arms = [1, -1].map(s => { const a = new THREE.Mesh(armGeo, LAMB); a.position.set(s * .25 * bw, 1.4, 0); a.rotation.z = s * .12; root.add(a); return a; });
+  root.scale.setScalar(look.h || 1);
+  const sh = new THREE.Mesh(SHADOW_GEO, SHADOW_MAT); sh.position.y = .012; root.add(sh);
+  scene.add(root);
+  return root;
+}
+const SHADOW_GEO = new THREE.CircleGeometry(.36, 16).rotateX(-Math.PI / 2);
+const SHADOW_MAT = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: .45, depthWrite: false });
+
+// The crowd in the stands: two instanced meshes (bodies and heads), seats from a fixed stream so they never change.
+const crowd = (function () {
+  let s = 99; const r = () => ((s = (s * 16807) % 2147483647) / 2147483647);
+  const seats = [];
+  for (let i = 0; i < 3; i++) for (let k = 0; k < 11; k++) { if (r() < .3) continue; seats.push([-4.0 - i * 1.05 + .1, .38 + i * .42 + .1, -6 + k * 1.1 + (r() - .5) * .3]); }
+  const n = seats.length;
+  const bodyG = partsToGeo([{ g: cyl(.17, .2, .55), c: '#ffffff', m: M4(0, .3, 0) }, { g: BOX, c: '#bfc6d0', m: M4(0, .06, .2, .34, .12, .4) }]);
+  const headG = partsToGeo([{ g: SPH, c: '#ffffff', m: M4(0, 0, 0, .13, .14, .13) }]);
+  const bodies = new THREE.InstancedMesh(bodyG, LAMB, n), heads = new THREE.InstancedMesh(headG, LAMB, n);
+  const depts = Object.values(DEPT).concat(['#6a5a8a', '#4a6a4a', '#8a5a4a']);
+  const ph = [];
+  for (let i = 0; i < n; i++) { bodies.setColorAt(i, col(depts[Math.floor(r() * depts.length)])); heads.setColorAt(i, col(SKIN[Math.floor(r() * 6)])); ph.push(r() * 6.28); }
+  scene.add(bodies, heads);
+  const m = new THREE.Matrix4(), q = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, Math.PI / 2, 0)), one = new THREE.Vector3(1, 1, 1), v = new THREE.Vector3();
+  let cheer = 0, groan = 0;
+  function update(t, dt) {
+    cheer = Math.max(0, cheer - dt * .9); groan = Math.max(0, groan - dt * .7);
+    for (let i = 0; i < n; i++) {
+      const [x, y, z] = seats[i];
+      const jump = cheer > 0 ? Math.max(0, Math.sin(t * 11 + ph[i])) * .22 * Math.min(1, cheer * 1.5) : 0;
+      const idle = RM ? 0 : Math.sin(t * 1.3 + ph[i]) * .012;
+      v.set(x, y + jump + idle, z); m.compose(v, q, one); bodies.setMatrixAt(i, m);
+      v.set(x + (groan > 0 ? .05 * groan : 0), y + .72 + jump + idle - groan * .07, z); m.compose(v, q, one); heads.setMatrixAt(i, m);
+    }
+    bodies.instanceMatrix.needsUpdate = heads.instanceMatrix.needsUpdate = true;
+  }
+  return { update, cheer: () => { cheer = 1.4; }, groan: () => { groan = 1; } };
+})();
+
+// =====================================================================
+// 4. THE DISC, ITS RING, TRAIL AND PULSE
+// =====================================================================
+const discMat = new THREE.MeshBasicMaterial({ color: col('#ffffff'), toneMapped: false });
+const disc = new THREE.Mesh(cyl(DISC_R, DISC_R, .05, 20), discMat); scene.add(disc);
+const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: GLOW, color: col(CY), blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false })); halo.scale.setScalar(1.1); disc.add(halo);
+const ring = new THREE.Mesh(new THREE.RingGeometry(.24, .32, 24).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: col('#ffffff'), transparent: true, opacity: .55, depthWrite: false, toneMapped: false }));
+ring.position.y = .02; scene.add(ring);
+const TRN = 14;
+const trailGeo = new THREE.BufferGeometry();
+trailGeo.setAttribute('position', new THREE.Float32BufferAttribute(new Float32Array(TRN * 2 * 3), 3));
+trailGeo.setAttribute('color', new THREE.Float32BufferAttribute(new Float32Array(TRN * 2 * 3), 3));
+{ const idx = []; for (let i = 0; i < TRN - 1; i++) { const a = i * 2; idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2); } trailGeo.setIndex(idx); }
+const trail = new THREE.Mesh(trailGeo, new THREE.MeshBasicMaterial({ vertexColors: true, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, toneMapped: false }));
+trail.frustumCulled = false; scene.add(trail);
+const trailPts = [];
+const pulse = new THREE.Sprite(new THREE.SpriteMaterial({ map: RING, color: col(CY), blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false, transparent: true }));
+pulse.visible = false; scene.add(pulse); let pulseT = 1;
+
+// =====================================================================
+// 5. THE GAME (fixed 60 steps a second, one seeded stream per game)
+// =====================================================================
+const DT = 1 / 60, S0 = 5.0, SCAP = 10.5, SUP = 1.05, REACH = .9, MAXA = Math.PI / 3, CURVE_K = .5, CURL_DECAY = 1.5, CHARGE = 4 / 3, YOU_SPEED = 9;
+function mulberry(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+let G = null;         // the game in play
+let RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const chatR = mulberry(7);      // chatter only: its own stream so talk never shifts the game
+
+function newPlayer(side, who, ai) {
+  return { side, who, ai, x: 0, z: side * BASE, vx: 0, tx: 0, tz: side * BASE, streak: 0, swing: 0, plan: null, fig: null, hits: 0 };
+}
+function newGame(o) {
+  const g = { seed: o.seed >>> 0 || 1, target: o.quick ? 5 : 7, watch: !!o.watch, step: 0, phase: 'serve', timer: 1, score: [0, 0], rally: 0, log: [], how: o.how ? 0 : -1, howMoved: 0, trail: [] };
+  g.rng = mulberry(g.seed * 2654435761);
+  const youWho = o.watch ? CREW[o.watch[0]] : YOU, themWho = o.watch ? CREW[o.watch[1]] : CREW[o.opp];
+  g.p = [newPlayer(1, youWho, o.watch ? youWho : (o.autoYou ? AUTO : null)), newPlayer(-1, themWho, themWho)];
+  g.server = g.rng() < .5 ? 0 : 1;
+  g.d = { x: 0, z: 0, vx: 0, vz: 0, spd: S0, curl: 0, boost: 1, owner: g.server, charged: false };
+  placeServe(g);
+  return g;
+}
+function placeServe(g) {
+  const sp = g.p[g.server], d = g.d;
+  d.x = sp.x; d.z = sp.z - sp.side * .7; d.vx = d.vz = 0; d.curl = 0; d.spd = S0; d.boost = 1; d.owner = g.server; d.charged = false;
+  g.p.forEach(p => { p.streak = 0; p.plan = null; });
+  g.rally = 0; g.trail = [];
+}
+function launch(g) {
+  const sp = g.p[g.server], d = g.d;
+  const a = (g.rng() * 2 - 1) * (Math.PI / 6);      // the serve angle, from the game's own stream
+  d.vx = Math.sin(a) * d.spd; d.vz = -sp.side * Math.cos(a) * d.spd;
+  g.phase = 'live'; planAll(g); ev('serve');
+}
+// Move a disc one step; returns 'wall:<side>' if it bounced (shared by the game and the crew's prediction).
+function discStep(d) {
+  d.vx += d.curl * DT; d.curl *= Math.exp(-CURL_DECAY * DT);
+  const sp = d.spd * d.boost, m = Math.hypot(d.vx, d.vz) || 1;
+  d.vx *= sp / m; d.vz *= sp / m;
+  if (Math.abs(d.vz) < .45 * sp) { d.vz = Math.sign(d.vz || 1) * .45 * sp; d.vx = Math.sign(d.vx) * Math.sqrt(sp * sp - d.vz * d.vz); }
+  d.x += d.vx * DT; d.z += d.vz * DT;
+  const lim = HX - DISC_R;
+  if (d.x > lim) { d.x = 2 * lim - d.x; d.vx = -Math.abs(d.vx); d.curl *= -.4; return 1; }
+  if (d.x < -lim) { d.x = -2 * lim - d.x; d.vx = Math.abs(d.vx); d.curl *= -.4; return -1; }
+  return 0;
+}
+// Where will the disc cross z? (the crew's reading of it, before their error is added)
+function predictX(d, z) {
+  const c = { ...d }; let n = 0;
+  while (n++ < 400) { const before = c.z; discStep(c); if ((before - z) * (c.z - z) <= 0) return c.x; }
+  return c.x;
+}
+function planAll(g) {
+  for (const p of g.p) {
+    if (!p.ai) continue;
+    const toward = g.d.vz * p.side > 0, L = p.ai, r = g.rng;
+    if (!toward) { p.plan = { at: g.step + Math.round(L.react * 30), home: true }; continue; }
+    // misjudging: likelier as the disc speeds up, and on a charged or curving disc; a misjudge really misses
+    const d = g.d, k = .5 + 1.3 * (d.spd - S0) / (SCAP - S0) + (d.charged ? .8 : 0) + (Math.abs(d.curl) > .3 ? .6 : 0);
+    const err = r() < L.miss * k ? (r() < .5 ? -1 : 1) * (REACH + .05 + r() * L.missAmt) : (r() * 2 - 1) * .12;
+    const other = g.p[p === g.p[0] ? 1 : 0];
+    const mag = L.aim[0] + r() * (L.aim[1] - L.aim[0]);
+    let sgn = Math.abs(other.x) > .3 ? -Math.sign(other.x) : (r() < .5 ? -1 : 1);
+    if (L.aimRand) sgn = r() < .5 ? -1 : 1;
+    const off = mag * sgn;                                      // meet it off-centre by this much: off>0 sends it toward +x
+    const curve = r() < L.curve ? (r() < .5 ? -1 : 1) : 0;
+    p.plan = { at: g.step + Math.round(L.react / DT), err, off, curve, x: null };
+  }
+}
+function step(g) {
+  g.step++;
+  const d = g.d;
+  // players move
+  for (const p of g.p) {
+    const ox = p.x;
+    if (p.ai) aiMove(g, p);
+    else humanMove(g, p);
+    p.vx = (p.x - ox) / DT;
+    p.swing = Math.max(0, p.swing - DT * 3.5);
+    if (!p.ai && g.how === 0) { g.howMoved += Math.abs(p.x - ox); if (g.howMoved > 1.6) howDone(0); }
+  }
+  if (g.phase === 'serve') {
+    const sp = g.p[g.server]; d.x = sp.x; d.z = sp.z - sp.side * .7;
+    if ((g.timer -= DT) <= 0) launch(g);
+    return;
+  }
+  if (g.phase === 'point') { if ((g.timer -= DT) <= 0) { if (g.over) { g.phase = 'over'; ev('over'); } else { g.phase = 'serve'; g.timer = 1; placeServe(g); ev('serveReady'); } } return; }
+  if (g.phase !== 'live') return;
+  const bz = d.z, w = discStep(d);
+  g.trail.unshift(d.x, d.z); if (g.trail.length > TRN * 2) g.trail.length = TRN * 2;   // the light trail: the last few steps
+  if (w) ev('wall', w);
+  if (bz * d.z <= 0) ev('net');
+  for (let i = 0; i < 2; i++) {
+    const p = g.p[i];
+    if (d.vz * p.side <= 0) continue;                         // moving away from this player
+    const dz = d.z - p.z, dx = d.x - p.x;
+    if (Math.abs(dz) < .45 && Math.abs(dx) < REACH) { hit(g, i, dx); break; }
+  }
+  for (let i = 0; i < 2; i++) {
+    const p = g.p[i];
+    if (d.z * p.side > OUT) { point(g, 1 - i); break; }
+  }
+}
+function hit(g, i, dx) {
+  const p = g.p[i], d = g.d;
+  const off = Math.max(-1, Math.min(1, dx / REACH)), a = off * MAXA;
+  d.spd = Math.min(SCAP, d.spd * SUP);
+  p.streak++;
+  const charged = p.streak >= 4;                               // after three returns in a row, the next one is charged
+  if (charged) p.streak = 0;
+  d.boost = charged ? CHARGE : 1; d.charged = charged;
+  // as in Pong, meeting it off-centre sends it on toward that side (+x stays +x), up to 60°
+  d.vx = Math.sin(a) * d.spd; d.vz = -p.side * Math.cos(a) * d.spd;
+  const curved = Math.abs(p.vx) > 1.0;
+  d.curl = curved ? Math.max(-8, Math.min(8, p.vx)) * CURVE_K : 0;
+  d.z = p.z - p.side * .46; d.owner = i;
+  p.swing = 1; p.hits++; g.rally++;
+  g.p[1 - i].streak = 0;
+  planAll(g);
+  ev('hit', { i, charged, curved, off });
+}
+function point(g, w) {
+  g.score[w]++; g.server = 1 - w; g.phase = 'point'; g.timer = 1.1;
+  const [a, b] = g.score, t = g.target;
+  if ((a >= t || b >= t) && Math.abs(a - b) >= 2) { g.over = true; g.winner = a > b ? 0 : 1; g.timer = 1.4; }
+  g.log.push({ step: g.step, w, rally: g.rally, dx: +(g.d.x - g.p[1 - w].x).toFixed(2), spd: +g.d.spd.toFixed(2) });
+  ev('point', w);
+}
+function aiMove(g, p) {
+  const L = p.ai, d = g.d, sp = L.speed;
+  let tx = p.x, tz = p.side * BASE;
+  if (g.phase === 'serve' || g.phase === 'point') tx = p.x * .98;
+  else if (p.plan && g.step >= p.plan.at) {
+    if (p.plan.home) tx = 0;
+    else {
+      if (p.plan.x === null) p.plan.x = predictX(d, p.z);
+      tx = p.plan.x + p.plan.err - p.plan.off * REACH * .8;
+      const tt = (p.z - d.z) / (d.vz || 1e-3);                  // seconds until it reaches me
+      if (p.plan.curve) tx += p.plan.curve * (tt < .18 ? .5 : -.5);   // wait to one side, then sweep through the disc so it meets you moving
+    }
+  }
+  const lim = HX - .25;
+  tx = Math.max(-lim, Math.min(lim, tx));
+  const k = p.plan && p.plan.home ? .6 : 1;
+  p.x += Math.max(-sp * k * DT, Math.min(sp * k * DT, tx - p.x));
+  p.z += Math.max(-2 * DT, Math.min(2 * DT, tz - p.z));
+}
+// You: follow the thumb/mouse target, or the keys.
+const INPUT = { tx: null, tz: null, keys: {} };
+function humanMove(g, p) {
+  const lim = HX - .25;
+  const kx = (INPUT.keys.r ? 1 : 0) - (INPUT.keys.l ? 1 : 0), kz = (INPUT.keys.b ? 1 : 0) - (INPUT.keys.f ? 1 : 0);
+  if (kx || kz) { p.x += kx * 6 * DT; p.z += kz * 4 * DT; INPUT.tx = null; INPUT.tz = null; }
+  else {
+    if (INPUT.tx !== null) p.x += Math.max(-YOU_SPEED * DT, Math.min(YOU_SPEED * DT, INPUT.tx - p.x));
+    if (INPUT.tz !== null) p.z += Math.max(-5 * DT, Math.min(5 * DT, INPUT.tz - p.z));
+  }
+  p.x = Math.max(-lim, Math.min(lim, p.x));
+  p.z = Math.max(BASE - ZONE + .2, Math.min(BASE + .25, p.z));
+}
+
+// =====================================================================
+// 6. EVENTS: sound, talk, the crowd, How to play
+// =====================================================================
+let AC = null;
+function blip(f, d = .08, type = 'sine', v = .12, f2) {
+  if (!document.getElementById('snd').checked || !AC || G && G.fast) return;
+  const t = AC.currentTime, o = AC.createOscillator(), gn = AC.createGain();
+  o.type = type; o.frequency.setValueAtTime(f, t); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + d);
+  gn.gain.setValueAtTime(v, t); gn.gain.exponentialRampToValueAtTime(.001, t + d);
+  o.connect(gn).connect(AC.destination); o.start(t); o.stop(t + d + .02);
+}
+function say(i, kind) {
+  const who = G.p[i].who; if (!who.lines || !who.lines[kind]) return;
+  const L = who.lines[kind]; SAY[i] = { text: L[Math.floor(chatR() * L.length)], t: 2 };
+}
+const SAY = [null, null];
+function ev(kind, a) {
+  if (!G) return;
+  if (kind === 'hit') {
+    const p = G.p[a.i];
+    if (!G.fast) { pulse.visible = true; pulseT = 0; pulse.position.set(p.x, DISC_Y, G.d.z); pulse.material.color.copy(col(a.i === 0 ? CY : OR)); }
+    blip(a.charged ? 880 : 520 + G.rally * 8, a.charged ? .16 : .07, a.charged ? 'sawtooth' : 'triangle', .1, a.charged ? 1320 : 0);
+    if (a.charged) say(a.i, 'charged'); else if (a.curved && chatR() < .35) say(a.i, 'curve');
+    if (a.i === 0 && !p.ai) { if (G.how === 1) howDone(1); if (G.how === 2 && a.curved) howDone(2); if (G.how === 3 && a.charged) howDone(3); }
+  }
+  if (kind === 'wall') { flash(G.d.x + a * DISC_R, DISC_Y, G.d.z); blip(300, .05, 'square', .05); }
+  if (kind === 'net') flash(G.d.x, DISC_Y, 0, .7);
+  if (kind === 'point') {
+    const p = G.p[a];
+    if (!G.fast) {
+      drawBoard(G.score[0], G.score[1], G.p[0].who.name, G.p[1].who.name, G.over ? (p.who.name === 'You' ? 'YOU WIN' : p.who.name.toUpperCase() + ' WINS') : null);
+      callout(G.over ? 'Game: ' + p.who.name : 'Point: ' + p.who.name, a === 0 ? CY : OR);
+      if (!RM) shake = .25;
+    }
+    if (G.watch || a === 0) crowd.cheer(); else crowd.groan();
+    blip(a === 0 ? 660 : 330, .25, 'sine', .12, a === 0 ? 990 : 220);
+    if (G.over) say(a, 'win'); else if (chatR() < .45) say(a, 'point'); else if (chatR() < .3) say(1 - a, 'lose');
+  }
+  if (kind === 'over' && !G.fast) showResult();
+}
+let callT = 0;
+function callout(t, c) { const e = document.getElementById('call'); e.textContent = t; e.style.color = c; e.classList.remove('hide'); callT = 1.1; }
+
+const HOW_TXT = [
+  matchMedia('(pointer: coarse)').matches ? 'Put your thumb down and drag: you go where your thumb goes.' : 'Move the mouse, or use the arrow keys, to move your player.',
+  'No button to hit: stand in the disc\'s way and it goes back.',
+  'Be moving as the disc meets you and it curves that way.',
+  'Three returns in a row and your next one is charged.',
+];
+function howShow() {
+  const e = document.getElementById('how');
+  if (!G || G.how < 0 || G.how > 3) { e.classList.add('hide'); return; }
+  e.classList.remove('hide'); e.querySelector('.n').textContent = 'How to play · ' + (G.how + 1) + ' of 4'; e.querySelector('.x').textContent = HOW_TXT[G.how];
+  document.getElementById('howNext').textContent = G.how === 3 ? 'Done' : 'Next';
+}
+function howDone(k) { if (!G || G.how !== k) return; G.how = k === 3 ? -1 : k + 1; if (G.how === -1) try { localStorage.setItem('ld.how', '1'); } catch (e) {} howShow(); }
+
+// =====================================================================
+// 7. CAMERA: the menu overview and the game view (fitted to the screen)
+// =====================================================================
+const tmpCam = new THREE.PerspectiveCamera(50, 1, .1, 100);
+let gameCam = null;
+// Starts at the plan's ~55° (42° held sideways) and lowers the angle only as far as it must for the
+// scoreboard to show above the far end.
+function fitGameView() {
+  const asp = innerWidth / innerHeight, port = asp < 1;
+  const v = new THREE.Vector3(), dir = new THREE.Vector3();
+  const ndc = (x, y, z) => v.set(x, y, z).project(tmpCam);
+  const goalY = port ? -.56 : -.5;                               // your player about a fifth of the way up, your thumb below
+  const place = (dist, tz) => { tmpCam.position.set(0, 0, tz).addScaledVector(dir, dist); tmpCam.lookAt(0, 0, tz); tmpCam.updateMatrixWorld(); };
+  let best = null;
+  for (let deg = port ? 55 : 42; deg >= 30 && !best; deg -= 1) for (const fov of port ? [52, 58] : [44, 50]) {
+  if (best) break;
+  const el = deg * Math.PI / 180; dir.set(0, Math.sin(el), Math.cos(el));
+  tmpCam.fov = fov; tmpCam.aspect = asp; tmpCam.updateProjectionMatrix();
+  for (let dist = 5; dist < 40; dist += .25) {
+    let lo = -14, hi = BASE;                                     // you sit higher on screen as the aim point moves bow-wards
+    for (let k = 0; k < 40; k++) { const mid = (lo + hi) / 2; place(dist, mid); if (ndc(0, .9, BASE).y > goalY) hi = mid; else lo = mid; }
+    const tz = (lo + hi) / 2; place(dist, tz);
+    if (Math.abs(ndc(0, .9, BASE).y - goalY) > .01) continue;   // couldn't put you where you belong at this distance
+    const w = Math.abs(ndc(HX + .3, 0, BASE + .4).x), top = ndc(0, port ? 6.5 : 4.4, -10.9).y;   // the board's top (held sideways: its digits) clears the score pill
+    const near = ndc(0, 0, OUT + .2).y;
+    if (w <= .98 && top <= (port ? .88 : .9) && near > -.98) { best = { pos: tmpCam.position.clone(), target: new THREE.Vector3(0, 0, tz), fov, deg }; break; }
+  }
+  }
+  if (!best) { dir.set(0, .7, .7); tmpCam.fov = 50; place(18, 0); best = { pos: tmpCam.position.clone(), target: new THREE.Vector3(0, 0, 0), fov: 50, deg: 45 }; }
+  gameCam = best;
+}
+fitGameView();
+const camFrom = { pos: new THREE.Vector3(), target: new THREE.Vector3(), fov: 50 }, camCur = { pos: new THREE.Vector3(), target: new THREE.Vector3(), fov: 50 };
+let camMode = 'menu', camT = 1, shake = 0, menuA = .6;
+function overview(t) {
+  const a = RM ? .6 : menuA + t * .05, r = 17;
+  return { pos: new THREE.Vector3(Math.sin(a) * r * .8, 10, Math.cos(a) * r), target: new THREE.Vector3(0, 0, -1.5), fov: 50 };
+}
+function setCam(mode) { camFrom.pos.copy(camCur.pos); camFrom.target.copy(camCur.target); camFrom.fov = camCur.fov; camMode = mode; camT = RM ? 1 : 0; }
+
+// =====================================================================
+// 8. FLOW: menu, start, result, records
+// =====================================================================
+const $ = id => document.getElementById(id);
+let pick = 'pell';
+function rec() { try { return JSON.parse(localStorage.getItem('ld.rec') || '{}'); } catch (e) { return {}; } }
+function saveRec(k, won) { const r = rec(); r[k] = r[k] || [0, 0]; r[k][won ? 0 : 1]++; try { localStorage.setItem('ld.rec', JSON.stringify(r)); } catch (e) {} }
+function buildMenu() {
+  const box = $('opps'); box.innerHTML = '';
+  for (const [k, c] of Object.entries(CREW)) {
+    const b = document.createElement('button'); b.className = 'opp'; b.dataset.k = k;
+    b.innerHTML = `<b>${c.name}<span class="lv ${c.lvl}">${c.lvl}</span></b><small>${c.blurb}</small>`;
+    b.onclick = () => { pick = k; startGame({ opp: k }); };
+    box.appendChild(b);
+  }
+  for (const id of ['wa', 'wb']) { const s = $(id); s.innerHTML = Object.entries(CREW).map(([k, c]) => `<option value="${k}">${c.name}</option>`).join(''); }
+  $('wa').value = 'holt'; $('wb').value = 'rina';
+  const r = rec(), parts = Object.entries(r).map(([k, v]) => `${CREW[k] ? CREW[k].name : k} ${v[0]}–${v[1]}`);
+  $('rec').textContent = parts.length ? 'Your record: ' + parts.join(' · ') : '';
+  let how = true; try { how = !localStorage.getItem('ld.how'); } catch (e) {}
+  $('howOn').checked = how;
+}
+let lastOpts = null;
+function clearFigures() { if (G) for (const p of G.p) if (p.fig) { scene.remove(p.fig); p.fig = null; } }
+function startGame(o) {
+  if (!AC) try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {}
+  RM = $('rm').checked;
+  const opts = Object.assign({ seed: +$('seed').value || 1, quick: $('quick').checked, how: $('howOn').checked && !o.watch }, o);
+  lastOpts = opts;
+  clearFigures();
+  G = newGame(opts);
+  G.p[0].fig = makeFigure(G.p[0].who.look, CY); G.p[1].fig = makeFigure(G.p[1].who.look, OR);
+  G.p[0].fig.rotation.y = Math.PI;                              // you face the stern (figures are built facing +z, as the stern player does)
+  trailPts.length = 0; SAY[0] = SAY[1] = null;
+  drawBoard(0, 0, G.p[0].who.name, G.p[1].who.name);
+  for (const id of ['menu', 'result']) $(id).classList.add('hide');
+  for (const id of ['hud', 'leave']) $(id).classList.remove('hide');
+  $('leave').textContent = G.watch ? 'Stop watching' : 'Leave';
+  INPUT.tx = INPUT.tz = null;
+  tags[0].textContent = G.p[0].who.name; tags[1].textContent = G.p[1].who.name;
+  tags[0].style.color = '#9fe3ff'; tags[1].style.color = '#ffd2a0';
+  setCam('game'); howShow(); acc = 0;
+  return G;
+}
+function showResult() {
+  const w = G.winner, [a, b] = G.score, hi = Math.max(a, b), lo = Math.min(a, b);
+  let t, s = '';
+  if (G.watch) { t = G.p[w].who.name + ' wins ' + hi + '–' + lo; s = G.p[0].who.full + ' v ' + G.p[1].who.full + ' · seed ' + G.seed; }
+  else {
+    t = w === 0 ? 'You win ' + hi + '–' + lo : G.p[1].who.name + ' wins ' + hi + '–' + lo;
+    saveRec(lastOpts.opp, w === 0); const r = rec()[lastOpts.opp];
+    s = 'Your record against ' + G.p[1].who.full + ': ' + r[0] + '–' + r[1] + '. Longest rally: ' + Math.max(0, ...G.log.map(l => l.rally)) + '.';
+  }
+  $('resT').textContent = t; $('resS').textContent = s;
+  $('result').classList.remove('hide'); $('how').classList.add('hide'); $('leave').classList.add('hide');   // the result sits over the court
+}
+function leave() {
+  clearFigures(); G = null;
+  for (const id of ['hud', 'leave', 'how', 'result', 'call']) $(id).classList.add('hide');
+  $('menu').classList.remove('hide'); buildMenu(); setCam('menu'); drawBoard(0, 0, 'Home', 'Away');
+  SAY[0] = SAY[1] = null;
+}
+$('leave').onclick = leave; $('done').onclick = leave;
+$('again').onclick = () => { const o = Object.assign({}, lastOpts); o.how = false; o.seed = (o.seed || 1) + 1; $('seed').value = o.seed; startGame(o); };
+$('watch').onclick = () => startGame({ watch: [$('wa').value, $('wb').value] });
+$('howNext').onclick = e => { e.stopPropagation(); if (G) howDone(G.how); };
+$('howSkip').onclick = e => { e.stopPropagation(); if (G) { G.how = -1; try { localStorage.setItem('ld.how', '1'); } catch (er) {} howShow(); } };
+$('rm').onchange = () => { RM = $('rm').checked; };
+if (Q.get('seed')) $('seed').value = Q.get('seed');
+$('rm').checked = RM;
+buildMenu();
+
+// =====================================================================
+// 9. INPUT: absolute thumb position (left edge = left side of the court), mouse, keys
+// =====================================================================
+const cv = renderer.domElement;
+let drag = null;
+function aimX(cx) { const f = cx / innerWidth * 2 - 1; return f * (HX - .25) * 1.12; }
+cv.addEventListener('pointerdown', e => {
+  if (!G || G.watch) return;
+  drag = { id: e.pointerId, y0: e.clientY, z0: G.p[0].z };
+  INPUT.tx = aimX(e.clientX); try { cv.setPointerCapture(e.pointerId); } catch (er) {}
+});
+cv.addEventListener('pointermove', e => {
+  if (!G || G.watch) return;
+  if (drag && drag.id === e.pointerId) { INPUT.tx = aimX(e.clientX); INPUT.tz = drag.z0 + (e.clientY - drag.y0) / innerHeight * 5; }
+  else if (e.pointerType === 'mouse') INPUT.tx = aimX(e.clientX);
+});
+const lift = e => { if (drag && drag.id === e.pointerId) { drag = null; if (G && e.pointerType !== 'mouse') { INPUT.tx = G.p[0].x; INPUT.tz = G.p[0].z; } } };
+cv.addEventListener('pointerup', lift); cv.addEventListener('pointercancel', lift);
+const KEYS = { ArrowLeft: 'l', a: 'l', A: 'l', ArrowRight: 'r', d: 'r', D: 'r', ArrowUp: 'f', w: 'f', W: 'f', ArrowDown: 'b', s: 'b', S: 'b' };
+addEventListener('keydown', e => { if (KEYS[e.key]) { INPUT.keys[KEYS[e.key]] = true; e.preventDefault(); } if (e.key === 'Escape' && G) leave(); });
+addEventListener('keyup', e => { if (KEYS[e.key]) INPUT.keys[KEYS[e.key]] = false; });
+addEventListener('blur', () => { INPUT.keys = {}; });
+addEventListener('resize', () => { renderer.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); fitGameView(); });
+
+// =====================================================================
+// 10. DRAWING EACH FRAME
+// =====================================================================
+const tags = [0, 1].map(() => { const e = document.createElement('div'); e.className = 'tag hide'; document.body.appendChild(e); return e; });
+const says = [0, 1].map(() => { const e = document.createElement('div'); e.className = 'say hide'; document.body.appendChild(e); return e; });
+const V = new THREE.Vector3();
+function toScreen(x, y, z, el) {
+  V.set(x, y, z).project(camera);
+  if (V.z > 1) { el.classList.add('hide'); return; }
+  el.style.left = ((V.x + 1) / 2 * innerWidth) + 'px'; el.style.top = ((1 - V.y) / 2 * innerHeight) + 'px'; el.classList.remove('hide');
+}
+function drawGame(dtR, tR) {
+  const d = G.d;
+  for (const p of G.p) {
+    const f = p.fig; f.position.set(p.x, RM ? 0 : Math.abs(Math.sin(tR * 9)) * Math.min(1, Math.abs(p.vx) / 6) * .06, p.z);
+    f.rotation.z = Math.max(-.2, Math.min(.2, p.vx * .03 * p.side));   // lean into the move
+    const reachSide = -Math.sign(d.x - p.x) * p.side || 1;    // which arm reaches for the disc, in the figure's own x
+    f.arms.forEach((a, k) => { const s = k === 0 ? 1 : -1; const sw = s === reachSide ? p.swing : 0; a.rotation.x = -sw * 1.7 - (RM ? 0 : Math.sin(tR * 9) * Math.min(1, Math.abs(p.vx) / 6) * .4 * s); a.rotation.z = s * (.12 + sw * .5); });
+  }
+  const live = G.phase === 'live' || G.phase === 'serve';
+  disc.visible = ring.visible = live || G.phase === 'point';
+  disc.position.set(d.x, DISC_Y + (G.phase === 'serve' ? Math.sin(tR * 8) * .06 : 0), d.z);
+  disc.rotation.y += dtR * 12;
+  const dc = d.charged ? '#ffffff' : (d.owner === 0 ? CY : OR);
+  discMat.color.copy(col(d.charged ? '#ffffff' : (d.owner === 0 ? '#d8fbff' : '#ffe6cc')));
+  halo.material.color.copy(col(dc)); halo.scale.setScalar(d.charged ? 1.8 + Math.sin(tR * 30) * .15 : 1.15);
+  ring.position.x = d.x; ring.position.z = d.z; ring.material.color.copy(col(dc));
+  // trail
+  trailPts.length = 0; if (G.phase === 'live') for (let i = 0; i < G.trail.length; i += 2) trailPts.push([G.trail[i], G.trail[i + 1]]);
+  const pa = trailGeo.attributes.position.array, ca = trailGeo.attributes.color.array, tc = col(dc);
+  for (let i = 0; i < TRN; i++) {
+    const a = trailPts[Math.min(i, trailPts.length - 1)] || [d.x, d.z], b = trailPts[Math.min(i + 1, trailPts.length - 1)] || a;
+    let nx = -(b[1] - a[1]), nz = b[0] - a[0]; const nl = Math.hypot(nx, nz) || 1; nx /= nl; nz /= nl;
+    const wdt = DISC_R * (1 - i / TRN) * (d.charged ? 1.4 : 1), k = trailPts.length ? (1 - i / TRN) * (d.charged ? 1 : .6) : 0;
+    pa.set([a[0] + nx * wdt, DISC_Y, a[1] + nz * wdt, a[0] - nx * wdt, DISC_Y, a[1] - nz * wdt], i * 6);
+    ca.set([tc.r * k, tc.g * k, tc.b * k, tc.r * k, tc.g * k, tc.b * k], i * 6);
+  }
+  trailGeo.attributes.position.needsUpdate = trailGeo.attributes.color.needsUpdate = true;
+  // labels and talk
+  for (let i = 0; i < 2; i++) {
+    const p = G.p[i], h = 2.05 * (p.who.look.h || 1);
+    toScreen(p.x, h, p.z, tags[i]);
+    if (SAY[i] && (SAY[i].t -= dtR) > 0) { says[i].textContent = SAY[i].text; toScreen(p.x, h + .75, p.z, says[i]); } else { SAY[i] = null; says[i].classList.add('hide'); }
+  }
+  const [a, b] = G.score;
+  $('score').innerHTML = `<span class="a">${G.p[0].who.name} ${a}</span> · <span class="b">${b} ${G.p[1].who.name}</span>${G.target === 5 ? ' <small style="color:#9fb2b8">to 5</small>' : ''}`;
+}
+let acc = 0, last = performance.now(), tR = 0;
+function frame(now) {
+  requestAnimationFrame(frame);
+  let dtR = Math.min(.1, (now - last) / 1000); last = now; tR += dtR;
+  if (G && !G.paused && G.phase !== 'over') {
+    acc += dtR; let n = 0;
+    while (acc >= DT && n < 6) { step(G); acc -= DT; n++; }
+    if (n === 6) acc = 0;
+  }
+  // camera
+  camT = Math.min(1, camT + dtR / .8);
+  const want = camMode === 'game' && gameCam ? gameCam : overview(tR);
+  const e = camT * camT * (3 - 2 * camT);
+  camCur.pos.lerpVectors(camFrom.pos, want.pos, e); camCur.target.lerpVectors(camFrom.target, want.target, e); camCur.fov = camFrom.fov + (want.fov - camFrom.fov) * e;
+  camera.position.copy(camCur.pos);
+  if (shake > 0) { shake = Math.max(0, shake - dtR); camera.position.x += Math.sin(tR * 70) * shake * .12; camera.position.y += Math.cos(tR * 53) * shake * .08; }
+  camera.lookAt(camCur.target);
+  if (camera.fov !== camCur.fov) { camera.fov = camCur.fov; camera.updateProjectionMatrix(); }
+  // fields, flashes, pulse
+  FIELD.uniforms.uT.value = RM ? 0 : tR;
+  for (const f of FIELD.uniforms.uF.value) f.w = Math.max(0, f.w - dtR * 4);
+  if (pulse.visible) { pulseT += dtR / .3; pulse.scale.setScalar(.6 + pulseT * 2.2); pulse.material.opacity = Math.max(0, 1 - pulseT); if (pulseT >= 1 || RM) pulse.visible = false; }
+  if (callT > 0 && (callT -= dtR) <= 0) $('call').classList.add('hide');
+  crowd.update(tR, dtR);
+  if (G && G.p[0].fig) drawGame(dtR, tR);
+  else { disc.visible = ring.visible = false; trailPts.length = 0; tags.forEach(t => t.classList.add('hide')); says.forEach(t => t.classList.add('hide')); }
+  if (G && G.phase === 'over') { tags.forEach(t => t.classList.add('hide')); }
+  renderer.render(scene, camera);
+  if (DEBUG) $('dbg').textContent = `${gameCam.deg}° · calls ${renderer.info.render.calls} · tris ${renderer.info.render.triangles} · ${G ? G.phase + ' step ' + G.step : 'menu'}`;
+}
+camCur.pos.copy(overview(0).pos); camCur.target.copy(overview(0).target); camFrom.pos.copy(camCur.pos); camFrom.target.copy(camCur.target);
+requestAnimationFrame(frame);
+document.addEventListener('visibilitychange', () => { last = performance.now(); acc = 0; });
+
+// =====================================================================
+// 11. TEST HOOKS (Playwright): start games, run steps fast, read state
+// =====================================================================
+window.LD = {
+  start: o => { startGame(o); return LD.state(); },
+  // run n fixed steps right now (fast: no sound or callouts); stops at the end of the game
+  steps: n => { if (!G) return null; G.fast = true; for (let i = 0; i < n && G.phase !== 'over'; i++) step(G); G.fast = false; if (G.phase === 'over' && $('result').classList.contains('hide')) { drawBoard(G.score[0], G.score[1], G.p[0].who.name, G.p[1].who.name, 'FINAL'); showResult(); } return LD.state(); },
+  // a whole game on paper (no drawing), the way off-screen crew games are worked out
+  paper: o => { const g = newGame(Object.assign({ seed: 1 }, o)); const keep = G; G = null; let n = 0; while (g.phase !== 'over' && n++ < 60 * 60 * 30) step(g); G = keep; return { score: g.score, steps: g.step, winner: g.winner, rallies: g.log.map(l => l.rally), log: g.log }; },
+  state: () => G && { phase: G.phase, score: G.score.slice(), step: G.step, server: G.server, you: { x: G.p[0].x, z: G.p[0].z, hits: G.p[0].hits }, them: { x: G.p[1].x, hits: G.p[1].hits }, disc: { ...G.d }, how: G.how, over: !!G.over, winner: G.winner },
+  calls: () => renderer.info.render.calls,
+  pause: v => { if (G) G.paused = v; },
+  leave,
+};
+</script>
+</body>
+</html>
