@@ -249,7 +249,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.44.2
+   STARSHIP CADET: CSV Wren                           build 0.44.3
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7808,7 +7808,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.44.2';                           // keep in step with the header's build line
+const GAME_BUILD = '0.44.3';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -9319,8 +9319,8 @@ function whereIs(person, t) {
 // for someone, they're on your deck (crossing decks with you: they step out of the lift after you), at `to` if it's a
 // place there. Only in play (the deck you're on); plans never see it. Section 10's CrewAgent walks them (escortStep)
 function escortPlanOf(p, t) {
-  if (typeof escortPlan !== 'function') return null;     // (before section 10 has run, deckDef and player don't exist yet)
-  try { if (!deckDef || !player) return null; const e = escortPlan(p, t); return e && /^(lead|follow|wait)$/.test(e.mode) ? e : null; } catch (e) { return null; }
+  if (typeof escortPlan !== 'function' && typeof worksEscort !== 'function') return null;     // (before section 10 has run, deckDef and player don't exist yet)
+  try { if (!deckDef || !player) return null; const e = (typeof escortPlan === 'function' ? escortPlan(p, t) : null) || (typeof worksEscort === 'function' ? worksEscort(p, t) : null); return e && /^(lead|follow|wait)$/.test(e.mode) ? e : null; } catch (e) { return null; }   // worksEscort: section 24's teachers (0.44.3)
 }
 function escortWhere(p, t) {
   const e = escortPlanOf(p, t); if (!e) return null;
