@@ -162,7 +162,7 @@ Deck 5 is the ship's garage, not its home, and it was built first after Deck 4 s
 
 | Area | What's there | Opens at |
 | --- | --- | --- |
-| Shuttle bay (stern) | One small shuttle, the Tern, on its pad (sleeker from 0.60.7: a tapered nose, a raked windscreen, swept fins); the flat stern hull is the bay doors; a control booth with glass over the pad. Where you first arrive. | Start (bay floor) |
+| Shuttle bay (stern) | One small shuttle, the Tern, on its pad (sleeker from 0.60.7: a tapered nose, a raked windscreen, swept fins; the second pass, 0.47.4, the user's yes: a tapered tail with engine pods, a shaped roof spine and rounded corners); the flat stern hull is the bay doors; a control booth with glass over the pad. Where you first arrive. | Start (bay floor) |
 | Bay door gear | Giant gears and rams in the stern corner; the doors slide into a pocket here. Glass panel onto the pad. | Sealed, visible through glass |
 | Cargo hold | Crates off the shuttles plus the big spares. Where supplies enter the ship; they leave on hover hand carts up the main lift. Its cargo hatch to the shuttle bay is open to Works crew and the player. | Open: supplies move by cart since Pillar 2 |
 | Cart bay | Hover hand carts, docked and charging between runs. | Opens once supplies start moving |

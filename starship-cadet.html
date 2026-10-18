@@ -212,7 +212,7 @@ body.dlgon .devhu{display:none}
 #fade{position:fixed;inset:0;background:#05080d;opacity:0;pointer-events:none;z-index:4}
 /* speech bubbles (section 8b's bubbleSay, 0.43.30): a soft card, a tail that points at the speaker, their name in a tag
    in their department's colour, a small pop on arrival. The card's own animation is cosmetic: the fade still comes from tick */
-.bubw{position:absolute;transform:translate(-50%,calc(-100% - 9px))}
+.bubw{position:absolute;left:0;top:0;will-change:transform;transform:translate(-50%,calc(-100% - 9px))}
 .bub{position:relative;width:max-content;min-width:110px;max-width:min(240px,72vw);padding:8px 12px 9px;border-radius:16px;
   background:linear-gradient(#fffdf8,#f3eee4);color:#1c2633;font-size:15px;line-height:1.35;border:1px solid rgba(255,255,255,.8);
   box-shadow:0 6px 16px rgba(4,10,18,.32),0 1px 3px rgba(4,10,18,.22);transform-origin:calc(50% + var(--tx,0px)) 100%;animation:bubIn .24s cubic-bezier(.3,1.45,.6,1) both}
@@ -1592,10 +1592,20 @@ const KIT = {
     // (half-width 1.12 at the front), the windscreen rakes back to the roof, the roof's edges are softened, the fins sweep
     // back, a dark canopy line runs aft from the windscreen, and the red and teal lines follow the taper. Same materials.
     const NZ = 2.1, NF = 3.05, NW = 1.12, NA = Math.atan2(1.39 - NW, NF - NZ), NL = Math.hypot(1.39 - NW, NF - NZ) + .04;
+    // 0.47.4 (Tern pass 2, plans/tern-pass2.md): the tail tapers like the nose, over a shorter run (straight from z TZ, half-width TW at the back)
+    const TZ = -2.45, TF = -3.05, TW = 1.12, TA = Math.atan2(1.39 - TW, TZ - TF), TL = Math.hypot(1.39 - TW, TZ - TF) + .04;
+    const slab = (pts, y, h, mat, p, bev) => {             // a flat piece drawn in plan ([x, z] corners), from y up h (bev: bevelled edges)
+      const sh = new THREE.Shape(); pts.forEach(([x, z], k) => k ? sh.lineTo(x, -z) : sh.moveTo(x, -z));
+      const geo = new THREE.ExtrudeGeometry(sh, bev ? { depth: h - 2 * bev, bevelEnabled: true, bevelThickness: bev, bevelSize: bev, bevelSegments: 1 } : { depth: h, bevelEnabled: false });
+      if (bev) geo.translate(0, 0, bev);
+      const m = new THREE.Mesh(geo, mat); m.rotation.x = -Math.PI / 2; m.position.y = y; m.castShadow = m.receiveShadow = true; p.add(m); return m;
+    };
+    const mirror = q => [...q, ...q.slice().reverse().map(([x, z]) => [-x, z])];   // the +x half's corners, nose to tail -> the whole outline
     const side = (y, h, mat, gx, roofG) => {             // a hull side at x = gx, from y to y + h; the +x side has the door gap (pz -.97 to -.03)
-      const parts = gx > 0 ? [[-3, -.97], [-.03, NZ + .02]] : [[-3, NZ + .02]];
+      const parts = gx > 0 ? [[TZ - .02, -.97], [-.03, NZ + .02]] : [[TZ - .02, NZ + .02]];
       for (const [z0, z1] of parts) box(.12, h, z1 - z0, mat, gx, y + h / 2, (z0 + z1) / 2, roofG);
       const sd = Math.sign(gx), off = Math.abs(gx) - 1.39;   // and the nose piece, angled in (off: a line laid on the hull's face)
+      box(.12, h, TL, mat, sd * ((1.39 + TW) / 2 + off * Math.cos(TA)), y + h / 2, (TZ + TF) / 2 - off * Math.sin(TA), roofG).rotation.y = sd * TA;   // the tail piece, angled in
       const cx = sd * ((1.39 + NW) / 2 + off * Math.cos(NA)), cz = (NZ + NF) / 2 + off * Math.sin(NA);
       if (y + h < 1.6) { box(.12, h, NL, mat, cx, y + h / 2, cz, roofG).rotation.y = -sd * NA; return; }
       const sh = new THREE.Shape();                      // the upper hull's nose piece: its top slopes down with the windscreen
@@ -1603,21 +1613,24 @@ const KIT = {
       const geo = new THREE.ExtrudeGeometry(sh, { depth: .12, bevelEnabled: false }); geo.translate(0, 0, -.06);
       const m = new THREE.Mesh(geo, mat); m.position.set(cx, 0, cz); m.rotation.y = -Math.PI / 2 - sd * NA; m.castShadow = m.receiveShadow = true; roofG.add(m);
     };
-    box(2.7, .02, 5.9, WM.steel, 0, .01, 0, g);                                               // the cabin floor
+    slab(mirror([[1.05, 2.95], [1.33, NZ], [1.33, TZ], [1.05, -2.95]]), 0, .02, WM.steel, g);   // the cabin floor, inside the taper
     for (const gx of [-1.39, 1.39]) { side(0, 1.0, WM.hull, gx, g); side(.86, .08, KM.red, gx + Math.sign(gx) * .012, g); }   // lower hull, a red line at the top
-    box(2.9, 1.0, .12, WM.hull, 0, .5, -2.99, g); box(2.3, 1.0, .12, WM.hull, 0, .5, 2.99, g);   // tail and nose, lower
+    box(2.3, 1.0, .12, WM.hull, 0, .5, -2.99, g); box(2.3, 1.0, .12, WM.hull, 0, .5, 2.99, g);   // tail and nose, lower
     box(.5, .42, 4.0, WM.hullDark, -1.05, .21, 0, g); box(.46, .08, 3.9, KM.teal, -1.05, .46, 0, g); box(.08, .6, 4.0, WM.hullDark, -1.29, .76, 0, g);   // the north bench
     for (const [z, l] of [[1.0, 2.0], [-1.5, 1.0]]) { box(.5, .42, l, WM.hullDark, 1.05, .21, z, g); box(.46, .08, l - .1, KM.teal, 1.05, .46, z, g); box(.08, .6, l, WM.hullDark, 1.29, .76, z, g); }   // the south benches, either side of the door
-    box(2.66, 1.9, .9, WM.hullDark, 0, .95, -2.5, g); for (const x of [-.66, 0, .66]) box(.6, .04, .02, WM.steel, x, 1.2, -2.04, g);   // the lockers across the tail, and their handles
+    slab(mirror([[1.33, -2.05], [1.33, TZ], [1.06, -2.93]]), 0, 1.9, WM.hullDark, g); for (const x of [-.66, 0, .66]) box(.6, .04, .02, WM.steel, x, 1.2, -2.04, g);   // the lockers across the tail, and their handles
     box(2.0, .03, .03, WM.lightStrip, 0, 1.75, -2.04, g); box(2.0, .03, .03, WM.lightStrip, 0, .79, 2.48, g);   // cabin lights: over the lockers and along the console's edge (glow, no lamp)
     box(2.2, .8, .45, WM.paintDark, 0, .4, 2.72, g); for (const x of [-.55, .55]) { box(.5, .02, .3, WM.screen, x, .81, 2.7, g); cyl(.2, .2, .1, KM.teal, x, .45, 2.3, g, 14); cyl(.05, .05, .4, WM.steel, x, .2, 2.3, g, 8); }   // the cockpit: console, screens, two seats
-    for (const sx of [-.7, .7]) { const e = cyl(.32, .28, .5, WM.hullDark, sx, 1.0, -3.25, g, 18); e.rotation.x = Math.PI / 2; const f = cyl(.22, .22, .02, WM.engine, sx, 1.0, -3.51, g, 18); f.rotation.x = Math.PI / 2; }   // engines
+    for (const sx of [-.62, .62]) {                     // engine pods faired into the tail: a long pod, a steel nozzle, the glow set inside it
+      for (const [rt, rb, l, mat, z] of [[.34, .3, .5, WM.hullDark, -3.28], [.3, .27, .08, WM.steel, -3.58], [.22, .22, .02, WM.engine, -3.635]]) cyl(rt, rb, l, mat, sx, 1.0, z, g, 18).rotation.x = Math.PI / 2;
+    }
+    box(.6, .34, .5, WM.hullDark, 0, 1.0, -3.28, g);                                       // the fairing between the pods
     for (const sd of [-1, 1]) { box(.62, .07, 1.0, WM.hull, sd * 1.72, .75, -2.3, g).rotation.y = sd * .5; box(.06, .12, .12, sd < 0 ? WM.navRed : WM.navGreen, sd * 1.98, .75, -2.62, g); }   // stub wings, swept back; nav lights at the tips
     // the roof group: the hull above 1 m, windows, livery, windscreen, roof and fin
     const R = new THREE.Group(); g.add(R);
     for (const gx of [-1.39, 1.39]) { side(1.0, 1.3, WM.hull, gx, R); side(1.08, .12, KM.teal, gx + Math.sign(gx) * .012, R); for (const z of [-1.5, -.5, .5, 1.5]) if (!(gx > 0 && z === -.5)) box(.03, .32, .5, WM.cockpit, gx + Math.sign(gx) * .065, 1.6, z, R); }
     box(.12, .3, .94, WM.hull, 1.39, 2.15, -.5, R);                                             // over the door
-    box(2.9, 1.3, .12, WM.hull, 0, 1.65, -2.99, R);
+    box(2.3, 1.3, .12, WM.hull, 0, 1.65, -2.99, R);
     box(2.3, .58, .12, WM.hull, 0, 1.28, 2.99, R);                                               // the nose under the windscreen
     {                                                    // the windscreen: from the nose (y 1.54) raked back to the roof, as wide as the tapering sides
       const sh = new THREE.Shape(), Lw = Math.hypot(.77, NF - .05 - NZ - .02);
@@ -1625,8 +1638,14 @@ const KIT = {
       const ws = new THREE.Mesh(new THREE.ExtrudeGeometry(sh, { depth: .03, bevelEnabled: false }), WM.cockpit);
       ws.position.set(0, 1.54, NF - .05); ws.rotation.x = -Math.atan2(NF - .05 - NZ - .02, .77); ws.castShadow = true; R.add(ws);
     }
-    box(2.9, .1, NZ + 3.05, WM.hull, 0, 2.35, (NZ - 3.05) / 2, R); box(1.6, .12, 4.0, WM.hull, 0, 2.46, -.4, R);   // the roof (back from the windscreen) and its raised spine
-    for (const sx of [-1.36, 1.36]) box(.17, .17, NZ + 2.95, WM.hull, sx, 2.32, (NZ - 2.95) / 2, R).rotation.z = Math.PI / 4;   // the roof's edges, softened
+    slab(mirror([[1.45, NZ], [1.45, TZ], [1.18, TF]]), 2.3, .1, WM.hull, R);                // the roof (back from the windscreen), tapering at the tail
+    slab(mirror([[.45, 1.55], [.75, .8], [.75, -1.8], [.5, -2.35]]), 2.38, .14, WM.hull, R, .04);   // its raised spine, narrowing at both ends, edges bevelled
+    for (const sd of [-1, 1]) {                         // the roof's edges, softened, round the tail too; the nose and tail corners rounded
+      box(.17, .17, NZ - TZ, WM.hull, sd * 1.36, 2.32, (NZ + TZ) / 2, R).rotation.z = Math.PI / 4;
+      box(.17, .17, TL, WM.hull, sd * ((1.45 + TW + .06) / 2 - .09 * Math.cos(TA)), 2.32, (TZ + TF) / 2 + .09 * Math.sin(TA), R).rotation.set(0, sd * TA, Math.PI / 4);
+      for (const z of [2.99, -2.99]) { box(.15, 1.0, .15, WM.hull, sd * 1.12, .5, z, g).rotation.y = Math.PI / 4; box(.15, z > 0 ? .56 : 1.3, .15, WM.hull, sd * 1.12, z > 0 ? 1.28 : 1.65, z, R).rotation.y = Math.PI / 4; }
+    }
+    box(2.2, .17, .17, WM.hull, 0, 2.32, -2.96, R).rotation.x = Math.PI / 4;
     box(.9, .03, .52, WM.cockpit, 0, 2.415, NZ - .24, R); box(.9, .03, 2.4, WM.cockpit, 0, 2.535, .4, R);   // the canopy line, aft from the windscreen
     box(.08, .55, 1.1, WM.hull, 0, 2.62, -2.55, R).rotation.x = -.5; box(.09, .14, .55, KM.teal, 0, 2.78, -2.72, R).rotation.x = -.5;   // the fin, swept back
     const name = tex(256, 64, (c, w, h) => { c.fillStyle = '#1c3d44'; c.font = '700 40px system-ui,sans-serif'; c.fillText('TERN', 8, 44); c.font = '600 18px system-ui,sans-serif'; c.fillText('CSV WREN · 1', 130, 42); });
@@ -1903,8 +1922,10 @@ const KIT = {
   weightBench(g) {
     box(.32, .1, 1.2, GYM.teal, 0, .45, 0, g); for (const z of [-.5, .5]) box(.3, .4, .06, GYM.frame, 0, .2, z, g);
     for (const x of [-.55, .55]) box(.05, 1.2, .05, GYM.frame, x, .6, -.45, g);
-    const bar = cyl(.018, .018, 1.6, GYM.chrome, 0, 1.15, -.45, g, 8); bar.rotation.z = Math.PI / 2;
-    for (const x of [-.68, .68]) { cyl(.18, .18, .05, GYM.plate, x, 1.15, -.45, g, 16).rotation.z = Math.PI / 2; }
+    const bar = new THREE.Group(); bar.position.set(0, 1.15, -.45); g.add(bar);   // 0.47.5: the bar and its plates, one piece that hides while it's in a lifter's hands (BENCH_BAR)
+    cyl(.018, .018, 1.6, GYM.chrome, 0, 0, 0, bar, 8).rotation.z = Math.PI / 2;
+    for (const x of [-.68, .68]) { cyl(.18, .18, .05, GYM.plate, x, 0, 0, bar, 16).rotation.z = Math.PI / 2; }
+    noMergeAll(bar); BENCH_BAR.g = bar; bar.children[0].onBeforeRender = () => { const on = performance.now() - BENCH_BAR.t > 500; for (const m of bar.children) m.scale.setScalar(on ? 1 : 1e-4); };
     return { w: 1.3, d: 1.3 };
   },
   gymMats(g) {                                           // three mats, a ball and a roller in the stretching corner
@@ -2522,6 +2543,8 @@ const WALL_KIT = {
   },
 };
 
+// 0.47.5: the weight bench's bar: hidden (scaled to nothing) for half a second after anyone presses it (ACTS.bench); dx centres the held bar between the hands
+const BENCH_BAR = { g: null, t: -1e9, dx: .3, rz: .42 };   // rz: the grip's spread, undone so the bar lies level
 // ---- placing things ----
 const FACING = { n: 0, w: Math.PI / 2, e: -Math.PI / 2, s: Math.PI };   // which wall the back of a piece is against
 // place a floor piece in room-local units (0,0 = room's top-left corner)
@@ -5158,7 +5181,7 @@ DECKS[3] = {
     { id: '3-gym-3', type: 'gym', at: [28, 20], xy: [28.5, 20.5], walk: [28, 19], face: 's', pose: 'stand', anim: 'run', y: 0.16, room: 'F' },
     { id: '3-gym-4', type: 'gym', at: [30, 20], xy: [30.6, 20.2], walk: [31, 20], face: 's', pose: 'sit', anim: 'row', y: .43, room: 'F', cush: 0.34 },
     { id: '3-gym-5', type: 'gym', at: [30, 15], xy: [30.92, 15.6], walk: [30, 15], face: 'e', pose: 'stand', room: 'F' },
-    { id: '3-gym-6', type: 'gym', at: [29, 16], xy: [29.4, 16], walk: [28, 15], face: 'e', pose: 'lie', room: 'F' },
+    { id: '3-gym-6', type: 'gym', at: [29, 16], xy: [29.4, 16], walk: [28, 15], face: 'e', pose: 'lie', anim: 'bench', room: 'F' },   // 0.47.5: the bench press
     { id: '3-gym-7', type: 'gym', at: [23, 15], xy: [23.85, 15.6], walk: [23, 15], face: 's', pose: 'lie', room: 'F', y: .035 },   // 0.27.39: on the floor mat (top .015; the back sits within about 2 cm, by build), not the default bed height (the user: "they hover")
     { id: '3-gym-8', type: 'gym', at: [24, 15], xy: [24.6, 15.6], walk: [24, 15], face: 's', pose: 'lie', room: 'F', y: .035 },
     { id: '3-gym-9', type: 'gym', at: [25, 15], xy: [25.35, 15.6], walk: [25, 15], face: 's', pose: 'lie', room: 'F', y: .035 },
@@ -7331,17 +7354,21 @@ DECKS[5].places.push({ id: '5-delivery-1', type: 'event', event: 'delivery', at:
 // shown by the trace { id: 'nameYours', day }. 5-beam-1: where you paint (under the west end, facing it); 5-beam-2..8: the
 // Works crew watching, facing the same spot. All type 'event', event 'name-beam'.
 const BEAM = { room: 'w', along: 7.0, len: 7.8, y: 2.42, yours: 3.6,   // the bay's hull wall runs from along 3 (the Chief's office) to 11
-  past: ['Okafor', 'Lindgren', 'Baptiste', 'Hale', 'Moreau', 'Iversen', 'Quill', 'Abara', 'Novak', 'Reyes', 'Kaur', 'Dunmore', 'Pike', 'Vasquez', 'Ito', 'Brandt'] };
+  past: ['Ada', 'Lars', 'Mireille', 'Tom', 'Celine', 'Ivar', 'Juno', 'Kemi', 'Petra', 'Luis', 'Harpreet', 'Gil', 'Rosa', 'Mateo', 'Yuki', 'Otto'],   // 0.47.6 (playtest): first names, all of them
+  // 0.47.6 (playtest): the west end (the first 2.5 m, 650 of the canvas's 2048 px) is kept for the four newest, a 2 x 2 grid: slot 0 is
+  // yours (DECK_DRESS.nameYours), slots 1-3 the Works hands who join later (DECK_DRESS.nameNew, the traces { id: 'nameNew', day, name })
+  slots: [[3.72, .085], [4.98, .085], [3.72, -.085], [4.98, -.085]], clear: 650 };
+const firstName = n => String(n || '').trim().split(/\s+/)[0] || 'Cadet';
 Object.assign(WALL_KIT, {
   nameBeam(g) {
-    const names = BEAM.past.slice(0, 8).concat(dressNames('works', 14), BEAM.past.slice(8)), C = ['#f4efe2', '#e8c06a', '#7fd6c8', '#f0a37a'];
+    const names = BEAM.past.slice(0, 8).concat((typeof ROSTER === 'undefined' ? [] : ROSTER.filter(p => !p.player && p.dept === 'works').slice(0, 14).map(p => firstName(p.name))), BEAM.past.slice(8)), C = ['#f4efe2', '#e8c06a', '#7fd6c8', '#f0a37a'];
     const t = tex(2048, 128, (c, w, h) => {
       c.fillStyle = '#3a4248'; c.fillRect(0, 0, w, h);
       c.fillStyle = 'rgba(0,0,0,.18)'; for (let x = 0; x < w; x += 196) c.fillRect(x, 0, 3, h);   // the plate seams
-      let x = 260, row = 0;                              // the west end is left clear for the newest names (yours)
+      let x = BEAM.clear, row = 0;                       // the west end is left clear for the newest names (yours, and later hands')
       names.forEach((n, k) => {
         c.font = (k % 3 ? 'italic 600 ' : '700 ') + (row ? 40 : 42) + 'px Georgia,serif'; const tw = c.measureText(n).width;
-        if (x + tw > w - 20) { row++; x = 260 + (row % 2) * 60; }
+        if (x + tw > w - 20) { row++; x = BEAM.clear + (row % 2) * 60; }
         if (row > 1) return;
         c.fillStyle = C[k % 4]; c.fillText(n, x, row ? 108 : 52); x += tw + 36 + (k * 7) % 23;
       });
@@ -7355,6 +7382,14 @@ DECKS[5].places.push(
   { id: '5-beam-1', type: 'event', event: 'name-beam', at: [13, 0], xy: [13.6, .75], face: 180, pose: 'stand', anim: 'work', room: 'w' },
   ...[[14, 1], [15, 1], [16, 1], [17, 1], [13, 2], [12, 3], [13, 3]].map(([c, r], k) => ({ id: '5-beam-' + (k + 2), type: 'event', event: 'name-beam', at: [c, r], xy: [c + .5, r + .5],
     face: Math.round(Math.atan2(13.6 - c - .5, .75 - r - .5) * 180 / Math.PI), pose: 'stand', anim: 'talk', room: 'w' })),
+);
+// 0.47.6 (playtest): Sunrise stretch moves to the garden: 3-stretchg-1 is the leader's, on the east side facing the group; 3-stretchg-2..8
+// stand in two loose rows across the open floor between the beds (rows 7-9), facing the leader. Type 'event', event 'stretch-garden' (its own tag, so they stay unused until the traditions
+// engineer points Sunrise stretch at them: the tradition fills its spots from every place tagged 'sunrise-stretch', the old 3-stretch-*)
+DECKS[3].places.push(
+  { id: '3-stretchg-1', type: 'event', event: 'stretch-garden', at: [11, 8], xy: [11.35, 8.5], face: 'w', pose: 'stand', anim: 'stretch', room: 'G' },
+  ...[[9, 7], [8, 7], [7, 7], [8, 8], [9, 9], [8, 9], [7, 9]].map(([c, r], k) => ({ id: '3-stretchg-' + (k + 2), type: 'event', event: 'stretch-garden', at: [c, r],
+    xy: [c + .5 + (r === 8 ? .2 : 0), r + .5], face: Math.round(Math.atan2(11.35 - c - .5, 8.5 - r - .5) * 180 / Math.PI), pose: 'stand', anim: 'stretch', room: 'G' })),
 );
 // 0.38.31: the spice shelf (Spice shelf supper): a plank on the mess hall's galley wall over the drinks station, its jars
 // drawn by DECK_DRESS.spiceJars (SPICES.slots: x along the shelf, up to 12). The postcard box and a writing ledge (Postcard
@@ -7397,7 +7432,7 @@ DECKS[3].places.push(
   const deg = (dx, dz) => Math.round(Math.atan2(dx, dz) * 180 / Math.PI);
   DECKS[3].places.push(
     ...lap.map(([c, r], k) => { const [nc, nr] = lap[(k + 1) % lap.length]; return { id: '3-lap-' + (k + 1), type: 'event', event: 'lap-of-the-wren', at: [c, r], xy: [c + .5, r + .5], face: deg(nc - c, nr - r), pose: 'stand', anim: 'talk', room: roomOfTile(3, c, r) }; }),
-    ...[[24, 9], [25, 9], [33, 9], [39, 9], [25, 12], [27, 12], [33, 12], [39, 12]].map(([c, r], k) => ({ id: '3-stretch-' + (k + 1), type: 'event', event: 'sunrise-stretch', at: [c, r], xy: [c + .5, r === 9 ? 9.4 : 12.6], face: r === 9 ? 'n' : 's', pose: 'stand', anim: 'stretch', room: '=' })),
+    ...[[24, 9], [25, 9], [33, 9], [39, 9], [25, 12], [27, 12], [33, 12], [39, 12]].map(([c, r], k) => ({ id: '3-stretch-' + (k + 1), type: 'event', event: 'stretch-promenade', at: [c, r], xy: [c + .5, r === 9 ? 9.4 : 12.6], face: r === 9 ? 'n' : 's', pose: 'stand', anim: 'stretch', room: '=' })),
     ...[[32, 2], [32, 3], [32, 5], [32, 6], [33, 2], [33, 7]].map(([c, r], k) => ({ id: '3-cookalong-' + (k + 1), type: 'event', event: 'cook-along', at: [c, r], xy: [c + .5, r + .5], face: 90, pose: 'stand', anim: 'talk', room: 'M' })),
   );
 }
@@ -7811,10 +7846,21 @@ const DECK_DRESS = {
   } },
   // 0.38.30: nameYours: a lasting trace from Name on the beam: your name, freshly painted at the beam's west end. 1 draw call
   nameYours: { deck: 5, what: 'your name, freshly painted on the Works bay\'s beam', make(g) {
-    const s = dressAt(g, BEAM.room, 'n', BEAM.yours), name = (SHIP.player && SHIP.player.name) || 'Cadet';
-    const t = tex(256, 64, (c, w, h) => { c.fillStyle = '#f8f4ea'; c.font = '700 40px Georgia,serif'; const tw = Math.min(w - 8, c.measureText(name).width); c.fillText(name, (w - tw) / 2, 46, w - 8); });
-    const p = new THREE.Mesh(new THREE.PlaneGeometry(1.0, .25), new THREE.MeshBasicMaterial({ map: t, transparent: true, toneMapped: false })); p.position.set(0, BEAM.y, .132); s.add(p);
-    return { t: 'Your name', x: 'Your name on the beam, the paint still bright, at the end of the row. Every new hand gets one. Yours will fade like the others, slowly, and somebody will touch it up.', wall: [BEAM.room, 'n', BEAM.yours], y: BEAM.y, w: 1.0, h: .4 };
+    const [sa, sy] = BEAM.slots[0], s = dressAt(g, BEAM.room, 'n', sa), name = firstName(SHIP.player && SHIP.player.name);   // 0.47.6: your first name, in slot 0
+    const t = tex(256, 40, (c, w, h) => { c.fillStyle = '#f8f4ea'; c.font = '700 32px Georgia,serif'; const tw = Math.min(w - 8, c.measureText(name).width); c.fillText(name, (w - tw) / 2, 30, w - 8); });
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(1.2, .1875), new THREE.MeshBasicMaterial({ map: t, transparent: true, toneMapped: false })); p.position.set(0, BEAM.y + sy, .138); s.add(p);
+    return { t: 'Your name', x: 'Your name on the beam, the paint still bright, at the end of the row. Every new hand gets one. Yours will fade like the others, slowly, and somebody will touch it up.', wall: [BEAM.room, 'n', sa], y: BEAM.y + sy, w: 1.2, h: .2 };
+  } },
+  // 0.47.6 (playtest): nameNew: the Works hands who joined after you, painted beside your name (slots 1-3, the newest three, in the
+  // order they came). Every { id: 'nameNew', day, name } in SHIP.traces, on one canvas: 1 draw call
+  nameNew: { deck: 5, what: 'the newest Works hands\' names, painted on the beam beside yours', make(g) {
+    const list = (SHIP.traces || []).filter(x => x && x.id === 'nameNew' && x.name).slice(-3), [a0] = BEAM.slots[1], [a1] = BEAM.slots[2], mid = (a0 + a1) / 2;
+    const s = dressAt(g, BEAM.room, 'n', mid), span = a0 - a1 + 1.2;   // one plane over slots 1-3 (slot 0's corner stays clear)
+    const t = tex(512, 80, (c, w, h) => { c.font = '700 32px Georgia,serif'; list.forEach((x, k) => { const [sa, sy] = BEAM.slots[k + 1], n = firstName(x.name);
+      const cx = (sa - mid + span / 2) / span * w, tw = Math.min(w * 1.2 / span - 8, c.measureText(n).width); c.fillStyle = ['#f8f4ea', '#e8c06a', '#7fd6c8'][k];
+      c.fillText(n, cx - tw / 2, sy > 0 ? 30 : 70, w * 1.2 / span - 8); }); });
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(span, .375), new THREE.MeshBasicMaterial({ map: t, transparent: true, toneMapped: false })); p.position.set(0, BEAM.y, .132); s.add(p);   // 6 mm in front of the beam's names, 6 mm behind yours (0.47.8, R2: at least 5 mm)
+    return { t: 'New names', x: 'The newest names on the beam, beside yours: ' + list.map(x => firstName(x.name)).join(', ') + '. The paint is still bright.', wall: [BEAM.room, 'n', mid], y: BEAM.y, w: span, h: .4 };
   } },
   partyLounge: { deck: 3, what: 'party decorations in the bow lounge: bunting, balloons and a banner', make(g, o) {
     const s = dressAt(g, 'L', 'floor', 0, 0), C = ['#c45a3f', '#e8c06a', '#5fd6c6'], y = 2.2;
@@ -7910,7 +7956,7 @@ function placeSun(p) {
 }
 
 const DAY = { sky: col('#e3ebf1'), gnd: col('#5b4d41'), hemi: .85, sun: col('#fff2e0'), sunI: 1.6, exp: 1.05, bg: new THREE.Color('#151d2c') };
-const NIGHT = { sky: col('#6d7ca3'), gnd: col('#2a1f18'), hemi: .32, sun: col('#ffb371'), sunI: .5, exp: 1.0, bg: new THREE.Color('#0a0e17') };
+const NIGHT = { sky: col('#7886ad'), gnd: col('#30241c'), hemi: .42, sun: col('#ffb371'), sunI: .62, exp: 1.03, bg: new THREE.Color('#0a0e17') };   // 0.47.5 (playtest: "a little brighter"): hemi .32, sunI .5, exp 1.0, sky #6d7ca3, ground #2a1f18 before; the dimming still starts at 20:30 (nightAt)
 let nightT = 0;                                          // 0 day ... 1 night; follows the clock (section 13)
 function applyLight(k) {
   const lerp = THREE.MathUtils.lerp;
@@ -39030,6 +39076,7 @@ function poseOf(pl) {
   if (base === 'sit' && !pl.anim && pl.type !== 'callhome') return base;   // by type, only booths and the gym are busy sitting (the music room's beanbags listen)
   if (base === 'sit' && ACT_SEATED.has(act)) return 'sit:' + act;
   if (base === 'lie' && act === 'lift') return 'lie:lift';
+  if (base === 'lie' && act === 'bench') return 'lie:bench';   // 0.47.5: the weight bench (its place says anim: 'bench')
   return base;
 }
 const _parsed = new Map(), _parsedHi = new Map();          // 0.27.30: seated-height poses in their own map (no key string to build)
@@ -39098,7 +39145,7 @@ const ACTS = {
     for (const leg of r.legs) {
       const th = (t * 5 + ph * 6.283) + (leg === r.legs[0] ? 0 : Math.PI);
       const t0 = leg.thigh.rotation.x, k0 = leg.knee.rotation.x, a0 = leg.ankle.rotation.x;
-      const ang = legIK(leg, ANK + (.32 + .13 * Math.sin(th)) / h - (hy - HIP_OFF), (.35 + .13 * Math.cos(th)) / h);
+      const ang = legIK(leg, ANK + (.32 - .13 * Math.sin(th)) / h - (hy - HIP_OFF), (.35 + .13 * Math.cos(th)) / h);   // 0.47.5 (playtest): pedalling forward, down the front
       leg.thigh.rotation.x = L(t0, leg.thigh.rotation.x, s); leg.knee.rotation.x = L(k0, leg.knee.rotation.x, s); leg.ankle.rotation.x = L(a0, -ang, s);
     }
     r.torso.rotation.x = L(r.torso.rotation.x, .32, s);
@@ -39108,6 +39155,11 @@ const ACTS = {
   run: { f(r, s, t) {                                    // the legs run in place (the gait, in animateActivity); arms bent and pumping
     for (const a of r.arms) { a.el.rotation.x = L(a.el.rotation.x, -1.5, s); a.sh.rotation.z = L(a.sh.rotation.z, a.side * .12, s); }
     r.torso.rotation.x = L(r.torso.rotation.x, .1, s);
+  } },
+  bench: { props: { R: 'barbell' }, f(r, s, t, b, ph) {           // 0.47.5 (playtest): the bench press: the rack's bar in both hands, down to the chest and up, together
+    const c = .5 - .5 * Math.cos(t * 1.5 + ph); if (s > .5) BENCH_BAR.t = performance.now();   // the rack's own bar hides while it's in someone's hands
+    for (const a of r.arms) armTo(a, s, L(-.75, -1.5, c), L(-1.45, -.05, c), .42, .2);
+    r.head.rotation.x = L(r.head.rotation.x, -.05, s);
   } },
   lift: { props: { R: 'dumbbell', L: 'dumbbell' }, f(r, s, t, b, ph) {
     for (const a of r.arms) {
@@ -39192,6 +39244,11 @@ const ACTS = {
     r.head.rotation.x = L(r.head.rotation.x, -.15 + .3 * fold, s);
   } },
   talk: { f(r, s, t, b, ph) {
+    if (b === 'sit') {                                    // 0.47.5 (playtest, "seated arm-waving"): seated, the hands stay on the lap; now and then one opens a little
+      for (const a of r.arms) { const g = pulse(t, 9 + 2 * a.side, 1.8, ph + a.side * 4.1); armTo(a, s, L(SIT_LAP.sx, -.42, g), L(SIT_LAP.ex, -1.2, g), L(SIT_LAP.sz, .1, g), L(SIT_LAP.hx, -.15, g)); }
+      r.head.rotation.x = L(r.head.rotation.x, .05 * Math.sin(t * 2.3 + ph), s); r.head.rotation.y = L(r.head.rotation.y, .2 * Math.sin(t * .4 + ph), s);
+      return;
+    }
     for (const a of r.arms) {
       const g = pulse(t, 5 + a.side, 1.6, ph + a.side * 1.7);
       armTo(a, s, L(b === 'sit' ? SIT_LAP.sx : -.08, -.75, g) + .1 * g * Math.sin(t * 4), L(b === 'sit' ? SIT_LAP.ex : -.25, -1.3, g), L(b === 'sit' ? SIT_LAP.sz : .12, .3, g), L(b === 'sit' ? SIT_LAP.hx : 0, -.3, g));
@@ -39205,6 +39262,7 @@ const CROWD_ANIMS = new Set(Object.keys(ACTS));        // the activities drawn: 
 // Built the first time they're needed, from the character kit's primitives; colours through col(); no R().
 const PROP_BONE = { R: 0, L: 1, C: 2, B: 3 };            // B: the body, at the feet facing forward (a cart)
 const PROP_KIT = {
+  barbell(p) { const a = BENCH_BAR.rz, c = Math.cos(a), n = Math.sin(a); for (const [x, geo, colr] of [[0, cylG(.014, .014, 1.5, 8), '#a4aeb4'], [-.62, cylG(.15, .15, .045, 14), '#2b2f33'], [.62, cylG(.15, .15, .045, 14), '#2b2f33']]) part(p, geo, colr, (BENCH_BAR.dx + x) * c, -.055 + (BENCH_BAR.dx + x) * n, .01, 1, 1, 1, 0, 0, Math.PI / 2 + a); },   // 0.47.5: the bench's bar, centred between the hands
   dumbbell(p) { part(p, cylG(.012, .012, .17, 8), '#a4aeb4', 0, -.055, .01, 1, 1, 1, 0, 0, Math.PI / 2); for (const x of [-.07, .07]) part(p, cylG(.04, .04, .035, 10), '#2b2f33', x, -.055, .01, 1, 1, 1, 0, 0, Math.PI / 2); },
   receiver(p) { part(p, GEO.box, '#2b2f33', 0, -.07, .045, .04, .17, .045, .3); part(p, GEO.sph, '#2b2f33', 0, -.15, .07, .03, .025, .03); },
   basket(p) { part(p, GEO.box, '#2a9d8f', 0, -.2, .02, .24, .12, .16); part(p, GEO.box, '#1f6f66', 0, -.11, .02, .015, .1, .015); },
@@ -39919,12 +39977,19 @@ function devicePropRecolour() {                          // forget the built pro
 // replaces theirs. Plain DOM (no draw calls), placed each frame from the 3D position; hidden off screen, when zoomed far
 // out, or while bubbles.hidden (a dialogue panel). bubbleClear() removes them all. ----
 const BUBBLE_MAX = 2;
-const bubbles = { list: [], hidden: false, el: null, v: new THREE.Vector3(), on: [],
+// 0.47.9 (playtest: "bubbles shake or jump between two spots", on a phone): placed in place(), from the main loop just before the
+// frame is drawn, with the camera already moved for this frame (they were placed in crowd.update, before the camera followed you, so
+// each one lagged by however far the camera moved that frame, and on a phone's uneven frames that lag changed every frame); placed
+// with a fractional-pixel transform, not whole-pixel left/top; and two overlapping bubbles keep their order and their stacking until
+// they are clearly apart (pair, below). tick(dt) only counts their time down (crowd.update, while the ship runs)
+const bubbles = { list: [], hidden: false, el: null, v: new THREE.Vector3(), on: [], pair: null,
   tick(dt) {
-    if (!this.list.length) return;
-    const on = this.on; on.length = 0;
-    for (const b of this.list.slice()) {
-      b.t -= dt; if (b.t <= 0) { b.el.remove(); this.list.splice(this.list.indexOf(b), 1); continue; }
+    for (const b of this.list.slice()) { b.t -= dt; if (b.t <= 0) { b.el.remove(); this.list.splice(this.list.indexOf(b), 1); } }
+  },
+  place() {
+    if (!this.list.length) { this.pair = null; return; }
+    const on = this.on, now = performance.now(), dts = this.at ? Math.min(.1, (now - this.at) / 1000) : 1, ease = Math.min(1, dts * 10), lim = 900 * dts; on.length = 0; this.at = now;   // lim: a slide never goes faster than 900 px a second (0.47.10)
+    for (const b of this.list) {
       const w = b.who, p = w.pos || (w.obj && w.obj.position) || w, h = w.h || 1;
       const seat = w.pos && w.pos.y >= .3 ? w.pos.y : 0;   // seated: above the head on the seat; standing: above a standing head
       this.v.set(p.x, seat ? seat + 1.15 * h : (w.pos ? w.pos.y : w.obj ? w.obj.position.y : p.y || 0) + 2.0 * h, p.z).project(camera);
@@ -39932,22 +39997,32 @@ const bubbles = { list: [], hidden: false, el: null, v: new THREE.Vector3(), on:
       b.el.style.display = vis ? '' : 'none';
       if (!vis) continue;
       if (!b.w) { b.w = b.el.offsetWidth; b.hh = b.el.offsetHeight + (b.card.classList.contains('named') ? 10 : 0); }   // measured once (0.43.30), not every frame
-      const hw = b.w / 2 + 8; b.ax = (this.v.x + 1) / 2 * innerWidth; b.x = Math.min(innerWidth - hw, Math.max(hw, b.ax)); b.y = (1 - this.v.y) / 2 * innerHeight;
+      const hw = b.w / 2 + 8; b.ax = (this.v.x + 1) / 2 * innerWidth; b.x = Math.min(innerWidth - hw, Math.max(hw, b.ax)); b.y = b.ay = (1 - this.v.y) / 2 * innerHeight;
       on.push(b);
     }
     // 0.43.30: two bubbles that would cover each other move apart sideways, as far as their tails can still reach their
     // speakers, and if that isn't enough the older one sits higher
     if (on.length === 2) {
-      const [a, c] = on[0].ax <= on[1].ax ? on : [on[1], on[0]], top = b => b.y - 9 - b.hh;
+      // the same two as last frame keep their left-to-right order unless their speakers are clearly the other way round now,
+      // and once stacked they stay stacked until they'd be 12 px apart side by side (0.47.9: no flipping from frame to frame)
+      const P = this.pair && this.pair.l && on.includes(this.pair.l) && on.includes(this.pair.r) ? this.pair : null;
+      const keep = P && P.r.ax - P.l.ax > -24, [a, c] = keep ? [P.l, P.r] : on[0].ax <= on[1].ax ? on : [on[1], on[0]], top = b => b.y - 9 - b.hh;
       const overY = () => Math.min(a.y, c.y) - Math.max(top(a), top(c)) + 6, overX = () => a.x + a.w / 2 - (c.x - c.w / 2) + 6;
+      let stack = false;
       if (overY() > 0 && overX() > 0) {
         const fit = b => { const r = b.w / 2 - 18, hw = b.w / 2 + 8; b.x = Math.min(innerWidth - hw, Math.max(hw, Math.min(b.ax + r, Math.max(b.ax - r, b.x)))); };
         const d = overX() / 2; a.x -= d; c.x += d; fit(a); fit(c);
-        if (overX() > 0) { const old = on[0], other = on[1]; old.y = Math.min(old.y, top(other) - 6); }
-      }
+        stack = overX() > (keep && P.stack ? -12 : 0);
+      } else stack = !!(keep && P.stack && overX() > -12 && overY() > -12);
+      if (stack) { const old = on[0], other = on[1]; old.y = Math.min(old.y, top(other) - 6); }
+      this.pair = { l: a, r: c, stack };
+    } else this.pair = null;
+    for (const b of on) {                                // a change of layout (side by side, stacked) slides in over a few frames; the speaker is followed exactly
+      const ox = b.x - b.ax, oy = b.y - b.ay, step = d => Math.max(-lim, Math.min(lim, d * ease)); b.ox = b.ox === undefined ? ox : b.ox + step(ox - b.ox); b.oy = b.oy === undefined ? oy : b.oy + step(oy - b.oy);
+      const hw = b.w / 2 + 8; b.x = Math.min(innerWidth - hw, Math.max(hw, b.ax + b.ox)); b.y = b.ay + b.oy;
     }
     for (const b of on) {
-      b.el.style.left = b.x.toFixed(0) + 'px'; b.el.style.top = b.y.toFixed(0) + 'px'; b.el.style.opacity = Math.min(1, b.t * 2, (b.life - b.t) * 4).toFixed(2);
+      b.el.style.transform = 'translate3d(' + b.x.toFixed(1) + 'px,' + b.y.toFixed(1) + 'px,0) translate(-50%,calc(-100% - 9px))'; b.el.style.opacity = Math.min(1, b.t * 2, (b.life - b.t) * 4).toFixed(2);
       const tx = Math.max(18 - b.w / 2, Math.min(b.w / 2 - 18, b.ax - b.x)).toFixed(0) + 'px';   // the tail still points at the speaker when the card is moved
       if (tx !== b.tx) { b.tx = tx; b.card.style.setProperty('--tx', tx); }
     }
@@ -39981,8 +40056,8 @@ const POSE_DEMO = (() => {
   if (urlFlag('poses') === null) return null;
   const POSES = ['stand', 'walk', 'work', 'sit', 'lie', 'run', 'row', 'lift', 'lie:lift', 'call', 'sit:call', 'browse',
     'pay', 'play', 'sit:play', 'water', 'cook', 'wash', 'fold', 'drink', 'sit:drink', 'read', 'sit:read', 'talk',
-    'walk+tray', 'walk+toolbox', 'walk+datapad', 'crouch', 'stand+device', 'walk+device', 'punch', 'stretch', 'stand+go', 'walk+go'];
-  const NAMES = { 'lie:lift': 'lift (bench)', 'sit:call': 'call (seated)', 'sit:play': 'play (keys)', 'sit:drink': 'drink (seated)', 'sit:read': 'read (seated)', row: 'row' };
+    'walk+tray', 'walk+toolbox', 'walk+datapad', 'crouch', 'stand+device', 'walk+device', 'punch', 'stretch', 'stand+go', 'walk+go', 'lie:bench', 'sit:talk', 'cycle'];
+  const NAMES = { 'lie:lift': 'lift (mat)', 'lie:bench': 'bench press', 'sit:talk': 'talk (seated)', 'sit:call': 'call (seated)', 'sit:play': 'play (keys)', 'sit:drink': 'drink (seated)', 'sit:read': 'read (seated)', row: 'row' };
   let here = [], furn = null, labels = null, started = false;
   const v = new THREE.Vector3();
   function fill() {
@@ -41512,6 +41587,7 @@ function loop() {
   }
   const r = roomAt(...player.here()); if (r && r !== lastRoom) { lastRoom = r; roomEl.textContent = ROOMS[r].name; }
 
+  camera.updateMatrixWorld(); bubbles.place();           // 0.47.9: the speech bubbles, with this frame's camera (they shook on phones)
   renderer.render(scene, camera);
   requestAnimationFrame(loop);
 }
