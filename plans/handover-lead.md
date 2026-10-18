@@ -561,3 +561,4 @@ Read: CLAUDE.md, TEAM.md (session chain rule + overnight exception), plans/brief
 - ~11:46 M1 f65c929 (0.45.2: Day 2 time fix + extinguisher/Calendar/Friday-tea; mech_check OK; cadet_test identical). Reminded crate fix + O4 96649fe ready.
 - ~11:47 M1 8f5783f (0.45.3 crate fix; mech_check m4 OK; cadet_test identical). Now m2.
 - ~11:50 check-in: lead 12 memory ~22%; weekly allowance still 'allowed_warning' (unchanged). Sweep delegated.
+- ~11:51 M1 740234d (0.45.4 m2 uniform on O4 96649fe; mech/clothes OK; cadet_test identical). All M1 pages built; held stocktake; idle.
