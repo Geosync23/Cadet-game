@@ -35107,6 +35107,7 @@ function trainTick(now) {                                // once a ship minute i
     else if (r.status === 'missed') c.st = 'ask';        // offered again on your next workday
     return;
   }
+  if (c.st === 'held') { if (!worksCaseOpen(c.j)) worksEscortEnd(c.id); return; }   // waiting on worksEscortEnd (the teacher stays with you), or its case closing
   if (c.st !== 'watch' && c.st !== 'do') return;
   const j = SHIP.jobs.find(x => x.id === c.j);
   if (c.st === 'watch') {
@@ -35120,7 +35121,6 @@ function trainTick(now) {                                // once a ship minute i
     }
     return;
   }
-  if (c.st === 'held') { if (!worksCaseOpen(c.j)) worksEscortEnd(c.id); return; }   // waiting on worksEscortEnd (the teacher stays with you), or its case closing
   if (j && j.status === 'done' && j.doneBy === 'you') { worksDone(row.id, now); return; }
   if (!j || j.status === 'done' || (!heldForYou(j) && j.claimedBy !== 'you')) c.st = 'again';
 }
