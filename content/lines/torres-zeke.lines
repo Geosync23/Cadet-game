@@ -752,18 +752,18 @@
 // ---- Pillar 5 (head writer, seat W): Zeke teaching (kind 'work'; seat C's flags train.<id>.lead|follow.<step>).
 // M7 and P3 only when he's the one teaching (a save where the row opens on a day he's on shift). Bubbles, 60 or fewer.
 == work
-? flag:train.m7.lead.look
+? flag:train.m7.lead.hold
 - Watch. Panel, scanner, and a little patience.
 - That one's at twenty. Sulking badly. There's our part.
 ? flag:train.m7.lead.done
 - Fixed. Your go next. I'll be the one humming.
-? flag:train.m7.follow.look
+? flag:train.m7.follow.hold
 - Look first, then scan. What's it telling you?
 ? flag:train.m7.follow.choose
 - Your call. I'm not even looking. I'm looking a bit.   #funny
 ? flag:train.m7.follow.done
 - Right first time. My old scanner likes you.   #warm
-? flag:train.p3.follow.look
+? flag:train.p3.follow.hold
 - Second note's on the panel. What does it say?
 ? flag:train.p3.follow.choose
 - One suspect left. Go on, say it.

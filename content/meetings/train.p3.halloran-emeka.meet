@@ -1,0 +1,20 @@
+@meeting train.p3.halloran-emeka
+// Pillar 5, P3 (Day 5, Friday afternoon, after your second scanner reading): the main Day 5 version. Emeka shows you
+// your first head-scratcher at the board: Washer 2 leaks; the crew tried a door seal and a drain valve. Head writer, seat W.
+title: A funny one
+from: Emeka Halloran
+gist: Your first head-scratcher: a washer that leaks. Notes from the crew say what's been tried. Cross off what didn't work.
+== lines
+halloran-emeka: Ooh, here's a funny one for you. Washer 2, junior laundry. It leaks.   [gesture]
+halloran-emeka: Two of the crew have had a go already. Neither fixed it. Both left a note, bless them.
+halloran-emeka > you: Open Fault notes. Three suspects. The door seal, the drain valve and the pump.
+halloran-emeka: Chief's rule, page one: if someone fitted it and it's still wrong, it isn't that.
+halloran-emeka: First note's taped to the job. New door seal in, still leaks. So?
+? choice
+* Then it isn't the seal.   rel:halloran-emeka+2 flavour:practical
+  halloran-emeka: Lovely. Cross it off.   [nod]
+* What if the new seal's faulty?   rel:halloran-emeka+1 flavour:listen
+  halloran-emeka: Could be, in theory. Not today. Trust the note and cross it off.
+* (Cross off the door seal)
+  halloran-emeka: There you go. One down.
+halloran-emeka: The other note's on the washer itself. Lead on. I'll follow.

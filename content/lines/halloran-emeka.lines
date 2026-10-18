@@ -139,3 +139,35 @@
 // mail d5-mug: Friday, if you missed Works tea
 ? flag:mail.d5-mug
 - Your mug | Missed you at tea. Your mug's on the end hook. It's the law. Well, it's me.
+
+// ---- Pillar 5 (head writer, seat W): Emeka teaching the scanner and the first head-scratcher on Day 5 (the main
+// version; seat C's flags train.<id>.lead|follow.<step>; lead.take when he leads you to it, lead.done when he hands
+// over). Kind 'work'. Every line under a flag plays in order. Bubbles, 60 or fewer.
+== work
+? flag:train.m7.lead.take
+- Follow me. It's a short walk. I'll tell you a joke on the way.   #funny
+? flag:train.m7.lead.hold
+- Watch. Panel, scanner, and a moment's patience.
+- That one's at twenty. There's our culprit.
+- The rest read good. Leave them be.
+? flag:train.m7.lead.done
+- Lovely. Your turn next. I'll be right behind you.
+? flag:train.m7.follow.take
+- All yours. I'm only here for the company.
+? flag:train.m7.follow.hold
+- Look first, then scan. Which bar's the lowest?
+? flag:train.m7.follow.fetch
+- Right shelf. Well done, you.
+? flag:train.m7.follow.done
+- Right part, first time. Zeke will be thrilled.   #warm
+? flag:train.p3.follow.hold
+- There's the other note, on the panel. What does it say?
+- Swapped the drain valve. Still leaks. So that's two off.
+? flag:train.p3.follow.fetch
+- Pump. Plumbing shelf. Off you pop.
+? flag:train.p3.follow.done
+- Floor's dry! Right first time. Zeke will be sorry he missed it.   #warm
+? flag:train.p3.hint.2
+- Have you read every note? One's not on the card.
+? flag:train.p3.hint.3
+- Pop over to the washer's panel. There's a note waiting.

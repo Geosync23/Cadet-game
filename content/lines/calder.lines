@@ -459,7 +459,7 @@
 // M7, the scanner: she reads the first one (lead)
 ? flag:train.m7.lead.take
 - Held for you. Read the card. What's it doing?
-? flag:train.m7.lead.look
+? flag:train.m7.lead.hold
 - Watch. Panel, scanner, wait.
 - That one's at twenty. There's your problem.
 - The rest read good. Leave them.
@@ -472,7 +472,7 @@
 // M7: you read one, she follows
 ? flag:train.m7.follow.take
 - Yours. I'm only watching. Mostly.
-? flag:train.m7.follow.look
+? flag:train.m7.follow.hold
 - Look first. Then scan. Then think.
 - Read me the lowest. Out loud.
 ? flag:train.m7.follow.choose
@@ -484,7 +484,7 @@
 ? flag:train.m7.follow.turnin
 - Turn it in. Then the board. Something's come up.
 // P3, the first head-scratcher: she follows you to the washer and back
-? flag:train.p3.follow.look
+? flag:train.p3.follow.hold
 - There's the other note. Taped to the panel. Read it.
 - Swapped the drain valve. Still leaks. So?
 ? flag:train.p3.follow.choose

@@ -22,8 +22,9 @@
 - Where next?
 == case.hint.p3.1
 - Have you read every note? One's on the machine.
+// case.solved: shown only AFTER the fix works (the machine is right again), never at "Call it", so it can't give the answer away
 == case.solved
-- Solved. Fetch the {part} and fit it.
+- Fixed. That was it.
 == case.wrong
 - Not that one. Have another look at the notes.
 == case.new
