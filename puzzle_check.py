@@ -12,6 +12,14 @@
 #   on taking the job, Where next?, a wrong call (the part back on its shelf, the suspect crossed by the evidence, the
 #   job not done), the right call (the machine put right, right first time), the long way always ends, the save
 #   round trip mid-case, a junk save and a gone job, and with no kind opened nothing happens at all
+#   the scanner (24g, 0.55.3): every Tier 1 kind with a table reads 3-5 parts; the failing part is the cause's, the same
+#   twice and frozen on the job; a worn decoy has the same card and a different sign; no scanner, no reading; the right
+#   pick finishes; a wrong pick puts the part back, names the right part and doesn't fix it
+#   P3 (0.55.3): sweep cases have one note per decoy, each killing only its decoy, written by a Works crew member at
+#   work at that time, 2-12 hours on (or the next morning); the part comes off the shelf when tried; the case shows only
+#   then, inside your shift. Day 5's training case: 4-washer-2 leaking from Day 4 18:00 (the pump), the seal and the
+#   valve tried, hidden from the board till the p3 row opens, then shown with the teacher; solved with two notes,
+#   right first time; the scanner reads the pump failing and the new seal worn
 # Setup and environment as for cadet_test.py.
 # Run:  python3 puzzle_check.py BUILD.html
 import sys, json
@@ -57,7 +65,9 @@ SETUP = r"""(() => {
     lights: [{ id: 'relay', part: 'relay', w: 3, shows: 'lights flicker', sign: 'the whole room' }, { id: 'lamp', part: 'lamp', w: 2, shows: 'lights flicker', sign: 'one lamp only' },
       { id: 'breaker', part: 'breaker', w: 1, shows: 'lights out' }],
     range: [{ id: 'element', part: 'element', w: 3, shows: 'a ring is weak' }, { id: 'relay', part: 'relay', w: 2, shows: 'a ring is weak' }] };
-  if (!SHIP.works) { if (out.realWorks) worksInit(); if (!SHIP.works) SHIP.works = { v: 1, tier: 1, rank: 'junior', xp: 0, tr: {} }; }
+  if (!SHIP.works) { if (out.realWorks) { if (typeof WORKS_START !== 'undefined' && shipNow() < WORKS_START) setShipNow(WORKS_START); worksInit(); } if (!SHIP.works) SHIP.works = { v: 1, tier: 1, rank: 'junior', xp: 0, tr: {}, op: {}, tools: {} }; }
+  out.realTools = typeof hasTool === 'function'; if (!out.realTools) window.hasTool = id => !!(SHIP.works && SHIP.works.tools && SHIP.works.tools[id]);
+  caseState().first = 'none';                            // Day 5's training case only in its own part, below
   window.__ptOpen = false;
   CASE_KINDS.zz = { name: 'Stand-in', ladder: 'zz', open: () => window.__ptOpen,
     // the cause, its same-card decoys, and stand-in wiring suspects up to the band's fewest suspects (one note each)
@@ -136,6 +146,91 @@ SWEEP = r"""(() => {
   return out;
 })()"""
 
+# the scanner: on a fresh job for each Tier 1 machine with a part cause
+SCAN = r"""(() => {
+  const out = { parts: {}, bad: [], twoLow: 0, none: null }, keep = SHIP.jobs, tools = SHIP.works.tools; SHIP.jobs = [];
+  SHIP.works.tools = {}; const m0 = machineList().find(m => m.kind === 'washer'), j0 = { id: 'scan0', machine: m0.id, deck: m0.deck, kind: 'repair', posted: 5 * 1440, parts: ['pump'], status: 'open', cause: 'pump' };
+  SHIP.jobs.push(j0); out.none = scanRead('scan0'); SHIP.works.tools = { scanner: [5, 0] };
+  for (const m of machineList()) {
+    const fs = (FAULT_CAUSES[m.kind] || []).filter(f => f.part); if (!fs.length || (m.tier || MACHINE_KINDS[m.kind].tier) > 1) continue;
+    for (let d = 5; d < 25; d++) { const f = fs[d % fs.length], j = { id: 'scan' + m.id + d, machine: m.id, deck: m.deck, kind: 'repair', posted: (d - 1) * 1440 + 600, parts: [f.part], status: 'open', cause: f.id };
+      SHIP.jobs.push(j); const r = scanRead(j.id), again = JSON.stringify(scanRead(j.id)); delete j.scan; const fresh = JSON.stringify(scanRead(j.id));
+      out.parts[m.kind] = r.length; (out.have = out.have || {})[m.kind] = new Set(fs.map(x => x.part)).size;
+      const low = r.filter(x => x[1] < 40), worn = r.filter(x => x[1] >= 40 && x[1] < 66);
+      if (low.length !== 1 || low[0][0] !== f.part || again !== fresh) out.bad.push(m.id + ' ' + d + ' ' + JSON.stringify(r));
+      for (const [p] of worn) { out.twoLow++; const w = FAULT_CAUSES[m.kind].find(x => x.part === p); if (!w || w.shows !== f.shows || w.sign === f.sign) out.bad.push('worn ' + m.id + ' ' + p); }
+    } }
+  // the pick: wrong, then right, on a washer's leak held for you
+  JOBS_ON = false; let d = 8; while (!playerShiftOn(d)) d++; setShipNow((d - 1) * 1440 + 600); machinesNow();
+  const m = machineList().find(x => x.kind === 'washer'); SHIP.machines[m.id].cond = 30; SHIP.machines[m.id].state = machineState(30);
+  const j = { id: 'scanpick', machine: m.id, deck: m.deck, kind: 'repair', urgency: 1, posted: shipNow(), found: shipNow(), claimedBy: null, parts: ['pump'], status: 'open', cause: 'pump' };
+  SHIP.jobs.push(j); claimJob(j.id);
+  scanOpen(j.id); out.view = document.getElementById('devBody').textContent.slice(0, 200); deviceClose();
+  const wrong = j.scan.find(x => x[0] !== 'pump')[0], shelf = SHIP.stores[wrong];
+  out.pickWrong = scanPick(j.id, wrong); out.partsAfterPick = j.parts.slice(); SHIP.stores[wrong]--;
+  const n = jobStops(j).length; for (let k = 0; k < n; k++) jobStepDone(j.id, k);
+  out.wrong = { done: !!j.workDone, back: SHIP.stores[wrong] === shelf, parts: j.parts.slice(), cond: SHIP.machines[m.id].cond };
+  for (let k = 0; k < n; k++) jobStepDone(j.id, k);
+  out.right = { done: !!j.workDone, cond: SHIP.machines[m.id].cond, first: j.rightFirst };
+  SHIP.jobs = keep; SHIP.works.tools = tools; JOBS_ON = true;
+  return out;
+})()"""
+
+# P3: a sweep through the real kind (opened by its ladder row), then Day 5's training case
+P3 = r"""(() => {
+  const out = { cases: [], bad: [] }, C = caseState(), keep = SHIP.jobs, op = SHIP.works.op; SHIP.jobs = []; SHIP.works.op = { 5: ['p3'] }; SHIP.works.rank = 'junior';
+  const crewOk = (by, t) => { const p = schedPeople().find(x => x.id === by); return !!p && jobCrew(p) === 'works' && planWhere(p, t).act === 'work'; };
+  for (let d = 5; d <= 40; d++) if (playerShiftOn(d)) for (const m of machineList()) {
+    const fs = (FAULT_CAUSES[m.kind] || []).filter(f => f.part), f = fs[d % (fs.length || 1)]; if (!f || (m.tier || MACHINE_KINDS[m.kind].tier) > 1) continue;
+    C.open = []; const t = (d - 1) * 1440 + 600, j = { id: m.id + '@p3' + d, machine: m.id, deck: m.deck, kind: 'repair', urgency: 1, posted: t, found: t, claimedBy: null, parts: [f.part], status: 'open', cause: f.id };
+    SHIP.jobs.push(j); setShipNow(t);
+    const rate = CASE_RATE.junior; CASE_RATE.junior = 1; caseOffer(j, (d - 1) * 24 + 10); CASE_RATE.junior = rate;
+    const c = caseOf(j); if (!c) continue;
+    const notes = c.clues, decoys = c.sus.filter(s => s !== c.cause);
+    const r = { id: c.id, kind: c.kind, sus: c.sus.slice(), cause: c.cause, wait: c.wait, hidden: caseHidden(j), parts: j.parts.slice(), clues: notes.map(k => ({ id: k.id, at: k.at, kills: k.kills.slice(), by: k.src.by, t: k.src.t, tried: k.src.tried, crew: !!k.src.by && crewOk(k.src.by, k.src.t), dt: k.src.t - t })), fewest: c.fewest, band: c.band };
+    r.oneEach = notes.length === decoys.length && notes.every(k => k.kills.length === 1 && k.kills[0] === k.src.tried && decoys.includes(k.src.tried));
+    // the tries done: the parts come off the shelves; the case shows inside the shift
+    const last = Math.max(...notes.map(k => k.src.t)), shelf = notes.map(k => SHIP.stores[caseSus(c, k.src.tried).part]);
+    let s = last; while (true) { const dd = Math.floor(s / 1440) + 1, mm = s % 1440; if (playerShiftOn(dd) && mm >= 480 && mm < 900) break; s += 30; }
+    setShipNow(last - 1); caseTick(); r.early = !c.wait;
+    setShipNow(s); caseTick(); r.shown = !c.wait && j.title === c.title && j.parts.length === 0 && !caseHidden(j);
+    r.used = notes.map((k, i) => shelf[i] - SHIP.stores[caseSus(c, k.src.tried).part]);
+    r.text = caseClueText(c, notes[0]);
+    out.cases.push(r);
+    for (const k of notes) SHIP.stores[caseSus(c, k.src.tried).part] += 1;
+  }
+  C.open = []; SHIP.jobs = keep; SHIP.works.op = op;
+  return out;
+})()"""
+
+FIRST = r"""(() => {
+  const out = {}, C = caseState(), op = SHIP.works.op; C.open = []; C.done = []; delete C.first; SHIP.works.op = {}; SHIP.works.tr = {}; SHIP.works.tools = { scanner: [5, 0] };
+  let d4 = 4; while (weekday(d4) !== 3) d4++;           // a Thursday (Day 4 in a new game)
+  MACH_HOUR = null; MACH_SEEN = -1; setShipNow((d4 - 1) * 1440 + 1000); machinesNow(); caseTick(); out.before = !!C.first;
+  setShipNow((d4 - 1) * 1440 + 1090); machinesNow(); caseTick();
+  const c = caseById(C.first), j = c && caseJob(c); out.staged = !!c; if (!c) return out;
+  out.machine = j.machine; out.cause = c.cause; out.sus = c.sus.slice().sort(); out.train = c.train; out.reserved = j.reserved;
+  out.notes = c.clues.map(k => ({ tried: k.src.tried, by: k.src.by, t: k.src.t - (d4 - 1) * 1440, at: k.at }));
+  out.boardHidden = caseHidden(j);
+  // Friday morning: the tries are done; still hidden till the p3 row opens
+  setShipNow(d4 * 1440 + 600); machinesNow(); caseTick(); out.waitingNoRow = c.wait; out.faulty = SHIP.machines[j.machine].state;
+  SHIP.works.op = { [d4 + 1]: ['m7', 'p3'] }; setShipNow(d4 * 1440 + 660); machinesNow(); caseTick();
+  out.shown = !c.wait; out.title = j.title; out.by = c.by; out.notesText = c.clues.map(k => caseClueText(c, k));
+  // the scanner on it: the pump failing, the new seal worn
+  const r = scanRead(j.id); out.scan = r;
+  // solve it: take it (the first note comes with it), Where next?, cross both, call the pump, fit it
+  claimJob(j.id); caseTick(); out.got = c.got.slice();
+  caseAct('case:next', c.id + '|0'); out.goal = IX_GOAL ? IX_GOAL.place : null; out.panel = panelPlace(j.machine);
+  for (const k of c.clues) if (k.at !== 'board') caseClue(c.id, k.id);
+  for (const s of ['seal', 'valve']) caseAct('case:cross', c.id + '|' + s);
+  caseAct('case:call', c.id + '|pump'); caseAct('case:yes', c.id + '|pump');
+  const n = jobStops(j).length; for (let k = 0; k < n; k++) jobStepDone(j.id, k);
+  out.fixed = !!j.workDone && SHIP.machines[j.machine].cond > 40; out.flags = [j.rightFirst, j.clever];
+  turnInJob(j.id); caseTick(); out.closed = !caseById(c.id); out.done = caseFlags(j.id);
+  SHIP.works.op = op;
+  return out;
+})()"""
+
 # a case in play, on a weekday's shift: a washer's leak (pump), held for you
 PLAY = r"""(() => {
   const out = {}, C = caseState(); C.open = []; C.done = [];
@@ -151,7 +246,7 @@ PLAY = r"""(() => {
   out.sus = c.sus.slice(); out.title = j.title; out.parts = j.parts.slice(); out.held = caseHeld(j);
   caseTick();
   // Fault notes: the chips, crossing out and back
-  deviceShow('faults');
+  deviceShow('faultnotes');
   const chips = () => [...document.querySelectorAll('#devBody .chips .chip')].map(x => x.textContent + (x.classList.contains('off') ? ':off' : ''));
   out.chips0 = chips(); out.viewText = document.getElementById('devBody').textContent;
   document.querySelector('#devBody .chips .chip').click(); out.chips1 = chips();
@@ -189,7 +284,7 @@ PLAY = r"""(() => {
   // a junk save, and a save whose job is gone
   CASE_SAVED = { open: [{ id: 'cx', job: 'nope', kind: 'zz', cause: 'pump', sus: ['pump'], clues: [] }, 'junk'], done: 'x', n: -3 }; delete SHIP.works.cases; CASE_CLEAN = false;
   const cj = caseState(); out.junk = cj.open.length === 0 && cj.done.length === 0 && cj.n === 0;
-  out.chief = (() => { caseAct('case:chief', 1); deviceShow('faults'); const t = document.getElementById('devBody').textContent; caseAct('case:chief', 0); return t.includes('isn\'t that'); })();
+  out.chief = (() => { caseAct('case:chief', 1); deviceShow('faultnotes'); const t = document.getElementById('devBody').textContent; caseAct('case:chief', 0); return t.includes('isn\'t that'); })();
   // a kind opens with its ladder row (SHIP.works.op), not when it's trained
   CASE_KINDS.zop = { ladder: 'zop', fits: () => false }; const op0 = SHIP.works.op, tr0 = SHIP.works.tr;
   SHIP.works.op = {}; SHIP.works.tr = { zop: 5 }; const a1 = caseOpened('zop'); SHIP.works.op = { 5: ['zop'] }; SHIP.works.tr = {}; out.opens = [a1, caseOpened('zop')];
@@ -264,6 +359,37 @@ def run(path):
         check(json.dumps(A['cases']) == json.dumps(B['cases']) and json.dumps(Sw) == json.dumps(Sw2), 'twice -> the same cases')
         fb = sum(r['fallback'] for r in Sw['perRank'].values()); rl = sum(r['rolled'] for r in Sw['perRank'].values())
         if rl and fb / rl > .1: print(f"WARN sweep fallbacks {fb}/{rl}")
+        Sc = g.ev(SCAN)
+        print('scanner:', {k: v for k, v in Sc.items() if k != 'bad'}, Sc['bad'][:4])
+        check(Sc['none'] is None, 'no scanner, no reading')
+        check(Sc['parts'] and all(min(3, Sc['have'][k]) <= n <= 5 for k, n in Sc['parts'].items()), f"every kind with a table reads 3-5 parts (fewer only if its table has fewer): {Sc['parts']} of {Sc['have']}")
+        check(not Sc['bad'], f"the failing part is the cause's, the same twice; a worn decoy shares the card, not the sign: {Sc['bad'][:4]}")
+        check(Sc['twoLow'] > 0, f"some readings have a worn decoy: {Sc['twoLow']}")
+        check(Sc['pickWrong'] and Sc['partsAfterPick'][0] != 'pump', f"a pick puts that part on the job: {Sc['partsAfterPick']}")
+        w = Sc['wrong']; check(not w['done'] and w['back'] and w['parts'] == ['pump'] and w['cond'] == 30, f"a wrong pick: not fixed, the part back, the job names the right part: {w}")
+        check(Sc['right']['done'] and Sc['right']['cond'] > 30 and Sc['right']['first'] is False, f"then the right one fixes it (not right first time): {Sc['right']}")
+        Q = g.ev(P3)
+        qc = Q['cases']; print(f"P3 sweep: {len(qc)} cases"); [print('  ', c) for c in qc[:2]]
+        check(len(qc) >= 20, f"P3 cases: {len(qc)}")
+        for c in qc:
+            sus, clues = c['sus'], c['clues']
+            left = lambda ks: [s for s in sus if not any(s in k['kills'] for k in ks)]
+            check(c['kind'] == 'p3' and c['oneEach'] and left(clues) == [c['cause']] and all(len(left([k])) > 1 for k in clues), f"{c['id']}: one note per decoy, each kills only its decoy, one left: {c}")
+            check(all(k['crew'] and 120 <= k['dt'] <= 1440 + 600 for k in clues), f"{c['id']}: tries by Works crew at work, 2-12 hours on or the next morning: {[(k['by'], k['dt'], k['crew']) for k in clues]}")
+            check(c['wait'] and c['hidden'] and c['parts'] != [] and not c['early'] and c['shown'], f"{c['id']}: hidden till the last try, then shown inside the shift: {c}")
+            check(all(u == 1 for u in c['used']), f"{c['id']}: each try's part came off its shelf: {c['used']}")
+            check(' — ' in c['text'] and 'Still' in c['text'], f"{c['id']}: a note names who tried: {c['text']!r}")
+        F = g.ev(FIRST)
+        print('first case:', F)
+        check(not F.get('before') and F.get('staged') and F.get('machine') in ('4-washer-2', '4-washer-3') and F.get('cause') == 'pump' and F.get('sus') == ['pump', 'seal', 'valve'] and F.get('train'), f"Day 4 18:00: Washer 2 leaking, the pump, three suspects, a training case: {F}")
+        if F.get('staged'):
+            check([n['tried'] for n in F['notes']] == ['seal', 'valve'] and F['notes'][0]['at'] == 'board' and F['notes'][1]['at'] == F['panel'], f"the seal tried first (on the job), then the valve (on the panel): {F['notes']}")
+            check(F['waitingNoRow'] and F['faulty'] in ('faulty', 'failing'), f"Friday morning: the washer faulty, the case waiting for the row: {F['waitingNoRow']} {F['faulty']}")
+            check(F['shown'] and F['title'].startswith('Head-scratcher: Washer') and F['title'].endswith('leaks'), f"shown once the row opens: {F['title']!r}, with {F['by']}")
+            sc = dict(F['scan'] or [])
+            check(sc.get('pump', 99) < 36 and 40 <= sc.get('seal', 0) < 61, f"the scanner: the pump failing, the new seal worn: {F['scan']}")
+            check(len(F['got']) == 1 and F['goal'] == F['panel'], f"the first note with the job, Where next? to the panel: {F['got']} {F['goal']}")
+            check(F['fixed'] and F['flags'] == [True, True] and F['closed'] and F['done'] == 6, f"called right first time, fixed and closed: {F}")
         P = g.ev(PLAY)
         print('play:', {k: v for k, v in P.items() if k not in ('viewText',)})
         check(P.get('made') and P['parts'] == [] and P['held'], f"a case on the washer, its part not given, held for you: {P.get('parts')} {P.get('held')}")
