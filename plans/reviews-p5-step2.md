@@ -3,14 +3,24 @@
 Started by lead 12 (session_01GjWhU9Z9V8RNoR8yyELA9V) at ~11:28 for every Step 2 piece; R (claude/reviews-p5) keeps Step 1. Who gets verdicts: the seat and BM4 (session_013h22isZZqmJJSEKSbrwabf) get each one line; FAILs and design clashes also go to the lead. Format and standards as plans/reviews-p5.md: behaviour, save and schedule changes in depth against the piece's approved page (plans/mechanics/ on claude/p5-design), determinism, old saves load, phones first, cadet_test differences explained; content and test-only changes skimmed. Verdicts newest first.
 
 ## Passing tips
+- S claude/ship-systems **01a3a3b** (machine_check only: 5o/5t cope with 24d; contains 78bf1c2)
 - Onboarding 4 claude/arrival-0607b **96649fe** (0.42.46, 21b's uniform grime for m2; 1 LOW, the page's field names)
 - S claude/ship-systems **03340c5** (0.33.48-0.33.51, Step 2 parts; also inside 78bf1c2, which R reviews for Step 1; 1 nit)
 
 ## Failing / waiting on a fix
-- M1 claude/mech-rounds **7285601** (0.45.1, contains 8a6cea8): two items (8a6cea8's item 1, the Day 2 lesson's time; 0.45.1's item 2, Yara's crate is lost)
-- S machine_check (test only): 5o and 5t fail once 24d is in (see the M1 0.45.1 verdict)
+- M1 claude/mech-rounds **f65c929** (0.45.2): item 1 closed; item 2 (Yara's crate is lost, from 0.45.1) still open
 
 ## Verdicts
+
+### M1 f65c929 (0.45.2): item 1 fixed, the LOWs, 24b uniform — item 1 closed; FAIL stays on item 2 (in depth)
+- **Item 1 closed:** `WORK_MECH.m1.at = () => 625`. With C 88f71b7 merged, Day 2's meeting with Torres is at 10:45 (mech_check m1 checks it's 10:35 or later).
+- LOW 1 closed. The extinguisher prop is PROP_KIT.extinguisher plus HOLDS.extinguisher: built the first time it's needed, colours through col(), no R(), drawn in the character's own mesh, so no new draw calls. The drill kind's `hold` is 'extinguisher' between take and put back. The Calendar's Wednesday line names the drill through a getter on DEV_WEEK[2]'s 15:00 entry, so section 19 isn't edited; it's set only when the drill's places exist. Calder's Friday-tea word: Friday 18:45-19:30 at works-tea or new-hands-tea on Deck 5, after a fast drill you came to, once a week (simNote('drillTea')). LOW 3 closed: a reload mid-round in mech_check m1. The "off on worn" nit is in DEV_NOTES. LOW 2 (stages 2-3) is out by the lead's call.
+- **24b, your work uniform (new, read against m2-uniform.html):** grime on your job's turnin from Day 8 through 15c's `clothesGrime` (oily repair or overhaul +.35, oily service +.2, else +.05; the page's OILY set). The first oily job sets flag works.oily (m2's need). WORK_MECH.m2 is registered only when 15c's `uniformState` exists (Onboarding 4's 0.42.46), so it's inert here. m2's open plays Torres's two lines if he's on your deck, else Mail, and counts its use (a simplification of "within 90 minutes at the board or tea corner"; fine for a small row). The tint: one cached clone of CHAR_MAT in col('#e1ded9'), swapped onto the player's body meshes (props skipped) when uniformState is grubby, checked once a ship minute. No new draw calls, no material per frame. Stage 2 is not built (optional).
+- **Item 2 still open** (sent after this commit was made): `done` still haulTakes the crates of Yara's load-only run (line ~35644), so Day 3's first crate is never delivered.
+- Checks (my runs on f65c929): cadet_test vs d3d720b **ALL IDENTICAL**; **mech_check OK** (m1 meeting at 645; m4; m2 "not in this build" without 0.42.46); **machine_check OK** with S's fixed copy (01a3a3b).
+
+### S 01a3a3b: machine_check 5o and 5t with 24d in (test only) — PASS
+- 5o reads `partsCrates()` when it's there, for the unload's crates and `emptied`. 5t stubs 24d's own `post` while it reads the hold and puts it back after. My run on M1 f65c929 with this copy: MACHINE CHECK OK.
 
 ### Onboarding 4 96649fe (0.42.46): the uniform's grime in section 21b (m2's 15c part) — PASS with a LOW (in depth)
 Base: live 0.60.7 ce26fb2. Read against m2-uniform.html's 15c row.
