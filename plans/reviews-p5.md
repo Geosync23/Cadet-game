@@ -7,10 +7,13 @@ How: behaviour, save and schedule changes in depth (against the piece's approved
 ## Passing tips
 - C claude/works-career: none yet (87df8f5 / ae6598a FAIL, 1 item)
 - A claude/deck-0607 **6cc826b** (0.47.2, contains c20f91f and ad5e704; no LOWs open)
-- H claude/mech-cases **55343c6** (0.55.10, contains everything from eece4d4; no LOWs open)
+- H claude/mech-cases **171f901** (0.55.11, contains everything from eece4d4; no LOWs open)
 - W claude/writer-p5 **0d179ac** (0.48.86, text; contains 843bac9 and 76fc413; no LOWs open)
 
 ## Verdicts
+
+### H 171f901 (0.55.11): `verbs: 'case'` on the Fault notes tab — PASS (read; H's checks)
+- One field on the worksTabAdd call, so C's `split(':')[0]` routing sends 'case:*' to the tab whichever tab is on show. H's checks: puzzle_check OK, cadet_test ALL IDENTICAL.
 
 ### C 87df8f5 (0.44.0-0.44.6) + ae6598a (0.44.7): section 24 WORK core — FAIL, one item (in depth; read with a helper against foundation.html)
 - **Item 1 (blocking): a big row's ask is silent when you've slept, which is the usual case.** Big rows open from 06:00 (WORKS_ASK [360, 630]). Sleep skips to 07:40, so SIM_ADVANCE's handler (line ~34879) runs ladderTick for 06:00 and 07:00 during the skip. trainOffer (34626) then sends the Mail `quiet: true`, and its toast and setGoal need `t >= shipNow() - 1`, which is false. So on Day 2 you wake to a silent Mail about Rounds: no toast, no goal pointer. The page says a toast, a Mail and the pointer. Fix: keep `c.told`, and in play (trainTick or the minute tick) give the toast and setGoal the first time `st === 'meet' && !c.told`. Or open a big row only in play, not inside SIM_ADVANCE, while its meeting is still ahead.
