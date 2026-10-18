@@ -8360,7 +8360,9 @@ DECKS[7] = {
   // the auditorium's seats (0.80.1): reached from the aisle beside their row; a type no crew code knows, so they stay the player's
   places: REC_SEATS.map((s, k) => ({ id: '7-seat-' + (k + 1), type: 'rec:seat', at: [s.col, Math.floor(s.z)], walk: [s.col, s.aisle], face: 'e', pose: 'sit', room: 'A', xy: [s.x, s.z], y: Math.round((s.h + .47) * 100) / 100 }))
     // the stands' 33 seats (0.80.2), facing the court, reached from the aisle at column 6 or 14
-    .concat(REC_STAND_SEATS.map((s, k) => ({ id: '7-stand-' + (k + 1), type: 'rec:seat', at: [s.col, s.tier ? 12 : 11], walk: [s.aisle, s.tier ? 12 : 11], face: 's', pose: 'sit', room: 'T', xy: [s.col + .5, s.z + .02], y: Math.round((s.h + .45) * 100) / 100 }))),
+    .concat(REC_STAND_SEATS.map((s, k) => ({ id: '7-stand-' + (k + 1), type: 'rec:seat', at: [s.col, s.tier ? 12 : 11], walk: [s.aisle, s.tier ? 12 : 11], face: 's', pose: 'sit', room: 'T', xy: [s.col + .5, s.z + .02], y: Math.round((s.h + .45) * 100) / 100 })))
+    // the concourse's two beanbags (0.80.9, the user's): lounge seats like the music room's, so crew can use them in phase 2
+    .concat([[5, 5.5, 7.45], [6, 6.6, 7.55]].map(([c, x, z], k) => ({ id: '7-beanbag-' + (k + 1), type: 'lounge-seat', at: [c, 7], walk: [c, 8], face: 's', pose: 'sit', room: '=', xy: [x, z], y: .42, cush: .32 }))),
   dress(d) {
     recMats();
     for (const [key, tw, text] of d.plates) placeOnEdge('plate', key, tw, { text });
@@ -14074,6 +14076,7 @@ Object.assign(PLAYER_ACTS, {
   recFloat:  { need: 'leisure', gain: 25, mins: 10, pose: 'float', title: 'Float room', done: 'Back to full gravity. Your legs feel very heavy.' },
   recSeat:   { need: 'leisure', gain: 8, mins: 15, pose: 'sit', title: 'Auditorium', done: 'You get up and stretch.' },
   recWatch:  { need: 'leisure', gain: 8, mins: 15, pose: 'sit', title: 'Stands', done: 'You get up and stretch.' },
+  recBean:   { need: 'leisure', gain: 8, mins: 15, pose: 'sit', title: 'Beanbag', done: 'You haul yourself out of the beanbag. It takes two goes.' },
   recShower: { need: 'hygiene', gain: 20, mins: 3, pose: 'stand', title: 'Shower' },
 });
 const REC = { chain: null, last: null };
@@ -14090,7 +14093,7 @@ function recTap(it, at, point) {
   const t = it.t;
   if (t === 'Lightdisc court' || t === 'Scoreboard' || t === 'Ask someone to play') { toast(t, it.x); return true; }
   const kind = t === 'Pool' ? 'swim' : /^(Kayak dock|River|White water|Kayak rack|Wave gate)$/.test(t) ? 'kayak' : t === 'Climbing wall' ? 'climb'
-    : t === 'Float room' ? 'float' : t === 'Seats' ? 'seat' : t === 'Stands' ? 'watch' : t === 'Lockers' && recKitOn() ? 'unchange' : null;
+    : t === 'Float room' ? 'float' : t === 'Seats' ? 'seat' : t === 'Stands' ? 'watch' : t === 'Beanbag' ? 'bean' : t === 'Lockers' && recKitOn() ? 'unchange' : null;
   if (!kind) return false;
   if (!recOpen() && kind !== 'unchange') { toast(t, 'The rec dec\'s closed till six.'); return true; }
   recGo(kind, point, t, it.x); return true;
@@ -14098,10 +14101,11 @@ function recTap(it, at, point) {
 PLAYER_TAPS.push(recTap);
 function recGo(kind, point, title, flavour) {
   REC.chain = null;
-  if (kind === 'seat' || kind === 'watch') {             // the nearest free seat to your tap, in that room
-    const room = kind === 'seat' ? 'A' : 'T', pl = [...PLACE_OF.values()].filter(p => p.type === 'rec:seat' && p.room === room && !heldBy(p.id))
+  if (kind === 'seat' || kind === 'watch' || kind === 'bean') {   // the nearest free seat to your tap, in that room (a beanbag: the concourse's)
+    const room = kind === 'seat' ? 'A' : kind === 'bean' ? '=' : 'T', type = kind === 'bean' ? 'lounge-seat' : 'rec:seat', pl = [...PLACE_OF.values()].filter(p => p.type === type && p.room === room && !heldBy(p.id))
       .map(p => [p, placeSpot(p.id)]).filter(([, s]) => s).sort((a, b) => Math.hypot(a[1].x - point.x, a[1].z - point.z) - Math.hypot(b[1].x - point.x, b[1].z - point.z))[0];
     if (!pl) { toast(title, 'Every seat\'s taken.'); return; }
+    if (kind === 'bean') { actStart('recBean', pl[0].id, { pose: 'sit', title, flavour, after: 'You flop into the beanbag. It swallows you whole.' }); return; }
     actStart(kind === 'seat' ? 'recSeat' : 'recWatch', pl[0].id, { pose: 'sit', title, flavour, after: kind === 'seat' ? 'You sink into a violet seat and look at the stars behind the stage.' : 'You take a seat on the bench and watch the court.' });
     return;
   }
