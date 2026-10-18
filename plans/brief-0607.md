@@ -50,3 +50,6 @@ Systems was the long pole. The old sim items move to the social engineer (finish
 ## PE6's list split (lead, ~05:08)
 PE6 keeps: Hobbies app, time clock pop-up, bathroom rate + toilet icon, tray text, player_check one-liner. Moved: Gym club member + Tiles table any time → traditions; the bar order → social; low-need pop-ups + first-evening tips + Ideas card + Settling-in items → onboarding 4. All build on PE6's hook 52839a6.
 **Split cancelled (~05:10):** PE6 had already built every moved item locally (0.28.62-0.28.64, pushing ~05:30). All stay with PE6. Added for PE6 (the user, ~05:10): gardening counts as a hobby (leisure) with a tip; head writer writes the lines.
+
+## Lead 11 (from ~05:35)
+Report to lead 11, session_01YKC3CGA9VS4b7wuqLbPT7V (lead 10 is idle). ~06:01: **build master 4** session_013h22isZZqmJJSEKSbrwabf started (push branch claude/cand-0607) to take the 0.60.7 candidate from BM3 (~58% memory) at its next quiet point. DA4 bisects the day_check day 3 'kovac-zainab Deck 5 stuck' failure.
