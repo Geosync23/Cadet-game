@@ -1148,15 +1148,13 @@ with sync_playwright() as pw:
             g.ev("setShipNow(shipNow() + 31)"); g.step(2); g.ev(WTAP); w3 = json.loads(g.ev(WST))
             check(w3['res'][-1:] == [[3, {}]], f'work steps: tapped after it\'s ready, the wait is done ({w3["res"]})')
             # hold: today's behaviour, untouched (ixStop, its minutes); then the job's work is done
-            g.ev("window.__ae0 = actEnd; window.__ae = []; window.__ixn = 0; window.__ixt0 = ixTips; ixTips = () => { window.__ixn++; return window.__ixt0(); }; window.__isd0 = ixStopDone; window.__isd = []; ixStopDone = A => { const j = ixChore(); window.__isd.push([A.o.job, A.o.ixStep, j && j.id, A.done, A.def.mins]); return window.__isd0(A); }; actEnd = abort => { if (ACT && ACT.kind === 'ixStop') window.__ae.push([!!abort, ACT.phase, player.path.length, !!player.steer, ACT.deck === deckDef, String(new Error().stack).split('\\n').slice(2, 6).map(x => x.trim().slice(0, 60))]); return window.__ae0(abort); }")
             g.ev(WTAP); g.step(2); h1 = json.loads(g.ev(WST))
             check(h1['act'] and h1['act'][0] == 'ixStop', f'work steps: a stop with no how is today\'s hold ({h1["act"]})')
             for k in range(200):
                 g.step(30)
                 if not g.ev("!!ACT"): break
+            g.step(3)                                          # 15b's ixFrame marks the stop on the frame after the activity ends
             h2 = json.loads(g.ev(WST)); print('  hold:', h1['act'], '->', h2['done'], h2['toast'][:60], '| needs', n0, '->', h2['needs'])
-            if not h2['done']: print('  hold, how it ended:', g.ev("JSON.stringify([window.__ae, window.__ixn, window.__isd, typeof IX_ACTS !== 'undefined' && Object.keys(IX_ACTS).length])"))
-            g.ev("actEnd = window.__ae0; ixTips = window.__ixt0; ixStopDone = window.__isd0")
             if not h2['done']: print('  hold, not done: [the test job, your job, all yours]', g.ev("JSON.stringify([(j => j ? [j.status, j.claimedBy, j.stepsDone, j.workDone || null] : 'gone')(SHIP.jobs.find(j => j.id === 'pcws')), (j => j && j.id)(myJob()), SHIP.jobs.filter(j => j.claimedBy === 'you').map(j => [j.id, j.kind, j.status]), typeof ixChore === 'function' && (j => j && j.id)(ixChore())])"))
             check(h2['done'] and h2['res'][-1:] == [[4, None]], f'work steps: the hold stop ends the job\'s work ({h2["res"]})')
             check(all(b <= a + .5 for a, b in zip(n0, h2['needs'])), f'work steps: no need rose from the steps ({n0} -> {h2["needs"]})')
