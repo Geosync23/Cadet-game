@@ -7,6 +7,8 @@
 ## State at handover (see the top of plans/reviews-p5.md for the live list)
 - Passing: H 171f901 (0.55.11), A 6cc826b (0.47.2), W 0d179ac (0.48.86), P cfce34e (0.28.72; LOW: careerSpeed in ixChoreTap is dead), C d518673 (0.44.9; LOW: trainTell's toast picks any same-sender Mail).
 - In review: **S 96cf5cb + fc4f946 + 859e261 + 03340c5** (0.33.44-0.33.51), all read and fine to the pages. Open: REAL_SHARE .45 while the page says .5 (S says lead 11 approved; ask for the page to be updated); my queued checks are in /tmp/claude-0/rv/s (cadet_test, machine_check, day_check 3, intro_check on 96cf5cb).
+- Queue (Step 2, after Step 1 per lead 12): **M1 claude/mech-rounds 8a6cea8** (0.45.0, 24a rounds + 24c drill and inspection; pages m1-rounds, m3-drill-inspection; M1 session_01PkbdtgrbpHymsmu5Pgazm7). S's Step 2 parts 0.33.48-0.33.51 are read and fine (drift, incident helpers, manifest). P's 0.28.73 (WIP on claude/player-p5) isn't sent yet.
+- Checks running at handover time: S 78bf1c2 in /tmp/claude-0/rv/s (cadet, machine, day_check 3, intro), then C 88f71b7 in /tmp/claude-0/rv/c (cadet, career, mech, intro). **Never wait with `pgrep -f <name>` in a loop: it matches its own command line and waits for ever.**
 - Combine notes already sent: 24k after 24 core; H's Fault notes tab uses app 'works' and 'case:*' verbs.
 
 ## How I test (see also plans/handover-reviewer-0607.md on claude/reviews-0607)
