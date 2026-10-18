@@ -26,3 +26,4 @@ Build master 5 (BM5, session_01DbBJ7iK6TrrADyEw7qbCsQ) on claude/p5-cand-pt1; re
 - ~19:31 DA5's bubble shake fix: deck-pt1 e55cf31 (0.47.9, new bubble_check.py: added to the full set); with R3. U confirms 55b2499 ready (its player_check FAIL is on cb7d30a too). p3: career, puzzle, machine, mech, day0 OK.
 - ~19:33 R3 PASS U 55b2499 and T 574da73. Remaining: X 98e93bf (R3 reviewing), O5 fix (ea0685e or later) + Day 0 auto-sit, A5 e55cf31 bubble fix.
 - ~19:40 R3 PASS X 98e93bf (0.71.1; 1 LOW: storekeeper's 08:00 rota). All pass except O5 (fix pending) and A5 e55cf31 (bubble fix, R3). p3 day1, day2 OK.
+- trial p4 (BM6 scratch aae6378, the expected final) = 0.63.1 + C2 bb4423c + X 98e93bf + P 587a2cd + O4 7a2bc5d + O5 2d213b1 (0.42.63, with R3) + T 574da73 + U 55b2499 + A5 e55cf31 (0.47.9 bubbles, with R3) + W 97fa9ae: merges clean, verify_merge 0 problems, bake 9022 lines / 35 traditions, NAMES OK.
