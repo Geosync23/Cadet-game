@@ -162,7 +162,7 @@ Deck 5 is the ship's garage, not its home, and it was built first after Deck 4 s
 
 | Area | What's there | Opens at |
 | --- | --- | --- |
-| Shuttle bay (stern) | One small shuttle, the Tern, on its pad; the flat stern hull is the bay doors; a control booth with glass over the pad. Where you first arrive. | Start (bay floor) |
+| Shuttle bay (stern) | One small shuttle, the Tern, on its pad (sleeker from 0.60.7: a tapered nose, a raked windscreen, swept fins); the flat stern hull is the bay doors; a control booth with glass over the pad. Where you first arrive. | Start (bay floor) |
 | Bay door gear | Giant gears and rams in the stern corner; the doors slide into a pocket here. Glass panel onto the pad. | Sealed, visible through glass |
 | Cargo hold | Crates off the shuttles plus the big spares. Where supplies enter the ship; they leave on hover hand carts up the main lift. Its cargo hatch to the shuttle bay is open to Works crew and the player. | Open: supplies move by cart since Pillar 2 |
 | Cart bay | Hover hand carts, docked and charging between runs. | Opens once supplies start moving |
@@ -184,11 +184,11 @@ The first build of Deck 5 (step 6c) made the lift lobby, haulway, corridor, Work
 
 Everyone comes here to eat. A wide promenade runs stern to bow down the middle of the ship, with the lift standing in a plaza halfway along: the hydroponics garden at the stern end, the bow lounge at the bow end, and every room opening off it. 52 × 22 tiles, the widest outline (Deck 2 shares it). The plan is in `plans/deck3-plan.html`.
 
-- **Mess hall and galley** along the port side. The mess hall is the biggest room on the ship: long tables and round ones, a drinks station, a tray return, a menu board (see "Food and cooking") and hull windows. The serving counter opens through to Chef Brennan's galley, with a grab-and-go shelf for anyone running late. A walk-in cold store sits behind the galley, stocked by hover cart.
+- **Mess hall and galley** along the port side. The mess hall is the biggest room on the ship: long tables and round ones, a drinks station with a shelf of spices from home over it (it grows a jar each Spice shelf supper), a menu board (see "Food and cooking") and hull windows. The serving counter opens through to Chef Brennan's galley, with a grab-and-go shelf for anyone running late. A walk-in cold store sits behind the galley, stocked by hover cart.
 - **The bow lounge** fills the whole bow on one floor, with curved windows sweeping from side to side and a curved bar stocked from the galley behind it. It's zoned so it never feels like one empty hall: a lively bar end and a quiet window end.
 - **The infirmary** is just aft of the lift, with a ward, an exam room and Rina on duty.
 - **The hydroponics garden** fills the stern: grow racks, raised beds, fruit trees, a pond with benches and a herb wall for the galley. Glass doors at the end of the promenade let you see green as soon as you step out of the lift.
-- **Along the starboard side:** a gym (with a treadmill, added 2026-10-15; no extra kit or booked slots for now, more later), a small crew store, and call-home booths for recorded messages home.
+- **Along the starboard side:** a gym (four treadmills, three rowers, two exercise bikes facing the promenade, weights, a punch bag and mats; 0.60.7), a small crew store, and call-home booths for recorded messages home.
 - **Washrooms** off the plaza.
 - **Service layer:** the galley plant, the water recycler (when it struggles, the showers on Deck 4 run weak) and the garden's irrigation room, all sealed.
 
