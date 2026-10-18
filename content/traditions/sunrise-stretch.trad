@@ -1,0 +1,36 @@
+@tradition sunrise-stretch
+// Sunrise stretch (0.60.7, the user's pick): a gentle group stretch along the promenade windows before breakfast,
+// Mondays, Wednesdays and Fridays. Anyone can join. wake: 15 (most traditions need an hour after waking).
+// The deck architect may tag stretch spots by the windows (event: 'sunrise-stretch'); else the promenade benches.
+k: 448
+title: Sunrise stretch
+when: weekly monday,wednesday,friday
+at: 06:30-07:00
+min: 15
+wake: 15
+where: 3 room Promenade: bench
+where: 3 room Lift plaza: bench
+hold: none
+who: early-riser 55%, runner 40%, gym-regular 35%, everyone 8%
+from: The promenade
+
+
+== mail
+- Sunrise stretch at {time}, along the promenade windows. Gentle, slow, done before breakfast. Come in what you slept in.
+
+== ask
+- Sunrise stretch in the morning? Gentle. I promise.
+- Stretch before breakfast? Wakes you up better than tea.
+
+== here
+- Reach up. And down. And groan quietly.   #funny
+- Look out the window while you stretch. Lovely start.
+- My knees say no. My knees are outvoted.   #funny
+
+== thanks
+- You stretch along the promenade windows with a few early risers while the stars slide past. Breakfast tastes better after.
+
+== chatter
+- Sunrise stretch tomorrow. Set an alarm.
+- I go to sunrise stretch for the windows, honestly.   #warm
+- My back's better since I started the stretch.
