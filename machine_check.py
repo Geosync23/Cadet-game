@@ -22,6 +22,8 @@
 #   the board through a week (0.33.32): jobs for you on every weekday shift, none held on your days off (5i)
 #   the garden (0.33.34): grow lights, gardenAt, the crate run and carryWaiting (5j)
 #   reserved jobs and job notes (Pillar 4): jobReserve, jobRelease, simNote('job', 'repair', 'jobAbandoned', 'jobUnclaimed') (5k)
+#   the Works crew at work (0.33.40): the two placed jobs on Days 1 and 2, every third small job to the crew at once (5l)
+#   the shelves and the Wednesday delivery (0.33.41-0.33.42): the right shelf, the machine shop, crates, two trips, 14:00 (5m)
 #   your side: a job you claim is left to you, and finishing it puts the machine right
 #   the save: machines, jobs and supplies written by the save hook and read back by machinesLoad come out the
 #   same, and run on the same afterwards
@@ -285,6 +287,7 @@ with sync_playwright() as pw:
 
     # 5. your side: a job you claim is left to you
     y = g.ev("""(() => {
+      if (typeof SHARE_ON !== 'undefined') SHARE_ON = false;   // 0.33.40: no job of yours handed to the crew at once here (5l tests that)
       JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(4 * 1440 + 9 * 60); machinesNow();
       const o = SHIP.machines['3-oven-1']; o.cond = 40; o.state = machineState(40);       // the oven acts up
       setShipNow(4 * 1440 + 10 * 60); machinesNow();
@@ -314,6 +317,7 @@ with sync_playwright() as pw:
       const k3 = takeable() || breakOne();
       if (k3 && claimJob(k3.id)) { setShipNow(shipNow() + 600); touchJob(k3.id); setShipNow(shipNow() + 180); machinesNow(); const b = SHIP.jobs.find(x => x.id === k3.id); kept = !!b && b.claimedBy === 'you'; dropJob(k3.id); }
       const s0 = SHIP.stores.relay || 0, ret = returnPart('relay') && SHIP.stores.relay === s0 + 1;
+      if (typeof SHARE_ON !== 'undefined') SHARE_ON = true;
       return { id, claimed, mine, fin, before, after, took, stock, oneAtATime, lapse, kept, ret };
     })()""")
     print(f"Your job: {y}")
@@ -558,7 +562,7 @@ with sync_playwright() as pw:
       if (stand) window.__sc("playerShiftOn = d => weekday(d) < 5");
       const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min;
       JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t0); machinesNow();
-      const small = j => forYou(j) && !j.leave && j.cargo !== 'meals';
+      const small = j => forYou(j) && !j.leave && !j.cargo;   // the delivery (cargo 'stores') isn't one of them from 0.33.42: it waits till 14:00 on its own rule
       const out = { stand, emptyStart: 0, firstMorning: null, empty: 0, hours: 0, sum: 0, maxHeld: 0, offHeld: [], offCrew: 0, offTook: null, offOpen: 0 };
       for (let t = t0; t < t0 + 7 * 1440; t += 60) {
         setShipNow(t); machinesNow();
@@ -687,6 +691,93 @@ with sync_playwright() as pw:
         or rs['stops'] != 'fetch make job' or rs['makeMins'] != [30, 30, 30] or not rs['kept'] or not rs['turned'] or rs['crewBefore'] or not rs['crewAfter'] or not rs['released'] or rs['lapse'] is False or rs['dropAb'] is False or not rs['repairYou'].endswith(':faulty') or rs['repairCrew'] < 1 or rs['unclaimed'] < 1 or not rs['unclaimedOnce'] or rs['badShape']
         or not all(x in rs['notes'].split() for x in ['take/1', 'stop:fetch/1', 'stop:make/1', 'stop:job/1', 'done/1', 'turnin/1'])):
         fail('reserved jobs and job notes')
+
+    # 5l. the Works crew at work (0.33.40, the plan for 0.60.7): a fresh ship's first two days have the two crew jobs placed
+    # for you to see (SHOW_JOBS: the vent by Deck 4's lift on Day 1's morning, a delivery into the Works bay on Day 2 after
+    # lunch), each taken by the named junior or another of the crew, standing at its place, the delivery's box carried
+    # from the pickup to the drop and showJob(day) saying so; through a week about every third small job goes to the crew
+    # at once (j.shared), never while fewer than SHARE_KEEP others are held for you, and none of those is ever held
+    if g.ev("typeof SHOW_JOBS === 'undefined'"):
+        print("Works crew at work: not in this build (skipped)")
+    else:
+        cw = g.ev("""(() => {
+          const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min;
+          JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t0); machinesNow();
+          const out = { show: {}, shared: 0, small: 0, keptLow: [], heldShared: [] };
+          for (let t = t0; t < t0 + 7 * 1440; t += 60) {
+            setShipNow(t); machinesNow();
+            for (const j of SHIP.jobs) if (j.shareSeen && !j.__seen) { j.__seen = true; out.small++; if (!j.shared) continue; out.shared++; if (j.shared < SHARE_KEEP) out.keptLow.push(j.id); if (t < leaveEnd(j)) out.heldShared.push(j.id); }
+            for (const d of [1, 2]) if (!out.show[d]) { const s = showJob(d); if (s) { const j = SHIP.jobs.find(x => x.id === s.id); out.show[d] = { who: s.who, place: s.place, deck: s.deck, carry: (j.segs || []).some(sg => sg.hold === 'carry'), dropCarry: (j.segs || []).some(sg => sg.tag === 'drop' && sg.hold === 'carry'), stand: (j.segs || []).some(sg => sg.placeId === s.place && sg.tag !== 'pickup') }; } }
+          }
+          out.keptLow = out.keptLow.slice(0, 4); out.heldShared = out.heldShared.slice(0, 4);
+          setShipNow(t0);
+          return out;
+        })()""")
+        s1, s2 = cw['show'].get('1') or {}, cw['show'].get('2') or {}
+        print(f"Works crew at work: Day 1 {s1}, Day 2 {s2}; shared at once {cw['shared']} of {cw['small']} small jobs in the week, "
+              f"with fewer than {g.ev('SHARE_KEEP')} others held {cw['keptLow']}, a shared one held for you {cw['heldShared']}")
+        if (not s1 or s1['place'] != '4-lift-1' or not s1['stand'] or not s2 or not s2['place'] or s2['deck'] != 5 or not s2['carry'] or not s2['dropCarry']
+                or cw['shared'] < 1 or cw['shared'] > cw['small'] * .6 or cw['keptLow'] or cw['heldShared']):
+            fail('the Works crew at work')
+
+    # 5m. the shelves and the Wednesday delivery (0.33.41-0.33.42, the plan for 0.60.7): every part has its own shelf,
+    # a job's fetch stop starts at it, shelfNeed/shelfWrong send you to it (any other shelf: wrong, nothing taken), the
+    # machine shop tops up what it can at 15:00; the delivery is never late in the first week, lands as crates at
+    # Wednesday 10:00, waits for you till 14:00 (the crew don't touch it), your cart pulls in up to CART_CRATES and a shelf
+    # unloads them (a second trip when there are more), and one left alone goes to the crew at 14:00 and gets done
+    if g.ev("typeof shelfOf === 'undefined' || typeof holdCrates === 'undefined'"):
+        print("Shelves and the delivery: not in this build (skipped)")
+    else:
+        sd = g.ev("""(() => {
+          if (typeof SHARE_ON !== 'undefined') SHARE_ON = false;
+          const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min, out = {};
+          JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t0); machinesNow();
+          out.noShelf = Object.keys(STOCK).filter(k => !shelfOf(k) || !shelfStock(shelfOf(k)).some(x => x.part === k));
+          out.lineOk = Object.keys(SHELF_NAME).every(id => /^[a-zA-Z ]+ \\d+ of \\d+/.test(shelfLine(id)));
+          // a machine job: its fetch stop starts at its part's shelf; the shelves send you there
+          const m = machineList().find(x => !x.stub && panelPlace(x.id) && jobTier({ machine: x.id }) <= PLAYER_TIER && !ENGINE_KINDS.has(x.kind) && shelfOf(MACHINE_KINDS[x.kind].part) !== '5-parts-1');
+          const s = SHIP.machines[m.id]; s.cond = 40; s.state = machineState(40); setShipNow(t0 + 120); machinesNow();
+          const j = SHIP.jobs.find(x => x.machine === m.id && x.status !== 'done'), part = MACHINE_KINDS[m.kind].part, want = shelfOf(part);
+          out.claimed = !!j && !j.claimedBy && claimJob(j.id);
+          out.stopFirst = j && jobStops(j)[0].places[0] === want;
+          out.need = shelfNeed() === part && shelfWant() === want;
+          const was = SHIP.stores[part];
+          out.wrong = shelfWrong({ t: 'Lights' }) === true && SHIP.stores[part] === was;
+          out.right = shelfWrong({ t: SHELF_NAME[want] }) === false;
+          if (j) dropJob(j.id);
+          out.noNeed = shelfNeed() === null;
+          // the machine shop: a part it can make, run down, is one up after 15:00; one it can't stays
+          const mk = Object.keys(STOCK).find(k => !NO_MAKE.has(k)), nm = [...NO_MAKE][0];
+          setShipNow(t0 + 8 * 60 + 1); machinesNow(); SHIP.stores[mk] = 0; SHIP.stores[nm] = 0; MACH_REV++;
+          setShipNow(t0 + 9 * 60 + 30); machinesNow(); out.shop = [SHIP.stores[mk], SHIP.stores[nm]];
+          // the first week's delivery: Day 3, 10:00, crates, held for you till 14:00
+          out.lateWeek1 = [1, 2, 3, 4, 5, 6, 7].some(d => deliveryLate(d));
+          setShipNow(2 * 1440 + 10 * 60 + 5); machinesNow();
+          const dj = SHIP.jobs.find(x => x.cargo === 'stores' && x.status !== 'done');
+          out.crates = holdCrates(); out.dj = !!dj && Math.floor(dj.found / 1440) + 1 === 3 && dj.found % 1440 === 600;
+          out.title = dj && jobCard(dj)[0]; out.keep = dj && leaveEnd(dj) % 1440 === DELIVERY_KEEP;
+          setShipNow(2 * 1440 + 13 * 60 + 30); machinesNow(); out.crewBefore = !!dj.claimedBy;
+          // two trips: more than a cart's worth in the hold
+          SHIP.hold.seal = (SHIP.hold.seal || 0) + 20; MACH_REV++; const crates = holdCrates();
+          out.took = claimJob(dj.id);
+          const l1 = cartLoadHold(dj.id), u1 = cartUnloadShelves(dj.id), l2 = cartLoadHold(dj.id), u2 = cartUnloadShelves(dj.id);
+          out.trips = [crates, l1, u1.left, l2, u2.left]; out.emptied = holdCrates() === 0 && !Object.keys(SHIP.hold).some(k => k !== 'meals' && SHIP.hold[k] > 0);
+          out.fin = finishJob(dj.id); if (typeof turnInJob === 'function') turnInJob(dj.id);
+          // the next week's, left alone: the crew take it at 14:00 and it's done by the evening
+          setShipNow(9 * 1440 + 10 * 60 + 5); machinesNow();
+          const k = SHIP.jobs.find(x => x.cargo === 'stores' && x.status !== 'done');
+          if (k) { setShipNow(9 * 1440 + 13 * 60 + 55); machinesNow(); out.k0 = !!k.claimedBy; setShipNow(9 * 1440 + 14 * 60 + 5); machinesNow(); out.k1 = k.claimedBy; out.cartRun = !!(k.segs || []).some(sg => sg.hold === 'cartfull');
+                   setShipNow(9 * 1440 + 20 * 60); machinesNow(); out.k2 = k.status === 'done' && holdCrates() === 0; }
+          if (typeof SHARE_ON !== 'undefined') SHARE_ON = true;
+          setShipNow(t0);
+          return out;
+        })()""")
+        print(f"Shelves and the delivery: {sd}")
+        if (sd['noShelf'] or not sd['lineOk'] or not sd['claimed'] or not sd['stopFirst'] or not sd['need'] or not sd['wrong'] or not sd['right'] or not sd['noNeed']
+                or sd['shop'] != [1, 0] or sd['lateWeek1'] or not sd['crates'] or not sd['dj'] or sd['title'] != 'Unload the Wednesday delivery' or not sd['keep'] or sd['crewBefore']
+                or not sd['took'] or sd['trips'][1] != g.ev('CART_CRATES') or sd['trips'][2] < 1 or sd['trips'][4] != 0 or not sd['emptied'] or not sd['fin']
+                or sd.get('k0') is not False or not sd.get('k1') or not sd.get('cartRun') or not sd.get('k2')):
+            fail('the shelves and the Wednesday delivery')
 
     # 6. the save
     rt = g.ev("""(() => {

@@ -278,6 +278,10 @@ Food is simulated from store to plate (agreed 2026-10-15):
 
 Supplies come aboard by shuttle into the Deck 5 cargo hold and are shelved in main storage: filters, spare parts, tools, linen and food stores. Food goes up to Deck 3's cold store on hover hand carts via the main lift. Repairs use parts and cooking uses food. Low stock adds restock work. An empty shelf blocks a repair until supplies arrive, unless you make the part in the machine shop, which is slower. Shortages come from the numbers (a late delivery, heavy use), not from a story beat, and the game tells you about them in the Mail tab on your device.
 
+**Stock and the Wednesday delivery** (agreed for 0.60.7, 2026-10-18). Each part lives on one shelf in main storage (Lights, Filters, Plumbing, Galley parts); tap a shelf to see what's on it ("relays 4 of 6"), with low ones marked. Stock runs down through the week as repairs use it; the machine shop tops up what it can make, and the rest waits for the delivery. The supply shuttle comes every Wednesday at 10:00 (sometimes a day or two late, never in your first week): the delivery appears as a stack of crates in the cargo hold and a job goes up, "Unload the Wednesday delivery". Take a hover cart, tap the crates (the cart pulls in up to four by itself), take it to main storage and tap any shelf: it unloads itself, every part onto its own shelf. One trip, two after a busy week. It's a tier 1 and 2 job, kept for you until 14:00 on a shift day; after that, or on your days off, a Works junior does it where you can see.
+
+**The Works crew at work** (agreed for 0.60.7). At most three small jobs wait for you on the board; about every third new one goes straight to the crew ("Bea on it"), unless you'd be left with fewer than two. Crew deliveries are carried by hand to where they're going. On your first two days two are placed where you'll see them: a junior cleaning a vent by Deck 4's lift in the morning, and a box of tools carried into the Works bay after lunch.
+
 ### The job list
 
 One list for the whole ship, shown on the big job board in the Works bay and on your personal device. The ship adds jobs itself: faults, routine servicing, restocking, cleaning, cooking.
@@ -460,7 +464,7 @@ You work the day shift as a Works maintenance tech, taking jobs from the same li
 
 1. **Notice and take.** A fault shows on the Works bay job board, someone flags you down, or you spot a worn machine on your rounds. You always take jobs at the board (agreed 2026-10-16). The device's Jobs app only tracks them: the tracked job sets the on-screen arrow and the map pins, step by step (board, storage, machine shop, machine, back to the board). The pointer is a marker over the place when it's on screen, an arrow at the screen edge when it isn't, and "Take the lift to Deck N" when it's on another deck; Maps uses the same pointer.
 2. **Diagnose.** Open the panel and inspect it. You see which component is failing and what the fix needs.
-3. **Fetch.** Get the part or tool from main storage or the Works bay, or make it in the machine shop. You can carry two items at a time.
+3. **Fetch.** Get the part or tool from main storage or the Works bay, or make it in the machine shop. You can carry two items at a time. Each part is on its own shelf: the job and the arrow name it ("Fetch a relay: the Lights shelf") and that shelf glows; tap the wrong one and nothing is lost, the right one lights up.
 4. **Repair.** Hold to work. Repairs take longer on broken machines and go faster as your skill grows.
 5. **Turn in.** The machine recovers and the people it affected notice, but the job only completes when you turn it in back at the board, which is when it counts toward credit, your Record and commendations (agreed 2026-10-16). Favours are the exception: you accept them in person in a chat and hand them back to that person.
 

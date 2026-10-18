@@ -899,7 +899,7 @@ with sync_playwright() as pw:
             check(g.ev(TAPI) is True, 'job loop: a tap on the machine should be the job'); s1 = jrun()
             print('  inspected:', s1[3][:110]); check(s1[2]['seen'] and 'needs' in s1[3], f'job loop: inspecting should say what it needs ({s1[3]})')
             g.ev("goToDeck(5)"); g.step(5)
-            shelf = g.ev("JSON.stringify(ITEMS.filter(i => roomAt(...cellAt(i.hit.getWorldPosition(_wp).x, _wp.z)) === 'r' && !/tarp/i.test(i.t)).map(i => i.t)[0])")
+            shelf = g.ev("JSON.stringify(typeof shelfOf === 'function' && shelfOf(myJob().parts[0]) ? shelfName(shelfOf(myJob().parts[0])) : ITEMS.filter(i => roomAt(...cellAt(i.hit.getWorldPosition(_wp).x, _wp.z)) === 'r' && !/tarp/i.test(i.t)).map(i => i.t)[0])")   # the part's own shelf (section 17's shelves, 0.33.41)
             check(g.ev(TAPS % shelf) is True, 'job loop: a tap on a storage shelf should fetch'); s2 = jrun()
             print('  fetched:', s2[1], s2[3][:100]); check(s2[1] == mj[0][:2], f'job loop: should carry {mj[0]}, carries {s2[1]}')
             check(g.ev(f"SHIP.stores[{json.dumps(mj[0][0])}]") == mj[3] - 1, 'job loop: one off the storage shelf')
@@ -945,7 +945,7 @@ with sync_playwright() as pw:
             print('  a reserved job:', rj)
             if check(rj and rj[2] and rj[2] in rj[1] and 'make' in rj[4], f'reserved job: should need a part you make ({rj})'):
                 g.ev("goToDeck(5)"); g.step(5)
-                shelf = g.ev("JSON.stringify(ITEMS.filter(i => roomAt(...cellAt(i.hit.getWorldPosition(_wp).x, _wp.z)) === 'r' && !/tarp/i.test(i.t)).map(i => i.t)[0])")
+                shelf = g.ev("JSON.stringify(typeof shelfWant === 'function' && shelfWant() ? shelfName(shelfWant()) : ITEMS.filter(i => roomAt(...cellAt(i.hit.getWorldPosition(_wp).x, _wp.z)) === 'r' && !/tarp/i.test(i.t)).map(i => i.t)[0])")   # the part's own shelf (0.33.41)
                 g.ev(TAPS % shelf); r1 = jrun(); print('  fetched:', r1[1], '|', r1[3][:120])
                 check(r1[1] == [x for x in rj[1] if x != rj[2]] and 'machine shop' in r1[3], f'reserved job: fetch takes the shelf part only and points to the machine shop ({r1[1]}, {r1[3]})')
                 g.ev(TAPS % shelf); g.step(3); t2 = g.ev("document.getElementById('tx').textContent")
@@ -1002,6 +1002,8 @@ with sync_playwright() as pw:
             dock = g.ev("[1, 2].find(n => !(typeof cartsOut === 'function' ? cartsOut(shipNow()) : new Set()).has(n)) || 1")   # a crew run may have the other cart out
             print('    taking the cart at dock', dock)
             g.ev(TAPS % json.dumps('Cart dock %d' % dock)); c1 = jrun(); c1 = json.loads(g.ev(CST)); steps.append(c1)
+            shelves = g.ev("typeof cartUnloadShelves === 'function'")   # 0.33.42: the parts go onto their shelves at the unload, not at docking
+            pre0 = g.ev("[SHIP.stores.filter || 0, SHIP.hold.filter || 0]")
             hold_room = g.ev("placeRoom('5-hold-1')")
             g.ev("playerGo(placeSpot('5-hold-2').walk)"); jrun(); g.step(90); jrun(); g.step(1); c2 = json.loads(g.ev(CST)); steps.append(c2)   # nothing to tap in the hold: stop there
             g.ev(f"({IN_ROOM})('r')"); jrun(); g.step(1); c3 = json.loads(g.ev(CST)); steps.append(c3)   # g.step(1): the held cart follows the stage a frame later (playerUpdate sets player.holding before actUpdate ends the act)
@@ -1015,7 +1017,8 @@ with sync_playwright() as pw:
             check(c2[0] and c2[0]['stage'] == 'full' and c2[1] == 'cartfull', f'cart run: loading in the hold ({c2})')
             check(c3[0] and c3[0]['stage'] == 'done' and c3[1] == 'cart', f'cart run: unloading in storage ({c3})')
             check(c4[0] is None and not c4[1] and 'Job done' in c4[2], f'cart run: docking the cart finishes the job ({c4})')
-            check(fin[0] == 'done' and pre[1] > 0 and fin[1] == pre[0] + pre[1] and fin[2] is None, f'cart run: the delivery is on the shelves ({pre} -> {fin})')
+            if shelves: check(fin[0] == 'done' and pre0[1] > 0 and pre[1] == 0 and abs(fin[1] - (pre0[0] + pre0[1])) <= 2 and fin[2] is None, f'cart run: the delivery is on the shelves ({pre0} -> {pre} -> {fin})')   # within 2: the crew may take a filter meanwhile
+            else: check(fin[0] == 'done' and pre[1] > 0 and fin[1] == pre[0] + pre[1] and fin[2] is None, f'cart run: the delivery is on the shelves ({pre} -> {fin})')
         # the Repair button (0.28.52, the user's design): at your job's stop with its part in hand, a small Repair button shows
         # (thumb-sized, on screen); a real click starts the same work as a tap there; hidden while at work, without the
         # part, or away from the stop. A lamp chore in Deck 4's lift lobby and an oven repair (its seal in hand)
