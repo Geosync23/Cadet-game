@@ -15116,6 +15116,7 @@ function jobsHour(h) {
       if (JOB_URGENCY[st] > j.urgency) {
         if (kind !== 'service' && !j.cause) { const c = faultPick(m, h); if (c) j.cause = c.id; }   // a service gone on to a fault: its cause now (0.33.46)
         j.kind = kind; j.urgency = JOB_URGENCY[st]; j.parts = faultParts(m, kind, faultCause(j)); j.found = Math.min(j.found, t);
+        if (j.cause && kind === 'repair' && typeof caseOffer === 'function') caseOffer(j, h);   // 24k (0.33.47)
       }
       continue;
     }
@@ -15373,7 +15374,7 @@ function jobWhere(person, t) {
 }
 // ---- your side of the job list (the device and the board come later, with the player engineer) ----
 // the board: jobs found and not done, the most urgent first
-function jobsBoard() { machinesNow(); const t = shipNow(); return SHIP.jobs.filter(j => j.status !== 'done' && j.kind !== 'favour' && j.found <= t).sort((a, b) => b.urgency - a.urgency || a.found - b.found); }
+function jobsBoard() { machinesNow(); const t = shipNow(); return SHIP.jobs.filter(j => j.status !== 'done' && j.kind !== 'favour' && j.found <= t && !(typeof caseHidden === 'function' && caseHidden(j))).sort((a, b) => b.urgency - a.urgency || a.found - b.found); }
 // your jobs on the ship notes bus (Pillar 4, for onboarding's Settling-in and the social side): simNote('job', { id,
 // step, reserved, ... }) when you take one ('take'), tick off a stop ('stop', with k and its tag), finish its work ('done'),
 // turn it in ('turnin'), give it up ('drop') or leave it till it lapses ('lapse', sent once the hour has run). reserved:
@@ -15651,6 +15652,8 @@ function jobReserve(kind, day, at, slot = 1, o = {}) {
   const id = 'reserve' + slot + ':' + pick.id + '@' + due;
   SHIP.jobs.push({ id, machine: pick.id, deck: pick.deck, kind: 'repair', urgency: 1, posted: due, found: due, until, reserved: slot, make: RESERVE_MAKE, makeMins: RESERVE_MAKE_MINS,
                    claimedBy: null, parts: [MACHINE_KINDS[pick.kind].part, RESERVE_MAKE], status: 'open', ...(o.train ? { train: o.train } : {}) });
+  const oc = o.cause && (FAULT_CAUSES[pick.kind] || []).find(c => c.id === o.cause);   // o.cause (24k, 0.33.47): a reserved fault with that cause, its part, nothing to make
+  if (oc) { const J = SHIP.jobs[SHIP.jobs.length - 1]; J.cause = oc.id; J.parts = faultParts(pick, 'repair', oc); delete J.make; delete J.makeMins; }
   MACH_REV++; return id;
 }
 // machineFound(id, by = 'you') -> { id, fresh } | null (0.33.47, for 24a's rounds: m1-rounds.html): you noticed a machine
@@ -15671,6 +15674,8 @@ function machineFound(id, by = 'you') {
   if (typeof simNote === 'function') simNote('found', { machine: id, by, id: j.id, t });
   return { id: j.id, fresh: true };
 }
+// jobSetPart(id, part) (24k's scanner): your job's first part becomes `part` (a part in STOCK), e.g. the part you chose
+function jobSetPart(id, part) { const j = SHIP.jobs.find(x => x.id === id && x.status !== 'done'); if (!j || !(part in STOCK) || !j.parts.length) return false; j.parts[0] = part; MACH_REV++; return true; }
 function jobReserved(slot) { const j = SHIP.jobs.find(x => x.reserved === slot && x.status !== 'done'); return j ? j.id : null; }
 function jobRelease(slot) { let n = 0; for (const j of SHIP.jobs) if (heldForYou(j) && !j.claimedBy && (slot === undefined || j.reserved === slot)) { j.freed = j.released = true; n++; } if (n) MACH_REV++; return n; }
 // each hour (jobsHour): a reserved job's machine goes faulty in the hour it's due; one not taken by its `until` is released
