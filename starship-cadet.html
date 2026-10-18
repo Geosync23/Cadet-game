@@ -34461,6 +34461,7 @@ const scanHave = () => typeof hasTool === 'function' && hasTool('scanner');
 const scanDay = j => Math.floor((j.posted || 0) / 1440) + 1;
 // a job's machine by name ("Washer 2"), without the symptom section 17's job card may add after it
 const caseMachName = j => { const m = j && j.machine && machineById(j.machine); if (!m) return jobCard(j)[0];
+  if (typeof machineTitle === 'function') { try { const t = machineTitle(m.id); if (t) return t; } catch (e) { /* our own below */ } }   // section 17's (0.33.52)
   return MACHINE_KINDS[m.kind].name + (machineList().filter(x => x.kind === m.kind && x.deck === m.deck).length > 1 ? ' ' + m.id.split('-').pop() : ''); };
 // a kind's parts as the scanner sees them: section 17's scanParts(kind), else the part causes in its fault table
 function scanPartsOf(m) {
