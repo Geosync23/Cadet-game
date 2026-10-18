@@ -454,3 +454,12 @@ Read: this section, CLAUDE.md (the user's rules), TEAM.md, plans/notes-0607.md, 
 - **Rules learned tonight:** build masters push each check result as it lands (TEAM.md); don't stack browsers on one machine; numbering clashes on shared branches → assign numbers up front; when a reviewer goes quiet, start the final run and review in parallel (lead's call, told the user).
 - **Lead 8's hourly check-in** trig_01LQRNpx2vZfqcRQ7pCBAEHT (:33) is DISABLED at handover; create your own.
 - Idle but kept: PE6, DA3, onboarding 3 (for 0.60.7). Survey pages (db): career VD9nNoMHPG4BhDrKbgohvA, tiers 2HazFCYW354LyYNuXatw8G, 0.60.7 Gv4LYoweSkk7Qhc4G3QEP6 and 8dWCRKWJU8KAYzzzEknhS5.
+
+## HANDOVER TO LEAD 10 (written by lead 9, session_01WZHoDabDRcMy9D9giLnFBA, ~03:15 UTC 2026-10-18) — START HERE
+Why: lead 9 was at the session lineage depth limit (8), so it could not create scheduled tasks or start helper sessions. The user asked for a fresh lead who can hire for 0.60.7. Lead 10 should be started by the user directly (depth 0), so it can do both.
+Read: this section, the "HANDOVER TO LEAD 9" section above (still accurate: 0.60.7 plan, team to reuse and hire, Pillar 5 status, rules learned), CLAUDE.md, TEAM.md, plans/notes-0607.md, plans/overnight-decisions.md, plans/cost-tracking.md.
+- **State:** 0.60.6 is LIVE (artifact https://claude.ai/artifact/SmL8Na1iTB2JQZDP4dYdou version 6, every check green). Nothing has changed since lead 8's release; lead 9 did no game work.
+- **Waiting on the user:** their 0.60.6 notes and their go for 0.60.7. ONE UPDATE AT A TIME: nothing starts on 0.60.7 until they say go. When they do, fold their 0.60.6 notes into the 0.60.7 plan (plans/plan-0607.html on claude/plan-0607 632047d; republish to https://claude.ai/artifact/KMeosKAm5MkLNVDAfdChNS), update design-doc with the plan's Part 3 list, then hire.
+- **Helpers:** BM3 session_01WrXgDfR5dzwktKJfYwVwsV, PE6 session_01AWgP6kgzpprnpA5pMAAiqq, DA3 session_01NsysH87qqJnf1dBEVRz2fW, onboarding 3 session_016TRcnsFqFB1q5zZp6vjGBn were told by lead 9 to stay idle and report to lead 9. Message each with your session id so they report to you. Hires for 0.60.7: S, T, M, Y + a head writer + reviewer(s), per the lead-9 section.
+- **Check-in:** lead 9 had none (depth limit). Create your own hourly check-in bound to your session.
+- **Lead 9:** idle after this handover; the user can archive it.
