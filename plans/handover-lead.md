@@ -679,3 +679,4 @@ Read: CLAUDE.md, TEAM.md (Lead line, "Released" and "Step 3" lines), plans/brief
 - **Step 3 additions already in brief-p5s3.md:** bridge room locked until invited; ship health ~75 at start; jobs raise one or more meters; turn-in shows rep + meter points; Tiles paused notice. NB the events plan moves the bridge invite to "the morning after the first event you helped in" (Pillar 6) — Step 3's placeholder trigger stands until then.
 - **Weekly allowance:** 'allowed_warning' (resets ~Oct 22). Keep seats lean; idle seats cost nothing but archive finished ones.
 - ~00:15 lead 14 started lead 15 session_01TfFnwP88RmL4MhCWAMdSGn (depth 5). Lead 14 stays reachable until lead 15 says hello.
+- ~23:56 lead 15 took over: TEAM.md Lead line, check-in trig_015E9MEvPTj86vLZpGcjN4VN, lead 14's trigger disabled, seats told.
