@@ -249,7 +249,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.44.5
+   STARSHIP CADET: CSV Wren                           build 0.44.6
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7808,7 +7808,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.44.5';                           // keep in step with the header's build line
+const GAME_BUILD = '0.44.6';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -34524,8 +34524,8 @@ function worksClean(s) {
     const sk = {}; if (obj(s.sk)) for (const k of Object.keys(s.sk).slice(0, 60)) if (k.length <= 24 && Number.isInteger(s.sk[k])) sk[k] = Math.max(0, Math.min(9999, s.sk[k]));
     const log = Array.isArray(s.log) ? s.log.filter(e => Array.isArray(e) && typeof e[0] === 'string' && Number.isInteger(e[1])).slice(-WORKS_LOG)
       .map(e => [e[0].slice(0, 80), e[1], int(e[2], 0, 255, 0), typeof e[3] === 'string' ? e[3].slice(0, 24) : ''].concat(typeof e[4] === 'string' ? [e[4].slice(0, 40)] : [])) : [];
-    const c = s.cur, cur = obj(c) && ids.has(c.id) && /^(ask|meet|watch|do|again)$/.test(c.st) ? { id: c.id, st: c.st, d: int(c.d, 0, 99999, 0), by: typeof c.by === 'string' ? c.by : null,
-      occ: typeof c.occ === 'string' ? c.occ : null, j: typeof c.j === 'string' ? c.j : null, w: int(c.w, 0, 999, 0) } : null;
+    const c = s.cur, cur = obj(c) && ids.has(c.id) && /^(ask|meet|watch|do|again|held)$/.test(c.st) ? { id: c.id, st: c.st, d: int(c.d, 0, 99999, 0), by: typeof c.by === 'string' ? c.by : null,
+      occ: typeof c.occ === 'string' ? c.occ : null, j: typeof c.j === 'string' ? c.j : null, w: int(c.w, 0, 999, 0), ...(c.hold ? { hold: true } : {}) } : null;
     const t = s.test, test = obj(t) ? { tier: int(t.tier, 1, 4, 2), day: int(t.day, 0, 99999, 0), tries: int(t.tries, 0, 99, 0), passed: !!t.passed } : null;
     return { v: 1, tier: int(s.tier, 1, 4, 1), rank: WORK_RANKS.includes(s.rank) ? s.rank : 'junior', xp: isFinite(s.xp) ? Math.max(0, Math.min(9999, +s.xp)) : 0,
       tr: days(s.tr), use: (() => { const u = {}; if (obj(s.use)) for (const k in s.use) if (ids.has(k) && Number.isInteger(s.use[k])) u[k] = Math.max(0, Math.min(9999, s.use[k])); return u; })(),
@@ -34693,7 +34693,8 @@ function trainTick(now) {                                // once a ship minute i
     }
     return;
   }
-  if (j && j.status === 'done' && j.doneBy === 'you') { worksTrained(row.id); return; }
+  if (c.st === 'held') return;                          // waiting on worksEscortEnd (the teacher stays with you)
+  if (j && j.status === 'done' && j.doneBy === 'you') { worksDone(row.id, now); return; }
   if (!j || j.status === 'done' || (!heldForYou(j) && j.claimedBy !== 'you')) c.st = 'again';
 }
 function worksTrained(id, t = shipNow()) {               // trained: the Training page, the tool, the note
@@ -34708,11 +34709,22 @@ function worksTrained(id, t = shipNow()) {               // trained: the Trainin
   simNote('trained', { mech: id });
   return true;
 }
+// your training job turned in: trained, unless something holds the teacher with you (worksEscortHold: the designer's
+// Day 5, where Torres's scanner lesson runs on into the P3 training case); worksEscortEnd(id) then trains you
+function worksDone(id, t) { const c = SHIP.works && SHIP.works.cur; if (c && c.id === id && c.hold) { c.st = 'held'; return; } worksTrained(id, t); }
+function worksEscortHold(id) { const c = SHIP.works && SHIP.works.cur; if (!c || c.id !== id || !/^(watch|do|meet|ask|again)$/.test(c.st)) return false; c.hold = true; return true; }
+function worksEscortEnd(id) {
+  const c = SHIP.works && SHIP.works.cur; if (!c || c.id !== id) return false;
+  delete c.hold; if (c.st === 'held') worksTrained(id); return true;
+}
+onSim('caseCalled', n => { const c = SHIP.works && SHIP.works.cur; if (n && n.train && c && c.hold) worksEscortEnd(c.id); });   // 24k: the training case is called
 // the teacher's walk (section 14's escortPlanOf asks): lead you to the training job while you watch, follow you while you do one
 function worksEscort(p, t) {
-  const W = SHIP.works, c = W && W.cur; if (!c || !p || p.id !== c.by || (c.st !== 'watch' && c.st !== 'do') || worksDay(t) !== c.d) return null;
-  const j = SHIP.jobs.find(x => x.id === c.j), spot = trainSpot(j); if (!j || j.status === 'done' || !spot) return null;
-  if (c.st === 'do' && j.workDone) return null;          // done: they go back to their own work while you turn it in
+  const W = SHIP.works, c = W && W.cur; if (!c || !p || p.id !== c.by || (c.st !== 'watch' && c.st !== 'do' && c.st !== 'held') || worksDay(t) !== c.d) return null;
+  const j = SHIP.jobs.find(x => x.id === c.j), spot = trainSpot(j);
+  if (c.st === 'held') return spot ? { mode: 'follow', to: { deck: spot.deck, tile: spot.tile } } : null;   // they stay with you
+  if (!j || j.status === 'done' || !spot) return null;
+  if (c.st === 'do' && j.workDone && !c.hold) return null;   // done: they go back to their own work while you turn it in
   return { mode: c.st === 'watch' ? 'lead' : 'follow', to: { deck: spot.deck, tile: spot.tile } };
 }
 function worksSay(id, text) {                            // the teacher says it in a bubble if they're on your deck, else a toast
@@ -34756,7 +34768,7 @@ onSim('job', n => {
   worksXp((WORK_XP[kind] || 1) + (found ? 1 : 0) + (right ? 1 : 0) + (clever ? 1 : 0));
   if (m) W.sk[m.kind] = (W.sk[m.kind] || 0) + 1;
   W.log.push([String(n.id).slice(0, 80), d, (found ? 1 : 0) | (right ? 2 : 0) | (clever ? 4 : 0), String(kind).slice(0, 24)]); if (W.log.length > WORKS_LOG) W.log.splice(0, W.log.length - WORKS_LOG);
-  const c = W.cur; if (c && c.st === 'do' && c.j === n.id) worksTrained(c.id, n.t);
+  const c = W.cur; if (c && c.st === 'do' && c.j === n.id) worksDone(c.id, n.t);
 });
 onSim('job', n => {                                      // the teacher's word at each step of your training job
   const c = SHIP.works && SHIP.works.cur; if (!n || !c || c.st !== 'do' || n.id !== c.j || n.step === 'turnin') return;
