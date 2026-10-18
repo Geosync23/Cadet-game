@@ -242,7 +242,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.28.61
+   STARSHIP CADET: CSV Wren                           build 0.28.64
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7592,7 +7592,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.28.61';                           // keep in step with the header's build line
+const GAME_BUILD = '0.28.64';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -9544,7 +9544,7 @@ function deviceRefresh() {
 const DEVICE_SKIN = (() => {
   const $ = id => document.getElementById(id);
   const el = $('device'), body = $('devBody'), btn = $('devBtn'), badge = $('devMail'), head = $('devT'), backB = $('devBack'), led = $('devLed');
-  const GLYPH = { home: '⌂', needs: '♥', wrench: '⚒', mail: '✉', wallet: '¤', schedule: '◷', calendar: '▦', memo: '✎', map: '⌖', ship: '◈', news: '☰', record: '★', crew: '☺', people: '♡', gear: '✲', dot: '•' };
+  const GLYPH = { hobby: '✿', home: '⌂', needs: '♥', wrench: '⚒', mail: '✉', wallet: '¤', schedule: '◷', calendar: '▦', memo: '✎', map: '⌖', ship: '◈', news: '☰', record: '★', crew: '☺', people: '♡', gear: '✲', dot: '•' };
   const mk = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
   const act = (b, action) => { b.type = 'button'; b.onclick = e => { e.stopPropagation(); deviceDo(action); }; return b; };
   let back = null, drawn = null, drawnKey = null, mapCache = null;
@@ -9833,6 +9833,8 @@ deviceApp({ id: 'home', title: 'Home', icon: 'home', order: 0, view: () => {
   if (sl && sa && !devTry(sa.hidden)) say('Settling in: ' + sl.filter(x => settleDone(x.id)).length + ' of ' + sl.length + ' done.');
   const pin = SHIP.device.memos.find(x => x.pinned);
   if (pin) say('▪ ' + pin.title + (pin.text ? ': ' + pin.text.slice(0, 120) : ''));
+  const idea = typeof ideasTonight === 'function' ? devTry(ideasTonight) : null;   // "Ideas for tonight" (0.28.63, section 15)
+  if (idea && idea.length) { B.push({ kind: 'text', text: idea[0], mark: 'head' }); for (const x of idea.slice(1)) say('▪ ' + x); }
   return { title: 'Home', blocks: B };
 } });
 
@@ -10130,6 +10132,8 @@ deviceApp({ id: 'record', title: 'Record', icon: 'record', order: 70, view: () =
       .concat(rv.depts.some(x => x.band === 'new') ? [{ text: 'Elsewhere', sub: 'A new face: ' + rv.depts.filter(x => x.band === 'new').map(x => DN[x.dept] || x.dept).join(', '), mark: 'past' }] : []) });
     if (rv.notes && rv.notes.length) { B.push({ kind: 'text', text: 'What people said', mark: 'head' }); B.push({ kind: 'list', rows: rv.notes.slice(0, 4).map(n => ({ text: n.text, sub: (n.from ? n.from + ', ' : '') + 'Day ' + n.day })) }); }
   } else B.push({ kind: 'text', text: 'The Chief\'s view and your road to certification will show here.' });
+  const hw = typeof hobbyWords === 'function' ? hobbyWords() : [];   // your hobbies in words (0.28.63, the plan: no levels or points)
+  if (hw.length) { B.push({ kind: 'text', text: 'Free time', mark: 'head' }); for (const t of hw) B.push({ kind: 'text', text: t }); }
   return { title: 'Record', blocks: B };
 } });
 
@@ -10463,7 +10467,7 @@ const NEED_LABEL = { hunger: 'Food', energy: 'Energy', hygiene: 'Hygiene', fitne
 // about six hours, so it comes up three or four times a day (on waking, midday, dinner, bedtime); 3 asleep.
 // Leisure (0.28.61, the 0.60.7 plan): 0.8 an hour awake, none asleep, so about 6 ship days from full to the low line;
 // hobbies, traditions, Tiles, the bar, a full talk, calling home and a few places fill it (leisureAdd, below)
-const NEED_DRAIN = { hunger: [4, 2], energy: [4.4, 0], hygiene: [2.5, 1], fitness: [.6, .3], social: [1, .25], bathroom: [12, 3], leisure: [.8, 0] };
+const NEED_DRAIN = { hunger: [4, 2], energy: [4.4, 0], hygiene: [2.5, 1], fitness: [.6, .3], social: [1, .25], bathroom: [6, 1.5], leisure: [.8, 0] };   // bathroom halved in 0.28.62 (the 0.60.7 plan: about two visits a day)
 const SLEEP_GAIN = 12.5;                                 // energy per ship hour asleep: 8 hours fills it
 const NEEDS_FRESH = { hunger: 60, energy: 100, hygiene: 60, fitness: 70, social: 70, bathroom: 60, leisure: 70 };   // a new game: just woken, before breakfast
 const NEEDS_OLD = 80;                                    // a v 1 save had no needs: start them here
@@ -10620,7 +10624,31 @@ function needWarnTick(now) {
   }
   if (!pick || POP.busy || DEV.open || Math.max(POP.toast, POP.card, POP.warn) > now - WARN_GAP) return null;
   const w = NEED_WARN[pick][lvl - 1]; WARN_SAID[pick] = lvl; POP.warn = POP.toast = now;
-  toast(w[0], w[1]); return pick;
+  if (lvl === 1) needPop(pick); else toast(w[0], w[1]);  // the first one: a pop-up in plain words (0.28.62); the firm one stays a toast
+  return pick;
+}
+// the low-need pop-up (0.28.62, the user's "in plain words: 'You need to pee'"): one line beside the need's icon on the
+// needs strip (or its folded heart), as the need first crosses the low line. needWarnTick's pacing keeps it one at a time,
+// never over a panel, a card or a dialogue. Words: the head writer's need.low.<need> (variant 0), these until they're in.
+const NEED_LOW_SAY = { bathroom: 'You need to pee.', hunger: 'You\'re hungry.', energy: 'You\'re tired.', hygiene: 'You could do with a wash.',
+  fitness: 'You could do with some exercise.', social: 'You could do with some company.', leisure: 'You could do with some time to yourself.' };
+const NEED_POP = { el: null, t: 0 };
+function needPop(k) {
+  let txt = null; try { txt = careerText('need.low.' + k); } catch (e) { txt = null; }
+  txt = txt || NEED_LOW_SAY[k] || NEED_WARN[k][0][1];
+  let el = NEED_POP.el;
+  if (!el) {
+    el = NEED_POP.el = document.createElement('div'); el.id = 'needPop'; el.setAttribute('role', 'status'); el.setAttribute('aria-live', 'polite');
+    el.style.cssText = 'position:fixed;z-index:3;max-width:min(260px,calc(100vw - 28px));padding:8px 12px;border-radius:12px;background:rgba(13,21,33,.92);border:1px solid var(--line);font-size:14px;line-height:1.3;color:var(--ink);box-shadow:0 6px 18px rgba(0,0,0,.4);pointer-events:auto;cursor:pointer';
+    el.onclick = e => { e.stopPropagation(); el.hidden = true; };
+    el.addEventListener('pointerdown', e => e.stopPropagation());
+    document.body.appendChild(el);
+  }
+  const strip = needStrip(), icon = strip.querySelector('.ns[data-k="' + k + '"]'), fold = strip.classList.contains('fold'), r = (fold || !icon ? strip : icon).getBoundingClientRect(), sr = strip.getBoundingClientRect();
+  el.textContent = txt; el.style.borderColor = NEED_COL[k]; el.hidden = false;
+  el.style.left = Math.round(Math.max(14, Math.min(r.left - 6, innerWidth - 14 - el.offsetWidth))) + 'px'; el.style.top = Math.round(sr.bottom + 6) + 'px';
+  simClear(NEED_POP.t); NEED_POP.t = simTimeout(() => { el.hidden = true; }, 6000);
+  return txt;
 }
 // teaching tips (0.28.42, the user's "a lot more tips and tutorial bubbles appearing, teaching you. But not too many and
 // not too often"): TEACH lists them in priority order, [id, test(c), text]. teachTick (from playerUpdate, once a second)
@@ -10635,6 +10663,13 @@ const teachRecent = (at, c, ms = 120000) => at !== undefined && c.now - at < ms;
 const teachMeal = m => m >= 360 && m < 480 || m >= 1020 && m < 1230;   // breakfast and dinner at the servery
 const TEACH = [   // text: head writer 3. A 4th element { sure: true }: shown when due whatever the 3-minute and 60 s pacing says
   ['t:rep', c => c.d >= 1 && (c.S.turnin !== undefined && shipNow() - c.S.turnin >= 30 || c.min >= 1020 || c.d >= 2), 'Not just jobs: kindness and joining in count too. Each department has its own view of you, and so does the ship.', { sure: true }],   // the user's: on the 2nd day (Monday), after your first job's turned in or at the shift's end; half an hour after the turn-in, so Zeke says his part first (0.28.50)
+  // free time (0.28.63, the 0.60.7 plan's "Tips for your first evenings"; the plan's approved words): off shift, then one an evening, Days 1-4
+  ['t:offshift', c => c.d >= 1 && c.min >= 1020 && c.min < 1290, 'Off shift. Your evening is yours: call home from the booths on Deck 3, go to a ship tradition (Calendar), talk a while with someone, or try a hobby.', { sure: true }],
+  ['t:eve-talk', c => c.d === 1 && c.min >= 1110 && c.min < 1320 && !!SHIP.device.tipsSeen['t:offshift'], 'Tap someone and choose Talk a while: a proper chat builds far more friendship than a quick hello.', { sure: true }],
+  ['t:eve-hobby', c => c.d === 2 && c.min >= 1050 && c.min < 1320, 'Hobbies fill your Leisure. Open Hobbies on your device to read, write or play a game, anywhere you sit or stand still.', { sure: true }],
+  ['t:eve-trad', c => c.d === 3 && c.min >= 1050 && c.min < 1260, 'Several traditions on tonight, and you can\'t go to them all. Pick one in the Calendar.', { sure: true }],
+  ['t:eve-call', c => c.d === 4 && c.min >= 1050 && c.min < 1320, 'Missing home? The call-home booths on Deck 3 put you through to your people. One call a day.', { sure: true }],
+  ['t:a-hobbies', c => c.app === 'hobbies', 'Hobbies fill your Leisure. Read, write or play games on your device anywhere. Drawing, knitting and puzzles need supplies from the crew store on Deck 3; Zeke might teach you to knit.'],
   ['t:a-sched', c => c.app === 'schedule', 'Your day at a glance: meals, your shift, anything booked. Tap an entry and the marker shows the way.'],
   ['t:a-cal', c => c.app === 'calendar', 'The weeks ahead: days off, traditions, birthdays and appointments.'],
   ['t:a-maps', c => c.app === 'maps', 'Every deck, room by room. Tap a room to put the marker on it.'],
@@ -10952,6 +10987,10 @@ const STORE = {
 const STORE_SHELF = it => /fridge/i.test(it.t) ? 'drink' : /display/i.test(it.t) ? 'comfort' : 'snack';
 const JOB_PAY = 15;
 function storePick(kind) {                               // the next thing on that shelf: deterministic, never R()
+  if (kind === 'comfort' && typeof HOBBIES !== 'undefined') {   // hobby supplies first, one of each you don't have yet (0.28.63, the 0.60.7 plan)
+    const id = ['draw', 'puzzle', 'knit'].find(h => !hobbyHas(h));
+    if (id) { const h = HOBBIES[id]; let name = null; try { name = careerText('hobby.store.' + id); } catch (e) { name = null; } return { kind: 'hobby', name: name || h.prop, price: h.price, gain: 0, gift: null, hobby: id }; }
+  }
   const list = STORE[kind], n = SHIP.player.locker.length + (SHIP.player.bought || 0) + SHIP.time.day;
   const [name, price, gain, gift] = list[n % list.length];
   return { kind, name, price, gain, gift: gift || null };
@@ -11071,7 +11110,14 @@ function playerTap(it, at, point) {
     return true;
   }
   if (kind === 'grab' && !foodFrom('grab', true).ok) { toast(it.t, foodFrom('grab', true).why); return true; }
-  const free = near.find(([pl]) => !heldBy(pl.id));
+  let free = near.find(([pl]) => !heldBy(pl.id)), member = false;
+  if (!free && kind === 'gym' && gymClubOn()) {          // Gym club (0.28.62, the 0.60.7 plan): you're a member, so the machine is yours; whoever had it picks another (section 10: nobody keeps the place you're using)
+    free = near[0]; const a = heldBy(free[0].id);
+    if (a && a.h && typeof bubbleSay === 'function') { let l = null; try { l = typeof lineFor === 'function' && lineFor(a.p.id, 'gym.yield', {}); } catch (e) { l = null; } bubbleSay(a.h, l && l.text || 'All yours. I\'ll take another.'); }
+    member = true;
+    let mt = null; try { mt = careerText('gym.member'); } catch (e) { mt = null; }
+    toast(it.t, mt || 'Gym club: you\'re a member, so this one\'s yours.');
+  }
   if (!free) {
     const a = heldBy(near[0][0].id);
     toast(it.t, (kind === 'tray' ? 'There\'s a queue at the servery. Try again in a minute.' : kind === 'toilet' ? 'Occupied: the little light is red. Try another, or wait a minute.' : 'In use: ' + a.p.name + ' is ' + (kind === 'eat' ? 'sitting there.' : 'on it.')) + ' ' + it.x);
@@ -11081,7 +11127,7 @@ function playerTap(it, at, point) {
   const crowdPose = typeof poseOf === 'function' ? poseOf(pl) : null;   // section 8b's pose for a place (with A2), as the crew use
   const pose = kind === 'eat' ? spot.pose : kind === 'gym' && !pl.anim && /treadmill/i.test(it.t) ? 'run'
     : crowdPose || (kind === 'gym' ? pl.anim || (pl.pose === 'stand' ? 'lift' : pl.pose) : kind === 'call' ? pl.anim || 'call' : pl.anim || PLAYER_ACTS[kind].pose);
-  actStart(kind, pl.id, { pose, title: it.t, flavour: it.x, shelf: kind === 'browse' ? STORE_SHELF(it) : null });
+  actStart(kind, pl.id, { pose, title: it.t, flavour: it.x, shelf: kind === 'browse' ? STORE_SHELF(it) : null, member });
   return true;
 }
 // sit anywhere (0.28.12): a tap on a seat (or anything) with a free place you can sit at within SIT_NEAR m of the tap
@@ -11179,7 +11225,7 @@ function actStart(kind, placeId, o = {}) {
 }
 function actBegin() {
   const A = ACT; if (!A) return;
-  const pl = A.placeId && PLACE_OF.get(A.placeId), who = pl && heldBy(pl.id);
+  const pl = A.placeId && PLACE_OF.get(A.placeId), who = pl && !A.o.member && heldBy(pl.id);   // a Gym club member's machine is theirs (0.28.62)
   if (who) {                                             // someone got there first: the next free one of its kind nearby, if any
     const alt = [...PLACE_OF.values()].filter(q => q.type === pl.type && q.id !== pl.id && !heldBy(q.id) && !(PRIVATE_TYPES.has(q.type) && privatePlace(q)))
       .map(q => [q, placeSpot(q.id)]).filter(([, s]) => s && Math.hypot(s.x - A.spot.x, s.z - A.spot.z) < ACT_NEAR)
@@ -11214,6 +11260,7 @@ function actEnd(abort) {
   if (A.body) { A.body.dispose(); player.obj.visible = true; }
   if ((A.phase === 'do' || A.phase === 'out') && A.done > 0) {   // the note bus (0.28.22): done, or walked away part way
     const act = { shower: 'wash', eat: 'eat', grab: 'eat', call: 'call' }[A.kind];
+    if (A.kind === 'call' && A.done >= A.def.mins) leisureAdd(5, 'call');   // a whole call home: +5 leisure (0.28.64)
     if (act) simAct(act, act === 'eat' ? { with: A.o.company || 0 } : {});
   }
   if (abort) return;
@@ -11228,6 +11275,9 @@ function actEnd(abort) {
     const b = basket, P = SHIP.player; P.credits -= b.price; P.bought = (P.bought || 0) + 1; simAct('buy', { item: b.name });
     if (b.gift && typeof giftAdd === 'function' && giftAdd(b.gift)) {   // a gift: into your hands (0.28.25)
       toast('Paid', 'You pay ' + b.price + ' credits for ' + b.name + '. You keep it in your hands to give to someone. ' + P.credits + ' credits left.'); basket = null; return;
+    }
+    if (b.kind === 'hobby') {                          // a hobby's supplies (0.28.63): yours for good
+      hobbyGive(b.hobby); toast('Paid', 'You pay ' + b.price + ' credits for ' + b.name + '. Sit down anywhere and tap Hobby for some ' + HOBBIES[b.hobby].name.toLowerCase() + '. ' + P.credits + ' credits left.'); basket = null; return;
     }
     if (b.kind === 'comfort') { P.locker.push(b.name); while (P.locker.length > LOCKER_MAX) P.locker.shift(); P.needs.social = needClamp(P.needs.social + b.gain); }   // a full locker: the oldest goes home, never the new one (0.28.39)
     else P.needs.hunger = needClamp(P.needs.hunger + b.gain);
@@ -11456,7 +11506,7 @@ const NEED_AMBER = cssCol('#ff9a3c');
 const NEED_ICON = {                                       // 24-unit stroke icons: fork and knife, bolt, droplet, dumbbell, two people, door
   hunger: 'M7 3v7M5 3v4a2 2 0 0 0 4 0V3M7 10v11M17 3c-2 1-3 4-3 8h3v10', energy: 'M13 2 5 13h6l-1 9 8-12h-6z',
   hygiene: 'M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z', fitness: 'M3 10v4M6.5 7v10M17.5 7v10M21 10v4M6.5 12h11',
-  social: 'M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM3 20c0-3 3-5 6-5s6 2 6 5M16 5.5a2.5 2.5 0 0 1 0 5M17 15c2.5.3 4 2.2 4 5', bathroom: 'M6 21V3h12v18M4 21h16M14 12h1',
+  social: 'M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM3 20c0-3 3-5 6-5s6 2 6 5M16 5.5a2.5 2.5 0 0 1 0 5M17 15c2.5.3 4 2.2 4 5', bathroom: 'M7 3h5v7H7zM5 10h12a5 5 0 0 1-5 5H9l-1 6h7',   // a toilet (0.28.62; a door before)
   leisure: 'M12 3l2.4 5.2 5.6.6-4.2 3.8 1.2 5.6L12 15.4 7 18.2l1.2-5.6L4 8.8l5.6-.6z' };   // leisure (0.28.61): a star
 const RISES = {};                                         // need -> { v, at }: the "+N" showing beside its icon
 // folding it away (0.28.33, the user's "you should be able to collapse the needs window"): the little chevron at its end
@@ -12000,6 +12050,43 @@ const hobbyHas = id => !!HOBBIES[id] && (!HOBBIES[id].prop || SHIP.player.hobbie
 function hobbyGive(id) { const H = SHIP.player.hobbies; if (!HOBBIES[id] || !HOBBIES[id].prop || H.has.includes(id)) return false; H.has.push(id); return true; }
 // what you can do where you are: the device hobbies anywhere you're still; prop hobbies and stargazing only sitting (a
 // window seat, the observatory or a lounge window for the stars)
+// ---- the bar (0.28.62, the 0.60.7 plan's "A bartender and a drink"): tap the bow lounge's bar from 17:30 to 23:00
+// with someone behind it (the deck architect's 3-bar-1/2, the systems engineer's rota; a deck without those places
+// serves anyway): "What'll it be?" Tea, juice, fizz or cocoa, BAR_PRICE credits. You carry it to a stool and drink it
+// there (15b's ixDrink: a little food, social and leisure). The same drink three times running and they offer "The
+// usual". Out of hours: "Back at 17:30". SHIP.player.bar = { last, run } is saved; the drink in hand is not.
+const BAR_OPEN = [1050, 1380], BAR_PRICE = 2;
+const BAR_DRINKS = { tea: { name: 'Tea', short: 'tea' }, juice: { name: 'Juice', short: 'juice' }, fizz: { name: 'Fizz', short: 'fizz' }, cocoa: { name: 'Cocoa', short: 'cocoa' } };
+SHIP.player.bar = (() => { const b = SAVED && SAVED.player && SAVED.player.bar; return { last: b && BAR_DRINKS[b.last] ? b.last : null, run: b && Number.isInteger(b.run) && b.run > 0 ? Math.min(b.run, 99) : 0 }; })();
+SHIP.player.drink = null;
+SAVE_EXTRA.push(s => { (s.player || (s.player = {})).bar = { ...SHIP.player.bar }; });
+const barSays = (who, kind, fb, ctx) => { let l = null; try { l = who && typeof lineFor === 'function' && lineFor(who, kind, ctx || {}); } catch (e) { l = null; } let t = l && l.text; if (!t) { try { t = careerText(kind); } catch (e) { t = null; } } t = t || fb; for (const k in ctx || {}) t = t.split('{' + k + '}').join(ctx[k]); return t; };
+function barTap(it, at) {
+  if (!it || !(it.bar || /^the bar$/i.test(it.t || ''))) return false;
+  if (SHIP.player.drink) return false;                   // drink in hand: a tap on the bar is a tap on its stools (15b's ixDrink), open or not
+  const m = SHIP.time.min, staff = ['3-bar-1', '3-bar-2'].filter(id => PLACE_OF.has(id)), keeper = staff.map(id => heldBy(id)).find(a => a && a.settled);
+  if (m < BAR_OPEN[0] || m >= BAR_OPEN[1] || staff.length && !keeper) { toast(it.t, barSays(null, 'bar.closed', 'Back at 17:30.')); return true; }
+  const who = keeper ? keeper.p.id : null, name = keeper ? shortName(keeper.p) : 'The bar';
+  const order = () => {
+    const B = SHIP.player.bar, ids = Object.keys(BAR_DRINKS), usual = B.run >= 3 && B.last;
+    const choices = (usual ? [barSays(who, 'bar.usual', 'The usual? ' + BAR_DRINKS[usual].name + '.', { drink: BAR_DRINKS[usual].short })] : []).concat(ids.map(id => barSays(null, 'bar.drink.' + id, BAR_DRINKS[id].name) + ' (' + BAR_PRICE + ' credits)'));
+    const pick = i => {
+      const id = usual ? (i === 0 ? usual : ids[i - 1]) : ids[i]; if (!id) return;
+      if (SHIP.player.credits < BAR_PRICE) { toast(name, barSays(who, 'bar.broke', 'That\'s ' + BAR_PRICE + ' credits, and you\'re a bit short. Next time.')); return; }
+      SHIP.player.credits -= BAR_PRICE; SHIP.player.drink = id; B.run = B.last === id ? B.run + 1 : 1; B.last = id;
+      toast(name, barSays(who, 'bar.serve', 'One ' + BAR_DRINKS[id].short + '. Enjoy.', { drink: BAR_DRINKS[id].short }) + ' Take it to a stool.');
+    };
+    if (typeof deviceChoose === 'function') deviceChoose({ title: name, text: barSays(who, 'bar.ask', 'What\'ll it be?'), choices }, pick); else pick(usual ? 0 : 0);
+  };
+  if (typeof approach === 'function' && it.front !== undefined) approach(at.clone(), it.front, it.depth, order); else order();
+  return true;
+}
+PLAYER_TAPS.unshift(barTap);
+// Gym club (the traditions engineer's renamed Running club, id 'running'): on now, on this ship day
+function gymClubOn() {
+  if (typeof eventsOn !== 'function') return false;
+  const m = SHIP.time.min; try { return eventsOn(SHIP.time.day).some(e => e.id === 'running' && m >= e.from - 10 && m < e.to); } catch (e) { return false; }
+}
 function hobbyHere() {
   const A = ACT, sat = A && A.kind === 'sit' && A.phase === 'do', pl = sat && A.placeId && PLACE_OF.get(A.placeId);
   const still = !A ? !player.path.length && !player.steer : sat;
@@ -12011,17 +12098,32 @@ function hobbyStart(id) {
   const h = HOBBIES[id]; if (!h || !hobbyHere().includes(id)) return false;
   const A = ACT, title = hobbyText('hobby.name.' + id, h.name), start = hobbyText('hobby.start.' + id, h.doing + '...');
   if (A && A.kind === 'sit' && A.phase === 'do') {
-    A.kind = 'hobby'; A.def = { ...PLAYER_ACTS.hobby, title }; A.done = 0; A.pose = h.pose; A.o.hobby = id; A.o.sat = true;
+    A.kind = 'hobby'; A.def = { ...PLAYER_ACTS.hobby, title }; A.done = 0; A.pose = h.pose; A.o.hobby = id; A.o.sat = true; A.o.shared = hobbyShare(id);
     toast(title, start + ' About ' + taskMins(A.def.mins) + ' minutes; walk away to stop.');
-  } else actStart('hobby', null, { hobby: id, title, pose: h.stand || h.pose, flavour: start });
+  } else { actStart('hobby', null, { hobby: id, title, pose: h.stand || h.pose, flavour: start }); if (ACT && ACT.kind === 'hobby') ACT.o.shared = hobbyShare(id); }
   return true;
+}
+// sharing a hobby (0.28.64, the plan: "sitting near someone who shares the hobby gives a little social and a line"):
+// crew settled within HOBBY_NEAR m whose habits (or the systems engineer's p.hobby) match. Once a hobby, as it starts
+const HOBBY_HABITS = { read: ['quiet-corner', 'reader'], games: ['common-room', 'gamer'], stars: ['stargazer', 'window-seat'], knit: ['knitter'], draw: ['sketcher'], puzzle: ['puzzler'], write: ['writer'] };
+const HOBBY_NEAR = 3.5, HOBBY_SHARE = 3;
+const hobbyOf = (p, id) => !!p && (p.hobby === id || (Array.isArray(p.hobbies) && p.hobbies.includes(id)) || (p.habits || []).some(h => (HOBBY_HABITS[id] || []).includes(h)) || id === 'knit' && p.id === INTRO_ESCORT);
+function hobbyShare(id) {
+  const me = player.obj.position, a = DECK_CREW.find(c => c.settled && c.p && c.p.id && hobbyOf(c.p, id) && Math.hypot(c.x - me.x, c.z - me.z) < HOBBY_NEAR);
+  if (!a) return null;
+  SHIP.player.needs.social = needClamp(SHIP.player.needs.social + HOBBY_SHARE * needEffects().socialGain * (typeof bondMult === 'function' ? bondMult(a.p.id) : 1));
+  let l = null; try { l = typeof lineFor === 'function' && lineFor(a.p.id, 'hobby.share.' + id, {}); } catch (e) { l = null; }
+  if (a.h && typeof bubbleSay === 'function') bubbleSay(a.h, l && l.text || 'You too? Nice. Mind if I join you?');
+  return a.p.id;
 }
 function hobbyUntil(A) {   // the meter's full: counted for the Record; sitting, you sit on
   if (A.done < A.def.mins) return false;
   const id = A.o.hobby, H = SHIP.player.hobbies;
   if (id && !A.o.counted) {
-    A.o.counted = true; H.done[id] = (H.done[id] || 0) + 1; H.last[id] = SHIP.time.day;
-    const t = hobbyText('hobby.done.' + id, 'That was nice.');
+    A.o.counted = true; H.done[id] = (H.done[id] || 0) + 1; H.last[id] = SHIP.time.day; simAct('hobby', { hobby: id });   // the note bus: the Settling-in list's 'Try a hobby' (0.28.63)
+    let t = hobbyText('hobby.done.' + id, 'That was nice.');
+    const pl = A.placeId && PLACE_OF.get(A.placeId);
+    if (id === 'draw' && pl && pl.window) t += ' ' + hobbyText('hobby.drew', 'You sketched the view from the {room}.', { room: ((deckDef.rooms || {})[pl.room] || {}).name || 'window' });   // a nice view (0.28.64)
     if (A.o.sat) toast(A.def.title, t + ' Leisure ' + Math.round(SHIP.player.needs.leisure) + '.'); else A.def.done = t;   // standing, actEnd says it as you put the device away
   }
   if (A.o.sat) { A.kind = 'sit'; A.def = { ...PLAYER_ACTS.sit }; A.pose = 'sit'; A.done = 0; return false; }
@@ -12046,6 +12148,42 @@ function handTick(now) {
   const b = Math.round(innerHeight - Math.min(...tops)), key = b + 'px';
   if (HAND.bottom !== key) { HAND.bottom = key; el.style.bottom = b > 76 ? b + 'px' : ''; }   // measured: the safe area is already in it
 }
+// the Record's words for your hobbies (0.28.63): the head writer's hobby.record.<h>, else by how often and how lately
+function hobbyWords() {
+  const H = SHIP.player.hobbies, d = SHIP.time.day;
+  return Object.keys(HOBBIES).filter(id => (H.done[id] || 0) > 0).sort((a, b) => H.done[b] - H.done[a]).slice(0, 4).map(id => {
+    const n = H.done[id], ago = d - (H.last[id] || d), noun = HOBBIES[id].name.toLowerCase();
+    let t = null; try { t = careerText('hobby.record.' + id); } catch (e) { t = null; }
+    return t && n >= 3 ? t : n >= 6 && ago <= 3 ? 'You make time for ' + noun + ' most days.' : n >= 3 ? 'You enjoy ' + noun + ' now and then.' : 'You\'ve tried ' + noun + '.';
+  });
+}
+// "Ideas for tonight" (0.28.63, the 0.60.7 plan's first evenings): on the device's home screen from 17:00 to 23:00 for
+// your first two weeks: the next tradition, someone you know on this deck, a hobby to try, a free booth. Texts: ideas.*
+function ideasTonight() {
+  const d = SHIP.time.day, m = SHIP.time.min; if (d < 1 || d > 14 || m < 1020 || m >= 1380) return null;
+  const T = (k, fb, ctx) => hobbyText(k, fb, ctx), out = [T('ideas.title', 'Ideas for tonight')];
+  let tr = null; try { tr = devTraditions(shipNow(), d * 1440 - 1).find(x => x.at >= shipNow() - 15); } catch (e) { tr = null; }
+  if (tr) out.push(T('ideas.trad', '{trad} at {time}.', { trad: tr.title, time: devWhen(tr.at) }));
+  let fr = null; try { fr = DECK_CREW.filter(a => a.p && a.p.id && ROSTER.some(x => x.id === a.p.id) && typeof relTier === 'function' && relTier(a.p.id) >= 1).sort((a, b) => relTier(b.p.id) - relTier(a.p.id) || (a.p.id < b.p.id ? -1 : 1))[0]; } catch (e) { fr = null; }
+  if (fr) out.push(T('ideas.friend', '{name} is about, in the {room}. Talk a while?', { name: shortName(fr.p), room: ((deckDef.rooms || {})[roomAt(...fr.here())] || {}).name || 'deck' }));
+  const H = SHIP.player.hobbies, hb = Object.keys(HOBBIES).filter(hobbyHas).sort((a, b) => (H.done[a] || 0) - (H.done[b] || 0) || (a < b ? -1 : 1))[0];
+  if (hb) out.push(T('ideas.hobby', 'Try {hobby}: open Hobbies on your device.', { hobby: HOBBIES[hb].name.toLowerCase() }));
+  out.push(T('ideas.booth', 'Call home from the booths on Deck 3.'));
+  return out.length > 1 ? out : [out[0], T('ideas.none', 'A quiet evening. Sit somewhere nice and try a hobby.')];
+}
+// the Hobbies app (0.28.63): Read, Write and Play games on your device, anywhere you're still; the prop hobbies you have
+// and how to get the rest. A first-time tooltip (tip.hobby) explains it
+deviceApp({ id: 'hobbies', title: 'Hobbies', icon: 'hobby', order: 46,
+  view: () => {
+    const here = hobbyHere(), dev = ['read', 'write', 'games'], B = [];
+    B.push({ kind: 'text', text: 'Hobbies fill your Leisure: about 30 minutes for a good boost. Walk away to stop; you keep what you got.' });
+    B.push({ kind: 'buttons', items: dev.map(id => ({ label: hobbyText('hobby.name.' + id, HOBBIES[id].name), action: { app: 'hobbies', do: 'start', arg: id } })) });
+    if (!here.length) B.push({ kind: 'text', text: 'Stand still or sit down to start one.', mark: 'down' });
+    const props = ['draw', 'knit', 'puzzle', 'stars'].map(id => ({ text: hobbyText('hobby.name.' + id, HOBBIES[id].name), sub: id === 'stars' ? 'Sit at a big window, or in the observatory, and tap Hobby.' : hobbyHas(id) ? 'Yours. Sit anywhere and tap Hobby.' : id === 'knit' ? 'Needles and wool at the crew store, Deck 3. Zeke might teach you.' : HOBBIES[id].prop[0].toUpperCase() + HOBBIES[id].prop.slice(1) + ' at the crew store, Deck 3 (' + HOBBIES[id].price + ' credits).' }));
+    B.push({ kind: 'text', text: 'With your own things', mark: 'head' }); B.push({ kind: 'list', rows: props });
+    return { title: 'Hobbies', blocks: B };
+  },
+  act: (verb, arg) => { if (verb === 'start' && HOBBIES[arg]) { if (hobbyStart(arg)) deviceClose(); else toast('Hobbies', 'Stand still or sit down first.'); } } });
 // the Hobby button: the one hobby here, or a choice of them (the device's chooser, in its style)
 function hobbyPick() {
   const ids = hobbyHere().filter(id => !HOBBIES[id].dev);
@@ -12206,13 +12344,13 @@ SAVE_EXTRA.push(s => { const p = s.player || (s.player = {}); p.cart = SHIP.play
 // need: the main need, gain over mins; also: { need: gain } on the side, and `with`: extra social with company
 const IX_ACTS = {
   ixWater:  { need: 'hunger', gain: 3, mins: 2, pose: 'drink', title: 'Water', done: 'Cold, and it tastes faintly of the recycler. You feel better for it.' },
-  ixDrink:  { need: 'hunger', gain: 10, mins: 20, also: { social: 4 }, with: 6, title: 'A drink', done: 'You finish your drink and push the glass back across.' },
+  ixDrink:  { need: 'hunger', gain: 10, mins: 20, also: { social: 4, leisure: 5 }, with: 6, title: 'A drink', done: 'You finish your drink and push the glass back across.' },   // only with a drink from the bar (0.28.62)
   ixTea:    { need: 'hunger', gain: 5, mins: 6, also: { social: 1 }, with: 3, pose: 'drink', title: 'A cup of tea', done: 'Tea, the ship\'s real fuel.' },
-  ixRead:   { need: 'energy', gain: 5, mins: 20, also: { social: 2 }, with: 3, title: 'Reading', done: 'You put the book down feeling rested.' },
+  ixRead:   { need: 'energy', gain: 5, mins: 20, also: { social: 2, leisure: 6 }, with: 3, title: 'Reading', done: 'You put the book down feeling rested.' },
   ixLounge: { need: 'social', gain: 4, mins: 20, also: { energy: 4 }, with: 8, title: 'Taking it easy', done: 'You get up, unhurried.' },
-  ixStars:  { need: 'energy', gain: 6, mins: 15, also: { social: 2 }, with: 4, title: 'Stargazing', done: 'The stars don\'t move much, but you feel calmer for watching them.' },
-  ixGarden: { need: 'social', gain: 6, mins: 20, also: { fitness: 2 }, with: 4, pose: 'water', title: 'Gardening', done: 'The beds are watered. Your hands smell of tomato leaves.' },
-  ixMusic:  { need: 'social', gain: 8, mins: 20, also: { energy: 2 }, with: 4, pose: 'play', title: 'Playing music', done: 'You stop playing. Someone, somewhere, claps.' },
+  ixStars:  { need: 'energy', gain: 6, mins: 15, also: { social: 2, leisure: 6 }, with: 4, title: 'Stargazing', done: 'The stars don\'t move much, but you feel calmer for watching them.' },
+  ixGarden: { need: 'social', gain: 6, mins: 20, also: { fitness: 2, leisure: 6 }, with: 4, pose: 'water', title: 'Gardening', done: 'The beds are watered. Your hands smell of tomato leaves.' },
+  ixMusic:  { need: 'social', gain: 8, mins: 20, also: { energy: 2, leisure: 6 }, with: 4, pose: 'play', title: 'Playing music', done: 'You stop playing. Someone, somewhere, claps.' },   // leisure +6 on these four (0.28.64, the plan's table)
   ixFold:   { need: 'hygiene', gain: 12, mins: 15, pose: 'fold', title: 'Doing your laundry', done: 'Clean clothes, folded, ready for the locker.' },
   ixBasin:  { need: 'hygiene', gain: 6, mins: 2, pose: 'stand', title: 'Washing up', done: 'Hands and face washed.' },
 };
@@ -12228,7 +12366,7 @@ function ixKind(pl, it) {
   if (t === 'gym') return a === 'drink' ? 'ixWater' : 'gym';                 // the gym's kit is section 15's; its water cooler is ours
   if (t === 'lounge-seat' || t === 'common-room') {
     if (/observ/i.test(ixRoomName(pl))) return 'ixStars';
-    if (a === 'drink') return sit ? 'ixDrink' : 'ixTea';
+    if (a === 'drink') return sit ? (SHIP.player.drink ? 'ixDrink' : null) : 'ixTea';   // a bar stool: your drink from the bar (barTap, 0.28.62), else just a seat
     if (!sit) return /telescope|window/i.test(title) ? 'ixStars' : 'ixTea';  // the kettle, the hot water, the telescope
     return a === 'read' ? 'ixRead' : 'ixLounge';
   }
@@ -12246,6 +12384,7 @@ const ixBond = s => typeof bondBest === 'function' ? bondBest(DECK_CREW.filter(c
 // the side gains as the minutes pass (ixFrame, below, each frame while one of ours runs): also{}, plus `with` more
 // social for company (scaled by needEffects' socialGain). They follow A.done, so needEffects' task speed applies
 function ixSide(A) {
+  if (A.kind === 'ixDrink' && !A.o.drink && SHIP.player.drink) { A.o.drink = SHIP.player.drink; SHIP.player.drink = null; A.def.done = 'You finish your ' + BAR_DRINKS[A.o.drink].short + '.'; }   // the drink from the bar goes as you drink it (0.28.62)
   const d = A.def, f = Math.max(0, Math.min(1, A.done / d.mins));
   if (!A.o.ixSide) {
     let mult = 1; try { const e = typeof needEffects === 'function' ? needEffects(SHIP.player.needs) : null; if (e && isFinite(e.socialGain)) mult = e.socialGain; } catch (e) { mult = 1; }
@@ -12376,7 +12515,7 @@ PLAYER_TAPS.push(ixTap);
 // lets you set it down; nothing is lost and the job stays yours"). A thumb-sized button, bottom right (#putDown), shown
 // while your hands hold a part, a tray or a delivery's crate. One tap puts all of them down: parts go back on the main
 // storage shelf (returnPart; a part your job makes waits finished at the machine shop's lathe instead, P.work.make), and
-// a chore's fetch stop opens again so you fetch them later; a tray goes to the tray return; the crate is set down where
+// a chore's fetch stop opens again so you fetch them later; a tray is just set down (0.60.7: no tray return); the crate is set down where
 // you stand (SHIP.player.crate: { job, deck, x, z, at }, saved) and a tap on it picks it up again. Left till 05:00, or
 // once the job isn't yours, the crew take it back to the pickup (its pickup stop opens again). A gift and the kit bag
 // aren't put down: they have their own ways (give it to someone; your locker in Bunk 1). Hidden while you're busy. ----
@@ -12418,7 +12557,7 @@ function putDown() {
     if (back.length) said.push('You put ' + partList(back) + ' back on the shelf in main storage, Deck 5. Fetch ' + (back.length > 1 ? 'them' : 'it') + ' again when you need ' + (back.length > 1 ? 'them' : 'it') + '.');
     if (kept) said.push('The ' + kept + ' waits for you at the lathe in the machine shop, Deck 5.');
   }
-  if (trayHeld()) { P.tray = null; said.push('You take your tray back to the tray return by the servery.'); }
+  if (trayHeld()) { P.tray = null; said.push('You set your tray down. Someone will clear it.'); }   // no tray return (the user, 0.60.7): a tray just goes
   if (crateHeld()) {
     const d = putDelivery(), p = player.obj.position, f = player.face || 0;
     P.crate = { job: d.j.id, deck: deckDef.num, x: p.x + Math.sin(f) * .45, z: p.z + Math.cos(f) * .45, at: shipNow() };
@@ -28762,7 +28901,8 @@ function careerAtWork() {
 const careerClockedIn = (d = SHIP.time.day) => !!SHIP.career && SHIP.career.ci > 0 && Math.floor(SHIP.career.ci / 1440) + 1 === d;
 const careerClockedOut = (d = SHIP.time.day) => careerClockedIn(d) && SHIP.career.co > SHIP.career.ci;
 const careerFullDay = d => d <= CAREER.grace || !careerClockedIn(d) || !careerClockedOut(d) || SHIP.career.co % 1440 >= CAREER.earlyOut;   // not a short shift (no clock record: the first week, or on paper)
-function careerClock(now = shipNow()) {                  // -> 'in' | 'out' | null, with a toast
+function careerClock(now = shipNow(), quiet) {           // -> 'in' | 'out' | null, with a toast (quiet: the time clock's screen says it instead, 0.28.63)
+  const toast = quiet ? () => {} : TOAST_FN;
   const c = careerInit(now), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
   if (!playerShiftOn(d)) { toast('Time clock', careerOn(d) ? 'You\'re on leave today. No need to clock in.' : sickToday(d) ? 'You\'re off sick. No need to clock in.' : 'No shift today. The clock can wait.'); return null; }
   if (!careerClockedIn(d)) {
@@ -28779,7 +28919,44 @@ function careerClock(now = shipNow()) {                  // -> 'in' | 'out' | nu
 }
 function careerClockTap(it, at) {                        // section 15's PLAYER_TAPS: walk up to the clock and use it
   if (it.t !== 'Time clock' || typeof approach !== 'function') return false;
-  approach(at.clone(), it.front, it.depth, () => careerClock()); return true;
+  approach(at.clone(), it.front, it.depth, () => clockScreen()); return true;   // its screen (0.28.63, the user's: in the device's style)
+}
+// ---- the time clock's screen (0.28.63, the user's "a device-style pop-up screen at the time clock: clock in / clock out
+// / your hours"): the device's phosphor look, in the strip at the foot of the screen. What's on today, Clock in or Clock
+// out (out before CAREER.earlyOut asks first), your hours today and this week. careerClock does the clocking (quiet).
+// SHIP.player.clockLog = { day: minutes } for the last 14 days, saved. Words: the head writer's clock.screen.*
+const TOAST_FN = (...a) => toast(...a);
+const csText = (k, fb, ctx) => { let t = null; try { t = careerText('clock.screen.' + k); } catch (e) { t = null; } t = t || fb; for (const x in ctx || {}) t = t.split('{' + x + '}').join(ctx[x]); return t; };
+SHIP.player.clockLog = (() => { const l = SAVED && SAVED.player && SAVED.player.clockLog, out = {}; if (l && typeof l === 'object') for (const k in l) if (/^\d+$/.test(k) && Number.isFinite(l[k]) && l[k] >= 0) out[k] = Math.min(1440, Math.floor(l[k])); return out; })();
+SAVE_EXTRA.push(s => { const L = SHIP.player.clockLog, d = SHIP.time.day; for (const k in L) if (+k < d - 14) delete L[k]; (s.player || (s.player = {})).clockLog = { ...L }; });
+const hrs = mins => (Math.round(mins / 6) / 10).toString();
+function clockScreen(said, ask) {
+  let el = document.getElementById('clockScreen');
+  if (!el) {
+    el = document.createElement('div'); el.id = 'clockScreen'; el.className = 'devdlg'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'Time clock');
+    el.addEventListener('pointerdown', e => e.stopPropagation()); document.body.appendChild(el);
+    addEventListener('keydown', e => { if (e.key === 'Escape' && !el.hidden) el.hidden = true; });
+  }
+  const now = shipNow(), d = SHIP.time.day, m = SHIP.time.min, C = SHIP.career, mk = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x !== undefined) e.textContent = x; return e; };
+  const on = playerShiftOn(d), inn = careerClockedIn(d), out = careerClockedOut(d), wd = weekday(d);
+  const st = said || (!on ? (careerOn(d) ? csText('leave', 'On leave today. Enjoy it.') : sickToday(d) ? csText('sick', 'Off sick. Get well.') : csText('offday', 'Day off. No clocking today.'))
+    : out ? (wd === 4 ? csText('weekend', 'Shift done. See you Monday.') : csText('done', 'Shift done. See you tomorrow.')) : inn ? csText('onshift', 'On shift since {time}.', { time: hhmm(C.ci % 1440) })
+    : m >= CAREER.clockOut ? csText('done', 'Shift done. See you tomorrow.') : csText('ready', 'Shift starts at {time}. Tap to clock in.', { time: hhmm(480) }));
+  el.dataset.ph = SHIP.device.settings.phosphor; el.textContent = ''; el.hidden = false;
+  const x = mk('button', 'x', '×'); x.type = 'button'; x.setAttribute('aria-label', csText('close', 'Close')); x.onclick = e => { e.stopPropagation(); el.hidden = true; };
+  el.append(x, mk('small', '', csText('title', 'WORKS TIME CLOCK') + ' · ' + csText('sub', 'CSV Wren · Works bay')), mk('p', '', ask ? csText('early', 'Before 17:00. Clock out early?') : st));
+  const today = inn ? (out ? C.co : Math.floor(now)) - C.ci : 0;
+  let week = today; for (let k = d - wd; k < d; k++) week += SHIP.player.clockLog[k] || 0;
+  el.append(mk('small', '', csText('hours', 'YOUR HOURS')), mk('p', '', csText('today', 'Today: {hours} h', { hours: hrs(today) }) + ' · ' + csText('week', 'This week: {hours} h', { hours: hrs(week) })));
+  const row = mk('div', 'btns'), act = (label, f) => { const b = mk('button', 'act', label); b.type = 'button'; b.onclick = e => { e.stopPropagation(); f(); }; row.appendChild(b); return b; };
+  if (on && !out && !(inn ? false : m >= CAREER.clockOut || m < 420)) {
+    if (!inn) act(csText('in', 'Clock in'), () => { const r = careerClock(shipNow(), true); clockScreen(r ? (SHIP.time.min - 480 > 5 ? csText('late', 'Clocked in at {time}. A little late. It happens.', { time: hhmm(SHIP.time.min) }) : csText('didin', 'Clocked in at {time}. Have a good shift.', { time: hhmm(SHIP.time.min) })) : null); });
+    else if (SHIP.time.min < CAREER.clockOut && !ask) act(csText('out', 'Clock out'), () => clockScreen(null, true));   // before the shift ends (17:00): asks first
+    else act(csText('out', 'Clock out'), () => { const r = careerClock(shipNow(), true); if (r === 'out') SHIP.player.clockLog[d] = C.co - C.ci; clockScreen(r ? csText('didout', 'Clocked out at {time}. Evening\'s yours.', { time: hhmm(SHIP.time.min) }) : null); });
+  }
+  act(csText('close', 'Close'), () => { el.hidden = true; }).classList.add('next');
+  el.appendChild(row);
+  try { (row.querySelector('button') || x).focus(); } catch (e) { /* no focus */ }
 }
 if (typeof PLAYER_TAPS !== 'undefined') PLAYER_TAPS.unshift(careerClockTap);
 // ---- reputation you can see (0.61.15, the user's: "when you complete a job, rep goes up a little; we need a visual
@@ -30751,6 +30928,7 @@ const SETTLE = [
   { id: 'tradition', title: 'Join a tradition', teacher: 'pell', place: { deck: 3, room: 'Bow lounge' }, done: (k, d) => k === 'tradition' && d.you },
   { id: 'dayoff', title: 'A day off', teacher: 'tomas', place: { deck: 3, room: 'Hydroponics garden' }, done: introStepIs('d6-sowing') },
 ];
+SETTLE.push({ id: 'hobby', title: 'Try a hobby', teacher: INTRO_ESCORT, place: null, done: (k, d) => k === 'act' && d.act === 'hobby' });   // 0.60.7 (the player engineer, 0.28.63): section 15's hobbies send act 'hobby'
 // the list listens on section 13's bus once it's there (onSim(kind, fn), fn called with the note's data)
 let INTRO_HEARD = false;
 if (typeof onSim === 'function') { INTRO_HEARD = true; for (const k of SETTLE_KINDS) onSim(k, d => settleNote(k, d)); onSim('job', introJobNote); onSim('apptMissed', introHealthMissed); }
@@ -31848,7 +32026,8 @@ function tilesSeatTick(A) {   // the 'tiles' activity while you sit: find someon
     o.st = 'wait'; o.opp = a.p.id; o.seat = seat[0]; o.since = shipNow(); o.here = false;
     const go = crewComeTo(a.p, seat[0], () => { o.here = true; }, { until: shipNow() + TL_WAIT + 30 }), prev = A.release;
     A.release = () => { if (prev) prev(); go(); };     // actEnd lets them go back to their own plans
-    toast('Tiles', shortName(a.p) + ' sees you at the board and comes over to play.');
+    let said = null; try { const l = typeof lineFor === 'function' && lineFor(a.p.id, 'tiles.anytime', {}); said = l && l.text; } catch (e) { said = null; }   // the head writer's tiles.anytime, when it's in
+    toast('Tiles', shortName(a.p) + ' sees you at the board and comes over to play.' + (said ? ' "' + said + '"' : ''));
     return false;
   }
   if (o.st === 'wait') {
@@ -31897,7 +32076,8 @@ function tilesNightNow() {
 }
 function tilesWorldTap(it, at, point) {
   if (!it || !TL_ITEM.test(it.t || '')) return false;
-  if (!/^Tiles station\b/i.test(it.t) && !tilesNightNow()) return false;
+  const jcr = /^Tiles table\b/i.test(it.t) && roomAt(...cellAt(at.x, at.z)) === 'j' && deckDef.num === 4;   // the junior common room's table: any time (0.28.62, the 0.60.7 plan)
+  if (!/^Tiles station\b/i.test(it.t) && !jcr && !tilesNightNow()) return false;
   if (TL_GAME && tilesSeated()) { deviceShow('tiles'); return true; }
   const room = roomAt(...cellAt(at.x, at.z));
   const seats = [...PLACE_OF.values()].map(pl => [pl, placeSpot(pl.id)])
@@ -31916,7 +32096,8 @@ function tilesReward(G, you) {
   const T = SHIP.tiles, day = SHIP.time.day, first = G.name;
   try {   // the game's social (0.28.51): in one go, as no ship minutes passed while you played; by your bond, with your needs' effects
     const N = SHIP.player.needs, fx = typeof playerFx === 'function' ? playerFx() : null, bm = typeof bondMult === 'function' ? bondMult(G.opp) : 1;
-    const once = T.relDay[G.opp] !== day ? 1 : TL_AGAIN;   // the full gain for your first game with them each ship day, a quarter after (the lead, 0.28.54: no filling social in no time)
+    const once = T.relDay[G.opp] !== day ? 1 : TL_AGAIN;
+    if (typeof leisureAdd === 'function') leisureAdd(10 * once, 'tiles');   // a game of Tiles: +10 leisure (0.28.64), a quarter for more with them that day   // the full gain for your first game with them each ship day, a quarter after (the lead, 0.28.54: no filling social in no time)
     N.social = needClamp(N.social + TL_GAIN * once * (fx && typeof fxR === 'function' ? fxR(fx, 'social') : 1) * bm);
   } catch (e) { /* needs not there (tests on paper) */ }
   if (T.relDay[G.opp] !== day) {   // friendship and the memory once a ship day per opponent, like a chat; later games still count
