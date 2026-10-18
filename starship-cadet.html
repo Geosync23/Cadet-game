@@ -11595,6 +11595,7 @@ function playerUpdate(dt, t) {
   const crouch = crawlTiles().has(K(player.here()));   // a crawlway (0.28.11): crouch-walk, slower
   if (crouch) player.maxV *= CRAWL_SPEED;
   if (squeezeStep()) player.maxV *= SQUEEZE_SPEED;      // squeezing past someone (0.28.12)
+  shuffleTick(dt);                                       // walking into someone on their feet: they step aside (0.28.70)
   if (crouch && !player.crouch) toast('Crawlway', 'You duck down and crouch-walk through.');
   const bent = typeof sickBent === 'function' && sickBent();   // doubled over when you're very unwell (0.61.5)
   if (crouch || bent || player.crouch) player.crouch = crouch || bent;
@@ -11631,6 +11632,61 @@ function squeezeStep() {                                 // each frame: slow dow
     toast(a.p.name, '"Excuse me, ' + (/chef/i.test(a.p.role || '') ? 'Chef' : first) + '." ' + first + ' shifts aside to let you by.');
   }
   return true;
+}
+// shuffling aside (0.28.70, the user's note on 0.60.5): walk into a crew member who's standing or walking (not seated,
+// not settled at a place: squeeze past covers those) and they take a small step aside, SHUFFLE_STEP tiles to the
+// nearer open side of your way (the other side if that one's a wall or furniture; in a one-tile corridor a shorter
+// step, SHUFFLE_SHORT, to the wall; else a step back), then carry on with what they were doing. You're never held up
+// by them (section 10's press-and-hold push skips them: shuffleable). No room on any side: you pass them anyway.
+// Stepped once, a person isn't stepped again for SHUFFLE_COOL ms (no wobbling while you follow close behind). A polite
+// word in a speech bubble over them (8b's bubbleSay; never a toast, so the need warnings never wait on it), at most once
+// a person a minute (SHUFFLE_SAID, real ms), and never over something they're already saying.
+const SHUFFLE_STEP = .5, SHUFFLE_SHORT = .25, SHUFFLE_V = 2, SHUFFLE_NEAR = .45, SHUFFLE_SAY = 60000, SHUFFLE_COOL = 1500;
+const SHUFFLE_WORDS = ['Oh, sorry.', 'After you.', 'Excuse me.', 'Oops, mind out.', 'Sorry, go ahead.'];
+const SHUFFLE = new Map(), SHUFFLE_SAID = new Map(), SHUFFLE_DONE = new Map();   // crew agent -> { x, z, left } (the step still to take); person id -> when they last said it; crew agent -> when their step ended
+const shuffleable = a => !!a && !a.settled && !a.esc && !(a.talking > 0) && !(a.p && a.p.player) && a.pose !== 'sit' && a.pose !== 'lie';
+const shuffleStep = (b, c) => {                           // from tile b to the next tile c: no wall between (a diagonal: open round one corner)
+  const di = c[0] - b[0], dj = c[1] - b[1]; if (Math.abs(di) > 1 || Math.abs(dj) > 1) return false;
+  if (!di || !dj) return edgeOpen(b[0], b[1], c[0], c[1], null);
+  return [[c[0], b[1]], [b[0], c[1]]].some(m => free(...m) && edgeOpen(b[0], b[1], m[0], m[1], null) && edgeOpen(m[0], m[1], c[0], c[1], null));
+};
+function shuffleClear(x0, z0, x1, z1) {                  // a body can go from (x0, z0) to (x1, z1): open tiles, no wall between, nothing solid
+  const n = Math.max(2, Math.ceil(Math.hypot(x1 - x0, z1 - z0) / .2));
+  for (let k = 1; k <= n; k++) {
+    const x = x0 + (x1 - x0) * k / n, z = z0 + (z1 - z0) * k / n, c = cellAt(x, z), b = cellAt(x0 + (x1 - x0) * (k - 1) / n, z0 + (z1 - z0) * (k - 1) / n);
+    if (!free(...c)) return false;
+    if (K(c) !== K(b) && !shuffleStep(b, c)) return false;
+    const q = { x, z }; collide(q, BODY_R, null); if (Math.hypot(q.x - x, q.z - z) > .02) return false;
+  }
+  return true;
+}
+function shuffleTick(dt) {
+  if (typeof DECK_CREW === 'undefined') return;
+  for (const [a, s] of SHUFFLE) {                        // the step aside, a little each frame
+    if (!DECK_CREW.includes(a) || !shuffleable(a)) { SHUFFLE.delete(a); continue; }
+    const st = Math.min(s.left, SHUFFLE_V * dt); a.x += s.x * st; a.z += s.z * st; s.left -= st;
+    if (s.left <= 1e-4) { SHUFFLE.delete(a); SHUFFLE_DONE.set(a, performance.now()); }
+  }
+  for (const [a, t] of SHUFFLE_DONE) if (performance.now() - t >= SHUFFLE_COOL || !DECK_CREW.includes(a)) SHUFFLE_DONE.delete(a);
+  const pos = player.obj.position, s = player.steer;
+  let mx = s ? s.x : 0, mz = s ? s.z : 0;               // which way you're walking: the finger, or the next tile of your path
+  if (!s && player.path.length) { const c = cellPos(...player.path[0]); mx = c.x - pos.x; mz = c.z - pos.z; }
+  const ml = Math.hypot(mx, mz); if (ml < 1e-3 || player.vel < .15) return;
+  mx /= ml; mz /= ml;
+  for (const a of DECK_CREW) {
+    if (SHUFFLE.has(a) || SHUFFLE_DONE.has(a) || !shuffleable(a)) continue;
+    const ox = a.x - pos.x, oz = a.z - pos.z, od = Math.hypot(ox, oz);
+    if (od >= SHUFFLE_NEAR || od > 1e-4 && (ox * mx + oz * mz) / od < .3) continue;   // touching, and ahead of you
+    const side = ox * mz - oz * mx >= 0 ? 1 : -1;       // the side of your way they're already on (a tie: your right)
+    const L = SHUFFLE_STEP, S = SHUFFLE_SHORT, ways = [[mz * side, -mx * side, L], [-mz * side, mx * side, L], [mz * side, -mx * side, S], [-mz * side, mx * side, S], [mx, mz, L]];
+    const w = ways.find(([ux, uz, l]) => shuffleClear(a.x, a.z, a.x + ux * l, a.z + uz * l) && (!a.path.length || (() => { const c = cellPos(...a.path[0]); return shuffleClear(a.x + ux * l, a.z + uz * l, c.x, c.z); })()));
+    if (!w) continue;                                    // nowhere to step: you just get by
+    SHUFFLE.set(a, { x: w[0], z: w[1], left: w[2] });
+    const id = a.p && a.p.id, at = performance.now();
+    if (id && a.h && typeof bubbleSay === 'function' && !(at - SHUFFLE_SAID.get(id) < SHUFFLE_SAY) && !bubbles.list.some(b => b.who === a.h)) {   // never over something they're already saying
+      SHUFFLE_SAID.set(id, at); bubbleSay(a.h, SHUFFLE_WORDS[(idHash(id) + SHUFFLE_SAID.size) % SHUFFLE_WORDS.length], 2.5);
+    }
+  }
 }
 // crawlway tiles: the deck's crawl list (['i,j', ...], from the architects); CRAWL_SPEED of your walking speed there
 const CRAWL_SPEED = .5; let CRAWL = { def: null, set: new Set() };
@@ -33773,6 +33829,7 @@ class Walker {
       }
       for (const a of DECK_CREW) {                       // nor through crew on their feet
         const bp = a.settled && a.spot ? a.spot.pose : a.pose; if (bp === 'sit' || bp === 'lie') continue;
+        if (this.isPlayer && typeof shuffleable === 'function' && shuffleable(a)) continue;   // section 15: on their feet and not at a place, they step aside for you (0.28.70)
         const qx = pos.x - a.x, qz = pos.z - a.z, qd = Math.hypot(qx, qz);
         if (qd < .42 && qd > 1e-4) { pos.x = a.x + qx / qd * .42; pos.z = a.z + qz / qd * .42; }
       }
