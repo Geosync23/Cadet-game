@@ -112,10 +112,10 @@ td code{white-space:normal}
     <tr><td><code>m3d</code></td><td>The drill (your drill job)</td><td>Day 3 (Wed 15:00)</td><td>small</td><td>—</td><td>Calder (<code>calder</code>)</td><td>—</td></tr>
     <tr><td><code>m5</code></td><td>Tuning</td><td>Day 4</td><td>big</td><td><code>m4</code> used once</td><td>Brennan and Calder</td><td>—</td></tr>
     <tr><td><code>m3i</code></td><td>The inspection (real check)</td><td>Day 4 (Thu 06:30)</td><td>small</td><td>—</td><td>Tomas (<code>tomas</code>)</td><td>—</td></tr>
-    <tr><td><code>m7</code></td><td>The scanner</td><td>Day 5</td><td>big</td><td><code>m5</code> used once</td><td>Torres</td><td>the scanner</td></tr>
-    <tr><td><code>p3</code></td><td>First head-scratcher (What's been tried?)</td><td>Day 5</td><td>small</td><td><code>m7</code> trained</td><td>Torres</td><td>Fault notes, the Chief's notes</td></tr>
+    <tr><td><code>m7</code></td><td>The scanner</td><td>Day 5</td><td>big</td><td><code>m5</code> used once</td><td>Torres or Calder (<code>by: ['torres-zeke', 'calder']</code>, first on shift; Day 5 is Torres's day off, so Calder)</td><td>Torres's old scanner</td></tr>
+    <tr><td><code>p3</code></td><td>First head-scratcher (What's been tried?)</td><td>Day 5</td><td>small</td><td><code>m7</code> trained</td><td>Torres or Calder (as <code>m7</code>)</td><td>Fault notes, the Chief's notes</td></tr>
     <tr><td><code>m6</code></td><td>Making it safe (incidents)</td><td>Day 8</td><td>big</td><td><code>m7</code> used once</td><td>Calder</td><td>—</td></tr>
-    <tr><td><code>m2</code></td><td>Your work uniform</td><td>Day 8</td><td>small</td><td>an oily job turned in</td><td>Torres</td><td>—</td></tr>
+    <tr><td><code>m2</code></td><td>Your work uniform</td><td>Day 8</td><td>small</td><td>an oily job turned in from Day 8 (<code>flag('works.oily')</code>, set by 24b)</td><td>Torres</td><td>—</td></tr>
     <tr><td><code>t2</code></td><td>Tier 2 test job</td><td>Day 9</td><td>big</td><td>reputation "Relied on" (Tier 1) and <code>m6</code> trained</td><td>Calder</td><td>(promotion: its own page, Step 3)</td></tr>
   </table></div>
   <p class="note">The drill and the inspection are fixed in the week (Wednesday 15:00, Thursday 06:30), so they open on their day, not by use. Day 2 already has your first laundry (0.60.7), so Day 2 gets only one new thing.</p>
@@ -323,6 +323,8 @@ td code{white-space:normal}
   <h2>Builders' questions</h2>
   <h3>How does a sub-block add a tab to the Works app? (seat H, 2026-10-18)</h3>
   <p>24 core exposes <code>worksTabAdd({ id, title, order, view, act })</code>; the <code>works</code> app shows its own tabs (Training, Work log, Tools) and every added tab in <code>order</code>. Sub-blocks call it typeof-guarded at load. Before 24 core is in a build, 24k registers a stand-in app <code>deviceApp({ id: 'faultnotes', title: 'Fault notes', icon: 'wrench', order: 32, ... })</code>, hidden while no case kind is open; once <code>worksTabAdd</code> exists, 24k uses it and doesn't register the stand-in.</p>
+  <h3>Torres is off on Day 5 (seat C, 2026-10-18)</h3>
+  <p>Torres's rota is <code>offDays [3, 4]</code> (Thursday and Friday), so he can't teach on Day 5. Rows take a <code>by</code> list, first on shift wins: <code>m7</code> and <code>p3</code> are <code>['torres-zeke', 'calder']</code>, so Calder teaches both on Day 5 (she hands over Torres's old scanner, which he left with a note). No rota change; the other rows' teachers are on shift on their days (checked: Torres Tue and Mon, Yara Wed, Brennan and Tomas Thu, Calder Mon-Fri). <code>m2</code>'s "oily job" is <code>flag('works.oily')</code>, set by 24b when you turn in an oily job on Day 8 or later.</p>
 </section>
 
 </main>

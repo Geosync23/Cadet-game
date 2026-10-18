@@ -55,8 +55,8 @@ Dates are for a steady player. If you're slower, the next thing waits (the ladde
 | 0-1 | Junior Officer · 1 | **Pillar 4's arrival and Day 1:** the shadow shift (fetch and replace with Torres), your name on the beam | (Pillar 4's) | Torres, Calder, Tomas… |
 | 2 Tue | Junior · 1 | **M1 Rounds** (Torres takes you on his round after the 10:30 tea; your first solo job with Calder is that morning) | — (the day already has Rina's health check and your first laundry after shift, 0.60.7) | Torres |
 | 3 Wed | Junior · 1 | **M4 Hauling and stores**: after you unload your first Wednesday delivery (10:00, 0.60.7), Yara takes its crates to their stops with you on a manifest run | **M3 the drill** (15:00, your junior drill job) | Yara Esposito; Calder |
-| 4 Thu | Junior · 1 | **M5 Tuning** (Torres is off on Thursdays this week) | **M3 the inspection** (06:30: Pillar 4's inspection scene becomes the real check) | Brennan and Calder; Tomas |
-| 5 Fri | Junior · 1 | **M7 The scanner** | **P3 What's been tried?**: your first head-scratcher (the gentlest, a Tier 1 machine) | Torres |
+| 4 Thu | Junior · 1 | **M5 Tuning** (Torres is off on Thursdays and Fridays) | **M3 the inspection** (06:30: Pillar 4's inspection scene becomes the real check) | Brennan and Calder; Tomas |
+| 5 Fri | Junior · 1 | **M7 The scanner** | **P3 What's been tried?**: your first head-scratcher (the gentlest, a Tier 1 machine) | Calder (Torres is off on Fridays; she hands over his old scanner) |
 | 6-7 | | days off (Sowing morning, Pillar 4) | off shift: tinkering, star logging | |
 | 8 Mon | Junior · 1 | **M6 Making it safe** (your first small incident) | **M2** your work uniform (grubby on oily jobs) · Calder, after the Monday briefing: "Tomorrow, your test job" | Calder; Torres |
 | 9 Tue | Junior · 1 | **The test job** (a Tier 2 machine, Calder watching) | | Calder |
@@ -209,7 +209,7 @@ Each card: **the verb · how it's taught · how it unlocks · how it grows · wh
 - **Phone:** the cart exists; crates are one instanced mesh (2 draw calls).
 - **Test:** `mech_check`: a manifest run delivers every stop once; a stocktake finds a planted shortfall; carts never go over the cap; `machine_check`'s stock never below 0.
 
-### M5. Tuning (Day 4, Brennan with Calder; Torres is off on Thursdays in the first week)
+### M5. Tuning (Day 4, Brennan with Calder; Torres is off on Thursdays and Fridays)
 
 - **The verb:** some faults aren't a broken part but **a machine out of adjustment**: an oven running hot, a scrubber fan humming off-pitch, a light relay chattering, a cart dock charging slow. You **turn** a setting a step at a time and **watch the machine respond in the world**: the oven's glow steadies, the hum smooths, the lights stop flickering (the machine looks section 17 already draws). Settle it in the right range and it's done. Overshoot and it shows the other way; turn it back.
 - **Why it's not a mini-game:** there's no timer or score; the feedback is the machine itself on the deck. *(The user: yes, this is the right side of the "no mini-games" line, 2026-10-17.)*
@@ -230,7 +230,7 @@ Each card: **the verb · how it's taught · how it unlocks · how it grows · wh
 - **Phone:** a puddle decal and a smoke wisp (instanced), at most 3 draw calls, only during the incident.
 - **Test:** `mech_check`: each incident's three steps in order; crew reroute and return; never on an event day, a tradition evening or at night; the same twice; `day_check` on an incident day.
 
-### M7. The scanner and diagnosing (Day 5, Torres)
+### M7. The scanner and diagnosing (Day 5, Calder, with Torres's old scanner: Torres is off on Fridays)
 
 - **The verb:** the **diagnostic scanner** reads a machine's parts. Inspecting a faulty machine with it shows **its 3-5 parts with a reading each** (in the device's screen style): usually one is clearly off; sometimes two, and what you saw on the deck (the drip, the flicker) tells them apart. You **choose** the part to fetch. A wrong pick costs a walk back ("Fitted a new seal. Still low flow: it's the pump"), never a fail. Before the scanner, inspecting simply tells you the part (as now), so the early game stays simple.
 - **Taught:** Torres hands you the scanner and does the first reading with you. Later the same day he brings you your **first head-scratcher** (P3, the small new thing of Day 5): a fault the scanner can't settle on its own, where the last shift's notes do the work.
@@ -459,7 +459,7 @@ Every type has the same frame: **symptom → suspects (3-6) → clues at places 
 - *Grows:* T1+ a witness who only saw part of it; T2 witnesses on two decks and one on a different shift you have to find (Roster); T2+ two stories that both are true and point to two faults.
 - *Screen:* a card per person (portrait initial, where and when, what they said), with a tap to mark "doesn't fit".
 
-**P3. What's been tried?** (Day 5, Torres, with the scanner; a full training moment; the first head-scratcher, the gentlest)
+**P3. What's been tried?** (Day 5, Calder (Torres is off on Fridays), with the scanner; a full training moment; the first head-scratcher, the gentlest)
 - *Spec (2026-10-18, `plans/mechanics/p3-whats-been-tried.html`):* the first case is a laundry washer that leaks (Deck 4 has no light-relay machine with a panel), and each note rules out only what was tried (the reset note below would solve the case on its own, which the solver forbids; it stays as a clue for harder P3 cases).
 - *Example (T1):* "The lamp in Bunk 2 flickers." Taped to the job: Torres's note ("Swapped the bulb. Still flickers. Z."), and Pell's ("Reset the breaker last night: fine for an hour, then back"). Suspects: bulb, switch, the junction's relay, the wiring. The bulb is out; a switch or wiring fault wouldn't care about a reset; **fine for an hour then back is a relay warming up.**
 - *Grows:* T1+ a note that rules out less than it seems ("changed the filter", but the wrong size was fitted); T2 a night-shift handover log with five entries; T2+ the cold-case board (6.6).
