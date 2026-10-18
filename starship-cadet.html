@@ -252,7 +252,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.82.4
+   STARSHIP CADET: CSV Wren                           build 0.82.5
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8155,7 +8155,7 @@ Object.assign(KIT, {
       for (let q = 0; q < 5; q++) { const a = q * 1.257 + k, f = box(.07, .02, .5, RK.fern, x + Math.sin(a) * .18, .72, z + Math.cos(a) * .18, g); f.rotation.set(-.5 * Math.cos(a), a, .5 * Math.sin(a), 'YXZ'); } }
     // the water: the fast run and the bow end foam white, the return channel and the stern end run slow
     const fast = recWaterMesh(recQuads([[R_.x0, R_.z0, R_.x1, R_.iz0], [R_.in1, R_.iz0, R_.x1, R_.iz1]], .36), RK.riverFast);
-    const slow = recWaterMesh(recQuads([[R_.x0, R_.iz1, R_.x1, R_.z1], [R_.x0, R_.iz0, R_.in0, R_.iz1]], .36), RK.riverSlow);
+    const slow = recWaterMesh(recQuads([[R_.x0, R_.iz1, R_.x1, R_.z1], [R_.x0, R_.iz0, R_.in0, R_.iz1]], .36), RK.poolWater);   // the pool's own water (0.82.5)
     g.add(fast, slow);
     // the wave gate across the fast run near the bow end: two steel posts, a beam with the gate's lights, a ramp under the water
     for (const z of [R_.z0 - .05, R_.iz0 + .05]) box(.16, 1.7, .16, RK.steel, 11.3, .85, z, g);
@@ -8242,7 +8242,7 @@ Object.assign(KIT, {
     box(.08, 2.3, .08, RK.black, 0, 1.15, 0, g);
     [['POOL  ·  AUDITORIUM  →', '#50e6ff'], ['←  RIVERS  ·  WALL  ·  COURT', '#ff9a3c'], ['FLOAT ROOM  ↓', '#ff6fe0']].forEach(([txt, c_], k) => {
       const t = tex(512, 80, (c, w, h) => { c.fillStyle = '#16181c'; c.fillRect(0, 0, w, h); c.fillStyle = c_; c.fillRect(0, 0, 10, h); c.fillStyle = '#f4f4f0'; c.font = '700 34px system-ui,sans-serif'; c.textBaseline = 'middle'; c.fillText(txt, 28, h / 2 + 2); });
-      const p = new THREE.Mesh(new THREE.BoxGeometry(1.25, .2, .04), [RK.black, RK.black, RK.black, RK.black, new THREE.MeshBasicMaterial({ map: t, toneMapped: false }), RK.black]); p.position.set(.1, 2.0 - k * .28, .02); g.add(p);
+      const p = new THREE.Mesh(new THREE.BoxGeometry(1.25, .2, .04), [RK.black, RK.black, RK.black, RK.black, new THREE.MeshBasicMaterial({ map: t, toneMapped: false }), RK.black]); p.position.set(.1, 2.0 - k * .28, .07); g.add(p);
     });
     return { w: .3, d: .3, noBlock: true };
   },
@@ -8379,7 +8379,8 @@ DECKS[7] = {
     // the concourse: a towel bin by the lobby (0.80.2: its two benches went; the stands fill that glass now)
     // 0.80.8 (the user's: livelier, busier): the REC DEC gantry sign by the lift, bunting, murals, beanbags, plants, benches,
     // a water station and a drinks fridge, a trophy case, a signpost; all along the edges, clear of every door and the lanes' middle
-    place('=', 'recBigSign', 12.3, 2.0, 'n', { span: 3.8, it: IT('REC DEC', 'A gantry across the concourse with REC DEC in pink neon, two storeys up. You can see it the moment the lift doors open.') });
+    place('=', 'recBigSign', 21.5, 2.0, 'n', { span: 3.5,   // 0.82.5 (the user's): east of the lift, where the default view looks (was 12.3, behind the lobby wall)
+      it: IT('REC DEC', 'A gantry across the concourse with REC DEC in pink neon, two storeys up. You can see it the moment the lift doors open.') });
     place('=', 'recBunting', 8.5, 2.0, 'n', { span: 3.8 });   // 0.80.9 (the user's: a little too busy): one string, and fewer things below
     for (const [x, z, f] of [[1.5, .5, RK.padA], [2.6, .6, RK.kayak[1]]]) place('=', 'beanbag', x, z, 'n', { fab: f, it: IT('Beanbag', 'A big squashy beanbag, still warm. Someone is always about to get up from it.') });
     for (const [x, z] of [[.4, .35], [25.6, .35]]) place('=', 'plant', x, z, 'n');
@@ -8387,7 +8388,8 @@ DECKS[7] = {
     place('=', 'drinksFridge', 25.5, 3.6, 's', { it: IT('Drinks fridge', 'Fizzy lime, cold tea and something blue called RIPTIDE.') });
     place('=', 'recTrophyCase', 23.9, 3.7, 's', { w: 1.4, it: IT('Trophy case', 'Three gold cups and an empty shelf, waiting for this season\'s winners.') });
     placeOnEdge('recMural', 'v,4,9', 'e', { w: 1.9, off: -.5, text: 'SWIM · PADDLE · CLIMB', it: IT('Mural', 'A bold mural in teal, coral and neon: SWIM, PADDLE, CLIMB.') });
-    place('+', 'recSignpost', 5.6, 5.5, 'n', { it: IT('Signpost', 'Pool and auditorium forward, rivers, wall and court aft, the float room through the glass.') });
+    place('+', 'recSignpost', 4.4, 5.4, 'n',   // 0.82.5: in the lobby's open floor, its boards clear of the wall (was 5.6, 5.5)
+      { it: IT('Signpost', 'Pool and auditorium forward, rivers, wall and court aft, the float room through the glass.') });
     place('=', 'hamper', 12.4, .45, 'n', { snug: true, it: IT('Towel bin', 'For wet towels from the river hall. It smells of chlorine and good intentions.') });
     // the auditorium (0.80.1, R2): the rake and its 76 seats, the stage against the bow windows, the truss, lectern, piano and screen
     const rake = []; for (let c = 1; c <= 6; c++) for (const [z0, z1] of REC_BLOCKS) for (let z = z0; z < z1; z++) rake.push([c, z]);
@@ -8467,9 +8469,10 @@ function recMats() {
     stageTop: M.wood, stageSide: std('#1d1630', .7), truss: std('#c9a24a', .4, .7), black: std('#16181c', .6, .3), wood: std('#6b4a32', .6), screen: std('#e8e6df', .9),
     standStep: std('#3a404a', .85), bench: std('#c9783a', .6),
     rim: std('#d8e6e4', .45), coping: std('#f2f0ea', .4), poolSide: std('#6fc3c9', .4), mosaic: new THREE.MeshStandardMaterial({ map: recMosaic(), roughness: .4 }),
-    poolWater: recWater('#1f8fa6', '#4fd0dc', { alpha: .8 }), ropeOrange: std('#ff8a3a', .5), ropeWhite: std('#f4f4f0', .5),
+    poolWater: recWater('#1f8fa6', '#4fd0dc', { alpha: 1 }), ropeOrange: std('#ff8a3a', .5), ropeWhite: std('#f4f4f0', .5),
     rock: std('#6f8a7c', .9), rockDark: std('#4f6559', .9), riverBed: std('#6fc3c9', .4), fern: std('#3f8a4a', .8),
-    riverFast: recWater('#1f8fa6', '#4fd0dc', { foam: .9, flow: 1.4, alpha: .8 }), riverSlow: recWater('#1f8fa6', '#4fd0dc', { flow: .35, alpha: .8 }),   // 0.80.9: the pool's water (the user's: they didn't match)
+    riverFast: recWater('#1f8fa6', '#4fd0dc', { foam: .9, flow: 1.4, alpha: 1 }),   // 0.82.5 (the user's: still two looks): one water, opaque so the bed under it can't tint it; the fast run adds only its foam
+      // 0.80.9: the pool's water (the user's: they didn't match)
     steel: std('#8a959c', .4, .6), gateLight: new THREE.MeshBasicMaterial({ color: col('#50e6ff'), toneMapped: false }), dock: std('#a0703f', .7), dockDark: std('#5a3d22', .8),
     kayak: ['#e0412f', '#f2c230', '#2f6fe0', '#3fbf5a'].map(c => std(c, .45, .1)), paddle: std('#2a2f36', .5, .3),
     wallOchre: std('#c08a3e', .95), wallRust: std('#9a4a28', .95), hold: std('#ffffff', .6), holdC: ['#ff4f6d', '#ffd23f', '#3fa9ff', '#5ee06a'].map(col),
@@ -8544,7 +8547,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.82.4';                           // keep in step with the header's build line
+const GAME_BUILD = '0.82.5';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -14066,10 +14069,11 @@ requestAnimationFrame(ixFrame);
 // Lightdisc's court, scoreboard and its Ask someone to play panel say it's coming soon. Nothing here calls R().
 // =====================================================================
 Object.assign(PLAYER_ACTS, {
-  recSwim:   { need: 'leisure', gain: 25, mins: 15, cost: { energy: 8 }, also: { hygiene: 10, fitness: 4 }, pose: 'tread', title: 'Swimming', done: 'Your lengths done. You climb out tingling.' },
-  recKayak:  { need: 'leisure', gain: 25, mins: 15, cost: { energy: 6 }, also: { fitness: 4 }, pose: 'kayak', title: 'Kayaking', done: 'You bring the kayak in to the dock, soaked and grinning.' },
-  recClimb:  { need: 'leisure', gain: 20, mins: 8, cost: { energy: 6 }, also: { fitness: 4 }, pose: 'climb', title: 'Climbing', done: 'Back on the floor. Your arms are jelly. You rang the bell, though.' },
-  recFloat:  { need: 'leisure', gain: 25, mins: 10, pose: 'float', title: 'Float room', done: 'Back to full gravity. Your legs feel very heavy.' },
+  recSwim:   { need: 'leisure', gain: 25, mins: 15, cost: { energy: 8 }, also: { hygiene: 10, fitness: 15 }, pose: 'tread', title: 'Swimming', done: 'Your lengths done. You climb out tingling.' },
+  recKayak:  { need: 'leisure', gain: 25, mins: 15, cost: { energy: 6 }, also: { fitness: 15 }, pose: 'kayak', title: 'Kayaking', done: 'You bring the kayak in to the dock, soaked and grinning.' },
+  recClimb:  { need: 'leisure', gain: 20, mins: 8, cost: { energy: 6 }, also: { fitness: 8 }, pose: 'climb', title: 'Climbing', done: 'Back on the floor. Your arms are jelly. You rang the bell, though.' },
+  recFloat:  { need: 'leisure', gain: 25, mins: 10, also: { fitness: 10 }, pose: 'float',   // 0.82.5: fitness as the gym (1 a minute)
+    title: 'Float room', done: 'Back to full gravity. Your legs feel very heavy.' },
   recSeat:   { need: 'leisure', gain: 8, mins: 15, pose: 'sit', title: 'Auditorium', done: 'You get up and stretch.' },
   recWatch:  { need: 'leisure', gain: 8, mins: 15, pose: 'sit', title: 'Stands', done: 'You get up and stretch.' },
   recBean:   { need: 'leisure', gain: 8, mins: 15, pose: 'sit', title: 'Beanbag', done: 'You haul yourself out of the beanbag. It takes two goes.' },
@@ -14096,6 +14100,11 @@ function recTap(it, at, point) {
   recGo(kind, point, t, it.x); return true;
 }
 PLAYER_TAPS.push(recTap);
+// 0.82.5 (the user's): walking into the float room starts floating, no tap; walking out (or a tap elsewhere) ends it, as any activity
+function recRoomIn(r) {
+  if (r !== 'F' || !deckDef || deckDef.num !== 7 || ACT || !recOpen()) return;
+  recGo('float', null, 'Float room', 'A fifth of a g. The padding is soft underfoot.');
+}
 function recGo(kind, point, title, flavour) {
   REC.chain = null;
   if (kind === 'seat' || kind === 'watch' || kind === 'bean') {   // the nearest free seat to your tap, in that room (a beanbag: the concourse's)
@@ -37036,7 +37045,7 @@ function discOver() {   // the end of a game: the tally and what it gives
     const N = SHIP.player.needs, fx = playerFx();
     leisureAdd(10 * once, 'disc');
     N.social = needClamp(N.social + 12 * once * fxR(fx, 'social') * bondMult(id));
-    N.energy = needClamp(N.energy - 3);
+    N.energy = needClamp(N.energy - 3); N.fitness = needClamp(N.fitness + 10 * fxR(fx, 'fitness'));   // 0.82.5: fitness, about ten gym minutes a game
   } catch (e) { /* needs not there (checks on paper) */ }
   if (D.relDay[id] !== SHIP.time.day) {
     D.relDay[id] = SHIP.time.day;
@@ -42444,7 +42453,7 @@ function loop() {
   if (typeof introTick === 'function') introTick();      // section 21: the arrival evening (nothing with the intro off)
   if (typeof worksCareerTick === 'function') worksCareerTick();   // section 24: your Works career (the ladder, training moments)
   }
-  const r = roomAt(...player.here()); if (r && r !== lastRoom) { lastRoom = r; roomEl.textContent = ROOMS[r].name; }
+  const r = roomAt(...player.here()); if (r && r !== lastRoom) { lastRoom = r; roomEl.textContent = ROOMS[r].name; if (typeof recRoomIn === 'function') recRoomIn(r); }
 
   discFrame();                                           // section 23b: a game of Lightdisc on the court (0.82.0), frozen or not
   renderer.render(scene, DISC.cam || camera);
