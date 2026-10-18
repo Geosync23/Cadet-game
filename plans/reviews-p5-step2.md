@@ -6,7 +6,7 @@ Started by lead 12 (session_01GjWhU9Z9V8RNoR8yyELA9V) at ~11:28 for every Step 2
 Spec: plans/brief-playtest1.md on claude/lead-pillar1 (12b1b87); the user's answers in it are binding. Seats: T traditions session_01X4SZJFeHprDF21NZqU5fGi (claude/traditions-pt1, 0.70.x), X crew sim session_01SNaWA6X5E9i2ZKfMnPTHJf (claude/crew-pt1, 0.71.x), U HUD session_01FcMPTX7mMTHkyr4pxDfNcS (claude/hud-pt1, 0.72.x), C2 works career session_014yREkgPvuwMyxBtoqB1P14 (claude/works-career, 0.44.x), O4 (claude/onboard-pt1), W, P, A5 session_01CHRbUTZc18m7eBck8eWhXj (claude/deck-pt1). Verdicts go to the seat, BM5 and lead 13 (finished reviews, blockers, design calls). Behaviour and saves in depth; lines and tests skimmed. The base is 0.63.1 (claude/p5-cand-s2).
 
 ## Passing tips
-- W claude/writer-p5 **d47b63d** (0.48.89 + 'seek' + tea keys, playtest 1 lines, text; LOW 1 waits on X/C2's breakfast window)
+- W claude/writer-p5 **75280cc** (0.48.90: 0.48.89 + 'seek' + key renames, playtest 1 lines, text; LOW 1 waits on X/C2's breakfast window)
 - W claude/writer-p5 **ac60c8d** (0.48.88, text; contains 0d179ac)
 - C claude/works-career **8cc07a5** (0.44.13, the old-save catch-up; for 0.63.0a / Step 2)
 - P claude/player-p5 **f2156f1** (0.28.73 + the LOW fix 391c88e + player_check fixes f00ac1e, d6f321d, 642b511, ad9ff57, 1830f2d, f2156f1; no LOWs open)
@@ -20,6 +20,9 @@ Spec: plans/brief-playtest1.md on claude/lead-pillar1 (12b1b87); the user's answ
 - (none)
 
 ## Verdicts
+
+### W 75280cc (0.48.90): playtest 1 keys on the onboarding seats' names — PASS (skimmed: content only)
+- Keys renamed to what O4/O5 read: walk.train.open.1-3, walk.train.better.1, walk.cabin.wardrobe.1-2 (the wardrobe lines moved out of introBunk into the walk), walk.eve.choose.1-2, mail.zeke.cabin, tip.clothes. walk.follow is back to 1-29. Still no "locker" in Zeke's content. content_gen bakes clean; lines_check PASS (0 errors, the 2 old warnings). O4/O5 must read these exact keys (they're in keys-p5.md).
 
 ### W d47b63d: Zeke's tea keys on O5's names, facts.md times — PASS (skimmed: content only)
 - Zeke's tea lines are under walk.tea.explain / go / at / back (O5's keys); facts.md says the 09:00 shift, the briefing at ten to nine and the 13:00 tea, which closes LOW 2. LOW 1 (news breakfast hours) waits on X/C2's breakfast window. content_gen bakes clean; lines_check PASS.
