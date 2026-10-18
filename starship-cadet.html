@@ -11661,7 +11661,7 @@ function actBegin() {
     const ln = typeof lineSpot === 'function' && lineAt(lineSpot('player')); if (ln) A.spot = ln; }   // the back of the real line now (0.28.36; section 16 owns who's in it, 15 only reads the spot)
   if (A.kind === 'eat' && A.o.fed) SHIP.player.tray = null;   // sat down with your tray (0.28.31)
   if (A.kind === 'job' && !jobBegin(A)) return;          // at the machine: fit parts, then inspect or repair (the job loop, below)
-  if (A.kind === 'ixTea' && teaHere()) teaBegin(A);      // 13:00 in the Tea corner: tea and biscuits (playtest 1)
+  if ((A.kind === 'ixTea' || A.kind === 'ixLounge') && teaHere(A)) teaBegin(A);   // 13:00 in the Tea corner: tea and biscuits (playtest 1)
   if (A.def.need && NEED_GOAL && NEED_GOAL.need === A.def.need) needGoalClear();   // on your way to fixing it: the marker's done its job
   if (A.kind === 'sit' || A.kind === 'eat') sitBump(A);   // sitting down near people: a little social (playtest 1)
   const p = player.obj.position, s = A.spot || { x: p.x, z: p.z, y: 0, face: player.face };
@@ -12827,11 +12827,17 @@ const TEA_FROM = 780, TEA_TO = 825, TEA_GOAL = 'Tea and biscuits, in the Tea cor
 function teaOut(t = shipNow()) {
   if (typeof worksTeaOn === 'function') return !!worksTeaOn(t);
   const d = Math.floor(t / 1440) + 1, m = t - (d - 1) * 1440;
-  return m >= TEA_FROM && m < TEA_TO && (typeof playerShiftOn === 'function' ? !!playerShiftOn(d) : weekday(d) < 5);
+  const W = typeof WORKS_TEA !== 'undefined' && WORKS_TEA && Number.isFinite(WORKS_TEA.at) ? WORKS_TEA : { at: TEA_FROM, until: TEA_TO };   // section 14's crew tea (X, 0.71.1)
+  return m >= W.at && m < W.until && (typeof playerShiftOn === 'function' ? !!playerShiftOn(d) : weekday(d) < 5);
 }
-const teaHere = () => typeof deckDef !== 'undefined' && deckDef && deckDef.num === 5 && teaOut();
+function teaHere(A) {                                    // in the Tea corner (Deck 5, room 't'), while tea's out: its tea table, or a seat there
+  if (typeof deckDef === 'undefined' || !deckDef || deckDef.num !== 5 || !teaOut()) return false;
+  const pl = A && A.placeId && PLACE_OF.get(A.placeId), s = A && A.spot;
+  return (pl ? pl.room : s ? roomAt(...cellAt(s.x, s.z)) : null) === 't';
+}
 function teaBegin(A) {
-  A.def = { ...A.def, gain: 10, title: 'Tea and biscuits', done: 'Tea and a biscuit or two. Just the thing.' }; A.o.biscuits = true;
+  A.def = { ...A.def, need: 'hunger', gain: 10, mins: Math.max(6, A.def.mins || 0), title: 'Tea and biscuits', done: 'Tea and a biscuit or two. Just the thing.' }; A.o.biscuits = true;
+  if (A.kind === 'ixLounge') A.o.pose = 'sit:drink';     // in a seat there: a cup in your hand
   SHIP.player.teaDay = SHIP.time.day; teaDismiss(); if (typeof simNote === 'function') simNote('tea', { day: SHIP.time.day, who: 'you' });
 }
 const teaHad = (d = SHIP.time.day) => SHIP.player.teaDay === d;   // for section 21's Day 1 tea walk (O5)

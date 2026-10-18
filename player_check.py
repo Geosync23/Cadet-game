@@ -1232,12 +1232,12 @@ with sync_playwright() as pw:
             pt.append(g.ev("pushThrough(window.__who, player.obj.position.x + .4, player.obj.position.z, player.obj.position)"))
             g.ev("player.steer = null"); g.step(30); g.ev("player.steer = { x: 1, z: 0, k: 1 }")
             pt.append(g.ev("pushThrough(window.__who, player.obj.position.x + .4, player.obj.position.z, player.obj.position)"))
-            for k in range(7):
-                g.ev("player.steer = null"); g.step(10); g.ev("player.steer = { x: 1, z: 0, k: 1 }; pushThrough(window.__who, player.obj.position.x + .4, player.obj.position.z, player.obj.position)")
+            for k in range(16):                                # keep pushing, a call every 5 frames (the game asks every frame)
+                g.ev("player.steer = null"); g.step(5); g.ev("player.steer = { x: 1, z: 0, k: 1 }; pushThrough(window.__who, player.obj.position.x + .4, player.obj.position.z, player.obj.position)")
             pt.append(g.ev("pushThrough(window.__who, player.obj.position.x + .4, player.obj.position.z, player.obj.position)"))
             pt.append(g.ev("pushThrough({}, player.obj.position.x - .4, player.obj.position.z, player.obj.position)"))
             g.ev("player.steer = null; PUSH = null")
-            print('  push through [first touch, after a break, after 2.3 s pushing, someone behind you]:', pt)
+            print('  push through [first touch, after a break, after 2.7 s pushing, someone behind you]:', pt)
             check(pt == [False, False, True, False], f'playtest: 2 s of pushing someone gets you by them, not before, and only who you push ({pt})')
             tk = g.ev("""(() => { for (const j of SHIP.jobs) if (j.claimedBy === 'you' && j.status === 'claimed') { j.claimedBy = null; j.status = 'open'; } MACH_REV++; setGoal({ deck: 3, room: 'a', label: 'An old arrow' });
               const o = (typeof openJobs === 'function' ? openJobs('you') : []).find(o => o && o.id) || jobsBoard().find(j => !j.claimedBy && j.machine); if (!o) return null;
@@ -1263,7 +1263,7 @@ with sync_playwright() as pw:
             print('  tea [out at 13:05, out at 10:30, offered, arrow, card, after Keep working, after Off to tea, at the tea table]:', te, '| saved', sv, '| offered again the same day', again)
             check(te[0] is True and te[1] is False and te[2] is True and te[3] == 'Tea and biscuits, in the Tea corner' and te[4] and te[5] is None and te[6] == te[3], f'playtest: tea is out at 13:00, the arrow after a job, Keep working dismisses it ({te})')
             tt = json.loads(te[7]) if isinstance(te[7], str) else te[7]
-            check(tt[0] == 'ixTea' and tt[1] == 'Tea and biscuits' and tt[2] and tt[3] is None and isinstance(sv, int) and again is False, f'playtest: tea and biscuits at the tea table, the arrow goes, the day saved, not offered twice ({tt}, {sv}, {again})')
+            check(tt[0] in ('ixTea', 'ixLounge') and tt[1] == 'Tea and biscuits' and tt[2] and tt[3] is None and isinstance(sv, int) and again is False, f'playtest: tea and biscuits at the tea table, the arrow goes, the day saved, not offered twice ({tt}, {sv}, {again})')
             ew = json.loads(g.ev("""(() => { const was = [ACT, CHAT]; ACT = { kind: 'eat', phase: 'do', body: {}, def: { mins: 20, title: 'Eating' }, done: 5, o: {} };
               CHAT = { p: { name: 'Tomas Reyes' }, talk: { end: null } }; const a = actProgress(); CHAT = { p: { name: 'Tomas Reyes' }, talk: { end: 'full' } }; const b = actProgress(); ACT = was[0]; CHAT = was[1]; return JSON.stringify([a && a.title, b && b.title]); })()"""))
             print('  eating with a talk on, then over:', ew)
