@@ -14898,7 +14898,7 @@ const CREW_LEAVE = 180;                                 // crew leave easy, rout
 // alone, the page's first knob, left the first week's board thin and no faults before Day 5: machine_check 5o, the lead.)
 // A repair below urgent is held for you FAULT_LEAVE minutes of the day shift (not CREW_LEAVE) and never shared out
 // (shareOut). Days 0-1, your days off and the arrival's jobs are as before
-const WORKS_REAL_FROM = 2, FIND_LATE = 0, FAULT_LEAVE = 240, REAL_SHARE = .5;
+const WORKS_REAL_FROM = 2, FIND_LATE = 0, FAULT_LEAVE = 240, REAL_SHARE = .45;
 const realFor = (m, d) => d >= WORKS_REAL_FROM && playerShiftOn(d) && !ENGINE_KINDS.has(m.kind) && jobTier({ machine: m.id }) <= playerTier();
 const realRepair = j => j.kind === 'repair' && j.urgency === 1 && !!j.machine && !j.reserved && realFor(machineById(j.machine), Math.floor(j.found / 1440) + 1);
 const YOU_KEEP = 720;                                   // a job you take goes back on the board after 12 ship hours with no progress (touchJob)
