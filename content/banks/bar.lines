@@ -14,13 +14,13 @@
 
 == bar.usual
 - The usual? A {drink}?
-- {drink} again? Coming up before you ask.
+- Another {drink}? Coming up before you ask.
 - Let me guess. {drink}.   #funny
 
 == bar.serve
 - One {drink}. Enjoy.
 - There you go. One {drink}, nice and fresh.
-- {drink} for you. Find a stool, put your feet up.
+- Here's your {drink}. Find a stool, put your feet up.
 - Here you are. Careful, it's full.
 
 == bar.broke
