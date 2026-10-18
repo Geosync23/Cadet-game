@@ -249,7 +249,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.33.52
+   STARSHIP CADET: CSV Wren                           build 0.33.53
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7807,7 +7807,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.33.52';                           // keep in step with the header's build line
+const GAME_BUILD = '0.33.53';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -15205,7 +15205,10 @@ function jobsHour(h) {
   const band = typeof worksBand === 'function' ? worksBand() : null, pref = band === 'new' || band === 'steady' ? 'service' : band === 'trusted' || band === 'relied' ? 'repair' : null;
   const held = jobs.filter(j => j.status === 'open' && !j.claimedBy && !j.leave && !j.cargo && j.found <= t && t < leaveEnd(j))
     .sort((a, b) => (pref ? (b.kind === pref) - (a.kind === pref) : 0) || b.found - a.found || (a.id < b.id ? -1 : 1));
-  for (const j of held.slice(HOLD_MAX)) j.released = true;
+  // a mechanic's job held for you (a registered kind: a round, a tune) takes one of those places (0.33.53, M2's ask: jobs
+  // left for you stay 3-6 a day with the mechanics in); at least one ordinary job is still held
+  const mech = jobs.filter(j => jobKindOf(j) && j.status === 'open' && !j.claimedBy && !jobSide(j) && j.found <= t && (heldForYou(j) || (forYou(j) && t < leaveEnd(j)))).length;
+  for (const j of held.slice(Math.max(1, HOLD_MAX - mech))) j.released = true;
   const todo = jobs.filter(j => (j.status === 'open' || j.status === 'waiting') && !j.claimedBy && j.found <= t && t >= leaveEnd(j) && !heldForYou(j))
     .sort((a, b) => b.urgency - a.urgency || a.found - b.found || (a.id < b.id ? -1 : 1));
   for (const j of todo) if (j.machine && !j.unclaimed && !j.released && forYou(j) && leaveEnd(j) > j.found) { j.unclaimed = true; simLater('jobUnclaimed', { machine: j.machine, dept: null, id: j.id }); }
