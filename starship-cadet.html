@@ -249,7 +249,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.47.0
+   STARSHIP CADET: CSV Wren                           build 0.47.1
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7456,38 +7456,41 @@ DECKS[3].places.push(
 );
 const DRILL_EXT = { m: null };
 const drillExtShow = on => { if (DRILL_EXT.m) DRILL_EXT.m.visible = !!on; };   // the bracket's extinguisher, while you (or nobody) carry one
+// the kits' materials and painted labels, made once at load (no R()), so each kit merges into a few draw calls (0.47.1)
+const P5KM = { steel: std('#7d8a91', .4, .5), blue: std('#2a7fb8', .45, .2), red: std('#b03a2e', .4, .3), ext: std('#c0392b', .45),
+  plate: std('#e9c46a', .6), housing: std('#5a6870', .5, .4), lamp: std('#e74c3c', .4, 0, { emissive: col('#e74c3c'), emissiveIntensity: .5 }),
+  fire: new THREE.MeshBasicMaterial({ map: tex(128, 64, (c, w, h) => { c.fillStyle = '#c0392b'; c.fillRect(0, 0, w, h); c.fillStyle = '#fff4e6'; c.font = '700 22px system-ui,sans-serif'; c.textAlign = 'center'; c.fillText('FIRE', w / 2, 28); c.font = '600 15px system-ui,sans-serif'; c.fillText('extinguisher', w / 2, 50); }) }),
+  nums: new THREE.MeshBasicMaterial({ transparent: true, map: tex(256, 32, (c, w, h) => { c.fillStyle = '#e8c06a'; c.font = '700 18px system-ui,sans-serif'; c.textAlign = 'center'; ['1', '2', '3'].forEach((n, k) => c.fillText(n, w / 2 + (k - 1) * w * .4, 22)); c.fillText('→', w / 2 + w * .2, 22); c.fillText('→', w / 2 - w * .2, 22); }) }) };
 Object.assign(WALL_KIT, {
   extBracket(g) {                                        // a red extinguisher on a wall bracket, a sign over it
     box(.22, .04, .14, M.slateDark, 0, .62, .07, g); box(.04, .36, .03, M.slateDark, 0, .8, .02, g);
-    const e = cyl(.075, .075, .46, std('#c0392b', .45), 0, .87, .1, g, 14); e.userData.noMerge = true; DRILL_EXT.m = e;
-    const t = tex(128, 64, (c, w, h) => { c.fillStyle = '#c0392b'; c.fillRect(0, 0, w, h); c.fillStyle = '#fff4e6'; c.font = '700 22px system-ui,sans-serif'; c.textAlign = 'center'; c.fillText('FIRE', w / 2, 28); c.font = '600 15px system-ui,sans-serif'; c.fillText('extinguisher', w / 2, 50); });
-    const p = new THREE.Mesh(new THREE.PlaneGeometry(.26, .13), new THREE.MeshBasicMaterial({ map: t })); p.position.set(0, 1.32, .012); g.add(p);
+    const e = cyl(.075, .075, .46, P5KM.ext, 0, .87, .1, g, 14); e.userData.noMerge = true; DRILL_EXT.m = e;
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(.26, .13), P5KM.fire); p.position.set(0, 1.32, .012); g.add(p);
   },
   bulkheadWheel(g) {                                     // the bulkhead door's dogging wheel on a hazard-striped plate
-    box(.5, .5, .04, std('#e9c46a', .6), 0, 1.15, .02, g);
-    const w = new THREE.Mesh(new THREE.TorusGeometry(.17, .025, 8, 20), std('#b03a2e', .4, .3)); w.position.set(0, 1.15, .1); g.add(w);
-    box(.34, .03, .03, std('#b03a2e', .4, .3), 0, 1.15, .1, g); box(.03, .34, .03, std('#b03a2e', .4, .3), 0, 1.15, .1, g);
+    box(.5, .5, .04, P5KM.plate, 0, 1.15, .02, g);
+    const w = new THREE.Mesh(new THREE.TorusGeometry(.17, .025, 8, 20), P5KM.red); w.position.set(0, 1.15, .1); g.add(w);
+    box(.34, .03, .03, P5KM.red, 0, 1.15, .1, g); box(.03, .34, .03, P5KM.red, 0, 1.15, .1, g);
     cyl(.04, .04, .08, M.slateDark, 0, 1.15, .06, g, 10).rotation.x = Math.PI / 2;
   },
   valvePanel(g) {                                        // a pipe along the wall with three valve wheels, numbered upstream first
-    const pipe = cyl(.05, .05, 1.7, std('#7d8a91', .4, .5), 0, 1.25, .09, g, 10); pipe.rotation.z = Math.PI / 2;
+    const pipe = cyl(.05, .05, 1.7, P5KM.steel, 0, 1.25, .09, g, 10); pipe.rotation.z = Math.PI / 2;
     box(1.5, .62, .03, M.slateDark, 0, 1.25, .015, g);
     [-.6, 0, .6].forEach((x, k) => {
-      cyl(.035, .035, .12, std('#7d8a91', .4, .5), x, 1.25, .16, g, 8).rotation.x = Math.PI / 2;
-      const w = new THREE.Mesh(new THREE.TorusGeometry(.09, .018, 6, 16), std('#2a7fb8', .45, .2)); w.position.set(x, 1.25, .23); g.add(w);
+      cyl(.035, .035, .12, P5KM.steel, x, 1.25, .16, g, 8).rotation.x = Math.PI / 2;
+      const w = new THREE.Mesh(new THREE.TorusGeometry(.09, .018, 6, 16), P5KM.blue); w.position.set(x, 1.25, .23); g.add(w);
     });
-    const t = tex(256, 32, (c, w, h) => { c.fillStyle = '#e8c06a'; c.font = '700 18px system-ui,sans-serif'; c.textAlign = 'center'; ['1', '2', '3'].forEach((n, k) => c.fillText(n, w / 2 + (k - 1) * w * .4, 22)); c.fillText('→', w / 2 + w * .2, 22); c.fillText('→', w / 2 - w * .2, 22); });
-    const p = new THREE.Mesh(new THREE.PlaneGeometry(1.5, .19), new THREE.MeshBasicMaterial({ map: t, transparent: true })); p.position.set(0, 1.47, .032); g.add(p);
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(1.5, .19), P5KM.nums); p.position.set(0, 1.47, .036); g.add(p);   // 6 mm in front of the backing (.03)
   },
   liftBrake(g) {                                         // the lift's manual brake release: a geared housing and a big wheel
-    box(.5, .6, .26, std('#5a6870', .5, .4), 0, 1.0, .13, g); box(.52, .06, .28, std('#e9c46a', .6), 0, 1.33, .13, g);
-    const w = new THREE.Mesh(new THREE.TorusGeometry(.22, .03, 8, 22), std('#b03a2e', .4, .3)); w.position.set(0, 1.0, .32); g.add(w);
-    box(.44, .03, .03, std('#b03a2e', .4, .3), 0, 1.0, .32, g); cyl(.05, .05, .1, M.slateDark, 0, 1.0, .28, g, 10).rotation.x = Math.PI / 2;
+    box(.5, .6, .26, P5KM.housing, 0, 1.0, .13, g); box(.52, .06, .28, P5KM.plate, 0, 1.33, .13, g);
+    const w = new THREE.Mesh(new THREE.TorusGeometry(.22, .03, 8, 22), P5KM.red); w.position.set(0, 1.0, .32); g.add(w);
+    box(.44, .03, .03, P5KM.red, 0, 1.0, .32, g); cyl(.05, .05, .1, M.slateDark, 0, 1.0, .28, g, 10).rotation.x = Math.PI / 2;
   },
   alarmPanel(g) {                                        // the extractor's alarm panel (a red lamp and a reset key) and the vent switch beside it
-    box(.3, .36, .05, M.slateDark, -.22, 1.35, .025, g); cyl(.05, .05, .04, std('#e74c3c', .4, 0, { emissive: col('#e74c3c'), emissiveIntensity: .5 }), -.22, 1.45, .06, g, 12).rotation.x = Math.PI / 2;
-    box(.08, .05, .03, std('#e9c46a', .5), -.22, 1.28, .06, g);
-    box(.22, .3, .05, std('#5a6870', .5, .4), .23, 1.3, .025, g); box(.04, .14, .05, M.slateDark, .23, 1.3, .07, g);   // the vent switch's lever
+    box(.3, .36, .05, M.slateDark, -.22, 1.35, .025, g); cyl(.05, .05, .04, P5KM.lamp, -.22, 1.45, .06, g, 12).rotation.x = Math.PI / 2;
+    box(.08, .05, .03, P5KM.plate, -.22, 1.28, .06, g);
+    box(.22, .3, .05, P5KM.housing, .23, 1.3, .025, g); box(.04, .14, .05, M.slateDark, .23, 1.3, .07, g);   // the vent switch's lever
   },
 });
 function shelfIt(name, x) { const sh = DECKS[5].shelves.find(q => q.name === name); return { ...IT(name, x), shelf: sh ? sh.id : undefined }; }
@@ -7901,7 +7904,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.47.0';                           // keep in step with the header's build line
+const GAME_BUILD = '0.47.1';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
