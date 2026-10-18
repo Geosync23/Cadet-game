@@ -191,7 +191,7 @@ P3 = r"""(() => {
     r.oneEach = notes.length === decoys.length && notes.every(k => k.kills.length === 1 && k.kills[0] === k.src.tried && decoys.includes(k.src.tried));
     // the tries done: the parts come off the shelves; the case shows inside the shift
     const last = Math.max(...notes.map(k => k.src.t)), shelf = notes.map(k => SHIP.stores[caseSus(c, k.src.tried).part]);
-    let s = last; while (true) { const dd = Math.floor(s / 1440) + 1, mm = s % 1440; if (playerShiftOn(dd) && mm >= 480 && mm < 900) break; s += 30; }
+    let s = last; while (true) { const dd = Math.floor(s / 1440) + 1, mm = s % 1440; if (playerShiftOn(dd) && mm >= DAY_SHIFT[0] && mm < 900) break; s += 30; }
     setShipNow(last - 1); caseTick(); r.early = !c.wait;
     setShipNow(s); caseTick(); r.shown = !c.wait && j.title === c.title && j.parts.length === 0 && !caseHidden(j);
     r.used = notes.map((k, i) => shelf[i] - SHIP.stores[caseSus(c, k.src.tried).part]);
