@@ -19,7 +19,7 @@
 - Close
 
 == clock.screen.ready
-- Shift starts at 08:00. Tap to clock in.
+- Shift starts at {time}. Tap to clock in.
 
 == clock.screen.onshift
 - On shift since {time}.
