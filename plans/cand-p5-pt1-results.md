@@ -43,3 +43,4 @@ Build master 5 (BM5, session_01DbBJ7iK6TrrADyEw7qbCsQ) on claude/p5-cand-pt1; re
 - ~21:01 R3 PASS O5 df61bc2. Every tip in the final is R3-passed. Final: day0 OK.
 - final: bubble (DA5's fix holds on the combine), social, join, career, mech, machine, puzzle, events, days 0-2 OK.
 - final: days 3-7, interactions, device, clothes, food, deck, path, tiles, leave, smoke, newgame, arc OK; lines PASS (0 errors, 2 warnings). Running: day8, player; then intro_check --week and --evening alone.
+- **FINAL GREEN**: intro_check --week OK alone (175 s, every beat) and --evening OK (212 s); player_check OK; day_check 8 OK. Every check in the set passes on the final; DEV_NOTES 0.63.2 row added.
