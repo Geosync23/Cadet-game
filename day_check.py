@@ -125,8 +125,7 @@ with sync_playwright() as pw:
         if peak > BUDGET: fail(f"deck {n}: {peak} draw calls")
         L = o.get('line')
         if L and L['joined']:
-            print(f"  servery line: {L['joined']} joined, {L['served']} served, longest {L['long']}, longest wait {L['wait']:.1f} ship min, trays {L.get('trays', 0)}, returned {L['returned']} (longest walk back with one {L.get('back', 0):.1f} ship min), gave up {L['left']} {L['who']}")
-            if L.get('back', 0) > 12: fail(f"deck {n}: a {L['back']:.1f} ship minute walk to return a tray")
+            print(f"  servery line: {L['joined']} joined, {L['served']} served, longest {L['long']}, longest wait {L['wait']:.1f} ship min, trays {L.get('trays', 0)}, gone with the meal {L['returned']}, gave up {L['left']} {L['who']}")
             if L['left']: fail(f"deck {n}: {L['left']} gave up on the servery line: {L['who']}")
         if o['trayStill']: fail(f"deck {n}: standing still with a tray {o['trayStill']} times: {o['stillWho']}")
         if o['trayOut']: fail(f"deck {n}: a tray outside the mess hall {o['trayOut']} times: {o['trayWho']}")

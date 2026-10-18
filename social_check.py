@@ -4,6 +4,7 @@
 #   to Tomas and eats with him every day, chats to Pell every other day and hears the news Rina knows
 #   one big jump over two days comes out the same as those days hour by hour
 #   the save: its size, and that saving and loading gives back the same thing
+#   talking (0.36.82): Say hello, Talk a while's meter, reply, Stop, once a day, got-to-go before a shift, the save
 #   sensible numbers: how crew affinity moved (friends and rivals), the news born of each kind and how far it
 #   spread, and your tiers with Tomas (a friend after two weeks) and Pell (an acquaintance)
 # Setup and environment as for cadet_test.py.
@@ -76,6 +77,7 @@ LONG_RUN = r"""((days) => {
     if (hr === 8) repNote('shiftStart', { late: u < .1 ? 25 : 0 });
     if (hr === 12) { for (const id of pal) if (schedU(d, socHash(id), 9002) < .6) { relAdd(id, 'chat', REL_PTS.chat); memAdd(id, 'chat'); }
       const o = crew[Math.floor(schedU(d, h, 9003) * crew.length)]; relAdd(o.id, 'chat', REL_PTS.chat); memAdd(o.id, 'chat');
+      { const q = crew[Math.floor(schedU(d, h, 9005) * crew.length)]; relAdd(q.id, 'talk', 5); memAdd(q.id, 'talk.day'); relGet(q.id).talkDay = d; }   // a daily Talk a while (0.36.84): talkDay saved only on its day
       for (const q of [o, ...pal.map(id => SOC.crew[SOC.idx.get(id)])]) { const K = relGet(q.id).known, nx = (q.about || []).map(x => x.text).concat(q.life || []).find(x => x && !K.includes(x)); if (nx) K.push(nx); } }   // and asks them about themselves
     if (hr === 13) relAdd('tomas', 'meal', REL_PTS.meal);
     if (typeof eventAdvance === 'function') { try { eventAdvance(h * 60, true); } catch (e) { } }   // the ship's events and their news (section 18; its tick is stopped here)
@@ -557,6 +559,33 @@ with sync_playwright() as pw:
         if not hs['off'] or not hs['on'] or not hs['again'] or not hs['saved']: fail(f'Come over button wrong: {hs}')
         if hs['appt'] and (hs['appt'][:2] != ['yes', 'tomas'] or not all(hs['appt'][2:]) or hs.get('kept') != [True, 'host', True, True]): fail(f'Come over appointment or visit wrong: {hs}')
         if not hs['appt'] and 'Not tonight' not in (hs['said'] or ''): fail(f'Come over made no appointment: {hs}')
+
+    # Talking (0.36.82, plan-0607): Say hello +1; Talk a while fills a meter over TALK_MINS with +1 every TALK_EVERY minutes and
+    # a reply (+2 for the one that suits them); Stop keeps what you got; once a day each; got-to-go before a shift; the save
+    tk = g.ev(r"""(() => {
+      if (typeof talkStart !== 'function') return { skip: true };
+      const keep = JSON.stringify(socSave()), t0 = shipNow(), o = {}, dr = CHAT_SKIN.draw, n = SHIP.player.needs, s0 = n.social; let got = []; CHAT_SKIN.draw = (el, v) => { got = v.buttons.map(b => b.label); };
+      const tomas = SOC.crew[SOC.idx.get('tomas')], r = relGet('tomas');
+      const card = () => { chatClose(); CHAT = { p: tomas, line: { text: '', say: true }, ask: false, fav: null, at: shipNow(), reach: 99, checked: Math.floor(shipNow()) }; chatShow(); return got.slice(); };
+      const l0 = n.leisure, fresh = d => { setShipNow((d - 1) * 1440 + 720); r.pts = 0; r.tier = 0; r.chatDay = 0; r.talkDay = 0; n.social = 40; if (l0 !== undefined) n.leisure = 50; };   // leisure under its high line: no friendGain (section 15's leisureAdd after a full talk would cross it)
+      fresh(9); relAdd('tomas', 'chat', 1); o.m = r.pts; fresh(9); o.sg = needEffects().socialGain; o.fg = needEffects().friendGain || 1; o.cg = typeof CHAT_GAIN !== 'undefined' ? CHAT_GAIN * (typeof bondMult === 'function' ? bondMult('tomas') : 1) : 0;   // what +1 comes to for Tomas (friends of friends, openness) and your social gain now
+      o.buttons = card().slice(0, 2);
+      const nw = NEWS.splice(0); chatDo('chat'); o.hello = r.pts; NEWS.push(...nw);   /* no news passed on in the hello: hearing news is +REL_PTS.news of its own */ o.helloAgain = card()[0];
+      fresh(10); card(); chatDo('talk'); o.talking = got.slice(); const T = CHAT.talk;
+      for (let k = 1; k <= 60 && !T.end; k++) { setShipNow((10 - 1) * 1440 + 720 + k * .5); talkStep(CHAT); if (T.ask) { o.ask = [T.mins, got.slice()]; chatDo('reply:' + talkSuits(tomas)); } }
+      o.full = [T.end, Math.round(r.pts * 10) / 10, Math.round(n.social - 40), card().slice(0, 2)];
+      fresh(11); card(); chatDo('talk'); for (let k = 1; k <= 12; k++) { setShipNow((11 - 1) * 1440 + 720 + k * .5); talkStep(CHAT); } chatDo('talk-stop'); o.stop = [CHAT.talk.end, Math.round(r.pts * 10) / 10];
+      const S = JSON.stringify(socSave()); socLoad(JSON.parse(S)); o.saved = SHIP.rel.tomas.talkDay === 11;
+      const sh = planDay(tomas, 12).find(x => x.act === 'work'); o.go = sh ? [socMustGo(tomas, sh.from - 5), socMustGo(tomas, sh.from - 40)] : null;
+      chatClose(); CHAT_SKIN.draw = dr; n.social = s0; if (l0 !== undefined) n.leisure = l0; setShipNow(t0); socLoad(JSON.parse(keep)); return o; })()""")
+    print('Talking:', json.dumps(tk))
+    if not tk.get('skip'):
+        m, sg = tk['m'], tk['sg']
+        if tk['buttons'] != ['Say hello', 'Talk a while'] or abs(tk['hello'] - m) > .15 or tk['helloAgain'] != 'Said hello today': fail(f'Say hello wrong: {tk}')
+        if tk['talking'] != ['Stop'] or not tk.get('ask') or len(tk['ask'][1]) != 3 or not (6.5 <= tk['ask'][0] <= 7.5): fail(f'Talk a while meter or reply wrong: {tk}')
+        if tk['full'][0] != 'full' or abs(tk['full'][1] - 5 * m * tk['fg']) > .6 or abs(tk['full'][2] - (30 + tk['cg']) * sg) > 1.5 or tk['full'][3] != ['Said hello today', 'Talked today']: fail(f'a full talk wrong: {tk}')
+        if tk['stop'][0] != 'stop' or abs(tk['stop'][1] - m) > .15 or not tk['saved']: fail(f'Stop or the save wrong: {tk}')
+        if tk['go'] and (not tk['go'][0] or tk['go'][0].get('why') != 'shift' or tk['go'][1]): fail(f'got-to-go before a shift wrong: {tk}')
 
     # 18. small seams (0.36.68): the roster's short theme fields through socialFill ("" is none); the hour of the day on Day 0; one unclaimed-job dip a department a week (0.36.71)
     sm = g.ev(r"""(() => { const p = { ...SOC.crew[SOC.idx.get('tomas')], kin: 'my gran', lost: '', hobbyNoun: ' chess ' };
