@@ -587,3 +587,4 @@ Read: CLAUDE.md, TEAM.md (session chain rule + overnight exception), plans/brief
 - ~14:44 H handover written: claude/mech-cases 8a26cae plans/handover-puzzles.md. H on call for Step 2.
 - ~14:50 THE USER: leads may start leads and workers (awake or not); at depth 6 or 7 notify the user, who starts a new level-0 lead. Recorded in TEAM.md (session chain update). Lead 12 = depth 2, so its helpers/successor are depth 3.
 - ~14:46 D Step 3 page 1: plans/mechanics/promotion-officer.html bc1171c (test job Day 9 Deck 4 scrubber, summons, office, crew, 4-23 move, Day 11 ceremony; needs sim playerBed()). Batching pages for one user survey. Next M8, M9.
+- ~14:50 0.63.0 PUSHED (p5-cand 093bdd6, one player_check checker FAIL written up). Preview published: https://claude.ai/artifact/9UC4nQsLzKyo5fkPwWBahs v2 (title 'Starship Cadet Pillar 5 Preview'). Recorded in TEAM.md. BM5 on 0.63.1.
