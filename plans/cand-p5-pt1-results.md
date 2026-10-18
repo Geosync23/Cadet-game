@@ -42,3 +42,4 @@ Build master 5 (BM5, session_01DbBJ7iK6TrrADyEw7qbCsQ) on claude/p5-cand-pt1; re
 - FINAL cadet_test vs 0.63.1 a9fad20: DIFFERENCES, all explained (the same as p4, explained above: A5's brighter NIGHT and poses, U's Tracked button, P's low-need marker/toasts/+3 calls, X 0.71.1's crew places, A5 0.47.9's bubble placement, C2's tap1 toast); p4 vs final ALL IDENTICAL (the 1 and 6 px gaps between the two vs-0.63.1 runs are renderer noise).
 - ~21:01 R3 PASS O5 df61bc2. Every tip in the final is R3-passed. Final: day0 OK.
 - final: bubble (DA5's fix holds on the combine), social, join, career, mech, machine, puzzle, events, days 0-2 OK.
+- final: days 3-7, interactions, device, clothes, food, deck, path, tiles, leave, smoke, newgame, arc OK; lines PASS (0 errors, 2 warnings). Running: day8, player; then intro_check --week and --evening alone.
