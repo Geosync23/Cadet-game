@@ -437,3 +437,4 @@ Read: this section, the "STATE AT 19:35" section above, TEAM.md, CLAUDE.md (user
 - ~00:16 USER: one update at a time. 0.60.7 waits until 0.60.6 is live (and presumably played); no 0.60.7 hiring yet. Plan approval not yet given explicitly.
 - ~00:33 1g PASS f3b5186 (0.28.56) -> BM3 merged with putdown -> cand-0606 2757963. PE9 shuffle fix ec6e8a0 pushed (bubble, cooldown) -> 1g quick verdict, then the final run. PE7 archived (~$13.94).
 - 00:34 check-in: all 0.60.6 pieces in except 1g's verdict on shuffle ec6e8a0 (trial merge clean). PE7/PE8/PE9 archived. Active: BM3, R2, R3, R4, 1g, DA3, PE6 (idle), HW5 (idle), onboarding 3 (idle), perf 3 (idle). Lead memory fine.
+- 00:35 archived idle HW5 (~$5.57) and perf 3 (~$34.82); handovers on their branches. Kept for 0.60.7 reuse: PE6, DA3, onboarding 3.
