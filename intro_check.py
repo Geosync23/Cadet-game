@@ -220,7 +220,8 @@ def week(g):
             if not sow['sow']: fail('Tomas was never brought to the garden for Sowing')
 
 WEEK_ONLY = '--week' in sys.argv
-EVENING_ONLY = '--evening' in sys.argv   # part 8 alone: the evening walked in the real game (the tour's quick check)
+EVENING_ONLY = '--evening' in sys.argv or '--dawdle' in sys.argv
+DAWDLE = '--dawdle' in sys.argv   # 0.42.31 (the user on 0.60.6): part 8 lingers ~40 s by the Deck 5 lift and again after the bunk; Torres must still ride with you   # part 8 alone: the evening walked in the real game (the tour's quick check)
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     if not g.ev("typeof INTRO_STEPS !== 'undefined'"):
@@ -370,6 +371,7 @@ with sync_playwright() as pw:
         if wrong: fail('a tour place plays other lines than its own: ' + ', '.join(wrong))
         order, peak, led = [], {}, 0
         rides, rideFrom = [], None   # (the lead, the user on 0.60.5a): after each lift ride Torres steps out with you, not at the room he's heading for
+        lingered = []
         pre = { 'n': 0, 'pause': 0, 'still': 0, 'run': 0, 'last': None, 'sm': [] }   # 0.42.29 (the user on 0.60.5): from the ramp's welcome to the lift, walk-and-talk, no pauses
         dinner, bunkAt, seats = None, None, None
         INTRO_ESC_ID = g.ev('INTRO_ESCORT')
@@ -379,6 +381,12 @@ with sync_playwright() as pw:
             r = g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'follow'])
             peak[r['deck']] = max(peak.get(r['deck'], 0), r['calls'])
             if r['esc'] and r['esc'][2] == 'escort': led += 1
+            spot = ('lift' if r['step'] in ('lift', 'wing') and r['deck'] == 5 and r['me'][0] >= 14 else 'bunk' if r['step'] == 'toMess' and r['deck'] == 4 and not r['dlg'] else None)
+            if DAWDLE and spot and spot not in lingered:   # stand still for ~40 real s (more than the steps' old 20 ship minutes)
+                lingered.append(spot)
+                for _ in range(70): g.step(20); g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'stand'])
+                print(f"  lingered by {spot} till {g.ev('clockText()')}: step {g.ev('SHIP.intro.step')}, missed {g.ev('SHIP.intro.missed')}")
+                continue
             if r['act'] == 'riding' or (r['act'] or '').startswith('lift'): rideFrom = rideFrom or r['deck']
             elif rideFrom is not None and r['deck'] != rideFrom:
                 d = max(abs(r['me'][0] - r['esc'][0][0]), abs(r['me'][1] - r['esc'][0][1])) if r['esc'] else None
@@ -393,7 +401,7 @@ with sync_playwright() as pw:
                 dinner = g.ev("(() => { const G = SHIP.galley || {}, sv = G.servery || {}, mess = DECK_CREW.filter(a => deckDef.num === 3 && /Mess hall/.test((ROOMS[roomAt(...cellAt(a.x, a.z))] || {}).name || '')).length; return { t: clockText(), portions: sv.portions, dish: sv.dish, meal: sv.meal, mess, you: introSeat('you'), him: introSeat(INTRO_ESCORT) }; })()")
                 print(f"  at the table {dinner['t']}: servery {dinner['portions']} portions of {dinner['dish']} ({dinner['meal']}), {dinner['mess']} crew in the mess, seats you {dinner['you']}, Torres {dinner['him']}")
                 hm = dinner['t'].split()[-1]; tmin = int(hm[:2]) * 60 + int(hm[3:])
-                if tmin > 19 * 60: fail(f'the walk is too long: you reach the table at {hm}, too late for the dinner chat and the Chief before 19:30 (reviewer 1c: 19:00, the scenes wait till 19:30)')   # 0.42.27
+                if tmin > 19 * 60 and not DAWDLE: fail(f'the walk is too long: you reach the table at {hm}, too late for the dinner chat and the Chief before 19:30 (reviewer 1c: 19:00, the scenes wait till 19:30)')   # 0.42.27
             if r['step'] == 'free' and seats is None:   # reviewer 1: who sits in the three dinner seats once the Chief has come over
                 for _ in range(4): g.step(20); g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'stand'])   # stop steering: let the game sit you
                 seats = g.ev("(() => { const S = introStepById('chief').seats || {}, h = id => { const a = id && heldBy(id); return a ? a.p.id : null; }; return { you: [S.you, h(S.you), typeof ACT !== 'undefined' && ACT ? ACT.placeId || null : null], torres: [S[INTRO_ESCORT], h(S[INTRO_ESCORT])], calder: [S.calder, h(S.calder)], t: clockText() }; })()")
