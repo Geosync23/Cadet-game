@@ -16,3 +16,25 @@
 - `checks.sh HTML TAG check...` (= /tmp/cw/q.sh): sequential checks from the worktree, one log each in /tmp/cw/logs, one line each in /tmp/cw/logs/summary.txt; `dayN` = day_check N; `cadet` = cadet_test vs $OLD; TMO sets the timeout. Run at most 2 lanes at once (a third gives "game failed to start"); player_check needs TMO=2700 (~33 min); intro_check --week alone (~200 s on a quiet box).
 - smoke/newgame checks live in plans/build-master/ and exec cadet_test.py from their own folder: symlink cadet_test.py next to them.
 - Gotchas: a check copied under another name breaks its `__file__.replace('x_check.py', 'cadet_test.py')`; never pgrep -f/pkill by pattern (it matched and killed my shell); `git add -A` would pick up cadet_test screenshots in the worktree, add files by name; a chained `&&` merge stops silently on a build-line conflict (use the script).
+
+## 0.63.2 state at 18:07 UTC (tips as the seats and R2 sent them; newest last)
+- W 6a00d9c PASS (final)
+- X 2223cb7 0.71.0 (pending R2; 0.71.1 to follow)
+- T 1e254bd 0.70.0 (pending; 0.70.1 to follow; needs A5 deck-pt1 71962e0; new join_check.py)
+- U ebfdb2f 0.72.0 (pending; cadet diffs = new button box)
+- U -> 73b40cb (ebfdb2f + shots)
+- C2 23ef73c 0.44.14-16 (pending R2)
+- X 2223cb7 PASS
+- O4 97ed2a6 0.42.47 (pending R2)
+- C2 -> bb4423c (puzzle_check fix; pending R2)
+- U 73b40cb PASS
+- C2 a5d5c4c PASS
+- O4 97ed2a6 PASS
+- O4 -> 7a2bc5d (nit; pending R2)
+- O4 7a2bc5d PASS
+- A5 1b41751 (0.47.4-0.47.7; pending R2; needs T's @stretch-garden)
+- A5 1b41751 FAIL (beam planes 3mm; fix coming)
+- P 587a2cd 0.28.74 (pending R2)
+- A5 -> ff26b6d (0.47.8 beam fix; pending R2)
+- Still to come: X 0.71.1 (09:00 crew side, breakfast 06:00-09:00, 13:00 Works tea), T 0.70.1 (needs A5's @stretch-garden; new join_check.py), O5 claude/onboard-pt1 (Day 1 arrows + tea walk), C2 bb4423c (puzzle_check reads DAY_SHIFT; R2), P 587a2cd (R2), A5 ff26b6d (R2).
+- Trial p1 (C2 23ef73c + X 2223cb7 + T 1e254bd + U 73b40cb + W 6a00d9c on 0.63.1): merges clean, verify 0 missing, NAMES OK; career, mech, machine, leave, social, newgame, smoke, join OK; puzzle FAIL from C2's shift move (fixed in bb4423c). Log: plans/cand-p5-pt1-results.md on claude/p5-cand-pt1.
