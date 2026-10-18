@@ -1,0 +1,31 @@
+TITLE:Pillar 5 Spec Pages
+H1:Pillar 5 · the spec pages <span class="draft">Steps 1 and 2</span>
+SUB:One page per mechanic, each in plain words with a precise "for the builder" part. From the approved plan (<code>plans/pillar5-plan.md</code>, v9, and <code>plans/pillar5-plan.html</code>). Written 2026-10-18 by the Pillar 5 designer; approved or sent back by the lead.
+NAV:s1=Step 1|s2=Step 2|data=Data
+
+<section id="s1">
+  <h2>Step 1 · Foundation</h2>
+  <div class="grid">
+    <div class="card"><b><a href="foundation.html" style="color:inherit">The foundation</a></b><span>playerTier, more real faults, jobs by tier and rank, job kinds with steps (17); the work steps and careerSpeed (15); 24 core: the ladder, training moments, tools, reputation, the Works app. Build numbers and hash keys checked.</span><span class="meta"><span class="tag">S · P · C</span></span></div>
+    <div class="card"><b><a href="case-engine.html" style="color:inherit">The case engine</a></b><span>How head-scratchers are made from the real ship, checked for one answer, shown and solved.</span><span class="meta"><span class="tag">H</span></span></div>
+  </div>
+</section>
+<section id="s2">
+  <h2>Step 2 · Your Junior days (Days 2-8)</h2>
+  <div class="grid">
+    <div class="card"><b><a href="m1-rounds.html" style="color:inherit">M1 Rounds</a></b><span>Day 2, Torres.</span><span class="meta"><span class="tag">M1 · 24a</span></span></div>
+    <div class="card"><b><a href="m4-hauling.html" style="color:inherit">M4 Hauling and stores</a></b><span>Day 3, Yara Esposito.</span><span class="meta"><span class="tag">M1 · 24d</span></span></div>
+    <div class="card"><b><a href="m3-drill-inspection.html" style="color:inherit">M3 The drill and the inspection</a></b><span>Days 3-4, Calder and Tomas.</span><span class="meta"><span class="tag">M1 · 24c</span></span></div>
+    <div class="card"><b><a href="m5-tuning.html" style="color:inherit">M5 Tuning</a></b><span>Day 4, Brennan and Calder.</span><span class="meta"><span class="tag">M2 · 24e</span></span></div>
+    <div class="card"><b><a href="m7-scanner.html" style="color:inherit">M7 The scanner</a></b><span>Day 5, Torres.</span><span class="meta"><span class="tag">H · 24g</span></span></div>
+    <div class="card"><b><a href="p3-whats-been-tried.html" style="color:inherit">P3 What's been tried?</a></b><span>Day 5, Torres: your first head-scratcher.</span><span class="meta"><span class="tag">H · 24k</span></span></div>
+    <div class="card"><b><a href="m6-incidents.html" style="color:inherit">M6 Small incidents</a></b><span>Day 8, Calder.</span><span class="meta"><span class="tag">M2 · 24f</span></span></div>
+    <div class="card"><b><a href="m2-uniform.html" style="color:inherit">M2 Your work uniform</a></b><span>Day 8, Torres.</span><span class="meta"><span class="tag">M1 · 24b</span></span></div>
+  </div>
+</section>
+<section id="data">
+  <h2>Data</h2>
+  <div class="grid">
+    <div class="card"><b><a href="fault-tables.html" style="color:inherit">The fault tables</a></b><span>What can go wrong with each machine, in plain words. Tier 1 complete; Tier 2 drafted.</span><span class="meta"><span class="tag">S · 17</span></span></div>
+  </div>
+</section>

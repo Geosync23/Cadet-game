@@ -1,0 +1,76 @@
+TITLE:Hauling Spec
+H1:M4 · Hauling and stores (Day 3, Yara Esposito) <span class="draft">spec for approval</span>
+SUB:Grows out of 0.60.7's Wednesday delivery: once you've unloaded the parts crates onto the shelves, the rest of the delivery goes to its stops around the ship on a cart, with a manifest. Later, the stocktake. Step 2, sub-block 24d. Plan Part 2, M4.
+NAV:plain=In plain words|day=Day 3|grow=How it grows|crew=The crew|b=Builder|save=Save|tests=Tests|ranges=Builds and keys
+
+<section id="plain">
+  <h2>In plain words</h2>
+  <ul>
+    <li><b>Already in 0.60.7:</b> every Wednesday at 10:00 the delivery lands in the cargo hold as crates; a job waits for you until 14:00: take a hover cart, pull in up to four crates, and the shelves unload themselves (one or two trips).</li>
+    <li><b>New:</b> the delivery also has <b>a few crates for the rest of the ship</b> (linen for the laundry, medical supplies for the infirmary, stock for the crew store, spares for the bridge, dry goods for the galley). After the shelves, a <b>manifest run</b> takes them to their stops: load them from the hold (tap each; the cart fills), ride the lift, drop each one where it goes.</li>
+    <li><b>A junior job</b> (the job-by-rank map). As an Officer you sign off the manifests instead.</li>
+  </ul>
+</section>
+
+<section id="day">
+  <h2>Day 3, Wednesday</h2>
+  <ol class="steps">
+    <li><time>08:00</time><b>Yara mentions the delivery</b><span>(0.60.7, unchanged.)</span></li>
+    <li><time>10:00 onward</time><b>You unload the parts crates</b><span>(0.60.7.) It's offered, never forced.</span></li>
+    <li><time>When the shelves are done</time><b>Yara: "Now the rest of it"</b><span>She meets you at the hold with the manifest: three crates today (linen, medical, store stock). She loads the first with you watching; you load the others and drive. She walks along to the first stop (the laundry, Deck 4), then lets you do the infirmary and the store on your own ("I'll see you back at the counter").</span></li>
+    <li><time>After</time><b>Trained</b><span>"Trained: hauling, with Yara." Every Wednesday from now, the manifest run follows the unload, held for you till 16:00.</span></li>
+  </ol>
+  <p class="note">If you didn't take the unload, the crew did; Yara finds you after lunch with the manifest crates anyway. The drill at 15:00 is the day's small new thing (M3), so the run fits between: about 40 ship minutes.</p>
+</section>
+
+<section id="grow">
+  <h2>How it grows</h2>
+  <div class="grid">
+    <div class="card"><b>Stage 1 · Yara's order</b><span>The manifest lists the stops in order.</span><span class="meta"><span class="tag">Day 3</span></span></div>
+    <div class="card"><b>Stage 2 · Your order</b><span>After 2 runs you choose the order (fewer lift rides is quicker; Yara notices a good one).</span><span class="meta"><span class="tag">after 2 runs</span><span class="tag new">optional</span></span></div>
+    <div class="card"><b>Stage 3 · The stocktake</b><span>A short side job on Thursdays: walk the storage aisles and look at each shelf. Now and then a part is on the wrong shelf (someone put it back in a hurry); move it to its own shelf before a job goes looking for it.</span><span class="meta"><span class="tag">after 3 runs</span><span class="tag new">optional</span></span></div>
+  </div>
+</section>
+
+<section id="crew">
+  <h2>The crew</h2>
+  <p>If you don't take the manifest run by 16:00, a storekeeper or a junior Works hand does it (the existing <code>delivery</code> chore's walking, 0.33.40), more slowly. Nothing waits on you.</p>
+</section>
+
+<section id="b" class="builder">
+  <h2>For the builder (seat M1, sub-block 24d)</h2>
+  <div class="tablewrap"><table>
+    <tr><th>Section</th><th>What</th><th>Owner</th></tr>
+    <tr><td>24d (new)</td><td>the manifest (which crates, which stops), the <code>haul</code> job kind, the training with Yara, stage 2's order, stage 3's stocktake</td><td>M1</td></tr>
+    <tr><td>17</td><td>the Wednesday delivery adds <code>SHIP.hold.manifest = [{ id, dest, n }]</code> (2-4 crates, from <code>DELIVERIES</code>' destinations, picked with <code>schedU(week, 0, 866)</code>); <code>holdCrates()</code> also counts them (drawn with the same instanced crate mesh); the misplaced part for the stocktake (<code>SHIP.misplaced = { part, on }</code>, at most one, Thursdays, <code>schedU(week, 0, 867)</code> < .5)</td><td>S</td></tr>
+    <tr><td>15</td><td>nothing new: the cart run exists (<code>cartTap</code>, <code>cartStep</code>), with <code>carry</code> on the cart; each stop's drop is a tap within reach (15b's stop tap)</td><td>—</td></tr>
+    <tr><td>DECKS[3], [4], [5], [1]</td><td>drop places: <code>4-laundry-drop</code>, <code>3-infirmary-drop</code>, <code>3-store-drop</code>, <code>3-galley-drop</code>, <code>1-bridge-drop</code> (by the doors, room for the cart); <code>5-stock-1..4</code> (a spot in front of each shelf for the stocktake, may reuse <code>5-parts-N</code>)</td><td>deck architect 2</td></tr>
+    <tr><td>content</td><td>Yara's lines (<code>train.m4</code>), the stop names, the stocktake's lines</td><td>W</td></tr>
+  </table></div>
+  <ul>
+    <li><b>The job kind:</b> <code>jobKindAdd('haul', { tier: 1, junior: true, ... })</code>, posted when the unload job is done (or at 13:00 if the crew did it), held for you till 16:00; stops: <code>cart</code> (take a cart at <code>5-cart-N</code>), <code>load</code> at <code>5-hold-N</code> (one tap per crate, <code>hold</code> 1 ship minute each; the cart shows <code>cartfull</code>), then each drop in manifest order (<code>hold</code> 2 ship minutes), then the cart back. Lift rides as the cart run today.</li>
+    <li><b>Stage 2:</b> a <code>choose</code> step at the hold (order the stops: pick the next one from the remaining, repeated); the reputation note "a good route" if lift rides ≤ the best order's.</li>
+    <li><b>Stage 3:</b> a side job "Stocktake" on Thursdays at 09:00, held till 15:00 (never on the board for crew): <code>look</code> at each of <code>5-stock-1..4</code>; at the shelf holding <code>SHIP.misplaced.part</code>, the look's line says so and offers "Move it" (a <code>carry</code> to its own shelf: <code>shelfOf(part)</code>, 0.33.41). If nobody does, it's found by the next crew fetch (as today: nothing blocks).</li>
+    <li><b>Cart cap:</b> manifest crates and parts crates share <code>CART_CRATES</code> (4); a run with more takes two trips (as the unload).</li>
+    <li><b>Notes:</b> <code>simNote('haul', { stop })</code> per drop (the receiving person may say thanks: Rina at the infirmary).</li>
+  </ul>
+</section>
+
+<section id="save" class="builder">
+  <h2>Save</h2>
+  <ul><li><code>ship.hold.manifest</code> and <code>ship.misplaced</code> (section 17's save hook); the haul job in <code>ship.jobs</code> (<code>j.order</code>, <code>j.dropped</code>); <code>ship.works.use.m4</code>.</li></ul>
+</section>
+
+<section id="tests" class="builder">
+  <h2>Tests</h2>
+  <ul>
+    <li><b><code>mech_check</code></b> (24d): a manifest run delivers every stop once; the cart never over 4; two trips when needed; a run you don't take is done by the crew by evening; stage 2's order; a stocktake finds a planted misplaced part and moving it puts it on its own shelf; the same twice.</li>
+    <li><b><code>machine_check</code></b>: stock never below 0; 0.60.7's unload unchanged; deliveries still carried when you never haul.</li>
+    <li><b><code>day_check</code></b> on a Wednesday: crew still reach their places; draw calls under 450 with the manifest crates.</li>
+  </ul>
+</section>
+
+<section id="ranges" class="builder">
+  <h2>Builds and keys</h2>
+  <ul><li>Seat <b>M1</b>, <code>claude/mech-rounds</code>, <b>0.45.x</b>. Hash keys <b>866-867</b> (the manifest, the misplaced part). Needs 0.60.7's 0.33.42 (the Wednesday delivery as crates).</li></ul>
+</section>

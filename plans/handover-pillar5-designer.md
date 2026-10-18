@@ -1,10 +1,36 @@
-# Handover: Pillar 5 designer (puzzles)
+# Handover: Pillar 5 designer (seat D, no game code)
 
-- **Role:** design only, no game code. Reports to the lead (named at the top of TEAM.md; at the time of writing session_01KPJMYjXAPkNUcrQ8VRkhLE).
-- **Branch:** `claude/pillar5-plan`.
-- **What I own and built (2026-10-17):** Part 6 of `plans/pillar5-plan.md` ("Added: deductive repair puzzles", the head-scratchers), the "Added: puzzles" section of `plans/pillar5-plan.html` (plus small pointers: header, rule 3, risks, questions 8-16), `plans/pillar5-puzzles-mockup.html` (three phone screens) and `plans/shots/p5-puzzle-{when,line,rig}.png`, and the user's ask recorded in `plans/pillar5-notes.md`.
-- **The user's rule for this work:** keep the whole existing plan; add, never remove or shrink.
-- **Status:** **APPROVED by the user (~21:15; no hiring or building yet).** **The plan is final** (2026-10-17, after the user's N1-N11 answers): `plans/pillar5-plan.md` and `.html` were rewritten as one clean plan (no stacked "Added" parts). The arc is about 33 ship days (about 12-13 real hours); there's a "what changed because of 10-15 hours" box, one timeline, the job-by-rank map, six steps with check-ins, and one open question (the night shift on the weekend). The older drafts are in git history. Pillar 5 waits for Pillar 4 to finish, then the user's approval. Report to lead 8 (session_01FutyR6xiAmZv29oS4TWKdS).
-- **Next (Step 1, when Pillar 4 is done):** in Step 1, a spec page for the case engine and for P3 and P1 (`plans/mechanics/<id>.html`, in the style of `plans/pillar5-plan.html`), then the fault tables' causes in plain words per machine kind (Tier 1 kinds first).
-- **Mock-up shots:** re-made with `NODE_PATH=$(npm root -g) node shot.js` (a short Playwright script screenshotting `#m1`, `#m2`, `#m3` of the mock-up page at 2x; Chromium at `/opt/pw-browsers/chromium-1194/chrome-linux/chrome`).
-- **Gotchas:** hash keys 880-894 are a suggestion inside Pillar 5's 850-899 (F4 hands keys out); the build ranges 0.55.x/0.56.x for the new seats are not yet confirmed free by the build master. Crew names used: Calder (she), Zeke Torres, Brennan (she), Tomas, Pell, Rina, Yara Esposito; the machine shop tech and the laundry hand are unnamed.
+- **Role:** design only. Reports ONLY to the lead (TEAM.md names it; on 2026-10-18 lead 11, session_01YKC3CGA9VS4b7wuqLbPT7V) with send_message: one line when starting, one per finished page with its commit hash, at once if blocked. Never contacts the user. Never starts sessions. Stay inside `plans/` and `design-doc.md`.
+- **Branch:** `claude/p5-design` (made from `claude/pillar5-plan` 93a5a7f). Predecessor: session_01FDy4na3u2FS8L8vEjR6gAR (archived), then session_01VXENaUt4vdyYtr3KjVZk9z (this note's writer, 2026-10-18).
+- **Authority overnight (2026-10-18):** the lead approves or rejects each page against the approved plan; nothing waits for the user (`plans/overnight-decisions.md` on `claude/lead-pillar1`, last section).
+
+## Done (2026-10-18)
+| Commit | What |
+| --- | --- |
+| 8a50917 | Plan v9 (`pillar5-plan.md` + `.html`): P3 on Day 5 with the scanner, M2 uniform Day 8, puzzle rates 1/10 (Days 5-9), 1/5 (10-15), 1/4 (16-22; 1/3 own tier), 1/3 (23+), a T1 band; the case engine in Step 1 (seat H joins Step 1), P3 in Step 2; 24g scanner moved from M3 to H so Step 2 stays at 6 seats (D, B, M1, M2, H, A); M5's stale question fixed. `design-doc.md` taken from `claude/lead-pillar1` (newest) plus two bullets (Day-2 dates; puzzles from Day 5) |
+| 46f10be | `plans/mechanics/foundation.html` (17 playerTier, jobs by rank, real faults, causes, job kinds with steps, reserved training/test jobs; 15 work steps, careerSpeed; 24 core: ladder, training, tools, reputation bands, Works app, save; hooks; tests; build and key ranges; the name clash) |
+| 29904c1 | `case-engine.html` |
+| 374dc66, 9b94208, 7c860ad, 3c6e396, c481db1, 62a9ae4, 0a99c09 | `m1-rounds`, `m2-uniform`, `m3-drill-inspection`, `m4-hauling`, `m5-tuning`, `m6-incidents`, `m7-scanner` + `p3-whats-been-tried` |
+| 9cca2dc | `fault-tables.html` (Tier 1 complete, Tier 2 draft), `plans/mechanics/index.html`, plan notes on the corrections |
+
+## How the pages are made
+`plans/mechanics/src/`: each page's source is a `.body` file (four header lines TITLE/H1/SUB/NAV, then the sections), `mk.py BODY OUT base.css` wraps it in the plan page's style; `chk.js` (`NODE_PATH=$(npm root -g) node chk.js FILE...`) checks no sideways scroll at 390 px. Edit the body, rebuild, commit the html (and the body).
+
+## Facts found that the plan didn't have (all on the pages)
+- **Name clash:** `SHIP.career`, `ship.career`, `CAREER`, `career…` functions are the 0.61.x leave/missed-shift/time-clock system (section 20). Pillar 5 uses `SHIP.works` / `ship.works`; `CAREER_LADDER`, `careerSpeed` keep their names. Seat C is a different seat from the 0.61.x career engineer.
+- **Builds:** systems next 0.33.43+ (0.33.42 is 0.60.7's Wednesday delivery), player 0.28.71+; 0.44, 0.45, 0.47, 0.49-0.59 (but 0.48 is the content writer's), 0.63+ free on every branch (checked 2026-10-18).
+- **Hash keys:** 850-899 free (split on the foundation page: 850-854 core, 855-859 section 17, 860-879 mechanics, 880-894 cases, 895-899 spare). 900-949 is NOT free (901 sick, 920+k and 930 galley); 951-952 (time clock) are inside Pillar 6's 950-999. Suggested second range 1000-1049.
+- **Deck 4 has no light-relay machine with a panel** (4-lights-1 is a dropped stand-in); real machines list is in the game's `DECKS[n].machines`. P3's first case is `4-washer-2` leaking.
+- **Tiers in code:** junction Tier 3, doorgear Tier 2, valve Tier 2 (so a burst pipe's fix is a Tier 1 joint job).
+- 0.60.7 builds clothes in 15c (`player.clothes`, the onboarding engineer's), the Wednesday delivery as crates (0.33.42), right-shelf parts (0.33.41), `HOLD_MAX` 3 and `shareOut` (0.33.40). Details: `plans/plan-0607.md` on `claude/plan-0607`.
+
+## Next (in order)
+1. Whatever the lead sends back on the pages (fix and re-push; one line each).
+2. Step 3 pages when the lead asks: the Tier 2 test job and the first promotion, M8 team jobs, M9 tracing (with the pipe graph), P1, P2, the T2 band; finish the Tier 2 fault tables (signs, still lines, traced causes).
+3. Tier 2 bands for rounds (Officer routes), the drill's muster job, M5 stage 2.
+
+## Gotchas
+- Line numbers on the pages are from `claude/cand-0607`'s game file; builders match by text.
+- Every cause in a fault table needs a part already in `STOCK` (listed on `fault-tables.html`), and causes sharing a card need different signs.
+- The solver's rule "no single clue solves it" catches plan examples (P3's did); check each later kind's example against it.
+- Day 2 has only one new thing (rounds): 0.60.7's laundry and health check fill it.

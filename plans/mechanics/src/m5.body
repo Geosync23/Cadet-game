@@ -1,0 +1,84 @@
+TITLE:Tuning Spec
+H1:M5 · Tuning (Day 4, Brennan with Calder) <span class="draft">spec for approval</span>
+SUB:Some faults aren't a broken part but a machine out of adjustment. You turn a setting a step at a time and watch the machine itself answer: the oven's glow steadies, the lights stop flickering. No timer, no score (the user: yes, this is the right side of the "no mini-games" line). Step 2, sub-block 24e. Plan Part 2, M5.
+NAV:plain=In plain words|day=Day 4|look=What you watch|grow=How it grows|b=Builder|save=Save|tests=Tests|ranges=Builds and keys
+
+<section id="plain">
+  <h2>In plain words</h2>
+  <ul>
+    <li><b>Machines drift:</b> now and then an oven runs hot, a light relay chatters, a cart dock charges slow. It's on the board as "Tune: Oven 2 (runs hot)".</li>
+    <li><b>The verb:</b> at the machine's panel, <b>turn</b> its setting one step at a time (two big buttons, − and +). After each step the machine answers on the deck: the glow calms or flares, the flicker slows or quickens. Settle it and it's done. Overshoot and it shows the other way; turn it back.</li>
+    <li><b>The crew tune too</b> (today's "calibrate" chores become tuning), so a drifted machine never waits on you.</li>
+  </ul>
+</section>
+
+<section id="day">
+  <h2>Day 4, Thursday (Torres is off on Thursdays this week)</h2>
+  <ol class="steps">
+    <li><time>Morning</time><b>Brennan's oven runs hot</b><span>She grumbles about it at breakfast ("Burnt the edges of forty rolls"). Calder sends you a Mail: "Galley, 10:15. Bring nothing. — C."</span></li>
+    <li><time>10:15, the galley</time><b>Calder shows you</b><span>At Oven 1's panel: "Watch the glow, not the dial." She turns it two steps down; the glow stops stuttering. She hands over: "Oven 2 is doing the same. Your turn."</span></li>
+    <li><time>Oven 2</time><b>You tune, they watch</b><span>Brennan watches with her arms folded, then feeds you a biscuit when it settles.</span></li>
+    <li><time>After</time><b>Trained</b><span>"Trained: tuning, with Calder." Tuning jobs now come to you: about one every other workday.</span></li>
+  </ol>
+  <p class="note">The day's small new thing is the inspection's real check at 06:30 (M3, Tomas).</p>
+</section>
+
+<section id="look">
+  <h2>What you watch</h2>
+  <div class="tablewrap"><table>
+    <tr><th>Machine</th><th>Running high</th><th>Running low</th><th>Settled</th></tr>
+    <tr><td>Oven, range</td><td>the glow stutters (hot)</td><td>the screen dims (cool)</td><td>a steady glow</td></tr>
+    <tr><td>Light relays</td><td>the deck's lamps flicker fast</td><td>the lamps sag dim</td><td>steady light</td></tr>
+    <tr><td>Cart dock</td><td>its lamp blinks fast</td><td>its screen dims (charging slow)</td><td>a steady lamp</td></tr>
+  </table></div>
+  <p class="note">These are the looks section 17 and the performance engineer already draw (flicker, dim, blink). The panel card also says it in words ("running hot", "a little hot", "steady", "a little cool", "cold"); no numbers, unless the machine's own gauge has one.</p>
+</section>
+
+<section id="grow">
+  <h2>How it grows</h2>
+  <div class="grid">
+    <div class="card"><b>Stage 1 · One setting</b><span>Ovens, the range, light relays, cart docks.</span><span class="meta"><span class="tag">Day 4</span></span></div>
+    <div class="card"><b>Stage 2 · Two settings that pull on each other</b><span>An air scrubber's fan and flow: turning one moves the other a little. Tier 2 machines, so as an Officer.</span><span class="meta"><span class="tag">Officer</span><span class="tag new">optional</span></span></div>
+    <div class="card"><b>Stage 3 · Before anyone notices</b><span>With the scanner, a drifting setting shows on your round before it's on the board.</span><span class="meta"><span class="tag">with the scanner</span><span class="tag new">optional</span></span></div>
+  </div>
+  <p class="note">Later: coil balancing at Tier 4 (M23) is this verb grown up; the sensor array's calibration (M20) too. Some head-scratchers end "it's a setting, not a part" and become a tuning job.</p>
+</section>
+
+<section id="b" class="builder">
+  <h2>For the builder (seat M2, sub-block 24e)</h2>
+  <div class="tablewrap"><table>
+    <tr><th>Section</th><th>What</th><th>Owner</th></tr>
+    <tr><td>17</td><td><b>drift:</b> <code>SHIP.machines[id].drift</code> (−3…+3, 0 = settled) on <code>TUNABLE = { oven, range, lights, cartdock }</code> (stage 2 adds <code>scrubber</code> with <code>drift2</code>); each ship hour, a settled tunable machine drifts with <code>schedU(machSeed(id), hour, 868) &lt; TUNE_P</code> (about one drift a workday ship-wide) by ±1-3 (<code>schedU(..., 869)</code>); only from <code>TUNE_FROM</code> (Day 4 06:00, so Days 0-3 are exactly as now). A drift of 2+ posts a <code>tune</code> job (found 1-6 hours later, like a service); a drift of 1 shows but posts nothing. <code>CHORES.calibrate</code> on a drifted machine becomes its tune job. Effects: a drifted machine counts 8 condition points lower per step of drift in <code>machWorks</code> (so the galley's cook times feel it) and wears 10% faster per step. <code>machineLook</code>: high → <code>flicker</code> (ovens and lights) or <code>blink</code> (docks); low → <code>dim</code>.</td><td>S</td></tr>
+    <tr><td>24e (new)</td><td>the <code>tune</code> job kind (<code>jobKindAdd</code>), the panel card, the training (Day 4: on Day 4 at 06:00 <code>tuneSet('3-oven-1', +2)</code> and <code>tuneSet('3-oven-2', +2)</code>, Calder's job on oven 1, yours on oven 2), stage 2 coupling</td><td>M2</td></tr>
+    <tr><td>15</td><td>the <code>turn</code> step (foundation 15.1); the <code>tune</code> pose</td><td>P</td></tr>
+    <tr><td>8b</td><td><code>tune</code> pose (one hand at a panel at chest height; falls back to <code>work</code>)</td><td>performance (on call)</td></tr>
+    <tr><td>16</td><td>reads nothing new (drift reaches it through <code>shipEffects</code>' cook)</td><td>galley (informed)</td></tr>
+    <tr><td>content</td><td>Brennan's and Calder's lines (<code>train.m5</code>), the panel words</td><td>W</td></tr>
+  </table></div>
+  <ul>
+    <li><b>The job:</b> <code>jobKindAdd('tune', { tier: machine's, work: 0, stops: j =&gt; [{ deck, placeId: panel, step: 'turn', opts: { start: drift, onTurn: v =&gt; tuneSet(id, v), ok: v =&gt; v === 0, words } }], done: ..., crew: { can: works, mins: 15 } })</code>. The value starts at the machine's real drift; each − or + changes it by 1 (the card shows only words); <code>tuneSet</code> updates <code>SHIP.machines[id].drift</code> at once and bumps <code>MACH_REV</code> so the look follows within half a second. Settled (0): the job is done; turn-in as any job.</li>
+    <li><b>Overshoot:</b> nothing special; the look shows the other side.</li>
+    <li><b>Stage 2</b> (scrubbers, Tier 2): two settings on the card; turning fan by 1 moves flow by ½ (rounded toward 0) and the other way round; done when both are 0. The look: fan high → a higher hum (later, with sound; today the scrubber's <code>flicker</code>), flow low → <code>dim</code>.</li>
+    <li><b>Skill:</b> <code>careerSpeed(kind)</code> applies to the 1 ship minute per step.</li>
+    <li><b>Notes:</b> <code>simNote('tuned', { machine })</code>.</li>
+  </ul>
+</section>
+
+<section id="save" class="builder">
+  <h2>Save</h2>
+  <ul><li><code>ship.machines[id]</code> gains a third value, drift (<code>[cond, lastService, drift]</code>; read as 0 if missing); the tune job in <code>ship.jobs</code>; <code>ship.works.use.m5</code>.</li></ul>
+</section>
+
+<section id="tests" class="builder">
+  <h2>Tests</h2>
+  <ul>
+    <li><b><code>mech_check</code></b> (24e): a drifted machine settles only at 0; the look follows the setting both ways; Day 4's two ovens are drifted for the training; drift the same twice and in one jump; the crew tune drifted machines you leave.</li>
+    <li><b><code>machine_check</code></b>: no drift before Day 4 06:00; drift rate about one a workday; ship health unchanged within 2 over 14 days; the save of drift.</li>
+    <li><b><code>food_check</code></b>: food still ready with a drifted oven (cook a little slower).</li>
+  </ul>
+</section>
+
+<section id="ranges" class="builder">
+  <h2>Builds and keys</h2>
+  <ul><li>Seat <b>M2</b>, branch <code>claude/mech-incidents</code>, builds <b>0.51.x</b> (free, checked 2026-10-18). Hash keys <b>868-869</b> (drift chance, drift size).</li></ul>
+</section>

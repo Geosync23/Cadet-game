@@ -1,0 +1,90 @@
+TITLE:Drill and Inspection Spec
+H1:M3 · The drill and the inspection (Days 3-4, Calder and Tomas) <span class="draft">spec for approval</span>
+SUB:The crew's weekly drill (Wednesday 15:00) and bunk inspection (Thursday morning) are in the week already, but you take no part. Now they're real and small: a job at the drill, and three things checked at inspection. Step 2, sub-block 24c. Plan Part 2, M3.
+NAV:plain=In plain words|drill=The drill|insp=The inspection|rank=As you rise|b=Builder|save=Save|tests=Tests|ranges=Builds and keys
+
+<section id="plain">
+  <h2>In plain words</h2>
+  <ul>
+    <li><b>Wednesday 15:00, the drill:</b> a toast at 14:50; go to your <b>muster station</b> (the Works bay) and do your <b>drill job</b>. Calder times the Works team; a quick drill gets a word at Friday tea.</li>
+    <li><b>Thursday morning, the inspection:</b> before 06:30, have <b>a clean uniform</b>, <b>your berth made</b> and <b>your locker tidy</b>. The duty officer walks the junior wing and gives each a nod or a gentle remark ("Uniform's seen better days, cadet").</li>
+    <li><b>Both count toward your Works reputation</b> (turning up) and the crew's opinion. Missing one costs a remark, nothing more.</li>
+  </ul>
+</section>
+
+<section id="drill">
+  <h2>The drill</h2>
+  <div class="grid">
+    <div class="card"><b>Fire drill</b><span>Take the extinguisher from its bracket by the Works bay door and stand by the hatch until the all-clear.</span></div>
+    <div class="card"><b>Pressure drill</b><span>Close and dog the bulkhead door by the Works bay: turn the wheel (a <code>turn</code> step, four turns) and stand by.</span></div>
+    <div class="card"><b>Power drill</b><span>Stand by the breaker cabinet in Deck 5's utility room; at the call, switch the junior wing to reserve (a <code>hold</code>), then back.</span></div>
+  </div>
+  <ul>
+    <li><b>The kind rotates</b> by week (fire, pressure, power), the same every game. The device's Calendar says which on Wednesday morning.</li>
+    <li><b>Your first (Day 3):</b> Calder briefs you at 14:50 in the Works bay: "Fire drill. Extinguisher, hatch, wait for me." It's a training moment of one step: she watches you do it. "Trained: the drill."</li>
+    <li><b>Timing:</b> Calder's line at the end, from how long the Works team took (you included): "Two minutes ten. Better." It's words, never a score.</li>
+    <li><b>Off duty?</b> On a day off you muster by the lift like the off-duty crew (as today), no drill job.</li>
+  </ul>
+</section>
+
+<section id="insp">
+  <h2>The inspection</h2>
+  <ul>
+    <li><b>Three things:</b> <b>a clean uniform</b> (0.60.7's morning change, and not grubby: M2 from Day 8), <b>your berth made</b> (tap your bunk and "Make the bed": a short <code>hold</code>, from 05:30), <b>your locker tidy</b> (nothing loose: things you bought or made put away; a tap on the locker "Tidy up", a short <code>hold</code>, puts them away).</li>
+    <li><b>Your first (Day 4):</b> Pillar 4's inspection scene with Tomas panicking about his bunk becomes the real check: he shows you how ("Corners. She checks the corners."). It's the day's small new thing.</li>
+    <li><b>The walk:</b> the duty officer (an officer of the day by rota; Calder on your first) walks the junior wing at 06:30; at your berth they look over all three and say one line. You don't have to be there (if you are, they speak to you; if not, the remark comes by Mail).</li>
+    <li><b>What it gives:</b> all three right, a nod and +1 reputation (foundation 24.4); one or two wrong, a remark; none, a firmer remark. Never a fail.</li>
+    <li><b>No puzzles at the inspection</b> (the plan's links).</li>
+  </ul>
+</section>
+
+<section id="rank">
+  <h2>As you rise (the job-by-rank map)</h2>
+  <div class="tablewrap"><table>
+    <tr><th>Rank</th><th>The drill</th><th>The inspection</th></tr>
+    <tr><td>Junior Officer</td><td>the extinguisher, the bulkhead door or the breaker</td><td>you're inspected (junior wing)</td></tr>
+    <tr><td>Officer (Day 10)</td><td>muster the Works team: count them in at the bay (a <code>look</code> at each as they arrive)</td><td>officers aren't inspected</td></tr>
+    <tr><td>Senior Officer (Day 16)</td><td>run the Works part and time it; on Day 24 you run the whole Works drill</td><td>—</td></tr>
+  </table></div>
+  <p class="note">The Officer and Senior parts are built with Steps 3 and 5 and specified there; this page builds the Junior parts and leaves the rank switch in place.</p>
+</section>
+
+<section id="b" class="builder">
+  <h2>For the builder (seat M1, sub-block 24c)</h2>
+  <div class="tablewrap"><table>
+    <tr><th>Section</th><th>What</th><th>Owner</th></tr>
+    <tr><td>24c (new)</td><td>the drill job and the inspection items; the remarks; the ladder rows <code>m3d</code> (Day 3, small, fixed Wed 15:00) and <code>m3i</code> (Day 4, small, fixed Thu 06:30)</td><td>M1</td></tr>
+    <tr><td>14 schedules</td><td>on-duty Works crew muster at the Works bay at the drill (today only off-duty crew muster by the lifts), 15 minutes, tag <code>drill</code>; the duty officer's walk on Thursday (06:30-06:45, the junior wing's bunk rooms, a place per room); <code>drillKind(d)</code> read by both</td><td>sim (on call)</td></tr>
+    <tr><td>15 / 15b</td><td>"Make the bed" on your bunk and "Tidy up" on your locker (<code>hold</code> steps, 1 ship minute each); the extinguisher's take and put back (a <code>carry</code> of a new <code>extinguisher</code> prop)</td><td>interactions / P (on call)</td></tr>
+    <tr><td>DECKS[5]</td><td>place <code>5-drill-ext</code> (the extinguisher bracket by the Works bay door, a small prop), <code>5-drill-hatch</code>, <code>5-drill-door</code> (the bulkhead wheel), <code>5-drill-breaker</code> (the existing breaker cabinet in <code>u</code>), <code>5-muster-1..6</code> (spots in the Works bay)</td><td>deck architect 2</td></tr>
+    <tr><td>8b</td><td>the <code>extinguisher</code> carry prop (one small cylinder, shared kit, built once at load, no <code>R()</code>)</td><td>performance (on call)</td></tr>
+    <tr><td>content</td><td>Calder's brief and times; the duty officer's nods and remarks per item; Tomas's Day 4 lines</td><td>W</td></tr>
+  </table></div>
+  <ul>
+    <li><b><code>drillKind(d)</code></b> = <code>['fire', 'pressure', 'power'][Math.floor((d - 1) / 7) % 3]</code>: week 1 (Day 3) is fire, then pressure, then power; no hash needed.</li>
+    <li><b>The drill job:</b> a job kind <code>drill</code> (via <code>jobKindAdd</code>), posted at 14:50 on Wednesdays for you only (<code>j.reserved</code>, never on the board for crew), stops by kind: fire = <code>carry</code> from <code>5-drill-ext</code> then <code>hold</code> 10 ship minutes at <code>5-drill-hatch</code> then put back; pressure = <code>turn</code> at <code>5-drill-door</code> (four steps, <code>opts.ok: v &gt;= 4</code>) then <code>hold</code>; power = <code>hold</code> at <code>5-drill-breaker</code>. Ends at 15:15 whatever (the all-clear).</li>
+    <li><b>Timing words:</b> minutes from 15:00 until you reach your first stop, and the Works crew's arrival times from section 14's muster; Calder's line picks from fast / ok / slow (texts, never the number unless she says it).</li>
+    <li><b>The inspection:</b> at 06:30 Thursday, <code>inspectYou()</code> reads <code>uniformState()</code> (M2/15c), <code>SHIP.player.bedMade</code> (set by "Make the bed" from 05:30, cleared at 06:00 on waking, so you make it each Thursday) and <code>lockerTidy()</code> (true when no bought or made thing is "out": 15b's placed items list); the duty officer's line plays if you're in the bunk room, else by Mail at 07:00.</li>
+    <li><b>Notes:</b> <code>simNote('drill', { kind, mins })</code>, <code>simNote('inspection', { uniform, bed, locker })</code>; reputation +1 each attended (24.4).</li>
+    <li><b>Rank switch:</b> <code>SHIP.works.rank</code>: an officer gets no inspection and a muster job instead of a drill job (Step 3 writes them).</li>
+  </ul>
+</section>
+
+<section id="save" class="builder">
+  <h2>Save</h2>
+  <ul><li><code>player.bedMade</code> (a day number or null); <code>ship.works.use.m3d</code>, <code>use.m3i</code>; the drill job in <code>ship.jobs</code> while open.</li></ul>
+</section>
+
+<section id="tests" class="builder">
+  <h2>Tests</h2>
+  <ul>
+    <li><b><code>day_check</code></b> on a Wednesday and a Thursday: everyone still reaches their places; the Works crew muster and return; draw calls under 450.</li>
+    <li><b><code>mech_check</code></b> (24c): each drill kind's steps end to end; the drill kind the same twice and fire on Day 3; the three inspection items and the right remark; a missed drill or inspection costs only a remark; none on a day off.</li>
+    <li><b><code>intro_check</code></b>: Day 4's Pillar 4 inspection scene still plays, now ending in the real check.</li>
+  </ul>
+</section>
+
+<section id="ranges" class="builder">
+  <h2>Builds and keys</h2>
+  <ul><li>Seat <b>M1</b>, <code>claude/mech-rounds</code>, <b>0.45.x</b>. Hash keys <b>864-865</b> (864 the duty officer's rota; 865 spare).</li></ul>
+</section>

@@ -1,0 +1,247 @@
+TITLE:Works Foundation Spec
+H1:Step 1 · The foundation <span class="draft">spec for approval</span>
+SUB:Pillar 5's groundwork: more real faults, the board knowing your rank, how new work is taught, tools, getting quicker, your Works reputation and the device's work pages. Most of it you don't see on its own; everything in Pillar 5 stands on it. From the approved plan (<code>plans/pillar5-plan.md</code>, v9), Part 1 "The foundation". The case engine has its own page (<code>case-engine.html</code>).
+NAV:plain=In plain words|day=A work day|ladder=The ladder|rank=Rank and jobs|rep=Reputation|b17=Builder: 17|b15=Builder: 15|b24=Builder: 24 core|save=Save|hooks=Hooks|tests=Tests|ranges=Builds and keys|names=Name clash
+
+<section id="plain">
+  <h2>In plain words</h2>
+  <p>Today the job loop works, but the crew catch almost every fault early, so you mostly service things. And there's no way to grow: you're Tier 1 for ever. The foundation fixes both, quietly:</p>
+  <div class="grid">
+    <div class="card"><b>More real faults</b><span>About half the jobs left for you become real faults (a machine that's misbehaving, with a cause), not just servicing. The crew leave your kind of faults to you a little longer. Days off and nights stay as they are.</span></div>
+    <div class="card"><b>The board knows your rank</b><span>Every job has a tier, and some are kept for a rank (a junior job, or one only a senior technician may plan). The crew follow the same rule, so nothing waits on you.</span></div>
+    <div class="card"><b>New work is taught by a person</b><span>When something new opens, a crew member finds you, shows you once on a real job, then watches you do one. No pop-up lessons.</span></div>
+    <div class="card"><b>Tools</b><span>Tools come with their lesson (the scanner from Torres on Day 5) and live in your locker and on the device's Tools page. They never fill your hands.</span></div>
+    <div class="card"><b>Getting quicker</b><span>The more ovens you fix, the quicker ovens get. You see it only in words: "Ovens: you know these well."</span></div>
+    <div class="card"><b>Your Works reputation</b><span>One measure, in words: New, Steady, Reliable, Trusted, Relied on. It decides which jobs are left for you; at "Relied on" Calder sets your test job. Never a number, and never demoted.</span></div>
+    <div class="card"><b>The device's work pages</b><span>A Works app: what you're trained in and what's next, your last 30 jobs (and who noticed), and your tools. The Record shows your rank, your reputation and one "What's next" line.</span></div>
+  </div>
+  <p class="note">Nothing here changes Day 0 or Day 1. The first new thing (rounds with Torres) arrives on Day 2.</p>
+</section>
+
+<section id="day">
+  <h2>What a work day looks like after Step 1 (check-in 1)</h2>
+  <ul>
+    <li>At the board in the morning there are still 3 to 6 jobs for you, but now about half are faults: "Repair: Oven 2 (runs cool)" beside "Service: Washer 3".</li>
+    <li>Turning a job in moves your reputation. The Record says, for example, "Junior Technician. Works reputation: Steady. What's next: Torres wants to show you his round."</li>
+    <li>A job above your tier says "tier 2" and can't be taken; a junior job says nothing special while you're a junior.</li>
+    <li>The Works app's Training page lists what you're trained in ("Trained: the job loop, with Torres") and, in words, what's coming.</li>
+  </ul>
+  <p class="note">Check-in 1 plays a normal work day on Day 2-3 with the foundation in and the Step 2 mechanics still switched off (the ladder's entries are there but none opens until its sub-block exists).</p>
+</section>
+
+<section id="ladder">
+  <h2>The ladder: when each new thing opens</h2>
+  <p>Each new kind of work is one row. A row opens on a workday when <b>its day has come</b> and <b>what it needs has been used once or twice</b>, with <b>at most one big and one small</b> new thing on a workday and <b>nothing on days off</b>. If you're slow, it waits for the next workday; nothing is missed. Steps 1 and 2 fill these rows (later steps add theirs):</p>
+  <div class="tablewrap"><table>
+    <tr><th>id</th><th>What</th><th>Earliest</th><th>Big / small</th><th>Needs first</th><th>Taught by</th><th>Gives</th></tr>
+    <tr><td><code>m1</code></td><td>Rounds</td><td>Day 2</td><td>big</td><td>Day 1's shadow shift done (section 21's <code>SHIP.intro.done</code>; with the intro skipped, any job you've turned in)</td><td>Torres (<code>torres-zeke</code>)</td><td>the round clipboard</td></tr>
+    <tr><td><code>m4</code></td><td>Hauling and stores</td><td>Day 3</td><td>big</td><td><code>m1</code> used once</td><td>Yara Esposito (<code>esposito-yara</code>)</td><td>—</td></tr>
+    <tr><td><code>m3d</code></td><td>The drill (your drill job)</td><td>Day 3 (Wed 15:00)</td><td>small</td><td>—</td><td>Calder (<code>calder</code>)</td><td>—</td></tr>
+    <tr><td><code>m5</code></td><td>Tuning</td><td>Day 4</td><td>big</td><td><code>m4</code> used once</td><td>Brennan and Calder</td><td>—</td></tr>
+    <tr><td><code>m3i</code></td><td>The inspection (real check)</td><td>Day 4 (Thu 06:30)</td><td>small</td><td>—</td><td>Tomas (<code>tomas</code>)</td><td>—</td></tr>
+    <tr><td><code>m7</code></td><td>The scanner</td><td>Day 5</td><td>big</td><td><code>m5</code> used once</td><td>Torres</td><td>the scanner</td></tr>
+    <tr><td><code>p3</code></td><td>First head-scratcher (What's been tried?)</td><td>Day 5</td><td>small</td><td><code>m7</code> trained</td><td>Torres</td><td>Fault notes, the Chief's notes</td></tr>
+    <tr><td><code>m6</code></td><td>Making it safe (incidents)</td><td>Day 8</td><td>big</td><td><code>m7</code> used once</td><td>Calder</td><td>—</td></tr>
+    <tr><td><code>m2</code></td><td>Your work uniform</td><td>Day 8</td><td>small</td><td>an oily job turned in</td><td>Torres</td><td>—</td></tr>
+    <tr><td><code>t2</code></td><td>Tier 2 test job</td><td>Day 9</td><td>big</td><td>reputation "Relied on" (Tier 1) and <code>m6</code> trained</td><td>Calder</td><td>(promotion: its own page, Step 3)</td></tr>
+  </table></div>
+  <p class="note">The drill and the inspection are fixed in the week (Wednesday 15:00, Thursday 06:30), so they open on their day, not by use. Day 2 already has your first laundry (0.60.7), so Day 2 gets only one new thing.</p>
+</section>
+
+<section id="rank">
+  <h2>Ranks, tiers and which jobs are whose</h2>
+  <ul>
+    <li><b>Every job has a tier</b> (its machine's, or the rooms it goes into) and may carry a <b>rank rule</b>: a <b>junior job</b> (the food cart, hauling runs, the bunk inspection) or a job <b>only a rank may do</b> (planning a shutdown: senior technicians; the reactor: Engine Specialists).</li>
+    <li><b>The crew follow the same rule</b> by their roster rank, so a senior-only job waits for a senior crew member, never for you.</li>
+    <li><b>After a promotion</b>, junior jobs are no longer held for you, but they stay on the board if you want them (the user, N4).</li>
+  </ul>
+</section>
+
+<section id="rep">
+  <h2>Your Works reputation and "What's next"</h2>
+  <ul>
+    <li><b>It's Pillar 4's Work reputation</b>, the same idea, shown with five words for where you stand <b>in your rank</b>: New, Steady, Reliable, Trusted, Relied on. After each promotion it starts again as "New officer".</li>
+    <li><b>Up:</b> jobs turned in (bigger faults more), faults found early, the right part first time, clever fixes, turning up to the drill and inspection, keeping your shift. <b>Down:</b> missed shifts and abandoned jobs. A dip only means fewer interesting jobs until you pick up; you're never moved back a rank.</li>
+    <li><b>What it changes:</b> at New you're left mostly servicing and simple faults; at Trusted and Relied on, the real faults come to you first. At Relied on (and once you've learned the rank's work), Calder sets your test job.</li>
+    <li><b>"What's next"</b> is one sentence, always true: "Brennan's oven needs a lesson in tuning: Calder will show you" or "Keep at it: Calder's watching your work".</li>
+  </ul>
+</section>
+
+<section id="b17" class="builder">
+  <h2>For the builder · section 17 (seat S, systems)</h2>
+  <p class="note">Everything here is inert until something asks, and nothing calls <code>R()</code>. Line numbers are on candidate 0.60.7 (<code>claude/cand-0607</code>), for finding things; match by text, never by number.</p>
+  <h3>17.1 <code>playerTier()</code></h3>
+  <ul>
+    <li>Add beside <code>const PLAYER_TIER = 1</code> (line ~14239; keep the const as the default): <code>const playerTier = () =&gt; (SHIP.works &amp;&amp; SHIP.works.tier) || PLAYER_TIER;</code></li>
+    <li>Replace every read of <code>PLAYER_TIER</code> with <code>playerTier()</code>: section 17 (~14293 <code>hatchTier</code>, ~14307 <code>forYou</code>, ~14640 <code>claimJob</code>, ~14893 <code>jobReserve</code>'s <code>ok</code>, ~14985-14986 the old jobs section, ~14998 <code>openJobs</code>); section 19 (~9925 the Jobs app, ~10118 the Record's first line); section 15 (~11740); section 15b (~12489, ~12512, ~12524). The reads outside 17 are one-word edits; the lead's brief lets S make them (or route them to the player, interactions and device owners).</li>
+    <li>With no <code>SHIP.works</code>, it's 1: <code>cadet_test</code> ALL IDENTICAL, <code>intro_check</code> unchanged.</li>
+  </ul>
+  <h3>17.2 Jobs by tier and rank</h3>
+  <ul>
+    <li><b>Ranks:</b> <code>RANKS = ['junior', 'officer', 'senior', 'specialist']</code>; the player's from <code>SHIP.works.rank</code> (default <code>'junior'</code>); a crew member's from the roster's <code>rank</code> (chief, xo and captain count as senior, the engine crew as specialist).</li>
+    <li><b>A job's rule</b> (optional fields, saved on the job): <code>j.junior = true</code> (a junior job) or <code>j.only = 'senior' | 'specialist'</code> (a reserved rank). <code>CHORES</code> entries and the new job kinds (17.5) set them; the food cart run and delivery chores are junior jobs.</li>
+    <li><code>rankOk(who, j)</code>: <code>j.only</code> needs that rank or higher (<code>specialist</code> needs <code>specialist</code>); otherwise true. Used by the crew's claim in <code>jobsHour</code>, by <code>claimJob</code> and by <code>openJobs</code>.</li>
+    <li><b>Held for you:</b> <code>forYou(j)</code> also needs <code>!j.junior || rank === 'junior'</code>. So after a promotion junior jobs aren't held, but <code>openJobs('you')</code> still lists them and <code>claimJob</code> still takes them.</li>
+  </ul>
+  <h3>17.3 More real faults (from Day 2, your shift days only)</h3>
+  <ul>
+    <li>Two knobs, both only on <code>playerShiftOn(d)</code> days from <code>WORKS_REAL_FROM = 2</code>, and only for machines with <code>jobTier &lt;= playerTier()</code>:
+      <ul>
+        <li><code>FIND_LATE</code> (start at 10 hours): a worn machine's service job is <code>found</code> this much later than today's 2-24 hours, so some wear on to faulty before anyone sees them;</li>
+        <li><code>FAULT_LEAVE</code> (start at 240 minutes of the day shift): a <code>repair</code> at your tier, below urgent, is held for you this long (not <code>CREW_LEAVE</code>'s 180), within <code>HOLD_MAX</code> (3 since 0.33.40). <code>shareOut</code> (0.33.40) keeps sharing only <code>service</code> jobs out first.</li>
+      </ul></li>
+    <li><b>The target</b> (machine_check, Days 2-14, the real crew plus a scripted steady player): of the machine jobs left for you each shift day, <b>40-60% are repairs</b>; still 3-6 jobs a day; ship health 85+; nothing reaches broken because it was held for you (a held repair that turns failing becomes urgent and goes to the crew as now).</li>
+    <li>Days off, nights and Day 0-1 are unchanged (so <code>intro_check</code> and the arrival's held jobs, <code>INTRO_JOBS</code>, are untouched).</li>
+  </ul>
+  <h3>17.4 A real fault has a cause</h3>
+  <ul>
+    <li><code>FAULT_CAUSES[kind] = [{ id, part | setting | load, w, shows, when, reads, clues }]</code>: the fault tables (the designer writes the plain words per kind; Tier 1 first; the shape is on <code>case-engine.html</code>). A kind with no table behaves as today.</li>
+    <li>When a <code>repair</code> or <code>overhaul</code> is posted on a machine whose kind has a table: <code>j.cause = pick(FAULT_CAUSES[kind], schedU(machSeed(id), hour, 855))</code>, weighted by <code>w</code>. A <code>part</code> cause sets <code>j.parts[0]</code>; a <code>setting</code> cause makes it a tuning job once M5 is in (until then the kind's own part, as today); a <code>load</code> cause is for head-scratchers only (24k decides).</li>
+    <li>Before the scanner (M7), inspecting tells you the part, exactly as now. Saved: <code>j.cause</code> (a short id).</li>
+  </ul>
+  <h3>17.5 Job kinds with steps (so no mechanic edits section 17)</h3>
+  <ul>
+    <li><code>jobKindAdd(kind, def)</code>: section 24's sub-blocks register new job kinds at load. <code>def = { tier, junior?, only?, work, parts?, stops(j), post(h, jobs)?, done(j, t, by), crew: { can, mins } }</code>. <code>JOB_TYPES[kind]</code> is set from it so <code>jobMins</code> keeps working.</li>
+    <li><b>Stops gain a step:</b> <code>jobStops(j)</code> keeps its shape (<code>{ deck, placeId, mins, tag, done }</code>) plus <code>step: 'hold' | 'look' | 'carry' | 'choose' | 'turn' | 'wait'</code> (default <code>'hold'</code>, today's behaviour) and <code>opts</code> (step data, e.g. a <code>choose</code>'s options). Today's chores keep working unchanged.</li>
+    <li><code>jobStepDone(id, k, res)</code> takes an optional result (<code>{ pick }</code>, <code>{ value }</code>) and passes it to the kind's <code>done</code> or <code>stepDone</code>.</li>
+    <li><b>The crew</b> do registered kinds as today's segments (<code>jobRun</code>), in <code>crew.mins</code>; <code>crew.can(p)</code> says who may. So a round or a hauling run the player doesn't take still gets done, more slowly.</li>
+    <li>New notes (typeof-guarded): <code>simNote('found', { machine, by: 'you' })</code> when a worn machine you marked gets its job.</li>
+  </ul>
+  <h3>17.6 Reserved training and test jobs</h3>
+  <ul>
+    <li><code>jobReserve(kind, day, at, slot, o)</code> gains <code>o.tier</code> (the machine's tier may be above yours: the test job's Tier 2 machine) and <code>o.train</code> (the ladder id). Slots 1-3 stay the arrival's; Pillar 5 uses <code>slot = 10 + n</code> (training 10-19, test jobs 20-23).</li>
+    <li>A reserved job with <code>o.tier</code> above <code>playerTier()</code> is claimable by you only while it's held (<code>claimJob</code> checks <code>j.reserved &amp;&amp; heldForYou(j)</code> before the tier rule).</li>
+  </ul>
+</section>
+
+<section id="b15" class="builder">
+  <h2>For the builder · section 15 (seat P, player)</h2>
+  <h3>15.1 The work steps</h3>
+  <p>One runner, <code>workStep(job, stop, k)</code>, called where 15b's <code>ixChoreTap</code> and 15's <code>jobBegin</code> start a stop today. Each step ends with <code>jobStepDone(job.id, k, res)</code>. Walking away pauses (as now: progress in <code>SHIP.player.work</code>).</p>
+  <div class="tablewrap"><table>
+    <tr><th>step</th><th>What you do</th><th>On screen</th><th>Pose (8b)</th><th>Result</th></tr>
+    <tr><td><code>hold</code></td><td>stand and work for the stop's minutes (exists)</td><td>the progress bar (exists)</td><td><code>work</code></td><td>—</td></tr>
+    <tr><td><code>look</code></td><td>stand by it a moment (<code>opts.secs</code>, default 4 real seconds)</td><td>the progress bar, then a small mark card if <code>opts.marks</code> (e.g. fine / worn / something's off)</td><td><code>look</code> (stand, head turned; falls back to <code>stand</code>)</td><td><code>{ pick }</code> if marks</td></tr>
+    <tr><td><code>carry</code></td><td>pick up and set down (exists: two slots, the cart)</td><td>—</td><td>exists</td><td>—</td></tr>
+    <tr><td><code>choose</code></td><td>pick one of 2-6 things you've seen</td><td>a choice card in the device's screen style (<code>deviceDo</code>), options 44 px+</td><td><code>work</code></td><td><code>{ pick: id }</code></td></tr>
+    <tr><td><code>turn</code></td><td>a valve or dial, a step at a time, watching the machine</td><td>a two-button card (− / +) and the setting's name; no numbers unless the machine's own gauge shows one</td><td><code>tune</code> (one hand at a panel; falls back to <code>work</code>)</td><td><code>{ value }</code> each step to <code>opts.onTurn(v)</code>; done when <code>opts.ok(v)</code></td></tr>
+    <tr><td><code>wait</code></td><td>start something, leave, come back (a washer, a cure, a logger)</td><td>a toast with when; the job card says "ready at 14:20"</td><td>—</td><td>done when you tap it after <code>opts.until</code></td></tr>
+  </table></div>
+  <h3>15.2 Getting quicker: <code>careerSpeed(kind)</code></h3>
+  <ul>
+    <li><code>careerSpeed(kind)</code> = 1 for 0-4 jobs on that machine kind turned in, .8 from 5, .65 from 15 (<code>SHIP.works.sk[kind]</code>, counted by 24 core). It multiplies your repair minutes (<code>jobMins(j) × careerSpeed(kind)</code>, before <code>taskMins</code>) and the minutes of a mechanic's steps on that kind.</li>
+    <li>Words only, from 24 core's <code>skillWord(kind)</code>: under 5 "new to you", 5-14 "getting the hang of these", 15+ "you know these well".</li>
+  </ul>
+  <h3>15.3 Builds and checks</h3>
+  <p><code>player_check</code>: each step end to end on a test job (a registered test kind), a pause and resume per step, <code>careerSpeed</code>'s thresholds, needs unchanged by the new steps, the save of <code>work</code> mid-step.</p>
+</section>
+
+<section id="b24" class="builder">
+  <h2>For the builder · section 24 core (seat C)</h2>
+  <ul>
+    <li><b>Where:</b> a new <code>// 24. WORK</code> section after <code>// 23. TILES</code> and before <code>// 6. CAMERA</code> (it reads 13, 14, 17, 19, 20 and 21, all earlier). 24 core first, then one sub-block per mechanic (<code>// 24a ROUNDS</code> …), each removable on its own.</li>
+    <li><b>Lazy:</b> <code>worksInit()</code> makes <code>SHIP.works</code> the first time anything asks after Day 1's shift (never at load, never under <code>?nosave</code> until asked), like section 20's <code>careerInit</code>.</li>
+  </ul>
+  <h3>24.1 <code>CAREER_LADDER</code></h3>
+  <div class="lines">CAREER_LADDER = [ { id: 'm1', name: 'Rounds', size: 'big', day: 2, tier: 1, rank: 'junior',
+    needs: { intro: 'shadow' } | { mech: 'm4', uses: 1 } | { rep: 'relied' },
+    by: ['torres-zeke'], meet: 'train.m1', job: 'round', tool: 'clipboard',
+    stages: [{ uses: 0 }, { uses: 5 }, { mech: 'm7' }], fixed: null | { wd: 3, at: 900 } }, ... ]</div>
+  <ul>
+    <li><code>ladderTick(t)</code> (once a ship hour from <code>worksTick</code>, which 24 adds to the main loop with one line, or hangs off section 17's <code>worksTick</code> by one typeof-guarded line): on a <code>playerShiftOn</code> day, from 06:00, open the first big and the first small row whose <code>day</code> has come and whose <code>needs</code> are met; never two of a size on one day (<code>SHIP.works.op[day]</code>); none on a day off. A row whose sub-block isn't in the build (<code>WORK_MECH[id]</code> missing) never opens and never blocks the rows after it, except by its own <code>needs</code>.</li>
+    <li>Use counts: <code>worksUse(mech)</code>, called by each sub-block when you finish one (a round walked, a run delivered).</li>
+    <li>Stages: <code>worksStage(mech)</code> is the highest stage whose condition holds; stages after the first are optional and never on the main path.</li>
+  </ul>
+  <h3>24.2 Training moments</h3>
+  <ol class="steps">
+    <li><time>Opening (06:00-10:30)</time><b>The ask</b><span>A toast and Mail from the teacher (<code>mailSend</code>), and an occasion (<code>occasionAdd</code>, section 20) at a time inside both your shift and theirs (<code>occOnShift</code>); the goal pointer to the meeting place.</span></li>
+    <li><time>At the place</time><b>The meeting</b><span><code>MEETING_SCRIPTS['train.' + id]</code> (lines by the Works writer through section 22): short, one choice at most.</span></li>
+    <li><time>Watch one</time><b>They lead</b><span>A training job reserved for the teacher (<code>jobReserve(..., 10 + n, { train: id })</code>); they walk to it and you follow: <code>worksEscort(p, t)</code> returns <code>{ mode: 'lead' | 'follow' | 'wait', to }</code> like section 21's <code>escortPlan</code>, read by section 14's <code>escortPlanOf</code> (one line). They do it; you watch.</span></li>
+    <li><time>Do one</time><b>You lead</b><span>A second job held for you (<code>jobReserve</code>, the same slot after the first is done); the teacher follows (<code>mode: 'follow'</code>) and says a word at each step (the step notes on <code>simNote('job')</code>).</span></li>
+    <li><time>Done</time><b>Trained</b><span><code>SHIP.works.tr[id] = day</code>, a line on the Training page, the tool if any, <code>simNote('trained', { mech: id })</code>. If you never come, it's offered again the next workday (it waits; nothing is missed).</span></li>
+  </ol>
+  <p class="note">Small openings skip steps 1-4: a word from a crew member on the job itself (a meeting of one or two lines) and <code>simNote('trained')</code>.</p>
+  <h3>24.3 Tools</h3>
+  <ul>
+    <li><code>WORK_TOOLS = { clipboard, scanner, pipekit, logger, tester, calrig }</code> (the test rig is a bench in the machine shop, not a tool you carry): <code>{ name, mech, wearPerUse }</code>. <code>hasTool(id)</code>, <code>toolGive(id)</code>, <code>toolWear(id)</code> (0-1; M11 tool upkeep restores it; until then wear is kept but has no effect). A tool never takes a carry slot and never blocks a job.</li>
+    <li>Your locker in Bunk 1 (and later your cabin) shows them on a tap (one line in the locker's tap text, through 15b).</li>
+  </ul>
+  <h3>24.4 Reputation in your rank</h3>
+  <ul>
+    <li><code>SHIP.works.xp</code> (since your last promotion; numbers inside, words outside). From <code>simNote('job', { step: 'turnin' })</code> and friends: service 1, repair 2, overhaul 3, a chore 1, found by you +1, right first time +1 (from Day 5), a clever fix +1, the drill or inspection attended 1 each; a missed shift −3, an abandoned job −2 (never below 0).</li>
+    <li>Bands: <code>WORK_BANDS[tier] = [[0, 'new'], [a, 'steady'], [b, 'reliable'], [c, 'trusted'], [d, 'relied']]</code>; start with Tier 1 <code>[0, 8, 18, 30, 40]</code> and tune in Step 1 so <code>career_check</code>'s steady player reaches "Relied on" by the end of Day 8 (Calder's line after Monday's briefing), and not before Day 5 even for a very busy player. Later tiers get their numbers on their steps' pages.</li>
+    <li><b>One measure, not two:</b> the band is shown as "Works reputation" and the test job also needs Pillar 4's <code>SHIP.rep.ship.work</code> at 40 or more (its own scale, untouched). Section 20's Chief's talk and the leave system read <code>SHIP.rep</code> as today.</li>
+    <li><b>What it changes in 17:</b> <code>worksBand()</code> is read by <code>forYou</code>'s hold order: at New and Steady, services first; at Trusted and Relied on, repairs first. It never adds jobs.</li>
+    <li><code>worksNext()</code>: one sentence from the ladder's next unopened row and the band (texts through the Works writer: <code>content/works/next.lines</code>).</li>
+  </ul>
+  <h3>24.5 The device's work pages</h3>
+  <ul>
+    <li>One app, <code>deviceApp({ id: 'works', title: 'Works', short: 'Works', icon: 'wrench', order: 31, view, act })</code> (after Jobs, order 30ish; the device engineer confirms the order and icon). Tabs: <b>Training</b> (trained in, with whom and when; "What's next"), <b>Work log</b> (the last 30 of your jobs: title, day, found by you, right first time, who noticed, from <code>SHIP.works.log</code>), <b>Tools</b> (what you have, its state in words). 24k adds <b>Fault notes</b> and <b>the Chief's notes</b> tabs to the same app.</li>
+    <li><b>The Record</b> (section 19, line ~10118): one typeof-guarded line, the device engineer's: <code>B.push(typeof worksRecordHead === 'function' ? worksRecordHead() : { ...today's line })</code>, which gives "Junior Technician · Junior Officer. Works reputation: Steady. What's next: …". The else-text "The Chief's view and your road to certification will show here." stays for builds without 24.</li>
+  </ul>
+</section>
+
+<section id="save" class="builder">
+  <h2>For the builder · the save</h2>
+  <div class="lines">ship.works = { v: 1,
+  tier: 1, rank: 'junior', xp: 0,                 // tier and rank change only at a promotion
+  tr: { m1: 2, ... },                              // trained: ladder id -> day
+  use: { m1: 3, ... }, op: { 2: ['m1'], ... },     // uses; what opened on which day (the pacing rule)
+  tools: { scanner: [5, .12], ... },               // [day given, wear 0-1]
+  sk: { oven: 6, ... },                            // jobs turned in by machine kind (careerSpeed)
+  log: [[jobId, day, flags], ...],                 // the last 30; flags: 1 found by you, 2 right first time, 4 clever
+  test: null | { tier, day, tries, passed },
+  home: 'bunk', done: [], ms: [[id, day], ...] }   // filled by Step 3's promotion page</div>
+  <ul>
+    <li>Added by <code>SAVE_EXTRA.push(s =&gt; { if (SHIP.works) s.ship.works = SHIP.works; })</code>; read back with a cleaner (<code>worksClean</code>: unknown keys dropped, numbers clamped, <code>log</code> cut to 30, a junk save means none). <code>SAVE_V</code> stays 2. An older save loads as Tier 1, nothing trained; the ladder then opens from the current day (a save already past Day 2 gets rounds on its next workday).</li>
+    <li><code>onSim('newGame', () =&gt; { SHIP.works = null; })</code>.</li>
+    <li>Budget: under 3 KB by Day 30 (<code>player_check --long</code> lists <code>ship.works</code>); the whole save stays under 250 KB.</li>
+  </ul>
+</section>
+
+<section id="hooks" class="builder">
+  <h2>For the builder · hooks (all one line, typeof-guarded, listed in DEV_NOTES' hook register)</h2>
+  <div class="tablewrap"><table>
+    <tr><th>Where</th><th>The line</th><th>Owner</th></tr>
+    <tr><td>17 <code>forYou</code>, <code>openJobs</code>, <code>claimJob</code>, crew claims</td><td><code>rankOk</code>, <code>worksBand</code> order</td><td>S</td></tr>
+    <tr><td>17 <code>jobsHour</code></td><td><code>if (typeof ladderTick === 'function') ladderTick(h)</code> (or 24 runs its own hourly tick)</td><td>S</td></tr>
+    <tr><td>14 <code>escortPlanOf</code></td><td><code>escortPlan(p, t) || (typeof worksEscort === 'function' ? worksEscort(p, t) : null)</code> (and the early return only when neither exists)</td><td>sim (on call)</td></tr>
+    <tr><td>19 Record</td><td><code>worksRecordHead()</code></td><td>device (on call)</td></tr>
+    <tr><td>15 / 15b stop start</td><td><code>workStep(job, stop, k)</code></td><td>P (and interactions, on call)</td></tr>
+    <tr><td>15 <code>jobMins</code> use</td><td><code>× careerSpeed(kind)</code></td><td>P</td></tr>
+    <tr><td>15b locker tap</td><td><code>typeof worksLockerText === 'function' &amp;&amp; worksLockerText()</code></td><td>interactions (on call)</td></tr>
+  </table></div>
+  <p>Notes on the bus (new): <code>simNote('trained', { mech })</code>, <code>simNote('found', { machine, by })</code>, later <code>simNote('promoted', { tier, rank })</code>, <code>simNote('uniform', { state })</code>, <code>simNote('incident', { id, step })</code>. Section 20's lines and reputation may react; nothing needs them.</p>
+</section>
+
+<section id="tests" class="builder">
+  <h2>For the builder · tests</h2>
+  <ul>
+    <li><b><code>career_check.py</code></b> (new, seat C; one browser at a time): a scripted steady player (takes the board's top job each hour of the shift, turns it in, goes to the drill and inspection) over Days 0-9: the ladder opens as the table above (each row on its day for the steady player), never more than one big and one small on a workday, nothing on Days 6-7; a lazy player (one job a day) gets each row later and none is lost; training: the teacher's job, then yours, then trained; tools given; <code>careerSpeed</code> words; bands from xp; "Relied on" for the steady player by the end of Day 8 and not before Day 5; reserved-rank jobs never taken below their rank (crew or you); the save round trip mid-training; an old save loading as Tier 1; the whole run twice, identical.</li>
+    <li><b><code>machine_check</code></b> (S): the real-fault share (40-60% of jobs left for you, Days 2-14), still 3-6 a day, ship health 85+; jobs by tier and rank; <code>j.cause</code> the same twice; <code>jobKindAdd</code> with a test kind done by the crew when you don't.</li>
+    <li><b><code>player_check</code></b> (P): the six steps, pause and resume, <code>careerSpeed</code>.</li>
+    <li><b><code>intro_check</code></b> on every push that touches jobs, the player or the clock: Days 0-1 exactly as 0.60.7; <b><code>cadet_test</code></b> ALL IDENTICAL against the base build (nothing in Step 1 is drawn); <code>day_check</code> on Days 2-3.</li>
+  </ul>
+</section>
+
+<section id="ranges" class="builder">
+  <h2>For the builder · build numbers and hash keys (checked 2026-10-18)</h2>
+  <p>Checked against the build tables in DEV_NOTES on <code>claude/ship-integration</code> (0.60.6a), <code>claude/cand-0607</code> and every other branch on the remote, and against the hash keys in the 0.60.7 candidate's game file.</p>
+  <div class="tablewrap"><table>
+    <tr><th>Seat</th><th>Builds</th><th>Status</th></tr>
+    <tr><td>S systems (17)</td><td><b>0.33.43+</b></td><td>the systems line continues (0.33.42 is 0.60.7's Wednesday delivery, <code>claude/systems-0607</code>); the plan's "0.33.38+" is out of date</td></tr>
+    <tr><td>P player (15)</td><td><b>0.28.71+</b></td><td>continues (0.28.70 is the latest); the plan's "0.28.23+" is out of date</td></tr>
+    <tr><td>C career, 24 core</td><td><b>0.44.x</b></td><td>free: no 0.44 rows on any branch</td></tr>
+    <tr><td>H head-scratchers (24k, 24g)</td><td><b>0.55.x</b></td><td>free (confirmed)</td></tr>
+    <tr><td>M1, M2, M3, A</td><td>0.45.x, 0.51.x, 0.53.x, 0.47.x</td><td>free (confirmed); also free: 0.49, 0.50, 0.52, 0.54, 0.56-0.59, 0.63+</td></tr>
+  </table></div>
+  <ul>
+    <li><b>Hash keys 850-899 are free</b> (no <code>schedU</code> key or event <code>k</code> in that range today). Suggested split: <b>850-854</b> 24 core (the ladder, training times); <b>855-859</b> section 17 (855 a fault's cause, 856 real-fault find delays); <b>860-879</b> the mechanics, two each in ladder order (860-861 rounds, 862-863 uniform, 864-865 drill kind, 866-867 hauling, 868-869 tuning drift, 870-873 incidents, 874-875 the scanner); <b>880-894</b> head-scratchers; 895-899 spare.</li>
+    <li><b>The plan's suggested second range 900-949 is NOT free:</b> 901 is the sick roll (0.61.5), 920 + k the galley's favourite dishes, 930 the galley. And <b>951-952 inside Pillar 6's 950-999 are taken</b> by the time clock's remarks (0.61.13): Pillar 6's planner should know. <b>Suggested instead: 1000-1049</b> for Pillar 5's later steps (free today; 9100 and 9200 are section 14's).</li>
+  </ul>
+</section>
+
+<section id="names" class="builder">
+  <h2>For the builder · a name clash to avoid</h2>
+  <p><b><code>SHIP.career</code>, the save's <code>ship.career</code>, <code>CAREER</code> and the <code>career…</code> functions (<code>careerInit</code>, <code>careerOn</code>, <code>careerClockedIn</code>…) already belong to the leave, missed-shift and time-clock system</b> (the career engineer's 0.61.0-0.61.19, in section 20). The plan's <code>save.career</code> and <code>SHIP.career.tools</code> become <b><code>SHIP.works</code> / <code>ship.works</code></b> and <code>SHIP.works.tools</code>; new functions start with <code>works…</code>, <code>ladder…</code> or <code>tool…</code>. <code>CAREER_LADDER</code> and <code>careerSpeed</code> keep the plan's names (neither exists). To the lead: Pillar 5's seat C ("career engineer", <code>claude/works-career</code>) is a different seat from the 0.61.x career engineer (<code>claude/leave</code>); calling C the "Works career engineer" in briefs avoids mix-ups.</p>
+</section>
