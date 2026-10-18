@@ -989,7 +989,7 @@ with sync_playwright() as pw:
           jobKindAdd('testside', { side: true, text: 'Side test', stops: () => [{ deck: 4, placeId: '4-lift-1', mins: 5, tag: 'hold' }], done: () => {}, crew: { can: () => false, mins: 5 } });
           const b = mk('test-board'); out.board = claimJob(b.id);
           SHIP.jobs.push(jobMake('testside', { id: 'side@1', deck: 4, title: 'Side test' })); MACH_REV++;
-          out.side = claimJob('side@1'); out.myJob = myJob() && myJob().id === (b && b.id); out.sides = mySideJobs().map(j => j.id).join();
+          out.side = claimJob('side@1'); out.myJob = myJob() && myJob().id === (b && b.id); out.sides = mySideJobs().filter(j => j.kind === 'testside').map(j => j.id).join();   // only the test's (24c's drill may be yours too)
           delete JOB_KINDS.testside; delete JOB_TYPES.testside; SHIP.jobs = SHIP.jobs.filter(j => j.id !== 'side@1' && !j.id.startsWith('test-'));
           for (const j of SHIP.jobs) if (j.claimedBy === 'you') { j.claimedBy = null; j.status = 'open'; }
           // the lift's old id in a save
@@ -1013,8 +1013,10 @@ with sync_playwright() as pw:
         DR = r"""((stand, mode) => {
           window.__sc("window.__evD = [typeof eventNow === 'function' ? eventNow : undefined, typeof eventMod === 'function' ? eventMod : undefined]; if (window.__evD[0]) eventNow = () => null; if (window.__evD[1]) eventMod = () => null");
           const own = JOB_KINDS.tune;
-          if (stand && !own) jobKindAdd('tune', { text: 'Tune', stops: j => [{ deck: j.deck, placeId: panelPlace(j.machine), mins: 15, tag: 'tune', how: 'turn' }], done: (j, t, by) => tuneSet(j.machine, 0), crew: { can: p => jobCrew(p) === 'works', mins: 15 } });
-          if (!stand && own) { delete JOB_KINDS.tune; }
+          // a stand-in 'tune' kind when 24e's isn't in the build
+          const standIn = { text: 'Tune', stops: j => [{ deck: j.deck, placeId: panelPlace(j.machine), mins: 15, tag: 'tune', how: 'turn' }], done: (j, t, by) => tuneSet(j.machine, 0), crew: { can: p => jobCrew(p) === 'works', mins: 15 } };
+          if (own && !stand) delete JOB_KINDS.tune;           // 24e's own kind, when it's in, is the one measured (M2)
+          if (stand && !own) { JOB_KINDS.tune = standIn; JOB_TYPES.tune = JOB_TYPES.tune || { work: 15, restore: 0, parts: 0 }; }
           const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min, out = { first: null, starts: 0, minHealth: 100, tunes: 0, tunedByCrew: 0, sig: [] };
           JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; SHIP.works = null; setShipNow(t0); machinesNow();
           const prev = {};
@@ -1023,7 +1025,7 @@ with sync_playwright() as pw:
           else for (let t = t0; t <= t0 + 14 * 1440; t += 60) { setShipNow(t); machinesNow(); look(t); }
           const J = SHIP.jobs.filter(j => j.kind === 'tune'); out.tunes = J.length; out.tunedByCrew = J.filter(j => j.status === 'done' && j.doneBy && j.doneBy !== 'you').length; out.titles = [...new Set(J.map(j => j.title))].slice(0, 4);
           out.end = JSON.stringify(Object.fromEntries(machineList().map(m => [m.id, [Math.round(SHIP.machines[m.id].cond * 1000), machineDrift(m.id)]])));
-          if (stand && !own) { delete JOB_KINDS.tune; delete JOB_TYPES.tune; } else if (!stand && own) JOB_KINDS.tune = own;
+          delete JOB_KINDS.tune; if (own) JOB_KINDS.tune = own; else delete JOB_TYPES.tune;
           SHIP.jobs = SHIP.jobs.filter(j => j.kind !== 'tune');
           window.__sc("if (window.__evD[0]) eventNow = window.__evD[0]; if (window.__evD[1]) eventMod = window.__evD[1]");
           setShipNow(t0);
