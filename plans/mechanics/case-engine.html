@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Case Engine Spec</title>
+<style>
+:root{--ink:#e8eef0;--muted:#93a6ae;--teal:#4cc3b5;--gold:#e9c46a;--rose:#e58f7a;--glass:rgba(13,21,33,.78);--line:rgba(150,200,196,.22);--chip:rgba(76,195,181,.14)}
+*{box-sizing:border-box}
+html,body{margin:0;background:#121a27;color:var(--ink);font-family:"Avenir Next","Segoe UI",system-ui,sans-serif}
+body{background:radial-gradient(ellipse at 50% 20%,#22304a 0%,#141c2b 60%,#0c111b 100%) fixed;line-height:1.5}
+header{padding:18px 16px 4px;max-width:1100px;margin:0 auto}
+h1{font-size:21px;font-weight:600;margin:0}
+h2{font-size:17px;font-weight:600;margin:0 0 8px;color:#bdeee6}
+h3{font-size:14.5px;font-weight:600;margin:12px 0 4px;color:#d9eeea}
+.sub{font-size:13.5px;color:var(--muted);margin-top:4px}
+.draft{display:inline-block;font-size:11.5px;color:#14202a;background:var(--gold);border-radius:999px;padding:2px 9px;margin-left:6px;vertical-align:2px}
+nav{position:sticky;top:0;z-index:5;background:rgba(14,20,31,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+nav div{display:flex;gap:6px;overflow-x:auto;padding:8px 16px;max-width:1100px;margin:0 auto;-webkit-overflow-scrolling:touch}
+nav a{flex:none;text-decoration:none;border:1px solid var(--line);background:var(--glass);color:var(--ink);font-size:13px;padding:6px 11px;border-radius:999px}
+nav a:focus-visible,nav a:hover{border-color:var(--teal);color:#bdeee6;outline:none}
+main{max-width:1100px;margin:0 auto;padding:6px 16px 40px}
+section{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:14px 0;scroll-margin-top:56px}
+p{margin:6px 0;font-size:14px;color:#d6e0e3}
+ul{margin:6px 0;padding-left:20px;font-size:14px;color:#d6e0e3}
+li{margin:3px 0}
+.note{font-size:12.5px;color:var(--muted)}
+.grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.card{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.025)}
+.card b{display:block;color:#bdeee6;font-size:14px;margin-bottom:2px}
+.card span{font-size:13px;color:#cfd9dc}
+.card .meta{display:block;font-size:12px;color:var(--muted);margin-top:4px}
+.tag{display:inline-block;font-size:11.5px;border-radius:999px;padding:1px 8px;margin:2px 4px 0 0;background:var(--chip);color:#bdeee6;border:1px solid var(--line)}
+.tag.new{background:rgba(233,196,106,.16);color:#f1dca0}
+.tag.old{opacity:.75}
+.steps{list-style:none;padding:0;margin:8px 0;counter-reset:s}
+.steps li{position:relative;padding:8px 10px 8px 46px;border-left:2px solid rgba(76,195,181,.35);margin:0 0 0 14px}
+.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:-15px;top:8px;width:28px;height:28px;border-radius:50%;background:#183040;border:1px solid var(--teal);color:#bdeee6;font-size:12.5px;display:flex;align-items:center;justify-content:center}
+.steps time{display:block;font-size:12px;color:var(--gold)}
+.steps b{color:#e4f3f0;font-weight:600}
+.steps span{display:block;font-size:13.5px;color:#cfd9dc}
+.week{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.day{border:1px solid var(--line);border-radius:12px;padding:9px 10px;background:rgba(255,255,255,.02)}
+.day h4{margin:0 0 4px;font-size:13.5px;color:var(--gold);font-weight:600}
+.day p{font-size:12.5px;margin:4px 0;color:#cfd9dc}
+.day .who{color:#bdeee6;font-weight:600}
+.lines{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;background:#0b141c;border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:#9fe7dc;white-space:pre-wrap;overflow-x:auto;margin:8px 0}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0}
+.flow .box{border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:13px;background:rgba(255,255,255,.03)}
+.flow .arrow{color:var(--teal)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:12px}
+.tablewrap{overflow-x:auto}
+.waves{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+.wave{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.025)}
+.wave b{color:var(--gold);display:block}
+.wave .ci{display:block;margin-top:6px;font-size:12.5px;color:#f1dca0}
+ol.q{padding-left:22px;font-size:14px;color:#d6e0e3}
+ol.q li{margin:6px 0}
+ol.q em{color:var(--muted);font-style:normal;font-size:12.5px}
+svg text{font-family:inherit}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;color:#9fe7dc;background:rgba(0,0,0,.25);padding:0 4px;border-radius:4px;word-break:break-word}
+section.builder{border-color:rgba(233,196,106,.45)}
+section.builder h2{color:var(--gold)}
+.status{display:inline-block;font-size:11.5px;color:#14202a;background:var(--teal);border-radius:999px;padding:2px 9px;margin-left:6px;vertical-align:2px}
+td code{white-space:normal}
+</style>
+</head>
+<body>
+<header>
+  <h1>Step 1 · The case engine (head-scratchers' machinery) <span class="draft">spec for approval</span></h1>
+  <div class="sub">How a head-scratcher is made from the real ship, checked to have exactly one answer, shown on the device and solved. Built in Step 1, switched off until your first head-scratcher on Day 5 (P3, its own page). From the plan's Part 4 (<code>plans/pillar5-plan.md</code> v9). The foundation page (<code>foundation.html</code>) has the shared parts: <code>SHIP.works</code>, the ladder, build numbers and keys.</div>
+</header>
+<nav><div><a href="#plain">In plain words</a><a href="#life">A case's life</a><a href="#rules">The promises</a><a href="#rate">How often</a><a href="#faults">Fault tables</a><a href="#make">Builder: making a case</a><a href="#solve">Builder: the solver</a><a href="#clues">Builder: clues</a><a href="#screen">Builder: Fault notes</a><a href="#play">Builder: calling it</a><a href="#save">Save</a><a href="#tests">Tests</a><a href="#ranges">Builds and keys</a></div></nav>
+<main>
+
+<section id="plain">
+  <h2>In plain words</h2>
+  <p>Some faults don't show their cause. The crew call them <b>head-scratchers</b>. The job names a symptom ("the lamp in Bunk 2 flickers"); the device's <b>Fault notes</b> lists the <b>suspects</b> (the parts or causes it could be); you walk the ship collecting <b>clues</b> (a machine's log, what someone saw, the last shift's note, a gauge, the calendar), cross suspects out, and <b>call it</b>. Then it's an ordinary job: fetch the part, fit it by hand, turn it in.</p>
+  <ul>
+    <li><b>Every clue is real.</b> It comes from what really happened on the ship: who was where, how hard the machine worked each hour, who tried what. Ask the same person twice, you get the same answer.</li>
+    <li><b>Every case has exactly one answer</b>, checked before you ever see it. If a case can't be made fair, it simply stays a plain repair.</li>
+    <li><b>No timers, no scores, no fail.</b> A wrong call costs a walk and some time (from Tier 2, a used seal or cartridge). There's always <b>the long way</b>: fit each suspect in turn. And there are hints: the Chief's notes, a word from a Works hand, talking it through with Torres or Calder.</li>
+  </ul>
+  <p class="note">This page is the machinery. What your first case looks like is on <code>p3.html</code>; each later kind gets its own page with its step.</p>
+</section>
+
+<section id="life">
+  <h2>A case's life</h2>
+  <ol class="steps">
+    <li><time>Posted</time><b>A real fault becomes a case</b><span>A fault on a machine at your tier, on a shift day, of a shape some open puzzle kind can use; then a roll at the rank's rate. It's built, checked and frozen at once.</span></li>
+    <li><time>On the board</time><b>A head-scratcher card</b><span>"Head-scratcher: Bunk 2 lamp flickers", with a small mark. Taking it opens its Fault notes.</span></li>
+    <li><time>Clues</time><b>Walk, look, ask</b><span>Each clue place or person gives its clue when you get there ("+ clue: Pell"). A "Where next?" button points the arrow at a clue you haven't got.</span></li>
+    <li><time>Cross out</time><b>You decide</b><span>Tap a suspect to cross it out (tap again to bring it back). The game never crosses anything out for you.</span></li>
+    <li><time>Call it</time><b>Name the cause</b><span>The job's part is set and the arrow points at storage. Right: fetch, fit, done ("Right first time"). Wrong: the machine tells you when you fit it ("New bulb in. Still flickers."), and the case goes on.</span></li>
+    <li><time>Not taken</time><b>The crew solve it the long way</b><span>If you don't take it by the end of your shift, it goes to the crew, who take longer (a part at a time). The ship never waits on you.</span></li>
+  </ol>
+</section>
+
+<section id="rules">
+  <h2>The promises (the approved rules, in short)</h2>
+  <ul>
+    <li>Clues are in the world; the device only holds your notes. The fix stays physical.</li>
+    <li>Words, not numbers, for <i>you</i> ("Right first time", "A clever fix"); a machine's gauge may show its reading, as the scanner does.</li>
+    <li>Only real faults, never servicing, chores, hauling, the drill, an incident's make-it-safe step or a team job.</li>
+    <li>No setting for more or fewer (the user).</li>
+  </ul>
+</section>
+
+<section id="rate">
+  <h2>How often (the user, 2026-10-18: earlier, then more often)</h2>
+  <div class="tablewrap"><table>
+    <tr><th>When</th><th>Share of your real repairs</th><th>Kinds that can come</th><th>At most open</th></tr>
+    <tr><td>Days 1-4</td><td>none</td><td>—</td><td>—</td></tr>
+    <tr><td>Days 5-9 (Junior)</td><td>about 1 in 10</td><td>What's been tried? (P3) only, Tier 1 machines</td><td>1</td></tr>
+    <tr><td>Days 10-15 (Officer)</td><td>about 1 in 5</td><td>P3, then P1 (Day 12), P2 (Day 15)</td><td>1</td></tr>
+    <tr><td>Days 16-22 (Senior Officer)</td><td>about 1 in 4; 1 in 3 on Tier 3 machines</td><td>+ P4, P5, P9, P6</td><td>2</td></tr>
+    <tr><td>Day 23 on (Engine Specialist)</td><td>about 1 in 3</td><td>+ P7, P8</td><td>2</td></tr>
+  </table></div>
+  <p class="note">Never on days off or event days (Pillar 6), never at night. Your very first case (Day 5) is posted as Torres's training job, not by the roll (<code>p3.html</code>).</p>
+</section>
+
+<section id="faults">
+  <h2>The fault tables (what can go wrong with each kind of machine)</h2>
+  <p>For each kind of machine, a short list of <b>causes</b>, written in plain words by the designer (Tier 1 kinds first). Each says what's wrong, what you'd notice, when it shows, and what each kind of clue would show. They're data in section 17 (<code>FAULT_CAUSES</code>, the foundation's 17.4); real faults use them to pick a cause, and cases use them to pick suspects and clues.</p>
+  <div class="lines">FAULT_CAUSES.lights = [
+  { id: 'bulb',   part: 'lamp',  w: 3, shows: 'flicker', when: 'always',
+    tries: { bulb: 'fixes' },                              // what a crew member's quick try does
+    reads: { scanner: 'lamp: worn' },
+    words: 'A lamp at the end of its life.' },
+  { id: 'relay',  part: 'relay', w: 2, shows: 'flicker', when: 'warm',      // fine for a while after a reset, then back
+    tries: { bulb: 'no change', reset: 'fine for an hour' }, reads: { scanner: 'relay: ok cold' },
+    words: 'A relay that sticks when it warms up.' },
+  { id: 'switch', part: 'switch', w: 1, shows: 'flicker', when: 'touched',
+    tries: { bulb: 'no change', reset: 'no change' }, words: 'A worn switch.' },
+  { id: 'wiring', part: 'cable', w: 1, shows: 'flicker', when: 'always',
+    tries: { bulb: 'no change', reset: 'no change' }, tier: 2, words: 'Loose wiring behind the panel.' } ]</div>
+  <p class="note"><code>when</code> is one of <code>always</code>, <code>peak</code> (at the machine's busiest hours), <code>after-use</code>, <code>warm</code>, <code>touched</code>, <code>time</code> (at a time of day), <code>with:&lt;kind&gt;</code> (only while another machine runs). A cause with <code>tier: 2</code> is only a suspect on Tier 2 cases. A cause may name a part not in <code>STOCK</code> yet (<code>switch</code>, <code>cable</code>): the systems engineer adds it to <code>STOCK</code> and a shelf (<code>SHELF_MORE</code>, 0.33.41).</p>
+</section>
+
+<section id="make" class="builder">
+  <h2>For the builder · making a case (seat H, sub-block 24k)</h2>
+  <p class="note">Section 24's <code>// 24k CASES</code>, after 24 core. Pure functions plus <code>SHIP.works.cases</code>; nothing drawn in the 3D scene; no <code>R()</code>. Inert until <code>CASE_KINDS</code> has an opened kind (the ladder's <code>p3</code>).</p>
+  <h3>When (from section 17's posting, one hook)</h3>
+  <ul>
+    <li>Section 17, where a <code>repair</code>/<code>overhaul</code> gets its <code>j.cause</code> (foundation 17.4): <code>if (typeof caseOffer === 'function') caseOffer(j, h)</code>. Returns nothing; may set <code>j.case = caseId</code> and <code>j.title</code>.</li>
+    <li><code>caseOffer</code> posts only if all hold: <code>playerShiftOn(day)</code>; not an event day (<code>typeof eventDay === 'function' &amp;&amp; eventDay(day)</code>, Pillar 6, else false); between 06:00 and 15:00; <code>jobTier(j) &lt;= playerTier()</code>; fewer open cases than the limit; some opened kind fits the cause (<code>CASE_KINDS[k].fits(cause, machine)</code>); and the roll <code>schedU(machSeed(j.machine), day, 880) &lt; caseRate(rank, ownTier)</code> (the table above: .1, .2, .25 or .33 on Tier 3 machines, .33).</li>
+    <li>Which kind, if several fit: <code>schedU(machSeed(id), day, 881)</code> over the fitting kinds, the newest-opened kind weighted ×2 for its first week.</li>
+  </ul>
+  <h3>The case maker</h3>
+  <div class="lines">makeCase(j, kind, k)                        // k = 0..7 (sub-seed), key 882 + k
+  seed    = schedU(machSeed(j.machine), day, 882 + k) * 4294967296 | 0
+  cause   = j.cause                                 // already picked by 17.4 (weighted by the machine's wear)
+  band    = CASE_BANDS[caseBand(tier)]              // T1 Junior, T2 Officer, T3 Senior, T4 Specialist
+  suspects= [cause] + decoys from FAULT_CAUSES[kind] (same `shows`, allowed by band and tier),
+            plus kind-specific ones (a junction, a setting) from CASE_KINDS[kind].suspects(j)
+  clues   = CASE_KINDS[kind].clues(j, cause, suspects, seed)   // each from the simulation (below)
+  check   = solve(suspects, clues, band)            // the solver; fail -> k + 1, up to 8; then plain fault
+  frozen  = { id, job, kind, k, band, cause, sus: [ids], clues: [{ id, type, src, at, kills: [ids] }],
+              got: [], crossed: [], calls: [], posted }</div>
+  <div class="tablewrap"><table>
+    <tr><th>Band</th><th>Who</th><th>Suspects</th><th>Clues (reachable)</th><th>Fewest clues that solve it</th><th>Decks</th></tr>
+    <tr><td>T1</td><td>Junior (Days 5-9)</td><td>3-4</td><td>2-3</td><td>2</td><td>1 (the machine's)</td></tr>
+    <tr><td>T2</td><td>Officer</td><td>3-5</td><td>3-4</td><td>3</td><td>1-2</td></tr>
+    <tr><td>T3</td><td>Senior Officer</td><td>5-6</td><td>4-6</td><td>3</td><td>2-3; tools needed; one honest mix-up among witnesses</td></tr>
+    <tr><td>T4</td><td>Engine Specialist</td><td>5-6</td><td>4-6</td><td>3</td><td>a second cause behind the first ("now the real one shows")</td></tr>
+  </table></div>
+  <p class="note">The plan's T2 line said "2-4 suspects, 2-3 clues" but also "at least 3 clues at T2"; this table keeps "at least 3" and widens the counts to fit it.</p>
+  <h3>Puzzle kinds as data</h3>
+  <p><code>CASE_KINDS[id] = { name, ladder, fits(cause, m), suspects(j), clues(j, cause, sus, seed), view(c), hint(c) }</code>, one per puzzle kind, each registered by its own sub-block (P3's on <code>p3.html</code>; the others with their steps). The engine knows nothing about any one kind.</p>
+</section>
+
+<section id="solve" class="builder">
+  <h2>For the builder · the solver (every case, at posting)</h2>
+  <ul>
+    <li><b>Exactly one answer:</b> apply every reachable clue's <code>kills</code>; exactly one suspect is left, and it's the cause.</li>
+    <li><b>Needs thinking:</b> no single clue leaves one suspect; the smallest set of clues that does (brute force over subsets: at most 6 clues, 64 sets) is at least the band's "fewest".</li>
+    <li><b>Reachable:</b> each clue's place exists on its deck and isn't behind a locked door for you (<code>hatchPassable</code>, room locks); each person is aboard (<code>movedOff</code> false), on the Roster and somewhere you can find them during the case's window (their plan, <code>planDay</code>); each tool is one you have (<code>hasTool</code>).</li>
+    <li><b>In its band:</b> suspects, clues and decks within the band's numbers.</li>
+    <li>Fails: next sub-seed (<code>k + 1</code>), up to 8 tries; then it's a plain fault (<code>j.case</code> unset), counted in <code>CASE_STATS.fallback</code> for <code>puzzle_check</code>. A case that passes is frozen and never re-checked, so the ship moving on can't change it; if a clue person leaves the ship mid-case, that clue is given by Mail ("Before I go: it stuck at 17:10. Rina").</li>
+    <li>Cost: under 5 ms per case on the phone profile (<code>puzzle_check</code> measures).</li>
+  </ul>
+</section>
+
+<section id="clues" class="builder">
+  <h2>For the builder · clues come from the simulation</h2>
+  <div class="tablewrap"><table>
+    <tr><th>Type</th><th>Mark</th><th>Where you get it</th><th>Made from</th><th>Kinds</th></tr>
+    <tr><td><code>note</code></td><td>note</td><td>taped to the job at the board, or the machine's panel</td><td>real tries: a crew member on shift really did a 10-15 minute try at the machine (a registered <code>try</code> job kind, 17.5) and wrote what they did and what happened (<code>FAULT_CAUSES[...].tries</code>)</td><td>P3</td></tr>
+    <tr><td><code>log</code></td><td>clock</td><td>the machine's panel place (<code>panelPlace</code>)</td><td>the machine's real load by hour (<code>machUseDay</code>, <code>machNorm</code>) and its condition record (<code>MACH_HIST</code>)</td><td>P1, P3</td></tr>
+    <tr><td><code>person</code></td><td>person</td><td>asking someone (the chat card's <b>Ask about the fault</b>, P2's step)</td><td>who really was there and when (<code>planWhere</code>); a mix-up is someone whose plan had them elsewhere, so you can check it</td><td>P2 (later)</td></tr>
+    <tr><td><code>gauge</code></td><td>gauge</td><td>a panel, with the scanner or pipe kit</td><td>the machine's or line's reading (<code>MACHINE_LINKS</code>, M9)</td><td>P4-P6 (later)</td></tr>
+    <tr><td><code>calendar</code></td><td>calendar</td><td>the device's Calendar, or the board</td><td>the real week (rotas, traditions, the drill)</td><td>P7, P9 (later)</td></tr>
+  </table></div>
+  <ul>
+    <li>A clue's text is built when you collect it, from the frozen data and the Works writer's templates (<code>content/cases/*.lines</code> through section 22): <code>{ id, type, src, at, kills }</code> is all that's saved.</li>
+    <li>Collecting: being at its place (within reach, as 15b's stop taps) or asking its person; <code>caseClue(caseId, clueId)</code>; a quiet toast "+ clue: Pell" and a badge on Fault notes (<code>deviceNotify</code>).</li>
+  </ul>
+</section>
+
+<section id="screen" class="builder">
+  <h2>For the builder · Fault notes on the device</h2>
+  <ul>
+    <li>A tab of the foundation's <code>works</code> app (<code>deviceApp</code> view), one case per screen, top to bottom: the symptom; the suspects; the kind's own view (<code>CASE_KINDS[k].view(c)</code>); the clues (each with its mark); <b>Where next?</b>; <b>Call it</b>.</li>
+    <li><b>One new block from the device engineer</b> (on call): <code>{ kind: 'chips', items: [{ label, on, action }] }</code>: big toggles (44 px+), crossed-out when <code>on</code> is false. P3 needs only this plus today's <code>text</code>, <code>list</code> and <code>buttons</code>. Without it (an older skin), the suspects fall back to a <code>buttons</code> block with "✕ " on crossed ones. The day strip, the line map and the grid (P1, P5, P7) are later pieces, asked for with their steps.</li>
+    <li><b>Where next?</b> sets the goal pointer (<code>setGoal</code>) to the first clue not collected, in the order the kind lists them.</li>
+    <li><b>The Chief's notes</b>: a second tab; rules of thumb per kind and per machine kind, a page added when a kind opens (<code>CHIEF_NOTES</code>, text through the Works writer) and more lines for machine kinds you know well (<code>careerSpeed</code>'s 15+). A binder on Calder's shelf in her office opens the same tab (one place tap, deck architect 2).</li>
+    <li>On a wide screen (the unfolded phone), the device can stay docked while you walk (it already does).</li>
+  </ul>
+</section>
+
+<section id="play" class="builder">
+  <h2>For the builder · calling it, wrong calls, hints, the long way</h2>
+  <ul>
+    <li><b>Call it</b> (<code>caseCall(caseId, suspectId)</code>): asks "Call it: the relay?" (Yes / Not yet); sets the job's <code>parts</code> to the suspect's part (or makes it a tuning step for a <code>setting</code>, once M5 is in); the arrow points at storage; the job's normal loop runs.</li>
+    <li><b>Right:</b> the job finishes as any repair; <code>SHIP.works.log</code> flags right first time (no wrong call) and a clever fix (right first time, no talk-it-through, clues collected ≤ the fewest + 1); <code>simNote('cleverFix', { machine, kind })</code>; reputation as the foundation's 24.4.</li>
+    <li><b>Wrong:</b> at the machine, after fitting, one line from the machine (<code>FAULT_CAUSES</code>' words: "New bulb in. Still flickers."); the wrong suspect is crossed out for you <i>by the evidence</i> (it's now known), the part goes back to the shelf unused (Tier 1) or is spent (Tier 2 seals and cartridges, the user's choice); the case goes on. After two wrong calls, Torres or Calder offers to talk it through (a toast, an appointment if you say yes).</li>
+    <li><b>Hints, gentlest first:</b> the Chief's notes (free, always); <b>Ask a Works hand</b> at the board or tea corner: what kind of clue you're missing ("Have you read the notes on the job?"), free; <b>talk it through</b> with Torres or Calder: they cross one decoy out with you (no clever fix, still right first time); <b>the long way</b>: "Fit them one by one" on the case, which turns it into a plain job that fits each suspect's part in turn (always ends).</li>
+    <li><b>Not taken by shift end</b> (17:00, or dropped): released to the crew, who do it the long way on paper (<code>jobRun</code> segments, one part each); no remark.</li>
+  </ul>
+</section>
+
+<section id="save" class="builder">
+  <h2>For the builder · the save</h2>
+  <ul>
+    <li><code>SHIP.works.cases = { open: [frozen case, ...] (at most 2), done: [[id, day, flags], ...] (the last 20), n: 0 }</code> inside <code>ship.works</code>; a frozen case is under 600 bytes.</li>
+    <li>Save mid-case, load: the same case, the same clues collected, the same crossings (crossings are yours, kept). A save whose case's job is gone drops the case.</li>
+    <li>The job carries <code>j.case</code> (the case id) in <code>ship.jobs</code>.</li>
+  </ul>
+</section>
+
+<section id="tests" class="builder">
+  <h2>For the builder · <code>puzzle_check.py</code> (new, seat H)</h2>
+  <div class="lines">load the build headless (like machine_check); new game; skip the intro
+for each of two fixed seeds:
+  step Days 0-26 on paper, the player promoted on the plan's days (24 core's test hook)
+  for each case posted:
+    solver: brute force every suspect against every reachable clue -> exactly 1 left, and it's the cause
+    no single clue solves it; the fewest clues within the band
+    every clue reachable: the place exists on its deck, the person aboard and on the Roster in the
+      case's window, the tool owned, the room open
+    the long way always ends; a wrong call costs a walk (T1 no stock used; T2 one consumable), never a fail
+  rates per rank within the table above (+-50% over the arc); none on days off, event days or at night;
+    never more open than the limit; none before Day 5; only P3 before Day 10
+  fallbacks counted (warn above 10%)
+  twice -> identical case lists (seed, cause, suspects, clues)
+  save mid-case, load -> the same case and progress
+  in a browser: makeCase under 5 ms on the phone profile
+cadet_test: with no kind opened, ALL IDENTICAL; intro_check unchanged</div>
+  <p class="note">Step 1 builds the engine with one test kind (a stand-in registered only by <code>puzzle_check</code>) so all of this runs before P3 exists; Step 2 adds P3 and its own checks.</p>
+</section>
+
+<section id="ranges" class="builder">
+  <h2>For the builder · builds and keys</h2>
+  <ul>
+    <li><b>Seat H</b>, branch <code>claude/mech-cases</code>, builds <b>0.55.x</b> (free, checked 2026-10-18 against every branch's DEV_NOTES build table).</li>
+    <li><b>Hash keys 880-894</b> (free): 880 the rate roll, 881 which kind, 882-889 the eight sub-seeds, 890-894 inside the kinds (P3 uses 890-891). 855 (a fault's cause) is section 17's, from the foundation page.</li>
+    <li><b>Merge order:</b> after 24 core (seat C) and section 17's 17.4-17.5 (seat S); the device's <code>chips</code> block can land any time before Step 2.</li>
+  </ul>
+</section>
+
+</main>
+</body>
+</html>
