@@ -553,3 +553,4 @@ Read: CLAUDE.md, TEAM.md (session chain rule + overnight exception), plans/brief
 - ~11:31 C join fully green: claude/p5-join fa418d2 (S 78bf1c2 + P cfce34e + C 2865a21 0.44.12 + H 5a4d362; career/mech/machine/puzzle OK, cadet_test identical). BM4 to build 0.63.0 from it + A + W once R passes S/C.
 - ~11:37 M1 7285601 (0.45.1 hauling; mech_check OK, cadet_test identical, day 3 OK peak 270 calls). Next m2 uniform.
 - ~11:38 W: adding W 0d179ac made career_check fail 26× (checker's scripted player didn't close real training dialogues); C fixed checks in 56d15b4 on claude/p5-join; BM4 rerunning. No content change.
+- ~11:39 onboarding 4 (via lead 11) asked to build uniform grime (21b, 0.42.46, claude/arrival-0607b) for M1's m2 → yes (on approved page, it owns the code); added to brief-p5; M1 told.
