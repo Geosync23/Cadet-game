@@ -8,3 +8,4 @@ Built on claude/cand-0606 (from 0.60.6a c8685cf). One line per finished check (c
 - trial: arrival 31c6516f + writer a76e232: keys match (walk.train.<9 jobs>.<take|fetch|make|at|done|turnin>, walk.follow.1-29), bake 8093 lines, lines_check PASS
 - trial: arrival e2cd435e (0.42.32) + writer 2729ce1: clean, bake 8093, lines_check PASS, NAMES OK
 - trial: deck hook + systems f351cc3 (0.33.40) + arrival e2cd435e + writer 2729ce1: build lines only, NAMES OK, machine OK, smoke OK
+- trial (PE6 52839a6, deck hook, systems f351cc3, social 80116c5, arrival e2cd435e, writer 2729ce1): verify_merge 0, NAMES OK, smoke, social, device, interactions OK; cadet_test vs 0.60.6a: only i_tap0 2978 px (to explain on the full candidate)
