@@ -56,7 +56,9 @@ PAPER = r"""(({ plan, days }) => {
       const t = (d - 1) * 1440 + h * 60; at(t);
       if (plan === 'none' && h === 18) { worksCareerTick(t); continue; }
       worksCareerTick(t);
+      if (typeof DIALOGUE !== 'undefined' && DIALOGUE && typeof dialogueEnd === 'function') dialogueEnd(true);   // the player reads it through (a meeting on screen holds the training)
       const W = SHIP.works, c = W && W.cur;
+      if (c && c.mail && !mails.includes(c.by + ': ' + c.mail)) mails.push(c.by + ': ' + c.mail);
       // the training: be there for the meeting, watch, do your one
       if (c && c.st === 'meet') { const r = SHIP.occasions.find(x => x.key === c.occ);
         if (r) { asks[c.id] = asks[c.id] || []; if (!asks[c.id].includes(d)) asks[c.id].push(d); }
@@ -92,7 +94,7 @@ PAPER = r"""(({ plan, days }) => {
   stop.forEach(f => f());
   const W = SHIP.works;
   const occ = SHIP.occasions.filter(r => /^works\./.test(r.id)).map(r => ({ id: r.id, day: Math.floor(r.at / 1440) + 1, at: hhmm(r.at % 1440), by: r.by, status: r.status }));
-  return { days: days_, trained, asks, teach, seen, occ, firstJob, mail: SHIP.mail.filter(m => /^Training/.test(m.subject)).map(m => m.from + ': ' + m.subject),
+  return { days: days_, trained, asks, teach, seen, occ, firstJob, mail: mails,
     works: W ? JSON.parse(JSON.stringify(W)) : null, size: W ? JSON.stringify(W).length : 0, head: (worksRecordHead() || { text: null }).text, locker: worksLockerText(),
     view: W ? ['training', 'log', 'tools'].map(tab => { WORKS_TAB = tab; return worksView().blocks.filter(b => b.kind !== 'buttons').map(b => b.text || (b.rows || []).map(r => r.text + ' (' + r.sub + ')').join('; ')).join(' | '); }) : null };
 })"""
