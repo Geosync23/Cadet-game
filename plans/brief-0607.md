@@ -21,13 +21,13 @@ The user said go for 0.60.7. Every seat reads, in order: CLAUDE.md, this brief, 
 | Seat | Session | Branch | Plan items + the user's 0.60.6 notes |
 |---|---|---|---|
 | Player engineer 6 | session_01AWgP6kgzpprnpA5pMAAiqq | claude/player-needs | Plan list, minus the lift goal mark (already shipped in 0.60.6a), minus the shelf taps (moved to systems). Plus: **low-need pop-ups** in plain words ("You need to pee", one per need, once as it crosses the low line, never stacked or over a card); **the time clock gets a pop-up screen in the device's art style** (clock in / clock out / your hours). |
-| Social engineer (new) | | claude/social-0607 | Plan list. |
-| Traditions engineer (new) | | claude/trad-0607 | Plan list. |
-| Deck architect 4 (new; DA3's note: `plans/handover-deck-architect.md` on claude/poses) | | claude/deck-0607 | Plan list. Plus: **junior officers on Deck 4 lie crosswise in their beds** (fix the sleeping pose/orientation); **remove the tray return from the mess hall** (with the sim engineer, see below). |
-| Sim engineer (new) | | claude/sim-0607 | Plan list. Plus: **no tray return**: crew stop walking trays to it; the default (lead's call, the user can change it) is that diners leave trays on the table and the galley crew clear them, so nothing breaks in the galley/dish pit flow. Check food_check. |
-| Systems engineer (new) | | claude/systems-0607 | Plan list, plus the shelf taps (right part from the right shelf, the glow). |
+| Social engineer (new) | session_01Q6zXcCnBpTeJQrUP8qPKUP | claude/social-0607 | Plan list. |
+| Traditions engineer (new) | session_018vCE4Nv4tCR3YvNX7GTE3c | claude/trad-0607 | Plan list. |
+| Deck architect 4 (new; DA3's note: `plans/handover-deck-architect.md` on claude/poses) | session_01P6DtVbtWZs9i82fJ4UzRuB | claude/deck-0607 | Plan list. Plus: **junior officers on Deck 4 lie crosswise in their beds** (fix the sleeping pose/orientation); **remove the tray return from the mess hall** (with the sim engineer, see below). |
+| Sim engineer (new) | session_01F7zv2wjhyPPuoHxM8hFzzy | claude/sim-0607 | Plan list. Plus: **no tray return**: crew stop walking trays to it; the default (lead's call, the user can change it) is that diners leave trays on the table and the galley crew clear them, so nothing breaks in the galley/dish pit flow. Check food_check. |
+| Systems engineer (new) | session_016Mv2wxrtkGgAwcst4GWADY | claude/systems-0607 | Plan list, plus the shelf taps (right part from the right shelf, the glow). |
 | Onboarding engineer 3 | session_016TRcnsFqFB1q5zZp6vjGBn | claude/arrival | Plan list. Plus Zeke on Day 0/1: **not already in the mess hall** when you ride up to dinner on arrival night (he arrives with you); **always with you after the first lift ride down to Deck 4**; **the shuffle-aside (moving past people) works for him while he follows you**; **he stays with you between jobs** (doesn't stop when one ends and restart when the next is picked); **he acts as a trainer on Day 1**, saying more about each job (the head writer writes the lines; a sample is pitched to the user first). |
-| Head writer (new) | | claude/writer-0607 | Plan list (~500 lines). Plus: Zeke's trainer lines (pitch ~10 first), the low-need pop-up texts, the time clock screen's words. |
+| Head writer (new) | session_013DdpJv4AKFJcvuBBqjSXms | claude/writer-0607 | Plan list (~500 lines). Plus: Zeke's trainer lines (pitch ~10 first), the low-need pop-up texts, the time clock screen's words. |
 | Build master 3 | session_01WrXgDfR5dzwktKJfYwVwsV | claude/cand-0607 | Combine, check runners, results to `plans/cand-0607-results.md`. |
-| Reviewer 0607 (new) | | claude/reviews-0607 | Reviews each piece as it lands. |
+| Reviewer 0607 (new) | session_01BusfBzBamabWrCsrwQeABh | claude/reviews-0607 | Reviews each piece as it lands. |
 | DA3 | session_01NsysH87qqJnf1dBEVRz2fW | claude/poses | Stays idle as the expert on poses for questions; the dinner-profiling item goes to the sim engineer if time allows, else 0.60.8. |
