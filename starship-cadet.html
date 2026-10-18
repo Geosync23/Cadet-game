@@ -34978,7 +34978,7 @@ const ladderTeacher = (row, d) => (row.by || []).find(id => { try { return occOn
 // on a day off. A training not finished is offered again (that day's big one). Returns the ids opened.
 function ladderTick(h) {
   const t = h * 60, d = worksDay(t), m = t - (d - 1) * 1440, W = worksInit(t), out = [];
-  if (!W || m < WORKS_ASK[0] || m > WORKS_SMALL || !playerShiftOn(d)) return out;
+  if (!W || m < WORKS_ASK[0] || m > WORKS_SMALL || !playerShiftOn(d) || d < worksDay(shipNow())) return out;   // never for a day already past (section 17's catch-up after a load runs jobsHour from long ago)
   const today = W.op[d] || [], has = size => today.some(id => (ladderRow(id) || {}).size === size), opened = worksOpened(W);
   const c = W.cur;
   if (c && c.st === 'held' && c.d < d) worksEscortEnd(c.id);   // a hold left from an earlier day: trained now (the ladder never stalls)
