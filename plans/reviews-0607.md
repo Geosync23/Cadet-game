@@ -9,6 +9,15 @@
 
 ## Verdicts
 
+### Onboarding 4, 0.42.40-0.42.41, claude/arrival-0607b 924600b + 0ba0af8 (in depth): PASS
+Section 21b (clothes and laundry, `save.clothes`), typeof-guarded hooks in 15/15b (playerFx, holding, playerFloorTap, putWhat, putDown), `CLOTHES_BEATS` (Zeke's Day 1 dinner, Day 2 laundry nudge, the knitting offer), the crew-at-work pointers through `showJob`, INTRO_WEEK `d1-zeke-dinner`, and my pause-pacing LOW (now `simNow()`).
+- **Checks I ran:** **day_check day 1** (arrival on, so `d1-zeke-dinner` is in): DAY CHECK OK. No schedule problems, nobody stuck, plans the same twice, no places booked twice on days 0-1, peaks 229/202/268/250/215/163. **clothes_check: ALL OK**, 0 fails (the save round trip mid-wash, a bad save read back safely, an older save, a Monday start with the full kit, off again). The builder reports cadet_test ALL IDENTICAL; that's expected, since 21b is off at `?nosave` without `?clothes`.
+- **Save:** `SHIP.clothes` is small and bounded (`said` holds 3 beat ids, 2 `crew:` keys and one `remark` day). `clothesLoad` checks every field. An older save gets the full kit and counts as changed today, so nobody is "in yesterday's clothes" on loading. New game resets it through `simNote('newGame', { arrival })`, which is section 13's field name.
+- **Determinism and phones:** no `R()` (`hamperLook` uses `box`/`soft` with existing materials, made once on first need). Clothes never change crew plans. `d1-zeke-dinner` only adds Zeke to the mess at his normal dinner time, and day_check shows no conflict. `socialSeekAsk` is called each frame in the knit window but dedupes on `(id, from)`.
+- **LOW 1 (per-frame work):** 21b runs its own `requestAnimationFrame` loop. On Days 1-2 with the intro on, every frame calls `showJob(day)` (`machinesNow()` plus a `SHIP.jobs.find`) until the crew line is said. While you're in yesterday's clothes it also does a `DECK_CREW.find` with distances every frame until someone remarks. Cheap today, but both could run once a ship minute (or every 250 ms like `handTick`).
+- **LOW 2:** the `PLAYER_TAPS` wardrobe test matches any item titled "locker" within 1 m of your wardrobe. A neighbouring bunk's locker that close would open yours. Harmless.
+- **Not done:** the dawdle-squeezes-dinner LOW is left for 0.60.8, as the builder says.
+
 ### Re-check: social 0.36.83-0.36.84, claude/social-0607 d3e4d04: PASS, both MEDs fixed
 - **MED 1 fixed:** `chatTick` now steps the talk before the visit return (`if (C.visit) { if (C.talk && !C.talk.end) talkStep(C); return; }`). The builder's live probe reaches the reply at 7 minutes on a visit card.
 - **MED 2 fixed:** `talkDay` is saved only when it equals today, so the trailing-zero trim works again. The builder's `--long` with a daily talk: worst day to 140 is 28.6 KB (`SAVE_MAX` 30000), worst day 141-280 is 32.3 KB (`LONG_MAX` 40000). Both inside the limits.
