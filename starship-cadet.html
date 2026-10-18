@@ -34968,20 +34968,16 @@ function roundSign(id, day) {
 }
 // a mark is right: worn on a worn machine, worn or off on a faulty-or-worse one
 const roundRight = (pick, st) => st !== 'healthy' && (pick === 'off' || pick === 'worn');
-function roundFound(id, by, t) {                         // a machine's job found now (section 17's machineFound; a stand-in until it's in the build)
-  if (typeof machineFound === 'function') return machineFound(id, by);
-  const j = SHIP.jobs.find(x => x.machine === id && x.status !== 'done' && x.kind !== 'chore' && x.kind !== 'favour' && x.kind !== 'rounds');
-  if (!j || j.claimedBy) return j ? j.id : null;
-  j.found = Math.min(j.found, t); if (by === 'you') j.foundBy = 'you';
-  simNote('found', { machine: id, by }); if (typeof MACH_REV !== 'undefined') MACH_REV++;
-  return j.id;
-}
+// a machine's job found now: section 17's machineFound(id, by) -> { id, fresh } | null (fresh: it wasn't on the board
+// before, so it's found by `by`: j.foundBy and simNote('found')). Nothing without it
+const roundFound = (id, by) => typeof machineFound === 'function' ? machineFound(id, by) : null;
 // your mark at stop k: found by you on a right mark, a word from the teacher on a training round
 function roundMark(j, k, pick) {
   const id = (j.route || [])[k]; if (!id || !ROUND_MARKS.some(x => x[0] === pick)) return false;
-  const t = shipNow(), st = roundState(id), right = roundRight(pick, st), first = !(j.marks && j.marks[id]);
+  const st = roundState(id), right = roundRight(pick, st), first = !(j.marks && j.marks[id]);
   (j.marks = j.marks || {})[id] = pick;
-  if (right && first) { roundFound(id, 'you', t); worksXp(1); try { toast('Round', roundText('round.found', 'Found by you: {machine}.', { machine: machineLabel(machineById(id)).split(',')[0] })); } catch (e) { /* no UI */ } }
+  const f = right && first ? roundFound(id, 'you') : null;
+  if (f && f.fresh) { worksXp(1); try { toast('Round', roundText('round.found', 'Found by you: {machine}.', { machine: machineLabel(machineById(id)).split(',')[0] })); } catch (e) { /* no UI */ } }
   const c = SHIP.works && SHIP.works.cur, by = j.train && c && c.id === j.train ? c.by : null;
   const say = right ? ['train.m1.mark.right', 'Good eye.'] : st === 'healthy' && pick !== 'fine' ? ['train.m1.mark.okay', 'Looks all right to me. Better safe, though.'] : st !== 'healthy' && pick === 'fine' ? ['train.m1.mark.wrong', 'Mm. Listen again.'] : null;
   if (say && by) worksSay(by, worksText(say[0], say[1]));
@@ -34990,7 +34986,7 @@ function roundMark(j, k, pick) {
 }
 // a round finished: someone else's (the teacher's, the crew's) finds what's worn on it; yours counts as a use
 function roundDone(j, t, by) {
-  if (by && by !== 'you') for (const id of j.route || []) if (roundState(id) !== 'healthy') roundFound(id, by, t);
+  if (by && by !== 'you') for (const id of j.route || []) if (roundState(id) !== 'healthy') roundFound(id, by);
   if (by === 'you') { worksUse('m1'); try { toast('Round', roundText('round.done', 'Round done. Anything worn is on the board, found by you.')); } catch (e) { /* no UI */ } }
 }
 // a round job on the list: { kind: 'rounds', route, marks, deck, room, title }. o.train: the training's (the teacher's
