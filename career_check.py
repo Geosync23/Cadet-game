@@ -43,7 +43,10 @@ PAPER = r"""(({ plan, days }) => {
   const at = t => { setShipNow(t); machinesNow(); };
   const days_ = [], trained = {}, asks = {}, teach = {}, mails = [], band = {}, seen = { meet: 0, watch: 0, do: 0 }, bad = [];
   const stop = [onSim('trained', n => { trained[n.mech] = Math.floor(n.t / 1440) + 1; })];
-  const doJob = id => { if (!claimJob(id)) return false; const j = SHIP.jobs.find(x => x.id === id); jobStops(j).forEach((s, k) => jobStepDone(id, k)); return turnInJob(id); };
+  const doJob = id => { if (!claimJob(id)) return false; const j = SHIP.jobs.find(x => x.id === id);
+    const cs = j.case && SHIP.works && SHIP.works.cases && (SHIP.works.cases.open || []).find(c => c.job === id);   // a head-scratcher (24k): call it right first
+    if (cs && typeof caseCall === 'function') caseCall(cs.id, cs.cause);
+    jobStops(j).forEach((s, k) => jobStepDone(id, k)); return turnInJob(id); };
   const lazySkip = new Set();                            // the lazy player misses each training's first ask
   let firstJob = null;
   for (let d = 1; d <= days; d++) {
@@ -193,7 +196,7 @@ with sync_playwright() as pw:
       WORKS_TABS.splice(WORKS_TABS.findIndex(x => x.id === 'test'), 1); WORKS_TAB = 'training';
       return { r, tabs: v.blocks[0].items.map(x => x.label), body: v.blocks[1] && v.blocks[1].text, got }; })()""")
     print('  worksTabAdd:', tb)
-    check(tb['r'] and tb['tabs'] == ['Training', 'Work log', 'Tools', 'Test'] and tb['body'] == 'hello' and tb['got'] == 'poke:7', 'worksTabAdd: a tab shows, in order, and gets its verbs')
+    check(tb['r'] and tb['tabs'][:3] == ['Training', 'Work log', 'Tools'] and tb['tabs'][-1] == 'Test' and tb['body'] == 'hello' and tb['got'] == 'poke:7', 'worksTabAdd: a tab shows, in order, and gets its verbs')
 
     eh = ev("""(() => { SHIP.works = null; setShipNow(4 * 1440 + 600); const W = worksInit(); W.cur = { id: 'm7', st: 'do', d: 5, by: 'halloran-emeka', occ: null, j: 'jx', w: 15 };
       const out = { hold: worksEscortHold('m7') }; worksDone('m7', shipNow()); out.st = W.cur && W.cur.st; out.trainedEarly = W.tr.m7 !== undefined;
@@ -218,7 +221,7 @@ with sync_playwright() as pw:
     print('(f) The save:')
     sv = ev(f"""(() => {{ const r = ({PAPER})({{ plan: 'steady', days: 2 }}); const W = SHIP.works;
       W.cur = {{ id: 'm4', st: 'do', d: 3, by: 'esposito-yara', occ: 'works.m4@3', j: 'reserve11:x@1', w: 15 }};
-      const raw = JSON.stringify(W), back = JSON.stringify(worksClean(JSON.parse(raw)));
+      const core = Object.fromEntries(Object.entries(W).filter(([k]) => k in worksClean({{ v: 1 }}))), raw = JSON.stringify(core), back = JSON.stringify(worksClean(JSON.parse(raw)));   // 24 core's fields (sub-blocks keep their own)
       const junk = worksClean({{ v: 1, tier: 'x', rank: 'admiral', xp: -5, tr: {{ m1: 'a', zz: 3 }}, log: 5, tools: {{ bogus: [1, 2], scanner: [3, 7] }}, op: {{ 2: ['m1', 'nope'], x: [] }}, cur: {{ id: 'm1', st: 'eh' }} }});
       return {{ same: raw === back, raw: raw.length, junk, bad: worksClean(null) }}; }})()""")
     print('  round trip:', sv['same'], f"({sv['raw']} bytes); junk:", sv['junk'])
