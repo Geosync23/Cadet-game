@@ -49,3 +49,6 @@ Q1, Q4, Q5, Q8, Q9 (today+6), Q10, Q11 (Deck 2 suite), Q12 as suggested. Q2: add
 > Two elevator panels, one on each aide to serve any perspectivr
 
 > Oh one last thing the shuttle is good but needs just a little more sleek-ness. Its very boxy.
+
+## Stores answers (2026-10-18 ~00:10, db survey/s0607b)
+Q13 weekly Wednesday 10:00; Q14 no penalty, note: "indicator shows you" (a visual pointer to the right shelf); Q15 held till 14:00 then crew where you can see; Q16 crates appear in the hold.
