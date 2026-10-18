@@ -5,7 +5,7 @@
 # beat wants one (momentWantsVisit), the struggle themes through one crew member each (beats 1-3), and one call home a day at 20:00 (the user's rule, 0.62.0: whoever the booth says has news, else the next of Mum, Gran, Jo and Sam in turn; a second call that day must be refused). Then lists every arc
 # that didn't finish, with its next beat and how often (in the last 7 days) its when and its where held.
 # The crew arcs need the writers' baked MOMENTS (a build with claude/dialogue and claude/content, content_gen run).
-# Run: CADET_CHROME=/opt/pw-browsers/chromium python3 arc_check.py BUILD.html [DAYS] [arcs|themes|calls]   (themes: one crew
+# Run: CADET_CHROME=/opt/pw-browsers/chromium python3 arc_check.py BUILD.html [DAYS] [arcs|themes|calls|booth]   (themes: one crew
 #   member per struggle theme, in a game of their own: one serious moment a day is shared, and nobody's close to 20 people)   (a few minutes)
 import sys, os, json, types
 os.environ.setdefault('CADET_CHROME', '/opt/pw-browsers/chromium')
@@ -119,7 +119,48 @@ CALLS = r"""
   return out;
 })()
 """
+# 'booth' mode (0.62.5, the user's "clicking the phone works, then the menu to call someone disappears"): the real game
+# loop, Deck 3 at 10:30 on day 4, tap Booth 3, walk there and sit; then, a second of play between taps, tap the panel's
+# buttons as a player would (Go on, Call Mum, Go on to the end), by mouse click, and again by touch on a phone-sized
+# screen. The picker must stay open, the call must play to its end and Mum's first beat must be told. Then a recorded
+# message from Gran must stay open through a lift ride (0.62.6).
+BOOTH_TAP = r"""(() => { const it = ITEMS.find(i => i.t === 'Booth 3'); it.hit.getWorldPosition(_wp); return playerTap(it, _wp.clone(), _wp.clone()); })()"""
+BOOTH_ST = r"""(() => ({ dlg: DIALOGUE && DIALOGUE.id, b: homePeekC('mum').b }))()"""
+def booth_run(pw, touch):
+    from playwright.sync_api._generated import Browser
+    np0 = Browser.new_page
+    if touch: Browser.new_page = lambda self, **kw: np0(self, **{**kw, 'has_touch': True, 'is_mobile': True, 'viewport': {'width': 390, 'height': 760}})
+    try: g = ct.Game(pw, sys.argv[1])
+    finally: Browser.new_page = np0
+    g.step(3); g.ev("setShipNow(10 * 60 + 30 + 1440 * 3); needsT = null; goToDeck(3)"); g.step(5); g.ev(BOOTH_TAP)
+    for k in range(60):
+        g.step(15)
+        if g.ev(BOOTH_ST)['dlg']: break
+    seen, picked = [], False
+    for k in range(25):
+        g.step(30); s = g.ev(BOOTH_ST)
+        if not s['dlg']: break
+        bs = [b for b in g.page.locator('#devDlg button:visible').all_inner_texts() if b != '×']; seen.append(bs)
+        want = [b for b in bs if b.upper() == 'CALL MUM'] or bs
+        if not want: break
+        picked = picked or want[0].upper() == 'CALL MUM'
+        btn = g.page.locator('#devDlg button:visible', has_text=want[0]).first; btn.tap() if touch else btn.click()
+    end = g.ev(BOOTH_ST); errs = g.errors[:3]; g.close()
+    return { 'picked': picked, 'taps': len(seen), 'b': end['b'], 'open': end['dlg'], 'errors': errs }
 with sync_playwright() as pw:
+    if MODE == 'booth':
+        bad = []
+        for touch in (False, True):
+            r = booth_run(pw, touch); print('touch' if touch else 'click', json.dumps(r))
+            if not r['picked'] or r['b'] != 1 or r['open'] or r['errors']: bad.append('touch' if touch else 'click')
+        g = ct.Game(pw, sys.argv[1]); g.step(3)   # a recorded message plays on through the lift and off-room tiles (0.62.6, reviewer 1e)
+        g.ev("setShipNow(10 * 60 + 1440 * 5); needsT = null; goToDeck(3)"); g.step(5)
+        g.ev("(() => { homeC('gran').b = 1; homeC('gran').msg = { day: 6, i: 0, done: false }; return homeMessage('gran'); })()")
+        g.step(30); m1 = g.ev("DIALOGUE && DIALOGUE.id"); g.ev("goToDeck(4)"); g.step(60); m2 = g.ev("DIALOGUE && DIALOGUE.id"); g.close()
+        print('recorded message: open after 1 s', m1, '| after the lift', m2)
+        if m1 != 'home:msg:gran' or m2 != 'home:msg:gran': bad.append('message')
+        print('BOOTH CHECK OK' if not bad else 'BOOTH CHECK: ' + ', '.join(bad) + ' (the picker closed, or the call never ended with Mum\'s beat 1)')
+        sys.exit(0)
     g = ct.Game(pw, sys.argv[1]); g.step(3)
     if MODE == 'calls':
         r = g.ev(CALLS); g.close()

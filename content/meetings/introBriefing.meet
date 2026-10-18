@@ -1,9 +1,10 @@
 @meeting introBriefing
 // Day 1, Monday 07:50, the Works bay: Calder's Monday briefing, Torres and two Works crew on shift (cast 'works:2':
-// the script's tech1 and tech2). The Works writer. Calder hands you to Torres in two sentences. One choice, no wrong answer.
+// the script's tech1 and tech2). The Works writer; head writer 5 (0.48.76, the user's note): Torres shadows you, three
+// practical tips, and all that goes on aboard outside work (never called "traditions"). One choice, no wrong answer.
 title: Monday briefing
 from: Chief Ines Calder
-gist: The Monday briefing: Calder put you with Torres for the day. One job, end to end, with your own hands.
+gist: The Monday briefing: Calder put you with Torres for the day, gave three rules for the bay, and told you to join in aboard.
 == lines
 calder: Ten to eight. Good. Everyone's here.   [nod]
 calder: Board's at twelve. Two scrubbers, a lamp on Deck 4, the dish pit. A usual Monday.
@@ -12,6 +13,16 @@ tech1 > you: Morning, new hand.   [gesture]
 tech2 > you: Welcome to Works. Tea's at half ten. That's the important bit.
 calder: Torres. One job, end to end. Board to turn-in. Their hands, not yours.
 torres-zeke: Their hands. Got it, Chief.
+calder > you: Torres shadows you today. Every step. He'll talk you through it. He talks a lot. Listen anyway.
+torres-zeke: I do talk a lot. It's mostly useful.   [laugh]
+calder > you: Three things. Gloves on before the panel comes off. Not after.
+calder > you: If you don't know, ask. Asking takes a minute. Guessing takes a shift.
+calder > you: And put tools back where you found them. The wall has outlines. Use them.
+tech2: She means it about the wall.   [gesture]
+calder > you: Last thing. Work ends at five. The ship doesn't.
+calder > you: Sunday dinner at the long tables. Music on Fridays. Quiz nights. Observatory nights.
+calder > you: The garden, the lounge. Knitters, rowers, whoever's learning the guitar this month. Find your lot.
+calder > you: People who join in settle in. I've watched it for years. Go to things.
 ? choice
 * Ready when you are.   rel:torres-zeke+1 flavour:cheer
   torres-zeke: That's the spirit. Right, onward.   [laugh]

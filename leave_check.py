@@ -56,7 +56,7 @@ PAPER = r"""(({ plan, days, friends }) => {
       else if (mode === 'work' && st < want && (want > 1 || worked >= 5)) { mode = round >= 2 ? 'work' : 'skip'; }   // the Chief's: a week's work first, then three more missed
       if (mode === 'work' && playerShiftOn(d)) worked++;
       c = mode; }
-    careerTick(at(d, 0));
+    careerTick(at(d, 0)); if (d === 1) SHIP.career.sd = 99999;   // no sickness in these runs (the game seed is random; sickness has its own case)
     if (weekday(d) === 6) { repWeek(Math.floor(at(d, 240) / 60)); careerTick(at(d, 240)); }
     if (c === 'leave') { const ok = careerRota(d) && SHIP.career.l > 0 ? careerBook(d, at(d - 1, 1200)) : false; if (!ok) c = 'work'; }
     if (c === 'sick') careerSick(d);
@@ -185,10 +185,10 @@ with sync_playwright() as pw:
 
     print('Sickness (0.61.5): rare, never the first week, three weeks apart; excused; worse untreated; two cures:')
     r = ev("""(() => { const at = (d, m) => { SHIP.time.day = d; SHIP.time.min = m; return (d - 1) * 1440 + m; };
-      SHIP.career = null; SHIP.rep = null; SHIP.occasions.length = 0; careerTick(at(1, 0)); const c = SHIP.career, days = [];
+      SHIP.career = null; SHIP.rep = null; SHIP.occasions.length = 0; careerTick(at(1, 0)); const c = SHIP.career, days = []; c.gs = 12345;   // a fixed game seed: the same days every run
       for (let d = 1; d <= 420; d++) { c.e = c.z = d - 1; careerTick(at(d, 330)); if (c.sd === d) { days.push(d); c.sh = 3; } }
       const out = { days };
-      SHIP.career = null; careerTick(at(1, 0)); const C = SHIP.career, d = days[0] || 50; C.e = C.z = d - 1; C.w = Math.floor((d - 1) / 28); C.b.push(d); C.l--;
+      SHIP.career = null; careerTick(at(1, 0)); const C = SHIP.career, d = days[0] || 50; C.gs = 12345; C.e = C.z = d - 1; C.w = Math.floor((d - 1) / 28); C.b.push(d); C.l--;
       const l0 = C.l, w0 = careerWork(); careerTick(at(d, 330)); out.sick = sickToday(d); out.excused = !playerShiftOn(d); out.leaveBack = C.l === l0 + 1 && !C.b.includes(d);
       out.speeds = [420, 600, 780, 930].map(m => { careerTick(at(d, m)); return [Math.round(needEffects().walk * 100) / 100, sickBent()]; });
       careerTick(at(d, 760)); out.noMiss = careerWork() >= w0 - 0.01 && C.ms === 0;
@@ -196,7 +196,11 @@ with sync_playwright() as pw:
       out.cure = sickCure(1); out.after = [Math.round(needEffects().walk * 100) / 100, sickBent(), sickNow()];
       at(d + 1, 600); out.better = (sickChatLine(p, shipNow(), true) || {}).kind || null;
       SHIP.career.sd = d + 1; SHIP.career.sh = 0; at(d + 1, 700); out.nap = sickCure(3) && !sickNow();
-      out.save = JSON.stringify(SHIP.career).length; out.lines = !!(LINES['sick.getwell'] && LINES['sick.better']); return out; })()""")
+      SHIP.career = null; SHIP.rep = null; careerTick(at(30, 0)); repInit().ship.work = 30; const K = SHIP.career; K.e = K.z = 29; K.sd = 99999; careerTick(at(30, 800)); out.missTo = Math.round(careerWork()); out.missTip = !!(K.k & 2);
+      careerSick(30); out.refund = Math.round(careerWork());
+      const dueOf = gs => { SHIP.career.sd = 0; SHIP.career.gs = gs; const L = []; for (let d = 8; d <= 200; d++) if (sickDue(d)) L.push(d); return L.join(','); };
+      out.namesDiffer = dueOf(1) !== dueOf(2); out.seeded = typeof careerClean(JSON.parse(JSON.stringify(SHIP.career))).gs === 'number';
+      out.save = JSON.stringify(SHIP.career || {}).length; out.lines = !!(LINES['sick.getwell'] && LINES['sick.better']); return out; })()""")
     gaps = [b - a for a, b in zip(r['days'], r['days'][1:])]
     print(f"  sick days in 60 weeks: {r['days']} (gaps {gaps})")
     print(f"  on a sick day: {dict((k, v) for k, v in r.items() if k != 'days')}")
@@ -208,9 +212,61 @@ with sync_playwright() as pw:
     check(all(a > b for a, b in zip(sp, sp[1:])) and r['speeds'][-1][1] and not r['speeds'][0][1], f"untreated it doesn't get worse through the day to doubled over: {r['speeds']}")
     check(r['cure'] and r['after'][0] >= 0.99 and not r['after'][1] and not r['after'][2], 'the medicine did not cure it')
     check(r['nap'], 'sleeping it off did not cure it')
+    check(r['refund'] == 30 and r['missTo'] < 30, f"a sick note gave back {r['refund'] - r['missTo']} for a miss that took {30 - r['missTo']}")
+    check(r['missTip'], 'the first missed shift did not mark its warning shown (k & 2)')
+    check(r['namesDiffer'] and r['seeded'], 'every game is sick on the same days, or the game seed is not saved')
     if r['lines']: check(r['getwell'] == 'sick.getwell' and r['better'] == 'sick.better', 'crew have no get-well or glad-you-are-better line')
     else: print('  (no sick.getwell / sick.better lines baked yet)')
     check(r['save'] < SAVE_MAX, f"the save with sickness is {r['save']} bytes")
+
+    print('The time clock (0.61.13): in and out, the shift, leave, the auto clock-out, the crew:')
+    r = ev("""(() => { const at = (d, m) => { SHIP.time.day = d; SHIP.time.min = m; return (d - 1) * 1440 + m; };
+      SHIP.career = null; SHIP.rep = null; careerTick(at(10, 0)); const c = SHIP.career; c.e = c.z = 9; c.sd = 99999; const out = {};
+      careerTick(at(10, 420)); out.in = careerClock(at(10, 485)); out.started = c.on === 10; careerTick(at(10, 760)); out.noMiss = c.ms === 0 && c.md !== 10;
+      out.again = careerClock(at(10, 600)) === 'out'; out.done = careerClock(at(10, 1000)); out.hours = [c.ci % 1440, c.co % 1440];
+      careerTick(at(11, 0)); careerClock(at(11, 480)); careerTick(at(11, 1070)); out.notYet = !(c.co > c.ci); careerTick(at(11, 1090)); out.auto = c.co % 1440;
+      careerTick(at(12, 0)); careerTick(at(12, 760)); out.missedNoClock = c.md === 12;
+      out.sat = careerClock(at(13, 600));
+      careerTick(at(15, 0)); out.early = careerClock(at(15, 180)); flagSet('shiftSent', null); SHIP.notes = [];
+      const sent = []; const stop = onSim('shiftStart', n => sent.push(n)); careerClock(at(15, 690)); shiftTick(); at(15, 691); shiftTick(); stop();
+      out.lateNote = sent.map(n => [n.late, !!n.missed]);
+      careerTick(at(22, 0)); c.ms = 2; careerClock(at(22, 480)); const w1 = careerWork(); careerClock(at(22, 600)); out.earlyDip = Math.round((w1 - careerWork()) * 10) / 10;
+      careerTick(at(22, 760)); careerTick(at(23, 0)); out.shortKeepsRun = c.ms === 2 && c.md !== 22;
+      careerClock(at(23, 480)); careerClock(at(23, 960)); careerTick(at(23, 1000)); careerTick(at(24, 0)); out.fullEndsRun = c.ms === 0;
+      c.b.push(16); careerTick(at(16, 500)); out.leave = careerClock(at(16, 500));
+      careerTick(at(17, 0)); out.back = careerBack(17);
+      const S = schedData(), pl = S.byId.get('5-timeclock-1'), w = SOC.crew.filter(p => p.dept === 'works' && p.shift !== 'night' && isWorkDay(p, 10) && socAboard(p, 10) && planDay(p, 10).some(x => x.act === 'work' && /^5-/.test(x.placeId || '')));   // aboard, stationed on Deck 5
+      out.crew = w.map(p => planDay(p, 10).filter(x => x.tag === 'clock').length); out.place = !!pl;
+      return out; })()""")
+    print('  ', r)
+    check(r['in'] == 'in' and r['started'] and r['noMiss'], 'clocking in did not start the shift')
+    check(r['again'] and r['done'] is None, 'clocking out, or clocking out twice, went wrong')
+    check(r['notYet'] and r['auto'] == 1020, f"the auto clock-out: {r['auto']} (17:00 wanted)")
+    check(r['missedNoClock'], 'a workday after the first week with no clock-in was not missed')
+    check(r['sat'] is None and r['leave'] is None, 'the clock let you clock in on a day off or on leave')
+    check(r['back'], 'the first clock-in after leave is not "back"')
+    check(r['early'] is None, 'the clock let you clock in at 03:00')
+    check(r['earlyDip'] > 0 and r['shortKeepsRun'], f"a short shift (out at 10:00): dip {r['earlyDip']}, run kept and no miss: {r['shortKeepsRun']}")
+    check(r['fullEndsRun'], 'a full shift (out at 16:00) did not end the run of missed shifts')
+    check(r['lateNote'] == [[210, False]], f"clocking in at 11:30: the shift's start note was {r['lateNote']} (late 210, not missed, wanted)")
+    check(r['place'] and r['crew'] and min(r['crew']) >= 1 and sum(1 for n in r['crew'] if n >= 2) >= len(r['crew']) * 3 // 4, f"the Works crew don't use the clock: {r['crew']}")
+
+    print('Reputation you can see (0.61.15): a chip on turning a job in, one at a time, and a small gain:')
+    r = ev("""(() => { SHIP.rep = null; const w0 = careerWork(), d0 = repInit().dept.works, n0 = FLOATS.length; REP_CHIP_AT = -1e9; if (DEV.notes) delete DEV.notes.record;
+      simNote('job', { id: 'x1', step: 'turnin', job: 'restock', machine: null }); const n1 = FLOATS.length, text = n1 > n0 ? FLOATS[n1 - 1][0].textContent : null;
+      simNote('job', { id: 'x2', step: 'turnin', job: 'restock', machine: null }); const n2 = FLOATS.length;
+      return { text, once: n1 === n0 + 1 && n2 === n1, work: careerWork() > w0, dept: repInit().dept.works > d0, badge: DEV.notes && DEV.notes.record === 1 }; })()""")
+    print('  ', r)
+    check(r['text'] == '+ Works reputation' and r['once'], f"the reputation chip: {r['text']}, once: {r['once']}")
+    check(r['work'] and r['dept'], 'turning in a job without a machine gave no reputation')
+    check(r['badge'], 'the Record app got no mark')
+
+    print('A new game on day 0 is not sick (player engineer 5\'s bug in 0.60.5):')
+    r = ev("""(() => { const el0 = document.getElementById('sickCard'); if (el0) el0.hidden = true;   // left open by the sickness case
+      SHIP.career = null; SHIP.time.day = 0; SHIP.time.min = 1060; careerTick(); const c = SHIP.career;
+      return { sd: c.sd, sick: sickToday(0), now: sickNow(), stage: sickStage(), walk: Math.round(needEffects().walk * 100) / 100, card: !document.getElementById('sickCard') || document.getElementById('sickCard').hidden, excused: c.s.includes(0) }; })()""")
+    print('  ', r)
+    check(not r['sick'] and not r['now'] and r['stage'] == -1 and r['card'] and not r['excused'], 'a new game arrives sick on day 0')
 
     print('(e) The save:')
     r = ev(f"({PAPER})({{ plan: 'casual', days: 280, friends: [] }})")

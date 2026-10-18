@@ -1,0 +1,27 @@
+@template shy
+
+== clock.in
+- Oh. Morning. I... put the kettle on. If you want.
+- Hi. The board's long. Sorry. Not my fault. Still.
+- Morning. I like it quiet like this. Before everyone.
+
+== clock.out
+- Good shift. I think. Yes.
+- Five. That's... us. See you tomorrow.
+- Oh. Clocked out already? Today went fast.
+
+== clock.monday
+- Morning. Was your weekend... nice?
+- Hi. Good weekend? You don't have to tell me. Unless you want.
+
+== clock.friday
+- Have a good weekend. Um. Rest.
+- Two days off. That's nice. For you, I mean.
+
+== clock.back
+- Oh. You're back. That's... good. Really good.   #warm
+- Welcome back. I left you a clean pair of gloves.   #warm
+
+== clock.early
+- Oh. You're going? That's... fine. Take care.
+- Off early. I hope you're all right.
