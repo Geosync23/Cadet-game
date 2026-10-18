@@ -252,7 +252,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.55.11
+   STARSHIP CADET: CSV Wren                           build 0.55.12
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7810,7 +7810,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.55.11';                           // keep in step with the header's build line
+const GAME_BUILD = '0.55.12';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -34459,6 +34459,9 @@ const SCAN_WORDS = [[25, 'failing'], [40, 'low'], [66, 'worn'], [101, 'good']];
 const scanWord = v => (SCAN_WORDS.find(w => v < w[0]) || SCAN_WORDS[3])[1];
 const scanHave = () => typeof hasTool === 'function' && hasTool('scanner');
 const scanDay = j => Math.floor((j.posted || 0) / 1440) + 1;
+// a job's machine by name ("Washer 2"), without the symptom section 17's job card may add after it
+const caseMachName = j => { const m = j && j.machine && machineById(j.machine); if (!m) return jobCard(j)[0];
+  return MACHINE_KINDS[m.kind].name + (machineList().filter(x => x.kind === m.kind && x.deck === m.deck).length > 1 ? ' ' + m.id.split('-').pop() : ''); };
 // a kind's parts as the scanner sees them: section 17's scanParts(kind), else the part causes in its fault table
 function scanPartsOf(m) {
   if (typeof scanParts === 'function') { try { const p = scanParts(m.kind); if (Array.isArray(p) && p.length) return p; } catch (e) { /* the table's own */ } }
@@ -34490,7 +34493,7 @@ function scanRead(jobId) {
 // the panel, as device blocks: one bar a part, then a Fetch button each (the job's case, if it has one, is called)
 function scanView(jobId) {
   const j = SHIP.jobs.find(x => x.id === jobId), r = scanRead(jobId); if (!j || !r) return null;
-  const m = machineById(j.machine), f = caseCauses(m).find(x => x.id === j.cause), name = jobCard(j)[0], room = (DECKS[m.deck].rooms[m.room] || {}).name;
+  const m = machineById(j.machine), f = caseCauses(m).find(x => x.id === j.cause), name = caseMachName(j), room = (DECKS[m.deck].rooms[m.room] || {}).name;
   const B = [{ kind: 'text', text: 'Scanner · ' + name + (room ? ' (' + room + ')' : ''), mark: 'big' }, { kind: 'text', text: 'The job: ' + (f && f.shows || 'a fault') }];
   B.push({ kind: 'bars', items: r.map(([p, v]) => ({ label: p.replace(/^./, x => x.toUpperCase()) + ' · ' + scanWord(v), value: v, level: v < 40 ? 'low' : v < 66 ? 'mid' : '' })) });
   if (j.picked) B.push({ kind: 'text', text: 'Fetching: ' + j.picked + '.', mark: 'hot' });
@@ -34525,7 +34528,7 @@ function scanFitted(j) {
   j.scanWrong = true; j.picked = f.part;
   if (!(typeof jobSetPart === 'function' && jobSetPart(j.id, f.part))) j.parts = [f.part];   // the job now names the right part
   j.stepsDone = []; j.touched = shipNow();
-  if (typeof toast === 'function' && !SIM_AT) toast(jobCard(j)[0], line);
+  if (typeof toast === 'function' && !SIM_AT) toast(caseMachName(j), line);
   return true;
 }
 const SCAN_UI = { job: null };
@@ -34702,8 +34705,8 @@ function caseShow(c, j) {
   const t = caseNow(), m = machineById(j.machine), f = caseCauses(m).find(x => x.id === c.cause);
   c.wait = false; c.until = Math.floor(t / 1440) * 1440 + DAY_SHIFT[1]; c.posted = t;
   j.parts = []; j.stepsDone = (j.stepsDone || []).filter(k => k !== 0);   // the part is yours to find
-  const shows = f && f.shows || 'acts up', fb = 'Head-scratcher: ' + jobCard(j)[0] + ' ' + shows;
-  c.title = (typeof worksText === 'function' && worksText('case.title', null) || '').replace('{machine}', jobCard(j)[0]).replace('{shows}', shows) || fb;
+  const shows = f && f.shows || 'acts up', fb = 'Head-scratcher: ' + caseMachName(j) + ' ' + shows;
+  c.title = (typeof worksText === 'function' && worksText('case.title', null) || '').replace('{machine}', caseMachName(j)).replace('{shows}', shows).replace(/\.$/, '') || fb;   // a card's title: no full stop
   if (!/^Head-scratcher/.test(c.title)) c.title = 'Head-scratcher: ' + c.title;
   j.title = c.title;
 }
@@ -34852,7 +34855,7 @@ function caseFitted(j) {
     line = said || (s.part ? 'New ' + s.part + ' in.' : 'Done.') + ' Still ' + shows + '.';
   }
   j.stepsDone = []; j.parts = []; j.touched = shipNow();
-  if (typeof toast === 'function' && !SIM_AT) toast(jobCard(j)[0], line);
+  if (typeof toast === 'function' && !SIM_AT) toast(caseMachName(j), line);
   const wrong = c.calls.filter(x => x !== c.cause).length;
   if (wrong === 2 && !c.talk && typeof toast === 'function' && !SIM_AT) toast('Fault notes', (c.by ? schedPeople().find(p => p.id === c.by) || { name: 'Calder' } : { name: 'Calder' }).name.split(' ')[0] + ' can talk it through with you: it\'s on Fault notes.');
   if (c.long) caseLongNext(c);
