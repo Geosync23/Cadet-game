@@ -1,6 +1,7 @@
 @tradition open-door
 // Open door (0.60.7): end-of-shift tea on Wednesdays at the Works tea corner, where the Chief sits with whoever's
-// there. It opens at 16:40; Works crew still on shift come straight from it (after-shift), Calder too.
+// there. It opens at 16:40; Works crew still on shift come straight from it (after-shift), Calder too. Only the tea
+// corner's seats: the Works bay's stations are still in use until the shift ends (day_check, 0.34.56).
 k: 445
 title: Open door
 when: weekly wednesday
@@ -8,7 +9,6 @@ at: 16:40-17:50
 min: 15
 after-shift: yes
 where: 5 room Tea corner: lounge-seat
-where: 5 room Works bay: work:works, free
 hold: 1
 who: calder always, works 40%, tea-break 25%, everyone 4%
 anim: calder talk, everyone drink

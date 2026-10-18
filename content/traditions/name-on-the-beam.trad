@@ -15,7 +15,6 @@ prio: 2
 after-shift: yes
 venue: works-bay
 where: 5 pool @name-beam
-where: 5 room Works bay: work:works, free
 where: 5 room Tea corner: lounge-seat
 hold: none
 who: calder always, torres-zeke always, pell 95%, works 80%
