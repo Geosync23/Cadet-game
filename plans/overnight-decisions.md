@@ -155,6 +155,6 @@ All 8 packages approved (Zeke: "all good except he still walks and talks" → he
 |---|---|
 | Bridge rules timing | Agreed: Step 3 (0.63.3) |
 | Ship health at the start | Starts a little lower, so you can see your impact (replaces "reads healthy on Days 0 and 1, mostly green", design-doc ~line 251) |
-| What a job helps | Each job helps ONE ship meter (or very few), not many |
+| What a job helps | Each job helps at least one ship meter, often several ("one of the meters if not many", corrected by the user ~19:22) |
 | Turning a job in | You see your rep go up AND the points added to the ship meter(s) it helped |
-| (lead call) Numbers | Day 0 overall ship health about 75 (was about 90): a mix of fair/worn systems with some green, none failing; one job adds a visible step (a few points) to its one system meter. Tunable after the user plays. Step 3 (0.63.3), systems seat (S successor) + C2 (turn-in) + U (the panel's +points). design-doc §ship health updated with it |
+| (lead call) Numbers | Day 0 overall ship health about 75 (was about 90): a mix of fair/worn systems with some green, none failing; one job adds a visible step (a few points) to each meter it touches: its main system, plus related ones where it makes sense. Tunable after the user plays. Step 3 (0.63.3), systems seat (S successor) + C2 (turn-in) + U (the panel's +points). design-doc §ship health updated with it |
