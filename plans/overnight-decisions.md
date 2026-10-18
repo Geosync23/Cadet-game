@@ -96,3 +96,14 @@ The user (~05:20): the lead may approve or reject everything overnight; don't ho
 | ~12:09 (lead 12) | With the new kinds of work (rounds, tuning, hauling, incidents) added, a steady player gets about 6.2 jobs a day, just over the plan's 3-6. Trim? | Yes: the new kinds of work count towards the same 3-6 a day, so the job board offers fewer ordinary jobs when you have those | Keeps your days as busy as the plan intended, not busier |
 | ~13:58 (lead 12) | Step 1 has one test left failing (a job's pause step not ending its work), already fixed by the player builder's newest reviewed piece. Release the Step 1 preview with the known failure, wait for a test-only fix, or add the newer piece? | Add the newer, reviewed player piece to Step 1 and re-run the tests it touches | The preview gets the real fix instead of a known fault; it costs under an hour and the piece is already reviewed |
 | ~14:12 (lead 12) | (Follow-up) The newer player piece did NOT fix that last failing check after all; the player builder says the check itself trips over an earlier part of the same test (the step works when tested on its own). Wait for a test fix, or release Step 1 with it explained? | Wait until about 14:45 for the test fix; if it isn't ready, release the Step 1 preview with that one check written up as a test problem | The game step works on its own; an hour's wait on a test isn't worth holding the preview longer |
+
+## The user's answers, 2026-10-18 ~15:18 (Step 3 survey https://claude.ai/artifact/U5bjpTSw238NhniSCCVp5R)
+| Question | The user's answer |
+|---|---|
+| Promotion, tracing, P1, T2 band pages | Approved |
+| Team jobs page | Approved with a change: a few a week, not one a week |
+| P2 Who saw what? | Approved, but only once that mechanic unlocks |
+| Air-duct tracing | Full air line in Step 3 (add the main-fan panel): "All now" |
+| Team jobs stage 2 (fetch parts for the team) | Step 4 with the other extras |
+| Spare parts running short | Keep as is |
+| Sleeker Tern second pass | Do it now |

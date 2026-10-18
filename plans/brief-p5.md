@@ -29,6 +29,7 @@ The user said go for Pillar 5 Steps 1 (Foundation) and 2 (Junior days, Days 2-8)
 | A deck architect (DA4) | claude/deck-0607 (its only push branch; fast-forwarded to d3d720b) | session_01P6DtVbtWZs9i82fJ4UzRuB |
 | O4 clothes owner (uniform grime for m2) | claude/arrival-0607b (0.42.46) | session_01MeEsh5sp4RyuD7KwdQEbLC (onboarding 4, on call) |
 | BM5 build master for Step 2 (0.63.1) | claude/p5-cand-s2 | session_01DbBJ7iK6TrrADyEw7qbCsQ (started by lead 12 ~11:53, depth 3) |
+| A5 deck architect 5 (Tern pass 2 + Step 3 places, 0.47.3+) | claude/deck-p5s3 | session_01CHRbUTZc18m7eBck8eWhXj (started by lead 12 ~15:20, depth 3) |
 | R2 reviewer for Step 2 | claude/reviews-p5-step2 | session_01DZoxp9pxhp63Wye1Kr2MsZ (started by lead 12 ~11:28, depth 3) |
 | M2 (tuning, incidents) | claude/mech-incidents | session_016kzZEwTjU6H1miJmA13TRh (started by lead 12 ~10:25, depth 3) |
 
