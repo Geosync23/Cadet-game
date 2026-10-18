@@ -37,3 +37,9 @@ The user said go for 0.60.7. Every seat reads, in order: CLAUDE.md, this brief, 
 - The lead checks every helper's memory at each hourly check-in (get_session context_usage). At ~60% a helper is told to finish its piece and write its handover note; at ~70% it hands over at once.
 - **Replacements are always started by the lead** (a depth-0 session), never by a helper, so each new session starts with a fresh lineage and can itself schedule and (if needed) start sessions. Older helpers (BM3, PE6, onboarding 3) were started by late leads and may be near the depth limit: they ask the lead to start any session (check runners included).
 - A helper that sees its own memory near 60% tells the lead without waiting to be asked.
+
+## Team trimmed (the user, ~04:10)
+- The sim seat folds into systems (systems takes the bartender rota, shower queue, crew hobbies and trays); the sim engineer pushes its work and a note (`plans/handover-sim-0607.md` on claude/sim-0607) and is closed.
+- Onboarding 3 does only Zeke's five fix notes, then hands over; onboarding 4 takes clothes/laundry, Zeke's Day 1/Day 2, then the Day 3 delivery.
+- Check runners: 2 (INTRO alone; DAYS + PLAYER + PERF staggered on the second); BM3 runs the rest.
+- Merge order: PE6, deck, systems (incl. sim), social, traditions, onboarding 3, onboarding 4, writer.
