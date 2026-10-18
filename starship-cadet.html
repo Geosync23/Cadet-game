@@ -249,7 +249,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.44.0
+   STARSHIP CADET: CSV Wren                           build 0.44.1
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7808,7 +7808,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.44.0';                           // keep in step with the header's build line
+const GAME_BUILD = '0.44.1';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -34459,7 +34459,8 @@ const WORKS_LOG = 30;                                    // the work log keeps y
 // the ladder (Steps 1 and 2; later steps add their rows). needs: { intro: 'shadow' } Day 1's shadow shift done (or,
 // with the intro skipped, any job of yours turned in) | { mech, uses } | { trained } | { rep: band } | { work: n }
 // (Pillar 4's SHIP.rep.ship.work) | { flag } | a list, all of them. by: the teacher (the first on shift that day).
-// (m7 and p3: Torres is off on Fridays, so Calder teaches them on Day 5; asked of the designer, 0.44.0.) where: the meeting place. job: the training job's kind (jobReserve, or the sub-block's own reserve). stages: the
+// (m7 and p3: Torres is off on Fridays, so Emeka Halloran teaches them on Day 5, Calder the last fallback: the designer
+// and the lead, 210b86f.) where: the meeting place. job: the training job's kind (jobReserve, or the sub-block's own reserve). stages: the
 // first is the main path; later ones open with use. fixed: { wd: weekday, Monday 1, at } for rows set in the week.
 // xp: Works reputation for each use (the drill and the inspection, attended).
 const CAREER_LADDER = [
@@ -34468,8 +34469,8 @@ const CAREER_LADDER = [
   { id: 'm3d', name: 'The drill', size: 'small', day: 3, tier: 1, rank: 'junior', needs: null, by: ['calder'], fixed: { wd: 3, at: 900 }, xp: 1, stages: [{ uses: 0 }] },
   { id: 'm5', name: 'Tuning', size: 'big', day: 4, tier: 1, rank: 'junior', needs: { mech: 'm4', uses: 1 }, by: ['brennan', 'calder'], where: { deck: 3, room: 'K' }, job: 'tune', stages: [{ uses: 0 }, { uses: 5 }] },
   { id: 'm3i', name: 'The inspection', size: 'small', day: 4, tier: 1, rank: 'junior', needs: null, by: ['tomas'], fixed: { wd: 4, at: 390 }, xp: 1, stages: [{ uses: 0 }] },
-  { id: 'm7', name: 'The scanner', size: 'big', day: 5, tier: 1, rank: 'junior', needs: { mech: 'm5', uses: 1 }, by: ['torres-zeke', 'calder'], where: { deck: 5, room: 'w' }, job: 'scan', tool: 'scanner', stages: [{ uses: 0 }, { uses: 5 }] },
-  { id: 'p3', name: 'What\'s been tried?', size: 'small', day: 5, tier: 1, rank: 'junior', needs: { trained: 'm7' }, by: ['torres-zeke', 'calder'], stages: [{ uses: 0 }] },
+  { id: 'm7', name: 'The scanner', size: 'big', day: 5, tier: 1, rank: 'junior', needs: { mech: 'm5', uses: 1 }, by: ['torres-zeke', 'halloran-emeka', 'calder'], where: { deck: 5, room: 'w' }, job: 'scan', tool: 'scanner', stages: [{ uses: 0 }, { uses: 5 }] },
+  { id: 'p3', name: 'What\'s been tried?', size: 'small', day: 5, tier: 1, rank: 'junior', needs: { trained: 'm7' }, by: ['torres-zeke', 'halloran-emeka', 'calder'], stages: [{ uses: 0 }] },
   { id: 'm6', name: 'Making it safe', size: 'big', day: 8, tier: 1, rank: 'junior', needs: { mech: 'm7', uses: 1 }, by: ['calder'], where: { deck: 5, room: 'o' }, job: 'incident', stages: [{ uses: 0 }, { uses: 3 }] },
   { id: 'm2', name: 'Your work uniform', size: 'small', day: 8, tier: 1, rank: 'junior', needs: { flag: 'works.oily' }, by: ['torres-zeke'], stages: [{ uses: 0 }] },
   { id: 't2', name: 'Your Tier 2 test job', size: 'big', day: 9, tier: 1, rank: 'junior', needs: [{ rep: 'relied' }, { trained: 'm6' }, { work: 40 }], by: ['calder'], where: { deck: 5, room: 'o' }, job: 'test', stages: [{ uses: 0 }] },
@@ -34493,11 +34494,21 @@ const ladderRow = id => CAREER_LADDER.find(r => r.id === id) || null;
 const worksDay = t => Math.floor(t / 1440) + 1;
 const worksName = id => { try { const p = evPerson(id); return p ? p.name : id; } catch (e) { return id; } };
 const worksFirst = id => worksName(id).replace(/^(Chief|Chef|Commander|Captain)\s+/, '').split(' ')[0];
-function worksText(key, fallback) {                      // the Works writer's words (content/works/*.lines), else the stand-in
-  const L = typeof LINES !== 'undefined' && LINES[key], e = Array.isArray(L) && L.length ? L[0] : null;
+// the Works writer's words (content/works/*.lines; keys in content/works/keys-p5.md), else the stand-in; {x} filled from
+// vars; k picks among several (What's next: one a day)
+function worksText(key, fallback, vars, k = 0) {
+  const L = typeof LINES !== 'undefined' && LINES[key], e = Array.isArray(L) && L.length ? L[k % L.length] : null;
   const t = e && typeof e.text === 'string' ? e.text : fallback;
-  return typeof t === 'string' ? t.replace(/\{me\}/g, () => { try { return chatName(); } catch (x) { return 'you'; } }) : t;
+  return typeof t === 'string' ? t.replace(/\{(\w+)\}/g, (m, x) => x === 'me' ? (() => { try { return chatName(); } catch (y) { return 'you'; } })() : vars && vars[x] != null ? String(vars[x]) : m) : t;
 }
+const worksHas = key => typeof LINES !== 'undefined' && Array.isArray(LINES[key]) && LINES[key].length > 0;
+const mechName = id => worksText('works.mech.' + id, (ladderRow(id) || { name: id }).name);
+function worksVoice(id, flagKey) {                       // a teacher's own lines under a flag (kind 'work'), in order, or null
+  try { const v = typeof VOICE !== 'undefined' && VOICE[id], who = typeof linesWho === 'function' ? linesWho(id) : null;
+    const out = ((v && v.lines && v.lines.work) || []).filter(x => x.flag === flagKey).map(e => who && typeof linesFill === 'function' ? linesFill(e.text, who, { t: shipNow(), flags: { [flagKey]: true } }) : e.text).filter(Boolean);
+    return out.length ? out : null; } catch (e) { return null; }
+}
+function worksSayAll(id, lines) { (lines || []).forEach((l, i) => { if (!i) worksSay(id, l); else if (typeof simTimeout === 'function') simTimeout(() => worksSay(id, l), 5200 * i); }); }
 SHIP.works = null;
 (() => { const s = SAVED && SAVED.ship && SAVED.ship.works; if (s && typeof s === 'object' && s.v === 1) SHIP.works = worksClean(s); })();
 // a save's ship.works read back: unknown keys dropped, numbers clamped, the log cut to 30; a junk save means none
@@ -34529,6 +34540,7 @@ function worksInit(now = shipNow()) {
 }
 // ---- the ladder ----
 const worksOpened = (W = SHIP.works) => new Set(W ? Object.values(W.op).flat() : []);
+const worksIsOpen = id => worksOpened().has(id);       // a row has opened (its kind is "open": a head-scratcher kind counts from here, not from trained)
 function ladderNeeds(n, W) {                             // are a row's needs met (from saved state only)
   if (!n) return true;
   if (Array.isArray(n)) return n.every(x => ladderNeeds(x, W));
@@ -34593,27 +34605,34 @@ function worksStage(mech) {                              // the highest stage wh
 // trained. Not there? It's offered again the next workday; nothing is missed. ----
 const TRAIN_WATCH = 15;                                  // ship minutes watching the teacher work before your turn
 const TRAIN_NEAR = 3;                                    // tiles from the job's spot that count as watching
-function trainSetup(row) {                               // made when first asked (never at load): the occasion, and stand-in lines until the Works writer's
+function trainSetup(row) {                               // made when first asked (never at load): the occasion
   const id = 'works.' + row.id;
   if (!OCCASIONS[id]) OCCASIONS[id] = { title: 'Training: ' + row.name.charAt(0).toLowerCase() + row.name.slice(1), kind: 'meeting', by: row.by[0], deck: (row.where || {}).deck || 5, room: (row.where || {}).room || 'w', at: 540, len: 30, script: 'train.' + row.id, due: () => false, mail: null };
-  if (!MEETING_SCRIPTS['train.' + row.id]) MEETING_SCRIPTS['train.' + row.id] = { title: row.name, from: worksName(row.by[0]), stub: true,
-    gist: worksFirst(row.by[0]) + ' waited for you. ' + row.name + ' will keep: they\'ll ask again on your next workday.',
-    lines: [{ who: row.by[0], text: row.size === 'big' ? 'Right. ' + row.name + '. I\'ll do one, you watch; then you do one and I watch.' : row.name + '. Watch how it\'s done.' },
-      { who: row.by[0], text: row.size === 'big' ? 'Come on, follow me.' : 'That\'s all there is to it.' }] };
   return OCCASIONS[id];
 }
-for (const r of SHIP.occasions) if (/^works\./.test(r.id) && ladderRow(r.id.slice(6))) trainSetup(ladderRow(r.id.slice(6)));   // a reload: its occasion closes and its meeting plays
+function trainScript(row, by) {                          // the writer's meeting for who teaches (train.<id>.<teacher>), else a stand-in made now
+  const id = 'train.' + row.id + '.' + by; if (MEETING_SCRIPTS[id]) return id;
+  if (MEETING_SCRIPTS['train.' + row.id]) return 'train.' + row.id;
+  MEETING_SCRIPTS[id] = { title: row.name, from: worksName(by), stub: true,
+    gist: worksFirst(by) + ' waited for you. ' + row.name + ' will keep: they\'ll ask again on your next workday.',
+    lines: [{ who: by, text: row.size === 'big' ? 'Right. ' + row.name + '. I\'ll do one, you watch; then you do one and I watch.' : row.name + '. Watch how it\'s done.' },
+      { who: by, text: row.size === 'big' ? 'Come on, follow me.' : 'That\'s all there is to it.' }] };
+  return id;
+}
+for (const r of SHIP.occasions) if (/^works\./.test(r.id) && ladderRow(r.id.slice(6))) { const row = ladderRow(r.id.slice(6)), o = trainSetup(row); o.script = trainScript(row, r.by || row.by[0]); }   // a reload: its occasion closes and its meeting plays
 function trainOffer(row, c, d, t) {                      // the ask, or the ask again: an appointment today at a time in both shifts
   const m = t - (d - 1) * 1440, by = ladderTeacher(row, d); if (!by) return false;
   c.by = by; c.d = d; c.w = 0;
   if (c.st === 'again') return trainWatch(row, c, t, true);
   const at = Math.min(900, Math.max(m + 60, 510) + Math.ceil(schedU(machSeed(row.id), d, 850) * 6) * 10), o = trainSetup(row);
-  o.by = by; const r = occasionAdd('works.' + row.id, (d - 1) * 1440 + at, false, o.len);
+  o.by = by; o.script = trainScript(row, by); const r = occasionAdd('works.' + row.id, (d - 1) * 1440 + at, false, o.len);
   if (!r) return false;
   c.st = 'meet'; c.occ = r.key;
   const place = DECKS[o.deck] && DECKS[o.deck].rooms[o.room] ? DECKS[o.deck].rooms[o.room].name : 'the Works bay', when = hhmm(at);
-  const body = worksText('works.train.' + row.id + '.mail', 'Meet me in the ' + place.replace(/^Works Chief's office$/, 'Chief\'s office') + ' on Deck ' + o.deck + ' at ' + when + '. I\'ll show you ' + row.name.charAt(0).toLowerCase() + row.name.slice(1) + '.');
-  if (typeof mailSend === 'function') mailSend({ at: t, from: worksName(by), subject: 'Training: ' + row.name, body, quiet: true });
+  const where = place.replace(/^Works Chief's office$/, 'the Chief\'s office') + ' on Deck ' + o.deck, ask = worksText('works.ask.' + row.id, '', { time: when, place: where, name: worksName(by) }), cut = ask.indexOf(' | ');
+  let subject = 'Training: ' + mechName(row.id), body = 'Meet me in the ' + where.replace(/^the /, '') + ' at ' + when + '. I\'ll show you ' + mechName(row.id).replace(/^./, x => x.toLowerCase()) + '.';
+  if (cut > 0) { subject = ask.slice(0, cut); body = ask.slice(cut + 3); if (body.indexOf(when) < 0) body += ' (' + when + ', ' + where + '.)'; }   // the writer's words; the time and place if they don't say
+  if (typeof mailSend === 'function') mailSend({ at: t, from: worksName(by), subject, body, quiet: true });
   if (t >= shipNow() - 1) { try { toast(worksName(by), body); } catch (e) { /* no UI */ } if (typeof setGoal === 'function' && !(SHIP.player && SHIP.player.track)) setGoal({ deck: o.deck, room: o.room, label: row.name + ' with ' + worksFirst(by) + ', ' + when }); }
   return true;
 }
@@ -34631,7 +34650,7 @@ function trainWatch(row, c, t, again) {                  // the teacher's traini
   if (!id) { c.st = 'again'; c.d = d; return false; }
   c.st = 'watch'; c.j = id; c.w = 0;
   const j = SHIP.jobs.find(x => x.id === id); if (j) j.train = row.id;
-  worksSay(c.by, worksText('works.train.' + row.id + (again ? '.again' : '.watch'), again ? 'Let\'s try that again. Follow me, and watch.' : 'Follow me. Watch this one.'));
+  worksSayAll(c.by, worksVoice(c.by, 'train.' + row.id + '.lead.take') || [again ? 'Let\'s try that again. Follow me, and watch.' : 'Follow me. Watch this one.']);
   return true;
 }
 function trainDo(row, c, t) {                            // your turn: the same slot, held for you; the teacher follows
@@ -34639,7 +34658,7 @@ function trainDo(row, c, t) {                            // your turn: the same 
   let id = null; try { id = M.reserve ? M.reserve(d, t - (d - 1) * 1440, slot, { train: row.id, yours: true }) : jobReserve(row.job, d, t - (d - 1) * 1440, slot, { train: row.id }); } catch (e) { id = null; }
   if (!id) { c.st = 'again'; return false; }
   c.st = 'do'; c.j = id; const j = SHIP.jobs.find(x => x.id === id); if (j) j.train = row.id;
-  worksSay(c.by, worksText('works.train.' + row.id + '.do', 'Your turn. It\'s on the board for you; I\'ll be right behind you.'));
+  worksSayAll(c.by, worksVoice(c.by, 'train.' + row.id + '.lead.done') || ['Your turn. It\'s on the board for you; I\'ll be right behind you.']);
   return true;
 }
 function trainNear(spot) {                               // you're watching: on its deck, in its room or within a few tiles of it
@@ -34676,10 +34695,13 @@ function trainTick(now) {                                // once a ship minute i
 }
 function worksTrained(id, t = shipNow()) {               // trained: the Training page, the tool, the note
   const W = worksInit(t), row = ladderRow(id); if (!W || !row || W.tr[id] !== undefined) return false;
-  W.tr[id] = worksDay(t); if (W.cur && W.cur.id === id) W.cur = null;
+  W.tr[id] = worksDay(t);
   if (row.tool) toolGive(row.tool, t);
-  if (row.size === 'small' && MEETING_SCRIPTS['train.' + id] && !MEETING_SCRIPTS['train.' + id].stub && typeof dialogueShow === 'function' && !(typeof DIALOGUE !== 'undefined' && DIALOGUE)) dialogueShow('train.' + id);   // a word on the job itself
-  try { toast(worksName(row.by[0]), worksText('works.train.' + id + '.done', 'Trained: ' + row.name.charAt(0).toLowerCase() + row.name.slice(1) + '.' + (row.tool ? ' ' + WORK_TOOLS[row.tool].name.charAt(0).toUpperCase() + WORK_TOOLS[row.tool].name.slice(1) + ' is yours now.' : ''))); } catch (e) { /* no UI */ }
+  const by = W.cur && W.cur.id === id && W.cur.by || ladderTeacher(row, worksDay(t)) || row.by[0];
+  const sc = MEETING_SCRIPTS['train.' + id + '.' + by] ? 'train.' + id + '.' + by : 'train.' + id;   // (small rows: never a stand-in)
+  if (row.size === 'small' && MEETING_SCRIPTS[sc] && !MEETING_SCRIPTS[sc].stub && typeof dialogueShow === 'function' && !(typeof DIALOGUE !== 'undefined' && DIALOGUE)) dialogueShow(sc);   // a word on the job itself
+  try { toast(worksName(by), worksText('works.trained', 'Trained: {mech}, with {name}.', { mech: mechName(id).replace(/^./, x => x.toLowerCase()), name: worksName(by) }) + (row.tool ? ' ' + toolName(row.tool).replace(/^./, x => x.toUpperCase()) + ' is yours now.' : '')); } catch (e) { /* no UI */ }
+  if (W.cur && W.cur.id === id) W.cur = null;
   simNote('trained', { mech: id });
   return true;
 }
@@ -34698,20 +34720,22 @@ function worksSay(id, text) {                            // the teacher says it 
 const hasTool = id => !!(SHIP.works && SHIP.works.tools[id]);
 function toolGive(id, t = shipNow()) { const W = worksInit(t); if (!W || !WORK_TOOLS[id] || W.tools[id]) return false; W.tools[id] = [worksDay(t), 0]; simNote('tool', { id }); return true; }
 const toolWear = id => hasTool(id) ? SHIP.works.tools[id][1] : 0;   // 0-1: kept, no effect until M11 tool upkeep
-const toolWord = w => w < .25 ? 'like new' : w < .6 ? 'well used' : 'wants looking after';
+const toolWord = w => w < .25 ? worksText('works.toolwear.new', 'like new') : w < .5 ? worksText('works.toolwear.good', 'in good order') : w < .75 ? worksText('works.toolwear.worn', 'well used') : worksText('works.toolwear.tired', 'wants looking after');
+const toolName = id => worksText('works.tool.' + id, WORK_TOOLS[id] ? WORK_TOOLS[id].name : id);
 function worksLockerText() {                             // section 15b's locker tap, one line (or null)
   const W = SHIP.works, ts = W ? Object.keys(W.tools).filter(k => !WORK_TOOLS[k].bench) : [];
-  return ts.length ? 'Your tools: ' + ts.map(k => WORK_TOOLS[k].name).join(', ') + '.' : null;
+  return ts.length ? worksText('works.locker', 'Your tools: {tools}.', { tools: ts.map(toolName).join(', ') }) : null;
 }
 // ---- skill in words (section 15's careerSpeed reads SHIP.works.sk; this counts and words it) ----
-function skillWord(kind) { const n = SHIP.works && SHIP.works.sk[kind] || 0; return n >= 15 ? 'you know these well' : n >= 5 ? 'getting the hang of these' : 'new to you'; }
+function skillWord(kind) { const n = SHIP.works && SHIP.works.sk[kind] || 0; return n >= 15 ? worksText('works.skill.know', 'you know these well') : n >= 5 ? worksText('works.skill.hang', 'getting the hang of these') : worksText('works.skill.new', 'new to you'); }
 // ---- your Works reputation in your rank ----
 function worksXp(n) { const W = worksInit(); if (!W || !n) return; W.xp = Math.max(0, W.xp + n); }
 function worksBand() {                                   // 'new' ... 'relied', or null before SHIP.works (section 17 keeps today's order)
   const W = SHIP.works; if (!W) return null;
   const B = WORK_BANDS[W.tier] || WORK_BANDS[1]; let b = B[0][1]; for (const [x, k] of B) if (W.xp >= x) b = k; return b;
 }
-const worksBandWord = () => { const b = worksBand() || 'new', W = SHIP.works; return b === 'new' && W && W.rank !== 'junior' ? 'New ' + (W.rank === 'specialist' ? 'specialist' : 'officer') : BAND_WORD[b]; };
+const worksBandWord = () => { const b = worksBand() || 'new', W = SHIP.works; return b === 'new' && W && W.rank !== 'junior' ? worksText('works.band.newofficer', 'New ' + (W.rank === 'specialist' ? 'specialist' : 'officer')) : worksText('works.band.' + b, BAND_WORD[b]); };
+const worksRankTitle = (W = SHIP.works) => worksText('works.rank.' + (W ? W.rank : 'junior'), RANK_TITLE[W ? W.rank : 'junior']);
 // your jobs turned in (simNote('job', { step: 'turnin' })): reputation, skill by machine kind, the work log
 onSim('job', n => {
   if (!n || n.step !== 'turnin') return;
@@ -34727,34 +34751,50 @@ onSim('job', n => {
 });
 onSim('job', n => {                                      // the teacher's word at each step of your training job
   const c = SHIP.works && SHIP.works.cur; if (!n || !c || c.st !== 'do' || n.id !== c.j || n.step === 'turnin') return;
-  const key = n.step === 'stop' ? 'stop' : n.step;
-  worksSay(c.by, worksText('works.train.' + c.id + '.' + key, { take: 'Good. Take your time.', stop: 'That\'s it. Next.', done: 'Done. Turn it in at the board.' }[key]));
+  const key = n.step === 'stop' ? ({ job: 'hold', pickup: 'carry', drop: 'carry', cart: 'carry', load: 'carry', unload: 'carry', return: 'carry' }[n.tag] || n.tag || 'hold') : n.step;
+  const say = worksVoice(c.by, 'train.' + c.id + '.follow.' + key) || [{ take: 'Good. Take your time.', done: 'Done. Turn it in at the board.' }[key] || (n.step === 'stop' ? 'That\'s it. Next.' : null)].filter(Boolean);
+  worksSayAll(c.by, say);
 });
 onSim('shiftMissed', n => worksXp(WORK_XP.missed));
 onSim('jobAbandoned', n => worksXp(WORK_XP.abandoned));
 function worksNoticed(jobId, who) {                      // someone noticed a job of yours (section 20 may call it): the log shows who
   const e = SHIP.works && SHIP.works.log.find(x => x[0] === jobId); if (!e || typeof who !== 'string') return false; e[4] = who.slice(0, 40); return true;
 }
-// "What's next": one sentence, always true: the training under way, else the next row that can open, else a word from Calder
+// "What's next": one sentence, always true (the writer's content/works/next.lines, one a day if several): the training
+// under way (next.wait.<id>), the test job when it's open (next.t2), else the next row that can open (next.<id>), else
+// a word for where you stand (next.band.<band>)
 function worksNext() {
-  const W = SHIP.works; if (!W) return worksText('works.next.none', 'Keep at it: Calder\'s watching your work.');
-  const c = W.cur, row = c && ladderRow(c.id);
-  if (row) { const who = worksFirst(c.by || row.by[0]), r = c.occ && SHIP.occasions.find(x => x.key === c.occ);
-    return worksText('works.next.' + row.id, c.st === 'meet' && r ? who + ' wants to show you ' + row.name.toLowerCase() + ': ' + hhmm(r.at % 1440) + ', ' + (DECKS[r.deck].rooms[r.room] || { name: 'the Works bay' }).name + '.'
-      : c.st === 'watch' ? who + ' is showing you ' + row.name.toLowerCase() + '. Watch closely.' : c.st === 'do' ? 'Your turn at ' + row.name.toLowerCase() + ', with ' + who + ' watching.'
-      : who + ' will show you ' + row.name.toLowerCase() + ' on your next workday.'); }
-  const opened = worksOpened(W), next = CAREER_LADDER.find(r => !opened.has(r.id) && WORK_MECH[r.id] && r.tier <= W.tier && r.size === 'big');
-  if (next) return worksText('works.next.' + next.id + '.soon', worksFirst(next.by[0]) + ' will show you ' + next.name.toLowerCase() + ' when you\'re ready.');
-  return worksText('works.next.' + (worksBand() || 'new'), 'Keep at it: Calder\'s watching your work.');
+  const W = SHIP.works, k = Math.floor(schedU(851, SHIP.time.day, 851) * 8);
+  if (!W) return worksText('next.band.new', 'Keep at it: Calder\'s watching your work.', null, k);
+  const c = W.cur, row = c && ladderRow(c.id), low = s => s.replace(/^./, x => x.toLowerCase());
+  if (row) { const who = worksFirst(c.by || row.by[0]), r = c.occ && SHIP.occasions.find(x => x.key === c.occ), v = { name: worksName(c.by || row.by[0]), first: who, mech: low(mechName(row.id)) };
+    const say = c.st === 'meet' && r ? who + ' wants to show you ' + v.mech + ': ' + hhmm(r.at % 1440) + ', ' + (DECKS[r.deck].rooms[r.room] || { name: 'the Works bay' }).name + '.'
+      : c.st === 'watch' ? who + ' is showing you ' + v.mech + '. Watch closely.' : c.st === 'do' ? 'Your turn at ' + v.mech + ', with ' + who + ' watching.'
+      : who + ' will show you ' + v.mech + ' on your next workday.';
+    return c.st === 'meet' || c.st === 'again' || c.st === 'ask' ? worksText('next.wait.' + row.id, say, v, k) : say; }
+  const opened = worksOpened(W);
+  if (opened.has('t2') && !(W.test && W.test.passed)) return worksText('next.t2', 'Calder has your test job ready.', null, k);
+  const next = CAREER_LADDER.find(r => !opened.has(r.id) && WORK_MECH[r.id] && r.tier <= W.tier && r.size === 'big');
+  if (next) return worksText('next.' + next.id, worksFirst(next.by[0]) + ' will show you ' + mechName(next.id).replace(/^./, x => x.toLowerCase()) + ' when you\'re ready.', { name: worksName(next.by[0]), mech: mechName(next.id) }, k);
+  return worksText('next.band.' + (worksBand() || 'new'), 'Keep at it: Calder\'s watching your work.', null, k);
 }
 // the Record's first lines (section 19 asks): your rank, your Works reputation and "What's next"
 function worksRecordHead() {
-  const W = SHIP.works, rank = W ? W.rank : 'junior', tier = W ? W.tier : 1;
-  return { kind: 'text', mark: 'hot', text: RANK_TITLE[rank] + ', tier ' + tier + '. Works reputation: ' + (W ? worksBandWord() : 'New') + '. What\'s next: ' + worksNext() };
+  const W = SHIP.works, tier = W ? W.tier : 1, v = { title: worksText('works.title.t' + tier, 'tier ' + tier), rank: worksRankTitle(W), band: W ? worksBandWord() : worksText('works.band.new', 'New'), next: worksNext() };
+  return { kind: 'text', mark: 'hot', text: worksText('works.record', '{rank}, {title}. Works reputation: {band}. What\'s next: {next}', v) };
 }
-// ---- the device's Works app: Training, Work log, Tools (24k adds Fault notes and the Chief's notes) ----
+// ---- the device's Works app: Training, Work log, Tools; other sections add tabs with worksTabAdd (24k: Fault notes and
+// the Chief's notes): worksTabAdd({ id, title, order, view() -> [blocks], act?(verb, arg) }); the app's act passes
+// any verb but 'tab' to the tab on show ----
 let WORKS_TAB = 'training';
-const WORKS_TABS = [['training', 'Training'], ['log', 'Work log'], ['tools', 'Tools']];
+const WORKS_TABS = [];
+function worksTabAdd(def) {
+  if (!def || typeof def.id !== 'string' || typeof def.view !== 'function') return false;
+  const i = WORKS_TABS.findIndex(x => x.id === def.id); if (i >= 0) WORKS_TABS.splice(i, 1);
+  WORKS_TABS.push({ order: 50, title: def.id, ...def }); WORKS_TABS.sort((a, b) => a.order - b.order || (a.id < b.id ? -1 : 1));
+  if (typeof deviceRefresh === 'function') try { deviceRefresh(); } catch (e) { /* the device isn't up yet */ }
+  return true;
+}
 function worksLogTitle(e) {                              // a log row's title, from the job if it's still on the list, else its id
   const j = (SHIP.jobs || []).find(x => x.id === e[0]);
   try { if (j) { const [title] = jobCard(j), verb = { service: 'Service', repair: 'Repair', overhaul: 'Overhaul' }[j.kind]; return verb ? verb + ': ' + title : title; } } catch (x) { /* gone */ }
@@ -34763,31 +34803,37 @@ function worksLogTitle(e) {                              // a log row's title, f
   if (m && MACHINE_KINDS[m.kind]) return (verb ? verb + ': ' : '') + MACHINE_KINDS[m.kind].name;
   return e[3] ? e[3].charAt(0).toUpperCase() + e[3].slice(1) : 'A job';
 }
-function worksView() {
+worksTabAdd({ id: 'training', title: worksText('works.tab.training', 'Training'), order: 10, view() {
   const W = SHIP.works, B = [], say = (text, mark) => B.push({ kind: 'text', text, mark });
-  B.push({ kind: 'buttons', items: WORKS_TABS.map(([id, label]) => ({ label, on: WORKS_TAB === id, action: { app: 'works', do: 'tab', arg: id } })) });
-  if (WORKS_TAB === 'training') {
-    say(RANK_TITLE[W ? W.rank : 'junior'] + '. Works reputation: ' + (W ? worksBandWord() : 'New') + '.', 'hot');
-    say('What\'s next: ' + worksNext());
-    const rows = [];
-    if (worksShadowDone(W)) rows.push({ text: 'The job loop', sub: 'with Zeke Torres, Day 1' });
-    if (W) for (const r of CAREER_LADDER) if (W.tr[r.id] !== undefined) rows.push({ text: r.name, sub: 'with ' + worksName(r.by[0]) + ', Day ' + W.tr[r.id] });
-    say('Trained', 'head'); if (rows.length) B.push({ kind: 'list', rows }); else say('Nothing yet. Torres will start you off.');
-    const kinds = W ? Object.keys(W.sk).filter(k => W.sk[k] >= 5 && MACHINE_KINDS[k]) : [];
-    if (kinds.length) { say('What you know', 'head'); B.push({ kind: 'list', rows: kinds.map(k => ({ text: MACHINE_KINDS[k].name.replace(/^./, x => x.toUpperCase()).replace(/([^s])$/, '$1s'), sub: 'You: ' + skillWord(k) + '.' })) }); }
-  } else if (WORKS_TAB === 'log') {
-    const L = W ? W.log.slice().reverse() : [];
-    if (!L.length) say('Your jobs will be listed here as you turn them in.');
-    else B.push({ kind: 'list', rows: L.map(e => ({ text: worksLogTitle(e), sub: ['Day ' + e[1]].concat(e[2] & 1 ? ['found by you'] : [], e[2] & 2 ? ['right first time'] : [], e[2] & 4 ? ['a clever fix'] : [], e[4] ? [worksFirst(e[4]) + ' noticed'] : []).join(' · ') })) });
-  } else {
-    const ts = W ? Object.keys(W.tools) : [];
-    if (!ts.length) say('No tools of your own yet. They come with the work that needs them.');
-    else B.push({ kind: 'list', rows: ts.map(k => ({ text: WORK_TOOLS[k].name.replace(/^the /, '').replace(/^./, x => x.toUpperCase()), sub: (WORK_TOOLS[k].bench ? 'In the machine shop' : 'In your locker') + ' · ' + toolWord(W.tools[k][1]) + ' · since Day ' + W.tools[k][0] })) });
-  }
-  return { title: 'Works', blocks: B };
+  say(worksRankTitle(W) + '. Works reputation: ' + (W ? worksBandWord() : worksText('works.band.new', 'New')) + '.', 'hot');
+  say(worksText('works.training.next', 'What\'s next:') + ' ' + worksNext());
+  const rows = [];
+  if (worksShadowDone(W)) rows.push({ text: mechName('job').replace(/^job$/, 'The job loop'), sub: 'with Zeke Torres, Day 1' });
+  if (W) for (const r of CAREER_LADDER) if (W.tr[r.id] !== undefined) rows.push({ text: mechName(r.id), sub: 'Day ' + W.tr[r.id] });
+  say('Trained', 'head'); if (rows.length) B.push({ kind: 'list', rows }); else say(worksText('works.training.none', 'Nothing yet. Torres will start you off.'));
+  const kinds = W ? Object.keys(W.sk).filter(k => W.sk[k] >= 5 && MACHINE_KINDS[k]) : [];
+  if (kinds.length) { say('What you know', 'head'); B.push({ kind: 'list', rows: kinds.map(k => { const machine = MACHINE_KINDS[k].name.replace(/^./, x => x.toUpperCase()).replace(/([^s])$/, '$1s');
+    return { text: worksText('works.skill.row', '{machine}: {skill}.', { machine, skill: skillWord(k) }) }; }) }); }
+  return B;
+} });
+worksTabAdd({ id: 'log', title: worksText('works.tab.log', 'Work log'), order: 20, view() {
+  const W = SHIP.works, L = W ? W.log.slice().reverse() : [];
+  if (!L.length) return [{ kind: 'text', text: worksText('works.log.none', 'Your jobs will be listed here as you turn them in.') }];
+  return [{ kind: 'list', rows: L.map(e => ({ text: worksLogTitle(e), sub: ['Day ' + e[1]].concat(e[2] & 1 ? [worksText('works.log.found', 'found by you')] : [], e[2] & 2 ? [worksText('works.log.first', 'right first time')] : [],
+    e[2] & 4 ? [worksText('works.log.clever', 'a clever fix')] : [], e[4] ? [worksText('works.log.noticed', '{name} noticed', { name: worksFirst(e[4]) })] : []).join(' · ') })) }];
+} });
+worksTabAdd({ id: 'tools', title: worksText('works.tab.tools', 'Tools'), order: 30, view() {
+  const W = SHIP.works, ts = W ? Object.keys(W.tools) : [];
+  if (!ts.length) return [{ kind: 'text', text: worksText('works.tools.none', 'No tools of your own yet. They come with the work that needs them.') }];
+  return [{ kind: 'list', rows: ts.map(k => ({ text: toolName(k).replace(/^the /, '').replace(/^./, x => x.toUpperCase()), sub: (WORK_TOOLS[k].bench ? 'In the machine shop' : 'In your locker') + ' · ' + toolWord(W.tools[k][1]) + ' · since Day ' + W.tools[k][0] })) }];
+} });
+function worksView() {
+  const tab = WORKS_TABS.find(x => x.id === WORKS_TAB) || WORKS_TABS[0], B = [{ kind: 'buttons', items: WORKS_TABS.map(x => ({ label: x.title, on: x === tab, action: { app: 'works', do: 'tab', arg: x.id } })) }];
+  let more = []; try { more = tab ? tab.view() || [] : []; } catch (e) { more = [{ kind: 'text', text: 'Nothing to show.' }]; }
+  return { title: worksText('works.app.title', 'Works'), blocks: B.concat(more) };
 }
-if (typeof deviceApp === 'function') deviceApp({ id: 'works', title: 'Works', short: 'Works', icon: 'wrench', order: 31, view: worksView, hidden: () => !SHIP.works,   // from Day 1's evening (nothing changes Days 0-1)
-  act(verb, arg) { if (verb === 'tab' && WORKS_TABS.some(x => x[0] === arg)) WORKS_TAB = arg; } });
+if (typeof deviceApp === 'function') deviceApp({ id: 'works', title: worksText('works.app.title', 'Works'), short: 'Works', icon: 'wrench', order: 31, view: worksView, hidden: () => !SHIP.works,   // from Day 1's evening (nothing changes Days 0-1)
+  act(verb, arg) { if (verb === 'tab') { if (WORKS_TABS.some(x => x.id === arg)) WORKS_TAB = arg; return; } const tab = WORKS_TABS.find(x => x.id === WORKS_TAB); if (tab && tab.act) return tab.act(verb, arg); } });
 // ---- the clock: worksTick() from the main loop (section 12) each frame; it acts once a ship minute (the training)
 // and once a ship hour (the ladder). After a skip or a sleep the ladder catches up (training needs you there). ----
 const WORKS_TICK = { m: -1, h: -1 };

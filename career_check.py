@@ -145,6 +145,7 @@ with sync_playwright() as pw:
         t = st['teach'].get(k, {})
         check(k in st['trained'], f'steady: {k} never trained')
         check(t.get('by') not in (None, 'you') and t.get('you') == 'you', f"steady: {k}'s training: the teacher's job then yours ({t})")
+    check(st['teach'].get('m7', {}).get('by') == 'halloran-emeka', f"steady: the scanner on Day 5 is Emeka Halloran's to teach ({st['teach'].get('m7')})")
     check(st['works']['tools'].get('clipboard') and st['works']['tools'].get('scanner'), f"steady: tools given {st['works']['tools']}")
     check(len(st['mail']) >= 5 and len(st['occ']) >= 5 and all(o['status'] != 'missed' for o in st['occ']), f"steady: an ask (Mail and appointment) for each big training: {st['occ']}")
     b = {x['d']: x['band'] for x in st['days']}
@@ -186,6 +187,13 @@ with sync_playwright() as pw:
     check(e['give'] and not e['again'] and e['has'] and abs(e['wear'] - .2) < 1e-9, 'tools: given once, worn by use')
     check(e['missed'] == 7 and e['aband'] == 5 and e['floor'] == 0, 'a missed shift -3, an abandoned job -2, never below 0')
     check(e['before'] is None, 'SHIP.works made before Day 1\'s shift ended')
+
+    tb = ev("""(() => { const r = worksTabAdd({ id: 'test', title: 'Test', order: 40, view: () => [{ kind: 'text', text: 'hello' }], act: (v, a) => { window.__tabAct = v + ':' + a; } });
+      WORKS_TAB = 'test'; const v = worksView(); deviceDo({ app: 'works', do: 'poke', arg: 7 }); const got = window.__tabAct;
+      WORKS_TABS.splice(WORKS_TABS.findIndex(x => x.id === 'test'), 1); WORKS_TAB = 'training';
+      return { r, tabs: v.blocks[0].items.map(x => x.label), body: v.blocks[1] && v.blocks[1].text, got }; })()""")
+    print('  worksTabAdd:', tb)
+    check(tb['r'] and tb['tabs'] == ['Training', 'Work log', 'Tools', 'Test'] and tb['body'] == 'hello' and tb['got'] == 'poke:7', 'worksTabAdd: a tab shows, in order, and gets its verbs')
 
     print('(f) The save:')
     sv = ev(f"""(() => {{ const r = ({PAPER})({{ plan: 'steady', days: 2 }}); const W = SHIP.works;
