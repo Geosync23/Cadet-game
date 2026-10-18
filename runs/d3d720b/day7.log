@@ -1,0 +1,31 @@
+Day 7 (Sunday), 76 people aboard (1 of them guests)
+Schedules: sleep < 6 h 0 | meals < 2 0 | shift short 0 | double-booked 0 | gaps 0
+  peak headcount by deck: 0: 71 at 00:00, 1: 10 at 14:15, 2: 17 at 23:00, 3: 74 at 18:20, 4: 55 at 06:55, 5: 8 at 08:00, 6: 3 at 21:00
+  moments with no place (standing about): {'off': 12}
+Rooms in use over the week from day 7: 62 of 69 place types (deck and type) used
+  never used: 2 work:command, 3 bar-order, 3 patient-bed, 3 storage, 4 event, 5 event, 5 storage
+  used by fewer than 3 people: 1 work:helm (2), 1 work:ops (1), 1 work:watch (1), 3 bar-staff (2), 3 work:store (2), 6 bench (1)
+Crew needs (lowest/middle):
+  06:30  hunger 0/36  energy 37/100  hygiene 29/81  fitness 9/88  social 68/81
+  12:00  hunger 26/73  energy 71/82  hygiene 52/89  fitness 7/93  social 87/100
+  19:00  hunger 0/99  energy 45/56  hygiene 33/80  fitness 5/92  social 96/100
+  23:00  hunger 15/78  energy 35/47  hygiene 46/84  fitness 3/95  social 86/99
+Plans the same twice: True
+Deck 1: up to 10 crew, worst stuck 0.0 ship min (yilmaz-karin 12:11), draw calls peak 210 (budget 450)
+  busiest frames: 14:51 crowd 210 calls, 9 crew, 15:50 crowd 207 calls, 8 crew
+Deck 2: up to 18 crew, worst stuck 0.0 ship min (nakamura-bilal 09:51), draw calls peak 203 (budget 450)
+  busiest frames: 08:54 crowd 203 calls, 8 crew, 09:54 crowd 203 calls, 10 crew
+Deck 3: up to 75 crew, worst stuck 0.0 ship min (achterberg-lars 06:10), draw calls peak 280 (budget 450)
+  busiest frames: 17:49 lift 280 calls, 65 crew, 09:54 lift 279 calls, 35 crew
+  servery line: 120 joined, 120 served, longest 6, longest wait 3.5 ship min, trays 97, gone with the meal 97, gave up 0 []
+Deck 4: up to 55 crew, worst stuck 0.0 ship min (dlamini-lukas 05:20), draw calls peak 247 (budget 450)
+  busiest frames: 06:55 crowd 247 calls, 54 crew, 05:56 crowd 244 calls, 50 crew
+Deck 5: up to 8 crew, worst stuck 0.0 ship min (eklund-leila 07:54), draw calls peak 245 (budget 450)
+  busiest frames: 07:55 crowd 245 calls, 7 crew, 07:55 lift 232 calls, 7 crew
+Deck 6: up to 3 crew, worst stuck 0.0 ship min (), draw calls peak 166 (budget 450)
+  busiest frames: 00:00 lift 166 calls, 2 crew, 00:59 lift 166 calls, 2 crew
+Job visits (jobs on the books after the day): 1 work:works (panel): 2 at 2, 2 work:works (panel): 2 at 2, 3 garden: 1 at 1, 3 work:works (panel): 8 at 8, 4 work:works (panel): 9 at 8, 5 storage: 29 at 6, 5 work:works (panel): 8 at 7
+Deck 4 the same twice: True
+Arrival on, days 0 and 1, places booked twice: none
+errors []
+DAY CHECK OK

@@ -1,0 +1,32 @@
+Day 35 (Sunday), 76 people aboard (0 of them guests)
+Schedules: sleep < 6 h 0 | meals < 2 0 | shift short 0 | double-booked 0 | gaps 0
+  peak headcount by deck: 0: 73 at 15:00, 1: 9 at 15:45, 2: 18 at 23:05, 3: 74 at 18:10, 4: 53 at 06:55, 5: 9 at 13:20, 6: 3 at 21:00
+  moments with no place (standing about): {'off': 11}
+Rooms in use over the week from day 35: 62 of 69 place types (deck and type) used
+  never used: 2 work:command, 3 bar-order, 3 patient-bed, 3 storage, 4 event, 5 storage, 6 lift-wait
+  used by fewer than 3 people: 1 work:helm (2), 1 work:ops (1), 1 work:watch (1), 3 bar-staff (2), 3 work:store (2), 5 event (1), 6 bench (1)
+Crew needs (lowest/middle):
+  06:30  hunger 0/36  energy 37/100  hygiene 41/83  fitness 9/84  social 75/81
+  12:00  hunger 26/74  energy 71/81  hygiene 67/89  fitness 7/86  social 87/100
+  19:00  hunger 0/99  energy 45/55  hygiene 45/76  fitness 5/90  social 96/100
+  23:00  hunger 15/77  energy 35/46  hygiene 44/78  fitness 3/91  social 86/99
+Leavers waiting in the shuttle bay at 14:45 (the spot follows the bay's crowd places): teague-theo 5-shuttle-bay-crowd-1
+Plans the same twice: True
+Deck 1: up to 9 crew, worst stuck 0.0 ship min (), draw calls peak 210 (budget 450)
+  busiest frames: 10:53 crowd 210 calls, 8 crew, 13:51 lift 210 calls, 7 crew
+Deck 2: up to 19 crew, worst stuck 0.0 ship min (nakamura-bilal 12:22), draw calls peak 210 (budget 450)
+  busiest frames: 07:55 crowd 210 calls, 6 crew, 09:54 crowd 204 calls, 12 crew
+Deck 3: up to 74 crew, worst stuck 0.0 ship min (achterberg-lars 06:10), draw calls peak 275 (budget 450)
+  busiest frames: 18:48 crowd 275 calls, 74 crew, 07:55 lift 253 calls, 43 crew
+  servery line: 125 joined, 125 served, longest 6, longest wait 3.5 ship min, trays 104, gone with the meal 104, gave up 0 []
+Deck 4: up to 54 crew, worst stuck 0.0 ship min (dlamini-lukas 05:16), draw calls peak 243 (budget 450)
+  busiest frames: 00:00 crowd 243 calls, 52 crew, 04:57 crowd 241 calls, 51 crew
+Deck 5: up to 9 crew, worst stuck 0.0 ship min (rossi-femi 07:53), draw calls peak 217 (budget 450)
+  busiest frames: 08:54 crowd 217 calls, 8 crew, 09:54 crowd 217 calls, 8 crew
+Deck 6: up to 3 crew, worst stuck 0.0 ship min (), draw calls peak 166 (budget 450)
+  busiest frames: 00:00 lift 166 calls, 2 crew, 00:59 lift 166 calls, 2 crew
+Job visits (jobs on the books after the day): 1 work:works (panel): 3 at 3, 2 lift-wait: 1 at 1, 2 work:works (panel): 4 at 4, 3 lift-wait: 1 at 1, 3 storage: 2 at 2, 3 work:works (panel): 10 at 7, 4 work:works (panel): 4 at 3, 5 storage: 20 at 5, 5 work:works (panel): 3 at 2, 6 lift-wait: 1 at 1
+Deck 4 the same twice: True
+Arrival on, days 0 and 1, places booked twice: none
+errors []
+DAY CHECK OK

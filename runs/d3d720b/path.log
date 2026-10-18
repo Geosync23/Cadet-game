@@ -1,0 +1,10 @@
+Deck 1: 3000/3000 the same (1884 found, 1116 no path; 157 open tiles); new 231.7 ms, old 664.3 ms
+Deck 2: 3000/3000 the same (969 found, 2031 no path; 735 open tiles); new 636.4 ms, old 2805.9 ms
+Deck 3: 3000/3000 the same (2486 found, 514 no path; 715 open tiles); new 618.2 ms, old 3229.3 ms
+Deck 4: 3000/3000 the same (1094 found, 1906 no path; 605 open tiles); new 580 ms, old 1980.1 ms
+Deck 5: 3000/3000 the same (1766 found, 1234 no path; 528 open tiles); new 493.2 ms, old 2242.5 ms
+Deck 6: 3000/3000 the same (1647 found, 1353 no path; 282 open tiles); new 280.3 ms, old 1199.7 ms
+All decks: new 2840 ms, old 12122 ms (4.3x faster)
+A played day: 3436/3436 real calls the same (3435 found a path)
+PATH CHECK OK
+exit 0

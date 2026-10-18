@@ -1,0 +1,173 @@
+On paper, a week of normal days:
+  lowest {'hunger': 55, 'energy': 26.3, 'hygiene': 52.4, 'fitness': 62.5, 'social': 39.5, 'bathroom': 64.3, 'leisure': 46.6} slow minutes 0
+On paper, a week of neglect:
+  end {'hunger': 0, 'energy': 100, 'hygiene': 0, 'fitness': 0, 'social': 0, 'bathroom': 0, 'leisure': 0} lowest {'hunger': 0, 'energy': 21.6, 'hygiene': 0, 'fitness': 0, 'social': 0, 'bathroom': 0, 'leisure': 0} highest {'hunger': 59.9, 'energy': 100, 'hygiene': 60, 'fitness': 70, 'social': 70, 'bathroom': 59.9, 'leisure': 70}
+The speed rule:
+  fitness/energy: [speed, top speed ratio, walking speed reached after 1 s, as a ratio] {'80/80': [1.05, 1.05, 1.047], '20/80': [0.8, 0.8, 0.797], '80/20': [0.84, 0.84, 0.837], '20/20': [0.64, 0.64, 0.638], '25/25': [1, 1, 0.997]}
+  bathroom 0, then 0.5: [speed, walked, needGo, the pose blend, prop meshes, the device note] [[0.7, 0.7, True, 1, 0, 'Bursting'], [1, 1, False, 0, 0, 'You need']]
+Pause (0.28.48, the user's "Need a pause button"):
+  paused [on, overlay, button]: [True, True, 'Resume'] | before, after 3 s paused, 2 s after resuming: [1,360.06,59.997,"-4.326","0.665"] [1,360.06,59.997,"-4.326","0.665"] [1,361.26,59.917,"-3.500","0.500"] | resumed [on, overlay hidden, tips gap moved by the pause]: [False, True, 0]
+  a simTimeout across a 2 s pause [fired while paused, fired after, simNow moved while paused (ms)]: [0, 1, 0]
+  pause card keys [focused, dust, Tab keeps focus, dust after 1 s, Enter resumed, Escape resumed]: [True, True, True, True] True
+Walking speed on arrival (0.28.47, the user's "walking very slowly at the start"):
+  day 0 at 17:30 [day, unwell, speed, an unwell note]; a real sick day [unwell, slower]: [[0, False, 1, False], [True, True]]
+No tray, no meal (0.28.45, the user's):
+  a table, no tray: [activity, fed, tray on the table, tray in hand, food change, tray later] ['sit', False, False, None, -0.2, False]
+  a table with a served tray: ['eat', True, True, None, 8.2, True]
+Need warnings (0.28.41):
+    0 None
+    1 ['hunger', "You're hungry."]
+    2 None
+    3 None
+    4 ['hunger', 'Very hungry']
+    5 None
+    6 ['hunger', "You're hungry."]
+    7 ['bathroom', 'Bursting']
+    8 None
+    9 ['social', "You're lonely. Go and find someone."]
+    10 None
+    11 None
+    12 None
+    13 True
+    14 False
+    15 [[],false,false,0,false]
+    16 ['energy', "You're tired."]
+  in the game: [1, "You're hungry."]
+Teaching tips (0.28.42):
+    list [42, 42, 11, 182]
+    first ['t:rep', True, 't:rep', True]
+    gap [None, None, 't:deck3', True, None]
+    off [None, 0]
+    intro None
+    rep [1, None, 'not yet', 't:rep', 't:rep']
+    dev [None, 't:a-needs']
+    prio ['t:queue', 't:needs']
+    size 637
+The News feed (0.28.44):
+   {'counts': [4, 6, 4, 6, 7, 4, 6, 5, 5, 4, 2, 5, 6, 5], 'srcMax': 2, 'repeat': False, 'kept': 40, 'sources': 10, 'sorted': True, 'bytes': 6147, 'app': ['News feed', True, True], 'rel': 'Relationships', 'trad': True, 'tradText': None}
+  in the game: [['t:rep'], True, ['t:rep'], True]
+Sleep and time skips:
+  {'slept': 100, 'awake21h': 8, 'speed': 0.8, 'at': 'Day 3, Wednesday 03:00'}
+Long days (energy from 100 to the tired line, awake):
+  hours awake by fitness (food, hygiene, social held at 50): {'20': 16.1, '50': 17.1, '80': 18.2}
+Needs give bonuses and penalties (needEffects):
+  [walk, task, drain, socialGain, marks] {'mid': [1, 1, 1, 1, ''], 'high': [1.05, 1.265, 0.902, 1.5, 'energy,fitness,hunger,hygiene,social'], 'low': [0.64, 0.85, 1.113, 0.5, 'energy,fitness,hunger,hygiene,social'], 'edge': [0.8, 1, 1.018, 1, 'fitness,hunger']}
+  the device: [['up:▲', 'down:▼'], ['▼ Unwashed: chats −50%', '▲ Well fed: tiring −4%']]
+  ten ship minutes of a workout count as (rested, hungry, neither): [11.5, 8.5, 10]
+Going to bed (your bunk, no dialog):
+  at 14:00: [True, 'Too early to turn in. You can sleep here from 20:00.', 'Day 4, Thursday 14:00']
+  your bunk with a note, then again: [[True, 'Your bunk: You lie down for a rest. Tap anywhere to get up.'], [True, 'Your bunk: You lie down for a rest. Tap anywhere to get up.']]
+  lying down by day: ['lie', 'do', 'lie', True, 1.6, False] energy over an hour: 50 -> 53.0
+  walking off: [False, True]
+  at 21:00: True [5, '06:00', 100, 'Good morning', 'lie', 'do'] dialog shown: False
+  lay down at ['lie', False, '19:43'] -> past 20:00: [6, '06:00', 'lie']
+One player day, tapping the real things:
+  Shower                 tapped=True  poses=['stand'] 10:47 needs {'hunger': 18.9, 'energy': 98.7, 'hygiene': 89.8, 'fitness': 29.8, 'social': 19.7, 'bathroom': 18.3, 'leisure': 68.5} calls<=189
+  Toilet                 tapped=True  poses=['sit'] 10:53 needs {'hunger': 18.5, 'energy': 98.2, 'hygiene': 89.5, 'fitness': 29.8, 'social': 19.6, 'bathroom': 99.8, 'leisure': 68.4} calls<=156
+  Grab and go            tapped=True  poses=['stand'] 11:03 needs {'hunger': 43, 'energy': 97.4, 'hygiene': 89.1, 'fitness': 29.7, 'social': 19.4, 'bathroom': 98.8, 'leisure': 68.3} calls<=263
+  Treadmills             tapped=True  poses=['run'] 11:36 needs {'hunger': 40.8, 'energy': 88.9, 'hygiene': 87.7, 'fitness': 59.6, 'social': 18.9, 'bathroom': 95.5, 'leisure': 67.9} calls<=210
+  Weights                tapped=True  poses=['lift'] 12:06 needs {'hunger': 38.8, 'energy': 80.6, 'hygiene': 86.5, 'fitness': 89.5, 'social': 18.4, 'bathroom': 92.5, 'leisure': 67.5} calls<=223
+  Booth 1                tapped=True  poses=['sit:call'] 12:30 needs {'hunger': 37.1, 'energy': 78.9, 'hygiene': 85.4, 'fitness': 89.3, 'social': 58.2, 'bathroom': 90, 'leisure': 72.1} calls<=255
+  Toilet                 tapped=True  poses=['sit'] 12:47 needs {'hunger': 36, 'energy': 77.8, 'hygiene': 84.8, 'fitness': 89.1, 'social': 57.9, 'bathroom': 99.8, 'leisure': 71.9} calls<=286
+Seeing it work (0.28.20, 0.28.21): progress bars and +N notes
+  Shower       bar ['Showering · 12 min', 'Showering · 11 min']... notes ['+16 Hygiene', '+21 Hygiene', '+4 Food']
+  Toilet       bar ['Toilet · 4 min', 'Toilet · 3 min']... notes ['+71 Bathroom', '+82 Bathroom']
+  Grab and go  bar ['Grab and go · 3 min', 'Grab and go · 2 min']... notes ['+25 Food']
+  Treadmills   bar ['Working out · 25 min', 'Working out · 24 min']... notes ['+4 Fitness']
+  Booth 1      bar ['Calling home · 12 min', 'Calling home · 11 min']... notes ['+1 Social', '+10 Social', '+5 Leisure']
+  Deck 2 toilets private: 15 of 17 ['2-wctoilet-1', '2-wctoilet-2']
+  Shelves                tapped=True  poses=['browse'] 13:01 needs {'hunger': 35.1, 'energy': 76.8, 'hygiene': 84.2, 'fitness': 89, 'social': 57.7, 'bathroom': 98.4, 'leisure': 71.7} calls<=231
+  Counter                tapped=True  poses=['pay'] 13:05 needs {'hunger': 41.8, 'energy': 76.5, 'hygiene': 84, 'fitness': 88.9, 'social': 57.6, 'bathroom': 98, 'leisure': 71.7} calls<=213
+  credits 40 -> 38 | Paid: You pay 2 credits for a honey flapjack and have it on the way out. 38 credits left.
+  Servery, then a seat   tapped=True  poses=['stand'] 17:45 needs {'hunger': 41.5, 'energy': 76.2, 'hygiene': 83.8, 'fitness': 88.9, 'social': 57.5, 'bathroom': 97.5, 'leisure': 71.6} calls<=240
+  served, tray in hand, control back: ['curry and rice', 'tray', False]
+  Servery, then a seat (the seat) tapped=True  18:04 needs {'hunger': 96.3, 'energy': 74.9, 'hygiene': 83, 'fitness': 88.7, 'social': 60.3, 'bathroom': 95.5, 'leisure': 71.3}
+  the tray: carried to the seat True | on the table while eating True | after: on the table, in hand [False, False]
+  the real galley and machines in this build: {'takePortion': True, 'galleyJoin': True, 'shipEffects': True}
+  The queue, then a seat tapped=True  poses=['stand'] 18:08 needs {'hunger': 19.7, 'energy': 74.6, 'hygiene': 82.8, 'fitness': 88.7, 'social': 60.2, 'bathroom': 95.1, 'leisure': 71.3} calls<=247
+  served, tray in hand, control back: ['curry and rice', 'tray', False]
+  The queue, then a seat (the seat) tapped=True  18:30 needs {'hunger': 74.6, 'energy': 73.1, 'hygiene': 81.9, 'fitness': 88.4, 'social': 68.7, 'bathroom': 92.9, 'leisure': 71}
+  the line holds you (in it, tap held, asked, still queueing): [True, True, True, 'queue'] queue | after Leave: [False, True]
+  the real line from [[19, 10], 15.8] tiles/m away: in the line while walking {False} | while queueing {True} | phases ['walk', 'do'] | tray curry and rice
+  someone in the way: ['3-mess-3', 'wait'] -> ['wait', 'walk', 'in', 'do'] | stand-in, released before/after getting up: [False, 0, 0]
+  still in the galley's line after eating: False
+The store (credits, snacks, comforts):
+  [[14, ['a spare tiles set'], 54, None], [11, 1, 58], [True, False, None, 'A postcard of Earth is 3 credits, and you have 1. Finish a job or two first.'], [1, 0, None, True, True, 'old 1']]
+Gifts and your bunk (0.28.25: section 20's giftAdd, GIFT_MAKES, bunkNote; stand-ins when they're missing):
+  {'bought': [['postcard'], 0, 37], 'gifts': ['bar of chocolate', 'biscuits', 'tin of tea', 'paper novel', 'postcard', 'little plant', 'puzzle book', 'music chip', 'pocket puzzle', 'spare tiles set'], 'made': ['keyring'], 'mine': 'garden@11203', 'notToday': [], 'garden': ['herbs', 'tomato'], 'again': [], 'stub': False}
+Social from chatting and company:
+  first chat, again, clean, unwashed (and the remark), next day: [6, 1, 9, 3, True, 6]
+  first chat with a friend (0.28.43): 12
+  mess tables (seats each), your table-mates; ten minutes eating with [company, social]: nobody, 2 and 4 strangers at your table, 2 at another table, 2 and 4 close friends: {'tables': [4, 4, 4, 8, 8, 8, 8], 'mates': 7, 'out': [[0, 0], [2, 4], [4, 8], [0, 0], [6, 12], [6, 12]], 'mult': [1, 1.2, 1.5, 2, 3], 'rel': True}
+The note bus (0.28.22: simNote acts, inert until section 13 has simNote):
+  real
+Mail:
+  [True, False, '2', 2, ['Filters low', 'Cake tonight'], ['Mail', '2'], 2, 1, True]
+A machine tap (machineUse):
+  ['Air scrubber 1', True, '4-scrubber-1', 'Air scrubber 1: Air scrubber 1: in good order.']
+  a washer (its machine: the real one by the tap, else a stub by name and number): ['Washer 1', '4-washer-1', True]
+Crawlways (crouch-walk):
+  on a crawl tile [speed, crouching, toast], then off it [speed, crouching]: [0.5, True, 'You duck down and crouch-walk through.', 1, False]
+Sit anywhere:
+  tapped: ['3-bench-2', 'bench', 'Bench', True]
+  sitting: ['sit', '3-bench-2', 'sit', 0.48, False] | Where people wait for whoever is always last to breakfast. You sit down. Tap any
+  an hour sitting: energy drained 2.64 (awake, standing: 4.4)
+  walked off: [False, True]
+The treadmills, by real clicks (Deck 3 gym):
+  3-gym-1 (clicked at 0.3 m): ['3-gym-1', 'do', 'run'] | 5.0 ship min: fitness 40.5 -> 45.5, energy 69.7 -> 68.3 | belt moving True
+  3-gym-2 (clicked at 1.1 m): ['3-gym-2', 'do', 'run'] | 5.0 ship min: fitness 40.1 -> 45.1, energy 69.8 -> 68.4 | belt moving True
+  3-gym-3 (clicked at 0.6 m): ['3-gym-3', 'do', 'run'] | 5.0 ship min: fitness 40.0 -> 45.0, energy 69.8 -> 68.4 | belt moving True
+Squeezing past settled crew (the galley plant, Deck 3):
+  walled off without squeezing, path found, through the chef's tile: [True, True, True]
+  arrived at 39,1 | slowest 0.5 | Test Brennan: "Excuse me, Chef." Test shifts aside to let you by.
+Places held by crew, closed servery, walking away:
+  [True, False, "In use: Test 3-callhome-2 is on it. Someone is recording a message. The screen shows a child's drawing held up to a camera, light-years away."]
+  servery at 12:00 the next day: Servery: Closed. Dinner from 17:00. Cake after dinner: it's Esme's bir
+  walked away after 5 min: None visible True fitness 50 -> 50
+The ship's effects on needs (a set shipEffects reading):
+  {'drainHungerX2': 8, 'hygieneDrain': 2.5, 'speed': 1, 'maxV': 1, 'note': True, 'shower': 50}
+  playerFx is the real shipEffects for this deck: True
+The job loop (section 17's jobs):
+  your job: 4-washer-3@223 [['pump'], 4, '4-washer-3', 1]
+  inspected: Inspecting: The washer needs a pump. Main storage is on Deck 5.
+  fetched: ['pump'] Main storage: You take a pump. Now to the washer on Deck 4.
+  walked away mid-repair: None {'job': '4-washer-3@223', 'fitted': ['pump'], 'done': 4.039999999997235, 'seen': True, 'make': None}
+  touched (section 17's touchJob): [14969.019999999973, 14940.06, 14969.819999999972]
+  repaired: Job done: The washer is running sweetly again. That's one off the board. +15 cre | job done | condition 100
+  storage out of elements: Main storage: Nothing you need is on the shelves. None left: element. The machine shop next door can make one (about an 
+  made: ['element'] | Machine shop: You make an element. Now to the light relays on Deck 4.
+  a reserved job: ['reserve3:4-junction-1@15007.919999999936', ['relay', 'bracket'], 'bracket', 4, ['fetch', 'make', 'job']]
+  fetched: ['relay'] | Main storage: You take a relay. Now make the bracket in the machine shop next door.
+  made: ['relay', 'bracket'] | bar Machine shop 6 | stops done [[0, 1], ['fetch', 'make', 'job']] | Machine shop: You make a bracket. Now to the light relays on Deck 4.
+  repaired: ['done', False] | Job done: The light relays is running sweetly again. That's one off the board. +
+  notice: ['Your device', 'New job: Light relays 2, Deck 4 · starboard utility closet, and 1 more. Take it at the job board in the Works bay, Deck 5.']
+  three filters needed, carrying: ['filter', 'filter'] | Main storage: You take 2 × filter. Your hands are full; you'll need another trip for a filter. Now to the ligh
+  put back: [] | Main storage: You put back 2 × filter. | filters on the shelf 0 -> 2
+  the cart run:
+    taking the cart at dock 1
+    {'job': 'restock-stores@test', 'stage': 'empty', 'dock': '5-cart-1'} cart | Cart bay: The cart hums along at hip height. Load it in the cargo hold on Deck 5.
+    {'job': 'restock-stores@test', 'stage': 'full', 'dock': '5-cart-1'} cartfull | Cargo hold: The cart pulls in 1 crate by itself. Now to main storage on Deck 5: tap any sh
+    {'job': 'restock-stores@test', 'stage': 'done', 'dock': '5-cart-1'} cart | Unloaded: The cart unloads itself: 3 parts, each onto its own shelf. Take it back to its d
+    None False | Job done: Cart docked, run done. That's one off the board. +15 credits.
+    job done | filters on the shelf, in the hold before docking: [5, 0] | on the shelf after: 5
+The Repair button (0.28.52):
+  lamp: away False, at the stop True (96x44, on screen True), no part False, clicked -> ['ixStop', 'do'], then shown False
+  oven: away False, at the stop True (96x44, on screen True), no part False, clicked -> ['job', 'do'], then shown False
+  phone, at rest: {'repair': [282, 625, 378, 669], 'put': [254, 679, 378, 727], 'toast': [12, 737, 378, 826]}
+  phone, with a toast: {'repair': [282, 625, 378, 669], 'put': [254, 679, 378, 727], 'toast': [12, 737, 378, 826]}
+Saving:
+  v 1 save: [2, {'hunger': 80, 'energy': 80, 'hygiene': 80, 'fitness': 80, 'social': 80, 'bathroom': 80, 'leisure': 70}]
+  saved: 2 {'hunger': 11, 'energy': 22, 'hygiene': 33, 'fitness': 44, 'social': 55, 'bathroom': 66, 'leisure': 70}
+  v 2 save: {'hunger': 11, 'energy': 22, 'hygiene': 33, 'fitness': 44, 'social': 55, 'bathroom': 66, 'leisure': 70}
+  mail, credits, locker, chats, name kept: [['Kept|home:gran'], 77, ['a deck of cards'], ['x'], 'Ada']
+  the needs strip folded, kept, tapped open, folded again (0.28.33): [True, True, False, False, True]
+  junk needs: {'hunger': 80, 'energy': 100, 'hygiene': 80, 'fitness': 80, 'social': 80, 'bathroom': 80, 'leisure': 70}
+  ?nosave: [60, 100, 60, 70, 70, 60, 70]
+  a fresh start: mail [['Works Office', 'Welcome aboard the Wren', False]] credits 40
+  your name (0.28.22): fresh, set, empty, junk, long: [None, 'Ada Okafor', None, None, 24]
+  kit bag and device lock (0.28.26): [['kitbag'], [True, True, 'No device yet', False, 'Put your bag in your locker first'], ['kitbag'], [True, []], [True, True, False]] True [['kitbag'], [False, ['kitbag'], False, 'Device', True], [False, 1, 'Fit those first']]
+  the arrival dinner (0.28.28): [True, [28, 2], None] ['sit', 'do', '3-mess-10', True, '3-mess-10']
+  seated at the dinner, then after a new game: [True, False]
+errors []
+PLAYER CHECK OK
+exit 0
