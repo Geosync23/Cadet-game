@@ -47,3 +47,4 @@ The user played the Pillar 5 preview and sent 33 notes. The plan (8 packages) an
 | X crew sim + social | session_01SNaWA6X5E9i2ZKfMnPTHJf | claude/crew-pt1 | 0.71.x |
 | U HUD | session_01FcMPTX7mMTHkyr4pxDfNcS | claude/hud-pt1 | 0.72.x |
 | C2 works career | session_014yREkgPvuwMyxBtoqB1P14 | claude/works-career | 0.44.x |
+| O5 onboarding 2 (Day 1 arrows + tea walk; O4 keeps pacing/greeting/cabin, pushes to claude/arrival-0607b) | session_014y2M5qmkjuLdHK6K1JsqKD | claude/onboard-pt1 | 0.42.x after O4 |
