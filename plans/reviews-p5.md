@@ -6,10 +6,13 @@ How: behaviour, save and schedule changes in depth (against the piece's approved
 
 ## Passing tips
 - A claude/deck-0607 **6cc826b** (0.47.2, contains c20f91f and ad5e704; no LOWs open)
-- H claude/mech-cases **9cb6425** (0.55.9, contains everything from eece4d4; no LOWs open)
+- H claude/mech-cases **55343c6** (0.55.10, contains everything from eece4d4; no LOWs open)
 - W claude/writer-p5 **0d179ac** (0.48.86, text; contains 843bac9 and 76fc413; no LOWs open)
 
 ## Verdicts
+
+### H 55343c6 (0.55.10): the teacher stays for Day 5's case — PASS (read; H's checks)
+- One guarded call, `worksEscortHold('m7')`, only when Day 5's m7 job is the Washer 2 training case. It matches C's ae6598a (worksEscortHold sets c.hold; 24 core ends the escort on caseCalled) and the designer's 6fb5c49. H's checks: puzzle_check OK, cadet_test ALL IDENTICAL.
 
 ### H 9cb6425 (0.55.9): fallback when S's jobSetPart refuses — PASS (read; H's checks)
 - caseCall, scanPick and scanFitted now set j.parts themselves when section 17's jobSetPart returns false. That happens on a job whose parts are empty, which a case's job is after caseShow. Without it the call set no part on S's real build. Three one-line edits, correct.
