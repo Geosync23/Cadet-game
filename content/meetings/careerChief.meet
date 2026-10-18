@@ -4,7 +4,7 @@
 // wrong answer; she says it once and won't bring it up again if you fix it.
 title: A word with the Chief
 from: Chief Ines Calder
-gist: You didn't come to my office. Missed shifts. Be in the bay at ten to eight, every workday. Need a day? Book leave.
+gist: You didn't come to my office. Missed shifts. Be in the bay at ten to nine, every workday. Need a day? Book leave.
 == lines
 calder: Door. Thank you. Sit.   [gesture]
 calder > you: I'll be plain. You've missed shifts. Not one. Several.
@@ -18,7 +18,7 @@ calder > you: So. What's going on, {me}? Take your time.   [listen]
   calder: Honest. Good. I can work with honest.   [nod]
 * It won't happen again.   mem:career.chief.promise
   calder: Don't promise me. Show the board.
-calder: Here's what changes. You're in the bay at ten to eight. Every workday.
+calder: Here's what changes. You're in the bay at ten to nine. Every workday.
 calder: You take a job. You finish it. You turn it in at the board. Do that, and this goes away.
 calder: Need a day? Book leave on your device. An empty slot on paper beats a surprise.
 calder: If nothing changes, the Captain will want to see you. Neither of us wants that.

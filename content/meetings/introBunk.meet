@@ -5,16 +5,16 @@
 // self-contained aside (section 21 leaves them out when he isn't in the room): nothing after them depends on them.
 title: Your bunk
 from: Zeke Torres
-gist: Torres showed you Bunk 1 and your locker, and handed you your device.
+gist: Torres showed you Bunk 1 and your wardrobe, and handed you your device. He sent you a Mail on it.
 == lines
 torres-zeke > you: Bunk 1. This is you. This is where you sleep.   [gesture]
-torres-zeke: Top bunk at the back is yours.
-torres-zeke > you: Your locker's under it. Bag in there. Go on, it's yours now.
+torres-zeke: The top bunk in the middle is yours.
+torres-zeke > you: That's your wardrobe. It's where you get clean clothes. Bag in there.
 tomas: Oh! You're here! Hi. I'm Tomas. Watch. Bottom bunk, by the door.
 tomas > you: I only got here last Sunday. So I'm not the newest any more. Sorry. I'm very pleased about that.
 tomas: I'll show you the washroom in the morning. It's left at the end. It's left. It's probably left.
-torres-zeke > you: And this is yours too. Your device. Mail, your schedule, maps, the lot.   [gesture]
-torres-zeke: It'll want to say hello. They always do. Let it.
+torres-zeke > you: And this is yours. Your device.   [gesture]
+torres-zeke: I've sent you a Mail on it. Open it when you've a minute. The rest is in there.
 ? choice
 * What do I do first?   rel:torres-zeke+1 flavour:practical
   torres-zeke: Dinner. Always dinner first. Then everything else.   [nod]

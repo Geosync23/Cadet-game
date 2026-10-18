@@ -62,3 +62,7 @@
 
 == laundry.kit
 - The rest of your kit has arrived from stores. Five outfits in your wardrobe now.
+
+// Day 1 (playtest 1, O4): the clothes tip
+== tip.clothes.day1
+- Fresh clothes are in your wardrobe: change each morning. When you run out, do your laundry on Deck 4.

@@ -15,7 +15,7 @@
 
 == bye
 - {bye}. And eat something, mind.
-- {bye}. Tea's at half ten. You know where.
+- {bye}. Tea and biscuits at one. You know where.
 
 == feel
 ? mood:low
@@ -43,7 +43,7 @@
 // flag:mug (onboarding sets it) means your mug hangs on the tea corner rack.
 == week1
 ? week1:true weekday:thu
-- Works tea tomorrow at half ten. Don't be late. There's a reason. I can't say.   #funny
+- Works tea tomorrow at one. Don't be late. There's a reason. I can't say.   #funny
 ? week1:true weekday:fri
 - Here. Your mug. Your name on it and everything. Welcome to Works, properly.   #warm
 - Every new hand gets a mug on their first Friday. It's the law. Well, it's me.   #funny
@@ -69,7 +69,7 @@
 
 == invite
 ? tier>=acquaintance
-- Works tea, half ten, tea corner. Bring yourself. I'll find you a mug.
+- Works tea, one o'clock, tea corner. Bring yourself. I'll find you a mug.
 - Come and see the tomatoes after shift? The garden's lovely in the evening.
 
 == accept

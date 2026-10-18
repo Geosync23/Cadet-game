@@ -97,3 +97,12 @@ reactions `train.m1.mark.right` (you marked worn/off on a worn/faulty machine), 
 | M2 tuning | `tune.title` ({machine}), `tune.minus`, `tune.plus`, `tune.hot/warm/steady/cool/cold`, `tune.done` |
 | M2 incidents | `inc.card.burst` ({room}), `.lift`, `.alarm`; `inc.toast.<id>` ({deck}); `inc.step.safe/clean/fix`; `inc.wrong.valve`; `inc.safe.<id>`, `inc.clean.<id>`; `inc.done`; `inc.missed`; `inc.thanks` (the rescued rider, `remarks.lines`); reactions `@reactions incident.burst|lift|alarm` (cue `incident.<id>`, `.you` when you handled it) |
 | M1 uniform | `uniform.rule`, `uniform.grubby`, `uniform.wait` ({machine}); crew `clothes.grubby` (`remarks.lines`, gated `flag:clothes.grubby`) |
+
+## Playtest 1 (0.63.2; lead 13's brief plans/brief-playtest1.md)
+
+| Seat | Keys |
+| --- | --- |
+| O4 onboarding | Zeke (torres-zeke.lines, kind `week1`): `walk.shuttle.1-5` (plain greeting, "Works Department"), `walk.works.1`, `walk.day1.1-3` (training-day opener), `walk.follow.1-30` (4 is new: "jobs get better as you go"; the rest moved up one), `walk.dinner.eve.4-5` (you can't do every tradition), `walk.tea.1-3`, `walk.tea.go.1-2`, `walk.tea.at.1-3`, `walk.tea.after.1` (13:00 tea and biscuits); `mail.zeke-welcome` ("Subject \| body", up to 400); meeting `introBunk` reworded (the middle top bunk, the wardrobe, the device and his Mail); `tip.clothes.day1` (banks/clothes.lines) |
+| X crew | kind `approach` (banks/approach.lines): what a crew member says when they walk up to start a conversation, by tier; falls back to `greet` |
+| T traditions | `join.tip.<tradId>` ({host}), `join.notice.<tradId>` (up to 200), `join.done.<tradId>` for lap-of-the-wren, sunrise-stretch, running, cook-along, lantern-walk, knit-and-natter, tiles-ladder (banks/join.lines); `beam.tip`, `beam.done`; crew `beam.congrats` (to you), `beam.cheer` ({other}, a later Works arrival) in banks/beam.lines; Zeke `trad.beam.1-4` (restored), Calder `trad.beam.chief` |
+| everyone | the 09:00 shift and 13:00 tea and biscuits in every line (was 08:00 / ten to eight / half ten) |

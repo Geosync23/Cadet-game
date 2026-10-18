@@ -1,0 +1,59 @@
+@bank all
+// Head writer W (playtest 1, 0.63.2; seat T's tap-to-join). TEXTS. For each tradition where there's something to do
+// together: join.tip.<tradId> (the tip on arrival; {host} the leader's first name), join.notice.<tradId> (when you
+// join: what it is, what you do, what it gives), join.done.<tradId> (when it ends). Ids as the game's traditions.
+
+== join.tip.lap-of-the-wren
+- Tap {host} to join the lap.
+== join.notice.lap-of-the-wren
+- Lap of the Wren: a slow walk round the promenade together. Just walk with them and chat. Good for social and leisure.
+== join.done.lap-of-the-wren
+- One lap done. Lovely walk.
+
+== join.tip.sunrise-stretch
+- Tap {host} to join the stretch.
+== join.notice.sunrise-stretch
+- Sunrise stretch: a gentle stretch in the garden before breakfast. Follow along. Good for fitness and leisure.
+== join.done.sunrise-stretch
+- Stretched and ready for breakfast.
+
+== join.tip.running
+- Tap {host} to join Gym club.
+== join.notice.running
+- Gym club: everyone on a machine at once. Pick one and go. Good for fitness and social. Soup after.
+== join.done.running
+- Gym club done. Soup's on.
+
+== join.tip.cook-along
+- Tap {host} to join the cook-along.
+== join.notice.cook-along
+- Cook-along: learn one simple dish at the galley pass. Stir, taste, and keep a portion. Good for food and leisure.
+== join.done.cook-along
+- You made that. It's yours.
+
+== join.tip.lantern-walk
+- Tap {host} to join the lantern walk.
+== join.notice.lantern-walk
+- Lantern walk: carry a lantern round the ship with everyone. Just walk along. Good for social and leisure.
+== join.done.lantern-walk
+- The lanterns are home. What a sight.
+
+== join.tip.knit-and-natter
+- Tap {host} to join the circle.
+== join.notice.knit-and-natter
+- Knit and natter: sit with the circle and do any hobby. Good for leisure and social.
+== join.done.knit-and-natter
+- The circle packs up. Same time next week.
+
+== join.tip.tiles-ladder
+- Tap {host} to join the Tiles ladder.
+== join.notice.tiles-ladder
+- Tiles ladder: play a friendly round against everyone. Good for leisure and social.
+== join.done.tiles-ladder
+- Ladder over. Check the chalkboard.
+
+// Name on the Beam (the user: tell you to tap the beam; everyone congratulates you)
+== beam.tip
+- Tap the beam to paint your name.
+== beam.done
+- Your name is on the beam, beside everyone who's served in Works.
