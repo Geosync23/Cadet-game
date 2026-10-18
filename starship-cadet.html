@@ -11461,7 +11461,7 @@ function bunkTap(it, at) {
   const id = playerBed(), bed = PLACE_OF.get(id); if (!bed || at.distanceTo(cellPos(...bed.at)) > 1.2) return false;
   const p = at.clone();
   approach(p, it.front, it.depth, () => { let n = null; try { n = typeof bunkNote === 'function' ? bunkNote() : null; } catch (e) { n = null; }
-    if (n) toast('A note on your bunk', 'From ' + n.from + ': "' + n.text + '"'); else bunkLie(id); });
+    if (n) toast('A note on your bunk', 'From ' + n.from + ': "' + n.text + '"'); else bunkPick(id); });
   return true;
 }
 // lying down (0.28.29, the user's "I can't lay down in bed"): your bunk (only yours; the others' are private) lies you
@@ -11473,10 +11473,24 @@ function bunkLie(id) {
   const sick = typeof sickNow === 'function' && sickNow(), night = typeof bedtime === 'function' && bedtime() || sick;   // unwell: you sleep it off, by day too (0.61.5)
   actStart('lie', id, { title: 'Your bunk', sleep: night, after: sick ? 'You crawl into your bunk and close your eyes.' : night ? 'You climb into your bunk and pull the blanket up.' : 'You lie down for a rest. Tap anywhere to get up.' });
 }
+// the Thursday inspection's berth (Pillar 5, m3): on an inspection morning (Thursday 05:30-08:00, not unwell) a tap on
+// your bunk asks: Make the bed (SHIP.player.bedMade = the day; saved; cleared when you next sleep in it), Tidy your locker
+// (puts away what you bought since, SHIP.player.untidy; lockerTidy()) or Lie down. Each a 1-minute hold. Any other time: lie down
+const bunkMorning = () => weekday(SHIP.time.day) === 3 && SHIP.time.min >= 330 && SHIP.time.min < 480 && !(typeof sickNow === 'function' && sickNow());
+const lockerTidy = () => !SHIP.player.untidy;
+Object.assign(PLAYER_ACTS, { bedMake: { mins: 1, pose: 'work', title: 'Your bunk' }, tidy: { mins: 1, pose: 'work', title: 'Your locker' } });
+function bunkPick(id) {
+  const P = SHIP.player, made = P.bedMade === SHIP.time.day;
+  if (!bunkMorning() || made && lockerTidy() || typeof deviceChoose !== 'function') { bunkLie(id); return; }
+  const s = placeSpot(id), c = s && s.walk ? cellPos(...s.walk) : null, spot = c ? { ...s, x: c.x, z: c.z, y: 0, id: null, pose: 'stand' } : null;   // beside it, on your feet
+  const opts = (made ? [] : [['Make the bed', () => actStart('bedMake', null, { title: 'Your bunk', spot, after: 'You pull the blanket straight and tuck the corners in.' })]])
+    .concat(lockerTidy() ? [] : [['Tidy your locker', () => actStart('tidy', null, { title: 'Your locker', spot, after: 'You put your things away.' })]], [['Lie down', () => bunkLie(id)]]);
+  if (!deviceChoose({ title: 'Your bunk', text: 'The inspection is at 06:30.', choices: opts.map(o => o[0]) }, i => { if (opts[i]) opts[i][1](); })) bunkLie(id);
+}
 function bunkSleep(A) {                                  // once you're lying in it at night: sleep (section 13's fade and skip)
   if (A.kind !== 'lie' || A.o.slept || A.phase !== 'do') return;
   if (!A.o.sleep && !bedtime()) return; A.o.sleep = true;   // lay down by day and stayed past 20:00: sleep now (reviewer 1, 0.28.37)
-  A.o.slept = true; const bed = PLACE_OF.get(A.placeId);
+  A.o.slept = true; SHIP.player.bedMade = null; const bed = PLACE_OF.get(A.placeId);   // slept in: unmade (m3)
   if (bed && typeof offerSleep === 'function') offerSleep(cellPos(...bed.at));
 }
 const PLAYER_TAPS = [];                                  // other sections' taps (15b): f(item, itemPos, tapPoint) -> true if handled
@@ -11668,6 +11682,8 @@ function actEnd(abort) {
   }
   if (A.kind === 'workStep') workStepEnd(A, abort);       // a work step (Pillar 5): a look's marks, or a pause
   if (abort) return;
+  if (A.kind === 'bedMake' && A.done >= A.def.mins) { SHIP.player.bedMade = SHIP.time.day; toast('Your bunk', 'Bed made, corners and all.'); }   // the inspection's berth (m3)
+  if (A.kind === 'tidy' && A.done >= A.def.mins) { SHIP.player.untidy = false; toast('Your locker', 'All put away. Tidy.'); }
   player.face = player.obj.rotation.y = A.face;
   if (A.def.done) toast(A.def.title, A.def.done + (A.kind === 'eat' && A.o.company ? ' Good company, too.' : '') + (A.def.need ? ' ' + NEED_LABEL[A.def.need] + ' ' + Math.round(SHIP.player.needs[A.def.need]) + '.' : ''));
   if (A.kind === 'browse') {
@@ -11676,7 +11692,7 @@ function actEnd(abort) {
   }
   if (A.kind === 'pay' && basket && SHIP.player.credits < basket.price) { toast('Counter', basket.name[0].toUpperCase() + basket.name.slice(1) + ' is ' + basket.price + ' credits, and you have ' + SHIP.player.credits + '.'); basket = null; return; }   // checked again at the till (0.28.39)
   if (A.kind === 'pay' && basket) {
-    const b = basket, P = SHIP.player; P.credits -= b.price; P.bought = (P.bought || 0) + 1; simAct('buy', { item: b.name });
+    const b = basket, P = SHIP.player; P.credits -= b.price; P.bought = (P.bought || 0) + 1; P.untidy = true; simAct('buy', { item: b.name });   // untidy: out until you tidy your locker (m3)
     if (b.gift && typeof giftAdd === 'function' && giftAdd(b.gift)) {   // a gift: into your hands (0.28.25)
       toast('Paid', 'You pay ' + b.price + ' credits for ' + b.name + '. You keep it in your hands to give to someone. ' + P.credits + ' credits left.'); basket = null; return;
     }
@@ -12184,7 +12200,7 @@ SIM_ADVANCE.push((from, to) => {
 });
 // New game (section 13): fresh needs, nothing in hand
 function playerNew() {
-  actEnd(true); basket = null; SHIP.player.needs = needsLoad(null); NEED_SEEN = null; SHIP.player.carry = []; SHIP.player.work = null; SHIP.player.wsteps = []; SHIP.player.tray = null; SHIP.player.crate = null; needsT = null; slowWas = {}; WARN_SAID = {}; TEACH_ST = null; POP.tip = -1e9; Object.assign(SHIP, { news: [], newsUsed: [], newsAt: null, newsRows: {} });
+  actEnd(true); basket = null; SHIP.player.needs = needsLoad(null); NEED_SEEN = null; SHIP.player.carry = []; SHIP.player.work = null; SHIP.player.wsteps = []; SHIP.player.bedMade = null; SHIP.player.untidy = false; SHIP.player.tray = null; SHIP.player.crate = null; needsT = null; slowWas = {}; WARN_SAID = {}; TEACH_ST = null; POP.tip = -1e9; Object.assign(SHIP, { news: [], newsUsed: [], newsAt: null, newsRows: {} });
   Object.assign(SHIP.player, walletLoad(null)); SHIP.player.bought = 0; SHIP.player.cart = null; SHIP.player.name = null; SHIP.mail = []; mailWelcome(); device.refresh();
   DINNER_SAT = false; DINNER_TRY = -1;                   // a new arrival dinner seats you again (reviewer 1, 0.28.37)
 }
@@ -12657,7 +12673,7 @@ function jobEnd(A) {
     if (A.o.repair) {
       if (finishJob(mw.j.id)) { P.work = null; P.credits += JOB_PAY; toast('Job done', 'The ' + name + ' is running sweetly again. That\'s one off the board. +' + JOB_PAY + ' credits.'); }
       else toast('Your job', 'The job isn\'t yours any more.');
-    } else toast('Inspecting', 'The ' + name + ' needs ' + partList(A.o.need) + '. ' + (P.carry.length && !A.o.need.includes(madeHere(mw.j)) ? '' : whereFrom(mw.j, A.o.need)));
+    } else if (!(typeof scanOpen === 'function' && scanOpen(mw.j.id))) toast('Inspecting', 'The ' + name + ' needs ' + partList(A.o.need) + '. ' + (P.carry.length && !A.o.need.includes(madeHere(mw.j)) ? '' : whereFrom(mw.j, A.o.need)));
   }
   device.refresh();
 }
@@ -12737,14 +12753,16 @@ function workStepEnd(A, abort) {
   if (abort && A.done < A.def.mins) return;              // walked away: the look so far is kept
   const st = jobStops(j)[A.o.ws], marks = st && st.opts && Array.isArray(st.opts.marks) ? st.opts.marks.slice(0, 6) : null;
   if (!marks || !marks.length) { wsFinish(j, A.o.ws, {}, A.o.title); return; }
-  if (!deviceChoose({ title: st.opts.title || A.o.title, text: st.opts.ask || 'How does it look?', choices: marks.map(x => x.label) }, i => { if (marks[i]) wsFinish(j, A.o.ws, { pick: marks[i].id }, A.o.title); })) toast(A.o.title, 'Your device is busy; tap it again to mark it.');
+  if (!deviceChoose({ title: st.opts.title || A.o.title, text: [st.opts.text, st.opts.ask || 'How does it look?'].filter(Boolean).join(' '), choices: marks.map(x => x.label) }, i => { if (marks[i]) wsFinish(j, A.o.ws, { pick: marks[i].id }, A.o.title); })) toast(A.o.title, 'Your device is busy; tap it again to mark it.');
 }
 // the stop is done: section 17 marks it (with the result), and you hear what's next, as for a chore's stop
 function wsFinish(j, k, res, title, said) {
   const P = SHIP.player; P.wsteps = P.wsteps.filter(w => !(w.job === j.id && w.k === k));
   const r = jobStepDone(j.id, k, res); if (typeof ixGoalAt !== 'undefined') ixGoalAt = -1;
   if (!r || !r.ok) { toast('Your job', 'The job isn\'t yours any more.'); return; }
-  toast(r.done ? 'Work done' : title, [said, r.done ? j.title + ': done. Turn it in at the job board in the Works bay, Deck 5.' : 'Done here. ' + r.left + (r.left === 1 ? ' stop' : ' stops') + ' to go: follow the marker.'].filter(Boolean).join(' '));
+  if (r.wrong) { device.refresh(); return; }               // a wrong part: 24k's caseFitted has said so
+  if (r.retry) { toast(title, typeof r.say === 'string' && r.say ? r.say : 'Not quite. Try again.'); device.refresh(); return; }   // the kind said no (17's def.veto): the stop stays to do
+  toast(r.done ? 'Work done' : title, [said, typeof r.say === 'string' ? r.say : '', r.done ? j.title + ': done. Turn it in at the job board in the Works bay, Deck 5.' : 'Done here. ' + r.left + (r.left === 1 ? ' stop' : ' stops') + ' to go: follow the marker.'].filter(Boolean).join(' '));
   device.refresh();
 }
 function wstepsLoad(s) {                                // junk, or a step of no job, is dropped; at most 8
@@ -12753,6 +12771,8 @@ function wstepsLoad(s) {                                // junk, or a step of no
     .map(w => ({ job: w.job, k: w.k, how: w.how, v: Number.isFinite(w.v) ? +w.v : null, at: Number.isFinite(w.at) ? +w.at : null, done: Number.isFinite(w.done) && w.done > 0 ? Math.min(+w.done, 600) : 0 }));
 }
 SHIP.player.wsteps = wstepsLoad(SAVED);
+SHIP.player.bedMade = Number.isInteger(SAVED && SAVED.player && SAVED.player.bedMade) ? SAVED.player.bedMade : null; SHIP.player.untidy = !!(SAVED && SAVED.player && SAVED.player.untidy === true);
+SAVE_EXTRA.push(s => { const p = s.player || (s.player = {}); p.bedMade = SHIP.player.bedMade; p.untidy = !!SHIP.player.untidy; });
 SAVE_EXTRA.push(s => { const p = s.player || (s.player = {}); p.wsteps = SHIP.player.wsteps.filter(w => myJobAny(w.job)).map(w => ({ ...w })); });
 
 // ---- the cart run (0.28.11, answer 8): a restock job (section 17's kind 'restock', taken on the device) is a hover
@@ -12979,7 +12999,7 @@ function ixChoreTap(it, at) {
   const [title, pose] = IX_STOP[st.step] || ['Your job', 'work'];
   // the stop's spot, not the place: a lamp over the lift queue is yours to change even with someone waiting there
   actStart('ixStop', null, { ...o, pose, spot: { ...spot, id: null, pose: 'stand' }, after: j.title + ': about ' + Math.ceil(st.mins || 10) + ' minutes. Walk away to pause.' });
-  if (ACT && ACT.kind === 'ixStop') { ACT.def.mins = (st.mins || 10) * (typeof careerSpeed === 'function' ? careerSpeed(jobKindOfMachine(j)) : 1); ACT.def.title = title; }
+  if (ACT && ACT.kind === 'ixStop') { ACT.def.mins = st.mins || 10; ACT.def.title = title; }
   return true;
 }
 // what you carry for your job between stops (section 15 asks, for the held prop: 8b's '+toolbox', '+carry'), after its own
@@ -12992,7 +13012,9 @@ function ixHold() {
     const st = jobStops(j), pick = st.findIndex(x => x.step === 'pickup'), drop = st.findIndex(x => x.step === 'drop');
     return pick >= 0 && st[pick].done && !(drop >= 0 && st[drop].done) && !crateDown(j) ? 'carry' : null;   // not while it's set down (Put down, 0.28.60)
   }
-  return 'toolbox';
+  const kd = typeof JOB_KINDS === 'object' && JOB_KINDS && JOB_KINDS[j.kind];   // a registered kind's own (17's jobKindAdd def.hold: 'datapad' for a round, Pillar 5)
+  let h = null; try { h = kd ? typeof kd.hold === 'function' ? kd.hold(j) : kd.hold : null; } catch (e) { h = null; }   // or of the job (a haul: 'cart', then 'cartfull')
+  return typeof h === 'string' && typeof HOLDS !== 'undefined' && HOLDS[h] ? h : h === null && kd && 'hold' in kd ? null : 'toolbox';
 }
 // a stop's minutes are done (ixFrame sees the activity step out): mark it with section 17, and say what's next
 function ixStopDone(A) {
@@ -13006,11 +13028,14 @@ function ixStopDone(A) {
   }
   const r = jobStepDone(j.id, A.o.ixStep); ixGoalAt = -1;
   if (!r.ok) { toast('Your job', 'The job isn\'t yours any more.'); return; }
+  if (r.wrong) { device.refresh(); return; }               // a wrong part: 24k's caseFitted has said so
+  if (r.retry) { toast(A.def.title, typeof r.say === 'string' && r.say ? r.say : 'Not quite. Try again.'); device.refresh(); return; }   // the kind said no (17's def.veto)
+  const say = typeof r.say === 'string' && r.say ? r.say + ' ' : '';   // the kind's own words (its stepDone, through 17)
   if (r.done) {
     for (const p of j.parts) { const i = P.carry.indexOf(p); if (i >= 0) P.carry.splice(i, 1); }   // the lamp went in: it's used
-    toast('Work done', j.title + ': done. Turn it in at the job board in the Works bay, Deck 5.');
+    toast('Work done', say + j.title + ': done. Turn it in at the job board in the Works bay, Deck 5.');
     ixTip('turnin', 'Head back to the board to turn it in.');
-  } else toast(A.def.title, 'Done here. ' + r.left + (r.left === 1 ? ' stop' : ' stops') + ' to go: follow the marker.');
+  } else toast(A.def.title, say + 'Done here. ' + r.left + (r.left === 1 ? ' stop' : ' stops') + ' to go: follow the marker.');
   device.refresh();
 }
 // the tap (section 15's playerTap, through PLAYER_TAPS): the job board, or a place to use
