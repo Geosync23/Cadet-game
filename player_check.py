@@ -1000,8 +1000,8 @@ with sync_playwright() as pw:
             print('    taking the cart at dock', dock)
             g.ev(TAPS % json.dumps('Cart dock %d' % dock)); c1 = jrun(); c1 = json.loads(g.ev(CST)); steps.append(c1)
             hold_room = g.ev("placeRoom('5-hold-1')")
-            g.ev("playerGo(placeSpot('5-hold-2').walk)"); jrun(); g.step(90); jrun(); c2 = json.loads(g.ev(CST)); steps.append(c2)   # nothing to tap in the hold: stop there
-            g.ev(f"({IN_ROOM})('r')"); jrun(); c3 = json.loads(g.ev(CST)); steps.append(c3)
+            g.ev("playerGo(placeSpot('5-hold-2').walk)"); jrun(); g.step(90); jrun(); g.step(1); c2 = json.loads(g.ev(CST)); steps.append(c2)   # nothing to tap in the hold: stop there
+            g.ev(f"({IN_ROOM})('r')"); jrun(); g.step(1); c3 = json.loads(g.ev(CST)); steps.append(c3)   # g.step(1): the held cart follows the stage a frame later (playerUpdate sets player.holding before actUpdate ends the act)
             pre = g.ev("[SHIP.stores.filter || 0, SHIP.hold.filter || 0]")   # the hourly job list may have moved stock meanwhile: compare across the docking
             g.ev(TAPS % json.dumps('Cart dock %d' % dock)); jrun(); c4 = json.loads(g.ev(CST)); steps.append(c4)
             g.ev("(() => { const j = typeof turnInJob === 'function' && myJob(); if (j && j.workDone) turnInJob(j.id); })()")   # TURN_IN (0.37.3): finished jobs are turned in at the board
@@ -1043,6 +1043,19 @@ with sync_playwright() as pw:
                 check(not none['shown'], f'{kind}: no Repair button without the part')
                 check(work['act'] and work['act'][0] == want and not work['shown'], f'{kind}: clicking Repair starts the work ({work["act"]}) and the button goes')
                 g.ev("actEnd(true)")
+            # 0.28.55 (the lead): never over Put down (player engineer 8's #putDown, under it, lifts above a toast on phones) nor a toast:
+            # a phone screen, at the lamp's stop with the lamp, at rest and with a long toast up
+            RECTS = r"""(() => { const r = id => { const e = document.getElementById(id); if (!e || e.hidden) return null; const b = e.getBoundingClientRect(); return [b.left, b.top, b.right, b.bottom].map(Math.round); };
+              return { repair: r('repairBtn'), put: r('putDown'), toast: document.getElementById('toast').classList.contains('show') ? r('toast') : null }; })()"""
+            over = lambda a, b: bool(a and b and a[0] < b[2] and b[0] < a[2] and a[1] < b[3] and b[1] < a[3])
+            vp = g.page.viewport_size; g.page.set_viewport_size({'width': 390, 'height': 844})
+            g.ev("goToDeck(4)"); g.step(3); pid = g.ev(f"({HJ})('lamp')"); g.ev(f"({PUTAT})('{pid}', 0)"); g.step(5)
+            for label, js in [('at rest', ''), ('with a toast', "toast('Main storage', 'You take a lamp. Now replace a lamp: lift lobby. A long line, so it wraps on a phone, and wraps again.')")]:
+                if js: g.ev(js)
+                for k in range(8): g.step(8); g.page.wait_for_timeout(120)   # real time: the toast's transition, Put down's lift
+                rc = g.ev(RECTS); print(f'  phone, {label}:', rc)
+                check(rc['repair'] and not over(rc['repair'], rc['put']) and not over(rc['repair'], rc['toast']) and rc['repair'][3] <= 844, f'phone, {label}: Repair shown, clear of Put down and the toast ({rc})')
+            g.page.set_viewport_size(vp); g.step(3)
             g.ev("for (const j of SHIP.jobs) if (j.claimedBy === 'you' && j.status === 'claimed') { j.claimedBy = null; j.status = 'open'; } SHIP.jobs = SHIP.jobs.filter(j => !String(j.id).startsWith('pcrb-')); SHIP.player.carry = []; SHIP.player.work = null; MACH_REV++; handTick(true)")
     else:
         print('The job loop: this build has no section 17 jobs (myJob, finishJob): skipped')
