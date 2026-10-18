@@ -543,3 +543,4 @@ Read: CLAUDE.md, TEAM.md (session chain rule + overnight exception), plans/brief
 - ~11:09 R: C 87df8f5+ae6598a FAIL (1): big-row asks open at 06:00 inside sleep skip → silent Mail, no toast/pointer; fix sent to C; 4 LOWs.
 - ~11:10 BM4 BLOCKER 0.63.0: trial ded30e5 (S 96cf5cb + P + C 2ea7ab2 + H 9cb6425 + A + W) fails machine_check (ladder/jobkinds/24k hooks, from C merge on), career_check 8 FAILs with H, puzzle case title doubled. Told BM4 retry with C a8dd78e + H 55343c6, push trial branch; C leads join fix with S + H (logged).
 - ~11:13 C d518673 (0.44.9: R's FAIL + 4 LOWs fixed; career/mech OK, cadet_test identical); to R + BM4. Join fix still to do.
+- ~11:15 BM4: retrial with latest tips still fails (same + Record app hand merge). C confirmed owner of the join on claude/p5-join (S 96cf5cb + P + C d518673 + H 55343c6); S + H told to answer C fast; BM4 combines 0.63.0 from join + A + W.
