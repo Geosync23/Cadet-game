@@ -57,3 +57,5 @@ The user played the Pillar 5 preview and sent 33 notes. The plan (8 packages) an
 - **Watch a film hobby (the user ~18:33, U + W):** a new hobby on the personal device, same as reading (same pose), new button and text. Rides in 0.63.2 if ready before the final run.
 - **Flickering speech bubbles (the user ~18:36, seen on 0.63.1):** DA5 investigates and fixes at the root (with X / O4 / O5 if theirs). In 0.63.2.
 - **Film hobby:** confirmed by the user for 0.63.2 (BM6 waits for it).
+- **Bubble flicker** happens all over the ship (the user).
+- **Day 0 auto-sit at the Chief's table** stopped happening on 0.63.1 (the user, ~18:38): O5 restores it + an intro_check assertion. In 0.63.2.
