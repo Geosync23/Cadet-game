@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ship Holidays Plan</title>
+<style>
+:root{--ink:#e8eef0;--muted:#93a6ae;--teal:#4cc3b5;--gold:#e9c46a;--rose:#e58f7a;--glass:rgba(13,21,33,.78);--line:rgba(150,200,196,.22);--chip:rgba(76,195,181,.14)}
+*{box-sizing:border-box}
+html,body{margin:0;background:#121a27;color:var(--ink);font-family:"Avenir Next","Segoe UI",system-ui,sans-serif}
+body{background:radial-gradient(ellipse at 50% 20%,#22304a 0%,#141c2b 60%,#0c111b 100%) fixed;line-height:1.5}
+header{padding:18px 16px 4px;max-width:1100px;margin:0 auto}
+h1{font-size:21px;font-weight:600;margin:0}
+h2{font-size:17px;font-weight:600;margin:0 0 8px;color:#bdeee6}
+h3{font-size:14.5px;font-weight:600;margin:12px 0 4px;color:#d9eeea}
+.sub{font-size:13.5px;color:var(--muted);margin-top:4px}
+.draft{display:inline-block;font-size:11.5px;color:#14202a;background:var(--gold);border-radius:999px;padding:2px 9px;margin-left:6px;vertical-align:2px}
+nav{position:sticky;top:0;z-index:5;background:rgba(14,20,31,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+nav div{display:flex;gap:6px;overflow-x:auto;padding:8px 16px;max-width:1100px;margin:0 auto;-webkit-overflow-scrolling:touch}
+nav a{flex:none;text-decoration:none;border:1px solid var(--line);background:var(--glass);color:var(--ink);font-size:13px;padding:6px 11px;border-radius:999px}
+nav a:focus-visible,nav a:hover{border-color:var(--teal);color:#bdeee6;outline:none}
+main{max-width:1100px;margin:0 auto;padding:6px 16px 40px}
+section{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:14px 0;scroll-margin-top:56px}
+p{margin:6px 0;font-size:14px;color:#d6e0e3}
+ul{margin:6px 0;padding-left:20px;font-size:14px;color:#d6e0e3}
+li{margin:3px 0}
+.note{font-size:12.5px;color:var(--muted)}
+.grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.card{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.025)}
+.card b{display:block;color:#bdeee6;font-size:14px;margin-bottom:2px}
+.card span{font-size:13px;color:#cfd9dc}
+.card .meta{display:block;font-size:12px;color:var(--muted);margin-top:4px}
+.tag{display:inline-block;font-size:11.5px;border-radius:999px;padding:1px 8px;margin:2px 4px 0 0;background:var(--chip);color:#bdeee6;border:1px solid var(--line)}
+.tag.new{background:rgba(233,196,106,.16);color:#f1dca0}
+.tag.old{opacity:.75}
+.steps{list-style:none;padding:0;margin:8px 0;counter-reset:s}
+.steps li{position:relative;padding:8px 10px 8px 46px;border-left:2px solid rgba(76,195,181,.35);margin:0 0 0 14px}
+.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:-15px;top:8px;width:28px;height:28px;border-radius:50%;background:#183040;border:1px solid var(--teal);color:#bdeee6;font-size:12.5px;display:flex;align-items:center;justify-content:center}
+.steps time{display:block;font-size:12px;color:var(--gold)}
+.steps b{color:#e4f3f0;font-weight:600}
+.steps span{display:block;font-size:13.5px;color:#cfd9dc}
+.week{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.day{border:1px solid var(--line);border-radius:12px;padding:9px 10px;background:rgba(255,255,255,.02)}
+.day h4{margin:0 0 4px;font-size:13.5px;color:var(--gold);font-weight:600}
+.day p{font-size:12.5px;margin:4px 0;color:#cfd9dc}
+.day .who{color:#bdeee6;font-weight:600}
+.lines{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;background:#0b141c;border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:#9fe7dc;white-space:pre-wrap;overflow-x:auto;margin:8px 0}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0}
+.flow .box{border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:13px;background:rgba(255,255,255,.03)}
+.flow .arrow{color:var(--teal)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:12px}
+.tablewrap{overflow-x:auto}
+.waves{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+.wave{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.025)}
+.wave b{color:var(--gold);display:block}
+.wave .ci{display:block;margin-top:6px;font-size:12.5px;color:#f1dca0}
+ol.q{padding-left:22px;font-size:14px;color:#d6e0e3}
+ol.q li{margin:6px 0}
+ol.q em{color:var(--muted);font-style:normal;font-size:12.5px}
+svg text{font-family:inherit}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;color:#9fe7dc;background:rgba(0,0,0,.25);padding:0 4px;border-radius:4px;word-break:break-word}
+section.builder{border-color:rgba(233,196,106,.45)}
+section.builder h2{color:var(--gold)}
+.status{display:inline-block;font-size:11.5px;color:#14202a;background:var(--teal);border-radius:999px;padding:2px 9px;margin-left:6px;vertical-align:2px}
+td code{white-space:normal}
+</style>
+</head>
+<body>
+<header>
+  <h1>Ship holidays: the Wren's own days of the year <span class="draft">plan for the user's approval</span></h1>
+  <div class="sub">A new kind of ship tradition: holidays. Eleven made-up days through the ship's year (none real; some borrowed in spirit from real ones, some the Wren's own), with Captain's Day among them, alongside the crew's birthdays. Plus how holidays, birthdays and appointments show up on your device, so you never miss one by accident. A plan only: built later, probably in Pillar 6 with the ship-wide events. Written 2026-10-18 by the Pillar 5 designer for lead 13.</div>
+</header>
+<nav><div><a href="#plain">In plain words</a><a href="#year">The year</a><a href="#list">The holidays</a><a href="#rules">How they fit</a><a href="#cal">Calendar and notices</a><a href="#join">Tap to join</a><a href="#clash">Clashes</a><a href="#q">Questions</a><a href="#b">Builder</a></div></nav>
+<main>
+
+<section id="plain">
+  <h2>In plain words</h2>
+  <ul>
+    <li><b>What a holiday is:</b> a ship tradition that comes once a year on a fixed day of the ship's year, has a story behind it, and changes the look and feel of the ship for a day or an evening: decorations, a special dish, an activity, someone who leads it. It's a bigger cousin of the weekly traditions (quiz night, film night) and the yearly days the Wren already keeps (Founding Day, Midtour, the quiet watch, Year's end).</li>
+    <li><b>Never a mission.</b> Like every tradition: the crew who are free go, everyone talks about it, nothing stops the ship, no cutscenes. You can join in, help run it, or skip it.</li>
+    <li><b>Eleven new holidays</b>, a mix of big and small, spread over the four seasons. Three fall in your first five weeks aboard (Captain's Day on Day 13, Odd Socks Day on Day 24, Bright Day on Day 34), so everyone who plays sees some.</li>
+    <li><b>The four yearly days the Wren already has</b> become holidays too (same days, same content, now shown as holidays): Founding Day (day 100), Midtour (182), the quiet watch (300), Year's end (364). Fifteen in all.</li>
+    <li><b>Your device tells you</b> about holidays, birthdays and appointments clearly and in good time: the day before, that morning, and shortly before. Appointments get the loudest notice, because someone is waiting for you.</li>
+  </ul>
+</section>
+
+<section id="year">
+  <h2>The ship's year at a glance</h2>
+  <p>The year is 364 days (52 weeks), day 1 a Monday, the game's Day 1. Four seasons of 13 weeks, named for the garden: <b>Sowing</b> (days 1-91), <b>Greening</b> (92-182), <b>Harvest</b> (183-273), <b>Lanterns</b> (274-364). ★ marks a big holiday; ☆ a small one; (old) one the Wren already keeps.</p>
+  <div class="tablewrap"><table>
+    <tr><th>Day</th><th>Weekday</th><th>Season</th><th>Holiday</th><th>Size</th><th>Day off?</th></tr>
+    <tr><td>13</td><td>Saturday</td><td>Sowing</td><td><b>Captain's Day</b></td><td>★</td><td>a weekend anyway</td></tr>
+    <tr><td>24</td><td>Wednesday</td><td>Sowing</td><td>Odd Socks Day</td><td>☆</td><td>no</td></tr>
+    <tr><td>34</td><td>Saturday</td><td>Sowing</td><td>Bright Day (the big spring-clean)</td><td>★</td><td>a weekend anyway</td></tr>
+    <tr><td>52</td><td>Wednesday</td><td>Sowing</td><td>Relay Day (the post from home)</td><td>★</td><td>no (a long lunch)</td></tr>
+    <tr><td>100</td><td>Tuesday</td><td>Greening</td><td>Founding Day (old)</td><td>★</td><td>no (an evening)</td></tr>
+    <tr><td>125</td><td>Saturday</td><td>Greening</td><td>Fix-it Fair</td><td>☆</td><td>a weekend anyway</td></tr>
+    <tr><td>150</td><td>Wednesday</td><td>Greening</td><td>Sister Ship Night</td><td>★</td><td>no (an evening)</td></tr>
+    <tr><td>182</td><td>Sunday</td><td>Greening</td><td>Midtour (old)</td><td>☆</td><td>a weekend anyway</td></tr>
+    <tr><td>212</td><td>Tuesday</td><td>Harvest</td><td><b>Spanner Day</b> (the ship thanks its Works crew)</td><td>★</td><td><b>yes, for Works</b></td></tr>
+    <tr><td>240</td><td>Tuesday</td><td>Harvest</td><td>Swap Day</td><td>☆</td><td>no (a swapped morning)</td></tr>
+    <tr><td>265</td><td>Saturday</td><td>Harvest</td><td>Starfall Night</td><td>★</td><td>a weekend anyway</td></tr>
+    <tr><td>300</td><td>Saturday</td><td>Lanterns</td><td>The quiet watch (old)</td><td>☆</td><td>a weekend anyway</td></tr>
+    <tr><td>320</td><td>Friday</td><td>Lanterns</td><td>Long Night</td><td>★</td><td>no (an evening and a lie-in)</td></tr>
+    <tr><td>336</td><td>Sunday</td><td>Lanterns</td><td>Stir-up Sunday</td><td>☆</td><td>a weekend anyway</td></tr>
+    <tr><td>364</td><td>Sunday</td><td>Lanterns</td><td>Year's end (old)</td><td>★</td><td>a weekend anyway</td></tr>
+  </table></div>
+  <p class="note">Only one holiday gives a day off from work (Spanner Day, and only to the Works crew, which includes you). The rest are evenings, weekends or a changed hour, so the ship's rotas and your work days stay as they are.</p>
+</section>
+
+<section id="list">
+  <h2>The holidays</h2>
+
+  <h3>Captain's Day <span class="tag">★ · day 13, Saturday · Sowing · new</span></h3>
+  <ul>
+    <li><b>The story:</b> the anniversary of the day the current captain took command of the Wren. Every Wren captain's day has been kept since the first, and on it the ship turns the usual order upside down for a morning: the officers serve the crew, and the newest hand aboard takes the chair. (In spirit: the old naval habit of officers serving the crew's festive dinner.) Captain Marrow says every year she'd rather skip it, and never does.</li>
+    <li><b>Aboard:</b> bunting in the Wren's cyan along the promenade and in the mess; a small framed list of the Wren's captains appears by the mess door. <b>Breakfast 07:30-09:00:</b> the officers serve (Commander Vance pours the tea; Chief Calder hands out the plates; Chef Brennan supervises and is merciless about it). <b>10:00, the bridge: "the newest hand takes the chair"</b> for a quarter of an hour, with the Captain at their shoulder. In the evening, the Captain's toast in the bow lounge (19:30) and a cake.</li>
+    <li><b>You:</b> on Day 13 you are the newest hand aboard (you arrived on Day 0), so <b>you're the one in the chair</b>. Mail from Commander Vance the day before: "Tradition. Don't touch anything red." You sit, the Captain asks you one question about the ship (from what you've really done: "What's the first thing you'd check if the lights dimmed?"), and the bridge crew clap. You keep a <b>signed chair card</b> (a small card for your cabin shelf: there are no photos aboard). If you don't come, the next-newest junior sits, and you hear about it.</li>
+    <li><b>Gets you:</b> a little social with everyone at breakfast; the chair card; a ship-wide mood lift; a line in your Record. In later years, the newest hand is whoever came aboard last.</li>
+    <li><b>Work and rotas:</b> a Saturday, so no shifts for you. The bridge watch carries on (the chair moment is 15 minutes during the watch). The galley's breakfast is cooked as usual; the officers only serve it.</li>
+  </ul>
+
+  <h3>Odd Socks Day <span class="tag">☆ · day 24, Wednesday · Sowing · new</span></h3>
+  <ul>
+    <li><b>The story:</b> years ago the Wren's laundry ate one sock from every pair in a single week. The crew wore what was left, and the ship has worn odd socks on that day ever since. (In spirit: odd-socks and silly-hat days.)</li>
+    <li><b>Aboard:</b> everyone's socks don't match (a little colour swap on the crew's ankles; no new meshes). A board by the laundry: "Lost socks: 1 (still missing)". Chatter all day.</li>
+    <li><b>You:</b> your own laundry (0.60.7) leaves you an odd pair to wear that morning; wearing them gets a grin from everyone who notices. Pell runs a sweepstake on who's wearing the oddest.</li>
+    <li><b>Work and rotas:</b> nothing changes. A one-line joy.</li>
+  </ul>
+
+  <h3>Bright Day <span class="tag">★ · day 34, Saturday · Sowing · new</span></h3>
+  <ul>
+    <li><b>The story:</b> the big spring-clean, when the ship is aired, scrubbed and set right for the season. (In spirit: spring cleaning before a new year.) The ship's first captain started it after a long, grubby tour.</li>
+    <li><b>Aboard:</b> 09:00-12:00, cleaning teams by deck, each led by someone (Tomas has Deck 4's juniors; Chef Brennan has the galley; Yara Esposito has stores); vents opened, filters changed, the mess tables scrubbed. A prize for the tidiest bunk room (judged by the Captain at 12:00). A big lunch after, on the promenade.</li>
+    <li><b>You:</b> join a team (tap a team lead: see "Tap to join"); your bunk room's tidiness counts. As Works, you're asked to swap the filters on your deck (real chore jobs, done for a cheer rather than the board).</li>
+    <li><b>Gets you:</b> social with your team; the ship's cleanliness and a few machines' wear are really better for a week (a small, real effect on vents and filters).</li>
+    <li><b>Work and rotas:</b> a Saturday; the extra jobs are volunteer jobs, never required.</li>
+  </ul>
+
+  <h3>Relay Day <span class="tag">★ · day 52, Wednesday · Sowing · new</span></h3>
+  <ul>
+    <li><b>The story:</b> once a year the Wren passes close to the deep-space relay, and the whole year's slow post from home arrives at once: recorded messages, long letters, a year of news. (In spirit: mail days on remote stations and old ships.)</li>
+    <li><b>Aboard:</b> from 11:00 the call-home booths have queues and the mess a long lunch (12:00-14:00) where people read their messages out to friends. Happy, a little teary.</li>
+    <li><b>You:</b> a bundle from home in your Mail: one message each from Mum, Gran, Jo and Sam (their arcs, a step each), and you can record a long reply at a booth that day. Friends share theirs with you at lunch.</li>
+    <li><b>Work and rotas:</b> a workday with a long lunch; the booths' queue is real (crew wait their turn).</li>
+  </ul>
+
+  <h3>Founding Day <span class="tag">★ · day 100, Tuesday · Greening · already in the game</span></h3>
+  <ul>
+    <li>As now: cake and a few words from the Captain in the mess at 19:30, and the Founding Day feast. Now listed and shown as a holiday. In the year a ship-wide event grows it into the Founders' Day festival on the plaza, the festival is the event (design doc, "Ship-wide events").</li>
+  </ul>
+
+  <h3>Fix-it Fair <span class="tag">☆ · day 125, Saturday · Greening · new</span></h3>
+  <ul>
+    <li><b>The story:</b> the Works crew's open morning: bring anything broken (a lamp, a music player, a chair) and someone fixes it, or shows you how. (In spirit: repair cafés.)</li>
+    <li><b>Aboard:</b> 10:00-13:00 in the machine shop and the Works bay, a queue of crew holding small broken things, Torres in charge, tea.</li>
+    <li><b>You:</b> as Works, you can take a crew member's broken thing (tap them in the queue), fix it at the bench (a short work step with a part from the shelf or one made in the machine shop) and hand it back. Each fix is reputation with their department and a thank-you line.</li>
+    <li><b>Work and rotas:</b> a Saturday; all optional.</li>
+  </ul>
+
+  <h3>Sister Ship Night <span class="tag">★ · day 150, Wednesday · Greening · new</span></h3>
+  <ul>
+    <li><b>The story:</b> the Wren's sister ship, the CSV Linnet, passes within sight once a year on the far side of the survey loop. The two crews signal each other with their hull lights and swap a message of greetings. (In spirit: ships dipping their flags as they pass.)</li>
+    <li><b>Aboard:</b> 20:30-21:30, everyone at the windows (the bow lounge, the observatory, the promenade); a small far-off light that blinks back. The hull-lights crew (from the hull-lights evening) run the signal; the Captain reads the Linnet's message.</li>
+    <li><b>You:</b> join the light crew (tap the signaller) and press the lamp key for the Wren's greeting, or just watch with friends. A Mail from the Linnet's juniors to the Wren's arrives next morning.</li>
+    <li><b>Work and rotas:</b> an evening; the night watch is on as usual.</li>
+  </ul>
+
+  <h3>Midtour <span class="tag">☆ · day 182, Sunday · Greening · planned in Pillar 4</span></h3>
+  <ul><li>As planned: half the year; crew write a letter to themselves, read back at Year's end. Shown as a holiday.</li></ul>
+
+  <h3>Spanner Day <span class="tag">★ · day 212, Tuesday · Harvest · new</span></h3>
+  <ul>
+    <li><b>The story:</b> the day the ship thanks the people who keep it running. Once, when the whole Works crew worked three days straight through a coolant fault, the rest of the ship took over their chores for a day; it stuck. (In spirit: a labour day, for the engineers.)</li>
+    <li><b>Aboard:</b> <b>the Works crew have the day off</b>; the other departments cover the simple chores (badly, cheerfully: the bridge crew changing a lamp is the joke of the day), and only real faults call a Works crew member in. A banner in the Works bay; lunch cooked for Works by the bridge crew; Calder's speech at 17:00, short.</li>
+    <li><b>You:</b> a day off (a Tuesday), Mail of thanks from departments you've helped (from your real jobs: "To whoever fixed the oven before the Wednesday menu"), a lie-in. If a real fault is urgent, you may be called; you can say no.</li>
+    <li><b>Work and rotas:</b> the one holiday that changes rotas: Works on a Saturday rota (an on-call pair, as at weekends), everyone else on their usual one. The Pillar 5 ladder counts it as a day off (nothing new opens).</li>
+  </ul>
+
+  <h3>Swap Day <span class="tag">☆ · day 240, Tuesday · Harvest · new</span></h3>
+  <ul>
+    <li><b>The story:</b> for one morning, anyone who wants to swaps jobs with a friend from another department, so everyone remembers how the rest of the ship works. (In spirit: take-your-friend-to-work days and role swaps.)</li>
+    <li><b>Aboard:</b> 08:00-12:00, odd sights: a gardener at the job board, a Works tech on the galley line, Rina on the bridge tea round.</li>
+    <li><b>You:</b> pick a friend to swap with (tap them, from acquaintance up); you spend the morning at their kind of work (simple steps: stir, serve, water, file), and they do one easy job of yours, with a thank-you or a mess to tidy. Or don't swap and work as normal.</li>
+    <li><b>Work and rotas:</b> a workday; swaps only between people on shift that morning; the jobs board holds your real jobs till noon.</li>
+  </ul>
+
+  <h3>Starfall Night <span class="tag">★ · day 265, Saturday · Harvest · new</span></h3>
+  <ul>
+    <li><b>The story:</b> each year the Wren's route crosses an old comet's trail and the windows fill with falling sparks of dust. You tie a wish ribbon on the observatory rail. (In spirit: meteor-shower nights and wish trees.)</li>
+    <li><b>Aboard:</b> 21:00-23:00, the observatory, the bow lounge and the promenade windows; ribbons on the rail; hot drinks; the science crew naming the bright ones.</li>
+    <li><b>You:</b> sit with someone at a window (tap them); a quiet talk that can move a friendship a step. Tie a ribbon (one line of wish you choose from three).</li>
+    <li><b>Work and rotas:</b> a weekend evening. (If the comet viewing ship-wide event has happened, Starfall Night is its yearly echo; see "Clashes".)</li>
+  </ul>
+
+  <h3>The quiet watch <span class="tag">☆ · day 300, Saturday · Lanterns · already in the game</span></h3>
+  <ul><li>As now: a quiet while at the windows at 21:30 for the people we miss, led by Matthias Oduya. Shown as a holiday; no decor.</li></ul>
+
+  <h3>Long Night <span class="tag">★ · day 320, Friday · Lanterns · new</span></h3>
+  <ul>
+    <li><b>The story:</b> the middle of Lanterns, the ship's "winter": the ship's lights are kept at night-dim for the whole evening and everyone gathers in the warm. Stories, music and something hot. The next morning is a lie-in. (In spirit: midwinter festivals of light and warmth.)</li>
+    <li><b>Aboard:</b> 18:00 the lights go down to night-dim ship-wide (the cutaway's night look, early), lanterns in the bow lounge (from the lantern walk's decor), spiced drinks; 20:00 stories by the stage (the year's talent night could be held here: a question below); the Friday jam moves into it.</li>
+    <li><b>You:</b> sit in the warm with friends; tell a story yourself (pick one of three short tales from your own time aboard: a job, a friend, a mistake), which earns a laugh and a little social with everyone listening.</li>
+    <li><b>Work and rotas:</b> an evening; the next day (a Saturday) the galley's breakfast opens an hour late.</li>
+  </ul>
+
+  <h3>Stir-up Sunday <span class="tag">☆ · day 336, Sunday · Lanterns · new</span></h3>
+  <ul>
+    <li><b>The story:</b> four weeks before Year's end, the galley mixes the year's-end pudding in one enormous bowl, and everyone aboard takes a turn to stir and make a wish. (In spirit: the old stir-up Sunday.)</li>
+    <li><b>Aboard:</b> 11:00-14:00 in the mess, a giant bowl; Chef Brennan stern about the direction of stirring.</li>
+    <li><b>You:</b> stir (a short "stir" step) and make a wish. The pudding is served at Year's end, with a coin in it: whoever finds it has luck next year (it's hashed, not random: the same every time).</li>
+    <li><b>Work and rotas:</b> a Sunday; nothing changes.</li>
+  </ul>
+
+  <h3>Year's end <span class="tag">★ · day 364, Sunday · Lanterns · planned in Pillar 4</span></h3>
+  <ul><li>As planned: the year's log read in the bow lounge; the Midtour letters come back. Plus the Stir-up pudding. Shown as a holiday.</li></ul>
+</section>
+
+<section id="rules">
+  <h2>How holidays fit the rest of the ship</h2>
+  <ul>
+    <li><b>Same system as traditions:</b> a holiday is a ship tradition marked as a holiday, on a fixed day of the year (the system already has yearly days: Founding Day and the quiet watch use it). It's announced in Mail the evening before, shown on the Calendar, and talked about, like every tradition.</li>
+    <li><b>Holidays win the evening.</b> When a holiday and a weekly tradition fall at the same time and place, the holiday wins (the tradition system's rule: the higher priority, then the rarer one). Weekly ones move or skip that week (quiz night on Starfall Night is off; the Friday jam joins Long Night).</li>
+    <li><b>Birthdays share the day.</b> A crew member's birthday on a holiday still gets its cake after dinner; at a holiday's evening gathering, it's mentioned ("and it's Pell's birthday!"). Captain's Day is not the Captain's birthday.</li>
+    <li><b>Ship-wide events.</b> The events planner (Pillar 6) doesn't start a ship-wide event on a big holiday or the day before it. If an event is already running, a small holiday goes ahead quietly ("We still wore odd socks during the storm") and a big one is kept smaller (the gathering only, no decor). Nothing is ever cancelled outright.</li>
+    <li><b>Work.</b> Only Spanner Day changes a rota (Works off, an on-call pair). Holiday jobs (Bright Day's filters, Fix-it Fair's repairs) are volunteer jobs. The Pillar 5 ladder opens nothing on Spanner Day; Swap Day holds your jobs until noon.</li>
+    <li><b>Your first weeks.</b> Pillar 4's first week (Days 0-7) has no holiday. Captain's Day (13) and Bright Day (34) fall on weekends, when the Pillar 5 plan opens no new work; Odd Socks Day (24) is a workday in your Tier 4 week but changes nothing about work.</li>
+    <li><b>Same every time:</b> who leads, who comes, who sits next to you, the pudding's coin: all hashed from the day and ids, never random.</li>
+    <li><b>Phones:</b> each holiday's decor at most 6 draw calls (one merged or instanced mesh where it repeats: bunting, ribbons, lanterns), on its deck only, only that day; the socks are a colour swap.</li>
+  </ul>
+</section>
+
+<section id="cal">
+  <h2>The Calendar and notices: holidays, birthdays, appointments</h2>
+  <p>Today the Calendar shows a month ahead and chirps about 30 ship minutes before each tradition (birthdays included), quietly during your shift; an appointment gets one notice 10 minutes before. The user wants holidays and birthdays in the Calendar with notices, and appointments' notices made obvious. The plan:</p>
+  <div class="tablewrap"><table>
+    <tr><th>When</th><th>Holidays</th><th>Birthdays</th><th>Appointments</th></tr>
+    <tr><td><b>A week ahead</b></td><td>big ones: a Mail from whoever leads it, and a line on the Calendar's home ("Captain's Day, Saturday")</td><td>a close friend's: "Rina's birthday is next Tuesday" (time to make or buy a gift)</td><td>—</td></tr>
+    <tr><td><b>When made</b></td><td>—</td><td>—</td><td>the moment someone says yes (or invites or summons you): a notice "Gym with Tomas, Thursday 18:00", and it goes on the Calendar and Schedule with its own marker</td></tr>
+    <tr><td><b>The day before</b></td><td>Mail (as every tradition); a Calendar badge</td><td>a Calendar line "Tomorrow: Pell's birthday, cake at 20:15 in the mess"; friends' birthdays also Mail</td><td>a Calendar line "Tomorrow: Calder's office, 11:00"</td></tr>
+    <tr><td><b>That morning</b></td><td>the device's home shows a <b>holiday banner</b> in the holiday's colour ("Captain's Day: breakfast served by the officers, 07:30") and Home's "Today aboard" lists it first</td><td>"Today aboard: Pell's birthday (20:15)"; your friends' birthdays marked with a cake</td><td>"Today: Calder's office at 11:00" at the top of Home, above the traditions</td></tr>
+    <tr><td><b>An hour before</b></td><td>—</td><td>—</td><td>a badge on Appointments and the device button's light blinks</td></tr>
+    <tr><td><b>Shortly before</b></td><td>about 30 minutes before each holiday gathering, a chirp with "Go there" (holidays are marked "Remind me" by default, so they chirp even during your shift)</td><td>30 minutes before the cake, a chirp (as now; a friend's always chirps)</td><td><b>15 minutes before: a notice that stays</b> until you tap it (it doesn't fade), with "Go there" (the goal arrow) and the light blinking; it chirps even during your shift and when "quiet off shift" is on</td></tr>
+    <tr><td><b>If you're late</b></td><td>—</td><td>—</td><td>at the time, if you're not there: "Tomas is waiting at the gym" (stays); 15 minutes later the appointment counts as missed, as now (a remark next time)</td></tr>
+    <tr><td><b>Afterwards</b></td><td>a line in the Calendar's day ("You were there") and crew chatter</td><td>if you missed a friend's: a gentle line next day ("Missed you at my cake!")</td><td>as now</td></tr>
+  </table></div>
+  <ul>
+    <li><b>The Calendar:</b> the month view gets a coloured band on holidays (the holiday's name across the day), a cake on birthdays (with the name; friends' first) and a pin on your appointments. A new <b>"This year"</b> list shows every holiday of the year with its date and a line about it, so you can see what's coming beyond the month.</li>
+    <li><b>Asleep:</b> nothing chirps while you sleep; what's due waits for the morning line (an appointment you'd sleep through still shows as missed, gently).</li>
+    <li><b>Settings:</b> one switch each for holidays, birthdays, traditions and appointments (the existing per-tradition "Remind me" stays). Appointments' notices are on by default and are the last to go quiet; the device never pauses time.</li>
+    <li><b>Your own birthday</b> (the game already has "your birthday" cakes): the morning banner is yours, friends say happy birthday when they see you, and Mail from home.</li>
+  </ul>
+</section>
+
+<section id="join">
+  <h2>Tap to join (the user's new mechanic, coming in a playtest update)</h2>
+  <p>The user's coming "click a participant to join" mechanic for activity traditions (tap someone who's taking part, and you join them) fits several holidays well. They'd use it as it is built, not a version of their own:</p>
+  <ul>
+    <li><b>Captain's Day:</b> tap an officer serving at breakfast to be served (a line from them).</li>
+    <li><b>Bright Day:</b> tap a team lead to join their cleaning team.</li>
+    <li><b>Fix-it Fair:</b> tap someone in the queue to take their broken thing.</li>
+    <li><b>Sister Ship Night:</b> tap the signaller to join the light crew.</li>
+    <li><b>Swap Day:</b> tap a friend to swap with.</li>
+    <li><b>Starfall Night and Long Night:</b> tap someone at a window or by the fire to sit with them.</li>
+    <li><b>Stir-up Sunday:</b> tap Chef Brennan to take your turn at the bowl.</li>
+  </ul>
+  <p class="note">The rest (Odd Socks Day, Relay Day's lunch, Founding Day's toast, the quiet watch) work by being there, as traditions do now. When the mechanic's details are known, this list is checked against them.</p>
+</section>
+
+<section id="clash">
+  <h2>Clashes and things to check against the design doc</h2>
+  <ul>
+    <li><b>Founding Day and the Founders' Day festival:</b> the design doc names both (the yearly tradition, and the ship-wide event that grows from it). Kept as they are: the holiday every year, the festival as the event in the year it happens. Worth one name in the long run.</li>
+    <li><b>Most of the year is unseen in one playthrough.</b> The career arc runs to about Day 26 (10-15 hours); most holidays come later. So three fall early (Days 13, 24, 34). An alternative: start the game partway through the year so more come early (a question below).</li>
+    <li><b>Starfall Night and the comet viewing:</b> the comet viewing is a ship-wide event (Pillar 6). Starfall Night is a different, yearly thing (an old trail, not a comet); if the comet viewing happens near it, the holiday becomes its echo. Keep both, or fold one into the other (a question below).</li>
+    <li><b>Talent night "only once a year"</b> (the user, 2026-10-17) has no day yet; Long Night's stories are a natural home for it (a question below).</li>
+    <li><b>No photos anywhere</b> (design doc): no holiday gives a photo; keepsakes are cards, ribbons, a framed menu-style card.</li>
+    <li><b>The Calendar shows a month ahead</b> (design doc): the "This year" list is new; the design doc's Calendar line changes when this is approved.</li>
+    <li><b>Appointments' notices:</b> the design doc says ship-wide events give "at most a gentle note 15 minutes before a gathering". That stays for events; appointments get the louder, staying notice, since they're yours and someone waits.</li>
+    <li><b>Pillar 6's weekly rotation</b> of traditions: holidays sit outside the rotation (fixed days), and win their day.</li>
+    <li><b>The Linnet</b> is a new name (the Wren's sister ship); check it against the story pillar's plans.</li>
+  </ul>
+</section>
+
+<section id="q">
+  <h2>Questions for the user</h2>
+  <ol>
+    <li>Are these eleven the right mix? Any to drop, rename or add (for example a gardeners' day, or a day for the science crew)?</li>
+    <li>Captain's Day: you, the newest hand, in the Captain's chair on Day 13. Keep it as yours, or someone else's moment you watch?</li>
+    <li>Spanner Day as the only holiday with a day off (for Works, which includes you): yes, or more days off (for example Long Night's next morning off for everyone)?</li>
+    <li>Should the game start partway through the ship's year, so more holidays fall in a first playthrough? Or keep Day 1 as the year's start, with three early holidays?</li>
+    <li>Starfall Night and the comet viewing event: keep both, or make one?</li>
+    <li>Talent night's once-a-year: on Long Night?</li>
+    <li>Appointments: a notice that stays 15 minutes before, plus a badge an hour before. Loud enough, or too much?</li>
+  </ol>
+</section>
+
+<section id="b" class="builder">
+  <h2>For the builder (later; probably Pillar 6)</h2>
+  <ul>
+    <li><b>Data:</b> each holiday is a tradition entry (section 18's list) with <code>when: { yearDay: n }</code>, <code>holiday: true</code>, a <code>size</code> (big / small), a colour, its gatherings (several per day allowed: Captain's Day has breakfast, the chair and the toast), its decor (one kit piece each, made at load without <code>R()</code>), its lines (writers' files in <code>content/traditions/</code>), and its join targets (the tap-to-join mechanic).</li>
+    <li><b>The four old yearly days</b> get <code>holiday: true</code> and nothing else changes (regressions on those days stay identical apart from the Calendar's look).</li>
+    <li><b>Rotas:</b> one hook, <code>holidayRota(day)</code>, used only by Spanner Day (Works on the weekend rota); the Pillar 5 ladder treats that day as a day off.</li>
+    <li><b>Device:</b> the Calendar's band, cake and pin; the "This year" list; the morning banner; the appointment ladder (notice on accept, an hour-before badge and blink, the 15-minute staying notice, "waiting for you"); per-kind switches in Settings. All in the device's existing notice system (<code>deviceNotify</code>), one new <code>sticky</code> option.</li>
+    <li><b>Tests:</b> <code>events_check</code> steps a whole year on paper: each holiday on its day, people go, Mail the evening before, decor on its deck that day only, a weekly tradition yields; Spanner Day's rota; no event starts on a big holiday. A device check: the appointment notices in order, sticky until tapped, none while asleep.</li>
+  </ul>
+</section>
+
+</main>
+</body>
+</html>
