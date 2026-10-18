@@ -6,6 +6,7 @@ Started by lead 12 (session_01GjWhU9Z9V8RNoR8yyELA9V) at ~11:28 for every Step 2
 Spec: plans/brief-playtest1.md on claude/lead-pillar1 (12b1b87); the user's answers in it are binding. Seats: T traditions session_01X4SZJFeHprDF21NZqU5fGi (claude/traditions-pt1, 0.70.x), X crew sim session_01SNaWA6X5E9i2ZKfMnPTHJf (claude/crew-pt1, 0.71.x), U HUD session_01FcMPTX7mMTHkyr4pxDfNcS (claude/hud-pt1, 0.72.x), C2 works career session_014yREkgPvuwMyxBtoqB1P14 (claude/works-career, 0.44.x), O4 (claude/onboard-pt1), W, P, A5 session_01CHRbUTZc18m7eBck8eWhXj (claude/deck-pt1). Verdicts go to the seat, BM5 and lead 13 (finished reviews, blockers, design calls). Behaviour and saves in depth; lines and tests skimmed. The base is 0.63.1 (claude/p5-cand-s2).
 
 ## Passing tips
+- U claude/hud-pt1 **73b40cb** (0.72.0 ebfdb2f + screenshots; no LOWs)
 - X claude/crew-pt1 **2223cb7** (0.71.0, walk-ups and the mess fix; 1 LOW)
 - W claude/writer-p5 **6a00d9c** (0.48.91, playtest 1 package complete: time lines, breakfast 06:00-09:00, call-home tip; no LOWs open; 0.48.89 + 'seek' + key renames, playtest 1 lines, text; LOW 1 waits on X/C2's breakfast window)
 - W claude/writer-p5 **ac60c8d** (0.48.88, text; contains 0d179ac)
@@ -22,6 +23,11 @@ Spec: plans/brief-playtest1.md on claude/lead-pillar1 (12b1b87); the user's answ
 - (none)
 
 ## Verdicts
+
+### U ebfdb2f / 73b40cb (0.72.0): the Tracked button and panel, smaller device app labels — PASS (in depth)
+- The Tracked button sits in the Device button's row; on phones it goes under the needs strip, losing its word if it would touch the round buttons; it has a 44 px target. It shows a dot while an arrow is up. The panel lists your job (SHIP.player.track, as the Jobs app does), the rest of today and tomorrow until noon from the Schedule's devDay (traditions, appointments, meals, the shift), and fixed places (the job board, your bunk, the call booths `3-callhome-1`, which exists). A tap tracks it (setGoal with a `trk` key); a tap on the tracked one stops it; a tap outside or Escape closes the panel. Device app labels are 13 px. DOM only, nothing saved, no R(). 73b40cb only adds screenshots.
+- Note for T: U asks `tradGoal(x)` for a tradition's arrow (to the leader); T doesn't define it, so it falls back to the room, and T's tradJoinMinute then replaces a room goal with the arrow at the leader once you're there. Harmless; add a `tradGoal` only if you want the arrow at the leader from the start.
+- Checks (my runs on ebfdb2f): cadet_test vs 0.63.1: differences only inside the new button's box (x 132-225, y 86-116), state identical; **interactions_check OK** (the new "== tracked" part: opens, places listed, your job first and Tracking, a tap tracks your bunk and closes, a second tap stops, your job again, a meal to the mess, a tap outside closes, clear of the other buttons on a 320 px phone); **device_check OK**.
 
 ### X 2223cb7 (0.71.0): crew walk up to start a conversation; crew no longer stuck by you seated in the mess — PASS with a LOW (in depth)
 - Walk-ups (section 20 plus section 10's seekStep): socialSeek and the asked-for waves call `seekCome`. The friend walks over (`SEEK_COME`, re-aimed every 0.5 s, at most 30 real seconds; escorts come first), stops within 1.3 tiles facing you, says the opener in a bubble and the chip, and stays beside you while the chip is up (25 s), then back to their plan. They only come when their own act is leisure or off, not at work or tea. The opener: a career ask's line, else a chatLine that matters (TALK_KEEP), else section 22's kind 'seek' (W's c9a532f), else SEEK_OPEN. Someone off your deck still gets the chip. The odds (k 633) and the opener (k 634) are seeded with `p.seed ^ seekSalt()` (the career's gs; 0 under ?nosave, so checks are unchanged). Nothing saved.
