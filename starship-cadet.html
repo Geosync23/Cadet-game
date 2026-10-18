@@ -241,7 +241,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.42.42
+   STARSHIP CADET: CSV Wren                           build 0.42.43
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7591,7 +7591,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.42.42';                           // keep in step with the header's build line
+const GAME_BUILD = '0.42.43';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -31420,8 +31420,8 @@ function clothesFloorTap(point) {
 // a tap on a thing with words (section 15's PLAYER_TAPS): a wardrobe (the deck architect's, when it has a title), or a washer with your laundry in play
 PLAYER_TAPS.push((it, at) => {
   if (!CLOTHES_ON || typeof deckDef === 'undefined') return false;
-  if (it.wardrobe === playerBed() || /wardrobe|locker/i.test(it.t)) {
-    const w = clothesWardrobe(); if (!w || it.wardrobe !== playerBed() && Math.hypot(at.x - w.x, at.z - w.z) > 1) return false;
+  if (it.wardrobe === playerBed() || !it.wardrobe && /wardrobe/i.test(it.t)) {   // yours (the deck architect's tag), or a titled wardrobe right at it (reviewer's LOW: not any locker)
+    const w = clothesWardrobe(); if (!w || it.wardrobe !== playerBed() && Math.hypot(at.x - w.x, at.z - w.z) > .6) return false;
     approach(at.clone(), it.front, it.depth, wardrobeUse); return true;
   }
   if (!/^washer\b/i.test(it.t) || deckDef.num !== 4) return false;
@@ -31576,7 +31576,7 @@ function clothesCrewTick(C, now, crew) {
   CLOTHES_BEAT = { b: { who: INTRO_ESCORT, where: 'seek' }, lines: lines.slice() };
 }
 // once a frame: the washing done, yesterday's clothes at 10:00, the set-down hamper's look, the beats
-let HAMPER_LOOK = null, CLOTHES_STALE = null;
+let HAMPER_LOOK = null, CLOTHES_STALE = null, CLOTHES_SCAN = 0;
 function hamperLook() {                                  // a small laundry hamper on the floor, made once (no R())
   const g = new THREE.Group();
   box(.46, .4, .34, KM.hamper, 0, .21, 0, g);            // just off the floor: no coplanar faces
@@ -31600,6 +31600,7 @@ function clothesFrame() {
   const here = !!h && h.at === 'floor' && h.deck === deckDef.num;
   if (here && !HAMPER_LOOK) HAMPER_LOOK = hamperLook();
   if (HAMPER_LOOK) { HAMPER_LOOK.visible = here; if (here) HAMPER_LOOK.position.set(h.x, 0, h.z); }
+  if (simNow() < CLOTHES_SCAN) return; CLOTHES_SCAN = simNow() + 250;   // the beats, the crew-at-work look-up and the remark scan: four times a second, not every frame (reviewer's LOW)
   clothesBeatTick();
   if (stale && C.said.remark !== SHIP.time.day) clothesRemark(C);
 }
