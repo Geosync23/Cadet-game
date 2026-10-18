@@ -6,7 +6,7 @@ Started by lead 12 (session_01GjWhU9Z9V8RNoR8yyELA9V) at ~11:28 for every Step 2
 Spec: plans/brief-playtest1.md on claude/lead-pillar1 (12b1b87); the user's answers in it are binding. Seats: T traditions session_01X4SZJFeHprDF21NZqU5fGi (claude/traditions-pt1, 0.70.x), X crew sim session_01SNaWA6X5E9i2ZKfMnPTHJf (claude/crew-pt1, 0.71.x), U HUD session_01FcMPTX7mMTHkyr4pxDfNcS (claude/hud-pt1, 0.72.x), C2 works career session_014yREkgPvuwMyxBtoqB1P14 (claude/works-career, 0.44.x), O4 (claude/onboard-pt1), W, P, A5 session_01CHRbUTZc18m7eBck8eWhXj (claude/deck-pt1). Verdicts go to the seat, BM5 and lead 13 (finished reviews, blockers, design calls). Behaviour and saves in depth; lines and tests skimmed. The base is 0.63.1 (claude/p5-cand-s2).
 
 ## Passing tips
-- W claude/writer-p5 **a6593a8** (0.48.90 + time lines, breakfast 06:00-09:00, call-home tip; no LOWs open; 0.48.89 + 'seek' + key renames, playtest 1 lines, text; LOW 1 waits on X/C2's breakfast window)
+- W claude/writer-p5 **6a00d9c** (0.48.91, playtest 1 package complete: time lines, breakfast 06:00-09:00, call-home tip; no LOWs open; 0.48.89 + 'seek' + key renames, playtest 1 lines, text; LOW 1 waits on X/C2's breakfast window)
 - W claude/writer-p5 **ac60c8d** (0.48.88, text; contains 0d179ac)
 - C claude/works-career **8cc07a5** (0.44.13, the old-save catch-up; for 0.63.0a / Step 2)
 - P claude/player-p5 **f2156f1** (0.28.73 + the LOW fix 391c88e + player_check fixes f00ac1e, d6f321d, 642b511, ad9ff57, 1830f2d, f2156f1; no LOWs open)
@@ -21,6 +21,10 @@ Spec: plans/brief-playtest1.md on claude/lead-pillar1 (12b1b87); the user's answ
 - (none)
 
 ## Verdicts
+
+### W 79fbd5e + 6a00d9c (0.48.91): tap-to-join texts on T's keys, the lap on Sundays — PASS (skimmed); W's playtest 1 package complete
+- banks/join.lines on seat T's keys: join.<id>.tip / .notice for 21 traditions (what it is, what you do, what it gives), .done / .left for the two walks, and join.name-on-the-beam.tip / .tell / .paint / .notice. Zeke's lap line says Sundays. trad-words (not baked; for T to paste): the lap on Sundays, Sunrise stretch in the garden, the new Works hand's beam. content_gen clean (9015 lines); lines_check PASS.
+- To check when T lands: T's schedule must put Lap of the Wren on Sunday evenings and Sunrise stretch in the garden, as these texts now say, and T's code must read these exact keys.
 
 ### W a6593a8: breakfast 06:00-09:00 (X's window) — PASS (skimmed)
 - 5c9ac79 had moved the start to seven; X's window is 06:00-09:00 (the night shift eats at six). News, facts.md, Zeke's Mail and introDinner say six, and Chloe's, Tariq's and Vance's lines are back as they were; Rina's "closes at nine" stays. content_gen clean; lines_check PASS. (My note to X/C2 about the game code's breakfast texts: they should read 06:00-09:00.)
