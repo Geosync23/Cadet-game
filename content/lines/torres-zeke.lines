@@ -808,11 +808,11 @@
 - So pick the one you fancy. There's always next week.
 // Day 1: tea and biscuits at 13:00 (it replaced the half-ten tea). He explains it, walks you there after your job,
 // then work goes on with him following.
-? flag:walk.tea.1
-- One o'clock's tea and biscuits. Works stops for it.
-? flag:walk.tea.2
-- Not all at once. We take turns, so the board's covered.
-? flag:walk.tea.3
+? flag:walk.tea.explain.1
+- One o'clock's tea and biscuits, in the tea corner.
+? flag:walk.tea.explain.2
+- Most of Works goes, a few at a time. Fills a gap, too.
+? flag:walk.tea.explain.3
 - Finish this job, then I'll take you. Biscuits await.   #funny
 ? flag:walk.tea.go.1
 - Tea time. This way. The tea corner, behind the racks.
@@ -824,8 +824,10 @@
 - Have two biscuits. Nobody's counting. Pell is.   #funny
 ? flag:walk.tea.at.3
 - Whenever you're ready, the board's waiting. No rush.
-? flag:walk.tea.after.1
-- Right, back to it. I'll tag along behind.
+? flag:walk.tea.back.1
+- Right, back to it. Pick your next job.
+? flag:walk.tea.back.2
+- I'll tag along behind. Pretend I'm not here.   #funny
 
 // Zeke's welcome Mail on your device (the arrival evening: he tells you to open it). "Subject | body", unsigned.
 == mail.zeke-welcome
