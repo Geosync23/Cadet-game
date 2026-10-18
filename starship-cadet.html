@@ -35163,7 +35163,7 @@ if (typeof jobKindAdd === 'function') jobKindAdd('rounds', { tier: 1, junior: fa
     const j = roundJob(d, ROUND_AT); if (j) jobs.push(j);
   },
   stops: j => (j.route || []).map(id => { const m = machineById(id); return { deck: m.deck, placeId: panelPlace(id), mins: ROUND_LOOK, tag: 'look', how: 'look',
-    opts: { secs: 4, text: roundSign(id, worksDay(shipNow())), marks: ROUND_MARKS.map(([x, label]) => ({ id: x, label: roundText('round.mark.' + x, label) })) } }; }),
+    opts: { secs: 4, text: roundSign(id, worksDay(shipNow())), ask: roundSign(id, worksDay(shipNow())) + ' ' + roundText('round.ask', 'How does it look?'), marks: ROUND_MARKS.map(([x, label]) => ({ id: x, label: roundText('round.mark.' + x, label) })) } }; }),
   stepDone: (j, k, res) => roundMark(j, k, res && res.pick),
   done: roundDone,
   crew: { can: p => !!p.work && p.work.place === 'work:works', mins: 25 } });
