@@ -9,6 +9,11 @@
 
 ## Verdicts
 
+### Re-check: traditions 0.34.53, claude/trad-0607 1848e5f: PASS, the MED and LOW are fixed
+- **MED fixed:** the quiz tradition now has `host: 'tomas'` and `who` gives him 1. `eventPlan` now sorts `own` (their own birthday or rotation honour) first, then `host`, then prio, then start, so a host goes to what they host over a clash. The builder reports Tomas at quiz night on days 4, 18 and 25 (day 4 used to lose him to a birthday). The sort is a behaviour change for every host and honoree on a clash evening, but it's pure and deterministic, `e.honorees` is always an array (`let honorees = []` in `eventsOn`), and events_check and day_check day 4 pass, bar the known day-100 FAIL.
+- **LOW fixed:** if another card was open when you joined, the game opens once it's free (`QUIZ_PLAYED`, once a night).
+- **UI:** each question is asked on the choice card itself (`prompt`, labelled "Question n of 3"), and `noCount` hides the line counter. Shots in `plans/shots-0607/quiz-*.png`.
+
 ### Traditions 0.34.52, claude/trad-0607 dc44100 (in depth for the quiz): PASS, one MED (the quiz host isn't there)
 Since d27980f: `evRooms` strips escapes (my LOW 1, fixed); the 3-a-day cap was tried and reverted (the user kept the busy days); Cook-along moved to Saturday 15:30; the Quiz night mini-game (`quizPick`/`quizStart`, a `moment:` script on the choice card); events_check gains a held-place check and part 9e; the writer's quiz.lines copied in and baked.
 - **Probe:** day 4 (Thu) has quiz 20:00, a birthday, late piano and postcard night; days 6 and 13 (Sat) have Cook-along 15:30 alongside Tiles ladder and garden hour, and nothing is dropped. `quizPick(4)` gives the same three questions every call (shift start, delivery day, tea break) with the right answer at a different spot in each. `quizPick(11)` gives the next three (no repeats until the pool's used). The fix to q23 ("Food for anyone running late") is in.
