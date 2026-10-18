@@ -6,6 +6,7 @@ Started by lead 12 (session_01GjWhU9Z9V8RNoR8yyELA9V) at ~11:28 for every Step 2
 Spec: plans/brief-playtest1.md on claude/lead-pillar1 (12b1b87); the user's answers in it are binding. Seats: T traditions session_01X4SZJFeHprDF21NZqU5fGi (claude/traditions-pt1, 0.70.x), X crew sim session_01SNaWA6X5E9i2ZKfMnPTHJf (claude/crew-pt1, 0.71.x), U HUD session_01FcMPTX7mMTHkyr4pxDfNcS (claude/hud-pt1, 0.72.x), C2 works career session_014yREkgPvuwMyxBtoqB1P14 (claude/works-career, 0.44.x), O4 (claude/onboard-pt1), W, P, A5 session_01CHRbUTZc18m7eBck8eWhXj (claude/deck-pt1). Verdicts go to the seat, BM5 and lead 13 (finished reviews, blockers, design calls). Behaviour and saves in depth; lines and tests skimmed. The base is 0.63.1 (claude/p5-cand-s2).
 
 ## Passing tips
+- O5 claude/onboard-pt1 **2d213b1** (0.42.60-0.42.63, playtest 1 package O5; item 1 and the nit fixed)
 - T claude/traditions-pt1 **574da73** (0.70.0-0.70.6, playtest 1 package T; the LOW closed in 0.70.5; contains a9fad20)
 - U claude/hud-pt1 **55b2499** (0.72.1, Watch a film; contains 73b40cb)
 - W claude/writer-p5 **97fa9ae** (Watch a film hobby lines, text; contains 6a00d9c)
@@ -29,9 +30,12 @@ Spec: plans/brief-playtest1.md on claude/lead-pillar1 (12b1b87); the user's answ
 - S claude/ship-systems **03340c5** (0.33.48-0.33.51, Step 2 parts; also inside 78bf1c2, which R reviews for Step 1; 1 nit)
 
 ## Failing / waiting on a fix
-- O5 claude/onboard-pt1 **e4fe793** (0.42.60-0.42.62): one item (the servery arrow holds the evening; intro_check --evening FAILS)
 
 ## Verdicts
+
+### O5 ea0685e..2d213b1 (0.42.63): the servery arrow's time limit; "Board at nine"; the Day 0 auto-sit during the dinner chat — PASS (R3)
+- Item 1 closed: `INTRO_EAT_MINS` 30, `now >= at + INTRO_EAT_MINS` ends the servery arrow, so the call card and then the bunk arrow follow. The nit: "Board at nine". New (lead's ask): `dinnerTick`'s `yours` includes `I.step === 'table'`, so the game sits you in your seat during the Day 0 dinner chat with Zeke too; intro_check part 8 asserts it while introDinner is up.
+- Checks (my runs on 2d213b1): **intro_check --evening OK** (sat down by the game in 3-mess-10 at 18:40; the bunk arrow at 19:17); cadet_test vs e4fe793 **ALL IDENTICAL**. O5 reports --week and --firsts OK on P 36650dd + W 97fa9ae baked. O5's package is through.
 
 ### A5 0d682da + e55cf31 (0.47.9): speech bubbles no longer shake or jump on phones — PASS (R3)
 - Section 8b's bubbles: `tick(dt)` only counts down (crowd.update); `place()` runs from the main loop just before renderer.render, after `camera.updateMatrixWorld()`, so each bubble uses this frame's camera (it lagged a frame before, by an amount that varied with a phone's uneven frames); a translate3d at 0.1 px instead of whole-pixel left/top (`.bubw` left/top 0, will-change); an overlapping pair keeps its order (until the speakers are 24 px the other way round) and its stacking (until 12 px apart), and layout changes ease in over about 0.1 s (performance.now, display only). No R(), nothing saved, no draw calls (DOM).
