@@ -8,10 +8,14 @@
 (empty)
 
 ## Passing tips (for BM3)
-writer 0cc4cdf · arrival-0607b 5ce084d (includes arrival e2cd435 and PE6 52839a6) · systems 1e9476c · social 9c8ea6c · PE6 4bd606c · deck 55fca8d · traditions 5de2087.
+writer 0cc4cdf · arrival-0607b 82d573e (includes arrival e2cd435, PE6 52839a6, systems 1e9476c) · systems 521742a · social 9c8ea6c · PE6 4bd606c · deck 55fca8d · traditions 5de2087.
 events_check's day-100/day-231 seat clashes: OK on BM3's combine with social d3d5b4d. The bar needs PE6 and social together.
 
 ## Verdicts
+
+### Systems 0.33.43 521742a, and onboarding 4 0.42.44 82d573e: both PASS
+- **Systems 521742a:** Bea's Day 1 vent moves to 09:00-10:15 (75 minutes) at `4-lift-1`, after the briefing, when you and Zeke come down. That answers my LOW 1 on f351cc3. The delivery's load stop is DA4's `5-delivery-1` first (`loadAt`), then the hold's usual spots: `storagePlace` only takes known places, so it falls back cleanly without DA4's place. player_check and interactions_check tap the part's own shelf. Small and pure.
+- **Onboarding 4 82d573e (0.42.44, Day 3 delivery):** one new `CLOTHES_BEATS` entry, `d3-delivery`. Yara seeks you 10:00-13:30 on Day 3 only while `clothesDelivery()` (today's unclaimed stores restock) holds. She says her own `stores.delivery` voice-card lines under the flag `delivery.first` (`clothesVoice`, else the plan's stand-ins), then a toast says where it is. It's offered, never forced, and gone once someone claims the job. `introFlagSet` exists, and `b.keys` is now optional. The other two commits are merges only (systems 1e9476c, PE6 52839a6). The builder reports cadet_test vs 1e9476c ALL IDENTICAL, clothes_check OK and intro_check --week OK.
 
 ### Systems 0.33.41-0.33.42, claude/systems-0607 1e9476c (in depth): PASS
 The right part from the right shelf (`shelfOf`/`shelfStock`/`shelfLine`/`shelfWrong`, the amber glow, the machine shop's 15:00 top-up), and the Wednesday delivery as crates (`holdCrates`, `cartLoadHold`/`cartUnloadShelves`, `j.onCart`, held for you till 14:00 on shift days, never late in week 1, `holdCratesLive` for DA4's crate stack). Hooks in 15 (jobTap) and 15b (ixChoreTap, goal labels).
