@@ -27,3 +27,4 @@ Built on claude/cand-0606 (from 0.60.6a c8685cf). One line per finished check (c
 - cand 1 729f951: smoke, newgame, player, interactions, machine, clothes OK; leave_check FAIL (known, traditions; fix 8be5030 0.34.55 sent)
 - CANDIDATE 2 pushed: claude/cand-0607 3313db0 = cand 1 with traditions 8be5030 (0.34.55 clock-out fix) and ob4 79d8244 (0.42.45 intro_check settle fixes); merge clean, verify_merge same 14 explained, bake 8297, NAMES OK
 - cand 2 3313db0: leave (fixed), smoke, newgame, food, events, device, social, clothes, machine, deck, tiles OK; lines_check PASS (0 err, 2 warn)
+- trial 7d63a91 (cand 2 with traditions 8a512b5 0.34.56 in place of 8be5030): day_check day 3 OK (Deck 5 worst stuck 0.0; kovac-zainab fixed)
