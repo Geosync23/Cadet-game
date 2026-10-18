@@ -249,7 +249,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.51.0
+   STARSHIP CADET: CSV Wren                           build 0.51.1
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7919,7 +7919,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.51.0';                           // keep in step with the header's build line
+const GAME_BUILD = '0.51.1';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -35455,7 +35455,7 @@ if (JOB_KINDS.tune) WORK_MECH.m5 = {
   reserve(d, at, slot, o = {}) {
     const id = TUNE_TRAIN[o.yours ? 1 : 0], t = (d - 1) * 1440 + at; if (!machineById(id)) return null;
     if (!tuneDrift(id)) tuneSet(id, 2);                  // (a reload, or the crew got there first: drifted again for the lesson)
-    SHIP.jobs = SHIP.jobs.filter(x => !(x.reserved === slot && heldForYou(x) && !x.claimedBy) && !(x.kind === 'tune' && x.machine === id && !x.claimedBy && x.status !== 'done'));
+    SHIP.jobs = SHIP.jobs.filter(x => !(x.reserved === slot && heldForYou(x) && !x.claimedBy) && !(x.kind === 'tune' && x.machine === id && x.claimedBy !== 'you' && x.status !== 'done'));   // the oven's own tune job, even one a crew member took: the lesson stands for it
     const j = tuneJob(id, t, { slot, train: o.train || 'm5' }); if (!j) return null;
     SHIP.jobs.push(j); if (typeof MACH_REV !== 'undefined') MACH_REV++;
     return j.id;
@@ -35476,7 +35476,8 @@ if (JOB_KINDS.tune) WORK_MECH.m5 = {
 // Section 17's machine side (seat S): machineFault(id, cond), liftStuck(on), jointJobPost({ deck, placeId }).
 // Drawn: a puddle (two flat discs, one instanced draw call) and a smoke wisp (instanced quads, one draw call), only
 // during an incident on your deck. Saved: SHIP.works.inc = { plan: { week: [kind, day, minute, deck, done] },
-// open: null | { kind, deck, at, train, safe, j } } (ship.works.inc; old weeks dropped). Hash keys 870-873. No R().
+// open: null | { kind, deck, at, train, safe, j }, fix?: { id, kind } (the fix to note when it's done) } (ship.works.inc;
+// old weeks dropped). Hash keys 870-873. No R(). (Step 3: promotion days to be kept clear like test-job days.)
 const INC_KINDS = ['burst', 'lift', 'alarm'];
 const INC_FIRST = { day: 8, at: 630, kind: 'burst', deck: 4 };   // your first: Day 8 (a Monday), 10:30, Deck 4
 const INC_WIN = [540, 930], INC_MORNING = 690;           // 09:00-15:30; before 11:30 on a tradition evening's day
@@ -35495,6 +35496,7 @@ function incState() {
 // a save's inc read back (24 core's worksClean keeps only its own keys, so this block reads its part itself)
 function incClean(s, d = worksDay(shipNow())) {
   const out = { plan: {}, open: null }; if (!s || typeof s !== 'object') return out;
+  if (s.fix && typeof s.fix.id === 'string' && INC_KINDS.includes(s.fix.kind)) out.fix = { id: s.fix.id.slice(0, 80), kind: s.fix.kind };
   if (s.plan && typeof s.plan === 'object') for (const w in s.plan) { const e = s.plan[w]; if (/^\d{1,4}$/.test(w) && +w >= incWeek(d) && Array.isArray(e) && (e.length === 0 || INC_KINDS.includes(e[0]) && Number.isInteger(e[1]) && Number.isInteger(e[2]) && [3, 4, 5].includes(e[3]))) out.plan[w] = e.length ? [e[0], e[1], e[2], e[3], e[4] ? 1 : 0] : []; }
   const o = s.open; if (o && typeof o === 'object' && INC_KINDS.includes(o.kind) && [3, 4, 5].includes(o.deck) && Number.isFinite(o.at))
     out.open = { kind: o.kind, deck: o.deck, at: o.at, train: !!o.train, safe: !!o.safe, j: typeof o.j === 'string' ? o.j : null };
@@ -35565,6 +35567,7 @@ function incDone(j, t, by) {
   if (j.inc === 'burst') { const wet = incPlace((DECKS[j.deck] && DECKS[j.deck].wet) || [j.deck + '-wet-1']); fix = typeof jointJobPost === 'function' && wet ? jointJobPost({ placeId: wet, incident: j.inc }) : null; }
   else { const f = typeof machineFound === 'function' ? machineFound(j.inc === 'lift' ? INC_LIFT_M : INC_ALARM_M, by) : null; fix = f && f.id; }
   j.fix = fix || null;                                  // the fix's job id (saved with the job)
+  if (fix) I.fix = { id: fix, kind: j.inc };            // simNote('incident', { step: 'fixed' }) when it's turned in (the clock)
   if (by === 'you') {
     worksUse('m6');
     const F = fix && SHIP.jobs.find(x => x.id === fix), c = SHIP.works.cur;
@@ -35638,6 +35641,7 @@ if (JOB_KINDS.incident) WORK_MECH.m6 = {
 if (WORK_MECH.m6) WORK_TICKS.push((now, skip) => {
   const I = incState(); if (!I) return;
   const d = worksDay(now), m = now - (d - 1) * 1440, c = SHIP.works.cur, O = I.open;
+  if (I.fix) { const F = SHIP.jobs.find(x => x.id === I.fix.id); if (!F || F.status === 'done') { simNote('incident', { id: I.fix.kind, step: 'fixed', by: F ? F.doneBy : null }); I.fix = null; } }
   const R0 = c && c.id === 'm6' && c.st === 'meet' ? SHIP.occasions.find(x => x.key === c.occ) : null;   // the call at the meeting's minute
   if (R0 && now >= R0.at && now < R0.at + 60 && !O && !skip) {
     incStart(INC_FIRST.kind, INC_FIRST.deck, now, true);
