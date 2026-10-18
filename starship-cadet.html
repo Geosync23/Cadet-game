@@ -252,7 +252,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.80.0
+   STARSHIP CADET: CSV Wren                           build 0.80.1
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7916,6 +7916,84 @@ function recFloor(g, kind, i, j, x, y, PX) {
   }
   if (kind !== 'sport' && !sameRoom(i, j - 1) && !hall(i, j - 1) && (kind === 'pooltile' || kind === 'pad')) { g.fillStyle = 'rgba(80,230,255,.5)'; g.fillRect(x, y + 4, PX, 3); }   // the cyan stripe runs on into the port rooms
 }
+// the auditorium's 76 seats (0.80.1): six raked rows (columns 35-40, back to front, each step 0.2 lower), three blocks
+// with two aisles at rows 5 and 12. Pure numbers, so the seats' places can be data like every deck's
+const REC_SEATS = (() => {
+  const out = [], blocks = [[2, 5, 3], [6, 12, 7], [13, 16, 3]];
+  for (let r = 0; r < 6; r++) blocks.forEach(([z0, z1, n], b) => {
+    if (r === 5 && b !== 1) n = 2;                       // the front row's side blocks are one seat short: 76 in all
+    for (let k = 0; k < n; k++) out.push({ col: 35 + r, h: Math.round((1 - r * .2) * 100) / 100, x: 35 + r + .55, z: z0 + (z1 - z0) * (k + .5) / n, aisle: b === 0 || (b === 1 && k < 4) ? 5 : 12 });
+  });
+  return out;
+})();
+const REC_BLOCKS = [[2, 5], [6, 12], [13, 16]];          // the seat blocks' rows (z from, to)
+const REC_STAGE = { front: 7.65, back: 11.2, rz: 8.6 };   // room-local: the stage's front edge at the centre line, the bow arc's radii
+Object.assign(KIT, {
+  // the rake: one solid step per row and block (no holes, nothing on the floor's plane), and the seats on them, facing the stage
+  recRake(g) {
+    for (let r = 0; r < 5; r++) for (const [z0, z1] of REC_BLOCKS) { const h = 1 - r * .2; box(1, h, z1 - z0 - .02, RK.rake, r + 1.5, h / 2, (z0 + z1) / 2, g); box(.04, .03, z1 - z0 - .02, RK.gold, r + 1.98, h + .005, (z0 + z1) / 2, g); }
+    for (const s of REC_SEATS) {
+      const x = s.x - 34, y = s.h;
+      box(.44, .1, .5, RK.seat, x + .05, y + .42, s.z, g);              // the cushion
+      box(.08, .56, .5, RK.seat, x - .2, y + .74, s.z, g);              // the back
+      box(.12, .37, .3, RK.seatDark, x + .02, y + .185, s.z, g);         // the pedestal
+      box(.012, .06, .12, RK.gold, x - .246, y + .88, s.z, g);           // the gold number, on the back of the seat
+    }
+    return { w: .1, d: .1, noBlock: true };
+  },
+  // the stage: a curved platform across the bow, its back following the hull and its front bowing out toward the seats
+  recStage(g) {
+    const S = REC_STAGE, th = Math.acos(8 / S.back), sh = new THREE.Shape(), zA = 9 - S.rz * Math.sin(th), zB = 9 + S.rz * Math.sin(th);
+    sh.moveTo(8, zA); sh.quadraticCurveTo(2 * S.front - 8, 9, 8, zB);
+    for (let k = 0; k <= 24; k++) { const a = th - 2 * th * k / 24; sh.lineTo(S.back * Math.cos(a), 9 + S.rz * Math.sin(a)); }
+    const geo = new THREE.ExtrudeGeometry(sh, { depth: .55, bevelEnabled: false, curveSegments: 16 });
+    const m = new THREE.Mesh(geo, [RK.stageTop, RK.stageSide]); m.rotation.x = Math.PI / 2; m.position.y = .55; m.castShadow = m.receiveShadow = true; g.add(m);
+    return { w: .1, d: .1, noBlock: true };
+  },
+  // the lighting truss over the stage on two gold towers, with six lamps aimed at the stage
+  recTruss(g, o) {
+    const L = o.len, y = 3.9;
+    for (const z of [-L / 2, L / 2]) { box(.16, y + .1, .16, RK.truss, 0, .55 + (y - .55) / 2, z, g); box(.4, .05, .4, RK.truss, 0, .575, z, g); }
+    for (const [x, yy] of [[-.2, y], [.2, y], [-.2, y + .35], [.2, y + .35]]) box(.05, .05, L, RK.truss, x, yy, 0, g);
+    for (let k = 0; k <= 12; k++) { const z = -L / 2 + L * k / 12; box(.4, .03, .03, RK.truss, 0, y, z, g); box(.03, .35, .03, RK.truss, k % 2 ? -.2 : .2, y + .175, z, g); }
+    for (let k = 0; k < 6; k++) { const z = -L / 2 + L * (k + .5) / 6, c = cyl(.09, .12, .26, RK.black, -.05, y - .2, z, g, 12); c.rotation.z = -.7; }
+    return { w: .5, d: L, tall: true };
+  },
+  recLectern(g) {
+    box(.56, 1.0, .4, RK.wood, 0, .55 + .5, 0, g); box(.62, .05, .48, RK.wood, 0, 1.58, .03, g).rotation.x = -.18;
+    box(.3, .03, .22, RK.gold, 0, 1.18, .205, g);                       // the ship's crest on its front
+    return { w: .62, d: .48 };
+  },
+  // the film screen's housing, rolled up under the truss (it lowers for films, later)
+  recScreen(g, o) {
+    box(.24, .24, o.len, RK.black, 0, 4.35, 0, g); box(.04, .05, o.len - .2, RK.screen, .09, 4.2, 0, g);
+    return { w: .3, d: o.len, noBlock: true };
+  },
+  recHit(g, o) { return { w: o.w, d: o.d, noBlock: true }; },   // a tap target over something drawn elsewhere
+});
+Object.assign(WALL_KIT, {
+  // the REC DEC neon over the auditorium's doors: pink letters on a dark backing, drawn once per visit
+  recNeon(g) {
+    const t = tex(512, 160, (c, w, h) => {
+      c.fillStyle = '#1a1220'; c.fillRect(0, 0, w, h);
+      c.font = '800 96px system-ui,sans-serif'; c.textAlign = 'center'; c.lineJoin = 'round';
+      c.strokeStyle = 'rgba(255,79,216,.35)'; c.lineWidth = 18; c.strokeText('REC DEC', w / 2, 116);
+      c.strokeStyle = '#ff6fe0'; c.lineWidth = 6; c.strokeText('REC DEC', w / 2, 116); c.fillStyle = '#ffd6f6'; c.fillText('REC DEC', w / 2, 116);
+    });
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(2.4, .75), new THREE.MeshBasicMaterial({ map: t, toneMapped: false })); p.position.set(0, 3.25, .06); g.add(p);
+    box(2.5, .85, .05, RK.black, 0, 3.25, .025, g);
+  },
+  recPoster(g) {
+    const t = tex(256, 360, (c, w, h) => {
+      c.fillStyle = '#26183f'; c.fillRect(0, 0, w, h); c.fillStyle = '#ff6fe0'; c.fillRect(0, 0, w, 10); c.fillStyle = '#50e6ff'; c.fillRect(0, h - 10, w, 10);
+      c.textAlign = 'center'; c.fillStyle = '#ffe9a8'; c.font = '800 40px system-ui,sans-serif'; c.fillText('THE', w / 2, 90); c.fillText('REC DEC', w / 2, 136);
+      c.fillStyle = '#e8eef0'; c.font = '600 22px system-ui,sans-serif'; ['Pool', 'Rivers', 'Climbing wall', 'Float room', 'Lightdisc'].forEach((l, k) => c.fillText(l, w / 2, 190 + k * 28));
+      c.fillStyle = '#50e6ff'; c.font = '700 22px system-ui,sans-serif'; c.fillText('Open 06:00 to midnight', w / 2, 336);
+    });
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(.8, 1.12), new THREE.MeshStandardMaterial({ map: t, roughness: .8 })); p.position.set(0, 1.55, .045); g.add(p);
+    box(.86, 1.18, .04, RK.gold, 0, 1.55, .02, g);
+  },
+});
 DECKS[7] = {
   num: 7, name: 'Recreation', seed: 70771, tall: 1.6, playerOnly: true, open: [6, 24],
   blurb: 'Auditorium, court, pool, rivers', arrive: 'The concourse runs stern to bow: the rivers and the court aft, the pool and the auditorium forward.',
@@ -7996,7 +8074,8 @@ DECKS[7] = {
   hull: { sternX: 1, stern: 2, bowFrom: 34, bowLen: 11.6, byFace: true },
   service: [{ key: 'v,4,8', tier: 2 }, { key: 'v,4,15', tier: 2 }, { key: 'v,32,3', tier: 1 }, { key: 'h,31,11', tier: 1 }, { key: 'v,34,11', tier: 1 }],
   machines: [],                                          // TODO (phase 2, the systems engineer): the plan's section 6 machines
-  places: [],
+  // the auditorium's seats (0.80.1): reached from the aisle beside their row; a type no crew code knows, so they stay the player's
+  places: REC_SEATS.map((s, k) => ({ id: '7-seat-' + (k + 1), type: 'rec:seat', at: [s.col, Math.floor(s.z)], walk: [s.col, s.aisle], face: 'e', pose: 'sit', room: 'A', xy: [s.x, s.z], y: Math.round((s.h + .47) * 100) / 100 })),
   dress(d) {
     recMats();
     for (const [key, tw, text] of d.plates) placeOnEdge('plate', key, tw, { text });
@@ -8021,12 +8100,30 @@ DECKS[7] = {
     // the concourse: benches against the stands' glass, facing the rivers; a towel bin by the lobby
     for (const x of [3.5, 8.0]) place('=', 'bench', x, 3.55, 's', { w: 1.6, snug: true, it: IT('Bench', 'Facing the river glass. People sit here to watch the white water and pretend they aren\'t waiting for someone.') });
     place('=', 'hamper', 12.4, .45, 'n', { snug: true, it: IT('Towel bin', 'For wet towels from the river hall. It smells of chlorine and good intentions.') });
+    // the auditorium (0.80.1, R2): the rake and its 76 seats, the stage against the bow windows, the truss, lectern, piano and screen
+    const rake = []; for (let c = 1; c <= 6; c++) for (const [z0, z1] of REC_BLOCKS) for (let z = z0; z < z1; z++) rake.push([c, z]);
+    place('A', 'recRake', 0, 0, 'n', { block: rake });
+    REC_BLOCKS.forEach(([z0, z1], b) => place('A', 'recHit', 3.5, (z0 + z1) / 2, 'n', { w: 6, d: z1 - z0, hitH: 1.6, it: IT('Seats', ['The side seats by the hull: a good view of the piano, and nobody climbing over you.', 'The middle block. Deep violet seats with gold numbers on their backs, all facing the stage and the stars behind it.', 'The side seats on the starboard side, nearest the booth window. The sound is best here, they say.'][b]) }));
+    const stage = []; for (let j = 0; j < 18; j++) for (let c = 8; c < 12; c++) { const v = (j + .5 - 9) / REC_STAGE.rz; if (Math.abs(v) < 1 && c + .5 < REC_STAGE.back * Math.sqrt(1 - v * v)) stage.push([c, j]); }
+    place('A', 'recStage', 0, 0, 'n', { block: stage });
+    place('A', 'recHit', 9.3, 9, 'n', { w: 2.6, d: 9, hitH: .8, it: IT('Stage', 'A curved stage across the bow, and behind it nothing but the windows and the stars. Every show here is played against them.') });
+    place('A', 'recTruss', 9.6, 9, 'n', { len: 8, it: IT('Lighting truss', 'A gold truss over the stage on two towers, with six lamps aimed down. The booth runs them.') });
+    place('A', 'recScreen', 10.3, 9, 'n', { len: 6 });
+    place('A', 'recLectern', 8.8, 7.3, 'e', { it: IT('Lectern', 'The Captain\'s lectern, with the Wren\'s crest on the front. The microphone is bent at exactly her height.') });
+    place('A', 'grandPiano', 9.4, 12.4, 'w', { it: IT('Grand piano', 'A black grand piano at stage left, lid propped. Someone keeps it tuned, and nobody admits to it.') }).position.y = .55;
+    // the foyer: the REC DEC neon over the four doors, the deck's poster, a bench
+    placeWall('f', 'recNeon', 'e', 2.0, { hitW: 2.4, it: IT('REC DEC', 'A curved pink neon over the auditorium\'s doors. The official sign, RECREATION DECK, was too long to fit.') });
+    placeWall('f', 'recPoster', 'n', 2.5, { it: IT('Poster', 'THE REC DEC: pool, rivers, climbing wall, float room, Lightdisc. Open 06:00 to midnight.') });
+    place('f', 'bench', 2.9, 3.55, 's', { w: 1.6, snug: true, it: IT('Bench', 'Outside the auditorium doors. Good for waiting, and for hearing the piano through them.') });
   },
 };
 // the rec deck's materials, made when the deck is built (so they are freed with it)
 let RK = null;
 function recMats() {
-  RK = {};
+  RK = {
+    seat: std('#4a2f86', .8), seatDark: std('#22192f', .7, .2), gold: std('#d9b45a', .35, .7), rake: std('#2b2140', .9),
+    stageTop: M.wood, stageSide: std('#1d1630', .7), truss: std('#c9a24a', .4, .7), black: std('#16181c', .6, .3), wood: std('#6b4a32', .6), screen: std('#e8e6df', .9),
+  };
 }
 
 // =====================================================================
@@ -8088,7 +8185,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.80.0';                           // keep in step with the header's build line
+const GAME_BUILD = '0.80.1';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two

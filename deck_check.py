@@ -68,7 +68,7 @@ PLACES = r"""(() => {
   for (const p of ps) {
     const why = [], works = p.type === 'work:works' || p.type === 'storage' || p.works === true, seen = works ? seenWorks : seenAll, pass = passFor(works ? WORKS : null);
     if (typeof p.id !== 'string' || !p.id) why.push('no id');
-    if (!(TYPES.includes(p.type) || /^work:[a-z-]+$/.test(p.type || ''))) why.push('type ' + p.type);
+    if (!(TYPES.includes(p.type) || /^(work|rec):[a-z-]+$/.test(p.type || ''))) why.push('type ' + p.type);   // rec: the rec deck's player-only places (0.80.1)
     if (!POSES.includes(p.pose)) why.push('pose ' + p.pose);
     if (!FACES.includes(p.face) && !Number.isFinite(p.face)) why.push('face ' + p.face);   // a letter, or any finite degrees from south toward east, e.g. 90 or -145 (sim 0.26.11)
     const [c, r] = p.at || [];
@@ -79,7 +79,7 @@ PLACES = r"""(() => {
       if (!free(wc, wr)) why.push('walk ' + wc + ',' + wr + ' not walkable');
       if (roomAt(wc, wr) !== p.room) why.push('walk in room ' + roomAt(wc, wr));
       if (!seen.has(K([wc, wr]))) why.push('walk unreachable');
-      if (!(wc === c && wr === r) && Math.hypot(wc + .5 - sp[0], wr + .5 - sp[1]) > 2.5) why.push('walk too far from the spot');
+      if (!(wc === c && wr === r) && Math.hypot(wc + .5 - sp[0], wr + .5 - sp[1]) > (p.type === 'rec:seat' ? 4 : 2.5)) why.push('walk too far from the spot');   // an auditorium seat is reached along its row from the aisle
     } else {
       let ok = seen.has(K([c, r]));
       if (!ok && (p.pose === 'sit' || p.pose === 'lie' || !free(c, r)))    // a seat or bed: reached from the tile beside it
