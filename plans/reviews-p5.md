@@ -5,13 +5,20 @@ Who gets verdicts (lead 11, 09:27; kept by lead 12, session_01GjWhU9Z9V8RNoR8yyE
 How: behaviour, save and schedule changes in depth (against the piece's approved page in plans/mechanics/ on claude/p5-design, determinism, old saves load, phones first, cadet_test differences explained); content and test-only changes skimmed. Verdicts newest first.
 
 ## Passing tips
+- S claude/ship-systems **78bf1c2** (0.33.52, contains 96cf5cb, fc4f946, 859e261, 03340c5; 1 LOW open)
 - P claude/player-p5 **cfce34e** (0.28.72, contains 1829c8b; 1 LOW open)
-- C claude/works-career **d518673** (0.44.9, contains 87df8f5..ae6598a; 1 LOW open)
+- C claude/works-career **2865a21** (0.44.12; the trainTell LOW closed in 22411f8; 88f71b7 the S/P join and the page's bands, e88fa7b/2865a21 a held escort only while its case is open; all read and fine)
 - A claude/deck-0607 **6cc826b** (0.47.2, contains c20f91f and ad5e704; no LOWs open)
 - H claude/mech-cases **5a4d362** (0.55.12, contains everything from eece4d4; no LOWs open)
 - W claude/writer-p5 **0d179ac** (0.48.86, text; contains 843bac9 and 76fc413; no LOWs open)
 
 ## Verdicts
+
+### S 96cf5cb (0.33.44-0.33.47) through 78bf1c2 (0.33.52): section 17 for Pillar 5 — PASS with a LOW (in depth)
+- Step 1 (foundation 17.1-17.6). playerTier() everywhere PLAYER_TIER was read. Ranks: RANKS, rankOk, j.junior / j.only, forYou, and the hold order by worksBand. More real faults: REAL_SHARE of worn machines found already faulty (cond 49), key 856, from Day 2, on your shift days, at your tier; never a machine kept for a reserved job. FAULT_LEAVE 240; real repairs are never shared out. FAULT_CAUSES for the ten Tier 1 kinds; faultPick (key 855, settings from Day 4, bands by tier, never a load); the card's symptom. Job kinds: jobKindAdd, jobMake, the crew walk a kind's stops (crew.can, crew.mins), def.done/stepDone/veto/side, jobStepDone(id, k, res) keeping j.res and returning `say`. machineFound; jobReserve o.tier / o.train / o.cause; jobSetPart. 24k's hooks: caseOffer at posting and on upgrades, heldForYou ∪ caseHeld, caseFitted at the last stop, caseHidden on the board. machinesNow is re-entry safe (MACH_IN), with ladderTick after the claims. Load: jobs of an unknown kind are dropped at the first run (jobsTidy, after section 24 registers). The main lift's id becomes 5-mainlift-1, with the old id mapped on load (its place id clashed).
+- Step 2 parts, inert until their kinds register: drift (0.33.48, keys 868/869; only while 24e's 'tune' exists; saved as a third field). The incident helpers (0.33.49: machineFault, liftStuck, which isn't saved by design, and jointJobPost). The manifest and the misplaced part (0.33.50-51, keys 866/867; only while 24d's 'haul' exists; saved with cleaners). machineTitle (0.33.52).
+- Checks (my run on 78bf1c2): cadet_test vs d3d720b ALL IDENTICAL; machine_check OK; day_check Day 3 OK. intro_check is left to BM4's 0.63.0 candidate (lead 12's rule tonight).
+- LOW: REAL_SHARE is .45 (0.33.47); foundation.html's FAQ still says "The lead set REAL_SHARE = .5". S says lead 11 approved .45, and DEV_NOTES says so; ask the designer to put .45 on the page.
 
 ### H 169d13e (0.55.12): case titles name the machine without the symptom — PASS (read; H's checks)
 - caseMachName(j) replaces jobCard(j)[0], which since S 0.33.46 carries "(leaks)", so a title isn't "Washer 2 (leaks) leaks". The writer's template's full stop is dropped for a card. S 78bf1c2 has the same thing as `machineTitle(id)`; 5a4d362 prefers it when it's there (nit closed). H's checks: puzzle_check OK (on the branch and on an S+P+C combine), cadet_test ALL IDENTICAL.
