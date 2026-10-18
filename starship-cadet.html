@@ -8803,10 +8803,22 @@ function schedBuild(p, d, occ, S) {
   };
   // showers in the evening: the habit, or about one day in three for anyone else
   const eveShower = H.has('evening-shower') || U(90) < .3;
+  // the shower queue (0.36.91, plan-0607): a wait of SHOWER_Q+ minutes for a shower is spent in the washroom, not on
+  // the bunk: the wait before the shower becomes a 'shower-queue' stop (a free place of that type in the same room
+  // when the deck architect has them, else no place: section 10 stands them inside the washroom door, tag 'showerq')
+  const showerQueue = (t0, id) => {
+    const pl = S.byId.get(id), i = segs.length - 1, w = segs[i], pv = segs[i - 1];
+    if (!pl || !w || w.placeId !== id || !pv || pv.to !== w.from || pv.act === 'commute' || w.from - t0 < SHOWER_Q) return;
+    const q = (S.shared.get(bedDeck + '|shower-queue') || []).find(x => x.room === pl.room && isFree(x.id, t0, w.from));
+    if (pv.from >= t0) segs.splice(i - 1, 1); else pv.to = t0;   // the wait was added on the end of what they were doing
+    if (q) hold(q.id, t0, w.from);
+    segs.splice(segs.indexOf(w), 0, { from: t0, to: w.from, act: 'wash', deck: bedDeck, type: 'shower-queue', placeId: q ? q.id : null, tag: 'showerq' });
+  };
   const wash = (k, evening) => {                         // a shower (queueing if need be), else a basin, else in your own room
     const dur = evening || !eveShower ? 7 + Math.round(5 * U(k)) : 5;
-    const type = dur === 5 ? 'basin' : 'shower';
-    if (!take('wash', [[bedDeck, type]], dur, { wait: 25 }) && !take('wash', [[bedDeck, type === 'shower' ? 'basin' : 'shower']], 5, { wait: 15 })) {
+    const type = dur === 5 ? 'basin' : 'shower', t0 = t, d0 = deck, got = take('wash', [[bedDeck, type]], dur, { wait: 25 });
+    if (got && type === 'shower' && d0 === bedDeck) showerQueue(t0, got);
+    if (!got && !take('wash', [[bedDeck, type === 'shower' ? 'basin' : 'shower']], 5, { wait: 15 })) {
       go(bedDeck); seg('wash', t + 6, 'bed', p.bed, { tag: 'room' });
     }
   };
@@ -8944,11 +8956,13 @@ function schedBuild(p, d, occ, S) {
     if (U(k + 7) < .5) toilet(k + 7);
     wash(k);
     if (F.shape.inspect && /^4-B/.test(p.bed)) { go(bedDeck); seg('off', t + 10, 'bed', p.bed, { tag: 'inspection' }); }
+    const pre = meet.find(e => !e.meal && !e.done && e.at >= t && e.at + e.dur <= by - 25);   // a gathering before breakfast (Sunrise stretch, Pick-your-own; 0.36.86): to it, then breakfast
+    if (pre) leisureUntil(pre.at + pre.dur, k + 11);
     const mb = meet.find(e => e.meal === 'breakfast' && !e.done && e.at + 10 > t && e.at < by + 150);   // a meal tradition (the long breakfast) is their breakfast
     if (mb) { leisureUntil(mb.at + mb.dur, k + 9); if (segs.some(s => s.act === 'breakfast' && s.tag === mb.tag)) return; if (t >= by - 5) { grab('breakfast', k + 3); return; } }
-    if (H.has('skips-breakfast') && U(k + 1) < .7) { linger(Math.max(t, by - 8 - Math.round(10 * U(k + 2)))); grab('breakfast', k + 3); return; }
+    if (H.has('skips-breakfast') && U(k + 1) < .7) { if (!pre) linger(Math.max(t, by - 8 - Math.round(10 * U(k + 2)))); grab('breakfast', k + 3); return; }
     const want = Math.max(MEALS.breakfast[0], by - 30 - Math.round(25 * U(k + 4)) - (H.has('lingers-at-meals') ? 15 : 0));
-    if (want > t + C + 5) linger(want - (deck !== 3 ? C : 0));
+    if (want > t + C + 5 && !pre) linger(want - (deck !== 3 ? C : 0));   // after a gathering: straight to breakfast (waiting would only stretch the gathering)
     meal('breakfast', k + 5, by);
   };
 
@@ -9219,7 +9233,9 @@ function planDay(person, day) { return shipDay(day).plans.get(person.id) || []; 
 // table for Calder; the escort's is only a stand-in, since section 10's escort does the walking),
 // { deck, room } (a week beat: the first free place in that room, by id, nobody's own and nobody's desk) or 'seek'
 // (section 20's seek finds you: nothing planned). [] when the intro is off
-const INTRO_EARLY = 5;                                   // minutes early to a named seat (the Chief at your table)
+const STAFF_ONLY = new Set(['bar-staff']);              // behind the bar: the bartender's alone, never a beat's place (0.36.91; Pell's d4-quiz landed on 3-bar-1)
+const INTRO_EARLY = 5;
+const SHOWER_Q = 3;                                      // ship minutes: a shorter wait for a shower isn't worth queueing for                                   // minutes early to a named seat (the Chief at your table)
 function introPlan(p, d) {
   if (typeof introBeats !== 'function') return null;
   let beats = null; try { beats = introBeats(p.id, d); } catch (e) { return null; }
@@ -9227,7 +9243,7 @@ function introPlan(p, d) {
   const S = schedData(), nat = (a, b) => a.id.localeCompare(b.id, 'en', { numeric: true });
   return beats.filter(x => x && x.where && x.where !== 'seek' && x.until > x.at).map(x => {
     const w = x.where, rooms = (DECKS[w.deck] && DECKS[w.deck].rooms) || {};
-    const inRoom = q => q.deck === w.deck && (q.room === w.room || (rooms[q.room] && rooms[q.room].name === w.room)) && q.type !== 'bed' && !S.owner.has(q.id) && !S.deskOf(q.id) && !q.machine;
+    const inRoom = q => q.deck === w.deck && (q.room === w.room || (rooms[q.room] && rooms[q.room].name === w.room)) && q.type !== 'bed' && !STAFF_ONLY.has(q.type) && !S.owner.has(q.id) && !S.deskOf(q.id) && !q.machine;
     const cand = S.places.filter(inRoom).sort(nat), dist = q => w.tile ? Math.hypot(q.at[0] - w.tile[0], q.at[1] - w.tile[1]) : 0;
     const near = w.tile ? cand.filter(q => q.type !== 'event').sort((a, b) => dist(a) - dist(b)) : cand;   // a tile: the places nearest it first
     const pl = w.placeId && S.byId.get(w.placeId) ? S.byId.get(w.placeId) : near[0];   // a named place (Calder's seat across from yours)
@@ -10205,7 +10221,7 @@ deviceApp({ id: 'maps', title: 'Maps', icon: 'map', order: 25,
 const ROSTER_DEPTS = [['command', 'Command'], ['helm', 'Helm'], ['comms', 'Comms'], ['survey', 'Survey'], ['works', 'Works'], ['watch', 'Watch'],
   ['infirmary', 'Infirmary'], ['galley', 'Galley'], ['store', 'Ship\'s store'], ['civilian', 'Civilians'], ['guest', 'Guests']];
 const ROSTER_ACT = { work: 'On duty', breakfast: 'At breakfast', lunch: 'At lunch', dinner: 'At dinner', gym: 'At the gym', appt: 'At an appointment' };
-let rosterPick = null;
+let rosterPick = null, rosterTab = 'all';             // rosterTab: 'all' (everyone, the main view) or 'known' (People I know: Friends, Acquaintances, Met; 0.36.82)
 const rosterTier = id => { if (typeof relTier !== 'function') return 0; try { return relTier(id) || 0; } catch (e) { return 0; } };
 const rosterRoomName = n => /\d/.test(n) ? n : 'the ' + n.charAt(0).toLowerCase() + n.slice(1);
 function rosterWhere(p, t = shipNow()) {                 // { line, deck, room }: room only when Go there makes sense
@@ -10229,6 +10245,7 @@ deviceApp({ id: 'roster', title: 'Roster', icon: 'crew', order: 52,
   act(verb, arg) {
     if (verb === 'open' && arg && arg.who) rosterPick = arg.who;
     else if (verb === 'pick') rosterPick = rosterPick === arg ? null : arg;
+    else if (verb === 'tab') { rosterTab = arg === 'known' ? 'known' : 'all'; rosterPick = null; }
     else if (verb === 'go' && rosterPick && typeof setGoal === 'function') {
       const p = apptPerson(rosterPick), w = p && rosterWhere(p); if (!w || !w.room) return;
       SHIP.player.track = null; setGoal({ deck: w.deck, room: w.room, label: p.name.split(' ')[0] + ', ' + rosterRoomName(w.roomName) + (w.deck !== deckDef.num ? ', Deck ' + w.deck : '') });
@@ -10239,7 +10256,7 @@ deviceApp({ id: 'roster', title: 'Roster', icon: 'crew', order: 52,
     const B = [], ps = rosterPeople(), byName = (a, b) => a.p.name < b.p.name ? -1 : 1;
     const group = (title, list) => {
       if (!list.length) return;
-      B.push({ kind: 'text', text: title, mark: 'head' });
+      if (title) B.push({ kind: 'text', text: title, mark: 'head' });
       let rows = [];
       for (const x of list) {
         rows.push({ text: x.p.name, sub: (x.p.role || '') + (x.tier >= 1 && typeof REL_NAMES !== 'undefined' ? ' · ' + REL_NAMES[x.tier] : ''), mark: x.p.id === rosterPick ? 'hot' : null, action: { app: 'roster', do: 'pick', arg: x.p.id } });
@@ -10250,6 +10267,16 @@ deviceApp({ id: 'roster', title: 'Roster', icon: 'crew', order: 52,
       }
       if (rows.length) B.push({ kind: 'list', rows });
     };
+    const tx = (k, d, n) => (typeof talkText === 'function' ? talkText(k, d) : d).replace(/\{n\}/g, n);
+    B.push({ kind: 'buttons', items: [{ label: tx('roster.tab.all', 'Everyone'), on: rosterTab !== 'known', action: { app: 'roster', do: 'tab', arg: 'all' } },
+      { label: tx('roster.tab.known', 'People I know'), on: rosterTab === 'known', action: { app: 'roster', do: 'tab', arg: 'known' } }] });
+    if (rosterTab === 'known') {                         // People I know (0.36.82): Friends (friend, close friend), Acquaintances (acquaintance, colleague), Met (section 20's rel.met: you opened their card, were introduced, ate or worked together)
+      const met = x => { try { return typeof metDays === 'function' && metDays(x.p.id) >= 0; } catch (e) { return false; } };
+      const sets = [['roster.friends', 'Friends', ps.filter(x => x.tier >= 3)], ['roster.acq', 'Acquaintances', ps.filter(x => x.tier === 1 || x.tier === 2)], ['roster.met', 'Met', ps.filter(x => x.tier < 1 && met(x))]];
+      if (!sets.some(x => x[2].length)) B.push({ kind: 'text', text: tx('roster.none', 'Nobody yet. Say hello to someone!', 0) });
+      else for (const [k, d, list] of sets) { const h = tx(k, d + ' ({n})', list.length); B.push({ kind: 'text', text: /\d/.test(h) ? h : h + ' (' + list.length + ')', mark: 'head' }); if (list.length) { group(null, list.sort((a, b) => b.tier - a.tier || byName(a, b))); } }
+      return { title: 'Roster', blocks: B };
+    }
     group('People you know', ps.filter(x => x.tier >= 1).sort((a, b) => b.tier - a.tier || byName(a, b)));
     const rest = ps.filter(x => x.tier < 1), known = new Set(ROSTER_DEPTS.map(d => d[0]));
     for (const [d, title] of ROSTER_DEPTS) group(title, rest.filter(x => x.p.dept === d).sort(byName));
@@ -13140,6 +13167,7 @@ const GALLEY_AT = {
   wash: ['3-galley-7'],                                                            // the dish pit
   clean: ['3-galley-6', '3-galley-2', '3-galley-5', '3-galley-3'],
   tea: ['3-galley-8'],                                                             // Brennan's stool
+  bar: ['3-bar-1', '3-bar-2'],                                                     // behind the bow lounge bar (0.36.88; DECKS[3].bar)
 };
 const GALLEY_NEXT = { cook: 'prep', bake: 'prep', serve: 'wash', wash: 'clean', prep: 'clean', tea: 'clean' };   // when every station for a job is taken
 // each role's day, in minutes of the day: [from, to, task]. 'line' is serving and washing up by turns;
@@ -13148,6 +13176,7 @@ const GALLEY_SHIFTS = {
   chef: { wake: 270, plan: [[290, 480, 'cook'], [480, 500, 'breakfast'], [500, 570, 'clean'], [870, 990, 'cook'], [990, 1010, 'dinner'], [1010, 1230, 'cook'], [1230, 1245, 'tea']] },
   early: { wake: 305, plan: [[330, 360, 'bake'], [360, 480, 'line'], [480, 500, 'breakfast'], [500, 570, 'wash'], [570, 630, 'bake'], [630, 780, 'prep'], [780, 810, 'clean']] },
   late: { wake: null, plan: [[780, 870, 'prep'], [870, 990, 'cook'], [990, 1010, 'dinner'], [1010, 1230, 'line'], [1230, 1275, 'wash']] },
+  bar: { wake: null, plan: [[900, 1020, 'prep'], [1020, 1045, 'dinner'], [1050, 1380, 'bar']] },   // bar duty 17:30-23:00 (plan-0607), ended in time for an early start
 };
 // who does what on a day: the chef (Brennan, else her deputy, else the first hand on duty), then the hands on
 // duty by turns, late first, so there's always one on each shift
@@ -13156,12 +13185,19 @@ function galleyRoles(d) {
   const head = galleyStaff().find(p => galleyTeam(p) === 'chef');
   const chef = on.find(p => p === head) || on.find(p => galleyDeputy(p, head)) || on[0];
   if (chef) roles.set(chef.id, 'chef');
-  const hands = on.filter(p => p !== chef), fixed = hands.filter(p => ['early', 'late'].includes(galleyTeam(p)));
+  const hands = on.filter(p => p !== chef), fixed = hands.filter(p => ['early', 'late', 'bar'].includes(galleyTeam(p)));
   for (const p of fixed) roles.set(p.id, galleyTeam(p));
   const rest = hands.filter(p => !fixed.includes(p)), r = rest.length ? ((d % rest.length) + rest.length) % rest.length : 0;
   rest.slice(r).concat(rest.slice(0, r)).forEach((p, k) => roles.set(p.id, k % 2 ? 'early' : 'late'));
+  // the bar (0.36.91, the user's: one named bartender): rota.team 'bar' (Ivo Madsen) works it every evening he's on;
+  // on his days off the relief (rota.relief 'bar', Tamsin Haddad) does her own shift and the bar after it
+  // (roles.relief). Whoever's left keeps the galley going: with no late hand, the last early hand turns late
+  const of = r => [...roles].filter(([, x]) => x === r).map(([id]) => id);
+  if (!of('bar').length) { const rl = hands.find(p => p.rota && p.rota.relief === 'bar'); if (rl) roles.relief = rl.id; }
+  if (!of('late').length) { const er = of('early').filter(id => id !== roles.relief); if (er.length > 1) roles.set(er[er.length - 1], 'late'); }
   return roles;
 }
+const BARTENDER = () => ROSTER.find(p => p.rota && p.rota.team === 'bar') || null, BAR_RELIEF = () => ROSTER.find(p => p.rota && p.rota.relief === 'bar') || null;   // who's on the bar (0.36.91; for section 15's bar)
 const galleyWake = (p, d, role) => { const s = GALLEY_SHIFTS[role]; return s && s.wake !== null ? s.wake - 5 + Math.round(10 * schedU(p.seed, d, 301)) : null; };
 // the whole galley's day: everyone's blocks, cut into 15-30 minute stints that move between stations, with no
 // station held by two people at once
@@ -13178,14 +13214,17 @@ function galleyRota(d) {
     }
     return [null, task];
   };
-  const order = galleyStaff().slice().sort((a, b) => ['chef', 'early', 'late'].indexOf(roles.get(a.id)) - ['chef', 'early', 'late'].indexOf(roles.get(b.id)) || (a.id < b.id ? -1 : 1));
+  const order = galleyStaff().slice().sort((a, b) => ['chef', 'early', 'late', 'bar'].indexOf(roles.get(a.id)) - ['chef', 'early', 'late', 'bar'].indexOf(roles.get(b.id)) || (a.id < b.id ? -1 : 1));
   let n = 0;
   for (const p of order) {
     const role = roles.get(p.id) || null, nr = next.get(p.id), nw = nr ? galleyWake(p, d + 1, nr) : null;
     const day = { role, wake: role ? galleyWake(p, d, role) : null, bedBy: nw !== null ? nw + 1440 - 415 : null, blocks: [], meals: {} };
     if (role) {
       const me = n++;
-      for (const [a, b, task] of galleyPlan(role, d)) {
+      const cap = day.bedBy !== null ? day.bedBy - 25 : 1440, plan = galleyPlan(role, d).slice();   // (a copy: the relief adds to it) bar duty ends in time for bed before an early start
+      if (roles.relief === p.id) { const end = Math.max(...plan.map(x => x[1])); plan.push([Math.max(1050, end + 30), 1380, 'bar']); day.relief = true; }   // the relief: the bar after their own shift
+      for (const [a, B, task] of plan) {
+        const b = task === 'bar' ? Math.min(B, cap) : B; if (b <= a) continue;
         if (task === 'breakfast' || task === 'dinner') { day.meals[task] = [a, b]; continue; }
         for (let s = a, k = 0; s < b; k++) {             // stints of 15-30 minutes; the line swaps every half hour
           let e = task === 'line' ? s + 30 : s + 15 + Math.round(15 * schedU(p.seed, d, 310 + s));
@@ -28252,7 +28291,7 @@ if (SCHED_DATA) { SCHED_DATA = null; SHIP_DAYS.clear(); EV_DAYS.clear(); }   // 
 // (New game) starts afresh. Everything waits for its first use: ROSTER (section 9) comes later in the file.
 // =====================================================================
 const REL_TIERS = [0, 10, 30, 60, 100], REL_NAMES = ['stranger', 'acquaintance', 'colleague', 'friend', 'close friend'];
-const REL_PTS = { work: 6, meal: 3, chat: 2, favour: 8, news: 1, appt: 3, birthday: 3 };   // the plan's starting numbers, to tune
+const REL_PTS = { work: 6, meal: 3, chat: 2, favour: 8, news: 1, appt: 3, birthday: 3, hello: 1, talk: 1, reply: [1, 2] };   // hello: Say hello; talk: each TALK_EVERY minutes of Talk a while; reply: its choice, [another, the one that suits them] (0.36.82)   // the plan's starting numbers, to tune
 // traits that rub each other up the wrong way: anyone with one from the first list and one from the second
 const SOC_CLASH = [[['meticulous', 'precise', 'exacting', 'tidy', 'organised', 'formal'], ['messy', 'easygoing', 'forgetful', 'absent-minded', 'dreamy', 'unhurried', 'playful']],
   [['blunt', 'sarcastic', 'gruff'], ['nervous', 'shy', 'gentle']], [['competitive'], ['competitive']], [['chatty', 'sociable'], ['private', 'quiet']]];
@@ -28290,7 +28329,7 @@ function socReset(hour) {
   SHIP.social = { hour, fault: {}, pairs: {}, mail: [], feuds: {}, courtesy: {}, cues: [], bonds: {}, affWeek: null, stories: {} };
 }
 // the save: social = { ids, hour, aff (base64), news: [{ ...item, k: hex bits of who knows }], heard, fault, pairs,
-// rel: { id: [pts, met, lastTalk, known, chatDay, mealDay, workDay, favDay, seekDay, arc, arcDay, showDay, giftWeek] } }, mail (story Mail to come), cues, mentor,
+// rel: { id: [pts, met, lastTalk, known, chatDay, mealDay, workDay, favDay, seekDay, arc, arcDay, showDay, giftWeek, ..., talkDay] } }, mail (story Mail to come), cues, mentor,
 // given, keepsakes, memKeys and mem (Pillar 4). A save made with a different crew list keeps everything keyed by id and moves affinity across by id (idl)
 const bitsOf = set => { const b = new Uint8Array(Math.ceil(SOC.n / 8)); for (const id of set) { const i = SOC.idx.get(id); if (i !== undefined) b[i >> 3] |= 1 << (i & 7); } return [...b].map(x => x.toString(16).padStart(2, '0')).join(''); };
 const setOf = hex => { const s = new Set(); for (let i = 0; i < SOC.n; i++) if (parseInt(hex.substr((i >> 3) * 2, 2), 16) >> (i & 7) & 1) s.add(SOC.crew[i].id); return s; };
@@ -28380,7 +28419,7 @@ function affVals(str, ids) {                              // the saved affinity 
 function pairOf(k, n) { let i = 0; while (k >= n - 1 - i) { k -= n - 1 - i; i++; } return [i, i + 1 + k]; }   // the k-th pair of n people, in pair order
 function socSave() {
   socInit();
-  const rel = {}; for (const id in SHIP.rel) { const r = SHIP.rel[id]; rel[id] = [r.pts, r.met, r.lastTalk, knownPack(id, r.known), r.chatDay || 0, r.mealDay || 0, r.workDay || 0, r.favDay || 0, r.seekDay || 0, r.arc || 0, r.arcDay || 0, r.showDay || 0, r.giftWeek || 0, r.inviteDay || 0, r.visitDay || 0, r.bye || 0, r.hostDay || 0]; const x = rel[id]; while (x.length > 4 && !x[x.length - 1]) x.pop(); }   // trailing zeros left off (they load as 0)
+  const rel = {}; for (const id in SHIP.rel) { const r = SHIP.rel[id]; rel[id] = [r.pts, r.met, r.lastTalk, knownPack(id, r.known), r.chatDay || 0, r.mealDay || 0, r.workDay || 0, r.favDay || 0, r.seekDay || 0, r.arc || 0, r.arcDay || 0, r.showDay || 0, r.giftWeek || 0, r.inviteDay || 0, r.visitDay || 0, r.bye || 0, r.hostDay || 0, r.talkDay === SHIP.time.day ? r.talkDay : 0 /* talkDay only matters today (reviewer 0607) */]; const x = rel[id]; while (x.length > 4 && !x[x.length - 1]) x.pop(); }   // trailing zeros left off (they load as 0)
   return { ids: socHash(SOC.ids), idl: SOC.ids, hour: SHIP.social.hour, aff: affPack(), news: NEWS.map(newsSaved),
            heard: heardKept(), fault: { ...SHIP.social.fault }, pairs: pairsSaved(SHIP.social.pairs), mail: SHIP.social.mail.map(x => ({ ...x })), feuds: JSON.parse(JSON.stringify(SHIP.social.feuds)), courtesy: { ...SHIP.social.courtesy }, cues: SHIP.social.cues.map(cueRow), mentor: SHIP.social.mentor || null, given: (SHIP.social.given || []).map(x => ({ ...x })), keepsakes: (SHIP.social.keepsakes || []).map(x => ({ ...x })), rep: SHIP.rep ? JSON.parse(JSON.stringify(SHIP.rep)) : null, invites: (SHIP.social.invites || []).map(x => ({ ...x })), notes: (SHIP.social.notes || []).map(x => ({ ...x })), visitDay: SHIP.social.visitDay || 0, moved: (SHIP.social.moved || []).map(x => ({ ...x, mem: x.mem.slice() })), bonds: bondsPack(SHIP.social.bonds), affWeek: typeof SHIP.social.affWeek === 'string' ? SHIP.social.affWeek : null, stories: JSON.parse(JSON.stringify(SHIP.social.stories || {})), noteq: JSON.parse(JSON.stringify(SHIP.social.noteq || [])), seekAsks: (SHIP.social.seekAsks || []).map(x => ({ id: x.id, from: x.from, until: x.until, why: x.why, done: !!x.done })), guide: SHIP.social.guide ? { ...SHIP.social.guide } : null, rel: Object.entries(rel).map(([id, r]) => [SOC.idx.get(id), ...r]), ...memSave() }   // rel: [[crew index, pts, met, ...]] (0.36.81; an object by id before);
 }
@@ -28414,7 +28453,7 @@ function socLoad(s) {
     SHIP.heard = Array.isArray(s.heard) ? s.heard.map(h => Array.isArray(h) ? { id: h[0], from: h[1] ?? null, at: h[2], line: h.length > 3 ? h[3] : (NEWS.find(x => x.id === h[0]) || { lines: [null] }).lines[0] } : h).filter(h => h && typeof h.id === 'string').slice(-60) : [];   // arrays since 0.36.75, objects before
     SHIP.rel = {};
     const relIn = Array.isArray(s.rel) ? Object.fromEntries(s.rel.filter(x => Array.isArray(x)).map(([i, ...r]) => [(same || !old ? SOC.crew.map(p => p.id) : old)[i], r]).filter(([id]) => id)) : s.rel || {};
-    for (const id in relIn) { const r = relIn[id]; if (SOC.idx.has(id) && Array.isArray(r) && isFinite(r[0])) SHIP.rel[id] = { pts: +r[0], tier: 0, met: r[1] ?? null, lastTalk: r[2] ?? null, known: Array.isArray(r[3]) ? knownUnpack(id, r[3]) : [], chatDay: r[4] | 0, mealDay: r[5] | 0, workDay: r[6] | 0, favDay: r[7] | 0, seekDay: r[8] | 0, arc: r[9] | 0, arcDay: r[10] | 0, showDay: r[11] | 0, giftWeek: r[12] | 0, inviteDay: r[13] | 0, visitDay: r[14] | 0, bye: r[15] | 0, hostDay: r[16] | 0 }; }
+    for (const id in relIn) { const r = relIn[id]; if (SOC.idx.has(id) && Array.isArray(r) && isFinite(r[0])) SHIP.rel[id] = { pts: +r[0], tier: 0, met: r[1] ?? null, lastTalk: r[2] ?? null, known: Array.isArray(r[3]) ? knownUnpack(id, r[3]) : [], chatDay: r[4] | 0, mealDay: r[5] | 0, workDay: r[6] | 0, favDay: r[7] | 0, seekDay: r[8] | 0, arc: r[9] | 0, arcDay: r[10] | 0, showDay: r[11] | 0, giftWeek: r[12] | 0, inviteDay: r[13] | 0, visitDay: r[14] | 0, bye: r[15] | 0, hostDay: r[16] | 0, talkDay: r[17] | 0 }; }
     for (const id in SHIP.rel) SHIP.rel[id].tier = relTierOf(SHIP.rel[id].pts);
     memLoad(s);
     SHIP.rep = s.rep && typeof s.rep === 'object' && s.rep.dept && s.rep.ship ? JSON.parse(JSON.stringify(s.rep)) : null;
@@ -28675,7 +28714,7 @@ const socGreet = (p, t = shipNow(), peek = false) => { const l = socLine(p, 'gre
 //   memAdd(id, key, { w, cls }) -> the memory (a repeat refreshes it: today, and the heavier weight)
 const MEM_CLASS = { small: [30, 7], medium: [60, 21], big: [90, 60], core: [100, 0], sour: [40, 4] };
 const MEM_KIND = { chat: 'small', came: 'small', meeting: 'small', heard: 'small', fav: 'medium', fixed: 'medium', appt: 'medium', visit: 'medium', introduced: 'medium',
-  bday: 'medium', mended: 'medium', gift: 'medium', moment: 'big', show: 'big', helped: 'big', readyroom: 'big', guide: 'big', hosted: 'big', intro: 'core', keepsake: 'core', missed: 'sour', grubby: 'sour' };
+  bday: 'medium', mended: 'medium', talk: 'medium', gift: 'medium', moment: 'big', show: 'big', helped: 'big', readyroom: 'big', guide: 'big', hosted: 'big', intro: 'core', keepsake: 'core', missed: 'sour', grubby: 'sour' };
 const MEM_MAX = 8, MEM_FORGET = 10;
 const memClass = key => { for (let s = key; s; s = s.includes('.') ? s.slice(0, s.lastIndexOf('.')) : '') if (MEM_KIND[s]) return MEM_KIND[s]; return 'small'; };
 function memAdd(id, key, o = {}) {
@@ -30224,16 +30263,20 @@ function chatShow() {
   const buttons = C.ask === 'intro' ? intro.slice(0, 3).map(x => ({ id: 'intro:' + x.id, label: x.name })).concat([{ id: 'back', label: 'Back' }])
     : C.ask ? [{ id: 'ask-news', label: 'News' }, { id: 'ask-work', label: 'Their work' }, { id: 'ask-home', label: 'Home' }].concat(typeof introOptions === 'function' && introOptions(p).length ? [{ id: 'ask-intro', label: 'Do you know…?' }] : [], [{ id: 'back', label: 'Back' }])
     : C.offer ? [{ id: 'fav-yes', label: 'I\'ll do it' }, { id: 'fav-no', label: 'Not now' }]
-    : [{ id: 'chat', label: r.chatDay === today ? 'Chatted today' : 'Chat', off: r.chatDay === today }, { id: 'ask', label: 'Ask about…' },
+    : C.talk && !C.talk.end ? (C.talk.ask ? TALK_REPLIES.map(k => ({ id: 'reply:' + k, label: talkReply(C, k) })) : [{ id: 'talk-stop', label: talkText('talk.button.stop', 'Stop') }])   // Talk a while (0.36.82): the replies, else Stop
+    : [{ id: 'chat', label: r.chatDay === today ? talkText('talk.done.hello', 'Said hello today') : talkText('talk.button.hello', 'Say hello'), off: r.chatDay === today },
+       { id: 'talk', label: r.talkDay === today ? talkText('talk.done.talk', 'Talked today') : talkText('talk.button.talk', 'Talk a while'), off: r.talkDay === today || !!C.going }, { id: 'ask', label: 'Ask about…' },
        { id: 'help', label: ready ? 'Done: here you go' : 'Help?' }, { id: 'meet', label: 'Meet up' }];
-  if (!C.ask && !C.offer && C.line.kind === 'newcomer' && Array.isArray(C.line.answers)) buttons.splice(0, buttons.length, ...C.line.answers.slice(0, 3).map((a, k) => ({ id: 'nq:' + k, label: a })));   // A10: helpful, funny, honest
-  if (!C.ask && !C.offer && C.line.kind !== 'newcomer' && hostOk(p)) buttons.push(r.hostDay === today ? { id: 'host', label: 'Asked over', off: true } : { id: 'host', label: 'Come over' });   // A11: your own room
-  if (!C.ask && !C.offer && p.id === 'calder' && guideOn()) buttons.push({ id: 'guide-back', label: 'Hand ' + shortName(socP(guideOn().id)) + ' back' });
-  if (!C.ask && !C.offer && C.line.moment && typeof momentShow === 'function') buttons.splice(1, 0, { id: 'sit', label: 'Sit with them' });   // a moment is ready (20c)
-  const gift = !C.ask && !C.offer && giftInHands(); if (gift) buttons.push(r.giftWeek === socWeek() + 1 ? { id: 'give', label: 'Given this week', off: true } : { id: 'give', label: 'Give ' + gift });
+  const talking = C.talk && !C.talk.end;   // while you talk, only the talk's own buttons
+  if (!C.ask && !C.offer && !talking && C.line.kind === 'newcomer' && Array.isArray(C.line.answers)) buttons.splice(0, buttons.length, ...C.line.answers.slice(0, 3).map((a, k) => ({ id: 'nq:' + k, label: a })));   // A10: helpful, funny, honest
+  if (!C.ask && !C.offer && !talking && C.line.kind !== 'newcomer' && hostOk(p)) buttons.push(r.hostDay === today ? { id: 'host', label: 'Asked over', off: true } : { id: 'host', label: 'Come over' });   // A11: your own room
+  if (!C.ask && !C.offer && !talking && p.id === 'calder' && guideOn()) buttons.push({ id: 'guide-back', label: 'Hand ' + shortName(socP(guideOn().id)) + ' back' });
+  if (!C.ask && !C.offer && !talking && C.line.moment && typeof momentShow === 'function') buttons.splice(1, 0, { id: 'sit', label: 'Sit with them' });   // a moment is ready (20c)
+  const gift = !C.ask && !C.offer && !talking && giftInHands(); if (gift) buttons.push(r.giftWeek === socWeek() + 1 ? { id: 'give', label: 'Given this week', off: true } : { id: 'give', label: 'Give ' + gift });
   const v = { who: p.name, role: p.role, tier: REL_NAMES[relTier(p.id)], line: C.line.text, say: C.line.say !== false, buttons };
   const el = chatEl(); el.hidden = false;
   (CHAT_SKIN.draw || chatDraw)(el, v);
+  if (C.talk) talkMeter(el, C.talk);                     // the Talk a while meter, over the buttons (either skin)
 }
 function chatOpen(p, greet, line) {                       // greet: they came to you (socialSeek), so they say hello first; line: one to open with (a visit)
   if (!p || !p.id) return false;
@@ -30249,11 +30292,13 @@ function chatOpen(p, greet, line) {                       // greet: they came to
   if (CHAT.line.kind === 'goodbye') relGet(p.id).bye = SHIP.time.day;
   if (CHAT.line.kind === 'guide') SHIP.social.guide.told = true;
   if (CHAT.line.kind === 'missed') { const a = apptMissedBy(p); if (a) a.socSaid = true; }
+  if (TALK_KEEP.has(CHAT.line.kind)) CHAT.checked = Math.floor(shipNow());   // something that matters first; "got to go" can wait a minute
+  else talkGoCheck(CHAT, false);                         // their shift's in five: they say so (0.36.82)
   if (typeof toastEl !== 'undefined') toastEl.classList.remove('show');
   chatShow();
   return true;
 }
-function chatClose() { CHAT = null; const el = document.getElementById('chat'); if (el) el.hidden = true; }
+function chatClose() { if (CHAT && CHAT.talk && !CHAT.talk.end) talkEnd(CHAT, 'walk', true); CHAT = null; const el = document.getElementById('chat'); if (el) el.hidden = true; }
 const chatSay = (text, say = true) => { CHAT.line = { text, say }; chatShow(); };
 function chatDo(id) {
   const C = CHAT; if (!C) return;
@@ -30262,7 +30307,7 @@ function chatDo(id) {
     if (r.chatDay === SHIP.time.day) return;
     r.chatDay = SHIP.time.day;
     if (typeof playerChat === 'function') playerChat(p);  // section 15: social for you (half when you're grubby)
-    const before = r.tier, after = relAdd(p.id, 'chat', REL_PTS.chat);
+    const before = r.tier, after = relAdd(p.id, 'chat', REL_PTS.hello);   // Say hello, the old Chat: +1 (0.36.82; was REL_PTS.chat)
     const grubby = SHIP.player && SHIP.player.needs && typeof NEED_LOW !== 'undefined' && SHIP.player.needs.hygiene < NEED_LOW;
     memAdd(p.id, grubby ? 'grubby' : 'chat'); if (isBirthday(p, shipNow())) { memAdd(p.id, 'bday'); repAdd(null, 0, { spirit: 2 }); }
     repAdd(null, 0, p.dept !== 'works' ? { spirit: .5 } : null, 'chats'); if (SHIP.time.min >= 1380 || SHIP.time.min < 300) repInit().cnt.night = (repInit().cnt.night || 0) + 1;
@@ -30271,14 +30316,19 @@ function chatDo(id) {
     if (made) l = { text: made, say: false };
     else if (fd) l = { text: ['Maybe I was a bit hard on ', 'I suppose I should talk to ', 'It\'s silly, really. I miss chatting with '][Math.floor(schedU(p.seed, SHIP.time.day, 641) * 3)] + shortName(SOC.crew[SOC.idx.get(fd.other)]) + '.', say: true };
     let kk = 0; for (let k = 1; k <= 6 && (!l || l.say === false || l.text === C.line.text) && !fd; k++) { l = chatLine(p, shipNow() + 60 * k, true); kk = k; }
-    if (kk && l.line) l = chatLine(p, shipNow() + 60 * kk);   // the dialogue engine's line that's said: now it may note it
+    const hl = !fd && !TALK_KEEP.has(l.kind) && l.kind !== 'week1' && l.kind !== 'callback' ? socLine(p, 'hello', { t: shipNow(), tier: after, warmth: warmth(p.id) }) : null;   // their answer to hello (0.36.82), unless something matters more
+    if (hl) l = { text: hl.text, kind: 'hello', say: true };
+    else if (kk && l.line) l = chatLine(p, shipNow() + 60 * kk);   // the dialogue engine's line that's said: now it may note it
     if (l.news) playerHeard(l.news, p.id);
     if (l.kind === 'story') arcTold(p);
     if (l.kind === 'missed') { const a = apptMissedBy(p); if (a) a.socSaid = true; }
     if (l.kind === 'guide') SHIP.social.guide.told = true;
     if (l.kind === 'newcomer') { C.line = l; return chatShow(); }   // their question, with your answers
     chatSay((l.say === false ? 'You chat for a while. ' + l.text : l.text) + (grubby ? ' ' + shortName(p) + ' wrinkles their nose a little.' : '') + (after > before ? ' (You\'re ' + REL_NAMES[after] + 's now.)' : ''), l.say !== false && !grubby && after <= before);
-  } else if (id === 'ask') { C.ask = true; chatShow(); }
+  } else if (id === 'talk') talkStart(C);
+  else if (id === 'talk-stop') talkEnd(C, 'stop');
+  else if (id.startsWith('reply:')) talkAnswer(C, id.slice(6));
+  else if (id === 'ask') { C.ask = true; chatShow(); }
   else if (id === 'give') { const g = giftInHands(), res = g && giftGive(p, g); if (res) chatSay(res.text); }
   else if (id === 'sit') { const mo = C.line.moment; if (mo && typeof momentShow === 'function') { chatClose(); momentShow(mo); } }
   else if (id === 'back') { C.ask = false; chatShow(); }
@@ -30323,11 +30373,136 @@ function chatDo(id) {
     else chatSay('Appointments come with the new device. Soon.', false);
   }
 }
-// the card closes when you walk off or they leave the deck (socialTick, every frame)
+// ---- staying while you talk, Say hello and Talk a while (0.36.82, plans/plan-0607.html "Talking") ----
+// While the card is open they stay (section 10's a.talking, topped up each frame), up to CHAT_STAY ship minutes (about
+// a minute) if you leave it sitting there, and for the whole of a Talk a while. They only go for what they can't miss
+// (socMustGo: their shift within TALK_GO minutes, bedtime, a tradition they host) and say so (talk.go.*), then the card
+// closes CHAT_GO minutes later. Talk a while (once a day each): TALK_MINS ship minutes (about 25 real seconds) with a
+// meter in the card; you stand together, or sit beside them if they're sitting (section 15's playerSitNear). Social
+// fills by TALK_SOCIAL over the talk (needEffects' socialGain; friendGain, when section 15 has it, on the friendship),
+// friendship +REL_PTS.talk every TALK_EVERY minutes, and at TALK_ASK minutes the clock stops for a choice of three
+// replies (listen, share, cheer): the one that suits them (their voice card's needs; practical counts as listen)
+// gives REL_PTS.reply[1], the others [0]. Their lines come up every TALK_LINE minutes from one topic (the head writer's
+// talk.<topic>.* kinds, content/keys-0607.md), else their usual chat lines. Walk off or Stop: you keep what you got.
+// Saved: rel.talkDay. Nothing here calls R(); the topic is schedU k 668.
+const CHAT_STAY = 36, CHAT_GO = 3, TALK_GO = 10;
+const TALK_MINS = 15, TALK_SOCIAL = 30, TALK_EVERY = 5, TALK_ASK = 7, TALK_LINE = 2;
+const TALK_TOPICS = ['hobby', 'home', 'day', 'work', 'food', 'news', 'tradition', 'crew', 'ship', 'plans'];
+const TALK_REPLIES = ['listen', 'share', 'cheer'];
+const TALK_KEEP = new Set(['story', 'news', 'missed', 'guide', 'newcomer', 'invite', 'hint', 'goodbye', 'birthday', 'visit', 'host', 'feud']);   // lines that matter more than hello or "got to go"
+const talkText = (kind, dflt, k = 0) => { const L = typeof LINES !== 'undefined' && LINES[kind], e = Array.isArray(L) && L.length ? L[k % L.length] : null; return e && typeof e.text === 'string' && e.text ? e.text : dflt; };
+const talkCtx = (p, x) => ({ t: shipNow(), tier: relTier(p.id), warmth: warmth(p.id), ...x });
+function talkSays(C, kind, x) {                          // a line of theirs not yet said in this talk, noted as said
+  const T = C.talk, l = socLine(C.p, kind, talkCtx(C.p, { keep: e => !T || !T.said.includes(e.id), ...x }));
+  if (l && T) T.said.push(l.id); return l ? l.text : null;
+}
+function socMustGo(p, t = shipNow()) {                   // -> { why: 'shift' | 'bed' | 'trad', trad } when they must go within TALK_GO minutes, else null
+  if (typeof planDay !== 'function') return null;
+  const d = Math.floor(t / 1440) + 1, m = t - (d - 1) * 1440, w = typeof whereIs === 'function' ? whereIs(p, t) : null;
+  if (!w || w.escort || w.visit) return null;            // with you (section 21's escort) or on a visit: not going anywhere
+  const segs = planDay(p, d).concat(m > 1440 - TALK_GO ? planDay(p, d + 1) : []);   // plan times are ship minutes (eventPlan's are from midnight)
+  for (const s of segs) {
+    if (s.from <= t || s.from > t + TALK_GO) continue;
+    if (s.act === 'work' && w.act !== 'work' && !['tea', 'toilet', 'hands'].includes(s.tag)) return { why: 'shift' };
+    if (s.act === 'sleep' && w.act !== 'sleep') return { why: 'bed' };
+  }
+  if (typeof eventPlan === 'function') for (const e of eventPlan(p, d) || []) if (e.host && e.from - 5 > m && e.from - 5 <= m + TALK_GO) {
+    const ev = typeof eventsOn === 'function' && eventsOn(d).find(x => x.id === e.id); return { why: 'trad', trad: ev && ev.name || 'the tradition' };
+  }
+  return null;
+}
+const TALK_GO_SAY = { shift: ['Shift in five. Catch me later?', 'I\'m on shift in a minute. Later?'], bed: ['I\'m off to bed. Tomorrow?', 'Bedtime for me. Night!'],
+  trad: ['I\'m running {trad} in a minute. Come along?', 'Got to set up {trad}. See you there?'] };
+function talkGoCheck(C, show = true) {                    // once a ship minute: do they have to go? They say so, and leave CHAT_GO minutes later
+  const t = shipNow(); C.checked = Math.floor(t); if (C.going || C.visit) return false;
+  const g = socMustGo(C.p, t); if (!g) return false;
+  if (C.talk && !C.talk.end) talkEnd(C, 'go', true);
+  const l = socLine(C.p, 'talk.go.' + g.why, talkCtx(C.p, { trad: g.trad })), a = TALK_GO_SAY[g.why];
+  C.going = t + CHAT_GO; C.ask = false; C.offer = false;
+  C.line = { text: l ? l.text : a[Math.floor(schedU(C.p.seed, Math.floor(t / 60), 669) * a.length)].replace('{trad}', g.trad), kind: 'go', say: true };
+  if (show) chatShow(); return true;
+}
+function talkStart(C) {
+  const p = C.p, r = relGet(p.id), today = SHIP.time.day;
+  if (r.talkDay === today || C.going) return;
+  r.talkDay = today; if (r.chatDay !== today) r.chatDay = today;   // a talk is a hello and more
+  const a = typeof DECK_CREW !== 'undefined' && DECK_CREW.find(x => x.p === p), sits = !!(a && a.settled && a.spot && a.spot.pose === 'sit');
+  const U = k => schedU(p.seed, today, k), start = Math.floor(U(668) * TALK_TOPICS.length);
+  let topic = null; for (let i = 0; i < TALK_TOPICS.length && !topic; i++) { const k = TALK_TOPICS[(start + i) % TALK_TOPICS.length]; if (socLine(p, 'talk.' + k + '.open', talkCtx(p, { peek: true }))) topic = k; }
+  C.talk = { mins: 0, last: shipNow(), lineAt: 0, pts: 0, gained: 0, topic, said: [], ask: false, asked: false, reply: null, end: null, sits: false };
+  C.ask = false; C.offer = false;
+  if (sits && typeof playerSitNear === 'function' && playerSitNear(deckDef.num, cellAt(a.x, a.z), 'Talking with ' + shortName(p))) { C.talk.sits = true; C.reach = Math.max(C.reach, 5); }   // a seat beside them
+  const open = topic && talkSays(C, 'talk.' + topic + '.open'), hi = talkSays(C, sits ? 'talk.sit' : 'talk.start');
+  if (typeof playerChat === 'function') playerChat(p);   // the hello's little social (section 15)
+  memAdd(p.id, 'talk' + (topic ? '.' + topic : ''));
+  chatSay([hi, open].filter(Boolean).join(' ') || talkNext(C) || 'Go on then. What\'s new?');
+}
+function talkNext(C) {                                    // their next line while you talk: the topic's, a filler, else their usual chat
+  const T = C.talk, p = C.p;
+  const l = (T.topic && talkSays(C, 'talk.' + T.topic + '.more')) || talkSays(C, 'talk.filler');
+  if (l) return l;
+  for (let k = 1; k <= 8; k++) { const c = chatLine(p, shipNow() + 60 * k, true); if (c && c.say !== false && !TALK_KEEP.has(c.kind) && c.kind !== 'greet' && c.kind !== 'go' && !T.said.includes(c.text)) { T.said.push(c.text); return c.text; } }
+  return null;
+}
+function talkSuits(p) {                                   // the reply that suits them: their voice card's needs (practical counts as listen)
+  const v = typeof VOICE !== 'undefined' && VOICE[p.id], tp = v && typeof VOICE_TEMPLATES !== 'undefined' && VOICE_TEMPLATES[v.tpl || p.tpl];
+  const n = (v && v.needs) || (tp && tp.needs) || TALK_REPLIES[socHash(p.id) % 3];
+  return n === 'practical' ? 'listen' : TALK_REPLIES.includes(n) ? n : 'listen';
+}
+const TALK_REPLY_SAY = { listen: 'Tell me more.', share: 'That reminds me of home.', cheer: 'Ha! Go on.' };
+function talkReply(C, k) {
+  const tx = C.talk.topic && talkText('talk.' + C.talk.topic + '.reply.' + k, null, schedU(C.p.seed, SHIP.time.day, 670) * 7 | 0);
+  return (tx || TALK_REPLY_SAY[k]).replace(/\{name\}/g, C.p.name).replace(/\{first\}/g, shortName(C.p));
+}
+function talkAnswer(C, k) {
+  const T = C.talk; if (!T || !T.ask || !TALK_REPLIES.includes(k)) return;
+  T.ask = false; T.reply = k; T.last = shipNow();
+  const good = talkSuits(C.p) === k, pts = REL_PTS.reply[good ? 1 : 0] * talkBoost();
+  relAdd(C.p.id, 'talk', pts); T.pts += pts;
+  chatSay((T.topic && talkSays(C, 'talk.' + T.topic + '.ans.' + k)) || (good ? 'Exactly. You get it.' : 'Ha. Maybe.'));
+}
+const talkBoost = () => { const fx = typeof needEffects === 'function' ? needEffects() : null; return fx && fx.friendGain > 0 ? fx.friendGain : 1; };   // section 15's leisure: "In good spirits" talks warm faster
+function talkEnd(C, why, quiet) {                         // why: 'full' | 'stop' | 'walk' | 'go'
+  const T = C.talk; if (!T || T.end) return; T.end = why; T.ask = false;
+  if (why === 'full') { if (typeof leisureAdd === 'function') try { leisureAdd(5, 'talk'); } catch (e) { /* section 15's */ } if (typeof simNote === 'function') simNote('talk', { id: C.p.id, mins: TALK_MINS }); }
+  if (quiet) return;
+  const l = talkSays(C, why === 'full' ? 'talk.end' : 'talk.stop');
+  chatSay(l || (why === 'full' ? 'That was nice. Let\'s do it again.' : 'Another time, then.'));
+}
+function talkStep(C) {                                    // every frame while you talk
+  const T = C.talk, t = shipNow(), dm = Math.max(0, Math.min(1, t - T.last)); T.last = t;
+  if (T.ask || T.end || !dm) return;
+  const was = T.mins; T.mins = Math.min(TALK_MINS, T.mins + dm);
+  const P = SHIP.player, fx = typeof needEffects === 'function' ? needEffects() : { socialGain: 1 }, g = (T.mins - was) / TALK_MINS * TALK_SOCIAL * (fx.socialGain || 1);
+  if (P && P.needs && typeof needClamp === 'function') { P.needs.social = needClamp(P.needs.social + g); T.gained += g; }
+  for (let k = Math.floor(was / TALK_EVERY) + 1; k <= Math.floor(T.mins / TALK_EVERY); k++) { const pts = REL_PTS.talk * talkBoost(); relAdd(C.p.id, 'talk', pts); T.pts += pts; }
+  if (T.mins >= TALK_MINS) { talkEnd(C, 'full'); return; }
+  if (!T.asked && T.mins >= TALK_ASK) { T.asked = true; T.ask = true; T.askAt = t; chatSay((T.topic && talkSays(C, 'talk.' + T.topic + '.ask')) || 'What do you think?'); return; }
+  if (T.mins - T.lineAt >= TALK_LINE) { T.lineAt = T.mins; const l = talkNext(C); if (l) { C.line = { text: l, say: true }; chatShow(); return; } }
+  talkMeter(document.getElementById('chat'), T);
+}
+function talkMeter(el, T) {                               // the meter in the card, like eating's bar (section 15's actBar)
+  if (!el) return;
+  let m = el.querySelector('.talkm');
+  if (!m) { m = document.createElement('div'); m.className = 'talkm'; m.style.cssText = 'margin:0 0 9px;font-size:11.5px;opacity:.85';
+    m.innerHTML = '<span></span><i style="display:block;height:4px;margin-top:3px;border-radius:2px;background:rgba(150,200,196,.22);overflow:hidden"><b style="display:block;height:100%;background:var(--teal,#5fc9bd);transform-origin:left center"></b></i>';
+    const row = el.querySelector('.row, .btns'); el.insertBefore(m, row || null); }
+  const f = T.mins / TALK_MINS, txt = T.end ? (T.end === 'full' ? 'A good talk' : 'You talked a while') : T.ask ? 'Your turn' : 'Talking · ' + Math.max(1, Math.ceil(TALK_MINS - T.mins)) + ' min';
+  if (m.children[0].textContent !== txt) m.children[0].textContent = txt;
+  m.children[1].children[0].style.transform = 'scaleX(' + f.toFixed(3) + ')';
+}
+// the card closes when you walk off or they leave the deck (socialTick, every frame); while it's open they stay put
 function chatTick() {
-  if (!CHAT || CHAT.visit) return;                       // a visitor in your bunk room stays till you close it (or 22:00)
-  const a = typeof DECK_CREW !== 'undefined' && DECK_CREW.find(x => x.p === CHAT.p);
-  if (!a || Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) > CHAT.reach) chatClose();
+  const C = CHAT; if (!C) return;
+  if (C.visit) { if (C.talk && !C.talk.end) talkStep(C); return; }   // a visitor in your bunk room stays till you close it (or 22:00); a talk with them still runs
+  const a = typeof DECK_CREW !== 'undefined' && DECK_CREW.find(x => x.p === C.p);
+  if (!a || Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) > C.reach) { chatClose(); return; }
+  const t = shipNow();
+  if (C.going) { if (t >= C.going) chatClose(); else a.talking = Math.max(a.talking || 0, .25); return; }
+  const T = C.talk, on = T && !T.end && !(T.ask && t - T.askAt > CHAT_STAY);   // a reply left unanswered: after a minute they drift off
+  if (on || t - C.at < CHAT_STAY) a.talking = Math.max(a.talking || 0, .25);   // they stay (section 10 stops them while talking > 0)
+  if (Math.floor(t) !== C.checked && talkGoCheck(C)) return;
+  if (C.talk && !C.talk.end) talkStep(C);
 }
 
 // ---------------------------------------------------------------------
@@ -34332,9 +34507,9 @@ const ROSTER = [
   {"id": "grieve-thea", "name": "Thea Grieve", "rank": "junior", "dept": "infirmary", "uniform": "infirmary", "role": "Infirmary aide", "shift": "day", "rota": {"offDays": [3, 4]}, "bed": "4-B3-1", "work": {"deck": 3, "place": "work:infirmary"}, "habits": ["lingers-at-meals", "tea-break", "stargazer"], "traits": ["serious", "nervous"], "looks": {"skin": 1, "hair": "long", "hairColor": "dark", "height": 0.94, "build": "average", "acc": ["beard", "headband"]}, "bio": "Changes the infirmary beds and knows everyone's blood type.", "life": ["Keeps fish back home on New Aberdeen.", "Is quietly in charge of the lost-property box."], "seed": 780864, "birthday": 328, "habitShifts": [{"add": "gym-regular", "why": "Thea has joined the after-shift gym crowd."}], "tpl": "shy", "openness": "guarded", "needs": "listen", "loves": ["sweet", "tea"], "likes": ["star", "plant"], "joy": "a proper tea break", "thread": "exams", "keepsake": "a recipe card in their handwriting", "home": "New Aberdeen", "family": "twin", "about": [{"tier": 0, "topic": "work", "text": "Knows the infirmary better than anyone gives them credit for."}, {"tier": 1, "topic": "hobby", "text": "Lights up when anyone mentions a proper tea break."}, {"tier": 1, "topic": "home", "text": "Comes from New Aberdeen, and says it like a boast."}, {"tier": 2, "topic": "home", "text": "Has a twin, and misses them more than they let on."}, {"tier": 2, "topic": "work", "text": "Has a running bet with someone in another department that nobody else knows about."}, {"tier": 3, "topic": "work", "text": "Is studying for a certification and is quietly terrified of the practical."}, {"tier": 4, "topic": "secret", "text": "Failed it once already, before the Wren."}], "mentors": false, "transferTo": "the Meridian", "aboard": [null, 203], "hobby": "trying new teas", "since": "two years", "kin": "my twin", "lost": "", "hobbyNoun": "tea tasting"},
   {"id": "larsen-hamid", "name": "Hamid Larsen", "rank": "junior", "dept": "infirmary", "uniform": "infirmary", "role": "Infirmary aide", "shift": "day", "rota": {"offDays": [2, 3]}, "bed": "4-B3-2", "work": {"deck": 3, "place": "work:infirmary"}, "habits": ["skips-breakfast", "night-owl", "tea-break", "musician"], "traits": ["serious", "chatty"], "looks": {"skin": 1, "hair": "short", "hairColor": "brown", "height": 1.05, "build": "average", "acc": ["beard", "headband"]}, "bio": "Changes the infirmary beds and knows everyone's blood type.", "life": ["Is learning the guitar, badly.", "Is saving up for a boat on the Ostrander colonies."], "seed": 690121, "birthday": 74, "habitShifts": [{"add": "lingers-at-meals", "drop": "skips-breakfast", "why": "Hamid has started taking time over meals."}, {"drop": "night-owl", "why": "Hamid has started going to bed on time."}], "tpl": "brisk", "openness": "normal", "needs": "practical", "loves": ["music"], "likes": ["tea", "book"], "joy": "learning the guitar, badly", "thread": "notgood", "keepsake": "a guitar pick, worn smooth", "home": "the Ostrander colonies", "family": "younger brother", "about": [{"tier": 0, "topic": "work", "text": "Knows the infirmary better than anyone gives them credit for."}, {"tier": 1, "topic": "hobby", "text": "Spends free evenings learning the guitar, badly."}, {"tier": 1, "topic": "home", "text": "Grew up on the Ostrander colonies."}, {"tier": 2, "topic": "home", "text": "Writes to a younger brother more often than they write back."}, {"tier": 2, "topic": "work", "text": "Thinks the lift on Deck 5 has a personality."}, {"tier": 3, "topic": "past", "text": "Still thinks about a mistake on an old ship, though nobody else remembers it."}, {"tier": 4, "topic": "secret", "text": "Checks their own work twice because once, years ago, they didn't."}], "mentors": false, "transferTo": "the Heron", "aboard": null, "hobby": "learning the guitar, badly", "since": "eighteen months", "kin": "my younger brother", "lost": "", "hobbyNoun": "guitar"},
   {"id": "walsh-esme", "name": "Esme Walsh", "rank": "junior", "dept": "galley", "uniform": "works", "role": "Galley hand", "shift": "day", "rota": {"offDays": [5, 6], "team": "late"}, "bed": "4-B2-5", "work": {"deck": 3, "place": "work:galley"}, "habits": ["quiet-corner", "workaholic", "runner"], "traits": ["sharp-eyed", "meticulous"], "looks": {"skin": 5, "hair": "short", "hairColor": "black", "height": 0.92, "build": "slim", "acc": ["moustache"]}, "bio": "Chops, stirs and washes up under Brennan's eye.", "life": ["Keeps fish back home on Port Halloran.", "Keeps a cactus called Gerald on the windowsill."], "seed": 383530, "birthday": 9, "habitShifts": [{"add": "evening-shower", "why": "Esme has switched to showering at night."}], "tpl": "steady", "openness": "normal", "needs": "listen", "loves": ["plant", "book"], "likes": ["made", "sweet"], "joy": "looking after a cactus called Gerald", "thread": "notgood", "keepsake": "a cutting in a jar", "home": "Port Halloran", "family": "two older sisters", "about": [{"tier": 0, "topic": "work", "text": "Knows the galley better than anyone gives them credit for."}, {"tier": 1, "topic": "hobby", "text": "Will talk about looking after a cactus called Gerald for as long as you let them."}, {"tier": 1, "topic": "home", "text": "Still calls Port Halloran home."}, {"tier": 2, "topic": "home", "text": "Has two older sisters, and keeps a photo of them by the bunk."}, {"tier": 2, "topic": "work", "text": "Thinks the coffee on Deck 5 is the best on the ship, and says so loudly."}, {"tier": 3, "topic": "past", "text": "Still thinks about a mistake on an old ship, though nobody else remembers it."}, {"tier": 4, "topic": "secret", "text": "Checks their own work twice because once, years ago, they didn't."}], "mentors": false, "transferTo": "the Kestrel", "aboard": null, "hobby": "looking after a cactus called Gerald", "since": "a year", "kin": "my big sister", "lost": "", "hobbyNoun": "cactus care"},
-  {"id": "madsen-ivo", "name": "Ivo Madsen", "rank": "junior", "dept": "galley", "uniform": "works", "role": "Galley hand", "shift": "day", "rota": {"offDays": [0, 1], "team": "late"}, "bed": "4-B2-1", "work": {"deck": 3, "place": "work:galley"}, "habits": ["garden-lover", "shopper"], "traits": ["stubborn", "chatty"], "looks": {"skin": 4, "hair": "bald", "hairColor": "auburn", "height": 0.93, "build": "slim", "acc": ["glasses", "headband"]}, "bio": "Can carry six trays at once.", "life": ["Sings in the shower; the whole washroom knows.", "Collects pressed flowers from the garden."], "seed": 443898, "birthday": 157, "habitShifts": [{"add": "early-riser", "why": "Ivo has started getting up early."}], "tpl": "chatty", "openness": "open", "needs": "share", "loves": ["plant", "garden"], "likes": ["sweet", "music"], "joy": "pressing flowers from the garden", "thread": "rivalry", "keepsake": "a cutting in a jar", "home": "Kesh", "family": "big, noisy family", "about": [{"tier": 0, "topic": "work", "text": "Will tell you which corner of the galley is the warmest."}, {"tier": 1, "topic": "hobby", "text": "Spends free evenings pressing flowers from the garden."}, {"tier": 1, "topic": "home", "text": "Comes from Kesh, and says it like a boast."}, {"tier": 2, "topic": "home", "text": "Has a big, noisy family, and misses them more than they let on."}, {"tier": 2, "topic": "work", "text": "Has a running bet with someone in another department that nobody else knows about."}, {"tier": 3, "topic": "past", "text": "Has an old rivalry with someone aboard that goes back years."}, {"tier": 4, "topic": "secret", "text": "Can't remember how it started, and would quite like it to end."}], "mentors": false, "transferTo": "the Heron", "aboard": null, "hobby": "pressing flowers", "since": "ten months", "kin": "my dad", "lost": "", "hobbyNoun": "flower pressing"},
+  {"id": "madsen-ivo", "name": "Ivo Madsen", "rank": "junior", "dept": "galley", "uniform": "works", "role": "Bartender", "shift": "day", "rota": {"offDays": [0, 1], "team": "bar"}, "bed": "4-B2-1", "work": {"deck": 3, "place": "work:galley"}, "habits": ["garden-lover", "shopper"], "traits": ["stubborn", "chatty"], "looks": {"skin": 4, "hair": "bald", "hairColor": "auburn", "height": 0.93, "build": "slim", "acc": ["glasses", "headband"]}, "bio": "Can carry six trays at once.", "life": ["Sings in the shower; the whole washroom knows.", "Collects pressed flowers from the garden."], "seed": 443898, "birthday": 157, "habitShifts": [{"add": "early-riser", "why": "Ivo has started getting up early."}], "tpl": "chatty", "openness": "open", "needs": "share", "loves": ["plant", "garden"], "likes": ["sweet", "music"], "joy": "pressing flowers from the garden", "thread": "rivalry", "keepsake": "a cutting in a jar", "home": "Kesh", "family": "big, noisy family", "about": [{"tier": 0, "topic": "work", "text": "Will tell you which corner of the galley is the warmest."}, {"tier": 1, "topic": "hobby", "text": "Spends free evenings pressing flowers from the garden."}, {"tier": 1, "topic": "home", "text": "Comes from Kesh, and says it like a boast."}, {"tier": 2, "topic": "home", "text": "Has a big, noisy family, and misses them more than they let on."}, {"tier": 2, "topic": "work", "text": "Has a running bet with someone in another department that nobody else knows about."}, {"tier": 3, "topic": "past", "text": "Has an old rivalry with someone aboard that goes back years."}, {"tier": 4, "topic": "secret", "text": "Can't remember how it started, and would quite like it to end."}], "mentors": false, "transferTo": "the Heron", "aboard": null, "hobby": "pressing flowers", "since": "ten months", "kin": "my dad", "lost": "", "hobbyNoun": "flower pressing"},
   {"id": "varga-tariq", "name": "Tariq Varga", "rank": "junior", "dept": "galley", "uniform": "works", "role": "Galley hand", "shift": "day", "rota": {"offDays": [0, 1], "team": "early"}, "bed": "4-B2-4", "work": {"deck": 3, "place": "work:galley"}, "habits": ["early-riser", "late-diner", "lounge-regular", "runner"], "traits": ["competitive", "thoughtful"], "looks": {"skin": 1, "hair": "bun", "hairColor": "dark", "height": 0.93, "build": "slim", "acc": []}, "bio": "Chops, stirs and washes up under Brennan's eye.", "life": ["Sends voice messages to a grandmother on the Tevan belt.", "Writes letters home to Valo every rest day, on paper."], "seed": 599511, "birthday": 293, "habitShifts": [{"add": "window-seat", "why": "Tariq always heads for a window seat now."}], "tpl": "dreamy", "openness": "normal", "needs": "share", "loves": ["made", "tea"], "likes": ["sweet", "game"], "joy": "writing letters home", "thread": "rivalry", "keepsake": "something they made: a little gear on a chain", "home": "the Tevan belt", "family": "grandmother, who raised me", "about": [{"tier": 0, "topic": "work", "text": "Keeps a mug at the galley that nobody else is allowed to use."}, {"tier": 1, "topic": "hobby", "text": "Will talk about writing letters home for as long as you let them."}, {"tier": 1, "topic": "home", "text": "Comes from the Tevan belt, and says it like a boast."}, {"tier": 2, "topic": "home", "text": "Writes to a grandmother who raised them more often than they write back."}, {"tier": 2, "topic": "work", "text": "Thinks the lift on Deck 5 has a personality."}, {"tier": 3, "topic": "past", "text": "Has an old rivalry with someone aboard that goes back years."}, {"tier": 4, "topic": "secret", "text": "Can't remember how it started, and would quite like it to end."}], "mentors": false, "transferTo": "the Kestrel", "aboard": null, "hobby": "writing letters home", "since": "fourteen months", "kin": "my gran", "lost": "", "hobbyNoun": "letter writing"},
-  {"id": "haddad-tamsin", "name": "Tamsin Haddad", "rank": "junior", "dept": "galley", "uniform": "works", "role": "Galley hand", "shift": "day", "rota": {"offDays": [2, 3], "team": "early"}, "bed": "4-B6-2", "work": {"deck": 3, "place": "work:galley"}, "habits": ["evening-shower", "lingers-at-meals"], "traits": ["optimistic", "nervous"], "looks": {"skin": 1, "hair": "short", "hairColor": "auburn", "height": 0.94, "build": "average", "acc": ["glasses"]}, "bio": "Chops, stirs and washes up under Brennan's eye.", "life": ["Knows the lyrics to every song in the record cabinet.", "Is learning the guitar, badly."], "seed": 416759, "birthday": 4, "habitShifts": [{"add": "quiet-corner", "why": "Tamsin has been looking for quiet corners lately."}], "tpl": "shy", "openness": "guarded", "needs": "listen", "loves": ["music"], "likes": ["sweet", "made"], "joy": "learning the guitar, badly", "thread": "exams", "keepsake": "a guitar pick, worn smooth", "home": "the Ostrander colonies", "family": "younger brother", "about": [{"tier": 0, "topic": "work", "text": "Keeps a mug at the galley that nobody else is allowed to use."}, {"tier": 1, "topic": "hobby", "text": "Lights up when anyone mentions learning the guitar, badly."}, {"tier": 1, "topic": "home", "text": "Still calls the Ostrander colonies home."}, {"tier": 2, "topic": "home", "text": "Has a younger brother, and misses them more than they let on."}, {"tier": 2, "topic": "work", "text": "Has a running bet with someone in another department that nobody else knows about."}, {"tier": 3, "topic": "work", "text": "Is studying for a certification and is quietly terrified of the practical."}, {"tier": 4, "topic": "secret", "text": "Failed it once already, before the Wren."}], "mentors": false, "transferTo": "the Meridian", "aboard": [null, 203], "hobby": "learning the guitar, badly", "since": "four years", "kin": "my younger brother", "lost": "", "hobbyNoun": "guitar"},
+  {"id": "haddad-tamsin", "name": "Tamsin Haddad", "rank": "junior", "dept": "galley", "uniform": "works", "role": "Galley hand, relief bartender", "shift": "day", "rota": {"offDays": [2, 3], "team": "early", "relief": "bar"}, "bed": "4-B6-2", "work": {"deck": 3, "place": "work:galley"}, "habits": ["evening-shower", "lingers-at-meals"], "traits": ["optimistic", "nervous"], "looks": {"skin": 1, "hair": "short", "hairColor": "auburn", "height": 0.94, "build": "average", "acc": ["glasses"]}, "bio": "Chops, stirs and washes up under Brennan's eye.", "life": ["Knows the lyrics to every song in the record cabinet.", "Is learning the guitar, badly."], "seed": 416759, "birthday": 4, "habitShifts": [{"add": "quiet-corner", "why": "Tamsin has been looking for quiet corners lately."}], "tpl": "shy", "openness": "guarded", "needs": "listen", "loves": ["music"], "likes": ["sweet", "made"], "joy": "learning the guitar, badly", "thread": "exams", "keepsake": "a guitar pick, worn smooth", "home": "the Ostrander colonies", "family": "younger brother", "about": [{"tier": 0, "topic": "work", "text": "Keeps a mug at the galley that nobody else is allowed to use."}, {"tier": 1, "topic": "hobby", "text": "Lights up when anyone mentions learning the guitar, badly."}, {"tier": 1, "topic": "home", "text": "Still calls the Ostrander colonies home."}, {"tier": 2, "topic": "home", "text": "Has a younger brother, and misses them more than they let on."}, {"tier": 2, "topic": "work", "text": "Has a running bet with someone in another department that nobody else knows about."}, {"tier": 3, "topic": "work", "text": "Is studying for a certification and is quietly terrified of the practical."}, {"tier": 4, "topic": "secret", "text": "Failed it once already, before the Wren."}], "mentors": false, "transferTo": "the Meridian", "aboard": [null, 203], "hobby": "learning the guitar, badly", "since": "four years", "kin": "my younger brother", "lost": "", "hobbyNoun": "guitar"},
   {"id": "dlamini-lukas", "name": "Lukas Dlamini", "rank": "junior", "dept": "galley", "uniform": "works", "role": "Galley hand", "shift": "day", "rota": {"offDays": [1, 2], "team": "early", "cover": {"for": "brennan", "days": [4, 5]}}, "bed": "4-B1-5", "work": {"deck": 3, "place": "work:galley"}, "habits": ["garden-lover", "skips-breakfast", "night-owl", "bar-regular"], "traits": ["dry humour", "blunt"], "looks": {"skin": 4, "hair": "short", "hairColor": "black", "height": 1.1, "build": "average", "acc": ["moustache"]}, "bio": "Chops, stirs and washes up under Brennan's eye.", "life": ["Grew up on Port Halloran, and misses the rain.", "Got married just before the tour and counts the days."], "seed": 542406, "birthday": 123, "habitShifts": [{"add": "quiet-corner", "why": "Lukas has been looking for quiet corners lately."}], "tpl": "dry", "openness": "normal", "needs": "cheer", "loves": ["plant", "garden"], "likes": ["game", "tea"], "joy": "the garden benches", "thread": "notgood", "keepsake": "a cutting in a jar", "home": "Port Halloran", "family": "aunt, who was a pilot", "about": [{"tier": 0, "topic": "work", "text": "Keeps a mug at the galley that nobody else is allowed to use."}, {"tier": 1, "topic": "hobby", "text": "Spends free evenings the garden benches."}, {"tier": 1, "topic": "home", "text": "Still calls Port Halloran home."}, {"tier": 2, "topic": "home", "text": "Has an aunt who was a pilot, and misses them more than they let on."}, {"tier": 2, "topic": "work", "text": "Thinks the Wren is the best-run ship they've served on, and would never say so to Calder."}, {"tier": 3, "topic": "past", "text": "Still thinks about a mistake on an old ship, though nobody else remembers it."}, {"tier": 4, "topic": "secret", "text": "Checks their own work twice because once, years ago, they didn't."}], "mentors": false, "transferTo": "the Calypso", "aboard": null, "hobby": "sketching in the garden", "since": "eight months", "kin": "my aunt", "lost": "", "hobbyNoun": "sketching"},
 ];
 const ROSTER_GUESTS = [
@@ -34593,7 +34768,7 @@ const edgeTiles = k => { const [o, i, j] = k.split(','); return o === 'v' ? [[+i
 function placeSpot(id) {
   if (SPOT_OF.has(id)) return SPOT_OF.get(id);
   const pl = PLACE_OF.get(id); let s = null;
-  if (!pl && id[0] === '@') s = lineSpotMake(id);       // the servery line past its queue places, the tray return
+  if (!pl && id[0] === '@') s = lineSpotMake(id);       // the servery line past its queue places
   else if (pl) {
     const c = cellPos(...pl.at); let x = pl.xy ? pl.xy[0] - OX : c.x, z = pl.xy ? pl.xy[1] - OZ : c.z;
     if (pl.type === 'bed' && !pl.xy) {                   // a bed is longer than a tile: lie on the middle of the bed itself
@@ -34631,13 +34806,26 @@ const TAG_ACT = { play: 'play', bar: 'drink', wash: 'wash', tea: null, handover:
 const SIT_ABOUT = new Set(['lounge-seat', 'common-room', 'bench']);
 // the pose with what's held: '+cart', '+cartfull' or '+carry' after it (the crowd's held things, 8b)
 const heldPose = a => a.hold ? a.pose + '+' + a.hold : a.pose;
+// crew hobbies (0.36.89, plan-0607): crewHobby(p) -> one of the player's seven hobby ids (section 15's HOBBIES: read,
+// write, games, draw, knit, puzzle, stars) from the roster's hobby words, else null. Seated in their free time at a
+// common seat, someone with a hobby in hand does it most of the time (the 'read' activity: the crowd has no knitting
+// or drawing of its own yet); a stargazer on a window seat just looks out. Pure: no R(), no state
+const HOBBY_WORDS = [['knit', /knit|crochet/], ['draw', /draw|sketch|paint|comic/], ['puzzle', /crossword|puzzle|card trick|knot|sudoku/], ['write', /writ|journal|letter|poem|diary/],
+  ['read', /read|novel|book/], ['games', /\btiles\b|chess|game/], ['stars', /star|telescope|constellation|sky/]];
+function crewHobby(p) {
+  const h = String(p && (p.hobby || p.hobbyNoun) || '').toLowerCase(); if (!h) return null;
+  for (const [id, re] of HOBBY_WORDS) if (re.test(h)) return id;
+  return null;
+}
 function crewPose(a) {
   const sp = a.spot, pl = PLACE_OF.get(sp.id), base = sp.pose;
   if (typeof CROWD_ANIMS === 'undefined') return base;
   const ok = x => x && CROWD_ANIMS.has(x), comp = x => base === 'sit' || base === 'lie' ? base + ':' + x : base === 'stand' || base === 'work' ? x : base;
   if (a.tag in TAG_ACT) { const x = TAG_ACT[a.tag]; return ok(x) ? comp(x) : base; }
   if (base === 'sit' && pl && SIT_ABOUT.has(pl.type) && !pl.anim) {
-    const u = idHash(a.p.id + '|' + sp.id + '|' + SHIP.time.day) % 100, x = u < 45 ? 'read' : u < 80 || pl.type !== 'lounge-seat' ? 'talk' : 'drink';
+    const u = idHash(a.p.id + '|' + sp.id + '|' + SHIP.time.day) % 100, hb = crewHobby(a.p);
+    if (hb === 'stars' && pl.window) return base;         // a stargazer at the window: just looking out
+    const x = u < (hb && hb !== 'stars' ? 75 : 45) ? 'read' : u < 80 || pl.type !== 'lounge-seat' ? 'talk' : 'drink';   // a hobby in hand: at it three times in four
     if (ok(x)) return 'sit:' + x;
   }
   return typeof poseOf === 'function' && pl ? poseOf(pl) : base;
@@ -34657,11 +34845,11 @@ function crewPath(s, g, rooms, who, avoid) {
 // (3-queue-4, at the servery's south end) past the trays (3-queue-1), then back along the row-2 aisle; past those,
 // stand where you are. The first LINE_COUNTER stand along the servery and are served there after galleyServeMins
 // (section 16; LINE_SERVE until then) when galleyCanServe says there's food; you're served by section 15, which
-// calls lineLeave('player'). Trays go back at the rack by the drinks (TRAY_AT), dropped as each person reaches it.
+// calls lineLeave('player'). No tray return (0.36.85, the user's): a diner's tray goes away when the meal is over.
 // For other sections: servLine() (who's in it, front first), lineJoin(id), lineLeave(id), lineSpot(id) ({ at, xy,
 // face } to stand at, null past the spots), lineFront(id) (at the servery). LINE_LOG counts for day_check.
 const LINE_AT = [[33, 6], [33, 5], [33, 4], [33, 3], [32, 3], [32, 2], [31, 2], [30, 2], [29, 2], [28, 2], [27, 2], [26, 2], [25, 2], [24, 2], [23, 2]];
-const LINE_Q = ['3-queue-4', '3-queue-3', '3-queue-2', '3-queue-1'], TRAY_AT = [[33, 2], [33, 1]];   // the queue places, front first; at the tray return
+const LINE_Q = ['3-queue-4', '3-queue-3', '3-queue-2', '3-queue-1'];   // the queue places, front first
 const LINE_SERVE = .6, LINE_LATE = 12;
 // how many are served at once: one, or two while a meal tradition is on (the galley's second server: 0.26.41)
 let LINE_COUNTER = 1, LINE_CMIN = -1;
@@ -34671,16 +34859,35 @@ function lineCounter(now) {
   LINE_COUNTER = typeof eventsOn === 'function' && eventsOn(d).some(e => e.ev.meal && t >= e.from - TRAD_LINE[1] - 5 && t < e.to) ? 2 : 1;
   return LINE_COUNTER;
 }                   // ship minutes: serving one at the counter, still heading for the line after the meal's time; how many are served at once
-const LINE = [], LINE_LOG = { joined: 0, served: 0, trays: 0, left: 0, returned: 0, back: 0, long: 0, wait: 0, who: [] };
+const LINE = [], LINE_LOG = { joined: 0, served: 0, trays: 0, left: 0, returned: 0, long: 0, wait: 0, who: [] };   // returned: trays gone with the meal over
 const lineSpotId = k => k < LINE_Q.length ? LINE_Q[k] : k < LINE_AT.length ? '@line-' + k : null;
 const ALT_SEAT = new Set(['mess-seat', 'lounge-seat', 'bench']);   // places where someone sitting in yours sends you to the next one
 let MESS_ONLY = null;                                    // Deck 3's tiles outside the mess hall, for findPath's avoid (made once a deck)
 const messOnly = () => { if (!MESS_ONLY || MESS_ONLY.d !== deckDef) { MESS_ONLY = new Set(); MESS_ONLY.d = deckDef; for (const r in ROOM_TILES) if (r !== 'M') for (const t of ROOM_TILES[r]) MESS_ONLY.add(t[0] + ',' + t[1]); } return MESS_ONLY; };
 const lineSeg = w => w.type === 'servery-queue' || w.tag === 'queue';   // the plan's walk to the line, its queue stop, a grab at the servery
 const trayTo = id => { const pl = id && PLACE_OF.get(id); return !!pl && pl.room === 'M'; };   // a tray only to a seat in the mess hall
+// the shower queue's stand-in spots (0.36.91): open tiles of the washroom beside its way out, '@wq-<room>-<k>'
+let WQ_TILES = null;
+function washDoorTiles(rk) {
+  if (!WQ_TILES || WQ_TILES.d !== deckDef) { WQ_TILES = new Map(); WQ_TILES.d = deckDef; }
+  if (!WQ_TILES.has(rk)) {
+    const used = new Set((deckDef.places || []).map(q => placeSpot(q.id)).filter(Boolean).map(sp => sp.walk && sp.walk.join(',')));
+    const T = ROOM_TILES[rk] || [], door = T.filter(([i, j]) => [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([a, b]) => free(i + a, j + b) && roomAt(i + a, j + b) !== rk && edgeOpen(i, j, i + a, j + b)));
+    const dd = ([i, j]) => Math.min(...door.map(([x, y]) => Math.abs(x - i) + Math.abs(y - j))), open = T.filter(([i, j]) => !used.has(i + ',' + j));
+    const m = door.length && open.length ? Math.min(...open.map(dd)) : 0;
+    WQ_TILES.set(rk, door.length ? open.filter(t => dd(t) <= Math.max(m, 0)) : []);   // the free tiles by the way out (beside it, when a basin's walk-to tile has the doorway itself)
+  }
+  return WQ_TILES.get(rk);
+}
+function showerQSpot(a, w) {
+  const nx = whereIs(a.p, w.until), pl = nx && nx.placeId && PLACE_OF.get(nx.placeId); if (!pl) return null;
+  const l = washDoorTiles(pl.room); return l.length ? '@wq-' + pl.room + '-' + (idHash(a.p.id) % l.length) : null;
+}
 function lineSpotMake(id) {
-  const m = /^@(line|tray)-(\d+)$/.exec(id), at = m && (m[1] === 'line' ? LINE_AT : TRAY_AT)[+m[2]]; if (!at) return null;
-  const c = cellPos(...at), to = m[1] === 'line' ? cellPos(...LINE_AT[+m[2] - 1]) : cellPos(34, 2).add(new THREE.Vector3(.12, 0, 0));   // facing the one ahead, or the rack
+  const q = /^@wq-(\w+)-(\d+)$/.exec(id); if (q) { const at = washDoorTiles(q[1])[+q[2]]; if (!at) return null; const c = cellPos(...at);
+    return { id, walk: at, x: c.x, z: c.z, y: 0, face: 0, pose: 'stand', anim: null, room: q[1], onTile: true }; }
+  const m = /^@line-(\d+)$/.exec(id), at = m && LINE_AT[+m[1]]; if (!at) return null;
+  const c = cellPos(...at), to = cellPos(...LINE_AT[+m[1] - 1]);   // facing the one ahead
   return { id, walk: at, x: c.x, z: c.z, y: 0, face: Math.atan2(to.x - c.x, to.z - c.z), pose: 'stand', anim: null, room: 'M', onTile: true };
 }
 const servLine = () => LINE.slice(), lineFront = id => { const k = LINE.indexOf(id); return k >= 0 && k < LINE_COUNTER; };
@@ -34792,7 +34999,7 @@ class CrewAgent {
     let goalId;
     if (w.deck !== N) goalId = '@lift';
     else if (w.act === 'commute') { const nx = whereIs(this.p, w.until); goalId = nx.deck === N ? nx.placeId || null : '@lift'; }
-    else goalId = w.placeId || null;
+    else goalId = w.placeId || (w.tag === 'showerq' ? showerQSpot(this, w) : null);   // the shower queue with no place: inside the washroom door
     this.tag = w.placeId === goalId ? w.tag || null : null;   // what they'll do there (the plan's tag)
     const mg = this.mealStep(w, now, N);                 // the servery line and the tray, inside the mess hall (0.26.30)
     if (mg !== undefined) { goalId = mg; this.tag = null; }
@@ -34817,6 +35024,7 @@ class CrewAgent {
       if (d <= st) { this.x = c.x; this.z = c.z; this.path.shift(); }
       else { this.x += dx / d * st; this.z += dz / d * st; this.face = Math.atan2(dx, dz); }
       this.pose = 'walk'; this.y = 0;
+    } else if (this.spot && !this.settled && spotTaken(this, this.spot.id)) { this.pose = 'stand';   // someone sat down in it first (this very frame, before BUSY knew: 0.36.91, day 3's 3-mess-42): wait on the walk-to tile; next frame finds another
     } else if (this.spot && !this.settled) {             // the last step, from the walk-to tile onto the spot itself
       const dx = this.spot.x - this.x, dz = this.spot.z - this.z, d = Math.hypot(dx, dz), st = CREW_SPEED * .8 * dt;
       if (d <= st) { this.x = this.spot.x; this.z = this.spot.z; this.settled = true; this.pose = crewPose(this); this.face = this.spot.face; this.y = this.spot.y; }
@@ -34840,17 +35048,17 @@ class CrewAgent {
   // a meal from the servery (0.26.30, the user's rule): whoever's plan has them at a servery-queue place walks to the
   // back of the line and joins it in the mess hall, steps up as the front is served, is served at the counter, then
   // goes where the plan goes next (a sit-down meal: its seat, with a tray if the seat's in the mess hall). When the
-  // meal's over, a tray goes back to the tray return before anything else. Undefined: follow the plan
+  // meal's over, the tray simply goes (no tray return, 0.36.85) and on they go. Undefined: follow the plan
   mealStep(w, now, N) {
     const eat = N === 3 && w.deck === 3 && (w.act === 'breakfast' || w.act === 'dinner'), key = eat ? w.act + Math.floor(w.from / 1440) : null;
     let m = this.meal;
-    if (m && m.key !== key) {                            // over (or something else came up): out of the line, the tray back
+    if (m && m.key !== key) {                            // over (or something else came up): out of the line, the tray gone
       const k = m.served ? -1 : LINE.indexOf(this.p.id);
       if (k >= 0 && now - (m.over || (m.over = now)) < LINE_LATE) return lineSpotId(k);   // already in the line: a little late for what's next (served, they go on)
       if (k >= 0) lineLeave(this.p.id);                  // but not for ever (an empty galley serves nobody): out, a missed meal (reviewer 1b, 0.26.33)
       if (!m.served && key === null && now - (m.over || (m.over = now)) < LINE_LATE) return this.mealLine(now);   // on the way (a grab stop is shorter than the walk): a little late for what's next
       if (!m.served) { LINE_LOG.left++; if (LINE_LOG.who.length < 8) LINE_LOG.who.push(this.p.id + ' ' + hhmm(now % 1440)); }
-      if (m.tray && N === 3) return this.trayBack(m, now);
+      if (m.tray) { m.tray = false; LINE_LOG.returned++; }   // left on the table: it goes with the meal
       m = this.meal = null;
     }
     if (!eat) return undefined;
@@ -34892,14 +35100,6 @@ class CrewAgent {
     if (same && !nx.placeId && m.next) { m.tray = true; m.seat = m.next; }
     if (m.tray) LINE_LOG.trays++;
   }
-  trayBack(m, now) {                                     // the tray return: in it goes as you reach it, and on you go (nobody waits for a spot)
-    const id = '@tray-' + idHash(this.p.id) % TRAY_AT.length, sp = placeSpot(id);
-    if (!m.since) m.since = now;
-    if (this.goalId === id && !this.path.length && sp && Math.hypot(sp.x - this.x, sp.z - this.z) < .6) {
-      m.tray = false; this.meal = null; LINE_LOG.returned++; LINE_LOG.back = Math.max(LINE_LOG.back, now - m.since); return undefined;
-    }
-    return id;
-  }
   // the escort (Pillar 4, section 21's escortPlan): 'lead' walks to `to` (a place id or a [c, r] tile) and stops,
   // facing you, while you're more than ESC_WAIT tiles behind (on again within ESC_GO); 'follow' keeps about ESC_NEAR
   // tiles from you; 'wait' stands at `to` (or where they are). Paths are made again when the goal moves (you, or a new
@@ -34935,7 +35135,7 @@ const ESC_WAIT = 4, ESC_GO = 3, ESC_NEAR = 2;          // tiles: the escort wait
 function seatsBeside(placeId, n = 2, types = ['mess-seat', 'lounge-seat', 'bench']) {
   const at = placeId && PLACE_OF.get(placeId); if (!at) return [];
   const xy = q => q.xy || [q.at[0] + .5, q.at[1] + .5], [x, z] = xy(at);
-  const busy = new Set([placeId, PLAYER_PLACE].concat(DECK_CREW.map(a => a.spot && a.spot.id)));
+  const busy = new Set([placeId, PLAYER_PLACE].concat(DECK_CREW.map(a => a.spot && a.spot.id), DECK_CREW.map(a => a.meal && a.meal.next)));   // and a seat a served diner is about to walk to (0.36.91)
   // nor a seat shipDay holds for the arrival dinner now ('intro:<id>': yours, Torres's, the Chief's), even while it's empty
   // because Torres is still showing you round (reviewer 1c's paced tour, 0.26.39)
   const now = shipNow(), res = typeof shipDay === 'function' ? shipDay(Math.floor(now / 1440) + 1).occ.res : null;
@@ -35027,7 +35227,7 @@ function lineCatchUp(now) {
       if (c) { a.x = c.x; a.z = c.z; }
       const goal = a.meal.next; if (!goal || goal === '@lift') continue;
       a.retarget(goal); const sp = placeSpot(goal), done = Math.floor((now - t) / SHIP_RATE * CREW_SPEED);
-      if (sp && a.path.length && done >= a.path.length) { a.path = []; a.x = sp.x; a.z = sp.z; a.settled = true; a.pose = crewPose(a); a.face = sp.face; a.y = sp.y; }
+      if (sp && a.path.length && done >= a.path.length) { if (spotTaken(a, goal)) { arriveNear(a); continue; } a.path = []; a.x = sp.x; a.z = sp.z; a.settled = true; a.pose = crewPose(a); a.face = sp.face; a.y = sp.y; }
       else if (done > 0 && done < a.path.length) { const q = cellPos(...a.path[done - 1]); a.x = q.x; a.z = q.z; a.path = a.path.slice(done); }
       continue;
     }
@@ -35036,6 +35236,10 @@ function lineCatchUp(now) {
     if (sp) { a.retarget(id); a.path = []; a.x = sp.x; a.z = sp.z; a.settled = true; a.face = sp.face; a.pose = 'stand'; }
   }
 }
+// arriving part way (crewArrive, lineCatchUp) never sits anyone in a place someone's still settled in (0.36.87: day 100's
+// Founding Day walk onto Deck 3 during the Spice shelf supper seated two at 3-mess-12): they stop on its walk-to tile instead
+const spotTaken = (a, id) => !!id && (PLAYER_PLACE === id || DECK_CREW.some(o => o !== a && o.settled && o.spot && o.spot.id === id));
+function arriveNear(a) { const c = cellPos(...a.path[a.path.length - 1]); a.x = c.x; a.z = c.z; a.path = a.path.slice(-1); }
 function crewArrive(p, w, now, mid) {
   const N = deckDef.num, lift = liftTiles();
   if (w.visit) { DECK_CREW.push(new CrewAgent(p, lift.length ? lift[idHash(p.id) % lift.length] : nearestOpen(LIFT_AT[0], LIFT_AT[1], null))); return; }   // a visitor comes by lift
@@ -35058,7 +35262,8 @@ function crewArrive(p, w, now, mid) {
   a.retarget(w.placeId || null);
   if (!mid || !spot || !a.path.length) return;
   const done = Math.floor((now - w.from) / SHIP_RATE * CREW_SPEED);   // tiles walked since they set off
-  if (done >= a.path.length) { a.path = []; a.x = spot.x; a.z = spot.z; a.settled = true; a.tag = w.tag || null; a.pose = crewPose(a); a.face = spot.face; a.y = spot.y; }
+  if (done >= a.path.length && spotTaken(a, w.placeId)) arriveNear(a);   // someone's still in it: to its walk-to tile, and the next frame finds them another (elsewhere)
+  else if (done >= a.path.length) { a.path = []; a.x = spot.x; a.z = spot.z; a.settled = true; a.tag = w.tag || null; a.pose = crewPose(a); a.face = spot.face; a.y = spot.y; }
   else if (done > 0) { const c = cellPos(...a.path[done - 1]); a.x = c.x; a.z = c.z; a.path = a.path.slice(done); }
 }
 // once a frame from the main loop: everyone moves; now and then, anyone due on this deck who isn't here yet arrives
