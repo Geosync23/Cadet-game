@@ -5,7 +5,7 @@ Started by lead 12 (session_01GjWhU9Z9V8RNoR8yyELA9V) at ~11:28 for every Step 2
 ## Passing tips
 - W claude/writer-p5 **ac60c8d** (0.48.88, text; contains 0d179ac)
 - C claude/works-career **8cc07a5** (0.44.13, the old-save catch-up; for 0.63.0a / Step 2)
-- P claude/player-p5 **d6f321d** (0.28.73 + the LOW fix 391c88e + player_check fixes f00ac1e, d6f321d; no LOWs open)
+- P claude/player-p5 **ad9ff57** (0.28.73 + the LOW fix 391c88e + player_check fixes f00ac1e, d6f321d, 642b511, ad9ff57; no LOWs open)
 - M2 claude/mech-incidents **c9b211a** (0.51.1; LOWs 1-2 closed, LOW 3 for Step 3)
 - M1 claude/mech-rounds **c7c55cf** (0.45.5, contains 8a6cea8..740234d and Onboarding 4's 96649fe; items 1-2 closed; LOWs closed or out by the lead)
 - S claude/ship-systems **0e18118** (0.33.54 + social_check fix and handover note; contains b676814)
@@ -16,6 +16,9 @@ Started by lead 12 (session_01GjWhU9Z9V8RNoR8yyELA9V) at ~11:28 for every Step 2
 - (none)
 
 ## Verdicts
+
+### P 642b511 + ad9ff57 (with 7fe9fa8/ba0effa, debug, reverted): player_check timing and version guards (test only) — PASS (read)
+- The hold-stop arm steps 3 more frames after the activity ends, because 15b's ixFrame marks the stop on the next frame (0.63.0's FAIL was the checker catching the end on a batch's last frame), and prints the job's state if it isn't done. 0.28.73's r.say and def.hold checks are skipped on a build without `bunkPick` (an older build). The debug tracing is gone by ad9ff57. No game change.
 
 ### W d7d972c + d239047 + ac60c8d (0.48.87-0.48.88): train.m5 meetings — PASS (skimmed: content only)
 - After the 0.48.87 change and its undo, the net change vs 0d179ac is one new meeting, `train.m5.brennan` (m5's fallback teacher when Calder is off). It's set at the galley's Oven 1: Brennan settles Oven 1 and hands you Oven 2, as in m5-tuning.html. A three-way choice with small rel bumps. `train.m5.calder` is unchanged from 0d179ac (Brennan in the cast; C confirmed a second speaker never holds a training).
