@@ -697,58 +697,56 @@
 ? flag:walk.follow.3
 - Small jobs stay up for you. The crew take the rest.
 ? flag:walk.follow.4
-- Small stuff today. Don't worry. Jobs get better as you go.
-? flag:walk.follow.5
 - Shift's nine till five. Clock in by the tea corner.
-? flag:walk.follow.6
+? flag:walk.follow.5
 - Forget to clock out and it does it at five. It's kind.   #funny
-? flag:walk.follow.7
+? flag:walk.follow.6
 - Dinner's from five, in the mess. Brennan notices skippers.   #funny
-? flag:walk.follow.8
+? flag:walk.follow.7
 - Keep an eye on your needs. Eat, sleep, wash. Have fun.
-? flag:walk.follow.9
+? flag:walk.follow.8
 - Run yourself down and you work slower. Trust me.   #funny
-? flag:walk.follow.10
+? flag:walk.follow.9
 - Weekends are yours. Saturday and Sunday. No board.
-? flag:walk.follow.11
+? flag:walk.follow.10
 - Bunks for juniors. Officers get a cabin. A door. Imagine.   #funny
-? flag:walk.follow.12
+? flag:walk.follow.11
 - Do well and Calder signs you up for a qualifying job.
-? flag:walk.follow.13
+? flag:walk.follow.12
 - Pass it and you're an officer. New systems. Air, water.
-? flag:walk.follow.14
+? flag:walk.follow.13
 - Faults that start upstream. You trace them back. Fun.
-? flag:walk.follow.15
+? flag:walk.follow.14
 - Engines are the top. That's years away. Dream big, though.   #warm
-? flag:walk.follow.16
+? flag:walk.follow.15
 - Most days are like this. Quiet, steady, tea at one.
-? flag:walk.follow.17
+? flag:walk.follow.16
 - But now and then the ship gets lively. You'll see.
-? flag:walk.follow.18
+? flag:walk.follow.17
 - When the lights flicker on every deck, it's all hands.
-? flag:walk.follow.19
+? flag:walk.follow.18
 - Space does odd things. The old hands have stories.
-? flag:walk.follow.20
+? flag:walk.follow.19
 - Ask Calder about storms. Actually, wait till she asks you.   #funny
-? flag:walk.follow.21
+? flag:walk.follow.20
 - Always something on in the evening. Check your Calendar.
-? flag:walk.follow.22
+? flag:walk.follow.21
 - After your first shift there's the beam. You'll see.   #warm
-? flag:walk.follow.23
+? flag:walk.follow.22
 - Tuesday's Tiles or my knitting circle. No pressure. Knit.   #funny
-? flag:walk.follow.24
+? flag:walk.follow.23
 - Lap of the Wren's Mondays. Just walking. My kind of sport.   #funny
-? flag:walk.follow.25
+? flag:walk.follow.24
 - Everyone here's friendly. Say hello. Talk a while.
-? flag:walk.follow.26
+? flag:walk.follow.25
 - Your device has the lot. Jobs, Mail, Calendar, people.
-? flag:walk.follow.27
+? flag:walk.follow.26
 - Your Record keeps what you've done. It adds up, honestly.
-? flag:walk.follow.28
+? flag:walk.follow.27
 - Get stuck, ask anyone. Asking isn't failing.   #warm
-? flag:walk.follow.29
+? flag:walk.follow.28
 - You're quicker than I was. Don't let it go to your head.   #funny
-? flag:walk.follow.30
+? flag:walk.follow.29
 - You're doing well, you know. Really well.   #warm
 
 // ---- Pillar 5 (head writer, seat W): Zeke teaching (kind 'work'; seat C's flags train.<id>.lead|follow.<step>).
@@ -794,18 +792,26 @@
 // ---- Head writer W (playtest 1, 0.63.2; the user's notes via lead 13): onboarding seat O4's keys. Bubbles, said in
 // order, one flag key per line. Zeke stops and faces you while he says these (O4's pacing).
 == week1
-// Day 1 morning: the training-day opener when he meets you
-? flag:walk.day1.1
+// Day 1: the training-day opener at the briefing's end
+? flag:walk.train.open.1
 - Morning! It's a training day today. I'm with you all day.
-? flag:walk.day1.2
+? flag:walk.train.open.2
 - Anything you're not sure of, ask. That's what I'm here for.   #warm
-? flag:walk.day1.3
+? flag:walk.train.open.3
 - First, clock in. The time clock's by the tea corner.
 // Day 1 dinner: you can't do every tradition (after walk.dinner.eve.1-3)
-? flag:walk.dinner.eve.4
+? flag:walk.eve.choose.1
 - You can't do every tradition in a day. Nobody can.
-? flag:walk.dinner.eve.5
+? flag:walk.eve.choose.2
 - So pick the one you fancy. There's always next week.
+// after your first Day 1 job's turn-in
+? flag:walk.train.better.1
+- Small stuff today. Don't worry. Jobs get better as you go.
+// the arrival evening: at your wardrobe after the bunk meeting
+? flag:walk.cabin.wardrobe.1
+- That's your wardrobe. It's where you get clean clothes.
+? flag:walk.cabin.wardrobe.2
+- Change every morning. When it's empty, laundry's on this deck.
 // Day 1: tea and biscuits at 13:00 (it replaced the half-ten tea). He explains it, walks you there after your job,
 // then work goes on with him following.
 ? flag:walk.tea.explain.1
@@ -830,7 +836,7 @@
 - I'll tag along behind. Pretend I'm not here.   #funny
 
 // Zeke's welcome Mail on your device (the arrival evening: he tells you to open it). "Subject | body", unsigned.
-== mail.zeke-welcome
+== mail.zeke.cabin
 - Everything I didn't say | Your device has the lot: Mail, Schedule, Calendar, the Map and your Needs. Breakfast's from six. Shift starts at nine in the Works bay; Calder's briefing is at ten to nine. Clean clothes live in your wardrobe: change each morning, and do your laundry on Deck 4 when they run out. Tea and biscuits at one. Ask me anything, any time.
 
 // Name on the beam (first Monday after shift, the Works bay cross beam; seat T's flags trad.beam.<n>, in order).
