@@ -35,3 +35,7 @@ Built on claude/cand-0606 (from 0.60.6a c8685cf). One line per finished check (c
 - cand 3 d3d720b: perf_check vs c8685cf OK (no regressions; busiest junior common room portrait-wide 434 calls, was 431; quiz night 397, was 379; game code max 2.42 ms Sunday dinner portrait-wide; memory flat 548/43/150 over a week and round trips; file 3.97 MB, load ~6.3 s). phone.py dinner x2 each: new avg 3.70/3.71 ms, p99 10.1/10.0, worst 30.5/34.4 vs old avg 3.64/3.47, p99 10.6/10.3, worst 46.5/39.9: same
 - cand 3 d3d720b: arc_check OK, arc_check 70 booth OK
 - cand 3 d3d720b (runner 2): player_check OK (alone, 0 FAIL, no errors)
+- cand 1 729f951 (runner 1, stopped at part 12, superseded): only FAILs the 5 paper ones in parts 1/7 (clothes/hobby, fixed by ob4 79d8244); parts 0,2-6,8-11 and part 12 so far clean. Full intro_check on cand 3 d3d720b started (alone)
+- intro evidence (lead 11): onboarding 4 on 729f951+0.42.45 (= 3313db0/d3d720b's change) parts 0-11 no FAIL, part 12 clean to Day 3 16:31 (timeout)
+- cand 3 d3d720b (runner 2): interactions_check OK (draw-call peak 247)
+- cand 3 d3d720b (runner 2): path_check OK (6 decks x 3000 the same, a played day's 3436 calls the same). Runner 2's list all OK; logs on claude/runner-0607-2 runs/d3d720b/
