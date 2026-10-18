@@ -2,7 +2,14 @@
 
 Reviewer 1g, 2026-10-18. In-depth review, because it changes behaviour (crew positions, section 10's player push). There's no save change: `SHUFFLE` and `SHUFFLE_SAID` aren't saved and last under a second, or a minute for the polite word. The probes are `shuffle-32b8808-probe.py` (busy play: the player keeps walking into crew, every frame checked) and `shuffle-32b8808-toast-probe.py` (ordinary walking: how often the polite word comes, and a need warning). Run them next to a `cadet_test.py`.
 
-## Verdict: PASS WITH FIXES
+## Re-check: ec6e8a0: PASS
+PE9's fixes: the polite word is a 2.5 s speech bubble (`bubbleSay`, `SHUFFLE_WORDS`), never a toast; and once a person's step ends, they aren't stepped again for 1.5 s (`SHUFFLE_COOL`, `SHUFFLE_DONE`).
+- **MEDIUM 1, fixed.** `shuffle-ec6e8a0-bubble-probe.py` (the toast probe, counting the 2.5 s bubbles): with the same dinner walk on Deck 3, the hunger warning comes at **~33 s**, the same as with shuffling off (it was ~59 s), and there are no shuffle toasts.
+- **LOW 1, fixed.** `shuffle-32b8808-probe.py` on ec6e8a0: nobody stepped 3+ times within 3 s across the three 5-minute runs (it was up to 7). 0 stalls, about 170 steps.
+- **New LOW 2, not blocking:** `BUBBLE_MAX` is 2 and `bubbleSay` evicts the oldest bubble, so a shuffle bubble can push out an overheard conversation line (section 20) or the arrival tour escort's line (section 21). The check only skips a person who already has a bubble. **Fix:** also require `bubbles.list.length < BUBBLE_MAX`. PE9's session is inactive, so the lead has it.
+- One frame in about 27,000 had a stepping person (rossi-femi, Deck 3 at 07:10) 0.05+ m into a solid. It's transient, because their own walk was moving them during the step. No action.
+
+## Verdict on 32b8808: PASS WITH FIXES
 
 The step aside itself is sound. Nobody steps into a wall, a wall edge, furniture or a closed tile, the player never stalls, and crew carry on with their plans. One MEDIUM: the polite word is a full toast, which in a crowd comes in bursts, replaces other toasts and holds back the need warnings. One LOW: a short side-to-side wobble when you follow someone closely.
 
