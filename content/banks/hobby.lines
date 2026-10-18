@@ -155,3 +155,22 @@
 - Try a hobby
 == settle.talk
 - Talk a while with someone
+
+// Gardening as a hobby (the user's, via lead 10): hobby id 'garden', tending a bed in the hydroponics garden (Deck 3).
+// Same keys as the other hobbies.
+== tip.garden
+- The garden's yours off shift too. Tending a bed counts as a hobby: it fills your leisure.
+== hobby.name.garden
+- Tend a bed
+== hobby.start.garden
+- Tending the bed...
+- Watering, weeding, humming...
+== hobby.done.garden
+- The bed looks tidier. The leaves look happier.
+- Your hands smell of soil and mint. Lovely.
+== hobby.record.garden
+- You tend the garden.
+== hobby.share.garden
+- Grab a trowel. That bed's been waiting for you.
+- You garden too? The beans like a chat, I swear.   #funny
+- Gently with the roots. There you go. Lovely.
