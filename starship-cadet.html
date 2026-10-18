@@ -35193,7 +35193,7 @@ function introTeaTick(now) {
   if (D['tea:end'] !== undefined || typeof teaOut !== 'function') return;
   if (d > 1) { end(-1); return; }
   if (d < 1 || DIALOGUE) return;
-  const a = introWalker(), near = a && Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) <= 4, quiet = simNow() >= (INTRO_UI.sayEnd || 0) && simNow() >= INTRO_UI.next;
+  const a = introWalker(), near = a && Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) <= 4, quiet = simNow() >= (INTRO_UI.sayEnd || 0) && simNow() >= INTRO_UI.next && simNow() - (INTRO_UI.followAt || 0) >= INTRO_TOUR_GAP;   // (not over one of his walk.follow lines)
   const room = () => { try { return deckDef.num === 5 && roomAt(...player.here()) === 't'; } catch (e) { return false; } };
   const had = typeof teaHad === 'function' ? teaHad(1) : SHIP.player.teaDay === 1;
   if (D['tea:go'] === undefined) {
