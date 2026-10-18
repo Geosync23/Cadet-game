@@ -754,20 +754,20 @@ with sync_playwright() as pw:
           out.lateWeek1 = [1, 2, 3, 4, 5, 6, 7].some(d => deliveryLate(d));
           setShipNow(2 * 1440 + 10 * 60 + 5); machinesNow();
           const dj = SHIP.jobs.find(x => x.cargo === 'stores' && x.status !== 'done');
-          out.crates = holdCrates(); out.dj = !!dj && Math.floor(dj.found / 1440) + 1 === 3 && dj.found % 1440 === 600;
+          out.crates = (typeof partsCrates === 'function' ? partsCrates() : holdCrates()); out.dj = !!dj && Math.floor(dj.found / 1440) + 1 === 3 && dj.found % 1440 === 600;
           out.title = dj && jobCard(dj)[0]; out.keep = dj && leaveEnd(dj) % 1440 === DELIVERY_KEEP;
           setShipNow(2 * 1440 + 13 * 60 + 30); machinesNow(); out.crewBefore = !!dj.claimedBy;
           // two trips: more than a cart's worth in the hold
-          SHIP.hold.seal = (SHIP.hold.seal || 0) + 20; MACH_REV++; const crates = holdCrates();
+          SHIP.hold.seal = (SHIP.hold.seal || 0) + 20; MACH_REV++; const crates = (typeof partsCrates === 'function' ? partsCrates() : holdCrates());
           out.took = claimJob(dj.id);
           const l1 = cartLoadHold(dj.id), u1 = cartUnloadShelves(dj.id), l2 = cartLoadHold(dj.id), u2 = cartUnloadShelves(dj.id);
-          out.trips = [crates, l1, u1.left, l2, u2.left]; out.emptied = holdCrates() === 0 && !Object.keys(SHIP.hold).some(k => k !== 'meals' && SHIP.hold[k] > 0);
+          out.trips = [crates, l1, u1.left, l2, u2.left]; out.emptied = (typeof partsCrates === 'function' ? partsCrates() : holdCrates()) === 0 && !Object.keys(SHIP.hold).some(k => k !== 'meals' && SHIP.hold[k] > 0);
           out.fin = finishJob(dj.id); if (typeof turnInJob === 'function') turnInJob(dj.id);
           // the next week's, left alone: the crew take it at 14:00 and it's done by the evening
           setShipNow(9 * 1440 + 10 * 60 + 5); machinesNow();
           const k = SHIP.jobs.find(x => x.cargo === 'stores' && x.status !== 'done');
           if (k) { setShipNow(9 * 1440 + 13 * 60 + 55); machinesNow(); out.k0 = !!k.claimedBy; setShipNow(9 * 1440 + 14 * 60 + 5); machinesNow(); out.k1 = k.claimedBy; out.cartRun = !!(k.segs || []).some(sg => sg.hold === 'cartfull');
-                   setShipNow(9 * 1440 + 20 * 60); machinesNow(); out.k2 = k.status === 'done' && holdCrates() === 0; }
+                   setShipNow(9 * 1440 + 20 * 60); machinesNow(); out.k2 = k.status === 'done' && (typeof partsCrates === 'function' ? partsCrates() : holdCrates()) === 0; }
           if (typeof SHARE_ON !== 'undefined') SHARE_ON = true;
           setShipNow(t0);
           return out;
@@ -800,10 +800,11 @@ with sync_playwright() as pw:
           SHIP.works = { tier: 2, rank: 'junior' }; out.tier2 = playerTier(); SHIP.works = null;
           // the ladder's hook: once an hour, after the claims; a reserve from inside it (slot 20, a tier-2 machine)
           const calls = []; let rid = null;
-          window.ladderTick = h => { calls.push(h); if (rid === null && h === Math.floor(t / 60) + 2) rid = jobReserve('scrubber', SHIP.time.day, (h % 24) * 60 + 30, 20, { tier: 2, train: 't2', until: SHIP.time.day * 1440 + 1440 }) || 'none'; };
+          window.__lt = h => { calls.push(h); if (rid === null && h === Math.floor(t / 60) + 2) rid = jobReserve('scrubber', SHIP.time.day, (h % 24) * 60 + 30, 20, { tier: 2, train: 't2', until: SHIP.time.day * 1440 + 1440 }) || 'none'; };
+          window.__sc("window.__lt0 = typeof ladderTick === 'function' ? ladderTick : undefined; ladderTick = h => { window.__lt(h); if (window.__lt0) window.__lt0(h); }");   // section 24's own, if it's in, still runs
           let who = null;
           for (let m = t + 60; m <= t + 8 * 60; m += 60) { setShipNow(m); machinesNow(); if (sen.claimedBy && !who) who = sen.claimedBy; }
-          delete window.ladderTick;
+          window.__sc("if (window.__lt0) ladderTick = window.__lt0; else ladderTick = undefined");
           out.calls = calls.length; out.callsSeq = calls.every((h, i) => !i || h === calls[i - 1] + 1);
           out.seniorBy = who ? crewRank(schedPeople().find(p => p.id === who)) : null;
           const R = SHIP.jobs.find(j => j.id === rid); out.rid = rid; out.rTier = R ? jobTier(R) : null; out.rTrain = R ? R.train : null; out.rHeld = R ? heldForYou(R) : null;
@@ -912,14 +913,15 @@ with sync_playwright() as pw:
           const H0 = Math.floor(shipNow() / 60) + 1, room = (placeById('4-lift-1') || {}).room;
           out.overBuiltIn = jobKindAdd('repair', { stops: () => [], done: () => {} });
           out.added = jobKindAdd('testkind', { tier: 1, work: 20, text: 'Test run',
-            stops: j => [{ deck: 4, placeId: '4-lift-1', mins: 10, tag: 'look', how: 'look', opts: { marks: ['fine', 'worn'] } }, { deck: 4, placeId: '4-laundry-1', mins: 10, tag: 'pick', how: 'choose', opts: { options: ['a', 'b'] } }],
-            post: (h, jobs) => { if ((h === H0 || h === H0 + 1) && !jobs.some(x => x.id === 'tk@' + h)) jobs.push(jobMake('testkind', { h, id: 'tk@' + h, deck: 4, room, title: 'Test run: Deck 4', ...(h === H0 ? { released: true } : {}) })); },
+            stops: j => [{ deck: 4, placeId: '4-lift-1', mins: 10, tag: 'look', how: 'look', hold: 'cart', opts: { marks: ['fine', 'worn'] } }, { deck: 4, placeId: '4-laundry-1', mins: 10, tag: 'pick', how: 'choose', opts: { options: ['a', 'b'] } }],
+            post: (h, jobs) => { if ((h === H0 || h === H0 + 1) && !jobs.some(x => x.id === 'tk@' + h)) jobs.push(jobMake('testkind', { h, id: 'tk@' + h, deck: 4, room, title: 'Test run: Deck 4', ...(h === H0 ? { released: true } : { shareSeen: true, leave: 480 }) })); },   // B: its own hold (outside HOLD_MAX and the band's order)
             done: (j, t, by) => done.push([j.id, by, JSON.stringify(j.res || {})]), stepDone: (j, k, res) => steps.push([j.id, k, res && res.pick]),
             crew: { can: p => jobCrew(p) === 'works', mins: 30 } });
           let crewJob = null;
           const m0 = shipNow(); for (let m = m0 + 60; m <= m0 + 4 * 60; m += 60) { setShipNow(m); machinesNow(); }
           const A = SHIP.jobs.find(j => j.id === 'tk@' + H0), B = SHIP.jobs.find(j => j.id === 'tk@' + (H0 + 1));
           out.posted = [!!A, !!B]; out.aBy = A && A.claimedBy; out.aSegs = A && A.segs ? A.segs.filter(x => x.type === 'job').map(x => x.tag + '@' + x.placeId).join(' ') : null;
+          out.aHold = A && A.segs ? A.segs.filter(x => x.hold).map(x => x.tag + ':' + x.hold).join(' ') : null;
           out.aMins = A && A.segs ? A.segs.filter(x => x.type === 'job').reduce((a, x) => a + x.to - x.from, 0) : null;
           out.aDone = done.filter(d => d[0] === (A && A.id)).map(d => d[1] === A.claimedBy).join();
           out.bHeld = B && !B.claimedBy; out.card = B ? jobCard(B).join(' / ') : null; out.open = B ? openJobs('you').some(x => x.id === B.id) : null;
@@ -947,10 +949,10 @@ with sync_playwright() as pw:
           setShipNow(t0);
           return out;
         })()""")
-        print(f"Job kinds (0.33.47): registered {jk['added']} (over a built-in {jk['overBuiltIn']}), posted {jk['posted']}; untaken: {jk['aBy']} at {jk['aSegs']} ({jk['aMins']} min), done by them {jk['aDone']}")
+        print(f"Job kinds (0.33.47): registered {jk['added']} (over a built-in {jk['overBuiltIn']}), posted {jk['posted']}; untaken: {jk['aBy']} at {jk['aSegs']} ({jk['aMins']} min, held {jk['aHold']}), done by them {jk['aDone']}")
         print(f"  yours: held {jk['bHeld']}, card '{jk['card']}', on your board {jk['open']}, claimed {jk['claim']}, stops '{jk['stops']}', other jobs' steps {jk['otherHow']}; done {jk['workDone']}, results {jk['res']}, done for you '{jk['youDone']}', stepDone '{jk['steps']}'")
         print(f"  save keeps it {jk['saveKeeps']}, drops an unknown kind {jk['saveDrops']}; machineFound: healthy {jk['healthy']}, [fresh, again, found now, by, notes, note ok] {jk['found']}")
-        if (not jk['added'] or jk['overBuiltIn'] or jk['posted'] != [True, True] or not jk['aBy'] or jk['aBy'] == 'you' or not jk['aSegs'] or '4-lift-1' not in (jk['aSegs'] or '') or jk['aMins'] != 30 or jk['aDone'] != 'true'
+        if (not jk['added'] or jk['overBuiltIn'] or jk['posted'] != [True, True] or not jk['aBy'] or jk['aBy'] == 'you' or not jk['aSegs'] or '4-lift-1' not in (jk['aSegs'] or '') or jk['aMins'] != 30 or jk['aDone'] != 'true' or 'look:cart' not in (jk['aHold'] or '') or 'pick:' in (jk['aHold'] or '')
             or not jk['bHeld'] or not jk['open'] or not jk['claim'] or jk['stops'] != 'look:look+opts pick:choose+opts' or jk['otherHow'] != 'hold' or not jk['workDone']
             or jk['res'] != '{"0":{"pick":"worn"},"1":{"pick":"b"}}' or not jk['youDone'].startswith('you {') or jk['steps'] != '0:worn 1:b' or not jk['saveKeeps'] or not jk['saveDrops']
             or jk['healthy'] is not None or jk['found'] != [True, False, True, 'you', 1, True]):
@@ -964,27 +966,31 @@ with sync_playwright() as pw:
           const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min, out = {}, offered = [];
           JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; SHIP.works = null; setShipNow(t0); machinesNow();
           for (const j of SHIP.jobs) if (j.claimedBy === 'you') { j.claimedBy = null; j.status = 'open'; }
-          window.caseOffer = (j, h) => offered.push([j.id, j.cause, h]);
-          let held = null; window.caseHeld = j => j.id === held;
+          // stand-ins swapped in through the game's scope (24k's own, if it's in, is kept and put back after)
+          const swap = (name, fn) => { window['__f_' + name] = fn; window.__sc("window.__o_" + name + " = typeof " + name + " === 'function' ? " + name + " : undefined; " + name + " = (...a) => window.__f_" + name + "(...a)"); };
+          const unswap = name => window.__sc("if (window.__o_" + name + ") " + name + " = window.__o_" + name + "; else " + name + " = undefined");
+          swap('caseOffer', (j, h) => offered.push([j.id, j.cause, h]));
+          let held = null; swap('caseHeld', j => j.id === held); swap('caseHidden', () => false);
           setShipNow(t0 + 5 * 1440); machinesNow();
           out.offered = offered.length; out.offeredOk = offered.every(o => o[1] && SHIP.jobs.concat([]).length >= 0);
-          delete window.caseOffer;
-          const o = openJobs('you').find(x => x.kind === 'repair' || x.kind === 'service' || x.kind === 'calibrate' || x.kind === 'lamp') || openJobs('you')[0];
-          held = o && o.id; const J = SHIP.jobs.find(j => j.id === held);
+          unswap('caseOffer');
+          const tt = shipNow(), mk = id => { const j = { id, machine: null, deck: 4, room: (placeById('4-lift-1') || {}).room, kind: 'chore', chore: 'vent', target: id, title: 'Clean a vent: test', tier: 1,
+            stops: [{ deck: 4, placeId: '4-lift-1', mins: 10, tag: 'vent' }], urgency: 0, leave: null, posted: tt, found: tt, claimedBy: null, parts: [], status: 'open', shareSeen: true }; SHIP.jobs.push(j); MACH_REV++; return j; };
+          held = mk('test-case').id; const J = SHIP.jobs.find(j => j.id === held);
           if (J) { J.released = true; J.urgency = 1; }
           setShipNow(shipNow() + 3 * 60); machinesNow(); out.crewTook = J ? !!(J.claimedBy && J.claimedBy !== 'you') : null;
           out.claim = J ? claimJob(J.id) : null;
-          window.caseFitted = j => j.id === held;
+          swap('caseFitted', j => j.id === held);
           const n = J ? jobStops(J).length : 0, mid = J && J.machine ? SHIP.machines[J.machine].cond : null; let r = null;
           for (let k = 0; k < n; k++) r = jobStepDone(J.id, k);
           out.wrong = r && r.wrong === true && r.done === false && !J.workDone; out.condSame = J && J.machine ? SHIP.machines[J.machine].cond <= mid + 1e-9 : true;
-          delete window.caseFitted; delete window.caseHeld; if (J) dropJob(J.id);
+          unswap('caseFitted'); unswap('caseHeld'); unswap('caseHidden'); if (J) dropJob(J.id);
           // a side kind
           jobKindAdd('testside', { side: true, text: 'Side test', stops: () => [{ deck: 4, placeId: '4-lift-1', mins: 5, tag: 'hold' }], done: () => {}, crew: { can: () => false, mins: 5 } });
-          const b = openJobs('you').find(x => x.kind !== 'testside'); out.board = b ? claimJob(b.id) : null;
+          const b = mk('test-board'); out.board = claimJob(b.id);
           SHIP.jobs.push(jobMake('testside', { id: 'side@1', deck: 4, title: 'Side test' })); MACH_REV++;
-          out.side = claimJob('side@1'); out.myJob = myJob() && myJob().id === (b && b.id); out.sides = mySideJobs().map(j => j.id).join();
-          delete JOB_KINDS.testside; delete JOB_TYPES.testside; SHIP.jobs = SHIP.jobs.filter(j => j.id !== 'side@1');
+          out.side = claimJob('side@1'); out.myJob = myJob() && myJob().id === (b && b.id); out.sides = mySideJobs().filter(j => j.kind === 'testside').map(j => j.id).join();   // only the test's (24c's drill may be yours too)
+          delete JOB_KINDS.testside; delete JOB_TYPES.testside; SHIP.jobs = SHIP.jobs.filter(j => j.id !== 'side@1' && !j.id.startsWith('test-'));
           for (const j of SHIP.jobs) if (j.claimedBy === 'you') { j.claimedBy = null; j.status = 'open'; }
           // the lift's old id in a save
           const sv = { player: { deck: 4, tile: [0, 0], facing: 0 }, ship: { decks: {} }, crew: {} }; SAVE_EXTRA.forEach(f => f(sv));
@@ -998,6 +1004,117 @@ with sync_playwright() as pw:
         if (hk['offered'] < 1 or hk['crewTook'] is not False or not hk['claim'] or not hk['wrong'] or not hk['condSame'] or not hk['side'] or not hk['board'] or not hk['myJob'] or hk['sides'] != 'side@1'
             or not hk['hadNew'] or hk['liftCond'] != 33.5 or not hk['noOld']):
             fail('hooks for 24k and M1')
+
+    # 5r. drift (m5-tuning's section 17 part, 0.33.48), with a stand-in 'tune' kind (24e's isn't in this build): none without
+    # the kind, none before Day 4 06:00; about one a day after; a drift of 2+ gets a tune job the crew do; ship health within
+    # 2 of the run without drift; the same twice and in one jump; the look follows tuneSet both ways; the save keeps a drift
+    # and a save without drifts loads settled
+    if g.ev("typeof tuneSet === 'function'"):
+        DR = r"""((stand, mode) => {
+          window.__sc("window.__evD = [typeof eventNow === 'function' ? eventNow : undefined, typeof eventMod === 'function' ? eventMod : undefined]; if (window.__evD[0]) eventNow = () => null; if (window.__evD[1]) eventMod = () => null");
+          const own = JOB_KINDS.tune;
+          // a stand-in 'tune' kind when 24e's isn't in the build
+          const standIn = { text: 'Tune', stops: j => [{ deck: j.deck, placeId: panelPlace(j.machine), mins: 15, tag: 'tune', how: 'turn' }], done: (j, t, by) => tuneSet(j.machine, 0), crew: { can: p => jobCrew(p) === 'works', mins: 15 } };
+          if (own && !stand) delete JOB_KINDS.tune;           // 24e's own kind, when it's in, is the one measured (M2)
+          if (stand && !own) { JOB_KINDS.tune = standIn; JOB_TYPES.tune = JOB_TYPES.tune || { work: 15, restore: 0, parts: 0 }; }
+          const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min, out = { first: null, starts: 0, minHealth: 100, tunes: 0, tunedByCrew: 0, sig: [] };
+          JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; SHIP.works = null; setShipNow(t0); machinesNow();
+          const prev = {};
+          const look = t => { for (const m of machineList()) { const d = machineDrift(m.id); if (d && !prev[m.id]) { out.starts++; if (out.first === null) out.first = t; out.sig.push(m.id + '@' + Math.floor(t / 60) + ':' + d); } prev[m.id] = d; } out.minHealth = Math.min(out.minHealth, shipHealth()); };
+          if (mode === 'jump') { setShipNow(t0 + 14 * 1440); machinesNow(); }
+          else for (let t = t0; t <= t0 + 14 * 1440; t += 60) { setShipNow(t); machinesNow(); look(t); }
+          const J = SHIP.jobs.filter(j => j.kind === 'tune'); out.tunes = J.length; out.tunedByCrew = J.filter(j => j.status === 'done' && j.doneBy && j.doneBy !== 'you').length; out.titles = [...new Set(J.map(j => j.title))].slice(0, 4);
+          out.end = JSON.stringify(Object.fromEntries(machineList().map(m => [m.id, [Math.round(SHIP.machines[m.id].cond * 1000), machineDrift(m.id)]])));
+          delete JOB_KINDS.tune; if (own) JOB_KINDS.tune = own; else delete JOB_TYPES.tune;
+          SHIP.jobs = SHIP.jobs.filter(j => j.kind !== 'tune');
+          window.__sc("if (window.__evD[0]) eventNow = window.__evD[0]; if (window.__evD[1]) eventMod = window.__evD[1]");
+          setShipNow(t0);
+          return out;
+        })"""
+        d0 = g.ev(DR + "(false, 'hour')"); d1 = g.ev(DR + "(true, 'hour')"); d2 = g.ev(DR + "(true, 'hour')"); d3 = g.ev(DR + "(true, 'jump')")
+        lk = g.ev("""(() => {
+          const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min; JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t0); machinesNow();
+          const ov = '3-oven-1', dk = '5-cartdock-1', L = id => { const x = machineLook(id); return [x.flicker, x.dim, x.blink, x.drift || 0]; };
+          const out = { before: L(ov) }; tuneSet(ov, 2); out.hot = L(ov); tuneSet(ov, -2); out.cool = L(ov); out.eff = Math.round(machConds()[ov] - SHIP.machines[ov].cond);
+          tuneSet(dk, 1); out.dock = L(dk); out.clamp = (tuneSet(ov, 9), machineDrift(ov)); out.notTunable = tuneSet('5-airplant-1', 1);
+          const s = { player: { deck: 4, tile: [0, 0], facing: 0 }, ship: { decks: {} }, crew: {} }; SAVE_EXTRA.forEach(f => f(s));
+          out.saved = s.ship.machines[ov]; MACH_HOUR = null; machinesLoad(JSON.parse(JSON.stringify(s))); out.loaded = [machineDrift(ov), machineDrift(dk)];
+          for (const id in s.ship.machines) s.ship.machines[id] = s.ship.machines[id].slice(0, 2); MACH_HOUR = null; machinesLoad(JSON.parse(JSON.stringify(s)));
+          out.old = machineList().some(m => machineDrift(m.id)); tuneSet(ov, 0); tuneSet(dk, 0); out.after = L(ov); out.settled = !machineDrift(ov);
+          setShipNow(t0); return out;
+        })()""")
+        hh = lambda t: None if t is None else f"day {t // 1440 + 1} {t % 1440 // 60:02d}:00"
+        print(f"Drift (0.33.48): without the tune kind {d0['starts']} drifts; with a stand-in {d1['starts']} in 14 days (first {hh(d1['first'])}), tune jobs {d1['tunes']} ({d1['tunedByCrew']} done by the crew), e.g. {d1['titles']}")
+        print(f"  lowest ship health {d1['minHealth']:.1f} (without drift {d0['minHealth']:.1f}); the same twice {d1['sig'] == d2['sig'] and d1['end'] == d2['end']}, one jump {d1['end'] == d3['end']}")
+        print(f"  looks [flicker, dim, blink, drift]: settled {lk['before']}, +2 {lk['hot']}, -2 {lk['cool']} (works {lk['eff']} points lower), dock +1 {lk['dock']}, clamped to {lk['clamp']}, a fan refused {not lk['notTunable']}; after settling {lk['after']}")
+        print(f"  save: {lk['saved']} loads as {lk['loaded']}; a save without drifts loads settled {not lk['old']}")
+        if (d0['starts'] or not d1['starts'] or d1['first'] < g.ev("TUNE_FROM") or not (5 <= d1['starts'] <= 25) or not d1['tunes'] or not d1['tunedByCrew']
+            or d1['minHealth'] < d0['minHealth'] - 2 or d1['sig'] != d2['sig'] or d1['end'] != d2['end'] or d1['end'] != d3['end']
+            or not lk['hot'][0] > lk['before'][0] or not lk['cool'][1] > lk['before'][1] or lk['eff'] != -16 or lk['dock'][2] is not True or lk['clamp'] != 3 or lk['notTunable']
+            or lk['saved'][2:] != [3] or lk['loaded'] != [3, 1] or lk['old'] or lk['after'] != lk['before'] or not lk['settled']):
+            fail('drift')
+
+    # 5s. incidents' machine side (m6-incidents, 0.33.49): machineFault sets a machine faulty (never raises it) and its repair
+    # follows within the hour (machineFound finds it at once); liftStuck makes rides 3 times slower until it ends; a burst's
+    # joint job is a Tier 1 chore at the place, one seal, 20 minutes, on your board, and the crew fit it when you leave it
+    if g.ev("typeof jointJobPost === 'function'"):
+        inc = g.ev("""(() => {
+          const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min, out = {};
+          JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t0 + 7 * 1440 + 240); machinesNow();
+          for (const j of SHIP.jobs) if (j.claimedBy === 'you') { j.claimedBy = null; j.status = 'open'; }
+          const L = '5-mainlift-1', G = '3-galleyplant-1';
+          out.fault = machineFault(L); out.state = SHIP.machines[L].state; out.cond = SHIP.machines[L].cond;
+          const c0 = SHIP.machines[G].cond; machineFault(G, 90); out.notRaised = SHIP.machines[G].cond === Math.min(c0, 90);
+          const f = machineFound(L); const J = SHIP.jobs.find(j => j.id === (f && f.id)); out.found = !!(f && J && J.kind === 'repair');
+          const before = shipEffects(5).lift; out.stuck = liftStuck(true); out.liftX = Math.round(shipEffects(5).lift / before * 100) / 100;
+          setShipNow(shipNow() + 45); out.over = !liftStuckNow() && shipEffects(5).lift === shipEffects(5).lift;
+          liftStuck(true); liftStuck(false); out.off = !liftStuckNow();
+          const id = jointJobPost({ placeId: '4-lift-1', leave: 60 }), jj = SHIP.jobs.find(j => j.id === id);
+          out.joint = jj ? [jj.tier, jj.parts.join(), jj.stops.map(x => x.mins + '@' + x.placeId).join(), jobCard(jj)[2]] : null;
+          out.onBoard = openJobs('you').some(x => x.id === id);
+          const m0 = shipNow(); for (let m = m0 + 60; m <= m0 + 8 * 60; m += 60) { setShipNow(m); machinesNow(); }
+          out.crew = jj && jj.claimedBy && jj.claimedBy !== 'you' ? jj.status : null;
+          SHIP.jobs = SHIP.jobs.filter(j => j.chore !== 'joint');
+          setShipNow(t0); return out;
+        })()""")
+        print(f"Incidents (0.33.49): machineFault {inc['fault']} -> {inc['state']} ({inc['cond']}), never raised {inc['notRaised']}, its repair found {inc['found']}; lift stuck {inc['stuck']} x{inc['liftX']}, over after 40 min {inc['over']}, off {inc['off']}")
+        print(f"  joint job [tier, parts, stops, card] {inc['joint']}, on your board {inc['onBoard']}, the crew's when left: {inc['crew']}")
+        if (not inc['fault'] or inc['state'] != 'faulty' or inc['cond'] > 40 or not inc['notRaised'] or not inc['found'] or not inc['stuck'] or inc['liftX'] != 3 or not inc['over'] or not inc['off']
+            or not inc['joint'] or inc['joint'][:3] != [1, 'seal', '20@4-lift-1'] or not inc['onBoard'] or inc['crew'] not in ('claimed', 'done')):
+            fail("incidents' machine side")
+
+    # 5t. hauling's section 17 part (m4-hauling, 0.33.50), with a stand-in 'haul' kind: without the kind no manifest and no
+    # misplaced part; with it each Wednesday delivery brings 2-4 manifest crates to real drop places, counted by holdCrates
+    # but not by the unload (partsCrates); manifestTake loads one; on Thursdays about one week in two a part sits on a
+    # shelf not its own until a fetch or misplacedFix; the save keeps both; the same twice
+    if g.ev("typeof manifestFor === 'function'"):
+        HL = r"""((stand) => {
+          const own = JOB_KINDS.haul;
+          if (stand && !own) jobKindAdd('haul', { junior: true, text: 'Haul', stops: () => [], done: () => {}, crew: { can: () => false, mins: 30 } });
+          if (!stand && own) delete JOB_KINDS.haul;
+          if (stand && own) JOB_KINDS.haul = { ...own, post: undefined };   // 24d's own: no runs while the arm reads the hold (put back after)
+          const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min, out = { weeks: [], thursdays: 0, misplaced: [], badDest: [] };
+          JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t0); machinesNow();
+          for (let w = 0; w < 4; w++) {
+            setShipNow(t0 + (w * 7 + 2) * 1440 + 255); machinesNow();          // Wednesday 10:15
+            const M = (SHIP.manifest || []).map(c => c.id + '>' + c.dest); out.weeks.push(M.join(' '));
+            for (const c of SHIP.manifest || []) if (!placeById(c.dest)) out.badDest.push(c.dest);
+            if (w === 0) { out.crates = [holdCrates(), partsCrates(), manifestCrates()]; const c0 = (SHIP.manifest || [])[0]; out.take = c0 ? JSON.stringify(manifestTake(c0.id)) : null; out.after = manifestCrates(); }
+            setShipNow(t0 + (w * 7 + 3) * 1440 + 120); machinesNow();          // Thursday 08:00
+            out.thursdays++; if (SHIP.misplaced) { const x = SHIP.misplaced; out.misplaced.push(x.part + '@' + x.on); if (x.on === shelfOf(x.part)) out.badDest.push('own shelf ' + x.part); }
+            if (out.saved === undefined && SHIP.misplaced) { const s = { player: { deck: 4, tile: [0, 0], facing: 0 }, ship: { decks: {} }, crew: {} }; SAVE_EXTRA.forEach(f => f(s)); const was = JSON.stringify([SHIP.manifest, SHIP.misplaced]); MACH_HOUR = null; machinesLoad(JSON.parse(JSON.stringify(s))); out.saved = JSON.stringify([SHIP.manifest, SHIP.misplaced]) === was; const p = SHIP.misplaced.part; out.fetchFixes = takePart(p) && !SHIP.misplaced; returnPart(p); }
+          }
+          if (stand && !own) { delete JOB_KINDS.haul; delete JOB_TYPES.haul; } else if (own) JOB_KINDS.haul = own;
+          SHIP.manifest = []; SHIP.misplaced = null; setShipNow(t0);
+          return out;
+        })"""
+        h0 = g.ev(HL + "(false)"); h1 = g.ev(HL + "(true)"); h2 = g.ev(HL + "(true)")
+        print(f"Hauling (0.33.50): without the haul kind manifests {[w for w in h0['weeks'] if w]}, misplaced {h0['misplaced']}; with a stand-in: {h1['weeks']}")
+        print(f"  week 1 crates [all, parts, manifest] {h1.get('crates')}, took {h1.get('take')}, then {h1.get('after')}; misplaced on {len(h1['misplaced'])} of {h1['thursdays']} Thursdays {h1['misplaced']}; bad {h1['badDest']}; save keeps them {h1.get('saved')}, a fetch puts it right {h1.get('fetchFixes')}; the same twice {h1 == h2}")
+        sizes = [len(w.split()) for w in h1['weeks']]
+        if (any(h0['weeks']) or h0['misplaced'] or not all(2 <= n <= 4 for n in sizes) or h1['badDest'] or not h1.get('crates') or h1['crates'][0] != h1['crates'][1] + h1['crates'][2]
+            or not h1.get('take') or h1['after'] != h1['crates'][2] - 1 or not (1 <= len(h1['misplaced']) <= 3) or h1 != h2 or h1.get('saved') is not True or h1.get('fetchFixes') is not True):
+            fail('hauling: the manifest and the misplaced part')
 
     # 6. the save
     rt = g.ev("""(() => {

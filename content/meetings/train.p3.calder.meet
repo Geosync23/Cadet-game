@@ -1,0 +1,21 @@
+@meeting train.p3.calder
+// Pillar 5, P3 (Day 5, Friday afternoon, after your second scanner reading): your first head-scratcher, at the board.
+// Washer 2 leaks; the crew tried a door seal and a drain valve. Calder opens Fault notes with you and reads the first
+// note; then she follows you. Head writer, seat W. The note's name is whoever really fitted it (the game's).
+title: A funny one
+from: Chief Ines Calder
+gist: Your first head-scratcher: a washer that leaks. Notes from the crew say what's been tried. Cross off what didn't work.
+== lines
+calder: Here's a funny one. Washer 2 in the junior laundry. It leaks.   [gesture]
+calder: Two people have had a go. Neither fixed it. Both left notes.
+calder > you: Open Fault notes. Three suspects. The door seal, the drain valve, the pump.
+calder: Rule one, page one. If someone fitted it and it's still wrong, it isn't that.
+calder: First note's on the job. New door seal in. Still leaks. So?
+? choice
+* So it's not the seal.   rel:calder+2 flavour:practical
+  calder: Cross it off.   [nod]
+* Could the new seal be faulty?   rel:calder+1 flavour:listen
+  calder: Could be. Isn't. Trust the note. Cross it off.
+* (Tap the door seal)
+  calder: Good. Crossed off.
+calder: The other note's on the washer. Go and find it. I'll follow.

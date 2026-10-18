@@ -1,0 +1,9 @@
+@reactions incident.burst
+// Pillar 5 (head writer, seat W): crew talking about a burst pipe (M6). Cue incident.burst; .you when you handled it.
+? cue:incident.burst.you
+- Heard you sorted that pipe. Quick work.
+- You shut off the right valve first time? Nice.
+- My socks thank you. The corridor was a river.   #funny
+?
+- Did you see the junior wing? Ankle deep, they said.
+- A pipe went on Four. All fixed now, apparently.

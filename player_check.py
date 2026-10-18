@@ -893,7 +893,9 @@ with sync_playwright() as pw:
         g.ev("setShipNow(Math.floor(shipNow() / 1440) * 1440 + 1440 * 2 + 9 * 60); needsT = null; SHIP.player.carry = []; SHIP.player.work = null"); g.step(3)
         # a tier-1 service job on a machine with a panel place, handed to you (the crew may have claimed it: test only)
         jid = g.ev(r"""(() => { machinesNow(); const j = SHIP.jobs.find(j => j.machine && j.kind === 'service' && j.status !== 'done' && jobTier(j) <= PLAYER_TIER && panelPlace(j.machine) && !ENGINE_KINDS.has(machineById(j.machine).kind));
-          if (!j) return null; j.claimedBy = null; j.status = 'open'; delete j.start; j.found = Math.min(j.found, shipNow()); MACH_REV++; return claimJob(j.id) ? j.id : null; })()""")
+          if (!j) return null; j.claimedBy = null; j.status = 'open'; delete j.start; j.found = Math.min(j.found, shipNow()); MACH_REV++;
+          for (const p of j.parts) SHIP.stores[p] = Math.max(SHIP.stores[p] || 0, 2);   // the shelf has some (test only: since Pillar 5's faults and hauling the part may be out until the delivery)
+          return claimJob(j.id) ? j.id : null; })()""")
         check(jid is not None, 'job loop: a tier-1 service job to take')
         if jid:
             mj = json.loads(g.ev("JSON.stringify([myJob().parts, machineById(myJob().machine).deck, myJob().machine, SHIP.stores[myJob().parts[0]]])"))
@@ -944,7 +946,7 @@ with sync_playwright() as pw:
         # a reserved training job (0.28.24, section 17's jobReserve): a shelf part, then a bracket you make, then the repair
         if g.ev("typeof jobReserve === 'function'"):
             rj = g.ev(r"""(() => { SHIP.player.carry = []; SHIP.player.work = null; const id = jobReserve('lights', SHIP.time.day, Math.max(0, SHIP.time.min - 1), 3);
-              if (!id || !claimJob(id)) return null; myWork(); const j = myJob(); return [id, j.parts, j.make, machineById(j.machine).deck, jobStops(j).map(x => x.step)]; })()""")
+              if (!id || !claimJob(id)) return null; myWork(); const j = myJob(); for (const p of j.parts) if (p !== j.make) SHIP.stores[p] = Math.max(SHIP.stores[p] || 0, 2);   /* the shelf part in stock (test only) */ return [id, j.parts, j.make, machineById(j.machine).deck, jobStops(j).map(x => x.step)]; })()""")
             print('  a reserved job:', rj)
             if check(rj and rj[2] and rj[2] in rj[1] and 'make' in rj[4], f'reserved job: should need a part you make ({rj})'):
                 g.ev("goToDeck(5)"); g.step(5)
@@ -970,10 +972,11 @@ with sync_playwright() as pw:
                 print('  repaired:', rd, '|', r3[3][:80])
                 check(rd == ['done', False], f'reserved job: done after fitting both parts and the repair ({rd})')
         # the wrist comm: a job you could take, posted while you're free
-        nt = g.ev(r"""(() => { const t0 = document.getElementById('tx').textContent; JOB_SEEN = new Set(); machinesNow();
+        nt = g.ev(r"""(() => { const t0 = document.getElementById('tx').textContent; JOB_SEEN = new Set(); machinesNow(); actEnd(true);
+          const held = SHIP.jobs.filter(j => j.claimedBy === 'you' && j.status === 'claimed'); for (const j of held) { j.claimedBy = null; j.status = 'open'; }   // free hands (test only: Step 2 posts the drill already yours)
           const j = SHIP.jobs.find(j => j.machine && j.status !== 'done' && jobTier(j) <= PLAYER_TIER && !ENGINE_KINDS.has(machineById(j.machine).kind));
           if (!j) return null; j.claimedBy = null; j.status = 'open'; delete j.start; j.found = Math.min(j.found, shipNow()); MACH_REV++; jobNotice();
-          return [document.getElementById('tt').textContent, document.getElementById('tx').textContent]; })()""")
+          const out = [document.getElementById('tt').textContent, document.getElementById('tx').textContent]; for (const h of held) { h.claimedBy = 'you'; h.status = 'claimed'; } MACH_REV++; return out; })()""")
         print('  notice:', nt)
         check(nt is None or (nt[0] == 'Your device' and nt[1].startswith('New job')), f'job loop: a new job you could take should be announced ({nt})')
         # carrying two at most: a job needing three filters takes two trips
@@ -1151,14 +1154,57 @@ with sync_playwright() as pw:
             for k in range(200):
                 g.step(30)
                 if not g.ev("!!ACT"): break
+            g.step(3)                                          # 15b's ixFrame marks the stop on the frame after the activity ends
             h2 = json.loads(g.ev(WST)); print('  hold:', h1['act'], '->', h2['done'], h2['toast'][:60], '| needs', n0, '->', h2['needs'])
+            if not h2['done']: print('  hold, not done: [the test job, your job, all yours]', g.ev("JSON.stringify([(j => j ? [j.status, j.claimedBy, j.stepsDone, j.workDone || null] : 'gone')(SHIP.jobs.find(j => j.id === 'pcws')), (j => j && j.id)(myJob()), SHIP.jobs.filter(j => j.claimedBy === 'you').map(j => [j.id, j.kind, j.status]), typeof ixChore === 'function' && (j => j && j.id)(ixChore())])"))
             check(h2['done'] and h2['res'][-1:] == [[4, None]], f'work steps: the hold stop ends the job\'s work ({h2["res"]})')
             check(all(b <= a + .5 for a, b in zip(n0, h2['needs'])), f'work steps: no need rose from the steps ({n0} -> {h2["needs"]})')
             # a registered kind (section 17's JOB_KINDS) walks like a chore; a machine job's panel step goes to workStep
-            rk = g.ev("(() => { const j = SHIP.jobs.find(j => j.id === 'pcws'); j.kind = 'wtest'; const had = typeof JOB_KINDS !== 'undefined'; if (!had) window.JOB_KINDS = { wtest: {} }; const r = !!ixChore(); if (!had) delete window.JOB_KINDS; j.kind = 'chore'; return [r, had]; })()")
+            rk = g.ev("(() => { const j = SHIP.jobs.find(j => j.id === 'pcws'); j.kind = 'wtest'; const had = typeof JOB_KINDS !== 'undefined', R = had ? JOB_KINDS : (window.JOB_KINDS = {}), was = R.wtest; R.wtest = {}; const r = !!ixChore(); if (was === undefined) delete R.wtest; else R.wtest = was; if (!had) delete window.JOB_KINDS; j.kind = 'chore'; return [r, had]; })()")
             print('  a registered kind walks like a chore (stand-in registry?):', rk)
             check(rk[0], 'work steps: a JOB_KINDS kind is walked like a chore')
+            v73 = g.ev("typeof bunkPick === 'function'")   # 0.28.73's lines only on a build that has them
+            # 0.28.73: a kind's own words after a step (r.say), its held prop (def.hold), the scanner in the look-over (24g's scanOpen)
+            sy = g.ev("(() => { const j = { id: 'pcsay', title: 'Say test' }; window.__jsd1 = jobStepDone; jobStepDone = () => ({ ok: true, left: 2, done: false, say: 'Found by you: Washer 1.' }); wsFinish(j, 0, {}, 'Round'); const a = document.getElementById('tx').textContent; jobStepDone = () => ({ ok: true, left: 2, done: false, wrong: true }); toast('x', 'before'); wsFinish(j, 0, {}, 'Round'); const b = document.getElementById('tx').textContent; jobStepDone = () => ({ ok: true, left: 2, done: false, retry: true, say: 'That valve is stuck.' }); wsFinish(j, 0, {}, 'Round'); const c = document.getElementById('tx').textContent; jobStepDone = window.__jsd1; return [a, b, c]; })()")
+            print('  the kind\'s words, then a wrong part (left to 24k):', sy)
+            check(not v73 or 'Found by you: Washer 1.' in sy[0] and '2 stops to go' in sy[0] and sy[1] == 'before' and sy[2] == 'That valve is stuck.', f'work steps: r.say shown with the stop line; r.wrong says nothing; r.retry says only its words ({sy})')
+            hd = g.ev("(() => { const j = SHIP.jobs.find(j => j.id === 'pcws'); j.kind = 'wtest'; j.workDone = null; const had = typeof JOB_KINDS !== 'undefined', R = had ? JOB_KINDS : (window.JOB_KINDS = {}), was = R.wtest; R.wtest = { hold: 'datapad' }; const r = ixHold(); if (was === undefined) delete R.wtest; else R.wtest = was; if (!had) delete window.JOB_KINDS; j.kind = 'chore'; return [r, typeof HOLDS !== 'undefined' && !!HOLDS.datapad, had]; })()")
+            print('  a registered kind\'s held prop [ixHold, HOLDS.datapad, real registry]:', hd)
+            check(not v73 or hd[0] == ('datapad' if hd[1] else 'toolbox'), f'work steps: def.hold is the prop you carry ({hd})')
             g.ev("jobStops = window.__js0; jobStepDone = window.__jsd0; for (const j of SHIP.jobs) if (j.claimedBy === 'you' && j.status === 'claimed') { j.claimedBy = null; j.status = 'open'; } SHIP.jobs = SHIP.jobs.filter(j => j.id !== 'pcws'); SHIP.player.wsteps = []; MACH_REV++")
+            sc = g.ev("""(() => { for (const j of SHIP.jobs) if (j.claimedBy === 'you' && j.status === 'claimed') { j.claimedBy = null; j.status = 'open'; }
+              const t = shipNow(), m = machineById('3-oven-1'), j = { id: 'pcscan', machine: m.id, deck: 3, room: m.room, kind: Object.keys(JOB_TYPES)[0], urgency: 1, posted: t, found: t, claimedBy: 'you', status: 'claimed', start: t, parts: ['seal'], title: 'Repair the oven' };
+              SHIP.jobs.push(j); MACH_REV++; myWork(); const had = typeof scanOpen === 'function'; if (!had) window.scanOpen = id => { window.__scan = id; return true; };
+              toast('x', 'before'); jobEnd({ kind: 'job', o: { need: ['seal'] } }); const a = [window.__scan || null, document.getElementById('tx').textContent];
+              if (!had) { window.scanOpen = () => false; jobEnd({ kind: 'job', o: { need: ['seal'] } }); a.push(document.getElementById('tx').textContent); delete window.scanOpen; }
+              SHIP.jobs = SHIP.jobs.filter(x => x.id !== 'pcscan'); SHIP.player.work = null; MACH_REV++; return a.concat([had]); })()""")
+            print('  the look-over with the scanner (scanOpen stand-in: opened for, toast, without it):', sc)
+            check(sc[-1] or (sc[0] == 'pcscan' and sc[1] == 'before' and 'needs' in sc[2]), f'work steps: scanOpen takes the look-over, else it names the part ({sc})')
+        if g.ev("typeof bunkPick === 'function'"):
+            print('The inspection\'s berth (0.28.73, m3): Make the bed, Tidy your locker')
+            g.ev("goToDeck(4)"); g.step(3)
+            BED = "JSON.stringify({ card: !!DEV.choose, btn: [...document.querySelectorAll('#devDlg button')].filter(b => b.offsetParent).map(b => b.textContent.trim()), act: ACT && [ACT.kind, ACT.phase], made: SHIP.player.bedMade, untidy: !!SHIP.player.untidy, tidy: lockerTidy(), day: SHIP.time.day })"
+            g.ev("(() => { const d0 = SHIP.time.day + 1; let d = d0; while (weekday(d) !== 3) d++; setShipNow((d - 1) * 1440 + 6 * 60); needsT = null; actEnd(true); SHIP.player.bedMade = null; SHIP.player.untidy = false; const s = placeSpot(playerBed()), c = cellPos(...s.walk); player.obj.position.copy(c); player.stop(); })()"); g.step(3)
+            g.ev("bunkPick(playerBed())"); g.step(2); b1 = json.loads(g.ev(BED))
+            g.ev("devDialogueDo('choose', 0)")
+            for k in range(120):
+                g.step(10)
+                if not g.ev("!!ACT"): break
+            b2 = json.loads(g.ev(BED))
+            g.ev("SHIP.player.untidy = true; bunkPick(playerBed())"); g.step(2); b3 = json.loads(g.ev(BED)); g.ev("devDialogueDo('choose', 0)")
+            for k in range(120):
+                g.step(10)
+                if not g.ev("!!ACT"): break
+            b4 = json.loads(g.ev(BED))
+            sv = json.loads(g.ev("(() => { SHIP.player.untidy = true; const s = { player: {} }; for (const f of SAVE_EXTRA) try { f(s); } catch (e) {} SHIP.player.untidy = false; return JSON.stringify([s.player.bedMade, s.player.untidy]); })()"))
+            g.ev("bunkPick(playerBed())"); g.step(2); b5 = json.loads(g.ev(BED)); g.ev("actEnd(true)")
+            g.ev("setShipNow(shipNow() + 1440); needsT = null; SHIP.player.bedMade = null"); g.step(2); g.ev("bunkPick(playerBed())"); g.step(2); b6 = json.loads(g.ev(BED)); g.ev("actEnd(true)")
+            print('  Thursday 06:00:', b1['btn'], '| made:', b2['made'], b2['day'], '| bought something:', b3['btn'], '| tidied:', b4['tidy'], '| saved:', sv, '| all done, then Friday:', b5['act'], b6['act'], b6['card'])
+            check(b1['card'] and 'Make the bed' in b1['btn'] and 'Lie down' in b1['btn'] and 'Tidy your locker' not in b1['btn'], f'berth: the Thursday card ({b1["btn"]})')
+            check(b2['made'] == b2['day'], f'berth: Make the bed sets bedMade to the day ({b2})')
+            check(b3['card'] and b3['btn'][:2] != ['Make the bed'] and 'Tidy your locker' in b3['btn'] and b4['tidy'] and not b4['untidy'], f'berth: Tidy your locker puts things away ({b3["btn"]}, {b4})')
+            check(sv == [b2['day'], True], f'berth: bedMade and untidy are saved ({sv})')
+            check(not b5['card'] and b5['act'] and b5['act'][0] == 'lie' and not b6['card'] and b6['act'] and b6['act'][0] == 'lie', f'berth: made and tidy, or not an inspection morning, the bunk just lies you down ({b5}, {b6})')
     else:
         print('The job loop: this build has no section 17 jobs (myJob, finishJob): skipped')
 
