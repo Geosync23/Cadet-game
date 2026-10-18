@@ -241,7 +241,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.33.42
+   STARSHIP CADET: CSV Wren                           build 0.33.43
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7591,7 +7591,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.33.42';                           // keep in step with the header's build line
+const GAME_BUILD = '0.33.43';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -14350,6 +14350,7 @@ function leaveEnd(j) {
 const FETCH_AT = ['5-parts-1', '5-parts-2', '5-parts-3', '5-parts-4'], MAKE_AT = ['5-make-1', '5-make-2'];
 // for the hover carts: beside the docks, in the cargo hold, in Deck 3's cold store (asked of the architects; skipped till they're in)
 const CART_AT = ['5-cart-1', '5-cart-2'], HOLD_AT = ['5-hold-1', '5-hold-2'], COLD_AT = ['3-cold-1', '3-cold-2'];
+const loadAt = j => j.cargo === 'stores' ? ['5-delivery-1'].concat(HOLD_AT) : HOLD_AT;   // the delivery loads at its crates (the Deck 6 architect's 0.38.35), when that place is in
 // the shelves to try for a part: the one that stocks it first (the places' `stock`), then the rest
 function shelvesFor(part) {
   const st = id => ((DECKS[5].places || []).find(p => p.id === id) || {}).stock || [];
@@ -14381,7 +14382,7 @@ function jobRun(p, j, t, makeMin) {
     // the same dock out and back: one whose cart isn't already out on another run (about an hour, at most)
     const known = new Set((DECKS[5].places || []).map(p => p.id));
     const dock = CART_AT.find(id => known.has(id) && !SHIP.jobs.some(o => o.kind === 'restock' && o.segs && o.status === 'claimed' && o.segs[0] && o.segs.some(sg => sg.tag === 'cart' && sg.placeId === id) && o.start < c + 60 && c < o.end)) || null;
-    const s0 = segs.length; at(4, 'cart', dock); at(10, 'load', storagePlace(HOLD_AT, c, c + 10));
+    const s0 = segs.length; at(4, 'cart', dock); at(10, 'load', storagePlace(loadAt(j), c, c + 10));
     const s1 = segs.length;
     if (j.cargo === 'meals') { go(3); at(15, 'unload', storagePlace(COLD_AT, c, c + 15)); }
     else at(20, 'unload', storagePlace(FETCH_AT, c, c + 20));
@@ -14580,11 +14581,11 @@ function choresHour(h, jobs) {
 }
 // ---- the Works crew at work where you'll see them (0.33.40, the plan for 0.60.7) ----
 // SHOW_JOBS: on Days 1 and 2 two small crew jobs are placed for you to see: a junior cleaning a vent by Deck 4's lift
-// in the morning, and a delivery into the Works bay after lunch. Never held for you: the named junior takes it (j.crew,
+// in the morning (09:00-10:15), and a delivery into the Works bay after lunch. Never held for you: the named junior takes it (j.crew,
 // for its first hour; then any of the crew). showJob(day) -> { id, who, title, deck, place, from, to } | null for
 // onboarding's lines ("That's Bea on the vent"): the day's job and who's on it, once it's claimed
 const SHOW_JOBS = [
-  { key: 'vent', day: 1, hour: 8, crew: 'silva-bea', chore: 'vent', title: 'Clean a vent: lift lobby', stops: [{ placeId: '4-lift-1', mins: 40, tag: 'vent' }] },
+  { key: 'vent', day: 1, hour: 9, crew: 'silva-bea', chore: 'vent', title: 'Clean a vent: lift lobby', stops: [{ placeId: '4-lift-1', mins: 75, tag: 'vent' }] },   // 09:00-10:15: after the Monday briefing, when you and Zeke come down (0.33.43; 08:00-08:42 before)
   { key: 'tools', day: 2, hour: 13, crew: 'silva-bea', chore: 'delivery', title: 'Take new tools to the Works bay, Deck 5', bring: 'a box of tools',
     stops: [{ placeId: '5-hold-1', mins: 5, tag: 'pickup' }, { placeId: '5-bench-1', mins: 15, tag: 'drop' }] },
 ];
@@ -15036,7 +15037,7 @@ function jobStopsOf(j) {
   if (!j) return [];
   if (j.kind === 'chore' || j.kind === 'favour') return (j.parts.length ? [st('fetch', shelvesFor(j.parts[0]), 5)] : []).concat(j.stops.map(x => ({ step: x.tag, places: x.placeId && known.has(x.placeId) ? [x.placeId] : [], deck: x.deck, mins: x.mins, at: x.at || null })),
     j.kind === 'favour' ? [{ step: 'return', places: [], deck: null, person: j.from }] : []);
-  if (j.kind === 'restock') { const meals = j.cargo === 'meals'; return [st('cart', CART_AT, 5), st('load', HOLD_AT, 5), st('unload', meals ? COLD_AT : FETCH_AT, meals ? 3 : 5), st('return', CART_AT, 5)]; }
+  if (j.kind === 'restock') { const meals = j.cargo === 'meals'; return [st('cart', CART_AT, 5), st('load', loadAt(j), 5), st('unload', meals ? COLD_AT : FETCH_AT, meals ? 3 : 5), st('return', CART_AT, 5)]; }
   const m = machineById(j.machine); if (!m) return [];
   const pp = panelPlace(m.id);
   return [st('fetch', shelvesFor(j.parts[0]), 5)].concat(j.make ? [{ ...st('make', MAKE_AT, 5), part: j.make }] : [], [{ step: 'job', places: pp ? [pp] : [], deck: m.deck, at: m.panel, room: m.room }]);
