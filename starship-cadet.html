@@ -242,7 +242,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.28.65
+   STARSHIP CADET: CSV Wren                           build 0.60.7
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -1276,12 +1276,13 @@ const KIT = {
     for (const sd of [-1, 1]) { cyl(.17, .17, .06, LNG.rust, sd * .6, .46, 0, g, 16); cyl(.025, .025, .43, LNG.brass, sd * .6, .215, 0, g, 8); cyl(.14, .16, .02, M.slateDark, sd * .6, .01, 0, g, 16); }
     return { w: .72, d: .72 };
   },
-  cardTable(g) {
+  cardTable(g, o = {}) {                                 // o.tiles (0.38.34): a Tiles board set up on it instead of the cards (R() drawn as before)
     box(.9, .05, .9, std('#2f5e4f', .9), 0, .72, 0, g);
+    if (o.tiles) { const b = new THREE.Mesh(TILES_KIT.geo, TILES_KIT.mat); b.scale.set(.44, 1, .44); b.position.set(0, .746, 0); b.receiveShadow = true; g.add(b); }
     box(.94, .04, .94, M.wood, 0, .69, 0, g);
     cyl(.06, .08, .66, M.slateDark, 0, .34, 0, g, 12); cyl(.3, .32, .03, M.slateDark, 0, .015, 0, g, 20);
     const cardCols = ['#f1ece2', '#e9c46a', '#5fd6c6', '#e07a5f'];
-    for (let k = 0; k < 9; k++) box(.08, .006, .12, std(cardCols[k % 4], .6), (k % 3 - 1) * .14, .75, (Math.floor(k / 3) - 1) * .16, g).rotation.y = (R() - .5) * .5;
+    for (let k = 0; k < 9; k++) { const t = (R() - .5) * .5; if (!o.tiles) box(.08, .006, .12, std(cardCols[k % 4], .6), (k % 3 - 1) * .14, .75, (Math.floor(k / 3) - 1) * .16, g).rotation.y = t; }
     for (const [x, z] of [[0, -.65], [0, .65], [-.65, 0], [.65, 0]]) {
       const s = new THREE.Group(); s.position.set(x, 0, z); g.add(s); KIT.stool(s);
     }
@@ -1559,28 +1560,47 @@ const KIT = {
   // that hides while you're inside; the ramp (o.ramp gets its hinge) is the door, upright when closed, lying almost flat
   // when open. Both are merged on their own and kept out of the deck's merge. No R().
   shuttle(g, o = {}) {
+    // 0.38.33 (the user's "very boxy"): the same cabin, sleeker outside: the sides run straight to z 2.1, then taper to the nose
+    // (half-width 1.12 at the front), the windscreen rakes back to the roof, the roof's edges are softened, the fins sweep
+    // back, a dark canopy line runs aft from the windscreen, and the red and teal lines follow the taper. Same materials.
+    const NZ = 2.1, NF = 3.05, NW = 1.12, NA = Math.atan2(1.39 - NW, NF - NZ), NL = Math.hypot(1.39 - NW, NF - NZ) + .04;
     const side = (y, h, mat, gx, roofG) => {             // a hull side at x = gx, from y to y + h; the +x side has the door gap (pz -.97 to -.03)
-      const parts = gx > 0 ? [[-3, -.97], [-.03, 3]] : [[-3, 3]];
+      const parts = gx > 0 ? [[-3, -.97], [-.03, NZ + .02]] : [[-3, NZ + .02]];
       for (const [z0, z1] of parts) box(.12, h, z1 - z0, mat, gx, y + h / 2, (z0 + z1) / 2, roofG);
+      const sd = Math.sign(gx), off = Math.abs(gx) - 1.39;   // and the nose piece, angled in (off: a line laid on the hull's face)
+      const cx = sd * ((1.39 + NW) / 2 + off * Math.cos(NA)), cz = (NZ + NF) / 2 + off * Math.sin(NA);
+      if (y + h < 1.6) { box(.12, h, NL, mat, cx, y + h / 2, cz, roofG).rotation.y = -sd * NA; return; }
+      const sh = new THREE.Shape();                      // the upper hull's nose piece: its top slopes down with the windscreen
+      sh.moveTo(-NL / 2, y); sh.lineTo(NL / 2, y); sh.lineTo(NL / 2, 1.56); sh.lineTo(-NL / 2, y + h); sh.lineTo(-NL / 2, y);
+      const geo = new THREE.ExtrudeGeometry(sh, { depth: .12, bevelEnabled: false }); geo.translate(0, 0, -.06);
+      const m = new THREE.Mesh(geo, mat); m.position.set(cx, 0, cz); m.rotation.y = -Math.PI / 2 - sd * NA; m.castShadow = m.receiveShadow = true; roofG.add(m);
     };
     box(2.7, .02, 5.9, WM.steel, 0, .01, 0, g);                                               // the cabin floor
     for (const gx of [-1.39, 1.39]) { side(0, 1.0, WM.hull, gx, g); side(.86, .08, KM.red, gx + Math.sign(gx) * .012, g); }   // lower hull, a red line at the top
-    box(2.9, 1.0, .12, WM.hull, 0, .5, -2.99, g); box(2.9, .9, .12, WM.hull, 0, .45, 2.99, g);   // tail and nose, lower
+    box(2.9, 1.0, .12, WM.hull, 0, .5, -2.99, g); box(2.3, 1.0, .12, WM.hull, 0, .5, 2.99, g);   // tail and nose, lower
     box(.5, .42, 4.0, WM.hullDark, -1.05, .21, 0, g); box(.46, .08, 3.9, KM.teal, -1.05, .46, 0, g); box(.08, .6, 4.0, WM.hullDark, -1.29, .76, 0, g);   // the north bench
     for (const [z, l] of [[1.0, 2.0], [-1.5, 1.0]]) { box(.5, .42, l, WM.hullDark, 1.05, .21, z, g); box(.46, .08, l - .1, KM.teal, 1.05, .46, z, g); box(.08, .6, l, WM.hullDark, 1.29, .76, z, g); }   // the south benches, either side of the door
     box(2.66, 1.9, .9, WM.hullDark, 0, .95, -2.5, g); for (const x of [-.66, 0, .66]) box(.6, .04, .02, WM.steel, x, 1.2, -2.04, g);   // the lockers across the tail, and their handles
     box(2.0, .03, .03, WM.lightStrip, 0, 1.75, -2.04, g); box(2.0, .03, .03, WM.lightStrip, 0, .79, 2.48, g);   // cabin lights: over the lockers and along the console's edge (glow, no lamp)
-    box(2.4, .8, .45, WM.paintDark, 0, .4, 2.72, g); for (const x of [-.55, .55]) { box(.5, .02, .3, WM.screen, x, .81, 2.7, g); cyl(.2, .2, .1, KM.teal, x, .45, 2.3, g, 14); cyl(.05, .05, .4, WM.steel, x, .2, 2.3, g, 8); }   // the cockpit: console, screens, two seats
+    box(2.2, .8, .45, WM.paintDark, 0, .4, 2.72, g); for (const x of [-.55, .55]) { box(.5, .02, .3, WM.screen, x, .81, 2.7, g); cyl(.2, .2, .1, KM.teal, x, .45, 2.3, g, 14); cyl(.05, .05, .4, WM.steel, x, .2, 2.3, g, 8); }   // the cockpit: console, screens, two seats
     for (const sx of [-.7, .7]) { const e = cyl(.32, .28, .5, WM.hullDark, sx, 1.0, -3.25, g, 18); e.rotation.x = Math.PI / 2; const f = cyl(.22, .22, .02, WM.engine, sx, 1.0, -3.51, g, 18); f.rotation.x = Math.PI / 2; }   // engines
-    for (const sd of [-1, 1]) { box(.5, .07, 1.0, WM.hull, sd * 1.7, .75, -2.2, g); box(.06, .12, .12, sd < 0 ? WM.navRed : WM.navGreen, sd * 1.96, .75, -2.2, g); }   // stub wings, nav lights
+    for (const sd of [-1, 1]) { box(.62, .07, 1.0, WM.hull, sd * 1.72, .75, -2.3, g).rotation.y = sd * .5; box(.06, .12, .12, sd < 0 ? WM.navRed : WM.navGreen, sd * 1.98, .75, -2.62, g); }   // stub wings, swept back; nav lights at the tips
     // the roof group: the hull above 1 m, windows, livery, windscreen, roof and fin
     const R = new THREE.Group(); g.add(R);
     for (const gx of [-1.39, 1.39]) { side(1.0, 1.3, WM.hull, gx, R); side(1.08, .12, KM.teal, gx + Math.sign(gx) * .012, R); for (const z of [-1.5, -.5, .5, 1.5]) if (!(gx > 0 && z === -.5)) box(.03, .32, .5, WM.cockpit, gx + Math.sign(gx) * .065, 1.6, z, R); }
     box(.12, .3, .94, WM.hull, 1.39, 2.15, -.5, R);                                             // over the door
     box(2.9, 1.3, .12, WM.hull, 0, 1.65, -2.99, R);
-    for (const sx of [-1.25, 1.25]) box(.4, 1.5, .12, WM.hull, sx, 1.65, 2.99, R);              // the nose's pillars, and the windscreen between them
-    const ws = box(2.1, .04, 1.2, WM.cockpit, 0, 1.75, 2.75, R); ws.rotation.x = .9;
-    box(2.9, .1, 6.1, WM.hull, 0, 2.35, 0, R); box(1.6, .12, 4.0, WM.hull, 0, 2.46, -.4, R); box(.08, .5, 1.0, WM.hull, 0, 2.6, -2.5, R); box(.09, .14, .5, KM.teal, 0, 2.7, -2.55, R);
+    box(2.3, .58, .12, WM.hull, 0, 1.28, 2.99, R);                                               // the nose under the windscreen
+    {                                                    // the windscreen: from the nose (y 1.54) raked back to the roof, as wide as the tapering sides
+      const sh = new THREE.Shape(), Lw = Math.hypot(.77, NF - .05 - NZ - .02);
+      sh.moveTo(-NW - .01, 0); sh.lineTo(NW + .01, 0); sh.lineTo(1.37, Lw); sh.lineTo(-1.37, Lw); sh.lineTo(-NW - .01, 0);
+      const ws = new THREE.Mesh(new THREE.ExtrudeGeometry(sh, { depth: .03, bevelEnabled: false }), WM.cockpit);
+      ws.position.set(0, 1.54, NF - .05); ws.rotation.x = -Math.atan2(NF - .05 - NZ - .02, .77); ws.castShadow = true; R.add(ws);
+    }
+    box(2.9, .1, NZ + 3.05, WM.hull, 0, 2.35, (NZ - 3.05) / 2, R); box(1.6, .12, 4.0, WM.hull, 0, 2.46, -.4, R);   // the roof (back from the windscreen) and its raised spine
+    for (const sx of [-1.36, 1.36]) box(.17, .17, NZ + 2.95, WM.hull, sx, 2.32, (NZ - 2.95) / 2, R).rotation.z = Math.PI / 4;   // the roof's edges, softened
+    box(.9, .03, .52, WM.cockpit, 0, 2.415, NZ - .24, R); box(.9, .03, 2.4, WM.cockpit, 0, 2.535, .4, R);   // the canopy line, aft from the windscreen
+    box(.08, .55, 1.1, WM.hull, 0, 2.62, -2.55, R).rotation.x = -.5; box(.09, .14, .55, KM.teal, 0, 2.78, -2.72, R).rotation.x = -.5;   // the fin, swept back
     const name = tex(256, 64, (c, w, h) => { c.fillStyle = '#1c3d44'; c.font = '700 40px system-ui,sans-serif'; c.fillText('TERN', 8, 44); c.font = '600 18px system-ui,sans-serif'; c.fillText('CSV WREN · 1', 130, 42); });
     const nm = new THREE.Mesh(new THREE.PlaneGeometry(1.3, .32), new THREE.MeshBasicMaterial({ map: name, transparent: true, toneMapped: false }));
     nm.position.set(1.47, 1.95, 1.4); nm.rotation.y = Math.PI / 2; nm.userData.noShadow = true; R.add(nm);
@@ -2717,7 +2737,7 @@ const TEMPLATES = {
     const fz = V - 2.6;                                  // depth left in front of the footlockers
     if (fz >= 1.35) {
       const lv = Math.max(.75, Math.min(1.6, fz - .7));
-      out.push({ kind: 'locker', u: .4, v: lv, back: 'left', spot: 'cleanUniforms' });
+      out.push({ kind: 'locker', u: .4, v: lv, back: 'left', spot: 'cleanUniforms', o: o.wardrobe ? { it: o.wardrobe } : undefined });   // o.wardrobe: this one's a bed's wardrobe (0.38.24)
       out.push({ kind: 'locker', u: U - .4, v: lv, back: 'right', spot: 'cleanUniforms' });
     }
     if (V >= 6) {
@@ -2740,7 +2760,7 @@ const TEMPLATES = {
                         : IT('Toilet', 'Vacant. The little green light is the most trusted instrument on the ship.') } });
     }
     out.push({ kind: 'basinCounter', u: .375, v: mid, back: 'left', spot: 'basin', o: { w: len, n: len > 1.5 ? 2 : 1, it: IT('Basins', 'One mirror each and a long-running argument about toothpaste caps.') } });
-    out.push({ kind: 'bench', u: U - .3, v: mid, back: 'right', o: { w: Math.min(1.4, len) } });
+    if (o.bench !== false) out.push({ kind: 'bench', u: U - .3, v: mid, back: 'right', o: { w: Math.min(1.4, len) } });   // o.bench false: none (0.38.27)
     out.push({ wall: 'right', kind: 'towels', at: mid });
     out.push({ wall: 'right', kind: 'sconce', at: Math.min(V - 1.4, mid + len / 2 + .3) });
     return out;
@@ -3388,6 +3408,7 @@ function buildDeck(def) {
   buildCurves(def);
   if (ROOM_BOX['@']) {                                   // every deck's lift car: panel and handrail on the far wall, a light strip opposite
     placeWall('@', 'carPanel', 'n', 1.5, { hitW: .5, it: { t: 'Lift panel', x: '', lift: true } });
+    placeWall('@', 'carPanel', 's', .5, { hitW: .5, it: { t: 'Lift panel', x: '', lift: true } });   // 0.38.26: a second panel opposite, in front of the west column (panelTiles)
     placeWall('@', 'handrail', 'n', .55);
     placeWall('@', 'workLight', 's', 1.0);
   }
@@ -4003,30 +4024,32 @@ DECKS[4] = {
     { id: '4-B8-4', type: 'bed', at: [15, 11], face: 's', pose: 'lie', room: 'h' },
     { id: '4-B8-5', type: 'bed', at: [17, 11], face: 's', pose: 'lie', room: 'h' },
     { id: '4-B8-6', type: 'bed', at: [17, 11], face: 's', pose: 'lie', room: 'h' },
-    { id: '4-02', type: 'bed', at: [24, 1], face: 'e', pose: 'lie', room: 'A' },
-    { id: '4-04', type: 'bed', at: [24, 7], face: 'e', pose: 'lie', room: 'B' },
-    { id: '4-03', type: 'bed', at: [24, 11], face: 'e', pose: 'lie', room: 'C' },
-    { id: '4-01', type: 'bed', at: [24, 17], face: 'e', pose: 'lie', room: 'D' },
-    { id: '4-06', type: 'bed', at: [27, 1], face: 'e', pose: 'lie', room: 'E' },
-    { id: '4-08', type: 'bed', at: [27, 7], face: 'e', pose: 'lie', room: 'F' },
-    { id: '4-07', type: 'bed', at: [27, 11], face: 'e', pose: 'lie', room: 'G' },
-    { id: '4-05', type: 'bed', at: [27, 17], face: 'e', pose: 'lie', room: 'H' },
-    { id: '4-10', type: 'bed', at: [30, 1], face: 'e', pose: 'lie', room: 'I' },
-    { id: '4-12', type: 'bed', at: [30, 7], face: 'e', pose: 'lie', room: 'J' },
-    { id: '4-11', type: 'bed', at: [30, 11], face: 'e', pose: 'lie', room: 'K' },
-    { id: '4-09', type: 'bed', at: [30, 17], face: 'e', pose: 'lie', room: 'L' },
-    { id: '4-14', type: 'bed', at: [33, 1], face: 'e', pose: 'lie', room: 'M' },
-    { id: '4-16', type: 'bed', at: [33, 7], face: 'e', pose: 'lie', room: 'N' },
-    { id: '4-15', type: 'bed', at: [33, 11], face: 'e', pose: 'lie', room: 'O' },
-    { id: '4-13', type: 'bed', at: [33, 17], face: 'e', pose: 'lie', room: 'P' },
-    { id: '4-18', type: 'bed', at: [36, 1], face: 'e', pose: 'lie', room: 'Q' },
-    { id: '4-20', type: 'bed', at: [36, 7], face: 'e', pose: 'lie', room: 'R' },
-    { id: '4-19', type: 'bed', at: [36, 11], face: 'e', pose: 'lie', room: 'S' },
-    { id: '4-17', type: 'bed', at: [36, 17], face: 'e', pose: 'lie', room: 'T' },
-    { id: '4-22', type: 'bed', at: [39, 1], face: 'e', pose: 'lie', room: 'U' },
-    { id: '4-24', type: 'bed', at: [39, 7], face: 'e', pose: 'lie', room: 'V' },
-    { id: '4-23', type: 'bed', at: [39, 11], face: 'e', pose: 'lie', room: 'W' },
-    { id: '4-21', type: 'bed', at: [39, 17], face: 'e', pose: 'lie', room: 'X' },
+    // 0.38.25 (the user's "junior officers lie crosswise"): a cabin's bed runs north-south with its pillow at the north wall, so
+    // the sleeper faces 's' like the bunks (they were 'e', across the bed)
+    { id: '4-02', type: 'bed', at: [24, 1], face: 's', pose: 'lie', room: 'A' },
+    { id: '4-04', type: 'bed', at: [24, 7], face: 's', pose: 'lie', room: 'B' },
+    { id: '4-03', type: 'bed', at: [24, 11], face: 's', pose: 'lie', room: 'C' },
+    { id: '4-01', type: 'bed', at: [24, 17], face: 's', pose: 'lie', room: 'D' },
+    { id: '4-06', type: 'bed', at: [27, 1], face: 's', pose: 'lie', room: 'E' },
+    { id: '4-08', type: 'bed', at: [27, 7], face: 's', pose: 'lie', room: 'F' },
+    { id: '4-07', type: 'bed', at: [27, 11], face: 's', pose: 'lie', room: 'G' },
+    { id: '4-05', type: 'bed', at: [27, 17], face: 's', pose: 'lie', room: 'H' },
+    { id: '4-10', type: 'bed', at: [30, 1], face: 's', pose: 'lie', room: 'I' },
+    { id: '4-12', type: 'bed', at: [30, 7], face: 's', pose: 'lie', room: 'J' },
+    { id: '4-11', type: 'bed', at: [30, 11], face: 's', pose: 'lie', room: 'K' },
+    { id: '4-09', type: 'bed', at: [30, 17], face: 's', pose: 'lie', room: 'L' },
+    { id: '4-14', type: 'bed', at: [33, 1], face: 's', pose: 'lie', room: 'M' },
+    { id: '4-16', type: 'bed', at: [33, 7], face: 's', pose: 'lie', room: 'N' },
+    { id: '4-15', type: 'bed', at: [33, 11], face: 's', pose: 'lie', room: 'O' },
+    { id: '4-13', type: 'bed', at: [33, 17], face: 's', pose: 'lie', room: 'P' },
+    { id: '4-18', type: 'bed', at: [36, 1], face: 's', pose: 'lie', room: 'Q' },
+    { id: '4-20', type: 'bed', at: [36, 7], face: 's', pose: 'lie', room: 'R' },
+    { id: '4-19', type: 'bed', at: [36, 11], face: 's', pose: 'lie', room: 'S' },
+    { id: '4-17', type: 'bed', at: [36, 17], face: 's', pose: 'lie', room: 'T' },
+    { id: '4-22', type: 'bed', at: [39, 1], face: 's', pose: 'lie', room: 'U' },
+    { id: '4-24', type: 'bed', at: [39, 7], face: 's', pose: 'lie', room: 'V' },
+    { id: '4-23', type: 'bed', at: [39, 11], face: 's', pose: 'lie', room: 'W' },
+    { id: '4-21', type: 'bed', at: [39, 17], face: 's', pose: 'lie', room: 'X' },
     { id: '4-01-wash', type: 'shower', at: [26, 19], face: 'w', pose: 'stand', room: 'D' },
     { id: '4-02-wash', type: 'shower', at: [26, 3], face: 'w', pose: 'stand', room: 'A' },
     { id: '4-03-wash', type: 'shower', at: [26, 13], face: 'w', pose: 'stand', room: 'C' },
@@ -4057,6 +4080,11 @@ DECKS[4] = {
     { id: '4-shower-q1', type: 'shower', at: [4, 19], face: 's', pose: 'stand', room: 'q' },
     { id: '4-shower-q2', type: 'shower', at: [5, 19], face: 's', pose: 'stand', room: 'q' },
     { id: '4-toilet-q1', type: 'toilet', at: [2, 19], face: 'n', pose: 'sit', room: 'q', xy: [2.65, 19.5], y: 0.4 },
+    // 0.38.35: where people wait for a shower (the social engineer's shower queue), first then second, facing the stalls
+    { id: '4-shower-queue-p1', type: 'shower-queue', at: [4, 2], face: 'n', pose: 'stand', room: 'p' },
+    { id: '4-shower-queue-p2', type: 'shower-queue', at: [4, 3], face: 'n', pose: 'stand', room: 'p' },
+    { id: '4-shower-queue-q1', type: 'shower-queue', at: [3, 18], face: 's', pose: 'stand', room: 'q' },
+    { id: '4-shower-queue-q2', type: 'shower-queue', at: [3, 17], face: 's', pose: 'stand', room: 'q' },
     { id: '4-basin-p1', type: 'basin', at: [3, 2], face: 'w', pose: 'stand', room: 'p' },
     { id: '4-basin-p2', type: 'basin', at: [3, 3], face: 'w', pose: 'stand', room: 'p' },
     { id: '4-basin-q1', type: 'basin', at: [4, 16], face: 'e', pose: 'stand', room: 'q' },
@@ -4123,7 +4151,8 @@ DECKS[4] = {
       d: ['A guitar case under the bottom bunk. Nobody has heard it played.'],
       h: ['Curtain drawn. Someone on the night shift is asleep in there. Tiptoe.', 'Night shift. A sign says DAY SHIFT: PLEASE WHISPER.', 'Blackout blind down. Both berths belong to the night shift.'],
     };
-    for (const k of 'abcdefgh') furnish(k, 'bunkRoom', { blankets: k === 'h' ? night : undefined, its: (bunkText[k] || []).map(x => IT('Bunk', x)) });
+    for (const k of 'abcdefgh') furnish(k, 'bunkRoom', { blankets: k === 'h' ? night : undefined, its: (bunkText[k] || []).map(x => IT('Bunk', x)),
+      wardrobe: k === 'a' ? { ...IT('Your wardrobe', 'Your locker by the door, with your name on a strip of tape. Clean clothes on the left, and a hook for the hamper.'), wardrobe: '4-B1-4' } : undefined });   // 0.38.24: your wardrobe (DECKS[4].wardrobes)
     furnish('p', 'washroom'); furnish('q', 'washroom');   // two showers and a toilet each (0.27.45: the user kept the showers)
     furnish('l', 'laundry');
     // junior common room (6 x 8): stern windows, a sofa facing them, a Tiles table and a kettle
@@ -4133,7 +4162,7 @@ DECKS[4] = {
     place('j', 'coffeeTable', 3.3, 4, 'n');
     place('j', 'armchair', 3.3, 2.0, 'n', { fab: M.plum });
     place('j', 'armchair', 3.3, 6.0, 's', { fab: M.mustard });
-    place('j', 'cardTable', 1.15, 1.1, 'n', { it: IT('Tiles table', 'A game of Tiles is always about to start. Rina has never lost here.') });
+    place('j', 'cardTable', 1.15, 1.1, 'n', { tiles: true, it: { ...IT('Tiles table', 'A game of Tiles is always about to start. Rina has never lost here.'), tiles: 4 } });   // tiles: DECKS[4].tiles (0.38.24)
     place('j', 'dispenser', 5.5, .38, 'n', { it: IT('Kettle', 'It never fully cools. Chef Brennan refills the biscuit tin when nobody is looking.') });
     place('j', 'bookshelf', 5.3, 7.7, 's', { it: IT('Swap shelf', 'Take a book, leave a book. Mostly thrillers and one very battered star atlas.') });
     place('j', 'plant', .5, 7.5, 's', { big: true });
@@ -4397,7 +4426,7 @@ DECKS[5] = {
     { id: '5-tea-1', type: 'lounge-seat', at: [23, 0], face: 'w', pose: 'sit', room: 't', window: true, xy: [23.66, 0.6], y: 0.44, cush: 0.44 },
     { id: '5-tea-2', type: 'lounge-seat', at: [21, 0], face: 'e', pose: 'sit', room: 't', window: true, xy: [21.64, 0.64], y: 0.49 },
     { id: '5-tea-3', type: 'lounge-seat', at: [21, 1], face: 's', pose: 'stand', room: 't' },
-    { id: '5-shower-1', type: 'shower', at: [21, 3], face: 'n', pose: 'stand', room: 'q' },
+    { id: '5-toilet-2', type: 'toilet', at: [21, 3], face: 's', pose: 'sit', room: 'q', xy: [21.9, 3.5], y: 0.4 },   // 0.38.27: was the shower (5-shower-1)
     { id: '5-toilet-1', type: 'toilet', at: [23, 3], face: 's', pose: 'sit', room: 'q', xy: [23.3, 3.5], y: 0.4 },
     { id: '5-basin-1', type: 'basin', at: [22, 5], face: 'w', pose: 'stand', room: 'q' },
     { id: '5-basin-2', type: 'basin', at: [22, 6], face: 'w', pose: 'stand', room: 'q' },
@@ -4468,6 +4497,7 @@ DECKS[5] = {
     place('w', 'shelving', 10.66, 2.62, 'e', { it: IT('Parts racks', 'The bits you need ten times a day: fuses, seals, bulbs and filters. The tea corner hides behind them.') });
     place('w', 'crate', .55, 5.55, 's'); place('w', 'crate', 1.35, 5.6, 's', { turn: .2 });
     place('w', 'stool', 1.6, 3.7, 'w');
+    placeWall('w', 'nameBeam', 'n', BEAM.along, { it: IT('The beam', 'The cross beam over the Works bay, painted with the name of everyone who has served in Works, in whatever paint was to hand. The oldest ones have been touched up so often they stand out from the steel.') });   // 0.38.30: Name on the beam (BEAM)
     placeWall('w', 'notices', 'n', 7.65, { hitW: 1.0, it: IT('Notice board', 'Shift swaps, a lost-and-found glove, and a sign-up sheet for the Works quiz night. Chef Brennan is listed as \'judge, by force\'.') });
     // the Chief's office, seen through glass
     NO_FADE.add('o');
@@ -4485,13 +4515,13 @@ DECKS[5] = {
     place('t', 'dispenser', .5, 2.6, 's', { it: IT('Hot water', 'Always on. The Works crew would mutiny over anything else.') });
 
     // washroom
-    furnish('q', 'washroom');
+    furnish('q', 'washroom', { toilets: true });           // 0.38.27 (the user's): two toilets, no shower (showers are on Decks 2 and 4)
 
     // main storage: four aisles sorted by system, the counter by the door, and a dusty back corner
     place('r', 'counter', .4, 4.0, 'w', { it: IT('Check-out counter', 'Sign out what you take. The log says three filters left yesterday and nobody signed for them.') });
     [['Lights', 3.5], ['Filters', 5.5], ['Plumbing', 7.5], ['Galley parts', 9.67]].forEach(([name, x]) => {
-      for (const z of [1.6, 2.8, 4.0]) place('r', 'shelving', x, z, 'e', { fadeGroup: 'r:' + name, it: IT(name, { Lights: 'Bulbs, strips and spare lamp heads, sorted by deck.', Filters: 'Air filters in three sizes. The scrubber ones go fastest.',
-        Plumbing: 'Seals, valves and pipe joints. One box is labelled DO NOT.', 'Galley parts': 'Oven elements, fan belts and a whole shelf for Chef Brennan\'s mixer.' }[name]) });
+      for (const z of [1.6, 2.8, 4.0]) place('r', 'shelving', x, z, 'e', { fadeGroup: 'r:' + name, it: shelfIt(name, { Lights: 'Bulbs, strips and spare lamp heads, sorted by deck.', Filters: 'Air filters in three sizes. The scrubber ones go fastest.',
+        Plumbing: 'Seals, valves and pipe joints. One box is labelled DO NOT.', 'Galley parts': 'Oven elements, fan belts and a whole shelf for Chef Brennan\'s mixer.' }[name]) });   // shelfIt: tagged shelf: <id> (0.38.24)
       place('r', 'aisleSign', x, 4.85, 'n', { text: name });
     });
     place('r', 'tarpHeap', 9.45, .5, 'n', { it: IT('Under a tarp', 'A decorative fountain, still in its crate. Nobody remembers ordering it. The label says Deck 2.') });
@@ -4549,6 +4579,7 @@ DECKS[5] = {
     for (const x of [1.0, 3.0, 5.0, 7.0]) place('c', 'cargoRack', x, 5.54, 's');
     for (const [x, z, tn] of [[7.5, .45, 0], [8.4, .45, .12], [7.6, 1.2, -.1], [8.4, 1.3, 0], [4.5, .4, .05], [5.3, .45, -.08], [.45, 4.5, .1]]) place('c', 'crate', x, z, 'n', { turn: tn });
     for (const x of [2.5, 6.5]) placeWall('c', 'workLight', 'n', x);
+    deliveryCratesBuild();                               // the Wednesday delivery's crates, hidden until section 17 shows them (0.38.35)
     // pipe galleries: pipe runs along the hull, and a valve station halfway along each
     for (const [r, n, z0] of [['g', 10, .2], ['h', 13, .8]]) for (let x = 0; x < n; x += 2.5) {   // in short pieces, so the one near you fades the run
       const w = Math.min(2.5, n - x);
@@ -4615,6 +4646,27 @@ Object.assign(KIT, {
   gymMat(g) {                                            // one stretching mat, rolled out
     const m = box(.6, .015, 1.7, GYM.mat[1], 0, .008, 0, g); m.castShadow = false;
     return { w: .6, d: 1.7, noBlock: true };
+  },
+  // 0.38.28: an exercise bike, the rider facing -z (the handlebars and flywheel); the saddle's top at .62, .25 behind the
+  // centre; the crank at (0, .32, -.1). No R(). With o.place the flywheel turns while someone rides (MOVERS)
+  exerciseBike(g, o = {}) {
+    box(.42, .05, 1.0, GYM.frame, 0, .025, -.05, g);                                   // the foot rail
+    box(.06, .5, .06, GYM.frame, 0, .33, .22, g); box(.04, .1, .04, GYM.chrome, 0, .55, .24, g);   // the seat post
+    box(.22, .05, .26, GYM.rubber, 0, .595, .25, g);                                   // the saddle
+    box(.08, .55, .08, GYM.frame, 0, .42, -.4, g).rotation.x = -.25;                   // the stem, leaning back
+    box(.46, .04, .04, GYM.chrome, 0, .95, -.3, g); box(.16, .1, .03, MED.screen, 0, .9, -.36, g);   // the bars and a little screen
+    box(.38, .16, .08, GYM.frame, 0, .32, -.1, g);                                     // the crank housing
+    for (const x of [-.13, .13]) box(.03, .03, .16, GYM.accent, x, .32, -.1, g);       // the pedals' arms
+    const fw = cyl(.2, .2, .07, GYM.accent, 0, .26, -.48, g, 20); fw.rotation.z = Math.PI / 2;   // the flywheel
+    if (o.place) {
+      fw.userData.noMerge = true; let v = 0;
+      MOVERS.push({ place: o.place, tick(dt, on) {
+        if (!on && v === 0) return;
+        v += ((on ? 1 : 0) - v) * Math.min(1, dt * 3); if (!on && v < .01) v = 0;
+        fw.rotation.x = (fw.rotation.x + dt * v * 6) % (Math.PI * 2);
+      } });
+    }
+    return { w: .45, d: 1.1 };
   },
 });
 // ---- Deck 3 kit (A5b, the bridge architect; made at load, no R()): the crew store's till and baskets ----
@@ -4887,7 +4939,7 @@ DECKS[3] = {
   // the bow lounge's curves: the bar sweeping out from the aft wall round the galley door, and two planted glass
   // screens on one arc, splitting the lively bar end from the quiet window end with the way through left open
   curves: [
-    { kind: 'bar', arc: [41, 5.6, 2.6, -90, 90], out: -1, it: { t: 'The bar', x: 'A curved bar in dark wood with a brass foot rail, lit from underneath. Stocked from the galley through the door behind it. Juice, tea and a short list of things the Captain approves of.' } },
+    { kind: 'bar', arc: [41, 5.6, 2.6, -90, 90], out: -1, it: { t: 'The bar', x: 'A curved bar in dark wood with a brass foot rail, lit from underneath. Stocked from the galley through the door behind it. Juice, tea and a short list of things the Captain approves of.', bar: true } },   // bar: the bar order's tap (0.38.24)
     { kind: 'glass', arc: [40, 11, 7, -38, -23], it: { t: 'Glass screen', x: 'Planted low, glass above: it keeps the bar\'s noise at the bar end without hiding the view.' } },
     { kind: 'glass', arc: [40, 11, 7, 23, 38] },
   ],
@@ -5068,10 +5120,8 @@ DECKS[3] = {
     { id: '3-toilet-4', type: 'toilet', at: [17, 21], xy: [17.83, 21.5], walk: [17, 20], face: 'n', pose: 'sit', y: .4, room: 'w' },
     { id: '3-basin-1', type: 'basin', at: [21, 16], xy: [21.93, 16.7], walk: [21, 16], face: 'e', pose: 'stand', room: 'w' },
     { id: '3-basin-2', type: 'basin', at: [21, 17], xy: [21.93, 17.7], walk: [21, 17], face: 'e', pose: 'stand', room: 'w' },
-    { id: '3-wbench-1', type: 'bench', at: [17, 17], xy: [17.3, 17.55], walk: [17, 18], face: 'e', pose: 'sit', calm: false, room: 'w' },
-    { id: '3-wbench-2', type: 'bench', at: [17, 16], xy: [17.3, 16.85], walk: [18, 16], face: 'e', pose: 'sit', calm: false, room: 'w' },
     { id: '3-gym-1', type: 'gym', at: [24, 20], xy: [24.5, 20.5], walk: [24, 19], face: 's', pose: 'stand', anim: 'run', y: 0.16, room: 'F' },
-    { id: '3-gym-2', type: 'gym', at: [26, 20], xy: [26.5, 20.5], walk: [26, 19], face: 's', pose: 'stand', anim: 'run', y: 0.16, room: 'F' },
+    { id: '3-gym-2', type: 'gym', at: [25, 20], xy: [25.85, 20.5], walk: [25, 19], face: 's', pose: 'stand', anim: 'run', y: 0.16, room: 'F' },   // 0.38.28: moved west for a fourth treadmill
     { id: '3-gym-3', type: 'gym', at: [28, 20], xy: [28.5, 20.5], walk: [28, 19], face: 's', pose: 'stand', anim: 'run', y: 0.16, room: 'F' },
     { id: '3-gym-4', type: 'gym', at: [30, 20], xy: [30.6, 20.2], walk: [31, 20], face: 's', pose: 'sit', anim: 'row', y: .43, room: 'F', cush: 0.34 },
     { id: '3-gym-5', type: 'gym', at: [30, 15], xy: [30.92, 15.6], walk: [30, 15], face: 'e', pose: 'stand', room: 'F' },
@@ -5094,6 +5144,10 @@ DECKS[3] = {
     { id: '3-gym-12', type: 'gym', at: [24, 17], xy: [24.8, 17.4], walk: [25, 17], face: 's', pose: 'sit', anim: 'row', y: .43, room: 'F', cush: 0.34 },
     { id: '3-gym-13', type: 'gym', at: [29, 17], xy: [29.8, 17.5], face: 'e', pose: 'stand', anim: 'punch', room: 'F' },
     { id: '3-gym-14', type: 'gym', at: [27, 17], xy: [27.9, 17.15], face: 's', pose: 'stand', anim: 'stretch', room: 'F' },   // at the mat's head, 1.3 m of mat in front
+    // 0.38.28 (0.60.7): the fourth treadmill, and two exercise bikes facing the promenade windows (on the saddle, facing the bars)
+    { id: '3-gym-15', type: 'gym', at: [27, 20], xy: [27.2, 20.5], walk: [27, 19], face: 's', pose: 'stand', anim: 'run', y: 0.16, room: 'F' },
+    { id: '3-gym-16', type: 'gym', at: [28, 14], xy: [28.5, 14.2], walk: [28, 15], face: 'n', pose: 'sit', anim: 'cycle', y: .62, room: 'F' },
+    { id: '3-gym-17', type: 'gym', at: [29, 14], xy: [29.5, 14.2], walk: [30, 14], face: 'n', pose: 'sit', anim: 'cycle', y: .62, room: 'F' },
     // the machines' panels: where a Works tech stands to service each one (A5b)
     { id: '3-oven-1-panel', type: 'work:works', at: [37, 4], xy: [37.5, 4.3], walk: [37, 4], face: 'n', pose: 'work', machine: '3-oven-1', room: 'K' },
     { id: '3-oven-2-panel', type: 'work:works', at: [38, 4], xy: [38.5, 4.3], walk: [38, 4], face: 'n', pose: 'work', machine: '3-oven-2', room: 'K' },
@@ -5153,7 +5207,7 @@ DECKS[3] = {
     for (const [x, z, band] of [[1.3, .4, '#d9a441'], [3.9, .4, '#c45a3f'], [1.3, 3.6, '#c45a3f'], [3.9, 3.6, '#d9a441']]) place('=', 'plant', x, z, 'n', { band });
 
     // ---- mess hall: four long tables of eight under the port windows, three round tables of four by the promenade.
-    // The line runs down the galley wall: trays, the servery, grab-and-go. Drinks and tray return at the far end. 44 seats.
+    // The line runs down the galley wall: trays, the servery, grab-and-go. Drinks at the far end. 44 seats.
     const MT = [['Long table', 'Seats eight. The engineers take this one every morning and argue about pumps.'],
       ['Long table', 'Scratched initials on the bench: R + P, inside a lopsided heart. Nobody admits to it.'],
       ['Long table', 'The table nearest the servery. Always the first full and the last empty.'],
@@ -5161,10 +5215,11 @@ DECKS[3] = {
     [[2.6, 1.0], [7.4, 1.0], [2.6, 4.0], [7.4, 4.0]].forEach(([x, z], k) => place('M', 'longTable', x, z, 'n', { it: IT(...MT[k]) }));
     [[2.0, 6.9], [5.2, 6.9], [8.4, 6.9]].forEach(([x, z], k) => place('M', 'roundTable', x, z, 'n', { turn: k * .3, it: k === 1 ? IT('Round table', 'Four chairs, two orange and two teal. Good for quiet talks and for spreading out a card game.') : undefined }));
     place('M', 'drinksStation', 11.6, 1.0, 'e', { it: IT('Drinks station', 'Three juices, a tea urn that is never allowed to run dry, and a stack of mugs. Someone has labelled the orange one "probably orange".') });
-    place('M', 'trayReturn', 11.62, 2.5, 'e', { it: IT('Tray return', 'Trays in, cups on top, cutlery in the bin. Chef Brennan notices who doesn\'t.') });
+    // 0.38.25 (the user's): no tray return; diners leave their trays on the table and the galley crew clear them (kit trayReturn kept, unused)
     place('M', 'trayStack', 11.65, 3.5, 'e', { it: IT('Trays and cutlery', 'The start of the line. Take a tray, take a fork, keep moving.') });
     place('M', 'servery', 11.45, 5.5, 'e', { it: IT('Servery', 'The hot line, under heat lamps. Breakfast from 06:00 to 08:00, dinner from 17:00 to 20:30. The galley hands it through the counter behind.') });
     place('M', 'grabShelf', 11.6, 7.5, 'e', { live: true, it: IT('Grab and go', 'Rolls, fruit and juice, chilled, for anyone running late. It empties fast at 07:55.') });
+    placeWall('M', 'spiceShelf', 'e', SPICES.along, { hitW: 1.3, it: IT('Spice shelf', 'A shelf over the drinks for spices brought from home. Brennan says it will fill up. Brennan is patient.') });   // 0.38.31
     placeWall('M', 'menuBoard', 'e', 3.5, { hitW: 1.2, it: IT('Menu board', 'Two meals a day: breakfast 06:00 to 08:00, dinner 17:00 to 20:30. Today: Brennan\'s spiced lentils.') });
     placeWall('M', 'notices', 'w', 4.5, { hitW: 1.0, it: IT('Mess notices', 'This week\'s birthdays, the galley rota, and a polite note about taking mugs back to the mess.') });
     for (const x of [.45, 5.0]) place('M', 'plant', x, .45, 'n', { band: '#c86b4a' });   // under the windows, out of the aisles
@@ -5275,11 +5330,11 @@ DECKS[3] = {
     place('X', 'plant', 4.6, 2.55, 'e', { band: '#2f8e98' });
 
     // ---- washrooms ----
-    furnish('w', 'washroom', { toilets: true });
+    furnish('w', 'washroom', { toilets: true, bench: false });   // 0.38.27 (the user's): no bench in here
 
     // ---- gym: treadmills and the rower facing the starboard windows, weights by the store wall, mats in the corner ----
     // (Pillar 2, the Deck 6 architect: `place` names the place on each machine, so its belt or seat moves while someone uses it)
-    [1.5, 3.5, 5.5].forEach((x, k) => place('F', 'treadmill', x, 7.55, 's', { place: '3-gym-' + (k + 1), it: k === 1 ? IT('Treadmills', 'Facing the windows, so you can run towards the stars and never get any closer.') : undefined }));
+    [1.5, 2.85, 5.5, 4.2].forEach((x, k) => place('F', 'treadmill', x, 7.55, 's', { place: '3-gym-' + (k < 3 ? k + 1 : 15), it: k === 1 ? IT('Treadmills', 'Facing the windows, so you can run towards the stars and never get any closer.') : undefined }));   // 0.38.28: a fourth (3-gym-15); the second moved west
     place('F', 'rower', 7.6, 7.4, 's', { place: '3-gym-4', it: IT('Rowing machine', 'The ship\'s most argued-over leaderboard is taped to it. Vance is top. Vance taped it there.') });
     place('F', 'weightRack', 8.62, 2.6, 'e', { it: IT('Weights', 'Dumbbells from light to ridiculous. The ridiculous ones have never been moved.') });
     place('F', 'weightBench', 6.4, 3.0, 'w');
@@ -5327,12 +5382,15 @@ DECKS[3] = {
       IT('Booth 4', 'Playing a message on loop, volume low. Whoever it is for has stepped out to compose themselves.')][k] }));
     place('B', 'sofa', 2.5, 3.0, 'n', { w: 2.0, fab: LNG.olive, it: IT('Waiting sofa', 'Where people wait for a booth, and sometimes sit for a while after.') });
     placeWall('B', 'clocks', 'e', 3.0, { hitW: 1.5, it: IT('Three clocks', 'Ship time, home time, and how long a message takes to get there. The third one is the hardest to look at.') });
+    placeWall('B', 'postcardBox', ...POSTCARDS.box, { hitW: .5, it: IT('Post box', 'Cards and letters home go in here and out with the next mail run. Eklund empties it, and reads none of them. He says.') });   // 0.38.31
+    placeWall('B', 'writingLedge', ...POSTCARDS.ledge, { hitW: 1.8, it: IT('Writing ledge', 'Blank postcards, a pot of pens, and just enough room to lean on while you think of what to say.') });
     placeWall('B', 'msgBoard', 'w', 3.0, { hitW: 1.0, it: IT('Messages waiting', 'Who has something from home. Vance has two. Your line says none yet.') });
     for (const x of [.45, 4.55]) place('B', 'plant', x, .45, 'n', { band: '#d9a441' });
     // ---- Pillar 3 (C9, 0.38.2): more gym kit, last so nothing above moves; none of it calls R() ----
     [1.0, 1.8].forEach((x, k) => place('F', 'rower', x, 4.6, 's', { place: '3-gym-' + (11 + k), it: k ? IT('Rowing machines', 'A matched pair, side by side, so two people can race. Somebody always says it isn\'t a race.') : undefined }));
     place('F', 'punchBag', 7.5, 4.5, 'e', { place: '3-gym-13', it: IT('Punch bag', 'Patched with tape in three places. The Watch crew say it helps them think. The Works crew say it helps them not think.') });
     place('F', 'gymMat', 4.9, 4.6, 's', { it: IT('Stretching mat', 'One more mat, rolled out in the middle of the room, for people who want to stretch where everyone can see them do it.') });
+    [5.5, 6.5].forEach((x, k) => place('F', 'exerciseBike', x, .95, 'n', { place: '3-gym-' + (16 + k), it: k ? undefined : IT('Exercise bikes', 'Two bikes facing the promenade, so everyone walking past can see how hard you aren\'t pedalling.') }));   // 0.38.28
     // ---- the galley's root beds and third bean bed (C9, 0.38.7), grown by section 8b's garden view; last, since raisedBed and trellis draw R() ----
     [[8.1, 8.9, 'e'], [8.1, 13.15, 'e'], [5.7, 17.45, 'n']].forEach(([x, z, b], k) => place('G', 'raisedBed', x, z, b, { crop: 'roots', live: 'roots', it: k ? undefined : IT('Root beds', 'Carrots, beets and turnips, a month from seed to the galley. Chef Brennan pulls one up every few days to check, and pretends she\'s only weeding.') }));
     place('G', 'trellis', .3, 14.8, 'w', { live: 'beans', it: IT('Bean trellis', 'A second frame of runner beans against the stern windows. The galley wanted more beans. The galley always wants more beans.') });
@@ -7200,8 +7258,139 @@ DECKS[3].tiles = { room: 'L', station: ['3-tiles-1', '3-tiles-2'], board: [44.5,
     [49.4, .405, 10.895, 0, .26, [26, 28, 29]], [47.6, .445, 6.27, 0, .24, [31, 30]], [47.6, .445, 16.27, 0, .24, [32, 33]]].map(b => (b[5] = b[5].map(n => '3-lounge-' + n), b)) };
 function tilesSeats(k) {
   const T3 = DECKS[3].tiles;
+  if (k === 'j') return DECKS[4].tiles.station.slice();   // the junior common room's Tiles table (0.38.24)
   return k === 'station' ? T3.station.slice() : T3.boards[k] ? T3.boards[k][5].slice() : [];
 }
+// 0.38.24 (0.60.7, deck architect 4; DEV_NOTES "Places for 0.60.7"): the new places' data. All inert until a seat uses them:
+// the bar's staff and order spots are new types nobody's pool reads, your wardrobe's place is owned by your bed.
+// bar: the bow lounge bar. staff: behind the counter (the middle, then by the galley door), facing the stools; order: standing
+// between two stools at the counter, facing it. The bar's tap item has bar: true.
+DECKS[3].places.push(
+  { id: '3-bar-1', type: 'bar-staff', at: [42, 5], xy: [42.45, 5.6], face: 90, pose: 'stand', anim: 'work', room: 'L' },
+  { id: '3-bar-2', type: 'bar-staff', at: [41, 6], xy: [41.55, 6.45], face: 70, pose: 'stand', anim: 'work', room: 'L' },
+  { id: '3-bar-order-1', type: 'bar-order', at: [44, 5], xy: [44.2, 5.6], face: -90, pose: 'stand', room: 'L' },
+  { id: '3-bar-order-2', type: 'bar-order', at: [43, 3], xy: [43.45, 3.55], face: -50, pose: 'stand', room: 'L' },
+);
+DECKS[3].bar = { room: 'L', staff: ['3-bar-1', '3-bar-2'], order: ['3-bar-order-1', '3-bar-order-2'] };
+// wardrobes: bed -> its wardrobe (the locker by the door in Bunk 1 for yours; its item has wardrobe: <bed>) and where you
+// stand to use it, facing it
+DECKS[4].places.push({ id: '4-B1-4-wardrobe', type: 'event', at: [7, 3], xy: [7.15, 3.25], face: 'w', pose: 'stand', room: 'a' });
+DECKS[4].wardrobes = { '4-B1-4': { room: 'a', place: '4-B1-4-wardrobe' } };
+// tiles on Deck 4: the junior common room's card table is a Tiles table (its item has tiles: 4). The four stools stay
+// everyday seats (type common-room); station is the pair facing across the table, seats all four
+DECKS[4].tiles = { room: 'j', station: ['4-common-8', '4-common-9'], seats: ['4-common-8', '4-common-9', '4-common-10', '4-common-11'], board: [3.15, .746, 7.1] };   // board: its centre, on the felt (0.38.34)
+// shelves: main storage's four shelves on Deck 5 (place: where you stand to take a part, group: the shelving's fade group;
+// every shelving piece of a shelf has shelf: <id>). shelfItems(id) -> that shelf's tap items on the deck you're on ([] elsewhere)
+DECKS[5].shelves = [{ id: 'lights', name: 'Lights', place: '5-parts-1', group: 'r:Lights' }, { id: 'filters', name: 'Filters', place: '5-parts-2', group: 'r:Filters' },
+  { id: 'plumbing', name: 'Plumbing', place: '5-parts-3', group: 'r:Plumbing' }, { id: 'galley', name: 'Galley parts', place: '5-parts-4', group: 'r:Galley parts' }];
+// delivery (0.38.29; 0.38.35 the systems engineer's shape): the Wednesday crates in the cargo hold's clear floor, slots [x, z, y,
+// turn] (deck tiles, floor ones first), the tiles they block while out, and where you (or a storekeeper) stand to load them.
+// As Deck 5 is built, deliveryCratesBuild() makes one group per slot (one textured box, its own mesh, hidden) and hands each to
+// section 17's holdCratesLive(group, k) (k = 1..4), which shows the first holdCrates() of them. Once a frame (MOVERS) the
+// shown ones block their tiles and the stack's one tap ('Wednesday delivery', delivery: true) is there while any is shown
+DECKS[5].delivery = { room: 'c', place: '5-delivery-1', slots: [[16.25, 12.9, 0, .04], [16.97, 12.92, 0, -.05], [16.3, 12.88, .5, -.08], [16.93, 12.9, .5, .1]], block: [[16, 12], [17, 12]] };
+DECKS[5].places.push({ id: '5-delivery-1', type: 'event', event: 'delivery', at: [15, 12], xy: [15.55, 12.9], face: 90, pose: 'stand', anim: 'lift', room: 'c' });
+// the beam (0.38.30, Name on the beam): the Works bay's cross beam along the top of its hull wall, painted with names: the
+// Works crew aboard (the roster) and some who served before (BEAM.past). WALL_KIT.nameBeam draws it (a canvas, no R(); 2 draw
+// calls); your own name, freshly painted at its west end (BEAM.yours, along the wall from the room's west edge), is DECK_DRESS.nameYours,
+// shown by the trace { id: 'nameYours', day }. 5-beam-1: where you paint (under the west end, facing it); 5-beam-2..8: the
+// Works crew watching, facing the same spot. All type 'event', event 'name-beam'.
+const BEAM = { room: 'w', along: 7.0, len: 7.8, y: 2.42, yours: 3.6,   // the bay's hull wall runs from along 3 (the Chief's office) to 11
+  past: ['Okafor', 'Lindgren', 'Baptiste', 'Hale', 'Moreau', 'Iversen', 'Quill', 'Abara', 'Novak', 'Reyes', 'Kaur', 'Dunmore', 'Pike', 'Vasquez', 'Ito', 'Brandt'] };
+Object.assign(WALL_KIT, {
+  nameBeam(g) {
+    const names = BEAM.past.slice(0, 8).concat(dressNames('works', 14), BEAM.past.slice(8)), C = ['#f4efe2', '#e8c06a', '#7fd6c8', '#f0a37a'];
+    const t = tex(2048, 128, (c, w, h) => {
+      c.fillStyle = '#3a4248'; c.fillRect(0, 0, w, h);
+      c.fillStyle = 'rgba(0,0,0,.18)'; for (let x = 0; x < w; x += 196) c.fillRect(x, 0, 3, h);   // the plate seams
+      let x = 260, row = 0;                              // the west end is left clear for the newest names (yours)
+      names.forEach((n, k) => {
+        c.font = (k % 3 ? 'italic 600 ' : '700 ') + (row ? 40 : 42) + 'px Georgia,serif'; const tw = c.measureText(n).width;
+        if (x + tw > w - 20) { row++; x = 260 + (row % 2) * 60; }
+        if (row > 1) return;
+        c.fillStyle = C[k % 4]; c.fillText(n, x, row ? 108 : 52); x += tw + 36 + (k * 7) % 23;
+      });
+    });
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(BEAM.len, .34), new THREE.MeshBasicMaterial({ map: t })); p.position.set(0, BEAM.y, .126); g.add(p);
+    box(BEAM.len, .34, .04, WM.paintDark, 0, BEAM.y, .1, g);                                   // the web, the names on its face
+    for (const dy of [-.19, .19]) box(BEAM.len + .02, .04, .22, WM.steel, 0, BEAM.y + dy, .11, g);   // the flanges
+  },
+});
+DECKS[5].places.push(
+  { id: '5-beam-1', type: 'event', event: 'name-beam', at: [13, 0], xy: [13.6, .75], face: 180, pose: 'stand', anim: 'work', room: 'w' },
+  ...[[14, 1], [15, 1], [16, 1], [17, 1], [13, 2], [12, 3], [13, 3]].map(([c, r], k) => ({ id: '5-beam-' + (k + 2), type: 'event', event: 'name-beam', at: [c, r], xy: [c + .5, r + .5],
+    face: Math.round(Math.atan2(13.6 - c - .5, .75 - r - .5) * 180 / Math.PI), pose: 'stand', anim: 'talk', room: 'w' })),
+);
+// 0.38.31: the spice shelf (Spice shelf supper): a plank on the mess hall's galley wall over the drinks station, its jars
+// drawn by DECK_DRESS.spiceJars (SPICES.slots: x along the shelf, up to 12). The postcard box and a writing ledge (Postcard
+// night) in the call-home booths' room: places 3-postcard-1..3 at the ledge (standing, writing), 3-postcard-4 at the box.
+const SPICES = { room: 'M', wall: 'e', along: 1.0, y: 1.62, slots: [-.55, -.45, -.35, -.25, -.15, -.05, .05, .15, .25, .35, .45, .55] };
+const POSTCARDS = { room: 'B', box: ['e', 5.0], ledge: ['w', 5.6] };
+Object.assign(WALL_KIT, {
+  spiceShelf(g) {                                        // a plank on two brackets, and a painted label under it
+    box(1.3, .03, .16, M.wood, 0, SPICES.y, .08, g);
+    for (const x of [-.5, .5]) box(.03, .14, .12, M.slateDark, x, SPICES.y - .085, .06, g);
+    const t = tex(256, 32, (c, w, h) => { c.fillStyle = '#5a3b26'; c.fillRect(0, 0, w, h); c.fillStyle = '#f2e3c4'; c.font = '600 20px Georgia,serif'; c.textAlign = 'center'; c.fillText('Spices from home', w / 2, 23); });
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(.6, .075), new THREE.MeshBasicMaterial({ map: t })); p.position.set(0, SPICES.y - .07, .162); g.add(p);
+    box(.62, .085, .02, M.slateDark, 0, SPICES.y - .07, .15, g);
+  },
+  postcardBox(g) {                                       // a red post box on the wall, a slot and a little collection plate
+    box(.36, .5, .2, std('#b83a2e', .5), 0, 1.15, .1, g);
+    box(.38, .04, .22, std('#8c2a21', .5), 0, 1.42, .11, g);
+    box(.22, .025, .02, M.slateDark, 0, 1.28, .205, g);                             // the slot
+    const t = tex(128, 64, (c, w, h) => { c.fillStyle = '#f2e3c4'; c.fillRect(0, 0, w, h); c.fillStyle = '#8c2a21'; c.font = '700 18px system-ui,sans-serif'; c.textAlign = 'center'; c.fillText('POST', w / 2, 26); c.font = '500 13px system-ui,sans-serif'; c.fillText('next mail run', w / 2, 48); });
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(.2, .1), new THREE.MeshBasicMaterial({ map: t })); p.position.set(0, 1.08, .202); g.add(p);
+  },
+  writingLedge(g) {                                      // a narrow ledge to write on, a pot of pens and a stack of blank cards
+    box(1.8, .04, .26, M.wood, 0, 1.0, .13, g);
+    for (const x of [-.8, .8]) box(.04, .2, .2, M.slateDark, x, .88, .1, g);
+    cyl(.04, .035, .1, std('#2a9d8f', .6), -.6, 1.07, .12, g, 10);
+    for (const x of [-.63, -.59, -.57]) box(.008, .14, .008, M.slateDark, x, 1.12, .12, g);
+    for (let k = 0; k < 4; k++) box(.15, .006, .1, std('#f4efe2', .8), .5 + k * .002, 1.024 + k * .006, .13, g);
+  },
+});
+DECKS[3].places.push(
+  ...[17, 18, 19].map((r, k) => ({ id: '3-postcard-' + (k + 1), type: 'event', event: 'postcard-night', at: [36, r], xy: [36.55, r + .5], face: -90, pose: 'stand', anim: 'work', room: 'B' })),
+  { id: '3-postcard-4', type: 'event', event: 'postcard-night', at: [40, 18], xy: [40.45, 18.0], face: 90, pose: 'stand', room: 'B' },
+);
+// 0.38.32: the new traditions' places on Deck 3, all type 'event' (inert): Lap of the Wren (3-lap-1..12, the promenade loop in
+// walking order: east along the mess side, back west along the gym side, round the lift plaza; each faces the next), Sunrise
+// stretch (3-stretch-1..8 on the promenade's outer lanes, facing the glass, anim 'stretch') and Cook-along (3-cookalong-1..6 in
+// the mess, two rows back from the servery line, facing the pass; it's during dinner, so not on the line's own tiles)
+{
+  const lap = [[23, 10], [27, 9], [31, 9], [34, 9], [38, 9], [40, 10], [38, 12], [34, 12], [31, 12], [27, 12], [23, 11], [22, 10]];
+  const deg = (dx, dz) => Math.round(Math.atan2(dx, dz) * 180 / Math.PI);
+  DECKS[3].places.push(
+    ...lap.map(([c, r], k) => { const [nc, nr] = lap[(k + 1) % lap.length]; return { id: '3-lap-' + (k + 1), type: 'event', event: 'lap-of-the-wren', at: [c, r], xy: [c + .5, r + .5], face: deg(nc - c, nr - r), pose: 'stand', anim: 'talk', room: roomOfTile(3, c, r) }; }),
+    ...[[24, 9], [25, 9], [33, 9], [39, 9], [25, 12], [27, 12], [33, 12], [39, 12]].map(([c, r], k) => ({ id: '3-stretch-' + (k + 1), type: 'event', event: 'sunrise-stretch', at: [c, r], xy: [c + .5, r === 9 ? 9.4 : 12.6], face: r === 9 ? 'n' : 's', pose: 'stand', anim: 'stretch', room: '=' })),
+    ...[[32, 2], [32, 3], [32, 5], [32, 6], [33, 2], [33, 7]].map(([c, r], k) => ({ id: '3-cookalong-' + (k + 1), type: 'event', event: 'cook-along', at: [c, r], xy: [c + .5, r + .5], face: 90, pose: 'stand', anim: 'talk', room: 'M' })),
+  );
+}
+function roomOfTile(n, i, j) { return (DECKS[n].map[j] || '')[i]; }
+const DELIVERY_MAT = new THREE.MeshStandardMaterial({ roughness: .8, map: tex(128, 128, (c, w, h) => {   // made at load, no R()
+  c.fillStyle = '#4f6f86'; c.fillRect(0, 0, w, h); c.fillStyle = '#2f3f4c'; c.fillRect(18, 0, 10, h); c.fillRect(w - 28, 0, 10, h);   // the straps
+  c.fillStyle = '#e07a3c'; c.fillRect(42, 0, w - 84, 22); c.fillStyle = 'rgba(0,0,0,.25)'; c.fillRect(0, h - 4, w, 4); }) });   // the orange band
+function deliveryCratesBuild() {
+  const D = DECKS[5].delivery, groups = [], tiles = D.block.map(([i, j]) => i + ',' + j), mine = new Set();
+  D.slots.forEach(([x, z, y, tn], k) => {
+    const grp = new THREE.Group(); grp.position.set(X0(0) + x, y, Z0(0) + z); grp.rotation.y = tn; grp.visible = false; deckRoot.add(grp);
+    const m = new THREE.Mesh(new THREE.BoxGeometry(.66, .5, .52), DELIVERY_MAT); m.position.y = .25; m.castShadow = m.receiveShadow = true; m.userData.noMerge = true; grp.add(m);
+    groups.push(grp); if (typeof holdCratesLive === 'function') holdCratesLive(grp, k + 1);
+  });
+  const cx = X0(0) + (D.slots[0][0] + D.slots[1][0]) / 2, cz = Z0(0) + (D.slots[0][1] + D.slots[1][1]) / 2;
+  const hit = new THREE.Mesh(new THREE.BoxGeometry(1.4, 1.0, .6), HIT_MAT); hit.userData.noMerge = true; hit.position.set(cx, -10, cz); deckRoot.add(hit);
+  const item = { t: 'Wednesday delivery', x: '', hit, g: hit, front: 0, depth: .6, wall: false, delivery: true }; hit.userData.item = item; ITEMS.push(item);
+  let shown = -1;
+  MOVERS.push({ place: null, tick() {
+    const n = groups.filter(q => q.visible).length; if (n === shown) return; shown = n;
+    hit.position.y = n ? .5 : -10;
+    item.x = n + (n === 1 ? ' crate' : ' crates') + ' up from the supply run, still sealed, orange bands on. They go to main storage by hover cart.';
+    for (const t of tiles) { if (n && !BLOCKED.has(t)) { BLOCKED.add(t); mine.add(t); } else if (!n && mine.has(t)) { BLOCKED.delete(t); mine.delete(t); } }
+  } });
+  return groups;
+}
+function shelfIt(name, x) { const sh = DECKS[5].shelves.find(q => q.name === name); return { ...IT(name, x), shelf: sh ? sh.id : undefined }; }
+const shelfItems = id => (deckDef && deckDef.num === 5 ? ITEMS.filter(it => it.shelf === id) : []);
 function visitSpots(id) {
   for (const n of Object.keys(DECKS)) {
     const v = (DECKS[n].visits || {})[id]; if (!v) continue;
@@ -7469,6 +7658,25 @@ const DECK_DRESS = {
     im.userData.noMerge = true; im.frustumCulled = false; s.add(im);
     return { t: 'Lanterns', x: 'Paper lanterns all the way down the promenade, one for every name on the crew list, and a few spares for the ones who have left.', floor: ['=', pts[12][0], pts[12][2]], y: pts[12][1], w: .3, h: .4, d: .3 };
   } },
+  // 0.38.31: spiceJars: the jars on the mess hall's spice shelf, one more after each Spice shelf supper. A trace ({ id:
+  // 'spiceJars', day, n }): n jars when given, else one for each week since day (from the first supper), up to 12. 4 draw calls
+  spiceJars: { deck: 3, what: 'spice jars from home on the mess hall\'s spice shelf', make(g, o) {
+    const s = dressAt(g, SPICES.room, SPICES.wall, SPICES.along), C = ['#b5432a', '#d9a521', '#6e7f3a', '#7a4a2a', '#b5432a', '#3a2f2a'];
+    const n = Math.max(1, Math.min(SPICES.slots.length, Math.round(o.n || (1 + Math.floor(Math.max(0, SHIP.time.day - (o.day || SHIP.time.day)) / 7)))));
+    for (let k = 0; k < n; k++) {
+      const x = SPICES.slots[(k * 5) % SPICES.slots.length], h = .08 + (k % 3) * .015;
+      const j = new THREE.Mesh(new THREE.CylinderGeometry(.032, .032, h, 10), dressMat(C[k % 3])); j.position.set(x, SPICES.y + .015 + h / 2, .08); s.add(j);
+      const l = new THREE.Mesh(new THREE.CylinderGeometry(.034, .034, .02, 10), dressMat('#c9a64a')); l.position.set(x, SPICES.y + .025 + h, .08); s.add(l);
+    }
+    return { t: 'Spice shelf', x: n + (n === 1 ? ' jar' : ' jars') + ' on the shelf, each brought from home by someone aboard, labelled in their handwriting. Brennan cooks with three of them at every Spice shelf supper.', wall: [SPICES.room, SPICES.wall, SPICES.along], y: SPICES.y + .1, w: 1.3, h: .3 };
+  } },
+  // 0.38.30: nameYours: a lasting trace from Name on the beam: your name, freshly painted at the beam's west end. 1 draw call
+  nameYours: { deck: 5, what: 'your name, freshly painted on the Works bay\'s beam', make(g) {
+    const s = dressAt(g, BEAM.room, 'n', BEAM.yours), name = (SHIP.player && SHIP.player.name) || 'Cadet';
+    const t = tex(256, 64, (c, w, h) => { c.fillStyle = '#f8f4ea'; c.font = '700 40px Georgia,serif'; const tw = Math.min(w - 8, c.measureText(name).width); c.fillText(name, (w - tw) / 2, 46, w - 8); });
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(1.0, .25), new THREE.MeshBasicMaterial({ map: t, transparent: true, toneMapped: false })); p.position.set(0, BEAM.y, .132); s.add(p);
+    return { t: 'Your name', x: 'Your name on the beam, the paint still bright, at the end of the row. Every new hand gets one. Yours will fade like the others, slowly, and somebody will touch it up.', wall: [BEAM.room, 'n', BEAM.yours], y: BEAM.y, w: 1.0, h: .4 };
+  } },
   partyLounge: { deck: 3, what: 'party decorations in the bow lounge: bunting, balloons and a banner', make(g, o) {
     const s = dressAt(g, 'L', 'floor', 0, 0), C = ['#c45a3f', '#e8c06a', '#5fd6c6'], y = 2.2;
     const pts = [[41.4, 9.0], [46.44, 8.27], [46.44, 13.73], [41.4, 13.0]].map(([x, z]) => [x - ROOM_BOX.L.i0, z - ROOM_BOX.L.j0]);
@@ -7519,12 +7727,12 @@ function dressShow(list) {
     if (it.wall) { hit.position.set(0, it.y, .15); front = FACING[it.wall[1]]; }
     else { const r = ROOM_BOX[it.floor[0]]; hit.position.set(X0(r.i0) + it.floor[1], it.y || .05, Z0(r.j0) + it.floor[2]); }
     host.add(hit);
-    const item = { t: it.t, x: it.x, hit, g: host, front, depth: it.wall ? .1 : .6, wall: !!it.wall }; hit.userData.item = item; ITEMS.push(item);
+    const item = { t: it.t, x: it.x, hit, g: host, front, depth: it.wall ? .1 : .6, wall: !!it.wall, ...(it.tag || {}) }; hit.userData.item = item; ITEMS.push(item);   // tag: fields for the tap handlers (0.38.29)
     const items = [item];
     for (const m of it.more || []) {                     // 0.38.17: more floor taps with the same text (Tiles night: one on every board)
       const r = ROOM_BOX[m.floor[0]], h2 = new THREE.Mesh(new THREE.BoxGeometry(m.w || .6, m.h || .1, m.d || .3), HIT_MAT); h2.userData.noMerge = true;
       h2.position.set(X0(r.i0) + m.floor[1], m.y || .05, Z0(r.j0) + m.floor[2]); g.add(h2);
-      const i2 = { t: it.t, x: it.x, hit: h2, g, front: 0, depth: .6, wall: false }; h2.userData.item = i2; ITEMS.push(i2); items.push(i2);
+      const i2 = { t: it.t, x: it.x, hit: h2, g, front: 0, depth: .6, wall: false, ...(it.tag || {}) }; h2.userData.item = i2; ITEMS.push(i2); items.push(i2);
     }
     const blocked = (it.block || []).map(([i, j]) => i + ',' + j).filter(k => !BLOCKED.has(k)); for (const k of blocked) BLOCKED.add(k);   // 0.38.23: tiles it stands on, blocked while it's out
     DRESS.on.set(id, { g, item, items, decor, blocked, o: JSON.stringify(o) });
@@ -7592,7 +7800,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.28.65';                           // keep in step with the header's build line
+const GAME_BUILD = '0.60.7';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -11155,7 +11363,7 @@ function sitTap(it, at, point) {
 // usable place's spot at any height up to 1.2 m (the belt, the console, the seat), use that place as a tap on it
 // would: the gym, a call-home booth, a store shelf, or a seat to sit on. Else the floor tap walks, as always.
 const FLOOR_NEAR = .5;
-const FLOOR_ACTS = { gym: pl => pl.anim === 'run' ? 'Treadmill' : pl.anim === 'row' ? 'Rowing machine' : pl.pose === 'lie' ? 'Mats' : 'Weights', callhome: () => 'Booth', shop: () => 'Shelves', toilet: () => 'Toilet' };
+const FLOOR_ACTS = { gym: pl => pl.anim === 'run' ? 'Treadmill' : pl.anim === 'row' ? 'Rowing machine' : pl.anim === 'cycle' ? 'Exercise bike' : pl.pose === 'lie' ? 'Mats' : 'Weights', callhome: () => 'Booth', shop: () => 'Shelves', toilet: () => 'Toilet' };
 function playerFloorTap(point) {
   if (queueHeld()) return true;                          // in the line: ask first (0.28.31)
   if (bagLockerTap(point)) return true;                  // the kit bag into your locker (0.28.26)
@@ -32717,7 +32925,7 @@ const HOLDS = { cart: { prop: 'cart', sx: -.62, ex: -.62, sz: -.06, lean: .09 },
   // steps, a little lean and a jiggle on the spot (knees: how far the thighs turn in)
   go: { sx: -.24, ex: -.6, sz: -.34, hx: .6, lean: .14, look: .16, knees: .16 } };
 const ACT_OF_TYPE = { gym: 'lift', callhome: 'call', shop: 'browse', music: 'play', garden: 'water', laundry: 'fold', 'work:galley': 'cook' };
-const ACT_SEATED = new Set(['call', 'read', 'drink', 'talk', 'play', 'lift', 'row']);
+const ACT_SEATED = new Set(['call', 'read', 'drink', 'talk', 'play', 'lift', 'row', 'cycle']);
 const BASES = new Set(['walk', 'stand', 'sit', 'lie', 'work', 'crouch']);   // crouch (0.27.7): a crouch-walk, for crawlways; it walks like walk
 function poseOf(pl) {
   const act = pl.anim || ACT_OF_TYPE[pl.type], base = pl.type === 'bed' ? 'lie' : pl.pose || 'stand';
@@ -32735,7 +32943,7 @@ function parsePose(pose = 'stand', y = 0) {
   const plus = pose.indexOf('+'), mod = plus < 0 ? '' : pose.slice(plus + 1), bare = plus < 0 ? pose : pose.slice(0, plus);
   const cart = HOLDS[mod] ? mod : null;                  // something held: '+cart' (a hover cart, empty), '+cartfull' (loaded), '+carry' (a box of parts), '+tray', '+toolbox', '+datapad'
   const i = bare.indexOf(':'); let base = i < 0 ? bare : bare.slice(0, i), act = i < 0 ? null : bare.slice(i + 1);
-  if (i < 0 && ACTS[base]) { act = base; base = act === 'row' || y >= .3 && ACT_SEATED.has(act) ? 'sit' : 'stand'; }
+  if (i < 0 && ACTS[base]) { act = base; base = act === 'row' || act === 'cycle' || y >= .3 && ACT_SEATED.has(act) ? 'sit' : 'stand'; }
   if (!BASES.has(base)) base = 'stand';
   if (act && !ACTS[act]) act = null;
   pm.set(pose, r = { base, act, cart }); return r;
@@ -32789,6 +32997,18 @@ const ACTS = {
     r.torso.rotation.x = L(r.torso.rotation.x, L(.35, -.25, c), s);
     for (const a of r.arms) armTo(a, s, L(-1.3, .25, pull), L(-.1, -1.7, pull), .12, .1);
     r.head.rotation.x = L(r.head.rotation.x, L(-.2, .15, c), s);
+  } },
+  cycle: { f(r, s, t, b, ph, h) {                        // 0.38.28: the exercise bike: feet round the pedals, hands on the bars, a lean forward
+    const hy = r.hips.position.y;
+    for (const leg of r.legs) {
+      const th = (t * 5 + ph * 6.283) + (leg === r.legs[0] ? 0 : Math.PI);
+      const t0 = leg.thigh.rotation.x, k0 = leg.knee.rotation.x, a0 = leg.ankle.rotation.x;
+      const ang = legIK(leg, ANK + (.32 + .13 * Math.sin(th)) / h - (hy - HIP_OFF), (.35 + .13 * Math.cos(th)) / h);
+      leg.thigh.rotation.x = L(t0, leg.thigh.rotation.x, s); leg.knee.rotation.x = L(k0, leg.knee.rotation.x, s); leg.ankle.rotation.x = L(a0, -ang, s);
+    }
+    r.torso.rotation.x = L(r.torso.rotation.x, .32, s);
+    for (const a of r.arms) armTo(a, s, -1.15, -.35, .1, .1);
+    r.head.rotation.x = L(r.head.rotation.x, -.2, s);
   } },
   run: { f(r, s, t) {                                    // the legs run in place (the gait, in animateActivity); arms bent and pumping
     for (const a of r.arms) { a.el.rotation.x = L(a.el.rotation.x, -1.5, s); a.sh.rotation.z = L(a.sh.rotation.z, a.side * .12, s); }
@@ -34946,16 +35166,28 @@ const liftEl = document.getElementById('lift'), liftList = document.getElementBy
 let ride = null, liftReturn = null;
 const inLift = () => roomAt(...player.here()) === '@';
 const liftDoors = () => DOOR_OBJS.filter(d => d.e.type === 'lift');
-// The panel is on the car's back wall, in front of its east column. Tapping a lift door or the panel walks you
-// in and up to it, then opens the deck list. Choosing a deck: you reach out and press, and the ride starts.
-const panelTile = () => { const b = ROOM_BOX['@']; return b && [b.i0 + 1, b.j0]; };
-function facePanel() { const b = ROOM_BOX['@'], p = player.obj.position; player.face = Math.atan2(X0(b.i0) + 1.5 - p.x, Z0(b.j0) - p.z); }
+// The panels: one on the car's back wall in front of its east column, and (0.38.26, the user's) one on the front wall in
+// front of its west column. Tapping a lift door or a panel walks you in and up to the nearer one, then opens the deck list.
+// Choosing a deck: you reach out and press, and the ride starts. panelTiles() -> [[i, j, x, z], ...]: each panel's tile
+// and the point on the wall you face (world); panelTile() -> the nearer panel's tile (null with no car)
+const panelTiles = () => { const b = ROOM_BOX['@']; return b ? [[b.i0 + 1, b.j0, X0(b.i0) + 1.5, Z0(b.j0)], [b.i0, b.j1, X0(b.i0) + .5, Z0(b.j1) + 1]] : []; };
+function panelNear() {
+  const p = player.obj.position, l = panelTiles();
+  return l.length ? l.slice().sort((a, b) => Math.hypot(a[2] - p.x, a[3] - p.z) - Math.hypot(b[2] - p.x, b[3] - p.z)) : [];
+}
+const panelTile = () => { const l = panelNear(); return l.length ? [l[0][0], l[0][1]] : null; };
+let panelAt = null;                                      // the panel you're going to (for facing it)
+function facePanel() { const p = player.obj.position, pn = panelAt || panelNear()[0]; if (pn) player.face = Math.atan2(pn[2] - p.x, pn[3] - p.z); }
 function toPanel(done) {
-  const here = player.here(), pt = panelTile(); if (!pt) return;
+  const here = player.here(), l = panelNear(); if (!l.length) return;
   const at = () => { facePanel(); done(); };
-  if (K(pt) === K(here) && !player.path.length) { at(); return; }
-  if (free(...pt) && !occupiedBy(player).has(K(pt)) && findPath(here, pt, null, player)) { playerGo(pt, at); return; }
-  // someone's at the panel: nearest free car tile, and reach from there
+  for (const pn of l) {                                  // the nearer panel, else the other if someone's at it
+    const pt = [pn[0], pn[1]]; panelAt = pn;
+    if (K(pt) === K(here) && !player.path.length) { at(); return; }
+    if (free(...pt) && !occupiedBy(player).has(K(pt)) && findPath(here, pt, null, player)) { playerGo(pt, at); return; }
+  }
+  const pt = [l[0][0], l[0][1]]; panelAt = l[0];
+  // someone's at both panels: the free car tile nearest the nearer one, and reach from there
   const tiles = (ROOM_TILES['@'] || []).filter(c => K(c) === K(here) || findPath(here, c, null, player));
   if (!tiles.length) return;
   const goal = tiles.sort((a, b) => Math.hypot(a[0] - pt[0], a[1] - pt[1]) - Math.hypot(b[0] - pt[0], b[1] - pt[1]))[0];
