@@ -15,7 +15,8 @@ Spec: plans/brief-playtest1.md on claude/lead-pillar1 (12b1b87); the user's answ
 - C2 claude/works-career **bb4423c** (puzzle_check after the 09:00 shift; contains a5d5c4c)
 - C2 claude/works-career **a5d5c4c** (0.44.14-0.44.16 + the DEV_NOTES note; no LOWs)
 - U claude/hud-pt1 **73b40cb** (0.72.0 ebfdb2f + screenshots; no LOWs)
-- X claude/crew-pt1 **2223cb7** (0.71.0, walk-ups and the mess fix; 1 LOW)
+- X claude/crew-pt1 **98e93bf** (0.71.1, playtest 1 package X; contains 2223cb7 and a9fad20; 1 LOW: the storekeeper's hours)
+- X claude/crew-pt1 **2223cb7** (0.71.0, walk-ups and the mess fix; 1 LOW, closed in 0.71.1)
 - W claude/writer-p5 **6a00d9c** (0.48.91, playtest 1 package complete: time lines, breakfast 06:00-09:00, call-home tip; no LOWs open; 0.48.89 + 'seek' + key renames, playtest 1 lines, text; LOW 1 waits on X/C2's breakfast window)
 - W claude/writer-p5 **ac60c8d** (0.48.88, text; contains 0d179ac)
 - C claude/works-career **8cc07a5** (0.44.13, the old-save catch-up; for 0.63.0a / Step 2)
@@ -30,6 +31,11 @@ Spec: plans/brief-playtest1.md on claude/lead-pillar1 (12b1b87); the user's answ
 - O5 claude/onboard-pt1 **e4fe793** (0.42.60-0.42.62): one item (the servery arrow holds the evening; intro_check --evening FAILS)
 
 ## Verdicts
+
+### X 1072780..98e93bf (0.71.1): the crew's 09:00-17:00 day shift, breakfast to 09:00, the Works 13:00 tea, workaholics by 17:15, the news cap, walk-up guards — PASS with a LOW (R3, in depth)
+- `SHIFTS.day` [540, 1020] read by schedFrame's workStart/workEnd and section 10's day interval; Tove Cruz's rota 09:00. `MEALS.breakfast` to 540, the galley's serveTo 540 / close 570, the chef's and early hand's plans and `galleyPlan`'s long-breakfast head an hour on; teachMeal and the servery window read MEALS; the menu board canvas, the Servery and Menu board texts, the closed message and the hunger tips say 06:00-09:00. Workaholics' workEnd + 5-15 (17:05-17:15). `WORKS_TEA` / `worksTeaOn`: Works day crew working on Deck 5 drop the random tea for a 15-minute slot at 13:00/13:15/13:30/13:45 (seeded `U(30)`, odds .75, the tea-break habit always, workaholics .3) on the tea corner's three lounge seats (wait 8, else back to work); posted elsewhere, the old tea. The news cap: the lowest weight goes first, oldest of those, never the one just added (deterministic). `seekPrivate` (R2's LOW, closed) and `seekBusy` (not off T's walk). Nothing new saved; no R() outside seeded schedules.
+- **LOW (for X):** Yara Esposito, the storekeeper (day shift), still has rota hours [[480, 870]] (08:00-14:30), the one day-shift rota left at 08:00 after Tove Cruz's moved. If the store's hours are meant to stay as they are, say so in the row; else 540.
+- Checks (my runs on 98e93bf): **day_check 1 OK** (Works tea at 13:00: 10 on, 5 went, peak 3, none outside the hour; worst stuck 0.0; peak calls 260); **food_check OK**; **social_check OK**; cadet_test vs 0.63.1 a9fad20 differs from e_night on and in state_end (Deck 4's crew: +3 geometries, +3 calls), the schedule move as X explains (a copy with the schedule changes reverted is ALL IDENTICAL against 0.71.0, X's run). player_check needs C2's DAY_SHIFT (X: OK with bb4423c merged). X's package is through.
 
 ### U fc8c678 + 55b2499 (0.72.1): Watch a film, a device hobby like reading — PASS (R3)
 - `HOBBIES.film` (reading's pose and rules, `label` 'Watch a film' as the button until W's hobby.name.film, which 97fa9ae adds), the Hobbies app's device list, the two hobby tips. Saves: hobbies.done/last already take any HOBBIES id; interactions_check has a round trip and an old-save case. No R(), no 3D.
