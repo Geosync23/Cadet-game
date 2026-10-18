@@ -51,8 +51,8 @@ PAPER = r"""(({ plan, days }) => {
     const work = playerShiftOn(d), wd = weekday(d);
     for (let h = 6; h <= 22; h++) {
       const t = (d - 1) * 1440 + h * 60; at(t);
-      if (plan === 'none' && h === 18) { worksTick(t); continue; }
-      worksTick(t);
+      if (plan === 'none' && h === 18) { worksCareerTick(t); continue; }
+      worksCareerTick(t);
       const W = SHIP.works, c = W && W.cur;
       // the training: be there for the meeting, watch, do your one
       if (c && c.st === 'meet') { const r = SHIP.occasions.find(x => x.key === c.occ);
@@ -62,13 +62,13 @@ PAPER = r"""(({ plan, days }) => {
           else { r.met = true; seen.meet++; }
         }
         if (r && t >= r.at + r.len) { occasionsTick(t, true); }
-        worksTick(t + 1);
+        worksCareerTick(t + 1);
       }
       const c2 = W && W.cur;
-      if (c2 && c2.st === 'watch') { c2.w = TRAIN_WATCH; seen.watch++; worksTick(t + 2); const j = SHIP.jobs.find(x => x.id !== c2.j && x.train === c2.id && x.status === 'done');
+      if (c2 && c2.st === 'watch') { c2.w = TRAIN_WATCH; seen.watch++; worksCareerTick(t + 2); const j = SHIP.jobs.find(x => x.id !== c2.j && x.train === c2.id && x.status === 'done');
         teach[c2.id] = teach[c2.id] || {}; const dj = SHIP.jobs.filter(x => x.train === c2.id && x.status === 'done').pop(); if (dj) teach[c2.id].by = dj.doneBy; }
       const c3 = SHIP.works && SHIP.works.cur;
-      if (c3 && c3.st === 'do' && work && h >= 8 && h < 17) { seen.do++; if (!myJob() && doJob(c3.j)) { jobs++; (teach[c3.id] = teach[c3.id] || {}).you = (SHIP.jobs.find(x => x.id === c3.j) || {}).doneBy; } worksTick(t + 3); }
+      if (c3 && c3.st === 'do' && work && h >= 8 && h < 17) { seen.do++; if (!myJob() && doJob(c3.j)) { jobs++; (teach[c3.id] = teach[c3.id] || {}).you = (SHIP.jobs.find(x => x.id === c3.j) || {}).doneBy; } worksCareerTick(t + 3); }
       // the player's own work
       const shift = work && h >= 8 && h < 17;
       if (plan === 'steady' && shift && !myJob()) { const x = openJobs('you')[0]; if (x && doJob(x.id)) { jobs++; if (!firstJob) firstJob = d; } }
@@ -219,7 +219,7 @@ with sync_playwright() as pw:
         return lambda s: page.evaluate('s => window.__sc(s)', s)
     ev2 = load(); ev2("localStorage.clear()"); ev2 = load()
     w0 = ev2(f"""(() => {{ for (const r of CAREER_LADDER) WORK_MECH[r.id] = {{}}; setShipNow(1440 + 400); const W = worksInit(); W.xp = 12; W.sk.oven = 6; W.log.push(['oven-2@30', 2, 1, 'repair']);
-      W.tr.m1 = 2; W.use.m1 = 1; W.op[2] = ['m1']; toolGive('clipboard'); setShipNow(2 * 1440 + 400); WORKS_TICK.h = -1; worksTick();
+      W.tr.m1 = 2; W.use.m1 = 1; W.op[2] = ['m1']; toolGive('clipboard'); setShipNow(2 * 1440 + 400); WORKS_TICK.h = -1; worksCareerTick();
       const c = W.cur; saveGame(); return {{ works: JSON.stringify(W), cur: c && c.st, occ: SHIP.occasions.filter(r => /^works/.test(r.id)).length }}; }})()""")
     ev2 = load()
     w1 = ev2("(() => { const W = SHIP.works; return { works: JSON.stringify(W), occ: OCCASIONS['works.m4'] ? 'made' : 'missing', ok: !!W } })()")
@@ -229,7 +229,7 @@ with sync_playwright() as pw:
     ev2("localStorage.setItem(SAVE_KEY, JSON.stringify({ v: 2, build: '0.60.7', time: { day: 10, min: 300 }, player: { deck: 4, tile: [7, 3], facing: 0 }, ship: { decks: {} }, crew: {} })); Storage.prototype.setItem = () => {}")
     ev2 = load()
     old = ev2("""(() => { const out = { works: SHIP.works }; for (const r of CAREER_LADDER) WORK_MECH[r.id] = {}; SHIP.jobs.push({ id: 'old', status: 'done', doneBy: 'you', kind: 'service' });
-      WORKS_TICK.h = -1; setShipNow(9 * 1440 + 360); worksTick(); const W = SHIP.works; out.tier = W && W.tier; out.tr = W && W.tr; out.op = W && W.op; return out; })()""")
+      WORKS_TICK.h = -1; setShipNow(9 * 1440 + 360); worksCareerTick(); const W = SHIP.works; out.tier = W && W.tier; out.tr = W && W.tr; out.op = W && W.op; return out; })()""")
     print('  an old save on Day 10:', old)
     check(old['tier'] == 1 and old['tr'] == {} and old['op'].get('10', [None])[0] == 'm1' and list(old['op']) == ['10'], 'an old save loads as Tier 1, nothing trained, rounds on its next workday')
     ev2("localStorage.clear()"); b.close()

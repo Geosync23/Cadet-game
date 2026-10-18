@@ -249,7 +249,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.44.1
+   STARSHIP CADET: CSV Wren                           build 0.44.2
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7808,7 +7808,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.44.1';                           // keep in step with the header's build line
+const GAME_BUILD = '0.44.2';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -34445,12 +34445,12 @@ const tilesTrophy = () => SHIP.tiles.beatRina !== null;   // for the deck archit
 //   30] (flags: 1 found by you, 2 right first time, 4 clever), test: null | { tier, day, tries, passed }, home,
 //   done, ms (Step 3's promotion page), cur: null | the training under way { id, st: 'ask' | 'meet' | 'watch' | 'do'
 //   | 'again', d: its day, by: the teacher, occ: the occasion's key, j: the training job, w: minutes watched } }
-// The hooks other sections give it (DEV_NOTES "Hook register"): section 12's main loop calls worksTick() (24's own
+// The hooks other sections give it (DEV_NOTES "Hook register"): section 12's main loop calls worksCareerTick() (24's own
 // line); section 14's escortPlanOf asks worksEscort(p, t); section 19's Record asks worksRecordHead(); section 15b's
 // locker asks worksLockerText(); section 17 reads worksBand() (the hold order) and calls ladderTick(h) from jobsHour
 // (harmless twice: the ladder opens once a day). It reads section 17's jobs (jobReserve, jobFinish, SHIP.jobs,
 // j.foundBy, j.rightFirst, j.clever), 20's OCCASIONS and occasionAdd, 13's notes, 15's mailSend, 21's SHIP.intro.
-const RANKS = ['junior', 'officer', 'senior', 'specialist'];
+const WORK_RANKS = ['junior', 'officer', 'senior', 'specialist'];   // (section 17 has RANKS too, the same)
 const RANK_TITLE = { junior: 'Junior Technician', officer: 'Works Officer', senior: 'Senior Officer', specialist: 'Engine Specialist' };
 const WORKS_START = 1020;                                // Day 1's shift ends (17:00): SHIP.works can be made from then
 const WORKS_ASK = [360, 630];                            // a big ladder row opens (its ask) on a workday between 06:00 and 10:30
@@ -34508,6 +34508,9 @@ function worksVoice(id, flagKey) {                       // a teacher's own line
     const out = ((v && v.lines && v.lines.work) || []).filter(x => x.flag === flagKey).map(e => who && typeof linesFill === 'function' ? linesFill(e.text, who, { t: shipNow(), flags: { [flagKey]: true } }) : e.text).filter(Boolean);
     return out.length ? out : null; } catch (e) { return null; }
 }
+// a teacher's words at a step, for the sub-blocks too: their own lines under flag train.<mech>.<key> (key e.g.
+// 'lead.look', 'follow.hold'), else the fallback; said in their bubble (or a toast). Returns what was said, or null
+function worksTeach(mech, who, key, fallback) { const l = worksVoice(who, 'train.' + mech + '.' + key) || (fallback ? [].concat(fallback) : null); if (l) worksSayAll(who, l); return l; }
 function worksSayAll(id, lines) { (lines || []).forEach((l, i) => { if (!i) worksSay(id, l); else if (typeof simTimeout === 'function') simTimeout(() => worksSay(id, l), 5200 * i); }); }
 SHIP.works = null;
 (() => { const s = SAVED && SAVED.ship && SAVED.ship.works; if (s && typeof s === 'object' && s.v === 1) SHIP.works = worksClean(s); })();
@@ -34524,7 +34527,7 @@ function worksClean(s) {
     const c = s.cur, cur = obj(c) && ids.has(c.id) && /^(ask|meet|watch|do|again)$/.test(c.st) ? { id: c.id, st: c.st, d: int(c.d, 0, 99999, 0), by: typeof c.by === 'string' ? c.by : null,
       occ: typeof c.occ === 'string' ? c.occ : null, j: typeof c.j === 'string' ? c.j : null, w: int(c.w, 0, 999, 0) } : null;
     const t = s.test, test = obj(t) ? { tier: int(t.tier, 1, 4, 2), day: int(t.day, 0, 99999, 0), tries: int(t.tries, 0, 99, 0), passed: !!t.passed } : null;
-    return { v: 1, tier: int(s.tier, 1, 4, 1), rank: RANKS.includes(s.rank) ? s.rank : 'junior', xp: isFinite(s.xp) ? Math.max(0, Math.min(9999, +s.xp)) : 0,
+    return { v: 1, tier: int(s.tier, 1, 4, 1), rank: WORK_RANKS.includes(s.rank) ? s.rank : 'junior', xp: isFinite(s.xp) ? Math.max(0, Math.min(9999, +s.xp)) : 0,
       tr: days(s.tr), use: (() => { const u = {}; if (obj(s.use)) for (const k in s.use) if (ids.has(k) && Number.isInteger(s.use[k])) u[k] = Math.max(0, Math.min(9999, s.use[k])); return u; })(),
       op, tools, sk, log, test, home: typeof s.home === 'string' ? s.home.slice(0, 16) : 'bunk',
       done: Array.isArray(s.done) ? s.done.filter(x => typeof x === 'string').slice(0, 40) : [],
@@ -34784,12 +34787,13 @@ function worksRecordHead() {
   return { kind: 'text', mark: 'hot', text: worksText('works.record', '{rank}, {title}. Works reputation: {band}. What\'s next: {next}', v) };
 }
 // ---- the device's Works app: Training, Work log, Tools; other sections add tabs with worksTabAdd (24k: Fault notes and
-// the Chief's notes): worksTabAdd({ id, title, order, view() -> [blocks], act?(verb, arg) }); the app's act passes
-// any verb but 'tab' to the tab on show ----
-let WORKS_TAB = 'training';
-const WORKS_TABS = [];
+// the Chief's notes): worksTabAdd({ id, title, order, view() -> [blocks], act?(verb, arg), badge?() -> number }); the
+// app's act passes any verb but 'tab' to the tab on show (else to the first tab with an act that takes it); badges add up ----
+var WORKS_TAB = 'training';
+var WORKS_TABS;                                         // var, so worksTabAdd works from anywhere in the file (24k may load first)
 function worksTabAdd(def) {
   if (!def || typeof def.id !== 'string' || typeof def.view !== 'function') return false;
+  if (!WORKS_TABS) WORKS_TABS = [];
   const i = WORKS_TABS.findIndex(x => x.id === def.id); if (i >= 0) WORKS_TABS.splice(i, 1);
   WORKS_TABS.push({ order: 50, title: def.id, ...def }); WORKS_TABS.sort((a, b) => a.order - b.order || (a.id < b.id ? -1 : 1));
   if (typeof deviceRefresh === 'function') try { deviceRefresh(); } catch (e) { /* the device isn't up yet */ }
@@ -34828,22 +34832,31 @@ worksTabAdd({ id: 'tools', title: worksText('works.tab.tools', 'Tools'), order: 
   return [{ kind: 'list', rows: ts.map(k => ({ text: toolName(k).replace(/^the /, '').replace(/^./, x => x.toUpperCase()), sub: (WORK_TOOLS[k].bench ? 'In the machine shop' : 'In your locker') + ' · ' + toolWord(W.tools[k][1]) + ' · since Day ' + W.tools[k][0] })) }];
 } });
 function worksView() {
-  const tab = WORKS_TABS.find(x => x.id === WORKS_TAB) || WORKS_TABS[0], B = [{ kind: 'buttons', items: WORKS_TABS.map(x => ({ label: x.title, on: x === tab, action: { app: 'works', do: 'tab', arg: x.id } })) }];
+  const T = WORKS_TABS || [], tab = T.find(x => x.id === WORKS_TAB) || T[0], B = [{ kind: 'buttons', items: T.map(x => { const n = worksBadge(x); return { label: x.title + (n ? ' (' + n + ')' : ''), on: x === tab, action: { app: 'works', do: 'tab', arg: x.id } }; }) }];
   let more = []; try { more = tab ? tab.view() || [] : []; } catch (e) { more = [{ kind: 'text', text: 'Nothing to show.' }]; }
   return { title: worksText('works.app.title', 'Works'), blocks: B.concat(more) };
 }
+function worksBadge(x) { try { const n = typeof x.badge === 'function' ? x.badge() : x.badge; return Number.isFinite(n) && n > 0 ? n : 0; } catch (e) { return 0; } }
 if (typeof deviceApp === 'function') deviceApp({ id: 'works', title: worksText('works.app.title', 'Works'), short: 'Works', icon: 'wrench', order: 31, view: worksView, hidden: () => !SHIP.works,   // from Day 1's evening (nothing changes Days 0-1)
-  act(verb, arg) { if (verb === 'tab') { if (WORKS_TABS.some(x => x.id === arg)) WORKS_TAB = arg; return; } const tab = WORKS_TABS.find(x => x.id === WORKS_TAB); if (tab && tab.act) return tab.act(verb, arg); } });
-// ---- the clock: worksTick() from the main loop (section 12) each frame; it acts once a ship minute (the training)
+  badge: () => (WORKS_TABS || []).reduce((a, x) => a + worksBadge(x), 0) || null,
+  act(verb, arg) { const T = WORKS_TABS || []; if (verb === 'tab') { if (T.some(x => x.id === arg)) WORKS_TAB = arg; return; }
+    const tab = T.find(x => x.id === WORKS_TAB); if (tab && tab.act) return tab.act(verb, arg);
+    const any = T.find(x => x.act && /:/.test(verb) && verb.split(':')[0] === (x.verbs || x.id)) || null; if (any) return any.act(verb, arg); } });
+// ---- the clock: worksCareerTick() from the main loop (section 12) each frame; it acts once a ship minute (the training)
 // and once a ship hour (the ladder). After a skip or a sleep the ladder catches up (training needs you there). ----
 const WORKS_TICK = { m: -1, h: -1 };
-function worksTick(now = shipNow()) {
+// sub-blocks' clocks (WORK_TICKS.push(f)): f(now, false) once a ship minute in play (from Day 1 17:00); after a skip or
+// a sleep, f(t, true) once for each ship hour skipped
+const WORK_TICKS = [];
+function worksCareerTick(now = shipNow()) {   // (not worksTick: that's section 17's job board and cart docks)
   const m = Math.floor(now); if (m === WORKS_TICK.m) return; WORKS_TICK.m = m;
   if (!SHIP.works && now < WORKS_START) return;
   const h = Math.floor(now / 60); if (h !== WORKS_TICK.h) { WORKS_TICK.h = h; ladderTick(h); }
   trainTick(now);
+  for (const f of WORK_TICKS) try { f(now, false); } catch (e) { console.error(e); }
+  if (typeof caseTick === 'function') caseTick();       // 24k's head-scratchers (seat H)
 }
-SIM_ADVANCE.push((from, to) => { for (let h = Math.floor(from / 60) + 1; h <= Math.floor(to / 60); h++) { const t = h * 60, m = t % 1440; if (m >= WORKS_ASK[0] && m <= WORKS_SMALL) ladderTick(h); } WORKS_TICK.h = Math.floor(to / 60); });
+SIM_ADVANCE.push((from, to) => { for (let h = Math.floor(from / 60) + 1; h <= Math.floor(to / 60); h++) { const t = h * 60, m = t % 1440; if (m >= WORKS_ASK[0] && m <= WORKS_SMALL) ladderTick(h); if (t >= WORKS_START) for (const f of WORK_TICKS) try { f(t, true); } catch (e) { console.error(e); } } WORKS_TICK.h = Math.floor(to / 60); });
 
 // =====================================================================
 // 6. CAMERA
@@ -37840,7 +37853,7 @@ function loop() {
   eventsTick();                                          // section 18: the ship's events (Mail, decor, joining in)
   socialTick();                                          // section 20: the crew's social life, on paper
   if (typeof introTick === 'function') introTick();      // section 21: the arrival evening (nothing with the intro off)
-  if (typeof worksTick === 'function') worksTick();      // section 24: your Works career (the ladder, training moments)
+  if (typeof worksCareerTick === 'function') worksCareerTick();   // section 24: your Works career (the ladder, training moments)
   }
   const r = roomAt(...player.here()); if (r && r !== lastRoom) { lastRoom = r; roomEl.textContent = ROOMS[r].name; }
 

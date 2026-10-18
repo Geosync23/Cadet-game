@@ -37,11 +37,11 @@ TRAIN = r"""((id) => {
   const seen = [], doJob = jid => { if (!claimJob(jid)) return false; const j = SHIP.jobs.find(x => x.id === jid); jobStops(j).forEach((s, k) => jobStepDone(jid, k)); return turnInJob(jid); };
   let teacher = null, yours = null;
   for (let m = 360; m < 1020; m += 10) {
-    const t = (d - 1) * 1440 + m; setShipNow(t); machinesNow(); worksTick(t);
+    const t = (d - 1) * 1440 + m; setShipNow(t); machinesNow(); worksCareerTick(t);
     const c = SHIP.works.cur;
     if (c) seen.push(c.st);
-    if (c && c.st === 'meet') { const r = SHIP.occasions.find(x => x.key === c.occ); if (r && t >= r.at) { r.met = true; worksTick(t + 1); } }
-    if (c && c.st === 'watch') { c.w = TRAIN_WATCH; worksTick(t + 2); const dj = SHIP.jobs.filter(x => x.train === id && x.status === 'done').pop(); teacher = dj ? dj.doneBy : null; }
+    if (c && c.st === 'meet') { const r = SHIP.occasions.find(x => x.key === c.occ); if (r && t >= r.at) { r.met = true; worksCareerTick(t + 1); } }
+    if (c && c.st === 'watch') { c.w = TRAIN_WATCH; worksCareerTick(t + 2); const dj = SHIP.jobs.filter(x => x.train === id && x.status === 'done').pop(); teacher = dj ? dj.doneBy : null; }
     if (c && c.st === 'do' && !myJob() && doJob(c.j)) yours = (SHIP.jobs.find(x => x.id === c.j) || {}).doneBy;
     if (row.size === 'small' && worksOpened().has(id) && W.tr[id] === undefined) worksUse(id);
     if (W.tr[id] !== undefined) break;
