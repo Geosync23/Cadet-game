@@ -52,3 +52,4 @@ The user played the Pillar 5 preview and sent 33 notes. The plan (8 packages) an
 ## Added by the user ~17:00
 - **Call home tip, first night (O5 + W):** Day 0, after meeting the chief: a tip to call home with a "Track it" option; once you reach the booth the tracker goes away and the default goes back to pointing at your bed.
 - **Lap of the Wren (T):** Sunday 20:30, but not on the Sunday you arrive (Day 0); the first is Day 7.
+| BM6 build master (0.63.2 combine + full run; BM5 at 60% handing over) | session_01F8k6hqdBRoxDJMzqAuiHqR | claude/p5-cand-pt1 | 0.63.2 |
