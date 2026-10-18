@@ -252,7 +252,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.82.3
+   STARSHIP CADET: CSV Wren                           build 0.82.4
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7885,7 +7885,7 @@ function recFloor(g, kind, i, j, x, y, PX) {
   const fleck = (n, cs) => { for (let k = 0; k < n; k++) { g.fillStyle = cs[k % cs.length]; g.fillRect(x + recHash(i, j, k) * (PX - 2), y + recHash(i, j, k + 31) * (PX - 2), 2, 2); } };
   if (kind === 'concourse') {                            // the concourse and foyer (0.80.10, the user's: calmer, classier): two-tone terrazzo, an inlaid band at the walls
     g.fillStyle = (i + j) % 2 ? '#4d5759' : '#535e60'; g.fillRect(x, y, PX, PX);
-    for (let k = 0; k < 22; k++) { const c = recHash(i, j, k + 50); g.fillStyle = c < .45 ? 'rgba(232,226,214,.35)' : c < .7 ? 'rgba(31,163,155,.45)' : c < .85 ? 'rgba(240,121,90,.4)' : 'rgba(20,24,28,.35)'; const r = 1 + recHash(i, j, k + 80) * 2.2; g.fillRect(x + recHash(i, j, k + 110) * (PX - 3), y + recHash(i, j, k + 140) * (PX - 3), r, r); }
+    for (let k = 0; k < 22; k++) { const c = recHash(i, j, k + 50); g.fillStyle = c < .45 ? 'rgba(232,226,214,.35)' : c < .7 ? 'rgba(196,200,196,.3)' : c < .85 ? 'rgba(140,150,150,.32)' : 'rgba(20,24,28,.35)';   // 0.82.4 (the user's): plain chips, cream and greys, no coloured specks const r = 1 + recHash(i, j, k + 80) * 2.2; g.fillRect(x + recHash(i, j, k + 110) * (PX - 3), y + recHash(i, j, k + 140) * (PX - 3), r, r); }
     g.fillStyle = 'rgba(0,0,0,.12)'; if (i % 3 === 0) g.fillRect(x, y, 1, PX); if (j % 3 === 0) g.fillRect(x, y, PX, 1);   // thin joints every third tile
     if (edge(i, j - 1)) { g.fillStyle = '#c99a4a'; g.fillRect(x, y + 10, PX, 2); g.fillStyle = 'rgba(31,163,155,.8)'; g.fillRect(x, y + 14, PX, 3); }
     if (edge(i, j + 1)) { g.fillStyle = '#c99a4a'; g.fillRect(x, y + PX - 12, PX, 2); g.fillStyle = 'rgba(240,121,90,.75)'; g.fillRect(x, y + PX - 17, PX, 3); }
@@ -8544,7 +8544,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.82.3';                           // keep in step with the header's build line
+const GAME_BUILD = '0.82.4';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
