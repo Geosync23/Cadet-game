@@ -11526,9 +11526,13 @@ function squeezeStep() {                                 // each frame: slow dow
 // not settled at a place: squeeze past covers those) and they take a small step aside, SHUFFLE_STEP tiles to the
 // nearer open side of your way (the other side if that one's a wall or furniture; in a one-tile corridor a shorter
 // step, SHUFFLE_SHORT, to the wall; else a step back), then carry on with what they were doing. You're never held up
-// by them (section 10's press-and-hold push skips them: shuffleable). No room on any side: you pass them anyway. A polite word at most once a person a minute (SHUFFLE_SAID, real ms).
-const SHUFFLE_STEP = .5, SHUFFLE_SHORT = .25, SHUFFLE_V = 2, SHUFFLE_NEAR = .45, SHUFFLE_SAY = 60000;
-const SHUFFLE = new Map(), SHUFFLE_SAID = new Map();    // crew agent -> { x, z, left } (the step still to take); person id -> when they last said it
+// by them (section 10's press-and-hold push skips them: shuffleable). No room on any side: you pass them anyway.
+// Stepped once, a person isn't stepped again for SHUFFLE_COOL ms (no wobbling while you follow close behind). A polite
+// word in a speech bubble over them (8b's bubbleSay; never a toast, so the need warnings never wait on it), at most once
+// a person a minute (SHUFFLE_SAID, real ms), and never over something they're already saying.
+const SHUFFLE_STEP = .5, SHUFFLE_SHORT = .25, SHUFFLE_V = 2, SHUFFLE_NEAR = .45, SHUFFLE_SAY = 60000, SHUFFLE_COOL = 1500;
+const SHUFFLE_WORDS = ['Oh, sorry.', 'After you.', 'Excuse me.', 'Oops, mind out.', 'Sorry, go ahead.'];
+const SHUFFLE = new Map(), SHUFFLE_SAID = new Map(), SHUFFLE_DONE = new Map();   // crew agent -> { x, z, left } (the step still to take); person id -> when they last said it; crew agent -> when their step ended
 const shuffleable = a => !!a && !a.settled && !a.esc && !(a.talking > 0) && !(a.p && a.p.player) && a.pose !== 'sit' && a.pose !== 'lie';
 const shuffleStep = (b, c) => {                           // from tile b to the next tile c: no wall between (a diagonal: open round one corner)
   const di = c[0] - b[0], dj = c[1] - b[1]; if (Math.abs(di) > 1 || Math.abs(dj) > 1) return false;
@@ -11550,15 +11554,16 @@ function shuffleTick(dt) {
   for (const [a, s] of SHUFFLE) {                        // the step aside, a little each frame
     if (!DECK_CREW.includes(a) || !shuffleable(a)) { SHUFFLE.delete(a); continue; }
     const st = Math.min(s.left, SHUFFLE_V * dt); a.x += s.x * st; a.z += s.z * st; s.left -= st;
-    if (s.left <= 1e-4) SHUFFLE.delete(a);
+    if (s.left <= 1e-4) { SHUFFLE.delete(a); SHUFFLE_DONE.set(a, performance.now()); }
   }
+  for (const [a, t] of SHUFFLE_DONE) if (performance.now() - t >= SHUFFLE_COOL || !DECK_CREW.includes(a)) SHUFFLE_DONE.delete(a);
   const pos = player.obj.position, s = player.steer;
   let mx = s ? s.x : 0, mz = s ? s.z : 0;               // which way you're walking: the finger, or the next tile of your path
   if (!s && player.path.length) { const c = cellPos(...player.path[0]); mx = c.x - pos.x; mz = c.z - pos.z; }
   const ml = Math.hypot(mx, mz); if (ml < 1e-3 || player.vel < .15) return;
   mx /= ml; mz /= ml;
   for (const a of DECK_CREW) {
-    if (SHUFFLE.has(a) || !shuffleable(a)) continue;
+    if (SHUFFLE.has(a) || SHUFFLE_DONE.has(a) || !shuffleable(a)) continue;
     const ox = a.x - pos.x, oz = a.z - pos.z, od = Math.hypot(ox, oz);
     if (od >= SHUFFLE_NEAR || od > 1e-4 && (ox * mx + oz * mz) / od < .3) continue;   // touching, and ahead of you
     const side = ox * mz - oz * mx >= 0 ? 1 : -1;       // the side of your way they're already on (a tie: your right)
@@ -11567,10 +11572,8 @@ function shuffleTick(dt) {
     if (!w) continue;                                    // nowhere to step: you just get by
     SHUFFLE.set(a, { x: w[0], z: w[1], left: w[2] });
     const id = a.p && a.p.id, at = performance.now();
-    if (id && !(at - SHUFFLE_SAID.get(id) < SHUFFLE_SAY)) {
-      SHUFFLE_SAID.set(id, at); const nm = (a.p.name || '').split(' '), rank = /^(Captain|Commander|Dr\.|Chief|Chef|Lt\.?|Lieutenant|Ensign)$/.test(nm[0]) && nm.length > 2;
-      const first = rank ? nm[1] : nm[0], call = /chef/i.test(a.p.role || '') ? 'Chef' : rank ? ({ 'Dr.': 'Doctor', 'Lt.': 'Lieutenant', Lt: 'Lieutenant' }[nm[0]] || nm[0]) : first;   // "Excuse me, Doctor." Priya steps aside
-      toast(a.p.name, '"Excuse me, ' + call + '." ' + first + ' steps aside to let you by.');
+    if (id && a.h && typeof bubbleSay === 'function' && !(at - SHUFFLE_SAID.get(id) < SHUFFLE_SAY) && !bubbles.list.some(b => b.who === a.h)) {   // never over something they're already saying
+      SHUFFLE_SAID.set(id, at); bubbleSay(a.h, SHUFFLE_WORDS[(idHash(id) + SHUFFLE_SAID.size) % SHUFFLE_WORDS.length], 2.5);
     }
   }
 }
