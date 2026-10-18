@@ -3,9 +3,10 @@
 Started by lead 12 (session_01GjWhU9Z9V8RNoR8yyELA9V) at ~11:28 for every Step 2 piece; R (claude/reviews-p5) keeps Step 1. Who gets verdicts: the seat and BM4 (session_013h22isZZqmJJSEKSbrwabf) get each one line; FAILs and design clashes also go to the lead. Format and standards as plans/reviews-p5.md: behaviour, save and schedule changes in depth against the piece's approved page (plans/mechanics/ on claude/p5-design), determinism, old saves load, phones first, cadet_test differences explained; content and test-only changes skimmed. Verdicts newest first.
 
 ## Passing tips
-- M2 claude/mech-incidents **0bbb93d** (0.51.0, 24e tuning + 24f incidents; 3 LOWs open)
-- M1 claude/mech-rounds **740234d** (0.45.4, contains 8a6cea8..8f5783f and Onboarding 4's 96649fe; items 1-2 closed; LOWs closed or out by the lead)
-- S claude/ship-systems **01a3a3b** (machine_check only: 5o/5t cope with 24d; contains 78bf1c2)
+- P claude/player-p5 **3373828** (0.28.73, contains cfce34e; 1 LOW)
+- M2 claude/mech-incidents **c9b211a** (0.51.1; LOWs 1-2 closed, LOW 3 for Step 3)
+- M1 claude/mech-rounds **c7c55cf** (0.45.5, contains 740234d; was 740234d (0.45.4, contains 8a6cea8..8f5783f and Onboarding 4's 96649fe; items 1-2 closed; LOWs closed or out by the lead)
+- S claude/ship-systems **b676814** (0.33.54, contains 01a3a3b and 78bf1c2)
 - Onboarding 4 claude/arrival-0607b **96649fe** (0.42.46, 21b's uniform grime for m2; 1 LOW, the page's field names)
 - S claude/ship-systems **03340c5** (0.33.48-0.33.51, Step 2 parts; also inside 78bf1c2, which R reviews for Step 1; 1 nit)
 
@@ -13,6 +14,25 @@ Started by lead 12 (session_01GjWhU9Z9V8RNoR8yyELA9V) at ~11:28 for every Step 2
 - (none)
 
 ## Verdicts
+
+### P 3373828 (0.28.73): the look's sign, scanOpen, r.say/wrong/retry, a kind's held prop, the Thursday berth — PASS with a LOW (in depth)
+- The look's marks card shows `opts.text` (24a's sign) before the question. The look-over calls `scanOpen(job.id)` first; it's H's function, which opens the scanner and returns true when it read, else the old toast. jobStepDone's result: `r.wrong` (24k said so) and `r.retry` (17's veto) leave the stop to do and show the kind's words; `r.say` goes before "Done here" / "Work done". The held prop: a registered kind's `def.hold`, a string or a function of the job, used if HOLDS has it; null means nothing in hand (the drill outside its fire steps); else the toolbox as before. R's LOW on 0.28.72 is closed (the dead careerSpeed in ixChoreTap is gone).
+- The berth (m3): on Thursdays 05:30-08:00 (not unwell) a bunk tap offers Make the bed, Tidy your locker or Lie down (deviceChoose). Each is a 1-minute hold beside the bunk; the wake is 06:00, so there's time before 06:30. `SHIP.player.bedMade` is the day, cleared when you sleep in it. `untidy` is set by a purchase; `lockerTidy()` = !untidy. Both are saved, old saves → null / false, both reset on a new game. Tidy is offered from the bunk because Bunk 1's locker tap is 21b's wardrobe; that's a fair call. M1's inspectItems reads both.
+- No R(); page elements only.
+- Checks (my runs on 3373828): cadet_test vs d3d720b **ALL IDENTICAL**; **interactions_check OK**; **player_check OK** (the held prop from the real registry, the scanOpen stand-in, the berth: Thursday 06:00 choices, made, bought → Tidy offered, tidied, saved [18, true], Friday lies down).
+- LOW: the page says a locker is untidy with "things you bought **or made**" out. Only a purchase sets `untidy`; a made thing (the workshop, a craft) doesn't. Set it where a made thing is given to you too.
+
+### M1 c7c55cf (0.45.5): the drill posted already yours — PASS (read; M1's combine check plus my mech_check)
+- The drill job is pushed with claimedBy 'you', status 'claimed' and start = posted (14:50), so claimJob can't take it from the board as a second job (BM5's trial). The 14:50 tick keeps the toast and arrow only. It's a side job and ends at 15:15 whatever happens, so a claim made while you're away costs nothing.
+- Checks: mech_check OK on c7c55cf (my run; m3d needs A's places, and M1 reports it OK on a combine with A and M2).
+
+### S 66b4ebb (0.33.53) + b676814 (0.33.54): mechanic jobs inside HOLD_MAX, tune jobs held two hours — PASS (read in depth)
+- 0.33.53 (lead 12's call): an open mechanic job held for you takes one of the HOLD_MAX places. That's a registered kind (round, tune, haul, the drill) or an incident's joint, counted while heldForYou or inside its leaveEnd. At least one ordinary job is always kept. 0.33.54: tune jobs carry `leave: TUNE_LEAVE` (120), then they're the crew's (M2's ask). machine_check test fixes: 5q counts only its own side job; 5r measures drift with its own stand-in or 24e's real kind.
+- Checks (my runs on b676814): cadet_test vs d3d720b **ALL IDENTICAL**; **machine_check OK** (drift 14 in 14 days, as before).
+
+### M2 c9b211a (0.51.1): LOWs 1-2 — PASS
+- m5's reserve now drops the oven's tune job even when a crew member has claimed it (not yours), so the lesson stands in for it. `ship.works.inc.fix = { id, kind }` (cleaned on load) sends `simNote('incident', { step: 'fixed', by })` once the fix job is done (the clock). LOW 3 (promotion days) is noted in the code for Step 3.
+- Checks (my run): **mech_check OK** (m6 checks the fixed note).
 
 ### M2 0bbb93d (0.51.0): 24e tuning and 24f incidents — PASS with LOWs (in depth)
 Base: merges of P cfce34e, C 88f71b7, S 78bf1c2, A 6cc826b. M2's own code is the two blocks before "// 6. CAMERA" plus mech_check m5/m6. Read against m5-tuning.html and m6-incidents.html.
