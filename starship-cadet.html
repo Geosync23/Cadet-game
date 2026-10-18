@@ -249,7 +249,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.60.7
+   STARSHIP CADET: CSV Wren                           build 0.33.44
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7807,7 +7807,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.60.7';                           // keep in step with the header's build line
+const GAME_BUILD = '0.33.44';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -10184,7 +10184,7 @@ deviceApp({ id: 'jobs', title: 'Jobs', icon: 'wrench', order: 30,
     if (open.length) {
       say('On the board', 'head');
       B.push({ kind: 'list', rows: open.slice(0, 5).map(j => { const [title, where, state, pri] = jobCard(j);
-        return { text: (pri === 'urgent' ? '! ' : '') + title, sub: where + ' · ' + state + (jobTier(j) > PLAYER_TIER ? ' · tier ' + jobTier(j) : ''), mark: pri === 'urgent' ? 'urgent' : null }; }) });
+        return { text: (pri === 'urgent' ? '! ' : '') + title, sub: where + ' · ' + state + (jobTier(j) > playerTier() ? ' · tier ' + jobTier(j) : ''), mark: pri === 'urgent' ? 'urgent' : null }; }) });
       if (open.length > 5) say('And ' + (open.length - 5) + ' more on the board.');
     } else if (!mine) say('Nothing on the board. Enjoy it while it lasts.');
     if (!mine) B.push({ kind: 'buttons', items: [{ label: 'Show me the board', action: { app: 'jobs', do: 'board' } }] });
@@ -10388,7 +10388,7 @@ deviceApp({ id: 'ship', title: 'News feed', icon: 'news', order: 60, view: () =>
 // Record (0.35.4): your Works record, where progression shows. Certification and the Chief's comments come later.
 deviceApp({ id: 'record', title: 'Record', icon: 'record', order: 70, view: () => {
   const mine = (SHIP.jobs || []).filter(j => j.doneBy === 'you'), B = [];
-  B.push({ kind: 'text', text: 'Works technician, tier ' + (typeof PLAYER_TIER !== 'undefined' ? PLAYER_TIER : 1) + '.', mark: 'hot' });
+  B.push({ kind: 'text', text: 'Works technician, tier ' + (typeof playerTier === 'function' ? playerTier() : 1) + '.', mark: 'hot' });
   B.push({ kind: 'text', text: mine.length ? 'Jobs on the recent record: ' + mine.length + '.' : 'No jobs on your record yet. Take one at the job board in the Works bay.' });
   if (mine.length) B.push({ kind: 'list', rows: mine.slice(-6).reverse().map(j => { const [title, where] = jobCard(j); return { text: title, sub: where + ', Day ' + (Math.floor(j.doneAt / 1440) + 1) }; }) });
   // reputation (0.35.22, Pillar 4): section 20's repView(), words only, never numbers
@@ -12081,7 +12081,7 @@ function jobTouch(now) {
 let JOB_SEEN = null;
 function jobNotice() {
   if (!jobsOn() || typeof jobsBoard !== 'function') return;
-  const tier = typeof PLAYER_TIER !== 'undefined' ? PLAYER_TIER : 1;
+  const tier = typeof playerTier === 'function' ? playerTier() : 1;
   const open = jobsBoard().filter(j => !j.claimedBy && j.machine && (typeof jobTier !== 'function' || jobTier(j) <= tier)
     && !(typeof ENGINE_KINDS !== 'undefined' && ENGINE_KINDS.has((machineById(j.machine) || {}).kind)));
   if (!JOB_SEEN) { JOB_SEEN = new Set(open.map(j => j.id)); return; }
@@ -13001,7 +13001,7 @@ const ixHealth = (() => {
 const ixBoard = (() => {
   const el = document.getElementById('ixBoard'), list = document.getElementById('ixBoardL'), sub = document.getElementById('ixBoardX');
   let back = null;
-  const canTake = (j, mine) => !mine && !j.claimedBy && (typeof jobTier !== 'function' || jobTier(j) <= PLAYER_TIER)
+  const canTake = (j, mine) => !mine && !j.claimedBy && (typeof jobTier !== 'function' || jobTier(j) <= playerTier())
     && !(j.machine && typeof ENGINE_KINDS !== 'undefined' && ENGINE_KINDS.has((machineById(j.machine) || {}).kind));
   function row(title, line, pri, btn) {
     const r = document.createElement('div'), d = document.createElement('div'), h = document.createElement('b'), s = document.createElement('small');
@@ -13024,7 +13024,7 @@ const ixBoard = (() => {
       const yours = typeof openJobs === 'function' ? openJobs('you') : open.filter(j => canTake(j, null)).map(j => { const [title, where, state] = jobCard(j); return { id: j.id, title, where, state, urgency: j.urgency }; });
       const ids = new Set(yours.map(o => o.id));
       const crew = jobs.filter(j => j.claimedBy && j.claimedBy !== 'you');   // the crew's, as the board on the wall shows them (0.37.6)
-      sub.textContent = mine ? 'You have a job. Finish it or drop it to take another.' : yours.length ? 'Pick a job and take it. Tier ' + PLAYER_TIER + ' work is yours to take.'
+      sub.textContent = mine ? 'You have a job. Finish it or drop it to take another.' : yours.length ? 'Pick a job and take it. Tier ' + playerTier() + ' work is yours to take.'
         : 'Nothing open for you just now. New jobs come in through the day shift, and the crew take the urgent ones first: check back in an hour or two.';
       if (mine) {                                        // yours: Turn it in once the work's done (section 17's turnInJob), else Drop it
         const [title, where, state, pri] = jobCard(mine), done = mine.workDone && typeof turnInJob === 'function';
@@ -13036,7 +13036,7 @@ const ixBoard = (() => {
         row(o.title, o.where + ' · ' + o.state + (doable(raw) ? '' : ' · not yet: coming soon'), PRI[o.urgency], ok ? button('Take it', () => api.take(o.id)) : null);
       }
       for (const j of open.filter(j => !ids.has(j.id))) {   // on the board, but not yours to take: say why
-        const [title, where, state, pri] = jobCard(j), why = jobTier(j) > PLAYER_TIER ? 'tier ' + jobTier(j) : j.status === 'waiting' ? '' : 'crew only';
+        const [title, where, state, pri] = jobCard(j), why = jobTier(j) > playerTier() ? 'tier ' + jobTier(j) : j.status === 'waiting' ? '' : 'crew only';
         row(j.title || title, where + ' · ' + state + (why ? ' · ' + why : ''), pri, null);
       }
       for (const j of crew) { const [title, where, state, pri] = jobCard(j); row(j.title || title, where + ' · ' + state, pri + ' taken', null); }
@@ -14767,6 +14767,8 @@ const JOB_URGENCY = { worn: 0, faulty: 1, failing: 2, broken: 3 };
 const CREW_TIER = { junior: 2, officer: 3, senior: 3, chief: 4, xo: 4, captain: 4 };   // what Works crew may work on
 const ENGINE_KINDS = new Set(['reactor', 'coil']);      // the engine crew's, at any tier; nobody else's
 const PLAYER_TIER = 1;                                  // you, for now (design doc, "Works progression")
+// your tier (0.33.44, Pillar 5 foundation 17.1): section 24's SHIP.works.tier once there is one, else PLAYER_TIER
+const playerTier = () => (SHIP.works && SHIP.works.tier) || PLAYER_TIER;
 const CREW_LEAVE = 180;                                 // crew leave easy, routine jobs this long for you before taking them
 const YOU_KEEP = 720;                                   // a job you take goes back on the board after 12 ship hours with no progress (touchJob)
 const JOB_FETCH = 10, JOB_MAKE = 60, JOB_RIDE = 2;       // minutes: fetching parts; making one in the machine shop; a lift ride
@@ -14819,11 +14821,11 @@ let PLACE_IDX = null;
 const placeById = id => { if (!PLACE_IDX) { PLACE_IDX = new Map(); for (const n in DECKS) for (const p of DECKS[n].places || []) PLACE_IDX.set(p.id, { ...p, deck: +n }); } return id && PLACE_IDX.get(id) || null; };
 const placeTier = id => { const p = placeById(id); return p ? roomTier(p.deck, p.room) : 0; };
 // tier locks (answer 4, 0.33.18): who may pass a service hatch with a `tier` (section 4's hatchPassable): you at your
-// tier (PLAYER_TIER), Works crew by rank (CREW_TIER: the same tiers as the machines behind the hatches, so juniors
+// tier (playerTier()), Works crew by rank (CREW_TIER: the same tiers as the machines behind the hatches, so juniors
 // reach the plant rooms their jobs are in), the engine crew anywhere (they keep the reactor and coils). A `tier` on
 // the person (deck_check's stand-in) wins
 function hatchTier(who) {
-  if (who === 'player' || who.isPlayer) return PLAYER_TIER;
+  if (who === 'player' || who.isPlayer) return playerTier();
   if (who.tier > 0) return who.tier;
   const p = who.p || who;
   if (p.tier > 0) return p.tier;
@@ -14841,7 +14843,7 @@ const HOLD_MAX = 3;                                      // small jobs held for 
 // SHARE_KEEP held on the board: so you see the Works crew doing the jobs you do ("Bea on it")
 const SHARE_EVERY = 3, SHARE_KEEP = 2;
 let SHARE_ON = true;                                    // machine_check turns it off where it needs a job left for you
-const forYou = j => j.urgency < 2 && jobTier(j) <= PLAYER_TIER && !(j.machine && ENGINE_KINDS.has(machineById(j.machine).kind));
+const forYou = j => j.urgency < 2 && jobTier(j) <= playerTier() && !(j.machine && ENGINE_KINDS.has(machineById(j.machine).kind));
 function leaveEnd(j) {
   if (!forYou(j) || j.released) return j.found;
   if (j.cargo === 'meals') return j.found + 60;
@@ -15232,7 +15234,7 @@ function jobNote(j, step, o) { if (j.kind !== 'favour') simLater('job', { id: j.
 const abandonNote = j => { if (j.kind !== 'favour' && !j.workDone) simLater('jobAbandoned', { machine: j.machine || null, dept: null, id: j.id }); };
 function claimJob(id) {
   const j = jobsBoard().find(x => x.id === id);
-  if (!j || j.claimedBy || SHIP.jobs.some(x => x.claimedBy === 'you' && x.status === 'claimed' && x.kind !== 'favour') || PLAYER_TIER < jobTier(j) || (j.machine && ENGINE_KINDS.has(machineById(j.machine).kind))) return false;
+  if (!j || j.claimedBy || SHIP.jobs.some(x => x.claimedBy === 'you' && x.status === 'claimed' && x.kind !== 'favour') || playerTier() < jobTier(j) || (j.machine && ENGINE_KINDS.has(machineById(j.machine).kind))) return false;
   j.claimedBy = 'you'; j.status = 'claimed'; j.start = shipNow(); delete j.segs; delete j.done; delete j.end; MACH_REV++; jobNote(j, 'take'); simFlush(); return true;   // no crew route left on it
 }
 function dropJob(id) {
@@ -15485,7 +15487,7 @@ function jobReserve(kind, day, at, slot = 1, o = {}) {
   if (old && old.claimedBy) return old.id;
   if (old) SHIP.jobs = SHIP.jobs.filter(j => j !== old);
   const busy = new Set(SHIP.jobs.filter(heldForYou).map(j => j.machine)), byId = machineById(kind);
-  const ok = m => !m.stub && panelPlace(m.id) && jobTier({ machine: m.id }) <= PLAYER_TIER && !ENGINE_KINDS.has(m.kind);
+  const ok = m => !m.stub && panelPlace(m.id) && jobTier({ machine: m.id }) <= playerTier() && !ENGINE_KINDS.has(m.kind);
   const all = machineList().filter(ok).sort((a, b) => (a.deck === 4 ? 0 : 1) - (b.deck === 4 ? 0 : 1) || (a.id < b.id ? -1 : 1));
   const d4 = all.filter(m => m.deck === 4), free = xs => xs.find(m => !busy.has(m.id));   // Deck 4 first, a free one first, the kind asked for first
   const pick = byId && ok(byId) ? byId : free(d4.filter(m => m.kind === kind)) || free(d4) || d4.find(m => m.kind === kind) || d4[0] || free(all.filter(m => m.kind === kind)) || free(all) || all[0];
@@ -15577,8 +15579,8 @@ function jobsSection(el) {
   const open = board.filter(j => !j.claimedBy);
   if (!open.length && !mine) line('Nothing on the board. Enjoy it while it lasts.');
   for (const j of open.slice(0, 5)) {
-    const [title, where, state, pri] = jobCard(j), canTake = !mine && jobTier(j) <= PLAYER_TIER && !(j.machine && ENGINE_KINDS.has(machineById(j.machine).kind));
-    const p = line((pri === 'urgent' ? '! ' : '') + title + ' · ' + where + ' · ' + state + (canTake ? '' : jobTier(j) > PLAYER_TIER ? ' (tier ' + jobTier(j) + ')' : ''));
+    const [title, where, state, pri] = jobCard(j), canTake = !mine && jobTier(j) <= playerTier() && !(j.machine && ENGINE_KINDS.has(machineById(j.machine).kind));
+    const p = line((pri === 'urgent' ? '! ' : '') + title + ' · ' + where + ' · ' + state + (canTake ? '' : jobTier(j) > playerTier() ? ' (tier ' + jobTier(j) + ')' : ''));
     if (canTake) button('Take it', () => claimJob(j.id));
   }
   if (open.length > 5) line('And ' + (open.length - 5) + ' more on the board in the Works bay.');
@@ -15590,7 +15592,7 @@ if (typeof device !== 'undefined' && device.addSection) device.addSection('jobs'
 // urgency, state }]. at: the tile [i, j] of the main stop (the machine's panel, the drop-off, the first stop), place:
 // its place id or null. Take one with claimJob(id); finish it with finishJob(id); jobStops(job) gives the way there.
 function openJobs(forWho = 'you') {
-  const you = forWho === 'you', tier = you ? PLAYER_TIER : hatchTier(forWho);
+  const you = forWho === 'you', tier = you ? playerTier() : hatchTier(forWho);
   return jobsBoard().filter(j => !j.claimedBy && j.status !== 'waiting' && jobTier(j) <= tier && !(you && j.machine && ENGINE_KINDS.has(machineById(j.machine).kind)) && (you || !heldForYou(j))).map(j => {
     const [title, where, state] = jobCard(j), m = j.machine && machineById(j.machine);
     const stops = jobStops(j).filter(x => x.step !== 'fetch'), main = j.kind === 'chore' ? stops[stops.length - 1] : j.kind === 'restock' ? stops[2] : stops[0];
