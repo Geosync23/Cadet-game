@@ -5,7 +5,7 @@ Started by lead 12 (session_01GjWhU9Z9V8RNoR8yyELA9V) at ~11:28 for every Step 2
 ## Passing tips
 - W claude/writer-p5 **ac60c8d** (0.48.88, text; contains 0d179ac)
 - C claude/works-career **8cc07a5** (0.44.13, the old-save catch-up; for 0.63.0a / Step 2)
-- P claude/player-p5 **1830f2d** (0.28.73 + the LOW fix 391c88e + player_check fixes f00ac1e, d6f321d, 642b511, ad9ff57, 1830f2d; no LOWs open)
+- P claude/player-p5 **f2156f1** (0.28.73 + the LOW fix 391c88e + player_check fixes f00ac1e, d6f321d, 642b511, ad9ff57, 1830f2d, f2156f1; no LOWs open)
 - M2 claude/mech-incidents **c9b211a** (0.51.1; LOWs 1-2 closed, LOW 3 for Step 3)
 - M1 claude/mech-rounds **ec9b498** (0.45.6, contains 8a6cea8..c7c55cf and Onboarding 4's 96649fe; items 1-2 closed; LOWs closed or out by the lead)
 - S claude/ship-systems **0e18118** (0.33.54 + social_check fix and handover note; contains b676814)
@@ -16,6 +16,9 @@ Started by lead 12 (session_01GjWhU9Z9V8RNoR8yyELA9V) at ~11:28 for every Step 2
 - (none)
 
 ## Verdicts
+
+### P f2156f1: player_check's notice arm picks a job the board shows (test only) — PASS (read)
+- The arm takes an unclaimed job from `jobsBoard()` (Step 2 keeps held and side jobs off the board), or one the board shows, and gives your jobs back if there's none. No game change. P reports a full player_check on 0.63.1 (p5-cand-s2 37d2b1e): OK, 0 FAIL.
 
 ### M1 ec9b498 (0.45.6): a drill from an earlier day is closed on the next tick — PASS (read; mech_check on a scratch merge with A)
 - 24c's drill tick first closes, quietly, any drill job from an earlier day whose `until` has passed. Before this, a clock jump past Wednesday 15:15 left the drill claimed (P's probe on 0.63.1). The all-clear became `drillClose(j, now, quiet)` with the same body: done, ext shown, simNote('drill'), worksUse only if you came, Calder's toast and word only when not quiet. Today's drill is unchanged.
