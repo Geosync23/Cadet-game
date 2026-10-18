@@ -566,3 +566,4 @@ Read: CLAUDE.md, TEAM.md (session chain rule + overnight exception), plans/brief
 - ~11:53 BM4 handover note pushed (p5-cand 4c27a89); 0.63.0 local 67b15b0, quick set OK, long checks + intro_check --week running. Started BM5 session_01DbBJ7iK6TrrADyEw7qbCsQ (claude/p5-cand-s2) for Step 2 = 0.63.1 (logged).
 - ~11:58 R: Step 1 ALL PASS (S 78bf1c2, P cfce34e, C 2865a21, H 5a4d362, A 6cc826b, W 0d179ac, join 6e730b1); R stopped at ~70% (handover on claude/reviews-p5). R2 now reviews all remaining incl. P 0.28.73. Archive R when convenient.
 - ~11:59 R2: M1 740234d (0.45.4) PASS, all items closed. R2 owns P 0.28.73, 0.63.0a, M2.
+- ~12:08 P 3373828 (0.28.73: scanOpen, r.say, ixHold, Thursday bunk Make bed/Tidy locker saved; player/interactions OK, cadet_test identical). P done, idle.
