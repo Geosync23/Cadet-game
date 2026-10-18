@@ -837,7 +837,7 @@
 
 // Zeke's welcome Mail on your device (the arrival evening: he tells you to open it). "Subject | body", unsigned.
 == mail.zeke.cabin
-- Everything I didn't say | Your device has the lot: Mail, Schedule, Calendar, the Map and your Needs. Breakfast's from seven till nine. Shift starts at nine in the Works bay; Calder's briefing is at ten to nine. Clean clothes live in your wardrobe: change each morning, and do your laundry on Deck 4 when they run out. Tea and biscuits at one. Ask me anything, any time.
+- Everything I didn't say | Your device has the lot: Mail, Schedule, Calendar, the Map and your Needs. Breakfast's from six till nine. Shift starts at nine in the Works bay; Calder's briefing is at ten to nine. Clean clothes live in your wardrobe: change each morning, and do your laundry on Deck 4 when they run out. Tea and biscuits at one. Ask me anything, any time.
 
 // Name on the beam (first Monday after shift, the Works bay cross beam; seat T's flags trad.beam.<n>, in order).
 // Restored in playtest 1: 2799442 (0.48.82) cut these by mistake. He hands you the pen and tells you to tap the beam.

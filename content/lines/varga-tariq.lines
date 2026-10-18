@@ -62,7 +62,7 @@
 ? act:leisure deck:3
 - The lounge window. Best seat on the ship. I got here first. I always do.   #funny
 ? time:morning act:work
-- Rolls in the oven, porridge on. Seven o'clock, and the galley's already won.
+- Rolls in the oven, porridge on. Six o'clock, and the galley's already won.
 
 == life
 ? tier>=colleague
