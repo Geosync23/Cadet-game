@@ -4,9 +4,14 @@ How: behaviour, save and schedule changes in depth (against the piece's approved
 
 ## Passing tips
 - H claude/mech-cases **eece4d4** (0.55.0)
-- W claude/writer-p5 **76fc413** (0.48.85, text; contains 843bac9; LOWs open)
+- W claude/writer-p5 **0d179ac** (0.48.86, text; contains 843bac9 and 76fc413; no LOWs open)
 
 ## Verdicts
+
+### W 0d179ac (0.48.86): Day 5 by Emeka Halloran, case.solved fixed — PASS (skimmed: content only)
+- New train.m7.halloran-emeka and train.p3.halloran-emeka meetings (the main Day 5 version, per designer 210b86f; Halloran works Fridays) and his `work` step lines; m7/p3 panel steps renamed `hold` (seat C's step name) in Calder's and Torres's lines too.
+- `case.solved` is now "Fixed. That was it.", shown only after the fix works (noted in cases.lines and keys-p5.md): batch 1's LOW 2 closed.
+- Checks (my run): content_gen bakes clean (29 meetings); lines_check PASS (0 errors, the 2 old warnings).
 
 ### W 76fc413 (0.48.85): Pillar 5 text batch 2 (Step 2) — PASS (skimmed: content only)
 - 23 files, text plus lines_check placeholders: seven train.* meetings (m1 m2 Torres, m3d m5 m6 Calder, m3i Tomas, m4 Yara), teachers' step lines, step2/inspect/signs/remarks lines, three incident reaction banks.
