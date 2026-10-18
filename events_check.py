@@ -47,7 +47,7 @@ PLANS = r"""(days => {
     const on = eventsOn(d), wd = weekday(d), yd = shipYearDay(d), row = { d, wd: WEEKDAYS[wd].slice(0, 3), ev: [] };
     // due exactly when the table says
     for (const ev of SHIP_TRADITIONS) {
-      const w = ev.when, due = !(ev.flag && !(typeof flag === 'function' && flag(ev.flag))) && (w.birthday ? schedPeople().some(p => birthdayOf(p) === yd && (typeof aboard !== 'function' || (aboard(p, d) && (typeof guestStay !== 'function' || guestStay(p, d) !== 'leave')))) : w.rotation != null ? ROSTER_ROTATIONS.some(r => (w.rotation === 'after' ? d > r.day && d <= r.day + 7 && weekday(d) === w.weekday : d === r.day + w.rotation) && (w.rotation !== 'after' && w.rotation < 0 ? r.out : r.in).some(id => { const p = schedPeople().find(q => q.id === id); return p && (typeof aboard !== 'function' || aboard(p, d)); })) : DUE.has(ev.id) ? DUE.get(ev.id).has(d) : (w.weekday === wd || (w.every && d % w.every === w.on) || w.yearDay === yd)) && !eventPauses(ev, d) && !(EV_DROPPED.get(d) || []).includes(ev.id);   // a ship-wide event's quiet days; the voice budget
+      const w = ev.when, due = !(ev.flag && !(typeof flag === 'function' && flag(ev.flag))) && (w.birthday ? schedPeople().some(p => birthdayOf(p) === yd && (typeof aboard !== 'function' || (aboard(p, d) && (typeof guestStay !== 'function' || guestStay(p, d) !== 'leave')))) : w.rotation != null ? ROSTER_ROTATIONS.some(r => (w.rotation === 'after' ? d > r.day && d <= r.day + 7 && weekday(d) === w.weekday : d === r.day + w.rotation) && (w.rotation !== 'after' && w.rotation < 0 ? r.out : r.in).some(id => { const p = schedPeople().find(q => q.id === id); return p && (!w.dept || p.dept === w.dept) && (typeof aboard !== 'function' || aboard(p, d)); })) : DUE.has(ev.id) ? DUE.get(ev.id).has(d) : (w.weekday === wd || (w.every && d % w.every === w.on) || w.yearDay === yd)) && !eventPauses(ev, d) && !(EV_DROPPED.get(d) || []).includes(ev.id);   // a ship-wide event's quiet days; the voice budget
       if (due !== on.some(e => e.id === ev.id)) out.bad.push(d + ' ' + ev.id + (due ? ' due but not on' : ' on but not due'));
     }
     const S = schedData(), went = {}, places = {};
@@ -526,10 +526,12 @@ with sync_playwright() as pw:
       player.obj.position.copy(cellPos(...nearestOpen(...cellPos(...at).toArray().filter((_, i) => i !== 1), player)));
       const n0 = SHIP.player.needs.social = 50; SHIP.events.joined.length = 0;
       for (const m of [1210, 1213, 1217, 1220]) { setShipNow(3 * 1440 + m); EV_MIN = -1; eventsTick(); }
-      return { room: roomAt(...player.here()), joined: SHIP.events.joined.slice(), social: SHIP.player.needs.social, n0 };
+      const passive = SHIP.events.joined.slice();          // 0.70.0: the quiz is tap to join: being there isn't joining
+      deckCrewFill(); EV_MIN = -1; eventsTick(); const a = TJ_NOW && TJ_NOW.agent, tapped = !!a && tradJoinTap(a);
+      return { room: roomAt(...player.here()), passive, lead: TJ_NOW ? TJ_NOW.lead : (a && a.p.id), tapped, joined: SHIP.events.joined.slice(), social: SHIP.player.needs.social, n0 };
     })()""")
-    print(f"Player in room {j['room']} during the quiz: joined {j['joined']}, social {j['n0']} -> {j['social']}")
-    if j['joined'] != ['quiz@4'] or j['social'] <= j['n0']: fail('the player did not join the quiz')
+    print(f"Player in room {j['room']} during the quiz: joined by being there {j['passive']}; tapped {j['lead']}: {j['tapped']}, joined {j['joined']}, social {j['n0']} -> {j['social']}")
+    if j['passive'] or not j['tapped'] or j['joined'] != ['quiz@4'] or j['social'] <= j['n0']: fail('the player should join the quiz by tapping Tomas (and not by being there)')
 
     # 4b. Pillar 4: joining Sowing morning (day 6) leaves your seedling (trace seedlingYours with its day); a tradition's
     # ties.decor goes to dressShow only in its window
@@ -539,6 +541,7 @@ with sync_playwright() as pw:
       const t0 = SHIP.traces.slice(); SHIP.events.joined.length = 0;
       const e = eventsOn(6).find(x => x.id === 'sowing'); if (!e) return { err: 'sowing not on day 6' };
       for (const m of [e.from + 1, e.from + 4, e.from + 7, e.from + 10]) { setShipNow(5 * 1440 + m); EV_MIN = -1; eventsTick(); }
+      deckCrewFill(); EV_MIN = -1; eventsTick(); if (TJ_NOW && TJ_NOW.e.id === 'sowing') tradJoinTap(TJ_NOW.agent);   // 0.70.0: tap to join
       const tr = SHIP.traces.filter(x => x.id === 'seedlingYours'); SHIP.traces.length = 0; SHIP.traces.push(...t0);
       const ties = e.ev.ties; e.ev.ties = { ...ties, decor: 'testDecor' };
       const dec = [e.from - 40, e.from - 20, e.to + 10, e.to + 20].map(m => tradDecor(5 * 1440 + m).map(x => x.id).join());

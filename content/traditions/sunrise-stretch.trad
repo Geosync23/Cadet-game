@@ -11,7 +11,8 @@ wake: 15
 where: 3 room Promenade: bench
 where: 3 room Lift plaza: bench
 hold: none
-who: early-riser 55%, runner 40%, gym-regular 35%, everyone 8%
+who: rina always, early-riser 55%, runner 40%, gym-regular 35%, everyone 8%
+host: rina
 from: The promenade
 
 

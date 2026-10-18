@@ -93,6 +93,7 @@ Crew ids are the roster's (`brennan`, `calder`, `torres-zeke`, `rina`, `tomas`, 
 | `birthday` | each crew member's birthday (birthdays are never moved) |
 | `rotation -1` | the day before each crew rotation day (the crew designer's `ROSTER_ROTATIONS`; the Sunday shuttle): its honorees are that rotation's leavers. `rotation +N` from 0 on: the arrivals. |
 | `rotation friday` | the first Friday after a rotation day: its honorees are that rotation's arrivals |
+| `rotation monday dept works` | (0.70.0) any rotation rhythm may add `dept <department>`: only that department's people are its honorees, and with none it doesn't happen (Name on the beam for new Works hands) |
 
 Add any of these after the rhythm: `season greening` (or `season harvest,lanterns`), `from day 30`, `until day 200`. Example: `when: weekly wednesday season greening`.
 

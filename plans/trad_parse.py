@@ -105,6 +105,8 @@ def parse_when(v, where):
             if bad:
                 raise TradError(f'{where}: unknown season {bad}')
             w['season'], i = s[0] if len(s) == 1 else s, i + 2
+        elif low[i] == 'dept' and 'rotation' in w and i + 1 < len(t):   # 0.70.0: only that department's arrivals or leavers (Name on the beam's newcomers: works)
+            w['dept'], i = low[i + 1], i + 2
         elif low[i] in ('from', 'until') and low[i + 1:i + 2] == ['day'] and i + 2 < len(t):
             w[low[i]], i = _int(t[i + 2], where, 0, 100000, 'a day'), i + 3
         else:
