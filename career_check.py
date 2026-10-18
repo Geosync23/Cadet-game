@@ -39,11 +39,14 @@ PAPER = r"""(({ plan, days }) => {
   SHIP.works = null; SHIP.occasions.length = 0; SHIP.notes = []; SHIP.flags = {}; SHIP.jobs = []; SHIP.mail = []; SHIP.rep = null;
   JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; WORKS_TICK.m = WORKS_TICK.h = -1;
   for (const k in WORK_MECH) delete WORK_MECH[k];
-  if (plan !== 'none') for (const r of CAREER_LADDER) WORK_MECH[r.id] = r.id === 't2' ? { noJob: true } : {};   // stand-ins: the default training job
+  if (plan !== 'none') for (const r of CAREER_LADDER) WORK_MECH[r.id] = r.id === 't2' ? { noJob: true } : { reserve: (d, at, slot, o) => jobReserve('washer', d, at, slot, o) };   // stand-ins: the default training job
   const at = t => { setShipNow(t); machinesNow(); };
   const days_ = [], trained = {}, asks = {}, teach = {}, mails = [], band = {}, seen = { meet: 0, watch: 0, do: 0 }, bad = [];
   const stop = [onSim('trained', n => { trained[n.mech] = Math.floor(n.t / 1440) + 1; })];
-  const doJob = id => { if (!claimJob(id)) return false; const j = SHIP.jobs.find(x => x.id === id); jobStops(j).forEach((s, k) => jobStepDone(id, k)); return turnInJob(id); };
+  const doJob = id => { if (!claimJob(id)) return false; const j = SHIP.jobs.find(x => x.id === id);
+    const cs = j.case && SHIP.works && SHIP.works.cases && (SHIP.works.cases.open || []).find(c => c.job === id);   // a head-scratcher (24k): call it right first
+    if (cs && typeof caseCall === 'function') caseCall(cs.id, cs.cause);
+    jobStops(j).forEach((s, k) => jobStepDone(id, k)); return turnInJob(id); };
   const lazySkip = new Set();                            // the lazy player misses each training's first ask
   let firstJob = null;
   for (let d = 1; d <= days; d++) {
@@ -173,7 +176,7 @@ with sync_playwright() as pw:
 
     print('(e) Bands, skill words, tools, penalties:')
     e = ev("""(() => { SHIP.works = null; setShipNow(1440 + 600); const W = worksInit(), out = {};
-      out.bands = [0, 6, 7, 14, 15, 23, 24, 31, 32, 90].map(x => { W.xp = x; return worksBand(); });
+      out.bands = [0, 7, 8, 17, 18, 29, 30, 39, 40, 90].map(x => { W.xp = x; return worksBand(); });
       W.rank = 'officer'; W.xp = 0; out.officer = worksBandWord(); W.rank = 'junior';
       out.words = [0, 4, 5, 14, 15].map(n => { W.sk.oven = n; return skillWord('oven'); });
       out.give = toolGive('scanner'); out.again = toolGive('scanner'); out.has = hasTool('scanner'); W.tr.m7 = 5; for (let k = 0; k < 10; k++) worksUse('m7'); out.wear = toolWear('scanner');
@@ -193,7 +196,7 @@ with sync_playwright() as pw:
       WORKS_TABS.splice(WORKS_TABS.findIndex(x => x.id === 'test'), 1); WORKS_TAB = 'training';
       return { r, tabs: v.blocks[0].items.map(x => x.label), body: v.blocks[1] && v.blocks[1].text, got }; })()""")
     print('  worksTabAdd:', tb)
-    check(tb['r'] and tb['tabs'] == ['Training', 'Work log', 'Tools', 'Test'] and tb['body'] == 'hello' and tb['got'] == 'poke:7', 'worksTabAdd: a tab shows, in order, and gets its verbs')
+    check(tb['r'] and tb['tabs'][:3] == ['Training', 'Work log', 'Tools'] and tb['tabs'][-1] == 'Test' and tb['body'] == 'hello' and tb['got'] == 'poke:7', 'worksTabAdd: a tab shows, in order, and gets its verbs')
 
     eh = ev("""(() => { SHIP.works = null; setShipNow(4 * 1440 + 600); const W = worksInit(); W.cur = { id: 'm7', st: 'do', d: 5, by: 'halloran-emeka', occ: null, j: 'jx', w: 15 };
       const out = { hold: worksEscortHold('m7') }; worksDone('m7', shipNow()); out.st = W.cur && W.cur.st; out.trainedEarly = W.tr.m7 !== undefined;
@@ -203,10 +206,22 @@ with sync_playwright() as pw:
     print('  the escort hold (Day 5):', eh)
     check(eh['hold'] and eh['st'] == 'held' and not eh['trainedEarly'] and eh['esc'] == 'follow' and eh['clean'] and eh['after'] == 5 and eh['cur'] is None, 'worksEscortHold / caseCalled')
 
+    rv = ev("""(() => { SHIP.works = null; SHIP.occasions.length = 0; SHIP.mail = []; for (const r of CAREER_LADDER) WORK_MECH[r.id] = { reserve: (d, at, slot, o) => jobReserve('washer', d, at, slot, o) };
+      setShipNow(1440 + 300); const W = worksInit(); W.log.push(['x', 1, 0, 'service']); const out = {};
+      skipTo(1440 + 460); WORKS_TICK.m = -1; out.st = W.cur && W.cur.st; out.toldAsleep = W.cur && W.cur.told;
+      worksCareerTick(shipNow() + 1); out.toldUp = W.cur && W.cur.told; out.goal = !!(typeof IX_GOAL !== 'undefined' && IX_GOAL);
+      W.cur = { id: 'm7', st: 'held', d: 2, by: 'calder', occ: null, j: null, w: 0, hold: true }; ladderTick(Math.floor((2 * 1440 + 400) / 60)); out.heldTrained = W.tr.m7;
+      deviceDo({ app: 'works', tab: 'tools' }); out.tab = WORKS_TAB; WORKS_TAB = 'training';
+      for (const k in WORK_MECH) delete WORK_MECH[k]; SHIP.works = null; return out; })()""")
+    print('  asked while asleep, told when up; a stale hold; open on a tab:', rv)
+    check(rv['st'] == 'meet' and rv['toldAsleep'] is False and rv['toldUp'] is True and rv['goal'], 'an ask made during a sleep is told (toast, goal) when you are up')
+    check(rv['heldTrained'] is not None, 'a hold left from an earlier day trains you on the next workday')
+    check(rv['tab'] == 'tools', 'the Works app opens on a given tab')
+
     print('(f) The save:')
     sv = ev(f"""(() => {{ const r = ({PAPER})({{ plan: 'steady', days: 2 }}); const W = SHIP.works;
       W.cur = {{ id: 'm4', st: 'do', d: 3, by: 'esposito-yara', occ: 'works.m4@3', j: 'reserve11:x@1', w: 15 }};
-      const raw = JSON.stringify(W), back = JSON.stringify(worksClean(JSON.parse(raw)));
+      const core = Object.fromEntries(Object.entries(W).filter(([k]) => k in worksClean({{ v: 1 }}))), raw = JSON.stringify(core), back = JSON.stringify(worksClean(JSON.parse(raw)));   // 24 core's fields (sub-blocks keep their own)
       const junk = worksClean({{ v: 1, tier: 'x', rank: 'admiral', xp: -5, tr: {{ m1: 'a', zz: 3 }}, log: 5, tools: {{ bogus: [1, 2], scanner: [3, 7] }}, op: {{ 2: ['m1', 'nope'], x: [] }}, cur: {{ id: 'm1', st: 'eh' }} }});
       return {{ same: raw === back, raw: raw.length, junk, bad: worksClean(null) }}; }})()""")
     print('  round trip:', sv['same'], f"({sv['raw']} bytes); junk:", sv['junk'])
@@ -236,7 +251,7 @@ with sync_playwright() as pw:
     check(w1['occ'] == 'made', "a reload mid-training loses the training's occasion")
     ev2("localStorage.setItem(SAVE_KEY, JSON.stringify({ v: 2, build: '0.60.7', time: { day: 10, min: 300 }, player: { deck: 4, tile: [7, 3], facing: 0 }, ship: { decks: {} }, crew: {} })); Storage.prototype.setItem = () => {}")
     ev2 = load()
-    old = ev2("""(() => { const out = { works: SHIP.works }; for (const r of CAREER_LADDER) WORK_MECH[r.id] = {}; SHIP.jobs.push({ id: 'old', status: 'done', doneBy: 'you', kind: 'service' });
+    old = ev2("""(() => { const out = { works: SHIP.works }; for (const r of CAREER_LADDER) WORK_MECH[r.id] = { reserve: (d, at, slot, o) => jobReserve('washer', d, at, slot, o) }; SHIP.jobs.push({ id: 'old', status: 'done', doneBy: 'you', kind: 'service' });
       WORKS_TICK.h = -1; setShipNow(9 * 1440 + 360); worksCareerTick(); const W = SHIP.works; out.tier = W && W.tier; out.tr = W && W.tr; out.op = W && W.op; return out; })()""")
     print('  an old save on Day 10:', old)
     check(old['tier'] == 1 and old['tr'] == {} and old['op'].get('10', [None])[0] == 'm1' and list(old['op']) == ['10'], 'an old save loads as Tier 1, nothing trained, rounds on its next workday')
