@@ -252,7 +252,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.47.7
+   STARSHIP CADET: CSV Wren                           build 0.47.8
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7831,7 +7831,7 @@ const DECK_DRESS = {
   nameYours: { deck: 5, what: 'your name, freshly painted on the Works bay\'s beam', make(g) {
     const [sa, sy] = BEAM.slots[0], s = dressAt(g, BEAM.room, 'n', sa), name = firstName(SHIP.player && SHIP.player.name);   // 0.47.6: your first name, in slot 0
     const t = tex(256, 40, (c, w, h) => { c.fillStyle = '#f8f4ea'; c.font = '700 32px Georgia,serif'; const tw = Math.min(w - 8, c.measureText(name).width); c.fillText(name, (w - tw) / 2, 30, w - 8); });
-    const p = new THREE.Mesh(new THREE.PlaneGeometry(1.2, .1875), new THREE.MeshBasicMaterial({ map: t, transparent: true, toneMapped: false })); p.position.set(0, BEAM.y + sy, .132); s.add(p);
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(1.2, .1875), new THREE.MeshBasicMaterial({ map: t, transparent: true, toneMapped: false })); p.position.set(0, BEAM.y + sy, .138); s.add(p);
     return { t: 'Your name', x: 'Your name on the beam, the paint still bright, at the end of the row. Every new hand gets one. Yours will fade like the others, slowly, and somebody will touch it up.', wall: [BEAM.room, 'n', sa], y: BEAM.y + sy, w: 1.2, h: .2 };
   } },
   // 0.47.6 (playtest): nameNew: the Works hands who joined after you, painted beside your name (slots 1-3, the newest three, in the
@@ -7842,7 +7842,7 @@ const DECK_DRESS = {
     const t = tex(512, 80, (c, w, h) => { c.font = '700 32px Georgia,serif'; list.forEach((x, k) => { const [sa, sy] = BEAM.slots[k + 1], n = firstName(x.name);
       const cx = (sa - mid + span / 2) / span * w, tw = Math.min(w * 1.2 / span - 8, c.measureText(n).width); c.fillStyle = ['#f8f4ea', '#e8c06a', '#7fd6c8'][k];
       c.fillText(n, cx - tw / 2, sy > 0 ? 30 : 70, w * 1.2 / span - 8); }); });
-    const p = new THREE.Mesh(new THREE.PlaneGeometry(span, .375), new THREE.MeshBasicMaterial({ map: t, transparent: true, toneMapped: false })); p.position.set(0, BEAM.y, .129); s.add(p);   // 3 mm behind your name's plane
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(span, .375), new THREE.MeshBasicMaterial({ map: t, transparent: true, toneMapped: false })); p.position.set(0, BEAM.y, .132); s.add(p);   // 6 mm in front of the beam's names, 6 mm behind yours (0.47.8, R2: at least 5 mm)
     return { t: 'New names', x: 'The newest names on the beam, beside yours: ' + list.map(x => firstName(x.name)).join(', ') + '. The paint is still bright.', wall: [BEAM.room, 'n', mid], y: BEAM.y, w: span, h: .4 };
   } },
   partyLounge: { deck: 3, what: 'party decorations in the bow lounge: bunting, balloons and a banner', make(g, o) {
@@ -7968,7 +7968,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.47.7';                           // keep in step with the header's build line
+const GAME_BUILD = '0.47.8';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
