@@ -237,7 +237,7 @@ td code{white-space:normal}
   <h3>24.3 Tools</h3>
   <ul>
     <li><code>WORK_TOOLS = { clipboard, scanner, pipekit, logger, tester, calrig }</code> (the test rig is a bench in the machine shop, not a tool you carry): <code>{ name, mech, wearPerUse }</code>. <code>hasTool(id)</code>, <code>toolGive(id)</code>, <code>toolWear(id)</code> (0-1; M11 tool upkeep restores it; until then wear is kept but has no effect). A tool never takes a carry slot and never blocks a job.</li>
-    <li>Your locker in Bunk 1 (and later your cabin) shows them on a tap (one line in the locker's tap text, through 15b).</li>
+    <li>Your <b>kit locker in the Works bay</b> ("Yours has your name on a strip of tape") shows them on a tap (seat C, 0.44.6: Bunk 1's wardrobe tap belongs to the clothes section).</li>
   </ul>
   <h3>24.4 Reputation in your rank</h3>
   <ul>
@@ -331,6 +331,10 @@ td code{white-space:normal}
   <p>A worn machine takes 2-4 days to wear on to faulty, so finding it later can't give 40-60% repairs without leaving the first week with no faults and empty board hours (10 hours late: 0%; 3 days late with 70% of them: 52%, but no faults before Day 5). <b>Built instead (agreed):</b> from Day 2, on your shift days, about half of the worn machines at your tier (picked with <code>schedU(machSeed(id), day, 856)</code>) are found 2-24 hours later already at the top of faulty (condition 49), as a <code>repair</code> with a cause. The story is the same ("the crew didn't catch it while it was only worn"). Limits (as built): never a machine with a held reserved job or an open head-scratcher case; the drop is <code>min(cond, 49)</code>, once; only on days where Day ≥ 2, <code>playerShiftOn</code>, your tier and not the engine kinds; key 856, the same twice. The lead set <code>REAL_SHARE = .5</code>, <code>FIND_LATE = 0</code>. <code>machine_check</code> 5o: 53% repairs, 5.4 jobs a shift day, faults from Day 2, ship health 95+. <code>FIND_LATE</code> is not used.</p>
   <h3>Who walks you to the first puzzle? (seats H and C, through the lead, 2026-10-18)</h3>
   <p>P3 is a <b>small</b> ladder row, and only big rows get a teacher's escort. So <b>P3 borrows the scanner lesson's escort</b>: the scanner lesson's second machine (yours) is <code>4-washer-2</code>, the escort walks you there, and it doesn't end at the reading. The P3 lesson starts on the spot and the escort carries on until the case is called. For this first case only, the first note comes with the job card (handed over at the washer) and the second is on the washer's panel. Later P3 cases follow the normal rule (the first note at the board, the others at the machine).</p>
+  <h3>Day 5's escort, as built (seat C, 0.44.6)</h3>
+  <p><code>worksEscortHold('m7')</code> (called by 24g and 24k while the scanner lesson runs) keeps the teacher with you, following, after your training job is turned in. <code>m7</code> counts as trained only on <code>worksEscortEnd('m7')</code> or <code>simNote('caseCalled', { train: true })</code>. Your training job must be the P3 machine itself: <b><code>4-washer-2</code></b>, or <code>4-washer-3</code> if Washer 2 is busy with your own wash (pass it to <code>jobReserve</code> by id; never "whatever it picks"), so the reading and the case are on the same washer.</p>
+  <h3>Where your tools live (seat C)</h3>
+  <p>In your kit locker in the Works bay, not at your bunk (the wardrobe there is the clothes section's).</p>
 </section>
 
 </main>
