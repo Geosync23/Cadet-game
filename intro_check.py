@@ -557,7 +557,7 @@ with sync_playwright() as pw:
         print(f"  on to the bunk after the reload: reached {bunk['done']}, missed {bunk['missed']}, device {bunk['device']}")
         if not bunk['done'] or bunk['missed'] or not bunk['device']: fail(f'after reloading mid-walk the evening went wrong: {bunk}')
         g.page.evaluate('localStorage.clear()')
-    print('10. Monday in the real game: the three jobs held at 05:00, the briefing at 07:50, the shadow shift with Torres')
+    print('10. Monday in the real game: the three jobs held at 05:00, the briefing at 08:50, the shadow shift with Torres')
     if not g.ev("typeof jobReserve === 'function' && typeof newGameStart === 'function'"):
         print('  not yet: this build has no jobReserve (section 17, systems 0.33.36+)')
     else:
@@ -567,7 +567,7 @@ with sync_playwright() as pw:
         print(f'  New game again: the evening\'s state before {stale}, after {fresh}')
         if fresh['calder'] or fresh['tour'] or not fresh['step'] or fresh['meet']: fail(f'New game kept the last evening\'s state: {fresh}')
         g.page.fill('form input[maxlength="24"]', 'Sam'); g.page.click('form button'); g.step(5)
-        g.ev('skipTo(introAbs(1, 7 * 60 + 40))'); g.ev('(() => { goToDeck(5); player.obj.position.copy(cellPos(15, 3)); })()'); g.step(5)   # the next frames run 05:00's beat, which holds the jobs
+        g.ev('skipTo(introAbs(1, 8 * 60 + 40))'); g.ev('(() => { goToDeck(5); player.obj.position.copy(cellPos(15, 3)); })()'); g.step(5)   # the next frames run 05:00's beat, which holds the jobs
         res = g.ev("[1, 2, 3].map(k => SHIP.jobs.find(x => x.reserved === k)).map(j => j && j.machine)")
         print('  held for you:', res)
         if not all(res): fail('the week\'s three jobs are not all held')
@@ -575,11 +575,11 @@ with sync_playwright() as pw:
         for i in range(40):
             g.step(30); met = g.ev('DIALOGUE && DIALOGUE.id')
             if met: break
-        print('  07:50 in the Works bay:', met)
+        print('  08:50 in the Works bay:', met)
         who = g.ev("DIALOGUE ? { lines: DIALOGUE.queue.filter(l => l.who).map(l => l.who), cal: (() => { const a = DECK_CREW.find(x => x.p.id === 'calder'); return a ? (ROOMS[roomAt(...cellAt(a.x, a.z))] || {}).name : null; })() } : null")
         print('  its speakers:', who)
         if not met or not met.startswith('introBriefing'): fail('the Monday briefing did not play')
-        elif who and 'calder' in who['lines'] and who['cal'] != 'Works bay' and g.ev('shipNow() < introAbs(1, 480)'): fail('Calder speaks the briefing from ' + str(who['cal']))
+        elif who and 'calder' in who['lines'] and who['cal'] != 'Works bay' and g.ev('shipNow() < introAbs(1, 540)'): fail('Calder speaks the briefing from ' + str(who['cal']))
         # the lead (0.42.30): the briefing plays in full at a reader's pace (a tap every ~3 s) before the shadow shift starts
         bf = { 'start': g.ev('clockText()'), 'n': g.ev('DIALOGUE ? DIALOGUE.queue.length : 0'), 'taps': 0, 'cut': None, 'follow': None }
         while g.ev('!!DIALOGUE') and bf['taps'] < 60:
@@ -600,7 +600,7 @@ with sync_playwright() as pw:
         esc = g.ev("(() => { const a = DECK_CREW.find(x => x.p.id === INTRO_ESCORT), e = escortPlan(ROSTER.find(p => p.id === INTRO_ESCORT), shipNow()), pp = player.obj.position; return { mode: e && e.mode, d: a ? Math.round(Math.hypot(a.x - pp.x, a.z - pp.z)) : null }; })()")
         fin = g.ev("(() => { const j = SHIP.jobs.find(x => x.reserved === 1); jobStops(j).forEach((s, k) => jobStepDone(j.id, k)); j.workDone = true; return { t: turnInJob(j.id), shadow: !!SHIP.intro.settle.shadow, mem: (SHIP.notes || []).some(n => n.kind === 'introStep' && n.step === 'd1-shadow') }; })()")
         print(f"  took it: {took}; Torres {esc['mode']}, {esc['d']} tiles from you; turned in: {fin['t']}; 'Shadow a job' ticked: {fin['shadow']}; d1-shadow note: {fin['mem']}")
-        if not took: fail('could not take the shadow job at 08:06')
+        if not took: fail('could not take the shadow job at 09:06')
         if esc['mode'] != 'follow' or esc['d'] is None or esc['d'] > 4: fail(f'Torres is not with you on the shadow shift: {esc}')
         if not (fin['t'] and fin['shadow'] and fin['mem']): fail(f'the shadow job did not complete the intro\'s side: {fin}')
         # reviewer 1's lows (0.42.25): the health check booked once as a 'checkup', rebooked once when missed; a Mail
