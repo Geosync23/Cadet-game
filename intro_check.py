@@ -58,6 +58,7 @@ RUN = r"""(({ who, reload, to, skip, endAt, pace }) => {
 
 # one look at the real game for part 8: the player follows Torres (or walks to a step that isn't his), rides the lift
 # when he does, and taps through meetings, choosing the second reply
+CALDER_D = """(() => { const a = DECK_CREW.find(x => x.p && x.p.id === 'calder'), sp = placeSpot(introSeat('calder') || '3-mess-9'); return a && sp ? Math.round(Math.hypot(a.x - sp.x, a.z - sp.z) * 10) / 10 : null; })()"""
 WALK_TICK = r"""((mode) => {
   const I = SHIP.intro, st = introStepById(I.step), pp = player.obj.position, here = cellAt(pp.x, pp.z);
   const a = DECK_CREW.find(x => x.p && x.p.id === INTRO_ESCORT);
@@ -221,6 +222,60 @@ def week(g):
             print(f'  Sowing: Tomas brought to the garden {sow}')
             if not sow['sow']: fail('Tomas was never brought to the garden for Sowing')
 
+# part 13, also on its own: python3 intro_check.py BUILD.html --firsts (onboarding 5, 0.42.60-0.42.62, the 0.63.2 playtest):
+# the first-time arrows (the servery after the Chief's "Eat something", the time clock after Day 1's opener, the job
+# board once clocked in, gone once a job's taken), the first night's call-home card and its Track it arrow, and Zeke's
+# Day 1 tea (he explains it, leads you to the Tea corner once your first job's turned in, waits for your tea, follows again)
+def firsts(g):
+    print('13. First-time arrows, calling home, Zeke\'s Day 1 tea')
+    if not g.ev("typeof introArrowTick === 'function'"):
+        print('  not yet: no introArrowTick'); return
+    G = "(typeof IX_GOAL !== 'undefined' && IX_GOAL ? IX_GOAL.label : null)"
+    g.ev('localStorage.clear()'); g.ev('newGameStart(true)'); g.step(5)
+    g.page.fill('form input[maxlength="24"]', 'Sam'); g.page.click('form button'); g.step(5)
+    g.ev("skipTo(introAbs(0, 18 * 60 + 40))"); g.ev("(() => { goToDeck(3); player.obj.position.copy(cellPos(28, 2)); })()"); g.step(5)
+    g.ev("(() => { if (DIALOGUE) dialogueEnd(); INTRO_UI.chiefD = null; SHIP.intro.done['chief:met'] = SHIP.intro.done['chief:end'] = Math.floor(shipNow()); SHIP.player.tray = null; delete SHIP.intro.done['ate:last']; clearGoal(); })()"); g.step(20)
+    eat = g.ev(G); card0 = g.ev("SHIP.intro.done['call:tip'] !== undefined")
+    g.ev("SHIP.player.tray = 'Stew'"); g.step(10); eat2 = g.ev(G); card = ''
+    for i in range(10):
+        g.step(15); card = g.ev("(() => { const c = document.getElementById('devDlg'); return c && !c.hidden ? c.textContent : ''; })()")
+        if 'Call home' in card: break
+    if 'Call home' not in card: print('  (no card:', g.ev("({ dlg: DIALOGUE && DIALOGUE.id, choose: !!DEV.choose, panel: (document.getElementById('devDlg') || {}).hidden, keys: Object.keys(SHIP.intro.done).filter(k => /call|arrow|ate|chief/.test(k)).map(k => k + '=' + SHIP.intro.done[k]), arrow: INTRO_UI.arrow, chiefD: !!INTRO_UI.chiefD })"), ')')
+    print(f"  the Chief says eat, no tray: arrow '{eat}', call card held back {not card0}; with a tray: arrow '{eat2}', call card {'up' if 'Call home' in card else 'not up'}")
+    if eat != 'Get your dinner at the servery': fail(f'no servery arrow after the Chief told you to eat: {eat}')
+    if eat2 == 'Get your dinner at the servery' or card0: fail(f'the servery arrow stayed with a tray in hand ({eat2}) or the call card came first ({card0})')
+    if 'Call home' not in card: fail('no call-home card after the Chief\'s visit')
+    else:
+        g.ev("devChosen(0)"); g.step(20); tr = g.ev(G)
+        g.ev("(() => { player.obj.position.copy(cellPos(37, 19)); })()"); g.step(20)
+        end = g.ev("({ g: " + G + ", end: SHIP.intro.done['call:end'] !== undefined })")
+        print(f"  Track it: arrow '{tr}'; in the booths: arrow {end['g']}, done {end['end']}")
+        if not tr or 'booth' not in tr.lower() or end['g'] or not end['end']: fail(f'the call-home arrow went wrong: {tr}, {end}')
+    g.ev("(() => { const b = INTRO_WEEK.find(x => x.id === 'd1-briefing'); SHIP.intro.done['d1-briefing:met'] = introAbs(1, b.at); skipTo(introAbs(1, b.until + 6)); goToDeck(5); player.obj.position.copy(cellPos(15, 3)); clearGoal(); })()"); g.step(20)
+    c1 = g.ev(G); g.ev('careerClock()'); g.step(20); c2 = g.ev(G)
+    took = g.ev("(() => { const j = SHIP.jobs.find(x => x.reserved === 1) || SHIP.jobs.find(x => !x.by); return !!j && claimJob(j.id); })()"); g.step(20); c3 = g.ev(G)
+    print(f"  Day 1 after the briefing: '{c1}'; clocked in: '{c2}'; job taken {took}: {c3}")
+    if c1 != 'Clock in at the time clock' or c2 != 'Take a job at the job board' or c3 in ('Clock in at the time clock', 'Take a job at the job board'): fail(f'the Day 1 arrows went wrong: {c1}, {c2}, {c3}')
+    if not g.ev("typeof teaOut === 'function'"):
+        print('  tea: not yet (no teaOut, the player engineer\'s 0.28.74)'); return
+    g.ev("(() => { const j = SHIP.jobs.find(x => x.reserved === 1); if (j) { jobStops(j).forEach((s, k) => jobStepDone(j.id, k)); j.workDone = true; turnInJob(j.id); } SHIP.intro.done['d1-shadow:job'] = SHIP.intro.done['d1-shadow:job'] || Math.floor(shipNow()); })()")
+    g.ev("skipTo(introAbs(1, 13 * 60 + 1))"); g.ev("(() => { SHIP.player.needs = { hunger: 80, energy: 80, hygiene: 80, fitness: 80, social: 80 }; clearGoal(); const a = DECK_CREW.find(x => x.p.id === INTRO_ESCORT); if (a) { const n = nearestOpen(a.x + 1, a.z, player); if (n) player.obj.position.copy(cellPos(...n)); } })()")
+    for i in range(40):   # he starts once his turn-in talk is over, by 13:10 at the latest
+        g.step(30)
+        if g.ev("SHIP.intro.done['tea:go'] !== undefined || SHIP.intro.done['tea:end'] !== undefined"): break
+    g.step(30)
+    Z = "(e => e && e.mode)(escortPlan(ROSTER.find(p => p.id === INTRO_ESCORT), shipNow()))"
+    go = g.ev("({ go: SHIP.intro.done['tea:go'] !== undefined, told: SHIP.intro.done['tea:told'] !== undefined, g: " + G + ", mode: " + Z + ", lead: introTeaLead() })")
+    g.ev('(() => { goToDeck(5); player.obj.position.copy(cellPos(22, 1)); })()'); g.step(30)
+    at = g.ev("({ at: SHIP.intro.done['tea:at'] !== undefined, g: " + G + ", mode: " + Z + " })")
+    g.ev("SHIP.player.teaDay = 1"); g.step(60)
+    after = g.ev("({ end: SHIP.intro.done['tea:end'], mode: " + Z + " })")
+    print(f"  13:01, first job done: {go}; in the Tea corner: {at}; after your tea: {after}")
+    if not (go['go'] and go['told'] and go['mode'] == 'lead' and go['g'] == 'Tea and biscuits with Zeke' and go['lead']): fail(f'Zeke did not lead you to tea: {go}')
+    if not (at['at'] and at['mode'] == 'wait' and not at['g']): fail(f'tea at the Tea corner went wrong: {at}')
+    if after['end'] is None or after['end'] < 0 or after['mode'] == 'lead' or after['mode'] == 'wait': fail(f'the tea walk did not end after your tea: {after}')
+
+FIRSTS_ONLY = '--firsts' in sys.argv
 WEEK_ONLY = '--week' in sys.argv
 EVENING_ONLY = '--evening' in sys.argv or '--dawdle' in sys.argv
 DAWDLE = '--dawdle' in sys.argv   # 0.42.31 (the user on 0.60.6): part 8 lingers ~40 s by the Deck 5 lift and again after the bunk; Torres must still ride with you   # part 8 alone: the evening walked in the real game (the tour's quick check)
@@ -228,6 +283,10 @@ with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     if not g.ev("typeof INTRO_STEPS !== 'undefined'"):
         print('No section 21 in this build.'); sys.exit(1)
+    if FIRSTS_ONLY:
+        firsts(g)
+        if g.errors: fail('page errors: ' + ' | '.join(g.errors[:6]))
+        g.close(); print('OK' if ok else 'FAILED'); sys.exit(0 if ok else 1)
     if WEEK_ONLY:
         week(g)
         if g.errors: fail('page errors: ' + ' | '.join(g.errors[:6]))
@@ -375,7 +434,7 @@ with sync_playwright() as pw:
         rides, rideFrom = [], None   # (the lead, the user on 0.60.5a): after each lift ride Torres steps out with you, not at the room he's heading for
         lingered = []
         pre = { 'n': 0, 'pause': 0, 'still': 0, 'run': 0, 'last': None, 'sm': [] }   # 0.42.29 (the user on 0.60.5): from the ramp's welcome to the lift, walk-and-talk, no pauses
-        dinner, bunkAt, seats = None, None, None
+        dinner, bunkAt, seats, chat, chiefAt = None, None, None, None, None
         INTRO_ESC_ID = g.ev('INTRO_ESCORT')
         BED_GOAL = g.ev("typeof INTRO_BED_GOAL !== 'undefined' ? INTRO_BED_GOAL : 'Your bunk'")
         for k in range(420):
@@ -404,6 +463,17 @@ with sync_playwright() as pw:
                 print(f"  at the table {dinner['t']}: servery {dinner['portions']} portions of {dinner['dish']} ({dinner['meal']}), {dinner['mess']} crew in the mess, seats you {dinner['you']}, Torres {dinner['him']}")
                 hm = dinner['t'].split()[-1]; tmin = int(hm[:2]) * 60 + int(hm[3:])
                 if tmin > 19 * 60 and not DAWDLE: fail(f'the walk is too long: you reach the table at {hm}, too late for the dinner chat and the Chief before 19:30 (reviewer 1c: 19:00, the scenes wait till 19:30)')   # 0.42.27
+            if chat is None and g.ev("!!DIALOGUE && /^introDinner/.test(DIALOGUE.id || '')"):   # the dinner chat at your table (0.42.63, the user: the game sits you down for it)
+                for _ in range(4): g.step(20); g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'stand'])   # stop steering: let the game sit you
+                chat = { 't': g.ev('clockText()'), 'seat': g.ev("introSeat('you')"), 'sat': g.ev("typeof ACT !== 'undefined' && ACT ? ACT.placeId || null : null"), 'calder': g.ev(CALDER_D) }
+                print(f"  the dinner chat at {chat['t']}: sat down by the game in {chat['sat']} (your seat {chat['seat']}); the Chief {chat['calder']} m from her seat")
+                if chat['seat'] and chat['sat'] != chat['seat'] and not DAWDLE: fail(f"you weren't sat down at your table for the dinner chat: {chat}")
+                if chat['calder'] is not None and chat['calder'] < 2: fail(f"the Chief was already at your table when the dinner chat began (0.42.64: she walks over at its end): {chat}")
+            if chiefAt is None and g.ev("!!DIALOGUE && /^introChief/.test(DIALOGUE.id || '')"):   # her welcome: she's walked over and sat first, after you and the chat
+                chiefAt = { 't': g.ev('clockText()'), 'calder': g.ev(CALDER_D), 'in': g.ev('introCalderIn()'), 'chat': chat is not None, 'you': g.ev("typeof ACT !== 'undefined' && ACT ? ACT.placeId || null : null") }
+                print(f"  the Chief's welcome at {chiefAt['t']}: she's {chiefAt['calder']} m from her seat (at it: {chiefAt['in']}), after the chat {chiefAt['chat']}, you in {chiefAt['you']}")
+                if not chiefAt['in'] and not DAWDLE: fail(f"the Chief's welcome began before she'd walked over to your table: {chiefAt}")
+                if not chiefAt['chat'] and not DAWDLE: fail(f"the Chief's welcome came before the dinner chat with Torres: {chiefAt}")
             if r['step'] == 'free' and seats is None:   # reviewer 1: who sits in the three dinner seats once the Chief has come over
                 for _ in range(4): g.step(20); g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'stand'])   # stop steering: let the game sit you
                 seats = g.ev("(() => { const S = introStepById('chief').seats || {}, h = id => { const a = id && heldBy(id); return a ? a.p.id : null; }; return { you: [S.you, h(S.you), typeof ACT !== 'undefined' && ACT ? ACT.placeId || null : null], torres: [S[INTRO_ESCORT], h(S[INTRO_ESCORT])], calder: [S.calder, h(S.calder)], t: clockText() }; })()")
@@ -424,7 +494,7 @@ with sync_playwright() as pw:
             print(f'  his goodnight at {gn[0]} (ship minute; None: not with you), last lines said: {gn[1]}')
             if g.ev('SHIP.intro.done.goodnight === undefined'): fail('Torres never said goodnight (or the fallback never ran)')
             elif bunkAt and gn[0] is not None and int(bunkAt.split()[-1][:2]) * 60 + int(bunkAt.split()[-1][3:]) - 1440 < gn[0]: fail(f'the bunk arrow came before his goodnight ({bunkAt})')
-        if simnow and (not seats or seats['you'][1] or seats['you'][2] != seats['you'][0] or seats['torres'][1] != INTRO_ESC_ID or seats['calder'][1] != 'calder'): fail(f'the dinner seats are wrong (place, held by): {seats}')
+        if simnow and (not seats or seats['you'][1] or seats['you'][2] != seats['you'][0] or seats['torres'][1] != INTRO_ESC_ID or (seats['calder'][1] not in ('calder', None) or seats['calder'][1] is None and not chiefAt)): fail(f'the dinner seats are wrong (place, held by): {seats}')   # (0.42.64: the Chief may still be on her way over then; the welcome check below has her sat)
         w = g.ev("({ missed: SHIP.intro.missed, done: Object.keys(SHIP.intro.done), device: introFlag('intro.device'), calder: introFlag('met.calder') })")
         print(f'  draw-call peaks by deck {peak}; Torres led you for {led} looks')
         if w['missed']: fail('the real walk missed ' + ', '.join(w['missed']))
@@ -564,6 +634,7 @@ with sync_playwright() as pw:
             pm = g.ev("(() => { const ask = ((SHIP.social && SHIP.social.seekAsks) || []).find(a => a.id === 'pell'); return { done: ask ? ask.done : null, mail: (SHIP.mail.find(m => m.from === 'Mira Pell' || /Pell/.test(m.from)) || {}).subject || null, seek: SHIP.intro.done['d3-pell:seek'] }; })()")
             print(f"  Pell's Wednesday ask (you were away): {pm}")
             if pm['seek'] is None or (not pm['done'] and not pm['mail']): fail(f'no Mail when Pell never found you: {pm}')
+    firsts(g)
     week(g)
     if g.errors: fail('page errors: ' + ' | '.join(g.errors[:6]))
     g.close()
