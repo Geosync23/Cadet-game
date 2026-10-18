@@ -35,6 +35,8 @@ Done and sent: plan v10 (9e26a58: Step 2's optional stages into Step 4, the cold
 ## Since (2026-10-18 afternoon, session_01VAVLL8kQNeQwiZ7TJZ6GMF)
 - adc12e2 + 1083c85: Tier 2 fault tables complete (`Line` column: water/heat/air causes can be traced). e6b6601: the user's Step 3 survey applied (plan v11): pages approved; M8 2-3 team jobs a week (rota on the page), stage 2 in Step 4; P2 gated on `SHIP.works.said.p2`; the full air line now: `architect-air-line.html` (src `air.body`), M9 and the damper table. Fault tables' Tier 2 still awaits the user's approval.
 
+- 33587e7: `plans/holidays-plan.html` (src `plans/mechanics/src/holidays.body`), for lead 13; the user put holidays ON HOLD (2026-10-18 ~16:54); its 7 questions are unanswered; design-doc.md not edited for it.
+
 ## Next (in order)
 1. ~~**Finish the Tier 2 fault tables**~~ (done, adc12e2) (`fault-tables.html`, `src/ft.body`): each Tier 2 kind's causes in the Tier 1 format (card, up close, when, how common, still, from), parts from `STOCK` only, same card needs different signs. Needed by: M9's lines (water: recycler, filter, uv, pump, valve; heat: heater, heatpump, manifold), P1's first case (3-pump-1 `peak`; filter `always`; membrane; valve), P2's first case (scrubber: filter `always`, bearing `warm`, a new `panel` cause, part seal, `touched`). Air plant and main fan are stand-ins without panels (no tracing for air yet).
 2. Whatever the user sends back on the Step 3 pages (fix, re-push, one line to the lead each).
