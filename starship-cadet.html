@@ -249,7 +249,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.44.2
+   STARSHIP CADET: CSV Wren                           build 0.45.0
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7808,7 +7808,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.44.2';                           // keep in step with the header's build line
+const GAME_BUILD = '0.45.0';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -35337,7 +35337,7 @@ function drillStops(kind) {
   if (kind === 'pressure') return [st('door', 1, 'dog', { how: 'turn', opts: { label: 'The bulkhead wheel', v: 0, min: 0, max: 4, by: 1, onTurn: v => v >= 4 ? 'Dogged tight.' : ['Stiff.', 'A quarter turn.', 'Half way.', 'Nearly there.'][v] || null, ok: v => v >= 4 } }), st('door', 10, 'stand', { opts: { text: 'You stand by the door.' } })];
   return [st('breaker', 2, 'reserve', { opts: { text: 'The junior wing to reserve.' } }), st('breaker', 8, 'stand', { opts: { text: 'Back to main.' } })];
 }
-const drillDue = d => { const W = SHIP.works; return !!W && W.rank === 'junior' && weekday(d) === 2 && playerShiftOn(d) && (worksOpened(W).has('m3d') || W.tr.m3d !== undefined); };
+const drillDue = d => { const W = SHIP.works; return !!W && !!WORK_MECH.m3d && W.rank === 'junior' && weekday(d) === 2 && playerShiftOn(d) && (worksOpened(W).has('m3d') || W.tr.m3d !== undefined); };
 const drillJobOf = d => SHIP.jobs.find(x => x.kind === 'drill' && Math.floor(x.posted / 1440) + 1 === d) || null;
 if (typeof jobKindAdd === 'function') jobKindAdd('drill', { tier: 1, work: 0, side: true, text: 'The drill',
   post(h, jobs) {                                        // Wednesdays at 14:00's hour, found at 14:50
@@ -35375,7 +35375,7 @@ WORK_TICKS.push((now, skip) => {
       drillSay('drill.time.' + w, { fast: 'Two minutes ten. Better.', ok: 'Three minutes. Fine. We\'ll do better.', slow: 'Four and a half minutes. We\'ll talk about it.' }[w]); }
   }
 });
-if (typeof jobKindAdd === 'function') WORK_MECH.m3d = {};   // a small row: opens on Wednesday, trained by the first drill
+if (typeof jobKindAdd === 'function' && drillPlace('ext') && drillPlace('hatch') && drillPlace('door') && drillPlace('breaker')) WORK_MECH.m3d = {};   // a small row: opens on Wednesday, trained by the first drill; only with the drill's places in the build
 
 // =====================================================================
 // 6. CAMERA
