@@ -10389,7 +10389,7 @@ deviceApp({ id: 'ship', title: 'News feed', icon: 'news', order: 60, view: () =>
 // Record (0.35.4): your Works record, where progression shows. Certification and the Chief's comments come later.
 deviceApp({ id: 'record', title: 'Record', icon: 'record', order: 70, view: () => {
   const mine = (SHIP.jobs || []).filter(j => j.doneBy === 'you'), B = [];
-  B.push(typeof worksRecordHead === 'function' ? worksRecordHead() : { kind: 'text', text: 'Works technician, tier ' + (typeof PLAYER_TIER !== 'undefined' ? PLAYER_TIER : 1) + '.', mark: 'hot' });   // section 24 (0.44.4): rank, Works reputation, What's next
+  B.push((typeof worksRecordHead === 'function' && worksRecordHead()) || { kind: 'text', text: 'Works technician, tier ' + (typeof PLAYER_TIER !== 'undefined' ? PLAYER_TIER : 1) + '.', mark: 'hot' });   // section 24 (0.44.4): rank, Works reputation, What's next
   B.push({ kind: 'text', text: mine.length ? 'Jobs on the recent record: ' + mine.length + '.' : 'No jobs on your record yet. Take one at the job board in the Works bay.' });
   if (mine.length) B.push({ kind: 'list', rows: mine.slice(-6).reverse().map(j => { const [title, where] = jobCard(j); return { text: title, sub: where + ', Day ' + (Math.floor(j.doneAt / 1440) + 1) }; }) });
   // reputation (0.35.22, Pillar 4): section 20's repView(), words only, never numbers
@@ -34782,8 +34782,8 @@ function worksNext() {
   return worksText('next.band.' + (worksBand() || 'new'), 'Keep at it: Calder\'s watching your work.', null, k);
 }
 // the Record's first lines (section 19 asks): your rank, your Works reputation and "What's next"
-function worksRecordHead() {
-  const W = SHIP.works, tier = W ? W.tier : 1, v = { title: worksText('works.title.t' + tier, 'tier ' + tier), rank: worksRankTitle(W), band: W ? worksBandWord() : worksText('works.band.new', 'New'), next: worksNext() };
+function worksRecordHead() {                             // null before SHIP.works (Days 0-1 keep the Record's old line)
+  const W = SHIP.works; if (!W) return null; const tier = W.tier, v = { title: worksText('works.title.t' + tier, 'tier ' + tier), rank: worksRankTitle(W), band: worksBandWord(), next: worksNext() };
   return { kind: 'text', mark: 'hot', text: worksText('works.record', '{rank}, {title}. Works reputation: {band}. What\'s next: {next}', v) };
 }
 // ---- the device's Works app: Training, Work log, Tools; other sections add tabs with worksTabAdd (24k: Fault notes and

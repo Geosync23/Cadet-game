@@ -90,7 +90,7 @@ PAPER = r"""(({ plan, days }) => {
   const W = SHIP.works;
   const occ = SHIP.occasions.filter(r => /^works\./.test(r.id)).map(r => ({ id: r.id, day: Math.floor(r.at / 1440) + 1, at: hhmm(r.at % 1440), by: r.by, status: r.status }));
   return { days: days_, trained, asks, teach, seen, occ, firstJob, mail: SHIP.mail.filter(m => /^Training/.test(m.subject)).map(m => m.from + ': ' + m.subject),
-    works: W ? JSON.parse(JSON.stringify(W)) : null, size: W ? JSON.stringify(W).length : 0, head: worksRecordHead().text, locker: worksLockerText(),
+    works: W ? JSON.parse(JSON.stringify(W)) : null, size: W ? JSON.stringify(W).length : 0, head: (worksRecordHead() || { text: null }).text, locker: worksLockerText(),
     view: W ? ['training', 'log', 'tools'].map(tab => { WORKS_TAB = tab; return worksView().blocks.filter(b => b.kind !== 'buttons').map(b => b.text || (b.rows || []).map(r => r.text + ' (' + r.sub + ')').join('; ')).join(' | '); }) : null };
 })"""
 
