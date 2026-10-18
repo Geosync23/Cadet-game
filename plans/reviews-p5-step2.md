@@ -4,8 +4,7 @@ Started by lead 12 (session_01GjWhU9Z9V8RNoR8yyELA9V) at ~11:28 for every Step 2
 
 ## Passing tips
 - C claude/works-career **8cc07a5** (0.44.13, the old-save catch-up; for 0.63.0a / Step 2)
-- P claude/player-p5 **f00ac1e** (player_check only, on 3373828; for 0.63.0)
-- P claude/player-p5 **3373828** (0.28.73, contains cfce34e; 1 LOW)
+- P claude/player-p5 **d6f321d** (0.28.73 + the LOW fix 391c88e + player_check fixes f00ac1e, d6f321d; no LOWs open)
 - M2 claude/mech-incidents **c9b211a** (0.51.1; LOWs 1-2 closed, LOW 3 for Step 3)
 - M1 claude/mech-rounds **c7c55cf** (0.45.5, contains 8a6cea8..740234d and Onboarding 4's 96649fe; items 1-2 closed; LOWs closed or out by the lead)
 - S claude/ship-systems **0e18118** (0.33.54 + social_check fix and handover note; contains b676814)
@@ -16,6 +15,10 @@ Started by lead 12 (session_01GjWhU9Z9V8RNoR8yyELA9V) at ~11:28 for every Step 2
 - (none)
 
 ## Verdicts
+
+### P 391c88e + d6f321d: the LOW fix and a player_check fix — PASS (read)
+- 391c88e: a gift made in the machine shop sets `SHIP.player.untidy` too, so the m3 page's "bought or made" holds. One assignment beside `P.crafted`. That closes 0.28.73's LOW.
+- d6f321d (test only): the reserved-job arm puts 2 of each shelf part (not the one made here) in stock after claimJob, since with Pillar 5's real faults and hauling the shelf can be empty. No game change.
 
 ### S 140899a + 0e18118: S's handover note, social_check's cue arm (test only) — PASS (read)
 - social_check's cue arm empties SHIP.social.cues before its two test notes, since Pillar 5's real faults now give a real Day 2 lift repair cue. One line; no game change. S reports SOCIAL CHECK OK. The handover note is text only.
