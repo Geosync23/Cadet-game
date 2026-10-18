@@ -35562,8 +35562,9 @@ function incDone(j, t, by) {
   if (typeof liftStuck === 'function' && j.inc === 'lift') liftStuck(false);
   simNote('incident', { id: j.inc, step: 'clean', by });
   let fix = null;
-  if (j.inc === 'burst') { const wet = incPlace((DECKS[j.deck] && DECKS[j.deck].wet) || [j.deck + '-wet-1']); fix = typeof jointJobPost === 'function' && wet ? jointJobPost({ deck: j.deck, placeId: wet, at: t }) : null; }
+  if (j.inc === 'burst') { const wet = incPlace((DECKS[j.deck] && DECKS[j.deck].wet) || [j.deck + '-wet-1']); fix = typeof jointJobPost === 'function' && wet ? jointJobPost({ placeId: wet, incident: j.inc }) : null; }
   else { const f = typeof machineFound === 'function' ? machineFound(j.inc === 'lift' ? INC_LIFT_M : INC_ALARM_M, by) : null; fix = f && f.id; }
+  j.fix = fix || null;                                  // the fix's job id (saved with the job)
   if (by === 'you') {
     worksUse('m6');
     const F = fix && SHIP.jobs.find(x => x.id === fix), c = SHIP.works.cur;

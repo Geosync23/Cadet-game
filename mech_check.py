@@ -96,21 +96,22 @@ M6 = r"""(() => {
   out.kinds = {}; W.tr.m6 = W.tr.m6 || 8;
   for (const [kind, deck] of [['burst', 4], ['burst', 3], ['burst', 5], ['lift', 5], ['alarm', 3]]) {
     reset(16 * 1440 + 600); const r = out.kinds[kind + deck] = {};
+    for (const id of ['3-galleyplant-1', '5-mainlift-1']) { SHIP.machines[id].cond = 100; SHIP.machines[id].state = 'healthy'; SHIP.jobs = SHIP.jobs.filter(x => x.machine !== id); }   // fault-free first, so the fix is the incident's
     const O = incStart(kind, deck, shipNow(), false), j = SHIP.jobs.find(x => x.id === O.j);
-    r.held = j.leave; r.top = j.urgency; r.lift = STUB_LIFT; r.claimed = claimJob(j.id);
+    r.held = j.leave; r.top = j.urgency; r.lift = !!liftStuckNow(); r.claimed = claimJob(j.id);
     const st = jobStops(j); r.steps = st.map(s => s.step + ':' + s.how + '@' + (s.places[0] || '-'));
     if (kind === 'burst') { const line = DECKS[deck].valveLine; r.wrong = jobStepDone(j.id, 0, { pick: line[0] }); r.wrongSafe = W.inc.open.safe; r.vetoed = !(j.stepsDone || []).includes(0); j.stepsDone = (j.stepsDone || []).filter(k => k !== 0); r.right = jobStepDone(j.id, 0, { pick: line[line.length - 1] }).ok; }
     else r.right = jobStepDone(j.id, 0, kind === 'lift' ? { value: 3 } : {}).ok;
-    r.safe = W.inc.open.safe; r.liftAfter = STUB_LIFT;
+    r.safe = W.inc.open.safe; r.liftAfter = !!liftStuckNow();
     for (let k = 1; k < st.length; k++) jobStepDone(j.id, k, {});
     r.turnin = turnInJob(j.id); r.open = W.inc.open;
-    const fx = SHIP.jobs.filter(x => x.status !== 'done' && x.id !== j.id && (x.kind === 'joint' || x.foundBy === 'you')).map(x => x.kind + ':' + (x.machine || x.at) + ':' + (x.foundBy || '') + ':' + (x.leave || 0));
+    const fx = SHIP.jobs.filter(x => x.id === j.fix && x.status !== 'done').map(x => (x.chore || x.kind) + ':' + (x.machine || x.target) + ':' + (x.foundBy || '') + ':' + (x.leave || 0));
     r.fix = fx;
   }
   reset(16 * 1440 + 600); delete W.tr.m6;               // not trained: the crew's
   const O = incStart('burst', 4, shipNow(), false), cj = SHIP.jobs.find(x => x.id === O.j); out.crewHeld = cj.leave;
   for (let m = 610; m <= 780; m += 10) { setShipNow(16 * 1440 + m); machinesNow(); for (const f of WORK_TICKS) f(shipNow(), false); }
-  out.crew = { by: cj.doneBy, status: cj.status, open: W.inc.open, fix: SHIP.jobs.filter(x => x.kind === 'joint').length };
+  out.crew = { by: cj.doneBy, status: cj.status, open: W.inc.open, fix: SHIP.jobs.filter(x => x.chore === 'joint').length };
   reset(14 * 1440 + 300); W.tr.m6 = 8; const P = incPlan(3); out.skipPlan = P;
   if (P.length) { const t = (P[1] - 1) * 1440 + Math.ceil(P[2] / 60) * 60; setShipNow(t); machinesNow(); for (const f of WORK_TICKS) f(t, true); out.skip = { done: P[4], open: W.inc.open, jobs: SHIP.jobs.filter(x => x.kind === 'incident').map(x => x.status + ':' + x.doneBy) }; }
   W.inc.open = { kind: 'lift', deck: 5, at: 23000, train: false, safe: false, j: 'x' }; W.inc.plan[9] = ['alarm', 64, 600, 3, 1]; W.inc.plan[1] = ['burst', 8, 630, 4, 1];
@@ -139,7 +140,9 @@ def part_m6(g):
     s = json.loads(a['save'])
     check(s['open'] and s['open']['kind'] == 'lift' and '9' in s['plan'] and '1' not in s['plan'], 'm6: the save read back (old weeks dropped)')
     check(json.loads(a['saveOld']) == {'plan': {}, 'open': None}, 'm6: a save with no incidents reads as none')
-    check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'm6: differs the second time')
+    if not check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'm6: differs the second time'):
+        for k in a:
+            if json.dumps(a[k], sort_keys=True) != json.dumps(b[k], sort_keys=True): print('   ', k, json.dumps(a[k], sort_keys=True)[:300], '|', json.dumps(b[k], sort_keys=True)[:300])
 PARTS['m6'] = part_m6
 
 only = set(sys.argv[2:])
