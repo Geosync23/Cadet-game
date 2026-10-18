@@ -252,7 +252,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.80.5
+   STARSHIP CADET: CSV Wren                           build 0.80.6
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8450,7 +8450,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.80.5';                           // keep in step with the header's build line
+const GAME_BUILD = '0.80.6';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -12187,7 +12187,7 @@ function actBegin() {
   if (A.kind === 'eat' && A.o.fed) SHIP.player.tray = null;   // sat down with your tray (0.28.31)
   if (A.kind === 'job' && !jobBegin(A)) return;          // at the machine: fit parts, then inspect or repair (the job loop, below)
   const p = player.obj.position, s = A.spot || { x: p.x, z: p.z, y: 0, face: player.face };
-  A.body = new FullPerson(PLAYER_SPEC, 'you'); A.x = p.x; A.z = p.z; A.y = 0; A.face = player.face;
+  A.body = new FullPerson(typeof recLookSpec === 'function' ? recLookSpec() : PLAYER_SPEC, 'you'); A.x = p.x; A.z = p.z; A.y = 0; A.face = player.face;   // recLookSpec: rec kit on the rec deck (0.80.6)
   A.to = s; A.pose = A.o.pose || A.def.pose || 'stand'; A.phase = 'in';
   A.body.set({ x: A.x, y: 0, z: A.z }, A.face, 'stand'); player.obj.visible = false;
   const what = A.kind === 'queue' ? 'You join the queue.' :   // no count (0.28.30, the user's: you see the people ahead of you)
@@ -13958,6 +13958,143 @@ function ixFrame() {
   if (label !== ixLast) { lab.textContent = ixLast = label; }
 }
 requestAnimationFrame(ixFrame);
+
+// =====================================================================
+// 15r. THE REC DECK'S ACTIVITIES (the rec deck architect, 0.80.6; plans/recdeck-plan.html section 9 "For you: tap and do")
+// One tap each, for the player only (phase 1): the pool (swim lengths), the kayak dock and the rivers (paddle the loop),
+// the climbing wall (climb, ring the bell, be lowered), the float room (float), an auditorium seat (sit), the stands
+// (watch). Each is a section 15 activity (actStart, PLAYER_ACTS), so walking away stops it and the needs work as
+// everywhere. The pool and the kayaks need rec kit: in uniform, you go to a locker in the changing rooms first (a
+// change, as at your wardrobe), and when you're done you come back the same way for a quick shower and change back
+// (the first time, a tip says so). Rec kit is a colour change on your own rig (recKitWear): a teal top with a coral
+// band. It isn't saved, and leaving the deck puts your uniform back on. Swimming and paddling move your activity body
+// (recMove, its own requestAnimationFrame like 15b's). Outside 06:00-midnight: "The rec dec's closed till six."
+// Lightdisc's court says it's coming soon (it's being made on its own). Nothing here calls R().
+// =====================================================================
+Object.assign(PLAYER_ACTS, {
+  recSwim:   { need: 'leisure', gain: 25, mins: 20, cost: { energy: 8 }, also: { hygiene: 10, fitness: 4 }, pose: 'recSwim', title: 'Swimming', done: 'Twenty lengths, give or take. You climb out tingling.' },
+  recKayak:  { need: 'leisure', gain: 25, mins: 20, cost: { energy: 6 }, also: { fitness: 4 }, pose: 'recKayak', title: 'Kayaking', done: 'You bring the kayak in to the dock, soaked and grinning.' },
+  recClimb:  { need: 'leisure', gain: 20, mins: 12, cost: { energy: 6 }, also: { fitness: 4 }, pose: 'recClimb', title: 'Climbing', done: 'Back on the floor. Your arms are jelly. You rang the bell, though.' },
+  recFloat:  { need: 'leisure', gain: 25, mins: 15, pose: 'recFloat', title: 'Float room', done: 'Back to full gravity. Your legs feel very heavy.' },
+  recSeat:   { need: 'leisure', gain: 8, mins: 15, pose: 'sit', title: 'Auditorium', done: 'You get up and stretch.' },
+  recWatch:  { need: 'leisure', gain: 8, mins: 15, pose: 'sit', title: 'Stands', done: 'You get up and stretch.' },
+  recChange: { mins: 1, pose: 'browse', title: 'Changing rooms' },
+  recShower: { need: 'hygiene', gain: 20, mins: 3, pose: 'stand', title: 'Shower' },
+});
+const REC = { kit: false, chain: null, last: null, t: null };
+const recOpen = () => SHIP.time.min >= DECKS[7].open[0] * 60;   // 06:00 to midnight
+function recLookSpec() { return REC.kit ? { ...PLAYER_SPEC, dept: 'civilian', outfit: '#2aa198', acc: ['rec'] } : PLAYER_SPEC; }
+function recKitWear(on) {                                // your rig in rec kit or uniform: rebuilt (makeCharacter draws no R())
+  if (REC.kit === on) return; REC.kit = on;
+  const old = player.rig; player.obj.remove(old.root); old.root.traverse(o => { if (o.isMesh) o.geometry.dispose(); });
+  player.rig = makeCharacter(recLookSpec()); player.obj.add(player.rig.root); player.obj.traverse(o => { o.userData.walker = player; });
+  player.propKey = ''; player.propMeshes = []; player.bodyProps = null;
+}
+// where things are, in world units (the deck's tile edges through X0 and Z0)
+const recSpot = (walk, x, z, face, pose, y = 0) => ({ id: null, walk, x: X0(0) + x, z: Z0(0) + z, y, face, pose });
+const recLocker = () => recSpot([19, 1], 19.35, 1.25, Math.PI, 'browse');
+const recShowerAt = () => recSpot([17, 2], 17.65, 3.35, Math.PI, 'stand');
+const REC_LANES = [1.31, 2.5, 3.69];   // the pool's three lanes (tile z), between the ropes
+const REC_LOOP = { xs: 4.8, xe: 13.8, zn: 1.3, zs: 4.85 };   // the kayak loop's centre line (tile units)
+function recTap(it, at, point) {
+  if (typeof deckDef === 'undefined' || !deckDef || deckDef.num !== 7) return false;
+  const t = it.t;
+  if (t === 'Lightdisc court' || t === 'Scoreboard') { toast(t, it.x); return true; }
+  const kind = t === 'Pool' ? 'swim' : /^(Kayak dock|River|White water|Kayak rack|Wave gate)$/.test(t) ? 'kayak' : t === 'Climbing wall' ? 'climb'
+    : t === 'Float room' ? 'float' : t === 'Seats' ? 'seat' : t === 'Stands' ? 'watch' : t === 'Lockers' && REC.kit ? 'unchange' : null;
+  if (!kind) return false;
+  if (!recOpen() && kind !== 'unchange') { toast(t, 'The rec dec\'s closed till six.'); return true; }
+  recGo(kind, point, t, it.x); return true;
+}
+PLAYER_TAPS.push(recTap);
+function recGo(kind, point, title, flavour) {
+  REC.chain = null;
+  if (kind === 'seat' || kind === 'watch') {             // the nearest free seat to your tap, in that room
+    const room = kind === 'seat' ? 'A' : 'T', pl = [...PLACE_OF.values()].filter(p => p.type === 'rec:seat' && p.room === room && !heldBy(p.id))
+      .map(p => [p, placeSpot(p.id)]).filter(([, s]) => s).sort((a, b) => Math.hypot(a[1].x - point.x, a[1].z - point.z) - Math.hypot(b[1].x - point.x, b[1].z - point.z))[0];
+    if (!pl) { toast(title, 'Every seat\'s taken.'); return; }
+    actStart(kind === 'seat' ? 'recSeat' : 'recWatch', pl[0].id, { pose: 'sit', title, flavour, after: kind === 'seat' ? 'You sink into a violet seat and look at the stars behind the stage.' : 'You take a seat on the bench and watch the court.' });
+    return;
+  }
+  if (kind === 'unchange') { actStart('recChange', null, { title: 'Changing rooms', spot: recLocker(), back: true, after: 'You change back into your uniform.' }); return; }
+  if ((kind === 'swim' || kind === 'kayak') && !REC.kit) {   // the wet way: change first
+    if (typeof ixTip === 'function') ixTip('recChange', 'Swimming and kayaking: change first. You\'ll stop at the changing rooms by the lift.');
+    REC.chain = { then: kind, title, flavour };
+    actStart('recChange', null, { title: 'Changing rooms', spot: recLocker(), after: 'You change into rec kit at a locker: teal, with a coral stripe.' });
+    return;
+  }
+  recStart(kind, title, flavour, point);
+}
+function recStart(kind, title, flavour, point) {
+  if (kind === 'swim') {
+    const lane = REC_LANES.reduce((m, z) => point && Math.abs(Z0(0) + z - point.z) < Math.abs(Z0(0) + m - point.z) ? z : m, REC_LANES[1]);
+    actStart('recSwim', null, { title, flavour, lane, spot: recSpot([23, 2], 24.7, lane, Math.PI / 2, 'recSwim'), after: 'You slip in at the shallow end and start your lengths.' });
+  } else if (kind === 'kayak') {
+    actStart('recKayak', null, { title, flavour, spot: recSpot([11, 6], 11.4, REC_LOOP.zs, -Math.PI / 2, 'recKayak'), after: 'You take a kayak from the dock and push off into the slow channel.' });
+  } else if (kind === 'climb') {
+    const len = REC_WALL.z1 - REC_WALL.z0, r = Math.max(0, Math.min(REC_ROUTES - 1, Math.floor(((point ? point.z - Z0(0) : 4.3) - REC_WALL.z0) / len * REC_ROUTES)));
+    const z = REC_WALL.z0 + len * (r + .5) / REC_ROUTES, walk = [2, Math.max(2, Math.min(6, Math.floor(z)))];
+    actStart('recClimb', null, { title, flavour, spot: recSpot(walk, 1.82, z, -Math.PI / 2, 'recClimb'), after: 'You clip into the auto-belay on the ' + ['red', 'yellow', 'blue', 'green'][r] + ' route and start up.' });
+  } else if (kind === 'float') {
+    actStart('recFloat', null, { title, flavour, spot: recSpot([18, 12], 21, 14.8, 0, 'recFloat'), after: 'You pull on grip socks from the shelf and step into a fifth of a g.' });
+  }
+}
+// after each one ends: the next step of the wet way (change, the activity, a shower, change back)
+function recAfter(A) {
+  const done = A.phase === 'out' && A.done >= A.def.mins;
+  if (!done) { REC.chain = null; return; }
+  if (A.kind === 'recChange' && !A.o.back && REC.chain) { const c = REC.chain; REC.chain = null; recStart(c.then, c.title, c.flavour, null); return; }
+  if (A.kind === 'recSwim' || A.kind === 'recKayak') { actStart('recShower', null, { title: 'Changing rooms', spot: recShowerAt(), after: 'Back through the changing rooms: a quick shower first.' }); return; }
+  if (A.kind === 'recShower' && REC.kit) actStart('recChange', null, { title: 'Changing rooms', spot: recLocker(), back: true, after: 'You change back into your uniform.' });
+}
+// each frame: the side gains, the change itself, and moving your body through the water or up the wall
+function recFrame() {
+  requestAnimationFrame(recFrame);
+  const now = performance.now() / 1000, dt = Math.min(.1, Math.max(0, now - (REC.t === null ? now : REC.t))); REC.t = now;
+  if (typeof deckDef === 'undefined' || !deckDef || typeof ACT === 'undefined') return;
+  if (REC.kit && deckDef.num !== 7 && (!ACT || ACT.deck !== deckDef)) recKitWear(false);   // off the deck: back in uniform
+  const A = ACT;
+  if (A !== REC.last) { const was = REC.last; REC.last = A; if (was && was.kind.startsWith('rec') && !A) recAfter(was); }
+  if (!A || !A.kind.startsWith('rec') || A.phase !== 'do' || !A.body) return;
+  if (A.def.also) {                                      // the second gains (a swim washes you, all of them keep you fit), as the minutes go by
+    const d = Math.max(0, Math.min(A.done, A.def.mins) - (A.alsoDone || 0)), n = SHIP.player.needs; A.alsoDone = (A.alsoDone || 0) + d;
+    for (const k in A.def.also) if (k in n) n[k] = needClamp(n[k] + A.def.also[k] * d / A.def.mins);
+  }
+  if (A.kind === 'recChange' && !A.swapped && A.done >= A.def.mins / 2) {   // half way through the change: the other clothes on
+    A.swapped = true; recKitWear(!A.o.back);
+    const b = new FullPerson(recLookSpec(), 'you'); b.set({ x: A.x, y: A.y, z: A.z }, A.face, A.pose); A.body.dispose(); A.body = b;
+  }
+  recMove(A, dt, now);
+}
+requestAnimationFrame(recFrame);
+function recMove(A, dt, t) {
+  const r = A.body.rig, u = Math.min(1, A.done / A.def.mins);
+  if (A.kind === 'recSwim') {                            // lengths along the lane, turning at each end
+    const xa = X0(0) + 24.7, xb = X0(0) + 30.1; if (!A.dir) A.dir = 1;
+    A.x += A.dir * .55 * dt; if (A.x > xb) { A.x = xb; A.dir = -1; } if (A.x < xa) { A.x = xa; A.dir = 1; }
+    A.face = A.dir > 0 ? Math.PI / 2 : -Math.PI / 2; A.z = Z0(0) + A.o.lane;
+  } else if (A.kind === 'recKayak') {                    // round the loop: west along the slow channel, up the stern end, east down the white water, round the bow end
+    const L_ = REC_LOOP, w = L_.xe - L_.xs, d = L_.zs - L_.zn, per = 2 * w + 2 * d;
+    if (A.lap === undefined) A.lap = (L_.xe - 11.4) % per;
+    const s0 = A.lap % per, fast = s0 >= w + d && s0 < 2 * w + d; A.lap += (fast ? 1.3 : .75) * dt;
+    const s = A.lap % per; let x, z, fx, fz;
+    if (s < w) { x = L_.xe - s; z = L_.zs; fx = -1; fz = 0; }
+    else if (s < w + d) { x = L_.xs; z = L_.zs - (s - w); fx = 0; fz = -1; }
+    else if (s < 2 * w + d) { x = L_.xs + (s - w - d); z = L_.zn; fx = 1; fz = 0; }
+    else { x = L_.xe; z = L_.zn + (s - 2 * w - d); fx = 0; fz = 1; }
+    A.x = X0(0) + x; A.z = Z0(0) + z; A.face = Math.atan2(fx, fz); A.y = (fast ? .04 : .015) * Math.sin(t * (fast ? 5 : 2.5));
+  } else if (A.kind === 'recClimb') {                    // up (to 55%), the bell (to 70%), then lowered
+    const top = H - 2.55;
+    r.recMode = u < .55 ? 'up' : u < .7 ? 'ring' : 'down';
+    r.recLift = u < .55 ? top * u / .55 : u < .7 ? top : top * Math.max(0, 1 - (u - .7) / .26);
+    A.x = X0(0) + (r.recMode === 'down' ? 2.05 : 1.82);
+    if (r.recMode === 'ring' && !A.rang) { A.rang = true; toast('The bell', 'Ding! You ring the brass bell at the top of the wall. The whole river hall hears it.'); }
+  } else if (A.kind === 'recFloat') {                    // drifting round the room, bouncing slowly, a somersault every so often
+    const c = Math.cos(t * .25), sn = Math.sin(t * .25);
+    A.x = X0(0) + 21 + c * 1.6; A.z = Z0(0) + 14.8 + sn * 1.0; A.face = Math.atan2(-sn, c * .6);
+    r.recLift = .6 + .9 * Math.abs(Math.sin(t * .6)); const ph = (t / 9) % 1; r.recSpin = ph > .8 ? Math.PI * 2 * ss((ph - .8) / .2) : 0;
+  }
+}
 
 // =====================================================================
 // 16. GALLEY & FOOD
@@ -38598,6 +38735,7 @@ function makeCharacter(spec, finish = bake) {          // finish: what to do wit
   rig.chest = pv(rig.torso, 0, .07, 0);
   part(rig.chest, cylG(.17 * bw, .155 * bw, .25, 20), suit, 0, .125, 0);
   part(rig.chest, cylG(.183 * bw, .172 * bw, .12, 20), uni, 0, .22, 0);
+  if (has('rec')) part(rig.chest, cylG(.188 * bw, .186 * bw, .035, 20), '#ff7f6e', 0, .2, 0);   // rec kit's coral band (the rec deck, 0.80.6)
   part(rig.chest, cylG(.175 * bw, .175 * bw, .015, 20), uniDk, 0, .16, 0);
   part(rig.chest, GEO.sph, uni, 0, .28, 0, .2 * bw, .07, .15 * bw);
   if (has('apron')) part(rig.chest, GEO.box, '#e8e0cf', 0, .06, .162 * bw, .2 * bw, .2, .02);
@@ -39094,6 +39232,52 @@ const PROP_KIT = {
   },
   book(p) { part(p, GEO.box, '#8c3f22', .09, -.08, .05, .17, .22, .035, .2); part(p, GEO.box, '#efe9dc', .09, -.08, .07, .15, .2, .008, .2); },
 };
+// the rec deck's poses (0.80.6, plans/recdeck-plan.html section 8; the rec deck architect). Each moves the whole body by
+// the hips (lowered into the water, lifted up the wall, tipped face down), so they're for the player's activity body,
+// which is made for each activity and thrown away after. The climb and the float read rig.recLift (metres) and
+// rig.recMode / rig.recSpin, set each frame by section 15r
+Object.assign(ACTS, {
+  recSwim: { f(r, s, t, b, ph, h) {                      // front crawl: face down at the surface, arms over in turn, a flutter kick, a turn of the head to breathe
+    r.hips.position.y = L(r.hips.position.y, .3 / h, s); r.hips.rotation.x = 1.45 * s;
+    for (const leg of r.legs) { leg.thigh.rotation.x = L(leg.thigh.rotation.x, .22 * Math.sin(t * 7 + leg.side * 1.6), s); leg.knee.rotation.x = L(leg.knee.rotation.x, .2 + .12 * Math.sin(t * 7 + leg.side), s); }
+    for (const a of r.arms) { const u = (t * .8 + (a.side > 0 ? .5 : 0)) % 1; a.sh.rotation.x = L(a.sh.rotation.x, -Math.PI * 2 * u, s); a.el.rotation.x = L(a.el.rotation.x, u < .5 ? -.25 : -1.0, s); a.sh.rotation.z = L(a.sh.rotation.z, a.side * .12, s); }
+    r.head.rotation.y = Math.sin(t * .8 * Math.PI * 2) * .55 * s;
+  } },
+  recKayak: { props: { B: 'recBoat', R: 'recPaddle' }, f(r, s, t, b, ph, h) {   // sitting in the cockpit at the waterline, legs out in front, paddling side to side
+    r.hips.position.y = L(r.hips.position.y, .4 / h, s);
+    for (const leg of r.legs) { leg.thigh.rotation.x = L(leg.thigh.rotation.x, -1.45, s); leg.knee.rotation.x = L(leg.knee.rotation.x, .25, s); leg.ankle.rotation.x = L(leg.ankle.rotation.x, 0, s); }
+    const sw = Math.sin(t * 2.6); r.chest.rotation.y = L(r.chest.rotation.y, sw * .35, s);
+    for (const a of r.arms) armTo(a, s, -1.15 + a.side * sw * .3, -.55, .22, .1);
+    r.torso.rotation.x = L(r.torso.rotation.x, .1, s);
+  } },
+  recClimb: { f(r, s, t, b, ph, h) {                     // up the wall hand over hand; at the top a swing at the bell; then lowered, feet on the wall
+    const mode = r.recMode || 'up';
+    r.hips.position.y += (r.recLift || 0) / h * s;
+    if (mode === 'down') {
+      for (const leg of r.legs) { leg.thigh.rotation.x = L(leg.thigh.rotation.x, -1.2, s); leg.knee.rotation.x = L(leg.knee.rotation.x, .35, s); }
+      for (const a of r.arms) armTo(a, s, -2.2, -.6, .15, .1);
+      r.torso.rotation.x = L(r.torso.rotation.x, -.3, s); r.head.rotation.x = L(r.head.rotation.x, -.2, s);
+      return;
+    }
+    for (const leg of r.legs) { const u = Math.max(0, Math.sin(t * 2 + leg.side * 1.57)); leg.thigh.rotation.x = L(leg.thigh.rotation.x, -.25 - .55 * u, s); leg.knee.rotation.x = L(leg.knee.rotation.x, .3 + .9 * u, s); }
+    for (const a of r.arms) {
+      if (mode === 'ring' && a.side < 0) { armTo(a, s, -2.95, -.3 + .35 * Math.sin(t * 11), .3, .2); continue; }
+      armTo(a, s, -2.55 + .35 * Math.sin(t * 2 + a.side * 1.57), -.35, .18, .2);
+    }
+    r.head.rotation.x = L(r.head.rotation.x, mode === 'ring' ? -.5 : -.3, s); r.torso.rotation.x = L(r.torso.rotation.x, .06, s);
+  } },
+  recFloat: { f(r, s, t, b, ph, h) {                     // low gravity: drifting up and down, a star at the top, now and then a slow somersault
+    r.hips.position.y += (r.recLift || 0) / h * s; r.hips.rotation.x = (r.recSpin || 0) * s;
+    const star = Math.max(0, Math.sin(t * .7));
+    for (const a of r.arms) armTo(a, s, -.3 - .3 * star, -.2, .5 + 1.4 * star, .1);
+    for (const leg of r.legs) { leg.thigh.rotation.z = L(leg.thigh.rotation.z, leg.side * (.08 + .3 * star), s); leg.knee.rotation.x = L(leg.knee.rotation.x, .15 + .25 * (1 - star), s); }
+    r.head.rotation.x = L(r.head.rotation.x, -.15, s);
+  } },
+});
+Object.assign(PROP_KIT, {
+  recBoat(p) { part(p, GEO.sph, '#e0412f', 0, .33, .12, .3, .13, 1.3); part(p, cylG(.2, .2, .04, 14), '#16181c', 0, .43, 0); },   // the kayak, round the paddler
+  recPaddle(p) { part(p, GEO.box, '#2a2f36', .25, -.06, .03, 1.8, .03, .03); for (const x of [-.62, 1.12]) part(p, GEO.box, '#f2c230', x, -.06, .03, .16, .03, .1); },
+});
 // the device's screen colour: one shared value, the device skin's ink (section 19's DEVICE_SKIN.ink, else the CSS
 // --crt-ink on the page), else the Wren's cyan. Read when the prop is first built.
 function devicePhosphor() {
