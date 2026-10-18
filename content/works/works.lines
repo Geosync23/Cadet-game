@@ -1,0 +1,167 @@
+@bank all
+// Pillar 5 (head writer, seat W): the Works app, the Record and the training texts (seat C's 24 core). TEXTS, said by
+// nobody. Keys in content/works/keys-p5.md. Mails are "Subject | body", unsigned.
+
+== works.app.title
+- Works
+== works.tab.training
+- Training
+== works.tab.log
+- Work log
+== works.tab.tools
+- Tools
+
+// the ladder rows, by id
+== works.mech.job
+- the job loop
+== works.mech.m1
+- rounds
+== works.mech.m4
+- hauling and stores
+== works.mech.m3d
+- the drill
+== works.mech.m5
+- tuning
+== works.mech.m3i
+- the inspection
+== works.mech.m7
+- the scanner
+== works.mech.p3
+- head-scratchers
+== works.mech.m6
+- making it safe
+== works.mech.m2
+- your work uniform
+== works.mech.t2
+- the Tier 2 test job
+
+== works.trained
+- Trained: {mech}, with {name}.
+== works.training.none
+- Nothing yet. Your first lesson is coming.
+== works.training.next
+- What's next
+
+// the Work log
+== works.log.row
+- {job} · {weekday}, day {n}
+== works.log.found
+- found it yourself
+== works.log.first
+- right part first time
+== works.log.clever
+- a clever fix
+== works.log.noticed
+- {name} noticed
+== works.log.none
+- No jobs yet. The board's waiting.
+
+// tools
+== works.tool.clipboard
+- Round clipboard
+== works.tool.clipboard.about
+- Torres's round, one line a room. Fine, worn or something's off.
+== works.tool.scanner
+- Torres's old scanner
+== works.tool.scanner.about
+- Reads a machine's parts. A bar and a word for each.
+== works.tool.pipekit
+- Pipe kit
+== works.tool.pipekit.about
+- For pipes and the joints between them.
+== works.tool.logger
+- Data logger
+== works.tool.logger.about
+- Leave it on a machine. It remembers what you missed.
+== works.tool.tester
+- Conduit tester
+== works.tool.tester.about
+- Tells you where the power stops.
+== works.tool.calrig
+- Calibration rig
+== works.tool.calrig.about
+- The bench in the machine shop. Settings, set properly.
+== works.toolwear.new
+- like new
+== works.toolwear.good
+- in good order
+== works.toolwear.worn
+- a bit worn
+== works.toolwear.tired
+- tired, wants a service
+== works.tools.none
+- No tools yet. They come with their lessons.
+== works.locker
+- Your locker. Clean clothes, and your tools: {tools}.
+
+// getting quicker (skillWord) and the row the Works app shows
+== works.skill.new
+- new to you
+== works.skill.hang
+- getting the hang of these
+== works.skill.know
+- you know these well
+== works.skill.row
+- {machine}: {skill}.
+
+// reputation in your rank
+== works.band.new
+- New
+== works.band.steady
+- Steady
+== works.band.reliable
+- Reliable
+== works.band.trusted
+- Trusted
+== works.band.relied
+- Relied on
+== works.band.newofficer
+- New officer
+
+// titles and ranks
+== works.title.t1
+- Junior Technician
+== works.title.t2
+- Technician
+== works.title.t3
+- Senior Technician
+== works.title.t4
+- Engine Specialist
+== works.rank.junior
+- Junior Officer
+== works.rank.officer
+- Officer
+== works.rank.senior
+- Senior Officer
+== works.rank.specialist
+- Specialist
+
+// the Record's line
+== works.record
+- {title} · {rank}. Works reputation: {band}. What's next: {next}
+
+// the asks (toast and Mail when a row opens; the teacher sends it)
+== works.ask.m7
+- Board, when you're in | Board, when you're in. Torres left you something.
+== works.ask.p3
+- A funny one | Come to the board. Bring your device. I've got a funny one.
+
+// Torres's note, taped to the scanner
+== works.note.scanner
+- Mine's older than you. Look after it. Z.
+
+// the scanner's panel (seat H, 24g)
+== scan.title
+- Scanner · {machine}
+== scan.job
+- the job: {shows}
+== scan.read.good
+- good
+== scan.read.worn
+- worn
+== scan.read.low
+- low
+== scan.read.failing
+- failing
+== scan.fetch
+- Fetch: {part}

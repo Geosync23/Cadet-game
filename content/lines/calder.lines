@@ -451,3 +451,52 @@
 == week1
 ? flag:trad.beam.chief
 - Every name on that beam kept this ship flying. Now yours does too.   #warm
+
+// ---- Pillar 5 (head writer, seat W): Calder teaching. Kind 'work', flags set by seat C's training (24.2) and the
+// head-scratcher engine (24k): train.<id>.lead.<step> while she does the job and you watch, train.<id>.follow.<step>
+// while you lead. Every line under a flag plays in order. Bubbles, 60 characters or fewer. Exact, few words.
+== work
+// M7, the scanner: she reads the first one (lead)
+? flag:train.m7.lead.take
+- Held for you. Read the card. What's it doing?
+? flag:train.m7.lead.look
+- Watch. Panel, scanner, wait.
+- That one's at twenty. There's your problem.
+- The rest read good. Leave them.
+? flag:train.m7.lead.fetch
+- Right shelf. One part, not two.
+? flag:train.m7.lead.hold
+- Old one out. New one seated. Check it twice.
+? flag:train.m7.lead.done
+- Done. Your turn next.
+// M7: you read one, she follows
+? flag:train.m7.follow.take
+- Yours. I'm only watching. Mostly.
+? flag:train.m7.follow.look
+- Look first. Then scan. Then think.
+- Read me the lowest. Out loud.
+? flag:train.m7.follow.choose
+- Your pick. I won't nod. Choose.
+? flag:train.m7.follow.fetch
+- Right shelf. Good.
+? flag:train.m7.follow.done
+- Right part, first time. Noted.
+? flag:train.m7.follow.turnin
+- Turn it in. Then the board. Something's come up.
+// P3, the first head-scratcher: she follows you to the washer and back
+? flag:train.p3.follow.look
+- There's the other note. Taped to the panel. Read it.
+- Swapped the drain valve. Still leaks. So?
+? flag:train.p3.follow.choose
+- Two crossed off. One left. Call it.
+? flag:train.p3.follow.fetch
+- Pump. Plumbing shelf.
+? flag:train.p3.follow.hold
+- The scanner sees what's worn. The notes see what's been tried.
+? flag:train.p3.follow.done
+- Floor's dry. Right first time.
+- Torres will be sorry he missed that.
+? flag:train.p3.hint.2
+- Read every note. One isn't on the card.
+? flag:train.p3.hint.3
+- The washer's panel. Second note. Go and look.

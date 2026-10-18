@@ -1,0 +1,40 @@
+@bank all
+// Pillar 5 (head writer, seat W): head-scratcher texts (seat H's case engine, 24k) and the Chief's notes. TEXTS.
+// {machine} the machine's name, {shows} its card, {part} a part.
+
+== case.tab.notes
+- Fault notes
+== case.tab.chief
+- The Chief's notes
+== case.title
+- Head-scratcher: {machine} {shows}.
+== case.suspects
+- Suspects
+== case.notes
+- Notes
+== case.cross
+- Cross off
+== case.uncross
+- Put back
+== case.call
+- Call it: {part}?
+== case.where
+- Where next?
+== case.hint.p3.1
+- Have you read every note? One's on the machine.
+== case.solved
+- Solved. Fetch the {part} and fit it.
+== case.wrong
+- Not that one. Have another look at the notes.
+== case.new
+- A new head-scratcher is on the board.
+
+// The Chief's notes, page 1: "What's been tried" (three lines, Calder's hand)
+== chief.p3.title
+- What's been tried
+== chief.p3.1
+- If someone fitted it and it's still wrong, it isn't that.
+== chief.p3.2
+- Read every note. They're not all on the card. Check the machine.
+== chief.p3.3
+- The scanner sees what's worn. The notes see what's been tried.

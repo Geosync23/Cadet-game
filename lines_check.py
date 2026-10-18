@@ -24,7 +24,8 @@ TOKENS = {'hi', 'bye', 'yes', 'thanks', 'wow', 'sigh', 'nick'}
 PLACEHOLDERS = {'me', 'name', 'first', 'friend', 'best', 'rival', 'partner', 'mentor', 'mentee', 'boss', 'thing', 'trad',
                 'machine', 'room', 'deck', 'dish', 'weekday', 'home', 'family', 'hobby', 'since', 'other',
                 'kin', 'lost', 'hobbyNoun', 'missed',
-                'time', 'hours', 'n', 'max', 'part', 'shelf', 'drink', 'answer'}   # 0.60.7 texts (keys-0607.md): the engineer fills these   # kin, lost: "my gran", "my wife" (with the my); hobbyNoun: "knitting", "the piano"
+                'time', 'hours', 'n', 'max', 'part', 'shelf', 'drink', 'answer',
+                'mech', 'job', 'tools', 'skill', 'title', 'rank', 'band', 'next', 'shows'}   # Pillar 5 texts (content/works/keys-p5.md)   # 0.60.7 texts (keys-0607.md): the engineer fills these   # kin, lost: "my gran", "my wife" (with the my); hobbyNoun: "knitting", "the piano"
 PAIR_WORDS = {'same', 'bunk', 'friend', 'rival', 'senior', 'couple', 'best', 'mentor', 'mentee'}   # section 22's linePair
 NEEDS = {'home', 'family', 'hobby', 'since', 'kin', 'lost', 'hobbyNoun'}   # what a theme beat's needs: can name
 TRAD_PLACEHOLDERS = {'trad', 'host', 'names', 'first', 'season', 'weekday', 'time'}   # tradition texts: only these (plans/trad-format.md, tradFill)
