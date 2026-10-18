@@ -3,7 +3,7 @@
 The project lead session keeps this file current. A new lead session reads it first, together with CLAUDE.md and DEV_NOTES.md.
 
 **Lead:** lead 14, session_01RHtJv7GJDi4qosgU8Gb2b8, depth 4 (started ~18:52 UTC 2026-10-18), hourly check-in trig_019eHQTci9XVxtaeJueEa3rq (:53). Brief: `plans/handover-lead.md` "HANDOVER TO LEAD 14". Lead 13 (session_015UkCGSS9FyGoBdkePhrKbC, depth 3) handed over at ~52% memory; its check-in trig_01GHYjtfmTPvXLc6JVF3DSfx is disabled. Branch `claude/lead-pillar1`. Helpers now report to lead 14.
-**Rec dec (side project):** DA6 session_01WUAfx9EuiZa71hJcWp4VSz rooms on claude/recdeck-build (0.80.x, R1 b3e8c81); RA1 session_01KAGCZigadF4uRyQQafjkHW player animations on claude/recdeck-anim (0.81.x); plan v5 claude/recdeck-plan 7ab0d82 (planner session_01R8gMMXDCmWiuFKYvYp3rRS idle).
+**Rec dec (side project):** DA6 session_01WUAfx9EuiZa71hJcWp4VSz rooms on claude/recdeck-build (0.80.x, R1 b3e8c81); RA1 session_01KAGCZigadF4uRyQQafjkHW player animations on claude/recdeck-anim (0.81.x); plan v5 claude/recdeck-plan 7ab0d82 (planner session_01R8gMMXDCmWiuFKYvYp3rRS idle).  **Rec Dec Preview** https://claude.ai/artifact/9oG8Dq5kqFp1DUasKHZ62n (v1 = 0.80.7 fe1d705, title "Starship Cadet Rec Dec Preview"; publish: git show <hash>:starship-cadet.html to scratchpad, sed line 6 title). Next: DA6 integrates Lightdisc (0.80.8+).
 
 **Pillar 5 Step 2 = 0.63.1** (claude/p5-cand-s2 a9fad20, all checks OK) published by lead 13 ~17:25 to the preview https://claude.ai/artifact/9UC4nQsLzKyo5fkPwWBahs version 3.
 
