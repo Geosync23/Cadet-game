@@ -39,3 +39,11 @@ The user played the Pillar 5 preview and sent 33 notes. The plan (8 packages) an
 **A5 deck architect (session_01CHRbUTZc18m7eBck8eWhXj, claude/deck-tern2 → push playtest work to claude/deck-pt1 based on 0.63.1 + Tern pass 2):** poses: exercise bike pedals the right way (`ACTS.cycle`); bench press gets its own animation (grab the big bar, press) instead of 'lie:lift'; find and fix the seated arm-waving pose (everywhere but the mess hall; likely 'sit:talk'/'sit:drink'); evening dimming + night a little brighter (`nightAt`, `NIGHT`); the beam's room for names (with T); Sunrise stretch's garden spot (with T). Tern pass 2 (484f160) rides in 0.63.2.
 **BM5 build master:** after 0.63.1 is published, combine 0.63.2 on claude/p5-cand-pt1 in merge order: C2, X, P, O4, T, U, A5, W. Full check set incl. intro_check --week and day_check (09:00 shift).
 **R2 reviewer:** reviews every piece (behaviour and saves in depth; lines and tests skimmed).
+
+## New seats (started by lead 13 ~16:53, depth 4)
+| Seat | Session | Branch | Series |
+|---|---|---|---|
+| T traditions | session_01X4SZJFeHprDF21NZqU5fGi | claude/traditions-pt1 | 0.70.x |
+| X crew sim + social | session_01SNaWA6X5E9i2ZKfMnPTHJf | claude/crew-pt1 | 0.71.x |
+| U HUD | session_01FcMPTX7mMTHkyr4pxDfNcS | claude/hud-pt1 | 0.72.x |
+| C2 works career | session_014yREkgPvuwMyxBtoqB1P14 | claude/works-career | 0.44.x |
