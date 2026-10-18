@@ -6,7 +6,7 @@ Started by lead 12 (session_01GjWhU9Z9V8RNoR8yyELA9V) at ~11:28 for every Step 2
 Spec: plans/brief-playtest1.md on claude/lead-pillar1 (12b1b87); the user's answers in it are binding. Seats: T traditions session_01X4SZJFeHprDF21NZqU5fGi (claude/traditions-pt1, 0.70.x), X crew sim session_01SNaWA6X5E9i2ZKfMnPTHJf (claude/crew-pt1, 0.71.x), U HUD session_01FcMPTX7mMTHkyr4pxDfNcS (claude/hud-pt1, 0.72.x), C2 works career session_014yREkgPvuwMyxBtoqB1P14 (claude/works-career, 0.44.x), O4 (claude/onboard-pt1), W, P, A5 session_01CHRbUTZc18m7eBck8eWhXj (claude/deck-pt1). Verdicts go to the seat, BM5 and lead 13 (finished reviews, blockers, design calls). Behaviour and saves in depth; lines and tests skimmed. The base is 0.63.1 (claude/p5-cand-s2).
 
 ## Passing tips
-- O4 claude/arrival-0607b **97ed2a6** (0.42.47, playtest 1 part (a)+(b); 1 nit)
+- O4 claude/arrival-0607b **7a2bc5d** (0.42.48, playtest 1 part (a)+(b); no nits)
 - C2 claude/works-career **a5d5c4c** (0.44.14-0.44.16 + the DEV_NOTES note; no LOWs)
 - U claude/hud-pt1 **73b40cb** (0.72.0 ebfdb2f + screenshots; no LOWs)
 - X claude/crew-pt1 **2223cb7** (0.71.0, walk-ups and the mess fix; 1 LOW)
@@ -24,6 +24,9 @@ Spec: plans/brief-playtest1.md on claude/lead-pillar1 (12b1b87); the user's answ
 - (none)
 
 ## Verdicts
+
+### O4 7a2bc5d (0.42.48): the two stand-ins say "wardrobe" — PASS (read)
+- Two fallback strings only (d0-wardrobe's line, the clothes tip); W's text wins anyway. The nit is closed.
 
 ### O4 97ed2a6 (0.42.47): Zeke's greeting waits for you; the cabin's wardrobe line and Mail; the Day 1 opener and "jobs get better"; you choose your traditions; ten to nine — PASS (in depth)
 - Section 21: `INTRO_CLOSE` 3.5 and `introClose(a)`: the tour's 'shuttle' (greeting) lines start only once you're within 3.5 of Zeke; the rest of the tour's pacing is 0.63.1's. That's the user's call relayed by O4 ("perfect as it is"), in place of the brief's stop-and-talk for every line: a design call made upstream, noted. Calder's fallback Mail and Zeke's Works line say "ten to nine".
