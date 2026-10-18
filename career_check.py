@@ -51,8 +51,8 @@ PAPER = r"""(({ plan, days }) => {
     const work = playerShiftOn(d), wd = weekday(d);
     for (let h = 6; h <= 22; h++) {
       const t = (d - 1) * 1440 + h * 60; at(t);
-      if (plan === 'none' && h === 18) { worksTick(t); continue; }
-      worksTick(t);
+      if (plan === 'none' && h === 18) { worksCareerTick(t); continue; }
+      worksCareerTick(t);
       const W = SHIP.works, c = W && W.cur;
       // the training: be there for the meeting, watch, do your one
       if (c && c.st === 'meet') { const r = SHIP.occasions.find(x => x.key === c.occ);
@@ -62,13 +62,13 @@ PAPER = r"""(({ plan, days }) => {
           else { r.met = true; seen.meet++; }
         }
         if (r && t >= r.at + r.len) { occasionsTick(t, true); }
-        worksTick(t + 1);
+        worksCareerTick(t + 1);
       }
       const c2 = W && W.cur;
-      if (c2 && c2.st === 'watch') { c2.w = TRAIN_WATCH; seen.watch++; worksTick(t + 2); const j = SHIP.jobs.find(x => x.id !== c2.j && x.train === c2.id && x.status === 'done');
+      if (c2 && c2.st === 'watch') { c2.w = TRAIN_WATCH; seen.watch++; worksCareerTick(t + 2); const j = SHIP.jobs.find(x => x.id !== c2.j && x.train === c2.id && x.status === 'done');
         teach[c2.id] = teach[c2.id] || {}; const dj = SHIP.jobs.filter(x => x.train === c2.id && x.status === 'done').pop(); if (dj) teach[c2.id].by = dj.doneBy; }
       const c3 = SHIP.works && SHIP.works.cur;
-      if (c3 && c3.st === 'do' && work && h >= 8 && h < 17) { seen.do++; if (!myJob() && doJob(c3.j)) { jobs++; (teach[c3.id] = teach[c3.id] || {}).you = (SHIP.jobs.find(x => x.id === c3.j) || {}).doneBy; } worksTick(t + 3); }
+      if (c3 && c3.st === 'do' && work && h >= 8 && h < 17) { seen.do++; if (!myJob() && doJob(c3.j)) { jobs++; (teach[c3.id] = teach[c3.id] || {}).you = (SHIP.jobs.find(x => x.id === c3.j) || {}).doneBy; } worksCareerTick(t + 3); }
       // the player's own work
       const shift = work && h >= 8 && h < 17;
       if (plan === 'steady' && shift && !myJob()) { const x = openJobs('you')[0]; if (x && doJob(x.id)) { jobs++; if (!firstJob) firstJob = d; } }
@@ -145,6 +145,7 @@ with sync_playwright() as pw:
         t = st['teach'].get(k, {})
         check(k in st['trained'], f'steady: {k} never trained')
         check(t.get('by') not in (None, 'you') and t.get('you') == 'you', f"steady: {k}'s training: the teacher's job then yours ({t})")
+    check(st['teach'].get('m7', {}).get('by') == 'halloran-emeka', f"steady: the scanner on Day 5 is Emeka Halloran's to teach ({st['teach'].get('m7')})")
     check(st['works']['tools'].get('clipboard') and st['works']['tools'].get('scanner'), f"steady: tools given {st['works']['tools']}")
     check(len(st['mail']) >= 5 and len(st['occ']) >= 5 and all(o['status'] != 'missed' for o in st['occ']), f"steady: an ask (Mail and appointment) for each big training: {st['occ']}")
     b = {x['d']: x['band'] for x in st['days']}
@@ -187,6 +188,13 @@ with sync_playwright() as pw:
     check(e['missed'] == 7 and e['aband'] == 5 and e['floor'] == 0, 'a missed shift -3, an abandoned job -2, never below 0')
     check(e['before'] is None, 'SHIP.works made before Day 1\'s shift ended')
 
+    tb = ev("""(() => { const r = worksTabAdd({ id: 'test', title: 'Test', order: 40, view: () => [{ kind: 'text', text: 'hello' }], act: (v, a) => { window.__tabAct = v + ':' + a; } });
+      WORKS_TAB = 'test'; const v = worksView(); deviceDo({ app: 'works', do: 'poke', arg: 7 }); const got = window.__tabAct;
+      WORKS_TABS.splice(WORKS_TABS.findIndex(x => x.id === 'test'), 1); WORKS_TAB = 'training';
+      return { r, tabs: v.blocks[0].items.map(x => x.label), body: v.blocks[1] && v.blocks[1].text, got }; })()""")
+    print('  worksTabAdd:', tb)
+    check(tb['r'] and tb['tabs'] == ['Training', 'Work log', 'Tools', 'Test'] and tb['body'] == 'hello' and tb['got'] == 'poke:7', 'worksTabAdd: a tab shows, in order, and gets its verbs')
+
     print('(f) The save:')
     sv = ev(f"""(() => {{ const r = ({PAPER})({{ plan: 'steady', days: 2 }}); const W = SHIP.works;
       W.cur = {{ id: 'm4', st: 'do', d: 3, by: 'esposito-yara', occ: 'works.m4@3', j: 'reserve11:x@1', w: 15 }};
@@ -211,7 +219,7 @@ with sync_playwright() as pw:
         return lambda s: page.evaluate('s => window.__sc(s)', s)
     ev2 = load(); ev2("localStorage.clear()"); ev2 = load()
     w0 = ev2(f"""(() => {{ for (const r of CAREER_LADDER) WORK_MECH[r.id] = {{}}; setShipNow(1440 + 400); const W = worksInit(); W.xp = 12; W.sk.oven = 6; W.log.push(['oven-2@30', 2, 1, 'repair']);
-      W.tr.m1 = 2; W.use.m1 = 1; W.op[2] = ['m1']; toolGive('clipboard'); setShipNow(2 * 1440 + 400); WORKS_TICK.h = -1; worksTick();
+      W.tr.m1 = 2; W.use.m1 = 1; W.op[2] = ['m1']; toolGive('clipboard'); setShipNow(2 * 1440 + 400); WORKS_TICK.h = -1; worksCareerTick();
       const c = W.cur; saveGame(); return {{ works: JSON.stringify(W), cur: c && c.st, occ: SHIP.occasions.filter(r => /^works/.test(r.id)).length }}; }})()""")
     ev2 = load()
     w1 = ev2("(() => { const W = SHIP.works; return { works: JSON.stringify(W), occ: OCCASIONS['works.m4'] ? 'made' : 'missing', ok: !!W } })()")
@@ -221,7 +229,7 @@ with sync_playwright() as pw:
     ev2("localStorage.setItem(SAVE_KEY, JSON.stringify({ v: 2, build: '0.60.7', time: { day: 10, min: 300 }, player: { deck: 4, tile: [7, 3], facing: 0 }, ship: { decks: {} }, crew: {} })); Storage.prototype.setItem = () => {}")
     ev2 = load()
     old = ev2("""(() => { const out = { works: SHIP.works }; for (const r of CAREER_LADDER) WORK_MECH[r.id] = {}; SHIP.jobs.push({ id: 'old', status: 'done', doneBy: 'you', kind: 'service' });
-      WORKS_TICK.h = -1; setShipNow(9 * 1440 + 360); worksTick(); const W = SHIP.works; out.tier = W && W.tier; out.tr = W && W.tr; out.op = W && W.op; return out; })()""")
+      WORKS_TICK.h = -1; setShipNow(9 * 1440 + 360); worksCareerTick(); const W = SHIP.works; out.tier = W && W.tier; out.tr = W && W.tr; out.op = W && W.op; return out; })()""")
     print('  an old save on Day 10:', old)
     check(old['tier'] == 1 and old['tr'] == {} and old['op'].get('10', [None])[0] == 'm1' and list(old['op']) == ['10'], 'an old save loads as Tier 1, nothing trained, rounds on its next workday')
     ev2("localStorage.clear()"); b.close()
