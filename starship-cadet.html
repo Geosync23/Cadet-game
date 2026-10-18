@@ -34809,6 +34809,115 @@ function worksTick(now = shipNow()) {
 }
 SIM_ADVANCE.push((from, to) => { for (let h = Math.floor(from / 60) + 1; h <= Math.floor(to / 60); h++) { const t = h * 60, m = t % 1440; if (m >= WORKS_ASK[0] && m <= WORKS_SMALL) ladderTick(h); } WORKS_TICK.h = Math.floor(to / 60); });
 
+// ---------------------------------------------------------------------
+// 24a ROUNDS (M1, seat M1, 0.45.x; plans/mechanics/m1-rounds.html). Walk a route of 4-6 machines on one deck, look
+// at each (a `look` step: stand a moment, read its sign, mark it fine / worn / something's off). A worn machine you
+// mark worn or off, or a faulty-or-worse one you mark off or worn, gets its job "found by you" (section 17's
+// machineFound): a quick service now instead of a repair later. Marking wrong costs nothing: a healthy one marked
+// gets "Looks all right to me". Taught by Torres on Day 2 (ladder row m1: he looks at the first two, you watch; then
+// you look at the rest of the route while he watches); from the next workday a morning round is on the board at
+// 07:00, held for you to 11:00 (j.leave, so never against HOLD_MAX), then the crew's. The crew's own inspection round
+// (CHORES.round) runs as before. Removable: without this block the ladder's m1 row never opens.
+// Saved on the job: j.route (machine ids), j.marks ({ id: 'fine' | 'worn' | 'off' }). Nothing else.
+// No R(): the route is schedU 860, the sign's wording schedU 861. Lines: content/works/step2.lines (round.*),
+// signs.lines (sign.<kind>.<state>), Torres's train.m1.* (the stand-ins below are the writer's first lines).
+const ROUND_DECKS = [4, 3, 5];                           // the decks take turns by day; the training round is Deck 4
+const ROUND_AT = 420, ROUND_HELD = 180;                  // posted 07:00 on your workdays; held for you 180 minutes of the shift (to 11:00)
+const ROUND_LOOK = 2;                                    // ship minutes at each machine (the crew's round: crew.mins)
+const ROUND_MARKS = [['fine', 'Fine'], ['worn', 'Worn'], ['off', 'Something\'s off']];
+const roundText = (key, fb, ctx = {}) => String(worksText(key, fb)).replace(/\{(\w+)\}/g, (x, k) => ctx[k] !== undefined ? ctx[k] : x);
+// the machines a round can visit on a deck: at your tier, with a panel place, not the engine's
+const roundPool = n => machineList().filter(m => m.deck === n && !m.stub && panelPlace(m.id) && jobTier({ machine: m.id }) <= playerTier() && !ENGINE_KINDS.has(m.kind));
+function roundDeck(day, train) {                         // the deck by day (4, 3, 5), skipping one with fewer than 4 machines to look at
+  if (train) return 4;
+  for (let k = 0; k < ROUND_DECKS.length; k++) { const n = ROUND_DECKS[(day + k) % ROUND_DECKS.length]; if (roundPool(n).length >= 4) return n; }
+  return 4;
+}
+// roundRoute(day, train) -> machine ids: 4-6 of the deck's machines, picked by the day, in walking order from the lift
+function roundRoute(day, train) {
+  const n = roundDeck(day, train), pool = roundPool(n), D = DECKS[n];
+  const want = Math.min(pool.length, 4 + Math.floor(schedU(day, 0, 860) * 3));
+  const pick = pool.slice().sort((a, b) => schedU(a.seed, day, 860) - schedU(b.seed, day, 860) || (a.id < b.id ? -1 : 1)).slice(0, want);
+  const out = []; let at = D && D.lift ? D.lift : pick.length ? pick[0].panel : [0, 0];
+  while (pick.length) {                                  // the nearest next, from the lift
+    let k = 0; pick.forEach((m, i) => { const a = Math.hypot(m.panel[0] - at[0], m.panel[1] - at[1]), b = Math.hypot(pick[k].panel[0] - at[0], pick[k].panel[1] - at[1]); if (a < b || a === b && m.id < pick[k].id) k = i; });
+    out.push(pick[k].id); at = pick[k].panel; pick.splice(k, 1);
+  }
+  const w = train ? out.findIndex(id => machineById(id).kind === 'washer') : -1;   // Torres starts at a washer (his first line is about one)
+  if (w > 0) out.unshift(out.splice(w, 1)[0]);
+  return out;
+}
+const roundState = id => { const s = SHIP.machines[id]; return s ? s.state : 'healthy'; };
+const roundSignState = st => st === 'healthy' || st === 'worn' ? st : 'faulty';
+const ROUND_SIGN = {                                     // stand-ins until the writer's signs.lines are baked (theirs win)
+  healthy: 'Clean and quiet. Nothing to see.', worn: 'Something\'s a little tired about it.', faulty: 'Not right at all: it\'s labouring.' };
+// roundSign(id, day): what you see at the machine, from its kind and its state now; the same machine in the same state the same day says the same
+function roundSign(id, day) {
+  const m = machineById(id), st = roundSignState(roundState(id)), L = typeof LINES !== 'undefined' && m && LINES['sign.' + m.kind + '.' + st];
+  if (Array.isArray(L) && L.length) { const e = L[Math.floor(schedU(machSeed(id), day, 861) * L.length) % L.length]; if (e && typeof e.text === 'string') return e.text; }
+  return ROUND_SIGN[st];
+}
+// a mark is right: worn on a worn machine, worn or off on a faulty-or-worse one
+const roundRight = (pick, st) => st !== 'healthy' && (pick === 'off' || pick === 'worn');
+function roundFound(id, by, t) {                         // a machine's job found now (section 17's machineFound; a stand-in until it's in the build)
+  if (typeof machineFound === 'function') return machineFound(id, by);
+  const j = SHIP.jobs.find(x => x.machine === id && x.status !== 'done' && x.kind !== 'chore' && x.kind !== 'favour' && x.kind !== 'rounds');
+  if (!j || j.claimedBy) return j ? j.id : null;
+  j.found = Math.min(j.found, t); if (by === 'you') j.foundBy = 'you';
+  simNote('found', { machine: id, by }); if (typeof MACH_REV !== 'undefined') MACH_REV++;
+  return j.id;
+}
+// your mark at stop k: found by you on a right mark, a word from the teacher on a training round
+function roundMark(j, k, pick) {
+  const id = (j.route || [])[k]; if (!id || !ROUND_MARKS.some(x => x[0] === pick)) return false;
+  const t = shipNow(), st = roundState(id), right = roundRight(pick, st), first = !(j.marks && j.marks[id]);
+  (j.marks = j.marks || {})[id] = pick;
+  if (right && first) { roundFound(id, 'you', t); worksXp(1); try { toast('Round', roundText('round.found', 'Found by you: {machine}.', { machine: machineLabel(machineById(id)).split(',')[0] })); } catch (e) { /* no UI */ } }
+  const c = SHIP.works && SHIP.works.cur, by = j.train && c && c.id === j.train ? c.by : null;
+  const say = right ? ['train.m1.mark.right', 'Good eye.'] : st === 'healthy' && pick !== 'fine' ? ['train.m1.mark.okay', 'Looks all right to me. Better safe, though.'] : st !== 'healthy' && pick === 'fine' ? ['train.m1.mark.wrong', 'Mm. Listen again.'] : null;
+  if (say && by) worksSay(by, worksText(say[0], say[1]));
+  else if (say && st === 'healthy' && pick !== 'fine') { try { toast('Round', roundText('round.okay', 'Looks all right to me.')); } catch (e) { /* no UI */ } }
+  return true;
+}
+// a round finished: someone else's (the teacher's, the crew's) finds what's worn on it; yours counts as a use
+function roundDone(j, t, by) {
+  if (by && by !== 'you') for (const id of j.route || []) if (roundState(id) !== 'healthy') roundFound(id, by, t);
+  if (by === 'you') { worksUse('m1'); try { toast('Round', roundText('round.done', 'Round done. Anything worn is on the board, found by you.')); } catch (e) { /* no UI */ } }
+}
+// a round job on the list: { kind: 'rounds', route, marks, deck, room, title }. o.train: the training's (the teacher's
+// takes the first two stops, yours the rest), held for the teacher or you (reserved slot); else the morning round
+function roundJob(day, at, o = {}) {
+  const all = roundRoute(day, !!o.train), route = o.train ? (o.yours ? all.slice(2) : all.slice(0, 2)) : all;
+  if (route.length < (o.train ? 1 : 4)) return null;
+  const m0 = machineById(route[0]), n = m0.deck, t = (day - 1) * 1440 + at;
+  return { id: 'round' + (o.slot ? o.slot : '') + '-d' + n + '@' + Math.floor(t / 60) + (o.yours ? 'y' : ''), machine: null, deck: n, room: m0.room, kind: 'rounds', chore: 'rounds',
+           title: roundText('round.title', 'Morning round, Deck {deck}', { deck: n }), tier: 1, route, marks: {}, urgency: 0, posted: t, found: t, claimedBy: null, parts: [], status: 'open',
+           leave: o.slot ? null : ROUND_HELD, reserved: o.slot || undefined, until: o.slot ? (day - 1) * 1440 + DAY_SHIFT[1] : undefined };
+}
+if (typeof jobKindAdd === 'function') jobKindAdd('rounds', { tier: 1, junior: false, work: 0,
+  post(h, jobs) {                                        // workdays at 07:00 once trained (not the day you're trained): one round, held for you to 11:00
+    const d = Math.floor(h / 24) + 1, W = SHIP.works;
+    if ((h % 24 + 24) % 24 !== ROUND_AT / 60 || !W || W.tr.m1 === undefined || W.tr.m1 >= d || !playerShiftOn(d)) return;
+    if (jobs.some(j => j.kind === 'rounds' && !j.reserved && j.status !== 'done' && Math.floor(j.posted / 1440) + 1 === d)) return;
+    const j = roundJob(d, ROUND_AT); if (j) jobs.push(j);
+  },
+  stops: j => (j.route || []).map(id => { const m = machineById(id); return { deck: m.deck, placeId: panelPlace(id), mins: ROUND_LOOK, tag: 'look', how: 'look',
+    opts: { secs: 4, text: roundSign(id, worksDay(shipNow())), marks: ROUND_MARKS.map(([x, label]) => ({ id: x, label: roundText('round.mark.' + x, label) })) } }; }),
+  stepDone: (j, k, res) => roundMark(j, k, res && res.pick),
+  done: roundDone,
+  crew: { can: p => !!p.work && p.work.place === 'work:works', mins: 25 } });
+// the ladder row (m1): the training's two rounds are this block's own (reserve), held in the teacher's slot. Only
+// with section 17's job kinds in the build (without them a round can't be posted, so the row never opens)
+if (typeof jobKindAdd === 'function') WORK_MECH.m1 = {
+  reserve(d, at, slot, o = {}) {
+    const j = roundJob(d, at, { train: o.train || 'm1', yours: !!o.yours, slot }); if (!j) return null;
+    SHIP.jobs = SHIP.jobs.filter(x => !(x.reserved === slot && heldForYou(x) && !x.claimedBy));
+    SHIP.jobs.push(j); if (typeof MACH_REV !== 'undefined') MACH_REV++;
+    return j.id;
+  },
+  watch: 10,                                             // ship minutes watching Torres look at his two
+};
+
 // =====================================================================
 // 6. CAMERA
 // =====================================================================
