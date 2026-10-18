@@ -35027,6 +35027,42 @@ if (typeof jobKindAdd === 'function') WORK_MECH.m1 = {
   watch: 10,                                             // ship minutes watching Torres look at his two
 };
 
+// ---------------------------------------------------------------------
+// 24c DRILL AND INSPECTION (M3, seat M1, 0.45.x; plans/mechanics/m3-drill-inspection.html). Two small ladder rows
+// fixed in the week. The drill (m3d, Wednesday 15:00): a toast at 14:50, your drill job by the week's kind (fire: the
+// extinguisher from its bracket, stand by the hatch; pressure: dog the bulkhead door, four turns; power: stand by the
+// breaker cabinet), the all-clear at 15:15, Calder's word on the time. The inspection (m3i, Thursday 06:30): a clean
+// uniform, your bed made, your locker tidy; the duty officer's nod or remark (in person if you're in the bunk room,
+// else Mail at 07:00); +1 reputation each attended (the rows' xp, through worksUse). Never a fail. Places from the
+// Pillar 5 deck architect (DECKS[5].drill, DECKS[4].inspect). Hash key 864 (the duty officer's rota). No R().
+const DRILL_KINDS = ['fire', 'pressure', 'power'];
+const drillKind = d => DRILL_KINDS[Math.floor((d - 1) / 7) % 3];   // week 1 (Day 3) fire, then pressure, then power
+const DRILL_AT = 900, DRILL_TOAST = 890, DRILL_END = 915;      // 15:00, the toast at 14:50, the all-clear at 15:15
+const INSPECT_AT = 390, INSPECT_MAIL = 420, BED_FROM = 330;     // 06:30 the walk, 07:00 the Mail if you weren't there; the bed from 05:30
+// the duty officer: Calder on your first, else an officer on shift that day by the week's rota (key 864)
+function inspectOfficer(d) {
+  const W = SHIP.works; if (!W || W.use.m3i === undefined) return 'calder';
+  const os = schedPeople().filter(p => OFFICER_RANKS.has(p.rank) && p.rank !== 'captain' && p.rank !== 'xo' && occOnShift(p.id, d)).map(p => p.id).sort();
+  return os.length ? os[Math.floor(schedU(machSeed('inspect'), Math.floor((d - 1) / 7), 864) * os.length) % os.length] : 'calder';
+}
+// the three items now: { uniform, bed, locker } (true is right). A clean uniform: changed today (0.60.7's wardrobe) and
+// not grubby (M2, section 15's uniformState, from Day 8); the bed made this morning; the locker tidy (15b's lockerTidy)
+function inspectItems(d = SHIP.time.day) {
+  const C = typeof SHIP.clothes === 'object' && SHIP.clothes, P = SHIP.player || {};
+  const grubby = typeof uniformState === 'function' && /grub|dirt/.test(String(uniformState()));
+  return { uniform: !!C && C.changed === d && !grubby, bed: P.bedMade === d, locker: typeof lockerTidy === 'function' ? !!lockerTidy() : true };
+}
+const inspectResult = it => { const bad = ['uniform', 'bed', 'locker'].filter(k => !it[k]); return bad.length === 0 ? 'nod' : bad.length === 1 ? bad[0] : bad.length === 2 ? 'two' : 'none'; };
+const INSPECT_SAY = { nod: 'Good. Carry on.', uniform: 'Uniform\'s seen better days, cadet.', bed: 'Make the bed before you go, please.', locker: 'Locker. Things go in it, not on it.',
+  two: 'Two out of three. Let\'s get to three next week.', none: 'Uniform, bed and locker. All three. Next Thursday, please.' };
+const INSPECT_MAILS = { nod: 'Your berth was in good order this morning. Nothing to add.', uniform: 'Your berth was tidy. Next time, a clean uniform, please.',
+  bed: 'Your locker and uniform were fine. Next time, make the bed, please.', locker: 'Uniform and bed were fine. Next time, a tidy locker, please.',
+  two: 'Two of the three weren\'t right this morning. Uniform, bed, locker: all three next week.', none: 'Your berth wasn\'t ready this morning. Uniform, bed, locker: next Thursday, please.' };
+// you're at your berth for the walk: in your own bunk room on Deck 4
+function inspectHere() {
+  try { const bed = placeById(playerBed()); if (!bed || !deckDef || deckDef.num !== bed.deck || !player) return false; const [c, r] = player.here(); return roomAt(c, r) === bed.room; } catch (e) { return false; }
+}
+
 // =====================================================================
 // 6. CAMERA
 // =====================================================================
