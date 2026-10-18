@@ -15435,7 +15435,7 @@ function jobStepDone(id, k, res) {
   if (!left && !j.workDone && typeof caseFitted === 'function' && caseFitted(j)) { MACH_REV++; simFlush(); return { ok: true, left: n, done: false, wrong: true }; }   // 24k: the wrong fix, the machine not put right (0.33.47)
   if (!left && !j.workDone) { jobEffect(j, shipNow(), 'you'); j.workDone = shipNow(); machRecord(MACH_HOUR - 1); }
   MACH_REV++; jobNote(j, 'stop', { k, tag: jobStops(j)[k].step }); if (fresh && j.workDone) jobNote(j, 'done'); simFlush();
-  return { ok: true, left, done: !!j.workDone };
+  return { ok: true, left, done: !!j.workDone, ...(typeof kr === 'string' ? { say: kr } : {}) };   // say: the kind's words after the step (P's, for M1)
 }
 // turnInJob(id) -> true | false: at a job board, a job whose work is done is complete
 function turnInJob(id) {
