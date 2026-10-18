@@ -199,6 +199,10 @@ P3 = r"""(() => {
     out.cases.push(r);
     for (const k of notes) SHIP.stores[caseSus(c, k.src.tried).part] += 1;
   }
+  // a case still waiting three days on is a plain repair
+  { C.open = []; const m = machineList().find(x => x.kind === 'washer'), t = 9 * 1440 + 600, j = { id: m.id + '@p3wait', machine: m.id, deck: m.deck, kind: 'repair', urgency: 1, posted: t, found: t, claimedBy: null, parts: ['pump'], status: 'open', cause: 'pump' };
+    SHIP.jobs.push(j); setShipNow(t); let d = 10; const rate = CASE_RATE.junior; CASE_RATE.junior = 1; caseOffer(j, 9 * 24 + 10); CASE_RATE.junior = rate;
+    const c = caseOf(j); if (c) { for (const k of c.clues) k.src.t = t + 9 * 1440; setShipNow(t + 3 * 1440 + 60); caseTick(); out.waitEnds = !caseOf(j); } }
   C.open = []; SHIP.jobs = keep; SHIP.works.op = op;
   return out;
 })()"""
@@ -277,7 +281,8 @@ PLAY = r"""(() => {
     SHIP.machines[m.id].cond = 30; SHIP.machines[m.id].state = machineState(30); SHIP.jobs.push(k); CASE_RATE.junior = 1; caseOffer(k, h); CASE_RATE.junior = rate; return k; };
   const k1 = fresh('pump'), c3 = caseOf(k1); claimJob(k1.id); caseTick();
   for (const k of c3.clues) caseClue(c3.id, k.id);
-  caseCall(c3.id, 'pump'); for (let k = 0; k < jobStops(k1).length; k++) jobStepDone(k1.id, k); turnInJob(k1.id); caseTick(); out.first = caseFlags(k1.id); out.firstJob = [k1.rightFirst, k1.clever];
+  caseCall(c3.id, c3.sus.find(x => x !== 'pump')); caseCall(c3.id, 'pump'); out.recall = c3.calls.slice();   // a second thought before fitting replaces the call
+  for (let k = 0; k < jobStops(k1).length; k++) jobStepDone(k1.id, k); turnInJob(k1.id); caseTick(); out.first = caseFlags(k1.id); out.firstJob = [k1.rightFirst, k1.clever];
   const k2 = fresh('pump'), c4 = caseOf(k2); claimJob(k2.id); caseTick(); caseLong(c4.id); let rounds = 0;
   while (!k2.workDone && rounds++ < 8) { const ns = jobStops(k2).length; for (let k = 0; k < ns; k++) jobStepDone(k2.id, k); }
   out.long = { done: !!k2.workDone, rounds, calls: c4.calls.slice(), causeAt: c4.sus.indexOf(c4.cause) };
@@ -379,6 +384,7 @@ def run(path):
             check(c['wait'] and c['hidden'] and c['parts'] != [] and not c['early'] and c['shown'], f"{c['id']}: hidden till the last try, then shown inside the shift: {c}")
             check(all(u == 1 for u in c['used']), f"{c['id']}: each try's part came off its shelf: {c['used']}")
             check(' — ' in c['text'] and 'Still' in c['text'], f"{c['id']}: a note names who tried: {c['text']!r}")
+        check(Q.get('waitEnds'), f"a case still waiting after three days is let go: {Q.get('waitEnds')}")
         F = g.ev(FIRST)
         print('first case:', F)
         check(not F.get('before') and F.get('staged') and F.get('machine') in ('4-washer-2', '4-washer-3') and F.get('cause') == 'pump' and F.get('sus') == ['pump', 'seal', 'valve'] and F.get('train'), f"Day 4 18:00: Washer 2 leaking, the pump, three suspects, a training case: {F}")
@@ -401,6 +407,7 @@ def run(path):
         w = P['wrong']; check(not w['done'] and w['crossed'] and w['back'] and w['steps'] == 0 and w['cond'] == 30, f"a wrong call: not fixed, crossed by the evidence, the part back on its shelf, the stops again: {w}")
         check(P['saveSame'] and P['saveBytes'] < 1200, f"the save mid-case reads back the same ({P['saveBytes']} bytes)")
         check(P['right']['done'] and P['right']['cond'] > 30 and P['closed'] and P['flags'] == 0, f"the right call fixes it; one wrong call, so not right first time: {P['right']} {P['flags']}")
+        check(P['recall'] == ['pump'], f"calling again before fitting replaces the call: {P['recall']}")
         check(P['first'] == 6 and P['firstJob'] == [True, True], f"right first time and clever, flagged on the case and the job: {P['first']} {P['firstJob']}")
         check(P['long']['done'] and P['long']['rounds'] == P['long']['causeAt'] + 1 and P['long']['calls'][-1] == 'pump', f"the long way fits each in turn and always ends: {P['long']}")
         pos = {}
