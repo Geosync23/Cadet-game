@@ -252,7 +252,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.63.1
+   STARSHIP CADET: CSV Wren                           build 0.42.47
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7922,7 +7922,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.63.1';                           // keep in step with the header's build line
+const GAME_BUILD = '0.42.47';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -34518,10 +34518,10 @@ function introTrainLines(n, key) {
 }
 function introFollowTick() {
   if (!introFollowing() || DIALOGUE || simNow() < (INTRO_UI.sayEnd || 0) || simNow() < INTRO_UI.next) return;   // simNow: the pause-aware clock, like the tour's (reviewer 0607's LOW)
-  const a = introWalker(), now = simNow(); if (!a || a.pose !== 'walk' || Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) > 4) return;   // walking together
+  const a = introWalker(), now = simNow(); if (!a || !introClose(a) || player.path.length || player.steer) return;   // 0.42.47: when you've stopped and he's by you (he stops to talk, not walk-and-talk)
   if (now - (INTRO_UI.followAt || 0) < INTRO_FOLLOW_GAP) return;
   INTRO_UI.followAt = now; const k = (SHIP.intro.done['follow:n'] || 0) + 1, l = introWriterLine('walk.follow.' + k);
-  if (l && typeof bubbleSay === 'function') { SHIP.intro.done['follow:n'] = k; bubbleSay(a.h, l[0], 4.5); INTRO_UI.next = now + INTRO_TOUR_GAP; }
+  if (l && typeof bubbleSay === 'function') { SHIP.intro.done['follow:n'] = k; introSayTo(a, l[0]); }
 }
 function introJobNote(n) {
   if (!introOn() || !n) return;
@@ -34789,6 +34789,18 @@ if (!MEETING_SCRIPTS.introDinner) MEETING_SCRIPTS.introDinner = { ...INTRO_STUB_
 // a walking step with the tour quiet gives the next walk.more.<n> line.
 const INTRO_STROLL = 0.5;                                 // his pace on the walk to the lift (x CREW_SPEED): time for the welcome talk
 const INTRO_TOUR_GAP = 3600;                              // real ms between his tour lines (a 60-character bubble reads in about 3 s)
+// he stops, faces you and talks (the user on 0.63.1: "he must stop and face you while he speaks to you; he walks only between
+// stops; each line stays up long enough to read; his first lines wait until you've reached him", 0.42.47): introSayTo(a, text)
+// says one line as a bubble for introSayMs(text) (longer lines longer, never under INTRO_TOUR_GAP) and stops him for it (a.talking,
+// which section 10 honours for an escort too); his lines start only within INTRO_CLOSE m of you
+const INTRO_CLOSE = 3.5;
+const introSayMs = text => Math.max(INTRO_TOUR_GAP, 1400 + 55 * String(text || '').length);
+function introSayTo(a, text) {
+  if (!a || !text || typeof bubbleSay !== 'function') return 0;
+  const ms = introSayMs(text); a.talking = Math.max(a.talking || 0, ms / 1000); bubbleSay(a.h, text, ms / 1000 + .5); INTRO_UI.next = simNow() + ms;
+  return ms;
+}
+const introClose = a => !!a && typeof player !== 'undefined' && Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) <= INTRO_CLOSE;
 const INTRO_TOUR = [
   // before the lift (the user on 0.60.5): one stop at the ramp to welcome you, then walk-and-talk (`walk`: he never
   // pauses, strolling at INTRO_STROLL): walk.up in order from 3 tiles off the ramp (`leave`), walk.works as you pass the
@@ -34820,14 +34832,14 @@ function introTourTick() {
   const td = t && Math.max(Math.abs(here[0] - t.at[0]), Math.abs(here[1] - t.at[1]));
   if (t && deckDef.num === t.deck && (t.leave ? td > t.leave : td <= t.r)) {   // (before the dinner hand-over: its step may move on in the very frame you arrive)
     I.done['tour:' + t.id] = Math.floor(shipNow());
-    { const L = introTourSplit(t), q = { t, ...L, at: 0, held: 0, cap: (L.core.length + 1) * INTRO_TOUR_GAP }, k = Q.findIndex(x => x.t.walk && !x.t.must); if (t.must && k >= 0) Q.splice(k, 0, q); else Q.push(q); }   // (a must place goes before the walk's lines)
+    { const L = introTourSplit(t), q = { t, ...L, at: 0, held: 0, cap: L.core.reduce((n, x) => n + introSayMs(x), INTRO_TOUR_GAP) }, k = Q.findIndex(x => x.t.walk && !x.t.must); if (t.must && k >= 0) Q.splice(k, 0, q); else Q.push(q); }   // (a must place goes before the walk's lines)
     if (!t.walk) for (let i = Q.length - 1; i >= 0; i--) if (Q[i].t.walk && !Q[i].t.must) Q.splice(i, 1);   // at the lift, the walk's lines left unsaid are skipped
   } else if (t && INTRO_STEPS.indexOf(st) >= INTRO_STEPS.findIndex(x => x.id === t.step) + 2) I.done['tour:' + t.id] = -1;   // passed it without coming near
   if (st.id === 'table' || st.id === 'chief' || st.id === 'free') {   // the tour hands over to dinner: extras and places not yet reached are dropped; the core
     Q.forEach(q => { q.extra.length = 0; }); INTRO_UI.pause = null;   // lines left finish first (the dinner chat waits for them, introTick)
     for (const x of INTRO_TOUR) if (I.done['tour:' + x.id] === undefined) I.done['tour:' + x.id] = -1;
     while (Q.length && !Q[0].core.length) Q.shift();
-    if (Q.length && !DIALOGUE && a && typeof bubbleSay === 'function' && now >= INTRO_UI.next) { bubbleSay(a.h, Q[0].core.shift(), 4.5); INTRO_UI.next = now + INTRO_TOUR_GAP; }
+    if (Q.length && !DIALOGUE && a && introClose(a) && now >= INTRO_UI.next) introSayTo(a, Q[0].core.shift());
     return;
   }
   // a place whose core lines are done goes once the next is waiting or you've left it (its extras dropped); one on a
@@ -34836,15 +34848,15 @@ function introTourTick() {
   const head = Q[0], near = a && Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) <= 5;
   // he pauses where he is while core lines are waiting and you're with him (at the ramp and from the lift on: never on the walk between, the `walk` places), never longer in all than a place's lines take
   // (only the time he's actually held counts: not meetings, not the lift)
-  const hold = head && head.core.length && Q.some(q => !q.t.walk) && near && !DIALOGUE && head.held < head.cap;
+  const hold = head && head.core.length && near && !DIALOGUE && head.held < head.cap;   // (0.42.47: on the walk too: he stops to talk, then walks on)
   if (hold) head.held += Math.min(250, now - (INTRO_UI.tickAt || now));
   INTRO_UI.tickAt = now;
   if (hold && !INTRO_UI.pause) INTRO_UI.pause = cellAt(a.x, a.z); else if (!hold) INTRO_UI.pause = null;   // his tile on this deck (the queue holds only this deck's places)
   if (DIALOGUE || !a || typeof bubbleSay !== 'function') return;
   if (head) {
-    if (now >= INTRO_UI.next) {
+    if (now >= INTRO_UI.next && introClose(a)) {                 // not until you've reached him
       const text = head.core.length ? head.core.shift() : head.extra.shift();
-      if (!head.at) head.at = now; bubbleSay(a.h, text, 4.5); INTRO_UI.next = now + INTRO_TOUR_GAP; INTRO_UI.still = now;
+      if (!head.at) head.at = now; introSayTo(a, text); INTRO_UI.still = now;
     }
     return;
   }
@@ -34852,7 +34864,7 @@ function introTourTick() {
   const key = here.join(','); if (key !== INTRO_UI.stillAt) { INTRO_UI.stillAt = key; INTRO_UI.still = now; return; }
   if (now - INTRO_UI.still > 8000 && now >= INTRO_UI.next && st.mode !== 'meet' && Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) <= 3) {
     const l = introWriterLine('walk.more.' + (INTRO_UI.more + 1)); INTRO_UI.still = now;
-    if (l) { INTRO_UI.more++; bubbleSay(a.h, l[0], 4.5); INTRO_UI.next = now + INTRO_TOUR_GAP; }
+    if (l) { INTRO_UI.more++; introSayTo(a, l[0]); }
   }
 }
 // the first night (the user): after Torres lets you go on Sunday, and on Monday evening if you never found it, the
@@ -34902,8 +34914,9 @@ function introLines(step) {
 }
 function introSay(lines) {                                // his lines, one now and the rest a few seconds apart
   INTRO_UI.said.forEach(simClear); INTRO_UI.said = [];
-  INTRO_UI.sayEnd = simNow() + (lines || []).length * 4800 + 3000;   // (introFollowTick waits for them)
-  (lines || []).forEach((text, i) => INTRO_UI.said.push(simTimeout(() => { const a = introWalker(); if (a && typeof bubbleSay === 'function') bubbleSay(a.h, text, 4.5); }, i * 4800)));
+  let at = 0;                                            // each line as long as it takes to read (introSayMs), and he stops for it (0.42.47)
+  (lines || []).forEach(text => { INTRO_UI.said.push(simTimeout(() => introSayTo(introWalker(), text), at)); at += introSayMs(text) + 400; });
+  INTRO_UI.sayEnd = simNow() + at + 3000;                // (introFollowTick waits for them)
 }
 // A0: the shuttle's manifest, before the fade-in. The ship's clock holds at 17:30 (INTRO_START) until you've typed your name.
 function introManifest() {
@@ -35020,7 +35033,7 @@ function introBeatTick() {
   if (U.beat) {
     const a = crew(U.beat.b.who);
     if (!introBeatHere(U.beat.b, a)) U.beat = null;   // you (or they) left: the rest is dropped
-    else if ((a.talking = Math.max(a.talking || 0, 1)) && !DIALOGUE && t >= U.next) { bubbleSay(a.h, U.beat.lines.shift(), 4.5); U.next = t + INTRO_TOUR_GAP; if (!U.beat.lines.length) U.beat = null; }   // they stop for it, facing you (section 10's tap pause)
+    else if ((a.talking = Math.max(a.talking || 0, 1)) && !DIALOGUE && t >= U.next) { introSayTo(a, U.beat.lines.shift()); if (!U.beat.lines.length) U.beat = null; }   // they stop for it, facing you (section 10's tap pause)
     return;
   }
   if (DIALOGUE) return;
@@ -35328,6 +35341,10 @@ function clothesGoal(to) {
 // (walk.dinner.eve.1, .2, ...) or an exact flag, in order; the plan's words as stand-ins while content is missing.
 // when(C): still wanted; seek: section 20's socialSeekAsk brings him to you in the window; then: after the last line.
 const CLOTHES_BEATS = [
+  // the cabin (the user on 0.63.1, 0.42.48): after the bunk meeting Zeke shows you your wardrobe ("this is where you get clean
+  // clothes"), and the rest of his bunk talk comes as Mail from him (the meeting tells you to open it; clothesCabinMail)
+  { id: 'd0-wardrobe', day: 0, at: 17 * 60 + 40, till: 19 * 60, who: INTRO_ESCORT, where: { deck: 4, room: 'Bunk 1' }, when: () => SHIP.intro.done.bunk !== undefined,
+    keys: () => ['walk.cabin.wardrobe'], lines: () => ['That locker by the door is your wardrobe. It\'s where you get clean clothes.'], first: () => clothesCabinMail() },
   { id: 'd1-dinner-zeke', day: 1, at: 18 * 60, till: 20 * 60, who: INTRO_ESCORT, where: { deck: 3, room: 'Mess hall' }, when: () => true, settle: 'clothes',   // settle: the Settling-in item it teaches (as INTRO_WEEK's; intro_check reads both)
     keys: C => ['walk.dinner.eve', ...(C.kit ? [] : [['beat.d1-clothes', 'walk.dinner.laundry']])],   // the head writer's 5b57aa1 names first
     lines: C => ['Evenings are yours. Most of us have a thing. I knit, don\'t laugh. Pell reads. Find yours.',
@@ -35346,6 +35363,14 @@ const CLOTHES_BEATS = [
     first: () => introFlagSet('delivery.first'),
     then: () => { if (clothesDelivery()) toast('The Wednesday delivery', 'It\'s on the job board in the Works bay, Deck 5, until 14:00: take it there if you\'d like to. A hover cart from the Cart bay, the crates in the cargo hold, then tap any shelf in main storage.'); } },
 ];
+// Zeke's Mail after the bunk meeting (once, saved in SHIP.clothes.said): the writers' text mail.zeke.cabin ("Subject | body"),
+// else the stand-in; sent when his wardrobe line starts, or by the frame loop once the bunk step is done and you've left Bunk 1
+function clothesCabinMail() {
+  const C = SHIP.clothes; if (C.said.cabinMail !== undefined || typeof mailSend !== 'function') return;
+  C.said.cabinMail = Math.floor(shipNow());
+  const t = clothesText('mail.zeke.cabin', {}, 'Settling in | The rest of what I meant to say in the bunk room. Your bed\'s the upper one, middle of the three. Your wardrobe\'s by the door: clean clothes there every morning, and do your laundry when they run out. Washrooms at both ends of the wing. Dinner\'s on Three. Tomorrow\'s briefing is in the Works bay on Deck 5: the time\'s on your device. Sleep well. Z.'), i = t.indexOf(' | ');
+  mailSend({ at: shipNow(), from: 'Zeke Torres', subject: i < 0 ? 'Settling in' : t.slice(0, i), body: i < 0 ? t : t.slice(i + 3) });
+}
 // this week's delivery job while it's still open and nobody has it (section 17: a stores restock found today), or null
 const clothesDelivery = () => (SHIP.jobs || []).find(j => j.kind === 'restock' && j.cargo === 'stores' && j.status !== 'done' && !j.claimedBy && Math.floor(j.found / 1440) + 1 === SHIP.time.day && j.found <= shipNow()) || null;
 // one person's lines of one kind under a flag (the voice cards: VOICE[id].lines[kind], entries with that flag), filled, or null
@@ -35375,7 +35400,7 @@ function clothesBeatTick() {
     const B = CLOTHES_BEAT, a = crew(B.b.who);
     if (!introBeatHere(B.b, a)) CLOTHES_BEAT = null;
     else if ((a.talking = Math.max(a.talking || 0, 1)) && !DIALOGUE && t >= U.next) {
-      bubbleSay(a.h, B.lines.shift(), 4.5); U.next = t + INTRO_TOUR_GAP;
+      introSayTo(a, B.lines.shift());
       if (!B.lines.length) { CLOTHES_BEAT = null; if (B.b.then) B.b.then(C); }
     }
     return;
@@ -35417,10 +35442,11 @@ function clothesFrame() {
   requestAnimationFrame(clothesFrame);
   if (!CLOTHES_ON || typeof deckDef === 'undefined' || !deckDef || typeof player === 'undefined') return;
   const C = SHIP.clothes, h = C.hamper, now = shipNow();
+  if (SHIP.clothes.said.cabinMail === undefined && typeof introOn === 'function' && introOn() && SHIP.intro.done.bunk !== undefined && !(SHIP.intro.missed || []).includes('bunk') && deckDef.num !== 4) clothesCabinMail();   // left the wing without his wardrobe line: the Mail anyway
   uniformWatch();                                        // simNote('uniform') when it turns grubby, yesterday's or clean (10:00, 22:00, a change)
   if (h && h.at === 'washer' && !h.done && now >= h.until) { h.done = true; toast('Laundry', clothesText('laundry.done', {}, 'Your washing\'s done. Collect it from the laundry on Deck 4.') + ' It\'s in ' + washerName(h.washer) + '.'); }
   if (C.changed < SHIP.time.day && C.clean > 0 && SHIP.time.min >= 6 * 60 && SHIP.time.min < CLOTHES_LATE && deckDef.num === 4 && typeof ixTip === 'function' && !ACT)
-    ixTip('clothes', 'Your wardrobe is the locker by the door in Bunk 1. Change into clean clothes there every morning: by 10:00 you\'re in yesterday\'s clothes.');   // once (the device's tips)
+    ixTip('clothes', clothesText('tip.clothes', {}, 'Fresh clothes every morning from your wardrobe, the locker by the door in Bunk 1 (by 10:00 you\'re in yesterday\'s clothes). When they run out, do your laundry when you can.'));   // once (the device's tips)
   if (C.told !== SHIP.time.day && clothesYesterday()) {
     C.told = SHIP.time.day;
     toast('Yesterday\'s clothes', clothesText('clothes.stale', {}, 'You\'re in yesterday\'s clothes.') + (C.clean > 0 || h && h.state === 'clean' ? ' Change at your wardrobe in Bunk 1; till then you\'ll feel grubby sooner.' : ' And there are no clean ones left: your hamper\'s in your wardrobe. Do your laundry.'));
@@ -35431,10 +35457,30 @@ function clothesFrame() {
   if (here && !HAMPER_LOOK) HAMPER_LOOK = hamperLook();
   if (HAMPER_LOOK) { HAMPER_LOOK.visible = here; if (here) HAMPER_LOOK.position.set(h.x, 0, h.z); }
   if (simNow() < CLOTHES_SCAN) return; CLOTHES_SCAN = simNow() + 250;   // the beats, the crew-at-work look-up and the remark scan: four times a second, not every frame (reviewer's LOW)
-  clothesBeatTick();
+  clothesBeatTick(); clothesDay1Arrows();
   if (stale && C.said.remark !== SHIP.time.day) clothesRemark(C);
 }
 requestAnimationFrame(clothesFrame);
+// Day 1's arrows (the user on 0.63.1, 0.42.48), during the arrival only: to the time clock once the Monday briefing is over
+// and you haven't clocked in; to the job board once you have, until you take a job; to the servery queue once the cook has
+// told you to eat (d1-dinner's lines heard) until you have a tray or have eaten. Never over another section's arrow (only
+// when the goal arrow is free or ours), each ends by itself, and none outlives Day 1
+const D1_ARROWS = [
+  { id: 'clock', goal: { deck: 5, at: [20, 0], label: 'Time clock' }, want: () => SHIP.intro.done['d1-briefing'] !== undefined && !DIALOGUE && SHIP.time.min < 12 * 60 && typeof careerClockedIn === 'function' && !careerClockedIn() },
+  { id: 'board', goal: { deck: 5, at: [15, 1], label: 'Job board' }, want: () => typeof careerClockedIn === 'function' && careerClockedIn() && SHIP.time.min < 12 * 60 && !(typeof myJob === 'function' && jobsOn() && myJob()) && SHIP.clothes.said['d1:took'] === undefined },
+  { id: 'food', goal: { deck: 3, at: [33, 3], label: 'Servery' }, want: () => SHIP.intro.done['d1-dinner:said'] !== undefined && !SHIP.player.tray && SHIP.clothes.said['d1:ate'] === undefined && SHIP.time.min < 20 * 60 },
+];
+let D1_ARROW = null;
+onSim('job', n => { if (n.step === 'take' && SHIP.time.day === 1) SHIP.clothes.said['d1:took'] = Math.floor(shipNow()); });
+onSim('act', n => { if (n.act === 'eat' && SHIP.time.day === 1) SHIP.clothes.said['d1:ate'] = Math.floor(shipNow()); });
+function clothesDay1Arrows() {
+  if (typeof setGoal !== 'function' || typeof introOn !== 'function') return;
+  const on = introOn() && SHIP.time.day === 1, free = typeof IX_GOAL === 'undefined' || !IX_GOAL || D1_ARROW && IX_GOAL.label === D1_ARROW.goal.label;
+  const pick = on && free ? D1_ARROWS.find(x => x.want()) : null;
+  if (pick === D1_ARROW) return;
+  if (D1_ARROW && typeof IX_GOAL !== 'undefined' && IX_GOAL && IX_GOAL.label === D1_ARROW.goal.label) clearGoal();
+  D1_ARROW = pick; if (pick) setGoal(pick.goal);
+}
 // someone notices (the plan: "people may remark on it"): once a day at most, the first crew member who passes within
 // REMARK_NEAR m while you're in yesterday's clothes says one of the writers' clothes.remark lines (none: nobody does)
 const REMARK_NEAR = 2.2;
@@ -40165,6 +40211,7 @@ class CrewAgent {
   // `to`), at most twice a second. They may go anywhere you can (the rooms on their way are allowed)
   escortStep(dt, e) {
     const pp = player.obj.position, dist = Math.hypot(pp.x - this.x, pp.z - this.z), you = cellAt(pp.x, pp.z);
+    if (this.talking > 0) { this.talking -= dt; this.pose = 'stand'; this.face = Math.atan2(pp.x - this.x, pp.z - this.z); this.y = 0; this.h.set({ x: this.x, y: this.y, z: this.z }, this.face, heldPose(this)); return true; }   // stopped to say something to you, facing you (section 21's introSayTo, 0.42.47)
     const goal = e.mode === 'follow' ? you : escortGoal(e, this);
     const key = e.mode + '|' + (goal ? goal.join(',') : '-');
     this.escT = (this.escT || 0) - dt;
