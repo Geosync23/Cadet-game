@@ -1,0 +1,38 @@
+@tradition spice-shelf-supper
+// Spice shelf supper (0.60.7): everyone brought one spice from home. Brennan cooks Tuesday dinner with three of them,
+// and the jars line a shelf by the servery that grows over the weeks (the deck architect's spice shelf, always there).
+// A meal tradition: going to it IS dinner for those who go.
+k: 443
+title: Spice shelf supper
+when: weekly tuesday
+at: 18:15-19:15
+min: 25
+where: 3 room Mess hall: mess-seat
+hold: none
+who: brennan always, lingers-at-meals 70%, galley 60%, everyone 40%
+anim: talk
+host: brennan
+from: brennan
+ties: galley meal=dinner
+meal: dinner
+
+== mail
+- Spice shelf supper tomorrow at dinner, from {time}. Three jars off the shelf this week. Guess whose they are.
+
+== ask
+- Spice shelf supper tonight. I hope she picks my jar.   #warm
+- Brennan's cooking from the spice shelf. Bring an appetite and a glass of water.   #funny
+- Supper from the spice shelf at quarter past six. Three jars, three homes.   #warm
+
+== here
+- That's my gran's pepper. I'd know it anywhere.   #warm
+- Whose is the smoky one? I need to know.
+- Too hot. Wonderful. Too hot.   #funny
+
+== thanks
+- You eat from Brennan's spice shelf supper. Somebody tells you whose spice is in it, and where it came from.   #warm
+
+== chatter
+- The spice shelf's three jars longer than last month.
+- One day I'll find out whose jar is the green one.   #funny
+- Every jar on that shelf came a long way.   #warm

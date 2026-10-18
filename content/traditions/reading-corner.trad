@@ -1,0 +1,33 @@
+@tradition reading-corner
+// Reading corner (0.60.7, the user's pick): on Sunday afternoons crew bring a book to the bow lounge armchairs and read
+// together quietly, with a few murmured recommendations.
+k: 452
+title: Reading corner
+when: weekly sunday
+at: 16:00-17:00
+min: 20
+jitter: 10
+where: 3 room Bow lounge: lounge-seat
+hold: 1
+who: quiet-corner 60%, window-seat 35%, lounge-regular 30%, everyone 10%
+anim: read
+from: The bow lounge
+
+== mail
+- Reading corner tomorrow, {time}, in the bow lounge armchairs. Bring a book. Talking is optional, and quiet.
+
+== ask
+- Reading corner this afternoon. I'm halfway through a mystery. No spoilers.   #funny
+- Bring a book to the lounge later? It's quiet and the chairs are good.   #warm
+
+== here
+- Shh. Good bit.   #funny
+- You'd like this one. Borrow it after.   #warm
+- Just one more chapter.
+
+== thanks
+- You settle into an armchair with a book. Pages turn around you; somebody passes you a recommendation on a scrap of paper.   #warm
+
+== chatter
+- Reading corner got me through three novels this month.   #warm
+- Sunday afternoon in the lounge with a book. That's the good life.   #warm

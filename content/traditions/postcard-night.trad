@@ -1,0 +1,36 @@
+@tradition postcard-night
+// Postcard night (0.60.7): write a card home (the writing hobby's tradition) at the booth row; it goes out with the
+// next mail run. Eklund keeps the cards and the box (the deck architect's postcard box).
+k: 446
+title: Postcard night
+when: weekly thursday
+at: 18:45-19:45
+min: 20
+where: 3 room Call-home booths: bench
+where: 3 room Promenade: bench
+hold: 1
+who: eklund-leila always, calls-home 45%, quiet-corner 25%, everyone 10%
+anim: read
+host: eklund-leila
+from: eklund-leila
+invite: host=eklund-leila odds=30% line="Postcard night, by the booths. I've got spare cards. Write one home?"
+
+== mail
+- Postcard night tomorrow, {time}, by the call-home booths. Cards and pens on me. They go out with the next mail run.
+
+== ask
+- Postcard night later. I never know what to write. I write it anyway.   #warm
+- Eklund's got new cards. One's got the Wren on it.
+- Write one home tonight? Your family would like a card.   #warm
+
+== here
+- How do you spell "nebula"? Asking for my mum.   #funny
+- Short is fine. They just want to know you're well.   #warm
+- Leave room for a drawing. Everyone does a drawing.
+
+== thanks
+- You write a card home by the booths and drop it in Eklund's box. It goes out with the next mail run.   #warm
+
+== chatter
+- My gran keeps every card I send on her fridge. It's a big fridge.   #funny
+- Postcard night's quiet. Just pens, and people thinking about home.   #warm

@@ -1,0 +1,34 @@
+@tradition cook-along
+// Cook-along (0.60.7, the user's pick): Brennan's deputy, Lukas Dlamini, teaches one simple dish at the galley pass on
+// Thursdays after dinner; you stir, taste, and get a portion.
+k: 449
+title: Cook-along
+when: weekly thursday
+at: 19:30-20:15
+min: 25
+where: 3 room Mess hall: mess-seat
+hold: none
+who: dlamini-lukas always, galley 25%, lingers-at-meals 35%, everyone 10%
+anim: talk
+host: dlamini-lukas
+from: dlamini-lukas
+
+== mail
+- Cook-along tomorrow, {time}, at the galley pass. One simple dish, start to finish. You stir, you taste, you take a portion home.
+
+== ask
+- Cook-along tonight. Lukas says it's dumplings. I can't fold a dumpling.   #funny
+- Learn a dish at the galley pass later? Lukas is a good teacher.   #warm
+- Cook-along after dinner. Bring an apron, or borrow one.
+
+== here
+- Stir, don't splash. Stir.   #funny
+- A pinch. No, a smaller pinch.
+- Taste it now. Then taste it again in a minute. See?   #warm
+
+== thanks
+- Lukas shows you one simple dish at the galley pass. You stir, taste, and take away a warm portion of your own.   #warm
+
+== chatter
+- I made Lukas's soup in my cabin's kettle. Don't tell Brennan.   #funny
+- Cook-along's dumplings were better than mine at home. Don't tell my mum.   #funny

@@ -1,0 +1,36 @@
+@tradition open-door
+// Open door (0.60.7): end-of-shift tea on Wednesdays at the Works tea corner, where the Chief sits with whoever's
+// there. It opens at 16:40; Works crew still on shift come straight from it (after-shift), Calder too.
+k: 445
+title: Open door
+when: weekly wednesday
+at: 16:40-18:00
+min: 15
+after-shift: yes
+where: 5 room Tea corner: lounge-seat
+where: 5 room Works bay: work:works, free
+hold: 1
+who: calder always, works 40%, tea-break 25%, everyone 4%
+anim: calder talk, everyone drink
+host: calder
+from: calder
+
+== mail
+- Open door tomorrow at the tea corner from {time}. Bring a question, a gripe, or just a mug. I'll be there.
+
+== ask
+- Open door after shift. The Chief actually listens. Go on.   #warm
+- Calder's tea corner at end of shift. Bring the question you've been saving.
+- Open door today. Tea, biscuits, and the Chief with her boots off.   #funny
+
+== here
+- Ask her anything. She'll tell you straight.
+- More tea? The pot's still hot.
+- She fixed my rota in two minutes. Two.   #funny
+
+== thanks
+- You sit down at the tea corner with Chief Calder. She asks how your week is going, and waits for the real answer.   #warm
+
+== chatter
+- Open door's the only meeting I don't mind.   #funny
+- I asked the Chief about the coolant pumps at open door. She drew me a diagram on a napkin.

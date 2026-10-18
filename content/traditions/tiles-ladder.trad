@@ -1,0 +1,38 @@
+@tradition tiles-ladder
+// Tiles ladder (0.60.7, the user's pick): a friendly weekly Tiles round-robin on Saturday afternoons in the bow lounge,
+// with a chalkboard for the week's winner. Olu Farouk keeps the ladder. The boards are Tiles night's (decor tilesNight);
+// the results would be the Tiles engineer's (section 23).
+k: 450
+title: Tiles ladder
+when: weekly saturday
+at: 15:00-16:30
+min: 25
+jitter: 15
+where: 3 room Bow lounge: lounge-seat
+hold: 1
+who: farouk-olu always, rina 90%, lounge-regular 40%, everyone 10%
+anim: play
+host: farouk-olu
+from: farouk-olu
+ties: decor tilesNight
+invite: host=farouk-olu odds=30% line="Tiles ladder this afternoon. You're on the board. Bottom rung, but on the board."
+
+== mail
+- Tiles ladder tomorrow, {time}, in the bow lounge. Round-robin, friendly. The winner's name goes on the chalkboard for a week.
+
+== ask
+- Tiles ladder this afternoon. I'm on rung four. Rung four!   #funny
+- Coming to the ladder? Olu's got a board waiting.
+- Saturday Tiles. Friendly, Olu says. Olu keeps score in pen.   #funny
+
+== here
+- Your move. The ladder waits for no one.   #funny
+- Good game. Next table, please.
+- One more win and I'm on the chalkboard.
+
+== thanks
+- You play a round of the Tiles ladder. Olu writes your result on the chalkboard, neatly.
+
+== chatter
+- Rina's been top of the ladder three weeks. Someone stop her.   #funny
+- The ladder's chalkboard is the most read thing on the ship.   #funny

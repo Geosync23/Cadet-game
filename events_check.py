@@ -7,7 +7,7 @@
 #   on the deck, minute by minute through each event (the CrewAgents, no drawing): attendees reach their places,
 #   nobody is stuck for more than 10 ship minutes, nobody shares a place; draw calls at the event under BUDGET;
 #   the Mail the evening before (18:00), once each; the ship note after each tradition (simNote, once, who came);
-#   the voice budget (at most two traditions an evening, never two at once on a deck) every day of a year; decor on the deck while it's on, and gone after;
+#   the voice budget (at most two traditions at once, never two at once in a room; 2+ every weekday) every day of a year; decor on the deck while it's on, and gone after;
 #   the player joining by being in the room (a little social, once); the tap line before it;
 #   a whole ship year on paper (Pillar 4): the new rhythms (every 2 or 4 weeks, by quarter, by year, from your arrival)
 #   due exactly when they should be, the four seasons, the baked traditions (content/traditions) loaded and filled;
@@ -20,6 +20,7 @@ from playwright.sync_api import sync_playwright
 
 DAYS = int(sys.argv[2]) if len(sys.argv) > 2 else 28
 BUDGET = 450
+MORNING_WAIT = {'sunrise-stretch', 'pick-your-own'}       # the early ones (06:15, 06:30) wait for section 14 (0.34.51)
 STEP = 0.05                    # real seconds a step, as day_check
 
 # Pillar 4's rhythms, worked out forwards from each rhythm's first day (not with the game's evDue), for days lo..hi
@@ -345,7 +346,8 @@ with sync_playwright() as pw:
     seen = {e['id'] for row in r['days'] for e in row['ev'] if e['went']}
     for x in r['empty']: print('  note:', x)
     for i in r['ids']:
-        if i not in seen: fail(f"{i} never happened (or nobody ever went) in the days checked")
+        if i not in seen and i in MORNING_WAIT: print(f"  WAITING: {i}: nobody goes until section 14's morning() slots a gathering before breakfast (asked of the sim engineer at 0.34.51); then drop it from MORNING_WAIT")
+        elif i not in seen: fail(f"{i} never happened (or nobody ever went) in the days checked")
     for b in r['bad'][:20]: fail(b)
     if len(r['bad']) > 20: print(f"  ... and {len(r['bad']) - 20} more")
     same = g.ev(f"({SAME})(4)")
@@ -364,13 +366,14 @@ with sync_playwright() as pw:
         for (const d of on) if (!due.has(d)) out.bad.push(ev.id + ' on day ' + d + ' but not due');
         out.count[ev.id] = [...on].sort((a, b) => a - b);
       }
-      // the voice budget, every day of the year: at most two traditions an evening (from 17:00), never two at once on a
-      // deck (birthdays aside), and what it left out
+      // the voice budget, every day of the year (0.34.51, 0.60.7): at most two traditions at once, never two at once in
+      // one room (birthdays aside), and what it left out; and every weekday (Monday to Friday) has 2 or more
       out.dropped = [];
       for (let d = 0; d <= 364; d++) {
         const t = eventsOn(d).filter(e => SHIP_TRADITIONS.includes(e.ev) && !e.ev.when.birthday);
-        if (t.filter(e => e.from >= 1020 && e.to > 1080).length > 2) out.bad.push('day ' + d + ': more than two traditions in the evening');
-        for (const a of t) for (const b of t) if (a !== b && a.from < b.to && b.from < a.to && a.ev.where.some(w => b.ev.where.some(x => x.deck === w.deck))) out.bad.push('day ' + d + ': ' + a.id + ' and ' + b.id + ' at once on one deck');
+        for (const x of t) if (t.filter(k => k.from <= x.from && x.from < k.to).length > 2) out.bad.push('day ' + d + ': more than two traditions at once at ' + x.from);
+        for (const a of t) for (const b of t) if (a !== b && a.from < b.to && b.from < a.to && evRooms(a.ev).some(r => evRooms(b.ev).includes(r))) out.bad.push('day ' + d + ': ' + a.id + ' and ' + b.id + ' at once in one room');
+        if (d >= 1 && weekday(d) < 5 && t.length < 2 && !eventOn(d)) out.bad.push('day ' + d + ' (a weekday) has ' + t.length + ' tradition(s), not 2-3');
         if (EV_DROPPED.get(d)) out.dropped.push(d + ':' + EV_DROPPED.get(d).join('+'));
       }
       for (const d of [0, 1, 91, 92, 182, 183, 273, 274, 364, 365]) out.seasons.push(d + ':' + season(d) + ':' + seasonOf(d).week);
@@ -425,7 +428,7 @@ with sync_playwright() as pw:
     # every decor and trace id a tradition names is one the deck architect built (DECK_DRESS) or has announced, or one
     # a designer has asked for (it shows nothing until built); anything else is a typo
     ANNOUNCED = {'tilesNight', 'seedlingYours', 'tastingTable', 'lanternWalk', 'mugYours', 'longTables', 'harvestTables', 'cupBoard', 'talentStage', 'yearsEnd', 'openLab'}   # the deck architect, 0.38.10-0.38.14 and their list
-    ASKED = set()                                         # asked for in plans/trad-notes-*.md, not yet named by the deck architect
+    ASKED = {'nameOnBeam'}                                # asked of the deck architect (0.34.51: your name on the Works bay's cross beam), not built yet
     ids = g.ev("SHIP_TRADITIONS.flatMap(e => [e.ties && e.ties.decor, e.trace].filter(Boolean).map(x => [e.id, x]))")
     built = set(g.ev("typeof DECK_DRESS === 'undefined' ? [] : Object.keys(DECK_DRESS)"))
     waiting = sorted({x for _, x in ids if x not in built})

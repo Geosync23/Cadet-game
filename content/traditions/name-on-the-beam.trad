@@ -1,0 +1,42 @@
+@tradition name-on-the-beam
+// Name on the beam (0.60.7, the traditions engineer, plans/plan-0607.html "Traditions"): after your first full shift
+// the Works crew gather under the Works bay's cross beam and you paint your name beside everyone who's served there.
+// Zeke hands you the pen. Your first Monday (day 1), straight from shift: the crew come as they clock off (after-shift).
+// The beam and your name on it are the deck architect's (trace nameOnBeam, a lasting mark from the day you join).
+k: 441
+title: Name on the beam
+when: arrival monday
+at: 17:05-18:00
+min: 15
+prio: 2
+after-shift: yes
+venue: works-bay
+where: 5 room Works bay: work:works, free
+where: 5 room Tea corner: lounge-seat
+hold: none
+who: calder always, torres-zeke always, pell 95%, works 80%
+anim: talk
+host: calder
+from: calder
+trace: nameOnBeam
+
+== mail
+- After your shift tomorrow, stay in the Works bay a few minutes. Every new hand signs the beam. Bring nothing; Zeke has the pen.
+
+== ask
+- Don't rush off after shift. There's a beam with a gap on it, just your size.   #funny
+- After shift, under the cross beam. Every new hand signs it.
+- Zeke's got the pen ready. He's been practising handing it over.   #funny
+
+== here
+- Every name up there did a first shift, same as you.   #warm
+- Big letters. Nobody can read the small ones.   #funny
+- Mine's the faded one by the bolt. Ten years, near enough.   #warm
+
+== thanks
+- Zeke hands you the pen. You paint your name on the cross beam, beside everyone who's served in the Works. The crew clap.   #warm
+
+== chatter
+- Did you see the new name on the beam? Still wet.
+- The beam's nearly full on the port side. We'll start the starboard soon.   #funny
+- I read the beam sometimes. Every name's a story.   #warm

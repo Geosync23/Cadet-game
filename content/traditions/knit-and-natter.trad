@@ -1,0 +1,36 @@
+@tradition knit-and-natter
+// Knit and natter (0.60.7): Zeke's circle in the junior common room: knitting, sketching, reading together, any hobby
+// welcome. On at the same time as Tiles night (another deck), so you pick one.
+k: 444
+title: Knit and natter
+when: weekly tuesday
+at: 20:00-21:30
+min: 25
+jitter: 15
+where: 4 pool common-room
+hold: 1
+who: torres-zeke always, common-room 55%, quiet-corner 35%, juniors 20%, everyone 6%
+anim: read
+host: torres-zeke
+from: torres-zeke
+invite: host=torres-zeke odds=35% line="Knit and natter tonight, common room. Bring whatever you're making. Or just come and natter."
+
+== mail
+- Knit and natter tomorrow, {time}, junior common room. Bring a hobby: needles, a sketchbook, a book. Or nothing. Tea's on me.
+
+== ask
+- Knit and natter tonight. Zeke's teaching me to purl. It's going badly.   #funny
+- Bring your sketchbook to the common room later. Nobody looks unless you want them to.   #warm
+- Knit and natter or Tiles tonight? Can't do both.
+
+== here
+- Hold it looser. The wool's not going anywhere.   #warm
+- That's a scarf. It's definitely a scarf.   #funny
+- Pass the blue, would you?
+
+== thanks
+- You sit down in Zeke's circle. Needles click, pencils scratch, and the talk is easy.   #warm
+
+== chatter
+- Zeke's knitted something for half the Works. Mostly socks.   #funny
+- I finished a whole sketchbook at knit and natter.   #warm

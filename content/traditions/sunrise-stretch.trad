@@ -1,0 +1,35 @@
+@tradition sunrise-stretch
+// Sunrise stretch (0.60.7, the user's pick): a gentle group stretch along the promenade windows before breakfast,
+// Mondays, Wednesdays and Fridays. Anyone can join. wake: 15 (most traditions need an hour after waking).
+// The deck architect may tag stretch spots by the windows (event: 'sunrise-stretch'); else the promenade benches.
+k: 448
+title: Sunrise stretch
+when: weekly monday,wednesday,friday
+at: 06:30-07:00
+min: 15
+wake: 15
+venue: plaza
+where: 3 room Promenade: bench
+where: 3 room Lift plaza: bench
+hold: none
+who: early-riser 55%, runner 40%, gym-regular 35%, everyone 8%
+from: The promenade
+
+== mail
+- Sunrise stretch tomorrow, {time}, along the promenade windows. Gentle, slow, before breakfast. Come in whatever you slept in.   #funny
+
+== ask
+- Sunrise stretch this morning. Gentle, I promise.
+- Stretch by the windows before breakfast? Wakes you up better than tea.   #warm
+
+== here
+- Reach up. Hold it. And breathe.
+- My back says thank you. My knees have notes.   #funny
+- Look at the light on the hull.   #warm
+
+== thanks
+- You stretch with the early risers along the promenade windows. By breakfast you feel awake all the way through.   #warm
+
+== chatter
+- Sunrise stretch is the only reason I'm awake before seven.   #funny
+- The promenade at half six is the quietest place aboard.   #warm
