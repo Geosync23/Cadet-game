@@ -252,7 +252,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.55.9
+   STARSHIP CADET: CSV Wren                           build 0.55.10
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7810,7 +7810,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.55.9';                           // keep in step with the header's build line
+const GAME_BUILD = '0.55.10';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -34550,7 +34550,11 @@ function scanTrainReserve(d, at, slot, o) {
     if (o && o.yours && typeof toolGive === 'function') toolGive('scanner');   // handed over at the board: yours to read with
     if (o && o.yours) {                                  // Day 5 (the designer, 6fb5c49): your reading is on Washer 2 itself, P3's training case
       const C = SHIP.works && caseState(), c = C && C.first && caseById(C.first), j = c && caseJob(c);
-      if (c && c.train && j && j.status !== 'done' && !j.claimedBy) { c.m7 = true; MACH_REV++; return j.id; }
+      if (c && c.train && j && j.status !== 'done' && !j.claimedBy) {
+        c.m7 = true; MACH_REV++;
+        if (typeof worksEscortHold === 'function') worksEscortHold('m7');   // the teacher stays with you till the case is called (24 core ends it on caseCalled)
+        return j.id;
+      }
     }
     const m = scanTrainMachine(d, SCAN_TRAINED); if (!m) return null;
     const cs = caseCauses(m).filter(x => x.part), f = cs[Math.floor(schedU(machSeed(m.id), d, 875) * cs.length)];
