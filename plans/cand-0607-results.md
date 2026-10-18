@@ -34,3 +34,4 @@ Built on claude/cand-0606 (from 0.60.6a c8685cf). One line per finished check (c
 - cand 3 d3d720b (runner 2): day_check 6 OK (peak 269), 7 OK (peak 280), 35 OK (peak 275); all 6 days OK, every deck worst stuck 0.0
 - cand 3 d3d720b: perf_check vs c8685cf OK (no regressions; busiest junior common room portrait-wide 434 calls, was 431; quiz night 397, was 379; game code max 2.42 ms Sunday dinner portrait-wide; memory flat 548/43/150 over a week and round trips; file 3.97 MB, load ~6.3 s). phone.py dinner x2 each: new avg 3.70/3.71 ms, p99 10.1/10.0, worst 30.5/34.4 vs old avg 3.64/3.47, p99 10.6/10.3, worst 46.5/39.9: same
 - cand 3 d3d720b: arc_check OK, arc_check 70 booth OK
+- cand 3 d3d720b (runner 2): player_check OK (alone, 0 FAIL, no errors)
