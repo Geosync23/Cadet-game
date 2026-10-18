@@ -708,10 +708,10 @@ with sync_playwright() as pw:
     # 9e. Quiz night's mini-game (0.34.51): three questions from the pool (a stand-in pool here, unless the build has the
     # head writer's), the same three for a day, different the next week; joining the quiz in the bow lounge opens it;
     # a right and a wrong answer each get Tomas's remark, the score at the end
-    Q = g.ev("""(() => { const keep = {}; for (const k of ['quiz.q', 'quiz.right', 'quiz.wrong', 'quiz.done']) keep[k] = LINES[k];
-      const real = Array.isArray(LINES['quiz.q']) && LINES['quiz.q'].length >= 3;
-      if (!real) { LINES['quiz.q'] = Array.from({ length: 7 }, (_, i) => ({ text: 'Q' + i + '? | R' + i + ' | W' + i + 'a | W' + i + 'b | W' + i + 'c' }));
-        LINES['quiz.right'] = [{ text: 'Right.' }]; LINES['quiz.wrong'] = [{ text: 'It was {answer}.' }]; LINES['quiz.done'] = [{ text: '{n} of 3.' }]; }
+    Q = g.ev("""(() => { const keep = {}, real = !!LINES['quiz.q3.text'];
+      if (!real) { const set = (k, v) => { keep[k] = LINES[k]; LINES[k] = [{ text: v }]; };
+        for (let i = 1; i <= 7; i++) { set('quiz.q' + i + '.text', 'Q' + i + '?'); set('quiz.q' + i + '.a1', 'R' + i); for (const k of [2, 3, 4]) set('quiz.q' + i + '.a' + k, 'W' + i + k); }
+        set('quiz.right', 'Right.'); set('quiz.wrong', 'It was {answer}.'); set('quiz.done', '{n} of 3.'); }
       const d = 4, a = quizPick(d), out = { real, three: a.length === 3 && new Set(a.map(x => x.q)).size === 3, same: JSON.stringify(a) === JSON.stringify(quizPick(d)),
         next: quizPick(d + 7).map(x => x.q).join() !== a.map(x => x.q).join(), oneRight: a.every(x => x.answers.includes(x.right) && x.answers.length >= 3 && x.answers.length <= 4) };
       const was = DIALOGUE; if (was) dialogueClose();

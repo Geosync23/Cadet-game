@@ -23,7 +23,8 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 TOKENS = {'hi', 'bye', 'yes', 'thanks', 'wow', 'sigh', 'nick'}
 PLACEHOLDERS = {'me', 'name', 'first', 'friend', 'best', 'rival', 'partner', 'mentor', 'mentee', 'boss', 'thing', 'trad',
                 'machine', 'room', 'deck', 'dish', 'weekday', 'home', 'family', 'hobby', 'since', 'other',
-                'kin', 'lost', 'hobbyNoun', 'missed'}   # kin, lost: "my gran", "my wife" (with the my); hobbyNoun: "knitting", "the piano"
+                'kin', 'lost', 'hobbyNoun', 'missed',
+                'time', 'hours', 'n', 'max', 'part', 'shelf', 'drink', 'answer'}   # 0.60.7 texts (keys-0607.md): the engineer fills these   # kin, lost: "my gran", "my wife" (with the my); hobbyNoun: "knitting", "the piano"
 PAIR_WORDS = {'same', 'bunk', 'friend', 'rival', 'senior', 'couple', 'best', 'mentor', 'mentee'}   # section 22's linePair
 NEEDS = {'home', 'family', 'hobby', 'since', 'kin', 'lost', 'hobbyNoun'}   # what a theme beat's needs: can name
 TRAD_PLACEHOLDERS = {'trad', 'host', 'names', 'first', 'season', 'weekday', 'time'}   # tradition texts: only these (plans/trad-format.md, tradFill)
@@ -318,7 +319,7 @@ def main(argv):
                             errors.append(f'{tag}: beat is like beat:tomas.3 (arc id, a dot, beats told)')
         # length, with names filled in
         n = len(re.sub(r'\{[^}]*\}', 'x' * NAME_W, t))
-        lim = 90 if kind in ('trad.chatter', 'trad.ask', 'trad.here') else 200 if kind in ('trad.mail', 'trad.thanks') else 400 if kind == 'letter' else 60 if kind in BUBBLE_KINDS else 140 if kind.startswith(LONG_KINDS) else CARD
+        lim = 90 if kind in ('trad.chatter', 'trad.ask', 'trad.here') else 200 if kind in ('trad.mail', 'trad.thanks') or kind.startswith('tip.') else 400 if kind == 'letter' else 60 if kind in BUBBLE_KINDS else 140 if kind.startswith(LONG_KINDS) else CARD
         if not e.get('old'):
             if n > (90 if kind in BUBBLE_KINDS else lim):
                 errors.append(f'{tag}: {n} characters (at most {lim})')
