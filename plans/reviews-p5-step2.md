@@ -3,6 +3,8 @@
 Started by lead 12 (session_01GjWhU9Z9V8RNoR8yyELA9V) at ~11:28 for every Step 2 piece; R (claude/reviews-p5) keeps Step 1. Who gets verdicts: the seat and BM4 (session_013h22isZZqmJJSEKSbrwabf) get each one line; FAILs and design clashes also go to the lead. Format and standards as plans/reviews-p5.md: behaviour, save and schedule changes in depth against the piece's approved page (plans/mechanics/ on claude/p5-design), determinism, old saves load, phones first, cadet_test differences explained; content and test-only changes skimmed. Verdicts newest first.
 
 ## Passing tips
+- C claude/works-career **8cc07a5** (0.44.13, the old-save catch-up; for 0.63.0a / Step 2)
+- P claude/player-p5 **f00ac1e** (player_check only, on 3373828; for 0.63.0)
 - P claude/player-p5 **3373828** (0.28.73, contains cfce34e; 1 LOW)
 - M2 claude/mech-incidents **c9b211a** (0.51.1; LOWs 1-2 closed, LOW 3 for Step 3)
 - M1 claude/mech-rounds **c7c55cf** (0.45.5, contains 8a6cea8..740234d and Onboarding 4's 96649fe; items 1-2 closed; LOWs closed or out by the lead)
@@ -14,6 +16,13 @@ Started by lead 12 (session_01GjWhU9Z9V8RNoR8yyELA9V) at ~11:28 for every Step 2
 - (none)
 
 ## Verdicts
+
+### C 8cc07a5 (0.44.13): ladderTick opens nothing for a day already past — PASS (read; my quick checks)
+- One condition: `d < worksDay(shipNow())` returns early. Section 17's catch-up after loading an old save runs jobsHour, and so ladderTick, for every hour since the save's machine hour, which opened the drill and the inspection on long-gone days (M1 / BM5's finding). A sleep's hours on the same day (the 06:00 ask while you sleep) are unaffected. Hours skipped on an earlier day (a long skip) open nothing; the row opens on your next workday instead, which matches 24 core's "offered later, none lost". Test-only: career_check and mech_check's scripted player reads a meeting through (dialogueEnd), and career_check counts Mail from the training's own ask.
+- Checks (my runs on 8cc07a5): cadet_test vs d3d720b **ALL IDENTICAL**; **career_check OK**; **mech_check OK**.
+
+### P f00ac1e: player_check on the Pillar 5 join (test only) — PASS (read)
+- The job loop's test puts at least 2 of the job's parts on the shelf before claimJob (since Pillar 5's faults and hauling, a part may be out until the delivery). The `JOB_KINDS` arms add their test kind to the real registry and put it back, rather than skipping when one exists; the held-prop check no longer passes by default when a registry is there. No game code changes. Not run by me: player_check takes about 40 minutes, it's test-only, and P ran it on the join.
 
 ### P 3373828 (0.28.73): the look's sign, scanOpen, r.say/wrong/retry, a kind's held prop, the Thursday berth — PASS with a LOW (in depth)
 - The look's marks card shows `opts.text` (24a's sign) before the question. The look-over calls `scanOpen(job.id)` first; it's H's function, which opens the scanner and returns true when it read, else the old toast. jobStepDone's result: `r.wrong` (24k said so) and `r.retry` (17's veto) leave the stop to do and show the kind's words; `r.say` goes before "Done here" / "Work done". The held prop: a registered kind's `def.hold`, a string or a function of the job, used if HOLDS has it; null means nothing in hand (the drill outside its fire steps); else the toolbox as before. R's LOW on 0.28.72 is closed (the dead careerSpeed in ixChoreTap is gone).
