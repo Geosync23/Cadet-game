@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>First Promotion Spec</title>
+<style>
+:root{--ink:#e8eef0;--muted:#93a6ae;--teal:#4cc3b5;--gold:#e9c46a;--rose:#e58f7a;--glass:rgba(13,21,33,.78);--line:rgba(150,200,196,.22);--chip:rgba(76,195,181,.14)}
+*{box-sizing:border-box}
+html,body{margin:0;background:#121a27;color:var(--ink);font-family:"Avenir Next","Segoe UI",system-ui,sans-serif}
+body{background:radial-gradient(ellipse at 50% 20%,#22304a 0%,#141c2b 60%,#0c111b 100%) fixed;line-height:1.5}
+header{padding:18px 16px 4px;max-width:1100px;margin:0 auto}
+h1{font-size:21px;font-weight:600;margin:0}
+h2{font-size:17px;font-weight:600;margin:0 0 8px;color:#bdeee6}
+h3{font-size:14.5px;font-weight:600;margin:12px 0 4px;color:#d9eeea}
+.sub{font-size:13.5px;color:var(--muted);margin-top:4px}
+.draft{display:inline-block;font-size:11.5px;color:#14202a;background:var(--gold);border-radius:999px;padding:2px 9px;margin-left:6px;vertical-align:2px}
+nav{position:sticky;top:0;z-index:5;background:rgba(14,20,31,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+nav div{display:flex;gap:6px;overflow-x:auto;padding:8px 16px;max-width:1100px;margin:0 auto;-webkit-overflow-scrolling:touch}
+nav a{flex:none;text-decoration:none;border:1px solid var(--line);background:var(--glass);color:var(--ink);font-size:13px;padding:6px 11px;border-radius:999px}
+nav a:focus-visible,nav a:hover{border-color:var(--teal);color:#bdeee6;outline:none}
+main{max-width:1100px;margin:0 auto;padding:6px 16px 40px}
+section{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:14px 0;scroll-margin-top:56px}
+p{margin:6px 0;font-size:14px;color:#d6e0e3}
+ul{margin:6px 0;padding-left:20px;font-size:14px;color:#d6e0e3}
+li{margin:3px 0}
+.note{font-size:12.5px;color:var(--muted)}
+.grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.card{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.025)}
+.card b{display:block;color:#bdeee6;font-size:14px;margin-bottom:2px}
+.card span{font-size:13px;color:#cfd9dc}
+.card .meta{display:block;font-size:12px;color:var(--muted);margin-top:4px}
+.tag{display:inline-block;font-size:11.5px;border-radius:999px;padding:1px 8px;margin:2px 4px 0 0;background:var(--chip);color:#bdeee6;border:1px solid var(--line)}
+.tag.new{background:rgba(233,196,106,.16);color:#f1dca0}
+.tag.old{opacity:.75}
+.steps{list-style:none;padding:0;margin:8px 0;counter-reset:s}
+.steps li{position:relative;padding:8px 10px 8px 46px;border-left:2px solid rgba(76,195,181,.35);margin:0 0 0 14px}
+.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:-15px;top:8px;width:28px;height:28px;border-radius:50%;background:#183040;border:1px solid var(--teal);color:#bdeee6;font-size:12.5px;display:flex;align-items:center;justify-content:center}
+.steps time{display:block;font-size:12px;color:var(--gold)}
+.steps b{color:#e4f3f0;font-weight:600}
+.steps span{display:block;font-size:13.5px;color:#cfd9dc}
+.week{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.day{border:1px solid var(--line);border-radius:12px;padding:9px 10px;background:rgba(255,255,255,.02)}
+.day h4{margin:0 0 4px;font-size:13.5px;color:var(--gold);font-weight:600}
+.day p{font-size:12.5px;margin:4px 0;color:#cfd9dc}
+.day .who{color:#bdeee6;font-weight:600}
+.lines{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;background:#0b141c;border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:#9fe7dc;white-space:pre-wrap;overflow-x:auto;margin:8px 0}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0}
+.flow .box{border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:13px;background:rgba(255,255,255,.03)}
+.flow .arrow{color:var(--teal)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:12px}
+.tablewrap{overflow-x:auto}
+.waves{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+.wave{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.025)}
+.wave b{color:var(--gold);display:block}
+.wave .ci{display:block;margin-top:6px;font-size:12.5px;color:#f1dca0}
+ol.q{padding-left:22px;font-size:14px;color:#d6e0e3}
+ol.q li{margin:6px 0}
+ol.q em{color:var(--muted);font-style:normal;font-size:12.5px}
+svg text{font-family:inherit}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;color:#9fe7dc;background:rgba(0,0,0,.25);padding:0 4px;border-radius:4px;word-break:break-word}
+section.builder{border-color:rgba(233,196,106,.45)}
+section.builder h2{color:var(--gold)}
+.status{display:inline-block;font-size:11.5px;color:#14202a;background:var(--teal);border-radius:999px;padding:2px 9px;margin-left:6px;vertical-align:2px}
+td code{white-space:normal}
+</style>
+</head>
+<body>
+<header>
+  <h1>The Tier 2 test job and your first promotion: Officer (Days 8-11) <span class="draft">spec for approval</span></h1>
+  <div class="sub">From "Tomorrow, your test job" on Day 8 to the officer ceremony on Day 11: the test job, the urgent summons, Calder's office, the crew, your move to cabin 4-23, and the ceremony with the Captain. Step 3, section 24 core (seat C), with the sim engineer on call. Plan Part 3 (<code>plans/pillar5-plan.md</code> v10).</div>
+</header>
+<nav><div><a href="#plain">In plain words</a><a href="#days">Day by day</a><a href="#test">The test job</a><a href="#move">The move</a><a href="#cer">The ceremony</a><a href="#after">After</a><a href="#b">Builder</a><a href="#save">Save</a><a href="#tests">Tests</a><a href="#ranges">Builds and keys</a><a href="#faq">FAQ</a></div></nav>
+<main>
+
+<section id="plain">
+  <h2>In plain words</h2>
+  <p>When your Works reputation reaches "Relied on" and you've learned the Junior work (rounds, hauling, the drill and inspection, tuning, the scanner, your first incident), Calder sets your <b>test job</b>: a real Tier 2 job, with her watching. Pass it and the next work day you're <b>summoned</b>, promoted to <b>Officer</b> (Technician, Tier 2), cheered by the crew, walked to your own cabin, and the day after, <b>commissioned</b> by the Captain. Nothing about it can be missed, and the test job can only ever be delayed, never failed for good.</p>
+</section>
+
+<section id="days">
+  <h2>Day by day (a steady player)</h2>
+  <ol class="steps">
+    <li><time>Day 8, Monday, after the briefing</time><b>"Tomorrow, your test job."</b><span>Calder, in person at the board (or by Mail if you're not there by 10:00). The Record's "What's next" line says it too.</span></li>
+    <li><time>Day 9, Tuesday</time><b>The test job</b><span>A real Tier 2 job held for you: one of Deck 4's air scrubbers (<code>4-scrubber-1</code> or <code>-2</code>), with Calder following. You use what you've learned: the morning round finds it ("something's off"), the scanner reads it (the filter is low), you fetch a filter and fit it, and a tuning step settles the fan. She says a word at each step. Torres is on Tuesdays and comes by at the end.</span></li>
+    <li><time>Day 10, Wednesday, 10:30</time><b>The summons</b><span>An urgent toast, not a quiet badge: "Chief Calder: My office, 11:00. — C." A real appointment in her glass office in the Works bay; the goal arrow points there; Torres: "Go on. She doesn't bite. Usually." If you haven't come by 11:15, Calder walks over to find you wherever you are on the ship and says it there.</span></li>
+    <li><time>11:00, Calder's office</time><b>The scene</b><span>She tells you you've passed; hands you the <b>Technician's badge</b> and your <b>Officer's collar pip</b>; you choose one reply (proud, surprised, "about time"), which she remembers.</span></li>
+    <li><time>After</time><b>The crew</b><span>You walk out into the Works bay and the Works crew on shift are by the board: applause, Torres's grin, "Told you" from Pell if he's on. All day, people who know you react when you meet; Mail from friends and the Captain; a news item in the Ship app; Brennan's cake at the Works tea corner after the shift.</span></li>
+    <li><time>17:00</time><b>The move</b><span>Calder walks you to cabin 4-23 (below).</span></li>
+    <li><time>Day 11, Thursday</time><b>The ceremony</b><span>Mail from the Captain's office in the morning; your first team job (M8, its own page) in the morning; at 17:15 the officer ceremony in Deck 1's observation room (below). Officers aren't inspected, so that morning's 06:30 inspection isn't yours.</span></li>
+  </ol>
+</section>
+
+<section id="test">
+  <h2>The test job: only ever delayed</h2>
+  <ul>
+    <li><b>Passed</b> when the scrubber is put right (the filter fitted and the fan settled), whatever it took. Wrong picks or a slow job don't fail it; they're mentioned kindly.</li>
+    <li><b>Delayed</b> only if you don't do it (not taken by 15:00, or dropped): Calder says what to practise ("Get a few more scrubbers' worth of filters under your belt") and sets another in two work days. There's no limit and nobody is ever passed over.</li>
+    <li>It opens no earlier than Day 9, even for a very busy player, so the first week keeps its pace.</li>
+  </ul>
+</section>
+
+<section id="move">
+  <h2>The move to 4-23 (Day 10, about 17:00)</h2>
+  <ul>
+    <li><b>Calder walks you there</b> (Commander Vance if it's her day off): from the Works bay, up the lift, along the officers' corridor. On the way she talks about officers' ways: your door, quiet hours after 23:00, the "Come over" visits.</li>
+    <li><b>On the way you pass Tomas and Pell carrying your box.</b></li>
+    <li><b>At 4-23</b> the door plate already has your name and rank; your key opens it; your things are there: what was in your locker, the keepsakes on your shelf, gifts you were given. Your clothes and wardrobe move too (your laundry is still yours until the Deck 2 suite).</li>
+    <li>Tomas says goodbye as a bunkmate: "Don't be a stranger, Officer." That night you sleep in your own cabin, and Pillar 4's "Come over" visits start.</li>
+    <li>If you're busy at 17:00 (mid-job), Calder waits up to 30 minutes, then finds you; if you're asleep or off the ship's day plan, the move happens anyway and Calder's lines come by Mail.</li>
+  </ul>
+</section>
+
+<section id="cer">
+  <h2>The officer ceremony (Day 11, 17:15)</h2>
+  <ul>
+    <li><b>Where and who:</b> the observation room on Deck 1 (the conference table, the stern windows): the Captain, Commander Vance, Calder, Torres, and up to three of the friends you're closest to (chosen by the game from your friendships).</li>
+    <li><b>Short and formal:</b> the Captain reads your commission, <b>pins your Officer's insignia</b> (your uniform shows it from now on: a small collar mark, a colour change, nothing new drawn), a handshake, one line from you, a toast with the Captain's tea.</li>
+    <li><b>A clean uniform matters</b> (M2): if you're grubby, Calder gives you a look and the Captain says nothing; nothing else changes.</li>
+    <li><b>A keepsake:</b> the framed commission goes on your cabin shelf. Your Record: "Commissioned Officer, Day 11."</li>
+    <li><b>If you miss it</b> (you don't come by 17:30), Calder comes to find you and walks you up; it can't be missed.</li>
+  </ul>
+</section>
+
+<section id="after">
+  <h2>After the promotion</h2>
+  <ul>
+    <li>Your rank is Officer, your Works title Technician (Tier 2). The board starts leaving you Tier 2 jobs; junior jobs (the food cart, hauling runs) aren't held for you any more but stay on the board (the user, N4).</li>
+    <li>Your Works reputation starts again as "New officer".</li>
+    <li>Head-scratchers come more often (about 1 in 5 of your real repairs).</li>
+    <li>The Deck 5 machine rooms and the pipe galleries are now your work (tracing, M9, Day 12).</li>
+  </ul>
+</section>
+
+<section id="b" class="builder">
+  <h2>For the builder (seat C, 24 core; sim on call)</h2>
+  <div class="tablewrap"><table>
+    <tr><th>Section</th><th>What</th><th>Owner</th></tr>
+    <tr><td>24 core</td><td>the ladder row <code>t2</code> (Day 9, big, needs band <code>relied</code> at Tier 1 + <code>m6</code> trained, <code>by: ['calder', 'vance']</code>); the test job; the summons; the scene (<code>MEETING_SCRIPTS['promo.officer']</code>); the crew's gathering; <code>simNote('promoted', { tier: 2, rank: 'officer' })</code>; the move; the ceremony; the save</td><td>C</td></tr>
+    <tr><td>17</td><td><code>jobReserve('scrubber', day, 480, 20, { tier: 2, train: 't2', until: 900 })</code> on <code>4-scrubber-1</code> (or <code>-2</code> if the first is serviced); its cause is <code>filter</code> plus a drift of +2 on the fan (M5 stage 2, so a <code>tune</code> stop follows the fit)</td><td>S</td></tr>
+    <tr><td>14 / 10 sim</td><td>the crew gathering at the board (Works crew on shift, 11:10-11:25 Day 10); Calder's (or Vance's) walk with you (<code>worksEscort</code>); Tomas and Pell carrying the box (a <code>carry</code> segment on the corridor at 17:05, the box prop); <b><code>playerBed()</code></b>: your bed becomes <code>4-23</code> (today it's fixed to Bunk 1's berth); the ceremony's guests at Deck 1's observation room at 17:10-17:40</td><td>the social engineer (sim on call)</td></tr>
+    <tr><td>15 / 15b / 15c</td><td>your sleep, wardrobe and locker follow <code>playerBed()</code>; the bed tap in 4-23; the clothes section's wardrobe moves with you</td><td>P; onboarding 4 (15c) on call</td></tr>
+    <tr><td>DECKS[4], [1]</td><td>4-23's door plate (the deck's <code>namePlate</code> kit, text from <code>SHIP.works.home</code>); the keepsake shelf place in 4-23; ceremony places in the observation room (the Captain, you, guests)</td><td>seat A</td></tr>
+    <tr><td>8 / 8b</td><td>the collar pip and insignia on your uniform (a colour on the existing collar and badge; no new meshes); the box carry pose</td><td>C does it through <code>col()</code> (no performance seat), reporting draw calls</td></tr>
+    <tr><td>20</td><td>reactions on <code>simNote('promoted')</code> (friends, acquaintances, a rival); Mail from friends</td><td>social (reads only; lines through W)</td></tr>
+    <tr><td>content</td><td>the summons, the office scene, crew lines, Calder's walk, Tomas's goodbye, the ceremony</td><td>W</td></tr>
+  </table></div>
+  <ul>
+    <li><b>The summons:</b> the first work day after the test is passed, an occasion (<code>occasionAdd</code>) at 11:00 in Calder's office, a <b>loud</b> toast at 10:30 (<code>deviceNotify({ urgent: true })</code>) and the goal arrow. At 11:15, if you're not in the Works bay, <code>worksEscort</code> sends Calder to you (<code>mode: 'lead'</code> to your place, then she says it there: the same script).</li>
+    <li><b>Rank change:</b> <code>SHIP.works.tier = 2</code>, <code>rank = 'officer'</code>, <code>xp = 0</code>, <code>band = 'new'</code>; <code>playerTier()</code> now 2. Junior jobs stop being held (<code>forYou</code>'s junior rule, foundation 17.2).</li>
+    <li><b>The move:</b> <code>SHIP.works.home = '4-23'</code> at the escort's arrival (or 17:30 at the latest); 4-23 stops being a spare (section 14's cabin list; <code>spares</code>, DECKS[4]); <code>playerBed()</code> returns the bed place <code>4-23</code>; your locker's and shelf's things are moved (they keep their ids).</li>
+    <li><b>The ceremony:</b> an occasion at 17:15 Day 11 in Deck 1's observation room (unlocked for it, Pillar 3's occasion doors); guests = Captain, Vance, Calder, Torres + up to 3 friends by <code>relTier</code>, highest first; the insignia's colour change on "pins"; the keepsake (an item <code>commission</code> on the shelf).</li>
+    <li><b>Never missed:</b> every step that waits on you (the summons, the move, the ceremony) has an escort fallback at +15 minutes, and a Mail fallback if you're asleep or on a day off.</li>
+  </ul>
+</section>
+
+<section id="save" class="builder">
+  <h2>Save</h2>
+  <ul><li><code>ship.works</code>: <code>tier</code>, <code>rank</code>, <code>xp</code>, <code>test: { tier: 2, day, tries, passed }</code>, <code>home: '4-23'</code>, <code>done: ['summons2', 'move2', 'ceremony2']</code>, <code>ms: [['officer', 10], ['commissioned', 11]]</code>. A save made between the summons and the move resumes at the next step.</li></ul>
+</section>
+
+<section id="tests" class="builder">
+  <h2>Tests</h2>
+  <ul>
+    <li><b><code>career_check</code></b>: the steady player's test on Day 9, the summons Day 10, the move by 17:30, the ceremony Day 11; a lazy player's test later, never before Day 9; a test not done is delayed two work days, then passes; Calder comes to find you at 11:15 and 17:30 when you don't come; 4-23 no longer a spare; <code>playerBed()</code> is 4-23 that night; the ceremony once; the save at each step; twice identical.</li>
+    <li><b><code>day_check</code></b> on Day 10 and Day 11: everyone reaches their places; the gathering and the guests return; draw calls under 450 in the observation room.</li>
+    <li><b><code>deck_check</code></b>: 4-23 and the observation room's ceremony places reachable.</li>
+    <li><b><code>intro_check</code></b>: Days 0-8 unchanged.</li>
+  </ul>
+</section>
+
+<section id="ranges" class="builder">
+  <h2>Builds and keys</h2>
+  <ul><li>Seat <b>C</b> (<code>claude/works-career</code>, <b>0.44.x</b>); S for the reserved job (0.33.x); seat A (<code>claude/deck-0607</code>). Hash keys: <b>851</b> (the ceremony's friend choice on a tie). Uses <code>jobReserve</code> slot 20 (test jobs 20-23).</li></ul>
+</section>
+
+<section id="faq">
+  <h2>Builders' questions</h2>
+  <p class="note">None yet.</p>
+</section>
+
+</main>
+</body>
+</html>
