@@ -9,6 +9,12 @@
 
 ## Verdicts
 
+### Re-check: onboarding 0.42.32 e2cd435 + head writer 2729ce1: PASS, the MED is resolved
+- **Keys:** the writer's a76e232/2729ce1 moved Zeke's lines onto `walk.train.<job>.<step>` and `walk.follow.1-29`. Every `walk.train` job in torres-zeke.lines (lamp, vent, calibrate, delivery, round, fault, filter, seal, cart) is a real `CHORES` key or an `INTRO_TRAIN_JOB` mapping (`repair→fault`, `restock→cart`, `inspect→round`). Its steps (take, fetch, make, at, done, turnin) match `INTRO_TRAIN_STEP`. A missing pair just plays the base line.
+- **The writer's fixes:** no "lunch" left in talk.lines or torres-zeke.lines; one "Ask me how I know"; `clock.screen.ready` uses `{time}`.
+- **0.42.32 code:** `introFollowTick` now speaks while walking with you (`a.pose === 'walk'`, within 4 tiles), during jobs too, at most every 8 s plus `INTRO_TOUR_GAP` after a line, and waits for `sayEnd`. `INTRO_UI.next` starts undefined, and `now < undefined` is false, so that's fine. At this pace the 29 follow lines last a few minutes of walking together; that's the writer's and onboarding's call.
+- **Still open, LOW (passed to onboarding 4 by the lead):** the pacing is still on `performance.now()`, so a line can come at once on Resume after a Pause.
+
 ### Onboarding 3, 0.42.31, claude/arrival 31c6516 (in depth): PASS, one MED to settle before the combine
 Section 21 (introAdvance, the trainer and between-jobs lines, d1-shadow to 13:00) and one condition in PE6's `shuffleable`.
 - **Checks I ran:** cadet_test vs c8685cf **ALL IDENTICAL**, no errors. `intro_check --dawdle` **OK**: he rides both lifts with you (0 tiles apart after each ride), 18/18 core tour lines, nothing missed, draw-call peaks 193/208/258.
