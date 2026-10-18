@@ -3,7 +3,7 @@
 // a night, from this pool. All true to the game and learnable by playing (decks, crew, times, traditions, systems);
 // easy to medium; the wrong answers are a little silly. TEXTS: quiz.q<n>.text is the question, quiz.q<n>.a1 is ALWAYS
 // the right answer, a2-a4 the wrong ones (the game shuffles them). quiz.host.* are said by the quiz host (card or
-// bubble, any voice). {n} a score.
+// bubble, Tomas). {n} a score, {answer} the right answer.
 
 == quiz.q1.text
 - What's the name of the shuttle that brought you aboard?
@@ -25,7 +25,7 @@
 == quiz.q2.a3
 - Deck 6
 == quiz.q2.a4
-- Whichever deck the Captain is on
+- Wherever the Captain is
 
 == quiz.q3.text
 - Where will you find the mess and the galley?
@@ -157,7 +157,7 @@
 == quiz.q14.a3
 - 21:00
 == quiz.q14.a4
-- The moment Brennan rings the bell
+- When Brennan says so
 
 == quiz.q15.text
 - Which deck has the Works bay and the job board?
@@ -250,7 +250,7 @@
 == quiz.q23.text
 - What does the grab shelf in the mess hold?
 == quiz.q23.a1
-- Covered plates for anyone who misses dinner
+- Plates for anyone late to dinner
 == quiz.q23.a2
 - Spare spanners
 == quiz.q23.a3
@@ -278,7 +278,7 @@
 == quiz.q25.a3
 - The infirmary
 == quiz.q25.a4
-- The cold store. Keeps the songs fresh.
+- The cold store
 
 == quiz.q26.text
 - Which day does the weekly delivery come in?
@@ -300,12 +300,12 @@
 == quiz.q27.a3
 - Watering can
 == quiz.q27.a4
-- Gardener. Very tall. Very still.
+- Very tall gardener
 
 == quiz.q28.text
 - What can you see from the Deck 6 overlook?
 == quiz.q28.a1
-- The engine room and its drive coils
+- The drive coils
 == quiz.q28.a2
 - The garden
 == quiz.q28.a3
@@ -357,26 +357,30 @@
 == quiz.q32.a4
 - Soup and suffering
 
-// the host
-== quiz.host.open
-- Right, pens down, ears up. Three questions about the Wren.
-- Quiz time! Three questions. No looking at your device.
-- Three questions, one winner, and everyone gets biscuits.
-== quiz.host.right
-- Correct! Have a biscuit.
-- That's right. Somebody's been paying attention.
-- Yes! Spot on.
-- Right answer. Show-off.   #funny
-== quiz.host.wrong
-- Ooh, no. Good guess, though.
-- Not quite. Lovely confidence.   #funny
-- Wrong, but I like where your head's at.   #funny
-- No, but we've all thought it.
-== quiz.host.score
-- That's {n} out of three. Not bad at all.
-== quiz.host.perfect
-- Three out of three! Someone's been reading the walls.   #funny
-- A perfect round. Take a bow.
-== quiz.host.zero
-- None right. Still, you came. That's the main thing.   #warm
-- Zero! A brave score. Next week's yours.   #funny
+// the host (Tomas is the question master: earnest, a little nervous, delighted when you get it right)
+// quiz.open: optional, as the card opens. quiz.right: a right answer. quiz.wrong: a wrong one ({answer} = the right
+// answer; never a fail). quiz.done: after the third ({n} = right answers, 0-3; reads right for any score).
+// quiz.done.perfect / quiz.done.zero: optional, for 3 and 0.
+== quiz.open
+- Right. Um. Three questions about the Wren. No looking at your device.
+- Quiz time! I wrote these myself. Be kind.   #funny
+- Three questions. I think they're easy. I think.
+== quiz.right
+- Correct! A point to the new hand.
+- Yes! That's it. I'm so pleased.
+- Right! Somebody's been paying attention.
+- Spot on. I had to look that one up.   #funny
+== quiz.wrong
+- Close. It's {answer}.
+- Not quite. It's {answer}. Good guess, though.
+- Ooh, no. {answer}. I'd have said the same, honestly.
+- It's {answer}. Next one's yours.
+== quiz.done
+- {n} out of 3. Thanks for playing. Same time next week?
+- That's {n} out of 3. I'll write harder ones. Or easier. Sort of.   #funny
+- {n} out of 3! You came, that's the main thing.   #warm
+== quiz.done.perfect
+- Three out of three! Have you been reading the walls?   #funny
+- A perfect round. I'm genuinely impressed.
+== quiz.done.zero
+- None this time. Still, you came. That's the best part.   #warm
