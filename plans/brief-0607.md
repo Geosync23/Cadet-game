@@ -53,3 +53,4 @@ PE6 keeps: Hobbies app, time clock pop-up, bathroom rate + toilet icon, tray tex
 
 ## Lead 11 (from ~05:35)
 Report to lead 11, session_01YKC3CGA9VS4b7wuqLbPT7V (lead 10 is idle). ~06:01: **build master 4** session_013h22isZZqmJJSEKSbrwabf started (push branch claude/cand-0607) to take the 0.60.7 candidate from BM3 (~58% memory) at its next quiet point. DA4 bisects the day_check day 3 'kovac-zainab Deck 5 stuck' failure.
+~06:12: **Pillar 5 designer 2** session_01VXENaUt4vdyYtr3KjVZk9z (claude/p5-design) started: plan update for puzzles-from-Day-5, then spec pages for Steps 1-2. Pillar 5 builders start after 0.60.7 is released.
