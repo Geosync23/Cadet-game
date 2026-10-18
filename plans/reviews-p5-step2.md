@@ -6,7 +6,7 @@ Started by lead 12 (session_01GjWhU9Z9V8RNoR8yyELA9V) at ~11:28 for every Step 2
 Spec: plans/brief-playtest1.md on claude/lead-pillar1 (12b1b87); the user's answers in it are binding. Seats: T traditions session_01X4SZJFeHprDF21NZqU5fGi (claude/traditions-pt1, 0.70.x), X crew sim session_01SNaWA6X5E9i2ZKfMnPTHJf (claude/crew-pt1, 0.71.x), U HUD session_01FcMPTX7mMTHkyr4pxDfNcS (claude/hud-pt1, 0.72.x), C2 works career session_014yREkgPvuwMyxBtoqB1P14 (claude/works-career, 0.44.x), O4 (claude/onboard-pt1), W, P, A5 session_01CHRbUTZc18m7eBck8eWhXj (claude/deck-pt1). Verdicts go to the seat, BM5 and lead 13 (finished reviews, blockers, design calls). Behaviour and saves in depth; lines and tests skimmed. The base is 0.63.1 (claude/p5-cand-s2).
 
 ## Passing tips
-- W claude/writer-p5 **ff81441** (0.48.90 + time lines, breakfast 07:00-09:00, call-home tip; no LOWs open; 0.48.89 + 'seek' + key renames, playtest 1 lines, text; LOW 1 waits on X/C2's breakfast window)
+- W claude/writer-p5 **a6593a8** (0.48.90 + time lines, breakfast 06:00-09:00, call-home tip; no LOWs open; 0.48.89 + 'seek' + key renames, playtest 1 lines, text; LOW 1 waits on X/C2's breakfast window)
 - W claude/writer-p5 **ac60c8d** (0.48.88, text; contains 0d179ac)
 - C claude/works-career **8cc07a5** (0.44.13, the old-save catch-up; for 0.63.0a / Step 2)
 - P claude/player-p5 **f2156f1** (0.28.73 + the LOW fix 391c88e + player_check fixes f00ac1e, d6f321d, 642b511, ad9ff57, 1830f2d, f2156f1; no LOWs open)
@@ -21,6 +21,9 @@ Spec: plans/brief-playtest1.md on claude/lead-pillar1 (12b1b87); the user's answ
 - (none)
 
 ## Verdicts
+
+### W a6593a8: breakfast 06:00-09:00 (X's window) — PASS (skimmed)
+- 5c9ac79 had moved the start to seven; X's window is 06:00-09:00 (the night shift eats at six). News, facts.md, Zeke's Mail and introDinner say six, and Chloe's, Tariq's and Vance's lines are back as they were; Rina's "closes at nine" stays. content_gen clean; lines_check PASS. (My note to X/C2 about the game code's breakfast texts: they should read 06:00-09:00.)
 
 ### C2 fd26e15 (0.44.14): the day shift 09:00-17:00 in the career, clock and jobs code — waiting on 0.44.15 (read in depth)
 - DAY_SHIFT [540, 1020] (section 17: jobs held count shift minutes from 09:00; the board's day/night label). DEV_SHIFT.from 540 (the Schedule; a literal, since DAY_SHIFT comes later in the file). shiftTick's late from DAY_SHIFT[0], read at run time, so no load-order trouble. The time clock opens at 08:00 (CAREER.clockIn, was 07:00) for clocking, careerStarted, the reminder and the first tip: late after 09:00, still missed by 12:30, leave booked by 08:30 (bookBy 510). Day 1-3: INTRO_JOBS an hour later; the briefing 08:50-09:05, the shadow from 09:05, Day 2's word 08:45, Day 3's pick 09:00. Bea's Day 1 vent stays at 09:00. Tip t:shift at 08:30-09:00. The crew's SHIFTS/MEALS and breakfast are X's.
