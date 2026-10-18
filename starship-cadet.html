@@ -32892,6 +32892,8 @@ function socialChatter(m) {
 const SEEK_NEAR = 10, SEEK_ODDS = .06, SEEK_SECS = 25, SEEK_COME_SECS = 30, SEEK_BESIDE = 1.3;
 let SEEK = null, SEEK_COME = null;                        // { p, el, until, line, come }; { p, m, why, until } on the way
 const seekSalt = () => SHIP.career && SHIP.career.gs | 0 || 0;
+const SEEK_PRIVATE = new Set(['bathroom', 'shower', 'toilet', 'wash', 'hands']);   // reviewer 2's LOW on 0.71.0: nobody walks up while you wash, or in a washroom
+const seekPrivate = () => { if (typeof ACT !== 'undefined' && ACT && SEEK_PRIVATE.has(ACT.kind)) return true; try { const r = (deckDef.rooms || {})[roomAt(...player.here())]; return !!r && /washroom|shower|toilet/i.test(r.name || ''); } catch (e) { return false; } };
 const seekWho = p => !!(SEEK_COME && SEEK_COME.p === p || SEEK && SEEK.come && SEEK.p === p && !CHAT);
 const SEEK_OPEN = ['Got a minute? I was hoping I\'d catch you.', 'There you are. Have you got a moment?', 'Oh good, it\'s you. Come and talk to me a minute.', 'Hey, you. Got a second for me?'];   // until section 22 has 'seek' lines
 function seekCome(p, a, m, why) {                         // a: their agent on this deck; none (not here): the chip as before
@@ -32973,10 +32975,11 @@ function seekSpot() {                                    // somewhere by you for
 }
 function socialSeek(m) {
   if (typeof DECK_CREW === 'undefined') return;
-  if (SEEK_COME) { const a = DECK_CREW.find(x => x.p === SEEK_COME.p); if (!a || CHAT || SEEK || sleeping || simNow() > SEEK_COME.until) SEEK_COME = null; return; }   // on their way over (0.71.0)
+  if (SEEK_COME) { const a = DECK_CREW.find(x => x.p === SEEK_COME.p); if (!a || CHAT || SEEK || sleeping || seekPrivate() || simNow() > SEEK_COME.until) SEEK_COME = null; return; }   // on their way over (0.71.0); you went to wash: they leave it
+  if (!SEEK && seekPrivate()) return;                    // none starts while you wash (0.71.1)
   if (!SEEK && socialSeekAsks(m)) return;
   const near = a => Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) <= SEEK_NEAR;
-  if (SEEK) { if (SEEK.visit) return; const a = DECK_CREW.find(x => x.p === SEEK.p); if (!a || !near(a) || simNow() > SEEK.until || CHAT) seekEnd(); return; }
+  if (SEEK) { if (SEEK.visit) return; const a = DECK_CREW.find(x => x.p === SEEK.p); if (!a || !near(a) || simNow() > SEEK.until || CHAT || SEEK.come && seekPrivate()) seekEnd(); return; }
   if (CHAT || sleeping) return;
   const day = SHIP.time.day;
   for (const a of DECK_CREW) {
