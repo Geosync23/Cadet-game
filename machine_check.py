@@ -999,6 +999,53 @@ with sync_playwright() as pw:
             or not hk['hadNew'] or hk['liftCond'] != 33.5 or not hk['noOld']):
             fail('hooks for 24k and M1')
 
+    # 5r. drift (m5-tuning's section 17 part, 0.33.48), with a stand-in 'tune' kind (24e's isn't in this build): none without
+    # the kind, none before Day 4 06:00; about one a day after; a drift of 2+ gets a tune job the crew do; ship health within
+    # 2 of the run without drift; the same twice and in one jump; the look follows tuneSet both ways; the save keeps a drift
+    # and a save without drifts loads settled
+    if g.ev("typeof tuneSet === 'function'"):
+        DR = r"""((stand, mode) => {
+          window.__sc("window.__evD = [typeof eventNow === 'function' ? eventNow : undefined, typeof eventMod === 'function' ? eventMod : undefined]; if (window.__evD[0]) eventNow = () => null; if (window.__evD[1]) eventMod = () => null");
+          const own = JOB_KINDS.tune;
+          if (stand && !own) jobKindAdd('tune', { text: 'Tune', stops: j => [{ deck: j.deck, placeId: panelPlace(j.machine), mins: 15, tag: 'tune', how: 'turn' }], done: (j, t, by) => tuneSet(j.machine, 0), crew: { can: p => jobCrew(p) === 'works', mins: 15 } });
+          if (!stand && own) { delete JOB_KINDS.tune; }
+          const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min, out = { first: null, starts: 0, minHealth: 100, tunes: 0, tunedByCrew: 0, sig: [] };
+          JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; SHIP.works = null; setShipNow(t0); machinesNow();
+          const prev = {};
+          const look = t => { for (const m of machineList()) { const d = machineDrift(m.id); if (d && !prev[m.id]) { out.starts++; if (out.first === null) out.first = t; out.sig.push(m.id + '@' + Math.floor(t / 60) + ':' + d); } prev[m.id] = d; } out.minHealth = Math.min(out.minHealth, shipHealth()); };
+          if (mode === 'jump') { setShipNow(t0 + 14 * 1440); machinesNow(); }
+          else for (let t = t0; t <= t0 + 14 * 1440; t += 60) { setShipNow(t); machinesNow(); look(t); }
+          const J = SHIP.jobs.filter(j => j.kind === 'tune'); out.tunes = J.length; out.tunedByCrew = J.filter(j => j.status === 'done' && j.doneBy && j.doneBy !== 'you').length; out.titles = [...new Set(J.map(j => j.title))].slice(0, 4);
+          out.end = JSON.stringify(Object.fromEntries(machineList().map(m => [m.id, [Math.round(SHIP.machines[m.id].cond * 1000), machineDrift(m.id)]])));
+          if (stand && !own) { delete JOB_KINDS.tune; delete JOB_TYPES.tune; } else if (!stand && own) JOB_KINDS.tune = own;
+          SHIP.jobs = SHIP.jobs.filter(j => j.kind !== 'tune');
+          window.__sc("if (window.__evD[0]) eventNow = window.__evD[0]; if (window.__evD[1]) eventMod = window.__evD[1]");
+          setShipNow(t0);
+          return out;
+        })"""
+        d0 = g.ev(DR + "(false, 'hour')"); d1 = g.ev(DR + "(true, 'hour')"); d2 = g.ev(DR + "(true, 'hour')"); d3 = g.ev(DR + "(true, 'jump')")
+        lk = g.ev("""(() => {
+          const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min; JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t0); machinesNow();
+          const ov = '3-oven-1', dk = '5-cartdock-1', L = id => { const x = machineLook(id); return [x.flicker, x.dim, x.blink, x.drift || 0]; };
+          const out = { before: L(ov) }; tuneSet(ov, 2); out.hot = L(ov); tuneSet(ov, -2); out.cool = L(ov); out.eff = Math.round(machConds()[ov] - SHIP.machines[ov].cond);
+          tuneSet(dk, 1); out.dock = L(dk); out.clamp = (tuneSet(ov, 9), machineDrift(ov)); out.notTunable = tuneSet('5-airplant-1', 1);
+          const s = { player: { deck: 4, tile: [0, 0], facing: 0 }, ship: { decks: {} }, crew: {} }; SAVE_EXTRA.forEach(f => f(s));
+          out.saved = s.ship.machines[ov]; MACH_HOUR = null; machinesLoad(JSON.parse(JSON.stringify(s))); out.loaded = [machineDrift(ov), machineDrift(dk)];
+          for (const id in s.ship.machines) s.ship.machines[id] = s.ship.machines[id].slice(0, 2); MACH_HOUR = null; machinesLoad(JSON.parse(JSON.stringify(s)));
+          out.old = machineList().some(m => machineDrift(m.id)); tuneSet(ov, 0); tuneSet(dk, 0); out.after = L(ov); out.settled = !machineDrift(ov);
+          setShipNow(t0); return out;
+        })()""")
+        hh = lambda t: None if t is None else f"day {t // 1440 + 1} {t % 1440 // 60:02d}:00"
+        print(f"Drift (0.33.48): without the tune kind {d0['starts']} drifts; with a stand-in {d1['starts']} in 14 days (first {hh(d1['first'])}), tune jobs {d1['tunes']} ({d1['tunedByCrew']} done by the crew), e.g. {d1['titles']}")
+        print(f"  lowest ship health {d1['minHealth']:.1f} (without drift {d0['minHealth']:.1f}); the same twice {d1['sig'] == d2['sig'] and d1['end'] == d2['end']}, one jump {d1['end'] == d3['end']}")
+        print(f"  looks [flicker, dim, blink, drift]: settled {lk['before']}, +2 {lk['hot']}, -2 {lk['cool']} (works {lk['eff']} points lower), dock +1 {lk['dock']}, clamped to {lk['clamp']}, a fan refused {not lk['notTunable']}; after settling {lk['after']}")
+        print(f"  save: {lk['saved']} loads as {lk['loaded']}; a save without drifts loads settled {not lk['old']}")
+        if (d0['starts'] or not d1['starts'] or d1['first'] < g.ev("TUNE_FROM") or not (5 <= d1['starts'] <= 25) or not d1['tunes'] or not d1['tunedByCrew']
+            or d1['minHealth'] < d0['minHealth'] - 2 or d1['sig'] != d2['sig'] or d1['end'] != d2['end'] or d1['end'] != d3['end']
+            or not lk['hot'][0] > lk['before'][0] or not lk['cool'][1] > lk['before'][1] or lk['eff'] != -16 or lk['dock'][2] is not True or lk['clamp'] != 3 or lk['notTunable']
+            or lk['saved'][2:] != [3] or lk['loaded'] != [3, 1] or lk['old'] or lk['after'] != lk['before'] or not lk['settled']):
+            fail('drift')
+
     # 6. the save
     rt = g.ev("""(() => {
       JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(6 * 1440 + 11 * 60 + 17); machinesNow();
