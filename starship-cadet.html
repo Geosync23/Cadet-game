@@ -11707,7 +11707,7 @@ function actEnd(abort) {
   if (A.kind === 'fetch' || A.kind === 'job' || A.kind === 'stow' || A.kind === 'make') jobEnd(A);
   if (A.kind.startsWith('cart')) cartEnd(A);
   if (A.kind === 'craft') {                              // the gift you made (0.28.25)
-    const P = SHIP.player; if (P.carry.length < CARRY_MAX && (!A.o.needs || typeof SHIP.stores[A.o.needs] !== 'number' || takePart(A.o.needs)) && giftAdd(A.o.gift)) { P.crafted = (P.crafted || 0) + 1; toast('Machine shop', 'You make ' + partList([A.o.gift]) + '. It\'s in your hands: give it to someone.'); }
+    const P = SHIP.player; if (P.carry.length < CARRY_MAX && (!A.o.needs || typeof SHIP.stores[A.o.needs] !== 'number' || takePart(A.o.needs)) && giftAdd(A.o.gift)) { P.crafted = (P.crafted || 0) + 1; P.untidy = true; toast('Machine shop', 'You make ' + partList([A.o.gift]) + '. It\'s in your hands: give it to someone.'); }
   }
   if (A.kind === 'pay') basket = null;
   if (A.kind === 'queue' && !A.o.dish) { toast('Servery', A.o.why || 'Nothing to eat just now.'); return; }
