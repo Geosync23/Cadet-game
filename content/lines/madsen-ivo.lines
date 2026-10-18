@@ -201,3 +201,23 @@
 - Right, listen. New ship, new trays. I carried six on the first day. They clapped. Well, one person did.
 ? tier>=friend
 - Pressed a flower from the new garden. It's not as good as ours. I put it next to the Wren ones, though.
+
+// Head writer 0607: Ivo the bartender (social 0607: the bow lounge bar, Wed-Sun 17:30-23:00). On the card, through
+// the player engineer's bar order. {drink} is lower case.
+== bar.ask
+- Right, listen. What'll it be? I can carry six of anything.   #funny
+- {hi}! Bar's open. What are you having?
+- What'll it be, {nick}? Don't say "surprise me". I will.   #funny
+- Evening! Tea, juice, fizz or cocoa. Pick fast, I'm on a roll.
+== bar.usual
+- {drink} again? Already pouring. I remember everyone.
+- The usual? One {drink}. See, I listen.
+== bar.serve
+- One {drink}. Look, not a drop spilt. Training for seven trays.   #funny
+- There you go. {drink}, nice and full. Careful now.
+- {drink} for you. Grab a stool, they're the good ones.
+== bar.broke
+- Bit short? Come back later. I'll save you a stool.
+== bar.tap
+- Tap night! Drink of the week is {drink}. I named it myself.   #funny
+- {drink}, this week's special. Brennan says it's too sweet. It isn't.   #funny
