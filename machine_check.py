@@ -898,6 +898,64 @@ with sync_playwright() as pw:
         if st['sig'] != st2['sig']: print('    first run only', sorted(set(json.loads(st['sig'])) - set(json.loads(st2['sig'])))[:6], 'second only', sorted(set(json.loads(st2['sig'])) - set(json.loads(st['sig'])))[:6])
         if st['noCause'] or st['early'] or st['sig'] != st2['sig']: fail('causes missing, early or not the same twice')
 
+    # 5p. job kinds with steps (Pillar 5 foundation 17.5; 0.33.47) and machineFound (for m1-rounds): a test kind
+    # registered with jobKindAdd posts its own job each hour it wants; one you don't take the crew do (crew.can, crew.mins,
+    # its stops as segments) and its done runs with their id; one you take shows its stops' steps (how, opts) and every
+    # other job's stops say 'hold'; jobStepDone keeps each step's result for done ('you'); a built-in kind can't be
+    # registered over; the save keeps a registered job (with its results) and drops one whose kind isn't in the build.
+    # machineFound: a worn machine's unseen job is found now (fresh, j.foundBy, simNote('found')); again, not fresh; healthy: null
+    if g.ev("typeof jobKindAdd === 'function'"):
+        jk = g.ev("""(() => {
+          const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min, out = {}, done = [], steps = [], notes = [];
+          JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; SHIP.works = null; setShipNow(t0 + 1440 + 180); machinesNow();
+          for (const j of SHIP.jobs) if (j.claimedBy === 'you') { j.claimedBy = null; j.status = 'open'; }
+          const H0 = Math.floor(shipNow() / 60) + 1, room = (placeById('4-lift-1') || {}).room;
+          out.overBuiltIn = jobKindAdd('repair', { stops: () => [], done: () => {} });
+          out.added = jobKindAdd('testkind', { tier: 1, work: 20, text: 'Test run',
+            stops: j => [{ deck: 4, placeId: '4-lift-1', mins: 10, tag: 'look', how: 'look', opts: { marks: ['fine', 'worn'] } }, { deck: 4, placeId: '4-laundry-1', mins: 10, tag: 'pick', how: 'choose', opts: { options: ['a', 'b'] } }],
+            post: (h, jobs) => { if ((h === H0 || h === H0 + 1) && !jobs.some(x => x.id === 'tk@' + h)) jobs.push(jobMake('testkind', { h, id: 'tk@' + h, deck: 4, room, title: 'Test run: Deck 4', ...(h === H0 ? { released: true } : {}) })); },
+            done: (j, t, by) => done.push([j.id, by, JSON.stringify(j.res || {})]), stepDone: (j, k, res) => steps.push([j.id, k, res && res.pick]),
+            crew: { can: p => jobCrew(p) === 'works', mins: 30 } });
+          let crewJob = null;
+          for (let m = shipNow() + 60; m <= shipNow() + 4 * 60; m += 60) { setShipNow(m); machinesNow(); }
+          const A = SHIP.jobs.find(j => j.id === 'tk@' + H0), B = SHIP.jobs.find(j => j.id === 'tk@' + (H0 + 1));
+          out.posted = [!!A, !!B]; out.aBy = A && A.claimedBy; out.aSegs = A && A.segs ? A.segs.filter(x => x.type === 'job').map(x => x.tag + '@' + x.placeId).join(' ') : null;
+          out.aMins = A && A.segs ? A.segs.filter(x => x.type === 'job').reduce((a, x) => a + x.to - x.from, 0) : null;
+          out.aDone = done.filter(d => d[0] === (A && A.id)).map(d => d[1] === A.claimedBy).join();
+          out.bHeld = B && !B.claimedBy; out.card = B ? jobCard(B).join(' / ') : null; out.open = B ? openJobs('you').some(x => x.id === B.id) : null;
+          out.claim = B ? claimJob(B.id) : null;
+          out.stops = B ? jobStops(B).map(x => x.step + ':' + x.how + (x.opts ? '+opts' : '')).join(' ') : null;
+          const other = SHIP.jobs.find(j => j.kind === 'chore' || j.kind === 'service' || j.kind === 'repair'); out.otherHow = other ? [...new Set(jobStops(other).map(x => x.how))].join() : null;
+          if (B) { jobStepDone(B.id, 0, { pick: 'worn' }); const r = jobStepDone(B.id, 1, { pick: 'b' }); out.workDone = r.done; out.res = JSON.stringify(B.res); out.youDone = done.filter(d => d[0] === B.id).map(d => d[1] + ' ' + d[2]).join(); out.steps = steps.filter(x => x[0] === B.id).map(x => x[1] + ':' + x[2]).join(' '); }
+          // the save: a registered job (with its results) stays; one of an unknown kind goes
+          const s = { player: { deck: 4, tile: [0, 0], facing: 0 }, ship: { decks: {} }, crew: {} }; SAVE_EXTRA.forEach(f => f(s));
+          s.ship.jobs.push({ id: 'gone@1', machine: null, deck: 4, kind: 'nosuchkind', urgency: 0, posted: 0, found: 0, claimedBy: null, parts: [], status: 'open' });
+          const back = JSON.parse(JSON.stringify(s)); MACH_HOUR = null; machinesLoad(back); machinesNow();
+          const B2 = SHIP.jobs.find(j => B && j.id === B.id); out.saveKeeps = !!B2 && JSON.stringify(B2.res) === out.res; out.saveDrops = !SHIP.jobs.some(j => j.id === 'gone@1');
+          if (B2) finishJob(B2.id);
+          delete JOB_KINDS.testkind; delete JOB_TYPES.testkind; SHIP.jobs = SHIP.jobs.filter(j => j.kind !== 'testkind');
+          // machineFound
+          window.__fn = notes; window.__sc("window.__sn1 = typeof simNote === 'function' ? simNote : undefined; simNote = (k, d) => { if (k === 'found') window.__fn.push(d); if (window.__sn1) window.__sn1(k, d); }");
+          const mm = machineList().find(m => !m.stub && !ENGINE_KINDS.has(m.kind) && SHIP.machines[m.id].state === 'healthy' && !SHIP.jobs.some(j => j.machine === m.id && j.status !== 'done'));
+          out.healthy = machineFound(mm.id);
+          SHIP.machines[mm.id].cond = 60; SHIP.machines[mm.id].state = machineState(60); setShipNow(shipNow() + 60); machinesNow();
+          const jw = SHIP.jobs.find(j => j.machine === mm.id && j.status !== 'done'); if (jw) jw.found = shipNow() + 600;   // not yet seen
+          const f1 = machineFound(mm.id), f2 = machineFound(mm.id), jf = SHIP.jobs.find(j => j.id === (f1 && f1.id));
+          out.found = [f1 && f1.fresh, f2 && f2.fresh, jf && jf.found <= shipNow(), jf && jf.foundBy, notes.length, notes[0] && notes[0].machine === mm.id && notes[0].by === 'you'];
+          window.__sc("simNote = window.__sn1"); if (!window.__sn1) window.__sc("simNote = undefined");
+          for (const j of SHIP.jobs) if (j.claimedBy === 'you') { j.claimedBy = null; j.status = 'open'; }
+          setShipNow(t0);
+          return out;
+        })()""")
+        print(f"Job kinds (0.33.47): registered {jk['added']} (over a built-in {jk['overBuiltIn']}), posted {jk['posted']}; untaken: {jk['aBy']} at {jk['aSegs']} ({jk['aMins']} min), done by them {jk['aDone']}")
+        print(f"  yours: held {jk['bHeld']}, card '{jk['card']}', on your board {jk['open']}, claimed {jk['claim']}, stops '{jk['stops']}', other jobs' steps {jk['otherHow']}; done {jk['workDone']}, results {jk['res']}, done for you '{jk['youDone']}', stepDone '{jk['steps']}'")
+        print(f"  save keeps it {jk['saveKeeps']}, drops an unknown kind {jk['saveDrops']}; machineFound: healthy {jk['healthy']}, [fresh, again, found now, by, notes, note ok] {jk['found']}")
+        if (not jk['added'] or jk['overBuiltIn'] or jk['posted'] != [True, True] or not jk['aBy'] or jk['aBy'] == 'you' or not jk['aSegs'] or '4-lift-1' not in (jk['aSegs'] or '') or jk['aMins'] != 30 or jk['aDone'] != 'true'
+            or not jk['bHeld'] or not jk['open'] or not jk['claim'] or jk['stops'] != 'look:look+opts pick:choose+opts' or jk['otherHow'] != 'hold' or not jk['workDone']
+            or jk['res'] != '{"0":{"pick":"worn"},"1":{"pick":"b"}}' or not jk['youDone'].startswith('you {') or jk['steps'] != '0:worn 1:b' or not jk['saveKeeps'] or not jk['saveDrops']
+            or jk['healthy'] is not None or jk['found'] != [True, False, True, 'you', 1, True]):
+            fail('job kinds with steps, or machineFound')
+
     # 6. the save
     rt = g.ev("""(() => {
       JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(6 * 1440 + 11 * 60 + 17); machinesNow();
