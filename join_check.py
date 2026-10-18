@@ -91,6 +91,16 @@ with sync_playwright() as pw:
       depts: [...Array(200).keys()].map(x => x + 1).flatMap(d => (eventsOn(d).find(e => e.id === 'name-on-the-beam-new') || { honorees: [] }).honorees.map(p => p.dept)) }))()""")
     print('New Works hands on the beam:', nw)
     if not nw['names'] or set(nw['depts']) != {'works'} or len(nw['on']) != len(nw['names']): fail(f"newcomers' Name on the beam: {nw}")
+    # Sunday table's extra chairs (the playtest note): up from 30 minutes before, gone 15 after it ends, by the ship minute,
+    # after a sleep through it and after a deck change (reviewer R3's arm)
+    st = g.ev("""(() => { const d = 7, e = eventsOn(d).find(x => x.id === 'sunday-table'); if (!e) return { err: 'no sunday-table on day 7' };
+      const at = m => { setShipNow((d - 1) * 1440 + m); EV_MIN = -1; eventsTick(); return dressingOn().includes('longTables'); };
+      goToDeck(3); const r = { before: at(e.from - 40), on: at(e.from + 30), end: at(e.to + 10), after: at(e.to + 20) };
+      at(e.from + 30); skipTo((d - 1) * 1440 + e.to + 60); EV_MIN = -1; eventsTick(); r.slept = dressingOn().includes('longTables');
+      at(e.from + 30); goToDeck(4); setShipNow((d - 1) * 1440 + e.to + 30); EV_MIN = -1; eventsTick(); goToDeck(3); EV_MIN = -1; eventsTick(); r.deck = dressingOn().includes('longTables');
+      return r; })()""")
+    print("Sunday table's long tables:", st)
+    if st != {'before': False, 'on': True, 'end': True, 'after': False, 'slept': False, 'deck': False}: fail(f"the Sunday table's dressing should go 15 minutes after it ends: {st}")
     # the save (0.70.1): nameNew traces come back after a real reload (a page without ?nosave)
     url = g.page.url.split('?')[0]
     g.page.goto(url + '?debug'); g.page.wait_for_function('window.__sc !== undefined', timeout=60000)

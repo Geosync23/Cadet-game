@@ -252,7 +252,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.70.2
+   STARSHIP CADET: CSV Wren                           build 0.70.3
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7922,7 +7922,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.70.2';                           // keep in step with the header's build line
+const GAME_BUILD = '0.70.3';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -30360,7 +30360,7 @@ function tradLeader(e) {
   if (TJ_LEAD.size > 40) TJ_LEAD.clear(); TJ_LEAD.set(key, p ? p.id : null);
   return p ? p.id : null;
 }
-const tjFirst = id => { const p = schedPeople().find(q => q.id === id); return p ? p.name.split(' ').slice(-2)[0].replace(/^(Dr\.|Chef|Chief)$/, '') || p.name : id; };
+const tjFirst = id => { const p = schedPeople().find(q => q.id === id); return p ? shortName(p) : id; };   // section 14's: 'Dr. Sato', 'Chief Calder', 'Tomas' (reviewer R3, 0.70.3)
 const tjAgent = id => typeof DECK_CREW !== 'undefined' ? DECK_CREW.find(c => c.p && c.p.id === id) || null : null;
 // the tradition on now that you could join on this deck: { e, key, lead (id), agent } or null (once a ship minute)
 let TJ_NOW = null;
