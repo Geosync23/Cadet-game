@@ -17,7 +17,7 @@ The user said go for Pillar 5 Steps 1 (Foundation) and 2 (Junior days, Days 2-8)
 ## Seats (Step 1 first; Step 2 seats start as Step 1 pieces land)
 | Seat | Branch | Session |
 |---|---|---|
-| D designer | claude/p5-design | session_01VXENaUt4vdyYtr3KjVZk9z |
+| D designer | claude/p5-design | session_01VAVLL8kQNeQwiZ7TJZ6GMF (designer 2, from ~14:50; predecessor session_01VXENaUt4vdyYtr3KjVZk9z stopped at ~70%) |
 | B build master (BM4 continues after 0.60.7) | claude/cand-0607 → P5 candidates on claude/p5-cand | session_013h22isZZqmJJSEKSbrwabf |
 | C works career engineer | claude/works-career | session_01LgTgzjeqLNrjeCa2iRzbYx |
 | S systems | claude/ship-systems | session_01KxfsfBWkCGcncuuH2n1hFB |
