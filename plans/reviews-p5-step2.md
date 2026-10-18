@@ -9,13 +9,14 @@ Spec: plans/brief-playtest1.md on claude/lead-pillar1 (12b1b87); the user's answ
 - T claude/traditions-pt1 **574da73** (0.70.0-0.70.6, playtest 1 package T; the LOW closed in 0.70.5; contains a9fad20)
 - U claude/hud-pt1 **55b2499** (0.72.1, Watch a film; contains 73b40cb)
 - W claude/writer-p5 **97fa9ae** (Watch a film hobby lines, text; contains 6a00d9c)
+- A5 claude/deck-pt1 **e55cf31** (0.47.9, the bubbles' shake; contains ff26b6d)
 - A5 claude/deck-pt1 **ff26b6d** (0.47.4-0.47.8, playtest 1 package complete; the beam item fixed in 56db3dc)
 - P claude/player-p5 **587a2cd** (0.28.74, playtest 1 package P)
 - O4 claude/arrival-0607b **7a2bc5d** (0.42.48, playtest 1 part (a)+(b); no nits)
 - C2 claude/works-career **bb4423c** (puzzle_check after the 09:00 shift; contains a5d5c4c)
 - C2 claude/works-career **a5d5c4c** (0.44.14-0.44.16 + the DEV_NOTES note; no LOWs)
 - U claude/hud-pt1 **73b40cb** (0.72.0 ebfdb2f + screenshots; no LOWs)
-- X claude/crew-pt1 **98e93bf** (0.71.1, playtest 1 package X; contains 2223cb7 and a9fad20; 1 LOW: the storekeeper's hours)
+- X claude/crew-pt1 **6fef15c** (0.71.1 + the LOW answered in DEV_NOTES: the store keeps its hours; game = 98e93bf)
 - X claude/crew-pt1 **2223cb7** (0.71.0, walk-ups and the mess fix; 1 LOW, closed in 0.71.1)
 - W claude/writer-p5 **6a00d9c** (0.48.91, playtest 1 package complete: time lines, breakfast 06:00-09:00, call-home tip; no LOWs open; 0.48.89 + 'seek' + key renames, playtest 1 lines, text; LOW 1 waits on X/C2's breakfast window)
 - W claude/writer-p5 **ac60c8d** (0.48.88, text; contains 0d179ac)
@@ -31,6 +32,13 @@ Spec: plans/brief-playtest1.md on claude/lead-pillar1 (12b1b87); the user's answ
 - O5 claude/onboard-pt1 **e4fe793** (0.42.60-0.42.62): one item (the servery arrow holds the evening; intro_check --evening FAILS)
 
 ## Verdicts
+
+### A5 0d682da + e55cf31 (0.47.9): speech bubbles no longer shake or jump on phones — PASS (R3)
+- Section 8b's bubbles: `tick(dt)` only counts down (crowd.update); `place()` runs from the main loop just before renderer.render, after `camera.updateMatrixWorld()`, so each bubble uses this frame's camera (it lagged a frame before, by an amount that varied with a phone's uneven frames); a translate3d at 0.1 px instead of whole-pixel left/top (`.bubw` left/top 0, will-change); an overlapping pair keeps its order (until the speakers are 24 px the other way round) and its stacking (until 12 px apart), and layout changes ease in over about 0.1 s (performance.now, display only). No R(), nothing saved, no draw calls (DOM).
+- Checks (my runs): new **bubble_check OK on 0.47.9** (tail aim 0.00 px, no shakes, no flicker, no swaps) and **FAILS on 0.47.8** ("a bubble jumped 120.9 px more than its speaker moved"), so it catches the bug; cadet_test vs 0.47.8 ff26b6d differs only in b_wander10s and i_tap0, where a bubble is up (placed a few px over, as A5 says).
+
+### X 6fef15c: the LOW answered — closed (R3)
+- DEV_NOTES only: the store keeps its 08:00-14:30 hours (Yara Esposito's rota on purpose). The game is 98e93bf's.
 
 ### X 1072780..98e93bf (0.71.1): the crew's 09:00-17:00 day shift, breakfast to 09:00, the Works 13:00 tea, workaholics by 17:15, the news cap, walk-up guards — PASS with a LOW (R3, in depth)
 - `SHIFTS.day` [540, 1020] read by schedFrame's workStart/workEnd and section 10's day interval; Tove Cruz's rota 09:00. `MEALS.breakfast` to 540, the galley's serveTo 540 / close 570, the chef's and early hand's plans and `galleyPlan`'s long-breakfast head an hour on; teachMeal and the servery window read MEALS; the menu board canvas, the Servery and Menu board texts, the closed message and the hunger tips say 06:00-09:00. Workaholics' workEnd + 5-15 (17:05-17:15). `WORKS_TEA` / `worksTeaOn`: Works day crew working on Deck 5 drop the random tea for a 15-minute slot at 13:00/13:15/13:30/13:45 (seeded `U(30)`, odds .75, the tea-break habit always, workaholics .3) on the tea corner's three lounge seats (wait 8, else back to work); posted elsewhere, the old tea. The news cap: the lowest weight goes first, oldest of those, never the one just added (deterministic). `seekPrivate` (R2's LOW, closed) and `seekBusy` (not off T's walk). Nothing new saved; no R() outside seeded schedules.
