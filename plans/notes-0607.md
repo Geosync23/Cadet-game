@@ -64,6 +64,7 @@ For 0.60.6a (quick fix, PE6 on claude/player-needs, BM3 checks):
 - Clock is cut off in the upper-right corner of the UI.
 - The word "Needs" should be by the needs meters.
 - The Relationships app label on the device is far too large and overlaps other apps; use a different word if it won't scale and stay readable.
+- (added) Lift floor panel: show which deck the goal arrow points you to (the plan-0607 goal-deck mark, pulled forward; the second panel stays in 0.60.7).
 For 0.60.7:
 - Zeke is already in the mess hall when you take the lift up to dinner on arrival night (he should arrive with you / not be there ahead of you).
 - Get rid of the tray return in the mess hall.
