@@ -10,7 +10,7 @@ The user said go for Pillar 5 Steps 1 (Foundation) and 2 (Junior days, Days 2-8)
 - **Build numbers:** your seat's series as on your page (C 0.44.x, S 0.33.44+, P 0.28.71+, M1 0.45.x, M2 0.51.x, H 0.55.x, A 0.47.x). Bump the HUD build number and add a DEV_NOTES build-table row per turn.
 - **Rules:** small exact-string edits, never rewrite the file; determinism (no R() in shared kit at load); phones first (col(), no coplanar faces, watch draw calls); saves: every new saved field loads old saves (default) and has a round-trip test.
 - **Checks:** quick checks for what you touched (DEV_NOTES "Testing"), intro_check on any push touching jobs, the player or the clock; cadet_test differences explained.
-- **Report to the lead** (send_message to session_01YKC3CGA9VS4b7wuqLbPT7V): one line when you start, one per finished piece (hash, build number, what, checks), at once if blocked. No narration. Send each finished piece's hash to the Pillar 5 build master and reviewer too (ids in TEAM.md once started).
+- **Report to the lead** (send_message to lead 12, session_01GjWhU9Z9V8RNoR8yyELA9V; was lead 11): one line when you start, one per finished piece (hash, build number, what, checks), at once if blocked. No narration. Send each finished piece's hash to the Pillar 5 build master and reviewer too (ids in TEAM.md once started).
 - **Never** contact the user, start sessions, or push outside your branch.
 - **Memory:** tell the lead at ~60%; at ~70% write `plans/handover-<seat>.md`, push, stop.
 

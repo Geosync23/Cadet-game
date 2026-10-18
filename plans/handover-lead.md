@@ -523,3 +523,6 @@ Read: CLAUDE.md, TEAM.md (session chain rule + overnight exception), plans/brief
 - ~09:58 0.60.7 ON HOLD: intro part 12 stalls after Day 3 16:31 in two runs (729f951 + d3d720b). Onboarding 4 investigating with timing; runner 1 rerunning --week alone; BM4 asked to play day 3 16:00-18:00.
 - ~10:12 **0.60.7 RELEASED**: claude/ship-integration fast-forwarded c8685cf → ce26fb2; artifact SmL8Na1iTB2JQZDP4dYdou v8; user push-notified.
 - ~10:13 started lead 12 session_01GjWhU9Z9V8RNoR8yyELA9V (depth 2, overnight exception). Lead 11 stays reachable until lead 12 says hello.
+
+## Lead 12 log (session_01GjWhU9Z9V8RNoR8yyELA9V, depth 2)
+- ~10:15 arrived: check-in trig_01Ryk2qph1XsVjLr3SXp4o8f (:50) created, lead 11's disabled; BM4, S, P, C, H, M1, A, W, R, D told to report to lead 12; lead 11 told.
