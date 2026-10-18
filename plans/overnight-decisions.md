@@ -165,3 +165,4 @@ All 8 packages approved (Zeke: "all good except he still walks and talks" → he
 | ~22:22 (the user) | Lightdisc game length vs sharp crew (6.5-7.4 min) | Shorten now → target ~4 min vs sharp, ~2.5-3.5 vs easier (Lightdisc engineer, 0.82.2). Court floor dark grey and seeded crew levels 35/40/25: lead OK |
 | ~22:30 (the user, after playing 0.82.1) | Rec deck tweaks | Concourse a little less busy; paddles smaller to fit the kayaks; pool/river water match (DA6 0.80.9). Lightdisc: players must move with the game and animate (strafe, swing, fist pump) (Lightdisc engineer 0.82.2, with the shorter games) |
 | ~22:45 (the user) | Rec deck next pass | Concourse floor still too loud (it also leads to the auditorium): drop the road theme, calmer floor; remove the wall between the stands and the Lightdisc court (DA6, 0.80.10) |
+| ~22:55 (the user) | Concourse terrazzo | Good, but no coloured specks (Lightdisc engineer, with the 0.80.10 merge) |
