@@ -31,3 +31,8 @@ The user said go for 0.60.7. Every seat reads, in order: CLAUDE.md, this brief, 
 | Build master 3 | session_01WrXgDfR5dzwktKJfYwVwsV | claude/cand-0607 | Combine, check runners, results to `plans/cand-0607-results.md`. |
 | Reviewer 0607 (new) | session_01BusfBzBamabWrCsrwQeABh | claude/reviews-0607 | Reviews each piece as it lands. |
 | DA3 | session_01NsysH87qqJnf1dBEVRz2fW | claude/poses | Stays idle as the expert on poses for questions; the dinner-profiling item goes to the sim engineer if time allows, else 0.60.8. |
+
+## Handoffs (the user's request, 2026-10-18 ~04:10)
+- The lead checks every helper's memory at each hourly check-in (get_session context_usage). At ~60% a helper is told to finish its piece and write its handover note; at ~70% it hands over at once.
+- **Replacements are always started by the lead** (a depth-0 session), never by a helper, so each new session starts with a fresh lineage and can itself schedule and (if needed) start sessions. Older helpers (BM3, PE6, onboarding 3) were started by late leads and may be near the depth limit: they ask the lead to start any session (check runners included).
+- A helper that sees its own memory near 60% tells the lead without waiting to be asked.
