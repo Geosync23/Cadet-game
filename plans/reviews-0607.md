@@ -9,6 +9,14 @@
 
 ## Verdicts
 
+### Head writer 0.48.83 (quiz pool) bf99520, plus 5b57aa1 and onboarding 4's 22d88d3 (skim): PASS, one MED (a wrong "right" answer)
+- **lines_check:** PASS once baked (0 errors, the same 2 old warnings; 8268 lines).
+- **Laundry keys:** the writer's `beat.d1-clothes.1-2` / `beat.d2-laundry.1-2` (5b57aa1) are read by onboarding 4's 22d88d3, which tries each name in a list in turn (`['beat.d1-clothes', 'walk.dinner.laundry']`). The new `said()` loop ends correctly (it stops at the first missing `.n` when there are no exact lines, and caps at 12). Matched.
+- **The 32 quiz answers checked against design-doc and the game:**
+  - Right: the Tern; bridge on Deck 1; mess on Deck 3; three drive coils; tea at half ten; Chef Brennan; Ines Calder; Captain Marrow; the four seasons (Sowing, Greening, Harvest, Lanterns), so "Snowing" isn't one; credits; booths on Deck 3; laundry on Deck 4; shift at 08:00; dinner at 17:00; Works bay on Deck 5; observatory on Deck 2; Zeke knits; Tiles; Day 1 is a Monday; 364 days; Founding Day is day 100; Saruth; the record cabinet in the music room; delivery on Wednesday (the plan); the garden's big tree (crew lines mention it); the coils from the Deck 6 overlook; the name beam; one shuttle, the Tern; the junior common room on Deck 4; Gym club.
+- **MED:** q23 "What does the grab shelf in the mess hold?" gives "Plates for anyone late to dinner" as right. The grab shelf holds food: rolls and wraps baked by the early hands, plus leftovers wrapped after each meal (design-doc's galley section, DEV_NOTES "Galley and food"). Plates are what the dish pit washes. Suggest "Food for anyone running late" (design-doc: "a grab-and-go shelf for anyone running late").
+- **LOW:** q22 "Which is the strongest word you'll hear aboard? Blast" comes from the writers' style rule (content/README: "no swearing beyond 'blast'"). A player only learns it by noticing nobody swears harder. Fine as a joke, but it's the one question you can't learn from a place or a person.
+
 ### Onboarding 4, 0.42.40-0.42.41, claude/arrival-0607b 924600b + 0ba0af8 (in depth): PASS
 Section 21b (clothes and laundry, `save.clothes`), typeof-guarded hooks in 15/15b (playerFx, holding, playerFloorTap, putWhat, putDown), `CLOTHES_BEATS` (Zeke's Day 1 dinner, Day 2 laundry nudge, the knitting offer), the crew-at-work pointers through `showJob`, INTRO_WEEK `d1-zeke-dinner`, and my pause-pacing LOW (now `simNow()`).
 - **Checks I ran:** **day_check day 1** (arrival on, so `d1-zeke-dinner` is in): DAY CHECK OK. No schedule problems, nobody stuck, plans the same twice, no places booked twice on days 0-1, peaks 229/202/268/250/215/163. **clothes_check: ALL OK**, 0 fails (the save round trip mid-wash, a bad save read back safely, an older save, a Monday start with the full kit, off again). The builder reports cadet_test ALL IDENTICAL; that's expected, since 21b is off at `?nosave` without `?clothes`.
