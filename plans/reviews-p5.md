@@ -3,10 +3,23 @@
 How: behaviour, save and schedule changes in depth (against the piece's approved page in plans/mechanics/ on claude/p5-design, determinism, old saves load, phones first, cadet_test differences explained); content and test-only changes skimmed. Verdicts newest first.
 
 ## Passing tips
-- H claude/mech-cases **eece4d4** (0.55.0)
+- H claude/mech-cases **8c76b69** (0.55.2, contains eece4d4 and df7d356; LOWs open)
 - W claude/writer-p5 **0d179ac** (0.48.86, text; contains 843bac9 and 76fc413; no LOWs open)
 
 ## Verdicts
+
+### H df7d356 (0.55.1) + 8c76b69 (0.55.2): the case engine, section 24k — PASS with LOWs (in depth)
+- Against case-engine.html: posting conditions (on shift, not an event day, 06:00-15:00, jobTier <= your tier, under the open limit, a kind fits, roll key 880 < rate; senior .33 on Tier 3 machines), kind choice (881, newest-opened kind doubled for a week), eight sub-seeds (882-889), solver (exactly one left, cause never killed, fewest within the band, decks per band, every clue reachable), frozen once posted, held till shift end then released to the crew the long way, calls, wrong calls (Tier 1 part back on the shelf, Tier 2 seal/cartridge spent), talk it through after two wrong, the long way, Fault notes view (chips, clues, Where next?, Call it with Yes / Not yet), save in ship.works.cases with a cleaner. Keys 880-893 inside H's 880-894. 8c76b69: a kind opens with its ladder row (worksIsOpen, else SHIP.works.op), per the designer's FAQ.
+- Determinism: every roll is schedU(machSeed, day, key); nothing calls R(); performance.now() only feeds CASE_STATS.ms. Phones: page elements only, no draw calls.
+- Inert in this build: no kind registered, and section 17's caseOffer/caseFitted/heldForYou lines and FAULT_CAUSES aren't in yet (S's), so nothing changes in play.
+- Old saves: no `cases` → empty; junk and a case whose job is gone are dropped (puzzle_check's junk arm); mid-case save round-trips (591 bytes).
+- Checks (my run on 8c76b69): cadet_test vs d3d720b ALL IDENTICAL; puzzle_check OK (297 sweep cases, rates .10/.199/.248/.331, 0 fallbacks, 0.024 ms each); device_check OK; machine_check OK.
+- LOW 1 (Step 2): the "talk it through" toast after two wrong calls names Torres for a training case (`c.train ? 'Torres' : 'Calder'`); Day 5's teacher is now Emeka Halloran (designer 210b86f, by-list first on shift). Name the case's teacher.
+- LOW 2: the player-facing words are hard-coded ("Where next?", "Call it: the X?", "Head-scratcher: ...", the hints); the writer's `case.*` / `chief.p3.*` keys are in claude/writer-p5 0d179ac. Read them once baked, with these as fallbacks.
+- LOW 3: a case with `wait` set is held for you with no end (caseHeld returns true while c.wait). If a kind's tries never finish, the job never reaches the crew and fills an open slot. Give it an end (e.g. release at the end of the next shift) when P3 lands.
+- LOW 4 (with S's integration): Call it a second time before fitting (changing your mind) swaps j.parts and re-opens the fetch, but a part already fetched for the first call isn't put back; and it counts against "right first time". Check with S's jobSetPart/carry rules.
+- LOW 5: the stand-in app's id is `faults`; the page says `faultnotes`. Trivial; it only matters to whoever looks it up.
+- Combine notes (build master, C): 24 core and 24k both insert after `tilesTrophy`, before section 6: a hand merge, with 24k AFTER 24 core. 24k reads `typeof worksTabAdd` at load: if C defines worksTabAdd with `const` later in the file, that typeof throws (temporal dead zone) and the game stops loading. So worksTabAdd must be a function declaration or sit above 24k. The works app must pass `case:*` verbs to the tab's act (24k's actions use app 'works').
 
 ### W 0d179ac (0.48.86): Day 5 by Emeka Halloran, case.solved fixed — PASS (skimmed: content only)
 - New train.m7.halloran-emeka and train.p3.halloran-emeka meetings (the main Day 5 version, per designer 210b86f; Halloran works Fridays) and his `work` step lines; m7/p3 panel steps renamed `hold` (seat C's step name) in Calder's and Torres's lines too.
