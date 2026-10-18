@@ -4,12 +4,12 @@
 // replies are the onboarding engineer's stand-ins, kept: they were already right).
 title: The Chief stops by
 from: Chief Ines Calder
-gist: Chief Calder: Torres has you on Monday, ten to eight in the Works bay. Your first job on Tuesday is hers.
+gist: Chief Calder: Torres has you on Monday, ten to nine in the Works bay. Your first job on Tuesday is hers.
 == lines
 torres-zeke: Chief. Didn't think we'd see you tonight.
 calder: You haven't. I'm not here. Day off.   [nod]
 calder > you: Calder. Works is mine. Welcome aboard.
-calder: Tomorrow you're with Torres. Ten to eight, the Works bay. Not eight. Ten to.
+calder: Tomorrow you're with Torres. Ten to nine, the Works bay. Not nine. Ten to.
 calder: Tuesday, your first job's mine. I'll pick it. You'll do it.
 ? choice
 * Looking forward to it.   rel:calder+1
