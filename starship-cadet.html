@@ -269,7 +269,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.82.6
+   STARSHIP CADET: CSV Wren                           build 0.82.7
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -569,7 +569,10 @@ const SHIP = { decks: {} };
 const shipDeck = n => SHIP.decks[n] || (SHIP.decks[n] = { open: new Set() });
 // the rec deck (0.80.0, plans/recdeck-plan.html section 11): internal key 7, shown as R, between Decks 4 and 5. Lists that show
 // or loop over decks for the player go in DECK_ORDER; a deck's name on screen comes from deckWord (never "Deck 7")
-const DECK_ORDER = [1, 2, 3, 4, 7, 5, 6];
+// REC_DECK (0.82.7, the user's order via lead 14): the one switch for the rec deck. false keeps it dormant: no R on the lift
+// or in Maps, goToDeck(7) does nothing, a save left on it wakes on Deck 4; DECKS[7] is playerOnly, so nothing else changes
+const REC_DECK = true;
+const DECK_ORDER = REC_DECK ? [1, 2, 3, 4, 7, 5, 6] : [1, 2, 3, 4, 5, 6];
 const deckLabel = n => +n === 7 ? 'R' : String(n);
 const deckWord = n => +n === 7 ? 'Rec deck' : 'Deck ' + n;
 
@@ -8610,7 +8613,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.82.6';                           // keep in step with the header's build line
+const GAME_BUILD = '0.82.7';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -8769,7 +8772,7 @@ function loadGame() {
 }
 const SAVED = loadGame();
 // where you start: the save's deck, tile and facing, or Deck 4 at PLAYER_SPEC.start (section 10 reads this)
-const START = SAVED ? { deck: SAVED.player.deck, tile: SAVED.player.tile, face: SAVED.player.facing } : { deck: SHIP_START.deck };
+const START = SAVED && (REC_DECK || SAVED.player.deck !== 7) ? { deck: SAVED.player.deck, tile: SAVED.player.tile, face: SAVED.player.facing } : { deck: SHIP_START.deck };   // REC_DECK off: a save on the rec deck starts at the usual place
 if (SAVED) {
   SHIP.time.day = SAVED.time.day; SHIP.time.min = SAVED.time.min;
   const decks = (SAVED.ship && SAVED.ship.decks) || {};
@@ -43205,6 +43208,7 @@ let lastRoom = null;
 // ---- changing decks: you step out by the lift on deck n. The lift will call this (milestone step 6c). ----
 const deckEl = document.getElementById('deck');
 function goToDeck(n, at) {
+  if (n === 7 && !REC_DECK) return;                      // the rec deck is dormant (REC_DECK)
   endSteer(); player.stop();
   for (const c of crew) c.setActive(false);
   deckCrewClear();
