@@ -57,3 +57,4 @@ Q13 weekly Wednesday 10:00; Q14 no penalty, note: "indicator shows you" (a visua
 - Shuffle "Sorry" bubble can evict an overheard line or the arrival escort's line (BUBBLE_MAX 2): only bubble when a slot is free (1g LOW, one line).
 - Crew lines in section 22 still lower-case tradition names (ctx.trad ~29190) (PE8).
 - Pillar 5 later tidy: option B (shorter seat ray for all chairs) parked by DA3.
+- Dinner a little heavier in 0.60.6 vs 0.60.5b (4.0 vs 3.6 ms avg; 13-14 vs 3-5 slow frames/h on phone.py): profile in 0.60.7 (DA3).

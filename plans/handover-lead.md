@@ -440,3 +440,4 @@ Read: this section, the "STATE AT 19:35" section above, TEAM.md, CLAUDE.md (user
 - 00:35 archived idle HW5 (~$5.57) and perf 3 (~$34.82); handovers on their branches. Kept for 0.60.7 reuse: PE6, DA3, onboarding 3.
 - 00:48 1g silent on shuffle ec6e8a0 for 14 min; lead's call: final run starts NOW including ec6e8a0 (small, builder-green, clean trial), 1g reviews in parallel. ETA green ~02:00.
 - 00:54 1g: shuffle ec6e8a0 PASS (warnings no longer delayed; wobble gone). New LOW (bubble eviction) carried to 0.60.7 notes. All 0.60.6 pieces reviewed PASS. Final run on cand-0606 96582c4 in progress (~02:00).
+- 01:06 DA3 phone/perf on 96582c4: OK, shippable (dinner slightly heavier, logged for 0.60.7). BM3 share all green. Waiting R2, R3, R4 intro.
