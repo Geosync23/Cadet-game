@@ -293,6 +293,8 @@ One list for the whole ship, shown on the big job board in the Works bay and on 
 
 **Enough work, not overwhelming** (agreed 2026-10-16). About 3 to 6 jobs a day are left for the player on day shift. The Works crew take urgent and big jobs straight away; small Tier 1 jobs wait 3 day-shift hours for the player before the crew step in. The food cart run is a player job too: take it from the job board, and it waits an hour for you before the crew take it.
 
+**Real faults and their causes** (Pillar 5 foundation, approved by the lead 2026-10-18; plans/mechanics/foundation.html and fault-tables.html). From Day 2, on your shift days, about half the machine jobs left for you are real faults rather than servicing: some worn machines wear on unseen and are found already faulty. Each real fault has a cause from its kind's fault table (an oven runs cool because its element is failing, or its door seal is worn), and the job card says what everyone notices: "Repair: Oven 2 (runs cool)". Before the scanner, the job still tells you the part. Days 0 and 1 and your days off are unchanged. A job may be a junior job, or kept for a rank (a senior technician, an Engine Specialist); the crew follow the same rule, so nothing waits on you.
+
 ### Consequences
 
 Consequences come in stages, and you can see them:
