@@ -241,7 +241,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.60.6a
+   STARSHIP CADET: CSV Wren                           build 0.42.40
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7591,7 +7591,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.60.6a';                           // keep in step with the header's build line
+const GAME_BUILD = '0.42.40';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -10531,6 +10531,7 @@ function playerFx() {
     FX_MIN = m; FX_NOW = null;
     try { if (typeof shipEffects === 'function' && d) FX_NOW = shipEffects(d); } catch (e) { FX_NOW = null; }
     if (!FX_NOW) FX_NOW = { deck: d, restore: {}, drain: {}, notes: [] };
+    if (typeof clothesFx === 'function') FX_NOW = clothesFx(FX_NOW);   // section 21b: yesterday's clothes (0.42.40)
   }
   return FX_NOW;
 }
@@ -11095,6 +11096,7 @@ function playerFloorTap(point) {
   if (queueHeld()) return true;                          // in the line: ask first (0.28.31)
   if (bagLockerTap(point)) return true;                  // the kit bag into your locker (0.28.26)
   if (typeof crateTap === 'function' && crateTap(point)) return true;   // the crate you set down (Put down, 0.28.60)
+  if (typeof clothesFloorTap === 'function' && clothesFloorTap(point)) return true;   // section 21b: your wardrobe, or the hamper you set down (0.42.40)
   if (typeof PLACE_OF === 'undefined' || typeof ray === 'undefined') return false;
   const o = ray.ray.origin, d = ray.ray.direction, hits = [];
   for (const pl of PLACE_OF.values()) {
@@ -11592,7 +11594,7 @@ function playerUpdate(dt, t) {
   bagTick();                                             // the kit bag into your locker after the bunk step (0.28.26)
   handTick();                                            // the Repair button (0.28.52)
   dinnerTick();                                          // sit down at your table for the arrival dinner (0.28.28)
-  const P = SHIP.player, hold = P.cart ? (P.cart.stage === 'full' ? 'cartfull' : 'cart') : P.carry.length > 0 ? true
+  const P = SHIP.player, hold = P.cart ? (P.cart.stage === 'full' ? 'cartfull' : 'cart') : P.carry.length > 0 || typeof hamperHeld === 'function' && hamperHeld() ? true
     : ACT && ACT.kind === 'eat' && ACT.o.fed && ACT.phase === 'walk' || !ACT && P.tray ? 'tray' : typeof ixHold === 'function' && ixHold() || false;   // a tray from the servery to your seat (0.28.15); 15b's ixHold: a job's toolbox or crate
   if (hold || player.holding) player.holding = hold;   // in hand (Walker.update): parts (true, the crate) or a hover cart ('cart', 'cartfull')
   player.maxV = PLAYER_V0 * playerSpeed();
@@ -12308,7 +12310,7 @@ function putDelivery() {                                 // your delivery job, w
 }
 const crateHeld = () => { const d = putDelivery(); return !!d && d.st[d.pick].done && !(d.drop >= 0 && d.st[d.drop].done) && !crateDown(d.j); };
 const trayHeld = () => !!SHIP.player.tray;
-const putWhat = () => putParts().length > 0 || trayHeld() || crateHeld();
+const putWhat = () => putParts().length > 0 || trayHeld() || crateHeld() || typeof hamperHeld === 'function' && hamperHeld();   // section 21b's laundry hamper (0.42.40)
 function stepUndo(j, step) {                             // open a stop of your job again (section 17's stepsDone)
   const k = jobStops(j).findIndex(x => x.step === step); if (k < 0 || !Array.isArray(j.stepsDone)) return;
   j.stepsDone = j.stepsDone.filter(x => x !== k); if (typeof MACH_REV !== 'undefined') MACH_REV++;
@@ -12337,6 +12339,7 @@ function putDown() {
     P.crate = { job: d.j.id, deck: deckDef.num, x: p.x + Math.sin(f) * .45, z: p.z + Math.cos(f) * .45, at: shipNow() };
     said.push('You set the crate down here. Tap it to pick it up again; your job stays yours.');
   }
+  if (typeof hamperPut === 'function') { const h = hamperPut(); if (h) said.push(h); }   // section 21b (0.42.40)
   if (typeof ixGoalAt !== 'undefined') ixGoalAt = -1;
   if (typeof device !== 'undefined' && device.refresh) device.refresh();
   toast('Put down', said.join(' ') + (P.carry.length ? ' Still in your hands: ' + partList(P.carry) + '.' : ''));
@@ -30660,6 +30663,7 @@ const SETTLE = [
   { id: 'buy', title: 'Buy something', teacher: 'ishikawa-orla', place: { deck: 3, room: 'Crew store' }, done: (k, d) => k === 'act' && d.act === 'buy' },
   { id: 'friend', title: 'Make a friend', teacher: 'pell', place: null, done: (k, d) => k === 'tierUp' && d.tier >= 1 && d.id !== INTRO_ESCORT && d.id !== 'tomas' },
   { id: 'favour', title: 'Do a favour', teacher: 'kovac-zainab', place: null, done: k => k === 'favour' },
+  { id: 'clothes', title: 'Change your clothes', teacher: INTRO_ESCORT, place: { deck: 4, room: 'Bunk 1' }, done: (k, d) => k === 'act' && d.act === 'clothes' },   // section 21b (0.42.40)
   { id: 'laundry', title: 'Laundry day', teacher: 'tomas', place: { deck: 4, room: 'Laundry' }, done: (k, d) => k === 'act' && d.act === 'laundry' },
   { id: 'tradition', title: 'Join a tradition', teacher: 'pell', place: { deck: 3, room: 'Bow lounge' }, done: (k, d) => k === 'tradition' && d.you },
   { id: 'dayoff', title: 'A day off', teacher: 'tomas', place: { deck: 3, room: 'Hydroponics garden' }, done: introStepIs('d6-sowing') },
@@ -31294,6 +31298,225 @@ function introTick() {
     }
   } else if (INTRO_UI.goal) { INTRO_UI.goal = false; INTRO_UI.goalKey = ''; if (typeof clearGoal === 'function') clearGoal(); }
 }
+
+// =====================================================================
+// 21b. CLOTHES (onboarding engineer 4, 0.42.40+; plans/plan-0607.html "Clothes and laundry", the user's ask)
+// Change every morning at your wardrobe (the locker by your bunk in Bunk 1): one minute. Not changed by 10:00 and you're
+// "in yesterday's clothes" until 22:00: hygiene drains faster (CLOTHES_DRAIN, through section 15's playerFx) and the
+// device's status says so. Nothing worse. Out of clean clothes, the wardrobe gives you your laundry hamper: carry it to a
+// free washer in the Deck 4 laundry (WASH_MINS, you can leave; a toast says when it's done), take it out, and put it
+// away at the wardrobe: CLOTHES_FULL clean outfits again. No laundry duty.
+// A new arrival comes with one spare outfit (changed into on Day 1); Zeke warns you at dinner on Day 1, so the first
+// laundry is Day 2, and after it your full kit has come up from stores. A game started on Monday (or an older save)
+// has the full kit. The hamper is not in SHIP.player.carry (parts, the kit bag, gifts): it's SHIP.clothes.hamper, and
+// section 15/15b's hooks ask hamperHeld() (the holding pose, Put down) and clothesFloorTap(point) (the wardrobe and the
+// set-down hamper). Off at test URLs (?nosave) unless ?clothes is in the URL, so the regressions stay identical.
+//   SHIP.clothes = { clean, changed (the day you last changed; -1 never), kit, hamper, said: { beatId: shipMin }, told }
+//   hamper: null | { state: 'dirty' | 'washing' | 'clean', at: 'hands' | 'floor' | 'washer', deck, x, z, washer, until, done }
+// Nothing here calls R(); the set-down hamper's look is made the first time it's needed (existing materials only).
+// =====================================================================
+const CLOTHES_FULL = 5, CLOTHES_SPARE = 1, CLOTHES_LATE = 10 * 60, CLOTHES_NIGHT = 22 * 60, CLOTHES_DRAIN = 1.6, WASH_MINS = 30;
+const HAMPER_NEAR = .6, WARDROBE_NEAR = .6;
+let CLOTHES_ON = !NOSAVE || URL_FLAGS.has('clothes');
+const clothesBlank = full => ({ clean: full ? CLOTHES_FULL : CLOTHES_SPARE, changed: full ? -1 : 0, kit: !!full, hamper: null, said: {}, told: -1 });
+function clothesLoad(s) {
+  const x = s && s.clothes, C = clothesBlank(true);
+  if (!x || typeof x !== 'object') { C.changed = SHIP.time.day; return C; }   // an older save: the full kit, and already changed today
+  if (Number.isInteger(x.clean) && x.clean >= 0) C.clean = Math.min(CLOTHES_FULL, x.clean);
+  if (Number.isInteger(x.changed)) C.changed = x.changed;
+  if (Number.isInteger(x.told)) C.told = x.told;
+  C.kit = x.kit !== false;
+  if (x.said && typeof x.said === 'object') for (const k in x.said) if (isFinite(x.said[k])) C.said[k] = +x.said[k];
+  const h = x.hamper;
+  if (h && ['dirty', 'washing', 'clean'].includes(h.state) && ['hands', 'floor', 'washer'].includes(h.at)) {
+    const ok = h.at === 'hands' || h.at === 'floor' && DECKS[h.deck] && isFinite(h.x) && isFinite(h.z) || h.at === 'washer' && typeof h.washer === 'string' && isFinite(h.until);
+    if (ok) C.hamper = { state: h.state, at: h.at, deck: +h.deck || 0, x: +h.x || 0, z: +h.z || 0, washer: h.washer || null, until: +h.until || 0, done: !!h.done };
+  }
+  return C;
+}
+SHIP.clothes = clothesLoad(SAVED);
+SAVE_EXTRA.push(s => { s.clothes = JSON.parse(JSON.stringify(SHIP.clothes)); });
+onSim('newGame', n => { SHIP.clothes = clothesBlank(!n.arrival); });   // by shuttle: one spare outfit; on Monday: the full kit
+const hamperHeld = () => CLOTHES_ON && !!SHIP.clothes.hamper && SHIP.clothes.hamper.at === 'hands';
+const clothesYesterday = () => CLOTHES_ON && SHIP.clothes.changed < SHIP.time.day && SHIP.time.min >= CLOTHES_LATE && SHIP.time.min < CLOTHES_NIGHT;
+function clothesFx(fx) {                                 // section 15's playerFx: hygiene drains faster in yesterday's clothes
+  if (!clothesYesterday()) return fx;
+  return { ...fx, drain: { ...(fx.drain || {}), hygiene: fxD(fx, 'hygiene') * CLOTHES_DRAIN }, notes: [{ text: 'In yesterday\'s clothes' }, ...(fx.notes || [])] };
+}
+Object.assign(PLAYER_ACTS, { clothes: { mins: 1, pose: 'browse', title: 'Changing' } });
+const clothesHandsFull = () => { const P = SHIP.player; return P.carry.length > 0 || !!P.tray || !!P.cart || hamperHeld(); };
+const clothesLeft = n => n === 0 ? 'no clean outfits left' : n === 1 ? 'one clean outfit left' : n + ' clean outfits left';
+// your wardrobe: the locker in your bunk's room nearest your bunk (the bunk-room template's 'cleanUniforms' spots)
+function clothesWardrobe() {
+  if (typeof deckDef === 'undefined' || typeof PLACE_OF === 'undefined') return null;
+  const bed = PLACE_OF.get(playerBed()); if (!bed || deckDef.num !== deckOf(bed.id)) return null;
+  const b = cellPos(...bed.at);
+  return SPOTS.filter(s => s.tag === 'cleanUniforms' && s.room === bed.room).sort((m, n) => Math.hypot(m.x - b.x, m.z - b.z) - Math.hypot(n.x - b.x, n.z - b.z))[0] || null;
+}
+let CLOTHES_TILE = null;                                 // your wardrobe's tile, from the last time Deck 4 was built (else your bunk's)
+const clothesWardrobeTile = () => { const w = clothesWardrobe(); if (w) CLOTHES_TILE = cellAt(w.x, w.z); const bed = (DECKS[4].places || []).find(p => p.id === playerBed()); return CLOTHES_TILE || (bed ? bed.at : [8, 1]); };
+function clothesRayNear(x, z, top) {                     // how near the tap's line of sight passes to (x, z), from the floor to top
+  if (typeof ray === 'undefined') return Infinity;
+  const o = ray.ray.origin, d = ray.ray.direction; let best = Infinity;
+  for (let y = 0; y <= top; y += .1) { const k = (y - o.y) / d.y; if (k > 0) best = Math.min(best, Math.hypot(o.x + d.x * k - x, o.z + d.z * k - z)); }
+  return best;
+}
+// a tap that reached the floor (section 15's playerFloorTap; the bunk lockers have no words of their own): the wardrobe or the set-down hamper
+function clothesFloorTap(point) {
+  if (!CLOTHES_ON) return false;
+  const h = SHIP.clothes.hamper;
+  if (h && h.at === 'floor' && h.deck === deckDef.num && Math.min(Math.hypot(point.x - h.x, point.z - h.z), clothesRayNear(h.x, h.z, .5)) <= HAMPER_NEAR) {
+    approach(new THREE.Vector3(h.x, 0, h.z), 0, 0, () => hamperUp(false));
+    return true;
+  }
+  const w = clothesWardrobe(); if (!w) return false;
+  if (Math.min(Math.hypot(point.x - w.x, point.z - w.z), clothesRayNear(w.x, w.z, 2)) > WARDROBE_NEAR) return false;
+  approach(new THREE.Vector3(w.x, 0, w.z), w.front, .6, wardrobeUse);
+  return true;
+}
+// a tap on a thing with words (section 15's PLAYER_TAPS): a wardrobe (the deck architect's, when it has a title), or a washer with your laundry in play
+PLAYER_TAPS.push((it, at) => {
+  if (!CLOTHES_ON || typeof deckDef === 'undefined') return false;
+  if (/wardrobe|locker/i.test(it.t)) {
+    const w = clothesWardrobe(); if (!w || Math.hypot(at.x - w.x, at.z - w.z) > 1) return false;
+    approach(at.clone(), it.front, it.depth, wardrobeUse); return true;
+  }
+  if (!/^washer\b/i.test(it.t) || deckDef.num !== 4) return false;
+  const h = SHIP.clothes.hamper; if (!h || !(h.at === 'hands' && h.state === 'dirty' || h.at === 'washer')) return false;
+  const m = washerNear(at); if (!m) return false;
+  approach(at.clone(), it.front, it.depth, () => washerUse(m, it.t));
+  return true;
+});
+function wardrobeUse() {
+  const C = SHIP.clothes, h = C.hamper, today = SHIP.time.day;
+  if (h && h.at === 'hands' && h.state === 'clean') {   // put the clean washing away (and change, if you haven't today)
+    const first = !C.kit; C.kit = true; C.clean = CLOTHES_FULL; C.hamper = null; clothesGoal(null);
+    let say = first ? 'Your full kit has come up from stores while you were out: you put it away with your clean washing. Five outfits.' : 'You put your clean washing away. Five outfits.';
+    if (C.changed < today) { C.clean--; C.changed = today; simAct('clothes'); say += ' You change into a fresh set: ' + clothesLeft(C.clean) + '.'; }
+    actStart('clothes', null, { title: 'Wardrobe', after: say });
+    return;
+  }
+  if (h && h.at === 'hands') { toast('Wardrobe', 'Your hamper\'s full of dirty washing. Take it to a free washer in the laundry, past the washrooms in the junior wing.'); clothesGoal('washer'); return; }
+  if (h && h.at === 'washer') { toast('Wardrobe', 'Your washing is in ' + washerName(h.washer) + ' in the laundry' + (h.done || shipNow() >= h.until ? ': it\'s done, take it out.' : ', done at ' + hhmm(h.until) + '.')); return; }
+  if (h && h.at === 'floor') { toast('Wardrobe', 'Your laundry hamper is where you set it down' + (h.deck !== deckDef.num ? ', on Deck ' + h.deck : '') + '. Pick it up again when you\'re ready.'); return; }
+  if (C.clean > 0 && C.changed >= today) { toast('Wardrobe', 'You\'re in clean clothes today. ' + clothesLeft(C.clean)[0].toUpperCase() + clothesLeft(C.clean).slice(1) + ' in here.'); return; }
+  if (C.clean > 0) {
+    C.clean--; C.changed = today; simAct('clothes');
+    actStart('clothes', null, { title: 'Wardrobe', after: 'You change into clean clothes: ' + clothesLeft(C.clean) + '.' + (C.clean ? '' : ' Do your laundry before tomorrow: tap the wardrobe again for your hamper.') });
+    return;
+  }
+  if (clothesHandsFull()) { toast('Wardrobe', 'No clean clothes left. Your hamper\'s in here, but your hands are full: put things down first.'); return; }
+  C.hamper = { state: 'dirty', at: 'hands', deck: 0, x: 0, z: 0, washer: null, until: 0, done: false };
+  toast('Wardrobe', 'No clean clothes left. You take your laundry hamper: to a washer in the laundry, past the washrooms in the junior wing.');
+  if (typeof ixTip === 'function') ixTip('laundry', 'Laundry: carry your hamper to a free washer in the Deck 4 laundry and tap it. It runs half an hour, and you can leave. Take the clean washing out and put it away at your wardrobe.');
+  clothesGoal('washer');
+}
+// the washers (section 17's machines, kind 'washer', in the Deck 4 laundry): free, busy (anyone's run, MACH_RUN) or broken
+const washerList = () => typeof machineList === 'function' ? machineList().filter(m => m.kind === 'washer' && m.deck === 4 && m.at) : [];
+const washerName = id => 'Washer ' + ((String(id).match(/(\d+)$/) || [])[1] || '');
+const washerBusyUntil = id => { const mine = SHIP.clothes.hamper, r = typeof MACH_RUN !== 'undefined' && MACH_RUN[id] || 0; return Math.max(r, mine && mine.at === 'washer' && mine.washer === id ? mine.until : 0); };
+const washerBroken = id => { try { const st = machinesNow()[id]; return !!st && st.state === 'broken'; } catch (e) { return false; } };
+function washerNear(at) {
+  return washerList().map(m => [m, cellPos(...m.at)]).filter(([, c]) => Math.hypot(c.x - at.x, c.z - at.z) < 1.6)
+    .sort((a, b) => Math.hypot(a[1].x - at.x, a[1].z - at.z) - Math.hypot(b[1].x - at.x, b[1].z - at.z)).map(x => x[0])[0] || null;
+}
+function washerUse(m, title) {
+  const C = SHIP.clothes, h = C.hamper, now = shipNow(); if (!h) return;
+  if (h.at === 'washer') {                               // your washing: take it out when it's done
+    if (h.washer !== m.id) { toast(title, 'Your washing is in ' + washerName(h.washer) + '.'); return; }
+    if (now < h.until) { toast(title, 'Your washing is still going: done at ' + hhmm(h.until) + '.'); return; }
+    if (clothesHandsFull()) { toast(title, 'Your washing\'s done, but your hands are full: put things down first.'); return; }
+    C.hamper = { state: 'clean', at: 'hands', deck: 0, x: 0, z: 0, washer: null, until: 0, done: false };
+    toast(title, 'You take your clean washing out. Fold it at the folding table if you like, then put it away at your wardrobe in Bunk 1.');
+    clothesGoal('wardrobe');
+    return;
+  }
+  const free = id => washerBusyUntil(id) <= now && !washerBroken(id);
+  if (!free(m.id)) {
+    const others = washerList().filter(o => free(o.id));
+    if (others.length) { toast(title, (washerBroken(m.id) ? 'This one\'s broken.' : 'This one\'s going.') + ' ' + washerName(others[0].id) + ' is free.'); return; }
+    const first = washerList().filter(o => !washerBroken(o.id)).sort((a, b) => washerBusyUntil(a.id) - washerBusyUntil(b.id))[0];
+    toast(title, first ? 'All the washers are going. ' + washerName(first.id) + ' finishes first, at ' + hhmm(washerBusyUntil(first.id)) + '.' : 'Every washer is broken. Works will be on it: try later.');
+    return;
+  }
+  let r = null; try { r = machineUse(m.id, 'player'); } catch (e) { r = null; }
+  if (r && !r.ran) { toast(title, r.text || 'It won\'t start.'); return; }
+  C.hamper = { state: 'washing', at: 'washer', deck: 4, x: 0, z: 0, washer: m.id, until: now + WASH_MINS, done: false };
+  simAct('laundry'); clothesGoal(null);
+  toast(title, 'You load your washing and start it: done at ' + hhmm(now + WASH_MINS) + '. You don\'t have to wait; your device will tell you.');
+}
+function hamperUp(quiet) {                               // pick the set-down hamper up again
+  const h = SHIP.clothes.hamper; if (!h || h.at !== 'floor') return false;
+  if (clothesHandsFull()) { toast('Laundry hamper', 'Your hands are full: put things down first.'); return false; }
+  h.at = 'hands'; h.deck = 0;
+  if (!quiet) toast('Laundry hamper', 'You pick your hamper up again.');
+  return true;
+}
+function hamperPut() {                                   // section 15b's Put down: set the hamper down where you stand
+  if (!hamperHeld()) return '';
+  const h = SHIP.clothes.hamper, p = player.obj.position, f = player.face || 0;
+  h.at = 'floor'; h.deck = deckDef.num; h.x = p.x + Math.sin(f) * .45; h.z = p.z + Math.cos(f) * .45;
+  return 'You set your laundry hamper down. Tap it to pick it up again.';
+}
+// the arrow: to a free washer (or the laundry) with the dirty washing, back to your wardrobe with the clean
+let CLOTHES_GOAL = null;
+function clothesGoal(to) {
+  if (typeof setGoal !== 'function') return;
+  if (!to) { if (CLOTHES_GOAL && typeof IX_GOAL !== 'undefined' && IX_GOAL && IX_GOAL.label === CLOTHES_GOAL) clearGoal(); CLOTHES_GOAL = null; return; }
+  const w = washerList().find(m => washerBusyUntil(m.id) <= shipNow() && !washerBroken(m.id)) || washerList()[0];
+  const g = to === 'washer' ? { deck: 4, at: w ? (w.panel || w.at) : [13, 18], label: 'Laundry' } : { deck: 4, at: clothesWardrobeTile(), label: 'Your wardrobe' };
+  setGoal(g); CLOTHES_GOAL = g.label;
+}
+// the week's beats for clothes (said like section 21's: the writers' week-1 lines beat.<id>.<n> on `who` first, else
+// these stand-ins; once, in the window, when you're in the room with them, or within INTRO_BEAT_NEAR for where: 'seek')
+const CLOTHES_BEATS = [
+  { id: 'd1-clothes', day: 1, at: 18 * 60, till: 20 * 60, who: INTRO_ESCORT, where: { deck: 3, room: 'Mess hall' }, when: C => !C.kit,
+    lines: ['One change of clothes? The laundry\'s past the washrooms in the junior wing.', 'Do it tomorrow after shift, or you\'ll be wearing that on Wednesday.'] },
+  { id: 'd2-laundry', day: 2, at: 16 * 60 + 45, till: 18 * 60, who: INTRO_ESCORT, where: 'seek', when: C => !C.kit,
+    lines: ['Shift\'s done. Laundry now, while the washers are free.'] },
+];
+let CLOTHES_BEAT = null;
+function clothesBeatTick() {
+  if (typeof introOn !== 'function' || !introOn() || typeof DECK_CREW === 'undefined' || typeof bubbleSay !== 'function') return;
+  const C = SHIP.clothes, U = INTRO_UI, now = shipNow(), t = simNow(), crew = id => DECK_CREW.find(x => x.p && x.p.id === id);
+  if (CLOTHES_BEAT) {
+    const a = crew(CLOTHES_BEAT.b.who);
+    if (!introBeatHere(CLOTHES_BEAT.b, a)) CLOTHES_BEAT = null;
+    else if ((a.talking = Math.max(a.talking || 0, 1)) && !DIALOGUE && t >= U.next) { bubbleSay(a.h, CLOTHES_BEAT.lines.shift(), 4.5); U.next = t + INTRO_TOUR_GAP; if (!CLOTHES_BEAT.lines.length) CLOTHES_BEAT = null; }
+    return;
+  }
+  if (DIALOGUE || U.beat) return;
+  for (const b of CLOTHES_BEATS) {
+    if (C.said[b.id] !== undefined || !b.when(C)) continue;
+    if (now < introAbs(b.day, b.at) || now >= introAbs(b.day, b.till) || !introBeatHere(b, crew(b.who))) continue;
+    C.said[b.id] = Math.floor(now);
+    const w = introBeatLines(b); CLOTHES_BEAT = { b, lines: w.length ? w : b.lines.slice() }; return;
+  }
+}
+// once a frame: the washing done, yesterday's clothes at 10:00, the set-down hamper's look, the beats
+let HAMPER_LOOK = null;
+function hamperLook() {                                  // a small laundry hamper on the floor, made once (no R())
+  const g = new THREE.Group();
+  box(.46, .4, .34, KM.hamper, 0, .21, 0, g);            // just off the floor: no coplanar faces
+  box(.5, .04, .38, M.slateDark, 0, .42, 0, g);
+  soft(KM.teal, -.08, .45, 0, .13, .05, .1, g); soft(KM.gold, .1, .45, .03, .12, .05, .09, g);
+  g.visible = false; scene.add(g); return g;
+}
+function clothesFrame() {
+  requestAnimationFrame(clothesFrame);
+  if (!CLOTHES_ON || typeof deckDef === 'undefined' || !deckDef || typeof player === 'undefined') return;
+  const C = SHIP.clothes, h = C.hamper, now = shipNow();
+  if (h && h.at === 'washer' && !h.done && now >= h.until) { h.done = true; toast('Laundry', 'Your washing is done in ' + washerName(h.washer) + ', in the Deck 4 laundry. Take it out when you\'re passing.'); }
+  if (C.told !== SHIP.time.day && clothesYesterday()) {
+    C.told = SHIP.time.day;
+    toast('Yesterday\'s clothes', C.clean > 0 || h && h.state === 'clean' ? 'You\'re still in yesterday\'s clothes. Change at your wardrobe in Bunk 1; till then you\'ll feel grubby sooner.' : 'You\'re still in yesterday\'s clothes, and there are no clean ones left. Your hamper\'s in your wardrobe: do your laundry.');
+  }
+  const here = !!h && h.at === 'floor' && h.deck === deckDef.num;
+  if (here && !HAMPER_LOOK) HAMPER_LOOK = hamperLook();
+  if (HAMPER_LOOK) { HAMPER_LOOK.visible = here; if (here) HAMPER_LOOK.position.set(h.x, 0, h.z); }
+  clothesBeatTick();
+}
+requestAnimationFrame(clothesFrame);
 
 // =====================================================================
 // 23. TILES
