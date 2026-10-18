@@ -654,3 +654,4 @@ Read: CLAUDE.md, TEAM.md (Lead line + "Playtest update 1" paragraph), plans/brie
 - ~21:35 lead 14: published Rec Dec Preview 0.80.7 fe1d705 → https://claude.ai/artifact/9oG8Dq5kqFp1DUasKHZ62n (push sent). DA6 next: Lightdisc integration. RA1 done (can be archived after DA6 confirms merge — confirmed in fe1d705).
 - ~21:56 lead 14 check-in: lead 34%. BM6 29 (final 0.63.2 run, asked ETA), R3 33 idle, Lightdisc eng 34 (waiting DA6 note, builds on claude/lightdisc-proto 0.82.x), DA6 finishing 0.80.7 follow-up + Lightdisc plug-in note. RA1 archived (0.81.0 merged in fe1d705).
 - ~22:05 lead 14: published 0.63.2 (86dcda1) to the Pillar 5 preview v4; push sent. Waiting for the user's go on Step 3.
+- ~22:20 lead 14: Rec Dec Preview v2 = claude/lightdisc-proto c258151 (0.82.1: Lightdisc 0.82.0 + DA6 0.80.8 polish ab2cc9c). disc_check 34 OK; 0.80.8 tests still running at DA6. Open: game length vs sharp crew (6.5-7.4 min) — asked the user.
