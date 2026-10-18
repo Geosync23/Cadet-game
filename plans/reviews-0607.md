@@ -9,6 +9,14 @@
 
 ## Verdicts
 
+### Traditions 0.34.52, claude/trad-0607 dc44100 (in depth for the quiz): PASS, one MED (the quiz host isn't there)
+Since d27980f: `evRooms` strips escapes (my LOW 1, fixed); the 3-a-day cap was tried and reverted (the user kept the busy days); Cook-along moved to Saturday 15:30; the Quiz night mini-game (`quizPick`/`quizStart`, a `moment:` script on the choice card); events_check gains a held-place check and part 9e; the writer's quiz.lines copied in and baked.
+- **Probe:** day 4 (Thu) has quiz 20:00, a birthday, late piano and postcard night; days 6 and 13 (Sat) have Cook-along 15:30 alongside Tiles ladder and garden hour, and nothing is dropped. `quizPick(4)` gives the same three questions every call (shift start, delivery day, tea break) with the right answer at a different spot in each. `quizPick(11)` gives the next three (no repeats until the pool's used). The fix to q23 ("Food for anyone running late") is in.
+- **Code:** plain hashes (`quizH`/`quizS`), never `R()`. Ties are broken by index, or by the text for answers. Nothing saved. `quizStart` runs once per joined key, from `eventsPlayer`. The `moment:` id keeps it out of commendations. `onEnd` deletes the script.
+- **MED: Tomas hosts a quiz he isn't at.** The card and every host line are Tomas's (`who: ['tomas']`), but the quiz tradition has no `host`, and `eventPlan` for Tomas on Thursdays 4, 11 and 18 doesn't include quiz night. The player hears "Quiz time! I wrote these myself" from someone who isn't in the room. Fix: give the quiz `.trad` `host: tomas` (the host always goes, and comes 5 minutes early), or have the card speak as whoever hosts or is there.
+- **LOW:** if a dialogue is already open when you've been in the lounge 5 minutes (a chat card is fine, but a meeting or moment isn't), `quizStart` returns false and never tries again. The join is already recorded, so you miss that night's game. Rare.
+- events_check's day-100 seat share is still the one known FAIL (now with the social engineer).
+
 ### Re-check: onboarding 4, 0.42.42-0.42.43, claude/arrival-0607b f09145f: PASS, both LOWs fixed
 - 0.42.42 (22d88d3) only renames the laundry keys (checked with the writer's quiz note below).
 - 0.42.43: the beats, the crew-at-work look-up and the remark scan now run every 250 ms of `simNow` (pause-aware). Beat pacing still uses `U.next`, so lines aren't bunched. The wardrobe tap takes only your tagged wardrobe (`it.wardrobe === playerBed()`), or an untagged item titled "wardrobe" within .6 m. Plain lockers no longer match.
