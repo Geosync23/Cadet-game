@@ -51,6 +51,8 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 .lift .deckbtn small{display:block;font-size:12px;color:var(--muted);margin-top:1px}
 .lift .deckbtn:disabled{opacity:.42;cursor:default}
 .lift .deckbtn.here{opacity:1;border-color:var(--teal)}
+.lift .deckbtn.goal{border-color:#e8c06a;box-shadow:0 0 0 1px #e8c06a,0 0 14px rgba(232,192,106,.35)}   /* 0.28.58: your goal's deck */
+.lift .deckbtn em{flex:none;margin-left:auto;font-style:normal;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;border-radius:999px;background:#e8c06a;color:#1a1408}
 .lift .deckbtn.here i{background:#2a9d8f;color:#08201d;border-color:#2a9d8f}
 .lift .stay{margin:10px auto 0;padding:7px 16px}
 .devbtn{position:fixed;left:14px;top:86px;z-index:2;padding:6px 11px;font-size:12.5px}
@@ -239,7 +241,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.28.57
+   STARSHIP CADET: CSV Wren                           build 0.28.58
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7589,7 +7591,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.28.57';                           // keep in step with the header's build line
+const GAME_BUILD = '0.28.58';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -12556,6 +12558,8 @@ let IX_GOAL = null, ixJobGoal = null, ixGoalAt = -1;
 SAVE_EXTRA.push(s => { const p = s.player || (s.player = {}); if (SHIP.player.track !== undefined) p.track = SHIP.player.track; });
 function setGoal(g) { IX_GOAL = g && g.deck ? { ...g } : null; }
 function clearGoal() { IX_GOAL = null; }
+// the goal the arrow is showing, the same rule as ixFrame (0.28.58: the lift panel marks its deck); null with none
+function goalNow() { return IX_GOAL || (SHIP.player.track === null ? null : ixJobGoal); }
 // your job's next step: parts from main storage, a part from the machine shop, or the machine's panel
 function ixJobStep() {
   if (typeof myJob !== 'function') return null;
@@ -34679,12 +34683,14 @@ function openLiftPanel() {
     const i = document.createElement('i'), sp = document.createElement('span'), t = document.createElement('b'), sm = document.createElement('small');
     i.textContent = n; t.textContent = DECK_NAMES[n]; sm.textContent = here ? 'You are here' : built ? DECKS[n].blurb : 'Not built yet';
     sp.append(t, sm); b.append(i, sp);
-    b.setAttribute('aria-label', `Deck ${n}, ${DECK_NAMES[n]}: ${sm.textContent}`);
+    const gl = typeof goalNow === 'function' ? goalNow() : null, goal = !!(gl && gl.deck === n && !here && built);   // 0.28.58 (0.60.6a, the user's): the deck your goal arrow wants
+    if (goal) { b.classList.add('goal'); const g = document.createElement('em'); g.textContent = '→ Goal'; b.appendChild(g); }
+    b.setAttribute('aria-label', `Deck ${n}, ${DECK_NAMES[n]}: ${sm.textContent}` + (goal ? '. Your goal is here' + (gl.label ? ': ' + gl.label : '') : ''));
       b.onclick = () => { closeLiftPanel(); pressPanel(n); };
     liftList.appendChild(b);
   }
   liftEl.hidden = false; toastEl.classList.remove('show');
-  (liftList.querySelector('button:not(:disabled)') || document.getElementById('liftStay')).focus();
+  (liftList.querySelector('button.goal') || liftList.querySelector('button:not(:disabled)') || document.getElementById('liftStay')).focus();   // the goal's deck first (0.28.58)
 }
 function closeLiftPanel() { liftEl.hidden = true; if (liftReturn && liftReturn.focus) liftReturn.focus(); }
 document.getElementById('liftStay').onclick = closeLiftPanel;
