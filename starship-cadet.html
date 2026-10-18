@@ -14989,7 +14989,7 @@ const JOB_TYPES = {                                      // work: minutes at the
 };
 // job kinds with steps (0.33.47, foundation 17.5), so Pillar 5's mechanics never edit section 17: section 24's sub-blocks
 // register theirs at load. jobKindAdd(kind, def), def = { tier, junior?, only?, work, parts?, text?, stops(j) -> [{ deck,
-// placeId, mins, tag, how?, opts? }], post(h, jobs)?, done(j, t, by), stepDone?(j, k, res, t), crew: { can(p), mins }, side? }:
+// placeId, mins, tag, how?, opts? }], post(h, jobs)?, done(j, t, by), stepDone?(j, k, res, t), crew: { can(p), mins }, side?, veto? }:
 // post runs each ship hour in jobsHour (push jobMake(kind, {...}) results; it must not call machinesNow's readers);
 // done is what finishing it does (by: 'you' or a crew id); the crew do it as a walk through its stops in crew.mins
 // (a number, or a function of the job), if crew.can(p). A stop's `how`: 'hold' | 'look' | 'carry' | 'choose' | 'turn' |
@@ -15115,7 +15115,7 @@ const CREW_LEAVE = 180;                                 // crew leave easy, rout
 // alone, the page's first knob, left the first week's board thin and no faults before Day 5: machine_check 5o, the lead.)
 // A repair below urgent is held for you FAULT_LEAVE minutes of the day shift (not CREW_LEAVE) and never shared out
 // (shareOut). Days 0-1, your days off and the arrival's jobs are as before
-const WORKS_REAL_FROM = 2, FIND_LATE = 0, FAULT_LEAVE = 240, REAL_SHARE = .5;
+const WORKS_REAL_FROM = 2, FIND_LATE = 0, FAULT_LEAVE = 240, REAL_SHARE = .45;
 const realFor = (m, d) => d >= WORKS_REAL_FROM && playerShiftOn(d) && !ENGINE_KINDS.has(m.kind) && jobTier({ machine: m.id }) <= playerTier();
 const realRepair = j => j.kind === 'repair' && j.urgency === 1 && !!j.machine && !j.reserved && realFor(machineById(j.machine), Math.floor(j.found / 1440) + 1);
 const YOU_KEEP = 720;                                   // a job you take goes back on the board after 12 ship hours with no progress (touchJob)
@@ -15638,8 +15638,10 @@ function jobStepDone(id, k, res) {
   machinesNow(); const j = SHIP.jobs.find(x => x.id === id && x.claimedBy === 'you' && x.status === 'claimed');
   const n = j ? jobStops(j).length : 0;
   if (!j || !(k >= 0 && k < n) || (j.kind === 'favour' && k === n - 1)) return { ok: false, left: n, done: !!(j && j.workDone) };   // a favour goes back by favourTurnIn
+  const K = jobKindOf(j); let kr;
+  if (K && K.stepDone) { try { kr = K.stepDone(j, k, res || null, shipNow()); } catch (e) { console.warn('job kind ' + j.kind, e); } }
+  if (K && K.veto && kr === false) { simFlush(); return { ok: false, left: n - (j.stepsDone || []).length, done: !!j.workDone, retry: true }; }   // def.veto: a wrong pick leaves the stop to do again (M2's)
   if (res && typeof res === 'object') { (j.res || (j.res = {}))[k] = JSON.parse(JSON.stringify(res)); }   // a step's result ({ pick }, { value }): kept for the kind's done (0.33.47)
-  const K = jobKindOf(j); if (K && K.stepDone) { try { K.stepDone(j, k, res || null, shipNow()); } catch (e) { console.warn('job kind ' + j.kind, e); } }
   j.stepsDone = [...new Set([...(j.stepsDone || []), k])].sort((a, b) => a - b); j.touched = shipNow();
   if (jobStops(j)[k].step === 'drop' && j.dropAt === undefined) {
     j.dropAt = shipNow();                                // a delivery's arrival (traysArrivedAt, carryArrivedAt)
@@ -15650,7 +15652,7 @@ function jobStepDone(id, k, res) {
   if (!left && !j.workDone && typeof caseFitted === 'function' && caseFitted(j)) { MACH_REV++; simFlush(); return { ok: true, left: n, done: false, wrong: true }; }   // 24k: the wrong fix, the machine not put right (0.33.47)
   if (!left && !j.workDone) { jobEffect(j, shipNow(), 'you'); j.workDone = shipNow(); machRecord(MACH_HOUR - 1); }
   MACH_REV++; jobNote(j, 'stop', { k, tag: jobStops(j)[k].step }); if (fresh && j.workDone) jobNote(j, 'done'); simFlush();
-  return { ok: true, left, done: !!j.workDone };
+  return { ok: true, left, done: !!j.workDone, ...(typeof kr === 'string' ? { say: kr } : {}) };   // say: the kind's words after the step (P's, for M1)
 }
 // turnInJob(id) -> true | false: at a job board, a job whose work is done is complete
 function turnInJob(id) {

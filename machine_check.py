@@ -917,7 +917,7 @@ with sync_playwright() as pw:
             done: (j, t, by) => done.push([j.id, by, JSON.stringify(j.res || {})]), stepDone: (j, k, res) => steps.push([j.id, k, res && res.pick]),
             crew: { can: p => jobCrew(p) === 'works', mins: 30 } });
           let crewJob = null;
-          for (let m = shipNow() + 60; m <= shipNow() + 4 * 60; m += 60) { setShipNow(m); machinesNow(); }
+          const m0 = shipNow(); for (let m = m0 + 60; m <= m0 + 4 * 60; m += 60) { setShipNow(m); machinesNow(); }
           const A = SHIP.jobs.find(j => j.id === 'tk@' + H0), B = SHIP.jobs.find(j => j.id === 'tk@' + (H0 + 1));
           out.posted = [!!A, !!B]; out.aBy = A && A.claimedBy; out.aSegs = A && A.segs ? A.segs.filter(x => x.type === 'job').map(x => x.tag + '@' + x.placeId).join(' ') : null;
           out.aMins = A && A.segs ? A.segs.filter(x => x.type === 'job').reduce((a, x) => a + x.to - x.from, 0) : null;
