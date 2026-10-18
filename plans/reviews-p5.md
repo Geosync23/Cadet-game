@@ -5,12 +5,19 @@ Who gets verdicts (lead 11, 09:27; kept by lead 12, session_01GjWhU9Z9V8RNoR8yyE
 How: behaviour, save and schedule changes in depth (against the piece's approved page in plans/mechanics/ on claude/p5-design, determinism, old saves load, phones first, cadet_test differences explained); content and test-only changes skimmed. Verdicts newest first.
 
 ## Passing tips
+- P claude/player-p5 **cfce34e** (0.28.72, contains 1829c8b; 1 LOW open)
 - C claude/works-career **d518673** (0.44.9, contains 87df8f5..ae6598a; 1 LOW open)
 - A claude/deck-0607 **6cc826b** (0.47.2, contains c20f91f and ad5e704; no LOWs open)
 - H claude/mech-cases **171f901** (0.55.11, contains everything from eece4d4; no LOWs open)
 - W claude/writer-p5 **0d179ac** (0.48.86, text; contains 843bac9 and 76fc413; no LOWs open)
 
 ## Verdicts
+
+### P 1829c8b (0.28.71) + cfce34e (0.28.72): the work steps (foundation 15) and careerSpeed — PASS with a LOW (in depth)
+- workStep runs look (opts.secs real seconds, needs don't speed it, a marks card), choose (deviceChoose, 44 px+, up to 6), turn (−/+ with onTurn and ok; no number unless the machine's gauge gives one) and wait (a toast with "ready at", done when tapped after `until`). 'hold' and 'carry' keep today's path. It's started from ixChoreTap and from jobBegin's panel stop when that stop's `how` isn't 'hold'. Walking away pauses (a look's seconds kept). jobStepDone(id, k, res) at the end. careerSpeed(kind) gives 1, then .8 from 5 and .65 from 15, from SHIP.works.sk; it's applied in jobMins (only your repair minutes; the crew never call it).
+- Save: SHIP.player.wsteps, cleaned on load (junk dropped, at most 8, numbers clamped), saved only for your claimed jobs. Old saves → []. Reset on a new game. No R(); page elements only.
+- Checks (my run on cfce34e): cadet_test vs d3d720b ALL IDENTICAL; interactions_check OK; player_check OK (its new part: careerSpeed 1/1/.8/.8/.65/.65, a look under way, paused and kept, the marks card at 44 px).
+- LOW: careerSpeed in ixChoreTap (`jobKindOfMachine(j)`) is always 1, because ixChore takes only jobs with no machine. A registered kind with a machine (M5's tune) goes through jobBegin's panel path instead. Harmless, but either drop it or key it on the kind's machine kind, so the page's "a mechanic's steps on that kind" holds where it should.
 
 ### C a8dd78e (0.44.8) + d518673 (0.44.9): fixes for item 1 and the LOWs — PASS with a LOW (read; C's checks)
 - Item 1 closed: trainOffer sets cur.told = false and tells at once in play (trainTell: a toast and the goal arrow). Asked while you slept, trainTick tells you the first minute you're up, while the meeting is still ahead. `told` is cleaned on load. LOW 2: a 'held' cur from an earlier day ends (trained) at the next workday's ladderTick. LOW 3: act('open') takes a tab, plus worksTabShow(id). LOW 4: no sub-block reserve and no machine kind → trained at the meeting, with no stand-in fault. Nits done (851 documented; the sub-block data rule; small rows train only once opened; WORKS_TAB reset). a8dd78e: WORK_MECH[id].at(day), a meeting's earliest minute (M1's m4 after the unload), capped sensibly.
