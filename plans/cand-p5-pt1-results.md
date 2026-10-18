@@ -21,3 +21,4 @@ Build master 5 (BM5, session_01DbBJ7iK6TrrADyEw7qbCsQ) on claude/p5-cand-pt1; re
 - trial p2 day_check 0-8 all OK (09:00 shift, with X WIP 0.71.1's crew side). Lane free; player_check on part-t running.
 - ~19:11 T new head 574da73 (0.70.6 = ae7c877 Cook-along leader + a9fad20 merged + the lap's line keeps the lane clear); needs R3, else T stays 2a6fa43. U film hobby 55b2499 (0.72.1; with R3).
 - part-t (passed tips + O5 e4fe793 + T 807c071): player_check OK (1852 s).
+- part-t intro_check --week alone OK (179 s). X 0.71.1 ready 98e93bf (needs C2 first; join OK with T 574da73); with R3.
