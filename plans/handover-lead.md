@@ -613,3 +613,6 @@ Read: CLAUDE.md, TEAM.md, plans/brief-p5.md (all seats + ids), plans/overnight-d
 - **Open for the user (none urgent):** Zeke's Day 1 trainer lines sample (DEV_NOTES 0.48.81) still unanswered; Deck 3 breakfast seat share (known, pre-existing); spare parts short = keep (answered).
 - **Weekly allowance:** status 'allowed_warning' all day, unchanged.
 - ~15:52 started lead 13 session_015UkCGSS9FyGoBdkePhrKbC (depth 3). Lead 12 stays reachable until lead 13 says hello, then idle.
+
+## Lead 13 log (session_015UkCGSS9FyGoBdkePhrKbC, depth 3)
+- ~15:53 arrived: check-in trig_01GHYjtfmTPvXLc6JVF3DSfx (hourly :50), lead 12's disabled; BM5, R2, D2, DA5, S, P, C, H, M1, M2, W, O4 told to report to lead 13; lead 12 told; said hello to the user. Waiting on BM5's 0.63.1 hash to publish to the preview.
