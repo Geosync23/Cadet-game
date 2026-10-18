@@ -201,7 +201,7 @@ body.dlgon .devhu{display:none}
 #fade{position:fixed;inset:0;background:#05080d;opacity:0;pointer-events:none;z-index:4}
 /* speech bubbles (section 8b's bubbleSay, 0.43.30): a soft card, a tail that points at the speaker, their name in a tag
    in their department's colour, a small pop on arrival. The card's own animation is cosmetic: the fade still comes from tick */
-.bubw{position:absolute;transform:translate(-50%,calc(-100% - 9px))}
+.bubw{position:absolute;left:0;top:0;will-change:transform;transform:translate(-50%,calc(-100% - 9px))}
 .bub{position:relative;width:max-content;min-width:110px;max-width:min(240px,72vw);padding:8px 12px 9px;border-radius:16px;
   background:linear-gradient(#fffdf8,#f3eee4);color:#1c2633;font-size:15px;line-height:1.35;border:1px solid rgba(255,255,255,.8);
   box-shadow:0 6px 16px rgba(4,10,18,.32),0 1px 3px rgba(4,10,18,.22);transform-origin:calc(50% + var(--tx,0px)) 100%;animation:bubIn .24s cubic-bezier(.3,1.45,.6,1) both}
@@ -252,7 +252,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.47.8
+   STARSHIP CADET: CSV Wren                           build 0.47.9
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7968,7 +7968,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.47.8';                           // keep in step with the header's build line
+const GAME_BUILD = '0.47.9';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -39291,12 +39291,19 @@ function devicePropRecolour() {                          // forget the built pro
 // replaces theirs. Plain DOM (no draw calls), placed each frame from the 3D position; hidden off screen, when zoomed far
 // out, or while bubbles.hidden (a dialogue panel). bubbleClear() removes them all. ----
 const BUBBLE_MAX = 2;
-const bubbles = { list: [], hidden: false, el: null, v: new THREE.Vector3(), on: [],
+// 0.47.9 (playtest: "bubbles shake or jump between two spots", on a phone): placed in place(), from the main loop just before the
+// frame is drawn, with the camera already moved for this frame (they were placed in crowd.update, before the camera followed you, so
+// each one lagged by however far the camera moved that frame, and on a phone's uneven frames that lag changed every frame); placed
+// with a fractional-pixel transform, not whole-pixel left/top; and two overlapping bubbles keep their order and their stacking until
+// they are clearly apart (pair, below). tick(dt) only counts their time down (crowd.update, while the ship runs)
+const bubbles = { list: [], hidden: false, el: null, v: new THREE.Vector3(), on: [], pair: null,
   tick(dt) {
-    if (!this.list.length) return;
-    const on = this.on; on.length = 0;
-    for (const b of this.list.slice()) {
-      b.t -= dt; if (b.t <= 0) { b.el.remove(); this.list.splice(this.list.indexOf(b), 1); continue; }
+    for (const b of this.list.slice()) { b.t -= dt; if (b.t <= 0) { b.el.remove(); this.list.splice(this.list.indexOf(b), 1); } }
+  },
+  place() {
+    if (!this.list.length) { this.pair = null; return; }
+    const on = this.on, now = performance.now(), ease = this.at ? Math.min(1, (now - this.at) / 1000 * 10) : 1; on.length = 0; this.at = now;
+    for (const b of this.list) {
       const w = b.who, p = w.pos || (w.obj && w.obj.position) || w, h = w.h || 1;
       const seat = w.pos && w.pos.y >= .3 ? w.pos.y : 0;   // seated: above the head on the seat; standing: above a standing head
       this.v.set(p.x, seat ? seat + 1.15 * h : (w.pos ? w.pos.y : w.obj ? w.obj.position.y : p.y || 0) + 2.0 * h, p.z).project(camera);
@@ -39304,22 +39311,32 @@ const bubbles = { list: [], hidden: false, el: null, v: new THREE.Vector3(), on:
       b.el.style.display = vis ? '' : 'none';
       if (!vis) continue;
       if (!b.w) { b.w = b.el.offsetWidth; b.hh = b.el.offsetHeight + (b.card.classList.contains('named') ? 10 : 0); }   // measured once (0.43.30), not every frame
-      const hw = b.w / 2 + 8; b.ax = (this.v.x + 1) / 2 * innerWidth; b.x = Math.min(innerWidth - hw, Math.max(hw, b.ax)); b.y = (1 - this.v.y) / 2 * innerHeight;
+      const hw = b.w / 2 + 8; b.ax = (this.v.x + 1) / 2 * innerWidth; b.x = Math.min(innerWidth - hw, Math.max(hw, b.ax)); b.y = b.ay = (1 - this.v.y) / 2 * innerHeight;
       on.push(b);
     }
     // 0.43.30: two bubbles that would cover each other move apart sideways, as far as their tails can still reach their
     // speakers, and if that isn't enough the older one sits higher
     if (on.length === 2) {
-      const [a, c] = on[0].ax <= on[1].ax ? on : [on[1], on[0]], top = b => b.y - 9 - b.hh;
+      // the same two as last frame keep their left-to-right order unless their speakers are clearly the other way round now,
+      // and once stacked they stay stacked until they'd be 12 px apart side by side (0.47.9: no flipping from frame to frame)
+      const P = this.pair && this.pair.l && on.includes(this.pair.l) && on.includes(this.pair.r) ? this.pair : null;
+      const keep = P && P.r.ax - P.l.ax > -24, [a, c] = keep ? [P.l, P.r] : on[0].ax <= on[1].ax ? on : [on[1], on[0]], top = b => b.y - 9 - b.hh;
       const overY = () => Math.min(a.y, c.y) - Math.max(top(a), top(c)) + 6, overX = () => a.x + a.w / 2 - (c.x - c.w / 2) + 6;
+      let stack = false;
       if (overY() > 0 && overX() > 0) {
         const fit = b => { const r = b.w / 2 - 18, hw = b.w / 2 + 8; b.x = Math.min(innerWidth - hw, Math.max(hw, Math.min(b.ax + r, Math.max(b.ax - r, b.x)))); };
         const d = overX() / 2; a.x -= d; c.x += d; fit(a); fit(c);
-        if (overX() > 0) { const old = on[0], other = on[1]; old.y = Math.min(old.y, top(other) - 6); }
-      }
+        stack = overX() > (keep && P.stack ? -12 : 0);
+      } else stack = !!(keep && P.stack && overX() > -12 && overY() > -12);
+      if (stack) { const old = on[0], other = on[1]; old.y = Math.min(old.y, top(other) - 6); }
+      this.pair = { l: a, r: c, stack };
+    } else this.pair = null;
+    for (const b of on) {                                // a change of layout (side by side, stacked) slides in over a few frames; the speaker is followed exactly
+      const ox = b.x - b.ax, oy = b.y - b.ay; b.ox = b.ox === undefined ? ox : b.ox + (ox - b.ox) * ease; b.oy = b.oy === undefined ? oy : b.oy + (oy - b.oy) * ease;
+      const hw = b.w / 2 + 8; b.x = Math.min(innerWidth - hw, Math.max(hw, b.ax + b.ox)); b.y = b.ay + b.oy;
     }
     for (const b of on) {
-      b.el.style.left = b.x.toFixed(0) + 'px'; b.el.style.top = b.y.toFixed(0) + 'px'; b.el.style.opacity = Math.min(1, b.t * 2, (b.life - b.t) * 4).toFixed(2);
+      b.el.style.transform = 'translate3d(' + b.x.toFixed(1) + 'px,' + b.y.toFixed(1) + 'px,0) translate(-50%,calc(-100% - 9px))'; b.el.style.opacity = Math.min(1, b.t * 2, (b.life - b.t) * 4).toFixed(2);
       const tx = Math.max(18 - b.w / 2, Math.min(b.w / 2 - 18, b.ax - b.x)).toFixed(0) + 'px';   // the tail still points at the speaker when the card is moved
       if (tx !== b.tx) { b.tx = tx; b.card.style.setProperty('--tx', tx); }
     }
@@ -40856,6 +40873,7 @@ function loop() {
   }
   const r = roomAt(...player.here()); if (r && r !== lastRoom) { lastRoom = r; roomEl.textContent = ROOMS[r].name; }
 
+  camera.updateMatrixWorld(); bubbles.place();           // 0.47.9: the speech bubbles, with this frame's camera (they shook on phones)
   renderer.render(scene, camera);
   requestAnimationFrame(loop);
 }
