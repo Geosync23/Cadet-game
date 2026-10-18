@@ -252,7 +252,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.42.62
+   STARSHIP CADET: CSV Wren                           build 0.42.63
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7922,7 +7922,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.42.62';                           // keep in step with the header's build line
+const GAME_BUILD = '0.42.63';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -12307,7 +12307,8 @@ function bagLockerTap(point) {                           // a tap in Bunk 1 with
 // the arrival dinner (0.28.28, the lead's polish row): you sit at the table instead of standing. playerSitNear(deck,
 // tile, title) sits you at the free public seat nearest that tile (within DINNER_NEAR m; false if none or you're
 // elsewhere); section 21 may call it. dinnerTick() does it once by itself: section 21's 'chief' step (your table in the
-// mess) while it's yours, or in its first DINNER_MINS after you reached it, when you stand idle within DINNER_NEAR of
+// mess, and the 'table' step before it, the dinner chat with Torres at the same table: onboarding 5, 0.42.63, the user's "I used to sit down")
+// while it's yours, or in its first DINNER_MINS after you reached it, when you stand idle within DINNER_NEAR of
 // its checkpoint: at section 21's introSeat('you') (3-mess-10, by Torres) when it names a free one, else the nearest.
 // Tap anywhere to get up, as with any seat.
 const DINNER_NEAR = 3, DINNER_MINS = 30;
@@ -12327,7 +12328,7 @@ function dinnerTick() {
   const m = Math.floor(shipNow()); if (m === DINNER_TRY) return; DINNER_TRY = m;   // once a ship minute: no searching every frame while no seat is free (reviewer 1)
   const I = SHIP.intro, st = typeof introStepById === 'function' ? introStepById('chief') : null, cp = st && st.checkpoint;
   if (!cp || deckDef.num !== cp.deck) return;
-  const done = (I.done || {}).chief, yours = I.step === 'chief' || done !== undefined && !(I.missed || []).includes('chief') && shipNow() - done < DINNER_MINS;
+  const done = (I.done || {}).chief, yours = I.step === 'table' || I.step === 'chief' || done !== undefined && !(I.missed || []).includes('chief') && shipNow() - done < DINNER_MINS;
   if (!yours) return;
   const c = cellPos(...cp.tile), p = player.obj.position; if (Math.hypot(p.x - c.x, p.z - c.z) > DINNER_NEAR) return;
   const mine = typeof introSeat === 'function' ? introSeat('you') : null, sp = mine && PLACE_OF.has(mine) && !heldBy(mine) ? placeSpot(mine) : null;
