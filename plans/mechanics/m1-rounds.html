@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rounds Spec</title>
+<style>
+:root{--ink:#e8eef0;--muted:#93a6ae;--teal:#4cc3b5;--gold:#e9c46a;--rose:#e58f7a;--glass:rgba(13,21,33,.78);--line:rgba(150,200,196,.22);--chip:rgba(76,195,181,.14)}
+*{box-sizing:border-box}
+html,body{margin:0;background:#121a27;color:var(--ink);font-family:"Avenir Next","Segoe UI",system-ui,sans-serif}
+body{background:radial-gradient(ellipse at 50% 20%,#22304a 0%,#141c2b 60%,#0c111b 100%) fixed;line-height:1.5}
+header{padding:18px 16px 4px;max-width:1100px;margin:0 auto}
+h1{font-size:21px;font-weight:600;margin:0}
+h2{font-size:17px;font-weight:600;margin:0 0 8px;color:#bdeee6}
+h3{font-size:14.5px;font-weight:600;margin:12px 0 4px;color:#d9eeea}
+.sub{font-size:13.5px;color:var(--muted);margin-top:4px}
+.draft{display:inline-block;font-size:11.5px;color:#14202a;background:var(--gold);border-radius:999px;padding:2px 9px;margin-left:6px;vertical-align:2px}
+nav{position:sticky;top:0;z-index:5;background:rgba(14,20,31,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+nav div{display:flex;gap:6px;overflow-x:auto;padding:8px 16px;max-width:1100px;margin:0 auto;-webkit-overflow-scrolling:touch}
+nav a{flex:none;text-decoration:none;border:1px solid var(--line);background:var(--glass);color:var(--ink);font-size:13px;padding:6px 11px;border-radius:999px}
+nav a:focus-visible,nav a:hover{border-color:var(--teal);color:#bdeee6;outline:none}
+main{max-width:1100px;margin:0 auto;padding:6px 16px 40px}
+section{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:14px 0;scroll-margin-top:56px}
+p{margin:6px 0;font-size:14px;color:#d6e0e3}
+ul{margin:6px 0;padding-left:20px;font-size:14px;color:#d6e0e3}
+li{margin:3px 0}
+.note{font-size:12.5px;color:var(--muted)}
+.grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.card{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.025)}
+.card b{display:block;color:#bdeee6;font-size:14px;margin-bottom:2px}
+.card span{font-size:13px;color:#cfd9dc}
+.card .meta{display:block;font-size:12px;color:var(--muted);margin-top:4px}
+.tag{display:inline-block;font-size:11.5px;border-radius:999px;padding:1px 8px;margin:2px 4px 0 0;background:var(--chip);color:#bdeee6;border:1px solid var(--line)}
+.tag.new{background:rgba(233,196,106,.16);color:#f1dca0}
+.tag.old{opacity:.75}
+.steps{list-style:none;padding:0;margin:8px 0;counter-reset:s}
+.steps li{position:relative;padding:8px 10px 8px 46px;border-left:2px solid rgba(76,195,181,.35);margin:0 0 0 14px}
+.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:-15px;top:8px;width:28px;height:28px;border-radius:50%;background:#183040;border:1px solid var(--teal);color:#bdeee6;font-size:12.5px;display:flex;align-items:center;justify-content:center}
+.steps time{display:block;font-size:12px;color:var(--gold)}
+.steps b{color:#e4f3f0;font-weight:600}
+.steps span{display:block;font-size:13.5px;color:#cfd9dc}
+.week{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.day{border:1px solid var(--line);border-radius:12px;padding:9px 10px;background:rgba(255,255,255,.02)}
+.day h4{margin:0 0 4px;font-size:13.5px;color:var(--gold);font-weight:600}
+.day p{font-size:12.5px;margin:4px 0;color:#cfd9dc}
+.day .who{color:#bdeee6;font-weight:600}
+.lines{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;background:#0b141c;border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:#9fe7dc;white-space:pre-wrap;overflow-x:auto;margin:8px 0}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0}
+.flow .box{border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:13px;background:rgba(255,255,255,.03)}
+.flow .arrow{color:var(--teal)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:12px}
+.tablewrap{overflow-x:auto}
+.waves{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+.wave{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.025)}
+.wave b{color:var(--gold);display:block}
+.wave .ci{display:block;margin-top:6px;font-size:12.5px;color:#f1dca0}
+ol.q{padding-left:22px;font-size:14px;color:#d6e0e3}
+ol.q li{margin:6px 0}
+ol.q em{color:var(--muted);font-style:normal;font-size:12.5px}
+svg text{font-family:inherit}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;color:#9fe7dc;background:rgba(0,0,0,.25);padding:0 4px;border-radius:4px;word-break:break-word}
+section.builder{border-color:rgba(233,196,106,.45)}
+section.builder h2{color:var(--gold)}
+.status{display:inline-block;font-size:11.5px;color:#14202a;background:var(--teal);border-radius:999px;padding:2px 9px;margin-left:6px;vertical-align:2px}
+td code{white-space:normal}
+</style>
+</head>
+<body>
+<header>
+  <h1>M1 · Rounds (Day 2, Torres) <span class="draft">spec for approval</span></h1>
+  <div class="sub">Your first new kind of work: walk a route of machines, look at each one, and mark what you see. A worn machine you spot becomes a quick job "found by you", cheap now instead of a repair later. Step 2, sub-block 24a. From the plan's Part 2, M1 (<code>plans/pillar5-plan.md</code> v9); shared parts on <code>foundation.html</code>.</div>
+</header>
+<nav><div><a href="#plain">In plain words</a><a href="#walk">Your first round</a><a href="#signs">What you see</a><a href="#grow">How it grows</a><a href="#crew">The crew</a><a href="#b">Builder</a><a href="#save">Save</a><a href="#tests">Tests</a><a href="#ranges">Builds and keys</a></div></nav>
+<main>
+
+<section id="plain">
+  <h2>In plain words</h2>
+  <ul>
+    <li><b>The verb:</b> walk a route of 4-6 machines and <b>look</b> at each one (stand by it a moment; your character looks it over). You see a sign: "clean and quiet", "a faint rattle", "warm to the touch", "a drip under the pump". Then you <b>mark</b> it: <b>fine</b>, <b>worn</b>, or <b>something's off</b>.</li>
+    <li><b>Why it matters:</b> a worn machine you mark gets a quick service job "found by you" (20 minutes, one part) instead of turning into a repair later. Something that's really going wrong gets its repair posted at once. That's prevention you can feel.</li>
+    <li><b>No wrong answers that hurt:</b> mark a worn machine "fine" and nothing happens; the crew find it later, as now. Mark a fine one "worn" and Torres says "Looks all right to me." You get better at reading the signs; the Chief's notes and Torres's lines help.</li>
+    <li><b>Where it lives:</b> a <b>round clipboard</b> (a Works datapad in your hand while you walk; the device shows the route). One round a morning, on the board as "Morning round, Deck 4".</li>
+  </ul>
+</section>
+
+<section id="walk">
+  <h2>Your first round (Day 2, Tuesday)</h2>
+  <ol class="steps">
+    <li><time>Morning</time><b>Calder's first solo job</b><span>Pillar 4's Day 2 stays as it is: your first job alone with Calder (07:45).</span></li>
+    <li><time>10:30, the Works tea corner</time><b>Torres finds you</b><span>"Fancy a walk? I'll show you my round." (A toast and the goal arrow; if you're busy, he waits for you at the Works bay until 11:30, then asks again after lunch.)</span></li>
+    <li><time>The first two stops</time><b>He looks, you watch</b><span>Deck 4's round: Torres stops at the first washer, looks it over and says what he sees ("Hear that? Bearing's going. Worn."), marks it. The same at the scrubber.</span></li>
+    <li><time>The rest</time><b>You look, he watches</b><span>He hands you the clipboard. You look at the next two or three and mark them; he says a word at each ("Good eye" or "Mm. Listen again").</span></li>
+    <li><time>After</time><b>Trained</b><span>Any worn machine you marked is on the board, found by you. "Trained: rounds, with Torres." From Day 3 there's a morning round on the board each workday, held for you until 11:00.</span></li>
+  </ol>
+  <p class="note">Day 2 also has your first laundry after shift (0.60.7) and Rina's health check (14:00), so rounds is the day's only new thing.</p>
+</section>
+
+<section id="signs">
+  <h2>What you see at each machine</h2>
+  <p>A sign is chosen from the machine's real condition and kind; the same machine in the same state gives the same sign that day. Examples (the Works writer writes the full set, a few per kind and state):</p>
+  <div class="tablewrap"><table>
+    <tr><th>State</th><th>Washer</th><th>Oven</th><th>Light relays</th><th>Air scrubber</th></tr>
+    <tr><td>healthy</td><td>"Drum turns clean and quiet."</td><td>"Even heat, door seal snug."</td><td>"Steady light."</td><td>"A low, even hum."</td></tr>
+    <tr><td>worn</td><td>"A faint rattle at the end of the spin."</td><td>"The door seal's a bit tired."</td><td>"A click now and then in the box."</td><td>"The hum's a touch higher than it should be."</td></tr>
+    <tr><td>faulty and worse</td><td>"Water pooling under it."</td><td>"Hot one side, cool the other."</td><td>"The lights stutter."</td><td>"It's labouring; the air's stale near it."</td></tr>
+  </table></div>
+  <p class="note">The marks you can give are the same three everywhere. A worn machine is the one rounds are for: "something's off" on a faulty one also counts as found by you.</p>
+</section>
+
+<section id="grow">
+  <h2>How it grows (only the first stage is on the main path)</h2>
+  <div class="grid">
+    <div class="card"><b>Stage 1 · A set route</b><span>Each morning the clipboard gives a route of 4-6 machines on one deck (the decks take turns: 4, 3, 5).</span><span class="meta"><span class="tag">Day 2</span></span></div>
+    <div class="card"><b>Stage 2 · Your own route</b><span>After 5 rounds you pick which machines to look at (5 of up to 9 on the deck). A well-picked round finds more; Torres notices ("You've got a nose for it").</span><span class="meta"><span class="tag">after 5 rounds</span><span class="tag new">optional</span></span></div>
+    <div class="card"><b>Stage 3 · From the doorway</b><span>With the scanner (Day 5), you can read a room's machines from its doorway on your round: one look covers the room.</span><span class="meta"><span class="tag">with the scanner</span><span class="tag new">optional</span></span></div>
+  </div>
+  <p class="note">As you rise: as an Officer you choose any route (any deck you can enter); as a Senior Officer you also set the juniors' routes (the plan's job-by-rank map; built with Step 5).</p>
+</section>
+
+<section id="crew">
+  <h2>The crew still do rounds</h2>
+  <p>Today's crew inspection round (the <code>round</code> chore, 3 stops) keeps running. If you don't take your morning round by 11:00, it goes back to being a crew round, and they find worn machines as today. Nothing waits on you.</p>
+</section>
+
+<section id="b" class="builder">
+  <h2>For the builder (seat M1, sub-block 24a)</h2>
+  <h3>Sections touched</h3>
+  <div class="tablewrap"><table>
+    <tr><th>Section</th><th>What</th><th>Owner</th></tr>
+    <tr><td>24a (new)</td><td><code>// 24a ROUNDS</code>: the route, the signs, the marks, the job kind, the ladder row's training</td><td>M1</td></tr>
+    <tr><td>17</td><td>nothing new: 24a registers its kind with <code>jobKindAdd</code> (foundation 17.5) and posts found-by-you jobs with a new <code>machineFound(id, by)</code> (S adds it: sets <code>found</code> now on the machine's waiting service job, or posts it, and sends <code>simNote('found')</code>)</td><td>S (one function)</td></tr>
+    <tr><td>15</td><td>the <code>look</code> step with <code>opts.marks</code> (foundation 15.1)</td><td>P</td></tr>
+    <tr><td>8b</td><td>nothing: the clipboard is the <code>datapad</code> prop (<code>HOLDS.datapad</code>), held while a round job is yours and not done</td><td>—</td></tr>
+    <tr><td>22 / content</td><td><code>content/works/signs.lines</code> (sign texts by kind and state), Torres's training lines (<code>train.m1</code>)</td><td>W</td></tr>
+  </table></div>
+  <h3>The job kind</h3>
+  <div class="lines">jobKindAdd('rounds', { tier: 1, junior: false, work: 0,
+  post: (h, jobs) =&gt; ...          // workdays at 07:00, once trained (SHIP.works.tr.m1): one round, held for you to 11:00
+  stops: j =&gt; j.route.map(id =&gt; ({ deck, placeId: panelPlaceId(id), mins: 2, tag: 'look', step: 'look',
+                                  opts: { marks: ['fine', 'worn', 'off'], sign: roundSign(id, day) } })),
+  stepDone: (j, k, { pick }) =&gt; roundMark(j, k, pick),
+  done: (j, t, by) =&gt; worksUse('m1'),
+  crew: { can: p =&gt; p.work === 'work:works', mins: 25 } })</div>
+  <ul>
+    <li><b>Route</b> (stage 1): <code>roundRoute(day)</code>: the deck by <code>day % 3</code> (4, 3, 5; the training round is always Deck 4; skipping a deck with fewer than 4 machines with panel places), then 4-6 of its machines at your tier with <code>panelPlace</code>, ordered by a walk from the lift, picked with <code>schedU(day, 0, 860)</code>. Stage 2: the player picks with a <code>choose</code> step at the first stop (up to 9 shown, 5 picked).</li>
+    <li><b>Signs:</b> <code>roundSign(id, day)</code> = a line from <code>signs.lines</code> for the machine's kind and <code>machineState</code> now, varied with <code>schedU(machSeed(id), day, 861)</code>.</li>
+    <li><b>Marks:</b> <code>roundMark</code>: <code>worn</code> on a worn machine, or <code>off</code> on a faulty-or-worse one → <code>machineFound(id, 'you')</code>, xp +1 (foundation 24.4), the log's found-by-you flag. Anything else: nothing posted; a mark of <code>worn</code>/<code>off</code> on a healthy machine gets the teacher's (or the clipboard's) "Looks all right" line. Never a penalty.</li>
+    <li><b>Held for you:</b> the round is held to 11:00 (<code>j.until</code>); then released to the crew (as <code>CHORES.round</code> does today). It never counts against <code>HOLD_MAX</code>.</li>
+    <li><b>Training</b> (ladder row <code>m1</code>, foundation 24.2): Day 2, the ask at 10:35 (after the 10:30 tea); the teacher's round is the same kind with <code>j.train = 'm1'</code>, stops 1-2 done by Torres (<code>worksEscort</code> lead, he stands at the panel, his line plays), stops 3+ yours (<code>follow</code>).</li>
+    <li><b>Stage 3:</b> once <code>hasTool('scanner')</code>, a stop's place may be the room's doorway (<code>roomDoorPlace</code>, or the nearest walkable tile inside the door) covering every machine in that room (one look, one mark each).</li>
+  </ul>
+</section>
+
+<section id="save" class="builder">
+  <h2>Save</h2>
+  <ul>
+    <li>The round is an ordinary job in <code>ship.jobs</code>, with <code>j.route</code> (machine ids) and <code>j.marks</code> (<code>{ id: 'fine'|'worn'|'off' }</code>).</li>
+    <li>In <code>ship.works</code>: <code>use.m1</code>, <code>tr.m1</code> (foundation). Nothing else.</li>
+  </ul>
+</section>
+
+<section id="tests" class="builder">
+  <h2>Tests</h2>
+  <ul>
+    <li><b><code>mech_check</code></b> (C's frame, the 24a part): a round posts service jobs for the worn machines you mark and nothing for healthy ones; found-by-you counted (xp, log); a round you don't take goes to the crew at 11:00 and they finish it; stage 2 opens after 5; the route and signs the same twice.</li>
+    <li><b><code>career_check</code></b>: training on Day 2 with Torres for the steady player; asked again if missed.</li>
+    <li><b><code>machine_check</code></b>: ship health unchanged (±1) with and without rounds over 14 days; the crew round still runs.</li>
+    <li><b><code>intro_check</code></b>: Day 2's Pillar 4 beats unchanged (the solo job, the health check, the laundry).</li>
+  </ul>
+</section>
+
+<section id="ranges" class="builder">
+  <h2>Builds and keys</h2>
+  <ul>
+    <li>Seat <b>M1</b>, branch <code>claude/mech-rounds</code>, builds <b>0.45.x</b> (free, checked 2026-10-18).</li>
+    <li>Hash keys <b>860-861</b> (route, sign variety).</li>
+    <li>Merge after 24 core and 17.5 (<code>jobKindAdd</code>), and after <code>machineFound</code> in 17.</li>
+  </ul>
+</section>
+
+</main>
+</body>
+</html>
