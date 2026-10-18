@@ -252,7 +252,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.82.2
+   STARSHIP CADET: CSV Wren                           build 0.82.3
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8547,7 +8547,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.82.2';                           // keep in step with the header's build line
+const GAME_BUILD = '0.82.3';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -37126,6 +37126,9 @@ function discViewOn() {
   for (let i = 0; i < 3; i++) { const f = new THREE.Sprite(new THREE.SpriteMaterial({ map: glow, color: col('#ffffff'), ...addB, toneMapped: false })); f.visible = false; f.scale.set(1.4, 1.1, 1); V.grp.add(f); V.flashes.push({ s: f, t: 1 }); }
   for (const o of V.grp.children) o.userData.noShadow = true;
   scene.add(V.grp);
+  V.pose = [0, 1].map(() => ({ lx: 0, ph: 0, side: 1, swing: 0, pump: 0 }));
+  const who = ROSTER.find(x => x.id === DISC.opp);
+  if (who) { V.opp = new FullPerson(rosterSpec(who), who.id); V.opp.rig.root.traverse(o => { if (o.isMesh) o.castShadow = true; }); }
   V.cam = DISC.cam = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, .3, 120);
   V.azWas = azT; azT = Math.PI / 2;                       // the cutaway drops the walls between the bow and you
   // the overlay
@@ -37166,8 +37169,9 @@ function discViewOff(keep) {   // keep: a new game follows at once (Again): the 
   for (const t of V.tex) t.dispose();
   V.root.remove(); document.body.classList.remove('ld-on'); removeEventListener('keydown', V.kd, true); removeEventListener('keyup', V.ku, true); removeEventListener('resize', V.resize);
   azT = V.azWas; DISC.view = null; DISC.cam = null;
-  const a = DISC.agent, sp = placeSpot('7-disc-2');      // they stand back on their baseline; you on yours
-  if (a && sp) { a.x = sp.x; a.z = sp.z; a.face = Math.PI / 2; a.h.set({ x: a.x, y: 0, z: a.z }, a.face, 'stand'); }
+  if (V.opp) V.opp.dispose();
+  const a = DISC.agent, sp = placeSpot('7-disc-2');      // they stand back on their baseline (their own body again); you on yours
+  if (a && sp) { a.x = sp.x; a.z = sp.z; a.face = Math.PI / 2; a.h.set({ x: a.x, y: 0, z: a.z }, a.face, 'stand'); if (a.h.full) a.h.rig.root.visible = true; else crowd.update(0, 0); }
   const ys = placeSpot('7-disc-1'); if (ys) { player.obj.position.set(ys.x, 0, ys.z); player.face = -Math.PI / 2; }
   if (!keep) discBoard(true);
 }
@@ -37226,6 +37230,34 @@ function discResult() {
   btn('Again', () => discEnd('full'), true); btn('Quick game', () => discEnd('quick')); btn('Done', () => discEnd(false));
   V.res.classList.remove('hide'); V.how.classList.add('hide'); V.leave.classList.add('hide');
 }
+// the players' moves (plan v5 section 8, "disc ready / side-step / return"), posed straight onto a full rig each frame:
+// a low ready stance, quick side steps when moving across, a forehand or backhand throw on each return (right-handed:
+// a disc on your left is a backhand), a fist pump on a point. a: { lx: speed toward the figure's own left (+x), side:
+// where the disc is (+1 its left), swing 0..1 (1 at the return), pump 0..1, ph: the step phase }. Nothing here calls R().
+function discPose(rig, a, T) {
+  const TAU = Math.PI * 2, w = Math.min(1, Math.abs(a.lx) / 3), crouch = .1 + .02 * Math.sin(T * 3.1);
+  const hipY = HIP_Y - crouch + Math.abs(Math.sin(a.ph * Math.PI)) * .03 * w;
+  rig.hips.position.set(Math.sin(a.ph * Math.PI) * .03 * w * Math.sign(a.lx || 1), hipY, 0);
+  rig.hips.rotation.set(0, 0, 0);
+  for (let i = 0; i < rig.legs.length; i++) {
+    const leg = rig.legs[i], lead = Math.sign(a.lx || 1) === leg.side;   // the leg on the side you're stepping toward leads
+    const st = Math.sin(a.ph * TAU + (lead ? 0 : Math.PI)), lift = Math.max(0, st) * .08 * w;
+    const ang = legIK(leg, ANK + lift - (hipY - HIP_OFF), .02);
+    leg.thigh.rotation.z = leg.side * (.13 + .12 * w * (lead ? Math.max(0, st) : .3)); leg.ankle.rotation.x = -ang;
+  }
+  rig.torso.rotation.set(.18, 0, -.06 * w * Math.sign(a.lx));
+  const sw = a.swing, back = a.side > 0;                 // the throwing arm is the right (side -1)
+  rig.chest.rotation.set(0, (back ? .55 : -.55) * sw, 0); rig.head.rotation.set(-.12, (back ? -.4 : .4) * sw, 0);
+  for (const arm of rig.arms) {
+    let sx = -.55, ex = -1.15, sz = .28;                 // ready: both hands up in front
+    if (arm.side < 0 && sw > 0) {
+      if (back) { sx = L(-.55, -1.35, sw); ex = L(-1.15, -.25, sw); sz = L(.28, -.75, sw); }   // backhand: across the body and out
+      else { sx = L(-.55, -1.55, sw); ex = L(-1.15, -.2, sw); sz = L(.28, .55, sw); }          // forehand: a long reach forward
+    }
+    if (a.pump > 0 && arm.side < 0) { const k = Math.min(1, a.pump * 3); sx = L(sx, -2.75 + .35 * Math.sin(T * 16), k); ex = L(ex, -1.35, k); sz = L(sz, .15, k); }
+    arm.sh.rotation.set(sx, 0, arm.side * sz); arm.el.rotation.x = ex; arm.hand.rotation.x = 0;
+  }
+}
 // once a frame from the main loop (frozen or not): the game's fixed steps on real time, then the scene
 function discFrame() {
   const V = DISC.view, G = DISC.g; if (!V || !G) return;
@@ -37242,14 +37274,20 @@ function discFrame() {
     }
     if (n === 6) DISC.acc = 0;
   }
-  // the people: you and your opponent where the game has you
-  const P = (p, i) => {
-    const w = ldWorld(p.x, p.z), face = i ? Math.PI / 2 : -Math.PI / 2, moving = Math.abs(p.vx) > .5;
-    if (i === 0) { player.obj.position.set(w.x, 0, w.z); player.face = face; player.obj.rotation.y = face; }
-    else { const a = DISC.agent; if (a && DECK_CREW.includes(a)) { a.x = w.x; a.z = w.z; a.face = face; a.h.set({ x: w.x, y: 0, z: w.z }, face, moving ? 'walk' : 'stand', T * 6 % 1); if (a.h.full) a.h.update(rdt, T); } }
-  };
-  G.p.forEach(P);
-  if (DISC.agent && !DISC.agent.h.full) crowd.update(rdt, T);
+  // the people: you and your opponent where the game has you, animated (discPose) on full rigs
+  G.p.forEach((p, i) => {
+    const w = ldWorld(p.x, p.z), face = i ? Math.PI / 2 : -Math.PI / 2, lx = i ? p.vx : -p.vx, dx = i ? G.d.x - p.x : p.x - G.d.x, A = V.pose[i];
+    A.lx += (lx - A.lx) * Math.min(1, rdt * 12); A.ph += Math.abs(A.lx) * rdt * 1.6; A.swing = p.swing; A.pump = Math.max(0, A.pump - rdt);
+    if (p.swing > .95) A.side = Math.sign(dx) || 1;      // which side the disc was on as it came: forehand or backhand
+    const body = i ? V.opp : ACT && ACT.kind === 'disc' && ACT.body;   // you: the activity's stand-in (section 15 hides player.obj while you're at one)
+    if (!i) { player.obj.position.set(w.x, 0, w.z); player.face = face; if (ACT && ACT.kind === 'disc') { ACT.x = w.x; ACT.z = w.z; ACT.face = face; } }
+    const rig = body ? body.rig : !i && player.rig, root = body ? body.rig.root : player.obj;
+    if (!rig) return;
+    root.position.set(w.x, 0, w.z); root.rotation.y = face;
+    discPose(rig, A, T);
+  });
+  const a = DISC.agent;                                  // their own (crowd or full) body stays out of sight while the game's rig plays
+  if (a && DECK_CREW.includes(a)) { if (a.h.full) a.h.rig.root.visible = false; else { a.h.set({ x: a.x, y: -40, z: a.z }, a.face, 'stand'); crowd.update(rdt, T); } }
   // the disc, its ring and trail
   const d = G.d, w = ldWorld(d.x, d.z), live = G.phase === 'live' || G.phase === 'serve', dc = d.charged ? '#ffffff' : d.owner === 0 ? '#50e6ff' : '#ffa03c';
   V.disc.visible = V.ring.visible = G.phase !== 'over';
@@ -37298,7 +37336,7 @@ function discEvent(e) {
     f.s.visible = true; f.t = 0; f.s.position.set(q.x, .7, q.z); f.s.material.color.copy(col(e.k === 'net' ? '#e8f4ff' : e.z > 0 ? '#50e6ff' : '#ffa03c'));
   }
   if (e.k === 'point') {
-    discBoard();
+    discBoard(); V.pose[e.w].pump = 1.2;                 // a fist pump
     V.call.textContent = G.over ? (e.w === 0 ? 'Game: You' : 'Game: ' + DISC.short) : 'Point: ' + (e.w === 0 ? 'You' : DISC.short);
     V.call.style.color = e.w === 0 ? '#50e6ff' : '#ffa03c'; V.call.classList.remove('hide'); V.callT = 1.1;
     if (e.w === 1) { if (G.over) discTalk('win'); else if (V.chat() < .45) discTalk('point'); }
