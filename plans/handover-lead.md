@@ -551,3 +551,4 @@ Read: CLAUDE.md, TEAM.md (session chain rule + overnight exception), plans/brief
 - ~11:28 M1 8a6cea8 (0.45.0 rounds + drill/inspection; mech_check OK, cadet_test identical, intro parts 0-9,11 OK). Next 0.45.1 hauling. Step 2.
 - ~11:28 R ~60% → started R2 session_01DZoxp9pxhp63Wye1Kr2MsZ (claude/reviews-p5-step2) for all Step 2; R keeps Step 1. Told BM4, M1, M2, P (P asked to send 0.28.73).
 - ~11:31 C join fully green: claude/p5-join fa418d2 (S 78bf1c2 + P cfce34e + C 2865a21 0.44.12 + H 5a4d362; career/mech/machine/puzzle OK, cadet_test identical). BM4 to build 0.63.0 from it + A + W once R passes S/C.
+- ~11:37 M1 7285601 (0.45.1 hauling; mech_check OK, cadet_test identical, day 3 OK peak 270 calls). Next m2 uniform.
