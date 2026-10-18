@@ -193,7 +193,7 @@
 - Turned in. A job done well nudges your reputation up.
 - Have a look. Device, then Record. It's under Reputation.
 - That's how you rank up. Better jobs. Trickier ones.   #warm
-- Lunch, then you lead the next one. I'll just follow.   #warm
+- Next one's yours to lead. I'll just follow.   #warm
 
 // ---- Writer 2: job 2 (Day 1 afternoon: you lead, he follows) and job 3 (Tuesday: Calder's solo job).
 // Gated by flag:walk.job2.<step> and flag:walk.job3.<step>, which the onboarding hook sets. 60 characters or fewer.
@@ -705,11 +705,11 @@
 ? flag:walk.follow.5
 - Forget to clock out and it does it at five. It's kind.   #funny
 ? flag:walk.follow.6
-- Lunch is in the mess. Brennan notices if you skip it.
+- Dinner's from five, in the mess. Brennan notices skippers.   #funny
 ? flag:walk.follow.7
 - Keep an eye on your needs. Eat, sleep, wash. Have fun.
 ? flag:walk.follow.8
-- Run yourself down and you work slower. Ask me how I know.   #funny
+- Run yourself down and you work slower. Trust me.   #funny
 ? flag:walk.follow.9
 - Weekends are yours. Saturday and Sunday. No board.
 ? flag:walk.follow.10
@@ -735,7 +735,7 @@
 ? flag:walk.follow.20
 - Always something on in the evening. Check your Calendar.
 ? flag:walk.follow.21
-- Tonight there's the beam. You'll see. Don't run off at five.   #warm
+- After your first shift there's the beam. You'll see.   #warm
 ? flag:walk.follow.22
 - Tuesday's Tiles or my knitting circle. No pressure. Knit.   #funny
 ? flag:walk.follow.23
@@ -751,4 +751,4 @@
 ? flag:walk.follow.28
 - You're quicker than I was. Don't let it go to your head.   #funny
 ? flag:walk.follow.29
-- Nearly home time. You've done well today.   #warm
+- You're doing well, you know. Really well.   #warm
