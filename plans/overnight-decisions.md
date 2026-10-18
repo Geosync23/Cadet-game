@@ -149,3 +149,12 @@ All 8 packages approved (Zeke: "all good except he still walks and talks" → he
 | Works jobs before the invite | None in the bridge room until you're invited (the board doesn't offer them to you) |
 | When the invite comes | After a big moment, e.g. helping in the first ship-wide event; the Captain or Commander Vance invites you up; bridge hour (monthly) opens with it |
 | (lead call) Which build | Step 3 (0.63.3), not 0.63.2 (its final run is near); the invitation beat itself is written with the story work, with a placeholder trigger until then |
+
+## The user, 2026-10-18 ~19:20 (ship health and job turn-in)
+| Question | The user's answer |
+|---|---|
+| Bridge rules timing | Agreed: Step 3 (0.63.3) |
+| Ship health at the start | Starts a little lower, so you can see your impact (replaces "reads healthy on Days 0 and 1, mostly green", design-doc ~line 251) |
+| What a job helps | Each job helps ONE ship meter (or very few), not many |
+| Turning a job in | You see your rep go up AND the points added to the ship meter(s) it helped |
+| (lead call) Numbers | Day 0 overall ship health about 75 (was about 90): a mix of fair/worn systems with some green, none failing; one job adds a visible step (a few points) to its one system meter. Tunable after the user plays. Step 3 (0.63.3), systems seat (S successor) + C2 (turn-in) + U (the panel's +points). design-doc §ship health updated with it |
