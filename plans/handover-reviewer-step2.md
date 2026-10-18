@@ -1,8 +1,10 @@
+# Handover: reviewer R2 (stopped at ~70% memory, ~18:05 UTC)
+
 # Handover: reviewer R2 (Pillar 5 Step 2, then playtest update 1 = 0.63.2)
 
 - **Role:** reviewer. session_01DZoxp9pxhp63Wye1Kr2MsZ, branch `claude/reviews-p5-step2` (push only there). All verdicts are in `plans/reviews-p5-step2.md`, newest first. The "Passing tips" list at the top is the live state; "Failing / waiting on a fix" lists what's open.
 - **Lead:** lead 13, session_015UkCGSS9FyGoBdkePhrKbC (took over from lead 12 at ~15:52). Lead 13's rule: send the lead **only FAILs, design calls, and a one-line summary when a seat's whole package is through**. PASS verdicts go to the seat and BM5 only.
-- **Build master:** BM5, session_01DbBJ7iK6TrrADyEw7qbCsQ (claude/p5-cand-s2 for 0.63.1, claude/p5-cand-pt1 for 0.63.2). BM4 is inactive.
+- **Build master:** BM5, session_01DbBJ7iK6TrrADyEw7qbCsQ (claude/p5-cand-s2 for 0.63.1, claude/p5-cand-pt1 for 0.63.2). **BM5's session was inactive at ~18:05**: the P 587a2cd PASS didn't reach it, so ask lead 13 who builds 0.63.2 now and send them the tips list. BM4 is inactive.
 - **Never** contact the user, start sessions, or push outside the branch.
 
 ## The job now: playtest update 1 (0.63.2)
@@ -17,7 +19,7 @@ Spec: `plans/brief-playtest1.md` on claude/lead-pillar1 (12b1b87); the user's an
 | O4 onboarding | session_01MeEsh5sp4RyuD7KwdQEbLC | claude/arrival-0607b (→ onboard-pt1) | 7a2bc5d (0.42.48) PASS. Zeke's tea explanation and walk may still come (with X's tea and P's tea activity); O5 builds the Day 1 arrows and the call-home tip |
 | T traditions | session_01X4SZJFeHprDF21NZqU5fGi | claude/traditions-pt1 | 1e254bd (0.70.0) **read, verdict not written**: waiting on 0.70.1 (T said a hash follows; SHIP.traces nameNew entries). Points to raise: Sunday dinner's extra tables going away afterwards (brief item; not in 0.70.0); Tomas/Rina as hosts change plans, so want day_check on a Sunday and a Mon/Wed/Fri; cadet_test differs only via the lap's content move (T: with 3 content lines reverted, ALL IDENTICAL); U calls `tradGoal(x)`, which T doesn't define (harmless). W's join texts say Lap of the Wren on Sundays: T has `weekday: 6` at 20:30 ✓ |
 | A5 deck architect | session_01CHRbUTZc18m7eBck8eWhXj | claude/deck-pt1 | 1b41751 (0.47.4-0.47.7) **FAIL, item 1**: the beam's name planes are 3 mm apart (canvas .126, nameNew .129, nameYours .132). Fix sent: nameNew .132, nameYours .138. Re-check on the fix (read the two lines; deck_check) |
-| P player | session_0153WUGRakJnNzUCNNHf1E8X | claude/player-p5 | not sent yet for 0.63.2 (toilet hygiene + wash hands, talk while eating with one meter, low-need arrow, pass-through after 2 s, take() tracks the job and clears an older IX_GOAL, tea and biscuits activity) |
+| P player | session_0153WUGRakJnNzUCNNHf1E8X | claude/player-p5 | **package through**: 587a2cd (0.28.74) PASS |
 
 ## How I test
 - Setup in a fresh container: `pip install playwright`; `mkdir -p /tmp/cadet-work/three && cd /tmp/cadet-work/three && npm pack three@0.128.0 && tar xzf three-0.128.0.tgz`; then `export CADET_WORK=/tmp/cadet-work CADET_CHROME=/opt/pw-browsers/chromium`.
