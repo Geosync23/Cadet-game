@@ -35127,18 +35127,20 @@ const roundRight = (pick, st) => st !== 'healthy' && (pick === 'off' || pick ===
 // a machine's job found now: section 17's machineFound(id, by) -> { id, fresh } | null (fresh: it wasn't on the board
 // before, so it's found by `by`: j.foundBy and simNote('found')). Nothing without it
 const roundFound = (id, by) => typeof machineFound === 'function' ? machineFound(id, by) : null;
-// your mark at stop k: found by you on a right mark, a word from the teacher on a training round
+// your mark at stop k: found by you on a right mark, a word from the teacher on a training round. Returns the words
+// for after the step (section 15 shows a kind's stepDone text before "Done here", 0.28.73), or null
 function roundMark(j, k, pick) {
-  const id = (j.route || [])[k]; if (!id || !ROUND_MARKS.some(x => x[0] === pick)) return false;
+  const id = (j.route || [])[k]; if (!id || !ROUND_MARKS.some(x => x[0] === pick)) return null;
   const st = roundState(id), right = roundRight(pick, st), first = !(j.marks && j.marks[id]);
   (j.marks = j.marks || {})[id] = pick;
   const f = right && first ? roundFound(id, 'you') : null;
-  if (f && f.fresh) { worksXp(1); try { toast('Round', roundText('round.found', 'Found by you: {machine}.', { machine: machineLabel(machineById(id)).split(',')[0] })); } catch (e) { /* no UI */ } }
+  let said = null;
+  if (f && f.fresh) { worksXp(1); said = roundText('round.found', 'Found by you: {machine}.', { machine: machineLabel(machineById(id)).split(',')[0] }); }
   const c = SHIP.works && SHIP.works.cur, by = j.train && c && c.id === j.train ? c.by : null;
   const say = right ? ['mark.right', 'Good eye.'] : st === 'healthy' && pick !== 'fine' ? ['mark.okay', 'Looks all right to me. Better safe, though.'] : st !== 'healthy' && pick === 'fine' ? ['mark.wrong', 'Mm. Listen again.'] : null;
   if (say && by) worksTeach('m1', by, say[0], say[1]);
-  else if (say && st === 'healthy' && pick !== 'fine') { try { toast('Round', roundText('round.okay', 'Looks all right to me.')); } catch (e) { /* no UI */ } }
-  return true;
+  else if (say && st === 'healthy' && pick !== 'fine') said = roundText('round.okay', 'Looks all right to me.');
+  return said;
 }
 // a round finished: someone else's (the teacher's, the crew's) finds what's worn on it; yours counts as a use
 function roundDone(j, t, by) {
@@ -35156,7 +35158,7 @@ function roundJob(day, at, o = {}) {
   j.posted = j.found = t;
   return j;
 }
-if (typeof jobKindAdd === 'function') jobKindAdd('rounds', { tier: 1, junior: false, work: 0,
+if (typeof jobKindAdd === 'function') jobKindAdd('rounds', { tier: 1, junior: false, work: 0, hold: 'datapad',   // the round clipboard in your hand (15b's ixHold, 0.28.73)
   post(h, jobs) {                                        // workdays at 07:00 once trained (not the day you're trained): one round, held for you to 11:00
     const d = Math.floor(h / 24) + 1, W = SHIP.works;
     if ((h % 24 + 24) % 24 !== ROUND_AT / 60 || !W || W.tr.m1 === undefined || W.tr.m1 >= d || !playerShiftOn(d)) return;
@@ -35164,7 +35166,7 @@ if (typeof jobKindAdd === 'function') jobKindAdd('rounds', { tier: 1, junior: fa
     const j = roundJob(d, ROUND_AT); if (j) jobs.push(j);
   },
   stops: j => (j.route || []).map(id => { const m = machineById(id); return { deck: m.deck, placeId: panelPlace(id), mins: ROUND_LOOK, tag: 'look', how: 'look',
-    opts: { secs: 4, text: roundSign(id, worksDay(shipNow())), ask: roundSign(id, worksDay(shipNow())) + ' ' + roundText('round.ask', 'How does it look?'), marks: ROUND_MARKS.map(([x, label]) => ({ id: x, label: roundText('round.mark.' + x, label) })) } }; }),
+    opts: { secs: 4, text: roundSign(id, worksDay(shipNow())), marks: ROUND_MARKS.map(([x, label]) => ({ id: x, label: roundText('round.mark.' + x, label) })) } }; }),
   stepDone: (j, k, res) => roundMark(j, k, res && res.pick),
   done: roundDone,
   crew: { can: p => !!p.work && p.work.place === 'work:works', mins: 25 } });
