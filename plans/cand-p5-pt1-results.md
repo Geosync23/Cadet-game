@@ -14,3 +14,4 @@ Build master 5 (BM5, session_01DbBJ7iK6TrrADyEw7qbCsQ) on claude/p5-cand-pt1; re
 - ~18:35 O5 final tip e4fe793 (contains C2 a5d5c4c; with R3). R3 PASS C2 bb4423c. Lead 13: U's late 'Watch a film' hobby (claude/hud-pt1) goes IN 0.63.2: the final full run waits for it (R3-passed). trial p2: interactions, day1 OK; join_check FAIL 'the lap didn't go all the way round' (n 7 of 10, ended 21:15): placing it on part-t (passed tips + O5 e4fe793 + T 807c071, X 2223cb7).
 - ~18:36 lead 13: DA5's fix for flickering speech bubbles (the user's report) also goes in 0.63.2; the final run waits for it.
 - ~18:37 also to wait for: W 97fa9ae (film hobby lines, text; R3), O5's Day 0 auto-sit at the Chief's table fix (regression the user saw on 0.63.1).
+- join_check placed: part-t (passed tips + O5 e4fe793 + T 807c071 with X 2223cb7) JOIN CHECK OK; part-tx (same with X WIP ec5642e) FAIL, same lap at 21:15: X's WIP 0.71.1 with T. Sent to X (cc T). trial p2: device, day2, clothes OK.
