@@ -48,3 +48,7 @@ The user played the Pillar 5 preview and sent 33 notes. The plan (8 packages) an
 | U HUD | session_01FcMPTX7mMTHkyr4pxDfNcS | claude/hud-pt1 | 0.72.x |
 | C2 works career | session_014yREkgPvuwMyxBtoqB1P14 | claude/works-career | 0.44.x |
 | O5 onboarding 2 (Day 1 arrows + tea walk; O4 keeps pacing/greeting/cabin, pushes to claude/arrival-0607b) | session_014y2M5qmkjuLdHK6K1JsqKD | claude/onboard-pt1 | 0.42.x after O4 |
+
+## Added by the user ~17:00
+- **Call home tip, first night (O5 + W):** Day 0, after meeting the chief: a tip to call home with a "Track it" option; once you reach the booth the tracker goes away and the default goes back to pointing at your bed.
+- **Lap of the Wren (T):** Sunday 20:30, but not on the Sunday you arrive (Day 0); the first is Day 7.
