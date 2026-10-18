@@ -252,7 +252,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.80.2
+   STARSHIP CADET: CSV Wren                           build 0.80.3
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8042,6 +8042,76 @@ Object.assign(WALL_KIT, {
     box(4.4, 2.04, .08, RK.black, 0, 3.25, .04, g);
   },
 });
+// water (0.80.3, plan section 10): one small shader for the pool and the rivers. Slow moving caustics over two colours,
+// and on the rivers white foam streaming along the flow. No texture and no R(); colours through col() as uniforms; its
+// clock only ticks while it's drawn (onBeforeRender), so water off-screen costs nothing
+function recWater(deep, shallow, o = {}) {
+  const U = { uT: { value: 0 }, uDeep: { value: col(deep) }, uShallow: { value: col(shallow) }, uFoam: { value: o.foam || 0 }, uFlow: { value: o.flow || 0 }, uA: { value: o.alpha || .84 } };
+  const m = new THREE.ShaderMaterial({ uniforms: U, transparent: true, depthWrite: false,
+    vertexShader: 'varying vec3 vW; varying vec2 vUv; void main() { vec4 w = modelMatrix * vec4(position, 1.0); vW = w.xyz; vUv = uv; gl_Position = projectionMatrix * viewMatrix * w; }',
+    fragmentShader: `uniform float uT, uFoam, uFlow, uA; uniform vec3 uDeep, uShallow; varying vec3 vW; varying vec2 vUv;
+      void main() {
+        vec2 p = vW.xz * 1.6; p.x -= uT * uFlow;
+        float a = sin(p.x * 1.3 + uT * .8 + sin(p.y * 1.1 + uT * .5)) + sin(p.y * 1.7 - uT * .6 + sin(p.x * .9 - uT * .4));
+        float b = sin(p.x * 2.3 - p.y * 1.4 + uT * 1.1) * .5;
+        float caus = smoothstep(.35, 0.0, abs(a + b));                       // thin bright lines where the waves cross
+        vec3 c = mix(uDeep, uShallow, .5 + .25 * a) + caus * .28;
+        if (uFoam > 0.0) {                                                   // the white water: streaks running with the flow
+          float f = sin(p.x * 3.1 + sin(p.y * 4.3) * 1.5) * sin(p.y * 6.7 + p.x * .7) + sin(p.x * 5.3 - p.y * 2.1);
+          c = mix(c, vec3(.95, .98, 1.0), clamp(uFoam * smoothstep(.6, 1.6, f), 0.0, .85));
+        }
+        gl_FragColor = vec4(c, uA);
+        #include <tonemapping_fragment>
+        #include <encodings_fragment>
+      }` });
+  m.userData.U = U; return m;
+}
+const recWaterMesh = (geo, m) => { const w = new THREE.Mesh(geo, m); w.userData.noMerge = w.userData.noShadow = true; w.receiveShadow = false; w.castShadow = false; w.raycast = () => {};
+  w.onBeforeRender = () => { m.userData.U.uT.value = performance.now() / 1000; }; return w; };
+// the Wren in mosaic for the pool floor: a canvas drawn once per visit from fixed shapes (no R())
+function recMosaic() {
+  return tex(512, 320, (c, w, h) => {
+    c.fillStyle = '#8fd3d6'; c.fillRect(0, 0, w, h);
+    for (let y = 0; y < h; y += 16) for (let x = 0; x < w; x += 16) { const t = Math.round((recHash(x, y, 5) - .5) * 14); c.fillStyle = `rgb(${150 + t},${214 + t},${216 + t})`; c.fillRect(x + 1, y + 1, 14, 14); }
+    const tileFill = (pts, colr) => { c.save(); c.beginPath(); pts.forEach(([x, y], k) => k ? c.lineTo(x, y) : c.moveTo(x, y)); c.closePath(); c.clip();
+      for (let y = 0; y < h; y += 16) for (let x = 0; x < w; x += 16) { c.fillStyle = colr; c.fillRect(x + 1, y + 1, 14, 14); } c.restore(); };
+    tileFill([[90, 120], [330, 104], [420, 140], [440, 160], [420, 180], [330, 216], [90, 200], [70, 160]], '#24507a');   // the hull, bow to the right
+    tileFill([[110, 104], [180, 70], [210, 104]], '#24507a'); tileFill([[110, 216], [180, 250], [210, 216]], '#24507a');   // the nacelles' fins
+    tileFill([[330, 136], [400, 148], [400, 172], [330, 184]], '#e9c46a');                                                  // the bridge's glow
+    tileFill([[60, 140], [76, 140], [76, 180], [60, 180]], '#ff9a3c');                                                      // the drive
+  });
+}
+Object.assign(KIT, {
+  // the pool (0.80.3, R4): raised, so nothing is cut out of the deck. A tiled rim 0.42 high round a basin floor with the
+  // Wren mosaic, water just under the rim, three lanes with orange-and-white ropes, and steps down at the shallow end.
+  // Room-local, the basin runs x 1.2-7.6 and z 0.5-4.5
+  recPool(g) {
+    const x0 = 1.2, x1 = 7.6, z0 = .5, z1 = 4.5, H = .42, t = .22, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, L = x1 - x0, Wd = z1 - z0;
+    for (const z of [z0 + t / 2, z1 - t / 2]) box(L, H, t, RK.rim, cx, H / 2, z, g);
+    for (const x of [x0 + t / 2, x1 - t / 2]) box(t, H, Wd - 2 * t, RK.rim, x, H / 2, cz, g);
+    for (const z of [z0 - .02, z1 + .02]) box(L + .08, .05, .1, RK.coping, cx, H + .025, z + (z < cz ? .05 : -.05), g);   // the coping round the top
+    for (const x of [x0 - .02, x1 + .02]) box(.1, .05, Wd, RK.coping, x + (x < cx ? .05 : -.05), H + .025, cz, g);
+    const floor = new THREE.Mesh(new THREE.BoxGeometry(L - 2 * t, .03, Wd - 2 * t), [RK.poolSide, RK.poolSide, RK.mosaic, RK.poolSide, RK.poolSide, RK.poolSide]);
+    floor.position.set(cx, .015, cz); floor.userData.noMerge = true; g.add(floor);
+    for (let k = 0; k < 3; k++) box(.32, .1 + k * .1, Wd - 2 * t, RK.poolSide, x0 + t + .16 + k * .32, (.1 + k * .1) / 2 + .03, cz, g);   // the shallow end's steps, from the west
+    const water = recWaterMesh(new THREE.PlaneGeometry(L - 2 * t, Wd - 2 * t), RK.poolWater); water.rotation.x = -Math.PI / 2; water.position.set(cx, .35, cz); g.add(water);
+    for (const z of [z0 + t + (Wd - 2 * t) / 3, z0 + t + 2 * (Wd - 2 * t) / 3]) for (let k = 0; k < 16; k++) {   // the lane ropes: floats in runs of orange and white
+      const s = (L - 2 * t) / 16, f = cyl(.045, .045, s * .9, k % 4 < 2 ? RK.ropeOrange : RK.ropeWhite, x0 + t + s * (k + .5), .35, z, g, 8); f.rotation.z = Math.PI / 2;
+    }
+    return { w: .1, d: .1, noBlock: true };
+  },
+  recLounger(g) {
+    box(.62, .12, 1.7, RK.loungerFrame, 0, .3, 0, g); for (const [x, z] of [[-.26, -.75], [.26, -.75], [-.26, .75], [.26, .75]]) box(.05, .3, .05, RK.loungerFrame, x, .15, z, g);
+    box(.56, .07, 1.1, RK.loungerPad, 0, .4, .25, g); box(.56, .07, .62, RK.loungerPad, 0, .58, -.55, g).rotation.x = -.6;
+    return { w: .62, d: 1.7 };
+  },
+});
+Object.assign(WALL_KIT, {
+  recFirstAid(g) {
+    box(.5, .6, .14, RK.aidWhite, 0, 1.35, .07, g); box(.3, .08, .01, RK.aidRed, 0, 1.4, .145, g); box(.08, .3, .01, RK.aidRed, 0, 1.4, .145, g);
+    cyl(.05, .05, .04, RK.aidRed, .3, 1.15, .06, g, 12).rotation.x = Math.PI / 2;                       // the alarm button beside it
+  },
+});
 DECKS[7] = {
   num: 7, name: 'Recreation', seed: 70771, tall: 1.6, playerOnly: true, open: [6, 24],
   blurb: 'Auditorium, court, pool, rivers', arrive: 'The concourse runs stern to bow: the rivers and the court aft, the pool and the auditorium forward.',
@@ -8170,6 +8240,12 @@ DECKS[7] = {
     placeWall('C', 'recScoreboard', 'w', 2.5, { hitW: 4.2, it: IT('Scoreboard', 'Two storeys of scoreboard on the stern wall, reading nil-nil. It\'s waiting for the first game.') });
     const stands = []; for (const [c0, c1] of REC_STANDS) for (let c = c0; c < c1; c++) stands.push([c - 4, 0], [c - 4, 1]);
     place('T', 'recStands', 0, 0, 'n', { block: stands });
+    // the pool (0.80.3, R4): the raised basin with its water, lanes and mosaic; loungers on the inboard side; the first-aid point
+    const pool = []; for (let c = 1; c <= 7; c++) for (let z = 0; z <= 4; z++) pool.push([c, z]);
+    place('P', 'recPool', 0, 0, 'n', { block: pool });
+    place('P', 'recHit', 4.4, 2.5, 'n', { w: 6.4, d: 4, hitH: .5, it: IT('Pool', 'Three short lanes under the hull windows, with the Wren in mosaic on the bottom and the stars beside you. Warm, and very blue.') });
+    for (const x of [1.4, 4.6, 6.6]) place('P', 'recLounger', x, 6.55, 'e', { it: IT('Lounger', 'A lounger by the pool, facing the windows. Still damp from someone.') });
+    placeWall('P', 'recFirstAid', 'e', 5.6, { it: IT('First-aid point', 'A first-aid kit, a foil blanket and an alarm button that rings in the infirmary. There\'s no lifeguard; this, and the shallow end, are the safety.') });
     REC_STANDS.forEach(([c0, c1], b) => place('T', 'recHit', (c0 + c1) / 2 - 4, 1, 'n', { w: c1 - c0, d: 2, hitH: 1.3, it: IT('Stands', ['Three stepped benches at the stern end, by the scoreboard.', 'The middle of the stands: three stepped benches, right on the net. The best seats for a close game.', 'Three stepped benches at the bow end, by the gate onto the court.'][b]) }));
   },
 };
@@ -8180,6 +8256,9 @@ function recMats() {
     seat: std('#4a2f86', .8), seatDark: std('#22192f', .7, .2), gold: std('#d9b45a', .35, .7), rake: std('#2b2140', .9),
     stageTop: M.wood, stageSide: std('#1d1630', .7), truss: std('#c9a24a', .4, .7), black: std('#16181c', .6, .3), wood: std('#6b4a32', .6), screen: std('#e8e6df', .9),
     standStep: std('#3a404a', .85), bench: std('#c9783a', .6),
+    rim: std('#d8e6e4', .45), coping: std('#f2f0ea', .4), poolSide: std('#6fc3c9', .4), mosaic: new THREE.MeshStandardMaterial({ map: recMosaic(), roughness: .4 }),
+    poolWater: recWater('#1f8fa6', '#4fd0dc', { alpha: .8 }), ropeOrange: std('#ff8a3a', .5), ropeWhite: std('#f4f4f0', .5),
+    loungerFrame: std('#e8e8e2', .4, .3), loungerPad: std('#2f9fb0', .8), aidWhite: std('#f2f2ee', .5), aidRed: std('#d8322e', .5),
     lineOrange: new THREE.MeshBasicMaterial({ color: col('#ff9a3c'), toneMapped: false }), lineCyan: new THREE.MeshBasicMaterial({ color: col('#50e6ff'), toneMapped: false }),
     lineWhite: new THREE.MeshBasicMaterial({ color: col('#e8eef0'), toneMapped: false }),
     net: new THREE.MeshBasicMaterial({ color: col('#bfe6ff'), transparent: true, opacity: .2, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, toneMapped: false }),
@@ -8247,7 +8326,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.80.2';                           // keep in step with the header's build line
+const GAME_BUILD = '0.80.3';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
