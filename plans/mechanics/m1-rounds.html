@@ -139,7 +139,7 @@ td code{white-space:normal}
   <h3>The job kind</h3>
   <div class="lines">jobKindAdd('rounds', { tier: 1, junior: false, work: 0,
   post: (h, jobs) =&gt; ...          // workdays at 07:00, once trained (SHIP.works.tr.m1): one round, held for you to 11:00
-  stops: j =&gt; j.route.map(id =&gt; ({ deck, placeId: panelPlaceId(id), mins: 2, tag: 'look', step: 'look',
+  stops: j =&gt; j.route.map(id =&gt; ({ deck, placeId: panelPlaceId(id), mins: 2, tag: 'look', how: 'look',
                                   opts: { marks: ['fine', 'worn', 'off'], sign: roundSign(id, day) } })),
   stepDone: (j, k, { pick }) =&gt; roundMark(j, k, pick),
   done: (j, t, by) =&gt; worksUse('m1'),

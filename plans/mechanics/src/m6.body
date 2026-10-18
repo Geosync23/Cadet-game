@@ -67,13 +67,13 @@ NAV:plain=In plain words|three=The three incidents|when=When they happen|day=Day
   </table></div>
   <div class="lines">INCIDENTS = {
   burst: { decks: [3, 4, 5], weight: n =&gt; 1 + wornness('valve', n),
-           safe: { step: 'choose', at: n + '-valve-panel', opts: valves upstream-first, ok: the first upstream of the wet },
-           clean: { step: 'hold', at: n + '-wet-1', mins: 6, pose: 'mop', reps: 3 },
+           safe: { how: 'choose', at: n + '-valve-panel', opts: valves upstream-first, ok: the first upstream of the wet },
+           clean: { how: 'hold', at: n + '-wet-1', mins: 6, pose: 'mop', reps: 3 },
            fix: { job: 'joint', part: 'seal', at: n + '-wet-1' } },
-  lift:  { machine: '5-lift-1', safe: { step: 'turn', at: '5-lift-brake', ok: v =&gt; v &gt;= 3 },
-           clean: { step: 'hold', at: 'the car's door on the next deck', mins: 2 }, fix: { service: '5-lift-1' } },
-  alarm: { machine: '3-extractor-1', safe: { step: 'hold', at: '3-extractor-alarm', mins: 1 },
-           clean: { step: 'wait', at: '3-vent-1', mins: 5 }, fix: { look: hood, then service } } }</div>
+  lift:  { machine: '5-lift-1', safe: { how: 'turn', at: '5-lift-brake', ok: v =&gt; v &gt;= 3 },
+           clean: { how: 'hold', at: 'the car's door on the next deck', mins: 2 }, fix: { service: '5-lift-1' } },
+  alarm: { machine: '3-extractor-1', safe: { how: 'hold', at: '3-extractor-alarm', mins: 1 },
+           clean: { how: 'wait', at: '3-vent-1', mins: 5 }, fix: { look: hood, then service } } }</div>
   <ul>
     <li><b>The week's plan:</b> <code>incidentPlan(week)</code>: for weeks from Day 8's, a weekday (Mon-Fri, a <code>playerShiftOn</code> day, not an <code>eventsOn</code> event day, never the day of a test job or promotion) and a minute 540-930 from <code>schedU(week, 0, 870)</code>; the kind weighted by its machines' wear, picked with <code>schedU(week, 0, 871)</code>; the place with 872. Day 8's is fixed (burst, Deck 4, 630). If the day turns out a tradition evening's day, the incident is in the morning (before 12:00) so it's long over. Saved once planned.</li>
     <li><b>The job:</b> a job kind <code>incident</code> (urgency 2, held for you 30 minutes if you're on shift and on the ship, then the crew: two Works crew walk the three steps in 25-40 minutes), stops = safe, clean (repeated), then the fix job is posted as an ordinary repair held for you for the rest of the shift.</li>
