@@ -9,6 +9,16 @@
 
 ## Verdicts
 
+### Re-check: social 0.36.83-0.36.84, claude/social-0607 d3e4d04: PASS, both MEDs fixed
+- **MED 1 fixed:** `chatTick` now steps the talk before the visit return (`if (C.visit) { if (C.talk && !C.talk.end) talkStep(C); return; }`). The builder's live probe reaches the reply at 7 minutes on a visit card.
+- **MED 2 fixed:** `talkDay` is saved only when it equals today, so the trailing-zero trim works again. The builder's `--long` with a daily talk: worst day to 140 is 28.6 KB (`SAVE_MAX` 30000), worst day 141-280 is 32.3 KB (`LONG_MAX` 40000). Both inside the limits.
+- **LOW fixed:** Say hello keeps `week1` and `callback` lines.
+- **0.36.83 (found by the builder):** `socMustGo` compared plan segment times (absolute ship minutes) with minutes from midnight, so "got to go" only worked on Day 1. It now compares with `t`, and the next day's plan is concatenated as is (already absolute). The tradition-host part still uses `m` against `eventPlan`'s from-midnight times. Correct.
+- The `--long` arrival-jump arm still FAILs on section 17's bus notes. That's pre-existing, and the fix is in claude/social 068b8db's social_check, not in this base. The build master should take that check fix, or treat this one FAIL as known.
+
+### Traditions tip d27980f (skim): PASS
+Calendar labels only. A deferred DOM fit (`setTimeout`, UI only, nothing decides play) shortens a time-bar label to its first word, or nothing, when it doesn't fit. Shots in `plans/shots-0607/`. 317e24d's verdict stands for the tip.
+
 ### Traditions 0.34.51, claude/trad-0607 317e24d (in depth): PASS, not to combine until its known events_check FAIL is cleared
 Section 18: the voice budget (at most two at once, never two at once in one room), 12 new `.trad` files, Gym club with `spare: 2`, `evArrive` (`wake`, `afterShift`), `evGoers`, the 7-day Calendar with time bars, `leisureAdd(15)` when you join.
 - **Checks I ran:** **day_check day 1** (Monday, the arrival on): DAY CHECK OK. Nobody stuck on any deck, plans the same twice, Deck 4 the same twice, no places booked twice on days 0-1, peaks 229/202/268/250/215/163. The builder ran day 2. A probe of the first week (people planned to go): Mon beam 17:05 (18), Gym club 19:15 (12 of the gym's 17 shared places, spare kept), Lap 20:30 (17), stretch 06:30 (8). Tue spice supper (36), Tiles (17), knit (13). Wed open door (15), tasting (32), late piano, pick-your-own (4), stretch. Thu postcard (14), cook-along (8), quiz (9), late piano, plus a birthday. Fri new hand's tea (19), jam (11), tap night (14), stretch; Works tea dropped (a room clash, as meant). Nothing else dropped on days 1-5 or 8.
