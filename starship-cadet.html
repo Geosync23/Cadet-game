@@ -252,7 +252,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.63.1
+   STARSHIP CADET: CSV Wren                           build 0.42.62
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7922,7 +7922,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.63.1';                           // keep in step with the header's build line
+const GAME_BUILD = '0.42.62';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -34416,7 +34416,7 @@ const INTRO_WEEK = [
   { id: 'd1-dinner', day: 1, at: 18 * 60, until: 19 * 60, who: 'brennan', where: { deck: 3, room: 'Mess hall' }, settle: 'eat' },
   { id: 'd1-zeke-dinner', day: 1, at: 18 * 60, until: 19 * 60, who: INTRO_ESCORT, where: { deck: 3, room: 'Mess hall' } },   // 0.42.41: he eats in the mess (section 21b's evening and laundry lines, CLOTHES_BEATS)
   { id: 'd2-solo', day: 2, at: 7 * 60 + 45, until: 8 * 60, who: 'calder', where: { deck: 5, room: 'Works Chief\'s office' }, meeting: 'introSoloJob', settle: 'solo' },
-  { id: 'd2-tea', day: 2, at: 10 * 60 + 30, until: 11 * 60, who: INTRO_ESCORT, where: { deck: 5, room: 'Tea corner' }, says: 'walk.job3.tea' },   // his one check-in on your solo day
+  { id: 'd2-tea', day: 2, at: 13 * 60, until: 13 * 60 + 45, who: INTRO_ESCORT, where: { deck: 5, room: 'Tea corner' }, says: 'walk.job3.tea' },   // his one check-in on your solo day
   { id: 'd2-health', day: 2, at: 14 * 60, until: 14 * 60 + 30, who: 'rina', where: { deck: 3, room: 'Infirmary' }, appt: 'intro-health', settle: 'health' },
   { id: 'd2-booths', day: 2, at: 18 * 60, until: 19 * 60, who: 'eklund-leila', where: { deck: 3, room: 'Call-home booths' }, settle: 'call' },
   { id: 'd3-pick', day: 3, at: 8 * 60, until: 8 * 60 + 15, who: INTRO_ESCORT, where: { deck: 5, room: 'Works bay' }, settle: 'take' },
@@ -34425,7 +34425,7 @@ const INTRO_WEEK = [
   { id: 'd4-mail', day: 4, at: 7 * 60, who: null, mail: { from: 'Zeke Torres', subject: 'On your own', body: 'Day off for me. Don\'t break anything big. — Z.' } },
   { id: 'd4-favour', day: 4, at: 16 * 60, until: 19 * 60 + 30, who: 'kovac-zainab', where: 'seek', seek: true, settle: 'favour' },
   { id: 'd4-quiz', day: 4, at: 20 * 60, until: 21 * 60 + 30, who: 'pell', where: { deck: 3, room: 'Bow lounge' }, settle: 'tradition' },
-  { id: 'd5-mug', day: 5, at: 10 * 60 + 30, until: 11 * 60, who: 'halloran-emeka', where: { deck: 5, room: 'Tea corner' }, flags: ['mug'],
+  { id: 'd5-mug', day: 5, at: 13 * 60, until: 13 * 60 + 45, who: 'halloran-emeka', where: { deck: 5, room: 'Tea corner' }, flags: ['mug'],
     moment: { title: 'Friday tea', here: 'Halloran hands you a mug with your name on it. "New hand\'s mug. It lives on the rack now. So do you."',
       mail: { from: 'Emeka Halloran', subject: 'Your mug', body: 'Missed you at tea. Your mug\'s on the rack in the tea corner, name and all. — E.H.' } } },
   { id: 'd5-invite', day: 5, at: 18 * 60, who: 'tomas', invite: { trad: 'sowing', day: 6, from: 'tomas' } },
@@ -34714,6 +34714,7 @@ function escortPlan(p, t) {
     pace: st.mode === 'lead' && st.checkpoint.deck === 5 && I.done['tour:lift'] === undefined ? INTRO_STROLL : 1 };   // strolling to the lift (section 10 reads pace)
   if (st && st.id === 'free' && introSeat(p.id)) return { mode: 'wait', to: introSeat(p.id) };   // at the table until his goodnight
   const scene = typeof DIALOGUE !== 'undefined' && DIALOGUE && DIALOGUE.m && /^intro-/.test(DIALOGUE.m.id || '');   // (the lead, 0.42.30: Calder's briefing plays in full first)
+  const tea = typeof introTeaPlan === 'function' && !scene ? introTeaPlan(t) : null; if (tea) return tea;   // Zeke's Day 1 tea (0.42.61)
   for (const b of INTRO_WEEK) if (b.escort && b.who === p.id && t >= introAbs(b.day, b.at) && t < introAbs(b.day, b.until) && !scene) return { mode: b.escort, to: b.where };
   return null;
 }
@@ -34771,7 +34772,7 @@ for (const id of ['introBriefing', 'introSoloJob']) if (!MEETING_SCRIPTS[id]) ME
 const INTRO_UI = { min: null, step: undefined, said: [], callAt: 0, goal: false, goalKey: '', manifest: null, meet: [], next: 0, still: 0, stillAt: null, more: 0, bed: false, tour: [], pause: null, pilotAt: 0, ternOpened: false, ternShut: false };
 INTRO_STUB_SCRIPTS.introDinner = { title: 'Dinner with Torres', from: 'Zeke Torres', lines: [
   { who: INTRO_ESCORT, text: 'Engines, me. Deck 6. The drive coils, mostly. Coil three\'s my favourite. Don\'t tell the others.' },
-  { who: INTRO_ESCORT, text: 'Two years aboard. Day shift, tea at half ten. Works never misses tea.' },
+  { who: INTRO_ESCORT, text: 'Two years aboard. Day shift, tea and biscuits at one. Works never misses tea.' },
   { choice: [
     { text: 'Why coil three?', rel: { [INTRO_ESCORT]: 1 }, reply: { who: INTRO_ESCORT, text: 'She hums a half-step flat. Like she\'s thinking about something.' } },
     { text: 'What\'s a normal day?', reply: { who: INTRO_ESCORT, text: 'Board at eight, jobs, tea, jobs, dinner. Then the ship\'s yours till ten.' } }] },
@@ -35094,7 +35095,10 @@ const INTRO_ARROWS = {
   clock: { deck: 5, place: '5-timeclock-1', label: 'Clock in at the time clock' },
   board: { deck: 5, item: /job board/i, room: 'w', label: 'Take a job at the job board' },
   eat: { deck: 3, item: /^servery$/i, label: 'Get your dinner at the servery' },
+  tea: { deck: 5, room: 't', label: 'Tea and biscuits with Zeke' },   // Zeke's Day 1 tea (introTeaTick, below)
+  call: { deck: 3, room: 'B', label: 'Call home from the booths' },   // Day 0's call-home card, when you tap Track it (introCallTick)
 };
+INTRO_ARROWS.call.label = (typeof LINES !== 'undefined' && Array.isArray(LINES['tip.callhome.goal']) && LINES['tip.callhome.goal'][0] && LINES['tip.callhome.goal'][0].text) || INTRO_ARROWS.call.label;
 const INTRO_ARROW_LABELS = new Set(Object.values(INTRO_ARROWS).map(a => a.label));
 function introArrowTold(id) { if (introOn() && INTRO_ARROWS[id] && SHIP.intro.done['told:' + id] === undefined) SHIP.intro.done['told:' + id] = Math.floor(shipNow()); }
 function introArrowClear() {
@@ -35105,6 +35109,8 @@ function introArrowClear() {
 function introArrowWant(now) {
   const I = SHIP.intro, d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440, fin = id => { if (I.done['arrow:' + id] === undefined) I.done['arrow:' + id] = Math.floor(now); };
   const P = SHIP.player, late = m >= 20 * 60 + 30;        // dinner's till half eight
+  if (introTeaPhase(now) === 'go') return 'tea';
+  if (I.done['call:track'] !== undefined && I.done['call:end'] === undefined) return 'call';
   if (P.tray || ACT && (ACT.kind === 'queue' || ACT.kind === 'eat')) I.done['ate:last'] = Math.floor(now);   // the last minute you had food in hand (or were queueing, eating)
   if (I.done['arrow:eat'] === undefined) {
     const at = typeof I.done['chief:end'] === 'number' ? I.done['chief:end'] : I.done['d1-dinner:said'];   // told to eat (null: walked away from the Chief)
@@ -35130,12 +35136,77 @@ function introArrowWant(now) {
 }
 function introArrowTick() {
   const t = simNow(); if (t < (INTRO_UI.arrowAt || 0)) return; INTRO_UI.arrowAt = t + 250;   // four times a second
+  introTeaTick(Math.floor(shipNow())); introCallTick(Math.floor(shipNow()));
   const id = introArrowWant(Math.floor(shipNow())), g = id && INTRO_ARROWS[id];
   const cur = typeof IX_GOAL !== 'undefined' ? IX_GOAL : null, ours = cur && INTRO_ARROW_LABELS.has(cur.label);
   if (!g) { if (INTRO_UI.arrow) introArrowClear(); return; }
   if (cur && !ours) return;                               // someone else's arrow is up: ours waits for it
   if (!cur || cur.label !== g.label) setGoal(g);
   INTRO_UI.arrow = id;
+}
+// ---- call home on the first night (onboarding 5, 0.42.62; the user via lead 13): once the Chief's table visit is over
+// (and you've food, if she told you to eat), a card says to call home, with Track it (the head writer's tip.callhome,
+// .button, .goal; section 19's deviceChoose). Tracked, the arrow points to the Call-home booths on Deck 3 until you're
+// in there (or 22:00); then the default arrow, your bunk, comes back. Saved in SHIP.intro.done: 'call:tip', 'call:track', 'call:end'.
+const introText = (k, or) => { const L = typeof LINES !== 'undefined' && LINES[k], e = Array.isArray(L) && L[0]; return e && typeof e.text === 'string' ? e.text : or; };
+function introCallTick(now) {
+  const I = SHIP.intro, D = I.done; if (D['call:end'] !== undefined) return;
+  if (now >= introAbs(0, 22 * 60)) { D['call:end'] = -1; return; }   // past quiet hours (and every later day)
+  if (D['call:tip'] === undefined) {
+    if (D['chief:met'] === undefined || INTRO_UI.chiefD || DIALOGUE || INTRO_UI.arrow === 'eat' || D['arrow:eat'] === undefined && typeof D['chief:end'] === 'number') return;
+    const text = introText('tip.callhome', 'Call home tonight. The call booths are on Deck 3. Tell them you arrived safely.');
+    const shown = typeof deviceChoose === 'function' && deviceChoose({ title: 'Call home', text, choices: [introText('tip.callhome.button', 'Track it')], cancel: 'Not now' }, k => {
+      if (k === 0 && SHIP.intro.done['call:end'] === undefined) { SHIP.intro.done['call:track'] = Math.floor(shipNow()); INTRO_UI.arrowAt = 0; } else if (SHIP.intro.done['call:track'] === undefined) SHIP.intro.done['call:end'] = Math.floor(shipNow()); });
+    if (shown) D['call:tip'] = now; else if (typeof deviceChoose !== 'function') D['call:end'] = -1;
+    return;
+  }
+  if (D['call:track'] === undefined) return;
+  let there = false; try { there = deckDef.num === 3 && roomAt(...player.here()) === 'B'; } catch (e) { there = false; }
+  if (there) { D['call:end'] = now; INTRO_UI.bed = false; }   // reached: the bunk arrow (introBedTick) may come back
+}
+// ---- Zeke's Day 1 tea (onboarding 5, 0.42.61; the user: "Zeke explains it; once your job is finished he leads you there
+// (tracked, with an arrow), then work carries on with Zeke following and chatting"). The 13:00 tea and biscuits in the
+// Tea corner is the player engineer's (teaOut(t), teaHad(day), the 'tea' note) and the crew sim's (the Works crew,
+// staggered). On Day 1, once you've taken your first job, Zeke explains it at the first quiet moment (walk.tea.explain.<n>);
+// once that job's turned in and tea is out (and you've not had it), he says walk.tea.go.<n> and leads you to the Tea
+// corner (escortPlan 'lead', the arrow INTRO_ARROWS.tea; the player engineer's own after-job arrow stays down while
+// introTeaLead() is true); there he waits with you (walk.tea.at.<n>) until you've had tea, 20 minutes, or you leave,
+// then says walk.tea.back.<n> and follows you again (the week's d1-lead). Saved in SHIP.intro.done: 'tea:told', 'tea:go',
+// 'tea:at', 'tea:end' (-1: tea came and went without the walk). Tea that's over before your job is done: no walk.
+const INTRO_TEA_AT = [22, 2], INTRO_TEA_STAY = 20;      // where he stands in the Tea corner; minutes he stays at most
+const INTRO_TEA_LINES = {                                 // stand-ins (the head writer's d47b63d), used only while the writers' lines are missing
+  explain: ['One o\'clock\'s tea and biscuits, in the tea corner.', 'Most of Works goes, a few at a time. Fills a gap, too.', 'Finish this job, then I\'ll take you. Biscuits await.'],
+  go: ['Job done. Tea\'s out. Come on.'], at: ['Mug off the hook. Biscuits in the tin.'], back: ['Right. Back to it. I\'m right behind you.'],
+};
+const introTeaSay = k => introWriterLines('walk.tea.' + k) || (() => { const out = []; for (let n = 1; n <= 6; n++) { const l = introWriterLine('walk.tea.' + k + '.' + n); if (!l) break; out.push(l[0]); } return out.length ? out : INTRO_TEA_LINES[k]; })();
+function introTeaPhase(now) {                             // 'go' (he's leading you there), 'at' (tea together), or null
+  const I = SHIP.intro; if (!introOn() || I.done['tea:go'] === undefined || I.done['tea:end'] !== undefined || Math.floor(now / 1440) + 1 !== 1) return null;
+  return I.done['tea:at'] === undefined ? 'go' : 'at';
+}
+const introTeaLead = () => introOn() && SHIP.intro.done['tea:end'] === undefined && Math.floor(shipNow() / 1440) + 1 === 1;   // read by the player engineer's teaOffer: on Day 1 the tea is Zeke's (no after-job card or arrow) until his walk is over or off
+function introTeaPlan(t) {                                // escortPlan's: where he is for the tea walk
+  const ph = introTeaPhase(t); return !ph ? null : { mode: ph === 'go' ? 'lead' : 'wait', to: { deck: 5, tile: INTRO_TEA_AT } };
+}
+function introTeaTick(now) {
+  const I = SHIP.intro, d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440, D = I.done, end = v => { D['tea:end'] = v; };
+  if (D['tea:end'] !== undefined || typeof teaOut !== 'function') return;
+  if (d > 1) { end(-1); return; }
+  if (d < 1 || DIALOGUE) return;
+  const a = introWalker(), near = a && Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) <= 4, quiet = simNow() >= (INTRO_UI.sayEnd || 0) && simNow() >= INTRO_UI.next;
+  const room = () => { try { return deckDef.num === 5 && roomAt(...player.here()) === 't'; } catch (e) { return false; } };
+  const had = typeof teaHad === 'function' ? teaHad(1) : SHIP.player.teaDay === 1;
+  if (D['tea:go'] === undefined) {
+    if (D['tea:told'] === undefined && near && quiet && introFollowing() && typeof myJob === 'function' && myJob()) { D['tea:told'] = now; introSay(introTeaSay('explain')); return; }
+    if (m >= 13 * 60 && !teaOut(now) || had) { end(-1); return; }   // tea's over (or you've had it) before your job was done
+    if (D['d1-shadow:job'] !== undefined && teaOut(now) && quiet) { D['tea:go'] = now; introSay(introTeaSay('go')); }
+    return;
+  }
+  if (D['tea:at'] === undefined) {
+    if (room()) { D['tea:at'] = now; introSay(introTeaSay('at')); }
+    else if (!teaOut(now)) { end(now); introArrowClear(); }   // tea's over before you got there
+    return;
+  }
+  if (had || now >= D['tea:at'] + INTRO_TEA_STAY || !room() && now >= D['tea:at'] + 2 || !teaOut(now)) { end(now); if (quiet || had) introSay(introTeaSay('back')); }
 }
 function introTick() {
   if (INTRO_BOOT) { INTRO_BOOT = false; if (typeof newGameStart === 'function') newGameStart(true); }
