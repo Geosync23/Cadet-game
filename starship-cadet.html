@@ -241,7 +241,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.36.83
+   STARSHIP CADET: CSV Wren                           build 0.36.84
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7591,7 +7591,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.36.83';                           // keep in step with the header's build line
+const GAME_BUILD = '0.36.84';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -27780,7 +27780,7 @@ function affVals(str, ids) {                              // the saved affinity 
 function pairOf(k, n) { let i = 0; while (k >= n - 1 - i) { k -= n - 1 - i; i++; } return [i, i + 1 + k]; }   // the k-th pair of n people, in pair order
 function socSave() {
   socInit();
-  const rel = {}; for (const id in SHIP.rel) { const r = SHIP.rel[id]; rel[id] = [r.pts, r.met, r.lastTalk, knownPack(id, r.known), r.chatDay || 0, r.mealDay || 0, r.workDay || 0, r.favDay || 0, r.seekDay || 0, r.arc || 0, r.arcDay || 0, r.showDay || 0, r.giftWeek || 0, r.inviteDay || 0, r.visitDay || 0, r.bye || 0, r.hostDay || 0, r.talkDay || 0]; const x = rel[id]; while (x.length > 4 && !x[x.length - 1]) x.pop(); }   // trailing zeros left off (they load as 0)
+  const rel = {}; for (const id in SHIP.rel) { const r = SHIP.rel[id]; rel[id] = [r.pts, r.met, r.lastTalk, knownPack(id, r.known), r.chatDay || 0, r.mealDay || 0, r.workDay || 0, r.favDay || 0, r.seekDay || 0, r.arc || 0, r.arcDay || 0, r.showDay || 0, r.giftWeek || 0, r.inviteDay || 0, r.visitDay || 0, r.bye || 0, r.hostDay || 0, r.talkDay === SHIP.time.day ? r.talkDay : 0 /* talkDay only matters today (reviewer 0607) */]; const x = rel[id]; while (x.length > 4 && !x[x.length - 1]) x.pop(); }   // trailing zeros left off (they load as 0)
   return { ids: socHash(SOC.ids), idl: SOC.ids, hour: SHIP.social.hour, aff: affPack(), news: NEWS.map(newsSaved),
            heard: heardKept(), fault: { ...SHIP.social.fault }, pairs: pairsSaved(SHIP.social.pairs), mail: SHIP.social.mail.map(x => ({ ...x })), feuds: JSON.parse(JSON.stringify(SHIP.social.feuds)), courtesy: { ...SHIP.social.courtesy }, cues: SHIP.social.cues.map(cueRow), mentor: SHIP.social.mentor || null, given: (SHIP.social.given || []).map(x => ({ ...x })), keepsakes: (SHIP.social.keepsakes || []).map(x => ({ ...x })), rep: SHIP.rep ? JSON.parse(JSON.stringify(SHIP.rep)) : null, invites: (SHIP.social.invites || []).map(x => ({ ...x })), notes: (SHIP.social.notes || []).map(x => ({ ...x })), visitDay: SHIP.social.visitDay || 0, moved: (SHIP.social.moved || []).map(x => ({ ...x, mem: x.mem.slice() })), bonds: bondsPack(SHIP.social.bonds), affWeek: typeof SHIP.social.affWeek === 'string' ? SHIP.social.affWeek : null, stories: JSON.parse(JSON.stringify(SHIP.social.stories || {})), noteq: JSON.parse(JSON.stringify(SHIP.social.noteq || [])), seekAsks: (SHIP.social.seekAsks || []).map(x => ({ id: x.id, from: x.from, until: x.until, why: x.why, done: !!x.done })), guide: SHIP.social.guide ? { ...SHIP.social.guide } : null, rel: Object.entries(rel).map(([id, r]) => [SOC.idx.get(id), ...r]), ...memSave() }   // rel: [[crew index, pts, met, ...]] (0.36.81; an object by id before);
 }
@@ -29638,7 +29638,7 @@ function chatDo(id) {
     if (made) l = { text: made, say: false };
     else if (fd) l = { text: ['Maybe I was a bit hard on ', 'I suppose I should talk to ', 'It\'s silly, really. I miss chatting with '][Math.floor(schedU(p.seed, SHIP.time.day, 641) * 3)] + shortName(SOC.crew[SOC.idx.get(fd.other)]) + '.', say: true };
     let kk = 0; for (let k = 1; k <= 6 && (!l || l.say === false || l.text === C.line.text) && !fd; k++) { l = chatLine(p, shipNow() + 60 * k, true); kk = k; }
-    const hl = !fd && !TALK_KEEP.has(l.kind) ? socLine(p, 'hello', { t: shipNow(), tier: after, warmth: warmth(p.id) }) : null;   // their answer to hello (0.36.82), unless something matters more
+    const hl = !fd && !TALK_KEEP.has(l.kind) && l.kind !== 'week1' && l.kind !== 'callback' ? socLine(p, 'hello', { t: shipNow(), tier: after, warmth: warmth(p.id) }) : null;   // their answer to hello (0.36.82), unless something matters more
     if (hl) l = { text: hl.text, kind: 'hello', say: true };
     else if (kk && l.line) l = chatLine(p, shipNow() + 60 * kk);   // the dialogue engine's line that's said: now it may note it
     if (l.news) playerHeard(l.news, p.id);
@@ -29815,7 +29815,8 @@ function talkMeter(el, T) {                               // the meter in the ca
 }
 // the card closes when you walk off or they leave the deck (socialTick, every frame); while it's open they stay put
 function chatTick() {
-  const C = CHAT; if (!C || C.visit) return;             // a visitor in your bunk room stays till you close it (or 22:00)
+  const C = CHAT; if (!C) return;
+  if (C.visit) { if (C.talk && !C.talk.end) talkStep(C); return; }   // a visitor in your bunk room stays till you close it (or 22:00); a talk with them still runs
   const a = typeof DECK_CREW !== 'undefined' && DECK_CREW.find(x => x.p === C.p);
   if (!a || Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) > C.reach) { chatClose(); return; }
   const t = shipNow();

@@ -77,6 +77,7 @@ LONG_RUN = r"""((days) => {
     if (hr === 8) repNote('shiftStart', { late: u < .1 ? 25 : 0 });
     if (hr === 12) { for (const id of pal) if (schedU(d, socHash(id), 9002) < .6) { relAdd(id, 'chat', REL_PTS.chat); memAdd(id, 'chat'); }
       const o = crew[Math.floor(schedU(d, h, 9003) * crew.length)]; relAdd(o.id, 'chat', REL_PTS.chat); memAdd(o.id, 'chat');
+      { const q = crew[Math.floor(schedU(d, h, 9005) * crew.length)]; relAdd(q.id, 'talk', 5); memAdd(q.id, 'talk.day'); relGet(q.id).talkDay = d; }   // a daily Talk a while (0.36.84): talkDay saved only on its day
       for (const q of [o, ...pal.map(id => SOC.crew[SOC.idx.get(id)])]) { const K = relGet(q.id).known, nx = (q.about || []).map(x => x.text).concat(q.life || []).find(x => x && !K.includes(x)); if (nx) K.push(nx); } }   // and asks them about themselves
     if (hr === 13) relAdd('tomas', 'meal', REL_PTS.meal);
     if (typeof eventAdvance === 'function') { try { eventAdvance(h * 60, true); } catch (e) { } }   // the ship's events and their news (section 18; its tick is stopped here)
