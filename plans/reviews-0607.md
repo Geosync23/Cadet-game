@@ -9,6 +9,13 @@
 
 ## Verdicts
 
+### Deck architect 4, 0.38.24-0.38.27, claude/deck-0607 031c0e4 (in depth for places): PASS
+New place data (bar, wardrobe, the Deck 4 Tiles table, the shelves: inert); Deck 4 cabin beds face 's'; the mess tray return removed; a second lift panel in every car (`panelTiles`/`panelNear`, you walk to the nearer); the Deck 3 washroom bench gone; Deck 5's shower becomes `5-toilet-2`.
+- **Checks I ran:** cadet_test vs c8685cf: every screenshot pixel-identical. The state differs only in `items`/`wallDecor` +1 and geometries 464→465 (the second car panel), as the builder said. **day_check day 1: DAY CHECK OK** (places changed, so I ran it): nobody stuck on any deck, plans the same twice, Deck 4 the same twice, no double booking with the arrival on, draw-call peaks 232/205/265/253/218/166 (budget 450).
+- **Ids:** nothing in the file still names `5-shower-1`, `3-wbench-1/2` or the `trayReturn` piece (the kit function stays, unused). `tilesSeats('j')` only answers if someone asks for 'j'. The new `bar-staff`/`bar-order` types aren't in anyone's pool. The wardrobe place is type `event` with no `event` field, so no tradition picks it.
+- **LOW (cross-seat, for the combine):** crew still walk their trays to the old return spot (`trayBack`, `@tray-*` / `TRAY_AT`). day_check: "trays 125, returned 125". With the rack gone they now drop trays into thin air by the wall, until the sim engineer's "trays stay on the table" piece lands. Fine as long as both are in 0.60.7. If sim slips, this rack removal should wait with it.
+- **Not re-checked by me:** how the beds and the new panel look (no coplanar faces, the sleeper lying along the bed). The builder's before/after shots cover those, and cadet_test's views don't reach the cabins or the car's front wall.
+
 ### PE6 0.28.59 + 0.28.61, claude/player-needs 52839a6 (in depth): PASS, one MED (a check that will fail)
 0.28.59: HUD fit with large system fonts (UI only). 0.28.61: the leisure need, `leisureAdd`, `HOBBIES`, the hobby activity, the Hobby button, `SHIP.player.hobbies` saved.
 - **Checks I ran:** cadet_test vs c8685cf **ALL IDENTICAL** (cadet_test hides `#needStrip`, so it says nothing about the 7th icon). A probe at 320×640 with the strip shown: 7 icons plus "Needs" and the fold chevron fit (strip 14-302 px, last icon ends at 267), no overlap with the round buttons, no sideways scroll. Save probe: `SAVE_EXTRA` writes `needs.leisure` (42.5 round-trips) and `hobbies` (`{has:['knit'], done:{read:3}}` round-trips). A pre-leisure save loads leisure at 70. Junk hobbies (`'zz'`, a number, `'read'` in `has`, `'x'` counts) are dropped, and 2.7 floors to 2.
