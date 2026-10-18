@@ -12632,6 +12632,7 @@ function wsFinish(j, k, res, title, said) {
   const r = jobStepDone(j.id, k, res); if (typeof ixGoalAt !== 'undefined') ixGoalAt = -1;
   if (!r || !r.ok) { toast('Your job', 'The job isn\'t yours any more.'); return; }
   if (r.wrong) { device.refresh(); return; }               // a wrong part: 24k's caseFitted has said so
+  if (r.retry) { toast(title, typeof r.say === 'string' && r.say ? r.say : 'Not quite. Try again.'); device.refresh(); return; }   // the kind said no (17's def.veto): the stop stays to do
   toast(r.done ? 'Work done' : title, [said, typeof r.say === 'string' ? r.say : '', r.done ? j.title + ': done. Turn it in at the job board in the Works bay, Deck 5.' : 'Done here. ' + r.left + (r.left === 1 ? ' stop' : ' stops') + ' to go: follow the marker.'].filter(Boolean).join(' '));
   device.refresh();
 }
@@ -12898,6 +12899,7 @@ function ixStopDone(A) {
   const r = jobStepDone(j.id, A.o.ixStep); ixGoalAt = -1;
   if (!r.ok) { toast('Your job', 'The job isn\'t yours any more.'); return; }
   if (r.wrong) { device.refresh(); return; }               // a wrong part: 24k's caseFitted has said so
+  if (r.retry) { toast(A.def.title, typeof r.say === 'string' && r.say ? r.say : 'Not quite. Try again.'); device.refresh(); return; }   // the kind said no (17's def.veto)
   const say = typeof r.say === 'string' && r.say ? r.say + ' ' : '';   // the kind's own words (its stepDone, through 17)
   if (r.done) {
     for (const p of j.parts) { const i = P.carry.indexOf(p); if (i >= 0) P.carry.splice(i, 1); }   // the lamp went in: it's used
