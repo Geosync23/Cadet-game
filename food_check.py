@@ -348,7 +348,7 @@ with sync_playwright() as pw:
     print(f"Harvest supper (stand-in): {tr['supper']['dinner']} ({tr['supper']['note']}) | farewell supper: {tr['farewell']['dinner']} ({tr['farewell']['note']}), favourite {tr['fav']}")
     for x in tr['days']: print(f"   day {x['day']}: came {x['ate']}, got {x['got']}, missed {x['missed']}, fresh {x['fresh']}, longest {x['mealMax']}")
     print('Real traditions with galley ties, 21 days:', tr['real'] if tr['real'] else 'none (section 18 has no galley ties yet)')
-    if tr['breakfast'] != 'pancakes, fruit and syrup' or tr['end'] != 600 or tr['close'] != 630 or tr['endSun'] != 480 or tr['cookTo'] < 560 or tr['lineTo'] != 600: fail(f"long breakfast: {tr}")
+    if tr['breakfast'] != 'pancakes, fruit and syrup' or tr['end'] != 600 or tr['close'] != 630 or tr['endSun'] != g.ev('FOOD.serveTo.breakfast') or tr['cookTo'] < 560 or tr['lineTo'] != 600: fail(f"long breakfast: {tr}")
     if 'long breakfast' not in tr['txt'] or 'long breakfast' not in tr['board'] or not tr['at0915'] or tr['at0915'][2] + tr['at0915'][6] <= 0: fail(f"long breakfast texts or food at 09:00: {tr['txt']} | {tr['board']} | {tr['at0915']}")
     if not tr['supper']['dinner'].startswith('the harvest supper') or not tr['supper'].get('supper') or tr['farewell']['dinner'] != tr['fav']: fail(f"suppers: {tr['supper']} {tr['farewell']}")
     for x in tr['days']:
@@ -408,7 +408,7 @@ with sync_playwright() as pw:
           out.queued = takePortion('player'); out.queueNotes = heard.splice(0);
           SHIP.galley = null; setShipNow(B + 2880 + 17 * 60 + 25); galleyAdvance(shipNow()); heard.length = 0; out.onTime = takePortion('player'); out.onTimeNotes = heard.splice(0);
           SHIP.galley = null; setShipNow(B + 4 * 60); galleyAdvance(shipNow()); SHIP.galley.cold.meals = 0; SHIP.galley.cold.produce = []; SHIP.galley.carts = []; SHIP.galley.servery.portions = 0; SHIP.galley.grab.items = 0; heard.length = 0;
-          const keepClaim = typeof cartClaim === 'function'; FOOD.restock = 'none'; setShipNow(B + 9 * 60 + 30); galleyAdvance(shipNow()); FOOD.restock = 'carts';
+          const keepClaim = typeof cartClaim === 'function'; FOOD.restock = 'none'; setShipNow(B + FOOD.close.breakfast + FOOD.giveUp + 30); galleyAdvance(shipNow()); FOOD.restock = 'carts';
           out.crew = heard.splice(0); out.kinds = [...new Set(out.crew.map(x => x.how + ' ' + x.meal))];
           window.__late = []; SHIP.galley = null; return out; }})()""")
         print(f"Late meals: you at 20:45 from the shelf {lm['grabNotes']} (a second time: {len(lm['grabNotes']) == 1 and lm['again']}) | after a 15-minute queue {lm['queueNotes']} | on time {lm['onTimeNotes']}")
