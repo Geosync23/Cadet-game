@@ -120,7 +120,7 @@ with sync_playwright() as pw:
     check(took and g.ev("(myJob() || {}).id") == 'ixtest@1' and not s['board'], 'Take it: the job is yours and the board closes')
     g.step(2); check(g.ev("player.holding") == 'toolbox', f'a repair job: a toolbox in hand ({g.ev("player.holding")!r})')
     print('   goal:', s['goal'])
-    check(s['goal'] and 'storage' in s['goal'], f'the pointer: fetch from main storage ({s["goal"]})')
+    check(s['goal'] and ('storage' in s['goal'] or 'shelf' in s['goal']), f'the pointer: fetch from main storage ({s["goal"]})')   # or the part's own shelf (0.33.41)
     check(g.ev("SHIP.player.track") == 'ixtest@1', f'taking a job tracks it ({g.ev("SHIP.player.track")})')
     g.ev("SHIP.player.track = null"); g.step(3); s = st()
     check(s['goal'] is None, f'tracking switched off (the device): no job arrow ({s["goal"]})')
@@ -183,10 +183,10 @@ with sync_playwright() as pw:
             stops = g.ev(f"jobStops(myJob()).map(x => [x.step, x.deck, x.places[0] || null])")
             for i, (step, deck, place) in enumerate(stops):
                 s = st(); print('    goal before', step, ':', s['goal'])
-                check(s['goal'] and ('storage' in s['goal'] if step == 'fetch' else (f'Deck {deck}' in s['goal'] if g.ev('deckDef.num') != deck else True)), f'{kind} {step}: the pointer leads there ({s["goal"]})')
+                check(s['goal'] and (('storage' in s['goal'] or 'shelf' in s['goal']) if step == 'fetch' else (f'Deck {deck}' in s['goal'] if g.ev('deckDef.num') != deck else True)), f'{kind} {step}: the pointer leads there ({s["goal"]})')
                 if g.ev('deckDef.num') != deck: g.ev(f"goToDeck({deck})"); g.step(3)
                 if step == 'fetch':
-                    r = g.ev(f"({TAP})({{title: ITEMS.find(i => roomAt(...cellAt(i.hit.getWorldPosition(_wp).x, _wp.z)) === 'r' && !/tarp/i.test(i.t)).t}})")
+                    r = g.ev(f"({TAP})({{title: typeof shelfWant === 'function' && shelfWant() ? shelfName(shelfWant()) : ITEMS.find(i => roomAt(...cellAt(i.hit.getWorldPosition(_wp).x, _wp.z)) === 'r' && !/tarp/i.test(i.t)).t}})")   # the part's own shelf (section 17's shelves, 0.33.41)
                 else:
                     r = TAPAT_click(place)
                 g.step(2); s0 = st()
