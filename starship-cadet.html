@@ -252,7 +252,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.70.3
+   STARSHIP CADET: CSV Wren                           build 0.70.4
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7922,7 +7922,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.70.3';                           // keep in step with the header's build line
+const GAME_BUILD = '0.70.4';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -30528,7 +30528,7 @@ function tradGoal(x) {
 // behind the one ahead: one line. Section 14's whereIs asks tradWhere (in play only) and section 10's escortStep walks
 // them ('lead' waits for you; 'follow' with `after` follows the person ahead). You walk on your own: tap anywhere or
 // steer and you drop out. One lap, then everyone goes back to their spots. TJ_WALK: { e, lead, path, k, n, roles, cb }
-const TJ_LINE = 6, TJ_LOOP = Array.from({ length: 12 }, (_, k) => '3-lap-' + (k + 1));
+const TJ_LINE = 6, TJ_OVER = 15, TJ_LOOP = Array.from({ length: 12 }, (_, k) => '3-lap-' + (k + 1));
 let TJ_WALK = null, TJ_WALK_T = 0;
 const TJ_DT = (() => { let t0 = performance.now(); return () => { const t = performance.now(), d = Math.min(.1, (t - t0) / 1000); t0 = t; return d; }; })();   // real seconds since the last frame
 function tradWalkStart(e, lead) {
@@ -30540,7 +30540,7 @@ function tradWalkStart(e, lead) {
     .sort((x, y) => Math.hypot(x.x - a.x, x.z - a.z) - Math.hypot(y.x - a.x, y.z - a.z)).slice(0, TJ_LINE);
   const roles = new Map([[lead, { mode: 'lead', to: path[(k0 + 1) % path.length] }]]);
   others.forEach((c, i) => roles.set(c.p.id, { mode: 'follow', after: i ? others[i - 1] : null }));
-  TJ_WALK = { e, lead, path, k: k0 + 1, n: 0, roles, cb: () => {}, end: (e.day - 1) * 1440 + e.to };
+  TJ_WALK = { e, lead, path, k: k0 + 1, n: 0, roles, cb: () => {}, end: (e.day - 1) * 1440 + e.to + TJ_OVER };   // a lap begun late may finish a little after the end
   return true;
 }
 function tradWalkEnd(why) {
