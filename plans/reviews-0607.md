@@ -8,10 +8,13 @@
 (empty)
 
 ## Passing tips (for BM3)
-writer 0cc4cdf · arrival-0607b 82d573e (includes arrival e2cd435, PE6 52839a6, systems 1e9476c) · systems 521742a · social 9c8ea6c · PE6 4bd606c · deck 55fca8d · traditions 8be5030.
+writer 0cc4cdf · arrival-0607b 79d8244 (includes arrival e2cd435, PE6 52839a6, systems 1e9476c) · systems 521742a · social 9c8ea6c · PE6 4bd606c · deck 55fca8d · traditions 8be5030.
 events_check's day-100/day-231 seat clashes: OK on BM3's combine with social d3d5b4d. The bar needs PE6 and social together.
 
 ## Verdicts
+
+### Onboarding 4 0.42.45, claude/arrival-0607b 79d8244 (skim): PASS
+Test-side fix for the candidate's intro_check parts 1/7: intro_check reads `settle` on INTRO_WEEK or CLOTHES_BEATS and knows the clothes, hobby and talk notes. In the game there are only two data tags, `settle: 'clothes'` on `d1-dinner-zeke` and `settle: 'hobby'` on `d2-knit`. Nothing in the game reads a CLOTHES_BEATS entry's `settle` (I grepped), so play is unchanged.
 
 ### Traditions 0.34.55, claude/trad-0607 8be5030 (behaviour, small): PASS
 For BM4's leave_check FAIL (after-shift goers waiting at the one time clock and blocking it): `evArrive` now sets off non-hosts at `max(e.from, workEnd + 2)`, inside section 14's 10-minute join window (so the clock, a wash and the toilet still fit), and the host at `workEnd + 15` with 5 minutes left. Never before the tradition starts (f2318ef). Open door ends 17:50. Pure and small. The builder reports leave_check, food_check and day_check 1 OK. events_check fails only on the three items social's `morning()` fixes in the combine.
