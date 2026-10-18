@@ -637,6 +637,7 @@ The look is locked: textured low-poly in a cozy isometric cutaway, with every te
 - **Controls:** tap to walk to a spot or object, press and hold to walk toward your finger, tap a person to talk, tap a free seat to sit, tap a machine to look at it or use it. Walk into the lift car (or tap a lift door) and press the panel on its back wall to choose one of the six decks. Doors slide open for anyone nearby; sealed rooms give tap text.
 - **Pause** (the user, 2026-10-17; built in 0.28.48 and 0.28.50). A Pause button first in the top row of buttons (on a narrow phone, an icon beside the Device button) stops the ship: its time and the whole sim (crew, needs, the galley, events, dialogue and speech bubbles, heads-ups, tips), with a calm "Paused" panel; a tap anywhere on it resumes. The game saves when it pauses. Switching away from the game (the tab hidden) pauses it too, and it stays paused until you resume. Toasts keep their real time. Playing a game of Tiles stops time the same way (see "Tiles").
 - Crawlways get low ceilings, and their tiles slow you to a crouch-walk with a crouching pose.
+- **The HUD on phones** (the user, 2026-10-18, 0.60.6a): the clock reads "Day 3 · Wed 06:00" so it always fits, and the needs meters carry a small "Needs" label. On the device's home screen the Relationships app's tile says People, since the long word didn't fit.
 - **UI:** the personal device (its old-school screen look and apps are under "The player"), the machine inspection panel and a two-slot carry indicator. The only time control is Pause (above).
 
 

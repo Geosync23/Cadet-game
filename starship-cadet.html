@@ -142,6 +142,7 @@ html[data-ph="green"] body #seek,.devhu[data-ph="green"],.devaddr[data-ph="green
 .device .apps{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px;margin-top:14px}
 .device .app{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:76px;padding:8px 4px;font-size:15px;text-transform:uppercase;letter-spacing:.05em}
 .device .app i{font-style:normal;font-size:26px;line-height:1;color:var(--crt-hot)}
+.device .app span{max-width:100%;text-align:center;overflow-wrap:anywhere;line-height:1.15}   /* 0.28.57: a long label wraps inside its tile, never over the next */
 .device .app b{position:absolute;top:3px;right:4px;min-width:22px;padding:0 5px;border-radius:4px;background:var(--crt-hot);color:var(--crt-bg);font-size:15px;line-height:22px;text-shadow:none}
 .device .keys{display:flex;gap:10px;padding-top:10px;flex:none}
 .device .keys button{flex:1;justify-content:center;min-height:48px;font-family:var(--crt-font);font-size:15px;letter-spacing:.12em;text-transform:uppercase;color:#c3ccd3;text-shadow:none;border:0;border-radius:10px;
@@ -238,7 +239,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.60.6
+   STARSHIP CADET: CSV Wren                           build 0.28.57
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7588,7 +7589,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.60.6';                           // keep in step with the header's build line
+const GAME_BUILD = '0.28.57';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -10131,7 +10132,7 @@ deviceApp({ id: 'record', title: 'Record', icon: 'record', order: 70, view: () =
 
 // Crew and Appointments (0.35.4): shells. The social engineer's section 20 registers its own 'crew' and 'appointments' apps
 // with deviceApp, which replace these.
-deviceApp({ id: 'crew', title: 'Relationships', icon: 'people', order: 50, view: () => ({ title: 'Relationships', blocks: [{ kind: 'text', text: 'Your contacts fill in as you get to know people aboard.' }] }) });
+deviceApp({ id: 'crew', title: 'Relationships', short: 'People', icon: 'people', order: 50, view: () => ({ title: 'Relationships', blocks: [{ kind: 'text', text: 'Your contacts fill in as you get to know people aboard.' }] }) });
 
 // Appointments (0.35.6, C3): make one (who, when, where), and crew answer from their real day (section 14's
 // apptReply: yes, "how about 18:30?", or no). Accepted ones go into SHIP.device.appts (saved) and section 14 walks
@@ -11460,10 +11461,11 @@ function needStrip() {
     + '#needStrip.open u{display:block;width:22px;text-align:right;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}#needStrip.open em{left:100%;margin-left:6px;top:0}'
     + '#needStrip .nsFold,#needStrip .nsMini{display:flex;align-items:center;justify-content:center;width:18px;color:var(--muted)}#needStrip .nsMini{display:none;width:22px}'
     + '#needStrip .nsFold{appearance:none;border:0;background:none;padding:0;min-height:0;font-size:15px;line-height:1;cursor:pointer;-webkit-backdrop-filter:none;backdrop-filter:none}'
+    + '#needStrip .nsT{display:flex;align-items:center;font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.03em;padding-right:1px}#needStrip.open .nsT{align-self:flex-start}'   // 0.28.57: the strip says what it is (the user's)
     + '#needStrip.open .nsFold{align-self:flex-end}#needStrip.fold{padding:6px 8px}#needStrip.fold .ns,#needStrip.fold .nsFold{display:none}#needStrip.fold .nsMini{display:flex}';
   document.head.appendChild(st);
   el = document.createElement('div'); el.id = 'needStrip'; el.setAttribute('role', 'button'); el.setAttribute('aria-label', 'Your needs: tap for names and numbers');
-  el.innerHTML = NEED_KEYS.map(k => '<div class="ns" data-k="' + k + '" style="color:' + NEED_COL[k] + '"><svg viewBox="0 0 24 24"><path d="' + NEED_ICON[k] + '"/></svg><span>' + NEED_LABEL[k] + '</span><i><b></b></i><u></u><em></em></div>').join('')
+  el.innerHTML = '<b class="nsT" aria-hidden="true">Needs</b>' + NEED_KEYS.map(k => '<div class="ns" data-k="' + k + '" style="color:' + NEED_COL[k] + '"><svg viewBox="0 0 24 24"><path d="' + NEED_ICON[k] + '"/></svg><span>' + NEED_LABEL[k] + '</span><i><b></b></i><u></u><em></em></div>').join('')
     + '<button class="nsFold" aria-label="Fold your needs away">‹</button><div class="nsMini"><svg viewBox="0 0 24 24"><path d="' + STRIP_HEART + '"/></svg></div>';
   el.onclick = e => { e.stopPropagation(); if (SHIP.player.stripFold) stripFold(false); else { el.classList.toggle('open'); STRIP_SIG = ''; } };
   el.querySelector('.nsFold').onclick = e => { e.stopPropagation(); stripFold(true); };
@@ -29348,7 +29350,7 @@ function newsFeed() {
 // closest first, with where they are when you may know it; tap one for what you know about them
 let CREW_PICK = null;
 const shipNews = (limit = 20) => newsFeed().slice(0, limit).map(x => ({ text: x.line, from: x.from, at: x.at }));   // the Ship app's news feed (section 19)
-if (typeof deviceApp === 'function') deviceApp({ id: 'crew', title: 'Relationships', icon: 'people', order: 50,   // 'Crew' until 0.28.44 (the user's)
+if (typeof deviceApp === 'function') deviceApp({ id: 'crew', title: 'Relationships', short: 'People', icon: 'people', order: 50,   // 'Crew' until 0.28.44 (the user's); the tile says People (0.28.57: Relationships overflowed it)
   view: () => {
     const c = CREW_PICK && crewContacts({ all: true }).find(x => x.id === CREW_PICK);
     if (c) return { title: c.name, blocks: [
@@ -34603,8 +34605,11 @@ function updateClock() {
   const night = nightAt() > .5;
   clockEl.textContent = clockText(); drawClock(hhmm(SHIP.time.min));
   hudFit();
-  if (clockEl.scrollWidth > clockEl.clientWidth + 1) {   // 0.35.36: too long for its line (a narrow phone, a long weekday): the short weekday
-    const wd = WEEKDAYS[weekday(SHIP.time.day)]; clockEl.textContent = clockText().replace(wd, wd.slice(0, 3)); }   // 0.35.39: from clockText()
+  // too long for its line (0.35.36; 0.28.57, the user's "the clock is cut off" on a phone): a phone always gets the short
+  // form, "Day 3 · Wed 06:00"; anything still too long drops to "D3 · Wed 06:00", then "Wed 06:00"
+  const wd = WEEKDAYS[weekday(SHIP.time.day)].slice(0, 3), tm = hhmm(SHIP.time.min), over = () => clockEl.scrollWidth > clockEl.clientWidth + 1;
+  const phone = typeof matchMedia === 'function' && matchMedia('(max-width:720px),(max-height:500px)').matches;
+  for (const t of ['Day ' + SHIP.time.day + ' · ' + wd + ' ' + tm, 'D' + SHIP.time.day + ' · ' + wd + ' ' + tm, wd + ' ' + tm]) { if (!phone && !over()) break; clockEl.textContent = t; if (!over()) break; }
   lightBtn.querySelector('span').textContent = night ? 'Day' : 'Night';
   lightBtn.setAttribute('aria-label', night ? 'Debug: sleep until 07:40' : 'Debug: skip to 21:40');
 }
