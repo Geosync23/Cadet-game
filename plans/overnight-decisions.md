@@ -55,3 +55,11 @@ Big calls deliberately left for the user: the pull request to `main` (the user's
 | ~04:10 (the user) | Keep the full 0.60.7 team or trim it to save the weekly allowance? | Trim: sim and systems become one seat, one onboarding seat after Zeke's fixes, two check runners | The user's call (adds about an hour). |
 | ~04:46 (the user) | Some weekdays have more than 3 traditions in the plan's list (Wed 5, Thu 4 evening). Cap at 3? | Keep as built, but make sure no rooms conflict. Cook-along becomes a Saturday-afternoon activity only (it helps make dinner). The Quiz gets a mini-game: 3 multiple-choice questions about the ship. | The user's calls. |
 | ~04:58 (lead, from the user's 'puzzles earlier, then increase in rate') | How early and how often? | First (gentlest) puzzle Day 5 with the scanner; uniform to Day 8; ~1 in 10 repairs as Junior, 1 in 5 Officer, 1 in 4 Senior, 1 in 3 Engine Specialist | Earliest day that keeps one small new thing a day; a gentle ramp. Easy to change. |
+
+## Night of 2026-10-18 (lead 10): the user's overnight authority
+The user (~05:20): the lead may approve or reject everything overnight; don't hold anything (the user can change it in the morning); anything truly big needs safety nets and saves along the way. At check-in the lead gives detailed documentation plus an at-a-glance summary of every decision. After 0.60.7: Pillar 5 Steps 1 (Foundation) and 2 (Junior days, Days 2-8).
+| Time (UTC) | The question | What was done | Why |
+|---|---|---|---|
+| ~05:20 | Pillar 5 spec pages overnight: approve, or wait for the user? | The lead approves or rejects each page against the approved plan; nothing waits | The user's instruction |
+| ~05:20 | Where do Pillar 5 builds go? | A separate preview link; 0.60.7 stays on the main link until the user OKs Pillar 5 | Safety net: the main game is never broken overnight |
+| ~05:20 | How far to go overnight? | Steps 1 and 2, each saved as its own build; stop after Step 2 for the user's check-in, or earlier if the weekly allowance warning gets worse | Safety net on cost; each step can be undone on its own |
