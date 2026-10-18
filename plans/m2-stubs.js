@@ -1,7 +1,5 @@
-// TEST STUBS for section 17's Step 2 API (seat S's 0.33.48-49), only in test copies
+// TEST STUBS for section 17's Step 2 API (seat S's 0.33.49: the incidents' machine side; the drift is in from 0.33.48), only in test copies
 var STUB_LIFT = false;
-function machineDrift(id) { const s = SHIP.machines[id]; return s && s.drift || 0; }
-function tuneSet(id, v) { const s = SHIP.machines[id]; if (!s) return false; s.drift = Math.max(-3, Math.min(3, v)); MACH_REV++; if (!s.drift) simNote('tuned', { machine: id }); return true; }
 function machineFault(id, c = 40) { machinesNow(); const s = SHIP.machines[id]; if (!s) return false; s.cond = Math.min(s.cond, c); s.state = machineState(s.cond); MACH_REV++; return true; }
 function liftStuck(on) { STUB_LIFT = !!on; }
 jobKindAdd('joint', { tier: 1, work: 20, parts: ['seal'], text: 'Fit a joint', stops: j => [{ deck: j.deck, placeId: j.at, mins: 20, tag: 'job' }], done() {}, crew: { can: p => !!p.work && p.work.place === 'work:works', mins: 20 } });
