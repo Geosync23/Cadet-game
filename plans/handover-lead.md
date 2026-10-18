@@ -537,3 +537,4 @@ Read: CLAUDE.md, TEAM.md (session chain rule + overnight exception), plans/brief
 - ~11:02 S 859e261 (0.33.49 incidents machine side; machine_check OK, cadet_test identical); 0.33.50 hauling 2cb6ace checking.
 - ~11:03 C pushed 87df8f5 (0.44.3-6 incl. Day 5 escort end on caseCalled; career/device OK, cadet_test identical). Wardrobe-tools question → no (logged).
 - ~11:04 S 03340c5 (0.33.50 hauling + 0.33.51 stop.hold; machine_check OK, cadet_test identical) — S's Step 1+2 list complete, idle.
+- ~11:05 C ae6598a (0.44.7: WORK_MECH.offer for M2 m6, .hold for H m7, m5 Calder-first; career/mech OK, cadet_test identical). C ~37%.
