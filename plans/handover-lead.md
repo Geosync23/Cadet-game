@@ -539,3 +539,4 @@ Read: CLAUDE.md, TEAM.md (session chain rule + overnight exception), plans/brief
 - ~11:04 S 03340c5 (0.33.50 hauling + 0.33.51 stop.hold; machine_check OK, cadet_test identical) — S's Step 1+2 list complete, idle.
 - ~11:05 C ae6598a (0.44.7: WORK_MECH.offer for M2 m6, .hold for H m7, m5 Calder-first; career/mech OK, cadet_test identical). C ~37%.
 - ~11:07 C a8dd78e (0.44.8 WORK_MECH.at(day); career OK, cadet_test identical).
+- ~11:08 H 55343c6 (0.55.10 Day 5 escort holds until caseCalled; puzzle_check OK, cadet_test identical). H done.
