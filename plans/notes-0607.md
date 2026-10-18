@@ -60,7 +60,7 @@ Q13 weekly Wednesday 10:00; Q14 no penalty, note: "indicator shows you" (a visua
 - Dinner a little heavier in 0.60.6 vs 0.60.5b (4.0 vs 3.6 ms avg; 13-14 vs 3-5 slow frames/h on phone.py): profile in 0.60.7 (DA3).
 
 ## The user's notes after playing 0.60.6 (2026-10-18, verbatim in substance)
-For 0.60.6a (quick fix, PE6 on claude/fix-0606a, BM3 checks):
+For 0.60.6a (quick fix, PE6 on claude/player-needs, BM3 checks):
 - Clock is cut off in the upper-right corner of the UI.
 - The word "Needs" should be by the needs meters.
 - The Relationships app label on the device is far too large and overlaps other apps; use a different word if it won't scale and stay readable.
