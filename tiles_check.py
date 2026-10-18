@@ -17,7 +17,7 @@
 #   opens; someone already at the table plays you at once; nobody free (quiet hours): a toast says so and you just sit;
 #   playing stops ship time and a deck tap brings the board back; time runs again once it's over; How to play on your
 #   first game (Next, by itself as you select and step, Skip, again from the board and the Tiles app; every step about
-#   two lines); the game's social at its end; Done and Leave game stand you up; walking
+#   two lines); the game's social at its end (a quarter for later games with the same person that day, 0.28.54); Done and Leave game stand you up; walking
 #   away leaves a game uncounted; a game adds friendship and a memory once a day per opponent; who goes first turns
 #   about with each opponent (saved); beating Rina is news, once; save.tiles round-trips
 #   Tiles night (0.46.3): tilesNight(day, came) pairs everyone (one watches when odd), the same every time; Rina always
@@ -235,11 +235,12 @@ def seat(pw, path):
     check(res[6] >= min(100, t0[2] + 9), f'the game\'s social comes when it ends (no ship minutes passed): {t0[2]} -> {res[6]}')
     gg.step(30); t2 = gg.ev("[SHIP.time.min, FREEZE.frozen]")
     check(t2[0] > t1[0] and not t2[1], f'time runs again once the game is over: {t1[0]} -> {t2}')
-    again = gg.ev("""(() => { const id = window.__opp, p0 = (SHIP.rel[id] || {}).pts, f0 = SHIP.tiles.first[id];
+    again = gg.ev("""(() => { const id = window.__opp, p0 = (SHIP.rel[id] || {}).pts, f0 = SHIP.tiles.first[id]; SHIP.player.needs.social = 20; const s0 = SHIP.player.needs.social;
       tilesPlay(id, null, 'quick'); const G = TL_GAME, first = G.s.first; let n = 0;
       while (!G.s.over && n++ < 80) { if (G.timer) { clearTimeout(G.timer); G.timer = 0; } if (G.s.p === 0) tilesDo(tilesAI(G.s, 'medium', G.rng)); else tilesCrewMove(); }
       if (G.timer) clearTimeout(G.timer); TL_GAME = null;
-      return [p0, (SHIP.rel[id] || {}).pts, f0, first, SHIP.tiles.first[id], G.tut]; })()""")
+      return [p0, (SHIP.rel[id] || {}).pts, f0, first, SHIP.tiles.first[id], G.tut, SHIP.player.needs.social - s0, bondMult(id)]; })()""")
+    check(again[6] > 0 and again[6] <= 12 * .25 * again[7] * 1.3 + .01, f'a second game with them the same day gives a quarter of the social (0.28.54): +{again[6]:.2f} (bond {again[7]})')
     check(again[1] == again[0], f'a second game the same day adds no more friendship: {again[:2]}')
     check(again[2] == 1 and again[3] == 1 and again[4] == 0, f'who goes first turns about with each opponent, saved: {again[2:5]}')
     check(again[5] == -1, f'How to play only runs by itself on your first game: {again[5]}')

@@ -226,7 +226,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.28.53
+   STARSHIP CADET: CSV Wren                           build 0.28.54
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7564,7 +7564,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.28.53';                           // keep in step with the header's build line
+const GAME_BUILD = '0.28.54';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -10761,6 +10761,7 @@ function pauseSet(on) {
       + '<div style="font-size:20px;font-weight:600;margin-bottom:6px">Paused</div><div style="opacity:.8;margin-bottom:14px">The ship waits for you.</div>'
       + '<button type="button" style="font:inherit;min-height:44px;padding:8px 22px;border-radius:10px;border:1px solid #6fa8b0;background:#16323a;color:#e6f0f1">Resume</button></div>';
     el.addEventListener('pointerdown', e => { e.stopPropagation(); e.preventDefault(); pauseSet(false); });
+    el.querySelector('button').onclick = e => { e.stopPropagation(); pauseSet(false); };   // Enter or Space on the focused Resume (0.28.54, reviewer 1f)
     document.body.appendChild(el);
   }
   if (on) {
@@ -10768,6 +10769,8 @@ function pauseSet(on) {
   } else PAUSE.on = false;
   freezeSync();                                          // section 13's frozen clock (0.28.50): it calls pauseShift as the freeze ends
   el.hidden = !on; el.style.display = on ? 'flex' : 'none';   // the inline display would beat [hidden]
+  if (on && !document.hidden) try { el.querySelector('button').focus(); } catch (e) { /* no focus */ }   // Resume has the keyboard (0.28.54)
+  else if (!on && document.activeElement && el.contains(document.activeElement)) try { document.activeElement.blur(); } catch (e) { /* fine */ }
   if (btn) { btn.setAttribute('aria-pressed', String(on)); btn.setAttribute('aria-label', on ? 'Resume the game' : 'Pause the game'); const sp = btn.querySelector('span'); if (sp) sp.textContent = on ? 'Resume' : 'Pause'; }
   return PAUSE.on;
 }
@@ -10788,6 +10791,13 @@ addEventListener('resize', pausePlace); setTimeout(pausePlace, 0);
 if (typeof ResizeObserver === 'function') new ResizeObserver(() => pausePlace()).observe(document.getElementById('devBtn'));   // the mail count widens it
 { const b = document.getElementById('pauseBtn'); if (b) b.onclick = e => { e.stopPropagation(); pauseSet(!PAUSE.on); }; }
 document.addEventListener('visibilitychange', () => { if (document.hidden) pauseSet(true); });
+// paused, the keyboard stays on the card (0.28.54, reviewer 1f): Tab keeps to Resume, never the HUD buttons under it; Escape resumes
+addEventListener('keydown', e => {
+  if (!PAUSE.on) return;
+  const b = document.querySelector('#pauseCard button');
+  if (e.key === 'Tab') { e.preventDefault(); if (b) b.focus(); }
+  else if (e.key === 'Escape') { e.preventDefault(); pauseSet(false); }
+}, true);
 
 // ---- mail (0.28.10): any section sends with mailSend({ at, from, subject, body }) (at: absolute ship minutes, now if
 // left out). SHIP.mail holds the newest MAIL_MAX, newest first: { id, at, from, subject, body, read }. Saved in
@@ -30542,7 +30552,7 @@ deviceApp({ id: 'tiles', title: 'Tiles', short: 'Tiles', icon: 'dot', order: 75,
 // Playing stops time (the user's "Playing tiles stops time"): while a game is on (not yet over) PAUSE.tiles freezes the
 // ship like Pause, without the overlay; it runs again on the result screen. No ship minutes pass while you play, so the
 // game's social comes in one go at its end (TL_GAIN, by your bond with them, like the other activities).
-const TL_ITEM = /^Tiles (table|station|board)\b/i, TL_NEAR = 2.4, TL_FAR = 40, TL_WAIT = 30, TL_GAIN = 12;   // TL_FAR metres on the deck; TL_WAIT ship minutes for them to come
+const TL_ITEM = /^Tiles (table|station|board)\b/i, TL_NEAR = 2.4, TL_FAR = 40, TL_WAIT = 30, TL_GAIN = 12, TL_AGAIN = .25;   // TL_FAR metres on the deck; TL_WAIT ship minutes for them to come
 const tlSecond = id => { try { const p = ROSTER.find(x => x.id === id); return p ? p.name.split(' ')[0] : id; } catch (e) { return id; } };
 Object.assign(PLAYER_ACTS, { tiles: { need: null, mins: 20, pose: 'sit:play', title: 'Playing Tiles', done: 'You get up from the board.',
   until: A => tilesSeatTick(A) } });
@@ -30628,7 +30638,8 @@ function tilesReward(G, you) {
   const T = SHIP.tiles, day = SHIP.time.day, first = G.name;
   try {   // the game's social (0.28.51): in one go, as no ship minutes passed while you played; by your bond, with your needs' effects
     const N = SHIP.player.needs, fx = typeof playerFx === 'function' ? playerFx() : null, bm = typeof bondMult === 'function' ? bondMult(G.opp) : 1;
-    N.social = needClamp(N.social + TL_GAIN * (fx && typeof fxR === 'function' ? fxR(fx, 'social') : 1) * bm);
+    const once = T.relDay[G.opp] !== day ? 1 : TL_AGAIN;   // the full gain for your first game with them each ship day, a quarter after (the lead, 0.28.54: no filling social in no time)
+    N.social = needClamp(N.social + TL_GAIN * once * (fx && typeof fxR === 'function' ? fxR(fx, 'social') : 1) * bm);
   } catch (e) { /* needs not there (tests on paper) */ }
   if (T.relDay[G.opp] !== day) {   // friendship and the memory once a ship day per opponent, like a chat; later games still count
     T.relDay[G.opp] = day;
@@ -33449,7 +33460,7 @@ function loop() {
     U.uFar.value.set(SKY.far.x + px * .03, SKY.far.y + py * .03); U.uNear.value.set(SKY.near.x + px * .08, SKY.near.y + py * .08);
     U.uPR.value = renderer.getPixelRatio();
   }
-  for (const D_ of DUST) {
+  if (run) for (const D_ of DUST) {                       // still while frozen (0.28.54, reviewer 1f)
     const a = D_.geo.attributes.position.array;
     for (let i = 0; i < D_.n; i++) { a[i * 3 + 1] += Math.sin(t * .3 + D_.seeds[i]) * .0015; a[i * 3] += Math.cos(t * .2 + D_.seeds[i]) * .001; }
     D_.geo.attributes.position.needsUpdate = true;

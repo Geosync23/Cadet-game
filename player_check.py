@@ -29,6 +29,7 @@
 #   gifts (0.28.25): store gifts and machine-shop gifts into your hands (giftAdd); a friend's note on your bunk
 #   a reserved training job (0.28.24): the shelf part, the bracket made in the machine shop with the bar, the stops marked, the repair
 #   the note bus (0.28.22): simNote('act', ...) for wash, eat (with), call, buy; your name saved and cleaned
+#   the pause card (0.28.54): Resume focused, Tab stays on it, Enter and Escape resume; the dust stands still while paused
 #   saving: a v 2 save keeps needs; a v 1 save loads with needs at 80; ?nosave neither reads nor writes
 #   --long (0.28.41, the lead's save budget): only this: the whole save from the real arrival (newGameStart(true)) to
 #   day 280 (or --long N), skipTo ten hours at a time, measured after each day's 06:00; prints the size and the biggest
@@ -237,6 +238,15 @@ with sync_playwright() as pw:
     tq = g.ev("(() => { const out = [], s0 = simNow(); simTimeout(() => out.push('fired'), 500); pauseSet(true); window.__step(60, 1000 / 30); const held = out.length, s1 = simNow(); pauseSet(false); window.__step(20, 1000 / 30); return [held, out.length, Math.round(s1 - s0)]; })()")
     print('  a simTimeout across a 2 s pause [fired while paused, fired after, simNow moved while paused (ms)]:', tq)
     check(tq[0] == 0 and tq[1] == 1 and tq[2] < 100, f'a simTimeout waits out a pause, then fires once; the sim clock stands still while paused: {tq}')
+    # the pause card and the keyboard (0.28.54, reviewer 1f): Resume is focused, Tab stays on it, Enter resumes, Escape resumes; dust stands still
+    g.ev("pauseSet(true)"); g.step(2)
+    DU = "JSON.stringify(DUST.length ? Array.from(DUST[0].geo.attributes.position.array.slice(0, 6)) : [])"
+    kb = [g.ev("document.activeElement === document.querySelector('#pauseCard button')"), g.ev(DU)]
+    g.page.keyboard.press('Tab'); g.step(30); kb += [g.ev("document.activeElement === document.querySelector('#pauseCard button')"), g.ev(DU)]
+    g.page.keyboard.press('Enter'); g.step(1); kb.append(g.ev("PAUSE.on"))
+    g.ev("pauseSet(true)"); g.page.keyboard.press('Escape'); g.step(1); kb.append(g.ev("PAUSE.on"))
+    print('  pause card keys [focused, dust, Tab keeps focus, dust after 1 s, Enter resumed, Escape resumed]:', [kb[0], kb[2], not kb[4], not kb[5]], kb[1] == kb[3])
+    check(kb[0] and kb[2] and kb[4] is False and kb[5] is False and kb[1] == kb[3], f'paused: Resume has the keyboard (Tab stays on it, Enter and Escape resume) and the dust stands still: {kb[0]}, {kb[2]}, {kb[4]}, {kb[5]}, {kb[1] == kb[3]}')
 
     print('Walking speed on arrival (0.28.47, the user\'s "walking very slowly at the start"):')
     ar = g.ev(r"""(() => { if (typeof sickNow !== 'function' || typeof careerInit !== 'function') return null;
