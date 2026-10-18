@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tuning Spec</title>
+<style>
+:root{--ink:#e8eef0;--muted:#93a6ae;--teal:#4cc3b5;--gold:#e9c46a;--rose:#e58f7a;--glass:rgba(13,21,33,.78);--line:rgba(150,200,196,.22);--chip:rgba(76,195,181,.14)}
+*{box-sizing:border-box}
+html,body{margin:0;background:#121a27;color:var(--ink);font-family:"Avenir Next","Segoe UI",system-ui,sans-serif}
+body{background:radial-gradient(ellipse at 50% 20%,#22304a 0%,#141c2b 60%,#0c111b 100%) fixed;line-height:1.5}
+header{padding:18px 16px 4px;max-width:1100px;margin:0 auto}
+h1{font-size:21px;font-weight:600;margin:0}
+h2{font-size:17px;font-weight:600;margin:0 0 8px;color:#bdeee6}
+h3{font-size:14.5px;font-weight:600;margin:12px 0 4px;color:#d9eeea}
+.sub{font-size:13.5px;color:var(--muted);margin-top:4px}
+.draft{display:inline-block;font-size:11.5px;color:#14202a;background:var(--gold);border-radius:999px;padding:2px 9px;margin-left:6px;vertical-align:2px}
+nav{position:sticky;top:0;z-index:5;background:rgba(14,20,31,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+nav div{display:flex;gap:6px;overflow-x:auto;padding:8px 16px;max-width:1100px;margin:0 auto;-webkit-overflow-scrolling:touch}
+nav a{flex:none;text-decoration:none;border:1px solid var(--line);background:var(--glass);color:var(--ink);font-size:13px;padding:6px 11px;border-radius:999px}
+nav a:focus-visible,nav a:hover{border-color:var(--teal);color:#bdeee6;outline:none}
+main{max-width:1100px;margin:0 auto;padding:6px 16px 40px}
+section{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:14px 0;scroll-margin-top:56px}
+p{margin:6px 0;font-size:14px;color:#d6e0e3}
+ul{margin:6px 0;padding-left:20px;font-size:14px;color:#d6e0e3}
+li{margin:3px 0}
+.note{font-size:12.5px;color:var(--muted)}
+.grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.card{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.025)}
+.card b{display:block;color:#bdeee6;font-size:14px;margin-bottom:2px}
+.card span{font-size:13px;color:#cfd9dc}
+.card .meta{display:block;font-size:12px;color:var(--muted);margin-top:4px}
+.tag{display:inline-block;font-size:11.5px;border-radius:999px;padding:1px 8px;margin:2px 4px 0 0;background:var(--chip);color:#bdeee6;border:1px solid var(--line)}
+.tag.new{background:rgba(233,196,106,.16);color:#f1dca0}
+.tag.old{opacity:.75}
+.steps{list-style:none;padding:0;margin:8px 0;counter-reset:s}
+.steps li{position:relative;padding:8px 10px 8px 46px;border-left:2px solid rgba(76,195,181,.35);margin:0 0 0 14px}
+.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:-15px;top:8px;width:28px;height:28px;border-radius:50%;background:#183040;border:1px solid var(--teal);color:#bdeee6;font-size:12.5px;display:flex;align-items:center;justify-content:center}
+.steps time{display:block;font-size:12px;color:var(--gold)}
+.steps b{color:#e4f3f0;font-weight:600}
+.steps span{display:block;font-size:13.5px;color:#cfd9dc}
+.week{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.day{border:1px solid var(--line);border-radius:12px;padding:9px 10px;background:rgba(255,255,255,.02)}
+.day h4{margin:0 0 4px;font-size:13.5px;color:var(--gold);font-weight:600}
+.day p{font-size:12.5px;margin:4px 0;color:#cfd9dc}
+.day .who{color:#bdeee6;font-weight:600}
+.lines{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;background:#0b141c;border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:#9fe7dc;white-space:pre-wrap;overflow-x:auto;margin:8px 0}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0}
+.flow .box{border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:13px;background:rgba(255,255,255,.03)}
+.flow .arrow{color:var(--teal)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:12px}
+.tablewrap{overflow-x:auto}
+.waves{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+.wave{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.025)}
+.wave b{color:var(--gold);display:block}
+.wave .ci{display:block;margin-top:6px;font-size:12.5px;color:#f1dca0}
+ol.q{padding-left:22px;font-size:14px;color:#d6e0e3}
+ol.q li{margin:6px 0}
+ol.q em{color:var(--muted);font-style:normal;font-size:12.5px}
+svg text{font-family:inherit}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;color:#9fe7dc;background:rgba(0,0,0,.25);padding:0 4px;border-radius:4px;word-break:break-word}
+section.builder{border-color:rgba(233,196,106,.45)}
+section.builder h2{color:var(--gold)}
+.status{display:inline-block;font-size:11.5px;color:#14202a;background:var(--teal);border-radius:999px;padding:2px 9px;margin-left:6px;vertical-align:2px}
+td code{white-space:normal}
+</style>
+</head>
+<body>
+<header>
+  <h1>M5 · Tuning (Day 4, Brennan with Calder) <span class="draft">spec for approval</span></h1>
+  <div class="sub">Some faults aren't a broken part but a machine out of adjustment. You turn a setting a step at a time and watch the machine itself answer: the oven's glow steadies, the lights stop flickering. No timer, no score (the user: yes, this is the right side of the "no mini-games" line). Step 2, sub-block 24e. Plan Part 2, M5.</div>
+</header>
+<nav><div><a href="#plain">In plain words</a><a href="#day">Day 4</a><a href="#look">What you watch</a><a href="#grow">How it grows</a><a href="#b">Builder</a><a href="#save">Save</a><a href="#tests">Tests</a><a href="#ranges">Builds and keys</a></div></nav>
+<main>
+
+<section id="plain">
+  <h2>In plain words</h2>
+  <ul>
+    <li><b>Machines drift:</b> now and then an oven runs hot, a light relay chatters, a cart dock charges slow. It's on the board as "Tune: Oven 2 (runs hot)".</li>
+    <li><b>The verb:</b> at the machine's panel, <b>turn</b> its setting one step at a time (two big buttons, − and +). After each step the machine answers on the deck: the glow calms or flares, the flicker slows or quickens. Settle it and it's done. Overshoot and it shows the other way; turn it back.</li>
+    <li><b>The crew tune too</b> (today's "calibrate" chores become tuning), so a drifted machine never waits on you.</li>
+  </ul>
+</section>
+
+<section id="day">
+  <h2>Day 4, Thursday (Torres is off on Thursdays this week)</h2>
+  <ol class="steps">
+    <li><time>Morning</time><b>Brennan's oven runs hot</b><span>She grumbles about it at breakfast ("Burnt the edges of forty rolls"). Calder sends you a Mail: "Galley, 10:15. Bring nothing. — C."</span></li>
+    <li><time>10:15, the galley</time><b>Calder shows you</b><span>At Oven 1's panel: "Watch the glow, not the dial." She turns it two steps down; the glow stops stuttering. She hands over: "Oven 2 is doing the same. Your turn."</span></li>
+    <li><time>Oven 2</time><b>You tune, they watch</b><span>Brennan watches with her arms folded, then feeds you a biscuit when it settles.</span></li>
+    <li><time>After</time><b>Trained</b><span>"Trained: tuning, with Calder." Tuning jobs now come to you: about one every other workday.</span></li>
+  </ol>
+  <p class="note">The day's small new thing is the inspection's real check at 06:30 (M3, Tomas).</p>
+</section>
+
+<section id="look">
+  <h2>What you watch</h2>
+  <div class="tablewrap"><table>
+    <tr><th>Machine</th><th>Running high</th><th>Running low</th><th>Settled</th></tr>
+    <tr><td>Oven, range</td><td>the glow stutters (hot)</td><td>the screen dims (cool)</td><td>a steady glow</td></tr>
+    <tr><td>Light relays</td><td>the deck's lamps flicker fast</td><td>the lamps sag dim</td><td>steady light</td></tr>
+    <tr><td>Cart dock</td><td>its lamp blinks fast</td><td>its screen dims (charging slow)</td><td>a steady lamp</td></tr>
+  </table></div>
+  <p class="note">These are the looks section 17 and the performance engineer already draw (flicker, dim, blink). The panel card also says it in words ("running hot", "a little hot", "steady", "a little cool", "cold"); no numbers, unless the machine's own gauge has one.</p>
+</section>
+
+<section id="grow">
+  <h2>How it grows</h2>
+  <div class="grid">
+    <div class="card"><b>Stage 1 · One setting</b><span>Ovens, the range, light relays, cart docks.</span><span class="meta"><span class="tag">Day 4</span></span></div>
+    <div class="card"><b>Stage 2 · Two settings that pull on each other</b><span>An air scrubber's fan and flow: turning one moves the other a little. Tier 2 machines, so as an Officer.</span><span class="meta"><span class="tag">Officer</span><span class="tag new">optional</span></span></div>
+    <div class="card"><b>Stage 3 · Before anyone notices</b><span>With the scanner, a drifting setting shows on your round before it's on the board.</span><span class="meta"><span class="tag">with the scanner</span><span class="tag new">optional</span></span></div>
+  </div>
+  <p class="note">Later: coil balancing at Tier 4 (M23) is this verb grown up; the sensor array's calibration (M20) too. Some head-scratchers end "it's a setting, not a part" and become a tuning job.</p>
+</section>
+
+<section id="b" class="builder">
+  <h2>For the builder (seat M2, sub-block 24e)</h2>
+  <div class="tablewrap"><table>
+    <tr><th>Section</th><th>What</th><th>Owner</th></tr>
+    <tr><td>17</td><td><b>drift:</b> <code>SHIP.machines[id].drift</code> (−3…+3, 0 = settled) on <code>TUNABLE = { oven, range, lights, cartdock }</code> (stage 2 adds <code>scrubber</code> with <code>drift2</code>); each ship hour, a settled tunable machine drifts with <code>schedU(machSeed(id), hour, 868) &lt; TUNE_P</code> (about one drift a workday ship-wide) by ±1-3 (<code>schedU(..., 869)</code>); only from <code>TUNE_FROM</code> (Day 4 06:00, so Days 0-3 are exactly as now). A drift of 2+ posts a <code>tune</code> job (found 1-6 hours later, like a service); a drift of 1 shows but posts nothing. <code>CHORES.calibrate</code> on a drifted machine becomes its tune job. Effects: a drifted machine counts 8 condition points lower per step of drift in <code>machWorks</code> (so the galley's cook times feel it) and wears 10% faster per step. <code>machineLook</code>: high → <code>flicker</code> (ovens and lights) or <code>blink</code> (docks); low → <code>dim</code>.</td><td>S</td></tr>
+    <tr><td>24e (new)</td><td>the <code>tune</code> job kind (<code>jobKindAdd</code>), the panel card, the training (Day 4: on Day 4 at 06:00 <code>tuneSet('3-oven-1', +2)</code> and <code>tuneSet('3-oven-2', +2)</code>, Calder's job on oven 1, yours on oven 2), stage 2 coupling</td><td>M2</td></tr>
+    <tr><td>15</td><td>the <code>turn</code> step (foundation 15.1); the <code>tune</code> pose</td><td>P</td></tr>
+    <tr><td>8b</td><td><code>tune</code> pose (one hand at a panel at chest height; falls back to <code>work</code>)</td><td>performance (on call)</td></tr>
+    <tr><td>16</td><td>reads nothing new (drift reaches it through <code>shipEffects</code>' cook)</td><td>galley (informed)</td></tr>
+    <tr><td>content</td><td>Brennan's and Calder's lines (<code>train.m5</code>), the panel words</td><td>W</td></tr>
+  </table></div>
+  <ul>
+    <li><b>The job:</b> <code>jobKindAdd('tune', { tier: machine's, work: 0, stops: j =&gt; [{ deck, placeId: panel, step: 'turn', opts: { start: drift, onTurn: v =&gt; tuneSet(id, v), ok: v =&gt; v === 0, words } }], done: ..., crew: { can: works, mins: 15 } })</code>. The value starts at the machine's real drift; each − or + changes it by 1 (the card shows only words); <code>tuneSet</code> updates <code>SHIP.machines[id].drift</code> at once and bumps <code>MACH_REV</code> so the look follows within half a second. Settled (0): the job is done; turn-in as any job.</li>
+    <li><b>Overshoot:</b> nothing special; the look shows the other side.</li>
+    <li><b>Stage 2</b> (scrubbers, Tier 2): two settings on the card; turning fan by 1 moves flow by ½ (rounded toward 0) and the other way round; done when both are 0. The look: fan high → a higher hum (later, with sound; today the scrubber's <code>flicker</code>), flow low → <code>dim</code>.</li>
+    <li><b>Skill:</b> <code>careerSpeed(kind)</code> applies to the 1 ship minute per step.</li>
+    <li><b>Notes:</b> <code>simNote('tuned', { machine })</code>.</li>
+  </ul>
+</section>
+
+<section id="save" class="builder">
+  <h2>Save</h2>
+  <ul><li><code>ship.machines[id]</code> gains a third value, drift (<code>[cond, lastService, drift]</code>; read as 0 if missing); the tune job in <code>ship.jobs</code>; <code>ship.works.use.m5</code>.</li></ul>
+</section>
+
+<section id="tests" class="builder">
+  <h2>Tests</h2>
+  <ul>
+    <li><b><code>mech_check</code></b> (24e): a drifted machine settles only at 0; the look follows the setting both ways; Day 4's two ovens are drifted for the training; drift the same twice and in one jump; the crew tune drifted machines you leave.</li>
+    <li><b><code>machine_check</code></b>: no drift before Day 4 06:00; drift rate about one a workday; ship health unchanged within 2 over 14 days; the save of drift.</li>
+    <li><b><code>food_check</code></b>: food still ready with a drifted oven (cook a little slower).</li>
+  </ul>
+</section>
+
+<section id="ranges" class="builder">
+  <h2>Builds and keys</h2>
+  <ul><li>Seat <b>M2</b>, branch <code>claude/mech-incidents</code>, builds <b>0.51.x</b> (free, checked 2026-10-18). Hash keys <b>868-869</b> (drift chance, drift size).</li></ul>
+</section>
+
+</main>
+</body>
+</html>
