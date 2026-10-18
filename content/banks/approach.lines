@@ -1,37 +1,33 @@
 @bank all
-// Head writer W (playtest 1, 0.63.2; seat X's walk-up conversations): what a crew member says when they walk up and
-// stop beside you to start a conversation. Clearly to you, by how well they know you. Card lines (90 at most).
-// Seat X reads lineFor(who, 'approach', ctx), falling back to 'greet'.
+// Head writer W (playtest 1, 0.63.2; seat X's walk-up conversations): kind 'seek', the opener a crew member says when
+// they've walked up and stopped beside you (the side chip, a bubble, then the chat card's first line if you tap).
+// Addressed to you, 70 characters or fewer, a question or an invite. Tiers 1-4 (strangers don't walk up), plus the
+// week-1 evening check-in (any tier) and someone leaving soon.
 
-== approach
-? tier=stranger
-- {hi}. You're the new one, aren't you? I thought I'd come and say hello properly.
-- Sorry, I'm being nosy. You're new? Welcome aboard. I'm {first}.
-- {hi}! I keep seeing you about and never stopping. So, stopping. Hello.
-- Excuse me. You're the new hand? I've heard good things. Well, things.   #funny
-- {hi}. I wanted to say welcome before somebody else beat me to it.
-- You look like you're settling in. Are you? Honestly?
+== seek
 ? tier=acquaintance
-- {hi}, {nick}. Got a minute? I've been meaning to come and find you.
-- Oh good, it's you. I wanted to ask how your week's going.
-- {hi}! I saw you from over there and thought, I'll go and say hello.
-- There you are. Settling in all right? You look like you know your way now.
-- {hi}, {nick}. Mind if I stop a minute? My feet need a rest anyway.   #funny
+- {hi}, {nick}. Got a minute? I've been meaning to find you.
+- Oh good, it's you. How's your week going?
+- {hi}! Saw you and thought I'd come over. Settling in?
+- Mind if I stop a minute? My feet need a rest anyway.   #funny
+- You look like you know your way now. Do you?
 ? tier=colleague
-- {hi}, {nick}. I was hoping I'd catch you. How's it going?
-- Oh, {nick}! Just the person. Tell me something good about your day.
-- {hi}. You've been busy. I've seen you all over the ship.
+- {hi}, {nick}. Got a minute? How's it going?
+- Just the person. Tell me something good about your day.
+- You've been busy. I've seen you all over the ship. Sit a sec?
 - There you are! I was going to come and find you anyway.
 ? tier=friend
-- {nick}! I came over the second I saw you. How are you?   #warm
-- There you are. I've been saving up things to tell you.
-- {hi}, {nick}. Got a minute for me? Good. I've got news.
-- Oh, perfect. I was just thinking I hadn't seen you today.   #warm
+- {nick}! Came over the second I saw you. How are you?   #warm
+- There you are. I've been saving things up to tell you.
+- Got a minute for me? Good. I've got news.
+- I was just thinking I hadn't seen you today. Talk?   #warm
 ? tier=close
 - {nick}. Come here. How are you, really?   #warm
 - There you are. Everything's better with you about.   #warm
-- {hi}, {nick}. I was looking for you. No reason. Just was.   #warm
-? time:evening
-- {hi}, {nick}. Long day? Come and tell me about it.
-? time:morning
-- Morning, {nick}. Have you eaten? You look like you haven't.   #funny
+- I was looking for you. No reason. Just was. Got a minute?   #warm
+? week1:true time:evening
+- How was today, honestly? Got a minute to tell me?
+- First week's a lot. Want to talk it through?   #warm
+? leaving:soon
+- Got a minute? I'm not here much longer. I wanted to say things.   #warm
+- Before I go, can we talk a while? I'll miss this.   #warm
