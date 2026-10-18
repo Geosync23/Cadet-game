@@ -269,8 +269,9 @@ PLAY = r"""(() => {
   out.wrong = { done: !!j.workDone, known: c.known.slice(), crossed: c.crossed.includes(wrongS), back: SHIP.stores[wp] === shelf0, steps: (j.stepsDone || []).length, cond: SHIP.machines[m.id].cond };
   // the save mid-case: written by the save hook, read back by the cleaner
   const sv = { ship: {} }; for (const f of SAVE_EXTRA) { try { f(sv); } catch (e) {} }
-  const before = JSON.stringify(c); CASE_SAVED = JSON.parse(JSON.stringify(sv.ship.works.cases)); delete SHIP.works.cases; CASE_CLEAN = false;
-  const c2 = caseOf(j); out.saveSame = !!c2 && JSON.stringify(c2) === before; out.saveBytes = JSON.stringify(sv.ship.works.cases).length;
+  const canon = o => JSON.stringify(o, Object.keys(o).sort().concat(['id', 'type', 'src', 'at', 'kills', 'by', 't', 'tried', 'done']));   // key order doesn't matter
+  const before = canon(c); CASE_SAVED = JSON.parse(JSON.stringify(sv.ship.works.cases)); delete SHIP.works.cases; CASE_CLEAN = false;
+  const c2 = caseOf(j); out.saveSame = !!c2 && canon(c2) === before; out.saveBytes = JSON.stringify(sv.ship.works.cases).length;
   // the right call: the machine put right, right first time is lost (one wrong call), flags 0
   caseAct('case:call', c2.id + '|' + c2.cause); caseAct('case:yes', c2.id + '|' + c2.cause);
   for (let k = 0; k < n; k++) jobStepDone(j.id, k);
