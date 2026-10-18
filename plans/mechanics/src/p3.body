@@ -1,5 +1,5 @@
 TITLE:What's Been Tried Spec
-H1:P3 · What's been tried? (Day 5, Calder): your first head-scratcher <span class="draft">spec for approval</span>
+H1:P3 · What's been tried? (Day 5, Halloran): your first head-scratcher <span class="draft">spec for approval</span>
 SUB:The gentlest kind of head-scratcher, and the first you meet, the day you get the scanner. Notes left by the crew who already tried something tell you what it isn't. Step 2, built on the case engine (<code>case-engine.html</code>). Plan Part 4, P3 (moved from Day 11 to Day 5 by the user's "puzzles earlier" change).
 NAV:plain=In plain words|first=Your first case|why=A change from the plan|later=Later cases|grow=How it grows|b=Builder|save=Save|tests=Tests|ranges=Builds and keys|faq=FAQ
 
@@ -17,12 +17,12 @@ NAV:plain=In plain words|first=Your first case|why=A change from the plan|later=
   <h2>Your first case (Day 5, Friday afternoon)</h2>
   <ol class="steps">
     <li><time>Thursday evening and Friday morning</time><b>The crew try</b><span>Washer 2 in the junior wing's laundry has started leaking onto the floor (you may have seen the puddle). On Thursday's evening shift a Works hand fits a new door seal; on Friday morning another swaps the drain valve. Neither helps. Each leaves a note.</span></li>
-    <li><time>After your second scanner reading</time><b>Calder: "Here's a funny one"</b><span>At the board: "Head-scratcher: Washer 2 leaks." She opens Fault notes on your device with you: three suspects (the door seal, the drain valve, the pump) and the first note taped to the job.</span></li>
-    <li><time>The first note</time><b>She reads it with you</b><span>"New door seal in. Still leaks. — Kovac." (Whoever really did it.) Calder: "So it's not the seal. Cross it off." You tap the door seal: crossed out.</span></li>
+    <li><time>After your second scanner reading</time><b>Halloran: "Here's a funny one"</b><span>At the board: "Head-scratcher: Washer 2 leaks." Halloran opens Fault notes on your device with you: three suspects (the door seal, the drain valve, the pump) and the first note taped to the job.</span></li>
+    <li><time>The first note</time><b>Halloran reads it with you</b><span>"New door seal in. Still leaks. — Kovac." (Whoever really did it.) Halloran: "So it's not the seal. Cross it off." You tap the door seal: crossed out.</span></li>
     <li><time>The second note</time><b>You read it</b><span>The second note is on the washer's service panel in the laundry ("Where next?" points there): "Swapped the drain valve. Still leaks. — Pell." You cross out the drain valve.</span></li>
-    <li><time>Call it</time><b>The pump</b><span>"Call it: the pump?" Yes. The arrow points at storage (the Plumbing shelf); fetch a pump, fit it, the leak stops. Calder: "Right first time. Torres will be sorry he missed that." "Trained: head-scratchers, with Calder."</span></li>
+    <li><time>Call it</time><b>The pump</b><span>"Call it: the pump?" Yes. The arrow points at storage (the Plumbing shelf); fetch a pump, fit it, the leak stops. Halloran: "Right first time. Zeke will be sorry he missed that." "Trained: head-scratchers, with Halloran."</span></li>
   </ol>
-  <p class="note">With the scanner, the pump and the new seal both read low-ish (the seal is still bedding in), which is why the notes matter. Calder: "The scanner sees what's worn. The notes see what's been tried."</p>
+  <p class="note">With the scanner, the pump and the new seal both read low-ish (the seal is still bedding in), which is why the notes matter. Halloran: "The scanner sees what's worn. The notes see what's been tried."</p>
 </section>
 
 <section id="why">
@@ -63,7 +63,7 @@ NAV:plain=In plain words|first=Your first case|why=A change from the plan|later=
     <li><b>Where the notes are:</b> the first on the job card (collected when you take the job at the board), the others at the machine's panel place or the place the symptom shows (collected when you're within reach), alternating, so a case is at least one walk.</li>
     <li><b>The first case (Day 5):</b> fixed: <code>4-washer-2</code> (Tier 1, real, panel <code>4-washer-2-svc</code>) is set faulty on Day 4 at 18:00 (<code>jobReserve</code>-style, slot 20, <code>o.train: 'p3'</code>, never on the crew's board) with cause <code>pump</code>, symptom "leaks"; its drip shows once <code>washer</code> joins <code>LOOK_WET</code> in <code>machineLook</code> (one word, S). If 4-washer-2 is in use by you (your own wash), it's 4-washer-3. Two tries: a door seal (<code>seal</code>) by whoever of the Works crew is on the evening (or Day 5 morning) shift, and a drain valve (<code>valve</code>) by the next; both parts really come off the shelves. If no Works crew member is on shift in that window, a Works hand on Day 5's 06:00-08:00 does both. Names in the notes are whoever really did them.</li>
     <li><b>Parts:</b> all three are in <code>STOCK</code> today (seal, valve, pump; the Plumbing shelf). The washer's fault table (job 3, <code>FAULT_CAUSES.washer</code>) must list them as part causes with <code>shows: 'leaks'</code>.</li>
-    <li><b>Training:</b> the teacher's lines (<code>train.p3</code>) play as a meeting at the board, then they follow you (<code>worksEscort</code>) to the panel and back; the case is a normal case with <code>c.train = true</code> (hints 2 and 3 are the teacher). <code>by: ['torres-zeke', 'calder']</code>, first on shift: on Day 5 Calder (Torres is off on Fridays); lines for both.</li>
+    <li><b>Training:</b> the teacher's lines (<code>train.p3</code>) play as a meeting at the board, then they follow you (<code>worksEscort</code>) to the panel and back; the case is a normal case with <code>c.train = true</code> (hints 2 and 3 are the teacher). <code>by: ['torres-zeke', 'halloran-emeka', 'calder']</code>, first on shift: on Day 5 Halloran (Torres is off on Fridays), Calder only if neither is on; lines for all three.</li>
     <li><b>The Chief's notes, page 1:</b> "What's been tried" (three lines by the Works writer).</li>
   </ul>
 </section>
@@ -78,7 +78,7 @@ NAV:plain=In plain words|first=Your first case|why=A change from the plan|later=
   <ul>
     <li><b><code>puzzle_check</code></b> (the P3 part): every P3 case's notes match real done <code>try</code> jobs (who, when, what part came off the shelf); each note kills only its decoy; exactly one left; no single note solves it; the first case is Deck 4's lights on Day 5, solvable with Torres for the steady player; about 1 in 10 of real repairs on Days 6-9 (±50% over the run); none before Day 5; the same twice.</li>
     <li><b><code>machine_check</code></b>: try jobs use parts and crew time like any chore; ship health unchanged within 1.</li>
-    <li><b><code>career_check</code></b>: Day 5: the scanner's training, then P3, both by Calder (Torres is off on Fridays), for the steady player.</li>
+    <li><b><code>career_check</code></b>: Day 5: the scanner's training, then P3, both by Halloran (Torres is off on Fridays), for the steady player.</li>
   </ul>
 </section>
 
@@ -90,5 +90,5 @@ NAV:plain=In plain words|first=Your first case|why=A change from the plan|later=
 <section id="faq">
   <h2>Builders' questions</h2>
   <h3>Torres is off on Day 5 (seat C, 2026-10-18)</h3>
-  <p>Torres's rota is <code>offDays [3, 4]</code> (Thursday and Friday), so he can't teach on Day 5. Rows take a <code>by</code> list, first on shift wins: <code>m7</code> and <code>p3</code> are <code>['torres-zeke', 'calder']</code>, so Calder teaches both on Day 5 (she hands over Torres's old scanner, which he left with a note). No rota change; the other rows' teachers are on shift on their days (checked: Torres Tue and Mon, Yara Wed, Brennan and Tomas Thu, Calder Mon-Fri). <code>m2</code>'s "oily job" is <code>flag('works.oily')</code>, set by 24b when you turn in an oily job on Day 8 or later.</p>
+  <p>Torres's rota is <code>offDays [3, 4]</code> (Thursday and Friday), so he can't teach on Day 5. Rows take a <code>by</code> list, first on shift wins: <code>m7</code> and <code>p3</code> are <code>['torres-zeke', 'halloran-emeka', 'calder']</code>, so <b>Emeka Halloran</b> (a Works systems officer on the day shift, off Saturday and Sunday) teaches both on Day 5, handing over Torres's old scanner, which he left with a note; Calder only if neither is on shift (the lead: a Works officer first, Torres always first when he's on). No rota change; the other rows' teachers are on shift on their days (checked: Torres Tue and Mon, Yara Wed, Brennan and Tomas Thu, Calder Mon-Fri). <code>m2</code>'s "oily job" is <code>flag('works.oily')</code>, set by 24b when you turn in an oily job on Day 8 or later.</p>
 </section>
