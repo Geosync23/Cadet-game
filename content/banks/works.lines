@@ -6,9 +6,9 @@
 ? tier=stranger
 - {hi}. New to Works? The board's on Deck 5. Everything starts there.
 - {hi}. If you need a part, try main storage first, then the machine shop.
-- {hi}. Tea break's at half ten in the tea corner. It counts as work.
+- {hi}. Tea and biscuits at one in the tea corner. It counts as work.
 ? tier=stranger time:morning
-- {hi}. Calder's briefing is ten to eight. Not eight. Ten to.
+- {hi}. Calder's briefing is ten to nine. Not nine. Ten to.
 ? tier>=acquaintance time:morning
 - {hi}, {nick}. Board's busy this morning. Grab one before they're gone.
 - {hi}, {nick}. Kettle's on in the tea corner, if you're quick.

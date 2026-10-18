@@ -28,8 +28,8 @@ in section 20, the meetings in section 18) are canon too: never contradict a bea
   **Hesper Dock** (a big station-port: market stalls, boats, rain), **Kesh**, **Lisk** (a place: "letters home to Lisk"), **Valo**, **Coriel**,
   **Marra Station** (rebuilt twice; Kim collects its old maps), **New Aberdeen**, **the Ostrander colonies**, **the Tevan belt**, and Tomas's **farm moon** (unnamed: "the farm moon", a sky that is always the same
   grey). Pell's home town and the others not listed are unnamed until a writer needs one: ask.
-- **Time:** a ship day is 18 waking hours of play; breakfast 06:00-08:00, 08:00 shift, dinner 17:00-20:30 (design-doc). The day shift runs
-  08:00-17:00; the night shift is its own world (Bunk 8, the inner cabins). Tea break at 10:30 in Works.
+- **Time:** a ship day is 18 waking hours of play; breakfast 06:00-09:00 (seat X, playtest 1: the night shift eats at 06:00), 09:00 shift, dinner 17:00-20:30 (design-doc). The day shift runs
+  09:00-17:00 (the user, playtest 1); Calder's briefing at ten to nine; the night shift is its own world (Bunk 8, the inner cabins). Tea and biscuits at 13:00 in the Works tea corner (replaced the half-ten tea, playtest 1).
 - **The ship's year:** 364 days, 52 weeks, Day 1 a Monday. Four seasons named for the garden: **Sowing** (days 1-91),
   **Greening** (92-182), **Harvest** (183-273), **Lanterns** (274-364). You arrive on **Day 0**, a Sunday, the last evening
   of Lanterns. Founding Day is day 100; the quiet watch (a quiet while at the windows for the people you miss) is day 300.
@@ -529,3 +529,4 @@ introduces them), unless noted.
 | `weekday:` on a rest-day line must match the roster's `rota.offDays` (0 = Monday): check the game's ROSTER, not memory | everyone | head writer, 0.48.11 |
 | Career lines (0.48.61): Calder keeps a note on every tech she's trained (her certified list's sibling); Pell gives a let-go friend a screw from the Wren "for your tin"; at the send-off Calder "came to check the ramp seals"; Vance's regulation nine is rest (Marrow jokes about it) | Calder, Pell, Marrow | head writer 4 |
 | Calls home are one-sided scenes (the user, 2026-10-17): Mum's pottery teacher **Rolf** (forty years at it; sells her his old wheel; packs "like he's posting a baby"); **Mrs Ellery** next door (the hedge, buys a bowl for her keys); old **Mr Pask** the number nine waits for; Mum's Saturday market stall (after beat 6) | Mum | head writer 4 |
+| Pillar 5 (design-doc "Works progression"): titles **Junior Technician** (Tier 1), **Technician** (Tier 2, Officer), **Senior Technician** (Tier 3), **Engine Specialist** (Tier 4); Works reputation words New, Steady, Reliable, Trusted, Relied on; Torres gives you his old scanner (Day 5, through Calder: he is off on Fridays) with a note "Mine's older than you. Look after it. Z."; the Chief's notes (a page per kind of head-scratcher) | Works | head writer, seat W |

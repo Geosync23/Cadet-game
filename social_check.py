@@ -246,6 +246,7 @@ with sync_playwright() as pw:
       out.bonds = [socialFill(tomas, 'friend'), bondOf('tomas', 'friend'), bondOf('pell', 'friends'), socialFill(tomas, 'mentor'), bondOf('calder', 'mentee'), socialFill(tomas, 'best')]; SHIP.social.bonds = B0;
       out.pure = JSON.stringify(socSave()) === before;
       if (!out.pure) { const a = JSON.parse(before), b = socSave(); out.impure = Object.keys({ ...a, ...b }).filter(k => JSON.stringify(a[k]) !== JSON.stringify(b[k])).map(k => k + ': ' + JSON.stringify(a[k]).slice(0, 80) + ' -> ' + JSON.stringify(b[k]).slice(0, 80)); }   // which part changed
+      SHIP.social.cues = [];   // only the two notes below (the ship's own repairs by now, a lift's among them since Pillar 5's real faults, aren't this arm's)
       socNote('repair', { who: 'you', kind: 'oven', deck: 3 }); socNote('repair', { who: 'pell', kind: 'fan', deck: 5 });
       out.cue = [!!cue('repair.oven'), !!cue('repair.oven.you'), !!cue('repair.fan'), !!cue('repair.fan.you'), !!cue('repair'), cue('repair.lift') === null];
       const s = JSON.stringify(socSave()); socLoad(JSON.parse(s)); out.cueSaved = s === JSON.stringify(socSave()) && !!cue('repair.oven.you');
@@ -486,7 +487,7 @@ with sync_playwright() as pw:
       const real = typeof crewComeTo === 'function' ? crewComeTo : undefined; let walked = 0;
       crewComeTo = (p, id, cb) => { walked++; cb(); return () => {}; };   // section 10's walk, arriving at once
       const P0 = player.obj.position.clone(), lift = DECKS[deckDef.num].lift; player.obj.position.copy(cellPos(...lift));
-      socialSeek(Math.floor(t)); const o = { walked, chip: !!(SEEK && SEEK.p === tomas), done: SHIP.social.seekAsks[0].done };
+      socialSeek(Math.floor(t)); const o = { walked, chip: !!(SEEK && SEEK.p === tomas || SEEK_COME && SEEK_COME.p === tomas), done: SHIP.social.seekAsks[0].done };
       socialSeek(Math.floor(t) + 1); o.once = walked === 1;
       crewComeTo = real; seekEnd(); player.obj.position.copy(P0); setShipNow(t0); socLoad(JSON.parse(keep)); return o; })()""")
     print('An asked-for wave walks to you:', walk)

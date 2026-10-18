@@ -125,7 +125,7 @@
 
 == week1
 ? week1:true weekday:mon time:morning
-- Morning, new hand! Tea break's ten-thirty. That's the important bit. The rest is work.
+- Morning, new hand! Tea break's at one. That's the important bit. The rest is work.
 ? week1:true weekday:wed tier<=acquaintance
 - There you are. Settling in? Come and chat. Quiz is tomorrow. You're on my team now.
 ? week1:true weekday:thu time:evening

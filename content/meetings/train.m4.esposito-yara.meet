@@ -1,0 +1,19 @@
+@meeting train.m4.esposito-yara
+// Pillar 5, M4 hauling (Day 3, Wednesday, at the cargo hold, after the parts crates are on the shelves). Yara is
+// they/them. Head writer, seat W.
+title: The rest of the delivery
+from: Yara Esposito
+gist: Yara showed you the manifest run: load the cart from the hold, take each crate to its stop.
+== lines
+esposito-yara: Shelves done? Good. Now the rest of it.   [gesture]
+esposito-yara > you: The manifest. Three crates today. Linen, medical, store stock.
+esposito-yara: Each one's got a stop. Laundry, infirmary, my counter. Load, drive, drop.
+esposito-yara: I'll load the first. You load the rest. Then you drive. I'm not driving.
+? choice
+* Why not?   rel:esposito-yara+2 flavour:listen
+  esposito-yara: Last time I drove, a cart met a wall. The wall won.   [laugh]
+* In which order?   rel:esposito-yara+1 flavour:practical
+  esposito-yara: Mine, today. Yours, once you know the lift's moods.
+* (Pick up the manifest)
+  esposito-yara: Good. You read it before I told you to. Noted.
+esposito-yara: I'll walk you to the first stop. Then you're on your own.

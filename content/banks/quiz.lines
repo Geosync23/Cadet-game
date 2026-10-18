@@ -52,7 +52,7 @@
 == quiz.q5.text
 - What time is tea break in the Works bay?
 == quiz.q5.a1
-- Half ten
+- One o'clock
 == quiz.q5.a2
 - Noon
 == quiz.q5.a3
@@ -140,7 +140,7 @@
 == quiz.q13.text
 - When does the day shift start?
 == quiz.q13.a1
-- 08:00
+- 09:00
 == quiz.q13.a2
 - 06:00
 == quiz.q13.a3
