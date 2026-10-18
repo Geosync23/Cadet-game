@@ -1154,19 +1154,21 @@ with sync_playwright() as pw:
                 g.step(30)
                 if not g.ev("!!ACT"): break
             h2 = json.loads(g.ev(WST)); print('  hold:', h1['act'], '->', h2['done'], h2['toast'][:60], '| needs', n0, '->', h2['needs'])
+            if not h2['done']: print('  hold, not done: [the test job, your job, all yours]', g.ev("JSON.stringify([(j => j ? [j.status, j.claimedBy, j.stepsDone, j.workDone || null] : 'gone')(SHIP.jobs.find(j => j.id === 'pcws')), (j => j && j.id)(myJob()), SHIP.jobs.filter(j => j.claimedBy === 'you').map(j => [j.id, j.kind, j.status]), typeof ixChore === 'function' && (j => j && j.id)(ixChore())])"))
             check(h2['done'] and h2['res'][-1:] == [[4, None]], f'work steps: the hold stop ends the job\'s work ({h2["res"]})')
             check(all(b <= a + .5 for a, b in zip(n0, h2['needs'])), f'work steps: no need rose from the steps ({n0} -> {h2["needs"]})')
             # a registered kind (section 17's JOB_KINDS) walks like a chore; a machine job's panel step goes to workStep
             rk = g.ev("(() => { const j = SHIP.jobs.find(j => j.id === 'pcws'); j.kind = 'wtest'; const had = typeof JOB_KINDS !== 'undefined', R = had ? JOB_KINDS : (window.JOB_KINDS = {}), was = R.wtest; R.wtest = {}; const r = !!ixChore(); if (was === undefined) delete R.wtest; else R.wtest = was; if (!had) delete window.JOB_KINDS; j.kind = 'chore'; return [r, had]; })()")
             print('  a registered kind walks like a chore (stand-in registry?):', rk)
             check(rk[0], 'work steps: a JOB_KINDS kind is walked like a chore')
+            v73 = g.ev("typeof bunkPick === 'function'")   # 0.28.73's lines only on a build that has them
             # 0.28.73: a kind's own words after a step (r.say), its held prop (def.hold), the scanner in the look-over (24g's scanOpen)
             sy = g.ev("(() => { const j = { id: 'pcsay', title: 'Say test' }; window.__jsd1 = jobStepDone; jobStepDone = () => ({ ok: true, left: 2, done: false, say: 'Found by you: Washer 1.' }); wsFinish(j, 0, {}, 'Round'); const a = document.getElementById('tx').textContent; jobStepDone = () => ({ ok: true, left: 2, done: false, wrong: true }); toast('x', 'before'); wsFinish(j, 0, {}, 'Round'); const b = document.getElementById('tx').textContent; jobStepDone = () => ({ ok: true, left: 2, done: false, retry: true, say: 'That valve is stuck.' }); wsFinish(j, 0, {}, 'Round'); const c = document.getElementById('tx').textContent; jobStepDone = window.__jsd1; return [a, b, c]; })()")
             print('  the kind\'s words, then a wrong part (left to 24k):', sy)
-            check('Found by you: Washer 1.' in sy[0] and '2 stops to go' in sy[0] and sy[1] == 'before' and sy[2] == 'That valve is stuck.', f'work steps: r.say shown with the stop line; r.wrong says nothing; r.retry says only its words ({sy})')
+            check(not v73 or 'Found by you: Washer 1.' in sy[0] and '2 stops to go' in sy[0] and sy[1] == 'before' and sy[2] == 'That valve is stuck.', f'work steps: r.say shown with the stop line; r.wrong says nothing; r.retry says only its words ({sy})')
             hd = g.ev("(() => { const j = SHIP.jobs.find(j => j.id === 'pcws'); j.kind = 'wtest'; j.workDone = null; const had = typeof JOB_KINDS !== 'undefined', R = had ? JOB_KINDS : (window.JOB_KINDS = {}), was = R.wtest; R.wtest = { hold: 'datapad' }; const r = ixHold(); if (was === undefined) delete R.wtest; else R.wtest = was; if (!had) delete window.JOB_KINDS; j.kind = 'chore'; return [r, typeof HOLDS !== 'undefined' && !!HOLDS.datapad, had]; })()")
             print('  a registered kind\'s held prop [ixHold, HOLDS.datapad, real registry]:', hd)
-            check(hd[0] == ('datapad' if hd[1] else 'toolbox'), f'work steps: def.hold is the prop you carry ({hd})')
+            check(not v73 or hd[0] == ('datapad' if hd[1] else 'toolbox'), f'work steps: def.hold is the prop you carry ({hd})')
             g.ev("jobStops = window.__js0; jobStepDone = window.__jsd0; for (const j of SHIP.jobs) if (j.claimedBy === 'you' && j.status === 'claimed') { j.claimedBy = null; j.status = 'open'; } SHIP.jobs = SHIP.jobs.filter(j => j.id !== 'pcws'); SHIP.player.wsteps = []; MACH_REV++")
             sc = g.ev("""(() => { for (const j of SHIP.jobs) if (j.claimedBy === 'you' && j.status === 'claimed') { j.claimedBy = null; j.status = 'open'; }
               const t = shipNow(), m = machineById('3-oven-1'), j = { id: 'pcscan', machine: m.id, deck: 3, room: m.room, kind: Object.keys(JOB_TYPES)[0], urgency: 1, posted: t, found: t, claimedBy: 'you', status: 'claimed', start: t, parts: ['seal'], title: 'Repair the oven' };
