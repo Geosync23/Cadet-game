@@ -1,6 +1,6 @@
 # Pillar 5 plan: your Works career
 
-**APPROVED by the user (2026-10-17, ~21:15).** **The final plan (2026-10-17, the Pillar 5 designer, branch `claude/pillar5-plan`),** built from all of the user's answers (logged at the end and in `plans/pillar5-notes.md`). Pillar 5 is **the core of the game**: new ways to work, deductive repair puzzles, and your whole career from Junior Officer to Senior Officer and Engine Specialist. **The user has approved this plan; no hiring and no building yet** (the user, 2026-10-17). **Updated 2026-10-18 (the user): new kinds of work start on Day 2, not Day 8, and everything moves earlier** (Officer Day 10, Senior Officer Day 16, Engine Specialist Day 23, the arc about 27 ship days, about 10-11 hours); see the box below. Nothing else changed, except what 0.60.7 already built (your own laundry, the Wednesday delivery). When building starts, each mechanic still gets a short spec page the user reviews first. Pillar 5 is built **on its own, after Pillar 4 is finished**, by one small team.
+**APPROVED by the user (2026-10-17, ~21:15).** **The final plan (2026-10-17, the Pillar 5 designer, branch `claude/pillar5-plan`),** built from all of the user's answers (logged at the end and in `plans/pillar5-notes.md`). Pillar 5 is **the core of the game**: new ways to work, deductive repair puzzles, and your whole career from Junior Officer to Senior Officer and Engine Specialist. **The user has approved this plan; no hiring and no building yet** (the user, 2026-10-17). **Updated 2026-10-18 (the user): new kinds of work start on Day 2, not Day 8, and everything moves earlier** (Officer Day 10, Senior Officer Day 16, Engine Specialist Day 23, the arc about 27 ship days, about 10-11 hours); see the box below. **Updated again 2026-10-18 (~04:57, the user): puzzles show up earlier, then come more often:** the first head-scratcher (P3) on **Day 5** with the scanner, your work uniform moves to Day 8, and the share of your repairs that are puzzles rises with each rank (about 1 in 10 as a Junior, 1 in 5 as an Officer, 1 in 4 as a Senior Officer, 1 in 3 as an Engine Specialist); so the case engine is built in Step 1 and P3 in Step 2 (Part 6). Nothing else changed, except what 0.60.7 already built (your own laundry, the Wednesday delivery). When building starts, each mechanic still gets a short spec page the user reviews first. Pillar 5 is built **on its own, after Pillar 4 is finished**, by one small team.
 
 Read with `design-doc.md` ("The player", "Works progression", "Roadmap after Pillar 4"), `plans/pillar4-plan.md` (the first week), `TEAM.md`, `DEV_NOTES.md` ("Machines and wear", "Chores and openJobs", "Player needs and the device", "Hook register"). The plain-language version for the user is `plans/pillar5-plan.html`; phone mock-ups of the puzzle screens are in `plans/pillar5-puzzles-mockup.html`.
 
@@ -13,7 +13,7 @@ Read with `design-doc.md` ("The player", "Works progression", "Roadmap after Pil
 You arrive as a Junior Officer who can only **fetch a part and replace it** (Pillar 4's first week). From **Day 2**, over about **four ship weeks (Days 0-26, about 10-11 real hours of play)**, the job opens up, one new thing at a time, **each taught by a person on a real job**:
 
 - **New ways to work:** rounds, the drill and inspection, your work uniform, hauling, tuning, small incidents, the scanner; then tracing faults, team jobs; then power, shutdowns and the sensor array; then engines and the reactor. Plus side jobs you can take when you like (the workshop, tool upkeep, the logbook, leak hunting, irrigation, rewiring, the lift roof).
-- **Head-scratchers:** from your first days as an Officer, some repairs become deduction puzzles: you gather clues around the ship (logs, crew, gauges, notes, the calendar), cross out suspects, and call the cause; then you fix it by hand. Nine kinds, harder with each tier.
+- **Head-scratchers:** from **Day 5** (a gentle first one, with the scanner), some repairs become deduction puzzles: you gather clues around the ship (logs, crew, gauges, notes, the calendar), cross out suspects, and call the cause; then you fix it by hand. They come more often with each rank (about 1 in 10 of your real repairs as a Junior, up to 1 in 3 as an Engine Specialist). Nine kinds, harder with each tier.
 - **Your career:** one clear rule (good work → Works reputation → harder jobs → a test job → promotion). **Officer** on Day 10 (an urgent summons, the badge, the crew, Calder walking you to cabin 4-23, an officer ceremony with the Captain); **Senior Officer** on Day 16 (the Captain's ready room, Deck 2's visitors' suite, Vance walking you up); **Engine Specialist** on Day 23. Two nights on the night shift, a day mentoring a junior, the Monday briefing, leading a team, and a short career story with Calder and Torres that ends with **"Calder's question"** on Day 26.
 - **Every job is mapped to a rank**, and some are reserved for a rank (below).
 
@@ -31,7 +31,7 @@ The user: "The game shouldn't be 65 hours. More like 10-15." The arc was about 9
 | A new mechanic every 2-3 ship days | **About one a workday** while you're learning |
 | A mechanic opens after the one before is used about 3 times | **Used once or twice** |
 | First promotion about Day 20 (then Day 16) | **Day 10** (Officer); the second **Day 16** (Senior Officer); Engine Specialist **Day 23** |
-| Head-scratchers from Day 13 (then Day 17) | **From your first days as an Officer: Day 11** (the user, N1) |
+| Head-scratchers from Day 13 (then Day 17, then Day 11, your first days as an Officer: N1) | **From Day 5** (the user, 2026-10-18 ~04:57: "puzzle jobs should show up earlier, then they increase in rate"): P3, the gentlest, with the scanner; then about 1 in 10 of your real repairs (Days 5-9), 1 in 5 (Officer, Days 10-15), 1 in 4 (Senior, Days 16-22; 1 in 3 on your own tier's machines), 1 in 3 (Engine Specialist, Day 23 on). Later kinds keep their days. Your work uniform (M2) moves from Day 5 to Day 8 so Day 5 still has one big and one small new thing |
 | Each puzzle kind taught as its own training job | The **first head-scratcher** is a full training moment (Torres); each **later kind** arrives on a real case with **a short word from a crew member** ("Ask around who saw it") and a new page in the Chief's notes |
 | Tier 2 lasts about three weeks | **About a week** (Days 10-15) |
 | The night shift: a week | **Two nights** (Friday and Saturday, Days 19-20; the user chose "once") |
@@ -56,12 +56,12 @@ Dates are for a steady player. If you're slower, the next thing waits (the ladde
 | 2 Tue | Junior · 1 | **M1 Rounds** (Torres takes you on his round after the 10:30 tea; your first solo job with Calder is that morning) | — (the day already has Rina's health check and your first laundry after shift, 0.60.7) | Torres |
 | 3 Wed | Junior · 1 | **M4 Hauling and stores**: after you unload your first Wednesday delivery (10:00, 0.60.7), Yara takes its crates to their stops with you on a manifest run | **M3 the drill** (15:00, your junior drill job) | Yara Esposito; Calder |
 | 4 Thu | Junior · 1 | **M5 Tuning** (Torres is off on Thursdays this week) | **M3 the inspection** (06:30: Pillar 4's inspection scene becomes the real check) | Brennan and Calder; Tomas |
-| 5 Fri | Junior · 1 | **M7 The scanner** | **M2** your work uniform (grubby on oily jobs) | Torres |
+| 5 Fri | Junior · 1 | **M7 The scanner** | **P3 What's been tried?**: your first head-scratcher (the gentlest, a Tier 1 machine) | Torres |
 | 6-7 | | days off (Sowing morning, Pillar 4) | off shift: tinkering, star logging | |
-| 8 Mon | Junior · 1 | **M6 Making it safe** (your first small incident) | Calder, after the Monday briefing: "Tomorrow, your test job" | Calder |
+| 8 Mon | Junior · 1 | **M6 Making it safe** (your first small incident) | **M2** your work uniform (grubby on oily jobs) · Calder, after the Monday briefing: "Tomorrow, your test job" | Calder; Torres |
 | 9 Tue | Junior · 1 | **The test job** (a Tier 2 machine, Calder watching) | | Calder |
 | 10 Wed | **Officer · 2** | **Promotion:** the urgent summons (10:30 for 11:00), the badge and pip, the crew, Brennan's cake; 17:00 **Calder walks you to 4-23** | | Calder |
-| 11 Thu | Officer · 2 | **M8 Team jobs** (a pair of hands) · 17:15 **the officer ceremony** (Deck 1's observation room; officers aren't inspected, so no 06:30 inspection for you) | **P3 What's been tried?**: your first head-scratcher | a Works officer; the Captain; Torres |
+| 11 Thu | Officer · 2 | **M8 Team jobs** (a pair of hands) · 17:15 **the officer ceremony** (Deck 1's observation room; officers aren't inspected, so no 06:30 inspection for you) | — (head-scratchers now about 1 in 5 of your real repairs) | a Works officer; the Captain |
 | 12 Fri | Officer · 2 | **M9 Tracing** and the pipe kit | **P1 When does it happen?** · side jobs open (workshop, logbook, tool upkeep, leak hunting, irrigation, rewiring, the lift roof) | Calder; Torres |
 | 13-14 | | days off | favour cases begin; the fault-finder's first ticket (optional) | |
 | 15 Mon | Officer · 2 | **The Tier 3 test job** (a first planned shutdown, with Calder) | **P2 Who saw what?** | Calder; Tomas |
@@ -119,7 +119,7 @@ You climb but never command: Senior Officer is the top (design-doc).
 | M6 Incidents | Junior (with Calder) | — | Officer: first on the scene; Senior: you say it's safe and direct the crew (and at night, on your night shift) |
 | M7 The scanner and diagnosing | Junior · 1 | — | reads more at each tier |
 | Test jobs (certification) | the next tier | **held for you only** | |
-| Head-scratchers | Officer · by the machine's tier | — | bands T2, T3, T4 |
+| Head-scratchers | Junior (from Day 5: P3 on Tier 1 machines) · by the machine's tier | — | bands T1 (Junior), T2, T3, T4; more often with each rank |
 | M8 Team jobs (a pair of hands) | Officer · 2 | — | Tier 4: you lead them (M24) |
 | M9 Tracing | Officer · 2 | Tier 2 machines | Tier 3: power lines |
 | *Side:* M10 workshop orders, M11 tool upkeep, M13 leak hunting, M14 irrigation, M17 the lift roof | Officer | — | |
@@ -160,6 +160,7 @@ You climb but never command: Senior Officer is the top (design-doc).
 - **Skill in words** (`careerSpeed(kind)`): repairs and steps on a kind get quicker with practice (100% → about 80% after 5 → 65% after 15), shown only in words.
 - **More real faults** (section 17): about half of your 3-6 daily jobs become real faults, by having the crew leave your tier's faults longer and find worn machines later on your shift days; unchanged on days off and at night.
 - **`playerTier()`** replaces the constant `PLAYER_TIER`, once, early and inert.
+- **The case engine** (24k, the head-scratcher engineer; moved here from Step 3 because P3 now opens on Day 5): the case maker, the solver, the frozen case in the save, the **Fault notes** and **Chief's notes** device pages, and the hints. Built inert in Step 1 (no case is ever posted until P3 opens on Day 5); `puzzle_check.py`'s frame comes with it.
 - **The device's work pages** (registered from section 24 with `deviceApp`, as section 20 does; no change to section 19): Training (what you're trained in, what's next in words: "Calder says the storekeepers want a hand next week"), Work log (the last 30 jobs, found by you or not, who noticed), Tools.
 
 ---
@@ -177,11 +178,11 @@ Each card: **the verb · how it's taught · how it unlocks · how it grows · wh
 - **Phone:** nothing new drawn (a small clipboard prop in the hand, shared kit).
 - **Test:** `mech_check` (new): a round posts service jobs for worn machines and nothing for healthy ones; found-by-you counts; the same twice.
 
-### M2. Your work uniform (Day 5, Torres; your own laundry is 0.60.7's)
+### M2. Your work uniform (Day 8, Torres; your own laundry is 0.60.7's; moved from Day 5 to make room for P3)
 
 *Updated 2026-10-18:* 0.60.7 already built your clothes and laundry (the user): you change every morning at your wardrobe, and every 5 days you take the hamper to a washer and back; it first happens on **Day 2**, after Zeke Torres warns you at dinner on Day 1. **There is no laundry duty** (no rota, no laundry hand), and once you move to the suite your laundry is collected for you. So Pillar 5's M2 is what's left of the approved card:
 
-- **The verb:** your **work uniform gets grubby faster on oily jobs** (a shade duller: a material tint, no new meshes); a shower doesn't clean it, a change at your wardrobe does. Torres, on Day 5 after an oily job: "Change before tea. Calder notices."
+- **The verb:** your **work uniform gets grubby faster on oily jobs** (a shade duller: a material tint, no new meshes); a shower doesn't clean it, a change at your wardrobe does. Torres, on Day 8 after an oily job: "Change before tea. Calder notices."
 - **Why it matters:** a grubby uniform drains hygiene faster and gets remarks (exists); **the Thursday inspection and the officer ceremony check it** (M3, Part 3); the washers wear with use, so you see their faults coming.
 - **Grows:** stage 1, your uniform on oily jobs; stage 2, you can **service the washers** between your loads (the washers become real machines with panels).
 - **Touches:** 24b (your uniform's grubbiness from job kinds); 17 (the washers become real machines; their wear from loads); 8b (performance: the duller tint); DECKS[4] (deck architect 2: the washers' panel places).
@@ -211,7 +212,7 @@ Each card: **the verb · how it's taught · how it unlocks · how it grows · wh
 ### M5. Tuning (Day 4, Brennan with Calder; Torres is off on Thursdays in the first week)
 
 - **The verb:** some faults aren't a broken part but **a machine out of adjustment**: an oven running hot, a scrubber fan humming off-pitch, a light relay chattering, a cart dock charging slow. You **turn** a setting a step at a time and **watch the machine respond in the world**: the oven's glow steadies, the hum smooths, the lights stop flickering (the machine looks section 17 already draws). Settle it in the right range and it's done. Overshoot and it shows the other way; turn it back.
-- **Why it's not a mini-game:** there's no timer or score; the feedback is the machine itself on the deck. *(Open question 1: is this the right side of the "no mini-games" line?)*
+- **Why it's not a mini-game:** there's no timer or score; the feedback is the machine itself on the deck. *(The user: yes, this is the right side of the "no mini-games" line, 2026-10-17.)*
 - **Taught:** Brennan complains her oven runs hot; Calder shows you how to tune it while Brennan watches (and feeds you a biscuit).
 - **Grows:** stage 1, one setting (ovens, lights); stage 2, two settings that pull on each other (a scrubber's fan and flow); stage 3, with the scanner, you see the setting's drift before anyone notices.
 - **Touches:** 24e; 17 (a `tune` fault kind: a machine's setting drifts; `calibrate` chores become tuning); 15 (`turn`, `look`); 8b (a `tune` pose: one hand at a panel).
@@ -232,7 +233,7 @@ Each card: **the verb · how it's taught · how it unlocks · how it grows · wh
 ### M7. The scanner and diagnosing (Day 5, Torres)
 
 - **The verb:** the **diagnostic scanner** reads a machine's parts. Inspecting a faulty machine with it shows **its 3-5 parts with a reading each** (in the device's screen style): usually one is clearly off; sometimes two, and what you saw on the deck (the drip, the flicker) tells them apart. You **choose** the part to fetch. A wrong pick costs a walk back ("Fitted a new seal. Still low flow: it's the pump"), never a fail. Before the scanner, inspecting simply tells you the part (as now), so the early game stays simple.
-- **Taught:** Torres hands you the scanner and does the first reading with you.
+- **Taught:** Torres hands you the scanner and does the first reading with you. Later the same day he brings you your **first head-scratcher** (P3, the small new thing of Day 5): a fault the scanner can't settle on its own, where the last shift's notes do the work.
 - **Grows:** stage 1, read the panel up close; stage 2, read condition from across a room on your rounds (M1 stage 3, M5 stage 3); stage 3 (as an Officer), it reads flow along a pipe (M9).
 - **Touches:** 24g; 17 (parts per machine kind with readings and symptoms; the failing part hashed from the machine and the hour; right or wrong fits); 15 (`choose`); the device's skin draws the panel through the app layer.
 - **Phone:** none (a device view).
@@ -379,7 +380,7 @@ Tier 3 machines (design-doc): power conduits and junctions, relays, batteries, t
 4. **The crew react:** you walk out into the Works bay and the Works crew on shift have gathered by the board: applause, Torres's grin, a "Told you" from Pell if he's on. That day **everyone who knows you reacts** when you meet (Pillar 4's lines via `simNote('promoted')`: friends congratulate, acquaintances nod, a rival grumbles), **Mail** from friends and the Captain, a **ship news item** in the Ship app, and **Brennan's cake** at the Works tea corner after the shift.
 5. **Your new quarters, that evening (about 17:00):** **Calder walks you there** (on her day off, Commander Vance, the Executive Officer): from the Works bay, up the lift, along the officers' corridor (the escort's walking again; she talks on the way about officers' ways: your door, the "Come over" visits, quiet hours). **On the way you pass Tomas and Pell carrying your box.** At 4-23 the **door plate already has your name and rank**; your key opens it; **your things are already there**: your locker's contents, the keepsakes on your shelf, the framed menu if you have one, gifts you were given. Tomas says goodbye as a bunkmate ("Don't be a stranger, Officer"). That night you sleep in your own cabin, and Pillar 4's "Come over" visits start.
 6. **The officer ceremony, the next day (Day 11, a Thursday, 17:15, after your shift and your first team job; officers aren't inspected, so that morning's inspection isn't yours):** a summons from the Captain's office by Mail in the morning, so you can get ready (a clean uniform matters: M2). In the **observation room on Deck 1** (the conference table, the stern windows): the Captain, Commander Vance, Calder, Torres, and the friends you're closest to (up to three, invited by the game from your relationships). Short and formal: the Captain reads your commission, **pins your Officer's insignia** (your uniform now shows it: a small collar mark, a material change, no new meshes), a handshake, one line from you, a toast with the Captain's tea. A **keepsake** (the framed commission) goes on your cabin shelf. Your Record: "Commissioned Officer, Day 11."
-7. **After:** your Tier 2 key opens the Deck 5 machine rooms and the pipe galleries; the board starts leaving you Tier 2 jobs; the first head-scratcher comes the same day; your reputation bands start again as "New officer".
+7. **After:** your Tier 2 key opens the Deck 5 machine rooms and the pipe galleries; the board starts leaving you Tier 2 jobs; head-scratchers come more often (about 1 in 5 of your real repairs, on Tier 2 machines too); your reputation bands start again as "New officer".
 
 ### The second promotion: Senior Officer (Days 15-17)
 
@@ -423,7 +424,7 @@ Only **real faults** (Part 1's "more real faults") can be head-scratchers, and o
 | Shape | What makes it a puzzle | From |
 | --- | --- | --- |
 | **Comes and goes** (intermittent) | It only happens at some times, or under some load | Day 12 |
-| **Somebody tried already** | The last shift left notes on what didn't work | Day 11 |
+| **Somebody tried already** | The last shift left notes on what didn't work | Day 5 (the first) |
 | **Seen by others** | The crew saw it; you didn't | Day 15 |
 | **The gauge is lying** | A sensor reads wrong, so the machine "looks fine" | Day 17 |
 | **Starts somewhere else** (traced) | The symptom and the cause are on different machines | Day 18 (M9's harder stages) |
@@ -434,16 +435,19 @@ Only **real faults** (Part 1's "more real faults") can be head-scratchers, and o
 
 | When | Share of your real faults | At most open |
 | --- | --- | --- |
-| Days 1-10 (Junior; promoted on Day 10) | none | — |
-| Days 11-15 (Officer, Tier 2) | about 1 in 6 | 1 |
-| Days 16-21 (Senior, Tier 3) | about 1 in 4 (1 in 3 on Tier 3 machines) | 2 |
-| Days 22-26 and after (Tier 4) | about 1 in 4 (1 in 3 on Tier 4 machines) | 2 |
+| Days 1-4 | none | — |
+| Days 5-9 (Junior, Tier 1; P3 only) | about 1 in 10 | 1 |
+| Days 10-15 (Officer, Tier 2; promoted on Day 10) | about 1 in 5 | 1 |
+| Days 16-22 (Senior, Tier 3) | about 1 in 4 (1 in 3 on Tier 3 machines) | 2 |
+| Day 23 and after (Engine Specialist, Tier 4) | about 1 in 3 | 2 |
+
+*(The user, 2026-10-18 ~04:57: "puzzle jobs should show up earlier, then they increase in rate"; the numbers are the lead's tuning, logged, and the user can change them.)* Before Day 10 only P3 is posted (the other kinds keep their days); a kind is only posted once it has opened.
 
 None are posted on days off or event days (Pillar 6); favour cases can come off shift. If a case isn't taken by the end of your shift, the crew solve it the long way (over a day) so the ship never waits on you. **No setting** for more or fewer (the user): the hints and the long way keep it kind.
 
 ### The nine kinds
 
-Every type has the same frame: **symptom → suspects (3-6) → clues at places → cross out → call it → fetch and fit.** The first is **taught** as a training moment and each later kind arrives with a short word from a crew member (see "Hints, mistakes and teaching"); each adds a page of rules of thumb to **the Chief's notes**. Each grows in bands by tier: **T2** (your Officer week: 2-4 suspects, 2-3 clues, one or two decks), **T3** (Senior: 5-6 suspects, clues across decks and needing tools, one honest mistake among the witnesses), **T4** (engines: two causes at once, or a cause hiding a second one: "fixed it; now the real one shows"). The examples below say T1/T2; read them as the first and harder bands. A kind whose first case comes after your second promotion (P4 on Day 17) still starts at its first band, on a Tier 2 machine.
+Every type has the same frame: **symptom → suspects (3-6) → clues at places → cross out → call it → fetch and fit.** The first is **taught** as a training moment and each later kind arrives with a short word from a crew member (see "Hints, mistakes and teaching"); each adds a page of rules of thumb to **the Chief's notes**. Each grows in bands by tier: **T1** (your Junior days, Days 5-9: P3 only, on Tier 1 machines, 3-4 suspects, 2 clues, one deck), **T2** (your Officer week: 2-4 suspects, 2-3 clues, one or two decks), **T3** (Senior: 5-6 suspects, clues across decks and needing tools, one honest mistake among the witnesses), **T4** (engines: two causes at once, or a cause hiding a second one: "fixed it; now the real one shows"). The examples below say T1/T2; read them as the first and harder bands. A kind whose first case comes after your second promotion (P4 on Day 17) still starts at its first band, on a Tier 2 machine.
 
 **P1. When does it happen?** (Day 12, a word from Torres)
 - *Example (T1):* "Brennan's oven runs cool, but only at dinner." Suspects: the element, the door seal, the thermostat (a tuning job, M5), the Deck 3 power junction. Clues: the oven's log at its panel (fine at breakfast, sags 17:00-18:30), Brennan ("it's when the big range and the extractor are both going"), the junction's panel (its load peaks at dinner). A bad element or seal would be cool all day; a drifted thermostat wouldn't follow the range. **It's the junction, sagging under load.**
@@ -455,7 +459,7 @@ Every type has the same frame: **symptom → suspects (3-6) → clues at places 
 - *Grows:* T1+ a witness who only saw part of it; T2 witnesses on two decks and one on a different shift you have to find (Roster); T2+ two stories that both are true and point to two faults.
 - *Screen:* a card per person (portrait initial, where and when, what they said), with a tap to mark "doesn't fit".
 
-**P3. What's been tried?** (Day 11, Torres, a full training moment; the first head-scratcher, the gentlest)
+**P3. What's been tried?** (Day 5, Torres, with the scanner; a full training moment; the first head-scratcher, the gentlest)
 - *Example (T1):* "The lamp in Bunk 2 flickers." Taped to the job: Torres's note ("Swapped the bulb. Still flickers. Z."), and Pell's ("Reset the breaker last night: fine for an hour, then back"). Suspects: bulb, switch, the junction's relay, the wiring. The bulb is out; a switch or wiring fault wouldn't care about a reset; **fine for an hour then back is a relay warming up.**
 - *Grows:* T1+ a note that rules out less than it seems ("changed the filter", but the wrong size was fitted); T2 a night-shift handover log with five entries; T2+ the cold-case board (6.6).
 - *Screen:* the notes as paper slips, each crossing out what it proves.
@@ -498,7 +502,7 @@ Every type has the same frame: **symptom → suspects (3-6) → clues at places 
   3. **Talk it through** with Torres or Calder (at the board, or an appointment): they cross one suspect out with you. The case can still be "right first time", but not "a clever fix".
   4. **The long way:** fit each suspect in turn. Always works.
 - **What a wrong call costs:** the walk to storage and back, and the fitting time; the part you took goes back on the shelf unused (Tier 1). At Tier 2, a used seal or cartridge is spent (stock falls, restocked as usual; the user: yes). After two wrong calls on one case, Torres or Calder comes by to talk it through (hint 3, offered). Never a fail, never a remark worse than "Tricky one, that."
-- **Teaching:** the first head-scratcher (P3, Day 11) is a full training moment: Torres reads the first clue with you and thinks aloud, you finish it; the next you do while he watches. Each later kind arrives on a real case with a short word from a crew member and a new page in the Chief's notes (the box above).
+- **Teaching:** the first head-scratcher (P3, Day 5, the day you get the scanner) is a full training moment: Torres reads the first clue with you and thinks aloud, you finish it; the next you do while he watches. Each later kind arrives on a real case with a short word from a crew member and a new page in the Chief's notes (the box above).
 
 ### Around the puzzles
 - **Fault-finder grades** (words, a small pin on your uniform): Calder sets a **ticket case** for each, a harder case on your tier's machines, only ever delayed. Fault-finder (ticket from Day 13) → Trusted fault-finder (from Day 19) → the ship's fault-finder (from Day 24). **Side paths, optional**; the user: yes, three grades with pins. They sit inside Tier 2; they're not a promotion (Pillar 7's career story can build on them).
@@ -574,7 +578,8 @@ for seed in [two fixed saves]:
     the long way: fit each suspect in turn -> the case always ends
     a wrong call: time and a walk (T1 no stock used; T2 one consumable), never a fail
   shares: head-scratchers per tier within the table above; never on a day off or event day;
-    never more open than the limit; none before Day 11
+    never more open than the limit; none before Day 5; only P3 before Day 10;
+    about 1 in 10 / 1 in 5 / 1 in 4 (1 in 3 own tier) / 1 in 3 by rank
   fallbacks: count cases that fell back to plain faults (warn above 10%)
   determinism: run it twice -> identical case lists (seed, cause, suspects, clues)
   save mid-case, load -> the same case, the same clues collected
@@ -635,8 +640,8 @@ cadet_test: with head-scratchers off, ALL IDENTICAL
 | P | Player engineer | `claude/player-needs` | 0.28.23+ | section 15: the work steps (`look`, `choose`, `turn`, `wait`), `careerSpeed`, your uniform, the Ask button, off-shift activities; `player_check.py` |
 | M1 | Mechanic engineer 1 | `claude/mech-rounds` | 0.45.x | 24a rounds, 24b your uniform, 24c drill and inspection, 24d hauling, 24m tool upkeep, 24n the logbook, M18 shutdowns, M21 the briefing |
 | M2 | Mechanic engineer 2 | `claude/mech-incidents` | 0.51.x | 24e tuning, 24f incidents, 24h team jobs, 24o leak hunting, 24p irrigation, M23 engine work (with coolant rounds) and the reactor, M24 leading team jobs |
-| M3 | Mechanic engineer 3 | `claude/mech-diagnose` | 0.53.x | 24g scanner, 24i tracing, 24j workshop (and tinkering), 24q rewiring, 24s the lift roof, M19 power and relays, M20 the sensor array |
-| H | Head-scratcher engineer | `claude/mech-cases` | 0.55.x | 24k the case engine, the solver, Fault notes, the Chief's notes, hints, P1-P4; 24l P5-P9, the T3/T4 bands, the logger, the test rig, grades, favour cases, the cold-case board; `puzzle_check.py` |
+| M3 | Mechanic engineer 3 | `claude/mech-diagnose` | 0.53.x | 24i tracing, 24j workshop (and tinkering), 24q rewiring, 24s the lift roof, M19 power and relays, M20 the sensor array |
+| H | Head-scratcher engineer | `claude/mech-cases` | 0.55.x | 24k the case engine, the solver, Fault notes, the Chief's notes, hints (Step 1); 24g the scanner and P3 (Step 2: they open together on Day 5, both taught by Torres); P1, P2, P4; 24l P5-P9, the T3/T4 bands, the logger, the test rig, grades, favour cases, the cold-case board; `puzzle_check.py` |
 | A | Deck architect 2 | `claude/decks-p5` | 0.47.x | `// P5 places` blocks in `DECKS[n]`: the washers' panels, storage and hold, valves and extinguisher, your bench, the garden racks, Deck 6 gauges, cabin 4-23, the Deck 5 machine rooms and spine, the shop's order board and test rig |
 | W | Works writer | `claude/writer-p5` | — | `content/` lines: training moments, incidents, inspection remarks, the promotion, workshop orders, witness and handover-note templates, logbook summaries |
 
@@ -653,9 +658,9 @@ Each step ends in a playable build the user plays at a check-in; the user can pa
 | Step | What's built | Seats active (at most 6) | Check-in |
 | --- | --- | --- | --- |
 | 0 | Approval of this plan. Pillar 5 waits for Pillar 4 to finish. | — | — |
-| 1 · Foundation | `playerTier()`, more real faults, job kinds with steps, **jobs by tier and reserved rank** (17); the work steps (15); section 24 core: the ladder, training moments, tools, skill in words, **reputation bands and "What's next"**, device pages. The designer's pages for the foundation, the Junior days and the case engine. | D, B, C, S, P | **1:** a work day with more real faults; approve the pages |
-| 2 · The Junior days (Days 2-8) | M1 rounds, M2 your work uniform, M3 drill and inspection, M4 hauling, M5 tuning, M6 incidents, M7 the scanner; their places | D, B, M1, M2, M3, A | **2:** play Days 2-8 (with 0.60.7's first week around them) |
-| 3 · Officer (Days 9-15) | the test job and the full first promotion (summons, scene, crew, Calder's walk to 4-23, the ceremony); M8 team jobs, M9 tracing; the case engine, Fault notes, P1-P3 | D, B, C, H, sim, W | **3:** from Day 9 through your first head-scratchers |
+| 1 · Foundation | `playerTier()`, more real faults, job kinds with steps, **jobs by tier and reserved rank** (17); the work steps (15); section 24 core: the ladder, training moments, tools, skill in words, **reputation bands and "What's next"**, device pages; **the case engine** (24k: the case maker, the solver, Fault notes, the Chief's notes, hints; inert until Day 5). The designer's pages for the foundation, the case engine and the Junior days. | D, B, C, S, P, H | **1:** a work day with more real faults; approve the pages |
+| 2 · The Junior days (Days 2-8) | M1 rounds, M2 your work uniform, M3 drill and inspection, M4 hauling, M5 tuning, M6 incidents, M7 the scanner, **P3 What's been tried?** (Day 5) and the T1 band; their places | D, B, M1, M2, H, A | **2:** play Days 2-8 (with 0.60.7's first week around them) |
+| 3 · Officer (Days 9-15) | the test job and the full first promotion (summons, scene, crew, Calder's walk to 4-23, the ceremony); M8 team jobs, M9 tracing; P1, P2 and the T2 band | D, B, C, H, sim, W (M3 joins for M9) | **3:** from Day 9 through P1 and P2 |
 | 4 · Side jobs | M10 workshop, M11-M15, M17 the lift roof, favour cases, fault-finder tickets, the cold-case board, cabin touches, star logging | D, B, M1, M2, M3, H | **4:** a weekend of side jobs |
 | 5 · Senior Officer (Days 15-21) | the Tier 3 test job, the second promotion (the ready room, the suite's refit, Vance's walk, the Captain's table); Tier 3 machines; M19, M18, M20; P4, P5, P9; the T3 band; **M22 the night shift** | D, B, C, sim, M3, H | **5:** from Day 15 through the night shift |
 | 6 · Tier 4 and the end (Days 22-26) | M21 the Monday briefing; Engine Specialist; M23 engine work and the reactor; M24 leading a team; P6, P7, P8 and the T4 band; M25 mentoring (one day); the career story and milestones; "Calder's question" | D, B, C, M2, sim, W | **6:** Pillar 5 final; then a pull request to `main` with the user's OK |
@@ -673,7 +678,7 @@ Each step ends in a playable build the user plays at a check-in; the user can pa
 - **`player_check`** (P): the work steps, quicker tasks, the uniform, the off-shift activities.
 - **`day_check`**: Days 2-8 (with 0.60.7's laundry, delivery and inspection), a promotion day, a shutdown day, a night-shift night, a briefing Monday, a team-job day, a reactor day; draw calls under 450.
 - **`deck_check`**: the new places; 4-23 and the suite; the Tier 2-4 rooms (Decks 1, 2, 5, 6).
-- **`intro_check`** (Pillar 4's) on every push that touches jobs, the player or the clock: Pillar 4's first week (and 0.60.7's Day 2-3 moments) stays exactly as it is, with Pillar 5's Day 2-5 openings added beside it.
+- **`intro_check`** (Pillar 4's) on every push that touches jobs, the player or the clock: Pillar 4's first week (and 0.60.7's Day 2-3 moments) stays exactly as it is, with Pillar 5's Day 2-5 openings added beside it (Day 5: the scanner and P3).
 
 ### Building and checking (one team)
 
@@ -706,7 +711,7 @@ Each step ends in a playable build the user plays at a check-in; the user can pa
 ## The user's answers (2026-10-17), in short
 
 - **The mechanics:** tuning yes; a grubby uniform looks slightly duller; laundry duty every two weeks (later dropped in 0.60.7: you do your own laundry); all seven "more ideas" (now side jobs); cabin 4-23; Pillar 5 built on its own after Pillar 4 by one small team.
-- **Head-scratchers:** deduction puzzles are the diagnosing step done for real; keep all nine kinds; no more/fewer setting; three fault-finder grades with pins; a Tier 2+ wrong call uses up a seal or cartridge; favour cases and the cold-case board; keep the names; "the clash" at a later tier (Tier 3); they start in your first days as an Officer (N1).
+- **Head-scratchers:** deduction puzzles are the diagnosing step done for real; keep all nine kinds; no more/fewer setting; three fault-finder grades with pins; a Tier 2+ wrong call uses up a seal or cartridge; favour cases and the cold-case board; keep the names; "the clash" at a later tier (Tier 3); they started in your first days as an Officer (N1), then **from Day 5, more often with each rank** (2026-10-18 ~04:57).
 - **Career:** an urgent summons, Calder finds you if you don't come; both promotions in Pillar 5, the second switched on right away; Senior Officer as the top rank, never command; Deck 2's visitors' suite; Calder walks you (Vance on her days off) with Tomas and Pell carrying your box; the move at about 17:00; the officer ceremony; your uniform shows your rank; reputation in words with "What's next".
 - **Scope:** "this is absolute bulk of the game": all of the old Pillar 7's career work is in Pillar 5, with every job mapped to rank and some reserved; **10-15 hours, not 65** (N2); the night shift once; junior jobs not left for you after promotion but still on the board; Engine Specialist a badge, not a rank; the reactor with a permit; leading team jobs; mentoring for **one day**; the Monday briefing; the career story.
 - **The roadmap:** Pillar 6 = ship-wide events and more traditions, rotating weekly; Pillar 7 = the story (narrative moments forming a through line, not cutscenes) and bigger, more detailed crew arcs.
@@ -715,6 +720,7 @@ The full history of questions and answers is in `plans/pillar5-notes.md` and thi
 
 - **Final approval (~21:15):** the plan approved; the night shift on the weekend as suggested (Friday and Saturday nights, a half day before, Sunday off after); no hiring and no production yet.
 - **2026-10-18 (~04:20, through lead 10):** "need new job types by day 2. Then the cadence discussed kicks in." Answer **A**: everything moves earlier (Officer Day 10, Senior Officer Day 16, Engine Specialist Day 23, the arc about 27 ship days, about 10-11 hours).
+- **2026-10-18 (~04:57, through lead 10):** "puzzle jobs should show up earlier, then they increase in rate." The lead's reading: P3 on Day 5 with the scanner; M2 on Day 8; about 1 in 10 (Days 5-9), 1 in 5 (10-15), 1 in 4 (16-22; 1 in 3 on own-tier machines), 1 in 3 (23+). Lead 11 (~06:12): the case engine into Step 1, P3 into Step 2.
 
 ## Open questions
 
