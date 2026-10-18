@@ -32895,7 +32895,8 @@ let SEEK = null, SEEK_COME = null;                        // { p, el, until, lin
 const seekSalt = () => SHIP.career && SHIP.career.gs | 0 || 0;
 const SEEK_PRIVATE = new Set(['bathroom', 'shower', 'toilet', 'wash', 'hands']);   // reviewer 2's LOW on 0.71.0: nobody walks up while you wash, or in a washroom
 const seekPrivate = () => { if (typeof ACT !== 'undefined' && ACT && SEEK_PRIVATE.has(ACT.kind)) return true; try { const r = (deckDef.rooms || {})[roomAt(...player.here())]; return !!r && /washroom|shower|toilet/i.test(r.name || ''); } catch (e) { return false; } };
-const seekWho = p => !!(SEEK_COME && SEEK_COME.p === p || SEEK && SEEK.come && SEEK.p === p && !CHAT);
+const seekBusy = p => typeof TJ_WALK !== 'undefined' && !!TJ_WALK && !!TJ_WALK.roles && TJ_WALK.roles.has(p.id);   // in a tradition's walk with you (section 18's tap to join): not taken off it
+const seekWho = p => !seekBusy(p) && !!(SEEK_COME && SEEK_COME.p === p || SEEK && SEEK.come && SEEK.p === p && !CHAT);
 const SEEK_OPEN = ['Got a minute? I was hoping I\'d catch you.', 'There you are. Have you got a moment?', 'Oh good, it\'s you. Come and talk to me a minute.', 'Hey, you. Got a second for me?'];   // until section 22 has 'seek' lines
 function seekCome(p, a, m, why) {                         // a: their agent on this deck; none (not here): the chip as before
   if (!a) { seekShow(p, m, why); return; }
@@ -32986,7 +32987,7 @@ function socialSeek(m) {
   for (const a of DECK_CREW) {
     const p = a.p, mentor = socIntroOn() && p.id === SHIP.social.mentor && SHIP.time.min >= 1080 && SHIP.time.min < 1290;   // week 1: the escort checks in each evening
     const bye = relTier(p.id) >= 1 && (leavingSoon(p) ?? 99) <= 2 && !(SHIP.rel[p.id] && SHIP.rel[p.id].bye >= day - 1);   // leaving soon: they come to say goodbye
-    if (seekAskFor(p.id, shipNow())) continue;              // an asked-for wave: socialSeekAsks brings them
+    if (seekAskFor(p.id, shipNow()) || seekBusy(p)) continue;   // an asked-for wave: socialSeekAsks brings them
     if (!SOC.idx.has(p.id) || !near(a) || !(mentor || bye || (relTier(p.id) >= 3 && socGate('d3')))) continue;
     const r = relGet(p.id); if (r.seekDay === day || schedU(p.seed ^ seekSalt(), m, 633) >= (mentor || bye ? .25 : SEEK_ODDS)) continue;
     const w = whereIs(p, shipNow()); if (!w || !(w.act === 'leisure' || w.act === 'off') || w.tag === 'tea') continue;
