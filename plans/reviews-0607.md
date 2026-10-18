@@ -9,6 +9,13 @@
 
 ## Verdicts
 
+### Deck architect 4, 0.38.28-0.38.34, claude/deck-0607 1f07f99 (skim for kit; the gym's plan change looked at): PASS
+The gym (a 4th treadmill, 2 exercise bikes, the `cycle` pose), the Wednesday delivery crates, the name beam, the spice shelf, the post box and writing ledge, the lap/stretch/cook-along places, a sleeker Tern, and a Tiles board on Deck 4's table.
+- **Colours and determinism:** every new material goes through `std()`/`dressMat()`, which call `col()`. Canvas fills are texture paint, as everywhere else. The new kit says "no R()", and I found no new `R()` or `Math.random` in the diff. The Deck 4 card table still draws `R()` nine times when it shows the Tiles board, so the rest of Deck 4 stays the same (the builder reports cadet_test differs only on the table).
+- **Behaviour:** the gym's two new kinds of place are ordinary gym places, so crew plans change (217 of 247 changed plans in a week are just a different machine). day_check day 1 is OK per the builder. That's a planned schedule change, and Gym club's `spare: 2` now has more places to leave free. The crates block their two hold tiles through the existing `dressShow` block, and only once systems' crates are in (inert on this branch).
+- **Phones:** Deck 3 gains at most 4 draw calls in the gym (+4 for the spice jars, only with the trace on). Deck 4 by the lift goes 185→177 (the cards shared nothing). deck_check OK.
+- **Known, not this seat's to fix:** events_check's day-231 seat clash (kovac-zainab and raman both settle in 3-mess-20 at 18:12 at the harvest supper). It's exposed by the changed bench timing since 0.38.27, but it's a runtime seating clash in the sim's dinner seating; it's with social/sim, like day 100's. The build master should list both as known.
+
 ### Re-check: traditions 0.34.53, claude/trad-0607 1848e5f: PASS, the MED and LOW are fixed
 - **MED fixed:** the quiz tradition now has `host: 'tomas'` and `who` gives him 1. `eventPlan` now sorts `own` (their own birthday or rotation honour) first, then `host`, then prio, then start, so a host goes to what they host over a clash. The builder reports Tomas at quiz night on days 4, 18 and 25 (day 4 used to lose him to a birthday). The sort is a behaviour change for every host and honoree on a clash evening, but it's pure and deterministic, `e.honorees` is always an array (`let honorees = []` in `eventsOn`), and events_check and day_check day 4 pass, bar the known day-100 FAIL.
 - **LOW fixed:** if another card was open when you joined, the game opens once it's free (`QUIZ_PLAYED`, once a night).
