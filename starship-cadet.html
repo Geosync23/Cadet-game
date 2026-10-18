@@ -252,7 +252,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.82.1
+   STARSHIP CADET: CSV Wren                           build 0.82.2
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8552,7 +8552,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.82.1';                           // keep in step with the header's build line
+const GAME_BUILD = '0.82.2';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -36800,13 +36800,13 @@ const tilesTrophy = () => SHIP.tiles.beatRina !== null;   // for the deck archit
 // =====================================================================
 // A Tron-style disc and tennis game, live on the court in 3D: you only move, returns are automatic. Off-centre sends
 // the disc back steeper (up to 60°), moving as it meets you curves it, three returns in a row charge the next one, and
-// it speeds up 5% a return to a cap. First to 7, win by 2 (a quick game to 5). Ask someone to play at the court's gate:
+// it speeds up 10% a return to a cap (0.82.2, the user: shorter games; the prototype's was 5% to 10.5). First to 7, win by 2 (a quick game to 5). Ask someone to play at the court's gate:
 // one free crew member comes down to the rec dec (a crewComeTo visit, the one exception to the deck's playerOnly), plays
 // you, then goes back to their own plan. The ship's clock stops while you play (section 13's freeze, as for Tiles).
 // The rules are pure: game space is x across the court (+ is your right), z along it (+ is your end, the bow), no DOM,
 // no three.js, no R() and no Math.random. A game's stream is seeded from the save (schedU key 830); 831 picks a crew
 // member's level when they have no personality of their own. Fixed 60 steps a second, whatever the frame rate.
-const LD_DT = 1 / 60, LD_S0 = 5.0, LD_CAP = 10.5, LD_UP = 1.05, LD_REACH = .9, LD_MAXA = Math.PI / 3, LD_CURVE = .5, LD_CURL = 1.5, LD_CHARGE = 4 / 3, LD_YOU = 9;
+const LD_DT = 1 / 60, LD_S0 = 5.0, LD_CAP = 13.5, LD_UP = 1.1, LD_REACH = .9, LD_MAXA = Math.PI / 3, LD_CURVE = .5, LD_CURL = 1.5, LD_CHARGE = 4 / 3, LD_YOU = 9;
 const LD_HX = 2.38, LD_BASE = 5.6, LD_ZONE = 1.9, LD_OUT = 6.3, LD_R = .2;   // the court (DA6's recCourt): fields at ±2.38, baselines at 5.9, your zone to 3.9
 // the crew's levels (plan section 4): reaction, speed, how often they misjudge, how wide, how often they curve, how off-centre they aim
 const LD_LEVEL = {
@@ -36872,7 +36872,7 @@ function ldPlan(g) {
     const L = p.ai, r = g.rng, d = g.d;
     if (d.vz * p.side <= 0) { p.plan = { at: g.step + Math.round(L.react * 30), home: true }; continue; }
     // misjudging: likelier as the disc speeds up, and on a charged or curving disc; a misjudge really misses
-    const k = .5 + 1.3 * (d.spd - LD_S0) / (LD_CAP - LD_S0) + (d.charged ? .8 : 0) + (Math.abs(d.curl) > .3 ? .6 : 0);
+    const k = .5 + 2.6 * (d.spd - LD_S0) / (LD_CAP - LD_S0) + (d.charged ? .8 : 0) + (Math.abs(d.curl) > .3 ? .6 : 0);
     const err = r() < L.miss * k ? (r() < .5 ? -1 : 1) * (LD_REACH + .05 + r() * L.missAmt) : (r() * 2 - 1) * .12;
     const other = g.p[p === g.p[0] ? 1 : 0], mag = L.aim[0] + r() * (L.aim[1] - L.aim[0]);
     let sgn = Math.abs(other.x) > .3 ? -Math.sign(other.x) : (r() < .5 ? -1 : 1);
