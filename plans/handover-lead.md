@@ -560,3 +560,4 @@ Read: CLAUDE.md, TEAM.md (session chain rule + overnight exception), plans/brief
 - ~11:44 R2: M1 0.45.1 FAIL (Yara's run never delivers first crate; Day 2 time still open); S machine_check arms 5o/5t fail with 24d (test assumptions; S asked). m4 stages 2-3 deferred (logged).
 - ~11:46 M1 f65c929 (0.45.2: Day 2 time fix + extinguisher/Calendar/Friday-tea; mech_check OK; cadet_test identical). Reminded crate fix + O4 96649fe ready.
 - ~11:47 M1 8f5783f (0.45.3 crate fix; mech_check m4 OK; cadet_test identical). Now m2.
+- ~11:50 check-in: lead 12 memory ~22%; weekly allowance still 'allowed_warning' (unchanged). Sweep delegated.
