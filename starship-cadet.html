@@ -241,7 +241,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.38.34
+   STARSHIP CADET: CSV Wren                           build 0.38.35
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -4079,6 +4079,11 @@ DECKS[4] = {
     { id: '4-shower-q1', type: 'shower', at: [4, 19], face: 's', pose: 'stand', room: 'q' },
     { id: '4-shower-q2', type: 'shower', at: [5, 19], face: 's', pose: 'stand', room: 'q' },
     { id: '4-toilet-q1', type: 'toilet', at: [2, 19], face: 'n', pose: 'sit', room: 'q', xy: [2.65, 19.5], y: 0.4 },
+    // 0.38.35: where people wait for a shower (the social engineer's shower queue), first then second, facing the stalls
+    { id: '4-shower-queue-p1', type: 'shower-queue', at: [4, 2], face: 'n', pose: 'stand', room: 'p' },
+    { id: '4-shower-queue-p2', type: 'shower-queue', at: [4, 3], face: 'n', pose: 'stand', room: 'p' },
+    { id: '4-shower-queue-q1', type: 'shower-queue', at: [3, 18], face: 's', pose: 'stand', room: 'q' },
+    { id: '4-shower-queue-q2', type: 'shower-queue', at: [3, 17], face: 's', pose: 'stand', room: 'q' },
     { id: '4-basin-p1', type: 'basin', at: [3, 2], face: 'w', pose: 'stand', room: 'p' },
     { id: '4-basin-p2', type: 'basin', at: [3, 3], face: 'w', pose: 'stand', room: 'p' },
     { id: '4-basin-q1', type: 'basin', at: [4, 16], face: 'e', pose: 'stand', room: 'q' },
@@ -4573,6 +4578,7 @@ DECKS[5] = {
     for (const x of [1.0, 3.0, 5.0, 7.0]) place('c', 'cargoRack', x, 5.54, 's');
     for (const [x, z, tn] of [[7.5, .45, 0], [8.4, .45, .12], [7.6, 1.2, -.1], [8.4, 1.3, 0], [4.5, .4, .05], [5.3, .45, -.08], [.45, 4.5, .1]]) place('c', 'crate', x, z, 'n', { turn: tn });
     for (const x of [2.5, 6.5]) placeWall('c', 'workLight', 'n', x);
+    deliveryCratesBuild();                               // the Wednesday delivery's crates, hidden until section 17 shows them (0.38.35)
     // pipe galleries: pipe runs along the hull, and a valve station halfway along each
     for (const [r, n, z0] of [['g', 10, .2], ['h', 13, .8]]) for (let x = 0; x < n; x += 2.5) {   // in short pieces, so the one near you fades the run
       const w = Math.min(2.5, n - x);
@@ -7276,8 +7282,11 @@ DECKS[4].tiles = { room: 'j', station: ['4-common-8', '4-common-9'], seats: ['4-
 // every shelving piece of a shelf has shelf: <id>). shelfItems(id) -> that shelf's tap items on the deck you're on ([] elsewhere)
 DECKS[5].shelves = [{ id: 'lights', name: 'Lights', place: '5-parts-1', group: 'r:Lights' }, { id: 'filters', name: 'Filters', place: '5-parts-2', group: 'r:Filters' },
   { id: 'plumbing', name: 'Plumbing', place: '5-parts-3', group: 'r:Plumbing' }, { id: 'galley', name: 'Galley parts', place: '5-parts-4', group: 'r:Galley parts' }];
-// delivery (0.38.29): the Wednesday crates (DECK_DRESS.deliveryCrates), in the cargo hold's clear floor: slots [x, z, y, turn]
-// (deck tiles, floor ones first), the tiles they block while out, and where you (or a storekeeper) stand to load them, facing them
+// delivery (0.38.29; 0.38.35 the systems engineer's shape): the Wednesday crates in the cargo hold's clear floor, slots [x, z, y,
+// turn] (deck tiles, floor ones first), the tiles they block while out, and where you (or a storekeeper) stand to load them.
+// As Deck 5 is built, deliveryCratesBuild() makes one group per slot (one textured box, its own mesh, hidden) and hands each to
+// section 17's holdCratesLive(group, k) (k = 1..4), which shows the first holdCrates() of them. Once a frame (MOVERS) the
+// shown ones block their tiles and the stack's one tap ('Wednesday delivery', delivery: true) is there while any is shown
 DECKS[5].delivery = { room: 'c', place: '5-delivery-1', slots: [[16.25, 12.9, 0, .04], [16.97, 12.92, 0, -.05], [16.3, 12.88, .5, -.08], [16.93, 12.9, .5, .1]], block: [[16, 12], [17, 12]] };
 DECKS[5].places.push({ id: '5-delivery-1', type: 'event', event: 'delivery', at: [15, 12], xy: [15.55, 12.9], face: 90, pose: 'stand', anim: 'lift', room: 'c' });
 // the beam (0.38.30, Name on the beam): the Works bay's cross beam along the top of its hull wall, painted with names: the
@@ -7357,6 +7366,28 @@ DECKS[3].places.push(
   );
 }
 function roomOfTile(n, i, j) { return (DECKS[n].map[j] || '')[i]; }
+const DELIVERY_MAT = new THREE.MeshStandardMaterial({ roughness: .8, map: tex(128, 128, (c, w, h) => {   // made at load, no R()
+  c.fillStyle = '#4f6f86'; c.fillRect(0, 0, w, h); c.fillStyle = '#2f3f4c'; c.fillRect(18, 0, 10, h); c.fillRect(w - 28, 0, 10, h);   // the straps
+  c.fillStyle = '#e07a3c'; c.fillRect(42, 0, w - 84, 22); c.fillStyle = 'rgba(0,0,0,.25)'; c.fillRect(0, h - 4, w, 4); }) });   // the orange band
+function deliveryCratesBuild() {
+  const D = DECKS[5].delivery, groups = [], tiles = D.block.map(([i, j]) => i + ',' + j), mine = new Set();
+  D.slots.forEach(([x, z, y, tn], k) => {
+    const grp = new THREE.Group(); grp.position.set(X0(0) + x, y, Z0(0) + z); grp.rotation.y = tn; grp.visible = false; deckRoot.add(grp);
+    const m = new THREE.Mesh(new THREE.BoxGeometry(.66, .5, .52), DELIVERY_MAT); m.position.y = .25; m.castShadow = m.receiveShadow = true; m.userData.noMerge = true; grp.add(m);
+    groups.push(grp); if (typeof holdCratesLive === 'function') holdCratesLive(grp, k + 1);
+  });
+  const cx = X0(0) + (D.slots[0][0] + D.slots[1][0]) / 2, cz = Z0(0) + (D.slots[0][1] + D.slots[1][1]) / 2;
+  const hit = new THREE.Mesh(new THREE.BoxGeometry(1.4, 1.0, .6), HIT_MAT); hit.userData.noMerge = true; hit.position.set(cx, -10, cz); deckRoot.add(hit);
+  const item = { t: 'Wednesday delivery', x: '', hit, g: hit, front: 0, depth: .6, wall: false, delivery: true }; hit.userData.item = item; ITEMS.push(item);
+  let shown = -1;
+  MOVERS.push({ place: null, tick() {
+    const n = groups.filter(q => q.visible).length; if (n === shown) return; shown = n;
+    hit.position.y = n ? .5 : -10;
+    item.x = n + (n === 1 ? ' crate' : ' crates') + ' up from the supply run, still sealed, orange bands on. They go to main storage by hover cart.';
+    for (const t of tiles) { if (n && !BLOCKED.has(t)) { BLOCKED.add(t); mine.add(t); } else if (!n && mine.has(t)) { BLOCKED.delete(t); mine.delete(t); } }
+  } });
+  return groups;
+}
 function shelfIt(name, x) { const sh = DECKS[5].shelves.find(q => q.name === name); return { ...IT(name, x), shelf: sh ? sh.id : undefined }; }
 const shelfItems = id => (deckDef && deckDef.num === 5 ? ITEMS.filter(it => it.shelf === id) : []);
 function visitSpots(id) {
@@ -7626,21 +7657,6 @@ const DECK_DRESS = {
     im.userData.noMerge = true; im.frustumCulled = false; s.add(im);
     return { t: 'Lanterns', x: 'Paper lanterns all the way down the promenade, one for every name on the crew list, and a few spares for the ones who have left.', floor: ['=', pts[12][0], pts[12][2]], y: pts[12][1], w: .3, h: .4, d: .3 };
   } },
-  // 0.38.29 (0.60.7): the Wednesday delivery in the cargo hold, o.n crates (1-4, default 4): two on the floor, two on top, at
-  // DECKS[5].delivery.slots. One tap over the stack ('Wednesday delivery', delivery: true); it blocks its two tiles while it's out.
-  // Its own colours (dressMat), so 2 draw calls
-  deliveryCrates: { deck: 5, what: 'the Wednesday delivery: a stack of crates in the cargo hold', make(g, o) {
-    const D = DECKS[5].delivery, n = Math.max(1, Math.min(4, Math.round(o.n || 4))), s = dressAt(g, D.room, 'floor', 0, 0), r = ROOM_BOX[D.room];
-    D.slots.slice(0, n).forEach(([x, z, y, tn]) => {
-      const c = new THREE.Group(); c.position.set(x - r.i0, y, z - r.j0); c.rotation.y = tn; s.add(c);
-      dressBox(c, .66, .5, .52, '#4f6f86', 0, .25, 0);                                       // the crate
-      for (const dx of [-.22, .22]) dressBox(c, .05, .51, .53, '#2f3f4c', dx, .25, 0);       // its two straps
-      dressBox(c, .3, .1, .53, '#e07a3c', 0, .36, 0);                                        // the orange delivery band
-    });
-    const cx = D.slots.slice(0, n).reduce((a, q) => a + q[0], 0) / n, cz = D.slots.slice(0, n).reduce((a, q) => a + q[1], 0) / n;
-    return { t: 'Wednesday delivery', x: n + (n === 1 ? ' crate' : ' crates') + ' up from the supply run, still sealed, orange bands on. They go to main storage by hover cart.',
-      floor: [D.room, cx - r.i0, cz - r.j0], y: .5, w: 1.4, h: 1.0, d: .6, block: D.block, tag: { delivery: true } };
-  } },
   // 0.38.31: spiceJars: the jars on the mess hall's spice shelf, one more after each Spice shelf supper. A trace ({ id:
   // 'spiceJars', day, n }): n jars when given, else one for each week since day (from the first supper), up to 12. 4 draw calls
   spiceJars: { deck: 3, what: 'spice jars from home on the mess hall\'s spice shelf', make(g, o) {
@@ -7783,7 +7799,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.38.34';                           // keep in step with the header's build line
+const GAME_BUILD = '0.38.35';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
