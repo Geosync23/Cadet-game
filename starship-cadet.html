@@ -252,7 +252,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.63.1
+   STARSHIP CADET: CSV Wren                           build 0.47.4
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -1575,10 +1575,20 @@ const KIT = {
     // (half-width 1.12 at the front), the windscreen rakes back to the roof, the roof's edges are softened, the fins sweep
     // back, a dark canopy line runs aft from the windscreen, and the red and teal lines follow the taper. Same materials.
     const NZ = 2.1, NF = 3.05, NW = 1.12, NA = Math.atan2(1.39 - NW, NF - NZ), NL = Math.hypot(1.39 - NW, NF - NZ) + .04;
+    // 0.47.4 (Tern pass 2, plans/tern-pass2.md): the tail tapers like the nose, over a shorter run (straight from z TZ, half-width TW at the back)
+    const TZ = -2.45, TF = -3.05, TW = 1.12, TA = Math.atan2(1.39 - TW, TZ - TF), TL = Math.hypot(1.39 - TW, TZ - TF) + .04;
+    const slab = (pts, y, h, mat, p, bev) => {             // a flat piece drawn in plan ([x, z] corners), from y up h (bev: bevelled edges)
+      const sh = new THREE.Shape(); pts.forEach(([x, z], k) => k ? sh.lineTo(x, -z) : sh.moveTo(x, -z));
+      const geo = new THREE.ExtrudeGeometry(sh, bev ? { depth: h - 2 * bev, bevelEnabled: true, bevelThickness: bev, bevelSize: bev, bevelSegments: 1 } : { depth: h, bevelEnabled: false });
+      if (bev) geo.translate(0, 0, bev);
+      const m = new THREE.Mesh(geo, mat); m.rotation.x = -Math.PI / 2; m.position.y = y; m.castShadow = m.receiveShadow = true; p.add(m); return m;
+    };
+    const mirror = q => [...q, ...q.slice().reverse().map(([x, z]) => [-x, z])];   // the +x half's corners, nose to tail -> the whole outline
     const side = (y, h, mat, gx, roofG) => {             // a hull side at x = gx, from y to y + h; the +x side has the door gap (pz -.97 to -.03)
-      const parts = gx > 0 ? [[-3, -.97], [-.03, NZ + .02]] : [[-3, NZ + .02]];
+      const parts = gx > 0 ? [[TZ - .02, -.97], [-.03, NZ + .02]] : [[TZ - .02, NZ + .02]];
       for (const [z0, z1] of parts) box(.12, h, z1 - z0, mat, gx, y + h / 2, (z0 + z1) / 2, roofG);
       const sd = Math.sign(gx), off = Math.abs(gx) - 1.39;   // and the nose piece, angled in (off: a line laid on the hull's face)
+      box(.12, h, TL, mat, sd * ((1.39 + TW) / 2 + off * Math.cos(TA)), y + h / 2, (TZ + TF) / 2 - off * Math.sin(TA), roofG).rotation.y = sd * TA;   // the tail piece, angled in
       const cx = sd * ((1.39 + NW) / 2 + off * Math.cos(NA)), cz = (NZ + NF) / 2 + off * Math.sin(NA);
       if (y + h < 1.6) { box(.12, h, NL, mat, cx, y + h / 2, cz, roofG).rotation.y = -sd * NA; return; }
       const sh = new THREE.Shape();                      // the upper hull's nose piece: its top slopes down with the windscreen
@@ -1586,21 +1596,24 @@ const KIT = {
       const geo = new THREE.ExtrudeGeometry(sh, { depth: .12, bevelEnabled: false }); geo.translate(0, 0, -.06);
       const m = new THREE.Mesh(geo, mat); m.position.set(cx, 0, cz); m.rotation.y = -Math.PI / 2 - sd * NA; m.castShadow = m.receiveShadow = true; roofG.add(m);
     };
-    box(2.7, .02, 5.9, WM.steel, 0, .01, 0, g);                                               // the cabin floor
+    slab(mirror([[1.05, 2.95], [1.33, NZ], [1.33, TZ], [1.05, -2.95]]), 0, .02, WM.steel, g);   // the cabin floor, inside the taper
     for (const gx of [-1.39, 1.39]) { side(0, 1.0, WM.hull, gx, g); side(.86, .08, KM.red, gx + Math.sign(gx) * .012, g); }   // lower hull, a red line at the top
-    box(2.9, 1.0, .12, WM.hull, 0, .5, -2.99, g); box(2.3, 1.0, .12, WM.hull, 0, .5, 2.99, g);   // tail and nose, lower
+    box(2.3, 1.0, .12, WM.hull, 0, .5, -2.99, g); box(2.3, 1.0, .12, WM.hull, 0, .5, 2.99, g);   // tail and nose, lower
     box(.5, .42, 4.0, WM.hullDark, -1.05, .21, 0, g); box(.46, .08, 3.9, KM.teal, -1.05, .46, 0, g); box(.08, .6, 4.0, WM.hullDark, -1.29, .76, 0, g);   // the north bench
     for (const [z, l] of [[1.0, 2.0], [-1.5, 1.0]]) { box(.5, .42, l, WM.hullDark, 1.05, .21, z, g); box(.46, .08, l - .1, KM.teal, 1.05, .46, z, g); box(.08, .6, l, WM.hullDark, 1.29, .76, z, g); }   // the south benches, either side of the door
-    box(2.66, 1.9, .9, WM.hullDark, 0, .95, -2.5, g); for (const x of [-.66, 0, .66]) box(.6, .04, .02, WM.steel, x, 1.2, -2.04, g);   // the lockers across the tail, and their handles
+    slab(mirror([[1.33, -2.05], [1.33, TZ], [1.06, -2.93]]), 0, 1.9, WM.hullDark, g); for (const x of [-.66, 0, .66]) box(.6, .04, .02, WM.steel, x, 1.2, -2.04, g);   // the lockers across the tail, and their handles
     box(2.0, .03, .03, WM.lightStrip, 0, 1.75, -2.04, g); box(2.0, .03, .03, WM.lightStrip, 0, .79, 2.48, g);   // cabin lights: over the lockers and along the console's edge (glow, no lamp)
     box(2.2, .8, .45, WM.paintDark, 0, .4, 2.72, g); for (const x of [-.55, .55]) { box(.5, .02, .3, WM.screen, x, .81, 2.7, g); cyl(.2, .2, .1, KM.teal, x, .45, 2.3, g, 14); cyl(.05, .05, .4, WM.steel, x, .2, 2.3, g, 8); }   // the cockpit: console, screens, two seats
-    for (const sx of [-.7, .7]) { const e = cyl(.32, .28, .5, WM.hullDark, sx, 1.0, -3.25, g, 18); e.rotation.x = Math.PI / 2; const f = cyl(.22, .22, .02, WM.engine, sx, 1.0, -3.51, g, 18); f.rotation.x = Math.PI / 2; }   // engines
+    for (const sx of [-.62, .62]) {                     // engine pods faired into the tail: a long pod, a steel nozzle, the glow set inside it
+      for (const [rt, rb, l, mat, z] of [[.34, .3, .5, WM.hullDark, -3.28], [.3, .27, .08, WM.steel, -3.58], [.22, .22, .02, WM.engine, -3.635]]) cyl(rt, rb, l, mat, sx, 1.0, z, g, 18).rotation.x = Math.PI / 2;
+    }
+    box(.6, .34, .5, WM.hullDark, 0, 1.0, -3.28, g);                                       // the fairing between the pods
     for (const sd of [-1, 1]) { box(.62, .07, 1.0, WM.hull, sd * 1.72, .75, -2.3, g).rotation.y = sd * .5; box(.06, .12, .12, sd < 0 ? WM.navRed : WM.navGreen, sd * 1.98, .75, -2.62, g); }   // stub wings, swept back; nav lights at the tips
     // the roof group: the hull above 1 m, windows, livery, windscreen, roof and fin
     const R = new THREE.Group(); g.add(R);
     for (const gx of [-1.39, 1.39]) { side(1.0, 1.3, WM.hull, gx, R); side(1.08, .12, KM.teal, gx + Math.sign(gx) * .012, R); for (const z of [-1.5, -.5, .5, 1.5]) if (!(gx > 0 && z === -.5)) box(.03, .32, .5, WM.cockpit, gx + Math.sign(gx) * .065, 1.6, z, R); }
     box(.12, .3, .94, WM.hull, 1.39, 2.15, -.5, R);                                             // over the door
-    box(2.9, 1.3, .12, WM.hull, 0, 1.65, -2.99, R);
+    box(2.3, 1.3, .12, WM.hull, 0, 1.65, -2.99, R);
     box(2.3, .58, .12, WM.hull, 0, 1.28, 2.99, R);                                               // the nose under the windscreen
     {                                                    // the windscreen: from the nose (y 1.54) raked back to the roof, as wide as the tapering sides
       const sh = new THREE.Shape(), Lw = Math.hypot(.77, NF - .05 - NZ - .02);
@@ -1608,8 +1621,14 @@ const KIT = {
       const ws = new THREE.Mesh(new THREE.ExtrudeGeometry(sh, { depth: .03, bevelEnabled: false }), WM.cockpit);
       ws.position.set(0, 1.54, NF - .05); ws.rotation.x = -Math.atan2(NF - .05 - NZ - .02, .77); ws.castShadow = true; R.add(ws);
     }
-    box(2.9, .1, NZ + 3.05, WM.hull, 0, 2.35, (NZ - 3.05) / 2, R); box(1.6, .12, 4.0, WM.hull, 0, 2.46, -.4, R);   // the roof (back from the windscreen) and its raised spine
-    for (const sx of [-1.36, 1.36]) box(.17, .17, NZ + 2.95, WM.hull, sx, 2.32, (NZ - 2.95) / 2, R).rotation.z = Math.PI / 4;   // the roof's edges, softened
+    slab(mirror([[1.45, NZ], [1.45, TZ], [1.18, TF]]), 2.3, .1, WM.hull, R);                // the roof (back from the windscreen), tapering at the tail
+    slab(mirror([[.45, 1.55], [.75, .8], [.75, -1.8], [.5, -2.35]]), 2.38, .14, WM.hull, R, .04);   // its raised spine, narrowing at both ends, edges bevelled
+    for (const sd of [-1, 1]) {                         // the roof's edges, softened, round the tail too; the nose and tail corners rounded
+      box(.17, .17, NZ - TZ, WM.hull, sd * 1.36, 2.32, (NZ + TZ) / 2, R).rotation.z = Math.PI / 4;
+      box(.17, .17, TL, WM.hull, sd * ((1.45 + TW + .06) / 2 - .09 * Math.cos(TA)), 2.32, (TZ + TF) / 2 + .09 * Math.sin(TA), R).rotation.set(0, sd * TA, Math.PI / 4);
+      for (const z of [2.99, -2.99]) { box(.15, 1.0, .15, WM.hull, sd * 1.12, .5, z, g).rotation.y = Math.PI / 4; box(.15, z > 0 ? .56 : 1.3, .15, WM.hull, sd * 1.12, z > 0 ? 1.28 : 1.65, z, R).rotation.y = Math.PI / 4; }
+    }
+    box(2.2, .17, .17, WM.hull, 0, 2.32, -2.96, R).rotation.x = Math.PI / 4;
     box(.9, .03, .52, WM.cockpit, 0, 2.415, NZ - .24, R); box(.9, .03, 2.4, WM.cockpit, 0, 2.535, .4, R);   // the canopy line, aft from the windscreen
     box(.08, .55, 1.1, WM.hull, 0, 2.62, -2.55, R).rotation.x = -.5; box(.09, .14, .55, KM.teal, 0, 2.78, -2.72, R).rotation.x = -.5;   // the fin, swept back
     const name = tex(256, 64, (c, w, h) => { c.fillStyle = '#1c3d44'; c.font = '700 40px system-ui,sans-serif'; c.fillText('TERN', 8, 44); c.font = '600 18px system-ui,sans-serif'; c.fillText('CSV WREN · 1', 130, 42); });
@@ -7922,7 +7941,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.63.1';                           // keep in step with the header's build line
+const GAME_BUILD = '0.47.4';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
