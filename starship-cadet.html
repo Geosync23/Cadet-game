@@ -249,7 +249,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.44.8
+   STARSHIP CADET: CSV Wren                           build 0.44.9
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7808,7 +7808,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.44.8';                           // keep in step with the header's build line
+const GAME_BUILD = '0.44.9';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -34438,7 +34438,9 @@ const tilesTrophy = () => SHIP.tiles.beatRina !== null;   // for the deck archit
 // mechanic (// 24a ROUNDS ...), each removable on its own: a sub-block registers WORK_MECH[id] for its ladder row,
 // and a row whose sub-block isn't in the build never opens (nor blocks the rows after it, except by its own needs).
 // Lazy: SHIP.works is made the first time anything asks after Day 1's shift (worksInit), never at load. Nothing here
-// calls R(); choices come from schedU keys 850-854 (850 a training's meeting time; 851-854 spare).
+// calls R(); choices come from schedU keys 850-854 (850 a training's meeting time; 851 which "What's next" line
+// today, display only; 852-854 spare). A sub-block keeps its own data in SHIP.works under its own key and reads it back
+// from the save itself (worksClean keeps only 24 core's fields), as 24k and 24f do.
 //   SHIP.works (saved as ship.works) = { v: 1, tier, rank, xp (since your last promotion), tr: { ladder id: day
 //   trained }, use: { id: uses }, op: { day: [ids opened (or offered again) that day] }, tools: { id: [day given,
 //   wear 0-1] }, sk: { machine kind: jobs turned in }, log: [[job id, day, flags, kind, who noticed?], ... the last
@@ -34525,7 +34527,7 @@ function worksClean(s) {
     const log = Array.isArray(s.log) ? s.log.filter(e => Array.isArray(e) && typeof e[0] === 'string' && Number.isInteger(e[1])).slice(-WORKS_LOG)
       .map(e => [e[0].slice(0, 80), e[1], int(e[2], 0, 255, 0), typeof e[3] === 'string' ? e[3].slice(0, 24) : ''].concat(typeof e[4] === 'string' ? [e[4].slice(0, 40)] : [])) : [];
     const c = s.cur, cur = obj(c) && ids.has(c.id) && /^(ask|meet|watch|do|again|held)$/.test(c.st) ? { id: c.id, st: c.st, d: int(c.d, 0, 99999, 0), by: typeof c.by === 'string' ? c.by : null,
-      occ: typeof c.occ === 'string' ? c.occ : null, j: typeof c.j === 'string' ? c.j : null, w: int(c.w, 0, 999, 0), ...(c.hold ? { hold: true } : {}) } : null;
+      occ: typeof c.occ === 'string' ? c.occ : null, j: typeof c.j === 'string' ? c.j : null, w: int(c.w, 0, 999, 0), ...(c.hold ? { hold: true } : {}), ...(typeof c.told === 'boolean' ? { told: c.told } : {}) } : null;
     const t = s.test, test = obj(t) ? { tier: int(t.tier, 1, 4, 2), day: int(t.day, 0, 99999, 0), tries: int(t.tries, 0, 99, 0), passed: !!t.passed } : null;
     return { v: 1, tier: int(s.tier, 1, 4, 1), rank: WORK_RANKS.includes(s.rank) ? s.rank : 'junior', xp: isFinite(s.xp) ? Math.max(0, Math.min(9999, +s.xp)) : 0,
       tr: days(s.tr), use: (() => { const u = {}; if (obj(s.use)) for (const k in s.use) if (ids.has(k) && Number.isInteger(s.use[k])) u[k] = Math.max(0, Math.min(9999, s.use[k])); return u; })(),
@@ -34535,7 +34537,7 @@ function worksClean(s) {
   } catch (e) { return null; }
 }
 SAVE_EXTRA.push(s => { if (SHIP.works) s.ship.works = SHIP.works; });
-onSim('newGame', () => { SHIP.works = null; WORKS_TICK.h = -1; WORKS_TICK.m = -1; });
+onSim('newGame', () => { SHIP.works = null; WORKS_TICK.h = -1; WORKS_TICK.m = -1; WORKS_TAB = 'training'; });
 function worksInit(now = shipNow()) {
   if (SHIP.works) return SHIP.works;
   if (now < WORKS_START) return null;                    // not before Day 1's shift has ended
@@ -34568,6 +34570,7 @@ function ladderTick(h) {
   if (!W || m < WORKS_ASK[0] || m > WORKS_SMALL || !playerShiftOn(d)) return out;
   const today = W.op[d] || [], has = size => today.some(id => (ladderRow(id) || {}).size === size), opened = worksOpened(W);
   const c = W.cur;
+  if (c && c.st === 'held' && c.d < d) worksEscortEnd(c.id);   // a hold left from an earlier day: trained now (the ladder never stalls)
   if (c && c.d < d && (c.st === 'ask' || c.st === 'again') && !has('big') && m <= WORKS_ASK[1]) { const row = ladderRow(c.id); if (row && trainOffer(row, c, d, t)) { (W.op[d] = W.op[d] || []).push(row.id); out.push(row.id); } }
   for (const size of ['big', 'small']) {
     if ((W.op[d] || []).some(id => (ladderRow(id) || {}).size === size) || (size === 'big' && (W.cur || m > WORKS_ASK[1]))) continue;
@@ -34595,7 +34598,7 @@ function worksUse(mech, n = 1) {
   const row = ladderRow(mech); W.use[mech] = (W.use[mech] || 0) + n;
   if (row.xp) worksXp(row.xp * n);
   for (const k in WORK_TOOLS) if (WORK_TOOLS[k].mech === mech && W.tools[k]) W.tools[k][1] = Math.min(1, W.tools[k][1] + WORK_TOOLS[k].wearPerUse * n);
-  if (row.size === 'small' && W.tr[mech] === undefined) worksTrained(mech);
+  if (row.size === 'small' && W.tr[mech] === undefined && worksOpened(W).has(mech)) worksTrained(mech);
   return W.use[mech];
 }
 function worksStage(mech) {                              // the highest stage whose condition holds (stage 0 once trained or used)
@@ -34632,14 +34635,21 @@ function trainOffer(row, c, d, t) {                      // the ask, or the ask 
   const at = Math.min(Math.max(900, early), Math.max(m + 60, 510, early) + Math.ceil(schedU(machSeed(row.id), d, 850) * 6) * 10), o = trainSetup(row);
   o.by = by; o.script = trainScript(row, by); const r = occasionAdd('works.' + row.id, (d - 1) * 1440 + at, false, o.len);
   if (!r) return false;
-  c.st = 'meet'; c.occ = r.key;
+  c.st = 'meet'; c.occ = r.key; c.told = false;
   const place = DECKS[o.deck] && DECKS[o.deck].rooms[o.room] ? DECKS[o.deck].rooms[o.room].name : 'the Works bay', when = hhmm(at);
   const where = place.replace(/^Works Chief's office$/, 'the Chief\'s office') + ' on Deck ' + o.deck, ask = worksText('works.ask.' + row.id, '', { time: when, place: where, name: worksName(by) }), cut = ask.indexOf(' | ');
   let subject = 'Training: ' + mechName(row.id), body = 'Meet me in the ' + where.replace(/^the /, '') + ' at ' + when + '. I\'ll show you ' + mechName(row.id).replace(/^./, x => x.toLowerCase()) + '.';
   if (cut > 0) { subject = ask.slice(0, cut); body = ask.slice(cut + 3); if (body.indexOf(when) < 0) body += ' (' + when + ', ' + where + '.)'; }   // the writer's words; the time and place if they don't say
   if (typeof mailSend === 'function') mailSend({ at: t, from: worksName(by), subject, body, quiet: true });
-  if (t >= shipNow() - 1) { try { toast(worksName(by), body); } catch (e) { /* no UI */ } if (typeof setGoal === 'function' && !(SHIP.player && SHIP.player.track)) setGoal({ deck: o.deck, room: o.room, label: row.name + ' with ' + worksFirst(by) + ', ' + when }); }
+  if (t >= shipNow() - 1) trainTell(row, c);              // in play now; asked during a sleep, it's told when you're up (trainTick)
   return true;
+}
+function trainTell(row, c) {                             // the ask in play: a toast and the goal arrow to the meeting
+  const r = SHIP.occasions.find(x => x.key === c.occ); c.told = true; if (!r) return;
+  const o = OCCASIONS['works.' + row.id], place = (DECKS[r.deck].rooms[r.room] || { name: 'the Works bay' }).name, when = hhmm(r.at % 1440);
+  const m = (SHIP.mail || []).find(x => x.from === worksName(c.by) && Math.abs(x.at - shipNow()) < 1440);
+  try { toast(worksName(c.by), m ? m.body : 'Meet me in the ' + place + ' at ' + when + '.'); } catch (e) { /* no UI */ }
+  if (typeof setGoal === 'function' && !(SHIP.player && SHIP.player.track)) setGoal({ deck: r.deck, room: r.room, label: mechName(row.id) + ' with ' + worksFirst(c.by) + ', ' + when });
 }
 function trainSpot(j) {                                  // where a training job is done: { deck, tile, room }
   if (!j) return null;
@@ -34651,6 +34661,7 @@ function trainSpot(j) {                                  // where a training job
 function trainWatch(row, c, t, again) {                  // the teacher's training job: they lead, you watch
   const W = SHIP.works, d = worksDay(t), slot = 10 + Math.max(0, CAREER_LADDER.filter(r => r.size === 'big').indexOf(row)) % 10, M = WORK_MECH[row.id] || {};
   if (M.noJob) { worksTrained(row.id); return true; }
+  if (!M.reserve && !MACHINE_KINDS[row.job]) { worksTrained(row.id); return true; }   // no sub-block reserve and no machine kind: trained at the meeting (reviewer R: no stand-in faults)
   let id = null; try { id = M.reserve ? M.reserve(d, t - (d - 1) * 1440, slot, { train: row.id }) : jobReserve(row.job, d, t - (d - 1) * 1440, slot, { train: row.id }); } catch (e) { id = null; }
   if (!id) { c.st = 'again'; c.d = d; return false; }
   c.st = 'watch'; c.j = id; c.w = 0;
@@ -34678,6 +34689,7 @@ function trainTick(now) {                                // once a ship minute i
   const row = ladderRow(c.id); if (!row) { W.cur = null; return; }
   if (c.st === 'meet') {
     const r = SHIP.occasions.find(x => x.key === c.occ);
+    if (r && c.told === false && now < r.at + r.len) trainTell(row, c);   // asked while you slept: told now you're up
     if (!r) { c.st = 'ask'; return; }
     if ((r.met || r.status === 'kept') && !(typeof DIALOGUE !== 'undefined' && DIALOGUE)) trainWatch(row, c, now, false);
     else if (r.status === 'missed') c.st = 'ask';        // offered again on your next workday
@@ -34857,10 +34869,12 @@ function worksView() {
   let more = []; try { more = tab ? tab.view() || [] : []; } catch (e) { more = [{ kind: 'text', text: 'Nothing to show.' }]; }
   return { title: worksText('works.app.title', 'Works'), blocks: B.concat(more) };
 }
+function worksTabShow(id) { if ((WORKS_TABS || []).some(x => x.id === id)) WORKS_TAB = id; if (typeof deviceShow === 'function') deviceShow('works'); }
 function worksBadge(x) { try { const n = typeof x.badge === 'function' ? x.badge() : x.badge; return Number.isFinite(n) && n > 0 ? n : 0; } catch (e) { return 0; } }
 if (typeof deviceApp === 'function') deviceApp({ id: 'works', title: worksText('works.app.title', 'Works'), short: 'Works', icon: 'wrench', order: 31, view: worksView, hidden: () => !SHIP.works,   // from Day 1's evening (nothing changes Days 0-1)
   badge: () => (WORKS_TABS || []).reduce((a, x) => a + worksBadge(x), 0) || null,
   act(verb, arg) { const T = WORKS_TABS || []; if (verb === 'tab') { if (T.some(x => x.id === arg)) WORKS_TAB = arg; return; }
+    if (verb === 'open') { const id = arg && (arg.tab || arg.arg); if (T.some(x => x.id === id)) WORKS_TAB = id; return; }   // deviceDo({ app: 'works', tab }) opens on that tab
     const tab = T.find(x => x.id === WORKS_TAB); if (tab && tab.act) return tab.act(verb, arg);
     const any = T.find(x => x.act && /:/.test(verb) && verb.split(':')[0] === (x.verbs || x.id)) || null; if (any) return any.act(verb, arg); } });
 // ---- the clock: worksCareerTick() from the main loop (section 12) each frame; it acts once a ship minute (the training)
