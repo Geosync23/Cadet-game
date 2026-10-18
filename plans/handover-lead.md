@@ -646,3 +646,4 @@ Read: CLAUDE.md, TEAM.md (Lead line + "Playtest update 1" paragraph), plans/brie
 - **Seats now:** working: BM6, R3, X, O5, U, DA5, DA6. On call/idle: T (39%), C2 (25%), O4 (59%, done), P (60%, small fixes only; handover plans/handover-player.md 36650dd), W (65%, small fixes only; handover 0656925), D2 (28%, holidays on hold), M1 (57%), M2 (36%), rec planner, Lightdisc proto. Archived today by lead 13: C, H, S, lead 12, BM5, R2.
 - **Other open items for the user:** Zeke's Day 1 trainer sample (old, low priority); controller support and a PC .exe were discussed (both "after Pillar 5" if wanted, not started).
 - **Weekly allowance:** 'allowed_warning' all day. Keep seat count in check; archive idle seats whose work is pushed.
+- ~18:52 started lead 14 session_01RHtJv7GJDi4qosgU8Gb2b8 (depth 4). Lead 13 stays reachable until lead 14 says hello. Last sweep: O4 60%, W 67% (both done).
