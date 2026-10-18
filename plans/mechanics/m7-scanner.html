@@ -98,12 +98,11 @@ td code{white-space:normal}
   <div class="lines">Scanner · Oven 2 (Galley)            the job: runs cool
   Element      ███░░░░░░░  22   failing
   Door seal    ██████░░░░  58   worn
-  Thermostat   █████████░  91   good
-  Fan          ████████░░  84   good
-                         [ Fetch: element ]  [ Fetch: door seal ]  [ … ]</div>
+  Fan belt     ████████░░  84   good
+                         [ Fetch: element ]  [ Fetch: door seal ]  [ Fetch: fan belt ]</div>
   <ul>
     <li>Readings are machine numbers (like any gauge); <i>your</i> progress is still never a number.</li>
-    <li>When two read low, the job's symptom line and the Chief's notes ("Cool all over: the element. Cool by the door: the seal.") tell them apart.</li>
+    <li>When two read low, what you see up close (the look-over's line: "cool all over" or "cool by the door") and the Chief's notes ("Cool all over: the element. Cool by the door: the seal.") tell them apart.</li>
   </ul>
 </section>
 
@@ -132,7 +131,7 @@ td code{white-space:normal}
     <tr><td>content</td><td>Torres's lines (<code>train.m7</code>), the "still…" lines per cause (<code>FAULT_CAUSES</code>' words)</td><td>W</td></tr>
   </table></div>
   <ul>
-    <li><b>Readings:</b> the cause's part reads 12-35 ("failing" or "low"); the others 70-96 ("good"), except, with <code>schedU(machSeed(id), day, 874) &lt; .3</code>, one decoy reads 40-60 ("worn"), always one whose <code>shows</code> differs from the cause's, so the symptom tells them apart. Exact values from <code>schedU(machSeed(id), day, 875)</code>. Frozen on the job (<code>j.scan</code>) at the first reading, so they don't change on a second look.</li>
+    <li><b>Readings:</b> the cause's part reads 12-35 ("failing" or "low"); the others 70-96 ("good"), except, with <code>schedU(machSeed(id), day, 874) &lt; .3</code>, one decoy reads 40-60 ("worn"), always one with the same card (<code>shows</code>) but a different <code>sign</code> (<code>fault-tables.html</code>), so what you see up close tells them apart. Exact values from <code>schedU(machSeed(id), day, 875)</code>. Frozen on the job (<code>j.scan</code>) at the first reading, so they don't change on a second look.</li>
     <li><b>The symptom line</b> on the job card comes from the cause's <code>shows</code> ("runs cool", "flickers", "leaks"), shown from Day 2 (real faults), so players learn it before the scanner.</li>
     <li><b>Before the scanner</b> (or with no cause): exactly today's look-over.</li>
     <li><b>Training:</b> Day 5: <code>jobReserve</code> for Torres (slot 10+, <code>o.train: 'm7'</code>) on a faulty Tier 1 machine with a part cause; he reads it (lead), then a second reserved job for you (he follows). <code>toolGive('scanner')</code> at the board. The P3 case is posted after your second reading is done (<code>p3-whats-been-tried.html</code>).</li>

@@ -167,7 +167,7 @@ You climb but never command: Senior Officer is the top (design-doc).
 
 ## Part 2: the mechanics
 
-Each card: **the verb · how it's taught · how it unlocks · how it grows · what it touches (and whose section) · phone budget · test.** Each will get its own one-page spec (`plans/mechanics/<id>.html`, by the mechanic designer) for the user to approve before it's built.
+Each card: **the verb · how it's taught · how it unlocks · how it grows · what it touches (and whose section) · phone budget · test.** Each will get its own one-page spec (`plans/mechanics/<id>.html`, by the mechanic designer) for the user to approve before it's built. *(2026-10-18: Steps 1-2's pages are written: `plans/mechanics/index.html` lists them; the lead approves them overnight.)*
 
 ### M1. Rounds (Day 2, Torres)
 
@@ -460,6 +460,7 @@ Every type has the same frame: **symptom → suspects (3-6) → clues at places 
 - *Screen:* a card per person (portrait initial, where and when, what they said), with a tap to mark "doesn't fit".
 
 **P3. What's been tried?** (Day 5, Torres, with the scanner; a full training moment; the first head-scratcher, the gentlest)
+- *Spec (2026-10-18, `plans/mechanics/p3-whats-been-tried.html`):* the first case is a laundry washer that leaks (Deck 4 has no light-relay machine with a panel), and each note rules out only what was tried (the reset note below would solve the case on its own, which the solver forbids; it stays as a clue for harder P3 cases).
 - *Example (T1):* "The lamp in Bunk 2 flickers." Taped to the job: Torres's note ("Swapped the bulb. Still flickers. Z."), and Pell's ("Reset the breaker last night: fine for an hour, then back"). Suspects: bulb, switch, the junction's relay, the wiring. The bulb is out; a switch or wiring fault wouldn't care about a reset; **fine for an hour then back is a relay warming up.**
 - *Grows:* T1+ a note that rules out less than it seems ("changed the filter", but the wrong size was fitted); T2 a night-shift handover log with five entries; T2+ the cold-case board (6.6).
 - *Screen:* the notes as paper slips, each crossing out what it proves.
@@ -544,7 +545,7 @@ Every type has the same frame: **symptom → suspects (3-6) → clues at places 
 
 ### Built from the real ship, the same every time
 
-**Fault tables** (section 17, data): for each machine kind, its **causes**: which part (or setting, or load), what the symptom looks like, when it shows (always, at load peaks, after use, at a time), what each reading says, and what each kind of clue would show. Kinds are added a few at a time (Tier 1 kinds first: oven, range, extractor, chiller, washer, lights, junction, doorgear; then Tier 2: scrubber, recycler, heater, airplant, fan, manifold, pump, filter).
+**Fault tables** (section 17, data): for each machine kind, its **causes**: which part (or setting, or load), what the symptom looks like, when it shows (always, at load peaks, after use, at a time), what each reading says, and what each kind of clue would show. Kinds are added a few at a time (Tier 1 kinds first: oven, range, galley plant, extractor, chiller, washer, lift, light relays, cart dock, grow lights; then Tier 2: scrubber, recycler, heater, airplant, fan, manifold, pump, filter and the rest). *(Corrected 2026-10-18: the power junction and the bay door gear are Tier 3 and Tier 2 in the game.)* Written out in plain words in `plans/mechanics/fault-tables.html`.
 
 **Making a case** (section 24, the head-scratcher sub-blocks, when a real fault of a puzzle shape is posted for you):
 1. **The seed:** `hash(machine id, day, 'case', k)` with Pillar 5's keys (puzzles: 880-894). Never `R()`.

@@ -124,19 +124,11 @@ td code{white-space:normal}
 <section id="faults">
   <h2>The fault tables (what can go wrong with each kind of machine)</h2>
   <p>For each kind of machine, a short list of <b>causes</b>, written in plain words by the designer (Tier 1 kinds first). Each says what's wrong, what you'd notice, when it shows, and what each kind of clue would show. They're data in section 17 (<code>FAULT_CAUSES</code>, the foundation's 17.4); real faults use them to pick a cause, and cases use them to pick suspects and clues.</p>
-  <div class="lines">FAULT_CAUSES.lights = [
-  { id: 'bulb',   part: 'lamp',  w: 3, shows: 'flicker', when: 'always',
-    tries: { bulb: 'fixes' },                              // what a crew member's quick try does
-    reads: { scanner: 'lamp: worn' },
-    words: 'A lamp at the end of its life.' },
-  { id: 'relay',  part: 'relay', w: 2, shows: 'flicker', when: 'warm',      // fine for a while after a reset, then back
-    tries: { bulb: 'no change', reset: 'fine for an hour' }, reads: { scanner: 'relay: ok cold' },
-    words: 'A relay that sticks when it warms up.' },
-  { id: 'switch', part: 'switch', w: 1, shows: 'flicker', when: 'touched',
-    tries: { bulb: 'no change', reset: 'no change' }, words: 'A worn switch.' },
-  { id: 'wiring', part: 'cable', w: 1, shows: 'flicker', when: 'always',
-    tries: { bulb: 'no change', reset: 'no change' }, tier: 2, words: 'Loose wiring behind the panel.' } ]</div>
-  <p class="note"><code>when</code> is one of <code>always</code>, <code>peak</code> (at the machine's busiest hours), <code>after-use</code>, <code>warm</code>, <code>touched</code>, <code>time</code> (at a time of day), <code>with:&lt;kind&gt;</code> (only while another machine runs). A cause with <code>tier: 2</code> is only a suspect on Tier 2 cases. A cause may name a part not in <code>STOCK</code> yet (<code>switch</code>, <code>cable</code>): the systems engineer adds it to <code>STOCK</code> and a shelf (<code>SHELF_MORE</code>, 0.33.41).</p>
+  <div class="lines">FAULT_CAUSES.washer = [
+  { id: 'pump',  part: 'pump',  w: 3, shows: 'leaks', sign: 'puddle under it',        when: 'after-use' },
+  { id: 'seal',  part: 'seal',  w: 2, shows: 'leaks', sign: 'drips at the door',      when: 'after-use' },
+  { id: 'valve', part: 'valve', w: 2, shows: 'leaks', sign: 'water left in the drum', when: 'after-use' }, ... ]</div>
+  <p class="note"><code>shows</code> is the job card's symptom (causes that share it can be suspects together); <code>sign</code> is what you see up close (different within a card). <code>when</code> is one of <code>always</code>, <code>peak</code>, <code>after-use</code>, <code>warm</code>, <code>touched</code>, <code>time</code>, <code>with:&lt;kind&gt;</code>. The full tables, in plain words, are <code>fault-tables.html</code>; every part they name is already in <code>STOCK</code>.</p>
 </section>
 
 <section id="make" class="builder">

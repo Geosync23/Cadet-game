@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fault Tables</title>
+<style>
+:root{--ink:#e8eef0;--muted:#93a6ae;--teal:#4cc3b5;--gold:#e9c46a;--rose:#e58f7a;--glass:rgba(13,21,33,.78);--line:rgba(150,200,196,.22);--chip:rgba(76,195,181,.14)}
+*{box-sizing:border-box}
+html,body{margin:0;background:#121a27;color:var(--ink);font-family:"Avenir Next","Segoe UI",system-ui,sans-serif}
+body{background:radial-gradient(ellipse at 50% 20%,#22304a 0%,#141c2b 60%,#0c111b 100%) fixed;line-height:1.5}
+header{padding:18px 16px 4px;max-width:1100px;margin:0 auto}
+h1{font-size:21px;font-weight:600;margin:0}
+h2{font-size:17px;font-weight:600;margin:0 0 8px;color:#bdeee6}
+h3{font-size:14.5px;font-weight:600;margin:12px 0 4px;color:#d9eeea}
+.sub{font-size:13.5px;color:var(--muted);margin-top:4px}
+.draft{display:inline-block;font-size:11.5px;color:#14202a;background:var(--gold);border-radius:999px;padding:2px 9px;margin-left:6px;vertical-align:2px}
+nav{position:sticky;top:0;z-index:5;background:rgba(14,20,31,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+nav div{display:flex;gap:6px;overflow-x:auto;padding:8px 16px;max-width:1100px;margin:0 auto;-webkit-overflow-scrolling:touch}
+nav a{flex:none;text-decoration:none;border:1px solid var(--line);background:var(--glass);color:var(--ink);font-size:13px;padding:6px 11px;border-radius:999px}
+nav a:focus-visible,nav a:hover{border-color:var(--teal);color:#bdeee6;outline:none}
+main{max-width:1100px;margin:0 auto;padding:6px 16px 40px}
+section{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:14px 0;scroll-margin-top:56px}
+p{margin:6px 0;font-size:14px;color:#d6e0e3}
+ul{margin:6px 0;padding-left:20px;font-size:14px;color:#d6e0e3}
+li{margin:3px 0}
+.note{font-size:12.5px;color:var(--muted)}
+.grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.card{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.025)}
+.card b{display:block;color:#bdeee6;font-size:14px;margin-bottom:2px}
+.card span{font-size:13px;color:#cfd9dc}
+.card .meta{display:block;font-size:12px;color:var(--muted);margin-top:4px}
+.tag{display:inline-block;font-size:11.5px;border-radius:999px;padding:1px 8px;margin:2px 4px 0 0;background:var(--chip);color:#bdeee6;border:1px solid var(--line)}
+.tag.new{background:rgba(233,196,106,.16);color:#f1dca0}
+.tag.old{opacity:.75}
+.steps{list-style:none;padding:0;margin:8px 0;counter-reset:s}
+.steps li{position:relative;padding:8px 10px 8px 46px;border-left:2px solid rgba(76,195,181,.35);margin:0 0 0 14px}
+.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:-15px;top:8px;width:28px;height:28px;border-radius:50%;background:#183040;border:1px solid var(--teal);color:#bdeee6;font-size:12.5px;display:flex;align-items:center;justify-content:center}
+.steps time{display:block;font-size:12px;color:var(--gold)}
+.steps b{color:#e4f3f0;font-weight:600}
+.steps span{display:block;font-size:13.5px;color:#cfd9dc}
+.week{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.day{border:1px solid var(--line);border-radius:12px;padding:9px 10px;background:rgba(255,255,255,.02)}
+.day h4{margin:0 0 4px;font-size:13.5px;color:var(--gold);font-weight:600}
+.day p{font-size:12.5px;margin:4px 0;color:#cfd9dc}
+.day .who{color:#bdeee6;font-weight:600}
+.lines{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;background:#0b141c;border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:#9fe7dc;white-space:pre-wrap;overflow-x:auto;margin:8px 0}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0}
+.flow .box{border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:13px;background:rgba(255,255,255,.03)}
+.flow .arrow{color:var(--teal)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:12px}
+.tablewrap{overflow-x:auto}
+.waves{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+.wave{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.025)}
+.wave b{color:var(--gold);display:block}
+.wave .ci{display:block;margin-top:6px;font-size:12.5px;color:#f1dca0}
+ol.q{padding-left:22px;font-size:14px;color:#d6e0e3}
+ol.q li{margin:6px 0}
+ol.q em{color:var(--muted);font-style:normal;font-size:12.5px}
+svg text{font-family:inherit}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;color:#9fe7dc;background:rgba(0,0,0,.25);padding:0 4px;border-radius:4px;word-break:break-word}
+section.builder{border-color:rgba(233,196,106,.45)}
+section.builder h2{color:var(--gold)}
+.status{display:inline-block;font-size:11.5px;color:#14202a;background:var(--teal);border-radius:999px;padding:2px 9px;margin-left:6px;vertical-align:2px}
+td code{white-space:normal}
+</style>
+</head>
+<body>
+<header>
+  <h1>The fault tables: what can go wrong with each machine <span class="draft">for approval</span></h1>
+  <div class="sub">For each kind of machine, its causes in plain words: what's wrong, what the job card says, what you see up close, when it shows, and what you hear when the wrong part goes in. Real faults (from Day 2) pick their cause from here; the scanner (Day 5) reads these parts; head-scratchers pick their suspects and clues from here. Tier 1 kinds first and complete; Tier 2 kinds drafted for Step 3. Data for section 17's <code>FAULT_CAUSES</code> (foundation 17.4).</div>
+</header>
+<nav><div><a href="#plain">In plain words</a><a href="#rules">How to read them</a><a href="#t1">Tier 1</a><a href="#t2">Tier 2 (draft)</a><a href="#b">Builder</a><a href="#check">Checks</a></div></nav>
+<main>
+
+<section id="plain">
+  <h2>In plain words</h2>
+  <ul>
+    <li>A machine doesn't just "break": something in it goes. An oven runs cool because its element is failing, or because its door seal lets the heat out. The <b>job card</b> says what everyone notices ("runs cool"); <b>up close</b> you can tell more ("cool all over" or "cool by the door").</li>
+    <li>From Day 2 every real fault has one of these causes. Before the scanner, inspecting tells you the part, as now. With the scanner you read the parts and choose. In a head-scratcher, the other causes become the suspects.</li>
+    <li>A few causes are <b>settings</b> (fixed by tuning, M5), and a few are <b>loads</b> (the machine is fine; something else is pulling on it), which only come up as head-scratchers from your Officer days.</li>
+    <li>Every part named here is already on a shelf in main storage. Nothing new to stock.</li>
+  </ul>
+</section>
+
+<section id="rules">
+  <h2>How to read the tables</h2>
+  <ul>
+    <li><b>How common</b> (<code>w</code>): ●●● often, ●● sometimes, ● rarely. A worn part makes its cause likelier still.</li>
+    <li><b>Card</b> (<code>shows</code>): the symptom on the job card. Causes that share it can be suspects together (P3 needs at least three with the same card).</li>
+    <li><b>Up close</b> (<code>sign</code>): what you see at the machine, on rounds or the look-over. Causes with the same card have different signs, so when the scanner shows two low parts, the sign tells them apart.</li>
+    <li><b>When</b>: always, at peak (its busy hours), warm (after it's been on a while), after use, touched (when someone uses the control), or at a time.</li>
+    <li><b>Still</b>: the machine's line when you fit the wrong part.</li>
+    <li><b>From</b>: the first band it can appear in (Tier 1 machines in T1 from Day 2; "Officer" means only in Tier 2 bands and later).</li>
+  </ul>
+</section>
+
+<section id="t1">
+  <h2>Tier 1 machines (complete)</h2>
+
+  <h3>Oven <span class="tag">oven · Deck 3 galley · part: element</span></h3>
+  <div class="tablewrap"><table>
+    <tr><th>Cause</th><th>Fix</th><th>Card</th><th>Up close</th><th>When</th><th>How common</th><th>Still (wrong fit)</th><th>From</th></tr>
+    <tr><td>The element is failing</td><td>element</td><td>runs cool</td><td>cool all over, slow to heat</td><td>always</td><td>●●●</td><td>"New element in. Still cool by the door."</td><td>Day 2</td></tr>
+    <tr><td>The door seal is worn</td><td>seal</td><td>runs cool</td><td>cool by the door; you feel heat at the gap</td><td>always</td><td>●●</td><td>"Fresh seal. Still slow to heat all over."</td><td>Day 2</td></tr>
+    <tr><td>The fan's belt is slipping</td><td>fan belt</td><td>runs cool</td><td>hot at the back, cool at the front; a squeal at start</td><td>after use</td><td>●</td><td>"New belt. Still cool."</td><td>Day 2</td></tr>
+    <tr><td>Its setting has drifted</td><td>tune (M5)</td><td>runs hot / runs cool</td><td>the glow stutters (hot) or the screen dims (cool)</td><td>always</td><td>●●</td><td>—</td><td>Day 4</td></tr>
+    <tr><td>The galley's power junction sags under load</td><td>load: the Deck 3 junction (Tier 3, not yours)</td><td>runs cool</td><td>fine at breakfast, cool at dinner</td><td>at peak (with the range and extractor)</td><td>●</td><td>—</td><td>Officer (P1)</td></tr>
+  </table></div>
+
+  <h3>Range <span class="tag">range · Deck 3 galley · part: element</span></h3>
+  <div class="tablewrap"><table>
+    <tr><th>Cause</th><th>Fix</th><th>Card</th><th>Up close</th><th>When</th><th>How common</th><th>Still</th><th>From</th></tr>
+    <tr><td>A ring's element is failing</td><td>element</td><td>a ring is weak</td><td>one ring slow, the others fine</td><td>always</td><td>●●●</td><td>"New element. That ring's still weak: it clicks, no heat."</td><td>Day 2</td></tr>
+    <tr><td>A ring's switch relay is sticking</td><td>relay</td><td>a ring is weak</td><td>it clicks but sometimes won't heat</td><td>touched</td><td>●●</td><td>"New relay. Still slow to heat."</td><td>Day 2</td></tr>
+    <tr><td>Its setting has drifted</td><td>tune</td><td>runs hot</td><td>every ring too fierce; Brennan complains</td><td>always</td><td>●●</td><td>—</td><td>Day 4</td></tr>
+  </table></div>
+
+  <h3>Galley plant <span class="tag">galleyplant · Deck 3 · part: fan belt</span></h3>
+  <div class="tablewrap"><table>
+    <tr><th>Cause</th><th>Fix</th><th>Card</th><th>Up close</th><th>When</th><th>How common</th><th>Still</th><th>From</th></tr>
+    <tr><td>The fan belt is worn</td><td>fan belt</td><td>weak draw</td><td>a squeal, the belt shiny</td><td>after use</td><td>●●●</td><td>"New belt. Still weak: the grille's caked."</td><td>Day 2</td></tr>
+    <tr><td>The grease filter is clogged</td><td>filter</td><td>weak draw</td><td>grease on the grille, quiet fan</td><td>always</td><td>●●</td><td>"Clean filter. Still weak, and it squeals."</td><td>Day 2</td></tr>
+    <tr><td>The fan bearing is going</td><td>bearing</td><td>noisy</td><td>a grinding hum</td><td>always</td><td>●</td><td>"New belt. Still grinding."</td><td>Day 2</td></tr>
+  </table></div>
+
+  <h3>Galley extractor <span class="tag">extractor · part: fan belt</span></h3>
+  <div class="tablewrap"><table>
+    <tr><th>Cause</th><th>Fix</th><th>Card</th><th>Up close</th><th>When</th><th>How common</th><th>Still</th><th>From</th></tr>
+    <tr><td>The fan belt is slipping</td><td>fan belt</td><td>weak draw</td><td>a squeal at start, smoke lingers</td><td>after use</td><td>●●●</td><td>"New belt. Still weak: the hood's filter's black."</td><td>Day 2</td></tr>
+    <tr><td>The hood filter is clogged</td><td>filter</td><td>weak draw</td><td>grease dripping at the hood's edge</td><td>always</td><td>●●</td><td>"Clean filter. Still weak, and it squeals."</td><td>Day 2</td></tr>
+    <tr><td>The motor relay is sticking</td><td>relay</td><td>stops and starts</td><td>clicks, runs, stops</td><td>warm</td><td>●</td><td>"New belt. Still stops and starts."</td><td>Day 2</td></tr>
+  </table></div>
+
+  <h3>Cold store chiller <span class="tag">chiller · Deck 3 · part: compressor</span></h3>
+  <div class="tablewrap"><table>
+    <tr><th>Cause</th><th>Fix</th><th>Card</th><th>Up close</th><th>When</th><th>How common</th><th>Still</th><th>From</th></tr>
+    <tr><td>The compressor is labouring</td><td>compressor</td><td>runs warm</td><td>a laboured hum that never stops</td><td>always</td><td>●●</td><td>"New compressor. Still warm: frost round the door."</td><td>Day 2</td></tr>
+    <tr><td>The door seal is worn</td><td>seal</td><td>runs warm</td><td>frost round the door frame</td><td>after use (deliveries)</td><td>●●●</td><td>"Fresh seal. Still warm, and it hums all night."</td><td>Day 2</td></tr>
+    <tr><td>The fan bearing is going</td><td>bearing</td><td>runs warm</td><td>warm at the back shelves, a rattle</td><td>always</td><td>●</td><td>"New bearing. Still warm by the door."</td><td>Day 2</td></tr>
+    <tr><td>The temperature sensor reads wrong</td><td>signal card</td><td>milk going off (display fine)</td><td>the display says 3°, the back shelf feels warmer</td><td>always</td><td>●</td><td>"New compressor. Display still says 3°; still warm."</td><td>Senior Officer (P4)</td></tr>
+  </table></div>
+
+  <h3>Washer <span class="tag">washer · Deck 4 laundry · part: pump</span></h3>
+  <div class="tablewrap"><table>
+    <tr><th>Cause</th><th>Fix</th><th>Card</th><th>Up close</th><th>When</th><th>How common</th><th>Still</th><th>From</th></tr>
+    <tr><td>The pump is failing</td><td>pump</td><td>leaks</td><td>a puddle under it, the pump housing damp</td><td>after use</td><td>●●●</td><td>"New pump. Still drips at the door."</td><td>Day 2</td></tr>
+    <tr><td>The door seal is worn</td><td>seal</td><td>leaks</td><td>drips at the door during the spin</td><td>after use</td><td>●●</td><td>"Fresh seal. Still a puddle under it."</td><td>Day 2</td></tr>
+    <tr><td>The drain valve is sticking</td><td>valve</td><td>leaks</td><td>water left in the drum after the cycle</td><td>after use</td><td>●●</td><td>"New valve. Still a puddle under it."</td><td>Day 2</td></tr>
+    <tr><td>The drum bearing is going</td><td>bearing</td><td>loud spin</td><td>a rumble, the machine walks on the floor</td><td>after use</td><td>●</td><td>"New pump. Still rumbles."</td><td>Day 2</td></tr>
+    <tr><td>The control relay is sticking</td><td>relay</td><td>stops mid-cycle</td><td>stops, clicks, starts again</td><td>warm</td><td>●</td><td>"New pump. Still stops mid-cycle."</td><td>Day 2</td></tr>
+  </table></div>
+  <p class="note">The washer is Day 5's first head-scratcher (P3): pump, door seal and drain valve all show "leaks".</p>
+
+  <h3>Main lift <span class="tag">lift · the spine · part: relay</span></h3>
+  <div class="tablewrap"><table>
+    <tr><th>Cause</th><th>Fix</th><th>Card</th><th>Up close</th><th>When</th><th>How common</th><th>Still</th><th>From</th></tr>
+    <tr><td>The control relay is sticking</td><td>relay</td><td>slow, stops at decks</td><td>pauses before the doors open</td><td>warm (busy hours)</td><td>●●●</td><td>"New bearing. Still pauses at the doors."</td><td>Day 2</td></tr>
+    <tr><td>A guide bearing is worn</td><td>bearing</td><td>judders</td><td>a grinding in the shaft between decks</td><td>always</td><td>●●</td><td>"New relay. Still judders between decks."</td><td>Day 2</td></tr>
+    <tr><td>Its breaker trips</td><td>breaker</td><td>stops between decks</td><td>stalls, then the breaker light</td><td>at peak (shift change)</td><td>●</td><td>"New relay. It still stalls at shift change."</td><td>Day 2</td></tr>
+  </table></div>
+  <p class="note">A judder only at one deck is the lift-roof head-scratcher later (M17, side job).</p>
+
+  <h3>Light relays <span class="tag">lights · Decks 1 and 3 (real); part: relay</span></h3>
+  <div class="tablewrap"><table>
+    <tr><th>Cause</th><th>Fix</th><th>Card</th><th>Up close</th><th>When</th><th>How common</th><th>Still</th><th>From</th></tr>
+    <tr><td>A relay sticks when warm</td><td>relay</td><td>lights flicker</td><td>the whole room's lights, worse after an hour</td><td>warm</td><td>●●●</td><td>"New lamp. Still flickers, the whole room."</td><td>Day 2</td></tr>
+    <tr><td>A lamp is at its end</td><td>lamp</td><td>lights flicker</td><td>one lamp only</td><td>always</td><td>●●</td><td>"New relay. That one lamp still flickers."</td><td>Day 2</td></tr>
+    <tr><td>A breaker trips</td><td>breaker</td><td>lights out</td><td>a whole run dark; the breaker's lamp lit</td><td>at peak</td><td>●</td><td>"New relay. Dark again at dinner."</td><td>Day 2</td></tr>
+    <tr><td>Wiring loose behind the panel</td><td>cable</td><td>lights flicker</td><td>flickers when the door slams</td><td>touched</td><td>●</td><td>"New relay. Still flickers when the door goes."</td><td>Officer</td></tr>
+    <tr><td>Its setting has drifted</td><td>tune</td><td>lights flicker / lights dim</td><td>fast flicker everywhere (high) or a sag (low)</td><td>always</td><td>●●</td><td>—</td><td>Day 4</td></tr>
+  </table></div>
+  <p class="note">"Reset the breaker: fine for an hour, then back" is the warm relay's clue for later, harder P3 cases (it rules out the lamp, the breaker and the wiring at once, so it's never the only clue).</p>
+
+  <h3>Cart dock <span class="tag">cartdock · Deck 5 Cart bay · part: relay</span></h3>
+  <div class="tablewrap"><table>
+    <tr><th>Cause</th><th>Fix</th><th>Card</th><th>Up close</th><th>When</th><th>How common</th><th>Still</th><th>From</th></tr>
+    <tr><td>The charge relay is sticking</td><td>relay</td><td>charges slow</td><td>the lamp blinks, then holds</td><td>warm</td><td>●●</td><td>"New cell. Still blinks before it charges."</td><td>Day 2</td></tr>
+    <tr><td>The dock's cell is tired</td><td>cell</td><td>charges slow</td><td>the cart's gauge never gets past three quarters</td><td>always</td><td>●●</td><td>"New relay. Still stops at three quarters."</td><td>Day 2</td></tr>
+    <tr><td>The charge cable is worn</td><td>cable</td><td>won't charge</td><td>charges only if you jiggle the plug</td><td>touched</td><td>●</td><td>"New relay. Still only if you jiggle it."</td><td>Day 2</td></tr>
+    <tr><td>Its setting has drifted</td><td>tune</td><td>charges slow</td><td>the screen dims</td><td>always</td><td>●●</td><td>—</td><td>Day 4</td></tr>
+  </table></div>
+
+  <h3>Grow lights <span class="tag">growlight · Deck 3 garden · part: lamp</span></h3>
+  <div class="tablewrap"><table>
+    <tr><th>Cause</th><th>Fix</th><th>Card</th><th>Up close</th><th>When</th><th>How common</th><th>Still</th><th>From</th></tr>
+    <tr><td>Lamps at their end</td><td>lamp</td><td>a rack is dim</td><td>a row of pink lamps gone pale</td><td>always</td><td>●●●</td><td>"New relay. Still pale along that row."</td><td>Day 2</td></tr>
+    <tr><td>The rack's relay is sticking</td><td>relay</td><td>a rack is dim</td><td>the whole rack flickers off and on</td><td>warm</td><td>●●</td><td>"New lamps. The rack still cuts out."</td><td>Day 2</td></tr>
+    <tr><td>Its timer setting has drifted</td><td>tune</td><td>lights at the wrong hours</td><td>on at night, off at noon</td><td>at a time</td><td>●</td><td>—</td><td>Day 4</td></tr>
+  </table></div>
+</section>
+
+<section id="t2">
+  <h2>Tier 2 machines (draft, finished with Step 3)</h2>
+  <p class="note">Three causes each for now (part, sign); Step 3 adds the up-close signs, the "still" lines and the load and traced causes (M9: a symptom on one machine, the cause on another).</p>
+  <div class="tablewrap"><table>
+    <tr><th>Kind</th><th>Card</th><th>Causes (fix: what you see)</th></tr>
+    <tr><td>Air scrubber (<code>scrubber</code>)</td><td>stuffy air</td><td>filter clogged (filter: a grey grille); fan bearing (bearing: a whine); fan and flow drifted (tune, stage 2: hum off pitch)</td></tr>
+    <tr><td>Heating plant (<code>heater</code>)</td><td>cold cabins</td><td>valve sticking (valve: one branch cold); circulation pump (pump: all cool, a knock); control relay (relay: on and off)</td></tr>
+    <tr><td>Water recycler (<code>recycler</code>)</td><td>weak showers</td><td>membrane fouled (membrane: weak all day); pump can't keep up (pump: weak only after 18:00); valve sticking (valve: one deck weak)</td></tr>
+    <tr><td>Water filter bank (<code>filter</code>)</td><td>cloudy water</td><td>a cartridge spent (cartridge: one housing slow); a seal leaking (seal: damp floor); the bypass valve open (valve: clear then cloudy)</td></tr>
+    <tr><td>Heating pumps (<code>heatpump</code>)</td><td>cold cabins</td><td>pump (pump: a knock); bearing (bearing: a whine); valve (valve: one side cold)</td></tr>
+    <tr><td>Pipe valves (<code>valve</code>)</td><td>low pressure</td><td>valve sticking (valve); a seal weeping (seal: a drip)</td></tr>
+    <tr><td>Oxygen cells (<code>o2cell</code>)</td><td>air thin</td><td>a cell spent (oxygen cell); the regulator (regulator: a hiss)</td></tr>
+    <tr><td>Electrolyser (<code>electrolyser</code>)</td><td>air thin</td><td>membrane (membrane); a cell (cell); the relay (relay: stops and starts)</td></tr>
+    <tr><td>Circulation pumps (<code>pump</code>)</td><td>low flow</td><td>pump (pump); bearing (bearing: grinding); seal (seal: a drip)</td></tr>
+    <tr><td>UV steriliser (<code>uv</code>)</td><td>water tastes off</td><td>UV lamp spent (uv lamp: a dull glow); relay (relay); seal (seal)</td></tr>
+    <tr><td>Irrigation pumps (<code>irrigation</code>)</td><td>dry beds</td><td>pump (pump); a valve (valve: one bed dry); nozzles clogged (filter: spits, then nothing; M14)</td></tr>
+    <tr><td>Nutrient dosing (<code>nutrient</code>)</td><td>yellow leaves</td><td>nutrient pack (nutrient pack); pump (pump); regulator (regulator: doses too much)</td></tr>
+    <tr><td>Air plant (<code>airplant</code>)</td><td>stuffy air ship-wide</td><td>filter (filter); bearing (bearing); fan belt (fan belt: a squeal)</td></tr>
+    <tr><td>Main fan (<code>fan</code>)</td><td>stuffy air ship-wide</td><td>bearing (bearing: a rumble); fan belt (fan belt); relay (relay: stops)</td></tr>
+    <tr><td>Manifold (<code>manifold</code>)</td><td>one deck cold or weak</td><td>a valve (valve: that deck's branch); a seal (seal); the regulator (regulator)</td></tr>
+    <tr><td>Lab gas plant (<code>gasplant</code>)</td><td>low lab gas</td><td>regulator (regulator); seal (seal: a hiss); valve (valve)</td></tr>
+    <tr><td>Bay door gear (<code>doorgear</code>)</td><td>bay doors slow</td><td>seal (seal: a draught); bearing (bearing: a judder); relay (relay: stops halfway)</td></tr>
+  </table></div>
+</section>
+
+<section id="b" class="builder">
+  <h2>For the builder (seat S: section 17's <code>FAULT_CAUSES</code>)</h2>
+  <div class="lines">FAULT_CAUSES.washer = [
+  { id: 'pump',  part: 'pump',  w: 3, shows: 'leaks', sign: 'puddle under it', when: 'after-use', still: 'washer.pump' },
+  { id: 'seal',  part: 'seal',  w: 2, shows: 'leaks', sign: 'drips at the door', when: 'after-use', still: 'washer.seal' },
+  { id: 'valve', part: 'valve', w: 2, shows: 'leaks', sign: 'water left in the drum', when: 'after-use', still: 'washer.valve' },
+  { id: 'bearing', part: 'bearing', w: 1, shows: 'loud spin', ... },
+  { id: 'relay', part: 'relay', w: 1, shows: 'stops mid-cycle', when: 'warm', ... } ]
+// a setting:  { id: 'drift', setting: true, w: 2, shows: 'runs hot|runs cool', from: 4 }        (M5)
+// a load:     { id: 'junction', load: '3-junction-…', w: 1, shows: 'runs cool', when: 'peak', band: 'T2' }  (P1)
+// band:       'T2' / 'T3' = only as a suspect (and only as a real cause) in that band or later</div>
+  <ul>
+    <li><b>Texts</b> (<code>shows</code>, <code>sign</code>, <code>still</code>) are keys into the Works writer's <code>content/works/faults.lines</code>; the plain words above are the first draft of those lines.</li>
+    <li><b>The pick</b> (foundation 17.4): only causes allowed at the machine's band and day (<code>from</code>: a setting from Day 4; <code>band</code>), weighted by <code>w</code> × (1 + the part's wear share); a <code>load</code> is never picked as a real fault's cause on its own (it only appears in head-scratchers that say so).</li>
+    <li><b>Same card, different signs:</b> within a kind, causes sharing a <code>shows</code> must have different <code>sign</code>s (the scanner relies on it: when two parts read low, the sign tells them apart).</li>
+    <li><b>Parts:</b> every part here is in <code>STOCK</code> today; <code>compressor</code> has only 2 (fine: rare) and <code>signal card</code> 2.</li>
+    <li><b>Corrections to the plan:</b> the plan's Tier 1 list named the power junction and the bay door gear; in the game they're Tier 3 (<code>junction</code>) and Tier 2 (<code>doorgear</code>), so the junction appears only as a <i>load</i> suspect (P1) and the door gear is in the Tier 2 list. The Tier 1 kinds are the game's: oven, range, galley plant, extractor, chiller, washer, lift, light relays, cart dock, grow lights.</li>
+  </ul>
+</section>
+
+<section id="check" class="builder">
+  <h2>Checks</h2>
+  <ul>
+    <li><b><code>machine_check</code></b>: every Tier 1 kind has a table; every part is in <code>STOCK</code>; no two causes of a kind share both <code>shows</code> and <code>sign</code>; the picked cause the same twice; over 14 days every Tier 1 kind's causes all appear and the common ones most.</li>
+    <li><b><code>puzzle_check</code></b>: P3 fits the washer (three "leaks"), the lights (three "flicker"), the oven (three "runs cool") and the extractor (two "weak draw" + the relay: no, so P3 skips it on T1: fine).</li>
+  </ul>
+</section>
+
+</main>
+</body>
+</html>
