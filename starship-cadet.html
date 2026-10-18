@@ -248,7 +248,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.34.51
+   STARSHIP CADET: CSV Wren                           build 0.34.52
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7598,7 +7598,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.34.51';                           // keep in step with the header's build line
+const GAME_BUILD = '0.34.52';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -25748,7 +25748,7 @@ const MEETINGS_BAKED = {
 const TRADITIONS = [
   {"id": "book-circle", "k": 462, "name": "Book circle", "when": {"every": "2weeks", "weekday": 0, "week": 1, "from": 8}, "at": [1215, 1290], "min": 25, "jitter": 20, "where": [{"deck": 4, "pool": "common-room"}, {"deck": 4, "room": "^Lift lobby$", "types": ["bench"]}], "who": [["oduya", 1], ["quiet-corner", 0.55], ["window-seat", 0.35], ["common-room", 0.35], ["everyone", 0.15]], "anim": "read", "host": "oduya", "from": "oduya", "invite": {"host": "oduya", "odds": 0.25, "line": "Book circle tonight. Bring a page you liked, or just come and listen."}, "text": {"mail": [{"t": "Book circle tomorrow, {time}, the junior common room. Bring a page you liked and read it to us, or just come and listen. There will be cocoa.", "tone": "light"}], "ask": [{"t": "Book circle tonight. I've marked my favourite page.", "tone": "light"}, {"t": "I'm halfway through a very long book. Don't tell me the end.", "tone": "funny"}, {"t": "Book circle's nice. Nobody minds if you only listen.", "tone": "warm"}], "here": [{"t": "Read that bit again?", "tone": "light"}, {"t": "Oh, I like that.", "tone": "warm"}, {"t": "Shh. This is the good part.", "tone": "light"}], "thanks": [{"t": "You curl up in the common room while someone reads aloud. For an hour, the ship is very quiet.", "tone": "warm"}], "chatter": [{"t": "Someone read a recipe at book circle. We all got hungry.", "tone": "funny"}, {"t": "We swap books after book circle. Mine came back with a pressed leaf in it.", "tone": "warm"}, {"t": "Matthias reads like it's a bedtime story. Best sleep I've had all week.", "tone": "funny"}]}},
   {"id": "bridge-hour", "k": 461, "name": "Bridge hour", "when": {"every": "4weeks", "weekday": 1, "week": 4}, "at": [1035, 1080], "min": 20, "where": [{"deck": 1, "room": "^Bridge lobby$", "types": ["event"]}, {"deck": 1, "room": "^Observation room$", "types": ["common-room", "lounge-seat"]}], "who": [["marrow", 1], ["juniors", 0.4]], "anim": "talk", "host": "marrow", "from": "marrow", "invite": {"host": "marrow", "odds": 0.15, "line": "Bridge hour after shift. Come up and see where we steer from."}, "flag": "bridge.invited", "text": {"mail": [{"t": "Bridge hour tomorrow, {time}. Juniors are welcome on Deck 1 for a while: the helm, the charts and the view. I'll be there to say hello. Please don't touch anything red.", "tone": "light"}], "ask": [{"t": "Bridge hour later! I'm going to ask about the big chair.", "tone": "funny"}, {"t": "Juniors get to visit the bridge after shift. I've ironed my collar.", "tone": "funny"}, {"t": "The Captain says hello to everyone at bridge hour. Everyone.", "tone": "light"}], "here": [{"t": "That's the helm. Don't lean on it.", "tone": "funny"}, {"t": "You can see the whole bow from up here.", "tone": "light"}, {"t": "The Captain knows everyone's name. How?", "tone": "light"}], "thanks": [{"t": "You stand on the bridge with the other juniors. The Captain shakes your hand and asks how you're finding the Wren.", "tone": "warm"}], "chatter": [{"t": "At bridge hour the Captain asked about my bunk. My bunk!", "tone": "funny"}, {"t": "I touched the chart table at bridge hour. It was very ordinary. I loved it.", "tone": "warm"}, {"t": "One day I'll work up on the bridge. You watch.", "tone": "light"}]}},
-  {"id": "cook-along", "k": 449, "name": "Cook-along", "when": {"weekday": 3}, "at": [1170, 1215], "min": 25, "where": [{"deck": 3, "room": "^Mess hall$", "types": ["mess-seat"]}], "hold": [], "who": [["dlamini-lukas", 1], ["galley", 0.25], ["lingers-at-meals", 0.35], ["everyone", 0.1]], "anim": "talk", "host": "dlamini-lukas", "from": "dlamini-lukas", "text": {"mail": [{"t": "Cook-along tomorrow at {time} at the galley pass. One simple dish. You stir, you taste, you eat it. Aprons provided.", "tone": "light"}], "ask": [{"t": "Cook-along tonight. You make it, you eat it.", "tone": "light"}, {"t": "Learn a dish at the galley pass later? It's easy.", "tone": "light"}], "here": [{"t": "Stir, don't splash. Well, splash a little.", "tone": "funny"}, {"t": "Taste it. More salt? Less? You decide.", "tone": "light"}, {"t": "That's yours. You made that. Look at you.", "tone": "warm"}], "thanks": [{"t": "At the galley pass, {host} shows you one simple dish. You stir, taste, and walk away with a portion you made yourself.", "tone": "warm"}], "chatter": [{"t": "Cook-along later. Last week I made soup. Proper soup.", "tone": "light"}, {"t": "I can cook three things now. Three!", "tone": "funny"}, {"t": "Brennan peeks in at cook-along. Pretends she's not.", "tone": "funny"}]}},
+  {"id": "cook-along", "k": 449, "name": "Cook-along", "when": {"weekday": 5}, "at": [930, 990], "min": 25, "where": [{"deck": 3, "room": "^Mess hall$", "types": ["mess-seat"]}], "hold": [], "who": [["dlamini-lukas", 1], ["galley", 0.25], ["lingers-at-meals", 0.35], ["everyone", 0.1]], "anim": "talk", "host": "dlamini-lukas", "from": "dlamini-lukas", "text": {"mail": [{"t": "Cook-along tomorrow at {time} at the galley pass. One simple dish. You stir, you taste, you eat it. Aprons provided.", "tone": "light"}], "ask": [{"t": "Cook-along this afternoon. We help make dinner. You make it, you eat it.", "tone": "light"}, {"t": "Learn a dish at the galley pass later? It's easy.", "tone": "light"}], "here": [{"t": "Stir, don't splash. Well, splash a little.", "tone": "funny"}, {"t": "Taste it. More salt? Less? You decide.", "tone": "light"}, {"t": "That's yours. You made that. Look at you.", "tone": "warm"}], "thanks": [{"t": "At the galley pass, {host} shows you one simple dish. You stir, taste, and walk away with a portion you made yourself.", "tone": "warm"}], "chatter": [{"t": "Cook-along later. Last week I made soup. Proper soup.", "tone": "light"}, {"t": "I can cook three things now. Three!", "tone": "funny"}, {"t": "Brennan peeks in at cook-along. Pretends she's not.", "tone": "funny"}]}},
   {"id": "crew-welcome-tea", "k": 484, "name": "New hand's tea", "when": {"rotation": "after", "weekday": 4}, "at": [1120, 1170], "min": 20, "prio": 2, "early": 5, "where": [{"deck": 3, "room": "^Mess hall$", "types": ["mess-seat"]}], "hold": [0], "who": [["honoree", 1], ["dept-of-honoree", 0.8], ["bunk-of-honoree", 0.6], ["everyone", 0.1]], "anim": "drink", "from": "The Wren", "cake": true, "text": {"mail": [{"t": "{names} came aboard on Sunday's shuttle. New hand's tea tomorrow at {time}, in the mess. Come and say hello.", "tone": "light"}], "ask": [{"t": "New hand's tea for {first} tonight. Be friendly. You remember your first week.", "tone": "warm"}, {"t": "Tea for the new hand after dinner. I'm bringing biscuits.", "tone": "light"}], "here": [{"t": "Welcome aboard, {first}.", "tone": "warm"}, {"t": "You'll know your way round by next week. Promise.", "tone": "light"}, {"t": "There's cake. The galley always finds cake for a new face.", "tone": "funny"}], "thanks": [{"t": "You join the tea for {names}. Somebody asks you how your first week went, and you've got stories now.", "tone": "warm"}], "chatter": [{"t": "Have you met {first} yet? Came aboard on Sunday.", "tone": "light"}]}},
   {"id": "department-cup", "k": 456, "name": "Department cup", "when": {"every": "4weeks", "weekday": 0, "week": 4}, "at": [1215, 1275], "min": 25, "where": [{"deck": 3, "pool": "gym"}], "who": [["vance", 1], ["gym-regular", 0.8], ["runner", 0.65], ["everyone", 0.2]], "host": "vance", "from": "vance", "ties": {"tally": {"kind": "cup", "choices": ["works", "watch", "survey", "bridge", "commons"], "mode": "teams"}, "decor": "cupBoard"}, "invite": {"host": "vance", "odds": 0.25, "line": "Department cup in the gym tonight. Works is a rower short."}, "text": {"mail": [{"t": "The department cup is tomorrow, {time} in the gym: a rowing relay, one team for each department. I keep the board. The board does not lie.", "tone": "light"}], "ask": [{"t": "Department cup tonight. Come and cheer for your lot.", "tone": "light"}, {"t": "Rowing relay tonight. My arms already hurt, and we haven't started.", "tone": "funny"}, {"t": "Vance has polished the cup again. It's a mug on a stand.", "tone": "funny"}], "here": [{"t": "Pull! Pull! Pull!", "tone": "light"}, {"t": "Change over, quick!", "tone": "light"}, {"t": "The board does not lie.", "tone": "funny"}], "thanks": [{"t": "You cheer your department through the relay. Vance chalks every time on the board, very neatly.", "tone": "light"}], "chatter": [{"t": "The department cup is just a mug. We'd still fight for it.", "tone": "funny"}, {"t": "Vance timed my row to a tenth of a second. I didn't ask him to.", "tone": "funny"}, {"t": "Whoever wins the cup won't stop talking about it for a month.", "tone": "funny"}]}},
   {"id": "farewell-supper", "k": 483, "name": "Farewell supper", "when": {"rotation": -1}, "at": [1080, 1160], "min": 30, "prio": 2, "jitter": 10, "early": 5, "where": [{"deck": 3, "room": "^Mess hall$", "types": ["mess-seat"]}, {"deck": 3, "room": "^Mess hall$", "types": ["@long-table"]}, {"deck": 3, "pool": "mess-seat"}], "hold": [0], "who": [["honoree", 1], ["friends-of-honoree", 0.85], ["everyone", 0.15]], "anim": "talk", "from": "brennan", "ties": {"galley": {"meal": "dinner", "dish": "favourite"}, "decor": "longTables"}, "text": {"mail": [{"t": "Sunday's shuttle takes {names} away from the Wren. Farewell supper tomorrow, {time}, in the mess. Come and say goodbye properly.", "tone": "light"}], "ask": [{"t": "Farewell supper for {first} tonight. I'm not ready.", "tone": "warm"}, {"t": "Supper for {first} at six. Sit with us?", "tone": "light"}, {"t": "I've written {first} a card. It's mostly jokes. Some of it isn't.", "tone": "warm"}], "here": [{"t": "To {names}. The Wren won't be the same.", "tone": "warm"}, {"t": "Remember the night the lift stuck? {first} sang the whole time.", "tone": "funny"}, {"t": "Write to us. Properly, not just one line.", "tone": "warm"}, {"t": "Save a seat for {first}. It's still theirs tonight.", "tone": "light"}], "thanks": [{"t": "You join the long table for the farewell supper for {names}. There's laughing, and one or two quiet bits.", "tone": "warm"}], "chatter": [{"t": "I'll miss {first}. The new posting sounds good, though.", "tone": "light"}, {"t": "The farewell supper always goes on later than anyone plans.", "tone": "warm"}]}},
@@ -26792,7 +26792,50 @@ function eventsPlayer(now) {
   if (typeof leisureAdd === 'function') leisureAdd(15, 'tradition');   // 0.34.51: going to a tradition fills leisure (PE6's 7th need, +15 in the plan)
   toast(e.name, evText(e.ev.thanks, e));
   if (typeof mailSend === 'function') mailSend({ at: now, from: e.ev.from, subject: 'Thanks for coming', body: 'Good to see you at ' + e.name.toLowerCase() + '. Same time next one?', quiet: true });   // the join toast says it already
+  if (e.id === 'quiz') quizStart(d, now);
 }
+// Quiz night's mini-game (0.34.51, the user, 2026-10-18): when you join, Tomas asks you three questions about the ship
+// on the choice card (dialogueShow), 3-4 answers each, one right; a remark either way, no fail, a little leisure for
+// each right one. The head writer's pool: LINES['quiz.q'], each "Question? | right answer | wrong | wrong | wrong"
+// (the right one first; shown shuffled), with quiz.right, quiz.wrong ({answer}) and quiz.done ({n}). Three a night,
+// the same for a given day, no repeats until the pool is used: a fixed hash order of the pool, read three at a time
+// by the week. No pool in the build: no game (the join toast as before). Nothing saved
+const quizH = (a, b) => (Math.imul(a + 1, 2654435761) ^ Math.imul(b + 7, 40503)) >>> 0;   // a plain hash (never R())
+const quizS = s => { let h = 0; for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619) >>> 0; return h; };   // a string's hash
+function quizPick(d) {
+  const L = typeof LINES !== 'undefined' && Array.isArray(LINES['quiz.q']) ? LINES['quiz.q'] : [];
+  const pool = L.map(e => String(e && e.text || '').split('|').map(s => s.trim())).filter(q => q.length >= 4 && q.length <= 5 && q.every(Boolean));
+  if (pool.length < 3) return null;
+  const order = pool.map((q, i) => i).sort((a, b) => quizH(a, 991) - quizH(b, 991) || a - b), n = Math.floor((d - 1) / 7);
+  return [0, 1, 2].map(i => {
+    const q = pool[order[(n * 3 + i) % pool.length]], right = q[1];
+    return { q: q[0], right, answers: q.slice(1).sort((a, b) => quizH(d, quizS(a)) - quizH(d, quizS(b)) || (a < b ? -1 : 1)) };
+  });
+}
+function quizText(kind, k, ctx) {
+  const L = typeof LINES !== 'undefined' && LINES[kind], e = Array.isArray(L) && L.length ? L[k % L.length] : null;
+  return e && typeof e.text === 'string' ? e.text.replace(/\{(\w+)\}/g, (m, w) => ctx && ctx[w] != null ? ctx[w] : m) : null;
+}
+function quizStart(d, now) {
+  const qs = quizPick(d); if (!qs || typeof dialogueShow !== 'function' || DIALOGUE) return false;
+  let score = 0;
+  const lines = [];
+  qs.forEach((x, i) => {
+    lines.push({ who: 'tomas', text: x.q });
+    lines.push({ choice: x.answers.map(a => {
+      const ok = a === x.right, r = quizText(ok ? 'quiz.right' : 'quiz.wrong', d + i, { answer: x.right });
+      return { text: a, ok, last: i === qs.length - 1, reply: r ? { who: 'tomas', text: r } : null };
+    }) });
+  });
+  MEETING_SCRIPTS['moment:quiz'] = { title: 'Quiz night', lines,
+    onPick: (k, c) => {
+      if (c.ok) { score++; if (typeof leisureAdd === 'function') leisureAdd(2, 'quiz'); }
+      if (c.last && DIALOGUE) { const t = quizText('quiz.done', d, { n: score }); if (t) DIALOGUE.queue.push({ who: 'tomas', text: t }); }
+    },
+    onEnd: () => { delete MEETING_SCRIPTS['moment:quiz']; QUIZ_LAST = { day: d, score }; } };
+  return dialogueShow('moment:quiz', { id: 'moment:quiz', who: ['tomas'], at: now, where: { deck: 3, room: /^Bow lounge$/ } });   // 'moment:' never counts toward a commendation
+}
+let QUIZ_LAST = null;                                    // the last game's score (events_check reads it)
 // decor: a few cheap props on the deck while an event is on (from 30 minutes before to 15 after), built on demand,
 // added to the deck's root (so a deck change takes them away), colours through col(), no R(), no shadows
 const EV_DECOR = { key: '', g: null, root: null };

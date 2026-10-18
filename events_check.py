@@ -67,6 +67,13 @@ PLANS = r"""(days => {
       if (!n) out.empty.push(d + ' ' + e.id + ': nobody went (' + want + ' meant to; the room was full)');
       row.ev.push({ id: e.id, names: e.names, at: hhmm(e.from) + '-' + hhmm(e.to), want, went: n, places: places[e.id] ? places[e.id].size : 0, cap });
     }
+    // a tradition's held places (eventPlaces) are only for those going while it's on: nobody else (a meal, the gym, the
+    // bar) sits in one then (0.34.51, the user: no tradition shares a room or place with a meal or other use)
+    for (const e of on) {
+      const held = new Set(eventPlaces(e)), B = (d - 1) * 1440;
+      for (const p of schedPeople()) for (const s of planDay(p, d)) if (s.placeId && held.has(s.placeId) && s.from < B + e.to && B + e.from < s.to && tagId(s.tag || '') !== e.id)
+        out.bad.push(d + ' ' + p.id + ' in ' + s.placeId + ' (' + (s.tag || s.act) + ') ' + hhmm(s.from - B) + '-' + hhmm(s.to - B) + ', held for ' + e.id);
+    }
     const r = dayReport(d);
     for (const k of ['short', 'meals', 'work', 'double', 'gaps']) if (r[k].length) out.bad.push(d + ' dayReport ' + k + ': ' + r[k].slice(0, 4).join(', '));
     out.days.push(row);
@@ -697,6 +704,26 @@ with sync_playwright() as pw:
         for k, v in r.items():
             if k == 'day': continue
             if v.get('missing') or not v['hon'] or not v['mail'] or v['others'] < 2: fail(f"{k} for the rotation on day {r['day']}: {v}")
+
+    # 9e. Quiz night's mini-game (0.34.51): three questions from the pool (a stand-in pool here, unless the build has the
+    # head writer's), the same three for a day, different the next week; joining the quiz in the bow lounge opens it;
+    # a right and a wrong answer each get Tomas's remark, the score at the end
+    Q = g.ev("""(() => { const keep = {}; for (const k of ['quiz.q', 'quiz.right', 'quiz.wrong', 'quiz.done']) keep[k] = LINES[k];
+      const real = Array.isArray(LINES['quiz.q']) && LINES['quiz.q'].length >= 3;
+      if (!real) { LINES['quiz.q'] = Array.from({ length: 7 }, (_, i) => ({ text: 'Q' + i + '? | R' + i + ' | W' + i + 'a | W' + i + 'b | W' + i + 'c' }));
+        LINES['quiz.right'] = [{ text: 'Right.' }]; LINES['quiz.wrong'] = [{ text: 'It was {answer}.' }]; LINES['quiz.done'] = [{ text: '{n} of 3.' }]; }
+      const d = 4, a = quizPick(d), out = { real, three: a.length === 3 && new Set(a.map(x => x.q)).size === 3, same: JSON.stringify(a) === JSON.stringify(quizPick(d)),
+        next: quizPick(d + 7).map(x => x.q).join() !== a.map(x => x.q).join(), oneRight: a.every(x => x.answers.includes(x.right) && x.answers.length >= 3 && x.answers.length <= 4) };
+      const was = DIALOGUE; if (was) dialogueClose();
+      out.start = quizStart(d, shipNow()); const seen = [];
+      for (let s = 0; s < 14 && DIALOGUE && DIALOGUE.id === 'moment:quiz'; s++) { const v = dialogueView(); if (!v) break;
+        if (v.choices) { const x = a[Math.floor(s / 3)], k = s < 3 ? v.choices.indexOf(x.right) : v.choices.findIndex(c => c !== x.right); seen.push('pick ' + v.choices[k]); dialogueChoose(k); }
+        else { seen.push(v.text); dialogueNext(); } }
+      out.seen = seen; out.score = QUIZ_LAST && QUIZ_LAST.score; out.closed = !DIALOGUE;
+      for (const k in keep) { if (keep[k] === undefined) delete LINES[k]; else LINES[k] = keep[k]; }
+      return out; })()""")
+    print('Quiz night game:', Q)
+    if not (Q['three'] and Q['same'] and Q['next'] and Q['oneRight'] and Q['start'] and Q['closed'] and Q['score'] is not None and 1 <= Q['score'] <= 3 and len(Q['seen']) >= 9): fail(f"the quiz game: {Q}")
 
     # 10. the bridge invite (0.34.35), last: it skips on to day 50
     I = g.ev(INVITE)

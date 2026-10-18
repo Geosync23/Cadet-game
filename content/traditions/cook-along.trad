@@ -1,10 +1,11 @@
 @tradition cook-along
-// Cook-along (0.60.7, the user's pick): Brennan's deputy, Lukas Dlamini, teaches one simple dish at the galley pass on
-// Thursdays after dinner; you stir, taste, and get a portion.
+// Cook-along (0.60.7, the user's pick): Brennan's deputy, Lukas Dlamini, teaches one simple dish at the galley pass;
+// you stir, taste, and get a portion. It's helping make dinner, so Saturday afternoons only, done before dinner
+// service (the user, 2026-10-18; it was Thursdays 19:30). DA4's tagged places 3-cookalong-* come first.
 k: 449
 title: Cook-along
-when: weekly thursday
-at: 19:30-20:15
+when: weekly saturday
+at: 15:30-16:30
 min: 25
 where: 3 room Mess hall: mess-seat
 hold: none
@@ -18,7 +19,7 @@ from: dlamini-lukas
 - Cook-along tomorrow at {time} at the galley pass. One simple dish. You stir, you taste, you eat it. Aprons provided.
 
 == ask
-- Cook-along tonight. You make it, you eat it.
+- Cook-along this afternoon. We help make dinner. You make it, you eat it.
 - Learn a dish at the galley pass later? It's easy.
 
 == here
