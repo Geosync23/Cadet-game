@@ -201,3 +201,15 @@ Leads: session_015QoyPWBdMPM4ywf5W2jMMs, then session_01PxXKwc5mkC7tV5MPi3p7PP (
 - `jobUnclaimed` fires when a held job's wait ends, even if the crew are too busy to take it that hour.
 
 **Gotchas added:** machine_check runs must only move the clock forward inside one case (going back = New game, which wipes the jobs). Run player_check with a timeout of 20 minutes (it takes ~10). A `pkill -f` pattern can match your own shell command and kill it.
+
+## 0.60.7 session (2026-10-18, session_016Mv2wxrtkGgAwcst4GWADY): 0.33.40-0.33.42
+
+Lead 10: session_014hkEBULoSV9EKZZSwMWyPd. Branch `claude/systems-0607` (from live 0.60.6a, c8685cf). Brief: `plans/brief-0607.md` on `claude/lead-pillar1`; plan: `plans/plan-0607.html` on `claude/plan-0607` ("Around the ship", "Stores and the lift").
+
+- **0.33.40, the Works crew at work:** `HOLD_MAX` 3; `shareOut` (every third new small job by id hash to the crew at once while `SHARE_KEEP` 2 others are held; `SHARE_ON` for tests); `placeFreeFor` (chore stops at real places when nobody's plan or job is there); deliveries carried (`hold: 'carry'` from pickup through the drop); `SHOW_JOBS` (Day 1 08:00 Bea's vent at `4-lift-1`, Day 2 13:00 her box of tools from `5-hold-1` to `5-bench-1`; `j.crew`); `showJob(day)` for onboarding. machine_check 5l.
+- **0.33.41, the right shelf:** `SHELF_NAME`, `shelfOf`, `shelfStock`, `shelfLine`, `shelfTapped`, `shelfNeed`/`shelfWant`, `shelfWrong`, `shelfGlowTick` (one amber box, Deck 5, made on first use); the machine shop's 15:00 top-up. Small edits in section 15 (`jobTap`: stock card with no job at all, `shelfWrong` before fetching) and 15b (`ixChoreTap`'s fetch, `ixShelf` for the arrow and label). player_check and interactions_check tap the part's own shelf now.
+- **0.33.42, the Wednesday delivery:** no late delivery in week 1; crates (`CRATE_PARTS` 8, `CART_CRATES` 4); held for you till 14:00 (`DELIVERY_KEEP`); `cartLoadHold`/`cartUnloadShelves` (`j.onCart`); `holdCratesLive(group, k)` for the deck architect's crates (asked of them through the lead); section 15's `cartEnd` for the delivery (second trip, 10-minute unload). machine_check 5m; player_check's cart run checks the shelves after the unload.
+
+- **0.33.43:** Bea's Day 1 vent 09:00-10:17 (reviewer's LOW); the delivery loads at `5-delivery-1` (DA4's crates, which call `holdCratesLive`; checked on a scratch merge with deck-0607 55fca8d). Onboarding 4 (session_01MeEsh5sp4RyuD7KwdQEbLC) has the delivery and `showJob` hooks; the sim items lead 10 first gave me went to the social engineer. Lead 11: session_01YKC3CGA9VS4b7wuqLbPT7V.
+
+**Gotchas:** a chore's pickup can be at a shelf place (`5-parts-1`), so the shelf's stock card only shows with no job at all. Don't run two player_checks writing to the same file (a killed run keeps writing into it). Under load player_check takes over 30 minutes; run it alone. day_check day 3 fails on live 0.60.6a too (two diners in one mess seat), not section 17.
