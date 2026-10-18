@@ -189,3 +189,4 @@ All 8 packages approved (Zeke: "all good except he still walks and talks" → he
 | | Spacing | "Events shouldn't be so far apart": re-space every few days, mostly Days 4-40; at least the distress call inside the career arc |
 | | More events | Add Stuck Together, Space Creature, Visiting Inspector, Echo Signal (TNG-inspired). D2 writes v2 |
 | ~23:45 (the user) | TNG additions | Exactly four: Echo Signal, Loss of Power (Stuck Together), The Visiting Inspector, Space Creature. D2 writes a fleshed-out viewable pitch page (plans/events-pitch-tng.html), plan only, no building |
+| ~00:00 (the user, on events v2) | Spacing | Very good, but up to 9 events should happen BEFORE the career is complete (Days 1-26): shorten some / quicker; D2 re-works as v3 |
