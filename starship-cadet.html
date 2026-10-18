@@ -34521,7 +34521,7 @@ function introFollowTick() {
   const a = introWalker(), now = simNow(); if (!a || a.pose !== 'walk' || Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) > 4) return;   // walking together
   if (now - (INTRO_UI.followAt || 0) < INTRO_FOLLOW_GAP) return;
   INTRO_UI.followAt = now; const k = (SHIP.intro.done['follow:n'] || 0) + 1, l = introWriterLine('walk.follow.' + k);
-  if (l && typeof bubbleSay === 'function') { SHIP.intro.done['follow:n'] = k; introSayTo(a, l[0], false); }
+  if (l && typeof bubbleSay === 'function') { SHIP.intro.done['follow:n'] = k; bubbleSay(a.h, l[0], 4.5); INTRO_UI.next = now + INTRO_TOUR_GAP; }
 }
 function introJobNote(n) {
   if (!introOn() || !n) return;
@@ -34789,17 +34789,9 @@ if (!MEETING_SCRIPTS.introDinner) MEETING_SCRIPTS.introDinner = { ...INTRO_STUB_
 // a walking step with the tour quiet gives the next walk.more.<n> line.
 const INTRO_STROLL = 0.5;                                 // his pace on the walk to the lift (x CREW_SPEED): time for the welcome talk
 const INTRO_TOUR_GAP = 3600;                              // real ms between his tour lines (a 60-character bubble reads in about 3 s)
-// readable lines (the user on 0.63.1, as settled by lead 13, 0.42.47): introSayTo(a, text, stop) says one line as a bubble for
-// introSayMs(text) (longer lines longer, never under INTRO_TOUR_GAP); with stop he stops and faces you for it (a.talking, which
-// section 10 honours for an escort too): only the greeting at the ramp, the cabin and the week's beats; on the walk he talks
-// as he goes. His tour lines start only within INTRO_CLOSE m of you (he waits for you as a lead escort does)
+// his first lines wait until you've reached him (the user on 0.63.1, 0.42.47): the greeting at the ramp starts only within
+// INTRO_CLOSE m of you, so it doesn't fly by as you walk up; the tour's pacing is otherwise as it was (the user: "perfect")
 const INTRO_CLOSE = 3.5;
-const introSayMs = text => Math.max(INTRO_TOUR_GAP, 1400 + 55 * String(text || '').length);
-function introSayTo(a, text, stop = true) {
-  if (!a || !text || typeof bubbleSay !== 'function') return 0;
-  const ms = introSayMs(text); if (stop) a.talking = Math.max(a.talking || 0, ms / 1000); bubbleSay(a.h, text, ms / 1000 + .5); INTRO_UI.next = simNow() + ms;
-  return ms;
-}
 const introClose = a => !!a && typeof player !== 'undefined' && Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) <= INTRO_CLOSE;
 const INTRO_TOUR = [
   // before the lift (the user on 0.60.5): one stop at the ramp to welcome you, then walk-and-talk (`walk`: he never
@@ -34832,14 +34824,14 @@ function introTourTick() {
   const td = t && Math.max(Math.abs(here[0] - t.at[0]), Math.abs(here[1] - t.at[1]));
   if (t && deckDef.num === t.deck && (t.leave ? td > t.leave : td <= t.r)) {   // (before the dinner hand-over: its step may move on in the very frame you arrive)
     I.done['tour:' + t.id] = Math.floor(shipNow());
-    { const L = introTourSplit(t), q = { t, ...L, at: 0, held: 0, cap: L.core.reduce((n, x) => n + introSayMs(x), INTRO_TOUR_GAP) }, k = Q.findIndex(x => x.t.walk && !x.t.must); if (t.must && k >= 0) Q.splice(k, 0, q); else Q.push(q); }   // (a must place goes before the walk's lines)
+    { const L = introTourSplit(t), q = { t, ...L, at: 0, held: 0, cap: (L.core.length + 1) * INTRO_TOUR_GAP }, k = Q.findIndex(x => x.t.walk && !x.t.must); if (t.must && k >= 0) Q.splice(k, 0, q); else Q.push(q); }   // (a must place goes before the walk's lines)
     if (!t.walk) for (let i = Q.length - 1; i >= 0; i--) if (Q[i].t.walk && !Q[i].t.must) Q.splice(i, 1);   // at the lift, the walk's lines left unsaid are skipped
   } else if (t && INTRO_STEPS.indexOf(st) >= INTRO_STEPS.findIndex(x => x.id === t.step) + 2) I.done['tour:' + t.id] = -1;   // passed it without coming near
   if (st.id === 'table' || st.id === 'chief' || st.id === 'free') {   // the tour hands over to dinner: extras and places not yet reached are dropped; the core
     Q.forEach(q => { q.extra.length = 0; }); INTRO_UI.pause = null;   // lines left finish first (the dinner chat waits for them, introTick)
     for (const x of INTRO_TOUR) if (I.done['tour:' + x.id] === undefined) I.done['tour:' + x.id] = -1;
     while (Q.length && !Q[0].core.length) Q.shift();
-    if (Q.length && !DIALOGUE && a && introClose(a) && now >= INTRO_UI.next) introSayTo(a, Q[0].core.shift(), false);
+    if (Q.length && !DIALOGUE && a && typeof bubbleSay === 'function' && now >= INTRO_UI.next) { bubbleSay(a.h, Q[0].core.shift(), 4.5); INTRO_UI.next = now + INTRO_TOUR_GAP; }
     return;
   }
   // a place whose core lines are done goes once the next is waiting or you've left it (its extras dropped); one on a
@@ -34854,9 +34846,9 @@ function introTourTick() {
   if (hold && !INTRO_UI.pause) INTRO_UI.pause = cellAt(a.x, a.z); else if (!hold) INTRO_UI.pause = null;   // his tile on this deck (the queue holds only this deck's places)
   if (DIALOGUE || !a || typeof bubbleSay !== 'function') return;
   if (head) {
-    if (now >= INTRO_UI.next && introClose(a)) {                 // not until you've reached him
+    if (now >= INTRO_UI.next && (head.t.id !== 'shuttle' || introClose(a))) {   // his first lines wait until you've reached him (the user on 0.63.1, 0.42.47)
       const text = head.core.length ? head.core.shift() : head.extra.shift();
-      if (!head.at) head.at = now; introSayTo(a, text, head.t.id === 'shuttle'); INTRO_UI.still = now;   // he stops for his greeting only
+      if (!head.at) head.at = now; bubbleSay(a.h, text, 4.5); INTRO_UI.next = now + INTRO_TOUR_GAP; INTRO_UI.still = now;
     }
     return;
   }
@@ -34864,7 +34856,7 @@ function introTourTick() {
   const key = here.join(','); if (key !== INTRO_UI.stillAt) { INTRO_UI.stillAt = key; INTRO_UI.still = now; return; }
   if (now - INTRO_UI.still > 8000 && now >= INTRO_UI.next && st.mode !== 'meet' && Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) <= 3) {
     const l = introWriterLine('walk.more.' + (INTRO_UI.more + 1)); INTRO_UI.still = now;
-    if (l) { INTRO_UI.more++; introSayTo(a, l[0], false); }
+    if (l) { INTRO_UI.more++; bubbleSay(a.h, l[0], 4.5); INTRO_UI.next = now + INTRO_TOUR_GAP; }
   }
 }
 // the first night (the user): after Torres lets you go on Sunday, and on Monday evening if you never found it, the
@@ -34914,9 +34906,8 @@ function introLines(step) {
 }
 function introSay(lines) {                                // his lines, one now and the rest a few seconds apart
   INTRO_UI.said.forEach(simClear); INTRO_UI.said = [];
-  let at = 0;                                            // each line as long as it takes to read (introSayMs, 0.42.47); he talks as he goes
-  (lines || []).forEach(text => { INTRO_UI.said.push(simTimeout(() => introSayTo(introWalker(), text, false), at)); at += introSayMs(text) + 400; });
-  INTRO_UI.sayEnd = simNow() + at + 3000;                // (introFollowTick waits for them)
+  INTRO_UI.sayEnd = simNow() + (lines || []).length * 4800 + 3000;   // (introFollowTick waits for them)
+  (lines || []).forEach((text, i) => INTRO_UI.said.push(simTimeout(() => { const a = introWalker(); if (a && typeof bubbleSay === 'function') bubbleSay(a.h, text, 4.5); }, i * 4800)));
 }
 // A0: the shuttle's manifest, before the fade-in. The ship's clock holds at 17:30 (INTRO_START) until you've typed your name.
 function introManifest() {
@@ -35033,7 +35024,7 @@ function introBeatTick() {
   if (U.beat) {
     const a = crew(U.beat.b.who);
     if (!introBeatHere(U.beat.b, a)) U.beat = null;   // you (or they) left: the rest is dropped
-    else if ((a.talking = Math.max(a.talking || 0, 1)) && !DIALOGUE && t >= U.next) { introSayTo(a, U.beat.lines.shift()); if (!U.beat.lines.length) U.beat = null; }   // they stop for it, facing you (section 10's tap pause)
+    else if ((a.talking = Math.max(a.talking || 0, 1)) && !DIALOGUE && t >= U.next) { bubbleSay(a.h, U.beat.lines.shift(), 4.5); U.next = t + INTRO_TOUR_GAP; if (!U.beat.lines.length) U.beat = null; }   // they stop for it, facing you (section 10's tap pause)
     return;
   }
   if (DIALOGUE) return;
@@ -35180,7 +35171,7 @@ function clothesLoad(s) {
 }
 SHIP.clothes = clothesLoad(SAVED);
 SAVE_EXTRA.push(s => { s.clothes = JSON.parse(JSON.stringify(SHIP.clothes)); s.clothes.grime = grimeRound(SHIP.clothes.grime); });
-onSim('newGame', n => { SHIP.clothes = clothesBlank(!n.arrival); });
+onSim('newGame', n => { SHIP.clothes = clothesBlank(!n.arrival); });   // by shuttle: one spare outfit; on Monday: the full kit
 onSim('job', n => { if (n.step === 'turnin' && SHIP.time.day === 1 && SHIP.clothes.said['d1:turnin'] === undefined) SHIP.clothes.said['d1:turnin'] = Math.floor(shipNow()); });   // Day 1's first turn-in (d1-better)   // by shuttle: one spare outfit; on Monday: the full kit
 const hamperHeld = () => CLOTHES_ON && !!SHIP.clothes.hamper && SHIP.clothes.hamper.at === 'hands';
 const clothesYesterday = () => CLOTHES_ON && SHIP.clothes.changed < SHIP.time.day && SHIP.time.min >= CLOTHES_LATE && SHIP.time.min < CLOTHES_NIGHT;
@@ -35408,7 +35399,7 @@ function clothesBeatTick() {
     const B = CLOTHES_BEAT, a = crew(B.b.who);
     if (!introBeatHere(B.b, a)) CLOTHES_BEAT = null;
     else if ((a.talking = Math.max(a.talking || 0, 1)) && !DIALOGUE && t >= U.next) {
-      introSayTo(a, B.lines.shift());
+      bubbleSay(a.h, B.lines.shift(), 4.5); U.next = t + INTRO_TOUR_GAP;
       if (!B.lines.length) { CLOTHES_BEAT = null; if (B.b.then) B.b.then(C); }
     }
     return;
@@ -40199,7 +40190,6 @@ class CrewAgent {
   // `to`), at most twice a second. They may go anywhere you can (the rooms on their way are allowed)
   escortStep(dt, e) {
     const pp = player.obj.position, dist = Math.hypot(pp.x - this.x, pp.z - this.z), you = cellAt(pp.x, pp.z);
-    if (this.talking > 0) { this.talking -= dt; this.pose = 'stand'; this.face = Math.atan2(pp.x - this.x, pp.z - this.z); this.y = 0; this.h.set({ x: this.x, y: this.y, z: this.z }, this.face, heldPose(this)); return true; }   // stopped to say something to you, facing you (section 21's introSayTo, 0.42.47)
     const goal = e.mode === 'follow' ? you : escortGoal(e, this);
     const key = e.mode + '|' + (goal ? goal.join(',') : '-');
     this.escT = (this.escT || 0) - dt;
