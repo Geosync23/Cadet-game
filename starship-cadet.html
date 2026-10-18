@@ -12825,10 +12825,10 @@ function sitBump(A) {
 // marker points to the Tea corner, with a card to say Keep working (it goes). SHIP.player.teaDay: the day you had it (saved)
 const TEA_FROM = 780, TEA_TO = 825, TEA_GOAL = 'Tea and biscuits, in the Tea corner';
 function teaOut(t = shipNow()) {
-  if (typeof worksTeaOn === 'function') return !!worksTeaOn(t);
-  const d = Math.floor(t / 1440) + 1, m = t - (d - 1) * 1440;
+  const d = Math.floor(t / 1440) + 1, m = t - (d - 1) * 1440, shift = typeof playerShiftOn === 'function' ? !!playerShiftOn(d) : weekday(d) < 5;
+  if (typeof worksTeaOn === 'function') return shift && !!worksTeaOn(t);   // section 14's crew tea (X, 0.71.1): its times; your shift days
   const W = typeof WORKS_TEA !== 'undefined' && WORKS_TEA && Number.isFinite(WORKS_TEA.at) ? WORKS_TEA : { at: TEA_FROM, until: TEA_TO };   // section 14's crew tea (X, 0.71.1)
-  return m >= W.at && m < W.until && (typeof playerShiftOn === 'function' ? !!playerShiftOn(d) : weekday(d) < 5);
+  return shift && m >= W.at && m < W.until;
 }
 function teaHere(A) {                                    // in the Tea corner (Deck 5, room 't'), while tea's out: its tea table, or a seat there
   if (typeof deckDef === 'undefined' || !deckDef || deckDef.num !== 5 || !teaOut()) return false;
