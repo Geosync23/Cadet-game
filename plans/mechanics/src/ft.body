@@ -1,9 +1,9 @@
 TITLE:Fault Tables
 H1:The fault tables: what can go wrong with each machine <span class="draft">for approval</span>
-SUB:For each kind of machine, its causes in plain words: what's wrong, what the job card says, what you see up close, when it shows, and what you hear when the wrong part goes in. Real faults (from Day 2) pick their cause from here; the scanner (Day 5) reads these parts; head-scratchers pick their suspects and clues from here. Tier 1 kinds first and complete; Tier 2 kinds drafted for Step 3. Data for section 17's <code>FAULT_CAUSES</code> (foundation 17.4).
-NAV:plain=In plain words|rules=How to read them|t1=Tier 1|t2=Tier 2 (draft)|b=Builder|check=Checks|faq=FAQ
+SUB:For each kind of machine, its causes in plain words: what's wrong, what the job card says, what you see up close, when it shows, and what you hear when the wrong part goes in. Real faults (from Day 2) pick their cause from here; the scanner (Day 5) reads these parts; head-scratchers pick their suspects and clues from here. Tier 1 kinds first; then the Tier 2 kinds (Step 3), with the lines for tracing (M9) and the cases P1 and P2. Data for section 17's <code>FAULT_CAUSES</code> (foundation 17.4).
+NAV:plain=In plain words|rules=How to read them|t1=Tier 1|t2=Tier 2|b=Builder|check=Checks|faq=FAQ
 
-<p class="note"><b>Approved by the lead (2026-10-18, overnight authority).</b></p>
+<p class="note"><b>Tier 1 approved by the lead (2026-10-18, overnight authority).</b> Tier 2 (Step 3) is for the user's approval.</p>
 <section id="plain">
   <h2>In plain words</h2>
   <ul>
@@ -123,27 +123,163 @@ NAV:plain=In plain words|rules=How to read them|t1=Tier 1|t2=Tier 2 (draft)|b=Bu
 </section>
 
 <section id="t2">
-  <h2>Tier 2 machines (draft, finished with Step 3)</h2>
-  <p class="note">Three causes each for now (part, sign); Step 3 adds the up-close signs, the "still" lines and the load and traced causes (M9: a symptom on one machine, the cause on another).</p>
+  <h2>Tier 2 machines (complete, for approval)</h2>
+  <p class="note">The same columns as Tier 1, plus <b>Line</b>: a cause marked <i>water</i> or <i>heat</i> cuts the flow on that line (M9's <code>MACHINE_LINKS</code>), so it can be a <b>traced fault</b> (the card names the symptom at the end of the line, "Showers weak on Deck 4" or "Cold cabins on Deck 2", not the machine) and a suspect in a traced case (P1). A cause marked — only ever posts on its own machine. All Tier 2 causes are <b>From: Officer</b> (Day 10), except the load (T2+, P1's later form). <b>Warm</b>, on a machine that runs all day, means after hours of busy use: in the evening.</p>
+
+  <h3>Air scrubber <span class="tag">scrubber · Decks 4 and 2 (<code>4-scrubber-1</code>, <code>-2</code>, <code>2-extractor-1</code>) · part: filter</span></h3>
   <div class="tablewrap"><table>
-    <tr><th>Kind</th><th>Card</th><th>Causes (fix: what you see)</th></tr>
-    <tr><td>Air scrubber (<code>scrubber</code>)</td><td>stuffy air</td><td>filter clogged (filter: a grey grille); fan bearing (bearing: a whine); fan and flow drifted (tune, stage 2: hum off pitch)</td></tr>
-    <tr><td>Heating plant (<code>heater</code>)</td><td>cold cabins</td><td>valve sticking (valve: one branch cold); circulation pump (pump: all cool, a knock); control relay (relay: on and off)</td></tr>
-    <tr><td>Water recycler (<code>recycler</code>)</td><td>weak showers</td><td>membrane fouled (membrane: weak all day); pump can't keep up (pump: weak only after 18:00); valve sticking (valve: one deck weak)</td></tr>
-    <tr><td>Water filter bank (<code>filter</code>)</td><td>cloudy water</td><td>a cartridge spent (cartridge: one housing slow); a seal leaking (seal: damp floor); the bypass valve open (valve: clear then cloudy)</td></tr>
-    <tr><td>Heating pumps (<code>heatpump</code>)</td><td>cold cabins</td><td>pump (pump: a knock); bearing (bearing: a whine); valve (valve: one side cold)</td></tr>
-    <tr><td>Pipe valves (<code>valve</code>)</td><td>low pressure</td><td>valve sticking (valve); a seal weeping (seal: a drip)</td></tr>
-    <tr><td>Oxygen cells (<code>o2cell</code>)</td><td>air thin</td><td>a cell spent (oxygen cell); the regulator (regulator: a hiss)</td></tr>
-    <tr><td>Electrolyser (<code>electrolyser</code>)</td><td>air thin</td><td>membrane (membrane); a cell (cell); the relay (relay: stops and starts)</td></tr>
-    <tr><td>Circulation pumps (<code>pump</code>)</td><td>low flow</td><td>pump (pump); bearing (bearing: grinding); seal (seal: a drip)</td></tr>
-    <tr><td>UV steriliser (<code>uv</code>)</td><td>water tastes off</td><td>UV lamp spent (uv lamp: a dull glow); relay (relay); seal (seal)</td></tr>
-    <tr><td>Irrigation pumps (<code>irrigation</code>)</td><td>dry beds</td><td>pump (pump); a valve (valve: one bed dry); nozzles clogged (filter: spits, then nothing; M14)</td></tr>
-    <tr><td>Nutrient dosing (<code>nutrient</code>)</td><td>yellow leaves</td><td>nutrient pack (nutrient pack); pump (pump); regulator (regulator: doses too much)</td></tr>
-    <tr><td>Air plant (<code>airplant</code>)</td><td>stuffy air ship-wide</td><td>filter (filter); bearing (bearing); fan belt (fan belt: a squeal)</td></tr>
-    <tr><td>Main fan (<code>fan</code>)</td><td>stuffy air ship-wide</td><td>bearing (bearing: a rumble); fan belt (fan belt); relay (relay: stops)</td></tr>
-    <tr><td>Manifold (<code>manifold</code>)</td><td>one deck cold or weak</td><td>a valve (valve: that deck's branch); a seal (seal); the regulator (regulator)</td></tr>
-    <tr><td>Lab gas plant (<code>gasplant</code>)</td><td>low lab gas</td><td>regulator (regulator); seal (seal: a hiss); valve (valve)</td></tr>
-    <tr><td>Bay door gear (<code>doorgear</code>)</td><td>bay doors slow</td><td>seal (seal: a draught); bearing (bearing: a judder); relay (relay: stops halfway)</td></tr>
+    <tr><th>Cause</th><th>Fix</th><th>Card</th><th>Up close</th><th>When</th><th>How common</th><th>Still (wrong fit)</th><th>Line</th></tr>
+    <tr><td>The filter is clogged</td><td>filter</td><td>stuffy air · rattles</td><td>a grey grille; the intake buzzes all day</td><td>always</td><td>●●●</td><td>"Clean filter. Still rattles once it's run all day."</td><td>—</td></tr>
+    <tr><td>The fan bearing is going</td><td>bearing</td><td>rattles</td><td>a whine that builds through the evening</td><td>warm</td><td>●●</td><td>"New bearing. Still rattles when the door goes."</td><td>—</td></tr>
+    <tr><td>A housing panel is loose (its gasket's gone)</td><td>seal</td><td>rattles</td><td>the housing buzzes when the door goes</td><td>touched</td><td>●</td><td>"Fresh gasket on the panel. Still rattles, door or no door."</td><td>—</td></tr>
+    <tr><td>Fan and flow have drifted</td><td>tune (M5 stage 2)</td><td>stuffy air</td><td>the hum's off pitch; the grille's clean</td><td>always</td><td>●●</td><td>—</td><td>—</td></tr>
+  </table></div>
+  <p class="note">P2's first case (<code>4-scrubber-2</code>): filter, bearing and panel all show "rattles" and differ in <i>when</i> (always, warm, touched).</p>
+
+  <h3>Heating plant <span class="tag">heater · Deck 4 (<code>4-heater-1</code>) · part: valve · top of the heat line</span></h3>
+  <div class="tablewrap"><table>
+    <tr><th>Cause</th><th>Fix</th><th>Card</th><th>Up close</th><th>When</th><th>How common</th><th>Still (wrong fit)</th><th>Line</th></tr>
+    <tr><td>A valve is sticking</td><td>valve</td><td>cold cabins</td><td>one branch's pipe cold to the touch, the rest warm</td><td>always</td><td>●●●</td><td>"New valve. Still lukewarm everywhere, and it knocks."</td><td>heat</td></tr>
+    <tr><td>Its circulation pump is weak</td><td>pump</td><td>cold cabins</td><td>every pipe lukewarm; a knock in the plant</td><td>always</td><td>●●</td><td>"New pump. That one branch is still cold."</td><td>heat</td></tr>
+    <tr><td>Its control relay sticks</td><td>relay</td><td>cold cabins</td><td>warm, then cold for an hour: it clicks off and on</td><td>warm</td><td>●</td><td>"New valve. Still goes cold after it's run a while."</td><td>heat</td></tr>
+  </table></div>
+
+  <h3>Water recycler <span class="tag">recycler · Deck 3 (<code>3-recycler-1</code>) · part: membrane · top of the water line</span></h3>
+  <div class="tablewrap"><table>
+    <tr><th>Cause</th><th>Fix</th><th>Card</th><th>Up close</th><th>When</th><th>How common</th><th>Still (wrong fit)</th><th>Line</th></tr>
+    <tr><td>The membrane is fouled</td><td>membrane</td><td>low output</td><td>the output gauge low all day; a brown film in the sight glass</td><td>always</td><td>●●●</td><td>"New membrane. Output still sinks after 18:00."</td><td>water</td></tr>
+    <tr><td>Its feed pump can't keep up</td><td>pump</td><td>low output</td><td>fine in the morning; the gauge sinks after 18:00</td><td>peak</td><td>●●</td><td>"New pump. Output still low all day; the glass is brown."</td><td>water</td></tr>
+    <tr><td>Its outlet valve is sticking</td><td>valve</td><td>low output</td><td>the outlet pipe shudders; the gauge flickers</td><td>always</td><td>●</td><td>"New valve. Output still low; the glass is brown."</td><td>water</td></tr>
+    <tr><td>A housing seal weeps</td><td>seal</td><td>a drip</td><td>a wet ring on the floor under it</td><td>after use</td><td>●</td><td>"Fresh seal. Still a wet ring under it."</td><td>—</td></tr>
+  </table></div>
+  <p class="note">P1's first case: the membrane (always) is a suspect; its log is fine all day, which crosses it out.</p>
+
+  <h3>Water filter bank <span class="tag">filter · Deck 3 (<code>3-filter-1</code>) · part: cartridge</span></h3>
+  <div class="tablewrap"><table>
+    <tr><th>Cause</th><th>Fix</th><th>Card</th><th>Up close</th><th>When</th><th>How common</th><th>Still (wrong fit)</th><th>Line</th></tr>
+    <tr><td>A cartridge is clogged</td><td>cartridge</td><td>low flow</td><td>one housing's gauge in the red, all day</td><td>always</td><td>●●●</td><td>"New cartridge. Flow still low: the floor's damp."</td><td>water</td></tr>
+    <tr><td>A housing seal leaks</td><td>seal</td><td>low flow</td><td>a damp floor under one housing, a faint hiss</td><td>after use</td><td>●●</td><td>"Fresh seal. Flow still low; one gauge's in the red."</td><td>water</td></tr>
+    <tr><td>The bypass valve sticks open</td><td>valve</td><td>cloudy water</td><td>clear first thing, cloudy by the busy hours</td><td>peak</td><td>●</td><td>"New valve. Still clouds by the afternoon."</td><td>—</td></tr>
+  </table></div>
+  <p class="note">P1's first case: the filter bank (clogged: always) is a suspect; its log shows full flow all day, evenings too.</p>
+
+  <h3>UV steriliser <span class="tag">uv · Deck 3 (<code>3-uv-1</code>) · part: uv lamp</span></h3>
+  <div class="tablewrap"><table>
+    <tr><th>Cause</th><th>Fix</th><th>Card</th><th>Up close</th><th>When</th><th>How common</th><th>Still (wrong fit)</th><th>Line</th></tr>
+    <tr><td>The UV lamp is spent</td><td>uv lamp</td><td>water tastes off</td><td>a dull blue glow in the window</td><td>always</td><td>●●●</td><td>"New relay. The glow's still dull."</td><td>—</td></tr>
+    <tr><td>The lamp relay sticks</td><td>relay</td><td>water tastes off</td><td>the glow blinks off and on once it's warm</td><td>warm</td><td>●●</td><td>"New lamp. It still blinks off once it's warm."</td><td>—</td></tr>
+    <tr><td>A sleeve seal weeps</td><td>seal</td><td>low flow</td><td>water beading on the housing, a drip</td><td>after use</td><td>●</td><td>"Fresh seal. Flow still low."</td><td>water</td></tr>
+  </table></div>
+  <p class="note">Only the seal cuts the flow, so on a traced fault the UV steriliser is a suspect only through it.</p>
+
+  <h3>Circulation pumps <span class="tag">pump · Deck 3 (<code>3-pump-1</code>) and Deck 5 (<code>5-pump-1</code>, <code>-2</code>) · part: pump</span></h3>
+  <div class="tablewrap"><table>
+    <tr><th>Cause</th><th>Fix</th><th>Card</th><th>Up close</th><th>When</th><th>How common</th><th>Still (wrong fit)</th><th>Line</th></tr>
+    <tr><td>The pump can't keep up</td><td>pump</td><td>low flow</td><td>fine in the morning; labours after 18:00</td><td>peak</td><td>●●●</td><td>"New seal. Still labours in the evening."</td><td>water</td></tr>
+    <tr><td>Its shaft seal drips</td><td>seal</td><td>low flow</td><td>a drip under the shaft, low all day</td><td>always</td><td>●●</td><td>"New pump. Still drips under the shaft."</td><td>water</td></tr>
+    <tr><td>Its bearing is going</td><td>bearing</td><td>noisy</td><td>a grinding, worse after a long run</td><td>warm</td><td>●</td><td>"New pump. Still grinding."</td><td>—</td></tr>
+    <tr><td>The garden's irrigation draws on the same pipe</td><td>load: <code>3-irrigation-1</code> (book it, not a part)</td><td>low flow</td><td>low only while the garden's being watered</td><td>with: irrigation</td><td>●</td><td>—</td><td>water</td></tr>
+  </table></div>
+  <p class="note">P1's first case is <code>3-pump-1</code> "can't keep up" (peak). The load is for P1's later T2+ form only (never a real fault's cause on its own); seat S confirms the irrigation pump draws on the Deck 3 pipe.</p>
+
+  <h3>Pipe valves <span class="tag">valve · Deck 5 branch valves (<code>5-valve-1</code> Decks 1-3, <code>5-valve-2</code> Decks 4-6) · part: valve</span></h3>
+  <div class="tablewrap"><table>
+    <tr><th>Cause</th><th>Fix</th><th>Card</th><th>Up close</th><th>When</th><th>How common</th><th>Still (wrong fit)</th><th>Line</th></tr>
+    <tr><td>The valve is sticking</td><td>valve</td><td>low flow on its branch</td><td>its branch's decks weak; the handle's stiff</td><td>always</td><td>●●●</td><td>"Fresh seal. That branch is still weak."</td><td>water</td></tr>
+    <tr><td>Its gland seal weeps</td><td>seal</td><td>a drip</td><td>a drip from the gland, a wet floor</td><td>always</td><td>●●</td><td>"New valve. Still drips."</td><td>—</td></tr>
+  </table></div>
+  <p class="note">M9's training fault is <code>5-valve-2</code> sticking; P1's first case has it as a suspect (always: its log passes its share every hour).</p>
+
+  <h3>Heating pumps <span class="tag">heatpump · Deck 4 (<code>4-pump-1</code>, <code>-2</code>) · part: pump</span></h3>
+  <div class="tablewrap"><table>
+    <tr><th>Cause</th><th>Fix</th><th>Card</th><th>Up close</th><th>When</th><th>How common</th><th>Still (wrong fit)</th><th>Line</th></tr>
+    <tr><td>A pump is weak</td><td>pump</td><td>cold cabins</td><td>a knock; both outlets lukewarm all day</td><td>always</td><td>●●●</td><td>"New valve. Both outlets still lukewarm; it knocks."</td><td>heat</td></tr>
+    <tr><td>Its bearing is going</td><td>bearing</td><td>cold cabins</td><td>a whine, and the radiators cool off after hours of running</td><td>warm</td><td>●●</td><td>"New pump. Still cools off by evening, and whines."</td><td>heat</td></tr>
+    <tr><td>A valve is sticking</td><td>valve</td><td>cold cabins</td><td>one outlet hot, the other cold</td><td>always</td><td>●●</td><td>"New pump. One outlet still cold."</td><td>heat</td></tr>
+  </table></div>
+
+  <h3>Manifold <span class="tag">manifold · Deck 5 (<code>5-manifold-1</code>) · part: valve · splits the heat line to the decks</span></h3>
+  <div class="tablewrap"><table>
+    <tr><th>Cause</th><th>Fix</th><th>Card</th><th>Up close</th><th>When</th><th>How common</th><th>Still (wrong fit)</th><th>Line</th></tr>
+    <tr><td>A deck's branch valve sticks</td><td>valve</td><td>one deck cold</td><td>that deck's pipe cold at the manifold, all day</td><td>always</td><td>●●●</td><td>"Fresh seal. That deck's still cold."</td><td>heat</td></tr>
+    <tr><td>The regulator drifts low at night</td><td>regulator</td><td>cabins cold at night</td><td>fine by day; the gauge drops after 22:00</td><td>at a time (night)</td><td>●●</td><td>"New valve. Still cold after 22:00."</td><td>heat</td></tr>
+    <tr><td>A joint seal weeps</td><td>seal</td><td>a drip</td><td>a hiss and a wet floor under a joint</td><td>always</td><td>●</td><td>"New valve. Still hisses."</td><td>—</td></tr>
+  </table></div>
+
+  <h3>Oxygen cells <span class="tag">o2cell · Deck 5 (<code>5-o2-1</code>, <code>-2</code>) · part: oxygen cell</span></h3>
+  <div class="tablewrap"><table>
+    <tr><th>Cause</th><th>Fix</th><th>Card</th><th>Up close</th><th>When</th><th>How common</th><th>Still (wrong fit)</th><th>Line</th></tr>
+    <tr><td>A cell is spent</td><td>oxygen cell</td><td>air thin</td><td>one cell's lamp amber; the gauge low all day</td><td>always</td><td>●●●</td><td>"New regulator. One lamp's still amber."</td><td>—</td></tr>
+    <tr><td>The regulator sticks</td><td>regulator</td><td>air thin</td><td>a hiss, then the gauge jumps; worst at the busy hours</td><td>peak</td><td>●●</td><td>"New cell. Still hisses and jumps when everyone's up."</td><td>—</td></tr>
+    <tr><td>Its relay sticks</td><td>relay</td><td>stops and starts</td><td>the cells click off and on once warm</td><td>warm</td><td>●</td><td>"New cell. Still clicks off and on."</td><td>—</td></tr>
+  </table></div>
+
+  <h3>Electrolyser <span class="tag">electrolyser · Deck 5 (<code>5-electrolyser-1</code>) · part: membrane</span></h3>
+  <div class="tablewrap"><table>
+    <tr><th>Cause</th><th>Fix</th><th>Card</th><th>Up close</th><th>When</th><th>How common</th><th>Still (wrong fit)</th><th>Line</th></tr>
+    <tr><td>The membrane is fouled</td><td>membrane</td><td>air thin</td><td>bubbles slow in the sight glass, all day</td><td>always</td><td>●●●</td><td>"New cell. Bubbles still slow."</td><td>—</td></tr>
+    <tr><td>A cell is tired</td><td>cell</td><td>air thin</td><td>strong in the morning, fading by evening</td><td>warm</td><td>●●</td><td>"New membrane. Still fades by evening."</td><td>—</td></tr>
+    <tr><td>Its relay sticks</td><td>relay</td><td>stops and starts</td><td>clicks off, then on again</td><td>warm</td><td>●</td><td>"New membrane. Still stops and starts."</td><td>—</td></tr>
+  </table></div>
+
+  <h3>Irrigation pumps <span class="tag">irrigation · Deck 3 garden (<code>3-irrigation-1</code>) · part: pump</span></h3>
+  <div class="tablewrap"><table>
+    <tr><th>Cause</th><th>Fix</th><th>Card</th><th>Up close</th><th>When</th><th>How common</th><th>Still (wrong fit)</th><th>Line</th></tr>
+    <tr><td>The pump is worn</td><td>pump</td><td>dry beds</td><td>every bed damp, none wet; the pump hums low</td><td>always</td><td>●●●</td><td>"New valve. Every bed's still only damp."</td><td>—</td></tr>
+    <tr><td>A bed's valve sticks</td><td>valve</td><td>dry beds</td><td>one bed bone dry, the rest fine</td><td>always</td><td>●●</td><td>"New pump. That one bed's still dry."</td><td>—</td></tr>
+    <tr><td>The nozzles are clogged</td><td>filter</td><td>dry beds</td><td>spits, then nothing</td><td>after use</td><td>●</td><td>"New pump. Still spits, then nothing."</td><td>—</td></tr>
+  </table></div>
+  <p class="note">Clogged nozzles are the filter (it's the strainer in the line); the garden job M14 cleans them.</p>
+
+  <h3>Nutrient dosing <span class="tag">nutrient · Deck 3 garden (<code>3-nutrient-1</code>) · part: nutrient pack</span></h3>
+  <div class="tablewrap"><table>
+    <tr><th>Cause</th><th>Fix</th><th>Card</th><th>Up close</th><th>When</th><th>How common</th><th>Still (wrong fit)</th><th>Line</th></tr>
+    <tr><td>The pack is used up</td><td>nutrient pack</td><td>yellow leaves</td><td>the pack's window empty</td><td>always</td><td>●●●</td><td>"New pump. The window's still empty."</td><td>—</td></tr>
+    <tr><td>The dosing pump is weak</td><td>pump</td><td>yellow leaves</td><td>the pack full, the dosing line barely ticks</td><td>always</td><td>●●</td><td>"New pack. The line still barely ticks."</td><td>—</td></tr>
+    <tr><td>The regulator overdoses</td><td>regulator</td><td>brown leaf tips</td><td>a white crust on the tray edges</td><td>always</td><td>●</td><td>"New pack. Still a crust on the trays."</td><td>—</td></tr>
+  </table></div>
+
+  <h3>Air plant <span class="tag">airplant · Deck 5 (<code>5-scrubber-1</code>, <code>-2</code>) · part: filter</span></h3>
+  <div class="tablewrap"><table>
+    <tr><th>Cause</th><th>Fix</th><th>Card</th><th>Up close</th><th>When</th><th>How common</th><th>Still (wrong fit)</th><th>Line</th></tr>
+    <tr><td>The main filter is clogged</td><td>filter</td><td>stuffy air ship-wide</td><td>a grey filter face; the intake pulls hard</td><td>always</td><td>●●●</td><td>"New belt. Filter face still grey."</td><td>—</td></tr>
+    <tr><td>The fan belt is slipping</td><td>fan belt</td><td>stuffy air ship-wide</td><td>a squeal at shift change, weak for the next hour</td><td>peak</td><td>●●</td><td>"Clean filter. Still squeals at shift change."</td><td>—</td></tr>
+    <tr><td>The fan bearing is going</td><td>bearing</td><td>noisy</td><td>a rumble from the plant</td><td>warm</td><td>●</td><td>"New belt. Still rumbles."</td><td>—</td></tr>
+  </table></div>
+  <p class="note">In the game the Deck 5 air plants are <code>5-scrubber-1</code> and <code>-2</code> (kind <code>airplant</code>), and they <i>do</i> have panel places (<code>panel: [39, 3]</code>, <code>[40, 3]</code>); so an air line for tracing could come sooner than M9 says. A call for the user (open question).</p>
+
+  <h3>Main fan <span class="tag">fan · not in the game yet · part: bearing</span></h3>
+  <div class="tablewrap"><table>
+    <tr><th>Cause</th><th>Fix</th><th>Card</th><th>Up close</th><th>When</th><th>How common</th><th>Still (wrong fit)</th><th>Line</th></tr>
+    <tr><td>The bearing is going</td><td>bearing</td><td>stuffy air ship-wide</td><td>a rumble in the duct</td><td>warm</td><td>●●●</td><td>"New belt. Still rumbles."</td><td>—</td></tr>
+    <tr><td>The fan belt is glazed</td><td>fan belt</td><td>stuffy air ship-wide</td><td>a squeal; the belt shiny</td><td>always</td><td>●●</td><td>"New bearing. Still squeals."</td><td>—</td></tr>
+    <tr><td>Its relay sticks</td><td>relay</td><td>stops</td><td>stops, clicks, starts</td><td>warm</td><td>●</td><td>"New bearing. Still stops."</td><td>—</td></tr>
+  </table></div>
+  <p class="note">No main fan machine in <code>DECKS</code> today; kept for when one is added.</p>
+
+  <h3>Lab gas plant <span class="tag">gasplant · Deck 2 (<code>2-gasplant-1</code>) · part: regulator</span></h3>
+  <div class="tablewrap"><table>
+    <tr><th>Cause</th><th>Fix</th><th>Card</th><th>Up close</th><th>When</th><th>How common</th><th>Still (wrong fit)</th><th>Line</th></tr>
+    <tr><td>The regulator drifts</td><td>regulator</td><td>low lab gas</td><td>the gauge wanders all day</td><td>always</td><td>●●●</td><td>"Fresh seal. The gauge still wanders."</td><td>—</td></tr>
+    <tr><td>A joint seal hisses</td><td>seal</td><td>low lab gas</td><td>a hiss at a joint; soapy water bubbles</td><td>always</td><td>●●</td><td>"New regulator. Still hisses at the joint."</td><td>—</td></tr>
+    <tr><td>The supply valve sticks</td><td>valve</td><td>low lab gas</td><td>fine until someone opens a bench tap, then it drops</td><td>touched</td><td>●</td><td>"New regulator. Still drops when a tap opens."</td><td>—</td></tr>
+  </table></div>
+
+  <h3>Bay door gear <span class="tag">doorgear · not in the game yet · part: seal</span></h3>
+  <div class="tablewrap"><table>
+    <tr><th>Cause</th><th>Fix</th><th>Card</th><th>Up close</th><th>When</th><th>How common</th><th>Still (wrong fit)</th><th>Line</th></tr>
+    <tr><td>The door seal is worn</td><td>seal</td><td>bay doors slow</td><td>a draught at the frame</td><td>always</td><td>●●●</td><td>"New bearing. Still a draught at the frame."</td><td>—</td></tr>
+    <tr><td>A track bearing is worn</td><td>bearing</td><td>bay doors slow</td><td>a judder as they move, worse after a few runs</td><td>after use</td><td>●●</td><td>"Fresh seal. Still judders."</td><td>—</td></tr>
+    <tr><td>Its relay sticks</td><td>relay</td><td>doors stop halfway</td><td>stop halfway, click, then go</td><td>warm</td><td>●</td><td>"New bearing. Still stops halfway."</td><td>—</td></tr>
+  </table></div>
+  <p class="note">No door gear machine in <code>DECKS</code> today (the hangar's doors are Deck 6 scenery); kept for when one is added.</p>
+
+  <h3>The examples, checked against the solver</h3>
+  <div class="tablewrap"><table>
+    <tr><th>Case</th><th>Suspects (when)</th><th>Clues: what each crosses out</th><th>No single clue solves it?</th></tr>
+    <tr><td>P1's first: "Showers weak on Deck 4 after 18:00"</td><td>recycler membrane (always), filter bank cartridge (always), <b>3-pump-1 can't keep up (peak)</b>, 5-valve-2 sticking (always)</td><td>filter bank's log fine all day: the cartridge; recycler's log: the membrane; branch valve's log: the valve</td><td>Yes: each log crosses out one of four; any one leaves three, any two leave two. All four are <i>water</i> causes with parts in <code>STOCK</code> (membrane 3, cartridge 8, pump 4, valve 4).</td></tr>
+    <tr><td>P2's first: "Scrubber 2 on Deck 4 rattles now and then"</td><td>filter (always), <b>bearing (warm)</b>, panel (touched)</td><td>"quiet at breakfast": the filter (the bearing isn't warm yet; the panel needs the door); "rattling at 19:30, the door never moved": the panel</td><td>Yes: either witness alone leaves two. Parts filter 8, bearing 3, seal 4.</td></tr>
+    <tr><td>M9's training: "Showers weak on Deck 4"</td><td>(a trace, not a case) 5-valve-2 sticking</td><td>reading the middle (5-pump-1) full, then 5-valve-2 low after</td><td>—</td></tr>
   </table></div>
 </section>
 
@@ -157,13 +293,29 @@ NAV:plain=In plain words|rules=How to read them|t1=Tier 1|t2=Tier 2 (draft)|b=Bu
   { id: 'relay', part: 'relay', w: 1, shows: 'stops mid-cycle', when: 'warm', ... } ]
 // a setting:  { id: 'drift', setting: true, w: 2, shows: 'runs hot|runs cool', from: 4 }        (M5)
 // a load:     { id: 'junction', load: '3-junction-…', w: 1, shows: 'runs cool', when: 'peak', band: 'T2' }  (P1)
-// band:       'T2' / 'T3' = only as a suspect (and only as a real cause) in that band or later</div>
+// band:       'T2' / 'T3' = only as a suspect (and only as a real cause) in that band or later
+
+// Tier 2 (Step 3): line = the MACHINE_LINKS line the cause cuts (it can be traced, M9, and a P1 suspect)
+FAULT_CAUSES.pump = [
+  { id: 'pump',  part: 'pump',  w: 3, shows: 'low flow', sign: 'labours after 18:00', when: 'peak', line: 'water', band: 'T2', still: 'pump.pump' },
+  { id: 'seal',  part: 'seal',  w: 2, shows: 'low flow', sign: 'drip under the shaft', when: 'always', line: 'water', band: 'T2', still: 'pump.seal' },
+  { id: 'bearing', part: 'bearing', w: 1, shows: 'noisy', sign: 'grinding', when: 'warm', band: 'T2', still: 'pump.bearing' },
+  { id: 'irrigation', load: '3-irrigation-1', w: 1, shows: 'low flow', sign: 'low while watering', when: 'with:irrigation', line: 'water', band: 'T2+' } ]
+FAULT_CAUSES.scrubber = [
+  { id: 'filter', part: 'filter', w: 3, shows: 'stuffy air|rattles', sign: 'grey grille', when: 'always', band: 'T2', ... },
+  { id: 'bearing', part: 'bearing', w: 2, shows: 'rattles', sign: 'whine by evening', when: 'warm', band: 'T2', ... },
+  { id: 'panel', part: 'seal', w: 1, shows: 'rattles', sign: 'housing buzzes when the door goes', when: 'touched', band: 'T2', ... },   // P2
+  { id: 'drift', setting: true, w: 2, shows: 'stuffy air', band: 'T2' } ]                                                          // M5 stage 2</div>
   <ul>
     <li><b>Texts</b> (<code>shows</code>, <code>sign</code>, <code>still</code>) are keys into the Works writer's <code>content/works/faults.lines</code>; the plain words above are the first draft of those lines.</li>
     <li><b>The pick</b> (foundation 17.4): only causes allowed at the machine's band and day (<code>from</code>: a setting from Day 4; <code>band</code>), weighted by <code>w</code> × (1 + the part's wear share); a <code>load</code> is never picked as a real fault's cause on its own (it only appears in head-scratchers that say so).</li>
     <li><b>Same card, different signs:</b> within a kind, causes sharing a <code>shows</code> must have different <code>sign</code>s (the scanner relies on it: when two parts read low, the sign tells them apart).</li>
     <li><b>Parts:</b> every part here is in <code>STOCK</code> today; <code>compressor</code> has only 2 (fine: rare) and <code>signal card</code> 2.</li>
     <li><b>Corrections to the plan:</b> the plan's Tier 1 list named the power junction and the bay door gear; in the game they're Tier 3 (<code>junction</code>) and Tier 2 (<code>doorgear</code>), so the junction appears only as a <i>load</i> suspect (P1) and the door gear is in the Tier 2 list. The Tier 1 kinds are the game's: oven, range, galley plant, extractor, chiller, washer, lift, light relays, cart dock, grow lights.</li>
+    <li><b>Tier 2 texts:</b> the table's words are the first draft of <code>faults.lines</code> as for Tier 1. In play a still line's second half follows the real cause's sign (the writer's line has a slot for it); the lines above are written for the commonest real cause.</li>
+    <li><b>Traced faults</b> (M9): pick only among causes with a <code>line</code>; a cause without one posts on its own machine as now. A Tier 2 cause is never picked before <code>band: 'T2'</code> (the player an Officer, Day 10); before that Tier 2 machines still fault as now, with the crew's causes picked from the same table.</li>
+    <li><b><code>with:&lt;kind&gt;</code></b> (the load): the case engine's <code>when</code> value; the symptom shows only in hours when that kind's machine is in use (<code>machUseDay</code>).</li>
+    <li><b>Kinds without a machine:</b> main fan and bay door gear have no machine in <code>DECKS</code> today; their tables wait. The extractor's Tier 1 table is the same.</li>
   </ul>
 </section>
 
@@ -172,6 +324,8 @@ NAV:plain=In plain words|rules=How to read them|t1=Tier 1|t2=Tier 2 (draft)|b=Bu
   <ul>
     <li><b><code>machine_check</code></b>: every Tier 1 kind has a table; every part is in <code>STOCK</code>; no two causes of a kind share both <code>shows</code> and <code>sign</code>; the picked cause the same twice; over 14 days every Tier 1 kind's causes all appear and the common ones most.</li>
     <li><b><code>puzzle_check</code></b>: P3 fits the washer (three "leaks"), the lights (three "flicker"), the oven (three "runs cool") and the extractor (two "weak draw" + the relay: no, so P3 skips it on T1: fine).</li>
+    <li><b><code>machine_check</code> (Tier 2)</b>: every Tier 2 kind in <code>MACHINE_KINDS</code> has a table; every part in <code>STOCK</code>; same card, different signs; every machine on a <code>MACHINE_LINKS</code> line has at least one cause with that <code>line</code>; a <code>load</code> is never a real fault's cause.</li>
+    <li><b><code>puzzle_check</code> (Tier 2)</b>: P1's first case fits the water line (membrane, cartridge, valve always; <code>3-pump-1</code> peak); P2's first fits <code>4-scrubber-2</code> (three "rattles": always, warm, touched); both pass the solver (no single clue solves them).</li>
   </ul>
 </section>
 
