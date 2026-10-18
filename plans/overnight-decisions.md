@@ -140,3 +140,12 @@ All 8 packages approved (Zeke: "all good except he still walks and talks" → he
 | Population 75 → 100? | The user is considering it. Lead view: doable as its own planned change after Pillar 5, starting with a feasibility study. Lead 14 asked the user whether to start that study |
 | ~19:05 (the user) | Population 100? | Just a thought, shelved: "let's see how things go". Stays 75 | Study: wait (no study now; after Pillar 5 if ever) |
 | ~19:05 (the user) | Rec deck vs commons | "Rec deck just needs people using it. Commons needs to be busy." → rec deck cap ~15 on evenings/weekends (activity spots + a few watching), commons keep priority; day_check compares commons evening counts with and without the rec deck. Plan v5 (rec planner) |
+
+## The user, 2026-10-18 ~19:15 (bridge access)
+| Question | The user's answer |
+|---|---|
+| Bridge access | You can't enter the bridge without permission; the game tells you as you try. Getting invited is meant to be a cool moment |
+| What locks | Just the bridge room: Deck 1 corridor, ready room and observation room stay open; the bridge door stops you with a message |
+| Works jobs before the invite | None in the bridge room until you're invited (the board doesn't offer them to you) |
+| When the invite comes | After a big moment, e.g. helping in the first ship-wide event; the Captain or Commander Vance invites you up; bridge hour (monthly) opens with it |
+| (lead call) Which build | Step 3 (0.63.3), not 0.63.2 (its final run is near); the invitation beat itself is written with the story work, with a placeholder trigger until then |
