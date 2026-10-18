@@ -1,0 +1,20 @@
+@meeting train.m5.brennan
+// Pillar 5, M5 tuning, if Brennan teaches it (m5's by list is calder, brennan: only when Calder is off that day).
+// The galley, Oven 1's panel. Head writer, seat W.
+title: Tuning
+from: Chef Auda Brennan
+gist: Brennan showed you tuning: turn a setting a step at a time and watch the oven answer. Settle it and it's done.
+== lines
+brennan: Forty rolls, love. Burnt edges. This oven's got a temper.   [sigh]
+brennan: Calder says nothing's broken. It's drifted. Like me after a double shift.
+brennan > you: Watch the glow, not the dial. One click down. See? Calmer.   [gesture]
+brennan: Another. There. Steady as a good stew. Done.
+brennan: Too far and it sulks the other way. Just click it back.
+? choice
+* How do I know when it's right?   rel:brennan+2 flavour:practical
+  brennan: When it stops stuttering and just glows. Same as a happy pan.   [nod]
+* Why do ovens drift?   rel:brennan+1 flavour:listen
+  brennan: Heat, use, and me slamming the door. Mostly me.   [laugh]
+* Sorry about the rolls, Chef.   rel:brennan+1 flavour:cheer
+  brennan: Not your fault, love. Fix the other one and you're forgiven.
+brennan: Oven 2's doing the same. Your turn. I'll be watching. Arms folded.
