@@ -877,7 +877,7 @@ function makeDust(len) {
 // walls, door frames and posts (instanced: a few draw calls for the whole deck)
 const capMat = std('#262e35', .8, .1);
 const wallMat = new THREE.MeshStandardMaterial({ map: wallTex, roughness: .85, metalness: .05 });
-const SEG = 1 - T, HDR = H - 2.2;
+const SEG = 1 - T, HDR = H - 2.2, RAIL_H = .45;
 const wallGeo = new THREE.BoxGeometry(SEG, H, T); wallGeo.translate(0, H / 2, 0);
 const postGeo = new THREE.BoxGeometry(T, H, T); postGeo.translate(0, H / 2, 0);
 const hdrGeo = new THREE.BoxGeometry(SEG, HDR, T);
@@ -892,13 +892,13 @@ function writeWalls() {
   // a tall deck (0.80.0): walls and headers stretch to H when up, and come down to the usual low wall when cut away
   const ts = s => WALL_K === 1 ? s : s * (1 + (WALL_K - 1) * Math.max(0, (s - .12) / .88)), HK = WALL_K === 1 ? 1 : (H - 2.2) / HDR;
   for (const e of wallEdges) setInst(wallIM, e.inst, e.wx, 0, e.wz, e.horiz ? 0 : Math.PI / 2, ts(e.s), e.sx);
-  for (const e of frameEdges) { const k = THREE.MathUtils.clamp((e.s - .5) / .5, 0, 1); setInst(hdrIM, e.hinst, e.cx, 2.2 + HDR * HK / 2, e.cz, e.horiz ? 0 : Math.PI / 2, k * HK); }
-  fullPosts.forEach((p, k) => setInst(postIM, k, p.cx, 0, p.cz, 0, ts(p.s)));
-  hdrPosts.forEach((p, k) => { const s = THREE.MathUtils.clamp((p.s - .5) / .5, 0, 1); setInst(hpostIM, k, p.cx, 2.2 + HDR * HK / 2, p.cz, 0, s * HK); });
+  for (const e of frameEdges) { const k = e.rail ? 0 : THREE.MathUtils.clamp((e.s - .5) / .5, 0, 1); setInst(hdrIM, e.hinst, e.cx, 2.2 + HDR * HK / 2, e.cz, e.horiz ? 0 : Math.PI / 2, k * HK); }
+  fullPosts.forEach((p, k) => setInst(postIM, k, p.cx, 0, p.cz, 0, p.rail ? RAIL_H / 2.8 : ts(p.s)));   // e.rail / p.rail: a low rail (the rec deck's court, 0.80.10)
+  hdrPosts.forEach((p, k) => { const s = p.rail ? 0 : THREE.MathUtils.clamp((p.s - .5) / .5, 0, 1); setInst(hpostIM, k, p.cx, 2.2 + HDR * HK / 2, p.cz, 0, s * HK); });
   for (const im of [wallIM, hdrIM, postIM, hpostIM]) im.instanceMatrix.needsUpdate = true;
   if (sillIM) {
     for (const e of glassEdges) {
-      setInst(sillIM, e.ginst, e.cx, 0, e.cz, e.horiz ? 0 : Math.PI / 2, Math.min(1, e.s * H / SILL));
+      setInst(sillIM, e.ginst, e.cx, 0, e.cz, e.horiz ? 0 : Math.PI / 2, e.rail ? RAIL_H / SILL : Math.min(1, e.s * H / SILL));
       setInst(paneIM, e.ginst, e.cx, (SILL + 2.2) / 2, e.cz, e.horiz ? 0 : Math.PI / 2, e.type === 'pass' ? 0 : THREE.MathUtils.clamp((e.s - .5) / .5, 0, 1));
     }
     sillIM.instanceMatrix.needsUpdate = paneIM.instanceMatrix.needsUpdate = true;
@@ -7883,8 +7883,14 @@ function recFloor(g, kind, i, j, x, y, PX) {
   const hall = (a, b) => { const r2 = roomAt(a, b); return r2 && ROOMS[r2].hall; }, sameRoom = (a, b) => roomAt(a, b) === roomAt(i, j);
   const edge = (a, b) => ROOMS[roomAt(i, j)].hall ? !hall(a, b) : !sameRoom(a, b);   // a stripe where the floor meets a wall
   const fleck = (n, cs) => { for (let k = 0; k < n; k++) { g.fillStyle = cs[k % cs.length]; g.fillRect(x + recHash(i, j, k) * (PX - 2), y + recHash(i, j, k + 31) * (PX - 2), 2, 2); } };
-  if (kind === 'sport' || kind === 'concourse') {        // charcoal sports floor (the concourse: bright teal squares, 0.80.8); the neon stripes, cyan to port and magenta to starboard
-    g.fillStyle = kind === 'concourse' ? ((Math.floor(i / 2) + Math.floor(j / 2)) % 2 ? '#1d6f78' : '#18626b') : '#2a2e35'; g.fillRect(x, y, PX, PX);
+  if (kind === 'concourse') {                            // the concourse and foyer (0.80.10, the user's: calmer, classier): two-tone terrazzo, an inlaid band at the walls
+    g.fillStyle = (i + j) % 2 ? '#4d5759' : '#535e60'; g.fillRect(x, y, PX, PX);
+    for (let k = 0; k < 22; k++) { const c = recHash(i, j, k + 50); g.fillStyle = c < .45 ? 'rgba(232,226,214,.35)' : c < .7 ? 'rgba(31,163,155,.45)' : c < .85 ? 'rgba(240,121,90,.4)' : 'rgba(20,24,28,.35)'; const r = 1 + recHash(i, j, k + 80) * 2.2; g.fillRect(x + recHash(i, j, k + 110) * (PX - 3), y + recHash(i, j, k + 140) * (PX - 3), r, r); }
+    g.fillStyle = 'rgba(0,0,0,.12)'; if (i % 3 === 0) g.fillRect(x, y, 1, PX); if (j % 3 === 0) g.fillRect(x, y, PX, 1);   // thin joints every third tile
+    if (edge(i, j - 1)) { g.fillStyle = '#c99a4a'; g.fillRect(x, y + 10, PX, 2); g.fillStyle = 'rgba(31,163,155,.8)'; g.fillRect(x, y + 14, PX, 3); }
+    if (edge(i, j + 1)) { g.fillStyle = '#c99a4a'; g.fillRect(x, y + PX - 12, PX, 2); g.fillStyle = 'rgba(240,121,90,.75)'; g.fillRect(x, y + PX - 17, PX, 3); }
+  } else if (kind === 'sport') {                         // charcoal sports floor; the neon stripes, cyan to port and magenta to starboard
+    g.fillStyle = '#2a2e35'; g.fillRect(x, y, PX, PX);
     fleck(8, ['rgba(80,230,255,.16)', 'rgba(255,90,200,.14)', 'rgba(220,225,230,.12)']);
     if (i % 4 === 0) { g.fillStyle = 'rgba(0,0,0,.2)'; g.fillRect(x, y, 2, PX); }
     if (edge(i, j - 1)) { g.fillStyle = 'rgba(80,230,255,.9)'; g.fillRect(x, y + 9, PX, 4); g.fillStyle = 'rgba(80,230,255,.25)'; g.fillRect(x, y + 6, PX, 10); }
@@ -8263,20 +8269,6 @@ Object.assign(WALL_KIT, {
     const p = new THREE.Mesh(new THREE.PlaneGeometry(W_, Hh), new THREE.MeshBasicMaterial({ map: t, toneMapped: false })); p.position.set(o.off || 0, o.y || 2.45, .03); g.add(p);
   },
 });
-// the concourse's floor art (0.80.8; calmer in 0.80.9): running lanes in coral and white, and a big REC DEC roundel aft
-function recFloorArt(g, PX) {
-  const P = v => v * PX;
-  for (const [x0, x1] of [[4, 17], [23, 30]]) {
-    g.fillStyle = 'rgba(255,111,97,.75)'; for (const z of [8, 10]) g.fillRect(P(x0), P(z) - 3, P(x1 - x0), 6);
-    g.fillStyle = 'rgba(255,255,255,.55)'; for (let x = x0; x < x1; x += .8) g.fillRect(P(x), P(9) - 2, P(.45), 4);
-  }
-  const roundel = (cx, cz, r) => {
-    g.beginPath(); g.arc(P(cx), P(cz), P(r), 0, Math.PI * 2); g.fillStyle = '#ff6f61'; g.fill();
-    g.beginPath(); g.arc(P(cx), P(cz), P(r * .8), 0, Math.PI * 2); g.fillStyle = '#2a1d45'; g.fill();
-    g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#ffd23f'; g.font = `900 ${Math.round(P(.42))}px system-ui,sans-serif`; g.fillText('REC DEC', P(cx), P(cz));
-  };
-  roundel(10.5, 9, 1.3);
-}
 DECKS[7] = {
   num: 7, name: 'Recreation', seed: 70771, tall: 1.3, playerOnly: true, open: [6, 24],
   blurb: 'Auditorium, court, pool, rivers', arrive: 'The concourse runs stern to bow: the rivers and the court aft, the pool and the auditorium forward.',
@@ -8355,7 +8347,6 @@ DECKS[7] = {
     'h,20,11': { t: 'Spine ladder', x: 'The maintenance ladder, up to Quarters and down to Operations, through the rec dec on the way. Tier 2 access.' },
   },
   hull: { sternX: 1, stern: 2, bowFrom: 34, bowLen: 11.6, byFace: true },
-  floorArt: (g, PX) => recFloorArt(g, PX),   // the concourse's lanes and roundels (0.80.8)
   service: [{ key: 'v,4,8', tier: 2 }, { key: 'v,4,15', tier: 2 }, { key: 'v,32,3', tier: 1 }, { key: 'h,31,11', tier: 1 }, { key: 'v,34,11', tier: 1 }],
   machines: [],                                          // TODO (phase 2, the systems engineer): the plan's section 6 machines
   // the auditorium's seats (0.80.1): reached from the aisle beside their row; a type no crew code knows, so they stay the player's
@@ -8418,6 +8409,10 @@ DECKS[7] = {
     place('C', 'recHit', 6.5, 2.5, 'n', { w: 12.6, d: 4.6, hitH: .3, it: IT('Lightdisc court', 'A black court with glowing lines, cyan at the bow end and orange at the stern, and a shimmering force-field net across the middle. Tap it, or the panel by the gate, to ask someone down to play.') });
     placeWall('C', 'recScoreboard', 'w', 2.5, { hitW: 2.8, it: IT('Scoreboard', 'Two storeys of scoreboard on the stern wall. It keeps the score of the game on the court.') });
     placeOnEdge('recPlayPanel', 'h,15,13', 's', { it: IT('Ask someone to play', 'A panel by the court gate: ASK SOMEONE TO PLAY.') });
+    // 0.80.10 (the user's): the stands look straight onto the court: its rail is a low kick board, no header, no posts above it
+    for (let i = 4; i <= 16; i++) { const e = EDGES.get('h,' + i + ',13'); if (e) e.rail = true; }
+    for (const p of POSTS) if (p.touch.every(e => e.rail)) p.rail = true;
+    writeWalls();
     const stands = []; for (const [c0, c1] of REC_STANDS) for (let c = c0; c < c1; c++) stands.push([c - 4, 0], [c - 4, 1]);
     place('T', 'recStands', 0, 0, 'n', { block: stands });
     // the pool (0.80.3, R4): the raised basin with its water, lanes and mosaic; loungers on the inboard side; the first-aid point
