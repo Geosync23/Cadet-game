@@ -1,0 +1,67 @@
+@bank all
+// Head writer 0607: the words on the time clock's new pop-up screen (player engineer 6's), in the device's art style:
+// short, upper-case headings like an old ship terminal, plain sentences below. TEXTS: said by nobody.
+// {time} a clock time ("08:02"), {hours} a count of hours ("7.5"), {day} a weekday.
+
+== clock.screen.title
+- WORKS TIME CLOCK
+
+== clock.screen.sub
+- CSV Wren · Works bay
+
+== clock.screen.in
+- Clock in
+
+== clock.screen.out
+- Clock out
+
+== clock.screen.close
+- Close
+
+== clock.screen.ready
+- Shift starts at {time}. Tap to clock in.
+
+== clock.screen.onshift
+- On shift since {time}.
+
+== clock.screen.offshift
+- Off shift.
+
+== clock.screen.didin
+- Clocked in at {time}. Have a good shift.
+
+== clock.screen.didout
+- Clocked out at {time}. Evening's yours.
+
+== clock.screen.late
+- Clocked in at {time}. A little late. It happens.
+
+== clock.screen.early
+- Before 17:00. Clock out early?
+
+== clock.screen.hours
+- YOUR HOURS
+
+== clock.screen.today
+- Today: {hours} h
+
+== clock.screen.week
+- This week: {hours} h
+
+== clock.screen.day
+- {weekday}: {hours} h
+
+== clock.screen.offday
+- Day off. No clocking today.
+
+== clock.screen.leave
+- On leave today. Enjoy it.
+
+== clock.screen.sick
+- Off sick. Get well.
+
+== clock.screen.done
+- Shift done. See you tomorrow.
+
+== clock.screen.weekend
+- Shift done. See you Monday.

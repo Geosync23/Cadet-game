@@ -1,0 +1,18 @@
+@tradition spice-shelf-supper
+// Tuesdays 18:15, the mess. Host Brennan. Everyone brought one spice from home; she cooks with three, and the jars
+// line a shelf by the servery that grows over the weeks.
+== mail
+- Spice shelf supper tomorrow at {time}. I'm picking three jars from the shelf. Bring a guess, and an appetite.
+== ask
+- Spice shelf supper tonight. Brennan picked three jars. Guess whose.
+- Supper's a mystery tonight. Three spices off the shelf.
+== here
+- That's mine! That warm one. That's from home.   #warm
+- Is that smoky one yours? It's lovely.
+- Brennan never says whose jar it is. We have to guess.
+== thanks
+- Brennan sets out supper made with three jars from the spice shelf, and the whole mess tries to guess whose they are.   #warm
+== chatter
+- Spice shelf supper tonight. Hope she picks my jar.
+- That shelf's got half the galaxy on it now.   #warm
+- Bring a spice from home next leave. Brennan will use it.

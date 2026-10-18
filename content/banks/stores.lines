@@ -1,0 +1,51 @@
+@bank all
+// Head writer 0607: shelves, stock and the Wednesday delivery (the systems engineer's, plan-0607 "The right part from
+// the right shelf"). TEXTS, except stores.keeper (crew, a bubble) and stores.delivery (Yara Esposito; see
+// content/lines/esposito-yara.lines). {part} a part's name ("relay"), {shelf} a shelf's name ("Lights"), {n} {max}.
+
+== stores.fetch
+- Fetch a {part}: the {shelf} shelf.
+
+== stores.wrong
+- Not this one. {part}s live on the {shelf} shelf.
+
+== stores.shelf
+- {part}s: {n} of {max}
+
+== stores.low
+- low
+
+== stores.empty
+- none left: the machine shop can make one
+
+== stores.job.unload
+- Unload the Wednesday delivery
+
+== stores.unload.cart
+- Take a hover cart from the cart bay.
+
+== stores.unload.crates
+- Tap the crates in the cargo hold. The cart pulls them in.
+
+== stores.unload.shelf
+- Take the cart to main storage and tap any shelf.
+
+== stores.unload.again
+- {n} crates still in the hold. One more trip.
+
+== stores.unload.done
+- All unloaded. Every part is on its shelf.
+
+== stores.late
+- The Wednesday delivery is late. It should be in a day or two.
+
+== stores.keeper
+- Relays on Lights, filters on Filters. Easy.
+- Four crates. Lovely. My back says otherwise.   #funny
+- Mind the cart. It's got a mind of its own.
+- New stock! Best day of the week, this.
+- Count twice, shelve once. That's the rule.
+
+// the job board: a small job the crew took at once ({name} is their first name)
+== board.crew
+- {name} on it

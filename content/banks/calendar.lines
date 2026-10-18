@@ -1,0 +1,27 @@
+@bank all
+// Head writer 0607: the Calendar's words and the postcard (the traditions engineer's, plan-0607 "The Calendar").
+// TEXTS. {n} a count, {trad} a tradition's name.
+
+== cal.count
+- {n} traditions today
+
+== cal.one
+- 1 tradition today
+
+== cal.none
+- No traditions today. A quiet one.
+
+== cal.same
+- same time as {trad}
+
+== cal.member
+- You're a member
+
+== cal.title
+- The next 7 days
+
+== postcard.write
+- Write a postcard home
+
+== postcard.sent
+- Your card is in the box. It goes out with the next mail run.

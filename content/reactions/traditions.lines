@@ -30,7 +30,7 @@
 - Good to see you up at the observatory. It's better with more people.   #warm
 
 ? cue:tradition.running !cue:tradition.running.you
-- Running club went well. Nobody fell off the treadmill. A record.   #funny
+- Gym club went well. Nobody fell off the treadmill. A record.   #funny
 ? cue:tradition.running.you tier>=acquaintance
 - You came running! Your legs will hate you by lunch. That's how you know it worked.   #funny
 

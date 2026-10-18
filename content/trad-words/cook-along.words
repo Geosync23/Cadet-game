@@ -1,0 +1,18 @@
+@tradition cook-along
+// Thursdays 19:30, the mess, at the galley pass. Brennan's deputy teaches one simple dish; you stir, taste, and get
+// a portion. {host} is the deputy.
+== mail
+- Cook-along tomorrow at {time} at the galley pass. One simple dish. You stir, you taste, you eat it. Aprons provided.
+== ask
+- Cook-along tonight. You make it, you eat it.
+- Learn a dish at the galley pass later? It's easy.
+== here
+- Stir, don't splash. Well, splash a little.   #funny
+- Taste it. More salt? Less? You decide.
+- That's yours. You made that. Look at you.   #warm
+== thanks
+- At the galley pass, {host} shows you one simple dish. You stir, taste, and walk away with a portion you made yourself.   #warm
+== chatter
+- Cook-along later. Last week I made soup. Proper soup.
+- I can cook three things now. Three!   #funny
+- Brennan peeks in at cook-along. Pretends she's not.   #funny

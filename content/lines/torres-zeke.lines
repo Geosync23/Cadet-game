@@ -193,7 +193,7 @@
 - Turned in. A job done well nudges your reputation up.
 - Have a look. Device, then Record. It's under Reputation.
 - That's how you rank up. Better jobs. Trickier ones.   #warm
-- Lunch, then you lead the next one. I'll just follow.   #warm
+- Next one's yours to lead. I'll just follow.   #warm
 
 // ---- Writer 2: job 2 (Day 1 afternoon: you lead, he follows) and job 3 (Tuesday: Calder's solo job).
 // Gated by flag:walk.job2.<step> and flag:walk.job3.<step>, which the onboarding hook sets. 60 characters or fewer.
@@ -550,7 +550,7 @@
 ? trad:quiz
 - Quiz night. The music round's mine. Takahashi says it's theirs. We'll see.   #funny
 ? trad:running
-- Running club! I run like I talk. Fast, then out of breath, then fast again.   #funny
+- Gym club! I run like I talk. Fast, then out of breath, then fast again.   #funny
 ? trad:film
 - Film night! I knit right through it. I've never seen the end of anything.   #funny
 ? trad:market
@@ -591,3 +591,160 @@
 // mail d4-mail: Thursday 07:00, his day off
 ? flag:mail.d4-mail
 - On your own today | My day off. The board's yours. You're ready. Don't break anything big.
+
+// ---- Head writer 0607 (plan-0607): Zeke's new Day 1-2 lines. Onboarding engineer 3's flags (content/keys-0607.md);
+// every line under a flag plays IN ORDER, one flag key per line where the key ends in a number. Bubbles, 60 or fewer.
+== week1
+// Day 1: he points out a crew member at work (the systems engineer places one on Days 1 and 2)
+? flag:walk.crew.vent
+- That's Bea on the vent. You'll do those by Wednesday.
+- See her check the draught after? Everyone skips that.
+? flag:walk.crew.delivery
+- Delivery coming through. We share the small jobs out.
+- Some days you'll carry. Some days you'll get carried for.   #funny
+// Day 1 dinner: evenings are yours (the plan's words, split into bubbles)
+? flag:walk.dinner.eve.1
+- Evenings are yours. Most of us have a thing.
+? flag:walk.dinner.eve.2
+- I knit. Don't laugh. Pell reads.   #funny
+? flag:walk.dinner.eve.3
+- Find yours. There's no wrong answer.   #warm
+// Day 1 dinner: the laundry warning (onboarding engineer 4's keys, claude/arrival-0607b; the plan's words in two bubbles)
+? flag:beat.d1-clothes.1
+- One change of clothes? Laundry's past the junior washrooms.
+? flag:beat.d1-clothes.2
+- Do it tomorrow after shift, or you'll wear that Wednesday.   #funny
+// Day 2, just after shift: a nudge while the washers are free (17:00-18:00)
+? flag:beat.d2-laundry.1
+- Shift's done. Laundry now, while the washers are free.
+? flag:beat.d2-laundry.2
+- Load it, leave it, go and eat. It'll be done.
+// he offers to teach you to knit (it's his hobby)
+? flag:walk.knit.1
+- Want to learn to knit? I've got spare needles.
+? flag:walk.knit.2
+- I'll teach you. Kovac taught me. She despairs.   #funny
+? flag:walk.knit.3
+- Knit and natter, Tuesdays. Bring nothing. I've got wool.   #warm
+
+// ---- Head writer 0607: ZEKE THE TRAINER (the user approved the pitch, with additions, via lead 10). Onboarding
+// engineer 3's keys (0.42.31): while he's with you on Day 1, each step of any job adds walk.train.<job>.<step> after
+// the slot lines. <job>: the board's kind (lamp, vent, calibrate, delivery, fault, filter, seal; a cart run 'cart', an
+// inspection round 'round'). <step>: take, fetch, make, at, done, turnin. Every line plays IN ORDER; 1-2 a step.
+== week1
+? flag:walk.train.lamp.take
+- Lamps. Easiest job going, and everyone sees it.
+? flag:walk.train.lamp.fetch
+- Lamps live on the Lights shelf. Funny, that.   #funny
+? flag:walk.train.lamp.at
+- Power off at the fitting first. Then twist, don't pull.
+? flag:walk.train.lamp.done
+- Light's back. Nobody will thank you. That's how you know.   #funny
+? flag:walk.train.vent.take
+- Vents. Fluff, mostly. And the odd sock. Don't ask.   #funny
+? flag:walk.train.vent.at
+- Brush it out, then feel for the draught.
+? flag:walk.train.vent.done
+- Feel that? Air moving. Someone sleeps better tonight.   #warm
+? flag:walk.train.calibrate.take
+- Calibrating. Machines drift. We nudge them back.
+? flag:walk.train.calibrate.at
+- It's just listening. Nudge it till the hum goes flat.
+? flag:walk.train.calibrate.done
+- Hear that? Steady. That's a happy machine.
+? flag:walk.train.delivery.take
+- Deliveries are walks with a box. Say hello on the way.
+? flag:walk.train.delivery.fetch
+- Pick it up from storage. Label says where it's going.
+? flag:walk.train.delivery.done
+- Delivered. Someone's day just got easier.
+? flag:walk.train.round.take
+- Inspection round. Look, listen, sniff. Note anything odd.
+? flag:walk.train.round.at
+- Smell that? Nothing. Good. Nothing's the best smell.   #funny
+? flag:walk.train.round.done
+- Round done. Spotting it early beats fixing it late.
+? flag:walk.train.fault.take
+- Small fault. Could be anything. That's the fun part.
+? flag:walk.train.fault.fetch
+- Each part lives on one shelf. The card says which.
+- Tap a shelf to see what's left. Low ones get marked.
+? flag:walk.train.fault.make
+- Shelf empty? The shop makes it. The stock comes Wednesdays.
+? flag:walk.train.fault.at
+- Read the panel first. It tells you what's sulking.
+- Power off, cover off, then look. Always that order.
+? flag:walk.train.fault.done
+- Run it once and listen. Quiet means happy.
+? flag:walk.train.fault.turnin
+- Ship health ticks up when we fix things. Board on Five.
+? flag:walk.train.cart.take
+- Hover cart. It floats. It won't float into walls. Mostly.   #funny
+? flag:walk.train.cart.done
+- Park it in the bay after. Somebody always forgets.
+? flag:walk.train.filter.take
+- Filters are officer work, really. Watch and learn.
+? flag:walk.train.seal.take
+- Pressure seals. Officer job. One day, that's you.   #warm
+
+// Walk and talk (onboarding 0.42.31's walk.follow.<n>): while he walks with you between jobs on Day 1, one now and
+// then, IN ORDER, never repeated. Mixed on purpose: how things work, life aboard, what's ahead (rank, events: teased,
+// never promised), and the traditions.
+? flag:walk.follow.1
+- Right. Walk and talk. That's half this job, honestly.
+? flag:walk.follow.2
+- The board fills itself. Machines wear, faults pop up.
+? flag:walk.follow.3
+- Small jobs stay up for you. The crew take the rest.
+? flag:walk.follow.4
+- Shift's eight till five. Clock in by the tea corner.
+? flag:walk.follow.5
+- Forget to clock out and it does it at five. It's kind.   #funny
+? flag:walk.follow.6
+- Dinner's from five, in the mess. Brennan notices skippers.   #funny
+? flag:walk.follow.7
+- Keep an eye on your needs. Eat, sleep, wash. Have fun.
+? flag:walk.follow.8
+- Run yourself down and you work slower. Trust me.   #funny
+? flag:walk.follow.9
+- Weekends are yours. Saturday and Sunday. No board.
+? flag:walk.follow.10
+- Bunks for juniors. Officers get a cabin. A door. Imagine.   #funny
+? flag:walk.follow.11
+- Do well and Calder signs you up for a qualifying job.
+? flag:walk.follow.12
+- Pass it and you're an officer. New systems. Air, water.
+? flag:walk.follow.13
+- Faults that start upstream. You trace them back. Fun.
+? flag:walk.follow.14
+- Engines are the top. That's years away. Dream big, though.   #warm
+? flag:walk.follow.15
+- Most days are like this. Quiet, steady, tea at half ten.
+? flag:walk.follow.16
+- But now and then the ship gets lively. You'll see.
+? flag:walk.follow.17
+- When the lights flicker on every deck, it's all hands.
+? flag:walk.follow.18
+- Space does odd things. The old hands have stories.
+? flag:walk.follow.19
+- Ask Calder about storms. Actually, wait till she asks you.   #funny
+? flag:walk.follow.20
+- Always something on in the evening. Check your Calendar.
+? flag:walk.follow.21
+- After your first shift there's the beam. You'll see.   #warm
+? flag:walk.follow.22
+- Tuesday's Tiles or my knitting circle. No pressure. Knit.   #funny
+? flag:walk.follow.23
+- Lap of the Wren's Mondays. Just walking. My kind of sport.   #funny
+? flag:walk.follow.24
+- Everyone here's friendly. Say hello. Talk a while.
+? flag:walk.follow.25
+- Your device has the lot. Jobs, Mail, Calendar, people.
+? flag:walk.follow.26
+- Your Record keeps what you've done. It adds up, honestly.
+? flag:walk.follow.27
+- Get stuck, ask anyone. Asking isn't failing.   #warm
+? flag:walk.follow.28
+- You're quicker than I was. Don't let it go to your head.   #funny
+? flag:walk.follow.29
+- You're doing well, you know. Really well.   #warm

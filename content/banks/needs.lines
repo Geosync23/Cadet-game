@@ -1,0 +1,52 @@
+@bank all
+// Head writer 0607: the low-need pop-ups (player engineer 6's, the user's note: plain words, one per need, shown once
+// as the need crosses the low line, never stacked or over a card). TEXTS: shown by the game, said by nobody.
+// Variant 0 is the main one; the others are spares if the engineer wants to vary them. Plain and warm, a few words.
+
+== need.low.bathroom
+- You need to pee.
+- You need the loo.
+- Time to find a toilet.
+
+== need.low.hunger
+- You're hungry.
+- Your stomach's rumbling. Time to eat.
+- You could do with some food.
+
+== need.low.energy
+- You're tired.
+- You're flagging. A rest would help.
+- Your eyes are heavy. Bed soon?
+
+== need.low.hygiene
+- You could do with a wash.
+- You feel grubby. Time for a shower.
+- A wash would feel good about now.
+
+== need.low.fitness
+- You've been sitting a lot. Stretch your legs.
+- You feel stiff. The gym's on Deck 3.
+- You could do with some exercise.
+
+== need.low.social
+- You're lonely. Go and find someone.
+- You miss people. Say hello to someone.
+- You could do with some company.
+
+== need.low.leisure
+- You could do with some time to yourself.
+- You're restless. Try a hobby.
+- All work lately. Do something fun.
+
+// the needs strip and the Needs app
+== need.label.leisure
+- Leisure
+
+== leisure.high
+- In good spirits
+
+== leisure.low
+- Restless
+
+== leisure.nudge
+- You could do with some time to yourself. A hobby, a tradition, a game of Tiles.

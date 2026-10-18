@@ -1,0 +1,18 @@
+@tradition tap-night
+// Fridays 20:00, the bow lounge bar. The bartender's Friday: a drink of the week and a busy bar. Same time as the music
+// jam on Deck 4.
+== mail
+- Tap night tomorrow at {time} in the bow lounge. New drink of the week. Bring a friend and a guess what's in it.
+== ask
+- Tap night at the bar. There's a drink of the week.
+- Friday at the bar? Or the jam? Can't do both.
+== here
+- What's in it? Don't tell me. Yes, tell me.   #funny
+- Same again? Go on, it's Friday.
+- Best seats are by the window. Grab one.
+== thanks
+- The bow lounge bar is busy and bright. You try the drink of the week and lean on the counter with everyone else.
+== chatter
+- Tap night later. Last week's drink was purple.   #funny
+- Friday at the bar. Best way to end a week.
+- Jam or tap night? I'm doing both. Somehow.   #funny
