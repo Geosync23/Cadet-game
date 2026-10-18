@@ -241,7 +241,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.42.41
+   STARSHIP CADET: CSV Wren                           build 0.42.42
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7591,7 +7591,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.42.41';                           // keep in step with the header's build line
+const GAME_BUILD = '0.42.42';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -31519,22 +31519,23 @@ function clothesGoal(to) {
 // when(C): still wanted; seek: section 20's socialSeekAsk brings him to you in the window; then: after the last line.
 const CLOTHES_BEATS = [
   { id: 'd1-dinner-zeke', day: 1, at: 18 * 60, till: 20 * 60, who: INTRO_ESCORT, where: { deck: 3, room: 'Mess hall' }, when: () => true,
-    keys: C => ['walk.dinner.eve', ...(C.kit ? [] : ['walk.dinner.laundry'])],
+    keys: C => ['walk.dinner.eve', ...(C.kit ? [] : [['beat.d1-clothes', 'walk.dinner.laundry']])],   // the head writer's 5b57aa1 names first
     lines: C => ['Evenings are yours. Most of us have a thing. I knit, don\'t laugh. Pell reads. Find yours.',
       ...(C.kit ? [] : ['One change of clothes? The laundry\'s past the washrooms in the junior wing.', 'Do it tomorrow after shift, or you\'ll be wearing that on Wednesday.'])] },
   { id: 'd2-laundry', day: 2, at: 16 * 60 + 45, till: 18 * 60, who: INTRO_ESCORT, where: 'seek', when: C => !C.kit && !(C.hamper && C.hamper.state !== 'dirty'),
-    keys: () => ['walk.laundry'], lines: () => ['Laundry today, remember? After shift\'s quietest.'] },
+    keys: () => [['beat.d2-laundry', 'walk.laundry']], lines: () => ['Laundry today, remember? After shift\'s quietest.'] },
   { id: 'd2-knit', day: 2, at: 18 * 60 + 30, till: 21 * 60, who: INTRO_ESCORT, where: 'seek', seek: true, when: () => typeof hobbyHas !== 'function' || !hobbyHas('knit'),
     keys: () => ['walk.knit'], lines: () => ['Want to learn to knit? I\'ve got spare needles.'],
     then: () => { if (typeof hobbyGive === 'function' && hobbyGive('knit')) toast('Knitting', 'Zeke gives you a pair of spare needles and some wool. Knitting is one of your hobbies now: sit down and tap Hobby.'); } },
 ];
 function clothesBeatLines(b, C) {                        // the writers' lines for a beat, in order, or the stand-ins
   const out = [];
-  for (const k of b.keys(C)) {
-    const one = typeof introWriterLines === 'function' ? introWriterLines(k, b.who) : null;
-    if (one) { out.push(...one); continue; }
-    for (let n = 1; n <= 12; n++) { const l = typeof introWriterLines === 'function' ? introWriterLines(k + '.' + n, b.who) : null; if (!l) break; out.push(...l); }
-  }
+  const said = k => {                                    // one key: its exact lines, else k.1, k.2, ... in order
+    const W = f => typeof introWriterLines === 'function' ? introWriterLines(f, b.who) : null, got = W(k) || [];
+    for (let n = 1; !got.length || n <= 12; n++) { const l = W(k + '.' + n); if (!l) break; got.push(...l); }
+    return got;
+  };
+  for (const k of b.keys(C)) { for (const alt of [].concat(k)) { const l = said(alt); if (l.length) { out.push(...l); break; } } }   // an array: the first name that has lines
   return out.length ? out : b.lines(C).slice();
 }
 let CLOTHES_BEAT = null;
