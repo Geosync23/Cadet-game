@@ -18,3 +18,4 @@ Built on claude/cand-0606 (from 0.60.6a c8685cf). One line per finished check (c
 - trial (PE6 a0d4b43, deck 55fca8d, sys f351cc3, social d3d5b4d, trad 1848e5f, ob4 5ce084d, writer 5578e80; all reviewed): smoke, interactions, tiles, device, day 1 OK; still FAIL social Stop-points (social follow-up) and food 'no queue in a rush' (traditions)
 - trial with social 9c8ea6c (0.36.91) + writer 0cc4cdf: social_check OK (pair fixed); day_check day 3 FAIL: deck 5 kovac-zainab 17:00 stuck 13.4 ship min (bisecting)
 - state ~06:05: reviewed tips PE6 4bd606c, deck 55fca8d, systems f351cc3, social 9c8ea6c, trad 5de2087, ob4 5ce084d, writer 0cc4cdf; day 3 kovac-zainab stuck with DA4; waiting systems 0.33.41/42 + ob4 Day 3
+- trial with PE6 4bd606c + trad 5de2087 (the committed plans/build-master/build0607.sh): clean, bake 8297, NAMES OK; verify_merge's 12 'missing' all rewrites by later pieces (new one: the HOBBIES filter, rewritten by PE6 0.28.65's gardening)
