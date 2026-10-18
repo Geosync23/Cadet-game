@@ -598,7 +598,7 @@
 // Day 1: he points out a crew member at work (the systems engineer places one on Days 1 and 2)
 ? flag:walk.crew.vent
 - That's Bea on the vent. You'll do those by Wednesday.
-- See how she checks the draught after? That's the bit people skip.
+- See her check the draught after? Everyone skips that.
 ? flag:walk.crew.delivery
 - Delivery coming through. We share the small jobs out.
 - Some days you'll carry. Some days you'll get carried for.   #funny
@@ -629,28 +629,106 @@
 ? flag:walk.knit.2
 - I'll teach you. Kovac taught me. She despairs.   #funny
 ? flag:walk.knit.3
-- Knit and natter, Tuesday nights. Bring nothing. I've got wool.   #warm
-// walking with you between jobs on Day 1 (he stays with you now): in order, never repeated
-? flag:walk.follow.1
-- Right. What's next? Your pick.
-? flag:walk.follow.2
-- Board's the place. Grab whatever looks friendly.
-? flag:walk.follow.3
+- Knit and natter, Tuesdays. Bring nothing. I've got wool.   #warm
+
+// ---- Head writer 0607: ZEKE THE TRAINER (the user approved the pitch, with additions, via lead 10). Onboarding
+// engineer 3's keys: walk.job.<step>.<kind> plays right after walk.job.<step> when the job's machine kind matches
+// (Day 1: 'lights', a junction box, in the morning; 'washer' in the afternoon). Same for job2 and job3. Every line
+// plays IN ORDER; a step stays at about 6 lines with the base lines above.
+== week1
+? flag:walk.job.take.lights
+- Lights first. Easiest job going, and everyone sees it.
+- Junction box. It feeds every lamp in a corridor.
+? flag:walk.job.fetch.lights
+- Lights shelf. Each part lives on one shelf. Always.
+- Tap a shelf to see what's left. Low ones get marked.
+? flag:walk.job.make.lights
+- Shelf was out? The shop makes it. Takes a minute.
+? flag:walk.job.panel.lights
+- Power off at the box first. Then the cover.
+- Old relay out, new one in. Push till it seats.
+? flag:walk.job.done.lights
+- Lights back. Nobody will thank you. That's how you know.   #funny
+? flag:walk.job.turnin.lights
+- Ship health ticks up when we fix things. Board on Five.
+? flag:walk.job2.take.washer
+- Washer. Laundry's on Four. You'll be there tomorrow anyway.   #funny
+? flag:walk.job2.fetch.washer
+- Plumbing shelf for washer bits. Hoses, seals, the lot.
+? flag:walk.job2.panel.washer
+- Water off before you open her up. Ask me how I know.   #funny
+- Check the seal. Drips start small, then they're floods.
+? flag:walk.job2.done.washer
+- Run it empty once. Listen for the thump. No thump? Done.
+? flag:walk.job2.turnin.washer
+- Someone gets clean socks tonight. Thanks to you.   #warm
+? flag:walk.job.take.washer
+- Washer. Laundry's on Four. Water off first, always.
+? flag:walk.job.panel.washer
+- Seal first. A small drip today is a flood next week.
+? flag:walk.job2.take.lights
+- Lights again. You know this one. Go on, lead.
+? flag:walk.job2.panel.lights
+- Power off first. You remembered. I saw.   #funny
+
+// Walk and talk: while you walk with him between job steps and between jobs on Day 1 (onboarding's walk.talk.<n>).
+// IN ORDER, one line a key, never repeated; whatever's left carries on next walk. Mixed on purpose: how things work,
+// life aboard, what's ahead (rank, events: teased, never promised), and the traditions. Replaces walk.follow.
+? flag:walk.talk.1
+- Right. Walk and talk. That's half this job, honestly.
+? flag:walk.talk.2
+- The board fills itself. Machines wear, faults pop up.
+? flag:walk.talk.3
+- Small jobs stay up for you. The crew take the rest.
+? flag:walk.talk.4
+- Shift's eight till five. Clock in by the tea corner.
+? flag:walk.talk.5
+- Forget to clock out and it does it at five. It's kind.   #funny
+? flag:walk.talk.6
+- Lunch is in the mess. Brennan notices if you skip it.
+? flag:walk.talk.7
+- Keep an eye on your needs. Eat, sleep, wash. Have fun.
+? flag:walk.talk.8
+- Run yourself down and you work slower. Ask me how I know.   #funny
+? flag:walk.talk.9
+- Weekends are yours. Saturday and Sunday. No board.
+? flag:walk.talk.10
+- Bunks for juniors. Officers get a cabin. A door. Imagine.   #funny
+? flag:walk.talk.11
+- Do well and Calder signs you up for a qualifying job.
+? flag:walk.talk.12
+- Pass it and you're an officer. New systems. Air, water.
+? flag:walk.talk.13
+- Faults that start upstream. You trace them back. Fun.
+? flag:walk.talk.14
+- Engines are the top. That's years away. Dream big, though.   #warm
+? flag:walk.talk.15
+- Most days are like this. Quiet, steady, tea at half ten.
+? flag:walk.talk.16
+- But now and then the ship gets lively. You'll see.
+? flag:walk.talk.17
+- When the lights flicker on every deck, it's all hands.
+? flag:walk.talk.18
+- Space does odd things. The old hands have stories.
+? flag:walk.talk.19
+- Ask Calder about storms. Actually, wait till she asks you.   #funny
+? flag:walk.talk.20
+- Always something on in the evening. Check your Calendar.
+? flag:walk.talk.21
+- Tonight there's the beam. You'll see. Don't run off at five.   #warm
+? flag:walk.talk.22
+- Tuesday's Tiles or my knitting circle. No pressure. Knit.   #funny
+? flag:walk.talk.23
+- Lap of the Wren's Mondays. Just walking. My kind of sport.   #funny
+? flag:walk.talk.24
+- Everyone here's friendly. Say hello. Talk a while.
+? flag:walk.talk.25
+- Your device has the lot. Jobs, Mail, Calendar, people.
+? flag:walk.talk.26
+- Your Record keeps what you've done. It adds up, honestly.
+? flag:walk.talk.27
+- Get stuck, ask anyone. Asking isn't failing.   #warm
+? flag:walk.talk.28
 - You're quicker than I was. Don't let it go to your head.   #funny
-? flag:walk.follow.4
-- Tea break soon. Half ten. Don't forget.
-? flag:walk.follow.5
-- I like this bit. Walking. Nobody can give you a job.   #funny
-? flag:walk.follow.6
-- After lunch you lead. I'll be the one humming.
-? flag:walk.follow.7
+? flag:walk.talk.29
 - Nearly home time. You've done well today.   #warm
-// Name on the beam (first Monday, 17:05, the Works bay cross beam): Zeke hands you the pen. In order.
-? flag:trad.beam.1
-- Right. Everyone stay put. New hand's turn.
-? flag:trad.beam.2
-- Here. The pen. It's the same one we all used.   #warm
-? flag:trad.beam.3
-- Anywhere you like. Next to mine, if you want.   #warm
-? flag:trad.beam.4
-- There. You're part of the bay now. Properly.   #warm
