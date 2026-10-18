@@ -252,7 +252,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.80.7
+   STARSHIP CADET: CSV Wren                           build 0.80.8
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7883,8 +7883,8 @@ function recFloor(g, kind, i, j, x, y, PX) {
   const hall = (a, b) => { const r2 = roomAt(a, b); return r2 && ROOMS[r2].hall; }, sameRoom = (a, b) => roomAt(a, b) === roomAt(i, j);
   const edge = (a, b) => ROOMS[roomAt(i, j)].hall ? !hall(a, b) : !sameRoom(a, b);   // a stripe where the floor meets a wall
   const fleck = (n, cs) => { for (let k = 0; k < n; k++) { g.fillStyle = cs[k % cs.length]; g.fillRect(x + recHash(i, j, k) * (PX - 2), y + recHash(i, j, k + 31) * (PX - 2), 2, 2); } };
-  if (kind === 'sport') {                                // charcoal sports floor; the neon stripes, cyan to port and magenta to starboard
-    g.fillStyle = '#2a2e35'; g.fillRect(x, y, PX, PX);
+  if (kind === 'sport' || kind === 'concourse') {        // charcoal sports floor (the concourse: bright teal squares, 0.80.8); the neon stripes, cyan to port and magenta to starboard
+    g.fillStyle = kind === 'concourse' ? ((Math.floor(i / 2) + Math.floor(j / 2)) % 2 ? '#1d6f78' : '#18626b') : '#2a2e35'; g.fillRect(x, y, PX, PX);
     fleck(8, ['rgba(80,230,255,.16)', 'rgba(255,90,200,.14)', 'rgba(220,225,230,.12)']);
     if (i % 4 === 0) { g.fillStyle = 'rgba(0,0,0,.2)'; g.fillRect(x, y, 2, PX); }
     if (edge(i, j - 1)) { g.fillStyle = 'rgba(80,230,255,.9)'; g.fillRect(x, y + 9, PX, 4); g.fillStyle = 'rgba(80,230,255,.25)'; g.fillRect(x, y + 6, PX, 10); }
@@ -7915,7 +7915,7 @@ function recFloor(g, kind, i, j, x, y, PX) {
     g.fillStyle = '#5d666e'; g.fillRect(x + 2, y + 2, PX - 4, PX - 4);
     g.fillStyle = 'rgba(0,0,0,.08)'; for (let a = 10; a < PX - 8; a += 14) for (let b = 10; b < PX - 8; b += 14) g.fillRect(x + a, y + b, 6, 2);
   }
-  if (kind !== 'sport' && !sameRoom(i, j - 1) && !hall(i, j - 1) && (kind === 'pooltile' || kind === 'pad')) { g.fillStyle = 'rgba(80,230,255,.5)'; g.fillRect(x, y + 4, PX, 3); }   // the cyan stripe runs on into the port rooms
+  if (kind !== 'sport' && kind !== 'concourse' && !sameRoom(i, j - 1) && !hall(i, j - 1) && (kind === 'pooltile' || kind === 'pad')) { g.fillStyle = 'rgba(80,230,255,.5)'; g.fillRect(x, y + 4, PX, 3); }   // the cyan stripe runs on into the port rooms
 }
 // the auditorium's 76 seats (0.80.1): six raked rows (columns 35-40, back to front, each step 0.2 lower), three blocks
 // with two aisles at rows 5 and 12. Pure numbers, so the seats' places can be data like every deck's
@@ -8156,7 +8156,7 @@ Object.assign(KIT, {
     box(.9, .1, R_.iz0 - R_.z0 - .04, RK.steel, 11.5, .26, (R_.z0 + R_.iz0) / 2, g).rotation.z = .12;
     // the kayak dock on the inboard bank by the doors, and three kayaks out on the water
     box(2.4, .08, .9, RK.dock, 10.4, .5, R_.z1 - .3, g); for (let k = 0; k < 8; k++) box(.02, .012, .86, RK.dockDark, 9.3 + k * .3, .545, R_.z1 - .3, g);
-    for (const [x, z, c, a] of [[6.0, 1.2, 0, .04], [9.2, 1.4, 2, -.05], [7.5, 4.85, 3, .02]]) recKayak(g, x, .37, z, Math.PI / 2 + a, RK.kayak[c]);
+    recKayak(g, 10.4, .66, R_.z1 - .3, Math.PI / 2 + .03, RK.kayak[3]);   // the green kayak up on the dock (0.80.8, the user's: no kayaks left in the water; one is on it only while someone paddles)
     return { w: .1, d: .1, noBlock: true };
   },
   // the kayak rack on the bow end wall: four kayaks on two arms, red, yellow, blue and green, paddles alongside
@@ -8205,6 +8205,80 @@ Object.assign(KIT, {
     return { w: .5, d: .4 };
   },
 });
+// the concourse's showpieces (0.80.8, the user's: "not nearly fun looking enough"): the big REC DEC sign on a gantry
+// across the concourse by the lift, bunting, murals, a signpost and a trophy case. Canvases drawn per visit, no R()
+Object.assign(KIT, {
+  recBigSign(g, o) {
+    const half = o.span / 2, y = H - 1.0;
+    for (const z of [-half, half]) { box(.12, y + .55, .12, RK.black, 0, (y + .55) / 2, z, g); box(.3, .04, .3, RK.black, 0, .02, z, g); }
+    box(.14, .1, o.span, RK.black, 0, y + .55, 0, g);
+    const t = tex(1024, 300, (c, w, h) => {
+      c.fillStyle = '#120b1c'; c.fillRect(0, 0, w, h); c.strokeStyle = '#50e6ff'; c.lineWidth = 8; c.shadowColor = '#50e6ff'; c.shadowBlur = 24; c.strokeRect(16, 16, w - 32, h - 32);
+      c.textAlign = 'center'; c.font = '900 168px system-ui,sans-serif'; c.shadowColor = '#ff4fd8'; c.shadowBlur = 40;
+      c.lineWidth = 10; c.strokeStyle = '#ff4fd8'; c.strokeText('REC DEC', w / 2, 192); c.fillStyle = '#ffe3fa'; c.fillText('REC DEC', w / 2, 192);
+      c.shadowBlur = 16; c.shadowColor = '#50e6ff'; c.fillStyle = '#bff6ff'; c.font = '700 34px system-ui,sans-serif'; c.fillText('THE RECREATION DECK  ·  OPEN 06:00 TO MIDNIGHT', w / 2, 258);
+    });
+    const m = new THREE.MeshBasicMaterial({ map: t, toneMapped: false });
+    for (const s of [1, -1]) { const p = new THREE.Mesh(new THREE.PlaneGeometry(o.span - .3, (o.span - .3) * 300 / 1024), m); p.rotation.y = s * Math.PI / 2; p.position.set(s * .06, y, 0); g.add(p); }
+    box(.08, (o.span - .2) * 300 / 1024, o.span - .2, RK.black, 0, y, 0, g);
+    return { w: .2, d: o.span, noBlock: true };
+  },
+  // a string of pennants across the concourse, four colours, sagging a little
+  recBunting(g, o) {
+    const n = 11, half = o.span / 2, cs = [RK.flagA, RK.flagB, RK.flagC, RK.flagD], tri = new THREE.Shape(); tri.moveTo(-.11, 0); tri.lineTo(.11, 0); tri.lineTo(0, -.24); tri.closePath();
+    const geo = new THREE.ShapeGeometry(tri);
+    for (let k = 0; k < n; k++) { const u = (k + .5) / n, z = -half + o.span * u, y = H - .55 - .35 * 4 * u * (1 - u); const f = new THREE.Mesh(geo, cs[k % 4]); f.position.set(0, y, z); f.rotation.y = Math.PI / 2; g.add(f); }
+    const line = box(.012, .012, o.span, RK.black, 0, H - .55 - .17, 0, g); line.scale.y = 1;
+    return { w: .1, d: o.span, noBlock: true };
+  },
+  recSignpost(g) {
+    box(.08, 2.3, .08, RK.black, 0, 1.15, 0, g);
+    [['POOL  ·  AUDITORIUM  →', '#50e6ff'], ['←  RIVERS  ·  WALL  ·  COURT', '#ff9a3c'], ['FLOAT ROOM  ↓', '#ff6fe0']].forEach(([txt, c_], k) => {
+      const t = tex(512, 80, (c, w, h) => { c.fillStyle = '#16181c'; c.fillRect(0, 0, w, h); c.fillStyle = c_; c.fillRect(0, 0, 10, h); c.fillStyle = '#f4f4f0'; c.font = '700 34px system-ui,sans-serif'; c.textBaseline = 'middle'; c.fillText(txt, 28, h / 2 + 2); });
+      const p = new THREE.Mesh(new THREE.BoxGeometry(1.25, .2, .04), [RK.black, RK.black, RK.black, RK.black, new THREE.MeshBasicMaterial({ map: t, toneMapped: false }), RK.black]); p.position.set(.1, 2.0 - k * .28, .02); g.add(p);
+    });
+    return { w: .3, d: .3, noBlock: true };
+  },
+  recTrophyCase(g, o) {
+    const w = o.w || 1.4;
+    box(w, .9, .45, RK.black, 0, .45, 0, g); box(w, .06, .47, RK.gold, 0, .93, 0, g);
+    box(w, .9, .04, RK.black, 0, 1.41, -.2, g);   // the back panel
+    for (let k = 0; k < 3; k++) { const x = -w / 2 + w * (k + .5) / 3; cyl(.05, .03, .08, RK.gold, x, 1.0, .05, g, 10); cyl(.09 - k * .015, .04, .2 + k * .04, RK.gold, x, 1.14 + k * .02, .05, g, 12); }
+    box(w + .02, .02, .47, RK.gold, 0, 1.87, 0, g);
+    return { w, d: .47 };
+  },
+});
+Object.assign(WALL_KIT, {
+  // a bold painted mural: diagonal bands in the deck's colours and the five things you can do here
+  recMural(g, o) {
+    const W_ = o.w || 1.9, Hh = W_ * .5;
+    const t = tex(512, 256, (c, w, h) => {
+      const cs = ['#1fa39b', '#ff6f61', '#ffd23f', '#50e6ff', '#ff4fd8', '#2a1d45'];
+      c.fillStyle = '#2a1d45'; c.fillRect(0, 0, w, h);
+      for (let k = -2; k < 9; k++) { c.fillStyle = cs[(k + 6) % 5]; c.beginPath(); c.moveTo(k * 70, h); c.lineTo(k * 70 + 40, h); c.lineTo(k * 70 + 40 + h * .6, 0); c.lineTo(k * 70 + h * .6, 0); c.closePath(); c.fill(); }
+      c.fillStyle = 'rgba(18,11,28,.72)'; c.fillRect(0, h * .3, w, h * .4);
+      c.textAlign = 'center'; c.fillStyle = '#ffffff'; c.font = '900 40px system-ui,sans-serif'; c.fillText(o.text || 'SWIM · PADDLE · CLIMB', w / 2, h * .5 + 14);
+    });
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(W_, Hh), new THREE.MeshBasicMaterial({ map: t, toneMapped: false })); p.position.set(o.off || 0, o.y || 2.45, .03); g.add(p);
+  },
+});
+// the concourse's floor art (0.80.8): running lanes in coral and white, and a big REC DEC roundel aft and a star forward
+function recFloorArt(g, PX) {
+  const P = v => v * PX;
+  for (const [x0, x1] of [[4, 17], [23, 30]]) {
+    g.fillStyle = 'rgba(255,111,97,.75)'; for (const z of [8, 10]) g.fillRect(P(x0), P(z) - 3, P(x1 - x0), 6);
+    g.fillStyle = 'rgba(255,255,255,.55)'; for (let x = x0; x < x1; x += .8) g.fillRect(P(x), P(9) - 2, P(.45), 4);
+    g.fillStyle = 'rgba(255,210,63,.6)'; for (let x = x0 + .4; x < x1 - .5; x += 2) { g.beginPath(); g.moveTo(P(x), P(7.45)); g.lineTo(P(x + .35), P(7.6)); g.lineTo(P(x), P(7.75)); g.closePath(); g.fill(); }   // chevrons toward the bow
+  }
+  const roundel = (cx, cz, r) => {
+    g.beginPath(); g.arc(P(cx), P(cz), P(r), 0, Math.PI * 2); g.fillStyle = '#ff6f61'; g.fill();
+    g.beginPath(); g.arc(P(cx), P(cz), P(r * .8), 0, Math.PI * 2); g.fillStyle = '#2a1d45'; g.fill();
+    g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#ffd23f'; g.font = `900 ${Math.round(P(.42))}px system-ui,sans-serif`; g.fillText('REC DEC', P(cx), P(cz));
+  };
+  roundel(10.5, 9, 1.3);
+  const star = (cx, cz, r) => { g.beginPath(); for (let k = 0; k < 10; k++) { const a = -Math.PI / 2 + k * Math.PI / 5, rr = k % 2 ? r * .45 : r; g.lineTo(P(cx + Math.cos(a) * rr), P(cz + Math.sin(a) * rr)); } g.closePath(); g.fillStyle = '#ffd23f'; g.fill(); g.lineWidth = 6; g.strokeStyle = '#ff4fd8'; g.stroke(); };
+  star(26.5, 9, 1.1);
+}
 DECKS[7] = {
   num: 7, name: 'Recreation', seed: 70771, tall: 1.3, playerOnly: true, open: [6, 24],
   blurb: 'Auditorium, court, pool, rivers', arrive: 'The concourse runs stern to bow: the rivers and the court aft, the pool and the auditorium forward.',
@@ -8258,9 +8332,9 @@ DECKS[7] = {
   plates: [['h,21,6', 's', 'Recreation Deck'], ['h,22,4', 's', 'Changing rooms'], ['h,16,7', 's', 'River hall'], ['h,5,11', 'n', 'Stands'],
     ['h,30,7', 's', 'Pool gallery'], ['h,25,11', 'n', 'Washroom'], ['h,19,12', 'n', 'Float room']],
   rooms: {
-    '=': { name: 'Concourse', floor: 'sport', hall: true, rec: true },
-    '+': { name: 'Lift lobby', floor: 'sport', hall: true, rec: true },
-    f: { name: 'Foyer', floor: 'sport', hall: true, rec: true },
+    '=': { name: 'Concourse', floor: 'concourse', hall: true, rec: true },
+    '+': { name: 'Lift lobby', floor: 'concourse', hall: true, rec: true },
+    f: { name: 'Foyer', floor: 'concourse', hall: true, rec: true },
     '@': { name: 'Main lift', floor: 'lift' },
     Y: { name: 'Spine trunks', floor: 'grate', spine: true }, Z: { name: 'Spine ladder', floor: 'grate', spine: true },
     A: { name: 'Auditorium', floor: 'violet', rec: true },
@@ -8283,6 +8357,7 @@ DECKS[7] = {
     'h,20,11': { t: 'Spine ladder', x: 'The maintenance ladder, up to Quarters and down to Operations, through the rec dec on the way. Tier 2 access.' },
   },
   hull: { sternX: 1, stern: 2, bowFrom: 34, bowLen: 11.6, byFace: true },
+  floorArt: (g, PX) => recFloorArt(g, PX),   // the concourse's lanes and roundels (0.80.8)
   service: [{ key: 'v,4,8', tier: 2 }, { key: 'v,4,15', tier: 2 }, { key: 'v,32,3', tier: 1 }, { key: 'h,31,11', tier: 1 }, { key: 'v,34,11', tier: 1 }],
   machines: [],                                          // TODO (phase 2, the systems engineer): the plan's section 6 machines
   // the auditorium's seats (0.80.1): reached from the aisle beside their row; a type no crew code knows, so they stay the player's
@@ -8311,6 +8386,19 @@ DECKS[7] = {
     for (const z of [1.9, 3.1, 4.3, 5.5]) place('u', 'toiletStall', 2.45, z, 'e');
     place('u', 'basinCounter', .38, 3.5, 'w', { w: 2.6, it: IT('Basins', 'A long row of basins for the interval queue.') });
     // the concourse: a towel bin by the lobby (0.80.2: its two benches went; the stands fill that glass now)
+    // 0.80.8 (the user's: livelier, busier): the REC DEC gantry sign by the lift, bunting, murals, beanbags, plants, benches,
+    // a water station and a drinks fridge, a trophy case, a signpost; all along the edges, clear of every door and the lanes' middle
+    place('=', 'recBigSign', 12.3, 2.0, 'n', { span: 3.8, it: IT('REC DEC', 'A gantry across the concourse with REC DEC in pink neon, two storeys up. You can see it the moment the lift doors open.') });
+    for (const x of [3.0, 8.5, 21.5]) place('=', 'recBunting', x, 2.0, 'n', { span: 3.8 });
+    for (const [x, z, f] of [[1.5, .5, RK.padA], [2.6, .6, RK.kayak[1]], [19.5, 4.5, RK.kayak[2]], [20.5, 4.5, RK.padB]]) place('=', 'beanbag', x, z, 'n', { fab: f, it: IT('Beanbag', 'A big squashy beanbag, still warm. Someone is always about to get up from it.') });
+    for (const [x, z] of [[.4, .35], [11.6, .35], [19.4, .35], [25.6, .35]]) place('=', 'plant', x, z, 'n');
+    for (const x of [4.0, 8.5]) place('=', 'bench', x, 3.6, 's', { w: 1.8, snug: true, it: IT('Bench', 'Facing the river glass. People sit here to watch the white water and pretend they aren\'t waiting for someone.') });
+    place('=', 'dispenser', 11.5, 3.65, 's', { it: IT('Water station', 'Cold water and a stack of cups. A sign says DRINK BEFORE YOU CLIMB.') });
+    place('=', 'drinksFridge', 25.5, 3.6, 's', { it: IT('Drinks fridge', 'Fizzy lime, cold tea and something blue called RIPTIDE.') });
+    place('=', 'recTrophyCase', 23.9, 3.7, 's', { w: 1.4, it: IT('Trophy case', 'Three gold cups and an empty shelf, waiting for this season\'s winners.') });
+    placeOnEdge('recMural', 'v,4,9', 'e', { w: 1.9, off: -.5, text: 'SWIM · PADDLE · CLIMB', it: IT('Mural', 'A bold mural in teal, coral and neon: SWIM, PADDLE, CLIMB.') });
+    placeOnEdge('recMural', 'h,28,11', 'n', { w: 1.9, off: -.5, text: 'FLOAT · PLAY · CHEER', it: IT('Mural', 'Diagonal bands in the deck\'s colours: FLOAT, PLAY, CHEER.') });
+    place('+', 'recSignpost', 5.6, 5.5, 'n', { it: IT('Signpost', 'Pool and auditorium forward, rivers, wall and court aft, the float room through the glass.') });
     place('=', 'hamper', 12.4, .45, 'n', { snug: true, it: IT('Towel bin', 'For wet towels from the river hall. It smells of chlorine and good intentions.') });
     // the auditorium (0.80.1, R2): the rake and its 76 seats, the stage against the bow windows, the truss, lectern, piano and screen
     const rake = []; for (let c = 1; c <= 6; c++) for (const [z0, z1] of REC_BLOCKS) for (let z = z0; z < z1; z++) rake.push([c, z]);
@@ -8394,7 +8482,8 @@ function recMats() {
     wallOchre: std('#c08a3e', .95), wallRust: std('#9a4a28', .95), hold: std('#ffffff', .6), holdC: ['#ff4f6d', '#ffd23f', '#3fa9ff', '#5ee06a'].map(col),
     belay: std('#30363d', .5, .4), rope: std('#ff8a3a', .7), brass: std('#d9a441', .3, .8),
     loungerFrame: std('#e8e8e2', .4, .3), padA: std('#e3907f', .95), padB: std('#d77f73', .95),
-    orb: new THREE.MeshBasicMaterial({ color: col('#ffd0e4'), toneMapped: false }), loungerPad: std('#2f9fb0', .8), aidWhite: std('#f2f2ee', .5), aidRed: std('#d8322e', .5),
+    orb: new THREE.MeshBasicMaterial({ color: col('#ffd0e4'), toneMapped: false }),
+    flagA: std('#ff6f61', .7, 0, { side: THREE.DoubleSide }), flagB: std('#ffd23f', .7, 0, { side: THREE.DoubleSide }), flagC: std('#50e6ff', .7, 0, { side: THREE.DoubleSide }), flagD: std('#ff4fd8', .7, 0, { side: THREE.DoubleSide }), loungerPad: std('#2f9fb0', .8), aidWhite: std('#f2f2ee', .5), aidRed: std('#d8322e', .5),
     lineOrange: new THREE.MeshBasicMaterial({ color: col('#ff9a3c'), toneMapped: false }), lineCyan: new THREE.MeshBasicMaterial({ color: col('#50e6ff'), toneMapped: false }),
     lineWhite: new THREE.MeshBasicMaterial({ color: col('#e8eef0'), toneMapped: false }),
     net: new THREE.MeshBasicMaterial({ color: col('#bfe6ff'), transparent: true, opacity: .2, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, toneMapped: false }),
@@ -8462,7 +8551,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.80.7';                           // keep in step with the header's build line
+const GAME_BUILD = '0.80.8';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -14038,7 +14127,7 @@ function recStart(kind, title, flavour, p) {             // p: the tap in deck c
       move: { kind: 'swim', path: [[24.5, lane], [30.5, lane]], y: water.pool, lengths: 4 }, after: 'You slip in at the shallow end and start your lengths.' });
   } else if (kind === 'kayak') {
     actStart('recKayak', null, { title, flavour, spot: recSpot([11, 6], 11.4, 5.75, Math.PI, 'stand'),
-      move: { kind: 'kayak', path: REC_LOOP, y: water.river, laps: 2 }, after: 'You take a kayak from the dock and push off into the slow channel.' });
+      move: { kind: 'kayak', path: REC_LOOP, y: water.river, laps: 2 }, follow: true, after: 'You take a kayak from the dock and push off into the slow channel.' });
   } else if (kind === 'climb') {
     const len = REC_WALL.z1 - REC_WALL.z0, r = Math.max(0, Math.min(REC_ROUTES - 1, Math.floor(((p ? p[1] : 4.3) - REC_WALL.z0) / len * REC_ROUTES)));
     const z = REC_WALL.z0 + len * (r + .5) / REC_ROUTES;
@@ -14047,7 +14136,7 @@ function recStart(kind, title, flavour, p) {             // p: the tap in deck c
       after: 'You clip into an auto-belay on the ' + ['red', 'yellow', 'blue', 'green'][r] + ' route and start up.' });
   } else if (kind === 'float') {
     actStart('recFloat', null, { title, flavour, spot: recSpot([18, 12], 20.5, 14.5, 0, 'stand'),
-      move: { kind: 'float', at: [21, 14.8], r: 1.2, top: Math.min(2.2, H - 1.4), bounces: 4 }, after: 'You pull on grip socks from the shelf and step into a fifth of a g.' });
+      move: { kind: 'float', at: [21, 14.8], r: 1.2, top: Math.min(2.2, H - 1.4), bounces: 4 }, follow: true, after: 'You pull on grip socks from the shelf and step into a fifth of a g.' });
   }
 }
 // after each one ends: the next step of the wet way (change, the activity, a shower, change back)
@@ -41717,7 +41806,7 @@ function loop() {
 
   // camera follows you
   az += (azT - az) * Math.min(1, dt * 6);
-  const pp = player.obj.position;
+  const pp = typeof ACT !== 'undefined' && ACT && ACT.o && ACT.o.follow && ACT.body && ACT.phase === 'do' ? { x: ACT.x, z: ACT.z } : player.obj.position;   // 0.80.8: a rec deck activity that moves you round the room (floating, paddling) takes the camera with it
   target.x += (pp.x - target.x) * Math.min(1, dt * 3); target.z += (pp.z - target.z) * Math.min(1, dt * 3);
   placeCam(); placeSun(target);
 
