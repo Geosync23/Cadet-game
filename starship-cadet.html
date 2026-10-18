@@ -252,7 +252,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.80.3
+   STARSHIP CADET: CSV Wren                           build 0.80.4
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8112,6 +8112,71 @@ Object.assign(WALL_KIT, {
     cyl(.05, .05, .04, RK.aidRed, .3, 1.15, .06, g, 12).rotation.x = Math.PI / 2;                       // the alarm button beside it
   },
 });
+// the river hall (0.80.4, R5). Room-local (the hall's box starts at column 1): the rivers are one raised loop round a
+// rock island, x 3.0-13.6 and z 0.5-5.6. The fast white-water run is along the windows (north), the slow return channel
+// on the inboard side (south), joined at both ends; a wave gate across the fast run at the bow end. The walkway runs
+// along the concourse glass (row 6) and up the bow end (column 15) to the changing rooms' door; the climbing wall fills
+// the stern end, its foot clear (local x 0-2.8)
+const RIV = { x0: 3.0, x1: 13.6, z0: .5, z1: 5.6, in0: 4.6, in1: 12.0, iz0: 2.1, iz1: 4.0 };
+const REC_ROUTES = 4, REC_WALL = { x: .35, z0: 2.0, z1: 6.6 };
+function recQuads(rects, y) {                            // one flat geometry from rectangles [x0, z0, x1, z1] (a water surface in one draw)
+  const P = [], N = [], U = [], I = [];
+  rects.forEach(([a, b, c, d], k) => { P.push(a, y, b, c, y, b, c, y, d, a, y, d); for (let q = 0; q < 4; q++) N.push(0, 1, 0); U.push(0, 0, 1, 0, 1, 1, 0, 1); const o = k * 4; I.push(o, o + 2, o + 1, o, o + 3, o + 2); });
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(N, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(U, 2)); g.setIndex(I); return g;
+}
+Object.assign(KIT, {
+  recRiver(g) {
+    const R_ = RIV, rh = .46, t = .2;
+    // the outer bank, grey-green fake rock, and the river bed under the water
+    box(R_.x1 - R_.x0, rh, t, RK.rock, (R_.x0 + R_.x1) / 2, rh / 2, R_.z0 - t / 2, g); box(R_.x1 - R_.x0 + 2 * t, rh, t, RK.rock, (R_.x0 + R_.x1) / 2, rh / 2, R_.z1 + t / 2, g);
+    box(t, rh, R_.z1 - R_.z0 + t, RK.rock, R_.x0 - t / 2, rh / 2, (R_.z0 + R_.z1) / 2 - t / 2, g); box(t, rh, R_.z1 - R_.z0 + t, RK.rock, R_.x1 + t / 2, rh / 2, (R_.z0 + R_.z1) / 2 - t / 2, g);
+    box(R_.x1 - R_.x0, .03, R_.z1 - R_.z0, RK.riverBed, (R_.x0 + R_.x1) / 2, .015, (R_.z0 + R_.z1) / 2, g);
+    // the island: a long rock bank with boulders and ferns
+    box(R_.in1 - R_.in0, .62, R_.iz1 - R_.iz0, RK.rock, (R_.in0 + R_.in1) / 2, .31, (R_.iz0 + R_.iz1) / 2, g);
+    for (let k = 0; k < 9; k++) { const x = R_.in0 + .5 + k * .85, z = R_.iz0 + .35 + recHash(k, 1, 7) * 1.2, s = .28 + recHash(k, 2, 7) * .22; soft(k % 3 ? RK.rock : RK.rockDark, x, .62, z, s * 1.4, s, s, g); }
+    for (let k = 0; k < 7; k++) { const x = R_.in0 + .9 + k * 1.05, z = R_.iz0 + .5 + recHash(k, 3, 7) * .9;
+      for (let q = 0; q < 5; q++) { const a = q * 1.257 + k, f = box(.07, .02, .5, RK.fern, x + Math.sin(a) * .18, .72, z + Math.cos(a) * .18, g); f.rotation.set(-.5 * Math.cos(a), a, .5 * Math.sin(a), 'YXZ'); } }
+    // the water: the fast run and the bow end foam white, the return channel and the stern end run slow
+    const fast = recWaterMesh(recQuads([[R_.x0, R_.z0, R_.x1, R_.iz0], [R_.in1, R_.iz0, R_.x1, R_.iz1]], .36), RK.riverFast);
+    const slow = recWaterMesh(recQuads([[R_.x0, R_.iz1, R_.x1, R_.z1], [R_.x0, R_.iz0, R_.in0, R_.iz1]], .36), RK.riverSlow);
+    g.add(fast, slow);
+    // the wave gate across the fast run near the bow end: two steel posts, a beam with the gate's lights, a ramp under the water
+    for (const z of [R_.z0 - .05, R_.iz0 + .05]) box(.16, 1.7, .16, RK.steel, 11.3, .85, z, g);
+    box(.22, .2, R_.iz0 - R_.z0 + .3, RK.steel, 11.3, 1.7, (R_.z0 + R_.iz0) / 2, g); box(.04, .05, R_.iz0 - R_.z0, RK.gateLight, 11.19, 1.66, (R_.z0 + R_.iz0) / 2, g);
+    box(.9, .1, R_.iz0 - R_.z0 - .04, RK.steel, 11.5, .26, (R_.z0 + R_.iz0) / 2, g).rotation.z = .12;
+    // the kayak dock on the inboard bank by the doors, and three kayaks out on the water
+    box(2.4, .08, .9, RK.dock, 10.4, .5, R_.z1 - .3, g); for (let k = 0; k < 8; k++) box(.02, .012, .86, RK.dockDark, 9.3 + k * .3, .545, R_.z1 - .3, g);
+    for (const [x, z, c, a] of [[6.0, 1.2, 0, .04], [9.2, 1.4, 2, -.05], [7.5, 4.85, 3, .02]]) recKayak(g, x, .37, z, Math.PI / 2 + a, RK.kayak[c]);
+    return { w: .1, d: .1, noBlock: true };
+  },
+  // the kayak rack on the bow end wall: four kayaks on two arms, red, yellow, blue and green, paddles alongside
+  recKayakRack(g) {
+    for (const z of [-1.0, 1.0]) { box(.08, 1.6, .08, RK.steel, .15, .8, z, g); for (const y of [.45, .85, 1.25]) box(.5, .05, .06, RK.steel, -.05, y, z, g); }   // east (wall) side is +x
+    for (let k = 0; k < 3; k++) recKayak(g, -.1, .52 + k * .4, 0, 0, RK.kayak[k]);
+    for (let k = 0; k < 3; k++) { box(.04, .04, 2.0, RK.paddle, .05, 1.5 + k * .06, 0, g); for (const e of [-1, 1]) box(.03, .16, .09, RK.kayak[(k + 1) % 4], .05, 1.5 + k * .06, e * 1.0, g); }
+    return { w: .5, d: 2.6, tall: true };
+  },
+  // the climbing wall: ochre and rust panels from the floor to the roof, four routes of coloured holds (one instanced
+  // mesh, coloured per hold), an auto-belay at the top of each with its rope down, and the brass bell at the very top
+  recClimbWall(g) {
+    const W_ = REC_WALL, len = W_.z1 - W_.z0, top = H - .12, zc = (W_.z0 + W_.z1) / 2;
+    box(.3, top, len, RK.wallOchre, W_.x, top / 2, zc, g);
+    for (let k = 0; k < 6; k++) { const p = box(.06, .7 + recHash(k, 4, 9) * .9, .9, RK.wallRust, W_.x + .17, .6 + k * .62, W_.z0 + .5 + recHash(k, 5, 9) * (len - 1), g); p.rotation.x = (recHash(k, 6, 9) - .5) * .3; }
+    const holds = [], cols = [RK.holdC[0], RK.holdC[1], RK.holdC[2], RK.holdC[3]];
+    for (let r = 0; r < REC_ROUTES; r++) for (let k = 0; k < 11; k++) holds.push([W_.x + .19, .35 + k * .36, W_.z0 + len * (r + .5) / REC_ROUTES + (recHash(r, k, 11) - .5) * .7, r]);
+    const im = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(.07, 0), RK.hold, holds.length), m4 = new THREE.Matrix4();
+    holds.forEach(([x, y, z, r], k) => { m4.makeScale(1, .8 + recHash(k, 1, 13) * .5, 1.2); m4.setPosition(x, y, z); im.setMatrixAt(k, m4); im.setColorAt(k, cols[r]); });
+    im.userData.noMerge = true; im.castShadow = true; g.add(im);
+    for (let r = 0; r < REC_ROUTES; r++) { const z = W_.z0 + len * (r + .5) / REC_ROUTES; box(.2, .22, .2, RK.belay, W_.x + .25, top - .3, z, g); box(.015, top - .45, .015, RK.rope, W_.x + .32, (top - .45) / 2 + .05, z + .08, g); }
+    // the bell, on a bracket at the very top between the middle routes
+    box(.5, .06, .06, RK.brass, W_.x + .3, top - .05, zc, g); const bell = cyl(.09, .2, .26, RK.brass, W_.x + .5, top - .25, zc, g, 16); cyl(.03, .03, .05, RK.brass, W_.x + .5, top - .1, zc, g, 8);
+    return { w: .4, d: len, noBlock: true };
+  },
+});
+function recKayak(g, x, y, z, rot, m) {                  // a kayak: a long pointed hull, a dark cockpit rim (no R())
+  const k = new THREE.Group(); k.position.set(x, y, z); k.rotation.y = rot; g.add(k);
+  soft(m, 0, 0, 0, .3, .13, 1.3, k); cyl(.17, .17, .05, RK.black, 0, .1, .1, k, 14);
+}
 DECKS[7] = {
   num: 7, name: 'Recreation', seed: 70771, tall: 1.6, playerOnly: true, open: [6, 24],
   blurb: 'Auditorium, court, pool, rivers', arrive: 'The concourse runs stern to bow: the rivers and the court aft, the pool and the auditorium forward.',
@@ -8246,6 +8311,16 @@ DECKS[7] = {
     place('P', 'recHit', 4.4, 2.5, 'n', { w: 6.4, d: 4, hitH: .5, it: IT('Pool', 'Three short lanes under the hull windows, with the Wren in mosaic on the bottom and the stars beside you. Warm, and very blue.') });
     for (const x of [1.4, 4.6, 6.6]) place('P', 'recLounger', x, 6.55, 'e', { it: IT('Lounger', 'A lounger by the pool, facing the windows. Still damp from someone.') });
     placeWall('P', 'recFirstAid', 'e', 5.6, { it: IT('First-aid point', 'A first-aid kit, a foil blanket and an alarm button that rings in the infirmary. There\'s no lifeguard; this, and the shallow end, are the safety.') });
+    // the river hall (0.80.4, R5): the river loop, the island, the wave gate, the dock and kayaks, the rack, the climbing wall and bell
+    const river = []; for (let c = 3; c <= 13; c++) for (let z = 0; z <= 5; z++) river.push([c, z]);
+    place('K', 'recRiver', 0, 0, 'n', { block: river });
+    place('K', 'recHit', 8.3, 1.3, 'n', { w: 10.6, d: 1.6, hitH: .5, it: IT('White water', 'The fast run, along the windows: white water over a hidden ramp, kayakers bracing through the standing wave by the gate.') });
+    place('K', 'recHit', 8.3, 4.8, 'n', { w: 10.6, d: 1.6, hitH: .5, it: IT('River', 'The slow return channel, wide and green-blue, where you get your breath back before the next lap.') });
+    place('K', 'recHit', 10.4, 5.3, 'n', { w: 2.4, d: .9, hitH: .7, it: IT('Kayak dock', 'A wooden dock on the bank, a pebble beach beside it, and kayaks bumping gently at the edge.') });
+    place('K', 'recHit', 11.3, 1.3, 'n', { w: .5, d: 2.0, hitH: 1.8, it: IT('Wave gate', 'A steel gate across the fast run that kicks up a standing wave. Its lights go blue when it\'s running.') });
+    place('K', 'recKayakRack', 15.6, 3.7, 'n', { it: IT('Kayak rack', 'Red, yellow and blue kayaks on the rack, paddles and helmets alongside. The green one is always out.') });
+    place('K', 'recClimbWall', 0, 0, 'n', { block: [2, 3, 4, 5, 6].map(z => [0, z]) });
+    place('K', 'recHit', .55, 4.3, 'n', { w: .6, d: 4.6, hitH: 2.4, it: IT('Climbing wall', 'Ochre and rust rock from the floor to the roof: four routes in red, yellow, blue and green holds, an auto-belay at the top of each, and the brass bell at the very top.') });
     REC_STANDS.forEach(([c0, c1], b) => place('T', 'recHit', (c0 + c1) / 2 - 4, 1, 'n', { w: c1 - c0, d: 2, hitH: 1.3, it: IT('Stands', ['Three stepped benches at the stern end, by the scoreboard.', 'The middle of the stands: three stepped benches, right on the net. The best seats for a close game.', 'Three stepped benches at the bow end, by the gate onto the court.'][b]) }));
   },
 };
@@ -8258,6 +8333,12 @@ function recMats() {
     standStep: std('#3a404a', .85), bench: std('#c9783a', .6),
     rim: std('#d8e6e4', .45), coping: std('#f2f0ea', .4), poolSide: std('#6fc3c9', .4), mosaic: new THREE.MeshStandardMaterial({ map: recMosaic(), roughness: .4 }),
     poolWater: recWater('#1f8fa6', '#4fd0dc', { alpha: .8 }), ropeOrange: std('#ff8a3a', .5), ropeWhite: std('#f4f4f0', .5),
+    rock: std('#6f8a7c', .9), rockDark: std('#4f6559', .9), riverBed: std('#1d3b40', .8), fern: std('#3f8a4a', .8),
+    riverFast: recWater('#1a7f8f', '#58d6cf', { foam: .9, flow: 1.4, alpha: .88 }), riverSlow: recWater('#1f8a96', '#3fc4c4', { flow: .35, alpha: .86 }),
+    steel: std('#8a959c', .4, .6), gateLight: new THREE.MeshBasicMaterial({ color: col('#50e6ff'), toneMapped: false }), dock: std('#a0703f', .7), dockDark: std('#5a3d22', .8),
+    kayak: ['#e0412f', '#f2c230', '#2f6fe0', '#3fbf5a'].map(c => std(c, .45, .1)), paddle: std('#2a2f36', .5, .3),
+    wallOchre: std('#c08a3e', .95), wallRust: std('#9a4a28', .95), hold: std('#ffffff', .6), holdC: ['#ff4f6d', '#ffd23f', '#3fa9ff', '#5ee06a'].map(col),
+    belay: std('#30363d', .5, .4), rope: std('#ff8a3a', .7), brass: std('#d9a441', .3, .8),
     loungerFrame: std('#e8e8e2', .4, .3), loungerPad: std('#2f9fb0', .8), aidWhite: std('#f2f2ee', .5), aidRed: std('#d8322e', .5),
     lineOrange: new THREE.MeshBasicMaterial({ color: col('#ff9a3c'), toneMapped: false }), lineCyan: new THREE.MeshBasicMaterial({ color: col('#50e6ff'), toneMapped: false }),
     lineWhite: new THREE.MeshBasicMaterial({ color: col('#e8eef0'), toneMapped: false }),
@@ -8326,7 +8407,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.80.3';                           // keep in step with the header's build line
+const GAME_BUILD = '0.80.4';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
