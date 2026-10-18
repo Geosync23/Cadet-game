@@ -12,3 +12,4 @@ Built on claude/p5-cand (base: 0.60.7 = ce26fb2). Build numbers (lead 12): Step 
 - career FAIL cause: with W's content, m5 waits at 'meet' (W's content/meetings/train.m5.calder.meet: 'Brennan and Calder are waiting for you in the galley') from Day 4 on; the scripted steady player never attends, so m7/p3/m6/t2 never open. Sent to C (test or meeting path) and W
 - cand 0.63.0 local 67b15b0 (p5-join 573e0ff + A 6cc826b + W 0d179ac): career, mech, puzzle, machine, smoke, newgame OK; day_check 0 OK; --check up to date; NAMES OK (rest running)
 - R: S 78bf1c2 (0.33.44-0.33.52) PASS w/ LOW; C 2865a21 read and fine; join 6e730b1 verdict pending
+- R: Step 1 join p5-join 6e730b1 PASS (cadet identical, machine/career/mech/day 3 OK). Step 1 passing tips: S 78bf1c2, P cfce34e, C 2865a21, H 5a4d362, A 6cc826b, W 0d179ac
