@@ -1046,6 +1046,35 @@ with sync_playwright() as pw:
             or lk['saved'][2:] != [3] or lk['loaded'] != [3, 1] or lk['old'] or lk['after'] != lk['before'] or not lk['settled']):
             fail('drift')
 
+    # 5s. incidents' machine side (m6-incidents, 0.33.49): machineFault sets a machine faulty (never raises it) and its repair
+    # follows within the hour (machineFound finds it at once); liftStuck makes rides 3 times slower until it ends; a burst's
+    # joint job is a Tier 1 chore at the place, one seal, 20 minutes, on your board, and the crew fit it when you leave it
+    if g.ev("typeof jointJobPost === 'function'"):
+        inc = g.ev("""(() => {
+          const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min, out = {};
+          JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t0 + 7 * 1440 + 240); machinesNow();
+          for (const j of SHIP.jobs) if (j.claimedBy === 'you') { j.claimedBy = null; j.status = 'open'; }
+          const L = '5-mainlift-1', G = '3-galleyplant-1';
+          out.fault = machineFault(L); out.state = SHIP.machines[L].state; out.cond = SHIP.machines[L].cond;
+          const c0 = SHIP.machines[G].cond; machineFault(G, 90); out.notRaised = SHIP.machines[G].cond === Math.min(c0, 90);
+          const f = machineFound(L); const J = SHIP.jobs.find(j => j.id === (f && f.id)); out.found = !!(f && J && J.kind === 'repair');
+          const before = shipEffects(5).lift; out.stuck = liftStuck(true); out.liftX = Math.round(shipEffects(5).lift / before * 100) / 100;
+          setShipNow(shipNow() + 45); out.over = !liftStuckNow() && shipEffects(5).lift === shipEffects(5).lift;
+          liftStuck(true); liftStuck(false); out.off = !liftStuckNow();
+          const id = jointJobPost({ placeId: '4-lift-1', leave: 60 }), jj = SHIP.jobs.find(j => j.id === id);
+          out.joint = jj ? [jj.tier, jj.parts.join(), jj.stops.map(x => x.mins + '@' + x.placeId).join(), jobCard(jj)[2]] : null;
+          out.onBoard = openJobs('you').some(x => x.id === id);
+          const m0 = shipNow(); for (let m = m0 + 60; m <= m0 + 8 * 60; m += 60) { setShipNow(m); machinesNow(); }
+          out.crew = jj && jj.claimedBy && jj.claimedBy !== 'you' ? jj.status : null;
+          SHIP.jobs = SHIP.jobs.filter(j => j.chore !== 'joint');
+          setShipNow(t0); return out;
+        })()""")
+        print(f"Incidents (0.33.49): machineFault {inc['fault']} -> {inc['state']} ({inc['cond']}), never raised {inc['notRaised']}, its repair found {inc['found']}; lift stuck {inc['stuck']} x{inc['liftX']}, over after 40 min {inc['over']}, off {inc['off']}")
+        print(f"  joint job [tier, parts, stops, card] {inc['joint']}, on your board {inc['onBoard']}, the crew's when left: {inc['crew']}")
+        if (not inc['fault'] or inc['state'] != 'faulty' or inc['cond'] > 40 or not inc['notRaised'] or not inc['found'] or not inc['stuck'] or inc['liftX'] != 3 or not inc['over'] or not inc['off']
+            or not inc['joint'] or inc['joint'][:3] != [1, 'seal', '20@4-lift-1'] or not inc['onBoard'] or inc['crew'] not in ('claimed', 'done')):
+            fail("incidents' machine side")
+
     # 6. the save
     rt = g.ev("""(() => {
       JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(6 * 1440 + 11 * 60 + 17); machinesNow();

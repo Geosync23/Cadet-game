@@ -249,7 +249,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.33.48
+   STARSHIP CADET: CSV Wren                           build 0.33.49
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7807,7 +7807,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.33.48';                           // keep in step with the header's build line
+const GAME_BUILD = '0.33.49';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -14405,7 +14405,7 @@ function machinesReset(hour) {
 // a new game (section 13's newGameStart, 0.26.31): the machines and jobs start afresh at once, whichever way the clock
 // moved, so the old game's jobs never carry over and jobs reserved right after (section 21) aren't wiped by a rewind
 function machinesNew() {
-  machinesReset(Math.floor(shipNow() / 60)); MACH_SEEN = shipNow();
+  machinesReset(Math.floor(shipNow() / 60)); MACH_SEEN = shipNow(); LIFT_STUCK = null;
   CART_RUNS.clear(); CART_PENDING.length = 0; SIM_Q.length = 0;
 }
 // run the ship's hours up to and including this one: each hour, the jobs (jobsHour), then that hour's wear.
@@ -14593,7 +14593,31 @@ function shipEffects(deck) {
   machinesNow();
   if (FX_REV !== MACH_REV) { FX_CACHE = new Map(); FX_REV = MACH_REV; }
   if (!FX_CACHE.has(deck)) FX_CACHE.set(deck, fxFrom(deck, machConds()));
-  return FX_CACHE.get(deck);
+  const fx = FX_CACHE.get(deck);
+  return liftStuckNow() ? { ...fx, lift: fx.lift * LIFT_STUCK_X } : fx;   // a stuck lift (m6's incident, 0.33.49)
+}
+// incidents' machine side (0.33.49, plans/mechanics/m6-incidents.html; section 24f runs the incident). machineFault(id, cond =
+// 40): a machine set faulty when its incident starts (never raised; its repair is posted by the hour's jobs as any fault's,
+// and machineFound finds it at once). liftStuck(on, until?): the lift's rides LIFT_STUCK_X slower while it's stuck (till
+// `until`, default 40 minutes on; not saved: 24f calls it again after a load). jointJobPost({ deck, placeId, title?,
+// leave?, reserved? }) -> job id: the burst's fix, a Tier 1 joint job at the burst (a seal, 20 minutes), posted now
+const LIFT_STUCK_X = 3;
+let LIFT_STUCK = null;
+const liftStuckNow = () => LIFT_STUCK !== null && shipNow() < LIFT_STUCK;
+function liftStuck(on, until) { LIFT_STUCK = on ? (Number.isFinite(until) ? until : shipNow() + 40) : null; MACH_REV++; return liftStuckNow(); }
+function machineFault(id, cond = 40) {
+  machinesNow(); const s = SHIP.machines[id]; if (!s || !Number.isFinite(cond)) return false;
+  s.cond = Math.min(s.cond, Math.max(0, cond)); s.state = machineState(s.cond); MACH_REV++; if (MACH_HOUR !== null) machRecord(MACH_HOUR - 1);
+  return true;
+}
+function jointJobPost(o = {}) {
+  machinesNow(); const pl = placeById(o.placeId); if (!pl) return null;
+  const t = shipNow(), id = 'chore-joint:' + pl.id + '@' + Math.floor(t);
+  if (SHIP.jobs.some(j => j.id === id)) return id;
+  SHIP.jobs.push({ id, machine: null, deck: pl.deck, room: pl.room, kind: 'chore', chore: 'joint', target: pl.id, title: o.title || 'Replace a burst joint: ' + (roomName(pl.deck, pl.room) || 'corridor'),
+                   bring: null, tier: 1, stops: [{ deck: pl.deck, placeId: pl.id, mins: 20, tag: 'joint' }], urgency: 1, leave: o.leave || null, posted: t, found: t, claimedBy: null,
+                   parts: ['seal'], status: 'open', ...(o.reserved ? { reserved: o.reserved } : {}), ...(o.incident ? { incident: o.incident } : {}) });
+  MACH_REV++; return id;
 }
 const MACH_HIST = new Map(), MACH_HIST_DAYS = 8;          // hour -> { id: cond } once that hour has run
 let FX_AT = new Map(), FX_AT_REV = -1;
@@ -15248,6 +15272,7 @@ const CHORES = {
                where: () => choreMachines(['lights', 'cartdock', 'washer', 'extractor']).map(m => ({ key: m.id, title: (m.kind === 'lights' ? 'Reset a tripped breaker: ' : m.kind === 'cartdock' ? 'Free a jammed cart dock: ' : 'Clear a fault: ') + machineLabel(m).split(',')[0].toLowerCase(), deck: m.deck, room: m.room, machine: m.id, stops: [panelStop(m, 10, 'fault')] })) },
   filter:    { tier: 2, per: 1, parts: ['filter'], text: 'Swap the filters', helps: { self: 10 },
                where: () => choreMachines(['scrubber', 'airplant', 'o2cell']).map(m => ({ key: m.id, title: 'Swap the filters: ' + machineLabel(m).split(',')[0].toLowerCase(), deck: m.deck, room: m.room, machine: m.id, tier: 2, stops: [panelStop(m, 20, 'filter')] })) },
+  joint:     { tier: 1, per: 0, parts: ['seal'], text: 'Burst joint', where: () => [] },   // posted by an incident only (jointJobPost, 0.33.49)
   seal:      { tier: 2, per: .7, parts: [], text: 'Check a pressure seal', helps: { self: 5 },
                where: () => choreMachines(['hullseal', 'doorgear', 'valve', 'manifold']).map(m => ({ key: m.id, title: 'Check a pressure seal: ' + machineLabel(m).split(',')[0].toLowerCase(), deck: m.deck, room: m.room, machine: m.id, tier: 2, stops: [panelStop(m, 15, 'seal')] })) },
 };
