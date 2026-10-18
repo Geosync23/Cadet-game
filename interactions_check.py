@@ -157,11 +157,13 @@ with sync_playwright() as pw:
     if g.ev("typeof jobStepDone === 'function' && typeof CHORES !== 'undefined'"):
         print('== chores')
         g.ev("TURN_IN = true")   # on in the build from 0.37.3; set anyway, so the check also works on older builds
-        # stand by the thing nearest a place and tap it, the way a player would
-        TAPAT = r"""(({ place }) => { const s = placeSpot(place); if (!s) return 'no spot';
-          const it = ITEMS.filter(i => !i.lift && !i.see).map(i => [i, ixDist(i, s)]).sort((a, b) => a[1] - b[1])[0][0];
-          it.hit.getWorldPosition(_wp); const g = nearestOpen(_wp.x, _wp.z, player); player.obj.position.copy(cellPos(...g)); player.stop();
-          return [it.t, playerTap(it, _wp.clone(), _wp.clone())]; })"""
+        # stand by the stop and tap the floor at it, the way a player would (0.28.55: a thing you can use there does its own
+        # thing now, like the laundry's washers at a delivery's drop; before, this tapped the nearest thing)
+        STANDAT = r"""(({ place }) => { const s = placeSpot(place); if (!s) return null; const gl = nearestOpen(s.x, s.z, player); player.obj.position.copy(cellPos(...gl)); player.stop(); return true; })"""
+        SCRAT = r"""(({ place }) => { const s = placeSpot(place), v = new THREE.Vector3(s.x, .02, s.z).project(camera); return [(v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight]; })"""
+        def TAPAT_click(place):
+            if not g.ev(f"({STANDAT})({json.dumps({'place': place})})"): return 'no spot'
+            g.step(15); x, y = g.ev(f"({SCRAT})({json.dumps({'place': place})})"); g.page.mouse.click(x, y); return ['floor', x, y]
         def walk_stop(label):
             for k in range(200):
                 g.step(30); s = st()
@@ -186,11 +188,11 @@ with sync_playwright() as pw:
                 if step == 'fetch':
                     r = g.ev(f"({TAP})({{title: ITEMS.find(i => roomAt(...cellAt(i.hit.getWorldPosition(_wp).x, _wp.z)) === 'r' && !/tarp/i.test(i.t)).t}})")
                 else:
-                    r = g.ev(f"({TAPAT})({json.dumps({'place': place})})")
+                    r = TAPAT_click(place)
                 g.step(2); s0 = st()
                 for tries in range(5):                       # a crew member on the walk-to tile: try again in a little while
                     if s0['act'] or 'in the way' not in s0['toast']: break
-                    g.step(120); r = g.ev(f"({TAPAT})({json.dumps({'place': place})})") if step != 'fetch' else r; g.step(2); s0 = st()
+                    g.step(120); r = TAPAT_click(place) if step != 'fetch' else r; g.step(2); s0 = st()
                 check(s0['act'] and s0['act'][0] == 'ixStop', f'{kind} {step}: the stop starts ({r}, {s0["act"]}, {s0["toast"][:80]})')
                 s = walk_stop(step); g.step(3); s = st()
                 done = g.ev(f"jobStops(myJob() || {{}}).map(x => !!x.done)") if g.ev("!!myJob()") else []
@@ -210,6 +212,94 @@ with sync_playwright() as pw:
             check(not g.ev("myJob()") and g.ev(f"SHIP.jobs.find(j => j.id === '{job[0]}').status") == 'done' and s['goal'] is None, f'{kind}: turned in, complete, no pointer ({s["toast"][:80]})')
             check(g.ev("SHIP.player.credits || 0") > cr or not g.ev("typeof JOB_PAY !== 'undefined'"), f'{kind}: paid at turn-in')
             g.ev("ixBoard.close()")
+    # a tap at your job's stop starts the work (0.28.52, the user's lamp report from 0.60.5b): a real screen tap at the spot the
+    # marker shows, on the floor or on whatever is in front of it (Deck 1's trunk head, seen through glass), for every lamp
+    # chore, section 18's two lamp jobs (stormBallasts, veyliLamp, in the Captain's locked quarters) and a machine repair
+    if g.ev("typeof jobHere === 'function' && typeof CHORES !== 'undefined'"):
+        print('== a tap at the stop')
+        MKJ = r"""((kind) => { const t = shipNow(), out = []; SHIP.stores.lamp = Math.max(SHIP.stores.lamp || 0, 9);
+          const add = j => { if (j) { SHIP.jobs.push(j); out.push(j.id); } };
+          if (kind === 'lamp') choreWhere('lamp').forEach(c => add({ id: 'ixtap-' + c.key, machine: null, deck: c.deck, room: c.room, kind: 'chore', chore: 'lamp', target: c.key, title: c.title, tier: 1,
+            stops: c.stops.map(x => ({ ...x })), urgency: 0, posted: t, found: t, claimedBy: null, parts: ['lamp'], status: 'open' }));
+          if (kind === 'event' && typeof SHIP_EVENTS !== 'undefined') for (const id of ['stormBallasts', 'veyliLamp']) {
+            const E = (Array.isArray(SHIP_EVENTS) ? SHIP_EVENTS : Object.values(SHIP_EVENTS)).find(e => e.jobs && Object.values(e.jobs).some(l => Array.isArray(l) && l.some(x => x.id === id)));
+            if (E) add(eventJob(Object.values(E.jobs).flat().find(x => x && x.id === id), E.id, t, 'ixtap-' + id)); }
+          if (kind === 'machine') { const m = machineList().find(m => m.id === '3-oven-1');
+            if (m) add({ id: 'ixtap-oven', machine: m.id, deck: m.deck, room: m.room, kind: Object.keys(JOB_TYPES)[0], urgency: 1, posted: t, found: t, claimedBy: null, parts: ['seal'], status: 'open', title: 'Repair the oven' }); }
+          MACH_REV++; return out; })"""
+        HOLD = r"""((id) => { for (const j of SHIP.jobs) if (j.claimedBy === 'you' && j.status === 'claimed') { j.claimedBy = null; j.status = 'open'; }
+          actEnd(true); SHIP.player.work = null; const j = SHIP.jobs.find(x => x.id === id); j.claimedBy = 'you'; j.status = 'claimed'; j.start = shipNow(); MACH_REV++;   // claimed by hand: the tier doesn't matter here
+          SHIP.player.carry = j.parts.slice(0, 2); jobStops(j).forEach((x, k) => { if (x.step === 'fetch' && j.kind === 'chore') jobStepDone(j.id, k); });
+          const nx = jobStops(j).find(x => !x.done && x.step !== 'fetch'); return nx ? [nx.step, nx.deck, nx.places[0]] : null; })"""
+        SCR = r"""((pid) => { const s = placeSpot(pid), v = new THREE.Vector3(s.x, .02, s.z).project(camera); return [(v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight]; })"""
+        PUT = r"""((pid) => { const s = placeSpot(pid), gl = nearestOpen(s.x, s.z, player); player.obj.position.copy(cellPos(...gl)); player.stop(); })"""
+        for kind in ['lamp', 'event', 'machine']:
+            for jid in g.ev(f"({MKJ})('{kind}')"):
+                nx = g.ev(f"({HOLD})('{jid}')")
+                if not check(nx, f'{jid}: a stop to go to'): continue
+                step, deck, pid = nx
+                if g.ev('deckDef.num') != deck: g.ev(f"goToDeck({deck})"); g.step(3)
+                if jid == 'ixtap-veyliLamp':                 # the Captain's quarters are locked: your job's stop opens the door for you
+                    path = g.ev(f"(() => {{ const pl = PLACE_OF.get('{pid}'), lw = [...PLACE_OF.values()].find(p => p.type === 'lift-wait'); return !!findPath(lw.walk || lw.at, pl.walk || pl.at, null, player); }})()")
+                    check(path, f'{jid}: the way into the Captain\'s quarters is open while the job is yours')
+                g.ev(f"({PUT})('{pid}')"); g.step(15)
+                x, y = g.ev(f"({SCR})('{pid}')")
+                g.page.mouse.click(x, y); g.step(90); s = st()
+                check(s['act'] and s['act'][0] in ('ixStop', 'job'), f'{jid}: a tap at the stop ({step}, Deck {deck}) starts the work ({s["act"]}, {s["toast"][:70]})')
+                print('  ', jid, step, 'Deck', deck, '->', s['act'])
+                g.ev("actEnd(true)")
+        g.ev("for (const j of SHIP.jobs) if (j.claimedBy === 'you' && j.status === 'claimed') { j.claimedBy = null; j.status = 'open'; } SHIP.jobs = SHIP.jobs.filter(j => !String(j.id).startsWith('ixtap-')); SHIP.player.carry = []; SHIP.player.work = null; MACH_REV++")
+        lw = g.ev("(() => { goToDeck(2); const pl = PLACE_OF.get('2-captable-1'), lw = [...PLACE_OF.values()].find(p => p.type === 'lift-wait'); return pl ? !!findPath(lw.walk || lw.at, pl.walk || pl.at, null, player) : null; })()")
+        check(lw is not True, f'with no job the Captain\'s quarters stay shut ({lw})')
+    # 0.28.55 (reviewer 1f's BLOCK on 0.28.52): (1) holding a repair, a real click on another usable thing near its machine
+    # does that thing (Washer 2 starts a load; the welding bench and the Works station aren't the repair), and the machine
+    # itself still starts it; (2) the Captain's quarters let you out once the lamp is in, and after turn-in; shut from outside
+    if g.ev("typeof jobDoorOpen === 'function' && typeof machineById === 'function'"):
+        print('== near your job, but not it')
+        HOLD = r"""((mid) => { for (const j of SHIP.jobs) if (j.claimedBy === 'you' && j.status === 'claimed') { j.claimedBy = null; j.status = 'open'; }
+          actEnd(true); SHIP.player.work = null; const m = machineById(mid), t = shipNow(); if (!m) return null;
+          SHIP.jobs.push({ id: 'ixhj-' + mid, machine: m.id, deck: m.deck, room: m.room, kind: Object.keys(JOB_TYPES)[0], urgency: 1, posted: t, found: t, claimedBy: 'you', status: 'claimed', start: t, parts: ['seal'], title: 'Repair ' + mid });
+          MACH_REV++; SHIP.player.carry = ['seal']; return panelPlace(m.id); })"""
+        CLICK = r"""((title, near) => { const c = placeSpot(near);
+          const its = ITEMS.filter(i => i.t === title).map(i => { i.hit.getWorldPosition(_wp); return [i, _wp.clone()]; }).sort((a, b) => Math.hypot(a[1].x - c.x, a[1].z - c.z) - Math.hypot(b[1].x - c.x, b[1].z - c.z));
+          if (!its.length) return null; const p = its[0][1], gl = nearestOpen(p.x, p.z, player); player.obj.position.copy(cellPos(...gl)); player.stop(); return [p.x, p.y, p.z]; })"""
+        SCRP = r"""((x, y, z) => { const v = new THREE.Vector3(x, y, z).project(camera); return [(v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight]; })"""
+        for mid, deck, title, mine in [('4-washer-1', 4, 'Washer 2', False), ('5-battery-1', 5, 'Welding bench', False), ('1-databus-1', 1, 'Works station', False), ('4-washer-1', 4, 'Washer 1', True)]:
+            if g.ev('deckDef.num') != deck: g.ev(f"goToDeck({deck})"); g.step(3)
+            pid = g.ev(f"({HOLD})('{mid}')"); p = g.ev(f"({CLICK})('{title}', '{pid}')") if pid else None
+            if not check(p, f'{mid} and a {title} to test'): continue
+            g.step(10); x, y = g.ev(f"({SCRP})({p[0]}, {p[1]}, {p[2]})"); g.page.mouse.click(x, y); g.step(90); s = st()
+            rep = bool(s['act'] and s['act'][0] == 'job')
+            print('  ', mid, 'held, clicked', title, '->', s['act'], '|', s['toast'][:70])
+            check(rep == mine, f'{mid} held: a click on {title} ' + ('starts the repair' if mine else 'does its own thing, not the repair') + f' ({s["act"]}, {s["toast"][:70]})')
+            g.ev("actEnd(true)")
+        # a chore's stop (0.28.55): the laundry's lamp; Washer 1 there starts a load, and the floor at the stop the lamp
+        CH = r"""(() => { for (const j of SHIP.jobs) if (j.claimedBy === 'you' && j.status === 'claimed') { j.claimedBy = null; j.status = 'open'; }
+          actEnd(true); SHIP.player.work = null; const c = choreWhere('lamp').find(c => c.key === '4-laundry-1'), t = shipNow(); if (!c) return null;
+          const j = { id: 'ixhj-lamp', machine: null, deck: 4, room: c.room, kind: 'chore', chore: 'lamp', target: c.key, title: c.title, tier: 1, stops: c.stops.map(x => ({ ...x })), urgency: 0, posted: t, found: t, claimedBy: 'you', status: 'claimed', start: t, parts: ['lamp'] };
+          SHIP.jobs.push(j); MACH_REV++; jobStepDone(j.id, 0); SHIP.player.carry = ['lamp']; return c.key; })()"""
+        if g.ev('deckDef.num') != 4: g.ev("goToDeck(4)"); g.step(3)
+        pid = g.ev(CH)
+        if check(pid, 'a laundry lamp chore to test'):
+            p = g.ev(f"({CLICK})('Washer 1', '{pid}')"); g.step(10); x, y = g.ev(f"({SCRP})({p[0]}, {p[1]}, {p[2]})"); g.page.mouse.click(x, y); g.step(90); s = st()
+            print('   lamp chore in the laundry, clicked Washer 1 ->', s['act'], '|', s['toast'][:70])
+            check(not (s['act'] and s['act'][0] == 'ixStop'), f'a lamp chore in the laundry: Washer 1 does its own thing ({s["act"]}, {s["toast"][:70]})')
+            g.ev("actEnd(true)")
+        g.ev("goToDeck(2)"); g.step(3)
+        lk = g.ev(r"""(() => { for (const j of SHIP.jobs) if (j.claimedBy === 'you' && j.status === 'claimed') { j.claimedBy = null; j.status = 'open'; }
+          SHIP.player.carry = []; SHIP.player.work = null; if (typeof SHIP_EVENTS === 'undefined') return null;
+          const E = (Array.isArray(SHIP_EVENTS) ? SHIP_EVENTS : Object.values(SHIP_EVENTS)).find(e => e.jobs && Object.values(e.jobs).some(l => Array.isArray(l) && l.some(x => x.id === 'veyliLamp')));
+          const j = E && eventJob(Object.values(E.jobs).flat().find(x => x && x.id === 'veyliLamp'), E.id, shipNow(), 'ixhj-veyli'); if (!j) return null;
+          SHIP.jobs.push(j); j.claimedBy = 'you'; j.status = 'claimed'; MACH_REV++;
+          const pl = PLACE_OF.get('2-captable-1'), lw = [...PLACE_OF.values()].find(p => p.type === 'lift-wait'), w = pl.walk || pl.at, lwt = lw.walk || lw.at;
+          const out = { in: !!findPath(lwt, w, null, player) }; player.obj.position.copy(cellPos(...w)); player.stop();
+          jobStops(j).forEach((x, k) => jobStepDone(j.id, k)); out.done = !!j.workDone; out.outAfterDone = !!findPath(w, lwt, null, player);
+          if (typeof turnInJob === 'function') turnInJob(j.id); out.outAfterTurnIn = !!findPath(w, lwt, null, player);
+          player.obj.position.copy(cellPos(...lwt)); player.stop(); out.shutFromOutside = !findPath(lwt, w, null, player); return out; })()""")
+        print('   the Captain\'s quarters:', lk)
+        if check(lk, 'veyliLamp to test the Captain\'s quarters'):
+            check(lk['in'] and lk['done'] and lk['outAfterDone'] and lk['outAfterTurnIn'] and lk['shutFromOutside'], f'the Captain\'s quarters: in for the lamp, out after it and after turn-in, shut from outside ({lk})')
+        g.ev("for (const j of SHIP.jobs) if (j.claimedBy === 'you' && j.status === 'claimed') { j.claimedBy = null; j.status = 'open'; } SHIP.jobs = SHIP.jobs.filter(j => !String(j.id).startsWith('ixhj-')); SHIP.player.carry = []; SHIP.player.work = null; MACH_REV++")
     # the ship health board (0.37.6): tapping it opens a panel with every system, the ship's health, faults and jobs
     if g.ev("typeof shipHealthRows === 'function'"):
         print('== ship health')

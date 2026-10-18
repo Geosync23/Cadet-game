@@ -12,9 +12,12 @@
 #   390px one, no text under 15px, no sideways scroll; tap a tile and its squares glow, tap one to move; the crew
 #   member answers; a whole game played by taps ends with the result, Again / Quick game / Done, and a 'tiles' note;
 #   the first game uses the teaching layout and points at a jump; opening it adds nothing to the 3D scene
-#   sitting down (0.46.2, 0.46.4): the Tiles station always, tables and boards only on Tiles night (else a plain seat);
-#   tapping the Tiles table with nobody about gives a tip and sits you as before (15b); with a crew member at it, you walk to a
-#   free seat and sit (the 'tiles' activity, sit:play) and the game opens against them; Done stands you up; walking
+#   sitting down (0.46.2, 0.46.4, 0.28.51): the Tiles station always, tables and boards only on Tiles night (else a plain seat);
+#   you sit (the 'tiles' activity, sit:play) and a free crew member comes over (a visit) and sits opposite, and the game
+#   opens; someone already at the table plays you at once; nobody free (quiet hours): a toast says so and you just sit;
+#   playing stops ship time and a deck tap brings the board back; time runs again once it's over; How to play on your
+#   first game (Next, by itself as you select and step, Skip, again from the board and the Tiles app; every step about
+#   two lines); the game's social at its end (a quarter for later games with the same person that day, 0.28.54); Done and Leave game stand you up; walking
 #   away leaves a game uncounted; a game adds friendship and a memory once a day per opponent; who goes first turns
 #   about with each opponent (saved); beating Rina is news, once; save.tiles round-trips
 #   Tiles night (0.46.3): tilesNight(day, came) pairs everyone (one watches when odd), the same every time; Rina always
@@ -175,57 +178,108 @@ SEAT = r"""((stage) => {
   return { tapped: r, act: ACT && [ACT.kind, ACT.placeId, ACT.o.opp], toast: document.getElementById('tx').textContent };
 })"""
 
+FINISH = """(() => { const G = TL_GAME; G.style = Object.assign({}, G.style, { level: 'easy' }); let n = 0;
+      while (!G.s.over && n++ < 80) { if (G.timer) { clearTimeout(G.timer); G.timer = 0; } if (G.s.p === 0) tilesDo(tilesAI(G.s, 'hard', G.rng)); else tilesCrewMove(); }
+      if (G.timer) { clearTimeout(G.timer); G.timer = 0; } })()"""
+SEATED = "!!(ACT && ACT.kind === 'tiles' && ACT.phase === 'do' && TL_GAME)"
+def wait_for(gg, cond, n=60, k=10):
+    for _ in range(n):
+        gg.step(k)
+        if gg.ev(cond): return True
+    return False
+
 def seat(pw, path):
-    gg = Game(pw, path, 900, 760); gg.step(3)
+    gg = Game(pw, path, 390, 844); gg.step(3)
     r = gg.ev(SEAT + "('rina')")
     if r.get('none'): check(False, 'the Deck 4 Tiles table is there'); gg.close(); return
     check(not r['act'] or r['act'][0] != 'tiles', f'outside Tiles night the Deck 4 table is a plain seat (15b): {r}')
     gg.ev("actEnd(true); tilesNightNow = () => true")   # Tiles night from here on (stand-in for section 18's tradition)
-    gg.ev("for (const a of DECK_CREW) { a.settled = false; }")
+    # 0.28.51: you sit down, and a free crew member walks over and sits opposite (the user's "You sit down and someone will come up if available")
+    gg.ev("setShipNow((SHIP.time.day - 1) * 1440 + 19 * 60); for (const a of DECK_CREW) a.settled = false"); gg.step(60)
     r = gg.ev(SEAT + "(null)")
-    check(r['act'] and r['act'][0] != 'tiles' and gg.ev("SHIP.device.tipsSeen['tiles-nobody'] === true"), f'nobody about: a tip, and the stools are a plain seat as before: {r}')
-    gg.ev("actEnd(true)")
-    r = gg.ev(SEAT + "('rina')")
-    check(r['act'] and r['act'][0] == 'tiles' and r['act'][2] == gg.ev("window.__opp"), f'a crew member at the table: you go to sit and play them: {r}')
-    for k in range(40):
-        gg.step(10)
-        if gg.ev("!!(ACT && ACT.phase === 'do' && TL_GAME)"): break
-    st = gg.ev("[ACT && ACT.phase, ACT && ACT.pose, !!TL_GAME, TL_GAME && TL_GAME.where, ACT && ACT.placeId, DEV.open, DEV.app]")
-    check(st[0] == 'do' and st[1] == 'sit:play' and st[2] and st[3] == st[4] and st[5] and st[6] == 'tiles', f'seated: sit:play, the game opens on the device: {st}')
-    # win the game for the check: play Hard for you against the opponent's own level, the crew answering at once
-    gg.ev("""(() => { const G = TL_GAME; G.style = Object.assign({}, G.style, { level: 'easy' }); let n = 0;
-      while (!G.s.over && n++ < 80) { if (G.timer) { clearTimeout(G.timer); G.timer = 0; } if (G.s.p === 0) tilesDo(tilesAI(G.s, 'hard', G.rng)); else tilesCrewMove(); }
-      if (G.timer) { clearTimeout(G.timer); G.timer = 0; } })()""")
-    res = gg.ev("[TL_GAME.s.win, SHIP.tiles.played, SHIP.tiles.won, SHIP.tiles.firstWin !== null, (SHIP.rel[window.__opp] || {}).pts || 0, (SHIP.mem[window.__opp] || []).map(m => m[0])]")
-    print(f'  seated game against {gg.ev("window.__opp")}: win {res[0]}, tally {res[1:4]}, friendship {res[4]}, memories {res[5]}')
+    check(r['act'] and r['act'][0] == 'tiles' and not r['act'][2], f'nobody at the table: you go to sit, with nobody named yet: {r}')
+    came = wait_for(gg, "!!(ACT && ACT.o.st === 'wait')", 40)
+    w = gg.ev("[ACT && ACT.o.opp, ACT && ACT.o.seat, ACT && ACT.placeId, document.getElementById('tx').textContent, (() => { const p = ROSTER.find(x => x.id === (ACT && ACT.o.opp)); const w = p && whereIs(p, shipNow()); return w && w.act; })()]")
+    check(came and w[0] and w[1] != w[2] and 'comes over to play' in w[3] and w[4] == 'visit', f'once you sit, someone free comes over to the other seat: {w}')
+    ok_on = wait_for(gg, SEATED, 80)
+    st = gg.ev("(() => { const a = DECK_CREW.find(x => x.p && x.p.id === TL_GAME.opp), sp = placeSpot(ACT.o.seat); return [ACT.phase, ACT.pose, TL_GAME.opp, TL_GAME.where === ACT.placeId, DEV.open, DEV.app, !!a && Math.hypot(a.x - sp.x, a.z - sp.z) < .8, !!a && a.settled]; })()")
+    check(ok_on and st[2] == w[0] and st[3] and st[4] and st[5] == 'tiles' and st[6] and st[7], f'they sit opposite and the game opens on the device: {st}')
+    # playing stops time (the user's "Playing tiles stops time"); a tap on the deck brings the board back
+    t0 = gg.ev("[SHIP.time.min, FREEZE.frozen, SHIP.player.needs.social, (SHIP.rel[TL_GAME.opp] || {}).pts || 0]"); gg.ev("deviceClose()"); gg.step(150)
+    gg.page.mouse.click(195, 300); gg.step(2)
+    t1 = gg.ev("[SHIP.time.min, FREEZE.frozen, DEV.open, DEV.app, document.getElementById('tx').textContent]")
+    check(t1[0] == t0[0] and t0[1] and t1[1], f'while you play, ship time stands still (5 seconds: {t0[0]} -> {t1[0]})')
+    check(t1[2] and t1[3] == 'tiles' and 'is waiting' in t1[4], f'a tap on the deck mid-game brings the board back: {t1[2:]}')
+    # How to play: your first game runs it; steps move on with Next, and by themselves when you do the thing
+    tu = gg.ev("""(() => { const G = TL_GAME, txt = () => { const e = document.querySelector('#devBody .tl-tut'); return e && !e.hidden ? e.textContent : ''; }, out = [G.tut, txt()];
+      document.querySelector('#devBody .tl-tut button[data-end="tnext"]').click(); out.push(G.tut);
+      document.querySelector('#devBody .tl-tut button[data-end="tnext"]').click(); out.push(G.tut, txt());
+      const c = G.s.b.findIndex((t, i) => t && tlO(t) === 0 && tilesMoves(G.s, 0).some(m => m.from === i)); tilesTap(c); out.push(G.tut);
+      const mv = tilesMoves(G.s, 0).find(m => m.from === c && m.k === 's'); tilesTap(mv.to); out.push(G.tut);
+      if (G.timer) { clearTimeout(G.timer); G.timer = 0; } tilesCrewMove(); if (G.timer) { clearTimeout(G.timer); G.timer = 0; }
+      document.querySelector('#devBody .tl-tut button[data-end="tskip"]').click(); out.push(G.tut, txt(), !!document.querySelector('#devBody .tl-play button[data-end="teach"]'));
+      document.querySelector('#devBody .tl-play button[data-end="teach"]').click(); out.push(G.tut, txt().slice(0, 4));
+      const long = TL_TUT.map(x => x.t('Olu', TL_MODES.full)).filter(t => t.length > 62); out.push(long, SHIP.tiles.taught);
+      G.tut = -1; tilesDraw(); return out; })()""")
+    print('  How to play:', tu)
+    check(tu[0] == 0 and tu[1].startswith('1/8') and tu[2] == 1 and tu[3] == 2 and tu[4].startswith('3/8'), f'the first game opens How to play at step 1; Next moves on: {tu[:5]}')
+    check(tu[5] == 3 and tu[6] == 4, f'selecting a tile and stepping it move the walkthrough on by themselves: {tu[5:7]}')
+    check(tu[7] == -1 and tu[8] == '' and tu[9] and tu[10] == 0 and tu[11].startswith('1/8'), f'Skip ends it; How to play on the board runs it again: {tu[7:12]}')
+    check(not tu[12] and tu[13] is True, f'every step fits in about two lines on a phone (62 characters), and the save knows you were taught: {tu[12:]}')
+    gg.ev(FINISH)
+    res = gg.ev("[TL_GAME.s.win, SHIP.tiles.played, SHIP.tiles.won, SHIP.tiles.firstWin !== null, (SHIP.rel[TL_GAME.opp] || {}).pts || 0, (SHIP.mem[TL_GAME.opp] || []).map(m => m[0]), SHIP.player.needs.social, TL_GAME.opp]")
+    gg.ev(f"window.__opp = {json.dumps(res[7])}")
+    print(f'  seated game against {res[7]}: win {res[0]}, tally {res[1:4]}, friendship {res[4]}, memories {res[5]}, social {t0[2]:.1f} -> {res[6]:.1f}')
     check(res[1] == 1 and (res[0] != 0 or (res[2] == 1 and res[3])), f'the tally counts the game: {res}')
-    check(res[4] > 0 and 'came.tiles' in res[5], f'a game adds friendship and a memory: {res}')
-    again = gg.ev("""(() => { const id = window.__opp, p0 = (SHIP.rel[id] || {}).pts, f0 = SHIP.tiles.first[id];
+    check(res[4] > t0[3] and 'came.tiles' in res[5], f'a game adds friendship and a memory: {res}')
+    check(res[6] >= min(100, t0[2] + 9), f'the game\'s social comes when it ends (no ship minutes passed): {t0[2]} -> {res[6]}')
+    gg.step(30); t2 = gg.ev("[SHIP.time.min, FREEZE.frozen]")
+    check(t2[0] > t1[0] and not t2[1], f'time runs again once the game is over: {t1[0]} -> {t2}')
+    again = gg.ev("""(() => { const id = window.__opp, p0 = (SHIP.rel[id] || {}).pts, f0 = SHIP.tiles.first[id]; SHIP.player.needs.social = 20; const s0 = SHIP.player.needs.social;
       tilesPlay(id, null, 'quick'); const G = TL_GAME, first = G.s.first; let n = 0;
       while (!G.s.over && n++ < 80) { if (G.timer) { clearTimeout(G.timer); G.timer = 0; } if (G.s.p === 0) tilesDo(tilesAI(G.s, 'medium', G.rng)); else tilesCrewMove(); }
       if (G.timer) clearTimeout(G.timer); TL_GAME = null;
-      return [p0, (SHIP.rel[id] || {}).pts, f0, first, SHIP.tiles.first[id]]; })()""")
+      return [p0, (SHIP.rel[id] || {}).pts, f0, first, SHIP.tiles.first[id], G.tut, SHIP.player.needs.social - s0, bondMult(id)]; })()""")
+    check(again[6] > 0 and again[6] <= 12 * .25 * again[7] * 1.3 + .01, f'a second game with them the same day gives a quarter of the social (0.28.54): +{again[6]:.2f} (bond {again[7]})')
     check(again[1] == again[0], f'a second game the same day adds no more friendship: {again[:2]}')
-    check(again[2] == 1 and again[3] == 1 and again[4] == 0, f'who goes first turns about with each opponent, saved: {again[2:]}')
-    gg.page.click('#devBody .tl-end button[data-end="done"]'); gg.step(30)
-    st = gg.ev("[!!TL_GAME, ACT && ACT.kind]")
-    check(not st[0] and st[1] != 'tiles', f'Done stands you up: {st}')
+    check(again[2] == 1 and again[3] == 1 and again[4] == 0, f'who goes first turns about with each opponent, saved: {again[2:5]}')
+    check(again[5] == -1, f'How to play only runs by itself on your first game: {again[5]}')
+    gg.step(30)
+    st = gg.ev("[!!TL_GAME, ACT && ACT.kind, (() => { const p = ROSTER.find(x => x.id === window.__opp); const w = p && whereIs(p, shipNow()); return w && w.act; })()]")
+    check(not st[0] and st[1] != 'tiles' and st[2] != 'visit', f'Done (the game gone) stands you up, and they go back to their own plans: {st}')
+    # someone already at the table plays you at once
+    r = gg.ev(SEAT + "('rina')")
+    sat = gg.ev("(ACT.o.board || []).map(id => heldBy(id)).filter(a => a && a.settled && a.p && a.p.id).map(a => a.p.id)")
+    on = wait_for(gg, SEATED, 40)
+    st = gg.ev("[TL_GAME && TL_GAME.opp, ACT && ACT.o.since === undefined]")
+    check(on and st[0] in sat and st[1], f'someone already at the table: you sit and play them, nobody sent for: {r} at the board {sat}, {st}')
+    # Leave game mid-game: you get up, uncounted
+    gg.ev("if (TL_GAME.timer) { clearTimeout(TL_GAME.timer); TL_GAME.timer = 0; } deviceShow('tiles')"); gg.step(1)
+    gg.page.click('#devBody .tl-play button[data-end="leave"]'); gg.step(40)
+    st = gg.ev("[!!TL_GAME, SHIP.tiles.played, ACT && ACT.kind, FREEZE.frozen]")
+    check(not st[0] and st[1] == 2 and st[2] != 'tiles' and not st[3], f'Leave game: you get up, the game uncounted (two played before), time runs: {st}')
     # walk away mid-game: the game is left, uncounted
-    gg.ev(SEAT + "('rina')")
-    for k in range(40):
-        gg.step(10)
-        if gg.ev("!!(ACT && ACT.phase === 'do' && TL_GAME)"): break
+    gg.ev(SEAT + "('rina')"); wait_for(gg, SEATED, 40)
     gg.ev("if (TL_GAME.timer) { clearTimeout(TL_GAME.timer); TL_GAME.timer = 0; } actEnd(true); deviceRefresh()")
     st = gg.ev("[!!TL_GAME, SHIP.tiles.played]")
     check(not st[0] and st[1] == 2, f'walking away leaves the game uncounted (two played before): {st}')
+    # nobody free (quiet hours): a toast says so and you just sit
+    gg.ev("SHIP.time.min = 22 * 60 + 30; for (const a of DECK_CREW) a.settled = false"); gg.step(2)
+    r = gg.ev(SEAT + "(null)")
+    sat = wait_for(gg, "!!(ACT && ACT.phase === 'do' && ACT.o.st === 'none')", 40)
+    st = gg.ev("[ACT && ACT.kind, !!TL_GAME, document.getElementById('tx').textContent]")
+    check(sat and st[0] == 'sit' and not st[1] and 'Nobody’s around to play right now' in st[2], f'nobody free: a toast says so and you stay sat: {st}')
+    gg.ev("actEnd(true)")
     # beating Rina: news once, her memory, the day kept
     gg.ev("tilesPlay('rina', null, 'full'); if (TL_GAME.timer) { clearTimeout(TL_GAME.timer); TL_GAME.timer = 0; } TL_GAME.s.sc = [6, 0]; TL_GAME.s.p = 0")
     gg.ev("""(() => { const G = TL_GAME; let n = 0; while (!G.s.over && n++ < 80) { if (G.timer) { clearTimeout(G.timer); G.timer = 0; } if (G.s.p === 0) tilesDo(tilesAI(G.s, 'hard', G.rng)); else { const mv = tilesMoves(G.s, 1).find(m => !tilesApply(G.s, m).pts) || tilesMoves(G.s, 1)[0]; tilesDo(mv); } } if (G.timer) clearTimeout(G.timer); })()""")
     b = gg.ev("[TL_GAME.s.win, SHIP.tiles.beatRina !== null, NEWS.filter(n => n.id === 'tiles-rina-beaten').length, (SHIP.mem.rina || []).some(m => m[0] === 'moment.tiles'), SHIP.traces.filter(x => (x && x.id || x) === 'tilesTrophy').length]")
     check(b == [0, True, 1, True, 1], f'beating Rina: news once, her memory, the day kept, the trophy trace once: {b}')
-    sv = gg.ev("(() => { const s = { ship: {} }; for (const f of SAVE_EXTRA) f(s); const back = tilesLoad(JSON.parse(JSON.stringify(s))); return [JSON.stringify(back) === JSON.stringify(SHIP.tiles), JSON.stringify(tilesLoad({ tiles: { played: -3, vs: { x: 'no' }, beatRina: 'x' } }))]; })()")
+    ap = gg.ev("(() => { TL_GAME = null; deviceShow('tiles'); const b = [...document.querySelectorAll('#devBody button')].find(x => /How to play/.test(x.textContent)); if (b) b.click(); const on = TL_UI.teachNext; tilesPlay('tomas', null, 'full'); const t = TL_GAME.tut; if (TL_GAME.timer) clearTimeout(TL_GAME.timer); TL_GAME = null; deviceClose(); return [!!b, on, t, TL_UI.teachNext]; })()")
+    check(ap == [True, True, 0, False], f'How to play in the Tiles app runs it at your next game: {ap}')
+    sv = gg.ev("(() => { const s = { ship: {} }; for (const f of SAVE_EXTRA) f(s); const back = tilesLoad(JSON.parse(JSON.stringify(s))); return [JSON.stringify(back) === JSON.stringify(SHIP.tiles), JSON.stringify(tilesLoad({ tiles: { played: -3, vs: { x: 'no' }, beatRina: 'x', taught: 'yes' } }))]; })()")
     check(sv[0], f'save.tiles round-trips: {sv}')
-    check(sv[1] == '{"played":0,"won":0,"lost":0,"vs":{},"first":{},"relDay":{},"firstWin":null,"beatRina":null,"night":{"last":null,"rina":0,"games":[]}}', f'a bad save.tiles reads safely: {sv[1]}')
+    check(sv[1] == '{"played":0,"won":0,"lost":0,"taught":false,"vs":{},"first":{},"relDay":{},"firstWin":null,"beatRina":null,"night":{"last":null,"rina":0,"games":[]}}', f'a bad save.tiles reads safely: {sv[1]}')
     check(not gg.errors and not gg.ev("DEV.errors.length"), f'seating: no errors: {gg.errors[:3]}')
     gg.close()
 

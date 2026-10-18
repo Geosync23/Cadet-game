@@ -29,6 +29,7 @@
 #   gifts (0.28.25): store gifts and machine-shop gifts into your hands (giftAdd); a friend's note on your bunk
 #   a reserved training job (0.28.24): the shelf part, the bracket made in the machine shop with the bar, the stops marked, the repair
 #   the note bus (0.28.22): simNote('act', ...) for wash, eat (with), call, buy; your name saved and cleaned
+#   the pause card (0.28.54): Resume focused, Tab stays on it, Enter and Escape resume; the dust stands still while paused
 #   saving: a v 2 save keeps needs; a v 1 save loads with needs at 80; ?nosave neither reads nor writes
 #   --long (0.28.41, the lead's save budget): only this: the whole save from the real arrival (newGameStart(true)) to
 #   day 280 (or --long N), skipTo ten hours at a time, measured after each day's 06:00; prints the size and the biggest
@@ -237,6 +238,15 @@ with sync_playwright() as pw:
     tq = g.ev("(() => { const out = [], s0 = simNow(); simTimeout(() => out.push('fired'), 500); pauseSet(true); window.__step(60, 1000 / 30); const held = out.length, s1 = simNow(); pauseSet(false); window.__step(20, 1000 / 30); return [held, out.length, Math.round(s1 - s0)]; })()")
     print('  a simTimeout across a 2 s pause [fired while paused, fired after, simNow moved while paused (ms)]:', tq)
     check(tq[0] == 0 and tq[1] == 1 and tq[2] < 100, f'a simTimeout waits out a pause, then fires once; the sim clock stands still while paused: {tq}')
+    # the pause card and the keyboard (0.28.54, reviewer 1f): Resume is focused, Tab stays on it, Enter resumes, Escape resumes; dust stands still
+    g.ev("pauseSet(true)"); g.step(2)
+    DU = "JSON.stringify(DUST.length ? Array.from(DUST[0].geo.attributes.position.array.slice(0, 6)) : [])"
+    kb = [g.ev("document.activeElement === document.querySelector('#pauseCard button')"), g.ev(DU)]
+    g.page.keyboard.press('Tab'); g.step(30); kb += [g.ev("document.activeElement === document.querySelector('#pauseCard button')"), g.ev(DU)]
+    g.page.keyboard.press('Enter'); g.step(1); kb.append(g.ev("PAUSE.on"))
+    g.ev("pauseSet(true)"); g.page.keyboard.press('Escape'); g.step(1); kb.append(g.ev("PAUSE.on"))
+    print('  pause card keys [focused, dust, Tab keeps focus, dust after 1 s, Enter resumed, Escape resumed]:', [kb[0], kb[2], not kb[4], not kb[5]], kb[1] == kb[3])
+    check(kb[0] and kb[2] and kb[4] is False and kb[5] is False and kb[1] == kb[3], f'paused: Resume has the keyboard (Tab stays on it, Enter and Escape resume) and the dust stands still: {kb[0]}, {kb[2]}, {kb[4]}, {kb[5]}, {kb[1] == kb[3]}')
 
     print('Walking speed on arrival (0.28.47, the user\'s "walking very slowly at the start"):')
     ar = g.ev(r"""(() => { if (typeof sickNow !== 'function' || typeof careerInit !== 'function') return null;
@@ -1003,6 +1013,50 @@ with sync_playwright() as pw:
             check(c3[0] and c3[0]['stage'] == 'done' and c3[1] == 'cart', f'cart run: unloading in storage ({c3})')
             check(c4[0] is None and not c4[1] and 'Job done' in c4[2], f'cart run: docking the cart finishes the job ({c4})')
             check(fin[0] == 'done' and pre[1] > 0 and fin[1] == pre[0] + pre[1] and fin[2] is None, f'cart run: the delivery is on the shelves ({pre} -> {fin})')
+        # the Repair button (0.28.52, the user's design): at your job's stop with its part in hand, a small Repair button shows
+        # (thumb-sized, on screen); a real click starts the same work as a tap there; hidden while at work, without the
+        # part, or away from the stop. A lamp chore in Deck 4's lift lobby and an oven repair (its seal in hand)
+        if g.ev("typeof handTick === 'function' && typeof CHORES !== 'undefined'"):
+            print('The Repair button (0.28.52):')
+            RB = r"""(() => { handTick(true); const b = document.getElementById('repairBtn'), r = b.getBoundingClientRect();
+              return { shown: !b.hidden && r.width > 0, w: Math.round(r.width), h: Math.round(r.height), x: r.left + r.width / 2, y: r.top + r.height / 2,
+                inside: r.left >= 0 && r.top >= 0 && r.right <= innerWidth && r.bottom <= innerHeight, act: ACT && [ACT.kind, ACT.phase] }; })()"""
+            HJ = r"""((kind) => { for (const j of SHIP.jobs) if (j.claimedBy === 'you' && j.status === 'claimed') { j.claimedBy = null; j.status = 'open'; }
+              actEnd(true); SHIP.player.work = null; SHIP.player.carry = []; const t = shipNow(); let j, pid;
+              if (kind === 'lamp') { const c = choreWhere('lamp').find(c => c.key === '4-lift-1'); pid = c.key;
+                j = { id: 'pcrb-lamp', machine: null, deck: 4, room: c.room, kind: 'chore', chore: 'lamp', target: c.key, title: c.title, tier: 1, stops: c.stops.map(x => ({ ...x })), urgency: 0, posted: t, found: t, claimedBy: 'you', status: 'claimed', start: t, parts: ['lamp'] }; }
+              else { const m = machineById('3-oven-1'); pid = panelPlace(m.id);
+                j = { id: 'pcrb-oven', machine: m.id, deck: 3, room: m.room, kind: Object.keys(JOB_TYPES)[0], urgency: 1, posted: t, found: t, claimedBy: 'you', status: 'claimed', start: t, parts: ['seal'], title: 'Repair the oven' }; }
+              SHIP.jobs.push(j); MACH_REV++; if (kind === 'lamp') jobStepDone(j.id, 0); SHIP.player.carry = j.parts.slice();
+              return pid; })"""
+            PUTAT = r"""((pid, off) => { const s = placeSpot(pid), gl = nearestOpen(s.x + off, s.z, player); player.obj.position.copy(cellPos(...gl)); player.stop(); })"""
+            for kind, deck, want in [('lamp', 4, 'ixStop'), ('oven', 3, 'job')]:
+                g.ev(f"goToDeck({deck})"); g.step(3)
+                pid = g.ev(f"({HJ})('{kind}')")
+                g.ev(f"({PUTAT})('{pid}', 6)"); g.step(5); away = g.ev(RB)
+                g.ev(f"({PUTAT})('{pid}', 0)"); g.step(5); at = g.ev(RB)
+                g.ev("SHIP.player.carry = []"); none = g.ev(RB); g.ev(f"SHIP.player.carry = {json.dumps(['lamp'] if kind == 'lamp' else ['seal'])}")
+                at = g.ev(RB); g.page.mouse.click(at['x'], at['y']); g.step(60); work = g.ev(RB)
+                print(f'  {kind}: away {away["shown"]}, at the stop {at["shown"]} ({at["w"]}x{at["h"]}, on screen {at["inside"]}), no part {none["shown"]}, clicked -> {work["act"]}, then shown {work["shown"]}')
+                check(not away['shown'], f'{kind}: no Repair button 6 m from the stop')
+                check(at['shown'] and at['inside'] and at['w'] >= 44 and at['h'] >= 44, f'{kind}: the Repair button at the stop, thumb-sized and on screen ({at})')
+                check(not none['shown'], f'{kind}: no Repair button without the part')
+                check(work['act'] and work['act'][0] == want and not work['shown'], f'{kind}: clicking Repair starts the work ({work["act"]}) and the button goes')
+                g.ev("actEnd(true)")
+            # 0.28.55 (the lead): never over Put down (player engineer 8's #putDown, under it, lifts above a toast on phones) nor a toast:
+            # a phone screen, at the lamp's stop with the lamp, at rest and with a long toast up
+            RECTS = r"""(() => { const r = id => { const e = document.getElementById(id); if (!e || e.hidden) return null; const b = e.getBoundingClientRect(); return [b.left, b.top, b.right, b.bottom].map(Math.round); };
+              return { repair: r('repairBtn'), put: r('putDown'), toast: document.getElementById('toast').classList.contains('show') ? r('toast') : null }; })()"""
+            over = lambda a, b: bool(a and b and a[0] < b[2] and b[0] < a[2] and a[1] < b[3] and b[1] < a[3])
+            vp = g.page.viewport_size; g.page.set_viewport_size({'width': 390, 'height': 844})
+            g.ev("goToDeck(4)"); g.step(3); pid = g.ev(f"({HJ})('lamp')"); g.ev(f"({PUTAT})('{pid}', 0)"); g.step(5)
+            for label, js in [('at rest', ''), ('with a toast', "toast('Main storage', 'You take a lamp. Now replace a lamp: lift lobby. A long line, so it wraps on a phone, and wraps again.')")]:
+                if js: g.ev(js)
+                for k in range(8): g.step(8); g.page.wait_for_timeout(120)   # real time: the toast's transition, Put down's lift
+                rc = g.ev(RECTS); print(f'  phone, {label}:', rc)
+                check(rc['repair'] and not over(rc['repair'], rc['put']) and not over(rc['repair'], rc['toast']) and rc['repair'][3] <= 844, f'phone, {label}: Repair shown, clear of Put down and the toast ({rc})')
+            g.page.set_viewport_size(vp); g.step(3)
+            g.ev("for (const j of SHIP.jobs) if (j.claimedBy === 'you' && j.status === 'claimed') { j.claimedBy = null; j.status = 'open'; } SHIP.jobs = SHIP.jobs.filter(j => !String(j.id).startsWith('pcrb-')); SHIP.player.carry = []; SHIP.player.work = null; MACH_REV++; handTick(true)")
     else:
         print('The job loop: this build has no section 17 jobs (myJob, finishJob): skipped')
 
