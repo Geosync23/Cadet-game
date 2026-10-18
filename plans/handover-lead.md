@@ -435,3 +435,4 @@ Read: this section, the "STATE AT 19:35" section above, TEAM.md, CLAUDE.md (user
 - ~00:11 user answered stores Q13-16 (defaults; Q14 + visual indicator on the right shelf) -> planner folding in. Awaiting the user's plan go-ahead.
 - ~00:13 plan-0607 e7220d7 published (v3, all answers in, no open questions; wrong shelf -> right shelf glows). Planner archived (~$12.42; handover plans/handover-planner-0607.md). Waiting on the user: approve + start now or after 0.60.6.
 - ~00:16 USER: one update at a time. 0.60.7 waits until 0.60.6 is live (and presumably played); no 0.60.7 hiring yet. Plan approval not yet given explicitly.
+- ~00:33 1g PASS f3b5186 (0.28.56) -> BM3 merged with putdown -> cand-0606 2757963. PE9 shuffle fix ec6e8a0 pushed (bubble, cooldown) -> 1g quick verdict, then the final run. PE7 archived (~$13.94).
