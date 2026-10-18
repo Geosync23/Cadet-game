@@ -358,11 +358,13 @@ if '--quick' not in sys.argv:
 # places, each tracked with the goal arrow on a tap and stopped on a second; the device's app labels on one line on a 320 px phone
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1], 320, 640)
+    g.page.add_style_tag(content='#needStrip{display:flex!important}')   # Game hides it for screenshots; the button sits under it on phones
     if g.ev("!!document.getElementById('trkBtn')"):
         print('== tracked')
         g.ev("typeof introSkip === 'function' && introSkip()"); g.step(3)
         g.ev("skipTo(17 * 60 + 40)"); g.step(3)
-        job = g.ev("(() => { const o = openJobs('you'); return o.length && claimJob(o[0].id) ? myJob().id : null })()"); g.step(3)
+        job = g.ev("(() => { const o = openJobs('you'); return o.length && claimJob(o[0].id) ? myJob().id : null })()")
+        g.ev("clearGoal(); if (myJob()) SHIP.player.track = myJob().id"); g.step(3)   # as Take it at the board does (no other arrow up)
         ROWS = "JSON.stringify([...document.querySelectorAll('#trkList button')].map(b => [b.querySelector('b').textContent, b.classList.contains('goal'), b.disabled]))"
         g.page.click('#trkBtn'); g.step(2)
         rows = json.loads(g.ev(ROWS)); titles = [r[0] for r in rows]
