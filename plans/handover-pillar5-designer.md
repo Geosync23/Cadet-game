@@ -2,6 +2,8 @@
 
 - **Role:** design only. Reports ONLY to the lead (TEAM.md names it; on 2026-10-18 lead 11, session_01YKC3CGA9VS4b7wuqLbPT7V) with send_message: one line when starting, one per finished page with its commit hash, at once if blocked. Never contacts the user. Never starts sessions. Stay inside `plans/` and `design-doc.md`.
 - **Branch:** `claude/p5-design` (made from `claude/pillar5-plan` 93a5a7f). Predecessor: session_01FDy4na3u2FS8L8vEjR6gAR (archived), then session_01VXENaUt4vdyYtr3KjVZk9z (this note's writer, 2026-10-18).
+- **Messaging rule (lead 11, ~09:00):** answer builders' questions directly (no cc to the lead); message the lead ONLY for a design call beyond the approved pages or a real blocker. Record every answer in the page's "Builders' questions" section.
+- **Seats (2026-10-18):** C Works career session_01LgTgzjeqLNrjeCa2iRzbYx; H cases session_013nqpqRFX4hh3cLPhhpZirJ; S systems session_01KxfsfBWkCGcncuuH2n1hFB; R reviewer session_01MSLjUdmeVJetxFhh9PqzLt; seat A's branch is claude/deck-0607.
 - **Authority overnight (2026-10-18):** the lead approves or rejects each page against the approved plan; nothing waits for the user (`plans/overnight-decisions.md` on `claude/lead-pillar1`, last section).
 
 ## Done (2026-10-18)
@@ -23,6 +25,9 @@
 - **Deck 4 has no light-relay machine with a panel** (4-lights-1 is a dropped stand-in); real machines list is in the game's `DECKS[n].machines`. P3's first case is `4-washer-2` leaking.
 - **Tiers in code:** junction Tier 3, doorgear Tier 2, valve Tier 2 (so a burst pipe's fix is a Tier 1 joint job).
 - 0.60.7 builds clothes in 15c (`player.clothes`, the onboarding engineer's), the Wednesday delivery as crates (0.33.42), right-shelf parts (0.33.41), `HOLD_MAX` 3 and `shareOut` (0.33.40). Details: `plans/plan-0607.md` on `claude/plan-0607`.
+
+## Since the first pages (all approved; FAQs record the builders' answers)
+- Day 5's teacher is Emeka Halloran (Torres off Thu+Fri), by-lists first-on-shift; the work-step field is `how`; real faults are made by finding worn machines already at the top of faulty (S, key 856); lift machine 5-mainlift-1; galley alarm on 3-galleyplant-1; worksTabAdd; a case kind is open when its ladder row opened; P3 borrows the scanner lesson's escort at Washer 2.
 
 ## Next (in order)
 1. Whatever the lead sends back on the pages (fix and re-push; one line each).
