@@ -252,7 +252,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.47.4
+   STARSHIP CADET: CSV Wren                           build 0.47.5
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -1905,8 +1905,10 @@ const KIT = {
   weightBench(g) {
     box(.32, .1, 1.2, GYM.teal, 0, .45, 0, g); for (const z of [-.5, .5]) box(.3, .4, .06, GYM.frame, 0, .2, z, g);
     for (const x of [-.55, .55]) box(.05, 1.2, .05, GYM.frame, x, .6, -.45, g);
-    const bar = cyl(.018, .018, 1.6, GYM.chrome, 0, 1.15, -.45, g, 8); bar.rotation.z = Math.PI / 2;
-    for (const x of [-.68, .68]) { cyl(.18, .18, .05, GYM.plate, x, 1.15, -.45, g, 16).rotation.z = Math.PI / 2; }
+    const bar = new THREE.Group(); bar.position.set(0, 1.15, -.45); g.add(bar);   // 0.47.5: the bar and its plates, one piece that hides while it's in a lifter's hands (BENCH_BAR)
+    cyl(.018, .018, 1.6, GYM.chrome, 0, 0, 0, bar, 8).rotation.z = Math.PI / 2;
+    for (const x of [-.68, .68]) { cyl(.18, .18, .05, GYM.plate, x, 0, 0, bar, 16).rotation.z = Math.PI / 2; }
+    noMergeAll(bar); BENCH_BAR.g = bar; bar.children[0].onBeforeRender = () => { const on = performance.now() - BENCH_BAR.t > 500; for (const m of bar.children) m.scale.setScalar(on ? 1 : 1e-4); };
     return { w: 1.3, d: 1.3 };
   },
   gymMats(g) {                                           // three mats, a ball and a roller in the stretching corner
@@ -2524,6 +2526,8 @@ const WALL_KIT = {
   },
 };
 
+// 0.47.5: the weight bench's bar: hidden (scaled to nothing) for half a second after anyone presses it (ACTS.bench); dx centres the held bar between the hands
+const BENCH_BAR = { g: null, t: -1e9, dx: .3, rz: .42 };   // rz: the grip's spread, undone so the bar lies level
 // ---- placing things ----
 const FACING = { n: 0, w: Math.PI / 2, e: -Math.PI / 2, s: Math.PI };   // which wall the back of a piece is against
 // place a floor piece in room-local units (0,0 = room's top-left corner)
@@ -5160,7 +5164,7 @@ DECKS[3] = {
     { id: '3-gym-3', type: 'gym', at: [28, 20], xy: [28.5, 20.5], walk: [28, 19], face: 's', pose: 'stand', anim: 'run', y: 0.16, room: 'F' },
     { id: '3-gym-4', type: 'gym', at: [30, 20], xy: [30.6, 20.2], walk: [31, 20], face: 's', pose: 'sit', anim: 'row', y: .43, room: 'F', cush: 0.34 },
     { id: '3-gym-5', type: 'gym', at: [30, 15], xy: [30.92, 15.6], walk: [30, 15], face: 'e', pose: 'stand', room: 'F' },
-    { id: '3-gym-6', type: 'gym', at: [29, 16], xy: [29.4, 16], walk: [28, 15], face: 'e', pose: 'lie', room: 'F' },
+    { id: '3-gym-6', type: 'gym', at: [29, 16], xy: [29.4, 16], walk: [28, 15], face: 'e', pose: 'lie', anim: 'bench', room: 'F' },   // 0.47.5: the bench press
     { id: '3-gym-7', type: 'gym', at: [23, 15], xy: [23.85, 15.6], walk: [23, 15], face: 's', pose: 'lie', room: 'F', y: .035 },   // 0.27.39: on the floor mat (top .015; the back sits within about 2 cm, by build), not the default bed height (the user: "they hover")
     { id: '3-gym-8', type: 'gym', at: [24, 15], xy: [24.6, 15.6], walk: [24, 15], face: 's', pose: 'lie', room: 'F', y: .035 },
     { id: '3-gym-9', type: 'gym', at: [25, 15], xy: [25.35, 15.6], walk: [25, 15], face: 's', pose: 'lie', room: 'F', y: .035 },
@@ -7912,7 +7916,7 @@ function placeSun(p) {
 }
 
 const DAY = { sky: col('#e3ebf1'), gnd: col('#5b4d41'), hemi: .85, sun: col('#fff2e0'), sunI: 1.6, exp: 1.05, bg: new THREE.Color('#151d2c') };
-const NIGHT = { sky: col('#6d7ca3'), gnd: col('#2a1f18'), hemi: .32, sun: col('#ffb371'), sunI: .5, exp: 1.0, bg: new THREE.Color('#0a0e17') };
+const NIGHT = { sky: col('#7886ad'), gnd: col('#30241c'), hemi: .42, sun: col('#ffb371'), sunI: .62, exp: 1.03, bg: new THREE.Color('#0a0e17') };   // 0.47.5 (playtest: "a little brighter"): hemi .32, sunI .5, exp 1.0, sky #6d7ca3, ground #2a1f18 before; the dimming still starts at 20:30 (nightAt)
 let nightT = 0;                                          // 0 day ... 1 night; follows the clock (section 13)
 function applyLight(k) {
   const lerp = THREE.MathUtils.lerp;
@@ -7941,7 +7945,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.47.4';                           // keep in step with the header's build line
+const GAME_BUILD = '0.47.5';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -38357,6 +38361,7 @@ function poseOf(pl) {
   if (base === 'sit' && !pl.anim && pl.type !== 'callhome') return base;   // by type, only booths and the gym are busy sitting (the music room's beanbags listen)
   if (base === 'sit' && ACT_SEATED.has(act)) return 'sit:' + act;
   if (base === 'lie' && act === 'lift') return 'lie:lift';
+  if (base === 'lie' && act === 'bench') return 'lie:bench';   // 0.47.5: the weight bench (its place says anim: 'bench')
   return base;
 }
 const _parsed = new Map(), _parsedHi = new Map();          // 0.27.30: seated-height poses in their own map (no key string to build)
@@ -38425,7 +38430,7 @@ const ACTS = {
     for (const leg of r.legs) {
       const th = (t * 5 + ph * 6.283) + (leg === r.legs[0] ? 0 : Math.PI);
       const t0 = leg.thigh.rotation.x, k0 = leg.knee.rotation.x, a0 = leg.ankle.rotation.x;
-      const ang = legIK(leg, ANK + (.32 + .13 * Math.sin(th)) / h - (hy - HIP_OFF), (.35 + .13 * Math.cos(th)) / h);
+      const ang = legIK(leg, ANK + (.32 - .13 * Math.sin(th)) / h - (hy - HIP_OFF), (.35 + .13 * Math.cos(th)) / h);   // 0.47.5 (playtest): pedalling forward, down the front
       leg.thigh.rotation.x = L(t0, leg.thigh.rotation.x, s); leg.knee.rotation.x = L(k0, leg.knee.rotation.x, s); leg.ankle.rotation.x = L(a0, -ang, s);
     }
     r.torso.rotation.x = L(r.torso.rotation.x, .32, s);
@@ -38435,6 +38440,11 @@ const ACTS = {
   run: { f(r, s, t) {                                    // the legs run in place (the gait, in animateActivity); arms bent and pumping
     for (const a of r.arms) { a.el.rotation.x = L(a.el.rotation.x, -1.5, s); a.sh.rotation.z = L(a.sh.rotation.z, a.side * .12, s); }
     r.torso.rotation.x = L(r.torso.rotation.x, .1, s);
+  } },
+  bench: { props: { R: 'barbell' }, f(r, s, t, b, ph) {           // 0.47.5 (playtest): the bench press: the rack's bar in both hands, down to the chest and up, together
+    const c = .5 - .5 * Math.cos(t * 1.5 + ph); if (s > .5) BENCH_BAR.t = performance.now();   // the rack's own bar hides while it's in someone's hands
+    for (const a of r.arms) armTo(a, s, L(-.75, -1.5, c), L(-1.45, -.05, c), .42, .2);
+    r.head.rotation.x = L(r.head.rotation.x, -.05, s);
   } },
   lift: { props: { R: 'dumbbell', L: 'dumbbell' }, f(r, s, t, b, ph) {
     for (const a of r.arms) {
@@ -38519,6 +38529,11 @@ const ACTS = {
     r.head.rotation.x = L(r.head.rotation.x, -.15 + .3 * fold, s);
   } },
   talk: { f(r, s, t, b, ph) {
+    if (b === 'sit') {                                    // 0.47.5 (playtest, "seated arm-waving"): seated, the hands stay on the lap; now and then one opens a little
+      for (const a of r.arms) { const g = pulse(t, 9 + 2 * a.side, 1.8, ph + a.side * 4.1); armTo(a, s, L(SIT_LAP.sx, -.42, g), L(SIT_LAP.ex, -1.2, g), L(SIT_LAP.sz, .1, g), L(SIT_LAP.hx, -.15, g)); }
+      r.head.rotation.x = L(r.head.rotation.x, .05 * Math.sin(t * 2.3 + ph), s); r.head.rotation.y = L(r.head.rotation.y, .2 * Math.sin(t * .4 + ph), s);
+      return;
+    }
     for (const a of r.arms) {
       const g = pulse(t, 5 + a.side, 1.6, ph + a.side * 1.7);
       armTo(a, s, L(b === 'sit' ? SIT_LAP.sx : -.08, -.75, g) + .1 * g * Math.sin(t * 4), L(b === 'sit' ? SIT_LAP.ex : -.25, -1.3, g), L(b === 'sit' ? SIT_LAP.sz : .12, .3, g), L(b === 'sit' ? SIT_LAP.hx : 0, -.3, g));
@@ -38532,6 +38547,7 @@ const CROWD_ANIMS = new Set(Object.keys(ACTS));        // the activities drawn: 
 // Built the first time they're needed, from the character kit's primitives; colours through col(); no R().
 const PROP_BONE = { R: 0, L: 1, C: 2, B: 3 };            // B: the body, at the feet facing forward (a cart)
 const PROP_KIT = {
+  barbell(p) { const a = BENCH_BAR.rz, c = Math.cos(a), n = Math.sin(a); for (const [x, geo, colr] of [[0, cylG(.014, .014, 1.5, 8), '#a4aeb4'], [-.62, cylG(.15, .15, .045, 14), '#2b2f33'], [.62, cylG(.15, .15, .045, 14), '#2b2f33']]) part(p, geo, colr, (BENCH_BAR.dx + x) * c, -.055 + (BENCH_BAR.dx + x) * n, .01, 1, 1, 1, 0, 0, Math.PI / 2 + a); },   // 0.47.5: the bench's bar, centred between the hands
   dumbbell(p) { part(p, cylG(.012, .012, .17, 8), '#a4aeb4', 0, -.055, .01, 1, 1, 1, 0, 0, Math.PI / 2); for (const x of [-.07, .07]) part(p, cylG(.04, .04, .035, 10), '#2b2f33', x, -.055, .01, 1, 1, 1, 0, 0, Math.PI / 2); },
   receiver(p) { part(p, GEO.box, '#2b2f33', 0, -.07, .045, .04, .17, .045, .3); part(p, GEO.sph, '#2b2f33', 0, -.15, .07, .03, .025, .03); },
   basket(p) { part(p, GEO.box, '#2a9d8f', 0, -.2, .02, .24, .12, .16); part(p, GEO.box, '#1f6f66', 0, -.11, .02, .015, .1, .015); },
@@ -39308,8 +39324,8 @@ const POSE_DEMO = (() => {
   if (urlFlag('poses') === null) return null;
   const POSES = ['stand', 'walk', 'work', 'sit', 'lie', 'run', 'row', 'lift', 'lie:lift', 'call', 'sit:call', 'browse',
     'pay', 'play', 'sit:play', 'water', 'cook', 'wash', 'fold', 'drink', 'sit:drink', 'read', 'sit:read', 'talk',
-    'walk+tray', 'walk+toolbox', 'walk+datapad', 'crouch', 'stand+device', 'walk+device', 'punch', 'stretch', 'stand+go', 'walk+go'];
-  const NAMES = { 'lie:lift': 'lift (bench)', 'sit:call': 'call (seated)', 'sit:play': 'play (keys)', 'sit:drink': 'drink (seated)', 'sit:read': 'read (seated)', row: 'row' };
+    'walk+tray', 'walk+toolbox', 'walk+datapad', 'crouch', 'stand+device', 'walk+device', 'punch', 'stretch', 'stand+go', 'walk+go', 'lie:bench', 'sit:talk', 'cycle'];
+  const NAMES = { 'lie:lift': 'lift (mat)', 'lie:bench': 'bench press', 'sit:talk': 'talk (seated)', 'sit:call': 'call (seated)', 'sit:play': 'play (keys)', 'sit:drink': 'drink (seated)', 'sit:read': 'read (seated)', row: 'row' };
   let here = [], furn = null, labels = null, started = false;
   const v = new THREE.Vector3();
   function fill() {
