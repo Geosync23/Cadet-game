@@ -4,9 +4,15 @@ How: behaviour, save and schedule changes in depth (against the piece's approved
 
 ## Passing tips
 - H claude/mech-cases **eece4d4** (0.55.0)
-- W claude/writer-p5 **843bac9** (0.48.84, text; with LOWs)
+- W claude/writer-p5 **76fc413** (0.48.85, text; contains 843bac9; LOWs open)
 
 ## Verdicts
+
+### W 76fc413 (0.48.85): Pillar 5 text batch 2 (Step 2) — PASS (skimmed: content only)
+- 23 files, text plus lines_check placeholders: seven train.* meetings (m1 m2 Torres, m3d m5 m6 Calder, m3i Tomas, m4 Yara), teachers' step lines, step2/inspect/signs/remarks lines, three incident reaction banks.
+- Teachers match the pages and are on shift that weekday (roster: Torres off Thu/Fri, Yara and Tomas off Mon/Tue, Brennan off Fri/Sat): m1 Day 2 Tue, m4 Day 3 Wed, m3i and m5 Day 4 Thu (Brennan watches), m2 and m6 Day 8 Mon.
+- Checks (my run): content_gen bakes clean (27 meetings); lines_check PASS (0 errors, the 2 old warnings).
+- Still open from batch 1: `case.solved` LOW 2, and Halloran's Day 5 lines for train.m7/train.p3 (the lead's call).
 
 ### W 843bac9 (0.48.84): Pillar 5 text batch 1 — PASS with LOWs (skimmed: content only)
 - Own commits only (18b4fa2, 843bac9 on writer-0607 0cc4cdf): content/works/*.lines, keys-p5.md, four train.* meetings, calder/torres-zeke `work` lines, facts.md row, lines_check placeholders. No game code.
