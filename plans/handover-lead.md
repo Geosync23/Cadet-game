@@ -633,3 +633,4 @@ Read: CLAUDE.md, TEAM.md, plans/brief-p5.md (all seats + ids), plans/overnight-d
 - ~18:40 the user: push-notify them on each rec deck update (Lightdisc prototype, architect progress).
 - ~18:40 the user asked to start the rec deck architect now: DA6 session_01WUAfx9EuiZa71hJcWp4VSz (claude/recdeck-build from 0.63.1 a9fad20, series 0.80.x, phase 1 player-only, notes after R1/R3/R6). Ping the user on each update.
 - ~18:48 Lightdisc prototype (claude/lightdisc-proto ba6b4ac) published https://claude.ai/artifact/2HcpxJ8KbEWWqwqsYPb8az; user pinged. Proto engineer session_013LcEsgjMTDMMeiACKLj2bB idle (low memory). Open tuning: sharp-v-sharp games 4-7 min.
+- ~18:50 the user approved the Lightdisc prototype; real game: 'Ask someone to play' by the court (crew comes down), clock pauses with a notice; Tiles gets the same notice (lead: in 0.63.3).

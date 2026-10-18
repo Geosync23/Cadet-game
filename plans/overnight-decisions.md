@@ -122,3 +122,11 @@ All 8 packages approved (Zeke: "all good except he still walks and talks" → he
 | ~17:10 (lead 13) | Zeke now stops to talk (the user's note), which made the Day 0 ramp-to-Works walk take 34 ship minutes and pushed dinner late | Hold the ship clock while Zeke is talking to you on Day 0 before dinner (like the 17:30 manifest hold); walking still takes time | Keeps the readable pacing the user asked for without moving the evening |
 | ~17:12 (the user) | (Follow-up) Pause the clock for Zeke? | **No pause**: Zeke may walk and talk on the tour; he stops only for the greeting and the cabin hand-over; lines readable and wait until you're with him | The user's call |
 | ~17:14 (the user) | Zeke's tour pacing | "Perfect how it is": keep 0.63.1's walk-and-talk pacing; only the greeting, 'Works Department', and first lines waiting until you reach him change | The user's call |
+
+## The user, 2026-10-18 ~18:50 (Lightdisc prototype)
+| Question | The user's answer |
+|---|---|
+| Lightdisc prototype (claude/lightdisc-proto ba6b4ac) | Approved ("you nailed it") |
+| Finding an opponent in the real game | Like Tiles you need an opponent: a button by the court to ask someone to play; they come down to the rec dec |
+| Does time pause while playing? | Yes, and the game must tell you it's paused. Same for Tiles |
+| (lead call) Tiles "time is paused" notice | Goes into the next main build (Step 3, 0.63.3), not 0.63.2, to keep 0.63.2's final run on track |
