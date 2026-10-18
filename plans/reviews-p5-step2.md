@@ -6,6 +6,7 @@ Started by lead 12 (session_01GjWhU9Z9V8RNoR8yyELA9V) at ~11:28 for every Step 2
 Spec: plans/brief-playtest1.md on claude/lead-pillar1 (12b1b87); the user's answers in it are binding. Seats: T traditions session_01X4SZJFeHprDF21NZqU5fGi (claude/traditions-pt1, 0.70.x), X crew sim session_01SNaWA6X5E9i2ZKfMnPTHJf (claude/crew-pt1, 0.71.x), U HUD session_01FcMPTX7mMTHkyr4pxDfNcS (claude/hud-pt1, 0.72.x), C2 works career session_014yREkgPvuwMyxBtoqB1P14 (claude/works-career, 0.44.x), O4 (claude/onboard-pt1), W, P, A5 session_01CHRbUTZc18m7eBck8eWhXj (claude/deck-pt1). Verdicts go to the seat, BM5 and lead 13 (finished reviews, blockers, design calls). Behaviour and saves in depth; lines and tests skimmed. The base is 0.63.1 (claude/p5-cand-s2).
 
 ## Passing tips
+- O5 claude/onboard-pt1 **df61bc2** (0.42.64, the Chief walks over after you're sat; contains 2d213b1)
 - O5 claude/onboard-pt1 **2d213b1** (0.42.60-0.42.63, playtest 1 package O5; item 1 and the nit fixed)
 - T claude/traditions-pt1 **574da73** (0.70.0-0.70.6, playtest 1 package T; the LOW closed in 0.70.5; contains a9fad20)
 - U claude/hud-pt1 **55b2499** (0.72.1, Watch a film; contains 73b40cb)
@@ -33,6 +34,10 @@ Spec: plans/brief-playtest1.md on claude/lead-pillar1 (12b1b87); the user's answ
 ## Failing / waiting on a fix
 
 ## Verdicts
+
+### O5 75d21e7 + df61bc2 (0.42.64): the Chief has dinner at the far table and walks over after you're sat — PASS (R3)
+- The 'chief' step's `away: { calder: '3-mess-44' }` (introBeats plans her there; the place exists). She's sent over (crewComeTo) on the dinner chat's last line, at its end (`table:end`, saved in I.done), if it was missed, or 10 minutes after the chief step began (a reload mid-chat); `introChief` waits for `introCalderIn()` (within 1.2 m of her seat), 10 minutes at most. `INTRO_UI.tableD` is reset in introUiReset. No R(), no new save field.
+- Checks (my runs on df61bc2): **intro_check --evening OK** (at the chat 18:40 she's 7.6 m away; her welcome at 18:46 with her 0.7 m from her seat, after the chat; the bunk arrow 19:20); **intro_check --week OK**; cadet_test vs 2d213b1 **ALL IDENTICAL**.
 
 ### A5 080b0b8 (0.47.10): a bubble's layout slide capped at 900 px a second — PASS (R3)
 - BM6's combine failed bubble_check (a 63.6 px first step when a stacked pair comes apart). In `bubbles.place()` the eased offset now moves at most `900 * dts` px a frame (dts from performance.now, capped at 0.1 s; the first frame snaps as before). Display only.
