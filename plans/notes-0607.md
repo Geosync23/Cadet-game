@@ -47,3 +47,5 @@ Q1, Q4, Q5, Q8, Q9 (today+6), Q10, Q11 (Deck 2 suite), Q12 as suggested. Q2: add
 > If arrow is presenr then iniactor whixh floor its on when slecting floor panel on elevator.
 >
 > Two elevator panels, one on each aide to serve any perspectivr
+
+> Oh one last thing the shuttle is good but needs just a little more sleek-ness. Its very boxy.
