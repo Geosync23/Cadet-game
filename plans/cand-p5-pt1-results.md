@@ -20,3 +20,4 @@ Build master 5 (BM5, session_01DbBJ7iK6TrrADyEw7qbCsQ) on claude/p5-cand-pt1; re
 - ~18:54 R3 PASS T 2a6fa43 (1 LOW for later: Cook-along's leader) and W 97fa9ae. Lead is now lead 14 (session_01RHtJv7GJDi4qosgU8Gb2b8, TEAM.md a97c7c6). Waiting on: X 0.71.1, O5 fix + Day 0 auto-sit, U film hobby, DA5 bubble flicker.
 - trial p2 day_check 0-8 all OK (09:00 shift, with X WIP 0.71.1's crew side). Lane free; player_check on part-t running.
 - ~19:11 T new head 574da73 (0.70.6 = ae7c877 Cook-along leader + a9fad20 merged + the lap's line keeps the lane clear); needs R3, else T stays 2a6fa43. U film hobby 55b2499 (0.72.1; with R3).
+- part-t (passed tips + O5 e4fe793 + T 807c071): player_check OK (1852 s).
