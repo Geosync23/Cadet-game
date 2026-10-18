@@ -34597,9 +34597,9 @@ function introNewGame(arriving) { try { introUiReset(); } catch (e) {} if (arriv
 const INTRO_BED_GOAL = 'Head to your bunk when you\'re done looking around';   // a suggestion, not an order (the user, 0.60.5a)
 function introUiReset() {
   const U = INTRO_UI; (U.said || []).forEach(simClear); U.night = null; U.chiefD = null;
-  const own = typeof IX_GOAL !== 'undefined' && IX_GOAL && (IX_GOAL.label === INTRO_BED_GOAL || IX_GOAL.label === 'Zeke Torres');
+  const own = typeof IX_GOAL !== 'undefined' && IX_GOAL && (IX_GOAL.label === INTRO_BED_GOAL || IX_GOAL.label === 'Zeke Torres' || INTRO_ARROW_LABELS.has(IX_GOAL.label));
   if (own && typeof clearGoal === 'function') clearGoal();
-  Object.assign(U, { min: null, step: undefined, said: [], callAt: 0, goal: false, goalKey: '', meet: [], next: 0, still: 0, stillAt: null, more: 0, bed: false, tour: [], pause: null, calder: false, calls: 0, beat: null, sow: false });
+  Object.assign(U, { arrow: null, arrowAt: 0, min: null, step: undefined, said: [], callAt: 0, goal: false, goalKey: '', meet: [], next: 0, still: 0, stillAt: null, more: 0, bed: false, tour: [], pause: null, calder: false, calls: 0, beat: null, sow: false });
   if ('pilotAt' in U) Object.assign(U, { pilotAt: 0, ternOpened: false, ternShut: false });
 }
 // section 14 plans the crew again when this changes (introBeats depends on nothing else)
@@ -34672,7 +34672,7 @@ function introAdvance(t, here) {
 // "I know my way around" (the device), the week's end, or skip: the scripted beats stop, the list stays as a checklist
 function introEnd(finished) {
   const I = SHIP.intro; if (!I.on || I.ended) return;
-  I.ended = true; I.step = null;
+  I.ended = true; I.step = null; if (typeof introArrowClear === 'function') introArrowClear();
   for (const k of INTRO_FLAGS) if (k !== 'mug' && k !== 'seedling') introFlagSet(k);
   if (typeof jobRelease === 'function') jobRelease();   // section 17: any of the week's jobs you haven't taken go to the crew
   introMarkArrived();
@@ -35083,6 +35083,60 @@ function introWeekMeetings(now) {
     if (b.id === 'd2-solo' && typeof jobReserved === 'function' && typeof claimJob === 'function') { const id = jobReserved(3); if (id) claimJob(id); }
   }
 }
+// ---- the first-time arrows (onboarding 5, 0.42.60, the user's playtest notes for 0.63.2): the goal arrow (15b's setGoal)
+// shows the way the first time you're told to do something. Day 1: the time clock once you're in the Works bay and have
+// been told to clock in (the briefing over, or introArrowTold('clock') from whoever says it), then the job board the
+// moment you've clocked in, until you take a job (your job's own arrow then). The servery the first time the Chief tells
+// you to eat (Calder's "Eat something" at the arrival dinner; Brennan's Day 1 dinner beat if you missed her), unless
+// you've a tray or have eaten. Each is shown again after a reload until it's done (I.done 'arrow:<id>', saved), never
+// over someone else's arrow, and cleared once done or past its time.
+const INTRO_ARROWS = {
+  clock: { deck: 5, place: '5-timeclock-1', label: 'Clock in at the time clock' },
+  board: { deck: 5, item: /job board/i, room: 'w', label: 'Take a job at the job board' },
+  eat: { deck: 3, item: /^servery$/i, label: 'Get your dinner at the servery' },
+};
+const INTRO_ARROW_LABELS = new Set(Object.values(INTRO_ARROWS).map(a => a.label));
+function introArrowTold(id) { if (introOn() && INTRO_ARROWS[id] && SHIP.intro.done['told:' + id] === undefined) SHIP.intro.done['told:' + id] = Math.floor(shipNow()); }
+function introArrowClear() {
+  INTRO_UI.arrow = null;
+  if (typeof IX_GOAL !== 'undefined' && IX_GOAL && INTRO_ARROW_LABELS.has(IX_GOAL.label) && typeof clearGoal === 'function') clearGoal();
+}
+// which arrow is wanted now, or null; marks the ones that are done or past
+function introArrowWant(now) {
+  const I = SHIP.intro, d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440, fin = id => { if (I.done['arrow:' + id] === undefined) I.done['arrow:' + id] = Math.floor(now); };
+  const P = SHIP.player, late = m >= 20 * 60 + 30;        // dinner's till half eight
+  if (P.tray || ACT && (ACT.kind === 'queue' || ACT.kind === 'eat')) I.done['ate:last'] = Math.floor(now);   // the last minute you had food in hand (or were queueing, eating)
+  if (I.done['arrow:eat'] === undefined) {
+    const at = typeof I.done['chief:end'] === 'number' ? I.done['chief:end'] : I.done['d1-dinner:said'];   // told to eat (null: walked away from the Chief)
+    if (typeof at === 'number') { if (late || d > 1 || I.done['ate:last'] !== undefined && I.done['ate:last'] >= at - 60) fin('eat'); else return 'eat'; }
+    else if (d > 1 || d === 1 && late) fin('eat');
+  }
+  if (d > 1 || typeof careerClockedIn !== 'function') { fin('clock'); fin('board'); return null; }
+  if (d < 1) return null;
+  const out = m >= (typeof CAREER !== 'undefined' ? CAREER.clockOut : 1020);
+  if (I.done['arrow:clock'] === undefined) {
+    let inBay = false; try { inBay = deckDef.num === 5 && roomAt(...player.here()) === 'w'; } catch (e) { inBay = false; }
+    if (careerClockedIn(1) || out) fin('clock');
+    else {
+      if (I.done['told:clock'] === undefined && inBay && !DIALOGUE && I.done['d1-briefing:met'] !== undefined) I.done['told:clock'] = Math.floor(now);   // the briefing's over (or missed) and you're in the bay
+      if (I.done['told:clock'] !== undefined) return 'clock';
+    }
+  }
+  if (I.done['arrow:board'] === undefined && careerClockedIn(1)) {
+    if (out || typeof myJob === 'function' && myJob()) fin('board');
+    else return 'board';
+  }
+  return null;
+}
+function introArrowTick() {
+  const t = simNow(); if (t < (INTRO_UI.arrowAt || 0)) return; INTRO_UI.arrowAt = t + 250;   // four times a second
+  const id = introArrowWant(Math.floor(shipNow())), g = id && INTRO_ARROWS[id];
+  const cur = typeof IX_GOAL !== 'undefined' ? IX_GOAL : null, ours = cur && INTRO_ARROW_LABELS.has(cur.label);
+  if (!g) { if (INTRO_UI.arrow) introArrowClear(); return; }
+  if (cur && !ours) return;                               // someone else's arrow is up: ours waits for it
+  if (!cur || cur.label !== g.label) setGoal(g);
+  INTRO_UI.arrow = id;
+}
 function introTick() {
   if (INTRO_BOOT) { INTRO_BOOT = false; if (typeof newGameStart === 'function') newGameStart(true); }
   if (!introOn() || typeof player === 'undefined') return;
@@ -35114,9 +35168,9 @@ function introTick() {
   // his lines for a step once its time has come and no meeting is on ("I'm on Four if you need me" waits for 19:00)
   const cur = introStepById(I.step);
   if (I.step !== INTRO_UI.step && !DIALOGUE && (!cur || Math.floor(shipNow()) >= introAbs(cur.day, cur.at))) { INTRO_UI.step = I.step; }   // ('free' said walk.free here until 0.42.27: his goodnight, introNightTick, says it now)
-  introTourTick(); introNightTick(); introBedTick(); introTernTick(); introBeatTick(); introFollowTick();
+  introTourTick(); introNightTick(); introBedTick(); introTernTick(); introBeatTick(); introFollowTick(); introArrowTick();
   // the goal arrow points at him while he's leading you (section 15b's setGoal), and is cleared when he lets you go
-  const st = introStep(), lead = !DIALOGUE && introEscorting(st);   // while he's yours, not over a meeting
+  const st = introStep(), lead = !DIALOGUE && introEscorting(st) && !INTRO_UI.arrow;   // while he's yours, not over a meeting (nor over a first-time arrow: the servery after the Chief's "Eat something")
   if (lead) {
     const a = introWalker(), d = st.checkpoint.deck;
     const g = a && deckDef.num === d ? { deck: d, at: cellAt(a.x, a.z), label: 'Zeke Torres' } : { deck: d, at: st.checkpoint.tile, label: 'Zeke Torres' };
@@ -35125,7 +35179,7 @@ function introTick() {
     if (a && Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) > 6 && simNow() - INTRO_UI.callAt > 15000 && simNow() >= INTRO_UI.next && typeof bubbleSay === 'function') {
       INTRO_UI.callAt = simNow(); bubbleSay(a.h, (introLines('call') || [])[0], 3.5); INTRO_UI.next = simNow() + INTRO_TOUR_GAP;   // never over a tour line
     }
-  } else if (INTRO_UI.goal) { INTRO_UI.goal = false; INTRO_UI.goalKey = ''; if (typeof clearGoal === 'function') clearGoal(); }
+  } else if (INTRO_UI.goal) { INTRO_UI.goal = false; INTRO_UI.goalKey = ''; if (typeof clearGoal === 'function' && !INTRO_UI.arrow) clearGoal(); }
 }
 
 // =====================================================================
