@@ -35124,7 +35124,8 @@ function introArrowWant(now) {
     let inBay = false; try { inBay = deckDef.num === 5 && roomAt(...player.here()) === 'w'; } catch (e) { inBay = false; }
     if (careerClockedIn(1) || out) fin('clock');
     else {
-      if (I.done['told:clock'] === undefined && inBay && !DIALOGUE && I.done['d1-briefing:met'] !== undefined) I.done['told:clock'] = Math.floor(now);   // the briefing's over (or missed) and you're in the bay
+      const brief = INTRO_WEEK.find(b => b.id === 'd1-briefing'), opened = I.done['d1-opener'] !== undefined || I.done['d1-briefing:met'] !== undefined && now >= introAbs(1, brief.until) + 5;   // Zeke's training-day opener done (onboarding 4's 'd1-opener'), or the briefing's window five minutes gone
+      if (I.done['told:clock'] === undefined && inBay && !DIALOGUE && opened) I.done['told:clock'] = Math.floor(now);
       if (I.done['told:clock'] !== undefined) return 'clock';
     }
   }
