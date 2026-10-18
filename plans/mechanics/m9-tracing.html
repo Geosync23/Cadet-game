@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tracing Spec</title>
+<style>
+:root{--ink:#e8eef0;--muted:#93a6ae;--teal:#4cc3b5;--gold:#e9c46a;--rose:#e58f7a;--glass:rgba(13,21,33,.78);--line:rgba(150,200,196,.22);--chip:rgba(76,195,181,.14)}
+*{box-sizing:border-box}
+html,body{margin:0;background:#121a27;color:var(--ink);font-family:"Avenir Next","Segoe UI",system-ui,sans-serif}
+body{background:radial-gradient(ellipse at 50% 20%,#22304a 0%,#141c2b 60%,#0c111b 100%) fixed;line-height:1.5}
+header{padding:18px 16px 4px;max-width:1100px;margin:0 auto}
+h1{font-size:21px;font-weight:600;margin:0}
+h2{font-size:17px;font-weight:600;margin:0 0 8px;color:#bdeee6}
+h3{font-size:14.5px;font-weight:600;margin:12px 0 4px;color:#d9eeea}
+.sub{font-size:13.5px;color:var(--muted);margin-top:4px}
+.draft{display:inline-block;font-size:11.5px;color:#14202a;background:var(--gold);border-radius:999px;padding:2px 9px;margin-left:6px;vertical-align:2px}
+nav{position:sticky;top:0;z-index:5;background:rgba(14,20,31,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+nav div{display:flex;gap:6px;overflow-x:auto;padding:8px 16px;max-width:1100px;margin:0 auto;-webkit-overflow-scrolling:touch}
+nav a{flex:none;text-decoration:none;border:1px solid var(--line);background:var(--glass);color:var(--ink);font-size:13px;padding:6px 11px;border-radius:999px}
+nav a:focus-visible,nav a:hover{border-color:var(--teal);color:#bdeee6;outline:none}
+main{max-width:1100px;margin:0 auto;padding:6px 16px 40px}
+section{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:14px 0;scroll-margin-top:56px}
+p{margin:6px 0;font-size:14px;color:#d6e0e3}
+ul{margin:6px 0;padding-left:20px;font-size:14px;color:#d6e0e3}
+li{margin:3px 0}
+.note{font-size:12.5px;color:var(--muted)}
+.grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.card{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.025)}
+.card b{display:block;color:#bdeee6;font-size:14px;margin-bottom:2px}
+.card span{font-size:13px;color:#cfd9dc}
+.card .meta{display:block;font-size:12px;color:var(--muted);margin-top:4px}
+.tag{display:inline-block;font-size:11.5px;border-radius:999px;padding:1px 8px;margin:2px 4px 0 0;background:var(--chip);color:#bdeee6;border:1px solid var(--line)}
+.tag.new{background:rgba(233,196,106,.16);color:#f1dca0}
+.tag.old{opacity:.75}
+.steps{list-style:none;padding:0;margin:8px 0;counter-reset:s}
+.steps li{position:relative;padding:8px 10px 8px 46px;border-left:2px solid rgba(76,195,181,.35);margin:0 0 0 14px}
+.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:-15px;top:8px;width:28px;height:28px;border-radius:50%;background:#183040;border:1px solid var(--teal);color:#bdeee6;font-size:12.5px;display:flex;align-items:center;justify-content:center}
+.steps time{display:block;font-size:12px;color:var(--gold)}
+.steps b{color:#e4f3f0;font-weight:600}
+.steps span{display:block;font-size:13.5px;color:#cfd9dc}
+.week{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.day{border:1px solid var(--line);border-radius:12px;padding:9px 10px;background:rgba(255,255,255,.02)}
+.day h4{margin:0 0 4px;font-size:13.5px;color:var(--gold);font-weight:600}
+.day p{font-size:12.5px;margin:4px 0;color:#cfd9dc}
+.day .who{color:#bdeee6;font-weight:600}
+.lines{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;background:#0b141c;border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:#9fe7dc;white-space:pre-wrap;overflow-x:auto;margin:8px 0}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0}
+.flow .box{border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:13px;background:rgba(255,255,255,.03)}
+.flow .arrow{color:var(--teal)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:12px}
+.tablewrap{overflow-x:auto}
+.waves{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+.wave{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.025)}
+.wave b{color:var(--gold);display:block}
+.wave .ci{display:block;margin-top:6px;font-size:12.5px;color:#f1dca0}
+ol.q{padding-left:22px;font-size:14px;color:#d6e0e3}
+ol.q li{margin:6px 0}
+ol.q em{color:var(--muted);font-style:normal;font-size:12.5px}
+svg text{font-family:inherit}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;color:#9fe7dc;background:rgba(0,0,0,.25);padding:0 4px;border-radius:4px;word-break:break-word}
+section.builder{border-color:rgba(233,196,106,.45)}
+section.builder h2{color:var(--gold)}
+.status{display:inline-block;font-size:11.5px;color:#14202a;background:var(--teal);border-radius:999px;padding:2px 9px;margin-left:6px;vertical-align:2px}
+td code{white-space:normal}
+</style>
+</head>
+<body>
+<header>
+  <h1>M9 · Tracing connected faults (Day 12, Calder; the pipe kit) <span class="draft">spec for approval</span></h1>
+  <div class="sub">Tier 2's new kind of thinking: a fault that shows in one place and starts somewhere else. Water and heat run through pipes between rooms and decks; with the pipe kit you read the flow at each machine along the line and follow the low reading back to its cause. Step 3, sub-block 24i (seat M3). Plan Part 2, M9; P5 "Follow the line" is how it gets harder (Step 5).</div>
+</header>
+<nav><div><a href="#plain">In plain words</a><a href="#day">Day 12</a><a href="#lines">The lines</a><a href="#grow">How it grows</a><a href="#b">Builder</a><a href="#save">Save</a><a href="#tests">Tests</a><a href="#ranges">Builds and keys</a><a href="#faq">FAQ</a></div></nav>
+<main>
+
+<section id="plain">
+  <h2>In plain words</h2>
+  <ul>
+    <li><b>The job card names the symptom</b>, not the machine: "Showers weak on Deck 4", "Cold cabins, officers' corridor".</li>
+    <li><b>The verb:</b> with the <b>pipe kit</b> (a new tool, with its lesson), clip it on at a machine's panel and read the flow there (a bar and a word: full, low, very low). Walk along the line reading machines: where the flow is fine before a machine and low after it, that machine is the cause. Then it's an ordinary repair.</li>
+    <li><b>The Chief's notes</b> get a page: "Read the middle first. Halve the line each time."</li>
+    <li><b>Wrong turn costs a walk</b>, never a fail. The board's card says which line it's on; the device's Maps app highlights the line's machines.</li>
+  </ul>
+</section>
+
+<section id="day">
+  <h2>Day 12, Friday: your first, with Calder (Torres is off on Fridays)</h2>
+  <ol class="steps">
+    <li><time>Morning</time><b>"Showers weak on Deck 4"</b><span>Calder hands you the pipe kit at the board ("Your first proper Tier 2 tool. Don't drop it in the manifold").</span></li>
+    <li><time>The line</time><b>Start at the middle</b><span>She shows you the water line on the Maps app, then walks with you to the Deck 5 pumps (the middle): the flow reads full. So the cause is downstream, toward Deck 4.</span></li>
+    <li><time>Halve it</time><b>You read the next</b><span>The Deck 5 branch valve (<code>5-valve-2</code>): full before, low after. "There's your problem."</span></li>
+    <li><time>Fix</time><b>The valve</b><span>A Tier 2 repair (a valve from the Plumbing shelf). The showers on Deck 4 run full again. "Trained: tracing, with Calder."</span></li>
+  </ol>
+  <p class="note">Day 12's small new thing is the head-scratcher kind P1 "When does it happen?" (its own page), and the side jobs open (Step 4). The real-machine ids on this page are the game's (checked 2026-10-18); seat S confirms which rooms each pipe runs through.</p>
+</section>
+
+<section id="lines">
+  <h2>The two lines (Tier 2, using machines that are real in the game today)</h2>
+  <div class="tablewrap"><table>
+    <tr><th>Line</th><th>In order, upstream to downstream</th><th>Symptoms at the end</th></tr>
+    <tr><td><b>Water</b></td><td>Deck 3 recycler (<code>3-recycler-1</code>) → filter bank (<code>3-filter-1</code>) → UV steriliser (<code>3-uv-1</code>) → Deck 3 pump (<code>3-pump-1</code>) → the spine → Deck 5 pumps (<code>5-pump-1</code>, <code>-2</code>) → branch valves (<code>5-valve-1</code> to Decks 1-3, <code>5-valve-2</code> to Decks 4-6)</td><td>weak showers, slow basins on the branch's decks</td></tr>
+    <tr><td><b>Heat</b></td><td>Deck 4 heating plant (<code>4-heater-1</code>) → heating pumps (<code>4-pump-1</code>, <code>-2</code>) → the manifold (<code>5-manifold-1</code>) → deck loops</td><td>cold cabins on a deck</td></tr>
+  </table></div>
+  <p class="note">The plan also names the air plant, the main fan and the Deck 5 machine rooms' ducts; in the game those are still stand-ins without service panels (<code>5-airplant-1</code>, <code>-2</code>, <code>5-fan-1</code>), so air lines wait until seat A gives them panel places. Tracing works with water and heat now.</p>
+</section>
+
+<section id="grow">
+  <h2>How it grows</h2>
+  <div class="grid">
+    <div class="card"><b>Stage 1 · One line, one cause</b><span>Day 12.</span></div>
+    <div class="card"><b>Later · P5 Follow the line, P6 Does it add up?</b><span>Branches, sums at junctions, power lines at Tier 3 (Step 5 and 6 pages).</span></div>
+  </div>
+</section>
+
+<section id="b" class="builder">
+  <h2>For the builder (seat M3, sub-block 24i)</h2>
+  <div class="tablewrap"><table>
+    <tr><th>Section</th><th>What</th><th>Owner</th></tr>
+    <tr><td>17</td><td><b><code>MACHINE_LINKS</code></b>: <code>{ water: [ids in order, with branches as { valve: [deck list] }], heat: [...] }</code>; <code>lineFlow(line, id)</code> → 0-1 at a machine (the product of <code>machWorks</code> upstream of it, through it); a <b>traced fault</b>: a <code>repair</code> posted on the symptom (<code>j.symptom = { line, decks }</code>, no machine shown) whose real machine is the worst on the line; when it's fixed, the symptom's job closes. The existing <code>shipEffects</code> water and heat effects already follow these machines</td><td>S</td></tr>
+    <tr><td>24i (new)</td><td>the pipe kit tool (<code>toolGive('pipekit')</code>), the reading step, the job's flow, the training (ladder row <code>m9</code>: Day 12, big, Officer, <code>by: ['calder', 'halloran-emeka']</code>; Torres is off on Fridays)</td><td>M3</td></tr>
+    <tr><td>15</td><td>the reading: <code>how: 'look'</code> at a panel with <code>opts.read = lineFlow</code> (the result card shows the flow before and after the machine)</td><td>P</td></tr>
+    <tr><td>19</td><td>the Maps app highlights a line's machines (a <code>map</code> block option <code>marks: [ids]</code>) — device's piece, built by M3 itself (no device seat)</td><td>M3</td></tr>
+    <tr><td>DECKS</td><td>nothing new: the readings are at the machines' existing panel places</td><td>—</td></tr>
+  </table></div>
+  <ul>
+    <li><b>Training (Day 12):</b> fix it to be the water line's Deck 4-6 branch valve <code>5-valve-2</code> (set faulty at 06:00 Day 12 through <code>jobReserve</code>, slot 11, <code>o.tier: 2</code>); the card: "Showers weak on Deck 4".</li>
+    <li><b>Traced faults after training:</b> a Tier 2 water or heat repair posted for you becomes traced (its card names the symptom) about half the time (<code>schedU(machSeed(id), day, 878)</code> &lt; .5), Officers only.</li>
+    <li><b>Reading words:</b> full (.8+), low (.5-.8), very low (under .5); the bar is the number.</li>
+    <li><b>Notes:</b> <code>simNote('traced', { line, machine })</code>.</li>
+  </ul>
+</section>
+
+<section id="save" class="builder">
+  <h2>Save</h2>
+  <ul><li>The job's <code>j.symptom</code> and <code>j.read = [ids read]</code> in <code>ship.jobs</code>; <code>ship.works.tools.pipekit</code>; <code>use.m9</code>.</li></ul>
+</section>
+
+<section id="tests" class="builder">
+  <h2>Tests</h2>
+  <ul>
+    <li><b><code>machine_check</code></b>: <code>MACHINE_LINKS</code> names only real machines with panel places; a traced fault's symptom and cause are on different machines; fixing the cause clears the symptom and its effect; the flow falls only downstream of a bad machine.</li>
+    <li><b><code>mech_check</code></b> (24i): Day 12's training ends at <code>5-valve-2</code>; reading the middle first finds it in two readings; traced faults about half of Officer water/heat repairs; the same twice.</li>
+  </ul>
+</section>
+
+<section id="ranges" class="builder">
+  <h2>Builds and keys</h2>
+  <ul><li>Seat <b>M3</b>, <code>claude/mech-diagnose</code>, <b>0.53.x</b>. Hash keys <b>878-879</b> (traced or not; spare).</li></ul>
+</section>
+
+<section id="faq">
+  <h2>Builders' questions</h2>
+  <p class="note">None yet.</p>
+</section>
+
+</main>
+</body>
+</html>

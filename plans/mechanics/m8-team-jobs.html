@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Team Jobs Spec</title>
+<style>
+:root{--ink:#e8eef0;--muted:#93a6ae;--teal:#4cc3b5;--gold:#e9c46a;--rose:#e58f7a;--glass:rgba(13,21,33,.78);--line:rgba(150,200,196,.22);--chip:rgba(76,195,181,.14)}
+*{box-sizing:border-box}
+html,body{margin:0;background:#121a27;color:var(--ink);font-family:"Avenir Next","Segoe UI",system-ui,sans-serif}
+body{background:radial-gradient(ellipse at 50% 20%,#22304a 0%,#141c2b 60%,#0c111b 100%) fixed;line-height:1.5}
+header{padding:18px 16px 4px;max-width:1100px;margin:0 auto}
+h1{font-size:21px;font-weight:600;margin:0}
+h2{font-size:17px;font-weight:600;margin:0 0 8px;color:#bdeee6}
+h3{font-size:14.5px;font-weight:600;margin:12px 0 4px;color:#d9eeea}
+.sub{font-size:13.5px;color:var(--muted);margin-top:4px}
+.draft{display:inline-block;font-size:11.5px;color:#14202a;background:var(--gold);border-radius:999px;padding:2px 9px;margin-left:6px;vertical-align:2px}
+nav{position:sticky;top:0;z-index:5;background:rgba(14,20,31,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+nav div{display:flex;gap:6px;overflow-x:auto;padding:8px 16px;max-width:1100px;margin:0 auto;-webkit-overflow-scrolling:touch}
+nav a{flex:none;text-decoration:none;border:1px solid var(--line);background:var(--glass);color:var(--ink);font-size:13px;padding:6px 11px;border-radius:999px}
+nav a:focus-visible,nav a:hover{border-color:var(--teal);color:#bdeee6;outline:none}
+main{max-width:1100px;margin:0 auto;padding:6px 16px 40px}
+section{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:14px 0;scroll-margin-top:56px}
+p{margin:6px 0;font-size:14px;color:#d6e0e3}
+ul{margin:6px 0;padding-left:20px;font-size:14px;color:#d6e0e3}
+li{margin:3px 0}
+.note{font-size:12.5px;color:var(--muted)}
+.grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.card{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.025)}
+.card b{display:block;color:#bdeee6;font-size:14px;margin-bottom:2px}
+.card span{font-size:13px;color:#cfd9dc}
+.card .meta{display:block;font-size:12px;color:var(--muted);margin-top:4px}
+.tag{display:inline-block;font-size:11.5px;border-radius:999px;padding:1px 8px;margin:2px 4px 0 0;background:var(--chip);color:#bdeee6;border:1px solid var(--line)}
+.tag.new{background:rgba(233,196,106,.16);color:#f1dca0}
+.tag.old{opacity:.75}
+.steps{list-style:none;padding:0;margin:8px 0;counter-reset:s}
+.steps li{position:relative;padding:8px 10px 8px 46px;border-left:2px solid rgba(76,195,181,.35);margin:0 0 0 14px}
+.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:-15px;top:8px;width:28px;height:28px;border-radius:50%;background:#183040;border:1px solid var(--teal);color:#bdeee6;font-size:12.5px;display:flex;align-items:center;justify-content:center}
+.steps time{display:block;font-size:12px;color:var(--gold)}
+.steps b{color:#e4f3f0;font-weight:600}
+.steps span{display:block;font-size:13.5px;color:#cfd9dc}
+.week{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.day{border:1px solid var(--line);border-radius:12px;padding:9px 10px;background:rgba(255,255,255,.02)}
+.day h4{margin:0 0 4px;font-size:13.5px;color:var(--gold);font-weight:600}
+.day p{font-size:12.5px;margin:4px 0;color:#cfd9dc}
+.day .who{color:#bdeee6;font-weight:600}
+.lines{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;background:#0b141c;border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:#9fe7dc;white-space:pre-wrap;overflow-x:auto;margin:8px 0}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0}
+.flow .box{border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:13px;background:rgba(255,255,255,.03)}
+.flow .arrow{color:var(--teal)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:12px}
+.tablewrap{overflow-x:auto}
+.waves{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+.wave{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.025)}
+.wave b{color:var(--gold);display:block}
+.wave .ci{display:block;margin-top:6px;font-size:12.5px;color:#f1dca0}
+ol.q{padding-left:22px;font-size:14px;color:#d6e0e3}
+ol.q li{margin:6px 0}
+ol.q em{color:var(--muted);font-style:normal;font-size:12.5px}
+svg text{font-family:inherit}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;color:#9fe7dc;background:rgba(0,0,0,.25);padding:0 4px;border-radius:4px;word-break:break-word}
+section.builder{border-color:rgba(233,196,106,.45)}
+section.builder h2{color:var(--gold)}
+.status{display:inline-block;font-size:11.5px;color:#14202a;background:var(--teal);border-radius:999px;padding:2px 9px;margin-left:6px;vertical-align:2px}
+td code{white-space:normal}
+</style>
+</head>
+<body>
+<header>
+  <h1>M8 · Team jobs (Day 11, Emeka Halloran) <span class="draft">spec for approval</span></h1>
+  <div class="sub">A big job that takes three or four Works crew at once. As a new Officer you're one pair of hands: be at your spot, do your part when your turn comes, and the job moves on. Day 11's morning, before the officer ceremony. Step 3, sub-block 24h (seat M2). Plan Part 2, M8.</div>
+</header>
+<nav><div><a href="#plain">In plain words</a><a href="#day">Day 11</a><a href="#jobs">The jobs</a><a href="#grow">How it grows</a><a href="#b">Builder</a><a href="#tests">Tests</a><a href="#ranges">Builds and keys</a><a href="#faq">FAQ</a></div></nav>
+<main>
+
+<section id="plain">
+  <h2>In plain words</h2>
+  <ul>
+    <li><b>The verb:</b> a team job is posted for a time ("Recycler membrane change, 09:30, Deck 3, a team of four"). You go to your spot when it starts; the lead calls each step; when it's your turn you <b>hold</b> your part (brace the housing, pass the tools, turn the crank) and the job moves on. The crew talk while they work.</li>
+    <li><b>It waits for you a little:</b> up to 15 minutes at the start; if you don't come, they start without you and finish a bit slower. Never a fail.</li>
+    <li><b>Officer and up</b> (the job-by-rank map). Leading one is M24, much later.</li>
+  </ul>
+</section>
+
+<section id="day">
+  <h2>Day 11, Thursday morning (the ceremony is that evening)</h2>
+  <p>Mail at 08:05 from Emeka Halloran, a Works systems officer: "Recycler's membrane bank, 09:30, Deck 3. Need four. You're the fourth. — E.H." At the recycler, Halloran gives each person a spot; yours is the housing brace. Three steps call on you: brace (a hold), pass the new cartridge (a carry from the crate to Halloran), brace again while it seats. About 40 ship minutes. "Trained: team jobs, with Halloran."</p>
+  <p class="note">Torres is off on Thursdays and Fridays; Halloran is the Works officer on shift (by-list <code>['torres-zeke', 'halloran-emeka', 'calder']</code>, first on shift).</p>
+</section>
+
+<section id="jobs">
+  <h2>The jobs (Tier 2 machines that are real today)</h2>
+  <div class="tablewrap"><table>
+    <tr><th>Job</th><th>Machine</th><th>Team</th><th>Your parts</th></tr>
+    <tr><td>Recycler membrane change</td><td><code>3-recycler-1</code></td><td>4</td><td>brace, pass, brace</td></tr>
+    <tr><td>Washer overhaul (all four in a row)</td><td><code>4-washer-1..4</code></td><td>3</td><td>tip and hold, pass the pump, crank the drum</td></tr>
+    <tr><td>Manifold valve bank</td><td><code>5-manifold-1</code></td><td>3</td><td>close the valves in order (turn), hold the bank, open again</td></tr>
+  </table></div>
+  <p class="note">About one a week, on a workday, posted the day before (a big machine's overhaul or its planned service). Never during an incident or on an event day. A case's answer can be "needs a team job" (later bands); there's never a puzzle during one.</p>
+</section>
+
+<section id="grow">
+  <h2>How it grows</h2>
+  <div class="grid">
+    <div class="card"><b>Stage 1 · A pair of hands</b><span>Day 11.</span></div>
+    <div class="card"><b>Stage 2 · Bring the parts</b><span>After 2 team jobs: you're asked to bring the parts for the whole team (a manifest run from stores, M4's verb).</span><span class="meta"><span class="tag new">optional</span></span></div>
+    <div class="card"><b>Leading one</b><span>M24, as an Engine Specialist (Day 25).</span></div>
+  </div>
+</section>
+
+<section id="b" class="builder">
+  <h2>For the builder (seat M2, sub-block 24h)</h2>
+  <div class="tablewrap"><table>
+    <tr><th>Section</th><th>What</th><th>Owner</th></tr>
+    <tr><td>24h (new)</td><td><code>TEAM_JOBS</code> (data, above), the week's team job, the steps and turns, the Day 11 training (ladder row <code>m8</code>: Day 11, big, Officer, <code>by</code> as above)</td><td>M2</td></tr>
+    <tr><td>17</td><td>a <code>team</code> job kind via <code>jobKindAdd</code>: several claims on one job (<code>j.team = [ids]</code>), one start time, finishing puts the machine right (overhaul, restore 90); the crew's claim blocks the team members for the job's span</td><td>S</td></tr>
+    <tr><td>14 / 10 sim</td><td>the team meeting at the machine at the start (each at a team spot), standing at their spots through the job, crew talk (overheard lines)</td><td>the social engineer (sim on call)</td></tr>
+    <tr><td>15</td><td>your turns: <code>how: 'hold'</code> (brace, 2 ship minutes), <code>'carry'</code> (pass), <code>'turn'</code> (crank, valves)</td><td>P</td></tr>
+    <tr><td>8b</td><td><code>brace</code> and <code>crank</code> poses (fall back to <code>work</code>)</td><td>M2 itself</td></tr>
+    <tr><td>DECKS[3], [4], [5]</td><td>team spots by each machine (<code>3-recycler-team-1..4</code>, <code>4-washer-team-1..3</code>, <code>5-manifold-team-1..3</code>)</td><td>seat A</td></tr>
+  </table></div>
+  <ul>
+    <li><b>The plan:</b> <code>teamPlan(week)</code>: one job a week on a workday from Day 11 (Day 11's fixed: the recycler, 09:30); the machine is the Tier 2 machine of <code>TEAM_JOBS</code> most in need, with <code>schedU(week, 0, 876)</code> on ties; the team is the Works crew on shift then whose plans are free (<code>planWhere</code>), lowest load first; you're added if you're Officer or higher. Posted at 16:00 the day before, with Mail.</li>
+    <li><b>The run:</b> the job's steps in order; each step names who (a crew id or <code>'you'</code>); a crew step takes its minutes on paper; your step waits for you (a toast "Your turn: brace the housing" and the goal pointer). If you're not at your spot 15 minutes after the start, your steps go to the lead, and the job takes 20% longer.</li>
+    <li><b>Notes:</b> <code>simNote('team', { id, step, by })</code>; reputation +2 for a team job you were in.</li>
+  </ul>
+</section>
+
+<section id="tests" class="builder">
+  <h2>Tests</h2>
+  <ul>
+    <li><b><code>mech_check</code></b> (24h): the team assembles; waits for you up to 15 minutes; finishes without you, slower; your three turns on Day 11; the machine put right; one a week; the same twice.</li>
+    <li><b><code>day_check</code></b> on a team-job day: everyone reaches their places; draw calls under 450 with 4 crew at the recycler.</li>
+  </ul>
+</section>
+
+<section id="ranges" class="builder">
+  <h2>Builds and keys</h2>
+  <ul><li>Seat <b>M2</b>, <code>claude/mech-incidents</code>, <b>0.51.x</b>. Hash keys <b>876-877</b> (the machine, the team).</li></ul>
+</section>
+
+<section id="faq">
+  <h2>Builders' questions</h2>
+  <p class="note">None yet.</p>
+</section>
+
+</main>
+</body>
+</html>

@@ -1,0 +1,75 @@
+TITLE:Team Jobs Spec
+H1:M8 · Team jobs (Day 11, Emeka Halloran) <span class="draft">spec for approval</span>
+SUB:A big job that takes three or four Works crew at once. As a new Officer you're one pair of hands: be at your spot, do your part when your turn comes, and the job moves on. Day 11's morning, before the officer ceremony. Step 3, sub-block 24h (seat M2). Plan Part 2, M8.
+NAV:plain=In plain words|day=Day 11|jobs=The jobs|grow=How it grows|b=Builder|tests=Tests|ranges=Builds and keys|faq=FAQ
+
+<section id="plain">
+  <h2>In plain words</h2>
+  <ul>
+    <li><b>The verb:</b> a team job is posted for a time ("Recycler membrane change, 09:30, Deck 3, a team of four"). You go to your spot when it starts; the lead calls each step; when it's your turn you <b>hold</b> your part (brace the housing, pass the tools, turn the crank) and the job moves on. The crew talk while they work.</li>
+    <li><b>It waits for you a little:</b> up to 15 minutes at the start; if you don't come, they start without you and finish a bit slower. Never a fail.</li>
+    <li><b>Officer and up</b> (the job-by-rank map). Leading one is M24, much later.</li>
+  </ul>
+</section>
+
+<section id="day">
+  <h2>Day 11, Thursday morning (the ceremony is that evening)</h2>
+  <p>Mail at 08:05 from Emeka Halloran, a Works systems officer: "Recycler's membrane bank, 09:30, Deck 3. Need four. You're the fourth. — E.H." At the recycler, Halloran gives each person a spot; yours is the housing brace. Three steps call on you: brace (a hold), pass the new cartridge (a carry from the crate to Halloran), brace again while it seats. About 40 ship minutes. "Trained: team jobs, with Halloran."</p>
+  <p class="note">Torres is off on Thursdays and Fridays; Halloran is the Works officer on shift (by-list <code>['torres-zeke', 'halloran-emeka', 'calder']</code>, first on shift).</p>
+</section>
+
+<section id="jobs">
+  <h2>The jobs (Tier 2 machines that are real today)</h2>
+  <div class="tablewrap"><table>
+    <tr><th>Job</th><th>Machine</th><th>Team</th><th>Your parts</th></tr>
+    <tr><td>Recycler membrane change</td><td><code>3-recycler-1</code></td><td>4</td><td>brace, pass, brace</td></tr>
+    <tr><td>Washer overhaul (all four in a row)</td><td><code>4-washer-1..4</code></td><td>3</td><td>tip and hold, pass the pump, crank the drum</td></tr>
+    <tr><td>Manifold valve bank</td><td><code>5-manifold-1</code></td><td>3</td><td>close the valves in order (turn), hold the bank, open again</td></tr>
+  </table></div>
+  <p class="note">About one a week, on a workday, posted the day before (a big machine's overhaul or its planned service). Never during an incident or on an event day. A case's answer can be "needs a team job" (later bands); there's never a puzzle during one.</p>
+</section>
+
+<section id="grow">
+  <h2>How it grows</h2>
+  <div class="grid">
+    <div class="card"><b>Stage 1 · A pair of hands</b><span>Day 11.</span></div>
+    <div class="card"><b>Stage 2 · Bring the parts</b><span>After 2 team jobs: you're asked to bring the parts for the whole team (a manifest run from stores, M4's verb).</span><span class="meta"><span class="tag new">optional</span></span></div>
+    <div class="card"><b>Leading one</b><span>M24, as an Engine Specialist (Day 25).</span></div>
+  </div>
+</section>
+
+<section id="b" class="builder">
+  <h2>For the builder (seat M2, sub-block 24h)</h2>
+  <div class="tablewrap"><table>
+    <tr><th>Section</th><th>What</th><th>Owner</th></tr>
+    <tr><td>24h (new)</td><td><code>TEAM_JOBS</code> (data, above), the week's team job, the steps and turns, the Day 11 training (ladder row <code>m8</code>: Day 11, big, Officer, <code>by</code> as above)</td><td>M2</td></tr>
+    <tr><td>17</td><td>a <code>team</code> job kind via <code>jobKindAdd</code>: several claims on one job (<code>j.team = [ids]</code>), one start time, finishing puts the machine right (overhaul, restore 90); the crew's claim blocks the team members for the job's span</td><td>S</td></tr>
+    <tr><td>14 / 10 sim</td><td>the team meeting at the machine at the start (each at a team spot), standing at their spots through the job, crew talk (overheard lines)</td><td>the social engineer (sim on call)</td></tr>
+    <tr><td>15</td><td>your turns: <code>how: 'hold'</code> (brace, 2 ship minutes), <code>'carry'</code> (pass), <code>'turn'</code> (crank, valves)</td><td>P</td></tr>
+    <tr><td>8b</td><td><code>brace</code> and <code>crank</code> poses (fall back to <code>work</code>)</td><td>M2 itself</td></tr>
+    <tr><td>DECKS[3], [4], [5]</td><td>team spots by each machine (<code>3-recycler-team-1..4</code>, <code>4-washer-team-1..3</code>, <code>5-manifold-team-1..3</code>)</td><td>seat A</td></tr>
+  </table></div>
+  <ul>
+    <li><b>The plan:</b> <code>teamPlan(week)</code>: one job a week on a workday from Day 11 (Day 11's fixed: the recycler, 09:30); the machine is the Tier 2 machine of <code>TEAM_JOBS</code> most in need, with <code>schedU(week, 0, 876)</code> on ties; the team is the Works crew on shift then whose plans are free (<code>planWhere</code>), lowest load first; you're added if you're Officer or higher. Posted at 16:00 the day before, with Mail.</li>
+    <li><b>The run:</b> the job's steps in order; each step names who (a crew id or <code>'you'</code>); a crew step takes its minutes on paper; your step waits for you (a toast "Your turn: brace the housing" and the goal pointer). If you're not at your spot 15 minutes after the start, your steps go to the lead, and the job takes 20% longer.</li>
+    <li><b>Notes:</b> <code>simNote('team', { id, step, by })</code>; reputation +2 for a team job you were in.</li>
+  </ul>
+</section>
+
+<section id="tests" class="builder">
+  <h2>Tests</h2>
+  <ul>
+    <li><b><code>mech_check</code></b> (24h): the team assembles; waits for you up to 15 minutes; finishes without you, slower; your three turns on Day 11; the machine put right; one a week; the same twice.</li>
+    <li><b><code>day_check</code></b> on a team-job day: everyone reaches their places; draw calls under 450 with 4 crew at the recycler.</li>
+  </ul>
+</section>
+
+<section id="ranges" class="builder">
+  <h2>Builds and keys</h2>
+  <ul><li>Seat <b>M2</b>, <code>claude/mech-incidents</code>, <b>0.51.x</b>. Hash keys <b>876-877</b> (the machine, the team).</li></ul>
+</section>
+
+<section id="faq">
+  <h2>Builders' questions</h2>
+  <p class="note">None yet.</p>
+</section>
