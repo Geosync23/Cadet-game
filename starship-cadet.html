@@ -249,7 +249,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.47.1
+   STARSHIP CADET: CSV Wren                           build 0.47.2
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -4161,7 +4161,7 @@ DECKS[4] = {
     for (const k of 'abcdefgh') furnish(k, 'bunkRoom', { blankets: k === 'h' ? night : undefined, its: (bunkText[k] || []).map(x => IT('Bunk', x)),
       wardrobe: k === 'a' ? { ...IT('Your wardrobe', 'Your locker by the door, with your name on a strip of tape. Clean clothes on the left, and a hook for the hamper.'), wardrobe: '4-B1-4' } : undefined });   // 0.38.24: your wardrobe (DECKS[4].wardrobes)
     furnish('p', 'washroom'); furnish('q', 'washroom');   // two showers and a toilet each (0.27.45: the user kept the showers)
-    placeWall('=', 'valvePanel', 'n', VALVE_PANELS[4].along, { hitW: 1.5, it: { ...IT('Pipe valves', 'Three valves on the junior wing\'s water line, numbered from upstream. Close the one before a leak.'), valves: 4 } });   // 0.47.0: incidents (m6)
+    wallFixed('=', 'valvePanel', 'n', VALVE_PANELS[4].along, { hitW: 1.5, it: { ...IT('Pipe valves', 'Three valves on the junior wing\'s water line, numbered from upstream. Close the one before a leak.'), valves: 4 } });   // 0.47.0: incidents (m6)
     furnish('l', 'laundry');
     // junior common room (6 x 8): stern windows, a sofa facing them, a Tiles table and a kettle
     place('j', 'rug', 3.3, 4, 'n', { tex: rugLounge, w: 2.6, d: 3.4 });
@@ -4579,10 +4579,10 @@ DECKS[5] = {
     placeWall('y', 'workLight', 's', 3.0);
     // utility closet: the deck's power junction and its light relays
     place('u', 'breakerCabinet', 1.66, 1.5, 'e', { w: .7, it: IT('Breaker cabinet', 'Deck 5\'s power junction. The Works bay alone has its own row.') });
-    placeWall('w', 'extBracket', 's', 5.5, { hitW: .4, it: { ...IT('Fire extinguisher', 'Red, full, and checked every week: the tag says so. It comes off the bracket for the fire drill.'), drill: 'ext' } });   // 0.47.0: the drill (m3)
-    placeWall('w', 'bulkheadWheel', 's', 8.5, { hitW: .5, it: { ...IT('Bulkhead wheel', 'Four turns closes and dogs the bulkhead door by the bay. You turn it for the pressure drill, and hope never for real.'), drill: 'door' } });
-    placeWall('u', 'liftBrake', 'w', .5, { hitW: .6, it: { ...IT('Lift brake', 'The main lift\'s manual brake release, by the ladder. Turn it to let a stuck car down to the next deck.'), brake: true } });   // 0.47.0: incidents (m6)
-    placeWall('=', 'valvePanel', 'n', VALVE_PANELS[5].along, { hitW: 1.5, it: { ...IT('Pipe valves', 'Three valves on the main water line, numbered from upstream. Close the one before a leak.'), valves: 5 } });
+    wallFixed('w', 'extBracket', 's', 5.5, { hitW: .4, it: { ...IT('Fire extinguisher', 'Red, full, and checked every week: the tag says so. It comes off the bracket for the fire drill.'), drill: 'ext' } });   // 0.47.0: the drill (m3)
+    wallFixed('w', 'bulkheadWheel', 's', 8.5, { hitW: .5, it: { ...IT('Bulkhead wheel', 'Four turns closes and dogs the bulkhead door by the bay. You turn it for the pressure drill, and hope never for real.'), drill: 'door' } });
+    wallFixed('u', 'liftBrake', 'w', .5, { hitW: .6, it: { ...IT('Lift brake', 'The main lift\'s manual brake release, by the ladder. Turn it to let a stuck car down to the next deck.'), brake: true } });   // 0.47.0: incidents (m6)
+    wallFixed('=', 'valvePanel', 'n', VALVE_PANELS[5].along, { hitW: 1.5, it: { ...IT('Pipe valves', 'Three valves on the main water line, numbered from upstream. Close the one before a leak.'), valves: 5 } });
     placeWall('u', 'relayBoard', 'n', 1.5, { it: IT('Light relays', 'Deck 5\'s lights. The shuttle bay floods have a relay to themselves.') });
     // cart bay: two docks with a cart charging on each
     for (const [z, n] of [[1.0, 1], [3.0, 2]]) place('m', 'cartDock', 1.45, z, 'e', { dock: n, it: IT('Cart dock ' + n, n === 1 ? 'A hover hand cart, charging. The sticker says I BRAKE FOR NOBODY.' : 'A hover hand cart, charging, with a crate strap still hooked on.') });
@@ -5231,8 +5231,8 @@ DECKS[3] = {
     place('M', 'trayStack', 11.65, 3.5, 'e', { it: IT('Trays and cutlery', 'The start of the line. Take a tray, take a fork, keep moving.') });
     place('M', 'servery', 11.45, 5.5, 'e', { it: IT('Servery', 'The hot line, under heat lamps. Breakfast from 06:00 to 08:00, dinner from 17:00 to 20:30. The galley hands it through the counter behind.') });
     place('M', 'grabShelf', 11.6, 7.5, 'e', { live: true, it: IT('Grab and go', 'Rolls, fruit and juice, chilled, for anyone running late. It empties fast at 07:55.') });
-    placeWall('=', 'valvePanel', 'n', VALVE_PANELS[3].along, { hitW: 1.5, it: { ...IT('Pipe valves', 'Three valves on the Commons\' water line, numbered from upstream. Close the one before a leak.'), valves: 3 } });   // 0.47.0: incidents (m6)
-    placeWall('K', 'alarmPanel', 'w', 4.5, { hitW: .7, it: { ...IT('Extractor alarm', 'The galley extractor\'s alarm and, beside it, the switch that opens the vents. Brennan has views on how often it goes off.'), alarm: true, vent: true } });
+    wallFixed('=', 'valvePanel', 'n', VALVE_PANELS[3].along, { hitW: 1.5, it: { ...IT('Pipe valves', 'Three valves on the Commons\' water line, numbered from upstream. Close the one before a leak.'), valves: 3 } });   // 0.47.0: incidents (m6)
+    wallFixed('K', 'alarmPanel', 'w', 4.5, { hitW: .7, it: { ...IT('Extractor alarm', 'The galley extractor\'s alarm and, beside it, the switch that opens the vents. Brennan has views on how often it goes off.'), alarm: true, vent: true } });
     placeWall('M', 'spiceShelf', 'e', SPICES.along, { hitW: 1.3, it: IT('Spice shelf', 'A shelf over the drinks for spices brought from home. Brennan says it will fill up. Brennan is patient.') });   // 0.38.31
     placeWall('M', 'menuBoard', 'e', 3.5, { hitW: 1.2, it: IT('Menu board', 'Two meals a day: breakfast 06:00 to 08:00, dinner 17:00 to 20:30. Today: Brennan\'s spiced lentils.') });
     placeWall('M', 'notices', 'w', 4.5, { hitW: 1.0, it: IT('Mess notices', 'This week\'s birthdays, the galley rota, and a polite note about taking mugs back to the mess.') });
@@ -7456,41 +7456,55 @@ DECKS[3].places.push(
 );
 const DRILL_EXT = { m: null };
 const drillExtShow = on => { if (DRILL_EXT.m) DRILL_EXT.m.visible = !!on; };   // the bracket's extinguisher, while you (or nobody) carry one
-// the kits' materials and painted labels, made once at load (no R()), so each kit merges into a few draw calls (0.47.1)
-const P5KM = { steel: std('#7d8a91', .4, .5), blue: std('#2a7fb8', .45, .2), red: std('#b03a2e', .4, .3), ext: std('#c0392b', .45),
-  plate: std('#e9c46a', .6), housing: std('#5a6870', .5, .4), lamp: std('#e74c3c', .4, 0, { emissive: col('#e74c3c'), emissiveIntensity: .5 }),
-  fire: new THREE.MeshBasicMaterial({ map: tex(128, 64, (c, w, h) => { c.fillStyle = '#c0392b'; c.fillRect(0, 0, w, h); c.fillStyle = '#fff4e6'; c.font = '700 22px system-ui,sans-serif'; c.textAlign = 'center'; c.fillText('FIRE', w / 2, 28); c.font = '600 15px system-ui,sans-serif'; c.fillText('extinguisher', w / 2, 50); }) }),
-  nums: new THREE.MeshBasicMaterial({ transparent: true, map: tex(256, 32, (c, w, h) => { c.fillStyle = '#e8c06a'; c.font = '700 18px system-ui,sans-serif'; c.textAlign = 'center'; ['1', '2', '3'].forEach((n, k) => c.fillText(n, w / 2 + (k - 1) * w * .4, 22)); c.fillText('→', w / 2 + w * .2, 22); c.fillText('→', w / 2 - w * .2, 22); }) }) };
-Object.assign(WALL_KIT, {
-  extBracket(g) {                                        // a red extinguisher on a wall bracket, a sign over it
-    box(.22, .04, .14, M.slateDark, 0, .62, .07, g); box(.04, .36, .03, M.slateDark, 0, .8, .02, g);
-    const e = cyl(.075, .075, .46, P5KM.ext, 0, .87, .1, g, 14); e.userData.noMerge = true; DRILL_EXT.m = e;
-    const p = new THREE.Mesh(new THREE.PlaneGeometry(.26, .13), P5KM.fire); p.position.set(0, 1.32, .012); g.add(p);
+// the kits (0.47.2, the lead: at most +2 draw calls a deck): built into the deck's merged static geometry by wallFixed(), in
+// materials the decks already draw (WM, M), no painted labels, so they add almost nothing. Only the bracket's extinguisher is
+// its own mesh (it hides while carried). Unlike placeWall's pieces they don't lower with their wall
+function wallFixed(rk, kind, wall, along, o = {}) {
+  const b = ROOM_BOX[rk], g = new THREE.Group();
+  if (wall === 'n') g.position.set(X0(b.i0) + along, 0, Z0(b.j0) + T / 2);
+  if (wall === 's') g.position.set(X0(b.i0) + along, 0, Z0(b.j1 + 1) - T / 2);
+  if (wall === 'w') g.position.set(X0(b.i0) + T / 2, 0, Z0(b.j0) + along);
+  if (wall === 'e') g.position.set(X0(b.i1 + 1) - T / 2, 0, Z0(b.j0) + along);
+  g.rotation.y = FACING[wall]; staticRoot.add(g);
+  WALL_KIT[kind](g, o);
+  if (o.it) {
+    const hit = new THREE.Mesh(new THREE.BoxGeometry(o.hitW || .9, 1.2, .3), HIT_MAT); hit.position.set(0, 1.25, .15); hit.userData.noMerge = true; g.add(hit);
+    ITEMS.push({ ...o.it, hit, g, front: FACING[wall], depth: .1, wall: true });
+  }
+  return g;
+}
+Object.assign(WALL_KIT, {                               // each stands on the floor against its wall, so it reads as furniture when the wall is lowered
+  extBracket(g) {                                        // an extinguisher stand: a post with a red sign, the extinguisher in its bracket
+    box(.06, 1.42, .06, M.slateDark, 0, .71, .05, g); box(.3, .03, .2, M.slateDark, 0, .015, .1, g);
+    box(.22, .04, .14, M.slateDark, 0, .62, .12, g); box(.24, .12, .02, WM.red, 0, 1.32, .09, g);
+    const e = cyl(.075, .075, .46, WM.red, 0, .87, .15, g, 14); e.userData.noMerge = true; DRILL_EXT.m = e;
   },
-  bulkheadWheel(g) {                                     // the bulkhead door's dogging wheel on a hazard-striped plate
-    box(.5, .5, .04, P5KM.plate, 0, 1.15, .02, g);
-    const w = new THREE.Mesh(new THREE.TorusGeometry(.17, .025, 8, 20), P5KM.red); w.position.set(0, 1.15, .1); g.add(w);
-    box(.34, .03, .03, P5KM.red, 0, 1.15, .1, g); box(.03, .34, .03, P5KM.red, 0, 1.15, .1, g);
-    cyl(.04, .04, .08, M.slateDark, 0, 1.15, .06, g, 10).rotation.x = Math.PI / 2;
+  bulkheadWheel(g) {                                     // the bulkhead door's dogging wheel on a pedestal by the door
+    box(.12, 1.0, .12, M.slateDark, 0, .5, .08, g); box(.34, .03, .24, M.slateDark, 0, .015, .1, g);
+    box(.44, .44, .06, M.slateDark, 0, 1.15, .06, g);
+    const w = new THREE.Mesh(new THREE.TorusGeometry(.17, .025, 8, 20), WM.red); w.position.set(0, 1.15, .16); g.add(w);
+    box(.34, .03, .03, WM.red, 0, 1.15, .16, g); box(.03, .34, .03, WM.red, 0, 1.15, .16, g);
   },
-  valvePanel(g) {                                        // a pipe along the wall with three valve wheels, numbered upstream first
-    const pipe = cyl(.05, .05, 1.7, P5KM.steel, 0, 1.25, .09, g, 10); pipe.rotation.z = Math.PI / 2;
-    box(1.5, .62, .03, M.slateDark, 0, 1.25, .015, g);
+  valvePanel(g) {                                        // a valve rack: a pipe on two legs with three valve wheels; red ticks count 1, 2, 3 from upstream
+    for (const x of [-.82, .82]) box(.06, 1.3, .06, M.slateDark, x, .65, .1, g);
+    const pipe = cyl(.05, .05, 1.76, WM.steel, 0, 1.25, .1, g, 10); pipe.rotation.z = Math.PI / 2;
+    box(1.5, .2, .03, M.slateDark, 0, 1.47, .05, g);
     [-.6, 0, .6].forEach((x, k) => {
-      cyl(.035, .035, .12, P5KM.steel, x, 1.25, .16, g, 8).rotation.x = Math.PI / 2;
-      const w = new THREE.Mesh(new THREE.TorusGeometry(.09, .018, 6, 16), P5KM.blue); w.position.set(x, 1.25, .23); g.add(w);
+      cyl(.035, .035, .12, WM.steel, x, 1.25, .17, g, 8).rotation.x = Math.PI / 2;
+      const w = new THREE.Mesh(new THREE.TorusGeometry(.09, .018, 6, 16), WM.red); w.position.set(x, 1.25, .24); g.add(w);
+      for (let t = 0; t <= k; t++) box(.025, .08, .012, WM.red, x + (t - k / 2) * .045, 1.47, .071, g);   // 6 mm proud of the strip (.065)
     });
-    const p = new THREE.Mesh(new THREE.PlaneGeometry(1.5, .19), P5KM.nums); p.position.set(0, 1.47, .036); g.add(p);   // 6 mm in front of the backing (.03)
   },
-  liftBrake(g) {                                         // the lift's manual brake release: a geared housing and a big wheel
-    box(.5, .6, .26, P5KM.housing, 0, 1.0, .13, g); box(.52, .06, .28, P5KM.plate, 0, 1.33, .13, g);
-    const w = new THREE.Mesh(new THREE.TorusGeometry(.22, .03, 8, 22), P5KM.red); w.position.set(0, 1.0, .32); g.add(w);
-    box(.44, .03, .03, P5KM.red, 0, 1.0, .32, g); cyl(.05, .05, .1, M.slateDark, 0, 1.0, .28, g, 10).rotation.x = Math.PI / 2;
+  liftBrake(g) {                                         // the lift's manual brake release: a cabinet from the floor and a big wheel
+    box(.5, 1.3, .3, M.slateDark, 0, .65, .15, g);
+    const w = new THREE.Mesh(new THREE.TorusGeometry(.22, .03, 8, 22), WM.red); w.position.set(0, 1.0, .36); g.add(w);
+    box(.44, .03, .03, WM.red, 0, 1.0, .36, g); cyl(.05, .05, .1, WM.steel, 0, 1.0, .33, g, 10).rotation.x = Math.PI / 2;
   },
-  alarmPanel(g) {                                        // the extractor's alarm panel (a red lamp and a reset key) and the vent switch beside it
-    box(.3, .36, .05, M.slateDark, -.22, 1.35, .025, g); cyl(.05, .05, .04, P5KM.lamp, -.22, 1.45, .06, g, 12).rotation.x = Math.PI / 2;
-    box(.08, .05, .03, P5KM.plate, -.22, 1.28, .06, g);
-    box(.22, .3, .05, P5KM.housing, .23, 1.3, .025, g); box(.04, .14, .05, M.slateDark, .23, 1.3, .07, g);   // the vent switch's lever
+  alarmPanel(g) {                                        // the extractor's alarm (a red lamp, a reset key) and the vent switch, on a post
+    box(.06, 1.2, .06, M.slateDark, 0, .6, .05, g); box(.3, .03, .2, M.slateDark, 0, .015, .1, g);
+    box(.7, .36, .05, M.slateDark, 0, 1.35, .07, g);
+    cyl(.05, .05, .04, WM.red, -.22, 1.45, .11, g, 12).rotation.x = Math.PI / 2; box(.08, .05, .03, WM.steel, -.22, 1.28, .105, g);
+    box(.04, .14, .05, WM.red, .23, 1.3, .115, g);       // the vent switch's lever
   },
 });
 function shelfIt(name, x) { const sh = DECKS[5].shelves.find(q => q.name === name); return { ...IT(name, x), shelf: sh ? sh.id : undefined }; }
@@ -7904,7 +7918,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.47.1';                           // keep in step with the header's build line
+const GAME_BUILD = '0.47.2';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
