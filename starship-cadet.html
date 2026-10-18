@@ -249,7 +249,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.45.0
+   STARSHIP CADET: CSV Wren                           build 0.45.1
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7808,7 +7808,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.45.0';                           // keep in step with the header's build line
+const GAME_BUILD = '0.45.1';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -35368,7 +35368,7 @@ function roundJob(day, at, o = {}) {
   const m0 = machineById(route[0]), n = m0.deck, t = (day - 1) * 1440 + at;
   const j = jobMake('rounds', { id: 'round' + (o.slot ? o.slot : '') + '-d' + n + '@' + Math.floor(t / 60) + (o.yours ? 'y' : ''), deck: n, room: m0.room, h: Math.floor(t / 60),
     title: roundText('round.title', 'Morning round, Deck {deck}', { deck: n }), route, marks: {}, ...(o.slot ? { reserved: o.slot, until: (day - 1) * 1440 + DAY_SHIFT[1] } : { leave: ROUND_HELD }) });
-  j.posted = j.found = t;
+  j.posted = j.found = t; j.shareSeen = true;            // held to 11:00 as the page says: never shared out early (section 17's shareOut)
   return j;
 }
 if (typeof jobKindAdd === 'function') jobKindAdd('rounds', { tier: 1, junior: false, work: 0, hold: 'datapad',   // the round clipboard in your hand (15b's ixHold, 0.28.73)
@@ -35508,6 +35508,91 @@ WORK_TICKS.push((now, skip) => {
   }
 });
 if (typeof jobKindAdd === 'function' && drillPlace('ext') && drillPlace('hatch') && drillPlace('door') && drillPlace('breaker')) WORK_MECH.m3d = {};   // a small row: opens on Wednesday, trained by the first drill; only with the drill's places in the build
+
+// ---------------------------------------------------------------------
+// 24d HAULING (M4, seat M1, 0.45.x; plans/mechanics/m4-hauling.html). The Wednesday delivery has a few crates for the
+// rest of the ship (section 17's SHIP.manifest = [{ id, dest, n }], 0.33.50: linen, medical, store, galley, bridge).
+// A manifest run takes them: a hover cart from the Cart bay, load each crate in the hold (a tap, a minute each), ride
+// the lift, drop each where it goes, the cart back. A junior job, at most CART_CRATES a run (more: a second run).
+// Yara Esposito teaches it on Day 3 once the delivery's in (ladder row m4: she takes the cart and loads the first crate
+// while you watch; you take the rest). Once trained, each Wednesday's run is held for you to 16:00 after the unload
+// (or from 13:00), then the crew's; before that the crew do it. Saved on the job: j.crates ([{ id, dest }]), j.got
+// (crate ids loaded). Hash keys: section 17's 866-867 (the manifest, the misplaced part). Not yet: stage 2 (choose the
+// order) and stage 3 (the Thursday stocktake: SHIP.misplaced).
+const HAUL_FROM = 780, HAUL_UNTIL = 960, HAUL_TRAIN = 660;   // posted by 13:00 (after the unload), held to 16:00; Yara's meeting from 11:00
+const haulDay = d => weekday(d) === DELIVERY.day + (typeof deliveryLate === 'function' ? deliveryLate(d) : 0);
+const haulDock = () => CART_AT.find(id => placeById(id)) || null;
+const haulLoadAt = () => HOLD_AT.find(id => placeById(id)) || null;
+const haulName = c => worksText('haul.crate.' + c.id, ({ laundry: 'Linen', medical: 'Medical supplies', infirmary: 'Medical supplies', store: 'Crew store stock', galley: 'Dry goods', bridge: 'Bridge spares' })[c.id] || 'A crate');
+const haulWhere = c => { const p = placeById(c.dest); return p ? (roomName(p.deck, p.room) || 'the room') + ', Deck ' + p.deck : 'its stop'; };
+// a run's crates from what's left of the manifest: up to CART_CRATES, by deck from the hold upward (4, 3, 2, 1): fewest rides
+function haulCrates(max = CART_CRATES) {
+  const out = []; for (const c of SHIP.manifest || []) for (let i = 0; i < (c.n || 0); i++) out.push({ id: c.id, dest: c.dest });
+  const dk = c => (placeById(c.dest) || { deck: 0 }).deck;
+  return out.sort((a, b) => dk(b) - dk(a) || (a.id < b.id ? -1 : 1)).slice(0, max);
+}
+const haulOpen = () => SHIP.jobs.some(j => j.kind === 'haul' && j.status !== 'done');
+function haulJob(t, crates, o = {}) {
+  const j = jobMake('haul', { id: 'haul' + (o.slot || '') + '@' + Math.floor(t / 60) + (o.yours ? 'y' : ''), deck: 5, room: 'r', h: Math.floor(t / 60),
+    title: roundText('haul.title', 'Manifest run: {n} crates', { n: crates.length }).replace(/: 1 crates$/, ': 1 crate'), crates, got: [],
+    ...(o.slot ? { reserved: o.slot, until: Math.floor(t / 1440) * 1440 + DAY_SHIFT[1] } : o.crew ? { released: true } : { leave: Math.max(30, HAUL_UNTIL - Math.max(t % 1440, DAY_SHIFT[0])) }) });
+  j.posted = j.found = t; j.shareSeen = true;            // held for you as the page says: never shared out to the crew early (section 17's shareOut)
+  return j;
+}
+// the stops: the cart, a load per crate, a drop per crate (unless o.only: the teacher's run is the cart and the first load), the cart back
+function haulStops(j) {
+  const dock = haulDock(), hold = haulLoadAt(), cs = j.crates || [], out = [];
+  if (!dock || !hold) return out;
+  out.push({ deck: 5, placeId: dock, mins: 2, tag: 'cart', hold: 'cart', opts: { text: 'You take a hover cart from its dock.' } });
+  cs.forEach(c => out.push({ deck: 5, placeId: hold, mins: 1, tag: 'load', hold: 'cartfull', crate: c.id, opts: { text: haulName(c) + ' for ' + haulWhere(c) + ': on the cart.' } }));
+  if (j.only !== 'load') {
+    cs.forEach(c => { const p = placeById(c.dest); if (p) out.push({ deck: p.deck, placeId: c.dest, mins: 2, tag: 'deliver', hold: 'cartfull', crate: c.id, opts: { text: haulName(c) + ' delivered.' } }); });
+    out.push({ deck: 5, placeId: dock, mins: 2, tag: 'return', hold: 'cart', opts: { text: 'The cart back on its dock.' } });
+  }
+  return out;
+}
+function haulTake(j, id) {                               // a crate off the hold's stack onto this run's cart (once)
+  if (!id || (j.got || []).includes(id)) return false;
+  (j.got = j.got || []).push(id); if (typeof manifestTake === 'function') manifestTake(id); return true;
+}
+if (typeof jobKindAdd === 'function' && typeof haulOn === 'function') jobKindAdd('haul', { tier: 1, junior: true, work: 0, text: 'Manifest run',
+  hold: j => { const st = jobStops(j), last = st.reduce((a, s, k) => s.step === 'deliver' ? k : a, -1), first = st.findIndex(s => s.step === 'load');
+    return first >= 0 && st[first].done && !(last >= 0 && st[last].done) ? 'cartfull' : 'cart'; },
+  post(h, jobs) {                                        // delivery days: once the unload's done (or from 13:00), the manifest's run
+    const d = Math.floor(h / 24) + 1, m = (h % 24 + 24) % 24 * 60, W = SHIP.works;
+    if (!haulDay(d) || m < DELIVERY.hour * 60 + 60 || m > DAY_SHIFT[1] || !(SHIP.manifest || []).length || jobs.some(j => j.kind === 'haul' && j.status !== 'done')) return;
+    const unloading = jobs.some(j => j.kind === 'restock' && j.cargo === 'stores' && j.status !== 'done');
+    if (unloading && m < HAUL_FROM) return;
+    if (W && W.cur && W.cur.id === 'm4' && W.cur.d === d) return;   // Yara's training run has them today
+    const crates = haulCrates(); if (!crates.length) return;
+    jobs.push(haulJob(h * 60, crates, { crew: !(W && W.tr.m4 !== undefined) || playerRank() !== 'junior' }));
+  },
+  stops: haulStops,
+  stepDone(j, k, res, t) {
+    const s = haulStops(j)[k]; if (!s) return null;
+    const c = (j.crates || []).find(x => x.id === s.crate);
+    if (s.tag === 'load') { haulTake(j, s.crate); return c ? haulName(c) + ' on the cart.' : null; }
+    if (s.tag === 'deliver' && c) { simNote('haul', { stop: c.dest, id: c.id }); return haulName(c) + ' delivered to ' + haulWhere(c) + '.'; }
+    return null;
+  },
+  done(j, t, by) {                                       // the crew's run (or the teacher's) takes what it hadn't loaded; yours is a use of m4
+    for (const c of j.crates || []) haulTake(j, c.id);
+    if (by === 'you' && j.only !== 'load') { worksUse('m4'); return; }
+  },
+  crew: { can: p => !!p.work && p.work.place === 'work:works', mins: j => 15 + 10 * (j.crates || []).length } });
+// the ladder row (m4): Yara's run is the cart and the first crate (you watch); yours is the rest, in the same slot
+if (typeof jobKindAdd === 'function' && typeof haulOn === 'function' && JOB_KINDS.haul) WORK_MECH.m4 = {
+  at: d => HAUL_TRAIN,                                   // after the 10:00 delivery's unload
+  reserve(d, at, slot, o = {}) {
+    const t = (d - 1) * 1440 + at, crates = haulCrates(o.yours ? CART_CRATES : 1); if (!crates.length || !haulDock() || !haulLoadAt()) return null;
+    SHIP.jobs = SHIP.jobs.filter(x => !(x.reserved === slot && heldForYou(x) && !x.claimedBy));
+    for (const x of SHIP.jobs) if (x.kind === 'haul' && x.status === 'open' && !x.claimedBy && !x.reserved) { x.status = 'done'; x.doneAt = t; x.doneBy = null; }   // an ordinary run waiting: this one stands for it
+    const j = haulJob(t, crates, { slot, yours: !!o.yours }); if (!o.yours) j.only = 'load';
+    SHIP.jobs.push(j); if (typeof MACH_REV !== 'undefined') MACH_REV++;
+    return j.id;
+  },
+  watch: 10,
+};
 
 // =====================================================================
 // 6. CAMERA
