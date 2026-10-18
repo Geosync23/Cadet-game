@@ -35386,6 +35386,7 @@ if (typeof jobKindAdd === 'function') jobKindAdd('rounds', { tier: 1, junior: fa
 // the ladder row (m1): the training's two rounds are this block's own (reserve), held in the teacher's slot. Only
 // with section 17's job kinds in the build (without them a round can't be posted, so the row never opens)
 if (typeof jobKindAdd === 'function') WORK_MECH.m1 = {
+  at: () => 625,                                         // Torres's ask after the 10:30 tea (24 core books the meeting from 10:35; the page)
   reserve(d, at, slot, o = {}) {
     const j = roundJob(d, at, { train: o.train || 'm1', yours: !!o.yours, slot }); if (!j) return null;
     SHIP.jobs = SHIP.jobs.filter(x => !(x.reserved === slot && heldForYou(x) && !x.claimedBy));
@@ -35518,6 +35519,7 @@ function drillStops(kind) {
 const drillDue = d => { const W = SHIP.works; return !!W && !!WORK_MECH.m3d && W.rank === 'junior' && weekday(d) === 2 && playerShiftOn(d) && (worksOpened(W).has('m3d') || W.tr.m3d !== undefined); };
 const drillJobOf = d => SHIP.jobs.find(x => x.kind === 'drill' && Math.floor(x.posted / 1440) + 1 === d) || null;
 if (typeof jobKindAdd === 'function') jobKindAdd('drill', { tier: 1, work: 0, side: true, text: 'The drill',
+  hold: j => { if (j.drill !== 'fire') return null; const st = jobStops(j), a = st.find(x => x.step === 'take'), b = st.find(x => x.step === 'putback'); return a && a.done && !(b && b.done) ? 'extinguisher' : null; },   // the extinguisher in your hand (8b's prop, this block's)
   post(h, jobs) {                                        // Wednesdays at 14:00's hour, found at 14:50
     const d = Math.floor(h / 24) + 1; if ((h % 24 + 24) % 24 !== 14 || !drillDue(d) || jobs.some(x => x.kind === 'drill' && Math.floor(x.posted / 1440) + 1 === d)) return;
     const kind = drillKind(d), t = (d - 1) * 1440 + DRILL_TOAST, j = jobMake('drill', { id: 'drill-' + kind + '@' + d, deck: 5, room: 'w', h, title: worksText('drill.kind.' + kind, kind.charAt(0).toUpperCase() + kind.slice(1) + ' drill'),
@@ -35553,7 +35555,24 @@ WORK_TICKS.push((now, skip) => {
       drillSay('drill.time.' + w, { fast: 'Two minutes ten. Better.', ok: 'Three minutes. Fine. We\'ll do better.', slow: 'Four and a half minutes. We\'ll talk about it.' }[w]); }
   }
 });
-if (typeof jobKindAdd === 'function' && drillPlace('ext') && drillPlace('hatch') && drillPlace('door') && drillPlace('breaker')) WORK_MECH.m3d = {};   // a small row: opens on Wednesday, trained by the first drill; only with the drill's places in the build
+// the device's Calendar names the week's drill (its fixed Wednesday line, section 19's DEV_WEEK, read as a getter: no edit there)
+// and, on the Friday tea after a quick drill you turned up to, Calder says so (Pillar 4's tradition: works-tea, or new-hands-tea)
+function drillCalendar() {
+  const e = typeof DEV_WEEK !== 'undefined' && DEV_WEEK[2] && DEV_WEEK[2].find(x => x.at === DRILL_AT); if (!e || Object.getOwnPropertyDescriptor(e, 'title').get) return;
+  const plain = e.title;
+  Object.defineProperty(e, 'title', { configurable: true, enumerable: true, get() {
+    const d0 = SHIP.time.day, d = d0 + ((2 - weekday(d0)) + 7) % 7;   // this week's Wednesday, today or next
+    return drillDue(d) ? worksText('drill.cal', 'Drill at 15:00: {drill}').replace('{drill}', worksText('drill.kind.' + drillKind(d), drillKind(d) + ' drill')) + '. Muster at the Works bay' : plain; } });
+}
+const DRILL_TEA = /^(works-tea|new-hands-tea)$/;
+WORK_TICKS.push((now, skip) => {
+  const d = worksDay(now), m = now - (d - 1) * 1440; if (skip || weekday(d) !== 4 || m < 1125 || m > 1170 || !WORK_MECH.m3d) return;
+  const tea = typeof eventsOn === 'function' && eventsOn(d).find(e => DRILL_TEA.test(e.id)); if (!tea || typeof deckDef === 'undefined' || !deckDef || deckDef.num !== 5) return;
+  if (simNotes('drillTea', now - 2880).some(n => n.day === d)) return;
+  const dr = simNotes('drill', now - 3 * 1440).filter(n => n.you).pop(); if (!dr || drillTimeWord(dr.mins) !== 'fast') return;
+  simNote('drillTea', { day: d }); drillSay('drill.tea', 'Wednesday\'s drill was quick. Well done, all of you.');
+});
+if (typeof jobKindAdd === 'function' && drillPlace('ext') && drillPlace('hatch') && drillPlace('door') && drillPlace('breaker')) { WORK_MECH.m3d = {}; drillCalendar(); }   // a small row: opens on Wednesday, trained by the first drill; only with the drill's places in the build
 
 // ---------------------------------------------------------------------
 // 24d HAULING (M4, seat M1, 0.45.x; plans/mechanics/m4-hauling.html). The Wednesday delivery has a few crates for the
@@ -36173,6 +36192,7 @@ const HOLDS = { cart: { prop: 'cart', sx: -.62, ex: -.62, sz: -.06, lean: .09 },
   tray: { prop: 'tray', sx: -.36, ex: -1.2, sz: .14, lean: -.02 },
   toolbox: { prop: 'toolbox', bone: 'R', one: -1, sx: .03, ex: -.1, sz: .2, hx: 0 },
   datapad: { prop: 'datapad', bone: 'L', one: 1, sx: -.5, ex: -1.35, sz: .1, hx: .25, look: .28 },
+  extinguisher: { prop: 'extinguisher', bone: 'R', one: -1, sx: .03, ex: -.1, sz: .2, hx: 0 },   // the drill's (Pillar 5, 24c): carried by its handle like the toolbox
   // 0.27.13 (Pillar 3, C11): your own device, held in both hands at the chest and read, head down, standing or walking
   device: { prop: 'device', bone: 'L', sx: -.55, ex: -1.4, sz: .1, hx: .3, look: .38 },
   // 0.28.41 (the user's): bursting for the toilet. No prop: both hands clasped low in front, knees in, short quick
@@ -36401,6 +36421,10 @@ const PROP_KIT = {
   device(p) {                                            // the player's handheld: a dark bezel, its screen glowing in the device's phosphor colour
     part(p, GEO.box, '#1b1f24', -.03, -.1, .035, .17, .21, .02); part(p, GEO.box, devicePhosphor(), -.03, -.1, .046, .14, .15, .006);
     part(p, GEO.box, '#e8a04c', .035, -.19, .046, .012, .012, .006);   // the power light
+  },
+  extinguisher(p) {                                      // a red extinguisher hanging from the hand: the cylinder, its grey valve, a black hose (24c's drill)
+    part(p, cylG(.055, .055, .3, 10), '#c0392b', 0, -.26, .01); part(p, cylG(.03, .04, .05, 8), '#8f979c', 0, -.09, .01);
+    part(p, GEO.box, '#1d2226', .045, -.2, .04, .018, .2, .018);
   },
   datapad(p) {                                           // a datapad on the palm, its screen lit
     part(p, GEO.box, '#2b2f33', 0, -.1, .03, .14, .2, .015); part(p, GEO.box, '#7fd4e6', 0, -.1, .039, .12, .17, .006);
