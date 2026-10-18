@@ -43,3 +43,6 @@ The user said go for 0.60.7. Every seat reads, in order: CLAUDE.md, this brief, 
 - Onboarding 3 does only Zeke's five fix notes, then hands over; onboarding 4 takes clothes/laundry, Zeke's Day 1/Day 2, then the Day 3 delivery.
 - Check runners: 2 (INTRO alone; DAYS + PLAYER + PERF staggered on the second); BM3 runs the rest.
 - Merge order: PE6, deck, systems (incl. sim), social, traditions, onboarding 3, onboarding 4, writer.
+
+## Rebalance (lead, ~04:42)
+Systems was the long pole. The old sim items move to the social engineer (finished and idle): trays, morning() slotting for the morning traditions, the day-100 seat share at 3-mess-12, bartender rota, shower queue, crew hobbies (in that order), on claude/social-0607 from 0.36.85. Systems keeps shelves (0.33.41), the Wednesday delivery (0.33.42) and moving Bea's Day 1 vent later.
