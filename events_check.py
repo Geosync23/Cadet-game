@@ -373,6 +373,7 @@ with sync_playwright() as pw:
         const t = eventsOn(d).filter(e => SHIP_TRADITIONS.includes(e.ev) && !e.ev.when.birthday);
         for (const x of t) if (t.filter(k => k.from <= x.from && x.from < k.to).length > 2) out.bad.push('day ' + d + ': more than two traditions at once at ' + x.from);
         for (const a of t) for (const b of t) if (a !== b && a.from < b.to && b.from < a.to && evRooms(a.ev).some(r => evRooms(b.ev).includes(r))) out.bad.push('day ' + d + ': ' + a.id + ' and ' + b.id + ' at once in one room');
+        if (weekday(d) < 5 && t.filter(e => e.from >= 960).length > 3) out.bad.push('day ' + d + ' (a weekday) has more than three evening traditions');
         if (d >= 1 && weekday(d) < 5 && t.length < 2 && !eventOn(d)) out.bad.push('day ' + d + ' (a weekday) has ' + t.length + ' tradition(s), not 2-3');
         if (EV_DROPPED.get(d)) out.dropped.push(d + ':' + EV_DROPPED.get(d).join('+'));
       }

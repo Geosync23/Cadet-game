@@ -1,10 +1,11 @@
 @tradition postcard-night
 // Postcard night (0.60.7): write a card home (the writing hobby's tradition) at the booth row; it goes out with the
-// next mail run. Eklund keeps the cards and the box (the deck architect's postcard box).
+// next mail run. Eklund keeps the cards and the box (the deck architect's postcard box). Moved from Thursday 18:45 to
+// Sunday 19:15, after the long table (lead 10, reviewer 0607 LOW 2: Thursday had four evening traditions; weekends keep all).
 k: 446
 title: Postcard night
-when: weekly thursday
-at: 18:45-19:45
+when: weekly sunday
+at: 19:15-20:15
 min: 20
 where: 3 room Call-home booths: bench
 where: 3 room Promenade: bench
@@ -17,7 +18,7 @@ invite: host=eklund-leila odds=30% line="Postcard night, by the booths. I've got
 
 
 == mail
-- Postcard night tomorrow at {time} by the booths. Cards on the table, pens in the pot. The mail run takes them Friday.
+- Postcard night tomorrow at {time} by the booths. Cards on the table, pens in the pot. The next mail run takes them.
 
 == ask
 - Postcard night. Write one home. They'll love it.
@@ -34,4 +35,4 @@ invite: host=eklund-leila odds=30% line="Postcard night, by the booths. I've got
 == chatter
 - Postcard night later. My gran keeps every one.   #warm
 - I write the same card every week. Nobody minds.   #funny
-- Mail run goes Friday. Get your card in tonight.
+- Mail run goes this week. Get your card in tonight.
