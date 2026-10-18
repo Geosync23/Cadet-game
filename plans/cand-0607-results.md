@@ -40,3 +40,4 @@ Built on claude/cand-0606 (from 0.60.6a c8685cf). One line per finished check (c
 - cand 3 d3d720b (runner 2): interactions_check OK (draw-call peak 247)
 - cand 3 d3d720b (runner 2): path_check OK (6 decks x 3000 the same, a played day's 3436 calls the same). Runner 2's list all OK; logs on claude/runner-0607-2 runs/d3d720b/
 - cand 3 d3d720b (runner 1): intro_check parts 0-11 OK, 0 FAIL lines (1/7 clothes/hobby fix holds); part 12 heard every beat through d3-store (Day 3 16:31) then printed nothing for ~13 min until the runner's 2 h limit killed it (same place onboarding 4's run stopped). Investigating
+- cand 3 d3d720b intro_check part 12 bisect (BM4): --beats=d4-quiz OK 5/5 (2 min); d3-store,d4-quiz OK 5/5+5/5 (1.5 min); d5-invite OK 4/4; d6-sowing OK 5/5 + Tomas to the garden. Stall needs earlier beats' state; sets d1-* + d4-quiz and d2-booths..d3-store + d4-quiz running
