@@ -32,8 +32,11 @@
 ## Step 3 (2026-10-18 afternoon; approval is the USER's again, through lead 12; send the lead each hash)
 Done and sent: plan v10 (9e26a58: Step 2's optional stages into Step 4, the cold-case board into Step 5), `promotion-officer.html` (bc1171c), `m8-team-jobs.html` + `m9-tracing.html` (0e84ab7), `p1-when-does-it-happen.html` + `p2-who-saw-what.html` (445f63f), the T2 band on `case-engine.html#t2` and the index (b6d6534).
 
+## Since (2026-10-18 afternoon, session_01VAVLL8kQNeQwiZ7TJZ6GMF)
+- adc12e2 + 1083c85: Tier 2 fault tables complete (`Line` column: water/heat/air causes can be traced). e6b6601: the user's Step 3 survey applied (plan v11): pages approved; M8 2-3 team jobs a week (rota on the page), stage 2 in Step 4; P2 gated on `SHIP.works.said.p2`; the full air line now: `architect-air-line.html` (src `air.body`), M9 and the damper table. Fault tables' Tier 2 still awaits the user's approval.
+
 ## Next (in order)
-1. **Finish the Tier 2 fault tables** (`fault-tables.html`, `src/ft.body`): each Tier 2 kind's causes in the Tier 1 format (card, up close, when, how common, still, from), parts from `STOCK` only, same card needs different signs. Needed by: M9's lines (water: recycler, filter, uv, pump, valve; heat: heater, heatpump, manifold), P1's first case (3-pump-1 `peak`; filter `always`; membrane; valve), P2's first case (scrubber: filter `always`, bearing `warm`, a new `panel` cause, part seal, `touched`). Air plant and main fan are stand-ins without panels (no tracing for air yet).
+1. ~~**Finish the Tier 2 fault tables**~~ (done, adc12e2) (`fault-tables.html`, `src/ft.body`): each Tier 2 kind's causes in the Tier 1 format (card, up close, when, how common, still, from), parts from `STOCK` only, same card needs different signs. Needed by: M9's lines (water: recycler, filter, uv, pump, valve; heat: heater, heatpump, manifold), P1's first case (3-pump-1 `peak`; filter `always`; membrane; valve), P2's first case (scrubber: filter `always`, bearing `warm`, a new `panel` cause, part seal, `touched`). Air plant and main fan are stand-ins without panels (no tracing for air yet).
 2. Whatever the user sends back on the Step 3 pages (fix, re-push, one line to the lead each).
 3. Step 4 pages when asked (side jobs, Step 2's optional stages, favours, fault-finder tickets, cabin touches, star logging), then Step 5.
 
