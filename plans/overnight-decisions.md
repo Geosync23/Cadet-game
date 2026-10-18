@@ -138,3 +138,5 @@ All 8 packages approved (Zeke: "all good except he still walks and talks" → he
 | Capacities | Court 2, climbing wall 2, pool 4 (4 LANES, one per lane; plan v3 had 3 → planner updates to v4, DA6 builds 4), lazy river ~3-4, float room ~6 |
 | (lead 13 suggestion, phase 2) When full | Crew queue/watch/lounge, time-boxed turns (20-40 min), spill to other decks; ~15-30 on the deck on a busy evening |
 | Population 75 → 100? | The user is considering it. Lead view: doable as its own planned change after Pillar 5, starting with a feasibility study. Lead 14 asked the user whether to start that study |
+| ~19:05 (the user) | Population 100? | Just a thought, shelved: "let's see how things go". Stays 75 |
+| ~19:05 (the user) | Rec deck vs commons | "Rec deck just needs people using it. Commons needs to be busy." → rec deck cap ~15 on evenings/weekends (activity spots + a few watching), commons keep priority; day_check compares commons evening counts with and without the rec deck. Plan v5 (rec planner) |
