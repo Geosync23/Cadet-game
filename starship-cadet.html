@@ -252,7 +252,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.44.15
+   STARSHIP CADET: CSV Wren                           build 0.44.16
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7922,7 +7922,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.44.15';                           // keep in step with the header's build line
+const GAME_BUILD = '0.44.16';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -15281,7 +15281,7 @@ function hatchTier(who) {
 // now held to the end of the shift its wait runs out in, and at most HOLD_MAX at once (jobsHour lets the oldest go,
 // j.released). On your days off (playerShiftOn, Saturday and Sunday) nothing is held: the crew take it then.
 const DAY_SHIFT = [540, 1020];                           // 09:00-17:00, when you're on shift (08:00 until the playtest's 0.44.14, the user's)
-const HOLD_MAX = 3;                                      // small jobs held for you at once, at most (6 until 0.33.40, the plan for 0.60.7)
+const HOLD_MAX = 4;                                      // small jobs held for you at once, at most (6 until 0.33.40, the plan for 0.60.7; 3 until 0.44.16, the playtest's "a few more jobs on the board")
 // every third or so new small job goes to the crew at once (shareOut, jobsHour), unless that would leave you fewer than
 // SHARE_KEEP held on the board: so you see the Works crew doing the jobs you do ("Bea on it")
 const SHARE_EVERY = 3, SHARE_KEEP = 2;
@@ -15504,7 +15504,8 @@ function jobsHour(h) {
 // tier (raised by the rooms it goes into: jobTier), minutes at each stop, parts to bring, how many a day (`per`), and
 // where it can happen (`where()` -> candidates: { key, title, deck, room, machine?, stops: [{ deck, placeId, mins, tag }] }).
 // The `per`s are tuned so about 5-6 jobs a day wait for you in all (machine jobs, cart runs and chores: the lead,
-// 2026-10-16, from the user's "enough work, not overwhelming"). Each day's chores come from schedU (the type's seed, the day): the same ship gets the same jobs. Posted at their
+// 2026-10-16, from the user's "enough work, not overwhelming"; raised about 1 a day in 0.44.16, mostly the crew-tier filters and seals, the playtest's "a few more jobs on the
+// board now that crew take jobs too", with HOLD_MAX 4: the board ~6.5 on a shift, ~3.5 of them yours to take). Each day's chores come from schedU (the type's seed, the day): the same ship gets the same jobs. Posted at their
 // hour (07:00-18:00), one open at a time per place; small ones at your tier wait for you like any other (leaveEnd;
 // a type may set its own `leave`, in minutes of the day shift). Finishing one does what it says (choreDone): a
 // calibration or a filter swap helps its machine, a vent helps the deck's air, a round finds worn machines early.
@@ -15521,25 +15522,25 @@ const DELIVERIES = [
   { key: 'galley', from: '5-hold-1', to: '3-cold-1', title: 'Take dry goods to the galley', bring: 'a sack of dry goods' },
 ];
 const CHORES = {
-  lamp:      { tier: 1, per: .5, parts: ['lamp'], text: 'Replace a lamp',
+  lamp:      { tier: 1, per: .6, parts: ['lamp'], text: 'Replace a lamp',
                where: () => lobbyish().map(p => ({ key: p.id, title: 'Replace a lamp: ' + roomName(p.deck, p.room), deck: p.deck, room: p.room, stops: [{ deck: p.deck, placeId: p.id, mins: 15, tag: 'lamp' }] })) },
-  vent:      { tier: 1, per: .4, parts: [], text: 'Clean a vent', helps: { kinds: ['scrubber', 'airplant', 'fan'], by: 4 },
+  vent:      { tier: 1, per: .5, parts: [], text: 'Clean a vent', helps: { kinds: ['scrubber', 'airplant', 'fan'], by: 4 },
                where: () => lobbyish().concat(placesOf(['garden']).slice(0, 1)).map(p => ({ key: p.id, title: 'Clean a vent: ' + roomName(p.deck, p.room), deck: p.deck, room: p.room, stops: [{ deck: p.deck, placeId: p.id, mins: 20, tag: 'vent' }] })) },
-  calibrate: { tier: 1, per: .7, parts: [], text: 'Calibrate', helps: { self: 6 },
+  calibrate: { tier: 1, per: .8, parts: [], text: 'Calibrate', helps: { self: 6 },
                where: () => choreMachines(['oven', 'range', 'chiller', 'galleyplant', 'extractor', 'washer', 'cartdock', 'relay', 'databus', 'array', 'gasplant'])
                  .map(m => ({ key: m.id, title: 'Calibrate the ' + machineLabel(m).split(',')[0].toLowerCase(), deck: m.deck, room: m.room, machine: m.id, tier: MACHINE_KINDS[m.kind].tier, stops: [panelStop(m, 15, 'calibrate')] })) },
-  delivery:  { tier: 1, per: .5, parts: [], text: 'Delivery',
+  delivery:  { tier: 1, per: .6, parts: [], text: 'Delivery',
                where: () => DELIVERIES.filter(r => placeById(r.from) && placeById(r.to)).map(r => { const a = placeById(r.from), b = placeById(r.to);
                  return { key: r.key, title: r.title + ', Deck ' + b.deck, deck: b.deck, room: b.room, bring: r.bring, stops: [{ deck: a.deck, placeId: a.id, mins: 5, tag: 'pickup' }, { deck: b.deck, placeId: b.id, mins: 10, tag: 'drop' }] }; }) },
   round:     { tier: 1, per: .4, parts: [], text: 'Inspection round', finds: true,
                where: () => [3, 4, 5].map(n => { const ms = choreMachines(['oven', 'range', 'chiller', 'galleyplant', 'cartdock', 'washer']).filter(m => m.deck === n), ps = ms.length >= 2 ? ms.slice(0, 3).map(m => panelStop(m, 5, 'inspect')) : lobbyish().filter(p => p.deck === n).slice(0, 3).map(p => ({ deck: n, placeId: p.id, mins: 5, tag: 'inspect' }));
                  return ps.length ? { key: 'deck' + n, title: 'Inspection round, Deck ' + n, deck: n, room: (placeById(ps[0].placeId) || {}).room, stops: ps } : null; }).filter(Boolean) },
-  fault:     { tier: 1, per: .3, parts: [], text: 'Small fault', leave: 30,
+  fault:     { tier: 1, per: .4, parts: [], text: 'Small fault', leave: 30,
                where: () => choreMachines(['lights', 'cartdock', 'washer', 'extractor']).map(m => ({ key: m.id, title: (m.kind === 'lights' ? 'Reset a tripped breaker: ' : m.kind === 'cartdock' ? 'Free a jammed cart dock: ' : 'Clear a fault: ') + machineLabel(m).split(',')[0].toLowerCase(), deck: m.deck, room: m.room, machine: m.id, stops: [panelStop(m, 10, 'fault')] })) },
-  filter:    { tier: 2, per: 1, parts: ['filter'], text: 'Swap the filters', helps: { self: 10 },
+  filter:    { tier: 2, per: 1.4, parts: ['filter'], text: 'Swap the filters', helps: { self: 10 },
                where: () => choreMachines(['scrubber', 'airplant', 'o2cell']).map(m => ({ key: m.id, title: 'Swap the filters: ' + machineLabel(m).split(',')[0].toLowerCase(), deck: m.deck, room: m.room, machine: m.id, tier: 2, stops: [panelStop(m, 20, 'filter')] })) },
   joint:     { tier: 1, per: 0, parts: ['seal'], text: 'Burst joint', where: () => [] },   // posted by an incident only (jointJobPost, 0.33.49)
-  seal:      { tier: 2, per: .7, parts: [], text: 'Check a pressure seal', helps: { self: 5 },
+  seal:      { tier: 2, per: 1, parts: [], text: 'Check a pressure seal', helps: { self: 5 },
                where: () => choreMachines(['hullseal', 'doorgear', 'valve', 'manifold']).map(m => ({ key: m.id, title: 'Check a pressure seal: ' + machineLabel(m).split(',')[0].toLowerCase(), deck: m.deck, room: m.room, machine: m.id, tier: 2, stops: [panelStop(m, 15, 'seal')] })) },
 };
 let CHORE_WHERE = null;
