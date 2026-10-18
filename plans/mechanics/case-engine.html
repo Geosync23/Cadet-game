@@ -83,7 +83,7 @@ td code{white-space:normal}
     <li><b>Every case has exactly one answer</b>, checked before you ever see it. If a case can't be made fair, it simply stays a plain repair.</li>
     <li><b>No timers, no scores, no fail.</b> A wrong call costs a walk and some time (from Tier 2, a used seal or cartridge). There's always <b>the long way</b>: fit each suspect in turn. And there are hints: the Chief's notes, a word from a Works hand, talking it through with Torres or Calder.</li>
   </ul>
-  <p class="note">This page is the machinery. What your first case looks like is on <code>p3.html</code>; each later kind gets its own page with its step.</p>
+  <p class="note">This page is the machinery. What your first case looks like is on <code>p3-whats-been-tried.html</code>; each later kind gets its own page with its step.</p>
 </section>
 
 <section id="life">
@@ -118,7 +118,7 @@ td code{white-space:normal}
     <tr><td>Days 16-22 (Senior Officer)</td><td>about 1 in 4; 1 in 3 on Tier 3 machines</td><td>+ P4, P5, P9, P6</td><td>2</td></tr>
     <tr><td>Day 23 on (Engine Specialist)</td><td>about 1 in 3</td><td>+ P7, P8</td><td>2</td></tr>
   </table></div>
-  <p class="note">Never on days off or event days (Pillar 6), never at night. Your very first case (Day 5) is posted as Torres's training job, not by the roll (<code>p3.html</code>).</p>
+  <p class="note">Never on days off or event days (Pillar 6), never at night. Your very first case (Day 5) is posted as Torres's training job, not by the roll (<code>p3-whats-been-tried.html</code>).</p>
 </section>
 
 <section id="faults">
@@ -168,7 +168,7 @@ td code{white-space:normal}
   </table></div>
   <p class="note">The plan's T2 line said "2-4 suspects, 2-3 clues" but also "at least 3 clues at T2"; this table keeps "at least 3" and widens the counts to fit it.</p>
   <h3>Puzzle kinds as data</h3>
-  <p><code>CASE_KINDS[id] = { name, ladder, fits(cause, m), suspects(j), clues(j, cause, sus, seed), view(c), hint(c) }</code>, one per puzzle kind, each registered by its own sub-block (P3's on <code>p3.html</code>; the others with their steps). The engine knows nothing about any one kind.</p>
+  <p><code>CASE_KINDS[id] = { name, ladder, fits(cause, m), suspects(j), clues(j, cause, sus, seed), view(c), hint(c) }</code>, one per puzzle kind, each registered by its own sub-block (P3's on <code>p3-whats-been-tried.html</code>; the others with their steps). The engine knows nothing about any one kind.</p>
 </section>
 
 <section id="solve" class="builder">
