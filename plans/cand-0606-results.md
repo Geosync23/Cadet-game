@@ -29,3 +29,4 @@ One line per finished check (check, game commit, OK/FAIL, key numbers). A new bu
 - 2757963 (R3): player OK (cart fix works) · interactions OK · path OK (3008/3008)
 - FINAL CANDIDATE 96582c4 (+ shuffle ec6e8a0). Final run started 00:50: R4 intro, R2 days 0/1/6/7/35, R3 player/interactions/path, DA3 phone+perf, BM3 the rest.
 - 96582c4 BM3 share: NAMES OK · content_gen up to date (7515) · smoke OK · newgame OK · food OK · machine OK · deck OK · leave OK · device OK · lines PASS (0 err, 3 warn) · tiles ALL OK · events OK · arc OK · booth OK · social OK · cadet_test vs 2757963: only i_tap3 7014 px (shuffle-aside) · vs 0.60.5b: explained diffs (no place/spot changes now; walks/taps = player-needs time skip; Pause button; poses; bubbles)
+- 96582c4 day_check (R2) days 0/1/6/7/35 ALL OK: shift short 0, stuck 0.0, peak D3 279 (budget 450), servery all served
