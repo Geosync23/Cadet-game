@@ -241,7 +241,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.33.40
+   STARSHIP CADET: CSV Wren                           build 0.33.42
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7591,7 +7591,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.33.40';                           // keep in step with the header's build line
+const GAME_BUILD = '0.33.42';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -11845,6 +11845,8 @@ function jobTap(it, at) {
   const P = SHIP.player, mw = myWork(), c = cellAt(at.x, at.z);
   if (deckDef.num === 5 && roomAt(...c) === 'r' && !/tarp/i.test(it.t)) {      // main storage, Deck 5: a shelf or the counter
     if (!mw) {
+      const sh = typeof shelfTapped === 'function' ? shelfTapped(it) : null;   // no job at all: a shelf says what's on it (0.33.41)
+      if (sh && !myJob() && !P.carry.some(p => p !== KIT_BAG)) { toast(it.t + ' shelf', shelfLine(sh)); return true; }   // not with a chore: its stop may be here (a delivery's pickup)
       if (!P.carry.some(p => p !== KIT_BAG) || typeof returnPart !== 'function') return false;
       approach(at.clone(), it.front, it.depth, () => actStart('stow', null, { title: it.t }));
       return true;
@@ -11853,6 +11855,7 @@ function jobTap(it, at) {
     if (!need.length && jobNeeds(mw.j, mw.w, P.carry).length) { toast(it.t, 'The ' + mw.j.make + ' isn\'t kept on the shelves: you make it yourself in the machine shop next door.'); return true; }   // 0.28.24
     if (!need.length) { toast(it.t, 'You have what the job needs: ' + partList(P.carry) + '. It\'s at the ' + machineName(machineById(mw.j.machine)) + ' on Deck ' + mw.j.deck + '.'); return true; }
     if (P.carry.length >= CARRY_MAX) { toast(it.t, 'Your hands are full (' + partList(P.carry) + '). ' + handsFix('Fit those first') + ', then come back for ' + partList(need) + '.'); return true; }
+    if (typeof shelfWrong === 'function' && shelfWrong(it)) return true;   // the right part from the right shelf (0.33.41): another shelf costs nothing
     const o = { title: it.t, flavour: it.x, after: 'You look for ' + partList(need) + '.' }, pl = jobPlaceNear('storage', 'r', at);
     if (pl) actStart('fetch', pl.id, { ...o, pose: 'browse' }); else approach(at.clone(), it.front, it.depth, () => actStart('fetch', null, o));
     return true;
@@ -12063,7 +12066,7 @@ function cartStep(j, c, d, rm, title) {
   const dest = cartDest(j);
   if (c.stage === 'full' && d === dest.deck && rm === dest.room) {
     actStart('cartUnload', cartFree(cartStops(j, 'unload', dest.ids)), { title: title || 'Unloading', after: 'You unload the cart and shelve it all.' });
-    if (ACT && ACT.kind === 'cartUnload' && j.cargo !== 'meals') ACT.def.mins = 20;
+    if (ACT && ACT.kind === 'cartUnload' && j.cargo !== 'meals') ACT.def.mins = 10;   // it unloads itself (0.33.42; 20 before)
     return true;
   }
   return false;
@@ -12076,7 +12079,15 @@ function cartAuto() {                                    // each ship minute (pl
 function cartEnd(A) {
   const P = SHIP.player, j = jobsOn() ? myJob() : null;
   if (A.kind === 'cartTake' && j) { P.cart = { job: j.id, stage: 'empty', dock: A.o.dock || '5-cart-1' }; touchJob(j.id); toast('Cart bay', 'The cart hums along at hip height. ' + CART_STEP.empty); }
+  else if (A.kind === 'cartLoad' && P.cart && j && j.cargo === 'stores' && typeof cartLoadHold === 'function') {   // the delivery's crates (section 17, 0.33.42)
+    const n = cartLoadHold(j.id); P.cart.stage = 'full'; touchJob(j.id);
+    toast('Cargo hold', (n ? 'The cart pulls in ' + n + (n === 1 ? ' crate' : ' crates') + ' by itself.' : 'Loaded.') + ' Now to main storage on Deck 5: tap any shelf.');
+  }
   else if (A.kind === 'cartLoad' && P.cart && j) { P.cart.stage = 'full'; touchJob(j.id); toast('Cargo hold', 'Loaded. Now to ' + cartDest(j).name + '.'); }
+  else if (A.kind === 'cartUnload' && P.cart && j && j.cargo === 'stores' && typeof cartUnloadShelves === 'function') {   // every part onto its own shelf
+    const r = cartUnloadShelves(j.id); P.cart.stage = r.left ? 'empty' : 'done';
+    toast('Unloaded', 'The cart unloads itself: ' + r.parts + ' parts, each onto its own shelf. ' + (r.left ? r.left + (r.left === 1 ? ' crate is' : ' crates are') + ' still in the cargo hold: one more trip.' : CART_STEP.done));
+  }
   else if (A.kind === 'cartUnload' && P.cart && j) {
     P.cart.stage = 'done'; touchJob(j.id);
     const h = +String(j.id).split('@')[1];               // a meals run's food lands in the cold store now (section 16; safe to call twice)
@@ -12219,6 +12230,7 @@ function ixChoreTap(it, at) {
     const need = jobNeeds(j, { fitted: [] }, P.carry);
     if (!need.length) { jobStepDone(j.id, k); ixGoalAt = -1; toast(it.t, 'You have what the job needs: ' + partList(P.carry) + '.'); return true; }
     if (P.carry.length >= CARRY_MAX) { toast(it.t, 'Your hands are full (' + partList(P.carry) + '). Put something back first.'); return true; }
+    if (typeof shelfWrong === 'function' && shelfWrong(it)) return true;   // the right shelf (0.33.41)
     const pl = jobPlaceNear('storage', 'r', at);
     actStart('ixStop', pl ? pl.id : null, { ...o, ixFetch: true, pose: 'browse', after: 'You look for ' + partList(need) + '.' });
     if (ACT && ACT.kind === 'ixStop') { ACT.def.mins = PLAYER_ACTS.fetch ? PLAYER_ACTS.fetch.mins : 4; ACT.def.title = 'Main storage'; }
@@ -12560,6 +12572,9 @@ function setGoal(g) { IX_GOAL = g && g.deck ? { ...g } : null; }
 function clearGoal() { IX_GOAL = null; }
 // the goal the arrow is showing, the same rule as ixFrame (0.28.58: the lift panel marks its deck); null with none
 function goalNow() { return IX_GOAL || (SHIP.player.track === null ? null : ixJobGoal); }
+// the shelf a part's on (section 17's shelfOf, 0.33.41): the arrow points at it and the label names it ("Fetch a relay:
+// the Lights shelf"); without section 17's shelves, main storage as before
+const ixShelf = need => { const id = typeof shelfOf === 'function' && need.length ? shelfOf(need[0]) : null; return id ? { place: id, say: ': the ' + shelfName(id) + ' shelf' } : { place: null, say: ' from main storage' }; };
 // your job's next step: parts from main storage, a part from the machine shop, or the machine's panel
 function ixJobStep() {
   if (typeof myJob !== 'function') return null;
@@ -12574,7 +12589,7 @@ function ixJobStep() {
   if (crateDown(j)) { const c = SHIP.player.crate; return { deck: c.deck, xz: { x: c.x, z: c.z }, label: 'Pick up the crate you set down' }; }   // Put down (0.28.60)
   if (!j.machine) {                                      // a chore (section 17): parts first if it needs any, then its stops
     const P = SHIP.player, need = jobNeeds(j, { fitted: [] }, P.carry), nx = typeof jobStops === 'function' ? ixNextStop(j) : null;
-    if (nx && nx.s.step === 'fetch' && need.length) return { deck: 5, room: 'r', label: 'Fetch ' + partList(need) + ' from main storage' };
+    if (nx && nx.s.step === 'fetch' && need.length) return { deck: 5, room: 'r', place: ixShelf(need).place, label: 'Fetch ' + partList(need) + ixShelf(need).say };
     const st = nx && nx.s.step === 'fetch' ? jobStops(j)[nx.k + 1] : nx && nx.s;
     return st ? { deck: st.deck, place: st.places[0] || null, label: st.step === 'pickup' ? 'Pick up ' + (j.bring || 'the delivery') : st.step === 'inspect' ? j.title + ': the next stop' : j.title } : null;
   }
@@ -12583,7 +12598,7 @@ function ixJobStep() {
   const need = jobNeeds(j, w, P.carry), name = machineName(m);
   if (need.length && P.carry.length < CARRY_MAX) {
     if (w.make && w.make.part) return { deck: 5, room: 'f', label: 'Make ' + partList([w.make.part]) + ' in the machine shop' };
-    if (need.some(p => SHIP.stores[p] > 0)) return { deck: 5, room: 'r', label: 'Fetch ' + partList(need.filter(p => SHIP.stores[p] > 0)) + ' from main storage' };
+    if (need.some(p => SHIP.stores[p] > 0)) { const on = need.filter(p => SHIP.stores[p] > 0), sh = ixShelf(on); return { deck: 5, room: 'r', place: sh.place, label: 'Fetch ' + partList(on) + sh.say }; }
     if (need.some(p => !(typeof NO_MAKE !== 'undefined' && NO_MAKE.has(p)))) return { deck: 5, room: 'f', label: 'Make ' + partList([need.find(p => !NO_MAKE.has(p))]) + ' in the machine shop' };
   }
   const pid = typeof panelPlace === 'function' ? panelPlace(m.id) : null;
@@ -14195,7 +14210,7 @@ function machineUse(id, who = 'you') {
 // runs out (NO_MAKE: once, until it's restocked), and when the hold's food falls under two days' worth. SHIP.short remembers what's
 // been told (saved).
 const DELIVERY_SEED = machSeed('delivery'), FOOD_LOW = 300;
-const deliveryLate = d => { const wk = d - weekday(d); return schedU(DELIVERY_SEED, wk, 11) < .2 ? 1 + Math.floor(2 * schedU(DELIVERY_SEED, wk, 12)) : 0; };
+const deliveryLate = d => { const wk = d - weekday(d); return wk <= 1 ? 0 : schedU(DELIVERY_SEED, wk, 11) < .2 ? 1 + Math.floor(2 * schedU(DELIVERY_SEED, wk, 12)) : 0; };   // never in the first week: your first is Day 3 (0.33.42)
 const DAY_NAME = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const plural = p => (/s$/.test(p) ? p : p.replace(/([^aeiou])y$/, '$1ie') + 's').replace(/^uv /, 'UV ');
 SHIP.short = {};
@@ -14246,6 +14261,9 @@ const STOCK = { lamp: 10, element: 6, 'fan belt': 4, compressor: 2, pump: 4, rel
                 membrane: 3, bearing: 3, regulator: 3, cell: 3, 'oxygen cell': 3, breaker: 3, cable: 4, 'signal card': 2, seal: 4, 'control rod': 2, 'coil winding': 2 };
 const NO_MAKE = new Set(['filter', 'cartridge', 'membrane', 'uv lamp', 'nutrient pack', 'cell', 'oxygen cell', 'control rod']);
 const DELIVERY = { day: 2, hour: 10, meals: 1200 };     // weekday (0 = Monday), hour; the hold's meals topped up to this (a week and a bit)
+// the delivery as crates in the cargo hold (0.33.42, the plan for 0.60.7): CRATE_PARTS parts a crate; a hover cart pulls in
+// up to CART_CRATES; unloading it is held for you till DELIVERY_KEEP (14:00) on a day you're on shift, then the crew do it
+const CRATE_PARTS = 8, CART_CRATES = 4, DELIVERY_KEEP = 14 * 60;
 // cart runs of food to the cold store (the galley engineer's numbers): one a day on the day shift when it's under
 // CART_DAILY, and one at any hour when it's under CART_URGENT; each carries up to CART_MEALS, never past the store's
 // cap; the meals land CART_RUN minutes after the hour (later when the lift is slow)
@@ -14312,6 +14330,7 @@ const forYou = j => j.urgency < 2 && jobTier(j) <= PLAYER_TIER && !(j.machine &&
 function leaveEnd(j) {
   if (!forYou(j) || j.released) return j.found;
   if (j.cargo === 'meals') return j.found + 60;
+  if (j.cargo === 'stores') { const d0 = Math.floor(j.found / 1440) * 1440; return playerShiftOn(d0 / 1440 + 1) && j.found < d0 + DELIVERY_KEEP ? d0 + DELIVERY_KEEP : j.found; }   // the delivery (0.33.42)
   let t = j.found, left = j.leave || CREW_LEAVE;
   for (let k = 0; k < 14 && left > 0; k++) {
     const d0 = Math.floor(t / 1440) * 1440;
@@ -14411,6 +14430,8 @@ function jobEffect(j, t, by) {
     if (by === 'you' && typeof galleyCartLand === 'function') galleyCartLand(Math.floor(j.posted / 60));
   } else {
     for (const k in SHIP.hold) if (k !== 'meals') { SHIP.stores[k] = (SHIP.stores[k] || 0) + SHIP.hold[k]; delete SHIP.hold[k]; }
+    for (const k in j.onCart || {}) SHIP.stores[k] = (SHIP.stores[k] || 0) + j.onCart[k];   // what you'd loaded and not unloaded (0.33.42)
+    delete j.onCart;
   }
 }
 const jobCrew = p => p.work && (p.work.place === 'work:works' ? 'works' : p.work.place === 'work:engine' ? 'engine' : null);
@@ -14426,6 +14447,9 @@ function jobsHour(h) {
     for (const k in STOCK) { const n = STOCK[k] - (SHIP.stores[k] || 0) - (SHIP.hold[k] || 0); if (n > 0) SHIP.hold[k] = (SHIP.hold[k] || 0) + n; }
     if (cartsCarryFood()) SHIP.hold.meals = Math.max(SHIP.hold.meals || 0, DELIVERY.meals);
   }
+  // between deliveries the machine shop makes what it can (0.33.41): at 15:00, one more of each part it can make that's
+  // under half on its shelf (the filters and the like wait for Wednesday)
+  if (h % 24 === 15) for (const k in STOCK) if (!NO_MAKE.has(k) && (SHIP.stores[k] || 0) < STOCK[k] / 2) SHIP.stores[k] = (SHIP.stores[k] || 0) + 1;
   // 3. post a job for each machine that needs one, or bring an unclaimed one up to date
   const open = new Map(); for (const j of jobs) if (j.status !== 'done' && j.kind !== 'chore' && j.kind !== 'favour') open.set(j.machine || 'restock:' + j.cargo, j);
   for (const m of machineList()) {
@@ -14455,7 +14479,7 @@ function jobsHour(h) {
   showHour(h, jobs);
   shareOut(t, jobs);
   // at most HOLD_MAX small jobs held for you: past that, the oldest go to the crew now (0.33.32)
-  const held = jobs.filter(j => j.status === 'open' && !j.claimedBy && !j.leave && j.cargo !== 'meals' && j.found <= t && t < leaveEnd(j))
+  const held = jobs.filter(j => j.status === 'open' && !j.claimedBy && !j.leave && !j.cargo && j.found <= t && t < leaveEnd(j))
     .sort((a, b) => b.found - a.found || (a.id < b.id ? -1 : 1));
   for (const j of held.slice(HOLD_MAX)) j.released = true;
   const todo = jobs.filter(j => (j.status === 'open' || j.status === 'waiting') && !j.claimedBy && j.found <= t && t >= leaveEnd(j) && !heldForYou(j))
@@ -15026,12 +15050,12 @@ function jobsSection(el) {
     line('Yours: ' + title + ', ' + where + '.', 'devtime');
     if (mine.kind === 'chore') {
       const stops = mine.stops.map(st => { const p = placeById(st.placeId); return (st.tag === 'pickup' ? 'pick up ' + (mine.bring || 'the load') + ' in the ' : st.tag === 'drop' ? 'drop it in the ' : '') + (p ? roomName(p.deck, p.room) || 'room' : 'room') + ' on Deck ' + st.deck; });
-      line(mine.title + '. ' + (mine.parts.length ? 'Bring ' + mine.parts.map(k => 'a ' + k).join(', ') + ' from main storage on Deck 5. ' : '') + 'Go to: ' + stops.join(', then ') + '.');
+      line(mine.title + '. ' + (mine.parts.length ? 'Bring ' + mine.parts.map(k => 'a ' + k).join(', ') + ' from ' + (shelfName(mine.parts[0]) ? 'the ' + shelfName(mine.parts[0]) + ' shelf in ' : '') + 'main storage on Deck 5. ' : '') + 'Go to: ' + stops.join(', then ') + '.');
     } else if (m) {
       const need = {}; for (const k of mine.parts) need[k] = (need[k] || 0) + 1;
-      line('Needs ' + Object.entries(need).map(([k, n]) => n + ' × ' + k + ' (' + (SHIP.stores[k] || 0) + ' in storage)').join(', ') + '. Parts are in main storage on Deck 5; the job is in the ' + ((DECKS[m.deck].rooms[m.room] || {}).name || 'room').toLowerCase() + ' on Deck ' + m.deck + '.');
+      line('Needs ' + Object.entries(need).map(([k, n]) => n + ' × ' + k + ' (' + (shelfName(k) ? 'the ' + shelfName(k) + ' shelf, ' + (SHIP.stores[k] || 0) + ' there' : k === mine.make ? 'you make it' : (SHIP.stores[k] || 0) + ' in storage') + ')').join(', ') + '. Parts are in main storage on Deck 5; the job is in the ' + ((DECKS[m.deck].rooms[m.room] || {}).name || 'room').toLowerCase() + ' on Deck ' + m.deck + '.');
     } else line(mine.cargo === 'meals' ? 'Take a hover cart from the Cart bay on Deck 5, load ' + (mine.meals || 'the') + ' meals in the cargo hold, and take them up to the cold store on Deck 3. Then bring the cart back.'
-      : 'Take a hover cart from the Cart bay on Deck 5, load the delivery in the cargo hold, and take it to main storage. Then bring the cart back.');
+      : 'Take a hover cart from the Cart bay on Deck 5. In the cargo hold tap the crates' + (holdCrates() ? ' (' + holdCrates() + ' there)' : '') + ' and the cart pulls them in; in main storage tap any shelf and it unloads itself. Then bring the cart back.');
     button('Drop it', () => dropJob(mine.id));
   }
   const open = board.filter(j => !j.claimedBy);
@@ -15062,6 +15086,98 @@ function openJobs(forWho = 'you') {
   });
 }
 
+// ---- the shelves (0.33.41, the plan for 0.60.7, "The right part from the right shelf") ----
+// Each part lives on one shelf in main storage, Deck 5: the shelf place whose `stock` lists it (the Deck 6 architect's
+// 5-parts-1..4: Lights, Filters, Plumbing, Galley parts), and lamps on Lights. shelfOf(part) -> place id | null;
+// shelfName(place id or part) -> 'Lights' | ...; shelfStock(id) -> [{ part, n, of, low }] (of: what the shelf keeps,
+// STOCK; low: under half); shelfLine(id): that in words, for a tap; shelfTapped(it): the shelf a tapped item is (by its
+// name), or null. Your job's parts come off their own shelf (section 15's jobTap and 15b's ixChoreTap ask
+// shelfWant/shelfWrong): the arrow points at it, it glows while you need something from it (shelfGlowTick, one mesh,
+// Deck 5 only), and tapping another shelf costs nothing: it says where, and the right one flares
+const SHELF_NAME = { '5-parts-1': 'Lights', '5-parts-2': 'Filters', '5-parts-3': 'Plumbing', '5-parts-4': 'Galley parts' };
+const SHELF_MORE = { lamp: '5-parts-1' };                // parts no shelf's stock list names
+function shelfOf(part) { return FETCH_AT.find(id => ((placeById(id) || {}).stock || []).includes(part)) || SHELF_MORE[part] || null; }
+const shelfName = x => SHELF_NAME[x] || SHELF_NAME[shelfOf(x)] || null;
+function shelfParts(id) { const st = ((placeById(id) || {}).stock || []).slice(); for (const k in SHELF_MORE) if (SHELF_MORE[k] === id && !st.includes(k)) st.push(k); return st; }
+function shelfStock(id) { machinesNow(); return shelfParts(id).map(part => { const n = SHIP.stores[part] || 0, of = STOCK[part] || 0; return { part, n, of, low: n < of / 2 }; }); }
+const shelfLine = id => shelfStock(id).map(x => plural(x.part) + ' ' + x.n + ' of ' + x.of + (x.n === 0 ? ' (none left)' : x.low ? ' (low)' : '')).join(', ') + '.';
+function shelfTapped(it) { const name = it && it.t; return Object.keys(SHELF_NAME).find(id => SHELF_NAME[id] === name) || null; }
+// the part your job needs next from the shelves (one that's there), or null: its parts, less what you've fitted or carry
+// and any you make yourself (j.make)
+function shelfNeed() {
+  const j = typeof myJob === 'function' ? myJob() : null; if (!j || j.workDone || !j.parts || !j.parts.length) return null;
+  const P = SHIP.player || {}, need = j.parts.slice(), less = ((P.work && P.work.job === j.id && P.work.fitted) || []).concat(P.carry || []);
+  for (const p of less) { const i = need.indexOf(p); if (i >= 0) need.splice(i, 1); }
+  return need.find(p => p !== j.make && SHIP.stores[p] > 0 && shelfOf(p)) || null;
+}
+const shelfWant = () => { const p = shelfNeed(); return p ? shelfOf(p) : null; };
+let SHELF_FLASH = 0;
+// a tap on the wrong shelf (or the counter) while your job needs something from another: nothing lost, it says where
+// and the right shelf flares for a moment. True if it was the wrong one (the tap's done); false: go ahead and fetch
+function shelfWrong(it) {
+  const part = shelfNeed(), want = part && shelfOf(part), at = shelfTapped(it);
+  if (!want || at === want) return false;
+  SHELF_FLASH = performance.now() + 2500;
+  const Ps = plural(part), name = SHELF_NAME[want];
+  toast(it.t, (at ? 'No ' + Ps + ' on the ' + SHELF_NAME[at] + ' shelf. ' : '') + Ps.charAt(0).toUpperCase() + Ps.slice(1) + ' are on the ' + name + ' shelf: it\'s lit up for you.');
+  return true;
+}
+// the glow: one see-through amber box round the shelf you want, while you need something from it and you're on Deck 5. Made on
+// first use (no R()), kept for good and hidden elsewhere; it never shares a plane (padded, lifted off the floor)
+let SHELF_GLOW = null;
+function shelfGlowTick() {
+  const want = typeof deckDef !== 'undefined' && deckDef && deckDef.num === 5 ? shelfWant() : null;
+  if (!want) { if (SHELF_GLOW) SHELF_GLOW.mesh.visible = false; return; }
+  if (!SHELF_GLOW) {
+    const mat = new THREE.MeshBasicMaterial({ color: col(0xffa526), transparent: true, opacity: .3, depthWrite: false });
+    SHELF_GLOW = { mesh: new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), mat), def: null, id: null };
+    SHELF_GLOW.mesh.renderOrder = 2; scene.add(SHELF_GLOW.mesh);
+  }
+  const G = SHELF_GLOW, m = G.mesh;
+  if (G.def !== deckDef || G.id !== want) {
+    G.def = deckDef; G.id = want;
+    const box = new THREE.Box3(), b = new THREE.Box3();
+    for (const it of ITEMS) if (it.t === SHELF_NAME[want] && it.g) box.union(b.setFromObject(it.g));
+    if (box.isEmpty()) { G.id = null; m.visible = false; return; }
+    const c = box.getCenter(new THREE.Vector3()), sz = box.getSize(new THREE.Vector3());
+    m.scale.set(sz.x + .12, sz.y + .1, sz.z + .12); m.position.set(c.x, (sz.y + .1) / 2 + .02, c.z);
+  }
+  const now = performance.now(), fl = now < SHELF_FLASH;
+  m.material.opacity = fl ? .5 + .16 * Math.sin(now / 90) : .34 + .08 * Math.sin(now / 420);
+  m.visible = true;
+}
+
+// ---- the Wednesday delivery as crates (0.33.42, the plan for 0.60.7, "Stores and the lift") ----
+// The delivery lands in the cargo hold at 10:00 on Wednesdays (jobsHour; never late in your first week, so your first is
+// Day 3) as crates: holdCrates() -> how many (CRATE_PARTS parts each; meals aren't crates). Its job, "Unload the
+// Wednesday delivery", waits for you till 14:00 on a shift day (leaveEnd; on your days off the crew take it at once).
+// Your run (section 15's cart): take a hover cart, and in the hold cartLoadHold(jobId) pulls in up to CART_CRATES crates
+// (-> how many; the parts ride on the job, j.onCart, so they're saved); at any shelf in main storage
+// cartUnloadShelves(jobId) -> { parts, left } puts every part on its own shelf; left: crates still in the hold (a
+// second trip). holdCratesLive(group, k): the Deck 6 architect's crate stack hands each crate (k = 1, 2, ...) as Deck 5
+// is built, and worksTick shows the first holdCrates() of them
+const holdParts = () => Object.keys(SHIP.hold).filter(k => k !== 'meals').reduce((a, k) => a + (SHIP.hold[k] || 0), 0);
+function holdCrates() { machinesNow(); return Math.ceil(holdParts() / CRATE_PARTS); }
+function cartLoadHold(id) {
+  machinesNow(); const j = SHIP.jobs.find(x => x.id === id && x.cargo === 'stores' && x.claimedBy === 'you' && x.status === 'claimed'); if (!j) return 0;
+  let room = CART_CRATES * CRATE_PARTS - Object.values(j.onCart || {}).reduce((a, n) => a + n, 0); if (room <= 0) return 0;
+  const was = holdParts(); j.onCart = j.onCart || {};
+  for (const k of Object.keys(SHIP.hold).filter(k => k !== 'meals').sort()) { const n = Math.min(room, SHIP.hold[k] || 0); if (!n) continue; j.onCart[k] = (j.onCart[k] || 0) + n; SHIP.hold[k] -= n; room -= n; if (!SHIP.hold[k]) delete SHIP.hold[k]; }
+  MACH_REV++; return Math.ceil(was / CRATE_PARTS) - Math.ceil(holdParts() / CRATE_PARTS);
+}
+function cartUnloadShelves(id) {
+  machinesNow(); const j = SHIP.jobs.find(x => x.id === id && x.cargo === 'stores' && x.claimedBy === 'you' && x.status === 'claimed'); if (!j) return { parts: 0, left: holdCrates() };
+  let n = 0; for (const k in j.onCart || {}) { SHIP.stores[k] = (SHIP.stores[k] || 0) + j.onCart[k]; n += j.onCart[k]; }
+  delete j.onCart; MACH_REV++; touchJob(id); return { parts: n, left: holdCrates() };
+}
+const HOLD_CRATES = { def: null, groups: new Map(), n: -1 };
+function holdCratesLive(group, k) { if (HOLD_CRATES.def !== deckDef) { HOLD_CRATES.def = deckDef; HOLD_CRATES.groups = new Map(); HOLD_CRATES.n = -1; } HOLD_CRATES.groups.set(k, group); }
+function holdCratesTick() {
+  const H = HOLD_CRATES; if (H.def !== deckDef || !H.groups.size) return;
+  const n = holdCrates(); if (n === H.n) return;
+  H.n = n; for (const [k, g] of H.groups) g.visible = k <= n;
+}
+
 // ---- the Works bay job board (Deck 5), live (0.33.8) ----
 // The jobBoard kit (section 4b) hands its canvas texture to jobBoardLive as the deck is built (one inert line);
 // worksTick (main loop) redraws it whenever the job list changes, in the kit's own look. Up to six cards: the
@@ -15074,7 +15190,7 @@ function jobCard(j) {
   const who = j.claimedBy === 'you' ? 'you' : j.claimedBy ? ((schedPeople().find(p => p.id === j.claimedBy) || {}).name || '').split(' ')[0] : null;
   if (j.kind === 'chore') return [j.title.split(':')[0], 'Deck ' + j.deck + (j.room && roomName(j.deck, j.room) ? ' · ' + roomName(j.deck, j.room) : ''),
     j.status === 'waiting' ? j.why : who ? who + ' on it' : (CHORES[j.chore] || {}).text || 'chore', j.leave ? 'soon' : 'routine'];
-  if (j.kind === 'restock') return [j.cargo === 'meals' ? 'Food to the cold store' : 'Restock storage', j.cargo === 'meals' ? 'Hold to Deck 3' : 'Deck 5 · cargo hold', who ? who + ' on it' : 'hover cart', JOB_PRI[j.urgency]];
+  if (j.kind === 'restock') return [j.cargo === 'meals' ? 'Food to the cold store' : weekday(Math.floor(j.found / 1440) + 1) === DELIVERY.day ? 'Unload the Wednesday delivery' : 'Unload the delivery', j.cargo === 'meals' ? 'Hold to Deck 3' : 'Deck 5 · cargo hold', who ? who + ' on it' : j.cargo === 'meals' ? 'hover cart' : 'hover cart, ' + holdCrates() + (holdCrates() === 1 ? ' crate' : ' crates'), JOB_PRI[j.urgency]];
   const m = machineById(j.machine), K = MACHINE_KINDS[m.kind], room = (DECKS[m.deck].rooms[m.room] || {}).name;
   const n = machineList().filter(x => x.kind === m.kind && x.deck === m.deck).length > 1 ? ' ' + m.id.split('-').pop() : '';
   const state = j.status === 'waiting' ? j.why : (j.urgency === 2 ? 'failing: urgent' : JOB_WORD[j.kind]) + (who ? ', ' + who + ' on it' : heldForYou(j) ? ', asked for you' : '');
@@ -15103,6 +15219,7 @@ function drawJobBoard(t) {
 // the main loop's step (section 12): redraw the board on Deck 5 when the jobs change (or each ship hour, for the shift)
 function worksTick() {
   const B = JOB_BOARD, D = CART_DOCKS;
+  shelfGlowTick(); holdCratesTick();
   if (B && B.def === deckDef) {
     machinesNow();
     const hr = Math.floor(shipNow() / 60);
