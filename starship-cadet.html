@@ -241,7 +241,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.36.90
+   STARSHIP CADET: CSV Wren                           build 0.36.91
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7618,7 +7618,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.36.90';                           // keep in step with the header's build line
+const GAME_BUILD = '0.36.91';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -8621,10 +8621,22 @@ function schedBuild(p, d, occ, S) {
   };
   // showers in the evening: the habit, or about one day in three for anyone else
   const eveShower = H.has('evening-shower') || U(90) < .3;
+  // the shower queue (0.36.91, plan-0607): a wait of SHOWER_Q+ minutes for a shower is spent in the washroom, not on
+  // the bunk: the wait before the shower becomes a 'shower-queue' stop (a free place of that type in the same room
+  // when the deck architect has them, else no place: section 10 stands them inside the washroom door, tag 'showerq')
+  const showerQueue = (t0, id) => {
+    const pl = S.byId.get(id), i = segs.length - 1, w = segs[i], pv = segs[i - 1];
+    if (!pl || !w || w.placeId !== id || !pv || pv.to !== w.from || pv.act === 'commute' || w.from - t0 < SHOWER_Q) return;
+    const q = (S.shared.get(bedDeck + '|shower-queue') || []).find(x => x.room === pl.room && isFree(x.id, t0, w.from));
+    if (pv.from >= t0) segs.splice(i - 1, 1); else pv.to = t0;   // the wait was added on the end of what they were doing
+    if (q) hold(q.id, t0, w.from);
+    segs.splice(segs.indexOf(w), 0, { from: t0, to: w.from, act: 'wash', deck: bedDeck, type: 'shower-queue', placeId: q ? q.id : null, tag: 'showerq' });
+  };
   const wash = (k, evening) => {                         // a shower (queueing if need be), else a basin, else in your own room
     const dur = evening || !eveShower ? 7 + Math.round(5 * U(k)) : 5;
-    const type = dur === 5 ? 'basin' : 'shower';
-    if (!take('wash', [[bedDeck, type]], dur, { wait: 25 }) && !take('wash', [[bedDeck, type === 'shower' ? 'basin' : 'shower']], 5, { wait: 15 })) {
+    const type = dur === 5 ? 'basin' : 'shower', t0 = t, d0 = deck, got = take('wash', [[bedDeck, type]], dur, { wait: 25 });
+    if (got && type === 'shower' && d0 === bedDeck) showerQueue(t0, got);
+    if (!got && !take('wash', [[bedDeck, type === 'shower' ? 'basin' : 'shower']], 5, { wait: 15 })) {
       go(bedDeck); seg('wash', t + 6, 'bed', p.bed, { tag: 'room' });
     }
   };
@@ -9039,7 +9051,9 @@ function planDay(person, day) { return shipDay(day).plans.get(person.id) || []; 
 // table for Calder; the escort's is only a stand-in, since section 10's escort does the walking),
 // { deck, room } (a week beat: the first free place in that room, by id, nobody's own and nobody's desk) or 'seek'
 // (section 20's seek finds you: nothing planned). [] when the intro is off
-const INTRO_EARLY = 5;                                   // minutes early to a named seat (the Chief at your table)
+const STAFF_ONLY = new Set(['bar-staff']);              // behind the bar: the bartender's alone, never a beat's place (0.36.91; Pell's d4-quiz landed on 3-bar-1)
+const INTRO_EARLY = 5;
+const SHOWER_Q = 3;                                      // ship minutes: a shorter wait for a shower isn't worth queueing for                                   // minutes early to a named seat (the Chief at your table)
 function introPlan(p, d) {
   if (typeof introBeats !== 'function') return null;
   let beats = null; try { beats = introBeats(p.id, d); } catch (e) { return null; }
@@ -9047,7 +9061,7 @@ function introPlan(p, d) {
   const S = schedData(), nat = (a, b) => a.id.localeCompare(b.id, 'en', { numeric: true });
   return beats.filter(x => x && x.where && x.where !== 'seek' && x.until > x.at).map(x => {
     const w = x.where, rooms = (DECKS[w.deck] && DECKS[w.deck].rooms) || {};
-    const inRoom = q => q.deck === w.deck && (q.room === w.room || (rooms[q.room] && rooms[q.room].name === w.room)) && q.type !== 'bed' && !S.owner.has(q.id) && !S.deskOf(q.id) && !q.machine;
+    const inRoom = q => q.deck === w.deck && (q.room === w.room || (rooms[q.room] && rooms[q.room].name === w.room)) && q.type !== 'bed' && !STAFF_ONLY.has(q.type) && !S.owner.has(q.id) && !S.deskOf(q.id) && !q.machine;
     const cand = S.places.filter(inRoom).sort(nat), dist = q => w.tile ? Math.hypot(q.at[0] - w.tile[0], q.at[1] - w.tile[1]) : 0;
     const near = w.tile ? cand.filter(q => q.type !== 'event').sort((a, b) => dist(a) - dist(b)) : cand;   // a tile: the places nearest it first
     const pl = w.placeId && S.byId.get(w.placeId) ? S.byId.get(w.placeId) : near[0];   // a named place (Calder's seat across from yours)
@@ -12745,16 +12759,19 @@ function galleyRoles(d) {
   const head = galleyStaff().find(p => galleyTeam(p) === 'chef');
   const chef = on.find(p => p === head) || on.find(p => galleyDeputy(p, head)) || on[0];
   if (chef) roles.set(chef.id, 'chef');
-  const hands = on.filter(p => p !== chef), fixed = hands.filter(p => ['early', 'late'].includes(galleyTeam(p)));
+  const hands = on.filter(p => p !== chef), fixed = hands.filter(p => ['early', 'late', 'bar'].includes(galleyTeam(p)));
   for (const p of fixed) roles.set(p.id, galleyTeam(p));
   const rest = hands.filter(p => !fixed.includes(p)), r = rest.length ? ((d % rest.length) + rest.length) % rest.length : 0;
   rest.slice(r).concat(rest.slice(0, r)).forEach((p, k) => roles.set(p.id, k % 2 ? 'early' : 'late'));
-  // the bar (0.36.88, plan-0607 "a galley hand on bar duty every evening, two taking turns, so no new crew"): a spare
-  // hand, beyond one early and one late, takes it; the late hands first, by turns day by day. No spare: the bar's shut
-  const of = r => [...roles].filter(([, x]) => x === r).map(([id]) => id), lt = of('late'), er = of('early'), c = lt.length > 1 ? lt : er.length > 1 ? er : [];
-  if (c.length && GALLEY_AT.bar.every(id => (DECKS[3].places || []).some(q => q.id === id))) roles.set(c[((d % c.length) + c.length) % c.length], 'bar');
+  // the bar (0.36.91, the user's: one named bartender): rota.team 'bar' (Ivo Madsen) works it every evening he's on;
+  // on his days off the relief (rota.relief 'bar', Tamsin Haddad) does her own shift and the bar after it
+  // (roles.relief). Whoever's left keeps the galley going: with no late hand, the last early hand turns late
+  const of = r => [...roles].filter(([, x]) => x === r).map(([id]) => id);
+  if (!of('bar').length) { const rl = hands.find(p => p.rota && p.rota.relief === 'bar'); if (rl) roles.relief = rl.id; }
+  if (!of('late').length) { const er = of('early').filter(id => id !== roles.relief); if (er.length > 1) roles.set(er[er.length - 1], 'late'); }
   return roles;
 }
+const BARTENDER = () => ROSTER.find(p => p.rota && p.rota.team === 'bar') || null, BAR_RELIEF = () => ROSTER.find(p => p.rota && p.rota.relief === 'bar') || null;   // who's on the bar (0.36.91; for section 15's bar)
 const galleyWake = (p, d, role) => { const s = GALLEY_SHIFTS[role]; return s && s.wake !== null ? s.wake - 5 + Math.round(10 * schedU(p.seed, d, 301)) : null; };
 // the whole galley's day: everyone's blocks, cut into 15-30 minute stints that move between stations, with no
 // station held by two people at once
@@ -12778,9 +12795,10 @@ function galleyRota(d) {
     const day = { role, wake: role ? galleyWake(p, d, role) : null, bedBy: nw !== null ? nw + 1440 - 415 : null, blocks: [], meals: {} };
     if (role) {
       const me = n++;
-      const cap = role === 'bar' && day.bedBy !== null ? day.bedBy - 25 : 1440;   // bar duty ends in time for bed before an early start
-      for (const [a, B, task] of galleyPlan(role, d)) {
-        const b = Math.min(B, cap); if (b <= a) continue;
+      const cap = day.bedBy !== null ? day.bedBy - 25 : 1440, plan = galleyPlan(role, d).slice();   // (a copy: the relief adds to it) bar duty ends in time for bed before an early start
+      if (roles.relief === p.id) { const end = Math.max(...plan.map(x => x[1])); plan.push([Math.max(1050, end + 30), 1380, 'bar']); day.relief = true; }   // the relief: the bar after their own shift
+      for (const [a, B, task] of plan) {
+        const b = task === 'bar' ? Math.min(B, cap) : B; if (b <= a) continue;
         if (task === 'breakfast' || task === 'dinner') { day.meals[task] = [a, b]; continue; }
         for (let s = a, k = 0; s < b; k++) {             // stints of 15-30 minutes; the line swaps every half hour
           let e = task === 'line' ? s + 30 : s + 15 + Math.round(15 * schedU(p.seed, d, 310 + s));
@@ -33850,9 +33868,9 @@ const ROSTER = [
   {"id": "grieve-thea", "name": "Thea Grieve", "rank": "junior", "dept": "infirmary", "uniform": "infirmary", "role": "Infirmary aide", "shift": "day", "rota": {"offDays": [3, 4]}, "bed": "4-B3-1", "work": {"deck": 3, "place": "work:infirmary"}, "habits": ["lingers-at-meals", "tea-break", "stargazer"], "traits": ["serious", "nervous"], "looks": {"skin": 1, "hair": "long", "hairColor": "dark", "height": 0.94, "build": "average", "acc": ["beard", "headband"]}, "bio": "Changes the infirmary beds and knows everyone's blood type.", "life": ["Keeps fish back home on New Aberdeen.", "Is quietly in charge of the lost-property box."], "seed": 780864, "birthday": 328, "habitShifts": [{"add": "gym-regular", "why": "Thea has joined the after-shift gym crowd."}], "tpl": "shy", "openness": "guarded", "needs": "listen", "loves": ["sweet", "tea"], "likes": ["star", "plant"], "joy": "a proper tea break", "thread": "exams", "keepsake": "a recipe card in their handwriting", "home": "New Aberdeen", "family": "twin", "about": [{"tier": 0, "topic": "work", "text": "Knows the infirmary better than anyone gives them credit for."}, {"tier": 1, "topic": "hobby", "text": "Lights up when anyone mentions a proper tea break."}, {"tier": 1, "topic": "home", "text": "Comes from New Aberdeen, and says it like a boast."}, {"tier": 2, "topic": "home", "text": "Has a twin, and misses them more than they let on."}, {"tier": 2, "topic": "work", "text": "Has a running bet with someone in another department that nobody else knows about."}, {"tier": 3, "topic": "work", "text": "Is studying for a certification and is quietly terrified of the practical."}, {"tier": 4, "topic": "secret", "text": "Failed it once already, before the Wren."}], "mentors": false, "transferTo": "the Meridian", "aboard": [null, 203], "hobby": "trying new teas", "since": "two years", "kin": "my twin", "lost": "", "hobbyNoun": "tea tasting"},
   {"id": "larsen-hamid", "name": "Hamid Larsen", "rank": "junior", "dept": "infirmary", "uniform": "infirmary", "role": "Infirmary aide", "shift": "day", "rota": {"offDays": [2, 3]}, "bed": "4-B3-2", "work": {"deck": 3, "place": "work:infirmary"}, "habits": ["skips-breakfast", "night-owl", "tea-break", "musician"], "traits": ["serious", "chatty"], "looks": {"skin": 1, "hair": "short", "hairColor": "brown", "height": 1.05, "build": "average", "acc": ["beard", "headband"]}, "bio": "Changes the infirmary beds and knows everyone's blood type.", "life": ["Is learning the guitar, badly.", "Is saving up for a boat on the Ostrander colonies."], "seed": 690121, "birthday": 74, "habitShifts": [{"add": "lingers-at-meals", "drop": "skips-breakfast", "why": "Hamid has started taking time over meals."}, {"drop": "night-owl", "why": "Hamid has started going to bed on time."}], "tpl": "brisk", "openness": "normal", "needs": "practical", "loves": ["music"], "likes": ["tea", "book"], "joy": "learning the guitar, badly", "thread": "notgood", "keepsake": "a guitar pick, worn smooth", "home": "the Ostrander colonies", "family": "younger brother", "about": [{"tier": 0, "topic": "work", "text": "Knows the infirmary better than anyone gives them credit for."}, {"tier": 1, "topic": "hobby", "text": "Spends free evenings learning the guitar, badly."}, {"tier": 1, "topic": "home", "text": "Grew up on the Ostrander colonies."}, {"tier": 2, "topic": "home", "text": "Writes to a younger brother more often than they write back."}, {"tier": 2, "topic": "work", "text": "Thinks the lift on Deck 5 has a personality."}, {"tier": 3, "topic": "past", "text": "Still thinks about a mistake on an old ship, though nobody else remembers it."}, {"tier": 4, "topic": "secret", "text": "Checks their own work twice because once, years ago, they didn't."}], "mentors": false, "transferTo": "the Heron", "aboard": null, "hobby": "learning the guitar, badly", "since": "eighteen months", "kin": "my younger brother", "lost": "", "hobbyNoun": "guitar"},
   {"id": "walsh-esme", "name": "Esme Walsh", "rank": "junior", "dept": "galley", "uniform": "works", "role": "Galley hand", "shift": "day", "rota": {"offDays": [5, 6], "team": "late"}, "bed": "4-B2-5", "work": {"deck": 3, "place": "work:galley"}, "habits": ["quiet-corner", "workaholic", "runner"], "traits": ["sharp-eyed", "meticulous"], "looks": {"skin": 5, "hair": "short", "hairColor": "black", "height": 0.92, "build": "slim", "acc": ["moustache"]}, "bio": "Chops, stirs and washes up under Brennan's eye.", "life": ["Keeps fish back home on Port Halloran.", "Keeps a cactus called Gerald on the windowsill."], "seed": 383530, "birthday": 9, "habitShifts": [{"add": "evening-shower", "why": "Esme has switched to showering at night."}], "tpl": "steady", "openness": "normal", "needs": "listen", "loves": ["plant", "book"], "likes": ["made", "sweet"], "joy": "looking after a cactus called Gerald", "thread": "notgood", "keepsake": "a cutting in a jar", "home": "Port Halloran", "family": "two older sisters", "about": [{"tier": 0, "topic": "work", "text": "Knows the galley better than anyone gives them credit for."}, {"tier": 1, "topic": "hobby", "text": "Will talk about looking after a cactus called Gerald for as long as you let them."}, {"tier": 1, "topic": "home", "text": "Still calls Port Halloran home."}, {"tier": 2, "topic": "home", "text": "Has two older sisters, and keeps a photo of them by the bunk."}, {"tier": 2, "topic": "work", "text": "Thinks the coffee on Deck 5 is the best on the ship, and says so loudly."}, {"tier": 3, "topic": "past", "text": "Still thinks about a mistake on an old ship, though nobody else remembers it."}, {"tier": 4, "topic": "secret", "text": "Checks their own work twice because once, years ago, they didn't."}], "mentors": false, "transferTo": "the Kestrel", "aboard": null, "hobby": "looking after a cactus called Gerald", "since": "a year", "kin": "my big sister", "lost": "", "hobbyNoun": "cactus care"},
-  {"id": "madsen-ivo", "name": "Ivo Madsen", "rank": "junior", "dept": "galley", "uniform": "works", "role": "Galley hand", "shift": "day", "rota": {"offDays": [0, 1], "team": "late"}, "bed": "4-B2-1", "work": {"deck": 3, "place": "work:galley"}, "habits": ["garden-lover", "shopper"], "traits": ["stubborn", "chatty"], "looks": {"skin": 4, "hair": "bald", "hairColor": "auburn", "height": 0.93, "build": "slim", "acc": ["glasses", "headband"]}, "bio": "Can carry six trays at once.", "life": ["Sings in the shower; the whole washroom knows.", "Collects pressed flowers from the garden."], "seed": 443898, "birthday": 157, "habitShifts": [{"add": "early-riser", "why": "Ivo has started getting up early."}], "tpl": "chatty", "openness": "open", "needs": "share", "loves": ["plant", "garden"], "likes": ["sweet", "music"], "joy": "pressing flowers from the garden", "thread": "rivalry", "keepsake": "a cutting in a jar", "home": "Kesh", "family": "big, noisy family", "about": [{"tier": 0, "topic": "work", "text": "Will tell you which corner of the galley is the warmest."}, {"tier": 1, "topic": "hobby", "text": "Spends free evenings pressing flowers from the garden."}, {"tier": 1, "topic": "home", "text": "Comes from Kesh, and says it like a boast."}, {"tier": 2, "topic": "home", "text": "Has a big, noisy family, and misses them more than they let on."}, {"tier": 2, "topic": "work", "text": "Has a running bet with someone in another department that nobody else knows about."}, {"tier": 3, "topic": "past", "text": "Has an old rivalry with someone aboard that goes back years."}, {"tier": 4, "topic": "secret", "text": "Can't remember how it started, and would quite like it to end."}], "mentors": false, "transferTo": "the Heron", "aboard": null, "hobby": "pressing flowers", "since": "ten months", "kin": "my dad", "lost": "", "hobbyNoun": "flower pressing"},
+  {"id": "madsen-ivo", "name": "Ivo Madsen", "rank": "junior", "dept": "galley", "uniform": "works", "role": "Bartender", "shift": "day", "rota": {"offDays": [0, 1], "team": "bar"}, "bed": "4-B2-1", "work": {"deck": 3, "place": "work:galley"}, "habits": ["garden-lover", "shopper"], "traits": ["stubborn", "chatty"], "looks": {"skin": 4, "hair": "bald", "hairColor": "auburn", "height": 0.93, "build": "slim", "acc": ["glasses", "headband"]}, "bio": "Can carry six trays at once.", "life": ["Sings in the shower; the whole washroom knows.", "Collects pressed flowers from the garden."], "seed": 443898, "birthday": 157, "habitShifts": [{"add": "early-riser", "why": "Ivo has started getting up early."}], "tpl": "chatty", "openness": "open", "needs": "share", "loves": ["plant", "garden"], "likes": ["sweet", "music"], "joy": "pressing flowers from the garden", "thread": "rivalry", "keepsake": "a cutting in a jar", "home": "Kesh", "family": "big, noisy family", "about": [{"tier": 0, "topic": "work", "text": "Will tell you which corner of the galley is the warmest."}, {"tier": 1, "topic": "hobby", "text": "Spends free evenings pressing flowers from the garden."}, {"tier": 1, "topic": "home", "text": "Comes from Kesh, and says it like a boast."}, {"tier": 2, "topic": "home", "text": "Has a big, noisy family, and misses them more than they let on."}, {"tier": 2, "topic": "work", "text": "Has a running bet with someone in another department that nobody else knows about."}, {"tier": 3, "topic": "past", "text": "Has an old rivalry with someone aboard that goes back years."}, {"tier": 4, "topic": "secret", "text": "Can't remember how it started, and would quite like it to end."}], "mentors": false, "transferTo": "the Heron", "aboard": null, "hobby": "pressing flowers", "since": "ten months", "kin": "my dad", "lost": "", "hobbyNoun": "flower pressing"},
   {"id": "varga-tariq", "name": "Tariq Varga", "rank": "junior", "dept": "galley", "uniform": "works", "role": "Galley hand", "shift": "day", "rota": {"offDays": [0, 1], "team": "early"}, "bed": "4-B2-4", "work": {"deck": 3, "place": "work:galley"}, "habits": ["early-riser", "late-diner", "lounge-regular", "runner"], "traits": ["competitive", "thoughtful"], "looks": {"skin": 1, "hair": "bun", "hairColor": "dark", "height": 0.93, "build": "slim", "acc": []}, "bio": "Chops, stirs and washes up under Brennan's eye.", "life": ["Sends voice messages to a grandmother on the Tevan belt.", "Writes letters home to Valo every rest day, on paper."], "seed": 599511, "birthday": 293, "habitShifts": [{"add": "window-seat", "why": "Tariq always heads for a window seat now."}], "tpl": "dreamy", "openness": "normal", "needs": "share", "loves": ["made", "tea"], "likes": ["sweet", "game"], "joy": "writing letters home", "thread": "rivalry", "keepsake": "something they made: a little gear on a chain", "home": "the Tevan belt", "family": "grandmother, who raised me", "about": [{"tier": 0, "topic": "work", "text": "Keeps a mug at the galley that nobody else is allowed to use."}, {"tier": 1, "topic": "hobby", "text": "Will talk about writing letters home for as long as you let them."}, {"tier": 1, "topic": "home", "text": "Comes from the Tevan belt, and says it like a boast."}, {"tier": 2, "topic": "home", "text": "Writes to a grandmother who raised them more often than they write back."}, {"tier": 2, "topic": "work", "text": "Thinks the lift on Deck 5 has a personality."}, {"tier": 3, "topic": "past", "text": "Has an old rivalry with someone aboard that goes back years."}, {"tier": 4, "topic": "secret", "text": "Can't remember how it started, and would quite like it to end."}], "mentors": false, "transferTo": "the Kestrel", "aboard": null, "hobby": "writing letters home", "since": "fourteen months", "kin": "my gran", "lost": "", "hobbyNoun": "letter writing"},
-  {"id": "haddad-tamsin", "name": "Tamsin Haddad", "rank": "junior", "dept": "galley", "uniform": "works", "role": "Galley hand", "shift": "day", "rota": {"offDays": [2, 3], "team": "early"}, "bed": "4-B6-2", "work": {"deck": 3, "place": "work:galley"}, "habits": ["evening-shower", "lingers-at-meals"], "traits": ["optimistic", "nervous"], "looks": {"skin": 1, "hair": "short", "hairColor": "auburn", "height": 0.94, "build": "average", "acc": ["glasses"]}, "bio": "Chops, stirs and washes up under Brennan's eye.", "life": ["Knows the lyrics to every song in the record cabinet.", "Is learning the guitar, badly."], "seed": 416759, "birthday": 4, "habitShifts": [{"add": "quiet-corner", "why": "Tamsin has been looking for quiet corners lately."}], "tpl": "shy", "openness": "guarded", "needs": "listen", "loves": ["music"], "likes": ["sweet", "made"], "joy": "learning the guitar, badly", "thread": "exams", "keepsake": "a guitar pick, worn smooth", "home": "the Ostrander colonies", "family": "younger brother", "about": [{"tier": 0, "topic": "work", "text": "Keeps a mug at the galley that nobody else is allowed to use."}, {"tier": 1, "topic": "hobby", "text": "Lights up when anyone mentions learning the guitar, badly."}, {"tier": 1, "topic": "home", "text": "Still calls the Ostrander colonies home."}, {"tier": 2, "topic": "home", "text": "Has a younger brother, and misses them more than they let on."}, {"tier": 2, "topic": "work", "text": "Has a running bet with someone in another department that nobody else knows about."}, {"tier": 3, "topic": "work", "text": "Is studying for a certification and is quietly terrified of the practical."}, {"tier": 4, "topic": "secret", "text": "Failed it once already, before the Wren."}], "mentors": false, "transferTo": "the Meridian", "aboard": [null, 203], "hobby": "learning the guitar, badly", "since": "four years", "kin": "my younger brother", "lost": "", "hobbyNoun": "guitar"},
+  {"id": "haddad-tamsin", "name": "Tamsin Haddad", "rank": "junior", "dept": "galley", "uniform": "works", "role": "Galley hand, relief bartender", "shift": "day", "rota": {"offDays": [2, 3], "team": "early", "relief": "bar"}, "bed": "4-B6-2", "work": {"deck": 3, "place": "work:galley"}, "habits": ["evening-shower", "lingers-at-meals"], "traits": ["optimistic", "nervous"], "looks": {"skin": 1, "hair": "short", "hairColor": "auburn", "height": 0.94, "build": "average", "acc": ["glasses"]}, "bio": "Chops, stirs and washes up under Brennan's eye.", "life": ["Knows the lyrics to every song in the record cabinet.", "Is learning the guitar, badly."], "seed": 416759, "birthday": 4, "habitShifts": [{"add": "quiet-corner", "why": "Tamsin has been looking for quiet corners lately."}], "tpl": "shy", "openness": "guarded", "needs": "listen", "loves": ["music"], "likes": ["sweet", "made"], "joy": "learning the guitar, badly", "thread": "exams", "keepsake": "a guitar pick, worn smooth", "home": "the Ostrander colonies", "family": "younger brother", "about": [{"tier": 0, "topic": "work", "text": "Keeps a mug at the galley that nobody else is allowed to use."}, {"tier": 1, "topic": "hobby", "text": "Lights up when anyone mentions learning the guitar, badly."}, {"tier": 1, "topic": "home", "text": "Still calls the Ostrander colonies home."}, {"tier": 2, "topic": "home", "text": "Has a younger brother, and misses them more than they let on."}, {"tier": 2, "topic": "work", "text": "Has a running bet with someone in another department that nobody else knows about."}, {"tier": 3, "topic": "work", "text": "Is studying for a certification and is quietly terrified of the practical."}, {"tier": 4, "topic": "secret", "text": "Failed it once already, before the Wren."}], "mentors": false, "transferTo": "the Meridian", "aboard": [null, 203], "hobby": "learning the guitar, badly", "since": "four years", "kin": "my younger brother", "lost": "", "hobbyNoun": "guitar"},
   {"id": "dlamini-lukas", "name": "Lukas Dlamini", "rank": "junior", "dept": "galley", "uniform": "works", "role": "Galley hand", "shift": "day", "rota": {"offDays": [1, 2], "team": "early", "cover": {"for": "brennan", "days": [4, 5]}}, "bed": "4-B1-5", "work": {"deck": 3, "place": "work:galley"}, "habits": ["garden-lover", "skips-breakfast", "night-owl", "bar-regular"], "traits": ["dry humour", "blunt"], "looks": {"skin": 4, "hair": "short", "hairColor": "black", "height": 1.1, "build": "average", "acc": ["moustache"]}, "bio": "Chops, stirs and washes up under Brennan's eye.", "life": ["Grew up on Port Halloran, and misses the rain.", "Got married just before the tour and counts the days."], "seed": 542406, "birthday": 123, "habitShifts": [{"add": "quiet-corner", "why": "Lukas has been looking for quiet corners lately."}], "tpl": "dry", "openness": "normal", "needs": "cheer", "loves": ["plant", "garden"], "likes": ["game", "tea"], "joy": "the garden benches", "thread": "notgood", "keepsake": "a cutting in a jar", "home": "Port Halloran", "family": "aunt, who was a pilot", "about": [{"tier": 0, "topic": "work", "text": "Keeps a mug at the galley that nobody else is allowed to use."}, {"tier": 1, "topic": "hobby", "text": "Spends free evenings the garden benches."}, {"tier": 1, "topic": "home", "text": "Still calls Port Halloran home."}, {"tier": 2, "topic": "home", "text": "Has an aunt who was a pilot, and misses them more than they let on."}, {"tier": 2, "topic": "work", "text": "Thinks the Wren is the best-run ship they've served on, and would never say so to Calder."}, {"tier": 3, "topic": "past", "text": "Still thinks about a mistake on an old ship, though nobody else remembers it."}, {"tier": 4, "topic": "secret", "text": "Checks their own work twice because once, years ago, they didn't."}], "mentors": false, "transferTo": "the Calypso", "aboard": null, "hobby": "sketching in the garden", "since": "eight months", "kin": "my aunt", "lost": "", "hobbyNoun": "sketching"},
 ];
 const ROSTER_GUESTS = [
@@ -34209,7 +34227,26 @@ let MESS_ONLY = null;                                    // Deck 3's tiles outsi
 const messOnly = () => { if (!MESS_ONLY || MESS_ONLY.d !== deckDef) { MESS_ONLY = new Set(); MESS_ONLY.d = deckDef; for (const r in ROOM_TILES) if (r !== 'M') for (const t of ROOM_TILES[r]) MESS_ONLY.add(t[0] + ',' + t[1]); } return MESS_ONLY; };
 const lineSeg = w => w.type === 'servery-queue' || w.tag === 'queue';   // the plan's walk to the line, its queue stop, a grab at the servery
 const trayTo = id => { const pl = id && PLACE_OF.get(id); return !!pl && pl.room === 'M'; };   // a tray only to a seat in the mess hall
+// the shower queue's stand-in spots (0.36.91): open tiles of the washroom beside its way out, '@wq-<room>-<k>'
+let WQ_TILES = null;
+function washDoorTiles(rk) {
+  if (!WQ_TILES || WQ_TILES.d !== deckDef) { WQ_TILES = new Map(); WQ_TILES.d = deckDef; }
+  if (!WQ_TILES.has(rk)) {
+    const used = new Set((deckDef.places || []).map(q => placeSpot(q.id)).filter(Boolean).map(sp => sp.walk && sp.walk.join(',')));
+    const T = ROOM_TILES[rk] || [], door = T.filter(([i, j]) => [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([a, b]) => free(i + a, j + b) && roomAt(i + a, j + b) !== rk && edgeOpen(i, j, i + a, j + b)));
+    const dd = ([i, j]) => Math.min(...door.map(([x, y]) => Math.abs(x - i) + Math.abs(y - j))), open = T.filter(([i, j]) => !used.has(i + ',' + j));
+    const m = door.length && open.length ? Math.min(...open.map(dd)) : 0;
+    WQ_TILES.set(rk, door.length ? open.filter(t => dd(t) <= Math.max(m, 0)) : []);   // the free tiles by the way out (beside it, when a basin's walk-to tile has the doorway itself)
+  }
+  return WQ_TILES.get(rk);
+}
+function showerQSpot(a, w) {
+  const nx = whereIs(a.p, w.until), pl = nx && nx.placeId && PLACE_OF.get(nx.placeId); if (!pl) return null;
+  const l = washDoorTiles(pl.room); return l.length ? '@wq-' + pl.room + '-' + (idHash(a.p.id) % l.length) : null;
+}
 function lineSpotMake(id) {
+  const q = /^@wq-(\w+)-(\d+)$/.exec(id); if (q) { const at = washDoorTiles(q[1])[+q[2]]; if (!at) return null; const c = cellPos(...at);
+    return { id, walk: at, x: c.x, z: c.z, y: 0, face: 0, pose: 'stand', anim: null, room: q[1], onTile: true }; }
   const m = /^@line-(\d+)$/.exec(id), at = m && LINE_AT[+m[1]]; if (!at) return null;
   const c = cellPos(...at), to = cellPos(...LINE_AT[+m[1] - 1]);   // facing the one ahead
   return { id, walk: at, x: c.x, z: c.z, y: 0, face: Math.atan2(to.x - c.x, to.z - c.z), pose: 'stand', anim: null, room: 'M', onTile: true };
@@ -34323,7 +34360,7 @@ class CrewAgent {
     let goalId;
     if (w.deck !== N) goalId = '@lift';
     else if (w.act === 'commute') { const nx = whereIs(this.p, w.until); goalId = nx.deck === N ? nx.placeId || null : '@lift'; }
-    else goalId = w.placeId || null;
+    else goalId = w.placeId || (w.tag === 'showerq' ? showerQSpot(this, w) : null);   // the shower queue with no place: inside the washroom door
     this.tag = w.placeId === goalId ? w.tag || null : null;   // what they'll do there (the plan's tag)
     const mg = this.mealStep(w, now, N);                 // the servery line and the tray, inside the mess hall (0.26.30)
     if (mg !== undefined) { goalId = mg; this.tag = null; }
@@ -34348,6 +34385,7 @@ class CrewAgent {
       if (d <= st) { this.x = c.x; this.z = c.z; this.path.shift(); }
       else { this.x += dx / d * st; this.z += dz / d * st; this.face = Math.atan2(dx, dz); }
       this.pose = 'walk'; this.y = 0;
+    } else if (this.spot && !this.settled && spotTaken(this, this.spot.id)) { this.pose = 'stand';   // someone sat down in it first (this very frame, before BUSY knew: 0.36.91, day 3's 3-mess-42): wait on the walk-to tile; next frame finds another
     } else if (this.spot && !this.settled) {             // the last step, from the walk-to tile onto the spot itself
       const dx = this.spot.x - this.x, dz = this.spot.z - this.z, d = Math.hypot(dx, dz), st = CREW_SPEED * .8 * dt;
       if (d <= st) { this.x = this.spot.x; this.z = this.spot.z; this.settled = true; this.pose = crewPose(this); this.face = this.spot.face; this.y = this.spot.y; }
@@ -34458,7 +34496,7 @@ const ESC_WAIT = 4, ESC_GO = 3, ESC_NEAR = 2;          // tiles: the escort wait
 function seatsBeside(placeId, n = 2, types = ['mess-seat', 'lounge-seat', 'bench']) {
   const at = placeId && PLACE_OF.get(placeId); if (!at) return [];
   const xy = q => q.xy || [q.at[0] + .5, q.at[1] + .5], [x, z] = xy(at);
-  const busy = new Set([placeId, PLAYER_PLACE].concat(DECK_CREW.map(a => a.spot && a.spot.id)));
+  const busy = new Set([placeId, PLAYER_PLACE].concat(DECK_CREW.map(a => a.spot && a.spot.id), DECK_CREW.map(a => a.meal && a.meal.next)));   // and a seat a served diner is about to walk to (0.36.91)
   // nor a seat shipDay holds for the arrival dinner now ('intro:<id>': yours, Torres's, the Chief's), even while it's empty
   // because Torres is still showing you round (reviewer 1c's paced tour, 0.26.39)
   const now = shipNow(), res = typeof shipDay === 'function' ? shipDay(Math.floor(now / 1440) + 1).occ.res : null;

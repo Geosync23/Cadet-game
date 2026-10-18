@@ -567,7 +567,7 @@ with sync_playwright() as pw:
       const keep = JSON.stringify(socSave()), t0 = shipNow(), o = {}, dr = CHAT_SKIN.draw, n = SHIP.player.needs, s0 = n.social; let got = []; CHAT_SKIN.draw = (el, v) => { got = v.buttons.map(b => b.label); };
       const tomas = SOC.crew[SOC.idx.get('tomas')], r = relGet('tomas');
       const card = () => { chatClose(); CHAT = { p: tomas, line: { text: '', say: true }, ask: false, fav: null, at: shipNow(), reach: 99, checked: Math.floor(shipNow()) }; chatShow(); return got.slice(); };
-      const fresh = d => { setShipNow((d - 1) * 1440 + 720); r.pts = 0; r.tier = 0; r.chatDay = 0; r.talkDay = 0; n.social = 40; };
+      const l0 = n.leisure, fresh = d => { setShipNow((d - 1) * 1440 + 720); r.pts = 0; r.tier = 0; r.chatDay = 0; r.talkDay = 0; n.social = 40; if (l0 !== undefined) n.leisure = 50; };   // leisure under its high line: no friendGain (section 15's leisureAdd after a full talk would cross it)
       fresh(9); relAdd('tomas', 'chat', 1); o.m = r.pts; fresh(9); o.sg = needEffects().socialGain; o.fg = needEffects().friendGain || 1; o.cg = typeof CHAT_GAIN !== 'undefined' ? CHAT_GAIN * (typeof bondMult === 'function' ? bondMult('tomas') : 1) : 0;   // what +1 comes to for Tomas (friends of friends, openness) and your social gain now
       o.buttons = card().slice(0, 2);
       const nw = NEWS.splice(0); chatDo('chat'); o.hello = r.pts; NEWS.push(...nw);   /* no news passed on in the hello: hearing news is +REL_PTS.news of its own */ o.helloAgain = card()[0];
@@ -577,7 +577,7 @@ with sync_playwright() as pw:
       fresh(11); card(); chatDo('talk'); for (let k = 1; k <= 12; k++) { setShipNow((11 - 1) * 1440 + 720 + k * .5); talkStep(CHAT); } chatDo('talk-stop'); o.stop = [CHAT.talk.end, Math.round(r.pts * 10) / 10];
       const S = JSON.stringify(socSave()); socLoad(JSON.parse(S)); o.saved = SHIP.rel.tomas.talkDay === 11;
       const sh = planDay(tomas, 12).find(x => x.act === 'work'); o.go = sh ? [socMustGo(tomas, sh.from - 5), socMustGo(tomas, sh.from - 40)] : null;
-      chatClose(); CHAT_SKIN.draw = dr; n.social = s0; setShipNow(t0); socLoad(JSON.parse(keep)); return o; })()""")
+      chatClose(); CHAT_SKIN.draw = dr; n.social = s0; if (l0 !== undefined) n.leisure = l0; setShipNow(t0); socLoad(JSON.parse(keep)); return o; })()""")
     print('Talking:', json.dumps(tk))
     if not tk.get('skip'):
         m, sg = tk['m'], tk['sg']
