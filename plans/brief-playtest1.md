@@ -55,3 +55,5 @@ The user played the Pillar 5 preview and sent 33 notes. The plan (8 packages) an
 | BM6 build master (0.63.2 combine + full run; BM5 at 60% handing over) | session_01F8k6hqdBRoxDJMzqAuiHqR | claude/p5-cand-pt1 | 0.63.2 |
 | R3 reviewer (R2 retired at 70%) | session_01AR6tGFiSZF7hL1LfVpWgng | claude/reviews-p5-step2 | — |
 - **Watch a film hobby (the user ~18:33, U + W):** a new hobby on the personal device, same as reading (same pose), new button and text. Rides in 0.63.2 if ready before the final run.
+- **Flickering speech bubbles (the user ~18:36, seen on 0.63.1):** DA5 investigates and fixes at the root (with X / O4 / O5 if theirs). In 0.63.2.
+- **Film hobby:** confirmed by the user for 0.63.2 (BM6 waits for it).
