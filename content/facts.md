@@ -28,8 +28,8 @@ in section 20, the meetings in section 18) are canon too: never contradict a bea
   **Hesper Dock** (a big station-port: market stalls, boats, rain), **Kesh**, **Lisk** (a place: "letters home to Lisk"), **Valo**, **Coriel**,
   **Marra Station** (rebuilt twice; Kim collects its old maps), **New Aberdeen**, **the Ostrander colonies**, **the Tevan belt**, and Tomas's **farm moon** (unnamed: "the farm moon", a sky that is always the same
   grey). Pell's home town and the others not listed are unnamed until a writer needs one: ask.
-- **Time:** a ship day is 18 waking hours of play; breakfast 06:00-08:00, 08:00 shift, dinner 17:00-20:30 (design-doc). The day shift runs
-  08:00-17:00; the night shift is its own world (Bunk 8, the inner cabins). Tea break at 10:30 in Works.
+- **Time:** a ship day is 18 waking hours of play; breakfast 06:00-09:00 (seat X, playtest 1: the night shift eats at 06:00), 09:00 shift, dinner 17:00-20:30 (design-doc). The day shift runs
+  09:00-17:00 (the user, playtest 1); Calder's briefing at ten to nine; the night shift is its own world (Bunk 8, the inner cabins). Tea and biscuits at 13:00 in the Works tea corner (replaced the half-ten tea, playtest 1).
 - **The ship's year:** 364 days, 52 weeks, Day 1 a Monday. Four seasons named for the garden: **Sowing** (days 1-91),
   **Greening** (92-182), **Harvest** (183-273), **Lanterns** (274-364). You arrive on **Day 0**, a Sunday, the last evening
   of Lanterns. Founding Day is day 100; the quiet watch (a quiet while at the windows for the people you miss) is day 300.

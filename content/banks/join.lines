@@ -1,0 +1,123 @@
+@bank all
+// Head writer W (playtest 1, 0.63.2; seat T's tap-to-join, read as LINES['join.<id>.<what>'][k].text). TEXTS.
+// join.<id>.tip: the tip and the arrow's label (short; {name} = the leader's first name).
+// join.<id>.notice: the toast when you join: what it is, what you do, what it gives.
+// Walks only: join.<id>.done (the walk finished) and join.<id>.left (you dropped out).
+
+== join.running.tip
+- Tap {name} to join Gym club
+== join.running.notice
+- Gym club: pick a machine and work out with everyone. Fitness and social up. Soup after.
+
+== join.department-cup.tip
+- Tap {name} to join the cup
+== join.department-cup.notice
+- Department cup: play for Works against the other departments. Social and leisure up.
+
+== join.lap-of-the-wren.tip
+- Tap {name} to join the lap
+== join.lap-of-the-wren.notice
+- Lap of the Wren: walk the promenade together, in one line, chatting. Social and leisure up.
+== join.lap-of-the-wren.done
+- One lap of the Wren. Lovely walk.
+== join.lap-of-the-wren.left
+- You've stepped out of the lap. They'll go round without you.
+
+== join.lantern-walk.tip
+- Tap {name} to join the lantern walk
+== join.lantern-walk.notice
+- Lantern walk: carry a lantern round the ship with everyone. Social and leisure up.
+== join.lantern-walk.done
+- The lanterns are home. What a sight.
+== join.lantern-walk.left
+- You've left the lantern walk. The lights carry on without you.
+
+== join.sunrise-stretch.tip
+- Tap {name} to join the stretch
+== join.sunrise-stretch.notice
+- Sunrise stretch: a gentle stretch in the garden before breakfast. Fitness and leisure up.
+
+== join.cook-along.tip
+- Tap {name} to join the cook-along
+== join.cook-along.notice
+- Cook-along: learn one simple dish at the galley pass, then eat your portion. Food and leisure up.
+
+== join.garden-hour.tip
+- Tap {name} to join garden hour
+== join.garden-hour.notice
+- Garden hour: tend the beds with the gardeners. Leisure and social up.
+
+== join.pick-your-own.tip
+- Tap {name} to pick fruit
+== join.pick-your-own.notice
+- Pick-your-own: fill a basket from the racks and take it to breakfast. Food and leisure up.
+
+== join.sowing.tip
+- Tap {name} to help with the sowing
+== join.sowing.notice
+- Sowing: plant the new season's seeds with everyone. Leisure and social up.
+
+== join.harvest.tip
+- Tap {name} to help with the harvest
+== join.harvest.notice
+- Harvest morning: pick the ripe crops with the garden crew. Leisure and social up.
+
+== join.tiles-night.tip
+- Tap {name} to join Tiles night
+== join.tiles-night.notice
+- Tiles night: sit at a board and play a few friendly games. Leisure and social up.
+
+== join.tiles-ladder.tip
+- Tap {name} to join the Tiles ladder
+== join.tiles-ladder.notice
+- Tiles ladder: play a round against everyone. The winner goes on the chalkboard. Leisure and social up.
+
+== join.quiz.tip
+- Tap {name} to join the quiz
+== join.quiz.notice
+- Quiz night: three questions about the ship. Nobody fails. Leisure and social up.
+
+== join.jam.tip
+- Tap {name} to join the jam
+== join.jam.notice
+- Music jam: sing along, clap along, or just listen. Leisure and social up.
+
+== join.book-circle.tip
+- Tap {name} to join the book circle
+== join.book-circle.notice
+- Book circle: sit with the circle and talk about this month's book. Leisure and social up.
+
+== join.knit-and-natter.tip
+- Tap {name} to join the circle
+== join.knit-and-natter.notice
+- Knit and natter: sit with the circle and do any hobby. Leisure and social up.
+
+== join.postcard-night.tip
+- Tap {name} to write a postcard
+== join.postcard-night.notice
+- Postcard night: write a card home. It goes out with the next mail run. Leisure and social up.
+
+== join.observatory-night.tip
+- Tap {name} to join observatory night
+== join.observatory-night.notice
+- Observatory night: lie back and look at the stars with everyone. Leisure and social up.
+
+== join.open-lab.tip
+- Tap {name} to join the open lab
+== join.open-lab.notice
+- Open lab: the Survey team show you what they're working on. Leisure and social up.
+
+== join.works-tea.tip
+- Tap {name} to join Friday tea
+== join.works-tea.notice
+- Works Friday tea: tea, biscuits and the week's news with Works. Social up, and a little food.
+
+// Name on the beam (you, on arrival)
+== join.name-on-the-beam.tip
+- Tap the beam to paint your name
+== join.name-on-the-beam.tell
+- Go on, tap the beam. Your name goes up there.
+== join.name-on-the-beam.paint
+- Zeke hands you the pen. You paint your first name on the beam, beside everyone who's served in Works.
+== join.name-on-the-beam.notice
+- Your name is on the beam. The whole bay cheers. Welcome to Works.

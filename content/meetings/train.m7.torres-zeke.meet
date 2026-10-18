@@ -12,7 +12,7 @@ torres-zeke: Two low? Use your eyes. What does the card say? What do you see up 
 torres-zeke: Wrong pick, you walk back. Happens to all of us. Me, twice on Tuesday.
 ? choice
 * Are you sure? It's yours.   rel:torres-zeke+2 flavour:listen
-  torres-zeke: It's been in my locker a year. It wants a job. Go on.   [laugh]
+  torres-zeke: It's been in my wardrobe a year. It wants a job. Go on.   [laugh]
 * Two low parts. How do I pick?   rel:torres-zeke+1 flavour:practical
   torres-zeke: Look before you scan. Cold door, seal. Cold oven, element.
 * Thanks, Zeke.   rel:torres-zeke+1 flavour:cheer
