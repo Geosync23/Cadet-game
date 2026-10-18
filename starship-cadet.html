@@ -249,7 +249,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.33.51
+   STARSHIP CADET: CSV Wren                           build 0.33.52
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7807,7 +7807,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.33.51';                           // keep in step with the header's build line
+const GAME_BUILD = '0.33.52';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -15299,8 +15299,7 @@ function choresOfDay(d) {
 function tunePost(m, h, jobs, found) {
   if (jobs.some(x => x.kind === 'tune' && x.machine === m.id && x.status !== 'done')) return null;
   const d = machineDrift(m.id), dc = (FAULT_CAUSES[m.kind] || []).find(c => c.setting), w = dc ? dc.shows.split('|') : [], word = d > 0 ? w[0] : w[w.length - 1];
-  const n = machineList().filter(x => x.kind === m.kind && x.deck === m.deck).length > 1 ? ' ' + m.id.split('-').pop() : '';
-  const j = jobMake('tune', { id: 'tune:' + m.id + '@' + h, machine: m.id, deck: m.deck, room: m.room, h, found, tier: jobTier({ machine: m.id }), title: 'Tune: ' + MACHINE_KINDS[m.kind].name + n + (word ? ' (' + word + ')' : '') });
+  const j = jobMake('tune', { id: 'tune:' + m.id + '@' + h, machine: m.id, deck: m.deck, room: m.room, h, found, tier: jobTier({ machine: m.id }), title: 'Tune: ' + machineTitle(m.id) + (word ? ' (' + word + ')' : '') });
   jobs.push(j); return j;
 }
 function choresHour(h, jobs) {
@@ -15983,6 +15982,8 @@ let JOB_BOARD = null;
 function jobBoardLive(t) { JOB_BOARD = { t, def: deckDef, rev: -1, min: -1 }; worksTick(); }
 const JOB_PRI = ['routine', 'soon', 'urgent', 'urgent'];
 const JOB_WORD = { service: 'service due', repair: 'repair', overhaul: 'broken: overhaul' };
+// a machine's name on a card: its kind's name, and its number when its deck has more than one ("Washer 2"); no symptom (0.33.52)
+function machineTitle(id) { const m = machineById(id); if (!m) return null; return MACHINE_KINDS[m.kind].name + (machineList().filter(x => x.kind === m.kind && x.deck === m.deck).length > 1 ? ' ' + m.id.split('-').pop() : ''); }
 function jobCard(j) {
   const who = j.claimedBy === 'you' ? 'you' : j.claimedBy ? ((schedPeople().find(p => p.id === j.claimedBy) || {}).name || '').split(' ')[0] : null;
   if (jobKindOf(j)) return [j.title.split(':')[0], 'Deck ' + j.deck + (j.room && roomName(j.deck, j.room) ? ' · ' + roomName(j.deck, j.room) : ''),
@@ -15990,10 +15991,9 @@ function jobCard(j) {
   if (j.kind === 'chore') return [j.title.split(':')[0], 'Deck ' + j.deck + (j.room && roomName(j.deck, j.room) ? ' · ' + roomName(j.deck, j.room) : ''),
     j.status === 'waiting' ? j.why : who ? who + ' on it' : (CHORES[j.chore] || {}).text || 'chore', j.leave ? 'soon' : 'routine'];
   if (j.kind === 'restock') return [j.cargo === 'meals' ? 'Food to the cold store' : weekday(Math.floor(j.found / 1440) + 1) === DELIVERY.day ? 'Unload the Wednesday delivery' : 'Unload the delivery', j.cargo === 'meals' ? 'Hold to Deck 3' : 'Deck 5 · cargo hold', who ? who + ' on it' : j.cargo === 'meals' ? 'hover cart' : 'hover cart, ' + partsCrates() + (partsCrates() === 1 ? ' crate' : ' crates'), JOB_PRI[j.urgency]];
-  const m = machineById(j.machine), K = MACHINE_KINDS[m.kind], room = (DECKS[m.deck].rooms[m.room] || {}).name;
-  const n = machineList().filter(x => x.kind === m.kind && x.deck === m.deck).length > 1 ? ' ' + m.id.split('-').pop() : '';
+  const m = machineById(j.machine), room = (DECKS[m.deck].rooms[m.room] || {}).name;
   const state = j.status === 'waiting' ? j.why : (j.urgency === 2 ? 'failing: urgent' : JOB_WORD[j.kind]) + (who ? ', ' + who + ' on it' : heldForYou(j) ? ', asked for you' : '');
-  return [K.name + n + (faultShows(j) ? ' (' + faultShows(j) + ')' : ''), 'Deck ' + m.deck + (room ? ' · ' + room.toLowerCase() : ''), state, JOB_PRI[j.urgency]];   // a real fault says what everyone notices (0.33.46)
+  return [machineTitle(m.id) + (faultShows(j) ? ' (' + faultShows(j) + ')' : ''), 'Deck ' + m.deck + (room ? ' · ' + room.toLowerCase() : ''), state, JOB_PRI[j.urgency]];   // a real fault says what everyone notices (0.33.46)
 }
 function drawJobBoard(t) {
   const { g: c, c: cv } = t.userData, w = cv.width, h = cv.height, now = shipNow() % 1440;

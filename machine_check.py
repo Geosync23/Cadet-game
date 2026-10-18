@@ -800,10 +800,11 @@ with sync_playwright() as pw:
           SHIP.works = { tier: 2, rank: 'junior' }; out.tier2 = playerTier(); SHIP.works = null;
           // the ladder's hook: once an hour, after the claims; a reserve from inside it (slot 20, a tier-2 machine)
           const calls = []; let rid = null;
-          window.ladderTick = h => { calls.push(h); if (rid === null && h === Math.floor(t / 60) + 2) rid = jobReserve('scrubber', SHIP.time.day, (h % 24) * 60 + 30, 20, { tier: 2, train: 't2', until: SHIP.time.day * 1440 + 1440 }) || 'none'; };
+          window.__lt = h => { calls.push(h); if (rid === null && h === Math.floor(t / 60) + 2) rid = jobReserve('scrubber', SHIP.time.day, (h % 24) * 60 + 30, 20, { tier: 2, train: 't2', until: SHIP.time.day * 1440 + 1440 }) || 'none'; };
+          window.__sc("window.__lt0 = typeof ladderTick === 'function' ? ladderTick : undefined; ladderTick = h => { window.__lt(h); if (window.__lt0) window.__lt0(h); }");   // section 24's own, if it's in, still runs
           let who = null;
           for (let m = t + 60; m <= t + 8 * 60; m += 60) { setShipNow(m); machinesNow(); if (sen.claimedBy && !who) who = sen.claimedBy; }
-          delete window.ladderTick;
+          window.__sc("if (window.__lt0) ladderTick = window.__lt0; else ladderTick = undefined");
           out.calls = calls.length; out.callsSeq = calls.every((h, i) => !i || h === calls[i - 1] + 1);
           out.seniorBy = who ? crewRank(schedPeople().find(p => p.id === who)) : null;
           const R = SHIP.jobs.find(j => j.id === rid); out.rid = rid; out.rTier = R ? jobTier(R) : null; out.rTrain = R ? R.train : null; out.rHeld = R ? heldForYou(R) : null;
@@ -913,7 +914,7 @@ with sync_playwright() as pw:
           out.overBuiltIn = jobKindAdd('repair', { stops: () => [], done: () => {} });
           out.added = jobKindAdd('testkind', { tier: 1, work: 20, text: 'Test run',
             stops: j => [{ deck: 4, placeId: '4-lift-1', mins: 10, tag: 'look', how: 'look', hold: 'cart', opts: { marks: ['fine', 'worn'] } }, { deck: 4, placeId: '4-laundry-1', mins: 10, tag: 'pick', how: 'choose', opts: { options: ['a', 'b'] } }],
-            post: (h, jobs) => { if ((h === H0 || h === H0 + 1) && !jobs.some(x => x.id === 'tk@' + h)) jobs.push(jobMake('testkind', { h, id: 'tk@' + h, deck: 4, room, title: 'Test run: Deck 4', ...(h === H0 ? { released: true } : {}) })); },
+            post: (h, jobs) => { if ((h === H0 || h === H0 + 1) && !jobs.some(x => x.id === 'tk@' + h)) jobs.push(jobMake('testkind', { h, id: 'tk@' + h, deck: 4, room, title: 'Test run: Deck 4', ...(h === H0 ? { released: true } : { shareSeen: true, leave: 480 }) })); },   // B: its own hold (outside HOLD_MAX and the band's order)
             done: (j, t, by) => done.push([j.id, by, JSON.stringify(j.res || {})]), stepDone: (j, k, res) => steps.push([j.id, k, res && res.pick]),
             crew: { can: p => jobCrew(p) === 'works', mins: 30 } });
           let crewJob = null;
@@ -970,8 +971,9 @@ with sync_playwright() as pw:
           setShipNow(t0 + 5 * 1440); machinesNow();
           out.offered = offered.length; out.offeredOk = offered.every(o => o[1] && SHIP.jobs.concat([]).length >= 0);
           delete window.caseOffer;
-          const o = openJobs('you').find(x => x.kind === 'repair' || x.kind === 'service' || x.kind === 'calibrate' || x.kind === 'lamp') || openJobs('you')[0];
-          held = o && o.id; const J = SHIP.jobs.find(j => j.id === held);
+          const tt = shipNow(), mk = id => { const j = { id, machine: null, deck: 4, room: (placeById('4-lift-1') || {}).room, kind: 'chore', chore: 'vent', target: id, title: 'Clean a vent: test', tier: 1,
+            stops: [{ deck: 4, placeId: '4-lift-1', mins: 10, tag: 'vent' }], urgency: 0, leave: null, posted: tt, found: tt, claimedBy: null, parts: [], status: 'open', shareSeen: true }; SHIP.jobs.push(j); MACH_REV++; return j; };
+          held = mk('test-case').id; const J = SHIP.jobs.find(j => j.id === held);
           if (J) { J.released = true; J.urgency = 1; }
           setShipNow(shipNow() + 3 * 60); machinesNow(); out.crewTook = J ? !!(J.claimedBy && J.claimedBy !== 'you') : null;
           out.claim = J ? claimJob(J.id) : null;
@@ -982,10 +984,10 @@ with sync_playwright() as pw:
           delete window.caseFitted; delete window.caseHeld; if (J) dropJob(J.id);
           // a side kind
           jobKindAdd('testside', { side: true, text: 'Side test', stops: () => [{ deck: 4, placeId: '4-lift-1', mins: 5, tag: 'hold' }], done: () => {}, crew: { can: () => false, mins: 5 } });
-          const b = openJobs('you').find(x => x.kind !== 'testside'); out.board = b ? claimJob(b.id) : null;
+          const b = mk('test-board'); out.board = claimJob(b.id);
           SHIP.jobs.push(jobMake('testside', { id: 'side@1', deck: 4, title: 'Side test' })); MACH_REV++;
           out.side = claimJob('side@1'); out.myJob = myJob() && myJob().id === (b && b.id); out.sides = mySideJobs().map(j => j.id).join();
-          delete JOB_KINDS.testside; delete JOB_TYPES.testside; SHIP.jobs = SHIP.jobs.filter(j => j.id !== 'side@1');
+          delete JOB_KINDS.testside; delete JOB_TYPES.testside; SHIP.jobs = SHIP.jobs.filter(j => j.id !== 'side@1' && !j.id.startsWith('test-'));
           for (const j of SHIP.jobs) if (j.claimedBy === 'you') { j.claimedBy = null; j.status = 'open'; }
           // the lift's old id in a save
           const sv = { player: { deck: 4, tile: [0, 0], facing: 0 }, ship: { decks: {} }, crew: {} }; SAVE_EXTRA.forEach(f => f(sv));
