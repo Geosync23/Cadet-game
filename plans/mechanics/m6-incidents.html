@@ -90,7 +90,7 @@ td code{white-space:normal}
   <div class="grid">
     <div class="card"><b>A burst pipe</b><span>A corridor floor is wet and crew step round it. <b>Safe:</b> close the line's valve (two or three valves on the nearby panel; the right one is the one upstream of the wet, following the pipe). <b>Clean:</b> mop the puddle (a few holds). <b>Fix:</b> replace the burst joint (one seal from stores, fitted at the burst).</span><span class="meta"><span class="tag">Decks 3, 4, 5</span></span></div>
     <div class="card"><b>The lift sticks</b><span>The main lift stops between decks with someone inside, for up to 20 minutes; crew take the ladder (rides are slow). <b>Safe:</b> at the lift machine room on Deck 5, release the brake (a turn). <b>Clean:</b> help them out at the next deck (a short word; they're grateful for days). <b>Fix:</b> service the lift.</span><span class="meta"><span class="tag">the lift</span></span></div>
-    <div class="card"><b>The galley alarm</b><span>A scorched pan sets off the extractor's alarm. <b>Safe:</b> reset the alarm at the extractor's panel (a hold). <b>Clean:</b> clear the air: open the vents and wait a few minutes. <b>Fix:</b> check the hood (look) and service the extractor. Brennan is embarrassed.</span><span class="meta"><span class="tag">Deck 3</span></span></div>
+    <div class="card"><b>The galley alarm</b><span>A scorched pan sets off the galley plant's smoke alarm (the galley plant runs the galley's extraction). <b>Safe:</b> reset the alarm at the galley plant's panel (a hold). <b>Clean:</b> clear the air: open the vents and wait a few minutes. <b>Fix:</b> check the hood (look) and service the galley plant. Brennan is embarrassed.</span><span class="meta"><span class="tag">Deck 3</span></span></div>
   </div>
 </section>
 
@@ -99,7 +99,7 @@ td code{white-space:normal}
   <ul>
     <li><b>About one a week</b>, on a workday between 09:00 and 15:30, from Day 8. Which incident, which day and where are worked out from the week (the same every game).</li>
     <li><b>Your first is fixed:</b> Day 8, Monday, about 10:30 (after the Monday briefing), a burst pipe on Deck 4.</li>
-    <li>They come from the machines: a burst pipe is more likely where the pipe valves are worn, the galley alarm when the extractor is, the lift sticking when the lift is.</li>
+    <li>They come from the machines: a burst pipe is more likely where the pipe valves are worn, the galley alarm when the galley plant is, the lift sticking when the lift is.</li>
   </ul>
 </section>
 
@@ -129,11 +129,11 @@ td code{white-space:normal}
   <div class="tablewrap"><table>
     <tr><th>Section</th><th>What</th><th>Owner</th></tr>
     <tr><td>24f (new)</td><td><code>INCIDENTS</code> (data), the week's plan, the three-step job, the Day 8 training, crew handling when you don't come</td><td>M2</td></tr>
-    <tr><td>17</td><td>the machine side: an incident's fix is an ordinary job, posted at the clean-up's end: for a burst, a Tier 1 <code>joint</code> job at the burst (one <code>seal</code>, 20 minutes; the deck's <code>valve</code> machines are Tier 2, so they're never the junior's fix: a worn one just gets its service job as usual); for the lift and the alarm, a repair on <code>5-lift-1</code> or <code>3-extractor-1</code> (Tier 1), which the incident sets to faulty (cond 40) when it starts; the lift's <code>lift</code> effect ×3 while stuck</td><td>S</td></tr>
-    <tr><td>14 / 10 sim</td><td>a <b>wet patch</b> crew walk round (the corridor tiles under the puddle cost more in pathing for crew, never blocked: no plan changes); the <b>stuck person</b> (a crew member whose plan has them riding the lift at the start minute; held in the car, <code>wait</code>, until released or 40 minutes); Brennan at the extractor for the alarm; crew remarks for a day (<code>simNote('incident')</code>)</td><td>the social engineer (on call for sim items)</td></tr>
+    <tr><td>17</td><td>the machine side: an incident's fix is an ordinary job, posted at the clean-up's end: for a burst, a Tier 1 <code>joint</code> job at the burst (one <code>seal</code>, 20 minutes; the deck's <code>valve</code> machines are Tier 2, so they're never the junior's fix: a worn one just gets its service job as usual); for the lift and the alarm, a repair on the lift machine (<code>5-mainlift-1</code>, see below) or <code>3-galleyplant-1</code> (Tier 1), which the incident sets to faulty (cond 40) when it starts; the lift's <code>lift</code> effect ×3 while stuck</td><td>S</td></tr>
+    <tr><td>14 / 10 sim</td><td>a <b>wet patch</b> crew walk round (the corridor tiles under the puddle cost more in pathing for crew, never blocked: no plan changes); the <b>stuck person</b> (a crew member whose plan has them riding the lift at the start minute; held in the car, <code>wait</code>, until released or 40 minutes); Brennan by the galley plant for the alarm; crew remarks for a day (<code>simNote('incident')</code>)</td><td>the social engineer (on call for sim items)</td></tr>
     <tr><td>15 / 15b</td><td>the steps: <code>choose</code> (valve), <code>turn</code> (brake), <code>hold</code> with the <code>mop</code> pose, <code>wait</code> (clear the air), <code>look</code> (the hood)</td><td>P</td></tr>
     <tr><td>8b</td><td>a <b>puddle decal</b> (one flat, see-through disc, lifted 1 cm off the floor so it's never coplanar; instanced, shared with M13 leak hunting later) and a <b>smoke wisp</b> (a few instanced soft quads in the galley); at most 3 draw calls, only during an incident on your deck; the <code>mop</code> pose</td><td>M2 itself (no performance seat tonight), checking the draw calls</td></tr>
-    <tr><td>DECKS[3], [4], [5]</td><td>per deck: valve places by the corridors (<code>4-valve-1..3</code> on the junior wing's pipe panel, with the pipe order known: <code>valveLine</code> = upstream first), puddle spots (<code>4-wet-1..2</code>), the lift machine room's brake (<code>5-lift-brake</code>), the extractor's alarm panel (<code>3-extractor-alarm</code>, may be its panel place), vents (<code>3-vent-1</code>)</td><td>seat A</td></tr>
+    <tr><td>DECKS[3], [4], [5]</td><td>per deck: valve places by the corridors (<code>4-valve-1..3</code> on the junior wing's pipe panel, with the pipe order known: <code>valveLine</code> = upstream first), puddle spots (<code>4-wet-1..2</code>), the lift machine room's brake (<code>5-lift-brake</code>), the galley plant's alarm panel (<code>3-galleyplant-alarm</code>, may be its panel place), vents (<code>3-vent-1</code>)</td><td>seat A</td></tr>
     <tr><td>18 events</td><td>reads only: <code>eventsOn(d)</code> for event days and tradition evenings</td><td>—</td></tr>
     <tr><td>content</td><td>the call, Calder's steps, crew remarks, the stuck person's thanks, Brennan</td><td>W</td></tr>
   </table></div>
@@ -142,9 +142,9 @@ td code{white-space:normal}
            safe: { how: 'choose', at: n + '-valve-panel', opts: valves upstream-first, ok: the first upstream of the wet },
            clean: { how: 'hold', at: n + '-wet-1', mins: 6, pose: 'mop', reps: 3 },
            fix: { job: 'joint', part: 'seal', at: n + '-wet-1' } },
-  lift:  { machine: '5-lift-1', safe: { how: 'turn', at: '5-lift-brake', ok: v =&gt; v &gt;= 3 },
-           clean: { how: 'hold', at: 'the car's door on the next deck', mins: 2 }, fix: { service: '5-lift-1' } },
-  alarm: { machine: '3-extractor-1', safe: { how: 'hold', at: '3-extractor-alarm', mins: 1 },
+  lift:  { machine: '5-mainlift-1', safe: { how: 'turn', at: '5-lift-brake', ok: v =&gt; v &gt;= 3 },
+           clean: { how: 'hold', at: 'the car's door on the next deck', mins: 2 }, fix: { service: '5-mainlift-1' } },
+  alarm: { machine: '3-galleyplant-1', safe: { how: 'hold', at: '3-galleyplant-alarm', mins: 1 },
            clean: { how: 'wait', at: '3-vent-1', mins: 5 }, fix: { look: hood, then service } } }</div>
   <ul>
     <li><b>The week's plan:</b> <code>incidentPlan(week)</code>: for weeks from Day 8's, a weekday (Mon-Fri, a <code>playerShiftOn</code> day, not an <code>eventsOn</code> event day, never the day of a test job or promotion) and a minute 540-930 from <code>schedU(week, 0, 870)</code>; the kind weighted by its machines' wear, picked with <code>schedU(week, 0, 871)</code>; the place with 872. Day 8's is fixed (burst, Deck 4, 630). If the day turns out a tradition evening's day, the incident is in the morning (before 12:00) so it's long over. Saved once planned.</li>
@@ -177,7 +177,10 @@ td code{white-space:normal}
 
 <section id="faq">
   <h2>Builders' questions</h2>
-  <p class="note">Questions from builders and the answers go here (ask the Pillar 5 designer through the lead). None yet.</p>
+  <h3>Two ids (seat A, through the lead, 2026-10-18)</h3>
+  <p><b>The lift machine:</b> <code>5-lift-1</code> is both a <code>lift-wait</code> place on Deck 5 and section 17's stand-in id for the main lift (<code>STUB_MACHINES[5]</code>). The machine is renamed <b><code>5-mainlift-1</code></b> (seat S, in <code>STUB_MACHINES</code>); <code>machinesLoad</code> reads an old save's <code>5-lift-1</code> entry as <code>5-mainlift-1</code>, so the lift keeps its wear; open jobs with the old id are dropped (re-posted next hour). The place keeps <code>5-lift-1</code>.</p>
+  <p><b>The galley alarm:</b> there's no <code>3-extractor-1</code> in the game (its stand-in dropped out when the galley plant <code>3-galleyplant-1</code>, room <code>g</code>, was built). The alarm incident uses <code>3-galleyplant-1</code> and the place <code>3-galleyplant-alarm</code>.</p>
+  <p><b>Seat A's branch</b> is <code>claude/deck-0607</code>.</p>
 </section>
 
 </main>
