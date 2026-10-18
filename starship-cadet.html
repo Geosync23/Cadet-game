@@ -241,7 +241,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.60.6a
+   STARSHIP CADET: CSV Wren                           build 0.33.40
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7591,7 +7591,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.60.6a';                           // keep in step with the header's build line
+const GAME_BUILD = '0.33.40';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -14303,7 +14303,11 @@ function hatchTier(who) {
 // now held to the end of the shift its wait runs out in, and at most HOLD_MAX at once (jobsHour lets the oldest go,
 // j.released). On your days off (playerShiftOn, Saturday and Sunday) nothing is held: the crew take it then.
 const DAY_SHIFT = [480, 1020];                           // 08:00-17:00, when you're on shift
-const HOLD_MAX = 6;                                      // small jobs held for you at once, at most
+const HOLD_MAX = 3;                                      // small jobs held for you at once, at most (6 until 0.33.40, the plan for 0.60.7)
+// every third or so new small job goes to the crew at once (shareOut, jobsHour), unless that would leave you fewer than
+// SHARE_KEEP held on the board: so you see the Works crew doing the jobs you do ("Bea on it")
+const SHARE_EVERY = 3, SHARE_KEEP = 2;
+let SHARE_ON = true;                                    // machine_check turns it off where it needs a job left for you
 const forYou = j => j.urgency < 2 && jobTier(j) <= PLAYER_TIER && !(j.machine && ENGINE_KINDS.has(machineById(j.machine).kind));
 function leaveEnd(j) {
   if (!forYou(j) || j.released) return j.found;
@@ -14337,6 +14341,14 @@ function storagePlace(ids, a, b) {
   for (const id of ids) if (known.has(id) && !SHIP.jobs.some(j => j.segs && j.status === 'claimed' && j.segs.some(s => s.placeId === id && s.from < b && a < s.to))) return id;
   return null;
 }
+// a place the crew may stand at for a chore's stop (0.33.40, so deliveries and vents happen where they are): one you
+// stand at, not a machine's or storage (those have their own rules), nobody's plan has them there at its start, middle
+// or end, and no other job is using it then. Else they work where they are, as before
+function placeFreeFor(id, a, b) {
+  const pl = placeById(id); if (!pl || !(pl.pose === 'stand' || pl.pose === 'work') || pl.type === 'event') return false;
+  if (SHIP.jobs.some(j => j.segs && j.status === 'claimed' && j.segs.some(s => s.placeId === id && s.from < b && a < s.to))) return false;
+  return !schedPeople().some(q => [a, (a + b) / 2, b - 1].some(x => { const w = planWhere(q, x); return w && w.placeId === id; }));
+}
 function jobRun(p, j, t, makeMin) {
   const w = planWhere(p, t);
   if (!w || w.act !== 'work' || w.moving || w.tag === 'tea') return null;
@@ -14363,10 +14375,11 @@ function jobRun(p, j, t, makeMin) {
     if (j.parts.length) { go(5); at(JOB_FETCH, 'fetch', storagePlace(shelvesFor(j.parts[0]), c, c + JOB_FETCH)); if (makeMin) at(makeMin, 'make', storagePlace(MAKE_AT, c, c + makeMin)); }
     // the crew stand at a stop's place only if it's a machine's panel or a storage spot nobody else's job is using;
     // anywhere else (someone's desk, a seat, a lobby) they work where they are, so they never take a person's place
-    const crewAt = (id, a, b) => { const pl = placeById(id); return !pl ? null : pl.machine ? id : pl.type === 'storage' ? storagePlace([id], a, b) : null; };
+    const crewAt = (id, a, b) => { const pl = placeById(id); return !pl ? null : pl.machine ? id : pl.type === 'storage' ? storagePlace([id], a, b) : placeFreeFor(id, a, b) ? id : null; };
     const s0 = segs.length;
     for (const st of j.stops) { go(st.deck); at(st.mins, st.tag, crewAt(st.placeId, c, c + st.mins)); }
     if (j.chore === 'trays' || j.chore === 'garden') { const p0 = segs.findIndex((sg, i) => i >= s0 && sg.tag === 'pickup'); if (p0 >= 0) segs.forEach((sg, i) => { if (i > p0) sg.hold = 'cartfull'; }); }   // a cart of trays in hand
+    if (j.chore === 'delivery') { const p0 = segs.findIndex((sg, i) => i >= s0 && sg.tag === 'pickup'), d0 = segs.findIndex((sg, i) => i > p0 && sg.tag === 'drop'); if (p0 >= 0) segs.forEach((sg, i) => { if (i > p0 && (d0 < 0 || i <= d0)) sg.hold = 'carry'; }); }   // the box in their arms from the pickup till it's set down at the drop (0.33.40; they walk there in the drop's own minutes)
   } else {
     const m = machineById(j.machine), K = MACHINE_KINDS[m.kind];
     go(5);
@@ -14439,6 +14452,8 @@ function jobsHour(h) {
   // busy till their last job's route ends, the walk back included: a job done at j.done still has them walking to j.end (0.33.38)
   const busy = new Map(); for (const j of jobs) if (j.claimedBy && j.claimedBy !== 'you' && j.end > t) busy.set(j.claimedBy, Math.max(busy.get(j.claimedBy) || 0, j.end));
   const crew = schedPeople().filter(jobCrew).sort((a, b) => (CREW_TIER[a.rank] || 0) - (CREW_TIER[b.rank] || 0) || (a.id < b.id ? -1 : 1));
+  showHour(h, jobs);
+  shareOut(t, jobs);
   // at most HOLD_MAX small jobs held for you: past that, the oldest go to the crew now (0.33.32)
   const held = jobs.filter(j => j.status === 'open' && !j.claimedBy && !j.leave && j.cargo !== 'meals' && j.found <= t && t < leaveEnd(j))
     .sort((a, b) => b.found - a.found || (a.id < b.id ? -1 : 1));
@@ -14453,6 +14468,7 @@ function jobsHour(h) {
     if (missing.some(p => NO_MAKE.has(p))) { j.status = 'waiting'; j.why = 'needs ' + missing.find(p => NO_MAKE.has(p)); continue; }
     const engine = j.machine && ENGINE_KINDS.has(machineById(j.machine).kind), tier = jobTier(j);
     for (const p of crew) {
+      if (j.crew && p.id !== j.crew && t < j.found + 60) continue;   // a job placed for someone (SHOW_JOBS): theirs for its first hour
       if ((busy.get(p.id) || 0) > t || jobCrew(p) !== (engine ? 'engine' : 'works') || (!engine && (CREW_TIER[p.rank] || 0) < tier)) continue;
       const run = jobRun(p, j, t, missing.length * JOB_MAKE);
       if (!run) continue;
@@ -14536,6 +14552,45 @@ function choresHour(h, jobs) {
     jobs.push({ id: 'chore-' + key + '@' + h, machine: c.cand.machine || null, deck: c.cand.deck, room: c.cand.room, kind: 'chore', chore: c.kind, target: c.cand.key,
                 title: c.cand.title, bring: c.cand.bring || null, tier: Math.max(C.tier, c.cand.tier || 0), stops: c.cand.stops.map(st => ({ ...st })),
                 urgency: C.leave ? 1 : 0, leave: C.leave || null, posted: t, found: t, claimedBy: null, parts: C.parts.slice(), status: 'open' });
+  }
+}
+// ---- the Works crew at work where you'll see them (0.33.40, the plan for 0.60.7) ----
+// SHOW_JOBS: on Days 1 and 2 two small crew jobs are placed for you to see: a junior cleaning a vent by Deck 4's lift
+// in the morning, and a delivery into the Works bay after lunch. Never held for you: the named junior takes it (j.crew,
+// for its first hour; then any of the crew). showJob(day) -> { id, who, title, deck, place, from, to } | null for
+// onboarding's lines ("That's Bea on the vent"): the day's job and who's on it, once it's claimed
+const SHOW_JOBS = [
+  { key: 'vent', day: 1, hour: 8, crew: 'silva-bea', chore: 'vent', title: 'Clean a vent: lift lobby', stops: [{ placeId: '4-lift-1', mins: 40, tag: 'vent' }] },
+  { key: 'tools', day: 2, hour: 13, crew: 'silva-bea', chore: 'delivery', title: 'Take new tools to the Works bay, Deck 5', bring: 'a box of tools',
+    stops: [{ placeId: '5-hold-1', mins: 5, tag: 'pickup' }, { placeId: '5-bench-1', mins: 15, tag: 'drop' }] },
+];
+function showHour(h, jobs) {
+  const d = Math.floor(h / 24) + 1, t = h * 60;
+  for (const S of SHOW_JOBS) {
+    if (S.day !== d || S.hour !== (h % 24 + 24) % 24 || S.stops.some(x => !placeById(x.placeId))) continue;
+    const id = 'show-' + S.key + '@' + h, last = placeById(S.stops[S.stops.length - 1].placeId);
+    if (jobs.some(j => j.id === id)) continue;
+    jobs.push({ id, machine: null, deck: last.deck, room: last.room, kind: 'chore', chore: S.chore, target: S.key, title: S.title, bring: S.bring || null, tier: 1,
+                stops: S.stops.map(x => ({ deck: placeById(x.placeId).deck, ...x })), urgency: 0, leave: null, posted: t, found: t, claimedBy: null, parts: [], status: 'open',
+                crew: S.crew, released: true, shown: S.key });
+  }
+}
+function showJob(day) {
+  machinesNow();
+  const j = SHIP.jobs.find(x => x.shown && Math.floor(x.posted / 1440) + 1 === day && x.claimedBy && x.claimedBy !== 'you'); if (!j) return null;
+  const last = j.stops[j.stops.length - 1], seg = (j.segs || []).find(s => s.tag === last.tag);
+  return { id: j.id, key: j.shown, who: j.claimedBy, title: j.title, deck: last.deck, place: seg && seg.placeId || null, from: j.start, to: j.done };
+}
+// every SHARE_EVERY-th new small job (by its id, so the same every way) goes to the crew at once, while at least SHARE_KEEP
+// others are still held for you; j.shared marks it, with that count (once looked at, j.shareSeen)
+function shareOut(t, jobs) {
+  const heldNow = j => j.status === 'open' && !j.claimedBy && !j.released && !j.cargo && !heldForYou(j) && forYou(j) && j.found <= t && t < leaveEnd(j);
+  for (const j of jobs) {
+    if (j.shareSeen || j.status !== 'open' || j.claimedBy || j.found > t || j.cargo || heldForYou(j) || !forYou(j)) continue;
+    j.shareSeen = true;
+    if (!SHARE_ON || j.released || ((machSeed(j.id) >>> 0) % SHARE_EVERY)) continue;
+    const n = jobs.filter(x => x !== j && heldNow(x)).length;
+    if (n >= SHARE_KEEP) { j.released = true; j.shared = n; }   // j.shared: how many others were held for you then
   }
 }
 // a chore done: what it does to the ship
