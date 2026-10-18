@@ -12832,11 +12832,14 @@ function teaOut(t = shipNow()) {
 const teaHere = () => typeof deckDef !== 'undefined' && deckDef && deckDef.num === 5 && teaOut();
 function teaBegin(A) {
   A.def = { ...A.def, gain: 10, title: 'Tea and biscuits', done: 'Tea and a biscuit or two. Just the thing.' }; A.o.biscuits = true;
-  SHIP.player.teaDay = SHIP.time.day; teaDismiss();
+  SHIP.player.teaDay = SHIP.time.day; teaDismiss(); if (typeof simNote === 'function') simNote('tea', { day: SHIP.time.day, who: 'you' });
 }
+const teaHad = (d = SHIP.time.day) => SHIP.player.teaDay === d;   // for section 21's Day 1 tea walk (O5)
+const teaGoal = () => teaOut() ? { deck: 5, room: 't', label: TEA_GOAL } : null;
 function teaOffer() {
-  const P = SHIP.player; if (!teaOut() || P.teaDay === SHIP.time.day || typeof setGoal !== 'function' || typeof IX_GOAL === 'undefined' || IX_GOAL) return false;
-  setGoal({ deck: 5, room: 't', label: TEA_GOAL });
+  const P = SHIP.player; if (!teaOut() || teaHad() || typeof setGoal !== 'function' || typeof IX_GOAL === 'undefined' || IX_GOAL) return false;
+  if (typeof introTeaLead === 'function' && introTeaLead()) return false;   // Day 1: Zeke leads you there himself (section 21)
+  setGoal(teaGoal());
   const say = 'Tea\'s out in the Tea corner on Deck 5, and biscuits. Follow the marker, or keep working.';
   if (!(typeof deviceChoose === 'function' && deviceChoose({ title: 'Tea and biscuits', text: say, choices: ['Off to tea'], cancel: 'Keep working' }, i => { if (i < 0) teaDismiss(); }))) toast('Tea and biscuits', say);
   return true;
