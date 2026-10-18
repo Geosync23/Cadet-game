@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ship-wide Events Plan</title>
+<style>
+:root{--ink:#e8eef0;--muted:#93a6ae;--teal:#4cc3b5;--gold:#e9c46a;--rose:#e58f7a;--glass:rgba(13,21,33,.78);--line:rgba(150,200,196,.22);--chip:rgba(76,195,181,.14)}
+*{box-sizing:border-box}
+html,body{margin:0;background:#121a27;color:var(--ink);font-family:"Avenir Next","Segoe UI",system-ui,sans-serif}
+body{background:radial-gradient(ellipse at 50% 20%,#22304a 0%,#141c2b 60%,#0c111b 100%) fixed;line-height:1.5}
+header{padding:18px 16px 4px;max-width:1100px;margin:0 auto}
+h1{font-size:21px;font-weight:600;margin:0}
+h2{font-size:17px;font-weight:600;margin:0 0 8px;color:#bdeee6}
+h3{font-size:14.5px;font-weight:600;margin:12px 0 4px;color:#d9eeea}
+.sub{font-size:13.5px;color:var(--muted);margin-top:4px}
+.draft{display:inline-block;font-size:11.5px;color:#14202a;background:var(--gold);border-radius:999px;padding:2px 9px;margin-left:6px;vertical-align:2px}
+nav{position:sticky;top:0;z-index:5;background:rgba(14,20,31,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+nav div{display:flex;gap:6px;overflow-x:auto;padding:8px 16px;max-width:1100px;margin:0 auto;-webkit-overflow-scrolling:touch}
+nav a{flex:none;text-decoration:none;border:1px solid var(--line);background:var(--glass);color:var(--ink);font-size:13px;padding:6px 11px;border-radius:999px}
+nav a:focus-visible,nav a:hover{border-color:var(--teal);color:#bdeee6;outline:none}
+main{max-width:1100px;margin:0 auto;padding:6px 16px 40px}
+section{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:14px 0;scroll-margin-top:56px}
+p{margin:6px 0;font-size:14px;color:#d6e0e3}
+ul{margin:6px 0;padding-left:20px;font-size:14px;color:#d6e0e3}
+li{margin:3px 0}
+.note{font-size:12.5px;color:var(--muted)}
+.grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.card{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.025)}
+.card b{display:block;color:#bdeee6;font-size:14px;margin-bottom:2px}
+.card span{font-size:13px;color:#cfd9dc}
+.card .meta{display:block;font-size:12px;color:var(--muted);margin-top:4px}
+.tag{display:inline-block;font-size:11.5px;border-radius:999px;padding:1px 8px;margin:2px 4px 0 0;background:var(--chip);color:#bdeee6;border:1px solid var(--line)}
+.tag.new{background:rgba(233,196,106,.16);color:#f1dca0}
+.tag.old{opacity:.75}
+.steps{list-style:none;padding:0;margin:8px 0;counter-reset:s}
+.steps li{position:relative;padding:8px 10px 8px 46px;border-left:2px solid rgba(76,195,181,.35);margin:0 0 0 14px}
+.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:-15px;top:8px;width:28px;height:28px;border-radius:50%;background:#183040;border:1px solid var(--teal);color:#bdeee6;font-size:12.5px;display:flex;align-items:center;justify-content:center}
+.steps time{display:block;font-size:12px;color:var(--gold)}
+.steps b{color:#e4f3f0;font-weight:600}
+.steps span{display:block;font-size:13.5px;color:#cfd9dc}
+.week{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.day{border:1px solid var(--line);border-radius:12px;padding:9px 10px;background:rgba(255,255,255,.02)}
+.day h4{margin:0 0 4px;font-size:13.5px;color:var(--gold);font-weight:600}
+.day p{font-size:12.5px;margin:4px 0;color:#cfd9dc}
+.day .who{color:#bdeee6;font-weight:600}
+.lines{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;background:#0b141c;border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:#9fe7dc;white-space:pre-wrap;overflow-x:auto;margin:8px 0}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0}
+.flow .box{border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:13px;background:rgba(255,255,255,.03)}
+.flow .arrow{color:var(--teal)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:12px}
+.tablewrap{overflow-x:auto}
+.waves{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+.wave{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.025)}
+.wave b{color:var(--gold);display:block}
+.wave .ci{display:block;margin-top:6px;font-size:12.5px;color:#f1dca0}
+ol.q{padding-left:22px;font-size:14px;color:#d6e0e3}
+ol.q li{margin:6px 0}
+ol.q em{color:var(--muted);font-style:normal;font-size:12.5px}
+svg text{font-family:inherit}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;color:#9fe7dc;background:rgba(0,0,0,.25);padding:0 4px;border-radius:4px;word-break:break-word}
+section.builder{border-color:rgba(233,196,106,.45)}
+section.builder h2{color:var(--gold)}
+.status{display:inline-block;font-size:11.5px;color:#14202a;background:var(--teal);border-radius:999px;padding:2px 9px;margin-left:6px;vertical-align:2px}
+td code{white-space:normal}
+</style>
+</head>
+<body>
+<header>
+  <h1>Ship-wide events: the Wren's big moments, in order <span class="draft">plan for the user's approval</span></h1>
+  <div class="sub">Every ship-wide event (the "main missions"), in the order they happen from Day 0: what happens day by day, who speaks, what the news feed says, the jobs at each tier, what it does to the ship, and how it can go well or poorly. Built in Pillar 6, after Pillar 5's Step 4. From the user's answers of 2026-10-18 (~23:25), the design doc's "Ship-wide events", the Pillar 3 plan's list and the engine already in the game. Written by the Pillar 5 designer for lead 14.</div>
+</header>
+<nav><div><a href="#plain">In plain words</a><a href="#rules">The user's rules</a><a href="#cal">The calendar</a><a href="#how">How every event works</a><a href="#list">The events</a><a href="#links">The links</a><a href="#engine">Changes to what's built</a><a href="#clash">Clashes</a><a href="#q">Open questions</a></div></nav>
+<main>
+
+<section id="plain">
+  <h2>In plain words</h2>
+  <ul>
+    <li><b>Sixteen events, each once.</b> Thirteen from the earlier plans (the ion storm, the diplomatic visit, the comet, crew rotation day, the garden creature, the power surge, the Wren cough, the late shuttle, the nebula, the Founders' Day festival, salvage, the Veyli ship in trouble, the déjà vu day) and <b>three new ones: the distress call, the stowaway and reactor trouble</b>.</li>
+    <li><b>A mix of cozy and dangerous</b> (the user: "both"). Danger: the storm, the distress call, the power surge, reactor trouble, the Veyli ship. Cozy: the visit, the comet, the garden creature, the stowaway, the nebula, the festival, salvage. Somewhere between: the cough, the late shuttle, the déjà vu day.</li>
+    <li><b>The storm comes on Day 4</b> and lasts three days; <b>the Veyli visit comes on Day 12</b> and lasts a weekend. Then about one event every week or two, fitted round your career's big days.</li>
+    <li><b>You can't fail one.</b> Every event ends, always. How it went is smooth, bumpy or rough, told as story; something lasting stays on the ship either way.</li>
+    <li><b>Your part grows with your rank.</b> As a junior you carry and fix; as an Officer you trace; as a Senior Officer you plan around people; as an Engine Specialist you lead a team with the bridge on the line.</li>
+  </ul>
+</section>
+
+<section id="rules">
+  <h2>The user's rules (2026-10-18, binding)</h2>
+  <div class="tablewrap"><table>
+    <tr><th>Rule</th><th>What this plan does</th></tr>
+    <tr><td>Events never repeat</td><td>Each happens once in a game (the engine already works this way). After the last one, life goes on with traditions, incidents and work; new events come with later pillars.</td></tr>
+    <tr><td>Ion storm on Day 4 or 5, 3 days, emergency lighting only at the start</td><td>Days 4-6 (Thursday to Saturday). Emergency lighting for about 20 minutes as it hits on Day 4, then only flicker and faults.</td></tr>
+    <tr><td>Diplomatic visit: a few days at most, and sooner</td><td>Days 12-15: Mail on Friday, the guests aboard Saturday morning to Monday breakfast (was 9 days from Day 25).</td></tr>
+    <tr><td>New: distress call, stowaway, reactor trouble, each with dialogue, story beats and news items</td><td>Days 27-29, 59-61 and 88-90, each with meetings, addresses, choices and news lines below.</td></tr>
+    <tr><td>You can't fail, only do poorly or well</td><td>Smooth / bumpy / rough bands kept; the dangerous ones always end safely (the pod's pilot always lives; the reactor is always fixed).</td></tr>
+    <tr><td>Both cozy and dangerous</td><td>Seven cozy, five dangerous, four in between; they alternate where they can.</td></tr>
+  </table></div>
+</section>
+
+<section id="cal">
+  <h2>The calendar from Day 0</h2>
+  <p>Day 1 is a Monday; weekends are your days off. The career's big days (Pillar 5) stay clear: the Tier 2 test and promotion (Days 9-11), the Tier 3 test and promotion (15-16), the night shift (19-20), Tier 4 (22-24) and Calder's question (26). The holidays (on hold) are shown in grey where they'd sit.</p>
+  <div class="tablewrap"><table>
+    <tr><th>Days</th><th>Event</th><th>Kind</th><th>Around it</th></tr>
+    <tr><td>0-1</td><td>—</td><td></td><td>arrival, your first shift (Pillar 4)</td></tr>
+    <tr><td><b>4-6</b> Thu-Sat</td><td><b>1. Ion storm</b></td><td>danger</td><td>Day 4 tuning and the inspection, Day 5 the scanner and your first head-scratcher go ahead in the storm; Sowing morning (Day 6, 09:00) is the first calm morning</td></tr>
+    <tr><td>9-11</td><td>—</td><td></td><td>test job, promotion to Officer, the ceremony</td></tr>
+    <tr><td><b>12-15</b> Fri-Mon</td><td><b>2. Diplomatic visit</b></td><td>cozy</td><td>guests aboard over the weekend; talent night (Day 14) with the guests; they leave before Monday's shift (Day 15: Tier 3 test). <span style="opacity:.6">Captain's Day (holiday, Day 13) would move.</span></td></tr>
+    <tr><td>15-16</td><td>—</td><td></td><td>Tier 3 test, Senior Officer</td></tr>
+    <tr><td><b>18</b> Thu eve</td><td><b>3. Comet viewing</b></td><td>cozy</td><td>an evening; your night shift is the next night</td></tr>
+    <tr><td>19-26</td><td>—</td><td></td><td>night shift, Tier 4, Engine Specialist, Calder's question <span style="opacity:.6">(Odd Socks Day, 24)</span></td></tr>
+    <tr><td><b>27-29</b> Sat-Mon</td><td><b>4. Distress call</b> (new)</td><td>danger</td><td>the first weekend after your career arc</td></tr>
+    <tr><td><b>35</b> Sun</td><td><b>5. Crew rotation day</b></td><td>cozy</td><td>the roster's first rotation (Day 35) <span style="opacity:.6">(Bright Day, 34)</span></td></tr>
+    <tr><td><b>39-42</b> Thu-Sun</td><td><b>6. Something in the garden</b></td><td>cozy</td><td></td></tr>
+    <tr><td><b>47</b> Fri</td><td><b>7. Power surge</b></td><td>danger</td><td></td></tr>
+    <tr><td><b>59-61</b> Wed-Fri</td><td><b>8. Stowaway</b> (new)</td><td>cozy</td><td>found in the Wednesday delivery <span style="opacity:.6">(Relay Day, 52)</span></td></tr>
+    <tr><td><b>66-69</b> Wed-Sat</td><td><b>9. The Wren cough</b></td><td>between</td><td></td></tr>
+    <tr><td><b>73-74</b> Wed-Thu</td><td><b>10. The late supply shuttle</b></td><td>between</td><td>the second rotation is Day 77 (Pip may join)</td></tr>
+    <tr><td><b>80-82</b> Wed-Fri</td><td><b>11. Nebula drift</b></td><td>cozy</td><td></td></tr>
+    <tr><td><b>88-90</b> Thu-Sat</td><td><b>12. Reactor trouble</b> (new)</td><td>danger</td><td></td></tr>
+    <tr><td><b>100</b> Tue</td><td><b>13. Founders' Day festival</b></td><td>cozy</td><td>Founding Day itself (the tradition, day 100)</td></tr>
+    <tr><td><b>108-110</b> Wed-Fri</td><td><b>14. Salvage</b></td><td>cozy</td><td></td></tr>
+    <tr><td><b>116-117</b> Thu-Fri</td><td><b>15. A Veyli vessel needs help</b></td><td>danger</td><td>the third rotation is Day 119</td></tr>
+    <tr><td><b>124</b> Fri</td><td><b>16. The déjà vu day</b></td><td>strange</td><td>the last <span style="opacity:.6">(Fix-it Fair, 125)</span></td></tr>
+  </table></div>
+  <p class="note">The days are fixed so a game always tells the same story (the user's rule for the career's dates). The engine's "need" rule stays: if the person an event needs (Calder for the storm, Vance for the visit, Sato for the comet) is off that day, it moves to their next working day, and the next event moves with it. A slow or quick player meets them on the same days, because they follow the ship's calendar, not your progress.</p>
+</section>
+
+<section id="how">
+  <h2>How every event works (kept from the design doc)</h2>
+  <ul>
+    <li><b>Ambient:</b> never a mission you're given. News reaches you as it reaches everyone: chatter, the Ship app's <b>news feed</b> (with who told you), Mail, the boards, and at big turns the <b>Captain's address</b> on every deck. No cutscenes; the camera stays with you.</li>
+    <li><b>Shape:</b> warning, onset, escalation, resolution, afterglow, over one to four days.</li>
+    <li><b>Four kinds of moment:</b> felt everywhere, the Captain's address, gatherings at a real place and time, and meetings with dialogue (a panel of lines, sometimes two or three replies; walk away any time, the gist comes by Mail).</li>
+    <li><b>Jobs by tier:</b> each event's jobs go on the board tagged with the event; you see the ones for your tier and below. The Tier 3 and Tier 4 rows are <b>slots</b>: the kind of work is named here, and Steps 5 and 6 of Pillar 5 (shutdowns, the night shift's senior post, the Monday briefing, leading a team, the reactor) give them their exact verbs.</li>
+    <li><b>Threads and bands:</b> three to five threads per event, measured from what really happened; each lands smoothly, bumpily or roughly, and the blend is the result. Your own part (jobs done, meetings, people helped) is counted separately: your commendation, the friendships, a mention in the debrief.</li>
+    <li><b>Traces:</b> something stays on the ship either way: a pinned roster, a plaque, a sculpture, a pet, a scorch mark.</li>
+    <li><b>Traditions:</b> paused in an event's hardest phases (no quiz night in a storm), except birthdays; a party or gathering after.</li>
+  </ul>
+</section>
+
+<section id="list">
+  <h2>The events</h2>
+
+  <h3 id="e-storm">1. Ion storm <span class="tag">main · danger · Days 4-6 (Thu-Sat), 3 days · built (0.34.12), to be changed</span></h3>
+  <p>Survey spots an ion front ahead that the Wren can't steer round. The ship rides it out for two days: flickering lights, no calls home, a tired bridge. The first time you see the whole crew pull together.</p>
+  <ol class="steps"><li><time>Day 4 Thu 06:00 · warning</time><span>Dr. Sato's readings; chatter starts in Survey. 08:15 <b>Calder's storm briefing</b> at the Works job board. <b>12:30 the first all-hands</b> (the Captain at the lectern in the auditorium: "We're heading into weather").</span></li><li><time>Day 4 Thu 14:00 · onset</time><span><b>Felt everywhere:</b> a jolt, every deck drops to <b>emergency lighting for about 20 minutes</b> (the only emergency lighting of the storm, the user's rule), then flickering. The Captain's address. Comms down: booths shut, no outside Mail. Bridge on double shifts; the bow lounge closes.</span></li><li><time>Day 5 Fri · escalation</time><span>Power wear doubled, comms tripled: relay faults, the chiller strains (no more blackouts). Storm stew; trays to the bridge by cart. Crew short-tempered, sleep worse.</span></li><li><time>Day 6 Sat 07:30 · resolution</time><span><b>The all-clear</b> in the observation room (a meeting) and on every deck. Comms back: a queue at the booths all morning. 09:00 Sowing morning goes ahead: the first calm morning. <b>Evening: film night, for the first time in the auditorium</b>, as the storm party.</span></li><li><time>Day 7 Sun · afterglow</time><span>Chatter, the debrief Mail, commendations. Vance's bridge invitation if you helped (see "The links").</span></li></ol>
+  <ul><li><b>Dialogue:</b> Calder's briefing (one choice: take the bridge battery run, the lounge, or nothing); the first all-hands; the all-clear (if you're there, the Captain thanks the Works crew by name).</li><li><b>News feed:</b> "Sato hasn't left the chart room since last night." · "They say it's the size of a moon." · "No calls home till it's over." · after: "Lights only went once, thanks to Works."</li><li><b>Ship health:</b> power and comms dip hard on Days 4-5; food if the chiller strains; mood dips, then lifts at the party.</li><li><b>Goes well:</b> short flicker, nothing spoiled, a cheerful film night: <b>the storm crew's signed duty roster</b> pinned in the tea corner.</li><li><b>Goes poorly:</b> long faults, binned food, a grumpy weekend: a scorch mark and a taped panel in the relay room.</li></ul>
+  <div class="tablewrap"><table><tr><th>Tier</th><th>Jobs</th></tr><tr><td>Tier 1 · fetch and fix</td><td>secure the lounge glassware; shielded lamp ballasts; battery packs from Deck 5 to the bridge; trays to the bridge</td></tr><tr><td>Tier 2 · trace</td><td>trace a relay line that keeps tripping (the power line, once P5 exists; a flow fault on water/heat now)</td></tr><tr><td>Tier 3 · plan around people</td><td><i>slot (Step 5):</i> plan which decks get power first if a junction goes; the bridge crew's rest rota</td></tr><tr><td>Tier 4 · lead with the bridge</td><td><i>slot (Step 6):</i> lead the relay repair team with the bridge on the line</td></tr></table></div>
+
+  <h3 id="e-visit">2. Diplomatic visit <span class="tag">main · cozy (social) · Days 12-15 (Fri-Mon morning), 2 days aboard · built as a draft (0.34.16), to be shortened</span></h3>
+  <p>A Veyli delegation of four (Speaker Teshavi, her aide Kesrin, the scholar Moleth, their pilot Ithra) spends a weekend aboard. The Veyli like it warm, love herbs and notice manners.</p>
+  <ol class="steps"><li><time>Day 12 Fri 09:00 · warning</time><span>Vance's Mail; Holt grumbles. Get the visitors' suite and second cabin ready (heaters up), fix the Captain's dining lamp, carry gift crates from the hold; dress uniforms through the laundry.</span></li><li><time>Day 13 Sat 10:00 · onset</time><span><b>The greeting</b> in the shuttle bay (a meeting): the crew line the bay; if you're near the front a delegate speaks to you. 19:30 the formal dinner (a meeting for the table).</span></li><li><time>Day 14 Sun · escalation and resolution</time><span>The tea ritual in the observatory, a tour of the decks, Holt and the pilot's small clash (gossip). 11:00 <b>the gift exchange</b> in the observation room. The guests stay for <b>talent night</b> (Day 14) that evening.</span></li><li><time>Day 15 Mon 07:30 · farewell</time><span>A short farewell at the shuttle bay before the day shift; afterglow that day.</span></li></ol>
+  <ul><li><b>Dialogue:</b> the greeting (courteous replies nudge the courtesy thread); the dinner (Tier 3+ at the table); the gift exchange.</li><li><b>News feed:</b> "Veyli on Saturday. Heaters up on Deck 2." · "Holt and their pilot had words about the Watch rota." · after: "The Speaker asked after the junior who fixed her lamp."</li><li><b>Ship health:</b> heat on Deck 2 (cold cabins hurt); food (herbs, dinners on time); laundry load.</li><li><b>Goes well:</b> a <b>Veyli cord sculpture</b> on the bow lounge's west wall (already built); Saruth warms to you.</li><li><b>Goes poorly:</b> a stiff farewell, no gift; Holt's line becomes a running joke.</li></ul>
+  <div class="tablewrap"><table><tr><th>Tier</th><th>Jobs</th></tr><tr><td>Tier 1 · fetch and fix</td><td>heaters, lamps, gift crates, extra laundry, herbs from the garden to the galley</td></tr><tr><td>Tier 2 · trace</td><td>trace a cold cabin on Deck 2 (the heat line)</td></tr><tr><td>Tier 3 · plan around people</td><td><i>slot:</i> plan the tour route and who's on show; the dinner rota</td></tr><tr><td>Tier 4 · lead with the bridge</td><td><i>slot:</i> at the Captain's table; brief the bridge on the Veyli shuttle's docking</td></tr></table></div>
+
+  <h3 id="e-comet">3. Comet viewing <span class="tag">short · cozy · Day 18 (Thu evening), 1 evening · drafted (comet-viewing-draft.js)</span></h3>
+  <p>A comet passes close enough to fill the bow windows with its tail. No strain at all: a gentle evening.</p>
+  <ol class="steps"><li><time>Day 18 Thu 08:00</time><span>Sato's Mail.</span></li><li><time>21:00-22:15</time><span>The comet at the bow lounge windows and in the observatory (Sato's scope). Quiz night gives way.</span></li><li><time>Day 19</time><span>A little chatter.</span></li></ol>
+  <ul><li><b>Dialogue:</b> none needed; Sato at the scope has a line for whoever takes a turn.</li><li><b>News feed:</b> "Comet at nine. Get a window seat early." · after: "Green all the way along the tail."</li><li><b>Ship health:</b> mood up a little.</li><li><b>Goes well:</b> always smooth: nothing to lose.</li></ul>
+  <div class="tablewrap"><table><tr><th>Tier</th><th>Jobs</th></tr><tr><td>Tier 1 · fetch and fix</td><td>(none; you can help Sato carry the folding chairs)</td></tr><tr><td>Tier 2 · trace</td><td>—</td></tr><tr><td>Tier 3 · plan around people</td><td>—</td></tr><tr><td>Tier 4 · lead with the bridge</td><td>—</td></tr></table></div>
+
+  <h3 id="e-distress">4. Distress call <span class="tag">main · danger · Days 27-29 (Sat-Mon), 2 days · NEW</span></h3>
+  <p>A beacon: a damaged courier pod, drifting, its air running low. The Tern flies out for the first time while you're aboard, brings the pod's pilot home, and the whole ship looks after someone it never met.</p>
+  <ol class="steps"><li><time>Day 27 Sat 09:40 · warning</time><span>The bridge picks up the beacon; the Captain's address: "We're going to get them." Short warning: an hour.</span></li><li><time>10:45 · onset</time><span><b>The Tern launches</b> (the bay doors open; crew watch from the booth and the lobby window). The infirmary readied. The pilot's voice on the bay speaker, thin and calm.</span></li><li><time>13:30 · escalation</time><span>The pod is damaged and towing is slow; the Tern's air runs tight; the bay's doors must cycle on time. A second address.</span></li><li><time>15:00 · resolution</time><span><b>The Tern back in the bay</b> (a gathering): the pilot, Ilse Varga, helped out, wrapped in a blanket, and a sack of undelivered mail she wouldn't leave behind.</span></li><li><time>Days 28-29 · afterglow</time><span>A meeting in the infirmary (Ilse thanks whoever helped; Rina and Dr. Nandakumar); Ilse in a Deck 4 guest cabin for a week until a transport; her mail sack is sorted and sent on.</span></li></ol>
+  <ul><li><b>Dialogue:</b> the bay speaker (Ilse and the Tern's pilot); the Captain's two addresses; Ilse in the infirmary (choices: ask about the pod, or just sit with her).</li><li><b>News feed:</b> "There's a pod out there. One person." · "The Tern's going out!" · "She brought the mail with her. All of it." · after: "Ilse's in the guest cabin by the lift. She likes the garden."</li><li><b>Ship health:</b> air and hull (the bay cycling), transport (the Tern), the infirmary's load; mood up at the end.</li><li><b>Goes well:</b> Ilse always comes home safe. Smooth: <b>the pod's nameplate</b> on the shuttle bay wall, a friend in the guest cabin, Mail from Ilse later.</li><li><b>Goes poorly:</b> Rough: a long cold wait, a dent in the bay door's seal (a job for later), Ilse quieter; still home, still grateful.</li></ul>
+  <div class="tablewrap"><table><tr><th>Tier</th><th>Jobs</th></tr><tr><td>Tier 1 · fetch and fix</td><td>carry blankets and med kits to the bay, top up the Tern's oxygen cells, sort the mail sack</td></tr><tr><td>Tier 2 · trace</td><td>trace the bay's air line before the doors cycle (the air line, M9)</td></tr><tr><td>Tier 3 · plan around people</td><td><i>slot:</i> plan the bay clearance and the infirmary's night rota; who works the extra shift</td></tr><tr><td>Tier 4 · lead with the bridge</td><td><i>slot:</i> lead the bay team with the bridge on the line (the approach and the door cycle)</td></tr></table></div>
+
+  <h3 id="e-rotation">5. Crew rotation day <span class="tag">short · cozy · Day 35 (Sunday) · uses the crew rotation already in the game</span></h3>
+  <p>The Sunday shuttle takes crew home and brings new faces; the first rotation of your time aboard (the roster's Day 35 rotation).</p>
+  <ol class="steps"><li><time>Day 34 Sat evening</time><span>The farewell supper (already a tradition).</span></li><li><time>Day 35 Sun 10:00</time><span>Goodbyes in the shuttle bay (a gathering); the new hand walks down the ramp.</span></li><li><time>Day 35-36</time><span>The new hand's tea (already a tradition); new names in Crew.</span></li></ol>
+  <ul><li><b>Dialogue:</b> the leaver's goodbye to their friends (if you know them, a line to you).</li><li><b>News feed:</b> "Theo's going home on Sunday." · "There's a new one in Bunk 3."</li><li><b>Ship health:</b> none; mood a little bittersweet.</li><li><b>Goes well:</b> always smooth.</li></ul>
+  <div class="tablewrap"><table><tr><th>Tier</th><th>Jobs</th></tr><tr><td>Tier 1 · fetch and fix</td><td>carry the leavers' bags; make up the new hand's bunk</td></tr><tr><td>Tier 2 · trace</td><td>—</td></tr><tr><td>Tier 3 · plan around people</td><td><i>slot:</i> rework the rota for the gap</td></tr><tr><td>Tier 4 · lead with the bridge</td><td>—</td></tr></table></div>
+
+  <h3 id="e-garden">6. Something in the garden <span class="tag">main · cozy (mystery) · Days 39-42 (Thu-Sun), 3 days · designed (Pillar 3)</span></h3>
+  <p>Nibbled leaves, a stripped herb rack, tiny tracks. Someone (something) is eating the garden. The crew blame each other until it's caught: a small harmless creature that stays as the ship's pet.</p>
+  <ol class="steps"><li><time>Day 39 · warning</time><span>Nibbles, tracks, things moved in storage; blame in chatter.</span></li><li><time>Day 40 · onset</time><span>The herb wall bare; Brennan's furious Mail; the menu goes bland.</span></li><li><time>Day 41 · escalation</time><span>Sightings on other decks; traps from the machine shop; a volunteer garden watch at night (a sign-up sheet).</span></li><li><time>Day 42 · resolution</time><span>Caught: a gathering in the garden, someone names it (a vote you can join).</span></li></ol>
+  <ul><li><b>Dialogue:</b> Brennan's rant; the naming (your suggestion can win).</li><li><b>News feed:</b> "Something ran under the bunks in Bunk 6!" · "Brennan's blaming the Watch." · after: "It sleeps in the tomato bed."</li><li><b>Ship health:</b> food (crop loss, bland meals); mood dips then lifts.</li><li><b>Goes well:</b> always gets a pet: <b>the ship's pet</b> lives in the garden for the rest of the game. How well it went decides how soon the garden recovers.</li><li><b>Goes poorly:</b> the garden takes two weeks to recover; a bland fortnight.</li></ul>
+  <div class="tablewrap"><table><tr><th>Tier</th><th>Jobs</th></tr><tr><td>Tier 1 · fetch and fix</td><td>make and set traps, check them each morning, the garden watch</td></tr><tr><td>Tier 2 · trace</td><td>trace why the garden's humidity is high (the water line's irrigation)</td></tr><tr><td>Tier 3 · plan around people</td><td><i>slot:</i> plan the watch rota</td></tr><tr><td>Tier 4 · lead with the bridge</td><td>—</td></tr></table></div>
+
+  <h3 id="e-surge">7. Power surge <span class="tag">short · danger · Day 47 (Fri), 1 day · designed (Pillar 3)</span></h3>
+  <p>A junction on Deck 6 trips under a surge and two decks lose power for a while.</p>
+  <ol class="steps"><li><time>Day 47 Fri 11:20</time><span><b>Felt everywhere:</b> a bang below, two decks dark (emergency lighting on those two decks).</span></li><li><time>11:30-15:00</time><span>The Works crew on Deck 6; hand lamps; the galley on half power.</span></li><li><time>15:00</time><span>Power back; Calder's short Mail.</span></li></ol>
+  <ul><li><b>Dialogue:</b> Calder on the Works channel (a short briefing at the board).</li><li><b>News feed:</b> "Decks 4 and 5 are dark!" · after: "Junction 6-2 again. Torres says it's the last time."</li><li><b>Ship health:</b> power down hard for hours; transport (the lift) slow.</li><li><b>Goes well:</b> under two hours dark: a thank-you on the board.</li><li><b>Goes poorly:</b> five hours: a tired evening, a scorched junction cover.</li></ul>
+  <div class="tablewrap"><table><tr><th>Tier</th><th>Jobs</th></tr><tr><td>Tier 1 · fetch and fix</td><td>hand lamps to the dark decks, battery packs to the infirmary</td></tr><tr><td>Tier 2 · trace</td><td>trace which machine on the power line dropped (P5, Step 5)</td></tr><tr><td>Tier 3 · plan around people</td><td><i>slot:</i> plan who gets power back first (Tier 3, M18 shutdowns)</td></tr><tr><td>Tier 4 · lead with the bridge</td><td>—</td></tr></table></div>
+
+  <h3 id="e-stowaway">8. Stowaway <span class="tag">main · cozy (people) · Days 59-61 (Wed-Fri), 3 days · NEW</span></h3>
+  <p>Unloading the Wednesday delivery, someone finds a person curled up behind the crates: Pip Arden, nineteen, who hid aboard at the supply depot because she wanted to see the stars. The ship has to decide what to do with her.</p>
+  <ol class="steps"><li><time>Day 59 Wed 10:15 · onset (no warning)</time><span><b>Found in the hold</b> during the delivery (you, if you're unloading; else Yara Esposito finds her and calls you over). Holt's Watch take her to the infirmary first.</span></li><li><time>Day 59 afternoon · escalation</time><span>Holt's questions in the Watch office (a meeting). Gossip everywhere. Pip in a guest cabin; nobody is sure if she's in trouble.</span></li><li><time>Day 60 Thu · escalation</time><span>Pip works a day in the galley with Brennan (she's good at it). The Captain asks for views: <b>a meeting in the ready room</b> with Vance, Holt and Brennan (Tier 3+ at the table; Tier 1-2 can speak up for her by Mail).</span></li><li><time>Day 61 Fri 09:00 · resolution</time><span>The Captain's decision, in an address: Pip works her passage aboard until the next rotation, and may apply to join. Afterglow: Pip in the mess, nervous and grinning.</span></li></ol>
+  <ul><li><b>Dialogue:</b> finding her (choices: "Are you all right?" / call the Watch / give her your lunch: all good, each a different first line from her); Holt's questions; the ready room.</li><li><b>News feed:</b> "There's someone in the hold!" · "She hid in a crate of flour. A crate of flour." · "Holt's not happy." · after: "Pip's on the galley line. Ask for extra."</li><li><b>Ship health:</b> air in the hold (a fault found); mood: curious, kind.</li><li><b>Goes well:</b> Pip is offered a junior berth at the next rotation (Day 77) and joins the crew: <b>a new crew member</b> who remembers who was kind.</li><li><b>Goes poorly:</b> Pip leaves on the Day 77 shuttle; a letter from her later. Still kind, never punished.</li></ul>
+  <div class="tablewrap"><table><tr><th>Tier</th><th>Jobs</th></tr><tr><td>Tier 1 · fetch and fix</td><td>clear and check the hold, make up a guest bunk, fetch clothes and a badge from stores</td></tr><tr><td>Tier 2 · trace</td><td>trace the hold's stale air (how did she breathe? a damper on the air line)</td></tr><tr><td>Tier 3 · plan around people</td><td><i>slot:</i> plan where she sleeps and works; the galley rota</td></tr><tr><td>Tier 4 · lead with the bridge</td><td><i>slot:</i> the report to the depot with the bridge</td></tr></table></div>
+
+  <h3 id="e-cough">9. The Wren cough <span class="tag">main · cozy-hard · Days 66-69 (Wed-Sat), 4 days · designed (Pillar 3)</span></h3>
+  <p>A cough goes round. About a fifth of the crew are off, the infirmary fills, and the ship runs short-handed.</p>
+  <ol class="steps"><li><time>Day 66 · warning</time><span>Coughing in the mess; Rina mentions it.</span></li><li><time>Day 67 · onset</time><span>The infirmary fills; one bunk room quarantined.</span></li><li><time>Day 68 · escalation</time><span>Works short-handed; soup to the bunk rooms by cart; you can catch it if your hygiene is low (energy drains faster, nothing worse).</span></li><li><time>Day 69 · resolution</time><span>The last patients out; Rina and Dr. Nandakumar exhausted (bring them tea: a favour).</span></li></ol>
+  <ul><li><b>Dialogue:</b> Rina at the infirmary door; Dr. Nandakumar's Mail.</li><li><b>News feed:</b> "Half of Bunk 2 is coughing." · "Soup again." · after: "Rina slept for fourteen hours."</li><li><b>Ship health:</b> every system a little (fewer hands); air in the infirmary.</li><li><b>Goes well:</b> few caught it, nothing left undone: a thank-you card on the infirmary door.</li><li><b>Goes poorly:</b> a long week, a backlog of jobs; recovers.</li></ul>
+  <div class="tablewrap"><table><tr><th>Tier</th><th>Jobs</th></tr><tr><td>Tier 1 · fetch and fix</td><td>soup carts, fresh linen, more jobs left for you on the board</td></tr><tr><td>Tier 2 · trace</td><td>trace the infirmary's air (the air line)</td></tr><tr><td>Tier 3 · plan around people</td><td><i>slot:</i> cover the gaps in the rotas (Tier 3: planning around people)</td></tr><tr><td>Tier 4 · lead with the bridge</td><td><i>slot:</i> lead a short-handed team job</td></tr></table></div>
+
+  <h3 id="e-late">10. The late supply shuttle <span class="tag">short · cozy-hard · Days 73-74 (Wed-Thu) · designed (Pillar 3)</span></h3>
+  <p>The Wednesday delivery doesn't come. Rationing, a bland menu, short filters, a busy machine shop. All from the numbers.</p>
+  <ol class="steps"><li><time>Day 73 Wed 10:00</time><span>No shuttle; Yara's Mail; a shortage list.</span></li><li><time>Day 73-74</time><span>Rationing; the machine shop makes parts.</span></li><li><time>Day 74 Thu 16:00</time><span>The shuttle arrives late; a double unload.</span></li></ol>
+  <ul><li><b>Dialogue:</b> Yara at the stores counter.</li><li><b>News feed:</b> "No delivery. Yara's counting filters." · after: "Two weeks of crates in one afternoon."</li><li><b>Ship health:</b> food and stores low for two days.</li><li><b>Goes well:</b> nobody goes without: Yara's thanks.</li><li><b>Goes poorly:</b> a bland, grumpy two days.</li></ul>
+  <div class="tablewrap"><table><tr><th>Tier</th><th>Jobs</th></tr><tr><td>Tier 1 · fetch and fix</td><td>the double unload; parts made in the machine shop</td></tr><tr><td>Tier 2 · trace</td><td>—</td></tr><tr><td>Tier 3 · plan around people</td><td><i>slot:</i> decide what gets the last filters</td></tr><tr><td>Tier 4 · lead with the bridge</td><td>—</td></tr></table></div>
+
+  <h3 id="e-nebula">11. Nebula drift <span class="tag">main · cozy (strange) · Days 80-82 (Wed-Fri), 3 days · designed (Pillar 3)</span></h3>
+  <p>The Wren drifts through a nebula. Every window fills with colour; crew dream strange dreams and talk late into the night.</p>
+  <ol class="steps"><li><time>Day 80 · warning</time><span>A visiting scientist arrives (Deck 4 guest cabin); the observatory booked.</span></li><li><time>Day 81 · onset</time><span><b>Felt everywhere:</b> every window fills with colour. The sensor array overloads.</span></li><li><time>Day 81-82 · escalation</time><span>Strange dreams (energy refills slower) and chatty crew (social faster); dream gossip; the observatory full every night.</span></li><li><time>Day 82 · resolution</time><span>The ship drifts out; the scientist's talk in the auditorium (a gathering).</span></li></ol>
+  <ul><li><b>Dialogue:</b> the scientist's talk; a dream told to you by a friend.</li><li><b>News feed:</b> "I dreamt the Admiral could talk." · after: "Sato's printing the nebula."</li><li><b>Ship health:</b> comms (the array); energy down, social up.</li><li><b>Goes well:</b> <b>a framed print of the nebula</b> in the observatory.</li><li><b>Goes poorly:</b> the print, and a tired ship for a day.</li></ul>
+  <div class="tablewrap"><table><tr><th>Tier</th><th>Jobs</th></tr><tr><td>Tier 1 · fetch and fix</td><td>carry coolant to the array</td></tr><tr><td>Tier 2 · trace</td><td>trace the array's coolant line</td></tr><tr><td>Tier 3 · plan around people</td><td><i>slot (Step 5):</i> the sensor array's jobs (M20)</td></tr><tr><td>Tier 4 · lead with the bridge</td><td>—</td></tr></table></div>
+
+  <h3 id="e-reactor">12. Reactor trouble <span class="tag">main · danger · Days 88-90 (Thu-Sat), 2-3 days · NEW</span></h3>
+  <p>A reading on the reactor that Torres doesn't like at 02:00. By morning the reactor is stepped down to low power, Deck 6 is cleared, and the ship runs on batteries while the Works crew find the fault. A real scare that ends well, because Works gets it right.</p>
+  <ol class="steps"><li><time>Day 88 Thu 02:10 · warning</time><span>The night engine watch calls Torres; the reactor alarm on Deck 6 only. By 06:00 rumours everywhere.</span></li><li><time>06:30 · onset</time><span><b>The Captain's address</b>: the reactor goes to low power "as a precaution". <b>Felt everywhere:</b> the lights step down to half; the lift slows; the galley on reduced power. Deck 6 cleared except the engine crew.</span></li><li><time>Day 88-89 · escalation</time><span>The fault traced to a coolant loop and a control-rod drive. A repair under permit, timed with the bridge (the helm holds the ship steady). A second address at the worst moment: a pressure spike, then calm.</span></li><li><time>Day 89 evening · resolution</time><span><b>Full power</b>: the lights come back up deck by deck (felt everywhere). The Captain's all-clear names the Works crew.</span></li><li><time>Day 90 Sat · afterglow</time><span>The engine crew's party in the bow lounge; commendations.</span></li></ol>
+  <ul><li><b>Dialogue:</b> Torres at the Deck 6 door (if you're there); a briefing in the Works bay with Calder and Torres; the bridge call during the repair (Tier 4: you're on it); the all-clear.</li><li><b>News feed:</b> "Torres was up at two." · "They've stepped the reactor down. It's fine. Probably." · "The lights are half." · after: "Works got it. Coolant loop, they said."</li><li><b>Ship health:</b> power at half for a day and a half; transport (lift); food (reduced galley); air steady; mood dips hard, then the best party of the year.</li><li><b>Goes well:</b> always ends well. Smooth: <b>the engine crew's signed valve wheel</b> on the Works bay wall, and the ship talks about Works for a week.</li><li><b>Goes poorly:</b> Rough: two days at half power, a cold, tired ship; a scorch on the shielding; still fixed, still thanked.</li></ul>
+  <div class="tablewrap"><table><tr><th>Tier</th><th>Jobs</th></tr><tr><td>Tier 1 · fetch and fix</td><td>battery packs to the infirmary and galley, hand lamps, coolant seals and spare parts to Deck 6's door</td></tr><tr><td>Tier 2 · trace</td><td>trace the coolant loop's low flow (the heat line, M9)</td></tr><tr><td>Tier 3 · plan around people</td><td><i>slot (Step 5):</i> plan who gets power while it's low (the infirmary, air, the galley), warn crew, the shutdown windows (M18)</td></tr><tr><td>Tier 4 · lead with the bridge</td><td><i>slot (Step 6):</i> lead the reactor team with the bridge: the permit, the dosimeter, the timed repair (M23-M24)</td></tr></table></div>
+
+  <h3 id="e-festival">13. Founders' Day festival <span class="tag">short · cozy (big crowd) · Day 100 (Tue, Founding Day), 1 day · designed (Pillar 3)</span></h3>
+  <p>The year Founding Day grows into a festival: the plaza decorated, the galley's big feast, the whole crew together. The crowd test, built once the phone test says over 70 crew in one place is fine.</p>
+  <ol class="steps"><li><time>Day 99</time><span>Setting up the plaza (a sign-up sheet).</span></li><li><time>Day 100 Tue 17:00-22:00</time><span>The festival on the plaza and the feast; the Captain's words at 19:30 (the Founding Day tradition, made big).</span></li></ol>
+  <ul><li><b>Dialogue:</b> the Captain's toast.</li><li><b>News feed:</b> "Bunting on the plaza already." · after: "Best feast since I came aboard."</li><li><b>Ship health:</b> food (the feast); mood up.</li><li><b>Goes well:</b> always smooth: the festival bunting stays a week.</li></ul>
+  <div class="tablewrap"><table><tr><th>Tier</th><th>Jobs</th></tr><tr><td>Tier 1 · fetch and fix</td><td>set up the plaza, lights and tables</td></tr><tr><td>Tier 2 · trace</td><td>—</td></tr><tr><td>Tier 3 · plan around people</td><td><i>slot:</i> the rota so the night shift gets a plate</td></tr><tr><td>Tier 4 · lead with the bridge</td><td>—</td></tr></table></div>
+
+  <h3 id="e-salvage">14. Salvage <span class="tag">main · cozy (adventure) · Days 108-110 (Wed-Fri), 3 days · designed (Pillar 3)</span></h3>
+  <p>Survey finds a derelict. The Tern flies out again and comes back with crates of odd finds.</p>
+  <ol class="steps"><li><time>Day 108 · warning</time><span>The derelict found; chatter about what it might be.</span></li><li><time>Day 109 · onset</time><span>The Tern out (a gathering at the bay's booth).</span></li><li><time>Day 109-110 · escalation</time><span>Crates fill the hold: sorting (cart jobs); one holds an old but excellent part.</span></li><li><time>Day 110 · resolution</time><span>A "salvage auction" evening in the bow lounge.</span></li></ol>
+  <ul><li><b>Dialogue:</b> Survey's briefing; the auction (bid on an odd object for your cabin).</li><li><b>News feed:</b> "It's old. Older than the Wren." · after: "Torres has a part he won't stop polishing."</li><li><b>Ship health:</b> stores up.</li><li><b>Goes well:</b> <b>the salvaged part</b> makes one machine wear slower for good; an odd object on a shelf.</li><li><b>Goes poorly:</b> the part, but fitted late.</li></ul>
+  <div class="tablewrap"><table><tr><th>Tier</th><th>Jobs</th></tr><tr><td>Tier 1 · fetch and fix</td><td>sort crates, cart them to stores</td></tr><tr><td>Tier 2 · trace</td><td>fit the salvaged part (a Tier 2 machine)</td></tr><tr><td>Tier 3 · plan around people</td><td><i>slot:</i> plan the hold's space</td></tr><tr><td>Tier 4 · lead with the bridge</td><td><i>slot:</i> lead the boarding team (later: away jobs)</td></tr></table></div>
+
+  <h3 id="e-veyli">15. A Veyli vessel needs help <span class="tag">short · danger · Days 116-117 (Thu-Fri) · designed (Pillar 3)</span></h3>
+  <p>A Veyli ship limps alongside; Works sends parts across; one Veyli engineer comes aboard for a few days. A seed for away jobs later.</p>
+  <ol class="steps"><li><time>Day 116</time><span>Their hail; Saruth translates (a meeting on the bridge for Tier 4).</span></li><li><time>Day 116-117</time><span>Parts across by the Tern; the engineer aboard (a guest).</span></li></ol>
+  <ul><li><b>Dialogue:</b> Saruth and the Veyli engineer (who remembers the visit if it went well).</li><li><b>News feed:</b> "Veyli, limping." · after: "Their engineer beat Torres at tiles."</li><li><b>Ship health:</b> stores down a little.</li><li><b>Goes well:</b> a Veyli tool on the Works bay wall.</li><li><b>Goes poorly:</b> a stiff thank-you.</li></ul>
+  <div class="tablewrap"><table><tr><th>Tier</th><th>Jobs</th></tr><tr><td>Tier 1 · fetch and fix</td><td>pick and pack the parts</td></tr><tr><td>Tier 2 · trace</td><td>trace their fault from the readings they send</td></tr><tr><td>Tier 3 · plan around people</td><td><i>slot:</i> what we can spare</td></tr><tr><td>Tier 4 · lead with the bridge</td><td><i>slot:</i> lead the parts transfer with the bridge</td></tr></table></div>
+
+  <h3 id="e-dejavu">16. The déjà vu day <span class="tag">main · strange · Day 124 (Fri), replayed once · designed (Pillar 3)</span></h3>
+  <p>You wake to the same morning as yesterday. Only you (and perhaps Envoy Saruth) notice. What you change the second time changes how the day goes.</p>
+  <ol class="steps"><li><time>Day 123 midnight</time><span>A faint shimmer at the windows.</span></li><li><time>Day 124 (the replay)</time><span>The same breakfast, chatter and jobs; fix a fault early, warn a friend.</span></li><li><time>Day 124 evening</time><span>Survey finds the cause; the day runs on.</span></li></ol>
+  <ul><li><b>Dialogue:</b> Saruth's hint ("Again, cadet?").</li><li><b>News feed:</b> "Did breakfast feel... familiar?" · after: nobody else remembers.</li><li><b>Ship health:</b> as the day goes.</li><li><b>Goes well:</b> a quiet line in your Record that only you understand.</li></ul>
+  <div class="tablewrap"><table><tr><th>Tier</th><th>Jobs</th></tr><tr><td>Tier 1 · fetch and fix</td><td>whatever you set right the second time</td></tr><tr><td>Tier 2 · trace</td><td>—</td></tr><tr><td>Tier 3 · plan around people</td><td>—</td></tr><tr><td>Tier 4 · lead with the bridge</td><td>—</td></tr></table></div></section>
+
+<section id="links">
+  <h2>The links (the lead's brief)</h2>
+  <ul>
+    <li><b>The first all-hands is the storm's.</b> The Captain's first all-hands is on Day 4 at 12:30, in the auditorium on the rec dec (the rec dec plan already says the first all-hands comes with the first ship-wide event, not on Day 1). Until the rec dec is built, it's held in the mess hall. After that, an all-hands once a season, plus the event addresses (the rec dec plan).</li>
+    <li><b>Film night moves after it.</b> Film night stays in the junior common room until the storm; its first night in the auditorium is Day 6 (Saturday), and it doubles as the storm's party. From then on every Saturday film night is in the auditorium.</li>
+    <li><b>The bridge invitation comes from helping in the storm.</b> Today Vance's invitation comes at breakfast before your first bridge hour (Day 22, from Day 15 on). The plan: it needs you to have helped in the storm (one storm job done, or Calder's briefing or the all-clear attended); Vance asks at breakfast on Day 7, the morning after the all-clear. If you sat the storm out, it waits for the first event you help in. Bridge hour itself (every four weeks) stays where it is (first on Day 23) unless the user moves it (a question below).</li>
+    <li><b>Commendations</b> (built): two event jobs, or one and a meeting, in an event: a letter from the Captain, and the ready room summons after your first (built).</li>
+  </ul>
+</section>
+
+<section id="engine" class="builder">
+  <h2>Changes to what's built (for the events engineer, Pillar 6)</h2>
+  <ul>
+    <li><code>SHIP_EVENTS.ionStorm</code>: <code>days: 6 → 4</code> (three days plus the afterglow), <code>earliest: 10 → 4</code>, <code>spread: 0</code>; the phases on Day 4 06:00 (warning), Day 4 14:00 (onset), Day 5 06:00 (escalation), Day 6 07:30 (resolution), Day 6 22:00 (afterglow to the end of Day 7); <code>'blackouts'</code> moves from escalation to onset only, and becomes all decks for about 20 minutes (the emergency lighting); a new meeting for the all-hands; the party is film night in the auditorium. Its need stays Calder (on shift Thursdays).</li>
+    <li><code>SHIP_EVENTS.diplomatic</code>: <code>days: 9 → 4</code>, <code>earliest: 12</code>, the greeting Saturday 10:00, the dinner Saturday 19:30, the gift exchange Sunday 11:00, the farewell Monday 07:30; the guests aboard Saturday to Monday; <code>draft</code> lifted when the user says.</li>
+    <li><code>EVENT_ORDER</code> gets all sixteen, and each event a fixed <code>earliest</code> day (this page's calendar) with <code>spread: 0</code> and a <code>gap</code> of 0, so the calendar is fixed; <code>need</code> still moves a day.</li>
+    <li>The comet: <code>plans/comet-viewing-draft.js</code> as it is, <code>earliest: 18</code>.</li>
+    <li>New: <code>SHIP_EVENTS.distress</code> (the Tern's launch uses the salvage's bay-doors moment, so it's built first here), <code>stowaway</code> (a guest who can become crew: the crew designer's rotation on Day 77), <code>reactor</code> (low power through section 17's effects: half lights, a slow lift, the galley on reduced power).</li>
+    <li><code>bridgeInvite</code>: its <code>due</code> also needs <code>SHIP.eventLog</code>'s storm entry with something of yours in <code>mine</code>, and becomes the morning after the event you first helped in.</li>
+    <li>Rotation day: the event reads <code>ROSTER_ROTATIONS</code>' first entry (Day 35); it doesn't make its own.</li>
+  </ul>
+</section>
+
+<section id="clash">
+  <h2>Clashes found</h2>
+  <ul>
+    <li><b>The storm sits on Pillar 5's busy days 4-5</b> (tuning, the inspection, the scanner, your first head-scratcher). The user's rule puts it there; the lessons go ahead ("Storms don't wait," says Calder), and a storm fault can be your scanner's first real use. A question below in case it feels like too much at once.</li>
+    <li><b>The diplomatic visit's Saturday is Captain's Day</b> in the holidays plan (on hold). If holidays come back, Captain's Day moves (to Day 20 or 27).</li>
+    <li><b>Talent night</b> is Day 14 in the rec dec plan: the Veyli are aboard and come to it.</li>
+    <li><b>Stowaway and the garden creature:</b> the old plan said the creature might be a stowaway from the crates. Now the stowaway is a person, and the creature comes from the salvage crates in later playthroughs only (Pillar 3's note) or from an earlier delivery.</li>
+    <li><b>The Tern's first flight</b> was salvage's moment; the distress call comes first now, so it flies there first.</li>
+    <li><b>Reactor trouble and the power surge</b> are both Deck 6 power scares; they're six weeks apart and different in kind (a tripped junction for an afternoon; the reactor at low power for a day and a half).</li>
+    <li><b>Most players see the first four</b> (the career arc is about 26 days); the rest come in a longer game.</li>
+  </ul>
+</section>
+
+<section id="q">
+  <h2>Open questions for the user (with my recommendations)</h2>
+  <ol>
+    <li><b>The storm on Days 4-6 with Pillar 5's lessons:</b> keep the lessons going in the storm, or pause the Day 5 lessons to the next workday? <i>Recommended: keep them; the storm makes them matter.</i></li>
+    <li><b>The order:</b> the three new ones at Days 27 (distress call), 59 (stowaway) and 88 (reactor trouble). Bring one earlier, inside the first 26 days (for example the distress call on Day 20-21, during your night shift)? <i>Recommended: keep the career arc's days clear; the distress call is the first thing after it.</i></li>
+    <li><b>Reactor trouble before or after you're an Engine Specialist</b> (Day 23)? It's on Day 88 here, so you can lead it. <i>Recommended: after, as here.</i></li>
+    <li><b>The bridge invitation:</b> Vance asks on Day 7; is the first bridge hour on Day 23 too far off? Move bridge hour to week 2 of each four (first on Day 9, the evening of your test job)? <i>Recommended: move it to week 2, so the invitation and the bridge are close to the storm.</i></li>
+    <li><b>Pip the stowaway:</b> can she join the crew (at the Day 77 rotation) if it goes well? <i>Recommended: yes; a new face who remembers you.</i></li>
+    <li><b>After the last event (Day 124):</b> nothing more until later pillars add events? <i>Recommended: yes, as the "never repeat" rule says; the ship carries on with traditions and incidents.</i></li>
+    <li><b>The visit's farewell on Monday 07:30</b>, before your Tier 3 test: fine, or let them leave Sunday evening? <i>Recommended: Monday breakfast (they see talent night).</i></li>
+    <li><b>Danger scenes:</b> how dark may the dangerous ones get (the pod's pilot hurt, a crew member hurt in the reactor scare)? <i>Recommended: frightened but nobody hurt beyond a bruise; the design doc's "nobody dies on screen" stays.</i></li>
+  </ol>
+</section>
+
+</main>
+</body>
+</html>
