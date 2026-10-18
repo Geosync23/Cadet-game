@@ -26783,6 +26783,7 @@ function eventsPlayer(now) {
   if (e.ev.trace) traceAdd(e.ev.trace, d);              // e.g. Sowing morning plants your seedling (the deck architect's seedlingYours)
   const bb = typeof bondBest === 'function' && typeof DECK_CREW !== 'undefined' ? Math.max(1, bondBest(DECK_CREW.filter(c => c.settled && c.spot && e.rooms.has(deckDef.num + '|' + c.spot.room)).map(c => (c.p || c).id))) : 1;   // 0.28.43: by the best bond there
   const n = SHIP.player && SHIP.player.needs; if (n && typeof n.social === 'number') n.social = Math.min(100, n.social + Math.min(20, 12 * bb));   // at most +20 even among close friends (0.28.49, the lead)
+  if (typeof leisureAdd === 'function') leisureAdd(15, 'tradition');   // 0.34.51: going to a tradition fills leisure (PE6's 7th need, +15 in the plan)
   toast(e.name, evText(e.ev.thanks, e));
   if (typeof mailSend === 'function') mailSend({ at: now, from: e.ev.from, subject: 'Thanks for coming', body: 'Good to see you at ' + e.name.toLowerCase() + '. Same time next one?', quiet: true });   // the join toast says it already
 }
