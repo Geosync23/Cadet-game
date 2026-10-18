@@ -249,7 +249,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.44.11
+   STARSHIP CADET: CSV Wren                           build 0.44.12
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7808,7 +7808,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.44.11';                           // keep in step with the header's build line
+const GAME_BUILD = '0.44.12';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -35006,7 +35006,7 @@ function trainTick(now) {                                // once a ship minute i
     }
     return;
   }
-  if (c.st === 'held') return;                          // waiting on worksEscortEnd (the teacher stays with you)
+  if (c.st === 'held') { if (!worksCaseOpen(c.j)) worksEscortEnd(c.id); return; }   // waiting on worksEscortEnd (the teacher stays with you), or its case closing
   if (j && j.status === 'done' && j.doneBy === 'you') { worksDone(row.id, now); return; }
   if (!j || j.status === 'done' || (!heldForYou(j) && j.claimedBy !== 'you')) c.st = 'again';
 }
@@ -35024,7 +35024,8 @@ function worksTrained(id, t = shipNow()) {               // trained: the Trainin
 }
 // your training job turned in: trained, unless something holds the teacher with you (worksEscortHold: the designer's
 // Day 5, where Torres's scanner lesson runs on into the P3 training case); worksEscortEnd(id) then trains you
-function worksDone(id, t) { const c = SHIP.works && SHIP.works.cur; if (c && c.id === id && c.hold) { c.st = 'held'; return; } worksTrained(id, t); }
+const worksCaseOpen = jobId => { const C = SHIP.works && SHIP.works.cases; return !!(C && Array.isArray(C.open) && C.open.some(x => x && x.job === jobId)); };   // 24k's case on that job still open
+function worksDone(id, t) { const c = SHIP.works && SHIP.works.cur; if (c && c.id === id && c.hold && worksCaseOpen(c.j)) { c.st = 'held'; return; } worksTrained(id, t); }   // held only while its case is still open
 function worksEscortHold(id) { const c = SHIP.works && SHIP.works.cur; if (!c || c.id !== id || !/^(watch|do|meet|ask|again)$/.test(c.st)) return false; c.hold = true; return true; }
 function worksEscortEnd(id) {
   const c = SHIP.works && SHIP.works.cur; if (!c || c.id !== id) return false;
