@@ -1,8 +1,9 @@
 TITLE:When Does It Happen Spec
-H1:P1 · When does it happen? (Day 12, a word from Calder) <span class="draft">spec for approval</span>
+H1:P1 · When does it happen? (Day 12, a word from Calder) <span class="draft">approved by the user</span>
 SUB:A fault that only shows at some times. Machines' logs show how hard they worked each hour; the pattern tells the causes apart. A small new thing on Day 12 (the day of tracing), on the case engine (<code>case-engine.html</code>), seat H. Plan Part 4, P1.
 NAV:plain=In plain words|first=Your first P1|screen=On the device|grow=How it grows|b=Builder|tests=Tests|faq=FAQ
 
+<p class="note"><b>Approved by the user 2026-10-18</b> (the Step 3 survey, 15:18).</p>
 <section id="plain">
   <h2>In plain words</h2>
   <ul>

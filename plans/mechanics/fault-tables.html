@@ -196,12 +196,12 @@ td code{white-space:normal}
 
 <section id="t2">
   <h2>Tier 2 machines (complete, for approval)</h2>
-  <p class="note">The same columns as Tier 1, plus <b>Line</b>: a cause marked <i>water</i> or <i>heat</i> cuts the flow on that line (M9's <code>MACHINE_LINKS</code>), so it can be a <b>traced fault</b> (the card names the symptom at the end of the line, "Showers weak on Deck 4" or "Cold cabins on Deck 2", not the machine) and a suspect in a traced case (P1). A cause marked — only ever posts on its own machine. All Tier 2 causes are <b>From: Officer</b> (Day 10), except the load (T2+, P1's later form). <b>Warm</b>, on a machine that runs all day, means after hours of busy use: in the evening.</p>
+  <p class="note">The same columns as Tier 1, plus <b>Line</b>: a cause marked <i>water</i>, <i>heat</i> or <i>air</i> cuts the flow on that line (M9's <code>MACHINE_LINKS</code>), so it can be a <b>traced fault</b> (the card names the symptom at the end of the line, "Showers weak on Deck 4", "Cold cabins on Deck 2" or "Stuffy air on Deck 4", not the machine) and a suspect in a traced case (P1). A cause marked — only ever posts on its own machine. All Tier 2 causes are <b>From: Officer</b> (Day 10), except the load (T2+, P1's later form). <b>Warm</b>, on a machine that runs all day, means after hours of busy use: in the evening.</p>
 
   <h3>Air scrubber <span class="tag">scrubber · Decks 4 and 2 (<code>4-scrubber-1</code>, <code>-2</code>, <code>2-extractor-1</code>) · part: filter</span></h3>
   <div class="tablewrap"><table>
     <tr><th>Cause</th><th>Fix</th><th>Card</th><th>Up close</th><th>When</th><th>How common</th><th>Still (wrong fit)</th><th>Line</th></tr>
-    <tr><td>The filter is clogged</td><td>filter</td><td>stuffy air · rattles</td><td>a grey grille; the intake buzzes all day</td><td>always</td><td>●●●</td><td>"Clean filter. Still rattles once it's run all day."</td><td>—</td></tr>
+    <tr><td>The filter is clogged</td><td>filter</td><td>stuffy air · rattles</td><td>a grey grille; the intake buzzes all day</td><td>always</td><td>●●●</td><td>"Clean filter. Still rattles once it's run all day."</td><td>air</td></tr>
     <tr><td>The fan bearing is going</td><td>bearing</td><td>rattles</td><td>a whine that builds through the evening</td><td>warm</td><td>●●</td><td>"New bearing. Still rattles when the door goes."</td><td>—</td></tr>
     <tr><td>A housing panel is loose (its gasket's gone)</td><td>seal</td><td>rattles</td><td>the housing buzzes when the door goes</td><td>touched</td><td>●</td><td>"Fresh gasket on the panel. Still rattles, door or no door."</td><td>—</td></tr>
     <tr><td>Fan and flow have drifted</td><td>tune (M5 stage 2)</td><td>stuffy air</td><td>the hum's off pitch; the grille's clean</td><td>always</td><td>●●</td><td>—</td><td>—</td></tr>
@@ -281,16 +281,16 @@ td code{white-space:normal}
   <h3>Oxygen cells <span class="tag">o2cell · Deck 5 (<code>5-o2-1</code>, <code>-2</code>) · part: oxygen cell</span></h3>
   <div class="tablewrap"><table>
     <tr><th>Cause</th><th>Fix</th><th>Card</th><th>Up close</th><th>When</th><th>How common</th><th>Still (wrong fit)</th><th>Line</th></tr>
-    <tr><td>A cell is spent</td><td>oxygen cell</td><td>air thin</td><td>one cell's lamp amber; the gauge low all day</td><td>always</td><td>●●●</td><td>"New regulator. One lamp's still amber."</td><td>—</td></tr>
-    <tr><td>The regulator sticks</td><td>regulator</td><td>air thin</td><td>a hiss, then the gauge jumps; worst at the busy hours</td><td>peak</td><td>●●</td><td>"New cell. Still hisses and jumps when everyone's up."</td><td>—</td></tr>
+    <tr><td>A cell is spent</td><td>oxygen cell</td><td>air thin</td><td>one cell's lamp amber; the gauge low all day</td><td>always</td><td>●●●</td><td>"New regulator. One lamp's still amber."</td><td>air</td></tr>
+    <tr><td>The regulator sticks</td><td>regulator</td><td>air thin</td><td>a hiss, then the gauge jumps; worst at the busy hours</td><td>peak</td><td>●●</td><td>"New cell. Still hisses and jumps when everyone's up."</td><td>air</td></tr>
     <tr><td>Its relay sticks</td><td>relay</td><td>stops and starts</td><td>the cells click off and on once warm</td><td>warm</td><td>●</td><td>"New cell. Still clicks off and on."</td><td>—</td></tr>
   </table></div>
 
   <h3>Electrolyser <span class="tag">electrolyser · Deck 5 (<code>5-electrolyser-1</code>) · part: membrane</span></h3>
   <div class="tablewrap"><table>
     <tr><th>Cause</th><th>Fix</th><th>Card</th><th>Up close</th><th>When</th><th>How common</th><th>Still (wrong fit)</th><th>Line</th></tr>
-    <tr><td>The membrane is fouled</td><td>membrane</td><td>air thin</td><td>bubbles slow in the sight glass, all day</td><td>always</td><td>●●●</td><td>"New cell. Bubbles still slow."</td><td>—</td></tr>
-    <tr><td>A cell is tired</td><td>cell</td><td>air thin</td><td>strong in the morning, fading by evening</td><td>warm</td><td>●●</td><td>"New membrane. Still fades by evening."</td><td>—</td></tr>
+    <tr><td>The membrane is fouled</td><td>membrane</td><td>air thin</td><td>bubbles slow in the sight glass, all day</td><td>always</td><td>●●●</td><td>"New cell. Bubbles still slow."</td><td>air</td></tr>
+    <tr><td>A cell is tired</td><td>cell</td><td>air thin</td><td>strong in the morning, fading by evening</td><td>warm</td><td>●●</td><td>"New membrane. Still fades by evening."</td><td>air</td></tr>
     <tr><td>Its relay sticks</td><td>relay</td><td>stops and starts</td><td>clicks off, then on again</td><td>warm</td><td>●</td><td>"New membrane. Still stops and starts."</td><td>—</td></tr>
   </table></div>
 
@@ -314,20 +314,29 @@ td code{white-space:normal}
   <h3>Air plant <span class="tag">airplant · Deck 5 (<code>5-scrubber-1</code>, <code>-2</code>) · part: filter</span></h3>
   <div class="tablewrap"><table>
     <tr><th>Cause</th><th>Fix</th><th>Card</th><th>Up close</th><th>When</th><th>How common</th><th>Still (wrong fit)</th><th>Line</th></tr>
-    <tr><td>The main filter is clogged</td><td>filter</td><td>stuffy air ship-wide</td><td>a grey filter face; the intake pulls hard</td><td>always</td><td>●●●</td><td>"New belt. Filter face still grey."</td><td>—</td></tr>
-    <tr><td>The fan belt is slipping</td><td>fan belt</td><td>stuffy air ship-wide</td><td>a squeal at shift change, weak for the next hour</td><td>peak</td><td>●●</td><td>"Clean filter. Still squeals at shift change."</td><td>—</td></tr>
+    <tr><td>The main filter is clogged</td><td>filter</td><td>stuffy air ship-wide</td><td>a grey filter face; the intake pulls hard</td><td>always</td><td>●●●</td><td>"New belt. Filter face still grey."</td><td>air</td></tr>
+    <tr><td>The fan belt is slipping</td><td>fan belt</td><td>stuffy air ship-wide</td><td>a squeal at shift change, weak for the next hour</td><td>peak</td><td>●●</td><td>"Clean filter. Still squeals at shift change."</td><td>air</td></tr>
     <tr><td>The fan bearing is going</td><td>bearing</td><td>noisy</td><td>a rumble from the plant</td><td>warm</td><td>●</td><td>"New belt. Still rumbles."</td><td>—</td></tr>
   </table></div>
-  <p class="note">In the game the Deck 5 air plants are <code>5-scrubber-1</code> and <code>-2</code> (kind <code>airplant</code>), and they <i>do</i> have panel places (<code>panel: [39, 3]</code>, <code>[40, 3]</code>); as do the oxygen cells, the electrolyser and the deck scrubbers; only the main fan (<code>5-fan-1</code>, a stand-in inside the locked Fan hall's fan) has no reachable panel. So a short air line without the fan could come sooner than M9 says. A call for the user (open question).</p>
+  <p class="note">In the game the Deck 5 air plants are <code>5-scrubber-1</code> and <code>-2</code> (kind <code>airplant</code>), with panels at [39, 3] and [40, 3]. The air line (M9) is built in Step 3 (the user, 2026-10-18).</p>
 
-  <h3>Main fan <span class="tag">fan · not in the game yet · part: bearing</span></h3>
+  <h3>Main fan <span class="tag">fan · Deck 5 Fan hall (<code>5-fan-1</code>) · part: bearing · the air line's middle</span></h3>
   <div class="tablewrap"><table>
     <tr><th>Cause</th><th>Fix</th><th>Card</th><th>Up close</th><th>When</th><th>How common</th><th>Still (wrong fit)</th><th>Line</th></tr>
-    <tr><td>The bearing is going</td><td>bearing</td><td>stuffy air ship-wide</td><td>a rumble in the duct</td><td>warm</td><td>●●●</td><td>"New belt. Still rumbles."</td><td>—</td></tr>
-    <tr><td>The fan belt is glazed</td><td>fan belt</td><td>stuffy air ship-wide</td><td>a squeal; the belt shiny</td><td>always</td><td>●●</td><td>"New bearing. Still squeals."</td><td>—</td></tr>
-    <tr><td>Its relay sticks</td><td>relay</td><td>stops</td><td>stops, clicks, starts</td><td>warm</td><td>●</td><td>"New bearing. Still stops."</td><td>—</td></tr>
+    <tr><td>The bearing is going</td><td>bearing</td><td>stuffy air ship-wide</td><td>a rumble in the duct</td><td>warm</td><td>●●●</td><td>"New belt. Still rumbles."</td><td>air</td></tr>
+    <tr><td>The fan belt is glazed</td><td>fan belt</td><td>stuffy air ship-wide</td><td>a squeal; the belt shiny</td><td>always</td><td>●●</td><td>"New bearing. Still squeals."</td><td>air</td></tr>
+    <tr><td>Its relay sticks</td><td>relay</td><td>stops</td><td>stops, clicks, starts</td><td>warm</td><td>●</td><td>"New bearing. Still stops."</td><td>air</td></tr>
   </table></div>
-  <p class="note">No main fan machine in <code>DECKS</code> today; kept for when one is added.</p>
+  <p class="note">Today <code>5-fan-1</code> is a stand-in with no reachable panel; the deck architect makes it real in Step 3 (<a href="architect-air-line.html">the architect's spec</a>).</p>
+
+  <h3>Duct dampers <span class="tag">damper · new, Deck 5 Fan hall (<code>5-damper-1</code> Decks 1-3, <code>5-damper-2</code> Decks 4-6) · part: relay</span></h3>
+  <div class="tablewrap"><table>
+    <tr><th>Cause</th><th>Fix</th><th>Card</th><th>Up close</th><th>When</th><th>How common</th><th>Still (wrong fit)</th><th>Line</th></tr>
+    <tr><td>The flap's actuator relay sticks</td><td>relay</td><td>stuffy air on its decks</td><td>the flap clicks but stays half shut, worse once warm</td><td>warm</td><td>●●●</td><td>"New bearing. The flap still clicks and stays half shut."</td><td>air</td></tr>
+    <tr><td>The flap's linkage bearing is worn</td><td>bearing</td><td>stuffy air on its decks</td><td>the flap judders and sits half open, all day</td><td>always</td><td>●●</td><td>"New relay. The flap still judders."</td><td>air</td></tr>
+    <tr><td>A blade seal is worn</td><td>seal</td><td>a whistle in the duct</td><td>a whistle at the duct mouth</td><td>always</td><td>●</td><td>"New relay. Still whistles."</td><td>—</td></tr>
+  </table></div>
+  <p class="note">A new kind (seat S) with the air line; its parts are all in <code>STOCK</code> (relay 6, bearing 3, seal 4).</p>
 
   <h3>Lab gas plant <span class="tag">gasplant · Deck 2 (<code>2-gasplant-1</code>) · part: regulator</span></h3>
   <div class="tablewrap"><table>
@@ -387,7 +396,7 @@ FAULT_CAUSES.scrubber = [
     <li><b>Tier 2 texts:</b> the table's words are the first draft of <code>faults.lines</code> as for Tier 1. In play a still line's second half follows the real cause's sign (the writer's line has a slot for it); the lines above are written for the commonest real cause.</li>
     <li><b>Traced faults</b> (M9): pick only among causes with a <code>line</code>; a cause without one posts on its own machine as now. A Tier 2 cause is never picked before <code>band: 'T2'</code> (the player an Officer, Day 10); before that Tier 2 machines still fault as now, with the crew's causes picked from the same table.</li>
     <li><b><code>with:&lt;kind&gt;</code></b> (the load): the case engine's <code>when</code> value; the symptom shows only in hours when that kind's machine is in use (<code>machUseDay</code>).</li>
-    <li><b>Kinds without a machine:</b> main fan and bay door gear have no machine in <code>DECKS</code> today; their tables wait. The extractor's Tier 1 table is the same.</li>
+    <li><b>Kinds without a machine:</b> the bay door gear has no machine in <code>DECKS</code> today; its table waits, as the extractor's Tier 1 table does. The main fan becomes real, and the dampers are added, with the air line in Step 3 (the architect's spec).</li>
   </ul>
 </section>
 

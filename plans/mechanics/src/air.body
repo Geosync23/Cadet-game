@@ -1,0 +1,66 @@
+TITLE:Air Line Spec
+H1:The air line: what the deck architect builds on Deck 5 <span class="draft">for the architect (Step 3)</span>
+SUB:The user chose the full air line for tracing in Step 3 ("all now", 2026-10-18). Tracing (M9) reads the flow at each machine's panel along a line and halves it. The air line's middle is the main fan, which today is only a stand-in inside the locked Fan hall. This page lists what Deck 5 needs so the whole line can be read: one hatch, the fan as a real machine with a panel, and two duct dampers. Short, for the deck architect (seat A) and seat S.
+NAV:plain=In plain words|line=The line|build=What to build|s=Seat S|tests=Tests|faq=FAQ
+
+<p class="note"><b>Decided by the user 2026-10-18</b> (the Step 3 survey, 15:18): the full air line now, in Step 3, with the deck architect adding a reachable main-fan panel and access.</p>
+<section id="plain">
+  <h2>In plain words</h2>
+  <ul>
+    <li>Air on the Wren runs in one line: the electrolyser makes oxygen, the oxygen cells hold it, the two main scrubber stacks (the air plants) clean the stale air, the <b>main fan</b> pushes it under the main corridor and up the spine, and two <b>duct dampers</b> split it to the upper decks (1-3) and the lower decks (4-6). Each deck's own scrubbers are at the far end.</li>
+    <li>When the card says "Stuffy air on Deck 4", you clip the pipe kit on in the middle first: the main fan. Then halve the line, as with water and heat.</li>
+    <li>Today the fan is behind glass with no way in, and there are no dampers. So: open one hatch from the air plant into the Fan hall, make the fan a real machine with a panel you can reach, and add the two dampers in the Fan hall where the duct leaves it.</li>
+  </ul>
+</section>
+
+<section id="line">
+  <h2>The line, upstream to downstream</h2>
+  <div class="tablewrap"><table>
+    <tr><th>#</th><th>Machine</th><th>Where</th><th>Panel today?</th></tr>
+    <tr><td>1</td><td>Electrolyser <code>5-electrolyser-1</code></td><td>Deck 5 air plant (<code>a</code>)</td><td>yes, [36, 2]</td></tr>
+    <tr><td>2</td><td>Oxygen cells <code>5-o2-1</code>, <code>-2</code> (side by side)</td><td>air plant</td><td>yes, [35, 1], [37, 1]</td></tr>
+    <tr><td>3</td><td>Air plants (main scrubber stacks) <code>5-scrubber-1</code>, <code>-2</code> (side by side)</td><td>air plant, on the Fan hall wall</td><td>yes, [39, 3], [40, 3]</td></tr>
+    <tr><td>4</td><td><b>Main fan</b> <code>5-fan-1</code></td><td>Fan hall (<code>F</code>)</td><td><b>no</b>: a stand-in; its panel falls on the room's middle tile, inside the big fan, behind locked walls</td></tr>
+    <tr><td>5</td><td><b>Duct dampers</b> <code>5-damper-1</code> (Decks 1-3), <code>5-damper-2</code> (Decks 4-6)</td><td>Fan hall, at the duct mouth on its west wall</td><td><b>new</b></td></tr>
+    <tr><td>6</td><td>Deck scrubbers: <code>2-extractor-1</code> (after damper 1), <code>4-scrubber-1</code>, <code>-2</code> (after damper 2)</td><td>Decks 2 and 4</td><td>yes</td></tr>
+  </table></div>
+  <p class="note">Six steps with a real middle: reading the fan first splits the line in two, the way Calder teaches. Decks 1, 3 and 6 have no scrubbers of their own; their stuffy-air card ends at their damper, which is enough (the reading after the damper is the deck's air). No other duct machines are needed.</p>
+</section>
+
+<section id="build" class="builder">
+  <h2>What the deck architect builds (DECKS[5] and its dressing)</h2>
+  <ol class="steps">
+    <li><time>1</time><b>The hatch</b><span>Open one of the sealed hatches between the air plant (<code>a</code>) and the Fan hall (<code>F</code>) as an ordinary door, at the east end of their shared wall, clear of the scrubber stacks and the duct riser (a suggestion: the edge at column 42 or 43, row 5; you choose). The corridor window (<code>v,34,8</code>) stays glass. The Fan hall stays a Tier 2 room (its tap text already says so): open to walk into, as every utility room is (the user, 2026-10-17); tiers only gate jobs. Drop <code>'F'</code> from <code>NO_FADE</code> if it fades badly once you can stand in it, your call.</span></li>
+    <li><time>2</time><b>The main fan as a real machine</b><span>Add <code>{ id: '5-fan-1', kind: 'fan', at: [the big fan's tile], room: 'F', face: ..., panel: [a walkable tile beside it, reached from the hatch] }</code> to <code>DECKS[5].machines</code>. The same id as the stand-in, so the stand-in drops out and the sim keeps the same machine (only its place and panel change). Keep the big fan where it is; give it a keep-clear outline so nobody walks through it; a <code>look</code> lamp and drip if you like, as the other machines have.</span></li>
+    <li><time>3</time><b>Two duct dampers</b><span>Two small wall machines on the Fan hall's west wall where the duct leaves for the corridor and the spine: <code>5-damper-1</code> (labelled "Upper decks, 1-3") and <code>5-damper-2</code> ("Lower decks, 4-6"), kind <code>damper</code>, each with its panel tile in front. A new shared-kit piece, <code>ductDamper</code> (a square duct section with a flap handle and a small label plate), made once at load, never calling <code>R()</code>, every colour through <code>col()</code>, no coplanar faces (the label plate stands off the duct).</span></li>
+    <li><time>4</time><b>Walkable and reachable</b><span>From the Deck 5 lift to every new panel tile, through the air plant and the hatch; <code>deck_check</code> finds them all.</span></li>
+  </ol>
+  <ul>
+    <li><b>Phones:</b> about 3 new meshes (two dampers and a door); Deck 5's draw calls stay under the limit (<code>deck_check</code>).</li>
+    <li><b>Regressions:</b> Deck 5 views that see the Fan hall or the air plant change on purpose (the hatch, the dampers); every other deck stays pixel-identical. Name the changed shots in the build table.</li>
+    <li><b>Builds:</b> the deck architect's own range; one turn (or two: the hatch and fan, then the dampers).</li>
+  </ul>
+</section>
+
+<section id="s" class="builder">
+  <h2>What seat S adds (section 17)</h2>
+  <ul>
+    <li><code>MACHINE_KINDS.damper = { name: 'Duct dampers', sys: 'air', life: 30, time: 1, scope: 'ship', w: 1, tier: 2, part: 'relay' }</code>; its effect follows the pipe valves' (its branch's decks only).</li>
+    <li><code>MACHINE_LINKS.air = ['5-electrolyser-1', ['5-o2-1', '5-o2-2'], ['5-scrubber-1', '5-scrubber-2'], '5-fan-1', { '5-damper-1': [1, 2, 3], '5-damper-2': [4, 5, 6] }]</code>, the deck scrubbers at the ends (<code>2-extractor-1</code> after damper 1; <code>4-scrubber-1</code>, <code>-2</code> after damper 2). Side-by-side machines count as one step (the lower of the two).</li>
+    <li>The fault tables: <code>damper</code> and <code>fan</code> (on <code>fault-tables.html</code>, Tier 2), and the air causes there marked <i>air</i>.</li>
+  </ul>
+</section>
+
+<section id="tests" class="builder">
+  <h2>Tests</h2>
+  <ul>
+    <li><b><code>deck_check</code></b>: Deck 5 reachable, the three new panels reachable from the lift, draw calls under the limit.</li>
+    <li><b><code>machine_check</code></b>: <code>5-fan-1</code> is a real machine (no stand-in); <code>MACHINE_LINKS.air</code> names only real machines with panel places; the flow falls only downstream of a bad machine.</li>
+    <li><b><code>mech_check</code></b> (24i): a traced "Stuffy air on Deck 4" with a bad <code>5-damper-2</code> is found in two readings from the middle (the fan full, damper 2 low after).</li>
+  </ul>
+</section>
+
+<section id="faq">
+  <h2>Builders' questions</h2>
+  <p class="note">None yet.</p>
+</section>

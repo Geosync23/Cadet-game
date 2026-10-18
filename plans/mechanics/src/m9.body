@@ -1,8 +1,9 @@
 TITLE:Tracing Spec
-H1:M9 · Tracing connected faults (Day 12, Calder; the pipe kit) <span class="draft">spec for approval</span>
+H1:M9 · Tracing connected faults (Day 12, Calder; the pipe kit) <span class="draft">approved by the user</span>
 SUB:Tier 2's new kind of thinking: a fault that shows in one place and starts somewhere else. Water and heat run through pipes between rooms and decks; with the pipe kit you read the flow at each machine along the line and follow the low reading back to its cause. Step 3, sub-block 24i (seat M3). Plan Part 2, M9; P5 "Follow the line" is how it gets harder (Step 5).
 NAV:plain=In plain words|day=Day 12|lines=The lines|grow=How it grows|b=Builder|save=Save|tests=Tests|ranges=Builds and keys|faq=FAQ
 
+<p class="note"><b>Approved by the user 2026-10-18</b> (the Step 3 survey, 15:18): <b>changed</b> to add the full air line now, in Step 3: the deck architect gives the main fan a reachable panel and adds two duct dampers (the air line below and <a href="architect-air-line.html">the architect's spec</a>).</p>
 <section id="plain">
   <h2>In plain words</h2>
   <ul>
@@ -25,13 +26,14 @@ NAV:plain=In plain words|day=Day 12|lines=The lines|grow=How it grows|b=Builder|
 </section>
 
 <section id="lines">
-  <h2>The two lines (Tier 2, using machines that are real in the game today)</h2>
+  <h2>The three lines (Tier 2)</h2>
   <div class="tablewrap"><table>
     <tr><th>Line</th><th>In order, upstream to downstream</th><th>Symptoms at the end</th></tr>
     <tr><td><b>Water</b></td><td>Deck 3 recycler (<code>3-recycler-1</code>) → filter bank (<code>3-filter-1</code>) → UV steriliser (<code>3-uv-1</code>) → Deck 3 pump (<code>3-pump-1</code>) → the spine → Deck 5 pumps (<code>5-pump-1</code>, <code>-2</code>) → branch valves (<code>5-valve-1</code> to Decks 1-3, <code>5-valve-2</code> to Decks 4-6)</td><td>weak showers, slow basins on the branch's decks</td></tr>
     <tr><td><b>Heat</b></td><td>Deck 4 heating plant (<code>4-heater-1</code>) → heating pumps (<code>4-pump-1</code>, <code>-2</code>) → the manifold (<code>5-manifold-1</code>) → deck loops</td><td>cold cabins on a deck</td></tr>
+    <tr><td><b>Air</b> (new: the user, 2026-10-18)</td><td>electrolyser (<code>5-electrolyser-1</code>) → oxygen cells (<code>5-o2-1</code>, <code>-2</code>) → air plants (<code>5-scrubber-1</code>, <code>-2</code>) → <b>main fan</b> (<code>5-fan-1</code>, the middle) → duct dampers (<code>5-damper-1</code> to Decks 1-3, <code>5-damper-2</code> to Decks 4-6) → deck scrubbers (<code>2-extractor-1</code>; <code>4-scrubber-1</code>, <code>-2</code>)</td><td>stuffy air on a deck</td></tr>
   </table></div>
-  <p class="note">The plan also names the air plant, the main fan and the Deck 5 machine rooms' ducts; in the game those are still stand-ins without service panels (<code>5-airplant-1</code>, <code>-2</code>, <code>5-fan-1</code>), so air lines wait until seat A gives them panel places. Tracing works with water and heat now.</p>
+  <p class="note"><b>The air line is built in Step 3</b> (the user, 2026-10-18: "all now"). Today the main fan is a stand-in whose panel falls inside the big fan in the locked Fan hall, and there are no dampers. The deck architect opens a hatch from the air plant into the Fan hall, makes <code>5-fan-1</code> a real machine with a reachable panel, and adds the two dampers: <a href="architect-air-line.html">the architect's spec</a>. Everything else on the line already has a panel. Until the architect's turn is in the build, <code>MACHINE_LINKS.air</code> is left out (typeof-guarded: a line whose machines aren't all real is skipped) and tracing works with water and heat.</p>
 </section>
 
 <section id="grow">
@@ -46,15 +48,15 @@ NAV:plain=In plain words|day=Day 12|lines=The lines|grow=How it grows|b=Builder|
   <h2>For the builder (seat M3, sub-block 24i)</h2>
   <div class="tablewrap"><table>
     <tr><th>Section</th><th>What</th><th>Owner</th></tr>
-    <tr><td>17</td><td><b><code>MACHINE_LINKS</code></b>: <code>{ water: [ids in order, with branches as { valve: [deck list] }], heat: [...] }</code>; <code>lineFlow(line, id)</code> → 0-1 at a machine (the product of <code>machWorks</code> upstream of it, through it); a <b>traced fault</b>: a <code>repair</code> posted on the symptom (<code>j.symptom = { line, decks }</code>, no machine shown) whose real machine is the worst on the line; when it's fixed, the symptom's job closes. The existing <code>shipEffects</code> water and heat effects already follow these machines</td><td>S</td></tr>
+    <tr><td>17</td><td><b><code>MACHINE_LINKS</code></b>: <code>{ water: [ids in order, with branches as { valve: [deck list] }], heat: [...], air: [...] }</code> (air: the architect's page; side-by-side machines as <code>[a, b]</code>, one step); the new kind <code>damper</code>; <code>lineFlow(line, id)</code> → 0-1 at a machine (the product of <code>machWorks</code> upstream of it, through it); a <b>traced fault</b>: a <code>repair</code> posted on the symptom (<code>j.symptom = { line, decks }</code>, no machine shown) whose real machine is the worst on the line; when it's fixed, the symptom's job closes. The existing <code>shipEffects</code> water and heat effects already follow these machines</td><td>S</td></tr>
     <tr><td>24i (new)</td><td>the pipe kit tool (<code>toolGive('pipekit')</code>), the reading step, the job's flow, the training (ladder row <code>m9</code>: Day 12, big, Officer, <code>by: ['calder', 'halloran-emeka']</code>; Torres is off on Fridays)</td><td>M3</td></tr>
     <tr><td>15</td><td>the reading: <code>how: 'look'</code> at a panel with <code>opts.read = lineFlow</code> (the result card shows the flow before and after the machine)</td><td>P</td></tr>
     <tr><td>19</td><td>the Maps app highlights a line's machines (a <code>map</code> block option <code>marks: [ids]</code>) — device's piece, built by M3 itself (no device seat)</td><td>M3</td></tr>
-    <tr><td>DECKS</td><td>nothing new: the readings are at the machines' existing panel places</td><td>—</td></tr>
+    <tr><td>DECKS[5]</td><td>water and heat: nothing new (the readings are at the machines' existing panel places). Air: the Fan hall hatch, <code>5-fan-1</code> as a real machine with a reachable panel, <code>5-damper-1</code> and <code>-2</code> (<a href="architect-air-line.html">the architect's spec</a>)</td><td>seat A</td></tr>
   </table></div>
   <ul>
     <li><b>Training (Day 12):</b> fix it to be the water line's Deck 4-6 branch valve <code>5-valve-2</code> (set faulty at 06:00 Day 12 through <code>jobReserve</code>, slot 11, <code>o.tier: 2</code>); the card: "Showers weak on Deck 4".</li>
-    <li><b>Traced faults after training:</b> a Tier 2 water or heat repair posted for you becomes traced (its card names the symptom) about half the time (<code>schedU(machSeed(id), day, 878)</code> &lt; .5), Officers only.</li>
+    <li><b>Traced faults after training:</b> a Tier 2 water, heat or air repair posted for you becomes traced (its card names the symptom) about half the time (<code>schedU(machSeed(id), day, 878)</code> &lt; .5), Officers only.</li>
     <li><b>Reading words:</b> full (.8+), low (.5-.8), very low (under .5); the bar is the number.</li>
     <li><b>Notes:</b> <code>simNote('traced', { line, machine })</code>.</li>
   </ul>
@@ -68,8 +70,8 @@ NAV:plain=In plain words|day=Day 12|lines=The lines|grow=How it grows|b=Builder|
 <section id="tests" class="builder">
   <h2>Tests</h2>
   <ul>
-    <li><b><code>machine_check</code></b>: <code>MACHINE_LINKS</code> names only real machines with panel places; a traced fault's symptom and cause are on different machines; fixing the cause clears the symptom and its effect; the flow falls only downstream of a bad machine.</li>
-    <li><b><code>mech_check</code></b> (24i): Day 12's training ends at <code>5-valve-2</code>; reading the middle first finds it in two readings; traced faults about half of Officer water/heat repairs; the same twice.</li>
+    <li><b><code>machine_check</code></b>: <code>MACHINE_LINKS</code> names only real machines with panel places (air included, once the architect's turn is in; <code>5-fan-1</code> no longer a stand-in); a traced fault's symptom and cause are on different machines; fixing the cause clears the symptom and its effect; the flow falls only downstream of a bad machine.</li>
+    <li><b><code>mech_check</code></b> (24i): Day 12's training ends at <code>5-valve-2</code>; reading the middle first finds it in two readings; traced faults about half of Officer water/heat/air repairs; a stuffy-air trace from the fan found in two readings; the same twice.</li>
   </ul>
 </section>
 

@@ -216,6 +216,7 @@ td code{white-space:normal}
 
 <section id="t2" class="builder">
   <h2>The T2 band: head-scratchers as an Officer (Days 10-15, Step 3)</h2>
+  <p class="note"><b>Approved by the user 2026-10-18</b> (the Step 3 survey, 15:18), as written.</p>
   <ul>
     <li><b>Rate:</b> about 1 in 5 of your real repairs (the table above), Tier 1 and Tier 2 machines; at most 1 open.</li>
     <li><b>Kinds:</b> P3 (now its T1+ and T2 forms: a note that rules out less than it seems; a night-shift handover log with five entries), P1 from Day 12, P2 from Day 15. Pages: <code>p1-when-does-it-happen.html</code>, <code>p2-who-saw-what.html</code>.</li>
@@ -271,7 +272,7 @@ cadet_test: with no kind opened, ALL IDENTICAL; intro_check unchanged</div>
   <h3>How does a sub-block add a tab to the Works app? (seat H, 2026-10-18)</h3>
   <p>24 core exposes <code>worksTabAdd({ id, title, order, view, act })</code>; the <code>works</code> app shows its own tabs (Training, Work log, Tools) and every added tab in <code>order</code>. Sub-blocks call it typeof-guarded at load. Before 24 core is in a build, 24k registers a stand-in app <code>deviceApp({ id: 'faultnotes', title: 'Fault notes', icon: 'wrench', order: 32, ... })</code>, hidden while no case kind is open; once <code>worksTabAdd</code> exists, 24k uses it and doesn't register the stand-in.</p>
   <h3>When is a puzzle kind "open"? (seat H, 2026-10-18)</h3>
-  <p>When its ladder row has <b>opened</b>, not when you're trained in it: <code>Object.values(SHIP.works.op || {}).some(ids =&gt; ids.includes(kind.ladder))</code>, read defensively. (Trained is set only when the first case is solved, and the first case is posted after the row opens, so "trained" would never let the training case appear.) <code>puzzle_check</code>'s stand-in kind writes its own entry in <code>SHIP.works.op</code>.</p>
+  <p>When its ladder row has <b>opened</b>, not when you're trained in it: <code>Object.values(SHIP.works.op || {}).some(ids =&gt; ids.includes(kind.ladder))</code>, read defensively. (Trained is set only when the first case is solved, and the first case is posted after the row opens, so "trained" would never let the training case appear.) <b>P2 is stricter</b> (the user, 2026-10-18): it opens only once Tomas's word has been given (<code>SHIP.works.said.p2</code>, set when the word ends), never at 06:00 when the row opens; see the P2 page. <code>puzzle_check</code>'s stand-in kind writes its own entry in <code>SHIP.works.op</code>.</p>
   <h3>Doesn't the scanner give the answer away? (reviewer R, 2026-10-18)</h3>
   <p>It did: with M7's normal rule the cause is always the lowest bar. <b>On a head-scratcher's job every suspect reads in the same "worn" band</b> (40-60, hashed, unrelated to the cause; new parts read worn while they bed in), and non-suspects read good. The scanner narrows the field to the suspects and stops there; the clues decide. The reading is not a clue in the solver. Day 5's case: pump, door seal and drain valve all read worn.</p>
 </section>

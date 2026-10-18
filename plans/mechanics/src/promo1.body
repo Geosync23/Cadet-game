@@ -1,8 +1,9 @@
 TITLE:First Promotion Spec
-H1:The Tier 2 test job and your first promotion: Officer (Days 8-11) <span class="draft">spec for approval</span>
+H1:The Tier 2 test job and your first promotion: Officer (Days 8-11) <span class="draft">approved by the user</span>
 SUB:From "Tomorrow, your test job" on Day 8 to the officer ceremony on Day 11: the test job, the urgent summons, Calder's office, the crew, your move to cabin 4-23, and the ceremony with the Captain. Step 3, section 24 core (seat C), with the sim engineer on call. Plan Part 3 (<code>plans/pillar5-plan.md</code> v10).
 NAV:plain=In plain words|days=Day by day|test=The test job|move=The move|cer=The ceremony|after=After|b=Builder|save=Save|tests=Tests|ranges=Builds and keys|faq=FAQ
 
+<p class="note"><b>Approved by the user 2026-10-18</b> (the Step 3 survey, 15:18).</p>
 <section id="plain">
   <h2>In plain words</h2>
   <p>When your Works reputation reaches "Relied on" and you've learned the Junior work (rounds, hauling, the drill and inspection, tuning, the scanner, your first incident), Calder sets your <b>test job</b>: a real Tier 2 job, with her watching. Pass it and the next work day you're <b>summoned</b>, promoted to <b>Officer</b> (Technician, Tier 2), cheered by the crew, walked to your own cabin, and the day after, <b>commissioned</b> by the Captain. Nothing about it can be missed, and the test job can only ever be delayed, never failed for good.</p>

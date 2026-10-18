@@ -69,12 +69,13 @@ td code{white-space:normal}
 </head>
 <body>
 <header>
-  <h1>M8 · Team jobs (Day 11, Emeka Halloran) <span class="draft">spec for approval</span></h1>
+  <h1>M8 · Team jobs (Day 11, Emeka Halloran) <span class="draft">approved by the user</span></h1>
   <div class="sub">A big job that takes three or four Works crew at once. As a new Officer you're one pair of hands: be at your spot, do your part when your turn comes, and the job moves on. Day 11's morning, before the officer ceremony. Step 3, sub-block 24h (seat M2). Plan Part 2, M8.</div>
 </header>
 <nav><div><a href="#plain">In plain words</a><a href="#day">Day 11</a><a href="#jobs">The jobs</a><a href="#grow">How it grows</a><a href="#b">Builder</a><a href="#tests">Tests</a><a href="#ranges">Builds and keys</a><a href="#faq">FAQ</a></div></nav>
 <main>
 
+<p class="note"><b>Approved by the user 2026-10-18</b> (the Step 3 survey, 15:18): <b>changed</b> to two or three team jobs a week, not one (the rota below); stage 2, bringing the parts, moves to Step 4 with the other extras.</p>
 <section id="plain">
   <h2>In plain words</h2>
   <ul>
@@ -97,15 +98,24 @@ td code{white-space:normal}
     <tr><td>Recycler membrane change</td><td><code>3-recycler-1</code></td><td>4</td><td>brace, pass, brace</td></tr>
     <tr><td>Washer overhaul (all four in a row)</td><td><code>4-washer-1..4</code></td><td>3</td><td>tip and hold, pass the pump, crank the drum</td></tr>
     <tr><td>Manifold valve bank</td><td><code>5-manifold-1</code></td><td>3</td><td>close the valves in order (turn), hold the bank, open again</td></tr>
+    <tr><td>Heating plant pump swap</td><td><code>4-heater-1</code></td><td>3</td><td>drain down (turn), take the old pump's weight (hold), pass the new one</td></tr>
+    <tr><td>Scrubber fan change (both stacks)</td><td><code>4-scrubber-1</code>, <code>-2</code></td><td>3</td><td>hold the housing, pass the fan, hold again</td></tr>
   </table></div>
-  <p class="note">About one a week, on a workday, posted the day before (a big machine's overhaul or its planned service). Never during an incident or on an event day. A case's answer can be "needs a team job" (later bands); there's never a puzzle during one.</p>
+  <p class="note">Two new jobs (the heating plant and the Deck 4 scrubbers) so that two or three a week don't keep landing on the same three machines.</p>
+  <h3>The rota: two or three a week (the user, 2026-10-18)</h3>
+  <ul>
+    <li><b>Tuesdays and Thursdays</b>, every week, at 09:30; and <b>Fridays at 14:00 in even ship weeks</b> (weeks 2, 4, ...: Days 12, 26, ...). So two one week, three the next.</li>
+    <li>The first is Day 11 (Thursday, week 2: the recycler, the training). Week 2's Friday (Day 12) is skipped, because it's your tracing lesson; so the rota really starts on Day 16 (Tuesday).</li>
+    <li>A day with an incident, an event, or your test job moves that day's team job to the next rota-free workday that week, or drops it. Never the same machine twice in one week. On your night shift (Days 19-20) they go ahead without you; you're not asked.</li>
+    <li>Posted the day before at 16:00, with Mail, as before (a big machine's overhaul or its planned service). A case's answer can be "needs a team job" (later bands); there's never a puzzle during one.</li>
+  </ul>
 </section>
 
 <section id="grow">
   <h2>How it grows</h2>
   <div class="grid">
     <div class="card"><b>Stage 1 · A pair of hands</b><span>Day 11.</span></div>
-    <div class="card"><b>Stage 2 · Bring the parts</b><span>After 2 team jobs: you're asked to bring the parts for the whole team (a manifest run from stores, M4's verb).</span><span class="meta"><span class="tag new">optional</span></span></div>
+    <div class="card"><b>Stage 2 · Bring the parts</b><span>After 2 team jobs: you're asked to bring the parts for the whole team (a manifest run from stores, M4's verb). <b>Built in Step 4</b> with the other extras (the user, 2026-10-18).</span><span class="meta"><span class="tag new">optional · Step 4</span></span></div>
     <div class="card"><b>Leading one</b><span>M24, as an Engine Specialist (Day 25).</span></div>
   </div>
 </section>
@@ -119,10 +129,10 @@ td code{white-space:normal}
     <tr><td>14 / 10 sim</td><td>the team meeting at the machine at the start (each at a team spot), standing at their spots through the job, crew talk (overheard lines)</td><td>the social engineer (sim on call)</td></tr>
     <tr><td>15</td><td>your turns: <code>how: 'hold'</code> (brace, 2 ship minutes), <code>'carry'</code> (pass), <code>'turn'</code> (crank, valves)</td><td>P</td></tr>
     <tr><td>8b</td><td><code>brace</code> and <code>crank</code> poses (fall back to <code>work</code>)</td><td>M2 itself</td></tr>
-    <tr><td>DECKS[3], [4], [5]</td><td>team spots by each machine (<code>3-recycler-team-1..4</code>, <code>4-washer-team-1..3</code>, <code>5-manifold-team-1..3</code>)</td><td>seat A</td></tr>
+    <tr><td>DECKS[3], [4], [5]</td><td>team spots by each machine (<code>3-recycler-team-1..4</code>, <code>4-washer-team-1..3</code>, <code>5-manifold-team-1..3</code>, <code>4-heater-team-1..3</code>, <code>4-scrubber-team-1..3</code>)</td><td>seat A</td></tr>
   </table></div>
   <ul>
-    <li><b>The plan:</b> <code>teamPlan(week)</code>: one job a week on a workday from Day 11 (Day 11's fixed: the recycler, 09:30); the machine is the Tier 2 machine of <code>TEAM_JOBS</code> most in need, with <code>schedU(week, 0, 876)</code> on ties; the team is the Works crew on shift then whose plans are free (<code>planWhere</code>), lowest load first; you're added if you're Officer or higher. Posted at 16:00 the day before, with Mail.</li>
+    <li><b>The plan:</b> <code>teamPlan(week)</code>: the rota above (Tue and Thu 09:30, Fri 14:00 in even weeks; from Day 11, Day 11's fixed: the recycler, 09:30; Day 12 skipped); a clash moves it to the next rota-free workday that week (<code>schedU(week, slot, 877)</code> never needed: the first free one), or drops it; the machine is the Tier 2 machine of <code>TEAM_JOBS</code> most in need and not already done that week, with <code>schedU(week, 0, 876)</code> on ties; the team is the Works crew on shift then whose plans are free (<code>planWhere</code>), lowest load first; you're added if you're Officer or higher. Posted at 16:00 the day before, with Mail.</li>
     <li><b>The run:</b> the job's steps in order; each step names who (a crew id or <code>'you'</code>); a crew step takes its minutes on paper; your step waits for you (a toast "Your turn: brace the housing" and the goal pointer). If you're not at your spot 15 minutes after the start, your steps go to the lead, and the job takes 20% longer.</li>
     <li><b>Notes:</b> <code>simNote('team', { id, step, by })</code>; reputation +2 for a team job you were in.</li>
   </ul>
@@ -131,7 +141,7 @@ td code{white-space:normal}
 <section id="tests" class="builder">
   <h2>Tests</h2>
   <ul>
-    <li><b><code>mech_check</code></b> (24h): the team assembles; waits for you up to 15 minutes; finishes without you, slower; your three turns on Day 11; the machine put right; one a week; the same twice.</li>
+    <li><b><code>mech_check</code></b> (24h): the team assembles; waits for you up to 15 minutes; finishes without you, slower; your three turns on Day 11; the machine put right; two or three a week on the rota (Tue, Thu, even-week Fri), never one machine twice in a week, Day 12 free; the same twice.</li>
     <li><b><code>day_check</code></b> on a team-job day: everyone reaches their places; draw calls under 450 with 4 crew at the recycler.</li>
   </ul>
 </section>

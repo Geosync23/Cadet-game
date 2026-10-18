@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Air Line Spec</title>
+<style>
+:root{--ink:#e8eef0;--muted:#93a6ae;--teal:#4cc3b5;--gold:#e9c46a;--rose:#e58f7a;--glass:rgba(13,21,33,.78);--line:rgba(150,200,196,.22);--chip:rgba(76,195,181,.14)}
+*{box-sizing:border-box}
+html,body{margin:0;background:#121a27;color:var(--ink);font-family:"Avenir Next","Segoe UI",system-ui,sans-serif}
+body{background:radial-gradient(ellipse at 50% 20%,#22304a 0%,#141c2b 60%,#0c111b 100%) fixed;line-height:1.5}
+header{padding:18px 16px 4px;max-width:1100px;margin:0 auto}
+h1{font-size:21px;font-weight:600;margin:0}
+h2{font-size:17px;font-weight:600;margin:0 0 8px;color:#bdeee6}
+h3{font-size:14.5px;font-weight:600;margin:12px 0 4px;color:#d9eeea}
+.sub{font-size:13.5px;color:var(--muted);margin-top:4px}
+.draft{display:inline-block;font-size:11.5px;color:#14202a;background:var(--gold);border-radius:999px;padding:2px 9px;margin-left:6px;vertical-align:2px}
+nav{position:sticky;top:0;z-index:5;background:rgba(14,20,31,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+nav div{display:flex;gap:6px;overflow-x:auto;padding:8px 16px;max-width:1100px;margin:0 auto;-webkit-overflow-scrolling:touch}
+nav a{flex:none;text-decoration:none;border:1px solid var(--line);background:var(--glass);color:var(--ink);font-size:13px;padding:6px 11px;border-radius:999px}
+nav a:focus-visible,nav a:hover{border-color:var(--teal);color:#bdeee6;outline:none}
+main{max-width:1100px;margin:0 auto;padding:6px 16px 40px}
+section{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:14px 0;scroll-margin-top:56px}
+p{margin:6px 0;font-size:14px;color:#d6e0e3}
+ul{margin:6px 0;padding-left:20px;font-size:14px;color:#d6e0e3}
+li{margin:3px 0}
+.note{font-size:12.5px;color:var(--muted)}
+.grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.card{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.025)}
+.card b{display:block;color:#bdeee6;font-size:14px;margin-bottom:2px}
+.card span{font-size:13px;color:#cfd9dc}
+.card .meta{display:block;font-size:12px;color:var(--muted);margin-top:4px}
+.tag{display:inline-block;font-size:11.5px;border-radius:999px;padding:1px 8px;margin:2px 4px 0 0;background:var(--chip);color:#bdeee6;border:1px solid var(--line)}
+.tag.new{background:rgba(233,196,106,.16);color:#f1dca0}
+.tag.old{opacity:.75}
+.steps{list-style:none;padding:0;margin:8px 0;counter-reset:s}
+.steps li{position:relative;padding:8px 10px 8px 46px;border-left:2px solid rgba(76,195,181,.35);margin:0 0 0 14px}
+.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:-15px;top:8px;width:28px;height:28px;border-radius:50%;background:#183040;border:1px solid var(--teal);color:#bdeee6;font-size:12.5px;display:flex;align-items:center;justify-content:center}
+.steps time{display:block;font-size:12px;color:var(--gold)}
+.steps b{color:#e4f3f0;font-weight:600}
+.steps span{display:block;font-size:13.5px;color:#cfd9dc}
+.week{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.day{border:1px solid var(--line);border-radius:12px;padding:9px 10px;background:rgba(255,255,255,.02)}
+.day h4{margin:0 0 4px;font-size:13.5px;color:var(--gold);font-weight:600}
+.day p{font-size:12.5px;margin:4px 0;color:#cfd9dc}
+.day .who{color:#bdeee6;font-weight:600}
+.lines{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;background:#0b141c;border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:#9fe7dc;white-space:pre-wrap;overflow-x:auto;margin:8px 0}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0}
+.flow .box{border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:13px;background:rgba(255,255,255,.03)}
+.flow .arrow{color:var(--teal)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:12px}
+.tablewrap{overflow-x:auto}
+.waves{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+.wave{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.025)}
+.wave b{color:var(--gold);display:block}
+.wave .ci{display:block;margin-top:6px;font-size:12.5px;color:#f1dca0}
+ol.q{padding-left:22px;font-size:14px;color:#d6e0e3}
+ol.q li{margin:6px 0}
+ol.q em{color:var(--muted);font-style:normal;font-size:12.5px}
+svg text{font-family:inherit}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;color:#9fe7dc;background:rgba(0,0,0,.25);padding:0 4px;border-radius:4px;word-break:break-word}
+section.builder{border-color:rgba(233,196,106,.45)}
+section.builder h2{color:var(--gold)}
+.status{display:inline-block;font-size:11.5px;color:#14202a;background:var(--teal);border-radius:999px;padding:2px 9px;margin-left:6px;vertical-align:2px}
+td code{white-space:normal}
+</style>
+</head>
+<body>
+<header>
+  <h1>The air line: what the deck architect builds on Deck 5 <span class="draft">for the architect (Step 3)</span></h1>
+  <div class="sub">The user chose the full air line for tracing in Step 3 ("all now", 2026-10-18). Tracing (M9) reads the flow at each machine's panel along a line and halves it. The air line's middle is the main fan, which today is only a stand-in inside the locked Fan hall. This page lists what Deck 5 needs so the whole line can be read: one hatch, the fan as a real machine with a panel, and two duct dampers. Short, for the deck architect (seat A) and seat S.</div>
+</header>
+<nav><div><a href="#plain">In plain words</a><a href="#line">The line</a><a href="#build">What to build</a><a href="#s">Seat S</a><a href="#tests">Tests</a><a href="#faq">FAQ</a></div></nav>
+<main>
+
+<p class="note"><b>Decided by the user 2026-10-18</b> (the Step 3 survey, 15:18): the full air line now, in Step 3, with the deck architect adding a reachable main-fan panel and access.</p>
+<section id="plain">
+  <h2>In plain words</h2>
+  <ul>
+    <li>Air on the Wren runs in one line: the electrolyser makes oxygen, the oxygen cells hold it, the two main scrubber stacks (the air plants) clean the stale air, the <b>main fan</b> pushes it under the main corridor and up the spine, and two <b>duct dampers</b> split it to the upper decks (1-3) and the lower decks (4-6). Each deck's own scrubbers are at the far end.</li>
+    <li>When the card says "Stuffy air on Deck 4", you clip the pipe kit on in the middle first: the main fan. Then halve the line, as with water and heat.</li>
+    <li>Today the fan is behind glass with no way in, and there are no dampers. So: open one hatch from the air plant into the Fan hall, make the fan a real machine with a panel you can reach, and add the two dampers in the Fan hall where the duct leaves it.</li>
+  </ul>
+</section>
+
+<section id="line">
+  <h2>The line, upstream to downstream</h2>
+  <div class="tablewrap"><table>
+    <tr><th>#</th><th>Machine</th><th>Where</th><th>Panel today?</th></tr>
+    <tr><td>1</td><td>Electrolyser <code>5-electrolyser-1</code></td><td>Deck 5 air plant (<code>a</code>)</td><td>yes, [36, 2]</td></tr>
+    <tr><td>2</td><td>Oxygen cells <code>5-o2-1</code>, <code>-2</code> (side by side)</td><td>air plant</td><td>yes, [35, 1], [37, 1]</td></tr>
+    <tr><td>3</td><td>Air plants (main scrubber stacks) <code>5-scrubber-1</code>, <code>-2</code> (side by side)</td><td>air plant, on the Fan hall wall</td><td>yes, [39, 3], [40, 3]</td></tr>
+    <tr><td>4</td><td><b>Main fan</b> <code>5-fan-1</code></td><td>Fan hall (<code>F</code>)</td><td><b>no</b>: a stand-in; its panel falls on the room's middle tile, inside the big fan, behind locked walls</td></tr>
+    <tr><td>5</td><td><b>Duct dampers</b> <code>5-damper-1</code> (Decks 1-3), <code>5-damper-2</code> (Decks 4-6)</td><td>Fan hall, at the duct mouth on its west wall</td><td><b>new</b></td></tr>
+    <tr><td>6</td><td>Deck scrubbers: <code>2-extractor-1</code> (after damper 1), <code>4-scrubber-1</code>, <code>-2</code> (after damper 2)</td><td>Decks 2 and 4</td><td>yes</td></tr>
+  </table></div>
+  <p class="note">Six steps with a real middle: reading the fan first splits the line in two, the way Calder teaches. Decks 1, 3 and 6 have no scrubbers of their own; their stuffy-air card ends at their damper, which is enough (the reading after the damper is the deck's air). No other duct machines are needed.</p>
+</section>
+
+<section id="build" class="builder">
+  <h2>What the deck architect builds (DECKS[5] and its dressing)</h2>
+  <ol class="steps">
+    <li><time>1</time><b>The hatch</b><span>Open one of the sealed hatches between the air plant (<code>a</code>) and the Fan hall (<code>F</code>) as an ordinary door, at the east end of their shared wall, clear of the scrubber stacks and the duct riser (a suggestion: the edge at column 42 or 43, row 5; you choose). The corridor window (<code>v,34,8</code>) stays glass. The Fan hall stays a Tier 2 room (its tap text already says so): open to walk into, as every utility room is (the user, 2026-10-17); tiers only gate jobs. Drop <code>'F'</code> from <code>NO_FADE</code> if it fades badly once you can stand in it, your call.</span></li>
+    <li><time>2</time><b>The main fan as a real machine</b><span>Add <code>{ id: '5-fan-1', kind: 'fan', at: [the big fan's tile], room: 'F', face: ..., panel: [a walkable tile beside it, reached from the hatch] }</code> to <code>DECKS[5].machines</code>. The same id as the stand-in, so the stand-in drops out and the sim keeps the same machine (only its place and panel change). Keep the big fan where it is; give it a keep-clear outline so nobody walks through it; a <code>look</code> lamp and drip if you like, as the other machines have.</span></li>
+    <li><time>3</time><b>Two duct dampers</b><span>Two small wall machines on the Fan hall's west wall where the duct leaves for the corridor and the spine: <code>5-damper-1</code> (labelled "Upper decks, 1-3") and <code>5-damper-2</code> ("Lower decks, 4-6"), kind <code>damper</code>, each with its panel tile in front. A new shared-kit piece, <code>ductDamper</code> (a square duct section with a flap handle and a small label plate), made once at load, never calling <code>R()</code>, every colour through <code>col()</code>, no coplanar faces (the label plate stands off the duct).</span></li>
+    <li><time>4</time><b>Walkable and reachable</b><span>From the Deck 5 lift to every new panel tile, through the air plant and the hatch; <code>deck_check</code> finds them all.</span></li>
+  </ol>
+  <ul>
+    <li><b>Phones:</b> about 3 new meshes (two dampers and a door); Deck 5's draw calls stay under the limit (<code>deck_check</code>).</li>
+    <li><b>Regressions:</b> Deck 5 views that see the Fan hall or the air plant change on purpose (the hatch, the dampers); every other deck stays pixel-identical. Name the changed shots in the build table.</li>
+    <li><b>Builds:</b> the deck architect's own range; one turn (or two: the hatch and fan, then the dampers).</li>
+  </ul>
+</section>
+
+<section id="s" class="builder">
+  <h2>What seat S adds (section 17)</h2>
+  <ul>
+    <li><code>MACHINE_KINDS.damper = { name: 'Duct dampers', sys: 'air', life: 30, time: 1, scope: 'ship', w: 1, tier: 2, part: 'relay' }</code>; its effect follows the pipe valves' (its branch's decks only).</li>
+    <li><code>MACHINE_LINKS.air = ['5-electrolyser-1', ['5-o2-1', '5-o2-2'], ['5-scrubber-1', '5-scrubber-2'], '5-fan-1', { '5-damper-1': [1, 2, 3], '5-damper-2': [4, 5, 6] }]</code>, the deck scrubbers at the ends (<code>2-extractor-1</code> after damper 1; <code>4-scrubber-1</code>, <code>-2</code> after damper 2). Side-by-side machines count as one step (the lower of the two).</li>
+    <li>The fault tables: <code>damper</code> and <code>fan</code> (on <code>fault-tables.html</code>, Tier 2), and the air causes there marked <i>air</i>.</li>
+  </ul>
+</section>
+
+<section id="tests" class="builder">
+  <h2>Tests</h2>
+  <ul>
+    <li><b><code>deck_check</code></b>: Deck 5 reachable, the three new panels reachable from the lift, draw calls under the limit.</li>
+    <li><b><code>machine_check</code></b>: <code>5-fan-1</code> is a real machine (no stand-in); <code>MACHINE_LINKS.air</code> names only real machines with panel places; the flow falls only downstream of a bad machine.</li>
+    <li><b><code>mech_check</code></b> (24i): a traced "Stuffy air on Deck 4" with a bad <code>5-damper-2</code> is found in two readings from the middle (the fan full, damper 2 low after).</li>
+  </ul>
+</section>
+
+<section id="faq">
+  <h2>Builders' questions</h2>
+  <p class="note">None yet.</p>
+</section>
+
+</main>
+</body>
+</html>

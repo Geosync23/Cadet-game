@@ -1,8 +1,9 @@
 TITLE:Who Saw What Spec
-H1:P2 · Who saw what? (Day 15, a word from Tomas) <span class="draft">spec for approval</span>
+H1:P2 · Who saw what? (Day 15, a word from Tomas) <span class="draft">approved by the user</span>
 SUB:The crew noticed the fault; you didn't. Ask the people who were there when it happened, and when. One of them may be honestly mixed up. A small new thing on Day 15, on the case engine, seat H. Plan Part 4, P2.
 NAV:plain=In plain words|first=Your first P2|rules=How witnesses work|grow=How it grows|b=Builder|tests=Tests|faq=FAQ
 
+<p class="note"><b>Approved by the user 2026-10-18</b> (the Step 3 survey, 15:18): <b>with</b> "only once this mechanic unlocks": no P2 case, Ask button or witness line before Tomas has shown you, on Day 15 (the rule below).</p>
 <section id="plain">
   <h2>In plain words</h2>
   <ul>
@@ -30,6 +31,7 @@ NAV:plain=In plain words|first=Your first P2|rules=How witnesses work|grow=How i
     <li><b>Who knows:</b> crew whose real plan had them near the machine (same room or the next) during the fault's window; they're found by Roster as now.</li>
     <li><b>What they say:</b> at the time they were there, the machine was showing or not (from the cause's <code>when</code>); "showing at t" crosses out causes that can't show at t; "quiet at t" crosses out causes that would show at t.</li>
     <li><b>A mix-up</b> is a person whose plan had them elsewhere; their line is about the machine where they really were. It crosses out nothing, and the case must be solvable without it.</li>
+    <li><b>Only once it unlocks</b> (the user, 2026-10-18): until Tomas has had his word with you (Day 15's breakfast, or the next time you're both there if you miss it), there is no P2 case, no Ask button on anyone's chat card, and no witness line anywhere. A head-scratcher before then is one of the kinds you already have.</li>
   </ul>
 </section>
 
@@ -47,6 +49,7 @@ NAV:plain=In plain words|first=Your first P2|rules=How witnesses work|grow=How i
   <ul>
     <li><code>CASE_KINDS.p2 = { ladder: 'p2', fits: causes differing in <code>when</code>, suspects: cause + decoys, clues: one <code>person</code> clue per chosen witness: { who, at, saw: true|false, kills } }</code>.</li>
     <li><b>Witnesses from the sim:</b> <code>planWhere(p, t)</code> over the fault's window (the 24 hours before posting); candidates are crew whose place was in the machine's room or an adjoining room; their minute is the middle of their stay; what they saw is the cause's real <code>when</code> at that minute. A mix-up is picked from crew on the Roster whose plan had them elsewhere (the same kind of machine on another deck), at most one per case, never needed.</li>
+    <li><b>The unlock gate</b> (the user, 2026-10-18): P2 is open only from the moment Tomas's word ends: <code>SHIP.works.said.p2 = day</code> is set then (new, a number per word given; trained stays as the case engine has it, set when the first case is solved), not when the row opens at 06:00. Until then: <code>CASE_KINDS.p2</code> never fits (the case maker skips it, overriding the case engine's "open when its row opened" for this kind), the Ask button is never drawn, and <code>content/cases/p2.lines</code> is never read. If you miss breakfast, Tomas's word waits for the next meal you share, as every opening waits. <code>said</code> is saved in <code>ship.works</code> (<code>worksClean</code> keeps known ladder ids, numbers only); a save from before the word loads with P2 shut.</li>
     <li><b>The Ask button</b> on the chat card (<code>chatOpen</code>, section 20): one line, typeof-guarded, shown only while a P2 case is open and the person is a witness or a mix-up; the answer is their line from <code>content/cases/p2.lines</code>; collecting it is <code>caseClue</code>.</li>
     <li><b>The ladder:</b> row <code>p2</code> (Day 15, small, Officer, <code>by: ['tomas', 'torres-zeke']</code>; it's a word, not a lesson, so an off-duty teacher counts if they're aboard and awake). First case: <code>4-scrubber-2</code>, cause <code>bearing</code> (when: warm), suspects filter (always), bearing, panel (touched; a new Tier 2 cause for the scrubber's table, part <code>seal</code>, sign "the housing buzzes when the door goes"); if <code>4-scrubber-2</code> is busy, <code>4-scrubber-1</code>.</li>
     <li><b>Keys:</b> 893 (witness choice), 894 (the mix-up).</li>
@@ -55,7 +58,7 @@ NAV:plain=In plain words|first=Your first P2|rules=How witnesses work|grow=How i
 
 <section id="tests" class="builder">
   <h2>Tests</h2>
-  <ul><li><b><code>puzzle_check</code></b> (P2): every witness really was there at their minute (<code>planWhere</code>); every mix-up really was elsewhere; the case solves without the mix-up; no single witness solves it; the same twice.</li></ul>
+  <ul><li><b><code>puzzle_check</code></b> (P2): every witness really was there at their minute (<code>planWhere</code>); every mix-up really was elsewhere; no P2 case, Ask button or witness line before <code>SHIP.works.said.p2</code> (step to Day 15 05:59 and to just before Tomas's word: none; after it: the first case); the case solves without the mix-up; no single witness solves it; the same twice.</li></ul>
 </section>
 
 <section id="faq">

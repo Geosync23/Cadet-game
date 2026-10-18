@@ -727,6 +727,7 @@ Done so far:
 - **Pillar 5 plan APPROVED (the user, 2026-10-17 ~21:20):** the final plan (claude/pillar5-plan e3b96c5, plans/pillar5-plan.md): about 33 ship days (~12-13 hours), Officer day 16, Senior Officer day 23, Engine Specialist day 30, puzzles from day 17, the night shift on two weekend nights (days 26-27, the plan's suggestion), mentoring one day, side jobs optional, jobs mapped to rank. **Not started:** no hiring and no building until the user says so.
 - **Pillar 5's dates moved earlier (the user, 2026-10-18 ~04:20, answer A; plans/pillar5-plan.md):** new kinds of work start on **Day 2** (rounds Day 2, hauling from the first Wednesday delivery Day 3, tuning Day 4, the scanner Day 5, the first incident Day 8), then at most one big and one small new thing per workday; **Officer Day 10** (the officer ceremony Day 11), **Senior Officer Day 16**, **Engine Specialist Day 23**; side jobs from Day 12; the night shift on the nights of Days 19 and 20; "Calder's question" Day 26; the arc about 27 ship days (about 10-11 hours). From 0.60.7: no laundry duty (you do your own laundry from Day 2); hauling grows out of the Wednesday delivery.
 - **Puzzles earlier, then more often (the user, 2026-10-18 ~04:57: "puzzle jobs should show up earlier, then they increase in rate"):** the first head-scratcher (P3, "What's been tried?", the gentlest) on **Day 5** with the scanner; your work uniform moves to Day 8. Share of your real repairs that are puzzles (the lead's tuning, open to change): about **1 in 10** (Days 5-9, Junior), **1 in 5** (Days 10-15, Officer), **1 in 4** (Days 16-22, Senior Officer; 1 in 3 on your own tier's machines), **1 in 3** (Day 23 on, Engine Specialist). The other puzzle kinds keep their days. The puzzle machinery is built in Pillar 5's Step 1 and the first puzzle in Step 2.
+- **Pillar 5's Officer pages (the user, 2026-10-18 ~15:18, Step 3 survey; plan v11):** the first promotion, tracing, P1 and the T2 band approved as written. **Team jobs two or three a week**, not one (Tuesdays and Thursdays, and Fridays every other week); bringing the parts for the team (their stage 2) is built in Step 4 with the other extras. **"Who saw what?" only once it unlocks:** no Ask-about-the-fault button and no witnesses until Tomas has shown you, on Day 15. **Tracing covers air too, now:** the deck architect opens a hatch from the air plant into the Fan hall, makes the main fan a real machine with a panel you can reach, and adds two duct dampers (upper decks, lower decks), so the air line can be halved like the pipes (`plans/mechanics/architect-air-line.html`). Spare parts running short stays as it is.
 - **Pillar 6 (the user, 2026-10-17):** ship-wide events **and more traditions**, with **traditions rotating weekly** so the weeks feel different.
 - **Pillar 7 (the user, 2026-10-17): the story.** Lots of **narrative moments** that add up to a larger thread through the game: not cutscenes, a through line you live. And **big arcs for the crew members**, with more detail.
 - **An audio pass (the user, 2026-10-17):** sound comes later, after a few more pillars, as its own pass.
@@ -741,7 +742,6 @@ Done so far:
 - How does diagnosing a fault look on screen: a simple panel with labelled components, or something more hands-on? Prototype it in Pillar 2.
 - Beyond the name you type on the shuttle, should the player ever choose their look? (No choice of look for now, the user, 2026-10-16.)
 - Does the diplomacy-and-story starship game become its own future project?
-- Tracing an air line: the Deck 5 air plants (`5-scrubber-1`, `-2`) already have service panels in the game, as do the oxygen cells, the electrolyser and the deck scrubbers; only the main fan has none (its stand-in sits inside the locked Fan hall's fan). Ship air tracing in Step 3 on a short line without the fan, or wait for the deck architect to give the fan a reachable panel (see `plans/mechanics/fault-tables.html`, Tier 2)?
 
 **The decks:**
 
@@ -749,6 +749,7 @@ Done so far:
 
 **Answered:**
 
+- Tracing an air line: the full air line now, in Step 3 ("all now"): the deck architect gives the main fan a reachable panel and access and adds two duct dampers (the user, 2026-10-18). See "Roadmap after Pillar 4".
 - Night shift: yes, later: you're assigned the night shift for a while in Pillar 7 (career); no opt-in on-call (the user, 2026-10-17).
 - Passed over for certification: never, only delayed (the user, 2026-10-17).
 
