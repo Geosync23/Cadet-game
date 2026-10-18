@@ -37,6 +37,8 @@ Done and sent: plan v10 (9e26a58: Step 2's optional stages into Step 4, the cold
 
 - 33587e7: `plans/holidays-plan.html` (src `plans/mechanics/src/holidays.body`), for lead 13; the user put holidays ON HOLD (2026-10-18 ~16:54); its 7 questions are unanswered; design-doc.md not edited for it.
 
+- 2c49900 (v1) and 69d076e (v2): `plans/events-plan.html` (src `plans/mechanics/src/events.body`, generated from a data script: edit the body directly now), the ship-wide events plan for lead 14 (session_01RHtJv7GJDi4qosgU8Gb2b8, the lead from 2026-10-18 ~23:20). v2 has the user's answers; its 7 open questions await the user.
+
 ## Next (in order)
 1. ~~**Finish the Tier 2 fault tables**~~ (done, adc12e2) (`fault-tables.html`, `src/ft.body`): each Tier 2 kind's causes in the Tier 1 format (card, up close, when, how common, still, from), parts from `STOCK` only, same card needs different signs. Needed by: M9's lines (water: recycler, filter, uv, pump, valve; heat: heater, heatpump, manifold), P1's first case (3-pump-1 `peak`; filter `always`; membrane; valve), P2's first case (scrubber: filter `always`, bearing `warm`, a new `panel` cause, part seal, `touched`). Air plant and main fan are stand-ins without panels (no tracing for air yet).
 2. Whatever the user sends back on the Step 3 pages (fix, re-push, one line to the lead each).
