@@ -170,3 +170,15 @@ All 8 packages approved (Zeke: "all good except he still walks and talks" → he
 | ~23:05 (the user) | Order of work | Rec deck: when ready, merge into the main build kept DORMANT (no way in); then Step 3, Step 4; then SHIP-WIDE EVENTS (before Steps 5-6), then Steps 5-6 to finish the campaign, then fill in. Lead: events plan must leave slots for Tier 3-4 roles |
 | ~23:10 (the user) | Step 3 go; rec deck timing | GO for Step 3 now, then Step 4; the rec deck is merged into the main build AFTER Step 4 (replaces the ~23:05 'rec deck first'). Step 3 seats build with the rec deck merge in mind (brief-p5s3.md) |
 | ~23:15 (the user) | Step 3 | Not yet: HOLD (seats briefed and waiting). Next: recap + brainstorm ship-wide events |
+
+## The user, 2026-10-18 ~23:25 (ship-wide events brainstorm)
+| Question | The user's answer |
+|---|---|
+| Repeats | Ship-wide events NEVER repeat (each happens once) |
+| Ion storm | Comes sooner: Day 4 or 5. Lasts 3 days (was 6). Emergency lighting when it starts, not the whole time |
+| Diplomatic visit | A few days at most (was 9), and sooner too |
+| New events | Distress call, stowaway, reactor trouble: each with dialogue and story beats, and items in the news feed |
+| Failing | You can't fail an event; you can do poorly or well (the smooth/bumpy/rough bands stay) |
+| Cozy or danger? | Both |
+| Storm vs promotion clash (Days 10-11) | Already covered by moving the storm to Day 4-5 |
+| (lead) Next step | The designer D2 writes an events plan page (all events, order, days, beats, tier roles, links to bridge invite / first all-hands / film night) for the user to approve |
