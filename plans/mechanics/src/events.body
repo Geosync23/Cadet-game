@@ -6,7 +6,7 @@ NAV:plain=In plain words|rules=The user's rules|cal=The calendar|how=How every e
 <section id="plain">
   <h2>In plain words</h2>
   <ul>
-    <li><b>Twenty events, each once.</b> Thirteen from the earlier plans, three new ones from the user's brainstorm (<b>the distress call, the stowaway, reactor trouble</b>) and four more the user picked, inspired by Star Trek: The Next Generation (<b>Stuck Together, Space Creature, Visiting Inspector, Echo Signal</b>).</li>
+    <li><b>Twenty events, each once.</b> Thirteen from the earlier plans, three new ones from the user's brainstorm (<b>the distress call, the stowaway, reactor trouble</b>) and four more the user picked, inspired by Star Trek: The Next Generation (<b>Echo Signal, Loss of Power, the Visiting Inspector, Space Creature</b>; "that will be enough": no others). Each is pitched in full on <a href="events-pitch-tng.html">its own page</a>.</li>
     <li><b>Close together</b> (the user: "events shouldn't be so far apart"): <b>eleven of the twenty fall in Days 4-40</b>, six of them inside the career arc (Days 1-26), the distress call among them. A game of 10-15 hours meets most of them.</li>
     <li><b>Around the career's big days:</b> nothing on a promotion test, a promotion or its ceremony, or Calder's question. Short cozy evenings sit on quiet career days.</li>
     <li><b>Cozy and dangerous mixed</b> (the user: "both"); the dangerous ones can hurt someone a little (a day or two in the infirmary), never worse.</li>
@@ -31,7 +31,7 @@ NAV:plain=In plain words|rules=The user's rules|cal=The calendar|how=How every e
     <tr><td>Pip the stowaway always leaves</td><td>On the late supply shuttle (Day 53); a letter later.</td></tr>
     <tr><td>Minor injuries are fine; nobody dies</td><td>Kovac's elbow in the storm, Ilse's sprain, Salo's burnt hand: a day or two in the infirmary each.</td></tr>
     <tr><td>Events closer together; the distress call inside the career arc; short events may sit next to career days, a short cozy one may share a quiet career day</td><td>The calendar below.</td></tr>
-    <tr><td>Four new events: Stuck Together, Space Creature, Visiting Inspector, Echo Signal</td><td>Days 27, 29-31, 32-33 and 18.</td></tr>
+    <tr><td>Four new events, exactly: Echo Signal, Loss of Power (stranded with an odd group when the lifts and power fail), the Visiting Inspector, Space Creature (<a href="events-pitch-tng.html">the pitch page</a>)</td><td>Days 27, 29-31, 32-33 and 18.</td></tr>
   </table></div>
 </section>
 
@@ -51,7 +51,7 @@ NAV:plain=In plain words|rules=The user's rules|cal=The calendar|how=How every e
     <tr><td>19-20</td><td>—</td><td></td><td><b>the night shift</b></td></tr>
     <tr><td><b>21-22</b> Sun-Mon</td><td><b>6. Distress call</b></td><td>danger</td><td>your Sunday off after the night shift; Monday (Tier 4 test) only chatter</td></tr>
     <tr><td>22-26</td><td>—</td><td></td><td><b>Tier 4 test, Engine Specialist, Calder's question</b> (bridge hour on 23) <span style="opacity:.6">(Odd Socks Day, 24)</span></td></tr>
-    <tr><td><b>27</b> Sat</td><td><b>7. Stuck Together</b></td><td>cozy</td><td>the morning after the arc ends</td></tr>
+    <tr><td><b>27</b> Sat</td><td><b>7. Loss of Power</b></td><td>cozy</td><td>the morning after the arc ends</td></tr>
     <tr><td><b>29-31</b> Mon-Wed</td><td><b>8. Space Creature</b></td><td>cozy</td><td></td></tr>
     <tr><td><b>32-33</b> Thu-Fri</td><td><b>9. Visiting Inspector</b></td><td>tense</td><td><span style="opacity:.6">(Bright Day, 34)</span></td></tr>
     <tr><td><b>35</b> Sun</td><td><b>10. Crew rotation day</b></td><td>cozy</td><td>the roster's first rotation; Ilse leaves on it</td></tr>
@@ -121,7 +121,7 @@ NAV:plain=In plain words|rules=The user's rules|cal=The calendar|how=How every e
   <ul><li><b>Dialogue:</b> the bay speaker (Ilse and the Tern's pilot); the Captain's two addresses; Ilse in the infirmary (choices: ask about the pod, or just sit with her).</li><li><b>News feed:</b> "There's a pod out there. One person." · "The Tern's going out!" · "She brought the mail with her. All of it." · after: "Ilse's in the guest cabin by the lift. She likes the garden."</li><li><b>Ship health:</b> air and hull (the bay cycling), transport (the Tern), the infirmary's load; mood up at the end.</li><li><b>Goes well:</b> Ilse always comes home (hurt a little, never badly). Smooth: <b>the pod's nameplate</b> on the shuttle bay wall, a friend in the guest cabin, Mail from Ilse later.</li><li><b>Goes poorly:</b> Rough: a long cold wait, a dent in the bay door's seal (a job for later), Ilse quieter; still home, still grateful.</li></ul>
   <div class="tablewrap"><table><tr><th>Tier</th><th>Jobs</th></tr><tr><td>Tier 1 · fetch and fix</td><td>carry blankets and med kits to the bay, top up the Tern's oxygen cells, sort the mail sack</td></tr><tr><td>Tier 2 · trace</td><td>trace the bay's air line before the doors cycle (the air line, M9)</td></tr><tr><td>Tier 3 · plan around people</td><td><i>slot:</i> plan the bay clearance and the infirmary's night rota; who works the extra shift</td></tr><tr><td>Tier 4 · lead with the bridge</td><td><i>slot:</i> lead the bay team with the bridge on the line (the approach and the door cycle)</td></tr></table></div>
 
-  <h3 id="e-stuck">7. Stuck Together <span class="tag">short · cozy (people) · Day 27 (Sat), about 2 hours · NEW (TNG-inspired)</span></h3>
+  <h3 id="e-stuck">7. Loss of Power <span class="tag">short · cozy (people) · Day 27 (Sat), about 2 hours · NEW (TNG-inspired)</span></h3>
   <p>A relay fault stops every lift between decks on a Saturday morning. You're in the main lift with an odd little group: Chef Brennan with a crate of eggs, Nell (eight, a passenger's daughter, aboard for the week) and Commander Vance. You fix what you can from inside; the ship fixes the rest from outside.</p>
   <ol class="steps"><li><time>Day 27 Sat 10:00-12:00 · onset</time><span>The next time you take the lift that morning it stops between Decks 3 and 4 and the lights go to the car's little emergency lamp. (If you don't ride it, other crew are stuck and you help from outside: the spine ladder and the car's roof hatch.)</span></li><li><time>the first hour · escalation</time><span>Torres on the car's intercom. Inside: the car's panel (reset its relay with your tool roll, a work step), keep Nell calm (a story, a game of I-spy), Brennan's eggs, Vance's dry jokes. Conversations you'd never have otherwise.</span></li><li><time>the second hour · resolution</time><span>Your reset plus Works outside get the car down to Deck 3; the doors open to a small crowd and applause. Nell insists you all have lunch together.</span></li><li><time>Day 28 · afterglow</time><span>Gossip ("Vance did impressions!"); the lifts' relays replaced.</span></li></ol>
   <ul><li><b>Dialogue:</b> the whole two hours are a meeting in the car, in stretches: three or four choices (comfort Nell, ask Vance about his first ship, help Brennan save the eggs); each nudges that friendship.</li><li><b>News feed:</b> "All the lifts stopped!" · "Brennan was in one with a crate of eggs." · after: "Nell says the junior from Works is her best friend now."</li><li><b>Ship health:</b> transport down for two hours (meals late, crew on ladders).</li><li><b>Goes well:</b> <b>a big friendship boost</b> with whoever was stuck with you (a full step with each); Nell's drawing of "the lift people" on the Works bay board; Brennan names an egg dish after you.</li><li><b>Goes poorly:</b> a long, stuffy wait; still friends after (a smaller step).</li></ul>
@@ -238,7 +238,7 @@ NAV:plain=In plain words|rules=The user's rules|cal=The calendar|how=How every e
     <li><b>Talent night</b> is Day 14 (the rec dec plan): the Veyli come to it.</li>
     <li><b>The power surge</b> lands on your power lesson (Day 17): a feature, not a clash, but if it's too much, Day 18's morning works too.</li>
     <li><b>The distress call</b> is the Sunday after the night shift: you'll often sleep in; the beacon comes at 11:30 so you wake to it.</li>
-    <li><b>Stuck Together needs a child aboard:</b> there are no children in the crew; Nell comes as an everyday guest with her parent that week (the crew designer's guests).</li>
+    <li><b>Loss of Power needs a child aboard:</b> there are no children in the crew; Nell comes as an everyday guest with her parent that week (the crew designer's guests).</li>
     <li><b>Stowaway and the garden creature:</b> the stowaway is a person; the creature comes from the crates of a delivery (or salvage, in later playthroughs).</li>
     <li><b>Space Creature and reactor trouble</b> both dip the power: six weeks apart, and different (a gentle drain over two days; a precaution at half power).</li>
   </ul>
@@ -247,7 +247,7 @@ NAV:plain=In plain words|rules=The user's rules|cal=The calendar|how=How every e
 <section id="q">
   <h2>Open questions for the user (with my recommendations)</h2>
   <ol>
-    <li><b>Stuck Together's group:</b> Brennan, Nell (eight, a passenger's daughter) and Commander Vance? <i>Recommended: yes; or Holt instead of Vance for more comedy.</i></li>
+    <li><b>Loss of Power's group:</b> Brennan, Nell (eight, a passenger's daughter) and Commander Vance? <i>Recommended: yes; or Holt instead of Vance for more comedy.</i></li>
     <li><b>If you never ride the lift that morning</b>, you help from outside instead (and the friendship boost goes to whoever you help out). Or should a crew member call you into the lift ("Hold the doors!")? <i>Recommended: the call: someone holds the doors for you at 10:00 wherever you are on the spine, so you're nearly always inside.</i></li>
     <li><b>Space Creature's name:</b> the crew pick "Sprat", or you suggest one (a vote, like the garden pet)? <i>Recommended: a vote with your suggestion in it, as with the pet.</i></li>
     <li><b>The inspector's findings:</b> read out in front of everyone, or a Mail to each department? <i>Recommended: read out (a meeting), short and kind; the Mail too.</i></li>

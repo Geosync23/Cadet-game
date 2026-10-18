@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Four New Events</title>
+<style>
+:root{--ink:#e8eef0;--muted:#93a6ae;--teal:#4cc3b5;--gold:#e9c46a;--rose:#e58f7a;--glass:rgba(13,21,33,.78);--line:rgba(150,200,196,.22);--chip:rgba(76,195,181,.14)}
+*{box-sizing:border-box}
+html,body{margin:0;background:#121a27;color:var(--ink);font-family:"Avenir Next","Segoe UI",system-ui,sans-serif}
+body{background:radial-gradient(ellipse at 50% 20%,#22304a 0%,#141c2b 60%,#0c111b 100%) fixed;line-height:1.5}
+header{padding:18px 16px 4px;max-width:1100px;margin:0 auto}
+h1{font-size:21px;font-weight:600;margin:0}
+h2{font-size:17px;font-weight:600;margin:0 0 8px;color:#bdeee6}
+h3{font-size:14.5px;font-weight:600;margin:12px 0 4px;color:#d9eeea}
+.sub{font-size:13.5px;color:var(--muted);margin-top:4px}
+.draft{display:inline-block;font-size:11.5px;color:#14202a;background:var(--gold);border-radius:999px;padding:2px 9px;margin-left:6px;vertical-align:2px}
+nav{position:sticky;top:0;z-index:5;background:rgba(14,20,31,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+nav div{display:flex;gap:6px;overflow-x:auto;padding:8px 16px;max-width:1100px;margin:0 auto;-webkit-overflow-scrolling:touch}
+nav a{flex:none;text-decoration:none;border:1px solid var(--line);background:var(--glass);color:var(--ink);font-size:13px;padding:6px 11px;border-radius:999px}
+nav a:focus-visible,nav a:hover{border-color:var(--teal);color:#bdeee6;outline:none}
+main{max-width:1100px;margin:0 auto;padding:6px 16px 40px}
+section{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:14px 0;scroll-margin-top:56px}
+p{margin:6px 0;font-size:14px;color:#d6e0e3}
+ul{margin:6px 0;padding-left:20px;font-size:14px;color:#d6e0e3}
+li{margin:3px 0}
+.note{font-size:12.5px;color:var(--muted)}
+.grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.card{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.025)}
+.card b{display:block;color:#bdeee6;font-size:14px;margin-bottom:2px}
+.card span{font-size:13px;color:#cfd9dc}
+.card .meta{display:block;font-size:12px;color:var(--muted);margin-top:4px}
+.tag{display:inline-block;font-size:11.5px;border-radius:999px;padding:1px 8px;margin:2px 4px 0 0;background:var(--chip);color:#bdeee6;border:1px solid var(--line)}
+.tag.new{background:rgba(233,196,106,.16);color:#f1dca0}
+.tag.old{opacity:.75}
+.steps{list-style:none;padding:0;margin:8px 0;counter-reset:s}
+.steps li{position:relative;padding:8px 10px 8px 46px;border-left:2px solid rgba(76,195,181,.35);margin:0 0 0 14px}
+.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:-15px;top:8px;width:28px;height:28px;border-radius:50%;background:#183040;border:1px solid var(--teal);color:#bdeee6;font-size:12.5px;display:flex;align-items:center;justify-content:center}
+.steps time{display:block;font-size:12px;color:var(--gold)}
+.steps b{color:#e4f3f0;font-weight:600}
+.steps span{display:block;font-size:13.5px;color:#cfd9dc}
+.week{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.day{border:1px solid var(--line);border-radius:12px;padding:9px 10px;background:rgba(255,255,255,.02)}
+.day h4{margin:0 0 4px;font-size:13.5px;color:var(--gold);font-weight:600}
+.day p{font-size:12.5px;margin:4px 0;color:#cfd9dc}
+.day .who{color:#bdeee6;font-weight:600}
+.lines{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;background:#0b141c;border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:#9fe7dc;white-space:pre-wrap;overflow-x:auto;margin:8px 0}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0}
+.flow .box{border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:13px;background:rgba(255,255,255,.03)}
+.flow .arrow{color:var(--teal)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:12px}
+.tablewrap{overflow-x:auto}
+.waves{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+.wave{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.025)}
+.wave b{color:var(--gold);display:block}
+.wave .ci{display:block;margin-top:6px;font-size:12.5px;color:#f1dca0}
+ol.q{padding-left:22px;font-size:14px;color:#d6e0e3}
+ol.q li{margin:6px 0}
+ol.q em{color:var(--muted);font-style:normal;font-size:12.5px}
+svg text{font-family:inherit}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;color:#9fe7dc;background:rgba(0,0,0,.25);padding:0 4px;border-radius:4px;word-break:break-word}
+section.builder{border-color:rgba(233,196,106,.45)}
+section.builder h2{color:var(--gold)}
+.status{display:inline-block;font-size:11.5px;color:#14202a;background:var(--teal);border-radius:999px;padding:2px 9px;margin-left:6px;vertical-align:2px}
+td code{white-space:normal}
+</style>
+</head>
+<body>
+<header>
+  <h1>Four new ship-wide events: the pitch <span class="draft">for the user's approval · plan only</span></h1>
+  <div class="sub">The four events the user picked, inspired by Star Trek: The Next Generation: Echo Signal, Loss of Power, the Visiting Inspector and Space Creature. Each one in full: the premise, who's in it, how it runs hour by hour, sample conversations with your choices, what the news feed says, what you do at each rank, what it does to the ship, how it can go, what it leaves behind, and why it's fun. They sit in the events plan (plans/events-plan.html) at Days 18, 27, 29-31 and 32-33. No game code.</div>
+</header>
+<nav><div><a href="#echo">Echo Signal</a><a href="#power">Loss of Power</a><a href="#creature">Space Creature</a><a href="#inspector">The Inspector</a><a href="#fit">How they fit</a><a href="#q">Questions</a></div></nav>
+<main>
+
+<section id="echo">
+  <h2>Echo Signal <span class="tag">Day 18, Thursday evening · cozy, moving · one evening</span></h2>
+  <p><b>The premise.</b> A probe drifting at the edge of the survey loop sends out a faint, broken signal. Under the noise, Dr. Sato's team finds music: a recording made on Halden, a colony that went silent long before most of the crew were born. They clean it up during the day, and in the evening the whole ship gathers in the observation room to hear it. Nothing goes wrong. It's simply a moving evening, and afterwards the tune lives on the ship.</p>
+  <p><b>Who's in it:</b> Dr. Imra Sato (Survey), the comms crew, Captain Marrow, Matthias Oduya (who leads the quiet watch), whoever you're closest to, and an older crew member whose grandmother came from Halden (the crew designer picks one with a fitting background).</p>
+  <h3>How it runs</h3>
+  <ol class="steps">
+    <li><time>09:00</time><b>A signal</b><span>Survey hears something under the probe's carrier. Chatter starts in the Survey lab; by 11:00 the word is "music".</span></li>
+    <li><time>12:30</time><b>Lunch</b><span>Everyone's talking about it in the mess. Sato's Mail at 13:00: "Observation room, 20:30. Bring nothing. Just come."</span></li>
+    <li><time>16:00</time><b>A job</b><span>The recording has a hum in it: the sensor array's coolant pump, picked up by the comms line. Works is asked to quieten it (a job on the board).</span></li>
+    <li><time>20:15</time><b>Gathering</b><span>The observation room on Deck 1 fills: crew on the floor, the steps and the window ledges, the lights down low. The night watch listen on the bridge.</span></li>
+    <li><time>20:30</time><b>The music</b><span>Sato says a few words and plays it: a small choir and a piano, a little out of tune, and at the end a child's voice counting in for a second song that never comes. About three minutes. Then silence.</span></li>
+    <li><time>20:40</time><b>The Captain</b><span>A few lines about Halden. People stay and talk quietly, or leave without a word.</span></li>
+    <li><time>Day 19</time><b>Afterwards</b><span>People hum it at breakfast. That night someone plays it on the music room's piano, and it joins the late piano tradition.</span></li>
+  </ol>
+  <h3>Sample conversations</h3>
+  <div class="tablewrap"><table>
+    <tr><th>Where</th><th>The exchange</th></tr>
+    <tr><td>The Survey lab, 11:00 (if you drop in)</td><td><b>Sato:</b> "Listen. No, under the hiss. There." <i>(A faint melody.)</i> "That's a piano. Somebody played that on a piano, a very long way from here." <br>You: <b>"Where's it from?"</b> → "Halden, by the call sign. Nobody's heard from Halden in sixty years." · <b>"Can I help?"</b> → "There's a hum on the line. Your lot's coolant pump, I think. Fix that and I'll owe you a seat at the front." (adds the job) · <b>"It's beautiful."</b> → "Isn't it. Don't tell anyone yet. Actually, tell everyone."</td></tr>
+    <tr><td>The observation room, 20:30</td><td><b>Sato:</b> "We don't know who they were. We know they could sing." <br><i>(The recording plays.)</i> <br><b>Captain Marrow:</b> "Halden went quiet before I was born. We still keep a light for them on the charts. Tonight, I think, they kept one for us."</td></tr>
+    <tr><td>After, beside your closest friend</td><td><b>Tomas</b> (for example): "...I didn't think I'd cry at a choir." <br>You: <b>"Me neither."</b> → he laughs, and the friendship warms · <b>"Do you miss home?"</b> → a line from his own arc (his little brother) · <i>say nothing, sit</i> → "Thanks for not saying anything." (the same warmth)</td></tr>
+    <tr><td>Day 19, the mess, the older crew member</td><td>"My gran sang that. The second one, the one that never starts. I know how it goes." <i>(If you ask, she hums it: a seed for the story pillar.)</i></td></tr>
+  </table></div>
+  <h3>The news feed</h3>
+  <ul><li>"Sato found music in a probe signal." (Survey, mid-morning)</li><li>"Halden. My gran used to talk about Halden."</li><li>"Observation room at half eight. Everyone's going."</li><li>After: "Someone's been playing it on the piano all night." · "That child counting in... I can't stop thinking about it."</li></ul>
+  <h3>What you do, by rank</h3>
+  <div class="tablewrap"><table>
+    <tr><th>Tier</th><th>Your part</th></tr>
+    <tr><td>1 · fetch and fix</td><td>carry chairs and cushions up to Deck 1; fix the observation room's crackling speaker (a lamp and relay job)</td></tr>
+    <tr><td>2 · trace</td><td>trace the hum to the array's coolant pump (the heat line) and quieten it before 20:30</td></tr>
+    <tr><td>3 · plan people</td><td>none needed; you can swap the night watch's slot so they hear it live (a small favour)</td></tr>
+    <tr><td>4 · lead with the bridge</td><td>none; it's an evening to just be there</td></tr>
+  </table></div>
+  <p><b>The ship:</b> comms busy for a day (the array working the signal); mood up, quiet and warm for two days.</p>
+  <p><b>Goes well</b> (the hum quietened in time): the whole tune, clear. <b>The trace:</b> "The Halden Song" joins the music room piano's pieces (late piano plays it from now on), and Sato frames the probe's call sign by the observatory door. <b>Goes poorly</b> (the hum stays in): only half the tune comes through clearly. The piano plays the fragment, and crew hum the rest their own way, which is lovely in its own way.</p>
+  <p><b>Why it's fun:</b> it's the quiet one. After the night-shift build-up it's a breath: the whole crew in one room, still, the stars behind them. It also leaves something you can hear for the rest of the game.</p>
+</section>
+
+<section id="power">
+  <h2>Loss of Power <span class="tag">Day 27, Saturday morning · cozy-tense, people · about two hours</span></h2>
+  <p><b>The premise.</b> A relay on the spine's power feed fails on a Saturday morning, and the lifts stop with the lights in the shaft. You're in the main lift with an odd little group: Chef Auda Brennan with a crate of eggs, Nell (eight, a passenger's daughter, aboard for the week) and Commander Teo Vance. For two hours you're stuck between Decks 3 and 4 with a dim emergency lamp, an intercom, your tool roll and three people you'd never otherwise spend two hours with. You fix what you can from inside; the ship fixes the rest from outside.</p>
+  <p><b>Who's in it:</b> Brennan (prickly, practical, worried about the eggs), Nell (curious, brave until she isn't), Vance (the ship's dry, careful second-in-command, more human in a stuck lift than on the bridge), Torres on the intercom, the Works crew outside.</p>
+  <h3>How it runs</h3>
+  <ol class="steps">
+    <li><time>10:00</time><b>Hold the doors</b><span>Wherever you are near the spine that morning, someone calls "Hold the doors!" and you step in with them (if you're nowhere near, see the questions: you help from outside instead).</span></li>
+    <li><time>10:04</time><b>The stop</b><span>A clunk, the car stops between Decks 3 and 4, the lights go out and the small emergency lamp comes on. Every lift on the ship stops too (felt everywhere: the lift lights go dark).</span></li>
+    <li><time>10:10</time><b>The intercom</b><span>Torres: "Everyone all right in there? It's the spine relay. Give us an hour. Maybe two. Don't do anything clever." Nell: "Is this an adventure?"</span></li>
+    <li><time>10:20-11:00</time><b>Inside</b><span>The car's panel: you can open it and reset the car's own relay (a work step), which gets the fan and the light back. Then talk. Each stretch of conversation is a moment with one of them.</span></li>
+    <li><time>11:00-11:45</time><b>The long middle</b><span>It gets warm. Nell gets scared. Brennan's eggs become a plan (she shares the boiled ones from the bottom of the crate). Vance tells a story.</span></li>
+    <li><time>11:50</time><b>Down</b><span>Works outside replaces the spine relay; your reset means the car can creep down to Deck 3 on its own power. The doors open on a small crowd and applause.</span></li>
+    <li><time>12:30</time><b>Lunch</b><span>Nell insists you all have lunch together, so you do.</span></li>
+  </ol>
+  <h3>Sample conversations</h3>
+  <div class="tablewrap"><table>
+    <tr><th>When</th><th>The exchange</th></tr>
+    <tr><td>Just after the stop</td><td><b>Nell:</b> "Are we going to fall?" <br>You: <b>"No. Lifts have brakes, lots of them."</b> → Vance: "She's right. Seven, on this one." Nell, impressed: "Seven." · <b>"I'm Works. I'll have a look."</b> → Brennan: "Then look quickly. These eggs have a lunch to be in." · <b>"Want to play I-spy?"</b> → Nell: "I spy... something dark." Vance, deadpan: "Everything."</td></tr>
+    <tr><td>With Brennan, the eggs</td><td><b>Brennan:</b> "Forty-eight eggs for the Saturday bake. If this car gets any warmer I'm serving them boiled." <br>You: <b>"I'll get the fan back."</b> (if you've reset the relay: "...Fine. You can have one.") · <b>"Boiled eggs for everyone, then."</b> → a rare laugh: "Don't you dare tell the mess." · <b>"Why do you always cook so much?"</b> → "Because somebody's always hungry at the wrong hour. Usually you lot."</td></tr>
+    <tr><td>With Vance, the long middle</td><td><b>Vance:</b> "My first ship, the lift stopped with me and the Admiral in it. Four hours. I've never told anyone what he said." <br>You: <b>"What did he say?"</b> → "...'I've always wanted to know what you think of my speeches.' I told him the truth. That's how I got this job." · <b>"Were you scared?"</b> → "Terrified. I'm a lot less scared now. Nell's handling it better than I did." · <b>"Did you get in trouble?"</b> → "Promoted. Never stand next to an Admiral in a lift."</td></tr>
+    <tr><td>Nell, when it gets warm</td><td><b>Nell</b> (quietly): "I want my mum." <br>You: <b>"She knows where you are. Torres told her."</b> → "...Okay." · <b>"Tell me about her."</b> → Nell talks about her mum's job on a mining station; she calms · <b>"Want to help me fix the light?"</b> → she holds the torch; the light comes on; she's very proud.</td></tr>
+    <tr><td>The doors open</td><td><b>Torres:</b> "You did something clever, didn't you." <br><b>Nell</b> (to the whole crowd): "We were stuck for a hundred years!"</td></tr>
+  </table></div>
+  <h3>The news feed</h3>
+  <ul><li>"All the lifts stopped!"</li><li>"Brennan's in one. With eggs."</li><li>"The Commander's stuck in the main lift with a kid and a junior from Works."</li><li>After: "Vance did impressions. Of the Admiral." · "Nell says the junior from Works is her best friend now." · "Brennan's calling it Lift Eggs."</li></ul>
+  <h3>What you do, by rank</h3>
+  <div class="tablewrap"><table>
+    <tr><th>Tier</th><th>Inside the lift (most players)</th><th>Outside (if you weren't in one)</th></tr>
+    <tr><td>1 · fetch and fix</td><td>reset the car's relay; keep everyone calm</td><td>hand lamps and ladders to the spine; carry lunch up the stairs</td></tr>
+    <tr><td>2 · trace</td><td>read the car panel and tell Torres which side of the spine relay is dead</td><td>trace which relay on the lift's power line failed</td></tr>
+    <tr><td>3 · plan people</td><td>talk Torres through who's in which car, from the car's call list</td><td>plan the ladders and who carries meals up and down while the lifts are out</td></tr>
+    <tr><td>4 · lead with the bridge</td><td>(you're stuck: Torres leads; a line from Vance: "You'd normally be out there.")</td><td>lead the lift-shaft team with the bridge</td></tr>
+  </table></div>
+  <p><b>The ship:</b> transport down for two hours (meals late, crew on the spine ladders, a Saturday's traditions shuffled). Mood: a ship full of stories.</p>
+  <p><b>Goes well</b> (you reset the car, everyone stays calm): <b>a big friendship boost with all three</b> (a full step each), and Nell's drawing of "the lift people" (four stick figures and some eggs) pinned on the Works bay board. Brennan's Lift Eggs appear on the Saturday menu from then on. <b>Goes poorly</b> (a long, hot wait): still friends after (a smaller step), and the drawing has frowns on it.</p>
+  <p><b>Why it's fun:</b> it's a chamber play. A tiny space, three people you only know by their jobs, and two hours to find out who they are. It's the biggest friendship moment in the game, and it comes from bad luck.</p>
+</section>
+
+<section id="creature">
+  <h2>Space Creature <span class="tag">Days 29-31, Monday to Wednesday · cozy, wonder · three days</span></h2>
+  <p><b>The premise.</b> For a day the power keeps dipping and Works can't find a fault anywhere. Then the port windows glow. A baby space creature, soft and translucent, a bit like a jellyfish the size of a shuttle, has latched onto the hull near a power conduit and is feeding on the Wren's power. It isn't hostile; it's hungry. Nobody wants to hurt it. So Works weans it off, lowering the conduit's output a step at a time until it loses interest. On the third morning it lets go, and far out a much larger glow comes to meet it.</p>
+  <p><b>Who's in it:</b> Dr. Sato (who works out what it is), Chief Calder and Torres (the weaning plan), Captain Marrow, the observatory crowd, and the whole ship at the windows.</p>
+  <h3>How it runs</h3>
+  <ol class="steps">
+    <li><time>Day 29 Mon, all day</time><b>Dips</b><span>The lights soften now and then; the galley's ovens slow; jobs come in for faults that aren't there. Works checks the junctions and finds nothing. Grumbling.</span></li>
+    <li><time>Day 29, 21:10</time><b>The glow</b><span><b>Felt everywhere:</b> a soft blue-green glow drifts across every port-side window. Crew stop and stare. Sato runs to the observatory.</span></li>
+    <li><time>Day 29, 22:00</time><b>The Captain</b><span>Her address: "We have a visitor. A young one. It's hungry, it's not dangerous, and we're going to be gentle with it."</span></li>
+    <li><time>Day 30 Tue, 08:15</time><b>The plan</b><span>A meeting at the Works board: Sato, Calder and Torres. Lower the hull conduit's output in small steps so it drifts off without starving. A job for every two hours of the day shift: one step down, then read how it reacts.</span></li>
+    <li><time>Day 30, all day</time><b>Weaning</b><span>Each step is a tuning job at the conduit's panel (M5's verb: one notch at a time, watch the reading). Too fast and it clings harder (the power dips); too slow and the ship stays dim. The crew name it (a vote: "Sprat" leads). The observatory is packed all evening.</span></li>
+    <li><time>Day 31 Wed, 06:40</time><b>Let go</b><span><b>Felt everywhere:</b> the glow lifts off the hull and drifts out; a far larger glow comes to meet it. Applause on the promenade from the early risers. The power comes back to full.</span></li>
+  </ol>
+  <h3>Sample conversations</h3>
+  <div class="tablewrap"><table>
+    <tr><th>Where</th><th>The exchange</th></tr>
+    <tr><td>The Works board, Day 29 afternoon</td><td><b>Torres:</b> "Third oven fault today, and nothing wrong with any of them. Something's eating the power." <br>You: <b>"Could it be the junctions?"</b> → "Checked. Twice." · <b>"Something, or someone?"</b> → "...Now you've got me looking at the windows." · <b>"I'll check the conduits."</b> → adds a tracing job (Tier 2+)</td></tr>
+    <tr><td>The observatory, Day 29 night</td><td><b>Sato:</b> "It's alive. And it's young: look at the edges, they're still soft." <br>You: <b>"Is it hurting the ship?"</b> → "Only the way a kitten hurts a jumper." · <b>"Where's its mother?"</b> → "That's what worries me. And what makes me hopeful." · <b>"Can we keep it?"</b> → "Not a chance. But we can say goodbye nicely."</td></tr>
+    <tr><td>The Works board, Day 30, 08:15 (a meeting)</td><td><b>Calder:</b> "We lower the output a notch every two hours. Not more. If it panics it'll clamp on." <b>Torres:</b> "And if it doesn't let go by tomorrow?" <b>Calder:</b> "Then we wait longer. We're not in a hurry." <br>You: <b>"I'll take the first step."</b> (takes the job; Calder: "Gently.") · <b>"What if we starve it?"</b> → Sato: "We won't. It eats starlight too. We're just a snack." · <i>nod</i></td></tr>
+    <tr><td>At the conduit panel, a step</td><td>The reading drops; the glow on the window flickers, then settles. <b>Torres</b> (on the intercom): "Good. It noticed. It's not cross." <i>(Too big a step:)</i> "Whoa: it grabbed on. Back it up a notch."</td></tr>
+    <tr><td>The promenade, Day 31 dawn</td><td><b>Pell:</b> "Its mum came for it. I'm not crying, the window's dusty." <br>You: <b>"Goodbye, Sprat."</b> → the people nearby say it too.</td></tr>
+  </table></div>
+  <h3>The news feed</h3>
+  <ul><li>"The power's dipping and Works can't find why."</li><li>"There's something ON the hull."</li><li>"Sato says it's a baby."</li><li>"They're calling it Sprat."</li><li>After: "Its mother came for it." · "Works talked a space creature off the hull. Works!"</li></ul>
+  <h3>What you do, by rank</h3>
+  <div class="tablewrap"><table>
+    <tr><th>Tier</th><th>Your part</th></tr>
+    <tr><td>1 · fetch and fix</td><td>hand lamps where the lights are low; carry the conduit readings to Sato; keep the galley's ovens going</td></tr>
+    <tr><td>2 · trace</td><td>trace where on the power line it's drawing from (which conduit)</td></tr>
+    <tr><td>3 · plan people</td><td>plan who gets full power while the output's down (the infirmary, air, the galley); tell the decks</td></tr>
+    <tr><td>4 · lead with the bridge</td><td>lead the weaning steps, with the bridge holding the ship still so it isn't startled</td></tr>
+  </table></div>
+  <p><b>The ship:</b> power a little low for two days (soft lights, slower ovens, a slower lift); mood up (wonder, gossip, a full observatory).</p>
+  <p><b>Goes well</b> (steady, gentle steps): it lets go on time, unhurt. <b>The trace:</b> "Sprat" in the ship's log and Sato's sketch of it framed in the observatory. <b>Goes poorly</b> (steps too fast or skipped): it clings a day longer, the ship stays dim, and a scorched hull plate where it fed becomes a job for later. It still swims off safe.</p>
+  <p><b>Why it's fun:</b> a mystery fault with a gorgeous answer, and a repair that's about care instead of force. It uses a skill you learned on your fourth day (tuning) for something nobody expected.</p>
+</section>
+
+<section id="inspector">
+  <h2>The Visiting Inspector <span class="tag">Days 32-33, Thursday and Friday · cozy-tense · two days</span></h2>
+  <p><b>The premise.</b> Fleet Inspector Dagny Krell comes aboard for a two-day audit: logs, drills, machines, the job board, how the crew answer questions. She's strict, fair and impossible to read. Chief Holt is nervous, Calder is calm in a way that worries everyone, and Works scrambles to clear the board. You can impress her or embarrass the department, but nobody ever fails: the worst outcome is a notice pinned up for the crew to joke about.</p>
+  <p><b>Who's in it:</b> Inspector Krell (a two-day guest), Commander Vance (her escort), Chief Holt (the Watch, sweating), Chief Calder (Works, unflappable), Chef Brennan (who will not be inspected, and is), the Works crew.</p>
+  <h3>How it runs</h3>
+  <ol class="steps">
+    <li><time>Day 31 Wed, 16:00</time><b>Warning</b><span>Vance's Mail to all departments: "Fleet inspection, tomorrow and Friday. Be yourselves. Tidy yourselves first." Holt drills the Watch that evening. The job board's backlog suddenly matters.</span></li>
+    <li><time>Day 32 Thu, 10:00</time><b>Arrival</b><span>She comes off the shuttle (a short meeting at the bay): a handshake for the Captain and a clipboard for everyone else.</span></li>
+    <li><time>Day 32, 10:30-17:00</time><b>The walk</b><span>She walks the decks with Vance, opens panels at random, reads the logbook, and asks crew questions where she finds them (you, about a machine you really serviced).</span></li>
+    <li><time>Day 33 Fri, 09:00</time><b>Surprise drill</b><span>A fire drill she calls herself. You run the Works part (as a Senior Officer); she times it.</span></li>
+    <li><time>Day 33, 11:00</time><b>The galley</b><span>She inspects the galley. Brennan, very politely, says three things nobody has ever heard Brennan say.</span></li>
+    <li><time>Day 33, 15:00</time><b>Findings</b><span>A meeting in the observation room: her findings read out department by department, short and fair. Works Friday tea after, loud with relief.</span></li>
+  </ol>
+  <h3>Sample conversations</h3>
+  <div class="tablewrap"><table>
+    <tr><th>Where</th><th>The exchange</th></tr>
+    <tr><td>Wherever she finds you, Day 32</td><td><b>Krell:</b> "You're Works. The washer on Deck 4: the last repair. Who did it, and what did they fit?" <br>You (the game knows if it was you): <b>the honest detail</b> ("I did. The drain valve, on Day 30; the pump was fine, the valve was sticking.") → she writes for a while: "Good." · <b>a confident summary</b> ("All four washers are serviced and running.") → "That isn't what I asked." (a small mark) · <b>"I'll check and come back to you."</b> → "Do." (and if you come back with it that day, a better mark than the confident answer)</td></tr>
+    <tr><td>Holt, Day 31 evening</td><td><b>Holt:</b> "Last inspector we had wrote 'adequate' about my Watch. Adequate. I've had it framed so I never forget." <br>You: <b>"You'll be fine."</b> → "I'll be adequate." · <b>"Want help drilling?"</b> → he accepts; the Watch's thread improves a little · <b>"What's she like?"</b> → "Imagine Calder, with a clipboard, who doesn't like you yet."</td></tr>
+    <tr><td>The surprise drill, Day 33</td><td><b>Krell</b> (stopwatch): "Fire in the Deck 4 laundry. Go." <br>You call it: <b>"Works to the laundry, Torres on the breaker."</b> (the drill's real steps, M3) → if quick: "Ninety seconds. Better than the fleet's average." · if slow: "Three minutes. You'll be quicker next time." (never worse than that)</td></tr>
+    <tr><td>The galley, Day 33</td><td><b>Krell:</b> "The cold store's thermometer reads two degrees warm." <b>Brennan:</b> "...Thank you for noticing. I'll have it looked at." <i>(Everyone in the galley turns to stare.)</i></td></tr>
+    <tr><td>The findings, Day 33, 15:00</td><td><b>Krell:</b> "Works. A clean board, an honest logbook, and a junior who answered what I asked." (or: "Works. Room to improve. Your board had nineteen open jobs at ten on Thursday.") <b>Calder</b> (afterwards, to you): "Well. That's that." (and the faintest smile, if it went well)</td></tr>
+  </table></div>
+  <h3>The news feed</h3>
+  <ul><li>"An inspector. Tomorrow."</li><li>"Holt's polishing the Watch office door."</li><li>"She opened the oven. Just opened it."</li><li>"Brennan said thank you to her. Out loud."</li><li>After: "Works got a line to itself in the findings." (or: "Works got a notice. Torres is pretending he's not bothered.")</li></ul>
+  <h3>What you do, by rank</h3>
+  <div class="tablewrap"><table>
+    <tr><th>Tier</th><th>Your part</th></tr>
+    <tr><td>1 · fetch and fix</td><td>clear the board's small jobs, tidy and label the stores, clean the Works bay</td></tr>
+    <tr><td>2 · trace</td><td>trace a known flaky line and fix it before she opens that panel</td></tr>
+    <tr><td>3 · plan people</td><td>plan the drill and the rota so the board stays staffed while crew are being questioned</td></tr>
+    <tr><td>4 · lead with the bridge</td><td>walk her through the engine room and the reactor with the bridge, answering for Works</td></tr>
+  </table></div>
+  <p><b>The ship:</b> every system gets checked, and a little extra wear from the rush; the board nearly empty by Friday; mood tense, then a big lift at Friday tea.</p>
+  <p><b>Goes well</b> (the board cleared, honest answers, a quick drill): <b>a framed fleet commendation for Works</b> on the Works bay wall, and a line about you in her findings (your Record keeps it). <b>Goes poorly:</b> a "notice of improvement" pinned in the Works bay, which the crew joke about for weeks ("Room to improve!" whenever someone drops a spanner). Never a failure, never a punishment, and it comes down the next time Works has a smooth event.</p>
+  <p><b>Why it's fun:</b> everyone's on their best behaviour, which is very funny to watch. Your everyday work suddenly matters out loud: the honest answer about a repair you really did, and a drill you really learned.</p>
+</section>
+
+<section id="fit">
+  <h2>How they fit the calendar</h2>
+  <div class="tablewrap"><table>
+    <tr><th>Day</th><th>Event</th><th>Next to</th></tr>
+    <tr><td>18 Thu evening</td><td>Echo Signal</td><td>the day after the power surge and the Captain's table; the evening before your first night shift</td></tr>
+    <tr><td>27 Sat morning</td><td>Loss of Power</td><td>the morning after Calder's question (the career arc's end)</td></tr>
+    <tr><td>29-31 Mon-Wed</td><td>Space Creature</td><td>a quiet week after the arc</td></tr>
+    <tr><td>32-33 Thu-Fri</td><td>The Visiting Inspector</td><td>its warning Mail on Day 31, the creature's last morning; crew rotation follows on Day 35</td></tr>
+  </table></div>
+  <p class="note">Each happens once (the user's rule). The inspector asks about a machine you really serviced, and the creature's weaning uses tuning, so both draw on what you've done. Loss of Power needs Nell aboard that week as an everyday guest with her parent (the crew designer's guests).</p>
+</section>
+
+<section id="q">
+  <h2>Questions for the user (with my recommendations)</h2>
+  <ol>
+    <li><b>Loss of Power's group:</b> Brennan, Nell and Commander Vance? <i>Recommended: yes (Holt instead of Vance would be funnier, but Vance's story is the heart of it).</i></li>
+    <li><b>Getting you into the lift:</b> someone calls "Hold the doors!" when you're near the spine at 10:00, so you're nearly always inside; if you're far away, you help from outside. <i>Recommended: yes.</i></li>
+    <li><b>The creature's name:</b> a crew vote with your suggestion in it ("Sprat" leads). <i>Recommended: yes, as with the garden pet.</i></li>
+    <li><b>The inspector's findings:</b> read out to everyone in a meeting, plus a Mail. <i>Recommended: yes, short and kind.</i></li>
+    <li><b>Halden:</b> leave it a mystery, a seed for the story pillar (Pillar 7) to pick up. <i>Recommended: yes.</i></li>
+  </ol>
+</section>
+
+</main>
+</body>
+</html>
