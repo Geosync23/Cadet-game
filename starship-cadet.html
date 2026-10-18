@@ -15205,9 +15205,9 @@ function jobsHour(h) {
   const band = typeof worksBand === 'function' ? worksBand() : null, pref = band === 'new' || band === 'steady' ? 'service' : band === 'trusted' || band === 'relied' ? 'repair' : null;
   const held = jobs.filter(j => j.status === 'open' && !j.claimedBy && !j.leave && !j.cargo && j.found <= t && t < leaveEnd(j))
     .sort((a, b) => (pref ? (b.kind === pref) - (a.kind === pref) : 0) || b.found - a.found || (a.id < b.id ? -1 : 1));
-  // a mechanic's job held for you (a registered kind: a round, a tune) takes one of those places (0.33.53, M2's ask: jobs
+  // a mechanic's job held for you (a registered kind: a round, a tune, a haul, the drill; an incident's joint) takes one of those places (0.33.53, M2's ask: jobs
   // left for you stay 3-6 a day with the mechanics in); at least one ordinary job is still held
-  const mech = jobs.filter(j => jobKindOf(j) && j.status === 'open' && !j.claimedBy && !jobSide(j) && j.found <= t && (heldForYou(j) || (forYou(j) && t < leaveEnd(j)))).length;
+  const mech = jobs.filter(j => (jobKindOf(j) || j.chore === 'joint') && j.status === 'open' && !j.claimedBy && j.found <= t && (heldForYou(j) || (forYou(j) && t < leaveEnd(j)))).length;   // rounds, tuning, hauling, the drill, an incident's joint (the lead)
   for (const j of held.slice(Math.max(1, HOLD_MAX - mech))) j.released = true;
   const todo = jobs.filter(j => (j.status === 'open' || j.status === 'waiting') && !j.claimedBy && j.found <= t && t >= leaveEnd(j) && !heldForYou(j))
     .sort((a, b) => b.urgency - a.urgency || a.found - b.found || (a.id < b.id ? -1 : 1));
