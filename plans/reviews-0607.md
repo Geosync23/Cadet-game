@@ -9,6 +9,15 @@
 
 ## Verdicts
 
+### Systems 0.33.40, claude/systems-0607 f351cc3 (in depth): PASS
+Section 17: `HOLD_MAX` 6→3, `shareOut` (about every third new small job to the crew), `placeFreeFor` (crew stand at a chore's stop when it's free), the delivery's `hold: 'carry'`, `SHOW_JOBS`/`showHour`/`showJob`; machine_check 5l.
+- **Checks I ran:** cadet_test vs c8685cf: only **i_tap0** differs (2978 px, a chatter bubble: Lukas draws different ship news), as the builder said; no errors. A probe on a fresh ship: Day 1 `show-vent@8` is Bea Silva's, at `4-lift-1` from 08:00 to 08:42 (`showJob(1)` gives the same). Day 2 `show-tools@37` is Bea's, from `5-hold-1` to `5-bench-1` with `hold: 'carry'` on the drop (13:00-13:20). One job was shared on Day 1 (3-oven-2, Eklund).
+- **Determinism:** the pick is `machSeed(j.id) % SHARE_EVERY`, made once per job (`j.shareSeen`). `placeFreeFor` reads only plans (`planWhere`) and claimed jobs, so live and replay agree (machine_check's same-every-way cases pass). No `R()`, no colours, nothing drawn. The crew's carry uses the existing `walk+carry`/`stand+carry` pose (`heldPose`).
+- **Save:** every job now carries `shareSeen` (plus `shared`, `crew`, `shown` on some). The jobs part of the save grows by about 1.3-1.6 KB (8.1→9.4 KB on Day 1 at 14:00; 22.4→24.0 KB at day 3). Small, and no new state outside `SHIP.jobs`. The round-trip case (machine_check 6) covers it.
+- **LOW 1 (the Day 1 showcase may be missed):** the vent runs 08:00-08:42 at Deck 4's lift lobby. You only pass it if your first job (reserved slot 1, a Deck 4 lights machine) gets you down there before 08:42, after the full briefing (to about 08:05), the fetch and maybe the make. Close. Worth making the vent about 60 minutes, or checking in intro_check part 10 that you and Zeke are on Deck 4 while `showJob(1)` is live, so walk.crew.vent can play.
+- **LOW 2:** `placeFreeFor` samples other people's plans at three moments (start, middle, last minute). Someone whose plan visits the spot briefly between those, such as a lift wait at `4-lift-1` during the 08:00 rush, can end up on the same spot as Bea for a minute. day_check days 1 and 2 found no double booking, so this is cosmetic.
+- **Note:** `HOLD_MAX` 3 counts the reserved intro jobs among the held ones (as with 6 before). With 3, the oldest non-reserved small jobs go to the crew sooner on Days 1-2. Expected by the plan.
+
 ### Re-check: onboarding 0.42.32 e2cd435 + head writer 2729ce1: PASS, the MED is resolved
 - **Keys:** the writer's a76e232/2729ce1 moved Zeke's lines onto `walk.train.<job>.<step>` and `walk.follow.1-29`. Every `walk.train` job in torres-zeke.lines (lamp, vent, calibrate, delivery, round, fault, filter, seal, cart) is a real `CHORES` key or an `INTRO_TRAIN_JOB` mapping (`repair→fault`, `restock→cart`, `inspect→round`). Its steps (take, fetch, make, at, done, turnin) match `INTRO_TRAIN_STEP`. A missing pair just plays the base line.
 - **The writer's fixes:** no "lunch" left in talk.lines or torres-zeke.lines; one "Ask me how I know"; `clock.screen.ready` uses `{time}`.
