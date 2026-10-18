@@ -556,3 +556,4 @@ Read: CLAUDE.md, TEAM.md (session chain rule + overnight exception), plans/brief
 - ~11:39 onboarding 4 (via lead 11) asked to build uniform grime (21b, 0.42.46, claude/arrival-0607b) for M1's m2 → yes (on approved page, it owns the code); added to brief-p5; M1 told.
 - ~11:40 R2: M1 0.45.0 FAIL (Day 2 rounds lesson time → 10:25 after tea; fix sent); LOWs: extinguisher prop, Calendar line, Friday-tea word → add now; rounds stages 2-3 later (logged). S 0.33.48-51 PASS.
 - ~11:40 W ac60c8d (0.48.88): workaround undone, Brennan back in m5 meeting per page + train.m5.brennan fallback; BM4 has it.
+- ~11:42 O4 96649fe (0.42.46 uniform grime; clothes_check OK incl. save round trip/old saves; cadet_test identical); to M1, BM4, R2. O4 ~40%.
