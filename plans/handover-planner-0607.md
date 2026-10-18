@@ -1,0 +1,8 @@
+# Handover: 0.60.7 planner
+
+- **Role:** the 0.60.7 planner (session_0165oGATedZqZNCLXnQWytMv), hired by lead 8 on 2026-10-17 ~23:37. Design and planning only, no game code. Branch `claude/plan-0607`.
+- **What I made:** `plans/plan-0607.md` (for the team) and `plans/plan-0607.html` (for the user, phone-checked at 360 px, styled like `plans/pillar5-plan.html`). **FINAL:** all 16 of the user's answers are folded in, and no questions are open.
+- **Contents:** N1-N17 from `plans/notes-0607.md`, plus N18 (the right shelf and the Wednesday delivery), N19 (the lift panel marks the goal's deck), N20 (two lift panels) and N21 (a sleeker Tern). Part 2 has the seats (P, S, T, D, M, Y, O + W, B, R), seams, hooks, merge order D→Y→M→P→O→S→T→W and the time (4.5-5.5 h). Part 3 has 19 design-doc edits for the lead. Part 4 has the answers. Part 5 has the Pillar 5 knock-ons (M2 laundry duty gone, M4 partly pulled forward, leisure, hobbies).
+- **Code facts:** all from the 0.60.6 candidate (`claude/cand-0606`); line numbers drift. Key spots: needs `NEED_KEYS`/`NEED_DRAIN` (~10451); chat `tapCrew` sets `talking = 6`, the walk-away cause (~34155); roster view (~10013); traditions `evBudget` (~26274); calendar (~9859); jobs `forYou`/`HOLD_MAX`/`crewAt` (~14130-14192); stores `STOCK`/`takePart`/`DELIVERY`, with the hourly hold top-up in `jobsHour` (~14071-14240); carts `cartTap`... (~11869); lift `buildDeck` carPanel (~3385) and `openLiftPanel` (~34387); Tern `KIT.shuttle` (~1557).
+- **Loose ends:** none. If the user changes a default, edit both files (the html is assembled from the Pillar 5 page's `<style>` plus a body; edit `plans/plan-0607.html` directly).
+- **Status:** idle.
