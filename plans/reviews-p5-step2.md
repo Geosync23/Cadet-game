@@ -6,6 +6,7 @@ Started by lead 12 (session_01GjWhU9Z9V8RNoR8yyELA9V) at ~11:28 for every Step 2
 Spec: plans/brief-playtest1.md on claude/lead-pillar1 (12b1b87); the user's answers in it are binding. Seats: T traditions session_01X4SZJFeHprDF21NZqU5fGi (claude/traditions-pt1, 0.70.x), X crew sim session_01SNaWA6X5E9i2ZKfMnPTHJf (claude/crew-pt1, 0.71.x), U HUD session_01FcMPTX7mMTHkyr4pxDfNcS (claude/hud-pt1, 0.72.x), C2 works career session_014yREkgPvuwMyxBtoqB1P14 (claude/works-career, 0.44.x), O4 (claude/onboard-pt1), W, P, A5 session_01CHRbUTZc18m7eBck8eWhXj (claude/deck-pt1). Verdicts go to the seat, BM5 and lead 13 (finished reviews, blockers, design calls). Behaviour and saves in depth; lines and tests skimmed. The base is 0.63.1 (claude/p5-cand-s2).
 
 ## Passing tips
+- O4 claude/arrival-0607b **97ed2a6** (0.42.47, playtest 1 part (a)+(b); 1 nit)
 - C2 claude/works-career **a5d5c4c** (0.44.14-0.44.16 + the DEV_NOTES note; no LOWs)
 - U claude/hud-pt1 **73b40cb** (0.72.0 ebfdb2f + screenshots; no LOWs)
 - X claude/crew-pt1 **2223cb7** (0.71.0, walk-ups and the mess fix; 1 LOW)
@@ -23,6 +24,12 @@ Spec: plans/brief-playtest1.md on claude/lead-pillar1 (12b1b87); the user's answ
 - (none)
 
 ## Verdicts
+
+### O4 97ed2a6 (0.42.47): Zeke's greeting waits for you; the cabin's wardrobe line and Mail; the Day 1 opener and "jobs get better"; you choose your traditions; ten to nine — PASS (in depth)
+- Section 21: `INTRO_CLOSE` 3.5 and `introClose(a)`: the tour's 'shuttle' (greeting) lines start only once you're within 3.5 of Zeke; the rest of the tour's pacing is 0.63.1's. That's the user's call relayed by O4 ("perfect as it is"), in place of the brief's stop-and-talk for every line: a design call made upstream, noted. Calder's fallback Mail and Zeke's Works line say "ten to nine".
+- Section 21b: `d0-wardrobe` (Bunk 1 after the bunk meeting: walk.cabin.wardrobe, and `clothesCabinMail()` sends Zeke's Mail mail.zeke.cabin, once; also sent if you leave the wing first); `d1-opener` (at the Day 1 briefing's end, read from INTRO_WEEK, so it follows C2's 09:05; walk.train.open; sets SHIP.intro.done['d1-opener'] for O5's clock arrow); `d1-better` (after Day 1's first turn-in, onSim('job'); walk.train.better); walk.eve.choose in the Day 1 dinner keys; the clothes tip from tip.clothes. All keys match W's 75280cc names. State: only SHIP.clothes.said keys (cabinMail, d1:turnin), already saved and bounded. No R(), no 3D.
+- Checks (my runs on 97ed2a6): cadet_test vs 0.63.1 **ALL IDENTICAL**; clothes_check **ALL OK**. O4 reports intro_check --evening OK; BM5 runs --week on the combine.
+- Nit: the stand-ins (used only if W's text is missing) still say "locker" (d0-wardrobe's "That locker by the door is your wardrobe", the clothes tip's "the locker by the door"). W's walk.cabin.wardrobe and tip.clothes win, so players never see them; swap the word when you're next in there.
 
 ### C2 f738cb0 (0.44.15) + 23ef73c (0.44.16) + a5d5c4c: the round to 11:00, leave_check, a few more jobs — PASS (C2's tip passes)
 - 0.44.15: ROUND_HELD 120 (from 09:00, so still to 11:00, as the m1 page says); leave_check reads the new times. 0.44.16 (the brief's "a few more jobs on the board"): CHORES per a day raised (lamp .6, vent .5, calibrate .8, delivery .6, fault .4; the crew-tier filter 1.4 and seal 1.0) and HOLD_MAX 4. C2 measured the board at 5.7 → 6.5 a shift, yours to take 2.8 → 3.5: still the brief's 3-6. a5d5c4c: the 0.44.14 row explains tap1's toast (DEV_SHIFT alone; a copy with DEV_SHIFT.from back at 480 is ALL IDENTICAL vs 0.63.1). No new saved fields.
