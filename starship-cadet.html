@@ -26495,7 +26495,7 @@ const EV_DROPPED = new Map();
 const evRare = w => w.after ? 5 : w.rotation != null ? 4 : w.yearDay || w.every === 'year' ? 4 : w.every === 'quarter' ? 3 : w.every === '4weeks' || w.every >= 28 ? 2 : w.every === '2weeks' || w.every >= 14 ? 1 : 0;
 const evDecks = ev => ev.where.map(w => w.deck);
 const EV_POOL_ROOM = { gym: 'gym', 'gym-run': 'gym', music: 'music room', garden: 'hydroponics garden', 'garden-tend': 'hydroponics garden', 'common-room': 'junior common room', 'mess-seat': 'mess hall', 'lounge-seat': 'bow lounge' };
-const evRooms = ev => ev.where.map(w => w.deck + '|' + (w.room ? w.room.source.replace(/^\^|\$$/g, '').toLowerCase() : EV_POOL_ROOM[w.pool] || w.pool));
+const evRooms = ev => ev.where.map(w => w.deck + '|' + (w.room ? w.room.source.replace(/^\^|\$$/g, '').replace(/\\/g, '').toLowerCase() : EV_POOL_ROOM[w.pool] || w.pool));
 // an evening's tradition starts at 17:00 or later and runs past 18:00 (one-week-aboard's tea after shift, 17:15-17:55, doesn't)
 const evEvening = e => e.from >= 1020 && e.to > 1080;
 function evBudget(list) {
