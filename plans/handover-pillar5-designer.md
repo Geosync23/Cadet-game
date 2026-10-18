@@ -2,7 +2,7 @@
 
 - **Role:** design only. Reports ONLY to the lead (TEAM.md names it; on 2026-10-18 ~10:14 lead 12, session_01GjWhU9Z9V8RNoR8yyELA9V; before that lead 11, session_01YKC3CGA9VS4b7wuqLbPT7V) with send_message: one line when starting, one per finished page with its commit hash, at once if blocked. Never contacts the user. Never starts sessions. Stay inside `plans/` and `design-doc.md`.
 - **Branch:** `claude/p5-design` (made from `claude/pillar5-plan` 93a5a7f). Predecessor: session_01FDy4na3u2FS8L8vEjR6gAR (archived), then session_01VXENaUt4vdyYtr3KjVZk9z (this note's writer, 2026-10-18).
-- **Messaging rule (lead 11, ~09:00):** answer builders' questions directly (no cc to the lead); message the lead ONLY for a design call beyond the approved pages or a real blocker. Record every answer in the page's "Builders' questions" section.
+- **Messaging rule (lead 12):** send the lead only design calls beyond the pages, finished pages (hash), or blockers; answer builders directly. (lead 11's rule, ~09:00, was the same:) answer builders' questions directly (no cc to the lead); message the lead ONLY for a design call beyond the approved pages or a real blocker. Record every answer in the page's "Builders' questions" section.
 - **Seats (2026-10-18):** C Works career session_01LgTgzjeqLNrjeCa2iRzbYx; H cases session_013nqpqRFX4hh3cLPhhpZirJ; S systems session_01KxfsfBWkCGcncuuH2n1hFB; R reviewer session_01MSLjUdmeVJetxFhh9PqzLt; seat A's branch is claude/deck-0607.
 - **Authority overnight (2026-10-18):** the lead approves or rejects each page against the approved plan; nothing waits for the user (`plans/overnight-decisions.md` on `claude/lead-pillar1`, last section).
 
@@ -29,10 +29,13 @@
 ## Since the first pages (all approved; FAQs record the builders' answers)
 - Day 5's teacher is Emeka Halloran (Torres off Thu+Fri), by-lists first-on-shift; the work-step field is `how`; real faults are made by finding worn machines already at the top of faulty (S, key 856); lift machine 5-mainlift-1; galley alarm on 3-galleyplant-1; worksTabAdd; a case kind is open when its ladder row opened; P3 borrows the scanner lesson's escort at Washer 2.
 
+## Step 3 (2026-10-18 afternoon; approval is the USER's again, through lead 12; send the lead each hash)
+Done and sent: plan v10 (9e26a58: Step 2's optional stages into Step 4, the cold-case board into Step 5), `promotion-officer.html` (bc1171c), `m8-team-jobs.html` + `m9-tracing.html` (0e84ab7), `p1-when-does-it-happen.html` + `p2-who-saw-what.html` (445f63f), the T2 band on `case-engine.html#t2` and the index (b6d6534).
+
 ## Next (in order)
-1. Whatever the lead sends back on the pages (fix and re-push; one line each).
-2. Step 3 pages when the lead asks: the Tier 2 test job and the first promotion, M8 team jobs, M9 tracing (with the pipe graph), P1, P2, the T2 band; finish the Tier 2 fault tables (signs, still lines, traced causes).
-3. Tier 2 bands for rounds (Officer routes), the drill's muster job, M5 stage 2.
+1. **Finish the Tier 2 fault tables** (`fault-tables.html`, `src/ft.body`): each Tier 2 kind's causes in the Tier 1 format (card, up close, when, how common, still, from), parts from `STOCK` only, same card needs different signs. Needed by: M9's lines (water: recycler, filter, uv, pump, valve; heat: heater, heatpump, manifold), P1's first case (3-pump-1 `peak`; filter `always`; membrane; valve), P2's first case (scrubber: filter `always`, bearing `warm`, a new `panel` cause, part seal, `touched`). Air plant and main fan are stand-ins without panels (no tracing for air yet).
+2. Whatever the user sends back on the Step 3 pages (fix, re-push, one line to the lead each).
+3. Step 4 pages when asked (side jobs, Step 2's optional stages, favours, fault-finder tickets, cabin touches, star logging), then Step 5.
 
 ## Gotchas
 - Line numbers on the pages are from `claude/cand-0607`'s game file; builders match by text.
