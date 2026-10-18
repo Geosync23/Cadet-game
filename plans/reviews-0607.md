@@ -8,10 +8,13 @@
 (empty)
 
 ## Passing tips (for BM3)
-writer 5578e80 · arrival-0607b 5ce084d (includes arrival e2cd435 and PE6 52839a6) · systems f351cc3 · social d3d5b4d · PE6 a0d4b43 (= 4a7673c + handover) · deck 55fca8d · traditions 1848e5f.
+writer 0cc4cdf · arrival-0607b 5ce084d (includes arrival e2cd435 and PE6 52839a6) · systems f351cc3 · social d3d5b4d · PE6 a0d4b43 (= 4a7673c + handover) · deck 55fca8d · traditions 1848e5f.
 events_check's day-100/day-231 seat clashes: OK on BM3's combine with social d3d5b4d. The bar needs PE6 and social together.
 
 ## Verdicts
+
+### Re-check: head writer 0cc4cdf: PASS, the {drink} LOW is fixed
+6 lines reworded (Ivo 3, Tamsin 1, banks/bar.lines 2). No line in content/ now opens with `{drink}`. lines_check PASS once baked.
 
 ### BM3's three newer tips: deck 55fca8d, arrival-0607b 5ce084d, writer 5578e80: all PASS
 - **Deck 0.38.35, 55fca8d (in depth): PASS.** The crates are now four hidden groups made as Deck 5 is built and handed to section 17's `holdCratesLive(grp, k)` (typeof-guarded; without systems 0.33.41+ they never show). One `MOVERS` tick a frame does nothing unless the count of shown crates changed; then it moves the stack's hit box up or down and adds or removes the two hold tiles in `BLOCKED` (only the ones it added itself: `mine`). `DELIVERY_MAT` is made at load with a canvas `tex`, without `R()`. Hidden crates cost no draw calls. Stacked crates touch face to face, but those faces are inside and culled, as with the old dress version. Four `shower-queue` places on Deck 4 (new type, for social's shower queue). LOW: the crate material has no `col()` colour (white plus the canvas paint), like other textured kit. Fine.
