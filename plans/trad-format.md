@@ -68,6 +68,10 @@ One tradition per file, the file named after its id.
 | `invite:` | no | crew may invite you (social reads it) | `invite: host=rina odds=40% line="Tiles tonight. I need a victim."` |
 | `trace:` | no | a lasting mark the first time you join it (the deck architect's DECK_DRESS id), saved with the day: Sowing morning's `seedlingYours` plants your seedling | `trace: seedlingYours` |
 | `flag:` | no | waits for a story beat: it happens only once that flag is set (`flag(name)`, section 13), e.g. bridge hour after your first invitation to the bridge | `flag: bridge.invited` |
+| `wake:` | no | (0.34.51) the minutes after waking someone can be there (default 60); early-morning traditions say 15 | `wake: 15` |
+| `after-shift:` | no | (0.34.51) `yes`: day workers whose shift ends inside the window come straight from it (5 minutes after), if `min:` is still left | `after-shift: yes` |
+| `spare:` | no | (0.34.51) leave this many of its places free (for you): the keenest go first, at most places minus spare | `spare: 2` |
+| `venue:` | no | (0.34.51) a big-gathering venue's standing spots (the deck architect's DECKS[n].gathers: `works-bay`, `plaza`, `bow-lounge`, `mess`, `shuttle-bay`, `observation`) as its first places, before the `where:` lines | `venue: plaza` |
 | `meal:` | no | `dinner` or `breakfast`: going to it IS that meal for those who go (the sim engineer plans them there instead of the servery); the galley's dish goes in `ties: galley ...` | `meal: dinner` |
 
 Crew ids are the roster's (`brennan`, `calder`, `torres-zeke`, `rina`, `tomas`, `pell`...: see `plans/crew-roster.html`).

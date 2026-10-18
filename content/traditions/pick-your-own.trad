@@ -1,0 +1,37 @@
+@tradition pick-your-own
+// Pick-your-own breakfast (0.60.7, the user's pick): on Wednesday mornings the gardeners leave baskets out and crew
+// pick fruit straight off the racks to take to breakfast. wake: 15 (an early one).
+k: 451
+title: Pick-your-own breakfast
+when: weekly wednesday
+at: 06:15-06:55
+min: 15
+wake: 15
+where: 3 pool garden-tend
+where: 3 pool garden
+hold: none
+who: cruz-tove always, gardener 70%, garden-lover 50%, early-riser 35%, everyone 6%
+anim: water
+host: cruz-tove
+from: cruz-tove
+
+
+== mail
+- Pick-your-own breakfast tomorrow at {time} in the garden. Baskets by the door. Take what's ripe and carry it up.
+
+== ask
+- Pick your own in the garden tomorrow. Fresh fruit for breakfast.
+- Baskets are out in the garden in the morning. Come early.
+
+== here
+- This one's ripe. Smell it.
+- Only the ripe ones. The gardeners are watching.   #funny
+- Best breakfast of the week, this.
+
+== thanks
+- In the garden you fill a basket with fruit straight off the racks and carry it up to breakfast.   #warm
+
+== chatter
+- Pick your own tomorrow. Get there before the gym lot.   #funny
+- Fruit off the rack tastes different. Better.
+- The garden smells amazing on pick-your-own day.

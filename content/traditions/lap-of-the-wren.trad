@@ -1,0 +1,36 @@
+@tradition lap-of-the-wren
+// Lap of the Wren (0.60.7): a slow walk round the promenade together, chatting. The easiest tradition to join.
+// Lantern walk (once a year, the same Monday evening, the same promenade) is rarer, so on its night it takes the place.
+k: 442
+title: Lap of the Wren
+when: weekly monday
+at: 20:30-21:15
+min: 20
+jitter: 10
+where: 3 room Promenade: bench
+where: 3 room Lift plaza: bench
+hold: none
+who: window-seat 50%, lingers-at-meals 35%, early-to-bed 10%, everyone 22%
+anim: talk
+from: The promenade
+
+
+== mail
+- Lap of the Wren at {time}: one slow walk round the promenade. No pace, no rules, just company.
+
+== ask
+- Lap of the Wren tonight? It's just walking. And gossip.   #funny
+- Walk the promenade with us later? Slow as you like.
+
+== here
+- Slower, slower. It's not a race. It's a stroll.   #funny
+- Look at the stars from this side. Different, isn't it?
+- One lap, then tea. That's the deal.
+
+== thanks
+- You join the slow walk round the promenade. People fall into step, chat, and drift between groups as the stars slide past.
+
+== chatter
+- Lap of the Wren's the best bit of a Monday.
+- I walk the lap to stretch my legs and my ears.   #funny
+- Monday lap tonight. Bring someone new.
