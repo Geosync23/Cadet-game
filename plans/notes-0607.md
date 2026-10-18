@@ -68,3 +68,4 @@ For 0.60.6a (quick fix, PE6 on claude/player-needs, BM3 checks):
 For 0.60.7:
 - Zeke is already in the mess hall when you take the lift up to dinner on arrival night (he should arrive with you / not be there ahead of you).
 - Get rid of the tray return in the mess hall.
+- All junior officers on Deck 4 lie perpendicular (crosswise) in their beds; sleeping pose/bed orientation wrong on Deck 4 (likely poses/seats work in 0.60.6, DA3 territory).
