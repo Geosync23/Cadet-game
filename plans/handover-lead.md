@@ -528,3 +528,4 @@ Read: CLAUDE.md, TEAM.md (session chain rule + overnight exception), plans/brief
 - ~10:15 arrived: check-in trig_01Ryk2qph1XsVjLr3SXp4o8f (:50) created, lead 11's disabled; BM4, S, P, C, H, M1, A, W, R, D told to report to lead 12; lead 11 told.
 - ~10:16 BM4 asked combined number → 0.63.x (logged). A (DA4 58%, done, idle), H (0.55.8 PASS, waits on S/P/C), W (0.48.86 PASS, idle) reported.
 - ~10:20 sweep: S 0.33.47 untested is the critical path (holds BM4/H/M1); C had 0.44.3-6 unpushed (asked to push); DA4 62% done idle. Decision: per-seat intro_check dropped, BM4 runs it once per candidate (logged).
+- ~10:25 P finished 0.28.72 (cfce34e, via lead 11) → started M2 session_016kzZEwTjU6H1miJmA13TRh (claude/mech-incidents, 0.51.x, base ce26fb2 + P cfce34e, S 0.33.47 when tested).
