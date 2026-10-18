@@ -8,10 +8,16 @@
 (empty)
 
 ## Passing tips (for BM3)
-writer bf99520 (+ 0c5e902 q23 fix) · arrival-0607b f09145f (includes arrival e2cd435) · systems f351cc3 · social d3d5b4d · PE6 4a7673c · deck 1f07f99 · traditions 1848e5f.
-Known open: events_check day 100 (3-mess-12; social's spotTaken in d3d5b4d should fix it) and day 231 (3-mess-20), both dinner-seat clashes. Recheck on the combine. The bar needs PE6 and social together.
+writer 5578e80 · arrival-0607b 5ce084d (includes arrival e2cd435 and PE6 52839a6) · systems f351cc3 · social d3d5b4d · PE6 a0d4b43 (= 4a7673c + handover) · deck 55fca8d · traditions 1848e5f.
+events_check's day-100/day-231 seat clashes: OK on BM3's combine with social d3d5b4d. The bar needs PE6 and social together.
 
 ## Verdicts
+
+### BM3's three newer tips: deck 55fca8d, arrival-0607b 5ce084d, writer 5578e80: all PASS
+- **Deck 0.38.35, 55fca8d (in depth): PASS.** The crates are now four hidden groups made as Deck 5 is built and handed to section 17's `holdCratesLive(grp, k)` (typeof-guarded; without systems 0.33.41+ they never show). One `MOVERS` tick a frame does nothing unless the count of shown crates changed; then it moves the stack's hit box up or down and adds or removes the two hold tiles in `BLOCKED` (only the ones it added itself: `mine`). `DELIVERY_MAT` is made at load with a canvas `tex`, without `R()`. Hidden crates cost no draw calls. Stacked crates touch face to face, but those faces are inside and culled, as with the old dress version. Four `shower-queue` places on Deck 4 (new type, for social's shower queue). LOW: the crate material has no `col()` colour (white plus the canvas paint), like other textured kit. Fine.
+- **Arrival-0607b 5ce084d: PASS.** It's f09145f with PE6's 52839a6 merged in (already reviewed: PASS). `git show --cc` shows no hand-edited hunks in the game file (the only conflict was the build line, kept at 0.42.43). On the merged file: name_check clean, and clothes_check ALL OK (the hamper hooks still work with PE6's code in).
+- **Writer 5578e80 + 55a7b8d (skim): PASS.** Gardening as a hobby (`tip.garden`, `hobby.*.garden`), and bar lines for Ivo Madsen (bartender) and Tamsin Haddad (relief) on PE6's `bar.ask/usual/serve/broke` kinds (plus `bar.tap`). lines_check PASS once baked (8297 lines). LOW: `{drink}` is lower case (PE6 passes `BAR_DRINKS[id].short`), so the lines that start with it read "tea again? Already pouring." Start those lines another way, or have the fill capitalise the first letter.
+- **BM3's combine note:** events_check is OK on the combine with social d3d5b4d (day 100 fixed; no day-231 clash), so both known FAILs are closed.
 
 ### PE6 0.28.62-0.28.64, claude/player-needs 4a7673c (in depth): PASS, my earlier MED fixed
 Bathroom at half rate and a toilet icon; the low-need pop-up; the Tiles table plays any time; the Gym club member takes a held machine; the bar order (`SHIP.player.bar`); the Hobbies app, store supplies, Record words and the Settling-in hobby; the free-time tips and Ideas for tonight; the time clock screen (`SHIP.player.clockLog`); more leisure sources; sharing a hobby.
