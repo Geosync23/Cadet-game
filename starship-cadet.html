@@ -7883,9 +7883,9 @@ function recFloor(g, kind, i, j, x, y, PX) {
   const hall = (a, b) => { const r2 = roomAt(a, b); return r2 && ROOMS[r2].hall; }, sameRoom = (a, b) => roomAt(a, b) === roomAt(i, j);
   const edge = (a, b) => ROOMS[roomAt(i, j)].hall ? !hall(a, b) : !sameRoom(a, b);   // a stripe where the floor meets a wall
   const fleck = (n, cs) => { for (let k = 0; k < n; k++) { g.fillStyle = cs[k % cs.length]; g.fillRect(x + recHash(i, j, k) * (PX - 2), y + recHash(i, j, k + 31) * (PX - 2), 2, 2); } };
-  if (kind === 'concourse') {                            // the concourse and foyer (0.80.10, the user's: calmer, classier): two-tone terrazzo, an inlaid band at the walls
+  if (kind === 'concourse') {                            // the concourse and foyer (0.80.10, the user's: calmer, classier): two-tone terrazzo, an inlaid band at the walls; plain chips, cream and greys (0.82.4, the user's)
     g.fillStyle = (i + j) % 2 ? '#4d5759' : '#535e60'; g.fillRect(x, y, PX, PX);
-    for (let k = 0; k < 22; k++) { const c = recHash(i, j, k + 50); g.fillStyle = c < .45 ? 'rgba(232,226,214,.35)' : c < .7 ? 'rgba(196,200,196,.3)' : c < .85 ? 'rgba(140,150,150,.32)' : 'rgba(20,24,28,.35)';   // 0.82.4 (the user's): plain chips, cream and greys, no coloured specks const r = 1 + recHash(i, j, k + 80) * 2.2; g.fillRect(x + recHash(i, j, k + 110) * (PX - 3), y + recHash(i, j, k + 140) * (PX - 3), r, r); }
+    for (let k = 0; k < 22; k++) { const c = recHash(i, j, k + 50); g.fillStyle = c < .45 ? 'rgba(232,226,214,.35)' : c < .7 ? 'rgba(196,200,196,.3)' : c < .85 ? 'rgba(140,150,150,.32)' : 'rgba(20,24,28,.35)'; const r = 1 + recHash(i, j, k + 80) * 2.2; g.fillRect(x + recHash(i, j, k + 110) * (PX - 3), y + recHash(i, j, k + 140) * (PX - 3), r, r); }
     g.fillStyle = 'rgba(0,0,0,.12)'; if (i % 3 === 0) g.fillRect(x, y, 1, PX); if (j % 3 === 0) g.fillRect(x, y, PX, 1);   // thin joints every third tile
     if (edge(i, j - 1)) { g.fillStyle = '#c99a4a'; g.fillRect(x, y + 10, PX, 2); g.fillStyle = 'rgba(31,163,155,.8)'; g.fillRect(x, y + 14, PX, 3); }
     if (edge(i, j + 1)) { g.fillStyle = '#c99a4a'; g.fillRect(x, y + PX - 12, PX, 2); g.fillStyle = 'rgba(240,121,90,.75)'; g.fillRect(x, y + PX - 17, PX, 3); }
