@@ -11026,6 +11026,7 @@ function leisureAdd(n, why) {
 }
 let WARN_SAID = {};                                      // need -> 0 armed, 1 the gentle one said, 2 the firm one said
 function needWarnTick(now) {
+  needGoalTick();                                        // a very low need's marker goes once it's back up (playtest 1)
   const n = SHIP.player.needs; let pick = null, lvl = 0;
   for (const k of NEED_KEYS) {
     if (n[k] >= WARN_REARM) { WARN_SAID[k] = 0; continue; }
@@ -11034,7 +11035,7 @@ function needWarnTick(now) {
   }
   if (!pick || POP.busy || DEV.open || Math.max(POP.toast, POP.card, POP.warn) > now - WARN_GAP) return null;
   const w = NEED_WARN[pick][lvl - 1]; WARN_SAID[pick] = lvl; POP.warn = POP.toast = now;
-  if (lvl === 1) needPop(pick); else toast(w[0], w[1]);  // the first one: a pop-up in plain words (0.28.62); the firm one stays a toast
+  if (lvl === 1) needPop(pick); else toast(w[0], w[1] + (needGoal(pick) ? ' Follow the marker.' : ''));  // the first one: a pop-up in plain words (0.28.62); the firm one stays a toast, with the way (playtest 1)
   return pick;
 }
 // the low-need pop-up (0.28.62, the user's "in plain words: 'You need to pee'"): one line beside the need's icon on the
@@ -11364,7 +11365,7 @@ const PLAYER_ACTS = {   // need and gain over mins ship minutes; pose: the crowd
   browse: { mins: 8, pose: 'browse', title: 'Browsing' },
   pay:    { mins: 2, pose: 'pay', title: 'Paying' },
   shower: { need: 'hygiene', gain: 80, mins: 10, pose: 'stand', title: 'Showering', done: 'Clean, and smelling of the ship\'s one soap.' },
-  toilet: { need: 'bathroom', gain: 100, mins: 3, pose: 'sit', title: 'Toilet', done: 'You wash your hands on the way out.' },   // any public toilet (0.28.19)
+  toilet: { need: 'bathroom', gain: 100, mins: 3, pose: 'sit', cost: { hygiene: 3 }, title: 'Toilet', done: 'Now wash your hands at the basins.' },   // any public toilet (0.28.19); a little hygiene, back at the basins (15b's ixBasin, playtest 1)
   tray:   { mins: 1, pose: 'stand', title: 'At the servery' },
   queue:  { mins: 1, pose: 'stand', title: 'In the queue', until: A => {   // the servery's queue (section 16): wait for your turn, then take a tray
     if (!galleyTurn('player')) return false;
@@ -11668,6 +11669,9 @@ function actBegin() {
     const ln = typeof lineSpot === 'function' && lineAt(lineSpot('player')); if (ln) A.spot = ln; }   // the back of the real line now (0.28.36; section 16 owns who's in it, 15 only reads the spot)
   if (A.kind === 'eat' && A.o.fed) SHIP.player.tray = null;   // sat down with your tray (0.28.31)
   if (A.kind === 'job' && !jobBegin(A)) return;          // at the machine: fit parts, then inspect or repair (the job loop, below)
+  if ((A.kind === 'ixTea' || A.kind === 'ixLounge') && teaHere(A)) teaBegin(A);   // 13:00 in the Tea corner: tea and biscuits (playtest 1)
+  if (A.def.need && NEED_GOAL && NEED_GOAL.need === A.def.need) needGoalClear();   // on your way to fixing it: the marker's done its job
+  if (A.kind === 'sit' || A.kind === 'eat') sitBump(A);   // sitting down near people: a little social (playtest 1)
   const p = player.obj.position, s = A.spot || { x: p.x, z: p.z, y: 0, face: player.face };
   A.body = new FullPerson(PLAYER_SPEC, 'you'); A.x = p.x; A.z = p.z; A.y = 0; A.face = player.face;
   A.to = s; A.pose = A.o.pose || A.def.pose || 'stand'; A.phase = 'in';
@@ -12034,7 +12038,8 @@ function actProgress(A = ACT) {
   const title = A.def.title || A.o.title || '';
   if (A.kind === 'queue') return null;                    // no countdown in the queue (0.28.30): its turn is only an estimate
   if (A.def.until || !(A.def.mins > 0)) return null;
-  return { title, frac: Math.max(0, Math.min(1, A.done / A.def.mins)), left: Math.max(0, (A.def.mins - A.done) / needEffects().task) };
+  const tk = A.kind === 'eat' && typeof CHAT !== 'undefined' && CHAT && CHAT.talk && !CHAT.talk.end ? CHAT : null;   // talking while you eat: one bar for both (playtest 1)
+  return { title: tk ? 'Eating, talking with ' + shortName(tk.p) : title, frac: Math.max(0, Math.min(1, A.done / A.def.mins)), left: Math.max(0, (A.def.mins - A.done) / needEffects().task) };
 }
 function actBar() {
   let el = document.getElementById('actBar');
@@ -12210,7 +12215,7 @@ SIM_ADVANCE.push((from, to) => {
 });
 // New game (section 13): fresh needs, nothing in hand
 function playerNew() {
-  actEnd(true); basket = null; SHIP.player.needs = needsLoad(null); NEED_SEEN = null; SHIP.player.carry = []; SHIP.player.work = null; SHIP.player.wsteps = []; SHIP.player.bedMade = null; SHIP.player.untidy = false; SHIP.player.tray = null; SHIP.player.crate = null; needsT = null; slowWas = {}; WARN_SAID = {}; TEACH_ST = null; POP.tip = -1e9; Object.assign(SHIP, { news: [], newsUsed: [], newsAt: null, newsRows: {} });
+  actEnd(true); basket = null; SHIP.player.needs = needsLoad(null); NEED_SEEN = null; SHIP.player.carry = []; SHIP.player.work = null; SHIP.player.wsteps = []; SHIP.player.bedMade = null; SHIP.player.untidy = false; SHIP.player.teaDay = null; NEED_GOAL = null; PUSH = null; SHIP.player.tray = null; SHIP.player.crate = null; needsT = null; slowWas = {}; WARN_SAID = {}; TEACH_ST = null; POP.tip = -1e9; Object.assign(SHIP, { news: [], newsUsed: [], newsAt: null, newsRows: {} });
   Object.assign(SHIP.player, walletLoad(null)); SHIP.player.bought = 0; SHIP.player.cart = null; SHIP.player.name = null; SHIP.mail = []; mailWelcome(); device.refresh();
   DINNER_SAT = false; DINNER_TRY = -1;                   // a new arrival dinner seats you again (reviewer 1, 0.28.37)
 }
@@ -12785,6 +12790,79 @@ SHIP.player.bedMade = Number.isInteger(SAVED && SAVED.player && SAVED.player.bed
 SAVE_EXTRA.push(s => { const p = s.player || (s.player = {}); p.bedMade = SHIP.player.bedMade; p.untidy = !!SHIP.player.untidy; });
 SAVE_EXTRA.push(s => { const p = s.player || (s.player = {}); p.wsteps = SHIP.player.wsteps.filter(w => myJobAny(w.job)).map(w => ({ ...w })); });
 
+// ---- playtest 1 (0.28.74, plans/brief-playtest1.md, package P) ----
+// a very low need (needWarnTick's firm warning): the marker to the nearest place that fixes it, on this deck if there's
+// one, else the nearest deck's. Cleared when you start fixing it, or the need is back up (WARN_REARM)
+const NEED_FIX = { hunger: ['servery-queue', 'grab-shelf'], energy: ['bed'], hygiene: ['shower'], bathroom: ['toilet'], fitness: ['gym'], social: ['callhome'], leisure: ['lounge-seat'] };
+const NEED_FIX_SAY = { hunger: 'Food', energy: 'Your bunk', hygiene: 'A shower', bathroom: 'A toilet', fitness: 'The gym', social: 'The call booths', leisure: 'Somewhere to sit and unwind' };
+let NEED_GOAL = null;                                     // { need, label } while the marker is ours
+function needGoal(k) {
+  if (!NEED_FIX[k] || typeof setGoal !== 'function' || typeof IX_GOAL === 'undefined' || IX_GOAL && !(NEED_GOAL && IX_GOAL.label === NEED_GOAL.label)) return false;   // never over someone else's arrow
+  const bed = typeof playerBed === 'function' ? playerBed() : null, here = typeof deckDef !== 'undefined' && deckDef ? deckDef.num : 4, pos = player.obj.position;
+  const ok = pl => k === 'energy' ? pl.id === bed : NEED_FIX[k].includes(pl.type) && !(PRIVATE_TYPES.has(pl.type) && privatePlace(pl));
+  const near = pl => pl.deck === here ? Math.hypot(cellPos(...pl.at).x - pos.x, cellPos(...pl.at).z - pos.z) : 1000 * (1 + Math.abs(pl.deck - here));
+  const all = Object.keys(DECKS).flatMap(n => (DECKS[n].places || []).map(pl => ({ ...pl, deck: +n }))).filter(ok);
+  const pl = all.sort((a, b) => near(a) - near(b) || (a.id < b.id ? -1 : 1))[0]; if (!pl) return false;
+  NEED_GOAL = { need: k, label: NEED_FIX_SAY[k] + (pl.deck !== here ? ', Deck ' + pl.deck : '') };
+  setGoal({ deck: pl.deck, place: pl.id, label: NEED_GOAL.label }); return true;
+}
+function needGoalClear() { if (NEED_GOAL && typeof IX_GOAL !== 'undefined' && IX_GOAL && IX_GOAL.label === NEED_GOAL.label) clearGoal(); NEED_GOAL = null; }
+function needGoalTick() { if (NEED_GOAL && SHIP.player.needs[NEED_GOAL.need] >= WARN_REARM) needGoalClear(); }
+// pushing into someone who can't step aside (settled, leading you, talking: section 10's press-and-hold stops you):
+// after PUSH_MS of pushing their way, you get by them for PASS_MS (the user's "push through", playtest 1)
+const PUSH_MS = 2000, PASS_MS = 1500; let PUSH = null;   // { who, t0, last, until }
+function pushThrough(who, x, z, pos) {
+  const s = player.steer, now = performance.now();
+  if (PUSH && PUSH.who === who && now < PUSH.until) return true;
+  const dx = x - pos.x, dz = z - pos.z, d = Math.hypot(dx, dz);
+  if (!s || s.k < .2 || d > .5 || d > 1e-4 && (dx * s.x + dz * s.z) / d < .3) return false;   // not pushing their way
+  if (!PUSH || PUSH.who !== who || now - PUSH.last > 300) PUSH = { who, t0: now, last: now, until: 0 };
+  PUSH.last = now;
+  if (now - PUSH.t0 < PUSH_MS) return false;
+  PUSH.until = now + PASS_MS; return true;
+}
+// sitting down near people (a seat or a meal, with company at hand: sitCompany): a little social, once a ship hour
+const SIT_BUMP = 2; let SIT_BUMP_AT = -1e9;
+function sitBump(A) {
+  const c = sitCompany(A), t = shipNow(); if (!(c > 0) || t - SIT_BUMP_AT < 60) return;
+  SIT_BUMP_AT = t; SHIP.player.needs.social = needClamp(SHIP.player.needs.social + SIT_BUMP);
+}
+// tea and biscuits at 13:00 (the user's: it replaces the Works' 10:30 tea): in the Tea corner on Deck 5 on your shift
+// days, 13:00-13:45 (the crew's own tea is section 14's; worksTeaOn(t) when it's there). The tea table's cup of tea is
+// then tea and biscuits (a little more food). When you turn a job in while it's out and you haven't had yours, the
+// marker points to the Tea corner, with a card to say Keep working (it goes). SHIP.player.teaDay: the day you had it (saved)
+const TEA_FROM = 780, TEA_TO = 825, TEA_GOAL = 'Tea and biscuits, in the Tea corner';
+function teaOut(t = shipNow()) {
+  const d = Math.floor(t / 1440) + 1, m = t - (d - 1) * 1440, shift = typeof playerShiftOn === 'function' ? !!playerShiftOn(d) : weekday(d) < 5;
+  if (typeof worksTeaOn === 'function') return shift && !!worksTeaOn(t);   // section 14's crew tea (X, 0.71.1): its times; your shift days
+  const W = typeof WORKS_TEA !== 'undefined' && WORKS_TEA && Number.isFinite(WORKS_TEA.at) ? WORKS_TEA : { at: TEA_FROM, until: TEA_TO };   // section 14's crew tea (X, 0.71.1)
+  return shift && m >= W.at && m < W.until;
+}
+function teaHere(A) {                                    // in the Tea corner (Deck 5, room 't'), while tea's out: its tea table, or a seat there
+  if (typeof deckDef === 'undefined' || !deckDef || deckDef.num !== 5 || !teaOut()) return false;
+  const pl = A && A.placeId && PLACE_OF.get(A.placeId), s = A && A.spot;
+  return (pl ? pl.room : s ? roomAt(...cellAt(s.x, s.z)) : null) === 't';
+}
+function teaBegin(A) {
+  A.def = { ...A.def, need: 'hunger', gain: 10, mins: Math.max(6, A.def.mins || 0), title: 'Tea and biscuits', done: 'Tea and a biscuit or two. Just the thing.' }; A.o.biscuits = true;
+  if (A.kind === 'ixLounge') A.o.pose = 'sit:drink';     // in a seat there: a cup in your hand
+  SHIP.player.teaDay = SHIP.time.day; teaDismiss(); if (typeof simNote === 'function') simNote('tea', { day: SHIP.time.day, who: 'you' });
+}
+const teaHad = (d = SHIP.time.day) => SHIP.player.teaDay === d;   // for section 21's Day 1 tea walk (O5)
+const teaGoal = () => teaOut() ? { deck: 5, room: 't', label: TEA_GOAL } : null;
+function teaOffer() {
+  const P = SHIP.player; if (!teaOut() || teaHad() || typeof setGoal !== 'function' || typeof IX_GOAL === 'undefined' || IX_GOAL) return false;
+  if (typeof introTeaLead === 'function' && introTeaLead()) return false;   // Day 1: Zeke leads you there himself (section 21)
+  setGoal(teaGoal());
+  const say = 'Tea\'s out in the Tea corner on Deck 5, and biscuits. Follow the marker, or keep working.';
+  if (!(typeof deviceChoose === 'function' && deviceChoose({ title: 'Tea and biscuits', text: say, choices: ['Off to tea'], cancel: 'Keep working' }, i => { if (i < 0) teaDismiss(); }))) toast('Tea and biscuits', say);
+  return true;
+}
+function teaDismiss() { if (typeof IX_GOAL !== 'undefined' && IX_GOAL && IX_GOAL.label === TEA_GOAL) clearGoal(); }
+if (typeof onSim === 'function') onSim('job', n => { if (n && n.step === 'turnin') teaOffer(); });
+SHIP.player.teaDay = Number.isInteger(SAVED && SAVED.player && SAVED.player.teaDay) ? SAVED.player.teaDay : null;
+SAVE_EXTRA.push(s => { const p = s.player || (s.player = {}); p.teaDay = SHIP.player.teaDay; });
+
 // ---- the cart run (0.28.11, answer 8): a restock job (section 17's kind 'restock', taken on the device) is a hover
 // cart you push yourself, the same steps as the crew's jobRun: take a cart from its dock in the Cart bay (Deck 5),
 // load it in the cargo hold, unload it in main storage ('stores') or Deck 3's cold store ('meals'), and dock it
@@ -13313,7 +13391,7 @@ const ixBoard = (() => {
     take(id) {
       if (!claimJob(id)) { toast('Job board', 'Someone got there first.'); api.draw(); return false; }
       const j = myJob(), [title, where] = jobCard(j);
-      SHIP.player.track = j.id;                          // a job taken is tracked (the device's Track switch: null = off)
+      SHIP.player.track = j.id; clearGoal();             // a job taken is tracked (the device's Track switch: null = off), over any older arrow (playtest 1)
       api.close(); device.refresh(); ixGoalAt = -1;
       toast('Job taken', (j.title || title) + ', ' + where + '. Follow the marker' + (j.parts && j.parts.length ? ': parts first, from main storage on Deck 5.' : '.'));
       ixTip('taken', 'Track it on your device; the marker shows the way.');
@@ -33437,7 +33515,9 @@ function talkStart(C) {
   let topic = null; for (let i = 0; i < TALK_TOPICS.length && !topic; i++) { const k = TALK_TOPICS[(start + i) % TALK_TOPICS.length]; if (socLine(p, 'talk.' + k + '.open', talkCtx(p, { peek: true }))) topic = k; }
   C.talk = { mins: 0, last: shipNow(), lineAt: 0, pts: 0, gained: 0, topic, said: [], ask: false, asked: false, reply: null, end: null, sits: false };
   C.ask = false; C.offer = false;
-  if (sits && typeof playerSitNear === 'function' && playerSitNear(deckDef.num, cellAt(a.x, a.z), 'Talking with ' + shortName(p))) { C.talk.sits = true; C.reach = Math.max(C.reach, 5); }   // a seat beside them
+  const seated = typeof ACT !== 'undefined' && ACT && ACT.phase === 'do' && (ACT.kind === 'eat' || ACT.kind === 'sit');   // already at a table: you talk from your seat, still eating (playtest 1)
+  if (seated) { C.talk.sits = true; C.reach = Math.max(C.reach, 5); }
+  else if (sits && typeof playerSitNear === 'function' && playerSitNear(deckDef.num, cellAt(a.x, a.z), 'Talking with ' + shortName(p))) { C.talk.sits = true; C.reach = Math.max(C.reach, 5); }   // a seat beside them
   const open = topic && talkSays(C, 'talk.' + topic + '.open'), hi = talkSays(C, sits ? 'talk.sit' : 'talk.start');
   if (typeof playerChat === 'function') playerChat(p);   // the hello's little social (section 15)
   memAdd(p.id, 'talk' + (topic ? '.' + topic : ''));
@@ -33493,6 +33573,7 @@ function talkMeter(el, T) {                               // the meter in the ca
   if (!m) { m = document.createElement('div'); m.className = 'talkm'; m.style.cssText = 'margin:0 0 9px;font-size:11.5px;opacity:.85';
     m.innerHTML = '<span></span><i style="display:block;height:4px;margin-top:3px;border-radius:2px;background:rgba(150,200,196,.22);overflow:hidden"><b style="display:block;height:100%;background:var(--teal,#5fc9bd);transform-origin:left center"></b></i>';
     const row = el.querySelector('.row, .btns'); el.insertBefore(m, row || null); }
+  m.style.display = typeof ACT !== 'undefined' && ACT && ACT.kind === 'eat' && ACT.phase === 'do' ? 'none' : '';   // eating too: section 15's one bar says both (playtest 1)
   const f = T.mins / TALK_MINS, txt = T.end ? (T.end === 'full' ? 'A good talk' : 'You talked a while') : T.ask ? 'Your turn' : 'Talking · ' + Math.max(1, Math.ceil(TALK_MINS - T.mins)) + ' min';
   if (m.children[0].textContent !== txt) m.children[0].textContent = txt;
   m.children[1].children[0].style.transform = 'scaleX(' + f.toFixed(3) + ')';
@@ -39771,12 +39852,14 @@ class Walker {
       pos.x += s.x * this.vel * dt; pos.z += s.z * this.vel * dt;
       for (const o of walkers) {                         // don't walk through people
         if (o === this || !o.active) continue;
+        if (this.isPlayer && typeof pushThrough === 'function' && pushThrough(o, o.obj.position.x, o.obj.position.z, pos)) continue;   // section 15 (playtest 1)
         const qx = pos.x - o.obj.position.x, qz = pos.z - o.obj.position.z, qd = Math.hypot(qx, qz);
         if (qd < .42 && qd > 1e-4) { pos.x = o.obj.position.x + qx / qd * .42; pos.z = o.obj.position.z + qz / qd * .42; }
       }
       for (const a of DECK_CREW) {                       // nor through crew on their feet
         const bp = a.settled && a.spot ? a.spot.pose : a.pose; if (bp === 'sit' || bp === 'lie') continue;
         if (this.isPlayer && typeof shuffleable === 'function' && shuffleable(a)) continue;   // section 15: on their feet and not at a place, they step aside for you (0.28.70)
+        if (this.isPlayer && typeof pushThrough === 'function' && pushThrough(a, a.x, a.z, pos)) continue;   // section 15: pushing 2 s, you get by (playtest 1)
         const qx = pos.x - a.x, qz = pos.z - a.z, qd = Math.hypot(qx, qz);
         if (qd < .42 && qd > 1e-4) { pos.x = a.x + qx / qd * .42; pos.z = a.z + qz / qd * .42; }
       }
