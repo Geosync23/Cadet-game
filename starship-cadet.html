@@ -248,7 +248,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.34.52
+   STARSHIP CADET: CSV Wren                           build 0.34.53
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7598,7 +7598,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.34.52';                           // keep in step with the header's build line
+const GAME_BUILD = '0.34.53';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -26590,7 +26590,8 @@ const SHIP_TRADITIONS = [
     ask: 'Observatory night later. Sato says the nebula is showing off.', here: 'Look at that. Never gets old.', thanks: 'You join the stargazers in the dark. Someone points out a pulsar.' },
   { id: 'quiz', name: 'Quiz night', k: 322, when: { weekday: 3 }, at: [1200, 1290], min: 25,
     where: [{ deck: 3, room: /^Bow lounge$/, types: ['lounge-seat'] }],
-    who: (p, d) => evHas(p, d, 'bar-regular') ? .8 : evHas(p, d, 'lounge-regular') ? .7 : .25, anim: (p, d) => evHas(p, d, 'bar-regular') ? 'drink' : 'talk',
+    host: 'tomas',   // 0.34.52: the question master always goes (he asks the quiz game's questions)
+    who: (p, d) => p.id === 'tomas' ? 1 : evHas(p, d, 'bar-regular') ? .8 : evHas(p, d, 'lounge-regular') ? .7 : .25, anim: (p, d) => evHas(p, d, 'bar-regular') ? 'drink' : 'talk',
     from: 'Tomas Lind', mail: 'Quiz night tomorrow, 20:00 in the bow lounge. Teams of four. Question master: me. No looking things up on the ship\'s library, Survey.',
     invite: { host: 'tomas', odds: .5, line: 'Quiz tonight. We need someone who knows the engines. You in?' },
     ask: 'Coming to the quiz tonight? We need someone who knows the engines.', here: 'Shh, the next question is the tie-breaker.', thanks: 'You squeeze onto a quiz team. You get one right about the reactor, and the table cheers.' },
@@ -26986,9 +26987,9 @@ function eventPlan(p, d) {
     const opts = eventOpts(ev, p); if (!opts.length) continue;
     const anim = ev.anim(p, d) || null;
     const from = at - (ev.early && e.honorees.includes(p) ? ev.early : 0), to = e.to - Math.round((ev.jitter || 0) * schedU(p.seed, d, ev.k + 100));   // 420-433
-    out.push({ id: ev.id, from, to, opts, anim, tag: 'ev-' + ev.id + (anim ? '-' + anim : ''), min: ev.min || 20, prio: ev.prio || 0, host: !!(ev.host && ev.host === p.id), meal: ev.meal || null });   // host: section 14 seats them first; meal: going IS their dinner or breakfast (section 14)
+    out.push({ id: ev.id, from, to, opts, anim, tag: 'ev-' + ev.id + (anim ? '-' + anim : ''), min: ev.min || 20, prio: ev.prio || 0, host: !!(ev.host && ev.host === p.id), own: e.honorees.includes(p), meal: ev.meal || null });   // host: section 14 seats them first; meal: going IS their dinner or breakfast (section 14)
   }
-  out.sort((x, y) => y.prio - x.prio || x.from - y.from);
+  out.sort((x, y) => y.own - x.own || y.host - x.host || y.prio - x.prio || x.from - y.from);   // their own birthday, then one they host (0.34.52: Tomas's quiz on a birthday night), then prio
   const keep = [];
   for (const x of out) if (!keep.some(k => x.from < k.to && k.from < x.to)) keep.push(x);
   return keep.sort((x, y) => x.from - y.from);
@@ -27127,6 +27128,7 @@ function eventsPlayer(now) {
   const e = eventsOn(d).find(x => m >= x.from && m < x.to && (x.rooms || (x.rooms = eventRooms(x.ev))).has(here));
   const key = e ? e.id + '@' + d : null;
   if (key !== EV_IN.key) EV_IN = { key, since: now };
+  if (key && e.id === 'quiz' && QUIZ_PLAYED !== d && SHIP.events.joined.includes(key) && !DIALOGUE) quizStart(d, now);   // joined while another card was open: the game when it's free
   if (!key || now - EV_IN.since < 5 || SHIP.events.joined.includes(key)) return;
   SHIP.events.joined.push(key);
   if (e.ev.trace) traceAdd(e.ev.trace, d);              // e.g. Sowing morning plants your seedling (the deck architect's seedlingYours)
@@ -27165,7 +27167,7 @@ function quizText(kind, k, ctx) {
 }
 function quizStart(d, now) {
   const qs = quizPick(d); if (!qs || typeof dialogueShow !== 'function' || DIALOGUE) return false;
-  let score = 0;
+  QUIZ_PLAYED = d; let score = 0;
   const lines = [], open = quizText('quiz.open', d);
   if (open) lines.push({ who: 'tomas', text: open });
   qs.forEach((x, i) => {
@@ -27182,7 +27184,7 @@ function quizStart(d, now) {
     onEnd: () => { delete MEETING_SCRIPTS['moment:quiz']; QUIZ_LAST = { day: d, score }; } };
   return dialogueShow('moment:quiz', { id: 'moment:quiz', who: ['tomas'], at: now, where: { deck: 3, room: /^Bow lounge$/ } });   // 'moment:' never counts toward a commendation
 }
-let QUIZ_LAST = null;                                    // the last game's score (events_check reads it)
+let QUIZ_LAST = null, QUIZ_PLAYED = null;               // the last game's score (events_check reads it); the day a game last opened (once a night)
 // decor: a few cheap props on the deck while an event is on (from 30 minutes before to 15 after), built on demand,
 // added to the deck's root (so a deck change takes them away), colours through col(), no R(), no shadows
 const EV_DECOR = { key: '', g: null, root: null };
