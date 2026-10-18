@@ -627,3 +627,4 @@ Read: CLAUDE.md, TEAM.md, plans/brief-p5.md (all seats + ids), plans/overnight-d
 - ~18:08 BM5 at ~60%: hired BM6 session_01F8k6hqdBRoxDJMzqAuiHqR for the 0.63.2 combine/full run.
 - ~18:09 BM5 archived (handover bf38612); R2 at 70% → R3 session_01AR6tGFiSZF7hL1LfVpWgng hired; seats told the new BM6/R3 ids. R2 passed: W, X 0.71.0, U, C2, O4, P.
 - ~18:16 the user approved rec deck v2 (db survey/recdeck3): first all-hands after/during the first ship-wide event, no auditorium film night until then; JCR quiet; walk through changing rooms + tip; keep regatta/bell; no staff (crew use freely); talent night every 4 weeks; Winner Stays On longer/earlier. Sent to the planner for v3. The user asked how to build/test the rec deck in isolation.
+- ~18:20 rec deck plan v3 final (claude/recdeck-plan 731c560), published v3 at the same link; no open questions. Asked the user whether to start a Lightdisc prototype now + the architect on rooms after 0.63.2.
