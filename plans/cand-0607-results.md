@@ -4,3 +4,4 @@ Built on claude/cand-0606 (from 0.60.6a c8685cf). One line per finished check (c
 
 - trial: deck hook dba2627 + writer hook 7e4fb1e merge clean on cand-0606 (c8685cf + results), NAMES OK
 - trial: writer c2b1b6a (0.48.81) merges clean; baked 8047 lines (was 7515); --check up to date; lines_check PASS (0 err, 2 warn); NAMES OK
+- trial: arrival 31c6516f + writer 5916bd5 merge clean, bake 8084 lines, lines_check PASS, NAMES OK; KEY MISMATCH: code asks walk.train.<job>.<step> (31539) + walk.follow.N (31548), writer has walk.job.* + walk.talk.1-29
