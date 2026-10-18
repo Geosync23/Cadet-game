@@ -252,7 +252,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.42.63
+   STARSHIP CADET: CSV Wren                           build 0.42.64
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7922,7 +7922,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.42.63';                           // keep in step with the header's build line
+const GAME_BUILD = '0.42.64';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -34390,6 +34390,7 @@ const INTRO_STEPS = [
   { id: 'chief', day: 0, at: 18 * 60 + 20, who: 'calder', mode: 'meet', where: 'your table in the mess', meeting: 'introChief',
     checkpoint: { deck: 3, tile: [28, 1], room: 'Mess hall' }, rel: { calder: 3 }, flags: ['met.calder'],
     seats: { you: '3-mess-10', [INTRO_ESCORT]: '3-mess-12', calder: '3-mess-9' },   // you, Torres beside you, the Chief across
+    away: { calder: '3-mess-44' },   // (0.42.64, the user) she has her dinner at the far table and walks over at the end of the dinner chat (introCalderTick)
     fallback: { until: 19 * 60 + 30, later: 'free', mail: { from: 'I. Calder', subject: 'Tomorrow', body: 'Missed you at dinner. Torres has you tomorrow; ten to eight, the Works bay. — I. Calder' } } },
   { id: 'free', day: 0, at: 19 * 60 + 30, who: INTRO_ESCORT, mode: 'free', where: 'the mess', rel: { [INTRO_ESCORT]: 3 } },   // he lets you go after his goodnight (introNightTick), 19:30 at the latest (reviewer 1c: no fixed 19:00)
   { id: 'tomas', day: 0, at: 19 * 60 + 30, who: 'tomas', mode: 'free', where: 'the junior common room or Bunk 1', teaches: 'Chat and Ask about', seek: 22 * 60 },
@@ -34601,7 +34602,7 @@ function introUiReset() {
   const U = INTRO_UI; (U.said || []).forEach(simClear); U.night = null; U.chiefD = null;
   const own = typeof IX_GOAL !== 'undefined' && IX_GOAL && (IX_GOAL.label === INTRO_BED_GOAL || IX_GOAL.label === 'Zeke Torres' || INTRO_ARROW_LABELS.has(IX_GOAL.label));
   if (own && typeof clearGoal === 'function') clearGoal();
-  Object.assign(U, { arrow: null, arrowAt: 0, min: null, step: undefined, said: [], callAt: 0, goal: false, goalKey: '', meet: [], next: 0, still: 0, stillAt: null, more: 0, bed: false, tour: [], pause: null, calder: false, calls: 0, beat: null, sow: false });
+  Object.assign(U, { tableD: null, arrow: null, arrowAt: 0, min: null, step: undefined, said: [], callAt: 0, goal: false, goalKey: '', meet: [], next: 0, still: 0, stillAt: null, more: 0, bed: false, tour: [], pause: null, calder: false, calls: 0, beat: null, sow: false });
   if ('pilotAt' in U) Object.assign(U, { pilotAt: 0, ternOpened: false, ternShut: false });
 }
 // section 14 plans the crew again when this changes (introBeats depends on nothing else)
@@ -34724,7 +34725,7 @@ function escortPlan(p, t) {
 function introBeats(id, d) {
   if (!introOn()) return [];
   const out = [];
-  for (const st of INTRO_STEPS) if (st.day === d && st.who === id && st.checkpoint) { const f = st.fallback || {}, seat = st.seats && st.seats[id]; out.push({ id: st.id, at: st.at, until: f.until !== undefined ? f.until : st.at + (f.wait || 20), where: seat ? { ...st.checkpoint, placeId: seat } : st.checkpoint }); }
+  for (const st of INTRO_STEPS) if (st.day === d && st.who === id && st.checkpoint) { const f = st.fallback || {}, seat = (st.away && st.away[id]) || st.seats && st.seats[id]; out.push({ id: st.id, at: st.at, until: f.until !== undefined ? f.until : st.at + (f.wait || 20), where: seat ? { ...st.checkpoint, placeId: seat } : st.checkpoint }); }
   for (const b of INTRO_WEEK) if (b.day === d && (b.who === id || (b.also || []).includes(id)) && b.until) out.push({ id: b.id, at: b.at, until: b.until, where: b.where });
   return out;
 }
@@ -35212,6 +35213,11 @@ function introTeaTick(now) {
   }
   if (had || now >= D['tea:at'] + INTRO_TEA_STAY || !room() && now >= D['tea:at'] + 2 || !teaOut(now)) { end(now); if (quiet || had) introSay(introTeaSay('back')); }
 }
+// the Chief at your table: her agent within a tile of her seat (section 10's crewComeTo brings her)
+function introCalderIn() {
+  const id = introSeat('calder'), a = typeof DECK_CREW !== 'undefined' && DECK_CREW.find(x => x.p && x.p.id === 'calder'), sp = id && typeof placeSpot === 'function' ? placeSpot(id) : null;
+  return !!(a && sp && Math.hypot(a.x - sp.x, a.z - sp.z) <= 1.2);
+}
 function introTick() {
   if (INTRO_BOOT) { INTRO_BOOT = false; if (typeof newGameStart === 'function') newGameStart(true); }
   if (!introOn() || typeof player === 'undefined') return;
@@ -35228,16 +35234,24 @@ function introTick() {
     for (const st of INTRO_UI.meet.slice()) {
       if (typeof dialogueShow !== 'function') { INTRO_UI.meet.length = 0; break; }
       const cp = st.checkpoint, room = new RegExp('^' + cp.room.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$'), m = { id: 'intro-' + st.id, who: INTRO_MEETINGS[st.meeting].cast.filter(w => !/:/.test(w)), where: { deck: cp.deck, room }, at: now };
-      if (!inMeeting(m)) { INTRO_UI.meet.splice(INTRO_UI.meet.indexOf(st), 1); if (typeof meetingGist === 'function') meetingGist(st.meeting); if (st.id === 'chief') I.done['chief:end'] = null; continue; }
+      if (!inMeeting(m)) { INTRO_UI.meet.splice(INTRO_UI.meet.indexOf(st), 1); if (typeof meetingGist === 'function') meetingGist(st.meeting); if (st.id === 'chief') I.done['chief:end'] = null; if (st.id === 'table' && I.done['table:end'] === undefined) I.done['table:end'] = now; continue; }
       if (DIALOGUE || INTRO_UI.tour.some(q => q.core.length)) break;   // after the tour's last core lines
+      if (st.id === 'chief' && !introCalderIn() && now < (I.done.chief !== undefined ? I.done.chief : now) + 10) break;   // she's still on her way over
       INTRO_UI.meet.splice(INTRO_UI.meet.indexOf(st), 1); dialogueShow(introScriptHere(st.meeting, m, st.who), m);
+      if (st.id === 'table') INTRO_UI.tableD = DIALOGUE;   // its last line sends the Chief over
       if (st.id === 'chief') { I.done['chief:met'] = now; INTRO_UI.chiefD = DIALOGUE; }   // the Chief's welcome: the goodnight waits for it (0.42.27)
     }
   }
   if (INTRO_UI.chiefD && DIALOGUE !== INTRO_UI.chiefD) { const D = INTRO_UI.chiefD; INTRO_UI.chiefD = null; I.done['chief:end'] = D.i >= D.queue.length ? Math.floor(shipNow()) : null; }   // all her lines, or walked away (null: day 0's minutes are negative)
   if (now === INTRO_UI.min) { introWeekMeetings(now); introMoments(now); introSeekMail(now); introSowTick(now); }
   // the Chief comes over to your table for her step (section 10's crewComeTo, live only, so again after a reload)
-  if ((I.step === 'chief' || I.step === 'free') && !INTRO_UI.calder && introSeat('calder') && typeof crewComeTo === 'function' && deckDef.num === 3) {
+  // (0.42.64, the user: "the Chief used to walk up after you were sat"): she has her dinner at the far table (the step's
+  // `away`) and comes over once the dinner chat with Torres is on its last line ("Look who's coming over") or over,
+  // or the chat never happened; her own welcome waits until she's sat at your table (introCalderIn), ten minutes at most
+  if (INTRO_UI.tableD && DIALOGUE !== INTRO_UI.tableD) { INTRO_UI.tableD = null; if (I.done['table:end'] === undefined) I.done['table:end'] = now; }
+  const chat = INTRO_UI.tableD && DIALOGUE === INTRO_UI.tableD && DIALOGUE.i >= DIALOGUE.queue.length - 1;
+  const calderGo = I.done['table:end'] !== undefined || chat || I.missed.includes('table') || I.step === 'free' && I.done['chief:met'] !== undefined || I.done.chief !== undefined && now >= I.done.chief + 10;   // (the last: a reload mid-chat, or a chat that never came)
+  if ((I.step === 'chief' || I.step === 'free') && calderGo && !INTRO_UI.calder && introSeat('calder') && typeof crewComeTo === 'function' && deckDef.num === 3) {
     INTRO_UI.calder = true; crewComeTo('calder', introSeat('calder'), null, { until: introAbs(0, 19 * 60) });
   }
   // his lines for a step once its time has come and no meeting is on ("I'm on Four if you need me" waits for 19:00)

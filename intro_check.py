@@ -58,6 +58,7 @@ RUN = r"""(({ who, reload, to, skip, endAt, pace }) => {
 
 # one look at the real game for part 8: the player follows Torres (or walks to a step that isn't his), rides the lift
 # when he does, and taps through meetings, choosing the second reply
+CALDER_D = """(() => { const a = DECK_CREW.find(x => x.p && x.p.id === 'calder'), sp = placeSpot(introSeat('calder') || '3-mess-9'); return a && sp ? Math.round(Math.hypot(a.x - sp.x, a.z - sp.z) * 10) / 10 : null; })()"""
 WALK_TICK = r"""((mode) => {
   const I = SHIP.intro, st = introStepById(I.step), pp = player.obj.position, here = cellAt(pp.x, pp.z);
   const a = DECK_CREW.find(x => x.p && x.p.id === INTRO_ESCORT);
@@ -433,7 +434,7 @@ with sync_playwright() as pw:
         rides, rideFrom = [], None   # (the lead, the user on 0.60.5a): after each lift ride Torres steps out with you, not at the room he's heading for
         lingered = []
         pre = { 'n': 0, 'pause': 0, 'still': 0, 'run': 0, 'last': None, 'sm': [] }   # 0.42.29 (the user on 0.60.5): from the ramp's welcome to the lift, walk-and-talk, no pauses
-        dinner, bunkAt, seats, chat = None, None, None, None
+        dinner, bunkAt, seats, chat, chiefAt = None, None, None, None, None
         INTRO_ESC_ID = g.ev('INTRO_ESCORT')
         BED_GOAL = g.ev("typeof INTRO_BED_GOAL !== 'undefined' ? INTRO_BED_GOAL : 'Your bunk'")
         for k in range(420):
@@ -464,9 +465,15 @@ with sync_playwright() as pw:
                 if tmin > 19 * 60 and not DAWDLE: fail(f'the walk is too long: you reach the table at {hm}, too late for the dinner chat and the Chief before 19:30 (reviewer 1c: 19:00, the scenes wait till 19:30)')   # 0.42.27
             if chat is None and g.ev("!!DIALOGUE && /^introDinner/.test(DIALOGUE.id || '')"):   # the dinner chat at your table (0.42.63, the user: the game sits you down for it)
                 for _ in range(4): g.step(20); g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'stand'])   # stop steering: let the game sit you
-                chat = { 't': g.ev('clockText()'), 'seat': g.ev("introSeat('you')"), 'sat': g.ev("typeof ACT !== 'undefined' && ACT ? ACT.placeId || null : null") }
-                print(f"  the dinner chat at {chat['t']}: sat down by the game in {chat['sat']} (your seat {chat['seat']})")
+                chat = { 't': g.ev('clockText()'), 'seat': g.ev("introSeat('you')"), 'sat': g.ev("typeof ACT !== 'undefined' && ACT ? ACT.placeId || null : null"), 'calder': g.ev(CALDER_D) }
+                print(f"  the dinner chat at {chat['t']}: sat down by the game in {chat['sat']} (your seat {chat['seat']}); the Chief {chat['calder']} m from her seat")
                 if chat['seat'] and chat['sat'] != chat['seat'] and not DAWDLE: fail(f"you weren't sat down at your table for the dinner chat: {chat}")
+                if chat['calder'] is not None and chat['calder'] < 2: fail(f"the Chief was already at your table when the dinner chat began (0.42.64: she walks over at its end): {chat}")
+            if chiefAt is None and g.ev("!!DIALOGUE && /^introChief/.test(DIALOGUE.id || '')"):   # her welcome: she's walked over and sat first, after you and the chat
+                chiefAt = { 't': g.ev('clockText()'), 'calder': g.ev(CALDER_D), 'in': g.ev('introCalderIn()'), 'chat': chat is not None, 'you': g.ev("typeof ACT !== 'undefined' && ACT ? ACT.placeId || null : null") }
+                print(f"  the Chief's welcome at {chiefAt['t']}: she's {chiefAt['calder']} m from her seat (at it: {chiefAt['in']}), after the chat {chiefAt['chat']}, you in {chiefAt['you']}")
+                if not chiefAt['in'] and not DAWDLE: fail(f"the Chief's welcome began before she'd walked over to your table: {chiefAt}")
+                if not chiefAt['chat'] and not DAWDLE: fail(f"the Chief's welcome came before the dinner chat with Torres: {chiefAt}")
             if r['step'] == 'free' and seats is None:   # reviewer 1: who sits in the three dinner seats once the Chief has come over
                 for _ in range(4): g.step(20); g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'stand'])   # stop steering: let the game sit you
                 seats = g.ev("(() => { const S = introStepById('chief').seats || {}, h = id => { const a = id && heldBy(id); return a ? a.p.id : null; }; return { you: [S.you, h(S.you), typeof ACT !== 'undefined' && ACT ? ACT.placeId || null : null], torres: [S[INTRO_ESCORT], h(S[INTRO_ESCORT])], calder: [S.calder, h(S.calder)], t: clockText() }; })()")
