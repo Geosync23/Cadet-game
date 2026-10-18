@@ -241,7 +241,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.60.6a
+   STARSHIP CADET: CSV Wren                           build 0.38.24
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -2716,7 +2716,7 @@ const TEMPLATES = {
     const fz = V - 2.6;                                  // depth left in front of the footlockers
     if (fz >= 1.35) {
       const lv = Math.max(.75, Math.min(1.6, fz - .7));
-      out.push({ kind: 'locker', u: .4, v: lv, back: 'left', spot: 'cleanUniforms' });
+      out.push({ kind: 'locker', u: .4, v: lv, back: 'left', spot: 'cleanUniforms', o: o.wardrobe ? { it: o.wardrobe } : undefined });   // o.wardrobe: this one's a bed's wardrobe (0.38.24)
       out.push({ kind: 'locker', u: U - .4, v: lv, back: 'right', spot: 'cleanUniforms' });
     }
     if (V >= 6) {
@@ -4122,7 +4122,8 @@ DECKS[4] = {
       d: ['A guitar case under the bottom bunk. Nobody has heard it played.'],
       h: ['Curtain drawn. Someone on the night shift is asleep in there. Tiptoe.', 'Night shift. A sign says DAY SHIFT: PLEASE WHISPER.', 'Blackout blind down. Both berths belong to the night shift.'],
     };
-    for (const k of 'abcdefgh') furnish(k, 'bunkRoom', { blankets: k === 'h' ? night : undefined, its: (bunkText[k] || []).map(x => IT('Bunk', x)) });
+    for (const k of 'abcdefgh') furnish(k, 'bunkRoom', { blankets: k === 'h' ? night : undefined, its: (bunkText[k] || []).map(x => IT('Bunk', x)),
+      wardrobe: k === 'a' ? { ...IT('Your wardrobe', 'Your locker by the door, with your name on a strip of tape. Clean clothes on the left, and a hook for the hamper.'), wardrobe: '4-B1-4' } : undefined });   // 0.38.24: your wardrobe (DECKS[4].wardrobes)
     furnish('p', 'washroom'); furnish('q', 'washroom');   // two showers and a toilet each (0.27.45: the user kept the showers)
     furnish('l', 'laundry');
     // junior common room (6 x 8): stern windows, a sofa facing them, a Tiles table and a kettle
@@ -4132,7 +4133,7 @@ DECKS[4] = {
     place('j', 'coffeeTable', 3.3, 4, 'n');
     place('j', 'armchair', 3.3, 2.0, 'n', { fab: M.plum });
     place('j', 'armchair', 3.3, 6.0, 's', { fab: M.mustard });
-    place('j', 'cardTable', 1.15, 1.1, 'n', { it: IT('Tiles table', 'A game of Tiles is always about to start. Rina has never lost here.') });
+    place('j', 'cardTable', 1.15, 1.1, 'n', { it: { ...IT('Tiles table', 'A game of Tiles is always about to start. Rina has never lost here.'), tiles: 4 } });   // tiles: DECKS[4].tiles (0.38.24)
     place('j', 'dispenser', 5.5, .38, 'n', { it: IT('Kettle', 'It never fully cools. Chef Brennan refills the biscuit tin when nobody is looking.') });
     place('j', 'bookshelf', 5.3, 7.7, 's', { it: IT('Swap shelf', 'Take a book, leave a book. Mostly thrillers and one very battered star atlas.') });
     place('j', 'plant', .5, 7.5, 's', { big: true });
@@ -4489,8 +4490,8 @@ DECKS[5] = {
     // main storage: four aisles sorted by system, the counter by the door, and a dusty back corner
     place('r', 'counter', .4, 4.0, 'w', { it: IT('Check-out counter', 'Sign out what you take. The log says three filters left yesterday and nobody signed for them.') });
     [['Lights', 3.5], ['Filters', 5.5], ['Plumbing', 7.5], ['Galley parts', 9.67]].forEach(([name, x]) => {
-      for (const z of [1.6, 2.8, 4.0]) place('r', 'shelving', x, z, 'e', { fadeGroup: 'r:' + name, it: IT(name, { Lights: 'Bulbs, strips and spare lamp heads, sorted by deck.', Filters: 'Air filters in three sizes. The scrubber ones go fastest.',
-        Plumbing: 'Seals, valves and pipe joints. One box is labelled DO NOT.', 'Galley parts': 'Oven elements, fan belts and a whole shelf for Chef Brennan\'s mixer.' }[name]) });
+      for (const z of [1.6, 2.8, 4.0]) place('r', 'shelving', x, z, 'e', { fadeGroup: 'r:' + name, it: shelfIt(name, { Lights: 'Bulbs, strips and spare lamp heads, sorted by deck.', Filters: 'Air filters in three sizes. The scrubber ones go fastest.',
+        Plumbing: 'Seals, valves and pipe joints. One box is labelled DO NOT.', 'Galley parts': 'Oven elements, fan belts and a whole shelf for Chef Brennan\'s mixer.' }[name]) });   // shelfIt: tagged shelf: <id> (0.38.24)
       place('r', 'aisleSign', x, 4.85, 'n', { text: name });
     });
     place('r', 'tarpHeap', 9.45, .5, 'n', { it: IT('Under a tarp', 'A decorative fountain, still in its crate. Nobody remembers ordering it. The label says Deck 2.') });
@@ -4886,7 +4887,7 @@ DECKS[3] = {
   // the bow lounge's curves: the bar sweeping out from the aft wall round the galley door, and two planted glass
   // screens on one arc, splitting the lively bar end from the quiet window end with the way through left open
   curves: [
-    { kind: 'bar', arc: [41, 5.6, 2.6, -90, 90], out: -1, it: { t: 'The bar', x: 'A curved bar in dark wood with a brass foot rail, lit from underneath. Stocked from the galley through the door behind it. Juice, tea and a short list of things the Captain approves of.' } },
+    { kind: 'bar', arc: [41, 5.6, 2.6, -90, 90], out: -1, it: { t: 'The bar', x: 'A curved bar in dark wood with a brass foot rail, lit from underneath. Stocked from the galley through the door behind it. Juice, tea and a short list of things the Captain approves of.', bar: true } },   // bar: the bar order's tap (0.38.24)
     { kind: 'glass', arc: [40, 11, 7, -38, -23], it: { t: 'Glass screen', x: 'Planted low, glass above: it keeps the bar\'s noise at the bar end without hiding the view.' } },
     { kind: 'glass', arc: [40, 11, 7, 23, 38] },
   ],
@@ -7199,8 +7200,33 @@ DECKS[3].tiles = { room: 'L', station: ['3-tiles-1', '3-tiles-2'], board: [44.5,
     [49.4, .405, 10.895, 0, .26, [26, 28, 29]], [47.6, .445, 6.27, 0, .24, [31, 30]], [47.6, .445, 16.27, 0, .24, [32, 33]]].map(b => (b[5] = b[5].map(n => '3-lounge-' + n), b)) };
 function tilesSeats(k) {
   const T3 = DECKS[3].tiles;
+  if (k === 'j') return DECKS[4].tiles.station.slice();   // the junior common room's Tiles table (0.38.24)
   return k === 'station' ? T3.station.slice() : T3.boards[k] ? T3.boards[k][5].slice() : [];
 }
+// 0.38.24 (0.60.7, deck architect 4; DEV_NOTES "Places for 0.60.7"): the new places' data. All inert until a seat uses them:
+// the bar's staff and order spots are new types nobody's pool reads, your wardrobe's place is owned by your bed.
+// bar: the bow lounge bar. staff: behind the counter (the middle, then by the galley door), facing the stools; order: standing
+// between two stools at the counter, facing it. The bar's tap item has bar: true.
+DECKS[3].places.push(
+  { id: '3-bar-1', type: 'bar-staff', at: [42, 5], xy: [42.45, 5.6], face: 90, pose: 'stand', anim: 'work', room: 'L' },
+  { id: '3-bar-2', type: 'bar-staff', at: [41, 6], xy: [41.55, 6.45], face: 70, pose: 'stand', anim: 'work', room: 'L' },
+  { id: '3-bar-order-1', type: 'bar-order', at: [44, 5], xy: [44.2, 5.6], face: -90, pose: 'stand', room: 'L' },
+  { id: '3-bar-order-2', type: 'bar-order', at: [43, 3], xy: [43.45, 3.55], face: -50, pose: 'stand', room: 'L' },
+);
+DECKS[3].bar = { room: 'L', staff: ['3-bar-1', '3-bar-2'], order: ['3-bar-order-1', '3-bar-order-2'] };
+// wardrobes: bed -> its wardrobe (the locker by the door in Bunk 1 for yours; its item has wardrobe: <bed>) and where you
+// stand to use it, facing it
+DECKS[4].places.push({ id: '4-B1-4-wardrobe', type: 'event', at: [7, 3], xy: [7.15, 3.25], face: 'w', pose: 'stand', room: 'a' });
+DECKS[4].wardrobes = { '4-B1-4': { room: 'a', place: '4-B1-4-wardrobe' } };
+// tiles on Deck 4: the junior common room's card table is a Tiles table (its item has tiles: 4). The four stools stay
+// everyday seats (type common-room); station is the pair facing across the table, seats all four
+DECKS[4].tiles = { room: 'j', station: ['4-common-8', '4-common-9'], seats: ['4-common-8', '4-common-9', '4-common-10', '4-common-11'], board: [3.15, .755, 7.1] };
+// shelves: main storage's four shelves on Deck 5 (place: where you stand to take a part, group: the shelving's fade group;
+// every shelving piece of a shelf has shelf: <id>). shelfItems(id) -> that shelf's tap items on the deck you're on ([] elsewhere)
+DECKS[5].shelves = [{ id: 'lights', name: 'Lights', place: '5-parts-1', group: 'r:Lights' }, { id: 'filters', name: 'Filters', place: '5-parts-2', group: 'r:Filters' },
+  { id: 'plumbing', name: 'Plumbing', place: '5-parts-3', group: 'r:Plumbing' }, { id: 'galley', name: 'Galley parts', place: '5-parts-4', group: 'r:Galley parts' }];
+function shelfIt(name, x) { const sh = DECKS[5].shelves.find(q => q.name === name); return { ...IT(name, x), shelf: sh ? sh.id : undefined }; }
+const shelfItems = id => (deckDef && deckDef.num === 5 ? ITEMS.filter(it => it.shelf === id) : []);
 function visitSpots(id) {
   for (const n of Object.keys(DECKS)) {
     const v = (DECKS[n].visits || {})[id]; if (!v) continue;
@@ -7591,7 +7617,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.60.6a';                           // keep in step with the header's build line
+const GAME_BUILD = '0.38.24';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
