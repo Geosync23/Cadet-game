@@ -176,7 +176,7 @@ with sync_playwright() as pw:
 
     print('(e) Bands, skill words, tools, penalties:')
     e = ev("""(() => { SHIP.works = null; setShipNow(1440 + 600); const W = worksInit(), out = {};
-      out.bands = [0, 6, 7, 14, 15, 23, 24, 31, 32, 90].map(x => { W.xp = x; return worksBand(); });
+      out.bands = [0, 7, 8, 17, 18, 29, 30, 39, 40, 90].map(x => { W.xp = x; return worksBand(); });
       W.rank = 'officer'; W.xp = 0; out.officer = worksBandWord(); W.rank = 'junior';
       out.words = [0, 4, 5, 14, 15].map(n => { W.sk.oven = n; return skillWord('oven'); });
       out.give = toolGive('scanner'); out.again = toolGive('scanner'); out.has = hasTool('scanner'); W.tr.m7 = 5; for (let k = 0; k < 10; k++) worksUse('m7'); out.wear = toolWear('scanner');
