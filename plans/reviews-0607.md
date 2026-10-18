@@ -9,6 +9,15 @@
 
 ## Verdicts
 
+### PE6 0.28.62-0.28.64, claude/player-needs 4a7673c (in depth): PASS, my earlier MED fixed
+Bathroom at half rate and a toilet icon; the low-need pop-up; the Tiles table plays any time; the Gym club member takes a held machine; the bar order (`SHIP.player.bar`); the Hobbies app, store supplies, Record words and the Settling-in hobby; the free-time tips and Ideas for tonight; the time clock screen (`SHIP.player.clockLog`); more leisure sources; sharing a hobby.
+- **Checks I ran:** cadet_test vs 52839a6 **ALL IDENTICAL**, no errors. The builder reports player_check OK and tiles_check ALL OK (interactions_check was rerunning).
+- **MED from 52839a6 fixed:** player_check line 865 now treats leisure like bathroom (left out = 1), and the save checks allow for leisure.
+- **Behaviour looked at:** the Gym club member takes `near[0]` only when every nearby machine is held; the crew member moves because section 10 sends anyone whose goal is `PLAYER_PLACE` `elsewhere` (34220). `actBegin` skips the "in use" check only for `A.o.member`. The bar: you pay 2 credits, `SHIP.player.drink` is in hand (not saved, by design), and a stool's `ixDrink` takes it. "The usual" comes after three of the same. Closed outside 17:30-23:00 or with nobody behind the bar (so it's always closed on this branch alone, and needs social's bartender role in the combine). The pop-up uses `simTimeout`, `needWarnTick` paces it, and the second warning stays a toast. The time clock screen uses the `{time}` key (the writer's LOW). Tiles any time only at the junior common room's table on Deck 4. The Tiles leisure is a quarter for repeat games, like the social gain.
+- **Save:** `bar` is `{ last, run }` (run capped at 99). `clockLog` keeps at most 15 day keys (pruned in the save hook), validated on load. `hobbies` is as before. All small.
+- **LOW 1:** `clockLog` is only written when you clock out on the screen. The 17:00 auto clock-out (Zeke: "forget to clock out and it does it at five") and any other `careerClock` path don't log, so "This week" under-counts those days. Log it inside `careerClock` on `'out'` instead.
+- **LOW 2:** a bought drink isn't saved; a save and reload with one in hand loses it and the 2 credits. Fine as designed, just noting it.
+
 ### Social (sim items) 0.36.85-0.36.90, claude/social-0607 d3d5b4d (in depth): PASS
 Sections 10/14/16: trays go with the meal (`TRAY_AT`/`trayBack` gone); `morning()` takes a gathering before breakfast; `spotTaken`/`arriveNear` when crew arrive part way (the day-100 fix); the galley's `bar` role; `crewHobby` and the hobby bias in `crewPose`. DA4's 031c0e4 is merged in.
 - **Checks I ran:** **food_check: FOOD CHECK OK** (the rota with the bar role, galley staff at their stations, no errors). The builder reports day_check, events_check (the day-100 Founding Day walk: 0 shared, 47 of 47 reached) and, on a scratch merge with traditions d27980f, their events_check OK. cadet_test differs only because a Day 1 galley hand now has the bar role and sleeps later; a copy without the bar role is ALL IDENTICAL.
