@@ -183,8 +183,8 @@ LIVE = r"""(() => {
   const tick = (a, b) => { for (let t = a; t <= b; t++) { setShipNow(t); eventsTick(); } };
   const frames = () => { window.__skip = false; window.__step(1, 1); window.__step(2, 16); return renderer.info.render.calls; };
   skipTo(9 * 1440 + 7 * 60); eventStart('ionStorm', 10); EV_DAYS.clear(); eventAdvance(shipNow(), true);
-  // the briefing: day 10, 08:15, the Works bay
-  put(5, '5-jobboard-1'); tick(9 * 1440 + 7 * 60 + 50, 9 * 1440 + 8 * 60 + 16);
+  // the briefing: day 10, 09:15, the Works bay (0.70.1: the 09:00 shift)
+  put(5, '5-jobboard-1'); tick(9 * 1440 + 8 * 60 + 50, 9 * 1440 + 9 * 60 + 16);
   D.briefing = DIALOGUE ? { open: true, cast: Object.fromEntries(Object.entries(DIALOGUE.cast).map(([k, p]) => [k, p.name])), first: dialogueView() } : { open: false };
   const devDlg = document.getElementById('devDlg');   // section 19's panel (deviceDialogue) when the device is merged, else the plain strip
   D.panel = !!(DIALOGUE_EL && !DIALOGUE_EL.hidden && DIALOGUE_EL.textContent.length > 5) || !!(devDlg && !devDlg.hidden && devDlg.textContent.length > 5);
@@ -595,7 +595,7 @@ with sync_playwright() as pw:
     if len(a['addr']) != 2 or 'in it' not in a['addr'][0] or 'passed' not in a['addr'][1]: fail(f"the Captain's addresses: {a['addr']}")
     if not any('Storm prep' in x for x in a['mails']) or not any('how it went' in x for x in a['mails']): fail(f"the storm's Mail: {a['mails']}")
     if len(a['news']) != 7 or not all('@10 ' in x for x in a['news']): fail(f"the storm's news: {a['news']}")
-    if a['on'] != ['10:0 warning@360', '11:1 warning@0 onset@840', '13:3 escalation@0 resolution@600 afterglow@1320', '16:-'] or 'stormBriefing works-bay 08:15' not in a['gath'][0] or 'party bow-lounge 19:00' not in a['gath'][1]: fail(f"eventOn / eventGatherings: {a['on']} {a['gath']}")
+    if a['on'] != ['10:0 warning@360', '11:1 warning@0 onset@840', '13:3 escalation@0 resolution@600 afterglow@1320', '16:-'] or 'stormBriefing works-bay 09:15' not in a['gath'][0] or 'party bow-lounge 19:00' not in a['gath'][1]: fail(f"eventOn / eventGatherings: {a['on']} {a['gath']}")
     if len(a['meets']) != 2: fail(f"the storm's meetings: {a['meets']}")
     if m.get('menu') != 'stormStew': fail('eventMod at t: no storm stew in the escalation')
     if a['log'] and 'calls' not in a['log'][0]['threads']: fail('the call-home backlog was not scored')

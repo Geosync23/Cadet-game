@@ -252,7 +252,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.70.1
+   STARSHIP CADET: CSV Wren                           build 0.70.2
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7922,7 +7922,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.70.1';                           // keep in step with the header's build line
+const GAME_BUILD = '0.70.2';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -30792,8 +30792,9 @@ SHIP_EVENTS.ionStorm = {
   ],
   // meetings with dialogue: who: ROSTER ids, or 'works:2' (two Works crew on shift there, the script's tech1 and tech2)
   meetings: [
-    { id: 'stormBriefing', phase: 'warning', at: [0, 495], len: 12, where: { venue: 'works-bay', deck: 5, room: /^Works bay$/ }, script: 'calderStorm', who: ['calder', 'works:2'],
-      notify: 'Chief Calder\'s storm briefing, at the job board in the Works bay at 08:15.' },
+    { id: 'stormBriefing', phase: 'warning', at: [0, 555],   // 09:15 (0.70.1: the day shift starts at 09:00, playtest 1; was 08:15)
+      len: 12, where: { venue: 'works-bay', deck: 5, room: /^Works bay$/ }, script: 'calderStorm', who: ['calder', 'works:2'],
+      notify: 'Chief Calder\'s storm briefing, at the job board in the Works bay at 09:15.' },
     { id: 'allClear', phase: 'resolution', at: [3, 600], len: 12, where: { venue: 'observation', deck: 1, room: /^Observation room$/ }, script: 'captainAllClear', who: ['marrow', 'vance', 'sato', 'holt', 'calder'] },
   ],
   address: {
@@ -31205,7 +31206,7 @@ function dialogueStep(k) {
 const dialogueNext = () => dialogueStep(), dialogueChoose = k => dialogueStep(k);   // section 19's taps
 // a job offered in a meeting: always remembered in SHIP.event.mine ('wants:<job>': the sign-up sheet reads it, and
 // section 17 claims it for you when it posts it later), and claimed at once if section 17 has already posted it
-// (tagged event and eventJob). The lead's 0.41.7 merge fix: the battery job is already up at the 08:15 briefing
+// (tagged event and eventJob). The lead's 0.41.7 merge fix: the battery job is already up at the briefing (09:15 since 0.70.1)
 function eventTakeJob(job) {
   const e = SHIP.event; if (!e) return false;
   e.mine['wants:' + job] = 1;
