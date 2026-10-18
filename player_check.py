@@ -974,8 +974,10 @@ with sync_playwright() as pw:
         # the wrist comm: a job you could take, posted while you're free
         nt = g.ev(r"""(() => { const t0 = document.getElementById('tx').textContent; JOB_SEEN = new Set(); machinesNow(); actEnd(true);
           const held = SHIP.jobs.filter(j => j.claimedBy === 'you' && j.status === 'claimed'); for (const j of held) { j.claimedBy = null; j.status = 'open'; }   // free hands (test only: Step 2 posts the drill already yours)
-          const j = SHIP.jobs.find(j => j.machine && j.status !== 'done' && jobTier(j) <= PLAYER_TIER && !ENGINE_KINDS.has(machineById(j.machine).kind));
-          if (!j) return null; j.claimedBy = null; j.status = 'open'; delete j.start; j.found = Math.min(j.found, shipNow()); MACH_REV++; jobNotice();
+          const ok = j => j.machine && j.status !== 'done' && jobTier(j) <= PLAYER_TIER && !ENGINE_KINDS.has(machineById(j.machine).kind);
+          const j = jobsBoard().find(j => ok(j) && !j.claimedBy) || SHIP.jobs.find(j => ok(j) && jobsBoard().some(x => x.id === j.id));   // one the board shows (Step 2 holds some off it)
+          if (!j) { for (const h of held) { h.claimedBy = 'you'; h.status = 'claimed'; } MACH_REV++; return null; }
+          j.claimedBy = null; j.status = 'open'; delete j.start; j.found = Math.min(j.found, shipNow()); MACH_REV++; jobNotice();
           const out = [document.getElementById('tt').textContent, document.getElementById('tx').textContent]; for (const h of held) { h.claimedBy = 'you'; h.status = 'claimed'; } MACH_REV++; return out; })()""")
         print('  notice:', nt)
         check(nt is None or (nt[0] == 'Your device' and nt[1].startswith('New job')), f'job loop: a new job you could take should be announced ({nt})')
