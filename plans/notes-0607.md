@@ -52,3 +52,8 @@ Q1, Q4, Q5, Q8, Q9 (today+6), Q10, Q11 (Deck 2 suite), Q12 as suggested. Q2: add
 
 ## Stores answers (2026-10-18 ~00:10, db survey/s0607b)
 Q13 weekly Wednesday 10:00; Q14 no penalty, note: "indicator shows you" (a visual pointer to the right shelf); Q15 held till 14:00 then crew where you can see; Q16 crates appear in the hold.
+
+## Carried into 0.60.7 from 0.60.6 reviews (lead)
+- Shuffle "Sorry" bubble can evict an overheard line or the arrival escort's line (BUBBLE_MAX 2): only bubble when a slot is free (1g LOW, one line).
+- Crew lines in section 22 still lower-case tradition names (ctx.trad ~29190) (PE8).
+- Pillar 5 later tidy: option B (shorter seat ray for all chairs) parked by DA3.
