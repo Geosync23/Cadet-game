@@ -1,0 +1,19 @@
+@meeting train.p3.torres-zeke
+// Pillar 5, P3, if Torres teaches it (a save where the row opens on a day he's on shift). Head writer, seat W.
+title: A funny one
+from: Zeke Torres
+gist: Your first head-scratcher: a machine that's still wrong after the crew tried. Cross off what didn't work.
+== lines
+torres-zeke: Ooh. A head-scratcher. My favourite kind of job.   [laugh]
+torres-zeke: People have had a go already. Nothing worked. They left notes.
+torres-zeke > you: Open Fault notes. There's your suspects. Now the notes.
+torres-zeke: Calder's rule. If someone fitted it and it's still wrong, it isn't that.
+torres-zeke: First note's on the job. Read it. What can you cross off?
+? choice
+* Whatever they fitted.   rel:torres-zeke+2 flavour:practical
+  torres-zeke: Exactly. Cross it off.   [nod]
+* What if they fitted it badly?   rel:torres-zeke+1 flavour:listen
+  torres-zeke: Good question. Not today. Today the notes are true.
+* (Cross it off)
+  torres-zeke: Look at you. Detective.
+torres-zeke: Next note's at the machine. Lead on. I'll follow and hum.

@@ -1,0 +1,160 @@
+@bank all
+// Pillar 5 (head writer, seat W): what you see on your rounds (M1, 24a's roundSign). TEXTS. sign.<kind>.<state>,
+// state healthy / worn / faulty (faulty means faulty or worse). A few per state; 24a picks one by the day.
+// Kinds: the Tier 1 ten, plus scrubber and heater for rounds that pass them. Plain words, a few at a time.
+
+== sign.washer.healthy
+- Drum turns clean and quiet.
+- A smooth spin. No drips.
+- Dry floor, quiet drum.
+== sign.washer.worn
+- A faint rattle at the end of the spin.
+- The door seal looks a little tired.
+- A damp patch by the pump. Just a damp patch.
+== sign.washer.faulty
+- Water pooling under it.
+- It thumps on the spin and walks across the floor.
+- It stops halfway and clicks.
+
+== sign.oven.healthy
+- Even heat, door seal snug.
+- Warms up quickly and evenly.
+- A steady glow behind the glass.
+== sign.oven.worn
+- The door seal's a bit tired.
+- Slow to warm up this morning.
+- A squeal from the fan, then quiet.
+== sign.oven.faulty
+- Hot one side, cool the other.
+- Barely warm after ten minutes.
+- The glow stutters.
+
+== sign.range.healthy
+- Every ring heats evenly.
+- Clean rings, quick heat.
+- Clicks once, heats at once.
+== sign.range.worn
+- One ring's a touch slow.
+- A click, a pause, then heat.
+- A ring's edge is darker than the rest.
+== sign.range.faulty
+- One ring stays cold.
+- It clicks and clicks. No heat.
+- Every ring too fierce.
+
+== sign.galleyplant.healthy
+- A low, steady draw.
+- The grille's clean. The fan's quiet.
+- Air moving nicely.
+== sign.galleyplant.worn
+- A faint squeal as it starts.
+- A film of grease on the grille.
+- The belt looks shiny.
+== sign.galleyplant.faulty
+- Barely drawing. The air's thick.
+- A grinding hum.
+- Grease dripping off the grille.
+
+== sign.extractor.healthy
+- The hood draws clean.
+- Smoke goes straight up and out.
+- Quiet and steady.
+== sign.extractor.worn
+- A squeal at start, then fine.
+- The hood's filter is darkening.
+- Smoke hangs a moment too long.
+== sign.extractor.faulty
+- Smoke lingers over the hob.
+- It runs, stops, runs again.
+- Grease dripping at the hood's edge.
+
+== sign.chiller.healthy
+- Cold and quiet. A soft hum.
+- Door shuts with a good seal.
+- Frost-free and steady.
+== sign.chiller.worn
+- A little frost round the door frame.
+- The hum runs a bit long.
+- The back shelf's not as cold as the front.
+== sign.chiller.faulty
+- Warm inside. The milk won't last.
+- A laboured hum that never stops.
+- A rattle from the back.
+
+== sign.lift.healthy
+- Smooth between decks.
+- Doors open on time.
+- A quiet ride.
+== sign.lift.worn
+- A short pause before the doors open.
+- A faint grinding between decks.
+- It hesitates at Four.
+== sign.lift.faulty
+- It judders between decks.
+- It stalls at the doors.
+- The breaker light's on.
+
+== sign.lights.healthy
+- Steady light.
+- Every lamp bright and even.
+- Quiet in the box.
+== sign.lights.worn
+- A click now and then in the box.
+- One lamp's a touch dim.
+- A slight flicker after a while.
+== sign.lights.faulty
+- The lights stutter.
+- A whole run's dark.
+- Flickers every time the door slams.
+
+== sign.cartdock.healthy
+- The lamp holds steady. Charging.
+- The cart's gauge climbs nicely.
+- Plug in, lamp on. Good.
+== sign.cartdock.worn
+- The lamp blinks before it holds.
+- The gauge is slow to climb.
+- The cable's worn near the plug.
+== sign.cartdock.faulty
+- It won't charge at all.
+- Stuck at three quarters.
+- Only charges if you jiggle the plug.
+
+== sign.growlight.healthy
+- A rack of bright pink lamps.
+- Even light along the rack.
+- Warm and bright.
+== sign.growlight.worn
+- One lamp in the row is pale.
+- The rack blinks once, then holds.
+- A lamp at the end looks tired.
+== sign.growlight.faulty
+- A whole row gone pale.
+- The rack keeps cutting out.
+- Lit at the wrong hour.
+
+== sign.scrubber.healthy
+- A low, even hum.
+- The air smells clean.
+- The grille is clear.
+== sign.scrubber.worn
+- The hum's a touch higher than it should be.
+- The grille's going grey.
+- A faint whine under the hum.
+== sign.scrubber.faulty
+- It's labouring. The air's stale near it.
+- A loud whine.
+- The grille's thick with grey.
+
+== sign.heater.healthy
+- Warm and quiet.
+- The pipes are warm along their length.
+- A gentle tick as it runs.
+== sign.heater.worn
+- One branch is cooler than the rest.
+- A knock now and then.
+- It clicks off and on.
+== sign.heater.faulty
+- Cold pipes. Cold cabins.
+- A steady knocking.
+- Off, on, off, on.

@@ -66,7 +66,7 @@ PLACES = r"""(() => {
   const seenAll = flood(passFor(null)), seenWorks = flood(passFor(WORKS));
   const bad = [], counts = {};
   for (const p of ps) {
-    const why = [], works = p.type === 'work:works' || p.type === 'storage', seen = works ? seenWorks : seenAll, pass = passFor(works ? WORKS : null);
+    const why = [], works = p.type === 'work:works' || p.type === 'storage' || p.works === true, seen = works ? seenWorks : seenAll, pass = passFor(works ? WORKS : null);
     if (typeof p.id !== 'string' || !p.id) why.push('no id');
     if (!(TYPES.includes(p.type) || /^work:[a-z-]+$/.test(p.type || ''))) why.push('type ' + p.type);
     if (!POSES.includes(p.pose)) why.push('pose ' + p.pose);

@@ -1,0 +1,53 @@
+@bank all
+// Pillar 5 (head writer, seat W): "What's next" (seat C's worksNext, 24.4). One true sentence, shown on the Record and
+// the Training tab. next.<id>: the next row that hasn't opened (what's coming). next.wait.<id>: it's open, go and
+// find them. next.band.<band>: nothing new ahead in this rank yet. TEXTS.
+
+== next.m1
+- Torres wants to show you his round.
+== next.wait.m1
+- Torres is waiting to show you his round. Find him.
+== next.m4
+- Yara Esposito could use a hand with the stores.
+== next.wait.m4
+- Yara has a hauling run for you. Stores, Deck 5.
+== next.m3d
+- Wednesday at three: the drill. Calder runs it.
+== next.wait.m3d
+- The drill's on. Calder's waiting.
+== next.m5
+- Brennan's oven needs a lesson in tuning: Calder will show you.
+== next.wait.m5
+- Brennan and Calder are waiting for you in the galley.
+== next.m3i
+- Thursday morning: Tomas will check your bunk. Tidy up.
+== next.wait.m3i
+- Inspection now. Tomas is on his way.
+== next.m7
+- Something's coming your way from Torres. A tool.
+== next.wait.m7
+- Torres left something for you at the board.
+== next.p3
+- The Chief has a funny one for you soon.
+== next.wait.p3
+- Calder has a head-scratcher waiting at the board.
+== next.m6
+- Calder will teach you how to make things safe.
+== next.wait.m6
+- Calder's waiting to teach you about incidents.
+== next.m2
+- Your first oily job will earn you a work uniform.
+== next.wait.m2
+- Torres has something for you to wear. Find him.
+== next.t2
+- Calder has a test job for you: Tier 2.
+== next.band.new
+- Keep at it: the board will teach you plenty.
+== next.band.steady
+- Keep at it: Calder's watching your work.
+== next.band.reliable
+- People are starting to rely on you. Keep going.
+== next.band.trusted
+- The real faults come to you first now. Show them why.
+== next.band.relied
+- Calder relies on you. That's not nothing.

@@ -1,0 +1,19 @@
+@meeting train.m3i.tomas
+// Pillar 5, M3 the inspection (Day 4, Thursday, before 06:30, Bunk 1): Tomas shows you the three things. The day's
+// small new thing. Head writer, seat W. (Calder walks the wing on your first; later the duty officer.)
+title: Inspection morning
+from: Tomas
+gist: Tomas showed you the Thursday inspection: a clean uniform, your berth made, your locker tidy. Before 06:30.
+== lines
+tomas: Oh no. Thursday. Inspection. I forgot it was Thursday.   [sigh]
+tomas > you: Three things. Clean uniform. Bed made. Locker tidy. Before half six.
+tomas: Corners. She checks the corners. I think she has a ruler. I've never seen it.
+tomas: Tidy means nothing loose. Put things away. All the things.
+? choice
+* Help me with the corners?   rel:tomas+2 flavour:practical
+  tomas: Fold, tuck, fold again. Like a parcel. A very flat parcel.   [gesture]
+* What if it's not perfect?   rel:tomas+1 flavour:listen
+  tomas: Then she says something. Quietly. That's worse, sort of. But that's all.
+* You'll be fine, Tomas.   rel:tomas+1 flavour:cheer
+  tomas: Will I? Yes. I will. Thank you. Thank you.   [laugh]
+tomas: Quick. She's on the stairs. No, the lift. Same thing. Quick.

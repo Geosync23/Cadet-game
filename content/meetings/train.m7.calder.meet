@@ -1,0 +1,21 @@
+@meeting train.m7.calder
+// Pillar 5, M7 (Day 5, Friday): Calder hands you Torres's old scanner at the board (Torres is off on Fridays) and does
+// the first reading. Head writer, seat W. One choice, no wrong answer.
+title: Torres's old scanner
+from: Chief Ines Calder
+gist: Calder gave you Torres's old scanner. It reads a machine's parts, so you can choose which one to fetch.
+== lines
+calder: Right. Torres is off. He left this for you.   [gesture]
+calder > you: His old scanner. There's a note. I didn't read it. I read it.
+calder: Hold it to a panel. It reads each part. A bar and a word.
+calder: Good, worn, low, failing. One is usually clearly off. That's your part.
+calder: Sometimes two read low. Then you use your eyes. The job card, and what you see up close.
+calder: Pick wrong and you walk back. That's all. Nobody shouts.
+? choice
+* How do I tell two low parts apart?   rel:calder+2 flavour:practical
+  calder: Look before you scan. A cold door is a seal. A cold oven is an element.   [nod]
+* Torres gave me his scanner?   rel:calder+1 flavour:listen
+  calder: He did. He'll pretend it was nothing. It wasn't.
+* (Turn it over in your hands)
+  calder: It's older than you. It still works. Like most of Works.
+calder: There's one held for you. I'll read the first. You watch. Then you do one.

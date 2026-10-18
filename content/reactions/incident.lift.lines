@@ -1,0 +1,8 @@
+@reactions incident.lift
+// Pillar 5 (head writer, seat W): the lift stuck between decks (M6). Cue incident.lift; .you when you handled it.
+? cue:incident.lift.you
+- You got the lift going? I was nearly late for dinner.
+- Heard you let someone out of the lift. Good on you.
+?
+- Lift got stuck today. I took the ladder. My legs hate me.   #funny
+- Twenty minutes between decks. Imagine.
