@@ -50,3 +50,17 @@ cadet_test (ALL IDENTICAL on Deck 4), deck_check (Deck 7 everything reachable; 1
 - Waiting loops with `pgrep -f "<pattern>"` match themselves; read the log instead.
 - `relayBoard` is a WALL_KIT piece, not KIT.
 - Never put a `//` comment in the middle of a line you're replacing: it swallowed `A.z = p.z` once (NaN positions).
+
+## Next: Lightdisc on the court (the user's go, via lead 14, 2026-10-18)
+
+Brief (lead 14): integrate the approved prototype (`claude/lightdisc-proto` ba6b4ac, `lightdisc-proto.html`; spec in plan v5 section 4 on `claude/recdeck-plan` 7ab0d82) as 0.80.8+. Live on the 3D court, game-view camera, thumb-drag controls, rules, crew levels, How to play, results saved. Like Tiles you need an opponent: **Ask someone to play** brings one crew member down to the rec deck to play you, the one exception to player-only (they walk down, play, leave; no other crew behaviour). The ship clock **pauses** while you play, and the game says so clearly. Tests: a new disc_check (seeded games replay the same, same timing at different frame rates, save round trip), cadet_test identical on other decks, player_check. The prototype engineer is session_013LcEsgjMTDMMeiACKLj2bB.
+
+Prototype pointers (from its engineer): the game logic is its section 5 (`newGame`, `step`, `discStep`, `hit`, `point`, `aiMove`, `planAll`), pure and seeded, and ports as is; `LD.paper()` works a game out on paper; `fitGameView()` fits the camera; the fixed-step loop is the `acc`/`DT` loop in `frame()`; its check is `tools/lightdisc_proto_check.js`.
+
+Where it plugs into the rec deck:
+- **Taps:** `recTap` (section 15r) answers 'Lightdisc court', 'Scoreboard' and 'Ask someone to play' with a toast; replace that with the game's entry.
+- **The court:** room `C`, deck x 4-17, z 13-18 (13 × 5); baselines drawn at deck x 4.6 (stern, orange) and 16.4 (bow, cyan), sidelines z 13.3 and 17.7, net at x 10.5 (`recCourt`, room-local). You play from the bow end. The gate onto the court is `h,14,13`; the panel is a wall piece on `h,15,13` facing the court (`recPlayPanel`).
+- **The scoreboard** is a static canvas in `WALL_KIT.recScoreboard` (on the stern wall, centre y `H - .72`, 2.8 × 1.22); make its texture redrawable for live scores.
+- **The net and side fields** are `RK.net` / `RK.field` (additive, their opacity breathed by `PULSES`); a wall flash can reuse `RK.field`.
+- **The opponent exception:** `DECKS[7].playerOnly` keeps the deck out of the schedules (`schedData`, `placesOf`, `apptPlaces`, the job finder, the blackouts). The opponent has to come through some other route than the day plans (Tiles' way of fetching an opponent is the model).
+- **Pausing:** the clock's freeze is section 13's `FREEZE` / `freezeSync` (Tiles uses it).

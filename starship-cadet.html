@@ -14043,7 +14043,7 @@ function recStart(kind, title, flavour, p) {             // p: the tap in deck c
     const len = REC_WALL.z1 - REC_WALL.z0, r = Math.max(0, Math.min(REC_ROUTES - 1, Math.floor(((p ? p[1] : 4.3) - REC_WALL.z0) / len * REC_ROUTES)));
     const z = REC_WALL.z0 + len * (r + .5) / REC_ROUTES;
     actStart('recClimb', null, { title, flavour, spot: recSpot([2, Math.max(2, Math.min(6, Math.floor(z)))], 2.5, z, -Math.PI / 2, 'stand'),
-      move: { kind: 'climb', at: [1.95, z], face: 'w', top: Math.max(.8, H - 2.45), onRing: () => toast('The bell', 'Ding! You ring the brass bell at the top of the wall. The whole river hall hears it.') },
+      move: { kind: 'climb', at: [1.95, z], face: 'w', top: Math.max(.8, H - 2.25), onRing: () => toast('The bell', 'Ding! You ring the brass bell at the top of the wall. The whole river hall hears it.') },
       after: 'You clip into an auto-belay on the ' + ['red', 'yellow', 'blue', 'green'][r] + ' route and start up.' });
   } else if (kind === 'float') {
     actStart('recFloat', null, { title, flavour, spot: recSpot([18, 12], 20.5, 14.5, 0, 'stand'),
