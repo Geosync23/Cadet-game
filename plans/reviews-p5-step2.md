@@ -21,9 +21,15 @@ Spec: plans/brief-playtest1.md on claude/lead-pillar1 (12b1b87); the user's answ
 - S claude/ship-systems **03340c5** (0.33.48-0.33.51, Step 2 parts; also inside 78bf1c2, which R reviews for Step 1; 1 nit)
 
 ## Failing / waiting on a fix
+- A5 claude/deck-pt1 **1b41751** (0.47.4-0.47.7): one item (the beam's name planes 3 mm apart)
 - (none)
 
 ## Verdicts
+
+### A5 fcfe1c9 + 4455e4b + 71962e0 + c5ff5bf + 1b41751 (0.47.4-0.47.7): the Tern's second pass, poses, the night, the beam, the garden stretch — FAIL, one item (read in depth; A5's checks)
+- **Item 1 (blocking, phones first: no coplanar faces): the beam's name planes are 3 mm apart.** The beam's names canvas is at z .126 (opaque), the new `nameNew` plane at .129 (transparent, spanning slots 1-3 and covering slot 0's area too, since its height .375 covers both rows), and your name (`nameYours`) at .132. That's two 3 mm gaps between overlapping planes; the rule is at least 5 mm, and on a phone's depth buffer at that distance they'll shimmer. **Fix:** step them 6 mm apart: `nameNew` at `.132` and `nameYours` at `.138` (the flanges reach z .22, so nothing in front is touched). Or keep yours at .132 and size/place nameNew so it doesn't overlap slot 0, moving it to .138 anyway, since it still overlaps the canvas at .126 by 3 mm. Check the slot grid still reads from the textures afterwards.
+- Otherwise correct to the brief. 0.47.4: the Tern's second pass (the user's yes): same size, tiles, places, materials and draw calls (Deck 5 179). 0.47.5: the bike pedals forward (ACTS.cycle's ankle path); the bench press is its own `lie:bench` at 3-gym-6 (anim 'bench'), the barbell prop in both hands; the rack bar (now a noMerge group, 2 meshes) hides for half a second after a press (real-time, display only); `sit:talk` keeps the hands on the lap with an occasional small gesture (the mess's eating pose was why it looked fine there); NIGHT a little brighter (hemi .42, sunI .62, exp 1.03, colours through col()), with the dimming still from 20:30 (nightAt unchanged). 0.47.6: the beam in first names (BEAM.past, the crew's firstName), the west end (650 px) kept for the four newest in a 2 × 2 grid; nameNew from SHIP.traces { id: 'nameNew', day, name } (T pushes them), one canvas, 1 draw call. Sunrise stretch places in the garden (3-stretchg-1..8, event 'stretch-garden'). 0.47.7: the old 3-stretch-* retagged 'stretch-promenade' (inert); on this branch alone 68 stretch-morning plans fall back to the promenade benches, and with T's `where: @stretch-garden` they go to the garden. No R() in the new kit.
+- A5's checks: deck_check OK (Deck 3 226, Deck 5 179 calls by the lift, unchanged); crew plans identical but for the bench's label and 0.47.7's stretch mornings; cadet_test differs by at most 11 (e_night 131), from the brighter NIGHT at the 06:00 start; 0.47.6 ALL IDENTICAL. player_check's one FAIL (the new-job notice) is P's test, fixed in P f2156f1. Not re-run by me.
 
 ### O4 7a2bc5d (0.42.48): the two stand-ins say "wardrobe" — PASS (read)
 - Two fallback strings only (d0-wardrobe's line, the clothes tip); W's text wins anyway. The nit is closed.
