@@ -72,3 +72,4 @@ For 0.60.7:
 - A better clock-in / clock-out interface: a screen that pops up at the time clock, in the same art style as the personal device.
 - When any need gets low, a pop-up explains it in plain words (e.g. "You need to pee").
 - Zeke on Day 1 (following you on jobs): (a) the shuffle-aside / moving-past-people mechanic doesn't work for him; (b) he should say more about the job and act as a trainer on the first day; (c) he stops following after a job is done until the next job is picked, then starts again (should stay with you between jobs).
+  (d) sometimes Zeke isn't with you after the first lift ride down to Deck 4 (he should arrive with you every time).
