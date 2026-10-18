@@ -773,3 +773,18 @@
 - Have you read every note? One's hiding.
 ? flag:train.p3.hint.3
 - Try the machine's panel. Notes love a panel.
+// M1 rounds (Day 2): he looks at the first two stops (lead), then you look and mark (follow).
+? flag:train.m1.lead.look
+- Hear that? End of the spin. Bearing's going. Worn.
+- Low, even hum. That's a happy one. Fine.
+? flag:train.m1.follow.look
+- Your turn. Stand still a sec. Listen first.
+? flag:train.m1.mark.right
+- Good eye.
+- That's it. You're a natural. Don't tell Calder.   #funny
+? flag:train.m1.mark.wrong
+- Mm. Listen again.
+? flag:train.m1.mark.okay
+- Looks all right to me. Better safe, though.
+? flag:train.m1.follow.done
+- That's a round. Anything worn's on the board now. Yours.   #warm

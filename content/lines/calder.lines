@@ -500,3 +500,40 @@
 - Read every note. One isn't on the card.
 ? flag:train.p3.hint.3
 - The washer's panel. Second note. Go and look.
+// M5 tuning (Day 4): she does Oven 1 (lead), you do Oven 2 (follow).
+? flag:train.m5.lead.turn
+- One down. Watch it.
+- Another. Steady now. Done.
+? flag:train.m5.follow.turn
+- The glow. Not the card. Watch the glow.
+- Too far. It's dimming. Back one.
+? flag:train.m5.follow.done
+- Settled. That's tuning.
+// M6 incidents (Day 8): you lead every step; she follows.
+? flag:train.m6.follow.choose
+- Which valve? Follow the pipe.
+? flag:train.m6.follow.wrong
+- Still running. That one's downstream. Again.
+? flag:train.m6.follow.clean
+- Water's off. Mop. Plenty of it.
+? flag:train.m6.follow.fetch
+- One seal. Stores. Then the joint.
+? flag:train.m6.follow.done
+- Safe, clean, fixed. In that order. Good.
+
+// M3 the drill: her line at the end, from how long the Works team took (seat M1's fast / ok / slow)
+== drill.time.fast
+- Two minutes ten. Better.
+- Quick. Friday tea will hear about it.
+== drill.time.ok
+- Three minutes. Fine. We'll do better.
+- Not bad. Not good either. Next week.
+== drill.time.slow
+- Four and a half minutes. We'll talk about it.
+- Slow. Somebody stopped for tea. I know who.   #funny
+
+// M2: grubby uniform, briefly
+== clothes.grubby
+? flag:clothes.grubby
+- Change before you go near the galley.
+- Uniform. Wardrobe. Today.

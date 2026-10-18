@@ -165,3 +165,19 @@
 - failing
 == scan.fetch
 - Fetch: {part}
+
+// Step 2 asks (toast and Mail when a row opens; unsigned, the teacher sends it)
+== works.ask.m1
+- Fancy a walk? | Fancy a walk? I'll show you my round. Tea corner, or the bay till half eleven.
+== works.ask.m4
+- The rest of the delivery | Shelves done? Meet me at the hold. There's a manifest with your name on it.
+== works.ask.m3d
+- Drill at three | Drill at three. Works bay, ten to. Fire, this week.
+== works.ask.m5
+- Galley, 10:15 | Galley, 10:15. Bring nothing.
+== works.ask.m3i
+- Inspection tomorrow | Inspection is Thursday at 06:30. Clean uniform, bed made, locker tidy.
+== works.ask.m6
+- Burst pipe | Burst pipe, junior wing. With me.
+== works.ask.m2
+- Your uniform | Saw you after that job. Change before tea. A shower won't shift it. The wardrobe will.

@@ -1,0 +1,18 @@
+@meeting train.m1.torres-zeke
+// Pillar 5, M1 rounds (Day 2, Tuesday, after the 10:30 tea; the Works tea corner). Head writer, seat W.
+title: Torres's round
+from: Zeke Torres
+gist: Zeke showed you his morning round: walk a route of machines, look at each one, mark fine, worn or something's off.
+== lines
+torres-zeke: Fancy a walk? I'll show you my round.   [gesture]
+torres-zeke > you: Four or five machines on one deck. Look at each. Listen. Then mark it.
+torres-zeke: Fine, worn, or something's off. That's all the clipboard wants.
+torres-zeke: Worn's the one we're after. Catch it worn, it's a quick service. Miss it, it's a repair.
+? choice
+* What if I mark it wrong?   rel:torres-zeke+2 flavour:practical
+  torres-zeke: Then nothing happens. Or I say "looks all right to me". Nobody gets told off.
+* How do you know it's worn?   rel:torres-zeke+1 flavour:listen
+  torres-zeke: You hear it. A rattle that wasn't there. Heat where there shouldn't be. You'll see.
+* Lead on.   rel:torres-zeke+1 flavour:cheer
+  torres-zeke: That's the spirit. Deck 4 today.   [laugh]
+torres-zeke: I'll do the first two. You watch. Then the clipboard's yours.

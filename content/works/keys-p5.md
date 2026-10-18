@@ -75,3 +75,25 @@ teaches it), `next.wait.<id>` (opened but not trained yet: go and meet them), `n
 | `case.solved`, `case.wrong` | outcome texts |
 | `chief.p3.1` ... `chief.p3.3` | the Chief's notes, page 1 "What's been tried" |
 | teacher's hints 2 and 3 (c.train) | kind `work`, `? flag:train.p3.hint.2` / `.3` in the teacher's lines |
+
+## Step 2 (seats M1, M2; batch 2)
+
+Meetings (24.2): `train.m1.torres-zeke`, `train.m4.esposito-yara`, `train.m3d.calder`, `train.m3i.tomas`,
+`train.m5.calder` (Brennan in the cast), `train.m6.calder`, `train.m2.torres-zeke` (one line). Asks: `works.ask.<id>` for
+m1 m4 m3d m5 m3i m6 m2 (Mail "Subject | body", up to 140).
+
+Teachers' step words (kind `work`, flags as above): Torres `train.m1.lead.look`, `train.m1.follow.look/done`, and the mark
+reactions `train.m1.mark.right` (you marked worn/off on a worn/faulty machine), `.mark.wrong` (fine on a worn one),
+`.mark.okay` (worn/off on a healthy one). Yara `train.m4.lead.load`, `train.m4.follow.load/drop/done`; `haul.goodroute`
+(Yara's kind, stage 2). Calder `train.m5.lead.turn`, `train.m5.follow.turn/done`, `train.m6.follow.choose/wrong/clean/fetch/done`;
+`drill.time.fast|ok|slow` (her kind); `clothes.grubby` (her kind). Brennan `train.m5.grumble` (breakfast, Day 4) and
+`train.m5.follow.done` (the biscuit); `inc.alarm` (her kind). Tomas `inc.mop` (passing while you mop).
+
+| Seat | Texts (`content/works/step2.lines` unless noted) |
+| --- | --- |
+| M1 rounds | `round.title` ({deck}), `round.mark.fine/worn/off`, `round.okay`, `round.found` ({machine}), `round.done`, `round.pick`, `round.nose`; signs `sign.<kind>.healthy/worn/faulty` (`signs.lines`, Tier 1 kinds + scrubber, heater) |
+| M1 hauling | `haul.title` ({n}), `haul.manifest`, `haul.crate.<dest>`, `haul.stop.<dest>` (laundry infirmary store galley bridge), `haul.load`, `haul.drop`, `haul.done`, `haul.order`, `haul.goodroute.note`; stocktake `stock.title/look/wrong ({part} {shelf})/move/moved`; `haul.thanks` (crew, `remarks.lines`) |
+| M1 drill + inspection | `drill.kind.fire/pressure/power`, `drill.cal` ({drill}), `drill.toast`, `drill.job.<kind>`, `drill.allclear`, `drill.offduty`; `inspect.bed.button`, `inspect.locker.button`, `inspect.bed.done`, `inspect.locker.done`, `inspect.reminder`, `inspect.mail.subject`; the duty officer's remarks (`inspect.lines`): `inspect.nod`, `.uniform`, `.bed`, `.locker`, `.two`, `.none` and Mail `inspect.mail.<result>` |
+| M2 tuning | `tune.title` ({machine}), `tune.minus`, `tune.plus`, `tune.hot/warm/steady/cool/cold`, `tune.done` |
+| M2 incidents | `inc.card.burst` ({room}), `.lift`, `.alarm`; `inc.toast.<id>` ({deck}); `inc.step.safe/clean/fix`; `inc.wrong.valve`; `inc.safe.<id>`, `inc.clean.<id>`; `inc.done`; `inc.missed`; `inc.thanks` (the rescued rider, `remarks.lines`); reactions `@reactions incident.burst|lift|alarm` (cue `incident.<id>`, `.you` when you handled it) |
+| M1 uniform | `uniform.rule`, `uniform.grubby`, `uniform.wait` ({machine}); crew `clothes.grubby` (`remarks.lines`, gated `flag:clothes.grubby`) |
