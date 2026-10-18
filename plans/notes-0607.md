@@ -37,3 +37,13 @@
 > No weekly laundry duty. You do your own until you move upstairs.
 >
 > Get .6 out. In the meantime hire a .7 planner for all these features and fixes. Show me the plan when ready.
+
+## Survey answers (2026-10-18 ~00:01, db survey/s0607)
+Q1, Q4, Q5, Q8, Q9 (today+6), Q10, Q11 (Deck 2 suite), Q12 as suggested. Q2: add "Play games" on your personal device ("like Sims where it's a meter"). Q3: as suggested + reading and writing on your personal device; a tooltip explains hobbies and where to buy more. Q6: the full roster stays as the main view; another tab for Met / Acquaintances / Friends. Q7: allow all 6 on Saturday.
+
+## More notes (2026-10-18 ~00:02, verbatim)
+> You need to grab the right part from the right shelf. Inventory simulated. Shipments come in, must be unloaded. Not too tedious. Hover cart to pull in boxes then click shelves to auto unload . This is a tier 1 and 2 job.
+>
+> If arrow is presenr then iniactor whixh floor its on when slecting floor panel on elevator.
+>
+> Two elevator panels, one on each aide to serve any perspectivr
