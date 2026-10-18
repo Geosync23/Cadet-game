@@ -161,3 +161,4 @@ All 8 packages approved (Zeke: "all good except he still walks and talks" → he
 | ~19:45 (the user) | Rec deck wall height (1.6× hides far rooms facing stern) | Lower to about 1.3× (DA6, from R4) |
 | ~21:00 (the user) | Who integrates Lightdisc, when | DA6 (rec deck builder), right after the walkable preview 0.80.7; prototype engineer answers its questions. Ask someone to play → crew opponent comes down; clock pauses with a notice |
 | ~21:35 (lead call) | Lightdisc integrator | DA6 at ~55% memory → the Lightdisc prototype engineer (session_013LcEsgjMTDMMeiACKLj2bB, ~21%, wrote the game) integrates on claude/lightdisc-proto (0.82.x, its session may only push there) from DA6's plug-in note; DA6 on call |
+| ~22:00 (the user, after playing 0.80.7) | Rec deck polish | Kayaks out of the water (on the rack); concourse much more fun/dense; its own floor (not the gym's); camera follows you in the float room; a cool REC DEC sign in the concourse. DA6 as 0.80.8 |
