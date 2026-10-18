@@ -31,3 +31,7 @@ Spec: `plans/brief-playtest1.md` on claude/lead-pillar1 (12b1b87); the user's an
 
 ## Step 2 (0.63.1) is done
 Every Step 2 piece passed (see the tips list): S 0e18118, P f2156f1, C 8cc07a5, O4 96649fe, M1 ec9b498, M2 c9b211a, W ac60c8d. Open LOW: M2's incidents should skip promotion days (Step 3).
+
+## Arrived after I stopped (18:07)
+- A5: the fix for item 1 is 0.47.8 **56db3dc** (nameNew .132, nameYours .138, beam names .126); branch head ff26b6d merges the final 0.63.1 a9fad20 (A5: player_check OK, deck_check OK). To do: read the two z values, then PASS and update the tips list.
+- X: the washroom LOW is fixed for 0.71.1 (`seekPrivate()`); the hash comes with 0.71.1.
