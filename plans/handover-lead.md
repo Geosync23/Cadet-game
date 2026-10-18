@@ -531,3 +531,4 @@ Read: CLAUDE.md, TEAM.md (session chain rule + overnight exception), plans/brief
 - ~10:25 P finished 0.28.72 (cfce34e, via lead 11) → started M2 session_016kzZEwTjU6H1miJmA13TRh (claude/mech-incidents, 0.51.x, base ce26fb2 + P cfce34e, S 0.33.47 when tested).
 - ~10:50 check-in: lead 12 memory ~12%; weekly allowance status 'allowed_warning' (watching: overnight rule says stop early if it gets worse). Sweep delegated.
 - ~10:53 sweep: no failures; BM4 local trial f0cde69 (0.63.0, P+C+H+A+W, no S; one C/H sec-24 conflict hand-resolved); S 0.33.47 final checks running (7b6ddee WIP); P 0.28.73 WIP a8c4724; M2 0.51.0 WIP 461594ea; R reviewing P cfce34e. C still hasn't pushed 0.44.3-6 → asked again. A 62% done/idle; W, D idle.
+- ~10:53 S finished Step 1: 96cf5cb (0.33.44-47; machine_check OK 5.3 jobs/shift, 52% repairs; cadet_test identical). Told to continue Step 2 (0.33.48+) and give M2 the drift API early.
