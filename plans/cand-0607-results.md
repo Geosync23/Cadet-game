@@ -37,3 +37,4 @@ Built on claude/cand-0606 (from 0.60.6a c8685cf). One line per finished check (c
 - cand 3 d3d720b (runner 2): player_check OK (alone, 0 FAIL, no errors)
 - cand 1 729f951 (runner 1, stopped at part 12, superseded): only FAILs the 5 paper ones in parts 1/7 (clothes/hobby, fixed by ob4 79d8244); parts 0,2-6,8-11 and part 12 so far clean. Full intro_check on cand 3 d3d720b started (alone)
 - intro evidence (lead 11): onboarding 4 on 729f951+0.42.45 (= 3313db0/d3d720b's change) parts 0-11 no FAIL, part 12 clean to Day 3 16:31 (timeout)
+- cand 3 d3d720b (runner 2): interactions_check OK (draw-call peak 247)
