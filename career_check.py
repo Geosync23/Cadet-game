@@ -90,7 +90,7 @@ PAPER = r"""(({ plan, days }) => {
   const W = SHIP.works;
   const occ = SHIP.occasions.filter(r => /^works\./.test(r.id)).map(r => ({ id: r.id, day: Math.floor(r.at / 1440) + 1, at: hhmm(r.at % 1440), by: r.by, status: r.status }));
   return { days: days_, trained, asks, teach, seen, occ, firstJob, mail: SHIP.mail.filter(m => /^Training/.test(m.subject)).map(m => m.from + ': ' + m.subject),
-    works: W ? JSON.parse(JSON.stringify(W)) : null, size: W ? JSON.stringify(W).length : 0, head: worksRecordHead().text, locker: worksLockerText(),
+    works: W ? JSON.parse(JSON.stringify(W)) : null, size: W ? JSON.stringify(W).length : 0, head: (worksRecordHead() || { text: null }).text, locker: worksLockerText(),
     view: W ? ['training', 'log', 'tools'].map(tab => { WORKS_TAB = tab; return worksView().blocks.filter(b => b.kind !== 'buttons').map(b => b.text || (b.rows || []).map(r => r.text + ' (' + r.sub + ')').join('; ')).join(' | '); }) : null };
 })"""
 
@@ -194,6 +194,14 @@ with sync_playwright() as pw:
       return { r, tabs: v.blocks[0].items.map(x => x.label), body: v.blocks[1] && v.blocks[1].text, got }; })()""")
     print('  worksTabAdd:', tb)
     check(tb['r'] and tb['tabs'] == ['Training', 'Work log', 'Tools', 'Test'] and tb['body'] == 'hello' and tb['got'] == 'poke:7', 'worksTabAdd: a tab shows, in order, and gets its verbs')
+
+    eh = ev("""(() => { SHIP.works = null; setShipNow(4 * 1440 + 600); const W = worksInit(); W.cur = { id: 'm7', st: 'do', d: 5, by: 'halloran-emeka', occ: null, j: 'jx', w: 15 };
+      const out = { hold: worksEscortHold('m7') }; worksDone('m7', shipNow()); out.st = W.cur && W.cur.st; out.trainedEarly = W.tr.m7 !== undefined;
+      out.esc = (() => { SHIP.jobs.push({ id: 'jx', machine: machineList()[0].id, status: 'done', doneBy: 'you' }); const e = worksEscort({ id: 'halloran-emeka' }, shipNow()); return e && e.mode; })();
+      out.clean = JSON.stringify(worksClean(JSON.parse(JSON.stringify(W))).cur) === JSON.stringify(W.cur);
+      simNote('caseCalled', { train: true }); out.after = W.tr.m7; out.cur = W.cur; SHIP.works = null; SHIP.jobs = SHIP.jobs.filter(j => j.id !== 'jx'); return out; })()""")
+    print('  the escort hold (Day 5):', eh)
+    check(eh['hold'] and eh['st'] == 'held' and not eh['trainedEarly'] and eh['esc'] == 'follow' and eh['clean'] and eh['after'] == 5 and eh['cur'] is None, 'worksEscortHold / caseCalled')
 
     print('(f) The save:')
     sv = ev(f"""(() => {{ const r = ({PAPER})({{ plan: 'steady', days: 2 }}); const W = SHIP.works;
