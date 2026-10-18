@@ -127,6 +127,9 @@ html[data-ph="green"] body #seek,.devhu[data-ph="green"],.devaddr[data-ph="green
 .device .act{margin:8px 0 4px;text-transform:uppercase;letter-spacing:.08em}
 .device .btns{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}
 .device .btns .act.on{background:var(--crt-ink);color:var(--crt-bg);text-shadow:none}
+.device .chips{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}
+.device .chips .chip{min-height:48px;min-width:48px;padding:8px 14px;border-color:var(--crt-ink)}
+.device .chips .chip.off{color:var(--crt-dim);border-color:var(--crt-dim);border-style:dashed;text-decoration:line-through;text-decoration-thickness:2px}
 .device .tl{margin:2px 0 8px}
 .device .tl-row{position:relative;height:28px;margin:2px 0;border-left:2px solid var(--crt-dim);border-right:2px solid var(--crt-dim);background:linear-gradient(transparent 21px,rgba(255,255,255,.07) 21px)}
 .device .tl-blk{position:absolute;bottom:1px;height:6px;min-width:6px;background:var(--crt-ink);border-radius:1px;box-shadow:0 0 5px var(--crt-glow)}
@@ -249,7 +252,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.60.7
+   STARSHIP CADET: CSV Wren                           build 0.55.0
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7807,7 +7810,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.60.7';                           // keep in step with the header's build line
+const GAME_BUILD = '0.55.0';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -9437,7 +9440,9 @@ SIM_ADVANCE.push((from, to) => { shipDay(Math.floor(to / 1440) + 1); });
 // render) stays as a shim: render(el) draws into a box, as before.
 // VIEW: { title, blocks: [ { kind: 'text', text, mark }, { kind: 'list', rows:
 //   [{ text, sub, mark, action, button }] }, { kind: 'bars', items: [{ label,
-//   value, mark, note, level }] }, { kind: 'buttons', items: [{ label, action }] } ] }
+//   value, mark, note, level }] }, { kind: 'buttons', items: [{ label, action }] },
+//   { kind: 'chips', items: [{ label, on, action }] } ] } (chips: big toggles, crossed out while on is false;
+//   build one with devChips(items), which falls back to buttons marked "✕ " on a skin without them)
 // action: { app, do, arg }. mark: 'up' | 'down' | 'new' | 'urgent' | 'hot' | 'big'.
 // Sits before 15 (after 14), so 15 and 17 can register at load; apps only read
 // other sections when drawn. Nothing here calls R() or makes 3D objects.
@@ -9833,6 +9838,11 @@ const DEVICE_SKIN = (() => {
       if (b.ticks) { const tk = mk('div', 'tl-ticks'); for (const s of b.ticks) tk.appendChild(mk('span', '', s)); box.appendChild(tk); }
       return box;
     },
+    chips(b) {                                 // 0.55.0 (the case engine's suspects): big toggles, crossed out while on is false
+      const box = mk('div', 'chips');
+      for (const it of b.items || []) { const x = act(mk('button', 'chip' + (it.on === false ? ' off' : ''), it.label), it.action); x.setAttribute('aria-pressed', it.on !== false); box.appendChild(x); }
+      return box;
+    },
     buttons(b) { const box = mk('div', 'btns'); for (const it of b.items || []) { const x = act(mk('button', 'act' + (it.on ? ' on' : ''), it.label), it.action); if (it.on != null) x.setAttribute('aria-pressed', !!it.on); box.appendChild(x); } return box; },
     map(b) {                                   // a deck plan as SVG (DOM, not a canvas): room runs, walls, you, the pick and the goal
       // 0.35.14 (the performance engineer's advice): the plan is kept while its deck, rooms, pick and goal stay the same,
@@ -9890,6 +9900,7 @@ const DEVICE_SKIN = (() => {
   const skin = {
     get ink() { return INK[SHIP.device.settings.phosphor] || INK.cyan; },
     wide: () => innerWidth > innerHeight * 1.15 && innerWidth >= 720,
+    has: kind => !!blocks[kind],               // 0.55.0: which VIEW blocks this skin draws (devChips asks)
     open() { back = document.activeElement; el.hidden = false; layout(); $('devClose').focus(); },
     close() { el.hidden = true; drawn = null; drawnKey = null; layout(); if (back && back.focus) back.focus(); },
     button() {
@@ -10009,6 +10020,12 @@ const DEVICE_SKIN = (() => {
   addEventListener('pointercancel', () => { swipe = null; }, true);
   return skin;
 })();
+
+// a chips block for an app's view (0.55.0); a skin without chips gets the same toggles as buttons, "✕ " on the crossed ones
+function devChips(items) {
+  if (DEVICE_SKIN.has && DEVICE_SKIN.has('chips')) return { kind: 'chips', items };
+  return { kind: 'buttons', items: items.map(it => ({ label: (it.on === false ? '✕ ' : '') + it.label, action: it.action })) };
+}
 
 // ---- the shim: the old device object. addSection(id, title, render) becomes an app drawn by render(el); an app
 // already registered with deviceApp keeps its id (the native one wins). show('status') is the home screen. ----
