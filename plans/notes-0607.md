@@ -70,3 +70,4 @@ For 0.60.7:
 - Get rid of the tray return in the mess hall.
 - All junior officers on Deck 4 lie perpendicular (crosswise) in their beds; sleeping pose/bed orientation wrong on Deck 4 (likely poses/seats work in 0.60.6, DA3 territory).
 - A better clock-in / clock-out interface: a screen that pops up at the time clock, in the same art style as the personal device.
+- When any need gets low, a pop-up explains it in plain words (e.g. "You need to pee").
