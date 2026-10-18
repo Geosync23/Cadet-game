@@ -252,7 +252,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.55.1
+   STARSHIP CADET: CSV Wren                           build 0.55.2
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7810,7 +7810,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.55.1';                           // keep in step with the header's build line
+const GAME_BUILD = '0.55.2';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -34458,8 +34458,8 @@ const tilesTrophy = () => SHIP.tiles.beatRina !== null;   // for the deck archit
 // (caseFitted, from section 17's jobStepDone); the job is held for you till your shift ends (caseHeld, from
 // heldForYou), then goes to the crew, who do it the long way. Puzzle kinds register in CASE_KINDS: { name, ladder,
 // fits(cause, m), suspects(j, seed, band), clues(j, cause, sus, seed, band), view(c), hint(c), text?(c, clue),
-// tick?(c, j) }; the engine knows none of them, and is inert until one is opened (its ladder row trained:
-// SHIP.works.tr[ladder]). Pure functions and state: nothing here calls R() or makes 3D objects.
+// tick?(c, j) }; the engine knows none of them, and is inert until one is opened (its ladder row opened:
+// worksIsOpen(ladder)). Pure functions and state: nothing here calls R() or makes 3D objects.
 // Hash keys 880 (the rate roll), 881 (which kind), 882-889 (the eight sub-seeds), 892 (caseDecoys' order, for the
 // kinds), 893 (the order suspects are shown in); 890-891 are P3's.
 // =====================================================================
@@ -34480,8 +34480,10 @@ const caseTier = () => typeof playerTier === 'function' ? playerTier() : PLAYER_
 const caseNow = () => SIM_AT != null ? SIM_AT : shipNow();   // inside section 17's hour, that hour
 const caseApp = () => typeof worksTabAdd === 'function' ? 'works' : 'faults';
 const caseCauses = m => (typeof FAULT_CAUSES !== 'undefined' && m && FAULT_CAUSES[m.kind]) || [];
-// a kind is opened once its ladder row is trained (24 core's SHIP.works.tr), or by its own open() (puzzle_check's stand-in)
-const caseOpened = id => { const K = CASE_KINDS[id]; try { return K.open ? !!K.open() : !!(SHIP.works && SHIP.works.tr && SHIP.works.tr[K.ladder] != null); } catch (e) { return false; } };
+// a kind is opened once its ladder row has opened (24 core's worksIsOpen, else SHIP.works.op lists it; not trained:
+// tr.p3 is only set once the training case is solved), or by its own open()
+const caseOpened = id => { const K = CASE_KINDS[id]; try { if (K.open) return !!K.open(); if (typeof worksIsOpen === 'function') return !!worksIsOpen(K.ladder);
+  return Object.values((SHIP.works && SHIP.works.op) || {}).some(ids => Array.isArray(ids) && ids.includes(K.ladder)); } catch (e) { return false; } };
 const caseKindsOpen = () => Object.keys(CASE_KINDS).sort().filter(caseOpened);
 // the cases (SHIP.works.cases = { open: [frozen case], done: [[id, day, flags]], n }), cleaned once the first time
 // they're asked for: from 24 core's copy, or the save's own (a cleaner there may drop keys it doesn't know)
@@ -34544,7 +34546,8 @@ function caseOffer(j, h) {
   if (schedU(machSeed(j.machine), d, 880) >= caseRate(rank, own)) return;
   CASE_STATS.rolled++;
   // which kind: the newest-opened one counts double for its first week
-  const tr = (SHIP.works && SHIP.works.tr) || {}, newest = Math.max(...fit.map(id => tr[CASE_KINDS[id].ladder] ?? -1));
+  const opened = {}; for (const [dy, ids] of Object.entries((SHIP.works && SHIP.works.op) || {})) for (const x of Array.isArray(ids) ? ids : []) if (!(x in opened)) opened[x] = +dy;
+  const tr = opened, newest = Math.max(...fit.map(id => tr[CASE_KINDS[id].ladder] ?? -1));   // the day each row opened
   const w = fit.map(id => { const t = tr[CASE_KINDS[id].ladder]; return t === newest && t >= 0 && d - t < 7 ? 2 : 1; }), sum = w.reduce((a, b) => a + b, 0);
   let u = schedU(machSeed(j.machine), d, 881) * sum, kid = fit[fit.length - 1];
   for (let i = 0; i < fit.length; i++) { if (u < w[i]) { kid = fit[i]; break; } u -= w[i]; }
@@ -34808,7 +34811,7 @@ function caseAct(verb, arg) {
 }
 // a tab of 24 core's Works app when it has tabs (worksTabAdd), else its own app, hidden till a kind opens
 const CASE_BADGE = () => { const C = SHIP.works && SHIP.works.cases; return C && C.open.some(c => !c.wait && !c.got.length) ? 1 : null; };
-if (typeof worksTabAdd === 'function') worksTabAdd({ id: 'faults', title: 'Fault notes', order: 40, view: caseView, act: caseAct, badge: CASE_BADGE });
+if (typeof worksTabAdd === 'function') worksTabAdd({ id: 'faults', title: 'Fault notes', order: 40, view: () => caseView().blocks, act: caseAct, badge: CASE_BADGE });
 else deviceApp({ id: 'faults', title: 'Fault notes', short: 'Faults', icon: 'wrench', order: 32, hidden: () => !caseKindsOpen().length, badge: CASE_BADGE, view: caseView, act: caseAct });
 
 // =====================================================================

@@ -190,6 +190,10 @@ PLAY = r"""(() => {
   CASE_SAVED = { open: [{ id: 'cx', job: 'nope', kind: 'zz', cause: 'pump', sus: ['pump'], clues: [] }, 'junk'], done: 'x', n: -3 }; delete SHIP.works.cases; CASE_CLEAN = false;
   const cj = caseState(); out.junk = cj.open.length === 0 && cj.done.length === 0 && cj.n === 0;
   out.chief = (() => { caseAct('case:chief', 1); deviceShow('faults'); const t = document.getElementById('devBody').textContent; caseAct('case:chief', 0); return t.includes('isn\'t that'); })();
+  // a kind opens with its ladder row (SHIP.works.op), not when it's trained
+  CASE_KINDS.zop = { ladder: 'zop', fits: () => false }; const op0 = SHIP.works.op, tr0 = SHIP.works.tr;
+  SHIP.works.op = {}; SHIP.works.tr = { zop: 5 }; const a1 = caseOpened('zop'); SHIP.works.op = { 5: ['zop'] }; SHIP.works.tr = {}; out.opens = [a1, caseOpened('zop')];
+  SHIP.works.op = op0; SHIP.works.tr = tr0; delete CASE_KINDS.zop;
   deviceClose(); JOBS_ON = true; window.__ptOpen = false;
   out.errors = DEV.errors.slice();
   return out;
@@ -278,6 +282,7 @@ def run(path):
         check(len(pos) >= 3 and max(pos.values()) < .6 * len(Sw['cases']), f"the cause isn't always in the same place among the suspects: {pos}")
         check(P['junk'], 'a junk save and a gone job: no cases')
         check(P['chief'], "the Chief's notes page")
+        check(P['opens'] == [False, True], f"a kind opens when its ladder row opens, not when trained: {P['opens']}")
         check(not P['errors'], f"no device errors: {P['errors']}")
         pe = [e for e in g.errors if e.startswith('pageerror')]
         check(not errs and not pe, f'no errors: {errs} {pe}')
