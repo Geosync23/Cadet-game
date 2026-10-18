@@ -79,7 +79,7 @@ PLACES = r"""(() => {
       if (!free(wc, wr)) why.push('walk ' + wc + ',' + wr + ' not walkable');
       if (roomAt(wc, wr) !== p.room) why.push('walk in room ' + roomAt(wc, wr));
       if (!seen.has(K([wc, wr]))) why.push('walk unreachable');
-      if (!(wc === c && wr === r) && Math.hypot(wc + .5 - sp[0], wr + .5 - sp[1]) > (p.type === 'rec:seat' ? 4 : 2.5)) why.push('walk too far from the spot');   // an auditorium seat is reached along its row from the aisle
+      if (!(wc === c && wr === r) && Math.hypot(wc + .5 - sp[0], wr + .5 - sp[1]) > (p.type === 'rec:seat' ? 4.5 : 2.5)) why.push('walk too far from the spot');   // a rec seat (the auditorium, the stands) is reached along its row from the aisle
     } else {
       let ok = seen.has(K([c, r]));
       if (!ok && (p.pose === 'sit' || p.pose === 'lie' || !free(c, r)))    // a seat or bed: reached from the tile beside it

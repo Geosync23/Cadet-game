@@ -252,7 +252,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.80.1
+   STARSHIP CADET: CSV Wren                           build 0.80.2
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7899,6 +7899,7 @@ function recFloor(g, kind, i, j, x, y, PX) {
   } else if (kind === 'court') {                         // the Lightdisc court's black floor (its lines come with the court, 0.80.2)
     g.fillStyle = '#0c0f14'; g.fillRect(x, y, PX, PX);
     g.fillStyle = 'rgba(120,160,200,.06)'; g.fillRect(x, y, PX, 1); g.fillRect(x, y, 1, PX);
+    if (i <= 5 || i >= 15) { g.fillStyle = i <= 5 ? 'rgba(255,154,60,.07)' : 'rgba(80,230,255,.07)'; g.fillRect(x, y, PX, PX); }   // each player's zone, by their baseline
   } else if (kind === 'stand') {
     g.fillStyle = '#2e333b'; g.fillRect(x, y, PX, PX); fleck(5, ['rgba(255,255,255,.08)']);
   } else if (kind === 'violet') {                        // the auditorium's deep violet carpet with small gold diamonds
@@ -7994,6 +7995,53 @@ Object.assign(WALL_KIT, {
     box(.86, 1.18, .04, RK.gold, 0, 1.55, .02, g);
   },
 });
+// the stands (0.80.2): three stepped benches along the court's inboard side (rows 11-12), in three blocks with aisles at
+// columns 6 and 14 (in from the concourse's doors). One seat a tile on each tier: 33 in all
+const REC_STANDS = [[4, 6], [7, 14], [15, 17]], REC_TIER = [{ z: 11.33, h: .7 }, { z: 11.99, h: .35 }, { z: 12.65, h: 0 }];
+const REC_STAND_SEATS = REC_STANDS.flatMap(([c0, c1]) => REC_TIER.flatMap((t, k) => Array.from({ length: c1 - c0 }, (_, q) => ({ col: c0 + q, tier: k, h: t.h, z: t.z, aisle: c0 + q < 10 ? 6 : 14 }))));
+Object.assign(KIT, {
+  recStands(g) {
+    for (const [c0, c1] of REC_STANDS) {
+      const w = c1 - c0, x = (c0 + c1) / 2 - 4;
+      REC_TIER.forEach((t, k) => {
+        if (t.h) box(w - .04, t.h, .66, RK.standStep, x, t.h / 2, t.z - 11, g);
+        box(w - .1, .06, .36, RK.bench, x, t.h + .42, t.z - 11 + .06, g);                       // the plank
+        for (let q = 0; q < w; q++) box(.08, .39, .26, RK.black, c0 + q + .5 - 4, t.h + .195, t.z - 11 + .06, g);   // its legs, one a seat
+      });
+    }
+    return { w: .1, d: .1, noBlock: true };
+  },
+  // the court: glowing lines (cyan at the bow end, orange at the stern), the force-field net across the middle and the
+  // side walls, faint until the disc hits them. Room-local: the court is 13 x 5
+  recCourt(g) {
+    const ln = (m, w, d, x, z) => box(w, .014, d, m, x, .007, z, g);
+    ln(RK.lineOrange, .07, 4.4, .6, 2.5); ln(RK.lineCyan, .07, 4.4, 12.4, 2.5);                  // the baselines
+    for (const z of [.3, 4.7]) { ln(RK.lineOrange, 5.9, .06, 3.55, z); ln(RK.lineCyan, 5.9, .06, 9.45, z); }   // the sidelines, each end its colour
+    ln(RK.lineWhite, .05, 4.4, 6.5, 2.5);
+    for (const x of [2.6, 10.4]) ln(x < 6 ? RK.lineOrange : RK.lineCyan, .04, 4.4, x, 2.5);     // the edge of each player's zone
+    // the net: a shimmering field from a post at each side, glowing along its top
+    for (const z of [.18, 4.82]) cyl(.05, .06, 1.3, RK.black, 6.5, .65, z, g, 10);
+    const net = new THREE.Mesh(new THREE.PlaneGeometry(4.6, 1.05), RK.net); net.position.set(6.5, .6, 2.5); net.rotation.y = Math.PI / 2; net.userData.noMerge = net.userData.noShadow = true; g.add(net);
+    box(.03, .03, 4.6, RK.lineWhite, 6.5, 1.14, 2.5, g);
+    // the side walls: a faint field along each side, the length of the court
+    for (const z of [.12, 4.88]) { const f = new THREE.Mesh(new THREE.PlaneGeometry(12.8, 1.1), RK.field); f.position.set(6.5, .58, z); f.userData.noMerge = f.userData.noShadow = true; g.add(f); }
+    return { w: .1, d: .1, noBlock: true };
+  },
+});
+Object.assign(WALL_KIT, {
+  // the scoreboard on the court's stern wall, high up (it's two storeys of wall): a static board until Lightdisc is played
+  recScoreboard(g) {
+    const t = tex(512, 224, (c, w, h) => {
+      c.fillStyle = '#05070b'; c.fillRect(0, 0, w, h); c.strokeStyle = '#2a3340'; c.lineWidth = 6; c.strokeRect(3, 3, w - 6, h - 6);
+      c.textAlign = 'center'; c.fillStyle = '#e8eef0'; c.font = '700 30px system-ui,sans-serif'; c.fillText('LIGHTDISC', w / 2, 44);
+      c.font = '800 112px system-ui,sans-serif'; c.fillStyle = '#ff9a3c'; c.fillText('0', w * .27, 168); c.fillStyle = '#50e6ff'; c.fillText('0', w * .73, 168);
+      c.fillStyle = '#e8eef0'; c.font = '800 80px system-ui,sans-serif'; c.fillText(':', w / 2, 158);
+      c.font = '600 20px system-ui,sans-serif'; c.fillStyle = '#ff9a3c'; c.fillText('STERN', w * .27, 204); c.fillStyle = '#50e6ff'; c.fillText('BOW', w * .73, 204);
+    });
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(4.2, 1.84), new THREE.MeshBasicMaterial({ map: t, toneMapped: false })); p.position.set(0, 3.25, .09); g.add(p);
+    box(4.4, 2.04, .08, RK.black, 0, 3.25, .04, g);
+  },
+});
 DECKS[7] = {
   num: 7, name: 'Recreation', seed: 70771, tall: 1.6, playerOnly: true, open: [6, 24],
   blurb: 'Auditorium, court, pool, rivers', arrive: 'The concourse runs stern to bow: the rivers and the court aft, the pool and the auditorium forward.',
@@ -8019,7 +8067,7 @@ DECKS[7] = {
     '.eeeCCCCCCCCCCCCCFFFFFFFFuuubbbbbbAAAAAA......',
     '..eeCCCCCCCCCCCCCFFFFFFFFuuubbbbbbAAAA........',
   ],
-  // the plan's DOORSR. One change: v,19,10 and v,21,10 are solid wall (not glass), so the lift's call panels sit beside
+  // the plan's DOORSR. Changes: the court's gate is at h,14,13 (the stands' bow aisle; the plan had h,10,13, which the benches fill), and v,19,10 and v,21,10 are solid wall (not glass), so the lift's call panels sit beside
   // the doors as on every deck. pass: a counter opening (the kit hire desk) or a rail with no pane (the court's).
   doors: {
     'v,19,7': 'lift', 'v,19,8': 'lift', 'v,19,9': 'lift', 'v,21,7': 'lift', 'v,21,8': 'lift', 'v,21,9': 'lift',   // one wide door each side
@@ -8034,8 +8082,8 @@ DECKS[7] = {
     'v,4,8': 'hatch',                                        // river pump room, off the concourse's aft end
     'h,6,11': 'door', 'h,14,11': 'door', 'h,7,11': 'glass', 'h,8,11': 'glass', 'h,9,11': 'glass', 'h,10,11': 'glass',
     'h,11,11': 'glass', 'h,12,11': 'glass', 'h,13,11': 'glass', 'h,15,11': 'glass',   // the stands, behind glass on the concourse
-    'h,10,13': 'door', 'h,4,13': 'pass', 'h,5,13': 'pass', 'h,6,13': 'pass', 'h,7,13': 'pass', 'h,8,13': 'pass', 'h,9,13': 'pass',
-    'h,11,13': 'pass', 'h,12,13': 'pass', 'h,13,13': 'pass', 'h,14,13': 'pass', 'h,15,13': 'pass', 'h,16,13': 'pass',   // the court's rail and its gate
+    'h,10,13': 'pass', 'h,4,13': 'pass', 'h,5,13': 'pass', 'h,6,13': 'pass', 'h,7,13': 'pass', 'h,8,13': 'pass', 'h,9,13': 'pass',
+    'h,11,13': 'pass', 'h,12,13': 'pass', 'h,13,13': 'pass', 'h,14,13': 'door', 'h,15,13': 'pass', 'h,16,13': 'pass',   // the court's rail and its gate (0.80.2: at column 14, the stands' bow aisle, near your baseline)
     'v,4,15': 'hatch',                                       // the court's emitter room
     'h,26,7': 'door', 'h,23,7': 'glass', 'h,24,7': 'glass', 'h,25,7': 'glass', 'h,27,7': 'glass', 'h,28,7': 'glass', 'h,29,7': 'glass',   // the pool's gallery
     'v,32,3': 'hatch',                                       // pool plant, from the pool deck
@@ -8075,7 +8123,9 @@ DECKS[7] = {
   service: [{ key: 'v,4,8', tier: 2 }, { key: 'v,4,15', tier: 2 }, { key: 'v,32,3', tier: 1 }, { key: 'h,31,11', tier: 1 }, { key: 'v,34,11', tier: 1 }],
   machines: [],                                          // TODO (phase 2, the systems engineer): the plan's section 6 machines
   // the auditorium's seats (0.80.1): reached from the aisle beside their row; a type no crew code knows, so they stay the player's
-  places: REC_SEATS.map((s, k) => ({ id: '7-seat-' + (k + 1), type: 'rec:seat', at: [s.col, Math.floor(s.z)], walk: [s.col, s.aisle], face: 'e', pose: 'sit', room: 'A', xy: [s.x, s.z], y: Math.round((s.h + .47) * 100) / 100 })),
+  places: REC_SEATS.map((s, k) => ({ id: '7-seat-' + (k + 1), type: 'rec:seat', at: [s.col, Math.floor(s.z)], walk: [s.col, s.aisle], face: 'e', pose: 'sit', room: 'A', xy: [s.x, s.z], y: Math.round((s.h + .47) * 100) / 100 }))
+    // the stands' 33 seats (0.80.2), facing the court, reached from the aisle at column 6 or 14
+    .concat(REC_STAND_SEATS.map((s, k) => ({ id: '7-stand-' + (k + 1), type: 'rec:seat', at: [s.col, s.tier ? 12 : 11], walk: [s.aisle, s.tier ? 12 : 11], face: 's', pose: 'sit', room: 'T', xy: [s.col + .5, s.z + .02], y: Math.round((s.h + .45) * 100) / 100 }))),
   dress(d) {
     recMats();
     for (const [key, tw, text] of d.plates) placeOnEdge('plate', key, tw, { text });
@@ -8097,8 +8147,7 @@ DECKS[7] = {
     // washroom (3 x 7): four stalls on the bow side, a row of basins opposite
     for (const z of [1.9, 3.1, 4.3, 5.5]) place('u', 'toiletStall', 2.45, z, 'e');
     place('u', 'basinCounter', .38, 3.5, 'w', { w: 2.6, it: IT('Basins', 'A long row of basins for the interval queue.') });
-    // the concourse: benches against the stands' glass, facing the rivers; a towel bin by the lobby
-    for (const x of [3.5, 8.0]) place('=', 'bench', x, 3.55, 's', { w: 1.6, snug: true, it: IT('Bench', 'Facing the river glass. People sit here to watch the white water and pretend they aren\'t waiting for someone.') });
+    // the concourse: a towel bin by the lobby (0.80.2: its two benches went; the stands fill that glass now)
     place('=', 'hamper', 12.4, .45, 'n', { snug: true, it: IT('Towel bin', 'For wet towels from the river hall. It smells of chlorine and good intentions.') });
     // the auditorium (0.80.1, R2): the rake and its 76 seats, the stage against the bow windows, the truss, lectern, piano and screen
     const rake = []; for (let c = 1; c <= 6; c++) for (const [z0, z1] of REC_BLOCKS) for (let z = z0; z < z1; z++) rake.push([c, z]);
@@ -8115,6 +8164,13 @@ DECKS[7] = {
     placeWall('f', 'recNeon', 'e', 2.0, { hitW: 2.4, it: IT('REC DEC', 'A curved pink neon over the auditorium\'s doors. The official sign, RECREATION DECK, was too long to fit.') });
     placeWall('f', 'recPoster', 'n', 2.5, { it: IT('Poster', 'THE REC DEC: pool, rivers, climbing wall, float room, Lightdisc. Open 06:00 to midnight.') });
     place('f', 'bench', 2.9, 3.55, 's', { w: 1.6, snug: true, it: IT('Bench', 'Outside the auditorium doors. Good for waiting, and for hearing the piano through them.') });
+    // the Lightdisc court and its stands (0.80.2, R3): lines, the net and side fields, the scoreboard (static), the benches
+    place('C', 'recCourt', 0, 0, 'n');
+    place('C', 'recHit', 6.5, 2.5, 'n', { w: 12.6, d: 4.6, hitH: .3, it: IT('Lightdisc court', 'A black court with glowing lines, cyan at the bow end and orange at the stern, and a shimmering force-field net across the middle. Lightdisc is coming soon.') });
+    placeWall('C', 'recScoreboard', 'w', 2.5, { hitW: 4.2, it: IT('Scoreboard', 'Two storeys of scoreboard on the stern wall, reading nil-nil. It\'s waiting for the first game.') });
+    const stands = []; for (const [c0, c1] of REC_STANDS) for (let c = c0; c < c1; c++) stands.push([c - 4, 0], [c - 4, 1]);
+    place('T', 'recStands', 0, 0, 'n', { block: stands });
+    REC_STANDS.forEach(([c0, c1], b) => place('T', 'recHit', (c0 + c1) / 2 - 4, 1, 'n', { w: c1 - c0, d: 2, hitH: 1.3, it: IT('Stands', ['Three stepped benches at the stern end, by the scoreboard.', 'The middle of the stands: three stepped benches, right on the net. The best seats for a close game.', 'Three stepped benches at the bow end, by the gate onto the court.'][b]) }));
   },
 };
 // the rec deck's materials, made when the deck is built (so they are freed with it)
@@ -8123,7 +8179,13 @@ function recMats() {
   RK = {
     seat: std('#4a2f86', .8), seatDark: std('#22192f', .7, .2), gold: std('#d9b45a', .35, .7), rake: std('#2b2140', .9),
     stageTop: M.wood, stageSide: std('#1d1630', .7), truss: std('#c9a24a', .4, .7), black: std('#16181c', .6, .3), wood: std('#6b4a32', .6), screen: std('#e8e6df', .9),
+    standStep: std('#3a404a', .85), bench: std('#c9783a', .6),
+    lineOrange: new THREE.MeshBasicMaterial({ color: col('#ff9a3c'), toneMapped: false }), lineCyan: new THREE.MeshBasicMaterial({ color: col('#50e6ff'), toneMapped: false }),
+    lineWhite: new THREE.MeshBasicMaterial({ color: col('#e8eef0'), toneMapped: false }),
+    net: new THREE.MeshBasicMaterial({ color: col('#bfe6ff'), transparent: true, opacity: .2, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, toneMapped: false }),
+    field: new THREE.MeshBasicMaterial({ color: col('#50e6ff'), transparent: true, opacity: .05, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, toneMapped: false }),
   };
+  PULSES.push({ m: RK.net, key: 'opacity', base: .14, amp: .16, w: 3.1, ph: 0 }, { m: RK.field, key: 'opacity', base: .03, amp: .04, w: 1.3, ph: 1 });   // the net shimmers, the side fields breathe
 }
 
 // =====================================================================
@@ -8185,7 +8247,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.80.1';                           // keep in step with the header's build line
+const GAME_BUILD = '0.80.2';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
