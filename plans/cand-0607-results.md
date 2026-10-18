@@ -29,3 +29,4 @@ Built on claude/cand-0606 (from 0.60.6a c8685cf). One line per finished check (c
 - cand 2 3313db0: leave (fixed), smoke, newgame, food, events, device, social, clothes, machine, deck, tiles OK; lines_check PASS (0 err, 2 warn)
 - trial 7d63a91 (cand 2 with traditions 8a512b5 0.34.56 in place of 8be5030): day_check day 3 OK (Deck 5 worst stuck 0.0; kovac-zainab fixed)
 - CANDIDATE 3 pushed: claude/cand-0607 d3d720b (game = trial 7d63a91) = cand 2 with traditions 8a512b5 (0.34.56) in place of 8be5030; day_check day 3 OK on it (above). Cand 2's other results carry over; re-running leave/food/events/device/smoke
+- cand 3 d3d720b (runner 2): day_check 3 OK (Deck 5 stuck 0.0, peak 270, servery 132/132), day 0 OK (peak 265), day 1 OK (peak 269)
