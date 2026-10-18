@@ -6,6 +6,8 @@ Started by lead 12 (session_01GjWhU9Z9V8RNoR8yyELA9V) at ~11:28 for every Step 2
 Spec: plans/brief-playtest1.md on claude/lead-pillar1 (12b1b87); the user's answers in it are binding. Seats: T traditions session_01X4SZJFeHprDF21NZqU5fGi (claude/traditions-pt1, 0.70.x), X crew sim session_01SNaWA6X5E9i2ZKfMnPTHJf (claude/crew-pt1, 0.71.x), U HUD session_01FcMPTX7mMTHkyr4pxDfNcS (claude/hud-pt1, 0.72.x), C2 works career session_014yREkgPvuwMyxBtoqB1P14 (claude/works-career, 0.44.x), O4 (claude/onboard-pt1), W, P, A5 session_01CHRbUTZc18m7eBck8eWhXj (claude/deck-pt1). Verdicts go to the seat, BM5 and lead 13 (finished reviews, blockers, design calls). Behaviour and saves in depth; lines and tests skimmed. The base is 0.63.1 (claude/p5-cand-s2).
 
 ## Passing tips
+- T claude/traditions-pt1 **2a6fa43** (0.70.0-0.70.4, playtest 1 package T; 1 LOW: Cook-along's leader)
+- W claude/writer-p5 **97fa9ae** (Watch a film hobby lines, text; contains 6a00d9c)
 - A5 claude/deck-pt1 **ff26b6d** (0.47.4-0.47.8, playtest 1 package complete; the beam item fixed in 56db3dc)
 - P claude/player-p5 **587a2cd** (0.28.74, playtest 1 package P)
 - O4 claude/arrival-0607b **7a2bc5d** (0.42.48, playtest 1 part (a)+(b); no nits)
@@ -25,9 +27,16 @@ Spec: plans/brief-playtest1.md on claude/lead-pillar1 (12b1b87); the user's answ
 
 ## Failing / waiting on a fix
 - O5 claude/onboard-pt1 **e4fe793** (0.42.60-0.42.62): one item (the servery arrow holds the evening; intro_check --evening FAILS)
-- T claude/traditions-pt1 **807c071** (0.70.0-0.70.2): one item (the leader's name in the tip and marker) and one question (Sunday dinner's extra tables)
 
 ## Verdicts
+
+### W 0656925 + 97fa9ae: the handover note; Watch a film hobby lines — PASS (R3, text skim)
+- banks/hobby.lines: hobby.name/start/done/record/share.film for seat U, and films in tip.hobby / tip.eve.hobby. No game code. My content_gen + lines_check on 97fa9ae: **PASS** (0 errors, the 2 old "(Say nothing)" warnings).
+
+### T 2be6dc6 (0.70.3) + 2a6fa43 (0.70.4): leader names via shortName; the Sunday table arm; a late lap may finish 15 minutes over — PASS with a LOW (R3)
+- Item 1 closed: `tjFirst` is `shortName(p)` ("Tap Dr. Sato to stargaze with them", "Tap Chief Calder to wipe tools over tea", Tomas unchanged). The Sunday tables question is answered: it already works, and join_check has a new arm (longTables off at start-40, on at start+30 and end+10, off at end+20, off after sleeping through it, off after a deck change); lead 13 is asking the user what was seen. 0.70.4: `TJ_OVER` 15, a joined walk's end is the tradition's end + 15 (crew in the line follow via tradWhere while the walk lasts; in play only).
+- **LOW (for T, not blocking):** Cook-along's host is Lukas Dlamini (he teaches the dish), but on day 6 the leader was Dr. Sato: `tradLeader` takes the host only when his plan has him at the tradition (`tradGoers`), and Lukas's doesn't, so the hash picks a goer and the marker and tip go over the wrong person. Either let the host lead when he's aboard and in one of its rooms, or put Lukas's cook-along time in his plan.
+- Checks (my run on 2a6fa43): **join_check OK** (names, the lap 7 turns to 21:10, dropping out, the Sunday table arm). T's package is through.
 
 ### O5 e4fe793 (0.42.60-0.42.62): Day 1 first-time arrows, Zeke's Day 1 tea walk, the first night's call-home card — FAIL, one item (R3, in depth)
 - **Item 1 (blocking, a regression): intro_check --evening FAILS** ("the first-night arrow never pointed to your bunk before 20:00"); on C2 a5d5c4c, the base it merges, the same run is OK (bunk arrow 18:49). Cause, traced: when the Chief's visit ends with "Eat something" (chief:end 18:47) and you've no tray, `introArrowWant` returns 'eat' until 20:30 (`late`), so the servery arrow sits over the evening: introBedTick's bunk arrow never comes (it never goes over another arrow) and introCallTick holds the call card (`INTRO_UI.arrow === 'eat'`). A player who sits down without food gets neither the bunk suggestion nor the call-home tip until 20:30. Same on e4fe793 alone and on my scratch merge with P 587a2cd + W 6a00d9c (content baked). **Fix:** give the servery arrow a time limit, e.g. in introArrowWant: `if (late || d > 1 || now >= at + 30 || I.done['ate:last'] !== undefined && I.done['ate:last'] >= at - 60) fin('eat');` (30 ship minutes after you're told, or the servery closing if that's sooner), so the call card and then the bunk arrow follow. Then run intro_check --evening (and --week for the tea/Day 1 parts) alongside --firsts.
