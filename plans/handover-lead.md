@@ -541,3 +541,4 @@ Read: CLAUDE.md, TEAM.md (session chain rule + overnight exception), plans/brief
 - ~11:07 C a8dd78e (0.44.8 WORK_MECH.at(day); career OK, cadet_test identical).
 - ~11:08 H 55343c6 (0.55.10 Day 5 escort holds until caseCalled; puzzle_check OK, cadet_test identical). H done.
 - ~11:09 R: C 87df8f5+ae6598a FAIL (1): big-row asks open at 06:00 inside sleep skip → silent Mail, no toast/pointer; fix sent to C; 4 LOWs.
+- ~11:10 BM4 BLOCKER 0.63.0: trial ded30e5 (S 96cf5cb + P + C 2ea7ab2 + H 9cb6425 + A + W) fails machine_check (ladder/jobkinds/24k hooks, from C merge on), career_check 8 FAILs with H, puzzle case title doubled. Told BM4 retry with C a8dd78e + H 55343c6, push trial branch; C leads join fix with S + H (logged).
