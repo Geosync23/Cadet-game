@@ -570,3 +570,4 @@ Read: CLAUDE.md, TEAM.md (session chain rule + overnight exception), plans/brief
 - ~12:09 M2 0bbb93d (0.51.0 tuning + incidents; mech m5/m6 OK, cadet_test identical, machine/interactions/career 0 FAILs); combined with M1 steady player 6.2 jobs/day → S to count mechanic jobs inside 3-6 (logged).
 - ~12:17 S 66b4ebb (0.33.53 mechanic jobs inside 3-6: 5.7/day on full combine, 52% repairs; cadet_test identical); to M1, M2, BM5, R2.
 - ~12:19 M2 c9b211a (0.51.1, R2 PASS on 0.51.0 + lows); M2 flags player_check 16 FAILs on base C+S+P (Step 1 content) → P asked to investigate; BM4 warned.
+- ~12:20 BM4: 0.63.0 player_check 11 FAILs (job loop parts/shelf/crate/fitted/save/done, reserved-part, announcement, hold stop, JOB_KINDS walk); all else OK so far; holding hash for P's fix. Details forwarded to P (try with 3373828 first).
