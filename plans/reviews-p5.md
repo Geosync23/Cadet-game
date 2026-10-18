@@ -3,11 +3,16 @@
 How: behaviour, save and schedule changes in depth (against the piece's approved page in plans/mechanics/ on claude/p5-design, determinism, old saves load, phones first, cadet_test differences explained); content and test-only changes skimmed. Verdicts newest first.
 
 ## Passing tips
-- A claude/deck-0607 **c20f91f** (0.47.0; LOWs open)
+- A claude/deck-0607 **ad5e704** (0.47.1, contains c20f91f; no LOWs open)
 - H claude/mech-cases **8c76b69** (0.55.2, contains eece4d4 and df7d356; LOWs open)
 - W claude/writer-p5 **0d179ac** (0.48.86, text; contains 843bac9 and 76fc413; no LOWs open)
 
 ## Verdicts
+
+### A (DA4) ad5e704 (0.47.1): shared kit materials, the valve strip moved — PASS
+- P5KM: the kits' materials and two painted labels, made once at load (line 7460, before the first buildDeck, no R()). Their ids are below every deckMark, so unloadDeck leaves them alone (no blank labels on a revisit). Deck 4's memory holds steady over round trips (373 geometries, 41 textures).
+- Draw calls by the lift: Deck 3 230 (base 226), Deck 5 184 (base 178), now in the DEV_NOTES rows. The valve strip is at z .036, 6 mm clear of the backing. Both LOWs closed.
+- Checks (my run): cadet_test vs d3d720b: every shot identical; state differs only by the new kits. deck_check OK.
 
 ### A (DA4) c20f91f (0.47.0): the Steps 1-2 places and five wall kits — PASS with LOWs (in depth: geometry)
 - Places: drill (5-drill-*, 5-muster-1..6, DECKS[5].drill), inspection (4-inspect-a..h), hauling (HAUL_DROPS, 5-stock-1..4), incidents (n-valve-panel / -valve-1..3 / -wet-1..2 on Decks 3-5 with DECKS[n].valveLine and .wet, 5-lift-brake, 3-extractor-alarm, 3-vent-1). All type `event` with an event tag, so they're inert: nobody's plans change. Wall kits: extBracket, bulkheadWheel, valvePanel, liftBrake, alarmPanel. They're made per deck build with no R(), colours through std()/col(), and only the extinguisher is noMerge (drillExtShow hides it).
