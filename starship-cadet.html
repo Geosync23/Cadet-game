@@ -249,7 +249,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.44.10
+   STARSHIP CADET: CSV Wren                           build 0.44.11
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7808,7 +7808,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.44.10';                           // keep in step with the header's build line
+const GAME_BUILD = '0.44.11';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -34824,7 +34824,7 @@ function worksClean(s) {
     const log = Array.isArray(s.log) ? s.log.filter(e => Array.isArray(e) && typeof e[0] === 'string' && Number.isInteger(e[1])).slice(-WORKS_LOG)
       .map(e => [e[0].slice(0, 80), e[1], int(e[2], 0, 255, 0), typeof e[3] === 'string' ? e[3].slice(0, 24) : ''].concat(typeof e[4] === 'string' ? [e[4].slice(0, 40)] : [])) : [];
     const c = s.cur, cur = obj(c) && ids.has(c.id) && /^(ask|meet|watch|do|again|held)$/.test(c.st) ? { id: c.id, st: c.st, d: int(c.d, 0, 99999, 0), by: typeof c.by === 'string' ? c.by : null,
-      occ: typeof c.occ === 'string' ? c.occ : null, j: typeof c.j === 'string' ? c.j : null, w: int(c.w, 0, 999, 0), ...(c.hold ? { hold: true } : {}), ...(typeof c.told === 'boolean' ? { told: c.told } : {}) } : null;
+      occ: typeof c.occ === 'string' ? c.occ : null, j: typeof c.j === 'string' ? c.j : null, w: int(c.w, 0, 999, 0), ...(c.hold ? { hold: true } : {}), ...(typeof c.told === 'boolean' ? { told: c.told } : {}), ...(typeof c.mail === 'string' ? { mail: c.mail.slice(0, 80) } : {}) } : null;
     const t = s.test, test = obj(t) ? { tier: int(t.tier, 1, 4, 2), day: int(t.day, 0, 99999, 0), tries: int(t.tries, 0, 99, 0), passed: !!t.passed } : null;
     return { v: 1, tier: int(s.tier, 1, 4, 1), rank: WORK_RANKS.includes(s.rank) ? s.rank : 'junior', xp: isFinite(s.xp) ? Math.max(0, Math.min(9999, +s.xp)) : 0,
       tr: days(s.tr), use: (() => { const u = {}; if (obj(s.use)) for (const k in s.use) if (ids.has(k) && Number.isInteger(s.use[k])) u[k] = Math.max(0, Math.min(9999, s.use[k])); return u; })(),
@@ -34938,13 +34938,14 @@ function trainOffer(row, c, d, t) {                      // the ask, or the ask 
   let subject = 'Training: ' + mechName(row.id), body = 'Meet me in the ' + where.replace(/^the /, '') + ' at ' + when + '. I\'ll show you ' + mechName(row.id).replace(/^./, x => x.toLowerCase()) + '.';
   if (cut > 0) { subject = ask.slice(0, cut); body = ask.slice(cut + 3); if (body.indexOf(when) < 0) body += ' (' + when + ', ' + where + '.)'; }   // the writer's words; the time and place if they don't say
   if (typeof mailSend === 'function') mailSend({ at: t, from: worksName(by), subject, body, quiet: true });
+  c.mail = subject.slice(0, 80);                         // trainTell shows this Mail, not another from the same person
   if (t >= shipNow() - 1) trainTell(row, c);              // in play now; asked during a sleep, it's told when you're up (trainTick)
   return true;
 }
 function trainTell(row, c) {                             // the ask in play: a toast and the goal arrow to the meeting
   const r = SHIP.occasions.find(x => x.key === c.occ); c.told = true; if (!r) return;
   const o = OCCASIONS['works.' + row.id], place = (DECKS[r.deck].rooms[r.room] || { name: 'the Works bay' }).name, when = hhmm(r.at % 1440);
-  const m = (SHIP.mail || []).find(x => x.from === worksName(c.by) && Math.abs(x.at - shipNow()) < 1440);
+  const m = (SHIP.mail || []).find(x => x.from === worksName(c.by) && x.subject === c.mail);
   try { toast(worksName(c.by), m ? m.body : 'Meet me in the ' + place + ' at ' + when + '.'); } catch (e) { /* no UI */ }
   if (typeof setGoal === 'function' && !(SHIP.player && SHIP.player.track)) setGoal({ deck: r.deck, room: r.room, label: mechName(row.id) + ' with ' + worksFirst(c.by) + ', ' + when });
 }
