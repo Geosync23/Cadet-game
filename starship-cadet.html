@@ -35038,8 +35038,8 @@ function roundMark(j, k, pick) {
   const f = right && first ? roundFound(id, 'you') : null;
   if (f && f.fresh) { worksXp(1); try { toast('Round', roundText('round.found', 'Found by you: {machine}.', { machine: machineLabel(machineById(id)).split(',')[0] })); } catch (e) { /* no UI */ } }
   const c = SHIP.works && SHIP.works.cur, by = j.train && c && c.id === j.train ? c.by : null;
-  const say = right ? ['train.m1.mark.right', 'Good eye.'] : st === 'healthy' && pick !== 'fine' ? ['train.m1.mark.okay', 'Looks all right to me. Better safe, though.'] : st !== 'healthy' && pick === 'fine' ? ['train.m1.mark.wrong', 'Mm. Listen again.'] : null;
-  if (say && by) worksSay(by, worksText(say[0], say[1]));
+  const say = right ? ['mark.right', 'Good eye.'] : st === 'healthy' && pick !== 'fine' ? ['mark.okay', 'Looks all right to me. Better safe, though.'] : st !== 'healthy' && pick === 'fine' ? ['mark.wrong', 'Mm. Listen again.'] : null;
+  if (say && by) worksTeach('m1', by, say[0], say[1]);
   else if (say && st === 'healthy' && pick !== 'fine') { try { toast('Round', roundText('round.okay', 'Looks all right to me.')); } catch (e) { /* no UI */ } }
   return true;
 }
@@ -35081,6 +35081,13 @@ if (typeof jobKindAdd === 'function') WORK_MECH.m1 = {
   },
   watch: 10,                                             // ship minutes watching Torres look at his two
 };
+// while Torres leads (the teacher's round), his words at the machines once you're with him: the writer's train.m1.lead.look
+let ROUND_TAUGHT = null;
+if (WORK_MECH.m1) WORK_TICKS.push((now, skip) => {
+  const c = SHIP.works && SHIP.works.cur; if (skip || !c || c.id !== 'm1' || c.st !== 'watch' || ROUND_TAUGHT === c.j) return;
+  const j = SHIP.jobs.find(x => x.id === c.j); if (!j || !trainNear(trainSpot(j))) return;
+  ROUND_TAUGHT = c.j; worksTeach('m1', c.by, 'lead.look', ['Hear that? End of the spin. Bearing\'s going. Worn.', 'Low, even hum. That\'s a happy one. Fine.']);
+});
 
 // ---------------------------------------------------------------------
 // 24c DRILL AND INSPECTION (M3, seat M1, 0.45.x; plans/mechanics/m3-drill-inspection.html). Two small ladder rows
@@ -35105,7 +35112,7 @@ function inspectOfficer(d) {
 function inspectItems(d = SHIP.time.day) {
   const C = typeof SHIP.clothes === 'object' && SHIP.clothes, P = SHIP.player || {};
   const grubby = typeof uniformState === 'function' && /grub|dirt/.test(String(uniformState()));
-  return { uniform: !!C && C.changed === d && !grubby, bed: P.bedMade === d, locker: typeof lockerTidy === 'function' ? !!lockerTidy() : true };
+  return { uniform: !!C && C.changed === d && !grubby, bed: 'bedMade' in P ? P.bedMade === d : true, locker: typeof lockerTidy === 'function' ? !!lockerTidy() : true };   // (no bed or locker action in the build yet: counted as right)
 }
 const inspectResult = it => { const bad = ['uniform', 'bed', 'locker'].filter(k => !it[k]); return bad.length === 0 ? 'nod' : bad.length === 1 ? bad[0] : bad.length === 2 ? 'two' : 'none'; };
 const INSPECT_SAY = { nod: 'Good. Carry on.', uniform: 'Uniform\'s seen better days, cadet.', bed: 'Make the bed before you go, please.', locker: 'Locker. Things go in it, not on it.',
@@ -35117,6 +35124,28 @@ const INSPECT_MAILS = { nod: 'Your berth was in good order this morning. Nothing
 function inspectHere() {
   try { const bed = placeById(playerBed()); if (!bed || !deckDef || deckDef.num !== bed.deck || !player) return false; const [c, r] = player.here(); return roomAt(c, r) === bed.room; } catch (e) { return false; }
 }
+// the walk: Thursdays at 06:30 on your workdays while you're a junior, from the day the row (m3i) opens. In the bunk
+// room: the duty officer's line now; else Mail at 07:00 (and after a sleep through it). Turning up, or all three right
+// while you were out, counts as the inspection attended (worksUse: the row's reputation, and the first is the training)
+function inspectDue(d) {
+  const W = SHIP.works;
+  return !!W && W.rank === 'junior' && weekday(d) === 3 && playerShiftOn(d) && worksOpened(W).has('m3i') && !simNotes('inspection', (d - 1) * 1440 - 1).some(n => n.day === d);
+}
+function inspectRun(d, here) {
+  const it = inspectItems(d), res = inspectResult(it), by = inspectOfficer(d);
+  simNote('inspection', { day: d, uniform: it.uniform, bed: it.bed, locker: it.locker, result: res, by, here });
+  if (here) worksSay(by, worksText('inspect.' + res, INSPECT_SAY[res]));
+  else if (typeof mailSend === 'function') mailSend({ at: (d - 1) * 1440 + INSPECT_MAIL, from: worksName(by), subject: worksText('inspect.mail.subject', 'This morning\'s inspection'), body: worksText('inspect.mail.' + res, INSPECT_MAILS[res]) });
+  if (here || res === 'nod') worksUse('m3i');
+  return res;
+}
+WORK_TICKS.push((now, skip) => {
+  const d = worksDay(now), m = now - (d - 1) * 1440;
+  if (m < INSPECT_AT || m >= INSPECT_AT + 60 || !inspectDue(d)) return;
+  if (!skip && m < INSPECT_MAIL && inspectHere()) inspectRun(d, true);
+  else if (skip || m >= INSPECT_MAIL - 1) inspectRun(d, false);
+});
+WORK_MECH.m3i = {};                                      // a small row: opens on Thursday, trained by the first inspection
 
 // =====================================================================
 // 6. CAMERA
