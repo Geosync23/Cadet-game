@@ -8,10 +8,13 @@ How: behaviour, save and schedule changes in depth (against the piece's approved
 - P claude/player-p5 **cfce34e** (0.28.72, contains 1829c8b; 1 LOW open)
 - C claude/works-career **d518673** (0.44.9, contains 87df8f5..ae6598a; 1 LOW open)
 - A claude/deck-0607 **6cc826b** (0.47.2, contains c20f91f and ad5e704; no LOWs open)
-- H claude/mech-cases **171f901** (0.55.11, contains everything from eece4d4; no LOWs open)
+- H claude/mech-cases **169d13e** (0.55.12, contains everything from eece4d4; no LOWs open)
 - W claude/writer-p5 **0d179ac** (0.48.86, text; contains 843bac9 and 76fc413; no LOWs open)
 
 ## Verdicts
+
+### H 169d13e (0.55.12): case titles name the machine without the symptom — PASS (read; H's checks)
+- caseMachName(j) replaces jobCard(j)[0], which since S 0.33.46 carries "(leaks)", so a title isn't "Washer 2 (leaks) leaks". The writer's template's full stop is dropped for a card. Nit: S 78bf1c2 has the same thing as `machineTitle(id)`; use it when it's there (`typeof machineTitle === 'function'`), so there's one copy after the combine. H's checks: puzzle_check OK (on the branch and on an S+P+C combine), cadet_test ALL IDENTICAL.
 
 ### P 1829c8b (0.28.71) + cfce34e (0.28.72): the work steps (foundation 15) and careerSpeed — PASS with a LOW (in depth)
 - workStep runs look (opts.secs real seconds, needs don't speed it, a marks card), choose (deviceChoose, 44 px+, up to 6), turn (−/+ with onTurn and ok; no number unless the machine's gauge gives one) and wait (a toast with "ready at", done when tapped after `until`). 'hold' and 'carry' keep today's path. It's started from ixChoreTap and from jobBegin's panel stop when that stop's `how` isn't 'hold'. Walking away pauses (a look's seconds kept). jobStepDone(id, k, res) at the end. careerSpeed(kind) gives 1, then .8 from 5 and .65 from 15, from SHIP.works.sk; it's applied in jobMins (only your repair minutes; the crew never call it).
