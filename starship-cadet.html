@@ -37073,22 +37073,28 @@ if (typeof jobKindAdd === 'function') jobKindAdd('drill', { tier: 1, work: 0, si
 function drillTimeWord(mins) { return mins === undefined || mins === null ? 'slow' : mins <= 3 ? 'fast' : mins <= 6 ? 'ok' : 'slow'; }
 function drillSay(key, fb) { try { const l = typeof lineFor === 'function' ? lineFor('calder', key) : null; worksSay('calder', l && l.text || fb); } catch (e) { worksSay('calder', fb); } }
 WORK_TICKS.push((now, skip) => {
-  const d = worksDay(now), m = now - (d - 1) * 1440, j = weekday(d) === 2 ? drillJobOf(d) : null; if (!j) return;
+  const d = worksDay(now), m = now - (d - 1) * 1440;
+  for (const x of SHIP.jobs) if (x.kind === 'drill' && x.status !== 'done' && now >= x.until && Math.floor(x.posted / 1440) + 1 !== d) drillClose(x, now, true);   // an earlier day's drill after a jump: closed quietly
+  const j = weekday(d) === 2 ? drillJobOf(d) : null; if (!j) return;
   if (!skip && m >= DRILL_TOAST && m < DRILL_END && !j.told) {   // 14:50: the toast, the job yours, the arrow
     j.told = true;
     try { toast(worksName('calder'), worksText('drill.toast', 'Drill in ten minutes. Muster at the Works bay.') + ' ' + worksText('drill.job.' + j.drill, '')); } catch (e) { /* no UI */ }
     if (typeof setGoal === 'function') setGoal({ deck: 5, room: 'w', label: worksText('drill.kind.' + j.drill, 'Drill') + ', 15:00' });
   }
-  if (m >= DRILL_END && j.status !== 'done') {           // the all-clear: over whatever the state; no lapse, no abandoned job
+  if (m >= DRILL_END && j.status !== 'done') drillClose(j, now, skip);
+});
+// the all-clear: the drill is over whatever the state (no lapse, no abandoned job); quiet when skipped past or from an earlier day
+function drillClose(j, now, quiet) {
+  {
     const did = !!j.workDone, mins = j.reached;
     j.status = 'done'; j.doneAt = now; j.doneBy = did ? 'you' : null; if (typeof MACH_REV !== 'undefined') MACH_REV++;
     if (typeof drillExtShow === 'function') drillExtShow(true);
     simNote('drill', { kind: j.drill, mins: mins === undefined ? null : mins, you: did });
     if (did || mins !== undefined) worksUse('m3d');      // you turned up: the row's reputation (and the first is the training)
-    if (!skip) { try { toast(worksName('calder'), worksText('drill.allclear', 'All clear. Drill over.')); } catch (e) { /* no UI */ } const w = drillTimeWord(mins);
+    if (!quiet) { try { toast(worksName('calder'), worksText('drill.allclear', 'All clear. Drill over.')); } catch (e) { /* no UI */ } const w = drillTimeWord(mins);
       drillSay('drill.time.' + w, { fast: 'Two minutes ten. Better.', ok: 'Three minutes. Fine. We\'ll do better.', slow: 'Four and a half minutes. We\'ll talk about it.' }[w]); }
   }
-});
+}
 // the device's Calendar names the week's drill (its fixed Wednesday line, section 19's DEV_WEEK, read as a getter: no edit there)
 // and, on the Friday tea after a quick drill you turned up to, Calder says so (Pillar 4's tradition: works-tea, or new-hands-tea)
 function drillCalendar() {
