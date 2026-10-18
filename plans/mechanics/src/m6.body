@@ -1,8 +1,9 @@
 TITLE:Small Incidents Spec
 H1:M6 · Making it safe: small incidents (Day 8, Calder) <span class="draft">spec for approval</span>
 SUB:About once a week, a small incident from the machines: an hour or two on one deck. You make it safe, clean up, then fix the cause. Not a ship-wide event (those are Pillar 6). Step 2, sub-block 24f. Plan Part 2, M6.
-NAV:plain=In plain words|three=The three incidents|when=When they happen|day=Day 8|grow=How it grows|b=Builder|save=Save|tests=Tests|ranges=Builds and keys
+NAV:plain=In plain words|three=The three incidents|when=When they happen|day=Day 8|grow=How it grows|b=Builder|save=Save|tests=Tests|ranges=Builds and keys|faq=FAQ
 
+<p class="note"><b>Approved by the lead (2026-10-18, overnight authority).</b></p>
 <section id="plain">
   <h2>In plain words</h2>
   <ul>
@@ -57,10 +58,10 @@ NAV:plain=In plain words|three=The three incidents|when=When they happen|day=Day
     <tr><th>Section</th><th>What</th><th>Owner</th></tr>
     <tr><td>24f (new)</td><td><code>INCIDENTS</code> (data), the week's plan, the three-step job, the Day 8 training, crew handling when you don't come</td><td>M2</td></tr>
     <tr><td>17</td><td>the machine side: an incident's fix is an ordinary job, posted at the clean-up's end: for a burst, a Tier 1 <code>joint</code> job at the burst (one <code>seal</code>, 20 minutes; the deck's <code>valve</code> machines are Tier 2, so they're never the junior's fix: a worn one just gets its service job as usual); for the lift and the alarm, a repair on <code>5-lift-1</code> or <code>3-extractor-1</code> (Tier 1), which the incident sets to faulty (cond 40) when it starts; the lift's <code>lift</code> effect ×3 while stuck</td><td>S</td></tr>
-    <tr><td>14 / 10 sim</td><td>a <b>wet patch</b> crew walk round (the corridor tiles under the puddle cost more in pathing for crew, never blocked: no plan changes); the <b>stuck person</b> (a crew member whose plan has them riding the lift at the start minute; held in the car, <code>wait</code>, until released or 40 minutes); Brennan at the extractor for the alarm; crew remarks for a day (<code>simNote('incident')</code>)</td><td>sim (on call)</td></tr>
+    <tr><td>14 / 10 sim</td><td>a <b>wet patch</b> crew walk round (the corridor tiles under the puddle cost more in pathing for crew, never blocked: no plan changes); the <b>stuck person</b> (a crew member whose plan has them riding the lift at the start minute; held in the car, <code>wait</code>, until released or 40 minutes); Brennan at the extractor for the alarm; crew remarks for a day (<code>simNote('incident')</code>)</td><td>the social engineer (on call for sim items)</td></tr>
     <tr><td>15 / 15b</td><td>the steps: <code>choose</code> (valve), <code>turn</code> (brake), <code>hold</code> with the <code>mop</code> pose, <code>wait</code> (clear the air), <code>look</code> (the hood)</td><td>P</td></tr>
-    <tr><td>8b</td><td>a <b>puddle decal</b> (one flat, see-through disc, lifted 1 cm off the floor so it's never coplanar; instanced, shared with M13 leak hunting later) and a <b>smoke wisp</b> (a few instanced soft quads in the galley); at most 3 draw calls, only during an incident on your deck; the <code>mop</code> pose</td><td>performance (on call)</td></tr>
-    <tr><td>DECKS[3], [4], [5]</td><td>per deck: valve places by the corridors (<code>4-valve-1..3</code> on the junior wing's pipe panel, with the pipe order known: <code>valveLine</code> = upstream first), puddle spots (<code>4-wet-1..2</code>), the lift machine room's brake (<code>5-lift-brake</code>), the extractor's alarm panel (<code>3-extractor-alarm</code>, may be its panel place), vents (<code>3-vent-1</code>)</td><td>deck architect 2</td></tr>
+    <tr><td>8b</td><td>a <b>puddle decal</b> (one flat, see-through disc, lifted 1 cm off the floor so it's never coplanar; instanced, shared with M13 leak hunting later) and a <b>smoke wisp</b> (a few instanced soft quads in the galley); at most 3 draw calls, only during an incident on your deck; the <code>mop</code> pose</td><td>M2 itself (no performance seat tonight), checking the draw calls</td></tr>
+    <tr><td>DECKS[3], [4], [5]</td><td>per deck: valve places by the corridors (<code>4-valve-1..3</code> on the junior wing's pipe panel, with the pipe order known: <code>valveLine</code> = upstream first), puddle spots (<code>4-wet-1..2</code>), the lift machine room's brake (<code>5-lift-brake</code>), the extractor's alarm panel (<code>3-extractor-alarm</code>, may be its panel place), vents (<code>3-vent-1</code>)</td><td>seat A</td></tr>
     <tr><td>18 events</td><td>reads only: <code>eventsOn(d)</code> for event days and tradition evenings</td><td>—</td></tr>
     <tr><td>content</td><td>the call, Calder's steps, crew remarks, the stuck person's thanks, Brennan</td><td>W</td></tr>
   </table></div>
@@ -99,5 +100,10 @@ NAV:plain=In plain words|three=The three incidents|when=When they happen|day=Day
 <section id="ranges" class="builder">
   <h2>Builds and keys</h2>
   <ul><li>Seat <b>M2</b>, <code>claude/mech-incidents</code>, <b>0.51.x</b>. Hash keys <b>870-873</b> (870 the day and minute, 871 the kind, 872 the place, 873 the stuck person if two are riding).</li>
-  <li><b>Risk</b> to watch: the stuck lift. If the sim engineer finds holding a rider costly, the lift incident ships without a rider (the lift just stalls, slow rides) and the "help them out" step becomes "check the car".</li></ul>
+  <li><b>The stuck lift (the lead's call):</b> the builder takes the fallback unless the social engineer (sim on call) says holding a rider is cheap. The fallback, if holding a rider is costly: the lift incident ships without a rider (the lift just stalls, slow rides) and the "help them out" step becomes "check the car".</li></ul>
+</section>
+
+<section id="faq">
+  <h2>Builders' questions</h2>
+  <p class="note">Questions from builders and the answers go here (ask the Pillar 5 designer through the lead). None yet.</p>
 </section>

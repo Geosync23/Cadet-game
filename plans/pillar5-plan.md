@@ -156,7 +156,7 @@ You climb but never command: Senior Officer is the top (design-doc).
 - **The ladder** (`CAREER_LADDER` in section 24): each mechanic's id, what it needs first (the one before, used N times; a day; your tier), who teaches it, its training script, and its stages.
 - **Training moments:** a training job held for you (`jobReserve`, extended with a `train` slot), a teacher who leads then follows (Pillar 4's escort lead-and-follow walker mode), meeting lines (`MEETING_SCRIPTS`), and `simNote('trained', { mech })`.
 - **Work steps** (section 15, the player engineer): a small set of building blocks every mechanic uses, so no mechanic edits section 15 itself: `hold` (hold to work, exists), `look` (stand and look; marks what you see), `carry` (exists: two slots, plus a cart), `choose` (pick one of a few things, in the device's screen style), `turn` (a valve or a dial, with a pose), `wait` (start something, come back later: a washer, a cure). A mechanic is data: its steps, places and outcomes.
-- **Tools** (`SHIP.career.tools`): each comes with its mechanic's training and lives on the device's Tools page and in your locker (not a carry slot).
+- **Tools** (`SHIP.works.tools`): each comes with its mechanic's training and lives on the device's Tools page and in your locker (not a carry slot).
 - **Skill in words** (`careerSpeed(kind)`): repairs and steps on a kind get quicker with practice (100% → about 80% after 5 → 65% after 15), shown only in words.
 - **More real faults** (section 17): about half of your 3-6 daily jobs become real faults, by having the crew leave your tier's faults longer and find worn machines later on your shift days; unchanged on days off and at night.
 - **`playerTier()`** replaces the constant `PLAYER_TIER`, once, early and inert.
@@ -278,7 +278,7 @@ They open in your Officer week (Day 12) as **side jobs**: each taught once by a 
 - **The verb:** your tools wear with use: the scanner's charge runs down, the pipe kit's seals and the logger's clip get grubby. At your bench in the Works bay (Friday afternoons are the custom), **recharge** the scanner (the `wait` step), **clean and re-seal** the pipe kit (`hold`), check the logger. A tool that's due still works, just slower ("Your scanner's charge is low"); it never stops working.
 - **Taught:** Torres shows you his own Friday bench routine.
 - **Grows:** stage 1, the scanner; stage 2, the pipe kit and the logger as they arrive; stage 3, you look after the Works team's shared tools too (Calder notices).
-- **Touches:** 24m; 24 core (a wear state per tool in `SHIP.career.tools`); 15 (`wait`, `hold`); DECKS[5] (deck architect 2: your bench place in the Works bay).
+- **Touches:** 24m; 24 core (a wear state per tool in `SHIP.works.tools`); 15 (`wait`, `hold`); DECKS[5] (deck architect 2: your bench place in the Works bay).
 - **Phone:** none new.
 - **Test:** `mech_check`: tools wear with use, upkeep restores them, a tool that's due slows a step and never blocks a job.
 
@@ -397,7 +397,7 @@ A Tier 4 test job on a drive coil (Day 22), then the engine crew's welcome (Day 
 ### What the promotions build on
 
 - **Who:** the career engineer owns the test jobs and the scenes. On call: sim (Calder or Vance walking you, the crew gathering, the ceremony's guests, `playerBed()`, Tomas and Pell carrying your box), performance (the collar mark and insignia on your uniform, a box-carry pose), deck architect 2 (door plates, the keepsake shelf, ceremony places, the suite's refit), the Works writer (all the scenes), social (reactions on `simNote('promoted')`).
-- **Save:** `save.career` holds your rank and tier, your reputation band per rank, the cabin (bunk, 4-23, the suite), ceremonies done, keepsakes and milestones.
+- **Save:** `ship.works` (`SHIP.works`; `ship.career` is the leave system's) holds your rank and tier, your reputation band per rank, the cabin (bunk, 4-23, the suite), ceremonies done, keepsakes and milestones.
 
 ---
 
@@ -612,8 +612,8 @@ cadet_test: with head-scratchers off, ALL IDENTICAL
 
 - **One mechanic, one sub-block, one owner.** Removing a sub-block removes the mechanic and nothing else breaks; its unlock simply never comes.
 - **`playerTier()`** replaces `PLAYER_TIER` once, early and inert, with `cadet_test` identical.
-- **Hash keys** (checked free by the build master): 850-899 for Pillar 5 (24 core 850-859, head-scratchers 880-894, the rest as the career engineer hands them out), **plus a second range to ask the build master for** (for example 900-949; Pillar 6 has 950-999). Incidents are in section 24, not section 18, so no `k + 100` jitter range is needed. *(Pillar 6's events will take 950-999 as the build master suggested.)*
-- **The save:** `save.career` (tier, the ladder, tools, skill by kind, uniform, the work log ring, certification) and one small part per mechanic inside it; read defensively; `SAVE_V` stays 2.
+- **Hash keys** (checked free by the build master): 850-899 for Pillar 5 (24 core 850-859, head-scratchers 880-894, the rest as the career engineer hands them out), **plus a second range, 1000-1049** (the lead, 2026-10-18: 900-949 is partly taken by the sick roll and the galley). **Pillar 6's 950-999 must skip 951-952** (the time clock's remarks). Split of 850-899: `plans/mechanics/foundation.html`. Incidents are in section 24, not section 18, so no `k + 100` jitter range is needed. *(Pillar 6's events will take 950-999 as the build master suggested.)*
+- **The save:** `ship.works` (`SHIP.works`; `ship.career` is the leave system's) (tier, the ladder, tools, skill by kind, uniform, the work log ring, certification) and one small part per mechanic inside it; read defensively; `SAVE_V` stays 2.
 - **Merge order:** systems (17) → player (15) → career (24 core) → mechanics (24a… in ladder order) → head-scratchers (24k, 24l) → deck architect 2 → the writer's lines. One build master combines them (Part 5).
 - **Notes on the bus:** `simNote('trained', { mech })`, `simNote('found', { machine })`, `simNote('incident', { id, step })`, `simNote('promoted')`, `simNote('uniform', { state })`, so Pillar 4's lines and reputation can react without new hooks.
 
@@ -631,14 +631,14 @@ cadet_test: with head-scratchers off, ALL IDENTICAL
 | --- | --- | --- | --- | --- | --- |
 | D | **Designer** (mechanics and puzzles; no code) | this role continues | `claude/p5-design` | — | a spec page per mechanic and per puzzle type (`plans/mechanics/<id>.html`), the case engine page, the fault tables in plain words, the Chief's notes; plays generated cases for fairness; keeps this plan current; answers builders' design questions |
 | B | **Build master** | new (or Pillar 4's, carried over when Pillar 4 is done) | `claude/integration-test` | candidates on the lead's release line | combines the builders' branches in merge order, runs every check (1-2 short-lived check runners only for the slow ones), reviews each branch against `plans/review-checklist.md` plus a Pillar 5 section (mechanics physical, words not numbers, the ladder's rules, determinism twice, phone budget, one owner per sub-block), hands the lead each candidate; the lead releases |
-| C | **Career engineer** | new | `claude/works-career` | 0.44.x | section 24 core (ladder, training, tools and their wear, skill, reputation bands and "What's next", the drill and inspection hooks, test jobs, all three promotions and their scenes, M22 the night shift with sim, M25 mentoring, the career story, device pages); `career_check.py`; the frames of `mech_check.py` and `puzzle_check.py` |
+| C | **Works career engineer** (not the 0.61.x career engineer of leave and the time clock) | new | `claude/works-career` | 0.44.x | section 24 core (ladder, training, tools and their wear, skill, reputation bands and "What's next", the drill and inspection hooks, test jobs, all three promotions and their scenes, M22 the night shift with sim, M25 mentoring, the career story, device pages); `career_check.py`; the frames of `mech_check.py` and `puzzle_check.py` |
 
 **Rotating builders** (up to 3 at once; each joins for its step and is archived, with a handover note, when its part is signed off):
 
 | # | Seat | Branch | Builds | Owns |
 | --- | --- | --- | --- | --- |
-| S | Systems engineer (a fresh session) | `claude/ship-systems` | 0.33.38+ | section 17: `playerTier()`, more real faults, job kinds with steps, each mechanic's machine side, the fault tables; `machine_check.py` |
-| P | Player engineer | `claude/player-needs` | 0.28.23+ | section 15: the work steps (`look`, `choose`, `turn`, `wait`), `careerSpeed`, your uniform, the Ask button, off-shift activities; `player_check.py` |
+| S | Systems engineer (a fresh session) | `claude/ship-systems` | 0.33.44+ | section 17: `playerTier()`, more real faults, job kinds with steps, each mechanic's machine side, the fault tables; `machine_check.py` |
+| P | Player engineer | `claude/player-needs` | 0.28.71+ | section 15: the work steps (`look`, `choose`, `turn`, `wait`), `careerSpeed`, your uniform, the Ask button, off-shift activities; `player_check.py` |
 | M1 | Mechanic engineer 1 | `claude/mech-rounds` | 0.45.x | 24a rounds, 24b your uniform, 24c drill and inspection, 24d hauling, 24m tool upkeep, 24n the logbook, M18 shutdowns, M21 the briefing |
 | M2 | Mechanic engineer 2 | `claude/mech-incidents` | 0.51.x | 24e tuning, 24f incidents, 24h team jobs, 24o leak hunting, 24p irrigation, M23 engine work (with coolant rounds) and the reactor, M24 leading team jobs |
 | M3 | Mechanic engineer 3 | `claude/mech-diagnose` | 0.53.x | 24i tracing, 24j workshop (and tinkering), 24q rewiring, 24s the lift roof, M19 power and relays, M20 the sensor array |

@@ -1,8 +1,9 @@
 TITLE:Scanner Spec
 H1:M7 · The scanner and diagnosing (Day 5, Torres) <span class="draft">spec for approval</span>
 SUB:Your first tool. Inspecting a faulty machine with the diagnostic scanner shows its parts with a reading each; you pick the part to fetch. Before the scanner, inspecting simply tells you the part (as now). Step 2, sub-block 24g, now with the head-scratcher seat (it opens the same day as your first head-scratcher, and both are Torres's). Plan Part 2, M7.
-NAV:plain=In plain words|day=Day 5|panel=The panel|wrong=A wrong pick|grow=How it grows|b=Builder|save=Save|tests=Tests|ranges=Builds and keys
+NAV:plain=In plain words|day=Day 5|panel=The panel|wrong=A wrong pick|grow=How it grows|b=Builder|save=Save|tests=Tests|ranges=Builds and keys|faq=FAQ
 
+<p class="note"><b>Approved by the lead (2026-10-18, overnight authority).</b></p>
 <section id="plain">
   <h2>In plain words</h2>
   <ul>
@@ -85,4 +86,9 @@ NAV:plain=In plain words|day=Day 5|panel=The panel|wrong=A wrong pick|grow=How i
 <section id="ranges" class="builder">
   <h2>Builds and keys</h2>
   <ul><li>Seat <b>H</b> (moved from M3 in plan v9 so Step 2 stays at 6 seats), <code>claude/mech-cases</code>, <b>0.55.x</b>. Hash keys <b>874-875</b>.</li></ul>
+</section>
+
+<section id="faq">
+  <h2>Builders' questions</h2>
+  <p class="note">Questions from builders and the answers go here (ask the Pillar 5 designer through the lead). None yet.</p>
 </section>

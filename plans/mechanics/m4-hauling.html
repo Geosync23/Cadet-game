@@ -72,9 +72,10 @@ td code{white-space:normal}
   <h1>M4 · Hauling and stores (Day 3, Yara Esposito) <span class="draft">spec for approval</span></h1>
   <div class="sub">Grows out of 0.60.7's Wednesday delivery: once you've unloaded the parts crates onto the shelves, the rest of the delivery goes to its stops around the ship on a cart, with a manifest. Later, the stocktake. Step 2, sub-block 24d. Plan Part 2, M4.</div>
 </header>
-<nav><div><a href="#plain">In plain words</a><a href="#day">Day 3</a><a href="#grow">How it grows</a><a href="#crew">The crew</a><a href="#b">Builder</a><a href="#save">Save</a><a href="#tests">Tests</a><a href="#ranges">Builds and keys</a></div></nav>
+<nav><div><a href="#plain">In plain words</a><a href="#day">Day 3</a><a href="#grow">How it grows</a><a href="#crew">The crew</a><a href="#b">Builder</a><a href="#save">Save</a><a href="#tests">Tests</a><a href="#ranges">Builds and keys</a><a href="#faq">FAQ</a></div></nav>
 <main>
 
+<p class="note"><b>Approved by the lead (2026-10-18, overnight authority).</b></p>
 <section id="plain">
   <h2>In plain words</h2>
   <ul>
@@ -116,7 +117,7 @@ td code{white-space:normal}
     <tr><td>24d (new)</td><td>the manifest (which crates, which stops), the <code>haul</code> job kind, the training with Yara, stage 2's order, stage 3's stocktake</td><td>M1</td></tr>
     <tr><td>17</td><td>the Wednesday delivery adds <code>SHIP.hold.manifest = [{ id, dest, n }]</code> (2-4 crates, from <code>DELIVERIES</code>' destinations, picked with <code>schedU(week, 0, 866)</code>); <code>holdCrates()</code> also counts them (drawn with the same instanced crate mesh); the misplaced part for the stocktake (<code>SHIP.misplaced = { part, on }</code>, at most one, Thursdays, <code>schedU(week, 0, 867)</code> < .5)</td><td>S</td></tr>
     <tr><td>15</td><td>nothing new: the cart run exists (<code>cartTap</code>, <code>cartStep</code>), with <code>carry</code> on the cart; each stop's drop is a tap within reach (15b's stop tap)</td><td>—</td></tr>
-    <tr><td>DECKS[3], [4], [5], [1]</td><td>drop places: <code>4-laundry-drop</code>, <code>3-infirmary-drop</code>, <code>3-store-drop</code>, <code>3-galley-drop</code>, <code>1-bridge-drop</code> (by the doors, room for the cart); <code>5-stock-1..4</code> (a spot in front of each shelf for the stocktake, may reuse <code>5-parts-N</code>)</td><td>deck architect 2</td></tr>
+    <tr><td>DECKS[3], [4], [5], [1]</td><td>drop places: <code>4-laundry-drop</code>, <code>3-infirmary-drop</code>, <code>3-store-drop</code>, <code>3-galley-drop</code>, <code>1-bridge-drop</code> (by the doors, room for the cart); <code>5-stock-1..4</code> (a spot in front of each shelf for the stocktake, may reuse <code>5-parts-N</code>)</td><td>seat A</td></tr>
     <tr><td>content</td><td>Yara's lines (<code>train.m4</code>), the stop names, the stocktake's lines</td><td>W</td></tr>
   </table></div>
   <ul>
@@ -145,6 +146,11 @@ td code{white-space:normal}
 <section id="ranges" class="builder">
   <h2>Builds and keys</h2>
   <ul><li>Seat <b>M1</b>, <code>claude/mech-rounds</code>, <b>0.45.x</b>. Hash keys <b>866-867</b> (the manifest, the misplaced part). Needs 0.60.7's 0.33.42 (the Wednesday delivery as crates).</li></ul>
+</section>
+
+<section id="faq">
+  <h2>Builders' questions</h2>
+  <p class="note">Questions from builders and the answers go here (ask the Pillar 5 designer through the lead). None yet.</p>
 </section>
 
 </main>

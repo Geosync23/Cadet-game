@@ -1,8 +1,9 @@
 TITLE:Rounds Spec
 H1:M1 · Rounds (Day 2, Torres) <span class="draft">spec for approval</span>
 SUB:Your first new kind of work: walk a route of machines, look at each one, and mark what you see. A worn machine you spot becomes a quick job "found by you", cheap now instead of a repair later. Step 2, sub-block 24a. From the plan's Part 2, M1 (<code>plans/pillar5-plan.md</code> v9); shared parts on <code>foundation.html</code>.
-NAV:plain=In plain words|walk=Your first round|signs=What you see|grow=How it grows|crew=The crew|b=Builder|save=Save|tests=Tests|ranges=Builds and keys
+NAV:plain=In plain words|walk=Your first round|signs=What you see|grow=How it grows|crew=The crew|b=Builder|save=Save|tests=Tests|ranges=Builds and keys|faq=FAQ
 
+<p class="note"><b>Approved by the lead (2026-10-18, overnight authority).</b></p>
 <section id="plain">
   <h2>In plain words</h2>
   <ul>
@@ -106,4 +107,9 @@ NAV:plain=In plain words|walk=Your first round|signs=What you see|grow=How it gr
     <li>Hash keys <b>860-861</b> (route, sign variety).</li>
     <li>Merge after 24 core and 17.5 (<code>jobKindAdd</code>), and after <code>machineFound</code> in 17.</li>
   </ul>
+</section>
+
+<section id="faq">
+  <h2>Builders' questions</h2>
+  <p class="note">Questions from builders and the answers go here (ask the Pillar 5 designer through the lead). None yet.</p>
 </section>

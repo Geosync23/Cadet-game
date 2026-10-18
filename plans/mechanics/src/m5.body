@@ -1,8 +1,9 @@
 TITLE:Tuning Spec
 H1:M5 · Tuning (Day 4, Brennan with Calder) <span class="draft">spec for approval</span>
 SUB:Some faults aren't a broken part but a machine out of adjustment. You turn a setting a step at a time and watch the machine itself answer: the oven's glow steadies, the lights stop flickering. No timer, no score (the user: yes, this is the right side of the "no mini-games" line). Step 2, sub-block 24e. Plan Part 2, M5.
-NAV:plain=In plain words|day=Day 4|look=What you watch|grow=How it grows|b=Builder|save=Save|tests=Tests|ranges=Builds and keys
+NAV:plain=In plain words|day=Day 4|look=What you watch|grow=How it grows|b=Builder|save=Save|tests=Tests|ranges=Builds and keys|faq=FAQ
 
+<p class="note"><b>Approved by the lead (2026-10-18, overnight authority).</b></p>
 <section id="plain">
   <h2>In plain words</h2>
   <ul>
@@ -66,14 +67,14 @@ NAV:plain=In plain words|day=Day 4|look=What you watch|grow=How it grows|b=Build
 
 <section id="save" class="builder">
   <h2>Save</h2>
-  <ul><li><code>ship.machines[id]</code> gains a third value, drift (<code>[cond, lastService, drift]</code>; read as 0 if missing); the tune job in <code>ship.jobs</code>; <code>ship.works.use.m5</code>.</li></ul>
+  <ul><li><code>ship.machines[id]</code> gains a third value, drift (<code>[cond, lastService, drift]</code>). <b>Old saves have only two values: <code>machinesLoad</code> reads a missing or non-numeric third value as 0 (settled), and clamps it to −3…+3</b>; the tune job in <code>ship.jobs</code>; <code>ship.works.use.m5</code>.</li></ul>
 </section>
 
 <section id="tests" class="builder">
   <h2>Tests</h2>
   <ul>
     <li><b><code>mech_check</code></b> (24e): a drifted machine settles only at 0; the look follows the setting both ways; Day 4's two ovens are drifted for the training; drift the same twice and in one jump; the crew tune drifted machines you leave.</li>
-    <li><b><code>machine_check</code></b>: no drift before Day 4 06:00; drift rate about one a workday; ship health unchanged within 2 over 14 days; the save of drift.</li>
+    <li><b><code>machine_check</code></b>: no drift before Day 4 06:00; drift rate about one a workday; ship health unchanged within 2 over 14 days; <b>save round trip</b> (case 5's save hook test): a save with drifted machines loads with the same drift, and a 0.60.7 save (two values per machine) loads with drift 0 everywhere and runs on identically.</li>
     <li><b><code>food_check</code></b>: food still ready with a drifted oven (cook a little slower).</li>
   </ul>
 </section>
@@ -81,4 +82,9 @@ NAV:plain=In plain words|day=Day 4|look=What you watch|grow=How it grows|b=Build
 <section id="ranges" class="builder">
   <h2>Builds and keys</h2>
   <ul><li>Seat <b>M2</b>, branch <code>claude/mech-incidents</code>, builds <b>0.51.x</b> (free, checked 2026-10-18). Hash keys <b>868-869</b> (drift chance, drift size).</li></ul>
+</section>
+
+<section id="faq">
+  <h2>Builders' questions</h2>
+  <p class="note">Questions from builders and the answers go here (ask the Pillar 5 designer through the lead). None yet.</p>
 </section>

@@ -1,8 +1,9 @@
 TITLE:Case Engine Spec
 H1:Step 1 · The case engine (head-scratchers' machinery) <span class="draft">spec for approval</span>
 SUB:How a head-scratcher is made from the real ship, checked to have exactly one answer, shown on the device and solved. Built in Step 1, switched off until your first head-scratcher on Day 5 (P3, its own page). From the plan's Part 4 (<code>plans/pillar5-plan.md</code> v9). The foundation page (<code>foundation.html</code>) has the shared parts: <code>SHIP.works</code>, the ladder, build numbers and keys.
-NAV:plain=In plain words|life=A case's life|rules=The promises|rate=How often|faults=Fault tables|make=Builder: making a case|solve=Builder: the solver|clues=Builder: clues|screen=Builder: Fault notes|play=Builder: calling it|save=Save|tests=Tests|ranges=Builds and keys
+NAV:plain=In plain words|life=A case's life|rules=The promises|rate=How often|faults=Fault tables|make=Builder: making a case|solve=Builder: the solver|clues=Builder: clues|screen=Builder: Fault notes|play=Builder: calling it|save=Save|tests=Tests|ranges=Builds and keys|faq=FAQ
 
+<p class="note"><b>Approved by the lead (2026-10-18, overnight authority).</b></p>
 <section id="plain">
   <h2>In plain words</h2>
   <p>Some faults don't show their cause. The crew call them <b>head-scratchers</b>. The job names a symptom ("the lamp in Bunk 2 flickers"); the device's <b>Fault notes</b> lists the <b>suspects</b> (the parts or causes it could be); you walk the ship collecting <b>clues</b> (a machine's log, what someone saw, the last shift's note, a gauge, the calendar), cross suspects out, and <b>call it</b>. Then it's an ordinary job: fetch the part, fit it by hand, turn it in.</p>
@@ -123,7 +124,7 @@ NAV:plain=In plain words|life=A case's life|rules=The promises|rate=How often|fa
   <h2>For the builder · Fault notes on the device</h2>
   <ul>
     <li>A tab of the foundation's <code>works</code> app (<code>deviceApp</code> view), one case per screen, top to bottom: the symptom; the suspects; the kind's own view (<code>CASE_KINDS[k].view(c)</code>); the clues (each with its mark); <b>Where next?</b>; <b>Call it</b>.</li>
-    <li><b>One new block from the device engineer</b> (on call): <code>{ kind: 'chips', items: [{ label, on, action }] }</code>: big toggles (44 px+), crossed-out when <code>on</code> is false. P3 needs only this plus today's <code>text</code>, <code>list</code> and <code>buttons</code>. Without it (an older skin), the suspects fall back to a <code>buttons</code> block with "✕ " on crossed ones. The day strip, the line map and the grid (P1, P5, P7) are later pieces, asked for with their steps.</li>
+    <li><b>One new block, built by seat H itself</b> as its own small first commit (no device engineer is staffed; the lead, 2026-10-18), in section 19's skin: <code>{ kind: 'chips', items: [{ label, on, action }] }</code>: big toggles (44 px+), crossed-out when <code>on</code> is false. P3 needs only this plus today's <code>text</code>, <code>list</code> and <code>buttons</code>. Without it (an older skin), the suspects fall back to a <code>buttons</code> block with "✕ " on crossed ones. The day strip, the line map and the grid (P1, P5, P7) are later pieces, asked for with their steps.</li>
     <li><b>Where next?</b> sets the goal pointer (<code>setGoal</code>) to the first clue not collected, in the order the kind lists them.</li>
     <li><b>The Chief's notes</b>: a second tab; rules of thumb per kind and per machine kind, a page added when a kind opens (<code>CHIEF_NOTES</code>, text through the Works writer) and more lines for machine kinds you know well (<code>careerSpeed</code>'s 15+). A binder on Calder's shelf in her office opens the same tab (one place tap, deck architect 2).</li>
     <li>On a wide screen (the unfolded phone), the device can stay docked while you walk (it already does).</li>
@@ -178,4 +179,9 @@ cadet_test: with no kind opened, ALL IDENTICAL; intro_check unchanged</div>
     <li><b>Hash keys 880-894</b> (free): 880 the rate roll, 881 which kind, 882-889 the eight sub-seeds, 890-894 inside the kinds (P3 uses 890-891). 855 (a fault's cause) is section 17's, from the foundation page.</li>
     <li><b>Merge order:</b> after 24 core (seat C) and section 17's 17.4-17.5 (seat S); the device's <code>chips</code> block can land any time before Step 2.</li>
   </ul>
+</section>
+
+<section id="faq">
+  <h2>Builders' questions</h2>
+  <p class="note">Questions from builders and the answers go here (ask the Pillar 5 designer through the lead). None yet.</p>
 </section>

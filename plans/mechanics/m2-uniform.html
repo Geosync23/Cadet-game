@@ -72,9 +72,10 @@ td code{white-space:normal}
   <h1>M2 · Your work uniform (Day 8, Torres) <span class="draft">spec for approval</span></h1>
   <div class="sub">Oily jobs make your uniform grubby faster; it looks a shade duller until you change at your wardrobe. Your own laundry is 0.60.7's (the wardrobe, the hamper, the washers); this adds only what grows from the job. Moved from Day 5 to Day 8 (the user's "puzzles earlier" change). Step 2, sub-block 24b. Plan Part 2, M2.</div>
 </header>
-<nav><div><a href="#plain">In plain words</a><a href="#day">Day 8</a><a href="#why">Why it matters</a><a href="#grow">How it grows</a><a href="#b">Builder</a><a href="#save">Save</a><a href="#tests">Tests</a><a href="#ranges">Builds and keys</a></div></nav>
+<nav><div><a href="#plain">In plain words</a><a href="#day">Day 8</a><a href="#why">Why it matters</a><a href="#grow">How it grows</a><a href="#b">Builder</a><a href="#save">Save</a><a href="#tests">Tests</a><a href="#ranges">Builds and keys</a><a href="#faq">FAQ</a></div></nav>
 <main>
 
+<p class="note"><b>Approved by the lead (2026-10-18, overnight authority).</b></p>
 <section id="plain">
   <h2>In plain words</h2>
   <ul>
@@ -114,9 +115,9 @@ td code{white-space:normal}
   <h2>For the builder (seat M1, sub-block 24b)</h2>
   <div class="tablewrap"><table>
     <tr><th>Section</th><th>What</th><th>Owner</th></tr>
-    <tr><td>15c clothes (0.60.7)</td><td><code>SHIP.player.clothes.grime</code> (0-1); <code>uniformState()</code> → <code>'clean' | 'yesterday' | 'grubby'</code>; a change while grubby always uses an outfit and sets grime 0; grubby drains hygiene like yesterday's clothes (max, not product)</td><td>the onboarding engineer (15c's owner, on call) or P with the lead's OK</td></tr>
+    <tr><td>15c clothes (0.60.7)</td><td><code>SHIP.player.clothes.grime</code> (0-1); <code>uniformState()</code> → <code>'clean' | 'yesterday' | 'grubby'</code>; a change while grubby always uses an outfit and sets grime 0; grubby drains hygiene like yesterday's clothes (max, not product)</td><td>onboarding engineer 4 (15c's owner, on call: session_01MeEsh5sp4RyuD7KwdQEbLC)</td></tr>
     <tr><td>24b (new)</td><td>grime from jobs; the Day 8 moment; stage 2's held washer service</td><td>M1</td></tr>
-    <tr><td>8 / 8b</td><td>the player's uniform tint: <code>playerUniformTint(k)</code>, k 0-1, multiplies the uniform's material colour toward grey (k = 1: 12% darker, 20% less saturated), through <code>col()</code>; the player only, no new material per frame (two cached materials, swapped)</td><td>performance (on call)</td></tr>
+    <tr><td>8 / 8b</td><td>the player's uniform tint: <code>playerUniformTint(k)</code>, k 0-1, multiplies the uniform's material colour toward grey (k = 1: 12% darker, 20% less saturated), through <code>col()</code>; the player only, no new material per frame (two cached materials, swapped)</td><td><b>M1 itself</b> (no performance seat tonight); reports draw calls before and after</td></tr>
     <tr><td>17</td><td>nothing (the washers wear from <code>loads</code>, and your load already adds wear via <code>machineUse</code>)</td><td>—</td></tr>
     <tr><td>content</td><td>Torres's line (<code>train.m2</code>), remarks on <code>uniform: grubby</code></td><td>W</td></tr>
   </table></div>
@@ -149,6 +150,11 @@ td code{white-space:normal}
     <li>Seat <b>M1</b>, branch <code>claude/mech-rounds</code>, builds <b>0.45.x</b>. Hash keys <b>862-863</b> (set aside; grime is deterministic and needs none today).</li>
     <li>Needs 0.60.7's 15c clothes in the base build.</li>
   </ul>
+</section>
+
+<section id="faq">
+  <h2>Builders' questions</h2>
+  <p class="note">Questions from builders and the answers go here (ask the Pillar 5 designer through the lead). None yet.</p>
 </section>
 
 </main>

@@ -1,8 +1,9 @@
 TITLE:Works Foundation Spec
 H1:Step 1 · The foundation <span class="draft">spec for approval</span>
 SUB:Pillar 5's groundwork: more real faults, the board knowing your rank, how new work is taught, tools, getting quicker, your Works reputation and the device's work pages. Most of it you don't see on its own; everything in Pillar 5 stands on it. From the approved plan (<code>plans/pillar5-plan.md</code>, v9), Part 1 "The foundation". The case engine has its own page (<code>case-engine.html</code>).
-NAV:plain=In plain words|day=A work day|ladder=The ladder|rank=Rank and jobs|rep=Reputation|b17=Builder: 17|b15=Builder: 15|b24=Builder: 24 core|save=Save|hooks=Hooks|tests=Tests|ranges=Builds and keys|names=Name clash
+NAV:plain=In plain words|day=A work day|ladder=The ladder|rank=Rank and jobs|rep=Reputation|b17=Builder: 17|b15=Builder: 15|b24=Builder: 24 core|save=Save|hooks=Hooks|tests=Tests|ranges=Builds and keys|names=Name clash|faq=FAQ
 
+<p class="note"><b>Approved by the lead (2026-10-18, overnight authority): SHIP.works, seat C the Works career engineer, systems from 0.33.44, second key range 1000-1049.</b></p>
 <section id="plain">
   <h2>In plain words</h2>
   <p>Today the job loop works, but the crew catch almost every fault early, so you mostly service things. And there's no way to grow: you're Tier 1 for ever. The foundation fixes both, quietly:</p>
@@ -229,7 +230,7 @@ NAV:plain=In plain words|day=A work day|ladder=The ladder|rank=Rank and jobs|rep
   <p>Checked against the build tables in DEV_NOTES on <code>claude/ship-integration</code> (0.60.6a), <code>claude/cand-0607</code> and every other branch on the remote, and against the hash keys in the 0.60.7 candidate's game file.</p>
   <div class="tablewrap"><table>
     <tr><th>Seat</th><th>Builds</th><th>Status</th></tr>
-    <tr><td>S systems (17)</td><td><b>0.33.43+</b></td><td>the systems line continues (0.33.42 is 0.60.7's Wednesday delivery, <code>claude/systems-0607</code>); the plan's "0.33.38+" is out of date</td></tr>
+    <tr><td>S systems (17)</td><td><b>0.33.44+</b></td><td>the systems line continues (0.33.42 is 0.60.7's Wednesday delivery and 0.33.43 the systems seat's vent move, <code>claude/systems-0607</code>); the plan's "0.33.38+" is out of date</td></tr>
     <tr><td>P player (15)</td><td><b>0.28.71+</b></td><td>continues (0.28.70 is the latest); the plan's "0.28.23+" is out of date</td></tr>
     <tr><td>C career, 24 core</td><td><b>0.44.x</b></td><td>free: no 0.44 rows on any branch</td></tr>
     <tr><td>H head-scratchers (24k, 24g)</td><td><b>0.55.x</b></td><td>free (confirmed)</td></tr>
@@ -237,11 +238,16 @@ NAV:plain=In plain words|day=A work day|ladder=The ladder|rank=Rank and jobs|rep
   </table></div>
   <ul>
     <li><b>Hash keys 850-899 are free</b> (no <code>schedU</code> key or event <code>k</code> in that range today). Suggested split: <b>850-854</b> 24 core (the ladder, training times); <b>855-859</b> section 17 (855 a fault's cause, 856 real-fault find delays); <b>860-879</b> the mechanics, two each in ladder order (860-861 rounds, 862-863 uniform, 864-865 drill kind, 866-867 hauling, 868-869 tuning drift, 870-873 incidents, 874-875 the scanner); <b>880-894</b> head-scratchers; 895-899 spare.</li>
-    <li><b>The plan's suggested second range 900-949 is NOT free:</b> 901 is the sick roll (0.61.5), 920 + k the galley's favourite dishes, 930 the galley. And <b>951-952 inside Pillar 6's 950-999 are taken</b> by the time clock's remarks (0.61.13): Pillar 6's planner should know. <b>Suggested instead: 1000-1049</b> for Pillar 5's later steps (free today; 9100 and 9200 are section 14's).</li>
+    <li><b>The plan's suggested second range 900-949 is NOT free:</b> 901 is the sick roll (0.61.5), 920 + k the galley's favourite dishes, 930 the galley. And <b>951-952 inside Pillar 6's 950-999 are taken</b> by the time clock's remarks (0.61.13): Pillar 6's planner should know. <b>Pillar 5's second range is 1000-1049</b> (the lead, 2026-10-18; free today; 9100 and 9200 are section 14's). Pillar 6's 950-999 must skip 951-952.</li>
   </ul>
 </section>
 
 <section id="names" class="builder">
   <h2>For the builder · a name clash to avoid</h2>
-  <p><b><code>SHIP.career</code>, the save's <code>ship.career</code>, <code>CAREER</code> and the <code>career…</code> functions (<code>careerInit</code>, <code>careerOn</code>, <code>careerClockedIn</code>…) already belong to the leave, missed-shift and time-clock system</b> (the career engineer's 0.61.0-0.61.19, in section 20). The plan's <code>save.career</code> and <code>SHIP.career.tools</code> become <b><code>SHIP.works</code> / <code>ship.works</code></b> and <code>SHIP.works.tools</code>; new functions start with <code>works…</code>, <code>ladder…</code> or <code>tool…</code>. <code>CAREER_LADDER</code> and <code>careerSpeed</code> keep the plan's names (neither exists). To the lead: Pillar 5's seat C ("career engineer", <code>claude/works-career</code>) is a different seat from the 0.61.x career engineer (<code>claude/leave</code>); calling C the "Works career engineer" in briefs avoids mix-ups.</p>
+  <p><b><code>SHIP.career</code>, the save's <code>ship.career</code>, <code>CAREER</code> and the <code>career…</code> functions (<code>careerInit</code>, <code>careerOn</code>, <code>careerClockedIn</code>…) already belong to the leave, missed-shift and time-clock system</b> (the career engineer's 0.61.0-0.61.19, in section 20). The plan's <code>save.career</code> and <code>SHIP.career.tools</code> become <b><code>SHIP.works</code> / <code>ship.works</code></b> and <code>SHIP.works.tools</code>; new functions start with <code>works…</code>, <code>ladder…</code> or <code>tool…</code>. <code>CAREER_LADDER</code> and <code>careerSpeed</code> keep the plan's names (neither exists). To the lead: Pillar 5's seat C ("career engineer", <code>claude/works-career</code>) is a different seat from the 0.61.x career engineer (<code>claude/leave</code>); seat C is called the <b>Works career engineer</b> in briefs (the lead, 2026-10-18).</p>
+</section>
+
+<section id="faq">
+  <h2>Builders' questions</h2>
+  <p class="note">Questions from builders and the answers go here (ask the Pillar 5 designer through the lead). None yet.</p>
 </section>

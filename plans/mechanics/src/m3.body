@@ -1,8 +1,9 @@
 TITLE:Drill and Inspection Spec
 H1:M3 · The drill and the inspection (Days 3-4, Calder and Tomas) <span class="draft">spec for approval</span>
 SUB:The crew's weekly drill (Wednesday 15:00) and bunk inspection (Thursday morning) are in the week already, but you take no part. Now they're real and small: a job at the drill, and three things checked at inspection. Step 2, sub-block 24c. Plan Part 2, M3.
-NAV:plain=In plain words|drill=The drill|insp=The inspection|rank=As you rise|b=Builder|save=Save|tests=Tests|ranges=Builds and keys
+NAV:plain=In plain words|drill=The drill|insp=The inspection|rank=As you rise|b=Builder|save=Save|tests=Tests|ranges=Builds and keys|faq=FAQ
 
+<p class="note"><b>Approved by the lead (2026-10-18, overnight authority).</b></p>
 <section id="plain">
   <h2>In plain words</h2>
   <ul>
@@ -54,10 +55,10 @@ NAV:plain=In plain words|drill=The drill|insp=The inspection|rank=As you rise|b=
   <div class="tablewrap"><table>
     <tr><th>Section</th><th>What</th><th>Owner</th></tr>
     <tr><td>24c (new)</td><td>the drill job and the inspection items; the remarks; the ladder rows <code>m3d</code> (Day 3, small, fixed Wed 15:00) and <code>m3i</code> (Day 4, small, fixed Thu 06:30)</td><td>M1</td></tr>
-    <tr><td>14 schedules</td><td>on-duty Works crew muster at the Works bay at the drill (today only off-duty crew muster by the lifts), 15 minutes, tag <code>drill</code>; the duty officer's walk on Thursday (06:30-06:45, the junior wing's bunk rooms, a place per room); <code>drillKind(d)</code> read by both</td><td>sim (on call)</td></tr>
+    <tr><td>14 schedules</td><td>on-duty Works crew muster at the Works bay at the drill (today only off-duty crew muster by the lifts), 15 minutes, tag <code>drill</code>; the duty officer's walk on Thursday (06:30-06:45, the junior wing's bunk rooms, a place per room); <code>drillKind(d)</code> read by both</td><td>the social engineer (on call for sim items: session_01Q6zXcCnBpTeJQrUP8qPKUP)</td></tr>
     <tr><td>15 / 15b</td><td>"Make the bed" on your bunk and "Tidy up" on your locker (<code>hold</code> steps, 1 ship minute each); the extinguisher's take and put back (a <code>carry</code> of a new <code>extinguisher</code> prop)</td><td>interactions / P (on call)</td></tr>
-    <tr><td>DECKS[5]</td><td>place <code>5-drill-ext</code> (the extinguisher bracket by the Works bay door, a small prop), <code>5-drill-hatch</code>, <code>5-drill-door</code> (the bulkhead wheel), <code>5-drill-breaker</code> (the existing breaker cabinet in <code>u</code>), <code>5-muster-1..6</code> (spots in the Works bay)</td><td>deck architect 2</td></tr>
-    <tr><td>8b</td><td>the <code>extinguisher</code> carry prop (one small cylinder, shared kit, built once at load, no <code>R()</code>)</td><td>performance (on call)</td></tr>
+    <tr><td>DECKS[5]</td><td>place <code>5-drill-ext</code> (the extinguisher bracket by the Works bay door, a small prop), <code>5-drill-hatch</code>, <code>5-drill-door</code> (the bulkhead wheel), <code>5-drill-breaker</code> (the existing breaker cabinet in <code>u</code>), <code>5-muster-1..6</code> (spots in the Works bay)</td><td>seat A (Pillar 5's deck architect)</td></tr>
+    <tr><td>8b</td><td>the <code>extinguisher</code> carry prop (one small cylinder, shared kit, built once at load, no <code>R()</code>)</td><td>M1 itself (no performance seat tonight), reporting draw calls</td></tr>
     <tr><td>content</td><td>Calder's brief and times; the duty officer's nods and remarks per item; Tomas's Day 4 lines</td><td>W</td></tr>
   </table></div>
   <ul>
@@ -87,4 +88,9 @@ NAV:plain=In plain words|drill=The drill|insp=The inspection|rank=As you rise|b=
 <section id="ranges" class="builder">
   <h2>Builds and keys</h2>
   <ul><li>Seat <b>M1</b>, <code>claude/mech-rounds</code>, <b>0.45.x</b>. Hash keys <b>864-865</b> (864 the duty officer's rota; 865 spare).</li></ul>
+</section>
+
+<section id="faq">
+  <h2>Builders' questions</h2>
+  <p class="note">Questions from builders and the answers go here (ask the Pillar 5 designer through the lead). None yet.</p>
 </section>

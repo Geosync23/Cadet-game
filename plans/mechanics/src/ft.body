@@ -1,8 +1,9 @@
 TITLE:Fault Tables
 H1:The fault tables: what can go wrong with each machine <span class="draft">for approval</span>
 SUB:For each kind of machine, its causes in plain words: what's wrong, what the job card says, what you see up close, when it shows, and what you hear when the wrong part goes in. Real faults (from Day 2) pick their cause from here; the scanner (Day 5) reads these parts; head-scratchers pick their suspects and clues from here. Tier 1 kinds first and complete; Tier 2 kinds drafted for Step 3. Data for section 17's <code>FAULT_CAUSES</code> (foundation 17.4).
-NAV:plain=In plain words|rules=How to read them|t1=Tier 1|t2=Tier 2 (draft)|b=Builder|check=Checks
+NAV:plain=In plain words|rules=How to read them|t1=Tier 1|t2=Tier 2 (draft)|b=Builder|check=Checks|faq=FAQ
 
+<p class="note"><b>Approved by the lead (2026-10-18, overnight authority).</b></p>
 <section id="plain">
   <h2>In plain words</h2>
   <ul>
@@ -171,4 +172,9 @@ NAV:plain=In plain words|rules=How to read them|t1=Tier 1|t2=Tier 2 (draft)|b=Bu
     <li><b><code>machine_check</code></b>: every Tier 1 kind has a table; every part is in <code>STOCK</code>; no two causes of a kind share both <code>shows</code> and <code>sign</code>; the picked cause the same twice; over 14 days every Tier 1 kind's causes all appear and the common ones most.</li>
     <li><b><code>puzzle_check</code></b>: P3 fits the washer (three "leaks"), the lights (three "flicker"), the oven (three "runs cool") and the extractor (two "weak draw" + the relay: no, so P3 skips it on T1: fine).</li>
   </ul>
+</section>
+
+<section id="faq">
+  <h2>Builders' questions</h2>
+  <p class="note">Questions from builders and the answers go here (ask the Pillar 5 designer through the lead). None yet.</p>
 </section>
