@@ -476,3 +476,4 @@ Read: this section, the "HANDOVER TO LEAD 9" section above (still accurate: 0.60
 - ~04:04 sim engineer stopped (claude/sim-0607 9c9f84e, note only, no game code) and archived; systems told (tray: goes away when meal done). Hooks landed and forwarded: deck dba2627, writer keys 7e4fb1e. Zeke trainer pitch (12 lines) sent to the user for approval. BM3: 2 runners OK, check stage ~1.5-2 h from full candidate.
 - ~04:06 the user approved Zeke's trainer lines, plus informative lines, ship life/what to expect, new jobs as you rank up, hints of the wild ship events, and some about traditions. Sent to the head writer.
 - ~04:16 the user: clock is fine in 0.60.6a, no 0.60.6b. PE6's large-text HUD fix 0.28.59 (4362d76) rides in 0.60.7. Writer done (final 2729ce1), idle. Onboarding 3 finishing Zeke follow-lines during jobs, then stops.
+- ~04:17 onboarding 3 finished (claude/arrival e2cd435e, 0.42.32) and archived; review findings go to onboarding 4. Sent to reviewer and BM3.
