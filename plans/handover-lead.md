@@ -477,3 +477,4 @@ Read: this section, the "HANDOVER TO LEAD 9" section above (still accurate: 0.60
 - ~04:06 the user approved Zeke's trainer lines, plus informative lines, ship life/what to expect, new jobs as you rank up, hints of the wild ship events, and some about traditions. Sent to the head writer.
 - ~04:16 the user: clock is fine in 0.60.6a, no 0.60.6b. PE6's large-text HUD fix 0.28.59 (4362d76) rides in 0.60.7. Writer done (final 2729ce1), idle. Onboarding 3 finishing Zeke follow-lines during jobs, then stops.
 - ~04:17 onboarding 3 finished (claude/arrival e2cd435e, 0.42.32) and archived; review findings go to onboarding 4. Sent to reviewer and BM3.
+- ~04:22 the user: Pillar 5 change, new job types from Day 2, option A (whole arc earlier, Officer ~Day 10, ~27 ship days). Recorded in plans/pillar5-notes.md on claude/pillar5-plan (3d3a751+); the timeline rewrite is the Pillar 5 designer's first job when Pillar 5 starts.
