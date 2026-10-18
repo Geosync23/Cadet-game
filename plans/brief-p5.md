@@ -19,10 +19,10 @@ The user said go for Pillar 5 Steps 1 (Foundation) and 2 (Junior days, Days 2-8)
 |---|---|---|
 | D designer | claude/p5-design | session_01VXENaUt4vdyYtr3KjVZk9z |
 | B build master (BM4 continues after 0.60.7) | claude/cand-0607 → P5 candidates on claude/p5-cand | session_013h22isZZqmJJSEKSbrwabf |
-| C works career engineer | claude/works-career | (lead fills in) |
-| S systems | claude/ship-systems | (lead fills in) |
-| P player | claude/player-p5 | (lead fills in) |
-| H case engine + scanner + P3 | claude/mech-cases | (lead fills in) |
+| C works career engineer | claude/works-career | session_01LgTgzjeqLNrjeCa2iRzbYx |
+| S systems | claude/ship-systems | session_01KxfsfBWkCGcncuuH2n1hFB |
+| P player | claude/player-p5 | session_0153WUGRakJnNzUCNNHf1E8X |
+| H case engine + scanner + P3 | claude/mech-cases | session_013nqpqRFX4hh3cLPhhpZirJ |
 | M1, M2, A | Step 2 | later |
 
 Merge order within a step: 17 (S), 15 (P), 24 core (C), mechanics in ladder order, head-scratchers (H), deck architect (A), writer.
