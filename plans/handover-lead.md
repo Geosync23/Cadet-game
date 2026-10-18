@@ -562,3 +562,4 @@ Read: CLAUDE.md, TEAM.md (session chain rule + overnight exception), plans/brief
 - ~11:47 M1 8f5783f (0.45.3 crate fix; mech_check m4 OK; cadet_test identical). Now m2.
 - ~11:50 check-in: lead 12 memory ~22%; weekly allowance still 'allowed_warning' (unchanged). Sweep delegated.
 - ~11:51 M1 740234d (0.45.4 m2 uniform on O4 96649fe; mech/clothes OK; cadet_test identical). All M1 pages built; held stocktake; idle.
+- ~11:53 sweep: 0.63.0 built, career/mech/puzzle/machine/smoke/newgame/day0 pass, rest running; BM4 63% → finish 0.63.0 + handover note, BM5 for Step 2. R was running intro_check per piece on S 78bf1c2 → told to skip (BM4's covers). P 0.28.73 still WIP → asked to send. M2 e133750 checks running. A 62% idle, H 59% done.
