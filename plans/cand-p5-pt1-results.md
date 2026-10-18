@@ -35,3 +35,4 @@ Build master 5 (BM5, session_01DbBJ7iK6TrrADyEw7qbCsQ) on claude/p5-cand-pt1; re
 - bubble_check placed: A5 e55cf31 alone OK (speakers esposito-yara/larsen-hamid, 3.4 px); p4 FAIL twice, same 63.6 px (speakers kim-yusuf/pell): deterministic; the combine's crew (X 0.71.1 schedules) give the check another pair and a one-frame jump the fix doesn't cover. Sent to DA5 with the merge recipe. p4: career, mech, machine, puzzle, events, day1, day2 OK.
 - ~20:26 DA5 fix 080b0b8 (0.47.10: the stacked pair's slide capped at 900 px/s; DA5's run on my combine list: bubble_check OK, 31.2 px); with R3. p4: day3-5, interactions, device, clothes, food, deck, path OK; lines PASS (0 errors, 2 warnings).
 - p4: tiles, leave, day6, smoke, newgame, arc OK. p4 player_check running.
+- ~20:32 R3 PASS A5 080b0b8. Only O5's follow-up (the Chief joins after you're seated) remains.
