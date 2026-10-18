@@ -35244,6 +35244,55 @@ WORK_TICKS.push((now, skip) => {
   else if (skip || m >= INSPECT_MAIL - 1) inspectRun(d, false);
 });
 WORK_MECH.m3i = {};                                      // a small row: opens on Thursday, trained by the first inspection
+// the drill job: a side job (beside any board job you hold, never the crew's), posted for you at 14:50 on Wednesdays
+// you're on shift as a junior, from the day the row (m3d) opens; yours at once (claimed for you), over at 15:15 whatever
+// the state (the all-clear). Places: DECKS[5].drill (the Pillar 5 deck architect's); a kind's stops left out till they're in
+const drillPlace = k => { const D = DECKS[5] && DECKS[5].drill, id = D && D[k]; return id && placeById(id) ? id : null; };
+function drillStops(kind) {
+  const st = (k, mins, tag, more) => ({ deck: 5, placeId: drillPlace(k), mins, tag, ...more });
+  if (kind === 'fire') return [st('ext', 1, 'take', { opts: { text: 'You lift the extinguisher off its bracket.' } }), st('hatch', 10, 'stand', { opts: { text: 'You stand by the hatch with it.' } }), st('ext', 1, 'putback', { opts: { text: 'Back on its bracket.' } })];
+  if (kind === 'pressure') return [st('door', 1, 'dog', { how: 'turn', opts: { label: 'The bulkhead wheel', v: 0, min: 0, max: 4, by: 1, onTurn: v => v >= 4 ? 'Dogged tight.' : ['Stiff.', 'A quarter turn.', 'Half way.', 'Nearly there.'][v] || null, ok: v => v >= 4 } }), st('door', 10, 'stand', { opts: { text: 'You stand by the door.' } })];
+  return [st('breaker', 2, 'reserve', { opts: { text: 'The junior wing to reserve.' } }), st('breaker', 8, 'stand', { opts: { text: 'Back to main.' } })];
+}
+const drillDue = d => { const W = SHIP.works; return !!W && W.rank === 'junior' && weekday(d) === 2 && playerShiftOn(d) && (worksOpened(W).has('m3d') || W.tr.m3d !== undefined); };
+const drillJobOf = d => SHIP.jobs.find(x => x.kind === 'drill' && Math.floor(x.posted / 1440) + 1 === d) || null;
+if (typeof jobKindAdd === 'function') jobKindAdd('drill', { tier: 1, work: 0, side: true, text: 'The drill',
+  post(h, jobs) {                                        // Wednesdays at 14:00's hour, found at 14:50
+    const d = Math.floor(h / 24) + 1; if ((h % 24 + 24) % 24 !== 14 || !drillDue(d) || jobs.some(x => x.kind === 'drill' && Math.floor(x.posted / 1440) + 1 === d)) return;
+    const kind = drillKind(d), t = (d - 1) * 1440 + DRILL_TOAST, j = jobMake('drill', { id: 'drill-' + kind + '@' + d, deck: 5, room: 'w', h, title: worksText('drill.kind.' + kind, kind.charAt(0).toUpperCase() + kind.slice(1) + ' drill'),
+      drill: kind, reserved: true, until: (d - 1) * 1440 + DRILL_END });
+    j.posted = j.found = t; jobs.push(j);
+  },
+  stops: j => drillStops(j.drill).filter(x => x.placeId),
+  stepDone(j, k, res, t) {
+    if (j.reached === undefined) j.reached = Math.round((t !== undefined ? t : shipNow()) - (Math.floor(j.posted / 1440) * 1440 + DRILL_AT));   // minutes from 15:00 to your first stop
+    const tag = (jobStops(j)[k] || {}).step;
+    if (tag === 'take' && typeof drillExtShow === 'function') drillExtShow(false);
+    if (tag === 'putback' && typeof drillExtShow === 'function') drillExtShow(true);
+  },
+  done(j, t, by) { if (by === 'you') j.drilled = true; },
+  crew: { can: () => false, mins: 0 } });
+// Calder's word on the time (her lines drill.time.fast | ok | slow): words, never the number unless she says it
+function drillTimeWord(mins) { return mins === undefined || mins === null ? 'slow' : mins <= 3 ? 'fast' : mins <= 6 ? 'ok' : 'slow'; }
+function drillSay(key, fb) { try { const l = typeof lineFor === 'function' ? lineFor('calder', key) : null; worksSay('calder', l && l.text || fb); } catch (e) { worksSay('calder', fb); } }
+WORK_TICKS.push((now, skip) => {
+  const d = worksDay(now), m = now - (d - 1) * 1440, j = weekday(d) === 2 ? drillJobOf(d) : null; if (!j) return;
+  if (!skip && m >= DRILL_TOAST && m < DRILL_END && !j.told) {   // 14:50: the toast, the job yours, the arrow
+    j.told = true; if (!j.claimedBy && j.status === 'open') { j.claimedBy = 'you'; j.status = 'claimed'; j.start = now; if (typeof MACH_REV !== 'undefined') MACH_REV++; }
+    try { toast(worksName('calder'), worksText('drill.toast', 'Drill in ten minutes. Muster at the Works bay.') + ' ' + worksText('drill.job.' + j.drill, '')); } catch (e) { /* no UI */ }
+    if (typeof setGoal === 'function') setGoal({ deck: 5, room: 'w', label: worksText('drill.kind.' + j.drill, 'Drill') + ', 15:00' });
+  }
+  if (m >= DRILL_END && j.status !== 'done') {           // the all-clear: over whatever the state; no lapse, no abandoned job
+    const did = !!j.workDone, mins = j.reached;
+    j.status = 'done'; j.doneAt = now; j.doneBy = did ? 'you' : null; if (typeof MACH_REV !== 'undefined') MACH_REV++;
+    if (typeof drillExtShow === 'function') drillExtShow(true);
+    simNote('drill', { kind: j.drill, mins: mins === undefined ? null : mins, you: did });
+    if (did || mins !== undefined) worksUse('m3d');      // you turned up: the row's reputation (and the first is the training)
+    if (!skip) { try { toast(worksName('calder'), worksText('drill.allclear', 'All clear. Drill over.')); } catch (e) { /* no UI */ } const w = drillTimeWord(mins);
+      drillSay('drill.time.' + w, { fast: 'Two minutes ten. Better.', ok: 'Three minutes. Fine. We\'ll do better.', slow: 'Four and a half minutes. We\'ll talk about it.' }[w]); }
+  }
+});
+if (typeof jobKindAdd === 'function') WORK_MECH.m3d = {};   // a small row: opens on Wednesday, trained by the first drill
 
 // =====================================================================
 // 6. CAMERA
