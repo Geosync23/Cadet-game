@@ -32672,7 +32672,8 @@ function newsAdd({ id, about = null, lines, weight = .6, seed = [], born = Math.
   seed = [...new Set(seed.flatMap(s => s === 'all' ? SOC.crew.map(p => p.id) : /^dept:/.test(s) ? SOC.crew.filter(p => p.dept === s.slice(5)).map(p => p.id) : [s]))];
   const it = { id, about, lines: lines.slice(), weight, seed: seed.filter(s => SOC.idx.has(s) && socAboard(SOC.crew[SOC.idx.get(s)])), born, kind, event, life };
   NEWS.push(it); SHIP.knows[id] = new Set(it.seed);
-  while (NEWS.length > NEWS_MAX) { let k = 0; for (let i = 1; i < NEWS.length; i++) if (NEWS[i].born < NEWS[k].born || (NEWS[i].born === NEWS[k].born && NEWS[i].id < NEWS[k].id)) k = i; delete SHIP.knows[NEWS[k].id]; NEWS.splice(k, 1); }   // a hard cap: the oldest goes
+  const wt = n => +n.weight || 0;                        // a hard cap: the least of it goes first (a tradition's chatter, then a fault), the oldest of those, never the one just added (0.71.1: an arrival's news, weight .6, fell off behind a run of faults)
+  while (NEWS.length > NEWS_MAX) { let k = NEWS[0] === it ? 1 : 0; for (let i = k + 1; i < NEWS.length; i++) if (NEWS[i] !== it) if (wt(NEWS[i]) < wt(NEWS[k]) || wt(NEWS[i]) === wt(NEWS[k]) && (NEWS[i].born < NEWS[k].born || (NEWS[i].born === NEWS[k].born && NEWS[i].id < NEWS[k].id))) k = i; delete SHIP.knows[NEWS[k].id]; NEWS.splice(k, 1); }
   return it;
 }
 function newsKnownBy(p, t = shipNow()) {
