@@ -2366,6 +2366,21 @@ The names first (the hook, 2026-10-18), so every seat can code against them; the
 | Washrooms | Deck 3's washroom bench goes; Deck 5's Works washroom shower becomes `5-toilet-2`; shower queue spots `4-shower-queue-p1/p2`, `-q1/q2` (type `shower-queue`) | sim, social (shower queue) |
 
 
+## Places for Pillar 5 Steps 1-2 (seat A, deck architect 4, 0.47.x)
+
+The names first (the hook, 2026-10-18), from the approved pages m3-drill-inspection, m4-hauling and m6-incidents (m1-rounds uses the machines' existing panel places; nothing new). Every place is type `event` with an `event` tag (inert: nobody's plans change) unless it says otherwise. Item tags are fields on the tap item (`ITEMS[k].<tag>`). Marked **built** with the build number as each lands.
+
+| Page | Names | Notes |
+| --- | --- | --- |
+| m3 drill (Deck 5) | `5-drill-ext` (at the extinguisher bracket by the Works bay door; the bracket is wall kit `extBracket`, its tap item `drill: 'ext'`; `drillExtShow(on)` shows or hides the extinguisher on it while you carry yours), `5-drill-hatch` (standing by the nearest service hatch), `5-drill-door` (at the bulkhead door's wheel by the Works bay; wall kit `bulkheadWheel`, item `drill: 'door'`), `5-drill-breaker` (at the breaker cabinet in the utility closet `u`; item `drill: 'breaker'`), `5-muster-1..6` (standing spots in the Works bay, facing the job board). Event tag `drill`. `DECKS[5].drill = { ext, hatch, door, breaker, muster: [...] }` | the extinguisher you carry is M1's prop |
+| m3 inspection (Deck 4) | `4-inspect-a..h`: where the duty officer stands in each bunk room (Bunk 1..8, inside the door, facing the bunks), event tag `inspection`; `DECKS[4].inspect = { a: '4-inspect-a', ... }` | for the sim's Thursday walk |
+| m4 hauling drops | `4-laundry-drop`, `3-infirmary-drop`, `3-store-drop`, `3-galley-drop`, `1-bridge-drop` (standing inside each door with room for the cart beside you), event tag `haul`; `HAUL_DROPS = { laundry: '4-laundry-drop', infirmary: ..., store: ..., galley: ..., bridge: ... }` | |
+| m4 stocktake (Deck 5) | `5-stock-1..4`, one in front of each shelf (Lights, Filters, Plumbing, Galley parts: the same order as `DECKS[5].shelves`), event tag `stocktake` | own ids, on the `5-parts-N` spots' neighbours so both can be used at once |
+| m6 burst pipe (Decks 3, 4, 5) | per deck n: `n-valve-panel` (where you stand at the corridor's pipe panel; wall kit `valvePanel`, three wheels on a pipe, item `valves: n`), `n-valve-1..3` (each wheel's spot, for the choose step's options), `n-wet-1..2` (the puddle spots on the corridor, downstream of the panel), and `DECKS[n].valveLine = ['n-valve-1', 'n-valve-2', 'n-valve-3']` (upstream first: valve 1 feeds 2 feeds 3); `DECKS[n].wet = ['n-wet-1', 'n-wet-2']`. Event tag `incident` | the puddle decal and smoke are M2's |
+| m6 lift (Deck 5) | `5-lift-brake` (the lift machine room's brake wheel; wall kit `liftBrake`, item `brake: true`) | the page names the lift's machine `5-lift-1`, which is already a lift-wait place id on Deck 5: the machine needs another id (systems/designer) |
+| m6 galley alarm (Deck 3) | `3-extractor-alarm` (the alarm panel by the galley's extractor; wall kit `alarmPanel`, item `alarm: true`), `3-vent-1` (where you open the vents, in the galley) | the page's machine `3-extractor-1` doesn't exist yet (the galley plant's machine is `3-galleyplant-1`): systems' call |
+
+
 ## Leave, missed shifts and being let go (the career engineer, 0.61.x)
 
 The career section sits in section 20, after crew come and go (`movedOff`). It reads section 20's reputation, section 18's occasions and section 14's plans, and nothing in it calls `R()`. All the numbers are in `CAREER`.
