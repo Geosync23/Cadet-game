@@ -35403,6 +35403,52 @@ if (WORK_MECH.m1) WORK_TICKS.push((now, skip) => {
 });
 
 // ---------------------------------------------------------------------
+// 24b YOUR WORK UNIFORM (M2, seat M1, 0.45.x; plans/mechanics/m2-uniform.html). From Day 8, oily jobs make your uniform
+// grubby: each oily repair or overhaul you turn in adds .35 grime, an oily service .2, anything else .05 (section 15c's
+// clothes keep the number and say grubby from .6, so two oily repairs; a change at your wardrobe clears it, a shower
+// doesn't: clothesGrime and uniformState are 15c's, read typeof-guarded). The first oily job turned in on Day 8 or later
+// sets flag works.oily, which opens the small ladder row m2: Torres's word (the writer's train.m2.torres-zeke meeting,
+// played by 24 core when you're trained; his two lines in a bubble or by Mail if it isn't baked). Grubby, you look a shade
+// duller: the player's body only, swapped to a second cached copy of the characters' material (no new material per
+// frame, no new draw calls). Not yet: stage 2 (a worn washer's service held for you while your wash runs).
+const OILY = new Set(['oven', 'range', 'extractor', 'galleyplant', 'cartdock', 'lift', 'pump', 'heatpump', 'fan', 'irrigation']);
+const GRIME_FROM = 8;                                    // oily jobs count from Day 8 (the ladder's m2 day)
+const GRIME_ADD = { oily: { repair: .35, overhaul: .35, service: .2 }, other: .05 };
+const grimeFor = (kind, machineKind) => OILY.has(machineKind) ? GRIME_ADD.oily[kind] || GRIME_ADD.other : GRIME_ADD.other;
+onSim('job', n => {                                      // your job turned in: grime, and the first oily one opens m2
+  if (!n || n.step !== 'turnin' || worksDay(n.t) < GRIME_FROM) return;
+  const j = (SHIP.jobs || []).find(x => x.id === n.id), m = n.machine && typeof machineById === 'function' ? machineById(n.machine) : null, kind = n.job || (j && j.kind) || '';
+  if (typeof clothesGrime === 'function') clothesGrime(grimeFor(kind, m && m.kind));
+  if (m && OILY.has(m.kind) && typeof flagSet === 'function' && !(typeof flag === 'function' && flag('works.oily'))) flagSet('works.oily', worksDay(n.t));
+});
+if (typeof uniformState === 'function') WORK_MECH.m2 = {
+  open(row, d) {                                         // Torres's word, and trained (a small row's first use)
+    const sc = MEETING_SCRIPTS['train.m2.torres-zeke'] || MEETING_SCRIPTS['train.m2'];
+    if (!sc || sc.stub) {
+      const L = ['You\'ve got half a machine on you. Change before tea. Calder notices.', 'Shower won\'t shift it. Wardrobe will.'];
+      const near = (typeof DECK_CREW !== 'undefined' ? DECK_CREW : []).some(x => x.p && x.p.id === 'torres-zeke');
+      if (near) worksSayAll('torres-zeke', L);
+      else if (typeof mailSend === 'function') mailSend({ at: shipNow(), from: worksName('torres-zeke'), subject: 'Your uniform', body: L.join(' ') });
+    }
+    worksUse('m2');
+  },
+};
+// the look: grubby, the player's body meshes use a second copy of the characters' material, a shade darker (col())
+let UNIFORM_MAT = null;
+function playerUniformTint(k) {
+  if (typeof player === 'undefined' || !player || !player.rig || typeof CHAR_MAT === 'undefined') return false;
+  if (!UNIFORM_MAT) { UNIFORM_MAT = CHAR_MAT.clone(); UNIFORM_MAT.color = col('#e1ded9'); }   // about 12% darker, a touch warmer grey
+  const to = k ? UNIFORM_MAT : CHAR_MAT, props = new Set(player.propMeshes || []); let n = 0;
+  player.rig.root.traverse(o => { if (o.isMesh && !props.has(o) && (o.material === CHAR_MAT || o.material === UNIFORM_MAT) && o.material !== to) { o.material = to; n++; } });
+  return n;
+}
+WORK_TICKS.push((now, skip) => {                         // once a ship minute: the tint follows uniformState (cheap when nothing changed)
+  if (skip || typeof uniformState !== 'function') return;
+  const want = uniformState() === 'grubby' ? 1 : 0;
+  if (want || UNIFORM_MAT) playerUniformTint(want);
+});
+
+// ---------------------------------------------------------------------
 // 24c DRILL AND INSPECTION (M3, seat M1, 0.45.x; plans/mechanics/m3-drill-inspection.html). Two small ladder rows
 // fixed in the week. The drill (m3d, Wednesday 15:00): a toast at 14:50, your drill job by the week's kind (fire: the
 // extinguisher from its bracket, stand by the hatch; pressure: dog the bulkhead door, four turns; power: stand by the
