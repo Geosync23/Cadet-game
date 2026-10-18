@@ -1,7 +1,7 @@
 # Handover: the rec deck architect (DA6)
 
 **Role:** rec deck architect, hired by lead 13; reports to lead 14 (session_01RHtJv7GJDi4qosgU8Gb2b8) since lead 13 handed over. RA1 (session_01KAGCZigadF4uRyQQafjkHW, claude/recdeck-anim) owns the player's poses, props, rec kit and the mover (section 8c). Phase 1 of the rec deck (plans/recdeck-plan.html v3 on `claude/recdeck-plan`): build the deck and its animations, usable by the player only.
-**Branch:** `claude/recdeck-build` (from `claude/p5-cand-s2` a9fad20 = 0.63.1). Builds 0.80.0 to 0.80.6.
+**Branch:** `claude/recdeck-build` (from `claude/p5-cand-s2` a9fad20 = 0.63.1). Builds 0.80.0 to 0.80.10. The Lightdisc engineer (session_013LcEsgjMTDMMeiACKLj2bB, `claude/lightdisc-proto`, series 0.82.x) merges this branch.
 
 ## What I built (turn by turn, all in DEV_NOTES' build table and its section "The rec deck")
 
@@ -15,6 +15,9 @@
 | 0.80.5 | R6 rooms | Float room, and the four service rooms' insides from existing kit. Machines are TODO. |
 | 0.80.6 | R6 activities | Section 15r: swim, kayak, climb + bell + lowered, float, sit, watch; the changing-room chain with rec kit and a tip; closed before 06:00. |
 | 0.80.7 | Merge + v4 | RA1's 0.81.0 merged (poses, kit, mover are theirs; 15r uses `actStart(kind, place, { move })`); walls 1.3×; pool 4 lanes; 2 belays on a rail; Ask someone to play panel by the court gate. |
+| 0.80.8 | Polish | The user's list from the preview: a livelier concourse (REC DEC gantry sign `recBigSign`, bunting, murals, beanbags, plants, water station, fridge, trophy case, signpost), kayaks out of the water, the camera follows floating and paddling (`o.follow`, one line in the main loop). |
+| 0.80.9 | Polish | Calmer concourse; RA1's paddle scaled to the kayak; one water across the deck; the beanbags usable (`7-beanbag-1/-2`, type `lounge-seat`, `recBean`). |
+| 0.80.10 | Polish | The concourse floor is calm terrazzo (no lanes or roundel); the stands open onto the court (`e.rail` edges: a 0.45 m kick board, no header or posts; `RAIL_H`). |
 
 ## Where the code is
 
@@ -38,7 +41,8 @@
 - **Lift `playerOnly`** when crew come (R7): then places need real types; the seats are `rec:seat`.
 - Lightdisc (R9): the court's tap says "coming soon" (`recTap`); the scoreboard texture is static.
 - The film screen is only its housing (rolled up); the house lights don't dim; no stage lights' pools.
-- The camera doesn't follow your kayak round the loop.
+- The court gate `h,14,13` is still a door with full-height leaves in a low rail; the Lightdisc engineer may change it.
+- Seats and beanbags use the ordinary seated pose (no slump yet).
 - RA1's `?recposes` lineup is still in the build (dev only).
 
 ## How to test
@@ -66,3 +70,7 @@ Where it plugs into the rec deck:
 - **Pausing:** the clock's freeze is section 13's `FREEZE` / `freezeSync` (Tiles uses it).
 - **The game-view camera** (section 6): an orthographic `camera` placed each frame by `placeCam()` from `target` (a Vector3), `az` / `azT` (the turn; 3π/4 looks from the bow side toward the stern wall and its scoreboard) and `camera.zoom` (`ZOOM_MIN`..`ZOOM_MAX`, with `camera.updateProjectionMatrix()`); the elevation is fixed at 0.62 rad inside `placeCam`. The main loop eases `target` toward the player each frame (`target.x += (pp.x - target.x) * …`, around the main loop's camera lines), so a game mode needs one guard there (hold the target while the game owns the camera) and to put `az`, zoom and target back on exit. The prototype's `fitGameView()` sets its own camera; port its numbers into these.
 - **Checks to run:** cadet_test (Deck 4 must stay ALL IDENTICAL), the Decks 1-6 zoomed-out pixel compare (an ad hoc script: `goToDeck(n)`, `camera.zoom = .55`, screenshot both builds, compare; see the R1 row), deck_check, day_check (the opponent mustn't leave anyone stuck or double-book a place), player_check (the pause and the needs), interactions_check (the taps), and the new disc_check.
+
+## State at handover (2026-10-18, ~65% memory)
+
+All my work is pushed. The last test round I started was on 842b64d (0.80.10); its results are in the DEV_NOTES row for 0.80.10 if they landed before I stopped, otherwise rerun: cadet_test, deck_check, the Decks 1-6 pixel compare, interactions_check, player_check (and day_check). A successor taking the rec deck: read this note, DEV_NOTES "The rec deck" and "Rec deck moves", and the plan (v5 on `claude/recdeck-plan`).
