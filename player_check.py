@@ -946,7 +946,7 @@ with sync_playwright() as pw:
         # a reserved training job (0.28.24, section 17's jobReserve): a shelf part, then a bracket you make, then the repair
         if g.ev("typeof jobReserve === 'function'"):
             rj = g.ev(r"""(() => { SHIP.player.carry = []; SHIP.player.work = null; const id = jobReserve('lights', SHIP.time.day, Math.max(0, SHIP.time.min - 1), 3);
-              if (!id || !claimJob(id)) return null; myWork(); const j = myJob(); return [id, j.parts, j.make, machineById(j.machine).deck, jobStops(j).map(x => x.step)]; })()""")
+              if (!id || !claimJob(id)) return null; myWork(); const j = myJob(); for (const p of j.parts) if (p !== j.make) SHIP.stores[p] = Math.max(SHIP.stores[p] || 0, 2);   /* the shelf part in stock (test only) */ return [id, j.parts, j.make, machineById(j.machine).deck, jobStops(j).map(x => x.step)]; })()""")
             print('  a reserved job:', rj)
             if check(rj and rj[2] and rj[2] in rj[1] and 'make' in rj[4], f'reserved job: should need a part you make ({rj})'):
                 g.ev("goToDeck(5)"); g.step(5)
