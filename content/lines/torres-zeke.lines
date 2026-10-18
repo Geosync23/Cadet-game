@@ -591,3 +591,57 @@
 // mail d4-mail: Thursday 07:00, his day off
 ? flag:mail.d4-mail
 - On your own today | My day off. The board's yours. You're ready. Don't break anything big.
+
+// ---- Head writer 0607 (plan-0607): Zeke's new Day 1-2 lines. Onboarding engineer 3's flags (content/keys-0607.md);
+// every line under a flag plays IN ORDER, one flag key per line where the key ends in a number. Bubbles, 60 or fewer.
+== week1
+// Day 1: he points out a crew member at work (the systems engineer places one on Days 1 and 2)
+? flag:walk.crew.vent
+- That's Bea on the vent. You'll do those by Wednesday.
+- See how she checks the draught after? That's the bit people skip.
+? flag:walk.crew.delivery
+- Delivery coming through. We share the small jobs out.
+- Some days you'll carry. Some days you'll get carried for.   #funny
+// Day 1 dinner: evenings are yours (the plan's words, split into bubbles)
+? flag:walk.dinner.eve.1
+- Evenings are yours. Most of us have a thing.
+? flag:walk.dinner.eve.2
+- I knit. Don't laugh. Pell reads.   #funny
+? flag:walk.dinner.eve.3
+- Find yours. There's no wrong answer.   #warm
+// Day 1 dinner: the laundry warning (you came with one spare outfit)
+? flag:walk.dinner.laundry.1
+- One change of clothes? That won't last.
+? flag:walk.dinner.laundry.2
+- The laundry's past the washrooms in the junior wing.
+? flag:walk.dinner.laundry.3
+- Do it tomorrow after shift.
+? flag:walk.dinner.laundry.4
+- Or you'll be wearing that on Wednesday.   #funny
+// Day 2: the wardrobe is empty; he suggests after shift (before works too)
+? flag:walk.laundry.1
+- Laundry today, remember? After shift's quietest.
+? flag:walk.laundry.2
+- Load it, leave it, go and eat. It'll be done.
+// he offers to teach you to knit (it's his hobby)
+? flag:walk.knit.1
+- Want to learn to knit? I've got spare needles.
+? flag:walk.knit.2
+- I'll teach you. Kovac taught me. She despairs.   #funny
+? flag:walk.knit.3
+- Knit and natter, Tuesday nights. Bring nothing. I've got wool.   #warm
+// walking with you between jobs on Day 1 (he stays with you now): in order, never repeated
+? flag:walk.follow.1
+- Right. What's next? Your pick.
+? flag:walk.follow.2
+- Board's the place. Grab whatever looks friendly.
+? flag:walk.follow.3
+- You're quicker than I was. Don't let it go to your head.   #funny
+? flag:walk.follow.4
+- Tea break soon. Half ten. Don't forget.
+? flag:walk.follow.5
+- I like this bit. Walking. Nobody can give you a job.   #funny
+? flag:walk.follow.6
+- After lunch you lead. I'll be the one humming.
+? flag:walk.follow.7
+- Nearly home time. You've done well today.   #warm

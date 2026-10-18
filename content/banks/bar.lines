@@ -1,0 +1,62 @@
+@bank all
+// Head writer 0607: the bow lounge bar (player engineer 6's bar order; the sim engineer's bartender rota, two galley
+// hands, 17:30-23:00). bar.ask/usual/serve/broke/tap are said by the bartender on the card; the rest are TEXTS.
+// {drink} is the drink's name in lower case ("tea", "cocoa").
+
+== bar.ask
+- What'll it be?
+- Evening. What can I get you?
+- {hi}. What are you having?
+- Right, what's it to be?
+- Long day? What'll it be?
+? tier>=friend
+- Oh, it's you. What'll it be, {nick}?   #warm
+
+== bar.usual
+- The usual? A {drink}?
+- {drink} again? Coming up before you ask.
+- Let me guess. {drink}.   #funny
+
+== bar.serve
+- One {drink}. Enjoy.
+- There you go. One {drink}, nice and fresh.
+- {drink} for you. Find a stool, put your feet up.
+- Here you are. Careful, it's full.
+
+== bar.broke
+- Bit short? Come back when you've a few more credits.
+- Not enough credits, sorry. Water's free, though.
+
+== bar.tap
+- Tap night! The drink of the week is {drink}. Go on.
+- Drink of the week: {drink}. I'm very proud of it.   #funny
+
+== bar.drink.tea
+- Tea
+== bar.drink.juice
+- Juice
+== bar.drink.fizz
+- Fizz
+== bar.drink.cocoa
+- Cocoa
+
+== bar.closed
+- Back at 17:30.
+
+== bar.order
+- Order a drink (2 credits)
+
+// Gym club (the player engineer's "you're a member"; the traditions engineer's rename)
+== gym.member
+- You're a Gym club member: this machine is yours.
+
+== gym.yield
+- Oh, go on. I'll take the next one.
+- All yours. I'll hop on the bike.
+- You have it. I need the rest anyway.   #funny
+
+// the Tiles table in the junior common room, any evening
+== tiles.anytime
+- Tiles? Go on, then. Quick game.
+- A game? You're on. Prepare to lose.   #funny
+- Sure. I'll even let you go first.

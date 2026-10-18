@@ -1,0 +1,19 @@
+@bank dept:works
+// Head writer 0607: the Works crew at work where you can see them (the systems engineer's, plan-0607 "The Works crew
+// at work"). crewjob.repair while they fix something near you, crewjob.carry while they carry a box (bubbles, 60).
+
+== crewjob.repair
+- Come on, {machine}. Be nice to me.
+- There we are. Nearly. Nearly.
+- Who keeps breaking this? Oh. Nobody. It's just old.   #funny
+- Panel off, part in, job done. Lovely.
+- Hold still. I'm only helping.   #funny
+- That's the fluff out. Breathe, little vent.
+- Hear that? Better already.
+
+== crewjob.carry
+- Coming through! Box with legs.   #funny
+- Mind your toes. Heavy one.
+- Delivery for Deck 3. Again.
+- Sorry, squeezing past. Thanks.
+- This one's for the galley. Smells like it, too.
