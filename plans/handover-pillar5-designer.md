@@ -43,6 +43,8 @@ Done and sent: plan v10 (9e26a58: Step 2's optional stages into Step 4, the cold
 
 - 563dc35: events plan v4 (artifact https://claude.ai/artifact/5fAouaAV1K1qptqPYez9rt Version 4). The user OK'd Space Creature on Day 8: mark that question answered next time the page is touched (no new version just for it). Awaiting overall approval.
 
+- 71fe06b: events plan v4 APPROVED (2026-10-19), written into design-doc's Ship-wide events. Lead 16 (session_01UMyfd16GqSdgNyz5PE8qSv) from ~02:15: Step 3 seats route page questions via the lead or directly. Standing by.
+
 ## Next (in order)
 1. ~~**Finish the Tier 2 fault tables**~~ (done, adc12e2) (`fault-tables.html`, `src/ft.body`): each Tier 2 kind's causes in the Tier 1 format (card, up close, when, how common, still, from), parts from `STOCK` only, same card needs different signs. Needed by: M9's lines (water: recycler, filter, uv, pump, valve; heat: heater, heatpump, manifold), P1's first case (3-pump-1 `peak`; filter `always`; membrane; valve), P2's first case (scrubber: filter `always`, bearing `warm`, a new `panel` cause, part seal, `touched`). Air plant and main fan are stand-ins without panels (no tracing for air yet).
 2. Whatever the user sends back on the Step 3 pages (fix, re-push, one line to the lead each).
