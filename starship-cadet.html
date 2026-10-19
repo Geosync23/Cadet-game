@@ -40379,8 +40379,8 @@ function teamStepDone(j, k, res, t) {
 }
 // the clock: the week's plan posted at 16:00 the day before; each team job's steps run
 if (typeof teamJobPost === 'function') WORK_TICKS.push((now, skip) => {
-  if (!teamState()) return;
-  const d = worksDay(now), m = now - (d - 1) * 1440, w = teamWeek(d);
+  const d = worksDay(now), w = teamWeek(d);
+  if (d < TEAM_FIRST.day - 1 || !teamState()) return;   // (nothing saved before Day 10: the first is posted on Day 10 at 16:00)
   for (const ww of [w, w + 1]) for (const P of teamPlan(ww)) if (!P[2] && (P[0] - 2) * 1440 + TEAM_POST <= now && now < (P[0] - 1) * 1440 + P[1]) teamPost(P, ww, Math.max(now, (P[0] - 2) * 1440 + TEAM_POST));
   for (const j of SHIP.jobs) if (j.kind === 'team' && j.status !== 'done') teamTick(j, now, skip);
 });
