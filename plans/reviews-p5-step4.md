@@ -20,6 +20,13 @@ Lines skimmed. In a fresh archive content_gen bakes 9342 lines; lines_check PASS
 
 ## Step 4
 
+### E5 claude/mech-incidents 2c513e6 (0.51.14, M8 stage 2: team parts), R5: PASS
+Diff 60a418fe..2c513e6, read by hand against step4-stages ("bringing a team job's parts").
+- From Day 18, once m8 is at stage 1, a team job you're in asks you (in its Mail, mail.team.parts) to bring its two parts: E6's manifestRun from stores to the machine, held for you till the start. At the start (teamPartsCheck): brought, side.parts +1; not there, the run is withdrawn (manifestRunEnd) and the lead fetches them, the job starting TEAM_PARTS_LATE = 10 min late (teamT0; the wait for you counts from teamT0). Never a fail. Calls E6's API only, no copies; the five kinds' parts are all in STOCK. No R(). Lives only when merged with E6 (manifestRun).
+- Notes: the run takes the parts off the shelves, while the lead's late fetch takes none (harmless); an empty shelf still "loads" (E6's manifestRun note).
+- Merge note for BM7: mech_check conflicts with E6/E4 at the main loop: keep E5's EXTRA condition (with teamParts) once, and E4's `part_t24` line after the loop (a naive keep-both leaves the old EXTRA line indented under part_t24: IndentationError).
+- Checks: on a merge of E6 910131e + E5 2c513e6 + E3/E4 d51c5ed, queued.
+
 ### E6 claude/mech-rounds 910131e1 (0.45.15, hauling stage 3: the Thursday stocktake), R5: PASS
 Diff 2edb69c8..910131e1, read by hand against step4-stages.
 - Thursdays from Day 18, officers trained in hauling: a side job ('stocktake') posted at 13:30, held for you (slot 31) to 16:00, then withdrawn if untaken; never the crew's. One count stop per aisle at E3's 5-stock-1..4 (built by formula in 9d179e9). The week's short aisle and part from schedU(week, 0..1, 1026) (the only key, in range), kept on the job; finding it moves up to 2 from SHIP.stores to SHIP.hold (section 17 posts the restock run) and pays +1 through worksSideXp; the job's own xp is 0, so no second pay. Thursday's misplaced part on a counted aisle goes back (misplacedFix). Saved: side.stock { week, found }.
