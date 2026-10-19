@@ -743,7 +743,7 @@ PARTS['m11'] = part_m11
 # 1 still yours): three summaries from it in the day's order; an entry once a day (+1, a use, the open jobs logged and 10%
 # quicker for whoever takes them); stage 2's flag looked at by the night crew at 22:00; logLast; saved; the same twice
 M12 = r"""(() => {
-  SHIP.works = null; SHIP.notes = []; SHIP.jobs = []; setShipNow(11 * 1440 + 990); machinesNow(); ACT = null;
+  SHIP.works = null; SHIP.notes = []; SHIP.jobs = []; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(11 * 1440 + 990); machinesNow(); ACT = null;   // the machines replayed from the start, whatever the part before left (BM8, 0.63.5)
   const W = worksInit(), out = {}, t = shipNow(); W.tier = 2; W.rank = 'officer'; W.op[12] = ['m12'];
   SHIP.jobs.push({ id: '4-washer-2@x', machine: '4-washer-2', deck: 4, kind: 'repair', parts: ['pump'], status: 'done', doneBy: 'you', posted: t - 300, found: t - 300 });
   W.log.push(['4-washer-2@x', 12, 0, 'repair']);
@@ -1129,7 +1129,7 @@ EXTRA['ff'] = extra_ff
 # not brought: the run withdrawn, the lead fetches them, 10 minutes late, never a fail; before stage 2 or Day 18 the
 # old Mail and no run; the same twice
 TPARTS = r"""(() => { const out = {}, W0 = JSON.stringify(SHIP.works);
- const reset = (t, uses) => { machinesNew(); SHIP.jobs = []; SHIP.mail = []; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t); machinesNow(); SHIP.works = null; const W = worksInit(t);
+ const reset = (t, uses) => { SHIP.works = JSON.parse(W0); machinesNew(); SHIP.jobs = []; SHIP.mail = []; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t); machinesNow(); SHIP.works = null; const W = worksInit(t);
    W.team = { plan: {} }; W.inc = { plan: {}, open: null }; W.tier = 2; W.rank = 'officer'; W.tr.t2 = 10; W.tr.m8 = 11; W.use.m8 = uses; if (worksSide()) worksSide().parts = 0; return W; };
  const run = (t0, t1, uses, bring, d0 = 18) => { const W = reset(t0, uses), r = {}; let j = null;
    for (let t = t0; t <= t1; t += 5) { setShipNow(t); machinesNow(); for (const f of WORK_TICKS) f(t, false);
