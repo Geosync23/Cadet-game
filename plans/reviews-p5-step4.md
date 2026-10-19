@@ -20,6 +20,16 @@ Lines skimmed. In a fresh archive content_gen bakes 9342 lines; lines_check PASS
 
 ## Step 4
 
+### E2 claude/mech-incidents 51611e02 (0.51.9, 24l fault-finder tickets), R5: PASS WITH FIXES (four)
+Diff d0e6fe99..51611e02, read with a helper agent; fixes confirmed by hand.
+- Good: Calder's Mail Day 13 on (mailSend); a ticket at 08:00 on a workday of yours, slot 23, held to 17:00, until graded; the case engine only called (caseMake/caseShow/caseRelease/caseTalker/caseKindsOpen/caseCauses); keys 1022/1023 via schedU, no R(); saved under side.ff, cleaned, the ffOk marker not enumerable. One owner: FF_*/ff* names nowhere else. Rep only through the normal turn-in (no worksSideXp, no double pay). Line keys exist with fallbacks.
+- **Fix 1 (bug): a crossed-out suspect counts as a wrong call.** 42044/42050 test `c.crossed.length`, but crossed also fills when you cross a suspect out on the notepad (40880) and with "talk it through" (40821). Normal deduction ends the ticket "Not yet. Next week." Test the calls instead (a call that isn't c.cause).
+- **Fix 2 (the lead's call): "hints only after your third look" isn't built.** FF_HINT (41982) and c.ticket (42013) are read nowhere; caseHint has no ticket guard. One guard line in caseHint (H2's function: one-line hook, say so in the row).
+- **Fix 3: the pin can never show.** ffPin needs `playerRigRebuild` (no branch has it) and section 8's builder has no `s.pin`, so it always returns false (and is retried every tick). The lead's call: a small gold disc baked into the chest on the right breast (merged, col(), no extra draw call, no R()), drawn from spec.pin, with a rebuild path that exists; old saves without a grade: no pin.
+- **Fix 4: Calder's line never plays.** calder.lines:635 needs `flag:ticket.solved`; nothing sets it. Set it in ffGrade.
+- Also (small): no real save round trip of side.ff in mech_check; the toast joins ticket.solved and works.pin into one odd sentence ("... Calder's initials on it. your fault-finder pin"); 'ff1' goes into W.ms but the Record shows only 'commissioned'; "one more clue" for the ticket's case isn't built (c.ticket set after caseMake); after a 17:00 release, check the ticket's case doesn't stay in C.open.
+- Checks on 51611e02: queued.
+
 ### W2 claude/writer-p5 1beddb1 (0.48.114, rewire.faded singular, the lead's m15 call), R5: PASS
 "This one's faded. Which colour was it?" Bakes 9564 lines; lines_check PASS. W2's tip.
 
@@ -30,7 +40,8 @@ Diff dd0ec462..d0e6fe99, read with a helper agent against favour-cases (D3's ans
 - **Fix 2 (bug):** an accepted favour still lapses at `expires` (section 17, 16790: `!j.workDone`), set at the ask (41916). Mid-case it lapses ("asked someone else" after you said yes) and the 'fcase' side job is left in your jobs for good. When the side job is made, push F.expires out (or null); in the lapse branch also close any `kind 'fcase' && favour === e.id` job.
 - **Fix 3 (the brief):** a real save round trip of side.favours, the side job and F.fcase (mech_check only cleans junk in memory).
 - Notes: "friendly or better" is `relTier >= 2`, but REL_NAMES[2] is 'colleague' (friend is 3): which was meant? Not built from the page: a weekend ask, a person as a clue, the occasional thank-you gift; W2's favour.thanks / favour.head / favour.<id>.ask are never read. The lamp lines name Pell's guitar next door, but Pell can be the asker.
-- Checks on d0e6fe99: mech_check OK (fcase part), social_check OK, cadet_test running.
+- Checks on d0e6fe99: mech_check OK (fcase part), social_check OK, cadet_test vs dd0ec462 ALL IDENTICAL (renderer noise only).
+- Lead 17's calls after this verdict: "friendly or better" = the friend tier (relTier >= 3), as a named constant.
 
 ### E2 claude/mech-incidents dd0ec462 (0.51.7, 24q M15 rewiring), R5: PASS WITH FIXES (three)
 Diff b6130f62..dd0ec462, read with a helper agent against m15-rewiring; the fixes confirmed by hand (line numbers in dd0ec462).
@@ -38,7 +49,7 @@ Diff b6130f62..dd0ec462, read with a helper agent against m15-rewiring; the fixe
 - **Fix 1 (double pay):** rewDone (42108-42109) sets j.rightFirst AND calls worksSideXp(1, 'rewire'); E1's turn-in already adds +1 for j.rightFirst. Today the +2 cap hides it. Delete the worksSideXp line, keep j.rightFirst.
 - **Fix 2 (the brief):** a real save round trip: mid-job (after a wrong pair) saveGame/loadGame, check pairs/wrongs/the open stop survive and side.rewire reads back. Default j.pairs/j.wrongs where read (an old/junk job makes `j.pairs[k] =` throw and `j.wrongs +=` NaN, 42093).
 - **Fix 3 (gameplay):** the right answer is always the stop's position: wire stops go in chart order (42078) and the options are T1..Tn in order, so the k-th wire is always Tk (42092) and the chart never needs reading. Store a seeded stop order on the job at posting (key 1016) and check the colour's chart position.
-- Notes: the code fades two colours, the page says one (W2's line says "these two"): lead's call / page update. rewBoxes can pick a junction with an open section-17 repair (two jobs on one box). On E2's branch alone nothing posts until E1's core is merged.
+- Notes: the code fades two colours, the page says one: lead 17 ~06:02: ONE (the page); W2's line is singular in 1beddb1. rewBoxes can pick a junction with an open section-17 repair (two jobs on one box). On E2's branch alone nothing posts until E1's core is merged.
 - Checks on dd0ec462: mech_check OK, cadet_test vs b6130f62 ALL IDENTICAL.
 
 ### W2 claude/writer-p5 1c051274 (0.48.113, M13/M14 lines matched to E2's code), R5: PASS
