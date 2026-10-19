@@ -2488,6 +2488,19 @@ A standalone page, `wall-proto.html`, made the same way as the kayak one, NOT pa
 - **Test hooks:** `window.WL` (start, steps, paper, fps, state, holds, screen, set, hand, advice, rate, calls, pause, leave).
 - **Chat lines** in `CREW[...].lines` are stand-ins until the writers' `wall.<kind>` lines arrive.
 
+## Pool prototype (Lengths, seat K1, 2026-10-19)
+
+A standalone page, `pool-proto.html`, made the same way as the kayak and wall ones, NOT part of the game. Design: `plans/rec-minigames-plan.html` "Pool" (Lengths).
+
+- **What it is:** four lengths in rhythm in the game's pool (basin x .8-8.2, z .9-4.5 room-local, four lanes between ropes at z 1.8, 2.7, 3.6, water at .35, 6 m chest to chest as the game's swim path). A ring closes in on your swimmer: tap as it meets for a stroke (clean within .08 s, good .16, ok .3, else a splash that breaks your rhythm). Clean strokes in a row build "flow" (up to a quarter more push). Every 3rd beat (breaststroke) or 4th (front crawl) the ring is blue: hold the thumb down through it to breathe; miss breaths and you run out of air and stop to catch it (about 1.5 s; no failing). Near the wall (1.2 m) the beats stop and "Swipe up to turn" shows: closer to the wall is a better push-off; no swipe and you touch and turn the slow way. Four lengths take about 50-80 s.
+- **Strokes:** breaststroke first; front crawl (quicker beat) is a menu switch here, standing in for "smoother rhythm over weeks unlocks it".
+- **Modes:** swim alone; with crew (Rina, Tomas and Pell, one a lane, at their own pace); Race me? (the same three, placings in words); Dawn swim (Rina in the next lane: "You kept with Rina!" when you stayed within about a body length most of the way; the friendship step is noted for later).
+- **The rules (section 5), pure:** `plNew`, `plStep`, `plPaper`, `plClone`, fixed 60 steps a second, `g.rs`. Input per step is a press (timed at the touch, not the lift), whether the thumb is down, and a swipe. The crew and the test autopilot plan each beat once (a seeded timing error by skill, sometimes skipping a breath, turning near the wall).
+- **Look:** the game's pool (tiled rim and coping, steps, the Wren mosaic floor, opaque water, orange and white lane ropes as one instanced mesh), hull windows along the port side and the bow end with stars, a pale tiled stern wall with the deck's teal band. Swimmers lie along the lane, back at the water, in rec kit with a swim cap. The ring, judgement, turn prompt and air bar are screen overlay; splashes are small spray puffs above the water. The camera sits above and behind you, looking down the lane, and swings round at each turn. Draw calls about 18-31.
+- **Check:** `NODE_PATH=$(npm root -g) node tools/pool_proto_check.js` (about 1.5 minutes). Rhythm needs exact timing that a software renderer can't give, so the touch tests pause the frame loop, step to the moment (`PL.toBeat`, `PL.toWall`), make a real touch and step on with it (`PL.live`): a clean tap, a splash, a held breath, running out of air, a swipe turn, four lengths with one thumb; then paper, clones and 60/30/20 fps, crew, race, Dawn swim; shots into `plans/shots-pool/`.
+- **Test hooks:** `window.PL` (start, steps, live, toBeat, toWall, paper, fps, state, set, rate, calls, pause, leave).
+- **Chat lines** in `CREW[...].lines` are stand-ins until the writers' `pool.<kind>` lines arrive.
+
 ## Working method
 
 - Edit the build in place and never rewrite the whole file. Make small exact-string edits, each matching once.

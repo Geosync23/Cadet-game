@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Pool Prototype</title>
+<!--
+  Lengths: the pool mini-game prototype for Starship Cadet. A standalone test page, NOT part of the game file.
+  Follows plans/rec-minigames-plan.html ("Pool", Lengths): swim four lengths in rhythm. A ring closes in on your
+  swimmer; tap as it meets the beat for a clean stroke (mistimed: a splash and a slower stroke). Every few strokes the
+  ring turns blue: hold your thumb down through it to breathe. At the wall, swipe up for a tumble turn. No failing,
+  no times on screen: bests said in words. Crew swim the other lanes at their own pace; "Race me?" makes it a race;
+  Dawn swim is keeping with Rina. Front crawl once your rhythm is smooth (a menu switch here).
+  The rules (section 5) are pure: plNew, plStep, plPaper, plClone; fixed 60 steps a second, one seeded stream per go
+  kept as plain state (g.rs), no Math.random, no DOM. The game's pool (KIT.recPool): the basin x .8-8.2, z .9-4.5
+  room-local, four lanes between ropes at z 1.8, 2.7, 3.6, water at .35, swum chest to chest over 6 m (x 1.5-7.5).
+  Every colour through col(); no coplanar surfaces. Test hooks: window.PL. ?seed=N, ?debug.
+-->
+<style>
+  :root { --cy: #50e6ff; --co: #ff7a5c; --ink: #e8f2f5; --dim: #9fb2b8; --panel: rgba(8, 12, 20, .9); --line: rgba(255,255,255,.14); }
+  html, body { margin: 0; height: 100%; background: #05070d; color: var(--ink); font: 15px/1.35 system-ui, -apple-system, "Segoe UI", sans-serif; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; }
+  canvas { display: block; }
+  .hide { display: none !important; }
+  button { font: inherit; color: var(--ink); background: rgba(255,255,255,.08); border: 1px solid var(--line); border-radius: 999px; padding: 8px 16px; cursor: pointer; }
+  button:active { transform: scale(.97); }
+  button.go { background: #0f3440; border-color: var(--cy); color: #dffaff; font-weight: 600; }
+  #hud { position: fixed; left: 0; right: 0; top: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: calc(env(safe-area-inset-top) + 8px) 12px 0; pointer-events: none; }
+  .pill { background: rgba(5,8,14,.7); border: 1px solid var(--line); border-radius: 999px; padding: 4px 14px; font-weight: 600; font-size: 14px; }
+  .pz { background: rgba(5,8,14,.62); border: 1px solid rgba(80,230,255,.35); border-radius: 10px; padding: 3px 10px; font-size: 12px; color: #bfefff; }
+  #leave { position: fixed; right: 12px; bottom: calc(env(safe-area-inset-bottom) + 12px); font-size: 13px; padding: 6px 14px; background: rgba(5,8,14,.6); }
+  #call { position: fixed; left: 0; right: 0; top: 30%; text-align: center; font-size: 26px; font-weight: 700; text-shadow: 0 0 12px rgba(0,0,0,.9); pointer-events: none; }
+  #ring, #target { position: fixed; border-radius: 50%; pointer-events: none; transform: translate(-50%, -50%); box-sizing: border-box; }
+  #target { width: 64px; height: 64px; border: 3px solid rgba(255,255,255,.75); }
+  #ring { border: 4px solid #ffffff; }
+  #ring.breath { border-color: #50b8ff; } #target.breath { border-color: rgba(80,184,255,.9); background: rgba(80,184,255,.15); }
+  #judge { position: fixed; transform: translate(-50%, -100%); font-weight: 700; font-size: 18px; text-shadow: 0 0 8px #000, 0 0 2px #000; pointer-events: none; }
+  #turn { position: fixed; left: 0; right: 0; top: 27%; text-align: center; font-size: 20px; font-weight: 700; color: #ffe08a; text-shadow: 0 0 10px #000; pointer-events: none; }
+  #turn .arrow { display: block; font-size: 34px; animation: up .8s ease-in-out infinite; }
+  @keyframes up { 50% { transform: translateY(-10px); } }
+  #air { position: fixed; width: 150px; transform: translate(-50%, 0); pointer-events: none; text-align: center; }
+  #air .bar { height: 10px; border-radius: 8px; background: rgba(5,8,14,.75); border: 1px solid rgba(255,255,255,.35); overflow: hidden; }
+  #air .fill { height: 100%; width: 100%; border-radius: 8px; background: #50b8ff; }
+  #air .lab { font-size: 11px; font-weight: 600; color: #e8f2f5; text-shadow: 0 0 6px #000; margin-top: 2px; }
+  .tag { position: fixed; transform: translate(-50%, -100%); font-size: 12px; font-weight: 600; padding: 1px 7px; border-radius: 6px; background: rgba(5,8,14,.55); pointer-events: none; white-space: nowrap; }
+  .say { position: fixed; transform: translate(-50%, -100%); font-size: 13px; padding: 4px 9px; border-radius: 10px; background: #f3efe4; color: #1b1f24; pointer-events: none; white-space: nowrap; }
+  #how { position: fixed; left: 10px; right: 10px; top: calc(env(safe-area-inset-top) + 74px); display: flex; align-items: center; gap: 8px; background: var(--panel); border: 1px solid var(--cy); border-radius: 14px; padding: 9px 10px 9px 14px; pointer-events: none; max-width: 520px; margin: 0 auto; }
+  #how .t { flex: 1; } #how .n { color: var(--cy); font-size: 12px; display: block; } #how button { pointer-events: auto; padding: 6px 12px; font-size: 13px; }
+  .over { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; padding: 16px; overflow-y: auto; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 18px; width: 100%; max-width: 440px; box-sizing: border-box; margin: auto; }
+  h1 { margin: 0 0 2px; font-size: 30px; letter-spacing: .06em; background: linear-gradient(90deg, var(--cy), #fff 50%, #50b8ff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .sub { color: var(--dim); font-size: 13px; margin-bottom: 12px; }
+  .modes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .mode { text-align: left; border-radius: 12px; padding: 9px 10px; }
+  .mode b { display: block; } .mode small { color: var(--dim); display: block; font-size: 12px; margin-top: 2px; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; margin-top: 10px; font-size: 13px; color: var(--dim); }
+  .row label { display: flex; gap: 6px; align-items: center; }
+  .row input[type=number] { width: 64px; background: #0b111b; color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 4px 6px; font: inherit; }
+  h2 { font-size: 14px; margin: 14px 0 6px; color: var(--ink); }
+  .res h2 { font-size: 23px; margin: 0 0 6px; }
+  .res p { margin: 4px 0; color: var(--dim); font-size: 14px; }
+  .btns { display: flex; gap: 10px; margin-top: 14px; }
+  #dbg { position: fixed; left: 8px; bottom: 6px; font: 11px monospace; color: #6f8a92; pointer-events: none; }
+</style>
+</head>
+<body>
+<div id="hud" class="hide"><div class="pill" id="status"></div><div class="pz">⏸ The ship's clock is paused while you swim</div></div>
+<div id="target" class="hide"></div><div id="ring" class="hide"></div><div id="judge" class="hide"></div>
+<div id="turn" class="hide"><span class="arrow">⬆</span>Swipe up to turn</div>
+<div id="call" class="hide"></div>
+<div id="air" class="hide"><div class="bar"><div class="fill"></div></div><div class="lab">Air</div></div>
+<button id="leave" class="hide">Leave</button>
+<div id="how" class="hide"><div class="t"><span class="n"></span><span class="x"></span></div><button id="howNext">Next</button><button id="howSkip">Skip</button></div>
+
+<div id="menu" class="over">
+  <div class="card">
+    <h1>LENGTHS</h1>
+    <div class="sub">The pool, CSV Wren. A prototype to feel the swimming game: four lengths in rhythm, under the hull windows.</div>
+    <div class="modes">
+      <button class="mode" data-m="alone"><b>Swim</b><small>Four lengths, just you.</small></button>
+      <button class="mode" data-m="crew"><b>Swim with crew</b><small>Three in the other lanes, at their own pace.</small></button>
+      <button class="mode" data-m="race"><b>Race me?</b><small>The same three, racing you.</small></button>
+      <button class="mode" data-m="dawn"><b>Dawn swim</b><small>Keep with Rina in the next lane.</small></button>
+    </div>
+    <h2>Your progress (prototype only)</h2>
+    <div class="row" style="margin-top:0"><label><input type="checkbox" id="crawl"> Front crawl <small>(once your rhythm's smooth; breaststroke before)</small></label></div>
+    <div class="row">
+      <label><input type="checkbox" id="howOn" checked> How to play</label>
+      <label><input type="checkbox" id="rm"> Reduced motion</label>
+      <label><input type="checkbox" id="snd" checked> Sound</label>
+      <label>Seed <input type="number" id="seed" value="1" min="1"></label>
+    </div>
+    <div class="row" id="rec"></div>
+  </div>
+</div>
+
+<div id="result" class="over hide">
+  <div class="card res">
+    <h2 id="resT"></h2>
+    <div id="resS"></div>
+    <div class="btns"><button class="go" id="again">Again</button><button id="done">Done</button></div>
+  </div>
+</div>
+<div id="dbg"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+'use strict';
+// =====================================================================
+// 1. SETUP (the game's conventions: sRGB colours through col(), 1 unit = 1 tile)
+// =====================================================================
+const col = h => new THREE.Color(h).convertSRGBToLinear();
+const Q = new URLSearchParams(location.search);
+const DEBUG = Q.has('debug');
+const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+document.body.prepend(renderer.domElement);
+const scene = new THREE.Scene();
+scene.background = col('#05070d');
+const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, .1, 120);
+scene.add(new THREE.HemisphereLight(col('#d6eef4'), col('#2a2620'), .9));
+const sun = new THREE.DirectionalLight(col('#ffffff'), .55); sun.position.set(-3, 9, 5); scene.add(sun);
+
+// The pool, room-local as in the game (KIT.recPool): a raised basin x .8-8.2, z .9-4.5, its rim .42 high and .22
+// thick, water at .35, four lanes between ropes at z 1.8, 2.7, 3.6. A length is swum chest to chest over 6 m.
+const POOL = { x0: .8, x1: 8.2, z0: .9, z1: 4.5, H: .42, t: .22, wy: .35 };
+const ROPES = [1.8, 2.7, 3.6];
+const LANES = [(POOL.z0 + POOL.t + 1.8) / 2, 2.25, 3.15, (3.6 + POOL.z1 - POOL.t) / 2];
+const LX0 = 1.5, LEN = 6;                     // the chest's run: x 1.5 to 7.5
+const ROOM = { w: 9, d: 7, h: 3.64 };
+
+function partsToGeo(parts) {
+  const P = [], N = [], C = [];
+  for (const p of parts) {
+    const g = (p.g.index ? p.g.toNonIndexed() : p.g.clone()).applyMatrix4(p.m);
+    const c = col(p.c), pa = g.attributes.position.array, na = g.attributes.normal.array;
+    for (let i = 0; i < pa.length; i += 3) { P.push(pa[i], pa[i + 1], pa[i + 2]); N.push(na[i], na[i + 1], na[i + 2]); C.push(c.r, c.g, c.b); }
+    g.dispose();
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(P, 3));
+  geo.setAttribute('normal', new THREE.Float32BufferAttribute(N, 3));
+  geo.setAttribute('color', new THREE.Float32BufferAttribute(C, 3));
+  geo.computeBoundingSphere();
+  return geo;
+}
+const M4 = (x, y, z, sx = 1, sy = 1, sz = 1, rx = 0, ry = 0, rz = 0) => new THREE.Matrix4().compose(new THREE.Vector3(x, y, z), new THREE.Quaternion().setFromEuler(new THREE.Euler(rx, ry, rz)), new THREE.Vector3(sx, sy, sz));
+const BOX = new THREE.BoxGeometry(1, 1, 1);
+const cyl = (rt, rb, h, s = 10) => new THREE.CylinderGeometry(rt, rb, h, s);
+const SPH = new THREE.SphereGeometry(1, 16, 10);
+const LAMB = new THREE.MeshLambertMaterial({ vertexColors: true });
+const GLOWV = new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false });
+function mulberry(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const hash = (a, b, c) => { const s = Math.sin(a * 127.1 + b * 311.7 + c * 74.7) * 43758.5453; return s - Math.floor(s); };
+
+// =====================================================================
+// 2. THE POOL ROOM (one merged lit mesh, one glow mesh, the mosaic, the water, the ropes, the stars)
+// =====================================================================
+const roomParts = [], glowParts = [];
+const rbox = (c, x, y, z, sx, sy, sz, rx = 0, ry = 0, rz = 0) => roomParts.push({ g: BOX, c, m: M4(x, y, z, sx, sy, sz, rx, ry, rz) });
+const gbox = (c, x, y, z, sx, sy, sz) => glowParts.push({ g: BOX, c, m: M4(x, y, z, sx, sy, sz) });
+(function room() {
+  const P = POOL, cx = (P.x0 + P.x1) / 2, cz = (P.z0 + P.z1) / 2, L = P.x1 - P.x0, W = P.z1 - P.z0;
+  rbox('#c9d6d4', ROOM.w / 2, -.05, ROOM.d / 2, ROOM.w + .4, .1, ROOM.d + .4);                          // the tiled deck
+  for (const z of [P.z0 + P.t / 2, P.z1 - P.t / 2]) rbox('#d8e6e4', cx, P.H / 2, z, L, P.H, P.t);          // the rim
+  for (const x of [P.x0 + P.t / 2, P.x1 - P.t / 2]) rbox('#d8e6e4', x, P.H / 2, cz, P.t, P.H, W - 2 * P.t);
+  for (const z of [P.z0 - .02, P.z1 + .02]) rbox('#f2f0ea', cx, P.H + .025, z + (z < cz ? .05 : -.05), L + .08, .05, .1);   // the coping
+  for (const x of [P.x0 - .02, P.x1 + .02]) rbox('#f2f0ea', x + (x < cx ? .05 : -.05), P.H + .025, cz, .1, .05, W);
+  for (let k = 0; k < 3; k++) rbox('#6fc3c9', P.x0 + P.t + .5, (.3 - k * .1) / 2 + .03, P.z1 - P.t - .15 - k * .3, 1.0, .3 - k * .1, .3);   // the steps
+  // the end walls' targets (a dark T on each wall under each lane, just off the rim's face)
+  for (const z of LANES) for (const x of [P.x0 + P.t + .006, P.x1 - P.t - .006]) rbox('#1d4c6a', x, .2, z, .01, .22, .05);
+  // walls: hull windows along the north (port) side and the bow end, a wall with the changing rooms' door at the stern
+  const wy0 = .9, wy1 = 2.9, H = ROOM.h;
+  rbox('#2c3a44', ROOM.w / 2, wy0 / 2, -.1, ROOM.w + .2, wy0, .2); rbox('#2c3a44', ROOM.w / 2, (wy1 + H) / 2, -.1, ROOM.w + .2, H - wy1, .2);
+  for (const x of [0, 3, 6, 9]) rbox('#33434e', x, (wy0 + wy1) / 2, -.1, .3, wy1 - wy0, .24);
+  rbox('#2c3a44', ROOM.w + .1, wy0 / 2, ROOM.d / 2, .2, wy0, ROOM.d); rbox('#2c3a44', ROOM.w + .1, (wy1 + H) / 2, ROOM.d / 2, .2, H - wy1, ROOM.d);
+  for (const z of [0, 2.3, 4.6, 7]) rbox('#33434e', ROOM.w + .1, (wy0 + wy1) / 2, z, .24, wy1 - wy0, .3);
+  rbox('#b9cfd3', -.1, H / 2, ROOM.d / 2, .2, H, ROOM.d); rbox('#2a3c46', -.02, 1.0, 5.6, .06, 2.0, .9);   // the stern wall: pale tile, the changing rooms' door
+  rbox('#2f9fb0', -.005, 1.4, 2.7, .02, .3, 5.0); rbox('#ff7a5c', -.005, 1.62, 2.7, .02, .06, 5.0);   // the rec deck's teal band and coral stripe
+  rbox('#5a6578', ROOM.w / 2, .55, 7.0, ROOM.w, .06, .06);                                              // the rail on the lobby's glass
+  for (const x of [2.2, 4.4, 6.6]) { rbox('#e8e8e2', x, .3, 5.6, .62, .12, 1.7); rbox('#2f9fb0', x, .4, 5.85, .56, .07, 1.1); }   // loungers
+  rbox('#26323d', ROOM.w / 2, H + .05, ROOM.d / 2, ROOM.w + .4, .1, ROOM.d + .4);
+  gbox('#50e6ff', ROOM.w / 2, .9, .01, ROOM.w, .04, .04); gbox('#50e6ff', ROOM.w - .01, .9, ROOM.d / 2, .04, .04, ROOM.d);
+  for (const z of [1.5, 3.5, 5.5]) gbox('#fff3d6', ROOM.w / 2, H - .02, z, ROOM.w - 1, .02, .12);
+  gbox('#dff6ff', .01, 2.6, 2.7, .02, .5, 3.2);                                                         // a lit sign panel over the stern end
+})();
+scene.add(new THREE.Mesh(partsToGeo(roomParts), LAMB));
+scene.add(new THREE.Mesh(partsToGeo(glowParts), GLOWV));
+(function stars() {
+  const r = mulberry(4242), P = [];
+  for (let i = 0; i < 300; i++) P.push(-2 + r() * 13, .9 + r() * 2, -.6 - r() * 6);
+  for (let i = 0; i < 300; i++) P.push(ROOM.w + .6 + r() * 6, .9 + r() * 2, -2 + r() * 11);
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3));
+  scene.add(new THREE.Points(g, new THREE.PointsMaterial({ color: col('#dfe8ff'), size: 1.6, sizeAttenuation: false })));
+})();
+// the basin floor with the Wren in mosaic (the game's recMosaic, drawn once from fixed shapes)
+(function floor() {
+  const c = document.createElement('canvas'); c.width = 512; c.height = 320; const g = c.getContext('2d'), w = 512, h = 320;
+  g.fillStyle = '#8fd3d6'; g.fillRect(0, 0, w, h);
+  for (let y = 0; y < h; y += 16) for (let x = 0; x < w; x += 16) { const t = Math.round((hash(x, y, 5) - .5) * 14); g.fillStyle = `rgb(${150 + t},${214 + t},${216 + t})`; g.fillRect(x + 1, y + 1, 14, 14); }
+  const fill = (pts, cc) => { g.save(); g.beginPath(); pts.forEach(([x, y], k) => k ? g.lineTo(x, y) : g.moveTo(x, y)); g.closePath(); g.clip(); for (let y = 0; y < h; y += 16) for (let x = 0; x < w; x += 16) { g.fillStyle = cc; g.fillRect(x + 1, y + 1, 14, 14); } g.restore(); };
+  fill([[90, 120], [330, 104], [420, 140], [440, 160], [420, 180], [330, 216], [90, 200], [70, 160]], '#24507a');
+  fill([[110, 104], [180, 70], [210, 104]], '#24507a'); fill([[110, 216], [180, 250], [210, 216]], '#24507a');
+  fill([[330, 136], [400, 148], [400, 172], [330, 184]], '#e9c46a'); fill([[60, 140], [76, 140], [76, 180], [60, 180]], '#ff9a3c');
+  const tex = new THREE.CanvasTexture(c); tex.encoding = THREE.sRGBEncoding;
+  const P = POOL, side = new THREE.MeshLambertMaterial({ color: col('#6fc3c9') });
+  const m = new THREE.Mesh(new THREE.BoxGeometry(P.x1 - P.x0 - 2 * P.t, .03, P.z1 - P.z0 - 2 * P.t), [side, side, new THREE.MeshLambertMaterial({ map: tex }), side, side, side]);
+  m.position.set((P.x0 + P.x1) / 2, .015, (P.z0 + P.z1) / 2); scene.add(m);
+})();
+// the water (the game's recWater, opaque): slow caustics
+const WATER = (function () {
+  const U = { uT: { value: 0 }, uDeep: { value: col('#1f8fa6') }, uShallow: { value: col('#4fd0dc') } };
+  const m = new THREE.ShaderMaterial({ uniforms: U,
+    vertexShader: 'varying vec3 vW; void main() { vec4 w = modelMatrix * vec4(position, 1.0); vW = w.xyz; gl_Position = projectionMatrix * viewMatrix * w; }',
+    fragmentShader: `uniform float uT; uniform vec3 uDeep, uShallow; varying vec3 vW;
+      void main() {
+        vec2 p = vW.xz * 1.6;
+        float a = sin(p.x * 1.3 + uT * .8 + sin(p.y * 1.1 + uT * .5)) + sin(p.y * 1.7 - uT * .6 + sin(p.x * .9 - uT * .4));
+        float b = sin(p.x * 2.3 - p.y * 1.4 + uT * 1.1) * .5;
+        float caus = smoothstep(.35, 0.0, abs(a + b));
+        gl_FragColor = vec4(mix(uDeep, uShallow, .5 + .25 * a) + caus * .28, 1.0);
+        #include <tonemapping_fragment>
+        #include <encodings_fragment>
+      }` });
+  const P = POOL, w = new THREE.Mesh(new THREE.PlaneGeometry(P.x1 - P.x0 - 2 * P.t, P.z1 - P.z0 - 2 * P.t), m);
+  w.rotation.x = -Math.PI / 2; w.position.set((P.x0 + P.x1) / 2, P.wy, (P.z0 + P.z1) / 2); scene.add(w);
+  return U;
+})();
+// the lane ropes: floats in runs of orange and white (one instanced mesh)
+(function ropes() {
+  const P = POOL, L = P.x1 - P.x0 - 2 * P.t, n = 16, s = L / n, im = new THREE.InstancedMesh(cyl(.045, .045, s * .9, 8), new THREE.MeshLambertMaterial(), n * 3), m = new THREE.Matrix4();
+  let k = 0;
+  for (const z of ROPES) for (let i = 0; i < n; i++) { m.compose(new THREE.Vector3(P.x0 + P.t + s * (i + .5), P.wy, z), new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0, Math.PI / 2)), new THREE.Vector3(1, 1, 1)); im.setMatrixAt(k, m); im.setColorAt(k, col(i % 4 < 2 ? '#ff8a3a' : '#f4f4f0')); k++; }
+  scene.add(im);
+})();
+// splashes: white spray puffs above the water (one instanced mesh, a few at a time)
+const SPL = 24, splash = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1, 0), new THREE.MeshBasicMaterial({ color: col('#f4fbff'), transparent: true, opacity: .85, toneMapped: false }), SPL);
+splash.frustumCulled = false; scene.add(splash);
+const SP = Array.from({ length: SPL }, () => ({ x: 0, y: -9, z: 0, vx: 0, vy: 0, vz: 0, t: 1, s: .03 }));
+const spR = mulberry(31); let spI = 0;
+function spray(x, z, n, big) { if (RM) return; for (let i = 0; i < n; i++) { const p = SP[spI++ % SPL]; p.x = x; p.y = POOL.wy + .05; p.z = z; p.vx = (spR() - .5) * .8; p.vz = (spR() - .5) * .8; p.vy = .6 + spR() * (big ? 1.4 : .7); p.t = 0; p.s = .025 + spR() * (big ? .05 : .03); } }
+
+// =====================================================================
+// 3. SWIMMERS (rec kit, a swim cap; the body lies along the lane, back at the water; arms and legs move)
+// =====================================================================
+const SKIN = ['#f3cfae', '#e3b08a', '#c98f66', '#a46c4b', '#7d4f35', '#573626'];
+const REC_TEAL = '#2f9fb0', REC_CORAL = '#ff7a5c';
+// Crew. Chat lines are STAND-INS until the writers' pool.<kind> lines arrive. spread: how far off the beat they
+// stroke (seconds); breathMiss: how often they skip a breath; turnErr: how far off the best spot they turn.
+const CREW = {
+  rina:  { name: 'Rina', full: 'Rina Deshi', skin: 3, cap: '#50b8ff', crawl: 1, spread: .05, breathMiss: .02, turnErr: .15,
+           lines: { go: ['Morning. Keep up if you like.'], keep: ['Fine. You\'re keeping up.'], fin: ['Fine.', 'Good swim.'] } },
+  tomas: { name: 'Tomas', full: 'Tomas', skin: 1, cap: '#ffd23f', crawl: 1, spread: .08, breathMiss: .05, turnErr: .25,
+           lines: { go: ['Race you to the wall. Kidding. Mostly.'], fin: ['Ha! Good one.'] } },
+  pell:  { name: 'Pell', full: 'Pell Okafor', skin: 5, cap: '#ff4f6d', crawl: 0, spread: .16, breathMiss: .14, turnErr: .5,
+           lines: { go: ['Is it cold? It\'s cold.'], fin: ['I swallowed half the pool.'] } },
+  holt:  { name: 'Holt', full: 'Chief Bram Holt', skin: 2, cap: '#f4f4ee', crawl: 0, spread: .07, breathMiss: .03, turnErr: .3,
+           lines: { go: ['Steady strokes.'], fin: ['Tidy lengths.'] } },
+};
+const YOU = { name: 'You', full: 'You', skin: 2, cap: '#5ee06a' };
+const AUTO = { spread: .06, breathMiss: .03, turnErr: .2 };      // your side on autopilot (the tests)
+const who = k => k === 'you' ? YOU : CREW[k];
+const SEG = cyl(1, 1, 1, 8), UPV = new THREE.Vector3(0, 1, 0), tv = new THREE.Vector3();
+function seg(m, a, b, r) { tv.subVectors(b, a); const L = tv.length() || 1e-4; m.position.addVectors(a, b).multiplyScalar(.5); m.quaternion.setFromUnitVectors(UPV, tv.divideScalar(L)); m.scale.set(r, L, r); }
+// built in the swimmer's own frame: +z is the way they swim, +y up out of the water
+function makeSwimmer(look) {
+  const root = new THREE.Group(); scene.add(root);
+  const body = new THREE.Mesh(partsToGeo([
+    { g: cyl(.13, .11, .5), c: REC_TEAL, m: M4(0, 0, 0, 1, 1, .8, Math.PI / 2) }, { g: cyl(.135, .135, .05), c: REC_CORAL, m: M4(0, 0, .12, 1, 1, .8, Math.PI / 2) },
+    { g: cyl(.11, .1, .2), c: '#2a6f7c', m: M4(0, 0, -.33, 1, 1, .8, Math.PI / 2) },
+  ]), LAMB);
+  root.add(body);
+  const head = new THREE.Group(); head.position.set(0, .02, .36); root.add(head);
+  head.add(new THREE.Mesh(partsToGeo([{ g: SPH, c: SKIN[look.skin], m: M4(0, 0, 0, .11, .11, .12) }, { g: new THREE.SphereGeometry(1, 14, 8, 0, Math.PI * 2, 0, Math.PI * .55), c: look.cap, m: M4(0, .01, -.01, .118, .12, .125, -1.1) }]), LAMB));
+  const limb = (c) => { const a = new THREE.Mesh(SEG, new THREE.MeshLambertMaterial({ color: col(c) })); scene.add(a); return a; };
+  const arms = [limb(SKIN[look.skin]), limb(SKIN[look.skin])], legs = [limb(SKIN[look.skin]), limb(SKIN[look.skin])];
+  return { root, head, arms, legs, parts: [root, ...arms, ...legs], ph: 0 };
+}
+function freeSwimmer(f) { for (const o of f.parts) scene.remove(o); }
+
+// =====================================================================
+// 4. THE STROKES (breaststroke first; front crawl once unlocked)
+// =====================================================================
+// beat: seconds a stroke; push: speed a clean stroke adds; drag: how fast you slow a second; breathEvery: every Nth
+// beat is a breath (hold through it instead of a tap)
+const STROKES = {
+  breast: { name: 'breaststroke', beat: 1.15, push: .5, drag: 1.1, breathEvery: 3 },
+  crawl:  { name: 'front crawl', beat: .8, push: .38, drag: 1.1, breathEvery: 4 },
+};
+
+// =====================================================================
+// 5. THE RULES (fixed 60 steps a second, one seeded stream per go, plain state; no DOM, no drawing, no Math.random)
+// =====================================================================
+// timing windows (seconds from the beat): clean, good, ok; outside ok it's a splash
+const DT = 1 / 60, W_CLEAN = .08, W_GOOD = .16, W_OK = .3, KICK = .1, TURN_ZONE = 1.2, PUSH = .9, AIR_STROKE = .1, AIR_MISS = .35, GASP = 1.6;
+function rnd(g) { let a = g.rs = g.rs + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }
+function newSwimmer(k, lane, ai, stroke) {
+  return { k, lane, ai, stroke, x: 0, dir: 1, len: 0, v: .3, phase: 'swim', timer: 0, beat: 1, next: 1.0, used: 0, holdFrom: -1, air: 1, flow: 0,
+    clean: 0, good: 0, ok: 0, splash: 0, missed: 0, breaths: 0, breathMiss: 0, gasps: 0, turns: [], done: 0, lastJ: '', lastJStep: -99,
+    plan: -1, planHold: 0, planned: -1, turnAt: -1, keep: 0, keepN: 0 };
+}
+function plNew(o) {
+  const g = { seed: o.seed >>> 0 || 1, step: 0, t: 0, phase: 'count', timer: 2.5, race: !!o.race, dawn: !!o.dawn,
+    inp: { press: 0, down: 0, swipe: 0 }, ev: [], evOn: !o.paper, s: [] };
+  g.rs = Math.imul(g.seed, 2654435761) | 0;
+  const crew = o.dawn ? ['rina'] : (o.crew || []);
+  g.s.push(newSwimmer('you', 1, o.autoYou ? 'auto' : null, o.crawl ? 'crawl' : 'breast'));
+  const lanes = o.dawn ? [2] : [2, 0, 3];
+  crew.slice(0, 3).forEach((k, i) => g.s.push(newSwimmer(k, lanes[i], k, CREW[k].crawl ? 'crawl' : 'breast')));
+  for (const s of g.s) s.next = 2.5 + .6 + (s.ai && s.k !== 'you' ? rnd(g) * .3 : 0);   // the first beat, just after the start
+  return g;
+}
+function plClone(g) { return JSON.parse(JSON.stringify(g)); }
+function ev(g, k, i, a) { if (g.evOn) g.ev.push({ k, i, a }); }
+function plStep(g) {
+  if (g.phase === 'over') return;
+  g.step++; g.t += DT;
+  if (g.phase === 'count') { if ((g.timer -= DT) <= 0) { g.phase = 'go'; ev(g, 'go', -1); } return; }
+  for (let i = 0; i < g.s.length; i++) swimStep(g, g.s[i], i);
+  const me = g.s[0];
+  if (g.dawn && g.s[1] && !me.done) { me.keepN++; if (Math.abs(prog(me) - prog(g.s[1])) < 1.2) me.keep++; }   // keeping with Rina: within a body length or so
+  g.inp.press = 0; g.inp.swipe = 0;
+  if (g.s.every(s => s.done) || g.step > 60 * 300) { g.phase = 'over'; ev(g, 'over', -1); }
+}
+const ST = s => STROKES[s.stroke];
+const prog = s => s.len * LEN + (s.dir > 0 ? s.x : LEN - s.x);   // metres swum
+function judge(g, s, i, e) {                                        // a stroke on the beat: how clean was it?
+  const a = Math.abs(e), S = ST(s);
+  let k, mult;
+  if (a <= W_CLEAN) { k = 'clean'; mult = 1 + .25 * s.flow; s.flow = Math.min(1, s.flow + .2); s.clean++; }
+  else if (a <= W_GOOD) { k = 'good'; mult = .85 + .1 * s.flow; s.flow = Math.min(1, s.flow + .08); s.good++; }
+  else if (a <= W_OK) { k = 'ok'; mult = .6; s.flow = Math.max(0, s.flow - .25); s.ok++; }
+  else { k = 'splash'; mult = .3; s.flow = 0; s.splash++; }
+  s.v += S.push * mult; s.air = Math.max(-.01, s.air - AIR_STROKE * (k === 'splash' ? 2 : 1)); s.lastJ = k; s.lastJStep = g.step;
+  ev(g, 'stroke', i, k);
+}
+function swimStep(g, s, i) {
+  if (s.done) return;
+  const S = ST(s), inp = s.ai ? aiInput(g, s) : g.inp, wall = s.dir > 0 ? LEN - s.x : s.x, last = s.len === 3;
+  if (s.phase === 'gasp') { s.v *= Math.exp(-3 * DT); s.x += s.dir * s.v * DT; if ((s.timer -= DT) <= 0) { s.phase = 'swim'; s.air = .7; s.next = g.t + .4; s.used = 0; } return; }
+  if (s.phase === 'turn') {
+    if ((s.timer -= DT) <= 0) { s.phase = 'swim'; s.dir = -s.dir; s.len++; s.v = s.push; s.next = g.t + .55; s.used = 0; s.beat++; ev(g, 'push', i); }
+    return;
+  }
+  // move: a little kick always keeps you going; you slow between strokes
+  s.v = Math.max(KICK, s.v * Math.exp(-S.drag * DT));
+  s.x += s.dir * s.v * DT;
+  const inZone = !last && wall < TURN_ZONE;
+  if (inZone) {                                                  // near the wall: no beats; swipe up to tumble-turn
+    s.holdFrom = -1;
+    if (inp.swipe) { const q = Math.max(0, 1 - Math.abs(wall - .45) / .9); s.phase = 'turn'; s.timer = .6; s.push = PUSH * (.55 + .45 * q); s.turns.push(+q.toFixed(3)); s.x = s.dir > 0 ? Math.min(LEN, s.x) : Math.max(0, s.x); ev(g, 'turn', i, q); return; }
+    if (wall <= 0) { s.x = s.dir > 0 ? LEN : 0; s.phase = 'turn'; s.timer = 1.3; s.push = PUSH * .4; s.turns.push(0); ev(g, 'touch', i); return; }   // no swipe: you touch and turn the slow way
+    s.next = g.t + .3; s.used = 0;
+    return;
+  }
+  if (last && wall <= 0) { s.x = s.dir > 0 ? LEN : 0; s.done = g.step; ev(g, 'fin', i); return; }
+  // the beat: tap on a stroke beat; hold through a breath beat
+  const breathBeat = s.beat % S.breathEvery === 0, e = g.t - s.next;
+  if (breathBeat) {
+    if (inp.press && !s.used && Math.abs(e) <= W_OK) { s.holdFrom = g.step; s.used = 1; }
+    if (s.holdFrom >= 0 && !inp.down) {                            // let go: long enough past the beat?
+      const ok = g.t >= s.next + .2; s.holdFrom = -1;
+      s.air = Math.min(1, s.air + (ok ? 1 : .45)); s.breaths++; s.v += S.push * (ok ? .7 : .35); ev(g, 'breath', i, ok ? 'good' : 'short');
+      s.lastJ = ok ? 'breath' : 'short'; s.lastJStep = g.step; nextBeat(s, S);
+    } else if (s.holdFrom >= 0 && g.t >= s.next + .45) {           // held long enough: the breath is in
+      s.holdFrom = -1; s.air = 1; s.breaths++; s.v += S.push * .7; ev(g, 'breath', i, 'good'); s.lastJ = 'breath'; s.lastJStep = g.step; nextBeat(s, S);
+    } else if (!s.used && e > W_OK) {                              // missed the breath
+      s.air -= AIR_MISS; s.breathMiss++; s.lastJ = 'no breath'; s.lastJStep = g.step; ev(g, 'nobreath', i); nextBeat(s, S);
+    } else if (inp.press && !s.used && e < -W_OK) { s.used = 1; s.splash++; s.flow = 0; s.v += S.push * .2; s.air -= .1; s.lastJ = 'splash'; s.lastJStep = g.step; ev(g, 'stroke', i, 'splash'); }
+  } else {
+    if (inp.press && !s.used) { s.used = 1; judge(g, s, i, e); }
+    if (e > W_OK) { if (!s.used) { s.missed++; s.flow = Math.max(0, s.flow - .3); } nextBeat(s, S); }
+  }
+  if (s.air <= 0) { s.phase = 'gasp'; s.timer = GASP; s.gasps++; s.flow = 0; s.holdFrom = -1; ev(g, 'gasp', i); }
+}
+function nextBeat(s, S) { s.beat++; s.next += S.beat; s.used = 0; }
+// the crew's autopilot (and yours in the tests): stroke near the beat by their spread, breathe (mostly), turn near the wall
+function aiInput(g, s) {
+  const L = s.ai === 'auto' ? AUTO : CREW[s.ai], S = ST(s), out = { press: 0, down: 0, swipe: 0 }, wall = s.dir > 0 ? LEN - s.x : s.x;
+  const easy = !g.race && s.ai !== 'auto' ? 1.4 : 1;
+  if (s.phase !== 'swim') return out;
+  if (s.len < 3 && wall < TURN_ZONE) {
+    if (s.turnAt < 0) s.turnAt = .45 + (rnd(g) - .5) * 2 * L.turnErr;
+    if (wall <= Math.max(.05, s.turnAt)) { out.swipe = 1; s.turnAt = -1; }
+    return out;
+  }
+  if (s.planned !== s.beat) {                                     // plan this beat once: when to press, whether to breathe
+    s.planned = s.beat; const breath = s.beat % S.breathEvery === 0;
+    s.plan = s.next + (rnd(g) - .5) * 2 * L.spread * easy; s.planHold = breath ? (rnd(g) < L.breathMiss * easy ? -1 : .5 + rnd(g) * .2) : 0;
+  }
+  if (s.planHold < 0) return out;                                 // skips this breath
+  if (!s.used && g.t >= s.plan) out.press = 1;
+  out.down = s.holdFrom >= 0 && g.t < s.plan + s.planHold ? 1 : out.press;
+  return out;
+}
+function plPaper(o) { const g = plNew(Object.assign({ seed: 1, autoYou: true }, o, { paper: true })); while (g.phase !== 'over') plStep(g); return plSummary(g); }
+function plOrder(g) { return g.s.map((s, i) => i).sort((a, b) => (g.s[a].done || 1e9) - (g.s[b].done || 1e9) || a - b); }
+function plSummary(g) { return { steps: g.step, order: plOrder(g).map(i => g.s[i].k), s: g.s.map(s => ({ k: s.k, done: s.done, clean: s.clean, good: s.good, ok: s.ok, splash: s.splash, missed: s.missed, breaths: s.breaths, breathMiss: s.breathMiss, gasps: s.gasps, turns: s.turns, x: +s.x.toFixed(4) })) }; }
+
+// =====================================================================
+// 6. EVENTS: sound, talk, How to play
+// =====================================================================
+let AC = null, FAST = false;
+function blip(f, d = .08, type = 'sine', v = .12, f2) {
+  if (!$('snd').checked || !AC || FAST) return;
+  const t = AC.currentTime, o = AC.createOscillator(), gn = AC.createGain();
+  o.type = type; o.frequency.setValueAtTime(f, t); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + d);
+  gn.gain.setValueAtTime(v, t); gn.gain.exponentialRampToValueAtTime(.001, t + d);
+  o.connect(gn).connect(AC.destination); o.start(t); o.stop(t + d + .02);
+}
+const chatR = mulberry(7), SAY = [];
+function say(i, kind) { if (FAST) return; const w = who(G.s[i].k); if (!w.lines || !w.lines[kind]) return; const L = w.lines[kind]; SAY[i] = { text: L[Math.floor(chatR() * L.length)], t: 2.4 }; }
+let callT = 0;
+function callout(t, c) { if (FAST) return; const e = $('call'); e.textContent = t; e.style.color = c; e.classList.remove('hide'); callT = 1.4; }
+const JC = { clean: '#c8ffd0', good: '#dffaff', ok: '#ffe08a', splash: '#ffb09a', breath: '#9fd8ff', short: '#ffe08a', 'no breath': '#ffb09a' };
+const JT = { clean: 'Clean!', good: 'Good', ok: 'OK', splash: 'Splash', breath: 'Breath', short: 'Short breath', 'no breath': 'No breath' };
+let judgeT = 0;
+function drainEvents() {
+  for (const e of G.ev) {
+    const me = e.i === 0, s = G.s[e.i];
+    if (e.k === 'go') { callout('Go!', '#dffaff'); blip(523, .3); for (let i = 1; i < G.s.length; i++) if (chatR() < .6) say(i, 'go'); }
+    if (e.k === 'stroke' && me) { judgeT = .7; blip(e.a === 'clean' ? 660 : e.a === 'good' ? 560 : e.a === 'ok' ? 440 : 160, .08, e.a === 'splash' ? 'square' : 'triangle', .08); if (G.how === 0 && e.a !== 'splash' && ++howN >= 2) howDone(0); }
+    if (e.k === 'stroke' && !FAST) spray(LX0 + s.x + s.dir * .45, LANES[s.lane], e.a === 'splash' ? 9 : 3, e.a === 'splash');
+    if (e.k === 'breath' && me) { judgeT = .7; blip(330, .3, 'sine', .07, 440); if (G.how === 1) howDone(1); }
+    if (e.k === 'nobreath' && me) { judgeT = .7; blip(200, .2, 'square', .04); }
+    if (e.k === 'gasp' && me) { callout('Out of air: catch your breath', '#ffd2a0'); blip(250, .5, 'sine', .07, 180); }
+    if ((e.k === 'turn' || e.k === 'touch') && !FAST) spray(LX0 + s.x, LANES[s.lane], 8, true);
+    if (e.k === 'turn' && me) { callout(e.a > .75 ? 'Great turn!' : e.a > .35 ? 'Turn' : 'An early turn', '#dffaff'); blip(392, .2, 'sine', .08, 523); if (G.how === 2) howDone(2); }
+    if (e.k === 'touch' && me) callout('You touched the wall', '#ffe08a');
+    if (e.k === 'fin') { if (me) { callout('Four lengths!', '#dffaff'); blip(660, .4, 'sine', .1, 990); } else if (chatR() < .6) say(e.i, 'fin'); }
+    if (e.k === 'over') showResult();
+  }
+  G.ev.length = 0;
+}
+const TOUCH = matchMedia('(pointer: coarse)').matches;
+const HOW_TXT = [
+  TOUCH ? 'Tap anywhere as the ring meets your swimmer: a clean stroke. Too early or late is a splash.' : 'Click (or press Space) as the ring meets your swimmer: a clean stroke. Too early or late is a splash.',
+  TOUCH ? 'A blue ring is a breath: hold your thumb down as it meets you, then let go.' : 'A blue ring is a breath: hold the button (or Space) as it meets you, then let go.',
+  TOUCH ? 'At the wall, swipe up to tumble-turn. Close to the wall is best.' : 'At the wall, press the up arrow (or swipe up) to tumble-turn. Close to the wall is best.',
+];
+let howN = 0;
+function howShow() {
+  const e = $('how');
+  if (!G || G.how < 0 || G.how > 2) { e.classList.add('hide'); return; }
+  e.classList.remove('hide'); e.querySelector('.n').textContent = 'How to play · ' + (G.how + 1) + ' of 3'; e.querySelector('.x').textContent = HOW_TXT[G.how];
+  $('howNext').textContent = G.how === 2 ? 'Done' : 'Next';
+}
+function howDone(k) { if (!G || G.how !== k) return; G.how = k === 2 ? -1 : k + 1; if (G.how === -1) try { localStorage.setItem('pl.how', '1'); } catch (e) {} howShow(); }
+
+// =====================================================================
+// 7. CAMERA: the menu overview, and the view above and behind your lane, looking down it (it swings round at a turn)
+// =====================================================================
+const camFrom = { pos: new THREE.Vector3(), target: new THREE.Vector3(), fov: 50 }, camCur = { pos: new THREE.Vector3(), target: new THREE.Vector3(), fov: 50 };
+const view = { pos: new THREE.Vector3(), target: new THREE.Vector3(), fov: 60, yaw: 0, init: false };
+let camMode = 'menu', camT = 1;
+function overview(t) { const a = .5 + (RM ? 0 : Math.sin(t * .1) * .2); return { pos: new THREE.Vector3(4.5 - Math.cos(a) * 6, 5.2, 2.7 + Math.sin(a) * 6), target: new THREE.Vector3(4.5, .2, 2.7), fov: 50 }; }
+function laneView(dtR, snap) {
+  const s = G.s[0], port = innerWidth < innerHeight, x = LX0 + s.x, z = LANES[s.lane];
+  const want = s.dir > 0 ? 0 : Math.PI;                          // the way you swim (eased round at the wall)
+  view.yaw = snap || !view.init || RM ? want : view.yaw + Math.atan2(Math.sin(want - view.yaw), Math.cos(want - view.yaw)) * Math.min(1, dtR * 2.2);
+  const fx = Math.cos(view.yaw), fz = Math.sin(view.yaw), back = port ? 2.9 : 2.5, up = port ? 2.5 : 1.8, ahead = port ? 2.3 : 2.8;
+  const px = Math.max(.3, Math.min(ROOM.w - .3, x - fx * back)), pz = z - fz * back + (port ? .25 : .4);
+  if (snap || !view.init) { view.pos.set(px, up, pz); view.target.set(x + fx * ahead, .3, z); view.init = true; }
+  else { const k = Math.min(1, dtR * 5); view.pos.lerp(V.set(px, up, pz), k); view.target.lerp(V.set(x + fx * ahead, .3, z), k); }
+  view.fov = port ? 62 : 50;
+}
+function setCam(mode) { camFrom.pos.copy(camCur.pos); camFrom.target.copy(camCur.target); camFrom.fov = camCur.fov; camMode = mode; camT = RM ? 1 : 0; }
+
+// =====================================================================
+// 8. FLOW: menu, start, result, bests in words
+// =====================================================================
+const $ = id => document.getElementById(id);
+let G = null, RM = matchMedia('(prefers-reduced-motion: reduce)').matches, lastOpts = null, figs = [];
+function store(k, d) { try { return JSON.parse(localStorage.getItem(k) || d); } catch (e) { return JSON.parse(d); } }
+function put(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+function buildMenu() {
+  let how = true; try { how = !localStorage.getItem('pl.how'); } catch (e) {}
+  $('howOn').checked = how;
+  $('rec').textContent = Object.keys(store('pl.best', '{}')).length ? 'Your best swims are remembered (in words, no times).' : '';
+}
+function startGo(o) {
+  if (document.activeElement && document.activeElement.blur) document.activeElement.blur();   // so Space plays, not presses the menu's button again
+  if (!AC) try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {}
+  RM = $('rm').checked;
+  const m = o.mode || 'alone';
+  const opts = Object.assign({ seed: +$('seed').value || 1, crawl: $('crawl').checked, how: $('howOn').checked, race: m === 'race', dawn: m === 'dawn', crew: m === 'crew' || m === 'race' ? ['rina', 'tomas', 'pell'] : [] }, o);
+  lastOpts = opts;
+  for (const f of figs) freeSwimmer(f);
+  G = plNew(opts); G.how = opts.how ? 0 : -1; G.mode = m; howN = 0;
+  figs = G.s.map(s => makeSwimmer(who(s.k)));
+  SAY.length = 0;
+  for (const id of ['menu', 'result']) $(id).classList.add('hide');
+  for (const id of ['hud', 'leave', 'air']) $(id).classList.remove('hide');
+  INPUT.down = 0; INPUT.press = 0; INPUT.swipe = 0; view.init = false;
+  tags.forEach((t, i) => { t.textContent = G.s[i] ? who(G.s[i].k).name : ''; t.classList.add('hide'); });
+  laneView(0, true); setCam('game'); howShow(); acc = 0;
+  callout('Ready…', '#dffaff');
+  return G;
+}
+function statusText() {
+  if (!G) return '';
+  const s = G.s[0], L = Math.min(4, s.len + 1), base = 'Length ' + L + ' of 4 · ' + STROKES[s.stroke].name;
+  if (G.race) { const ord = plProgressOrder(); const p = ord.indexOf(0); return base + ' · ' + (p === 0 ? 'you\'re in front' : ['', '2nd', '3rd', '4th'][p]); }
+  if (G.dawn) return base + ' · keep with Rina';
+  return base;
+}
+function plProgressOrder() { return G.s.map((s, i) => i).sort((a, b) => (G.s[a].done || 1e9) - (G.s[b].done || 1e9) || prog(G.s[b]) - prog(G.s[a])); }
+function showResult() {
+  const g = G, s = g.s[0], key = s.stroke, best = store('pl.best', '{}'), st = s.done || g.step, lines = [];
+  let words;
+  if (!best[key]) words = 'Your first four lengths of ' + STROKES[key].name + '.';
+  else if (st < best[key]) words = 'Your best four lengths yet.';
+  else if (st < best[key] * 1.05) words = 'Close to your best.';
+  else words = 'A steady swim. Your best was quicker.';
+  if (!best[key] || st < best[key]) { best[key] = st; put('pl.best', best); }
+  const strokes = s.clean + s.good + s.ok + s.splash, smooth = strokes ? (s.clean + s.good * .6) / strokes : 0;
+  const rhythm = smooth > .8 ? 'Your rhythm was smooth.' : smooth > .55 ? 'A good rhythm, with a few splashes.' : 'A splashy one: listen for the beat.';
+  let t = 'Four lengths!';
+  if (g.race) { const ord = plOrder(g), p = ord.indexOf(0), n = ord.map(i => who(g.s[i].k).name); t = p === 0 ? 'You won the race!' : n[0] + ' won the race.'; lines.push('Then ' + n.slice(1).join(', then ') + '.'); }
+  else if (g.dawn) { const f = s.keepN ? s.keep / s.keepN : 0; t = f > .7 ? 'You kept with Rina!' : f > .4 ? 'You kept with Rina some of the way.' : 'Rina pulled away.'; lines.push(f > .7 ? 'Rina noticed. (A friendship step, when this is in the game.)' : 'Dawn swim is Tuesdays and Thursdays: try again.'); }
+  else if (g.s.length > 1) lines.push(g.s.slice(1).map(x => who(x.k).name).join(', ') + ' swam beside you.');
+  lines.push(words, rhythm);
+  const good = s.turns.filter(q => q > .75).length;
+  if (s.turns.length) lines.push(good === s.turns.length ? 'Every turn a great one.' : s.turns.some(q => q === 0) ? 'You touched the wall instead of turning ' + (s.turns.filter(q => q === 0).length === 1 ? 'once.' : 'a few times.') : good ? 'Some great turns.' : 'Turn a little closer to the wall.');
+  if (s.gasps) lines.push('You ran out of air ' + (s.gasps === 1 ? 'once' : s.gasps + ' times') + ': hold through the blue rings.');
+  $('resT').textContent = t; $('resS').innerHTML = lines.map(l => '<p>' + l + '</p>').join('');
+  $('result').classList.remove('hide');
+  for (const id of ['how', 'leave', 'air', 'ring', 'target', 'turn', 'judge']) $(id).classList.add('hide');
+  $('status').textContent = statusText();
+}
+function leave() {
+  for (const f of figs) freeSwimmer(f); figs = []; G = null;
+  for (const id of ['hud', 'leave', 'how', 'result', 'call', 'air', 'ring', 'target', 'turn', 'judge']) $(id).classList.add('hide');
+  $('menu').classList.remove('hide'); buildMenu(); setCam('menu'); SAY.length = 0;
+}
+$('leave').onclick = leave; $('done').onclick = leave;
+$('again').onclick = () => { const o = Object.assign({}, lastOpts); o.how = false; o.seed = (o.seed || 1) + 1; $('seed').value = o.seed; startGo(o); };
+for (const b of document.querySelectorAll('.mode')) b.onclick = () => startGo({ mode: b.dataset.m });
+$('howNext').onclick = e => { e.stopPropagation(); if (G) howDone(G.how); };
+$('howSkip').onclick = e => { e.stopPropagation(); if (G) { G.how = -1; try { localStorage.setItem('pl.how', '1'); } catch (er) {} howShow(); } };
+for (const id of ['howNext', 'howSkip']) $(id).addEventListener('pointerdown', e => e.stopPropagation());
+$('rm').onchange = () => { RM = $('rm').checked; };
+if (Q.get('seed')) $('seed').value = Q.get('seed');
+$('rm').checked = RM;
+buildMenu();
+
+// =====================================================================
+// 9. INPUT: a press anywhere is a stroke (timed at the touch); keep it down to breathe; slide up to turn.
+// Mouse: the button. Keys: Space (press and hold), the up arrow to turn.
+// =====================================================================
+const INPUT = { press: 0, down: 0, swipe: 0, thumb: null };
+const cv = renderer.domElement;
+let drag = null;
+cv.addEventListener('pointerdown', e => {
+  if (!G || G.phase === 'over' || drag) return;
+  drag = { id: e.pointerId, y0: e.clientY, t0: performance.now() }; INPUT.thumb = [e.clientX, e.clientY];
+  INPUT.press = 1; INPUT.down = 1;
+  try { cv.setPointerCapture(e.pointerId); } catch (er) {}
+});
+cv.addEventListener('pointermove', e => {
+  if (!drag || drag.id !== e.pointerId) return;
+  INPUT.thumb = [e.clientX, e.clientY];
+  if (drag.y0 - e.clientY > 40 && !drag.swiped) { drag.swiped = 1; INPUT.swipe = 1; }   // slid up: a turn
+});
+const lift = e => { if (!drag || drag.id !== e.pointerId) return; drag = null; INPUT.down = 0; };
+cv.addEventListener('pointerup', lift); cv.addEventListener('pointercancel', lift);
+addEventListener('keydown', e => {
+  if (!G) return;
+  if (e.key === ' ') { e.preventDefault(); if (!e.repeat) { INPUT.press = 1; INPUT.down = 1; } }
+  if (e.key === 'ArrowUp' || e.key === 'w') { e.preventDefault(); INPUT.swipe = 1; }
+  if (e.key === 'Escape') leave();
+});
+addEventListener('keyup', e => { if (e.key === ' ') INPUT.down = 0; });
+addEventListener('resize', () => { renderer.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); });
+
+// =====================================================================
+// 10. DRAWING EACH FRAME
+// =====================================================================
+const tags = [0, 1, 2, 3].map(() => { const e = document.createElement('div'); e.className = 'tag hide'; document.body.appendChild(e); return e; });
+const says = [0, 1, 2, 3].map(() => { const e = document.createElement('div'); e.className = 'say hide'; document.body.appendChild(e); return e; });
+const V = new THREE.Vector3(), A_ = new THREE.Vector3(), B_ = new THREE.Vector3();
+function project(x, y, z) { V.set(x, y, z).project(camera); return V.z > 1 ? null : [(V.x + 1) / 2 * innerWidth, (1 - V.y) / 2 * innerHeight]; }
+function toScreen(x, y, z, el) { const p = project(x, y, z); if (!p || p[1] < 120 || p[0] < 0 || p[0] > innerWidth) { el.classList.add('hide'); return; } el.style.left = p[0] + 'px'; el.style.top = p[1] + 'px'; el.classList.remove('hide'); }
+// a swimmer's frame: the body flat along the lane, the back just at the water; strokes from its phase
+function drawSwimmer(s, f, dtR, tR, i) {
+  const S = ST(s), x = LX0 + s.x, z = LANES[s.lane], yaw = s.dir > 0 ? Math.PI / 2 : -Math.PI / 2;
+  const sinceStroke = (G.step - s.lastJStep) / 60;
+  if (s.phase === 'swim' && G.phase === 'go') f.ph += dtR / S.beat * (sinceStroke < .4 ? 1.6 : .7);
+  const turning = s.phase === 'turn', gasp = s.phase === 'gasp' || s.done;
+  f.root.position.set(x, POOL.wy - .05 + (gasp ? -.08 : RM ? 0 : .012 * Math.sin(tR * 3 + i)), z);
+  f.root.rotation.set(0, yaw, 0);
+  if (turning && !RM) f.root.rotateX(Math.min(1, (.6 - s.timer) / .6) * Math.PI * 2 * (s.timer > 0 ? 1 : 0));   // the tumble
+  if (gasp) f.root.rotateX(-1.2);                                 // upright, treading water
+  const breathing = s.holdFrom >= 0 || (s.lastJ === 'breath' && sinceStroke < .5);
+  f.head.rotation.set(0, 0, breathing ? (S === STROKES.crawl ? 1.1 : 0) : 0); f.head.position.y = breathing && S === STROKES.breast ? .12 : .02;
+  // arms and legs, in world space from the root
+  f.root.updateMatrixWorld();
+  const W = (lx, ly, lz) => new THREE.Vector3(lx, ly, lz).applyMatrix4(f.root.matrixWorld);
+  for (let k = 0; k < 2; k++) {
+    const sd = k === 0 ? 1 : -1, sh = W(sd * .15, .02, .22);
+    let hand;
+    if (gasp) hand = W(sd * .45, -.05, .35 + .1 * Math.sin(tR * 3 + k));
+    else if (S === STROKES.crawl) { const a = f.ph * Math.PI * 2 + (k ? Math.PI : 0); hand = W(sd * .2, .3 * Math.sin(a), .22 + .5 * Math.cos(a)); }
+    else { const u = (f.ph % 1), a = u < .5 ? u * 2 : 1 - (u - .5) * 2; hand = W(sd * (.12 + .38 * Math.sin(a * Math.PI)), -.05 + .03 * a, .3 + .45 * (1 - a)); }
+    seg(f.arms[k], sh, hand, .035);
+    const hip = W(sd * .07, -.04, -.42);
+    const kick = S === STROKES.crawl ? .12 * Math.sin(tR * 12 + k * Math.PI) : .1 * Math.sin(f.ph * Math.PI * 2);
+    const foot = gasp ? W(sd * .2, -.5, -.6) : S === STROKES.crawl ? W(sd * .08, kick - .08, -.95) : W(sd * (.12 + .2 * Math.max(0, kick * 5)), -.09, -.9 + .1 * kick);
+    seg(f.legs[k], hip, foot, .05);
+  }
+  if (i > 0) {
+    toScreen(x, POOL.wy + .55, z, tags[i]);
+    if (SAY[i] && (SAY[i].t -= dtR) > 0) { says[i].textContent = SAY[i].text; toScreen(x, POOL.wy + .9, z, says[i]); } else { SAY[i] = null; says[i].classList.add('hide'); }
+  }
+}
+// the ring closing in on your swimmer (screen overlay), the target ring, the judgement, the turn prompt, the air bar
+function drawOverlay(dtR) {
+  const s = G.s[0], S = ST(s), p = project(LX0 + s.x, POOL.wy + .1, LANES[s.lane]);
+  const wall = s.dir > 0 ? LEN - s.x : s.x, inZone = s.phase === 'swim' && s.len < 3 && wall < TURN_ZONE;
+  const showRing = G.phase === 'go' && s.phase === 'swim' && !inZone && !s.done && p;
+  const ring = $('ring'), tgt = $('target');
+  if (showRing) {
+    const breath = s.beat % S.breathEvery === 0, left = s.next - G.t, k = Math.max(0, Math.min(1.6, left / S.beat));
+    const d = 64 + k * 130;
+    ring.style.width = ring.style.height = d + 'px'; ring.style.left = tgt.style.left = p[0] + 'px'; ring.style.top = tgt.style.top = p[1] + 'px';
+    ring.style.opacity = s.used && !breath ? .25 : Math.min(1, 1.6 - k);
+    ring.classList.toggle('breath', breath); tgt.classList.toggle('breath', breath); ring.classList.remove('hide'); tgt.classList.remove('hide');
+  } else { ring.classList.add('hide'); tgt.classList.add('hide'); }
+  $('turn').classList.toggle('hide', !inZone);
+  const j = $('judge');
+  if ((judgeT -= dtR) > 0 && p) { j.textContent = JT[s.lastJ] || ''; j.style.color = JC[s.lastJ] || '#fff'; j.style.left = p[0] + 'px'; j.style.top = (p[1] - 48) + 'px'; j.classList.remove('hide'); } else j.classList.add('hide');
+  const a = $('air'), th = INPUT.thumb, ax = th ? Math.max(80, Math.min(innerWidth - 80, th[0])) : innerWidth / 2, ay = th ? Math.min(innerHeight - 36, th[1] + 40) : innerHeight - 70;
+  a.style.left = ax + 'px'; a.style.top = ay + 'px';
+  const fl = a.querySelector('.fill'); fl.style.width = Math.max(0, s.air * 100).toFixed(1) + '%'; fl.style.background = s.air > .4 ? '#50b8ff' : '#ff9a6a';
+  a.querySelector('.lab').textContent = s.phase === 'gasp' ? 'Catching your breath…' : s.holdFrom >= 0 ? 'Air · breathing in' : 'Air';
+}
+function drawSplash(dtR) {
+  const m = new THREE.Matrix4(), q = new THREE.Quaternion(), sc = new THREE.Vector3();
+  for (let i = 0; i < SPL; i++) {
+    const p = SP[i];
+    if (p.t < 1) { p.t += dtR * 1.6; p.vy -= 4 * dtR; p.x += p.vx * dtR; p.y += p.vy * dtR; p.z += p.vz * dtR; if (p.y < POOL.wy + .02) p.t = 1; }
+    sc.setScalar(p.t < 1 ? p.s * (1 - p.t * .5) : 0); m.compose(V.set(p.x, p.y, p.z), q, sc); splash.setMatrixAt(i, m);
+  }
+  splash.instanceMatrix.needsUpdate = true;
+}
+function liveStep() {                                      // one step with the thumb's input (presses and swipes are used once)
+  if (!G.s[0].ai) { G.inp.press = INPUT.press; G.inp.down = INPUT.down; G.inp.swipe = INPUT.swipe; INPUT.press = 0; INPUT.swipe = 0; }
+  plStep(G);
+}
+let acc = 0, last = performance.now(), tR = 0;
+function frame(now) {
+  requestAnimationFrame(frame);
+  const dtR = Math.min(.1, (now - last) / 1000); last = now; tR += dtR;
+  if (G && !G.paused && G.phase !== 'over') {
+    const sp = (G.s[0].done ? 6 : 1) * PL.rate;
+    acc += dtR * sp; let n = 0;
+    while (acc >= DT && n < 6 * sp) { liveStep(); acc -= DT; n++; }
+    if (n === 6 * sp) acc = 0;
+  }
+  if (G) drainEvents();
+  camT = Math.min(1, camT + dtR / .8);
+  let want;
+  if (camMode === 'game' && G) { laneView(dtR); want = view; } else want = overview(tR);
+  const e = camT * camT * (3 - 2 * camT);
+  camCur.pos.lerpVectors(camFrom.pos, want.pos, e); camCur.target.lerpVectors(camFrom.target, want.target, e); camCur.fov = camFrom.fov + (want.fov - camFrom.fov) * e;
+  camera.position.copy(camCur.pos); camera.lookAt(camCur.target);
+  if (camera.fov !== camCur.fov) { camera.fov = camCur.fov; camera.updateProjectionMatrix(); }
+  WATER.uT.value = RM ? 0 : tR;
+  drawSplash(dtR);
+  if (callT > 0 && (callT -= dtR) <= 0) $('call').classList.add('hide');
+  if (G && figs.length) { G.s.forEach((s, i) => drawSwimmer(s, figs[i], dtR, tR, i)); if (G.phase !== 'over') { drawOverlay(dtR); $('status').textContent = statusText(); } }
+  if (!G || G.phase === 'over') { tags.forEach(t => t.classList.add('hide')); says.forEach(t => t.classList.add('hide')); }
+  renderer.render(scene, camera);
+  if (DEBUG) $('dbg').textContent = `calls ${renderer.info.render.calls} · tris ${renderer.info.render.triangles} · ${G ? G.phase + ' step ' + G.step + ' len ' + G.s[0].len + ' x ' + G.s[0].x.toFixed(2) + ' air ' + G.s[0].air.toFixed(2) : 'menu'}`;
+}
+{ const o = overview(0); camCur.pos.copy(o.pos); camCur.target.copy(o.target); camCur.fov = o.fov; camFrom.pos.copy(o.pos); camFrom.target.copy(o.target); camFrom.fov = o.fov; }
+requestAnimationFrame(frame);
+document.addEventListener('visibilitychange', () => { last = performance.now(); acc = 0; });
+
+// =====================================================================
+// 11. TEST HOOKS (Playwright): start goes, run steps fast, read state, paper, clones at other frame rates
+// =====================================================================
+window.PL = {
+  start: o => { startGo(o || {}); return PL.state(); },
+  steps: (n, inp) => { if (!G) return null; FAST = true; for (let i = 0; i < n && G.phase !== 'over'; i++) { if (inp) Object.assign(G.inp, inp); plStep(G); } drainEvents(); FAST = false; return PL.state(); },
+  // step until your next beat is t seconds away (or it's a breath beat / you're near the wall: what = 'any')
+  toBeat: (t = 0) => { if (!G) return null; FAST = true; let n = 0; const s = G.s[0]; while (G.phase !== 'over' && n++ < 600 && (G.phase !== 'go' || s.phase !== 'swim' || s.next - G.t > t + 1e-9)) plStep(G); drainEvents(); FAST = false; return PL.state(); },
+  // n steps with whatever the thumb is doing (the test pauses the frame loop, then steps exactly with real touches)
+  live: n => { if (!G) return null; FAST = true; for (let i = 0; i < n && G.phase !== 'over'; i++) liveStep(); drainEvents(); FAST = false; return PL.state(); },
+  // step (no input) until you're near the wall (for a turn), or a breath beat is t seconds away
+  toWall: d => { if (!G) return null; FAST = true; let n = 0; const s = G.s[0]; while (G.phase !== 'over' && n++ < 3000 && !(s.phase === 'swim' && s.len < 3 && (s.dir > 0 ? LEN - s.x : s.x) <= d)) plStep(G); drainEvents(); FAST = false; return PL.state(); },
+  paper: o => plPaper(o),
+  fps: (o, fps, fromLive) => {
+    const g = fromLive && G ? plClone(G) : plNew(Object.assign({ seed: 1, autoYou: true }, o, { paper: true }));
+    g.evOn = false; g.ev = [];
+    let a = 0, frames = 0; const dt = 1 / fps;
+    while (g.phase !== 'over' && frames < fps * 600) { a += dt; frames++; while (a >= DT - 1e-12) { plStep(g); a -= DT; } }
+    return plSummary(g);
+  },
+  summary: () => G && plSummary(G),
+  state: () => G && { phase: G.phase, step: G.step, t: G.t, how: G.how, race: G.race,
+    s: G.s.map(s => ({ k: s.k, lane: s.lane, stroke: s.stroke, x: s.x, dir: s.dir, len: s.len, v: s.v, phase: s.phase, beat: s.beat, next: s.next, used: s.used, breathBeat: s.beat % STROKES[s.stroke].breathEvery === 0, holdFrom: s.holdFrom, air: s.air, flow: s.flow, clean: s.clean, good: s.good, ok: s.ok, splash: s.splash, missed: s.missed, breaths: s.breaths, breathMiss: s.breathMiss, gasps: s.gasps, turns: s.turns.slice(), done: s.done, lastJ: s.lastJ, wall: s.dir > 0 ? LEN - s.x : s.x })) },
+  set: o => { if (G) Object.assign(G.s[0], o); },
+  rate: 1, calls: () => renderer.info.render.calls,
+  pause: v => { if (G) G.paused = v; },
+  leave,
+};
+</script>
+</body>
+</html>
