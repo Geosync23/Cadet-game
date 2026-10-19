@@ -41696,7 +41696,8 @@ function roofTalk(now) {
   if (!liftHeld(now) || ROOF.r && !ROOF.r.off || typeof DECK_CREW === 'undefined' || typeof lineFor !== 'function' || now - ROOF_TALK.at < 6) return;
   if (ROOF_TALK.of !== LIFT_HOLD) { ROOF_TALK.of = LIFT_HOLD; ROOF_TALK.said = new Set(); }
   const p = player.obj.position, a = DECK_CREW.find(x => x.p && !ROOF_TALK.said.has(x.p.id) && Math.hypot(x.x - p.x, x.z - p.z) < 8 && roofWait(x.p, now)); if (!a) return;
-  ROOF_TALK.said.add(a.p.id); const l = lineFor(a.p.id, 'roof.wait', { t: now, keep: e => !/stairs/i.test(e.text || '') });   // (the lead's call: nobody takes the ladder, so W2's "Stairs it is" line is left out) if (!l || !l.text) return;
+  ROOF_TALK.said.add(a.p.id); const l = lineFor(a.p.id, 'roof.wait', { t: now, keep: e => !/stairs/i.test(e.text || '') });   // (the lead's call: nobody takes the ladder, so W2's "Stairs it is" line is left out)
+  if (!l || !l.text) return;   // (merge fix, 0.63.4: this guard sat inside the comment above)
   ROOF_TALK.at = now; if (typeof bubbleSay === 'function') bubbleSay(a.h, l.text, 5);
 }
 if (typeof WORK_TICKS !== 'undefined') WORK_TICKS.push((now, skip) => { if (!skip && !SIM_AT && LIFT_HOLD) roofTalk(now); });
