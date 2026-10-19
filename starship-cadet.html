@@ -285,7 +285,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.84.1
+   STARSHIP CADET: CSV Wren                           build 0.84.2
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -591,6 +591,7 @@ const REC_DECK = false;                                  // 0.63.2r: merged dorm
 const DECK_ORDER = REC_DECK ? [1, 2, 3, 4, 7, 5, 6] : [1, 2, 3, 4, 5, 6];
 const deckLabel = n => +n === 7 ? 'R' : String(n);
 const deckWord = n => +n === 7 ? 'Rec deck' : 'Deck ' + n;
+const deckIn = n => +n === 7 ? 'the rec deck' : 'Deck ' + n;   // 0.84.2 (lead 18): a deck's name mid-sentence ("on the rec deck"); deckWord for labels and signs
 
 // =====================================================================
 // 4a. THE CURRENT DECK
@@ -8774,7 +8775,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.84.1';                           // keep in step with the header's build line
+const GAME_BUILD = '0.84.2';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -11338,13 +11339,13 @@ deviceApp({ id: 'jobs', title: 'Jobs', icon: 'wrench', order: 30,
       const [title, where] = jobCard(mine), m = mine.machine && machineById(mine.machine), tracked = SHIP.player.track !== null;   // a taken job is tracked until you switch it off (null)
       say('Yours: ' + title + ', ' + where + '.', 'hot');
       if (mine.kind === 'chore') {
-        const stops = mine.stops.map(st => { const p = placeById(st.placeId); return (st.tag === 'pickup' ? 'pick up ' + (mine.bring || 'the load') + ' in the ' : st.tag === 'drop' ? 'drop it in the ' : '') + (p ? roomName(p.deck, p.room) || 'room' : 'room') + ' on ' + deckWord(st.deck); });
+        const stops = mine.stops.map(st => { const p = placeById(st.placeId); return (st.tag === 'pickup' ? 'pick up ' + (mine.bring || 'the load') + ' in the ' : st.tag === 'drop' ? 'drop it in the ' : '') + (p ? roomName(p.deck, p.room) || 'room' : 'room') + ' on ' + deckIn(st.deck); });
         say(mine.title + '. ' + (mine.parts.length ? 'Bring ' + mine.parts.map(k => 'a ' + k).join(', ') + ' from main storage on Deck 5. ' : '') + 'Go to: ' + stops.join(', then ') + '.');
       } else if (typeof traceHidden === 'function' && traceHidden(mine)) {   // 24i: a traced job not yet found (the machine stays hidden)
         say(worksText('trace.how', 'Find where it starts: tap the machines on {line} with the pipe kit to read the flow. The Maps app marks them.', { line: traceLineName(mine.symptom.line) }));
       } else if (m) {
         const need = {}; for (const k of mine.parts) need[k] = (need[k] || 0) + 1;
-        say('Needs ' + Object.entries(need).map(([k, n]) => n + ' × ' + k + ' (' + (SHIP.stores[k] || 0) + ' in storage)').join(', ') + '. Parts are in main storage on Deck 5; the job is in the ' + ((DECKS[m.deck].rooms[m.room] || {}).name || 'room').toLowerCase() + ' on ' + deckWord(m.deck) + '.');
+        say('Needs ' + Object.entries(need).map(([k, n]) => n + ' × ' + k + ' (' + (SHIP.stores[k] || 0) + ' in storage)').join(', ') + '. Parts are in main storage on Deck 5; the job is in the ' + ((DECKS[m.deck].rooms[m.room] || {}).name || 'room').toLowerCase() + ' on ' + deckIn(m.deck) + '.');
       } else say(mine.cargo === 'meals' ? 'Take a hover cart from the Cart bay on Deck 5, load ' + (mine.meals || 'the') + ' meals in the cargo hold, and take them up to the cold store on Deck 3. Then bring the cart back.'
         : 'Take a hover cart from the Cart bay on Deck 5, load the delivery in the cargo hold, and take it to main storage. Then bring the cart back.');
       const step = typeof ixJobStep === 'function' ? ixJobStep() : null;
@@ -11437,7 +11438,7 @@ function rosterWhere(p, t = shipNow()) {                 // { line, deck, room }
   let w = null; try { w = typeof whereIs === 'function' ? whereIs(p, t) : null; } catch (e) { w = null; }
   if (!w) return { line: 'Not aboard right now.' };
   if (w.act === 'sleep' || w.act === 'wash') return { line: 'In their quarters.' };
-  if (w.moving) return { line: 'On the move' + (w.deck ? ', heading for ' + deckWord(w.deck) : '') + '.' };
+  if (w.moving) return { line: 'On the move' + (w.deck ? ', heading for ' + deckIn(w.deck) : '') + '.' };
   const S = typeof schedData === 'function' ? schedData() : null, pl = w.placeId && S ? S.byId.get(w.placeId) : null;
   const room = pl && pl.deck === w.deck ? pl.room : null, r = room && DECKS[w.deck] && (DECKS[w.deck].rooms || {})[room], rn = r && r.name;
   if (rn && mapLocked(w.deck, room) && w.act !== 'work') return { line: 'In their quarters.' };   // a private cabin
@@ -13440,7 +13441,7 @@ function jobTap(it, at) {
     }
     const need = shelfNeeds(mw.j, mw.w, P.carry);
     if (!need.length && jobNeeds(mw.j, mw.w, P.carry).length) { toast(it.t, 'The ' + mw.j.make + ' isn\'t kept on the shelves: you make it yourself in the machine shop next door.'); return true; }   // 0.28.24
-    if (!need.length) { toast(it.t, 'You have what the job needs: ' + partList(P.carry) + '. It\'s at the ' + machineName(machineById(mw.j.machine)) + ' on ' + deckWord(mw.j.deck) + '.'); return true; }
+    if (!need.length) { toast(it.t, 'You have what the job needs: ' + partList(P.carry) + '. It\'s at the ' + machineName(machineById(mw.j.machine)) + ' on ' + deckIn(mw.j.deck) + '.'); return true; }
     if (P.carry.length >= CARRY_MAX) { toast(it.t, 'Your hands are full (' + partList(P.carry) + '). ' + handsFix('Fit those first') + ', then come back for ' + partList(need) + '.'); return true; }
     if (typeof shelfWrong === 'function' && shelfWrong(it)) return true;   // the right part from the right shelf (0.33.41): another shelf costs nothing
     const o = { title: it.t, flavour: it.x, after: 'You look for ' + partList(need) + '.' }, pl = jobPlaceNear('storage', 'r', at);
@@ -13744,7 +13745,7 @@ function jobEnd(A) {
     toast('Main storage', back.length ? 'You put back ' + partList(back) + '.' : 'Nothing to put back.');
   } else if (A.kind === 'make' && mw && P.work.make) {
     const part = P.work.make.part; P.work.make = null;
-    if (P.carry.length < CARRY_MAX) { P.carry.push(part); toast('Machine shop', 'You make ' + partList([part]) + '. ' + (shelfNeeds(mw.j, mw.w, P.carry).length ? 'Now ' + partList(shelfNeeds(mw.j, mw.w, P.carry)) + ' from main storage next door.' : 'Now to the ' + machineName(machineById(mw.j.machine)) + ' on ' + deckWord(mw.j.deck) + '.')); }
+    if (P.carry.length < CARRY_MAX) { P.carry.push(part); toast('Machine shop', 'You make ' + partList([part]) + '. ' + (shelfNeeds(mw.j, mw.w, P.carry).length ? 'Now ' + partList(shelfNeeds(mw.j, mw.w, P.carry)) + ' from main storage next door.' : 'Now to the ' + machineName(machineById(mw.j.machine)) + ' on ' + deckIn(mw.j.deck) + '.')); }
     if (part === madeHere(mw.j)) jobStopMark(mw.j, 'make');   // the job's make stop (0.28.24)
   } else if (A.kind === 'fetch' && mw) {
     const need = shelfNeeds(mw.j, mw.w, P.carry), got = [], none = [];
@@ -13757,7 +13758,7 @@ function jobEnd(A) {
     toast('Main storage', (got.length ? 'You take ' + partList(got) + '.' : 'Nothing you need is on the shelves.')
       + (none.length ? ' None left: ' + none.join(', ') + '. ' + (none.some(p => typeof NO_MAKE !== 'undefined' && !NO_MAKE.has(p)) ? 'The machine shop next door can make one (about an hour at the lathe).' : 'It can\'t be made aboard; the next delivery is on Wednesday.') : '')
       + (rest.length && !none.length ? ' Your hands are full; you\'ll need another trip for ' + partList(rest) + '.' : '')
-      + (got.length ? toMake && !rest.length ? ' Now make the ' + mw.j.make + ' in the machine shop next door.' : ' Now to the ' + machineName(machineById(mw.j.machine)) + ' on ' + deckWord(mw.j.deck) + '.' : ''));
+      + (got.length ? toMake && !rest.length ? ' Now make the ' + mw.j.make + ' in the machine shop next door.' : ' Now to the ' + machineName(machineById(mw.j.machine)) + ' on ' + deckIn(mw.j.deck) + '.' : ''));
   } else if (A.kind === 'job' && mw) {
     const name = machineName(machineById(mw.j.machine));
     if (A.o.repair) {
@@ -14158,7 +14159,7 @@ function ixChoreTap(it, at) {
   if (st.deck !== deckDef.num) return false;
   const pid = st.places[0], spot = pid && PLACE_OF.has(pid) ? placeSpot(pid) : null;
   if (!spot || !(it.hit ? ixDist(it, spot) < IX_NEAR + .6 : Math.hypot(spot.x - at.x, spot.z - at.z) < JOB_REACH) && PLACE_OF.get(pid).room !== room) return false;   // no thing (jobHere, 0.28.52): from the point
-  if (st.step === 'drop' && crateDown(j)) { toast(it.t, 'The crate is where you set it down, on ' + deckWord(SHIP.player.crate.deck) + '. Pick it up first: follow the marker.'); return true; }   // Put down (0.28.60)
+  if (st.step === 'drop' && crateDown(j)) { toast(it.t, 'The crate is where you set it down, on ' + deckIn(SHIP.player.crate.deck) + '. Pick it up first: follow the marker.'); return true; }   // Put down (0.28.60)
   if (typeof workStep === 'function' && workStep(j, st, k, spot)) return true;   // look, choose, turn, wait (section 15, Pillar 5)
   const [title, pose] = IX_STOP[st.step] || ['Your job', 'work'];
   // the stop's spot, not the place: a lamp over the lift queue is yours to change even with someone waiting there
@@ -17723,7 +17724,7 @@ function traceFor(m, h) {
 function traceSymptom(line, id) { const decks = lineDecks(line, id); return { line, decks, deck: decks.includes(4) ? 4 : decks[0] }; }
 const traceHidden = j => !!(j && j.symptom && !j.traceFound);
 function traceTitle(j) {                                 // the Works writer's trace.symptom.<line> line when it's in (M3's ask)
-  const fb = (SYMPTOM_TEXT[j.symptom.line] || 'A fault') + ' on ' + deckWord(j.symptom.deck);
+  const fb = (SYMPTOM_TEXT[j.symptom.line] || 'A fault') + ' on ' + deckIn(j.symptom.deck);
   return typeof worksText === 'function' ? worksText('trace.symptom.' + j.symptom.line, fb, { deck: j.symptom.deck, where: '' }) : fb;
 }
 function traceMark(jobId, id) {
@@ -17893,11 +17894,11 @@ function jobsSection(el) {
     const [title, where, state] = jobCard(mine), m = mine.machine && !traceHidden(mine) && machineById(mine.machine);   // a traced fault: no room till it's found
     line('Yours: ' + title + ', ' + where + '.', 'devtime');
     if (jobByStops(mine) && mine.kind !== 'favour') {
-      const stops = mine.stops.map(st => { const p = placeById(st.placeId); return (st.tag === 'pickup' ? 'pick up ' + (mine.bring || 'the load') + ' in the ' : st.tag === 'drop' ? 'drop it in the ' : '') + (p ? roomName(p.deck, p.room) || 'room' : 'room') + ' on ' + deckWord(st.deck); });
+      const stops = mine.stops.map(st => { const p = placeById(st.placeId); return (st.tag === 'pickup' ? 'pick up ' + (mine.bring || 'the load') + ' in the ' : st.tag === 'drop' ? 'drop it in the ' : '') + (p ? roomName(p.deck, p.room) || 'room' : 'room') + ' on ' + deckIn(st.deck); });
       line(mine.title + '. ' + (mine.parts.length ? 'Bring ' + mine.parts.map(k => 'a ' + k).join(', ') + ' from ' + (shelfName(mine.parts[0]) ? 'the ' + shelfName(mine.parts[0]) + ' shelf in ' : '') + 'main storage on Deck 5. ' : '') + 'Go to: ' + stops.join(', then ') + '.');
     } else if (m) {
       const need = {}; for (const k of mine.parts) need[k] = (need[k] || 0) + 1;
-      line('Needs ' + Object.entries(need).map(([k, n]) => n + ' × ' + k + ' (' + (shelfName(k) ? 'the ' + shelfName(k) + ' shelf, ' + (SHIP.stores[k] || 0) + ' there' : k === mine.make ? 'you make it' : (SHIP.stores[k] || 0) + ' in storage') + ')').join(', ') + '. Parts are in main storage on Deck 5; the job is in the ' + ((DECKS[m.deck].rooms[m.room] || {}).name || 'room').toLowerCase() + ' on ' + deckWord(m.deck) + '.');
+      line('Needs ' + Object.entries(need).map(([k, n]) => n + ' × ' + k + ' (' + (shelfName(k) ? 'the ' + shelfName(k) + ' shelf, ' + (SHIP.stores[k] || 0) + ' there' : k === mine.make ? 'you make it' : (SHIP.stores[k] || 0) + ' in storage') + ')').join(', ') + '. Parts are in main storage on Deck 5; the job is in the ' + ((DECKS[m.deck].rooms[m.room] || {}).name || 'room').toLowerCase() + ' on ' + deckIn(m.deck) + '.');
     } else line(mine.cargo === 'meals' ? 'Take a hover cart from the Cart bay on Deck 5, load ' + (mine.meals || 'the') + ' meals in the cargo hold, and take them up to the cold store on Deck 3. Then bring the cart back.'
       : 'Take a hover cart from the Cart bay on Deck 5. In the cargo hold tap the crates' + (partsCrates() ? ' (' + partsCrates() + ' there)' : '') + ' and the cart pulls them in; in main storage tap any shelf and it unloads itself. Then bring the cart back.');
     button('Drop it', () => dropJob(mine.id));
@@ -35939,10 +35940,10 @@ function socBorn(h, rooms) {
     const there = []; for (const [k, l] of rooms) if (k.startsWith(m.deck + '|')) there.push(...l.map(i => crew[i]));
     if (!there.length) continue;                         // nobody about to notice: it's news when someone is
     SHIP.social.fault[m.id] = lvl;
-    const name = MACHINE_KINDS[m.kind].name.toLowerCase(), s = SOC_SYMPTOM[m.kind] || 'playing up', where = 'the ' + name + ' on ' + deckWord(m.deck);
+    const name = MACHINE_KINDS[m.kind].name.toLowerCase(), s = SOC_SYMPTOM[m.kind] || 'playing up', where = 'the ' + name + ' on ' + deckIn(m.deck);
     newsAdd({ id: 'fault:' + m.id + ':' + h, about: m.id, kind: 'fault', weight: lvl === 'faulty' ? .5 : lvl === 'failing' ? .7 : .9, life: 3, born: t,
       seed: socPick(there, 3, socHash(m.id), h, 604).map(q => q.id),
-      lines: ['The ' + name + ' on ' + deckWord(m.deck) + ' has been ' + s + ' all week.', 'Someone should look at ' + where + '. It keeps ' + s + '.', 'Have you heard? ' + where[0].toUpperCase() + where.slice(1) + ' is ' + s + ' again.'] });
+      lines: ['The ' + name + ' on ' + deckIn(m.deck) + ' has been ' + s + ' all week.', 'Someone should look at ' + where + '. It keeps ' + s + '.', 'Have you heard? ' + where[0].toUpperCase() + where.slice(1) + ' is ' + s + ' again.'] });
   }
 }
 // ---- one ship hour on paper: who spent time together, affinity drifting, news passing on ----
@@ -38682,7 +38683,7 @@ function wardrobeUse() {
   }
   if (h && h.at === 'hands') { toast('Wardrobe', 'Your hamper\'s full of dirty washing. Take it to a free washer in the laundry, past the washrooms in the junior wing.'); clothesGoal('washer'); return; }
   if (h && h.at === 'washer') { toast('Wardrobe', 'Your washing is in ' + washerName(h.washer) + ' in the laundry' + (h.done || shipNow() >= h.until ? ': it\'s done, take it out.' : ', done at ' + hhmm(h.until) + '.')); return; }
-  if (h && h.at === 'floor') { toast('Wardrobe', 'Your laundry hamper is where you set it down' + (h.deck !== deckDef.num ? ', on ' + deckWord(h.deck) : '') + '. Pick it up again when you\'re ready.'); return; }
+  if (h && h.at === 'floor') { toast('Wardrobe', 'Your laundry hamper is where you set it down' + (h.deck !== deckDef.num ? ', on ' + deckIn(h.deck) : '') + '. Pick it up again when you\'re ready.'); return; }
   if (C.clean > 0 && C.changed >= today && C.grime < GRIME_GRUBBY) { toast('Wardrobe', 'You\'re in clean clothes today. ' + clothesLeft(C.clean)[0].toUpperCase() + clothesLeft(C.clean).slice(1) + ' in here.'); return; }
   if (C.clean > 0) {                                     // (grubby: always, even if you changed today)
     C.clean--; C.changed = today; C.grime = 0; uniformWatch(); simAct('clothes');
@@ -40294,7 +40295,7 @@ function trainOffer(row, c, d, t) {                      // the ask, or the ask 
   if (!r) return false;
   c.st = 'meet'; c.occ = r.key; c.told = false;
   const place = DECKS[o.deck] && DECKS[o.deck].rooms[o.room] ? DECKS[o.deck].rooms[o.room].name : 'the Works bay', when = hhmm(at);
-  const where = place.replace(/^Works Chief's office$/, 'the Chief\'s office') + ' on ' + deckWord(o.deck), ask = worksText('works.ask.' + row.id, '', { time: when, place: where, name: worksName(by) }), cut = ask.indexOf(' | ');
+  const where = place.replace(/^Works Chief's office$/, 'the Chief\'s office') + ' on ' + deckIn(o.deck), ask = worksText('works.ask.' + row.id, '', { time: when, place: where, name: worksName(by) }), cut = ask.indexOf(' | ');
   let subject = 'Training: ' + mechName(row.id), body = 'Meet me in the ' + where.replace(/^the /, '') + ' at ' + when + '. I\'ll show you ' + mechName(row.id).replace(/^./, x => x.toLowerCase()) + '.';
   if (cut > 0) { subject = ask.slice(0, cut); body = ask.slice(cut + 3); if (body.indexOf(when) < 0) body += ' (' + when + ', ' + where + '.)'; }   // the writer's words; the time and place if they don't say
   if (typeof mailSend === 'function') mailSend({ at: t, from: worksName(by), subject, body, quiet: true });
@@ -41568,7 +41569,7 @@ function traceRead(j, id) {
   } else {
     const hint = r.after >= .8 ? worksText('trace.down', 'Full after it: the trouble is further down the line.') : r.before < .8 ? worksText('trace.up', 'Already low before it: the trouble is further up.') : '';
     toast(name, [words, hint].filter(Boolean).join(' '));
-    traceSay(j, 'read', r.after >= .8 ? 'Full here. So it\'s further down, toward ' + deckWord(s.deck) + '. Halve it again.' : 'Low before it too. Back up the line.');
+    traceSay(j, 'read', r.after >= .8 ? 'Full here. So it\'s further down, toward ' + deckIn(s.deck) + '. Halve it again.' : 'Low before it too. Back up the line.');
   }
   if (typeof ixGoalAt !== 'undefined') ixGoalAt = -1;
   if (typeof deviceShow === 'function') deviceShow('pipekit');
