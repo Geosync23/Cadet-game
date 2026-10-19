@@ -269,7 +269,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.44.25
+   STARSHIP CADET: CSV Wren                           build 0.44.26
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8682,7 +8682,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.44.25';                           // keep in step with the header's build line
+const GAME_BUILD = '0.44.26';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -40266,12 +40266,13 @@ function promoSummonsTick(now) {                         // book it, warn at 10:
     try { toast('Chief Calder', text); } catch (e) { /* no UI */ }
     if (typeof setGoal === 'function') setGoal({ deck: 5, room: 'o', label: 'The Chief\'s office, 11:00' });
     if (promoInBay()) promoSay('torres-zeke', 'summons.torres', 'Go on. She doesn\'t bite. Usually.'); }
-  if (m >= PROMO.seekAt && !f.seek && !r.met && !promoInBay() && !(typeof DIALOGUE !== 'undefined' && DIALOGUE)) { f.seek = now; worksSayAll(r.by, worksVoice(r.by, 'promo.fetch.summons') || ['There you are. My office was the idea, but this will do.']); }   // 11:15: she comes to you
+  if (m >= PROMO.seekAt && !f.seek && !r.met && !promoInBay() && !(typeof DIALOGUE !== 'undefined' && DIALOGUE)) f.seek = now;   // 11:15: she comes to you
 }
 function promoSeekTick(now) {                            // she's found you: the scene where you are
   const r = SHIP.occasions.find(x => x.id === 'promoSummons' && x.status === 'asked'); if (!r || !r.f || !r.f.seek || r.met || (typeof DIALOGUE !== 'undefined' && DIALOGUE)) return;
   try { const a = DECK_CREW.find(x => x.p && x.p.id === r.by), p = player.obj.position;
-    if (a && Math.hypot(a.x - p.x, a.z - p.z) < 2.2) { promoScript(); r.met = true; dialogueShow('promo.officer', { id: r.key, who: [r.by], at: now }); } } catch (e) { /* not in play */ }
+    if (a && Math.hypot(a.x - p.x, a.z - p.z) < 2.2) { worksSayAll(r.by, worksVoice(r.by, 'promo.fetch.summons') || ['There you are. My office was the idea, but this will do.']);   // her word as she reaches you, then the scene
+      promoScript(); r.met = true; dialogueShow('promo.officer', { id: r.key, who: [r.by], at: now }); } } catch (e) { /* not in play */ }
 }
 function promoEscort(p, t) {                             // worksEscort's 24p part: Calder walking over to find you
   const r = SHIP.occasions.find(x => x.id === 'promoSummons' && x.status === 'asked');
