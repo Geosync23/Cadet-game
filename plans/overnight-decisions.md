@@ -244,3 +244,4 @@ The user went to bed ~03:40: **overnight mode ON** until they check in in the mo
 | ~05:25 (the user) | If tonight's list finishes early | Move on to ship-wide events (Phase 1), in chronological order (ion storm first), built switched OFF (dormant, like the rec deck was) |
 | ~05:26 (the user) | Ship-wide events tonight | At most ONE event for now (the ion storm), switched off |
 | ~05:26 | Item 12 "appointment notifications": booked appointments already notify; which ones were missing? | Lead's call: add notifications for timed training/onboarding beats not booked as appointments (Torres's training, first shift, Day 2 starts, Calder's first job) and for invitations still awaiting Accept | Most likely what you saw; tell me in the morning if you meant something else |
+| ~05:28 (the user) | Leisure | Work hits leisure harder; lead tuning: about double the drain while working (a workday takes ~40-50%) → U2 |

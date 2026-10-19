@@ -31,3 +31,4 @@ The user's playtest notes (~05:12). Goal: fold into Step 4 (0.63.4) if ready whe
 U's list is long: do 3, 6, 7, 17, 9, 19 (onboarding and tips) first, then 10-12, 18, then 4-5 (needs and the alarm clock; the biggest). Tell the lead at ~60% memory; unfinished items move to a fresh seat.
 
 **Update ~05:22:** U (0.72.5 93194ef: items 3, 6, 7, 9, 17, 19) does batch B (10-12, 18) and hands over; **U2 session_012TFwzt5eZoNZKrXrXTzN2w** (claude/hud-pt2, 0.73.x) takes items 4-5 and the arrow/tips half of item 1.
+| 23 | "Work needs to hit leisure a good bit harder" | While working, leisure drains about twice as fast (lead's tuning: a full workday takes ~40-50% off unless you do something fun); pop-up numbers | U2 |
