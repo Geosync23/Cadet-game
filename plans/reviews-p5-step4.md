@@ -34,6 +34,14 @@ Lines skimmed. In a fresh archive content_gen bakes 9342 lines; lines_check PASS
 
 ## Step 4
 
+### E6 claude/mech-rounds 64a2b19b (0.45.17: R5's load-stop fix, round.pick.some, empty shelves, the tester on the bench), R6: PASS
+Read by hand (17 game lines).
+- The order fix: `haulOrderAsk(j, got)` builds the picks apart and sets `j.order` only when complete and before any delivery stop is done; `haulStops` sorts by j.order only when it names every crate, so the load stops never move and an old save's partial `j.order` is ignored. mech_check haul2 drives it (load stops unchanged, order undefined mid-pick and after a delivery).
+- Empty shelves: `manifestRun` leaves out a stocked part with none on its shelf (E5's team parts then get a shorter run, or none: E5's code already handles a null id); one emptied after the run was made says "No {part} on the shelf." at its load and isn't in the manifestRun note.
+- `round.pick.some` replaces reading W2's "Pick five" (good). `TOOL_UPKEEP.tester` so "all charged" counts the m15 tester. Note: its label says "circuit tester" (as TOOLS.tester.name) while W2's `works.tool.tester` says "Conduit tester": one name for the next writer to settle (older than this build).
+- New lines in style: "No {part} on the shelf.", "Pick a handful to look at today: four to six.", "Check the circuit tester". Fine.
+- Checks on 64a2b19b: node --check OK; mech_check OK (manifestRun empty-shelf part, haul2 order part, round23); machine_check OK; career_check OK; cadet_test vs f36d81ec ALL IDENTICAL (renderer noise only).
+
 ### E6 claude/mech-rounds f36d81ec (0.45.16, rounds stages 2 and 3: the pick list, the doorway), R6: PASS (notes; E1's 0.45.13 load-stop order still open)
 Read by hand (75 game lines) against step4-stages.
 - Good: `roundWalk` is roundRoute's old loop moved out unchanged (same start at the lift, same tie-break, the training's washer-first kept in roundRoute), so stage 0/1 and the training route are as before (cadet_test identical). Stage 2: a WORK_TICK on a morning round you hold (never reserved/training, before any look) asks one machine at a time, longest unlooked first with W2's round.last / round.last.never, "That's my round" from the fourth, at most 6; refused before 4 keeps the day's route; the device busy keeps four-or-more picks. `roundLast` (side.round.last) is read defensively, written only by your marks (not the training's). Two worn found: Torres's round.two + `worksSideXp(1, 'round')` (in the +2 cap). Stage 3 (`roundDoorway`: stage 2, 5 rounds, a scanner): from 24a's stepDone, before jobStepDone merges stepsDone and counts what's left, so a doorway that reads the rest finishes the job properly; one `toolWear('scanner', 4)` per doorway. No R(); no meshes; one owner (none of the eight new names on E4 9e34c989, E5 2c513e6, X2 ec0cbc36, U2 c6cfdae9 or U 0335523d). U2's 0.73.0 arrow reads `j.route[nx.k]`, fine with a re-routed pick list.
