@@ -190,3 +190,7 @@ All 8 packages approved (Zeke: "all good except he still walks and talks" → he
 | | More events | Add Stuck Together, Space Creature, Visiting Inspector, Echo Signal (TNG-inspired). D2 writes v2 |
 | ~23:45 (the user) | TNG additions | Exactly four: Echo Signal, Loss of Power (Stuck Together), The Visiting Inspector, Space Creature. D2 writes a fleshed-out viewable pitch page (plans/events-pitch-tng.html), plan only, no building |
 | ~00:00 (the user, on events v2) | Spacing | Very good, but up to 9 events should happen BEFORE the career is complete (Days 1-26): shorten some / quicker; D2 re-works as v3 |
+| ~23:59 (the user, on events v3, via lead 14) | Ion storm | Two days: Days 4-5. Days 6-7 = your first full weekend free |
+| | Space Creature | Pulls up a day so the Day 9 test has more breathing room (exact day: D2 proposes in v4) |
+| | Loss of Power | Stuck in the lift ~4 game hours after your first meal; not penalized for missed work |
+| | Build phases | Phase 1 = the 9 events in the career arc (Days 1-26), built first; Phase 2 = the other 11, later. D2 writes v4 showing the phases ("and we're there") |
