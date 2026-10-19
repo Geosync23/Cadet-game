@@ -899,3 +899,11 @@
 ? flag:train.m10.lead
 - Set it spinning. Go and have a tea. Ten minutes.
 - Now finish it by hand. That's where it gets good.
+
+// W3, Wren talks (RA's talk panel): when they give a talk
+== talk.open
+- Hey, everyone! This is {title}. Coil three sends its regards.
+== talk.answer
+- Great question! Right, so, picture a coil. A moody one.
+== talk.listen
+- Thanks for listening! Right, onward. Mind the coils.

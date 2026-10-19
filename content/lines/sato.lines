@@ -119,3 +119,11 @@
 - Your logs are good. Neat. Better than mine, frankly.   #funny
 ? flag:stars.paid
 - Your star logs helped calibrate the array. Your name's on the report.   #warm
+
+// W3, Wren talks (RA's talk panel): when they give a talk
+== talk.open
+- Right. You all saw it. Tonight: {title}. Don't pretend you were eating.
+== talk.answer
+- Good question. Write it down. Then write the answer down. That's Survey.
+== talk.listen
+- No questions? Then tea. Survey's tea. Nobody else will drink it.

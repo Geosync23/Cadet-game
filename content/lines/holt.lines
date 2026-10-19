@@ -464,3 +464,11 @@
 == disc.lose
 - Hm. Well played.
 - Adequate. More than.   #warm
+
+// W3, Wren talks (RA's talk panel): when they give a talk
+== talk.open
+- Sit. This is {title}. It's a true story. Hm.
+== talk.answer
+- Hm. Fair question. The answer is: procedure. And luck.
+== talk.listen
+- Right. That's all. Off with you. Safely.

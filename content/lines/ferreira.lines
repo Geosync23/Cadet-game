@@ -119,3 +119,26 @@
 == chat
 - Talent night's my favourite night aboard. Everyone's brave for five minutes. Come.   #warm
 - The sign-up sheet's in the foyer. A tune, a joke, a spanner trick. I'll introduce you.
+
+// W3, Wren talks (RA's talk panel): when they give a talk
+== talk.open
+- Hello, hello! Tonight: {title}. Messages take strange roads.
+== talk.answer
+- Oh, lovely question. Here's the strangest one I know.
+== talk.listen
+- Thank you all. Write home this week. Someone's waiting.
+
+// W3, rec talent night (RA's panel): talent.ask (the sign-up, to you), talent.tune / talent.joke / talent.trick (after
+// your act), talent.watch (you came and watched)
+== talent.ask
+- Talent night's coming. Will you do an act? A tune, a joke, a spanner trick. Anything.
+- The sign-up sheet's in the foyer. Put your name down. I'll make you sound brilliant.
+== talent.tune
+- Lovely tune! Not a single wrong note. Well, one. It was the best one.   #warm
+== talent.joke
+- That joke was terrible. They all laughed. That's a win.   #funny
+== talent.trick
+- A spanner on one finger! Chief Calder clapped. Mark the day.   #funny
+== talent.watch
+- Thanks for coming to talent night. Every act needs someone clapping.   #warm
+- Did you enjoy it? Next time, you're on. I'm only half joking.   #funny

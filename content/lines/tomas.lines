@@ -627,3 +627,11 @@
 - Wall night tonight, half six. I've chalked my hands already. Too early. Very white.   #funny
 == smalltalk
 - Climb on! Oh, you are. Sorry.   #funny
+
+// W3, Wren talks (RA's talk panel): when they give a talk
+== talk.open
+- Oh! People came. Hi. Sit anywhere. I made too much tea. This is {title}.
+== talk.answer
+- Oh, good question! I think. Sort of. Yes. Here's what I know.
+== talk.listen
+- Thanks for coming. Really. You can keep the tea. Not the cups.

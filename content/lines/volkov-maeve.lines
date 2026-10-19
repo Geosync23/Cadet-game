@@ -128,3 +128,11 @@
 - Sunday morning, the court net always flickers. I swear it knows there's a game on.   #funny
 == smalltalk
 - Nine minutes forty. Beat that.   #funny
+
+// W3, Wren talks (RA's talk panel): when they give a talk
+== talk.open
+- Hiya! Tonight's {title}. I've timed it. Nine minutes forty.
+== talk.answer
+- Ooh, good one. Short answer: a fifth of a g, and a lot of coffee.
+== talk.listen
+- Ta-ra, everyone. Go and float. Responsibly.

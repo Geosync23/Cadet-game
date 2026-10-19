@@ -648,3 +648,11 @@
 - The pool sits over Deck 5 storage. If storage drips, look up.
 ? rep:known
 - The rec dec is Maeve's round. Take a job down there and she'll time you. Ignore her.   #funny
+
+// W3, Wren talks (RA's talk panel): when they give a talk
+== talk.open
+- Evening. This will take twenty-five minutes. I've timed it. {title}.
+== talk.answer
+- Good question. Short answer: look there first.
+== talk.listen
+- No questions. Good. The board's waiting in the morning.
