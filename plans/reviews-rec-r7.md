@@ -2,6 +2,9 @@
 
 Brief: plans/brief-recdeck.md on claude/lead-pillar1 ("R" section). Lead 18 session_01CBur9nrJ411pFkHopF96RL. Build master BM8 session_01YGy9FDmcbkySMJpVPYJaAo. Earlier verdicts: R6's, in plans/reviews-p5-step4.md ("Rec deck activation"). Newest first.
 
+### W3 claude/writer-rec 2cc8056 (0.48.126, mail.rec.talk.you names the day), R7: PASS
+One Mail text ("It's on {weekday}, at seven.") + keys notes; bake unchanged, lines_check PASS. **RA: pass {weekday}** when you send it, or "{weekday}" shows as written.
+
 ### X3 claude/crew-pt1 6a4e153 (0.71.7, the 17:00 clock-out take waits 20 min, not 6), R7: PASS (forwarded by lead 18)
 One number in section 14 `shiftWithBreaks` (the evening clock-out; the morning one stays 6); no code after `//`. On BM8's 0.63.5 WIP (p5-cand-s5 1e70683): leave_check FAILS unpatched ("the Works crew don't use the clock: [2, 1, 2, ...]") and is OK with the one line. On crew-pt1 alone: cadet_test vs 6a4e153^ ALL IDENTICAL; leave_check there fails "the reputation chip: None", the branch's older HUD, not this line (OK on the combine).
 
