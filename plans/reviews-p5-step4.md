@@ -2,6 +2,21 @@
 
 R4 succeeds R3 (whose verdicts are in `plans/reviews-p5-step2.md`). Newest first.
 
+## Step 4
+
+### E3 claude/mech-diagnose 9d179e9 (0.53.4, the places turn): PASS WITH FIXES (five leak joints move)
+Base 0.63.3 7a6e137. Diff: one places block after Step 3's, two Deck 5 props (your bench, the order board), build lines, DEV_NOTES.
+- One owner: E3 alone defines `DECKS[n].leakJoints`, `growRacks`, `cabinSpots` and the new place ids; E2 (cfc4961a) only reads `leakJoints` through `placeById`. E1 (89369630) touches none of them. Good.
+- Places are `type: 'event'` with `event: 'side' | 'leak' | 'leakp'`: inert for crew plans. Ids unique (deck_check OK, my run too). Nothing saved, no R().
+- Props: the bench under the Works bay window (room w i0 10: the bench blocks tile 10,4; the place is 11,4, clear) and the order board on the machine shop's north wall (edges h,21-23,9 are 'wall'). Both look right in screenshots.
+- **Fix: five leak joints are on the wrong spot.** I checked each joint's wall edge (EDGES at the place tile's `wall` side) and the place tile:
+  - `3-leak-2` (galley 36,6 'w'): no edge at v,36,6, open floor: the joint and damp would hang in the air.
+  - `3-leak-4` (promenade 13,9 'n'): the tile is BLOCKED by the call booths (12-14,9); standing there puts you inside the booth and the joint behind it. deck_check lets it through because a standing place on a blocked tile passes when a neighbour is reachable.
+  - `4-leak-3` (laundry 12,16 'n') and `4-leak-4` (junior corridor 8,4 'n'): edge h,12,16 / h,8,4 is a `door`: the joint and damp would sit on a doorway.
+  - `4-leak-2` (starboard washroom 2,18 's'): no edge at h,2,19: it's the curved hull, so the flat `wallAt` spot isn't on the wall.
+  The other seven: wall or hull edges, tiles free, puddle tiles free and in the same room. Keep the ids and order (E2 reads them); move each to a free tile whose `wall` edge is 'wall' (or a straight 'hull'). Worth a line in deck_check: a leak place's tile free and its wall edge 'wall'/'hull'.
+- Minor, no fix needed: `4-23-shelf` sits on exactly `4-23-keepsake`'s at/xy/face (fine while both are player-only).
+
 ## Step 3: U's Tracked device app
 
 ### C2 claude/works-career f553607 (0.44.27): PASS (for BM6, over f3b744c)
