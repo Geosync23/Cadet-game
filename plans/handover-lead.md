@@ -764,3 +764,4 @@ Read: CLAUDE.md; TEAM.md (Lead line, "OVERNIGHT MODE ON", "Tonight's goal", "Ove
 - ~07:32: CR2 session_018xWmWkrtNWudZUgXygkW1u started (2nd check runner for the 0.63.4 final, BM7's ask). BM7 ~50%.
 - ~07:38: kayak prototype published https://claude.ai/artifact/K593iZT8A2XSZ1KnSMwhCq (db0dd08); push-notified. K1 idle ~30% (keep for wall prototype next).
 - ~07:38: E6 done (final 5bd6f97 0.45.19, R6 PASS), archived. Step 4 final waits on X2 0.71.5/0.71.6, U2 0f34cfb verdict, E4 0.53.15.
+- ~07:45: E4 done (final b0cb86c 0.53.15, note plans/handover-mech4-e4.md), archived; R6 reviewing. Working: BM7, CR2, R6, X2, U2 (on call), K1 (wall prototype). Rec deck seats RA/RB/W3 start once 0.63.4's hash is final.
