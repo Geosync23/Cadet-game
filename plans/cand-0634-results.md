@@ -90,3 +90,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - t9 done: mech, career, machine OK, lines PASS, cadet ALL IDENTICAL (renderer noise only). All passed tips together are green on the quick set.
 - ~06:40 R5 PASS E6 910131e (stocktake; E6's tip).
 - trial t10 (wt4) = 2bc08d5 + E6 910131e + E5 60a418f + E3 d51c5ed + W2 0e8571a (all passed tips): same hand merges, same 6 explained; NAMES OK (3181), parses, bake 9560 / 48. Checks running: mech, career, machine, cadet, food.
+- ~06:40 X2 ec0cbc3 (0.71.4 on X 056f8d8: playtest 2 items 15+20, booth and shower queues (sections 10, 14; one-line hook in 15 playerTap), deck_check memory compare fix); with R5. R4's 'loaders' crate never shows' fix on 056f8d8: in this? ask.
