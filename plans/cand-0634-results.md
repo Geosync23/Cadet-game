@@ -101,3 +101,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - trial t12 (wt4) = 2bc08d5 + E6 910131e + E5 2c513e6 + E4 85a4cb6 + X2 ec0cbc3 + W2 0e8571a: mech_check by hand: E5's EXTRA loop (with tparts) kept ONCE, then E4's part_t24 call; every part call present (side, mrun/haul2/stock, round23, EXTRA, t24); parses. verify_merge: the same 6 under 85a4cb6. NAMES OK (3228), JS parses, bake 9560 / 48. mech, career, machine queued after t11.
 - ~06:50 E6 f36d81e (0.45.16: rounds stages 2-3 in 24a); with R5. Load-stop fix: ask if in.
 - ~06:51 R5: X2 ec0cbc3 PASS WITH FIXES (queueJoin must end the current activity): hold for X2's 0.71.5 (+ crate fix, 21+22 redo).
+- ~06:52 lead 17: reviewer R5 → R6 = session_01CPyuA1o5jgxwQtv7huZTNg (R5 finishes E4/U verdicts first).
