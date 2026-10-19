@@ -12,3 +12,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - ~05:17 lead 16: 0.63.3 GREEN and released = claude/p5-cand-pt1 2bc08d5 (game identical to 7a6e137) = the base; merged into claude/p5-cand-s4. t1's base (7325c7a) has the same game file.
 - ~05:18 W2 b00e08b (0.48.105 Step 4 lines batch 1, includes 6a5d34a; scratch bake 9569 lines / 47 meetings; renames may follow); with R4.
 - ~05:18 R4 PASS E3 b809339 (replaces 9d179e9).
+- ~05:19 R4 PASS W2 b00e08b. trial t2 (2bc08d5 + E3 b809339 + W2 b00e08b): merges clean, bake 9569 lines / 434 conversations / 47 meetings / 35 traditions, NAMES OK, lines PASS (0 errors, 2 warnings). (writer-p5 tip is now 7dffd32: not sent yet.)
