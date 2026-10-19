@@ -86,3 +86,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - t8: interactions OK. t9 checks started.
 - ~06:37 R5's own checks: E3 d51c5ed mech/deck/interactions OK, cadet ALL IDENTICAL; E5 60a418f mech OK, cadet ALL IDENTICAL; E6 2edb69c (+E3 places) mech/career OK, cadet ALL IDENTICAL.
 - t9: mech OK (m15 right-first +2 passes with E6's fix), career OK.
+- ~06:39 E6 910131e (0.45.15: the Thursday stocktake, job kind 'stocktake' in 24d); with R5. Load-stop fix still to come.
