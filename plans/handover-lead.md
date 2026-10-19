@@ -682,3 +682,4 @@ Read: CLAUDE.md, TEAM.md (Lead line, "Released" and "Step 3" lines), plans/brief
 - ~23:56 lead 15 took over: TEAM.md Lead line, check-in trig_015E9MEvPTj86vLZpGcjN4VN, lead 14's trigger disabled, seats told.
 - ~00:05 lead 15 published rec deck 0.82.7 (claude/lightdisc-proto abb958d, game file = bc43691; all checks pass) to the Rec Dec Preview https://claude.ai/artifact/9oG8Dq5kqFp1DUasKHZ62n version 4; user notified. Lightdisc engineer stopped (handover plans/handover-lightdisc.md). Events v4 asked of D2.
 - ~00:05 events plan v4 published by D2 (claude/p5-design 563dc35, artifact 5fAouaAV1K1qptqPYez9rt v4); user notified. Rec sign 'wrong side of the lift' fix (0.82.8) asked of the rec deck owner.
+- ~00:07 rec deck 0.82.8 (claude/lightdisc-proto 0ef4c46, sign on the lift's stern side) published to the Rec Dec Preview v5 without waiting for checks (the user's call); checks still running with the rec deck owner.
