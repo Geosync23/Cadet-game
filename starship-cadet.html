@@ -281,7 +281,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.63.3
+   STARSHIP CADET: CSV Wren                           build 0.53.4
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -4598,6 +4598,7 @@ DECKS[5] = {
     place('w', 'shelving', 10.66, 2.62, 'e', { it: IT('Parts racks', 'The bits you need ten times a day: fuses, seals, bulbs and filters. The tea corner hides behind them.') });
     place('w', 'crate', .55, 5.55, 's'); place('w', 'crate', 1.35, 5.6, 's', { turn: .2 });
     place('w', 'stool', 1.6, 3.7, 'w');
+    place('w', 'workbench', .42, 4.3, 'w', { w: 1.2, it: IT('Your bench', 'A short bench under the bay window, with a view of the shuttle pad. An officer\'s, so it\'s yours.') });   // 0.53.4: 5-bench-you (M11)
     placeWall('w', 'nameBeam', 'n', BEAM.along, { it: IT('The beam', 'The cross beam over the Works bay, painted with the name of everyone who has served in Works, in whatever paint was to hand. The oldest ones have been touched up so often they stand out from the steel.') });   // 0.38.30: Name on the beam (BEAM)
     placeWall('w', 'notices', 'n', 7.65, { hitW: 1.0, it: IT('Notice board', 'Shift swaps, a lost-and-found glove, and a sign-up sheet for the Works quiz night. Chef Brennan is listed as \'judge, by force\'.') });
     // the Chief's office, seen through glass
@@ -4633,6 +4634,7 @@ DECKS[5] = {
     place('f', 'weldBench', 6.45, 3.3, 'e', { it: IT('Welding bench', 'Mask, gas and a bracket that needs one more seam. The screen keeps the glare off everyone else.') });
     place('f', 'workbench', 3.3, 3.5, 'n', { w: 1.6, it: IT('Workbench', 'Drawings for a pump housing, weighed down with a coffee mug.') });
     place('f', 'shelving', 1.2, 5.55, 's', { it: IT('Bar stock', 'Rods, plate and tube for the lathe and the fabricator.') });
+    wallFixed('f', 'notices', 'n', 1.0, { hitW: 1.0, it: IT('Order board', 'Little orders from the crew: a hook, a bracket, a stand for something. Pinned up on Mondays.') });   // 0.53.4: 5-shop-board (M10)
 
     // shuttle bay: the Tern on its pad, nose to the bay doors; floodlights along the hull; crates waiting for the cargo hold
     place('S', 'shuttle', 4.0, 7.5, 'e', { noBlock: true, block: DECKS[5].tern.block.map(([i, j]) => [i - 1, j]), roof: ternRoof, ramp: ternHinge });   // 0.38.18: the walk-in Tern (tiles x 2-7, rows 6-8)
@@ -7312,6 +7314,53 @@ DECKS[5].places.push(
 }
 DECKS[4].places.push({ id: '4-23-keepsake', type: 'event', at: [40, 10], xy: [40.1, 10.8], face: -139, pose: 'stand', room: 'W' });
 DECKS[4].homeKeepsakes = { '4-23': { room: 'W', bed: '4-23', place: '4-23-keepsake', slots: [39.14, 39.28, 39.43, 39.57, 39.72, 39.86].map(x => [x, 2.17, 10.2]), trophy: [39.79, 2.17, 10.13] } };
+// 0.53.4 (Pillar 5 Step 4, seat E3: the places turn): the places the Step 4 pages ask for, so the side jobs can rely on them.
+// All type `event` with `event: 'side'` (or 'leak'): inert, nobody's day plan uses them; `works: true` on the ones behind a service hatch (you and Works crew).
+// M10 workshop: `5-shop-board` (the order board, machine shop north wall), `5-shop-lathe`, `5-shop-fab`. M11 tool upkeep:
+// `5-bench-you` (your bench under the Works bay window), `5-tool-rack` (the team's shared tools: the tool wall). M12 logbook:
+// `5-works-terminal` (by the Works bay notice board). The stocktake (step4-stages) uses Step 2's `5-stock-1..4` (one per
+// storage aisle, in DECKS[5].shelves' order): nothing new.
+// M13 leak hunting: `n-leak-1..4` on Decks 3-5 (`event: 'leak'`; DECKS[n].leakJoints lists them in the same order): at
+// plumbing in public rooms and corridors (stage 1), except Deck 5's last two, `gallery: true`, behind the Tier 2 hatches in the
+// pipe galleries by the two valves (stage 2). Each: `joint` the dripping joint on the wall in front of you ([x, y, z], tiles for
+// x and z, metres for y), `wall` its wall, `damp: [x, z, wall]` where the damp patch goes on that wall, `puddle: [x, z]` a floor
+// spot 2-3 tiles off in the same room where the drip runs to.
+// M14 irrigation: `3-rack-1..3` in front of the garden's three north grow racks, west first (DECKS[3].growRacks; `rack` is the
+// rack's front centre). Off shift: cabin 4-23's four spots `4-23-rug`, `-desk`, `-shelf` (beside the keepsakes), `-ledge` (a
+// small wall ledge towards the door, for a plant: there's no window) in DECKS[4].cabinSpots['4-23'] ({ place, at: [x, y, z]
+// where a thing would sit }); `2-telescope` at the observatory's brass telescope.
+{
+  const ev = (id, room, c, r, face, o = {}) => ({ id, type: 'event', event: 'side', at: [c, r], face, pose: 'stand', room, ...o });
+  const wallAt = (c, r, face, y = .45) => ({ n: [c + .5, y, r + .08], s: [c + .5, y, r + .92], w: [c + .08, y, r + .5], e: [c + .92, y, r + .5] })[face];
+  const leaks = (n, list) => list.forEach(([room, c, r, face, [pc, pr], gallery], k) => {
+    const id = `${n}-leak-${k + 1}`, j = wallAt(c, r, face);
+    DECKS[n].places.push(ev(id, room, c, r, face, { event: 'leak', anim: 'work', ...(gallery ? { works: true, gallery: true } : {}) }));
+    (DECKS[n].leakJoints = DECKS[n].leakJoints || []).push({ place: id, room, wall: face, joint: j, damp: [j[0], j[2], face], puddle: [pc + .5, pr + .5], ...(gallery ? { gallery: true } : {}) });
+  });
+  DECKS[5].places.push(
+    ev('5-shop-board', 'f', 22, 9, 'n', { xy: [22.0, 9.5] }),
+    ev('5-shop-lathe', 'f', 22, 12, 'w', { anim: 'work' }),
+    ev('5-shop-fab', 'f', 25, 9, 'e', { anim: 'work' }),
+    ev('5-bench-you', 'w', 11, 4, 'w', { anim: 'work', xy: [11.25, 4.3] }),
+    ev('5-tool-rack', 'w', 18, 1, 'n'),
+    ev('5-works-terminal', 'w', 17, 1, 'n', { xy: [17.65, 1.5] }),
+  );
+  leaks(3, [['w', 17, 19, 'w', [19, 18]], ['K', 36, 6, 'w', [38, 7]], ['G', 2, 12, 'w', [4, 12]], ['=', 13, 9, 'n', [14, 11]]]);   // washrooms, galley, garden, promenade
+  leaks(4, [['p', 5, 1, 'e', [3, 1]], ['q', 2, 18, 's', [4, 18]], ['l', 12, 16, 'n', [13, 18]], ['=', 8, 4, 'n', [10, 5]]]);       // the two washrooms, laundry, junior corridor
+  leaks(5, [['q', 21, 4, 'w', [23, 4]], ['=', 27, 8, 's', [25, 7]], ['g', 27, 0, 'n', [30, 0], true], ['h', 30, 15, 's', [32, 15], true]]);   // Works washroom, main corridor; the galleries
+  DECKS[3].growRacks = [4.4, 6.4, 8.4].map((x, k) => {
+    DECKS[3].places.push(ev('3-rack-' + (k + 1), 'G', Math.floor(x), 1, 'n', { anim: 'work', xy: [x, 1.1] })); return { place: '3-rack-' + (k + 1), rack: [x, .78] };
+  });
+  DECKS[4].places.push(
+    ev('4-23-rug', 'W', 40, 12, 'n', { xy: [40.5, 12.6] }),
+    ev('4-23-desk', 'W', 41, 11, 'n', { xy: [41.0, 11.45] }),
+    ev('4-23-shelf', 'W', 40, 10, -139, { xy: [40.1, 10.8] }),
+    ev('4-23-ledge', 'W', 39, 12, 'w', { xy: [39.6, 12.45] }),
+  );
+  DECKS[4].cabinSpots = { '4-23': { rug: { place: '4-23-rug', at: [40.5, .01, 12.0] }, desk: { place: '4-23-desk', at: [41.15, .76, 10.45] },
+    shelf: { place: '4-23-shelf', at: [40.2, 2.17, 10.2] }, ledge: { place: '4-23-ledge', at: [39.12, 1.15, 12.45] } } };
+  DECKS[2].places.push(ev('2-telescope', 'J', 43, 5, 'n', { xy: [43.2, 5.25] }));
+}
 DECKS[5].mugRack = { room: 't', yours: [21.8, 1.44, 2.83] };
 const CALM_TYPES = ['lounge-seat', 'common-room', 'garden', 'bench', 'mess-seat', 'music'];
 const placeCalm = p => !!p && (p.calm !== undefined ? !!p.calm : CALM_TYPES.includes(p.type) && p.pose === 'sit' && !p.machine);
@@ -8694,7 +8743,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.63.3';                           // keep in step with the header's build line
+const GAME_BUILD = '0.53.4';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
