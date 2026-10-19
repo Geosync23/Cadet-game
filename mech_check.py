@@ -558,6 +558,8 @@ PARTS['m9'] = part_m9
 SIDE = r"""(() => {
   const out = {}; SHIP.works = null; SHIP.notes = []; SHIP.jobs = []; setShipNow(11 * 1440 + 540); const W = worksInit();
   toolGive('scanner'); toolGive('pipekit');
+  for (let i = 0; i < 20; i++) toolWear('scanner', 4); out.early = [toolCharge('scanner'), toolSlow('scanner')];   // before M11 opens: no wear (R4)
+  (W.op[12] = W.op[12] || []).push('m11');   // M11 open (Day 12)
   out.fresh = [toolState('scanner'), toolCharge('scanner'), toolSlow('scanner'), toolStateWord('scanner')];
   for (let i = 0; i < 11; i++) toolWear('scanner', 4);
   out.low = [toolState('scanner'), toolCharge('scanner'), toolSlow('scanner')];
@@ -593,6 +595,7 @@ def part_side(g):
     b = g.ev(SIDE)
     print('  side tools:', a['fresh'], a['low'], a['due'], 'none:', a['none'], 'uses:', a['uses'], 'look:', a['look'])
     print('  side rep:', a['xp'], a['gain'], a['xp2'], a['notes'], '| save:', a['kept'], a['old'], a['junk'], '| bunk:', a['bunk'])
+    check(a['early'] == [100, 1], f"side: no wear before M11 tool upkeep is open ({a['early']})")
     check(a['fresh'][:3] == ['charged', 100, 1] and a['fresh'][3] == 'Charged', f"side: a new tool is charged ({a['fresh']})")
     check(a['low'] == ['low', 56, 1], f"side: eleven scans: getting low, not slower ({a['low']})")
     check(a['due'][:4] == ['due', 28, 1.25, 1.25] and a['due'][4] == 'Due', f"side: eighteen scans: due, a quarter slower ({a['due']})")
