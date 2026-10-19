@@ -205,3 +205,5 @@ All 8 packages approved (Zeke: "all good except he still walks and talks" → he
 | | Rec opening | When switched on: open from Day 1 (06:00-midnight) |
 | ~00:30 (the user) | Session depth | Loosened: lead 15 (depth 5) may start helper seats at depth 6 (helpers never start sessions); the user starts a fresh level-0 chain (lead 16) before Step 3 |
 | ~02:05 (the user) | Big moves | OK on the 0.63.2r merge to main; from now on inform the user and give them a chance for input before big moves (CLAUDE.md) |
+| ~02:20 (the user, to lead 16) | Step 3 | GO (lead 16 sent each seat "GO") |
+| | Order of work | Step 3 → Step 4 → rec deck activation; activation adds rec-deck-specific traditions (~a dozen, e.g. a Sunday Lightdisc tournament), built in that phase. Plan now in parallel with Step 3: D2 writes plans/rec-traditions-plan.html (plan only) for the user to approve |
