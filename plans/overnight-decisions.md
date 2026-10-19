@@ -240,3 +240,4 @@ The user went to bed ~03:40: **overnight mode ON** until they check in in the mo
 | ~05:15 | Energy balance numbers | Lead's tuning: a normal 16 h day ends near 20-25% energy; the alarm shows the energy you will wake with; a warning if the alarm is after your shift | "Burns faster" without a number; easy to tune in the morning |
 | ~05:15 | Crew wake time | About 30 minutes earlier, staggered and seeded | "Wake earlier" without a number |
 | ~05:20 (the user) | Crew mornings | Wake earlier and varied (lead: day shift ~05:30-07:15, seeded per person); not all go straight to breakfast (wash, dress, exercise, coffee first); everyone eats and is at work by 09:00. Sent to X |
+| ~05:18 | Publish 0.63.3 | Published to its own new link https://claude.ai/artifact/BKRhQBKyqhCEz91MqqvuDG (page title "Starship Cadet Step 3"); main + main game link untouched | Your goal for tonight; every check green |
