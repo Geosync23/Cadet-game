@@ -406,7 +406,7 @@ with sync_playwright() as pw:
             # a tap outside: (160, 620) unless the panel reaches it (a longer Tracked list with the rec traditions on, lead 19), else
             # the first point near it that lands on the scene itself, clear of the panel
             ox, oy = g.ev("""(() => { const r = document.getElementById('trkPanel').getBoundingClientRect(), H = innerHeight;
-              const c = [[160, 620], [160, r.top - 30], [160, r.bottom + 30], [20, r.top - 30], [160, 200]].filter(([x, y]) => y > 0 && y < H);
+              const c = [[160, 620], [160, r.top - 30], [160, r.bottom + 30], [20, r.top - 30], [160, 200], [r.left / 2, H / 2], [(r.right + innerWidth) / 2, H / 2], [160, (r.bottom + H) / 2]].filter(([x, y]) => y > 0 && y < H);   // the last three: the margins round a panel that fills the screen
               const ok = ([x, y]) => { const e = document.elementFromPoint(x, y); return e && e.tagName === 'CANVAS' && !(x >= r.left && x <= r.right && y >= r.top && y <= r.bottom); };
               return c.find(ok) || [160, 620]; })()""")
             g.page.mouse.click(ox, oy); g.step(2)
