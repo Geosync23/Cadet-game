@@ -281,7 +281,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.63.3
+   STARSHIP CADET: CSV Wren                           build 0.45.7
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8694,7 +8694,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.63.3';                           // keep in step with the header's build line
+const GAME_BUILD = '0.45.7';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -11858,8 +11858,15 @@ const NEED_SAY = {
 };
 function needsLine() {
   const n = SHIP.player.needs, k = NEED_KEYS.slice().sort((a, b) => n[a] - n[b])[0];
-  return n[k] < SLOW_BELOW ? NEED_SAY[k][0] : n[k] < 50 ? NEED_SAY[k][1] : 'You feel fine.';
+  return bedText(n[k] < SLOW_BELOW ? NEED_SAY[k][0] : n[k] < 50 ? NEED_SAY[k][1] : 'You feel fine.');
 }
+// your bed's room by name for the texts that say "Bunk 1" (0.45.7, Step 4's loose end): after the move to your cabin
+// (SHIP.works.home, which playerBed() follows) they name its room instead
+function myBedRoom() {
+  const id = typeof playerBed === 'function' ? playerBed() : null, pl = id && (DECKS[4].places || []).find(q => q.id === id), r = pl && DECKS[4].rooms[pl.room];
+  return r && r.name ? r.name.replace(/^(Spare|Guest) cabin /, 'Cabin ') : 'Bunk 1';   // 'Cabin 4-23', as the move's Mail says
+}
+const bedText = s => typeof s === 'string' && s.includes('Bunk 1') ? s.replace(/Bunk 1/g, myBedRoom()) : s;
 // quiet moments (0.28.41): what's on screen. popupBusy: a panel, a card, a dialogue, sleep, the lift or a fade is up,
 // so nothing new should pop up (the panels are looked at four times a second, the rest every frame). POP.toast / POP.card:
 // when an ordinary toast / a tip card or dialogue was last on screen, or a heads-up came up (performance.now(), so virtual in tests).
@@ -11916,7 +11923,7 @@ function needWarnTick(now) {
   }
   if (!pick || POP.busy || DEV.open || Math.max(POP.toast, POP.card, POP.warn) > now - WARN_GAP) return null;
   const w = NEED_WARN[pick][lvl - 1]; WARN_SAID[pick] = lvl; POP.warn = POP.toast = now;
-  if (lvl === 1) needPop(pick); else toast(w[0], w[1] + (needGoal(pick) ? ' Follow the marker.' : ''));  // the first one: a pop-up in plain words (0.28.62); the firm one stays a toast, with the way (playtest 1)
+  if (lvl === 1) needPop(pick); else toast(w[0], bedText(w[1]) + (needGoal(pick) ? ' Follow the marker.' : ''));  // the first one: a pop-up in plain words (0.28.62); the firm one stays a toast, with the way (playtest 1)
   return pick;
 }
 // the low-need pop-up (0.28.62, the user's "in plain words: 'You need to pee'"): one line beside the need's icon on the
@@ -11927,7 +11934,7 @@ const NEED_LOW_SAY = { bathroom: 'You need to pee.', hunger: 'You\'re hungry.', 
 const NEED_POP = { el: null, t: 0 };
 function needPop(k) {
   let txt = null; try { txt = careerText('need.low.' + k); } catch (e) { txt = null; }
-  txt = txt || NEED_LOW_SAY[k] || NEED_WARN[k][0][1];
+  txt = bedText(txt || NEED_LOW_SAY[k] || NEED_WARN[k][0][1]);
   let el = NEED_POP.el;
   if (!el) {
     el = NEED_POP.el = document.createElement('div'); el.id = 'needPop'; el.setAttribute('role', 'status'); el.setAttribute('aria-live', 'polite');
@@ -12026,7 +12033,7 @@ function teachTick(now) {
     trad: teachTry(() => typeof eventsOn === 'function' && eventsOn(d).some(e => min >= e.from - 60 && min < e.to)) };
   for (const [id, test, text, o] of TEACH) {
     if (D.tipsSeen[id] || !paced && !(o && o.sure) || id.startsWith('t:a-') !== !!DEV.open || !teachTry(() => test(c))) continue;
-    if (tipShow(id, text)) { POP.tip = POP.card = now; return id; }
+    if (tipShow(id, bedText(text))) { POP.tip = POP.card = now; return id; }
   }
   return null;
 }
@@ -13539,7 +13546,7 @@ function jobBegin(A) {
     return true;
   }
   if (!w.seen) {
-    w.seen = true; A.def = { mins: INSPECT_MINS, pose: 'work', title: 'Inspecting' };
+    w.seen = true; A.def = { mins: INSPECT_MINS * (j.cause && typeof scanHave === 'function' && scanHave() && typeof toolSlow === 'function' ? toolSlow('scanner') : 1), pose: 'work', title: 'Inspecting' };   // a due scanner: a quarter longer (M11)
     A.o.after = fitted + 'You open the panel on the ' + name + ' and look it over.'; A.o.need = need;
     return true;
   }
@@ -13608,7 +13615,7 @@ function workStep(j, st, k, spot) {
     const at = wsUntil(w, o); if (shipNow() < at) { toast(title, 'Not ready yet: ready at ' + hhmm(at) + '.'); return true; }
     wsFinish(j, k, {}, title); return true;
   }
-  const secs = Number.isFinite(o.secs) && o.secs > 0 ? o.secs : 4, mins = how === 'look' ? secs * SHIP_RATE : 1;
+  const secs = (Number.isFinite(o.secs) && o.secs > 0 ? o.secs : 4) * (o.tool && typeof toolSlow === 'function' ? toolSlow(o.tool) : 1), mins = how === 'look' ? secs * SHIP_RATE : 1;   // o.tool: a due tool, a quarter longer (M11)
   actStart('workStep', null, { title, job: j.id, ws: k, how, pose: how === 'look' ? WS_POSE('look', 'stand') : how === 'turn' ? WS_POSE('tune', 'work') : 'work',
     spot: spot ? { ...spot, id: null, pose: 'stand' } : null, after: o.text || (how === 'look' ? 'You stand and look it over.' : '') });
   if (ACT && ACT.kind === 'workStep') {
@@ -39378,15 +39385,15 @@ const CAREER_LADDER = [
 const WORK_MECH = {};                                    // the sub-blocks: WORK_MECH[ladder id] = { open?(row, day), offer?(row, cur, day, t) -> bool (its own ask), at?(day) -> earliest meeting minute, reserve?(day, at, slot, o) -> job id, noJob?, watch? (minutes), hold? }
 const WORK_TOOLS = {
   clipboard: { name: 'the round clipboard', mech: 'm1', wearPerUse: .01 },
-  scanner: { name: 'the scanner', mech: 'm7', wearPerUse: .02 },
-  pipekit: { name: 'the pipe kit', mech: 'm9', wearPerUse: .02 },   // with tracing (M3's m9, Day 12; was m13, leak hunting, Step 4)
-  logger: { name: 'the data logger', mech: 'p5', wearPerUse: .02 },
+  scanner: { name: 'the scanner', mech: 'm7', wearPerUse: 0 },     // these three wear at the use (toolWear: a scan 4, a trace 5,
+  pipekit: { name: 'the pipe kit', mech: 'm9', wearPerUse: 0 },     // a use 3 of 100; M11, 0.45.7), not again on worksUse (with tracing, M3's m9, Day 12)
+  logger: { name: 'the data logger', mech: 'p5', wearPerUse: 0 },
   tester: { name: 'the circuit tester', mech: 'm15', wearPerUse: .02 },
   calrig: { name: 'the test rig', mech: 'm10', wearPerUse: 0, bench: true },   // a bench in the machine shop, not carried
 };
 // your Works reputation in your rank: five words; numbers stay inside. Tier 1 is tuned by career_check (a steady
 // player reaches "Relied on" by the end of Day 8, a very busy one not before Day 5); later tiers get theirs on their steps' pages
-const WORK_BANDS = { 1: [[0, 'new'], [8, 'steady'], [18, 'reliable'], [30, 'trusted'], [40, 'relied']], 2: [[0, 'new'], [12, 'steady'], [28, 'reliable'], [45, 'trusted'], [60, 'relied']] };   // 2: provisional (0.44.19, C2: about a dozen steady workdays to "Relied on" as an officer) until Step 4's page sets it   // the page's; with section 17's real faults in (0.44.10): steady 45-48 by the end of Day 8, a very busy player 35 at the end of Day 4
+const WORK_BANDS = { 1: [[0, 'new'], [8, 'steady'], [18, 'reliable'], [30, 'trusted'], [40, 'relied']], 2: [[0, 'new'], [12, 'steady'], [28, 'reliable'], [45, 'trusted'], [60, 'relied']] };   // 2: C2's 0.44.19 numbers, kept by Step 4's page (0.45.7): about a dozen steady workdays to "Relied on" as an officer; side jobs add +2 a day at most (worksSideXp)   // the page's; with section 17's real faults in (0.44.10): steady 45-48 by the end of Day 8, a very busy player 35 at the end of Day 4
 const BAND_WORD = { new: 'New', steady: 'Steady', reliable: 'Reliable', trusted: 'Trusted', relied: 'Relied on' };
 const WORK_XP = { service: 1, repair: 2, overhaul: 3, missed: -3, abandoned: -2 };
 const WORKS_RIGHT_FROM = 5;                              // "right first time" counts from Day 5 (the scanner)
@@ -39431,7 +39438,8 @@ function worksClean(s) {
       tr: days(s.tr), use: (() => { const u = {}; if (obj(s.use)) for (const k in s.use) if (ids.has(k) && Number.isInteger(s.use[k])) u[k] = Math.max(0, Math.min(9999, s.use[k])); return u; })(),
       op, tools, sk, log, test, home: typeof s.home === 'string' ? s.home.slice(0, 16) : 'bunk',
       done: Array.isArray(s.done) ? s.done.filter(x => typeof x === 'string').slice(0, 40) : [], said: days(s.said),   // said: { ladder id: day } (24k's P2: Tomas's word; 0.44.22)
-      ms: Array.isArray(s.ms) ? s.ms.filter(e => Array.isArray(e) && typeof e[0] === 'string' && Number.isInteger(e[1])).slice(0, 40).map(e => [e[0].slice(0, 40), e[1]]) : [], cur };
+      ms: Array.isArray(s.ms) ? s.ms.filter(e => Array.isArray(e) && typeof e[0] === 'string' && Number.isInteger(e[1])).slice(0, 40).map(e => [e[0].slice(0, 40), e[1]]) : [], cur,
+      ...(obj(s.side) && JSON.stringify(s.side).length < 65536 ? { side: s.side } : {}) };   // side: Step 4's side jobs, kept whole (each sub-block reads its own key defensively; E1 0.45.7)
   } catch (e) { return null; }
 }
 SAVE_EXTRA.push(s => { if (SHIP.works) s.ship.works = SHIP.works; });
@@ -39650,7 +39658,43 @@ function worksSay(id, text) {                            // the teacher says it 
 // ---- tools: they come with their training, live on the device's Tools page and in your locker; never in your hands ----
 const hasTool = id => !!(SHIP.works && SHIP.works.tools[id]);
 function toolGive(id, t = shipNow()) { const W = worksInit(t); if (!W || !WORK_TOOLS[id] || W.tools[id]) return false; W.tools[id] = [worksDay(t), 0]; simNote('tool', { id }); return true; }
-const toolWear = id => hasTool(id) ? SHIP.works.tools[id][1] : 0;   // 0-1: kept, no effect until M11 tool upkeep
+// ---- tool wear (M11 tool upkeep's core, Step 4; built by E1 on C's behalf, 0.45.7). Wear stays 0-1 used (0 like new, so
+// old saves load as they were); the page's numbers are charge = 100 - 100 x wear: the scanner 4 a scan, the pipe kit 5 a
+// trace, the logger 3 a use; "Due" under 30, "Getting low" under 60. toolWear(id, n) wears it by n of 100 (none: just reads)
+// and returns the wear; toolState(id) 'charged' | 'low' | 'due' (null: not yours); toolSlow(id) 1.25 for a due tool (a step
+// takes a quarter longer, never blocked) and says so once a ship day. Upkeep at your bench (24m) puts the wear back to 0 ----
+function toolWear(id, n) {
+  if (!hasTool(id)) return 0; const v = SHIP.works.tools[id];
+  if (n > 0) v[1] = Math.min(1, v[1] + n / 100);
+  return v[1];
+}
+const TOOL_DUE = 30, TOOL_LOW = 60;
+const toolCharge = id => hasTool(id) ? Math.round(100 - 100 * SHIP.works.tools[id][1]) : null;
+const toolState = id => { const c = toolCharge(id); return c === null ? null : c < TOOL_DUE ? 'due' : c < TOOL_LOW ? 'low' : 'charged'; };
+const toolStateWord = id => { const s = toolState(id); return s ? worksText('works.toolstate.' + s, { charged: 'Charged', low: 'Getting low', due: 'Due' }[s]) : ''; };
+const TOOL_SLOW_SAY = { scanner: 'Your scanner\'s charge is low.', pipekit: 'Your pipe kit\'s seals are grubby.', logger: 'Your data logger\'s clip is worn.' };
+function toolSlow(id) {
+  if (toolState(id) !== 'due') return 1;
+  const S = worksSide(), d = worksDay(shipNow()), said = S && (S.slow && typeof S.slow === 'object' ? S.slow : (S.slow = {}));
+  if (said && said[id] !== d && !SIM_AT) {
+    said[id] = d;
+    toast(toolName(id).replace(/^the /, '').replace(/^./, x => x.toUpperCase()), worksText('works.toolslow.' + id, TOOL_SLOW_SAY[id] || 'Your ' + toolName(id).replace(/^the /, '') + ' wants looking after.')
+      + ' ' + worksText('works.toolslow.bench', 'It still works, just slower. See to it at your bench in the Works bay.'));
+  }
+  return 1.25;
+}
+// ---- Step 4's side jobs (E1 on C's behalf, 0.45.7): their data lives under SHIP.works.side (worksClean keeps it whole;
+// each sub-block reads its own key defensively, a missing one is its default). worksSideXp(n, why): Works reputation from a
+// side job, +2 a ship day at most across all of them (so they help but never rush a promotion); returns what it gave
+const SIDE_XP_DAY = 2;
+const worksSide = () => { const W = SHIP.works; if (!W) return null; if (!W.side || typeof W.side !== 'object' || Array.isArray(W.side)) W.side = {}; return W.side; };
+function worksSideXp(n, why) {
+  const S = worksSide(); if (!S || !(n > 0)) return 0;
+  const d = worksDay(shipNow()), x = S.xp && S.xp.day === d && Number.isFinite(S.xp.n) ? S.xp : (S.xp = { day: d, n: 0 }), give = Math.min(n, SIDE_XP_DAY - x.n);
+  if (give <= 0) return 0;
+  x.n += give; worksXp(give); simNote('sideXp', { why: String(why || '').slice(0, 24), n: give });
+  return give;
+}
 const toolWord = w => w < .25 ? worksText('works.toolwear.new', 'like new') : w < .5 ? worksText('works.toolwear.good', 'in good order') : w < .75 ? worksText('works.toolwear.worn', 'well used') : worksText('works.toolwear.tired', 'wants looking after');
 const toolName = id => worksText('works.tool.' + id, WORK_TOOLS[id] ? WORK_TOOLS[id].name : id);
 function worksLockerText() {                             // section 15b's locker tap, one line (or null)
@@ -39769,7 +39813,7 @@ worksTabAdd({ id: 'log', title: worksText('works.tab.log', 'Work log'), order: 2
 worksTabAdd({ id: 'tools', title: worksText('works.tab.tools', 'Tools'), order: 30, view() {
   const W = SHIP.works, ts = W ? Object.keys(W.tools) : [];
   if (!ts.length) return [{ kind: 'text', text: worksText('works.tools.none', 'No tools of your own yet. They come with the work that needs them.') }];
-  return [{ kind: 'list', rows: ts.map(k => ({ text: toolName(k).replace(/^the /, '').replace(/^./, x => x.toUpperCase()), sub: (WORK_TOOLS[k].bench ? 'In the machine shop' : 'In your locker') + ' · ' + toolWord(W.tools[k][1]) + ' · since Day ' + W.tools[k][0] })) }];
+  return [{ kind: 'list', rows: ts.map(k => ({ text: toolName(k).replace(/^the /, '').replace(/^./, x => x.toUpperCase()), sub: (WORK_TOOLS[k].bench ? 'In the machine shop' : 'In your locker') + ' · ' + (TOOL_SLOW_SAY[k] ? toolStateWord(k) : toolWord(W.tools[k][1])) + ' · since Day ' + W.tools[k][0] })) }];
 } });
 function worksView() {
   const T = WORKS_TABS || [], tab = T.find(x => x.id === WORKS_TAB) || T[0], B = [{ kind: 'buttons', items: T.map(x => { const n = worksBadge(x); return { label: x.title + (n ? ' (' + n + ')' : ''), on: x === tab, action: { app: 'works', do: 'tab', arg: x.id } }; }) }];
@@ -40220,7 +40264,7 @@ function scanRead(jobId) {
   if (tr) sus.sus.filter(x => x !== sus.cause).forEach((x, i) => { tr[caseSus(sus, x).part] = [44, 49, 52][i] || 50; });   // first puzzle doesn't teach "pick the lowest bar"
   const val = (p, u) => tr && p in tr ? tr[p] : sp ? (sp.has(p) ? 40 + Math.round(u * 20) : 70 + Math.round(u * 26)) : p === f.part ? 12 + Math.round(u * 23) : p === worn ? 40 + Math.round(u * 20) : 70 + Math.round(u * 26);
   j.scan = parts.slice(0, 5).map((p, i) => [p, val(p, schedU(seed ^ Math.imul(i + 1, 40503), d, 875))]);
-  if (typeof toolWear === 'function' && SHIP.works && SHIP.works.tools && SHIP.works.tools.scanner) SHIP.works.tools.scanner[1] = Math.min(1, SHIP.works.tools.scanner[1] + .01);
+  if (typeof toolWear === 'function') toolWear('scanner', 4);   // M11: 4 of 100 a scan (E1, 0.45.7; in the hook register)
   MACH_REV++;
   return j.scan;
 }
@@ -40366,7 +40410,7 @@ function traceTap(it, at) {
   if (!spot || typeof workStep !== 'function') return false;
   if (TRACE_UI.at !== id) SHIP.player.wsteps = SHIP.player.wsteps.filter(w => !(w.job === j.id && w.k === TRACE_READ_K));   // a fresh look at a new machine
   TRACE_UI.at = id;
-  const st = { step: 'read', places: [pid], deck: m[0].deck, how: 'look', opts: { secs: TRACE_SECS, title: worksText('trace.kit', 'Pipe kit'), text: worksText('trace.clip', 'You clip the pipe kit on and read the flow.') } };
+  const st = { step: 'read', places: [pid], deck: m[0].deck, how: 'look', opts: { secs: TRACE_SECS, tool: 'pipekit', title: worksText('trace.kit', 'Pipe kit'), text: worksText('trace.clip', 'You clip the pipe kit on and read the flow.') } };
   if (!workStep(j, st, TRACE_READ_K, spot)) return false;
   if (ACT && ACT.kind === 'workStep') ACT.o.read = id;
   return true;
@@ -40379,7 +40423,7 @@ function traceRead(j, id) {
   const words = worksText('trace.before', 'Before: {word}', { word: traceWord(r.before) }) + ' · ' + worksText('trace.after', 'After: {word}', { word: traceWord(r.after) }) + '.';
   if (j.traceFound) {
     simNote('traceFound', { line: s.line, machine: j.machine, id: j.id });
-    worksUse('m9');
+    worksUse('m9'); if (typeof toolWear === 'function') toolWear('pipekit', 5);   // M11: 5 of 100 a trace (E1, 0.45.7)
     toast(name, words + ' ' + worksText('trace.found', 'Fine before {machine}, low after: that\'s where it starts.', { machine: traceName(j.machine) }));
     traceSay(j, 'found', 'There\'s your problem.');
   } else {

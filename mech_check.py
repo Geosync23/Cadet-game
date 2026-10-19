@@ -514,6 +514,61 @@ def part_m9(g):
     check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'm9: differs the second time')
 PARTS['m9'] = part_m9
 
+# Step 4's core (seat E1, 0.45.7, on C's behalf): tool wear in the page's numbers (charge 100 - wear: the scanner 4 a
+# scan; "Getting low" under 60, "Due" under 30), a due tool a quarter slower with its toast once a day, never blocking;
+# worksUse no longer wears the three again; the side-job cap (+2 Works reputation a ship day in all); SHIP.works.side kept
+# by the save's tidy (worksClean), an old save without it and a junk one; section 15's Bunk 1 texts name your cabin's room
+# after the move (playerBed() follows SHIP.works.home). The same twice. Run alone: mech_check.py BUILD side
+SIDE = r"""(() => {
+  const out = {}; SHIP.works = null; SHIP.notes = []; SHIP.jobs = []; setShipNow(11 * 1440 + 540); const W = worksInit();
+  toolGive('scanner'); toolGive('pipekit');
+  out.fresh = [toolState('scanner'), toolCharge('scanner'), toolSlow('scanner'), toolStateWord('scanner')];
+  for (let i = 0; i < 11; i++) toolWear('scanner', 4);
+  out.low = [toolState('scanner'), toolCharge('scanner'), toolSlow('scanner')];
+  for (let i = 0; i < 7; i++) toolWear('scanner', 4);
+  out.due = [toolState('scanner'), toolCharge('scanner'), toolSlow('scanner'), toolSlow('scanner'), toolStateWord('scanner')];
+  out.said = W.side && W.side.slow && W.side.slow.scanner;
+  out.none = [toolState('logger'), toolSlow('logger'), toolWear('logger', 3)];
+  worksUse('m9'); worksUse('m7'); out.uses = [toolCharge('pipekit'), toolCharge('scanner')];
+  // a look step with a due tool: a quarter longer, and still a step (never blocked)
+  const look = tool => { SHIP.player.wsteps = []; ACT = null; const j = { id: 'probe@s4', title: 'Probe' };
+    const st = { step: 'read', places: [], how: 'look', opts: { secs: 4, ...(tool ? { tool } : {}) } };
+    const took = workStep(j, st, 63, null); const m = ACT && ACT.def ? ACT.def.mins : null; ACT = null; SHIP.player.wsteps = []; return [took, m]; };
+  for (let i = 0; i < 18; i++) toolWear('pipekit', 5);
+  const a = look(null), b = look('pipekit'); out.look = [a[0], b[0], a[1] && b[1] ? Math.round(b[1] / a[1] * 100) / 100 : null];
+  // the cap
+  const x0 = W.xp; out.xp = [worksSideXp(1, 'a'), worksSideXp(3, 'b'), worksSideXp(1, 'c'), worksSideXp(-1, 'd')]; out.gain = W.xp - x0;
+  setShipNow(12 * 1440 + 540); out.xp2 = worksSideXp(3, 'e'); out.notes = SHIP.notes.filter(n => n.kind === 'sideXp').map(n => n.why + n.n);
+  // the save's tidy
+  const c = worksClean(JSON.parse(JSON.stringify(W))); out.kept = !!c && JSON.stringify(c.side) === JSON.stringify(W.side) && JSON.stringify(c.tools) === JSON.stringify(W.tools);
+  const old = JSON.parse(JSON.stringify(W)); delete old.side; const c2 = worksClean(old); out.old = !!c2 && !('side' in c2) && JSON.stringify(worksSide()) === JSON.stringify(W.side);
+  const junk = JSON.parse(JSON.stringify(W)); junk.side = [1, 2]; out.junk = (worksClean(junk) || {}).side === undefined;
+  // Bunk 1's texts
+  const P = SHIP.player, e0 = P.needs.energy; P.needs.energy = 5;
+  out.bunk = [bedText('Your bunk\'s in Bunk 1 on Deck 4.'), needsLine().includes('Bunk 1')];
+  W.home = '4-23'; out.bunk.push(playerBed(), bedText('Your bunk\'s in Bunk 1 on Deck 4.'), needsLine().includes('Bunk 1'), needsLine().includes(myBedRoom()));
+  P.needs.energy = e0; SHIP.works = null;
+  return out;
+})()"""
+def part_side(g):
+    a = g.ev(SIDE)
+    b = g.ev(SIDE)
+    print('  side tools:', a['fresh'], a['low'], a['due'], 'none:', a['none'], 'uses:', a['uses'], 'look:', a['look'])
+    print('  side rep:', a['xp'], a['gain'], a['xp2'], a['notes'], '| save:', a['kept'], a['old'], a['junk'], '| bunk:', a['bunk'])
+    check(a['fresh'][:3] == ['charged', 100, 1] and a['fresh'][3] == 'Charged', f"side: a new tool is charged ({a['fresh']})")
+    check(a['low'] == ['low', 56, 1], f"side: eleven scans: getting low, not slower ({a['low']})")
+    check(a['due'][:4] == ['due', 28, 1.25, 1.25] and a['due'][4] == 'Due', f"side: eighteen scans: due, a quarter slower ({a['due']})")
+    check(a['said'] == 12, 'side: the toast once on the day (Day 12)')
+    check(a['none'] == [None, 1, 0], 'side: a tool you don\'t have has no state and doesn\'t slow you')
+    check(a['uses'] == [100, 28], f"side: worksUse doesn't wear the scanner or the pipe kit again ({a['uses']})")
+    check(a['look'][0] and a['look'][1] and a['look'][2] == 1.25, f"side: a look step with a due tool takes a quarter longer and still starts ({a['look']})")
+    check(a['xp'] == [1, 1, 0, 0] and a['gain'] == 2 and a['xp2'] == 2, f"side: side jobs give at most +2 a day ({a['xp']}, {a['xp2']})")
+    check(a['notes'] == ['a1', 'b1', 'e2'], f"side: the sideXp notes ({a['notes']})")
+    check(a['kept'] and a['old'] and a['junk'], 'side: SHIP.works.side kept by the save\'s tidy; an old save loads without it; junk dropped')
+    check(a['bunk'][0] == 'Your bunk\'s in Bunk 1 on Deck 4.' and a['bunk'][1] and a['bunk'][2] == '4-23' and a['bunk'][3] == 'Your bunk\'s in Cabin 4-23 on Deck 4.' and not a['bunk'][4] and a['bunk'][5],
+          f"side: the texts name Bunk 1 before the move and your cabin after ({a['bunk']})")
+    check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'side: differs the second time')
+
 only = set(sys.argv[2:])
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
@@ -538,6 +593,8 @@ with sync_playwright() as pw:
         check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), f"{r['id']}: the training differs the second time")
         if r['id'] in PARTS:
             PARTS[r['id']](g)
+    if (not only or 'side' in only) and ev("typeof worksSideXp === 'function'"):
+        print('side (Step 4\'s core: tool wear, the side-job cap, the texts):'); part_side(g)
     ev("SHIP.works = null")
     if g.errors: fail('page errors: ' + ' | '.join(g.errors[:5]))
     g.close()
