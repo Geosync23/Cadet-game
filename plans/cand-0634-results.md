@@ -169,3 +169,7 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - CR2 92d40d5: join OK (left: leave).
 - CR2 DONE on 92d40d5: 14/14 OK (smoke, newgame, events, device, food, clothes, arc, deck, path, tiles, disc, bubble, join, leave); note claude/p5-cand-s4-checks 26be4a3 plans/cand-0634-cr2.md. X2 is out of 0.63.4 (no re-run needed).
 - ~08:24 BM7 at ~65%: HANDOVER to BM8 (session_01YGy9FDmcbkySMJpVPYJaAo). Final candidate c336170; still to run: interactions (U2 also), day 1-8, intro --week, player. See plans/handover-build-master-7.md 'STATE AT HANDOVER'.
+- ~08:25 BM8 (session_01YGy9FDmcbkySMJpVPYJaAo) takes over (lead 18 authorised claude/p5-cand-s4). Placings done while shadowing: t15's 'ixtap-3-lift-1' interactions FAIL = X2's (2bc08d5 + X2 6c26c72 alone fails it, X2's own check files; to X3); the round-guide tip lines = interactions_check's stub (U2 06a5e99). For 0.63.5: X2's mech m12 + tparts FAILs are check-only leaks between mech_check parts (tparts' reset now restores the fresh works before machinesNew; M12 now resets the machine clock like the other parts): 92d40d5 + X2 6c26c72 = MECH CHECK OK, 92d40d5 alone = MECH CHECK OK with the same edits.
+- BM8 c336170 (game = 92d40d5), own CADET_WORK each: interactions OK (06a5e99's check; U2 alone also OK), day1 OK.
+- CR2 c336170: day5, day6, day7, day8 OK, intro --week OK (claude/p5-cand-s4-checks 19cdb99).
+- BM8 c336170: day2, day3, day4 OK, player OK (1997 s, TMO 2700). **0.63.4 ROUND GREEN** on c336170's game (= 92d40d5): every check OK; DEV_NOTES 0.63.4 row finished.
