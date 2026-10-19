@@ -281,7 +281,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.53.8
+   STARSHIP CADET: CSV Wren                           build 0.53.9
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8744,7 +8744,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.53.8';                           // keep in step with the header's build line
+const GAME_BUILD = '0.53.9';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -10256,6 +10256,7 @@ function introLay(p, d, occ, segs) {
 // machinesNow would run an hour's jobs twice. The flag stops jobWhere reaching jobWhere again through whereIs.
 let JOB_WHERE_BUSY = false;
 function whereIs(person, t) {
+  if (typeof liftHeld === 'function' && liftHeld(t) && typeof roofWait === 'function') { const lw = roofWait(person, t); if (lw) return lw; }   // 24s: the car held for the roof job: crew who need another deck wait by the lift
   const es = escortWhere(person, t); if (es) return es;   // section 21's escort goes where you go (section 10 walks them)
   const cv = comeWhere(person, t); if (cv) return cv;       // a visit (crewComeTo): to a place on your deck, then back
   const tw = typeof tradWhere === 'function' ? tradWhere(person, t) : null; if (tw) return tw;   // section 18: a tradition's walk in one line (0.70.0)
@@ -40913,6 +40914,236 @@ if (typeof WORK_TICKS !== 'undefined') WORK_TICKS.push(now => {   // the cabin's
 });
 
 // =====================================================================
+// 24s. THE LIFT ROOF (M17, seat E4, 0.53.x; plans/mechanics/m17-lift-roof.html on claude/p5-design)
+// Thursdays 15:30-16:30 from Day 18, once you're trained: tap the main lift on the top deck (Deck 1) and choose to climb
+// onto the car's roof (a hold of ROOF_CLIMB ship minutes). From then till 16:30 the car is held (section 11's liftHold):
+// nobody can call it, and crew who need another deck wait by the lift on the deck they were on (roofWait, asked by
+// section 14's whereIs) till 16:30, never by the ladder. The car rides slowly down the spine (the shaft, drawn lazily
+// on the first ride ROOF_X m east of the deck, about 10 draw calls with the two near walls hidden; hidden after) and
+// stops at each deck's guide, where you grease it (ROOF_GREASE ship minutes, the 'work' pose: 8b has no 'grease' pose
+// yet). At the bottom you step off on Deck 6: Works reputation +1 (worksSideXp), a use of m17, and the lift runs a
+// little smoother (its condition up ROOF_COND). Step off part way (drag away, a time skip) and you're out of the car on
+// the deck it was at. The ladder row (m17, big): Halloran's Mail and a meeting at the lift at 15:30 on a Thursday he's
+// on shift (WORK_MECH.m17.offer); trained at the meeting (noJob); he rides with you until stage 2 (after 2 rides).
+// The writer's keys (content/works/keys-p5.md "Step 4", E3 M17): meeting train.m17.halloran-emeka; Halloran's work
+// flags roof.climb, roof.grease, roof.view, roof.done; roof.held, roof.result, roof.resume; roof.card, roof.up (asked of
+// W2 by E4). Saved in SHIP.works.side.roof = { rides, last } (24 core's worksSide(); read defensively, so old saves
+// load); the hold itself isn't saved: a save mid-ride loads with you on the top deck (where you stood in the car), the
+// lift let go. No R(); every colour through col() (std); no keys.
+const ROOF_FROM = 18, ROOF_WD = 3, ROOF_HOURS = [930, 990], ROOF_CLIMB = 1, ROOF_GREASE = 1, ROOF_DROP = 2, ROOF_WHO = 'halloran-emeka', ROOF_COND = 6;
+const ROOF_X = 400, ROOF_DH = 4, ROOF_W = 3, ROOF_D = 4, ROOF_FADE = .4;   // the shaft: this far east of the deck, a deck every 4 m, the car's well 3 m by 4
+const roofDecks = () => DECK_ORDER.filter(n => DECKS[n]);   // top to bottom (the rec deck only when it's on)
+const roofLen = () => { const n = roofDecks().length; return ROOF_CLIMB + n * ROOF_GREASE + (n - 1) * ROOF_DROP; };
+function roofData() {
+  const S = typeof worksSide === 'function' ? worksSide() : null; if (!S) return null;
+  const r = S.roof && typeof S.roof === 'object' && !Array.isArray(S.roof) ? S.roof : (S.roof = {});
+  for (const k of Object.keys(r)) if (k !== 'rides' && k !== 'last') delete r[k];
+  if (!Number.isInteger(r.rides) || r.rides < 0) r.rides = 0; if (!Number.isInteger(r.last) || r.last < 0) r.last = 0;
+  return r;
+}
+const roofTrained = () => !!(SHIP.works && SHIP.works.tr && SHIP.works.tr.m17 !== undefined);
+const roofMate = () => roofTrained() && worksStage('m17') < 1 && schedPeople().some(p => p.id === ROOF_WHO);   // Halloran rides with you till stage 2
+function roofOpen(t = shipNow()) {                       // can you climb on now? (a Thursday, trained, from 15:30 while there's time for the whole spine, once a day)
+  const d = worksDay(t), m = t - (d - 1) * 1440, r = roofData();
+  return !!r && roofTrained() && d >= ROOF_FROM && weekday(d) === ROOF_WD && m >= ROOF_HOURS[0] && m <= ROOF_HOURS[1] - roofLen() && r.last !== d;
+}
+function roofSay(flag, fb) { const l = worksVoice(ROOF_WHO, flag); toast(worksName(ROOF_WHO), l ? l[0] : fb); }   // a toast: his bubble would be on the deck, not in the shaft
+// section 14's whereIs, while the car is held: someone whose plan has them on another deck than at the hold's start waits
+// by the lift there (a lift-wait place, by their id) till it's let go. ROOF_WAIT: each one's deck at the start, per hold
+const ROOF_WAIT = { of: null, at: new Map() }; let ROOF_BUSY = false;
+function roofWait(p, t) {
+  if (ROOF_BUSY || !p || !LIFT_HOLD) return null;
+  ROOF_BUSY = true;
+  try {
+    const H = LIFT_HOLD; if (ROOF_WAIT.of !== H) { ROOF_WAIT.of = H; ROOF_WAIT.at = new Map(); }
+    let d0 = ROOF_WAIT.at.get(p.id); if (d0 === undefined) { const w0 = whereIs(p, H.from); d0 = w0 ? w0.deck : null; ROOF_WAIT.at.set(p.id, d0); }
+    const w = whereIs(p, t); if (!w || d0 == null || !DECKS[d0] || w.deck === d0) return null;
+    const lw = (DECKS[d0].places || []).filter(q => q.type === 'lift-wait'), pl = lw.length ? lw[idHash(p.id) % lw.length] : null;
+    return { deck: d0, act: 'off', type: 'lift-wait', placeId: pl ? pl.id : null, moving: false, from: H.from, until: H.until, tag: 'lift' };
+  } finally { ROOF_BUSY = false; }
+}
+// the lift's door or panel (section 11's enterLift asks first): the offer on the top deck, or "held" while it is
+function roofLiftTap() {
+  if (typeof deckDef === 'undefined' || ACT && ACT.kind === 'roofRide') return false;
+  if (deckDef.num === roofDecks()[0] && roofOpen()) {
+    const shown = deviceChoose({ title: mechName('m17'), text: worksText('roof.card', 'The lift\'s maintenance hour. Climb up through the hatch and ride the roof down the spine, greasing each deck\'s guide on the way?'),
+      choices: ['Climb onto the roof', 'Ride inside'] }, i => { if (i === 0) roofClimb(); else if (i === 1 && !liftHeld()) toPanel(openLiftPanel); });
+    if (shown) return true;
+  }
+  if (liftHeld()) { toast('Main lift', worksText('roof.held', 'Held for maintenance till 16:30. Nobody\'s going anywhere for a bit.')); return true; }
+  return false;
+}
+function roofClimb() {                                   // into the car (its tile nearest the middle), then up through the hatch
+  const mid = (ROOM_TILES['@'] || []).filter(c => free(...c)).map(c => [c, cellPos(...c)]).sort((a, b) => Math.hypot(a[1].x - LIFT_AT[0], a[1].z - LIFT_AT[1]) - Math.hypot(b[1].x - LIFT_AT[0], b[1].z - LIFT_AT[1]))[0];
+  if (!mid) return false;
+  actStart('roofRide', null, { title: mechName('m17'), follow: true, spot: { walk: mid[0], x: mid[1].x, z: mid[1].z, y: 0, face: player.face, pose: 'work', id: null },
+    after: worksText('roof.up', 'You open the hatch in the car\'s ceiling and climb up onto the roof.') });
+  return true;
+}
+// the shaft, made on the first ride and kept (hidden) after: the car (still), the spine (the walls, each deck's slab and
+// guides, the trunks and the ladder; it rises as the car goes down), a glint on the guide you're greasing
+const ROOF = { g: null, spine: null, walls: [], glint: null, mate: null, r: null, say: null };
+function roofShaft() {
+  if (ROOF.g) return ROOF.g;
+  const n = roofDecks().length, H = (n - 1) * ROOF_DH + 28, yMid = -(n - 1) * ROOF_DH / 2 + 6, W2 = ROOF_W / 2, D2 = ROOF_D / 2;
+  const M = { wall: std('#46525f', .9, 0, { emissive: col('#151b24') }), slab: std('#6b7887', .8, 0, { emissive: col('#151b24') }), rail: std('#9aa3ad', .4, .5), brass: std('#c9a24a', .5, .3), pipeA: std('#7d8c99', .5, .3), pipeB: std('#b5703d', .5, .3), pipeC: std('#4f6f8f', .6), car: std('#59636e', .7), safety: std('#d9a441', .6),
+    lamp: new THREE.MeshBasicMaterial({ color: col('#ffe6a8') }) };
+  const box = (grp, m, w, h, d, x, y, z) => { const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); b.position.set(x, y, z); grp.add(b); return b; };
+  const cyl = (grp, m, r, h, x, y, z) => { const c = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, 10), m); c.position.set(x, y, z); grp.add(c); return c; };
+  const g = new THREE.Group(); g.position.set(ROOF_X, 0, 0); scene.add(g); ROOF.g = g;
+  const spine = new THREE.Group(); g.add(spine); ROOF.spine = spine;
+  // four walls, each its own group (the near two are hidden each frame); n: which way it faces out from the well
+  for (const [nx, nz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+    const w = new THREE.Group(), side = nx !== 0, len = (side ? ROOF_D : ROOF_W) + 8, at = (side ? W2 : D2) + .1;
+    const P = (u, y, v, sw, sh, sd) => side ? [sd, sh, sw, nx * (at - v), y, u] : [sw, sh, sd, u, y, nz * (at - v)];   // u along the wall, v in from its face
+    const B = (m, u, y, v, sw, sh, sd) => { const [a, b, c, x, yy, z] = P(u, y, v, sw, sh, sd); return box(w, m, a, b, c, x, yy, z); };
+    B(M.wall, 0, yMid, 0, len, side ? H + .1 : H, .2);   // (the side walls a touch taller: no shared top faces at the corners)
+    for (let k = 0; k < n; k++) {
+      const y0 = -k * ROOF_DH - 2.75;                     // deck k's slab, where the car's floor sits at its stop
+      B(M.slab, 0, y0, .06, len + .02, side ? .3 : .28, .3);
+      B(M.lamp, side ? -1.2 : -1, y0 + 2.2, .16, .3, .1, .06);
+      if (side) B(M.brass, 0, y0 + 3.6, .2, .3, .32, .26);   // the guide shoes on the rails at roof height: yours west, Halloran's east
+      if (!side && nz > 0) { B(M.slab, -.8, y0 + 1.26, .1, .12, 2.2, .26); B(M.slab, .8, y0 + 1.26, .1, .12, 2.2, .26); B(M.slab, 0, y0 + 2.4, .1, 1.74, .12, .26); }   // the deck's lift doors, from behind
+    }
+    if (side) B(M.rail, 0, yMid, .2, .12, H, .14);       // the guide rail, the whole height
+    if (!side && nz < 0) {                               // the back: the spine's trunks
+      for (const [u, r, m] of [[-.9, .12, M.pipeA], [-.55, .09, M.pipeB], [.75, .14, M.pipeC]]) cyl(w, m, r, H, u, yMid, -(D2 - r - .04));
+      B(M.slab, .2, yMid, .08, .34, H, .14);             // a cable tray
+    }
+    if (side && nx > 0) {                                // the east wall: the spine ladder (two rails, a rung every 30 cm)
+      for (const u of [1.3, 1.75]) B(M.rail, u, yMid, .18, .06, H, .06);
+      for (let y = -H / 2 + .2; y < H / 2; y += .3) B(M.rail, 1.525, yMid + y, .18, .45, .04, .04);
+    }
+    mergeMeshes(w); w.traverse(o => { if (o.isMesh) o.castShadow = false; });
+    spine.add(w); ROOF.walls.push({ g: w, n: [nx, nz] });
+  }
+  // the car: its roof at y 0 (a hatch, the safety rail along three sides, a work lamp), its body below
+  const car = new THREE.Group(); g.add(car);
+  box(car, M.car, ROOF_W - .5, 2.6, ROOF_D - .5, 0, -1.3, 0);
+  box(car, M.slab, .8, .04, .8, .35, .02, .6);
+  for (const [x, z, w, d] of [[0, -(D2 - .3), ROOF_W - .6, .06], [-(W2 - .3), 0, .06, ROOF_D - .6], [W2 - .3, 0, .06, ROOF_D - .6]]) { const h = w > d ? .05 : .04; box(car, M.safety, w, h, d, x, .95, z); box(car, M.safety, w, h, d, x, .5, z); }
+  for (const [x, z] of [[-(W2 - .3), -(D2 - .3)], [W2 - .3, -(D2 - .3)], [-(W2 - .3), D2 - .3], [W2 - .3, D2 - .3]]) box(car, M.safety, .08, .97, .08, x, .485, z);
+  box(car, M.lamp, .22, .12, .12, 0, 1.0, -(D2 - .3));
+  mergeMeshes(car); car.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+  const gl = new THREE.Mesh(new THREE.SphereGeometry(.12, 10, 8), new THREE.MeshBasicMaterial({ color: col('#fff3c4') })); gl.visible = false; g.add(gl); ROOF.glint = gl;
+  return g;
+}
+// the ride, each frame of the activity (section 15's def.until): climb, fade, grease and drop deck by deck, fade, out on the bottom deck
+Object.assign(PLAYER_ACTS, { roofRide: { mins: 600, pose: 'work', title: 'The lift roof', until: roofStep } });
+function roofStep(A) {
+  const now = performance.now(), R = A.o.r || (A.o.r = { st: 'climb', k: 0, t0: 0, real: now, said: {} }), rt = (now - R.real) / 1000;
+  const dt = Math.min(.1, (now - (R.last || now)) / 1000); R.last = now;
+  const decks = roofDecks(), n = decks.length, to = st => { R.st = st; R.real = now; R.t0 = A.done; };
+  if (R.st === 'climb') {
+    if (A.done >= ROOF_CLIMB) {
+      const d = worksDay(shipNow()); liftHold(true, (d - 1) * 1440 + ROOF_HOURS[1]); ROOF.r = R; R.mate = roofMate();
+      if (R.mate) roofSay('roof.climb', 'Clip on, hands inside the rail. I\'ll take the east guides, you take the west.');
+      to('dark');
+    }
+  } else if (R.st === 'dark') {
+    fadeEl.style.opacity = Math.min(1, rt / ROOF_FADE);
+    if (rt >= ROOF_FADE) {
+      roofShaft().visible = true; ROOF.spine.position.y = 0; R.inShaft = true;
+      A.x = ROOF_X - .8; A.z = 0; A.y = 0; A.face = -Math.PI / 2; target.x = A.x; target.z = A.z;
+      to('light');
+    }
+  } else if (R.st === 'light') {
+    fadeEl.style.opacity = Math.max(0, 1 - rt / ROOF_FADE);
+    if (rt >= ROOF_FADE) { fadeEl.style.opacity = 0; to('grease'); }
+  } else if (R.st === 'grease') {
+    A.pose = 'work'; A.face = -Math.PI / 2;
+    ROOF.glint.visible = Math.floor(rt * 3) % 2 === 0; ROOF.glint.position.set(-(ROOF_W / 2 - .3), .85, 0);
+    if (A.done - R.t0 >= ROOF_GREASE) {
+      ROOF.glint.visible = false;
+      if (R.mate && R.k === 0) roofSay('roof.grease', 'One long stroke down the shoe. Not too much: it only drips on the next car.');
+      to(R.k >= n - 1 ? 'end' : 'drop');
+    }
+  } else if (R.st === 'drop') {
+    A.pose = 'stand'; const p = Math.min(1, (A.done - R.t0) / ROOF_DROP);
+    ROOF.spine.position.y = (R.k + p * p * (3 - 2 * p)) * ROOF_DH;
+    if (R.mate && R.k === 1 && p >= .5 && !R.said.view) { R.said.view = 1; roofSay('roof.view', 'Look up. Six decks of her, and nobody else gets to see it like this.'); }
+    if (p >= 1) { R.k++; to('grease'); }
+  } else if (R.st === 'end') {
+    if (!R.done) { R.done = true; roofDone(R); }
+    fadeEl.style.opacity = Math.min(1, rt / ROOF_FADE);
+    if (rt >= ROOF_FADE && !R.off) {                      // out on the bottom deck, by section 11's ride from its darkest point
+      R.off = true; A.o.follow = false; ROOF.g.visible = false; roofMateGone();
+      ride = { n: decks[n - 1], t: RIDE.dark - .01, at: null, face: -Math.PI / 2, swapped: false };
+    }
+  }
+  if (R.inShaft && !R.off) roofMateStep(A, R, dt);
+  return false;                                          // never by itself: the deck change (or stepping off) ends it
+}
+function roofMateStep(A, R, dt) {                        // Halloran on the roof beside you, on the east guides
+  if (!R.mate) return;
+  if (!ROOF.mate) { const p = schedPeople().find(q => q.id === ROOF_WHO); if (!p) { R.mate = false; return; } ROOF.mate = new FullPerson(rosterSpec(p), p.id); }
+  const g = R.st === 'grease';
+  ROOF.mate.set({ x: ROOF_X + .8, y: 0, z: .3 }, g ? Math.PI / 2 : Math.atan2(A.x - ROOF_X - .8, A.z - .3), g ? 'work' : 'stand');
+  ROOF.mate.update(dt, performance.now() / 1000);
+}
+function roofMateGone() { if (ROOF.mate) { ROOF.mate.dispose(); ROOF.mate = null; } }
+function roofDone(R) {                                   // every guide greased: the ride counts, the lift runs smoother
+  const r = roofData(), d = worksDay(shipNow()); if (!r) return;
+  r.rides++; r.last = d;
+  if (typeof worksUse === 'function') worksUse('m17');
+  if (typeof worksSideXp === 'function') worksSideXp(1, 'roof');
+  if (typeof machinesNow === 'function') {
+    machinesNow(); const s = SHIP.machines && SHIP.machines['5-mainlift-1'];
+    if (s) { s.cond = Math.min(100, s.cond + ROOF_COND); s.state = machineState(s.cond); MACH_REV++; if (MACH_HOUR !== null) machRecord(MACH_HOUR - 1); }
+  }
+  const l = R.mate && worksVoice(ROOF_WHO, 'roof.done');
+  ROOF.say = R.mate ? [worksName(ROOF_WHO), l ? l[0] : 'That\'s her done for the week. Hear how quiet she runs now? Good work.']
+    : [mechName('m17'), worksText('roof.result', 'Every guide greased, top to bottom. The lift runs a little smoother.')];
+}
+// each frame: only the far walls show; stepped off part way (dragged away, a time skip), you're out of the car on the
+// deck it was at; once the ride's over, the last word
+function roofFrame() {
+  requestAnimationFrame(roofFrame);
+  if (ROOF.say && typeof ride !== 'undefined' && !ride) { const [a, b] = ROOF.say; ROOF.say = null; toast(a, b); }
+  if (!ROOF.g || !ROOF.g.visible) return;
+  const A = ACT, R = ROOF.r;
+  if (A && A.kind === 'roofRide' && A.o.r === R && R.inShaft && !R.off) {
+    const cx = Math.sin(az), cz = Math.cos(az);
+    for (const w of ROOF.walls) w.g.visible = w.n[0] * cx + w.n[1] * cz < .25;
+    return;
+  }
+  ROOF.g.visible = false; roofMateGone();
+  if (R && R.inShaft && !R.off) {
+    R.off = true; fadeEl.style.opacity = 1; target.copy(player.obj.position).setY(.7);
+    if (!ride) ride = { n: roofDecks()[Math.min(R.k, roofDecks().length - 1)], t: RIDE.dark - .01, at: null, face: player.face, swapped: false };
+  }
+}
+requestAnimationFrame(roofFrame);
+if (typeof WORK_TICKS !== 'undefined') WORK_TICKS.push(now => {   // 16:30: the car's let go (section 11 keeps the hold's record)
+  if (LIFT_HOLD && LIFT_HOLD.until <= now && LIFT_HOLD.until > now - 2 && !LIFT_HOLD.said && !SIM_AT) { LIFT_HOLD.said = true; toast('Main lift', worksText('roof.resume', 'The lift\'s back in service.')); }
+  const o = typeof OCCASIONS !== 'undefined' && OCCASIONS['works.m17']; if (o && (o.deck !== 1 || o.room !== '+')) { o.deck = 1; o.room = '+'; }   // after a reload trainSetup makes it in the Works bay
+});
+onSim('newGame', () => { LIFT_HOLD = null; ROOF.r = null; ROOF.say = null; });
+// the ladder row: Halloran's ask is for a Thursday he's on shift, at the lift on Deck 1 at 15:30; trained at the meeting
+if (typeof WORK_MECH !== 'undefined') WORK_MECH.m17 = {
+  noJob: true,
+  offer(row, c, d, t) {
+    const m = t - (d - 1) * 1440, by = ROOF_WHO;
+    if (weekday(d) !== ROOF_WD || m > ROOF_HOURS[0] - 30 || !occOnShift(by, d)) return false;   // not a Thursday (it asks again tomorrow, and so on)
+    const sid = 'train.m17.' + by;
+    if (!MEETING_SCRIPTS[sid]) MEETING_SCRIPTS[sid] = { title: row.name, from: worksName(by), stub: true,
+      gist: worksFirst(by) + ' waited for you at the lift. The roof will keep: next Thursday.',
+      lines: [{ who: by, text: 'Thursday, half three: the lift\'s maintenance hour. The car\'s ours till half four.' },
+        { who: by, text: 'We ride the roof down the spine and grease every guide on the way. Up through the hatch: after you.' }] };
+    const o = trainSetup(row); o.by = by; o.deck = 1; o.room = '+'; o.script = sid;
+    const r = occasionAdd('works.m17', (d - 1) * 1440 + ROOF_HOURS[0], true, 20); if (!r) return false;
+    c.by = by; c.d = d; c.w = 0; c.st = 'meet'; c.occ = r.key; c.told = false;
+    const ask = worksText('works.ask.m17', '', { time: hhmm(ROOF_HOURS[0]), place: 'the Bridge lobby on Deck 1', name: worksName(by) }), cut = ask.indexOf(' | ');
+    let subject = 'Training: ' + mechName('m17'), body = 'It\'s the lift\'s maintenance hour on Thursday afternoons. Meet me at the lift on Deck 1 at ' + hhmm(ROOF_HOURS[0]) + ': we\'re riding the roof.';
+    if (cut > 0) { subject = ask.slice(0, cut); body = ask.slice(cut + 3); }
+    if (typeof mailSend === 'function') mailSend({ at: t, from: worksName(by), subject, body, quiet: true });
+    c.mail = subject.slice(0, 80);
+    if (t >= shipNow() - 1) trainTell(row, c);
+    return true;
+  },
+};
+
+// =====================================================================
 // 24k. CASES: head-scratchers (Pillar 5, seat H, 0.55.x; plans/mechanics/case-engine.html on claude/p5-design)
 // Some faults don't show their cause. A real fault at your tier may become a case when section 17 posts it
 // (caseOffer(j, h), one line there): its suspects are the cause and decoys from FAULT_CAUSES (section 17.4), its
@@ -45877,7 +46108,11 @@ function toPanel(done) {
   const goal = tiles.sort((a, b) => Math.hypot(a[0] - pt[0], a[1] - pt[1]) - Math.hypot(b[0] - pt[0], b[1] - pt[1]))[0];
   if (K(goal) === K(here) && !player.path.length) at(); else playerGo(goal, at);
 }
-function enterLift() { if (!ride) toPanel(openLiftPanel); }
+function enterLift() {
+  if (ride) return;
+  if (typeof roofLiftTap === 'function' && roofLiftTap()) return;   // 24s: the lift roof job (Thursdays 15:30-16:30), or the car held for it
+  toPanel(openLiftPanel);
+}
 function pressPanel(n) {
   toPanel(() => { player.press = { t: 0, fired: false, cb: () => startRide(n) }; });
 }
@@ -45927,6 +46162,15 @@ function updateRide(dt) {
     }
   }
 }
+// ---- the car held for maintenance (M17, seat E4 on the lift owner's behalf, 0.53.9; plans/mechanics/m17-lift-roof.html).
+// liftHold(on, until?): from now till `until` (absolute ship minutes; default an hour) nobody can call the car (the panel
+// stays shut: enterLift asks 24s first); liftHold(false) lets it go at once. liftHeld(t?) -> is it held at ship minute t
+// (default now): section 14's whereIs asks it (crew who need another deck wait by the lift till it's let go). The hold
+// is kept after its end, so replays over that hour see it; not saved (a load lets it go). var, not let: section 14 may
+// ask before this line has run
+var LIFT_HOLD = null;
+function liftHold(on, until) { LIFT_HOLD = on ? { from: shipNow(), until: Number.isFinite(until) ? until : shipNow() + 60 } : LIFT_HOLD && liftHeld() ? { ...LIFT_HOLD, until: shipNow() } : LIFT_HOLD; return liftHeld(); }
+function liftHeld(t) { if (!LIFT_HOLD) return false; if (!Number.isFinite(t)) t = shipNow(); return t >= LIFT_HOLD.from && t < LIFT_HOLD.until; }
 
 // =====================================================================
 // 12. MAIN LOOP

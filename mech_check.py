@@ -662,6 +662,81 @@ def part_t24(g):
     check(all(a['friends']), '24t: Survey warms to you (Sato, then Mori)')
     check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), '24t: differs the second time')
 
+# 24s the lift roof (M17, seat E4): on paper, when you can climb on (Thursdays from Day 18, trained, 15:30 till there's time for
+# the whole spine, once a day); the hold: crew whose plan takes them to another deck wait by the lift on the deck they were
+# on until 16:30, then follow their plan; the ride itself, frame by frame: a stop at every deck's guide, out on the bottom
+# deck, a ride and a use counted, the lift a little smoother, the car held till 16:30 and let go then; draw calls in the
+# shaft; stepping off part way leaves you on that deck; a save mid-ride has you on the top deck in the car, the hold not
+# saved; an old or odd save part loads as the default. The same twice.
+M17P = r"""(() => {
+  SHIP.works = null; SHIP.jobs = []; LIFT_HOLD = null; const B = 17 * 1440; setShipNow(B + 900); machinesNow(); const W = worksInit(); W.tier = 2; W.rank = 'officer';
+  const out = { untrained: roofOpen(B + 935) }; W.tr.m17 = 18; const r = roofData(); r.rides = 0; r.last = 0;
+  out.open = [roofOpen(B + 929), roofOpen(B + 930), roofOpen(B + 990 - roofLen()), roofOpen(B + 991 - roofLen()), roofOpen(B - 1440 + 935), roofOpen(B + 7 * 1440 + 935), roofOpen(B - 7 * 1440 + 935)];
+  r.last = 18; out.twice = roofOpen(B + 935); r.last = 0;
+  const ppl = schedPeople(), ts = []; for (let m = 935; m <= 1010; m += 5) ts.push(B + m);
+  const base = ppl.map(p => ts.map(t => { const w = whereIs(p, t); return w ? w.deck : null; }));
+  setShipNow(B + 935); liftHold(true, B + 990);
+  let movers = 0, bad = [], waiting = 0, after = 0;
+  ppl.forEach((p, i) => {
+    const d0 = base[i][0]; let moved = false;
+    ts.forEach((t, k) => { const w = whereIs(p, t), dk = w ? w.deck : null;
+      if (t < B + 990) { if (base[i][k] !== d0) { moved = true; if (dk !== d0 || w.type !== 'lift-wait') bad.push(p.id + '@' + hhmm(t % 1440)); else waiting++; } else if (dk !== base[i][k]) bad.push(p.id + '~' + hhmm(t % 1440)); }
+      else { if (dk !== base[i][k]) bad.push(p.id + '>' + hhmm(t % 1440)); else after++; } });
+    if (moved) movers++;
+  });
+  out.hold = { movers, waiting, bad: bad.slice(0, 6), held: [liftHeld(B + 935), liftHeld(B + 989), liftHeld(B + 990), liftHeld(B + 934)] };
+  LIFT_HOLD = null;
+  delete worksSide().roof; out.old = JSON.stringify(roofData()); worksSide().roof = { rides: -3, last: 'x', foo: 1 }; out.junk = JSON.stringify(roofData());
+  worksSide().roof = { rides: 2, last: 11 }; out.trip = JSON.stringify(worksClean(JSON.parse(JSON.stringify(SHIP.works))).side.roof);
+  return out;
+})()"""
+M17SET = r"""((day) => {
+  const B = (day - 1) * 1440; LIFT_HOLD = null; setShipNow(B + 935); machinesNow();
+  goToDeck(1); const c = nearestOpen(LIFT_AT[0] + 2.5, LIFT_AT[1], player); player.obj.position.copy(cellPos(...c));
+  window.__m17 = { cond: Math.round(SHIP.machines['5-mainlift-1'].cond), stops: [], calls: 0 };
+  const a = roofLiftTap(); devChosen(0); return [a, ACT && ACT.kind];
+})"""
+M17WATCH = r"""(() => { const A = ACT, R = A && A.kind === 'roofRide' && A.o.r, M = window.__m17;
+  if (R && R.st === 'grease' && !M.stops.includes(R.k)) M.stops.push(R.k);
+  if (R && R.inShaft && !R.off) M.calls = Math.max(M.calls, renderer.info.render.calls);
+  return R ? [R.st, R.k, !!R.inShaft, player.deck, roomAt(...player.here())] : A && A.kind === 'roofRide' ? ['in', 0, false, player.deck, roomAt(...player.here())] : null; })()"""
+def part_m17(g):
+    if not g.ev("typeof roofStep === 'function'"):
+        print('  m17: 24s is not in this build'); return
+    a = g.ev(M17P); b = g.ev(M17P)
+    print('  m17 open:', a['untrained'], a['open'], a['twice'], '| hold:', a['hold'], '| saves:', a['old'], a['junk'], a['trip'])
+    check(a['untrained'] is False and a['open'] == [False, True, True, False, False, True, False] and a['twice'] is False, f"m17: you can climb on Thursdays from Day 18, 15:30 while there's time, once a day ({a['open']})")
+    h = a['hold']
+    check(h['held'] == [True, True, False, False] and not h['bad'], f"m17: held 15:35-16:30; crew who'd change deck wait by the lift, then follow their plan ({h['bad']})")
+    check(a['old'] == '{"rides":0,"last":0}' and a['junk'] == '{"rides":0,"last":0}' and a['trip'] == '{"rides":2,"last":11}', 'm17: an old or odd save part loads as the default; it round-trips')
+    check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'm17: differs the second time')
+    runs = []
+    for day, off in ((18, None), (25, 2)):
+        g.ev("SHIP.works = null"); g.ev("(() => { setShipNow(17 * 1440 + 900); const W = worksInit(); W.tier = 2; W.rank = 'officer'; W.tr.m17 = 18; })()")
+        if day == 25: g.ev("(() => { const r = roofData(); r.rides = 1; r.last = 18; SHIP.works.use.m17 = 1; })()")
+        start = g.ev(f"({M17SET})({day})"); seen = []; mid = None
+        for n in range(200):
+            g.step(10); w = g.ev(M17WATCH)
+            if w and (not seen or seen[-1][:2] != w[:2]): seen.append(w)
+            if w and w[2] and mid is None: mid = w
+            if off is not None and w and w[0] == 'drop' and w[1] == off: g.ev("actEnd(true)"); g.step(60); break
+            if w is None: g.step(60); break
+        res = g.ev("[deckDef.num, ACT && ACT.kind, ROOF.g && ROOF.g.visible, JSON.stringify(roofData()), SHIP.works.use.m17 || 0, Math.round(SHIP.machines['5-mainlift-1'].cond), liftHeld(), Math.round(shipNow() % 1440), JSON.stringify(window.__m17), roofDecks()]")
+        held = g.ev(f"[liftHeld({(day - 1) * 1440 + 989}), liftHeld({(day - 1) * 1440 + 990}), 'LIFT_HOLD' in JSON.parse(JSON.stringify(SHIP.works))]")
+        runs.append([start, seen, mid, res, held])
+        print(f'  m17 ride Day {day}:', start, '| mid', mid, '| end', res, held)
+    (s1, seen1, mid1, r1, h1), (s2, seen2, mid2, r2, h2) = runs
+    m1 = json.loads(r1[8]); decks = r1[9]
+    check(s1 == [True, 'roofRide'] and mid1 and mid1[3] == 1 and mid1[4] == '@', f"m17: you climb on; mid-ride a save has you on Deck 1 in the car ({mid1})")
+    check(m1['stops'] == list(range(len(decks))) and r1[0] == decks[-1] and r1[1] is None and not r1[2], f"m17: a stop at every deck's guide, out on the bottom deck ({m1['stops']}, Deck {r1[0]})")
+    check(r1[3] == '{"rides":1,"last":18}' and r1[4] == 1 and r1[5] > m1['cond'], f"m17: the ride counts, the lift runs smoother ({r1[3]} use {r1[4]} cond {m1['cond']} -> {r1[5]})")
+    check(r1[6] and h1[:2] == [True, False] and not h1[2], 'm17: the car is held till 16:30, let go then; the hold is not saved')
+    check(0 < m1['calls'] < 160, f"m17: draw calls in the shaft {m1['calls']}")
+    check(r2[0] == decks[2] and r2[1] is None and not r2[2] and r2[3] == '{"rides":1,"last":18}', f"m17: stepping off part way leaves you on that deck, no ride counted ({r2[0]}, {r2[3]})")
+    a2 = g.ev(M17P)
+    check(json.dumps(a2, sort_keys=True) == json.dumps(a, sort_keys=True), 'm17: the paper part differs after the rides')
+PARTS['m17'] = part_m17
+
 only = set(sys.argv[2:])
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
