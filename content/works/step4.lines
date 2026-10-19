@@ -55,32 +55,7 @@
 == works.order.thanks.tablet-stand
 - The stand's lovely. My socks are free again. Thanks.
 == works.order.lapse
-- I made do | I made do, don't worry. Thanks anyway.
-// tinkering: your own things (gifts). Names, and one line each.
-== tinker.lamp
-- a little lamp
-== tinker.lamp.about
-- Bent pipe, a spare bulb, a shade you cut yourself.
-== tinker.mugrack
-- a mug rack
-== tinker.mugrack.about
-- Four pegs. Room for friends' mugs.
-== tinker.rocket
-- a toy rocket
-== tinker.rocket.about
-- Fins from offcuts. It doesn't fly. It looks like it would.
-== tinker.pot
-- a plant pot
-== tinker.pot.about
-- A plant pot with a drip tray. The garden lent you soil.
-== tinker.ship
-- a model ship
-== tinker.ship.about
-- The Wren, a hand long. The windows are a bit wonky.
-== tinker.rug
-- a woven rug
-== tinker.rug.about
-- Offcut cord, woven on a frame you made. Warm underfoot.
+- I made do, don't worry. Thanks anyway.
 
 // ---- M11 tool upkeep (E1, 24m)
 == works.toolstate.charged
