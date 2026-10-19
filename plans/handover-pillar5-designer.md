@@ -1,6 +1,6 @@
 # Handover: Pillar 5 designer (seat D: D2, then D3)
 
-**Latest (D3, session_0115ZiGhf9s3oYtFdjs7TgYS, 2026-10-19 ~03:20, standing by idle on lead 16's word).** Lead: **lead 17, session_016bN7x175WBwBL7S9xc2Lpb** (from 2026-10-19 ~05:49; before that lead 16, session_01UMyfd16GqSdgNyz5PE8qSv); report only to it with send_message. Never contact the user, never start sessions, push only to `claude/p5-design`, stay inside `plans/` and `design-doc.md`.
+**Latest (D3, session_0115ZiGhf9s3oYtFdjs7TgYS, 2026-10-19 ~03:20, standing by idle on lead 16's word).** Lead: **lead 18, session_01CBur9nrJ411pFkHopF96RL** (from 2026-10-19 ~07:56; lead 17, session_016bN7x175WBwBL7S9xc2Lpb, from ~05:49; before that lead 16, session_01UMyfd16GqSdgNyz5PE8qSv); report only to it with send_message. Never contact the user, never start sessions, push only to `claude/p5-design`, stay inside `plans/` and `design-doc.md`.
 
 ## D3 did (all FINAL, all in design-doc's Ship traditions paragraph "Rec dec traditions" and two Answered bullets)
 | Piece | Files | Artifact | State |
