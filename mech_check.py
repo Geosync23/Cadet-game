@@ -45,7 +45,7 @@ TRAIN = r"""((id) => {
   const seen = [], doJob = jid => { const j0 = SHIP.jobs.find(x => x.id === jid); if (j0 && j0.kind === 'team') return teamDo(jid); if (!claimJob(jid)) return false; const j = SHIP.jobs.find(x => x.id === jid);
     const cs = SHIP.works && SHIP.works.cases && (SHIP.works.cases.open || []).find(c => c.job === jid);   // a head-scratcher (24k): call it right first
     if (cs && typeof caseCall === 'function') caseCall(cs.id, cs.cause);
-    jobStops(j).forEach((s, k) => jobStepDone(jid, k)); return turnInJob(jid); };
+    jobStops(j).forEach((s, k) => jobStepDone(jid, k, j.kind === 'rewire' && s.step === 'wire' ? { pick: rewRight(j, k) } : undefined)); return turnInJob(jid); };   // 24q: a rewire's pairs answered from its chart
   let teacher = null, yours = null;
   for (let m = 360; m < 1020; m += 10) {
     const t = (d - 1) * 1440 + m; setShipNow(t); machinesNow(); worksCareerTick(t);
@@ -850,11 +850,372 @@ def part_side(g):
     check(a['bunk'][0] == 'Your bunk\'s in Bunk 1 on Deck 4.' and a['bunk'][1] and a['bunk'][2] == '4-23' and a['bunk'][3] == 'Your bunk\'s in Cabin 4-23 on Deck 4.' and not a['bunk'][4] and a['bunk'][5],
           f"side: the texts name Bunk 1 before the move and your cabin after ({a['bunk']})")
     check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'side: differs the second time')
+# ---- M13 leak hunting (24o, seat E2): stand-ins first, where a seat's piece isn't in this build (24 core's worksSide, E3's
+# leak joints: printed). The week's day (a workday of yours, Day 12 on, not the incident's day) the same twice; the first
+# leak at 08:00 once the row is open, the board saying only the deck; the puddle first (the damp and the joint refused
+# before it), then the joint tightened: found by you, the puddle gone, trained; a worn joint posts its replacement, held
+# for you; not taken, the crew fix it the next day; after 3 leaks the galleries too; junk in the save cleaned; the look
+# (puddle and damp) on the deck only while a leak is open; the same twice
+M13_STAND = r"""(() => { const out = [];
+  if (typeof worksSide !== 'function') { window.worksSide = () => SHIP.works ? (SHIP.works.side = SHIP.works.side || {}) : null; out.push('worksSide'); }
+  if (![3, 4, 5].some(n => (DECKS[n].leakJoints || []).length)) { out.push('leakJoints');
+    for (const n of [3, 4, 5]) { const v = placeById(n + '-valve-1'), w = placeById(n + '-wet-1'), w2 = placeById(n + '-wet-2');
+      DECKS[n].leakJoints = [{ place: n + '-valve-1', room: v.room, wall: 'n', joint: [v.at[0] + .5, 1.6, v.at[1]], damp: [v.at[0], v.at[1], 'n'], puddle: w.at.slice(), puddlePlace: n + '-wet-1' },
+        { place: n + '-valve-3', room: v.room, wall: 'n', joint: [v.at[0] + 1.5, 1.6, v.at[1]], damp: [v.at[0] + 1, v.at[1], 'n'], puddle: w2.at.slice(), puddlePlace: n + '-wet-2', ...(n === 5 ? { gallery: true, works: true } : {}) }]; } }
+  return out; })()"""
+M13 = r"""(() => { const out = {}, W0 = JSON.stringify(SHIP.works);
+ const reset = t => { machinesNew(); SHIP.jobs = []; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t); machinesNow(); SHIP.works = null; const W = worksInit(t); W.tier = 2; W.rank = 'officer'; W.tr.t2 = 10; (W.op[12] = W.op[12] || []).push('m13'); W.inc = { plan: {}, open: null }; worksSide().leaks = []; return W; };
+ const tick = (a, b, skip) => { for (let t = a; t <= b; t += 10) { setShipNow(t); machinesNow(); for (const f of WORK_TICKS) f(t, !!skip); } };
+ let W = reset(11 * 1440 + 300);
+ out.days = [1, 2, 3, 4, 5].map(w => { const d = leakDay(w); return d === null ? null : [d, weekday(d), playerShiftOn(d), (incPlan(w)[1] || 0) !== d]; });
+ tick(11 * 1440 + 360, 11 * 1440 + 470); out.before8 = SHIP.jobs.filter(x => x.kind === 'leak').length;
+ tick(11 * 1440 + 480, 11 * 1440 + 490);
+ let j = SHIP.jobs.find(x => x.kind === 'leak'); out.posted = j ? [j.title, j.deck, Math.round(j.posted % 1440)] : null; if (!j) return out;
+ const ob = openJobs().find(x => x.id === j.id); out.board = ob ? [ob.place, ob.room, ob.deck] : null;
+ out.claimed = claimJob(j.id); const st = jobStops(j); out.stops = st.map(s => s.step + ':' + s.how + '@' + (s.places[0] || '-'));
+ out.early = jobStepDone(j.id, 2, { value: 3 }).ok;
+ out.puddle = jobStepDone(j.id, 0, {}).ok; out.after = jobStops(j).map(s => s.places[0] || '-');
+ out.damp = jobStepDone(j.id, 1, {}).ok; out.joint = jobStepDone(j.id, 2, j.worn ? {} : { value: 3 }).ok;
+ const xp0 = W.xp; out.turnin = turnInJob(j.id); out.xp = [W.xp - xp0, typeof WORKS_SIDE_KINDS !== 'undefined']; out.entry = JSON.parse(JSON.stringify(worksSide().leaks[0])); out.open = leakOpen(); out.trained = W.tr.m13; out.uses = W.use.m13; out.wornFix = j.fix || null;
+ // a worn joint: its replacement posted, held for you
+ W = reset(15 * 1440 + 480); leakPost(15 * 1440 + 480, 2); j = SHIP.jobs.find(x => x.kind === 'leak'); j.worn = 1; claimJob(j.id);
+ jobStops(j).forEach((s, k) => jobStepDone(j.id, k, {})); turnInJob(j.id);
+ const F = SHIP.jobs.find(x => x.id === j.fix); out.worn = F ? [F.chore, F.target === j.joint, F.parts.join(), F.xp, forYou(F) && leaveEnd(F) > shipNow()] : null;
+ // not taken: held to 10:00 the next workday, then the crew's (the long way)
+ W = reset(15 * 1440 + 480); leakPost(15 * 1440 + 480, 2); j = SHIP.jobs.find(x => x.kind === 'leak'); out.held = leaveEnd(j) - 15 * 1440;
+ tick(15 * 1440 + 490, 16 * 1440 + 900); out.crew = [j.status, j.doneBy && j.doneBy !== 'you', (worksSide().leaks[0] || {}).found !== null, leakOpen()];
+ // the galleries after 3 leaks
+ W = reset(15 * 1440 + 300); const pick = () => [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map(w => leakPick(w)).filter(Boolean).map(P => !!P.J.gallery);
+ out.gal0 = pick().filter(Boolean).length; worksSide().leaks = [1, 2, 3].map(k => ({ id: 'leak:x' + k, joint: '4-valve-1', room: 'x', deck: 4, day: 12, worn: 0, found: 'you' })); out.gal3 = pick().filter(Boolean).length;
+ W.use.m13 = 3; out.stage = worksStage('m13');
+ // the save: junk dropped
+ worksSide().leaks = [{ id: 'leak:a', joint: '3-valve-1', deck: 3, day: 15, worn: 1, found: null }, { id: 7 }, null, { id: 'b', joint: 'x', deck: 9, day: 1 }, 'junk'];
+ delete worksSide().leaksOk; Object.defineProperty(worksSide(), 'leaksOk', { value: false, configurable: true });
+ out.save = JSON.stringify(leakList()); worksSide().leaks = 'junk'; out.saveJunk = JSON.stringify(leakList());
+ SHIP.works = JSON.parse(W0); return out; })()"""
+M13_FX = r"""(() => { if (typeof deckDef === 'undefined' || !deckDef || ![3, 4, 5].includes(deckDef.num)) return null;
+ const W0 = JSON.stringify(SHIP.works), n = deckDef.num, J = DECKS[n].leakJoints[0]; if (!SHIP.works) worksInit(shipNow());
+ const S = worksSide(); S.leaks = [{ id: 'leak:fx', joint: J.place, room: J.room, deck: n, day: 12, worn: 0, found: null }];
+ leakFx(); const on = [!!LEAK_FX.wet, !!LEAK_FX.damp, !!(LEAK_FX.wet && LEAK_FX.wet.parent), LEAK_FX.wet ? LEAK_FX.wet.count : 0];
+ S.leaks[0].found = 'you'; leakFx(); const off = [!!LEAK_FX.wet, !!LEAK_FX.damp];
+ SHIP.works = JSON.parse(W0); leakFx(); return { deck: n, on, off }; })()"""
+def part_m13(g):
+    check(g.ev(ROW_AGREE)['m13'], 'm13: the ladder row (24 core) and 24o disagree (day, stages, by)')
+    st = g.ev(M13_STAND)
+    if st: print('  m13 stand-ins:', st)
+    a, b = g.ev(M13), g.ev(M13)
+    print('  m13 days:', a['days'], 'posted', a['posted'], 'board', a['board'], 'stops', a['stops'], 'then', a['after'])
+    for e in a['days']:
+        if e: check(e[0] >= 12 and e[1] <= 4 and e[2] and e[3], f'm13: the week\'s day {e}')
+    check(a['before8'] == 0 and a['posted'] and a['posted'][2] == 480 and 'Deck' in a['posted'][0], 'm13: the first leak at 08:00, the board says the deck')
+    check(a['board'] and a['board'][0] is None and a['board'][1] is None, f"m13: the board doesn't say where ({a['board']})")
+    check(a['stops'] and a['stops'][0].startswith('puddle:look@') and '@-' not in a['stops'][0] and a['stops'][1].endswith('@-') and a['stops'][2].endswith('@-'), 'm13: the puddle shown, the damp and the joint not yet')
+    check(not a['early'] and a['puddle'] and '-' not in a['after'], 'm13: the joint refused before the puddle; then the trail shows')
+    check(a['damp'] and a['joint'] and a['turnin'] and a['entry']['found'] == 'you' and a['open'] is None, 'm13: found by you, fixed, the puddle gone')
+    check(a['trained'] is not None and a['uses'] == 1, 'm13: trained on the first')
+    if a['xp'][1]: check(a['xp'][0] == 1, f"m13: a leak found by you pays +1 reputation in all (the page; {a['xp'][0]})")
+    else: print(f"  m13: (the leak's +1 not checked: 24 core's side-job turn-in not in this build; paid {a['xp'][0]} here)")
+    print('  m13 worn:', a['worn'], 'held', a['held'], 'crew', a['crew'], 'galleries', a['gal0'], '->', a['gal3'], 'stage', a['stage'])
+    check(a['worn'] and a['worn'][0] == 'joint' and a['worn'][1] and a['worn'][2] == 'seal' and a['worn'][3] == 0 and a['worn'][4], 'm13: a worn joint posts its replacement, held for you, no rep of its own')
+    check(a['held'] == 1440 + 600, f"m13: held till 10:00 the next day ({a['held']})")
+    check(a['crew'][0] == 'done' and a['crew'][1] and a['crew'][2] and a['crew'][3] is None, 'm13: not taken, the crew fix it the next day')
+    check(a['gal0'] == 0 and a['gal3'] > 0 and a['stage'] == 1, 'm13: the galleries only after 3 leaks')
+    check(len(json.loads(a['save'])) == 1 and json.loads(a['saveJunk']) == [], 'm13: junk in the save dropped')
+    check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'm13: differs the second time')
+    fx = g.ev(M13_FX)
+    if fx: check(fx['on'][:3] == [True, True, True] and fx['off'] == [False, False], f'm13: the puddle and the damp only while open ({fx})')
+    else: print('  m13: (the look not checked: not on Decks 3-5)')
+PARTS['m13'] = part_m13
+
+# ---- M14 irrigation (24r, seat E2): on the first harvest morning from Day 13 the job goes up when the crew start picking;
+# 2-4 clogged nozzles over the racks (a hold each rack); the first trains the row; cleared ones make the next harvest's
+# bonus (all cleared: 0.1; none: 0, never lower); section 16's harvest reads it; left alone the job goes at midnight;
+# flushing from 2 harvests, the plant's look from 4; junk in the save cleaned; the same twice
+M14_STAND = r"""(() => { const out = [];
+  if (typeof worksSide !== 'function') { window.worksSide = () => SHIP.works ? (SHIP.works.side = SHIP.works.side || {}) : null; out.push('worksSide'); }
+  if (!(DECKS[3].growRacks || []).length) { out.push('growRacks'); DECKS[3].growRacks = DECKS[3].places.filter(p => /garden|plot|tend/.test(p.id)).slice(0, 3).map(p => ({ place: p.id, rack: p.at.slice() })); }
+  return out; })()"""
+M14 = r"""(() => { const out = {}, W0 = JSON.stringify(SHIP.works);
+ const reset = t => { machinesNew(); SHIP.jobs = []; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t); machinesNow(); SHIP.works = null; const W = worksInit(t); W.tier = 2; W.rank = 'officer'; W.tr.t2 = 10; (W.op[13] = W.op[13] || []).push('m14'); delete worksSide().nozOk; worksSide().nozzles = null; return W; };
+ const tick = (a, b) => { for (let t = a; t <= b; t += 10) { setShipNow(t); machinesNow(); for (const f of WORK_TICKS) f(t, false); } };
+ let d = 13; while (!gardenHarvestDay(d)) d++; let d2 = d + 1; while (!gardenHarvestDay(d2)) d2++;
+ out.days = [d, d2, weekday(d)];
+ let W = reset((d - 1) * 1440 + 300); tick((d - 1) * 1440 + 360, (d - 1) * 1440 + 660);
+ let j = SHIP.jobs.find(x => x.kind === 'nozzle'); out.posted = j ? [Math.round(j.posted % 1440), j.title, j.clogged.length, jobStops(j).map(s => s.step + ':' + s.how + ':' + (s.places[0] || '-'))] : null; if (!j) return out;
+ out.claimed = claimJob(j.id); jobStops(j).forEach((s, k) => jobStepDone(j.id, k, {})); out.turnin = turnInJob(j.id);
+ let N = worksSide().nozzles; out.after = [N.cleared.length, N.clogged.length, N.harvests, W.tr.m14 !== undefined, W.use.m14];
+ W.use.m14 = 2;                                         // the stage rose since (R4's fix 1): no flush was offered, so no penalty
+ tick((d - 1) * 1440 + 670, (d2 - 1) * 1440 + 660); N = worksSide().nozzles;
+ out.bonus = [irrigationBonus(d2), irrigationBonus(d2 + 1), N.day === d2];
+ const j2 = SHIP.jobs.find(x => x.kind === 'nozzle' && worksDay(x.posted) === d2); tick((d2 - 1) * 1440 + 670, d2 * 1440 + 20);
+ out.lapsed = j2 ? [j2.status, j2.doneBy] : null;
+ let d3 = d2 + 1; while (!gardenHarvestDay(d3)) d3++; nozPost((d3 - 1) * 1440 + 600); out.none = irrigationBonus(d3);
+ out.hook = [...document.scripts].some(s => s.textContent.includes("typeof irrigationBonus === 'function' ? 1 + irrigationBonus(d) : 1"));
+ W.use.m14 = 2; out.st1 = nozStops({ clogged: ['0.1'], stage: worksStage('m14') }).map(s => s.step || s.tag);
+ W.use.m14 = 4; out.st2 = nozStops({ clogged: ['0.1'], stage: worksStage('m14') }).map(s => s.tag);
+ out.clog = [13, 14, 15, 16, 17, 18].map(x => nozClogged(x).length);
+ worksSide().nozzles = { day: 'x', clogged: ['0.1', 7, '9.99', '1.2'], cleared: 'no', harvests: -3, bonus: 5 }; delete worksSide().nozOk;
+ out.save = JSON.stringify(nozState());
+ SHIP.works = JSON.parse(W0); return out; })()"""
+def part_m14(g):
+    check(g.ev(ROW_AGREE)['m14'], 'm14: the ladder row (24 core) and 24r disagree (day, stages, by)')
+    st = g.ev(M14_STAND)
+    if st: print('  m14 stand-ins:', st)
+    a, b = g.ev(M14), g.ev(M14)
+    if not a.get('after'): fail(f'm14: no job ({a})'); return
+    print('  m14 harvests', a['days'], 'posted', a['posted'], 'after', a['after'], 'bonus', a['bonus'], 'lapsed', a['lapsed'], 'none', a['none'], 'stages', a['st1'], a['st2'], 'clogged', a['clog'])
+    check(a['posted'] and 540 <= a['posted'][0] < 690 and 2 <= a['posted'][2] <= 4 and all(s.split(':')[2] != '-' for s in a['posted'][3]), 'm14: the job on the harvest morning, 2-4 nozzles, every rack a place')
+    check(a['claimed'] and a['turnin'] and a['after'][0] == a['after'][1] and a['after'][2] == 1 and a['after'][3] and a['after'][4] == 1, 'm14: cleared, trained, a use')
+    check(abs(a['bonus'][0] - .1) < 1e-9 and a['bonus'][1] == 0 and a['bonus'][2], 'm14: the next harvest a tenth bigger, that day only')
+    check(a['lapsed'] == ['done', None] and a['none'] == 0, 'm14: left alone it goes at midnight; uncleared never lowers it')
+    check(a['hook'], "m14: section 16's harvest reads irrigationBonus")
+    check('flush' in a['st1'] and 'plant' not in a['st1'] and 'plant' in a['st2'], 'm14: flushing from 2 harvests, the plant from 4')
+    check(all(2 <= n <= 4 for n in a['clog']), 'm14: 2-4 clogged a harvest')
+    s = json.loads(a['save'])
+    check(s['day'] == 0 and s['clogged'] == ['0.1', '1.2'] and s['cleared'] == [] and s['harvests'] == 0 and s['bonus'] == .1, f'm14: junk in the save cleaned ({s})')
+    check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'm14: differs the second time')
+PARTS['m14'] = part_m14
+
+ROW_STAND = r"""(() => { const out = [];
+  if (typeof worksSide !== 'function') { window.worksSide = () => SHIP.works ? (SHIP.works.side = SHIP.works.side || {}) : null; out.push('worksSide'); }
+  if (typeof LEAK_FROM !== 'undefined' && !ladderRow('m13')) { CAREER_LADDER.push({ id: 'm13', name: 'Leak hunting', size: 'small', day: LEAK_FROM, tier: 2, rank: 'officer', needs: null, by: LEAK_BY.slice(), job: 'leak', stages: [{ uses: 0 }, { uses: LEAK_GALLERY }] }); out.push('m13'); }
+  if (typeof NOZ_FROM !== 'undefined' && !ladderRow('m14')) { CAREER_LADDER.push({ id: 'm14', name: 'Garden irrigation', size: 'small', day: NOZ_FROM, tier: 2, rank: 'officer', needs: null, by: NOZ_BY.slice(), job: 'nozzle', stages: [{ uses: 0 }, { uses: 2 }, { uses: 4 }] }); out.push('m14'); }
+  if (typeof REW_FROM !== 'undefined' && !ladderRow('m15')) { CAREER_LADDER.push({ id: 'm15', name: 'Rewiring', size: 'big', day: REW_FROM, tier: 2, rank: 'officer', needs: null, by: ['calder'], where: { deck: 4, room: '-' }, job: 'rewire', tool: 'tester', stages: [{ uses: 0 }, { uses: REW_FADE }] }); out.push('m15'); }
+  return out; })()"""
+# the rows (24 core's, E1) and E2's sub-blocks agree: a retune on either side fails here instead of drifting (R4)
+ROW_AGREE = r"""(() => { const r13 = ladderRow('m13'), r14 = ladderRow('m14'), same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+  return { m13: !r13 || (r13.day === LEAK_FROM && r13.tier === 2 && r13.size === 'small' && (r13.stages || [])[1] && r13.stages[1].uses === LEAK_GALLERY && same(r13.by, LEAK_BY)),
+           m15: typeof REW_FROM === 'undefined' || !ladderRow('m15') || (ladderRow('m15').day === REW_FROM && ladderRow('m15').size === 'big' && ladderRow('m15').tier === 2 && (ladderRow('m15').stages || [])[1] && ladderRow('m15').stages[1].uses === REW_FADE && ladderRow('m15').by[0] === 'calder'),
+           m14: !r14 || (r14.day === NOZ_FROM && r14.tier === 2 && r14.size === 'small' && same((r14.stages || []).map(x => x.uses), [0, 2, 4]) && same(r14.by, NOZ_BY)) }; })()"""
+# ---- M15 rewiring (24q, seat E2): one a week from Day 17 once trained, 08:00 on a workday of yours, a junction job at Tier
+# 2; open the box, a pair per wire, test: right first time puts the junction right; a wrong pair pops at the test and
+# only that pair opens again (never a fail); from 3 a faded chart wants the lights flicked first; not taken, the crew's
+# the next day; junk in the save cleaned; the same twice
+M15 = r"""(() => { const out = {}, W0 = JSON.stringify(SHIP.works);
+ const reset = t => { machinesNew(); SHIP.jobs = []; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t); machinesNow(); SHIP.works = null; const W = worksInit(t); W.tier = 2; W.rank = 'officer'; W.tr.t2 = 10; W.tr.m15 = 17; W.use.m15 = 1; delete worksSide().rewOk; worksSide().rewire = null; W.inc = { plan: {}, open: null }; return W; };
+ const tick = (a, b) => { for (let t = a; t <= b; t += 10) { setShipNow(t); machinesNow(); for (const f of WORK_TICKS) f(t, false); } };
+ let W = reset(20 * 1440 + 300); const seen = new Map(); for (let t = 20 * 1440 + 360; t <= 41 * 1440 + 500; t += 10) { setShipNow(t); machinesNow(); for (const f of WORK_TICKS) f(t, false); for (const x of SHIP.jobs) if (x.kind === 'rewire') seen.set(x.id, x); }
+ const js = [...seen.values()]; out.weeks = js.map(x => [worksDay(x.posted), weekday(worksDay(x.posted)), Math.round(x.posted % 1440), x.machine, jobTier(x), x.chart.length, x.status]);
+ const right = (j, k) => ({ pick: rewRight(j, k) });
+ W = reset(22 * 1440 + 480); let j = rewJob('4-junction-1', shipNow(), { key: 99 }); SHIP.jobs.push(j); SHIP.machines['4-junction-1'].cond = 40;
+ out.board = !!openJobs().find(x => x.id === j.id); out.claimed = claimJob(j.id);
+ let S = jobStops(j); out.stops = S.map(s => s.step + ':' + s.how); out.ordered = [90, 91, 92, 93, 94, 95].some(k => { const x = rewChart(k, 0).order; return x.some((v, i) => v !== i); });
+ out.early = jobStepDone(j.id, 1, right(j, 1)).ok;
+ jobStepDone(j.id, 0, {}); S.forEach((s, k) => { if (s.step === 'wire') jobStepDone(j.id, k, right(j, k)); });
+ out.test = jobStepDone(j.id, S.length - 1, {}).ok; const xp0 = W.xp; out.turnin = turnInJob(j.id); out.xp = [W.xp - xp0, typeof WORKS_SIDE_KINDS !== 'undefined']; out.right = [j.rightFirst, j.wrongs, SHIP.machines['4-junction-1'].cond >= 90, worksSide().rewire.done];
+ // a wrong pair: the fuse pops, only that pair opens again
+ j = rewJob('4-junction-2', shipNow(), { key: 98 }); SHIP.jobs.push(j); claimJob(j.id); S = jobStops(j); jobStepDone(j.id, 0, {});
+ S.forEach((s, k) => { if (s.step === 'wire') jobStepDone(j.id, k, k === 2 ? { pick: rewRight(j, 2) === 'T1' ? 'T2' : 'T1' } : right(j, k)); });
+ out.pop = jobStepDone(j.id, S.length - 1, {}).ok; out.open = S.map((s, k) => (j.stepsDone || []).includes(k) ? 1 : 0); out.wrongs = j.wrongs;
+ jobStepDone(j.id, 2, right(j, 2)); out.retest = jobStepDone(j.id, S.length - 1, {}).ok; out.turnin2 = turnInJob(j.id); out.after = [j.rightFirst, worksSide().rewire.wrongs];
+ // stage 1: a faded chart, the lights first
+ W.use.m15 = 3; j = rewJob('4-junction-1', shipNow(), { key: 97, stage: worksStage('m15') }); SHIP.jobs.push(j); claimJob(j.id); S = jobStops(j); jobStepDone(j.id, 0, {});
+ out.faded = [j.faded.length, S[1].step, jobStepDone(j.id, 2, right(j, 2)).ok, jobStepDone(j.id, 1, {}).ok, jobStepDone(j.id, 2, right(j, 2)).ok];
+ // not taken: the crew's the next day
+ W = reset(22 * 1440 + 480); j = rewJob('4-junction-1', shipNow(), { key: 96 }); SHIP.jobs.push(j); out.held = leaveEnd(j) - 22 * 1440;
+ tick(22 * 1440 + 490, 23 * 1440 + 900); out.crew = [j.status, j.doneBy !== 'you' && !!j.doneBy];
+ worksSide().rewire = { done: 'x', wrongs: -4 }; delete worksSide().rewOk; out.save = JSON.stringify(rewState()); worksSide().rewire = { done: 3, wrongs: 1, week: 4 }; delete worksSide().rewOk; out.save2 = JSON.stringify(rewState());
+ SHIP.works = JSON.parse(W0); return out; })()"""
+def part_m15(g):
+    check(g.ev(ROW_AGREE)['m15'], 'm15: the ladder row (24 core) and 24q disagree (day, stages, by)')
+    a, b = g.ev(M15), g.ev(M15)
+    print('  m15 weeks:', a['weeks'])
+    print('  m15 stops', a['stops'], 'right', a['right'], 'pop', a['pop'], a['open'], 'wrongs', a['wrongs'], 'after', a['after'], 'faded', a['faded'], 'held', a['held'], 'crew', a['crew'])
+    check(3 <= len(a['weeks']) <= 4 and all(e[1] <= 4 and e[2] == 480 and e[4] == 2 and 4 <= e[5] <= 6 for e in a['weeks']), 'm15: one a week, 08:00 on a weekday, Tier 2, 4-6 wires')
+    check(a['board'] and a['claimed'] and not a['early'], 'm15: offered to an Officer; the box opened first')
+    check(a['test'] and a['turnin'] and a['right'][0] is True and a['right'][1] == 0 and a['right'][2] and a['right'][3] == 1, 'm15: right first time, the junction put right')
+    check(not a['pop'] and a['wrongs'] == 1 and a['open'][2] == 0 and sum(a['open']) == len(a['open']) - 2, 'm15: a wrong pair pops at the test, only that pair opens again')
+    if a['xp'][1]: check(a['xp'][0] == 2, f"m15: right first time pays +1, +1 more (the page; {a['xp'][0]})")
+    else: print(f"  m15: (the pay not checked: 24 core's side-job turn-in not in this build; paid {a['xp'][0]} here)")
+    check(a['retest'] and a['turnin2'] and a['after'][0] is False and a['after'][1] == 1, 'm15: redone, finished, not right first time (never a fail)')
+    check(a['faded'] == [1, 'check', False, True, True], 'm15: a faded chart from 3 (one colour): the lights first')
+    check(a.get('ordered'), 'm15: the wires come in a seeded order, not the chart\'s (the chart must be read)')
+    check(a['held'] == 1440 + 600 and a['crew'] == ['done', True], 'm15: not taken, the crew\'s the next day')
+    check(json.loads(a['save']) == {'done': 0, 'wrongs': 0, 'week': -1} and json.loads(a['save2']) == {'done': 3, 'wrongs': 1, 'week': 4}, 'm15: the save read back, junk cleaned')
+    check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'm15: differs the second time')
+PARTS['m15'] = part_m15
+
+# ---- favour cases (24l, seat E2 on H's behalf; not a ladder row, so it runs after the rows as EXTRA['fcase']): every
+# script has three clue places and its answer (sus.1) among the options; a friend asks (Mail, an offered favour) on the
+# week's evening; accepted, the side job: the clues before the call, a wrong pick refused (never a fail), the right one
+# gives the fix its place; fixed and handed back, done; another not taken lapses in 3 days, no harm; the same twice
+EXTRA = {}
+FC = r"""(() => { const out = {}, W0 = JSON.stringify(SHIP.works), R0 = JSON.stringify(SHIP.rel || {});
+ const reset = t => { machinesNew(); SHIP.jobs = []; SHIP.mail = []; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t); machinesNow(); SHIP.works = null; const W = worksInit(t); W.tier = 2; W.rank = 'officer'; W.tr.t2 = 10; delete worksSide().fcOk; worksSide().favours = []; W.inc = { plan: {}, open: null }; return W; };
+ const tick = (a, b) => { for (let t = a; t <= b; t += 10) { setShipNow(t); machinesNow(); for (const f of WORK_TICKS) f(t, false); } };
+ out.scripts = FC_IDS.map(c => { const j = { fcase: c, bed: schedPeople().find(p => p.bed && placeById(p.bed)).bed, order: [3, 1, 2], from: 'calder' }, S = fcStops(j);
+   return [c, S.length, S.slice(0, 3).every(x => x.how === 'look' && placeById(x.placeId)), S[3].how, S[3].opts.options.map(o => o.id).includes('sus1')]; });
+ const friends = schedPeople().filter(p => p.bed && placeById(p.bed)).sort((a, b) => (a.id < b.id ? -1 : 1)).slice(0, 6);
+ for (const p of friends) { const r = relGet(p.id); r.pts = Math.max(r.pts, REL_TIERS[FC_TIER]); r.tier = Math.max(r.tier, FC_TIER); }
+ let W = reset(14 * 1440 + 300); const w = incWeek(15), P = fcPlan(w); out.plan = P && [P.d, P.at];
+ tick(14 * 1440 + 360, (P.d - 1) * 1440 + P.at + 10);
+ let e = worksSide().favours[0]; out.asked = e ? [e.case, e.state, e.day, !!SHIP.mail.length] : null; if (!e) return out;
+ let F = favourById(e.id); out.offered = [F.status, F.stops[0].placeId]; out.accept = favourAccept(e.id);
+ tick(shipNow() + 10, shipNow() + 20); let j = SHIP.jobs.find(x => x.kind === 'fcase'); out.side = j ? [j.claimedBy, j.status, jobStops(j).map(s => s.step + ':' + s.how + ':' + (s.places[0] ? 'P' : '-'))] : null; if (!j) return out;
+ out.early = jobStepDone(j.id, 3, { pick: 'sus1' }).ok;
+ for (let k = 0; k < 3; k++) jobStepDone(j.id, k, {});
+ out.wrong = jobStepDone(j.id, 3, { pick: 'sus2' }).ok; out.right = jobStepDone(j.id, 3, { pick: 'sus1' }).ok; out.sideDone = [j.workDone ? 1 : 0, turnInJob(j.id) || j.status];
+ F = favourById(e.id); out.fixPlace = F.stops[0].placeId; out.fix = jobStepDone(e.id, 0, {}).ok; out.turnin = favourTurnIn(e.id);
+ tick(shipNow() + 10, shipNow() + 20); out.state = worksSide().favours[0].state;
+ // another, never taken: lapses in 3 days
+ W = reset(21 * 1440 + 300); const w2 = incWeek(22), P2 = fcPlan(w2); tick(21 * 1440 + 360, (P2.d - 1) * 1440 + P2.at + 10);
+ const e2 = worksSide().favours[0]; tick(shipNow() + 10, shipNow() + 4 * 1440); out.lapse = e2 ? [e2.state, (favourById(e2.id) || { status: 'gone' }).status] : null;
+ worksSide().favours = [{ id: 'f1', who: 'calder', case: 'lamp', day: 15, state: 'weird' }, { id: 2 }, { id: 'f3', who: 'x', case: 'nope', day: 1 }]; delete worksSide().fcOk; out.save = JSON.stringify(fcList());
+ SHIP.works = JSON.parse(W0); SHIP.rel = JSON.parse(R0); return out; })()"""
+def extra_fcase(g):
+    a, b = g.ev(FC), g.ev(FC)
+    print('  fcase scripts', a['scripts'])
+    print('  fcase plan', a['plan'], 'asked', a.get('asked'), 'offered', a.get('offered'), 'side', a.get('side'), 'early', a.get('early'), 'wrong', a.get('wrong'), 'right', a.get('right'), a.get('sideDone'), 'fix', a.get('fixPlace'), a.get('fix'), a.get('turnin'), a.get('state'), 'lapse', a.get('lapse'))
+    check(all(x[1] == 4 and x[2] and x[3] == 'choose' and x[4] for x in a['scripts']), 'fcase: every script: three clue places, the answer among the options')
+    if not check(a.get('asked') and a['asked'][1] == 'asked' and a['asked'][3], 'fcase: a friend asks on the week\'s evening (Mail, an offered favour)'): return
+    check(a['offered'][0] == 'offered' and a['offered'][1] is None and a['accept'], 'fcase: offered; the fix has no place yet')
+    check(a['side'] and a['side'][0] == 'you' and a['side'][2][:3] == ['clue:look:P'] * 3, 'fcase: accepted, the side job with three clue places')
+    check(not a['early'] and not a['wrong'] and a['right'], 'fcase: the call after the clues; a wrong pick refused, the right one taken')
+    check(a['fixPlace'] and a['fix'] and a['turnin'] and a['state'] == 'done', 'fcase: the fix gets its place; fixed, handed back, done')
+    check(a['lapse'] and a['lapse'][0] == 'lapsed', 'fcase: not taken in 3 days, it lapses')
+    s = json.loads(a['save'])
+    check(len(s) == 1 and s[0]['state'] == 'asked', 'fcase: junk in the save cleaned')
+    check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'fcase: differs the second time')
+EXTRA['fcase'] = extra_fcase
+
+# ---- fault-finder tickets (24l, seat E2): Calder's Mail on Day 13; a ticket at 08:00 on a workday (a Tier 2 machine's
+# fault, held in slot 23, a T2 case); solved right first time: grade 1 (W.ms ff1); a wrong call: "Not yet. Next week."
+# (the next a week on, the job a plain repair); junk in the save cleaned; the same twice
+FF = r"""(() => { const out = {}, W0 = JSON.stringify(SHIP.works);
+ const reset = t => { machinesNew(); SHIP.jobs = []; SHIP.mail = []; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t); machinesNow(); SHIP.works = null; const W = worksInit(t); W.tier = 2; W.rank = 'officer'; W.tr.t2 = 10;
+   for (const r of CAREER_LADDER) if (r.tier === 1 || ['p1', 'p2', 'm9'].includes(r.id)) { W.tr[r.id] = 5; (W.op[5] = W.op[5] || []).push(r.id); }
+   delete worksSide().ffOk; worksSide().ff = null; W.inc = { plan: {}, open: null }; W.cases = { open: [], done: [], n: 0 }; return W; };
+ const tick = (a, b) => { for (let t = a; t <= b; t += 10) { setShipNow(t); machinesNow(); for (const f of WORK_TICKS) f(t, false); } };
+ const solve = (j, right) => { const c = caseState().open.find(x => x.job === j.id); if (!c) return 'nocase';
+   if (c.wait) { c.wait = false; caseShow(c, j); } claimJob(j.id); caseCall(c.id, right ? c.cause : c.sus.find(x => x !== c.cause));
+   jobStops(j).forEach((s, k) => jobStepDone(j.id, k)); return [c.band, c.kind, !!c.ticket, turnInJob(j.id)]; };
+ const rigN = () => { let m = 0, v = 0; player.rig.root.traverse(o => { if (o.isMesh) { m++; v += o.geometry.attributes.position.count; } }); return [m, v]; };
+ delete PLAYER_SPEC.pin; delete player.spec.pin; playerRigRebuild(); out.rig0 = rigN();
+ let W = reset(12 * 1440 + 300); out.kinds = caseKindsOpen();
+ tick(12 * 1440 + 480, 12 * 1440 + 500); out.mail = [SHIP.mail.filter(x => /Calder/.test(x.from || '')).length, worksSide().ff.mail];
+ tick(14 * 1440 + 470, 14 * 1440 + 490); let j = SHIP.jobs.find(x => x.ticket);
+ out.posted = j ? [worksDay(j.posted), Math.round(j.posted % 1440), j.reserved, jobTier(j), j.title] : null; if (!j) return out;
+ out.solved = solve(j, true); tick(shipNow() + 10, shipNow() + 20);
+ out.grade = [worksSide().ff.grade, W.ms.find(x => x[0] === 'ff1') || null];
+ out.pin = [PLAYER_SPEC.pin || 0, player.spec.pin || 0, !!player.rig.root.parent, rigN()]; delete PLAYER_SPEC.pin; delete player.spec.pin; playerRigRebuild();   // the pin on, then off
+ for (const f of WORK_TICKS) f(shipNow(), false); out.pinBack = [PLAYER_SPEC.pin || 0, rigN()];   // a reload: back on from the grade (24l's tick)
+ tick(15 * 1440 + 470, 15 * 1440 + 490); out.after = SHIP.jobs.filter(x => x.ticket && worksDay(x.posted) === 16).length;
+ W = reset(14 * 1440 + 300); tick(14 * 1440 + 470, 14 * 1440 + 490); j = SHIP.jobs.find(x => x.ticket);
+ out.wrong = j ? solve(j, false) : null; tick(shipNow() + 10, shipNow() + 20);
+ out.wrongAfter = [worksSide().ff.grade, worksSide().ff.tries, worksSide().ff.next, worksSide().ff.job];
+ tick(15 * 1440 + 470, 15 * 1440 + 490); out.notYet = SHIP.jobs.filter(x => x.ticket && worksDay(x.posted) === 16).length;
+ worksSide().ff = { grade: 9, tries: 'x', next: 22, job: 5 }; delete worksSide().ffOk; out.save = JSON.stringify(ffState());
+ SHIP.works = JSON.parse(W0); delete PLAYER_SPEC.pin; delete player.spec.pin; playerRigRebuild(); out.rig1 = rigN(); return out; })()"""
+def extra_ff(g):
+    a, b = g.ev(FF), g.ev(FF)
+    print('  ff kinds', a['kinds'], 'mail', a['mail'], 'posted', a.get('posted'), 'solved', a.get('solved'), 'grade', a.get('grade'), 'after', a.get('after'), 'wrong', a.get('wrong'), a.get('wrongAfter'), 'notYet', a.get('notYet'))
+    check(a['mail'] == [1, 1], "ff: Calder's Mail on Day 13")
+    if not check(a.get('posted') and a['posted'][0] == 15 and a['posted'][1] == 480 and a['posted'][2] == 23 and a['posted'][3] == 2, 'ff: a ticket at 08:00 on the next workday, Tier 2, held in slot 23'): return
+    check(a['solved'][0] == 'T2' and a['solved'][2] and a['solved'][3], 'ff: a T2 case, solved and turned in')
+    check(a['grade'][0] == 1 and a['grade'][1], 'ff: right first time: grade 1, the Record\'s ff1')
+    check(a['after'] == 0, 'ff: no more tickets once graded (grades 2-3 are later steps)')
+    print('  ff pin: rig before', a['rig0'], 'graded', a['pin'], 'after a reload', a['pinBack'], 'cleared', a['rig1'])
+    check(a['pin'][:3] == [1, 1, True], f"ff: the pin on your uniform ({a.get('pin')})")
+    check(a['pin'][3][0] == a['rig0'][0] and a['pin'][3][1] > a['rig0'][1], 'ff: the pin merged into the chest (no extra mesh, so no extra draw call)')
+    check(a['pinBack'][0] == 1 and a['pinBack'][1] == a['pin'][3], 'ff: the pin back on after a reload (the grade)')
+    check(a['rig1'] == a['rig0'], 'ff: no grade, no pin')
+    check(a['wrongAfter'][0] == 0 and a['wrongAfter'][1] == 1 and a['wrongAfter'][2] == 22 and a['wrongAfter'][3] is None and a['notYet'] == 0, 'ff: a wrong call: not yet, the next a week on')
+    check(json.loads(a['save']) == {'grade': 3, 'tries': 0, 'next': 22, 'job': None, 'mail': 0}, f"ff: the save cleaned ({a['save']})")
+    check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'ff: differs the second time')
+EXTRA['ff'] = extra_ff
+
+# ---- M8 stage 2, team parts (24h, seat E5 for M2; step4-stages): from Day 18 after two team jobs, the team job's Mail
+# asks you to bring the parts (24d's manifestRun, E1: held for you till the start); brought: on time, side.parts + 1;
+# not brought: the run withdrawn, the lead fetches them, 10 minutes late, never a fail; before stage 2 or Day 18 the
+# old Mail and no run; the same twice
+TPARTS = r"""(() => { const out = {}, W0 = JSON.stringify(SHIP.works);
+ const reset = (t, uses) => { machinesNew(); SHIP.jobs = []; SHIP.mail = []; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t); machinesNow(); SHIP.works = null; const W = worksInit(t);
+   W.team = { plan: {} }; W.inc = { plan: {}, open: null }; W.tier = 2; W.rank = 'officer'; W.tr.t2 = 10; W.tr.m8 = 11; W.use.m8 = uses; if (worksSide()) worksSide().parts = 0; return W; };
+ const run = (t0, t1, uses, bring, d0 = 18) => { const W = reset(t0, uses), r = {}; let j = null;
+   for (let t = t0; t <= t1; t += 5) { setShipNow(t); machinesNow(); for (const f of WORK_TICKS) f(t, false);
+     j = j || SHIP.jobs.find(x => x.kind === 'team' && x.claimedBy === 'you' && worksDay(x.start) >= d0); if (!j || j.status === 'done') continue;
+     const R = j.partsRun && SHIP.jobs.find(x => x.id === j.partsRun);
+     if (R && !r.run) r.run = [R.kind, R.reserved, R.until === j.start, (R.crates || []).map(c => c.id).join('+'), R.crates.every(c => c.dest === panelPlace(j.machine))];
+     if (bring && R && !R.delivered && t >= j.start - 60 && R.status !== 'done') { claimJob(R.id); jobStops(R).forEach((s, k) => jobStepDone(R.id, k, {})); r.delivered = manifestRunDelivered(R.id); turnInJob(R.id); }
+     if (t >= j.start - 5) j.youIn = true;
+     const mine = j.seq.map((s, i) => s.who === 'you' ? i : -1).filter(i => i >= 0), k = mine.indexOf(j.cur);
+     if (k >= 0) { if (r.first === undefined) r.first = j.stepAt - j.start; jobStepDone(j.id, k, j.seq[j.cur].how === 'turn' ? { value: 3 } : {}); for (const f of WORK_TICKS) f(t, false); } }
+   const R = j && j.partsRun && SHIP.jobs.find(x => x.id === j.partsRun);
+   r.job = j && { day: worksDay(j.start), status: j.status, by: j.doneBy, late: j.late, partsLate: j.partsLate === undefined ? null : j.partsLate, mins: j.doneAt - j.start, run: !!j.partsRun };
+   r.left = R ? [R.status, !!R.delivered] : null; r.parts = worksSide() ? worksSide().parts || 0 : null;
+   r.mail = SHIP.mail.filter(m => j && m.from === worksName(j.lead) && (m.subject === 'Bring the parts' || Object.values(TEAM_NAME).includes(m.subject))).map(m => m.subject); return r; };
+ out.bring = run(16 * 1440 + 900, 18 * 1440 + 800, 2, true);
+ out.not = run(16 * 1440 + 900, 18 * 1440 + 800, 2, false);
+ out.stage0 = run(16 * 1440 + 900, 18 * 1440 + 800, 0, false);
+ out.early = run(14 * 1440 + 900, 16 * 1440 + 800, 2, false, 0);
+ worksSide().parts = 'x'; out.junk = teamPartsN(); worksSide().parts = 3; out.three = teamPartsN();
+ SHIP.works = JSON.parse(W0); return out; })()"""
+def extra_tparts(g):
+    if not g.ev("typeof manifestRun === 'function' && !!JOB_KINDS.haul && typeof worksSide === 'function'"):
+        print("  tparts: (not checked: 24d's manifestRun (E1) not in this build)"); return
+    a, b = g.ev(TPARTS), g.ev(TPARTS)
+    for k in ('bring', 'not', 'stage0', 'early'): print('  tparts', k, a[k])
+    B, N, S, E = a['bring'], a['not'], a['stage0'], a['early']
+    if not check(B['job'] and B['job']['run'] and B['job']['day'] >= 18, f"tparts: a team job from Day 18 you're in asks for the parts ({B['job']})"): return
+    check(B['run'][0] == 'haul' and B['run'][2] and B['run'][4] and B['run'][3] and 'Bring the parts' in B['mail'], f"tparts: the Mail asks you; a manifest run to the machine, held till the start ({B['run']}, {B['mail']})")
+    check(B['delivered'] and B['job']['partsLate'] is False and S['first'] == B['first'] and B['parts'] == 1 and B['job']['status'] == 'done', 'tparts: brought: it starts on time, side.parts 1')
+    check(N['job']['partsLate'] is True and N['first'] == B['first'] + 10 and N['left'] == ['done', False] and N['parts'] == 0 and N['job']['status'] == 'done' and N['job']['mins'] == B['job']['mins'] + 10, 'tparts: not brought: the run withdrawn, the lead fetches them, 10 minutes late, never a fail')
+    check(S['job'] and not S['job']['run'] and S['job']['partsLate'] is None and 'Bring the parts' not in S['mail'], 'tparts: before two team jobs, the old Mail and no run')
+    check(E['job'] and E['job']['day'] < 18 and not E['job']['run'], 'tparts: none before Day 18')
+    check(a['junk'] == 0 and a['three'] == 3, 'tparts: side.parts read defensively')
+    check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'tparts: differs the second time')
+EXTRA['tparts'] = extra_tparts
+
+# ---- E2's saved parts through a real save and reload (R4's fix 2): SHIP.works.side's leaks, nozzles, rewire, favours
+# and ff (and 24h's team parts count), written by saveGame (saving on) and read back by the sub-blocks after a reload; needs 24 core's worksClean to
+# keep `side` (E1), else it says so
+SIDE_SET = r"""(() => { if (typeof worksSide !== 'function') window.worksSide = () => SHIP.works ? (SHIP.works.side = SHIP.works.side || {}) : null;
+  setShipNow(12 * 1440 + 600); machinesNow(); const W = worksInit(); W.tier = 2; W.rank = 'officer';
+  const S = worksSide(); S.leaks = [{ id: 'leak:4-leak-1@300', joint: '4-leak-1', room: 'k', deck: 4, day: 12, worn: 1, found: 'you' }];
+  S.nozzles = { day: 20, clogged: ['0.1', '2.3'], cleared: ['0.1'], flushed: 1, harvests: 2, stage: 1, bonus: .05, told: 20 };
+  S.rewire = { done: 2, wrongs: 1, week: 3 }; S.favours = [{ id: 'favour:cruz-tove@1', who: 'cruz-tove', case: 'lamp', day: 15, state: 'done' }]; S.ff = { grade: 1, tries: 1, next: 22, job: null, mail: 1 }; S.parts = 2;
+  for (const k of ['leaksOk', 'nozOk', 'rewOk', 'fcOk', 'ffOk']) delete S[k];
+  SHIP.jobs = []; const rj = rewJob('4-junction-1', shipNow(), { key: 99 }); SHIP.jobs.push(rj); claimJob(rj.id); jobStepDone(rj.id, 0, {});
+  jobStops(rj).forEach((x, k) => { if (x.step === 'wire') jobStepDone(rj.id, k, { pick: k === 1 ? (rewRight(rj, 1) === 'T1' ? 'T2' : 'T1') : rewRight(rj, k) }); }); jobStepDone(rj.id, jobStops(rj).length - 1, {});   // a wrong pair popped
+  const P = schedPeople().find(p => p.bed && placeById(p.bed)), fid = favourPost({ from: P.id, title: 'x', stops: [{ deck: placeById(P.bed).deck, placeId: null, mins: 10, tag: 'fcase' }] }), F = favourById(fid); F.fcase = 'lamp'; favourAccept(fid);
+  const fj = jobMake('fcase', { id: 'fcase:' + fid, deck: placeById(P.bed).deck, h: 300, title: 'x', fcase: 'lamp', favour: fid, from: P.id, bed: P.bed, order: [2, 3, 1] }); fj.claimedBy = 'you'; fj.status = 'claimed'; SHIP.jobs.push(fj); jobStepDone(fj.id, 0, {});
+  S.favours.push({ id: fid, who: P.id, case: 'lamp', day: 13, state: 'taken' });
+  window.__ids = [rj.id, fid, fj.id];
+  const read = () => { const r = SHIP.jobs.find(x => x.kind === 'rewire'), f = SHIP.jobs.find(x => x.kind === 'favour'), q = SHIP.jobs.find(x => x.kind === 'fcase');
+    return JSON.stringify([leakList(), nozState(), rewState(), fcList(), ffState(), r && [r.pairs, r.wrongs, r.stepsDone, r.order, r.chart, r.claimedBy], f && [f.fcase, f.status, f.claimedBy], q && [q.fcase, q.order, q.stepsDone, q.claimedBy, q.favour], typeof teamPartsN === 'function' ? teamPartsN() : null]); };
+  window.__read = read; const before = read(); saveGame();
+  return { before, keeps: JSON.stringify(worksClean({ v: 1, side: { a: 1 } }) || {}).includes('side') }; })()"""
+SIDE_GET = r"""(() => { if (typeof worksSide !== 'function') window.worksSide = () => SHIP.works ? (SHIP.works.side = SHIP.works.side || {}) : null;
+  const r = SHIP.jobs.find(x => x.kind === 'rewire'), f = SHIP.jobs.find(x => x.kind === 'favour'), q = SHIP.jobs.find(x => x.kind === 'fcase');
+  return SHIP.works ? JSON.stringify([leakList(), nozState(), rewState(), fcList(), ffState(), r && [r.pairs, r.wrongs, r.stepsDone, r.order, r.chart, r.claimedBy], f && [f.fcase, f.status, f.claimedBy], q && [q.fcase, q.order, q.stepsDone, q.claimedBy, q.favour], typeof teamPartsN === 'function' ? teamPartsN() : null]) : null; })()"""
+def side_save(pw):
+    tmp = WORK / 'test' / '_mech_save.html'
+    tmp.write_text(instrument(pathlib.Path(sys.argv[1]).read_text()))
+    b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
+    page = b.new_page(viewport={'width': 600, 'height': 500})
+    page.route(re.compile(r'.*three\.min\.js'), lambda r: r.fulfill(body=THREE, content_type='application/javascript'))
+    page.add_init_script(INIT)
+    def load():
+        page.goto('file://' + str(tmp)); page.wait_for_function('window.__sc !== undefined', timeout=60000)
+        return lambda s: page.evaluate('s => window.__sc(s)', s)
+    ev2 = load(); ev2("localStorage.clear()"); ev2 = load()
+    a = ev2(SIDE_SET); ev2 = load(); after = ev2(SIDE_GET)
+    b.close()
+    print('  side save: before', a['before'][:160], '... after', (after or '')[:160])
+    A, B = json.loads(a['before']), json.loads(after or 'null') or [None] * 8
+    check(A[5:8] == B[5:8] and A[5] and A[7], 'side save: a rewire job after a wrong pair, an accepted favour and its side job through a real save and reload')
+    if not a['keeps']: print("  side save: (24 core's worksClean doesn't keep `side` in this build: E1's; side not checked)"); return
+    if after != a['before']:
+        for x, y in zip(json.loads(a['before']), json.loads(after or '[]')):
+            if x != y: print('   differs:', x, '|', y)
+    check(after == a['before'], 'side save: leaks, nozzles, rewire, favours and ff through a real save and reload')
 
 only = set(sys.argv[2:])
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     ev = g.ev
+    sr = ev(ROW_STAND)                                     # E2's rows (m13, m14) live in 24 core's table (E1); a stand-in only in a build without it
+    if sr: print('stand-in ladder rows (24 core\'s table not in this build):', sr)
     rows = ev("CAREER_LADDER.map(r => ({ id: r.id, name: r.name, size: r.size, inBuild: !!WORK_MECH[r.id], stages: (r.stages || []).length }))")
     for r in rows:
         if only and r['id'] not in only: continue
@@ -882,9 +1243,13 @@ with sync_playwright() as pw:
         if ev("!!JOB_KINDS.stocktake"): part_stock(g)
     if (not only or 'side' in only or 'm1' in only) and ev("typeof roundDoor === 'function'"):
         part_round23(g)
+    for k, f in EXTRA.items():                             # parts that aren't ladder rows (24l's favour cases)
+        if (not only or k in only) and ev(f"!!JOB_KINDS['{k}'] || (typeof ffState === 'function' && '{k}' === 'ff') || (typeof teamParts === 'function' && '{k}' === 'tparts')"): print(k + ':'); f(g)
     ev("SHIP.works = null")
     if g.errors: fail('page errors: ' + ' | '.join(g.errors[:5]))
     g.close()
+    if not only or only & {'m13', 'm14', 'm15', 'fcase', 'ff', 'side', 'tparts'}:
+        print('side (E2\'s saved parts):'); side_save(pw)
 
 print('MECH CHECK OK' if ok else 'MECH CHECK FAILED')
 sys.exit(0 if ok else 1)

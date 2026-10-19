@@ -281,7 +281,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.45.19
+   STARSHIP CADET: CSV Wren                           build 0.63.4
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8694,7 +8694,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.45.19';                           // keep in step with the header's build line
+const GAME_BUILD = '0.63.4';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -15199,7 +15199,7 @@ function galleyStep(S, m, st) {
     const items = [];
     for (const b of G.beds) {
       const c = GARDEN_CROPS[b[0]]; if (b[1] < c.days || (pickNow === 'daily' && !c.daily)) continue;   // the harvest morning picks everything ripe
-      const n = Math.round(c.yield * Math.min(1, c.days / Math.max(c.days, b[2])));
+      const n = Math.round(c.yield * Math.min(1, c.days / Math.max(c.days, b[2])) * (pickNow === 'harvest' && typeof irrigationBonus === 'function' ? 1 + irrigationBonus(d) : 1));   // 24r (E2): cleared nozzles, a little more
       if (n > 0) { const it = items.find(x => x[0] === b[0]); if (it) it[1] += n; else items.push([b[0], n]); if (st) st.picked += n; }
       b[1] = 0; b[2] = 0;
     }
@@ -41252,6 +41252,7 @@ function caseFitted(j) {
 // one decoy out with you (no clever fix); the long way fits each suspect in turn (always ends)
 function caseHint(caseId) {
   const c = caseById(caseId); if (!c) return null; const K = CASE_KINDS[c.kind];
+  if (c.ticket && c.got.length < 3) return worksText('ticket.nohint', 'It\'s a ticket: no hints till you\'ve looked at three things yourself.');   // 24l (E2, standing in for H): a ticket's hints after your third clue
   const miss = c.clues.find(k => !c.got.includes(k.id));
   if (!miss) return 'You\'ve got every clue there is. Cross out what they rule out.';
   try { const h = K.hint && K.hint(c); if (h) return h; } catch (e) { /* the plain words */ }
@@ -42204,7 +42205,10 @@ function teamPost(P, w, t) {                             // a plan entry posted 
   const [d, at, , kind] = P; if (P[2] && SHIP.jobs.some(j => j.id === P[2])) return null;
   const j = teamJob(kind, d, at); if (!j) { P[2] = 'none'; return null; }
   P[2] = j.id; if (typeof MACH_REV !== 'undefined') MACH_REV++;
-  if (j.claimedBy === 'you' && typeof mailSend === 'function') mailSend({ at: t, from: worksName(j.lead), subject: teamText('team.name.' + kind, TEAM_NAME[kind]),
+  const pr = teamParts(j, t);                            // stage 2: bring the parts (the Mail says so instead)
+  if (pr && typeof mailSend === 'function') { const m = teamText('mail.team.parts', 'Bring the parts | {job} tomorrow at {time}. {name} asks you to bring the parts from stores: {parts}.', { job: teamLabel(j), time: hhmm(at), name: worksFirst(j.lead), parts: TEAM_PARTS[kind].join(', ') }), i = m.indexOf(' | ');
+    mailSend({ at: t, from: worksName(j.lead), subject: i > 0 ? m.slice(0, i) : teamLabel(j), body: i > 0 ? m.slice(i + 3) : m }); }
+  else if (j.claimedBy === 'you' && typeof mailSend === 'function') mailSend({ at: t, from: worksName(j.lead), subject: teamText('team.name.' + kind, TEAM_NAME[kind]),
     body: teamText('mail.team', '{job}, {time} tomorrow, Deck {deck}. You\'re one of the team. — {name}', { job: teamText('team.name.' + kind, TEAM_NAME[kind]), time: hhmm(at), deck: j.deck, name: worksFirst(j.lead) }) });
   return j;
 }
@@ -42249,13 +42253,15 @@ function teamTick(j, now, skip) {
   if (teamYours(j) && !j.youIn && !skip && teamAtSpot(j)) j.youIn = true;
   if (j.youOut && !j.late) teamLate(j, now);
   if (now < j.start) return;
-  if (j.cur < 0) { simNote('team', { id: j.id, step: 0, by: j.lead, kind: 'start' }); if (teamYours(j) && !skip) worksTeach('m8', j.lead, 'call.start', null); teamNext(j, j.start); }
+  if (j.partsRun && j.partsLate === undefined) teamPartsCheck(j, j.start, skip);
+  if (j.cur < 0 && now < teamT0(j)) return;
+  if (j.cur < 0) { simNote('team', { id: j.id, step: 0, by: j.lead, kind: 'start' }); if (teamYours(j) && !skip) worksTeach('m8', j.lead, 'call.start', null); teamNext(j, teamT0(j)); }
   for (let guard = 0; guard < 20 && j.status !== 'done' && j.cur < j.seq.length; guard++) {
     const s = j.seq[j.cur];
     if (s.who === 'you') {
       const k = j.seq.slice(0, j.cur).filter(x => x.who === 'you').length;   // your stop for this step: done already (no stepDone hook)? on with the job
       if ((j.stepsDone || []).includes(k)) { j.youIn = true; teamNext(j, now); continue; }
-      if (skip || now >= j.start + TEAM_WAIT && !j.youIn) { teamLate(j, now); continue; } break; }
+      if (skip || now >= teamT0(j) + TEAM_WAIT && !j.youIn) { teamLate(j, now); continue; } break; }
     const t = j.stepAt + teamStepMins(j, s); if (now < t) break;
     teamNext(j, t);
   }
@@ -42268,6 +42274,27 @@ function teamStepDone(j, k, res, t) {
   j.youIn = true; simNote('team', { id: j.id, step: i, by: 'you', kind: 'step' });
   teamNext(j, t !== undefined ? t : shipNow());
   return true;
+}
+// ---- team parts (M8 stage 2, Step 4; plans/mechanics/step4-stages.html; seat E5 for M2): from Day 18, once you've done
+// two team jobs (m8's stage 1), the Mail of a team job you're in asks you to bring the parts: a manifest run (24d's
+// manifestRun, E1) from stores to the machine, held for you till the start. Not there at the start: the run withdrawn,
+// the lead fetches them and it starts TEAM_PARTS_LATE minutes late (team.parts.late). Never a fail. j.partsRun the run's
+// id, j.partsLate (false: brought) on the job; SHIP.works.side.parts = how many times you've brought them. No R().
+const TEAM_PARTS = { recycler: ['membrane', 'seal'], washer: ['pump', 'bearing'], manifold: ['valve', 'seal'], heater: ['pump', 'seal'], scrubber: ['filter', 'fan belt'] };
+const TEAM_PARTS_DAY = 18, TEAM_PARTS_LATE = 10;
+const teamT0 = j => j.start + (j.partsLate ? TEAM_PARTS_LATE : 0);   // when the first step starts
+const teamPartsN = () => { const S = typeof worksSide === 'function' && worksSide(), n = S && S.parts; return Number.isInteger(n) && n > 0 ? Math.min(n, 9999) : 0; };
+function teamParts(j, t) {                               // the parts ask on a team job you're in -> the run's id | null
+  if (typeof manifestRun !== 'function' || !j || j.claimedBy !== 'you' || j.partsRun || !TEAM_PARTS[j.team_kind]) return null;
+  if (worksDay(j.start) < TEAM_PARTS_DAY || typeof worksStage !== 'function' || worksStage('m8') < 1) return null;
+  const id = manifestRun(TEAM_PARTS[j.team_kind], j.machine, { at: t, until: j.start, for: j.lead }); if (id) j.partsRun = id;
+  return id || null;
+}
+function teamPartsCheck(j, t, skip) {                    // at the start: brought (one more), or the lead fetches them
+  j.partsLate = !(typeof manifestRunDelivered === 'function' && manifestRunDelivered(j.partsRun));
+  if (!j.partsLate) { const S = typeof worksSide === 'function' && worksSide(); if (S) S.parts = teamPartsN() + 1; return; }
+  if (typeof manifestRunEnd === 'function') manifestRunEnd(j.partsRun, t);
+  if (!skip) try { toast(teamLabel(j), teamText('team.parts.late', '{name} fetched the parts. Ten minutes late. Nobody minds. Much.', { name: worksFirst(j.lead) })); } catch (e) { /* no UI */ }
 }
 // the clock: the week's plan posted at 16:00 the day before; each team job's steps run
 if (typeof teamJobPost === 'function') WORK_TICKS.push((now, skip) => {
@@ -42301,6 +42328,597 @@ if (typeof teamJobPost === 'function') WORK_MECH.m8 = {
   watch: 0,
   oneJob: true,                                          // the teacher leads the same job you're in (no teacher's job first)
 };
+
+// ---------------------------------------------------------------------
+// 24l FAVOUR CASES (Pillar 5 Step 4, seat E2 on H's behalf; plans/mechanics/favour-cases.html: scripted cases on the
+// favours system, D3 de012aa, not the case engine). From Day 13, an Officer's, off shift: about once a week a crew
+// friend (FC_TIER: friend or closer) brings you a little mystery of their own, at an evening minute (18:00-21:00): their Mail
+// (mail.favour.<id>) and their open favour in the chat card (section 17's favourPost: offered, never on the board; the
+// chat's "help" accepts it). Accepted: a side job (the 'fcase' kind, beside your board job) in and around their cabin:
+// three clues (a look each: favour.<id>.clue.1-3, at their bed, or the junction, the laundry or the scrubber the clue
+// is about), then "What's causing it?" (a choose from sus.1-3, shuffled; a wrong pick: "Not that.", pick again, never
+// a fail). Solved (favour.<id>.solved): the favour's own stop (the fix, a hold at their bed) gets its place, then hand
+// it back in the chat card as any favour (friendship, reputation). Not taken in 3 days, they ask someone else
+// (favour.lapse, no harm). The six scripts are FAVOUR_CASES (W2's lines); sus.1 is always the answer. Saved:
+// SHIP.works.side.favours = [{ id, who, case, day, state }] (the last 12; state: asked, taken, solved, done, lapsed),
+// cleaned on read; the side job in ship.jobs. Hash keys 1019 (who asks), 1020 (which case), 1021 (which evening). No R().
+const FAVOUR_CASES = {                                    // where each clue is looked at (bed: their cabin)
+  lamp: ['bed', 'bed', 'junction'], cold: ['bed', 'bed', 'bed'], squeak: ['bed', 'bed', 'bed'],
+  shower: ['bed', 'bed', 'laundry'], clock: ['bed', 'bed', 'bed'], speaker: ['bed', 'scrubber', 'bed'] };
+const FC_TIER = 3;                                       // who asks: friend or closer (relTier; lead 17: the user may lower it to 2, colleague)
+const FC_IDS = Object.keys(FAVOUR_CASES), FC_FROM = 13, FC_EVE = [1080, 1260], FC_KEEP = 12, FC_DAYS = 3, FC_FIX = 10;
+function fcList() {                                      // side.favours, cleaned (a save may hold junk)
+  const s = typeof worksSide === 'function' ? worksSide() : null; if (!s) return null;
+  if (!Array.isArray(s.favours) || !s.fcOk) {
+    s.favours = (Array.isArray(s.favours) ? s.favours : []).filter(e => e && typeof e.id === 'string' && typeof e.who === 'string' && FC_IDS.includes(e.case) && Number.isInteger(e.day))
+      .slice(-FC_KEEP).map(e => ({ id: e.id.slice(0, 80), who: e.who.slice(0, 40), case: e.case, day: e.day, state: ['asked', 'taken', 'solved', 'done', 'lapsed'].includes(e.state) ? e.state : 'asked' }));
+    Object.defineProperty(s, 'fcOk', { value: true, enumerable: false, configurable: true });
+  }
+  return s.favours;
+}
+const fcSeed = () => machSeed('favourcase');
+const fcText = (c, k, fb) => worksText('favour.' + c + '.' + k, fb);
+// the week's ask: an evening of week w (any day from Day 13), a friend with a cabin, a case not done yet (else any)
+function fcPlan(w) {
+  const seed = fcSeed(), d = Math.max(FC_FROM, w * 7 + 1 + Math.floor(schedU(seed, w, 1021) * 7) % 7);
+  if (incWeek(d) !== w) return null;
+  const at = FC_EVE[0] + Math.floor(schedU(seed, w * 7 + 1, 1021) * ((FC_EVE[1] - FC_EVE[0]) / 10)) * 10;
+  return { d, at };
+}
+function fcWho(w) {
+  let ps = []; try { ps = schedPeople().filter(p => p.bed && placeById(p.bed) && relTier(p.id) >= FC_TIER && !(typeof favoursOf === 'function' && favoursOf(p.id).length)).sort((a, b) => (a.id < b.id ? -1 : 1)); } catch (e) { return null; }
+  return ps.length ? ps[Math.floor(schedU(fcSeed(), w, 1019) * ps.length) % ps.length] : null;
+}
+function fcCase(w) {
+  const L = fcList() || [], left = FC_IDS.filter(c => !L.some(e => e.case === c && e.state === 'done')), from = left.length ? left : FC_IDS;
+  return from[Math.floor(schedU(fcSeed(), w, 1020) * from.length) % from.length];
+}
+// a clue's place: their bed, or the deck's junction panel, the laundry's washer, the scrubber (else their bed)
+function fcPlace(where, bed) {
+  const B = placeById(bed), pp = id => machineById(id) ? panelPlace(id) : null;
+  const P = where === 'junction' ? (B && machineList().filter(m => /junction/.test(m.id) && m.deck === B.deck).map(m => panelPlace(m.id)).find(Boolean))
+    : where === 'laundry' ? pp('4-washer-1') : where === 'scrubber' ? pp('4-scrubber-1') : null;
+  return P && placeById(P) ? P : bed;
+}
+function fcAsk(w, t) {
+  const L = fcList(), p = fcWho(w); if (!L || !p || typeof favourPost !== 'function') return null;
+  const c = fcCase(w), B = placeById(p.bed);
+  const fid = favourPost({ from: p.id, title: fcText(c, 'title', 'A favour'), stops: [{ deck: B.deck, placeId: null, mins: FC_FIX, tag: 'fcase' }], expires: t + FC_DAYS * 1440 });
+  const F = fid && favourById(fid); if (!F) return null;
+  F.fcase = c;
+  L.push({ id: fid, who: p.id, case: c, day: worksDay(t), state: 'asked' }); if (L.length > FC_KEEP) L.splice(0, L.length - FC_KEEP);
+  const mail = worksText('mail.favour.' + c, 'A favour | ' + fcText(c, 'ask', 'Could you take a look at something for me?')), cut = mail.indexOf(' | ');
+  if (typeof mailSend === 'function') mailSend({ at: t, from: worksName(p.id), subject: cut > 0 ? mail.slice(0, cut) : 'A favour', body: cut > 0 ? mail.slice(cut + 3) : mail });
+  simNote('favourCase', { id: fid, case: c, from: p.id, step: 'ask' });
+  return fid;
+}
+// the side job (made when you accept): three clue looks, then the choose
+function fcStops(j) {
+  const S = FAVOUR_CASES[j.fcase], B = placeById(j.bed); if (!S || !B) return [];
+  const opts = (j.order || [1, 2, 3]).map(n => ({ id: 'sus' + n, label: fcText(j.fcase, 'sus.' + n, 'sus ' + n) }));
+  return [...S.map((where, k) => { const pl = fcPlace(where, j.bed), P = placeById(pl); return { deck: P.deck, placeId: pl, mins: 1, tag: 'clue', how: 'look', opts: { secs: 3, text: fcText(j.fcase, 'clue.' + (k + 1), '...') } }; }),
+    { deck: B.deck, placeId: j.bed, mins: 1, tag: 'call', how: 'choose', opts: { title: worksText('favour.call', 'What\'s causing it?'), text: fcText(j.fcase, 'title', ''), options: opts } }];
+}
+function fcStepDone(j, k, res, t) {
+  const st = fcStops(j)[k]; if (!st || st.tag !== 'call') return true;
+  if (![0, 1, 2].every(i => (j.stepsDone || []).includes(i))) return false;   // the clues first
+  if (!res || res.pick !== 'sus1') { j.wrong = (j.wrong || 0) + 1; try { toast(fcText(j.fcase, 'title', 'A favour'), worksText('favour.not', 'Not that. Look again.')); } catch (e) { /* no UI */ } return false; }
+  return true;
+}
+function fcDone(j, t, by) {
+  const F = typeof favourById === 'function' ? favourById(j.favour) : null, e = (fcList() || []).find(x => x.id === j.favour);
+  if (F && F.stops[0]) { F.stops[0].placeId = j.bed; if (typeof MACH_REV !== 'undefined') MACH_REV++; }   // the fix can be done now
+  if (e) e.state = 'solved';
+  try { toast(fcText(j.fcase, 'title', 'A favour'), fcText(j.fcase, 'solved', 'That\'s it.')); } catch (err) { /* no UI */ }
+  simNote('favourCase', { id: j.favour, case: j.fcase, from: j.from, step: 'solved', wrong: j.wrong || 0 });
+}
+if (typeof jobKindAdd === 'function') jobKindAdd('fcase', { tier: 1, work: 0, text: 'Favour', side: true, stops: fcStops, stepDone: fcStepDone, done: fcDone, veto: true, crew: { can: () => false, mins: 30 } });
+if (typeof WORKS_SIDE_KINDS !== 'undefined' && WORKS_SIDE_KINDS.add) WORKS_SIDE_KINDS.add('fcase');   // (never turned in at the board: finished when solved; the favour's hand-back is the reward)
+// the clock: the week's ask at its evening minute (an Officer, Day 13 on); an accepted favour gets its side job (yours at
+// once, the suspects shuffled by its id); a fixed and handed-back favour is done; one that lapsed, they ask someone else
+if (JOB_KINDS.fcase) WORK_TICKS.push((now, skip) => {
+  const W = SHIP.works, L = W && fcList(); if (!L || W.rank === 'junior') return;
+  const d = worksDay(now), m = now - (d - 1) * 1440, w = incWeek(d);
+  for (const e of L) {
+    if (e.state === 'done' || e.state === 'lapsed') continue;
+    const F = typeof favourById === 'function' ? favourById(e.id) : null;
+    if (!F || (F.status === 'done' && F.doneBy !== 'you')) {
+      e.state = 'lapsed';
+      for (const x of SHIP.jobs) if (x.kind === 'fcase' && x.favour === e.id && x.status !== 'done') { x.status = 'done'; x.doneAt = now; x.doneBy = null; }   // its side job goes too
+      if (!skip) try { toast(worksName(e.who), worksText('favour.lapse', '{name} asked someone else. No harm done.', { name: worksFirst(e.who) })); } catch (err) { /* no UI */ }
+      continue;
+    }
+    if (F.status === 'done') { e.state = 'done'; continue; }
+    for (const x of SHIP.jobs) if (x.kind === 'fcase' && x.favour === e.id && x.workDone && x.status !== 'done') jobFinish(x, now, 'you');   // solved: done, no board turn-in (R5)
+    if (e.state === 'asked' && F.status === 'claimed' && F.claimedBy === 'you' && !SHIP.jobs.some(x => x.kind === 'fcase' && x.favour === e.id)) {
+      const P = typeof schedPeople === 'function' ? schedPeople().find(p => p.id === e.who) : null; if (!P) continue;
+      const order = [1, 2, 3].map(n => [schedU(machSeed(e.id), n, 1020), n]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
+      const j = jobMake('fcase', { id: 'fcase:' + e.id, deck: placeById(P.bed).deck, h: Math.floor(now / 60), title: fcText(e.case, 'title', 'A favour'), fcase: e.case, favour: e.id, from: e.who, bed: P.bed, order });
+      j.posted = j.found = now; j.claimedBy = 'you'; j.status = 'claimed'; j.start = now; SHIP.jobs.push(j); e.state = 'taken';
+      F.expires = Math.max(F.expires || 0, now + 14 * 1440);   // accepted: it doesn't lapse mid-case
+      if (typeof MACH_REV !== 'undefined') MACH_REV++;
+    }
+  }
+  if (d < FC_FROM || L.some(e => incWeek(e.day) === w)) return;
+  const P = fcPlan(w); if (!P || P.d !== d || m < P.at || m > FC_EVE[1]) return;
+  fcAsk(w, now);
+});
+
+// ---- fault-finder tickets (24l, E2 on H's behalf; favour-cases.html "Fault-finder tickets"). Day 13: Calder's Mail
+// (mail.ticket.first). From then, on a workday shift of yours, a ticket on the Works board at 08:00: a Tier 2 machine's
+// real fault (key 1022 the machine, 1023 the fault) held for you in slot 23 till 17:00, with a T2 head-scratcher made
+// by 24k's caseMake for a kind that's open (c.ticket: hints only after your third clue, 24k's caseHint). Solved right
+// first time: you're a Fault-finder (grade 1): W.ms ['ff1', day] (24 core's Record line, E1), the pin on your uniform
+// (section 8's s.pin, rebuilt by 24 core's playerRigRebuild), ticket.solved and works.pin. A wrong call fitted: "Not yet. Next
+// week." (ticket.wrong): the ticket's over for this week, the job a plain repair; the next one a week on. Not taken: the
+// crew fix it at 17:00 and it's back the next workday. Saved: SHIP.works.side.ff = { grade, tries, next, job, mail }
+// (cleaned on read). Grades 2 and 3 (Days 19 and 24) are Steps 5 and 6 on this machinery.
+const FF_FROM = 13, FF_SLOT = 23, FF_POST = 480, FF_MAIL = 490;   // (a ticket's hints after three clues: 24k's caseHint)
+function ffState() {
+  const s = typeof worksSide === 'function' ? worksSide() : null; if (!s) return null;
+  const F = s.ff, n = (v, lo, hi, d) => Number.isInteger(v) ? Math.max(lo, Math.min(hi, v)) : d;
+  if (!F || typeof F !== 'object' || !s.ffOk) {
+    s.ff = { grade: n(F && F.grade, 0, 3, 0), tries: n(F && F.tries, 0, 999, 0), next: n(F && F.next, 0, 9999, FF_FROM), job: F && typeof F.job === 'string' ? F.job.slice(0, 80) : null, mail: F && F.mail ? 1 : 0 };
+    Object.defineProperty(s, 'ffOk', { value: true, enumerable: false, configurable: true });
+  }
+  return s.ff;
+}
+const ffSeed = () => machSeed('ticket');
+// the machine and its fault: a Tier 2 machine with no job of yours, the crew's or a case on it, a part fault that an open
+// case kind fits
+function ffPick(d) {
+  const kinds = caseKindsOpen(), ok = (m, f) => f.part && kinds.some(id => { try { return !!CASE_KINDS[id].fits(f, m); } catch (e) { return false; } });
+  const ms = machineList().filter(m => (m.tier || MACHINE_KINDS[m.kind].tier) === 2 && !ENGINE_KINDS.has(m.kind) && caseCauses(m).some(f => ok(m, f))
+    && !SHIP.jobs.some(j => j.machine === m.id && j.status !== 'done' && (j.claimedBy || j.case || j.reserved))).sort((a, b) => (a.id < b.id ? -1 : 1));
+  if (!ms.length) return null;
+  const m = ms[Math.floor(schedU(ffSeed(), d, 1022) * ms.length) % ms.length], fs = caseCauses(m).filter(f => ok(m, f));
+  return { m, f: fs[Math.floor(schedU(ffSeed(), d, 1023) * fs.length) % fs.length] };
+}
+function ffPost(t) {
+  const F = ffState(), C = typeof caseState === 'function' ? caseState() : null, d = worksDay(t); if (!F || !C || typeof jobReserve !== 'function') return null;
+  const P = ffPick(d); if (!P) return null;
+  const { m, f } = P, id = jobReserve(m.id, d, t % 1440, FF_SLOT, { tier: 2, until: (d - 1) * 1440 + DAY_SHIFT[1], cause: f.id }), j = id && SHIP.jobs.find(x => x.id === id);
+  if (!j) return null;
+  delete j.make; delete j.makeMins; j.cause = f.id; j.parts = [f.part]; j.ticket = true;
+  const kinds = caseKindsOpen().filter(k => { try { return !!CASE_KINDS[k].fits(f, m); } catch (e) { return false; } });
+  let c = null;
+  for (const kid of kinds) for (let k = 0; k < CASE_TRIES && !c; k++) { const r = caseMake(j, kid, k, d); if (!r.why) c = r.c; }
+  if (!c) { jobRelease(FF_SLOT); return null; }         // no fair case on it today: a plain repair; a ticket tomorrow
+  c.ticket = true; c.by = c.by || caseTalker(d); C.n++; C.open.push(c); j.case = c.id; F.job = j.id;
+  if (!c.wait) caseShow(c, j);
+  j.title = worksText('ticket.card', 'Ticket: {machine} ({shows})', { machine: caseMachName(j), shows: String(f.shows || '').split('|')[0] });
+  if (typeof MACH_REV !== 'undefined') MACH_REV++;
+  return j.id;
+}
+function ffGrade(n, t) {                                 // a grade: the Record's line, the pin, the words
+  const W = SHIP.works, F = ffState(); if (!W || !F || F.grade >= n) return false;
+  F.grade = n; if (!W.ms.some(x => x[0] === 'ff' + n)) W.ms.push(['ff' + n, worksDay(t)]);
+  ffPin(); if (typeof flagSet === 'function') flagSet('ticket.solved', 1);   // Calder's line (calder.lines, flag ticket.solved)
+  try { toast(worksName('calder'), worksText('ticket.solved', 'Calder signs it off. You\'re a Fault-finder.')); toast(worksText('works.grade.' + n, 'Fault-finder'), worksText('works.pin', 'A small pin for your uniform.')); } catch (e) { /* no UI */ }
+  simNote('faultFinder', { grade: n });
+  return true;
+}
+// the player's figure rebuilt from PLAYER_SPEC (24l owns it, lead 17; E1's 24 core never declares one): the old rig
+// removed and freed, makeCharacter again, the props reset, the grubby tint put back (as 24p's promoPip does for the pip)
+function playerRigRebuild() {
+  if (typeof player === 'undefined' || !player || !player.rig) return false;
+  const w = player, old = w.rig;
+  w.obj.remove(old.root); old.root.traverse(o => { if (o.isMesh) o.geometry.dispose(); });
+  w.rig = makeCharacter(w.spec); w.obj.add(w.rig.root); w.rig.root.traverse(o => { o.userData.walker = w; });
+  w.propMeshes = []; w.propKey = ''; w.bodyProps = null;
+  if (typeof ACT !== 'undefined' && ACT && ACT.body && typeof recBody === 'function') recBody(ACT);   // the stand-in at a place too (as playerKit does; E5)
+  const grubby = typeof uniformState === 'function' && uniformState() === 'grubby' && !PLAYER_SPEC.kit;
+  if (typeof playerUniformTint === 'function' && (grubby || (typeof UNIFORM_MAT !== 'undefined' && UNIFORM_MAT))) playerUniformTint(grubby ? 1 : 0);
+  return true;
+}
+function ffPin() {                                       // your uniform's pin (section 8's s.pin), from your grade
+  const F = ffState(), g = F ? F.grade : 0;
+  try { if (typeof playerRigRebuild !== 'function' || typeof player === 'undefined' || !player || (PLAYER_SPEC.pin || 0) === g) return false;
+    PLAYER_SPEC.pin = player.spec.pin = g; playerRigRebuild(); return true; } catch (e) { return false; }
+}
+// the clock: Calder's Mail on Day 13 (or the first day after, for an Officer); a ticket at 08:00 on a workday of yours
+// once it's due; a wrong call ends this week's; solved, grade 1
+if (typeof caseMake === 'function') WORK_TICKS.push((now, skip) => {
+  const W = SHIP.works, F = W && W.rank !== 'junior' && ffState(); if (!F) return;
+  const d = worksDay(now), m = now - (d - 1) * 1440, C = caseState();
+  if (!F.mail && d >= FF_FROM && m >= FF_MAIL && m < 1260) {
+    F.mail = 1;
+    const mail = worksText('mail.ticket.first', 'A ticket | A ticket case, when you\'re ready. On the Works board, any shift. — Calder'), cut = mail.indexOf(' | ');
+    if (typeof mailSend === 'function') mailSend({ at: now, from: worksName('calder'), subject: cut > 0 ? mail.slice(0, cut) : 'A ticket', body: cut > 0 ? mail.slice(cut + 3) : mail });
+  }
+  const j = F.job && SHIP.jobs.find(x => x.id === F.job), c = j && C && (C.open.find(x => x.job === j.id) || null);
+  if (F.job && j) {
+    if (c && c.fits > 0 && !j.workDone) {                // a wrong call fitted (crossing suspects out on the notepad isn't one): not yet, next week (the job a plain repair)
+      F.tries++; F.next = d + 7; F.job = null; if (typeof caseRelease === 'function') caseRelease(c, j); jobRelease(FF_SLOT);
+      if (!skip) try { toast(j.title, worksText('ticket.wrong', 'Not yet. Next week.')); } catch (e) { /* no UI */ }
+      simNote('ticket', { step: 'wrong', tries: F.tries });
+      return;
+    }
+    if (j.status === 'done') { F.job = null; if (j.doneBy === 'you' && j.rightFirst !== false) ffGrade(1, now); return; }
+    if (!heldForYou(j) && j.claimedBy !== 'you') F.job = null;   // released at 17:00: the crew's; back tomorrow
+    return;
+  }
+  if (F.job && !j) F.job = null;
+  if (F.grade >= 1 || d < Math.max(FF_FROM, F.next) || !playerShiftOn(d) || m < FF_POST || m > DAY_SHIFT[1] - 120) return;
+  if (SHIP.jobs.some(x => x.ticket && worksDay(x.posted) === d)) return;   // one a day
+  ffPost(now);
+});
+WORK_TICKS.push(() => { if (SHIP.works && SHIP.works.side && SHIP.works.side.ff && SHIP.works.side.ff.grade && typeof player !== 'undefined' && player && (PLAYER_SPEC.pin || 0) !== SHIP.works.side.ff.grade) ffPin(); });   // a reload: the pin back on
+
+// ---------------------------------------------------------------------
+// 24o LEAK HUNTING (M13, seat E2 (M2's), 0.51.x; plans/mechanics/m13-leak-hunting.html). A side job from Day 12, an
+// Officer's: about once a week (a workday of yours, posted 08:00) a pipe joint starts to drip and the board says only "A
+// pipe drips somewhere on Deck 4". Find it: a puddle on the floor and a damp patch on the wall show the room; look at the
+// puddle ("coming from above, along the north wall"), then the damp, then the joint: tighten it (a turn), or if it's worn
+// through, a joint from stores (section 17's jointJobPost, held for you). Ladder row m13 (24 core's table, E1: small, Day 12 = LEAK_FROM, stages at 0 and LEAK_GALLERY uses, by LEAK_BY; its first use is the
+// training, at the puddle: the Works officer on shift finds it with you, the writer's meeting train.m13.<id>). Not taken
+// by the end of your shift: held till 09:00 the next workday, then the crew find it the long way (an hour). Stages: 0 a
+// public room; 1 after 3 leaks also the Deck 5 pipe galleries (works: true places behind their panels); with the pipe kit
+// (24i's, M9) the puddle's look adds the kit's damp reading. The joints are E3's places (DECKS[n].leakJoints, n-leak-k
+// and n-leakp-k, Decks 3-5): on Decks 3-4 the joint itself wears (no machine), on Deck 5 a gallery joint by a worn valve
+// is likelier and likelier worn through. Drawn: the puddle (flat discs 1.2 cm up, one instanced draw call) and the damp
+// patch (discs 1.5 cm off the wall, one more), only while a leak is open on your deck. Saved: SHIP.works.side.leaks =
+// [{ id, joint, room, deck, day, worn, found }] (the last 12; found: 'you', a crew id, or null while open), read back
+// defensively (24 core's worksSide keeps side whole). Hash keys 1013 (which joint, worn through), 1014 (which day). No R().
+const LEAK_FROM = 12, LEAK_POST = 480, LEAK_LAST = 900, LEAK_KEEP = 12;   // from Day 12; posted 08:00 (the first by 15:00)
+const LEAK_CREW = 60, LEAK_GALLERY = 3;                  // the crew's long way (minutes); the galleries after 3 leaks of yours
+const LEAK_BY = ['torres-zeke', 'halloran-emeka', 'calder'];
+const leakSide = () => typeof worksSide === 'function' ? worksSide() : null;
+function leakList() {                                    // side.leaks, cleaned the first time it's read (a save may hold junk)
+  const s = leakSide(); if (!s) return null;
+  if (!Array.isArray(s.leaks) || !s.leaksOk) {
+    s.leaks = (Array.isArray(s.leaks) ? s.leaks : []).filter(e => e && typeof e.id === 'string' && typeof e.joint === 'string' && [3, 4, 5].includes(e.deck) && Number.isInteger(e.day))
+      .slice(-LEAK_KEEP).map(e => ({ id: e.id.slice(0, 80), joint: e.joint.slice(0, 40), room: typeof e.room === 'string' ? e.room.slice(0, 4) : null, deck: e.deck, day: e.day, worn: e.worn ? 1 : 0, found: typeof e.found === 'string' ? e.found.slice(0, 40) : null }));
+    Object.defineProperty(s, 'leaksOk', { value: true, enumerable: false, configurable: true });   // (not saved)
+  }
+  return s.leaks;
+}
+const leakJoints = () => [3, 4, 5].flatMap(n => ((DECKS[n] && DECKS[n].leakJoints) || []).filter(J => J && placeById(J.place)).map(J => ({ ...J, deck: n })));
+const leakJoint = id => leakJoints().find(J => J.place === id) || null;
+const leakFound = () => (leakList() || []).filter(e => e.found === 'you').length;
+const leakOpen = () => (leakList() || []).find(e => !e.found) || null;
+const leakSeed = () => machSeed('leak');
+const LEAK_WALL = { n: 'north', s: 'south', e: 'east', w: 'west' };
+function leakValveWear(J) {                              // a gallery joint by a worn valve (Deck 5's 5-valve-1/-2): 0-1
+  if (!J.gallery) return 0; const p = placeById(J.place); if (!p) return 0;
+  const vs = machineList().filter(m => m.kind === 'valve' && m.deck === J.deck && Math.hypot(m.at[0] - p.at[0], m.at[1] - p.at[1]) <= 6);
+  return vs.reduce((a, m) => Math.max(a, incWear(m.id)), 0);
+}
+// the week's leak day: a workday of yours, Day 12 on, not the week's incident day or a test job's day; null if none
+function leakDay(w) {
+  const W = SHIP.works; if (!W) return null; const P = incState() ? incPlan(w) : null;
+  const days = [0, 1, 2, 3, 4].map(k => w * 7 + 1 + k).filter(d => d >= LEAK_FROM && playerShiftOn(d) && !(P && P.length && P[1] === d) && !(W.test && W.test.day === d));
+  return days.length ? days[Math.floor(schedU(leakSeed(), w, 1014) * days.length) % days.length] : null;
+}
+// which joint drips (week w): public ones first; after 3 leaks the galleries too, by their valves' wear; worn through 1 in 3
+function leakPick(w) {
+  const all = leakJoints(), Js = all.filter(J => !J.gallery || leakFound() >= LEAK_GALLERY); if (!Js.length) return null;
+  const wt = Js.map(J => J.gallery ? 2 + 2 * leakValveWear(J) : 1), sum = wt.reduce((a, b) => a + b, 0);
+  let u = schedU(leakSeed(), w, 1013) * sum, J = Js[0];
+  for (let k = 0; k < Js.length; k++) { if (u < wt[k]) { J = Js[k]; break; } u -= wt[k]; }
+  return { J, worn: schedU(leakSeed(), w * 7 + 2, 1013) < .3 + .4 * leakValveWear(J) ? 1 : 0 };
+}
+function leakPost(t, w = incWeek(worksDay(t))) {
+  const L = leakList(); if (!L || leakOpen()) return null;
+  const P = leakPick(w); if (!P) return null;
+  const { J, worn } = P, p = placeById(J.place), d = worksDay(t);
+  const j = jobMake('leak', { id: 'leak:' + J.place + '@' + Math.floor(t / 60), deck: J.deck, room: null, h: Math.floor(t / 60), joint: J.place, worn, urgency: 1,
+    title: worksText('leak.card', 'A pipe drips somewhere on Deck {deck}', { deck: J.deck }), leave: Math.max(60, (d - 1) * 1440 + DAY_SHIFT[1] - Math.max(t, (d - 1) * 1440 + DAY_SHIFT[0])) + 60 });
+  j.posted = j.found = t;
+  SHIP.jobs.push(j); L.push({ id: j.id, joint: J.place, room: p.room || null, deck: J.deck, day: d, worn, found: null });
+  if (L.length > LEAK_KEEP) L.splice(0, L.length - LEAK_KEEP);
+  simNote('leak', { id: j.id, step: 'drip', deck: J.deck });
+  if (typeof MACH_REV !== 'undefined') MACH_REV++;
+  leakFx(); return j.id;
+}
+// the stops: the puddle (a look), the damp on the wall (a look at the joint), the joint (a turn, or a look when it's worn
+// through). The damp and the joint have no place till you've looked at the puddle (the board says only the deck); the
+// crew know where it is once they've taken it (the long way)
+function leakStops(j) {
+  const J = leakJoint(j.joint); if (!J) return [];
+  const pp = J.puddlePlace && placeById(J.puddlePlace) ? J.puddlePlace : J.place, open = (j.stepsDone || []).includes(0) || (!!j.claimedBy && j.claimedBy !== 'you');
+  const wall = LEAK_WALL[(J.damp && J.damp[2]) || J.wall] || 'near', kit = typeof hasTool === 'function' && hasTool('pipekit') && worksStage('m13') >= 1;
+  return [
+    { deck: J.deck, placeId: pp, mins: 1, tag: 'puddle', how: 'look', opts: { ...(kit ? { tool: 'pipekit' } : {}), secs: 3, text: worksText('leak.look.above', 'It\'s coming from above, towards {place}.', { place: 'the ' + wall + ' wall' })
+        + (kit ? ' ' + worksText('leak.look.warmer', 'Wetter here. You\'re close.') : '') } },
+    { deck: J.deck, placeId: open ? J.place : null, mins: 1, tag: 'damp', how: 'look', opts: { secs: 3, text: worksText('leak.look.here', 'There. A joint, weeping.') } },
+    j.worn ? { deck: J.deck, placeId: open ? J.place : null, mins: 2, tag: 'joint', how: 'look', opts: { secs: 3, text: worksText('leak.worn', 'Worn right through. Tightening won\'t hold it: it needs a new joint from stores.') } }
+      : { deck: J.deck, placeId: open ? J.place : null, mins: 2, tag: 'joint', how: 'turn', opts: { label: worksText('leak.fix.tighten', 'Tighten the joint'), v: 0, min: 0, max: 3, by: 1,
+        onTurn: v => v >= 3 ? worksText('leak.tight', 'Snug. The drip stops.') : v > 0 ? worksText('leak.turning', 'A quarter turn. Still a bead of water. A bit more.') : null, ok: v => v >= 3, gauge: null } },
+  ];
+}
+function leakStepDone(j, k, res, t) {
+  if (k > 0 && !(j.stepsDone || []).includes(0)) return false;   // the puddle first
+  if (k === 0 && SHIP.works.tr.m13 === undefined) {      // your first: the Works officer on shift finds it with you (the writer's meeting train.m13.<id>, else a word); trained here
+    const row = ladderRow('m13'), by = (row && ladderTeacher(row, worksDay(t))) || LEAK_BY[0];
+    if (!MEETING_SCRIPTS['train.m13.' + by] && !MEETING_SCRIPTS['train.m13']) worksTeach('m13', by, 'puddle', ['Follow the wet, not the noise. Well, both.']);
+    worksTrained('m13', t);
+  }
+  if (k === 0 && typeof hasTool === 'function' && hasTool('pipekit') && worksStage('m13') >= 1 && typeof toolWear === 'function') toolWear('pipekit', 5);   // the kit's damp reading (24 core's wear, E1)
+  return true;
+}
+// fixed (by you: found by you, the worn joint's replacement posted, held for you; by the crew: the long way). The puddle goes
+function leakDone(j, t, by) {
+  const e = (leakList() || []).find(x => x.id === j.id); if (e) e.found = by || 'crew';
+  if (by === 'you') {
+    worksUse('m13');                                    // +1 a leak (lead 17): no foundBy, so no found-by-you bonus; side.leaks keeps found
+    try { toast(j.title, worksText('leak.done', 'Dry. Found it yourself.')); } catch (e) { /* no UI */ }
+    if (j.worn && typeof jointJobPost === 'function') {
+      const p = placeById(j.joint), F = jointJobPost({ placeId: j.joint, title: worksText('leak.fix.replace', 'Replace the joint ({part})', { part: 'a seal' }) + ': ' + ((p && roomName(p.deck, p.room)) || 'corridor') }), J = F && SHIP.jobs.find(x => x.id === F);
+      if (J) { J.leave = Math.max(60, (worksDay(t) - 1) * 1440 + DAY_SHIFT[1] - t); J.xp = 0; j.fix = F; }   // no rep of its own: the leak's +1 covers it (24 core skips j.xp === 0; lead 17)
+    }
+  } else if (SHIP.works.tr.m13 !== undefined && t >= shipNow() - 1) try { toast(worksText('leak.card', 'A pipe drips somewhere on Deck {deck}', { deck: j.deck }), worksText('leak.found.crew', 'The crew found the drip on Deck {deck}. The long way.', { deck: j.deck })); } catch (e) { /* no UI */ }
+  simNote('leak', { id: j.id, step: 'fixed', by: by || null });
+  if (typeof MACH_REV !== 'undefined') MACH_REV++;
+  leakFx();
+}
+if (typeof jobKindAdd === 'function') jobKindAdd('leak', { tier: 2, work: 0, text: 'Leak', stops: leakStops, stepDone: leakStepDone, done: leakDone, veto: true,
+  crew: { can: incWorks, mins: LEAK_CREW } });
+if (typeof WORKS_SIDE_KINDS !== 'undefined' && WORKS_SIDE_KINDS.add) WORKS_SIDE_KINDS.add('leak');   // 24 core: a side job's reputation, capped
+if (JOB_KINDS.leak) WORK_MECH.m13 = {};
+// the clock: the first leak once the row is open (that day by 15:00, else the next workday's 08:00), then the week's on its
+// day at 08:00 (a week with one already, none). After a skip the crew have it in time
+if (WORK_MECH.m13) WORK_TICKS.push((now, skip) => {
+  const W = SHIP.works, L = W && leakList(); if (!L || !worksOpened(W).has('m13')) return;
+  const d = worksDay(now), m = now - (d - 1) * 1440, w = incWeek(d);
+  if (leakOpen() || m < LEAK_POST || !playerShiftOn(d)) return;
+  if (!L.length) { if (m <= LEAK_LAST || skip) leakPost(now, w); return; }
+  if (L.some(e => incWeek(e.day) === w) || leakDay(w) !== d) return;
+  leakPost(now, w);
+});
+// ---- the look: puddleAt(spots) (the puddle decal, M6's look: flat discs 1.2 cm off the floor, 3 mm apart) and the damp patch on the
+// wall (discs 1.5 cm off its face, hidden with its wall when the cutaway lowers it), each one instanced draw call, made the first time a leak is open on your deck (in
+// deckRoot, so the deck's unload frees them) ----
+const LEAK_FX = { root: null, wet: null, damp: null, decor: null, at: null };
+function puddleAt(spots, o = {}) {                       // spots: [[x, z, scale]] (tile units, a spot's centre); one instanced mesh in deckRoot
+  const g = new THREE.CircleGeometry(.5, 18); g.rotateX(-Math.PI / 2);
+  const im = new THREE.InstancedMesh(g, new THREE.MeshBasicMaterial({ color: col(o.color || '#4f86a8'), transparent: true, opacity: o.opacity || .5, depthWrite: false }), spots.length), M4 = new THREE.Matrix4();
+  spots.forEach(([x, z, s], k) => { M4.makeScale(s || 1, 1, (s || 1) * .85); M4.setPosition(X0(x), .012 + .003 * k, Z0(z)); im.setMatrixAt(k, M4); });
+  im.userData.noMerge = true; deckRoot.add(im); return im;
+}
+function leakFx() {
+  try {
+    if (typeof deckRoot === 'undefined' || !deckRoot || !deckDef) return;
+    const e = leakOpen(), J = e && e.deck === deckDef.num ? leakJoint(e.joint) : null;
+    if (LEAK_FX.root !== deckRoot || LEAK_FX.at !== (J && J.place)) {
+      for (const k of ['wet', 'damp']) if (LEAK_FX[k] && LEAK_FX.root === deckRoot) { deckRoot.remove(LEAK_FX[k]); LEAK_FX[k].geometry.dispose(); LEAK_FX[k].material.dispose(); }
+      if (LEAK_FX.decor) WALL_DECOR = WALL_DECOR.filter(x => x !== LEAK_FX.decor);
+      LEAK_FX.root = deckRoot; LEAK_FX.wet = LEAK_FX.damp = LEAK_FX.decor = null; LEAK_FX.at = J ? J.place : null;
+      if (J && J.puddle) LEAK_FX.wet = puddleAt([[J.puddle[0], J.puddle[1], 1.05], [J.puddle[0] + .35, J.puddle[1] - .2, .5]]);   // E3's puddle: a floor spot (tile units, centred)
+      const dk = J && J.damp && FACING[J.damp[2]] !== undefined ? (([x, z, w]) => w === 'n' || w === 's' ? `h,${Math.floor(x)},${w === 'n' ? Math.floor(z) : Math.ceil(z)}` : `v,${w === 'w' ? Math.floor(x) : Math.ceil(x)},${Math.floor(z)}`)(J.damp) : null, de = dk && EDGES.get(dk);
+      if (de && (de.type === 'wall' || de.type === 'hull')) {   // only on a solid wall (never a door or open floor)
+        const [x, z, wall] = J.damp, y = Math.max(1.15, ((J.joint && J.joint[1]) || 1.2) + .5);   // on the wall's light panel above the joint, streaking down to it
+        const pos = { n: [X0(x), Z0(Math.floor(z)) + T / 2], s: [X0(x), Z0(Math.ceil(z)) - T / 2], w: [X0(Math.floor(x)) + T / 2, Z0(z)], e: [X0(Math.ceil(x)) - T / 2, Z0(z)] }[wall];   // E3's damp: the joint's spot by its wall; the patch on the wall's face
+        const g = new THREE.CircleGeometry(.32, 16), im = new THREE.InstancedMesh(g, new THREE.MeshBasicMaterial({ color: col('#3f4a4e'), transparent: true, opacity: .42, depthWrite: false }), 2), M4 = new THREE.Matrix4(), Q = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, FACING[wall], 0));
+        const ax = new THREE.Vector3(1, 0, 0).applyQuaternion(Q), nx = new THREE.Vector3(0, 0, 1).applyQuaternion(Q);   // along the wall, out of it
+        [[0, 0, 1, 1.2, .015], [.05, -.4, .55, 1.1, .02]].forEach(([dx, dy, sx, sy, off], k) => { M4.compose(new THREE.Vector3(pos[0] + ax.x * dx + nx.x * off, y + dy, pos[1] + ax.z * dx + nx.z * off), Q, new THREE.Vector3(sx, sy, 1)); im.setMatrixAt(k, M4); });   // never coplanar: 5 mm apart
+        im.userData.noMerge = true; deckRoot.add(im); LEAK_FX.damp = im;
+        WALL_DECOR.push(LEAK_FX.decor = { g: im, e: de });   // the main loop hides it while the cutaway lowers its wall, as any wall piece
+      }
+    }
+  } catch (err) { console.error(err); }
+}
+WORK_TICKS.push((now, skip) => { if (!skip) leakFx(); });
+
+// ---------------------------------------------------------------------
+// 24q REWIRING (M15, seat E2, 0.51.x; plans/mechanics/m15-rewiring.html). From Day 17, an Officer's, about once a week
+// (posted 08:00 on a workday of yours): "Rewire junction 4-J2" (a junction job set to Tier 2 on the job itself; the
+// junction kind is Tier 3 in section 17). At the box's panel: open it (a look: the colour chart, 4-6 wires), then a
+// choose step a wire (this wire: which terminal?), then close up and test (a hold). A wrong pair pops a fuse at the
+// test: only that pair's stop opens again (never a fail); "right first time" if none. Done by you: the junction put
+// right (section 17's machine to 90 at least), a use. Stage 1 (after 3): one colour on the chart has faded; flick the
+// room's lights first (a look) and the chart's filled in. Stage 2 leads into P7 (Step 6). Ladder row m15 (24 core's
+// table, E1: big, Day 17 = REW_FROM, Calder, the tester; the lesson is W2's meeting train.m15.calder at the officers'
+// corridor's starboard utility closet: Calder rewires 4-junction-2 while you watch, then 4-junction-1 is yours). Not
+// taken: held to the end of your shift and an hour of the next, then the crew's (45 minutes). Saved:
+// SHIP.works.side.rewire = { done, wrongs, week } (jobs turned in, wrong pairs ever, the last week posted), cleaned on read; the job's own chart
+// in ship.jobs (j.chart: colours by terminal, j.faded, j.pairs: the pick per pair). Hash keys 1016 (which junction,
+// the wire count and chart), 1017 (which colour fades). No R().
+const REW_FROM = 17, REW_POST = 480, REW_CREW = 45, REW_FADE = 3, REW_KEEP = 90;
+const REW_TRAIN = ['4-junction-2', '4-junction-1'];      // Calder's, then yours (the officers' corridor's closet first)
+const REW_COLS = ['red', 'blue', 'yellow', 'green', 'white', 'black'];
+const rewSeed = () => machSeed('rewire');
+const rewBoxes = () => machineList().filter(m => /junction/.test(m.id) && panelPlace(m.id) && !SHIP.jobs.some(j => j.machine === m.id && j.status !== 'done'));   // not one with a job open
+function rewState() {                                    // side.rewire, cleaned (a save may hold junk)
+  const s = typeof worksSide === 'function' ? worksSide() : null; if (!s) return null;
+  const R = s.rewire;
+  if (!R || typeof R !== 'object' || !s.rewOk) {
+    s.rewire = { done: R && Number.isInteger(R.done) ? Math.max(0, Math.min(9999, R.done)) : 0, wrongs: R && Number.isInteger(R.wrongs) ? Math.max(0, Math.min(9999, R.wrongs)) : 0, week: R && Number.isInteger(R.week) ? R.week : -1 };
+    Object.defineProperty(s, 'rewOk', { value: true, enumerable: false, configurable: true });
+  }
+  return s.rewire;
+}
+const rewName = id => { const m = id.match(/^(\d)-junction-(\d+)$/); return m ? m[1] + '-J' + m[2] : id; };   // 4-junction-2 -> 4-J2
+const rewWire = c => worksText('wire.' + c, c);
+// the chart for a key (week, or a training's day): 4-6 colours in terminal order, and (stage 1 on) two that have faded
+function rewChart(k, stage) {
+  const seed = rewSeed(), n = 4 + Math.floor(schedU(seed, k, 1016) * 3) % 3;
+  const chart = REW_COLS.map((c, i) => [schedU(seed, k * 8 + i, 1016), c]).sort((a, b) => a[0] - b[0]).slice(0, n).map(x => x[1]);
+  const faded = stage >= 1 ? chart.map((c, i) => [schedU(seed, k * 8 + i, 1017), i]).sort((a, b) => a[0] - b[0]).slice(0, 1).map(x => x[1]) : [];   // one colour (the page; lead 17)
+  const order = chart.map((c, i) => [schedU(seed, k * 8 + 10 + i, 1016), i]).sort((a, b) => a[0] - b[0]).map(x => x[1]);   // the order the wires come to hand: the chart must be read (R5)
+  return { chart, faded, order };
+}
+// the week's day: a workday of yours from Day 17, not the incident's, the leak's or a test job's
+function rewDay(w) {
+  const W = SHIP.works; if (!W) return null; const P = incState() ? incPlan(w) : null, L = typeof leakDay === 'function' ? leakDay(w) : null;
+  const days = [0, 1, 2, 3, 4].map(k => w * 7 + 1 + k).filter(d => d >= REW_FROM && playerShiftOn(d) && !(P && P.length && P[1] === d) && d !== L && !(W.test && W.test.day === d));
+  return days.length ? days[Math.floor(schedU(rewSeed(), w, 1017) * days.length) % days.length] : null;
+}
+function rewJob(id, t, o = {}) {
+  const m = machineById(id); if (!m) return null;
+  const k = o.key !== undefined ? o.key : worksDay(t), { chart, faded, order } = rewChart(k, o.stage || 0);
+  const j = jobMake('rewire', { id: 'rewire' + (o.slot || '') + ':' + id + '@' + Math.floor(t / 60), machine: id, deck: m.deck, room: m.room, h: Math.floor(t / 60), tier: 2, urgency: 0,
+    title: worksText('rewire.card', 'Rewire junction {junction}', { junction: rewName(id) }), chart, faded, order, pairs: {}, wrongs: 0,
+    ...(o.slot ? { reserved: o.slot, until: (worksDay(t) - 1) * 1440 + DAY_SHIFT[1] } : { leave: Math.max(60, (worksDay(t) - 1) * 1440 + DAY_SHIFT[1] - Math.max(t, (worksDay(t) - 1) * 1440 + DAY_SHIFT[0])) + 60 }),
+    ...(o.train ? { train: o.train } : {}) });
+  j.posted = j.found = t;
+  return j;
+}
+// the stops, all at the box's panel: open it (the chart), flick the lights (faded charts only), a pair per wire, test
+function rewStops(j) {
+  const m = machineById(j.machine), pp = m && panelPlace(m.id); if (!pp) return [];
+  const chart = j.chart || [], fadedOpen = (j.faded || []).length && !(j.stepsDone || []).includes(1);
+  const shown = chart.map((c, i) => 'T' + (i + 1) + ' ' + ((j.faded || []).includes(i) && fadedOpen ? '?' : rewWire(c))).join(' · ');
+  const out = [{ deck: m.deck, placeId: pp, mins: 1, tag: 'open', how: 'look', opts: { secs: 3, text: shown + ((j.faded || []).length ? ' ' + worksText('rewire.faded', 'This one\'s faded. Which colour was it?') : '') } }];
+  if ((j.faded || []).length) out.push({ deck: m.deck, placeId: pp, mins: 1, tag: 'check', how: 'look', opts: { secs: 3, text: worksText('rewire.check', 'Flick the lights. See which one goes off.') + ' ' + chart.map((c, i) => 'T' + (i + 1) + ' ' + rewWire(c)).join(' · ') } });
+  for (const i of rewOrder(j)) out.push({ deck: m.deck, placeId: pp, mins: 1, tag: 'wire', how: 'choose', opts: { title: rewWire(chart[i]).replace(/^./, x => x.toUpperCase()),
+    text: shown, options: chart.map((_, i) => ({ id: 'T' + (i + 1), label: 'T' + (i + 1) })) } });
+  out.push({ deck: m.deck, placeId: pp, mins: 2, tag: 'test', how: 'hold' });
+  return out;
+}
+const rewFirst = j => (j.faded || []).length ? 2 : 1;   // the first pair's stop
+const rewOrder = j => Array.isArray(j.order) && j.order.length === (j.chart || []).length ? j.order : (j.chart || []).map((_, i) => i);   // (an older job: chart order)
+const rewRight = (j, k) => 'T' + (rewOrder(j)[k - rewFirst(j)] + 1);   // the stop's wire's terminal on the chart
+function rewStepDone(j, k, res, t) {
+  const st = rewStops(j)[k]; if (!st) return true;
+  if (!j.pairs || typeof j.pairs !== 'object') j.pairs = {}; if (!Number.isFinite(j.wrongs)) j.wrongs = 0;   // (a junk job)
+  const done = new Set(j.stepsDone || []);
+  if (st.tag !== 'open' && !done.has(0)) return false;   // open the box first
+  if (st.tag === 'wire') { if (rewFirst(j) === 2 && !done.has(1)) return false; j.pairs[k] = res && res.pick || null; return true; }   // a faded chart: the lights first
+  if (st.tag === 'test') {
+    const S = rewStops(j), wires = S.map((s, i) => s.tag === 'wire' ? i : -1).filter(i => i >= 0);
+    if (wires.some(i => !done.has(i))) return false;     // every pair in first
+    const wrong = wires.filter(i => j.pairs[i] !== rewRight(j, i));
+    if (wrong.length) {                                  // a fuse pops: only those pairs open again
+      j.wrongs += wrong.length; j.stepsDone = (j.stepsDone || []).filter(i => !wrong.includes(i));
+      for (const i of wrong) delete j.pairs[i];
+      try { toast(j.title, worksText('rewire.pop', 'Pop. That pair\'s wrong. Swap them and try again.')); } catch (e) { /* no UI */ }
+      return false;
+    }
+    if (!j.wrongs) try { toast(j.title, worksText('rewire.right', 'Right first time.')); } catch (e) { /* no UI */ }
+  }
+  return true;
+}
+function rewDone(j, t, by) {
+  const s = SHIP.machines && SHIP.machines[j.machine];
+  if (s) { s.cond = Math.max(s.cond, REW_KEEP); s.state = machineState(s.cond); }
+  if (by === 'you') {
+    const R = rewState(); if (R) { R.done++; R.wrongs += j.wrongs || 0; }
+    worksUse('m15'); j.rightFirst = !j.wrongs;            // right first time: 24 core's turn-in pays its +1 (once)
+    try { toast(j.title, worksText('rewire.done', 'Junction {junction} rewired. Lights steady.', { junction: rewName(j.machine) })); } catch (e) { /* no UI */ }
+  }
+  simNote('rewire', { id: j.id, machine: j.machine, by: by || null, wrongs: j.wrongs || 0 });
+  if (typeof MACH_REV !== 'undefined') MACH_REV++;
+}
+if (typeof jobKindAdd === 'function') jobKindAdd('rewire', { tier: 2, work: 0, text: 'Rewire', stops: rewStops, stepDone: rewStepDone, done: rewDone, veto: true,
+  crew: { can: incWorks, mins: REW_CREW } });
+if (typeof WORKS_SIDE_KINDS !== 'undefined' && WORKS_SIDE_KINDS.add) WORKS_SIDE_KINDS.add('rewire');
+// the lesson (ladder row m15, big): Calder's job on 4-junction-2 while you watch, then 4-junction-1 is yours (both held in
+// the row's slot, a clear chart)
+if (JOB_KINDS.rewire) WORK_MECH.m15 = {
+  reserve(d, at, slot, o = {}) {
+    const id = REW_TRAIN[o.yours ? 1 : 0], t = (d - 1) * 1440 + at; if (!machineById(id)) return null;
+    SHIP.jobs = SHIP.jobs.filter(x => !(x.reserved === slot && heldForYou(x) && !x.claimedBy) && !(x.kind === 'rewire' && x.machine === id && x.claimedBy !== 'you' && x.status !== 'done'));
+    const j = rewJob(id, t, { slot, train: o.train || 'm15', key: d * 2 + (o.yours ? 1 : 0) }); if (!j) return null;
+    SHIP.jobs.push(j); if (typeof MACH_REV !== 'undefined') MACH_REV++;
+    return j.id;
+  },
+  watch: 10,
+};
+// the clock: the week's rewiring at 08:00 on its day once you're trained (a week with one already, none)
+if (WORK_MECH.m15) WORK_TICKS.push((now, skip) => {
+  const W = SHIP.works; if (!W || W.tr.m15 === undefined || !rewState()) return;
+  const d = worksDay(now), m = now - (d - 1) * 1440, w = incWeek(d);
+  if (d <= W.tr.m15 || m < REW_POST || !playerShiftOn(d) || rewDay(w) !== d) return;
+  const R = rewState(); if (R.week >= w) return;
+  const boxes = rewBoxes(); if (!boxes.length) return;
+  const id = boxes[Math.floor(schedU(rewSeed(), w, 1016) * boxes.length) % boxes.length].id, j = rewJob(id, now, { key: w * 7 + 3, stage: worksStage('m15') });
+  if (j) { SHIP.jobs.push(j); R.week = w; if (typeof MACH_REV !== 'undefined') MACH_REV++; }
+});
+
+// ---------------------------------------------------------------------
+// 24r IRRIGATION (M14, seat E2, 0.51.x; plans/mechanics/m14-irrigation.html; 24r, not the page's old 24p, which is C2's
+// promotion: D3, 2026-10-19). Off shift, an Officer's, optional: on a harvest morning (section 16's gardenHarvestDay, the
+// first on or after Day 13) while the garden crew pick, walk the garden's three grow racks (E3's DECKS[3].growRacks,
+// 3-rack-1..3) and clear the clogged nozzles (2 to 4 in all, a short hold each at its rack). The next harvest is a little
+// bigger: irrigationBonus(d), 0 to 0.1, by the share you cleared (section 16's harvest pick reads it, one typeof-guarded
+// line; uncleared nozzles never lower it). Ladder row m14 (24 core's table, E1: small, Day 13 = NOZ_FROM, stages at 0, 2, 4 uses, by NOZ_BY; the first is the training, at the first rack: the
+// gardener leading the harvest, the writer's meeting train.m14.<id>). That evening's salad gets a mention. Stages: 0 the nozzles; 1 after 2 harvests flush a rack's line (a wait, 5 ship
+// minutes); 2 after 4 the irrigation plant (3-irrigation-1) gets a look, and a worn one is found by you. Nobody else
+// clears them: the job goes at midnight, no harm. A friendship step with the gardeners on duty each time. Saved:
+// SHIP.works.side.nozzles = { day, clogged: [rack, nozzle] pairs as 'r.n', cleared: [...], flushed, harvests, stage (that day's job's), bonus }
+// (bonus: what this harvest's pick gets, from the one before; told: the day its salad was mentioned). Hash key 1015 (which nozzles). No R().
+const NOZ_BY = ['cruz-tove', 'oneill-imani', 'hart-ravi'];   // the gardeners (the writer's meetings train.m14.<id>)
+const NOZ_FROM = 13, NOZ_PER = 4, NOZ_HOLD = 2, NOZ_FLUSH = 5, NOZ_MAX = .1, NOZ_PLANT = '3-irrigation-1';
+const nozRacks = () => ((DECKS[3] && DECKS[3].growRacks) || []).filter(R => R && placeById(R.place));
+function nozState() {                                    // side.nozzles, cleaned (a save may hold junk)
+  const s = typeof worksSide === 'function' ? worksSide() : null; if (!s) return null;
+  const N = s.nozzles, ok = a => Array.isArray(a) ? a.filter(x => typeof x === 'string' && /^\d\.\d$/.test(x)).slice(0, 12) : [];
+  if (!N || typeof N !== 'object' || !s.nozOk) {
+    s.nozzles = { day: N && Number.isInteger(N.day) ? N.day : 0, clogged: ok(N && N.clogged), cleared: ok(N && N.cleared), flushed: N && N.flushed ? 1 : 0,
+      harvests: N && Number.isInteger(N.harvests) ? Math.max(0, Math.min(999, N.harvests)) : 0, stage: N && Number.isInteger(N.stage) ? Math.max(0, Math.min(2, N.stage)) : 0, told: N && Number.isInteger(N.told) ? N.told : 0, bonus: N && Number.isFinite(N.bonus) ? Math.max(0, Math.min(NOZ_MAX, N.bonus)) : 0 };
+    Object.defineProperty(s, 'nozOk', { value: true, enumerable: false, configurable: true });
+  }
+  return s.nozzles;
+}
+// the harvest's share of a usual one more (section 16 multiplies the harvest pick by 1 + this): only on the day it was
+// worked out for, from the harvest before
+function irrigationBonus(d = worksDay(shipNow())) { const N = SHIP.works ? nozState() : null; return N && N.day === d ? N.bonus : 0; }
+// which nozzles are clogged on day d: 2 to 4 of the racks' twelve, by key 1015
+function nozClogged(d) {
+  const Rs = nozRacks(); if (!Rs.length) return [];
+  const all = Rs.flatMap((R, r) => [...Array(NOZ_PER)].map((_, k) => r + '.' + k)), seed = machSeed('nozzles'), n = 2 + Math.floor(schedU(seed, d, 1015) * 3) % 3;
+  return all.map((id, k) => [schedU(seed, d * 16 + k, 1015), id]).sort((a, b) => a[0] - b[0]).slice(0, n).map(x => x[1]).sort();
+}
+const nozLead = d => { try { const c = gardenCrew(d) || []; return (c.find(x => x.harvest && x.lead) || c.find(x => x.harvest) || c[0] || {}).id || null; } catch (e) { return null; } };
+function nozPost(t) {
+  const N = nozState(), d = worksDay(t); if (!N || N.day === d) return null;
+  const was = N.clogged.length ? N.cleared.length / N.clogged.length : 0, fl = N.flushed;
+  N.bonus = Math.round(NOZ_MAX * Math.min(1, was) * (N.stage >= 1 && N.day ? (fl ? 1 : .8) : 1) * 1000) / 1000;   // that harvest's job offered a flush (stage 1 on): flushing makes up the last fifth
+  N.day = d; N.clogged = nozClogged(d); N.cleared = []; N.flushed = 0; N.stage = Math.max(0, worksStage('m14'));
+  if (!N.clogged.length) return null;
+  const j = jobMake('nozzle', { id: 'nozzle:3@' + Math.floor(t / 60), deck: 3, room: (placeById(nozRacks()[0].place) || {}).room || null, h: Math.floor(t / 60), urgency: 0,
+    title: worksText('irr.clear', 'Clear the nozzles'), clogged: N.clogged.slice(), stage: N.stage, leave: 1440 });
+  j.posted = j.found = t; SHIP.jobs.push(j);
+  if (typeof MACH_REV !== 'undefined') MACH_REV++;
+  return j.id;
+}
+// the stops: each rack with clogged nozzles (a hold, 2 minutes a nozzle), then (stage 1 on) flush the first rack's line
+// (a wait), then (stage 2 on) a look at the irrigation plant
+function nozStops(j) {
+  const Rs = nozRacks(), by = r => (j.clogged || []).filter(x => +x[0] === r).length, out = [];
+  Rs.forEach((R, r) => { if (by(r)) out.push({ deck: 3, placeId: R.place, mins: NOZ_HOLD * by(r), tag: 'rack' + r, how: 'hold' }); });
+  if (j.stage >= 1 && Rs.length) out.push({ deck: 3, placeId: Rs[0].place, mins: 1, tag: 'flush', how: 'wait', opts: { mins: NOZ_FLUSH, label: worksText('irr.flush', 'Flush the line') } });
+  const pp = typeof panelPlace === 'function' && machineById(NOZ_PLANT) ? panelPlace(NOZ_PLANT) : null;
+  if (j.stage >= 2 && pp) out.push({ deck: 3, placeId: pp, mins: 1, tag: 'plant', how: 'look', opts: { secs: 3, text: worksText('noz.plant', 'The irrigation plant hums along. You check its filter and the pressure while you\'re here.') } });
+  return out;
+}
+function nozStepDone(j, k, res, t) {
+  const st = nozStops(j)[k], N = nozState(); if (!st || !N || N.day !== worksDay(j.posted)) return true;
+  if (SHIP.works.tr.m14 === undefined) {                // your first: the gardener leading the harvest shows you the first rack (the writer's meeting train.m14.<id>); trained here
+    if (!NOZ_BY.some(id => MEETING_SCRIPTS['train.m14.' + id])) { const by = nozLead(worksDay(t)); if (by) worksTeach('m14', by, 'rack', ['The nozzles clog. Clear each one and watch the water run even.']); }
+    worksTrained('m14', t);
+  }
+  if (/^rack/.test(st.tag)) {
+    const r = +st.tag.slice(4);
+    for (const x of j.clogged || []) if (+x[0] === r && !N.cleared.includes(x)) N.cleared.push(x);
+    try { toast(worksText('irr.title', 'Rack {n} · nozzles', { n: r + 1 }), worksText('irr.cleared', 'Clear. The water runs even again.')); } catch (e) { /* no UI */ }
+  }
+  if (st.tag === 'flush') { N.flushed = 1; try { toast(worksText('irr.flush', 'Flush the line'), worksText('irr.flushed', 'Flushed. The racks drink properly now.')); } catch (e) { /* no UI */ } }
+  if (st.tag === 'plant' && typeof machineFound === 'function') { const s = SHIP.machines[NOZ_PLANT]; if (s && s.cond < 70) machineFound(NOZ_PLANT, 'you'); }
+  return true;
+}
+function nozDone(j, t, by) {
+  const N = nozState(); if (by !== 'you' || !N) return;
+  N.harvests++; worksUse('m14');
+  try { for (const c of gardenCrew(worksDay(t)) || []) if (c.harvest) relAdd(c.id, 'work', 2); } catch (e) { /* no crew */ }
+  simNote('irrigation', { step: 'cleared', n: N.cleared.length, of: N.clogged.length });
+}
+if (typeof jobKindAdd === 'function') jobKindAdd('nozzle', { tier: 2, work: 0, text: 'Nozzles', stops: nozStops, stepDone: nozStepDone, done: nozDone, crew: { can: () => false, mins: 30 } });
+if (typeof WORKS_SIDE_KINDS !== 'undefined' && WORKS_SIDE_KINDS.add) WORKS_SIDE_KINDS.add('nozzle');
+if (JOB_KINDS.nozzle) WORK_MECH.m14 = {};
+// the clock: on a harvest morning once the row is open, the job goes up when the crew start picking (the harvest
+// gardeners' first minute, else 10:00) and stays till midnight; a job left from an earlier day goes
+if (WORK_MECH.m14) WORK_TICKS.push((now, skip) => {
+  const W = SHIP.works; if (!W || !nozState()) return;
+  const d = worksDay(now), m = now - (d - 1) * 1440;
+  for (const j of SHIP.jobs) if (j.kind === 'nozzle' && j.status !== 'done' && worksDay(j.posted) < d) { if (j.claimedBy === 'you' && typeof dropJob === 'function') dropJob(j.id); j.status = 'done'; j.doneAt = now; j.doneBy = null; }
+  const N = nozState();
+  if (N.day === d && N.bonus > 0 && N.told !== d && m >= 1080 && m < 1260 && !skip) { N.told = d; try { toast(worksText('irr.clear', 'Clear the nozzles'), worksText('irr.salad', 'Tonight\'s salad is extra crunchy. The garden says thank you.')); } catch (e) { /* no UI */ } }   // that evening's salad (18:00-21:00)
+  if (!worksOpened(W).has('m14') || d < NOZ_FROM || N.day === d || !gardenHarvestDay(d)) return;
+  let from = 600; try { const c = (gardenCrew(d) || []).filter(x => x.harvest && x.pick); if (c.length) from = Math.min(...c.map(x => x.pick[0])); } catch (e) { /* no crew */ }
+  if (m >= from && m < GARDEN.harvest) nozPost(now);
+});
 
 // 24p THE FIRST PROMOTION (Pillar 5 Step 3, the Works career engineer C2, 0.44.18+; plans/mechanics/promotion-officer.html
 // on claude/p5-design). Part 1, the Tier 2 test job: once you're "Relied on" and trained to make things safe (ladder
@@ -42927,6 +43545,7 @@ function makeCharacter(spec, finish = bake) {          // finish: what to do wit
       part(rig.chest, GEO.box, bd.inlay, bx, .2, bz + .006, .012, .012, .012);
     }
   }
+  if (s.pin && !plain) part(rig.chest, cylG(.022, .022, .014, 14), gold, -.085 * bw, .21, .168 * bw, 1, 1, 1, Math.PI / 2, 0, 0);   // 24l (E2): the fault-finder pin, right breast opposite the badge (merged in the chest)
   part(rig.chest, cylG(.075, .085, .05, 16), uniDk, 0, .33, 0);
   for (let i = 0; i < (plain ? 0 : Math.min(4, s.rank + 1)); i++) { const a = .55 + i * .32; part(rig.chest, GEO.sph, gold, Math.sin(a) * .083, .33, Math.cos(a) * .083, .011, .011, .011); }
   part(rig.chest, cylG(.05, .055, .08, 12), skin, 0, .37, 0);
