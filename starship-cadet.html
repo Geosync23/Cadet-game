@@ -39678,8 +39678,7 @@ function toolSlow(id) {
   const S = worksSide(), d = worksDay(shipNow()), said = S && (S.slow && typeof S.slow === 'object' ? S.slow : (S.slow = {}));
   if (said && said[id] !== d && !SIM_AT) {
     said[id] = d;
-    toast(toolName(id).replace(/^the /, '').replace(/^./, x => x.toUpperCase()), worksText('works.toolslow.' + id, TOOL_SLOW_SAY[id] || 'Your ' + toolName(id).replace(/^the /, '') + ' wants looking after.')
-      + ' ' + worksText('works.toolslow.bench', 'It still works, just slower. See to it at your bench in the Works bay.'));
+    toast(toolName(id).replace(/^the /, '').replace(/^./, x => x.toUpperCase()), worksText('tool.due.' + id, (TOOL_SLOW_SAY[id] || 'Your ' + toolName(id).replace(/^the /, '') + ' wants looking after.') + ' Bench, when you can.'));   // W2's tool.due.<id>
   }
   return 1.25;
 }
