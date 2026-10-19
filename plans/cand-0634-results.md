@@ -28,3 +28,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - ~05:34 R4 PASS E1 b82c8e2 (replaces b68e236). Merge note: E2 0.51.6 (coming) drops its m13/m14 pushes, so E1's CAREER_LADDER rows are the only copy. Passing for Step 4: E1 b82c8e2, E3 b809339, W2 7a5825b = exactly trial t4. Waiting for E2's round 1 (M13 leak hunting).
 - ~05:35 E3 626a907 (0.53.6 round 2: M10 workshop + tinkering, sub-block 24j between 24i and 24k; hooks in 15's jobTap and 20's chatShow/chatDo; mech_check part m10; contains b809339 + E1 7a9a942; lines = W2 7a5825b); with R4. Round 1 still waits on E2.
 - ~05:36 W2 c058947 (0.48.110, E1's five extra texts); with R4.
+- ~05:36 R4 PASS W2 c058947 (W2's tip).
