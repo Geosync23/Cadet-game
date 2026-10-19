@@ -588,6 +588,53 @@ def part_m13(g):
     else: print('  m13: (the look not checked: not on Decks 3-5)')
 PARTS['m13'] = part_m13
 
+# ---- M14 irrigation (24r, seat E2): on the first harvest morning from Day 13 the job goes up when the crew start picking;
+# 2-4 clogged nozzles over the racks (a hold each rack); the first trains the row; cleared ones make the next harvest's
+# bonus (all cleared: 0.1; none: 0, never lower); section 16's harvest reads it; left alone the job goes at midnight;
+# flushing from 2 harvests, the plant's look from 4; junk in the save cleaned; the same twice
+M14_STAND = r"""(() => { const out = [];
+  if (typeof worksSide !== 'function') { window.worksSide = () => SHIP.works ? (SHIP.works.side = SHIP.works.side || {}) : null; out.push('worksSide'); }
+  if (!(DECKS[3].growRacks || []).length) { out.push('growRacks'); DECKS[3].growRacks = DECKS[3].places.filter(p => /garden|plot|tend/.test(p.id)).slice(0, 3).map(p => ({ place: p.id, rack: p.at.slice() })); }
+  return out; })()"""
+M14 = r"""(() => { const out = {}, W0 = JSON.stringify(SHIP.works);
+ const reset = t => { machinesNew(); SHIP.jobs = []; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t); machinesNow(); SHIP.works = null; const W = worksInit(t); W.tier = 2; W.rank = 'officer'; W.tr.t2 = 10; (W.op[13] = W.op[13] || []).push('m14'); delete worksSide().nozOk; worksSide().nozzles = null; return W; };
+ const tick = (a, b) => { for (let t = a; t <= b; t += 10) { setShipNow(t); machinesNow(); for (const f of WORK_TICKS) f(t, false); } };
+ let d = 13; while (!gardenHarvestDay(d)) d++; let d2 = d + 1; while (!gardenHarvestDay(d2)) d2++;
+ out.days = [d, d2, weekday(d)];
+ let W = reset((d - 1) * 1440 + 300); tick((d - 1) * 1440 + 360, (d - 1) * 1440 + 660);
+ let j = SHIP.jobs.find(x => x.kind === 'nozzle'); out.posted = j ? [Math.round(j.posted % 1440), j.title, j.clogged.length, jobStops(j).map(s => s.step + ':' + s.how + ':' + (s.places[0] || '-'))] : null; if (!j) return out;
+ out.claimed = claimJob(j.id); jobStops(j).forEach((s, k) => jobStepDone(j.id, k, {})); out.turnin = turnInJob(j.id);
+ let N = worksSide().nozzles; out.after = [N.cleared.length, N.clogged.length, N.harvests, W.tr.m14 !== undefined, W.use.m14];
+ tick((d - 1) * 1440 + 670, (d2 - 1) * 1440 + 660); N = worksSide().nozzles;
+ out.bonus = [irrigationBonus(d2), irrigationBonus(d2 + 1), N.day === d2];
+ const j2 = SHIP.jobs.find(x => x.kind === 'nozzle' && worksDay(x.posted) === d2); tick((d2 - 1) * 1440 + 670, d2 * 1440 + 20);
+ out.lapsed = j2 ? [j2.status, j2.doneBy] : null;
+ let d3 = d2 + 1; while (!gardenHarvestDay(d3)) d3++; nozPost((d3 - 1) * 1440 + 600); out.none = irrigationBonus(d3);
+ out.hook = [...document.scripts].some(s => s.textContent.includes("typeof irrigationBonus === 'function' ? 1 + irrigationBonus(d) : 1"));
+ W.use.m14 = 2; out.st1 = nozStops({ clogged: ['0.1'], stage: worksStage('m14') }).map(s => s.step || s.tag);
+ W.use.m14 = 4; out.st2 = nozStops({ clogged: ['0.1'], stage: worksStage('m14') }).map(s => s.tag);
+ out.clog = [13, 14, 15, 16, 17, 18].map(x => nozClogged(x).length);
+ worksSide().nozzles = { day: 'x', clogged: ['0.1', 7, '9.99', '1.2'], cleared: 'no', harvests: -3, bonus: 5 }; delete worksSide().nozOk;
+ out.save = JSON.stringify(nozState());
+ SHIP.works = JSON.parse(W0); return out; })()"""
+def part_m14(g):
+    st = g.ev(M14_STAND)
+    if st: print('  m14 stand-ins:', st)
+    a, b = g.ev(M14), g.ev(M14)
+    if not a.get('after'): fail(f'm14: no job ({a})'); return
+    print('  m14 harvests', a['days'], 'posted', a['posted'], 'after', a['after'], 'bonus', a['bonus'], 'lapsed', a['lapsed'], 'none', a['none'], 'stages', a['st1'], a['st2'], 'clogged', a['clog'])
+    check(a['posted'] and 540 <= a['posted'][0] < 690 and 2 <= a['posted'][2] <= 4 and all(s.split(':')[2] != '-' for s in a['posted'][3]), 'm14: the job on the harvest morning, 2-4 nozzles, every rack a place')
+    check(a['claimed'] and a['turnin'] and a['after'][0] == a['after'][1] and a['after'][2] == 1 and a['after'][3] and a['after'][4] == 1, 'm14: cleared, trained, a use')
+    check(abs(a['bonus'][0] - .1) < 1e-9 and a['bonus'][1] == 0 and a['bonus'][2], 'm14: the next harvest a tenth bigger, that day only')
+    check(a['lapsed'] == ['done', None] and a['none'] == 0, 'm14: left alone it goes at midnight; uncleared never lowers it')
+    check(a['hook'], "m14: section 16's harvest reads irrigationBonus")
+    check('flush' in a['st1'] and 'plant' not in a['st1'] and 'plant' in a['st2'], 'm14: flushing from 2 harvests, the plant from 4')
+    check(all(2 <= n <= 4 for n in a['clog']), 'm14: 2-4 clogged a harvest')
+    s = json.loads(a['save'])
+    check(s['day'] == 0 and s['clogged'] == ['0.1', '1.2'] and s['cleared'] == [] and s['harvests'] == 0 and s['bonus'] == .1, f'm14: junk in the save cleaned ({s})')
+    check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'm14: differs the second time')
+PARTS['m14'] = part_m14
+
 only = set(sys.argv[2:])
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])

@@ -281,7 +281,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.51.4
+   STARSHIP CADET: CSV Wren                           build 0.51.5
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8694,7 +8694,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.51.4';                           // keep in step with the header's build line
+const GAME_BUILD = '0.51.5';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -15191,7 +15191,7 @@ function galleyStep(S, m, st) {
     const items = [];
     for (const b of G.beds) {
       const c = GARDEN_CROPS[b[0]]; if (b[1] < c.days || (pickNow === 'daily' && !c.daily)) continue;   // the harvest morning picks everything ripe
-      const n = Math.round(c.yield * Math.min(1, c.days / Math.max(c.days, b[2])));
+      const n = Math.round(c.yield * Math.min(1, c.days / Math.max(c.days, b[2])) * (pickNow === 'harvest' && typeof irrigationBonus === 'function' ? 1 + irrigationBonus(d) : 1));   // 24r (E2): cleared nozzles, a little more
       if (n > 0) { const it = items.find(x => x[0] === b[0]); if (it) it[1] += n; else items.push([b[0], n]); if (st) st.picked += n; }
       b[1] = 0; b[2] = 0;
     }
@@ -42015,6 +42015,101 @@ function leakFx() {
   } catch (err) { console.error(err); }
 }
 WORK_TICKS.push((now, skip) => { if (!skip) leakFx(); });
+
+// ---------------------------------------------------------------------
+// 24r IRRIGATION (M14, seat E2, 0.51.x; plans/mechanics/m14-irrigation.html; 24r, not the page's old 24p, which is C2's
+// promotion: D3, 2026-10-19). Off shift, an Officer's, optional: on a harvest morning (section 16's gardenHarvestDay, the
+// first on or after Day 13) while the garden crew pick, walk the garden's three grow racks (E3's DECKS[3].growRacks,
+// 3-rack-1..3) and clear the clogged nozzles (2 to 4 in all, a short hold each at its rack). The next harvest is a little
+// bigger: irrigationBonus(d), 0 to 0.1, by the share you cleared (section 16's harvest pick reads it, one typeof-guarded
+// line; uncleared nozzles never lower it). Ladder row m14 (small: the first is the training, at the first rack: the
+// gardener leading the harvest, the writer's meeting train.m14.<id>). That evening's salad gets a mention. Stages: 0 the nozzles; 1 after 2 harvests flush a rack's line (a wait, 5 ship
+// minutes); 2 after 4 the irrigation plant (3-irrigation-1) gets a look, and a worn one is found by you. Nobody else
+// clears them: the job goes at midnight, no harm. A friendship step with the gardeners on duty each time. Saved:
+// SHIP.works.side.nozzles = { day, clogged: [rack, nozzle] pairs as 'r.n', cleared: [...], flushed, harvests, bonus }
+// (bonus: what this harvest's pick gets, from the one before; told: the day its salad was mentioned). Hash key 1015 (which nozzles). No R().
+const NOZ_BY = ['cruz-tove', 'oneill-imani', 'hart-ravi'];   // the gardeners (the writer's meetings train.m14.<id>)
+const NOZ_FROM = 13, NOZ_PER = 4, NOZ_HOLD = 2, NOZ_FLUSH = 5, NOZ_MAX = .1, NOZ_PLANT = '3-irrigation-1';
+const nozRacks = () => ((DECKS[3] && DECKS[3].growRacks) || []).filter(R => R && placeById(R.place));
+function nozState() {                                    // side.nozzles, cleaned (a save may hold junk)
+  const s = typeof worksSide === 'function' ? worksSide() : null; if (!s) return null;
+  const N = s.nozzles, ok = a => Array.isArray(a) ? a.filter(x => typeof x === 'string' && /^\d\.\d$/.test(x)).slice(0, 12) : [];
+  if (!N || typeof N !== 'object' || !s.nozOk) {
+    s.nozzles = { day: N && Number.isInteger(N.day) ? N.day : 0, clogged: ok(N && N.clogged), cleared: ok(N && N.cleared), flushed: N && N.flushed ? 1 : 0,
+      harvests: N && Number.isInteger(N.harvests) ? Math.max(0, Math.min(999, N.harvests)) : 0, told: N && Number.isInteger(N.told) ? N.told : 0, bonus: N && Number.isFinite(N.bonus) ? Math.max(0, Math.min(NOZ_MAX, N.bonus)) : 0 };
+    Object.defineProperty(s, 'nozOk', { value: true, enumerable: false, configurable: true });
+  }
+  return s.nozzles;
+}
+// the harvest's share of a usual one more (section 16 multiplies the harvest pick by 1 + this): only on the day it was
+// worked out for, from the harvest before
+function irrigationBonus(d = worksDay(shipNow())) { const N = SHIP.works ? nozState() : null; return N && N.day === d ? N.bonus : 0; }
+// which nozzles are clogged on day d: 2 to 4 of the racks' twelve, by key 1015
+function nozClogged(d) {
+  const Rs = nozRacks(); if (!Rs.length) return [];
+  const all = Rs.flatMap((R, r) => [...Array(NOZ_PER)].map((_, k) => r + '.' + k)), seed = machSeed('nozzles'), n = 2 + Math.floor(schedU(seed, d, 1015) * 3) % 3;
+  return all.map((id, k) => [schedU(seed, d * 16 + k, 1015), id]).sort((a, b) => a[0] - b[0]).slice(0, n).map(x => x[1]).sort();
+}
+const nozLead = d => { try { const c = gardenCrew(d) || []; return (c.find(x => x.harvest && x.lead) || c.find(x => x.harvest) || c[0] || {}).id || null; } catch (e) { return null; } };
+function nozPost(t) {
+  const N = nozState(), d = worksDay(t); if (!N || N.day === d) return null;
+  const was = N.clogged.length ? N.cleared.length / N.clogged.length : 0, fl = N.flushed;
+  N.bonus = Math.round(NOZ_MAX * Math.min(1, was) * (worksStage('m14') >= 1 && N.day ? (fl ? 1 : .8) : 1) * 1000) / 1000;   // stage 1 on: flushing the line makes up the last fifth
+  N.day = d; N.clogged = nozClogged(d); N.cleared = []; N.flushed = 0;
+  if (!N.clogged.length) return null;
+  const j = jobMake('nozzle', { id: 'nozzle:3@' + Math.floor(t / 60), deck: 3, room: (placeById(nozRacks()[0].place) || {}).room || null, h: Math.floor(t / 60), urgency: 0,
+    title: worksText('irr.clear', 'Clear the nozzles'), clogged: N.clogged.slice(), stage: worksStage('m14'), leave: 1440 });
+  j.posted = j.found = t; SHIP.jobs.push(j);
+  if (typeof MACH_REV !== 'undefined') MACH_REV++;
+  return j.id;
+}
+// the stops: each rack with clogged nozzles (a hold, 2 minutes a nozzle), then (stage 1 on) flush the first rack's line
+// (a wait), then (stage 2 on) a look at the irrigation plant
+function nozStops(j) {
+  const Rs = nozRacks(), by = r => (j.clogged || []).filter(x => +x[0] === r).length, out = [];
+  Rs.forEach((R, r) => { if (by(r)) out.push({ deck: 3, placeId: R.place, mins: NOZ_HOLD * by(r), tag: 'rack' + r, how: 'hold' }); });
+  if (j.stage >= 1 && Rs.length) out.push({ deck: 3, placeId: Rs[0].place, mins: 1, tag: 'flush', how: 'wait', opts: { mins: NOZ_FLUSH, label: worksText('irr.flush', 'Flush the line') } });
+  const pp = typeof panelPlace === 'function' && machineById(NOZ_PLANT) ? panelPlace(NOZ_PLANT) : null;
+  if (j.stage >= 2 && pp) out.push({ deck: 3, placeId: pp, mins: 1, tag: 'plant', how: 'look', opts: { secs: 3, text: worksText('noz.plant', 'The irrigation plant hums along. You check its filter and the pressure while you\'re here.') } });
+  return out;
+}
+function nozStepDone(j, k, res, t) {
+  const st = nozStops(j)[k], N = nozState(); if (!st || !N || N.day !== worksDay(j.posted)) return true;
+  if (SHIP.works.tr.m14 === undefined) {                // your first: the gardener leading the harvest shows you the first rack (the writer's meeting train.m14.<id>); trained here
+    if (!NOZ_BY.some(id => MEETING_SCRIPTS['train.m14.' + id])) { const by = nozLead(worksDay(t)); if (by) worksTeach('m14', by, 'rack', ['The nozzles clog. Clear each one and watch the water run even.']); }
+    worksTrained('m14', t);
+  }
+  if (/^rack/.test(st.tag)) {
+    const r = +st.tag.slice(4);
+    for (const x of j.clogged || []) if (+x[0] === r && !N.cleared.includes(x)) N.cleared.push(x);
+    try { toast(worksText('irr.title', 'Rack {n} · nozzles', { n: r + 1 }), worksText('irr.cleared', 'Clear. The water runs even again.')); } catch (e) { /* no UI */ }
+  }
+  if (st.tag === 'flush') { N.flushed = 1; try { toast(worksText('irr.flush', 'Flush the line'), worksText('irr.flushed', 'Flushed. The racks drink properly now.')); } catch (e) { /* no UI */ } }
+  if (st.tag === 'plant' && typeof machineFound === 'function') { const s = SHIP.machines[NOZ_PLANT]; if (s && s.cond < 70) machineFound(NOZ_PLANT, 'you'); }
+  return true;
+}
+function nozDone(j, t, by) {
+  const N = nozState(); if (by !== 'you' || !N) return;
+  N.harvests++; worksUse('m14');
+  try { for (const c of gardenCrew(worksDay(t)) || []) if (c.harvest) relAdd(c.id, 'work', 2); } catch (e) { /* no crew */ }
+  simNote('irrigation', { step: 'cleared', n: N.cleared.length, of: N.clogged.length });
+}
+if (typeof jobKindAdd === 'function') jobKindAdd('nozzle', { tier: 2, work: 0, text: 'Nozzles', stops: nozStops, stepDone: nozStepDone, done: nozDone, crew: { can: () => false, mins: 30 } });
+if (typeof WORKS_SIDE_KINDS !== 'undefined' && WORKS_SIDE_KINDS.add) WORKS_SIDE_KINDS.add('nozzle');
+if (!ladderRow('m14')) CAREER_LADDER.push({ id: 'm14', name: 'Garden irrigation', size: 'small', day: NOZ_FROM, tier: 2, rank: 'officer', needs: null, by: NOZ_BY, job: 'nozzle', stages: [{ uses: 0 }, { uses: 2 }, { uses: 4 }] });
+if (JOB_KINDS.nozzle) WORK_MECH.m14 = {};
+// the clock: on a harvest morning once the row is open, the job goes up when the crew start picking (the harvest
+// gardeners' first minute, else 10:00) and stays till midnight; a job left from an earlier day goes
+if (WORK_MECH.m14) WORK_TICKS.push((now, skip) => {
+  const W = SHIP.works; if (!W || !nozState()) return;
+  const d = worksDay(now), m = now - (d - 1) * 1440;
+  for (const j of SHIP.jobs) if (j.kind === 'nozzle' && j.status !== 'done' && worksDay(j.posted) < d) { if (j.claimedBy === 'you' && typeof dropJob === 'function') dropJob(j.id); j.status = 'done'; j.doneAt = now; j.doneBy = null; }
+  const N = nozState();
+  if (N.day === d && N.bonus > 0 && N.told !== d && m >= 1080 && m < 1260 && !skip) { N.told = d; try { toast(worksText('irr.clear', 'Clear the nozzles'), worksText('irr.salad', 'Tonight\'s salad is extra crunchy. The garden says thank you.')); } catch (e) { /* no UI */ } }   // that evening's salad (18:00-21:00)
+  if (!worksOpened(W).has('m14') || d < NOZ_FROM || N.day === d || !gardenHarvestDay(d)) return;
+  let from = 600; try { const c = (gardenCrew(d) || []).filter(x => x.harvest && x.pick); if (c.length) from = Math.min(...c.map(x => x.pick[0])); } catch (e) { /* no crew */ }
+  if (m >= from && m < GARDEN.harvest) nozPost(now);
+});
 
 // 24p THE FIRST PROMOTION (Pillar 5 Step 3, the Works career engineer C2, 0.44.18+; plans/mechanics/promotion-officer.html
 // on claude/p5-design). Part 1, the Tier 2 test job: once you're "Relied on" and trained to make things safe (ladder
