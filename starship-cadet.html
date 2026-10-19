@@ -285,7 +285,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.64.0
+   STARSHIP CADET: CSV Wren                           build 0.64.1
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8858,7 +8858,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.64.0';                           // keep in step with the header's build line
+const GAME_BUILD = '0.64.1';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -10048,7 +10048,7 @@ function schedBuild(p, d, occ, S) {
     if (hab && vu(0) < odds * (F.works ? REC_ODDS.habit : REC_ODDS.habitOff)) kind = REC_HABITS[hab];
     else if (vu(0) > 1 - odds * REC_ODDS.casual) kind = ['watch', 'bean', 'float'][Math.floor(vu(1) * 3)];
     if (!kind) return false;
-    const sh = typeof recShutAt === 'function' ? recShutAt(B + t + C) : null;   // rec engineer B's machines (0.84.6): what's shut or off now
+    const sh = typeof recPlanShut === 'function' ? recPlanShut(d, occ) : null;   // rec engineer B's machines (0.84.6): what's shut or off, as the day's plan sees it (RC, 0.64.1)
     if (sh && (kind === 'disc' && sh.court || kind === 'float' && sh.float || kind === 'climb' && !sh.belays || kind === 'swim' && sh.pool && vu(5) < .7 || kind === 'kayak' && sh.river && vu(5) < .5)) return false;
     const R = REC_DO[kind], wet = !!R.wet, pre = wet ? 2 : 0, post = wet ? 6 : 0, dur = REC_TURN[0] + Math.round((REC_TURN[1] - REC_TURN[0]) * vu(2));
     const a0 = ride ? ride.a0 : t + C, open = DECKS[7].open, last = Math.min(to - C - post, open[1] * 60 - 15);
@@ -10416,7 +10416,7 @@ function jobVisits() {
 const SHIP_DAYS = new Map();
 function shipDay(d) {
   if (evChanged()) { EV_SIG = evSig(); EV_DAY.clear(); SHIP_DAYS.clear(); }   // a ship-wide event began or ended: plan again (C7)
-  if (SHIP_DAYS.has(d)) return SHIP_DAYS.get(d);
+  const was = SHIP_DAYS.get(d); if (was && !(was.occ.recAt != null && !was.occ.recSet && recSettled(was.occ.recAt))) return was;   // planned before its rec hour was settled: plan again (RC, 0.64.1)
   const S = schedData(), occ = new Map(), plans = new Map();
   // the day's stand-ins: for each spare station, one person from its department (day shift, working today) works there
   occ.rot = new Map();
@@ -16350,7 +16350,7 @@ function machUseDay(d) {
   const B = (d - 1) * 1440, z = () => new Float32Array(24);
   const u = { meal: z(), cook: z(), ride: z(), water: z(), loads: z(), garden: z(), heads: {} };
   for (const n of Object.keys(DECKS)) u.heads[n] = z();
-  const { plans } = shipDay(d), byId = schedData().byId;
+  const { plans, occ } = shipDay(d), byId = schedData().byId;
   let workedYesterday = 0;
   for (const p of schedPeople()) if (isWorkDay(p, d - 1)) workedYesterday++;
   for (const segs of plans.values()) for (const s of segs) {
@@ -16372,6 +16372,7 @@ function machUseDay(d) {
   if (typeof galleyCooks === 'function') for (let m = 0; m < 1440; m++) u.cook[Math.floor(m / 60)] += galleyCooks(B + m) / 60;
   else for (let h = 0; h < 24; h++) u.cook[h] = u.meal[h] + (h < 23 ? u.meal[h + 1] : 0);
   for (let h = 6; h < 10; h++) u.loads[h] += workedYesterday / 4 / 6;           // a load holds about six uniforms
+  if (occ.recAt != null && !occ.recSet) return u;        // a plan to be made again (recPlanShut): not kept (RC, 0.64.1)
   MACH_USE.set(d, u);
   for (const k of MACH_USE.keys()) if (k < d - 3 || k > d + 1) MACH_USE.delete(k);
   return u;
@@ -16434,6 +16435,7 @@ function machinesReset(hour) {
   SHIP.machines = {};
   for (const m of machineList()) { const c = machFresh(m); SHIP.machines[m.id] = { cond: c, state: machineState(c), lastService: null }; }
   jobsReset(); MACH_HIST.clear(); MACH_HOUR = hour; MACH_REV++; SHIP.upkeep = { ...UPKEEP_START };
+  for (const [k, v] of SHIP_DAYS) if (v.occ.recAt != null) { SHIP_DAYS.delete(k); MACH_USE.delete(k); }   // plans that read the old record (recPlanShut; RC, 0.64.1)
   SHIP.short = {}; for (const k in MACH_EXTRA) delete MACH_EXTRA[k]; for (const k in MACH_RUN) delete MACH_RUN[k];
 }
 // a new game (section 13's newGameStart, 0.26.31): the machines and jobs start afresh at once, whichever way the clock
@@ -16702,6 +16704,17 @@ function recShutAt(t) {
   REC_SHUT.set(h, r); return r;
 }
 function recShut() { machinesNow(); return recShutAt(shipNow()); }
+// the rec deck as the crew's plans for day d see it (RC, 0.64.1; BM9's find): recShutAt at 22:00 the evening before (hour
+// (d - 1) * 24 - 2), settled once the 23:00 hour has run (a repair rewrites the hour before the one running), so a day's
+// plan never depends on when it was made. Not settled yet (a day planned the day before, as the jobs and the evening
+// Mail do, a new game's first day, the days before a load): all clear, and the plan is made again once it is (occ.recAt,
+// occ.recSet; machUseDay doesn't keep its use till then). machinesReset drops the plans that read the old record
+const recSettled = h => MACH_HOUR !== null && h <= MACH_HOUR - 2 && MACH_HIST.has(h);
+function recPlanShut(d, occ) {
+  if (!REC_DECK) return REC_OK;
+  const h = (d - 1) * 24 - 2, ok = recSettled(h); if (occ) { occ.recAt = h; occ.recSet = ok; }
+  return ok ? recShutAt(h * 60) : REC_OK;
+}
 // one machine, for the job board and the device (B2): its definition, kind and state together
 function machineInfo(id) {
   const m = machineById(id); if (!m) return null;
