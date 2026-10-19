@@ -285,7 +285,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.84.6
+   STARSHIP CADET: CSV Wren                           build 0.84.7
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8775,7 +8775,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.84.6';                           // keep in step with the header's build line
+const GAME_BUILD = '0.84.7';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -16807,42 +16807,42 @@ const FAULT_CAUSES = {
   // the rec deck's (0.84.1, rec engineer B; plans/recdeck-plan.html section 6). Deck 7 has no crew hours yet, so no 'peak' or
   // 'after-use' causes (they'd never show); first drafts of the words, for the writers
   poolfilter: [
-    { id: 'cartridge', part: 'cartridge', w: 3, shows: 'the pool is cloudy', sign: 'the gauge high, the water milky past the shallow end', when: 'always', still: 'New seal. The water\'s still milky.' },
-    { id: 'seal', part: 'seal', w: 2, shows: 'a drip under the housing', sign: 'a wet ring on the floor under the housing', when: 'always', still: 'Fresh cartridge. Still dripping.', line: 'pool' } ],   // line: 0.84.5 (rec engineer B), the pool line's traced leak
+    { id: 'cartridge', part: 'cartridge', w: 3, shows: 'the pool is cloudy', sign: 'the gauge high, the water milky past the shallow end', when: 'always', still: 'Fresh cartridge. Still dripping.' },
+    { id: 'seal', part: 'seal', w: 2, shows: 'a drip under the housing', sign: 'a wet ring on the floor under the housing', when: 'always', still: 'New seal. The water\'s still milky.', line: 'pool' } ],   // line: 0.84.5 (rec engineer B), the pool line's traced leak
   pooldoser: [
     { id: 'drift', setting: true, w: 2, shows: 'stinging eyes|a green tinge', sign: 'the reading wanders; the swimmers come out red-eyed', when: 'always', from: 4 },
     { id: 'relay', part: 'relay', w: 2, shows: 'the dose has stopped', sign: 'the pump clicks but doesn\'t run', when: 'touched', still: 'New relay. It runs, but the reading\'s still off.' } ],
   poolheat: [
-    { id: 'valve', part: 'valve', w: 3, shows: 'the pool runs cold', sign: 'the return pipe barely warm', when: 'always', still: 'New regulator. The pipe\'s still cold.' },
-    { id: 'regulator', part: 'regulator', w: 1, shows: 'the pool runs cold', sign: 'warm by day, cold first thing', when: 'at-time', still: 'New valve. Still cold in the morning.' } ],
+    { id: 'valve', part: 'valve', w: 3, shows: 'the pool runs cold', sign: 'the return pipe barely warm', when: 'always', still: 'New valve. Still cold in the morning.' },
+    { id: 'regulator', part: 'regulator', w: 1, shows: 'the pool runs cold', sign: 'warm by day, cold first thing', when: 'at-time', still: 'New regulator. The pipe\'s still cold.' } ],
   riverpump: [
-    { id: 'bearing', part: 'bearing', w: 3, shows: 'the current pulses', sign: 'a rumble you feel through the grating', when: 'always', still: 'New impeller. Still rumbling.' },
-    { id: 'impeller', part: 'pump', w: 2, shows: 'the fast run goes slack', sign: 'quiet, but the gauge reads low', when: 'warm', still: 'New bearing. The current\'s still slack.' } ],
+    { id: 'bearing', part: 'bearing', w: 3, shows: 'the current pulses', sign: 'a rumble you feel through the grating', when: 'always', still: 'New bearing. The current\'s still slack.' },
+    { id: 'impeller', part: 'pump', w: 2, shows: 'the fast run goes slack', sign: 'quiet, but the gauge reads low', when: 'warm', still: 'New impeller. Still rumbling.' } ],
   wavegate: [
-    { id: 'relay', part: 'relay', w: 2, shows: 'no standing wave', sign: 'the gate lights blue but the gate doesn\'t move', when: 'touched', still: 'Fresh seal. Still no wave.' },
-    { id: 'seal', part: 'seal', w: 2, shows: 'a slick on the bank', sign: 'oily water round the gate\'s post', when: 'always', still: 'New relay. Still a slick by the post.' } ],
+    { id: 'relay', part: 'relay', w: 2, shows: 'no standing wave', sign: 'the gate lights blue but the gate doesn\'t move', when: 'touched', still: 'New relay. Still a slick by the post.' },
+    { id: 'seal', part: 'seal', w: 2, shows: 'a slick on the bank', sign: 'oily water round the gate\'s post', when: 'always', still: 'Fresh seal. Still no wave.' } ],
   wallholds: [
     { id: 'hold', part: 'seal', w: 3, shows: 'a hold spins underfoot', sign: 'a hold turns in your hand; its bolt\'s washer has split', when: 'always', still: 'New washer. Another hold\'s still loose.' } ],
   belay: [
     { id: 'brake', part: 'bearing', w: 3, shows: 'it lowers too fast', sign: 'the line pays out with a whine', when: 'always', still: 'New brake bearing. Still a bit fast: the tag\'s out too.' },
     { id: 'tag', setting: true, w: 2, shows: 'inspection due', sign: 'the inspection tag has run out', when: 'always', from: 4 } ],
   stagelights: [
-    { id: 'lamp', part: 'lamp', w: 3, shows: 'a stage light is out', sign: 'one lamp in the truss dark', when: 'always', still: 'New relay. That lamp\'s still dark.' },
-    { id: 'relay', part: 'relay', w: 2, shows: 'the whole rig flickers', sign: 'every lamp stutters at once', when: 'warm', still: 'New lamp. The rig still flickers.', band: 2 } ],
+    { id: 'lamp', part: 'lamp', w: 3, shows: 'a stage light is out', sign: 'one lamp in the truss dark', when: 'always', still: 'New lamp. The rig still flickers.' },
+    { id: 'relay', part: 'relay', w: 2, shows: 'the whole rig flickers', sign: 'every lamp stutters at once', when: 'warm', still: 'New relay. That lamp\'s still dark.', band: 2 } ],
   soundrack: [
-    { id: 'amp', part: 'regulator', w: 2, shows: 'a hum', sign: 'a low hum from every speaker, louder warm', when: 'warm', still: 'New cable. Still humming.' },
-    { id: 'cable', part: 'cable', w: 3, shows: 'the lectern mic cuts out', sign: 'the mic drops when the cable\'s touched', when: 'touched', still: 'New regulator. The mic still cuts out.' } ],
+    { id: 'amp', part: 'regulator', w: 2, shows: 'a hum', sign: 'a low hum from every speaker, louder warm', when: 'warm', still: 'New regulator. The mic still cuts out.' },
+    { id: 'cable', part: 'cable', w: 3, shows: 'the lectern mic cuts out', sign: 'the mic drops when the cable\'s touched', when: 'touched', still: 'New cable. Still humming.' } ],
   seathinges: [
     { id: 'hinge', part: 'bearing', w: 3, shows: 'a seat won\'t fold', sign: 'a seat stuck down, and a squeak from its neighbours', when: 'always', still: 'New pin in. The next one along still squeaks.' } ],
   courtnet: [
-    { id: 'coil', part: 'coil winding', w: 2, shows: 'the net flickers', sign: 'the net stutters, then drops for a breath', when: 'warm', still: 'New breaker. The net still flickers.' },
-    { id: 'power', part: 'breaker', w: 2, shows: 'the side walls fade', sign: 'the side fields dim, the power units whine', when: 'always', still: 'New coil. The walls still fade.' } ],
+    { id: 'coil', part: 'coil winding', w: 2, shows: 'the net flickers', sign: 'the net stutters, then drops for a breath', when: 'warm', still: 'New coil. The walls still fade.' },
+    { id: 'power', part: 'breaker', w: 2, shows: 'the side walls fade', sign: 'the side fields dim, the power units whine', when: 'always', still: 'New breaker. The net still flickers.' } ],
   scoreboard: [
-    { id: 'panel', part: 'lamp', w: 3, shows: 'dead pixels in the scores', sign: 'a dark block in the home score', when: 'always', still: 'New card. Still a dark block.' },
-    { id: 'driver', part: 'signal card', w: 2, shows: 'the board shows nonsense', sign: 'the names scramble', when: 'warm', still: 'New panel. Still scrambled.', band: 2 } ],
+    { id: 'panel', part: 'lamp', w: 3, shows: 'dead pixels in the scores', sign: 'a dark block in the home score', when: 'always', still: 'New panel. Still scrambled.' },
+    { id: 'driver', part: 'signal card', w: 2, shows: 'the board shows nonsense', sign: 'the names scramble', when: 'warm', still: 'New card. Still a dark block.', band: 2 } ],
   gravplate: [
-    { id: 'controller', part: 'signal card', w: 2, shows: 'gravity creeps back up', sign: 'the gauge drifts toward 1 g', when: 'always', still: 'New pump. Gravity still creeps.' },
-    { id: 'cooling', part: 'pump', w: 2, shows: 'the room closes itself', sign: 'the cooling loop hot to the touch', when: 'warm', still: 'New controller. The cooling\'s still hot.' } ],
+    { id: 'controller', part: 'signal card', w: 2, shows: 'gravity creeps back up', sign: 'the gauge drifts toward 1 g', when: 'always', still: 'New controller. The cooling\'s still hot.' },
+    { id: 'cooling', part: 'pump', w: 2, shows: 'the room closes itself', sign: 'the cooling loop hot to the touch', when: 'warm', still: 'New pump. Gravity still creeps.' } ],
   doorgear: [                                            // no door gear in DECKS today (a stand-in on Deck 5); kept for when one is real
     { id: 'seal', part: 'seal', w: 3, shows: 'bay doors slow', sign: 'a draught at the frame', when: 'always', still: 'New bearing. Still a draught at the frame.' },
     { id: 'bearing', part: 'bearing', w: 2, shows: 'bay doors slow', sign: 'a judder as they move, worse after a few runs', when: 'after-use', still: 'Fresh seal. Still judders.' },
