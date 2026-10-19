@@ -4,7 +4,7 @@ Work is paused. Everything is saved on GitHub; nothing is running.
 
 ## Read first
 1. `CLAUDE.md` (how we work), `DEV_NOTES.md`, `design-doc.md`.
-2. `plans/handover-lead.md` — the last section ("HANDOVER TO LEAD 19" and lead 19's log after it) is the current state.
+2. `plans/handover-lead.md` — read the last section, "HANDOVER TO LEAD 20": the formal handover for the next lead (fresh seats, who to start, what each reads).
 3. `plans/overnight-decisions.md` — every call made on the user's behalf; the user's own answers are at the end.
 
 ## Latest versions
