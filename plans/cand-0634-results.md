@@ -70,3 +70,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - t6: cadet ALL IDENTICAL, social OK; deck running. t7: mech OK; interactions running.
 - trial t8 (wt3) = 2bc08d5 + E1 633eade + E2 6714448 + E3 d51c5ed + W2 0e8571a (latest of each; R5 pending on E1 633eade/fb499eb and E2 6714448): mech_check hand merges as before plus E1's new MRUN part (all keep both). verify_merge: the same 6 'missing' under d51c5ed (E1's rewrites). NAMES OK (3170), parses, one toolWear, bake 9560 lines / 48 meetings. Checks queued after t6: lines, mech, career, machine, cadet, social, food, deck, interactions.
 - ~06:11 lead 17: W2 retired; final lines = 0e8571a (R5 PASS).
+- ~06:12 R5: E2 6714448 (final) PASS WITH FIXES: take it for 24o/q/r/l; one fix open for E5 (the pin: playerRigRebuild missing, pin never shows; harmless till then). Rewiring's right-first +1 needs E1's turn-in change (E1 verdict pending).
