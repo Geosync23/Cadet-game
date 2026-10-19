@@ -10192,6 +10192,41 @@ function worksGather(until = shipNow() + 15) {
 }
 // your box on the way to 4-23 (Day 10, 17:05): Tomas and Pell wait by its door on Deck 4 holding it
 function boxCarry(until = shipNow() + 40) { return crewGather(['tomas', 'pell'], [41, 14], { deck: 4, until, hold: 'carry' }); }
+// the officer ceremony's guests (Day 11, 17:15, Deck 1's observation room): one appointment with the Captain, Vance,
+// Calder, Torres and up to three friends, each at their own seat at the conference table (a.places), so section 14's
+// apptWhere brings them by lift and seats them; booked once (its occ id), saved with the device's appointments
+const CEREMONY_SEATS = ['1-conf-1', '1-conf-2', '1-conf-3', '1-conf-4', '1-conf-5', '1-conf-6', '1-conf-7', '1-conf-8'];
+function ceremonyBook(day, at = 1035, len = 25) {
+  if (typeof apptAdd !== 'function') return null;
+  const ids = ['marrow', 'vance', 'calder', 'torres-zeke'].concat(ceremonyGuests(3, day)).filter(id => SOC.idx.has(id) && socAboard(SOC.crew[SOC.idx.get(id)], day));
+  const places = {}; ids.forEach((id, k) => { if (CEREMONY_SEATS[k]) places[id] = CEREMONY_SEATS[k]; });
+  const a = apptAdd({ id: 'promo:ceremony2', with: ids, at: (day - 1) * 1440 + at, len, where: CEREMONY_SEATS[0], kind: 'meeting', title: 'Officer ceremony' });
+  if (a && !a.places) a.places = places;
+  return a;
+}
+// the sim side of the first promotion, a ship minute at a time (section 20's social tick): C2's promoPlan() (pure, from
+// the save) says when; this sets the crew going. Live and once a day per step (PROMO_LIVE), except the ceremony's
+// appointment, which is saved. The steps: the Works crew round the board (gather), Tomas and Pell with your box by
+// 4-23 from the move's time (box) and Tomas's goodbye once 4-23 is yours (bye), the ceremony's guests booked
+const PROMO_LIVE = new Set();
+function promoTick() {
+  const P = typeof promoPlan === 'function' ? (() => { try { return promoPlan(); } catch (e) { return null; } })() : null; if (!P) return;
+  const day = SHIP.time.day, m = SHIP.time.min, B = (day - 1) * 1440, once = k => !PROMO_LIVE.has(k + '@' + day) && !!PROMO_LIVE.add(k + '@' + day);
+  if (P.gather && P.gather.day === day && m >= P.gather.from && m < P.gather.to && once('gather')) worksGather(B + P.gather.to);
+  if (P.move && P.move.day === day && m >= P.move.at && m < P.move.at + 45 && playerBed() !== '4-23' && once('box')) boxCarry(B + P.move.at + 45);
+  if (P.move && P.move.day === day && PROMO_LIVE.has('box@' + day) && playerBed() === '4-23' && typeof DECK_CREW !== 'undefined') {
+    const a = DECK_CREW.find(x => x.p.id === 'tomas'), pp = player.obj.position;
+    if (a && Math.hypot(a.x - pp.x, a.z - pp.z) < 5 && once('bye')) {
+      const l = socLine(a.p, 'work', { t: shipNow(), flags: { 'promo.bye': true } }); bubbleSay(a.h, l ? l.text : 'Don\'t be a stranger, Officer.', 6);
+      crewScene('tomas', { mode: 'wait', to: { deck: 4, tile: [40, 14] }, until: shipNow() + 2, hold: null }); crewScene('pell', { mode: 'wait', to: { deck: 4, tile: [42, 14] }, until: shipNow() + 2, hold: null });   // the box is in: a minute, then off they go
+    }
+  }
+  if (P.ceremony && P.ceremony.day === day && m < P.ceremony.at && once('ceremony')) ceremonyBook(day, P.ceremony.at);
+  if (PROMO_LIVE.has('box@' + day) && typeof DECK_CREW !== 'undefined' && !PROMO_LIVE.has('boxsaid@' + day)) {   // Tomas or Pell says a word as you come up to them with the box
+    const pp = player.obj.position, a = DECK_CREW.find(x => (x.p.id === 'tomas' || x.p.id === 'pell') && x.hold === 'carry' && Math.hypot(x.x - pp.x, x.z - pp.z) < 4);
+    if (a && once('boxsaid')) { const l = socLine(a.p, 'work', { t: shipNow(), flags: { 'promo.box': true } }); if (l) bubbleSay(a.h, l.text, 5); }
+  }
+}
 // the officer ceremony's friends (Day 11): up to n crew you're closest to (relTier, highest first; ties by the
 // ceremony's hash key 851), aboard, not the fixed party
 function ceremonyGuests(n = 3, d = SHIP.time.day) {
@@ -10331,7 +10366,7 @@ function deviceLoad(s) {
   const appts = (Array.isArray(d.appts) ? d.appts : []).filter(a => a && typeof a === 'object' && Number.isInteger(a.id) && isFinite(a.at) && Array.isArray(a.with) && typeof a.where === 'string')
     .slice(-60).map(a => ({ ...a, id: a.id, with: a.with.filter(x => typeof x === 'string').slice(0, 8), at: +a.at, len: isFinite(a.len) ? +a.len : 30, where: a.where,
       kind: typeof a.kind === 'string' ? a.kind : 'social', status: ['asked', 'yes', 'no', 'kept', 'missed'].includes(a.status) ? a.status : 'no', by: typeof a.by === 'string' ? a.by : null,
-      ...(Number.isInteger(a.grp) ? { grp: a.grp } : {}) }));
+      ...(Number.isInteger(a.grp) ? { grp: a.grp } : {}), ...(a.places && typeof a.places === 'object' ? { places: Object.fromEntries(Object.entries(a.places).filter(([k, v]) => typeof v === 'string').slice(0, 8)) } : { places: undefined }) }));   // places: each person's seat (0.71.2)
   return { memos, tipsSeen, appts, booted: d.booted === true, settings: { phosphor: PHOSPHORS[st.phosphor] ? st.phosphor : 'cyan', fx: st.fx !== false, tips: st.tips !== false, quiet: st.quiet === true },
     calendarRemind: { on: r.on !== false, ahead: [15, 30, 60].includes(r.ahead) ? r.ahead : 15, morning: r.morning !== false, per, everyday: r.everyday !== false,
       heard: (Array.isArray(r.heard) ? r.heard : []).filter(k => typeof k === 'string' && k.length < 120).slice(-80) } };   // 0.35.29: heads-ups
@@ -34348,7 +34383,7 @@ function socialTick() {                                  // the main loop: the c
   if (typeof linesTick === 'function') linesTick();       // section 22: overheard conversations (0.43.12)
   const m = Math.floor(shipNow()); if (m === SOC_MIN) return;
   const step = SOC_MIN >= 0 && m > SOC_MIN && m - SOC_MIN < 30 ? m - SOC_MIN : 0;
-  SOC_MIN = m; socialTo(m); socialTogether(step); socialSeek(m); socialChatter(m); socialMail(m); socialAppts(); socInviteMail(m); socialVisit(m);
+  SOC_MIN = m; socialTo(m); socialTogether(step); promoTick(); socialSeek(m); socialChatter(m); socialMail(m); socialAppts(); socInviteMail(m); socialVisit(m);
 }
 // chatter you overhear (0.36.5) in the performance engineer's speech bubbles (section 8b: bubbleSay(who, text, secs),
 // at most two on screen; inert without it). Now and then (CHATTER_ODDS a ship minute, at most one every CHATTER_GAP
@@ -34370,7 +34405,7 @@ function cheerTick(m) {
   for (const id of C.ids) {
     if (C.said.has(id)) continue;
     const a = DECK_CREW.find(x => x.p.id === id); if (!a || !a.h || a.pose !== 'stand' || Math.hypot(a.x - P.x, a.z - P.z) > CHATTER_NEAR) continue;
-    const l = socLine(a.p, 'promoted', { t: shipNow(), tier: relTier(id), bubble: true });
+    const l = socLine(a.p, 'promoted', { t: shipNow(), tier: relTier(id), bubble: true, flags: { 'promo.gather': true } });
     bubbleSay(a.h, l ? l.text : CHEER_LINES[(Math.floor(schedU(a.p.seed, m, 640) * CHEER_LINES.length) + C.said.size) % CHEER_LINES.length]); C.said.add(id); CHATTER_AT = simNow(); return true;
   }
   return false;
@@ -34388,7 +34423,7 @@ function socialChatter(m) {
   for (const a of near) {
     const w = whereIs(a.p, t); if (!w || w.act === 'sleep' || w.act === 'wash') continue;
     const tj = teamJobOf(w); if (tj) {                   // at a team job: work talk first (m8, 0.71.2)
-      const l = socLine(a.p, 'team', { t, act: 'work', bubble: true }), text = l ? l.text : TEAM_TALK[Math.floor(schedU(a.p.seed, m, 641) * TEAM_TALK.length)];
+      const l = socLine(a.p, 'team', { t, act: 'work', bubble: true, flags: { 'team.on': true } }), text = l ? l.text : TEAM_TALK[Math.floor(schedU(a.p.seed, m, 641) * TEAM_TALK.length)];
       if (!CHATTER_LAST.includes(text) && bubbleSay(a.h, text)) { CHATTER_AT = simNow(); CHATTER_LAST.push(text); if (CHATTER_LAST.length > 8) CHATTER_LAST.shift(); return; }
     }
     const n = newsKnownBy(a.p, t).find(x => !heardIt(x) && !(x.about === a.p.id && x.kind !== 'fault'));
