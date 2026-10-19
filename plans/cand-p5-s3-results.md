@@ -49,3 +49,4 @@ Build master 6 (BM6, session_01F8k6hqdBRoxDJMzqAuiHqR) on claude/p5-cand-pt1 (th
 - ~03:56 R3 PASS X 3a494c8 and H2 935b1d9. Tips: S2 0d0aa59, C2 f3b744c, M2 b3e5cf9, M3 42c76cc, H2 935b1d9, DA5 25dbfce, X 3a494c8, U 9fa60da, W2 a21487e; U's Tracked app to come (a new reviewer takes it; R3 handing over at ~71%).
 - turn-in rep twice placed: 0.63.2r + S2 0d0aa59 + C2 f3b744c + U 9fa60da fails the same: sent to U and C2. s3i: tiles, device OK. s3j: day2, day10 OK.
 - s3j day11 OK (the ceremony day).
+- ~04:10 lead 16: U's Tracked piece now KEEPS the main-screen button and adds the device app (the user, ~04:00); wait for U's hash after 94a1b12, reviewed by R4 (session_01UGQxniXCxT5TLEE4tgRLfJ; R3 stopped). Main-screen shots should match 0.72.3.
