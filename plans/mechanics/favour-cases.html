@@ -80,7 +80,7 @@ td code{white-space:normal}
   <h2>In plain words</h2>
   <ul>
     <li><b>Favour cases</b> (off shift, about one a week: an evening 18:00-21:00 or a weekend): a crew friend asks in chat or Mail: "My lamp flickers only when Pell plays guitar next door." It goes on the Jobs app as a favour (the existing favours system).</li>
-    <li>In their cabin it's a small case (the T1/T2 bands, two or three clues, Fault notes): look at the lamp, ask Pell, check the junction. Solve it, then fix it (a Tier 1 job there). A friendship step, sometimes a small thank-you gift. Not taken in 3 days, they ask someone else: no harm.</li>
+    <li>In their cabin it's a small scripted case (three clue stops, then "What's causing it?" from three suspects; a wrong pick is just "not that", pick again): look at the lamp, ask Pell, check the junction. Solve it, then fix it (a Tier 1 job there). A friendship step, sometimes a small thank-you gift. Not taken in 3 days, they ask someone else: no harm.</li>
     <li><b>Fault-finder tickets:</b> on Day 13 Calder's Mail: "A ticket case, when you're ready." On any workday shift after, take it from the Works board: a harder case on Tier 2 machines (one more clue; hints only after your third look).</li>
     <li>Solve it and you're a <b>Fault-finder</b>: a small pin on your uniform and a Record line. A wrong answer only delays it: "Not yet. Next week." The second and third grades (Days 19 and 24) come in Steps 5 and 6 on this same machinery.</li>
   </ul>
@@ -101,7 +101,7 @@ td code{white-space:normal}
   <div class="tablewrap"><table>
     <tr><th>Section</th><th>What</th><th>Owner</th></tr>
     <tr><td>24l (new part)</td><td><code>FAVOUR_CASES</code> (six to start), <code>favourCasePost(week)</code>, the ticket, the grades, the pin</td><td>E2 (stands in for H tonight, from H's handover)</td></tr>
-    <tr><td>24k</td><td>cases made by the case engine with a <code>place</code> of a cabin (exists: kinds and bands)</td><td>H's code (exists, no change)</td></tr>
+    <tr><td>24k</td><td>favour cases do <b>not</b> go through <code>caseMake</code> (they aren't machines); only the tickets use the engine; Fault notes list an open favour case only if 24k has a cheap way, otherwise the device's favour card shows the clues seen</td><td>H's code (no change)</td></tr>
     <tr><td>Pillar 4 favours</td><td><code>typeof favourAdd === 'function' &amp;&amp; favourAdd(...)</code></td><td>social (exists)</td></tr>
     <tr><td>15c / uniform</td><td>the pin drawn into the uniform texture (no extra draw call)</td><td>E2, one line in M2's uniform code</td></tr>
     <tr><td>content/</td><td>the six favour cases' lines; Calder's ticket Mail</td><td>writer</td></tr>
@@ -128,7 +128,9 @@ td code{white-space:normal}
 
 <section id="faq">
   <h2>Builders' questions</h2>
-  <p class="note">None yet.</p>
+  <ul>
+    <li><b>E2, 2026-10-19:</b> the writer's six favour cases are fixed scripts (three suspects, sus.1 the real one; three fixed clues; a solve line) and aren't machines; must they go through <code>caseMake</code>? <i>No. Build them as small scripted cases on the existing favours system: <code>favourPost</code> from the friend, Mail <code>mail.favour.&lt;id&gt;</code> at their evening minute, shown on their chat card; in their cabin three clue stops (a <code>look</code> or a person, each showing clue.N), a <code>choose</code> "What's causing it?" (sus.1-3 shuffled; a wrong pick "not that", never a fail), the fix (<code>hold</code>), then <code>favourTurnIn</code> (a friendship step, sometimes a gift). <code>puzzle_check</code> checks each script: three clues, the answer sus.1, in the options. Fault notes only if 24k exposes a cheap way, else the favour card carries the clues. Tickets use the engine (Tier 2 machines).</i></li>
+  </ul>
 </section>
 
 </main>
