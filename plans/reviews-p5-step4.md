@@ -9,6 +9,9 @@ Lines skimmed. In a fresh archive content_gen bakes 9342 lines; lines_check PASS
 
 ## Step 4
 
+### W2 claude/writer-p5 c058947 (0.48.110, five texts for E1): PASS
+round.title.first, bench.charging ({time}), bench.charging.now, bench.rack, bench.rack.done; keys-p5.md updated. Bakes 9562 lines; lines_check PASS. W2's tip.
+
 ### W2 claude/writer-p5 7a5825b (0.48.109): PASS
 works.order.lapse is a Mail body only; the tinker.* texts go (E3's WIP 2d90d7ec reads no tinker.* key). Bakes 9557 lines; lines_check PASS. W2's tip, contains 418b8c9.
 
