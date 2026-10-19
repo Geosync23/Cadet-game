@@ -281,7 +281,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.71.6
+   STARSHIP CADET: CSV Wren                           build 0.71.7
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8695,7 +8695,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.71.6';                           // keep in step with the header's build line
+const GAME_BUILD = '0.71.7';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -9712,7 +9712,7 @@ function schedBuild(p, d, occ, S) {
       else toilet(34);
     }
     work(to);
-    if (clocks) take('work', [[5, 'timeclock']], 1, { wait: 6, min: 1, tag: 'clock' });   // out as the shift ends (a short queue after 17:00)
+    if (clocks) take('work', [[5, 'timeclock']], 1, { wait: 20, min: 1, tag: 'clock' });   // out as the shift ends: the whole day crew at one clock after 17:00, so a longer queue than the morning's (X3, 0.71.7: with 0.71.5's mornings 6 minutes let only 6 of 11 out; they finish up at their station meanwhile)
   };
   // showers in the evening: the habit, or about one day in three for anyone else
   const eveShower = H.has('evening-shower') || U(90) < .3;
