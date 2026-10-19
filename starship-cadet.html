@@ -4414,7 +4414,7 @@ DECKS[5] = {
   },
   // which room each shut door or hatch leads into (its tap text is that room's 'tap')
   sealed: {
-    'v,13,1': 'o', 'h,8,13': 'b', 'v,34,7': 'F', 'h,2,12': 'd', 'h,38,5': 'F', 'h,38,11': 'F',
+    'v,13,1': 'o', 'h,8,13': 'b', 'v,34,7': 'F', 'h,2,12': 'd', 'h,38,11': 'F',
 
   },
   plates: [
@@ -4440,7 +4440,7 @@ DECKS[5] = {
     o: { name: 'Works Chief\'s office', floor: 'plate', tap: 'Glass on two sides, so the Chief can see the whole bay and the shuttle pad. Locked while the Chief is out.' },
     b: { name: 'Bay control booth', floor: 'plate', tap: 'Launch and landing controls, behind glass over the pad. Watch staff only.' },
     d: { name: 'Bay door gear', floor: 'grate', tap: 'Giant gears and hydraulic rams. When the bay opens, the doors slide into a pocket here. Watch the gears through the window.' },
-    F: { name: 'Fan hall', floor: 'grate', tap: 'The ship\'s lungs: one huge fan pushing air under the main corridor and up the spine to every deck. Tier 2 access. You can watch it through the window.' },
+    F: { name: 'Fan hall', floor: 'grate', tap: 'The ship\'s lungs: one huge fan pushing air under the main corridor and up the spine to every deck. Tier 2 access, through the hatch from the air plant. You can watch it through the corridor window too.' },
     // utility rooms (Pillar 2, 0.30.3): floors that draw no random numbers, so the rest of the deck is unchanged
     c: { name: 'Cargo hold', floor: 'steel', still: true },
     m: { name: 'Cart bay', floor: 'steel', still: true },
@@ -4455,11 +4455,12 @@ DECKS[5] = {
   closedDoors: {},
   hull: { sternX: 1, stern: 1.5, bowFrom: 34, bowLen: 9.6, byFace: true },   // one hull piece per facing (0.30.11)
   // service hatches into the utility rooms (0.30.3): the player and Works crew pass (see hatchPassable)
-  // (the air plant and manifold room open off the pipe galleries; their hatches into the locked Fan hall stay sealed)
+  // (the air plant and manifold room open off the pipe galleries; since 0.47.3 the air plant's hatch opens into the Fan hall, the manifold room's stays sealed)
   // (0.30.12) with a tier each: 1 closets, stores and the cargo hold, 2 plant rooms and pipe galleries, 3 batteries. The cargo hold's
   // shuttle-bay hatch (v,10,12) is open to the player and Works crew; everyone else still goes round by the haulway.
   service: [{ key: 'v,34,0', tier: 2 }, { key: 'v,34,15', tier: 2 }, { key: 'h,30,9', tier: 3 }, { key: 'h,19,10', tier: 1 }, { key: 'v,19,13', tier: 1 },
-    { key: 'h,32,1', tier: 2 }, { key: 'h,25,15', tier: 2 }, { key: 'v,10,12', tier: 1 }],   // air plant, manifold, batteries, closet, cart bay, galleries, hold
+    { key: 'h,32,1', tier: 2 }, { key: 'h,25,15', tier: 2 }, { key: 'v,10,12', tier: 1 },   // air plant, manifold, batteries, closet, cart bay, galleries, hold
+    { key: 'h,38,5', tier: 2 }],                         // 0.47.3 (Pillar 5 Step 3, the air line): the Fan hall, through the air plant
   // machines (Pillar 2; format as on Deck 4): wall-mounted ones have `at` on their panel tile
   machines: [
     { id: '5-o2-1', kind: 'o2cell', at: [35, 0], room: 'a', face: 's', panel: [35, 1], look: { lamp: [0.5, 1.2, 0.37], drip: [0.5, 0.9, 0.42] } },
@@ -4480,6 +4481,10 @@ DECKS[5] = {
     { id: '5-cartdock-2', kind: 'cartdock', at: [20, 15], room: 'm', face: 'w', panel: [19, 15], look: { lamp: [-0.5, 1.08, 0.51], drip: [-0.5, 0.9, 0.56] } },
     { id: '5-valve-1', kind: 'valve', at: [28, 0], room: 'g', face: 's', panel: [28, 0] },
     { id: '5-valve-2', kind: 'valve', at: [29, 15], room: 'h', face: 'n', panel: [29, 15] },
+    // 0.47.3 (Pillar 5 Step 3, plans/mechanics/architect-air-line.html): the air line's middle and its two branches
+    { id: '5-fan-1', kind: 'fan', at: [36, 8], room: 'F', face: 's', panel: [36, 9] },
+    { id: '5-damper-1', kind: 'damper', at: [34, 6], room: 'F', face: 'e', panel: [34, 6] },   // Upper decks, 1-3
+    { id: '5-damper-2', kind: 'damper', at: [34, 9], room: 'F', face: 'e', panel: [34, 9] },   // Lower decks, 4-6
   ],
   // places (Pillar 1): every spot where a crew member does something, for the schedules. Data only: nothing draws them.
   // { id, type, at: [col, row], face, pose, room }. Seats and beds sit on furniture tiles and are reached from the tile beside them;
@@ -4548,8 +4553,11 @@ DECKS[5] = {
     { id: '5-cartdock-2-svc', machine: '5-cartdock-2', type: 'work:works', at: [19, 15], face: 'e', pose: 'work', room: 'm' },
     { id: '5-valve-1-svc', machine: '5-valve-1', type: 'work:works', at: [28, 0], face: 'n', pose: 'work', room: 'g' },
     { id: '5-valve-2-svc', machine: '5-valve-2', type: 'work:works', at: [29, 15], face: 's', pose: 'work', room: 'h' },
+    { id: '5-fan-1-svc', machine: '5-fan-1', type: 'work:works', at: [36, 9], face: 'n', pose: 'work', room: 'F' },
+    { id: '5-damper-1-svc', machine: '5-damper-1', type: 'work:works', at: [34, 6], face: 'w', pose: 'work', room: 'F' },
+    { id: '5-damper-2-svc', machine: '5-damper-2', type: 'work:works', at: [34, 9], face: 'w', pose: 'work', room: 'F' },
   ],
-  markings: [[21, 10, 2, 3], [25, 9, 3, 2], [26, 11, 2, 2]],   // keep-clear outlines: lathe, fabricator, welding bench
+  markings: [[21, 10, 2, 3], [25, 9, 3, 2], [26, 11, 2, 2], [35, 7, 3, 2]],   // keep-clear outlines: lathe, fabricator, welding bench, the main fan (0.47.3)
   dress(d) {
     for (const [key, tw, text] of d.plates) placeOnEdge('plate', key, tw, { text });
     for (const [key, tw] of d.workLights) placeOnEdge('workLight', key, tw);
@@ -4620,7 +4628,7 @@ DECKS[5] = {
     // the spine: the ladder below the car, as on Deck 4. The trunks run behind the car's back wall here.
     NO_FADE.add('Z');
     place('Z', 'spineLadder', 1, .5, 'n', { it: SPINE_IT.ladder });
-    place('F', 'bigFan', 2.6, 3.0, 'n');                 // faces the default camera; the corridor window sees it side-on
+    place('F', 'bigFan', 2.6, 3.0, 'n', { block: [[1, 2], [2, 2], [3, 2], [1, 3], [2, 3], [3, 3]], it: IT('Main fan', 'The ship\'s lungs. Every deck\'s air comes through these five blades. Its panel is on the walkway in front.') });   // faces the default camera; the corridor window sees it side-on (0.47.3: you can walk in, so it blocks its tiles)
     // ---- utility rooms (Pillar 2, 0.30.3). Last in dress() and free of R(), so nothing above them changes ----
     // air plant: the electrolyser on the stern wall feeds two banks of oxygen cells on the port hull; two scrubber stacks on the Fan hall wall
     place('a', 'electrolyser', 1.02, 3.0, 'w', { it: IT('Electrolyser', 'Splits water into oxygen and hydrogen. The oxygen goes to the cells; the hydrogen goes somewhere you are told not to worry about.') });
@@ -4646,6 +4654,8 @@ DECKS[5] = {
     wallFixed('w', 'bulkheadWheel', 's', 8.5, { hitW: .5, it: { ...IT('Bulkhead wheel', 'Four turns closes and dogs the bulkhead door by the bay. You turn it for the pressure drill, and hope never for real.'), drill: 'door' } });
     wallFixed('u', 'liftBrake', 'w', .5, { hitW: .6, it: { ...IT('Lift brake', 'The main lift\'s manual brake release, by the ladder. Turn it to let a stuck car down to the next deck.'), brake: true } });   // 0.47.0: incidents (m6)
     wallFixed('=', 'valvePanel', 'n', VALVE_PANELS[5].along, { hitW: 1.5, it: { ...IT('Pipe valves', 'Three valves on the main water line, numbered from upstream. Close the one before a leak.'), valves: 5 } });
+    wallFixed('F', 'ductDamper', 'w', 1.5, { n: 1, hitW: .8, it: IT('Duct damper 1', 'Upper decks, 1-3. The flap that sends the fan\'s air up the spine to the decks above.') });   // 0.47.3: the air line (Step 3)
+    wallFixed('F', 'ductDamper', 'w', 4.5, { n: 2, hitW: .8, it: IT('Duct damper 2', 'Lower decks, 4-6. The flap that sends the fan\'s air down to the decks below.') });
     placeWall('u', 'relayBoard', 'n', 1.5, { it: IT('Light relays', 'Deck 5\'s lights. The shuttle bay floods have a relay to themselves.') });
     // cart bay: two docks with a cart charging on each
     for (const [z, n] of [[1.0, 1], [3.0, 2]]) place('m', 'cartDock', 1.45, z, 'e', { dock: n, it: IT('Cart dock ' + n, n === 1 ? 'A hover hand cart, charging. The sticker says I BRAKE FOR NOBODY.' : 'A hover hand cart, charging, with a crate strap still hooked on.') });
@@ -7549,6 +7559,13 @@ function wallFixed(rk, kind, wall, along, o = {}) {
   return g;
 }
 Object.assign(WALL_KIT, {                               // each stands on the floor against its wall, so it reads as furniture when the wall is lowered
+  ductDamper(g, o = {}) {                                // 0.47.3: a square duct section out of the wall on two legs, its flap lever, a plate with o.n red ticks
+    for (const x of [-.3, .3]) box(.06, 1.62, .06, M.slateDark, x, .81, .32, g);
+    box(.6, .6, .5, UT.duct, 0, 1.92, .25, g); box(.68, .68, .04, WM.steel, 0, 1.92, .51, g);   // the duct and its flange (proud of the duct's face)
+    cyl(.03, .03, .1, WM.steel, .38, 1.92, .3, g, 8).rotation.z = Math.PI / 2; box(.04, .34, .04, WM.red, .45, 1.8, .3, g).rotation.z = .35;   // the flap's spindle and lever
+    box(.66, .05, .05, M.slateDark, 0, 1.45, .32, g); box(.34, .12, .015, WM.steel, 0, 1.45, .353, g);   // a crossbar and its plate, standing off it
+    for (let t = 0; t < (o.n || 1); t++) box(.025, .08, .012, WM.red, (t - ((o.n || 1) - 1) / 2) * .045, 1.45, .364, g);
+  },
   extBracket(g) {                                        // an extinguisher stand: a post with a red sign, the extinguisher in its bracket
     box(.06, 1.42, .06, M.slateDark, 0, .71, .05, g); box(.3, .03, .2, M.slateDark, 0, .015, .1, g);
     box(.22, .04, .14, M.slateDark, 0, .62, .12, g); box(.24, .12, .02, WM.red, 0, 1.32, .09, g);
@@ -15525,6 +15542,7 @@ const MACHINE_KINDS = {
   relay:       { name: 'Bridge relays',     sys: 'comms',      life: 24, time: .7, use: 'heads',  scope: 'ship', w: 2, tier: 3, part: 'relay' },
   databus:     { name: 'Bridge data bus',   sys: 'comms',      life: 24, time: 1,                 scope: 'ship', w: 1, tier: 3, part: 'signal card' },
   array:       { name: 'Sensor array',      sys: 'comms',      life: 40, time: 1,                 scope: 'ship', w: 2, tier: 3, part: 'signal card' },
+  damper:      { name: 'Duct dampers',      sys: 'air',        life: 30, time: 1,                 scope: 'ship', w: 1, tier: 2, part: 'relay' },   // the air line's two duct dampers (0.33.55, plans/mechanics/architect-air-line.html)
   doorgear:    { name: 'Bay door gear',     sys: 'hull',       life: 40, time: 1,                 scope: 'ship', w: 1, tier: 2, part: 'seal' },
   hullseal:    { name: 'Hull seals',        sys: 'hull',       life: 32, time: 1,                 scope: 'ship', w: 2, tier: 3, part: 'seal' },
   reactor:     { name: 'Reactor',           sys: 'power',      life: 60, time: 1,                 scope: 'ship', w: 3, tier: 4, part: 'control rod' },
@@ -15789,6 +15807,8 @@ function shipHealth(sys = shipSystems()) {
 // gives back (a shower's hygiene), drain = how fast a need runs down, walk = walking speed, cook = cooking time,
 // lift = ride time, spoil = how fast the cold store's food spoils. mood = points off a 0-100 mood. local: felt
 // only on the machine's own deck.
+// the decks a branch machine feeds (the air line's dampers: architect-air-line.html)
+const MACH_BRANCH = { '5-damper-1': [1, 2, 3], '5-damper-2': [4, 5, 6] };
 const MACHINE_FX = {
   oven:        { cook: .5, restore: { hunger: .15 }, mood: 2, text: 'Meals run late' },
   range:       { cook: .4, restore: { hunger: .1 }, mood: 2, text: 'Meals run late' },
@@ -15809,6 +15829,7 @@ const MACHINE_FX = {
   filter:      { restore: { hygiene: .2 }, mood: 2, text: 'The water runs cloudy' },
   pump:        { restore: { hygiene: .4 }, mood: 3, text: 'Showers run weak' },
   valve:       { mood: 1, text: 'A pipe drips somewhere' },
+  damper:      { mood: 1, text: 'The duct air is weak', branch: true },   // as the valves, on its branch's decks only (MACH_BRANCH)
   o2cell:      { drain: { energy: .2 }, mood: 3, text: 'The air feels thin' },
   electrolyser: { drain: { energy: .15 }, mood: 2, text: 'The air feels thin' },
   heatpump:    { restore: { energy: .15 }, mood: 2, text: 'The radiators run lukewarm' },
@@ -15829,6 +15850,7 @@ function fxFrom(deck, c) {
   for (const m of machineList()) {
     const F = MACHINE_FX[m.kind]; if (!F) continue;
     if ((MACHINE_KINDS[m.kind].scope === 'deck' || F.local) && m.deck !== deck) continue;
+    if (F.branch && MACH_BRANCH[m.id] && !MACH_BRANCH[m.id].includes(deck)) continue;   // a duct damper reaches its own decks (0.33.55)
     if (!groups.has(m.kind)) groups.set(m.kind, []); groups.get(m.kind).push(m);
   }
   const stateOf = id => machineState(c[id] ?? 100);
@@ -16179,7 +16201,86 @@ const FAULT_CAUSES = {
     { id: 'lamp', part: 'lamp', w: 3, shows: 'a rack is dim', sign: 'a row of pink lamps gone pale', when: 'always', still: 'New relay. Still pale along that row.' },
     { id: 'relay', part: 'relay', w: 2, shows: 'a rack is dim', sign: 'the whole rack flickers off and on', when: 'warm', still: 'New lamps. The rack still cuts out.' },
     { id: 'drift', setting: true, w: 1, shows: 'lights at the wrong hours', sign: 'on at night, off at noon', when: 'at-time', from: 4 } ],
+  // Tier 2 (0.33.55): the air line's duct dampers (fault-tables.html; line: 'air' marks a cause tracing reads along the air line)
+  damper: [
+    { id: 'relay', part: 'relay', w: 3, shows: 'stuffy air on its decks', sign: 'the flap clicks but stays half shut, worse once warm', when: 'warm', still: 'New bearing. The flap still clicks and stays half shut.', line: 'air' },
+    { id: 'bearing', part: 'bearing', w: 2, shows: 'stuffy air on its decks', sign: 'the flap judders and sits half open, all day', when: 'always', still: 'New relay. The flap still judders.', line: 'air' },
+    { id: 'seal', part: 'seal', w: 1, shows: 'a whistle in the duct', sign: 'a whistle at the duct mouth', when: 'always', still: 'New relay. Still whistles.' } ],
+  // the rest of Tier 2 (0.33.56, fault-tables.html, approved by the user 2026-10-18). No `band` on their part causes: the page's
+  // "never before T2" is the player meeting them, and a Tier 2 machine's jobs are above you till then anyway (jobTier); the
+  // crew's causes come from the same table ("before that Tier 2 machines still fault as now"). A load is never picked
+  scrubber: [
+    { id: 'filter', part: 'filter', w: 3, shows: 'stuffy air|rattles', sign: 'a grey grille; the intake buzzes all day', when: 'always', still: 'Clean filter. Still rattles once it\'s run all day.', line: 'air' },
+    { id: 'bearing', part: 'bearing', w: 2, shows: 'rattles', sign: 'a whine that builds through the evening', when: 'warm', still: 'New bearing. Still rattles when the door goes.' },
+    { id: 'panel', part: 'seal', w: 1, shows: 'rattles', sign: 'the housing buzzes when the door goes', when: 'touched', still: 'Fresh gasket on the panel. Still rattles, door or no door.' },
+    { id: 'drift', setting: true, w: 2, shows: 'stuffy air', sign: 'the hum\'s off pitch; the grille\'s clean', when: 'always', from: 4, band: 2 } ],   // M5 stage 2; till then the filter fixes it
+  heater: [
+    { id: 'valve', part: 'valve', w: 3, shows: 'cold cabins', sign: 'one branch\'s pipe cold to the touch, the rest warm', when: 'always', still: 'New valve. Still lukewarm everywhere, and it knocks.', line: 'heat' },
+    { id: 'pump', part: 'pump', w: 2, shows: 'cold cabins', sign: 'every pipe lukewarm; a knock in the plant', when: 'always', still: 'New pump. That one branch is still cold.', line: 'heat' },
+    { id: 'relay', part: 'relay', w: 1, shows: 'cold cabins', sign: 'warm, then cold for an hour: it clicks off and on', when: 'warm', still: 'New valve. Still goes cold after it\'s run a while.', line: 'heat' } ],
+  recycler: [
+    { id: 'membrane', part: 'membrane', w: 3, shows: 'low output', sign: 'the output gauge low all day; a brown film in the sight glass', when: 'always', still: 'New membrane. Output still sinks after 18:00.', line: 'water' },
+    { id: 'pump', part: 'pump', w: 2, shows: 'low output', sign: 'fine in the morning; the gauge sinks after 18:00', when: 'peak', still: 'New pump. Output still low all day; the glass is brown.', line: 'water' },
+    { id: 'valve', part: 'valve', w: 1, shows: 'low output', sign: 'the outlet pipe shudders; the gauge flickers', when: 'always', still: 'New valve. Output still low; the glass is brown.', line: 'water' },
+    { id: 'seal', part: 'seal', w: 1, shows: 'a drip', sign: 'a wet ring on the floor under it', when: 'after-use', still: 'Fresh seal. Still a wet ring under it.' } ],
+  filter: [
+    { id: 'cartridge', part: 'cartridge', w: 3, shows: 'low flow', sign: 'one housing\'s gauge in the red, all day', when: 'always', still: 'New cartridge. Flow still low: the floor\'s damp.', line: 'water' },
+    { id: 'seal', part: 'seal', w: 2, shows: 'low flow', sign: 'a damp floor under one housing, a faint hiss', when: 'after-use', still: 'Fresh seal. Flow still low; one gauge\'s in the red.', line: 'water' },
+    { id: 'valve', part: 'valve', w: 1, shows: 'cloudy water', sign: 'clear first thing, cloudy by the busy hours', when: 'peak', still: 'New valve. Still clouds by the afternoon.' } ],
+  uv: [
+    { id: 'lamp', part: 'uv lamp', w: 3, shows: 'water tastes off', sign: 'a dull blue glow in the window', when: 'always', still: 'New relay. The glow\'s still dull.' },
+    { id: 'relay', part: 'relay', w: 2, shows: 'water tastes off', sign: 'the glow blinks off and on once it\'s warm', when: 'warm', still: 'New lamp. It still blinks off once it\'s warm.' },
+    { id: 'seal', part: 'seal', w: 1, shows: 'low flow', sign: 'water beading on the housing, a drip', when: 'after-use', still: 'Fresh seal. Flow still low.', line: 'water' } ],
+  pump: [
+    { id: 'pump', part: 'pump', w: 3, shows: 'low flow', sign: 'fine in the morning; labours after 18:00', when: 'peak', still: 'New seal. Still labours in the evening.', line: 'water' },
+    { id: 'seal', part: 'seal', w: 2, shows: 'low flow', sign: 'a drip under the shaft, low all day', when: 'always', still: 'New pump. Still drips under the shaft.', line: 'water' },
+    { id: 'bearing', part: 'bearing', w: 1, shows: 'noisy', sign: 'a grinding, worse after a long run', when: 'warm', still: 'New pump. Still grinding.' },
+    { id: 'irrigation', load: '3-irrigation-1', w: 1, shows: 'low flow', sign: 'low only while the garden\'s being watered', when: 'with:irrigation', line: 'water', band: 2 } ],   // P1's later form only
+  valve: [
+    { id: 'valve', part: 'valve', w: 3, shows: 'low flow on its branch', sign: 'its branch\'s decks weak; the handle\'s stiff', when: 'always', still: 'Fresh seal. That branch is still weak.', line: 'water' },
+    { id: 'seal', part: 'seal', w: 2, shows: 'a drip', sign: 'a drip from the gland, a wet floor', when: 'always', still: 'New valve. Still drips.' } ],
+  heatpump: [
+    { id: 'pump', part: 'pump', w: 3, shows: 'cold cabins', sign: 'a knock; both outlets lukewarm all day', when: 'always', still: 'New valve. Both outlets still lukewarm; it knocks.', line: 'heat' },
+    { id: 'bearing', part: 'bearing', w: 2, shows: 'cold cabins', sign: 'a whine, and the radiators cool off after hours of running', when: 'warm', still: 'New pump. Still cools off by evening, and whines.', line: 'heat' },
+    { id: 'valve', part: 'valve', w: 2, shows: 'cold cabins', sign: 'one outlet hot, the other cold', when: 'always', still: 'New pump. One outlet still cold.', line: 'heat' } ],
+  manifold: [
+    { id: 'valve', part: 'valve', w: 3, shows: 'one deck cold', sign: 'that deck\'s pipe cold at the manifold, all day', when: 'always', still: 'Fresh seal. That deck\'s still cold.', line: 'heat' },
+    { id: 'regulator', part: 'regulator', w: 2, shows: 'cabins cold at night', sign: 'fine by day; the gauge drops after 22:00', when: 'at-time', still: 'New valve. Still cold after 22:00.', line: 'heat' },
+    { id: 'seal', part: 'seal', w: 1, shows: 'a drip', sign: 'a hiss and a wet floor under a joint', when: 'always', still: 'New valve. Still hisses.' } ],
+  o2cell: [
+    { id: 'cell', part: 'oxygen cell', w: 3, shows: 'air thin', sign: 'one cell\'s lamp amber; the gauge low all day', when: 'always', still: 'New regulator. One lamp\'s still amber.', line: 'air' },
+    { id: 'regulator', part: 'regulator', w: 2, shows: 'air thin', sign: 'a hiss, then the gauge jumps; worst at the busy hours', when: 'peak', still: 'New cell. Still hisses and jumps when everyone\'s up.', line: 'air' },
+    { id: 'relay', part: 'relay', w: 1, shows: 'stops and starts', sign: 'the cells click off and on once warm', when: 'warm', still: 'New cell. Still clicks off and on.' } ],
+  electrolyser: [
+    { id: 'membrane', part: 'membrane', w: 3, shows: 'air thin', sign: 'bubbles slow in the sight glass, all day', when: 'always', still: 'New cell. Bubbles still slow.', line: 'air' },
+    { id: 'cell', part: 'cell', w: 2, shows: 'air thin', sign: 'strong in the morning, fading by evening', when: 'warm', still: 'New membrane. Still fades by evening.', line: 'air' },
+    { id: 'relay', part: 'relay', w: 1, shows: 'stops and starts', sign: 'clicks off, then on again', when: 'warm', still: 'New membrane. Still stops and starts.' } ],
+  irrigation: [
+    { id: 'pump', part: 'pump', w: 3, shows: 'dry beds', sign: 'every bed damp, none wet; the pump hums low', when: 'always', still: 'New valve. Every bed\'s still only damp.' },
+    { id: 'valve', part: 'valve', w: 2, shows: 'dry beds', sign: 'one bed bone dry, the rest fine', when: 'always', still: 'New pump. That one bed\'s still dry.' },
+    { id: 'nozzles', part: 'filter', w: 1, shows: 'dry beds', sign: 'spits, then nothing', when: 'after-use', still: 'New pump. Still spits, then nothing.' } ],   // the strainer in the line (M14 cleans them)
+  nutrient: [
+    { id: 'pack', part: 'nutrient pack', w: 3, shows: 'yellow leaves', sign: 'the pack\'s window empty', when: 'always', still: 'New pump. The window\'s still empty.' },
+    { id: 'pump', part: 'pump', w: 2, shows: 'yellow leaves', sign: 'the pack full, the dosing line barely ticks', when: 'always', still: 'New pack. The line still barely ticks.' },
+    { id: 'regulator', part: 'regulator', w: 1, shows: 'brown leaf tips', sign: 'a white crust on the tray edges', when: 'always', still: 'New pack. Still a crust on the trays.' } ],
+  airplant: [
+    { id: 'filter', part: 'filter', w: 3, shows: 'stuffy air ship-wide', sign: 'a grey filter face; the intake pulls hard', when: 'always', still: 'New belt. Filter face still grey.', line: 'air' },
+    { id: 'belt', part: 'fan belt', w: 2, shows: 'stuffy air ship-wide', sign: 'a squeal at shift change, weak for the next hour', when: 'peak', still: 'Clean filter. Still squeals at shift change.', line: 'air' },
+    { id: 'bearing', part: 'bearing', w: 1, shows: 'noisy', sign: 'a rumble from the plant', when: 'warm', still: 'New belt. Still rumbles.' } ],
+  fan: [
+    { id: 'bearing', part: 'bearing', w: 3, shows: 'stuffy air ship-wide', sign: 'a rumble in the duct', when: 'warm', still: 'New belt. Still rumbles.', line: 'air' },
+    { id: 'belt', part: 'fan belt', w: 2, shows: 'stuffy air ship-wide', sign: 'a squeal; the belt shiny', when: 'always', still: 'New bearing. Still squeals.', line: 'air' },
+    { id: 'relay', part: 'relay', w: 1, shows: 'stops', sign: 'stops, clicks, starts', when: 'warm', still: 'New bearing. Still stops.', line: 'air' } ],
+  gasplant: [
+    { id: 'regulator', part: 'regulator', w: 3, shows: 'low lab gas', sign: 'the gauge wanders all day', when: 'always', still: 'Fresh seal. The gauge still wanders.' },
+    { id: 'seal', part: 'seal', w: 2, shows: 'low lab gas', sign: 'a hiss at a joint; soapy water bubbles', when: 'always', still: 'New regulator. Still hisses at the joint.' },
+    { id: 'valve', part: 'valve', w: 1, shows: 'low lab gas', sign: 'fine until someone opens a bench tap, then it drops', when: 'touched', still: 'New regulator. Still drops when a tap opens.' } ],
+  doorgear: [                                            // no door gear in DECKS today (a stand-in on Deck 5); kept for when one is real
+    { id: 'seal', part: 'seal', w: 3, shows: 'bay doors slow', sign: 'a draught at the frame', when: 'always', still: 'New bearing. Still a draught at the frame.' },
+    { id: 'bearing', part: 'bearing', w: 2, shows: 'bay doors slow', sign: 'a judder as they move, worse after a few runs', when: 'after-use', still: 'Fresh seal. Still judders.' },
+    { id: 'relay', part: 'relay', w: 1, shows: 'doors stop halfway', sign: 'stop halfway, click, then go', when: 'warm', still: 'New bearing. Still stops halfway.' } ],
 };
+const FAULT_T2 = ['scrubber', 'heater', 'recycler', 'filter', 'uv', 'pump', 'valve', 'heatpump', 'manifold', 'o2cell', 'electrolyser', 'irrigation', 'nutrient', 'airplant', 'fan', 'damper', 'gasplant', 'doorgear'];
 // a real fault's cause (17.4): picked when its repair or overhaul is posted (from Day 2), from the causes allowed that day
 // (a setting from its `from` day, a band from that tier; never a load), weighted by w; schedU key 855. faultCause(j) -> the
 // cause or null; faultShows(j) -> the job card's symptom (one of a setting's two, by the job)

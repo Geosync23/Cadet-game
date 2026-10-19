@@ -1116,6 +1116,38 @@ with sync_playwright() as pw:
             or not h1.get('take') or h1['after'] != h1['crates'][2] - 1 or not (1 <= len(h1['misplaced']) <= 3) or h1 != h2 or h1.get('saved') is not True or h1.get('fetchFixes') is not True):
             fail('hauling: the manifest and the misplaced part')
 
+    # 5u. the air line's dampers and the Tier 2 fault tables (Step 3, 0.33.56; architect-air-line.html, fault-tables.html Tier 2):
+    # 5-fan-1 and both dampers are real machines with panel places; a broken damper is felt on its own branch's decks only
+    # (damper 1: Decks 1-3, damper 2: Decks 4-6) and the other's decks are as before; every Tier 2 kind in MACHINE_KINDS has
+    # a table; every cause's line is water, heat or air; within a kind no two causes share both card and sign (5o checks
+    # every kind); and on paper over 40 days every Tier 2 machine's part causes all come up, the commonest most, never a load
+    if g.ev("typeof FAULT_T2 === 'object'"):
+        t2 = g.ev("""(() => {
+          const out = { real: {}, panels: {}, branch: {}, missing: [], badLine: [], noShow: [], order: [], loads: 0, kinds: 0 };
+          for (const id of ['5-fan-1', '5-damper-1', '5-damper-2']) { const m = machineById(id); out.real[id] = !!m && !m.stub; out.panels[id] = !!panelPlace(id); }
+          for (const k of FAULT_T2) if (MACHINE_KINDS[k] && !FAULT_CAUSES[k]) out.missing.push(k);
+          for (const k of FAULT_T2) for (const c of FAULT_CAUSES[k] || []) if (c.line && !['water', 'heat', 'air'].includes(c.line)) out.badLine.push(k + '.' + c.id);
+          for (const k of FAULT_T2) { const m = machineList().find(x => x.kind === k); if (!m || !FAULT_CAUSES[k]) continue; out.kinds++;
+            const n = {}; for (let h = 24; h < 24 * 41; h++) { const c = faultPick(m, h); if (!c) continue; if (c.load) out.loads++; n[c.id] = (n[c.id] || 0) + 1; }
+            const allowed = FAULT_CAUSES[k].filter(c => !c.load && !c.band);
+            for (const c of allowed) if (!n[c.id]) out.noShow.push(k + '.' + c.id);
+            const top = allowed.filter(c => c.w === Math.max(...allowed.map(x => x.w))).map(c => c.id), most = Object.entries(n).sort((a, b) => b[1] - a[1])[0];
+            if (most && !top.includes(most[0])) out.order.push(k + ': ' + most[0]); }
+          // the dampers' reach: each broken in turn on a fresh ship, the notes per deck
+          const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min;
+          for (const id of ['5-damper-1', '5-damper-2']) {
+            JOBS_ON = false; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t0); machinesNow(); machineFault(id, 5);
+            out.branch[id] = Object.keys(DECKS).map(Number).filter(n => shipEffects(n).notes.some(x => x.machine === id));
+          }
+          JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t0);
+          return out;
+        })()""")
+        print(f"Air line and Tier 2 tables (0.33.56): real {t2['real']}, panels {t2['panels']}; a broken damper is felt on decks {t2['branch']}")
+        print(f"  {t2['kinds']} Tier 2 kinds with a machine; missing tables {t2['missing']}, bad lines {t2['badLine']}, causes never picked {t2['noShow']}, commonest not the most often {t2['order']}, loads picked {t2['loads']}")
+        if (not all(t2['real'].values()) or not all(t2['panels'].values()) or t2['branch'].get('5-damper-1') != [1, 2, 3] or t2['branch'].get('5-damper-2') != [4, 5, 6]
+            or t2['missing'] or t2['badLine'] or t2['noShow'] or t2['order'] or t2['loads']):
+            fail('the air line and the Tier 2 fault tables')
+
     # 6. the save
     rt = g.ev("""(() => {
       JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(6 * 1440 + 11 * 60 + 17); machinesNow();
