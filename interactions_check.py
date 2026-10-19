@@ -412,12 +412,12 @@ with sync_playwright() as pw:
             r = g.ev("""(() => { if (myJob()) dropJob && dropJob(myJob().id); const o = openJobs('you'); if (!o.length || !claimJob(o[0].id)) return null; const j = myJob(); j.workDone = true;
               j.gains = { rep: [{ dept: 'works', add: 3 }], meters: [{ sys: 'power', add: 4 }, { sys: 'air', add: 2.4 }, { sys: 'heat', add: 0 }] };
               const ok = ixBoard.turnIn(j.id); return [ok, [...document.querySelectorAll('#tx .tgain b')].map(b => [b.textContent, b.className])]; })()""")
-            check(r is None or (r[0] and len(r[1]) == 3 and r[1][0][1] == 'rep' and '3' in r[1][0][0] and any('4' in t and t.startswith('+') for t, c in r[1][1:]) and not any('Heat' in t for t, c in r[1])), f'the turn-in shows rep first, then +N for each meter the job raised (none for 0) ({r})')
+            check(r is None or (r[0] and len(r[1]) == 3 and r[1][0][1] == 'rep' and 'reputation up' in r[1][0][0] and not any(ch.isdigit() for ch in r[1][0][0]) and any('4' in t and t.startswith('+') for t, c in r[1][1:]) and not any('Heat' in t for t, c in r[1])), f'the turn-in shows rep first (words only, the user\'s 0.61.15 rule), then +N for each meter the job raised (none for 0) ({r})')
             r = g.ev("""(() => { const o = openJobs('you'); if (!o.length || !claimJob(o[0].id)) return null; const j = myJob(); j.workDone = true;
               const a = turnInSnap(); a.sys.power -= 3; a.rep.works -= 2; return turnInGains(j, a).map(c => c.text); })()""")
             r2 = g.ev("""(() => turnInGains({ meters: [{ key: 'water', name: 'Water', gain: 3.4 }, { key: 'heat', name: 'Heat', gain: .2 }] }, null).map(c => c.text))()""")
             check(len(r2) == 1 and r2[0].startswith('+3') and 'Water' in r2[0], f"S2's j.meters (0.33.57) show as +N, under half a point left out ({r2})")
-            check(r is None or (any('reputation' in t and '2' in t for t in r) and any('3' in t and t.startswith('+') for t in r)), f'with no j.gains, a before/after look fills it in ({r})')
+            check(r is None or (any('reputation up' in t for t in r) and any('3' in t and t.startswith('+') for t in r)), f'with no j.gains, a before/after look fills it in ({r})')
         check(not g.errors, f'no console errors ({g.errors[:3]})')
     g.close()
 

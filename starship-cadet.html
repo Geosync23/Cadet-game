@@ -14305,9 +14305,9 @@ addEventListener('resize', trkPlace); setTimeout(trkPlace, 0);
 // added to each ship meter the job helped"). The board's turnIn calls turnInShow(job, before) after its toast, which gets
 // a row of chips: reputation first (gold), then each ship meter ("+4 Power"). What it shows comes from the job:
 // j.gains = { rep: [{ dept, name?, add }], meters: [{ sys, name?, add, now? }] }, filled by whoever applies a gain (C2 the
-// rep); the meters come from S2's j.meters = [{ key, name, gain }] (0.33.57, set when the work is done) when j.gains has none. Missing either list, a before/after look round turnInJob
-// (turnInSnap: SHIP.rep's departments, shipHealthRows' systems) fills it in. Words: the head writer's works.turnin.repN
-// ({n} {dept}) or works.turnin.rep, works.turnin.meter ({n} {system}), meter.<sys>. Nothing saved; the job keeps j.gains.
+// rep, as words: C2's careerJobIn, 0.44.22); the meters come from S2's j.meters = [{ key, name, gain }] (0.33.57, set when the work is done) when j.gains has none. Missing either list, a before/after look round turnInJob
+// (turnInSnap: SHIP.rep's departments, shipHealthRows' systems) fills it in. Reputation is words only, never a number
+// (the user's 0.61.15 rule). Words: the head writer's works.turnin.rep, works.turnin.meter ({n} {system}), meter.<sys>. Nothing saved; the job keeps j.gains.
 function turnInSnap() {
   const out = { rep: {}, sys: {} };
   try { const R = typeof repInit === 'function' ? repInit() : null; if (R) out.rep = { ...R.dept }; } catch (e) { /* none */ }
@@ -14325,9 +14325,9 @@ function turnInGains(j, a) {
     if (!mets) mets = Object.keys(b.sys).filter(k => isFinite(a.sys[k]) && b.sys[k] - a.sys[k] >= 1).map(k => ({ sys: k, add: b.sys[k] - a.sys[k] }));
   }
   const out = [];
-  for (const r of reps || []) { if (!r || !(r.add > 0) && r.add !== undefined) continue; const dn = r.name || tgDept(r.dept);
-    out.push({ rep: true, text: r.add ? T('works.turnin.repN', '{dept} reputation +{n}', { n: Math.round(r.add), dept: dn }) : T('works.turnin.rep', 'Works reputation up') }); }
-  for (const m of mets || []) { if (!m || !(m.add >= .5)) continue; const nm = m.name || T('meter.' + m.sys, m.fb || (typeof SYSTEM_NAME !== 'undefined' && SYSTEM_NAME[m.sys]) || String(m.sys));
+  for (const r of reps || []) { if (!r || !(r.add > 0) && r.add !== undefined) continue; const dn = r.name || tgDept(r.dept);   // words only, never a number (the user's 0.61.15 rule)
+    out.push({ rep: true, text: (r.dept || 'works') === 'works' ? T('works.turnin.rep', 'Works reputation up') : dn + ' reputation up' }); }
+  for (const m of mets || []) { if (!m || !(m.add >= .5)) continue; const nm = T('meter.' + m.sys, m.name || m.fb || (typeof SYSTEM_NAME !== 'undefined' && SYSTEM_NAME[m.sys]) || String(m.sys));   // the head writer's short name first
     out.push({ rep: false, text: T('works.turnin.meter', '+{n} {system}', { n: Math.round(m.add), system: nm }) }); }
   return out;
 }
