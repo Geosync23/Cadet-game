@@ -103,3 +103,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - ~06:51 R5: X2 ec0cbc3 PASS WITH FIXES (queueJoin must end the current activity): hold for X2's 0.71.5 (+ crate fix, 21+22 redo).
 - ~06:52 lead 17: reviewer R5 → R6 = session_01CPyuA1o5jgxwQtv7huZTNg (R5 finishes E4/U verdicts first).
 - ~06:53 R5: E4 f431a79 (0.53.10) PASS for 24t; but M17 (bca66df, inside it) PASS WITH FIXES (dark screen on leaving mid-fade; coplanar rail tops): hold M17 for E4's next hash, or ship it switched off as the lead decides. 24t fixes sit on top of M17, so taking them takes M17 too.
+- ~06:53 R5 PASS U 0335523 (0.72.6, U's tip: playtest 2 batch A+B; player_check needs >45 min). R5: E6 910131e merged checks green; X2 ec0cbc3 day_check OK.
