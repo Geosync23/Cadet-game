@@ -209,6 +209,25 @@
 - Nobody lies. Somebody's mixed up. The Roster knows which.
 == case.ask
 - Ask about the fault
+// P2's card (H2 adds "Head-scratcher: " and drops a final full stop); {machine} capitalised ("Air scrubber 2")
+== case.title.p2
+- {machine} on Deck {deck} {shows} now and then
+// the Fault notes heading for what people said
+== case.p2.head
+- What people said (tap a name if it doesn't fit)
+// the first hints (the teacher's later ones are their own lines)
+== case.hint.p1.1
+- Read the logs. Which machines were fine at the hours it happens?
+== case.hint.p2.1
+- Ask the people who were near it. Then check the Roster: were they?
+// a wrong call in P1: {where} the line's end ("Showers on Deck 4")
+== case.wrong.p1
+- New {part} in. {where} still {shows}.
+// the day strip: a machine fine all day, and the heading
+== case.strip.allday
+- full output every hour, evenings too
+== case.strip.head
+- Yesterday, hour by hour (the hours it shows outlined)
 // P1's card: the end of the line, and what it does (H2 fills {deck})
 == case.line.water
 - Showers on Deck {deck}

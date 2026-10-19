@@ -194,8 +194,13 @@ Matched to C2 0.44.22 (C2's own names for the first half, W2's for the move and 
 | `case.strip.title`, `case.strip.fine`, `case.strip.low` | the day strip ("{machine}'s log") and its list fallback | `{machine}`; `{from}` `{to}` |
 | `case.line.water/heat/air`, `case.line.<line>.shows` | P1's card: the line's end ("Showers on Deck {deck}") and what it does ("run weak") | `{deck}` |
 | `case.ask` | the chat card button: "Ask about the fault" | |
+| `case.title.p2` | P2's card (H2 adds "Head-scratcher: ") | `{machine}` `{deck}` `{shows}` |
+| `case.p2.head` | Fault notes heading for what people said | |
+| `case.hint.p1.1`, `case.hint.p2.1` | the first hints | |
+| `case.wrong.p1` | a wrong call in P1 | `{part}` `{where}` `{shows}` |
+| `case.strip.allday`, `case.strip.head` | the day strip: fine all day; its heading | |
 | `case.wrong.t2` | a wrong call at T2 (the part is spent) | `{part}` |
-| `content/cases/p2.lines`: kinds `ask.saw.still`, `ask.saw.door`, `ask.quiet.still`, `ask.quiet.door`, `ask.mixup`, `case.ask.none` (H2's names) | witness answers by what the door did; a mix-up names where they really were | `{time}` `{place}` (no "the") `{machine}` (short) |
+| `content/cases/p2.lines`: kinds `ask.saw.still`, `ask.saw.door`, `ask.quiet.still`, `ask.quiet.door`, `ask.mixup`, `case.ask.none` (H2's names) | witness answers by what the door did; a mix-up names where they really were | `{time}` `{place}` (with its article: "the lift lobby", "Bunk 3") `{machine}` (short, never sentence-first) |
 | `fault.tried.odd` (`faults.lines`) | P3 T2: a note that rules out less than it seems (H2 adds " — Surname") | `{part}` `{shows}` |
 
 ### Bridge, meters
