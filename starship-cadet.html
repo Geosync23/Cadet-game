@@ -62,6 +62,17 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 .devbtn b{min-width:16px;padding:0 4px;border-radius:8px;background:var(--teal);color:#08201d;font-size:11px;line-height:16px;margin-left:2px}
 .devbtn.compact span{display:none}                        /* 0.28.59: the narrowest phones, so Pause fits beside it (its aria-label still says Device) */
 .devbtn.low::after{content:"";width:7px;height:7px;border-radius:50%;background:#e8a04c;margin-left:2px}
+/* 0.72.0 (HUD U): the Tracked button, in the Device button's row (section 15b's trkPlace lines it up), and its panel */
+.trkbtn{position:fixed;left:140px;top:86px;z-index:2;padding:6px 11px;font-size:12.5px}
+.trkbtn.compact span{display:none}
+.trkbtn.on{border-color:#e8c06a}
+.trkbtn.on::after{content:"";width:7px;height:7px;border-radius:50%;background:#e8c06a;margin-left:2px}
+.trkbtn::before{content:"";position:absolute;inset:-7px -3px}  /* a 44px tap target */
+#trkPanel{max-height:calc(100% - 28px);overflow-y:auto;overscroll-behavior:contain}
+#trkPanel h3{margin:10px 2px 5px;font-size:11.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+#trkPanel .deckbtn i{width:auto;min-width:26px;padding:0 6px;border-radius:13px;font-size:12px}
+#trkPanel .deckbtn span{min-width:0;flex:1}
+#trkPanel .deckbtn b,#trkPanel .deckbtn small{overflow-wrap:anywhere}
 /* 19. the device's skin (0.35.1): an old-school phosphor screen in a bezel. CSS and DOM only: no canvas, blur or backdrop-filter. */
 .device,.devtip,.devhu,.devdlg,.devaddr,#chat.devchat,body #seek{--crt-ink:#6ff0dc;--crt-dim:#4ab1a3;--crt-bg:#03141a;--crt-hot:#e8fffb;--crt-glow:rgba(95,227,208,.45);--crt-scan:rgba(0,0,0,.2);--crt-radius:18px;--crt-font:ui-monospace,"Cascadia Mono",Menlo,Consolas,monospace;--crt-size:17px;--bezel:#1b1f24}
 html[data-ph="amber"] body #seek,.devhu[data-ph="amber"],.devaddr[data-ph="amber"],.devdlg[data-ph="amber"],#chat.devchat[data-ph="amber"],.devtip[data-ph="amber"],.device[data-ph="amber"]{--crt-ink:#ffb347;--crt-dim:#d09142;--crt-bg:#140c03;--crt-hot:#fff1d6;--crt-glow:rgba(255,170,60,.5)}
@@ -244,6 +255,12 @@ body.dlgon .devhu{display:none}
   <button class="stay" id="sleepNo">Not yet</button>
 </div>
 <button class="devbtn" id="devBtn" aria-label="Your device: the time and your needs"><svg viewBox="0 0 24 24"><rect x="6" y="3" width="12" height="18" rx="2.5"/><path d="M10 17.5h4"/></svg><span>Device</span><b id="devMail" hidden></b></button>
+<button class="trkbtn" id="trkBtn" aria-label="Tracked: what's on and coming up, and where to go" aria-haspopup="dialog"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="2.5"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3"/></svg><span>Tracked</span></button>
+<div class="lift" id="trkPanel" role="dialog" aria-labelledby="trkT" hidden>
+  <h2 id="trkT">Tracked</h2><p>Tap one to follow the arrow there. Tap it again to stop.</p>
+  <div id="trkList"></div>
+  <button class="stay" id="trkClose">Close</button>
+</div>
 <div class="device" id="device" role="dialog" aria-labelledby="devT" data-ph="cyan" hidden>
   <div class="bez" id="devBez"><span class="led" id="devLed" title="New mail"></span><span>CSV WREN · CREW PDA</span><span class="grip"></span></div>
   <div class="crt"><div class="devhead"><h2 id="devT">Your device</h2></div><div id="devBody"></div></div>
@@ -10787,7 +10804,7 @@ const DEVICE_SKIN = (() => {
       const tx = mk('span', '', ''); tx.append(mk('b', '', h.text), mk('small', '', h.where || '')); c.appendChild(tx);
       if (h.go) { const g = mk('button', 'act', 'Go there'); g.type = 'button'; g.onclick = e => { e.stopPropagation(); devHeadsDo('go'); }; c.appendChild(g); }
       c.style.top = ''; const me = c.getBoundingClientRect(); let top = me.top;   // 0.35.31: below section 15's needs strip and activity bar when they'd overlap (a phone)
-      for (const id of ['needStrip', 'actBar']) { const e = document.getElementById(id); if (!e || e.hidden || !e.offsetWidth) continue;
+      for (const id of ['needStrip', 'actBar', 'trkBtn']) { const e = document.getElementById(id); if (!e || e.hidden || !e.offsetWidth) continue;   // 0.72.0: and the Tracked button
         const r = e.getBoundingClientRect(); if (r.right > me.left && r.left < me.right && r.bottom + 8 > top) top = r.bottom + 8; }
       if (top !== me.top) c.style.top = Math.round(top) + 'px';
       c._t = simTimeout(() => devHeadsDo('done'), h.soft ? 6000 : 9000);
@@ -14202,7 +14219,7 @@ function ixFrame() {
   if (label !== ixLast) { lab.textContent = ixLast = label; }
 }
 requestAnimationFrame(ixFrame);
-// ---- Tracked (0.72.0, HUD U; the user's playtest note; a device app since 0.72.4, first in its list): everything on or coming up (the rest of
+// ---- Tracked (0.72.0, HUD U; the user's playtest note; also a device app since 0.72.4, first in its list): everything on or coming up (the rest of
 // today and tomorrow morning from the Schedule's devDay: traditions, appointments, meals, your shift, ship items), your
 // job, and a few fixed places (the job board, your bunk, the call booths). A tap tracks one with the goal arrow
 // (setGoal, the goal carrying trk, its key, so the panel knows it's on; your job with SHIP.player.track, as the Jobs app
@@ -14241,6 +14258,51 @@ function trkTap(key) {                                  // the app's tap: track 
   else return false;
   return true;
 }
+// the main-screen Tracked button and its panel (0.72.0; kept beside the app, the user's ~04:00 "for now keep it in the main UI")
+const trkEl = document.getElementById('trkPanel'), trkList = document.getElementById('trkList'), trkBtn = document.getElementById('trkBtn');
+const trkKey = () => Math.floor(shipNow()) + '|' + (IX_GOAL ? IX_GOAL.trk || IX_GOAL.label : '') + '|' + SHIP.player.track;
+let trkSig = '';
+function trkDraw() {
+  const items = trkItems(); trkList.textContent = ''; trkSig = trkKey();
+  for (const [sec, head] of [['job', 'Your job'], ['on', 'On and coming up'], ['place', 'Places']]) {
+    const rows = items.filter(x => x.sec === sec); if (!rows.length) continue;
+    const h = document.createElement('h3'), box = document.createElement('div'); h.textContent = head; box.className = 'decks'; trkList.append(h, box);
+    for (const it of rows) {
+      const on = trkOn(it), b = document.createElement('button'), sp = document.createElement('span'), t = document.createElement('b'), sm = document.createElement('small');
+      b.type = 'button'; b.className = 'deckbtn' + (on ? ' goal' : ''); b.disabled = !on && !it.job && !it.goal; b.setAttribute('aria-pressed', String(on));
+      if (it.tag) { const i = document.createElement('i'); i.textContent = it.tag; b.appendChild(i); }
+      t.textContent = it.title; sm.textContent = it.sub + (b.disabled ? ' · no arrow for this one' : ''); sp.append(t, sm); b.appendChild(sp);
+      if (on) { const e = document.createElement('em'); e.textContent = 'Tracking'; b.appendChild(e); }
+      b.onclick = e => { e.stopPropagation(); if (trkTap(it.key)) trkClose(); else trkDraw(); };   // on its way: the arrow shows; a stop stays open
+      box.appendChild(b);
+    }
+  }
+}
+function trkOpen() { if (!trkEl.hidden) return trkClose(); trkDraw(); trkEl.hidden = false; trkBtn.setAttribute('aria-expanded', 'true');
+  try { (trkList.querySelector('button.goal') || trkList.querySelector('button:not(:disabled)') || document.getElementById('trkClose')).focus({ preventScroll: true }); } catch (e) { /* no focus */ } }
+function trkClose() { trkEl.hidden = true; trkBtn.setAttribute('aria-expanded', 'false'); }
+trkBtn.addEventListener('pointerdown', e => e.stopPropagation());
+trkBtn.onclick = e => { e.stopPropagation(); trkOpen(); };
+document.getElementById('trkClose').onclick = trkClose;
+addEventListener('keydown', e => { if (e.key === 'Escape' && !trkEl.hidden) trkClose(); });
+addEventListener('pointerdown', e => { if (!trkEl.hidden && !trkEl.contains(e.target) && !trkBtn.contains(e.target)) { e.stopPropagation(); e.preventDefault(); trkClose(); } }, true);   // a tap outside closes it, and goes no further
+// where it sits: on phones (narrow or short, section 15's pausePlace's test) under the needs strip's right end, clear of
+// the activity bar under its left end, so it stays put as the Device button grows (mail, a low need) and Pause moves;
+// elsewhere, or with no needs strip, in the Device button's row after Device (or Pause beside it), without its word
+// when it would touch the round buttons
+function trkPlace() {
+  const d = document.getElementById('devBtn'), pb = document.getElementById('pauseBtn'), ns = document.getElementById('needStrip'); if (!d) return;
+  const dr = d.getBoundingClientRect();
+  trkBtn.classList.remove('compact'); trkBtn.style.height = Math.round(dr.height) + 'px';
+  if (matchMedia('(max-width:720px),(max-height:500px)').matches && ns && !ns.hidden && ns.offsetWidth) {
+    const r = ns.getBoundingClientRect(); trkBtn.style.left = Math.round(Math.min(r.right, innerWidth - 12) - trkBtn.offsetWidth) + 'px'; trkBtn.style.top = Math.round(r.bottom + 8) + 'px'; return;
+  }
+  const pr = pb && pb.style.left ? pb.getBoundingClientRect() : null, anchor = pr && Math.abs(pr.top - dr.top) < 4 ? pr : dr;
+  const put = () => { trkBtn.style.left = Math.round(anchor.right + 8) + 'px'; trkBtn.style.top = Math.round(dr.top) + 'px'; };
+  const hits = () => { const q = trkBtn.getBoundingClientRect(); return q.right > innerWidth - 8 || [...document.querySelectorAll('.controls button')].some(o => { if (o === pb || !o.offsetWidth) return false; const r = o.getBoundingClientRect(); return r.left < q.right + 4 && q.left < r.right && r.top < q.bottom && q.top < r.bottom; }); };
+  put(); if (hits()) { trkBtn.classList.add('compact'); put(); }
+}
+addEventListener('resize', trkPlace); setTimeout(trkPlace, 0);
 // the device app (0.72.4, the user's: "move it into the personal device as its own app, first in the list"); its glyph
 // is the skin's 'track'
 deviceApp({ id: 'tracked', title: 'Tracked', icon: 'track', order: 1,
@@ -14279,8 +14341,10 @@ function turnInGains(j, a) {
     if (!reps) reps = Object.keys(b.rep).filter(d => isFinite(a.rep[d]) && b.rep[d] - a.rep[d] >= .5).map(d => ({ dept: d, add: Math.round(b.rep[d] - a.rep[d]) }));
     if (!mets) mets = Object.keys(b.sys).filter(k => isFinite(a.sys[k]) && b.sys[k] - a.sys[k] >= 1).map(k => ({ sys: k, add: b.sys[k] - a.sys[k] }));
   }
+  const seen = new Set(), dup = k => seen.has(k) || !seen.add(k);   // one chip each: two sections may record the same gain (C2 and a test, BM6's find)
+  if (mets) { const best = {}; for (const m of mets) if (m && (!best[m.sys] || m.add > best[m.sys].add)) best[m.sys] = m; mets = mets.filter(m => m && best[m.sys] === m); }
   const out = [];
-  for (const r of reps || []) { if (!r || !(r.add > 0) && r.add !== undefined) continue; const dn = r.name || tgDept(r.dept);   // words only, never a number (the user's 0.61.15 rule)
+  for (const r of reps || []) { if (r && dup('rep:' + (r.dept || 'works'))) continue; if (!r || !(r.add > 0) && r.add !== undefined) continue; const dn = r.name || tgDept(r.dept);   // words only, never a number (the user's 0.61.15 rule)
     out.push({ rep: true, text: (r.dept || 'works') === 'works' ? T('works.turnin.rep', 'Works reputation up') : dn + ' reputation up' }); }
   for (const m of mets || []) { if (!m || !(m.add >= .5)) continue; const nm = T('meter.' + m.sys, m.name || m.fb || (typeof SYSTEM_NAME !== 'undefined' && SYSTEM_NAME[m.sys]) || String(m.sys));   // the head writer's short name first
     out.push({ rep: false, text: T('works.turnin.meter', '+{n} {system}', { n: Math.round(m.add), system: nm }) }); }
@@ -14402,6 +14466,14 @@ function recFrame() {
   }
 }
 requestAnimationFrame(recFrame);
+let trkAt = 0;
+(function trkFrame() {                                   // the button's dot while an arrow's up; its place (the Device button and Pause move); the panel kept current while open
+  requestAnimationFrame(trkFrame);
+  const now = performance.now(); if (now - trkAt < 400) return; trkAt = now;
+  const on = typeof goalNow === 'function' && !!goalNow(); if (trkBtn.classList.contains('on') !== on) trkBtn.classList.toggle('on', on);
+  trkPlace();
+  if (!trkEl.hidden && trkSig !== trkKey()) trkDraw();
+})();
 
 // =====================================================================
 // 16. GALLEY & FOOD

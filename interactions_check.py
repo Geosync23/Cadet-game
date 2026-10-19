@@ -354,14 +354,13 @@ if '--quick' not in sys.argv:
         check(not g.errors, f'no console errors ({g.errors[:3]})')
         g.close()
 
-# Tracked (0.72.0, HUD U; the user's playtest notes; since 0.72.4 a device app, first in its list, no HUD button): what's on
+# Tracked (0.72.0, HUD U; the user's playtest notes; since 0.72.4 also a device app, first in its list, the HUD button kept): what's on
 # and coming up, your job and the fixed places, each tracked with the goal arrow on a tap and stopped on a second; the
 # device's app labels on one line on a 320 px phone
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1], 320, 640)
     if g.ev("typeof DEVICE_APPS !== 'undefined' && DEVICE_APPS.has('tracked')"):
         print('== tracked')
-        check(not g.ev("!!document.getElementById('trkBtn')"), 'no Tracked button on the main screen any more (0.72.4)')
         g.ev("typeof introSkip === 'function' && introSkip()"); g.step(3)
         g.ev("skipTo(17 * 60 + 40)"); g.step(3)
         job = g.ev("(() => { const o = openJobs('you'); return o.length && claimJob(o[0].id) ? myJob().id : null })()")
@@ -394,7 +393,21 @@ with sync_playwright() as pw:
         g.page.click('#devBtn'); g.step(2); g.ev(OPEN); g.step(2)
         hadDinner = tap('Dinner'); g.step(3)
         check(not hadDinner or (g.ev("IX_GOAL && IX_GOAL.deck") == 3 and 'Deck 3' in (st()['goal'] or '')), f'a meal tracks the mess ({st()["goal"]})')
-        g.ev("deviceClose()"); g.step(1); g.page.click('#devBtn'); g.step(3); g.ev("deviceShow('home')"); g.step(1)
+        g.ev("deviceClose(); clearGoal()"); g.step(2)
+        if g.ev("!!document.getElementById('trkBtn')"):   # the main-screen button and panel, kept beside the app (the user, ~04:00)
+            g.page.add_style_tag(content='#needStrip{display:flex!important} #devTip{display:none!important}')   # a tip card over it would take the tap
+            g.page.click('#trkBtn'); g.step(2)
+            prow = g.ev("[...document.querySelectorAll('#trkList button b')].map(b => b.textContent)")
+            check(g.ev("!document.getElementById('trkPanel').hidden") and 'Your bunk' in prow, f'the Tracked button opens its panel with the same list ({prow[-3:]})')
+            g.page.click('#trkList button:has-text("Your bunk")'); g.step(3)
+            check(g.ev("document.getElementById('trkPanel').hidden") and g.ev("IX_GOAL && IX_GOAL.trk") == 'place:bed', 'a tap in the panel tracks it and closes the panel')
+            g.page.click('#trkBtn'); g.step(2); g.page.click('#trkList button:has-text("Your bunk")'); g.step(3)
+            check(g.ev("IX_GOAL") is None and not g.ev("document.getElementById('trkPanel').hidden"), 'a second tap stops it, the panel stays')
+            g.page.mouse.click(160, 620); g.step(2)
+            b = json.loads(g.ev("JSON.stringify(document.getElementById('trkBtn').getBoundingClientRect())"))
+            hit = g.ev(f"[...document.querySelectorAll('.controls button,#devBtn,#needStrip')].filter(o => o.offsetWidth).map(o => o.getBoundingClientRect()).some(r => r.left < {b['right']} && {b['left']} < r.right && r.top < {b['bottom']} && {b['top']} < r.bottom)")
+            check(g.ev("document.getElementById('trkPanel').hidden") and not hit and b['right'] <= 320, f'a tap outside closes it; the button clears the other HUD buttons on a 320 px phone ({b})')
+        g.page.click('#devBtn'); g.step(3); g.ev("deviceShow('home')"); g.step(1)
         wrap = g.ev("[...document.querySelectorAll('.device .app span')].filter(e => e.getClientRects().length > 1 || e.getBoundingClientRect().height > 24).map(e => e.textContent)")
         check(g.ev("document.querySelectorAll('.device .app span').length") > 4 and not wrap, f'no device app label wraps at 320 px ({wrap})')
         if g.ev("typeof HOBBIES !== 'undefined' && !!HOBBIES.film"):   # Watch a film (0.72.1, the user's): a device hobby exactly like reading
@@ -419,6 +432,8 @@ with sync_playwright() as pw:
               const a = turnInSnap(); a.sys.power -= 3; a.rep.works -= 2; return turnInGains(j, a).map(c => c.text); })()""")
             r2 = g.ev("""(() => turnInGains({ meters: [{ key: 'water', name: 'Water', gain: 3.4 }, { key: 'heat', name: 'Heat', gain: .2 }] }, null).map(c => c.text))()""")
             check(len(r2) == 1 and r2[0].startswith('+3') and 'Water' in r2[0], f"S2's j.meters (0.33.57) show as +N, under half a point left out ({r2})")
+            d = g.ev("""(() => turnInGains({ gains: { rep: [{ dept: 'works' }, { dept: 'works', name: 'Works' }], meters: [{ sys: 'power', add: 4 }, { sys: 'power', add: 4 }] } }, null).map(c => c.text))()""")
+            check(len(d) == 2, f'the same gain recorded twice (C2 and another section) shows once ({d})')
             check(r is None or (any('reputation up' in t for t in r) and any('3' in t and t.startswith('+') for t in r)), f'with no j.gains, a before/after look fills it in ({r})')
         check(not g.errors, f'no console errors ({g.errors[:3]})')
     g.close()
