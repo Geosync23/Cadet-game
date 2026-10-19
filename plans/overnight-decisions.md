@@ -220,3 +220,4 @@ All 8 packages approved (Zeke: "all good except he still walks and talks" → he
 | | When | Not now: built in the rec deck phase, prototypes first then integration. Now: Step 3 then Step 4 |
 | ~03:25 (the user) | Tracked button | Move the main-screen Tracked button (0.72.0) into the personal device as its own app "Tracked", first in the list, same functionality; main-screen button removed; Track switches in other apps stay. Added to Step 3 (U) |
 | ~03:30 (the user) | Lead handover | Lead 16 starts the next lead itself (fresh chain, permission given). Keep old lead logs in handover-lead.md (leads need context); optimise the process later, not now |
+| ~03:33 (the user) | Overnight wind-down | Shrink to 6-7 gradually as it makes sense; seats finish and hand over properly, never cut off mid-piece |
