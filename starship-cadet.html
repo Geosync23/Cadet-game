@@ -281,7 +281,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.53.9
+   STARSHIP CADET: CSV Wren                           build 0.53.10
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8744,7 +8744,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.53.9';                           // keep in step with the header's build line
+const GAME_BUILD = '0.53.10';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -40811,6 +40811,8 @@ const CABIN_LOOK = {                                     // each thing's shape: 
   'toy rocket': { c: '#d9534f', cyl: [[.035, .16, 0, .08], [.012, .05, 0, .185]] }, 'model ship': { c: '#9aa7b4', box: [[.24, .06, .08, 0, .03, 0], [.08, .05, .06, .02, .085, 0]] },
   'plant pot': { c: '#c0703e', cyl: [[.06, .1, 0, .05]] }, 'little plant': { c: '#5c9a4a', cyl: [[.06, .09, 0, .045], [.08, .1, 0, .14]] }, 'mug rack': { c: '#8a6a4a', box: [[.2, .16, .05, 0, .08, 0]] },
   'flower': { c: '#d98bb0', cyl: [[.03, .14, 0, .07]] },
+  'paper novel': { c: '#3f6e8c', box: [[.1, .15, .03, 0, .075, -.03]] }, 'puzzle book': { c: '#c9a24a', box: [[.14, .025, .1, 0, .0125, -.05]] },   // (E4, R5's fix 2: these four had no look)
+  'pocket puzzle': { c: '#d9534f', box: [[.06, .06, .06, 0, .03, -.05]] }, 'metal puzzle': { c: '#9aa7b4', cyl: [[.045, .02, 0, .01]], box: [[.02, .07, .02, 0, .055, 0]] },
 };
 const cabinMine = () => typeof worksHome === 'function' && worksHome() === '4-23' && !!(DECKS[4].cabinSpots && DECKS[4].cabinSpots['4-23']);
 function cabinData() {
@@ -40843,6 +40845,7 @@ function cabinDraw() {
       for (const [w, h, d, ox, oy, oz] of L.box || []) { const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); b.position.set(ox, oy + .002, oz); s.add(b); }
       for (const [r, h, ox, oy] of L.cyl || []) { const b = new THREE.Mesh(new THREE.CylinderGeometry(r * .8, r, h, 12), m); b.position.set(ox, oy + .002, 0); s.add(b); }
       if (k === 'ledge') { const b = new THREE.Mesh(new THREE.BoxGeometry(.13, .03, .32), m); b.position.set(.03, -.015, 0); s.add(b); }   // the ledge, on the west wall
+      if (k === 'shelf') { const b = new THREE.Mesh(new THREE.BoxGeometry(.3, .04, .25), m); b.position.set(.05, -.02, -.115); s.add(b); }   // a little bracket shelf beside the keepsake plank (E4, R5's fix 1: the spot is past the plank's end)
       if (typeof mergeMeshes === 'function') mergeMeshes(s);
       s.traverse(o => { if (o.isMesh) { o.castShadow = false; o.receiveShadow = true; } });
     }
@@ -40853,9 +40856,13 @@ function cabinDraw() {
   }
   if (typeof refreshPickables === 'function') refreshPickables();
 }
-function cabinTap(it, at) {
-  if (!it || !it.cabin || !cabinMine()) return false;
-  const k = it.cabin, c = cabinData(), P = SHIP.player; if (!c) return false;
+function cabinTap(it, at) {                              // you walk up to the spot first (R5's fix 3); with no point (the checks), at once
+  if (!it || !it.cabin || !cabinMine() || !cabinData()) return false;
+  if (at && typeof approach === 'function') approach(at.clone(), it.front, it.depth, () => cabinPut(it)); else cabinPut(it);
+  return true;
+}
+function cabinPut(it) {
+  const k = it.cabin, c = cabinData(), P = SHIP.player; if (!c || !cabinMine()) return false;
   const fit = P.carry.find(x => CABIN_FITS[k].includes(x)), had = c[k] || null;
   if (fit) {
     if (had && P.carry.length >= CARRY_MAX && !P.carry.includes(fit)) { toast(it.t, 'Your hands are full.'); return true; }
@@ -40926,10 +40933,10 @@ if (typeof WORK_TICKS !== 'undefined') WORK_TICKS.push(now => {   // the cabin's
 // the deck it was at. The ladder row (m17, big): Halloran's Mail and a meeting at the lift at 15:30 on a Thursday he's
 // on shift (WORK_MECH.m17.offer); trained at the meeting (noJob); he rides with you until stage 2 (after 2 rides).
 // The writer's keys (content/works/keys-p5.md "Step 4", E3 M17): meeting train.m17.halloran-emeka; Halloran's work
-// flags roof.climb, roof.grease, roof.view, roof.done; roof.held, roof.result, roof.resume; roof.card, roof.up (asked of
-// W2 by E4). Saved in SHIP.works.side.roof = { rides, last } (24 core's worksSide(); read defensively, so old saves
-// load); the hold itself isn't saved: a save mid-ride loads with you on the top deck (where you stood in the car), the
-// lift let go. No R(); every colour through col() (std); no keys.
+// flags roof.climb, roof.grease, roof.view, roof.done; roof.held, roof.result, roof.resume (after loading a save made on the
+// roof); E4's own new lines in the same style: roof.card, roof.up, roof.free (16:30). Saved in SHIP.works.side.roof = { rides, last, on? } (on: the day, while you're on the roof; 24 core's worksSide(); read
+// defensively, so old saves load); the hold itself isn't saved: a save mid-ride loads with you on the top deck (where you
+// stood in the car), the lift let go, and roof.resume says so. No R(); every colour through col() (std); no keys.
 const ROOF_FROM = 18, ROOF_WD = 3, ROOF_HOURS = [930, 990], ROOF_CLIMB = 1, ROOF_GREASE = 1, ROOF_DROP = 2, ROOF_WHO = 'halloran-emeka', ROOF_COND = 6;
 const ROOF_X = 400, ROOF_DH = 4, ROOF_W = 3, ROOF_D = 4, ROOF_FADE = .4;   // the shaft: this far east of the deck, a deck every 4 m, the car's well 3 m by 4
 const roofDecks = () => DECK_ORDER.filter(n => DECKS[n]);   // top to bottom (the rec deck only when it's on)
@@ -40937,8 +40944,8 @@ const roofLen = () => { const n = roofDecks().length; return ROOF_CLIMB + n * RO
 function roofData() {
   const S = typeof worksSide === 'function' ? worksSide() : null; if (!S) return null;
   const r = S.roof && typeof S.roof === 'object' && !Array.isArray(S.roof) ? S.roof : (S.roof = {});
-  for (const k of Object.keys(r)) if (k !== 'rides' && k !== 'last') delete r[k];
-  if (!Number.isInteger(r.rides) || r.rides < 0) r.rides = 0; if (!Number.isInteger(r.last) || r.last < 0) r.last = 0;
+  for (const k of Object.keys(r)) if (k !== 'rides' && k !== 'last' && k !== 'on') delete r[k];
+  if (!Number.isInteger(r.rides) || r.rides < 0) r.rides = 0; if (!Number.isInteger(r.last) || r.last < 0) r.last = 0; if ('on' in r && !Number.isInteger(r.on)) delete r.on;
   return r;
 }
 const roofTrained = () => !!(SHIP.works && SHIP.works.tr && SHIP.works.tr.m17 !== undefined);
@@ -41036,7 +41043,7 @@ function roofStep(A) {
   const decks = roofDecks(), n = decks.length, to = st => { R.st = st; R.real = now; R.t0 = A.done; };
   if (R.st === 'climb') {
     if (A.done >= ROOF_CLIMB) {
-      const d = worksDay(shipNow()); liftHold(true, (d - 1) * 1440 + ROOF_HOURS[1]); ROOF.r = R; R.mate = roofMate();
+      const d = worksDay(shipNow()), rd = roofData(); liftHold(true, (d - 1) * 1440 + ROOF_HOURS[1]); ROOF.r = R; R.mate = roofMate(); if (rd) rd.on = d;   // on: a save from now has you back at the top (roof.resume)
       if (R.mate) roofSay('roof.climb', 'Clip on, hands inside the rail. I\'ll take the east guides, you take the west.');
       to('dark');
     }
@@ -41084,7 +41091,7 @@ function roofMateStep(A, R, dt) {                        // Halloran on the roof
 function roofMateGone() { if (ROOF.mate) { ROOF.mate.dispose(); ROOF.mate = null; } }
 function roofDone(R) {                                   // every guide greased: the ride counts, the lift runs smoother
   const r = roofData(), d = worksDay(shipNow()); if (!r) return;
-  r.rides++; r.last = d;
+  r.rides++; r.last = d; delete r.on;
   if (typeof worksUse === 'function') worksUse('m17');
   if (typeof worksSideXp === 'function') worksSideXp(1, 'roof');
   if (typeof machinesNow === 'function') {
@@ -41109,13 +41116,14 @@ function roofFrame() {
   }
   ROOF.g.visible = false; roofMateGone();
   if (R && R.inShaft && !R.off) {
-    R.off = true; fadeEl.style.opacity = 1; target.copy(player.obj.position).setY(.7);
+    R.off = true; fadeEl.style.opacity = 1; target.copy(player.obj.position).setY(.7); const rd = roofData(); if (rd) delete rd.on;
     if (!ride) ride = { n: roofDecks()[Math.min(R.k, roofDecks().length - 1)], t: RIDE.dark - .01, at: null, face: player.face, swapped: false };
   }
 }
 requestAnimationFrame(roofFrame);
-if (typeof WORK_TICKS !== 'undefined') WORK_TICKS.push(now => {   // 16:30: the car's let go (section 11 keeps the hold's record)
-  if (LIFT_HOLD && LIFT_HOLD.until <= now && LIFT_HOLD.until > now - 2 && !LIFT_HOLD.said && !SIM_AT) { LIFT_HOLD.said = true; toast('Main lift', worksText('roof.resume', 'The lift\'s back in service.')); }
+if (typeof WORK_TICKS !== 'undefined') WORK_TICKS.push(now => {   // 16:30: the car's let go (section 11 keeps the hold's record); loaded from a save made on the roof: back at the top
+  if (LIFT_HOLD && LIFT_HOLD.until <= now && LIFT_HOLD.until > now - 2 && !LIFT_HOLD.said && !SIM_AT) { LIFT_HOLD.said = true; toast('Main lift', worksText('roof.free', 'Half four: the lift\'s back in service.')); }
+  const rd = roofData(); if (rd && rd.on !== undefined && !(ROOF.r && !ROOF.r.off)) { delete rd.on; if (!SIM_AT) toast(mechName('m17'), worksText('roof.resume', 'You\'d saved on the lift roof. You\'re back at the top deck.')); }
   const o = typeof OCCASIONS !== 'undefined' && OCCASIONS['works.m17']; if (o && (o.deck !== 1 || o.room !== '+')) { o.deck = 1; o.room = '+'; }   // after a reload trainSetup makes it in the Works bay
 });
 onSim('newGame', () => { LIFT_HOLD = null; ROOF.r = null; ROOF.say = null; });

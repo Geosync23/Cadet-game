@@ -651,6 +651,31 @@ T24 = r"""(() => {
   out.friends = [relGet('sato').pts > out.sato0, relGet('mori').pts > 0];
   P.carry = keep; return out;
 })()"""
+T24B = r"""(() => {
+  SHIP.works = null; SHIP.jobs = []; SHIP.rel = {}; setShipNow(11 * 1440 + 1230); machinesNow(); const W = worksInit(); W.tier = 2; W.rank = 'officer'; W.home = '4-23'; W.ms = [];
+  const out = {}, s = starsData(); s.n = 0; s.last = 0;
+  goToDeck(2); const it = ITEMS.find(x => /telescope/i.test(x.t) && x.hit && (() => { const p = new THREE.Vector3(); x.hit.getWorldPosition(p); return roomAt(...cellAt(p.x, p.z)) === 'J'; })());
+  const at = new THREE.Vector3(); if (it) it.hit.getWorldPosition(at);
+  const tapAt = t => { setShipNow(t); const r = starTap(it, at.clone()); if (ACT) actEnd(true); player.stop(); return r; };
+  out.found = !!it;
+  out.hours = [tapAt(11 * 1440 + 1199), tapAt(4 * 1440 + 1230)];   // 19:59; Day 5 (before Day 6)
+  const pick = k => { if (!starLog(it)) return false; devChosen(k); return true; }, d = 12, sky = starSky(d);
+  setShipNow(11 * 1440 + 1230);
+  out.tap = tapAt(11 * 1440 + 1230);
+  out.wrong = [pick((sky.fresh + 1) % 3), s.n];
+  out.right = [pick(sky.fresh), s.n, s.last];
+  out.again = tapAt(11 * 1440 + 1300);                      // one a night
+  out.next = tapAt(12 * 1440 + 1230);
+  setShipNow(11 * 1440 + 1230); const sato0 = relGet('sato').pts; s.n = 2; s.last = 0; pick(sky.fresh); out.third = [s.n, relGet('sato').pts > sato0];
+  s.n = 9; s.last = 0; pick(sky.fresh); out.ten = [s.n, W.ms.some(x => x[0] === 'stars')];
+  // the save's own path: SAVE_EXTRA builds it, JSON, then worksClean as at load
+  worksSide().cabin = { rug: 'woven rug', shelf: 'metal puzzle' };
+  const save = { ship: {} }; for (const f of SAVE_EXTRA) { try { f(save); } catch (e) { /* not ours */ } }
+  const back = worksClean(JSON.parse(JSON.stringify(save.ship.works)));
+  out.trip = [JSON.stringify(back.side.cabin), JSON.stringify(back.side.stars)];
+  out.looks = CABIN_SPOTS.map(k => CABIN_FITS[k].every(x => !!CABIN_LOOK[x]));
+  return out;
+})()"""
 def part_t24(g):
     if not g.ev("typeof cabinTap === 'function' && typeof starTap === 'function'"):
         print('24t (off shift): not in this build'); return
@@ -661,6 +686,13 @@ def part_t24(g):
     check(len(set(a['sky'])) == 3 and all(len(json.loads(x)['pts']) == 3 for x in a['sky']), '24t: three points a night, different nights differ')
     check(all(a['friends']), '24t: Survey warms to you (Sato, then Mori)')
     check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), '24t: differs the second time')
+    c = g.ev(T24B)
+    print('24t stars driven:', c)
+    check(c['found'] and c['hours'] == [False, False] and c['tap'], f"24t: the telescope offers the log from Day 6, 20:00 on ({c['hours']}, {c['tap']})")
+    check(c['wrong'] == [True, 0] and c['right'] == [True, 1, 12] and c['again'] is False and c['next'], f"24t: a wrong pick, look again; the right one logs; one a night ({c['wrong']} {c['right']} {c['again']})")
+    check(c['third'] == [3, True] and c['ten'] == [10, True], '24t: every third log Survey warms to you; ten give the Record line')
+    check(c['trip'] == ['{"rug":"woven rug","shelf":"metal puzzle"}', '{"n":10,"last":12}'], f"24t: cabin and stars round-trip through the save ({c['trip']})")
+    check(all(c['looks']), '24t: every thing that fits a spot has a look')
 
 # 24s the lift roof (M17, seat E4): on paper, when you can climb on (Thursdays from Day 18, trained, 15:30 till there's time for
 # the whole spine, once a day); the hold: crew whose plan takes them to another deck wait by the lift on the deck they were
@@ -703,6 +735,7 @@ M17WATCH = r"""(() => { const A = ACT, R = A && A.kind === 'roofRide' && A.o.r, 
 def part_m17(g):
     if not g.ev("typeof roofStep === 'function'"):
         print('  m17: 24s is not in this build'); return
+    keep = g.ev("JSON.stringify({ t: shipNow(), deck: deckDef.num, pos: [player.obj.position.x, player.obj.position.z], needs: SHIP.player.needs, carry: SHIP.player.carry })")
     a = g.ev(M17P); b = g.ev(M17P)
     print('  m17 open:', a['untrained'], a['open'], a['twice'], '| hold:', a['hold'], '| saves:', a['old'], a['junk'], a['trip'])
     check(a['untrained'] is False and a['open'] == [False, True, True, False, False, True, False] and a['twice'] is False, f"m17: you can climb on Thursdays from Day 18, 15:30 while there's time, once a day ({a['open']})")
@@ -735,6 +768,7 @@ def part_m17(g):
     check(r2[0] == decks[2] and r2[1] is None and not r2[2] and r2[3] == '{"rides":1,"last":18}', f"m17: stepping off part way leaves you on that deck, no ride counted ({r2[0]}, {r2[3]})")
     a2 = g.ev(M17P)
     check(json.dumps(a2, sort_keys=True) == json.dumps(a, sort_keys=True), 'm17: the paper part differs after the rides')
+    g.ev(f"(() => {{ const k = {keep}; LIFT_HOLD = null; setShipNow(k.t); if (deckDef.num !== k.deck) goToDeck(k.deck); player.obj.position.x = k.pos[0]; player.obj.position.z = k.pos[1]; Object.assign(SHIP.player.needs, k.needs); SHIP.player.carry = k.carry; }})()")   # as it was, for the parts after
 PARTS['m17'] = part_m17
 
 only = set(sys.argv[2:])
