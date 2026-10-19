@@ -83,3 +83,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - trial t9 (wt2) = 2bc08d5 + E6 2edb69c + E5 60a418f + E3 d51c5ed + W2 0e8571a: mech_check hand merges as before (keep both); verify_merge: the same 6 explained under d51c5ed; NAMES OK (3175), parses, bake 9560 / 48. Checks queued after t8's set: mech (m15 right-first +2 should pass with E6's fix), career, machine, lines, cadet.
 - ~06:27 R5 PASS E5 60a418f (contains 0.51.12): the 24o/q/r/l tip (pin works, leak +1).
 - ~06:28 R5 PASS E6 2edb69c (contains 0.45.11-13); one small fix open (load-stop order); fine to build on. So t9 = all passed tips (E6 2edb69c, E5 60a418f, E3 d51c5ed, W2 0e8571a); open: E6 load-stop fix, E4's 5 cabin+stars fixes, X2 crew, round 3-4 pieces.
+- t8: interactions OK. t9 checks started.
