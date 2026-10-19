@@ -25,7 +25,7 @@ E6 took E1's seat. Diff 013f53ec..2edb69c8.
 - logbookTick: only a worn flagged machine is serviced, never a faulty one, never a job held for you (heldForYou, section 17, defined earlier in the file).
 - Turn-in: side kinds pay (WORK_XP ?? 1) + 1 if right first time, still capped. Only rewiring sets j.rightFirst among side kinds (the other setters are scanFitted and 24k's cases, both repairs), so a leak stays +1 and the joint chore (j.xp 0) 0; mech_check side pays [2, 0, 1] and m12 leaves a failing machine and a held job open.
 - Still open on E6: 0.45.13's load-stop order (haulStops).
-- Checks: on a merge with E3's places, queued.
+- Checks on 2edb69c8 merged with E3's places (149aa0f6): mech_check OK, career_check OK, cadet_test vs the 0.45.13 merge ALL IDENTICAL.
 
 ### E5 claude/mech-incidents 60a418fe (0.51.13; contains 93fbdb5d 0.51.12), R5: PASS
 E5 took E2's seat. Diff 67144486..60a418fe.
@@ -33,7 +33,7 @@ E5 took E2's seat. Diff 67144486..60a418fe.
 - A leak +1 in all: leakDone no longer sets foundBy (side.leaks keeps found); mech_check checks the pay with E1's flat turn-in.
 - Note: promoPip and playerRigRebuild are now two copies of the same rebuild; promoPip could call playerRigRebuild (24p's owner, later; no fix asked).
 - Open elsewhere: rewiring's right-first +1 (E6's, see E1's verdict); E5's trial with E1 633eade found it too.
-- Checks on 60a418fe: running.
+- Checks on 60a418fe: mech_check OK, cadet_test vs 67144486 ALL IDENTICAL (renderer noise only).
 
 ### E1 claude/mech-rounds 013f53ec (0.45.13, hauling stage 2: haulFree, haulOrderAsk, haulTidy), R5: PASS WITH FIXES (one small; E1 has handed over: E6 session_018cZuXpb4XdFs47zXoPcF8B does it, with the two on 0.45.11)
 Diff 633eade..013f53ec, read by hand against step4-stages (D3's answers).
@@ -74,7 +74,7 @@ cabin.spot.rug/desk/shelf/ledge are now the placing sentences; star.title/pick (
 - Fix 2 done (the lead's call, in person): the finish hold puts the thing in SHIP.player.carry (refused at the start if your hands are full); "Give the <thing>" shows only while you hold it, and handing it over takes it from your hands; a made order not in your hands (old save, reload, put down) is given back at the order board; main storage won't take it.
 - shopData now cleans xpDay/taught/posted and an order's day/job/part (R4's note).
 - Note (small exploit, no fix asked): the order thing "mug rack" has the same name as TINKER_LIST's mug rack (a SOC_GIFTS gift and a cabin ledge thing in 24t), so the order's rack can be given as a gift to anyone or put on your cabin ledge; the board then hands you another. Renaming the order's thing (W2's thanks line names "mug rack") or marking the held order thing would close it.
-- Checks: running (mech_check, deck_check, interactions_check, cadet_test vs 626a907c).
+- Checks on d51c5edf: mech_check OK, deck_check OK, interactions_check OK, cadet_test vs 626a907c ALL IDENTICAL.
 
 ### E3 claude/mech-diagnose 2ce8e9e7 (0.53.7, 24t cabin touches and star logging), R5: PASS WITH FIXES (five; E3 has retired, so for E3's successor)
 Read with a helper agent against off-shift.html; 1-3 confirmed by hand.
