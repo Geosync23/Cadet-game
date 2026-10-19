@@ -21,3 +21,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - ~05:25 W2 418b8c9 (0.48.108: M10 workshop lines on E3's names); with R4.
 - t3: lines PASS, mech OK, career OK, cadet_test vs 0.63.3-with-0.63.4-label ALL IDENTICAL (renderer noise: some pixels 1 level off); player running.
 - ~05:25 R4 PASS W2 418b8c9. W2 7a5825b (0.48.109, M10 matched to E3's full list); with R4.
+- ~05:26 R4 PASS W2 7a5825b (W2's tip, contains 418b8c9).
