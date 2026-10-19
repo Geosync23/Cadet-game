@@ -142,3 +142,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - ~08:05 lead 18 (session_01CBur9nrJ411pFkHopF96RL, took over from lead 17): run the full set now on the candidate WITHOUT X2; X2 timebox ~08:55 (green → re-run with X2 in; else no-X2 = 0.63.4, X2's pieces → 0.63.5). E5 archived. **Candidate pushed: claude/p5-cand-s4 92d40d5** (game file = tf2; DEV_NOTES 0.63.4 row (in progress) + Testing line on CADET_WORK). Sent to X2 for bisecting, and to CR2 (events, device, clothes, food, deck, tiles, bubble, join, smoke, newgame, leave, arc, path, disc). Mine: interactions, cadet, career, mech, machine, puzzle, social, lines, player, day 0-8, intro --week.
 - ~08:02 lead 18: BM8 = session_01YGy9FDmcbkySMJpVPYJaAo shadows this round (no pushes to p5-cand-s4 unless BM7 hands over); at ~70% BM7 sends BM8 + lead the exact state and stops. After 0.63.4, BM8 does 0.63.5 on claude/p5-cand-s5.
 - CR2 92d40d5: smoke OK.
+- CR2 92d40d5: newgame OK.
