@@ -9,6 +9,9 @@ Lines skimmed. In a fresh archive content_gen bakes 9342 lines; lines_check PASS
 
 ## Step 4
 
+### W2 claude/writer-p5 d1e62d3 (0.48.111, favour.call and favour.not for E2): PASS
+Bakes 9564 lines; lines_check PASS. W2's tip.
+
 ### E3 claude/mech-diagnose 626a907 (0.53.6, M10 the workshop + tinkering, 24j): PASS WITH FIXES (two)
 Diff from b8992d5b (E3's merge of E1 0.45.8). Line numbers below are in 626a907's starship-cadet.html. Read with a helper agent against m10-workshop.html; the two fixes were confirmed by hand.
 - Good: posting matches the page (Day 12 Friday 08:00, then Mondays 08:00; seeded with keys 1010/1011 only, no R()). The board/lathe/fab places are E3's from 0.53.4. The steps are a 10-minute wait and a 2-minute hold. The first lesson goes through worksTeach('m10', ..., 'lead') = flag `train.m10.lead`, matching W2's lines. On hand-over: a friendship step, worksUse('m10'), +1 rep once a day through E1's worksSideXp. Lapse Mail after 7 days. All saved data under SHIP.works.side.shop. No new meshes. Ownership clean: ~30 new `shop*` / `SHOP_*` / `TINKER_*` names, none anywhere else; jobKindAdd and SOC_GIFTS are only called or appended to. The three hooks (jobTap, chatShow, chatDo) are typeof-guarded. `node --check` passes, and nothing it touches at load is defined later in the file (no TDZ).
