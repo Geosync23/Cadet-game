@@ -389,7 +389,7 @@ with sync_playwright() as pw:
         tap('Your bunk'); g.step(3)
         check(g.ev("IX_GOAL") is None and g.ev("SHIP.player.track") is None and g.ev("DEV.open"), 'a second tap stops it (no arrow), the device stays open')
         if job:
-            tap('Job'); g.step(3)
+            tap(g.ev("myJob().title")); g.step(3)
             check(g.ev("SHIP.player.track") == job and g.ev("IX_GOAL") is None, 'a tap on your job tracks it again')
         g.page.click('#devBtn'); g.step(2); g.ev(OPEN); g.step(2)
         hadDinner = tap('Dinner'); g.step(3)
