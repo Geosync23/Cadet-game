@@ -37,7 +37,7 @@ Session_01PtXCwVBprdkJ6AcQisEyJq, 2026-10-19 (overnight). Took over E3's seat (p
 ## Gotchas
 - **Comments after code on a line I edit with a script swallowed code twice** (0.53.12): put new comments on their own line; run `node --check` on the extracted script (python: the longest `<script>` block → .mjs) AND the m17/t24 checks before pushing.
 - `pkill -f` patterns matching your own shell kill it (exit 144): use `[m]ech_check`-style patterns.
-- The full mech_check takes ~25 min; deck/interactions/cadet_test ~10 more. One or two browsers at a time.
+- The full mech_check takes ~25 min; deck/interactions/cadet_test ~10 more. One or two browsers at a time, each parallel run with its own CADET_WORK (they share /tmp/cadet-work/test/_run_<name>.html otherwise; the lead's warning).
 - cadet_test's Game: virtual clock (`g.step(n)`); `performance.now` is virtual too.
 
 ## How to test
