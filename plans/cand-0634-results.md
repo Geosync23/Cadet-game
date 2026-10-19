@@ -22,3 +22,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - t3: lines PASS, mech OK, career OK, cadet_test vs 0.63.3-with-0.63.4-label ALL IDENTICAL (renderer noise: some pixels 1 level off); player running.
 - ~05:25 R4 PASS W2 418b8c9. W2 7a5825b (0.48.109, M10 matched to E3's full list); with R4.
 - ~05:26 R4 PASS W2 7a5825b (W2's tip, contains 418b8c9).
+- ~05:28 E1 7a9a942 (0.45.8 Step 4 ladder rows in 24 core, inert) and 3d31f55 (0.45.9 playtest 2 item 1: rounds training reworked; WORK_MECH.self; roundTrainStep for U2; Day 2 path changed, so intro_check must run on the candidate). 0.45.10 (R4's Day-12 fix) to follow; waiting for it.
