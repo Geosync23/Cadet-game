@@ -550,6 +550,37 @@ def part_m9(g):
     check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'm9: differs the second time')
 PARTS['m9'] = part_m9
 
+# manifestRun (seat E1, 0.45.12; E2's team parts call it): two parts from their shelves to a machine's panel, held for
+# you only; taken, every stop done in turn: the parts off the shelves once, delivered (j.delivered, the note), turned in;
+# a second run nobody takes is withdrawn at its time; the Wednesday manifest still posts beside an open parts run
+MRUN = r"""(() => {
+  SHIP.works = null; SHIP.notes = []; SHIP.jobs = []; setShipNow(17 * 1440 + 600); machinesNow(); const W = worksInit(), out = {};
+  SHIP.stores.filter = 3; SHIP.stores.pump = 3;   // on the shelves
+  const s0 = { ...SHIP.stores }, id = manifestRun(['filter', 'pump'], '5-scrubber-1', { for: 'team-x', until: shipNow() + 120 });
+  const j = SHIP.jobs.find(x => x.id === id); out.job = j && [j.kind, j.src, j.reserved, heldForYou(j), j.crates.length, jobStops(j).map(x => x.step + ':' + x.places[0])];
+  out.claimed = claimJob(id); jobStops(j).forEach((x, k) => jobStepDone(id, k));
+  out.took = ['filter', 'pump'].map(p => s0[p] - SHIP.stores[p]);
+  out.delivered = [manifestRunDelivered(id), SHIP.notes.filter(n => n.kind === 'manifestRun').map(n => n.for + ':' + n.to + ':' + n.parts.join('+'))];
+  out.turnin = turnInJob(id);
+  const id2 = manifestRun(['lamp'], '4-washer-1', { until: shipNow() + 30 }), j2 = SHIP.jobs.find(x => x.id === id2);
+  for (let m = 1; m <= 40; m++) { const t = shipNow() + 1; setShipNow(t); for (const f of WORK_TICKS) f(t, true); }
+  out.withdrawn = [j2.status, j2.doneBy || null, manifestRunDelivered(id2)];
+  out.bad = [manifestRun([], '4-washer-1'), manifestRun(['lamp'], 'nowhere')];
+  SHIP.works = null; return out;
+})()"""
+def part_mrun(g):
+    a = g.ev(MRUN)
+    b = g.ev(MRUN)
+    print('  manifestRun:', json.dumps(a))
+    jb = a['job']
+    check(jb and jb[0] == 'haul' and jb[1] == 'stores' and jb[3] and jb[4] == 2 and jb[5][0].startswith('cart') and jb[5][-1].startswith('return') and sum(1 for x in jb[5] if x.startswith('deliver:5-scrubber-1')) == 2, f"manifestRun: a held parts run, shelves to the scrubber's panel ({jb})")
+    check(a['claimed'] and a['took'] == [1, 1], f"manifestRun: each part off its shelf once ({a['took']})")
+    check(a['delivered'][0] and a['delivered'][1] == ['team-x:5-scrubber-1-svc:filter+pump'] or (a['delivered'][0] and len(a['delivered'][1]) == 1 and a['delivered'][1][0].startswith('team-x:')), f"manifestRun: delivered, the note ({a['delivered']})")
+    check(a['turnin'], 'manifestRun: turned in')
+    check(a['withdrawn'] == ['done', None, False], f"manifestRun: one nobody takes is withdrawn at its time ({a['withdrawn']})")
+    check(a['bad'] == [None, None], 'manifestRun: nothing for an empty list or an unknown place')
+    check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'manifestRun: differs the second time')
+
 # 24m tool upkeep (seat E1, 0.45.11): Day 12, an officer with the scanner and pipe kit; worn by use to "Due" (a quarter
 # slower); at your bench: the pipe kit's hold puts it back, the scanner charges 5 minutes on its own; the first upkeep
 # trains m11; +1 for a week kept up, once; after 4 upkeeps the team's rack once a week; saved; the same twice
@@ -711,6 +742,8 @@ with sync_playwright() as pw:
             PARTS[r['id']](g)
     if (not only or 'side' in only) and ev("typeof worksSideXp === 'function'"):
         print('side (Step 4\'s core: tool wear, the side-job cap, the texts):'); part_side(g)
+    if (not only or 'side' in only or 'm4' in only) and ev("typeof manifestRun === 'function' && !!JOB_KINDS.haul"):
+        part_mrun(g)
     ev("SHIP.works = null")
     if g.errors: fail('page errors: ' + ' | '.join(g.errors[:5]))
     g.close()
