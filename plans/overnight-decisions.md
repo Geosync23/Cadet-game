@@ -299,3 +299,4 @@ The user went to bed ~03:40: **overnight mode ON** until they check in in the mo
 | ~10:26 | Engine room crew clock-out wait (X3 0.71.7) | 20 minutes (was 6): fixes the leave check; crew are out by about 17:35, evenings nearly as before | Smallest change that fixes it |
 | ~10:40 | Pool symptom words (RB2) | Reuse the existing pool trace symptom text; the fault-tracing code stays untouched | No copy of shared code |
 | ~10:40 | Rec deck switch committed (RB2 32f7710, 0.84.11) before rec engineer A's crew work is in | Fine: it is its own commit and the build master adds it last, after the crew use, traditions and words | The released build gets everything together |
+| ~11:50 (the user) | Morning check-in, asked for the report | Overnight mode ENDS. Morning report page published (lead 19). From now on design calls are the user's again; the lead keeps making technical/pacing calls | The user checked in and asked for the report |
