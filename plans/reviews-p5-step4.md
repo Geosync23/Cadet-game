@@ -20,6 +20,14 @@ Lines skimmed. In a fresh archive content_gen bakes 9342 lines; lines_check PASS
 
 ## Step 4
 
+### E2 claude/mech-incidents 3014b864 (0.51.10: R4's three fixes on 0.51.6, the pin, the ticket hint guard), R5: PASS WITH FIXES
+Diff 51611e02..3014b864 (18 game lines, a mech_check save part).
+- Done: R4's fix 1 (the flush penalty uses N.stage, the stage of that harvest's job, saved and cleaned); fix 2 (mech_check `side` part: leaks, nozzles, rewire, favours and ff through a real saveGame and reload; on E2's branch alone it prints "not checked" because worksClean there doesn't keep `side`, so it proves itself only on a merge with E1); the ticket hint guard is one line in caseHint (c.ticket, under 3 clues: ticket.nohint); the pin is one line in section 8's builder (`s.pin`: a gold cylinder merged into rig.chest, right breast, no extra draw call; the gold is a literal colour like the rest of that builder).
+- **Fix A: two things lean on E1 code that doesn't exist on any branch.** (1) The worn-joint chore now sets `J.xp = 0` ("24 core skips j.xp === 0"), but E1's turn-in (mech-rounds 39740) never reads j.xp: it still pays WORK_XP||1 outside the cap. (2) ffPin still needs `playerRigRebuild` ("24 core's"), which no branch has, so the pin still never shows. Either E1 adds both (the lead to confirm with E1) or E2 does it locally (e.g. 'joint' through the cap, or not posting it as a paying chore; a rebuild path for the player rig in E2's own block, if the lead gives E2 that function).
+- **Fix B: a leak still pays 2, not the lead's +1.** leakDone (42158) still sets `j.foundBy = 'you'`, so E1's turn-in pays 1 + 1 (found). Drop the foundBy (keep e.found for the record), so a leak is +1.
+- Still open from 0.51.7/0.51.8/0.51.9 (sent after this hash was made): rewiring's three, favour cases' three (and the friend tier), tickets' 1 and 4 (a crossed-out suspect = a wrong call; flag ticket.solved).
+- Checks on 3014b864: queued.
+
 ### E2 claude/mech-incidents 51611e02 (0.51.9, 24l fault-finder tickets), R5: PASS WITH FIXES (four)
 Diff d0e6fe99..51611e02, read with a helper agent; fixes confirmed by hand.
 - Good: Calder's Mail Day 13 on (mailSend); a ticket at 08:00 on a workday of yours, slot 23, held to 17:00, until graded; the case engine only called (caseMake/caseShow/caseRelease/caseTalker/caseKindsOpen/caseCauses); keys 1022/1023 via schedU, no R(); saved under side.ff, cleaned, the ffOk marker not enumerable. One owner: FF_*/ff* names nowhere else. Rep only through the normal turn-in (no worksSideXp, no double pay). Line keys exist with fallbacks.
