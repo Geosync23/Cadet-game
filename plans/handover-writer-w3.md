@@ -65,6 +65,7 @@ tone, formats, gotchas), content/README.md, content/facts.md (its new section "T
 `python3 plans/trad_parse.py` for the .trad files; `grep -i -c "six decks" starship-cadet.html` (0) and no "Deck 7" in
 any text; interactions_check / events_check vs the base aa4f42c when texts on screen or traditions change.
 
-## Open questions for the user (via the lead)
-- The small invented details above: keep or change?
-- Should more Wren talks get full meetings (the rota after Day 29), or are the panel lines enough?
+## The user's answers (via lead 19, 2026-10-19 ~11:45)
+- The small invented details stay.
+- Later Wren talks get no full meetings: only the first four (talk.sato/calder/tomas/esposito-yara) and talk.you; the
+  rest use RA's panel with the talk.open/answer/listen lines.
