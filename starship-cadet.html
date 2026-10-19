@@ -281,7 +281,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.53.5
+   STARSHIP CADET: CSV Wren                           build 0.53.6
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8744,7 +8744,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.53.5';                           // keep in step with the header's build line
+const GAME_BUILD = '0.53.6';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -13297,6 +13297,7 @@ function jobTap(it, at) {
   if (!jobsOn() || typeof deckDef === 'undefined') return false;
   if (typeof traceHidden === 'function' && traceTap(it, at)) return true;   // 24i: a traced job not yet found: the pipe kit's reading (Pillar 5, M3)
   const P = SHIP.player, mw = myWork(), c = cellAt(at.x, at.z);
+  if (typeof shopTap === 'function' && shopTap(it, at, mw)) return true;   // 24j: the order board, your order's stops, tinkering (Pillar 5, M10)
   if (deckDef.num === 5 && roomAt(...c) === 'r' && !/tarp/i.test(it.t)) {      // main storage, Deck 5: a shelf or the counter
     if (!mw) {
       const sh = typeof shelfTapped === 'function' ? shelfTapped(it) : null;   // no job at all: a shelf says what's on it (0.33.41)
@@ -35832,7 +35833,8 @@ function chatShow() {
   if (!C.ask && !C.offer && !talking && p.id === 'calder' && guideOn()) buttons.push({ id: 'guide-back', label: 'Hand ' + shortName(socP(guideOn().id)) + ' back' });
   if (!C.ask && !C.offer && !talking && C.line.moment && typeof momentShow === 'function') buttons.splice(1, 0, { id: 'sit', label: 'Sit with them' });   // a moment is ready (20c)
   const gift = !C.ask && !C.offer && !talking && giftInHands(); if (gift) buttons.push(r.giftWeek === socWeek() + 1 ? { id: 'give', label: 'Given this week', off: true } : { id: 'give', label: 'Give ' + gift });
-  if (!C.ask && !C.offer && !talking && typeof caseAskButton === 'function') { const cb = caseAskButton(p); if (cb) buttons.push(cb); }   // 24k P2: Ask about the fault (only a witness, only after Tomas's word)
+  if (!C.ask && !C.offer && !talking && typeof caseAskButton === 'function') { const cb = caseAskButton(p); if (cb) buttons.push(cb); }
+  if (!C.ask && !C.offer && !talking && typeof shopGiveButton === 'function') { const sb = shopGiveButton(p); if (sb) buttons.push(sb); }   // 24j: Give the thing you made them (M10)   // 24k P2: Ask about the fault (only a witness, only after Tomas's word)
   const v = { who: p.name, role: p.role, tier: REL_NAMES[relTier(p.id)], line: C.line.text, say: C.line.say !== false, buttons };
   const el = chatEl(); el.hidden = false;
   (CHAT_SKIN.draw || chatDraw)(el, v);
@@ -35889,6 +35891,7 @@ function chatDo(id) {
   else if (id === 'talk-stop') talkEnd(C, 'stop');
   else if (id.startsWith('reply:')) talkAnswer(C, id.slice(6));
   else if (id === 'ask') { C.ask = true; chatShow(); }
+  else if (id === 'shop-give') chatSay((typeof shopGiveSay === 'function' && shopGiveSay(p)) || 'Thanks.');   // 24j: an order handed over (M10)
   else if (id === 'case-ask') chatSay((typeof caseAskSay === 'function' && caseAskSay(p)) || 'Didn\'t notice a thing. Sorry.');   // 24k P2: their witness line
   else if (id === 'give') { const g = giftInHands(), res = g && giftGive(p, g); if (res) chatSay(res.text); }
   else if (id === 'sit') { const mo = C.line.moment; if (mo && typeof momentShow === 'function') { chatClose(); momentShow(mo); } }
@@ -40582,6 +40585,200 @@ const TRACE_CHIEF = { title: 'Tracing', key: 'chief.m9', open: () => !!(SHIP.wor
   'Read the middle first. Halve the line each time.',
   'Fine before a machine and low after it: that machine is the cause. The symptom is only where it shows.'] };
 if (typeof WORK_TICKS !== 'undefined') WORK_TICKS.push(() => { if (typeof CHIEF_NOTES === 'object' && CHIEF_NOTES && !CHIEF_NOTES.m9) CHIEF_NOTES.m9 = TRACE_CHIEF; });
+
+// =====================================================================
+// 24j. THE WORKSHOP AND TINKERING (M10, seat E3, 0.53.x; plans/mechanics/m10-workshop.html on claude/p5-design)
+// Crew order little things at the machine shop and you make them. From Day 12, once you're a Works Officer, the order
+// board (5-shop-board, the machine shop's north wall) gets one or two orders a week: one on Day 12 at 08:00, then
+// Mondays at 08:00, each from crew who know you (an acquaintance or better; schedU(week, 0 | 2, 1010)) for a thing off
+// WORKSHOP_ORDERS (schedU(week, 1 | 3, 1011)). Tap the board and take one: it becomes your side job (kind 'shop',
+// beside your board job): at the lathe or the fabricator (5-shop-lathe / 5-shop-fab) a wait (10 ship minutes: set it
+// going, come back) and a short hold to finish. Then the thing is yours to hand over: their chat card shows Give <thing>
+// (section 20's two hook lines: shopGiveButton, shopGiveSay): a thank-you, a friendship step, and Works reputation +1
+// (at most one a day here, and through 24 core's side-job cap, worksSideXp). An order you never take lapses after 7 days
+// ("I made do"), no harm. The first order is ladder row m10 (small): the Works officer on shift (the row's by-list) says
+// how, at the machine. Stage 2, after 3 orders: an order with a part takes one from main storage first (you fetch it off
+// the shelf; none left, you make do with offcuts). Stage 3, after 6: two more things to tinker.
+// Tinkering, from Day 6: with no board job, tap the lathe or the fabricator and pick something off TINKER_LIST to make
+// from offcuts (scrap is free, one at a time); it goes into your hands as a gift (SOC_GIFTS gets the list, section 20's
+// Give) or for your cabin (24t). Before Day 6 the machine shop makes section 20's GIFT_MAKES, as before.
+// Hooks: one line in section 15's jobTap (shopTap, before its gift-making), two in section 20's chat card. Saved in
+// SHIP.works.side.shop = { orders: [{ id, who, what, day, state, job?, part? }], made, tinkered: [ids], xpDay, taught }
+// (24 core's worksSide(); read defensively, so old saves load). No R(); keys 1010-1011.
+const SHOP_FROM = 12, TINKER_FROM = 6, SHOP_POST = 480, SHOP_LAPSE = 7, SHOP_WAIT = 10, SHOP_HOLD = 2, SHOP_STAGE = [3, 6];
+// the orders: thing (what you make), ask (the order card), at (lathe | fab), part (stage 2: from main storage), thanks
+const WORKSHOP_ORDERS = [
+  { id: 'guitar-hook', thing: 'guitar hook', ask: 'A hook for my guitar, please.', at: 'lathe', thanks: 'It holds! The guitar finally has a home off the floor.' },
+  { id: 'mug-rack', thing: 'mug rack', ask: 'A little rack for my mugs?', at: 'fab', thanks: 'Four mugs, one rack, no more mugs on the floor. Thank you.' },
+  { id: 'book-stand', thing: 'book stand', ask: 'Something to hold a book open while I eat.', at: 'fab', thanks: 'Hands free for the soup. You\'re a marvel.' },
+  { id: 'lamp-arm', thing: 'lamp arm', ask: 'A bendy arm for my reading lamp.', at: 'lathe', part: 'cable', thanks: 'It bends exactly where I want it. Reading in bed again!' },
+  { id: 'plant-hanger', thing: 'plant hanger', ask: 'A hanger so my plant gets the light.', at: 'fab', thanks: 'It\'s already leaning towards the lamp. Thank you.' },
+  { id: 'fan-spindle', thing: 'fan spindle', ask: 'My desk fan\'s spindle snapped. Could you turn a new one?', at: 'lathe', part: 'bearing', thanks: 'Whirring again. Quietly, too.' },
+  { id: 'drawer-pull', thing: 'drawer pull', ask: 'A pull for my drawer. The old one came off in my hand.', at: 'lathe', thanks: 'Opens first time now. Small thing, big difference.' },
+  { id: 'tablet-stand', thing: 'tablet stand', ask: 'A stand for my tablet, for calls home?', at: 'fab', part: 'seal', thanks: 'Mum says I look less like I\'m calling from a cupboard.' },
+];
+// tinkering: what you can make from offcuts (the last two from stage 3); all gifts (SOC_GIFTS) and cabin things (24t's cabin: the spot each fits)
+const TINKER_LIST = [
+  { item: 'little lamp', mins: 20, cabin: 'desk' }, { item: 'mug rack', mins: 15, cabin: 'ledge' }, { item: 'toy rocket', mins: 15, cabin: 'shelf' },
+  { item: 'plant pot', mins: 10, cabin: 'ledge' }, { item: 'model ship', mins: 30, cabin: 'shelf', stage: 3 }, { item: 'woven rug', mins: 30, cabin: 'rug', stage: 3 },
+];
+if (typeof SOC_GIFTS === 'object' && SOC_GIFTS) for (const t of TINKER_LIST) if (!SOC_GIFTS[t.item]) SOC_GIFTS[t.item] = { tag: 'made', from: 'made' };
+const shopDef = id => WORKSHOP_ORDERS.find(o => o.id === id) || null;
+// your part of the save, cleaned (a missing or odd field is its default)
+function shopData() {
+  const S = typeof worksSide === 'function' ? worksSide() : null; if (!S) return null;
+  const s = S.shop && typeof S.shop === 'object' ? S.shop : (S.shop = {});
+  if (!Array.isArray(s.orders)) s.orders = [];
+  s.orders = s.orders.filter(o => o && typeof o.id === 'string' && shopDef(o.what) && typeof o.who === 'string' && /^(posted|taken|made|given|lapsed)$/.test(o.state)).slice(-20);
+  if (!Number.isInteger(s.made) || s.made < 0) s.made = 0;
+  if (!Array.isArray(s.tinkered)) s.tinkered = []; s.tinkered = s.tinkered.filter(x => typeof x === 'string').slice(-20);
+  return s;
+}
+const shopStage = s => s && s.made >= SHOP_STAGE[1] ? 3 : s && s.made >= SHOP_STAGE[0] ? 2 : 1;
+const shopOn = (d = worksDay(shipNow())) => d >= SHOP_FROM && !!SHIP.works && SHIP.works.rank !== 'junior' && typeof jobKindAdd === 'function';
+const shopWho = id => { try { return socP(id); } catch (e) { return null; } };
+const shopName = id => { const p = shopWho(id); return p ? shortName(p) : worksFirst(id); };
+const shopThing = o => (shopDef(o.what) || {}).thing || 'thing';
+// who asks this week: crew who know you (acquaintance or better), not with an order open, in id order, picked by key 1010
+function shopPick(week, k, taken) {
+  socInit();
+  let pool = SOC.crew.filter(p => p && p.id && !p.player && !taken.has(p.id) && relTier(p.id) >= 1).map(p => p.id).sort();
+  if (!pool.length) pool = SOC.crew.filter(p => p && p.id && !p.player && !taken.has(p.id) && p.dept === 'works').map(p => p.id).sort();   // nobody yet: a Works colleague
+  return pool.length ? pool[Math.floor(schedU(week, k, 1010) * pool.length)] : null;
+}
+function shopPost(d, s) {                                // one or two orders on the board (Day 12: one)
+  const week = Math.floor((d - 1) / 7), open = s.orders.filter(o => o.state === 'posted' || o.state === 'taken' || o.state === 'made');
+  const busy = new Set(open.map(o => o.who)), used = new Set(open.map(o => o.what)), n = d === SHOP_FROM ? 1 : schedU(week, 4, 1010) < .5 ? 2 : 1;
+  for (let k = 0; k < n; k++) {
+    const who = shopPick(week, 2 * k, busy), defs = WORKSHOP_ORDERS.filter(o => !used.has(o.id)); if (!who || !defs.length) break;
+    const what = defs[Math.floor(schedU(week, 2 * k + 1, 1011) * defs.length)].id;
+    s.orders.push({ id: 'o' + d + '-' + k, who, what, day: d, state: 'posted' }); busy.add(who); used.add(what);
+  }
+  s.posted = d;
+}
+// the side job: made when you take an order (yours from the start, like the drill), never on the board for the crew
+const shopPlace = o => (shopDef(o.what) || {}).at === 'fab' ? '5-shop-fab' : '5-shop-lathe';
+if (typeof jobKindAdd === 'function') jobKindAdd('shop', { tier: 2, work: 0, side: true, text: 'Workshop order',
+  stops: j => [{ deck: 5, placeId: j.place, mins: 0, tag: 'make', how: 'wait', opts: { mins: SHOP_WAIT, text: 'You set the ' + (j.place === '5-shop-fab' ? 'fabricator' : 'lathe') + ' going on the ' + j.thing + '.' } },
+               { deck: 5, placeId: j.place, mins: SHOP_HOLD, tag: 'finish' }],
+  done(j, t, by) { const s = shopData(), o = s && s.orders.find(x => x.id === j.order); if (o && o.state === 'taken') o.state = 'made'; },
+  crew: { can: () => false, mins: 0 } });
+const shopJobOf = o => o && o.job ? SHIP.jobs.find(j => j.id === o.job && j.status === 'claimed' && j.claimedBy === 'you') || null : null;
+function shopTake(o) {
+  if (typeof jobMake !== 'function' || o.state !== 'posted') return false;
+  const s = shopData(), def = shopDef(o.what), t = shipNow(), part = shopStage(s) >= 2 && def.part ? def.part : null;
+  const j = jobMake('shop', { id: 'shop:' + o.id, deck: 5, room: 'f', title: 'Make the ' + def.thing + ' for ' + shopName(o.who), order: o.id, place: shopPlace(o), thing: def.thing, parts: part ? [part] : [] });
+  j.claimedBy = 'you'; j.status = 'claimed'; j.start = t; SHIP.jobs.push(j);
+  o.state = 'taken'; o.job = j.id; if (part) o.part = part; MACH_REV++;
+  if (typeof flagSet === 'function' && !(typeof flag === 'function' && flag('works.shop'))) flagSet('works.shop', worksDay(t));   // opens ladder row m10
+  return true;
+}
+// the board: the orders up, to take one
+function shopBoard(it) {
+  const s = shopData(); if (!s) return false;
+  const up = s.orders.filter(o => o.state === 'posted'), mine = s.orders.filter(o => o.state === 'taken' || o.state === 'made');
+  const yours = mine.length ? ' Yours: ' + mine.map(o => 'the ' + shopThing(o) + ' for ' + shopName(o.who) + (o.state === 'made' ? ' (made: hand it over)' : '')).join('; ') + '.' : '';
+  if (!shopOn()) { toast(it.t, 'Little orders from the crew, for the machine shop. Officers take them.'); return true; }
+  if (!up.length) { toast(it.t, 'Nothing new pinned up. Orders go up on Mondays.' + yours); return true; }
+  const ok = deviceChoose({ title: 'Order board', text: 'Take an order: make it here, then hand it over in person.' + yours,
+    choices: up.slice(0, 5).map(o => shopName(o.who) + ': ' + worksText('works.order.ask.' + o.what, shopDef(o.what).ask)) }, i => {
+    const o = up[i]; if (!o || !shopTake(o)) return;
+    toast('Order board', 'You take ' + shopName(o.who) + '\'s order: the ' + shopThing(o) + '. ' + (o.part ? 'It needs ' + partList([o.part]) + ' from main storage, then the ' : 'At the ') + (shopPlace(o) === '5-shop-fab' ? 'fabricator' : 'lathe') + '.');
+    if (typeof device === 'object' && device && device.refresh) device.refresh();
+  });
+  if (!ok) toast(it.t, 'Your device is busy; try again in a moment.');
+  return true;
+}
+// at the machine: the first time, the officer on shift says how (ladder row m10's word)
+function shopTeach(s) {
+  if (s.taught) return; s.taught = worksDay(shipNow());
+  const row = typeof ladderRow === 'function' && ladderRow('m10'), by = row && (ladderTeacher(row, s.taught) || row.by[0]);
+  if (by) worksTeach('m10', by, 'lead', ['Set it going, then go and do something useful. It\'ll be ready in ten.', 'Finish it by hand. That\'s the part they\'ll notice.']);
+}
+const shopMachineOf = it => /^lathe$/i.test(it.t) ? '5-shop-lathe' : /fabricator/i.test(it.t) ? '5-shop-fab' : null;
+function shopStep(j, it, at) {                           // your order's next stop, at the machine it needs
+  const st = jobStops(j), k = st.findIndex(x => !x.done), x = st[k]; if (!x) return false;
+  const P = SHIP.player, s = shopData(), o = s && s.orders.find(y => y.id === j.order);
+  if (x.step === 'fetch') { toast(it.t, 'The ' + j.thing + ' needs ' + partList(j.parts) + ' from main storage next door first.'); return true; }
+  if (shopMachineOf(it) !== j.place) return false;
+  const pid = x.places[0], spot = pid && PLACE_OF.has(pid) ? placeSpot(pid) : null;
+  shopTeach(s);
+  if (x.step === 'make') {
+    const w = typeof wsFind === 'function' && wsFind(j.id, k);
+    if (j.parts.length && !(w && w.at !== null)) { const i = P.carry.indexOf(j.parts[0]); if (i >= 0) P.carry.splice(i, 1); }   // the part goes in as you set it going
+    return workStep(j, { ...x, how: 'wait', opts: { mins: SHOP_WAIT, text: 'You set the ' + (j.place === '5-shop-fab' ? 'fabricator' : 'lathe') + ' going on the ' + j.thing + '.' } }, k, spot);
+  }
+  actStart('shopFinish', null, { title: it.t, job: j.id, ws: k, spot: spot ? { ...spot, id: null, pose: 'stand' } : null, after: 'You finish the ' + j.thing + ' by hand.' });
+  if (ACT && ACT.kind === 'shopFinish') ACT.def.until = A => {
+    if (A.done < SHOP_HOLD) return false; if (A.o.fin) return true; A.o.fin = true;
+    const r = jobStepDone(A.o.job, A.o.ws);
+    if (r && r.done) { const jj = SHIP.jobs.find(y => y.id === A.o.job); if (jj && jj.status === 'claimed') jobFinish(jj, shipNow(), 'you');
+      if (o) toast('Machine shop', 'The ' + shopThing(o) + ' is done. Hand it to ' + shopName(o.who) + ' in person.'); }
+    if (typeof device === 'object' && device && device.refresh) device.refresh();
+    return true;
+  };
+  return true;
+}
+function shopFetch(j, it, at) {                          // stage 2: the order's part off a storage shelf
+  const st = jobStops(j), k = st.findIndex(x => !x.done), x = st[k]; if (!x || x.step !== 'fetch') return false;
+  const P = SHIP.player, part = j.parts[0];
+  if (P.carry.includes(part)) { jobStepDone(j.id, k); toast(it.t, 'You have the ' + part + '. Now the ' + (j.place === '5-shop-fab' ? 'fabricator' : 'lathe') + '.'); return true; }
+  if (P.carry.length >= CARRY_MAX) { toast(it.t, 'Your hands are full (' + partList(P.carry) + ').'); return true; }
+  if (takePart(part)) { P.carry.push(part); toast(it.t, 'You take ' + partList([part]) + ' for the ' + j.thing + '.'); }
+  else { j.parts = []; toast(it.t, 'No ' + part + ' left on the shelf. You\'ll make do with offcuts.'); }
+  jobStepDone(j.id, k); return true;
+}
+// tinkering: a short list, one at a time, from offcuts
+function shopTinker(it, at) {
+  const P = SHIP.player, s = shopData(), d = worksDay(shipNow());
+  if (d < TINKER_FROM || !shopMachineOf(it)) return false;
+  const held = P.carry.find(x => TINKER_LIST.some(t => t.item === x));
+  if (held) { toast(it.t, 'One at a time: give the ' + held + ' to someone, or find it a spot in your cabin, first.'); return true; }
+  if (P.carry.length >= CARRY_MAX) { toast(it.t, 'Your hands are full (' + partList(P.carry) + ').'); return true; }
+  const list = TINKER_LIST.filter(t => !t.stage || shopStage(s) >= t.stage), pl = jobPlaceNear('storage', 'f', at);
+  if (!pl) return false;
+  const ok = deviceChoose({ title: 'Tinker', text: 'Make something from offcuts: a gift, or something for your cabin.', choices: list.map(t => t.item.charAt(0).toUpperCase() + t.item.slice(1)) }, i => {
+    const t = list[i]; if (!t) return;
+    actStart('craft', pl.id, { title: it.t, flavour: it.x, gift: t.item, needs: null, after: 'You make ' + partList([t.item]) + ' from offcuts: about ' + taskMins(t.mins) + ' minutes.' });
+    if (ACT && ACT.kind === 'craft') { ACT.def.mins = t.mins; ACT.def.until = A => { if (A.done < t.mins) return false; if (!A.o.tk) { A.o.tk = true; if (s) s.tinkered = s.tinkered.concat([t.item]).slice(-20); if (typeof leisureAdd === 'function') leisureAdd(4, 'tinker'); } return true; }; }
+  });
+  if (!ok) toast(it.t, 'Your device is busy; try again in a moment.');
+  return true;
+}
+// section 15's jobTap asks this first (mw: your machine job under way, or null). Your board job comes first where it needs
+// the place: its shelves in main storage, its part to make in the machine shop; tinkering only with no machine job
+function shopTap(it, at, mw) {
+  if (typeof deckDef === 'undefined' || deckDef.num !== 5) return false;
+  const room = roomAt(...cellAt(at.x, at.z)), s = shopData(), P = SHIP.player;
+  if (room === 'f' && /^order board$/i.test(it.t)) return shopBoard(it);
+  const j = s && s.orders.map(shopJobOf).find(Boolean);
+  if (j && room === 'r' && !(mw && typeof shelfNeeds === 'function' && shelfNeeds(mw.j, mw.w, P.carry).length) && shopFetch(j, it, at)) return true;
+  if (room !== 'f') return false;
+  if (j && !(mw && (mw.w.make || typeof jobNeeds === 'function' && jobNeeds(mw.j, mw.w, P.carry).length)) && shopStep(j, it, at)) return true;
+  return !mw && shopTinker(it, at);
+}
+Object.assign(PLAYER_ACTS, { shopFinish: { mins: SHOP_HOLD, pose: 'work', title: 'Machine shop' } });
+// section 20's chat card: Give <thing> to whoever ordered it, once it's made
+function shopGiveButton(p) { const s = shopData(), o = s && p && s.orders.find(x => x.who === p.id && x.state === 'made'); return o ? { id: 'shop-give', label: 'Give the ' + shopThing(o) } : null; }
+function shopGiveSay(p) {
+  const s = shopData(), o = s && p && s.orders.find(x => x.who === p.id && x.state === 'made'); if (!o) return null;
+  const d = worksDay(shipNow()); o.state = 'given'; o.given = d; s.made++;
+  if (typeof relAdd === 'function') relAdd(p.id, 'favour', 6);
+  if (s.xpDay !== d) { s.xpDay = d; if (typeof worksSideXp === 'function') worksSideXp(1, 'shop'); }
+  worksUse('m10');
+  return worksText('works.order.thanks.' + o.what, shopDef(o.what).thanks, { name: shortName(p) });
+}
+if (typeof WORK_TICKS !== 'undefined') WORK_TICKS.push(now => {   // Day 12 and Mondays at 08:00: orders go up; a week untaken, one lapses
+  const d = worksDay(now), m = now - (d - 1) * 1440; if (!shopOn(d)) return;
+  const s = shopData(); if (!s) return;
+  if (m >= SHOP_POST && s.posted !== d && (d === SHOP_FROM || weekday(d) === 0 && d > SHOP_FROM)) shopPost(d, s);
+  for (const o of s.orders) if (o.state === 'posted' && d - o.day >= SHOP_LAPSE) {
+    o.state = 'lapsed';
+    if (typeof mailSend === 'function') mailSend({ at: now, from: worksName(o.who), subject: 'The ' + shopThing(o), body: worksText('works.order.lapse', 'I made do, don\'t worry. Another time!'), quiet: true });
+  }
+  for (const o of s.orders) if (o.state === 'taken' && !SHIP.jobs.some(j => j.id === o.job && j.status !== 'done')) o.state = SHIP.jobs.some(j => j.id === o.job) ? 'made' : 'posted';   // a job lost to a reload: back on the board
+});
+if (typeof WORK_MECH !== 'undefined') WORK_MECH.m10 = { open() { /* the word comes at the machine, with your first order (shopTeach) */ } };
 
 // =====================================================================
 // 24k. CASES: head-scratchers (Pillar 5, seat H, 0.55.x; plans/mechanics/case-engine.html on claude/p5-design)

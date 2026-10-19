@@ -571,6 +571,64 @@ def part_side(g):
     check(a['bunk'][0] == 'Your bunk\'s in Bunk 1 on Deck 4.' and a['bunk'][1] and a['bunk'][2] == '4-23' and a['bunk'][3] == 'Your bunk\'s in Cabin 4-23 on Deck 4.' and not a['bunk'][4] and a['bunk'][5],
           f"side: the texts name Bunk 1 before the move and your cabin after ({a['bunk']})")
     check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'side: differs the second time')
+# 24j the workshop (seat E3, M10): on paper. Day 12, an Officer who knows three crew: one order goes up at 08:00 (from
+# one of them); you take it (your side job: a wait, then a hold, at the lathe or the fabricator); made, it's handed over
+# (a thank-you, a friendship step, a use, reputation once a day). Monday's orders: one left a week lapses with a Mail.
+# Stage 2 (3 made): an order with a part starts at the shelves. Tinkering's things are gifts. The same twice.
+M10 = r"""(() => {
+  SHIP.works = null; SHIP.occasions.length = 0; SHIP.notes = []; SHIP.flags = {}; SHIP.jobs = []; SHIP.mail = [];
+  MACH_HOUR = null; MACH_SEEN = -1; WORKS_TICK.m = WORKS_TICK.h = -1; socInit(); SHIP.rel = {};
+  const run = (from, to) => { for (let m = from; m <= to; m += 10) { setShipNow(m); machinesNow(); worksCareerTick(m); } };
+  setShipNow(11 * 1440 + 300); machinesNow(); const W = worksInit(); W.tier = 2; W.rank = 'officer';
+  const know = SOC.crew.filter(p => !p.player).map(p => p.id).sort().slice(0, 3); for (const id of know) relAdd(id, 'chat', 15);
+  const out = { side: typeof worksSide === 'function', know };
+  if (!out.side) return out;
+  run(11 * 1440 + 300, 11 * 1440 + 470); const s0 = worksSide().shop; out.before = s0 ? s0.orders.length : 0;
+  run(11 * 1440 + 480, 11 * 1440 + 500); const s = worksSide().shop;
+  out.posted = s.orders.map(o => [o.who, o.what, o.day, o.state]);
+  const o = s.orders[0]; if (!o) return out;
+  out.fromKnown = know.includes(o.who);
+  out.take = shopTake(o); const j = SHIP.jobs.find(x => x.id === o.job);
+  out.job = j ? [j.kind, j.claimedBy, j.status, jobSide(j), !myJob()] : null;
+  out.stops = j ? jobStops(j).map(x => [x.step, x.how, x.places[0] || null, x.mins]) : null;
+  const xp0 = W.xp; out.btn0 = shopGiveButton(socP(o.who));
+  jobStops(j).forEach((x, k) => jobStepDone(j.id, k)); if (j.status === 'claimed') jobFinish(j, shipNow(), 'you');
+  run(11 * 1440 + 510, 11 * 1440 + 520);
+  out.made = o.state; out.btn = shopGiveButton(socP(o.who)); const r0 = SHIP.rel[o.who].pts;
+  out.thanks = shopGiveSay(socP(o.who)); out.after = [o.state, s.made, Math.round((SHIP.rel[o.who].pts - r0) * 10) / 10 > 0, W.use.m10 || 0, W.xp - xp0];
+  out.btnAfter = shopGiveButton(socP(o.who));
+  run(11 * 1440 + 530, 14 * 1440 + 500);                   // Monday, Day 15: one or two up
+  out.monday = s.orders.filter(x => x.day === 15).map(x => [x.who, x.what]);
+  const mail0 = SHIP.mail.length; run(14 * 1440 + 510, 21 * 1440 + 490);
+  out.lapsed = s.orders.filter(x => x.day === 15).map(x => x.state); out.mails = SHIP.mail.filter(m => s.orders.some(x => x.day === 15 && m.subject === 'The ' + shopThing(x))).length;
+  s.made = 3; const op = WORKSHOP_ORDERS.find(x => x.part); s.orders.push({ id: 'oT-0', who: know[1], what: op.id, day: 22, state: 'posted' });
+  const o2 = s.orders[s.orders.length - 1]; shopTake(o2); const j2 = SHIP.jobs.find(x => x.id === o2.job);
+  out.stage2 = [shopStage(s), j2 ? jobStops(j2).map(x => x.step) : null, o2.part || null];
+  out.gifts = TINKER_LIST.map(t => !!giftOf(t.item)); out.tinker = TINKER_LIST.filter(t => !t.stage || shopStage({ made: 6 }) >= t.stage).length;
+  // an old save: no side.shop at all loads as empty; a junk one is cleaned
+  worksSide().shop = { orders: [{ id: 1 }, { id: 'x', who: 'y', what: 'nope', state: 'posted' }], made: -4, tinkered: 'z' }; const c = shopData();
+  out.clean = [c.orders.length, c.made, Array.isArray(c.tinkered)]; delete worksSide().shop; out.empty = shopData().orders.length;
+  return out;
+})()"""
+def part_m10(g):
+    a = g.ev(M10)
+    if not a.get('side'):
+        print('  m10: 24 core\'s worksSide is not in this build: skipped'); return
+    b = g.ev(M10)
+    print('  m10 posted:', a['posted'], 'job:', a['job'], 'stops:', a['stops'])
+    print('  m10 hand over:', a['btn'], a['thanks'], a['after'], '| Monday:', a['monday'], a['lapsed'], 'mails', a['mails'])
+    print('  m10 stage 2:', a['stage2'], 'tinker:', a['tinker'], a['gifts'], 'clean:', a['clean'], a['empty'])
+    check(a['before'] == 0 and len(a['posted']) == 1 and a['posted'][0][2] == 12 and a['fromKnown'], 'm10: one order at 08:00 on Day 12, from someone who knows you')
+    check(a['take'] and a['job'] and a['job'][0] == 'shop' and a['job'][1] == 'you' and a['job'][3] and a['job'][4], 'm10: taken, it\'s your side job, not your board job')
+    check(a['stops'] and [x[1] for x in a['stops']] == ['wait', 'hold'] and a['stops'][0][2] in ('5-shop-lathe', '5-shop-fab'), f"m10: a wait then a hold at the machine ({a['stops']})")
+    check(a['btn0'] is None and a['made'] == 'made' and a['btn'] and a['btn']['id'] == 'shop-give', 'm10: Give appears once it\'s made')
+    check(a['after'][0] == 'given' and a['after'][1] == 1 and a['after'][2] and a['after'][3] == 1 and a['after'][4] in (1, 0) and a['btnAfter'] is None, f"m10: handed over: a friendship step, a use ({a['after']})")
+    check(1 <= len(a['monday']) <= 2 and all(x == 'lapsed' for x in a['lapsed']) and a['mails'] == len(a['lapsed']), 'm10: Monday\'s orders, a week untaken, lapse with a Mail')
+    check(a['stage2'][0] == 2 and a['stage2'][1][0] == 'fetch' and a['stage2'][2], 'm10: stage 2: a part from main storage first')
+    check(all(a['gifts']) and a['tinker'] == 6, 'm10: tinkering\'s things are gifts; stage 3 adds two')
+    check(a['clean'] == [0, 0, True] and a['empty'] == 0, 'm10: an odd or missing save part loads as empty')
+    check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'm10: differs the second time')
+PARTS['m10'] = part_m10
 
 only = set(sys.argv[2:])
 with sync_playwright() as pw:
