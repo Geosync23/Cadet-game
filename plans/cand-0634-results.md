@@ -88,3 +88,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - t9: mech OK (m15 right-first +2 passes with E6's fix), career OK.
 - ~06:39 E6 910131e (0.45.15: the Thursday stocktake, job kind 'stocktake' in 24d); with R5. Load-stop fix still to come.
 - t9 done: mech, career, machine OK, lines PASS, cadet ALL IDENTICAL (renderer noise only). All passed tips together are green on the quick set.
+- ~06:40 R5 PASS E6 910131e (stocktake; E6's tip).
