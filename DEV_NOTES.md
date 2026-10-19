@@ -2475,6 +2475,19 @@ A standalone page, `kayak-proto.html`, like `lightdisc-proto.html`: NOT part of 
 - **Test hooks:** `window.KY` (start, steps, paper, fps, state, set, water, advice, rate, calls, pause, leave). `?seed=N`, `?debug`.
 - **Chat lines** in `CREW[...].lines` are stand-ins until the writers' `kayak.<kind>` lines arrive.
 
+## Wall prototype (Reach, seat K1, 2026-10-19)
+
+A standalone page, `wall-proto.html`, made the same way as the kayak one, NOT part of the game. Design: `plans/rec-minigames-plan.html` "Climbing wall" (Reach); the lead's brief by message (the kayak brief's rules).
+
+- **What it is:** climb hold to hold up one of the four coloured routes to the top hold; touching it rings the bell and the auto-belay lowers you. Routes as the game colours them: red hard, yellow tricky, blue steady, green easy (harder: holds further apart, further to the side, smaller). About 10-15 moves; a careful human climb takes about a minute or two.
+- **Controls:** thumb down frees your lower hand; it follows a point just above your thumb (so the thumb doesn't hide it); lift over a glowing hold of your route to grab it, or over bare wall and the hand goes back. You can reach only inside the ring: .6 from your other hand and at most .28 above it (your hips and feet haven't come up yet). Feet follow by themselves. Mouse: hold the button. Keys: Space takes a hand off and lets go, the arrows move it.
+- **Grip:** small and medium holds drain it, hanging off one hand drains it hard, hanging still with a hand on a big hold refills it. Grip gone: the auto-belay takes you and lowers you slowly, and the height you reached counts. Heights are said in words ("halfway up", "nearly to the top", "all the way to the bell"); bests are kept per route in `localStorage`, and topping a route puts "You" on the bell board shown on the menu.
+- **The rules (section 5), pure:** `wlNew`, `wlStep`, `wlPaper`, `wlClone`, fixed 60 steps a second, `g.rs`. The routes are fixed (a hash, like a real wall's setting), never the go's stream. Crew and the test autopilot use `aiInput` (rest on a big hold when grip is low, pick the next hold up by skill, a seeded aiming error). Friend: Tomas, Rina, Pell or Holt climb the route next to yours at their own pace; "Race me?" makes it a race, first to the bell wins (or whoever got higher).
+- **Look:** the game's wall (REC_WALL x .35, z 2.0-6.6, 3.52 high), ochre panels and rust volumes, holds as one instanced mesh, a glow disc behind each (2 cm off the face; bright when in reach), the reach ring 4 cm off the face, the bell (swings when rung), two auto-belays on the rail with their ropes, crash mats, the hall's windows and ceiling. Climbers in rec kit with a harness, arms and legs as two bones bent toward the holds. The camera sits behind and a little below you, centred on your route and following the hands you're holding with (not the one reaching, so the wall doesn't slide under your thumb). Draw calls in a go about 17-30.
+- **Check:** `NODE_PATH=$(npm root -g) node tools/wall_proto_check.js` (about two minutes): a real thumb reaches, grabs, misses and hits the reach limit; grip rules; the belay; a full climb of green with one thumb; bell board; paper, clones and 60/30/20 fps; friend and race; shots into `plans/shots-wall/`.
+- **Test hooks:** `window.WL` (start, steps, paper, fps, state, holds, screen, set, hand, advice, rate, calls, pause, leave).
+- **Chat lines** in `CREW[...].lines` are stand-ins until the writers' `wall.<kind>` lines arrive.
+
 ## Working method
 
 - Edit the build in place and never rewrite the whole file. Make small exact-string edits, each matching once.

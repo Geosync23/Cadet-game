@@ -658,6 +658,7 @@ function modeKey(g) { return g.pump < .5 ? 'slow' : 'fast' + g.gate; }
 function clearBoats() { for (const m of boats) scene.remove(m); boats = []; }
 function startGo(o) {
   if (!AC) try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {}
+  if (document.activeElement && document.activeElement.blur) document.activeElement.blur();   // so Space plays, not presses the menu's button again
   RM = $('rm').checked;
   const m = o.mode || 'alone';
   const crew = o.crew || (m === 'regatta' ? ['pell', 'rina', 'vance'] : m === 'alone' ? [] : picked());

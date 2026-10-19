@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Wall Prototype</title>
+<!--
+  Reach: the climbing wall mini-game prototype for Starship Cadet. A standalone test page, NOT part of the game file.
+  Follows plans/rec-minigames-plan.html ("Climbing wall", Reach): climb hold to hold up one of the four coloured routes
+  to the bell. Your free hand follows your thumb; lift over a glowing hold inside your reach to grab it; feet follow by
+  themselves. A grip bar drains on small holds and refills when you hang still on a big one. Grip runs out and the
+  auto-belay lowers you; the height you reached counts. Bests in words, no times. A friend can climb beside you.
+  The rules (section 5) are pure: wlNew, wlStep, wlPaper, wlClone; fixed 60 steps a second, one seeded stream per go
+  kept as plain state (g.rs), no Math.random, no DOM. The game's wall: REC_WALL (x .35, z 2.0-6.6), 3.52 high
+  (H = 2.8 × 1.3, less .12), four routes, two auto-belays on a rail, the bell at the top. Every colour through col();
+  no coplanar surfaces (holds, glows and the reach ring stand off the wall's face).
+  Test hooks: window.WL. ?seed=N sets the default seed, ?debug shows draw calls.
+-->
+<style>
+  :root { --cy: #50e6ff; --co: #ff7a5c; --ink: #e8f2f5; --dim: #9fb2b8; --panel: rgba(8, 12, 20, .9); --line: rgba(255,255,255,.14); }
+  html, body { margin: 0; height: 100%; background: #05070d; color: var(--ink); font: 15px/1.35 system-ui, -apple-system, "Segoe UI", sans-serif; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; }
+  canvas { display: block; }
+  .hide { display: none !important; }
+  button { font: inherit; color: var(--ink); background: rgba(255,255,255,.08); border: 1px solid var(--line); border-radius: 999px; padding: 8px 16px; cursor: pointer; }
+  button:active { transform: scale(.97); }
+  button.go { background: #0f3440; border-color: var(--cy); color: #dffaff; font-weight: 600; }
+  #hud { position: fixed; left: 0; right: 0; top: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: calc(env(safe-area-inset-top) + 8px) 12px 0; pointer-events: none; }
+  .pill { background: rgba(5,8,14,.7); border: 1px solid var(--line); border-radius: 999px; padding: 4px 14px; font-weight: 600; font-size: 14px; }
+  .pz { background: rgba(5,8,14,.62); border: 1px solid rgba(80,230,255,.35); border-radius: 10px; padding: 3px 10px; font-size: 12px; color: #bfefff; }
+  #leave { position: fixed; right: 12px; bottom: calc(env(safe-area-inset-bottom) + 12px); font-size: 13px; padding: 6px 14px; background: rgba(5,8,14,.6); }
+  #call { position: fixed; left: 0; right: 0; top: 30%; text-align: center; font-size: 26px; font-weight: 700; text-shadow: 0 0 12px rgba(0,0,0,.9); pointer-events: none; }
+  #grip { position: fixed; width: 180px; transform: translate(-50%, 0); pointer-events: none; text-align: center; }
+  #grip .bar { height: 12px; border-radius: 8px; background: rgba(5,8,14,.75); border: 1px solid rgba(255,255,255,.35); overflow: hidden; }
+  #grip .fill { height: 100%; width: 100%; border-radius: 8px; background: #5ee06a; }
+  #grip .lab { font-size: 11px; font-weight: 600; color: #e8f2f5; text-shadow: 0 0 6px #000, 0 0 2px #000; margin-top: 2px; letter-spacing: .03em; }
+  #grip.low .fill { animation: puff .6s ease-in-out infinite; }
+  @keyframes puff { 50% { opacity: .45; } }
+  .tag { position: fixed; transform: translate(-50%, -100%); font-size: 12px; font-weight: 600; padding: 1px 7px; border-radius: 6px; background: rgba(5,8,14,.55); pointer-events: none; white-space: nowrap; }
+  .say { position: fixed; transform: translate(-50%, -100%); font-size: 13px; padding: 4px 9px; border-radius: 10px; background: #f3efe4; color: #1b1f24; pointer-events: none; white-space: nowrap; }
+  #how { position: fixed; left: 10px; right: 10px; top: calc(env(safe-area-inset-top) + 74px); display: flex; align-items: center; gap: 8px; background: var(--panel); border: 1px solid var(--cy); border-radius: 14px; padding: 9px 10px 9px 14px; pointer-events: none; max-width: 520px; margin: 0 auto; }
+  #how .t { flex: 1; } #how .n { color: var(--cy); font-size: 12px; display: block; } #how button { pointer-events: auto; padding: 6px 12px; font-size: 13px; }
+  .over { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; padding: 16px; overflow-y: auto; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 18px; width: 100%; max-width: 440px; box-sizing: border-box; margin: auto; }
+  h1 { margin: 0 0 2px; font-size: 30px; letter-spacing: .06em; background: linear-gradient(90deg, #ffd23f, #fff 50%, var(--co)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .sub { color: var(--dim); font-size: 13px; margin-bottom: 12px; }
+  .routes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .route { text-align: left; border-radius: 12px; padding: 9px 10px; border-width: 2px; }
+  .route b { display: block; } .route small { color: var(--dim); display: block; font-size: 12px; margin-top: 2px; }
+  .route.on { background: rgba(255,255,255,.16); }
+  .modes { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; margin-top: 10px; font-size: 13px; color: var(--dim); }
+  .row label { display: flex; gap: 6px; align-items: center; }
+  .row input[type=number] { width: 64px; background: #0b111b; color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 4px 6px; font: inherit; }
+  select { background: #0b111b; color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 5px; font: inherit; }
+  h2 { font-size: 14px; margin: 14px 0 6px; color: var(--ink); }
+  .res h2 { font-size: 23px; margin: 0 0 6px; }
+  .res p { margin: 4px 0; color: var(--dim); font-size: 14px; }
+  .btns { display: flex; gap: 10px; margin-top: 14px; }
+  #board { font-size: 13px; color: var(--dim); }
+  #dbg { position: fixed; left: 8px; bottom: 6px; font: 11px monospace; color: #6f8a92; pointer-events: none; }
+</style>
+</head>
+<body>
+<div id="hud" class="hide"><div class="pill" id="status"></div><div class="pz">⏸ The ship's clock is paused while you climb</div></div>
+<div id="call" class="hide"></div>
+<div id="grip" class="hide"><div class="bar"><div class="fill"></div></div><div class="lab">Grip</div></div>
+<button id="leave" class="hide">Leave</button>
+<div id="how" class="hide"><div class="t"><span class="n"></span><span class="x"></span></div><button id="howNext">Next</button><button id="howSkip">Skip</button></div>
+
+<div id="menu" class="over">
+  <div class="card">
+    <h1>REACH</h1>
+    <div class="sub">The climbing wall, river hall, CSV Wren. A prototype to feel the wall game: hold to hold up a coloured route to the bell.</div>
+    <h2>Pick a route</h2>
+    <div class="routes" id="routes"></div>
+    <div class="modes">
+      <button class="go mode" data-m="alone">Climb</button>
+      <button class="mode" data-m="friend">Climb with a friend</button>
+      <button class="mode" data-m="race">Race me?</button>
+    </div>
+    <div class="row">Friend <select id="friend"></select></div>
+    <div class="row">
+      <label><input type="checkbox" id="howOn" checked> How to play</label>
+      <label><input type="checkbox" id="rm"> Reduced motion</label>
+      <label><input type="checkbox" id="snd" checked> Sound</label>
+      <label>Seed <input type="number" id="seed" value="1" min="1"></label>
+    </div>
+    <h2>The bell board (this season)</h2>
+    <div id="board"></div>
+  </div>
+</div>
+
+<div id="result" class="over hide">
+  <div class="card res">
+    <h2 id="resT"></h2>
+    <div id="resS"></div>
+    <div class="btns"><button class="go" id="again">Again</button><button id="done">Done</button></div>
+  </div>
+</div>
+<div id="dbg"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+'use strict';
+// =====================================================================
+// 1. SETUP (the game's conventions: sRGB colours through col(), 1 unit = 1 tile)
+// =====================================================================
+const col = h => new THREE.Color(h).convertSRGBToLinear();
+const Q = new URLSearchParams(location.search);
+const DEBUG = Q.has('debug');
+const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+document.body.prepend(renderer.domElement);
+const scene = new THREE.Scene();
+scene.background = col('#05070d');
+const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, .1, 120);
+scene.add(new THREE.HemisphereLight(col('#cfe6f0'), col('#2a2620'), .85));
+const sun = new THREE.DirectionalLight(col('#ffffff'), .6); sun.position.set(6, 9, 3); scene.add(sun);
+
+// The wall, room-local as in the game (KIT.recClimbWall): its panel is a .3 box at x .35, z 2.0-6.6, so its face is
+// at x .5; the climber hangs off it toward +x. Four routes across it, two auto-belays on a rail at the top, the bell.
+const H = 2.8 * 1.3, TOP = H - .12;
+const WALL = { x: .35, face: .5, z0: 2.0, z1: 6.6 }, ROUTES = 4, RW = (WALL.z1 - WALL.z0) / ROUTES;
+const HOLD_X = WALL.face + .04;            // where a hand grips (the holds stand off the face)
+const ROUTE_C = ['#ff4f6d', '#ffd23f', '#3fa9ff', '#5ee06a'];   // the game's holdC, by route
+const ROUTE_N = ['red', 'yellow', 'blue', 'green'], ROUTE_L = ['hard', 'tricky', 'steady', 'easy'];
+const rz = r => WALL.z0 + RW * (r + .5);
+
+function partsToGeo(parts) {
+  const P = [], N = [], C = [];
+  for (const p of parts) {
+    const g = (p.g.index ? p.g.toNonIndexed() : p.g.clone()).applyMatrix4(p.m);
+    const c = col(p.c), pa = g.attributes.position.array, na = g.attributes.normal.array;
+    for (let i = 0; i < pa.length; i += 3) { P.push(pa[i], pa[i + 1], pa[i + 2]); N.push(na[i], na[i + 1], na[i + 2]); C.push(c.r, c.g, c.b); }
+    g.dispose();
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(P, 3));
+  geo.setAttribute('normal', new THREE.Float32BufferAttribute(N, 3));
+  geo.setAttribute('color', new THREE.Float32BufferAttribute(C, 3));
+  geo.computeBoundingSphere();
+  return geo;
+}
+const M4 = (x, y, z, sx = 1, sy = 1, sz = 1, rx = 0, ry = 0, rz_ = 0) => new THREE.Matrix4().compose(new THREE.Vector3(x, y, z), new THREE.Quaternion().setFromEuler(new THREE.Euler(rx, ry, rz_)), new THREE.Vector3(sx, sy, sz));
+const BOX = new THREE.BoxGeometry(1, 1, 1);
+const cyl = (rt, rb, h, s = 10) => new THREE.CylinderGeometry(rt, rb, h, s);
+const SPH = new THREE.SphereGeometry(1, 16, 10);
+const LAMB = new THREE.MeshLambertMaterial({ vertexColors: true });
+const GLOWV = new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false });
+function mulberry(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const hash = (a, b, c) => { const s = Math.sin(a * 127.1 + b * 311.7 + c * 74.7) * 43758.5453; return s - Math.floor(s); };   // fixed: the routes are set once
+
+// =====================================================================
+// 2. THE ROUTES (fixed, like a real wall's setting: from a hash, never the game's stream)
+// =====================================================================
+// Each route climbs its own strip of the wall from two start holds to a top hold (touch it and the bell rings).
+// Harder routes: holds further apart, further to the side, smaller. Sizes: 0 big (a jug: rest on it), 1 medium, 2 small.
+const START_Y = 1.0, TOP_Y = TOP - .22;
+const HOLDS = [];                       // { r, y, z, size, top, start }
+const ROUTE_HOLDS = [[], [], [], []];
+for (let r = 0; r < ROUTES; r++) {
+  const dif = 3 - r, zc = rz(r), add = (y, z, size, f = {}) => { const h = Object.assign({ i: HOLDS.length, r, y, z, size }, f); HOLDS.push(h); ROUTE_HOLDS[r].push(h.i); };
+  add(START_Y, zc - .16, 0, { start: 1 }); add(START_Y + .08, zc + .16, 0, { start: 1 });
+  const y0 = START_Y + .08, n = Math.ceil((TOP_Y - y0) / [.11, .135, .16, .19][dif]), step = (TOP_Y - y0) / n;
+  const spread = [.1, .14, .18, .21][dif], small = [.08, .22, .4, .55][dif], big = [.55, .35, .2, .1][dif];
+  let side = -1;
+  for (let k = 1; k < n; k++) {
+    const y = y0 + k * step + (hash(r, k, 3) - .5) * .04;
+    const z = zc + side * spread * (.6 + .4 * hash(r, k, 4)) + (hash(r, k, 5) - .5) * .1, u = hash(r, k, 6);
+    add(y, Math.max(zc - RW / 2 + .1, Math.min(zc + RW / 2 - .1, z)), u < big || k % 5 === 0 ? 0 : u < big + small ? 2 : 1);
+    if (dif <= 1 && hash(r, k, 7) < .45) add(y + .06, zc - side * spread * .4, hash(r, k, 8) < .5 ? 0 : 1);   // the easier routes have spare holds
+    side = -side;
+  }
+  add(TOP_Y, zc, 0, { top: 1 });
+}
+const HOLD_R = [.085, .062, .042];
+
+// =====================================================================
+// 3. THE ROOM: the wall (ochre panels, rust volumes, the rail, the belays, the bell), mats, the hall round it
+// =====================================================================
+const roomParts = [], glowParts = [];
+const rbox = (c, x, y, z, sx, sy, sz, rx = 0, ry = 0, rz_ = 0) => roomParts.push({ g: BOX, c, m: M4(x, y, z, sx, sy, sz, rx, ry, rz_) });
+const gbox = (c, x, y, z, sx, sy, sz) => glowParts.push({ g: BOX, c, m: M4(x, y, z, sx, sy, sz) });
+(function room() {
+  const len = WALL.z1 - WALL.z0, zc = (WALL.z0 + WALL.z1) / 2;
+  rbox('#3a4a52', 4, -.05, 3.5, 8.4, .1, 7.4);                                                // the deck floor
+  rbox('#c08a3e', WALL.x, TOP / 2, zc, .3, TOP, len);                                         // the wall: ochre panels
+  for (let k = 0; k < 6; k++) rbox('#9a4a28', WALL.face + .02, .6 + k * (TOP - 1.3) / 5, WALL.z0 + .5 + hash(k, 5, 9) * (len - 1), .06, .7 + hash(k, 4, 9) * .9, .9, (hash(k, 6, 9) - .5) * .3);
+  for (let r = 1; r < ROUTES; r++) rbox('#a87634', WALL.face + .005, TOP / 2, WALL.z0 + RW * r, .01, TOP, .02);   // faint seams between the routes' strips
+  rbox('#2f6fe0', 1.2, .12, zc, 1.4, .24, len);                                               // crash mats
+  rbox('#264f9c', 1.2, .245, zc, 1.3, .01, len - .1);
+  rbox('#8a959c', WALL.x + .3, TOP - .12, zc, .08, .08, len - .2);                            // the belays' rail along the top
+  rbox('#d9a441', WALL.x + .3, TOP - .05, zc, .5, .06, .06);                                  // the bell's bracket
+  // the hall round it: the north wall with windows, the south rail, the river's stern bank beyond the mats
+  rbox('#2c3a44', 4, .4, -.1, 8.4, .8, .2); rbox('#2c3a44', 4, (2.6 + H) / 2, -.1, 8.4, H - 2.6, .2);
+  for (const x of [.6, 5.35]) rbox('#33434e', x, 1.7, -.1, .5, 1.8, .24);
+  rbox('#5a6578', 4, .55, 7.0, 8.4, .06, .06);
+  rbox('#6f8a7c', 2.9, .23, 3.05, .2, .46, 5.3); rbox('#1f8fa6', 3.8, .36, 3.05, 1.6, .02, 5.1);
+  rbox('#2c3a44', -.2, H / 2, 3.5, .2, H, 7.4);
+  gbox('#50e6ff', 4, .9, .01, 8.4, .04, .04);
+  gbox('#26323d', 4, H + .05, 3.5, 8.4, .1, 7.4);                                                 // the ceiling (unlit, so it never goes black from below), with strip lights
+  for (const z of [1.2, 3.5, 5.8]) gbox('#fff3d6', 3, H - .02, z, 5, .02, .12);
+  for (let x = 1; x < 8; x += 1.6) gbox('#3a4856', x, H - .06, 3.5, .12, .1, 7.2);   // ceiling beams
+})();
+scene.add(new THREE.Mesh(partsToGeo(roomParts), LAMB));
+scene.add(new THREE.Mesh(partsToGeo(glowParts), GLOWV));
+(function stars() {
+  const r = mulberry(4242), P = [];
+  for (let i = 0; i < 260; i++) P.push(-2 + r() * 12, .8 + r() * 1.8, -.6 - r() * 6);
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3));
+  scene.add(new THREE.Points(g, new THREE.PointsMaterial({ color: col('#dfe8ff'), size: 1.6, sizeAttenuation: false })));
+})();
+// the holds: one instanced mesh, coloured per route; a glow disc behind each (2 cm off the face), bright on your route
+const holdMesh = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1, 0), new THREE.MeshLambertMaterial(), HOLDS.length);
+const glowMesh = new THREE.InstancedMesh(new THREE.CircleGeometry(1, 20).rotateY(Math.PI / 2), new THREE.MeshBasicMaterial({ transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false }), HOLDS.length);
+{
+  const m = new THREE.Matrix4();
+  HOLDS.forEach((h, k) => {
+    const s = HOLD_R[h.size];
+    m.compose(new THREE.Vector3(WALL.face + s * .55, h.y, h.z), new THREE.Quaternion().setFromEuler(new THREE.Euler(hash(k, 1, 2) * 3, hash(k, 2, 2) * 3, 0)), new THREE.Vector3(s * .7, s, s * (1.1 + .3 * hash(k, 3, 2))));
+    holdMesh.setMatrixAt(k, m); holdMesh.setColorAt(k, col(h.top ? '#f4f4ee' : ROUTE_C[h.r]));
+    m.compose(new THREE.Vector3(WALL.face + .02, h.y, h.z), new THREE.Quaternion(), new THREE.Vector3(1, s * 1.6, s * 1.6)); glowMesh.setMatrixAt(k, m); glowMesh.setColorAt(k, new THREE.Color(0, 0, 0));
+  });
+}
+scene.add(holdMesh, glowMesh);
+// the bell (it swings when rung), the two auto-belays (they slide along the rail to their climbers)
+const bell = new THREE.Group(); bell.position.set(WALL.x + .5, TOP - .1, (WALL.z0 + WALL.z1) / 2); scene.add(bell);
+bell.add(new THREE.Mesh(partsToGeo([{ g: cyl(.09, .2, .26, 16), c: '#d9a441', m: M4(0, -.15, 0) }, { g: cyl(.03, .03, .05, 8), c: '#d9a441', m: M4(0, 0, 0) }, { g: SPH, c: '#8a6a2a', m: M4(0, -.3, 0, .04, .04, .04) }]), LAMB));
+const belayGeo = partsToGeo([{ g: BOX, c: '#30363d', m: M4(0, 0, 0, .2, .22, .2) }, { g: BOX, c: '#ff8a3a', m: M4(0, -.06, .101, .1, .04, .01) }]);
+// the reach ring round the hand you're holding on with (4 cm off the face), and a mark on the hold you'd grab
+const reachRing = new THREE.Mesh(new THREE.RingGeometry(.96, 1, 48).rotateY(Math.PI / 2), new THREE.MeshBasicMaterial({ color: col('#dffaff'), transparent: true, opacity: .55, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false }));
+reachRing.visible = false; scene.add(reachRing);
+const grabMark = new THREE.Mesh(new THREE.RingGeometry(.07, .095, 24).rotateY(Math.PI / 2), new THREE.MeshBasicMaterial({ color: col('#ffffff'), transparent: true, depthWrite: false, toneMapped: false }));
+grabMark.visible = false; scene.add(grabMark);
+
+// =====================================================================
+// 4. CLIMBERS (rec kit, a harness; arms and legs as two bones each, bent toward the holds; the belay rope)
+// =====================================================================
+const SKIN = ['#f3cfae', '#e3b08a', '#c98f66', '#a46c4b', '#7d4f35', '#573626'];
+const HAIR = { black: '#1d1917', dark: '#3a2820', brown: '#6b4a2f', grey: '#9f9a93' };
+const REC_TEAL = '#2f9fb0', REC_CORAL = '#ff7a5c';
+// Crew. Levels from the plan's people; chat lines are STAND-INS until the writers' wall.<kind> lines arrive.
+const CREW = {
+  tomas: { name: 'Tomas', full: 'Tomas', skin: 1, hc: 'dark', think: 1.6, speed: 1.6, skill: .92, restAt: .3, restTo: .8, aimErr: .02,
+           lines: { go: ['Chalk up. Let\'s go.'], rest: ['Shake it out on the big ones.'], top: ['Ding!'], fall: ['Caught. That\'s what the belay\'s for.'] } },
+  rina:  { name: 'Rina', full: 'Rina Deshi', skin: 3, hc: 'black', think: 1.4, speed: 1.8, skill: .95, restAt: .25, restTo: .7, aimErr: .015,
+           lines: { go: ['Fine. Up we go.'], rest: ['Mm.'], top: ['Fine.'], fall: ['Hm. Again.'] } },
+  pell:  { name: 'Pell', full: 'Pell Okafor', skin: 5, hc: 'black', think: 2.0, speed: 1.4, skill: .5, restAt: .12, restTo: .5, aimErr: .07,
+           lines: { go: ['Up up up!'], rest: ['My arms are noodles.'], top: ['I rang it! Did you hear?'], fall: ['Wheee!'] } },
+  holt:  { name: 'Holt', full: 'Chief Bram Holt', skin: 2, hc: 'grey', think: 1.9, speed: 1.3, skill: .85, restAt: .35, restTo: .85, aimErr: .03,
+           lines: { go: ['Three points of contact.'], rest: ['Rest on the jugs.'], top: ['Tidy.'], fall: ['Down we come.'] } },
+};
+const YOU = { name: 'You', full: 'You', skin: 2, hc: 'brown' };
+const AUTO = { think: 2.0, speed: 1.6, skill: .9, restAt: .3, restTo: .8, aimErr: .02 };   // your side on autopilot (the tests)
+const who = k => k === 'you' ? YOU : CREW[k];
+const SEG = cyl(1, 1, 1, 8);
+const UP = new THREE.Vector3(0, 1, 0), tv = new THREE.Vector3(), tq = new THREE.Quaternion();
+function seg(m, a, b, r) { tv.subVectors(b, a); const L = tv.length() || 1e-4; m.position.addVectors(a, b).multiplyScalar(.5); m.quaternion.setFromUnitVectors(UP, tv.divideScalar(L)); m.scale.set(r, L, r); }
+function makeClimber(look) {
+  const root = new THREE.Group(); scene.add(root);
+  const torso = new THREE.Mesh(partsToGeo([
+    { g: cyl(.13, .12, .5), c: REC_TEAL, m: M4(0, .25, 0) }, { g: cyl(.14, .14, .05), c: REC_CORAL, m: M4(0, .36, 0) },
+    { g: cyl(.15, .14, .12), c: '#2b2f33', m: M4(0, .02, 0) }, { g: BOX, c: '#e8a33a', m: M4(.1, -.04, 0, .03, .12, .2) },
+    { g: SPH, c: REC_TEAL, m: M4(0, .5, 0, .19, .07, .12) }, { g: cyl(.05, .06, .08), c: SKIN[look.skin], m: M4(0, .56, 0) },
+    { g: SPH, c: SKIN[look.skin], m: M4(0, .68, 0, .12, .13, .12) }, { g: SPH, c: HAIR[look.hc] || '#333', m: M4(.012, .71, 0, .125, .11, .125) },
+  ]), LAMB);
+  root.add(torso);
+  const limb = (c, r) => { const a = new THREE.Mesh(SEG, new THREE.MeshLambertMaterial({ color: col(c) })); a.userData.r = r; scene.add(a); return a; };
+  const arms = [0, 1].map(() => [limb(REC_TEAL, .04), limb(SKIN[look.skin], .033)]);
+  const legs = [0, 1].map(() => [limb('#2a6f7c', .055), limb('#2a6f7c', .045)]);
+  const rope = limb('#ff8a3a', .012);
+  const belay = new THREE.Mesh(belayGeo, LAMB); scene.add(belay);
+  const feet = [new THREE.Vector3(), new THREE.Vector3()];
+  return { root, torso, arms, legs, rope, belay, feet, ftT: [0, 0], parts: [root, ...arms.flat(), ...legs.flat(), rope, belay] };
+}
+function freeClimber(c) { for (const o of c.parts) scene.remove(o); }
+// two bones from a toward t, the joint pushed toward the pole
+const J = new THREE.Vector3(), D_ = new THREE.Vector3(), P_ = new THREE.Vector3(), E_ = new THREE.Vector3();
+function ik(a, t, l1, l2, pole, out) {
+  D_.subVectors(t, a); let d = D_.length(); D_.divideScalar(d || 1);
+  const dd = Math.max(Math.abs(l1 - l2) + 1e-3, Math.min(l1 + l2 - 1e-3, d));
+  const k = (l1 * l1 - l2 * l2 + dd * dd) / (2 * dd), h = Math.sqrt(Math.max(0, l1 * l1 - k * k));
+  P_.copy(pole).addScaledVector(D_, -pole.dot(D_)).normalize();
+  out.copy(a).addScaledVector(D_, k).addScaledVector(P_, h);
+  E_.copy(a).addScaledVector(D_, Math.min(d, l1 + l2));
+  return E_;
+}
+
+// =====================================================================
+// 5. THE RULES (fixed 60 steps a second, one seeded stream per go, plain state; no DOM, no drawing, no Math.random)
+// =====================================================================
+const DT = 1 / 60, REACH = .6, UPREACH = .28, SNAP = .1, HAND_SPEED = 1.7, LOWER = .55;
+// grip a second: a big hold refills it when you hang still with both hands; medium and small holds drain it;
+// hanging off one hand while the other reaches drains it hard (more on a small hold)
+const G_REFILL = .16, G_MED = .012, G_SMALL = .032, G_ONE = [.03, .06, .1], G_BASE = .005, STILL = 24;
+function rnd(g) { let a = g.rs = g.rs + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }
+function newClimber(k, r, ai) {
+  const s = ROUTE_HOLDS[r];
+  return { k, r, ai, phase: 'climb', grip: 1, hands: [{ hold: s[0], y: HOLDS[s[0]].y, z: HOLDS[s[0]].z }, { hold: s[1], y: HOLDS[s[1]].y, z: HOLDS[s[1]].z }],
+    free: -1, back: -1, last: 1, still: 0, best: START_Y + .08, moves: 0, misses: 0, rests: 0, low: 0, ly: 0, rang: 0, fell: 0, done: 0,
+    wait: 0, plan: -1, tz: 0, ty: 0, resting: 0, think: 0, prev: -1 };
+}
+function wlNew(o) {
+  const g = { seed: o.seed >>> 0 || 1, step: 0, t: 0, phase: o.race ? 'count' : 'go', timer: o.race ? 3 : 0, race: !!o.race,
+    inp: { down: 0, y: 0, z: 0 }, ev: [], evOn: !o.paper, c: [] };
+  g.rs = Math.imul(g.seed, 2654435761) | 0;
+  const r = o.route === undefined ? 3 : o.route;
+  g.c.push(newClimber('you', r, o.autoYou ? 'auto' : null));
+  if (o.friend) {                                         // on the route next to yours, so they're beside you
+    g.c.push(newClimber(o.friend, r === 3 ? 2 : r + 1, o.friend)); g.c[1].wait = Math.round((.6 + rnd(g) * .6) * 60);
+  }
+  return g;
+}
+function wlClone(g) { return JSON.parse(JSON.stringify(g)); }
+function ev(g, k, i) { if (g.evOn) g.ev.push({ k, i }); }
+function wlStep(g) {
+  if (g.phase === 'over') return;
+  g.step++; g.t += DT;
+  if (g.phase === 'count') { if ((g.timer -= DT) <= 0) { g.phase = 'go'; ev(g, 'go', -1); } return; }
+  for (let i = 0; i < g.c.length; i++) climberStep(g, g.c[i], i);
+  if (g.c.every(c => c.done) || g.step > 60 * 360) { g.phase = 'over'; ev(g, 'over', -1); }
+}
+const HIPS_MIN = .8, hipsY = c => Math.max(HIPS_MIN, (c.hands[0].y + c.hands[1].y) / 2 - .62);   // hanging below the hands; standing on the mats at the start
+function reachClamp(c, y, z) {
+  const a = c.hands[1 - c.free]; let dy = y - a.y, dz = z - a.z; const d = Math.hypot(dy, dz);
+  if (d > REACH) { dy *= REACH / d; dz *= REACH / d; }
+  dy = Math.min(dy, UPREACH);
+  return [Math.max(.3, Math.min(TOP - .05, a.y + dy)), Math.max(WALL.z0 + .05, Math.min(WALL.z1 - .05, a.z + dz))];
+}
+// the hold you'd grab here: your route's, within SNAP of the hand and REACH of the other hand
+function grabAt(c, y, z) {
+  const a = c.hands[1 - c.free]; let best = -1, bd = SNAP;
+  for (const i of ROUTE_HOLDS[c.r]) { const h = HOLDS[i]; const d = Math.hypot(h.y - y, h.z - z); if (d < bd && Math.hypot(h.y - a.y, h.z - a.z) <= REACH + .02 && h.y <= a.y + UPREACH + .02) { bd = d; best = i; } }
+  return best;
+}
+function climberStep(g, c, i) {
+  if (c.done) return;
+  if (c.phase === 'ring') { if (--c.low <= 0) { c.phase = 'lower'; c.ly = hipsY(c); } return; }
+  if (c.phase === 'lower') { c.ly -= LOWER * DT; if (c.ly <= HIPS_MIN) { c.ly = HIPS_MIN; c.done = g.step; ev(g, 'down', i); } return; }
+  if (g.phase !== 'go') return;
+  if (c.wait > 0) { c.wait--; return; }
+  // input: yours from the thumb, the crew's (and the autopilot's) from aiInput
+  const inp = c.ai ? aiInput(g, c) : g.inp;
+  if (inp.down && c.free < 0 && c.back < 0) {
+    const f = c.hands[0].y < c.hands[1].y - .01 ? 0 : c.hands[1].y < c.hands[0].y - .01 ? 1 : 1 - c.last;   // the lower hand reaches
+    c.free = f; c.prev = c.hands[f].hold; c.hands[f].hold = -1; c.still = 0; ev(g, 'reach', i);
+  }
+  if (c.free >= 0) {
+    const h = c.hands[c.free];
+    let ty, tz;
+    if (c.back >= 0) { ty = HOLDS[c.back].y; tz = HOLDS[c.back].z; }
+    else if (inp.down) [ty, tz] = reachClamp(c, inp.y, inp.z);
+    else { ty = h.y; tz = h.z; }
+    const dy = ty - h.y, dz = tz - h.z, d = Math.hypot(dy, dz), mv = HAND_SPEED * DT;
+    if (d > mv) { h.y += dy / d * mv; h.z += dz / d * mv; } else { h.y = ty; h.z = tz; }
+    if (c.back >= 0 && d <= mv) { h.hold = c.back; c.back = -1; c.free = -1; c.misses++; ev(g, 'miss', i); }
+    else if (c.back < 0 && !inp.down) {                       // lifted: grab what's there, or the hand goes back to its hold
+      const k = grabAt(c, h.y, h.z);
+      if (k >= 0) {
+        h.hold = k; h.y = HOLDS[k].y; h.z = HOLDS[k].z; c.last = c.free; c.free = -1; c.moves++; c.still = 0; ev(g, 'grab', i);
+        c.best = Math.max(c.best, h.y);
+        if (HOLDS[k].top) { c.phase = 'ring'; c.rang = g.step; c.low = 90; ev(g, 'ring', i); return; }
+      } else c.back = c.prev;
+    }
+  } else c.still++;
+  // grip
+  const s0 = HOLDS[c.hands[0].hold], s1 = HOLDS[c.hands[1].hold];
+  let dg = -G_BASE;
+  if (c.free >= 0) { const s = c.free === 0 ? s1 : s0; dg -= G_ONE[s.size]; }
+  else {
+    const anyBig = s0.size === 0 || s1.size === 0;
+    if (anyBig && c.still > STILL) dg += G_REFILL * ((s0.size === 0) + (s1.size === 0)) / 2 + .03;
+    for (const s of [s0, s1]) dg -= s.size === 1 ? G_MED : s.size === 2 ? G_SMALL : 0;
+    if (Math.hypot(c.hands[0].y - c.hands[1].y, c.hands[0].z - c.hands[1].z) > .5) dg -= .02;   // stretched out
+  }
+  c.grip = Math.min(1, c.grip + dg * DT);
+  if (c.grip <= 0) {                                          // grip gone: the auto-belay takes you and lowers you, slowly
+    c.grip = 0; c.fell = g.step; c.phase = 'lower'; c.ly = hipsY(c); c.free = -1; c.back = -1; ev(g, 'fall', i);
+  }
+}
+// The crew's autopilot (and yours in the tests): rest on a big hold when grip is low, else pick the next hold up the
+// route for the lower hand (a bit of seeded misjudging by skill), reach for it, let go over it.
+function aiInput(g, c) {
+  const L = c.ai === 'auto' ? AUTO : CREW[c.ai], hurry = g.race ? .7 : 1;
+  const out = { down: 0, y: 0, z: 0 };
+  if (c.free >= 0) {
+    if (c.back >= 0) return out;
+    const h = c.hands[c.free];
+    out.y = c.ty; out.z = c.tz;
+    const [cy, cz] = reachClamp(c, c.ty, c.tz);
+    out.down = Math.hypot(h.y - cy, h.z - cz) > .005 ? 1 : 0;           // over it (or as far as it reaches): let go
+    return out;
+  }
+  if (c.think > 0) { c.think--; return out; }
+  const s0 = HOLDS[c.hands[0].hold], s1 = HOLDS[c.hands[1].hold], canRest = s0.size === 0 || s1.size === 0;
+  if (c.resting) { if (c.grip >= L.restTo || !canRest) c.resting = 0; else return out; }
+  if (c.grip < L.restAt && canRest) { c.resting = 1; c.rests++; return out; }
+  const f = c.hands[0].y < c.hands[1].y - .01 ? 0 : c.hands[1].y < c.hands[0].y - .01 ? 1 : 1 - c.last, a = c.hands[1 - f];
+  let best = -1, bs = -1e9;
+  for (const i of ROUTE_HOLDS[c.r]) {
+    if (i === c.hands[0].hold || i === c.hands[1].hold) continue;
+    const h = HOLDS[i], d = Math.hypot(h.y - a.y, h.z - a.z);
+    if (d > REACH * .97 || h.y > a.y + UPREACH - .01 || h.y < c.hands[f].y + .04) continue;
+    const sc = (h.y - c.hands[f].y) * 3 + (h.size === 0 ? .3 : h.size === 1 ? .12 : 0) * (c.grip < .5 ? 2 : 1) - d * .4 + (h.top ? 5 : 0) + (rnd(g) - .5) * (1 - L.skill) * 1.2;
+    if (sc > bs) { bs = sc; best = i; }
+  }
+  if (best < 0) { c.think = 30; return out; }
+  c.plan = best; const e = L.aimErr * (1 + (1 - c.grip));
+  c.ty = HOLDS[best].y + (rnd(g) - .5) * 2 * e * 2.4; c.tz = HOLDS[best].z + (rnd(g) - .5) * 2 * e * 2.4;
+  c.think = Math.round(L.think * hurry * (.7 + .6 * rnd(g)) * 60);
+  out.down = 1; out.y = c.ty; out.z = c.tz; return out;
+}
+function wlPaper(o) { const g = wlNew(Object.assign({ seed: 1, autoYou: true }, o, { paper: true })); while (g.phase !== 'over') wlStep(g); return wlSummary(g); }
+function wlSummary(g) { return { steps: g.step, c: g.c.map(c => ({ k: c.k, r: c.r, rang: c.rang, fell: c.fell, done: c.done, best: +c.best.toFixed(4), moves: c.moves, misses: c.misses, rests: c.rests, grip: +c.grip.toFixed(5) })) }; }
+// who won a race: the first to the bell; if nobody rang it, whoever got higher
+function wlWinner(g) { const [a, b] = g.c; if (a.rang || b.rang) return !b.rang || (a.rang && a.rang <= b.rang) ? 0 : 1; return a.best >= b.best ? 0 : 1; }
+const frac = c => Math.max(0, Math.min(1, (c.best - (START_Y + .08)) / (TOP_Y - START_Y - .08)));
+function heightWords(c) {
+  if (c.rang) return 'all the way to the bell';
+  const f = frac(c);
+  return f > .85 ? 'nearly to the top' : f > .6 ? 'two-thirds of the way up' : f > .42 ? 'halfway up' : f > .25 ? 'a third of the way up' : 'a few moves up';
+}
+
+// =====================================================================
+// 6. EVENTS: sound, talk, How to play
+// =====================================================================
+let AC = null, FAST = false;
+function blip(f, d = .08, type = 'sine', v = .12, f2) {
+  if (!$('snd').checked || !AC || FAST) return;
+  const t = AC.currentTime, o = AC.createOscillator(), gn = AC.createGain();
+  o.type = type; o.frequency.setValueAtTime(f, t); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + d);
+  gn.gain.setValueAtTime(v, t); gn.gain.exponentialRampToValueAtTime(.001, t + d);
+  o.connect(gn).connect(AC.destination); o.start(t); o.stop(t + d + .02);
+}
+function ding() { blip(1318, 1.6, 'sine', .14); blip(1975, 1.2, 'sine', .05); }
+const chatR = mulberry(7), SAY = [];
+function say(i, kind) { if (FAST) return; const w = who(G.c[i].k); if (!w.lines || !w.lines[kind]) return; const L = w.lines[kind]; SAY[i] = { text: L[Math.floor(chatR() * L.length)], t: 2.4 }; }
+let callT = 0, bellSwing = 0;
+function callout(t, c) { if (FAST) return; const e = $('call'); e.textContent = t; e.style.color = c; e.classList.remove('hide'); callT = 1.6; }
+function drainEvents() {
+  for (const e of G.ev) {
+    const me = e.i === 0;
+    if (e.k === 'go') { callout('Climb!', '#dffaff'); blip(523, .25); if (G.c[1]) say(1, 'go'); }
+    if (e.k === 'grab') { if (me) { blip(300 + G.c[0].best * 120, .07, 'triangle', .08); if (G.how === 0) howDone(0); } }
+    if (e.k === 'miss' && me) { blip(160, .08, 'square', .04); callout('Nothing to grab there', '#ffd2a0'); }
+    if (e.k === 'ring') { bellSwing = 1; ding(); if (me) callout('You rang the bell!', '#ffe08a'); else say(e.i, 'top'); }
+    if (e.k === 'fall') { if (me) { callout('Grip gone: the belay lowers you', '#ffd2a0'); blip(330, .6, 'sine', .08, 160); } else say(e.i, 'fall'); }
+    if (e.k === 'over') showResult();
+  }
+  G.ev.length = 0;
+  for (let i = 1; i < G.c.length; i++) if (G.c[i].resting && !G.c[i].saidRest && !FAST) { G.c[i].saidRest = 1; if (chatR() < .5) say(i, 'rest'); }
+}
+const TOUCH = matchMedia('(pointer: coarse)').matches;
+const HOW_TXT = [
+  TOUCH ? 'Put your thumb down: your free hand follows it, just above your thumb. Lift it over a glowing hold to grab.' : 'Hold the mouse button: your free hand follows the pointer. Let go over a glowing hold to grab.',
+  'You can only reach inside the ring. Your feet follow by themselves.',
+  'Small holds drain your grip. Hang still on a big one to get it back. Touch the top hold to ring the bell!',
+];
+let howT = 0;
+function howShow() {
+  const e = $('how');
+  if (!G || G.how < 0 || G.how > 2) { e.classList.add('hide'); return; }
+  e.classList.remove('hide'); e.querySelector('.n').textContent = 'How to play · ' + (G.how + 1) + ' of 3'; e.querySelector('.x').textContent = HOW_TXT[G.how];
+  $('howNext').textContent = G.how === 2 ? 'Done' : 'Next';
+}
+function howDone(k) { if (!G || G.how !== k) return; G.how = k === 2 ? -1 : k + 1; howT = 0; if (G.how === -1) try { localStorage.setItem('wl.how', '1'); } catch (e) {} howShow(); }
+
+// =====================================================================
+// 7. CAMERA: the menu overview, and the climb view behind and a little below you, looking up the wall
+// =====================================================================
+const camFrom = { pos: new THREE.Vector3(), target: new THREE.Vector3(), fov: 50 }, camCur = { pos: new THREE.Vector3(), target: new THREE.Vector3(), fov: 50 };
+const view = { pos: new THREE.Vector3(), target: new THREE.Vector3(), fov: 60, init: false };
+let camMode = 'menu', camT = 1;
+function overview(t) { const a = (RM ? 0 : Math.sin(t * .1) * .25); return { pos: new THREE.Vector3(5.6, 2.2, 4.3 + a * 3), target: new THREE.Vector3(.5, 1.9, 4.3), fov: 55 }; }
+function climbView(dtR, snap) {
+  // it follows where you're settled (a reaching hand counts at the hold it left) and stays centred on your route, so the
+  // wall doesn't slide under a still thumb while you reach
+  const c = G.c[0], port = innerWidth < innerHeight, hz = rz(c.r) + (G.c[1] ? (rz(G.c[1].r) - rz(c.r)) * (port ? .45 : .3) : 0);   // a friend's route drawn into view
+  const hy = c.phase === 'climb' ? Math.max(HIPS_MIN, c.hands.reduce((s, h, k) => s + (k === c.free ? HOLDS[c.prev].y : h.y), 0) / 2 - .62) : bodyY(c);
+  const want = { px: WALL.face + (port ? 4.4 : 3.1), py: Math.max(.9, hy + .1), pz: hz, ty: Math.min(TOP - .6, hy + (port ? 1.0 : .75)) };
+  if (snap || !view.init) { view.pos.set(want.px, want.py, want.pz); view.target.set(WALL.face, want.ty, want.pz); view.init = true; }
+  else { const k = Math.min(1, dtR * 3.5); view.pos.lerp(V.set(want.px, want.py, want.pz), k); view.target.lerp(V.set(WALL.face, want.ty, want.pz), k); }
+  view.fov = port ? 56 : 50;
+}
+function setCam(mode) { camFrom.pos.copy(camCur.pos); camFrom.target.copy(camCur.target); camFrom.fov = camCur.fov; camMode = mode; camT = RM ? 1 : 0; }
+// where the hips are: hanging below the hands, standing on the mats at the start, lowered by the belay after
+function bodyY(c) { return c.phase === 'lower' || c.done ? c.ly : hipsY(c); }
+
+// =====================================================================
+// 8. FLOW: menu, start, result, bests in words, the bell board
+// =====================================================================
+const $ = id => document.getElementById(id);
+let G = null, RM = matchMedia('(prefers-reduced-motion: reduce)').matches, lastOpts = null, figs = [], route = 3;
+function store(k, d) { try { return JSON.parse(localStorage.getItem(k) || d); } catch (e) { return JSON.parse(d); } }
+function put(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+function buildMenu() {
+  const box = $('routes');
+  if (!box.children.length) {
+    [3, 2, 1, 0].forEach(r => { const b = document.createElement('button'); b.className = 'route'; b.dataset.r = r; b.style.borderColor = ROUTE_C[r];
+      b.innerHTML = `<b style="color:${ROUTE_C[r]}">${ROUTE_N[r][0].toUpperCase() + ROUTE_N[r].slice(1)}</b><small>${ROUTE_L[r]}</small>`; b.onclick = () => { route = r; buildMenu(); }; box.appendChild(b); });
+    $('friend').innerHTML = Object.entries(CREW).map(([k, c]) => `<option value="${k}">${c.full}</option>`).join('');
+  }
+  for (const b of box.children) { b.classList.toggle('on', +b.dataset.r === route); const best = store('wl.best', '{}')[b.dataset.r]; b.querySelector('small').textContent = ROUTE_L[b.dataset.r] + (best ? ' · your best: ' + best : ''); }
+  let how = true; try { how = !localStorage.getItem('wl.how'); } catch (e) {}
+  $('howOn').checked = how;
+  const bb = store('wl.board', '{}'), names = Object.keys(bb);
+  $('board').innerHTML = (names.length ? names.map(r => `<span style="color:${ROUTE_C[r]}">●</span> ${ROUTE_N[r]}: ${bb[r].join(', ')}`).join('<br>') : 'Nobody yet. Top a route to put your name up.') + '<br><small>(Tomas keeps it on Wall night, Tuesdays.)</small>';
+}
+function startGo(o) {
+  if (!AC) try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {}
+  if (document.activeElement && document.activeElement.blur) document.activeElement.blur();   // so Space plays, not presses the menu's button again
+  RM = $('rm').checked;
+  const m = o.mode || 'alone';
+  const opts = Object.assign({ seed: +$('seed').value || 1, route, how: $('howOn').checked, race: m === 'race', friend: m === 'alone' ? null : $('friend').value }, o);
+  lastOpts = opts;
+  for (const f of figs) freeClimber(f);
+  G = wlNew(opts); G.how = opts.how ? 0 : -1; G.mode = m; howT = 0;
+  figs = G.c.map(c => makeClimber(who(c.k)));
+  SAY.length = 0;
+  for (const id of ['menu', 'result']) $(id).classList.add('hide');
+  for (const id of ['hud', 'leave', 'grip']) $(id).classList.remove('hide');
+  INPUT.down = 0; INPUT.thumb = null; view.init = false; bellSwing = 0;
+  tags.forEach((t, i) => { t.textContent = G.c[i] ? who(G.c[i].k).name : ''; t.classList.add('hide'); });
+  climbView(0, true); setCam('game'); howShow(); acc = 0;
+  if (G.race) callout('Ready…', '#dffaff');
+  return G;
+}
+function statusText() {
+  if (!G) return '';
+  const c = G.c[0], rn = ROUTE_N[c.r][0].toUpperCase() + ROUTE_N[c.r].slice(1);
+  if (G.race) { const o = G.c[1]; return 'Race v ' + who(o.k).name + ' · ' + (c.best >= o.best ? 'you\'re higher' : who(o.k).name + '\'s higher'); }
+  return rn + ' route' + (G.c[1] ? ' · ' + who(G.c[1].k).name + ' beside you' : '');
+}
+function showResult() {
+  const g = G, c = g.c[0], rn = ROUTE_N[c.r], lines = [];
+  const words = heightWords(c), best = store('wl.best', '{}'), bf = store('wl.bestf', '{}'), f = c.rang ? 2 : frac(c);
+  let note;
+  if (bf[c.r] === undefined) note = 'Your first go on ' + rn + '.';
+  else if (f > bf[c.r] + 1e-6) note = c.rang ? 'Your first time to the bell on ' + rn + '!' : 'Your best on ' + rn + ' yet.';
+  else note = c.rang ? 'The bell again.' : 'Your best on ' + rn + ' is ' + best[c.r] + '.';
+  if (bf[c.r] === undefined || f > bf[c.r]) { bf[c.r] = f; best[c.r] = words; put('wl.bestf', bf); put('wl.best', best); }
+  let t = c.rang ? 'You rang the bell!' : 'You got ' + words + '.';
+  if (g.race) { const w = wlWinner(g), o = g.c[1], on = who(o.k).name; t = w === 0 ? (c.rang ? 'You rang the bell first!' : 'You got higher than ' + on + '!') : (o.rang ? on + ' rang the bell first.' : on + ' got higher.'); lines.push('You got ' + words + '; ' + on + ' got ' + heightWords(o) + ' on ' + ROUTE_N[o.r] + '.'); }
+  else if (g.c[1]) { const o = g.c[1]; lines.push(who(o.k).name + ' climbed ' + ROUTE_N[o.r] + ' beside you and got ' + heightWords(o) + '.'); if (!g.race) lines.unshift('On the ' + rn + ' route.'); }
+  else lines.push('On the ' + rn + ' route.');
+  lines.push(note);
+  if (c.rang) { const bb = store('wl.board', '{}'); bb[c.r] = bb[c.r] || []; if (!bb[c.r].includes('You')) { bb[c.r].push('You'); put('wl.board', bb); lines.push('Your name goes up on the bell board.'); } }
+  if (c.rests) lines.push(c.rests === 1 ? 'You rested once on a big hold.' : 'You rested ' + c.rests + ' times on big holds.');
+  $('resT').textContent = t; $('resS').innerHTML = lines.map(l => '<p>' + l + '</p>').join('');
+  $('result').classList.remove('hide'); $('how').classList.add('hide'); $('leave').classList.add('hide'); $('grip').classList.add('hide');
+  $('status').textContent = statusText();
+}
+function leave() {
+  for (const f of figs) freeClimber(f); figs = []; G = null;
+  for (const id of ['hud', 'leave', 'how', 'result', 'call', 'grip']) $(id).classList.add('hide');
+  reachRing.visible = grabMark.visible = false;
+  $('menu').classList.remove('hide'); buildMenu(); setCam('menu'); SAY.length = 0;
+}
+$('leave').onclick = leave; $('done').onclick = leave;
+$('again').onclick = () => { const o = Object.assign({}, lastOpts); o.how = false; o.seed = (o.seed || 1) + 1; $('seed').value = o.seed; startGo(o); };
+for (const b of document.querySelectorAll('.mode')) b.onclick = () => startGo({ mode: b.dataset.m });
+$('howNext').onclick = e => { e.stopPropagation(); if (G) howDone(G.how); };
+$('howSkip').onclick = e => { e.stopPropagation(); if (G) { G.how = -1; try { localStorage.setItem('wl.how', '1'); } catch (er) {} howShow(); } };
+for (const id of ['howNext', 'howSkip']) $(id).addEventListener('pointerdown', e => e.stopPropagation());
+$('rm').onchange = () => { RM = $('rm').checked; };
+if (Q.get('seed')) $('seed').value = Q.get('seed');
+$('rm').checked = RM;
+buildMenu();
+
+// =====================================================================
+// 9. INPUT: thumb down frees the lower hand; it follows a point just above the thumb (on the wall); lift to grab.
+// Mouse: hold the button. Keys: arrows move the free hand, Space takes it off and lets go.
+// =====================================================================
+const INPUT = { down: 0, y: 0, z: 0, thumb: null, keys: {} };
+const cv = renderer.domElement, ray = new THREE.Raycaster(), NDC = new THREE.Vector2();
+let drag = null;
+const LIFT_PX = () => TOUCH ? Math.min(90, innerHeight * .1) : 0;
+function wallPoint(cx, cy) {                                // the screen point on the wall's face plane (x = HOLD_X)
+  NDC.set(cx / innerWidth * 2 - 1, -(cy / innerHeight) * 2 + 1); ray.setFromCamera(NDC, camera);
+  const o = ray.ray.origin, d = ray.ray.direction; if (Math.abs(d.x) < 1e-5) return null;
+  const t = (HOLD_X - o.x) / d.x; if (t < 0) return null; return [o.y + d.y * t, o.z + d.z * t];
+}
+function aimAt(cx, cy) { const w = wallPoint(cx, cy - LIFT_PX()); if (w) { INPUT.y = w[0]; INPUT.z = w[1]; } }
+cv.addEventListener('pointerdown', e => {
+  if (!G || G.phase !== 'go' || drag) return;
+  drag = { id: e.pointerId }; INPUT.thumb = [e.clientX, e.clientY]; aimAt(e.clientX, e.clientY); INPUT.down = 1;
+  try { cv.setPointerCapture(e.pointerId); } catch (er) {}
+});
+cv.addEventListener('pointermove', e => { if (drag && drag.id === e.pointerId) { INPUT.thumb = [e.clientX, e.clientY]; aimAt(e.clientX, e.clientY); } });
+const lift = e => { if (!drag || drag.id !== e.pointerId) return; drag = null; INPUT.down = 0; };
+cv.addEventListener('pointerup', lift); cv.addEventListener('pointercancel', lift);
+const KEYS = { ArrowLeft: 'l', ArrowRight: 'r', ArrowUp: 'u', ArrowDown: 'd', a: 'l', d: 'r', w: 'u', s: 'd' };
+addEventListener('keydown', e => {
+  if (KEYS[e.key]) { INPUT.keys[KEYS[e.key]] = 1; e.preventDefault(); }
+  if (e.key === ' ' && !e.repeat && G) { e.preventDefault(); if (!INPUT.down) { const c = G.c[0], f = c.hands[0].y < c.hands[1].y ? 0 : 1, a = c.hands[1 - f]; INPUT.y = a.y + .2; INPUT.z = a.z; INPUT.down = 1; INPUT.kb = 1; } else { INPUT.down = 0; INPUT.kb = 0; } }
+  if (e.key === 'Escape' && G) leave();
+});
+addEventListener('keyup', e => { if (KEYS[e.key]) INPUT.keys[KEYS[e.key]] = 0; });
+addEventListener('blur', () => { INPUT.keys = {}; });
+addEventListener('resize', () => { renderer.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); });
+function keysNow() {                                        // arrows move the free hand's aim (screen right is -z here)
+  const k = INPUT.keys, dy = (k.u ? 1 : 0) - (k.d ? 1 : 0), dz = (k.l ? 1 : 0) - (k.r ? 1 : 0);
+  if (INPUT.down && (dy || dz)) { INPUT.y += dy * 1.2 * DT; INPUT.z += dz * 1.2 * DT; }
+}
+
+// =====================================================================
+// 10. DRAWING EACH FRAME
+// =====================================================================
+const tags = [0, 1].map(() => { const e = document.createElement('div'); e.className = 'tag hide'; document.body.appendChild(e); return e; });
+const says = [0, 1].map(() => { const e = document.createElement('div'); e.className = 'say hide'; document.body.appendChild(e); return e; });
+const V = new THREE.Vector3(), A_ = new THREE.Vector3(), B_ = new THREE.Vector3(), T_ = new THREE.Vector3(), POLE = new THREE.Vector3();
+function toScreen(x, y, z, el) {
+  V.set(x, y, z).project(camera);
+  const top = (1 - V.y) / 2 * innerHeight;
+  if (V.z > 1 || Math.abs(V.x) > 1.05 || top < 120 || top > innerHeight) { el.classList.add('hide'); return; }
+  el.style.left = ((V.x + 1) / 2 * innerWidth) + 'px'; el.style.top = top + 'px'; el.classList.remove('hide');
+}
+function drawClimber(c, f, dtR, tR, i) {
+  const lowering = c.phase === 'lower' || c.done, hy = bodyY(c), hz = (c.hands[0].z + c.hands[1].z) / 2;
+  const hx = lowering ? WALL.face + .55 : WALL.face + .36;
+  f.root.position.set(hx, hy, hz);
+  f.root.rotation.set(0, 0, lowering ? -.25 : -.12 + (c.free >= 0 ? -.05 : 0));
+  f.torso.rotation.set(0, 0, 0);
+  const sh = (s) => A_.set(hx - .04, hy + .48, hz + s * .17);
+  // arms: to the holds (or the reaching hand); when lowering, hands on the rope
+  for (let k = 0; k < 2; k++) {
+    const s = k === 0 ? -1 : 1, hd_ = c.hands[k];   // hand 0 is the right hand (toward -z, the screen's right)
+    sh(s);
+    if (lowering) T_.set(hx + .1, hy + .62, hz + s * .06); else T_.set(HOLD_X + .02, hd_.y, hd_.z);
+    POLE.set(.6, -.5, s * .5);
+    const end = ik(A_, T_, .3, .3, POLE, J); B_.copy(end);
+    seg(f.arms[k][0], A_, J, f.arms[k][0].userData.r); seg(f.arms[k][1], J, B_, f.arms[k][1].userData.r);
+  }
+  // feet: they follow by themselves, stepping up onto the wall below the hips (or standing on the mats)
+  for (let k = 0; k < 2; k++) {
+    const s = k === 0 ? -1 : 1, onMat = hy < 1.0 && !lowering;
+    const want = lowering ? T_.set(WALL.face + .05, hy - .7, hz + s * .16) : onMat ? T_.set(WALL.face + .35, .26, hz + s * .14) : T_.set(WALL.face + .06, hy - .58 + (k === (c.last ^ 1) ? .1 : -.05), hz + s * .17);
+    const ft = f.feet[k];
+    if (!f.init || RM) ft.copy(want); else if (ft.distanceTo(want) > .18 || lowering) ft.lerp(want, Math.min(1, dtR * 7));   // a step when it's lagged far enough
+    A_.set(hx, hy - .02, hz + s * .1); POLE.set(1, .3, s * .4);
+    const end = ik(A_, ft, .43, .43, POLE, J); B_.copy(end);
+    seg(f.legs[k][0], A_, J, f.legs[k][0].userData.r); seg(f.legs[k][1], J, B_, f.legs[k][1].userData.r);
+  }
+  f.init = true;
+  // the auto-belay over the route, its rope down to the harness
+  f.belay.position.set(WALL.x + .3, TOP - .3, rz(c.r)); A_.set(WALL.x + .3, TOP - .42, rz(c.r)); B_.set(hx + .02, hy + .02, hz);
+  seg(f.rope, A_, B_, .012);
+  if (i > 0) {
+    toScreen(hx, hy + .95, hz, tags[i]);
+    if (SAY[i] && (SAY[i].t -= dtR) > 0) { says[i].textContent = SAY[i].text; toScreen(hx, hy + 1.3, hz, says[i]); } else { SAY[i] = null; says[i].classList.add('hide'); }
+  }
+}
+const GC = new THREE.Color();
+function drawHolds(tR) {
+  const c = G && G.c[0], a = c && c.free >= 0 ? c.hands[1 - c.free] : null;
+  for (let k = 0; k < HOLDS.length; k++) {
+    const h = HOLDS[k]; let b = 0;
+    if (c && h.r === c.r) { b = .16; if (a && Math.hypot(h.y - a.y, h.z - a.z) <= REACH && h.y <= a.y + UPREACH + .02) b = .6 + (RM ? 0 : .12 * Math.sin(tR * 5 + k)); if (h.top) b = Math.max(b, .5); }
+    GC.copy(col(h.top ? '#ffe08a' : ROUTE_C[h.r])).multiplyScalar(b); glowMesh.setColorAt(k, GC);
+  }
+  glowMesh.instanceColor.needsUpdate = true;
+  reachRing.visible = !!a && c.phase === 'climb';
+  if (a) { reachRing.position.set(WALL.face + .04, a.y, a.z); reachRing.scale.setScalar(REACH); }
+  grabMark.visible = false;
+  if (c && c.free >= 0 && c.back < 0) { const h = c.hands[c.free], k = grabAt(c, h.y, h.z); if (k >= 0) { grabMark.visible = true; grabMark.position.set(WALL.face + .05, HOLDS[k].y, HOLDS[k].z); } }
+}
+function drawGrip() {
+  const c = G.c[0], e = $('grip'), th = INPUT.thumb;
+  const x = th ? Math.max(95, Math.min(innerWidth - 95, th[0])) : innerWidth / 2, y = th ? Math.min(innerHeight - 40, th[1] + 34) : innerHeight - 70;
+  e.style.left = x + 'px'; e.style.top = y + 'px';
+  const f = e.querySelector('.fill'); f.style.width = (c.grip * 100).toFixed(1) + '%';
+  f.style.background = c.grip > .5 ? '#5ee06a' : c.grip > .22 ? '#ffd23f' : '#ff7a5c';
+  e.classList.toggle('low', c.grip < .22 && c.phase === 'climb');
+  const s0 = HOLDS[c.hands[0].hold], s1 = HOLDS[c.hands[1].hold];
+  e.querySelector('.lab').textContent = c.phase !== 'climb' ? 'Grip' : c.free >= 0 ? 'Grip · one hand' : (s0 && s1 && (s0.size === 0 || s1.size === 0) && c.still > STILL && c.grip < 1) ? 'Grip · resting on a big hold' : 'Grip';
+}
+let acc = 0, last = performance.now(), tR = 0;
+function frame(now) {
+  requestAnimationFrame(frame);
+  const dtR = Math.min(.1, (now - last) / 1000); last = now; tR += dtR;
+  if (G && !G.paused && G.phase !== 'over') {
+    const sp = (G.c[0].done ? 6 : 1) * WL.rate;           // after you're down, a friend's climb runs on quickly (the same steps)
+    acc += dtR * sp; let n = 0;
+    while (acc >= DT && n < 6 * sp) { if (!G.c[0].ai) { keysNow(); G.inp.down = INPUT.down; G.inp.y = INPUT.y; G.inp.z = INPUT.z; } wlStep(G); acc -= DT; n++; }
+    if (n === 6 * sp) acc = 0;
+  }
+  if (G) drainEvents();
+  camT = Math.min(1, camT + dtR / .8);
+  let want;
+  if (camMode === 'game' && G) { climbView(dtR); want = view; } else want = overview(tR);
+  const e = camT * camT * (3 - 2 * camT);
+  camCur.pos.lerpVectors(camFrom.pos, want.pos, e); camCur.target.lerpVectors(camFrom.target, want.target, e); camCur.fov = camFrom.fov + (want.fov - camFrom.fov) * e;
+  camera.position.copy(camCur.pos); camera.lookAt(camCur.target);
+  if (camera.fov !== camCur.fov) { camera.fov = camCur.fov; camera.updateProjectionMatrix(); }
+  bellSwing = Math.max(0, bellSwing - dtR * .5); bell.rotation.x = RM ? 0 : Math.sin(tR * 14) * .35 * bellSwing;
+  drawHolds(tR);
+  if (callT > 0 && (callT -= dtR) <= 0) $('call').classList.add('hide');
+  if (G && figs.length) { G.c.forEach((c, i) => drawClimber(c, figs[i], dtR, tR, i)); if (G.phase !== 'over') { drawGrip(); $('status').textContent = statusText(); } }
+  if (G && G.how === 1 && (howT += dtR) > 5) howDone(1);
+  if (!G || G.phase === 'over') { tags.forEach(t => t.classList.add('hide')); says.forEach(t => t.classList.add('hide')); }
+  renderer.render(scene, camera);
+  if (DEBUG) $('dbg').textContent = `calls ${renderer.info.render.calls} · tris ${renderer.info.render.triangles} · ${G ? G.phase + ' step ' + G.step + ' grip ' + G.c[0].grip.toFixed(2) + ' best ' + G.c[0].best.toFixed(2) : 'menu'}`;
+}
+{ const o = overview(0); camCur.pos.copy(o.pos); camCur.target.copy(o.target); camCur.fov = o.fov; camFrom.pos.copy(o.pos); camFrom.target.copy(o.target); camFrom.fov = o.fov; }
+requestAnimationFrame(frame);
+document.addEventListener('visibilitychange', () => { last = performance.now(); acc = 0; });
+
+// =====================================================================
+// 11. TEST HOOKS (Playwright): start goes, run steps fast, read state, paper, clones at other frame rates
+// =====================================================================
+window.WL = {
+  start: o => { startGo(o || {}); return WL.state(); },
+  steps: (n, inp) => { if (!G) return null; FAST = true; for (let i = 0; i < n && G.phase !== 'over'; i++) { if (inp) Object.assign(G.inp, inp); wlStep(G); } drainEvents(); FAST = false; return WL.state(); },
+  paper: o => wlPaper(o),
+  fps: (o, fps, fromLive) => {
+    const g = fromLive && G ? wlClone(G) : wlNew(Object.assign({ seed: 1, autoYou: true }, o, { paper: true }));
+    g.evOn = false; g.ev = [];
+    let a = 0, frames = 0; const dt = 1 / fps;
+    while (g.phase !== 'over' && frames < fps * 900) { a += dt; frames++; while (a >= DT - 1e-12) { wlStep(g); a -= DT; } }
+    return wlSummary(g);
+  },
+  summary: () => G && wlSummary(G),
+  state: () => G && { phase: G.phase, step: G.step, how: G.how, race: G.race,
+    c: G.c.map(c => ({ k: c.k, r: c.r, phase: c.phase, grip: c.grip, free: c.free, back: c.back, hands: c.hands.map(h => ({ ...h })), best: c.best, frac: frac(c), moves: c.moves, misses: c.misses, rests: c.rests, rang: c.rang, fell: c.fell, done: c.done, still: c.still })),
+    inp: { down: INPUT.down, y: INPUT.y, z: INPUT.z } },
+  holds: r => ROUTE_HOLDS[r].map(i => ({ ...HOLDS[i] })),
+  // where a wall point is on screen (for a test thumb: the thumb goes this far below it)
+  screen: (y, z) => { V.set(HOLD_X, y, z).project(camera); return [(V.x + 1) / 2 * innerWidth, (1 - V.y) / 2 * innerHeight + LIFT_PX()]; },
+  set: o => { if (G) Object.assign(G.c[0], o); },
+  hand: (k, i) => { if (G) { const h = G.c[0].hands[k]; h.hold = i; h.y = HOLDS[i].y; h.z = HOLDS[i].z; } },
+  rate: 1,
+  advice: () => { if (!G) return null; const g = wlClone(G), c = g.c[0]; c.ai = 'auto'; const o = aiInput(g, c); return { down: o.down, y: o.y, z: o.z, plan: c.plan }; },
+  calls: () => renderer.info.render.calls,
+  pause: v => { if (G) G.paused = v; },
+  leave,
+};
+</script>
+</body>
+</html>
