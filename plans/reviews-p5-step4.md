@@ -20,6 +20,13 @@ Lines skimmed. In a fresh archive content_gen bakes 9342 lines; lines_check PASS
 
 ## Step 4
 
+### E6 claude/mech-rounds 910131e1 (0.45.15, hauling stage 3: the Thursday stocktake), R5: PASS
+Diff 2edb69c8..910131e1, read by hand against step4-stages.
+- Thursdays from Day 18, officers trained in hauling: a side job ('stocktake') posted at 13:30, held for you (slot 31) to 16:00, then withdrawn if untaken; never the crew's. One count stop per aisle at E3's 5-stock-1..4 (built by formula in 9d179e9). The week's short aisle and part from schedU(week, 0..1, 1026) (the only key, in range), kept on the job; finding it moves up to 2 from SHIP.stores to SHIP.hold (section 17 posts the restock run) and pays +1 through worksSideXp; the job's own xp is 0, so no second pay. Thursday's misplaced part on a counted aisle goes back (misplacedFix). Saved: side.stock { week, found }.
+- One owner: STOCK_* / stock* names nowhere else; jobKindAdd returns true, so the side kind and the withdraw tick register; STOCK_AISLES reads FETCH_AT and SHELF_NAME, both defined earlier (no TDZ). Every stock.* key exists on writer-p5.
+- Notes: the find takes the parts off the shelf (the shortage becomes real only once found; harmless). Still open on E6: 0.45.13's load-stop order.
+- Checks: on a merge with E3's places (c08c93b8), running.
+
 ### E6 claude/mech-rounds 2edb69c8 (0.45.14, R5's two fixes on E1's 0.45.11/0.45.12), R5: PASS
 E6 took E1's seat. Diff 013f53ec..2edb69c8.
 - logbookTick: only a worn flagged machine is serviced, never a faulty one, never a job held for you (heldForYou, section 17, defined earlier in the file).
