@@ -514,6 +514,80 @@ def part_m9(g):
     check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'm9: differs the second time')
 PARTS['m9'] = part_m9
 
+# ---- M13 leak hunting (24o, seat E2): stand-ins first, where a seat's piece isn't in this build (24 core's worksSide, E3's
+# leak joints: printed). The week's day (a workday of yours, Day 12 on, not the incident's day) the same twice; the first
+# leak at 08:00 once the row is open, the board saying only the deck; the puddle first (the damp and the joint refused
+# before it), then the joint tightened: found by you, the puddle gone, trained; a worn joint posts its replacement, held
+# for you; not taken, the crew fix it the next day; after 3 leaks the galleries too; junk in the save cleaned; the look
+# (puddle and damp) on the deck only while a leak is open; the same twice
+M13_STAND = r"""(() => { const out = [];
+  if (typeof worksSide !== 'function') { window.worksSide = () => SHIP.works ? (SHIP.works.side = SHIP.works.side || {}) : null; out.push('worksSide'); }
+  if (![3, 4, 5].some(n => (DECKS[n].leakJoints || []).length)) { out.push('leakJoints');
+    for (const n of [3, 4, 5]) { const v = placeById(n + '-valve-1'), w = placeById(n + '-wet-1'), w2 = placeById(n + '-wet-2');
+      DECKS[n].leakJoints = [{ place: n + '-valve-1', room: v.room, wall: 'n', joint: [v.at[0] + .5, 1.6, v.at[1]], damp: [v.at[0], v.at[1], 'n'], puddle: w.at.slice(), puddlePlace: n + '-wet-1' },
+        { place: n + '-valve-3', room: v.room, wall: 'n', joint: [v.at[0] + 1.5, 1.6, v.at[1]], damp: [v.at[0] + 1, v.at[1], 'n'], puddle: w2.at.slice(), puddlePlace: n + '-wet-2', ...(n === 5 ? { gallery: true, works: true } : {}) }]; } }
+  return out; })()"""
+M13 = r"""(() => { const out = {}, W0 = JSON.stringify(SHIP.works);
+ const reset = t => { machinesNew(); SHIP.jobs = []; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t); machinesNow(); SHIP.works = null; const W = worksInit(t); W.tier = 2; W.rank = 'officer'; W.tr.t2 = 10; (W.op[12] = W.op[12] || []).push('m13'); W.inc = { plan: {}, open: null }; worksSide().leaks = []; return W; };
+ const tick = (a, b, skip) => { for (let t = a; t <= b; t += 10) { setShipNow(t); machinesNow(); for (const f of WORK_TICKS) f(t, !!skip); } };
+ let W = reset(11 * 1440 + 300);
+ out.days = [1, 2, 3, 4, 5].map(w => { const d = leakDay(w); return d === null ? null : [d, weekday(d), playerShiftOn(d), (incPlan(w)[1] || 0) !== d]; });
+ tick(11 * 1440 + 360, 11 * 1440 + 470); out.before8 = SHIP.jobs.filter(x => x.kind === 'leak').length;
+ tick(11 * 1440 + 480, 11 * 1440 + 490);
+ let j = SHIP.jobs.find(x => x.kind === 'leak'); out.posted = j ? [j.title, j.deck, Math.round(j.posted % 1440)] : null; if (!j) return out;
+ const ob = openJobs().find(x => x.id === j.id); out.board = ob ? [ob.place, ob.room, ob.deck] : null;
+ out.claimed = claimJob(j.id); const st = jobStops(j); out.stops = st.map(s => s.step + ':' + s.how + '@' + (s.places[0] || '-'));
+ out.early = jobStepDone(j.id, 2, { value: 3 }).ok;
+ out.puddle = jobStepDone(j.id, 0, {}).ok; out.after = jobStops(j).map(s => s.places[0] || '-');
+ out.damp = jobStepDone(j.id, 1, {}).ok; out.joint = jobStepDone(j.id, 2, j.worn ? {} : { value: 3 }).ok;
+ out.turnin = turnInJob(j.id); out.entry = JSON.parse(JSON.stringify(worksSide().leaks[0])); out.open = leakOpen(); out.trained = W.tr.m13; out.uses = W.use.m13; out.wornFix = j.fix || null;
+ // a worn joint: its replacement posted, held for you
+ W = reset(15 * 1440 + 480); leakPost(15 * 1440 + 480, 2); j = SHIP.jobs.find(x => x.kind === 'leak'); j.worn = 1; claimJob(j.id);
+ jobStops(j).forEach((s, k) => jobStepDone(j.id, k, {})); turnInJob(j.id);
+ const F = SHIP.jobs.find(x => x.id === j.fix); out.worn = F ? [F.chore, F.target === j.joint, F.parts.join(), F.foundBy, forYou(F) && leaveEnd(F) > shipNow()] : null;
+ // not taken: held to 10:00 the next workday, then the crew's (the long way)
+ W = reset(15 * 1440 + 480); leakPost(15 * 1440 + 480, 2); j = SHIP.jobs.find(x => x.kind === 'leak'); out.held = leaveEnd(j) - 15 * 1440;
+ tick(15 * 1440 + 490, 16 * 1440 + 900); out.crew = [j.status, j.doneBy && j.doneBy !== 'you', (worksSide().leaks[0] || {}).found !== null, leakOpen()];
+ // the galleries after 3 leaks
+ W = reset(15 * 1440 + 300); const pick = () => [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map(w => leakPick(w)).filter(Boolean).map(P => !!P.J.gallery);
+ out.gal0 = pick().filter(Boolean).length; worksSide().leaks = [1, 2, 3].map(k => ({ id: 'leak:x' + k, joint: '4-valve-1', room: 'x', deck: 4, day: 12, worn: 0, found: 'you' })); out.gal3 = pick().filter(Boolean).length;
+ W.use.m13 = 3; out.stage = worksStage('m13');
+ // the save: junk dropped
+ worksSide().leaks = [{ id: 'leak:a', joint: '3-valve-1', deck: 3, day: 15, worn: 1, found: null }, { id: 7 }, null, { id: 'b', joint: 'x', deck: 9, day: 1 }, 'junk'];
+ delete worksSide().leaksOk; Object.defineProperty(worksSide(), 'leaksOk', { value: false, configurable: true });
+ out.save = JSON.stringify(leakList()); worksSide().leaks = 'junk'; out.saveJunk = JSON.stringify(leakList());
+ SHIP.works = JSON.parse(W0); return out; })()"""
+M13_FX = r"""(() => { if (typeof deckDef === 'undefined' || !deckDef || ![3, 4, 5].includes(deckDef.num)) return null;
+ const W0 = JSON.stringify(SHIP.works), n = deckDef.num, J = DECKS[n].leakJoints[0]; if (!SHIP.works) worksInit(shipNow());
+ const S = worksSide(); S.leaks = [{ id: 'leak:fx', joint: J.place, room: J.room, deck: n, day: 12, worn: 0, found: null }];
+ leakFx(); const on = [!!LEAK_FX.wet, !!LEAK_FX.damp, !!(LEAK_FX.wet && LEAK_FX.wet.parent), LEAK_FX.wet ? LEAK_FX.wet.count : 0];
+ S.leaks[0].found = 'you'; leakFx(); const off = [!!LEAK_FX.wet, !!LEAK_FX.damp];
+ SHIP.works = JSON.parse(W0); leakFx(); return { deck: n, on, off }; })()"""
+def part_m13(g):
+    st = g.ev(M13_STAND)
+    if st: print('  m13 stand-ins:', st)
+    a, b = g.ev(M13), g.ev(M13)
+    print('  m13 days:', a['days'], 'posted', a['posted'], 'board', a['board'], 'stops', a['stops'], 'then', a['after'])
+    for e in a['days']:
+        if e: check(e[0] >= 12 and e[1] <= 4 and e[2] and e[3], f'm13: the week\'s day {e}')
+    check(a['before8'] == 0 and a['posted'] and a['posted'][2] == 480 and 'Deck' in a['posted'][0], 'm13: the first leak at 08:00, the board says the deck')
+    check(a['board'] and a['board'][0] is None and a['board'][1] is None, f"m13: the board doesn't say where ({a['board']})")
+    check(a['stops'] and a['stops'][0].startswith('puddle:look@') and '@-' not in a['stops'][0] and a['stops'][1].endswith('@-') and a['stops'][2].endswith('@-'), 'm13: the puddle shown, the damp and the joint not yet')
+    check(not a['early'] and a['puddle'] and '-' not in a['after'], 'm13: the joint refused before the puddle; then the trail shows')
+    check(a['damp'] and a['joint'] and a['turnin'] and a['entry']['found'] == 'you' and a['open'] is None, 'm13: found by you, fixed, the puddle gone')
+    check(a['trained'] is not None and a['uses'] == 1, 'm13: trained on the first')
+    print('  m13 worn:', a['worn'], 'held', a['held'], 'crew', a['crew'], 'galleries', a['gal0'], '->', a['gal3'], 'stage', a['stage'])
+    check(a['worn'] and a['worn'][0] == 'joint' and a['worn'][1] and a['worn'][2] == 'seal' and a['worn'][3] == 'you' and a['worn'][4], 'm13: a worn joint posts its replacement, held for you')
+    check(a['held'] == 1440 + 600, f"m13: held till 10:00 the next day ({a['held']})")
+    check(a['crew'][0] == 'done' and a['crew'][1] and a['crew'][2] and a['crew'][3] is None, 'm13: not taken, the crew fix it the next day')
+    check(a['gal0'] == 0 and a['gal3'] > 0 and a['stage'] == 1, 'm13: the galleries only after 3 leaks')
+    check(len(json.loads(a['save'])) == 1 and json.loads(a['saveJunk']) == [], 'm13: junk in the save dropped')
+    check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'm13: differs the second time')
+    fx = g.ev(M13_FX)
+    if fx: check(fx['on'][:3] == [True, True, True] and fx['off'] == [False, False], f'm13: the puddle and the damp only while open ({fx})')
+    else: print('  m13: (the look not checked: not on Decks 3-5)')
+PARTS['m13'] = part_m13
+
 only = set(sys.argv[2:])
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])

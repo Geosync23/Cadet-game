@@ -281,7 +281,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.63.3
+   STARSHIP CADET: CSV Wren                           build 0.51.4
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8694,7 +8694,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.63.3';                           // keep in step with the header's build line
+const GAME_BUILD = '0.51.4';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -41859,6 +41859,156 @@ if (typeof teamJobPost === 'function') WORK_MECH.m8 = {
   watch: 0,
   oneJob: true,                                          // the teacher leads the same job you're in (no teacher's job first)
 };
+
+// ---------------------------------------------------------------------
+// 24o LEAK HUNTING (M13, seat E2 (M2's), 0.51.x; plans/mechanics/m13-leak-hunting.html). A side job from Day 12, an
+// Officer's: about once a week (a workday of yours, posted 08:00) a pipe joint starts to drip and the board says only "A
+// pipe drips somewhere on Deck 4". Find it: a puddle on the floor and a damp patch on the wall show the room; look at the
+// puddle ("coming from above, along the north wall"), then the damp, then the joint: tighten it (a turn), or if it's worn
+// through, a joint from stores (section 17's jointJobPost, held for you). Ladder row m13 (small: its first use is the
+// training; the Works officer on shift has a word at the puddle: "Follow the wet, not the noise. Well, both."). Not taken
+// by the end of your shift: held till 09:00 the next workday, then the crew find it the long way (an hour). Stages: 0 a
+// public room; 1 after 3 leaks also the Deck 5 pipe galleries (works: true places behind their panels); with the pipe kit
+// (24i's, M9) the puddle's look adds the kit's damp reading. The joints are E3's places (DECKS[n].leakJoints, n-leak-k
+// and n-leakp-k, Decks 3-5): on Decks 3-4 the joint itself wears (no machine), on Deck 5 a gallery joint by a worn valve
+// is likelier and likelier worn through. Drawn: the puddle (flat discs 1.2 cm up, one instanced draw call) and the damp
+// patch (discs 1.5 cm off the wall, one more), only while a leak is open on your deck. Saved: SHIP.works.side.leaks =
+// [{ id, joint, room, deck, day, worn, found }] (the last 12; found: 'you', a crew id, or null while open), read back
+// defensively (24 core's worksSide keeps side whole). Hash keys 1013 (which joint, worn through), 1014 (which day). No R().
+const LEAK_FROM = 12, LEAK_POST = 480, LEAK_LAST = 900, LEAK_KEEP = 12;   // from Day 12; posted 08:00 (the first by 15:00)
+const LEAK_CREW = 60, LEAK_GALLERY = 3;                  // the crew's long way (minutes); the galleries after 3 leaks of yours
+const LEAK_BY = ['torres-zeke', 'halloran-emeka', 'calder'];
+const leakSide = () => typeof worksSide === 'function' ? worksSide() : null;
+function leakList() {                                    // side.leaks, cleaned the first time it's read (a save may hold junk)
+  const s = leakSide(); if (!s) return null;
+  if (!Array.isArray(s.leaks) || !s.leaksOk) {
+    s.leaks = (Array.isArray(s.leaks) ? s.leaks : []).filter(e => e && typeof e.id === 'string' && typeof e.joint === 'string' && [3, 4, 5].includes(e.deck) && Number.isInteger(e.day))
+      .slice(-LEAK_KEEP).map(e => ({ id: e.id.slice(0, 80), joint: e.joint.slice(0, 40), room: typeof e.room === 'string' ? e.room.slice(0, 4) : null, deck: e.deck, day: e.day, worn: e.worn ? 1 : 0, found: typeof e.found === 'string' ? e.found.slice(0, 40) : null }));
+    Object.defineProperty(s, 'leaksOk', { value: true, enumerable: false, configurable: true });   // (not saved)
+  }
+  return s.leaks;
+}
+const leakJoints = () => [3, 4, 5].flatMap(n => ((DECKS[n] && DECKS[n].leakJoints) || []).filter(J => J && placeById(J.place)).map(J => ({ ...J, deck: n })));
+const leakJoint = id => leakJoints().find(J => J.place === id) || null;
+const leakFound = () => (leakList() || []).filter(e => e.found === 'you').length;
+const leakOpen = () => (leakList() || []).find(e => !e.found) || null;
+const leakSeed = () => machSeed('leak');
+const LEAK_WALL = { n: 'north', s: 'south', e: 'east', w: 'west' };
+function leakValveWear(J) {                              // a gallery joint by a worn valve (Deck 5's 5-valve-1/-2): 0-1
+  if (!J.gallery) return 0; const p = placeById(J.place); if (!p) return 0;
+  const vs = machineList().filter(m => m.kind === 'valve' && m.deck === J.deck && Math.hypot(m.at[0] - p.at[0], m.at[1] - p.at[1]) <= 6);
+  return vs.reduce((a, m) => Math.max(a, incWear(m.id)), 0);
+}
+// the week's leak day: a workday of yours, Day 12 on, not the week's incident day or a test job's day; null if none
+function leakDay(w) {
+  const W = SHIP.works; if (!W) return null; const P = incState() ? incPlan(w) : null;
+  const days = [0, 1, 2, 3, 4].map(k => w * 7 + 1 + k).filter(d => d >= LEAK_FROM && playerShiftOn(d) && !(P && P.length && P[1] === d) && !(W.test && W.test.day === d));
+  return days.length ? days[Math.floor(schedU(leakSeed(), w, 1014) * days.length) % days.length] : null;
+}
+// which joint drips (week w): public ones first; after 3 leaks the galleries too, by their valves' wear; worn through 1 in 3
+function leakPick(w) {
+  const all = leakJoints(), Js = all.filter(J => !J.gallery || leakFound() >= LEAK_GALLERY); if (!Js.length) return null;
+  const wt = Js.map(J => J.gallery ? 2 + 2 * leakValveWear(J) : 1), sum = wt.reduce((a, b) => a + b, 0);
+  let u = schedU(leakSeed(), w, 1013) * sum, J = Js[0];
+  for (let k = 0; k < Js.length; k++) { if (u < wt[k]) { J = Js[k]; break; } u -= wt[k]; }
+  return { J, worn: schedU(leakSeed(), w * 7 + 2, 1013) < .3 + .4 * leakValveWear(J) ? 1 : 0 };
+}
+function leakPost(t, w = incWeek(worksDay(t))) {
+  const L = leakList(); if (!L || leakOpen()) return null;
+  const P = leakPick(w); if (!P) return null;
+  const { J, worn } = P, p = placeById(J.place), d = worksDay(t);
+  const j = jobMake('leak', { id: 'leak:' + J.place + '@' + Math.floor(t / 60), deck: J.deck, room: null, h: Math.floor(t / 60), joint: J.place, worn, urgency: 1,
+    title: worksText('leak.title', 'A pipe drips somewhere on Deck {deck}', { deck: J.deck }), leave: Math.max(60, (d - 1) * 1440 + DAY_SHIFT[1] - Math.max(t, (d - 1) * 1440 + DAY_SHIFT[0])) + 60 });
+  j.posted = j.found = t;
+  SHIP.jobs.push(j); L.push({ id: j.id, joint: J.place, room: p.room || null, deck: J.deck, day: d, worn, found: null });
+  if (L.length > LEAK_KEEP) L.splice(0, L.length - LEAK_KEEP);
+  simNote('leak', { id: j.id, step: 'drip', deck: J.deck });
+  if (typeof MACH_REV !== 'undefined') MACH_REV++;
+  leakFx(); return j.id;
+}
+// the stops: the puddle (a look), the damp on the wall (a look at the joint), the joint (a turn, or a look when it's worn
+// through). The damp and the joint have no place till you've looked at the puddle (the board says only the deck); the
+// crew know where it is once they've taken it (the long way)
+function leakStops(j) {
+  const J = leakJoint(j.joint); if (!J) return [];
+  const pp = J.puddlePlace && placeById(J.puddlePlace) ? J.puddlePlace : J.place, open = (j.stepsDone || []).includes(0) || (!!j.claimedBy && j.claimedBy !== 'you');
+  const wall = LEAK_WALL[(J.damp && J.damp[2]) || J.wall] || 'near', kit = typeof hasTool === 'function' && hasTool('pipekit') && worksStage('m13') >= 1;
+  return [
+    { deck: J.deck, placeId: pp, mins: 1, tag: 'puddle', how: 'look', opts: { secs: 3, text: worksText('leak.puddle', 'A puddle, and it\'s still dripping. It\'s coming from above, along the {wall} wall.', { wall })
+        + (kit ? ' ' + worksText('leak.kit', 'The pipe kit\'s damp reading climbs that way.') : '') } },
+    { deck: J.deck, placeId: open ? J.place : null, mins: 1, tag: 'damp', how: 'look', opts: { secs: 3, text: worksText('leak.damp', 'Damp on the wall, darkest just under the pipe. There: the joint.') } },
+    j.worn ? { deck: J.deck, placeId: open ? J.place : null, mins: 2, tag: 'joint', how: 'look', opts: { secs: 3, text: worksText('leak.worn', 'Worn right through. Tightening won\'t hold it: it needs a new joint from stores.') } }
+      : { deck: J.deck, placeId: open ? J.place : null, mins: 2, tag: 'joint', how: 'turn', opts: { label: worksText('leak.nut', 'The joint\'s nut'), v: 0, min: 0, max: 3, by: 1,
+        onTurn: v => v >= 3 ? worksText('leak.tight', 'Snug. The drip stops.') : v > 0 ? worksText('leak.turning', 'A quarter turn. Still a bead of water. A bit more.') : null, ok: v => v >= 3, gauge: null } },
+  ];
+}
+function leakStepDone(j, k, res, t) {
+  if (k === 0 && worksStage('m13') < 0) {   // your first: the Works officer on shift has a word
+    const by = ladderTeacher(ladderRow('m13'), worksDay(t)) || LEAK_BY[0];
+    worksTeach('m13', by, 'puddle', ['Follow the wet, not the noise. Well, both.']);
+  }
+  if (k > 0 && !(j.stepsDone || []).includes(0)) return false;   // the puddle first
+  return true;
+}
+// fixed (by you: found by you, the worn joint's replacement posted, held for you; by the crew: the long way). The puddle goes
+function leakDone(j, t, by) {
+  const e = (leakList() || []).find(x => x.id === j.id); if (e) e.found = by || 'crew';
+  if (by === 'you') {
+    j.foundBy = 'you'; worksUse('m13');
+    if (j.worn && typeof jointJobPost === 'function') {
+      const p = placeById(j.joint), F = jointJobPost({ placeId: j.joint, title: worksText('leak.replace', 'Replace a worn joint: {room}', { room: (p && roomName(p.deck, p.room)) || 'corridor' }) }), J = F && SHIP.jobs.find(x => x.id === F);
+      if (J) { J.leave = Math.max(60, (worksDay(t) - 1) * 1440 + DAY_SHIFT[1] - t); J.foundBy = 'you'; j.fix = F; }
+    }
+  }
+  simNote('leak', { id: j.id, step: 'fixed', by: by || null });
+  if (typeof MACH_REV !== 'undefined') MACH_REV++;
+  leakFx();
+}
+if (typeof jobKindAdd === 'function') jobKindAdd('leak', { tier: 2, work: 0, text: 'Leak', stops: leakStops, stepDone: leakStepDone, done: leakDone, veto: true,
+  crew: { can: incWorks, mins: LEAK_CREW } });
+if (typeof WORKS_SIDE_KINDS !== 'undefined' && WORKS_SIDE_KINDS.add) WORKS_SIDE_KINDS.add('leak');   // 24 core: a side job's reputation, capped
+if (!ladderRow('m13')) CAREER_LADDER.push({ id: 'm13', name: 'Leak hunting', size: 'small', day: LEAK_FROM, tier: 2, rank: 'officer', needs: null, by: LEAK_BY, job: 'leak', stages: [{ uses: 0 }, { uses: LEAK_GALLERY }] });
+if (JOB_KINDS.leak) WORK_MECH.m13 = {};
+// the clock: the first leak once the row is open (that day by 15:00, else the next workday's 08:00), then the week's on its
+// day at 08:00 (a week with one already, none). After a skip the crew have it in time
+if (WORK_MECH.m13) WORK_TICKS.push((now, skip) => {
+  const W = SHIP.works, L = W && leakList(); if (!L || !worksOpened(W).has('m13')) return;
+  const d = worksDay(now), m = now - (d - 1) * 1440, w = incWeek(d);
+  if (leakOpen() || m < LEAK_POST || !playerShiftOn(d)) return;
+  if (!L.length) { if (m <= LEAK_LAST || skip) leakPost(now, w); return; }
+  if (L.some(e => incWeek(e.day) === w) || leakDay(w) !== d) return;
+  leakPost(now, w);
+});
+// ---- the look: puddleAt(spots) (the puddle decal, M6's look: flat discs 1.2 cm off the floor, 3 mm apart) and the damp patch on the
+// wall (discs 1.5 cm off its face), each one instanced draw call, made the first time a leak is open on your deck (in
+// deckRoot, so the deck's unload frees them) ----
+const LEAK_FX = { root: null, wet: null, damp: null, at: null };
+function puddleAt(spots, o = {}) {                       // spots: [[x, z, scale]] in tiles; one instanced mesh in deckRoot
+  const g = new THREE.CircleGeometry(.5, 18); g.rotateX(-Math.PI / 2);
+  const im = new THREE.InstancedMesh(g, new THREE.MeshBasicMaterial({ color: col(o.color || '#4f86a8'), transparent: true, opacity: o.opacity || .5, depthWrite: false }), spots.length), M4 = new THREE.Matrix4();
+  spots.forEach(([x, z, s], k) => { M4.makeScale(s || 1, 1, (s || 1) * .85); M4.setPosition(X0(x), .012 + .003 * k, Z0(z)); im.setMatrixAt(k, M4); });
+  im.userData.noMerge = true; deckRoot.add(im); return im;
+}
+function leakFx() {
+  try {
+    if (typeof deckRoot === 'undefined' || !deckRoot || !deckDef) return;
+    const e = leakOpen(), J = e && e.deck === deckDef.num ? leakJoint(e.joint) : null;
+    if (LEAK_FX.root !== deckRoot || LEAK_FX.at !== (J && J.place)) {
+      for (const k of ['wet', 'damp']) if (LEAK_FX[k] && LEAK_FX.root === deckRoot) { deckRoot.remove(LEAK_FX[k]); LEAK_FX[k].geometry.dispose(); LEAK_FX[k].material.dispose(); }
+      LEAK_FX.root = deckRoot; LEAK_FX.wet = LEAK_FX.damp = null; LEAK_FX.at = J ? J.place : null;
+      if (J && J.puddle) LEAK_FX.wet = puddleAt([[J.puddle[0] + .5, J.puddle[1] + .5, 1.05], [J.puddle[0] + .85, J.puddle[1] + .3, .5]]);
+      if (J && J.damp && FACING[J.damp[2]] !== undefined) {
+        const [x, z, wall] = J.damp, y = Math.max(.8, ((J.joint && J.joint[1]) || 1.6) - .35);
+        const pos = { n: [X0(x + .5), Z0(z) + T / 2], s: [X0(x + .5), Z0(z + 1) - T / 2], w: [X0(x) + T / 2, Z0(z + .5)], e: [X0(x + 1) - T / 2, Z0(z + .5)] }[wall];
+        const g = new THREE.CircleGeometry(.32, 16), im = new THREE.InstancedMesh(g, new THREE.MeshBasicMaterial({ color: col('#5d6b70'), transparent: true, opacity: .35, depthWrite: false }), 2), M4 = new THREE.Matrix4(), Q = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, FACING[wall], 0));
+        const ax = new THREE.Vector3(1, 0, 0).applyQuaternion(Q), nx = new THREE.Vector3(0, 0, 1).applyQuaternion(Q);   // along the wall, out of it
+        [[0, 0, 1, 1.3, .015], [.1, -.35, .7, .9, .02]].forEach(([dx, dy, sx, sy, off], k) => { M4.compose(new THREE.Vector3(pos[0] + ax.x * dx + nx.x * off, y + dy, pos[1] + ax.z * dx + nx.z * off), Q, new THREE.Vector3(sx, sy, 1)); im.setMatrixAt(k, M4); });   // never coplanar: 5 mm apart
+        im.userData.noMerge = true; deckRoot.add(im); LEAK_FX.damp = im;
+      }
+    }
+  } catch (err) { console.error(err); }
+}
+WORK_TICKS.push((now, skip) => { if (!skip) leakFx(); });
 
 // 24p THE FIRST PROMOTION (Pillar 5 Step 3, the Works career engineer C2, 0.44.18+; plans/mechanics/promotion-officer.html
 // on claude/p5-design). Part 1, the Tier 2 test job: once you're "Relied on" and trained to make things safe (ladder
