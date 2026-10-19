@@ -300,3 +300,10 @@ The user went to bed ~03:40: **overnight mode ON** until they check in in the mo
 | ~10:40 | Pool symptom words (RB2) | Reuse the existing pool trace symptom text; the fault-tracing code stays untouched | No copy of shared code |
 | ~10:40 | Rec deck switch committed (RB2 32f7710, 0.84.11) before rec engineer A's crew work is in | Fine: it is its own commit and the build master adds it last, after the crew use, traditions and words | The released build gets everything together |
 | ~11:50 (the user) | Morning check-in, asked for the report | Overnight mode ENDS. Morning report page published (lead 19). From now on design calls are the user's again; the lead keeps making technical/pacing calls | The user checked in and asked for the report |
+
+## The user's answers, morning 2026-10-19 (~12:00)
+- Scope: finish the rec deck (0.64.0) and the playtest update (0.63.5), then stop for now. No ion storm.
+- Small invented writing details (Maeve's "nine minutes forty", Vance's 304 bell rings, the lone flipper, "a thousand labels"): keep them.
+- Later Wren talks (after the first four): no full meetings.
+- Pool stroke timing and putting the prototypes in the game: the user will test and say. Prototypes stay out of the game until then.
+- No survey needed for these.
