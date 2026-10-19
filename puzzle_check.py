@@ -441,6 +441,83 @@ P1FIRST = r"""(() => {
   return out;
 })()"""
 
+# P2: an Officer after Tomas's word (said set), the p2 row open; at 10:00 on each shift day, every cause P2 fits on
+# every machine becomes a case if it can; each witness checked against the plans (planWhere) at their minute
+P2 = r"""(() => {
+  const out = { cases: [], bad: [], fit: 0 }, C = caseState(), W = SHIP.works, keep = { op: W.op, rank: W.rank, tier: W.tier, tr: W.tr, said: W.said };
+  const jr = jobRun; jobRun = () => null;
+  W.rank = 'officer'; W.tier = 2; W.op = { 15: ['p2'] }; W.tr = {}; W.said = { p2: 15 }; C.p2 = 'none'; C.p1 = 'none'; C.open = [];
+  MACH_HOUR = null; MACH_SEEN = -1; setShipNow(14 * 1440); machinesNow();
+  for (let d = 15; d <= 34; d++) {
+    if (!playerShiftOn(d)) continue;
+    const t = (d - 1) * 1440 + 600; setShipNow(t); machinesNow();
+    for (const m of machineList()) for (const f of caseCauses(m)) {
+      if (!CASE_KINDS.p2.fits(f, m) || (m.tier || MACHINE_KINDS[m.kind].tier) > 2 || !panelPlace(m.id)) continue;
+      out.fit++; C.open = []; SHIP.jobs = SHIP.jobs.filter(x => !x.case);
+      const j = { id: m.id + '@p2' + d + f.id, machine: m.id, deck: m.deck, kind: 'repair', urgency: 1, posted: t, found: t, claimedBy: null, parts: [f.part], status: 'open', cause: f.id };
+      SHIP.jobs.push(j);
+      const keepK = {}; for (const k in CASE_KINDS) if (k !== 'p2') { keepK[k] = CASE_KINDS[k]; delete CASE_KINDS[k]; }   // P2 alone
+      const rate = CASE_RATE.officer; CASE_RATE.officer = 1; caseOffer(j, (d - 1) * 24 + 10); CASE_RATE.officer = rate; Object.assign(CASE_KINDS, keepK);
+      const c = caseOf(j); if (!c) continue;
+      const F = id => caseCauses(m).find(x => x.id === id), show = p2ShowAt(t);
+      const ws = c.clues.map(k => { const p = schedPeople().find(x => x.id === k.src.ask), w = p && planWhere(p, k.src.t), pl = placeById(k.src.pl);
+        return { id: k.id, who: k.src.ask, t: k.src.t, kills: k.kills.slice(), mix: k.src.mix || null, saw: k.src.saw, there: !!w && w.placeId === k.src.pl && w.act !== 'commute', inWindow: k.src.t >= t && k.src.t < show,
+          near: !!pl && pl.deck === m.deck && caseRoomsNear(m.deck, m.room).has(pl.room), trap: k.src.mix ? !caseShows(m, F(c.cause), k.src.t) : null, other: k.src.mix ? machineById(k.src.mix).deck !== m.deck : null,
+          deck: caseClueDeck(k), reach: caseReachable(k), place: true, line: p2Line(c, k) }; });
+      out.cases.push({ id: c.id, kind: c.kind, band: c.band, lim: caseBandOf(c.kind, c.band), cause: c.cause, sus: c.sus.slice(), fewest: c.fewest, wait: c.wait, hidden: caseHidden(j), clues: ws,
+        whens: c.sus.map(s => F(s).when) });
+      setShipNow(show - 30); caseTick(); const early = !c.wait; setShipNow(show); caseTick(); out.cases[out.cases.length - 1].shown = !early && !c.wait && j.title.startsWith('Head-scratcher: ') && / now and then$/.test(j.title);
+      out.cases[out.cases.length - 1].title = j.title;
+      setShipNow(t); SHIP.jobs = SHIP.jobs.filter(x => x !== j);
+    }
+  }
+  C.open = []; jobRun = jr; Object.assign(W, keep); delete C.p2; delete C.p1;
+  return out;
+})()"""
+
+# P2's gate and first case: staged 16:00 Day 14; at Day 15 05:59, at the row's opening and up to Tomas's word: no case
+# showing, no Ask button, no witness line, and no roll P2 case; the word (at a meal you share) opens it and shows the
+# first case with its witnesses; asking a witness gives their line (the same twice) and the clue; the save keeps it
+P2GATE = r"""(() => {
+  const out = {}, C = caseState(), W = SHIP.works, keep = { op: W.op, rank: W.rank, tier: W.tier, tr: W.tr, said: W.said };
+  C.open = []; delete C.p2; delete C.said; C.p1 = 'none'; W.said = {}; W.op = {}; W.tr = {}; W.rank = 'officer'; W.tier = 2;
+  MACH_HOUR = null; MACH_SEEN = -1; setShipNow(13 * 1440); machinesNow();
+  setShipNow(13 * 1440 + 961); machinesNow(); caseTick();
+  const c = caseById(C.p2), j = c && caseJob(c); out.staged = !!c; if (!c) return out;
+  out.machine = j.machine; out.cause = c.cause; out.sus = c.sus.slice().sort(); out.reserved = j.reserved; out.hidden = caseHidden(j);
+  const crew = schedPeople(), asks = () => crew.filter(p => caseAskButton(p)).length, says = () => crew.filter(p => caseAskSay(p)).length;
+  setShipNow(14 * 1440 + 359); machinesNow(); caseTick(); out.at559 = [p2Said(), caseOpened('p2'), asks(), says(), c.wait];
+  W.op = { 15: ['p2'] }; setShipNow(14 * 1440 + 361); machinesNow(); caseTick(); out.rowOpen = [p2Row(), caseOpened('p2'), asks(), says(), c.wait];
+  // a roll before the word: no P2 case, whatever fits
+  const m2 = machineList().find(x => x.id !== j.machine && x.kind === 'scrubber'), f2 = m2 && caseCauses(m2).find(x => x.id === 'bearing');
+  if (f2) { const k = { id: m2.id + '@gate', machine: m2.id, deck: m2.deck, kind: 'repair', urgency: 1, posted: 14 * 1440 + 600, found: 14 * 1440 + 600, claimedBy: null, parts: [f2.part], status: 'open', cause: 'bearing' };
+    SHIP.jobs.push(k); const r = CASE_RATE.officer; CASE_RATE.officer = 1; setShipNow(14 * 1440 + 600); caseOffer(k, 14 * 24 + 10); CASE_RATE.officer = r; out.rollBefore = !!caseOf(k) && caseOf(k).kind; SHIP.jobs = SHIP.jobs.filter(x => x !== k); C.open = C.open.filter(x => x.job !== k.id); }
+  // Tomas's word at breakfast: you in the room where he eats
+  const tomas = crew.find(p => p.id === 'tomas'), segs = tomas ? planDay(tomas, 15).filter(s => P2_MEALS.has(s.act) && s.placeId) : [], meal = segs[0];
+  out.meal = meal ? [meal.act, hhmm(meal.from % 1440), meal.deck, placeById(meal.placeId).room] : null;
+  if (meal) {
+    const tm = Math.floor((meal.from + meal.to) / 2); setShipNow(tm - 30); caseTick(); out.beforeWord = [p2Said(), asks(), c.wait];
+    const pl = placeById(meal.placeId); if (deckDef.num !== pl.deck && typeof goToDeck === 'function') goToDeck(pl.deck);
+    const sp = placeSpot(meal.placeId); player.obj.position.x = sp.x; player.obj.position.z = sp.z; out.here = [deckDef.num, roomAt(...player.here()), pl.room];
+    setShipNow(tm); caseTick(); out.word = [p2Said(), W.said && W.said.p2, C.said && C.said.p2];
+  }
+  if (p2Said() == null) p2Said1(C, 'tomas', 14 * 1440 + 450);   // (if the geometry couldn't be set up here)
+  out.shown = !c.wait; out.title = j.title; out.by = c.by; out.n = c.clues.length;
+  out.ws = c.clues.map(k => { const p = crew.find(x => x.id === k.src.ask), w = p && planWhere(p, k.src.t); return { who: k.src.ask, t: hhmm(k.src.t % 1440), kills: k.kills, mix: k.src.mix || null, saw: k.src.saw, door: k.src.door, there: !!w && w.placeId === k.src.pl, room: (placeById(k.src.pl) || {}).room, deck: (placeById(k.src.pl) || {}).deck }; });
+  out.asks = asks(); out.nonWitness = crew.filter(p => !c.clues.some(k => k.src.ask === p.id)).every(p => !caseAskButton(p));
+  const w0 = c.clues[0], p0 = w0 && crew.find(x => x.id === w0.src.ask);
+  if (p0) { out.line1 = caseAskSay(p0); out.line2 = caseAskSay(p0); out.got = c.got.slice(); }
+  // the save: the word and the case come back
+  const sv = { ship: {} }; for (const f of SAVE_EXTRA) { try { f(sv); } catch (e) {} }
+  CASE_SAVED = JSON.parse(JSON.stringify(sv.ship.works.cases)); delete SHIP.works.cases; delete W.said; CASE_CLEAN = false;
+  out.saved = [p2Said(), !!caseById(c.id), (caseById(c.id) || {}).clues && caseById(c.id).clues.length, JSON.stringify(sv.ship.works.cases).length];
+  // the right call: the bearing; fixed
+  claimJob(j.id); caseTick(); caseCall(c.id, c.cause); const n = jobStops(j).length; for (let k = 0; k < n; k++) jobStepDone(j.id, k);
+  out.fixed = !!j.workDone; turnInJob(j.id); caseTick(); out.done = caseFlags(j.id); out.closed = !caseById(c.id);
+  Object.assign(W, keep); C.open = []; delete C.p2; delete C.said; delete C.p1;
+  return out;
+})()"""
+
 def run(path):
     with sync_playwright() as pw:
         g = Game(pw, path, 390, 844)
@@ -616,6 +693,39 @@ def run(path):
             check(F1['atWrong'] == '3-filter-1' and F1['wrongFit']['spent'] and not F1['wrongFit']['done'] and F1['wrongFit']['known'], f"a wrong call: to the filter bank, its cartridge used up, not fixed: {F1['atWrong']} {F1['wrongFit']}")
             check(F1['saveSame'] and F1['savedP1'] and F1['saveBytes'] < 1100, f"the save mid-case reads back the same ({F1['saveBytes']} bytes)")
             check(F1['atRight'] is None and F1['fixed'] and F1['closed'] and F1['done'] == 0, f"the right call: the pump, fixed, closed (one wrong call: not right first time): {F1}")
+        # P2 (0.55.15)
+        R2 = g.ev(P2); R2b = g.ev(P2)
+        p2c = R2['cases']; print(f"P2 sweep: {len(p2c)} cases ({R2['fit']} fitted)"); [print('  ', c) for c in p2c[:1]]
+        check(len(p2c) >= 10, f"P2 cases: {len(p2c)} of {R2['fit']}")
+        check(json.dumps(R2) == json.dumps(R2b), 'P2: twice -> the same cases and witnesses')
+        nmix = sum(1 for c in p2c if any(k['mix'] for k in c['clues']))
+        check(nmix >= 1, f"some P2 cases have a mix-up: {nmix}/{len(p2c)}")
+        for c in p2c:
+            sus, clues, (sn, cn, few, decks) = c['sus'], c['clues'], lim(c)
+            left = lambda ks: [s for s in sus if not any(s in k['kills'] for k in ks)]
+            real = [k for k in clues if not k['mix']]
+            fewest = min((n for n in range(1, len(clues) + 1) for ks in combinations(clues, n) if len(left(list(ks))) == 1), default=99)
+            check(c['kind'] == 'p2' and left(real) == [c['cause']] and all(len(left([k])) > 1 for k in clues) and fewest == c['fewest'] and fewest >= few, f"{c['id']}: solved without the mix-up, no single witness solves it: {left(real)} {fewest}")
+            check(sn[0] <= len(sus) <= sn[1] and cn[0] <= len(clues) <= cn[1] and len(real) <= 3 and len(clues) - len(real) <= 1, f"{c['id']}: within the band: {len(sus)} suspects, {len(real)} witnesses + {len(clues) - len(real)} mix-up")
+            check(all(k['there'] and k['inWindow'] and k['reach'] for k in clues), f"{c['id']}: every witness really was where they say, in the window: {[(k['who'], k['t'], k['there'], k['inWindow']) for k in clues]}")
+            check(all(k['near'] for k in real) and all(k['mix'] is None or (k['other'] and k['trap'] and not k['kills']) for k in clues), f"{c['id']}: witnesses by the machine; a mix-up on another deck, when the real one was quiet, crossing out nothing: {clues}")
+            check(c['wait'] and c['hidden'] and c['shown'], f"{c['id']}: waits for its window, then shows ({c['title']!r})")
+            check(all(k['line'] and str(k['t'] % 1440 // 60).zfill(2) in k['line'] for k in clues), f"{c['id']}: each witness's words say when: {[k['line'] for k in clues][:2]}")
+        G = g.ev(P2GATE)
+        print('P2 gate and first:', G)
+        check(G.get('staged') and G.get('machine') in ('4-scrubber-2', '4-scrubber-1') and G.get('cause') == 'bearing' and G.get('reserved') == 22 and G.get('hidden'), f"P2's first: a Deck 4 scrubber's bearing from Day 14 16:00, slot 22, hidden: {G}")
+        if G.get('staged'):
+            check(G['sus'] == ['bearing', 'filter', 'panel'], f"the page's suspects: {G['sus']}")
+            check(G['at559'] == [None, False, 0, 0, True] and G['rowOpen'][1:] == [False, 0, 0, True], f"before Tomas's word: no P2 case, no Ask button, no witness line (05:59 {G['at559']}, row open {G['rowOpen']})")
+            check(G.get('rollBefore') in (None, False) or G.get('rollBefore') != 'p2', f"no roll P2 case before the word: {G.get('rollBefore')}")
+            check(G.get('meal') and G.get('beforeWord', [None])[0] is None and G.get('word', [None])[0] == 15 and G['word'][1] == 15 and G['word'][2] == 15, f"Tomas's word at a meal you share, Day 15: {G.get('meal')} {G.get('here')} {G.get('word')}")
+            check(G['shown'] and 'now and then' in G['title'] and G['by'] == 'tomas', f"then the first case shows: {G['title']!r}")
+            check(2 <= G['n'] <= 4 and all(w['there'] for w in G['ws']) and all(w['deck'] == 4 for w in G['ws'] if not w['mix']), f"its witnesses really were there: {G['ws']}")
+            check(any(w['mix'] for w in G['ws']), f"the first case has its honest mix-up, as on the page: {G['ws']}")
+            check(G['asks'] == G['n'] and G['nonWitness'], f"an Ask button for each witness ({G['asks']}) and nobody else")
+            check(G.get('line1') and G['line1'] == G['line2'] and len(G['got']) == 1, f"asking gives their line, the same twice, and the clue: {G.get('line1')!r}")
+            check(G['saved'][0] == 15 and G['saved'][1] and G['saved'][2] == G['n'] and G['saved'][3] < 2400, f"the save keeps the word and the case: {G['saved']}")
+            check(G['fixed'] and G['closed'] and G['done'] & 2, f"the right call fixes it, right first time: {G['fixed']} {G['done']}")
         g.ev(T2_UNDO)
         pe = [e for e in g.errors if e.startswith('pageerror')]
         check(not errs and not pe, f'no errors: {errs} {pe}')

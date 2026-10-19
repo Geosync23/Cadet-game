@@ -277,7 +277,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.55.14
+   STARSHIP CADET: CSV Wren                           build 0.55.15
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8621,7 +8621,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.55.14';                           // keep in step with the header's build line
+const GAME_BUILD = '0.55.15';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -34745,6 +34745,7 @@ function chatShow() {
   if (!C.ask && !C.offer && !talking && p.id === 'calder' && guideOn()) buttons.push({ id: 'guide-back', label: 'Hand ' + shortName(socP(guideOn().id)) + ' back' });
   if (!C.ask && !C.offer && !talking && C.line.moment && typeof momentShow === 'function') buttons.splice(1, 0, { id: 'sit', label: 'Sit with them' });   // a moment is ready (20c)
   const gift = !C.ask && !C.offer && !talking && giftInHands(); if (gift) buttons.push(r.giftWeek === socWeek() + 1 ? { id: 'give', label: 'Given this week', off: true } : { id: 'give', label: 'Give ' + gift });
+  if (!C.ask && !C.offer && !talking && typeof caseAskButton === 'function') { const cb = caseAskButton(p); if (cb) buttons.push(cb); }   // 24k P2: Ask about the fault (only a witness, only after Tomas's word)
   const v = { who: p.name, role: p.role, tier: REL_NAMES[relTier(p.id)], line: C.line.text, say: C.line.say !== false, buttons };
   const el = chatEl(); el.hidden = false;
   (CHAT_SKIN.draw || chatDraw)(el, v);
@@ -34801,6 +34802,7 @@ function chatDo(id) {
   else if (id === 'talk-stop') talkEnd(C, 'stop');
   else if (id.startsWith('reply:')) talkAnswer(C, id.slice(6));
   else if (id === 'ask') { C.ask = true; chatShow(); }
+  else if (id === 'case-ask') chatSay((typeof caseAskSay === 'function' && caseAskSay(p)) || 'Didn\'t notice a thing. Sorry.');   // 24k P2: their witness line
   else if (id === 'give') { const g = giftInHands(), res = g && giftGive(p, g); if (res) chatSay(res.text); }
   else if (id === 'sit') { const mo = C.line.moment; if (mo && typeof momentShow === 'function') { chatClose(); momentShow(mo); } }
   else if (id === 'back') { C.ask = false; chatShow(); }
@@ -39308,17 +39310,18 @@ function caseClean(x) {
   out.n = Number.isInteger(o.n) && o.n >= 0 ? o.n : 0;
   if (typeof o.first === 'string') out.first = o.first;  // Day 5's training case: its id once staged, 'none' if there won't be one
   for (const k of ['p1', 'p2']) if (typeof o[k] === 'string') out[k] = o[k].slice(0, 80);   // P1's and P2's first cases, the same way (0.55.14)
+  if (o.said && typeof o.said === 'object' && Number.isInteger(o.said.p2)) out.said = { p2: Math.max(0, o.said.p2) };   // Tomas's word (P2), kept here too (0.55.15)
   if (Array.isArray(o.done)) out.done = o.done.filter(d => Array.isArray(d) && typeof d[0] === 'string' && Number.isInteger(d[1]) && Number.isInteger(d[2])).slice(-CASE_DONE_KEEP);
   for (const c of Array.isArray(o.open) ? o.open : []) {
     if (!c || typeof c.id !== 'string' || typeof c.job !== 'string' || !CASE_KINDS[c.kind] || typeof c.cause !== 'string') continue;
     const j = SHIP.jobs.find(y => y.id === c.job); if (!j || j.status === 'done') continue;   // the case's job is gone: so is the case
     const clues = (Array.isArray(c.clues) ? c.clues : []).filter(k => k && typeof k.id === 'string' && typeof k.type === 'string')
       .map(k => ({ id: k.id, type: k.type, src: k.src && typeof k.src === 'object' ? k.src : {}, at: typeof k.at === 'string' ? k.at : null, kills: ids(k.kills) }));
-    const sus = ids(c.sus); if (!sus.includes(c.cause) || !clues.length) continue;
+    const sus = ids(c.sus); if (!sus.includes(c.cause) || (!clues.length && !(c.wait && c.train && c.kind === 'p2'))) continue;   // P2's first finds its witnesses when it shows
     const keep = a => ids(a).filter(s => sus.includes(s)), cl = clues.map(k => k.id);
     out.open.push({ id: c.id, job: c.job, kind: c.kind, k: Number.isInteger(c.k) ? c.k : 0, band: CASE_BANDS[c.band] ? c.band : 'T1', cause: c.cause, sus,
       fewest: Number.isInteger(c.fewest) ? c.fewest : 2, clues, got: ids(c.got).filter(s => cl.includes(s)), crossed: keep(c.crossed), known: keep(c.known), calls: keep(c.calls),
-      fits: Number.isInteger(c.fits) ? c.fits : 0, posted: isFinite(c.posted) ? +c.posted : 0, until: isFinite(c.until) ? +c.until : 0, by: typeof c.by === 'string' ? c.by : undefined, m7: c.m7 ? true : undefined, wait: !!c.wait, taken: !!c.taken, talk: !!c.talk, long: !!c.long, train: !!c.train, told: !!c.told, title: typeof c.title === 'string' ? c.title : '' });
+      fits: Number.isInteger(c.fits) ? c.fits : 0, ...(ids(c.doubt).some(s => cl.includes(s)) ? { doubt: ids(c.doubt).filter(s => cl.includes(s)) } : {}), posted: isFinite(c.posted) ? +c.posted : 0, until: isFinite(c.until) ? +c.until : 0, by: typeof c.by === 'string' ? c.by : undefined, m7: c.m7 ? true : undefined, wait: !!c.wait, taken: !!c.taken, talk: !!c.talk, long: !!c.long, train: !!c.train, told: !!c.told, title: typeof c.title === 'string' ? c.title : '' });
     if (!j.case) j.case = c.id;
   }
   return out;
@@ -39501,6 +39504,7 @@ function caseTick() {
   const C = SHIP.works && caseState(); if (!C) return;
   if (typeof p3Stage === 'function') p3Stage(C);        // Day 5's training case (P3, below)
   if (typeof p1Stage === 'function') p1Stage(C);        // Day 11's (P1)
+  if (typeof p2Stage === 'function') { p2Stage(C); p2Word(C); }   // Day 14's (P2), and Tomas's word that opens it
   if (!C.open.length) return;
   for (const c of C.open.slice()) {
     const j = caseJob(c), K = CASE_KINDS[c.kind];
@@ -39654,9 +39658,15 @@ function caseAct(verb, arg) {
   else if (v === 'next') {
     const k = c.clues.find(x => !c.got.includes(x.id)), p = k && k.at && k.at !== 'board' && placeById(k.at);
     if (p && typeof setGoal === 'function') { SHIP.player.track = null; setGoal({ deck: p.deck, place: p.id, label: (roomName(p.deck, p.room) || 'The clue') + (p.deck !== deckDef.num ? ', Deck ' + p.deck : '') }); }
+    else if (k && k.src && k.src.ask && typeof setGoal === 'function') {   // a person: where they are now
+      const p = schedPeople().find(x => x.id === k.src.ask), w = p && whereIs(p, shipNow());
+      if (w && w.placeId && placeById(w.placeId)) { SHIP.player.track = null; setGoal({ deck: w.deck, place: w.placeId, label: shortName(p) + (w.deck !== deckDef.num ? ', Deck ' + w.deck : '') }); }
+      else if (typeof toast === 'function') toast('Fault notes', caseHint(c.id));
+    }
     else if (k && k.at === 'board' && typeof setGoal === 'function') { SHIP.player.track = null; setGoal({ deck: 5, room: 'w', label: 'The job board, in the Works bay' }); }
     else if (k && typeof toast === 'function') toast('Fault notes', caseHint(c.id));
   }
+  else if (v === 'doubt') { c.doubt = c.doubt || []; const i = c.doubt.indexOf(s); if (i < 0) c.doubt.push(s); else c.doubt.splice(i, 1); }   // P2: a witness marked "doesn't fit" (yours, kept)
   else if (v === 'talk') caseTalk(c.id);
   else if (v === 'long') caseLong(c.id);
   MACH_REV++;
@@ -39927,6 +39937,200 @@ function p1Stage(C) {
     wait: true, taken: false, talk: false, long: false, train: true, told: false, title: '' };
   C.open.push(c); j.case = c.id; C.p1 = c.id; C.n++;
   MACH_REV++;
+}
+
+// ---- 24k P2. Who saw what? (Day 15, a word from Tomas; plans/mechanics/p2-who-saw-what.html). A fault that comes and
+// goes, that the crew noticed and you didn't: its suspects are causes on the same machine with a card in common and a
+// different `when` (always, warm, peak, after-use, at-time, touched: shows only when the machine room's door goes).
+// Witnesses are crew whose real plan had them awake in the machine's room or the next one (DECKS[n].map: rooms that
+// touch it) during the fault's window: their minute is the middle of their stay (going to bed: as they settle); what
+// they say is whether it was playing up then (the cause's real when) and whether the door went. "Playing up at t"
+// crosses out the suspects that couldn't show then; "quiet at t" those that would have. At most one is mixed up (key
+// 894): their plan had them by a machine of the same system on another deck when the real one was quiet, so what
+// they say is about that one and crosses out nothing (the Roster shows where they were). Asked on their chat card
+// ("Ask about the fault": caseAskButton and caseAskSay, section 20's chat card asks), the same answer every time
+// (their lines from content/cases/p2.lines, by the minute they were there). Witnesses from key 1001. A roll case
+// waits (the window is the next 12 hours to a minute in your shift, read from the plans when it's posted) and then
+// shows. **Shut until Tomas's word** (the user's): no P2 case, Ask button or witness line until SHIP.works.said.p2 is
+// set, when he (or Torres) has had his word with you at a meal you share from the day the p2 row opens. The first
+// (staged at 16:00 on Day 14 once you're an Officer: 4-scrubber-2, or -1, slot 22, the bearing) shows then. ----
+const P2_BAND = { sus: [3, 4], clues: [2, 4], fewest: 2, decks: 1 };   // the page's T2: 3-4 suspects, 2-3 witnesses and at most one mix-up (its later bands with their steps)
+const P2_WAIT = 720, P2_MEALS = new Set(['breakfast', 'lunch', 'dinner']);
+const P2_FIRST = { machines: ['4-scrubber-2', '4-scrubber-1'], cause: 'bearing', decoys: ['filter', 'panel'] };
+const caseShares = (a, b) => String(a.shows).split('|').some(s => String(b.shows).split('|').includes(s));   // two causes with a card in common
+// rooms on deck n that touch room r (and r): who'd hear a machine in it
+const CASE_NEAR = new Map();
+function caseRoomsNear(n, r) {
+  const k = n + '|' + r; if (CASE_NEAR.has(k)) return CASE_NEAR.get(k);
+  const map = DECKS[n] && DECKS[n].map || [], rooms = DECKS[n] && DECKS[n].rooms || {}, out = new Set([r]);
+  map.forEach((row, j) => { for (let i = 0; i < row.length; i++) if (row[i] === r) for (const [a, b] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+    const c = (map[j + b] || '')[i + a]; if (c && c !== r && rooms[c] && !rooms[c].void && !rooms[c].spine && c !== '@') out.add(c); } });
+  CASE_NEAR.set(k, out); return out;
+}
+// did the door of a machine's room go at minute t (someone came or went within five minutes, from the plans)
+const CASE_DOOR = new Map();
+function caseDoor(m, t) {
+  const d = caseDay(t), k = m.deck + '|' + m.room + '|' + d;
+  if (!CASE_DOOR.has(k)) {
+    const xs = [];
+    for (const p of schedPeople()) for (const s of planDay(p, d)) { const pl = s.deck === m.deck && s.placeId && placeById(s.placeId); if (pl && pl.room === m.room) xs.push(s.from, s.to); }
+    CASE_DOOR.set(k, xs); if (CASE_DOOR.size > 40) CASE_DOOR.delete(CASE_DOOR.keys().next().value);
+  }
+  return CASE_DOOR.get(k).some(x => Math.abs(x - t) <= 5);
+}
+// is cause f playing up at minute t
+const caseShows = (m, f, t) => !!f && (f.when === 'touched' ? caseDoor(m, t) : !!caseWhenHours(m, f.when, caseDay(t))[Math.floor((t % 1440) / 60)]);
+const p2Said = () => { const W = SHIP.works, C = W && caseState(), a = W && W.said && W.said.p2, b = C && C.said && C.said.p2; return Number.isInteger(a) ? a : Number.isInteger(b) ? b : null; };
+const p2Row = () => { try { return typeof worksIsOpen === 'function' ? worksIsOpen('p2') : Object.values((SHIP.works && SHIP.works.op) || {}).some(x => Array.isArray(x) && x.includes('p2')); } catch (e) { return false; } };
+const p2Decoys = (m, f) => caseCauses(m).filter(x => x.id !== f.id && x.part && !x.load && !x.setting && x.when && x.when !== f.when && !/^with:/.test(x.when) && caseShares(x, f));
+// crew awake in the machine's room or the next during [t0, t1): { p, t, pl }, one per stay
+function p2Seen(m, t0, t1) {
+  const near = caseRoomsNear(m.deck, m.room), out = [];
+  for (const p of schedPeople()) {
+    if (typeof movedOff === 'function' && movedOff(p.id)) continue;
+    for (let d = caseDay(t0); d <= caseDay(t1 - 1); d++) for (const s of planDay(p, d)) {
+      if (s.deck !== m.deck || s.act === 'commute' || (s.act === 'sleep' && s.from % 1440 === 0)) continue;   // a sleep carried over midnight: asleep
+      const pl = s.placeId && placeById(s.placeId); if (!pl || !near.has(pl.room)) continue;
+      const a = Math.max(s.from, t0), b = Math.min(s.to, t1); if (b - a < 10) continue;
+      if (s.act === 'sleep' && s.from < t0) continue;   // asleep already
+      out.push({ p: p.id, t: s.act === 'sleep' ? s.from + 3 : Math.floor((a + b) / 10) * 5, pl: pl.id });
+    }
+  }
+  return out;
+}
+// the witnesses for a case on job j over [t0, t1): each crosses out something new and none alone settles it; then
+// at most one mix-up (first: always if there is one; else key 894 half the time)
+function p2Witnesses(j, cause, sus, seed, t0, t1, first) {
+  const m = machineById(j.machine), F = id => caseCauses(m).find(x => x.id === id), fc = F(cause), decoys = sus.filter(s => s !== cause);
+  const all = p2Seen(m, t0, t1).map((x, i) => [schedU(seed, i, 1001), x]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
+  const got = new Set(), used = new Set(), out = [];
+  for (const x of all) {
+    if (used.has(x.p) || got.size === decoys.length || out.length >= 3) continue;
+    const saw = caseShows(m, fc, x.t), kills = decoys.filter(s => caseShows(m, F(s), x.t) !== saw);
+    if (!kills.length || kills.length === decoys.length || kills.every(s => got.has(s))) continue;
+    out.push({ id: 'w' + out.length, type: 'person', src: { ask: x.p, t: x.t, saw: saw ? 1 : 0, door: caseDoor(m, x.t) ? 1 : 0, pl: x.pl }, at: null, kills });
+    used.add(x.p); kills.forEach(s => got.add(s));
+  }
+  if (first || schedU(seed, 0, 894) < .5) {
+    const sys = MACHINE_KINDS[m.kind].sys, others = machineList().filter(o => o.deck !== m.deck && o.room && MACHINE_KINDS[o.kind].sys === sys);
+    const mix = [];
+    for (const o of others) for (const x of p2Seen(o, t0, t1)) if (!used.has(x.p) && !caseShows(m, fc, x.t)) mix.push({ ...x, o: o.id });   // there when the real one was quiet
+    const same = mix.filter(x => machineById(x.o).kind === m.kind), pool = same.length ? same : mix;   // the same kind of machine first
+    if (pool.length) { const x = pool[Math.floor(schedU(seed, 1, 894) * pool.length)]; out.push({ id: 'x0', type: 'person', src: { ask: x.p, t: x.t, saw: 1, door: 0, pl: x.pl, mix: x.o }, at: null, kills: [] }); }
+  }
+  return out;
+}
+// the first minute 12 hours on that's in your shift: a roll case's window ends and it shows
+function p2ShowAt(t0) { let t = Math.ceil((t0 + P2_WAIT) / 30) * 30; for (let n = 0; n < 400; n++, t += 30) { const mn = t % 1440; if (playerShiftOn(caseDay(t)) && mn >= DAY_SHIFT[0] && mn < 900) return t; } return t; }
+// a witness's words: their own line from content/cases/p2.lines (by the minute they were there, so the same every
+// time), else plain
+function p2Line(c, k) {
+  if (k.type !== 'person' || !k.src || !k.src.ask) return null;
+  const s = k.src, pl = placeById(s.pl), mm = machineById(s.mix || (caseJob(c) || {}).machine);
+  const rn = pl ? roomName(pl.deck, pl.room) || 'corridor' : 'corridor', place = /^(bunk|cabin|guest cabin|quarters)\b/.test(rn) ? rn.replace(/^./, x => x.toUpperCase()) : 'the ' + rn, machine = 'the ' + (mm ? MACHINE_KINDS[mm.kind].name.toLowerCase() : 'machine'), time = hhmm(s.t % 1440);
+  const kind = s.mix ? 'ask.mixup' : (s.saw ? 'ask.saw.' : 'ask.quiet.') + (s.door ? 'door' : 'still');
+  let l = null; try { l = typeof lineFor === 'function' ? lineFor(s.ask, kind, { t: s.t, time, place, machine, peek: true }) : null; } catch (e) { l = null; }
+  if (l && l.text) return l.text;
+  return s.mix ? 'It was playing up at ' + time + '! I was in ' + place + '. Heard ' + machine + ' clear as day.'
+    : s.saw ? (s.door ? 'It was playing up at ' + time + ', just as someone came through the door.' : 'It was playing up at ' + time + '. I was in ' + place + '. Nobody came or went.')
+    : s.door ? 'Quiet at ' + time + ', and people were in and out of ' + place + '.' : 'Quiet as anything at ' + time + ', in ' + place + '.';
+}
+// the chat card's button and answer (section 20 asks, one line each): only while a P2 case is showing and the person
+// is one of its witnesses (or its mix-up), and never before Tomas's word
+function p2CaseOf(pid) {
+  if (p2Said() == null) return null;
+  const C = SHIP.works && caseState(); if (!C) return null;
+  for (const c of C.open) if (c.kind === 'p2' && !c.wait) { const k = c.clues.find(x => x.src && x.src.ask === pid); if (k) return { c, k }; }
+  return null;
+}
+function caseAskButton(p) { return p && p2CaseOf(p.id) ? { id: 'case-ask', label: caseText('case.ask', 'Ask about the fault') } : null; }
+function caseAskSay(p) {
+  const x = p && p2CaseOf(p.id); if (!x) return p2Said() != null ? caseText('case.ask.none', 'Didn\'t notice a thing. Sorry.') : null;
+  caseClue(x.c.id, x.k.id);
+  return p2Line(x.c, x.k);
+}
+function p2Title(c, j) {                                 // "Air scrubber 2 on Deck 4 rattles now and then": the card the suspects share
+  const m = machineById(j.machine), fs = c.sus.map(s => caseCauses(m).find(x => x.id === s)).filter(Boolean);
+  const shows = (String(fs[0] && fs[0].shows || 'acts up').split('|').find(s => fs.every(f => String(f.shows).split('|').includes(s))) || 'acts up');
+  return caseText('case.title.p2', '{machine} on Deck {deck} {shows} now and then', { machine: caseMachName(j), deck: m.deck, shows });
+}
+function p2View(c) {
+  const got = c.clues.filter(k => c.got.includes(k.id) && k.src && k.src.ask); if (!got.length) return [];
+  const nm = id => { const p = schedPeople().find(x => x.id === id); return p ? shortName(p) : id; };
+  return [{ kind: 'text', text: caseText('case.p2.head', 'What people said (tap a name if it doesn\'t fit)') },
+    devChips(got.map(k => ({ label: nm(k.src.ask) + ', ' + hhmm(k.src.t % 1440), on: !(c.doubt || []).includes(k.id), action: { app: caseApp(), do: 'case:doubt', arg: c.id + '|' + k.id } })))];
+}
+// once a ship minute: a roll case shows once its window has passed; the first waits for Tomas's word (p2Word)
+function p2Tick(c, j) {
+  if (!c.wait || c.train) return;
+  const now = shipNow(), mn = now % 1440;
+  if (now >= p2ShowAt(c.posted) && playerShiftOn(caseDay(now)) && mn >= DAY_SHIFT[0] && mn < 900) caseShow(c, j);
+}
+CASE_KINDS.p2 = { name: 'Who saw what?', ladder: 'p2', open: () => p2Row() && p2Said() != null,   // the user's gate: never before Tomas's word
+  fits: (cause, m) => !!cause.part && !!cause.when && !/^with:/.test(cause.when) && caseBand(caseRank()) !== 'T1' && p2Decoys(m, cause).length >= 2,
+  suspects: (j, seed, band) => { const m = machineById(j.machine), f = caseCauses(m).find(x => x.id === j.cause), n = caseBandOf('p2', band).sus[1] - 1;
+    return [j.cause].concat(p2Decoys(m, f).map((x, i) => [schedU(seed, i, 892), x.id]).sort((a, b) => a[0] - b[0]).map(x => x[1]).slice(0, n)); },
+  clues: (j, cause, sus, seed) => { const t0 = caseNow(); return p2Witnesses(j, cause, sus, seed, t0, p2ShowAt(t0), false); },
+  bands: { T2: P2_BAND, T3: P2_BAND, T4: P2_BAND },
+  wait: () => true, tick: p2Tick, title: p2Title, text: p2Line, view: p2View,
+  hint: c => caseText('case.hint.p2.1', 'Ask who was there, and check they were: the Roster says where people really were.') };
+CHIEF_NOTES.p2 = { title: 'Who saw what?', key: 'chief.p2', lines: [
+  'Ask who was there, and check they were.',
+  'Nobody lies; someone may be mixed up. The Roster says where they really were.'] };
+if (typeof WORK_MECH !== 'undefined') WORK_MECH.p2 = { open() { /* Tomas's word comes at the next meal you share (p2Word) */ } };
+if (typeof CAREER_LADDER !== 'undefined' && typeof ladderRow === 'function' && !ladderRow('p2'))   // 24 core's row, if it hasn't one (C2 may own it)
+  CAREER_LADDER.push({ id: 'p2', name: 'Who saw what?', size: 'small', day: 15, tier: 2, rank: 'officer', needs: null, by: ['tomas', 'torres-zeke'], stages: [{ uses: 0 }] });
+// the first case, staged at 16:00 on Day 14 (or the first 16:00 after) once you're an Officer: 4-scrubber-2 (or 1),
+// slot 22, held a week, its fault the bearing; its witnesses are found when it shows, at Tomas's word
+function p2Stage(C) {
+  if (C.p2 || !SHIP.works) return;
+  const W = SHIP.works;
+  if (W.tr && W.tr.p2 !== undefined || p2Said() != null) { C.p2 = 'none'; return; }   // an older save past it
+  const now = shipNow(), t16 = Math.floor((now - 960) / 1440) * 1440 + 960, d = caseDay(t16);
+  if (now < 960 || d < 14 || W.rank === 'junior') return;
+  const busy = id => SHIP.jobs.some(j => j.machine === id && j.status !== 'done' && (j.claimedBy || j.case || j.reserved));
+  const m = P2_FIRST.machines.map(machineById).find(x => x && !busy(x.id)), f = m && caseCauses(m).find(x => x.id === P2_FIRST.cause);
+  const sus = f ? [f.id].concat(P2_FIRST.decoys.filter(s => p2Decoys(m, f).some(x => x.id === s))) : [];
+  if (!f || !f.part || sus.length < 3) { C.p2 = 'none'; return; }
+  const id = jobReserve(m.id, d, 960, 22, { train: 'p2', tier: 2, until: t16 + 7 * 1440, cause: f.id }), j = id && SHIP.jobs.find(x => x.id === id);
+  if (!j) return;
+  delete j.make; delete j.makeMins; j.cause = f.id; j.parts = [f.part]; j.train = 'p2';
+  const seed = machSeed('p2-first'), order = sus.map((s, i) => [schedU(seed, i, 893), s]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
+  const c = { id: 'c' + j.id, job: j.id, kind: 'p2', k: 0, band: 'T2', cause: f.id, sus: order, fewest: 2, clues: [], got: [], crossed: [], known: [], calls: [], fits: 0, posted: t16, until: 0,
+    wait: true, taken: false, talk: false, long: false, train: true, told: false, title: '' };
+  C.open.push(c); j.case = c.id; C.p2 = c.id; C.n++;
+  MACH_REV++;
+}
+// Tomas's word (or Torres's), once the p2 row has opened: at a meal you share (you in the room where they're eating),
+// from the day the row opened; then SHIP.works.said.p2 = today, and the first case shows with its witnesses
+function p2Word(C) {
+  if (p2Said() != null || !p2Row() || typeof player === 'undefined' || !player || !deckDef) return;
+  const row = typeof ladderRow === 'function' && ladderRow('p2'), now = shipNow();
+  let here = null; try { const [ci, cj] = player.here(); here = roomAt(ci, cj); } catch (e) { return; }
+  for (const id of row ? row.by : ['tomas', 'torres-zeke']) {
+    const p = schedPeople().find(x => x.id === id), w = p && planWhere(p, now), pl = w && w.placeId && placeById(w.placeId);
+    if (!pl || !P2_MEALS.has(w.act) || w.deck !== deckDef.num || pl.room !== here) continue;
+    p2Said1(C, id, now);
+    return;
+  }
+}
+function p2Said1(C, by, now) {
+  const W = SHIP.works, d = caseDay(now); W.said = W.said || {}; W.said.p2 = d; C.said = { ...(C.said || {}), p2: d };   // also in the cases, while 24 core's cleaner doesn't keep said
+  const said = typeof worksVoice === 'function' && worksVoice(by, 'train.p2.word');
+  const c = C.p2 && caseById(C.p2), j = c && caseJob(c), thing = j && machineById(j.machine) ? MACHINE_KINDS[machineById(j.machine).kind].name.toLowerCase().replace(/^air /, '') : 'fault';
+  if (said && typeof worksSayAll === 'function') worksSayAll(by, said);
+  else if (typeof worksSay === 'function') worksSay(by, 'You\'re asking around about the ' + thing + '? Ask who sleeps near it. And check they were in.');
+  if (c && j && c.wait) p2ShowFirst(C, c, j, now);
+  MACH_REV++;
+}
+function p2ShowFirst(C, c, j, now) {                     // its witnesses over [16:00 the day before, now); none fair: a plain repair
+  c.by = c.by || 'tomas';
+  for (let k = 0; k < CASE_TRIES; k++) {
+    const seed = schedU(machSeed(j.machine), caseDay(now), 882 + k) * 4294967296 | 0, clues = p2Witnesses(j, c.cause, c.sus, seed, c.posted, now, true), r = caseSolve(c.sus, clues, 'T2', c.cause, 'p2');
+    if (!r.why) { c.clues = clues; c.fewest = r.fewest; c.k = k; caseShow(c, j); return true; }
+  }
+  caseClose(c, 0); delete j.case; if (typeof jobRelease === 'function') jobRelease(22); C.p2 = 'none';
+  return false;
 }
 
 // ---------------------------------------------------------------------
