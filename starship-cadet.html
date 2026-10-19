@@ -285,7 +285,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.84.2
+   STARSHIP CADET: CSV Wren                           build 0.84.3
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8775,7 +8775,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.84.2';                           // keep in step with the header's build line
+const GAME_BUILD = '0.84.3';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -10657,7 +10657,7 @@ function devDay(d) {
   // up, a wash call at your bunk), the shift's own, meals, tea and traditions are listed already or need no heads-up.
   try { if (typeof introOn === 'function' && introOn() && typeof INTRO_WEEK !== 'undefined') for (const b of INTRO_WEEK)
     if (b.day === d && DEV_BEATS[b.id] && b.where && Number.isInteger(b.where.deck))
-      out.push({ from: b.at, to: b.until || b.at + 30, title: DEV_BEATS[b.id], where: b.where.room + ', ' + deckWord(b.where.deck), kind: 'beat', deck: b.where.deck, room: b.where.room }); } catch (e) { /* not yet */ }
+      out.push({ from: b.at, to: b.until || b.at + 30, title: DEV_BEATS[b.id], where: b.where.room + ', ' + deckIn(b.where.deck), kind: 'beat', deck: b.where.deck, room: b.where.room }); } catch (e) { /* not yet */ }
   return out.sort((x, y) => x.from - y.from);
 }
 const DEV_BEATS = { 'd1-briefing': 'Morning briefing with the Chief', 'd2-solo': 'The Chief\'s office: your first job', 'd2-booths': 'Calling home', 'd3-store': 'The crew store' };   // titles (stand-ins; the beats' own words are section 21's)
@@ -11230,7 +11230,7 @@ deviceApp({ id: 'settle', title: 'Settling in', short: 'Settling', icon: 'record
     const L = settleList() || [], done = L.filter(x => settleDone(x.id)).length, B = [];
     B.push({ kind: 'text', text: done + ' of ' + L.length + ' done. Nothing here is required: people will show you as the week goes on.', mark: 'hot' });
     const rows = L.map(it => { const d = settleDone(it.id), p = it.teacher && apptPerson(it.teacher), g = !d && settleGoal(it);
-      return { text: (d ? '✓ ' : '') + it.title, sub: d ? 'Done' : (p ? 'Ask ' + p.name : '') + (it.place ? (p ? ' · ' : '') + it.place.room + ', ' + deckWord(it.place.deck) : ''),
+      return { text: (d ? '✓ ' : '') + it.title, sub: d ? 'Done' : (p ? 'Ask ' + p.name : '') + (it.place ? (p ? ' · ' : '') + it.place.room + ', ' + deckIn(it.place.deck) : ''),
         mark: d ? 'past' : null, button: g ? 'Go there' : null, action: g ? { app: 'settle', do: 'go', arg: it.id } : null }; });
     B.push({ kind: 'list', rows });
     if (devTry(() => typeof introOn === 'function' && introOn()))
@@ -11349,7 +11349,7 @@ deviceApp({ id: 'jobs', title: 'Jobs', icon: 'wrench', order: 30,
       } else say(mine.cargo === 'meals' ? 'Take a hover cart from the Cart bay on Deck 5, load ' + (mine.meals || 'the') + ' meals in the cargo hold, and take them up to the cold store on Deck 3. Then bring the cart back.'
         : 'Take a hover cart from the Cart bay on Deck 5, load the delivery in the cargo hold, and take it to main storage. Then bring the cart back.');
       const step = typeof ixJobStep === 'function' ? ixJobStep() : null;
-      if (step && step.label) say('Next step: ' + step.label + (step.deck ? ' (' + deckWord(step.deck) + ')' : '') + '.');
+      if (step && step.label) say('Next step: ' + step.label + (step.deck ? ' (' + deckIn(step.deck) + ')' : '') + '.');
       B.push({ kind: 'buttons', items: [{ label: tracked ? 'Tracking' : 'Track', on: tracked, action: { app: 'jobs', do: 'track', arg: mine.id } }] });
       say('Turn it in at the job board when it\'s done.');
     } else say('You take jobs at the job board in the Works bay (Deck 5), and turn them in there when they\'re done.');
@@ -11380,7 +11380,7 @@ deviceApp({ id: 'maps', title: 'Maps', icon: 'map', order: 25,
     else if (verb === 'pick') mapPick = mapPick === arg ? null : arg;
     else if (verb === 'go' && mapPick && typeof setGoal === 'function') {
       const n = mapDeck || deckDef.num, r = DECKS[n].rooms[mapPick];
-      SHIP.player.track = null; setGoal({ deck: n, room: mapPick, label: r.name + (n !== deckDef.num ? ', ' + deckWord(n) : '') });
+      SHIP.player.track = null; setGoal({ deck: n, room: mapPick, label: r.name + (n !== deckDef.num ? ', ' + deckIn(n) : '') });
       deviceNotify({ app: 'maps', text: 'Follow the marker to the ' + r.name.toLowerCase() + '.', urgent: true }); delete DEV.notes.maps;
     }
     else if (verb === 'clear' && typeof clearGoal === 'function') clearGoal();
@@ -11458,7 +11458,7 @@ deviceApp({ id: 'roster', title: 'Roster', icon: 'crew', order: 52,
     else if (verb === 'tab') { rosterTab = arg === 'known' ? 'known' : 'all'; rosterPick = null; }
     else if (verb === 'go' && rosterPick && typeof setGoal === 'function') {
       const p = apptPerson(rosterPick), w = p && rosterWhere(p); if (!w || !w.room) return;
-      SHIP.player.track = null; setGoal({ deck: w.deck, room: w.room, label: p.name.split(' ')[0] + ', ' + rosterRoomName(w.roomName) + (w.deck !== deckDef.num ? ', ' + deckWord(w.deck) : '') });
+      SHIP.player.track = null; setGoal({ deck: w.deck, room: w.room, label: p.name.split(' ')[0] + ', ' + rosterRoomName(w.roomName) + (w.deck !== deckDef.num ? ', ' + deckIn(w.deck) : '') });
       deviceNotify({ app: 'roster', text: 'Follow the marker to ' + rosterRoomName(w.roomName) + '.', urgent: true }); delete DEV.notes.roster;
     }
   },
@@ -11632,7 +11632,7 @@ function apptRoomPlace(n, key) {
 const apptPerson = id => typeof schedPeople === 'function' ? schedPeople().find(p => p.id === id) : (typeof ROSTER !== 'undefined' ? ROSTER.find(p => p.id === id) : null);
 const apptName = id => { const p = apptPerson(id); return p ? p.name : String(id); };
 const apptWhereName = id => {                          // the room's name, for any place in it
-  for (const n of Object.keys(DECKS)) { const q = (DECKS[n].places || []).find(x => x.id === id); if (q) { const r = (DECKS[n].rooms || {})[q.room]; return (r ? r.name : 'there') + ', ' + deckWord(n); } }
+  for (const n of Object.keys(DECKS)) { const q = (DECKS[n].places || []).find(x => x.id === id); if (q) { const r = (DECKS[n].rooms || {})[q.room]; return (r ? r.name : 'there') + ', ' + deckIn(n); } }
   return 'there';
 };
 function apptPeople() {                                  // who you can ask: people you've met when section 20 says, else story and Works crew
@@ -11752,7 +11752,7 @@ deviceApp({ id: 'appointments', title: 'Appointments', short: 'Appts', icon: 'ca
           { kind: 'text', text: 'Where', mark: 'head' },
           { kind: 'buttons', items: [{ label: 'Pick on the map', action: { app: 'appointments', do: 'map' } }] },
           { kind: 'list', rows: (d.where && !apptPlaces().some(x => x.id === d.where) ? [{ text: apptWhereName(d.where), mark: 'hot', action: { app: 'appointments', do: 'where', arg: d.where } }] : [])
-            .concat(apptPlaces().map(x => ({ text: x.name + ', ' + deckWord(x.deck), mark: x.id === d.where ? 'hot' : null, action: { app: 'appointments', do: 'where', arg: x.id } }))) });
+            .concat(apptPlaces().map(x => ({ text: x.name + ', ' + deckIn(x.deck), mark: x.id === d.where ? 'hot' : null, action: { app: 'appointments', do: 'where', arg: x.id } }))) });
         if (d.where) B.push({ kind: 'buttons', items: [{ label: d.with.length > 1 ? 'Ask all ' + d.with.length : 'Ask ' + apptName(d.with[0]).split(' ').slice(-1)[0], action: { app: 'appointments', do: 'ask' } }] });
       }
       B.push({ kind: 'buttons', items: [{ label: 'Cancel', action: { app: 'appointments', do: 'cancel' } }] });
@@ -13880,7 +13880,7 @@ function needGoal(k) {
   const near = pl => pl.deck === here ? Math.hypot(cellPos(...pl.at).x - pos.x, cellPos(...pl.at).z - pos.z) : 1000 * (1 + Math.abs(pl.deck - here));
   const all = Object.keys(DECKS).flatMap(n => (DECKS[n].places || []).map(pl => ({ ...pl, deck: +n }))).filter(ok);
   const pl = all.sort((a, b) => near(a) - near(b) || (a.id < b.id ? -1 : 1))[0]; if (!pl) return false;
-  NEED_GOAL = { need: k, label: NEED_FIX_SAY[k] + (pl.deck !== here ? ', ' + deckWord(pl.deck) : '') };
+  NEED_GOAL = { need: k, label: NEED_FIX_SAY[k] + (pl.deck !== here ? ', ' + deckIn(pl.deck) : '') };
   setGoal({ deck: pl.deck, place: pl.id, label: NEED_GOAL.label }); return true;
 }
 function needGoalClear() { if (NEED_GOAL && typeof IX_GOAL !== 'undefined' && IX_GOAL && IX_GOAL.label === NEED_GOAL.label) clearGoal(); NEED_GOAL = null; }
@@ -16489,7 +16489,7 @@ const bridgeBars = j => bridgeShut() && !heldForYou(j) && bridgeJob(j);
 const healthState = v => v >= 90 ? 'fine' : v >= 70 ? 'worn' : v >= 45 ? 'poor' : 'failing';
 function machineLabel(m) {
   const K = MACHINE_KINDS[m.kind], n = machineList().filter(x => x.kind === m.kind && x.deck === m.deck).length > 1 ? ' ' + m.id.split('-').pop() : '';
-  return K.name + n + ', ' + deckWord(m.deck);
+  return K.name + n + ', ' + deckIn(m.deck);
 }
 function shipHealthRows() {
   const sys = shipMeters(), st = machinesNow(), health = shipHealth(sys);   // the meters: the machines less the upkeep (0.33.57)
@@ -17188,10 +17188,10 @@ const CHORES = {
                  .map(m => ({ key: m.id, title: 'Calibrate the ' + machineLabel(m).split(',')[0].toLowerCase(), deck: m.deck, room: m.room, machine: m.id, tier: MACHINE_KINDS[m.kind].tier, stops: [panelStop(m, 15, 'calibrate')] })) },
   delivery:  { tier: 1, per: .6, parts: [], text: 'Delivery',
                where: () => DELIVERIES.filter(r => placeById(r.from) && placeById(r.to)).map(r => { const a = placeById(r.from), b = placeById(r.to);
-                 return { key: r.key, title: r.title + ', ' + deckWord(b.deck), deck: b.deck, room: b.room, bring: r.bring, stops: [{ deck: a.deck, placeId: a.id, mins: 5, tag: 'pickup' }, { deck: b.deck, placeId: b.id, mins: 10, tag: 'drop' }] }; }) },
+                 return { key: r.key, title: r.title + ', ' + deckIn(b.deck), deck: b.deck, room: b.room, bring: r.bring, stops: [{ deck: a.deck, placeId: a.id, mins: 5, tag: 'pickup' }, { deck: b.deck, placeId: b.id, mins: 10, tag: 'drop' }] }; }) },
   round:     { tier: 1, per: .4, parts: [], text: 'Inspection round', finds: true,
                where: () => [3, 4, 5].map(n => { const ms = choreMachines(['oven', 'range', 'chiller', 'galleyplant', 'cartdock', 'washer']).filter(m => m.deck === n), ps = ms.length >= 2 ? ms.slice(0, 3).map(m => panelStop(m, 5, 'inspect')) : lobbyish().filter(p => p.deck === n).slice(0, 3).map(p => ({ deck: n, placeId: p.id, mins: 5, tag: 'inspect' }));
-                 return ps.length ? { key: 'deck' + n, title: 'Inspection round, ' + deckWord(n), deck: n, room: (placeById(ps[0].placeId) || {}).room, stops: ps } : null; }).filter(Boolean) },
+                 return ps.length ? { key: 'deck' + n, title: 'Inspection round, ' + deckIn(n), deck: n, room: (placeById(ps[0].placeId) || {}).room, stops: ps } : null; }).filter(Boolean) },
   fault:     { tier: 1, per: .4, parts: [], text: 'Small fault', leave: 30,
                where: () => choreMachines(['lights', 'cartdock', 'washer', 'extractor']).map(m => ({ key: m.id, title: (m.kind === 'lights' ? 'Reset a tripped breaker: ' : m.kind === 'cartdock' ? 'Free a jammed cart dock: ' : 'Clear a fault: ') + machineLabel(m).split(',')[0].toLowerCase(), deck: m.deck, room: m.room, machine: m.id, stops: [panelStop(m, 10, 'fault')] })) },
   filter:    { tier: 2, per: 1.4, parts: ['filter'], text: 'Swap the filters', helps: { self: 10 },
@@ -33125,8 +33125,8 @@ const WEEK_MAILS = [];                                   // what was sent (the c
 const evWeekly = w => !w.after && !w.birthday && !w.ship && !w.date && (w.every === 'week' || (w.weekday != null && !w.every));
 function evPlaceName(ev) {
   const w = ev.where[0], pool = { gym: 'the gym', garden: 'the garden', 'garden-tend': 'the garden', 'common-room': 'the junior common room', music: 'the music room', 'mess-seat': 'the mess', 'lounge-seat': 'the bow lounge', bench: 'the promenade' };
-  const room = w.room ? 'the ' + w.room.source.replace(/^\^|\$$/g, '').replace(/\\/g, '').toLowerCase() : pool[w.pool] || deckWord(w.deck);
-  return room + (w.room && w.deck <= 2 ? ', ' + deckWord(w.deck) : '');
+  const room = w.room ? 'the ' + w.room.source.replace(/^\^|\$$/g, '').replace(/\\/g, '').toLowerCase() : pool[w.pool] || deckIn(w.deck);
+  return room + (w.room && w.deck <= 2 ? ', ' + deckIn(w.deck) : '');
 }
 function weekMail(d) {                                   // d: a Sunday; -> { at, from, subject, body } or null
   const arr = evArrival(); if (weekday(d) !== 6 || d < arr + 7) return null;
@@ -34321,7 +34321,7 @@ function occasionsTick(now, quiet) {
   }
   for (const r of SHIP.occasions) {
     const o = OCCASIONS[r.id]; if (!o) continue;
-    if (r.status === 'asked' && now < r.at + r.len) meeting({ notify: o.chance || typeof deviceApp === 'function' || typeof apptAdd === 'function' ? null : o.title + ': ' + DECKS[r.deck].rooms[r.room].name + ', ' + deckWord(r.deck) + ', at ' + hhmm(r.at % 1440) + '.', id: r.key, event: 'occasion', where: { deck: r.deck, room: new RegExp('^' + DECKS[r.deck].rooms[r.room].name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$') }, at: r.at, len: r.len, who: [r.by], script: o.script });
+    if (r.status === 'asked' && now < r.at + r.len) meeting({ notify: o.chance || typeof deviceApp === 'function' || typeof apptAdd === 'function' ? null : o.title + ': ' + DECKS[r.deck].rooms[r.room].name + ', ' + deckIn(r.deck) + ', at ' + hhmm(r.at % 1440) + '.', id: r.key, event: 'occasion', where: { deck: r.deck, room: new RegExp('^' + DECKS[r.deck].rooms[r.room].name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$') }, at: r.at, len: r.len, who: [r.by], script: o.script });
     if (r.status === 'asked' && now >= r.at + r.len) {
       r.status = r.met ? 'kept' : 'missed'; if (r.met && o.trace && !SHIP.traces.includes(o.trace)) SHIP.traces.push(o.trace);
       const f = r.f || (r.f = {}); if (!r.met && o.chance && !f['gist:' + r.key]) { f['gist:' + r.key] = 1; meetingGist(o.script); }   // missed before its meeting was ever registered
@@ -36471,7 +36471,7 @@ function favourOf(p) {
   if (left.length && U(625) < .6) {
     const pl = left[Math.floor(U(626) * left.length)], room = ((DECKS[pl.deck].rooms || {})[pl.room] || {}).name || 'the ' + pl.type, thing = FAVOUR_THINGS[Math.floor(U(627) * FAVOUR_THINGS.length)];
     return { idea: true, title: 'Fetch ' + shortName(p) + '\'s ' + thing, ask: 'I think I left my ' + thing + ' in the ' + room.toLowerCase() + ' yesterday. Could you bring it to me?',
-             post: { from: p.id, title: 'Fetch ' + shortName(p) + '\'s ' + thing + ' (' + room + ', ' + deckWord(pl.deck) + ')', bring: thing, stops: [{ deck: pl.deck, placeId: pl.id, mins: 2, tag: 'pickup' }] } };
+             post: { from: p.id, title: 'Fetch ' + shortName(p) + '\'s ' + thing + ' (' + room + ', ' + deckIn(pl.deck) + ')', bring: thing, stops: [{ deck: pl.deck, placeId: pl.id, mins: 2, tag: 'pickup' }] } };
   }
   if (p.work && p.work.place && U(628) < .7)
     return { idea: true, title: 'A lamp for ' + shortName(p), ask: 'The lamp over my station keeps flickering. Could you swap it when you get a chance?',
@@ -37260,8 +37260,8 @@ function momentShow(id) {
 const storyPlace = (type, deck) => { const S = schedData(); for (const pl of S.byId.values()) if (pl.type === type && (deck === undefined || pl.deck === deck)) return pl; return null; };
 const STORY_FAVOURS = {
   brennanSage: p => { const pl = storyPlace('garden', 3); return pl && { from: p.id, title: 'Sage from the garden for ' + shortName(p) + ' (Deck 3)', bring: 'a bunch of sage', stops: [{ deck: pl.deck, placeId: pl.id, mins: 3, tag: 'pickup' }] }; },
-  pellPractice: p => { const pl = p.work && storyPlace(p.work.place, p.work.deck); return pl && { from: p.id, title: 'Help ' + shortName(p) + ' practise for his certification (' + deckWord(pl.deck) + ')', stops: [{ deck: pl.deck, placeId: pl.id, mins: 15, tag: 'favour' }] }; },
-  liftBrakes: p => { const pl = p.work && storyPlace(p.work.place, p.work.deck); return pl && { from: p.id, title: 'Check the lift brakes with ' + shortName(p) + ' (' + deckWord(pl.deck) + ')', stops: [{ deck: pl.deck, placeId: pl.id, mins: 15, tag: 'favour' }] }; },   // a stop at their station (reviewer 1: not a lamp swap)
+  pellPractice: p => { const pl = p.work && storyPlace(p.work.place, p.work.deck); return pl && { from: p.id, title: 'Help ' + shortName(p) + ' practise for his certification (' + deckIn(pl.deck) + ')', stops: [{ deck: pl.deck, placeId: pl.id, mins: 15, tag: 'favour' }] }; },
+  liftBrakes: p => { const pl = p.work && storyPlace(p.work.place, p.work.deck); return pl && { from: p.id, title: 'Check the lift brakes with ' + shortName(p) + ' (' + deckIn(pl.deck) + ')', stops: [{ deck: pl.deck, placeId: pl.id, mins: 15, tag: 'favour' }] }; },   // a stop at their station (reviewer 1: not a lamp swap)
 };
 function storyFavour(p, id) {
   const mk = STORY_FAVOURS[id]; if (!mk || typeof favourPost !== 'function') return false;
@@ -40993,7 +40993,7 @@ const haulDay = d => weekday(d) === DELIVERY.day + (typeof deliveryLate === 'fun
 const haulDock = () => CART_AT.find(id => placeById(id)) || null;
 const haulLoadAt = () => HOLD_AT.find(id => placeById(id)) || null;
 const haulName = c => c.part ? String(c.id).replace(/^./, x => x.toUpperCase()) : worksText('haul.crate.' + c.id, ({ laundry: 'Linen', medical: 'Medical supplies', infirmary: 'Medical supplies', store: 'Crew store stock', galley: 'Dry goods', bridge: 'Bridge spares' })[c.id] || 'A crate');
-const haulWhere = c => { const p = placeById(c.dest); return p ? (roomName(p.deck, p.room) || 'the room') + ', ' + deckWord(p.deck) : 'its stop'; };
+const haulWhere = c => { const p = placeById(c.dest); return p ? (roomName(p.deck, p.room) || 'the room') + ', ' + deckIn(p.deck) : 'its stop'; };
 // a run's crates from what's left of the manifest: up to CART_CRATES, by deck from the hold upward (4, 3, 2, 1): fewest rides
 function haulCrates(max = CART_CRATES) {
   const out = []; for (const c of SHIP.manifest || []) for (let i = 0; i < (c.n || 0); i++) out.push({ id: c.id, dest: c.dest });
@@ -42671,10 +42671,10 @@ function caseAct(verb, arg) {
   else if (v === 'yes') { CASE_UI.ask = null; if (caseCall(c.id, s)) { const p = caseSus(c, s).part; if (p && typeof toast === 'function') toast('Called it', 'A ' + p + ' from main storage, Deck 5. Follow the marker.'); } }
   else if (v === 'next') {
     const k = c.clues.find(x => !c.got.includes(x.id)), p = k && k.at && k.at !== 'board' && placeById(k.at);
-    if (p && typeof setGoal === 'function') { SHIP.player.track = null; setGoal({ deck: p.deck, place: p.id, label: (roomName(p.deck, p.room) || 'The clue') + (p.deck !== deckDef.num ? ', ' + deckWord(p.deck) : '') }); }
+    if (p && typeof setGoal === 'function') { SHIP.player.track = null; setGoal({ deck: p.deck, place: p.id, label: (roomName(p.deck, p.room) || 'The clue') + (p.deck !== deckDef.num ? ', ' + deckIn(p.deck) : '') }); }
     else if (k && k.src && k.src.ask && typeof setGoal === 'function') {   // a person: where they are now
       const p = schedPeople().find(x => x.id === k.src.ask), w = p && whereIs(p, shipNow());
-      if (w && w.placeId && placeById(w.placeId)) { SHIP.player.track = null; setGoal({ deck: w.deck, place: w.placeId, label: shortName(p) + (w.deck !== deckDef.num ? ', ' + deckWord(w.deck) : '') }); }
+      if (w && w.placeId && placeById(w.placeId)) { SHIP.player.track = null; setGoal({ deck: w.deck, place: w.placeId, label: shortName(p) + (w.deck !== deckDef.num ? ', ' + deckIn(w.deck) : '') }); }
       else if (typeof toast === 'function') toast('Fault notes', caseHint(c.id));
     }
     else if (k && k.at === 'board' && typeof setGoal === 'function') { SHIP.player.track = null; setGoal({ deck: 5, room: 'w', label: 'The job board, in the Works bay' }); }
