@@ -34,12 +34,15 @@ def check(cond, msg):
     return cond
 
 # one run on paper. plan: 'none' (no sub-blocks), 'steady', 'busy', 'lazy'. Returns the day-by-day story.
-PAPER = r"""(({ plan, days }) => {
+PAPER = r"""(({ plan, days, t2 }) => {
   const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min;
   SHIP.works = null; SHIP.occasions.length = 0; SHIP.notes = []; SHIP.flags = {}; SHIP.jobs = []; SHIP.mail = []; SHIP.rep = null;
   JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; WORKS_TICK.m = WORKS_TICK.h = -1;
+  if (WORK_MECH.t2 && WORK_MECH.t2.offer) window.__realT2 = WORK_MECH.t2;   // 24p's own test job (0.44.18), kept for t2: 'real' | 'late'
   for (const k in WORK_MECH) delete WORK_MECH[k];
   if (plan !== 'none') for (const r of CAREER_LADDER) WORK_MECH[r.id] = r.id === 't2' ? { noJob: true } : { reserve: (d, at, slot, o) => jobReserve('washer', d, at, slot, o) };   // stand-ins: the default training job
+  if (plan !== 'none' && t2 && window.__realT2) WORK_MECH.t2 = window.__realT2;
+  const promo = []; const stopP = onSim('promoTest', n => promo.push([n.step, Math.floor(n.t / 1440) + 1, n.day]));
   const at = t => { setShipNow(t); machinesNow(); };
   const days_ = [], trained = {}, asks = {}, teach = {}, mails = [], band = {}, seen = { meet: 0, watch: 0, do: 0 }, bad = [];
   const stop = [onSim('trained', n => { trained[n.mech] = Math.floor(n.t / 1440) + 1; })];
@@ -73,10 +76,12 @@ PAPER = r"""(({ plan, days }) => {
       if (c2 && c2.st === 'watch') { c2.w = TRAIN_WATCH; seen.watch++; worksCareerTick(t + 2); const j = SHIP.jobs.find(x => x.id !== c2.j && x.train === c2.id && x.status === 'done');
         teach[c2.id] = teach[c2.id] || {}; const dj = SHIP.jobs.filter(x => x.train === c2.id && x.status === 'done').pop(); if (dj) teach[c2.id].by = dj.doneBy; }
       const c3 = SHIP.works && SHIP.works.cur;
-      if (c3 && c3.st === 'do' && work && h >= 8 && h < 17) { seen.do++; if (!myJob() && doJob(c3.j)) { jobs++; (teach[c3.id] = teach[c3.id] || {}).you = (SHIP.jobs.find(x => x.id === c3.j) || {}).doneBy; } worksCareerTick(t + 3); }
+      const skipT2 = c3 && c3.id === 't2' && t2 === 'late' && SHIP.works.test && SHIP.works.test.tries === 1;   // the late player leaves the first test job
+      if (c3 && c3.st === 'do' && work && h >= 8 && h < 17 && !skipT2) { seen.do++; if (!myJob() && doJob(c3.j)) { jobs++; (teach[c3.id] = teach[c3.id] || {}).you = (SHIP.jobs.find(x => x.id === c3.j) || {}).doneBy; } worksCareerTick(t + 3); }
       // the player's own work
       const shift = work && h >= 8 && h < 17;
-      if (plan === 'steady' && shift && !myJob()) { const x = openJobs('you')[0]; if (x && doJob(x.id)) { jobs++; if (!firstJob) firstJob = d; } }
+      const leave = j => t2 === 'late' && (SHIP.jobs.find(x => x.id === j.id) || {}).reserved === 20 && SHIP.works && SHIP.works.test && SHIP.works.test.tries === 1;   // the late player leaves the first test job on the board too
+      if (plan === 'steady' && shift && !myJob()) { const x = openJobs('you').filter(j => !leave(j))[0]; if (x && doJob(x.id)) { jobs++; if (!firstJob) firstJob = d; } }
       if (plan === 'busy') for (let k = 0; k < 3 && !myJob(); k++) { const x = openJobs('you')[0]; if (x && doJob(x.id)) jobs++; else break; }
       if (plan === 'lazy' && shift && jobs === 0 && h === 10 && !myJob()) { const x = openJobs('you')[0]; if (x && doJob(x.id)) jobs++; }
       // using what you're trained in (a sub-block calls worksUse); the drill and the inspection, attended
@@ -91,10 +96,10 @@ PAPER = r"""(({ plan, days }) => {
     if (W) band[d] = worksBand();
     days_.push({ d, wd, work, jobs, op: W ? (W.op[d] || []) : [], xp: W ? Math.round(W.xp) : null, band: W ? worksBand() : null, cur: W && W.cur ? W.cur.id + ':' + W.cur.st : null, used });
   }
-  stop.forEach(f => f());
+  stop.forEach(f => f()); stopP();
   const W = SHIP.works;
   const occ = SHIP.occasions.filter(r => /^works\./.test(r.id)).map(r => ({ id: r.id, day: Math.floor(r.at / 1440) + 1, at: hhmm(r.at % 1440), by: r.by, status: r.status }));
-  return { days: days_, trained, asks, teach, seen, occ, firstJob, mail: mails,
+  return { days: days_, trained, asks, teach, seen, occ, firstJob, mail: mails, promo, test: W ? W.test : null, testJob: SHIP.jobs.filter(j => j.reserved === 20).map(j => [j.machine, j.status, j.doneBy, hhmm(j.found % 1440), hhmm(j.until % 1440)]),
     works: W ? JSON.parse(JSON.stringify(W)) : null, size: W ? JSON.stringify(W).length : 0, head: (worksRecordHead() || { text: null }).text, locker: worksLockerText(),
     view: W ? ['training', 'log', 'tools'].map(tab => { WORKS_TAB = tab; return worksView().blocks.filter(b => b.kind !== 'buttons').map(b => b.text || (b.rows || []).map(r => r.text + ' (' + r.sub + ')').join('; ')).join(' | '); }) : null };
 })"""
@@ -267,6 +272,21 @@ with sync_playwright() as pw:
     same = json.dumps(again, sort_keys=True) == json.dumps(st, sort_keys=True)
     print('  identical:', same)
     check(same, 'the steady run differs the second time')
+
+    print('(i) The Tier 2 test job (24p, Step 3):')
+    if not ev("typeof promoPassed === 'function'"): print('  not in this build')
+    else:
+        tr = ev(f"({PAPER})({{ plan: 'steady', days: 10, t2: 'real' }})")
+        print('   steady:', tr['promo'], tr['test'], tr['testJob'], 'Mail', [m for m in tr['mail'] if 'test' in m.lower()])
+        check(tr['test'] and tr['test']['passed'] and tr['test']['day'] == 9 and tr['test']['tries'] == 1, f"steady: the test job passed on Day 9, first try: {tr['test']}")
+        check(any(p[0] == 'set' and p[1] == 8 for p in tr['promo']), f"steady: told \"tomorrow, your test job\" on Day 8: {tr['promo']}")
+        check(tr['testJob'] and tr['testJob'][0][0].startswith('4-scrubber') and tr['testJob'][0][3] == '09:00' and tr['testJob'][0][4] == '15:00' and tr['testJob'][0][2] == 'you', f"steady: the test job, a Deck 4 scrubber held 09:00-15:00, done by you: {tr['testJob']}")
+        check(tr['works']['tr'].get('t2') == 9 and tr['works']['cur'] is None and tr['works']['tier'] == 1, f"steady: t2 done, nothing under way, still Tier 1 until the summons: {tr['works']['tr'].get('t2')}, {tr['works']['cur']}")
+        lt = ev(f"({PAPER})({{ plan: 'steady', days: 14, t2: 'late' }})")
+        print('   late:', lt['promo'], lt['test'])
+        dl = [p for p in lt['promo'] if p[0] == 'delayed']
+        check(dl and dl[0][1] == 9 and dl[0][2] == 11 and lt['test']['passed'] and lt['test']['tries'] == 2 and lt['test']['day'] == 11, f"late: the test left on Day 9 is set again two workdays on (Day 11) and passed then: {lt['promo']}, {lt['test']}")
+        check(all(p[1] >= 9 for p in lt['promo'] if p[0] == 'start'), 'a test job before Day 9')
 
     print('(h) The bridge, by invitation (Step 3):')
     br = ev("""(() => {

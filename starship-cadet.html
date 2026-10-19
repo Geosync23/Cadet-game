@@ -269,7 +269,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.44.17
+   STARSHIP CADET: CSV Wren                           build 0.44.18
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8614,7 +8614,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.44.17';                           // keep in step with the header's build line
+const GAME_BUILD = '0.44.18';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -38341,7 +38341,7 @@ const CAREER_LADDER = [
   { id: 'p3', name: 'What\'s been tried?', size: 'small', day: 5, tier: 1, rank: 'junior', needs: { trained: 'm7' }, by: ['torres-zeke', 'halloran-emeka', 'calder'], stages: [{ uses: 0 }] },
   { id: 'm6', name: 'Making it safe', size: 'big', day: 8, tier: 1, rank: 'junior', needs: { mech: 'm7', uses: 1 }, by: ['calder'], where: { deck: 5, room: 'o' }, job: 'incident', stages: [{ uses: 0 }, { uses: 3 }] },
   { id: 'm2', name: 'Your work uniform', size: 'small', day: 8, tier: 1, rank: 'junior', needs: { flag: 'works.oily' }, by: ['torres-zeke'], stages: [{ uses: 0 }] },
-  { id: 't2', name: 'Your Tier 2 test job', size: 'big', day: 9, tier: 1, rank: 'junior', needs: [{ rep: 'relied' }, { trained: 'm6' }, { work: 40 }], by: ['calder'], where: { deck: 5, room: 'o' }, job: 'test', stages: [{ uses: 0 }] },
+  { id: 't2', name: 'Your Tier 2 test job', size: 'big', day: 9, tier: 1, rank: 'junior', needs: [{ rep: 'relied' }, { trained: 'm6' }], by: ['calder', 'vance'], where: { deck: 5, room: 'o' }, job: 'test', stages: [{ uses: 0 }] },
 ];
 const WORK_MECH = {};                                    // the sub-blocks: WORK_MECH[ladder id] = { open?(row, day), offer?(row, cur, day, t) -> bool (its own ask), at?(day) -> earliest meeting minute, reserve?(day, at, slot, o) -> job id, noJob?, watch? (minutes), hold? }
 const WORK_TOOLS = {
@@ -38594,7 +38594,7 @@ function worksTrained(id, t = shipNow()) {               // trained: the Trainin
 // your training job turned in: trained, unless something holds the teacher with you (worksEscortHold: the designer's
 // Day 5, where Torres's scanner lesson runs on into the P3 training case); worksEscortEnd(id) then trains you
 const worksCaseOpen = jobId => { const C = SHIP.works && SHIP.works.cases; return !!(C && Array.isArray(C.open) && C.open.some(x => x && x.job === jobId)); };   // 24k's case on that job still open
-function worksDone(id, t) { const c = SHIP.works && SHIP.works.cur; if (c && c.id === id && c.hold && worksCaseOpen(c.j)) { c.st = 'held'; return; } worksTrained(id, t); }   // held only while its case is still open
+function worksDone(id, t) { const c = SHIP.works && SHIP.works.cur; if (c && c.id === id && c.hold && worksCaseOpen(c.j)) { c.st = 'held'; return; } if (id === 't2' && typeof promoPassed === 'function') { promoPassed(t); return; } worksTrained(id, t); }   // 24p: the test job is passed, not trained   // held only while its case is still open
 function worksEscortHold(id) { const c = SHIP.works && SHIP.works.cur; if (!c || c.id !== id || !/^(watch|do|meet|ask|again)$/.test(c.st)) return false; c.hold = true; return true; }
 function worksEscortEnd(id) {
   const c = SHIP.works && SHIP.works.cur; if (!c || c.id !== id) return false;
@@ -38606,7 +38606,7 @@ function worksEscort(p, t) {
   const W = SHIP.works, c = W && W.cur; if (!c || !p || p.id !== c.by || (c.st !== 'watch' && c.st !== 'do' && c.st !== 'held') || worksDay(t) !== c.d) return null;
   const j = SHIP.jobs.find(x => x.id === c.j), spot = trainSpot(j);
   if (c.st === 'held') return spot ? { mode: 'follow', to: { deck: spot.deck, tile: spot.tile } } : null;   // they stay with you
-  if (!j || j.status === 'done' || !spot) return null;
+  if (!j || j.status === 'done' || !spot || j.found > t) return null;   // (not before the job's due: 24p's test job is held from 09:00)
   if (c.st === 'do' && j.workDone && !c.hold) return null;   // done: they go back to their own work while you turn it in
   return { mode: c.st === 'watch' ? 'lead' : 'follow', to: { deck: spot.deck, tile: spot.tile } };
 }
@@ -40026,6 +40026,77 @@ function incFx() {
   } catch (e) { console.error(e); }
 }
 WORK_TICKS.push((now, skip) => { if (!skip) incFx(); });
+
+// ---------------------------------------------------------------------
+// 24p THE FIRST PROMOTION (Pillar 5 Step 3, the Works career engineer C2, 0.44.18+; plans/mechanics/promotion-officer.html
+// on claude/p5-design). Part 1, the Tier 2 test job: once you're "Relied on" and trained to make things safe (ladder
+// row t2's needs), on a workday from Day 8 (from 09:10, after the Monday briefing) Calder tells you "Tomorrow, your
+// test job": in person if you're in the Works bay, else by Mail at 10:00 (SHIP.works.test = { tier: 2, day: the test's
+// day, tries, passed }). On that day (never before Day 9) the ladder opens t2 (WORK_MECH.t2.offer, no meeting): a real
+// Tier 2 job held for you (jobReserve slot 20, from 09:00 to 15:00) on one of Deck 4's air scrubbers (the one in the worse
+// state; section 17 gives it its cause), Calder following you (worksEscort) with a word at each step (worksTeach, flags
+// train.t2.<step>). Passed when you turn it in, however it went. Only ever delayed: not taken by 15:00, or dropped, and
+// she says what to practise and sets another in two workdays (test.day), no limit. Words: the head writer's promo.*.
+const PROMO = { from: 8, at: 550, mailAt: 600, jobAt: 540, until: 900, slot: 20, again: 2, machines: ['4-scrubber-1', '4-scrubber-2'] };
+const promoWorkday = (d, n = 1) => { let k = d; for (let i = 0; i < 28 && n > 0; i++) { k++; if (playerShiftOn(k)) n--; } return k; };   // the n-th workday of yours after day d
+function promoSay(id, key, fallback, vars) {             // a line from the writer (promo.<key>), in the speaker's bubble or a toast
+  const text = worksText('promo.' + key, fallback, vars); if (text) worksSay(id, text); return text;
+}
+function promoInBay() { try { return deckDef.num === 5 && roomAt(...player.here()) === 'w'; } catch (e) { return false; } }
+function promoAnnounce(now) {                            // Day 8 on: "Tomorrow, your test job"
+  const W = SHIP.works, d = worksDay(now), m = now - (d - 1) * 1440, row = ladderRow('t2');
+  if (!W || W.tier !== 1 || W.test || !row || !WORK_MECH.t2 || d < PROMO.from || !playerShiftOn(d) || m < PROMO.at || m >= DAY_SHIFT[1] || !ladderNeeds(row.needs, W)) return;
+  const by = ladderTeacher(row, d) || 'calder', here = promoInBay();
+  if (!here && m < PROMO.mailAt) return;
+  W.test = { tier: 2, day: Math.max(row.day, promoWorkday(d)), tries: 0, passed: false };
+  if (here) promoSay(by, 'announce', 'Tomorrow, your test job. Tier 2, with me watching. Nothing you haven\'t done.');
+  else if (typeof mailSend === 'function') { const t = worksText('promo.announce.mail', 'Your test job | Tomorrow: your Tier 2 test job, with me watching. Be in the bay at nine. — C.'), i = t.indexOf(' | ');
+    mailSend({ at: now, from: worksName(by), subject: i > 0 ? t.slice(0, i) : 'Your test job', body: i > 0 ? t.slice(i + 3) : t }); }
+  simNote('promoTest', { step: 'set', day: W.test.day });
+}
+const promoMachine = () => { try { machinesNow(); } catch (e) { /* on paper */ } const ms = PROMO.machines.filter(id => typeof machineById === 'function' && machineById(id));
+  return ms.sort((a, b) => ((SHIP.machines[a] || {}).cond || 100) - ((SHIP.machines[b] || {}).cond || 100) || (a < b ? -1 : 1))[0] || 'scrubber'; };   // the one in the worse state
+WORK_MECH.t2 = {
+  offer(row, c, d, t) {                                  // the test, on its day: the job held for you, Calder with you
+    const W = SHIP.works; if (!W || !W.test || W.test.passed || d < W.test.day) return false;
+    const m = t - (d - 1) * 1440; if (m >= PROMO.until - 60) return false;
+    let id = null; try { id = jobReserve(promoMachine(), d, Math.max(m, PROMO.jobAt), PROMO.slot, { tier: 2, train: 't2', until: (d - 1) * 1440 + PROMO.until, cause: 'filter' }); } catch (e) { id = null; }
+    if (!id) return false;
+    c.st = 'do'; c.j = id; c.occ = null; c.told = true; W.test.tries++; W.test.day = d;
+    const j = SHIP.jobs.find(x => x.id === id); if (j) j.train = 't2';
+    if (t >= shipNow() - 1) promoTestTell(c);
+    simNote('promoTest', { step: 'start', day: d, job: id });
+    return true;
+  },
+  noJob: false,
+};
+function promoTestTell(c) {                              // the start in play: Calder's word (or a toast), the goal to the job
+  promoSay(c.by, 'test.start', 'Your test job\'s on the board: one of Four\'s scrubbers. Take it when you\'re ready. I\'ll be with you.');
+  const j = SHIP.jobs.find(x => x.id === c.j), m = j && typeof machineById === 'function' ? machineById(j.machine) : null;
+  if (m && typeof setGoal === 'function' && !(SHIP.player && SHIP.player.track)) setGoal({ deck: m.deck, room: m.room, label: 'Your test job' });
+}
+function promoPassed(t) {                                // the test job turned in: passed, whatever it took
+  const W = SHIP.works, c = W && W.cur; if (!W || !W.test || W.test.passed) return false;
+  const by = (c && c.by) || 'calder';
+  W.test.passed = true; W.test.day = worksDay(t); W.tr.t2 = worksDay(t); if (c && c.id === 't2') W.cur = null;
+  promoSay(by, 'test.passed', 'Good. That\'s the test. Go and have your tea; I\'ll be in touch.');
+  simNote('promoTest', { step: 'passed', day: worksDay(t) });
+  return true;
+}
+function promoDelay(now) {                               // not taken by 15:00, or dropped: set again in two workdays
+  const W = SHIP.works, c = W && W.cur; if (!c || c.id !== 't2' || c.st !== 'again' || !W.test || W.test.passed) return;
+  const d = worksDay(now); W.test.day = promoWorkday(d, PROMO.again); c.st = 'ask'; c.d = d; c.j = null;
+  const text = worksText('promo.test.again', 'Not today, then. Get a few more scrubbers\' worth of filters under your belt; we\'ll try again on {day}.', { day: dayName(W.test.day) });
+  if (promoInBay()) worksSay(c.by, text); else if (typeof mailSend === 'function') mailSend({ at: now, from: worksName(c.by), subject: 'Your test job', body: text });
+  simNote('promoTest', { step: 'delayed', day: W.test.day });
+}
+const dayName = d => { try { return ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][weekday(d)]; } catch (e) { return 'your next workday'; } };
+onSim('job', n => {                                      // Calder's word at each step of the test
+  const c = SHIP.works && SHIP.works.cur; if (!n || !c || c.id !== 't2' || c.st !== 'do' || n.id !== c.j) return;
+  const key = n.step === 'stop' ? 'step.' + (n.tag || 'stop') : 'step.' + n.step;
+  worksTeach('t2', c.by, key, { take: 'Right. Your job; I\'m only watching.', done: 'That\'s it settled. Turn it in at the board.' }[n.step] || null);
+});
+WORK_TICKS.push((now, skip) => { promoAnnounce(now); promoDelay(now); });
 
 
 // =====================================================================
