@@ -62,3 +62,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - t5: interactions OK. t5 done: all OK except the career key-order FAIL (E1's fb499eb fix; retest on t7). t6: lines PASS, mech OK.
 - ~06:08 W2 4e0d212 (0.48.115: 24t cabin/star lines matched to the code); with R5.
 - ~06:09 R5 PASS W2 4e0d212 (W2's tip).
+- t6: career OK, machine OK. t7: career OK (the key-order FAIL is gone with E1 fb499eb).
