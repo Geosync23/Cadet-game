@@ -134,3 +134,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - ~07:37 R6 PASS E6 5bd6f97 (E6's tip; two strings over 1c40c7a).
 - ~07:37 lead 17: E6 final = 5bd6f97 (E6 retiring). Open for the final: X2 0.71.5 verdict + 0.71.6 (queueJoin fix), U2 0f34cfb verdict, E4 0.53.15 (roof.wait line + shelf bracket).
 - ~07:44 E4 final b0cb86c (0.53.15 = 05bcbad + results/handover: roof.wait line + shelf bracket); E4 stopping (plans/handover-mech4-e4.md). With R6.
+- t15: career, machine OK, lines PASS, cadet (vs 0.63.3 + X2 alone) ALL IDENTICAL, deck OK; mech FAIL: m12 (open job not 10% quicker; flagged machine not seen to by the night crew at 22:00; differs twice) + tparts (brought: starts on time; not brought: run withdrawn...). Placed: 2bc08d5 + E6 1c40c7a + E5 2c513e6 + E4 2b5979a + U 0335523 + W2 = OK; + X2 693e4f4 = FAIL (U2 not needed). X2 × mechanics: sent to X2 (cc lead) for 0.71.6. E4 final b0cb86c to come in.
