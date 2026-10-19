@@ -165,3 +165,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - ~08:15 R6 confirms 92d40d5: roofTalk guard on its own line, parses, roof.wait baked; E4 0.53.15 good as merged (same fix in tf3).
 - ~08:17 U2 06a5e99: interactions_check.py only (the round-guide stub assigns the binding `roundTrainStep = ...`; a window property didn't replace 24a's own function, so with E6's rounds in the build the stub never took and every tip read empty): a check bug, game file unchanged from 0f34cfb. Merged into claude/p5-cand-s4 (game file still = 92d40d5). U2 running interactions on 92d40d5 + 06a5e99; R6 asked. tfA: day0 OK.
 - ~08:17 R6 PASS U2 06a5e99 (check-only; the cause of the round-guide FAIL). Lead 18: if interactions is green with it, 92d40d5's game + the check file (c336170) is 0.63.4 final.
+- CR2 92d40d5: bubble OK.
