@@ -113,6 +113,40 @@ with sync_playwright() as pw:
       return p.id + ' ' + (w && w.placeId || '-'); }}).join(', '))()""")
     if lv: print('Leavers waiting in the shuttle bay at 14:45 (the spot follows the bay\'s crowd places):', lv)
 
+    # 1b. the Commons first (the rec deck's crew, RA 0.83; plan v5 section 9): Deck 3's evening count (17:00-24:00, from the
+    # plans) beside the rec deck's, against the same build with the REC_DECK switch off. The rec deck's everyday use (the
+    # build with its traditions switched off, REC_TRAD_ON) must never leave the Commons with fewer people than without the
+    # deck, minute by minute; its traditions (gatherings, exempt from the cap like talent night) are reported beside it. The
+    # rec deck holds at most REC_CAP outside gatherings
+    rec = g.ev("typeof REC_DECK !== 'undefined' ? REC_DECK : null")
+    if rec is not None:
+        src = pathlib.Path(sys.argv[1]).read_text()
+        on_src = src.replace('const REC_DECK = false;', 'const REC_DECK = true;', 1)
+        off_src = on_src.replace('const REC_DECK = true;', 'const REC_DECK = false;', 1)
+        bare_src = on_src.replace('const REC_TRAD_ON = REC_DECK;', 'const REC_TRAD_ON = false;', 1)
+        if off_src == on_src: print('The Commons and the rec deck: no REC_DECK line to flip')
+        else:
+            COUNT = f"""(() => {{ const sd = shipDay({DAY}), h = Array.from(sd.occ.heads.slice(1020, 1440)), r = sd.occ.rec ? Array.from(sd.occ.rec.slice(1020, 1440)) : null;
+              // at a gathering (or riding to and from one: the ride is counted on the deck)
+              const gath = r ? Array.from({{ length: 420 }}, (_, i) => schedPeople().filter(p => planDay(p, {DAY}).some(s => s.deck === 7 && /^ev-/.test(s.tag || '') && s.from - 5 <= ({DAY} - 1) * 1440 + 1020 + i && s.to + 5 > ({DAY} - 1) * 1440 + 1020 + i)).length) : null;
+              return {{ h, r, gath, cap: typeof REC_CAP !== 'undefined' ? REC_CAP.busy : null, trads: eventsOn({DAY}).filter(e => /^rec-/.test(e.id)).map(e => e.id) }}; }})()"""
+            res = {}
+            for k, text in (('on', on_src), ('off', off_src), ('bare', bare_src)):
+                if text == src: res[k] = g.ev(COUNT); continue
+                f = WORK / 'test' / ('_rec_' + k + '_' + pathlib.Path(sys.argv[1]).name); f.write_text(text)
+                g2 = Game(pw, str(f)); res[k] = g2.ev(COUNT); g2.close()
+            on, off, bare = res['on'], res['off'], res['bare']
+            mean = lambda l: sum(l) / max(1, len(l))
+            print(f"The Commons and the rec deck, 17:00-24:00 (from the plans): Deck 3 mean {mean(off['h']):.1f} peak {max(off['h'])} without the rec deck;"
+                  f" {mean(bare['h']):.1f} / {max(bare['h'])} with its everyday use; {mean(on['h']):.1f} / {max(on['h'])} with its traditions too ({', '.join(on['trads']) or 'none today'})")
+            if on['r'] and bare['r']: print(f"  the rec deck: mean {mean(on['r']):.1f} peak {max(on['r'])} (everyday use alone: mean {mean(bare['r']):.1f} peak {max(bare['r'])})")
+            if not on['r'] or not bare['r'] or max(bare['r']) == 0: fail('the rec deck is on but nobody came to it in the evening (no rec counts): the comparison would prove nothing')   # R6
+            lower = [i for i in range(420) if bare['h'][i] < off['h'][i]]
+            if lower: fail(f"the Commons hold fewer with the rec deck's everyday use at {len(lower)} minutes, first {1020 + lower[0]} ({bare['h'][lower[0]]} v {off['h'][lower[0]]})")
+            if on['r'] and on['cap']:
+                over = [i for i in range(420) if on['r'][i] - on['gath'][i] > on['cap']]
+                if over: fail(f"the rec deck over its cap of {on['cap']} outside gatherings at {len(over)} minutes")
+
     # 2. the same start gives the same plans
     a = g.ev(f"(() => {{ SHIP_DAYS.clear(); return JSON.stringify(schedPeople().map(p => planDay(p, {DAY}))); }})()")
     b = g.ev(f"(() => {{ SHIP_DAYS.clear(); shipDay({DAY} + 3); shipDay({DAY} - 1); return JSON.stringify(schedPeople().map(p => planDay(p, {DAY}))); }})()")
