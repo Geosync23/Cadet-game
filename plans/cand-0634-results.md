@@ -46,3 +46,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - t5: lines PASS, mech OK, machine OK; career FAIL 'a reload mid-training changes SHIP.works'. Placed: 2bc08d5 + E2 b6130f6 alone OK; + E1 b82c8e2 + E2 b6130f6 FAIL. Cause: key order only: before the save SHIP.works ends 'cur','inc','side','cases' (side made lazily by worksSide after inc), after reload worksClean gives 'cur','side','inc','cases'; values identical, the check compares JSON strings. Sent to E1 (owns worksClean/worksSide), cc E2.
 - t5: cadet ALL IDENTICAL, food OK; interactions running.
 - ~05:59 R5 (replaces R4) PASS W2 1c05127 (W2's tip).
+- ~06:02 R5: E2 dd0ec46 (0.51.7 M15 rewiring) PASS WITH FIXES (double right-first pay, save round trip, the right terminal = stop position): hold for E2's next hash.
