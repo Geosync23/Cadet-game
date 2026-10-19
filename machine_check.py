@@ -85,7 +85,7 @@ RUN = r"""(({ days, mode, crew, perHour, events }) => {
     if ((t - t0) % 1440 === 1080) {                      // every day at midnight: a snapshot
       const sys = shipSystems();
       out.daily.push({ day: SHIP.time.day, health: shipHealth(sys), sys, cond: Object.fromEntries(list.map(m => [m.id, Math.round(SHIP.machines[m.id].cond * 10) / 10])) });
-      for (const n of Object.keys(DECKS)) { const f = shipEffects(+n); out.fx.push({ deck: +n, t, restore: f.restore, drain: f.drain, walk: f.walk, cook: f.cook, lift: f.lift, spoil: f.spoil, mood: f.mood, notes: f.notes.length, json: JSON.stringify(f) }); }
+      for (const n of (typeof DECK_ORDER !== 'undefined' ? DECK_ORDER : Object.keys(DECKS).map(Number))) { const f = shipEffects(+n); out.fx.push({ deck: +n, t, restore: f.restore, drain: f.drain, walk: f.walk, cook: f.cook, lift: f.lift, spoil: f.spoil, mood: f.mood, notes: f.notes.length, json: JSON.stringify(f) }); }
     }
   }
   setShipNow(end); machinesNow(); look(end);
@@ -251,12 +251,12 @@ with sync_playwright() as pw:
           if (!L || !states.includes(L.state) || !(L.dim >= 0 && L.dim <= 1) || !(L.flicker >= 0 && L.flicker <= 1) || typeof L.drip !== 'boolean'
               || L.blink !== (st === 'failing' || st === 'broken') || (st === 'healthy' && (L.state !== 'fine' || L.dim || L.flicker || L.drip))) bad.push(day + ' ' + m.id + ' ' + JSON.stringify(L));
         }
-        for (const n of Object.keys(DECKS)) { const D = deckLook(+n); if (!(D.dim >= 0 && D.dim <= 1 && D.flicker >= 0 && D.flicker <= 1 && D.spray > 0 && D.spray <= 1 && D.wilt >= 0 && D.wilt <= 1)) bad.push(day + ' deck ' + n + ' ' + JSON.stringify(D)); }
+        for (const n of (typeof DECK_ORDER !== 'undefined' ? DECK_ORDER : Object.keys(DECKS).map(Number))) { const D = deckLook(+n); if (!(D.dim >= 0 && D.dim <= 1 && D.flicker >= 0 && D.flicker <= 1 && D.spray > 0 && D.spray <= 1 && D.wilt >= 0 && D.wilt <= 1)) bad.push(day + ' deck ' + n + ' ' + JSON.stringify(D)); }
       }
       const rows = shipHealthRows(), rowsOk = rows.length === SYSTEMS.length + 1 && rows[0].key === 'ship' && rows.every(r => r.value >= 0 && r.value <= 100 && states.includes(r.state));
       const rev = MACH_REV, hour = MACH_HOUR; let moodBad = 0, chill = [], about = null;
       for (let t = shipNow() - 5 * 1440; t <= shipNow(); t += 180) {
-        for (const n of Object.keys(DECKS)) { const M = shipMoodAt(+n, t); if (M.mood !== shipEffectsAt(+n, t).mood || M.mood < -30 || M.mood > 0 || (M.mood < 0 && !M.about && M.health >= 70)) moodBad++; if (+n === 4 && M.about) about = M.about; }
+        for (const n of (typeof DECK_ORDER !== 'undefined' ? DECK_ORDER : Object.keys(DECKS).map(Number))) { const M = shipMoodAt(+n, t); if (M.mood !== shipEffectsAt(+n, t).mood || M.mood < -30 || M.mood > 0 || (M.mood < 0 && !M.about && M.health >= 70)) moodBad++; if (+n === 4 && M.about) about = M.about; }
         chill.push(chillerAt(t));
       }
       const chillOk = chill.every(c => c.spoil >= 0 && c.spoil <= CHILL_SPOIL && (machWorks(c.cond) >= 85) === (c.spoil === 0));
@@ -1140,7 +1140,7 @@ with sync_playwright() as pw:
           const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min;
           for (const id of ['5-damper-1', '5-damper-2']) {
             JOBS_ON = false; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t0); machinesNow(); machineFault(id, 5);
-            out.branch[id] = Object.keys(DECKS).map(Number).filter(n => shipEffects(n).notes.some(x => x.machine === id));
+            out.branch[id] = (typeof DECK_ORDER !== 'undefined' ? DECK_ORDER : Object.keys(DECKS).map(Number)).filter(n => shipEffects(n).notes.some(x => x.machine === id));
           }
           JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t0);
           return out;
