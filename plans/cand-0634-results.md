@@ -144,3 +144,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - CR2 92d40d5: smoke OK.
 - CR2 92d40d5: newgame OK.
 - ~08:04 BM8 shadowing; placing t15's interactions FAIL on 0.63.3 + X2 6c26c72 alone (mine: tf2i = no-X2 with U2).
+- CR2 92d40d5: events OK.
