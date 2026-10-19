@@ -1283,6 +1283,76 @@ with sync_playwright() as pw:
         if not tj['id'] or tj['state'] != 'faulty' or tj['drift'] != 2 or tj['cause'] != 'filter' or not tj['parts'] or tj['parts'][0] != 'filter' or not tj['held'] or tj['tune'] or tj['setOne'] or not tj['settle'] or tj['after'] or tj['again']:
             fail('the Tier 2 test job')
 
+    # 5x. the lines and traced faults (m9-tracing.html, architect-air-line.html; 0.33.59): every line names only real machines
+    # with panel places, all three on; on a ship with every line machine put right, one machine faulty at a time: the flow
+    # reads full above it and on the other branch, and low at it and below it (its twin side by side too), and the reading
+    # before it is full; Day 12's training fault (5-valve-2) is found reading the middle (5-pump-1: full) then 5-valve-2 (low
+    # after, full before). Traced faults, with you an Officer trained in tracing (a stand-in worksTrained) and the real crew
+    # for twice DAYS days: about half (25-75%) of the line repairs at your tier are traced; each one's cause cuts its line, its card
+    # names the symptom and not the machine, openJobs shows no place; none before you're trained; traceMark keeps its readings
+    # and finds it at its own machine (which reads low there); finishing it puts the machine right and closes it; the same twice
+    if g.ev("typeof MACHINE_LINKS === 'object'"):
+        ln = g.ev("""(() => {
+          const out = { on: {}, notReal: [], noPanel: [], bad: [], train: null };
+          const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min;
+          for (const l in MACHINE_LINKS) { out.on[l] = lineOn(l); for (const id of lineIds(l)) { const m = machineById(id); if (!m || m.stub) out.notReal.push(id); else if (!panelPlace(id)) out.noPanel.push(id); } }
+          JOBS_ON = false; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t0); machinesNow();
+          for (const l in MACHINE_LINKS) for (const x of lineIds(l)) {
+            for (const id of lineIds(l)) serviceMachine(id);
+            machineFault(x, 30);
+            const px = linePath(l, x), step = px[px.length - 1], below = id => { const p = linePath(l, id); return p.length >= px.length && JSON.stringify(p.slice(0, px.length - 1)) === JSON.stringify(px.slice(0, -1)) && p[px.length - 1].some(y => step.includes(y)); };
+            for (const id of lineIds(l)) { const f = lineFlow(l, id), low = below(id) || step.includes(id); if (low ? f >= .8 : f < .99) out.bad.push(l + ': ' + x + ' bad, ' + id + ' reads ' + f); }
+            if (lineFlow(l, x, true) < .99) out.bad.push(l + ': before ' + x + ' ' + lineFlow(l, x, true));
+          }
+          for (const id of lineIds('water')) serviceMachine(id);
+          machineFault('5-valve-2', 35);
+          out.train = [flowWord(lineFlow('water', '5-pump-1')), flowWord(lineFlow('water', '5-valve-2', true)), flowWord(lineFlow('water', '5-valve-2')), flowWord(lineFlow('water', '5-valve-1'))];
+          JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t0);
+          return out;
+        })()""")
+        print(f"Lines (0.33.59): on {ln['on']}, not real {ln['notReal']}, no panel {ln['noPanel']}; one bad machine at a time: wrong readings {ln['bad'][:5]}; Day 12's (5-pump-1, before/after 5-valve-2, 5-valve-1): {ln['train']}")
+        if not all(ln['on'].values()) or ln['notReal'] or ln['noPanel'] or ln['bad'] or ln['train'] != ['full', 'full', 'low', 'full']:
+            fail('the lines and lineFlow')
+        TR = r"""((trained) => {
+          window.__sc("window.__wt = typeof worksTrained === 'function' ? worksTrained : undefined; worksTrained = id => " + (trained ? "id === 'm9' || (window.__wt ? window.__wt(id) : false)" : "id === 'm9' ? false : (window.__wt ? window.__wt(id) : false)"));
+          window.__sc("window.__evTr = [typeof eventNow === 'function' ? eventNow : undefined, typeof eventMod === 'function' ? eventMod : undefined]; if (window.__evTr[0]) eventNow = () => null; if (window.__evTr[1]) eventMod = () => null");
+          const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min, end = t0 + 2 * DAYS * 1440, out = { line: 0, traced: 0, badCause: [], showsMachine: [], placeShown: [], decks: [] };
+          JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; SHIP.works = null; setShipNow(t0); machinesNow();
+          if (typeof worksInit === 'function') worksInit(WORKS_START); if (!SHIP.works) SHIP.works = {}; SHIP.works.tier = 2; SHIP.works.rank = 'officer';   // an Officer from the start
+          const seen = new Map();
+          for (let t = t0; t <= end; t += 60) {
+            setShipNow(t); machinesNow();
+            for (const j of SHIP.jobs) if (!seen.has(j.id)) seen.set(j.id, j);
+            for (const o of openJobs('you')) { const j = seen.get(o.id); if (j && j.symptom && (o.at || o.place || o.room)) out.placeShown.push(o.id); }
+            const j = !out.cardNow && SHIP.jobs.find(x => x.symptom && x.status === 'open' && !x.claimedBy && x.found <= t && !SHIP.jobs.some(y => y.claimedBy === 'you' && y.status === 'claimed'));
+            if (j) {                                       // the first one open: readings, then fixing it
+              out.cardNow = jobCard(j)[0]; const ids = lineIds(j.symptom.line); out.mid = traceMark(j.id, ids[Math.floor(ids.length / 2)]); out.own = traceMark(j.id, j.machine); out.read = j.read.length; out.found = !!j.traceFound;
+              out.claim = claimJob(j.id); jobStops(j).forEach((x, k) => jobStepDone(j.id, k)); out.fin = finishJob(j.id); out.cond = SHIP.machines[j.machine].cond; out.closed = j.status === 'done';
+            }
+          }
+          for (const j of seen.values()) if (j.machine && j.kind === 'repair' && !j.reserved && Math.floor(j.posted / 1440) + 1 >= WORKS_REAL_FROM) {
+            const m = machineById(j.machine), l = lineOf(m.id); if (!l || jobTier(j) > 2 || !(FAULT_CAUSES[m.kind] || []).some(c => c.line === l)) continue;
+            out.line++; if (!j.symptom) continue; out.traced++;
+            const c = faultCause(j); if (!c || c.line !== j.symptom.line || j.symptom.line !== l) out.badCause.push(j.id + ' ' + (c && c.id));
+            const card = jobCard(j); if (!j.traceFound && j.status !== 'done' && card[0].includes(machineTitle(m.id))) out.showsMachine.push(j.id);
+            out.decks.push(j.symptom.deck);
+          }
+          out.sig = JSON.stringify([...seen.values()].filter(x => x.symptom).map(x => x.id + ':' + x.cause + ':' + x.symptom.deck).sort());
+          for (const x of SHIP.jobs) if (x.claimedBy === 'you') { x.claimedBy = null; x.status = 'open'; }
+          SHIP.works = null;
+          window.__sc("if (window.__wt) worksTrained = window.__wt; if (window.__evTr[0]) eventNow = window.__evTr[0]; if (window.__evTr[1]) eventMod = window.__evTr[1]");
+          setShipNow(t0);
+          return out;
+        })"""
+        TR = TR.replace('DAYS', str(DAYS))
+        tr = g.ev(TR + "(true)"); tr2 = g.ev(TR + "(true)"); tu = g.ev(TR + "(false)")
+        share = 100 * tr['traced'] / tr['line'] if tr['line'] else 0
+        print(f"  traced faults ({2 * DAYS} days, an Officer): {tr['traced']} of {tr['line']} line repairs at your tier ({share:.0f}%), decks named {sorted(set(tr['decks']))}; cause off its line {tr['badCause'][:3]}, card shows the machine {tr['showsMachine'][:3]}, openJobs shows a place {tr['placeShown'][:3]}")
+        print(f"  one: '{tr.get('cardNow')}', read the middle {tr.get('mid')}, its own {tr.get('own')}, readings kept {tr.get('read')}, found {tr.get('found')}; claimed {tr.get('claim')}, fixed {tr.get('fin')} ({tr.get('cond')}), closed {tr.get('closed')}; untrained: {tu['traced']} traced; the same twice {tr['sig'] == tr2['sig']}")
+        if (not tr['line'] or not (25 <= share <= 75) or tr['badCause'] or tr['showsMachine'] or tr['placeShown'] or tu['traced'] or tr['sig'] != tr2['sig']
+            or not tr.get('cardNow') or not tr.get('found') or (tr.get('own') or {}).get('word') == 'full' or not tr.get('fin') or (tr.get('cond') or 0) < 90 or not tr.get('closed')):
+            fail('traced faults')
+
     # 6. the save
     rt = g.ev("""(() => {
       JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(6 * 1440 + 11 * 60 + 17); machinesNow();
