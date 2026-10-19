@@ -171,3 +171,43 @@
 - Have you read every note? One's not on the card.
 ? flag:train.p3.hint.3
 - Pop over to the washer's panel. There's a note waiting.
+
+// ---- Pillar 5 Step 3 (head writer W2): team jobs (M2), tracing (M3), P1 (H2). Kind 'work', flags as in
+// content/works/keys-p5.md "Step 3". Kind, a little fussy, "lovely".
+== work
+? flag:team.call.start
+- Spots, everyone. On my call. Lovely.
+? flag:team.call.brace
+- Brace. Feet wide. There.
+? flag:team.call.pass
+- Pass it here, please. Both hands.
+? flag:team.call.hold
+- Hold it. Nearly. Nearly.
+? flag:team.call.crank
+- Crank away. Slow and steady.
+? flag:team.call.tip
+- Tip it. Gently. Hold.
+? flag:team.call.valves
+- The valves. One, two, three.
+? flag:team.call.open
+- Open them again. Same order.
+? flag:team.call.drain
+- Drain it down. The bucket's there.
+? flag:team.call.done
+- And seated. Lovely work, everyone.   #warm
+? flag:train.m9.follow.give
+- Clip it on the panel. Gently. Then read.
+? flag:train.m9.follow.read
+- Full here. So it's further down. Onward.
+? flag:train.m9.follow.wrong
+- That's upstream. We know it's fine. Back we go.
+? flag:train.m9.follow.found
+- Full before, low after. There it is. Lovely.
+? flag:train.m9.follow.done
+- Showers on Four run full. That's tracing, that is.
+? flag:train.p1.word
+- Here's a puzzle the pipe kit can't solve.
+- It only happens sometimes. When? That's the clue.
+
+== promoted
+- Lovely. Lovely! Well done, you.   #warm

@@ -106,3 +106,111 @@ reactions `train.m1.mark.right` (you marked worn/off on a worn/faulty machine), 
 | X crew | kind `seek` (banks/approach.lines): the opener when a crew member has walked up beside you, tiers 1-4, week-1 evening, leaving soon; 70 characters or fewer |
 | T traditions | `join.<id>.tip` ({name}, also the arrow label), `join.<id>.notice`, walks only `join.<id>.done` / `.left`, for T's 21 ids (banks/join.lines); `join.name-on-the-beam.tip/.tell/.paint/.notice`; crew `beam.congrats` (banks/beam.lines, Works bank); Zeke `trad.beam.1-4`, Calder `trad.beam.chief` |
 | everyone | the 09:00 shift and 13:00 tea and biscuits in every line (was 08:00 / ten to eight / half ten) |
+
+## Step 3 (0.63.3; lead 16's brief plans/brief-p5s3.md; head writer W2)
+
+Proposed by W2 at the start of Step 3. **If your code already uses another name, tell W2 and W2 adopts yours.** Texts
+(said by nobody) are `@bank all` kinds in `content/works/step3.lines`; crew words are kinds in each person's own
+`content/lines/<id>.lines`, fetched with `lineFor(who, kind, { flags: { '<flag>': true } })`. Mails are "Subject | body",
+unsigned. Calder's flag lines also exist for Vance (`vance.lines`) where the page says Vance stands in.
+
+### The test job and the first promotion (C2; X for the walks and crowds)
+
+**Final: C2 0.44.24 uses the b4630d4 names** (our renames crossed three times; agreed final by both). The 0.44.23 text names are kept too (different kinds), so either reads.
+
+| When | Key | Who / kind | Placeholders |
+| --- | --- | --- | --- |
+| Day 8 in the bay, "Tomorrow, your test job" | `promo.announce` | text (worksText) | |
+| ... the Mail if you're not in the bay by 10:00 | `promo.announce.mail` | text, Mail | |
+| Day 9, 09:00, as the test job goes up | `promo.test.start` | text | |
+| Test job steps, Calder following | `flag:train.t2.step.<take\|fetch\|make\|job\|tune\|done\|turnin>` (+ `look`, `scan` if 24a/24g add stops) | calder `work` | |
+| Torres comes by at the end (Tuesday) | `flag:train.t2.torres` | torres-zeke `work` | |
+| Passed / not done | `promo.test.passed`, `promo.test.again` | text | `{day}` (weekday) |
+| The summons toast (urgent), Torres's nudge | `promo.summons`, `promo.summons.torres` | text | |
+| Calder finds you at 11:15 / 17:30 / the ceremony | `flag:promo.fetch.summons`, `.fetch.move`, `.fetch.ceremony` | calder `work` (vance for move and ceremony) | |
+| The office scene | meeting `promo.officer` | Calder; one choice of three in this order: proud, surprised, about time (C2 stores promo.reply 1-3) | |
+| The scene by Mail, if you never came | `promo.mail` | text, Mail | |
+| The crew at the board | kind `promoted` (X; 50 characters) | `banks/promo-works.lines` + torres-zeke, pell ("Told you"), kovac-zainab, halloran-emeka | `{nick}` |
+| All day: people who know you | `@reactions promoted` (`content/reactions/promoted.lines`), cue `promoted.you` | crew bank by tier | |
+| Mail from friends | kind `mail.promo.friend` (`content/banks/promo.lines`) | crew bank by tier; up to two friends | `{me}` `{nick}` |
+| Mail from the Captain | `promo.captain` | text, Mail | |
+| Ship app news (one gossip line) | `promo.news` | text | `{me}` |
+| Brennan's cake (C2 0.44.24, the lead's call: within 3 m of her at the tea corner, 16:30-17:00) | `flag:promo.cake`; toast `promo.cake.toast` | brennan `work` (and `cue`) ; text | |
+| Calder's walk to 4-23 | `flag:promo.walk.start`, `.lift`, `.corridor`, `.door`, `.inside` (C2 0.44.24); text `promo.walk` also there | calder `work`; the same flags in vance `work` | |
+| Tomas and Pell with your box; Tomas's goodbye (X) | `flag:promo.box`; `flag:promo.bye` | tomas, pell `work` | |
+| Move by Mail (without you) | `promo.move.mail` (C2 0.44.23; also `mail.promo.move`) | text, Mail | |
+| The door plate (DA5) | `works.plate` | text: "{name} · {rank}" | `{name}` `{rank}` |
+| Ceremony Mail (Day 11, 08:00) | `promo.ceremony.invite` (C2 0.44.23; also `mail.promo.ceremony`) | text, Mail | |
+| The ceremony | meeting `promo.ceremony` | marrow, vance, calder, torres-zeke (guests are walk-ons); the line ending ` {pin}` bakes `pin: true` (content_gen), then one choice for your line | |
+| The ceremony by Mail, if you never came | `promo.ceremony.mail` | text, Mail | |
+| Guests after the ceremony | `@reactions ceremony`, cue `ceremony.you` | guests / friends | |
+| The keepsake, the Record | `promo.keepsake` (its name), `works.record.commissioned` (C2 0.44.23; also `works.keepsake.commission`, `works.ms.commissioned` {n}) | text | `{day}` (day number) |
+| Calder's look at a grubby uniform, as you come in | `flag:promo.grubby` | calder `work` | |
+| Tomas's goodbye, text form (X plays tomas `promo.bye`) | `promo.move.tomas` | text | |
+| What's next | `next.t2` (have), `next.wait.t2` (the test set, not done), `next.summons`, `next.move`, `next.ceremony` (C2 reads these or `next.wait.*`) | `next.lines` | |
+
+### Team jobs (M2 24h; X for the crew)
+
+| Key | What | Placeholders |
+| --- | --- | --- |
+| `works.mech.m8`, `works.ask.m8` | ladder name; Day 11 Mail at 08:05 from Halloran | |
+| meeting `train.m8.halloran-emeka` (+ `.torres-zeke`, `.calder`) | at the recycler: spots, your part | |
+| `team.name.<job>` | job names: `recycler`, `washer`, `manifold`, `heater`, `scrubber` | |
+| `team.card` | the board card | `{job}` `{time}` `{deck}` `{n}` |
+| `mail.team` | the 16:00 posting Mail ("Subject \| body") | `{job}` `{time}` `{deck}` `{name}` (the lead) |
+| `team.turn.<part>` | your toast: `brace` `pass` `hold` `crank` `tip` `valves` `open` `drain` | |
+| `team.start`, `team.wait`, `team.late`, `team.done` | texts: started, waiting for you, started without you, done | `{name}` (the lead) in wait and late |
+| `flag:team.call.<part>` + `team.call.start/.done` | the lead's calls, kind `work` in halloran-emeka, torres-zeke, calder, and a works bank fallback (`content/banks/team.lines`); said for the crew's steps too, so they never name you | |
+| kind `team` (X's name) | crew talk while they work, one bubble each (`content/banks/team.lines`, works bank + Pell, Kovac, Torres) | |
+| `next.m8`, `next.wait.m8` | What's next | |
+| `@bank dept:works` fallbacks | `content/banks/team.lines` (calls), `content/banks/promo-works.lines` (the gathering) | |
+
+### Tracing (M3 24i)
+
+| Key | What | Placeholders |
+| --- | --- | --- |
+| `works.mech.m9`, `works.ask.m9`, `works.tool.pipekit` (have) | | |
+| meeting `train.m9.calder` (+ `.halloran-emeka`) | at the board: the pipe kit, the line on the Maps app | |
+| `flag:train.m9.follow.<step>`: `give` `map` `read` `wrong` `found` `done` | Calder's words | |
+| `trace.title` | "Pipe kit · {machine}" | `{machine}` |
+| `trace.full`, `trace.low`, `trace.verylow` | the reading word | |
+| `trace.before`, `trace.after` | "Before: {word}" / "After: {word}" | `{word}` |
+| `trace.found` | flow fine before, low after | `{machine}` |
+| `trace.wrongline` | reading a machine that isn't on the job's line | |
+| `trace.symptom.water`, `.heat`, `.air` | the card ("Showers weak on Deck {deck}", "Cold cabins on Deck {deck}") | `{deck}` |
+| `trace.line.water/heat/air` | line names (Maps app) | |
+| `chief.m9.1-2` | the Chief's notes page | |
+| `next.m9`, `next.wait.m9` | What's next | |
+
+### Head-scratchers T2, P1, P2 (H2 24k)
+
+| Key | What | Placeholders |
+| --- | --- | --- |
+| `works.mech.p1`, `works.mech.p2` | ladder names | |
+| `next.p1`, `next.wait.p1`, `next.p2`, `next.wait.p2` | What's next | |
+| `flag:train.p1.word` | calder / halloran-emeka `work`: "When does it happen?" | |
+| `flag:train.p2.word` | tomas `work` (+ torres-zeke): ask who was there | |
+| `chief.p1.1-2`, `chief.p2.1-2` | the Chief's notes pages | |
+| `case.title.p1` | "{machine} {shows}, but only {when}." | `{machine}` `{shows}` `{when}` |
+| `case.when.evening/morning/night/peak/after` | the when words | |
+| `case.strip.title`, `case.strip.fine`, `case.strip.low` | the day strip ("{machine}'s log") and its list fallback | `{machine}`; `{from}` `{to}` |
+| `case.line.water/heat/air`, `case.line.<line>.shows` | P1's card: the line's end ("Showers on Deck {deck}") and what it does ("run weak") | `{deck}` |
+| `case.ask` | the chat card button: "Ask about the fault" | |
+| `case.title.p2` | P2's card (H2 adds "Head-scratcher: ") | `{machine}` `{deck}` `{shows}` |
+| `case.p2.head` | Fault notes heading for what people said | |
+| `case.hint.p1.1`, `case.hint.p2.1` | the first hints | |
+| `case.wrong.p1` | a wrong call in P1 | `{part}` `{where}` `{shows}` |
+| `case.strip.allday`, `case.strip.head` | the day strip: fine all day; its heading | |
+| `case.wrong.t2` | a wrong call at T2 (the part is spent) | `{part}` |
+| `content/cases/p2.lines`: kinds `ask.saw.still`, `ask.saw.door`, `ask.quiet.still`, `ask.quiet.door`, `ask.mixup`, `case.ask.none` (H2's names) | witness answers by what the door did; a mix-up names where they really were | `{time}` `{place}` (with its article: "the lift lobby", "Bunk 3") `{machine}` (short, never sentence-first) |
+| `fault.tried.odd` (`faults.lines`) | P3 T2: a note that rules out less than it seems (H2 adds " — Surname") | `{part}` `{shows}` |
+
+### Bridge, meters
+
+| Key | What | Placeholders |
+| --- | --- | --- |
+| `bridge.locked` | tapping the bridge door before you're invited (C2 / DA5's hook) | |
+| meeting `bridgeInvite` (reworded) | Vance's invitation at breakfast, the day before the first bridge hour after the first ship-wide event (C2's placeholder trigger); it opens the bridge too | |
+| `meter.<sys>` | short meter names: air water power heat food waste hull comms propulsion transport | |
+| `works.turnin.rep`, `works.turnin.meter`, `works.turnin.repN` | the turn-in (C2 and U): "Works reputation up" (words only; C2 passes `{dept}`, unused) / "+{n} {system}" / "+{n} {dept} reputation" (U) | `{n}` `{system}` (the meter.<sys> name) `{dept}` |
+| `tiles.paused` | the Tiles notice under the score (U adds the pause sign) | |

@@ -850,3 +850,40 @@
 - Tap the beam where you want it. Next to mine, if you like.   #warm
 ? flag:trad.beam.4
 - There. You're part of the bay now. Properly.   #warm
+
+// ---- Pillar 5 Step 3 (head writer W2): the test job and promotion (C2), team jobs (M2), P2's word (H2). Kind 'work',
+// flags as in content/works/keys-p5.md "Step 3".
+== work
+// Day 9 (Tuesday): he comes by at the end of your test job
+? flag:train.t2.torres
+- Saw that. Don't tell her, but that was tidy.
+// M8: his calls when he leads
+? flag:team.call.start
+- Right, team. Spots. Wait for your name.
+? flag:team.call.brace
+- Brace. That's it.
+? flag:team.call.pass
+- Pass it over. Lovely.
+? flag:team.call.hold
+- Hold it there. Don't sneeze.   #funny
+? flag:team.call.crank
+- Crank. Steady does it.
+? flag:team.call.tip
+- Tip it back. Hold.
+? flag:team.call.valves
+- Valves. Left to right.
+? flag:team.call.open
+- Open them up again.
+? flag:team.call.drain
+- Drain it. Mind your boots.
+? flag:team.call.done
+- Done! Tea's on me. Well. Tea's on the kettle.   #funny
+// P2 (Day 15): his word, if Tomas's isn't given
+? flag:train.p2.word
+- Asking about that scrubber? Ask who sleeps near it.
+- And check they were in. The Roster knows.
+
+// the crew at the board after your promotion (seat X plays them as you come out)
+== promoted
+- There you are! Officer {nick}!   #warm
+- Knew it. Knew it on your first day.
