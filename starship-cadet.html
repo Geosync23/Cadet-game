@@ -281,7 +281,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.71.3
+   STARSHIP CADET: CSV Wren                           build 0.71.4
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8695,7 +8695,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.71.3';                           // keep in step with the header's build line
+const GAME_BUILD = '0.71.4';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -9645,7 +9645,8 @@ function schedBuild(p, d, occ, S) {
           if (!mine && !isFree(pl.id, s, end, o.tag)) continue;
           if (shut && evClosed(pl, B + s)) continue;          // closed for the event
           if (act === 'leisure' && type.startsWith('work:') && (S.deskOf(pl.id) || (occ.rotIds && occ.rotIds.has(pl.id)))) continue;   // a guest at a work type: never someone's desk, nor today's stand-in's
-          linger(s - (dk !== deck ? C : 0)); go(dk);
+          if (o.queue && s - arrive >= SHOWER_Q) { go(dk); seg('off', s, 'booth-queue', null, { tag: o.queue }); }   // a wait worth queueing for: in the line by the place (0.71.4, the booths)
+          else { linger(s - (dk !== deck ? C : 0)); go(dk); }
           if (!mine) hold(pl.id, s, end);
           const an = o.anim || placeAnim(pl), ex = {}; if (o.tag) ex.tag = o.tag; if (an) ex.anim = an;
           seg(act, end, pl.type, pl.id, ex);
@@ -9795,7 +9796,7 @@ function schedBuild(p, d, occ, S) {
       let rang = false;                                  // a ship-wide event (C7): a call owed when comms come back, or staying in
       if (EVD) {
         const ru = evRule(B + t, 'rush'), ra = ru && (ru.at || [600, 1080]);
-        if (ru && !called && t >= ra[0] && t < ra[1] - 20 && evOwed(p, evAt(B + t), d)) { called = true; rang = !!take('callhome', [[3, 'callhome']], 20 + Math.round(15 * U(63)), { wait: 30, min: 12, by: to, tag: 'rush' }); }
+        if (ru && !called && t >= ra[0] && t < ra[1] - 20 && evOwed(p, evAt(B + t), d)) { called = true; rang = !!take('callhome', [[3, 'callhome']], 20 + Math.round(15 * U(63)), { wait: 30, min: 12, by: to, tag: 'rush', queue: 'boothq' }); }
       }
       const si = !rang && EVD && evRule(B + t, 'stayIn', p);
       if (!rang && ((si && schedU(p.seed, d, 700 + k + n) < si.share) || pick[1] === 'rest' || !take('leisure', opts.filter(o => o[1] !== 'rest'), 1440, { by: to, min: 15 }))) {
@@ -9817,7 +9818,7 @@ function schedBuild(p, d, occ, S) {
     // the gym is likelier the lower fitness is, a call home the lonelier someone is
     const gym = () => take('gym', [[3, 'gym']], 40 + Math.round(20 * U(61)), { wait: 15, min: 25 });
     if (schedU(p.seed, d, 60) < GYM_BASE(p, d) + (100 - N.fitness) / 100 * .9) out.push(gym);
-    if (schedU(p.seed, d, 62) < CALL_BASE(p, d) + (100 - N.social) / 100 * .6) out.push(() => take('callhome', [[3, 'callhome']], 20 + Math.round(15 * U(63)), { wait: 10, min: 12 }));
+    if (schedU(p.seed, d, 62) < CALL_BASE(p, d) + (100 - N.social) / 100 * .6) out.push(() => take('callhome', [[3, 'callhome']], 20 + Math.round(15 * U(63)), { wait: 10, min: 12, queue: 'boothq' }));
     if (schedU(p.seed, d, 66) < SHOP_BASE(p, d)) out.push(() => {   // the crew store: browse the shelves, then pay at the till if there is one
       if (take('leisure', [[3, 'shop']], 10 + Math.round(12 * U(67)), { wait: 5, min: 8, tag: 'shop' })) take('leisure', [[3, 'pay']], 2, { wait: 6, min: 1, tag: 'pay' });
     });
@@ -12428,6 +12429,7 @@ function playerTap(it, at, point) {
     let mt = null; try { mt = careerText('gym.member'); } catch (e) { mt = null; }
     toast(it.t, mt || 'Gym club: you\'re a member, so this one\'s yours.');
   }
+  if (!free && (kind === 'call' || kind === 'shower') && typeof queueJoin === 'function' && queueJoin(kind, near[0][0], it)) return true;   // every booth or shower in use: the line (section 10, 0.71.4)
   if (!free) {
     const a = heldBy(near[0][0].id);
     toast(it.t, (kind === 'tray' ? 'There\'s a queue at the servery. Try again in a minute.' : kind === 'toilet' ? 'Occupied: the little light is red. Try another, or wait a minute.' : 'In use: ' + a.p.name + ' is ' + (kind === 'eat' ? 'sitting there.' : 'on it.')) + ' ' + it.x);
@@ -44454,7 +44456,112 @@ function showerQSpot(a, w) {
   const nx = whereIs(a.p, w.until), pl = nx && nx.placeId && PLACE_OF.get(nx.placeId); if (!pl) return null;
   const l = washDoorTiles(pl.room); return l.length ? '@wq-' + pl.room + '-' + (idHash(a.p.id) % l.length) : null;
 }
+// the live queues at the call booths and the showers (0.71.4, the user's playtest 2 items 15 + 20: "a queue at the
+// booths, with a message saying your place in line", "a visible queue at the showers"): whoever's plan has them
+// waiting for one (tag 'boothq', 'showerq'), or heading for the one you're using, stands in a line in that room in the
+// order they came into the room (on the way, they head for the back); you join at the back (queueJoin, from section 15's tap on a busy booth or shower) and take
+// the first free one once nobody's ahead of you. While you wait, anyone who came after you waits behind you. Live only,
+// not saved (as the servery line): a load starts you out of it. The line: the deck architect's 'shower-queue' places,
+// then open tiles of the room leading away from them (or from the middle of the booths), past every place's tile and
+// the doorways. For other sections: queueOf(type) ('callhome' or 'shower') -> { ids: front first ('player' is you), you }
+const QUEUE_TAGS = { boothq: 'callhome', showerq: 'shower' }, QUEUE_MAX = 6;
+const QUEUE_NOW = new Map(), QUEUE_SPOT = new Map(), QUEUE_IN = new Map(), QUEUE_CLAIM = new Set();   // 'type|room' -> [{ id, from }] front first; crew id -> their spot (null: past the spots); crew id -> when they came into the room; the places those ahead of you are going to. Made 4 times a second
+let QUEUE_YOU = null, QUEUE_AT = null, QUEUE_T = 0, QUEUE_D = null;   // QUEUE_T, QUEUE_D: the lines are made again 4 times a second, and on a new deck; you in a line: { type, kind, room, deck, at, title, flavour, k, tile, face, there, retry }; the made spots
+const queueOrd = n => n + (n % 100 >= 11 && n % 100 <= 13 ? 'th' : ['th', 'st', 'nd', 'rd'][n % 10] || 'th');
+function queueText(kind, fill, or) {                     // the head writer's line (LINES[kind]), else ours
+  const L = typeof LINES !== 'undefined' && LINES[kind], e = Array.isArray(L) && L.length ? L[SHIP.time.day % L.length] : null;
+  return (e && typeof e.text === 'string' ? e.text : or).replace(/\{(\w+)\}/g, (m, x) => fill[x] !== undefined ? fill[x] : m);
+}
+function queueSpots(type, room) {                        // the spot ids of that room's line, front first (made once a deck)
+  if (!QUEUE_AT || QUEUE_AT.d !== deckDef) { QUEUE_AT = new Map(); QUEUE_AT.d = deckDef; QUEUE_AT.lines = new Map(); }
+  const key = type + '|' + room; if (QUEUE_AT.lines.has(key)) return QUEUE_AT.lines.get(key);
+  const pls = (deckDef.places || []).filter(q => q.room === room), mine = pls.filter(q => q.type === type);
+  const out = type === 'shower' ? pls.filter(q => q.type === 'shower-queue').sort((a, b) => a.id < b.id ? -1 : 1).map(q => q.id) : [];
+  const used = new Set((deckDef.places || []).map(q => placeSpot(q.id)).filter(sp => sp && sp.walk).map(sp => K(sp.walk)));
+  const door = ([i, j]) => [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([a, b]) => free(i + a, j + b) && roomAt(i + a, j + b) !== room && edgeOpen(i, j, i + a, j + b));
+  const T = (ROOM_TILES[room] || []).filter(t => free(...t) && !used.has(K(t)) && !door(t)), open = new Set(T.map(K));
+  const ws = mine.map(q => placeSpot(q.id)).filter(Boolean); if (!ws.length) { QUEUE_AT.lines.set(key, out); return out; }
+  const cx = ws.reduce((a, sp) => a + sp.walk[0], 0) / ws.length, cz = ws.reduce((a, sp) => a + sp.walk[1], 0) / ws.length, far = t => Math.hypot(t[0] - cx, t[1] - cz);
+  const last = out.length ? placeSpot(out[out.length - 1]) : null;
+  let at = last ? last.walk : T.slice().sort((a, b) => far(a) - far(b) || a[0] - b[0] || a[1] - b[1])[0], dir = null;
+  const seen = new Set(out.map(id => { const sp = placeSpot(id); return sp ? K(sp.walk) : ''; }));
+  if (!last && at) { seen.add(K(at)); QUEUE_AT.set('@ql' + deckDef.num + '-' + key + '-0', { at, to: [cx, cz] }); out.push('@ql' + deckDef.num + '-' + key + '-0'); }
+  while (at && out.length < QUEUE_MAX) {                 // away from the places, straight on where it can
+    const nx = [[1, 0], [-1, 0], [0, 1], [0, -1]].map(([a, b]) => [at[0] + a, at[1] + b, a, b]).filter(([i, j]) => open.has(i + ',' + j) && !seen.has(i + ',' + j) && edgeOpen(at[0], at[1], i, j))
+      .sort((m, n) => far(n) - far(m) || (dir && (n[2] === dir[0] && n[3] === dir[1]) - (m[2] === dir[0] && m[3] === dir[1])) || m[0] - n[0] || m[1] - n[1])[0];
+    if (!nx) break;
+    const id = '@ql' + deckDef.num + '-' + key + '-' + out.length; seen.add(nx[0] + ',' + nx[1]);
+    QUEUE_AT.set(id, { at: [nx[0], nx[1]], to: at }); out.push(id); dir = [nx[2], nx[3]]; at = [nx[0], nx[1]];
+  }
+  QUEUE_AT.lines.set(key, out); return out;
+}
+function queueTick(dt, now) {
+  const N = deckDef.num;
+  if (QUEUE_YOU && (QUEUE_YOU.deck !== N || ACT)) queueOut(false);   // off the deck, or doing something else
+  if ((QUEUE_T -= dt) > 0 && QUEUE_D === deckDef) { if (QUEUE_YOU) queueYou(dt, false); return; }
+  QUEUE_T = .25; QUEUE_D = deckDef; QUEUE_NOW.clear(); QUEUE_SPOT.clear(); QUEUE_CLAIM.clear();
+  const Y = QUEUE_YOU, seen = new Set();
+  if (Y && Y.at === null && roomAt(...player.here()) === Y.room) Y.at = now;   // you're in the room: your place in the line from now
+  const add = (type, room, e) => { const k = type + '|' + room; (QUEUE_NOW.get(k) || QUEUE_NOW.set(k, []).get(k)).push(e); };
+  for (let i = 0; i < DECK_CREW.length; i++) {
+    const a = DECK_CREW[i], w = whereIs(a.p, now); if (!w || w.deck !== N) continue;
+    let type = QUEUE_TAGS[w.tag], pl = null, line = !!type;
+    if (type) { const nx = whereIs(a.p, w.until); pl = nx && nx.placeId && PLACE_OF.get(nx.placeId); }
+    else if (w.placeId && (w.type === 'callhome' || w.type === 'shower') && !(a.settled && a.spot && a.spot.id === w.placeId)) { pl = PLACE_OF.get(w.placeId); type = pl && pl.type; }   // on the way to one
+    if (!pl || pl.type !== type) continue;
+    if (!QUEUE_IN.has(a.p.id) && roomAt(...a.here()) === pl.room) QUEUE_IN.set(a.p.id, now);
+    const from = QUEUE_IN.has(a.p.id) ? QUEUE_IN.get(a.p.id) : Infinity; seen.add(a.p.id);
+    if (!line && pl.id !== PLAYER_PLACE && !(Y && Y.at !== null && Y.type === pl.type && Y.room === pl.room && from > Y.at)) { QUEUE_CLAIM.add(pl.id); continue; }   // theirs: unless it's the one you're using, or you were waiting first
+    add(type, pl.room, { id: a.p.id, from });
+  }
+  for (const id of QUEUE_IN.keys()) if (!seen.has(id)) QUEUE_IN.delete(id);
+  if (Y) add(Y.type, Y.room, { id: 'player', from: Y.at === null ? Infinity : Y.at });
+  for (const [k, L] of QUEUE_NOW) {
+    L.sort((x, y) => x.from - y.from || (x.id === 'player' ? 1 : y.id === 'player' ? -1 : x.id < y.id ? -1 : 1));
+    const sp = queueSpots(...k.split('|')); for (let i = 0; i < L.length; i++) if (L[i].id !== 'player') QUEUE_SPOT.set(L[i].id, sp[i] || null);
+  }
+  if (QUEUE_YOU) queueYou(dt, true);
+}
+function queueOf(type) {
+  let k = null; for (const key of QUEUE_NOW.keys()) if (key.startsWith(type + '|') && (!k || QUEUE_YOU && key === QUEUE_YOU.type + '|' + QUEUE_YOU.room)) k = key;
+  const ids = k ? QUEUE_NOW.get(k).filter(e => e.from < Infinity).map(e => e.id) : []; return { ids, you: ids.indexOf('player') };
+}
+// you, in a line: walk up as it moves, a word when your place changes, and the first free one is yours at the front
+// (fresh: the lines were just made, so who's ahead and where they're going is up to date)
+function queueYou(dt, fresh) {
+  const Q = QUEUE_YOU, L = QUEUE_NOW.get(Q.type + '|' + Q.room) || [], k = L.findIndex(e => e.id === 'player'), pp = player.obj.position;
+  if (player.steer || player.goal && Q.tile && K(player.goal) !== K(Q.tile) || Q.there && !player.path.length && Q.tile && Math.hypot(cellPos(...Q.tile).x - pp.x, cellPos(...Q.tile).z - pp.z) > 1.5) { queueOut(true); return; }   // walked off
+  if (fresh && k === 0 && Q.at !== null) {
+    const pl = [...PLACE_OF.values()].find(q => q.type === Q.type && q.room === Q.room && !(PRIVATE_TYPES.has(q.type) && privatePlace(q)) && !BUSY.has(q.id) && !QUEUE_CLAIM.has(q.id) && !(heldBy(q.id) && !QUEUE_SPOT.has(heldBy(q.id).p.id)));
+    if (pl) {
+      QUEUE_YOU = null; player.stop();
+      const pose = (typeof poseOf === 'function' ? poseOf(pl) : null) || pl.anim || (Q.kind === 'call' ? 'call' : PLAYER_ACTS[Q.kind].pose);
+      actStart(Q.kind, pl.id, { pose, title: Q.title, flavour: Q.flavour, after: queueText('queue.go', {}, 'Your turn.') });
+      return;
+    }
+  }
+  if (fresh && Q.at !== null && k !== Q.k) { Q.k = k; toast(Q.title, k === 0 ? queueText('queue.next', {}, 'You\'re next in line.') : queueText(Q.type === 'shower' ? 'queue.shower' : 'queue.booth', { nth: queueOrd(k + 1) }, 'You\'re {nth} in line' + (Q.type === 'shower' ? ' for a shower.' : ' for a booth.'))); }
+  const id = queueSpots(Q.type, Q.room)[k], sp = id && placeSpot(id);
+  if ((Q.retry -= dt) > 0 || !sp || Q.tile && K(Q.tile) === K(sp.walk)) return;
+  Q.retry = .5; if (K(player.here()) === K(sp.walk)) { Q.tile = sp.walk.slice(); Q.there = true; return; }
+  if (playerGo(sp.walk, () => { if (QUEUE_YOU !== Q) return; Q.there = true; player.face = player.obj.rotation.y = sp.face; })) { Q.tile = sp.walk.slice(); Q.there = false; }
+}
+// from section 15's tap when every booth or shower near it is in use: into that room's line (true: handled)
+function queueJoin(kind, pl, it) {
+  if (!pl || !QUEUE_KINDS_OK.has(pl.type)) return false;
+  if (QUEUE_YOU && QUEUE_YOU.type === pl.type && QUEUE_YOU.room === pl.room) { QUEUE_YOU.k = -1; return true; }   // in it already: your place again
+  QUEUE_YOU = { type: pl.type, kind, room: pl.room, deck: deckDef.num, at: null, title: it.t, flavour: it.x, k: -1, tile: null, face: 0, there: false, retry: 0 };
+  toast(it.t, queueText('queue.join', {}, 'All in use. You join the line.'));
+  return true;
+}
+const QUEUE_KINDS_OK = new Set(Object.values(QUEUE_TAGS));
+function queueOut(walked) {
+  const Q = QUEUE_YOU; QUEUE_YOU = null;
+  if (Q && walked) toast(Q.title, queueText('queue.left', {}, 'You step out of the line.'));
+}
 function lineSpotMake(id) {
+  const ql = QUEUE_AT && QUEUE_AT.d === deckDef && QUEUE_AT.get(id);   // a line at the booths or the showers (queueSpots)
+  if (ql) { const c = cellPos(...ql.at), to = ql.to.length ? cellPos(ql.to[0], ql.to[1]) : c; return { id, walk: ql.at, x: c.x, z: c.z, y: 0, face: Math.atan2(to.x - c.x, to.z - c.z), pose: 'stand', anim: null, room: roomAt(...ql.at), onTile: true }; }
   const q = /^@wq-(\w+)-(\d+)$/.exec(id); if (q) { const at = washDoorTiles(q[1])[+q[2]]; if (!at) return null; const c = cellPos(...at);
     return { id, walk: at, x: c.x, z: c.z, y: 0, face: 0, pose: 'stand', anim: null, room: q[1], onTile: true }; }
   const m = /^@line-(\d+)$/.exec(id), at = m && LINE_AT[+m[1]]; if (!at) return null;
@@ -44573,6 +44680,7 @@ class CrewAgent {
     if (w.deck !== N) goalId = '@lift';
     else if (w.act === 'commute') { const nx = whereIs(this.p, w.until); goalId = nx.deck === N ? nx.placeId || null : '@lift'; }
     else goalId = w.placeId || (w.tag === 'showerq' ? showerQSpot(this, w) : null);   // the shower queue with no place: inside the washroom door
+    if (goalId !== '@lift' && QUEUE_SPOT.has(this.p.id)) goalId = QUEUE_SPOT.get(this.p.id);   // in a line at the booths or the showers, in turn (queueTick, 0.71.4)
     this.tag = w.placeId === goalId ? w.tag || null : null;   // what they'll do there (the plan's tag)
     const mg = this.mealStep(w, now, N);                 // the servery line and the tray, inside the mess hall (0.26.30)
     if (mg !== undefined) { goalId = mg; this.tag = null; }
@@ -45157,6 +45265,7 @@ function crewArrive(p, w, now, mid) {
 function updateDeckCrew(dt) {
   const now = shipNow(), N = deckDef.num;
   lineTick(dt, now);
+  queueTick(dt, now);                                    // the booth and shower lines (0.71.4)
   for (let i = DECK_CREW.length - 1; i >= 0; i--) if (!DECK_CREW[i].update(dt, now, N)) { DECK_CREW[i].remove(); DECK_CREW.splice(i, 1); }
   for (let i = 0; i < DECK_CREW.length; i++) { const a = DECK_CREW[i]; if (a.h.full) { a.h.update(dt, clock.elapsedTime); a.h.rig.root.visible = crowd.visible; } }   // indexed: no iterator a frame (0.26.40)
   BUSY.clear(); for (let i = 0; i < DECK_CREW.length; i++) { const a = DECK_CREW[i]; if (a.settled && a.spot) BUSY.add(a.spot.id); }
