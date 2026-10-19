@@ -8499,11 +8499,11 @@ const REC_CREW_PLACES = [
     return { id: '7-ring-' + (k + 1), type: 'rec:seat', ring: true, at: [Math.floor(x), Math.floor(z)], walk: [41, Math.max(3, Math.min(14, Math.floor(z)))], xy: [+x.toFixed(2), +z.toFixed(2)], y: 1.0,
       face: Math.round(Math.atan2(43.7 - x, 9.0 - z) * 180 / Math.PI), pose: 'sit', room: 'A' }; }),
   { id: '7-stool-1', type: 'rec:stool', at: [42, 9], walk: [41, 9], xy: [42.35, 9.0], y: 1.05, face: 'w', pose: 'sit', room: 'A' },
-  { id: '7-lectern-1', type: 'rec:lectern', at: [43, 7], walk: [41, 7], xy: [43.35, 7.3], y: .55, face: 'w', pose: 'stand', room: 'A' },
+  { id: '7-lectern-1', type: 'rec:lectern', at: [43, 7], walk: [41, 7], xy: [43.3, 7.3], y: .55, face: 'w', pose: 'stand', room: 'A', move: { kind: 'address' } },   // the spots and moves: rec engineer B2's (0.84.9)
   { id: '7-lectern-2', type: 'rec:lectern', at: [43, 8], walk: [41, 8], xy: [43.95, 8.4], y: .55, face: 'w', pose: 'stand', room: 'A' },
-  { id: '7-act-1', type: 'rec:act', at: [42, 9], walk: [41, 9], xy: [42.85, 9.6], y: .55, face: 'w', pose: 'stand', room: 'A' },
-  { id: '7-act-2', type: 'rec:act', at: [42, 10], walk: [41, 10], xy: [42.85, 10.6], y: .55, face: 'w', pose: 'stand', room: 'A' },
-  { id: '7-act-piano', type: 'rec:act', at: [44, 12], walk: [41, 12], xy: [44.05, 12.4], y: 1.0, face: 'w', pose: 'sit', anim: 'play', room: 'A' },
+  { id: '7-act-1', type: 'rec:act', at: [43, 9], walk: [41, 9], xy: [43.3, 9.6], y: .55, face: 'w', pose: 'stand', room: 'A', move: { kind: 'perform', act: 'sing' } },   // at the mic
+  { id: '7-act-2', type: 'rec:act', at: [43, 10], walk: [41, 10], xy: [43.3, 10.2], y: .55, face: 'w', pose: 'stand', room: 'A', move: { kind: 'perform', act: 'juggle' } },
+  { id: '7-act-piano', type: 'rec:act', at: [43, 11], walk: [41, 11], xy: [43.0, 11.25], y: 1.0, face: 's', pose: 'sit', anim: 'play', room: 'A', move: { kind: 'perform', act: 'piano' } },   // the bench by the side-on piano
   { id: '7-booth-1', type: 'rec:booth', works: true, at: [32, 12], xy: [32.85, 12.6], y: .45, face: 'e', pose: 'sit', room: 'b' },
   // the regatta's crowd (the gather venue 'river-banks', DECKS[7].gathers): the beach, the concourse's glass, the bank by the
   // rack; Chief Holt's spot with his horn on the dock (lead 1)
@@ -33137,17 +33137,28 @@ onSim('tradition', x => {
   if (x.id === 'rec-wso') { const c = wsoCourt(x.day); for (const id of (c && c.three) || []) recBoardAdd('wso', id, x.day); }
   if (x.id === 'rec-wall-night') { for (const p of schedPeople()) if (planDay(p, x.day).some(s => s.type === 'rec:climb' && evTagId(s.tag) === x.id)) recBoardAdd('bell', p.id, x.day); if (x.you) recBoardAdd('bell', 'you', x.day); }
   if (x.id === 'rec-paddle-club' && x.you) SHIP.rec.pc++;
-  if (x.id === 'rec-regatta') { const w = regattaWinner(x.day); if (w) recBoardAdd('reg', w, x.day); }
-  if (x.id === 'rec-cup') { const c = cupBracket(x.day), you = REC.cup && REC.cup.day === x.day && REC.cup.won; if (you || c && c.winner) recBoardAdd('cup', you ? 'you' : c.winner, x.day); }
+  if (x.id === 'rec-wall-night') { const names = recBoard('bell', x.day).map(id => id === 'you' ? 'you' : shortName(schedPeople().find(p => p.id === id) || { name: id })).join(', ');
+    if (names) recMail(x.at, 'Tomas Lind', x.you ? 'mail.rec.bellboard.you' : 'mail.rec.bellboard', 'The bell board', 'This season\'s bell board in the foyer: ' + names + '.', { text: names }); }
+  if (x.id === 'rec-regatta') { const w = regattaWinner(x.day); if (w) { recBoardAdd('reg', w, x.day); const n = shortName(schedPeople().find(p => p.id === w) || { name: w }); recMail(x.at, 'Chief Bram Holt', 'mail.rec.regatta.won', 'The regatta', n + ' won the regatta. The pennant is up over the dock.', { name: n }); } }
+  if (x.id === 'rec-cup') { const c = cupBracket(x.day), you = REC.cup && REC.cup.day === x.day && REC.cup.won; if (you || c && c.winner) { recBoardAdd('cup', you ? 'you' : c.winner, x.day);
+    const n = you ? 'you' : shortName(schedPeople().find(p => p.id === c.winner) || { name: c.winner }); recMail(x.at, 'Pell Okafor', 'mail.rec.cup.won', 'The Lightdisc Cup', 'The Lightdisc Cup goes to ' + n + '. The foyer\'s board has the name.', { name: n }); } }
 });
 // the first Captain's all-hands (lead 17's call 1: no invented trigger): the first address of the first ship-wide event.
 // From then on the season's all-hands come on the first Monday of each season (rec-all-hands, flag rec.allHands), and film
 // night moves to the auditorium for good (rec-film-night, flag rec.filmMoved), the junior common room a quiet Saturday after;
 // a note for the writers' Mail (simNote('recMoved'))
+// the writer's words for the rec deck's Mail (W3's banks/mail-rec.lines: mail.rec.*), else the stand-in; "subject | body" or a body
+const recWords = (key, standIn, ctx) => (typeof quizText === 'function' && quizText(key, SHIP.time.day, ctx)) || standIn;
+const recMail = (at, from, key, subject, standIn, ctx) => {
+  if (typeof mailSend !== 'function') return;
+  const w = recWords(key, standIn, ctx), i = w.indexOf(' | ');
+  mailSend({ at, from, subject: i > 0 ? w.slice(0, i) : subject, body: i > 0 ? w.slice(i + 3) : w, quiet: true });
+};
 function recFirstAllHands(at) {
   const d = Math.floor(at / 1440) + 1; SHIP.rec.ah = d; SHIP.rec.film = d;
   flagSet('rec.allHands', d); flagSet('rec.filmMoved', d);
   if (typeof simNote === 'function') simNote('recMoved', { day: d, what: 'film' });
+  recMail(at, 'Pell Okafor', 'mail.rec.film.moved', 'Film night has moved', 'Film night is in the auditorium from this Saturday: the big screen, the violet seats and popcorn from the galley. The junior common room is all yours for a quiet Saturday.');
 }
 // the regatta's winner (heats of four on paper, the pennant): among those who paddled at it, seeded by the day (key 1038)
 const regattaPaddler = (p, d) => p.id !== 'holt' && (evHas(p, d, 'kayaker') || schedU(p.seed, d, 1038) < .4);   // the rest watch from the banks
@@ -33625,6 +33636,8 @@ function recActCard(e, d, now) {
   const say = (k, x) => { const L = typeof lineFor === 'function' ? lineFor(q.id, k, { t: now }) : null; return L && L.text || x; };
   const did = k => { if (typeof leisureAdd === 'function') leisureAdd(10, 'talent');
     if (typeof newsAdd === 'function') newsAdd({ id: 'rec-talent-you@' + d, about: 'you', lines: [['Did you see the new hand at talent night?', 'The new hand got up at talent night! Brave.', 'Talent night: the new hand\'s act. People are still talking about it.'][k]], seed: ['ferreira', 'volkov-maeve'], weight: .7, life: 4 }); };
+  const baked = MEETING_SCRIPTS['rec.talent.you'];          // the writer's act card (W3), when it's baked: its first three choices are acts
+  if (baked) { baked.onPick = k => { if (k < 3) did(k); }; dialogueShow('rec.talent.you', { id: 'rec.talent@' + d, who: [q.id], at: now }); return; }
   MEETING_SCRIPTS['rec.talent'] = { title: 'Talent night', gist: 'Talent night in the auditorium.',
     onPick: k => { if (k < 3) did(k); },
     lines: [{ who: q.id, text: say('talent.ask', 'You\'re on the sheet if you want to be. One act. Nobody fails at talent night.') },
@@ -33638,10 +33651,14 @@ function recActCard(e, d, now) {
 // speaker; a chief remembers who asked) or just listen. Words: the speaker's own lines (kinds talk.open, talk.answer,
 // talk.listen, the writer's), else stand-ins. SHIP.rec.talk keeps the talks heard and the speakers asked, by day
 function recTalkCard(e, d, now) {
-  const t = recTalk(d), q = t && schedPeople().find(p => p.id === t.by); if (!q || typeof dialogueShow !== 'function') return;
+  const t = recTalk(d), q = t && schedPeople().find(p => p.id === t.by);
+  if (t && t.by === 'you' && MEETING_SCRIPTS['talk.you'] && typeof dialogueShow === 'function') { dialogueShow('talk.you', { id: 'rec.talk@' + d, who: [], at: now }); return; }   // your own talk (W3's script)
+  if (!q || typeof dialogueShow !== 'function') return;
   const say = (k, x) => { const L = typeof lineFor === 'function' ? lineFor(q.id, k, { t: now }) : null; return L && L.text || x; };
   const key = t.by + '@' + d, T = SHIP.rec.talk;
   if (!T.heard.includes(key)) { T.heard.push(key); if (T.heard.length > 40) T.heard.shift(); }
+  const baked = MEETING_SCRIPTS['talk.' + t.by];          // the writer's longer script for this talk (W3's talk.<speaker>), when it's baked
+  if (baked) { dialogueShow('talk.' + t.by, { id: 'rec.talk@' + d, who: [q.id], at: now }); return; }
   MEETING_SCRIPTS['rec.talk'] = { title: '"' + t.title + '"', gist: shortName(q) + ' gave a talk: "' + t.title + '".',
     onPick: k => { if (k === 0 && !T.asked.includes(key)) { T.asked.push(key); if (T.asked.length > 40) T.asked.shift(); if (t.size === 'chief' && typeof memAdd === 'function') memAdd(q.id, 'asked.talk'); } },
     lines: [{ who: q.id, text: say('talk.open', 'So. ' + t.title + '. Stop me if you\'ve heard this one.') },
@@ -34049,7 +34066,7 @@ function recMyTalk(now) {
   const d0 = Math.floor(now / 1440) + 1; let d = d0 + 4;
   while (!([0, 3].includes(weekday(d)) && !recBigDay(d) && !recTalk(d))) d++;
   T.mine = d; EV_DAYS.clear(); for (const x of [...SHIP_DAYS.keys()]) if (x >= d) SHIP_DAYS.delete(x);
-  if (typeof mailSend === 'function') mailSend({ at: now, from: 'Comms Chief Lucia Ferreira', subject: 'A Wren talk from you?', body: 'Would you give one of the small Wren talks? ' + WEEKDAYS[weekday(d)] + ' at 19:00, on the auditorium stage. Call it "What I learned in my first month". Twenty minutes, then questions. Tea provided.' });
+  recMail(now, 'Comms Chief Lucia Ferreira', 'mail.rec.talk.you', 'A Wren talk from you?', 'Would you give one of the small Wren talks? ' + WEEKDAYS[weekday(d)] + ' at 19:00, on the auditorium stage. Call it "What I learned in my first month". Twenty minutes, then questions. Tea provided.', { weekday: WEEKDAYS[weekday(d)] });
   if (typeof simNote === 'function') simNote('recTalkAsked', { day: d });
 }
 // the deck architect's dressShow (0.38.1): the running event's dressing for its phase, plus every saved trace. It does

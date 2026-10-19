@@ -401,7 +401,7 @@ with sync_playwright() as pw:
       }
       // a tradition that waits for a story flag (bridge hour: 'bridge.invited') comes on once it's set, and goes again
       for (const ev of SHIP_TRADITIONS.filter(e => e.flag && typeof flagSet === 'function')) {
-        const was = flag(ev.flag), on = () => [...Array(56).keys()].filter(x => eventsOn(x + 1).some(e => e.id === ev.id)).length;
+        const was = flag(ev.flag), on = () => [...Array(56).keys()].map(x => x + 1).concat([92, 99]).filter(x => eventsOn(x).some(e => e.id === ev.id)).length;   // + 92, 99: a season's first Monday (the rec deck's all-hands, 0.83)
         flagSet(ev.flag, null); const off = on(); flagSet(ev.flag, true); const yes = on(); flagSet(ev.flag, was === undefined ? null : was); eventsOn(1);
         out.flags = (out.flags || []).concat(ev.id + ': ' + off + ' without, ' + yes + ' with ' + ev.flag);
         if (off || !yes) out.bad.push(ev.id + ' and its flag ' + ev.flag + ': ' + off + ' days without, ' + yes + ' with');
