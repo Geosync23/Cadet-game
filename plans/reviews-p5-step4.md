@@ -4,6 +4,11 @@ R4 succeeds R3 (whose verdicts are in `plans/reviews-p5-step2.md`). R5 (session_
 
 ## Playtest update 2 (brief: plans/brief-playtest2.md on claude/lead-pillar1; build master BM7 session_01QbuzvT3TwzMwSWRmakzX8Z)
 
+### X2 claude/crew-pt1 6c26c72 (0.71.6: R5's queue fixes, queue.join), R6: FAIL (interactions_check; X3 fixing)
+- Read: queueJoin ends the current activity first (R5's fix); past the line's last spot crew keep their old goal and you walk just inside the washroom door; newGameStart leaves any line (guarded at load); queue.join fallbacks by X2 in style ("Both showers are busy..." assumes two showers a washroom, true of the built washrooms); deck_check fails when nothing was compared. No code after `//`.
+- **interactions_check FAIL `ixtap-3-lift-1`**: "a tap at the stop (lamp, Deck 3) starts the work" gets no activity, only the job's toast. Bisect (isolated runs): passes on 056f8d8 (0.71.3) and ec0cbc36 (0.71.4), fails on 693e4f4 (0.71.5) and 6c26c72. So it came with 0.71.5 (the mornings or withHold), which I passed without running interactions_check: my miss. X2 has handed over; X3 (session_01KWHQN4wymqpEZSbsHkDE43) is fixing it.
+- Other checks on 6c26c72: deck_check OK; cadet_test vs 693e4f4 ALL IDENTICAL.
+
 ### U2 claude/hud-pt2 06a5e99 (check only, over 0f34cfb9), R6: PASS
 interactions_check's round-guide part stubbed `window.roundTrainStep`, which doesn't replace 24a's function declaration inside the game's closure on a merge with E1/E6's rounds (so BM7's 92d40d5 showed empty board arrow/tips: the check, not the game). It now assigns the name itself (the eval runs inside the closure; the game isn't strict, so with no 24a it makes a global, deleted after) and restores the real one. No game change.
 
@@ -20,7 +25,7 @@ Read by hand (362ed095..0f34cfb9, ~140 game lines); no code hidden after `//`.
 - Wake 05:30-07:15 (`330 + 105·U(10)`); on a quiet morning (no inspection or gathering, not a skips-breakfast day) `U(k+13)`: ~3 in 10 eat first then wash, ~2 in 10 a 15-25 minute workout, ~2 in 10 a coffee or read, the rest wash and go; day_check's new line fails anyone on the day shift late to work or without breakfast. withHold: load/unload stops always get 'carry' (the loaders' crate shows).
 - My probe of planDay (days 1, 3, 4; ~45 on the day shift): wakes spread 05:30-07:15, people eat at 06:18-08:38, workouts 4 and 6 of 45 on days 1 and 3 (fewer than 2 in 10: the gym needs 80+ minutes in hand), none on day 4 (not a quiet morning). Fine for the user's ask; tune later if wanted.
 - Notes: the morning keys `U(k+13..15)` with k = 20/22 overlap U(35), which the after-shift wash also uses (correlated, still deterministic); day_check's "first thing" tally counts the toilet's hand-wash as 'wash', so it under-counts workouts (the game is right, the label isn't).
-- Checks on 693e4f4: node --check OK; day_check OK (mornings line passes); food_check OK; deck_check OK; cadet_test vs ec0cbc36 differs on the crew, and with the wake/morning lines reverted (rev of 693e4f4) ALL IDENTICAL vs ec0cbc36 (X2's claim confirmed). intro_check timed out on a reload under CPU load in my runs (a 30 s page.goto, not a FAIL); BM7's intro run covers it.
+- Checks on 693e4f4: node --check OK; day_check OK (mornings line passes); food_check OK; deck_check OK; cadet_test vs ec0cbc36 differs on the crew, and with the wake/morning lines reverted (rev of 693e4f4) ALL IDENTICAL vs ec0cbc36 (X2's claim confirmed). intro_check timed out on a reload under CPU load in my runs (a 30 s page.goto, not a FAIL); BM7's intro run covers it. **Later:** interactions_check fails ixtap-3-lift-1 from this build on (see 6c26c72 above).
 
 ### U claude/hud-pt1 0335523d (0.72.5 93194ef6 + 0.72.6: playtest 2 items 3, 6, 7, 9, 10, 11, 12, 17, 18, 19), R5: PASS (checks partly pending)
 Diff cbd08fc7..0335523d (47 game lines), read by hand. U has retired (U2 continues the HUD items).
