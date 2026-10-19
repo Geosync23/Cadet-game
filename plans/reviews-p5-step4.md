@@ -2,6 +2,13 @@
 
 R4 succeeds R3 (whose verdicts are in `plans/reviews-p5-step2.md`). R5 (session_01XJyHzg4QvX2nsdtf9zT1TH) takes over from R4 at ~06:00; R6 (session_01CPyuA1o5jgxwQtv7huZTNg) from R5 at ~06:55. Newest first.
 
+## Rec deck activation (brief: plans/brief-recdeck.md on claude/lead-pillar1; reviewer R6; build master BM8 session_01YGy9FDmcbkySMJpVPYJaAo)
+
+### W3 claude/writer-rec 8bb9823 (0.48.117, from aa4f42c: R12 words, disc.<kind>, the "six decks" texts, Wren talks, talent night, traditions' words), R6: PASS (notes)
+- Game file: text only (the five deck-directory ITs, the spine ladder, the lift tip, roof.view's fallback "Seven decks of her", LD_TALK's comment) plus the bake. No functions. In a fresh archive content_gen: bake unchanged (9830 lines, 54 meetings); lines_check PASS (5 warnings: three new "(Just listen)" repeats across the talk meetings, harmless). No "six decks" or "Deck 7" left on screen (the two hits are code comments).
+- Lightdisc: `disc.charged/curve/point/win` match discTalk's four kinds; `disc.lose` is extra (nothing calls it yet; for 23b if wanted). Talks: the four the lead's call asked for, plus talk.you; keys in content/keys-rec.md are proposals for RA/RB to read (checked when their code lands). Speakers all exist. Tone fine and in style (skimmed the banks, talks, overheard).
+- Notes for the lead: (1) the words say "rec dec" in speech and facts ("Coming down the rec dec after shift?"), the directory "the Recreation Deck (R)", and RB's deckWord "Rec deck" mid-sentence ("on Rec deck"): pick one written form for screen text (speech can keep "rec dec"). (2) The directory and lift texts say "Seven decks" from this build, so they must only ship with `REC_DECK = true` (the brief's merge order does that).
+
 ## Playtest update 2 (brief: plans/brief-playtest2.md on claude/lead-pillar1; build master BM7 session_01QbuzvT3TwzMwSWRmakzX8Z)
 
 ### X2 claude/crew-pt1 6c26c72 (0.71.6: R5's queue fixes, queue.join), R6: FAIL (interactions_check; X3 fixing)
