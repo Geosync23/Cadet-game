@@ -20,6 +20,14 @@ Lines skimmed. In a fresh archive content_gen bakes 9342 lines; lines_check PASS
 
 ## Step 4
 
+### E5 claude/mech-incidents 60a418fe (0.51.13; contains 93fbdb5d 0.51.12), R5: PASS
+E5 took E2's seat. Diff 67144486..60a418fe.
+- The pin: `playerRigRebuild()` in 24l (lead 17: E2's, now E5's), the same steps as 24p's promoPip (old rig removed and its geometry freed, makeCharacter(spec) again, props reset, the grubby tint put back) plus the stand-in at a place (recBody). makeCharacter draws no R(), so no determinism change. ffPin can now show the pin; mech_check checks it merged into the chest and back after a reload.
+- A leak +1 in all: leakDone no longer sets foundBy (side.leaks keeps found); mech_check checks the pay with E1's flat turn-in.
+- Note: promoPip and playerRigRebuild are now two copies of the same rebuild; promoPip could call playerRigRebuild (24p's owner, later; no fix asked).
+- Open elsewhere: rewiring's right-first +1 (E6's, see E1's verdict); E5's trial with E1 633eade found it too.
+- Checks on 60a418fe: running.
+
 ### E1 claude/mech-rounds 013f53ec (0.45.13, hauling stage 2: haulFree, haulOrderAsk, haulTidy), R5: PASS WITH FIXES (one small; E1 has handed over: E6 session_018cZuXpb4XdFs47zXoPcF8B does it, with the two on 0.45.11)
 Diff 633eade..013f53ec, read by hand against step4-stages (D3's answers).
 - Good: m4 stage 1 now after 2 runs; from Day 10 (haulFree) a manifest run with crates for 2+ stops asks you the order once (j.orderAsked), before any delivery, one deviceChoose per stop, Cancel keeps the rest; "A tidy run" (haul.tidy) when the deck changes are the fewest possible, +1 through worksSideXp for an officer only; an officer at stage 2 keeps the run held to 16:00. Parts runs (j.src) and load-only runs are left alone. New names haulFree/haulDeck/haulTidy/haulOrderAsk nowhere else. No R(); j.order/j.orderAsked live on the job (saved with the jobs).
@@ -43,7 +51,7 @@ Diff 3014b864..67144486. E2 has retired; successor E5 (session_01QsZymCraDjLzVDo
 - Favour cases: FC_TIER = 3 (friend, lead 17); 'fcase' in WORKS_SIDE_KINDS; the side job is finished (jobFinish) when solved, no board turn-in; an accepted favour's expiry is pushed out 14 days (no lapse mid-case) and a lapse closes its side job.
 - Tickets: a wrong call is a fitted call that didn't fix it (`c.fits > 0 && !j.workDone`), so notepad crosses and "talk it through" no longer count; flag ticket.solved set in ffGrade; the toast split in two (Calder's line, then the pin).
 - Leak +1 in total and the worn-joint chore's J.xp = 0: settled by E1's 0.45.11 turn-in (side kinds flat, j.xp === 0 skipped).
-- **Fix (open): the pin still never shows.** ffPin still needs `playerRigRebuild`, which no branch defines; lead 17 ~06:05 made it E2's (now E5's). Build it (rebuild the player's rig from PLAYER_SPEC, disposing the old meshes, no R()) and a check that the pin appears after ffGrade(1) and survives a reload.
+- **Fix (done in E5's 60a418fe): the pin still never shows.** ffPin still needs `playerRigRebuild`, which no branch defines; lead 17 ~06:05 made it E2's (now E5's). Build it (rebuild the player's rig from PLAYER_SPEC, disposing the old meshes, no R()) and a check that the pin appears after ffGrade(1) and survives a reload.
 - **Cross-seat (E1's to fix, see E1's verdict): rewiring's right-first-time +1 is now paid by nobody.** The m15 page says +1, +1 more right first time; E2 rightly dropped its own payment (lead 17: right-first-time stays with E1's turn-in), but E1's 0.45.11 made side-kind turn-ins flat, so j.rightFirst is ignored for 'rewire'.
 - Note: the wire-order draws use indices k*8+10+i under key 1016, which overlap the next day's chart draws (k+1)*8+2+i: correlated, harmless.
 - Checks on 67144486: queued (and on a merge with E1, for the side save part).
