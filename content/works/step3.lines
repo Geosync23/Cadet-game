@@ -183,7 +183,7 @@
 == case.when.after
 - after it's been used
 == case.strip.title
-- How it ran, hour by hour
+- {machine}'s log
 == case.strip.fine
 - Fine {from}-{to}
 == case.strip.low
@@ -194,6 +194,19 @@
 - Nobody lies. Somebody's mixed up. The Roster knows which.
 == case.ask
 - Ask about the fault
+// P1's card: the end of the line, and what it does (H2 fills {deck})
+== case.line.water
+- Showers on Deck {deck}
+== case.line.heat
+- Cabins on Deck {deck}
+== case.line.air
+- The air on Deck {deck}
+== case.line.water.shows
+- run weak
+== case.line.heat.shows
+- run cold
+== case.line.air.shows
+- is stuffy
 
 // ---- the Tiles game (U): a small line under the score (U adds the pause sign)
 == tiles.paused

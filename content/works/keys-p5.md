@@ -189,11 +189,12 @@ unsigned. Calder's flag lines also exist for Vance (`vance.lines`) where the pag
 | `chief.p1.1-2`, `chief.p2.1-2` | the Chief's notes pages | |
 | `case.title.p1` | "{machine} {shows}, but only {when}." | `{machine}` `{shows}` `{when}` |
 | `case.when.evening/morning/night/peak/after` | the when words | |
-| `case.strip.title`, `case.strip.fine`, `case.strip.low` | the day strip and its list fallback | `{from}` `{to}` |
+| `case.strip.title`, `case.strip.fine`, `case.strip.low` | the day strip ("{machine}'s log") and its list fallback | `{machine}`; `{from}` `{to}` |
+| `case.line.water/heat/air`, `case.line.<line>.shows` | P1's card: the line's end ("Showers on Deck {deck}") and what it does ("run weak") | `{deck}` |
 | `case.ask` | the chat card button: "Ask about the fault" | |
 | `case.wrong.t2` | a wrong call at T2 (the part is spent) | `{part}` |
-| `content/cases/p2.lines`: kinds `ask.saw`, `ask.quiet`, `ask.mixup` | witness answers, crew bank by tier | `{time}` `{place}` `{machine}` |
-| `case.log.<n>` | P3 T2: night-shift handover log entries (H2 to confirm) | |
+| `content/cases/p2.lines`: kinds `ask.saw.still`, `ask.saw.door`, `ask.quiet.still`, `ask.quiet.door`, `ask.mixup`, `case.ask.none` (H2's names) | witness answers by what the door did; a mix-up names where they really were | `{time}` `{place}` (no "the") `{machine}` (short) |
+| `fault.tried.odd` (`faults.lines`) | P3 T2: a note that rules out less than it seems (H2 adds " — Surname") | `{part}` `{shows}` |
 
 ### Bridge, meters
 

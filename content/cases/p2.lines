@@ -1,22 +1,35 @@
 @bank all
 // Pillar 5 Step 3 (head writer W2): P2 "Who saw what?" (seat H2). A witness's answer to "Ask about the fault" on
 // their chat card. Read only after Tomas's word (SHIP.works.said.p2). {time} is when they were there ("22:00"),
-// {place} the room ("the junior common room"), {machine} the machine's plain name.
-// ask.saw: it was showing then. ask.quiet: it wasn't. ask.mixup: an honest mix-up (their plan had them by a different
-// machine); it reads like a sighting and gives no place, so the Roster is how you spot it.
-== ask.saw
-- It was playing up about {time}. I was in {place}.
-- {time}, in {place}. It was at it. Couldn't miss it.
-- About {time}. I was in {place}, and {machine} was playing up.
+// {place} the room without "the" ("junior common room"), {machine} a short name ("the scrubber").
+// saw: it was playing up then. quiet: it wasn't. .still: nobody came or went (the door didn't move); .door: people
+// were in and out. ask.mixup: an honest mix-up: {place} is where they really were and {machine} what they really
+// heard, so the Roster (and the place) is how you spot it. case.ask.none: nothing to say.
+== ask.saw.still
+- It was playing up at {time}. I was in the {place}. Nobody came or went.
+- {time}, in the {place}. Door shut, and {machine} at it the whole time.
+- About {time}. Just me in the {place}, and {machine} playing up.
 ? tier>=colleague
-- Oh, it was going at {time}. I was in {place}, trying to read. Trying.   #funny
-== ask.quiet
-- I was in {place} about {time}. Quiet as anything.
-- {time}? I was in {place}. {machine} was fine then.
-- Nothing at {time}. I was in {place}. Not a peep.
+- {time}. I was in the {place}, trying to read. Nobody else. Then {machine} started.   #funny
+== ask.saw.door
+- It was playing up at {time}, just as someone came through the door.
+- {time}, in the {place}. The door went, and off it went.
+- About {time}. People in and out of the {place}, and {machine} playing up.
+== ask.quiet.still
+- Quiet as anything at {time}, in the {place}.
+- {time}? I was in the {place}, nobody about, and {machine} was fine.
+- Nothing at {time}. Just me in the {place}. Not a peep.
 ? tier>=colleague
-- Quiet at {time}. I'd have noticed. I notice everything in {place}.   #funny
+- Quiet at {time}. I'd have noticed. I notice everything in the {place}.   #funny
+== ask.quiet.door
+- Quiet at {time}, and people were in and out of the {place}.
+- {time}, in the {place}. Door going all the time, and {machine} didn't mind.
+- Nothing at {time}. Busy in the {place}, mind. Door never stopped.
 == ask.mixup
-- It was going at {time}! I'm sure of it.
-- {time}, it was playing up. Definitely. I think.
-- About {time}. Plain as day. I'm certain.
+- It was playing up at {time}! I was in the {place}. Heard {machine} clear as day.
+- {time}, in the {place}. It was {machine}, definitely. I'm certain.
+- About {time}. I was in the {place}, and {machine} was at it.
+== case.ask.none
+- Didn't notice a thing. Sorry.
+- Can't help, I'm afraid. Wasn't near it.
+- Not a thing. I was elsewhere all day.

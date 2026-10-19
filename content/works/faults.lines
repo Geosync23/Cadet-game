@@ -438,3 +438,11 @@
 - lights at the wrong hours
 == fault.sign.growlight.drift
 - On at night, off at noon.
+
+// ---- Pillar 5 Step 3 (head writer W2): P3's T2 form (seat H2): a note that rules out less than it seems. The part
+// went in but never really worked, so that cause is NOT crossed off. {part} the part, {shows} the card's symptom
+// ("leaks", "runs cool"). H2 adds " — Surname".
+== fault.tried.odd
+- Put in a {part} from the old stock. Wrong size, never seated. Still {shows}.
+- Fitted a {part}. Came out of a crate marked "spares?". Didn't take. Still {shows}.
+- Tried a {part}. Had to bodge the fitting. Not sure it's right. Still {shows}.
