@@ -281,7 +281,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.63.3
+   STARSHIP CADET: CSV Wren                           build 0.72.5
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8694,7 +8694,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.63.3';                           // keep in step with the header's build line
+const GAME_BUILD = '0.72.5';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -11954,6 +11954,10 @@ let TEACH_CK = -1e9, TEACH_ST = null;
 const teachRecent = (at, c, ms = 120000) => at !== undefined && c.now - at < ms;
 const teachMeal = m => m >= MEALS.breakfast[0] && m < MEALS.breakfast[1] || m >= MEALS.dinner[0] && m < MEALS.dinner[1];   // breakfast and dinner at the servery
 const TEACH = [   // text: head writer 3. A 4th element { sure: true }: shown when due whatever the 3-minute and 60 s pacing says
+  // playtest 2 (0.72.5, HUD U; texts: the head writer's tip.device and tip.laundry.day2, read when shown): item 9, once on your
+  // training day while you're on shift; item 19, the laundry tip at the start of Day 2 (from 06:00, before 09:00's shift)
+  ['t:device-work', c => c.d === 1 && c.work && c.min >= 9 * 60 + 30 && c.min < 17 * 60 && !c.app, () => careerText('tip.device') || 'Working is a good chance to check out your device. Schedule, Jobs and Tracked are a tap away.'],
+  ['t:laundry-d2', c => c.d === 2 && c.min >= 6 * 60 && c.min < 9 * 60, () => careerText('tip.laundry.day2') || 'New day: fresh clothes from your wardrobe. When they run out, take your hamper to the laundry on Deck 4.', { sure: true }],
   ['t:rep', c => c.d >= 1 && (c.S.turnin !== undefined && shipNow() - c.S.turnin >= 30 || c.min >= 1020 || c.d >= 2), 'Not just jobs: kindness and joining in count too. Each department has its own view of you, and so does the ship.', { sure: true }],   // the user's: on the 2nd day (Monday), after your first job's turned in or at the shift's end; half an hour after the turn-in, so Zeke says his part first (0.28.50)
   // free time (0.28.63, the 0.60.7 plan's "Tips for your first evenings"; the plan's approved words): off shift, then one an evening, Days 1-4
   ['t:offshift', c => c.d >= 1 && c.min >= 1020 && c.min < 1290, 'Off shift. Your evening is yours: call home from the booths on Deck 3, go to a ship tradition (Calendar), talk a while with someone, or try a hobby.', { sure: true }],
@@ -12026,7 +12030,8 @@ function teachTick(now) {
     trad: teachTry(() => typeof eventsOn === 'function' && eventsOn(d).some(e => min >= e.from - 60 && min < e.to)) };
   for (const [id, test, text, o] of TEACH) {
     if (D.tipsSeen[id] || !paced && !(o && o.sure) || id.startsWith('t:a-') !== !!DEV.open || !teachTry(() => test(c))) continue;
-    if (tipShow(id, text)) { POP.tip = POP.card = now; return id; }
+    let tx = text; if (typeof text === 'function') { try { tx = text(); } catch (e) { tx = null; } }
+    if (tipShow(id, tx)) { POP.tip = POP.card = now; return id; }   // a text may be read when shown (the head writer's, 0.72.5)
   }
   return null;
 }
@@ -34692,9 +34697,10 @@ function careerText(kind, k = 0) {                       // a text from content 
   return e && typeof e.text === 'string' ? e.text.replace(/\{me\}/g, () => chatName()) : null;
 }
 const careerSplit = (kind, from) => { const t = careerText(kind) || '', i = t.indexOf(' | '); return i < 0 ? null : { from, subject: t.slice(0, i), body: t.slice(i + 3) }; };
-function careerTip(key) {                                // a warning: shown even with tips off (like the low-need ones), each time it's due
-  const text = careerText('career.tip.' + key), id = 'career.' + key;
-  if (!text || typeof TIP_Q === 'undefined' || typeof DEVICE_SKIN === 'undefined' || TIP_Q.some(x => x.id === id)) return false;
+function careerTip(key) {                                // a warning: shown even with tips off (like the low-need ones); once a save (0.72.5, playtest 2 item 17: "green tips shouldn't repeat")
+  const text = careerText('career.tip.' + key), id = 'career.' + key, seen = typeof SHIP.device !== 'undefined' && SHIP.device && SHIP.device.tipsSeen;
+  if (!text || typeof TIP_Q === 'undefined' || typeof DEVICE_SKIN === 'undefined' || TIP_Q.some(x => x.id === id) || seen && seen[id]) return false;
+  if (seen) seen[id] = true;   // the device's saved tipsSeen, as every other tip
   TIP_Q.push({ id, text }); if (TIP_Q.length === 1) DEVICE_SKIN.tip(TIP_Q[0]); return true;
 }
 function careerFriends(n) {                              // your friends aboard (tier 2+), closest first
@@ -37640,6 +37646,7 @@ const INTRO_ARROWS = {
   call: { deck: 3, room: 'B', label: 'Call home from the booths' },   // Day 0's call-home card, when you tap Track it (introCallTick)
 };
 INTRO_ARROWS.call.label = (typeof LINES !== 'undefined' && Array.isArray(LINES['tip.callhome.goal']) && LINES['tip.callhome.goal'][0] && LINES['tip.callhome.goal'][0].text) || INTRO_ARROWS.call.label;
+const INTRO_CLOCK_AUTO = 8 * 60 + 50;                     // 0.72.5 (playtest 2, item 6): on your first shift, the time clock's arrow from 08:50 if you're in the Works bay (then the job board's, item 7)
 const INTRO_EAT_MINS = 30;                                 // the servery arrow stays up this long after you're told to eat, at most (R3: never over the whole evening's bunk arrow and call card)
 const INTRO_ARROW_LABELS = new Set(Object.values(INTRO_ARROWS).map(a => a.label));
 function introArrowTold(id) { if (introOn() && INTRO_ARROWS[id] && SHIP.intro.done['told:' + id] === undefined) SHIP.intro.done['told:' + id] = Math.floor(shipNow()); }
@@ -37667,7 +37674,7 @@ function introArrowWant(now) {
     if (careerClockedIn(1) || out) fin('clock');
     else {
       const brief = INTRO_WEEK.find(b => b.id === 'd1-briefing'), opened = I.done['d1-opener'] !== undefined || I.done['d1-briefing:met'] !== undefined && now >= introAbs(1, brief.until) + 5;   // Zeke's training-day opener done (onboarding 4's 'd1-opener'), or the briefing's window five minutes gone
-      if (I.done['told:clock'] === undefined && inBay && !DIALOGUE && opened) I.done['told:clock'] = Math.floor(now);
+      if (I.done['told:clock'] === undefined && inBay && !DIALOGUE && (opened || m >= INTRO_CLOCK_AUTO)) I.done['told:clock'] = Math.floor(now);   // 0.72.5 (playtest 2, item 6): from 08:50 in the Works bay it comes up by itself
       if (I.done['told:clock'] !== undefined) return 'clock';
     }
   }
@@ -37681,7 +37688,7 @@ function introArrowTick() {
   const t = simNow(); if (t < (INTRO_UI.arrowAt || 0)) return; INTRO_UI.arrowAt = t + 250;   // four times a second
   introTeaTick(Math.floor(shipNow())); introCallTick(Math.floor(shipNow()));
   const id = introArrowWant(Math.floor(shipNow())), g = id && INTRO_ARROWS[id];
-  const cur = typeof IX_GOAL !== 'undefined' ? IX_GOAL : null, ours = cur && INTRO_ARROW_LABELS.has(cur.label);
+  const cur = typeof IX_GOAL !== 'undefined' ? IX_GOAL : null, ours = cur && (INTRO_ARROW_LABELS.has(cur.label) || cur.label === INTRO_BED_GOAL && id === 'call');   // 0.72.5 (playtest 2, item 3): the call-home arrow takes over from the first night's bunk arrow (up since the goodnight), which comes back once you're at the booths
   if (!g) { if (INTRO_UI.arrow) introArrowClear(); return; }
   if (cur && !ours) return;                               // someone else's arrow is up: ours waits for it
   if (!cur || cur.label !== g.label) setGoal(g);

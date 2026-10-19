@@ -438,5 +438,34 @@ with sync_playwright() as pw:
         check(not g.errors, f'no console errors ({g.errors[:3]})')
     g.close()
 
+# playtest 2 (HUD U, 0.72.5+): the first night's call-home arrow over the bunk arrow (item 3); Day 1's time clock arrow
+# from 08:50 in the Works bay, then the job board's (6, 7); the training-day device tip and Day 2's laundry tip (9, 19);
+# career warnings once a save like every other tip (17)
+with sync_playwright() as pw:
+    g = Game(pw, sys.argv[1], 390, 844); g.step(3)
+    if g.ev("typeof INTRO_CLOCK_AUTO !== 'undefined'"):
+        print('== playtest 2')
+        r = g.ev("""(() => { const I = SHIP.intro; I.on = true; I.ended = false; setShipNow(introAbs(0, 19 * 60));
+          I.done['call:track'] = I.done['call:tip'] = Math.floor(shipNow()); delete I.done['call:end'];
+          setGoal({ deck: 4, place: playerBed(), label: INTRO_BED_GOAL }); INTRO_UI.bed = true; INTRO_UI.arrowAt = 0;
+          introArrowTick(); const out = [IX_GOAL && IX_GOAL.label]; I.done['call:end'] = Math.floor(shipNow()); clearGoal(); return out; })()""")
+        check(r[0] == g.ev("INTRO_ARROWS.call.label"), f'"Track it" on the first night: the call-home arrow takes over from the bunk arrow ({r})')
+        g.ev("goToDeck(5)"); g.step(5)
+        r = g.ev("""(() => { const I = SHIP.intro; for (const k of ['told:clock','arrow:clock','arrow:board','d1-opener','d1-briefing:met']) delete I.done[k];
+          const c = cellPos(...(() => { for (let j = 0; j < D; j++) for (let i = 0; i < W; i++) if (MAP[j][i] === 'w') return [i, j]; })()); player.obj.position.copy(c); player.stop();
+          const tick = m => { setShipNow(introAbs(1, m)); INTRO_UI.arrowAt = 0; introArrowTick(); return IX_GOAL && IX_GOAL.label; };
+          clearGoal(); const a = [tick(8 * 60 + 40), tick(8 * 60 + 51)]; careerClock(Math.floor(shipNow())); a.push(tick(8 * 60 + 52)); return a; })()""")
+        check(r[0] is None and r[1] == 'Clock in at the time clock' and r[2] == 'Take a job at the job board', f'Day 1 in the Works bay: no arrow at 08:40, the time clock at 08:51, the job board once clocked in ({r})')
+        r = g.ev("""(() => { const out = {}, D = SHIP.device; D.settings.tips = true; SHIP.intro.on = false; clearGoal();
+          const run = (day, min) => { setShipNow((day - 1) * 1440 + min); POP.busy = false; POP.toast = POP.tip = POP.card = POP.warn = -1e9; TEACH_CK = -1e9; TIP_Q.length = 0; if (DEV.open) deviceClose(); return teachTick(performance.now() + 1e7); };
+          for (const [id] of TEACH) D.tipsSeen[id] = true; delete D.tipsSeen['t:device-work']; delete D.tipsSeen['t:laundry-d2'];
+          out.d1 = run(1, 10 * 60); out.d2 = run(2, 6 * 60 + 30); out.again = [run(1, 11 * 60), run(2, 7 * 60)];
+          delete D.tipsSeen['career.late']; TIP_Q.length = 0; out.ct = [careerTip('late'), (TIP_Q.length = 0, careerTip('late')), !!D.tipsSeen['career.late']];
+          return out; })()""")
+        check(r['d1'] == 't:device-work' and r['d2'] == 't:laundry-d2' and r['again'] == [None, None], f'the training-day device tip and the Day 2 laundry tip, each once ({r})')
+        check(r['ct'][0] is not False and r['ct'][1] is False and r['ct'][2], f'a career warning shows once a save, saved like the other tips ({r["ct"]})')
+        check(not g.errors, f'no console errors ({g.errors[:3]})')
+    g.close()
+
 print('INTERACTIONS CHECK OK' if ok else 'INTERACTIONS CHECK FAILED')
 sys.exit(0 if ok else 1)
