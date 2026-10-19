@@ -629,6 +629,7 @@ PARTS['m12'] = part_m12
 # after the move (playerBed() follows SHIP.works.home). The same twice. Run alone: mech_check.py BUILD side
 SIDE = r"""(() => {
   const out = {}; SHIP.works = null; SHIP.notes = []; SHIP.jobs = []; setShipNow(11 * 1440 + 540); const W = worksInit();
+  out.order = Object.keys(W).slice(-2).join(',');   // worksInit: side right after cur, as worksClean makes it
   toolGive('scanner'); toolGive('pipekit');
   for (let i = 0; i < 20; i++) toolWear('scanner', 4); out.early = [toolCharge('scanner'), toolSlow('scanner')];   // before M11 opens: no wear (R4)
   (W.op[12] = W.op[12] || []).push('m11');   // M11 open (Day 12)
@@ -653,8 +654,8 @@ SIDE = r"""(() => {
   simNote('job', { step: 'turnin', id: 'p4', job: 'service' }); out.turnin = W.xp - x1; WORKS_SIDE_KINDS.delete('probe'); out.notes = SHIP.notes.filter(n => n.kind === 'sideXp').map(n => n.why + n.n);
   // the save's tidy
   const c = worksClean(JSON.parse(JSON.stringify(W))); out.kept = !!c && JSON.stringify(c.side) === JSON.stringify(W.side) && JSON.stringify(c.tools) === JSON.stringify(W.tools);
-  const old = JSON.parse(JSON.stringify(W)); delete old.side; const c2 = worksClean(old); out.old = !!c2 && !('side' in c2) && JSON.stringify(worksSide()) === JSON.stringify(W.side);
-  const junk = JSON.parse(JSON.stringify(W)); junk.side = [1, 2]; out.junk = (worksClean(junk) || {}).side === undefined;
+  const old = JSON.parse(JSON.stringify(W)); delete old.side; const c2 = worksClean(old); out.old = !!c2 && JSON.stringify(c2.side) === '{}' && Object.keys(c2).indexOf('side') === Object.keys(c2).indexOf('cur') + 1;   // an old save: side {} right after cur (BM7: the key order)
+  const junk = JSON.parse(JSON.stringify(W)); junk.side = [1, 2]; out.junk = JSON.stringify((worksClean(junk) || {}).side) === '{}';
   // Bunk 1's texts
   const P = SHIP.player, e0 = P.needs.energy; P.needs.energy = 5;
   out.bunk = [bedText('Your bunk\'s in Bunk 1 on Deck 4.'), needsLine().includes('Bunk 1')];
@@ -678,6 +679,7 @@ def part_side(g):
     check(a['xp'] == [1, 1, 0, 0] and a['gain'] == 2 and a['xp2'] == 2, f"side: side jobs give at most +2 a day ({a['xp']}, {a['xp2']})")
     check(a['notes'] == ['a1', 'b1', 'e2', 'probe1', 'probe1'], f"side: the sideXp notes ({a['notes']})")
     check(a['turnin'] == 3, f"side: side-job kinds turned in at the board are capped too (+2), an ordinary job isn't (+1) ({a['turnin']})")
+    check(a.get('order') == 'cur,side', f"side: a new SHIP.works has side right after cur ({a.get('order')})")
     check(a['kept'] and a['old'] and a['junk'], 'side: SHIP.works.side kept by the save\'s tidy; an old save loads without it; junk dropped')
     check(a['bunk'][0] == 'Your bunk\'s in Bunk 1 on Deck 4.' and a['bunk'][1] and a['bunk'][2] == '4-23' and a['bunk'][3] == 'Your bunk\'s in Cabin 4-23 on Deck 4.' and not a['bunk'][4] and a['bunk'][5],
           f"side: the texts name Bunk 1 before the move and your cabin after ({a['bunk']})")
