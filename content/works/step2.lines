@@ -174,7 +174,7 @@
 == tip.round.go
 - Walk to {machine}. Follow the arrow.
 == tip.round.look
-- Look at {machine}. Listen to it. Tap Look.
+- Look at {machine}. Listen to it. Then mark what you see.
 == tip.round.mark
 - Mark it: fine, worn, or something's off. Trust your eyes.
 == tip.round.next
