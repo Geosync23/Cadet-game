@@ -46,3 +46,6 @@ session_01QbuzvT3TwzMwSWRmakzX8Z) and the reviewer (R5 session_01XJyHzg4QvX2nsdt
   confirmed; everything through 1c05127 (0.48.113) is reviewer PASS (R4, then R5). E2 may still send ticket and team-parts extras.
 - Playtest 2: U and X2 (crew seat, succeeded X) confirmed; E1 confirmed U2 shows tip.round.* from roundTrainStep().
 - `promo.ceremony.mail`, `works.plate` (DA5) and some Step 3 lines are written but may not be wired.
+- **Next writer's job (lead 17):** the rec deck writing (R12, the "six decks" texts). W2 takes only E2's ticket and
+  team-parts extras, then hands over at ~70%. The rec deck lives in the base dormant (REC_DECK=false; deck key 7,
+  `disc`, `DECK_ORDER`, `deckLabel()`): read the lead's rec-deck brief on `claude/lead-pillar1` first.
