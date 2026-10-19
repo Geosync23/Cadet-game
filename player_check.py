@@ -835,9 +835,11 @@ with sync_playwright() as pw:
     held = g.ev(r"""(() => { const ids = ['3-callhome-1', '3-callhome-2', '3-callhome-3', '3-callhome-4'];
       const fake = ids.map(id => ({ goalId: id, p: { name: 'Test ' + id } })); DECK_CREW.push(...fake);
       const it = ITEMS.find(i => i.t === 'Booth 2'); it.hit.getWorldPosition(_wp); const r = playerTap(it, _wp.clone(), _wp.clone());
-      DECK_CREW.splice(DECK_CREW.length - 4, 4); return [r, !!ACT, document.getElementById('tx').textContent]; })()""")
+      const q = typeof QUEUE_YOU !== 'undefined' ? !!(QUEUE_YOU && QUEUE_YOU.type === 'callhome') : null; if (typeof queueOut === 'function') queueOut(false);   // out of the line again, for what follows
+      DECK_CREW.splice(DECK_CREW.length - 4, 4); return [r, !!ACT, document.getElementById('tx').textContent, q]; })()""")
     print(' ', held)
-    check(held[0] is True and held[1] is False and held[2].startswith('In use'), f'held booths: {held}')
+    # every booth held: "In use", or since 0.71.4 (the user's playtest 2 item 15) you join the booth line and are told so
+    check(held[0] is True and held[1] is False and (held[2].startswith('In use') or held[3] is True and 'line' in held[2]), f'held booths: {held}')
     g.ev("setShipNow(Math.floor(shipNow() / 1440) * 1440 + 1440 + 12 * 60); needsT = null"); g.step(2)
     t = g.ev(f"({TAP})({json.dumps({'title': 'Servery'})})"); g.step(2); s = state(g)
     print('  servery at 12:00 the next day:', s['toast'][:70])
