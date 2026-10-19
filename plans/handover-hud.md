@@ -12,7 +12,7 @@
 | 0.72.3 | **Turn-in gains** chips in the "Job complete" toast: rep in words only (the user's 0.61.15 rule), then "+N <system>" per meter. `turnInSnap`/`turnInGains`/`turnInShow`; data `j.gains` (C2's careerJobIn) then S2's `j.meters`, else a before/after diff; one chip per dept/system | after the Tracked block; `ixBoard.turnIn` |
 | 0.72.4 | Tracked is **also a device app** (`deviceApp('tracked')`, order 1, glyph ◎), the HUD button kept (the user ~04:00) | after the panel code |
 | 0.72.4 (check) | leave_check's reputation-chip part reads the turn-in card (with `turnInShow`) | leave_check.py |
-| 0.72.5 (not yet merged) | Playtest 2 batch A: item 3 the call-home arrow can replace the first night's bunk arrow (`introArrowTick`'s `ours`); 6-7 `INTRO_CLOCK_AUTO` 08:50; 17 `careerTip` once a save; 9 `t:device-work`, 19 `t:laundry-d2` (TEACH text may be a function) | section 21 (introArrowTick/introArrowWant), section 24 careerTip, section 15 TEACH |
+| 0.72.5 (not yet merged) | Playtest 2 batch A: item 3 the call-home arrow can replace the first night's bunk arrow (`introArrowTick`'s `ours`); 6-7 `INTRO_CLOCK_AUTO` 08:50; 17 `careerTip` once a save; 9 `t:devwork`, 19 `t:laund2` (TEACH text may be a function) | section 21 (introArrowTick/introArrowWant), section 24 careerTip, section 15 TEACH |
 | 0.72.6 (not yet merged) | Batch B: tea + supply delivery in `devDay` (kinds 'tea', 'delivery', goals in `devItemGoal`, tea heads-ups under the everyday switch), `teaBegin` gain 4, `DECK_NAMES[2]` "Officers' quarters and science" | section 19 devDay/devItemGoal/devHeadsTick, section 15 teaBegin, the lift panel |
 
 Nothing I added is saved except what reuses existing saved fields (`SHIP.device.tipsSeen` for careerTip ids `career.<key>`).
