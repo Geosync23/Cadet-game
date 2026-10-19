@@ -63,3 +63,7 @@ Session: session_013LcEsgjMTDMMeiACKLj2bB. Lead: lead 14 (session_01RHtJv7GJDi4q
   - The user agreed the rec traditions: the final plan is on `claude/p5-design` 421ac2b, the artifact is https://claude.ai/artifact/4f8hTNDsaF9CdSiCMgy6xF, and design-doc has a "Rec dec traditions" section.
   - Ring the bell is RETIRED; Wall night keeps the bell board. The regatta's Sundays stand alone.
   - The user's new goal: each rec sport except floating becomes a mini-game like Lightdisc, reusing the Lightdisc kit. That plan is in progress: https://claude.ai/artifact/Ubn2MJvidnuK1awcx2gKMP.
+- Lead 16, 2026-10-19, later the same day:
+  - The mini-games plan is FINAL: https://claude.ai/artifact/Ubn2MJvidnuK1awcx2gKMP (`claude/p5-design` 214f5b7; see the rec dec traditions paragraph in design-doc).
+  - "No practice, no times" no longer holds. Three sports become mini-games like Lightdisc: the wall (Reach), the pool (Lengths) and the kayak (White water: currents and stamina).
+  - Each is prototyped standalone first, then integrated, in this order: kayak, then wall, then pool.
