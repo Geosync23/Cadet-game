@@ -281,7 +281,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.53.11
+   STARSHIP CADET: CSV Wren                           build 0.53.12
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8744,7 +8744,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.53.11';                           // keep in step with the header's build line
+const GAME_BUILD = '0.53.12';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -40970,8 +40970,9 @@ function roofData() {
 const roofTrained = () => !!(SHIP.works && SHIP.works.tr && SHIP.works.tr.m17 !== undefined);
 const roofMate = () => roofTrained() && worksStage('m17') < 1 && schedPeople().some(p => p.id === ROOF_WHO);   // Halloran rides with you till stage 2
 function roofOpen(t = shipNow()) {                       // can you climb on now? (a Thursday, trained, from 15:30 while there's time for the whole spine, once a day)
-  const d = worksDay(t), m = t - (d - 1) * 1440, r = roofData();
-  return !!r && roofTrained() && d >= ROOF_FROM && weekday(d) === ROOF_WD && m >= ROOF_HOURS[0] && m <= ROOF_HOURS[1] - roofLen() && r.last !== d;
+  const d = worksDay(t), m = t - (d - 1) * 1440;
+  if (!roofTrained() || d < ROOF_FROM || weekday(d) !== ROOF_WD || m < ROOF_HOURS[0] || m > ROOF_HOURS[1] - roofLen()) return false;
+  const r = roofData(); return !!r && r.last !== d;       // (side.roof made only when it could matter)
 }
 function roofSay(flag, fb) { const l = worksVoice(ROOF_WHO, flag); toast(worksName(ROOF_WHO), l ? l[0] : fb); }   // a toast: his bubble would be on the deck, not in the shaft
 // section 14's whereIs, while the car is held: someone whose plan has them on another deck than at the hold's start waits
@@ -41048,7 +41049,7 @@ function roofShaft() {
   box(car, M.car, ROOF_W - .5, 2.6, ROOF_D - .5, 0, -1.3, 0);
   box(car, M.slab, .8, .04, .8, .35, .02, .6);
   for (const [x, z, w, d] of [[0, -(D2 - .3), ROOF_W - .6, .06], [-(W2 - .3), 0, .06, ROOF_D - .6], [W2 - .3, 0, .06, ROOF_D - .6]]) { const h = w > d ? .05 : .04; box(car, M.safety, w, h, d, x, .95, z); box(car, M.safety, w, h, d, x, .5, z); }
-  for (const [x, z] of [[-(W2 - .3), -(D2 - .3)], [W2 - .3, -(D2 - .3)], [-(W2 - .3), D2 - .3], [W2 - .3, D2 - .3]]) box(car, M.safety, .08, .97, .08, x, .485, z);
+  for (const [x, z] of [[-(W2 - .3), -(D2 - .3)], [W2 - .3, -(D2 - .3)], [-(W2 - .3), D2 - .3], [W2 - .3, D2 - .3]]) box(car, M.safety, .08, .98, .08, x, .49, z);   // (posts a touch above the rail tops: no shared faces)
   box(car, M.lamp, .22, .12, .12, 0, 1.0, -(D2 - .3));
   mergeMeshes(car); car.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
   const gl = new THREE.Mesh(new THREE.SphereGeometry(.12, 10, 8), new THREE.MeshBasicMaterial({ color: col('#fff3c4') })); gl.visible = false; g.add(gl); ROOF.glint = gl;
@@ -41062,7 +41063,7 @@ function roofStep(A) {
   const decks = roofDecks(), n = decks.length, to = st => { R.st = st; R.real = now; R.t0 = A.done; };
   if (R.st === 'climb') {
     if (A.done >= ROOF_CLIMB) {
-      const d = worksDay(shipNow()), rd = roofData(); liftHold(true, (d - 1) * 1440 + ROOF_HOURS[1]); ROOF.r = R; R.mate = roofMate(); if (rd) rd.on = d;   // on: a save from now has you back at the top (roof.resume)
+      const d = worksDay(shipNow()), rd = roofData(); if (!liftHeld()) liftHold(true, (d - 1) * 1440 + ROOF_HOURS[1]);   // back on after stepping off: the same hold (its start stays, so nobody jumps decks) ROOF.r = R; R.mate = roofMate(); if (rd) rd.on = d;   // on: a save from now has you back at the top (roof.resume)
       if (R.mate) roofSay('roof.climb', 'Clip on, hands inside the rail. I\'ll take the east guides, you take the west.');
       to('dark');
     }
@@ -41126,6 +41127,8 @@ function roofDone(R) {                                   // every guide greased:
 function roofFrame() {
   requestAnimationFrame(roofFrame);
   if (ROOF.say && typeof ride !== 'undefined' && !ride) { const [a, b] = ROOF.say; ROOF.say = null; toast(a, b); }
+  { const R = ROOF.r; if (R && !R.off && !R.inShaft && !(ACT && ACT.kind === 'roofRide' && ACT.o.r === R)) {   // ended in the fade before the shaft (R5): no shaft to leave, just undo the fade
+    R.off = true; if (!ride) fadeEl.style.opacity = 0; const rd = roofData(); if (rd) delete rd.on; } }
   if (!ROOF.g || !ROOF.g.visible) return;
   const A = ACT, R = ROOF.r;
   if (A && A.kind === 'roofRide' && A.o.r === R && R.inShaft && !R.off) {
@@ -41142,7 +41145,7 @@ function roofFrame() {
 requestAnimationFrame(roofFrame);
 if (typeof WORK_TICKS !== 'undefined') WORK_TICKS.push(now => {   // 16:30: the car's let go (section 11 keeps the hold's record); loaded from a save made on the roof: back at the top
   if (LIFT_HOLD && LIFT_HOLD.until <= now && LIFT_HOLD.until > now - 2 && !LIFT_HOLD.said && !SIM_AT) { LIFT_HOLD.said = true; toast('Main lift', worksText('roof.free', 'Half four: the lift\'s back in service.')); }
-  const rd = roofData(); if (rd && rd.on !== undefined && !(ROOF.r && !ROOF.r.off)) { delete rd.on; if (!SIM_AT) toast(mechName('m17'), worksText('roof.resume', 'You\'d saved on the lift roof. You\'re back at the top deck.')); }
+  const S = worksSide(), rd = S && S.roof && S.roof.on !== undefined ? roofData() : null; if (rd && rd.on !== undefined && !(ROOF.r && !ROOF.r.off)) {   // (read only: no side.roof in saves that never rode) delete rd.on; if (!SIM_AT) toast(mechName('m17'), worksText('roof.resume', 'You\'d saved on the lift roof. You\'re back at the top deck.')); }
   const o = typeof OCCASIONS !== 'undefined' && OCCASIONS['works.m17']; if (o && (o.deck !== 1 || o.room !== '+')) { o.deck = 1; o.room = '+'; }   // after a reload trainSetup makes it in the Works bay
 });
 // crew waiting by the held lift say so now and then (the writer's bank roof.wait): someone roofWait keeps on your deck,

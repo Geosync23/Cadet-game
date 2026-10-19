@@ -786,6 +786,11 @@ def part_m17(g):
     check(r1[6] and h1[:2] == [True, False] and not h1[2], 'm17: the car is held till 16:30, let go then; the hold is not saved')
     check(0 < m1['calls'] < 160, f"m17: draw calls in the shaft {m1['calls']}")
     check(r2[0] == decks[2] and r2[1] is None and not r2[2] and r2[3] == '{"rides":1,"last":18}', f"m17: stepping off part way leaves you on that deck, no ride counted ({r2[0]}, {r2[3]})")
+    g.ev(f"({M17SET})(32)"); fade = None   # R5: walking off in the fade before the shaft: the fade goes, no "saved on the roof" left behind
+    for n in range(120):
+        g.step(5); w = g.ev(M17WATCH)
+        if w and w[0] == 'dark': g.ev("actEnd(true)"); g.step(20); fade = g.ev("[+fadeEl.style.opacity, ROOF.r.off, 'on' in roofData(), ACT && ACT.kind]"); break
+    check(fade == [0, True, False, None], f"m17: stepping away in the fade before the shaft undoes the fade ({fade})")
     a2 = g.ev(M17P)
     check(json.dumps({**a2, 'talk': 0}, sort_keys=True) == json.dumps({**a, 'talk': 0}, sort_keys=True), 'm17: the paper part differs after the rides')
     g.ev(f"(() => {{ const k = {keep}; LIFT_HOLD = null; setShipNow(k.t); if (deckDef.num !== k.deck) goToDeck(k.deck); player.obj.position.x = k.pos[0]; player.obj.position.z = k.pos[1]; Object.assign(SHIP.player.needs, k.needs); SHIP.player.carry = k.carry; }})()")   # as it was, for the parts after
