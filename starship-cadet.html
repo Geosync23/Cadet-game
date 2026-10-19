@@ -8545,7 +8545,7 @@ DECKS[7] = {
   },
   windows: ['P', 'K', 'A'].map(room => ({ room })),
   closedDoors: {
-    'h,20,11': { t: 'Spine ladder', x: 'The maintenance ladder, up to Quarters and down to Operations, through the rec dec on the way. Tier 2 access.' },
+    'h,20,11': { t: 'Spine ladder', x: 'The maintenance ladder, up to Quarters and down to Operations, through the rec deck on the way. Tier 2 access.' },
   },
   hull: { sternX: 1, stern: 2, bowFrom: 34, bowLen: 11.6, byFace: true },
   service: [{ key: 'v,4,8', tier: 2 }, { key: 'v,4,15', tier: 2 }, { key: 'v,32,3', tier: 1 }, { key: 'h,31,11', tier: 1 }, { key: 'v,34,11', tier: 1 }],
@@ -8570,7 +8570,7 @@ DECKS[7] = {
     place('k', 'hamper', 5.45, .4, 'n', { snug: true, it: IT('Returns bin', 'Wet towels and used kit go in here. It is always fuller than it should be.') });
     placeWall('k', 'plate', 'e', .5, { text: 'PUT IT BACK' });
     // changing rooms (6 x 4): lockers on the hull wall, a bench down the middle, two showers in the aft corner, lost property
-    for (const x of [1.0, 2.35, 3.7]) place('w', 'locker', x, .42, 'n', { it: IT('Lockers', 'Rec dec lockers. Yours is whichever one is free; the keys are on stretchy wristbands.') });
+    for (const x of [1.0, 2.35, 3.7]) place('w', 'locker', x, .42, 'n', { it: IT('Lockers', 'Rec deck lockers. Yours is whichever one is free; the keys are on stretchy wristbands.') });
     place('w', 'bench', 2.6, 2.5, 'n', { w: 2.2, snug: true, it: IT('Bench', 'Wet, always. Someone has written SIT HERE on a towel.') });
     for (const x of [.65, 1.9]) place('w', 'showerStall', x, 3.38, 's', { it: IT('Shower', 'A quick rinse before the pool and after it. The hot water takes a moment to remember.') });
     place('w', 'footlocker', 5.35, .32, 'n', { it: IT('Lost property', 'Odd socks, a single earring, three water bottles, and a goggle strap with no goggles.') });
