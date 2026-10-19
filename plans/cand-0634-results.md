@@ -133,3 +133,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - ~07:37 E6 5bd6f97 (0.45.19: tester name only); with R6.
 - ~07:37 R6 PASS E6 5bd6f97 (E6's tip; two strings over 1c40c7a).
 - ~07:37 lead 17: E6 final = 5bd6f97 (E6 retiring). Open for the final: X2 0.71.5 verdict + 0.71.6 (queueJoin fix), U2 0f34cfb verdict, E4 0.53.15 (roof.wait line + shelf bracket).
+- ~07:44 E4 final b0cb86c (0.53.15 = 05bcbad + results/handover: roof.wait line + shelf bracket); E4 stopping (plans/handover-mech4-e4.md). With R6.
