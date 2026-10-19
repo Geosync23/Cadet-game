@@ -111,3 +111,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - ~06:59 R6 PASS E6 f36d81e (0.45.16 rounds stages 2-3; contains 910131e): E6's tip. Load-stop fix still open (asked E6).
 - ~07:01 U (session_01FcMPTX7mMTHkyr4pxDfNcS) confirms 0335523 (0.72.6, on 7325c7a): touches 21 introArrowTick/Want, 24 careerTip, 15 TEACH rows + teachTick + teaBegin gain, 19 devDay/devItemGoal/devHeadsTick, DECK_NAMES[2], interactions_check '== playtest 2'. U2 (claude/hud-pt2) builds on 93194ef and merges U's. U's checks: cadet, interactions, device, player OK; leave, intro --evening OK. Already in t13 (teach-loop hand merge with E1's bedText).
 - ~07:09 E4 2b5979a (0.53.14: 0.53.11-14 = 24t extras, M17 fixes, M17 lines in new content/works/roof.lines (bake after W2's step4.lines; 24s reads roof.shut, W2's roof.held left unread)); skip 9d467c5. With R6.
+- t8: player OK (2361 s), day2 OK; intro --week running. t11: deck OK.
