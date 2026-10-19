@@ -131,3 +131,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - t14 done: all 12 OK (mech, career, machine, lines, cadet ALL IDENTICAL, deck, interactions, device, tiles, leave, food, social).
 - trial t15 (wt5) = 2bc08d5 + E6 1c40c7a + E5 2c513e6 + E4 2b5979a + X2 693e4f4 + U2 0f34cfb (contains U 0335523) + W2 0e8571a (X2 and U2 with R6): mk.sh, same hand merges (mech_check keep-both; EXTRA loop once then part_t24; teach loop combined). verify_merge: the same 11 explained. NAMES OK (3263), parses, bake 9565 / 48. cadet compared to 0.63.3 + X2 693e4f4 alone (label 0.63.4) so only non-X2 changes show. Checks (own CADET_WORK): mech, career, machine, lines, cadet, deck, interactions, food, day1.
 - ~07:37 E6 5bd6f97 (0.45.19: tester name only); with R6.
+- ~07:37 R6 PASS E6 5bd6f97 (E6's tip; two strings over 1c40c7a).
