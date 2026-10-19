@@ -50,3 +50,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - ~06:02 W2 1beddb1 (0.48.114: rewire.faded singular); with R5.
 - ~06:03 R5: E2 d0e6fe9 (0.51.8 favour cases) PASS WITH FIXES (fcase rep uncapped, mid-case lapse orphans the side job, save round trip): hold for E2's next hash.
 - ~06:03 R5 PASS W2 1beddb1 (W2's tip).
+- ~06:03 E3 d51c5ed (0.53.7 cabin touches + star logging 24t after 24j, PLAYER_TAPS cabinTap/starTap, mech_check part t24; 0.53.8 R4's M10 fixes in 24j; contains 626a907). Record line needs E1 0.45.11 (works.ms.stars). With R5. E3 handing over (plans/handover-mech3-e3.md); M17 to a fresh seat.
