@@ -41934,7 +41934,7 @@ function leakStops(j) {
   const pp = J.puddlePlace && placeById(J.puddlePlace) ? J.puddlePlace : J.place, open = (j.stepsDone || []).includes(0) || (!!j.claimedBy && j.claimedBy !== 'you');
   const wall = LEAK_WALL[(J.damp && J.damp[2]) || J.wall] || 'near', kit = typeof hasTool === 'function' && hasTool('pipekit') && worksStage('m13') >= 1;
   return [
-    { deck: J.deck, placeId: pp, mins: 1, tag: 'puddle', how: 'look', opts: { secs: 3, text: worksText('leak.puddle', 'A puddle, and it\'s still dripping. It\'s coming from above, along the {wall} wall.', { wall })
+    { deck: J.deck, placeId: pp, mins: 1, tag: 'puddle', how: 'look', opts: { ...(kit ? { tool: 'pipekit' } : {}), secs: 3, text: worksText('leak.puddle', 'A puddle, and it\'s still dripping. It\'s coming from above, along the {wall} wall.', { wall })
         + (kit ? ' ' + worksText('leak.kit', 'The pipe kit\'s damp reading climbs that way.') : '') } },
     { deck: J.deck, placeId: open ? J.place : null, mins: 1, tag: 'damp', how: 'look', opts: { secs: 3, text: worksText('leak.damp', 'Damp on the wall, darkest just under the pipe. There: the joint.') } },
     j.worn ? { deck: J.deck, placeId: open ? J.place : null, mins: 2, tag: 'joint', how: 'look', opts: { secs: 3, text: worksText('leak.worn', 'Worn right through. Tightening won\'t hold it: it needs a new joint from stores.') } }
@@ -41948,6 +41948,7 @@ function leakStepDone(j, k, res, t) {
     worksTeach('m13', by, 'puddle', ['Follow the wet, not the noise. Well, both.']);
   }
   if (k > 0 && !(j.stepsDone || []).includes(0)) return false;   // the puddle first
+  if (k === 0 && typeof hasTool === 'function' && hasTool('pipekit') && worksStage('m13') >= 1 && typeof toolWear === 'function') toolWear('pipekit', 5);   // the kit's damp reading (24 core's wear, E1)
   return true;
 }
 // fixed (by you: found by you, the worn joint's replacement posted, held for you; by the crew: the long way). The puddle goes
