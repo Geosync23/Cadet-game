@@ -9,6 +9,14 @@ Lines skimmed. In a fresh archive content_gen bakes 9342 lines; lines_check PASS
 
 ## Step 4
 
+### E3 claude/mech-diagnose 626a907 (0.53.6, M10 the workshop + tinkering, 24j): PASS WITH FIXES (two)
+Diff from b8992d5b (E3's merge of E1 0.45.8). Line numbers below are in 626a907's starship-cadet.html. Read with a helper agent against m10-workshop.html; the two fixes were confirmed by hand.
+- Good: posting matches the page (Day 12 Friday 08:00, then Mondays 08:00; seeded with keys 1010/1011 only, no R()). The board/lathe/fab places are E3's from 0.53.4. The steps are a 10-minute wait and a 2-minute hold. The first lesson goes through worksTeach('m10', ..., 'lead') = flag `train.m10.lead`, matching W2's lines. On hand-over: a friendship step, worksUse('m10'), +1 rep once a day through E1's worksSideXp. Lapse Mail after 7 days. All saved data under SHIP.works.side.shop. No new meshes. Ownership clean: ~30 new `shop*` / `SHOP_*` / `TINKER_*` names, none anywhere else; jobKindAdd and SOC_GIFTS are only called or appended to. The three hooks (jobTap, chatShow, chatDo) are typeof-guarded. `node --check` passes, and nothing it touches at load is defined later in the file (no TDZ).
+- **Fix 1 (bug): an empty shelf skips the make.** shopFetch (~40729): with no part on the shelf it sets `j.parts = []`, then calls `jobStepDone(j.id, k)` with k counted before the fetch stop disappeared. Without that stop, k is the **make** stop, so the 10-minute lathe/fab wait is ticked off unmade. Tick the fetch step before clearing parts, or keep the part and let the make stop skip using it. Add a test with an empty shelf.
+- **Fix 2 (the page): the thing goes into a hand.** The page: "The thing goes into a hand ... Hand it over in person (tap them)". In 0.53.6 the made thing never enters SHIP.player.carry; the hand-over is a chat button whether or not you have it. Put it in carry, and let the hand-over take it from there (or the lead accepts the shortcut).
+- Notes (no fix asked): when nobody is acquainted a Works colleague asks (not on the page); the flag 'works.shop' is set but nothing reads it; 'shop' isn't in WORKS_SIDE_KINDS (harmless: finished with jobFinish, no turn-in note); shopData doesn't clean xpDay/taught/posted or an order's day/job/part (junk `taught` means the lesson is never given); mech_check has no real save round trip and its rep check accepts 0 or 1; the tinker time doesn't scale with needs, so the toast's "about N" can be off; from Day 6 the lathe/fab stop making GIFT_MAKES; any tap in main storage does the shop fetch; the 24k comment moved off its line at 35836/35837.
+- Checks on 626a907: mech_check OK, social_check OK, cadet_test vs 7a6e137 ALL IDENTICAL.
+
 ### W2 claude/writer-p5 c058947 (0.48.110, five texts for E1): PASS
 round.title.first, bench.charging ({time}), bench.charging.now, bench.rack, bench.rack.done; keys-p5.md updated. Bakes 9562 lines; lines_check PASS. W2's tip.
 
