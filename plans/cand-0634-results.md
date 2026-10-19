@@ -167,3 +167,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - ~08:17 R6 PASS U2 06a5e99 (check-only; the cause of the round-guide FAIL). Lead 18: if interactions is green with it, 92d40d5's game + the check file (c336170) is 0.63.4 final.
 - CR2 92d40d5: bubble OK.
 - CR2 92d40d5: join OK (left: leave).
+- CR2 DONE on 92d40d5: 14/14 OK (smoke, newgame, events, device, food, clothes, arc, deck, path, tiles, disc, bubble, join, leave); note claude/p5-cand-s4-checks 26be4a3 plans/cand-0634-cr2.md. X2 is out of 0.63.4 (no re-run needed).
