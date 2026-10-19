@@ -28,3 +28,20 @@
 19 PASS, 1 FAIL.
 
 **leave FAIL**, the only FAIL line: `FAIL the Works crew don't use the clock: [2, 1, 2, 1, 2, 2, 1, 2, 2, 1, 1]` (clock stops in planDay(p, 10) per Works crew member; the rule wants every one at least 1 and three quarters (8 of 11) at 2; here 7). Passed on 0.63.4 (92d40d5). BM8 placed it: 2bc08d5 + X2 6c26c72 alone fails with the same numbers (X2's varied mornings vs the time clock's 6-minute wait); sent to X3.
+
+## Re-run on ee9f9ed (= 1e70683 + X3's 0.71.7 6a4e153: Works clock-out waits 20 min)
+
+For BM8, ~10:27-10:50, from a detached worktree of ee9f9ed, own CADET_WORK each, two at a time. (BM8 re-ran leave, day 0-3, cadet, interactions.)
+
+| check | result | time | last line |
+|---|---|---|---|
+| day_check 4 | PASS | 357s | DAY CHECK OK |
+| day_check 8 | PASS | 375s | DAY CHECK OK |
+| events | PASS | 317s | EVENTS CHECK OK |
+| day_check 5 | PASS | 353s | DAY CHECK OK |
+| food | PASS | 97s | FOOD CHECK OK |
+| deck | PASS | 144s | DECK CHECK OK |
+| day_check 6 | PASS | 304s | DAY CHECK OK |
+| day_check 7 | PASS | 201s | DAY CHECK OK |
+
+All 8 PASS.
