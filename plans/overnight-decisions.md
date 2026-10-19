@@ -213,3 +213,5 @@ All 8 packages approved (Zeke: "all good except he still walks and talks" → he
 | ~02:47 (the user) | Wren talks size | "Some talks are bigger though, for chiefs etc.": two sizes, most small and informal, some bigger ones by department chiefs in a larger room, less often; still not captain addresses. Sent to D3 |
 | ~02:52 (the user) | Overnight mode | No (not on) |
 | | Rec traditions | The user picks them once the design is done (D3 finishing v3 + chief talks) |
+| ~03:01 (the user, rec traditions survey) | Answers | Reading yes; rec plan three count; river hall = Paddle club + regatta (Glow paddle out); pool: neither new one; float: Slow stretch; no non-sport for now; chiefs talks yes; Cup matches yes; player gives a talk later yes; climbing wall: just one tradition |
+| ~03:05 (the user) | Rec mini-games | Goal: each rec sport except floating is a little mini-game / digital toy (Lightdisc already). D3 designs rock wall, pool, kayak (plan + survey); built in the rec deck phase |
