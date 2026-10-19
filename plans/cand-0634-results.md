@@ -128,3 +128,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - ~07:32 lead 17: second runner CR2 = session_018xWmWkrtNWudZUgXygkW1u (on claude/p5-cand-s4; notes to claude/p5-cand-s4-checks): give it the final hash + its half. Handover at ~65%; lead starts BM8 for the rec deck combine.
 - t14: interactions OK. Handover draft written (plans/handover-build-master-7.md; tools in plans/build-master/bm7/).
 - ~07:35 R6 PASS E6 1c40c7a (0.45.18; E6's tip).
+- t14 done: all 12 OK (mech, career, machine, lines, cadet ALL IDENTICAL, deck, interactions, device, tiles, leave, food, social).
