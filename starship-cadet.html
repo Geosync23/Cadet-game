@@ -41866,7 +41866,7 @@ if (typeof teamJobPost === 'function') WORK_MECH.m8 = {
 // pipe drips somewhere on Deck 4". Find it: a puddle on the floor and a damp patch on the wall show the room; look at the
 // puddle ("coming from above, along the north wall"), then the damp, then the joint: tighten it (a turn), or if it's worn
 // through, a joint from stores (section 17's jointJobPost, held for you). Ladder row m13 (small: its first use is the
-// training; the Works officer on shift has a word at the puddle: "Follow the wet, not the noise. Well, both."). Not taken
+// training, at the puddle: the Works officer on shift finds it with you, the writer's meeting train.m13.<id>). Not taken
 // by the end of your shift: held till 09:00 the next workday, then the crew find it the long way (an hour). Stages: 0 a
 // public room; 1 after 3 leaks also the Deck 5 pipe galleries (works: true places behind their panels); with the pipe kit
 // (24i's, M9) the puddle's look adds the kit's damp reading. The joints are E3's places (DECKS[n].leakJoints, n-leak-k
@@ -41918,7 +41918,7 @@ function leakPost(t, w = incWeek(worksDay(t))) {
   const P = leakPick(w); if (!P) return null;
   const { J, worn } = P, p = placeById(J.place), d = worksDay(t);
   const j = jobMake('leak', { id: 'leak:' + J.place + '@' + Math.floor(t / 60), deck: J.deck, room: null, h: Math.floor(t / 60), joint: J.place, worn, urgency: 1,
-    title: worksText('leak.title', 'A pipe drips somewhere on Deck {deck}', { deck: J.deck }), leave: Math.max(60, (d - 1) * 1440 + DAY_SHIFT[1] - Math.max(t, (d - 1) * 1440 + DAY_SHIFT[0])) + 60 });
+    title: worksText('leak.card', 'A pipe drips somewhere on Deck {deck}', { deck: J.deck }), leave: Math.max(60, (d - 1) * 1440 + DAY_SHIFT[1] - Math.max(t, (d - 1) * 1440 + DAY_SHIFT[0])) + 60 });
   j.posted = j.found = t;
   SHIP.jobs.push(j); L.push({ id: j.id, joint: J.place, room: p.room || null, deck: J.deck, day: d, worn, found: null });
   if (L.length > LEAK_KEEP) L.splice(0, L.length - LEAK_KEEP);
@@ -41934,20 +41934,21 @@ function leakStops(j) {
   const pp = J.puddlePlace && placeById(J.puddlePlace) ? J.puddlePlace : J.place, open = (j.stepsDone || []).includes(0) || (!!j.claimedBy && j.claimedBy !== 'you');
   const wall = LEAK_WALL[(J.damp && J.damp[2]) || J.wall] || 'near', kit = typeof hasTool === 'function' && hasTool('pipekit') && worksStage('m13') >= 1;
   return [
-    { deck: J.deck, placeId: pp, mins: 1, tag: 'puddle', how: 'look', opts: { ...(kit ? { tool: 'pipekit' } : {}), secs: 3, text: worksText('leak.puddle', 'A puddle, and it\'s still dripping. It\'s coming from above, along the {wall} wall.', { wall })
-        + (kit ? ' ' + worksText('leak.kit', 'The pipe kit\'s damp reading climbs that way.') : '') } },
-    { deck: J.deck, placeId: open ? J.place : null, mins: 1, tag: 'damp', how: 'look', opts: { secs: 3, text: worksText('leak.damp', 'Damp on the wall, darkest just under the pipe. There: the joint.') } },
+    { deck: J.deck, placeId: pp, mins: 1, tag: 'puddle', how: 'look', opts: { ...(kit ? { tool: 'pipekit' } : {}), secs: 3, text: worksText('leak.look.above', 'It\'s coming from above, towards {place}.', { place: 'the ' + wall + ' wall' })
+        + (kit ? ' ' + worksText('leak.look.warmer', 'Wetter here. You\'re close.') : '') } },
+    { deck: J.deck, placeId: open ? J.place : null, mins: 1, tag: 'damp', how: 'look', opts: { secs: 3, text: worksText('leak.look.here', 'There. A joint, weeping.') } },
     j.worn ? { deck: J.deck, placeId: open ? J.place : null, mins: 2, tag: 'joint', how: 'look', opts: { secs: 3, text: worksText('leak.worn', 'Worn right through. Tightening won\'t hold it: it needs a new joint from stores.') } }
-      : { deck: J.deck, placeId: open ? J.place : null, mins: 2, tag: 'joint', how: 'turn', opts: { label: worksText('leak.nut', 'The joint\'s nut'), v: 0, min: 0, max: 3, by: 1,
+      : { deck: J.deck, placeId: open ? J.place : null, mins: 2, tag: 'joint', how: 'turn', opts: { label: worksText('leak.fix.tighten', 'Tighten the joint'), v: 0, min: 0, max: 3, by: 1,
         onTurn: v => v >= 3 ? worksText('leak.tight', 'Snug. The drip stops.') : v > 0 ? worksText('leak.turning', 'A quarter turn. Still a bead of water. A bit more.') : null, ok: v => v >= 3, gauge: null } },
   ];
 }
 function leakStepDone(j, k, res, t) {
-  if (k === 0 && worksStage('m13') < 0) {   // your first: the Works officer on shift has a word
-    const by = ladderTeacher(ladderRow('m13'), worksDay(t)) || LEAK_BY[0];
-    worksTeach('m13', by, 'puddle', ['Follow the wet, not the noise. Well, both.']);
-  }
   if (k > 0 && !(j.stepsDone || []).includes(0)) return false;   // the puddle first
+  if (k === 0 && SHIP.works.tr.m13 === undefined) {      // your first: the Works officer on shift finds it with you (the writer's meeting train.m13.<id>, else a word); trained here
+    const by = ladderTeacher(ladderRow('m13'), worksDay(t)) || LEAK_BY[0];
+    if (!MEETING_SCRIPTS['train.m13.' + by] && !MEETING_SCRIPTS['train.m13']) worksTeach('m13', by, 'puddle', ['Follow the wet, not the noise. Well, both.']);
+    worksTrained('m13', t);
+  }
   if (k === 0 && typeof hasTool === 'function' && hasTool('pipekit') && worksStage('m13') >= 1 && typeof toolWear === 'function') toolWear('pipekit', 5);   // the kit's damp reading (24 core's wear, E1)
   return true;
 }
@@ -41956,11 +41957,12 @@ function leakDone(j, t, by) {
   const e = (leakList() || []).find(x => x.id === j.id); if (e) e.found = by || 'crew';
   if (by === 'you') {
     j.foundBy = 'you'; worksUse('m13');
+    try { toast(j.title, worksText('leak.done', 'Dry. Found it yourself.')); } catch (e) { /* no UI */ }
     if (j.worn && typeof jointJobPost === 'function') {
-      const p = placeById(j.joint), F = jointJobPost({ placeId: j.joint, title: worksText('leak.replace', 'Replace a worn joint: {room}', { room: (p && roomName(p.deck, p.room)) || 'corridor' }) }), J = F && SHIP.jobs.find(x => x.id === F);
+      const p = placeById(j.joint), F = jointJobPost({ placeId: j.joint, title: worksText('leak.fix.replace', 'Replace the joint ({part})', { part: 'a seal' }) + ': ' + ((p && roomName(p.deck, p.room)) || 'corridor') }), J = F && SHIP.jobs.find(x => x.id === F);
       if (J) { J.leave = Math.max(60, (worksDay(t) - 1) * 1440 + DAY_SHIFT[1] - t); J.foundBy = 'you'; j.fix = F; }
     }
-  }
+  } else if (SHIP.works.tr.m13 !== undefined && t >= shipNow() - 1) try { toast(worksText('leak.card', 'A pipe drips somewhere on Deck {deck}', { deck: j.deck }), worksText('leak.found.crew', 'The crew found the drip on Deck {deck}. The long way.', { deck: j.deck })); } catch (e) { /* no UI */ }
   simNote('leak', { id: j.id, step: 'fixed', by: by || null });
   if (typeof MACH_REV !== 'undefined') MACH_REV++;
   leakFx();
