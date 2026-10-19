@@ -269,7 +269,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.44.22
+   STARSHIP CADET: CSV Wren                           build 0.44.23
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8682,7 +8682,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.44.22';                           // keep in step with the header's build line
+const GAME_BUILD = '0.44.23';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -38418,8 +38418,9 @@ const CAREER_LADDER = [
   { id: 'm2', name: 'Your work uniform', size: 'small', day: 8, tier: 1, rank: 'junior', needs: { flag: 'works.oily' }, by: ['torres-zeke'], stages: [{ uses: 0 }] },
   { id: 't2', name: 'Your Tier 2 test job', size: 'big', day: 9, tier: 1, rank: 'junior', needs: [{ rep: 'relied' }, { trained: 'm6' }], by: ['calder', 'vance'], where: { deck: 5, room: 'o' }, job: 'test', stages: [{ uses: 0 }] },
   // Step 3, Tier 2 (0.44.22: rows here so worksClean keeps their state; their sub-blocks are 24h's m8 and 24k's p1/p2;
-  // 24i pushes m9 itself). m8 opens once you're an officer (Day 11 for a steady player: promoted on Day 10)
+  // m9 is 24i's, here too so a reload keeps it). m8 opens once you're an officer (Day 11 for a steady player: promoted on Day 10)
   { id: 'm8', name: 'Team jobs', size: 'big', day: 11, tier: 2, rank: 'officer', needs: { trained: 't2' }, by: ['torres-zeke', 'halloran-emeka', 'calder'], where: { deck: 3, room: 'R' }, job: 'team', stages: [{ uses: 0 }, { uses: 2 }] },
+  { id: 'm9', name: 'Tracing', size: 'big', day: 12, tier: 2, rank: 'officer', needs: null, by: ['calder', 'halloran-emeka'], where: { deck: 5, room: 'w' }, job: 'trace', tool: 'pipekit', stages: [{ uses: 0 }] },   // M3's 24i
   { id: 'p1', name: 'When does it happen?', size: 'small', day: 12, tier: 2, rank: 'officer', needs: { trained: 'm9' }, by: ['calder', 'halloran-emeka'], stages: [{ uses: 0 }] },
   { id: 'p2', name: 'Who saw what?', size: 'small', day: 15, tier: 2, rank: 'officer', needs: null, by: ['tomas', 'torres-zeke'], stages: [{ uses: 0 }] },
 ];
@@ -38427,7 +38428,7 @@ const WORK_MECH = {};                                    // the sub-blocks: WORK
 const WORK_TOOLS = {
   clipboard: { name: 'the round clipboard', mech: 'm1', wearPerUse: .01 },
   scanner: { name: 'the scanner', mech: 'm7', wearPerUse: .02 },
-  pipekit: { name: 'the pipe kit', mech: 'm13', wearPerUse: .02 },
+  pipekit: { name: 'the pipe kit', mech: 'm9', wearPerUse: .02 },   // with tracing (M3's m9, Day 12; was m13, leak hunting, Step 4)
   logger: { name: 'the data logger', mech: 'p5', wearPerUse: .02 },
   tester: { name: 'the circuit tester', mech: 'm15', wearPerUse: .02 },
   calrig: { name: 'the test rig', mech: 'm10', wearPerUse: 0, bench: true },   // a bench in the machine shop, not carried
@@ -38760,9 +38761,10 @@ function worksNext() {
   const opened = worksOpened(W);
   if (opened.has('t2') && !(W.test && W.test.passed)) return worksText('next.t2', 'Calder has your test job ready.', null, k);
   if (W.test && W.test.passed && typeof promoDone === 'function') {   // 24p: the promotion's steps (W2's next.summons / move / ceremony)
-    if (!promoDone('summons2')) return worksText('next.summons', 'Calder will want a word about your test job.', null, k);
-    if (!promoDone('move2')) return worksText('next.move', 'Your own cabin, 4-23, after the shift.', null, k);
-    if (!promoDone('ceremony2')) return worksText('next.ceremony', 'Your commission: the observation room, 17:15 tomorrow.', null, k); }
+    const nx = (key, fb) => worksText('next.' + key, worksText('next.wait.' + key, fb, null, k), null, k);   // (either of the writer's names)
+    if (!promoDone('summons2')) return nx('summons', 'Calder will want a word about your test job.');
+    if (!promoDone('move2')) return nx('move', 'Your own cabin, 4-23, after the shift.');
+    if (!promoDone('ceremony2')) return nx('ceremony', 'Your commission: the observation room, 17:15 tomorrow.'); }
   const next = CAREER_LADDER.find(r => !opened.has(r.id) && WORK_MECH[r.id] && r.tier <= W.tier && r.size === 'big');
   if (next) return worksText('next.' + next.id, worksFirst(next.by[0]) + ' will show you ' + mechName(next.id).replace(/^./, x => x.toLowerCase()) + ' when you\'re ready.', { name: worksName(next.by[0]), mech: mechName(next.id) }, k);
   return worksText('next.band.' + (worksBand() || 'new'), 'Keep at it: Calder\'s watching your work.', null, k);
@@ -38771,7 +38773,7 @@ function worksNext() {
 function worksRecordHead() {                             // null before SHIP.works (Days 0-1 keep the Record's old line)
   const W = SHIP.works; if (!W) return null; const tier = W.tier, v = { title: worksText('works.title.t' + tier, 'tier ' + tier), rank: worksRankTitle(W), band: worksBandWord(), next: worksNext() };
   const com = (W.ms.find(x => x[0] === 'commissioned') || [])[1];   // 24p: the ceremony
-  return { kind: 'text', mark: 'hot', text: worksText('works.record', '{rank}, {title}. Works reputation: {band}. What\'s next: {next}', v) + (com ? ' ' + worksText('works.ms.commissioned', 'Commissioned Officer, Day {n}.', { n: com }) : '') };
+  return { kind: 'text', mark: 'hot', text: worksText('works.record', '{rank}, {title}. Works reputation: {band}. What\'s next: {next}', v) + (com ? ' ' + worksText('works.record.commissioned', 'Commissioned Officer, Day {day}.', { day: com }) : '') };
 }
 // ---- the device's Works app: Training, Work log, Tools; other sections add tabs with worksTabAdd (24k: Fault notes and
 // the Chief's notes): worksTabAdd({ id, title, order, view() -> [blocks], act?(verb, arg), badge?() -> number }); the
@@ -40275,7 +40277,7 @@ function promoEscort(p, t) {                             // worksEscort's 24p pa
 WORK_TICKS.push((now, skip) => { promoSummonsTick(now); if (!skip) promoSeekTick(now); });
 // Part 3, the move to 4-23 (0.44.20): on the promotion's day at 17:00 (up to 30 minutes later if you're mid-job) Calder,
 // or Commander Vance if she's off, walks you from wherever you are to cabin 4-23 at the quiet end of the officers' corridor
-// (worksEscort 'lead' to Deck 4's spare W), talking about officers' ways as you go (promo.walk.*). It's yours when you get
+// (worksEscort 'lead' to Deck 4's spare W), talking about officers' ways as you go (promo.walk). It's yours when you get
 // there, or at 17:30 at the latest whatever happens (her lines by Mail if you're asleep or away): SHIP.works.home =
 // '4-23', done 'move2', simNote('moved', { home }) (Tomas and Pell with your box at the door, and his goodbye: the sim engineer's, on
 // simNote('moveStart')). From then the cabin's door opens for you
@@ -40301,24 +40303,20 @@ function promoMoveTick(now) {
     if (myJob() && m < DAY_SHIFT[1] + PROMO.moveWait) return;   // mid-job: she waits a while
     W.mv = { by: promoMoveBy(), at: Math.floor(now), s: [] };
     if (!promoInBay()) promoWalkSay('promo.fetch.move', 'There you are. Come on: your cabin.');
-    promoWalkSay('promo.walk.start', 'Right, Officer. Your cabin. Follow me.');
+    promoWalkSay('promo.walk', worksText('promo.walk', 'Right, Officer. Your cabin. Follow me.'), ['Your own door now. Quiet hours after eleven; people knock, they don\'t walk in.', 'And when someone says "come over", they mean it.']);   // her lines in order (W2's flag promo.walk)
     simNote('moveStart', { by: W.mv.by });   // the sim engineer's box carry (Tomas and Pell at 4-23's door)
     if (typeof setGoal === 'function') setGoal({ deck: PROMO.homeRoom.deck, room: PROMO.homeRoom.room, label: 'Your cabin, ' + PROMO.home });
   }
-  try { const rm = roomAt(...player.here()), n = deckDef.num, M = PROMO.homeRoom, bed = typeof PLACE_OF !== 'undefined' && PLACE_OF.get(PROMO.home);   // her lines along the way (W2's promo.walk.*)
-    if (rm === '@') promoWalkSay('promo.walk.lift', 'Officers\' corridor\'s on Four, the far side from the bunks.');
-    if (n === M.deck && rm !== M.room && ROOMS[rm] && ROOMS[rm].hall) promoWalkSay('promo.walk.corridor', 'Quiet hours after eleven up here. People knock; they don\'t walk in.');
-    if (n === M.deck && bed && Math.hypot(player.here()[0] - bed.at[0], player.here()[1] - bed.at[1]) < 5) promoWalkSay('promo.walk.door', 'Your door. Your name\'s on it.');
-    if (n === M.deck && rm === M.room) { promoWalkSay('promo.walk.inside', 'And when someone says "come over", they mean it. Goodnight, Officer.'); promoMoved(now, 'walked'); } } catch (e) { /* not in play */ }
+  try { if (deckDef.num === PROMO.homeRoom.deck && roomAt(...player.here()) === PROMO.homeRoom.room) promoMoved(now, 'walked'); } catch (e) { /* not in play */ }
 }
-function promoWalkSay(flagKey, fallback) {               // each of Calder's walk lines once (her VOICE lines under that flag, else the stand-in)
+function promoWalkSay(flagKey, fallback, more) {         // her lines under a flag once (her VOICE lines, else the stand-ins)
   const W = SHIP.works, m = W && W.mv; if (!m || m.s.includes(flagKey)) return; m.s.push(flagKey);
-  worksSayAll(m.by, worksVoice(m.by, flagKey) || [fallback]);
+  worksSayAll(m.by, worksVoice(m.by, flagKey) || [fallback].concat(more || []));
 }
 function promoMoved(now, how) {                          // 4-23 is yours
   const W = SHIP.works; if (!W || promoDone('move2')) return false;
   W.home = PROMO.home; W.done.push('move2'); const by = (W.mv && W.mv.by) || promoMoveBy(); delete W.mv;
-  if (how !== 'walked' && typeof mailSend === 'function') { const t = worksText('mail.promo.move', 'Your cabin | Cabin 4-23 is yours from tonight: your things are in, your name\'s on the door. Officers\' corridor, the quiet end. — C.'), i = t.indexOf(' | ');
+  if (how !== 'walked' && typeof mailSend === 'function') { const t = worksText('promo.move.mail', 'Your cabin | Cabin 4-23 is yours from tonight: your things are in, your name\'s on the door. Officers\' corridor, the quiet end. — C.'), i = t.indexOf(' | ');
     mailSend({ at: now, from: worksName(by), subject: i > 0 ? t.slice(0, i) : 'Your cabin', body: i > 0 ? t.slice(i + 3) : t }); }
   simNote('moved', { home: W.home, how, t: now });
   return true;
@@ -40351,7 +40349,7 @@ function promoCerScript() {                              // the writer's ceremon
     lines: [
       { who: 'vance', text: 'Attention, please. The Captain.' },
       { who: 'marrow', text: c => 'By the authority of the Concord Service, ' + c.you + ' is commissioned an Officer of the CSV Wren, Works Department.', pose: 'gesture' },
-      { who: 'calder', text: () => typeof uniformState === 'function' && uniformState() === 'grubby' ? '(Calder looks at your uniform, then at you, and says nothing.)' : 'Shoulders back.' },
+      { who: 'calder', text: 'Shoulders back.' },
       { who: 'marrow', text: 'Your insignia. Hold still.', pin: true },
       { choice: [
         { text: 'Thank you, Captain. I\'m proud to serve on the Wren.', reply: { who: 'marrow', text: 'And the Wren is glad of you.' } },
@@ -40371,8 +40369,8 @@ function promoCommission(now, how) {                     // commissioned: once
   const W = SHIP.works; if (!W || W.tier < 2 || promoDone('ceremony2')) return false;
   const d = worksDay(now), r = SHIP.occasions.find(x => x.id === 'promoCeremony' && x.status === 'asked'); if (r) r.met = true;
   W.done.push('ceremony2'); if (!W.ms.some(x => x[0] === 'commissioned')) W.ms.push(['commissioned', d]);
-  if (typeof giftKeepsake === 'function') try { giftKeepsake({ id: 'marrow' }, worksText('works.keepsake.commission', 'your framed commission')); } catch (e) { /* no social */ }
-  if (how === 'mail' && typeof mailSend === 'function') { const t = worksText('mail.promo.ceremony', 'Your commission | We missed you in the observation room. Your commission is signed all the same, and framed on your shelf. Congratulations, Officer. — O. Marrow'), i = t.indexOf(' | ');
+  if (typeof giftKeepsake === 'function') try { giftKeepsake({ id: 'marrow' }, worksText('promo.keepsake', 'your framed commission')); } catch (e) { /* no social */ }
+  if (how === 'mail' && typeof mailSend === 'function') { const t = worksText('promo.ceremony.mail', 'Your commission | We missed you in the observation room. Your commission is signed all the same, and framed on your shelf. Congratulations, Officer. — O. Marrow'), i = t.indexOf(' | ');
     mailSend({ at: now, from: 'Captain Odile Marrow', subject: i > 0 ? t.slice(0, i) : 'Your commission', body: i > 0 ? t.slice(i + 3) : t }); }
   promoPip();
   simNote('commissioned', { day: d, how });
@@ -40400,6 +40398,8 @@ function promoCerTick(now) {
   const f = r.f || (r.f = {});
   if (m >= PROMO.cerMailAt && !f.mail && typeof mailSend === 'function') { f.mail = 1; const t = worksText('promo.ceremony.invite', 'Your commissioning | This evening at 17:15, the observation room, Deck 1. A clean uniform, please. — The Captain\'s office'), i = t.indexOf(' | ');
     mailSend({ at: Math.max(now, (d - 1) * 1440 + PROMO.cerMailAt), from: 'The Captain\'s office', subject: i > 0 ? t.slice(0, i) : 'Your commissioning', body: i > 0 ? t.slice(i + 3) : t }); }
+  try { if (!f.gr && r.status === 'asked' && now >= r.at - 10 && deckDef.num === r.deck && roomAt(...player.here()) === r.room && typeof uniformState === 'function' && uniformState() === 'grubby') {
+    f.gr = 1; worksSayAll('calder', worksVoice('calder', 'promo.grubby') || ['(Calder looks at your uniform, then at you, and says nothing.)']); } } catch (e) { /* not in play */ }   // a clean uniform matters (M2): her look, nothing else
   if (m >= PROMO.cerSeek && !f.seek && !r.met && r.status === 'asked') { f.seek = now; r.len = PROMO.cerLate - PROMO.cerAt + 20;   // 17:30: Calder walks you up; the room waits for you
     worksSayAll('calder', worksVoice('calder', 'promo.fetch.ceremony') || ['There you are. The Captain\'s waiting. Come on.']);
     if (typeof setGoal === 'function') setGoal({ deck: 1, room: 'O', label: 'Your commission, the observation room' }); }
