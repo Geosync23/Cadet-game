@@ -130,6 +130,26 @@ with sync_playwright() as pw:
     print('Works tea at 13:00:', wt)
     if wt and (wt['outside'] or wt['peak'] > 3 or (wt['on'] and wt['went'] < wt['on'] // 3)): fail(f'Works tea wrong: {wt}')
 
+    # the morning (the user's playtest 2, 0.71.5): the day shift wakes spread out from 05:30, not all go straight to
+    # breakfast (some work out, some have a coffee or a read first), and every one of them eats breakfast and is at
+    # work by 09:00 (the galley rota and the night shift have their own mornings)
+    mo = g.ev(f"""(() => {{ const B = ({DAY} - 1) * 1440, out = {{ n: 0, wake: {{}}, first: {{}}, late: [], noBreakfast: [] }};
+      for (const p of schedPeople()) {{
+        if (p.shift === 'night' || !p.work || !isWorkDay(p, {DAY}) || (galleyRotaOn() && p.dept === 'galley') || !aboardAllDay(p, {DAY}) || (shiftBlocks(p, {DAY}) || {{}}).blocks) continue;   // a rota of their own (the store, the galley): dayReport checks those
+        const segs = planDay(p, {DAY}), w = segs.find(s => s.act === 'work'); if (!w) continue; out.n++;
+        const sl = segs.filter(s => s.act === 'sleep' && s.from < B + 600).pop(), wk = sl ? sl.to - B : 0, h = hhmm(Math.floor(wk / 30) * 30);
+        out.wake[h] = (out.wake[h] || 0) + 1;
+        const f = segs.find(s => s.from >= B + wk && !['sleep', 'commute', 'off'].includes(s.act) && !['toilet', 'lift', 'inspection'].includes(s.tag));
+        const k = !f ? 'none' : f.act === 'breakfast' ? 'breakfast' : f.act === 'gym' ? 'workout' : f.act === 'wash' ? (segs.some(s => s.from > f.from && s.act === 'leisure' && s.from < (segs.find(x => x.act === 'breakfast') || {{ from: Infinity }}).from) ? 'wash, then a coffee or read' : 'wash') : f.act;
+        out.first[k] = (out.first[k] || 0) + 1;
+        if (w.from > B + SHIFTS.day[0]) out.late.push(p.id + ' ' + hhmm(w.from - B));
+        if (!segs.some(s => s.act === 'breakfast')) out.noBreakfast.push(p.id + (habitsOn(p, {DAY}).includes('skips-breakfast') ? ' (skips)' : ''));
+      }}
+      return out; }})()""")
+    print('Mornings of the day shift:', mo['n'], '| woke', dict(sorted(mo['wake'].items())), '| first thing', mo['first'])
+    if mo['late']: fail(f"late to the shift: {mo['late'][:8]}")
+    if [x for x in mo['noBreakfast'] if not x.endswith('(skips)')]: fail(f"no breakfast: {mo['noBreakfast'][:8]}")
+
     # 3. every deck through the day
     decks = g.ev("typeof DECK_ORDER !== 'undefined' ? DECK_ORDER.slice().sort((a, b) => a - b) : Object.keys(DECKS).map(Number)")
     for n in decks:

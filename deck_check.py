@@ -24,7 +24,7 @@
 # Setup and environment as for cadet_test.py.
 # The game loads with ?nosave&debug (cadet_test.py's Game class), so a save never changes what it checks.
 # Run:  python3 deck_check.py BUILD.html
-import sys
+import sys, json
 exec(open(__file__.replace('deck_check.py', 'cadet_test.py')).read().split("a, shots = run(")[0])
 from playwright.sync_api import sync_playwright
 
@@ -197,9 +197,13 @@ with sync_playwright() as pw:
     mem = []
     for n in [d for d in decks if d != 4] * 3:
         g.ev(f"goToDeck({n})"); g.step(3); g.ev("goToDeck(4)"); g.step(3)
-        mem.append(g.ev("JSON.stringify(renderer.info.memory)"))
-    print('Deck 4 memory after round trips:', mem)
-    if len(set(mem[len(decks) - 1:])) > 1: ok = False; print('  memory changes between round trips')
+        mem.append(g.ev("JSON.stringify([renderer.info.memory, DECK_CREW.filter(a => a.h.full).map(a => a.p.id).sort()])"))
+    print('Deck 4 memory after round trips (and the story crew near you with a full body):', mem)
+    # story crew near you get a full body (crewDetail), freed when they go: compare trips with the same ones (0.71.4)
+    same = {}
+    for m in mem[len(decks) - 1:]: v = json.loads(m); same.setdefault(','.join(v[1]), set()).add(json.dumps(v[0]))
+    if any(len(v) > 1 for v in same.values()): ok = False; print('  memory changes between round trips')
+    if not any(sum(1 for m in mem[len(decks) - 1:] if ','.join(json.loads(m)[1]) == k) > 1 for k in same): ok = False; print('  no two round trips to compare')
     print('errors', g.errors)
     if g.errors: ok = False
     print('DECK CHECK OK' if ok else 'DECK CHECK FAILED')

@@ -235,7 +235,11 @@ with sync_playwright() as pw:
           actEnd(true); SHIP.player.work = null; const j = SHIP.jobs.find(x => x.id === id); j.claimedBy = 'you'; j.status = 'claimed'; j.start = shipNow(); MACH_REV++;   // claimed by hand: the tier doesn't matter here
           SHIP.player.carry = j.parts.slice(0, 2); jobStops(j).forEach((x, k) => { if (x.step === 'fetch' && j.kind === 'chore') jobStepDone(j.id, k); });
           const nx = jobStops(j).find(x => !x.done && x.step !== 'fetch'); return nx ? [nx.step, nx.deck, nx.places[0]] : null; })"""
-        SCR = r"""((pid) => { const s = placeSpot(pid), v = new THREE.Vector3(s.x, .02, s.z).project(camera); return [(v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight]; })"""
+        # the floor at the spot, or near it (inside JOB_REACH) where no crew member is in front: a tap on a person talks to them
+        # (section 10's tapCrew comes first), and someone waiting to get past you can stand there (X3: Sol at Deck 3's lift, 0.71.5)
+        SCR = r"""((pid) => { const s = placeSpot(pid), scr = (dx, dz) => { const v = new THREE.Vector3(s.x + dx, .02, s.z + dz).project(camera); return [(v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight]; };
+          for (const [dx, dz] of [[0, 0], [.4, 0], [-.4, 0], [0, .4], [0, -.4], [.4, .4], [-.4, .4], [.4, -.4], [-.4, -.4], [.8, 0], [-.8, 0], [0, .8], [0, -.8]]) { const p = scr(dx, dz); if (!crewAtScreen(...p)) return p; }
+          return scr(0, 0); })"""
         PUT = r"""((pid) => { const s = placeSpot(pid), gl = nearestOpen(s.x, s.z, player); player.obj.position.copy(cellPos(...gl)); player.stop(); })"""
         for kind in ['lamp', 'event', 'machine']:
             for jid in g.ev(f"({MKJ})('{kind}')"):

@@ -468,7 +468,7 @@ with sync_playwright() as pw:
                 chat = { 't': g.ev('clockText()'), 'seat': g.ev("introSeat('you')"), 'sat': g.ev("typeof ACT !== 'undefined' && ACT ? ACT.placeId || null : null"), 'calder': g.ev(CALDER_D) }
                 print(f"  the dinner chat at {chat['t']}: sat down by the game in {chat['sat']} (your seat {chat['seat']}); the Chief {chat['calder']} m from her seat")
                 if chat['seat'] and chat['sat'] != chat['seat'] and not DAWDLE: fail(f"you weren't sat down at your table for the dinner chat: {chat}")
-                if chat['calder'] is not None and chat['calder'] < 2: fail(f"the Chief was already at your table when the dinner chat began (0.42.64: she walks over at its end): {chat}")
+                if chat['calder'] is not None and chat['calder'] >= 2: fail(f"the Chief wasn't at your table when the dinner chat began (0.71.3, the user's playtest 2: she sits at the dinner with Zeke; 0.42.64 had her walk over at its end): {chat}")
             if chiefAt is None and g.ev("!!DIALOGUE && /^introChief/.test(DIALOGUE.id || '')"):   # her welcome: she's walked over and sat first, after you and the chat
                 chiefAt = { 't': g.ev('clockText()'), 'calder': g.ev(CALDER_D), 'in': g.ev('introCalderIn()'), 'chat': chat is not None, 'you': g.ev("typeof ACT !== 'undefined' && ACT ? ACT.placeId || null : null") }
                 print(f"  the Chief's welcome at {chiefAt['t']}: she's {chiefAt['calder']} m from her seat (at it: {chiefAt['in']}), after the chat {chiefAt['chat']}, you in {chiefAt['you']}")
