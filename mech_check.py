@@ -32,9 +32,17 @@ TRAIN = r"""((id) => {
   let d = Math.max(row.day, 2); while (!playerShiftOn(d) || (row.fixed && weekday(d) + 1 !== row.fixed.wd)) d++;
   setShipNow((d - 1) * 1440 + 300); machinesNow(); const W = worksInit();
   W.log.push(['earlier', 1, 0, 'service']);                 // a job of yours already turned in (Day 1's shadow shift, for m1)
+  if ((row.tier || 1) > W.tier) { W.tier = row.tier; W.rank = row.rank || W.rank; }   // a Tier 2 row (m8, m9): you're an Officer by then (M3, 0.53.0)
   for (const r of CAREER_LADDER.slice(0, CAREER_LADDER.indexOf(row))) { W.tr[r.id] = 1; W.use[r.id] = 9; (W.op[1] = W.op[1] || []).push(r.id); }   // everything before it, done
   if (row.needs) for (const n of [].concat(row.needs)) { if (n.flag) flagSet(n.flag, 1); if (n.rep) W.xp = 999; }
-  const seen = [], doJob = jid => { if (!claimJob(jid)) return false; const j = SHIP.jobs.find(x => x.id === jid);
+  W.tier = Math.max(W.tier, row.tier || 1); if (row.rank) W.rank = row.rank;   // a Tier 2 row needs an Officer
+  if (row.needs) for (const n of [].concat(row.needs)) if (n.trained && !ladderRow(n.trained)) W.tr[n.trained] = 1;   // a row it needs that isn't in this build
+  const teamDo = jid => {                                   // a team job (24h): your turns as the lead calls them, the clock running
+    const j = SHIP.jobs.find(x => x.id === jid); let t = Math.max(shipNow(), j.start - 5);
+    for (let n = 0; n < 240 && j.status !== 'done'; n++, t++) { setShipNow(t); machinesNow(); worksCareerTick(t); for (const f of WORK_TICKS) f(t, false); if (j.seq && t >= j.start - 5) j.youIn = true; const mine = (j.seq || []).map((s, i) => s.who === 'you' ? i : -1).filter(i => i >= 0), k = mine.indexOf(j.cur); if (k >= 0 && !(j.stepsDone || []).includes(k)) jobStepDone(jid, k, j.seq[j.cur].how === 'turn' ? { value: 3 } : {}); }
+    return j.status === 'done';
+  };
+  const seen = [], doJob = jid => { const j0 = SHIP.jobs.find(x => x.id === jid); if (j0 && j0.kind === 'team') return teamDo(jid); if (!claimJob(jid)) return false; const j = SHIP.jobs.find(x => x.id === jid);
     const cs = SHIP.works && SHIP.works.cases && (SHIP.works.cases.open || []).find(c => c.job === jid);   // a head-scratcher (24k): call it right first
     if (cs && typeof caseCall === 'function') caseCall(cs.id, cs.cause);
     jobStops(j).forEach((s, k) => jobStepDone(jid, k)); return turnInJob(jid); };
@@ -46,7 +54,7 @@ TRAIN = r"""((id) => {
     if (c) seen.push(c.st);
     if (c && c.st === 'meet') { const r = SHIP.occasions.find(x => x.key === c.occ); if (r && t >= r.at) { r.met = true; worksCareerTick(t + 1); } }
     if (c && c.st === 'watch') { c.w = TRAIN_WATCH; worksCareerTick(t + 2); const dj = SHIP.jobs.filter(x => x.train === id && x.status === 'done').pop(); teacher = dj ? dj.doneBy : null; }
-    if (c && c.st === 'do' && !myJob() && doJob(c.j)) yours = (SHIP.jobs.find(x => x.id === c.j) || {}).doneBy;
+    if (c && c.st === 'do' && (!myJob() || (SHIP.jobs.find(x => x.id === c.j) || {}).kind === 'team') && doJob(c.j)) yours = (SHIP.jobs.find(x => x.id === c.j) || {}).doneBy;
     if (row.size === 'small' && worksOpened().has(id) && W.tr[id] === undefined) worksUse(id);
     if (W.tr[id] !== undefined) break;
   }
@@ -194,6 +202,7 @@ PARTS['m3i'] = m3i_part
 # manifest empty, the cart never over 4, a use of m4. Then a planted manifest of 5: two runs (4, then 1). Then Day 17 with
 # nobody taking it: the crew do it by evening. The same twice.
 M4_RUN = r"""(() => {
+  const invited = SHIP.bridgeInvited; SHIP.bridgeInvited = true;   // the planted manifest has a bridge crate: yours only once invited (S2's 0.33.57, C2's 0.44.17)
   SHIP.works = null; SHIP.notes = []; SHIP.flags = {}; SHIP.jobs = []; SHIP.mail = []; SHIP.manifest = [];
   MACH_HOUR = null; MACH_SEEN = -1; WORKS_TICK.m = WORKS_TICK.h = -1;
   const run = (from, to, f) => { for (let m = from; m <= to; m += 10) { setShipNow(m); machinesNow(); worksCareerTick(m); if (f) f(m); } };
@@ -224,6 +233,7 @@ M4_RUN = r"""(() => {
   const m2 = manifestCrates(); out.d17 = [haulDay(d2), SHIP.jobs.filter(x => x.kind === 'restock').map(x => [x.id, x.status]), SHIP.manifest]; run(t2 + 620, t2 + 1300);
   const j2 = SHIP.jobs.filter(x => x.kind === 'haul' && Math.floor(x.posted / 1440) + 1 === d2);
   out.crew = [m2, j2.map(x => [x.status, x.doneBy]), manifestCrates()];
+  SHIP.bridgeInvited = invited;
   return out;
 })()"""
 def m4_part(g):
@@ -370,6 +380,140 @@ def part_m6(g):
                 else: print('   ', k, json.dumps(a[k], sort_keys=True)[:300], '|', json.dumps(b[k], sort_keys=True)[:300])
 PARTS['m6'] = part_m6
 
+# ---- M8 team jobs (24h, seat M2): the rota over four weeks (Day 11 the recycler, Day 12 free, Tue/Thu 09:30, Fri 14:00 in
+# even ship weeks, never one machine twice a week, a busy day moved within the week); a crew-only job runs on paper and
+# puts the machines right; with you: your turns in order (out of turn refused), finished by you, +rep; late: your steps go
+# to the lead and it runs slower; the save's part read back; the same twice
+M8 = r"""(() => { const out = {}, W0 = JSON.stringify(SHIP.works);
+ const reset = t => { machinesNew(); SHIP.jobs = []; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t); machinesNow(); SHIP.works = null; worksInit(t); SHIP.works.team = { plan: {} }; SHIP.works.inc = { plan: {}, open: null }; };
+ reset(9 * 1440 + 300);
+ out.plans = [1, 2, 3, 4].map(w => teamPlan(w).map(e => [e[0], weekday(e[0]), e[1], e[3]]));
+ SHIP.works.team.plan = {}; out.again = JSON.stringify([1, 2, 3, 4].map(w => teamPlan(w).map(e => [e[0], weekday(e[0]), e[1], e[3]])));
+ const run = (rank, act) => { reset(15 * 1440 + 900); SHIP.works.rank = rank; const r = {};
+   for (let t = 15 * 1440 + 900; t <= 16 * 1440 + 760; t += 5) { setShipNow(t); machinesNow(); for (const f of WORK_TICKS) f(t, false); const j = SHIP.jobs.find(x => x.kind === 'team'); if (j && act) act(j, t, r); }
+   const j = SHIP.jobs.find(x => x.kind === 'team');
+   r.job = j && { team: j.team.length + (j.you ? 1 : 0), you: !!j.you && !j.youOut, status: j.status, by: j.doneBy, late: j.late, mins: j.doneAt - j.start, posted: j.posted - j.start };
+   r.right = j ? j.machines.every(id => SHIP.machines[id].cond >= 90) : null; r.rep = SHIP.works.xp; r.uses = SHIP.works.use.m8 || 0; return r; };
+ out.crew = run('junior');
+ out.late = run('officer');
+ out.you = run('officer', (j, t, r) => { if (j.status === 'done') return; if (t >= j.start - 5) j.youIn = true; const mine = j.seq.map((s, i) => s.who === 'you' ? i : -1).filter(i => i >= 0), k = mine.indexOf(j.cur);
+   if (!r.early && JOB_KINDS.team.veto && j.cur >= 0 && k !== 0) r.early = jobStepDone(j.id, 0, {}).ok === false;
+   if (k >= 0) { (r.turns = r.turns || []).push(jobStepDone(j.id, k, j.seq[j.cur].how === 'turn' ? { value: 3 } : {}).ok); for (const f of WORK_TICKS) f(t, false); } });
+ SHIP.works.team.plan[9] = [[64, 570, 'x', 'washer']]; SHIP.works.team.plan[1] = [[11, 570, 'y', 'recycler']];
+ out.save = JSON.stringify(teamClean(JSON.parse(JSON.stringify(SHIP.works.team)), 60)); out.saveOld = JSON.stringify(teamClean(undefined));
+ SHIP.works = JSON.parse(W0); return out; })()"""
+def part_m8(g):
+    a, b = g.ev(M8), g.ev(M8)
+    print('  m8 plan:', a['plans'])
+    print('  m8 crew:', a['crew']['job'], 'late:', a['late']['job'], 'you:', a['you']['job'], a['you'].get('turns'), 'early refused', a['you'].get('early'))
+    P = a['plans']
+    check(P[0] == [[11, 3, 570, 'recycler']], 'm8: Day 11 the recycler at 09:30, Day 12 free')
+    for w, wk in zip([2, 3, 4], P[1:]):
+        check(2 <= len(wk) <= 3 and len(set(e[3] for e in wk)) == len(wk) and all(e[1] <= 4 for e in wk), f'm8: week {w + 1}: {wk}')
+        check(any(e[2] == 840 and e[1] == 4 for e in wk) == ((w + 1) % 2 == 0) or (w + 1) % 2 == 0, f'm8: week {w + 1}: Fridays only in even ship weeks')
+    check(P == json.loads(a['again']), 'm8: the plan the same when made again')
+    c, l, y = a['crew'], a['late'], a['you']
+    check(c['job'] and c['job']['status'] == 'done' and not c['job']['you'] and c['right'], 'm8: a crew-only team job runs and puts the machines right')
+    check(l['job'] and l['job']['status'] == 'done' and l['job']['late'] and l['job']['mins'] > c['job']['mins'], 'm8: without you it starts after 15 minutes and runs slower')
+    check(y['job'] and y['job']['by'] == 'you' and y.get('turns') == [True, True, True] and y['uses'] == 1 and y['rep'] >= 2, 'm8: your three turns in order, finished by you, +2')
+    if not y.get('early'): print('  m8: (a turn out of order is not refused: section 17\'s stepDone hook not in this build)')
+    s = json.loads(a['save'])
+    check('9' in s['plan'] and '1' not in s['plan'] and json.loads(a['saveOld']) == {'plan': {}}, 'm8: the save read back (old weeks dropped)')
+    check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'm8: differs the second time')
+PARTS['m8'] = part_m8
+
+# 24i tracing (seat M3): on paper, with section 17's lines and traced faults (seat S2, 0.33.59: MACHINE_LINKS, linePath,
+# lineFlow, traceHidden, traceMark, traceFor; skipped, listed, when they aren't in the build). Day 12's training ends at
+# 5-valve-2 after Calder's reading; a traced job hides its machine (card, board, goal pointer) until it's found; reading
+# the middle (the Deck 5 pumps) then the valve finds it in two readings; reading up from the end; a machine off the line
+# has no reading; the job is then an ordinary repair, and fixing it clears the flow; the crew fix one you leave; about
+# half of an Officer's line repairs are traced, none untrained; the save; the air line's fan trace; the same twice.
+M9 = r"""(() => {
+  if (typeof traceLinesOn !== 'function' || !traceLinesOn()) return { lines: false };
+  const out = { lines: true, air: tracePath('air', 4).length > 0 };
+  const reset = t => { SHIP.works = null; SHIP.occasions.length = 0; SHIP.notes = []; SHIP.flags = {}; SHIP.jobs = []; SHIP.mail = []; MACH_HOUR = null; MACH_SEEN = -1; WORKS_TICK.m = WORKS_TICK.h = -1;
+    setShipNow(t); machinesNow(); for (const id in SHIP.machines) { const s = SHIP.machines[id]; s.cond = 90; s.state = machineState(90); } MACH_REV++;
+    const W = worksInit(); W.tier = 2; W.rank = 'officer'; W.tr.m9 = 12; return W; };
+  const key = v => flowWord(v).replace(' ', '');
+  const read = (j, id) => { const b = lineFlow(j.symptom.line, id, true), a = lineFlow(j.symptom.line, id); TRACE_UI.at = id; const ok = traceRead(j, id); return ok ? [id, key(b), key(a), !!j.traceFound] : [id, null]; };
+  const post = (id, deck, line, parts) => { SHIP.machines[id].state = machineState(SHIP.machines[id].cond); MACH_REV++;
+    return SHIP.jobs[SHIP.jobs.push({ id: id + '@t', machine: id, deck: machineById(id).deck, kind: 'repair', urgency: 1, posted: shipNow(), found: shipNow(), claimedBy: null, parts, status: 'open', symptom: traceSymptom(line, id) }) - 1]; };
+  // a traced repair of 5-valve-2 on Day 13 (the training's machine, by hand)
+  reset(12 * 1440 + 480); SHIP.machines['5-valve-2'].cond = 40;
+  const j = post('5-valve-2', 4, 'water', ['valve']), id = j.id;
+  out.sym = j.symptom; out.hidden = traceHidden(j); out.card = jobCard(j);
+  out.open = openJobs().filter(x => x.id === id).map(x => [x.title, x.at, x.room]);
+  out.path = tracePath('water', 4);
+  out.claimed = claimJob(id); toolGive('pipekit');
+  const g = ixJobStep(); out.goal = g && [g.deck, g.place];
+  out.marks5 = (traceMarks(5) || {}).tiles; out.marks3 = (traceMarks(3) || {}).text;
+  out.reads = [read(j, '5-pump-1'), read(j, '5-valve-2')];
+  out.after = [traceHidden(j), jobCard(j)[0], jobStops(j).map(s => s.step)];
+  out.save = (() => { const k = JSON.parse(JSON.stringify(j)); return [k.symptom.deck, !!k.traceFound, k.read]; })();
+  out.used = SHIP.works.use.m9; out.note = SHIP.notes.filter(n => n.kind === 'traceFound').map(n => n.line + ':' + n.machine);
+  jobStops(j).forEach((s, k) => jobStepDone(id, k)); out.fixed = [!!j.workDone, SHIP.machines['5-valve-2'].state, lineFlow('water', '5-valve-2') >= .8];
+  // upstream: reading up from the end; a machine off the line
+  reset(13 * 1440 + 480); SHIP.machines['3-uv-1'].cond = 30;
+  const j2 = post('3-uv-1', 2, 'water', ['uv lamp']); j2.symptom = { line: 'water', decks: [1, 2, 3], deck: 2 };
+  claimJob(j2.id); toolGive('pipekit');
+  out.flows = tracePath('water', 2).map(st => key(lineFlow('water', st[0])));
+  out.reads2 = [read(j2, '5-valve-1'), read(j2, '3-pump-1'), read(j2, '3-filter-1'), read(j2, '3-uv-1')];
+  out.offline = [traceMark(j2.id, '4-heater-1'), traceSteps(j2).some(x => x.includes('4-heater-1'))];
+  // the crew fix one you leave: an open traced job on Deck 5's pump, from 09:00 to 15:00
+  reset(13 * 1440 + 540); SHIP.machines['5-pump-2'].cond = 35;
+  const j3 = post('5-pump-2', 5, 'water', ['pump']);
+  for (let m = 540; m <= 900; m += 60) { setShipNow(13 * 1440 + m); machinesNow(); }
+  out.crew = [j3.status, j3.doneBy && j3.doneBy !== 'you' ? 'crew' : j3.doneBy, SHIP.machines['5-pump-2'].state];
+  // how many would be traced (section 17's traceFor): every line machine over 20 days, trained and not
+  let n = 0, tr = 0, un = 0, lines = {}; const W = reset(14 * 1440);
+  if (typeof traceFor === 'function') {
+    for (let d = 14; d < 34; d++) for (const m of machineList()) { const l = lineOf(m.id); if (!l || !lineOn(l)) continue; n++; const t = traceFor(m, (d - 1) * 24 + 9); if (t) { tr++; lines[t] = (lines[t] || 0) + 1; } }
+    out.trainedAfter = W.tr.m9; delete W.tr.m9; for (const m of machineList()) if (traceFor(m, 14 * 24 + 9)) un++; out.trainedBy = W.tr.m9;
+  }
+  out.share = [n, tr, lines, un];
+  if (out.air) {
+    reset(15 * 1440 + 480); SHIP.machines['5-damper-2'].cond = 35;
+    const j4 = post('5-damper-2', 4, 'air', ['relay']); j4.symptom = { line: 'air', decks: [4], deck: 4 };
+    claimJob(j4.id); toolGive('pipekit'); out.airReads = [read(j4, '5-fan-1'), read(j4, '5-damper-2')];
+  }
+  return out;
+})()"""
+def part_m9(g):
+    tr = g.ev("SHIP.jobs.filter(x => x.train === 'm9').map(x => [x.kind, x.machine, x.symptom ? x.symptom.line + ':' + x.symptom.deck : null, x.doneBy])")   # the frame's training run, just before
+    a = g.ev(M9)
+    if not a['lines']:
+        print('  m9: section 17\'s lines (MACHINE_LINKS, lineFlow, traceMark ...) are not in this build: nothing traced')
+        return
+    b = g.ev(M9)
+    print('  m9 training jobs:', tr)
+    check(any(x[0] == 'tracedemo' and x[3] not in (None, 'you') for x in tr) and any(x[1] == '5-valve-2' and x[2] == 'water:4' and x[3] == 'you' for x in tr), 'm9: Day 12\'s training: Calder reads the line, then the traced 5-valve-2 is yours')
+    print('  m9 path:', a['path'], 'symptom:', a['sym'])
+    print('  m9 card:', a['card'], 'board:', a['open'], 'goal:', a['goal'])
+    print('  m9 reads:', a['reads'], '| upstream:', a['flows'], a['reads2'])
+    print('  m9 after:', a['after'], 'fixed:', a['fixed'], 'crew:', a['crew'], 'share:', a['share'])
+    check(a['hidden'] and 'Deck 4' in a['card'][0] and 'alve' not in a['card'][0], 'm9: the card names the symptom, not the valve')
+    check(a['open'] and a['open'][0][1] is None and 'alve' not in a['open'][0][0], 'm9: the board doesn\'t point at the valve')
+    check(a['goal'] and a['goal'][1] and '5-valve-2' not in a['goal'][1], f"m9: the goal pointer leads to the line, not the valve ({a['goal']})")
+    check(a['marks5'] and [29, 15] in a['marks5'] and a['marks3'], 'm9: the Maps app marks the line')
+    check(a['reads'] == [['5-pump-1', 'full', 'full', False], ['5-valve-2', 'full', 'low', True]], f"m9: middle then valve: found in two readings ({a['reads']})")
+    check(a['after'][0] is False and 'Pipe valves' in a['after'][1] and a['after'][2][-1] == 'job', 'm9: found, it\'s an ordinary repair')
+    check(a['save'] == [4, True, ['5-pump-1', '5-valve-2']], f"m9: the job keeps its symptom and readings ({a['save']})")
+    check(a['used'] == 1 and a['note'] == ['water:5-valve-2'], 'm9: a use and the traceFound note')
+    check(a['fixed'] == [True, 'healthy', True], 'm9: fixing the cause clears the flow')
+    check(a['flows'][:2] == ['full', 'full'] and all(f != 'full' for f in a['flows'][2:]), f"m9: the flow falls only downstream of the bad machine ({a['flows']})")
+    check([r[3] for r in a['reads2']] == [False, False, False, True], 'm9: reading up from the end finds the UV steriliser')
+    check(a['offline'][1] is False, 'm9: a machine off the job\'s line isn\'t on its path')
+    check(a['crew'][0] == 'done' and a['crew'][1] == 'crew', 'm9: the crew fix a traced job you leave')
+    n, t, lines, un = a['share']
+    if n:
+        check(.35 <= t / n <= .65 and un == 0, f'm9: about half traced ({t} of {n}), none untrained ({un})')
+        check(a.get('trainedBy') is None, 'm9: asking whether a repair is traced never trains you (section 17\'s traceFor)')
+    else: print('  m9: section 17\'s traceFor not in this build: the share skipped')
+    if a['air']: print('  m9 air:', a.get('airReads')); check([r[3] for r in a.get('airReads', [])] == [False, True], f"m9: stuffy air from the fan in two readings ({a.get('airReads')})")
+    else: print('  m9: the air line is not in this build: its trace skipped')
+    check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'm9: differs the second time')
+PARTS['m9'] = part_m9
+
 only = set(sys.argv[2:])
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
@@ -380,11 +524,14 @@ with sync_playwright() as pw:
         if not r['inBuild']:
             print(f"{r['id']} ({r['name']}): not in this build")
             continue
+        if r['id'] == 't2' and ev("typeof promoPassed === 'function'"):   # 24p's test job (0.44.18) is no training: career_check (i)-(j) tests it
+            print(f"t2 ({r['name']}): 24p's test job, not a training (career_check (i) and (j))")
+            continue
         a = ev(f"({TRAIN})('{r['id']}')")
         b = ev(f"({TRAIN})('{r['id']}')")
         print(f"{r['id']} ({r['name']}, {r['size']}): opened Day {a['day']}, trained Day {a['trained']}, steps {a['states']}, teacher's job by {a['teacher']}, yours by {a['yours']}, stage {a['stage']}")
         check(a['opened'] and a['trained'] is not None, f"{r['id']}: never trained")
-        if r['size'] == 'big' and not ev(f"!!WORK_MECH['{r['id']}'].noJob"):
+        if r['size'] == 'big' and not ev(f"!!WORK_MECH['{r['id']}'].noJob") and not ev(f"!!WORK_MECH['{r['id']}'].oneJob"):
             check(a['states'][:3] == ['meet', 'watch', 'do'] or 'meet' in a['states'], f"{r['id']}: the training's steps {a['states']}")
             check(a['teacher'] not in (None, 'you') and a['yours'] == 'you', f"{r['id']}: the teacher's job, then yours")
         check(a['stage'] == 0, f"{r['id']}: stage {a['stage']} once trained (0 expected)")

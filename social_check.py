@@ -494,6 +494,20 @@ with sync_playwright() as pw:
     if not walk.get('skip') and (walk['walked'] != 1 or not walk['chip'] or not walk['done'] or not walk['once']): fail(f'the asked-for wave does not happen: {walk}')
     if sk['ok'] != [True, False] or sk['win'] != [False, True, False] or not sk['saved'] or sk['fav'] is False: fail(f'socialSeekAsk wrong: {sk}')
 
+    # 14b. the first promotion's sim side (0.71.2): per-person appointment places round-trip through the device save
+    # (old appointments without them load as before; junk is dropped), and a guest goes to their own seat
+    pp = g.ev(r"""(() => { const keep = JSON.stringify(SHIP.device.appts), t = Math.floor(shipNow()) + 600;
+      const a = apptAdd({ id: 'promo:test', with: ['vance', 'calder'], at: t, len: 20, where: '1-conf-1', kind: 'meeting' }); if (!a) return { skip: true };
+      a.places = { vance: '1-conf-2', calder: '1-conf-3' };
+      const back = deviceLoad({ device: JSON.parse(JSON.stringify(SHIP.device)) }).appts.find(x => x.occ === 'promo:test');
+      const old = deviceLoad({ device: { appts: [{ id: 1, at: t, with: ['vance'], where: '1-conf-1', status: 'yes' }] } }).appts[0];
+      const junk = deviceLoad({ device: { appts: [{ id: 1, at: t, with: ['vance'], where: '1-conf-1', status: 'yes', places: { vance: 7, calder: '1-conf-3' } }] } }).appts[0];
+      const w = whereIs(SOC.crew[SOC.idx.get('vance')], t + 5);
+      SHIP.device.appts = JSON.parse(keep);
+      return { back: back && back.places, old: old.places === undefined, junk: junk.places, at: w && w.placeId }; })()""")
+    print('Per-person appointment places:', pp)
+    if not pp.get('skip') and (pp['back'] != {'vance': '1-conf-2', 'calder': '1-conf-3'} or not pp['old'] or pp['junk'] != {'calder': '1-conf-3'} or pp['at'] != '1-conf-2'): fail(f'per-person appointment places wrong: {pp}')
+
     # 15. a favour handed in on the card (0.36.62): the memory and the reputation it gives
     fv = g.ev(r"""(() => { if (typeof favourPost !== 'function') return null;
       const keep = JSON.stringify(socSave()), p = SOC.crew.find(q => !STORY_ARCS[q.id] && q.dept !== 'works');

@@ -1,0 +1,22 @@
+@reactions promoted
+// Pillar 5 Step 3 (head writer W2): people who know you, the day you're promoted (simNote('promoted'), cue
+// promoted.you; social reads it). Friends congratulate, acquaintances nod, now and then someone grumbles (kindly).
+? cue:promoted.you tier>=friend
+- Officer {nick}! Look at you. Look at the pip.   #warm
+- I knew it. I told Pell. Pell will say he told me.   #funny
+- You've earned it. Don't let it go to your head. Much.   #warm
+? cue:promoted.you tier=colleague
+- Heard you made Officer. Congratulations.
+- Officer, eh? Do I salute now? I'm not saluting.   #funny
+- Well done. Tier 2's a different world. You'll love it.
+? cue:promoted.you tier=acquaintance
+- Congratulations on the promotion.
+- Officer already? Well done.
+? cue:promoted.you tier=acquaintance odds:0.3
+- Officer in under two weeks. Some of us took a year.   #funny
+? cue:promoted.you dept:works tier>=acquaintance
+- Officer! Does this mean I can give you the hard jobs?   #funny
+- Tier 2. Welcome to the scrubbers. You'll hear them in your sleep.
+?
+- Did you hear? The new hand made Officer.
+- A promotion in Works, I heard. Good for them.

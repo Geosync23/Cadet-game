@@ -556,3 +556,15 @@
 - Don't. Don't say it. One pan. One.   #funny
 - Sorry, love. I turned my back for a second.
 - That alarm's louder than me. Nobody's louder than me.   #funny
+
+// ---- Pillar 5 Step 3 (head writer W2): Brennan's cake at the Works tea corner after your promotion (X). Warm,
+// fierce in her kitchen.
+== cue
+? flag:promo.cake
+- Cake. For the new officer. First slice is yours.   #warm
+- Pell. It is not for you. Not yet.   #funny
+// C2 0.44.24 plays her cake lines (VOICE, flag promo.cake) within 3 m of her at the Works tea corner, 16:30-17:00
+== work
+? flag:promo.cake
+- Cake. For the new officer. First slice is yours.   #warm
+- Pell. It is not for you. Not yet.   #funny
