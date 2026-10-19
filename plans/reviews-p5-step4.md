@@ -4,6 +4,9 @@ R4 succeeds R3 (whose verdicts are in `plans/reviews-p5-step2.md`). Newest first
 
 ## Step 3: U's Tracked device app
 
+### C2 claude/works-career f553607 (0.44.27): PASS (for BM6, over f3b744c)
+One game line: careerJobIn pushes a department's rep entry into j.gains.rep only if none is there yet; plus build lines, career_check (calls it twice, expects one entry), C2's handover. No lines shared with U 1d602ff7.
+
 ### U claude/hud-pt1 1d602ff7 (0.72.4, button kept beside the app): PASS
 Scope changed by the user ~04:00 (via lead 16): the device app stays AND the main-screen button stays. 94a1b127 below (button removed) is superseded, not to be merged.
 - Merged on every Step 3 tip (as below), `node --check` clean. The button, panel, placement and frame loop are back as in 0.72.3 (the frame loop moved after recFrame, harmless); the panel and the app share `trkTap(key)` (true when it starts something: the panel or the device closes; a stop keeps it open and redraws). App first in the list, as below.
