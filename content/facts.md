@@ -534,7 +534,8 @@ introduces them), unless noted.
 ## The rec dec (W3, rec deck R12; plans/recdeck-plan.html v5 and plans/rec-traditions-plan.html)
 
 - **Where:** between Deck 4 (Quarters) and Deck 5 (Operations). The lift says **R** ("Recreation Deck"); crew say
-  **"the rec dec"**. Never "Deck 7" (that's only the code's number). It went in at the Wren's **last refit**, between
+  **"the rec dec"** (their nickname, in speech only). Written texts (lead 18): signs and formal texts "Recreation
+  Deck" (the directory: "Recreation Deck (R)"); narration, Mail, news and UI mid-sentence "the rec deck". Never "Deck 7" (that's only the code's number). It went in at the Wren's **last refit**, between
   two old decks, which is why it has a letter: **"They ran out of numbers."** Seven decks in all now.
 - **Open 06:00 to midnight**; closed for quiet overnight (it lies under Deck 4's officers' corridor).
 - **Rooms:** the **auditorium** (76 violet seats, a stage with the stars behind; the music room is right above it),
