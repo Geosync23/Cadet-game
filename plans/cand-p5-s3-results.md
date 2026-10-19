@@ -12,3 +12,4 @@ Build master 6 (BM6, session_01F8k6hqdBRoxDJMzqAuiHqR) on claude/p5-cand-pt1 (th
 - R3 PASS S2 5cc7646. trial s3b (base + S2 + H2 043d20b + W2): cadet_test vs base-with-0.63.3-label ALL IDENTICAL; puzzle, mech, machine OK.
 - ~02:36 U 114bd49 (0.72.2 Tiles 'clock is paused' line; with R3): trial s3c = base + S2 + H2 + U + W2.
 - R3 PASS H2 043d20b. trial s3c (base + S2 + H2 + U 114bd49 + W2): cadet_test vs base-0.63.3-label ALL IDENTICAL; tiles ALL OK.
+- ~02:44 C2 205d130 (0.44.17 bridge by invitation; with R3; promotion 0.44.18-20 to follow). trial s3d = base + S2 + C2 205d130 + H2 + DA5 dd70a6f + U + W2: conflict C2 x DA5 in edgeBlocks and the door loop's walk line: two different bridge locks (C2 bridgeBarred; DA5 YOU_LOCKS waiting on a bridgeInvitedNow() C2 doesn't define, so keeping DA5's alone would never lock). Trial keeps both checks (OR). Sent to C2 and DA5 to agree one lock on one branch. NAMES OK, parses; checks running.
