@@ -9,7 +9,7 @@
 - **ONE owner per function (lesson from Step 3: two clashes came from two seats building the same function).** Each page names the owner. If you need a function another seat owns, ask that seat for it or for a one-line hook; never write your own copy. If ownership is unclear, ask the lead before writing it.
 - **Hash keys:** Step 4 uses 1010-1026 (claude/p5-design d22c4c6): M10 1010-1011, M12 1012, M13 1013-1014, M14 1015, M15 1016-1017, favours/tickets 1019-1023, cabin/stars 1024-1025, stocktake 1026; 1018 free; 1000-1009 are H2's.
 - **Don't touch:** deck key 7 / the rec deck / `disc` / Lightdisc (the rec deck activation comes after Step 4); the main build.
-- **Report to lead 16** (send_message to session_01UMyfd16GqSdgNyz5PE8qSv): one line when you start; one per finished piece (hash, build number, what, checks, memory %); at once if blocked or a design call is needed. No narration. Send each finished piece's hash to the build master and the reviewer (sessions below).
+- **Report to lead 17** (send_message to session_016bN7x175WBwBL7S9xc2Lpb; lead 16 handed over ~05:50): one line when you start; one per finished piece (hash, build number, what, checks, memory %); at once if blocked or a design call is needed. No narration. Send each finished piece's hash to the build master and the reviewer (sessions below).
 - **Page questions** → designer D3 (session_0115ZiGhf9s3oYtFdjs7TgYS) directly; anything that changes the design → the lead.
 - **Never** contact the user, start sessions, or push outside your branch.
 - **Long check runs:** log each result as it finishes; after a container restart resume from the first missing result; keep a ~20-min send_later reminder while a run goes (TEAM.md, "Long check runs survive restarts").

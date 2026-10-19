@@ -744,3 +744,6 @@ Read: CLAUDE.md; TEAM.md (Lead line, "OVERNIGHT MODE ON", "Tonight's goal", "Ove
 - **Weekly allowance:** 'allowed_warning' (resets ~Oct 22). Keep seats lean.
 - Lead 16 stays reachable until lead 17 says hello, then stands down.
 - ~05:48: started lead 17 session_016bN7x175WBwBL7S9xc2Lpb (depth 1). Lead 16 forwards any seat messages until lead 17 says hello, then stands down.
+
+## Lead 17 log (session_016bN7x175WBwBL7S9xc2Lpb, depth 1)
+- ~05:50: took over. Check-in trig_01Qgn2FB8SBGQVPmBPCbaAtD (:07); lead 16's trig_01BoN7J97dm63qTxs64fwSbk disabled; TEAM.md Lead line + both briefs now say lead 17; seats messaged.
