@@ -269,7 +269,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.33.57
+   STARSHIP CADET: CSV Wren                           build 0.33.58
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8630,7 +8630,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.33.57';                           // keep in step with the header's build line
+const GAME_BUILD = '0.33.58';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -15735,7 +15735,7 @@ const driftOn = () => !!JOB_KINDS.tune;
 const machEff = s => Math.max(0, s.cond - DRIFT_COND * Math.abs(s.drift || 0));
 const machineDrift = id => { const s = SHIP.machines[id]; return s && s.drift || 0; };
 function tuneSet(id, v) {
-  const s = SHIP.machines[id], m = machineById(id); if (!s || !m || !TUNABLE.has(m.kind) || !Number.isFinite(v)) return false;
+  const s = SHIP.machines[id], m = machineById(id); if (!s || !m || !(TUNABLE.has(m.kind) || s.drift && Math.round(v) === 0) || !Number.isFinite(v)) return false;   // any drift can be settled (0.33.58: the test job's fan)
   const was = s.drift || 0, d = Math.max(-3, Math.min(3, Math.round(v)));
   if (d) s.drift = d; else delete s.drift;
   MACH_REV++; if (MACH_HOUR !== null) machRecord(MACH_HOUR - 1);   // the effects follow at once
@@ -16551,6 +16551,7 @@ function jobDo(j, t, by) {
 const jobCrew = p => p.work && (p.work.place === 'work:works' ? 'works' : p.work.place === 'work:engine' ? 'engine' : null);
 function jobsHour(h) {
   const t = h * 60, jobs = SHIP.jobs, d = Math.floor(h / 24) + 1;
+  for (const j of jobs) if (j.kind === 'team' && j.claimedBy === 'you' && j.status === 'claimed' && !j.youIn && !j.workDone && t >= j.start + TEAM_WAIT) teamYouOut(j.id);   // you didn't come (0.33.58)
   // 1. finished jobs (the crew's; yours finish when you finish them, or go back on the board after YOU_KEEP)
   for (const j of jobs) if (j.status === 'claimed' && j.claimedBy !== 'you' && j.done <= t) jobFinish(j, j.done, j.claimedBy);
   for (const j of jobs) if (j.kind === 'favour' && j.status !== 'done' && j.expires && t >= j.expires && !j.workDone) { j.status = 'done'; j.doneAt = t; j.doneBy = null; j.lapsed = true; }
@@ -16591,7 +16592,7 @@ function jobsHour(h) {
   }
   const restock = (cargo, deck) => { if (!open.has('restock:' + cargo)) jobs.push({ id: 'restock-' + cargo + '@' + h, machine: null, deck, kind: 'restock', cargo, urgency: 1, posted: t, found: t, claimedBy: null, parts: [], status: 'open' }); };
   if (Object.keys(SHIP.hold).some(k => k !== 'meals' && SHIP.hold[k] > 0)) restock('stores', 5);
-  if (driftOn()) for (const m of machineList()) if (Math.abs(machineDrift(m.id)) >= 2) tunePost(m, h, jobs, t + 60 * (1 + Math.floor(6 * schedU(m.seed, h, 869))));   // drift: a tune job (0.33.48)
+  if (driftOn()) for (const m of machineList()) if (Math.abs(machineDrift(m.id)) >= 2 && !jobs.some(x => x.machine === m.id && x.drift && heldForYou(x))) tunePost(m, h, jobs, t + 60 * (1 + Math.floor(6 * schedU(m.seed, h, 869))));   // drift: a tune job (0.33.48)
   // (food runs come from cartClaim, the one rule the galley and the job list share: see cartPost)
   choresHour(h, jobs);
   for (const k in JOB_KINDS) if (JOB_KINDS[k].post) { try { JOB_KINDS[k].post(h, jobs); } catch (e) { console.warn('job kind ' + k, e); } }   // registered kinds post their own (0.33.47)
@@ -16601,7 +16602,7 @@ function jobsHour(h) {
   // 4. the crew on shift claim jobs: the most urgent first; each goes to the free crew member with the lowest
   // tier that may do it. Easy routine jobs wait CREW_LEAVE for you first.
   // busy till their last job's route ends, the walk back included: a job done at j.done still has them walking to j.end (0.33.38)
-  const busy = new Map(); for (const j of jobs) if (j.claimedBy && j.claimedBy !== 'you' && j.end > t) busy.set(j.claimedBy, Math.max(busy.get(j.claimedBy) || 0, j.end));
+  const busy = new Map(); for (const j of jobs) if (j.claimedBy && j.claimedBy !== 'you' && j.end > t && j.kind !== 'team') busy.set(j.claimedBy, Math.max(busy.get(j.claimedBy) || 0, j.end));   // a team job's crew: by its window (teamClash)
   const crew = schedPeople().filter(jobCrew).sort((a, b) => (CREW_TIER[a.rank] || 0) - (CREW_TIER[b.rank] || 0) || (a.id < b.id ? -1 : 1));
   showHour(h, jobs);
   shareOut(t, jobs);
@@ -16629,7 +16630,7 @@ function jobsHour(h) {
       if (jobKindOf(j) && !(jobKindOf(j).crew && jobKindOf(j).crew.can && jobKindOf(j).crew.can(p))) continue;   // a registered kind: who may (0.33.47)
       if ((busy.get(p.id) || 0) > t || jobCrew(p) !== (engine ? 'engine' : 'works') || (!engine && (CREW_TIER[p.rank] || 0) < tier) || !rankOk(p, j)) continue;   // a job kept for a rank waits for one (0.33.45)
       const run = jobRun(p, j, t, missing.length * JOB_MAKE);
-      if (!run) continue;
+      if (!run || teamClash(p.id, t, run.end)) continue;   // not into a team job they're in (0.33.58)
       for (const k of j.parts) if (SHIP.stores[k] > 0) SHIP.stores[k]--;
       if (SHIP.misplaced && j.parts.includes(SHIP.misplaced.part)) SHIP.misplaced = null;   // a fetch finds it on the wrong shelf and puts it right
       Object.assign(j, { claimedBy: p.id, status: 'claimed', start: t, segs: run.segs, done: run.done, end: run.end, made: missing.length });
@@ -16841,10 +16842,11 @@ function jobWhere(person, t) {
   machinesNow();
   if (JOB_IDX_REV !== MACH_REV) {
     JOB_IDX = new Map(); JOB_IDX_REV = MACH_REV;
-    for (const j of SHIP.jobs) if (j.segs && j.claimedBy !== 'you') { if (!JOB_IDX.has(j.claimedBy)) JOB_IDX.set(j.claimedBy, []); JOB_IDX.get(j.claimedBy).push(j); }
+    for (const j of SHIP.jobs) if (j.segsBy && j.status !== 'done') { for (const c in j.segsBy) { if (!JOB_IDX.has(c)) JOB_IDX.set(c, []); JOB_IDX.get(c).push(j); } }   // a team job: each member at their spot (0.33.58)
+    else if (j.segs && j.claimedBy !== 'you') { if (!JOB_IDX.has(j.claimedBy)) JOB_IDX.set(j.claimedBy, []); JOB_IDX.get(j.claimedBy).push(j); }
   }
   const js = JOB_IDX.get(person.id); if (!js) return null;   // most people: no job, and no empty list made for them (0.26.40)
-  for (let i = 0; i < js.length; i++) { const j = js[i]; for (let k = 0; k < j.segs.length; k++) { const s = j.segs[k]; if (s.from <= t && t < s.to)
+  for (let i = 0; i < js.length; i++) { const j = js[i], sg = j.segsBy ? j.segsBy[person.id] : j.segs; for (let k = 0; k < sg.length; k++) { const s = sg[k]; if (s.from <= t && t < s.to)
     return { deck: s.deck, act: s.act, type: s.type, placeId: s.placeId, moving: s.act === 'commute', fromDeck: s.fromDeck, from: s.from, until: s.to, tag: s.tag, job: j.id, hold: s.hold }; } }
   return null;
 }
@@ -17132,8 +17134,72 @@ function jobReserve(kind, day, at, slot = 1, o = {}) {
                    claimedBy: null, parts: [MACHINE_KINDS[pick.kind].part, RESERVE_MAKE], status: 'open', ...(o.train ? { train: o.train } : {}) });
   const oc = o.cause && (FAULT_CAUSES[pick.kind] || []).find(c => c.id === o.cause);   // o.cause (24k, 0.33.47): a reserved fault with that cause, its part, nothing to make
   if (oc) { const J = SHIP.jobs[SHIP.jobs.length - 1]; J.cause = oc.id; J.parts = faultParts(pick, 'repair', oc); delete J.make; delete J.makeMins; }
+  if (Number.isFinite(o.drift) && Math.round(o.drift)) SHIP.jobs[SHIP.jobs.length - 1].drift = Math.max(-3, Math.min(3, Math.round(o.drift)));   // o.drift (0.33.58, the Tier 2 test job): a setting off too, from when it faults (any kind; tuneSet settles it)
   MACH_REV++; return id;
 }
+// ---- team jobs (0.33.58, plans/mechanics/m8-team-jobs.html, section 17's part; 24h, seat M2, plans the week's and runs the steps) ----
+// A big job three or four Works crew do together at a set time. teamJobPost({ machine, start, mins, team: [crew ids], lead?,
+// you?, spots?, steps?, title?, found?, parts? }) -> id | null posts kind 'team' on `machine` (an id): j.team (the crew in it),
+// j.lead (o.lead, else the first), j.start, j.mins, j.spots ({ crew id | 'you': place id }; default the machine's team spots
+// '<machine id less its number>-team-<k>' in order, yours the next, else its panel place), j.segsBy ({ crew id: segments }:
+// the lift by `start`, their spot till it's done, the lift back), j.done, j.end. Anyone not at work all through it, or
+// already in a team job then, is left out (fewer than two left: null). With `you` (24h asks for Officers and up) it's
+// yours (claimedBy 'you', a side job: beside your board job, it never lapses) and your stops are `steps` (24h's: [{ deck,
+// placeId, mins, tag, how, opts }]) or one hold at your spot; else it's the lead's. teamYouOut(id): you didn't come (24h
+// calls it 15 minutes after the start; jobsHour does it by the next hour, TEAM_WAIT): your steps go to the lead and it
+// takes TEAM_SLOW longer. The crew in a team job take no other job that would overlap it (teamClash), and jobWhere puts
+// each at their spot. Finishing it (the lead's, at j.done; yours, when your stops are done) puts the machine right
+// (TEAM_RESTORE, an overhaul's); with j.youIn set (24h: you were at your spot) you get the meters' step (an overhaul's)
+// even when the lead finishes it. simNote('team', ...) is 24h's. Nothing here posts a team job by itself
+const TEAM_WAIT = 15, TEAM_SLOW = 1.2, TEAM_RESTORE = 90;
+function teamSpots(id) {
+  const m = machineById(id), pre = id.replace(/-\d+$/, '') + '-team-'; if (!m) return [];
+  return (DECKS[m.deck].places || []).filter(p => p.id.startsWith(pre)).map(p => p.id).sort((a, b) => parseInt(a.slice(pre.length), 10) - parseInt(b.slice(pre.length), 10));
+}
+// a crew id already in a team job that overlaps minutes [a, b)
+const teamClash = (cid, a, b) => SHIP.jobs.some(j => j.kind === 'team' && j.status !== 'done' && j.segsBy && j.segsBy[cid] && j.segsBy[cid][0].from < b && a < j.end);
+function teamSegs(p, deck, placeId, a, b) {
+  const w = planWhere(p, a - JOB_RIDE), w2 = planWhere(p, b - 1);
+  if (!w || w.act !== 'work' || w.moving || !w2 || w2.act !== 'work') return null;
+  const home = w.deck, segs = [];
+  if (home !== deck) segs.push({ from: a - JOB_RIDE, to: a, act: 'commute', deck, fromDeck: home, type: 'lift', placeId: null });
+  segs.push({ from: a, to: b, act: 'work', deck, type: 'job', placeId, tag: 'team' });
+  if (home !== deck) segs.push({ from: b, to: b + JOB_RIDE, act: 'commute', deck: home, fromDeck: deck, type: 'lift', placeId: null });
+  return segs;
+}
+function teamJobPost(o = {}) {
+  machinesNow(); const m = o.machine && machineById(o.machine); if (!m || !Number.isFinite(o.start) || !(o.mins > 0)) return null;
+  const id = o.id || 'team:' + m.id + '@' + Math.floor(o.start);
+  if (SHIP.jobs.some(j => j.id === id)) return id;
+  const ppl = new Map(schedPeople().map(p => [p.id, p])), spots = teamSpots(m.id), panel = panelPlace(m.id), done = o.start + Math.round(o.mins), team = [], segsBy = {}, at = {};
+  for (const cid of o.team || []) {
+    const p = ppl.get(cid); if (!p || team.includes(cid) || teamClash(cid, o.start - JOB_RIDE, done + JOB_RIDE)) continue;
+    const pl = o.spots && o.spots[cid] || spots[team.length] || panel, sg = teamSegs(p, m.deck, pl, o.start, done); if (!sg) continue;
+    team.push(cid); segsBy[cid] = sg; at[cid] = pl;
+  }
+  if (team.length < 2) return null;
+  const lead = o.lead && team.includes(o.lead) ? o.lead : team[0], you = !!o.you, t = shipNow(), found = Number.isFinite(o.found) ? o.found : t;
+  if (you) at.you = o.spots && o.spots.you || spots[team.length] || spots[spots.length - 1] || panel;
+  const j = { id, machine: m.id, deck: m.deck, room: m.room, kind: 'team', title: o.title || 'Team job: ' + machineTitle(m.id), tier: 2, team, lead, spots: at, segsBy, segs: segsBy[lead],
+              start: o.start, mins: done - o.start, done, end: Math.max(...team.map(c => segsBy[c][segsBy[c].length - 1].to)), urgency: 0, leave: null, posted: found, found,
+              claimedBy: you ? 'you' : lead, status: 'claimed', parts: (o.parts || []).slice(), ...(o.steps ? { steps: o.steps.map(x => ({ ...x })) } : {}), ...(you ? { you: true } : {}) };
+  j.stops = kindStops(j).map(plainStop);
+  SHIP.jobs.push(j); MACH_REV++; return id;
+}
+function teamYouOut(id) {
+  const j = SHIP.jobs.find(x => x.id === id && x.kind === 'team' && x.claimedBy === 'you' && x.status === 'claimed' && !x.workDone); if (!j) return false;
+  const ext = Math.round(j.mins * (TEAM_SLOW - 1));
+  for (const c of j.team) { let past = false; for (const s of j.segsBy[c]) { if (past) { s.from += ext; s.to += ext; } else if (s.tag === 'team') { s.to += ext; past = true; } } }
+  j.done += ext; j.end += ext; j.claimedBy = j.lead; j.youOut = true; MACH_REV++; return true;
+}
+jobKindAdd('team', { tier: 2, side: true, work: 0, text: 'Team job',
+  stops: j => j.steps || (j.spots && j.spots.you ? [{ deck: j.deck, placeId: j.spots.you, mins: Math.min(j.mins || 10, 10), tag: 'team', how: 'hold' }] : []),
+  done(j, t, by) {
+    const before = by !== 'you' && j.youIn && !j.meters ? shipMeters() : null, s = SHIP.machines[j.machine];
+    if (s) { s.cond = Math.max(s.cond, TEAM_RESTORE); s.state = machineState(s.cond); s.lastService = t; }
+    if (before) meterStep(j, before);
+  },
+  crew: { can: () => false, mins: 0 } });   // the crew never claim one: they're put in it (teamJobPost)
 // machineFound(id, by = 'you') -> { id, fresh } | null (0.33.47, for 24a's rounds: m1-rounds.html): you noticed a machine
 // that isn't healthy. Its job is found now (one not yet seen, a service's 2-24 hours or a fault worn on unseen), or posted
 // if it has none; fresh: it wasn't on the board till now (then j.foundBy = by, and simNote('found', { machine, by, id })).
@@ -17159,7 +17225,7 @@ function jobRelease(slot) { let n = 0; for (const j of SHIP.jobs) if (heldForYou
 // each hour (jobsHour): a reserved job's machine goes faulty in the hour it's due; one not taken by its `until` is released
 function reservedHour(t, jobs) {
   for (const j of jobs) if (j.reserved && heldForYou(j)) {   // reserved jobs only (a case's held job is 24k's)
-    if (!j.faulted && j.found < t + 60) { const s = SHIP.machines[j.machine]; if (s) { s.cond = Math.min(s.cond, 40); s.state = machineState(s.cond); } j.faulted = true; }
+    if (!j.faulted && j.found < t + 60) { const s = SHIP.machines[j.machine]; if (s) { s.cond = Math.min(s.cond, 40); s.state = machineState(s.cond); if (j.drift) s.drift = j.drift; } j.faulted = true; }
     if (!j.claimedBy && t >= j.until) j.freed = j.released = true;   // an ordinary job now, for the crew at once (leaveEnd)
   }
 }

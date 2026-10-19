@@ -1214,6 +1214,75 @@ with sync_playwright() as pw:
         if br['offeredShut'] or br['forYouShut'] or br['claimShut'] or not br['crew'] or not br['offeredOpen'] or not br['claimOpen'] or br['manShut'] or not br['manOpen'] or not br['saved'] or not br['oldNone']:
             fail('the bridge room and the upkeep in the save')
 
+    # 5w. team jobs (m8-team-jobs.html, section 17's part, 0.33.58): a team job posted the day before (Day 11, the recycler, 09:30,
+    # 40 minutes, four Works crew at work then, with you): each member is at their spot through it (jobWhere), takes no other
+    # job that overlaps it, and is back to their own plan after; you not coming: by the next hour it's the lead's and takes
+    # 20% longer, then the lead finishes it and the machine is put right (90+); with you: your stop done puts it right and
+    # gives the meters an overhaul's step; you at your spot (j.youIn) and the lead finishing: the step too; the save keeps it
+    # (jobWhere the same after a reload); the same twice. And the Tier 2 test job (promotion-officer.html): jobReserve on
+    # 4-scrubber-1 with cause filter and drift +2: faulty and drifted at 08:00, its part the filter, no tune job of its own,
+    # tuneSet settles the drift (and won't set a scrubber's)
+    if g.ev("typeof teamJobPost === 'function'"):
+        TM = r"""((mode) => {
+          const out = { mode }, d = 11, start = (d - 1) * 1440 + 570, mins = 40;
+          JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; SHIP.works = null; setShipNow((d - 2) * 1440 + 960); machinesNow();
+          const crew = schedPeople().filter(p => jobCrew(p) === 'works' && (CREW_TIER[p.rank] || 0) >= 2).filter(p => { const a = planWhere(p, start - 5), b = planWhere(p, start + mins + 15); return a && a.act === 'work' && !a.moving && b && b.act === 'work'; }).slice(0, 3).map(p => p.id);
+          machineFault('3-recycler-1', 45);
+          const id = teamJobPost({ machine: '3-recycler-1', start, mins, team: crew, you: mode !== 'crew', title: 'Recycler membrane change' });
+          const j = () => SHIP.jobs.find(x => x.id === id);
+          out.id = id; out.team = j() && j().team.length; out.lead = j() && j().lead; out.claimed = j() && j().claimedBy; out.stops = j() && jobStops(j()).length;
+          const ppl = new Map(schedPeople().map(p => [p.id, p]));
+          out.atSpot = (j() ? j().team : []).every(c => { const w = jobWhere(ppl.get(c), start + 10); return w && w.job === id && w.deck === 3 && w.placeId === j().spots[c]; });
+          out.after = (j() ? j().team : []).every(c => { const w = jobWhere(ppl.get(c), j().end + 1); return !w || w.job !== id; });
+          // the save keeps it, and jobWhere reads the same after a reload
+          const s = { player: { deck: 4, tile: [0, 0], facing: 0 }, ship: { decks: {} }, crew: {} }; SAVE_EXTRA.forEach(f => f(s));
+          MACH_HOUR = null; machinesLoad(JSON.parse(JSON.stringify(s)));
+          out.saved = !!j() && j().team.every(c => { const w = jobWhere(ppl.get(c), start + 10); return w && w.job === id; });
+          // run through the day; your side by mode
+          for (let t = (d - 2) * 1440 + 1020; t <= start + 300; t += 30) {
+            setShipNow(t); machinesNow();
+            if (mode === 'you' && t >= start && j()) j().youIn = true;   // at your spot from the start
+            if (mode === 'you' && t >= start + 30 && j() && j().claimedBy === 'you' && !j().workDone) { jobStops(j()).forEach((x, k) => jobStepDone(id, k)); jobFinish(j(), shipNow(), 'you'); }
+            if (mode === 'in' && t >= start && j() && !j().youIn) { j().youIn = true; teamYouOut(id); }
+          }
+          const J = j(); out.status = J && J.status; out.doneBy = J && J.doneBy; out.youOut = !!(J && J.youOut); out.long = J ? J.done - J.start : 0; out.cond = SHIP.machines['3-recycler-1'].cond;
+          out.meters = J && J.meters ? J.meters.length : 0;
+          // nobody in it on another job that overlaps it
+          out.overlap = SHIP.jobs.filter(x => x.id !== id && x.segs && J && J.team.includes(x.claimedBy) && x.start < J.end && J.segsBy[x.claimedBy][0].from < x.end).map(x => x.id + ' ' + x.claimedBy);
+          out.sig = JSON.stringify(J);
+          MACH_HOUR = null; MACH_SEEN = -1; setShipNow((SHIP_START.day - 1) * 1440 + SHIP_START.min);
+          return out;
+        })"""
+        tc = g.ev(TM + "('crew')"); tc2 = g.ev(TM + "('crew')"); ty = g.ev(TM + "('you')"); ti = g.ev(TM + "('in')"); tn = g.ev(TM + "('out')")
+        for r in (tc, ty, ti, tn):
+            print(f"Team job ({r['mode']}): {r['id']}, team {r['team']}, lead {r['lead']}, claimed by {r['claimed']}, your stops {r['stops']}; at their spots {r['atSpot']}, back after {r['after']}, kept in the save {r['saved']}; "
+                  f"{r['status']} by {r['doneBy']} (you out {r['youOut']}, {r['long']} min), recycler {r['cond']:.0f}, meters {r['meters']}, overlapping jobs {r['overlap'][:3]}")
+        print(f"  the same twice {tc['sig'] == tc2['sig']}")
+        bad = []
+        for r in (tc, ty, ti, tn):
+            if not r['id'] or (r['team'] or 0) < 2 or not r['atSpot'] or not r['after'] or not r['saved'] or r['status'] != 'done' or r['cond'] < 90 or r['overlap']: bad.append(r['mode'])
+        if tc['claimed'] == 'you' or tc['doneBy'] != tc['lead'] or tc['meters'] or tc['long'] != 40: bad.append('crew only')
+        if ty['claimed'] != 'you' or ty['doneBy'] != 'you' or not ty['meters'] or ty['youOut']: bad.append('with you')
+        if ti['doneBy'] != ti['lead'] or not ti['meters'] or ti['long'] != 48: bad.append('you at your spot, the lead finishing')
+        if not tn['youOut'] or tn['doneBy'] != tn['lead'] or tn['meters'] or tn['long'] != 48: bad.append('you not coming')
+        if tc['sig'] != tc2['sig']: bad.append('not the same twice')
+        if bad: fail('team jobs: ' + ', '.join(bad))
+        tj = g.ev("""(() => {
+          const out = {}, d = 9, t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min;
+          JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; SHIP.works = null; setShipNow((d - 1) * 1440 + 360); machinesNow();
+          const id = jobReserve('4-scrubber-1', d, 480, 20, { tier: 2, train: 't2', until: (d - 1) * 1440 + 900, cause: 'filter', drift: 2 });
+          setShipNow((d - 1) * 1440 + 490); machinesNow();
+          const j = SHIP.jobs.find(x => x.id === id), s = SHIP.machines['4-scrubber-1'];
+          out.id = id; out.state = s.state; out.drift = s.drift || 0; out.cause = j && j.cause; out.parts = j && j.parts; out.held = j && heldForYou(j);
+          out.tune = SHIP.jobs.some(x => x.kind === 'tune' && x.machine === '4-scrubber-1');
+          out.setOne = tuneSet('4-scrubber-1', 1); out.settle = tuneSet('4-scrubber-1', 0); out.after = machineDrift('4-scrubber-1'); out.again = tuneSet('4-scrubber-1', 2);
+          jobRelease(20); MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t0);
+          return out;
+        })()""")
+        print(f"Tier 2 test job: {tj['id']}, {tj['state']}, drift {tj['drift']}, cause {tj['cause']}, parts {tj['parts']}, held {tj['held']}, its own tune job {tj['tune']}; tuneSet to 1 {tj['setOne']}, to 0 {tj['settle']} (then {tj['after']}), to 2 again {tj['again']}")
+        if not tj['id'] or tj['state'] != 'faulty' or tj['drift'] != 2 or tj['cause'] != 'filter' or not tj['parts'] or tj['parts'][0] != 'filter' or not tj['held'] or tj['tune'] or tj['setOne'] or not tj['settle'] or tj['after'] or tj['again']:
+            fail('the Tier 2 test job')
+
     # 6. the save
     rt = g.ev("""(() => {
       JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(6 * 1440 + 11 * 60 + 17); machinesNow();
