@@ -367,7 +367,7 @@ P1 = r"""(() => {
   out.lines = Object.fromEntries(ms.map(m => [m.id, line(m.id).map(f => f.id)]));
   MACH_HOUR = null; MACH_SEEN = -1; setShipNow(9 * 1440); machinesNow();
   for (let d = 11; d <= 30; d++) {
-    for (const id of Object.values(P1_LINES).flat()) if (SHIP.machines[id]) { SHIP.machines[id].cond = Math.max(SHIP.machines[id].cond, 80); SHIP.machines[id].state = machineState(SHIP.machines[id].cond); }   // kept running well (a slow crew)
+    for (const id of (typeof lineIds === 'function' ? ['water', 'heat', 'air'].flatMap(lineIds) : Object.values(P1_LINES).flat())) if (SHIP.machines[id]) { SHIP.machines[id].cond = Math.max(SHIP.machines[id].cond, 80); SHIP.machines[id].state = machineState(SHIP.machines[id].cond); }   // kept running well (a slow crew)
     if (d === 20 && SHIP.machines['3-filter-1']) { SHIP.machines['3-filter-1'].cond = 30; SHIP.machines['3-filter-1'].state = 'faulty'; }   // Day 20: the filter bank runs badly all day
     for (let h = 0; h < 24; h++) { setShipNow((d - 1) * 1440 + h * 60); machinesNow(); }
     if (d === 20 && SHIP.machines['3-filter-1']) SHIP.machines['3-filter-1'].cond = 90;
@@ -399,7 +399,7 @@ P1FIRST = r"""(() => {
   const out = {}, C = caseState(), W = SHIP.works, keep = { op: W.op, rank: W.rank, tier: W.tier, tr: W.tr, test: W.test };
   C.open = []; delete C.p1; W.op = {}; W.tr = {}; W.rank = 'junior'; W.tier = 1; W.test = { tier: 2, day: 9, tries: 1, passed: true };
   MACH_HOUR = null; MACH_SEEN = -1; setShipNow(9 * 1440); machinesNow();
-  for (const id of Object.values(P1_LINES).flat()) if (SHIP.machines[id]) { SHIP.machines[id].cond = 90; SHIP.machines[id].state = 'healthy'; }
+  for (const id of (typeof lineIds === 'function' ? ['water', 'heat', 'air'].flatMap(lineIds) : Object.values(P1_LINES).flat())) if (SHIP.machines[id]) { SHIP.machines[id].cond = 90; SHIP.machines[id].state = 'healthy'; }
   for (let t = 9 * 1440; t <= 10 * 1440 + 900; t += 60) { setShipNow(t); machinesNow(); caseTick(); }
   out.before = !!C.p1;
   W.rank = 'officer'; W.tier = 2;
@@ -527,7 +527,7 @@ P1M9 = r"""(() => {
   MACH_HOUR = null; MACH_SEEN = -1; setShipNow(9 * 1440); machinesNow();
   for (let t = 9 * 1440; t <= 10 * 1440 + 1000; t += 60) { setShipNow(t); machinesNow(); caseTick(); }
   out.day11 = C.p1 || null;
-  for (const id of Object.values(P1_LINES).flat()) if (SHIP.machines[id]) { SHIP.machines[id].cond = 90; SHIP.machines[id].state = 'healthy'; }
+  for (const id of (typeof lineIds === 'function' ? ['water', 'heat', 'air'].flatMap(lineIds) : Object.values(P1_LINES).flat())) if (SHIP.machines[id]) { SHIP.machines[id].cond = 90; SHIP.machines[id].state = 'healthy'; }
   for (let t = 10 * 1440 + 1020; t <= 11 * 1440 + 600; t += 60) { setShipNow(t); machinesNow(); }
   const now = 11 * 1440 + 650; W.tr = { m9: 12 }; setShipNow(now); machinesNow(); caseTick();
   const c = C.p1 && caseById(C.p1), j = c && caseJob(c); out.staged = !!c; out.now = now; out.p1 = C.p1;

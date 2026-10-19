@@ -277,7 +277,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.55.16
+   STARSHIP CADET: CSV Wren                           build 0.55.17
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8638,7 +8638,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.55.16';                           // keep in step with the header's build line
+const GAME_BUILD = '0.55.17';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -39887,7 +39887,7 @@ function p3Stage(C) {
 // tracing lesson, with Calder's word) is fixed: 3-pump-1 can't keep up in the evening, the recycler's membrane, the
 // filter bank's cartridge and the Deck 4-6 branch valve the decoys. Lines: section 17's MACHINE_LINKS once it's in,
 // else P1_LINES. Key 1000: the busiest hours, on ties. ----
-const P1_LINES = { water: ['3-recycler-1', '3-filter-1', '3-pump-1', '5-valve-2'] };   // stand-in until section 17's MACHINE_LINKS (seat S2)
+const P1_LINES = { water: ['3-recycler-1', '3-filter-1', '3-pump-1', '5-valve-2'] };   // stand-in for a build without section 17's MACHINE_LINKS (0.33.59)
 const P1_LINE = { water: { deck: 4, where: 'Showers on Deck {deck}', shows: 'run weak' }, heat: { deck: 2, where: 'Cabins on Deck {deck}', shows: 'run cold' },
   air: { deck: 4, where: 'The air on Deck {deck}', shows: 'is stuffy' } };
 const P1_WHEN = { evening: 'in the evening', morning: 'in the morning', peak: 'at the busy hours', night: 'at night', after: 'after the busy hours' };
@@ -39897,12 +39897,24 @@ const P1_FINE = 8;                                       // a log hour at 80% or
 const P1_BAND = { sus: [4, 4], clues: [3, 3], fewest: 3, decks: 2 };   // the page's T2: one line, 4 suspects, 3 logs (its later bands come with their steps)
 const caseDay = t => Math.floor(t / 1440) + 1;
 const caseText = (key, fb, vars) => typeof worksText === 'function' ? worksText(key, fb, vars) : String(fb).replace(/\{(\w+)\}/g, (m, x) => vars && vars[x] != null ? String(vars[x]) : m);
-// the machines on a machine's line, in order (section 17's MACHINE_LINKS, else the stand-in), or null
+// the deck a fault on machine id is felt on (the card's): Deck 4 if the line feeds it there, else the first it feeds
+// (section 17's lineDecks), else the stand-in's
+function caseLineDeck(id, line) {
+  try { if (typeof lineDecks === 'function' && typeof MACHINE_LINKS !== 'undefined' && MACHINE_LINKS[line]) { const ds = lineDecks(line, id) || []; if (ds.length) return ds.includes(4) ? 4 : ds[0]; } } catch (e) { /* the stand-in */ }
+  return (P1_LINE[line] || P1_LINE.water).deck;
+}
+// the machines between the top of a machine's line and the deck its fault is felt on, in order (section 17's
+// MACHINE_LINKS: its steps through the branch that feeds that deck and the machines after it, 0.33.59; else the
+// stand-in), or null if it isn't on that line
 function caseLine(id, line) {
   try {
-    const L = typeof MACHINE_LINKS !== 'undefined' && MACHINE_LINKS && MACHINE_LINKS[line];
-    const xs = Array.isArray(L) ? L : L && (L.ids || L.machines || L.order) || [], ids = xs.map(x => typeof x === 'string' ? x : x && x.id).filter(x => typeof x === 'string');
-    if (ids.includes(id)) return ids;
+    if (typeof MACHINE_LINKS !== 'undefined' && MACHINE_LINKS[line] && typeof linePath === 'function') {
+      const D = caseLineDeck(id, line), S = MACHINE_LINKS[line].find(x => x && typeof x === 'object' && !Array.isArray(x));
+      const b = S && Object.keys(S).find(k => (S[k] || []).includes(D)), ends = b && typeof LINE_ENDS !== 'undefined' && (LINE_ENDS[line] || {})[b] || [];
+      const p = b ? linePath(line, ends.length ? ends[ends.length - 1] : b) : MACHINE_LINKS[line].map(x => typeof x === 'string' ? [x] : x);
+      const ids = (p || []).flat().filter(x => typeof x === 'string');
+      return ids.includes(id) ? ids : null;
+    }
   } catch (e) { /* the stand-in */ }
   const ids = P1_LINES[line]; return ids && ids.includes(id) ? ids.slice() : null;
 }
@@ -39967,8 +39979,8 @@ function p1Hours(c) {                                    // the symptom's hours 
   const { m, f } = p1Cause(c), k = c.clues.find(x => x.src && x.src.d); if (!f) return [];
   return caseWhenHours(m, f.when, k ? k.src.d : caseDay(c.posted) - 1).map((x, h) => x ? h : -1).filter(h => h >= 0);
 }
-function p1Where(c) { const { f } = p1Cause(c), line = f && f.line || 'water', L = P1_LINE[line] || P1_LINE.water;
-  return { line, deck: L.deck, where: caseText('case.line.' + line, L.where, { deck: L.deck }), shows: caseText('case.line.' + line + '.shows', L.shows) }; }
+function p1Where(c) { const { j, f } = p1Cause(c), line = f && f.line || 'water', L = P1_LINE[line] || P1_LINE.water, deck = j && j.symptom && j.symptom.deck || (j ? caseLineDeck(j.machine, line) : L.deck);
+  return { line, deck, where: caseText('case.line.' + line, L.where, { deck }), shows: caseText('case.line.' + line + '.shows', L.shows) }; }
 function p1Title(c) {
   const { f } = p1Cause(c), P = p1Where(c), hrs = new Array(24).fill(0); for (const h of p1Hours(c)) hrs[h] = 1;
   const w = c.train ? 'evening' : caseWhenWord(f.when, hrs), when = caseText('case.when.' + w, P1_WHEN[w]);
