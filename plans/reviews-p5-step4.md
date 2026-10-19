@@ -20,6 +20,15 @@ Lines skimmed. In a fresh archive content_gen bakes 9342 lines; lines_check PASS
 
 ## Step 4
 
+### E2 claude/mech-incidents dd0ec462 (0.51.7, 24q M15 rewiring), R5: PASS WITH FIXES (three)
+Diff b6130f62..dd0ec462, read with a helper agent against m15-rewiring; the fixes confirmed by hand (line numbers in dd0ec462).
+- Good: weekly at 08:00 on a workday of yours (not the incident/leak/test day) from Day 17, Tier 2 on the job; a wrong pair re-opens only its stop (never a fail); faded charts from 3 uses with the lights first; left alone it's held to 10:00 next workday, then the crew take 45 min. Calder's demo on 4-junction-2 (the officers' corridor closet, the lead's call); yours is 4-junction-1. 'rewire' in WORKS_SIDE_KINDS (after E1's core, no TDZ). One owner: the 19 REW_*/rew* names are nowhere else; no m15 ladder push (E1's row matches, ROW_AGREE). Keys 1016/1017 only, no R(). No meshes. Every line key exists on writer-p5 (rewire.*, wire.*, train.m15.calder). node --check OK.
+- **Fix 1 (double pay):** rewDone (42108-42109) sets j.rightFirst AND calls worksSideXp(1, 'rewire'); E1's turn-in already adds +1 for j.rightFirst. Today the +2 cap hides it. Delete the worksSideXp line, keep j.rightFirst.
+- **Fix 2 (the brief):** a real save round trip: mid-job (after a wrong pair) saveGame/loadGame, check pairs/wrongs/the open stop survive and side.rewire reads back. Default j.pairs/j.wrongs where read (an old/junk job makes `j.pairs[k] =` throw and `j.wrongs +=` NaN, 42093).
+- **Fix 3 (gameplay):** the right answer is always the stop's position: wire stops go in chart order (42078) and the options are T1..Tn in order, so the k-th wire is always Tk (42092) and the chart never needs reading. Store a seeded stop order on the job at posting (key 1016) and check the colour's chart position.
+- Notes: the code fades two colours, the page says one (W2's line says "these two"): lead's call / page update. rewBoxes can pick a junction with an open section-17 repair (two jobs on one box). On E2's branch alone nothing posts until E1's core is merged.
+- Checks on dd0ec462: mech_check OK, cadet_test vs b6130f62 ALL IDENTICAL.
+
 ### W2 claude/writer-p5 1c051274 (0.48.113, M13/M14 lines matched to E2's code), R5: PASS
 leak.turning, leak.tight, noz.plant and the meeting train.m13.calder added; leak.look.wall/floor/colder and leak.hint go (E2 reads none of them). Fresh archive: content_gen bakes 9564 lines, 48 meetings; lines_check PASS (the 2 old warnings). W2's tip.
 
