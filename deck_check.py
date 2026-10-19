@@ -19,6 +19,7 @@
 #   The answers pass (0.30.12): a deck's `service` entries are a hatch key or { key, tier } (tier 1, 2 or 3), each one a hatch;
 #   a place's `window: true` (a seat by a window) must be a seat or a standing place on a tile beside a hull wall with windows;
 #   a deck's `crawl: ['c,r', ...]` tiles must be walkable and reachable for Works crew. Counts are printed.
+#   Step 4 (0.53.4): a deck's leak joints stand on free tiles facing a real wall or straight hull, their puddle places free.
 # Then rides 4 -> n -> 4 three times and checks Deck 4's memory comes back to the same counts.
 # Setup and environment as for cadet_test.py.
 # The game loads with ?nosave&debug (cadet_test.py's Game class), so a save never changes what it checks.
@@ -139,6 +140,18 @@ TAGS = r"""(() => {
   return { bad, tiers, win, crawl: crawl.length };
 })()"""
 
+# Pillar 5 Step 4 (0.53.4, R4's ask): a deck's leak joints (DECKS[n].leakJoints, M13): each one's place stands on a free tile,
+# its wall edge is a real wall or a straight hull (not a door, glass or open floor), and its puddle place is free and in the room
+LEAKS = r"""(() => { const L = deckDef.leakJoints; if (!L) return null;
+  const key = (c, r, f) => ({ n: `h,${c},${r}`, s: `h,${c},${r + 1}`, w: `v,${c},${r}`, e: `v,${c + 1},${r}` })[f], bad = [];
+  for (const j of L) { const p = PLACE_OF.get(j.place), q = PLACE_OF.get(j.puddlePlace);
+    if (!p) { bad.push(j.place + ': no place'); continue; }
+    const e = EDGES.get(key(p.at[0], p.at[1], j.wall));
+    if (BLOCKED.has(K(p.at))) bad.push(j.place + ': its tile is blocked');
+    if (!e || !['wall', 'hull'].includes(e.type)) bad.push(j.place + ': its wall edge is ' + (e ? e.type : 'open floor'));
+    if (j.puddlePlace && (!q || BLOCKED.has(K(q.at)) || q.room !== p.room)) bad.push(j.puddlePlace + ': the puddle\'s place is missing, blocked or in another room'); }
+  return { n: L.length, bad }; })()"""
+
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     decks = g.ev("typeof DECK_ORDER !== 'undefined' ? DECK_ORDER.slice().sort((a, b) => a - b) : Object.keys(DECKS).map(Number)")
@@ -172,6 +185,10 @@ with sync_playwright() as pw:
                 allMachines[mid] = n
             if pl['mbad']:
                 print(f"  bad machines ({len(pl['mbad'])}): {pl['mbad'][:12]}"); ok = False
+        lk = g.ev(LEAKS)
+        if lk is not None:
+            print(f"  leak joints: {lk['n']}")
+            if lk['bad']: print(f"  bad leak joints: {lk['bad']}"); ok = False
         tg = g.ev(TAGS)
         if tg['tiers'] or tg['win'] or tg['crawl']:
             print(f"  tags: service tiers {tg['tiers']}, window places {tg['win']}, crawl tiles {tg['crawl']}")
