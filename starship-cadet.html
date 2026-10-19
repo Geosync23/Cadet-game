@@ -285,7 +285,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.63.4
+   STARSHIP CADET: CSV Wren                           build 0.84.0
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -2562,18 +2562,20 @@ const WALL_KIT = {
     const r = cyl(.025, .025, .9, WM.steelTop, 0, .95, .09, g, 10); r.rotation.z = Math.PI / 2;
     for (const x of [-.4, .4]) box(.03, .03, .08, WM.steel, x, .95, .045, g);
   },
-  // the deck directory by the lift: all six decks, top to bottom
+  // the deck directory by the lift: every deck, top to bottom (the rec deck's R row while it's on, 0.84.0)
   deckDirectory(g) {
     const t = tex(200, 260, (c, w, h) => {
       c.fillStyle = '#0d1a1f'; c.fillRect(0, 0, w, h);
       c.fillStyle = '#e8c06a'; c.font = '700 20px system-ui,sans-serif'; c.fillText('CSV WREN', 16, 30);
-      [['1', 'Bridge'], ['2', 'Command & Science'], ['3', 'Commons'], ['4', 'Quarters'], ['5', 'Operations'], ['6', 'Engineering']].forEach(([n, name], k) => {
-        const y = 62 + k * 32, here = n === String(deckDef.num);
-        if (here) { c.fillStyle = 'rgba(95,214,198,.18)'; c.fillRect(8, y - 21, w - 16, 29); }
+      const rows = [['1', 'Bridge'], ['2', 'Command & Science'], ['3', 'Commons'], ['4', 'Quarters'], ['5', 'Operations'], ['6', 'Engineering']], dy = REC_DECK ? 27 : 32;
+      if (REC_DECK) rows.splice(4, 0, ['R', 'Recreation']);   // 0.84.0 (rec engineer B): the rec deck's row, between 4 and 5
+      rows.forEach(([n, name], k) => {
+        const y = 62 + k * dy, here = n === deckLabel(deckDef.num);
+        if (here) { c.fillStyle = 'rgba(95,214,198,.18)'; c.fillRect(8, y - (REC_DECK ? 19 : 21), w - 16, REC_DECK ? 25 : 29); }
         c.fillStyle = here ? '#5fd6c6' : '#e8c06a'; c.font = '700 17px system-ui,sans-serif'; c.fillText(n, 16, y);
         c.fillStyle = here ? '#e8f4f1' : '#a9c4bf'; c.font = '500 15px system-ui,sans-serif'; c.fillText(name, 38, y);
       });
-      c.fillStyle = '#7fa9a3'; c.font = '500 12px system-ui,sans-serif'; c.fillText('You are on Deck ' + deckDef.num, 16, h - 12);
+      c.fillStyle = '#7fa9a3'; c.font = '500 12px system-ui,sans-serif'; c.fillText('You are on ' + (deckDef.num === 7 ? 'the rec deck' : deckWord(deckDef.num)), 16, h - 12);
     });
     const p = new THREE.Mesh(new THREE.PlaneGeometry(.6, .78), new THREE.MeshBasicMaterial({ map: t, toneMapped: false })); p.position.set(0, 1.45, .045); g.add(p);
     box(.66, .84, .04, M.slateDark, 0, 1.45, .02, g);
@@ -3900,7 +3902,7 @@ Object.assign(KIT, {
 // ---- The answers pass (0.30.12): the Ship health board (machine wear is drawn by section 8b's machineFx) ----
 // healthBoard: a wall screen listing the ship's systems and their condition, from section 17's shipHealthRows() (or, until
 // that's in, shipSystems() and shipHealth()). Redrawn when the machines change or the ship hour turns; nothing else.
-const HEALTH_NAME = { air: 'Air', water: 'Water', power: 'Power', heat: 'Heat', food: 'Food', waste: 'Waste & laundry', hull: 'Hull', comms: 'Comms & sensors', propulsion: 'Propulsion', transport: 'Lift & doors' };
+const HEALTH_NAME = { air: 'Air', water: 'Water', power: 'Power', heat: 'Heat', food: 'Food', waste: 'Waste & laundry', hull: 'Hull', comms: 'Comms & sensors', propulsion: 'Propulsion', transport: 'Lift & doors', rec: 'Rec deck' };
 function healthRows() {
   if (typeof shipHealthRows === 'function') return shipHealthRows() || [];
   if (typeof shipSystems !== 'function') return [];
@@ -8470,6 +8472,28 @@ Object.assign(WALL_KIT, {
     const p = new THREE.Mesh(new THREE.PlaneGeometry(W_, Hh), new THREE.MeshBasicMaterial({ map: t, toneMapped: false })); p.position.set(o.off || 0, o.y || 2.45, .03); g.add(p);
   },
 });
+// the rec deck's machines (0.84.0, rec engineer B; plans/recdeck-plan.html section 6): { id, kind, at, room, face, panel, look? }
+// like every deck's, each with a work:works place at its panel (pushed after DECKS[7]). section 17 lists them only while
+// REC_DECK is on (machineList), so a dormant rec deck wears nothing, posts nothing and sends nobody down
+const REC_MACHINES = [
+  { id: '7-pool-filter-1', kind: 'poolfilter', at: [33, 1], room: 'p', face: 'w', panel: [32, 1] },
+  { id: '7-pool-filter-2', kind: 'poolfilter', at: [33, 5], room: 'p', face: 'w', panel: [32, 5] },
+  { id: '7-pool-dosing', kind: 'pooldoser', at: [33, 3], room: 'p', face: 'w', panel: [32, 3], look: { lamp: [.25, 1.2, .45], drip: [.25, .9, .51], light: [.25, 2.1, .45] } },
+  { id: '7-pool-heat', kind: 'poolheat', at: [33, 3], room: 'p', face: 'w', panel: [32, 4], look: { lamp: [-.25, 1.2, .45], drip: [-.25, .9, .51], light: [-.25, 2.1, .45] } },
+  { id: '7-river-pump-1', kind: 'riverpump', at: [1, 7], room: 'r', face: 'e', panel: [2, 7] },
+  { id: '7-river-pump-2', kind: 'riverpump', at: [1, 10], room: 'r', face: 'e', panel: [2, 10] },
+  { id: '7-wave-gate', kind: 'wavegate', at: [12, 1], room: 'K', face: 'e', panel: [15, 1], look: { lamp: [0, 1.6, -.2], drip: [0, .5, -.15], light: [0, 2.4, -.2] } },
+  { id: '7-wall-holds', kind: 'wallholds', at: [1, 5], room: 'K', face: 'e', panel: [2, 5], look: { lamp: [0, 1.5, .15], drip: [0, .6, .2], light: [0, 2.6, .15] } },
+  { id: '7-belay-1', kind: 'belay', at: [1, 3], room: 'K', face: 'e', panel: [2, 3], look: { lamp: [0, 3.0, .2], drip: [0, 2.8, .25], light: [0, 3.4, .2] } },
+  { id: '7-belay-2', kind: 'belay', at: [1, 4], room: 'K', face: 'e', panel: [2, 4], look: { lamp: [0, 3.0, .2], drip: [0, 2.8, .25], light: [0, 3.4, .2] } },
+  { id: '7-aud-lights', kind: 'stagelights', at: [28, 13], room: 'b', face: 'e', panel: [29, 13] },
+  { id: '7-aud-sound', kind: 'soundrack', at: [28, 15], room: 'b', face: 'e', panel: [29, 15] },
+  { id: '7-aud-seats', kind: 'seathinges', at: [40, 7], room: 'A', face: 'e', panel: [41, 7], look: { lamp: [0, .6, .2], drip: [0, .4, .25], light: [0, 1.4, .2] } },
+  { id: '7-court-net', kind: 'courtnet', at: [1, 12], room: 'e', face: 'e', panel: [2, 12] },
+  { id: '7-court-board', kind: 'scoreboard', at: [1, 14], room: 'e', face: 'e', panel: [2, 14] },
+  { id: '7-grav-plates', kind: 'gravplate', at: [30, 17], room: 'b', face: 'n', panel: [30, 17] },
+];
+const REC_FACE_BACK = { n: 's', s: 'n', e: 'w', w: 'e' };
 DECKS[7] = {
   num: 7, name: 'Recreation', seed: 70771, tall: 1.3, playerOnly: true, open: [6, 24],
   blurb: 'Auditorium, court, pool, rivers', arrive: 'The concourse runs stern to bow: the rivers and the court aft, the pool and the auditorium forward.',
@@ -8549,7 +8573,7 @@ DECKS[7] = {
   },
   hull: { sternX: 1, stern: 2, bowFrom: 34, bowLen: 11.6, byFace: true },
   service: [{ key: 'v,4,8', tier: 2 }, { key: 'v,4,15', tier: 2 }, { key: 'v,32,3', tier: 1 }, { key: 'h,31,11', tier: 1 }, { key: 'v,34,11', tier: 1 }],
-  machines: [],                                          // TODO (phase 2, the systems engineer): the plan's section 6 machines
+  machines: REC_MACHINES,                                // 0.84.0 (rec engineer B): section 6's machines, above
   // the auditorium's seats (0.80.1): reached from the aisle beside their row; a type no crew code knows, so they stay the player's
   places: REC_SEATS.map((s, k) => ({ id: '7-seat-' + (k + 1), type: 'rec:seat', at: [s.col, Math.floor(s.z)], walk: [s.col, s.aisle], face: 'e', pose: 'sit', room: 'A', xy: [s.x, s.z], y: Math.round((s.h + .47) * 100) / 100 }))
     // the stands' 33 seats (0.80.2), facing the court, reached from the aisle at column 6 or 14
@@ -8662,6 +8686,8 @@ DECKS[7] = {
     REC_STANDS.forEach(([c0, c1], b) => place('T', 'recHit', (c0 + c1) / 2 - 4, 1, 'n', { w: c1 - c0, d: 2, hitH: 1.3, it: IT('Stands', ['Three stepped benches at the stern end, by the scoreboard.', 'The middle of the stands: three stepped benches, right on the net. The best seats for a close game.', 'Three stepped benches at the bow end, by the gate onto the court.'][b]) }));
   },
 };
+// 0.84.0 (rec engineer B): a work:works place at each machine's panel, facing it (panelPlace finds them; schedules and placesOf skip them)
+DECKS[7].places.push(...REC_MACHINES.map(m => ({ id: m.id + '-svc', machine: m.id, type: 'work:works', at: m.panel.slice(), face: m.panel[0] === m.at[0] && m.panel[1] === m.at[1] ? REC_FACE_BACK[m.face] : m.panel[0] > m.at[0] ? 'w' : m.panel[0] < m.at[0] ? 'e' : m.panel[1] > m.at[1] ? 'n' : 's', pose: 'work', room: m.room })));
 // the rec deck's materials, made when the deck is built (so they are freed with it)
 let RK = null;
 function recMats() {
@@ -8748,7 +8774,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.63.4';                           // keep in step with the header's build line
+const GAME_BUILD = '0.84.0';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -10574,7 +10600,7 @@ const DEV_WEEK = [
   [{ at: 900, title: 'Drill: off-duty crew muster by the lift', where: 'the lift lobby on each deck', len: 15 }],
   [{ at: 400, title: 'Bunk inspection: tidy your bunk', where: 'your bunk, Deck 4', len: 20 }],
   [], [], []];
-const devDeckOf = ev => { const w = ev && ev.where && ev.where[0]; return w ? 'Deck ' + w.deck : 'aboard'; };
+const devDeckOf = ev => { const w = ev && ev.where && ev.where[0]; return w ? deckWord(w.deck) : 'aboard'; };
 // the ship traditions between two absolute ship minutes: section 18's upcomingTraditions when it's there, else eventsOn
 function devTraditions(a, b) {
   if (typeof upcomingTraditions === 'function') {
@@ -10602,7 +10628,7 @@ function devOccasions(a, b) {
     const booked = new Set(SHIP.device.appts.map(x => x.occ).filter(Boolean));   // 0.35.32: those apptAdd booked are listed as appointments
     return SHIP.occasions.filter(r => r && r.status === 'asked' && r.at >= a && r.at <= b && OCCASIONS[r.id] && !OCCASIONS[r.id].chance && !booked.has(r.key)).map(r => {
       const rm = DECKS[r.deck] && DECKS[r.deck].rooms && DECKS[r.deck].rooms[r.room];
-      return { at: r.at, len: r.len || 30, title: OCCASIONS[r.id].title, deck: r.deck, room: rm ? r.room : null, where: (rm ? rm.name + ', ' : '') + 'Deck ' + r.deck };
+      return { at: r.at, len: r.len || 30, title: OCCASIONS[r.id].title, deck: r.deck, room: rm ? r.room : null, where: (rm ? rm.name + ', ' : '') + deckWord(r.deck) };
     });
   } catch (e) { return []; }
 }
@@ -10630,7 +10656,7 @@ function devDay(d) {
   // up, a wash call at your bunk), the shift's own, meals, tea and traditions are listed already or need no heads-up.
   try { if (typeof introOn === 'function' && introOn() && typeof INTRO_WEEK !== 'undefined') for (const b of INTRO_WEEK)
     if (b.day === d && DEV_BEATS[b.id] && b.where && Number.isInteger(b.where.deck))
-      out.push({ from: b.at, to: b.until || b.at + 30, title: DEV_BEATS[b.id], where: b.where.room + ', Deck ' + b.where.deck, kind: 'beat', deck: b.where.deck, room: b.where.room }); } catch (e) { /* not yet */ }
+      out.push({ from: b.at, to: b.until || b.at + 30, title: DEV_BEATS[b.id], where: b.where.room + ', ' + deckWord(b.where.deck), kind: 'beat', deck: b.where.deck, room: b.where.room }); } catch (e) { /* not yet */ }
   return out.sort((x, y) => x.from - y.from);
 }
 const DEV_BEATS = { 'd1-briefing': 'Morning briefing with the Chief', 'd2-solo': 'The Chief\'s office: your first job', 'd2-booths': 'Calling home', 'd3-store': 'The crew store' };   // titles (stand-ins; the beats' own words are section 21's)
@@ -11203,7 +11229,7 @@ deviceApp({ id: 'settle', title: 'Settling in', short: 'Settling', icon: 'record
     const L = settleList() || [], done = L.filter(x => settleDone(x.id)).length, B = [];
     B.push({ kind: 'text', text: done + ' of ' + L.length + ' done. Nothing here is required: people will show you as the week goes on.', mark: 'hot' });
     const rows = L.map(it => { const d = settleDone(it.id), p = it.teacher && apptPerson(it.teacher), g = !d && settleGoal(it);
-      return { text: (d ? '✓ ' : '') + it.title, sub: d ? 'Done' : (p ? 'Ask ' + p.name : '') + (it.place ? (p ? ' · ' : '') + it.place.room + ', Deck ' + it.place.deck : ''),
+      return { text: (d ? '✓ ' : '') + it.title, sub: d ? 'Done' : (p ? 'Ask ' + p.name : '') + (it.place ? (p ? ' · ' : '') + it.place.room + ', ' + deckWord(it.place.deck) : ''),
         mark: d ? 'past' : null, button: g ? 'Go there' : null, action: g ? { app: 'settle', do: 'go', arg: it.id } : null }; });
     B.push({ kind: 'list', rows });
     if (devTry(() => typeof introOn === 'function' && introOn()))
@@ -11312,17 +11338,17 @@ deviceApp({ id: 'jobs', title: 'Jobs', icon: 'wrench', order: 30,
       const [title, where] = jobCard(mine), m = mine.machine && machineById(mine.machine), tracked = SHIP.player.track !== null;   // a taken job is tracked until you switch it off (null)
       say('Yours: ' + title + ', ' + where + '.', 'hot');
       if (mine.kind === 'chore') {
-        const stops = mine.stops.map(st => { const p = placeById(st.placeId); return (st.tag === 'pickup' ? 'pick up ' + (mine.bring || 'the load') + ' in the ' : st.tag === 'drop' ? 'drop it in the ' : '') + (p ? roomName(p.deck, p.room) || 'room' : 'room') + ' on Deck ' + st.deck; });
+        const stops = mine.stops.map(st => { const p = placeById(st.placeId); return (st.tag === 'pickup' ? 'pick up ' + (mine.bring || 'the load') + ' in the ' : st.tag === 'drop' ? 'drop it in the ' : '') + (p ? roomName(p.deck, p.room) || 'room' : 'room') + ' on ' + deckWord(st.deck); });
         say(mine.title + '. ' + (mine.parts.length ? 'Bring ' + mine.parts.map(k => 'a ' + k).join(', ') + ' from main storage on Deck 5. ' : '') + 'Go to: ' + stops.join(', then ') + '.');
       } else if (typeof traceHidden === 'function' && traceHidden(mine)) {   // 24i: a traced job not yet found (the machine stays hidden)
         say(worksText('trace.how', 'Find where it starts: tap the machines on {line} with the pipe kit to read the flow. The Maps app marks them.', { line: traceLineName(mine.symptom.line) }));
       } else if (m) {
         const need = {}; for (const k of mine.parts) need[k] = (need[k] || 0) + 1;
-        say('Needs ' + Object.entries(need).map(([k, n]) => n + ' × ' + k + ' (' + (SHIP.stores[k] || 0) + ' in storage)').join(', ') + '. Parts are in main storage on Deck 5; the job is in the ' + ((DECKS[m.deck].rooms[m.room] || {}).name || 'room').toLowerCase() + ' on Deck ' + m.deck + '.');
+        say('Needs ' + Object.entries(need).map(([k, n]) => n + ' × ' + k + ' (' + (SHIP.stores[k] || 0) + ' in storage)').join(', ') + '. Parts are in main storage on Deck 5; the job is in the ' + ((DECKS[m.deck].rooms[m.room] || {}).name || 'room').toLowerCase() + ' on ' + deckWord(m.deck) + '.');
       } else say(mine.cargo === 'meals' ? 'Take a hover cart from the Cart bay on Deck 5, load ' + (mine.meals || 'the') + ' meals in the cargo hold, and take them up to the cold store on Deck 3. Then bring the cart back.'
         : 'Take a hover cart from the Cart bay on Deck 5, load the delivery in the cargo hold, and take it to main storage. Then bring the cart back.');
       const step = typeof ixJobStep === 'function' ? ixJobStep() : null;
-      if (step && step.label) say('Next step: ' + step.label + (step.deck ? ' (Deck ' + step.deck + ')' : '') + '.');
+      if (step && step.label) say('Next step: ' + step.label + (step.deck ? ' (' + deckWord(step.deck) + ')' : '') + '.');
       B.push({ kind: 'buttons', items: [{ label: tracked ? 'Tracking' : 'Track', on: tracked, action: { app: 'jobs', do: 'track', arg: mine.id } }] });
       say('Turn it in at the job board when it\'s done.');
     } else say('You take jobs at the job board in the Works bay (Deck 5), and turn them in there when they\'re done.');
@@ -11353,7 +11379,7 @@ deviceApp({ id: 'maps', title: 'Maps', icon: 'map', order: 25,
     else if (verb === 'pick') mapPick = mapPick === arg ? null : arg;
     else if (verb === 'go' && mapPick && typeof setGoal === 'function') {
       const n = mapDeck || deckDef.num, r = DECKS[n].rooms[mapPick];
-      SHIP.player.track = null; setGoal({ deck: n, room: mapPick, label: r.name + (n !== deckDef.num ? ', Deck ' + n : '') });
+      SHIP.player.track = null; setGoal({ deck: n, room: mapPick, label: r.name + (n !== deckDef.num ? ', ' + deckWord(n) : '') });
       deviceNotify({ app: 'maps', text: 'Follow the marker to the ' + r.name.toLowerCase() + '.', urgent: true }); delete DEV.notes.maps;
     }
     else if (verb === 'clear' && typeof clearGoal === 'function') clearGoal();
@@ -11411,11 +11437,11 @@ function rosterWhere(p, t = shipNow()) {                 // { line, deck, room }
   let w = null; try { w = typeof whereIs === 'function' ? whereIs(p, t) : null; } catch (e) { w = null; }
   if (!w) return { line: 'Not aboard right now.' };
   if (w.act === 'sleep' || w.act === 'wash') return { line: 'In their quarters.' };
-  if (w.moving) return { line: 'On the move' + (w.deck ? ', heading for Deck ' + w.deck : '') + '.' };
+  if (w.moving) return { line: 'On the move' + (w.deck ? ', heading for ' + deckWord(w.deck) : '') + '.' };
   const S = typeof schedData === 'function' ? schedData() : null, pl = w.placeId && S ? S.byId.get(w.placeId) : null;
   const room = pl && pl.deck === w.deck ? pl.room : null, r = room && DECKS[w.deck] && (DECKS[w.deck].rooms || {})[room], rn = r && r.name;
   if (rn && mapLocked(w.deck, room) && w.act !== 'work') return { line: 'In their quarters.' };   // a private cabin
-  const at = 'Deck ' + w.deck + (rn ? ', ' + rosterRoomName(rn) : '');
+  const at = deckWord(w.deck) + (rn ? ', ' + rosterRoomName(rn) : '');
   return { line: (ROSTER_ACT[w.act] ? ROSTER_ACT[w.act] + ': ' : '') + at + '.', deck: w.deck, room: rn ? room : null, roomName: rn };
 }
 function rosterPeople() {                                // everyone aboard: [{ p, tier }]; guests only while aboard
@@ -11431,7 +11457,7 @@ deviceApp({ id: 'roster', title: 'Roster', icon: 'crew', order: 52,
     else if (verb === 'tab') { rosterTab = arg === 'known' ? 'known' : 'all'; rosterPick = null; }
     else if (verb === 'go' && rosterPick && typeof setGoal === 'function') {
       const p = apptPerson(rosterPick), w = p && rosterWhere(p); if (!w || !w.room) return;
-      SHIP.player.track = null; setGoal({ deck: w.deck, room: w.room, label: p.name.split(' ')[0] + ', ' + rosterRoomName(w.roomName) + (w.deck !== deckDef.num ? ', Deck ' + w.deck : '') });
+      SHIP.player.track = null; setGoal({ deck: w.deck, room: w.room, label: p.name.split(' ')[0] + ', ' + rosterRoomName(w.roomName) + (w.deck !== deckDef.num ? ', ' + deckWord(w.deck) : '') });
       deviceNotify({ app: 'roster', text: 'Follow the marker to ' + rosterRoomName(w.roomName) + '.', urgent: true }); delete DEV.notes.roster;
     }
   },
@@ -11605,7 +11631,7 @@ function apptRoomPlace(n, key) {
 const apptPerson = id => typeof schedPeople === 'function' ? schedPeople().find(p => p.id === id) : (typeof ROSTER !== 'undefined' ? ROSTER.find(p => p.id === id) : null);
 const apptName = id => { const p = apptPerson(id); return p ? p.name : String(id); };
 const apptWhereName = id => {                          // the room's name, for any place in it
-  for (const n of Object.keys(DECKS)) { const q = (DECKS[n].places || []).find(x => x.id === id); if (q) { const r = (DECKS[n].rooms || {})[q.room]; return (r ? r.name : 'there') + ', Deck ' + n; } }
+  for (const n of Object.keys(DECKS)) { const q = (DECKS[n].places || []).find(x => x.id === id); if (q) { const r = (DECKS[n].rooms || {})[q.room]; return (r ? r.name : 'there') + ', ' + deckWord(n); } }
   return 'there';
 };
 function apptPeople() {                                  // who you can ask: people you've met when section 20 says, else story and Works crew
@@ -11725,7 +11751,7 @@ deviceApp({ id: 'appointments', title: 'Appointments', short: 'Appts', icon: 'ca
           { kind: 'text', text: 'Where', mark: 'head' },
           { kind: 'buttons', items: [{ label: 'Pick on the map', action: { app: 'appointments', do: 'map' } }] },
           { kind: 'list', rows: (d.where && !apptPlaces().some(x => x.id === d.where) ? [{ text: apptWhereName(d.where), mark: 'hot', action: { app: 'appointments', do: 'where', arg: d.where } }] : [])
-            .concat(apptPlaces().map(x => ({ text: x.name + ', Deck ' + x.deck, mark: x.id === d.where ? 'hot' : null, action: { app: 'appointments', do: 'where', arg: x.id } }))) });
+            .concat(apptPlaces().map(x => ({ text: x.name + ', ' + deckWord(x.deck), mark: x.id === d.where ? 'hot' : null, action: { app: 'appointments', do: 'where', arg: x.id } }))) });
         if (d.where) B.push({ kind: 'buttons', items: [{ label: d.with.length > 1 ? 'Ask all ' + d.with.length : 'Ask ' + apptName(d.with[0]).split(' ').slice(-1)[0], action: { app: 'appointments', do: 'ask' } }] });
       }
       B.push({ kind: 'buttons', items: [{ label: 'Cancel', action: { app: 'appointments', do: 'cancel' } }] });
@@ -13293,7 +13319,7 @@ function jobNotice() {
   if (!JOB_SEEN) { JOB_SEEN = new Set(open.map(j => j.id)); return; }
   const fresh = open.filter(j => !JOB_SEEN.has(j.id)); for (const j of open) JOB_SEEN.add(j.id);
   if (!fresh.length || myJob() || ACT) return;           // not while you hold a job or are busy
-  const c = typeof jobCard === 'function' ? jobCard(fresh[0]) : [fresh[0].kind, 'Deck ' + fresh[0].deck];
+  const c = typeof jobCard === 'function' ? jobCard(fresh[0]) : [fresh[0].kind, deckWord(fresh[0].deck)];
   toast('Your device', 'New job: ' + c[0] + ', ' + c[1] + (fresh.length > 1 ? ', and ' + (fresh.length - 1) + ' more' : '') + '. Take it at the job board in the Works bay, Deck 5.');
 }
 function carryLoad(s) { const c = s && s.player && s.player.carry; return Array.isArray(c) ? c.filter(x => typeof x === 'string').slice(0, CARRY_MAX) : []; }
@@ -13414,7 +13440,7 @@ function jobTap(it, at) {
     }
     const need = shelfNeeds(mw.j, mw.w, P.carry);
     if (!need.length && jobNeeds(mw.j, mw.w, P.carry).length) { toast(it.t, 'The ' + mw.j.make + ' isn\'t kept on the shelves: you make it yourself in the machine shop next door.'); return true; }   // 0.28.24
-    if (!need.length) { toast(it.t, 'You have what the job needs: ' + partList(P.carry) + '. It\'s at the ' + machineName(machineById(mw.j.machine)) + ' on Deck ' + mw.j.deck + '.'); return true; }
+    if (!need.length) { toast(it.t, 'You have what the job needs: ' + partList(P.carry) + '. It\'s at the ' + machineName(machineById(mw.j.machine)) + ' on ' + deckWord(mw.j.deck) + '.'); return true; }
     if (P.carry.length >= CARRY_MAX) { toast(it.t, 'Your hands are full (' + partList(P.carry) + '). ' + handsFix('Fit those first') + ', then come back for ' + partList(need) + '.'); return true; }
     if (typeof shelfWrong === 'function' && shelfWrong(it)) return true;   // the right part from the right shelf (0.33.41): another shelf costs nothing
     const o = { title: it.t, flavour: it.x, after: 'You look for ' + partList(need) + '.' }, pl = jobPlaceNear('storage', 'r', at);
@@ -13718,7 +13744,7 @@ function jobEnd(A) {
     toast('Main storage', back.length ? 'You put back ' + partList(back) + '.' : 'Nothing to put back.');
   } else if (A.kind === 'make' && mw && P.work.make) {
     const part = P.work.make.part; P.work.make = null;
-    if (P.carry.length < CARRY_MAX) { P.carry.push(part); toast('Machine shop', 'You make ' + partList([part]) + '. ' + (shelfNeeds(mw.j, mw.w, P.carry).length ? 'Now ' + partList(shelfNeeds(mw.j, mw.w, P.carry)) + ' from main storage next door.' : 'Now to the ' + machineName(machineById(mw.j.machine)) + ' on Deck ' + mw.j.deck + '.')); }
+    if (P.carry.length < CARRY_MAX) { P.carry.push(part); toast('Machine shop', 'You make ' + partList([part]) + '. ' + (shelfNeeds(mw.j, mw.w, P.carry).length ? 'Now ' + partList(shelfNeeds(mw.j, mw.w, P.carry)) + ' from main storage next door.' : 'Now to the ' + machineName(machineById(mw.j.machine)) + ' on ' + deckWord(mw.j.deck) + '.')); }
     if (part === madeHere(mw.j)) jobStopMark(mw.j, 'make');   // the job's make stop (0.28.24)
   } else if (A.kind === 'fetch' && mw) {
     const need = shelfNeeds(mw.j, mw.w, P.carry), got = [], none = [];
@@ -13731,7 +13757,7 @@ function jobEnd(A) {
     toast('Main storage', (got.length ? 'You take ' + partList(got) + '.' : 'Nothing you need is on the shelves.')
       + (none.length ? ' None left: ' + none.join(', ') + '. ' + (none.some(p => typeof NO_MAKE !== 'undefined' && !NO_MAKE.has(p)) ? 'The machine shop next door can make one (about an hour at the lathe).' : 'It can\'t be made aboard; the next delivery is on Wednesday.') : '')
       + (rest.length && !none.length ? ' Your hands are full; you\'ll need another trip for ' + partList(rest) + '.' : '')
-      + (got.length ? toMake && !rest.length ? ' Now make the ' + mw.j.make + ' in the machine shop next door.' : ' Now to the ' + machineName(machineById(mw.j.machine)) + ' on Deck ' + mw.j.deck + '.' : ''));
+      + (got.length ? toMake && !rest.length ? ' Now make the ' + mw.j.make + ' in the machine shop next door.' : ' Now to the ' + machineName(machineById(mw.j.machine)) + ' on ' + deckWord(mw.j.deck) + '.' : ''));
   } else if (A.kind === 'job' && mw) {
     const name = machineName(machineById(mw.j.machine));
     if (A.o.repair) {
@@ -13853,7 +13879,7 @@ function needGoal(k) {
   const near = pl => pl.deck === here ? Math.hypot(cellPos(...pl.at).x - pos.x, cellPos(...pl.at).z - pos.z) : 1000 * (1 + Math.abs(pl.deck - here));
   const all = Object.keys(DECKS).flatMap(n => (DECKS[n].places || []).map(pl => ({ ...pl, deck: +n }))).filter(ok);
   const pl = all.sort((a, b) => near(a) - near(b) || (a.id < b.id ? -1 : 1))[0]; if (!pl) return false;
-  NEED_GOAL = { need: k, label: NEED_FIX_SAY[k] + (pl.deck !== here ? ', Deck ' + pl.deck : '') };
+  NEED_GOAL = { need: k, label: NEED_FIX_SAY[k] + (pl.deck !== here ? ', ' + deckWord(pl.deck) : '') };
   setGoal({ deck: pl.deck, place: pl.id, label: NEED_GOAL.label }); return true;
 }
 function needGoalClear() { if (NEED_GOAL && typeof IX_GOAL !== 'undefined' && IX_GOAL && IX_GOAL.label === NEED_GOAL.label) clearGoal(); NEED_GOAL = null; }
@@ -14132,7 +14158,7 @@ function ixChoreTap(it, at) {
   if (st.deck !== deckDef.num) return false;
   const pid = st.places[0], spot = pid && PLACE_OF.has(pid) ? placeSpot(pid) : null;
   if (!spot || !(it.hit ? ixDist(it, spot) < IX_NEAR + .6 : Math.hypot(spot.x - at.x, spot.z - at.z) < JOB_REACH) && PLACE_OF.get(pid).room !== room) return false;   // no thing (jobHere, 0.28.52): from the point
-  if (st.step === 'drop' && crateDown(j)) { toast(it.t, 'The crate is where you set it down, on Deck ' + SHIP.player.crate.deck + '. Pick it up first: follow the marker.'); return true; }   // Put down (0.28.60)
+  if (st.step === 'drop' && crateDown(j)) { toast(it.t, 'The crate is where you set it down, on ' + deckWord(SHIP.player.crate.deck) + '. Pick it up first: follow the marker.'); return true; }   // Put down (0.28.60)
   if (typeof workStep === 'function' && workStep(j, st, k, spot)) return true;   // look, choose, turn, wait (section 15, Pillar 5)
   const [title, pose] = IX_STOP[st.step] || ['Your job', 'work'];
   // the stop's spot, not the place: a lamp over the lift queue is yours to change even with someone waiting there
@@ -15947,6 +15973,20 @@ const MACHINE_KINDS = {
   hullseal:    { name: 'Hull seals',        sys: 'hull',       life: 32, time: 1,                 scope: 'ship', w: 2, tier: 3, part: 'seal' },
   reactor:     { name: 'Reactor',           sys: 'power',      life: 60, time: 1,                 scope: 'ship', w: 3, tier: 4, part: 'control rod' },
   coil:        { name: 'Drive coil',        sys: 'propulsion', life: 30, time: 1,                 scope: 'ship', w: 1, tier: 4, part: 'coil winding' },
+  // the rec deck's (0.84.0, rec engineer B; plan section 6): their own 'rec' system, felt on that deck only; use 'heads' (people on the deck)
+  poolfilter:  { name: 'Pool filter',       sys: 'rec',        life: 10, time: .4, use: 'heads',  scope: 'deck', w: 2, tier: 1, part: 'cartridge' },
+  pooldoser:   { name: 'Pool dosing',       sys: 'rec',        life: 16, time: .6, use: 'heads',  scope: 'deck', w: 1, tier: 2, part: 'relay' },
+  poolheat:    { name: 'Pool heat exchanger', sys: 'rec',      life: 18, time: .6, use: 'heads',  scope: 'deck', w: 1, tier: 2, part: 'valve' },
+  riverpump:   { name: 'River pump',        sys: 'rec',        life: 16, time: .5, use: 'heads',  scope: 'deck', w: 2, tier: 2, part: 'bearing' },
+  wavegate:    { name: 'Wave gate',         sys: 'rec',        life: 20, time: .5, use: 'heads',  scope: 'deck', w: 1, tier: 2, part: 'seal' },
+  wallholds:   { name: 'Climbing holds',    sys: 'rec',        life: 7,  time: .3, use: 'heads',  scope: 'deck', w: 1, tier: 1, part: 'seal' },   // a chore: tighten and reset a route
+  belay:       { name: 'Auto-belay',        sys: 'rec',        life: 14, time: .4, use: 'heads',  scope: 'deck', w: 2, tier: 2, part: 'bearing' },
+  stagelights: { name: 'Stage lights',      sys: 'rec',        life: 18, time: .6, use: 'heads',  scope: 'deck', w: 1, tier: 1, part: 'lamp' },
+  soundrack:   { name: 'Sound rack',        sys: 'rec',        life: 24, time: .7, use: 'heads',  scope: 'deck', w: 1, tier: 2, part: 'cable' },
+  seathinges:  { name: 'Seat hinges',       sys: 'rec',        life: 10, time: .3, use: 'heads',  scope: 'deck', w: 1, tier: 1, part: 'bearing' },   // a chore: a few seats at a time
+  courtnet:    { name: 'Court emitters',    sys: 'rec',        life: 24, time: .7, use: 'heads',  scope: 'deck', w: 2, tier: 3, part: 'breaker' },
+  scoreboard:  { name: 'Scoreboard',        sys: 'rec',        life: 20, time: .7, use: 'heads',  scope: 'deck', w: 1, tier: 1, part: 'lamp' },
+  gravplate:   { name: 'Gravity plates',    sys: 'rec',        life: 30, time: .8, use: 'heads',  scope: 'deck', w: 2, tier: 3, part: 'signal card' },
 };
 MACHINE_KINDS.powerjunction = MACHINE_KINDS.junction;    // the old name for a power junction, still on Deck 2's 2-breaker-1
 const MACHINE_STATES = ['healthy', 'worn', 'faulty', 'failing', 'broken'];
@@ -15954,6 +15994,7 @@ const machineState = c => c >= 75 ? 'healthy' : c >= 50 ? 'worn' : c >= 25 ? 'fa
 const MACHINE_SEV = { healthy: 0, worn: 0, faulty: .35, failing: .7, broken: 1 };   // how hard a state is felt
 const SYSTEMS = ['air', 'water', 'power', 'heat', 'food', 'waste', 'hull', 'comms', 'propulsion', 'transport'];
 const SYSTEM_W = { air: 3, water: 2, power: 3, heat: 2, food: 2, waste: 1, hull: 2, comms: 1, propulsion: 1, transport: 1 };   // their weight in ship health
+if (REC_DECK) { SYSTEMS.push('rec'); SYSTEM_W.rec = 1; }   // 0.84.0 (rec engineer B, lead 18's call): the rec deck's machines, only while it's switched on
 // stand-ins until the architects add DECKS[n].machines with the utility rooms (A5): [id, kind, room]. Their
 // `at` and `panel` are the room's middle tile; the lift is at the lift. A stand-in drops out as soon as its deck
 // has a real machine with its id or in its room. Decks 1 and 3 use the bridge architect's agreed ids.
@@ -15984,6 +16025,7 @@ function machineList() {
   if (MACH_LIST) return MACH_LIST;
   MACH_LIST = [];
   for (const n of Object.keys(DECKS).map(Number).sort()) {
+    if (n === 7 && !REC_DECK) continue;                 // 0.84.0: a dormant rec deck has no machines (nothing wears, posts or sends crew down)
     const own = (DECKS[n].machines || []).map(m => ({ ...m })), ids = new Set(own.map(m => m.id)), rooms = new Set(own.map(m => m.room));
     const list = own.concat((STUB_MACHINES[n] || []).filter(([id, , room]) => !ids.has(id) && !rooms.has(room))
       .map(([id, kind, room]) => { const at = room ? machRoomTile(n, room) : DECKS[n].lift.slice(); return { id, kind, at, room, face: 's', panel: at, stub: true }; }));
@@ -16385,7 +16427,7 @@ function deckLook(deck) {
 // then each system, worst first. shipHealthRows() -> [{ key, name, value 0-100, state, worst }]: state as
 // machineLook's; worst: the system's worst machine that isn't fine, as 'Air scrubber 2, Deck 4', or null
 const SYSTEM_NAME = { air: 'Air', water: 'Water', power: 'Power', heat: 'Heat', food: 'Galley and food', waste: 'Waste and laundry', hull: 'Hull',
-                      comms: 'Comms and sensors', propulsion: 'Drive', transport: 'Lift and doors' };
+                      comms: 'Comms and sensors', propulsion: 'Drive', transport: 'Lift and doors', rec: 'Rec deck' };
 // ---- the ship meters (0.33.57, Pillar 5 Step 3; the user, 2026-10-18: ship health "starts a little lower, so you can see your
 // impact", and every job you do helps at least one meter, often several) ----
 // A meter is a Ship health board row: its system's score from the machines (shipSystems, which every effect reads, as
@@ -16446,7 +16488,7 @@ const bridgeBars = j => bridgeShut() && !heldForYou(j) && bridgeJob(j);
 const healthState = v => v >= 90 ? 'fine' : v >= 70 ? 'worn' : v >= 45 ? 'poor' : 'failing';
 function machineLabel(m) {
   const K = MACHINE_KINDS[m.kind], n = machineList().filter(x => x.kind === m.kind && x.deck === m.deck).length > 1 ? ' ' + m.id.split('-').pop() : '';
-  return K.name + n + ', Deck ' + m.deck;
+  return K.name + n + ', ' + deckWord(m.deck);
 }
 function shipHealthRows() {
   const sys = shipMeters(), st = machinesNow(), health = shipHealth(sys);   // the meters: the machines less the upkeep (0.33.57)
@@ -17106,10 +17148,10 @@ const CHORES = {
                  .map(m => ({ key: m.id, title: 'Calibrate the ' + machineLabel(m).split(',')[0].toLowerCase(), deck: m.deck, room: m.room, machine: m.id, tier: MACHINE_KINDS[m.kind].tier, stops: [panelStop(m, 15, 'calibrate')] })) },
   delivery:  { tier: 1, per: .6, parts: [], text: 'Delivery',
                where: () => DELIVERIES.filter(r => placeById(r.from) && placeById(r.to)).map(r => { const a = placeById(r.from), b = placeById(r.to);
-                 return { key: r.key, title: r.title + ', Deck ' + b.deck, deck: b.deck, room: b.room, bring: r.bring, stops: [{ deck: a.deck, placeId: a.id, mins: 5, tag: 'pickup' }, { deck: b.deck, placeId: b.id, mins: 10, tag: 'drop' }] }; }) },
+                 return { key: r.key, title: r.title + ', ' + deckWord(b.deck), deck: b.deck, room: b.room, bring: r.bring, stops: [{ deck: a.deck, placeId: a.id, mins: 5, tag: 'pickup' }, { deck: b.deck, placeId: b.id, mins: 10, tag: 'drop' }] }; }) },
   round:     { tier: 1, per: .4, parts: [], text: 'Inspection round', finds: true,
                where: () => [3, 4, 5].map(n => { const ms = choreMachines(['oven', 'range', 'chiller', 'galleyplant', 'cartdock', 'washer']).filter(m => m.deck === n), ps = ms.length >= 2 ? ms.slice(0, 3).map(m => panelStop(m, 5, 'inspect')) : lobbyish().filter(p => p.deck === n).slice(0, 3).map(p => ({ deck: n, placeId: p.id, mins: 5, tag: 'inspect' }));
-                 return ps.length ? { key: 'deck' + n, title: 'Inspection round, Deck ' + n, deck: n, room: (placeById(ps[0].placeId) || {}).room, stops: ps } : null; }).filter(Boolean) },
+                 return ps.length ? { key: 'deck' + n, title: 'Inspection round, ' + deckWord(n), deck: n, room: (placeById(ps[0].placeId) || {}).room, stops: ps } : null; }).filter(Boolean) },
   fault:     { tier: 1, per: .4, parts: [], text: 'Small fault', leave: 30,
                where: () => choreMachines(['lights', 'cartdock', 'washer', 'extractor']).map(m => ({ key: m.id, title: (m.kind === 'lights' ? 'Reset a tripped breaker: ' : m.kind === 'cartdock' ? 'Free a jammed cart dock: ' : 'Clear a fault: ') + machineLabel(m).split(',')[0].toLowerCase(), deck: m.deck, room: m.room, machine: m.id, stops: [panelStop(m, 10, 'fault')] })) },
   filter:    { tier: 2, per: 1.4, parts: ['filter'], text: 'Swap the filters', helps: { self: 10 },
@@ -17642,7 +17684,7 @@ function traceFor(m, h) {
 function traceSymptom(line, id) { const decks = lineDecks(line, id); return { line, decks, deck: decks.includes(4) ? 4 : decks[0] }; }
 const traceHidden = j => !!(j && j.symptom && !j.traceFound);
 function traceTitle(j) {                                 // the Works writer's trace.symptom.<line> line when it's in (M3's ask)
-  const fb = (SYMPTOM_TEXT[j.symptom.line] || 'A fault') + ' on Deck ' + j.symptom.deck;
+  const fb = (SYMPTOM_TEXT[j.symptom.line] || 'A fault') + ' on ' + deckWord(j.symptom.deck);
   return typeof worksText === 'function' ? worksText('trace.symptom.' + j.symptom.line, fb, { deck: j.symptom.deck, where: '' }) : fb;
 }
 function traceMark(jobId, id) {
@@ -17812,11 +17854,11 @@ function jobsSection(el) {
     const [title, where, state] = jobCard(mine), m = mine.machine && !traceHidden(mine) && machineById(mine.machine);   // a traced fault: no room till it's found
     line('Yours: ' + title + ', ' + where + '.', 'devtime');
     if (jobByStops(mine) && mine.kind !== 'favour') {
-      const stops = mine.stops.map(st => { const p = placeById(st.placeId); return (st.tag === 'pickup' ? 'pick up ' + (mine.bring || 'the load') + ' in the ' : st.tag === 'drop' ? 'drop it in the ' : '') + (p ? roomName(p.deck, p.room) || 'room' : 'room') + ' on Deck ' + st.deck; });
+      const stops = mine.stops.map(st => { const p = placeById(st.placeId); return (st.tag === 'pickup' ? 'pick up ' + (mine.bring || 'the load') + ' in the ' : st.tag === 'drop' ? 'drop it in the ' : '') + (p ? roomName(p.deck, p.room) || 'room' : 'room') + ' on ' + deckWord(st.deck); });
       line(mine.title + '. ' + (mine.parts.length ? 'Bring ' + mine.parts.map(k => 'a ' + k).join(', ') + ' from ' + (shelfName(mine.parts[0]) ? 'the ' + shelfName(mine.parts[0]) + ' shelf in ' : '') + 'main storage on Deck 5. ' : '') + 'Go to: ' + stops.join(', then ') + '.');
     } else if (m) {
       const need = {}; for (const k of mine.parts) need[k] = (need[k] || 0) + 1;
-      line('Needs ' + Object.entries(need).map(([k, n]) => n + ' × ' + k + ' (' + (shelfName(k) ? 'the ' + shelfName(k) + ' shelf, ' + (SHIP.stores[k] || 0) + ' there' : k === mine.make ? 'you make it' : (SHIP.stores[k] || 0) + ' in storage') + ')').join(', ') + '. Parts are in main storage on Deck 5; the job is in the ' + ((DECKS[m.deck].rooms[m.room] || {}).name || 'room').toLowerCase() + ' on Deck ' + m.deck + '.');
+      line('Needs ' + Object.entries(need).map(([k, n]) => n + ' × ' + k + ' (' + (shelfName(k) ? 'the ' + shelfName(k) + ' shelf, ' + (SHIP.stores[k] || 0) + ' there' : k === mine.make ? 'you make it' : (SHIP.stores[k] || 0) + ' in storage') + ')').join(', ') + '. Parts are in main storage on Deck 5; the job is in the ' + ((DECKS[m.deck].rooms[m.room] || {}).name || 'room').toLowerCase() + ' on ' + deckWord(m.deck) + '.');
     } else line(mine.cargo === 'meals' ? 'Take a hover cart from the Cart bay on Deck 5, load ' + (mine.meals || 'the') + ' meals in the cargo hold, and take them up to the cold store on Deck 3. Then bring the cart back.'
       : 'Take a hover cart from the Cart bay on Deck 5. In the cargo hold tap the crates' + (partsCrates() ? ' (' + partsCrates() + ' there)' : '') + ' and the cart pulls them in; in main storage tap any shelf and it unloads itself. Then bring the cart back.');
     button('Drop it', () => dropJob(mine.id));
@@ -17981,16 +18023,16 @@ const JOB_WORD = { service: 'service due', repair: 'repair', overhaul: 'broken: 
 function machineTitle(id) { const m = machineById(id); if (!m) return null; return MACHINE_KINDS[m.kind].name + (machineList().filter(x => x.kind === m.kind && x.deck === m.deck).length > 1 ? ' ' + m.id.split('-').pop() : ''); }
 function jobCard(j) {
   const who = j.claimedBy === 'you' ? 'you' : j.claimedBy ? ((schedPeople().find(p => p.id === j.claimedBy) || {}).name || '').split(' ')[0] : null;
-  if (jobKindOf(j)) return [j.title.split(':')[0], 'Deck ' + j.deck + (j.room && roomName(j.deck, j.room) ? ' · ' + roomName(j.deck, j.room) : ''),
+  if (jobKindOf(j)) return [j.title.split(':')[0], deckWord(j.deck) + (j.room && roomName(j.deck, j.room) ? ' · ' + roomName(j.deck, j.room) : ''),
     j.status === 'waiting' ? j.why : who ? who + ' on it' : heldForYou(j) ? 'asked for you' : jobKindOf(j).text || j.kind, JOB_PRI[j.urgency] || 'routine'];
-  if (j.kind === 'chore') return [j.title.split(':')[0], 'Deck ' + j.deck + (j.room && roomName(j.deck, j.room) ? ' · ' + roomName(j.deck, j.room) : ''),
+  if (j.kind === 'chore') return [j.title.split(':')[0], deckWord(j.deck) + (j.room && roomName(j.deck, j.room) ? ' · ' + roomName(j.deck, j.room) : ''),
     j.status === 'waiting' ? j.why : who ? who + ' on it' : (CHORES[j.chore] || {}).text || 'chore', j.leave ? 'soon' : 'routine'];
   if (j.kind === 'restock') return [j.cargo === 'meals' ? 'Food to the cold store' : weekday(Math.floor(j.found / 1440) + 1) === DELIVERY.day ? 'Unload the Wednesday delivery' : 'Unload the delivery', j.cargo === 'meals' ? 'Hold to Deck 3' : 'Deck 5 · cargo hold', who ? who + ' on it' : j.cargo === 'meals' ? 'hover cart' : 'hover cart, ' + partsCrates() + (partsCrates() === 1 ? ' crate' : ' crates'), JOB_PRI[j.urgency]];
   if (j.case && typeof caseCard === 'function') { const cc = caseCard(j); if (cc) return cc; }   // 24k: a P1 case's card names the line's symptom, not the machine (0.55.16)
   const m = machineById(j.machine), room = (DECKS[m.deck].rooms[m.room] || {}).name;
-  if (traceHidden(j)) return [traceTitle(j), 'Deck ' + j.symptom.deck + ' · the ' + j.symptom.line + ' line', (j.urgency === 2 ? 'failing: urgent' : JOB_WORD[j.kind]) + (who ? ', ' + who + ' on it' : ''), JOB_PRI[j.urgency]];   // a traced fault (0.33.59)
+  if (traceHidden(j)) return [traceTitle(j), deckWord(j.symptom.deck) + ' · the ' + j.symptom.line + ' line', (j.urgency === 2 ? 'failing: urgent' : JOB_WORD[j.kind]) + (who ? ', ' + who + ' on it' : ''), JOB_PRI[j.urgency]];   // a traced fault (0.33.59)
   const state = j.status === 'waiting' ? j.why : (j.urgency === 2 ? 'failing: urgent' : JOB_WORD[j.kind]) + (who ? ', ' + who + ' on it' : heldForYou(j) ? ', asked for you' : '');
-  return [machineTitle(m.id) + (faultShows(j) ? ' (' + faultShows(j) + ')' : ''), 'Deck ' + m.deck + (room ? ' · ' + room.toLowerCase() : ''), state, JOB_PRI[j.urgency]];   // a real fault says what everyone notices (0.33.46)
+  return [machineTitle(m.id) + (faultShows(j) ? ' (' + faultShows(j) + ')' : ''), deckWord(m.deck) + (room ? ' · ' + room.toLowerCase() : ''), state, JOB_PRI[j.urgency]];   // a real fault says what everyone notices (0.33.46)
 }
 function drawJobBoard(t) {
   const { g: c, c: cv } = t.userData, w = cv.width, h = cv.height, now = shipNow() % 1440;
@@ -33043,8 +33085,8 @@ const WEEK_MAILS = [];                                   // what was sent (the c
 const evWeekly = w => !w.after && !w.birthday && !w.ship && !w.date && (w.every === 'week' || (w.weekday != null && !w.every));
 function evPlaceName(ev) {
   const w = ev.where[0], pool = { gym: 'the gym', garden: 'the garden', 'garden-tend': 'the garden', 'common-room': 'the junior common room', music: 'the music room', 'mess-seat': 'the mess', 'lounge-seat': 'the bow lounge', bench: 'the promenade' };
-  const room = w.room ? 'the ' + w.room.source.replace(/^\^|\$$/g, '').replace(/\\/g, '').toLowerCase() : pool[w.pool] || 'Deck ' + w.deck;
-  return room + (w.room && w.deck <= 2 ? ', Deck ' + w.deck : '');
+  const room = w.room ? 'the ' + w.room.source.replace(/^\^|\$$/g, '').replace(/\\/g, '').toLowerCase() : pool[w.pool] || deckWord(w.deck);
+  return room + (w.room && w.deck <= 2 ? ', ' + deckWord(w.deck) : '');
 }
 function weekMail(d) {                                   // d: a Sunday; -> { at, from, subject, body } or null
   const arr = evArrival(); if (weekday(d) !== 6 || d < arr + 7) return null;
@@ -33593,7 +33635,7 @@ SHIP_EVENTS.ionStorm = {
     { id: 'storm-bridge', from: 'vance', phase: 'onset', at: [1, 900], seed: ['dept:command', 'dept:helm'], weight: 2,
       lines: ['The bridge is on double shifts.', 'Vance hasn\'t slept. You can tell.'] },
     { id: 'storm-dark', phase: 'escalation', at: [2, 420], seed: ['dept:watch'], weight: 2,
-      lines: c => [c.dark ? 'Deck ' + c.dark + ' went to emergency lights for a while.' : 'The lights held all morning. Fingers crossed.', 'I keep waiting for the next jolt.'] },
+      lines: c => [c.dark ? deckWord(c.dark) + ' went to emergency lights for a while.' : 'The lights held all morning. Fingers crossed.', 'I keep waiting for the next jolt.'] },
     { id: 'storm-stew', from: 'brennan', phase: 'escalation', at: [2, 660], seed: ['dept:galley'], weight: 1,
       lines: ['Storm stew again. One pot, no complaints.', 'Brennan\'s sending trays up to the bridge.'] },
     { id: 'storm-clear', from: 'marrow', phase: 'resolution', at: [3, 600], seed: ['all'], weight: 3,
@@ -34239,7 +34281,7 @@ function occasionsTick(now, quiet) {
   }
   for (const r of SHIP.occasions) {
     const o = OCCASIONS[r.id]; if (!o) continue;
-    if (r.status === 'asked' && now < r.at + r.len) meeting({ notify: o.chance || typeof deviceApp === 'function' || typeof apptAdd === 'function' ? null : o.title + ': ' + DECKS[r.deck].rooms[r.room].name + ', Deck ' + r.deck + ', at ' + hhmm(r.at % 1440) + '.', id: r.key, event: 'occasion', where: { deck: r.deck, room: new RegExp('^' + DECKS[r.deck].rooms[r.room].name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$') }, at: r.at, len: r.len, who: [r.by], script: o.script });
+    if (r.status === 'asked' && now < r.at + r.len) meeting({ notify: o.chance || typeof deviceApp === 'function' || typeof apptAdd === 'function' ? null : o.title + ': ' + DECKS[r.deck].rooms[r.room].name + ', ' + deckWord(r.deck) + ', at ' + hhmm(r.at % 1440) + '.', id: r.key, event: 'occasion', where: { deck: r.deck, room: new RegExp('^' + DECKS[r.deck].rooms[r.room].name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$') }, at: r.at, len: r.len, who: [r.by], script: o.script });
     if (r.status === 'asked' && now >= r.at + r.len) {
       r.status = r.met ? 'kept' : 'missed'; if (r.met && o.trace && !SHIP.traces.includes(o.trace)) SHIP.traces.push(o.trace);
       const f = r.f || (r.f = {}); if (!r.met && o.chance && !f['gist:' + r.key]) { f['gist:' + r.key] = 1; meetingGist(o.script); }   // missed before its meeting was ever registered
@@ -34339,7 +34381,7 @@ function upcomingTraditions(fromMin, toMin) {
     const at = (d - 1) * 1440 + e.from; if (at < fromMin || at > toMin) continue;
     const w = e.ev.where[0], pool = S.shared.get(w.deck + '|' + (w.room ? 'ev:' + e.id + ':0' : w.pool)) || [], pl = pool[0];
     const room = pl && DECKS[pl.deck].rooms && DECKS[pl.deck].rooms[pl.room], one = !!pl && pool.every(q => q.room === pl.room);
-    out.push({ id: e.id, title: e.name + (e.names ? ' (' + e.names + ')' : ''), at, to: (d - 1) * 1440 + e.to, where: (room ? room.name + ', ' : '') + 'Deck ' + w.deck,
+    out.push({ id: e.id, title: e.name + (e.names ? ' (' + e.names + ')' : ''), at, to: (d - 1) * 1440 + e.to, where: (room ? room.name + ', ' : '') + deckWord(w.deck),
       deck: pl ? pl.deck : w.deck, room: one ? pl.room : null });   // for the device's Go there (deck, room key; null: a pool over several rooms)
   }
   return out.sort((a, b) => a.at - b.at);
@@ -35858,10 +35900,10 @@ function socBorn(h, rooms) {
     const there = []; for (const [k, l] of rooms) if (k.startsWith(m.deck + '|')) there.push(...l.map(i => crew[i]));
     if (!there.length) continue;                         // nobody about to notice: it's news when someone is
     SHIP.social.fault[m.id] = lvl;
-    const name = MACHINE_KINDS[m.kind].name.toLowerCase(), s = SOC_SYMPTOM[m.kind] || 'playing up', where = 'the ' + name + ' on Deck ' + m.deck;
+    const name = MACHINE_KINDS[m.kind].name.toLowerCase(), s = SOC_SYMPTOM[m.kind] || 'playing up', where = 'the ' + name + ' on ' + deckWord(m.deck);
     newsAdd({ id: 'fault:' + m.id + ':' + h, about: m.id, kind: 'fault', weight: lvl === 'faulty' ? .5 : lvl === 'failing' ? .7 : .9, life: 3, born: t,
       seed: socPick(there, 3, socHash(m.id), h, 604).map(q => q.id),
-      lines: ['The ' + name + ' on Deck ' + m.deck + ' has been ' + s + ' all week.', 'Someone should look at ' + where + '. It keeps ' + s + '.', 'Have you heard? ' + where[0].toUpperCase() + where.slice(1) + ' is ' + s + ' again.'] });
+      lines: ['The ' + name + ' on ' + deckWord(m.deck) + ' has been ' + s + ' all week.', 'Someone should look at ' + where + '. It keeps ' + s + '.', 'Have you heard? ' + where[0].toUpperCase() + where.slice(1) + ' is ' + s + ' again.'] });
   }
 }
 // ---- one ship hour on paper: who spent time together, affinity drifting, news passing on ----
@@ -36218,7 +36260,7 @@ if (typeof deviceApp === 'function') deviceApp({ id: 'crew', title: 'Relationshi
       ...(typeof knowBlocks === 'function' ? knowBlocks(c.id) : [{ kind: 'list', rows: c.known.length ? c.known.map(k => ({ text: k })) : [{ text: 'Nothing yet. Ask them about themselves.' }] }]),   // what you know, by section (20c)
       { kind: 'buttons', items: [{ label: 'Where are they?', action: { app: 'roster', who: c.id } }].concat(c.met !== null ? [{ label: 'Meet up', action: { app: 'appointments', with: c.id } }] : [], [{ label: 'Back', action: { app: 'crew', do: 'back' } }]) }] };
     const cs = crewContacts(), mo = movedOn(), gone = mo.length ? [{ kind: 'text', text: 'Moved on', mark: 'head' }, { kind: 'list', rows: mo.map(x => ({ text: x.name, sub: x.to ? 'Now on the ' + x.to.replace(/^the /i, '') : 'Transferred', mark: 'past' })) }] : [];
-    return { title: 'Relationships', blocks: (cs.length ? [{ kind: 'list', rows: cs.map(x => ({ text: x.name, sub: x.tierName + (x.where ? ' · Deck ' + x.where.deck + (x.where.room ? ', ' + x.where.room : '') : ''), mark: x.tier >= 3 ? 'up' : null, action: { app: 'crew', do: 'show', arg: x.id } })) }]
+    return { title: 'Relationships', blocks: (cs.length ? [{ kind: 'list', rows: cs.map(x => ({ text: x.name, sub: x.tierName + (x.where ? ' · ' + deckWord(x.where.deck) + (x.where.room ? ', ' + x.where.room : '') : ''), mark: x.tier >= 3 ? 'up' : null, action: { app: 'crew', do: 'show', arg: x.id } })) }]
       : [{ kind: 'text', text: 'Nobody yet. Tap someone aboard to say hello.' }]).concat(gone) };
   },
   act: (verb, arg) => { CREW_PICK = verb === 'show' ? arg : null; } });
@@ -36389,7 +36431,7 @@ function favourOf(p) {
   if (left.length && U(625) < .6) {
     const pl = left[Math.floor(U(626) * left.length)], room = ((DECKS[pl.deck].rooms || {})[pl.room] || {}).name || 'the ' + pl.type, thing = FAVOUR_THINGS[Math.floor(U(627) * FAVOUR_THINGS.length)];
     return { idea: true, title: 'Fetch ' + shortName(p) + '\'s ' + thing, ask: 'I think I left my ' + thing + ' in the ' + room.toLowerCase() + ' yesterday. Could you bring it to me?',
-             post: { from: p.id, title: 'Fetch ' + shortName(p) + '\'s ' + thing + ' (' + room + ', Deck ' + pl.deck + ')', bring: thing, stops: [{ deck: pl.deck, placeId: pl.id, mins: 2, tag: 'pickup' }] } };
+             post: { from: p.id, title: 'Fetch ' + shortName(p) + '\'s ' + thing + ' (' + room + ', ' + deckWord(pl.deck) + ')', bring: thing, stops: [{ deck: pl.deck, placeId: pl.id, mins: 2, tag: 'pickup' }] } };
   }
   if (p.work && p.work.place && U(628) < .7)
     return { idea: true, title: 'A lamp for ' + shortName(p), ask: 'The lamp over my station keeps flickering. Could you swap it when you get a chance?',
@@ -37178,8 +37220,8 @@ function momentShow(id) {
 const storyPlace = (type, deck) => { const S = schedData(); for (const pl of S.byId.values()) if (pl.type === type && (deck === undefined || pl.deck === deck)) return pl; return null; };
 const STORY_FAVOURS = {
   brennanSage: p => { const pl = storyPlace('garden', 3); return pl && { from: p.id, title: 'Sage from the garden for ' + shortName(p) + ' (Deck 3)', bring: 'a bunch of sage', stops: [{ deck: pl.deck, placeId: pl.id, mins: 3, tag: 'pickup' }] }; },
-  pellPractice: p => { const pl = p.work && storyPlace(p.work.place, p.work.deck); return pl && { from: p.id, title: 'Help ' + shortName(p) + ' practise for his certification (Deck ' + pl.deck + ')', stops: [{ deck: pl.deck, placeId: pl.id, mins: 15, tag: 'favour' }] }; },
-  liftBrakes: p => { const pl = p.work && storyPlace(p.work.place, p.work.deck); return pl && { from: p.id, title: 'Check the lift brakes with ' + shortName(p) + ' (Deck ' + pl.deck + ')', stops: [{ deck: pl.deck, placeId: pl.id, mins: 15, tag: 'favour' }] }; },   // a stop at their station (reviewer 1: not a lamp swap)
+  pellPractice: p => { const pl = p.work && storyPlace(p.work.place, p.work.deck); return pl && { from: p.id, title: 'Help ' + shortName(p) + ' practise for his certification (' + deckWord(pl.deck) + ')', stops: [{ deck: pl.deck, placeId: pl.id, mins: 15, tag: 'favour' }] }; },
+  liftBrakes: p => { const pl = p.work && storyPlace(p.work.place, p.work.deck); return pl && { from: p.id, title: 'Check the lift brakes with ' + shortName(p) + ' (' + deckWord(pl.deck) + ')', stops: [{ deck: pl.deck, placeId: pl.id, mins: 15, tag: 'favour' }] }; },   // a stop at their station (reviewer 1: not a lamp swap)
 };
 function storyFavour(p, id) {
   const mk = STORY_FAVOURS[id]; if (!mk || typeof favourPost !== 'function') return false;
@@ -38601,7 +38643,7 @@ function wardrobeUse() {
   }
   if (h && h.at === 'hands') { toast('Wardrobe', 'Your hamper\'s full of dirty washing. Take it to a free washer in the laundry, past the washrooms in the junior wing.'); clothesGoal('washer'); return; }
   if (h && h.at === 'washer') { toast('Wardrobe', 'Your washing is in ' + washerName(h.washer) + ' in the laundry' + (h.done || shipNow() >= h.until ? ': it\'s done, take it out.' : ', done at ' + hhmm(h.until) + '.')); return; }
-  if (h && h.at === 'floor') { toast('Wardrobe', 'Your laundry hamper is where you set it down' + (h.deck !== deckDef.num ? ', on Deck ' + h.deck : '') + '. Pick it up again when you\'re ready.'); return; }
+  if (h && h.at === 'floor') { toast('Wardrobe', 'Your laundry hamper is where you set it down' + (h.deck !== deckDef.num ? ', on ' + deckWord(h.deck) : '') + '. Pick it up again when you\'re ready.'); return; }
   if (C.clean > 0 && C.changed >= today && C.grime < GRIME_GRUBBY) { toast('Wardrobe', 'You\'re in clean clothes today. ' + clothesLeft(C.clean)[0].toUpperCase() + clothesLeft(C.clean).slice(1) + ' in here.'); return; }
   if (C.clean > 0) {                                     // (grubby: always, even if you changed today)
     C.clean--; C.changed = today; C.grime = 0; uniformWatch(); simAct('clothes');
@@ -40213,7 +40255,7 @@ function trainOffer(row, c, d, t) {                      // the ask, or the ask 
   if (!r) return false;
   c.st = 'meet'; c.occ = r.key; c.told = false;
   const place = DECKS[o.deck] && DECKS[o.deck].rooms[o.room] ? DECKS[o.deck].rooms[o.room].name : 'the Works bay', when = hhmm(at);
-  const where = place.replace(/^Works Chief's office$/, 'the Chief\'s office') + ' on Deck ' + o.deck, ask = worksText('works.ask.' + row.id, '', { time: when, place: where, name: worksName(by) }), cut = ask.indexOf(' | ');
+  const where = place.replace(/^Works Chief's office$/, 'the Chief\'s office') + ' on ' + deckWord(o.deck), ask = worksText('works.ask.' + row.id, '', { time: when, place: where, name: worksName(by) }), cut = ask.indexOf(' | ');
   let subject = 'Training: ' + mechName(row.id), body = 'Meet me in the ' + where.replace(/^the /, '') + ' at ' + when + '. I\'ll show you ' + mechName(row.id).replace(/^./, x => x.toLowerCase()) + '.';
   if (cut > 0) { subject = ask.slice(0, cut); body = ask.slice(cut + 3); if (body.indexOf(when) < 0) body += ' (' + when + ', ' + where + '.)'; }   // the writer's words; the time and place if they don't say
   if (typeof mailSend === 'function') mailSend({ at: t, from: worksName(by), subject, body, quiet: true });
@@ -40911,7 +40953,7 @@ const haulDay = d => weekday(d) === DELIVERY.day + (typeof deliveryLate === 'fun
 const haulDock = () => CART_AT.find(id => placeById(id)) || null;
 const haulLoadAt = () => HOLD_AT.find(id => placeById(id)) || null;
 const haulName = c => c.part ? String(c.id).replace(/^./, x => x.toUpperCase()) : worksText('haul.crate.' + c.id, ({ laundry: 'Linen', medical: 'Medical supplies', infirmary: 'Medical supplies', store: 'Crew store stock', galley: 'Dry goods', bridge: 'Bridge spares' })[c.id] || 'A crate');
-const haulWhere = c => { const p = placeById(c.dest); return p ? (roomName(p.deck, p.room) || 'the room') + ', Deck ' + p.deck : 'its stop'; };
+const haulWhere = c => { const p = placeById(c.dest); return p ? (roomName(p.deck, p.room) || 'the room') + ', ' + deckWord(p.deck) : 'its stop'; };
 // a run's crates from what's left of the manifest: up to CART_CRATES, by deck from the hold upward (4, 3, 2, 1): fewest rides
 function haulCrates(max = CART_CRATES) {
   const out = []; for (const c of SHIP.manifest || []) for (let i = 0; i < (c.n || 0); i++) out.push({ id: c.id, dest: c.dest });
@@ -41487,7 +41529,7 @@ function traceRead(j, id) {
   } else {
     const hint = r.after >= .8 ? worksText('trace.down', 'Full after it: the trouble is further down the line.') : r.before < .8 ? worksText('trace.up', 'Already low before it: the trouble is further up.') : '';
     toast(name, [words, hint].filter(Boolean).join(' '));
-    traceSay(j, 'read', r.after >= .8 ? 'Full here. So it\'s further down, toward Deck ' + s.deck + '. Halve it again.' : 'Low before it too. Back up the line.');
+    traceSay(j, 'read', r.after >= .8 ? 'Full here. So it\'s further down, toward ' + deckWord(s.deck) + '. Halve it again.' : 'Low before it too. Back up the line.');
   }
   if (typeof ixGoalAt !== 'undefined') ixGoalAt = -1;
   if (typeof deviceShow === 'function') deviceShow('pipekit');
@@ -42589,10 +42631,10 @@ function caseAct(verb, arg) {
   else if (v === 'yes') { CASE_UI.ask = null; if (caseCall(c.id, s)) { const p = caseSus(c, s).part; if (p && typeof toast === 'function') toast('Called it', 'A ' + p + ' from main storage, Deck 5. Follow the marker.'); } }
   else if (v === 'next') {
     const k = c.clues.find(x => !c.got.includes(x.id)), p = k && k.at && k.at !== 'board' && placeById(k.at);
-    if (p && typeof setGoal === 'function') { SHIP.player.track = null; setGoal({ deck: p.deck, place: p.id, label: (roomName(p.deck, p.room) || 'The clue') + (p.deck !== deckDef.num ? ', Deck ' + p.deck : '') }); }
+    if (p && typeof setGoal === 'function') { SHIP.player.track = null; setGoal({ deck: p.deck, place: p.id, label: (roomName(p.deck, p.room) || 'The clue') + (p.deck !== deckDef.num ? ', ' + deckWord(p.deck) : '') }); }
     else if (k && k.src && k.src.ask && typeof setGoal === 'function') {   // a person: where they are now
       const p = schedPeople().find(x => x.id === k.src.ask), w = p && whereIs(p, shipNow());
-      if (w && w.placeId && placeById(w.placeId)) { SHIP.player.track = null; setGoal({ deck: w.deck, place: w.placeId, label: shortName(p) + (w.deck !== deckDef.num ? ', Deck ' + w.deck : '') }); }
+      if (w && w.placeId && placeById(w.placeId)) { SHIP.player.track = null; setGoal({ deck: w.deck, place: w.placeId, label: shortName(p) + (w.deck !== deckDef.num ? ', ' + deckWord(w.deck) : '') }); }
       else if (typeof toast === 'function') toast('Fault notes', caseHint(c.id));
     }
     else if (k && k.at === 'board' && typeof setGoal === 'function') { SHIP.player.track = null; setGoal({ deck: 5, room: 'w', label: 'The job board, in the Works bay' }); }
@@ -42818,7 +42860,7 @@ function p1Title(c) {
 }
 function p1Card(c, j) {                                  // the board card: the line's symptom and where it's felt, never the machine
   const P = p1Where(c), who = j.claimedBy === 'you' ? 'you' : j.claimedBy ? ((schedPeople().find(p => p.id === j.claimedBy) || {}).name || '').split(' ')[0] : null;
-  return [c.title.replace(/^Head-scratcher: /, ''), 'Deck ' + P.deck + ' · the ' + P.line + ' line', 'head-scratcher' + (who ? ', ' + who + ' on it' : ', asked for you'), JOB_PRI[j.urgency] || 'routine'];
+  return [c.title.replace(/^Head-scratcher: /, ''), deckWord(P.deck) + ' · the ' + P.line + ' line', 'head-scratcher' + (who ? ', ' + who + ' on it' : ', asked for you'), JOB_PRI[j.urgency] || 'routine'];
 }
 function p1Start(c, j) { const { f } = p1Cause(c), ids = f && caseLine(j.machine, f.line) || []; return ids.find(id => id !== j.machine && panelPlace(id)) || null; }   // the top of the line
 function p1Wrong(c, s) { const x = p1Sus(c, s), P = p1Where(c); return caseText('case.wrong.p1', 'New {part} in. {where} still {shows}.', { part: x && x.part || 'part', where: P.where, shows: P.shows }); }
