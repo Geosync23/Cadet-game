@@ -297,3 +297,5 @@ The user went to bed ~03:40: **overnight mode ON** until they check in in the mo
 | ~10:24 | Auditorium piano (RB2 0.84.9) | Turned side-on, pianist seen in profile: no room for a bench facing the seats on the stage's curve | Fits the stage as built; easy to revisit |
 | ~10:24 | When rec deck gets switched on | RB2 makes the switch its own last commit, without waiting; the build master adds it last, after rec engineer A's traditions and the writer's words | Keeps the order in the brief and saves a wait |
 | ~10:26 | Engine room crew clock-out wait (X3 0.71.7) | 20 minutes (was 6): fixes the leave check; crew are out by about 17:35, evenings nearly as before | Smallest change that fixes it |
+| ~10:40 | Pool symptom words (RB2) | Reuse the existing pool trace symptom text; the fault-tracing code stays untouched | No copy of shared code |
+| ~10:40 | Rec deck switch committed (RB2 32f7710, 0.84.11) before rec engineer A's crew work is in | Fine: it is its own commit and the build master adds it last, after the crew use, traditions and words | The released build gets everything together |
