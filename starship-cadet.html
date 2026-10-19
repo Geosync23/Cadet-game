@@ -33042,7 +33042,7 @@ const REC_TRADS = [
     who: (p, d) => p.id === 'holt' ? 1 : recIs(p, d, 'kayaker') ? .9 : .3, anim: () => 'cheer',
     from: 'Chief Bram Holt', mail: 'The river regatta tomorrow, 09:30 in the river hall. Heats of four round the loop; I start each one with the horn. Watch from the bank, or paddle the fun heat.',
     ask: 'Regatta this morning. Holt\'s got the horn.', here: 'Go on! Paddle!', thanks: 'You cheer from the bank as the heats race round the loop. Holt\'s horn makes everyone jump.' },
-  { id: 'rec-talent-night', name: 'Talent night', k: 497, when: { every: '4weeks', weekday: 6, week: 2 }, skip: d => Math.abs(shipYearDay(d) - 152) < 7,   // never within a week of the yearly one (lead 18) at: [1170, 1290], min: 40, hold: [], prio: 1,
+  { id: 'rec-talent-night', name: 'Talent night', k: 497, when: { every: '4weeks', weekday: 6, week: 2 }, skip: d => Math.abs(shipYearDay(d) - 152) < 7, at: [1170, 1290], min: 40, hold: [], prio: 1,   // skip: never within a week of the yearly one (lead 18)
     where: [{ deck: 7, pool: 'rec-aud' }, { deck: 7, pool: 'rec:act' }, { deck: 7, pool: 'rec:booth' }, { deck: 7, pool: 'rec:lectern' }], host: 'ferreira',
     whereFor: (p, d, o) => o.filter(([, k]) => p.id === 'volkov-maeve' ? k === 'rec:booth' : p.id === 'ferreira' ? k === 'rec:lectern' : recIs(p, d, 'musician') ? k === 'rec:act' || k === 'rec-aud' : k === 'rec-aud'),
     who: (p, d) => p.id === 'ferreira' || p.id === 'volkov-maeve' ? 1 : recIs(p, d, 'musician') ? .85 : recIs(p, d, 'film-buff') ? .7 : .4, anim: p => p.id === 'volkov-maeve' ? null : 'clap',
