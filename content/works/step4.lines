@@ -355,7 +355,7 @@
 == star.title
 - Star log
 == star.pick
-- Your chart shows two stars here: {a} and {b}. Through the eyepiece there are three. Which one is new?
+- Your chart has {a} and {b} here. The eyepiece shows three. Which one is new?
 == star.right
 - Logged: {star}. Survey will see it in the morning.
 == star.wrong
