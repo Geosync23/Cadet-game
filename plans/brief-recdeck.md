@@ -63,11 +63,11 @@
 ## Seats
 | Seat | Session | Branch | Series | Reads first |
 |---|---|---|---|---|
-| RA rec engineer A | (to start) | claude/rec-crew | 0.83.x | handover-recdeck-architect.md, handover-lightdisc.md |
-| RB rec engineer B | (to start) | claude/rec-works | 0.84.x | the same, plus handover-systems.md and S2's tracing notes |
-| W3 writer | (to start) | claude/writer-rec | content/ | handover-writer-w2.md (claude/writer-p5) |
-| B build master | BM7 session_01QbuzvT3TwzMwSWRmakzX8Z (or successor) | claude/p5-cand-s4 | 0.64.0 | its own notes |
-| R reviewer | R5 session_01XJyHzg4QvX2nsdtf9zT1TH (or successor) | its review branch | — | this brief |
+| RA rec engineer A | session_012mZrFQrGpbNeNWuRg4Bxyp (~08:27) | claude/rec-crew | 0.83.x | handover-recdeck-architect.md, handover-lightdisc.md |
+| RB rec engineer B | session_01PN7anFnvCzsMALwmWWEbhi (~08:27) | claude/rec-works | 0.84.x | the same, plus handover-systems.md and S2's tracing notes |
+| W3 writer | session_01LbftuR6cNubo3CvAScTuv5 (~08:27) | claude/writer-rec | content/ | handover-writer-w2.md (claude/writer-p5) |
+| B build master | BM8 session_01YGy9FDmcbkySMJpVPYJaAo (BM7 retired) | claude/p5-cand-s4 | 0.64.0 | its own notes |
+| R reviewer | R6 session_01CPyuA1o5jgxwQtv7huZTNg | its review branch | — | this brief |
 | D3 designer (on call) | session_0115ZiGhf9s3oYtFdjs7TgYS | claude/p5-design | — | (wrote the traditions and mini-games pages) |
 
 ## Lead 17's calls on the open questions (~06:55, overnight; all flagged for the user's morning review)
