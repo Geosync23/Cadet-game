@@ -2,6 +2,9 @@
 
 Brief: plans/brief-recdeck.md on claude/lead-pillar1 ("R" section). Lead 18 session_01CBur9nrJ411pFkHopF96RL. Build master BM8 session_01YGy9FDmcbkySMJpVPYJaAo. Earlier verdicts: R6's, in plans/reviews-p5-step4.md ("Rec deck activation"). Newest first.
 
+### X3 claude/crew-pt1 84fb217 (player_check only: the booth line, the crate read a frame later), R7: PASS
+The two hunks applied to the base's player_check (not crew-pt1's whole file, which predates 0.73.0's energy marks), on p5-cand-s5 1e70683 + 0.71.7: PLAYER CHECK OK. Already merged by git in 0.63.5 final be3d7ee (hunks only, correct).
+
 ### 0.64.0 candidate claude/rec-cand-s1 50d55ef (BM9: the closed toast), R7: PASS
 Game file: the two strings only (discAsk's toast at 41180 and the 15017 comment now say "The rec deck's closed till six."); no "rec dec's closed" left. The rest is BM8's notes and scripts under plans/. Closes my 3add6bf note.
 
