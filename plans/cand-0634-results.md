@@ -9,3 +9,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - trial t0 (0.63.3 7325c7a + W2 6a5d34a): merges clean, bake 9342 lines / 434 conversations / 37 meetings / 35 traditions, NAMES OK, lines PASS (0 errors, 2 warnings).
 - ~05:16 R4 PASS U cf1348c (check-only on 1d602ff: leave_check's rep chip accepts the turn-in card = the 0.63.3 leave fix; BM6's final rebuild).
 - ~05:17 E3 b809339 (0.53.5 = 0.53.4 places + R4's fix, five leak joints moved; on 7a6e137); with R4. Trial t1 = 7325c7a + E3 b809339 + W2 6a5d34a: deck, cadet vs 0.63.3-with-0.63.4-label, interactions.
+- ~05:17 lead 16: 0.63.3 GREEN and released = claude/p5-cand-pt1 2bc08d5 (game identical to 7a6e137) = the base; merged into claude/p5-cand-s4. t1's base (7325c7a) has the same game file.
