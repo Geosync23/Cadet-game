@@ -403,7 +403,7 @@ P1FIRST = r"""(() => {
   for (let t = 9 * 1440; t <= 10 * 1440 + 900; t += 60) { setShipNow(t); machinesNow(); caseTick(); }
   out.before = !!C.p1;
   W.rank = 'officer'; W.tier = 2;
-  if (ladderRow('m9')) W.tr = { m9: 11 };               // a build with M3's tracing row: the lesson's done (P1's first waits for it; P1M9 checks the wait)
+  if (caseTracing()) W.tr = { m9: 11 };                 // a build with M3's tracing: the lesson's done (P1's first waits for it; P1M9 checks the wait)
   setShipNow(10 * 1440 + 961); machinesNow(); caseTick();
   const c = caseById(C.p1), j = c && caseJob(c); out.staged = !!c; out.p1 = C.p1; if (!c) return out;
   out.machine = j.machine; out.cause = c.cause; out.sus = c.sus.slice().sort(); out.train = c.train; out.reserved = j.reserved; out.hidden = caseHidden(j); out.wait = c.wait;
@@ -522,8 +522,8 @@ P2GATE = r"""(() => {
 # P1's first with an m9 row (M3's tracing lesson reads this line on Day 12): nothing at 16:00 on Day 11; staged once
 # m9 is trained, the pump's fault from then
 P1M9 = r"""(() => {
-  const out = {}, C = caseState(), W = SHIP.works, keep = { op: W.op, rank: W.rank, tier: W.tier, tr: W.tr, test: W.test }, had = !!ladderRow('m9');
-  if (!had) CAREER_LADDER.push({ id: 'm9', name: 'Tracing', size: 'big', day: 12, tier: 2, rank: 'officer', needs: null, by: ['calder'], stages: [{ uses: 0 }] });
+  const out = {}, C = caseState(), W = SHIP.works, keep = { op: W.op, rank: W.rank, tier: W.tier, tr: W.tr, test: W.test }, had = !!WORK_MECH.m9;
+  if (!had) WORK_MECH.m9 = { open() {} };              // as if M3's tracing (24i) were in
   C.open = []; delete C.p1; W.op = {}; W.tr = {}; W.rank = 'officer'; W.tier = 2; W.test = { tier: 2, day: 9, tries: 1, passed: true };
   MACH_HOUR = null; MACH_SEEN = -1; setShipNow(9 * 1440); machinesNow();
   for (let t = 9 * 1440; t <= 10 * 1440 + 1000; t += 60) { setShipNow(t); machinesNow(); caseTick(); }
@@ -533,7 +533,7 @@ P1M9 = r"""(() => {
   const now = 11 * 1440 + 650; W.tr = { m9: 12 }; setShipNow(now); machinesNow(); caseTick();
   const c = C.p1 && caseById(C.p1), j = c && caseJob(c); out.staged = !!c; out.now = now; out.p1 = C.p1;
   if (j) { out.due = j.posted; out.logDay = c.clues[0] && c.clues[0].src.d; SHIP.jobs = SHIP.jobs.filter(x => x !== j); }
-  if (!had) CAREER_LADDER.splice(CAREER_LADDER.findIndex(r => r.id === 'm9'), 1);
+  if (!had) delete WORK_MECH.m9;
   Object.assign(W, keep); C.open = []; delete C.p1;
   return out;
 })()"""

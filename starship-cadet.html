@@ -40030,6 +40030,7 @@ CHIEF_NOTES.p1 = { title: 'When does it happen?', key: 'chief.p1', lines: [
 if (typeof WORK_MECH !== 'undefined') WORK_MECH.p1 = { open() { /* the first case is staged (p1Stage); it shows at the next tick */ } };
 if (typeof CAREER_LADDER !== 'undefined' && typeof ladderRow === 'function' && !ladderRow('p1'))   // 24 core's row, if it hasn't one (C2 may own it)
   CAREER_LADDER.push({ id: 'p1', name: 'When does it happen?', size: 'small', day: 12, tier: 2, rank: 'officer', needs: { trained: 'm9' }, by: ['calder', 'halloran-emeka'], stages: [{ uses: 0 }] });
+const caseTracing = () => typeof WORK_MECH !== 'undefined' && !!WORK_MECH.m9;   // M3's tracing (24i) is in the build, not just its ladder row (C2's)
 // the first case, staged at 16:00 on Day 11 (or the first 16:00 after, once your Tier 2 test is passed): 3-pump-1
 // reserved (slot 21, held a week), its fault the pump; the logs from the day before. Busy, or no fault table yet: none,
 // and the first roll case that fits is your first
@@ -40037,9 +40038,9 @@ function p1Stage(C) {
   if (C.p1 || !SHIP.works) return;
   const W = SHIP.works;
   if (W.tr && W.tr.p1 !== undefined || caseOpened('p1')) { C.p1 = 'none'; return; }   // an older save past it
-  const now = shipNow(), m9 = typeof ladderRow === 'function' && ladderRow('m9') && W.tr && W.tr.m9 !== undefined, t16 = m9 ? now : Math.floor((now - 960) / 1440) * 1440 + 960, d = caseDay(t16);   // after the lesson: from now
+  const now = shipNow(), m9 = caseTracing() && W.tr && W.tr.m9 !== undefined, t16 = m9 ? now : Math.floor((now - 960) / 1440) * 1440 + 960, d = caseDay(t16);   // after the lesson: from now
   if (now < 960 || d < 11 || !(W.rank !== 'junior' || W.test && W.test.passed)) return;
-  if (typeof ladderRow === 'function' && ladderRow('m9') && !(W.tr && W.tr.m9 !== undefined)) return;   // not before the tracing lesson's done: it reads this line on Day 12 (M3's ask)
+  if (caseTracing() && !(W.tr && W.tr.m9 !== undefined)) return;   // not before the tracing lesson's done: it reads this line on Day 12 (M3's ask)
   const m = machineById(P1_FIRST.machine), f = m && caseCauses(m).find(x => x.id === P1_FIRST.cause);
   if (!f || !f.line || !f.part || SHIP.jobs.some(j => j.machine === m.id && j.status !== 'done' && (j.claimedBy || j.case || j.reserved))) { C.p1 = 'none'; return; }
   const id = jobReserve(m.id, d, t16 % 1440, 21, { train: 'p1', tier: 2, until: t16 + 7 * 1440, cause: f.id }), j = id && SHIP.jobs.find(x => x.id === id);
