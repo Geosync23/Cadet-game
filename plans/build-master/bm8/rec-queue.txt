@@ -1,0 +1,39 @@
+RB 2e46584 0.84.0 machine places (on aa4f42c; own checks OK) ~09:11 — R6 PASS WITH FIXES (naming: "the rec deck" mid-sentence); take RB next hash
+W3 8bb9823 round 1 (0.48.117; content + game texts; re-bake on merge; lines PASS, interactions OK) ~09:16 — R6 PASS ~09:22
+W3 4e4d13c 0.48.118 (rec deck written name, lead 18's call; text only; on 8bb9823?) ~09:24 — R6 verdict? PASS (in 7b63846)
+W3 7b63846 0.48.119 (two Deck R scenery texts) ~09:25 — R6? PASS ~09:34 (W3 tip)
+RB 58fea440 0.84.2 — R6 PASS ~09:37 (RB tip for rec merge)
+RA 22ff1bb6 0.83.0 R7 round 1 (4e REC_CREW_PLACES, playerOnly:!REC_DECK; 14 habits recVisit/recSwap occ.rec; day_check 1b; inert REC_DECK false) ~09:35 — R6?
+RB e4c5da25 0.84.3 — R6 PASS ~09:39 (RB tip). Reviewer after R6: R7 session_01HCwvy5w432bhz41UYxHYwq
+W3 019dcd1 0.48.120 (rec machines' fault words, content only) ~09:39 — R? PASS ~09:40 (W3 tip)
+hardening M8/M13/M14/M15/FC/FF (W0 restore before machinesNew): m8 'crew-only team job runs' FAILs -> parts' expectations tuned to the leaked state; not cheap; dropped, note in DEV_NOTES
+W3 18cf522 0.48.121 rec Works texts — R7 PASS ~09:50 (W3 tip)
+RA 22ff1bb6 0.83.0 — R6 PASS WITH FIXES (crew booking player's Lightdisc baseline; 2 day_check fixes); wait RA next hash (R7)
+Reviewer for rec: R7 session_01HCwvy5w432bhz41UYxHYwq (claude/reviews-r7)
+W3 ef14088 0.48.123: 13 rec .trad files (gated rec.on), baked; events_check FAILs rec-all-hands (no due day in window) — with RA + lead; R7?
+RB b899519 0.84.4-0.84.7 — R7 PASS WITH FIXES (for RB2: climb refusals on taped route/tagged belay; wire W3's rec.shut.* + symptom words); mergeable as is. On combine: check crew rec moves + draw calls once RA's places carry `move` (RB probe: +3 calls for 6 movers)
+W3 4163cfe — R7 PASS (W3 tip)
+RB2 session_018cunWUG3yeKN8NzCPdRbTy now owns claude/rec-works. 0ab43cd 0.84.8 recShow (house lights, film screen, stage pools) + W3 rec text keys; cadet vs 0.84.7 ALL IDENTICAL, deck OK switch on — R7?
+W3 3b96ca3 0.48.124 (one Works key renamed trace.symptom.pool) — R7?
+W3 ef14088 — R7 PASS but merge ONLY with RA's events_check fix (dormant events_check fails rec-all-hands, first day 92). cadet vs aa4f42c only items ('Seven decks' texts)
+W3 4f2dcdc 0.48.125 talk/talent panel lines for RA — R7?
+RB2 11fb633 0.84.9 stage crew moves (perform/address), juggling, mic stand, piano bench; cadet vs 0.84.8 ALL IDENTICAL, deck OK — R7?
+RB2 11fb633 0.84.8-0.84.9 — R7 PASS (dormant ALL IDENTICAL to aa4f42c; climb-refusal fix from 0.84.7 still open) = RB tip. W3 2cc8056 — R7 PASS (W3 tip)
+RB2 f319ab3 0.84.10 (checks loop over DECK_ORDER); 32f7710 0.84.11 = THE SWITCH REC_DECK=true -> merge LAST (after RA+W3) or take f319ab3 till lead says go. R7?
+LEAD 19 ORDER for 0.64.0: RB2 f319ab3 in RB's order; 32f7710 (switch) LAST after RA 0.83.2 (with events_check day-92 fix) + W3 2cc8056; RB2's taped-route climb fix whenever it lands, before the switch
+W3 a095799 0.48.127 rec.shut.route text + handover note — R7?
+LEAD 19: W3 tip for combine = a095799 (not 2cc8056); R7 to confirm
+R7 PASS: RB2 f319ab3 + 32f7710 (switch LAST); climb fix expected 0.84.12. W3 a095799 PASS (W3 tip)
+RB2 2387479 0.84.12 (climb refusals, RA's talk ring + stool, pool symptom words) ON TOP of switch 32f7710. LEAD 19: merge f319ab3 in RB's place; 2387479 LAST (carries switch + fix) after RA 0.83.2 + W3 a095799; needs R7 PASS
+RB2 2387479 — R7 PASS ~11:11; all rec-works reviewed, no open fixes (RB2 final tip; carries switch → LAST)
+LEAD 19 ~11:45: user is up. Scope: finish 0.63.5, then 0.64.0 rec combine, then STOP (no ion storm, nothing after).
+RA FINAL bd3db3f7 0.83.2 (traditions engine; events_check flag days 92/99; W3 .trad merge by id onto REC_TRADS). RA out of memory; fixes → RB2 or lead.
+LEAD 19 FINAL ORDER 0.64.0 (on 0.63.5 final): f319ab3 → bd3db3f7 → W3 a095799 → RB2's interactions_check fix (Tracked tap-outside, check-only, pending) → 2387479 (switch) LAST.
+Known non-blocker: events_check day 32 '3-galley-5' double also on 0.63.4 (outside default 28 days).
+DRY RUN 0.64.0 on ee9f9ed (wt3 branch dry64, /tmp/cw/r64dry.html): f319ab3 clean(build line); bd3db3f7 3 conflicts (rec64.py: 2 keep-both, recTap Lightdisc = RB2 net-down line then RA's 2 lines); a095799 clean; 2387479 1 conflict (climb wall: RA's free-belay r pick then RB2's 2 refusals on r); MERGE FIX: duplicate REC_SHOW/recShowTick (RA's minute caller vs RB2's frame state) -> RA's renamed REC_SHOW_SENT/recShowSend (recshow_fix.py). parses, NAMES OK 3353, bake 10017 lines/54 meetings/48 traditions; verify 5 missing = f319ab3 lines RB2 rewrote later.
+LEAD 19 ~12:10: HOLD bd3db3f7; RB2 renames RA's REC_SHOW/recShowTick on claude/rec-crew -> use that new hash instead (then my recshow_fix.py not needed)
+LEAD 19 ~12:11 (supersedes): KEEP my merge fix REC_SHOW_SENT/recShowSend, use bd3db3f7 as is (unless RB2 already pushed a rename on rec-crew). Add RB2 interactions_check fix 2f0eea6 (check-only) before the switch once RB2 confirms.
+rec-crew still bd3db3f (no rename pushed) -> keep my fix. 2f0eea6 sits ON TOP of 2387479 on rec-works -> merge 2f0eea6 as the LAST step (it carries switch + climb fix + check fix).
+RB2 9dfe971 on rec-crew (= bd3db3f + REC_SHOW_CUE/recShowCue rename) — per lead's rule: USE 9dfe971 instead of bd3db3f7, DROP recshow_fix.py. Needs R7 PASS. RB2's conflict hints = my rec64.py resolution (court: refusal then RA's 2; climb: RA pick + sh=recShut() + 2 refusals; keep both blocks).
+R7 PASS 9dfe971 + 2f0eea6 ~12:16. RA 0.83.2 content verdict still pending (after R7's checks). R7: RA folded parts of RB2's stage spots -> keep RB2's kit + RA's places; after combine: node --check + dup scan (also check duplicate place ids on DECKS[7]).
+R7 PASS rec-works 87e3c5f (interactions_check only, after 2f0eea6) = rec-works' LAST commit to take (carries switch)
