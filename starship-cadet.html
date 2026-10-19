@@ -7324,7 +7324,7 @@ DECKS[4].homeKeepsakes = { '4-23': { room: 'W', bed: '4-23', place: '4-23-keepsa
 // plumbing in public rooms and corridors (stage 1), except Deck 5's last two, `gallery: true`, behind the Tier 2 hatches in the
 // pipe galleries by the two valves (stage 2). Each: `joint` the dripping joint on the wall in front of you ([x, y, z], tiles for
 // x and z, metres for y), `wall` its wall, `damp: [x, z, wall]` where the damp patch goes on that wall, `puddle: [x, z]` a floor
-// spot 2-3 tiles off in the same room where the drip runs to.
+// spot 2-3 tiles off in the same room where the drip runs to, with its own place `n-leakp-k` (`puddlePlace`, `event: 'leakp'`).
 // M14 irrigation: `3-rack-1..3` in front of the garden's three north grow racks, west first (DECKS[3].growRacks; `rack` is the
 // rack's front centre). Off shift: cabin 4-23's four spots `4-23-rug`, `-desk`, `-shelf` (beside the keepsakes), `-ledge` (a
 // small wall ledge towards the door, for a plant: there's no window) in DECKS[4].cabinSpots['4-23'] ({ place, at: [x, y, z]
@@ -7334,8 +7334,9 @@ DECKS[4].homeKeepsakes = { '4-23': { room: 'W', bed: '4-23', place: '4-23-keepsa
   const wallAt = (c, r, face, y = .45) => ({ n: [c + .5, y, r + .08], s: [c + .5, y, r + .92], w: [c + .08, y, r + .5], e: [c + .92, y, r + .5] })[face];
   const leaks = (n, list) => list.forEach(([room, c, r, face, [pc, pr], gallery], k) => {
     const id = `${n}-leak-${k + 1}`, j = wallAt(c, r, face);
-    DECKS[n].places.push(ev(id, room, c, r, face, { event: 'leak', anim: 'work', ...(gallery ? { works: true, gallery: true } : {}) }));
-    (DECKS[n].leakJoints = DECKS[n].leakJoints || []).push({ place: id, room, wall: face, joint: j, damp: [j[0], j[2], face], puddle: [pc + .5, pr + .5], ...(gallery ? { gallery: true } : {}) });
+    DECKS[n].places.push(ev(id, room, c, r, face, { event: 'leak', anim: 'work', ...(gallery ? { works: true, gallery: true } : {}) }),
+      ev(`${n}-leakp-${k + 1}`, room, pc, pr, face, { event: 'leakp', ...(gallery ? { works: true } : {}) }));   // at the puddle, looking towards the joint's wall
+    (DECKS[n].leakJoints = DECKS[n].leakJoints || []).push({ place: id, puddlePlace: `${n}-leakp-${k + 1}`, room, wall: face, joint: j, damp: [j[0], j[2], face], puddle: [pc + .5, pr + .5], ...(gallery ? { gallery: true } : {}) });
   });
   DECKS[5].places.push(
     ev('5-shop-board', 'f', 22, 9, 'n', { xy: [22.0, 9.5] }),
