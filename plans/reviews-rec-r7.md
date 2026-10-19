@@ -2,6 +2,12 @@
 
 Brief: plans/brief-recdeck.md on claude/lead-pillar1 ("R" section). Lead 18 session_01CBur9nrJ411pFkHopF96RL. Build master BM8 session_01YGy9FDmcbkySMJpVPYJaAo. Earlier verdicts: R6's, in plans/reviews-p5-step4.md ("Rec deck activation"). Newest first.
 
+### RB2 claude/rec-works f319ab3 + 32f7710 (0.84.10 checks loop over DECK_ORDER; 0.84.11 the switch, REC_DECK = true), R7: PASS (merge the switch last, as the brief says)
+- 0.84.10: device_check and machine_check walk `DECK_ORDER` (falls back to the DECKS keys for older builds); device_check's room-name fit now writes the HUD line with deckWord. Check code only.
+- 0.84.11: the one line, `REC_DECK = true` (DECK_ORDER puts R between 4 and 5). Grep of the switched-on build: no "Deck 7" literal outside comments; every `'Deck ' + n` goes through deckWord/deckIn except Maps' goal, which has its own "the rec deck". The `{deck}` fills (rounds, team Mail, 24o leaks, the p2 case title) can't see 7 today: rounds and the logbook skip the rec deck (lead 17's call 5), leaks and team jobs are fixed machines on Decks 1-6, and p2 needs 3+ causes (rec kinds have 2 at most). **Keep that true:** a future rec fault with 3 causes would read "Deck 7" in a p2 card.
+- Checks (32f7710 as is): device_check OK (Maps R), machine_check OK, deck_check OK (Deck 7 178 calls, 74 items, memory flat), cadet_test vs 11fb633 ALL IDENTICAL (noise only). RB2's: disc_check, interactions_check, the save on R reloading there.
+- My fix 1 (climb refusals) is still open; W3's rec.shut.route is ready for it.
+
 ### W3 claude/writer-rec ef1fc0b + a095799 (0.48.127, rec.shut.route; W3's handover note), R7: PASS
 One Works text for the taped route (my fix 1 to RB2) + notes; bake unchanged, lines_check PASS.
 
