@@ -1,4 +1,4 @@
-# Rec deck activation brief, lead 17 (session_016bN7x175WBwBL7S9xc2Lpb), 2026-10-19 (DRAFT, not sent)
+# Rec deck activation brief, lead 17 (session_016bN7x175WBwBL7S9xc2Lpb), 2026-10-19 
 
 **Overnight mode is ON** (the user is asleep until they check in and ask for the report). This is goal (3) of tonight's list: the full rec deck work, the agreed traditions, and the rec deck **switched on and open from Day 1**, on its OWN new link, **"Starship Cadet Rec Deck"** (never main, never the main game link, not the Pillar 5 preview, not the old Rec Dec Preview). It starts after Step 4 (0.63.4) ships. Where a plan says "lead's call", build it that way and log it.
 

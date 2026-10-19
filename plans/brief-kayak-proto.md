@@ -1,4 +1,4 @@
-# Kayak prototype brief ("White water"), lead 17 (session_016bN7x175WBwBL7S9xc2Lpb), 2026-10-19 (DRAFT, not sent)
+# Kayak prototype brief ("White water"), lead 17 (session_016bN7x175WBwBL7S9xc2Lpb), 2026-10-19
 
 **Overnight mode is ON** (the user is asleep until they check in and ask for the report). This is goal (4)'s first piece: the kayak mini-game **White water** as a **standalone prototype page**, the way Lightdisc was done (`lightdisc-proto.html`). It is NOT built into the game: the user tries it on its own link and approves it first; integration is a later, separate job. One seat.
 
@@ -42,3 +42,4 @@ The page plays a full lap on a phone with one thumb; currents, waves, eddies and
 | Seat | Session | Branch | Reads first |
 |---|---|---|---|
 | K kayak prototype engineer | (to start) | claude/kayak-proto | handover-lightdisc.md, lightdisc-proto.html |
+- **Lead call (~06:55):** up to 2 crew kayaks beside you (the channels are ~1.6 m; keep the game's RIV numbers). Note: tools/lightdisc_proto_check.js hard-codes /home/user/Cadet-game/; use your clone path.
