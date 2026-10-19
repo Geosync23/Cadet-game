@@ -305,7 +305,7 @@ body.dlgon .devhu{display:none}
 // 1. SETUP
 // =====================================================================
 let W = 0, D = 0, OX = 0, OZ = 0;         // the current deck's size in tiles, and where its tile (0,0) sits in the world (set by buildDeck)
-const H = 2.8, T = 0.2;                   // wall height and thickness
+let H = 2.8, WALL_K = 1; const T = 0.2;   // wall height and thickness; H is 2.8 × the deck's `tall` (the rec deck's double-height walls, 0.80.0), set by buildDeck
 const col = h => new THREE.Color(h).convertSRGBToLinear();
 const small = Math.min(innerWidth, innerHeight) < 700;
 
@@ -567,6 +567,14 @@ function glow(c, size, x, y, z, p = scene, op = .8) {
 // =====================================================================
 const SHIP = { decks: {} };
 const shipDeck = n => SHIP.decks[n] || (SHIP.decks[n] = { open: new Set() });
+// the rec deck (0.80.0, plans/recdeck-plan.html section 11): internal key 7, shown as R, between Decks 4 and 5. Lists that show
+// or loop over decks for the player go in DECK_ORDER; a deck's name on screen comes from deckWord (never "Deck 7")
+// REC_DECK (0.82.7, the user's order via lead 14): the one switch for the rec deck. false keeps it dormant: no R on the lift
+// or in Maps, goToDeck(7) does nothing, a save left on it wakes on Deck 4; DECKS[7] is playerOnly, so nothing else changes
+const REC_DECK = false;                                  // 0.63.2r: merged dormant (the user's, via lead 15); the rec work comes after Step 4
+const DECK_ORDER = REC_DECK ? [1, 2, 3, 4, 7, 5, 6] : [1, 2, 3, 4, 5, 6];
+const deckLabel = n => +n === 7 ? 'R' : String(n);
+const deckWord = n => +n === 7 ? 'Rec deck' : 'Deck ' + n;
 
 // =====================================================================
 // 4a. THE CURRENT DECK
@@ -889,7 +897,7 @@ function makeDust(len) {
 // walls, door frames and posts (instanced: a few draw calls for the whole deck)
 const capMat = std('#262e35', .8, .1);
 const wallMat = new THREE.MeshStandardMaterial({ map: wallTex, roughness: .85, metalness: .05 });
-const SEG = 1 - T, HDR = H - 2.2;
+const SEG = 1 - T, HDR = H - 2.2, RAIL_H = .45;
 const wallGeo = new THREE.BoxGeometry(SEG, H, T); wallGeo.translate(0, H / 2, 0);
 const postGeo = new THREE.BoxGeometry(T, H, T); postGeo.translate(0, H / 2, 0);
 const hdrGeo = new THREE.BoxGeometry(SEG, HDR, T);
@@ -901,14 +909,16 @@ function setInst(im, k, x, y, z, rot, sy, sx = 1) {
   _qy.setFromAxisAngle(_up, rot); _mx.compose(_pos.set(x, y, z), _qy, _scl.set(gone ? 0 : sx, gone ? 0 : sy, gone ? 0 : 1)); im.setMatrixAt(k, _mx);
 }
 function writeWalls() {
-  for (const e of wallEdges) setInst(wallIM, e.inst, e.wx, 0, e.wz, e.horiz ? 0 : Math.PI / 2, e.s, e.sx);
-  for (const e of frameEdges) { const k = THREE.MathUtils.clamp((e.s - .5) / .5, 0, 1); setInst(hdrIM, e.hinst, e.cx, 2.2 + HDR / 2, e.cz, e.horiz ? 0 : Math.PI / 2, k); }
-  fullPosts.forEach((p, k) => setInst(postIM, k, p.cx, 0, p.cz, 0, p.s));
-  hdrPosts.forEach((p, k) => { const s = THREE.MathUtils.clamp((p.s - .5) / .5, 0, 1); setInst(hpostIM, k, p.cx, 2.2 + HDR / 2, p.cz, 0, s); });
+  // a tall deck (0.80.0): walls and headers stretch to H when up, and come down to the usual low wall when cut away
+  const ts = s => WALL_K === 1 ? s : s * (1 + (WALL_K - 1) * Math.max(0, (s - .12) / .88)), HK = WALL_K === 1 ? 1 : (H - 2.2) / HDR;
+  for (const e of wallEdges) setInst(wallIM, e.inst, e.wx, 0, e.wz, e.horiz ? 0 : Math.PI / 2, ts(e.s), e.sx);
+  for (const e of frameEdges) { const k = e.rail ? 0 : THREE.MathUtils.clamp((e.s - .5) / .5, 0, 1); setInst(hdrIM, e.hinst, e.cx, 2.2 + HDR * HK / 2, e.cz, e.horiz ? 0 : Math.PI / 2, k * HK); }
+  fullPosts.forEach((p, k) => setInst(postIM, k, p.cx, 0, p.cz, 0, p.rail ? RAIL_H / 2.8 : ts(p.s)));   // e.rail / p.rail: a low rail (the rec deck's court, 0.80.10)
+  hdrPosts.forEach((p, k) => { const s = p.rail ? 0 : THREE.MathUtils.clamp((p.s - .5) / .5, 0, 1); setInst(hpostIM, k, p.cx, 2.2 + HDR * HK / 2, p.cz, 0, s * HK); });
   for (const im of [wallIM, hdrIM, postIM, hpostIM]) im.instanceMatrix.needsUpdate = true;
   if (sillIM) {
     for (const e of glassEdges) {
-      setInst(sillIM, e.ginst, e.cx, 0, e.cz, e.horiz ? 0 : Math.PI / 2, Math.min(1, e.s * H / SILL));
+      setInst(sillIM, e.ginst, e.cx, 0, e.cz, e.horiz ? 0 : Math.PI / 2, e.rail ? RAIL_H / SILL : Math.min(1, e.s * H / SILL));
       setInst(paneIM, e.ginst, e.cx, (SILL + 2.2) / 2, e.cz, e.horiz ? 0 : Math.PI / 2, e.type === 'pass' ? 0 : THREE.MathUtils.clamp((e.s - .5) / .5, 0, 1));
     }
     sillIM.instanceMatrix.needsUpdate = paneIM.instanceMatrix.needsUpdate = true;
@@ -3065,7 +3075,7 @@ function buildDeck(def) {
   ROOMS = def.rooms; WINDOWS = def.windows; HULL = def.hull;
   DOORS = Object.assign({}, def.doors); CLOSED_DOORS = Object.assign({}, def.closedDoors);
   for (const key of shipDeck(def.num).open) if (DOORS[key] === 'closed' || DOORS[key] === 'hatch') { DOORS[key] = 'door'; delete CLOSED_DOORS[key]; }   // unlocked since
-  W = def.map[0].length; D = def.map.length;
+  W = def.map[0].length; D = def.map.length; WALL_K = def.tall || 1; H = 2.8 * WALL_K;
   OX = def.lift[0] - LIFT_AT[0]; OZ = def.lift[1] - LIFT_AT[1];
   LAMPS = []; STEAM = []; DUST = []; glows.length = 0;
 
@@ -3116,6 +3126,7 @@ function buildDeck(def) {
       if (def.floorSeeds && i === def.floorSeeds.col && j < def.floorSeeds.rows.length) seed = def.floorSeeds.rows[j];   // a deck whose floor changed west of this column keeps its old grain (and its later random sequence) east of it
       if (!r) continue;
       if (st.void) { g.fillStyle = '#23272d'; g.fillRect(x, y, PX, PX); continue; }
+      if (st.rec) { recFloor(g, st.floor, i, j, x, y, PX); continue; }   // the rec deck's floors (0.80.0): no R()
       const v = st.floor === 'lift' || st.spine || st.still ? 0 : (R() - .5) * 8;   // the lift car (and `still` floors, such as utility rooms built later) draw nothing from the deck's random sequence, so the rest of the deck is unchanged
       if (st.floor === 'warm') {
         if ((i % 2 === 0) && (j % 2 === 0)) { g.fillStyle = '#4a413a'; g.fillRect(x, y, PX * 2, PX * 2); }
@@ -7944,6 +7955,623 @@ function dressShow(list) {
 const dressingOn = () => [...DRESS.on.keys()];
 
 // =====================================================================
+// 4e. THE REC DECK (DECKS[7], shown as R; the rec deck architect, 0.80.x; plans/recdeck-plan.html v3)
+// Phase 1 (the user's rule): the deck and its animations for the player only. `playerOnly` keeps it out of the crew's
+// schedules, the blackouts and the meeting places until crew are let in. Every floor here draws no R() (recFloor),
+// and its kit makes its materials when the deck is built (recMats), so nothing at load changes and the deck is
+// freed whole when you leave.
+// =====================================================================
+const recHash = (i, j, k) => { const x = Math.sin(i * 127.1 + j * 311.7 + k * 74.7) * 43758.5453; return x - Math.floor(x); };
+function recFloor(g, kind, i, j, x, y, PX) {
+  const hall = (a, b) => { const r2 = roomAt(a, b); return r2 && ROOMS[r2].hall; }, sameRoom = (a, b) => roomAt(a, b) === roomAt(i, j);
+  const edge = (a, b) => ROOMS[roomAt(i, j)].hall ? !hall(a, b) : !sameRoom(a, b);   // a stripe where the floor meets a wall
+  const fleck = (n, cs) => { for (let k = 0; k < n; k++) { g.fillStyle = cs[k % cs.length]; g.fillRect(x + recHash(i, j, k) * (PX - 2), y + recHash(i, j, k + 31) * (PX - 2), 2, 2); } };
+  if (kind === 'concourse') {                            // the concourse and foyer (0.80.10, the user's: calmer, classier): two-tone terrazzo, an inlaid band at the walls; plain chips, cream and greys (0.82.4, the user's)
+    g.fillStyle = (i + j) % 2 ? '#4d5759' : '#535e60'; g.fillRect(x, y, PX, PX);
+    for (let k = 0; k < 22; k++) { const c = recHash(i, j, k + 50); g.fillStyle = c < .45 ? 'rgba(232,226,214,.35)' : c < .7 ? 'rgba(196,200,196,.3)' : c < .85 ? 'rgba(140,150,150,.32)' : 'rgba(20,24,28,.35)'; const r = 1 + recHash(i, j, k + 80) * 2.2; g.fillRect(x + recHash(i, j, k + 110) * (PX - 3), y + recHash(i, j, k + 140) * (PX - 3), r, r); }
+    g.fillStyle = 'rgba(0,0,0,.12)'; if (i % 3 === 0) g.fillRect(x, y, 1, PX); if (j % 3 === 0) g.fillRect(x, y, PX, 1);   // thin joints every third tile
+    if (edge(i, j - 1)) { g.fillStyle = '#c99a4a'; g.fillRect(x, y + 10, PX, 2); g.fillStyle = 'rgba(31,163,155,.8)'; g.fillRect(x, y + 14, PX, 3); }
+    if (edge(i, j + 1)) { g.fillStyle = '#c99a4a'; g.fillRect(x, y + PX - 12, PX, 2); g.fillStyle = 'rgba(240,121,90,.75)'; g.fillRect(x, y + PX - 17, PX, 3); }
+  } else if (kind === 'sport') {                         // charcoal sports floor; the neon stripes, cyan to port and magenta to starboard
+    g.fillStyle = '#2a2e35'; g.fillRect(x, y, PX, PX);
+    fleck(8, ['rgba(80,230,255,.16)', 'rgba(255,90,200,.14)', 'rgba(220,225,230,.12)']);
+    if (i % 4 === 0) { g.fillStyle = 'rgba(0,0,0,.2)'; g.fillRect(x, y, 2, PX); }
+    if (edge(i, j - 1)) { g.fillStyle = 'rgba(80,230,255,.9)'; g.fillRect(x, y + 9, PX, 4); g.fillStyle = 'rgba(80,230,255,.25)'; g.fillRect(x, y + 6, PX, 10); }
+    if (edge(i, j + 1)) { g.fillStyle = 'rgba(255,79,216,.9)'; g.fillRect(x, y + PX - 13, PX, 4); g.fillStyle = 'rgba(255,79,216,.25)'; g.fillRect(x, y + PX - 16, PX, 10); }
+  } else if (kind === 'tile' || kind === 'pooltile') {   // small glazed tiles: pale aqua on the pool deck, pale grey-green in the changing rooms and washroom
+    const pool = kind === 'pooltile';
+    g.fillStyle = pool ? '#6f9aa0' : '#7f8c8a'; g.fillRect(x, y, PX, PX);
+    for (let a = 0; a < 4; a++) for (let b = 0; b < 4; b++) {
+      const t = (recHash(i * 4 + a, j * 4 + b, 3) - .5) * 12;
+      g.fillStyle = pool ? `rgb(${170 + t},${214 + t},${216 + t})` : `rgb(${196 + t},${206 + t},${200 + t})`; g.fillRect(x + a * 16 + 1, y + b * 16 + 1, 14, 14);
+    }
+  } else if (kind === 'court') {                         // the Lightdisc court's black floor (its lines come with the court, 0.80.2)
+    g.fillStyle = '#0c0f14'; g.fillRect(x, y, PX, PX);
+    g.fillStyle = 'rgba(120,160,200,.06)'; g.fillRect(x, y, PX, 1); g.fillRect(x, y, 1, PX);
+    if (i <= 5 || i >= 15) { g.fillStyle = i <= 5 ? 'rgba(255,154,60,.07)' : 'rgba(80,230,255,.07)'; g.fillRect(x, y, PX, PX); }   // each player's zone, by their baseline
+  } else if (kind === 'stand') {
+    g.fillStyle = '#2e333b'; g.fillRect(x, y, PX, PX); fleck(5, ['rgba(255,255,255,.08)']);
+  } else if (kind === 'violet') {                        // the auditorium's deep violet carpet with small gold diamonds
+    g.fillStyle = '#33264f'; g.fillRect(x, y, PX, PX);
+    g.fillStyle = 'rgba(233,196,106,.16)'; g.beginPath(); g.moveTo(x + 32, y + 24); g.lineTo(x + 40, y + 32); g.lineTo(x + 32, y + 40); g.lineTo(x + 24, y + 32); g.closePath(); g.fill();
+  } else if (kind === 'pad') {                           // the float room's soft coral padding, in squares
+    g.fillStyle = '#b8665c'; g.fillRect(x, y, PX, PX);
+    for (let a = 0; a < 2; a++) for (let b = 0; b < 2; b++) { g.fillStyle = (a + b + i + j) % 2 ? '#e3907f' : '#eaa093'; g.fillRect(x + a * 32 + 2, y + b * 32 + 2, 28, 28); }
+  } else if (kind === 'river') {                         // the river hall's slate floor, under the banks (0.80.4)
+    g.fillStyle = '#4a5654'; g.fillRect(x, y, PX, PX); fleck(10, ['rgba(160,190,170,.18)', 'rgba(20,30,28,.25)']);
+  } else {                                               // 'svc': service rooms, plain steel plate
+    g.fillStyle = '#353b42'; g.fillRect(x, y, PX, PX);
+    g.fillStyle = '#5d666e'; g.fillRect(x + 2, y + 2, PX - 4, PX - 4);
+    g.fillStyle = 'rgba(0,0,0,.08)'; for (let a = 10; a < PX - 8; a += 14) for (let b = 10; b < PX - 8; b += 14) g.fillRect(x + a, y + b, 6, 2);
+  }
+  if (kind !== 'sport' && kind !== 'concourse' && !sameRoom(i, j - 1) && !hall(i, j - 1) && (kind === 'pooltile' || kind === 'pad')) { g.fillStyle = 'rgba(80,230,255,.5)'; g.fillRect(x, y + 4, PX, 3); }   // the cyan stripe runs on into the port rooms
+}
+// the auditorium's 76 seats (0.80.1): six raked rows (columns 35-40, back to front, each step 0.2 lower), three blocks
+// with two aisles at rows 5 and 12. Pure numbers, so the seats' places can be data like every deck's
+const REC_SEATS = (() => {
+  const out = [], blocks = [[2, 5, 3], [6, 12, 7], [13, 16, 3]];
+  for (let r = 0; r < 6; r++) blocks.forEach(([z0, z1, n], b) => {
+    if (r === 5 && b !== 1) n = 2;                       // the front row's side blocks are one seat short: 76 in all
+    for (let k = 0; k < n; k++) out.push({ col: 35 + r, h: Math.round((1 - r * .2) * 100) / 100, x: 35 + r + .55, z: z0 + (z1 - z0) * (k + .5) / n, aisle: b === 0 || (b === 1 && k < 4) ? 5 : 12 });
+  });
+  return out;
+})();
+const REC_BLOCKS = [[2, 5], [6, 12], [13, 16]];          // the seat blocks' rows (z from, to)
+const REC_STAGE = { front: 7.65, back: 11.2, rz: 8.6 };   // room-local: the stage's front edge at the centre line, the bow arc's radii
+Object.assign(KIT, {
+  // the rake: one solid step per row and block (no holes, nothing on the floor's plane), and the seats on them, facing the stage
+  recRake(g) {
+    for (let r = 0; r < 5; r++) for (const [z0, z1] of REC_BLOCKS) { const h = 1 - r * .2; box(1, h, z1 - z0 - .02, RK.rake, r + 1.5, h / 2, (z0 + z1) / 2, g); box(.04, .03, z1 - z0 - .02, RK.gold, r + 1.98, h + .005, (z0 + z1) / 2, g); }
+    for (const s of REC_SEATS) {
+      const x = s.x - 34, y = s.h;
+      box(.44, .1, .5, RK.seat, x + .05, y + .42, s.z, g);              // the cushion
+      box(.08, .56, .5, RK.seat, x - .2, y + .74, s.z, g);              // the back
+      box(.12, .37, .3, RK.seatDark, x + .02, y + .185, s.z, g);         // the pedestal
+      box(.012, .06, .12, RK.gold, x - .246, y + .88, s.z, g);           // the gold number, on the back of the seat
+    }
+    return { w: .1, d: .1, noBlock: true };
+  },
+  // the stage: a curved platform across the bow, its back following the hull and its front bowing out toward the seats
+  recStage(g) {
+    const S = REC_STAGE, th = Math.acos(8 / S.back), sh = new THREE.Shape(), zA = 9 - S.rz * Math.sin(th), zB = 9 + S.rz * Math.sin(th);
+    sh.moveTo(8, zA); sh.quadraticCurveTo(2 * S.front - 8, 9, 8, zB);
+    for (let k = 0; k <= 24; k++) { const a = th - 2 * th * k / 24; sh.lineTo(S.back * Math.cos(a), 9 + S.rz * Math.sin(a)); }
+    const geo = new THREE.ExtrudeGeometry(sh, { depth: .55, bevelEnabled: false, curveSegments: 16 });
+    const m = new THREE.Mesh(geo, [RK.stageTop, RK.stageSide]); m.rotation.x = Math.PI / 2; m.position.y = .55; m.castShadow = m.receiveShadow = true; g.add(m);
+    return { w: .1, d: .1, noBlock: true };
+  },
+  // the lighting truss over the stage on two gold towers, with six lamps aimed at the stage
+  recTruss(g, o) {
+    const L = o.len, y = H - .75;
+    for (const z of [-L / 2, L / 2]) { box(.16, y + .1, .16, RK.truss, 0, .55 + (y - .55) / 2, z, g); box(.4, .05, .4, RK.truss, 0, .575, z, g); }
+    for (const [x, yy] of [[-.2, y], [.2, y], [-.2, y + .35], [.2, y + .35]]) box(.05, .05, L, RK.truss, x, yy, 0, g);
+    for (let k = 0; k <= 12; k++) { const z = -L / 2 + L * k / 12; box(.4, .03, .03, RK.truss, 0, y, z, g); box(.03, .35, .03, RK.truss, k % 2 ? -.2 : .2, y + .175, z, g); }
+    for (let k = 0; k < 6; k++) { const z = -L / 2 + L * (k + .5) / 6, c = cyl(.09, .12, .26, RK.black, -.05, y - .2, z, g, 12); c.rotation.z = -.7; }
+    return { w: .5, d: L, tall: true };
+  },
+  recLectern(g) {
+    box(.56, 1.0, .4, RK.wood, 0, .55 + .5, 0, g); box(.62, .05, .48, RK.wood, 0, 1.58, .03, g).rotation.x = -.18;
+    box(.3, .03, .22, RK.gold, 0, 1.18, .205, g);                       // the ship's crest on its front
+    return { w: .62, d: .48 };
+  },
+  // the film screen's housing, rolled up under the truss (it lowers for films, later)
+  recScreen(g, o) {
+    box(.24, .24, o.len, RK.black, 0, H - .3, 0, g); box(.04, .05, o.len - .2, RK.screen, .09, H - .45, 0, g);
+    return { w: .3, d: o.len, noBlock: true };
+  },
+  recHit(g, o) { return { w: o.w, d: o.d, noBlock: true }; },   // a tap target over something drawn elsewhere
+});
+Object.assign(WALL_KIT, {
+  // the REC DEC neon over the auditorium's doors: pink letters on a dark backing, drawn once per visit
+  recNeon(g) {
+    const t = tex(512, 160, (c, w, h) => {
+      c.fillStyle = '#1a1220'; c.fillRect(0, 0, w, h);
+      c.font = '800 96px system-ui,sans-serif'; c.textAlign = 'center'; c.lineJoin = 'round';
+      c.strokeStyle = 'rgba(255,79,216,.35)'; c.lineWidth = 18; c.strokeText('REC DEC', w / 2, 116);
+      c.strokeStyle = '#ff6fe0'; c.lineWidth = 6; c.strokeText('REC DEC', w / 2, 116); c.fillStyle = '#ffd6f6'; c.fillText('REC DEC', w / 2, 116);
+    });
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(2.4, .75), new THREE.MeshBasicMaterial({ map: t, toneMapped: false })); p.position.set(0, H - .5, .06); g.add(p);
+    box(2.5, .85, .05, RK.black, 0, H - .5, .025, g);
+  },
+  recPoster(g) {
+    const t = tex(256, 360, (c, w, h) => {
+      c.fillStyle = '#26183f'; c.fillRect(0, 0, w, h); c.fillStyle = '#ff6fe0'; c.fillRect(0, 0, w, 10); c.fillStyle = '#50e6ff'; c.fillRect(0, h - 10, w, 10);
+      c.textAlign = 'center'; c.fillStyle = '#ffe9a8'; c.font = '800 40px system-ui,sans-serif'; c.fillText('THE', w / 2, 90); c.fillText('REC DEC', w / 2, 136);
+      c.fillStyle = '#e8eef0'; c.font = '600 22px system-ui,sans-serif'; ['Pool', 'Rivers', 'Climbing wall', 'Float room', 'Lightdisc'].forEach((l, k) => c.fillText(l, w / 2, 190 + k * 28));
+      c.fillStyle = '#50e6ff'; c.font = '700 22px system-ui,sans-serif'; c.fillText('Open 06:00 to midnight', w / 2, 336);
+    });
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(.8, 1.12), new THREE.MeshStandardMaterial({ map: t, roughness: .8 })); p.position.set(0, 1.55, .045); g.add(p);
+    box(.86, 1.18, .04, RK.gold, 0, 1.55, .02, g);
+  },
+});
+// the stands (0.80.2): three stepped benches along the court's inboard side (rows 11-12), in three blocks with aisles at
+// columns 6 and 14 (in from the concourse's doors). One seat a tile on each tier: 33 in all
+const REC_STANDS = [[4, 6], [7, 14], [15, 17]], REC_TIER = [{ z: 11.33, h: .7 }, { z: 11.99, h: .35 }, { z: 12.65, h: 0 }];
+const REC_STAND_SEATS = REC_STANDS.flatMap(([c0, c1]) => REC_TIER.flatMap((t, k) => Array.from({ length: c1 - c0 }, (_, q) => ({ col: c0 + q, tier: k, h: t.h, z: t.z, aisle: c0 + q < 10 ? 6 : 14 }))));
+Object.assign(KIT, {
+  recStands(g) {
+    for (const [c0, c1] of REC_STANDS) {
+      const w = c1 - c0, x = (c0 + c1) / 2 - 4;
+      REC_TIER.forEach((t, k) => {
+        if (t.h) box(w - .04, t.h, .66, RK.standStep, x, t.h / 2, t.z - 11, g);
+        box(w - .1, .06, .36, RK.bench, x, t.h + .42, t.z - 11 + .06, g);                       // the plank
+        for (let q = 0; q < w; q++) box(.08, .39, .26, RK.black, c0 + q + .5 - 4, t.h + .195, t.z - 11 + .06, g);   // its legs, one a seat
+      });
+    }
+    return { w: .1, d: .1, noBlock: true };
+  },
+  // the court: glowing lines (cyan at the bow end, orange at the stern), the force-field net across the middle and the
+  // side walls, faint until the disc hits them. Room-local: the court is 13 x 5
+  recCourt(g) {
+    const ln = (m, w, d, x, z) => box(w, .014, d, m, x, .007, z, g);
+    ln(RK.lineOrange, .07, 4.4, .6, 2.5); ln(RK.lineCyan, .07, 4.4, 12.4, 2.5);                  // the baselines
+    for (const z of [.3, 4.7]) { ln(RK.lineOrange, 5.9, .06, 3.55, z); ln(RK.lineCyan, 5.9, .06, 9.45, z); }   // the sidelines, each end its colour
+    ln(RK.lineWhite, .05, 4.4, 6.5, 2.5);
+    for (const x of [2.6, 10.4]) ln(x < 6 ? RK.lineOrange : RK.lineCyan, .04, 4.4, x, 2.5);     // the edge of each player's zone
+    // the net: a shimmering field from a post at each side, glowing along its top
+    for (const z of [.18, 4.82]) cyl(.05, .06, 1.3, RK.black, 6.5, .65, z, g, 10);
+    const net = new THREE.Mesh(new THREE.PlaneGeometry(4.6, 1.05), RK.net); net.position.set(6.5, .6, 2.5); net.rotation.y = Math.PI / 2; net.userData.noMerge = net.userData.noShadow = true; g.add(net);
+    box(.03, .03, 4.6, RK.lineWhite, 6.5, 1.14, 2.5, g);
+    // the side walls: a faint field along each side, the length of the court
+    for (const z of [.12, 4.88]) { const f = new THREE.Mesh(new THREE.PlaneGeometry(12.8, 1.1), RK.field); f.position.set(6.5, .58, z); f.userData.noMerge = f.userData.noShadow = true; g.add(f); }
+    return { w: .1, d: .1, noBlock: true };
+  },
+});
+const REC_BOARD = { tex: null };                         // the scoreboard's canvas texture, for section 23b's live score (0.82.0)
+Object.assign(WALL_KIT, {
+  // the Lightdisc panel by the court's gate (0.80.7): where you'll ask someone to play. A post and a small lit screen
+  recPlayPanel(g) {
+    const t = tex(256, 160, (c, w, h) => {
+      c.fillStyle = '#05070b'; c.fillRect(0, 0, w, h); c.strokeStyle = '#50e6ff'; c.lineWidth = 4; c.strokeRect(4, 4, w - 8, h - 8);
+      c.textAlign = 'center'; c.fillStyle = '#e8eef0'; c.font = '700 24px system-ui,sans-serif'; c.fillText('LIGHTDISC', w / 2, 48);
+      c.fillStyle = '#50e6ff'; c.font = '700 22px system-ui,sans-serif'; c.fillText('ASK SOMEONE', w / 2, 92); c.fillText('TO PLAY', w / 2, 120);
+    });
+    box(.08, 1.25, .08, RK.black, 0, .625, .14, g); box(.5, .34, .06, RK.black, 0, 1.4, .14, g);
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(.44, .28), new THREE.MeshBasicMaterial({ map: t, toneMapped: false })); p.position.set(0, 1.4, .175); g.add(p);
+  },
+  // the scoreboard on the court's stern wall, high up (it's two storeys of wall); section 23b redraws its canvas (REC_BOARD) during a game
+  recScoreboard(g) {
+    const t = tex(512, 224, (c, w, h) => {
+      c.fillStyle = '#05070b'; c.fillRect(0, 0, w, h); c.strokeStyle = '#2a3340'; c.lineWidth = 6; c.strokeRect(3, 3, w - 6, h - 6);
+      c.textAlign = 'center'; c.fillStyle = '#e8eef0'; c.font = '700 30px system-ui,sans-serif'; c.fillText('LIGHTDISC', w / 2, 44);
+      c.font = '800 112px system-ui,sans-serif'; c.fillStyle = '#ff9a3c'; c.fillText('0', w * .27, 168); c.fillStyle = '#50e6ff'; c.fillText('0', w * .73, 168);
+      c.fillStyle = '#e8eef0'; c.font = '800 80px system-ui,sans-serif'; c.fillText(':', w / 2, 158);
+      c.font = '600 20px system-ui,sans-serif'; c.fillStyle = '#ff9a3c'; c.fillText('STERN', w * .27, 204); c.fillStyle = '#50e6ff'; c.fillText('BOW', w * .73, 204);
+    });
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(2.8, 1.22), new THREE.MeshBasicMaterial({ map: t, toneMapped: false })); p.position.set(0, H - .72, .09); g.add(p); REC_BOARD.tex = t;
+    box(2.95, 1.34, .08, RK.black, 0, H - .72, .04, g);   // over the emitter room's hatch
+  },
+});
+// water (0.80.3, plan section 10): one small shader for the pool and the rivers. Slow moving caustics over two colours,
+// and on the rivers white foam streaming along the flow. No texture and no R(); colours through col() as uniforms; its
+// clock only ticks while it's drawn (onBeforeRender), so water off-screen costs nothing
+function recWater(deep, shallow, o = {}) {
+  const U = { uT: { value: 0 }, uDeep: { value: col(deep) }, uShallow: { value: col(shallow) }, uFoam: { value: o.foam || 0 }, uFlow: { value: o.flow || 0 }, uA: { value: o.alpha || .84 } };
+  const m = new THREE.ShaderMaterial({ uniforms: U, transparent: true, depthWrite: false,
+    vertexShader: 'varying vec3 vW; varying vec2 vUv; void main() { vec4 w = modelMatrix * vec4(position, 1.0); vW = w.xyz; vUv = uv; gl_Position = projectionMatrix * viewMatrix * w; }',
+    fragmentShader: `uniform float uT, uFoam, uFlow, uA; uniform vec3 uDeep, uShallow; varying vec3 vW; varying vec2 vUv;
+      void main() {
+        vec2 p = vW.xz * 1.6; p.x -= uT * uFlow;
+        float a = sin(p.x * 1.3 + uT * .8 + sin(p.y * 1.1 + uT * .5)) + sin(p.y * 1.7 - uT * .6 + sin(p.x * .9 - uT * .4));
+        float b = sin(p.x * 2.3 - p.y * 1.4 + uT * 1.1) * .5;
+        float caus = smoothstep(.35, 0.0, abs(a + b));                       // thin bright lines where the waves cross
+        vec3 c = mix(uDeep, uShallow, .5 + .25 * a) + caus * .28;
+        if (uFoam > 0.0) {                                                   // the white water: streaks running with the flow
+          float f = sin(p.x * 3.1 + sin(p.y * 4.3) * 1.5) * sin(p.y * 6.7 + p.x * .7) + sin(p.x * 5.3 - p.y * 2.1);
+          c = mix(c, vec3(.95, .98, 1.0), clamp(uFoam * smoothstep(.6, 1.6, f), 0.0, .85));
+        }
+        gl_FragColor = vec4(c, uA);
+        #include <tonemapping_fragment>
+        #include <encodings_fragment>
+      }` });
+  m.userData.U = U; return m;
+}
+const recWaterMesh = (geo, m) => { const w = new THREE.Mesh(geo, m); w.userData.noMerge = w.userData.noShadow = true; w.receiveShadow = false; w.castShadow = false; w.raycast = () => {};
+  w.onBeforeRender = () => { m.userData.U.uT.value = performance.now() / 1000; }; return w; };
+// the Wren in mosaic for the pool floor: a canvas drawn once per visit from fixed shapes (no R())
+function recMosaic() {
+  return tex(512, 320, (c, w, h) => {
+    c.fillStyle = '#8fd3d6'; c.fillRect(0, 0, w, h);
+    for (let y = 0; y < h; y += 16) for (let x = 0; x < w; x += 16) { const t = Math.round((recHash(x, y, 5) - .5) * 14); c.fillStyle = `rgb(${150 + t},${214 + t},${216 + t})`; c.fillRect(x + 1, y + 1, 14, 14); }
+    const tileFill = (pts, colr) => { c.save(); c.beginPath(); pts.forEach(([x, y], k) => k ? c.lineTo(x, y) : c.moveTo(x, y)); c.closePath(); c.clip();
+      for (let y = 0; y < h; y += 16) for (let x = 0; x < w; x += 16) { c.fillStyle = colr; c.fillRect(x + 1, y + 1, 14, 14); } c.restore(); };
+    tileFill([[90, 120], [330, 104], [420, 140], [440, 160], [420, 180], [330, 216], [90, 200], [70, 160]], '#24507a');   // the hull, bow to the right
+    tileFill([[110, 104], [180, 70], [210, 104]], '#24507a'); tileFill([[110, 216], [180, 250], [210, 216]], '#24507a');   // the nacelles' fins
+    tileFill([[330, 136], [400, 148], [400, 172], [330, 184]], '#e9c46a');                                                  // the bridge's glow
+    tileFill([[60, 140], [76, 140], [76, 180], [60, 180]], '#ff9a3c');                                                      // the drive
+  });
+}
+Object.assign(KIT, {
+  // the pool (0.80.3, R4; four lanes from 0.80.7, plan v4): raised, so nothing is cut out of the deck. A tiled rim 0.42
+  // high round a basin floor with the Wren mosaic, water just under the rim, four lanes between orange-and-white ropes,
+  // and steps down in the stern-inboard corner. Room-local, the basin runs x 0.8-8.2 and z 0.9-4.5 (deck x 23.8-31.2)
+  recPool(g) {
+    const x0 = .8, x1 = 8.2, z0 = .9, z1 = 4.5, H = .42, t = .22, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, L = x1 - x0, Wd = z1 - z0;
+    for (const z of [z0 + t / 2, z1 - t / 2]) box(L, H, t, RK.rim, cx, H / 2, z, g);
+    for (const x of [x0 + t / 2, x1 - t / 2]) box(t, H, Wd - 2 * t, RK.rim, x, H / 2, cz, g);
+    for (const z of [z0 - .02, z1 + .02]) box(L + .08, .05, .1, RK.coping, cx, H + .025, z + (z < cz ? .05 : -.05), g);   // the coping round the top
+    for (const x of [x0 - .02, x1 + .02]) box(.1, .05, Wd, RK.coping, x + (x < cx ? .05 : -.05), H + .025, cz, g);
+    const floor = new THREE.Mesh(new THREE.BoxGeometry(L - 2 * t, .03, Wd - 2 * t), [RK.poolSide, RK.poolSide, RK.mosaic, RK.poolSide, RK.poolSide, RK.poolSide]);
+    floor.position.set(cx, .015, cz); floor.userData.noMerge = true; g.add(floor);
+    for (let k = 0; k < 3; k++) box(1.0, .3 - k * .1, .3, RK.poolSide, x0 + t + .5, (.3 - k * .1) / 2 + .03, z1 - t - .15 - k * .3, g);   // the steps, down from the inboard rim at the stern end
+    const water = recWaterMesh(new THREE.PlaneGeometry(L - 2 * t, Wd - 2 * t), RK.poolWater); water.rotation.x = -Math.PI / 2; water.position.set(cx, .35, cz); g.add(water);
+    for (const z of [1.8, 2.7, 3.6]) for (let k = 0; k < 16; k++) {   // the lane ropes: floats in runs of orange and white
+      const s = (L - 2 * t) / 16, f = cyl(.045, .045, s * .9, k % 4 < 2 ? RK.ropeOrange : RK.ropeWhite, x0 + t + s * (k + .5), .35, z, g, 8); f.rotation.z = Math.PI / 2;
+    }
+    return { w: .1, d: .1, noBlock: true };
+  },
+  recLounger(g) {
+    box(.62, .12, 1.7, RK.loungerFrame, 0, .3, 0, g); for (const [x, z] of [[-.26, -.75], [.26, -.75], [-.26, .75], [.26, .75]]) box(.05, .3, .05, RK.loungerFrame, x, .15, z, g);
+    box(.56, .07, 1.1, RK.loungerPad, 0, .4, .25, g); box(.56, .07, .62, RK.loungerPad, 0, .58, -.55, g).rotation.x = -.6;
+    return { w: .62, d: 1.7 };
+  },
+});
+Object.assign(WALL_KIT, {
+  recFirstAid(g) {
+    box(.5, .6, .14, RK.aidWhite, 0, 1.35, .07, g); box(.3, .08, .01, RK.aidRed, 0, 1.4, .145, g); box(.08, .3, .01, RK.aidRed, 0, 1.4, .145, g);
+    cyl(.05, .05, .04, RK.aidRed, .3, 1.15, .06, g, 12).rotation.x = Math.PI / 2;                       // the alarm button beside it
+  },
+});
+// the river hall (0.80.4, R5). Room-local (the hall's box starts at column 1): the rivers are one raised loop round a
+// rock island, x 3.0-13.6 and z 0.5-5.6. The fast white-water run is along the windows (north), the slow return channel
+// on the inboard side (south), joined at both ends; a wave gate across the fast run at the bow end. The walkway runs
+// along the concourse glass (row 6) and up the bow end (column 15) to the changing rooms' door; the climbing wall fills
+// the stern end, its foot clear (local x 0-2.8)
+const RIV = { x0: 3.0, x1: 13.6, z0: .5, z1: 5.6, in0: 4.6, in1: 12.0, iz0: 2.1, iz1: 4.0 };
+const REC_ROUTES = 4, REC_WALL = { x: .35, z0: 2.0, z1: 6.6 };
+function recQuads(rects, y) {                            // one flat geometry from rectangles [x0, z0, x1, z1] (a water surface in one draw)
+  const P = [], N = [], U = [], I = [];
+  rects.forEach(([a, b, c, d], k) => { P.push(a, y, b, c, y, b, c, y, d, a, y, d); for (let q = 0; q < 4; q++) N.push(0, 1, 0); U.push(0, 0, 1, 0, 1, 1, 0, 1); const o = k * 4; I.push(o, o + 2, o + 1, o, o + 3, o + 2); });
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(N, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(U, 2)); g.setIndex(I); return g;
+}
+Object.assign(KIT, {
+  recRiver(g) {
+    const R_ = RIV, rh = .46, t = .2;
+    // the outer bank, grey-green fake rock, and the river bed under the water
+    box(R_.x1 - R_.x0, rh, t, RK.rock, (R_.x0 + R_.x1) / 2, rh / 2, R_.z0 - t / 2, g); box(R_.x1 - R_.x0 + 2 * t, rh, t, RK.rock, (R_.x0 + R_.x1) / 2, rh / 2, R_.z1 + t / 2, g);
+    box(t, rh, R_.z1 - R_.z0 + t, RK.rock, R_.x0 - t / 2, rh / 2, (R_.z0 + R_.z1) / 2 - t / 2, g); box(t, rh, R_.z1 - R_.z0 + t, RK.rock, R_.x1 + t / 2, rh / 2, (R_.z0 + R_.z1) / 2 - t / 2, g);
+    box(R_.x1 - R_.x0, .03, R_.z1 - R_.z0, RK.riverBed, (R_.x0 + R_.x1) / 2, .015, (R_.z0 + R_.z1) / 2, g);
+    // the island: a long rock bank with boulders and ferns
+    box(R_.in1 - R_.in0, .62, R_.iz1 - R_.iz0, RK.rock, (R_.in0 + R_.in1) / 2, .31, (R_.iz0 + R_.iz1) / 2, g);
+    for (let k = 0; k < 9; k++) { const x = R_.in0 + .5 + k * .85, z = R_.iz0 + .35 + recHash(k, 1, 7) * 1.2, s = .28 + recHash(k, 2, 7) * .22; soft(k % 3 ? RK.rock : RK.rockDark, x, .62, z, s * 1.4, s, s, g); }
+    for (let k = 0; k < 7; k++) { const x = R_.in0 + .9 + k * 1.05, z = R_.iz0 + .5 + recHash(k, 3, 7) * .9;
+      for (let q = 0; q < 5; q++) { const a = q * 1.257 + k, f = box(.07, .02, .5, RK.fern, x + Math.sin(a) * .18, .72, z + Math.cos(a) * .18, g); f.rotation.set(-.5 * Math.cos(a), a, .5 * Math.sin(a), 'YXZ'); } }
+    // the water: the fast run and the bow end foam white, the return channel and the stern end run slow
+    const fast = recWaterMesh(recQuads([[R_.x0, R_.z0, R_.x1, R_.iz0], [R_.in1, R_.iz0, R_.x1, R_.iz1]], .36), RK.riverFast);
+    const slow = recWaterMesh(recQuads([[R_.x0, R_.iz1, R_.x1, R_.z1], [R_.x0, R_.iz0, R_.in0, R_.iz1]], .36), RK.poolWater);   // the pool's own water (0.82.5)
+    g.add(fast, slow);
+    // the wave gate across the fast run near the bow end: two steel posts, a beam with the gate's lights, a ramp under the water
+    for (const z of [R_.z0 - .05, R_.iz0 + .05]) box(.16, 1.7, .16, RK.steel, 11.3, .85, z, g);
+    box(.22, .2, R_.iz0 - R_.z0 + .3, RK.steel, 11.3, 1.7, (R_.z0 + R_.iz0) / 2, g); box(.04, .05, R_.iz0 - R_.z0, RK.gateLight, 11.19, 1.66, (R_.z0 + R_.iz0) / 2, g);
+    box(.9, .1, R_.iz0 - R_.z0 - .04, RK.steel, 11.5, .26, (R_.z0 + R_.iz0) / 2, g).rotation.z = .12;
+    // the kayak dock on the inboard bank by the doors, and three kayaks out on the water
+    box(2.4, .08, .9, RK.dock, 10.4, .5, R_.z1 - .3, g); for (let k = 0; k < 8; k++) box(.02, .012, .86, RK.dockDark, 9.3 + k * .3, .545, R_.z1 - .3, g);
+    recKayak(g, 10.4, .66, R_.z1 - .3, Math.PI / 2 + .03, RK.kayak[3]);   // the green kayak up on the dock (0.80.8, the user's: no kayaks left in the water; one is on it only while someone paddles)
+    return { w: .1, d: .1, noBlock: true };
+  },
+  // the kayak rack on the bow end wall: four kayaks on two arms, red, yellow, blue and green, paddles alongside
+  recKayakRack(g) {
+    for (const z of [-1.0, 1.0]) { box(.08, 1.6, .08, RK.steel, .15, .8, z, g); for (const y of [.45, .85, 1.25]) box(.5, .05, .06, RK.steel, -.05, y, z, g); }   // east (wall) side is +x
+    for (let k = 0; k < 3; k++) recKayak(g, -.1, .52 + k * .4, 0, 0, RK.kayak[k]);
+    for (let k = 0; k < 3; k++) { box(.04, .04, 2.0, RK.paddle, .05, 1.5 + k * .06, 0, g); for (const e of [-1, 1]) box(.03, .16, .09, RK.kayak[(k + 1) % 4], .05, 1.5 + k * .06, e * 1.0, g); }
+    return { w: .5, d: 2.6, tall: true };
+  },
+  // the climbing wall: ochre and rust panels from the floor to the roof, four routes of coloured holds (one instanced
+  // mesh, coloured per hold), an auto-belay at the top of each with its rope down, and the brass bell at the very top
+  recClimbWall(g) {
+    const W_ = REC_WALL, len = W_.z1 - W_.z0, top = H - .12, zc = (W_.z0 + W_.z1) / 2;
+    box(.3, top, len, RK.wallOchre, W_.x, top / 2, zc, g);
+    for (let k = 0; k < 6; k++) { const p = box(.06, .7 + recHash(k, 4, 9) * .9, .9, RK.wallRust, W_.x + .17, .6 + k * (top - 1.3) / 5, W_.z0 + .5 + recHash(k, 5, 9) * (len - 1), g); p.rotation.x = (recHash(k, 6, 9) - .5) * .3; }
+    const holds = [], cols = [RK.holdC[0], RK.holdC[1], RK.holdC[2], RK.holdC[3]];
+    for (let r = 0; r < REC_ROUTES; r++) for (let k = 0; k < 11; k++) holds.push([W_.x + .19, .35 + k * (top - .7) / 10, W_.z0 + len * (r + .5) / REC_ROUTES + (recHash(r, k, 11) - .5) * .7, r]);
+    const im = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(.07, 0), RK.hold, holds.length), m4 = new THREE.Matrix4();
+    holds.forEach(([x, y, z, r], k) => { m4.makeScale(1, .8 + recHash(k, 1, 13) * .5, 1.2); m4.setPosition(x, y, z); im.setMatrixAt(k, m4); im.setColorAt(k, cols[r]); });
+    im.userData.noMerge = true; im.castShadow = true; g.add(im);
+    box(.08, .08, len - .2, RK.steel, W_.x + .3, top - .12, zc, g);   // two auto-belays on a rail along the top (plan v4: two climb at once)
+    for (const r of [1, 2]) { const z = W_.z0 + len * (r + .5) / REC_ROUTES; box(.2, .22, .2, RK.belay, W_.x + .3, top - .3, z, g); }
+    // the bell, on a bracket at the very top between the middle routes
+    box(.5, .06, .06, RK.brass, W_.x + .3, top - .05, zc, g); const bell = cyl(.09, .2, .26, RK.brass, W_.x + .5, top - .25, zc, g, 16); cyl(.03, .03, .05, RK.brass, W_.x + .5, top - .1, zc, g, 8);
+    return { w: .4, d: len, noBlock: true };
+  },
+});
+function recKayak(g, x, y, z, rot, m) {                  // a kayak: a long pointed hull, a dark cockpit rim (no R())
+  const k = new THREE.Group(); k.position.set(x, y, z); k.rotation.y = rot; g.add(k);
+  soft(m, 0, 0, 0, .3, .13, 1.3, k); cyl(.17, .17, .05, RK.black, 0, .1, .1, k, 14);
+}
+Object.assign(KIT, {
+  // the float room (0.80.5, R6): soft coral padding on its walls and slow light orbs drifting round the room (one
+  // instanced mesh in a group that turns, via SPINS). Room-local, 8 x 6; the lobby's glass is the north side
+  recFloatRoom(g) {
+    for (const [x, z, w, d] of [[4, 5.83, 7.7, .14], [.17, 3.1, .14, 5.5], [7.83, 3.1, .14, 5.5]]) for (let k = 0; k < 2; k++)
+      box(w, .44, d, k % 2 ? RK.padA : RK.padB, x, .24 + k * .46, z, g);                        // padded panels, waist high (taller ones hid the room from the camera)
+    const orbs = new THREE.Group(); orbs.position.set(4, 0, 3); g.add(orbs);
+    const im = new THREE.InstancedMesh(new THREE.SphereGeometry(.13, 12, 8), RK.orb, 9), m4 = new THREE.Matrix4();
+    for (let k = 0; k < 9; k++) { const a = k * .698, r = 1.2 + recHash(k, 2, 17) * 1.4; m4.makeTranslation(Math.cos(a) * r, 1.1 + recHash(k, 3, 17) * (H - 1.6), Math.sin(a) * r * .7); im.setMatrixAt(k, m4); }
+    im.userData.noMerge = true; im.castShadow = false; orbs.add(im); SPINS.push({ o: orbs, ax: 'y', w: .12 });
+    return { w: .1, d: .1, noBlock: true };
+  },
+  recProjector(g) {
+    box(.08, .9, .08, RK.black, 0, .45, 0, g); box(.5, .28, .4, RK.black, 0, 1.04, 0, g); cyl(.08, .09, .1, RK.steel, 0, 1.06, .24, g, 14).rotation.x = Math.PI / 2;
+    return { w: .5, d: .4 };
+  },
+});
+// the concourse's showpieces (0.80.8, the user's: "not nearly fun looking enough"): the big REC DEC sign on a gantry
+// across the concourse by the lift, bunting, murals, a signpost and a trophy case. Canvases drawn per visit, no R()
+Object.assign(KIT, {
+  recBigSign(g, o) {
+    const half = o.span / 2, y = H - 1.0;
+    for (const z of [-half, half]) { box(.12, y + .55, .12, RK.black, 0, (y + .55) / 2, z, g); box(.3, .04, .3, RK.black, 0, .02, z, g); }
+    box(.14, .1, o.span, RK.black, 0, y + .55, 0, g);
+    const t = tex(1024, 300, (c, w, h) => {
+      c.fillStyle = '#120b1c'; c.fillRect(0, 0, w, h); c.strokeStyle = '#50e6ff'; c.lineWidth = 8; c.shadowColor = '#50e6ff'; c.shadowBlur = 24; c.strokeRect(16, 16, w - 32, h - 32);
+      c.textAlign = 'center'; c.font = '900 168px system-ui,sans-serif'; c.shadowColor = '#ff4fd8'; c.shadowBlur = 40;
+      c.lineWidth = 10; c.strokeStyle = '#ff4fd8'; c.strokeText('REC DEC', w / 2, 192); c.fillStyle = '#ffe3fa'; c.fillText('REC DEC', w / 2, 192);
+      c.shadowBlur = 16; c.shadowColor = '#50e6ff'; c.fillStyle = '#bff6ff'; c.font = '700 34px system-ui,sans-serif'; c.fillText('THE RECREATION DECK  ·  OPEN 06:00 TO MIDNIGHT', w / 2, 258);
+    });
+    const m = new THREE.MeshBasicMaterial({ map: t, toneMapped: false });
+    for (const s of [1, -1]) { const p = new THREE.Mesh(new THREE.PlaneGeometry(o.span - .3, (o.span - .3) * 300 / 1024), m); p.rotation.y = s * Math.PI / 2; p.position.set(s * .06, y, 0); g.add(p); }
+    box(.08, (o.span - .2) * 300 / 1024, o.span - .2, RK.black, 0, y, 0, g);
+    return { w: .2, d: o.span, noBlock: true };
+  },
+  // a string of pennants across the concourse, four colours, sagging a little
+  recBunting(g, o) {
+    const n = 11, half = o.span / 2, cs = [RK.flagA, RK.flagB, RK.flagC, RK.flagD], tri = new THREE.Shape(); tri.moveTo(-.11, 0); tri.lineTo(.11, 0); tri.lineTo(0, -.24); tri.closePath();
+    const geo = new THREE.ShapeGeometry(tri);
+    for (let k = 0; k < n; k++) { const u = (k + .5) / n, z = -half + o.span * u, y = H - .55 - .35 * 4 * u * (1 - u); const f = new THREE.Mesh(geo, cs[k % 4]); f.position.set(0, y, z); f.rotation.y = Math.PI / 2; g.add(f); }
+    const line = box(.012, .012, o.span, RK.black, 0, H - .55 - .17, 0, g); line.scale.y = 1;
+    return { w: .1, d: o.span, noBlock: true };
+  },
+  recSignpost(g) {
+    box(.08, 2.3, .08, RK.black, 0, 1.15, 0, g);
+    [['POOL  ·  AUDITORIUM  →', '#50e6ff'], ['←  RIVERS  ·  WALL  ·  COURT', '#ff9a3c'], ['FLOAT ROOM  ↓', '#ff6fe0']].forEach(([txt, c_], k) => {
+      const t = tex(512, 80, (c, w, h) => { c.fillStyle = '#16181c'; c.fillRect(0, 0, w, h); c.fillStyle = c_; c.fillRect(0, 0, 10, h); c.fillStyle = '#f4f4f0'; c.font = '700 34px system-ui,sans-serif'; c.textBaseline = 'middle'; c.fillText(txt, 28, h / 2 + 2); });
+      const p = new THREE.Mesh(new THREE.BoxGeometry(1.25, .2, .04), [RK.black, RK.black, RK.black, RK.black, new THREE.MeshBasicMaterial({ map: t, toneMapped: false }), RK.black]); p.position.set(.1, 2.0 - k * .28, .07); g.add(p);
+    });
+    return { w: .3, d: .3, noBlock: true };
+  },
+  recTrophyCase(g, o) {
+    const w = o.w || 1.4;
+    box(w, .9, .45, RK.black, 0, .45, 0, g); box(w, .06, .47, RK.gold, 0, .93, 0, g);
+    box(w, .9, .04, RK.black, 0, 1.41, -.2, g);   // the back panel
+    for (let k = 0; k < 3; k++) { const x = -w / 2 + w * (k + .5) / 3; cyl(.05, .03, .08, RK.gold, x, 1.0, .05, g, 10); cyl(.09 - k * .015, .04, .2 + k * .04, RK.gold, x, 1.14 + k * .02, .05, g, 12); }
+    box(w + .02, .02, .47, RK.gold, 0, 1.87, 0, g);
+    return { w, d: .47 };
+  },
+});
+Object.assign(WALL_KIT, {
+  // a bold painted mural: diagonal bands in the deck's colours and the five things you can do here
+  recMural(g, o) {
+    const W_ = o.w || 1.9, Hh = W_ * .5;
+    const t = tex(512, 256, (c, w, h) => {
+      const cs = ['#1fa39b', '#ff6f61', '#ffd23f', '#50e6ff', '#ff4fd8', '#2a1d45'];
+      c.fillStyle = '#2a1d45'; c.fillRect(0, 0, w, h);
+      for (let k = -2; k < 9; k++) { c.fillStyle = cs[(k + 6) % 5]; c.beginPath(); c.moveTo(k * 70, h); c.lineTo(k * 70 + 40, h); c.lineTo(k * 70 + 40 + h * .6, 0); c.lineTo(k * 70 + h * .6, 0); c.closePath(); c.fill(); }
+      c.fillStyle = 'rgba(18,11,28,.72)'; c.fillRect(0, h * .3, w, h * .4);
+      c.textAlign = 'center'; c.fillStyle = '#ffffff'; c.font = '900 40px system-ui,sans-serif'; c.fillText(o.text || 'SWIM · PADDLE · CLIMB', w / 2, h * .5 + 14);
+    });
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(W_, Hh), new THREE.MeshBasicMaterial({ map: t, toneMapped: false })); p.position.set(o.off || 0, o.y || 2.45, .03); g.add(p);
+  },
+});
+DECKS[7] = {
+  num: 7, name: 'Recreation', seed: 70771, tall: 1.3, playerOnly: true, open: [6, 24],
+  blurb: 'Auditorium, court, pool, rivers', arrive: 'The concourse runs stern to bow: the rivers and the court aft, the pool and the auditorium forward.',
+  lift: [20, 9],
+  // car on columns 19-20, rows 7-9; trunks behind glass on row 6, the ladder on row 10: the same world spot as every deck
+  map: [
+    '..KKKKKKKKKKKKKKKwwwwwwPPPPPPPPPppAAAA........',
+    '.KKKKKKKKKKKKKKKKwwwwwwPPPPPPPPPppAAAAAA......',
+    '.KKKKKKKKKKKKKKKKwwwwwwPPPPPPPPPppAAAAAAAA....',
+    '.KKKKKKKKKKKKKKKKwwwwwwPPPPPPPPPppAAAAAAAAA...',
+    '.KKKKKKKKKKKKKKKKkkkkkkPPPPPPPPPppAAAAAAAAAA..',
+    '.KKKKKKKKKKKKKKKKkkkkkkPPPPPPPPPppAAAAAAAAAAA.',
+    '.KKKKKKKKKKKKKKKK++YY++PPPPPPPPPppAAAAAAAAAAA.',
+    '.rrr=============++@@++=======ffffAAAAAAAAAAA.',
+    '.rrr=============++@@++=======ffffAAAAAAAAAAAA',
+    '.rrr=============++@@++=======ffffAAAAAAAAAAAA',
+    '.rrr=============++ZZ++=======ffffAAAAAAAAAAA.',
+    '.eeeTTTTTTTTTTTTT++++++==uuubbbbbbAAAAAAAAAAA.',
+    '.eeeTTTTTTTTTTTTTFFFFFFFFuuubbbbbbAAAAAAAAAAA.',
+    '.eeeCCCCCCCCCCCCCFFFFFFFFuuubbbbbbAAAAAAAAAA..',
+    '.eeeCCCCCCCCCCCCCFFFFFFFFuuubbbbbbAAAAAAAAA...',
+    '.eeeCCCCCCCCCCCCCFFFFFFFFuuubbbbbbAAAAAAAA....',
+    '.eeeCCCCCCCCCCCCCFFFFFFFFuuubbbbbbAAAAAA......',
+    '..eeCCCCCCCCCCCCCFFFFFFFFuuubbbbbbAAAA........',
+  ],
+  // the plan's DOORSR. Changes: the court's gate is at h,14,13 (the stands' bow aisle; the plan had h,10,13, which the benches fill), and v,19,10 and v,21,10 are solid wall (not glass), so the lift's call panels sit beside
+  // the doors as on every deck. pass: a counter opening (the kit hire desk) or a rail with no pane (the court's).
+  doors: {
+    'v,19,7': 'lift', 'v,19,8': 'lift', 'v,19,9': 'lift', 'v,21,7': 'lift', 'v,21,8': 'lift', 'v,21,9': 'lift',   // one wide door each side
+    'v,19,6': 'glass', 'v,21,6': 'glass',                    // the trunks, behind glass above the car
+    'h,19,11': 'glass', 'h,20,11': 'hatch',                  // the ladder, with its hatch
+    'h,17,6': 'pass', 'h,18,6': 'pass', 'h,22,6': 'door',    // kit hire: the counter onto the lobby, and its door
+    'h,21,4': 'door',                                        // kit hire through to the changing rooms
+    'v,17,1': 'door', 'v,17,2': 'glass',                     // changing rooms to the river hall (the wet way)
+    'v,23,2': 'door', 'v,23,1': 'glass',                     // changing rooms to the pool (the wet way)
+    'h,9,7': 'door', 'h,10,7': 'door', 'h,5,7': 'glass', 'h,6,7': 'glass', 'h,7,7': 'glass', 'h,8,7': 'glass',
+    'h,11,7': 'glass', 'h,12,7': 'glass', 'h,13,7': 'glass', 'h,14,7': 'glass', 'h,15,7': 'glass',   // the river hall's viewing glass
+    'v,4,8': 'hatch',                                        // river pump room, off the concourse's aft end
+    'h,6,11': 'door', 'h,14,11': 'door', 'h,7,11': 'glass', 'h,8,11': 'glass', 'h,9,11': 'glass', 'h,10,11': 'glass',
+    'h,11,11': 'glass', 'h,12,11': 'glass', 'h,13,11': 'glass', 'h,15,11': 'glass',   // the stands, behind glass on the concourse
+    'h,10,13': 'pass', 'h,4,13': 'pass', 'h,5,13': 'pass', 'h,6,13': 'pass', 'h,7,13': 'pass', 'h,8,13': 'pass', 'h,9,13': 'pass',
+    'h,11,13': 'pass', 'h,12,13': 'pass', 'h,13,13': 'pass', 'h,14,13': 'door', 'h,15,13': 'pass', 'h,16,13': 'pass',   // the court's rail and its gate (0.80.2: at column 14, the stands' bow aisle, near your baseline)
+    'v,4,15': 'hatch',                                       // the court's emitter room
+    'h,26,7': 'door', 'h,23,7': 'glass', 'h,24,7': 'glass', 'h,25,7': 'glass', 'h,27,7': 'glass', 'h,28,7': 'glass', 'h,29,7': 'glass',   // the pool's gallery
+    'v,32,3': 'hatch',                                       // pool plant, from the pool deck
+    'v,34,7': 'door', 'v,34,8': 'door', 'v,34,9': 'door', 'v,34,10': 'door',   // foyer into the auditorium: four wide doors
+    'h,26,11': 'door',                                       // washroom
+    'h,18,12': 'door', 'h,17,12': 'glass', 'h,21,12': 'glass', 'h,22,12': 'glass', 'h,23,12': 'glass', 'h,24,12': 'glass',   // float room
+    'h,31,11': 'hatch', 'v,34,12': 'glass', 'v,34,11': 'hatch',   // rec utility room: from the foyer, the booth window and the stage door
+  },
+  plates: [['h,21,6', 's', 'Recreation Deck'], ['h,22,4', 's', 'Changing rooms'], ['h,16,7', 's', 'River hall'], ['h,5,11', 'n', 'Stands'],
+    ['h,30,7', 's', 'Pool gallery'], ['h,25,11', 'n', 'Washroom'], ['h,19,12', 'n', 'Float room']],
+  rooms: {
+    '=': { name: 'Concourse', floor: 'concourse', hall: true, rec: true },
+    '+': { name: 'Lift lobby', floor: 'concourse', hall: true, rec: true },
+    f: { name: 'Foyer', floor: 'concourse', hall: true, rec: true },
+    '@': { name: 'Main lift', floor: 'lift' },
+    Y: { name: 'Spine trunks', floor: 'grate', spine: true }, Z: { name: 'Spine ladder', floor: 'grate', spine: true },
+    A: { name: 'Auditorium', floor: 'violet', rec: true },
+    C: { name: 'Lightdisc court', floor: 'court', rec: true },
+    T: { name: 'Stands', floor: 'stand', rec: true },
+    K: { name: 'River hall', floor: 'river', rec: true },
+    P: { name: 'Pool', floor: 'pooltile', rec: true },
+    F: { name: 'Float room', floor: 'pad', rec: true },
+    w: { name: 'Changing rooms', floor: 'tile', rec: true },
+    k: { name: 'Kit hire', floor: 'sport', rec: true },
+    u: { name: 'Washroom', floor: 'tile', rec: true },
+    // service rooms: Works and you, through hatches (their machines come with the systems engineer; section 6 of the plan)
+    b: { name: 'Rec utility room', floor: 'svc', rec: true, still: true },
+    r: { name: 'River pump room', floor: 'svc', rec: true, still: true },
+    p: { name: 'Pool plant', floor: 'svc', rec: true, still: true },
+    e: { name: 'Emitter room', floor: 'svc', rec: true, still: true },
+  },
+  windows: ['P', 'K', 'A'].map(room => ({ room })),
+  closedDoors: {
+    'h,20,11': { t: 'Spine ladder', x: 'The maintenance ladder, up to Quarters and down to Operations, through the rec dec on the way. Tier 2 access.' },
+  },
+  hull: { sternX: 1, stern: 2, bowFrom: 34, bowLen: 11.6, byFace: true },
+  service: [{ key: 'v,4,8', tier: 2 }, { key: 'v,4,15', tier: 2 }, { key: 'v,32,3', tier: 1 }, { key: 'h,31,11', tier: 1 }, { key: 'v,34,11', tier: 1 }],
+  machines: [],                                          // TODO (phase 2, the systems engineer): the plan's section 6 machines
+  // the auditorium's seats (0.80.1): reached from the aisle beside their row; a type no crew code knows, so they stay the player's
+  places: REC_SEATS.map((s, k) => ({ id: '7-seat-' + (k + 1), type: 'rec:seat', at: [s.col, Math.floor(s.z)], walk: [s.col, s.aisle], face: 'e', pose: 'sit', room: 'A', xy: [s.x, s.z], y: Math.round((s.h + .47) * 100) / 100 }))
+    // the stands' 33 seats (0.80.2), facing the court, reached from the aisle at column 6 or 14
+    .concat(REC_STAND_SEATS.map((s, k) => ({ id: '7-stand-' + (k + 1), type: 'rec:seat', at: [s.col, s.tier ? 12 : 11], walk: [s.aisle, s.tier ? 12 : 11], face: 's', pose: 'sit', room: 'T', xy: [s.col + .5, s.z + .02], y: Math.round((s.h + .45) * 100) / 100 })))
+    // the concourse's two beanbags (0.80.9, the user's): lounge seats like the music room's, so crew can use them in phase 2
+    .concat([[5, 5.5, 7.45], [6, 6.6, 7.55]].map(([c, x, z], k) => ({ id: '7-beanbag-' + (k + 1), type: 'lounge-seat', at: [c, 7], walk: [c, 8], face: 's', pose: 'sit', room: '=', xy: [x, z], y: .42, cush: .32 }))),
+  dress(d) {
+    recMats();
+    for (const [key, tw, text] of d.plates) placeOnEdge('plate', key, tw, { text });
+    for (const [key, tw] of [['v,19,10', 'w'], ['v,21,10', 'e']]) placeOnEdge('liftPanel', key, tw);
+    placeOnEdge('deckDirectory', 'h,20,12', 'n', { it: IT('Deck directory', 'Seven decks, top to bottom. Bridge, Command & Science, Commons, Quarters, the Recreation Deck (R), Operations, Engineering. You are here: the rec dec, between Quarters and Operations.') });
+    for (const r of ['Y', 'Z']) NO_FADE.add(r);
+    place('Y', 'spineTrunks', 1, .5, 'n', { it: SPINE_IT.trunks });
+    place('Z', 'spineLadder', 1, .5, 'n', { it: { t: 'Spine ladder', x: 'The maintenance ladder, passing through on its way from Quarters down to Operations.', see: true } });
+    // kit hire (6 x 2): self-serve shelves on the back wall, the counter at the lobby's opening, a returns bin and the sign
+    for (const x of [.7, 1.95, 3.2]) place('k', 'shelving', x, .33, 'n', { it: IT('Kit shelves', 'Rec kit in every size, towels, helmets, buoyancy vests, paddles, climbing shoes and harnesses, disc gloves and grip socks. Nobody staffs it: take what you need.') });
+    place('k', 'counter', 1.0, 1.62, 's', { it: IT('Kit hire', 'A self-serve counter onto the lobby. Someone has left a single flipper on it.') });
+    place('k', 'hamper', 5.45, .4, 'n', { snug: true, it: IT('Returns bin', 'Wet towels and used kit go in here. It is always fuller than it should be.') });
+    placeWall('k', 'plate', 'e', .5, { text: 'PUT IT BACK' });
+    // changing rooms (6 x 4): lockers on the hull wall, a bench down the middle, two showers in the aft corner, lost property
+    for (const x of [1.0, 2.35, 3.7]) place('w', 'locker', x, .42, 'n', { it: IT('Lockers', 'Rec dec lockers. Yours is whichever one is free; the keys are on stretchy wristbands.') });
+    place('w', 'bench', 2.6, 2.5, 'n', { w: 2.2, snug: true, it: IT('Bench', 'Wet, always. Someone has written SIT HERE on a towel.') });
+    for (const x of [.65, 1.9]) place('w', 'showerStall', x, 3.38, 's', { it: IT('Shower', 'A quick rinse before the pool and after it. The hot water takes a moment to remember.') });
+    place('w', 'footlocker', 5.35, .32, 'n', { it: IT('Lost property', 'Odd socks, a single earring, three water bottles, and a goggle strap with no goggles.') });
+    // washroom (3 x 7): four stalls on the bow side, a row of basins opposite
+    for (const z of [1.9, 3.1, 4.3, 5.5]) place('u', 'toiletStall', 2.45, z, 'e');
+    place('u', 'basinCounter', .38, 3.5, 'w', { w: 2.6, it: IT('Basins', 'A long row of basins for the interval queue.') });
+    // the concourse: a towel bin by the lobby (0.80.2: its two benches went; the stands fill that glass now)
+    // 0.80.8 (the user's: livelier, busier): the REC DEC gantry sign by the lift, bunting, murals, beanbags, plants, benches,
+    // a water station and a drinks fridge, a trophy case, a signpost; all along the edges, clear of every door and the lanes' middle
+    place('+', 'recBigSign', .6, 3.0, 'n', { span: 3.4,   // 0.82.8 (the user's): the lift's stern side again, but in the lobby, in front of the wall that hid it (0.82.5 had it east of the lift)
+      it: IT('REC DEC', 'A gantry across the concourse with REC DEC in pink neon, two storeys up. You can see it the moment the lift doors open.') });
+    place('=', 'recBunting', 8.5, 2.0, 'n', { span: 3.8 });   // 0.80.9 (the user's: a little too busy): one string, and fewer things below
+    for (const [x, z, f] of [[1.5, .5, RK.padA], [2.6, .6, RK.kayak[1]]]) place('=', 'beanbag', x, z, 'n', { fab: f, it: IT('Beanbag', 'A big squashy beanbag, still warm. Someone is always about to get up from it.') });
+    for (const [x, z] of [[.4, .35], [25.6, .35]]) place('=', 'plant', x, z, 'n');
+    place('=', 'dispenser', 11.5, 3.65, 's', { it: IT('Water station', 'Cold water and a stack of cups. A sign says DRINK BEFORE YOU CLIMB.') });
+    place('=', 'drinksFridge', 25.5, 3.6, 's', { it: IT('Drinks fridge', 'Fizzy lime, cold tea and something blue called RIPTIDE.') });
+    place('=', 'recTrophyCase', 23.9, 3.7, 's', { w: 1.4, it: IT('Trophy case', 'Three gold cups and an empty shelf, waiting for this season\'s winners.') });
+    placeOnEdge('recMural', 'v,4,9', 'e', { w: 1.9, off: -.5, text: 'SWIM · PADDLE · CLIMB', it: IT('Mural', 'A bold mural in teal, coral and neon: SWIM, PADDLE, CLIMB.') });
+    place('+', 'recSignpost', 4.4, 5.4, 'n',   // 0.82.5: in the lobby's open floor, its boards clear of the wall (was 5.6, 5.5)
+      { it: IT('Signpost', 'Pool and auditorium forward, rivers, wall and court aft, the float room through the glass.') });
+    place('=', 'hamper', 12.4, .45, 'n', { snug: true, it: IT('Towel bin', 'For wet towels from the river hall. It smells of chlorine and good intentions.') });
+    // the auditorium (0.80.1, R2): the rake and its 76 seats, the stage against the bow windows, the truss, lectern, piano and screen
+    const rake = []; for (let c = 1; c <= 6; c++) for (const [z0, z1] of REC_BLOCKS) for (let z = z0; z < z1; z++) rake.push([c, z]);
+    place('A', 'recRake', 0, 0, 'n', { block: rake });
+    REC_BLOCKS.forEach(([z0, z1], b) => place('A', 'recHit', 3.5, (z0 + z1) / 2, 'n', { w: 6, d: z1 - z0, hitH: 1.6, it: IT('Seats', ['The side seats by the hull: a good view of the piano, and nobody climbing over you.', 'The middle block. Deep violet seats with gold numbers on their backs, all facing the stage and the stars behind it.', 'The side seats on the starboard side, nearest the booth window. The sound is best here, they say.'][b]) }));
+    const stage = []; for (let j = 0; j < 18; j++) for (let c = 8; c < 12; c++) { const v = (j + .5 - 9) / REC_STAGE.rz; if (Math.abs(v) < 1 && c + .5 < REC_STAGE.back * Math.sqrt(1 - v * v)) stage.push([c, j]); }
+    place('A', 'recStage', 0, 0, 'n', { block: stage });
+    place('A', 'recHit', 9.3, 9, 'n', { w: 2.6, d: 9, hitH: .8, it: IT('Stage', 'A curved stage across the bow, and behind it nothing but the windows and the stars. Every show here is played against them.') });
+    place('A', 'recTruss', 9.6, 9, 'n', { len: 8, it: IT('Lighting truss', 'A gold truss over the stage on two towers, with six lamps aimed down. The booth runs them.') });
+    place('A', 'recScreen', 10.3, 9, 'n', { len: 6 });
+    place('A', 'recLectern', 8.8, 7.3, 'e', { it: IT('Lectern', 'The Captain\'s lectern, with the Wren\'s crest on the front. The microphone is bent at exactly her height.') });
+    place('A', 'grandPiano', 9.4, 12.4, 'w', { it: IT('Grand piano', 'A black grand piano at stage left, lid propped. Someone keeps it tuned, and nobody admits to it.') }).position.y = .55;
+    // the foyer: the REC DEC neon over the four doors, the deck's poster, a bench
+    placeWall('f', 'recNeon', 'e', 2.0, { hitW: 2.4, it: IT('REC DEC', 'A curved pink neon over the auditorium\'s doors. The official sign, RECREATION DECK, was too long to fit.') });
+    placeWall('f', 'recPoster', 'n', 2.5, { it: IT('Poster', 'THE REC DEC: pool, rivers, climbing wall, float room, Lightdisc. Open 06:00 to midnight.') });
+    place('f', 'bench', 2.9, 3.55, 's', { w: 1.6, snug: true, it: IT('Bench', 'Outside the auditorium doors. Good for waiting, and for hearing the piano through them.') });
+    // the Lightdisc court and its stands (0.80.2, R3): lines, the net and side fields, the scoreboard (static), the benches
+    place('C', 'recCourt', 0, 0, 'n');
+    place('C', 'recHit', 6.5, 2.5, 'n', { w: 12.6, d: 4.6, hitH: .3, it: IT('Lightdisc court', 'A black court with glowing lines, cyan at the bow end and orange at the stern, and a shimmering force-field net across the middle. Tap it, or the panel by the gate, to ask someone down to play.') });
+    placeWall('C', 'recScoreboard', 'w', 2.5, { hitW: 2.8, it: IT('Scoreboard', 'Two storeys of scoreboard on the stern wall. It keeps the score of the game on the court.') });
+    placeOnEdge('recPlayPanel', 'h,15,13', 's', { it: IT('Ask someone to play', 'A panel by the court gate: ASK SOMEONE TO PLAY.') });
+    // 0.80.10 (the user's): the stands look straight onto the court: its rail is a low kick board, no header, no posts above it
+    for (let i = 4; i <= 16; i++) { const e = EDGES.get('h,' + i + ',13'); if (e) e.rail = true; }
+    for (const p of POSTS) if (p.touch.every(e => e.rail)) p.rail = true;
+    writeWalls();
+    const stands = []; for (const [c0, c1] of REC_STANDS) for (let c = c0; c < c1; c++) stands.push([c - 4, 0], [c - 4, 1]);
+    place('T', 'recStands', 0, 0, 'n', { block: stands });
+    // the pool (0.80.3, R4): the raised basin with its water, lanes and mosaic; loungers on the inboard side; the first-aid point
+    const pool = []; for (let c = 1; c <= 7; c++) for (let z = 1; z <= 4; z++) pool.push([c, z]);
+    place('P', 'recPool', 0, 0, 'n', { block: pool });
+    place('P', 'recHit', 4.5, 2.7, 'n', { w: 7.4, d: 3.6, hitH: .5, it: IT('Pool', 'Four short lanes under the hull windows, with the Wren in mosaic on the bottom and the stars beside you. Warm, and very blue.') });
+    for (const x of [1.4, 4.6, 6.6]) place('P', 'recLounger', x, 6.55, 'e', { it: IT('Lounger', 'A lounger by the pool, facing the windows. Still damp from someone.') });
+    placeWall('P', 'recFirstAid', 'e', 5.6, { it: IT('First-aid point', 'A first-aid kit, a foil blanket and an alarm button that rings in the infirmary. There\'s no lifeguard; this, and the shallow end, are the safety.') });
+    // the river hall (0.80.4, R5): the river loop, the island, the wave gate, the dock and kayaks, the rack, the climbing wall and bell
+    const river = []; for (let c = 3; c <= 13; c++) for (let z = 0; z <= 5; z++) river.push([c, z]);
+    place('K', 'recRiver', 0, 0, 'n', { block: river });
+    place('K', 'recHit', 8.3, 1.3, 'n', { w: 10.6, d: 1.6, hitH: .5, it: IT('White water', 'The fast run, along the windows: white water over a hidden ramp, kayakers bracing through the standing wave by the gate.') });
+    place('K', 'recHit', 8.3, 4.8, 'n', { w: 10.6, d: 1.6, hitH: .5, it: IT('River', 'The slow return channel, wide and green-blue, where you get your breath back before the next lap.') });
+    place('K', 'recHit', 10.4, 5.3, 'n', { w: 2.4, d: .9, hitH: .7, it: IT('Kayak dock', 'A wooden dock on the bank, a pebble beach beside it, and kayaks bumping gently at the edge.') });
+    place('K', 'recHit', 11.3, 1.3, 'n', { w: .5, d: 2.0, hitH: 1.8, it: IT('Wave gate', 'A steel gate across the fast run that kicks up a standing wave. Its lights go blue when it\'s running.') });
+    place('K', 'recKayakRack', 15.6, 3.7, 'n', { it: IT('Kayak rack', 'Red, yellow and blue kayaks on the rack, paddles and helmets alongside. The green one is always out.') });
+    place('K', 'recClimbWall', 0, 0, 'n', { block: [2, 3, 4, 5, 6].map(z => [0, z]) });
+    place('K', 'recHit', .55, 4.3, 'n', { w: .6, d: 4.6, hitH: 2.4, it: IT('Climbing wall', 'Ochre and rust rock from the floor to the roof: four routes in red, yellow, blue and green holds, an auto-belay at the top of each, and the brass bell at the very top.') });
+    // the float room (0.80.5, R6): padding, drifting light orbs, the gravity sign
+    place('F', 'recFloatRoom', 0, 0, 'n');
+    place('F', 'recHit', 4, 3, 'n', { w: 7.4, d: 5.4, hitH: .4, it: IT('Float room', 'Soft coral padding, slow light orbs, and the gravity turned down to about a fifth. Everyone who goes in comes out grinning.') });
+    placeOnEdge('plate', 'h,19,12', 's', { text: 'GRAVITY 0.2 g' });
+    // the service rooms (0.80.5, R6), Works and you through their hatches. TODO (phase 2, the systems engineer): their
+    // machines entries (the plan's section 6: 7-river-pump-1/-2, 7-pool-filter-1/-2, 7-pool-dosing, 7-pool-heat, 7-court-net,
+    // 7-court-board, 7-aud-lights, 7-aud-sound, 7-grav-plates...) with panel tiles and work:works places
+    for (const z of [.95, 3.05]) place('r', 'pumpSkid', .7, z, 'w', { it: IT('River pump', 'One of two big current pumps that drive the rivers round. The fast run needs both.') });
+    place('r', 'utilShelf', 2.2, .25, 'n', { it: IT('Pump spares', 'Impellers, seals and a bearing in its box, labelled in Maeve\'s capitals.') });
+    placeWall('r', 'workLight', 'e', 3.5);
+    for (const z of [1.2, 5.6]) place('p', 'filterBank', 1.5, z, 'e', { it: IT('Pool filter', 'A sand filter for the pool. Seventy-five people, and they all shed.') });
+    place('p', 'circPump', 1.55, 3.5, 'e', { it: IT('Water balance', 'The pool\'s doser and its heat exchanger\'s pump, side by side. The top-up water comes down from the recycler.') });
+    for (const z of [1.0, 2.0]) place('e', 'powerCabinet', .3, z, 'w', { it: IT('Emitter power', 'The court\'s force-field power units, humming a little higher than anything else aboard.') });
+    place('e', 'relayBank', .35, 3.6, 'w', { w: 1.6, it: IT('Emitters', 'The net and side-wall emitters\' controls, and the scoreboard\'s driver.') });
+    placeWall('e', 'workLight', 'e', 1.5);
+    place('b', 'controlBoard', 5.55, 1.6, 'e', { w: 1.6, it: IT('Lighting desk', 'The booth\'s lighting desk, under the window onto the stage. Every fader is labelled; two are labelled DON\'T.') });
+    place('b', 'chair', 4.85, 1.6, 'w');
+    place('b', 'recProjector', 5.4, 3.0, 'e', { it: IT('Projector', 'The auditorium\'s projector, aimed through the booth window at the screen over the stage.') });
+    place('b', 'relayBank', .35, 2.5, 'w', { w: 2.0, it: IT('Dimmer racks', 'The stage lights\' dimmers, rack after rack.') });
+    for (const z of [4.3, 5.3]) place('b', 'powerCabinet', .3, z, 'w', { it: IT('Sound rack', 'Amplifiers and the lectern microphone\'s receiver.') });
+    placeWall('b', 'relayBoard', 's', 2.0, { it: IT('Gravity plates', 'The float room\'s gravity plate controller, set to 0.2 g, with its cooling beside it.') });
+    place('b', 'expansionTank', 3.5, 6.55, 's');
+    place('b', 'dispenser', 4.55, 6.6, 's', { it: IT('Kettle', 'A kettle and a tin of tea for whoever runs the lights.') });
+    place('b', 'medCabinet', 5.5, 6.6, 's', { it: IT('First-aid locker', 'Plasters, cold packs and a sign: FLOAT ROOM BUMPS GO IN THE BOOK.') });
+    place('b', 'utilShelf', 5.6, 4.6, 'e', { it: IT('Seat spares', 'Hinges, springs and a box of gold seat numbers.') });
+    REC_STANDS.forEach(([c0, c1], b) => place('T', 'recHit', (c0 + c1) / 2 - 4, 1, 'n', { w: c1 - c0, d: 2, hitH: 1.3, it: IT('Stands', ['Three stepped benches at the stern end, by the scoreboard.', 'The middle of the stands: three stepped benches, right on the net. The best seats for a close game.', 'Three stepped benches at the bow end, by the gate onto the court.'][b]) }));
+  },
+};
+// the rec deck's materials, made when the deck is built (so they are freed with it)
+let RK = null;
+function recMats() {
+  RK = {
+    seat: std('#4a2f86', .8), seatDark: std('#22192f', .7, .2), gold: std('#d9b45a', .35, .7), rake: std('#2b2140', .9),
+    stageTop: M.wood, stageSide: std('#1d1630', .7), truss: std('#c9a24a', .4, .7), black: std('#16181c', .6, .3), wood: std('#6b4a32', .6), screen: std('#e8e6df', .9),
+    standStep: std('#3a404a', .85), bench: std('#c9783a', .6),
+    rim: std('#d8e6e4', .45), coping: std('#f2f0ea', .4), poolSide: std('#6fc3c9', .4), mosaic: new THREE.MeshStandardMaterial({ map: recMosaic(), roughness: .4 }),
+    poolWater: recWater('#1f8fa6', '#4fd0dc', { alpha: 1 }), ropeOrange: std('#ff8a3a', .5), ropeWhite: std('#f4f4f0', .5),
+    rock: std('#6f8a7c', .9), rockDark: std('#4f6559', .9), riverBed: std('#6fc3c9', .4), fern: std('#3f8a4a', .8),
+    riverFast: recWater('#1f8fa6', '#4fd0dc', { foam: .9, flow: 1.4, alpha: 1 }),   // 0.82.5 (the user's: still two looks): one water, opaque so the bed under it can't tint it; the fast run adds only its foam
+      // 0.80.9: the pool's water (the user's: they didn't match)
+    steel: std('#8a959c', .4, .6), gateLight: new THREE.MeshBasicMaterial({ color: col('#50e6ff'), toneMapped: false }), dock: std('#a0703f', .7), dockDark: std('#5a3d22', .8),
+    kayak: ['#e0412f', '#f2c230', '#2f6fe0', '#3fbf5a'].map(c => std(c, .45, .1)), paddle: std('#2a2f36', .5, .3),
+    wallOchre: std('#c08a3e', .95), wallRust: std('#9a4a28', .95), hold: std('#ffffff', .6), holdC: ['#ff4f6d', '#ffd23f', '#3fa9ff', '#5ee06a'].map(col),
+    belay: std('#30363d', .5, .4), rope: std('#ff8a3a', .7), brass: std('#d9a441', .3, .8),
+    loungerFrame: std('#e8e8e2', .4, .3), padA: std('#e3907f', .95), padB: std('#d77f73', .95),
+    orb: new THREE.MeshBasicMaterial({ color: col('#ffd0e4'), toneMapped: false }),
+    flagA: std('#ff6f61', .7, 0, { side: THREE.DoubleSide }), flagB: std('#ffd23f', .7, 0, { side: THREE.DoubleSide }), flagC: std('#50e6ff', .7, 0, { side: THREE.DoubleSide }), flagD: std('#ff4fd8', .7, 0, { side: THREE.DoubleSide }), loungerPad: std('#2f9fb0', .8), aidWhite: std('#f2f2ee', .5), aidRed: std('#d8322e', .5),
+    lineOrange: new THREE.MeshBasicMaterial({ color: col('#ff9a3c'), toneMapped: false }), lineCyan: new THREE.MeshBasicMaterial({ color: col('#50e6ff'), toneMapped: false }),
+    lineWhite: new THREE.MeshBasicMaterial({ color: col('#e8eef0'), toneMapped: false }),
+    net: new THREE.MeshBasicMaterial({ color: col('#bfe6ff'), transparent: true, opacity: .2, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, toneMapped: false }),
+    field: new THREE.MeshBasicMaterial({ color: col('#50e6ff'), transparent: true, opacity: .05, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, toneMapped: false }),
+  };
+  PULSES.push({ m: RK.net, key: 'opacity', base: .14, amp: .16, w: 3.1, ph: 0 }, { m: RK.field, key: 'opacity', base: .03, amp: .04, w: 1.3, ph: 1 });   // the net shimmers, the side fields breathe
+}
+
+// =====================================================================
 // 5. LIGHTING
 // The sun casts all shadows and follows the camera, snapped to shadow
 // texels so edges don't shimmer. Lamps come up at night.
@@ -8098,7 +8726,7 @@ function sleepUntil(min) {
 const FREEZE = { frozen: false, at: 0, ms: 0 };
 function simNow() { return (FREEZE.frozen ? FREEZE.at : performance.now()) - FREEZE.ms; }
 function freezeSync() {
-  let f = false; try { f = !!(PAUSE.on || PAUSE.tiles && PAUSE.tiles()); } catch (e) { f = false; }
+  let f = false; try { f = !!(PAUSE.on || PAUSE.tiles && PAUSE.tiles() || PAUSE.disc && PAUSE.disc()); } catch (e) { f = false; }   // PAUSE.disc: a game of Lightdisc (section 23b, 0.82.0)
   if (f === FREEZE.frozen) return f;
   const n = performance.now();
   if (f) FREEZE.at = n; else { const d = n - FREEZE.at; FREEZE.ms += d; if (typeof pauseShift === 'function') pauseShift(d); }
@@ -8161,7 +8789,7 @@ function loadGame() {
 }
 const SAVED = loadGame();
 // where you start: the save's deck, tile and facing, or Deck 4 at PLAYER_SPEC.start (section 10 reads this)
-const START = SAVED ? { deck: SAVED.player.deck, tile: SAVED.player.tile, face: SAVED.player.facing } : { deck: SHIP_START.deck };
+const START = SAVED && (REC_DECK || SAVED.player.deck !== 7) ? { deck: SAVED.player.deck, tile: SAVED.player.tile, face: SAVED.player.facing } : { deck: SHIP_START.deck };   // REC_DECK off: a save on the rec deck starts at the usual place
 if (SAVED) {
   SHIP.time.day = SAVED.time.day; SHIP.time.min = SAVED.time.min;
   const decks = (SAVED.ship && SAVED.ship.decks) || {};
@@ -8318,7 +8946,7 @@ function schedData() {
   // below; those only for an event (type 'event', or Deck 1's handover and walk) are kept out of everyday use, while
   // everyday seats an event also uses (the observatory's window seats) stay in it
   const EVENT_ONLY = new Set(['handover', 'walk']), evPlaces = [];
-  for (const n of Object.keys(DECKS).map(Number)) for (const p of (DECKS[n].places || [])) if (!p.machine) (p.event && (p.type === 'event' || EVENT_ONLY.has(p.event)) ? evPlaces : places).push({ ...p, deck: n });
+  for (const n of Object.keys(DECKS).map(Number)) if (!DECKS[n].playerOnly) for (const p of (DECKS[n].places || [])) if (!p.machine) (p.event && (p.type === 'event' || EVENT_ONLY.has(p.event)) ? evPlaces : places).push({ ...p, deck: n });
   const byId = new Map(places.concat(evPlaces).map(p => [p.id, p]));
   // private places: one named after a bed ('4-05-wash') belongs to whoever sleeps there, and so does any place
   // in a room with a bed place in it (an en-suite, a desk, an armchair). In a room of several beds (a bunk room)
@@ -10446,8 +11074,8 @@ deviceApp({ id: 'maps', title: 'Maps', icon: 'map', order: 25,
     }
     const you = n === deckDef.num && typeof player !== 'undefined' ? player.here() : null;
     const g = typeof IX_GOAL !== 'undefined' && IX_GOAL && IX_GOAL.deck === n ? IX_GOAL : null;
-    const B = [{ kind: 'text', text: 'Deck' }, { kind: 'buttons', items: Object.keys(DECKS).map(Number).sort((a, b) => a - b).map(d => ({ label: String(d), on: d === n, action: { app: 'maps', do: 'deck', arg: d } })) },
-      { kind: 'text', text: 'Deck ' + n + ': ' + def.name + (n === deckDef.num ? ' (you are here)' : ''), mark: 'head' },
+    const B = [{ kind: 'text', text: 'Deck' }, { kind: 'buttons', items: DECK_ORDER.filter(d => DECKS[d]).map(d => ({ label: deckLabel(d), on: d === n, action: { app: 'maps', do: 'deck', arg: d } })) },
+      { kind: 'text', text: deckWord(n) + ': ' + def.name + (n === deckDef.num ? ' (you are here)' : ''), mark: 'head' },
       { kind: 'map', grid: def.map, rooms, you, pick: mapPick, goal: g ? (g.room && typeof g.room === 'string' ? g.room : null) : null, action: { app: 'maps', do: 'pick' } }];
     if (mapFor === 'appointments') {
       if (!apptDraft) mapFor = null;
@@ -10642,7 +11270,7 @@ function apptPlaces() {                                  // [{ id, name, deck }]
   if (apptPlacesCache) return apptPlacesCache;
   const out = [];
   for (const n of Object.keys(DECKS).map(Number).sort((a, b) => a - b)) {
-    const def = DECKS[n], rooms = def.rooms || {}, seen = new Set();
+    const def = DECKS[n], rooms = def.rooms || {}, seen = new Set(); if (def.playerOnly) continue;
     for (const pl of def.places || []) {
       const r = rooms[pl.room]; if (!r || seen.has(pl.room) || !APPT_PLACE_ROOMS.test(r.name || '') || mapLocked(n, pl.room)) continue;
       if (!APPT_SEATS.includes(pl.type) && !/office|infirmary/i.test(r.name)) continue;
@@ -11937,7 +12565,8 @@ function actUpdate(dt, t) {
       if (ln && !go(ln.x, ln.z)) pose = 'walk'; else if (ln) A.face = ln.face;
       if (ln) player.obj.position.set(A.x, 0, A.z);       // you are where your stand-in is (the camera follows; no walk back after)
     }
-    if (A.def.until ? A.def.until(A) : A.done >= A.def.mins) { A.phase = 'out'; A.y = 0; }
+    if (A.o.move && typeof recMoveStep === 'function') pose = recMoveStep(A, dt, t) || pose;   // a rec deck move (0.81.x, 8c): swim, paddle, climb, float
+    if (A.o.move ? A.mv && A.mv.done : A.def.until ? A.def.until(A) : A.done >= A.def.mins) { A.phase = 'out'; A.y = 0; }
     bunkSleep(A);                                        // lying down at night: to sleep (0.28.29)
   }
   if (A.phase === 'out') {
@@ -13586,7 +14215,7 @@ function ixFrame() {
   if (typeof actProgress === 'function' && actProgress(ACT)) { if (!el.hidden) el.hidden = true; return; }   // section 15's progress bar is up over you: it says it all
   const here = deckDef.num === g.deck, w = here ? ixGoalWorld(g) : { x: LIFT_AT[0], z: LIFT_AT[1] };
   if (!w) { el.hidden = true; return; }
-  const label = here ? g.label : 'Take the lift to Deck ' + g.deck + (g.label ? ': ' + g.label.charAt(0).toLowerCase() + g.label.slice(1) : '');
+  const label = here ? g.label : 'Take the lift to ' + (g.deck === 7 ? 'the rec deck' : 'Deck ' + g.deck) + (g.label ? ': ' + g.label.charAt(0).toLowerCase() + g.label.slice(1) : '');
   ixV.set(w.x, 1.2, w.z).project(camera);
   // the arrow keeps inside a frame clear of the HUD at the top and the toast at the bottom
   const W2 = innerWidth / 2, H2 = innerHeight / 2, sx = (ixV.x + 1) * W2, sy = (1 - ixV.y) * H2, L0 = 30, R0 = innerWidth - 30, T0 = 130, B0 = innerHeight - 110;
@@ -13692,6 +14321,115 @@ let trkAt = 0;
   trkPlace();
   if (!trkEl.hidden && trkSig !== trkKey()) trkDraw();
 })();
+
+// =====================================================================
+// 15r. THE REC DECK'S ACTIVITIES (the rec deck architect, 0.80.6-0.80.7; plans/recdeck-plan.html section 9 "For you: tap and do")
+// One tap each, for the player only (phase 1): the pool (swim lengths), the kayak dock and the rivers (paddle the loop),
+// the climbing wall (climb, ring the bell, be lowered), the float room (float), an auditorium seat (sit), the stands
+// (watch). Each is a section 15 activity, so walking away stops it and the needs work as everywhere; the moving ones use
+// section 8c's mover (RA1's actStart(kind, place, { move }): REC_MOVES, recMoveStep), its rec kit (playerKit) and its
+// locker change (PLAYER_ACTS.recChange). The pool and the kayaks need rec kit: in uniform you go to a locker first, and
+// when you're done you come back for a quick shower (a towel over your shoulder after) and change back; the first time a
+// tip says so. Leaving the deck puts your uniform back on. Outside 06:00-midnight: "The rec dec's closed till six."
+// Lightdisc's court, scoreboard and its Ask someone to play panel say it's coming soon. Nothing here calls R().
+// =====================================================================
+Object.assign(PLAYER_ACTS, {
+  recSwim:   { need: 'leisure', gain: 25, mins: 15, cost: { energy: 8 }, also: { hygiene: 10, fitness: 15 }, pose: 'tread', title: 'Swimming', done: 'Your lengths done. You climb out tingling.' },
+  recKayak:  { need: 'leisure', gain: 25, mins: 15, cost: { energy: 6 }, also: { fitness: 15 }, pose: 'kayak', title: 'Kayaking', done: 'You bring the kayak in to the dock, soaked and grinning.' },
+  recClimb:  { need: 'leisure', gain: 20, mins: 8, cost: { energy: 6 }, also: { fitness: 8 }, pose: 'climb', title: 'Climbing', done: 'Back on the floor. Your arms are jelly. You rang the bell, though.' },
+  recFloat:  { need: 'leisure', gain: 25, mins: 10, also: { fitness: 10 }, pose: 'float',   // 0.82.5: fitness as the gym (1 a minute)
+    title: 'Float room', done: 'Back to full gravity. Your legs feel very heavy.' },
+  recSeat:   { need: 'leisure', gain: 8, mins: 15, pose: 'sit', title: 'Auditorium', done: 'You get up and stretch.' },
+  recWatch:  { need: 'leisure', gain: 8, mins: 15, pose: 'sit', title: 'Stands', done: 'You get up and stretch.' },
+  recBean:   { need: 'leisure', gain: 8, mins: 15, pose: 'sit', title: 'Beanbag', done: 'You haul yourself out of the beanbag. It takes two goes.' },
+  recShower: { need: 'hygiene', gain: 20, mins: 3, pose: 'stand', title: 'Shower' },
+});
+const REC = { chain: null, last: null };
+const recKitOn = () => PLAYER_SPEC.kit === 'rec';
+const recOpen = () => SHIP.time.min >= DECKS[7].open[0] * 60;   // 06:00 to midnight
+// where things are: spots in world units (from deck tile coordinates), moves in deck coordinates (section 8c's)
+const recSpot = (walk, x, z, face, pose) => ({ id: null, walk, x: x - OX, z: z - OZ, y: 0, face, pose });
+const recLocker = () => recSpot([19, 1], 19.35, 1.25, Math.PI, 'browse');
+const recShowerAt = () => recSpot([17, 2], 17.65, 3.35, Math.PI, 'stand');
+const REC_LANES = [1.35, 2.25, 3.15, 4.05];             // the pool's four lanes (plan v4: ropes at 1.8, 2.7 and 3.6)
+const REC_LOOP = [[11.4, 4.85], [4.8, 4.85], [4.8, 1.3], [13.8, 1.3, 1], [13.8, 4.85, 1]];   // the kayak loop: west along the slow channel, east down the white water
+function recTap(it, at, point) {
+  if (typeof deckDef === 'undefined' || !deckDef || deckDef.num !== 7) return false;
+  const t = it.t;
+  if (t === 'Lightdisc court' || t === 'Ask someone to play') { discAsk(); return true; }   // section 23b (0.82.0)
+  if (t === 'Scoreboard') { toast(t, it.x); return true; }
+  const kind = t === 'Pool' ? 'swim' : /^(Kayak dock|River|White water|Kayak rack|Wave gate)$/.test(t) ? 'kayak' : t === 'Climbing wall' ? 'climb'
+    : t === 'Float room' ? 'float' : t === 'Seats' ? 'seat' : t === 'Stands' ? 'watch' : t === 'Beanbag' ? 'bean' : t === 'Lockers' && recKitOn() ? 'unchange' : null;
+  if (!kind) return false;
+  if (!recOpen() && kind !== 'unchange') { toast(t, 'The rec dec\'s closed till six.'); return true; }
+  recGo(kind, point, t, it.x); return true;
+}
+PLAYER_TAPS.push(recTap);
+// 0.82.5 (the user's): walking into the float room starts floating, no tap; walking out (or a tap elsewhere) ends it, as any activity
+function recRoomIn(r) {
+  if (r !== 'F' || !deckDef || deckDef.num !== 7 || ACT || !recOpen()) return;
+  recGo('float', null, 'Float room', 'A fifth of a g. The padding is soft underfoot.');
+}
+function recGo(kind, point, title, flavour) {
+  REC.chain = null;
+  if (kind === 'seat' || kind === 'watch' || kind === 'bean') {   // the nearest free seat to your tap, in that room (a beanbag: the concourse's)
+    const room = kind === 'seat' ? 'A' : kind === 'bean' ? '=' : 'T', type = kind === 'bean' ? 'lounge-seat' : 'rec:seat', pl = [...PLACE_OF.values()].filter(p => p.type === type && p.room === room && !heldBy(p.id))
+      .map(p => [p, placeSpot(p.id)]).filter(([, s]) => s).sort((a, b) => Math.hypot(a[1].x - point.x, a[1].z - point.z) - Math.hypot(b[1].x - point.x, b[1].z - point.z))[0];
+    if (!pl) { toast(title, 'Every seat\'s taken.'); return; }
+    if (kind === 'bean') { actStart('recBean', pl[0].id, { pose: 'sit', title, flavour, after: 'You flop into the beanbag. It swallows you whole.' }); return; }
+    actStart(kind === 'seat' ? 'recSeat' : 'recWatch', pl[0].id, { pose: 'sit', title, flavour, after: kind === 'seat' ? 'You sink into a violet seat and look at the stars behind the stage.' : 'You take a seat on the bench and watch the court.' });
+    return;
+  }
+  if (kind === 'unchange') { actStart('recChange', null, { title: 'Changing rooms', spot: recLocker(), kit: null, after: 'You change back into your uniform.' }); return; }
+  if ((kind === 'swim' || kind === 'kayak') && !recKitOn()) {   // the wet way: change first
+    if (typeof ixTip === 'function') ixTip('recChange', 'Swimming and kayaking: change first. You\'ll stop at the changing rooms by the lift.');
+    REC.chain = { then: kind, title, flavour, point: point ? [point.x + OX, point.z + OZ] : null };
+    actStart('recChange', null, { title: 'Changing rooms', spot: recLocker(), kit: 'rec', after: 'You change into rec kit at a locker: teal, with a coral stripe.' });
+    return;
+  }
+  recStart(kind, title, flavour, point ? [point.x + OX, point.z + OZ] : null);
+}
+function recStart(kind, title, flavour, p) {             // p: the tap in deck coordinates (or null)
+  const water = { pool: .35, river: .36 };
+  if (kind === 'swim') {
+    const lane = REC_LANES.reduce((m, z) => p && Math.abs(z - p[1]) < Math.abs(m - p[1]) ? z : m, REC_LANES[1]);
+    actStart('recSwim', null, { title, flavour, spot: recSpot([23, Math.min(4, Math.floor(lane))], 23.55, lane, Math.PI / 2, 'stand'),
+      move: { kind: 'swim', path: [[24.5, lane], [30.5, lane]], y: water.pool, lengths: 4 }, after: 'You slip in at the shallow end and start your lengths.' });
+  } else if (kind === 'kayak') {
+    actStart('recKayak', null, { title, flavour, spot: recSpot([11, 6], 11.4, 5.75, Math.PI, 'stand'),
+      move: { kind: 'kayak', path: REC_LOOP, y: water.river, laps: 2 }, follow: true, after: 'You take a kayak from the dock and push off into the slow channel.' });
+  } else if (kind === 'climb') {
+    const len = REC_WALL.z1 - REC_WALL.z0, r = Math.max(0, Math.min(REC_ROUTES - 1, Math.floor(((p ? p[1] : 4.3) - REC_WALL.z0) / len * REC_ROUTES)));
+    const z = REC_WALL.z0 + len * (r + .5) / REC_ROUTES;
+    actStart('recClimb', null, { title, flavour, spot: recSpot([2, Math.max(2, Math.min(6, Math.floor(z)))], 2.5, z, -Math.PI / 2, 'stand'),
+      move: { kind: 'climb', at: [1.95, z], face: 'w', top: Math.max(.8, H - 2.25), onRing: () => toast('The bell', 'Ding! You ring the brass bell at the top of the wall. The whole river hall hears it.') },
+      after: 'You clip into an auto-belay on the ' + ['red', 'yellow', 'blue', 'green'][r] + ' route and start up.' });
+  } else if (kind === 'float') {
+    actStart('recFloat', null, { title, flavour, spot: recSpot([18, 12], 20.5, 14.5, 0, 'stand'),
+      move: { kind: 'float', at: [21, 14.8], r: 1.2, top: Math.min(2.2, H - 1.4), bounces: 4 }, follow: true, after: 'You pull on grip socks from the shelf and step into a fifth of a g.' });
+  }
+}
+// after each one ends: the next step of the wet way (change, the activity, a shower, change back)
+function recAfter(A) {
+  const done = A.phase === 'out' && (A.o.move ? !!(A.mv && A.mv.done) : A.done >= A.def.mins);
+  if (!done) { REC.chain = null; return; }
+  if (A.kind === 'recChange' && A.o.kit === 'rec' && REC.chain) { const c = REC.chain; REC.chain = null; recStart(c.then, c.title, c.flavour, c.point); return; }
+  if (A.kind === 'recSwim' || A.kind === 'recKayak') { actStart('recShower', null, { title: 'Changing rooms', spot: recShowerAt(), after: 'Back through the changing rooms: a quick shower first.' }); return; }
+  if (A.kind === 'recShower' && recKitOn()) { if (typeof recTowel === 'function') recTowel(20); actStart('recChange', null, { title: 'Changing rooms', spot: recLocker(), kit: null, after: 'You change back into your uniform.' }); }
+}
+// each frame (its own requestAnimationFrame, like 15b's): the chain, the side gains, and your uniform back off the deck
+function recFrame() {
+  requestAnimationFrame(recFrame);
+  if (typeof deckDef === 'undefined' || !deckDef || typeof ACT === 'undefined') return;
+  if (recKitOn() && deckDef.num !== 7 && !ACT && typeof playerKit === 'function') playerKit(null);   // off the deck: back in uniform
+  const A = ACT;
+  if (A !== REC.last) { const was = REC.last; REC.last = A; if (was && was.kind.startsWith('rec') && !A) recAfter(was); }
+  if (A && A.kind.startsWith('rec') && A.phase === 'do' && A.def.also) {   // the second gains (a swim washes you, all of them keep you fit), as the minutes go by
+    const d = Math.max(0, Math.min(A.done, A.def.mins) - (A.alsoDone || 0)), n = SHIP.player.needs; A.alsoDone = (A.alsoDone || 0) + d;
+    for (const k in A.def.also) if (k in n) n[k] = needClamp(n[k] + A.def.also[k] * d / A.def.mins);
+  }
+}
+requestAnimationFrame(recFrame);
 
 // =====================================================================
 // 16. GALLEY & FOOD
@@ -15771,7 +16509,7 @@ function jobsHour(h) {
 // hour (07:00-18:00), one open at a time per place; small ones at your tier wait for you like any other (leaveEnd;
 // a type may set its own `leave`, in minutes of the day shift). Finishing one does what it says (choreDone): a
 // calibration or a filter swap helps its machine, a vent helps the deck's air, a round finds worn machines early.
-const placesOf = (types, decks) => Object.keys(DECKS).filter(n => !decks || decks.includes(+n)).flatMap(n => (DECKS[n].places || []).filter(p => types.includes(p.type) && !p.machine).map(p => ({ ...p, deck: +n })));
+const placesOf = (types, decks) => Object.keys(DECKS).filter(n => (!decks || decks.includes(+n)) && !DECKS[n].playerOnly).flatMap(n => (DECKS[n].places || []).filter(p => types.includes(p.type) && !p.machine).map(p => ({ ...p, deck: +n })));
 const roomName = (n, r) => ((DECKS[n].rooms[r] || {}).name || '').toLowerCase();
 const panelStop = (m, mins, tag) => ({ deck: m.deck, placeId: panelPlace(m.id), mins, tag });
 const choreMachines = kinds => machineList().filter(m => kinds.includes(m.kind) && panelPlace(m.id));
@@ -16065,7 +16803,7 @@ function eventStop(spec) {
   const pl = spec.place && placeById(spec.place); if (pl) return { deck: pl.deck, placeId: pl.id, room: pl.room };
   const m = spec.machine && machineById(spec.machine); if (m) return { deck: m.deck, placeId: panelPlace(m.id), room: m.room, machine: m.id, at: m.panel.slice() };
   const w = String(spec.where || '').toLowerCase(); if (!w) return null;
-  for (const n of Object.keys(DECKS).map(Number).filter(n => !spec.deck || n === spec.deck)) {
+  for (const n of Object.keys(DECKS).map(Number).filter(n => (!spec.deck || n === spec.deck) && !DECKS[n].playerOnly)) {
     const D = DECKS[n], rooms = Object.keys(D.rooms).filter(r => (D.rooms[r].name || '').toLowerCase().includes(w));
     const ps = (D.places || []).filter(p => !p.machine && (rooms.includes(p.room) || p.type === w));
     const stand = ps.find(p => /lift-wait|storage|laundry|garden|shop/.test(p.type)) || ps[0];
@@ -16132,7 +16870,7 @@ function blackoutHour(h) {
   if (typeof eventMod !== 'function' || eventMod('effect', 'blackouts', h * 60) !== true) return null;
   const c = MACH_HIST.get(histHour((h - 1) * 60)), power = c ? systemsFrom(c).power : 100, u = k => schedU(BLACKOUT_SEED, h, k);
   if (u(1) >= .15 + .45 * (1 - power / 100)) return null;
-  const decks = Object.keys(DECKS).map(Number).sort(), deck = decks[Math.floor(u(2) * decks.length)], len = 15 + Math.floor(46 * u(3));
+  const decks = Object.keys(DECKS).map(Number).filter(n => !DECKS[n].playerOnly).sort(), deck = decks[Math.floor(u(2) * decks.length)], len = 15 + Math.floor(46 * u(3));
   const from = h * 60 + Math.floor(u(4) * (61 - len));
   return { deck, from, to: from + len };
 }
@@ -36985,6 +37723,561 @@ onSim('tradition', d => { if (!d || !/^tiles/i.test(d.id || '')) return; tilesNi
 const tilesTrophy = () => SHIP.tiles.beatRina !== null;   // for the deck architect: the trophy on your bunk shelf once you've beaten Rina
 
 // =====================================================================
+// 23b. LIGHTDISC (the Lightdisc engineer, 0.82.x; plans/recdeck-plan.html section 4; the user approved the prototype,
+// lightdisc-proto.html on claude/lightdisc-proto ba6b4ac, and this is that game on the rec deck's court)
+// =====================================================================
+// A Tron-style disc and tennis game, live on the court in 3D: you only move, returns are automatic. Off-centre sends
+// the disc back steeper (up to 60°), moving as it meets you curves it, three returns in a row charge the next one, and
+// it speeds up 10% a return to a cap (0.82.2, the user: shorter games; the prototype's was 5% to 10.5). First to 7, win by 2 (a quick game to 5). Ask someone to play at the court's gate:
+// one free crew member comes down to the rec dec (a crewComeTo visit, the one exception to the deck's playerOnly), plays
+// you, then goes back to their own plan. The ship's clock stops while you play (section 13's freeze, as for Tiles).
+// The rules are pure: game space is x across the court (+ is your right), z along it (+ is your end, the bow), no DOM,
+// no three.js, no R() and no Math.random. A game's stream is seeded from the save (schedU key 830); 831 picks a crew
+// member's level when they have no personality of their own. Fixed 60 steps a second, whatever the frame rate.
+const LD_DT = 1 / 60, LD_S0 = 5.0, LD_CAP = 13.5, LD_UP = 1.1, LD_REACH = .9, LD_MAXA = Math.PI / 3, LD_CURVE = .5, LD_CURL = 1.5, LD_CHARGE = 4 / 3, LD_YOU = 9;
+const LD_HX = 2.38, LD_BASE = 5.6, LD_ZONE = 1.9, LD_OUT = 6.3, LD_R = .2;   // the court (DA6's recCourt): fields at ±2.38, baselines at 5.9, your zone to 3.9
+// the crew's levels (plan section 4): reaction, speed, how often they misjudge, how wide, how often they curve, how off-centre they aim
+const LD_LEVEL = {
+  easy:   { react: .5, speed: 4.2, miss: .3, missAmt: .9, curve: .5, aim: [0, .5], aimRand: 1 },
+  steady: { react: .38, speed: 5.0, miss: .14, missAmt: .6, curve: .1, aim: [0, .3] },
+  sharp:  { react: .27, speed: 6.0, miss: .09, missAmt: .5, curve: .3, aim: [.3, .6] },
+};
+const LD_CREW = {   // the four with a personality of their own (the plan's): the rest play their level plainly
+  pell:  { lvl: 'easy', react: .5, speed: 4.2, miss: .3, missAmt: .9, curve: .85, aim: [0, .5], aimRand: 1 },
+  holt:  { lvl: 'steady', react: .38, speed: 5.0, miss: .14, missAmt: .6, curve: 0, aim: [0, .15] },
+  vance: { lvl: 'sharp', react: .27, speed: 6.0, miss: .09, missAmt: .5, curve: .25, aim: [.3, .6] },
+  rina:  { lvl: 'sharp', react: .24, speed: 6.4, miss: .065, missAmt: .4, curve: .45, aim: [.45, .8] },
+};
+function ldLevel(id) {   // { lvl, react, speed, ... } for a crew member (the same every time)
+  if (LD_CREW[id]) return LD_CREW[id];
+  const u = schedU(typeof idHash === 'function' ? idHash(String(id)) : 0, 0, 831), lvl = u < .35 ? 'easy' : u < .75 ? 'steady' : 'sharp';
+  return { lvl, ...LD_LEVEL[lvl] };
+}
+function ldNext(g) {   // the game's own stream: mulberry32 on g.rs
+  const a = g.rs = (g.rs + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+}
+function ldClone(g) { const c = JSON.parse(JSON.stringify({ ...g, rng: null })); c.rng = () => ldNext(c); return c; }
+function ldRng(seed) {   // mulberry32, as the prototype and Tiles (the view's chatter stream)
+  let a = (seed >>> 0) || 1;
+  return () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+}
+// o: { seed, quick, you: level or null (null: you play by input), them: level }. Side 0 is you (+z), side 1 them (-z).
+function ldNew(o) {
+  const g = { seed: (o.seed >>> 0) || 1, target: o.quick ? 5 : 7, step: 0, phase: 'serve', timer: 1, score: [0, 0], rally: 0, log: [], over: false, winner: -1, trail: [], ev: [] };
+  g.rs = g.seed; g.rng = () => ldNext(g);              // the stream's state is plain data (g.rs), so a game can be copied (ldClone)
+  const pl = (side, ai) => ({ side, ai, x: 0, z: side * LD_BASE, vx: 0, streak: 0, swing: 0, plan: null, hits: 0 });
+  g.p = [pl(1, o.you || null), pl(-1, o.them)];
+  g.server = g.rng() < .5 ? 0 : 1;
+  g.d = { x: 0, z: 0, vx: 0, vz: 0, spd: LD_S0, curl: 0, boost: 1, owner: g.server, charged: false };
+  ldServe(g);
+  return g;
+}
+function ldServe(g) {
+  const sp = g.p[g.server], d = g.d;
+  d.x = sp.x; d.z = sp.z - sp.side * .7; d.vx = d.vz = 0; d.curl = 0; d.spd = LD_S0; d.boost = 1; d.owner = g.server; d.charged = false;
+  for (const p of g.p) { p.streak = 0; p.plan = null; }
+  g.rally = 0; g.trail = [];
+}
+function ldDisc(d) {   // one step of the disc; returns 1 or -1 when it bounces off a side field
+  d.vx += d.curl * LD_DT; d.curl *= Math.exp(-LD_CURL * LD_DT);
+  const sp = d.spd * d.boost, m = Math.hypot(d.vx, d.vz) || 1;
+  d.vx *= sp / m; d.vz *= sp / m;
+  if (Math.abs(d.vz) < .45 * sp) { d.vz = Math.sign(d.vz || 1) * .45 * sp; d.vx = Math.sign(d.vx) * Math.sqrt(sp * sp - d.vz * d.vz); }
+  d.x += d.vx * LD_DT; d.z += d.vz * LD_DT;
+  const lim = LD_HX - LD_R;
+  if (d.x > lim) { d.x = 2 * lim - d.x; d.vx = -Math.abs(d.vx); d.curl *= -.4; return 1; }
+  if (d.x < -lim) { d.x = -2 * lim - d.x; d.vx = Math.abs(d.vx); d.curl *= -.4; return -1; }
+  return 0;
+}
+function ldPredict(d, z) {   // where the disc will cross z (the crew's reading, before their error)
+  const c = { ...d };
+  for (let n = 0; n < 400; n++) { const b = c.z; ldDisc(c); if ((b - z) * (c.z - z) <= 0) return c.x; }
+  return c.x;
+}
+function ldPlan(g) {
+  for (const p of g.p) {
+    if (!p.ai) continue;
+    const L = p.ai, r = g.rng, d = g.d;
+    if (d.vz * p.side <= 0) { p.plan = { at: g.step + Math.round(L.react * 30), home: true }; continue; }
+    // misjudging: likelier as the disc speeds up, and on a charged or curving disc; a misjudge really misses
+    const k = .5 + 2.6 * (d.spd - LD_S0) / (LD_CAP - LD_S0) + (d.charged ? .8 : 0) + (Math.abs(d.curl) > .3 ? .6 : 0);
+    const err = r() < L.miss * k ? (r() < .5 ? -1 : 1) * (LD_REACH + .05 + r() * L.missAmt) : (r() * 2 - 1) * .12;
+    const other = g.p[p === g.p[0] ? 1 : 0], mag = L.aim[0] + r() * (L.aim[1] - L.aim[0]);
+    let sgn = Math.abs(other.x) > .3 ? -Math.sign(other.x) : (r() < .5 ? -1 : 1);
+    if (L.aimRand) sgn = r() < .5 ? -1 : 1;
+    const curve = r() < L.curve ? (r() < .5 ? -1 : 1) : 0;
+    p.plan = { at: g.step + Math.round(L.react / LD_DT), err, off: mag * sgn, curve, x: null };
+  }
+}
+function ldAI(g, p) {
+  const L = p.ai, d = g.d;
+  let tx = p.x;
+  if (g.phase !== 'live') tx = p.x * .98;
+  else if (p.plan && g.step >= p.plan.at) {
+    if (p.plan.home) tx = 0;
+    else {
+      if (p.plan.x === null) p.plan.x = ldPredict(d, p.z);
+      tx = p.plan.x + p.plan.err - p.plan.off * LD_REACH * .8;
+      const tt = (p.z - d.z) / (d.vz || 1e-3);
+      if (p.plan.curve) tx += p.plan.curve * (tt < .18 ? .5 : -.5);   // wait to one side, then sweep through it so it meets them moving
+    }
+  }
+  const lim = LD_HX - .25, k = p.plan && p.plan.home ? .6 : 1;
+  tx = Math.max(-lim, Math.min(lim, tx));
+  p.x += Math.max(-L.speed * k * LD_DT, Math.min(L.speed * k * LD_DT, tx - p.x));
+  const tz = p.side * LD_BASE; p.z += Math.max(-2 * LD_DT, Math.min(2 * LD_DT, tz - p.z));
+}
+// you, by input: inp = { tx, tz } a target (thumb or mouse; null: stay) and { kx, kz } keys held (-1, 0, 1)
+function ldYou(g, p, inp) {
+  const lim = LD_HX - .25;
+  if (inp.kx || inp.kz) { p.x += inp.kx * 6 * LD_DT; p.z += inp.kz * 4 * LD_DT; }
+  else {
+    if (inp.tx != null) p.x += Math.max(-LD_YOU * LD_DT, Math.min(LD_YOU * LD_DT, inp.tx - p.x));
+    if (inp.tz != null) p.z += Math.max(-5 * LD_DT, Math.min(5 * LD_DT, inp.tz - p.z));
+  }
+  p.x = Math.max(-lim, Math.min(lim, p.x));
+  p.z = Math.max(LD_BASE - LD_ZONE + .2, Math.min(LD_BASE + .45, p.z));
+}
+function ldStep(g, inp) {   // one fixed step; events go on g.ev ({ k: 'hit' | 'wall' | 'net' | 'point' | 'serve' | 'over', ... })
+  g.step++;
+  const d = g.d;
+  for (const p of g.p) {
+    const ox = p.x;
+    if (p.ai) ldAI(g, p); else ldYou(g, p, inp || {});
+    p.vx = (p.x - ox) / LD_DT; p.swing = Math.max(0, p.swing - LD_DT * 3.5);
+  }
+  if (g.phase === 'serve') {
+    const sp = g.p[g.server]; d.x = sp.x; d.z = sp.z - sp.side * .7;
+    if ((g.timer -= LD_DT) <= 0) {
+      const a = (g.rng() * 2 - 1) * (Math.PI / 6);
+      d.vx = Math.sin(a) * d.spd; d.vz = -sp.side * Math.cos(a) * d.spd; g.phase = 'live'; ldPlan(g); g.ev.push({ k: 'serve' });
+    }
+    return;
+  }
+  if (g.phase === 'point') {
+    if ((g.timer -= LD_DT) <= 0) { if (g.over) { g.phase = 'over'; g.ev.push({ k: 'over' }); } else { g.phase = 'serve'; g.timer = 1; ldServe(g); } }
+    return;
+  }
+  if (g.phase !== 'live') return;
+  const bz = d.z, w = ldDisc(d);
+  g.trail.unshift(d.x, d.z); if (g.trail.length > 28) g.trail.length = 28;
+  if (w) g.ev.push({ k: 'wall', side: w, x: d.x, z: d.z });
+  if (bz * d.z <= 0) g.ev.push({ k: 'net', x: d.x });
+  for (let i = 0; i < 2; i++) {
+    const p = g.p[i];
+    if (d.vz * p.side <= 0) continue;
+    const dx = d.x - p.x;
+    if (Math.abs(d.z - p.z) < .45 && Math.abs(dx) < LD_REACH) { ldHit(g, i, dx); break; }
+  }
+  for (let i = 0; i < 2; i++) if (d.z * g.p[i].side > LD_OUT) { ldPoint(g, 1 - i); break; }
+}
+function ldHit(g, i, dx) {
+  const p = g.p[i], d = g.d, off = Math.max(-1, Math.min(1, dx / LD_REACH)), a = off * LD_MAXA;
+  d.spd = Math.min(LD_CAP, d.spd * LD_UP);
+  p.streak++;
+  const charged = p.streak >= 4;                         // after three returns in a row, the next one is charged
+  if (charged) p.streak = 0;
+  d.boost = charged ? LD_CHARGE : 1; d.charged = charged;
+  d.vx = Math.sin(a) * d.spd; d.vz = -p.side * Math.cos(a) * d.spd;   // as in Pong: off-centre sends it on toward that side
+  const curved = Math.abs(p.vx) > 1.0;
+  d.curl = curved ? Math.max(-8, Math.min(8, p.vx)) * LD_CURVE : 0;
+  d.z = p.z - p.side * .46; d.owner = i;
+  p.swing = 1; p.hits++; g.rally++; g.p[1 - i].streak = 0;
+  ldPlan(g);
+  g.ev.push({ k: 'hit', i, charged, curved });
+}
+function ldPoint(g, w) {
+  g.score[w]++; g.server = 1 - w; g.phase = 'point'; g.timer = 1.1;
+  const [a, b] = g.score;
+  if ((a >= g.target || b >= g.target) && Math.abs(a - b) >= 2) { g.over = true; g.winner = a > b ? 0 : 1; g.timer = 1.4; }
+  g.log.push({ step: g.step, w, rally: g.rally });
+  g.ev.push({ k: 'point', w });
+}
+function ldPaper(o) {   // a whole game with no drawing (disc_check, and crew games worked out off-screen)
+  const g = ldNew(o);
+  while (g.phase !== 'over' && g.step < 60 * 60 * 30) { ldStep(g, null); g.ev.length = 0; }
+  return { score: g.score.slice(), steps: g.step, winner: g.winner, rallies: g.log.map(l => l.rally) };
+}
+// ---- on the rec deck: the court, the two baselines (places a crew visit can walk to), the saved record ----
+const LD_COURT = [10.5, 15.5];                           // the court's centre in deck tiles: game z runs along deck x (+ is the bow), game x across it (+ is deck -z)
+const ldWorld = (gx, gz) => ({ x: LD_COURT[0] + gz - OX, z: LD_COURT[1] - gx - OZ });
+DECKS[7].places.push(
+  { id: '7-disc-1', type: 'rec:disc', at: [16, 15], xy: [16.1, 15.5], face: 'w', pose: 'stand', room: 'C' },   // yours, at the bow end
+  { id: '7-disc-2', type: 'rec:disc', at: [4, 15], xy: [4.9, 15.5], face: 'e', pose: 'stand', room: 'C' });    // theirs, at the stern end
+function discLoad(s) {   // save.disc, read defensively (saves from before 0.82 have none)
+  const d = s && s.disc && typeof s.disc === 'object' ? s.disc : {}, n = k => Number.isFinite(d[k]) && d[k] >= 0 ? Math.floor(d[k]) : 0, vs = {}, relDay = {};
+  if (d.vs && typeof d.vs === 'object') for (const k in d.vs) { const v = d.vs[k]; if (Array.isArray(v) && v.length === 2 && k.length < 40) vs[k] = [Math.max(0, v[0] | 0), Math.max(0, v[1] | 0)]; }
+  if (d.relDay && typeof d.relDay === 'object') for (const k in d.relDay) if (k.length < 40 && Number.isFinite(d.relDay[k])) relDay[k] = Math.floor(d.relDay[k]);
+  return { played: n('played'), won: n('won'), lost: n('lost'), games: n('games'), taught: d.taught === true, vs, relDay, beatRina: Number.isFinite(d.beatRina) ? Math.floor(d.beatRina) : null };
+}
+SHIP.disc = discLoad(SAVED);
+SAVE_EXTRA.push(s => { s.disc = JSON.parse(JSON.stringify(SHIP.disc)); });
+// who'd come down and play: anyone aboard who's off or at leisure now, on any deck; nobody in quiet hours or with the deck shut
+function discFind() {
+  const now = shipNow(), m = ((now % 1440) + 1440) % 1440; if (m >= 1290 || m < DECKS[7].open[0] * 60) return null;
+  const D = SHIP.disc; let best = null, bs = -1e9;
+  for (const p of schedPeople()) {
+    if (!p || !p.id || !ROSTER.some(x => x.id === p.id) || COME_TO.has(p.id) || CREW_HELD.has(p.id)) continue;
+    if (typeof CHAT !== 'undefined' && CHAT && CHAT.p === p) continue;
+    let w = null; try { w = whereIs(p, now); } catch (e) { w = null; }
+    if (!w || w.act !== 'off' && w.act !== 'leisure') continue;
+    const v = typeof VOICE !== 'undefined' && VOICE[p.id], likes = !!(v && Array.isArray(v.invites) && v.invites.some(x => /disc|lightdisc/i.test(x))) || !!D.vs[p.id] || !!LD_CREW[p.id];
+    let tier = 0; try { tier = relTier(p.id) || 0; } catch (e) { tier = 0; }
+    const sc = (likes ? 30 : 0) + tier * 8 + (w.deck === 7 ? 4 : 0) + schedU(idHash(p.id), SHIP.time.day, 832) * 3;   // a little seeded variety among equals
+    if (sc > bs || sc === bs && best && p.id < best.id) { bs = sc; best = p; }
+  }
+  return best;
+}
+// ---- asking someone, the wait, the game, the end ----
+const DISC = { g: null, opp: null, name: '', agent: null, view: null, cam: null, acc: 0, last: 0, inp: { tx: null, tz: null, kx: 0, kz: 0 }, how: -1, ease: null, quick: false };
+Object.assign(PLAYER_ACTS, { disc: { need: null, mins: 30, pose: 'stand', title: 'Lightdisc', done: 'You step off the court.', until: A => discTick(A) } });
+const LD_WAIT = 40;                                      // ship minutes to come down before they give up
+function discAsk() {
+  if (DISC.g) return;
+  if (!recOpen()) { toast('Lightdisc', 'The rec dec\'s closed till six.'); return; }
+  const p = discFind();
+  if (!p) { toast('Lightdisc', 'Nobody\'s around to play right now. Try in the evening, or on a day off.'); return; }
+  actStart('disc', '7-disc-1', { title: 'Lightdisc', st: 'wait', opp: p.id, since: shipNow(), here: false });
+  const A = ACT; if (!A || A.kind !== 'disc') return;
+  const go = crewComeTo(p, '7-disc-2', () => { A.o.here = true; }, { until: shipNow() + LD_WAIT + 60 }), prev = A.release;
+  A.release = () => { if (prev) prev(); go(); };          // actEnd lets them go back to their own plans
+  toast('Lightdisc', shortName(p) + ' is on the way down to play you. Wait on your baseline.');
+}
+function discTick(A) {   // the 'disc' activity: true ends it
+  const o = A.o;
+  if (o.st === 'play') return !DISC.g;
+  const a = DECK_CREW.find(x => x.p && x.p.id === o.opp), sp = placeSpot('7-disc-2');
+  if (a && a.settled && (o.here || sp && Math.hypot(a.x - sp.x, a.z - sp.z) < .6)) { o.st = 'play'; discBegin(a, false); return false; }
+  if (shipNow() - o.since > LD_WAIT) { toast('Lightdisc', tlSecond(o.opp) + ' couldn\'t make it after all.'); return true; }
+  return false;
+}
+function discBegin(a, quick) {
+  const D = SHIP.disc; D.games++;
+  DISC.opp = a.p.id; DISC.name = shortName(a.p); DISC.agent = a; DISC.quick = !!quick;
+  DISC.short = DISC.name.split(' ').length > 1 && /^(Captain|Commander|Dr\.|Chief|Chef|Lt\.?|Lieutenant|Ensign)$/.test(DISC.name.split(' ')[0]) ? DISC.name.split(' ').pop() : DISC.name;   // on the score: Vance, not Commander Vance
+  DISC.g = ldNew({ seed: Math.floor(schedU(D.games, SHIP.time.day, 830) * 4294967296), quick, you: null, them: ldLevel(a.p.id) });
+  DISC.how = D.taught ? -1 : 0; DISC.moved = 0;
+  discViewOn();
+}
+PAUSE.disc = () => !!(DISC.g && DISC.view);              // section 13: a game on (and its result) stops the ship's clock
+function discOver() {   // the end of a game: the tally and what it gives
+  const G = DISC.g, D = SHIP.disc, won = G.winner === 0, id = DISC.opp;
+  D.played++; if (won) D.won++; else D.lost++;
+  const v = D.vs[id] || (D.vs[id] = [0, 0]); v[won ? 0 : 1]++;
+  D.taught = true;
+  const once = D.relDay[id] !== SHIP.time.day ? 1 : .25;
+  try {   // as for Tiles: the social in one go (no ship minutes passed), a quarter for later games with them that day; a little energy, some leisure
+    const N = SHIP.player.needs, fx = playerFx();
+    leisureAdd(10 * once, 'disc');
+    N.social = needClamp(N.social + 12 * once * fxR(fx, 'social') * bondMult(id));
+    N.energy = needClamp(N.energy - 3); N.fitness = needClamp(N.fitness + 10 * fxR(fx, 'fitness'));   // 0.82.5: fitness, about ten gym minutes a game
+  } catch (e) { /* needs not there (checks on paper) */ }
+  if (D.relDay[id] !== SHIP.time.day) {
+    D.relDay[id] = SHIP.time.day;
+    if (typeof relAdd === 'function') relAdd(id, 'disc', REL_PTS.chat || 2);
+    if (typeof memAdd === 'function') memAdd(id, 'came.disc');
+  }
+  if (won && id === 'rina' && D.beatRina === null) {   // crew talk about a good win
+    D.beatRina = SHIP.time.day;
+    if (typeof newsAdd === 'function') newsAdd({ id: 'disc-rina-beaten', about: 'you', lines: ['Rina lost at Lightdisc! To the new hand!', 'Somebody beat Rina on the court.'], seed: ['rina', 'pell'], weight: .8, life: 6 });
+  }
+  if (typeof saveGame === 'function') saveGame();
+}
+function discEnd(again) {   // Again / Quick game / Done from the result, or Leave mid-game (not counted)
+  const a = DISC.agent;
+  if (again && a && DECK_CREW.includes(a)) { discViewOff(true); discBegin(a, again === 'quick'); return; }
+  discViewOff(false);
+  DISC.g = null; DISC.agent = null;
+  if (ACT && ACT.kind === 'disc') actEnd();
+}
+onSim('newGame', () => { SHIP.disc = discLoad(null); if (DISC.view) discViewOff(false); DISC.g = null; DISC.agent = null; });
+// ---- the game view: a perspective camera behind and above your baseline (the prototype's fit), the disc, its ring,
+// trail and flashes, the live scoreboard, and the overlay (score, the paused clock, Leave, How to play, the result).
+// Made when a game starts and freed when it ends: nothing here exists at load, so no kit and no R().
+const LD_CSS = `
+#ld{position:fixed;inset:0;z-index:60;touch-action:none;user-select:none;-webkit-user-select:none;font:15px/1.35 system-ui,-apple-system,sans-serif;color:#e8f2f5}
+#ld .top{position:absolute;left:0;right:0;top:calc(env(safe-area-inset-top) + 8px);display:flex;flex-direction:column;align-items:center;gap:5px;pointer-events:none}
+#ld .sc{background:rgba(5,8,14,.72);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:4px 14px;font-weight:600;font-variant-numeric:tabular-nums}
+#ld .sc .a{color:#50e6ff}#ld .sc .b{color:#ffa03c}
+#ld .pz{background:rgba(5,8,14,.72);border:1px solid #ffd166;color:#ffe3a3;border-radius:999px;padding:2px 12px;font-size:12.5px}
+#ld button{font:inherit;color:#e8f2f5;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:8px 16px;cursor:pointer}
+#ld button.go{background:#0f3440;border-color:#50e6ff;color:#dffaff;font-weight:600}
+#ld .lv{position:absolute;right:12px;bottom:calc(env(safe-area-inset-bottom) + 12px);font-size:13px;padding:6px 14px;background:rgba(5,8,14,.6)}
+#ld .call{position:absolute;left:0;right:0;top:34%;text-align:center;font-size:22px;font-weight:700;text-shadow:0 0 12px rgba(0,0,0,.9);pointer-events:none}
+#ld .tag,#ld .say{position:absolute;transform:translate(-50%,-100%);white-space:nowrap;pointer-events:none}
+#ld .tag{font-size:12px;font-weight:600;padding:1px 7px;border-radius:6px;background:rgba(5,8,14,.55)}
+#ld .say{font-size:13px;padding:4px 9px;border-radius:10px;background:#f3efe4;color:#1b1f24}
+#ld .how{position:absolute;left:10px;right:10px;bottom:calc(env(safe-area-inset-bottom) + 50px);max-width:520px;margin:0 auto;display:flex;align-items:center;gap:8px;background:rgba(8,12,20,.92);border:1px solid #50e6ff;border-radius:14px;padding:9px 10px 9px 14px;pointer-events:none}
+#ld .how .t{flex:1}#ld .how .n{color:#50e6ff;font-size:12px;display:block}#ld .how button{pointer-events:auto;padding:6px 12px;font-size:13px}
+#ld .res{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:16px}
+#ld .card{background:rgba(8,12,20,.92);border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:18px;width:100%;max-width:420px;box-sizing:border-box}
+#ld .card h2{margin:0 0 4px;font-size:24px}#ld .card .s{color:#9fb2b8;font-size:13.5px}#ld .card .b{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+#ld .hide{display:none!important}
+body.ld-on .hud,body.ld-on .controls,body.ld-on #devBtn,body.ld-on #devMail,body.ld-on #needStrip,body.ld-on #devHu,body.ld-on #toast,body.ld-on #devTip{visibility:hidden}`;
+const LD_HOW = [
+  () => matchMedia('(pointer: coarse)').matches ? 'Put your thumb down and drag: you go where your thumb goes.' : 'Move the mouse, or use the arrow keys, to move.',
+  () => 'No button to hit: stand in the disc\'s way and it goes back.',
+  () => 'Be moving as the disc meets you and it curves that way.',
+  () => 'Three returns in a row and your next one is charged.',
+];
+const LD_TALK = {   // stand-ins until the writers' lines (lineFor(who, 'disc.<kind>')) arrive
+  charged: { vance: ['By the book, Cadet.', 'Page forty: the charged return.', 'Keep up.'] },
+  curve: { pell: ['Swerve!', 'Did you see that curve?', 'Where\'s it going? Who knows.'] },
+  point: { rina: ['Fine.', 'Again?', 'You\'ll get there.'], holt: ['Steady.', 'Hm.', 'Straight and simple.'] },
+  win: { rina: ['That\'s the game. Fine.'], holt: ['Good game, Cadet.'], vance: ['Regulation result.'], pell: ['Pell takes it!'] },
+};
+function discTalk(kind) {   // the opponent says something (a stream of its own, so talk never shifts the game)
+  const G = DISC.g, V = DISC.view; if (!G || !V) return;
+  let text = null; try { const l = typeof lineFor === 'function' && lineFor(DISC.opp, 'disc.' + kind, {}); text = l && l.text; } catch (e) { text = null; }
+  const L = !text && LD_TALK[kind] && LD_TALK[kind][DISC.opp];
+  if (!text && L) text = L[Math.floor(V.chat() * L.length)];
+  if (text) V.say = { text, t: 2 };
+}
+const ldEl = (tag, cls, parent, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; if (parent) parent.appendChild(e); return e; };
+function discGlow(ring) {   // a radial glow (or ring) texture, made when the view opens
+  return tex(64, 64, (c, w, h) => {
+    const r = c.createRadialGradient(32, 32, 0, 32, 32, 32);
+    if (ring) { r.addColorStop(0, 'rgba(255,255,255,0)'); r.addColorStop(.62, 'rgba(255,255,255,0)'); r.addColorStop(.8, 'rgba(255,255,255,1)'); r.addColorStop(1, 'rgba(255,255,255,0)'); }
+    else { r.addColorStop(0, 'rgba(255,255,255,1)'); r.addColorStop(.25, 'rgba(255,255,255,.55)'); r.addColorStop(1, 'rgba(255,255,255,0)'); }
+    c.fillStyle = r; c.fillRect(0, 0, w, h);
+  });
+}
+function discViewOn() {
+  const V = DISC.view = { grp: new THREE.Group(), fx: [], chat: ldRng(DISC.g.seed ^ 0x5bd1e995), say: null, callT: 0, pulseT: 1, flashes: [], camT: 0, rm: matchMedia('(prefers-reduced-motion: reduce)').matches };
+  const add = (m, mat) => { const o = new THREE.Mesh(m, mat); V.grp.add(o); return o; };
+  const glow = discGlow(false), ring = discGlow(true); V.tex = [glow, ring];
+  const basic = (c, o = {}) => new THREE.MeshBasicMaterial({ color: col(c), toneMapped: false, ...o });
+  const addB = { transparent: true, depthWrite: false, blending: THREE.AdditiveBlending };
+  V.discMat = basic('#ffffff'); V.disc = add(new THREE.CylinderGeometry(LD_R, LD_R, .05, 20), V.discMat);
+  V.halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: glow, color: col('#50e6ff'), ...addB, toneMapped: false })); V.halo.scale.setScalar(1.1); V.disc.add(V.halo);
+  V.ringMat = basic('#ffffff', { transparent: true, opacity: .55, depthWrite: false }); V.ring = add(new THREE.RingGeometry(.24, .32, 24).rotateX(-Math.PI / 2), V.ringMat);
+  const TRN = 14, tg = new THREE.BufferGeometry();
+  tg.setAttribute('position', new THREE.Float32BufferAttribute(new Float32Array(TRN * 6), 3)); tg.setAttribute('color', new THREE.Float32BufferAttribute(new Float32Array(TRN * 6), 3));
+  const idx = []; for (let i = 0; i < TRN - 1; i++) { const a = i * 2; idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2); } tg.setIndex(idx);
+  V.trail = add(tg, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.DoubleSide, toneMapped: false, ...addB })); V.trail.frustumCulled = false; V.TRN = TRN;
+  V.pulse = new THREE.Sprite(new THREE.SpriteMaterial({ map: ring, color: col('#50e6ff'), ...addB, toneMapped: false })); V.pulse.visible = false; V.grp.add(V.pulse);
+  for (let i = 0; i < 3; i++) { const f = new THREE.Sprite(new THREE.SpriteMaterial({ map: glow, color: col('#ffffff'), ...addB, toneMapped: false })); f.visible = false; f.scale.set(1.4, 1.1, 1); V.grp.add(f); V.flashes.push({ s: f, t: 1 }); }
+  for (const o of V.grp.children) o.userData.noShadow = true;
+  scene.add(V.grp);
+  V.pose = [0, 1].map(() => ({ lx: 0, ph: 0, side: 1, swing: 0, pump: 0 }));
+  const who = ROSTER.find(x => x.id === DISC.opp);
+  if (who) { V.opp = new FullPerson(rosterSpec(who), who.id); V.opp.rig.root.traverse(o => { if (o.isMesh) o.castShadow = true; }); }
+  V.cam = DISC.cam = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, .3, 120);
+  V.azWas = azT; azT = Math.PI / 2;                       // the cutaway drops the walls between the bow and you
+  // the overlay
+  if (!document.getElementById('ld-css')) { const s = ldEl('style', null, document.head, LD_CSS); s.id = 'ld-css'; }
+  const R = V.root = ldEl('div', null, document.body); R.id = 'ld'; document.body.classList.add('ld-on');   // the game view owns the screen: nothing else on it
+  const top = ldEl('div', 'top', R); V.sc = ldEl('div', 'sc', top); ldEl('div', 'pz', top, '⏸ The ship\'s clock is paused while you play');
+  V.call = ldEl('div', 'call hide', R);
+  V.tags = [ldEl('div', 'tag', R, 'You'), ldEl('div', 'tag', R, DISC.short)]; V.tags[0].style.color = '#9fe3ff'; V.tags[1].style.color = '#ffd2a0';
+  V.sayEl = ldEl('div', 'say hide', R);
+  V.leave = ldEl('button', 'lv', R, 'Leave'); V.leave.onclick = e => { e.stopPropagation(); discEnd(false); };
+  V.how = ldEl('div', 'how hide', R); const ht = ldEl('div', 't', V.how); V.howN = ldEl('span', 'n', ht); V.howX = ldEl('span', null, ht);
+  V.howNext = ldEl('button', null, V.how, 'Next'); V.howNext.onclick = e => { e.stopPropagation(); discHowDone(DISC.how); };
+  ldEl('button', null, V.how, 'Skip').onclick = e => { e.stopPropagation(); DISC.how = -1; SHIP.disc.taught = true; discHowShow(); };
+  V.res = ldEl('div', 'res hide', R);
+  // input: where your thumb (or the mouse) is, you go; the keys too
+  let drag = null; const inp = DISC.inp; inp.tx = inp.tz = null; inp.kx = inp.kz = 0;
+  const aimX = cx => (cx / innerWidth * 2 - 1) * (LD_HX - .25) * 1.12;
+  R.addEventListener('pointerdown', e => { if (e.target.tagName === 'BUTTON' || !DISC.g || DISC.g.over) return; drag = { id: e.pointerId, y0: e.clientY, z0: DISC.g.p[0].z }; inp.tx = aimX(e.clientX); try { R.setPointerCapture(e.pointerId); } catch (x) { /* fine */ } });
+  R.addEventListener('pointermove', e => { if (!DISC.g) return; if (drag && drag.id === e.pointerId) { inp.tx = aimX(e.clientX); inp.tz = drag.z0 + (e.clientY - drag.y0) / innerHeight * 5; } else if (e.pointerType === 'mouse') inp.tx = aimX(e.clientX); });
+  const lift = e => { if (drag && drag.id === e.pointerId) { drag = null; if (DISC.g && e.pointerType !== 'mouse') { inp.tx = DISC.g.p[0].x; inp.tz = DISC.g.p[0].z; } } };
+  R.addEventListener('pointerup', lift); R.addEventListener('pointercancel', lift);
+  const KEYS = { ArrowLeft: ['kx', -1], a: ['kx', -1], A: ['kx', -1], ArrowRight: ['kx', 1], d: ['kx', 1], D: ['kx', 1], ArrowUp: ['kz', -1], w: ['kz', -1], W: ['kz', -1], ArrowDown: ['kz', 1], s: ['kz', 1], S: ['kz', 1] };
+  V.kd = e => { const k = KEYS[e.key]; if (k) { inp[k[0]] = k[1]; e.preventDefault(); e.stopPropagation(); } };
+  V.ku = e => { const k = KEYS[e.key]; if (k && inp[k[0]] === k[1]) inp[k[0]] = 0; };
+  addEventListener('keydown', V.kd, true); addEventListener('keyup', V.ku, true);
+  // the camera eases in from your usual view (a dolly-zoom from the flat view), or cuts with reduced motion
+  discFit();
+  const from = new THREE.Vector3().subVectors(camera.position, target).normalize();
+  V.ease = { t: V.rm ? 1 : 0, T0: target.clone(), d0: from, h0: (camera.top - camera.bottom) / camera.zoom, back: false };
+  V.resize = () => discFit(); addEventListener('resize', V.resize);
+  DISC.acc = 0; DISC.last = performance.now();
+  discBoard(); discHowShow();
+}
+function discViewOff(keep) {   // keep: a new game follows at once (Again): the view's pieces are remade
+  const V = DISC.view; if (!V) return;
+  scene.remove(V.grp);
+  V.grp.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); });
+  for (const t of V.tex) t.dispose();
+  V.root.remove(); document.body.classList.remove('ld-on'); removeEventListener('keydown', V.kd, true); removeEventListener('keyup', V.ku, true); removeEventListener('resize', V.resize);
+  azT = V.azWas; DISC.view = null; DISC.cam = null;
+  if (V.opp) V.opp.dispose();
+  const a = DISC.agent, sp = placeSpot('7-disc-2');      // they stand back on their baseline (their own body again); you on yours
+  if (a && sp) { a.x = sp.x; a.z = sp.z; a.face = Math.PI / 2; a.h.set({ x: a.x, y: 0, z: a.z }, a.face, 'stand'); if (a.h.full) a.h.rig.root.visible = true; else crowd.update(0, 0); }
+  const ys = placeSpot('7-disc-1'); if (ys) { player.obj.position.set(ys.x, 0, ys.z); player.face = -Math.PI / 2; }
+  if (!keep) discBoard(true);
+}
+// the game view's camera, fitted as in the prototype: from about 55° (42° held sideways), lowered only as far as it
+// must for the scoreboard to show above the far end; your player a fifth of the way up so your thumb sits below.
+function discFit() {
+  const V = DISC.view; if (!V) return;
+  const asp = innerWidth / innerHeight, port = asp < 1, c = new THREE.PerspectiveCamera(50, asp, .3, 120), v = new THREE.Vector3(), dir = new THREE.Vector3();
+  const ndc = (x, y, z) => v.set(x, y, z).project(c), goalY = port ? -.56 : -.5, boardTop = H - .11;
+  const place = (dist, tz) => { c.position.set(0, 0, tz).addScaledVector(dir, dist); c.lookAt(0, 0, tz); c.updateMatrixWorld(); };
+  let best = null;
+  for (let deg = port ? 55 : 42; deg >= 30 && !best; deg--) for (const fov of port ? [52, 58] : [44, 50]) {
+    if (best) break;
+    const el = deg * Math.PI / 180; dir.set(0, Math.sin(el), Math.cos(el)); c.fov = fov; c.updateProjectionMatrix();
+    for (let dist = 5; dist < 40; dist += .25) {
+      let lo = -14, hi = LD_BASE;
+      for (let k = 0; k < 40; k++) { const mid = (lo + hi) / 2; place(dist, mid); if (ndc(0, .9, LD_BASE).y > goalY) hi = mid; else lo = mid; }
+      const tz = (lo + hi) / 2; place(dist, tz);
+      if (Math.abs(ndc(0, .9, LD_BASE).y - goalY) > .01) continue;
+      const w = Math.abs(ndc(LD_HX + .3, 0, LD_BASE + .4).x), top = ndc(0, port ? boardTop : boardTop - .5, -6.45).y, near = ndc(0, 0, LD_OUT + .2).y;
+      if (w <= .98 && top <= (port ? .88 : .9) && near > -.98) { best = { dist, tz, el, fov }; break; }
+    }
+  }
+  if (!best) best = { dist: 18, tz: 0, el: .8, fov: 50 };
+  // game space to the deck: game z runs along deck x, game x along deck -z
+  const tw = ldWorld(0, best.tz), cw = ldWorld(0, best.tz + best.dist * Math.cos(best.el));
+  V.fit = { T: new THREE.Vector3(tw.x, 0, tw.z), P: new THREE.Vector3(cw.x, best.dist * Math.sin(best.el), cw.z), fov: best.fov };
+  V.cam.aspect = asp; V.cam.updateProjectionMatrix();
+}
+function discBoard(reset) {   // the stern wall's scoreboard (WALL_KIT.recScoreboard's canvas), live while you play
+  const t = REC_BOARD.tex; if (!t || !t.image) return;
+  const c = t.image.getContext('2d'), w = t.image.width, h = t.image.height, G = DISC.g;
+  const sa = reset || !G ? 0 : G.score[1], sb = reset || !G ? 0 : G.score[0];
+  c.fillStyle = '#05070b'; c.fillRect(0, 0, w, h); c.strokeStyle = '#2a3340'; c.lineWidth = 6; c.strokeRect(3, 3, w - 6, h - 6);
+  c.textAlign = 'center'; c.fillStyle = '#e8eef0'; c.font = '700 30px system-ui,sans-serif'; c.fillText(G && G.over && !reset ? 'FINAL' : 'LIGHTDISC', w / 2, 44);
+  c.font = '800 112px system-ui,sans-serif'; c.fillStyle = '#ff9a3c'; c.fillText(String(sa), w * .27, 168); c.fillStyle = '#50e6ff'; c.fillText(String(sb), w * .73, 168);
+  c.fillStyle = '#e8eef0'; c.font = '800 80px system-ui,sans-serif'; c.fillText(':', w / 2, 158);
+  c.font = '600 20px system-ui,sans-serif'; c.fillStyle = '#ff9a3c'; c.fillText(reset || !G ? 'STERN' : DISC.short.toUpperCase(), w * .27, 204); c.fillStyle = '#50e6ff'; c.fillText(reset || !G ? 'BOW' : 'YOU', w * .73, 204);
+  t.needsUpdate = true;
+}
+function discHowShow() {
+  const V = DISC.view; if (!V) return;
+  if (DISC.how < 0 || DISC.how > 3) { V.how.classList.add('hide'); return; }
+  V.how.classList.remove('hide'); V.howN.textContent = 'How to play · ' + (DISC.how + 1) + ' of 4'; V.howX.textContent = LD_HOW[DISC.how]();
+  V.howNext.textContent = DISC.how === 3 ? 'Done' : 'Next';
+}
+function discHowDone(k) { if (DISC.how !== k) return; DISC.how = k === 3 ? -1 : k + 1; if (DISC.how < 0) SHIP.disc.taught = true; discHowShow(); }
+function discResult() {
+  const V = DISC.view, G = DISC.g; if (!V) return;
+  const won = G.winner === 0, hi = Math.max(...G.score), lo = Math.min(...G.score), v = SHIP.disc.vs[DISC.opp] || [0, 0];
+  V.res.innerHTML = ''; const card = ldEl('div', 'card', V.res);
+  ldEl('h2', null, card, won ? 'You win ' + hi + '–' + lo : DISC.name + ' wins ' + hi + '–' + lo);
+  ldEl('div', 's', card, 'Your record against ' + DISC.name + ': ' + v[0] + '–' + v[1] + '. Longest rally: ' + Math.max(0, ...G.log.map(l => l.rally)) + '.');
+  const b = ldEl('div', 'b', card);
+  const btn = (t, f, go) => { const e = ldEl('button', go ? 'go' : null, b, t); e.onclick = ev => { ev.stopPropagation(); f(); }; };
+  btn('Again', () => discEnd('full'), true); btn('Quick game', () => discEnd('quick')); btn('Done', () => discEnd(false));
+  V.res.classList.remove('hide'); V.how.classList.add('hide'); V.leave.classList.add('hide');
+}
+// the players' moves (plan v5 section 8, "disc ready / side-step / return"), posed straight onto a full rig each frame:
+// a low ready stance, quick side steps when moving across, a forehand or backhand throw on each return (right-handed:
+// a disc on your left is a backhand), a fist pump on a point. a: { lx: speed toward the figure's own left (+x), side:
+// where the disc is (+1 its left), swing 0..1 (1 at the return), pump 0..1, ph: the step phase }. Nothing here calls R().
+function discPose(rig, a, T) {
+  const TAU = Math.PI * 2, w = Math.min(1, Math.abs(a.lx) / 3), crouch = .1 + .02 * Math.sin(T * 3.1);
+  const hipY = HIP_Y - crouch + Math.abs(Math.sin(a.ph * Math.PI)) * .03 * w;
+  rig.hips.position.set(Math.sin(a.ph * Math.PI) * .03 * w * Math.sign(a.lx || 1), hipY, 0);
+  rig.hips.rotation.set(0, 0, 0);
+  for (let i = 0; i < rig.legs.length; i++) {
+    const leg = rig.legs[i], lead = Math.sign(a.lx || 1) === leg.side;   // the leg on the side you're stepping toward leads
+    const st = Math.sin(a.ph * TAU + (lead ? 0 : Math.PI)), lift = Math.max(0, st) * .08 * w;
+    const ang = legIK(leg, ANK + lift - (hipY - HIP_OFF), .02);
+    leg.thigh.rotation.z = leg.side * (.13 + .12 * w * (lead ? Math.max(0, st) : .3)); leg.ankle.rotation.x = -ang;
+  }
+  rig.torso.rotation.set(.18, 0, -.06 * w * Math.sign(a.lx));
+  const sw = a.swing, back = a.side > 0;                 // the throwing arm is the right (side -1)
+  rig.chest.rotation.set(0, (back ? .55 : -.55) * sw, 0); rig.head.rotation.set(-.12, (back ? -.4 : .4) * sw, 0);
+  for (const arm of rig.arms) {
+    let sx = -.55, ex = -1.15, sz = .28;                 // ready: both hands up in front
+    if (arm.side < 0 && sw > 0) {
+      if (back) { sx = L(-.55, -1.35, sw); ex = L(-1.15, -.25, sw); sz = L(.28, -.75, sw); }   // backhand: across the body and out
+      else { sx = L(-.55, -1.55, sw); ex = L(-1.15, -.2, sw); sz = L(.28, .55, sw); }          // forehand: a long reach forward
+    }
+    if (a.pump > 0 && arm.side < 0) { const k = Math.min(1, a.pump * 3); sx = L(sx, -2.75 + .35 * Math.sin(T * 16), k); ex = L(ex, -1.35, k); sz = L(sz, .15, k); }
+    arm.sh.rotation.set(sx, 0, arm.side * sz); arm.el.rotation.x = ex; arm.hand.rotation.x = 0;
+  }
+}
+// once a frame from the main loop (frozen or not): the game's fixed steps on real time, then the scene
+function discFrame() {
+  const V = DISC.view, G = DISC.g; if (!V || !G) return;
+  const now = performance.now(), rdt = Math.min(.1, (now - DISC.last) / 1000); DISC.last = now;
+  const T = now / 1000;
+  if (G.phase !== 'over') {
+    DISC.acc += rdt; let n = 0;
+    while (DISC.acc >= LD_DT && n < 6) {
+      const ox = G.p[0].x;
+      ldStep(G, DISC.inp); DISC.acc -= LD_DT; n++;
+      if (DISC.how === 0) { DISC.moved += Math.abs(G.p[0].x - ox); if (DISC.moved > 1.6) discHowDone(0); }
+      for (const e of G.ev) discEvent(e);
+      G.ev.length = 0;
+    }
+    if (n === 6) DISC.acc = 0;
+  }
+  // the people: you and your opponent where the game has you, animated (discPose) on full rigs
+  G.p.forEach((p, i) => {
+    const w = ldWorld(p.x, p.z), face = i ? Math.PI / 2 : -Math.PI / 2, lx = i ? p.vx : -p.vx, dx = i ? G.d.x - p.x : p.x - G.d.x, A = V.pose[i];
+    A.lx += (lx - A.lx) * Math.min(1, rdt * 12); A.ph += Math.abs(A.lx) * rdt * 1.6; A.swing = p.swing; A.pump = Math.max(0, A.pump - rdt);
+    if (p.swing > .95) A.side = Math.sign(dx) || 1;      // which side the disc was on as it came: forehand or backhand
+    const body = i ? V.opp : ACT && ACT.kind === 'disc' && ACT.body;   // you: the activity's stand-in (section 15 hides player.obj while you're at one)
+    if (!i) { player.obj.position.set(w.x, 0, w.z); player.face = face; if (ACT && ACT.kind === 'disc') { ACT.x = w.x; ACT.z = w.z; ACT.face = face; } }
+    const rig = body ? body.rig : !i && player.rig, root = body ? body.rig.root : player.obj;
+    if (!rig) return;
+    root.position.set(w.x, 0, w.z); root.rotation.y = face;
+    discPose(rig, A, T);
+  });
+  const a = DISC.agent;                                  // their own (crowd or full) body stays out of sight while the game's rig plays
+  if (a && DECK_CREW.includes(a)) { if (a.h.full) a.h.rig.root.visible = false; else { a.h.set({ x: a.x, y: -40, z: a.z }, a.face, 'stand'); crowd.update(rdt, T); } }
+  // the disc, its ring and trail
+  const d = G.d, w = ldWorld(d.x, d.z), live = G.phase === 'live' || G.phase === 'serve', dc = d.charged ? '#ffffff' : d.owner === 0 ? '#50e6ff' : '#ffa03c';
+  V.disc.visible = V.ring.visible = G.phase !== 'over';
+  V.disc.position.set(w.x, .9 + (G.phase === 'serve' && !V.rm ? Math.sin(T * 8) * .06 : 0), w.z); V.disc.rotation.y += rdt * 12;
+  V.discMat.color.copy(col(d.charged ? '#ffffff' : d.owner === 0 ? '#d8fbff' : '#ffe6cc'));
+  V.halo.material.color.copy(col(dc)); V.halo.scale.setScalar(d.charged ? 1.8 : 1.15);
+  V.ring.position.set(w.x, .03, w.z); V.ringMat.color.copy(col(dc));
+  const pa = V.trail.geometry.attributes.position.array, ca = V.trail.geometry.attributes.color.array, tc = col(dc), tr = G.phase === 'live' ? G.trail : [];
+  const pt = i => { const k = Math.min(i, tr.length / 2 - 1) * 2; return tr.length ? ldWorld(tr[k], tr[k + 1]) : w; };
+  for (let i = 0; i < V.TRN; i++) {
+    const a = pt(i), b = pt(i + 1); let nx = -(b.z - a.z), nz = b.x - a.x; const nl = Math.hypot(nx, nz) || 1; nx /= nl; nz /= nl;
+    const wd = LD_R * (1 - i / V.TRN) * (d.charged ? 1.4 : 1), k = tr.length ? (1 - i / V.TRN) * (d.charged ? 1 : .6) : 0;
+    pa.set([a.x + nx * wd, .9, a.z + nz * wd, a.x - nx * wd, .9, a.z - nz * wd], i * 6);
+    ca.set([tc.r * k, tc.g * k, tc.b * k, tc.r * k, tc.g * k, tc.b * k], i * 6);
+  }
+  V.trail.geometry.attributes.position.needsUpdate = V.trail.geometry.attributes.color.needsUpdate = true;
+  if (V.pulse.visible) { V.pulseT += rdt / .3; V.pulse.scale.setScalar(.6 + V.pulseT * 2.2); V.pulse.material.opacity = Math.max(0, 1 - V.pulseT); if (V.pulseT >= 1) V.pulse.visible = false; }
+  for (const f of V.flashes) if (f.s.visible) { f.t += rdt / .35; f.s.material.opacity = Math.max(0, 1 - f.t); if (f.t >= 1) f.s.visible = false; }
+  // the camera: eased in (or out) as a dolly-zoom from the flat view, then the fitted game view
+  const E = V.ease, F = V.fit, cam = V.cam;
+  E.t = Math.min(1, E.t + rdt / .8); const e = E.t * E.t * (3 - 2 * E.t), k = E.back ? 1 - e : e;
+  const d1 = F.P.distanceTo(F.T), h1 = 2 * d1 * Math.tan(F.fov * Math.PI / 360), D0 = 200;
+  const dist = Math.exp(Math.log(D0) + (Math.log(d1) - Math.log(D0)) * k), h = E.h0 + (h1 - E.h0) * k;
+  const dir = E.d0.clone().lerp(F.P.clone().sub(F.T).normalize(), k).normalize(), tgt = E.T0.clone().lerp(F.T, k);
+  cam.position.copy(tgt).addScaledVector(dir, dist); cam.fov = 2 * Math.atan(h / 2 / dist) * 180 / Math.PI;
+  cam.near = Math.max(.3, dist - 40); cam.far = dist + 40; cam.aspect = innerWidth / innerHeight; cam.updateProjectionMatrix(); cam.lookAt(tgt);
+  if (E.back && E.t >= 1) { const f = E.done; E.done = null; DISC.cam = null; if (f) f(); return; }
+  // labels and talk
+  const v = new THREE.Vector3(), at = (x, y, z, el) => { v.set(x, y, z).project(cam); if (v.z > 1) { el.classList.add('hide'); return; } el.style.left = ((v.x + 1) / 2 * innerWidth) + 'px'; el.style.top = ((1 - v.y) / 2 * innerHeight) + 'px'; el.classList.remove('hide'); };
+  const show = E.t >= 1 && G.phase !== 'over';
+  G.p.forEach((p, i) => { const q = ldWorld(p.x, p.z); if (show) at(q.x, 2.1, q.z, V.tags[i]); else V.tags[i].classList.add('hide'); });
+  if (V.say && (V.say.t -= rdt) > 0 && show) { const q = ldWorld(G.p[1].x, G.p[1].z); V.sayEl.textContent = V.say.text; at(q.x, 2.85, q.z, V.sayEl); } else { V.say = null; V.sayEl.classList.add('hide'); }
+  if (V.callT > 0 && (V.callT -= rdt) <= 0) V.call.classList.add('hide');
+  V.sc.innerHTML = '<span class="a">You ' + G.score[0] + '</span> · <span class="b">' + G.score[1] + ' ' + DISC.short + '</span>' + (G.target === 5 ? ' <small style="color:#9fb2b8">to 5</small>' : '');
+}
+function discEvent(e) {
+  const V = DISC.view, G = DISC.g;
+  if (e.k === 'hit') {
+    const p = G.p[e.i], q = ldWorld(G.d.x, G.d.z);
+    if (!V.rm) { V.pulse.visible = true; V.pulseT = 0; V.pulse.position.set(q.x, .9, q.z); V.pulse.material.color.copy(col(e.i === 0 ? '#50e6ff' : '#ffa03c')); }
+    if (e.i === 1) { if (e.charged) discTalk('charged'); else if (e.curved && V.chat() < .35) discTalk('curve'); }
+    if (e.i === 0 && !p.ai) { if (DISC.how === 1) discHowDone(1); else if (DISC.how === 2 && e.curved) discHowDone(2); else if (DISC.how === 3 && e.charged) discHowDone(3); }
+  }
+  if ((e.k === 'wall' || e.k === 'net') && !V.rm) {
+    const f = V.flashes.find(x => !x.s.visible) || V.flashes[0], q = ldWorld(e.k === 'wall' ? e.side * LD_HX : e.x, e.k === 'wall' ? e.z : 0);
+    f.s.visible = true; f.t = 0; f.s.position.set(q.x, .7, q.z); f.s.material.color.copy(col(e.k === 'net' ? '#e8f4ff' : e.z > 0 ? '#50e6ff' : '#ffa03c'));
+  }
+  if (e.k === 'point') {
+    discBoard(); V.pose[e.w].pump = 1.2;                 // a fist pump
+    V.call.textContent = G.over ? (e.w === 0 ? 'Game: You' : 'Game: ' + DISC.short) : 'Point: ' + (e.w === 0 ? 'You' : DISC.short);
+    V.call.style.color = e.w === 0 ? '#50e6ff' : '#ffa03c'; V.call.classList.remove('hide'); V.callT = 1.1;
+    if (e.w === 1) { if (G.over) discTalk('win'); else if (V.chat() < .45) discTalk('point'); }
+  }
+  if (e.k === 'over') { discOver(); discBoard(); discResult(); }
+}
+
+// =====================================================================
 // 24. WORK
 // Pillar 5, your Works career (the Works career engineer, 0.44.x; plans/mechanics/foundation.html, "section 24
 // core"; plans/pillar5-plan.md Part 1). 24 core first: the ladder of new kinds of work, training moments, tools,
@@ -37607,7 +38900,7 @@ function playerUniformTint(k) {
 }
 WORK_TICKS.push((now, skip) => {                         // once a ship minute: the tint follows uniformState (cheap when nothing changed)
   if (skip || typeof uniformState !== 'function') return;
-  const want = uniformState() === 'grubby' ? 1 : 0;
+  const want = uniformState() === 'grubby' && !PLAYER_SPEC.kit ? 1 : 0;   // rec kit is clean (0.81.0)
   if (want || UNIFORM_MAT) playerUniformTint(want);
 });
 
@@ -38905,6 +40198,8 @@ function collide(p, r, who) {
 // Spec fields: dept, rank, skin, hair, hairColor, height, build, acc[]
 // =====================================================================
 // uniform colours, design v3: command red; works and watch gold; survey and infirmary blue-green
+// the rec kit's colours (0.81.0): the deck's teal, darker shorts, the coral stripe, white grip socks with coral soles
+const REC_KIT = { teal: '#1fa39b', shorts: '#16676a', coral: '#f0795a', sock: '#eef0ea' };
 const DEPT = { command: '#b8433a', works: '#d9a441', watch: '#d9a441', survey: '#2f8e98', infirmary: '#2f8e98' };
 // departments that share a colour are told apart by the badge: a silver shape with a coloured inlay
 const BADGE = {
@@ -38960,8 +40255,16 @@ function makeCharacter(spec, finish = bake) {          // finish: what to do wit
   const s = Object.assign({ dept: 'survey', rank: 0, skin: 2, hair: 'short', hairColor: 'dark', height: 1, build: 'average', acc: [] }, spec);
   const bw = BUILD[s.build] || 1, skin = SKIN[s.skin] || s.skin, hc = HAIR[s.hairColor] || s.hairColor;
   const civ = s.dept === 'civilian';                     // 0.27.14: guests in plain clothes, a top in their outfit colour, no badge or pips
-  const uni = civ ? s.outfit || '#7a6a5a' : DEPT[s.dept] || DEPT.survey, uniDk = shade(uni, .66), has = a => s.acc.includes(a);
-  const suit = civ ? shade(uni, .82) : '#27313a', pants = civ ? '#454a52' : '#3a4653', boot = '#16191d', sole = '#3a3f44', gold = '#e8c06a';
+  // 0.81.0 (rec deck, plans/recdeck-plan.html section 8): kit 'rec' is the rec kit, a teal T-shirt and shorts with a coral
+  // stripe, bare arms and legs; socks: true adds the float room's grip socks. Only colours change (and the sleeves end at
+  // the elbow), so it's the same one mesh per joint: no extra draw calls. No badge, pips or belt
+  const rec = s.kit === 'rec', plain = civ || rec, RK = REC_KIT;
+  let uni = civ ? s.outfit || '#7a6a5a' : DEPT[s.dept] || DEPT.survey, uniDk = shade(uni, .66); const has = a => s.acc.includes(a);
+  let suit = civ ? shade(uni, .82) : '#27313a', pants = civ ? '#454a52' : '#3a4653', boot = '#16191d', sole = '#3a3f44', gold = '#e8c06a';
+  const belt = rec ? RK.shorts : boot;
+  if (rec) { uni = suit = RK.teal; uniDk = RK.coral; pants = RK.shorts; boot = skin; sole = shade(skin, .85); }
+  if (s.socks) { boot = RK.sock; sole = RK.coral; }
+  const shin = rec ? skin : pants, arm = rec ? skin : uni;
   const root = new THREE.Group(); root.scale.setScalar(s.height);
   const rig = { root, legs: [], arms: [], spec: s };
   const pv = (p, x, y, z) => { const g = new THREE.Group(); g.position.set(x, y, z); p.add(g); return g; };
@@ -38973,9 +40276,10 @@ function makeCharacter(spec, finish = bake) {          // finish: what to do wit
     const thigh = pv(rig.hips, side * .088 * bw, -HIP_OFF, 0);
     part(thigh, GEO.sph, pants, 0, 0, 0, .07 * bw, .07, .07 * bw);
     part(thigh, cylG(.07 * bw, .058 * bw, LT), pants, 0, -LT / 2, 0);
+    if (rec) part(thigh, GEO.box, RK.coral, side * .062 * bw, -LT * .3, 0, .012, LT * .5, .03);   // the coral stripe down the shorts
     const knee = pv(thigh, 0, -LT, 0);
-    part(knee, GEO.sph, pants, 0, 0, 0, .06 * bw, .06, .062 * bw);
-    part(knee, cylG(.057 * bw, .047 * bw, LS), pants, 0, -LS / 2, 0);
+    part(knee, GEO.sph, shin, 0, 0, 0, .06 * bw, .06, .062 * bw);
+    part(knee, cylG(.057 * bw, .047 * bw, LS), shin, 0, -LS / 2, 0);
     part(knee, cylG(.056 * bw, .06 * bw, .11), boot, 0, -LS + .06, 0);
     const ankle = pv(knee, 0, -LS, 0);
     part(ankle, GEO.sph, boot, 0, -.008, .04, .062 * bw, .042, .115);
@@ -38985,9 +40289,9 @@ function makeCharacter(spec, finish = bake) {          // finish: what to do wit
   // torso
   rig.torso = pv(rig.hips, 0, .05, 0);
   part(rig.torso, cylG(.153 * bw, .15 * bw, .1, 20), suit, 0, .03, 0);
-  part(rig.torso, cylG(.158 * bw, .158 * bw, .045, 20), boot, 0, 0, 0);
-  part(rig.torso, GEO.box, gold, 0, 0, .158 * bw, .06, .04, .02);
-  part(rig.torso, GEO.box, boot, -.12 * bw, -.035, .08 * bw, .07, .08, .05, 0, -.5, 0);
+  part(rig.torso, cylG(.158 * bw, .158 * bw, .045, 20), belt, 0, 0, 0);
+  part(rig.torso, GEO.box, rec ? RK.shorts : gold, 0, 0, .158 * bw, .06, .04, .02);
+  part(rig.torso, GEO.box, belt, -.12 * bw, -.035, .08 * bw, .07, .08, .05, 0, -.5, 0);
   if (has('apron')) part(rig.torso, GEO.box, '#e8e0cf', 0, -.1, .165 * bw, .25 * bw, .22, .02);
   rig.chest = pv(rig.torso, 0, .07, 0);
   part(rig.chest, cylG(.17 * bw, .155 * bw, .25, 20), suit, 0, .125, 0);
@@ -38995,7 +40299,7 @@ function makeCharacter(spec, finish = bake) {          // finish: what to do wit
   part(rig.chest, cylG(.175 * bw, .175 * bw, .015, 20), uniDk, 0, .16, 0);
   part(rig.chest, GEO.sph, uni, 0, .28, 0, .2 * bw, .07, .15 * bw);
   if (has('apron')) part(rig.chest, GEO.box, '#e8e0cf', 0, .06, .162 * bw, .2 * bw, .2, .02);
-  else if (!civ) {                                     // department badge, left breast
+  else if (!plain) {                                   // department badge, left breast
     const bd = BADGE[s.dept] || BADGE.survey, bx = .085 * bw, bz = .168 * bw, silver = '#dfe4e6';
     if (bd.shape === 'diamond') {
       part(rig.chest, GEO.box, silver, bx, .2, bz, .045, .045, .015, 0, 0, Math.PI / 4);
@@ -39014,7 +40318,7 @@ function makeCharacter(spec, finish = bake) {          // finish: what to do wit
     }
   }
   part(rig.chest, cylG(.075, .085, .05, 16), uniDk, 0, .33, 0);
-  for (let i = 0; i < (civ ? 0 : Math.min(4, s.rank + 1)); i++) { const a = .55 + i * .32; part(rig.chest, GEO.sph, gold, Math.sin(a) * .083, .33, Math.cos(a) * .083, .011, .011, .011); }
+  for (let i = 0; i < (plain ? 0 : Math.min(4, s.rank + 1)); i++) { const a = .55 + i * .32; part(rig.chest, GEO.sph, gold, Math.sin(a) * .083, .33, Math.cos(a) * .083, .011, .011, .011); }
   part(rig.chest, cylG(.05, .055, .08, 12), skin, 0, .37, 0);
   // head and face
   const h = rig.head = pv(rig.chest, 0, .4, 0);
@@ -39085,10 +40389,11 @@ function makeCharacter(spec, finish = bake) {          // finish: what to do wit
     const sh = pv(rig.chest, side * .205 * bw, .27, 0);
     part(sh, GEO.sph, uni, 0, 0, 0, .062 * bw, .062, .062 * bw);
     part(sh, cylG(.052 * bw, .046 * bw, .23), uni, 0, -.115, 0);
+    if (rec) part(sh, cylG(.054 * bw, .054 * bw, .03, 12), uniDk, 0, -.2, 0);   // the sleeve's coral hem
     const el = pv(sh, 0, -.23, 0);
-    part(el, GEO.sph, uni, 0, 0, 0, .046 * bw, .046, .046 * bw);
-    part(el, cylG(.045 * bw, .04 * bw, .2), uni, 0, -.1, 0);
-    part(el, cylG(.044 * bw, .044 * bw, .03, 12), uniDk, 0, -.185, 0);
+    part(el, GEO.sph, arm, 0, 0, 0, .046 * bw, .046, .046 * bw);
+    part(el, cylG(.045 * bw, .04 * bw, .2), arm, 0, -.1, 0);
+    part(el, cylG(.044 * bw, .044 * bw, .03, 12), rec ? skin : uniDk, 0, -.185, 0);
     const hand = pv(el, 0, -.2, 0);
     part(hand, GEO.sph, skin, 0, -.045, .005, .042 * bw, .052, .036);
     rig.arms.push({ sh, el, hand, side, x: 0, e: -.15 });
@@ -39562,6 +40867,7 @@ function animateActivity(o, pose, dt, t, sk, y = 0) {
   g.crouch = k.crouch ? ss(k.crouch) : 0;
   animateRig(rig, g, dt, t, sk, o.rnd || R);
   const cartKey = cart ? _cartKeys[cart] || (_cartKeys[cart] = '+' + cart) : null;
+  if (act && ACTS[act].root) o.rootOn = true;           // 0.81.0: a rec move that places the whole body (recRoot)
   if (k[base] === undefined) k[base] = 0; if (act && k[act] === undefined) k[act] = 0; if (cartKey && k[cartKey] === undefined) k[cartKey] = 0;
   for (const key in k) { const on = +(key === base || key === act || key === cartKey); k[key] = o.fresh ? on : k[key] + (on - k[key]) * Math.min(1, dt * 5); }
   const seat = base === 'sit' || base === 'lie' ? (y > 0 ? y : CROWD_SEAT[base]) : 0;
@@ -39704,6 +41010,7 @@ class CrowdPerson {
     const root = rig.root;
     root.position.set(this.pos.x + fx * off, L(floor, (this.pos.y > 0 ? this.pos.y : CROWD_SEAT[base] || CROWD_SEAT.sit) + .17 * h, lie), this.pos.z + fz * off);   // as before 0.27.0, getting out of bed
     root.rotation.set(-Math.PI / 2 * lie, this.rot, 0);
+    if (this.rootOn) recRoot(this, root, t + g.t0);       // 0.81.0: in the water, up the wall, tumbling (8c)
     root.updateMatrixWorld(true);
     this.fresh = false;
   }
@@ -39805,6 +41112,7 @@ const crowd = {
     deviceHook(); bubbles.tick(dt);                      // the device pose's hook and chatter bubbles (0.27.13)
     if (CROWD_DEMO) CROWD_DEMO.tick(dt, t);
     if (POSE_DEMO) POSE_DEMO.tick(dt, t);
+    if (REC_DEMO) REC_DEMO.tick(dt, t);
     if (SEAT_DEMO) SEAT_DEMO.tick(dt, t);
     if (!this.chunks.length) return;
     // 0.27.19: at a ship-wide event's gathering on this deck (FEEL_S.gather: the storm's all-clear party), the coarse
@@ -40296,6 +41604,67 @@ const POSE_DEMO = (() => {
   };
 })();
 
+// ---- the rec moves lineup (0.81.0, the rec deck animation engineer): ?recposes in the address goes to the rec deck at
+// 10:30 and shows every rec pose on the concourse in rec kit, labelled, with a swimmer, a kayaker, a climber and a
+// floater going round on stand-in water and wall (the movers, 8c). A test spot only: never saves; remove with the rooms' own. ----
+const REC_DEMO = (() => {
+  if (!REC_DECK || urlFlag('recposes') === null) return null;   // dev only, and never while the rec deck is dormant
+  const STILL = [['tread', .9], ['kayak', .45], ['climb', .7], ['ring', 1.1], ['lower', .8], ['float', 1.0], ['sit:cheer', .48], ['sit:clap', .48], ['sit:groan', .48], ['walk+towel', 0], ['stand', 0], ['stand', 0, 'grip socks']];
+  const MOVES = [{ kind: 'swim', path: [[5.6, 9.6], [15.4, 9.6]], y: .35 }, { kind: 'kayak', path: [[24.4, 7.9], [28.6, 7.9, 1], [28.6, 10.1], [24.4, 10.1]], y: .35 },
+    { kind: 'climb', at: [4.35, 8.5], face: 'w', top: 2.3 }, { kind: 'float', at: [11.5, 8.4], r: .5, top: 1.4 }];
+  let here = [], furn = null, labels = null, started = false;
+  const v = new THREE.Vector3();
+  function fill() {
+    const people = ROSTER.filter(p => !p.story);
+    furn = new THREE.Group(); scene.add(furn);
+    const water = new THREE.MeshStandardMaterial({ color: col('#3fb6c4'), roughness: .3 }), rock = new THREE.MeshStandardMaterial({ color: col('#b0703c'), roughness: .9 });
+    const slab = (m, x0, x1, z0, z1, y0, y1) => { const b = new THREE.Mesh(new THREE.BoxGeometry(x1 - x0, y1 - y0, z1 - z0), m); b.position.set((x0 + x1) / 2 - OX, (y0 + y1) / 2, (z0 + z1) / 2 - OZ); furn.add(b); };
+    slab(water, 4.8, 16.2, 9.15, 10.05, .012, .35); slab(water, 23.6, 29.4, 7.3, 10.7, .012, .35); slab(rock, 4.03, 4.13, 7.9, 9.1, .012, 3.4);
+    labels = document.createElement('div'); labels.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:2';
+    document.body.appendChild(labels);
+    const label = t => { const el = document.createElement('div'); el.textContent = t; el.style.cssText = 'position:absolute;transform:translate(-50%,-100%);font-size:12px;padding:2px 7px;border-radius:999px;background:rgba(13,21,33,.72);color:#e8eef0;white-space:nowrap'; labels.appendChild(el); return el; };
+    here = STILL.map(([pose, y, name], i) => {
+      const x = 5.6 + i * .95 - OX, z = 7.55 - OZ;
+      if (/^sit/.test(pose)) { const g = new THREE.Group(); g.position.set(x, 0, z); furn.add(g); KIT.stool(g); }
+      const h = crowd.add({ ...rosterSpec(people[(i * 7) % people.length]), kit: 'rec', socks: !!name || pose === 'float' });
+      if (pose === 'float') h.rig.star = .8;
+      return { pose, h, el: label(name || pose), x, y, z, face: 0 };
+    }).concat(MOVES.map((M, i) => {
+      const h = crowd.add({ ...rosterSpec(people[(i * 11 + 3) % people.length]), kit: 'rec', socks: M.kind === 'float' }), p = recXZ(M.path ? M.path[0] : M.at);
+      return { A: { o: { move: M }, def: { mins: 1e9 }, done: 0, x: p.x, z: p.z, y: 0, face: 0, body: h }, h, el: label(M.kind) };
+    }));
+  }
+  function clear() {
+    for (const e of here) crowd.remove(e.h); here = [];
+    if (furn) { scene.remove(furn); furn.traverse(o => { if (o.isMesh) o.geometry.dispose(); }); furn = null; }
+    if (labels) { labels.remove(); labels = null; }
+  }
+  return {
+    tick(dt, t) {
+      if (!started) {
+        started = true;
+        if (deckDef.num !== 7) goToDeck(7);
+        setShipNow((SHIP.time.day - 1) * 1440 + 10 * 60 + 30); nightT = nightAt(); updateClock();
+        const c = cellPos(11, 10); player.obj.position.copy(c); player.face = player.obj.rotation.y = Math.PI; target.copy(c).setY(.7);
+        toast('Rec moves', 'Every rec deck pose, in rec kit along the concourse, with a swimmer, a kayaker, a climber and a floater on stand-in water. Doesn\'t touch your save.');
+      }
+      const on = deckDef.num === 7;
+      if (on && !here.length) fill(); else if (!on && here.length) clear();
+      for (const e of here) {
+        let x, y, z;
+        if (e.A) {
+          const A = e.A; if (A.mv && A.mv.done) A.mv = null;
+          const pose = recMoveStep(A, dt, t) || 'stand'; e.h.set({ x: A.x, y: A.y, z: A.z }, A.face, pose); x = A.x; y = A.y; z = A.z;
+        } else { e.h.set({ x: e.x, y: e.y, z: e.z }, e.face, e.pose, /^walk/.test(e.pose) ? t * 1.1 : undefined); x = e.x; y = e.y; z = e.z; }
+        v.set(x, y + 1.9, z).project(camera);
+        const vis = v.z < 1 && Math.abs(v.x) < 1.1 && Math.abs(v.y) < 1.1;
+        e.el.style.display = vis ? '' : 'none';
+        if (vis) { e.el.style.left = ((v.x + 1) / 2 * innerWidth).toFixed(0) + 'px'; e.el.style.top = ((1 - v.y) / 2 * innerHeight).toFixed(0) + 'px'; }
+      }
+    },
+  };
+})();
+
 // ---- seat check (0.27.11): ?seats in the address puts a stand-in on every seat place of the deck you're on (pose
 // 'sit', at placeSpot's spot, height and facing, exactly where the crew would sit), labelled with the place's id, at
 // 10:30 when most of the crew are at work (seats with crew on them show two people). For checking place data (xy, y, face) against the furniture. Never saves. ----
@@ -40749,7 +42118,8 @@ class Walker {
     g.p += moved / (CYCLE * this.h);
     if (!moved && g.w < .02) g.p = 0;
     g.w += ((moved > 0 ? 1 : 0) - g.w) * Math.min(1, dt * (moved > 0 ? 6 : 7));
-    if (this.holding !== undefined || this.crouch !== undefined || this.deviceOut !== undefined || this.needGo !== undefined) animateActivity(this, (this.crouch ? 'crouch' : 'stand') + (this.holding ? '+' + (this.holding === true ? 'carry' : this.holding) : this.deviceOut ? '+device' : this.needGo ? '+go' : ''), dt, t + g.t0, Math.min(1, this.vel / this.maxV));   // section 15: in hand (8b's '+carry', '+cart', '+cartfull'), crouching in a crawlway
+    if (this.towel !== undefined && this.towel !== null && shipNow() >= this.towel) this.towel = null;   // 0.81.0: the towel after a swim (recTowel)
+    if (this.holding !== undefined || this.crouch !== undefined || this.deviceOut !== undefined || this.needGo !== undefined || this.towel !== undefined) animateActivity(this, (this.crouch ? 'crouch' : 'stand') + (this.holding ? '+' + (this.holding === true ? 'carry' : this.holding) : this.deviceOut ? '+device' : this.needGo ? '+go' : this.towel ? '+towel' : ''), dt, t + g.t0, Math.min(1, this.vel / this.maxV));   // section 15: in hand (8b's '+carry', '+cart', '+cartfull'), crouching in a crawlway
     else animateRig(this.rig, g, dt, t + g.t0, Math.min(1, this.vel / this.maxV));
   }
   setActive(on) {
@@ -41217,6 +42587,296 @@ class FullPerson {
 }
 FullPerson.prototype.set = CrowdPerson.prototype.set;
 FullPerson.prototype.update = CrowdPerson.prototype.update;
+
+// =====================================================================
+// 8c. REC DECK MOVES (the rec deck animation engineer, 0.81.x; plans/recdeck-plan.html sections 8 and 9)
+// The player's poses for the rec deck, on any rig (8b's ACTS): swim (front crawl), tread (chest-deep, sculling),
+// kayak (seated in a kayak, a double paddle, a helmet), climb / ring / lower (up the wall in a harness, ringing the
+// bell, lowered by the auto-belay), float (slow bounces, somersaults, a star shape), and seated or standing cheer, clap
+// and groan for the stands and the auditorium. '+towel' is a towel over the shoulder after a swim.
+// An activity with a `root` function moves the whole body too (in the water, up the wall, tumbling), after the base
+// pose has placed it: CrowdPerson.update calls recRoot only for someone who has used one (o.rootOn), so nobody else
+// changes. Props come from PROP_KIT on first use (no R(), colours through col()); the kayak rides the body bone, the
+// paddle and helmet the chest, the harness the chest; the belay line is one thin mesh on the stand-in while it climbs.
+// The rec kit is makeCharacter's kit: 'rec' (REC_KIT): a colour change, no extra draw calls. playerKit(k) changes yours.
+//
+// The mover (for section 15's activities): actStart(kind, placeId, { move: M }) walks you to the place as usual; in
+// the 'do' phase recMoveStep drives the stand-in along M and the activity ends when M is done. M is in DECK
+// coordinates like a place's xy ([20.5, 9.5] is tile [20, 9]'s centre), heights in metres above the deck floor:
+//   { kind: 'swim',  path: [[x, z], [x, z]], y: water top, lengths: 4 }      one lane, end to end; the point is the
+//                                                                          swimmer's chest, so keep ends ~.7 from the walls
+//   { kind: 'tread', at: [x, z], y: water top, face }                       until the activity's minutes are done
+//   { kind: 'kayak', path: [[x, z, fast?], ...], y: water top, laps: 1 }    a loop, closed for you; fast: 1 on white water
+//   { kind: 'climb', at: [x, z], face, top: metres, onRing() }              at: the foot of the route, against the wall;
+//                                                                          face: toward the wall ('n', 's', 'e', 'w' or degrees)
+//   { kind: 'float', at: [x, z], r: drift radius, top: metres, bounces }     grip socks on (the stand-in only)
+// Leave out lengths, laps or bounces and the move goes on until the activity's minutes are up, then stops at its
+// next natural end (back at the lane's start, the loop's start, the floor). Nothing here calls R().
+// =====================================================================
+Object.assign(HOLDS, { towel: { prop: 'towel', bone: 'C', one: 2 } });   // over the left shoulder; one: 2 is neither arm, so both swing as usual
+for (const a of ['cheer', 'clap', 'groan']) ACT_SEATED.add(a);
+Object.assign(PROP_KIT, {
+  kayak(p) {                                             // on the body bone, in metres from the root: the hull's waterline at .66
+    part(p, GEO.sph, '#f2a33a', 0, .66, .32, .34, .15, 1.38); part(p, GEO.sph, '#e05a3a', 0, .73, .32, .2, .09, 1.2);
+    part(p, torG(.21, .03), '#2b2f33', 0, .79, .02, 1, 1.3, 1, Math.PI / 2);
+  },
+  paddle(p) {                                            // on the chest: the shaft across the hands, a blade each end; and the helmet
+    part(p, GEO.box, '#2b2f33', 0, .1, .4, 1.3, .024, .024);   // 0.80.9 (the user's: too big for the kayak): 1.3 long, was 2.0
+    for (const x of [-1, 1]) part(p, GEO.sph, '#e9c46a', x * .69, .1, .4, .13, .065, .02, 0, x * .5, 0);
+    part(p, capG(.19, Math.PI * .56), '#d8432f', 0, .535, -.01, 1, 1.02, 1.05, -.2);
+    part(p, GEO.box, '#2b2f33', 0, .6, .17, .2, .02, .06, .3);
+  },
+  harness(p) {                                           // on the chest: the waist belt, the leg loops' straps, the belay loop in front
+    part(p, torG(.17, .022), '#2b2f33', 0, -.07, 0, 1, 1, 1.02, Math.PI / 2);
+    for (const x of [-.07, .07]) part(p, GEO.box, '#e8a33a', x, -.14, .15, .03, .12, .025, .3);
+    part(p, torG(.035, .012), '#f0795a', 0, -.11, .19);
+  },
+  towel(p) {                                             // on the chest: over the left shoulder, down the front and the back
+    for (const z of [1, -1]) part(p, GEO.box, '#f4f1ea', .16, .17, z * .19, .12, .28, .022, z * -.12);
+    part(p, GEO.sph, '#f4f1ea', .17, .33, 0, .075, .04, .2); part(p, GEO.box, REC_KIT.coral, .16, .0724, .2179, .122, .03, .008, -.12);   // on the front piece's face, tilted with it
+  },
+});
+const REC_ACTS = {
+  swim: { root(o, root, s, t) {                          // face down along the lane, the back just at the water; the point is the chest
+    const h = o.h, th = (Math.PI / 2 - .1) * s, c = 1.0 * h * s;
+    root.rotation.x = L(root.rotation.x, th, 1);
+    root.position.x -= Math.sin(o.rot) * c; root.position.z -= Math.cos(o.rot) * c;
+    root.position.y = L(root.position.y, o.pos.y - .2 * h + .015 * Math.sin(t * 3.4), s);
+  }, f(r, s, t, b, ph) {
+    const u = (t * .52 + ph) % 1;                        // one stroke each arm a cycle: pull under the body, recover over the back
+    for (const a of r.arms) {
+      const v = (u + (a.side > 0 ? .5 : 0)) % 1, ang = -Math.PI + 2 * Math.PI * v, rc = v > .5 ? Math.sin((v - .5) * 2 * Math.PI) : 0;
+      a.sh.rotation.x = L(a.sh.rotation.x, ang, s); a.el.rotation.x = L(a.el.rotation.x, -.2 - 1.2 * rc, s);
+      a.sh.rotation.z = L(a.sh.rotation.z, a.side * (.1 + .3 * rc), s); a.hand.rotation.x = L(a.hand.rotation.x, .25, s);
+    }
+    const roll = Math.sin(2 * Math.PI * u), br = pulse(t * .52 + ph, 2, .45);   // the body rolls with the stroke; a breath every other stroke
+    r.hips.position.y = L(r.hips.position.y, HIP_Y, s); r.hips.rotation.y = L(r.hips.rotation.y, .12 * roll, s); r.hips.rotation.z = L(r.hips.rotation.z, 0, s);
+    r.chest.rotation.y = L(r.chest.rotation.y, .38 * roll, s); r.torso.rotation.x = L(r.torso.rotation.x, 0, s);
+    r.head.rotation.x = L(r.head.rotation.x, -.3, s); r.head.rotation.y = L(r.head.rotation.y, -.38 * roll + 1.0 * br, s);
+    for (const leg of r.legs) {                          // a flutter kick, toes pointed
+      const k = Math.sin(t * 8.5 + (leg.side > 0 ? 0 : Math.PI));
+      leg.thigh.rotation.x = L(leg.thigh.rotation.x, .2 * k, s); leg.knee.rotation.x = L(leg.knee.rotation.x, .2 + .18 * k, s);
+      leg.ankle.rotation.x = L(leg.ankle.rotation.x, 1.15, s); leg.thigh.rotation.z = L(leg.thigh.rotation.z, 0, s);
+    }
+  } },
+  tread: { root(o, root, s, t) {                         // chest-deep, bobbing a little
+    root.position.y = L(root.position.y, o.pos.y - 1.02 * o.h + .025 * Math.sin(t * 1.3), s);
+  }, f(r, s, t, b, ph) {
+    for (const a of r.arms) { const w = Math.sin(t * 2.6 + a.side * .8 + ph); armTo(a, s, -.4, -.5, .75 + .12 * w, .45 * w); }   // sculling
+    for (const leg of r.legs) {                          // a slow eggbeater
+      const th = t * 2.1 + (leg.side > 0 ? 0 : Math.PI) + ph;
+      leg.thigh.rotation.x = L(leg.thigh.rotation.x, -.55 + .2 * Math.sin(th), s); leg.knee.rotation.x = L(leg.knee.rotation.x, 1.0 + .3 * Math.cos(th), s);
+      leg.thigh.rotation.z = L(leg.thigh.rotation.z, leg.side * .22, s); leg.ankle.rotation.x = L(leg.ankle.rotation.x, .4, s);
+    }
+    r.head.rotation.x = L(r.head.rotation.x, -.08, s); r.head.rotation.y = L(r.head.rotation.y, .3 * Math.sin(t * .4 + ph), s);
+  } },
+  kayak: { props: { B: 'kayak', C: 'paddle' }, root(o, root, s, t) {   // sitting in the hull, which bobs and rocks
+    root.position.y = L(root.position.y, o.pos.y - .66 + .02 * Math.sin(t * 1.9) * (o.fast ? 2.5 : 1), s);
+    root.rotation.z = L(root.rotation.z, (o.fast ? .09 : .04) * Math.sin(t * 1.4), s);
+    root.rotation.x = L(root.rotation.x, (o.fast ? .05 : .015) * Math.sin(t * 2.3), s);
+  }, f(r, s, t, b, ph) {
+    const w = Math.sin(t * 2.3 + ph);                     // the paddle dips one side, then the other
+    r.hips.position.y = L(r.hips.position.y, HIP_Y, s); r.hips.rotation.y = L(r.hips.rotation.y, 0, s); r.hips.rotation.z = L(r.hips.rotation.z, 0, s);
+    for (const leg of r.legs) {                          // legs out in front, inside the hull
+      leg.thigh.rotation.x = L(leg.thigh.rotation.x, -1.42, s); leg.knee.rotation.x = L(leg.knee.rotation.x, .15, s);
+      leg.ankle.rotation.x = L(leg.ankle.rotation.x, -.25, s); leg.thigh.rotation.z = L(leg.thigh.rotation.z, leg.side * .08, s);
+    }
+    r.torso.rotation.x = L(r.torso.rotation.x, .1, s);
+    r.chest.rotation.y = L(r.chest.rotation.y, .42 * w, s); r.chest.rotation.z = L(r.chest.rotation.z, .3 * w, s);
+    for (const a of r.arms) armTo(a, s, -1.2 - .22 * w * a.side, -.5, -.06, .2);
+    r.head.rotation.x = L(r.head.rotation.x, 0, s); r.head.rotation.y = L(r.head.rotation.y, 0, s);   // still: the helmet rides the chest
+  } },
+  climb: { props: { C: 'harness' }, root(o, root, s) { root.position.y = L(root.position.y, o.pos.y, s); },
+    f(r, s, t, b, ph) {                                  // one hand reaches up while the other pulls, the opposite foot steps up
+      const u = (t * .85 + ph) % 2, side = u < 1 ? 1 : -1, q = ss(u % 1);
+      for (const a of r.arms) { const k = a.side === side ? q : 1 - q; armTo(a, s, L(-2.15, -2.95, k), L(-1.5, -.2, k), .22, .3); }
+      recLegs(r, s, side, q);
+      r.torso.rotation.x = L(r.torso.rotation.x, .14, s); r.head.rotation.x = L(r.head.rotation.x, -.45, s); r.head.rotation.y = L(r.head.rotation.y, .25 * side * q, s);
+    } },
+  ring: { props: { C: 'harness' }, root(o, root, s) { root.position.y = L(root.position.y, o.pos.y, s); },
+    f(r, s, t, b, ph) {                                  // at the top: hold on with the left, ring the bell with the right
+      const [L_, R_] = [r.arms.find(a => a.side > 0), r.arms.find(a => a.side < 0)];
+      armTo(L_, s, -2.9, -.25, .15, .3); armTo(R_, s, -2.7, -.35 + .3 * Math.sin(t * 15), .55, .2);
+      recLegs(r, s, 1, .3);
+      r.torso.rotation.x = L(r.torso.rotation.x, .1, s); r.head.rotation.x = L(r.head.rotation.x, -.6, s); r.head.rotation.y = L(r.head.rotation.y, -.3, s);
+    } },
+  lower: { props: { C: 'harness' }, root(o, root, s) {  // sitting back in the harness, feet on the wall, walking down it
+    root.position.y = L(root.position.y, o.pos.y, s); root.rotation.x = L(root.rotation.x, -.42, s);
+    root.position.x -= Math.sin(o.rot) * .32 * s; root.position.z -= Math.cos(o.rot) * .32 * s;
+  }, f(r, s, t, b, ph) {
+    for (const a of r.arms) armTo(a, s, -1.65, -1.25, -.08, .25);   // both hands on the line
+    for (const leg of r.legs) {
+      const w = Math.sin(t * 3.2 + (leg.side > 0 ? 0 : Math.PI) + ph);
+      leg.thigh.rotation.x = L(leg.thigh.rotation.x, -1.15 + .22 * w, s); leg.knee.rotation.x = L(leg.knee.rotation.x, .75 - .3 * w, s);
+      leg.ankle.rotation.x = L(leg.ankle.rotation.x, -.35, s); leg.thigh.rotation.z = L(leg.thigh.rotation.z, leg.side * .14, s);
+    }
+    r.torso.rotation.x = L(r.torso.rotation.x, .2, s); r.head.rotation.x = L(r.head.rotation.x, .35, s);
+  } },
+  float: { root(o, root, s) {                            // up off the floor; a somersault turns about the middle, not the feet
+    const th = (o.spin || 0) * s, c = .78 * o.h;
+    root.position.y = L(root.position.y, o.pos.y, s) + c * (1 - Math.cos(th));
+    root.position.x -= Math.sin(o.rot) * c * Math.sin(th); root.position.z -= Math.cos(o.rot) * c * Math.sin(th);
+    root.rotation.x += th;
+  }, f(r, s, t, b, ph) {
+    const st = r.star || 0, d = Math.sin(t * .7 + ph);    // drifting limbs, opening to a star at the top of a bounce
+    for (const a of r.arms) armTo(a, s, L(-.7 + .3 * d * a.side, -.15, st), L(-.9 + .2 * d, -.08, st), L(.55, 1.5, st), .25 * Math.sin(t * 1.1 + a.side));
+    for (const leg of r.legs) {
+      const w = Math.sin(t * .9 + leg.side * 1.5 + ph);
+      leg.thigh.rotation.x = L(leg.thigh.rotation.x, L(-.4 + .25 * w, 0, st), s); leg.knee.rotation.x = L(leg.knee.rotation.x, L(.7 + .3 * w, .05, st), s);
+      leg.thigh.rotation.z = L(leg.thigh.rotation.z, leg.side * L(.12, .5, st), s); leg.ankle.rotation.x = L(leg.ankle.rotation.x, .35, s);
+    }
+    r.hips.position.y = L(r.hips.position.y, HIP_Y, s); r.torso.rotation.x = L(r.torso.rotation.x, .1 * (1 - st), s);
+    r.head.rotation.x = L(r.head.rotation.x, -.25 + .2 * st, s);
+    if (r.tail) r.tail.rotation.x = L(r.tail.rotation.x, -1.6, s);   // hair floats up
+  } },
+  cheer: { f(r, s, t, b, ph) {                           // arms up and pumping at a point
+    const u = pulse(t, 2.2, 1.3, ph);
+    for (const a of r.arms) armTo(a, s, L(-2.3, -2.95, u) + .12 * Math.sin(t * 8 + a.side), L(-1.0, -.15, u), .32, 0);
+    r.torso.rotation.x = L(r.torso.rotation.x, -.06, s); r.head.rotation.x = L(r.head.rotation.x, -.22, s);
+  } },
+  clap: { f(r, s, t, b, ph) {                            // hands together in front, about three claps a second
+    const c = Math.abs(Math.sin(t * 9.5 + ph));
+    for (const a of r.arms) armTo(a, s, -.85, -1.05, L(-.42, -.12, c), .2);
+    r.head.rotation.x = L(r.head.rotation.x, -.05, s);
+  } },
+  groan: { f(r, s, t, b, ph) {                           // a near miss: hands on the head, a look down
+    for (const a of r.arms) armTo(a, s, -2.55, -2.25, .6, .4);
+    r.head.rotation.x = L(r.head.rotation.x, .3 + .05 * Math.sin(t * 2), s); r.torso.rotation.x = L(r.torso.rotation.x, .1, s);
+  } },
+};
+// climbing legs: the `side` foot steps up as q goes 0 to 1, the other pushes down; feet toward the wall
+function recLegs(r, s, side, q) {
+  const hy = r.hips.position.y;
+  for (const leg of r.legs) {
+    const k = leg.side === side ? q : 1 - q, t0 = leg.thigh.rotation.x, k0 = leg.knee.rotation.x, a0 = leg.ankle.rotation.x;
+    const ang = legIK(leg, ANK + L(.02, .32, k) - (hy - HIP_OFF), L(.1, .2, k));
+    leg.thigh.rotation.x = L(t0, leg.thigh.rotation.x, s); leg.knee.rotation.x = L(k0, leg.knee.rotation.x, s); leg.ankle.rotation.x = L(a0, -ang + .15, s);
+    leg.thigh.rotation.z = L(leg.thigh.rotation.z, leg.side * .16, s);
+  }
+}
+Object.assign(ACTS, REC_ACTS);
+for (const a in REC_ACTS) CROWD_ANIMS.add(a);
+function recRoot(o, root, t) {                           // the rec moves' whole-body part, each by its blend weight
+  for (const key in o.k) { const A_ = ACTS[key]; if (A_ && A_.root && o.k[key] > .001) A_.root(o, root, ss(o.k[key]), t); }
+}
+// ---- the rec kit for you (0.81.0): playerKit('rec') or playerKit(null). Your Walker is rebuilt in the new clothes, and
+// so is the stand-in if you're at a place. Not saved: a reload finds you in uniform. ----
+function playerKit(k = null) {
+  if ((PLAYER_SPEC.kit || null) === k) return false;
+  for (const s of [PLAYER_SPEC, player.spec]) { if (k) s.kit = k; else delete s.kit; }
+  const w = player, old = w.rig;
+  w.obj.remove(old.root); old.root.traverse(o => { if (o.isMesh) o.geometry.dispose(); });
+  w.rig = makeCharacter(w.spec); w.obj.add(w.rig.root); w.rig.root.traverse(o => { o.userData.walker = w; });
+  w.propMeshes = []; w.propKey = ''; w.bodyProps = null;
+  if (ACT && ACT.body) recBody(ACT);
+  const grubby = !k && typeof uniformState === 'function' && uniformState() === 'grubby';
+  if (typeof playerUniformTint === 'function' && (grubby || UNIFORM_MAT)) playerUniformTint(grubby ? 1 : 0);
+  return true;
+}
+function recBody(A, extra) {                             // a new stand-in in your clothes now (plus extra: { socks: true }), where the old one was
+  const b = A.body, nb = new FullPerson({ ...PLAYER_SPEC, ...extra }, 'you');
+  nb.set({ x: A.x, y: A.y, z: A.z }, A.face, b ? b.pose : 'stand'); nb.rot = A.face;
+  if (b) b.dispose(); A.body = nb;
+}
+// a towel over your shoulder after a swim: recTowel(mins) for that many ship minutes (the Walker's '+towel')
+function recTowel(mins = 20) { player.towel = shipNow() + mins; }
+// changing at a locker: the wardrobe's browse for two ship minutes, then into rec kit (or back; o.kit: 'rec' or null)
+Object.assign(PLAYER_ACTS, { recChange: { mins: 2, pose: 'browse', title: 'Changing', until: A => {
+  if (A.done < A.def.mins) return false;
+  if (!A.o.changed) { A.o.changed = true; playerKit(A.o.kit !== undefined ? A.o.kit : PLAYER_SPEC.kit ? null : 'rec'); }
+  return true;
+} } });
+// ---- the mover ----
+const recXZ = p => ({ x: p[0] - OX, z: p[1] - OZ });
+const recFace = f => typeof f === 'number' ? f * Math.PI / 180 : FACE_ANGLE[f] || 0;
+function recGlide(A, x, z, sp, dt) {                     // toward x, z at sp m/s, facing the way; true when there
+  const dx = x - A.x, dz = z - A.z, d = Math.hypot(dx, dz), st = sp * dt;
+  if (d > 1e-4) A.face = Math.atan2(dx, dz);
+  if (d <= st) { A.x = x; A.z = z; return true; }
+  A.x += dx / d * st; A.z += dz / d * st; return false;
+}
+const recTimeUp = (A, n, count) => n ? count >= n : A.done >= A.def.mins;
+const REC_MOVES = {
+  swim(A, M, S, dt) {
+    const P = M.path.map(recXZ); A.y = M.y || 0;
+    if (!S.step) { S.step = 'in'; S.leg = 0; S.k = 0; }
+    if (S.step === 'in') { if (recGlide(A, P[0].x, P[0].z, .6, dt)) { S.step = 'turn'; S.k = 0; S.f = Math.atan2(P[1].x - P[0].x, P[1].z - P[0].z); } return 'tread'; }
+    if (S.step === 'turn') { A.face = S.f; S.k += dt; if (S.k > 1.3) S.step = 'swim'; return 'tread'; }
+    if (S.step === 'swim') {
+      const a = P[S.leg % 2], b = P[1 - S.leg % 2];
+      if (recGlide(A, b.x, b.z, M.speed || .75, dt)) {
+        S.leg++; S.k = 0;
+        if (recTimeUp(A, M.lengths, S.leg) && (M.lengths || S.leg % 2 === 0)) S.step = 'end';
+        else { S.step = 'turn'; S.f = Math.atan2(a.x - b.x, a.z - b.z); }
+      }
+      return 'swim';
+    }
+    S.k += dt; if (S.k > 1) S.done = true; return 'tread';
+  },
+  tread(A, M, S, dt, t) {
+    const p = recXZ(M.at); A.x = p.x; A.z = p.z; A.y = M.y || 0;
+    if (S.f === undefined) S.f = M.face !== undefined ? recFace(M.face) : A.face;
+    A.face = S.f + .5 * Math.sin(t * .15);
+    if (A.done >= A.def.mins) S.done = true; return 'tread';
+  },
+  kayak(A, M, S, dt) {
+    const P = M.path; A.y = M.y || 0;
+    if (S.i === undefined) { S.i = 0; S.lap = 0; S.go = false; }
+    const p = P[S.i], q = recXZ(p); A.body.fast = !!p[2];
+    if (recGlide(A, q.x, q.z, S.go ? (p[2] ? 1.7 : 1.05) : .7, dt)) {
+      if (S.go && S.i === 0) { S.lap++; if (recTimeUp(A, M.laps, S.lap)) { S.done = true; return 'kayak'; } }
+      S.go = true; S.i = (S.i + 1) % P.length;
+    }
+    return 'kayak';
+  },
+  climb(A, M, S, dt, t) {
+    const p = recXZ(M.at), f = recFace(M.face), top = M.top || 3.2;
+    if (!S.step) { S.step = 'to'; S.k = 0; A.y = 0; }
+    if (S.step === 'to') { if (!recGlide(A, p.x, p.z, .8, dt)) return 'walk'; S.step = 'up'; }
+    A.x = p.x; A.z = p.z; A.face = f;
+    let pose = 'climb';
+    if (S.step === 'up') { A.y += .34 * dt * (.35 + .65 * Math.abs(Math.sin(t * .85 * Math.PI))); if (A.y >= top) { A.y = top; S.step = 'ring'; if (M.onRing) try { M.onRing(); } catch (e) { /* the room's */ } } }
+    else if (S.step === 'ring') { pose = 'ring'; S.k += dt; if (S.k > 2.6) S.step = 'lower'; }
+    else if (S.step === 'lower') { pose = 'lower'; A.y = Math.max(0, A.y - .6 * dt); if (!A.y) { S.step = 'off'; S.k = 0; } }
+    else { pose = 'stand'; S.k += dt; if (S.k > .7) S.done = true; }
+    recRope(A, p.x + Math.sin(f) * .2, top + 1.1, p.z + Math.cos(f) * .2, S.step !== 'off');
+    return pose;
+  },
+  float(A, M, S, dt) {
+    const c = recXZ(M.at), r = M.r !== undefined ? M.r : 1.2, top = M.top || 2.2;
+    if (!S.t) { S.t = 0; S.f = A.face; if (A === ACT) recBody(A, { socks: true }); }
+    const n = Math.floor(S.t / 5), u = (S.t % 5) / 5;     // one slow bounce every five seconds
+    if (n >= 1 && u < dt / 5 + 1e-9 && recTimeUp(A, M.bounces, n)) { S.done = true; A.body.spin = 0; A.body.rig.star = 0; return 'float'; }
+    S.t += dt;
+    A.y = top * Math.sin(Math.PI * u) * (n === 0 ? ss(Math.min(1, S.t / 2)) : 1);
+    const flip = n % 3 === 2;                            // every third bounce a slow somersault, otherwise a star at the top
+    A.body.spin = flip ? 2 * Math.PI * ss(u) : 0; A.body.rig.star = flip ? 0 : Math.pow(Math.sin(Math.PI * u), 6);
+    const tx = c.x + r * Math.sin(S.t * .23), tz = c.z + r * .7 * Math.sin(S.t * .17 + 1);
+    A.x += (tx - A.x) * Math.min(1, dt * .8); A.z += (tz - A.z) * Math.min(1, dt * .8); A.face = S.f + S.t * .22;
+    return 'float';
+  },
+};
+function recMoveStep(A, dt, t) {
+  const M = A.o.move, fn = M && REC_MOVES[M.kind]; if (!fn || !A.body) return null;
+  const S = A.mv || (A.mv = {});
+  if (S.done) return M.kind === 'climb' ? 'stand' : M.kind === 'kayak' ? 'kayak' : M.kind === 'swim' || M.kind === 'tread' ? 'tread' : 'stand';
+  return fn(A, M, S, dt, t);
+}
+// the belay line, from the harness up to the top anchor (world x, y, z): one thin mesh on the stand-in's root (so it
+// goes when the stand-in does), its own geometry and a shared material made the first time
+let REC_ROPE_MAT = null; const _ropeA = new THREE.Vector3(), _ropeB = new THREE.Vector3(), _ropeU = new THREE.Vector3(0, 1, 0);
+function recRope(A, ax, ay, az, on) {
+  const root = A.body.rig.root; if (!A.body.full) return;   // a crowd body's root isn't in the scene (phase 2: the crew's own line)
+  if (!A.rope) {
+    A.rope = new THREE.Mesh(cylG(1, 1, 1, 6).clone(), REC_ROPE_MAT || (REC_ROPE_MAT = new THREE.MeshStandardMaterial({ color: col('#3a7bd5'), roughness: .7 })));
+    A.rope.castShadow = true; root.add(A.rope);
+  }
+  A.rope.visible = on; if (!on) return;
+  root.updateMatrixWorld(true);
+  _ropeA.set(0, .71, .19); _ropeB.set(ax, ay, az); root.worldToLocal(_ropeB);   // the belay loop, in the root's own units
+  const d = _ropeB.clone().sub(_ropeA), len = d.length(), rr = .016 / A.body.h;
+  A.rope.position.copy(_ropeA).addScaledVector(d, .5); A.rope.quaternion.setFromUnitVectors(_ropeU, d.normalize()); A.rope.scale.set(rr, len, rr);
+}
 function crewDetail() {                                  // who gets a full rig: the nearest story crew to you
   const pp = player.obj.position;
   const near = DECK_CREW.filter(a => a.p.story).map(a => [a, Math.hypot(a.x - pp.x, a.z - pp.z)])
@@ -41382,8 +43042,8 @@ function toast(t, x) {
   document.getElementById('tt').textContent = t; document.getElementById('tx').textContent = x;
   toastEl.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => toastEl.classList.remove('show'), 5600);
 }
-document.getElementById('deck').textContent = 'Deck ' + deckDef.num + ', CSV Wren';
-if (SAVED) toast('Deck ' + deckDef.num + ', CSV Wren', welcomeBack());
+document.getElementById('deck').textContent = deckWord(deckDef.num) + ', CSV Wren';
+if (SAVED) toast(deckWord(deckDef.num) + ', CSV Wren', welcomeBack());
 else toast('Deck 4, CSV Wren', 'You wake in Bunk 1, in the junior wing. Tap to walk somewhere, or press and hold to walk toward your finger. Tap anything or anyone to look closer.');
 
 const marker = new THREE.Mesh(new THREE.RingGeometry(.22, .28, 32), new THREE.MeshBasicMaterial({ color: col('#5fd6c6'), transparent: true, opacity: 0, depthWrite: false, toneMapped: false }));
@@ -41565,6 +43225,7 @@ let lastRoom = null;
 // ---- changing decks: you step out by the lift on deck n. The lift will call this (milestone step 6c). ----
 const deckEl = document.getElementById('deck');
 function goToDeck(n, at) {
+  if (n === 7 && !REC_DECK) return;                      // the rec deck is dormant (REC_DECK)
   endSteer(); player.stop();
   for (const c of crew) c.setActive(false);
   deckCrewClear();
@@ -41576,14 +43237,14 @@ function goToDeck(n, at) {
   for (const w of crew) if (w.deck === n && crewOn) w.setActive(true);
   deckCrewFill();                                        // section 10: the scheduled crew on this deck
   target.copy(player.obj.position).setY(.7);
-  refreshPickables(); deckEl.textContent = 'Deck ' + n + ', CSV Wren'; lastRoom = null;
+  refreshPickables(); deckEl.textContent = deckWord(n) + ', CSV Wren'; lastRoom = null;
   marker.material.opacity = 0; applyLight(nightT);
   saveGame();                                            // section 13: save on every deck change
 }
 
 // ---- the main lift: tap a lift door for the deck panel. A ride opens the doors, you step in, they close,
 // the view fades, the new deck is built behind the black, and the doors open on it. Timed by the game clock. ----
-const DECK_NAMES = { 1: 'Bridge', 2: 'Command & Science', 3: 'Commons', 4: 'Quarters', 5: 'Operations', 6: 'Engineering' };
+const DECK_NAMES = { 1: 'Bridge', 2: 'Command & Science', 3: 'Commons', 4: 'Quarters', 5: 'Operations', 6: 'Engineering', 7: 'Recreation' };
 const liftEl = document.getElementById('lift'), liftList = document.getElementById('liftList'), fadeEl = document.getElementById('fade');
 let ride = null, liftReturn = null;
 const inLift = () => roomAt(...player.here()) === '@';
@@ -41621,15 +43282,15 @@ function pressPanel(n) {
 }
 function openLiftPanel() {
   liftReturn = document.activeElement; liftList.textContent = '';
-  for (let n = 1; n <= 6; n++) {
+  for (const n of DECK_ORDER) {                         // R (the rec deck) between 4 and 5 (0.80.0)
     const here = n === deckDef.num, built = !!DECKS[n], b = document.createElement('button');
     b.className = 'deckbtn' + (here ? ' here' : ''); b.disabled = here || !built;
     const i = document.createElement('i'), sp = document.createElement('span'), t = document.createElement('b'), sm = document.createElement('small');
-    i.textContent = n; t.textContent = DECK_NAMES[n]; sm.textContent = here ? 'You are here' : built ? DECKS[n].blurb : 'Not built yet';
+    i.textContent = deckLabel(n); t.textContent = DECK_NAMES[n]; sm.textContent = here ? 'You are here' : built ? DECKS[n].blurb : 'Not built yet';
     sp.append(t, sm); b.append(i, sp);
     const gl = typeof goalNow === 'function' ? goalNow() : null, goal = !!(gl && gl.deck === n && !here && built);   // 0.28.58 (0.60.6a, the user's): the deck your goal arrow wants
     if (goal) { b.classList.add('goal'); const g = document.createElement('em'); g.textContent = '→ Goal'; b.appendChild(g); }
-    b.setAttribute('aria-label', `Deck ${n}, ${DECK_NAMES[n]}: ${sm.textContent}` + (goal ? '. Your goal is here' + (gl.label ? ': ' + gl.label : '') : ''));
+    b.setAttribute('aria-label', `${deckWord(n)}, ${DECK_NAMES[n]}: ${sm.textContent}` + (goal ? '. Your goal is here' + (gl.label ? ': ' + gl.label : '') : ''));
       b.onclick = () => { closeLiftPanel(); pressPanel(n); };
     liftList.appendChild(b);
   }
@@ -41661,7 +43322,7 @@ function updateRide(dt) {
     if (T_ >= RIDE.done) {
       for (const d of liftDoors()) delete d.force;      // back to opening for whoever's near
       fadeEl.style.opacity = 0; ride = null;
-      toast('Deck ' + deckDef.num + ', ' + deckDef.name, deckDef.arrive || '');
+      toast(deckWord(deckDef.num) + ', ' + deckDef.name, deckDef.arrive || '');
     }
   }
 }
@@ -41688,7 +43349,7 @@ function loop() {
 
   // camera follows you
   az += (azT - az) * Math.min(1, dt * 6);
-  const pp = player.obj.position;
+  const pp = typeof ACT !== 'undefined' && ACT && ACT.o && ACT.o.follow && ACT.body && ACT.phase === 'do' ? { x: ACT.x, z: ACT.z } : player.obj.position;   // 0.80.8: a rec deck activity that moves you round the room (floating, paddling) takes the camera with it
   target.x += (pp.x - target.x) * Math.min(1, dt * 3); target.z += (pp.z - target.z) * Math.min(1, dt * 3);
   placeCam(); placeSun(target);
 
@@ -41775,10 +43436,11 @@ function loop() {
   if (typeof introTick === 'function') introTick();      // section 21: the arrival evening (nothing with the intro off)
   if (typeof worksCareerTick === 'function') worksCareerTick();   // section 24: your Works career (the ladder, training moments)
   }
-  const r = roomAt(...player.here()); if (r && r !== lastRoom) { lastRoom = r; roomEl.textContent = ROOMS[r].name; }
+  const r = roomAt(...player.here()); if (r && r !== lastRoom) { lastRoom = r; roomEl.textContent = ROOMS[r].name; if (typeof recRoomIn === 'function') recRoomIn(r); }
 
+  discFrame();                                           // section 23b: a game of Lightdisc on the court (0.82.0), frozen or not
   camera.updateMatrixWorld(); bubbles.place();           // 0.47.9: the speech bubbles, with this frame's camera (they shook on phones)
-  renderer.render(scene, camera);
+  renderer.render(scene, DISC.cam || camera);
   requestAnimationFrame(loop);
 }
 drawScreen(0); applyLight(0); loop();
