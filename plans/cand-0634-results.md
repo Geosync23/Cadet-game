@@ -160,3 +160,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - ~08:16 too many browsers: stopped my placing run; BM8 places the tip-arrow FAIL (U2 alone vs U2 × E6). Told lead 18 (option: U 0335523 instead of U2 0f34cfb, as in green t14). Running: tfA day 0-8 + intro, tfB player.
 - CR2 92d40d5: tiles OK. X2: tparts = first-run state in the check (TPARTS warm-up), not the crew sim; X2's crew pieces held for 0.63.5 (already the lead's call).
 - CR2 92d40d5: disc OK (left: bubble, join, leave). BM8 placing the tip-arrow FAIL on 2bc08d5 + U2 and 2bc08d5 + E6 + U2.
+- ~08:14 R6 PASS U2 0f34cfb (0.73.2) and X2 693e4f4 (0.71.5; cadet diffs = morning crew only). R6 asks for the merge hash with the roofTalk guard fix: 92d40d5.
