@@ -9813,7 +9813,7 @@ function schedBuild(p, d, occ, S) {
       else toilet(34);
     }
     work(to);
-    if (clocks) take('work', [[5, 'timeclock']], 1, { wait: 6, min: 1, tag: 'clock' });   // out as the shift ends (a short queue after 17:00)
+    if (clocks) take('work', [[5, 'timeclock']], 1, { wait: 20, min: 1, tag: 'clock' });   // out as the shift ends: the whole day crew at one clock after 17:00, so a longer queue than the morning's (X3, 0.71.7: with 0.71.5's mornings 6 minutes let only 6 of 11 out; they finish up at their station meanwhile)
   };
   // showers in the evening: the habit, or about one day in three for anyone else
   const eveShower = H.has('evening-shower') || U(90) < .3;
