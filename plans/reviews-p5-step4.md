@@ -9,6 +9,9 @@ Lines skimmed. In a fresh archive content_gen bakes 9342 lines; lines_check PASS
 
 ## Step 4
 
+### W2 claude/writer-p5 8879ee3 (0.48.106-107): PASS
+tip.round.look no longer names a button; new `leak.worn` for E2 (in keys-p5.md). Bakes 9570 lines; lines_check PASS. Plus W2's handover note.
+
 ### W2 claude/writer-p5 b00e08b (0.48.105, Step 4 lines batch 1): PASS
 Skimmed: step4.lines (414 lines), workshop.lines, five crew banks, ten training meetings (M11-M17). In a fresh archive content_gen bakes 9569 lines and 47 meetings; lines_check PASS (the 2 old warnings). No reputation numbers. M11 follows the lead's call (Halloran teaches "Torres's Friday routine" on Day 12; Torres's own version for when he's on shift).
 
