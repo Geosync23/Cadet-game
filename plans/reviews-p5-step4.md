@@ -9,6 +9,9 @@ Lines skimmed. In a fresh archive content_gen bakes 9342 lines; lines_check PASS
 
 ## Step 4
 
+### E3 claude/mech-diagnose b809339 (0.53.5, the leak joints moved): PASS
+The five joints moved, same ids and order (3-leak-2 galley 35,3 'w'; 3-leak-4 promenade 23,9 'n'; 4-leak-2 starboard washroom 5,18 'e'; 4-leak-3 laundry 14,18 'e'; 4-leak-4 junior corridor 10,4 'n'), puddles with them. My edge probe on all 12: wall edge 'wall' or 'hull', place tile free, puddle tile free and in the same room. Screenshots look right. deck_check gains the line (leak tile free, wall edge wall/hull, puddle place free and in the room). Take this one, not 9d179e9.
+
 ### E3 claude/mech-diagnose 9d179e9 (0.53.4, the places turn): PASS WITH FIXES (five leak joints move)
 Base 0.63.3 7a6e137. Diff: one places block after Step 3's, two Deck 5 props (your bench, the order board), build lines, DEV_NOTES.
 - One owner: E3 alone defines `DECKS[n].leakJoints`, `growRacks`, `cabinSpots` and the new place ids; E2 (cfc4961a) only reads `leakJoints` through `placeById`. E1 (89369630) touches none of them. Good.
