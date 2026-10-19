@@ -80,6 +80,7 @@ SETUP = r"""(() => {
   CHIEF_NOTES.zz = { title: 'Stand-in', lines: ['If someone fitted it and it\'s still wrong, it isn\'t that.'] };
   // section 17's lines, until they're in: a cause on each repair as it's posted (17.4), caseOffer after it; caseFitted
   out.hookOffer = jobsHour.toString().includes('caseOffer'); out.hookFit = jobStepDone.toString().includes('caseFitted');
+  out.hookCard = jobCard.toString().includes('caseCard'); out.hookAt = jobStopsBase.toString().includes('caseAt');   // section 17's P1 lines (0.55.14)
   if (!out.hookOffer) { const jh = jobsHour; jobsHour = h => { jh(h);
     for (const j of SHIP.jobs) if (j.status !== 'done' && (j.kind === 'repair' || j.kind === 'overhaul') && j.machine && !j.cause) {
       const m = machineById(j.machine), t = FAULT_CAUSES[m.kind]; if (!t || j.cause) continue;
@@ -317,12 +318,126 @@ PLAY = r"""(() => {
   CASE_SAVED = { open: [{ id: 'cx', job: 'nope', kind: 'zz', cause: 'pump', sus: ['pump'], clues: [] }, 'junk'], done: 'x', n: -3 }; delete SHIP.works.cases; CASE_CLEAN = false;
   const cj = caseState(); out.junk = cj.open.length === 0 && cj.done.length === 0 && cj.n === 0;
   out.chief = (() => { caseAct('case:chief', 1); (typeof worksTabAdd === 'function' ? (deviceShow('works'), deviceDo({ app: 'works', do: 'tab', arg: 'faults' }), deviceShow('works')) : deviceShow('faultnotes')); const t = document.getElementById('devBody').textContent; caseAct('case:chief', 0); return t.includes('isn\'t that'); })();
+  // a page that isn't a case kind (24i's tracing) shows once its own open() says so (0.55.14)
+  CHIEF_NOTES.zzline = { title: 'Line test', lines: ['Follow the line, a panel at a time.'], open: () => window.__lineOpen };
+  const chiefText = () => { caseAct('case:chief', 1); (typeof worksTabAdd === 'function' ? (deviceShow('works'), deviceDo({ app: 'works', do: 'tab', arg: 'faults' }), deviceShow('works')) : deviceShow('faultnotes')); const t = document.getElementById('devBody').textContent; caseAct('case:chief', 0); return t; };
+  window.__lineOpen = false; const l0 = chiefText().includes('Follow the line'); window.__lineOpen = true; out.otherPage = [l0, chiefText().includes('Follow the line')]; delete CHIEF_NOTES.zzline;
   // a kind opens with its ladder row (SHIP.works.op), not when it's trained
   CASE_KINDS.zop = { ladder: 'zop', fits: () => false }; const op0 = SHIP.works.op, tr0 = SHIP.works.tr;
   SHIP.works.op = {}; SHIP.works.tr = { zop: 5 }; const a1 = caseOpened('zop'); SHIP.works.op = { 5: ['zop'] }; SHIP.works.tr = {}; out.opens = [a1, caseOpened('zop')];
   SHIP.works.op = op0; SHIP.works.tr = tr0; delete CASE_KINDS.zop;
   deviceClose(); JOBS_ON = true; window.__ptOpen = false;
   out.errors = DEV.errors.slice();
+  return out;
+})()"""
+
+# the Tier 2 water tables (fault-tables.html) while section 17 has none yet: added for P1's and P2's parts, then taken out
+T2_TABLES = r"""(() => {
+  const added = [];
+  const T = {
+    recycler: [{ id: 'membrane', part: 'membrane', w: 3, shows: 'low output', sign: 'the output gauge low all day', when: 'always', line: 'water', band: 2 },
+      { id: 'pump', part: 'pump', w: 2, shows: 'low output', sign: 'fine in the morning; the gauge sinks after 18:00', when: 'peak', line: 'water', band: 2 },
+      { id: 'valve', part: 'valve', w: 1, shows: 'low output', sign: 'the outlet pipe shudders', when: 'always', line: 'water', band: 2 },
+      { id: 'seal', part: 'seal', w: 1, shows: 'a drip', sign: 'a wet ring on the floor under it', when: 'after-use', band: 2 }],
+    filter: [{ id: 'cartridge', part: 'cartridge', w: 3, shows: 'low flow', sign: 'one housing\'s gauge in the red, all day', when: 'always', line: 'water', band: 2 },
+      { id: 'seal', part: 'seal', w: 2, shows: 'low flow', sign: 'a damp floor under one housing', when: 'after-use', line: 'water', band: 2 },
+      { id: 'valve', part: 'valve', w: 1, shows: 'cloudy water', sign: 'clear first thing, cloudy by the busy hours', when: 'peak', band: 2 }],
+    pump: [{ id: 'pump', part: 'pump', w: 3, shows: 'low flow', sign: 'fine in the morning; labours after 18:00', when: 'peak', line: 'water', band: 2 },
+      { id: 'seal', part: 'seal', w: 2, shows: 'low flow', sign: 'a drip under the shaft, low all day', when: 'always', line: 'water', band: 2 },
+      { id: 'bearing', part: 'bearing', w: 1, shows: 'noisy', sign: 'a grinding, worse after a long run', when: 'warm', band: 2 }],
+    valve: [{ id: 'valve', part: 'valve', w: 3, shows: 'low flow on its branch', sign: 'its branch\'s decks weak; the handle\'s stiff', when: 'always', line: 'water', band: 2 },
+      { id: 'seal', part: 'seal', w: 2, shows: 'a drip', sign: 'a drip from the gland', when: 'always', band: 2 }],
+    scrubber: [{ id: 'filter', part: 'filter', w: 3, shows: 'stuffy air|rattles', sign: 'a grey grille; the intake buzzes all day', when: 'always', band: 2 },
+      { id: 'bearing', part: 'bearing', w: 2, shows: 'rattles', sign: 'a whine that builds through the evening', when: 'warm', band: 2 },
+      { id: 'panel', part: 'seal', w: 1, shows: 'rattles', sign: 'the housing buzzes when the door goes', when: 'touched', band: 2 }] };
+  for (const k in T) if (!FAULT_CAUSES[k]) { FAULT_CAUSES[k] = T[k]; added.push(k); }
+  window.__t2added = added; return added;
+})()"""
+T2_UNDO = "(() => { for (const k of window.__t2added || []) delete FAULT_CAUSES[k]; window.__t2added = []; })()"
+
+# P1: real days with the crew idle (the machines wear, nothing's repaired), an Officer, the p1 row open; at 10:00 on
+# each shift day, every line cause that P1 fits on each line machine becomes a case if it can (the open list emptied
+# each time); every log checked against the recorded hours (MACH_HIST); then a day with a decoy machine running badly
+P1 = r"""(() => {
+  const out = { cases: [], bad: [], lines: {} }, C = caseState(), W = SHIP.works, keep = { jobs: SHIP.jobs, op: W.op, rank: W.rank, tier: W.tier, tr: W.tr };
+  const jr = jobRun; jobRun = () => null;
+  W.rank = 'officer'; W.tier = 2; W.op = { 12: ['p1'] }; W.tr = {}; C.p1 = 'none'; C.open = []; out.skipped = 0;
+  const line = id => (FAULT_CAUSES[(machineById(id) || {}).kind] || []).filter(f => f.part && f.line && P1_WHENS.has(f.when));
+  const ms = machineList().filter(m => line(m.id).length && caseLine(m.id, line(m.id)[0].line));
+  out.lines = Object.fromEntries(ms.map(m => [m.id, line(m.id).map(f => f.id)]));
+  MACH_HOUR = null; MACH_SEEN = -1; setShipNow(9 * 1440); machinesNow();
+  for (let d = 11; d <= 30; d++) {
+    for (const id of Object.values(P1_LINES).flat()) if (SHIP.machines[id]) { SHIP.machines[id].cond = Math.max(SHIP.machines[id].cond, 80); SHIP.machines[id].state = machineState(SHIP.machines[id].cond); }   // kept running well (a slow crew)
+    if (d === 20 && SHIP.machines['3-filter-1']) { SHIP.machines['3-filter-1'].cond = 30; SHIP.machines['3-filter-1'].state = 'faulty'; }   // Day 20: the filter bank runs badly all day
+    for (let h = 0; h < 24; h++) { setShipNow((d - 1) * 1440 + h * 60); machinesNow(); }
+    if (d === 20 && SHIP.machines['3-filter-1']) SHIP.machines['3-filter-1'].cond = 90;
+    const t = d * 1440 + 600; if (!playerShiftOn(d + 1)) continue;
+    setShipNow(t); machinesNow();
+    for (const m of ms) for (const f of line(m.id)) {
+      C.open = []; SHIP.jobs = SHIP.jobs.filter(x => !x.case);
+      const j = { id: m.id + '@p1' + (d + 1) + f.id, machine: m.id, deck: m.deck, kind: 'repair', urgency: 1, posted: t, found: t, claimedBy: null, parts: [f.part], status: 'open', cause: f.id };
+      SHIP.jobs.push(j); const rate = CASE_RATE.officer; CASE_RATE.officer = 1; caseOffer(j, d * 24 + 10); CASE_RATE.officer = rate;
+      const fine = (caseLine(m.id, f.line) || []).filter(id => id !== m.id && caseLogFine(caseLog(id, d)) && (FAULT_CAUSES[machineById(id).kind] || []).some(g => g.part && g.line === f.line)).length;
+      const c = caseOf(j); if (!c) { if (fine >= 3) out.bad.push('no case: ' + j.id + ' with ' + fine + ' fine machines on the line'); else out.skipped++; continue; }   // a line machine running badly can't be a decoy
+      const logOk = c.clues.every(k => { for (let hh = 0; hh < 24; hh++) { const r = MACH_HIST.get((k.src.d - 1) * 24 + hh); if (!r || r[k.src.m] == null) return false; if (+k.src.log[hh] !== Math.min(9, Math.floor(machWorks(r[k.src.m]) / 10))) return false; } return k.src.d === d; });
+      const sameWhen = c.sus.filter(s => s !== c.cause).some(s => { const at = caseSusAt(s), g = caseCauses(machineById(at)).find(x => x.id === s.slice(at.length + 1)); return g && g.when === f.when; });
+      const sameAvail = ms.some(x => x.id !== m.id && (FAULT_CAUSES[x.kind] || []).some(g => g.part && g.line === f.line && g.when === f.when && caseLogFine(caseLog(x.id, d))));
+      out.cases.push({ id: c.id, day: d + 1, kind: c.kind, band: c.band, lim: caseBandOf(c.kind, c.band), cause: c.cause, sus: c.sus.slice(), fewest: c.fewest, title: j.title, card: caseCard(j), at: caseAt(j), machine: m.id,
+        sameWhen, sameAvail, logOk, filter: c.sus.some(s => s.startsWith('3-filter-1:')), parts: j.parts.slice(),
+        clues: c.clues.map(k => ({ id: k.id, at: k.at, kills: k.kills.slice(), m: k.src.m, log: k.src.log, deck: caseClueDeck(k), reach: caseReachable(k), place: !!placeById(k.at), panel: panelPlace(k.src.m) === k.at, text: caseClueText(c, k) })),
+        scan: (W.tools = { scanner: [5, 0] }, scanRead(j.id)) });
+      SHIP.jobs = SHIP.jobs.filter(x => x !== j);
+    }
+  }
+  C.open = []; jobRun = jr; SHIP.jobs = keep.jobs; Object.assign(W, { op: keep.op, rank: keep.rank, tier: keep.tier, tr: keep.tr }); delete C.p1;
+  return out;
+})()"""
+
+# P1's first case: 16:00 on Day 11 with the test passed, 3-pump-1 reserved; shown once the p1 row opens (Day 12); the
+# card and the arrow don't name the pump; three logs; a wrong call (the filter bank's cartridge, spent), the right one
+P1FIRST = r"""(() => {
+  const out = {}, C = caseState(), W = SHIP.works, keep = { op: W.op, rank: W.rank, tier: W.tier, tr: W.tr, test: W.test };
+  C.open = []; delete C.p1; W.op = {}; W.tr = {}; W.rank = 'junior'; W.tier = 1; W.test = { tier: 2, day: 9, tries: 1, passed: true };
+  MACH_HOUR = null; MACH_SEEN = -1; setShipNow(9 * 1440); machinesNow();
+  for (const id of Object.values(P1_LINES).flat()) if (SHIP.machines[id]) { SHIP.machines[id].cond = 90; SHIP.machines[id].state = 'healthy'; }
+  for (let t = 9 * 1440; t <= 10 * 1440 + 900; t += 60) { setShipNow(t); machinesNow(); caseTick(); }
+  out.before = !!C.p1;
+  W.rank = 'officer'; W.tier = 2;
+  setShipNow(10 * 1440 + 961); machinesNow(); caseTick();
+  const c = caseById(C.p1), j = c && caseJob(c); out.staged = !!c; out.p1 = C.p1; if (!c) return out;
+  out.machine = j.machine; out.cause = c.cause; out.sus = c.sus.slice().sort(); out.train = c.train; out.reserved = j.reserved; out.hidden = caseHidden(j); out.wait = c.wait;
+  out.logs = c.clues.map(k => [k.src.m, k.src.log, k.kills.slice(), k.at]);
+  setShipNow(11 * 1440 + 540); machinesNow(); caseTick(); out.waitingNoRow = c.wait;
+  W.op = { 12: ['m9', 'p1'] }; setShipNow(11 * 1440 + 560); machinesNow(); caseTick();
+  out.shown = !c.wait; out.title = j.title; out.by = c.by; out.card = caseCard(j); out.cardBoard = jobCard(j); out.parts = j.parts.slice();
+  out.at0 = caseAt(j); out.stop0 = (jobStops(j).slice(-1)[0] || {}).places;
+  out.scan = (W.tools = { scanner: [5, 0] }, scanRead(j.id));
+  claimJob(j.id); caseTick();
+  for (const k of c.clues) caseClue(c.id, k.id);
+  out.texts = c.clues.map(k => caseClueText(c, k));
+  (typeof worksTabAdd === 'function' ? (deviceShow('works'), deviceDo({ app: 'works', do: 'tab', arg: 'faults' }), deviceShow('works')) : deviceShow('faultnotes'));
+  const b = document.getElementById('devBody'), rows = [...b.querySelectorAll('.strip .st-row')];
+  out.strip = rows.map(r => ({ bars: r.querySelectorAll('.st-h').length, pins: r.querySelectorAll('.st-h.pin').length, low: r.querySelectorAll('.st-h.low').length, w: Math.round(r.querySelector('.st-h').getBoundingClientRect().width) }));
+  out.chips = [...b.querySelectorAll('.chips .chip')].map(x => x.textContent);
+  const has = DEVICE_SKIN.has; DEVICE_SKIN.has = k => k !== 'strip' && has(k); DEV.app = 'home'; (typeof worksTabAdd === 'function' ? deviceShow('works') : deviceShow('faultnotes'));
+  out.stripFallback = b.querySelectorAll('.strip').length === 0 && b.textContent.includes('log: full output every hour'); DEVICE_SKIN.has = has; deviceClose();
+  // a wrong call: the filter bank's cartridge (Tier 2: spent); the arrow goes to the filter bank
+  const wrong = c.sus.find(s => s.startsWith('3-filter-1:')) || c.sus.find(s => s !== c.cause), wp = caseSus(c, wrong).part;
+  caseCall(c.id, wrong); out.atWrong = caseAt(j); out.stopWrong = (jobStops(j).slice(-1)[0] || {}).places;
+  const s0 = SHIP.stores[wp]; SHIP.stores[wp]--;
+  let n = jobStops(j).length; for (let k = 0; k < n; k++) jobStepDone(j.id, k);
+  out.wrongFit = { done: !!j.workDone, spent: SHIP.stores[wp] === s0 - 1, part: wp, known: c.known.includes(wrong) };
+  // the save mid-case
+  const sv = { ship: {} }; for (const f of SAVE_EXTRA) { try { f(sv); } catch (e) {} }
+  const canon = o => JSON.stringify(o, Object.keys(o).sort().concat(['id', 'type', 'src', 'at', 'kills', 'm', 'log', 'd']));
+  const before = canon(c); CASE_SAVED = JSON.parse(JSON.stringify(sv.ship.works.cases)); delete SHIP.works.cases; CASE_CLEAN = false;
+  const c2 = caseOf(j); out.saveSame = !!c2 && canon(c2) === before; out.saveBytes = JSON.stringify(c2).length; out.savedP1 = caseState().p1 === c.id;
+  // the right call: the pump; fixed
+  caseCall(c2.id, c2.cause); out.atRight = caseAt(j);
+  n = jobStops(j).length; for (let k = 0; k < n; k++) jobStepDone(j.id, k);
+  out.fixed = !!j.workDone && SHIP.machines[j.machine].cond > 40; out.flags = [j.rightFirst, j.clever];
+  turnInJob(j.id); caseTick(); out.closed = !caseById(c.id); out.done = caseFlags(j.id);
+  Object.assign(W, keep); C.open = []; delete C.p1;
   return out;
 })()"""
 
@@ -459,8 +574,49 @@ def run(path):
         check(len(pos) >= 3 and max(pos.values()) < .6 * len(Sw['cases']), f"the cause isn't always in the same place among the suspects: {pos}")
         check(P['junk'], 'a junk save and a gone job: no cases')
         check(P['chief'], "the Chief's notes page")
+        check(P['otherPage'] == [False, True], f"a Chief's notes page that isn't a case kind shows once its open() says so: {P['otherPage']}")
         check(P['opens'] == [False, True], f"a kind opens when its ladder row opens, not when trained: {P['opens']}")
         check(not P['errors'], f"no device errors: {P['errors']}")
+        # P1 (0.55.14)
+        added = g.ev(T2_TABLES); print('Tier 2 stand-in tables:', added or 'none (section 17 has them)')
+        R1 = g.ev(P1); R1b = g.ev(P1)
+        p1c = R1['cases']; print(f"P1 sweep: {len(p1c)} cases on {R1['lines']}"); [print('  ', {k: v for k, v in c.items() if k != 'clues'}) for c in p1c[:2]]
+        if p1c: print('   a log:', p1c[0]['clues'][0]['text'])
+        check(len(p1c) >= 10 and not R1['bad'], f"P1 cases on every line cause that fits, unless a machine on the line ran badly ({R1['skipped']} so): {len(p1c)}, {R1['bad'][:3]}")
+        if not check(json.dumps(R1) == json.dumps(R1b), 'P1: twice -> the same cases and logs'):
+            for x, y in zip(R1['cases'], R1b['cases']):
+                if x != y: print('   first diff:', {k: (x[k], y.get(k)) for k in x if x[k] != y.get(k)}); break
+            print('   counts', len(R1['cases']), len(R1b['cases']), R1['skipped'], R1b['skipped'])
+        for c in p1c:
+            sus, clues, (sn, cn, few, decks) = c['sus'], c['clues'], lim(c)
+            left = lambda ks: [s for s in sus if not any(s in k['kills'] for k in ks)]
+            fewest = min((n for n in range(1, len(clues) + 1) for ks in combinations(clues, n) if len(left(list(ks))) == 1), default=99)
+            check(c['kind'] == 'p1' and c['band'] == 'T2' and left(clues) == [c['cause']] and all(len(left([k])) > 1 for k in clues) and fewest == c['fewest'] == 3, f"{c['id']}: one left, no single log solves it, three needed: {left(clues)} {fewest}")
+            check(len(sus) == 4 and len(clues) == 3 and all(k['panel'] and k['reach'] and k['place'] for k in clues) and len({k['deck'] for k in clues}) <= decks, f"{c['id']}: 4 suspects, 3 logs at their machines' panels, reachable, {decks} decks at most: {clues}")
+            check(c['logOk'], f"{c['id']}: each log is the machine's real hours (MACH_HIST)")
+            check(all(len(k['kills']) == 1 and k['kills'][0].startswith(k['m'] + ':') and k['kills'][0] in sus for k in clues) and all(set(k['log']) <= set('89') for k in clues), f"{c['id']}: a decoy's log ran fine every hour and crosses it out: {[(k['m'], k['log']) for k in clues]}")
+            check(c['sameWhen'] or not c['sameAvail'], f"{c['id']}: a decoy with the cause's when first, when the line has one (lead 16)")
+            check(c['day'] != 21 or not c['filter'], f"{c['id']}: Day 20 the filter bank ran badly: not a decoy then")
+            check(c['card'] and c['machine'] not in json.dumps(c['card']) and 'Circulation' not in c['card'][0] and c['title'].startswith('Head-scratcher: ') and ', but only ' in c['title'], f"{c['id']}: the card names the line's symptom, not the machine: {c['card']} {c['title']!r}")
+            check(c['at'] and c['at'] != c['machine'], f"{c['id']}: before a call the arrow goes to the top of the line, not the cause's machine: {c['at']}")
+            check(c['scan'] is None and c['parts'] == [], f"{c['id']}: the scanner won't settle it, the part is yours to find: {c['scan']} {c['parts']}")
+        check(any(c['day'] == 21 for c in p1c) or R1['skipped'], 'P1: Day 21 made cases without the filter bank')
+        F1 = g.ev(P1FIRST)
+        print('P1 first:', F1)
+        check(not F1.get('before') and F1.get('staged') and F1.get('machine') == '3-pump-1' and F1.get('cause') == 'pump' and F1.get('train') and F1.get('reserved') == 21 and F1.get('hidden') and F1.get('wait'), f"P1's first: 3-pump-1 from Day 11 16:00, slot 21, hidden: {F1}")
+        if F1.get('staged'):
+            check(F1['sus'] == sorted(['pump', '3-recycler-1:membrane', '3-filter-1:cartridge', '5-valve-2:valve']), f"the page's suspects: {F1['sus']}")
+            check(F1['waitingNoRow'] and F1['shown'] and F1['by'] in ('calder', 'halloran-emeka'), f"shown once the p1 row opens, with {F1.get('by')}")
+            check('Showers on Deck 4' in F1['title'] and 'evening' in F1['title'] and 'pump' not in F1['title'].lower(), f"the card: {F1['title']!r}")
+            check(F1['cardBoard'] == F1['card'] or not st.get('hookCard', True), f"the board card is the case's (section 17's jobCard hook): {F1['cardBoard']}")
+            check(F1['at0'] == '3-recycler-1' and F1['scan'] is None and F1['parts'] == [], f"the arrow to the top of the line, no scanner, no part: {F1['at0']} {F1['scan']}")
+            check(len(F1['strip']) == 3 and all(r['bars'] == 24 and r['pins'] == 5 and r['w'] >= 12 and r['low'] == 0 for r in F1['strip']), f"the day strip: three logs, 24 bars of 12px+, the evening outlined, all fine: {F1['strip']}")
+            check(F1['stripFallback'], 'a skin without strips: the logs as a list')
+            check(all('log: full output every hour' in t for t in F1['texts']), f"the logs in words: {F1['texts']}")
+            check(F1['atWrong'] == '3-filter-1' and F1['wrongFit']['spent'] and not F1['wrongFit']['done'] and F1['wrongFit']['known'], f"a wrong call: to the filter bank, its cartridge used up, not fixed: {F1['atWrong']} {F1['wrongFit']}")
+            check(F1['saveSame'] and F1['savedP1'] and F1['saveBytes'] < 1100, f"the save mid-case reads back the same ({F1['saveBytes']} bytes)")
+            check(F1['atRight'] is None and F1['fixed'] and F1['closed'] and F1['done'] == 0, f"the right call: the pump, fixed, closed (one wrong call: not right first time): {F1}")
+        g.ev(T2_UNDO)
         pe = [e for e in g.errors if e.startswith('pageerror')]
         check(not errs and not pe, f'no errors: {errs} {pe}')
         g.close()

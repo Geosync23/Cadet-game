@@ -140,6 +140,14 @@ html[data-ph="green"] body #seek,.devhu[data-ph="green"],.devaddr[data-ph="green
 .device .btns .act.on{background:var(--crt-ink);color:var(--crt-bg);text-shadow:none}
 .device .chips{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}
 .device .chips .chip{min-height:48px;min-width:48px;padding:8px 14px;border-color:var(--crt-ink)}
+.device .strip{overflow-x:auto;margin:6px 0 10px;-webkit-overflow-scrolling:touch}
+.device .st-row{margin:4px 0 8px;min-width:max-content}
+.device .st-lab{font-size:15px;line-height:19px;color:var(--crt-ink)}
+.device .st-bars{display:flex;align-items:flex-end;gap:2px;height:34px;border-bottom:2px solid var(--crt-dim)}
+.device .st-h{display:block;width:12px;min-height:4px;background:var(--crt-ink);box-shadow:0 0 4px var(--crt-glow)}
+.device .st-h.low{background:var(--crt-hot)}
+.device .st-h.pin{outline:2px dashed var(--crt-hot);outline-offset:1px}
+.device .st-ticks{display:flex;justify-content:space-between;width:334px;font-size:13px;color:var(--crt-dim)}
 .device .chips .chip.off{color:var(--crt-dim);border-color:var(--crt-dim);border-style:dashed;text-decoration:line-through;text-decoration-thickness:2px}
 .device .tl{margin:2px 0 8px}
 .device .tl-row{position:relative;height:28px;margin:2px 0;border-left:2px solid var(--crt-dim);border-right:2px solid var(--crt-dim);background:linear-gradient(transparent 21px,rgba(255,255,255,.07) 21px)}
@@ -269,7 +277,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.55.13
+   STARSHIP CADET: CSV Wren                           build 0.55.14
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8613,7 +8621,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.55.13';                           // keep in step with the header's build line
+const GAME_BUILD = '0.55.14';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -10256,7 +10264,9 @@ SIM_ADVANCE.push((from, to) => { shipDay(Math.floor(to / 1440) + 1); });
 //   [{ text, sub, mark, action, button }] }, { kind: 'bars', items: [{ label,
 //   value, mark, note, level }] }, { kind: 'buttons', items: [{ label, action }] },
 //   { kind: 'chips', items: [{ label, on, action }] } ] } (chips: big toggles, crossed out while on is false;
-//   build one with devChips(items), which falls back to buttons marked "✕ " on a skin without them)
+//   build one with devChips(items), which falls back to buttons marked "✕ " on a skin without them),
+//   { kind: 'strip', rows: [{ label, hours: [24 × 0-1], pins: [hour] }] } (a day strip: a bar per hour, 12 px wide,
+//   scrolling sideways on a phone; build one with devStrip(rows, fallback), a list on a skin without it)
 // action: { app, do, arg }. mark: 'up' | 'down' | 'new' | 'urgent' | 'hot' | 'big'.
 // Sits before 15 (after 14), so 15 and 17 can register at load; apps only read
 // other sections when drawn. Nothing here calls R() or makes 3D objects.
@@ -10652,6 +10662,17 @@ const DEVICE_SKIN = (() => {
       if (b.ticks) { const tk = mk('div', 'tl-ticks'); for (const s of b.ticks) tk.appendChild(mk('span', '', s)); box.appendChild(tk); }
       return box;
     },
+    strip(b) {                                 // 0.55.14 (P1's day strip): a row per machine, a bar per hour of how it ran, the pinned hours outlined
+      const box = mk('div', 'strip');
+      for (const r of b.rows || []) {
+        const row = mk('div', 'st-row'), bars = mk('div', 'st-bars'), pins = new Set(r.pins || []);
+        (r.hours || []).slice(0, 24).forEach((v, h) => { const x = Math.max(0, Math.min(1, +v || 0)), c = mk('span', 'st-h' + (x < .8 ? ' low' : '') + (pins.has(h) ? ' pin' : ''));
+          c.style.height = Math.round(4 + 28 * x) + 'px'; c.title = String(h).padStart(2, '0') + ':00'; bars.appendChild(c); });
+        row.append(mk('div', 'st-lab', r.label || ''), bars); box.appendChild(row);
+      }
+      const tk = mk('div', 'st-ticks'); for (const t of ['00', '06', '12', '18', '24']) tk.appendChild(mk('span', '', t)); box.appendChild(tk);
+      return box;
+    },
     chips(b) {                                 // 0.55.0 (the case engine's suspects): big toggles, crossed out while on is false
       const box = mk('div', 'chips');
       for (const it of b.items || []) { const x = act(mk('button', 'chip' + (it.on === false ? ' off' : ''), it.label), it.action); x.setAttribute('aria-pressed', it.on !== false); box.appendChild(x); }
@@ -10839,6 +10860,12 @@ const DEVICE_SKIN = (() => {
 function devChips(items) {
   if (DEVICE_SKIN.has && DEVICE_SKIN.has('chips')) return { kind: 'chips', items };
   return { kind: 'buttons', items: items.map(it => ({ label: (it.on === false ? '✕ ' : '') + it.label, action: it.action })) };
+}
+
+// a day strip for an app's view (0.55.14); a skin without strips gets a list: each row's label and its words (fallback(row))
+function devStrip(rows, fallback) {
+  if (DEVICE_SKIN.has && DEVICE_SKIN.has('strip')) return { kind: 'strip', rows };
+  return { kind: 'list', rows: rows.map(r => ({ text: r.label + (fallback ? ': ' + fallback(r) : '') })) };
 }
 
 // ---- the shim: the old device object. addSection(id, title, render) becomes an app drawn by render(el); an app
@@ -39133,6 +39160,7 @@ function scanPartsOf(m) {
 function scanRead(jobId) {
   const j = SHIP.jobs.find(x => x.id === jobId); if (!j || !j.machine || !scanHave()) return null;
   if (j.scan) return j.scan;
+  const cz = typeof caseOf === 'function' && caseOf(j); if (cz && CASE_KINDS[cz.kind] && CASE_KINDS[cz.kind].noScan) return null;   // P1: the scanner won't settle a line (24k, 0.55.14)
   const m = machineById(j.machine), f = m && caseCauses(m).find(x => x.id === j.cause); if (!f || !f.part) return null;
   const d = scanDay(j), seed = machSeed(m.id), parts = scanPartsOf(m); if (!parts.includes(f.part)) parts.unshift(f.part);
   const dec = caseCauses(m).filter(x => x.part && x.part !== f.part && x.shows === f.shows && x.sign !== f.sign).map(x => x.part);
@@ -39279,6 +39307,7 @@ function caseClean(x) {
   const out = { open: [], done: [], n: 0 }, o = x && typeof x === 'object' ? x : {}, ids = a => Array.isArray(a) ? a.filter(s => typeof s === 'string').slice(0, 8) : [];
   out.n = Number.isInteger(o.n) && o.n >= 0 ? o.n : 0;
   if (typeof o.first === 'string') out.first = o.first;  // Day 5's training case: its id once staged, 'none' if there won't be one
+  for (const k of ['p1', 'p2']) if (typeof o[k] === 'string') out[k] = o[k].slice(0, 80);   // P1's and P2's first cases, the same way (0.55.14)
   if (Array.isArray(o.done)) out.done = o.done.filter(d => Array.isArray(d) && typeof d[0] === 'string' && Number.isInteger(d[1]) && Number.isInteger(d[2])).slice(-CASE_DONE_KEEP);
   for (const c of Array.isArray(o.open) ? o.open : []) {
     if (!c || typeof c.id !== 'string' || typeof c.job !== 'string' || !CASE_KINDS[c.kind] || typeof c.cause !== 'string') continue;
@@ -39302,7 +39331,7 @@ const caseJob = c => SHIP.jobs.find(j => j.id === c.job) || null;
 // a suspect in words: { id, label, part, still } from the machine's fault table, else the kind's own (a junction, a setting)
 function caseSus(c, id) {
   const j = caseJob(c), m = j && machineById(j.machine), f = caseCauses(m).find(x => x.id === id), K = CASE_KINDS[c.kind];
-  const own = !f && K && K.sus ? K.sus(c, id) : null;
+  const own = K && K.sus ? K.sus(c, id) : null;          // the kind's own words first (P1 names each suspect's machine), else the table's
   if (own) return { id, label: own.label || id, part: own.part || null, still: own.still || null };
   return { id, label: f && (f.name || f.label) || (f && f.part) || id, part: f && f.part || null, still: f && f.still || null, shows: f && f.shows };
 }
@@ -39370,6 +39399,8 @@ function caseShow(c, j) {
   j.parts = []; j.stepsDone = (j.stepsDone || []).filter(k => k !== 0);   // the part is yours to find
   const shows = f && f.shows || 'acts up', fb = 'Head-scratcher: ' + caseMachName(j) + ' ' + shows;
   c.title = (typeof worksText === 'function' && worksText('case.title', null) || '').replace('{machine}', caseMachName(j)).replace('{shows}', shows).replace(/\.$/, '') || fb;   // a card's title: no full stop
+  const K = CASE_KINDS[c.kind]; let kt = null; try { kt = K && K.title ? K.title(c, j) : null; } catch (e) { kt = null; }   // a kind's own (P1: the line's symptom, not the machine)
+  if (kt) c.title = String(kt).replace(/\.$/, '');
   if (!/^Head-scratcher/.test(c.title)) c.title = 'Head-scratcher: ' + c.title;
   j.title = c.title;
 }
@@ -39424,6 +39455,22 @@ function caseClose(c, flags) {
 }
 // the work log's flags for a job: 2 right first time, 4 a clever fix; 0 if it wasn't a case (also on the job as
 // j.rightFirst and j.clever, which 24 core reads at turn-in)
+// a suspect on another machine is 'machine:cause' (P1's, along a line): its machine id, else null
+const caseSusAt = s => { const i = typeof s === 'string' ? s.indexOf(':') : -1; return i > 0 && machineById(s.slice(0, i)) ? s.slice(0, i) : null; };
+// section 17's stops ask (jobStopsBase, one line): the machine a case's job takes you to, if not its own: the called
+// suspect's (P1), or before a call a kind's start (P1: the top of the line, so the arrow doesn't give the cause away)
+function caseAt(j) {
+  const c = j && j.case && caseOf(j); if (!c || c.wait) return null;
+  const s = c.calls[c.calls.length - 1];
+  if (s && !c.known.includes(s)) return caseSusAt(s);
+  const K = CASE_KINDS[c.kind]; try { return K && K.start ? K.start(c, j) || null : null; } catch (e) { return null; }
+}
+// section 17's board card asks (jobCard, one line): a kind's own card [title, where, state, priority] (P1's names the
+// line's symptom), else null and the card is as before
+function caseCard(j) {
+  const c = j && j.case && caseOf(j), K = c && !c.wait && CASE_KINDS[c.kind]; if (!K || !K.card) return null;
+  try { return K.card(c, j) || null; } catch (e) { return null; }
+}
 function caseFlags(jobId) { const C = SHIP.works && caseState(), d = C && C.done.find(x => x[0] === 'c' + jobId); return d ? d[2] : 0; }
 
 // ---- clues: collected where they are; a quiet toast and a badge on Fault notes ----
@@ -39453,6 +39500,7 @@ const CASE_MARK = { note: 'note', log: 'clock', person: 'person', gauge: 'gauge'
 function caseTick() {
   const C = SHIP.works && caseState(); if (!C) return;
   if (typeof p3Stage === 'function') p3Stage(C);        // Day 5's training case (P3, below)
+  if (typeof p1Stage === 'function') p1Stage(C);        // Day 11's (P1)
   if (!C.open.length) return;
   for (const c of C.open.slice()) {
     const j = caseJob(c), K = CASE_KINDS[c.kind];
@@ -39513,12 +39561,16 @@ function caseFitted(j) {
     const s = caseSus(c, last);
     if (!c.known.includes(last)) c.known.push(last);
     if (!c.crossed.includes(last)) c.crossed.push(last);
-    if (s.part && !(CASE_SPENT.has(s.part) && jobTier(j) >= 2)) returnPart(s.part);   // Tier 1: back on its shelf unused
-    const said = s.still && typeof faultWords === 'function' ? faultWords(s.still) : null;
-    line = said || (s.part ? 'New ' + s.part + ' in.' : 'Done.') + ' Still ' + shows + '.';
+    const spent = s.part && CASE_SPENT.has(s.part) && jobTier(j) >= 2;
+    if (s.part && !spent) returnPart(s.part);           // Tier 1: back on its shelf unused
+    const said = s.still && typeof faultWords === 'function' ? faultWords(s.still) : null, K = CASE_KINDS[c.kind];
+    let own = null; try { own = K && K.wrong ? K.wrong(c, last) : null; } catch (e) { own = null; }   // a kind's own words (P1: the line's symptom)
+    line = own || said || (s.part ? 'New ' + s.part + ' in.' : 'Done.') + ' Still ' + shows + '.';
+    if (spent) line += ' ' + caseText('case.wrong.t2', 'The {part} is used up.', { part: s.part });   // the T2 band: it was fitted and used
   }
+  const into = last && caseSusAt(last);                  // the machine the part went into (P1's suspects are along the line)
   j.stepsDone = []; j.parts = []; j.touched = shipNow();
-  if (typeof toast === 'function' && !SIM_AT) toast(caseMachName(j), line);
+  if (typeof toast === 'function' && !SIM_AT) toast(caseMachName(into ? { machine: into } : j), line);
   const wrong = c.calls.filter(x => x !== c.cause).length;
   if (wrong === 2 && !c.talk && typeof toast === 'function' && !SIM_AT) toast('Fault notes', (c.by ? schedPeople().find(p => p.id === c.by) || { name: 'Calder' } : { name: 'Calder' }).name.split(' ')[0] + ' can talk it through with you: it\'s on Fault notes.');
   if (c.long) caseLongNext(c);
@@ -39552,7 +39604,8 @@ function caseView() {
   const B = [];
   if (CASE_UI.chief) {
     B.push({ kind: 'text', text: 'The Chief\'s notes', mark: 'big' });
-    const pages = caseKindsOpen().map(id => CHIEF_NOTES[id]).filter(p => p);
+    const other = Object.keys(CHIEF_NOTES).filter(k => !CASE_KINDS[k] && typeof CHIEF_NOTES[k].open === 'function' && (() => { try { return !!CHIEF_NOTES[k].open(); } catch (e) { return false; } })()).sort();   // pages that aren't case kinds (24i's tracing: M3's ask), open by their own open()
+    const pages = caseKindsOpen().map(id => CHIEF_NOTES[id]).concat(other.map(k => CHIEF_NOTES[k])).filter(p => p);
     if (!pages.length) B.push({ kind: 'text', text: 'Nothing here yet.' });
     for (const p of pages) B.push({ kind: 'text', text: p.title, mark: 'hot' }, { kind: 'list', rows: p.lines.map((l, i) => ({ text: (p.key && typeof worksText === 'function' && worksText(p.key + '.' + (i + 1), null)) || l })) });   // the writer's chief.<kind>.N, else the stand-in
     B.push({ kind: 'buttons', items: [{ label: 'Back to the fault', action: { app: caseApp(), do: 'case:chief', arg: 0 } }] });
@@ -39705,6 +39758,174 @@ function p3Stage(C) {
   const c = { id: 'c' + j.id, job: j.id, kind: 'p3', k: 0, band: 'T1', cause: 'pump', sus, fewest: r.fewest, clues, got: [], crossed: [], known: [], calls: [], posted: t18, until: 0,
     wait: true, taken: false, talk: false, long: false, train: true, told: false, title: '' };
   C.open.push(c); j.case = c.id; C.first = c.id; C.n++;
+  MACH_REV++;
+}
+
+// ---- 24k P1. When does it happen? (Day 12, a word from Calder; plans/mechanics/p1-when-does-it-happen.html). A fault
+// on a line (water, heat or air: the cause has a `line`, and shows only at some hours: peak, warm, after-use or
+// at-time) becomes a case whose card names the line's symptom, not the machine ("Showers on Deck 4 run weak, but only
+// in the evening"). Its suspects are the cause and one cause on each of three other machines on the line (an id
+// 'machine:cause'); each of those machines keeps a log at its panel: how it ran each hour of the day before (machWorks
+// of its recorded condition, MACH_HIST). A machine that ran fine every hour isn't what cuts the flow, so its log
+// crosses its suspect out; decoys are only picked on machines whose log really is fine. A roll case puts a second
+// cause with the same `when` first when the line has one (lead 16), so the card alone doesn't settle it. Fault notes
+// shows the logs you've read as a day strip (devStrip), the symptom's hours outlined. The job's card (caseCard) and its
+// stop before a call (caseAt: the top of the line) don't name the machine; a call sends you to the suspect's machine.
+// The first (from 16:00 on Day 11 once your Tier 2 test is passed; shown once the p1 row opens on Day 12, after the
+// tracing lesson, with Calder's word) is fixed: 3-pump-1 can't keep up in the evening, the recycler's membrane, the
+// filter bank's cartridge and the Deck 4-6 branch valve the decoys. Lines: section 17's MACHINE_LINKS once it's in,
+// else P1_LINES. Key 1000: the busiest hours, on ties. ----
+const P1_LINES = { water: ['3-recycler-1', '3-filter-1', '3-pump-1', '5-valve-2'] };   // stand-in until section 17's MACHINE_LINKS (seat S2)
+const P1_LINE = { water: { deck: 4, where: 'Showers on Deck {deck}', shows: 'run weak' }, heat: { deck: 2, where: 'Cabins on Deck {deck}', shows: 'run cold' },
+  air: { deck: 4, where: 'The air on Deck {deck}', shows: 'is stuffy' } };
+const P1_WHEN = { evening: 'in the evening', morning: 'in the morning', peak: 'at the busy hours', night: 'at night', after: 'after the busy hours' };
+const P1_WHENS = new Set(['peak', 'warm', 'after-use', 'at-time']);
+const P1_FIRST = { machine: '3-pump-1', cause: 'pump', decoys: ['3-recycler-1:membrane', '3-filter-1:cartridge', '5-valve-2:valve'], hours: [18, 19, 20, 21, 22] };
+const P1_FINE = 8;                                       // a log hour at 80% or more: it ran fine
+const P1_BAND = { sus: [4, 4], clues: [3, 3], fewest: 3, decks: 2 };   // the page's T2: one line, 4 suspects, 3 logs (its later bands come with their steps)
+const caseDay = t => Math.floor(t / 1440) + 1;
+const caseText = (key, fb, vars) => typeof worksText === 'function' ? worksText(key, fb, vars) : String(fb).replace(/\{(\w+)\}/g, (m, x) => vars && vars[x] != null ? String(vars[x]) : m);
+// the machines on a machine's line, in order (section 17's MACHINE_LINKS, else the stand-in), or null
+function caseLine(id, line) {
+  try {
+    const L = typeof MACHINE_LINKS !== 'undefined' && MACHINE_LINKS && MACHINE_LINKS[line];
+    const xs = Array.isArray(L) ? L : L && (L.ids || L.machines || L.order) || [], ids = xs.map(x => typeof x === 'string' ? x : x && x.id).filter(x => typeof x === 'string');
+    if (ids.includes(id)) return ids;
+  } catch (e) { /* the stand-in */ }
+  const ids = P1_LINES[line]; return ids && ids.includes(id) ? ids.slice() : null;
+}
+// the hours of day d a cause shows in (24 flags): always; peak: the machine's six busiest hours (its kind's use
+// counter, else water on the water line, else the people on its deck; key 1000 on ties); after-use: the hour after
+// each busy run; warm: 18:00-24:00 (after hours of busy use); at-time: 22:00-06:00. touched and with: none here (they
+// follow something else: the door, another machine)
+function caseWhenHours(m, when, d) {
+  const out = new Array(24).fill(0);
+  if (when === 'always') return out.fill(1);
+  if (when === 'warm') { for (let h = 18; h < 24; h++) out[h] = 1; return out; }
+  if (when === 'at-time') { for (let h = 0; h < 24; h++) out[h] = h >= 22 || h < 6 ? 1 : 0; return out; }
+  if (when !== 'peak' && when !== 'after-use') return out;
+  const K = MACHINE_KINDS[m.kind], u = machUseDay(d), k = K.use || (K.sys === 'water' ? 'water' : 'heads'), v = (k === 'heads' ? u.heads[m.deck] : u[k]) || [];
+  const top = [...Array(24).keys()].filter(h => v[h] > 0).sort((a, b) => v[b] - v[a] || schedU(m.seed, d * 24 + a, 1000) - schedU(m.seed, d * 24 + b, 1000)).slice(0, 6);
+  for (const h of top) if (when === 'peak') out[h] = 1; else if (h < 23 && !top.includes(h + 1)) out[h + 1] = 1;
+  return out;
+}
+const caseWhenWord = (when, hrs) => { const on = hrs.map((x, h) => x ? h : -1).filter(h => h >= 0);
+  return when === 'at-time' ? 'night' : when === 'after-use' ? 'after' : when === 'warm' || on.length && on.every(h => h >= 17) ? 'evening' : on.length && on.every(h => h < 12) ? 'morning' : 'peak'; };
+// a machine's log for day d: 24 digits, how it ran each hour (machWorks of its recorded condition; an hour not
+// recorded reads as it is now), 9 meaning 90-100%
+function caseLog(id, d) {
+  const s0 = SHIP.machines[id]; let out = '';
+  for (let h = 0; h < 24; h++) { const r = MACH_HIST.get((d - 1) * 24 + h), c = r && r[id] != null ? r[id] : s0 ? machEff(s0) : 100; out += Math.min(9, Math.max(0, Math.floor(machWorks(c) / 10))); }
+  return out;
+}
+const caseLogFine = log => typeof log === 'string' && log.length === 24 && [...log].every(x => +x >= P1_FINE);
+// the decoys: another machine on the line, with a panel at your tier, whose log for day d is fine, and its part causes
+// that cut the same line; in the seed's order (key 892), those in `prefer` first; a roll case's first decoy a cause
+// with the same `when` as the cause if the line has one (lead 16), the rest a different `when` where they can
+function p1Pick(j, seed, band, prefer) {
+  const m = machineById(j.machine), cause = caseCauses(m).find(x => x.id === j.cause), d = caseDay(caseNow()) - 1, n = caseBandOf('p1', band).sus[1] - 1;
+  const pool = [];
+  for (const id of caseLine(m.id, cause.line) || []) {
+    const x = id !== m.id && machineById(id), pp = x && panelPlace(id);
+    if (!pp || placeTier(pp) > caseTier() || !caseLogFine(caseLog(id, d))) continue;
+    const fs = caseCauses(x).filter(f => f.part && f.line === cause.line && !f.load);
+    if (fs.length) pool.push({ id, fs, pre: prefer ? prefer.findIndex(s => s.startsWith(id + ':')) : -1 });
+  }
+  const order = pool.map((x, i) => [x.pre >= 0 ? x.pre - 9 : schedU(seed, i, 892), x]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
+  const out = [], same = !prefer && order.find(x => x.fs.some(f => f.when === cause.when));
+  if (same) out.push(same.id + ':' + same.fs.find(f => f.when === cause.when).id);
+  for (const x of order) {
+    if (out.length >= n) break; if (x === same) continue;
+    const f = x.pre >= 0 && x.fs.find(f => prefer[x.pre] === x.id + ':' + f.id) || x.fs.find(f => f.when !== cause.when) || x.fs[0]; out.push(x.id + ':' + f.id);
+  }
+  return out;
+}
+// one log per decoy, at its machine's panel; a fine log crosses its decoy out
+function p1Clues(j, cause, sus) {
+  const d = caseDay(caseNow()) - 1;
+  return sus.filter(s => s !== cause).map((s, i) => { const id = caseSusAt(s), log = caseLog(id, d); return { id: 'l' + i, type: 'log', src: { m: id, log, d }, at: panelPlace(id), kills: caseLogFine(log) ? [s] : [] }; });
+}
+function p1Sus(c, id) {                                  // every suspect named with its machine ("Water filter bank: cartridge")
+  const at = caseSusAt(id), j = caseJob(c), x = machineById(at || (j && j.machine)), cid = at ? id.slice(at.length + 1) : id, f = x && caseCauses(x).find(y => y.id === cid);
+  return x && f ? { label: caseMachName({ machine: x.id }) + ': ' + (f.name || f.part || f.id), part: f.part || null, still: null } : null;
+}
+const p1Cause = c => { const j = caseJob(c), m = j && machineById(j.machine); return { j, m, f: m && caseCauses(m).find(x => x.id === c.cause) }; };
+function p1Hours(c) {                                    // the symptom's hours (the card's): the first case's are the evening's
+  if (c.train) return P1_FIRST.hours.slice();
+  const { m, f } = p1Cause(c), k = c.clues.find(x => x.src && x.src.d); if (!f) return [];
+  return caseWhenHours(m, f.when, k ? k.src.d : caseDay(c.posted) - 1).map((x, h) => x ? h : -1).filter(h => h >= 0);
+}
+function p1Where(c) { const { f } = p1Cause(c), line = f && f.line || 'water', L = P1_LINE[line] || P1_LINE.water;
+  return { line, deck: L.deck, where: caseText('case.line.' + line, L.where, { deck: L.deck }), shows: caseText('case.line.' + line + '.shows', L.shows) }; }
+function p1Title(c) {
+  const { f } = p1Cause(c), P = p1Where(c), hrs = new Array(24).fill(0); for (const h of p1Hours(c)) hrs[h] = 1;
+  const w = c.train ? 'evening' : caseWhenWord(f.when, hrs), when = caseText('case.when.' + w, P1_WHEN[w]);
+  return caseText('case.title.p1', '{machine} {shows}, but only {when}', { machine: P.where, shows: P.shows, when });
+}
+function p1Card(c, j) {                                  // the board card: the line's symptom and where it's felt, never the machine
+  const P = p1Where(c), who = j.claimedBy === 'you' ? 'you' : j.claimedBy ? ((schedPeople().find(p => p.id === j.claimedBy) || {}).name || '').split(' ')[0] : null;
+  return [c.title.replace(/^Head-scratcher: /, ''), 'Deck ' + P.deck + ' · the ' + P.line + ' line', 'head-scratcher' + (who ? ', ' + who + ' on it' : ', asked for you'), JOB_PRI[j.urgency] || 'routine'];
+}
+function p1Start(c, j) { const { f } = p1Cause(c), ids = f && caseLine(j.machine, f.line) || []; return ids.find(id => id !== j.machine && panelPlace(id)) || null; }   // the top of the line
+function p1Wrong(c, s) { const x = p1Sus(c, s), P = p1Where(c); return caseText('case.wrong.p1', 'New {part} in. {where} still {shows}.', { part: x && x.part || 'part', where: P.where, shows: P.shows }); }
+function p1Runs(log) { const out = []; for (let h = 0; h < 24; h++) { const low = +log[h] < P1_FINE, r = out[out.length - 1]; if (r && r[2] === low) r[1] = h + 1; else out.push([h, h + 1, low]); } return out; }
+function p1Text(c, k) {
+  if (k.type !== 'log' || !k.src || !k.src.log) return null;
+  const nm = caseMachName({ machine: k.src.m }), runs = p1Runs(k.src.log), hh = h => String(h).padStart(2, '0');
+  const said = runs.length === 1 && !runs[0][2] ? caseText('case.strip.allday', 'full output every hour, evenings too')
+    : runs.map(([a, b, low]) => caseText(low ? 'case.strip.low' : 'case.strip.fine', (low ? 'low ' : 'fine ') + '{from}-{to}', { from: hh(a), to: hh(b) })).join(', ');
+  return caseText('case.strip.title', '{machine}\'s log', { machine: nm }) + ': ' + said + '.';
+}
+function p1View(c) {
+  const pins = p1Hours(c), rows = c.clues.filter(k => c.got.includes(k.id) && k.src && k.src.log).map(k => ({ label: caseText('case.strip.title', '{machine}\'s log', { machine: caseMachName({ machine: k.src.m }) }), hours: [...k.src.log].map(x => (+x + .5) / 10), pins, words: p1Text(c, k) }));
+  if (!rows.length) return [];
+  return [{ kind: 'text', text: caseText('case.strip.head', 'Yesterday, hour by hour (the hours it shows outlined)') }, devStrip(rows, r => r.words.replace(/^[^:]*: /, ''))];
+}
+// once a ship minute (24k's caseTick): the first case shows once the p1 row has opened, inside your shift, with the teacher's word
+function p1Tick(c, j) {
+  if (!c.wait || !c.train) return;
+  const now = shipNow(), d = caseDay(now), mn = now % 1440;
+  if (!caseOpened('p1') || !playerShiftOn(d) || mn < DAY_SHIFT[0] || mn >= 900) return;
+  const row = typeof ladderRow === 'function' && ladderRow('p1');
+  c.by = (row && typeof ladderTeacher === 'function' && ladderTeacher(row, d)) || 'calder';
+  caseShow(c, j);
+  const said = typeof worksVoice === 'function' && worksVoice(c.by, 'train.p1.word');
+  if (said && typeof worksSayAll === 'function') worksSayAll(c.by, said);
+  else if (typeof worksSay === 'function') worksSay(c.by, 'Here\'s one the pipe kit won\'t settle. ' + c.title.replace(/^Head-scratcher: /, '') + '. When does it happen? That\'s the question. The logs are at the panels.');
+}
+CASE_KINDS.p1 = { name: 'When does it happen?', ladder: 'p1', noScan: true,
+  fits: (cause, m) => !!cause.part && !!cause.line && P1_WHENS.has(cause.when) && caseBand(caseRank()) !== 'T1' && (caseLine(m.id, cause.line) || []).length >= 4,
+  suspects: (j, seed, band) => [j.cause].concat(p1Pick(j, seed, band)),
+  clues: (j, cause, sus) => p1Clues(j, cause, sus),
+  bands: { T2: P1_BAND, T3: P1_BAND, T4: P1_BAND },
+  sus: p1Sus, title: p1Title, card: p1Card, start: p1Start, wrong: p1Wrong, text: p1Text, view: p1View, tick: p1Tick,
+  hint: c => caseText('case.hint.p1.1', 'Read the logs along the line: a machine that ran fine every hour isn\'t it.') };
+CHIEF_NOTES.p1 = { title: 'When does it happen?', key: 'chief.p1', lines: [
+  'Bad all day: something\'s worn. Bad at the busy hours: something can\'t keep up.',
+  'Read the logs along the line. A machine that ran fine every hour isn\'t what\'s cutting it.'] };
+if (typeof WORK_MECH !== 'undefined') WORK_MECH.p1 = { open() { /* the first case is staged (p1Stage); it shows at the next tick */ } };
+if (typeof CAREER_LADDER !== 'undefined' && typeof ladderRow === 'function' && !ladderRow('p1'))   // 24 core's row, if it hasn't one (C2 may own it)
+  CAREER_LADDER.push({ id: 'p1', name: 'When does it happen?', size: 'small', day: 12, tier: 2, rank: 'officer', needs: { trained: 'm9' }, by: ['calder', 'halloran-emeka'], stages: [{ uses: 0 }] });
+// the first case, staged at 16:00 on Day 11 (or the first 16:00 after, once your Tier 2 test is passed): 3-pump-1
+// reserved (slot 21, held a week), its fault the pump; the logs from the day before. Busy, or no fault table yet: none,
+// and the first roll case that fits is your first
+function p1Stage(C) {
+  if (C.p1 || !SHIP.works) return;
+  const W = SHIP.works;
+  if (W.tr && W.tr.p1 !== undefined || caseOpened('p1')) { C.p1 = 'none'; return; }   // an older save past it
+  const now = shipNow(), t16 = Math.floor((now - 960) / 1440) * 1440 + 960, d = caseDay(t16);
+  if (now < 960 || d < 11 || !(W.rank !== 'junior' || W.test && W.test.passed)) return;
+  const m = machineById(P1_FIRST.machine), f = m && caseCauses(m).find(x => x.id === P1_FIRST.cause);
+  if (!f || !f.line || !f.part || SHIP.jobs.some(j => j.machine === m.id && j.status !== 'done' && (j.claimedBy || j.case || j.reserved))) { C.p1 = 'none'; return; }
+  const id = jobReserve(m.id, d, 960, 21, { train: 'p1', tier: 2, until: t16 + 7 * 1440, cause: f.id }), j = id && SHIP.jobs.find(x => x.id === id);
+  if (!j) return;
+  delete j.make; delete j.makeMins; j.cause = f.id; j.parts = [f.part]; j.train = 'p1';
+  const seed = machSeed('p1-first'), sus = [f.id].concat(p1Pick(j, seed, 'T2', P1_FIRST.decoys)).map((s, i) => [schedU(seed, i, 893), s]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
+  const clues = p1Clues(j, f.id, sus), r = caseSolve(sus, clues, 'T2', f.id, 'p1');
+  if (r.why) { C.p1 = 'none'; jobRelease(21); return; }   // a decoy's log not fine and no other on the line: a plain repair
+  const c = { id: 'c' + j.id, job: j.id, kind: 'p1', k: 0, band: 'T2', cause: f.id, sus, fewest: r.fewest, clues, got: [], crossed: [], known: [], calls: [], fits: 0, posted: t16, until: 0,
+    wait: true, taken: false, talk: false, long: false, train: true, told: false, title: '' };
+  C.open.push(c); j.case = c.id; C.p1 = c.id; C.n++;
   MACH_REV++;
 }
 
