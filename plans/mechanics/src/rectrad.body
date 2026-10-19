@@ -1,6 +1,6 @@
 TITLE:Rec Dec Traditions
 H1:Rec dec traditions: two per sport room <span class="draft">plan v3 · plan only</span>
-SUB:The rec dec's own traditions, for when the deck is switched on (after Pillar 5's Steps 3 and 4). v1 pitched twelve; the user kept seven. v2 offered eight more; the user answered: "2 for each room total (sports) and the talks should be closer together. Also they are small attendance. Nothing like captain addresses etc." v3 applies that: every sport room gets exactly two traditions, with two options for each empty place, and Wren talks become small, frequent chats. Written by the Pillar 5 designer for lead 16. No game code.
+SUB:The rec dec's own traditions, for when the deck is switched on (after Pillar 5's Steps 3 and 4). v1 pitched twelve; the user kept seven. v2 offered eight more; the user answered: "2 for each room total (sports) and the talks should be closer together. Also they are small attendance. Nothing like captain addresses etc." v3 applies that: every sport room gets exactly two traditions, with two options for each empty place, and Wren talks come in two sizes: frequent small chats, and a bigger chief's talk every two weeks (the user's addition, ~02:47: "Some talks are bigger though, for chiefs etc."). Written by the Pillar 5 designer for lead 16. No game code.
 NAV:read=Your answer|rooms=Room by room|talks=Wren talks|week=The week|fit=Clash check|cut=What no longer fits|q=Questions
 
 <style>
@@ -11,10 +11,10 @@ NAV:read=Your answer|rooms=Room by room|talks=Wren talks|week=The week|fit=Clash
 
 <section id="read">
   <h2>The lead's reading of your answer</h2>
-  <p class="reading"><b>Lead's reading (correct it if it's wrong):</b> each sport room (Lightdisc court, pool, river hall, climbing wall, float room) has exactly <b>two traditions in all</b>, counting the ones the rec deck plan already had, and Wren talks become <b>small chats for 4 to 10 people, twice a week</b>, never like a Captain's address; the auditorium's film night and talent night are not sport rooms, so the rule leaves them alone.</p>
+  <p class="reading"><b>Lead's reading (correct it if it's wrong):</b> each sport room (Lightdisc court, pool, river hall, climbing wall, float room) has exactly <b>two traditions in all</b>, counting the ones the rec deck plan already had, and Wren talks come in <b>two sizes</b>: most are <b>small chats for 4 to 10 people</b> (twice a week, any crew), and every two weeks a <b>department chief</b> gives a bigger one in the auditorium's seats; neither is ever like a Captain's address or an all-hands; the auditorium's film night and talent night are not sport rooms, so the rule leaves them alone.</p>
   <ul>
     <li><b>Still approved, unchanged:</b> the Lightdisc Cup, Dawn swim, Wall night, Paddle club, Float hour, Glow paddle.</li>
-    <li><b>Approved, changed by your answer:</b> Wren talks (small, twice a week, a new rota below).</li>
+    <li><b>Approved, changed by your answers:</b> Wren talks (small ones twice a week, a chief's talk every two weeks, a new rota below).</li>
     <li><b>Two places to fill:</b> one at the pool, one in the float room. Two options each, my pick marked ★.</li>
     <li><b>One room over:</b> the river hall's kayaks have three (Paddle club, Glow paddle and the rec plan's regatta). Nothing dropped; question 2 asks.</li>
   </ul>
@@ -58,36 +58,44 @@ NAV:read=Your answer|rooms=Room by room|talks=Wren talks|week=The week|fit=Clash
 </section>
 
 <section id="talks">
-  <h2>Wren talks, small and often</h2>
-  <ul>
-    <li><b>Twice a week:</b> Mondays and Thursdays, 19:00-19:40 (after dinner opens, before Thursday's quiz night).</li>
-    <li><b>Small:</b> 4 to 10 people. A ring of eight chairs on the auditorium stage, the house dark, the stars through the bow windows behind; anyone extra sits on the stage edge. Tea from the utility room's kettle.</li>
-    <li><b>Informal:</b> one crew member shares something they know or love, then chat. No chair, no lectern, no Commander introducing anyone (v2's "Vance chairs" is gone).</li>
-    <li><b>Skips:</b> the career's big days (1, 9-11, 15-16, 22-23, 26) and the storm (4-5), as v2 did. So the first four weeks have three talks, and from Day 29 it's twice every week.</li>
-    <li><b>You:</b> listen (the short meeting panel), ask one question if you like (a friendship step with the speaker). Later you may be asked to give one (question 6).</li>
-  </ul>
-  <h3>The rota, first five weeks and a bit</h3>
+  <h2>Wren talks: small chats and chiefs' talks</h2>
   <div class="tablewrap"><table>
-    <tr><th>Day</th><th>Speaker</th><th>The talk</th></tr>
-    <tr><td>8 Mon</td><td>Dr. Imra Sato (Survey)</td><td>"What lives between the stars": the creature that swam off at dinner (it left at 18:40)</td></tr>
-    <tr><td>18 Thu</td><td>Yara Esposito (Stores)</td><td>"Where every crate goes": the Wednesday delivery, crate by crate (ends before Echo Signal at 20:30)</td></tr>
-    <tr><td>25 Thu</td><td>Tomas (a junior, climbing)</td><td>"Reading a route": what the hold colours mean, with a hold passed round</td></tr>
-    <tr><td>29 Mon</td><td>Chef Auda Brennan (Galley)</td><td>"A spice for every port": three jars to sniff</td></tr>
-    <tr><td>32 Thu</td><td>Zeke Torres (Works, engine)</td><td>"How a drive coil sings": why the engine room hums in three notes</td></tr>
-    <tr><td>36 Mon</td><td>Maeve Volkov (rec dec machines)</td><td>"How the float room floats": the gravity plates, and why a fifth</td></tr>
-    <tr><td>39 Thu</td><td>Comms Chief Lucia Ferreira</td><td>"Messages that came home late"</td></tr>
+    <tr><th></th><th>Small talk</th><th>Chief's talk</th></tr>
+    <tr><td><b>How often</b></td><td>Mondays and Thursdays, 19:00-19:40</td><td>Every two weeks, on a Thursday, 19:00-19:45, in place of that Thursday's small talk (and Day 8, below)</td></tr>
+    <tr><td><b>Who speaks</b></td><td>Any crew member, juniors included, about something they know or love</td><td>A department chief (or senior crew like the head of Survey): their department's best story</td></tr>
+    <tr><td><b>Where</b></td><td>A ring of eight chairs on the auditorium stage, house dark, the stars behind; extras sit on the stage edge; tea from the utility room's kettle</td><td>The auditorium's seats, house lights half up, the speaker on a stool at the front of the stage (no lectern)</td></tr>
+    <tr><td><b>How many</b></td><td>4 to 10</td><td>20 to 40 (a gathering, exempt from the deck's cap like talent night)</td></tr>
+    <tr><td><b>How it goes</b></td><td>Chat; anyone can ask anything</td><td>About 25 minutes, then questions; no introductions, no Commander, never the Captain</td></tr>
+    <tr><td><b>You</b></td><td>Listen (the short meeting panel); ask one question for a friendship step with the speaker</td><td>Listen; one question, and a chief remembers who asked</td></tr>
   </table></div>
-  <p class="note">Then, about one new speaker a talk: Pell ("Every disc trick I know"), Chief Holt ("The oldest log in the Watch office"), Rina and Dr. Nandakumar (after the Wren cough, Days 50-53), Chief Calder ("The Wren's first refit"), Envoy Saruth (a Veyli story, if you know them well), and you. Speakers repeat with a new topic after about six weeks. Day 36's talk is the evening after crew rotation day (Day 35), an easy first evening for the new crew.</p>
+  <ul>
+    <li><b>Skips:</b> the career's big days (1, 9-11, 15-16, 22-23, 26) and the storm (4-5), as v2 did. So the first four weeks have three talks (two of them chiefs'); from Day 29 there are two a week.</li>
+    <li><b>Later</b> you may be asked to give a small talk yourself (question 7).</li>
+  </ul>
+  <h3>The rota, the first seven weeks</h3>
+  <div class="tablewrap"><table>
+    <tr><th>Day</th><th>Size</th><th>Speaker</th><th>The talk</th></tr>
+    <tr><td>8 Mon</td><td><span class="tag new">chief's</span></td><td>Dr. Imra Sato, head of Survey</td><td>"What lives between the stars": the creature everyone saw swim off at dinner (it left at 18:40). A one-off big Monday, since the whole ship wants to ask</td></tr>
+    <tr><td>18 Thu</td><td><span class="tag new">chief's</span></td><td>Chief Calder, Works</td><td>"The Wren's first refit" (ends 19:45, before Echo Signal at 20:30)</td></tr>
+    <tr><td>25 Thu</td><td><span class="tag">small</span></td><td>Tomas (a junior, climbing)</td><td>"Reading a route": what the hold colours mean, with a hold passed round</td></tr>
+    <tr><td>29 Mon</td><td><span class="tag">small</span></td><td>Yara Esposito (Stores)</td><td>"Where every crate goes": the Wednesday delivery, crate by crate</td></tr>
+    <tr><td>32 Thu</td><td><span class="tag new">chief's</span></td><td>Chief Bram Holt, Watch</td><td>"The oldest log in the Watch office": the night the Wren's first crew nearly lost the lift</td></tr>
+    <tr><td>36 Mon</td><td><span class="tag">small</span></td><td>Maeve Volkov (rec dec machines)</td><td>"How the float room floats": the gravity plates, and why a fifth (the evening after crew rotation day, an easy first evening for new crew)</td></tr>
+    <tr><td>39 Thu</td><td><span class="tag">small</span></td><td>Zeke Torres (Works, engine)</td><td>"How a drive coil sings": why the engine room hums in three notes</td></tr>
+    <tr><td>43 Mon</td><td><span class="tag">small</span></td><td>Chef Auda Brennan (Galley)</td><td>"A spice for every port": three jars to sniff</td></tr>
+    <tr><td>46 Thu</td><td><span class="tag new">chief's</span></td><td>Comms Chief Lucia Ferreira</td><td>"Messages that came home late": the longest a letter has taken to reach the Wren</td></tr>
+  </table></div>
+  <p class="note">Then small talks from Pell ("Every disc trick I know"), Rina, the bunkmates, Envoy Saruth (a Veyli story, if you know them well) and you; chiefs' talks from Dr. Nandakumar (after the Wren cough, Days 50-53) and the chiefs again with a new story after about ten weeks.</p>
 </section>
 
 <section id="week">
   <h2>The week</h2>
   <p class="note">Only the rec dec. <span class="tag new">gold</span> approved · <span class="tag">teal</span> rec deck plan · <span class="tag old">grey</span> my pick for an empty place. "4-wk" runs every four weeks.</p>
   <div class="week">
-    <div class="day"><h4>Monday</h4><p><span class="tag new">Wren talk 19:00</span></p><p>the Captain's all-hands 17:45 (first Monday of a season only)</p></div>
+    <div class="day"><h4>Monday</h4><p><span class="tag new">Small talk 19:00</span></p><p>the Captain's all-hands 17:45 (first Monday of a season only)</p></div>
     <div class="day"><h4>Tuesday</h4><p><span class="tag new">Dawn swim 06:15</span> <span class="tag new">Wall night 18:30</span></p></div>
     <div class="day"><h4>Wednesday</h4><p><span class="tag new">Paddle club 18:30</span> <span class="tag new">Float hour 21:30</span></p></div>
-    <div class="day"><h4>Thursday</h4><p><span class="tag new">Dawn swim 06:15</span> <span class="tag new">Wren talk 19:00</span></p></div>
+    <div class="day"><h4>Thursday</h4><p><span class="tag new">Dawn swim 06:15</span> <span class="tag new">Small talk 19:00, or a chief's talk (every 2 weeks)</span></p></div>
     <div class="day"><h4>Friday</h4><p><span class="tag old">★ Triple tries 19:00</span></p></div>
     <div class="day"><h4>Saturday</h4><p><span class="tag old">★ Ring dive 10:00</span> <span class="tag">Film night 20:00</span> <span class="tag new">Glow paddle 22:30 (4-wk)</span></p></div>
     <div class="day"><h4>Sunday</h4><p><span class="tag">Regatta or Ring the bell 09:30 (4-wk each, two weeks apart)</span> <span class="tag">Winner Stays On 11:30</span> <span class="tag new">Lightdisc Cup 11:30 (4-wk, in its place)</span> <span class="tag">Talent night 19:30 (4-wk)</span></p></div>
@@ -98,9 +106,9 @@ NAV:read=Your answer|rooms=Room by room|talks=Wren talks|week=The week|fit=Clash
 <section id="fit">
   <h2>Clash check</h2>
   <ul>
-    <li><b>Rooms:</b> no two share a room at once. The river hall's three are on different days; the regatta and Ring the bell (the wall is at the river hall's stern) alternate Sundays. The auditorium has talks Mon and Thu 19:00-19:40, the all-hands Mon 17:45-18:10 (ends first), film night Sat, talent night Sun.</li>
-    <li><b>Numbers:</b> each draws 2 to 10, inside the rec dec's evening cap of about 15; only the Cup, Winner Stays On and the shows are gatherings.</li>
-    <li><b>Events plan (approved v4):</b> Day 4-5 storm: no talk that week; Dawn swim on Day 4 is before the storm. Day 8: the creature leaves 18:40, Sato's talk is 19:00. Day 12: Triple tries during the Veyli visit (guests watch). Day 18: the talk ends 19:40, Echo Signal is 20:30. Day 21: the distress call (11:30-16:30) pauses Winner Stays On. Day 24: Loss of Power is a morning; Paddle club and Float hour run that evening. Day 25: the inspector is daytime; Tomas's talk is the evening. Day 27: Glow paddle, nothing near it.</li>
+    <li><b>Rooms:</b> no two share a room at once. The river hall's three are on different days; the regatta and Ring the bell (the wall is at the river hall's stern) alternate Sundays. The auditorium has talks Mon and Thu 19:00 (small ones on the stage, chiefs' in the seats, never both at once), the all-hands Mon 17:45-18:10 (ends first), film night Sat, talent night Sun.</li>
+    <li><b>Numbers:</b> each draws 2 to 10, inside the rec dec's evening cap of about 15; only the Cup, Winner Stays On, the chiefs' talks and the shows are gatherings.</li>
+    <li><b>Events plan (approved v4):</b> Day 4-5 storm: no talk that week; Dawn swim on Day 4 is before the storm. Day 8: the creature leaves 18:40, Sato's talk is 19:00. Day 18: Calder's talk ends 19:45, Echo Signal is 20:30. Day 12: Triple tries during the Veyli visit (guests watch). Day 21: the distress call (11:30-16:30) pauses Winner Stays On. Day 24: Loss of Power is a morning; Paddle club and Float hour run that evening. Day 25: the inspector is daytime; Tomas's talk is the evening. Day 27: Glow paddle, nothing near it.</li>
     <li><b>Career:</b> talks skip the big days; the weekly sport ones run as usual but aren't pushed at you on those days (no Mail nudge).</li>
     <li><b>Buildable with what exists:</b> the tradition engine's weekly and four-weekly rhythms, tap-to-join, the rec dec's animations (Ring dive adds a dive, Triple tries a tumble), the meeting panel, a speaker rota table.</li>
   </ul>
@@ -127,6 +135,7 @@ NAV:read=Your answer|rooms=Room by room|talks=Wren talks|week=The week|fit=Clash
     <li><b>The pool:</b> Ring dive or Captain's lengths? <i>Recommended: Ring dive.</i></li>
     <li><b>The float room:</b> Triple tries or Slow stretch? <i>Recommended: Triple tries.</i></li>
     <li><b>Any non-sport traditions</b> (Sing-along, Night-shift matinee, Kit mend night)? <i>Recommended: none for now; Kit mend night is the one to bring back later if the rec dec wants a Works night.</i></li>
-    <li><b>Still open from v2:</b> do you play your own Cup matches (the live Lightdisc game), and can you give a Wren talk once you're an Engine Specialist? <i>Recommended: yes to both.</i></li>
+    <li><b>Chiefs' talks every two weeks</b> (Thursdays, the auditorium's seats, 20 to 40 people), with small talks the other times? <i>Recommended: yes.</i></li>
+    <li><b>Still open from v2:</b> do you play your own Cup matches (the live Lightdisc game), and can you give a small Wren talk once you're an Engine Specialist? <i>Recommended: yes to both.</i></li>
   </ol>
 </section>
