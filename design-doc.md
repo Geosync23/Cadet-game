@@ -569,27 +569,29 @@ Whatever you saw or missed, the crew retell it in chatter for a day or two, with
 - **Progress talks** with Chief Calder are appointments you ask for. They take place in her office on any day she's on shift.
 - Each is an appointment that opens its door for its window. If you miss one, a short Mail tells you; nothing is lost.
 
-**Pacing:** roughly one main event every 1–2 ship weeks (about 4½–9½ real hours), with small incidents most days. Small incidents include crew moments the simulation can trigger: a friendship scene, an argument that needs smoothing over, a birthday cake in the mess.
+**Pacing** (the user, 2026-10-19, the approved events plan): about one event every two or three days through the career arc (Days 1-26), then about one a week; every event happens once and never repeats; small incidents most days. Small incidents include crew moments the simulation can trigger: a friendship scene, an argument that needs smoothing over, a birthday cake in the mess.
 
 **What the player sees depends on rank.** A junior carries filters during the storm. A senior is in the Captain's briefing about it.
 
-**The events, in order** (agreed 2026-10-16: all kept, nothing dropped). Seven main events, with six shorter ones slotted between them. The main events' order is fixed; the short events' exact slots can be tuned. The ion storm comes about a week and a half into a new game. The full breakdown of each event is in `plans/pillar3-plan.md`.
+**The events, in order** (the user approved the events plan v4 on 2026-10-19, "good for now"; it replaces the 2026-10-16 order; the full plan is `plans/events-plan.html`, and the four TNG-inspired events are pitched in `plans/events-pitch-tng.html`). Twenty events, each **once only**. You **can't fail** one: it goes smoothly, bumpily or roughly, and something lasting stays either way. Cozy and dangerous ones are mixed (never two dangerous ones back to back), and the dangerous ones can hurt someone a little (a day or two in the infirmary), never worse. Your part grows with your rank: you fetch and fix as a junior, trace as an Officer, plan around people as a Senior Officer, and lead a team with the bridge as an Engine Specialist. The days are fixed (the ship's calendar, not your progress) and keep the career's big moments clear: the test jobs, the promotions and the ceremony, the night shift, Engine Specialist and Calder's question.
 
-| Order | Event | Kind | In short |
+**Phase 1, built first: the nine events of the career arc** (most players' whole game).
+
+| Days | Event | Kind | In short |
 | --- | --- | --- | --- |
-| 1 | Ion storm | Main, built first | Touches every system: power flickers and comms go down. Calder's storm briefing in the Works bay, the Captain's address, emergency lighting deck by deck, storm stew, the Captain's all-clear, a rush on the call-home booths and a party in the bow lounge. |
-| — | Comet viewing | Short | One gentle evening at the observatory and the bow lounge windows. |
-| 2 | Diplomatic visit | Main | A Veyli delegation fills Deck 2's visitor rooms (the second visitors' cabin is kept for this). A greeting in the shuttle bay, formal dinners in the Captain's quarters, a gift exchange. |
-| — | Crew rotation day | Short | Five crew leave on a transport and five new faces arrive. |
-| 3 | Something in the garden | Main | A creature eats the crops; traps from the machine shop and a volunteer garden watch. It becomes the ship's pet. |
-| — | Power surge | Short | A junction on Deck 6 trips and two decks lose power for a while. |
-| 4 | Shipboard illness | Main | The infirmary fills and sick crew stay in their bunks, so more jobs are left for you. |
-| — | Founders' Day festival | Short | The whole crew together on the plaza: the big-crowd test, built only once the real-phone test says crowds over 70 are fine. |
-| 5 | Nebula drift | Main | Every window fills with colour, the sensor array overloads, and strange dreams leave the crew sleepy and chatty. |
-| — | The late supply shuttle | Short | Rationing, a bland menu and a busy machine shop, all from the numbers. |
-| 6 | Salvage | Main | The Tern flies out to a derelict and the hold fills with odd finds. In later playthroughs it can lead into the garden creature. |
-| — | A Veyli vessel needs help | Short | Works sends parts and a Veyli engineer comes aboard as a guest. |
-| 7 | The déjà vu day | Main | A time anomaly replays one day, and what you change the second time counts. Seeded routines make it cheap to build. |
+| 2 (evening) | Comet viewing | cozy | A comet's tail fills the bow windows; your first meeting with Dr. Sato. |
+| 4-5 | Ion storm | danger | Two days. Calder's briefing, the first all-hands (the auditorium; the mess hall until the rec deck exists), about 20 minutes of emergency lighting as it hits and only flicker after, no calls home, storm stew, the all-clear on Friday evening. Your first weekend (Days 6-7) is free: Sowing morning, and film night's first night in the auditorium. If you helped, Vance invites you to bridge hour (Day 23) at Sunday breakfast. |
+| 8 | Space Creature | cozy | A baby creature, drawn in by the storm, feeds on the hull's power; Works lowers the conduit a notch at a time until it swims off at dinner ("Sprat"). |
+| 12-15 | Diplomatic visit | cozy | A Veyli delegation of four, Saturday morning to Monday breakfast: the greeting in the shuttle bay, a formal dinner, the gift exchange, talent night. |
+| 17 (afternoon) | Power surge | danger | A Deck 6 junction trips; two decks dark for a few hours. |
+| 18 (evening) | Echo Signal | cozy | A probe carries music from the lost colony of Halden; the crew listen in the observation room; the tune joins the music room piano. |
+| 21 | Distress call | danger | The Tern flies out to a damaged courier pod and brings its pilot, Ilse Varga, home (a sprain, a sack of mail). |
+| 24 (07:40-11:40) | Loss of Power | cozy-tense | Stuck in the lift for four hours after breakfast with Brennan, Nell (a passenger's daughter) and Commander Vance; a big friendship step with each. Missing work while stuck is never held against you. |
+| 25 | Visiting Inspector | tense | A one-day fleet audit; she watches the first team job you lead; a framed commendation for Works, or a "notice of improvement" the crew joke about. |
+
+**Phase 2, later: the other eleven**, about a week apart after the arc: the stowaway (31-33: Pip, found in the Wednesday delivery, always goes home, on Day 46's late shuttle), crew rotation day (35), something in the garden (38-41: the ship's pet), the late supply shuttle (45-46), the Wren cough (50-53), nebula drift (57-59), reactor trouble (64-66: a scare on Deck 6 that ends well thanks to Works), salvage (73-75), a Veyli vessel needs help (80-81), the déjà vu day (87) and the Founders' Day festival (100, on Founding Day). Until Phase 2 is built, the ship after Day 26 carries on with traditions, incidents and work.
+
+**Nothing is built yet:** the order is Pillar 5's Step 3, then Step 4, then the rec deck merge, then events Phase 1.
 
 **Special missions.** Startable when you're ready, shown as an icon on the job list or ship map. Occasionally an away job by shuttle, like repairing another ship's systems.
 
@@ -756,7 +758,7 @@ Done so far:
 - Who meets you off the shuttle, and which milestone builds the arrival: Zeke Torres, a Works engine officer, built in Pillar 4 (the user, 2026-10-16/17). See "The player".
 - The device's phosphor colour is the Wren's cyan, with amber and green as options in Settings (the user, 2026-10-16).
 - The personal device (agreed 2026-10-16): two layers (apps describe, a skin draws), an old-school screen look built now, never pausing time, and the apps Schedule, Appointments, Maps, Memos, Mail, Calendar, Needs, Jobs, Crew, Ship, Record and Wallet (Music later, with sound). No Camera. See "The player".
-- The event after the ion storm is the diplomatic visit; all seven main events are kept in a fixed order with six short ones between them (agreed 2026-10-16). See "Ship-wide events".
+- The ship-wide events: twenty, each once, in two phases (Phase 1, the nine in Days 1-26, built first); the storm on Days 4-5, your first weekend free, Space Creature on Day 8 (the user, 2026-10-19, approving the events plan v4; it replaces the 2026-10-16 order). See "Ship-wide events".
 - Events are ambient, with four kinds of moment including meetings with dialogue, never a full cutscene (agreed 2026-10-16). See "Ship-wide events".
 - Deck 4's guests: an everyday guest arrives about once a ship week, plus guests who come with events (agreed 2026-10-16). See "Social life".
 - Pillar 3 builds the device, the social basics and the start of events together (agreed 2026-10-16). See "Milestones".
@@ -767,7 +769,7 @@ Done so far:
 
 - The player starts in Bunk 1 with Tomas, and Pell and Rina are in Bunk 2 (answered since v3).
 - 18 ship hours take 30 real minutes, so a whole day is 40 (agreed 2026-10-16; first 30 minutes a day, before that a guess of 10). This sets every wear rate.
-- What triggers the first story events: ship-wide events are the main missions, about one every 1–2 ship weeks, starting with the ion storm (see "Ship-wide events").
+- What triggers the first story events: ship-wide events are the main missions, starting with the comet (Day 2) and the ion storm (Days 4-5), about one every two or three days through the career arc (the user, 2026-10-19; see "Ship-wide events").
 - Decks 6 and 1 are reachable by lift from day one. Utility rooms are open to the player from the start (the user, 2026-10-17); tiers (closets 1, plant rooms 2, batteries and power junctions 3) now only gate which jobs you may take. Locking by story comes later.
 - The bridge's sunken command ring is faked for now with a rail, a painted step edge and a curved step strip.
 - The bridge washroom stays.

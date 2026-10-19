@@ -1,8 +1,9 @@
 TITLE:Ship-wide Events Plan
-H1:Ship-wide events: the Wren's big moments, in order <span class="draft">plan v4, for the user's approval</span>
+H1:Ship-wide events: the Wren's big moments, in order <span class="draft">plan v4, approved by the user 2026-10-19</span>
 SUB:Every ship-wide event (the "main missions"), in the order they happen from Day 0: what happens day by day, who speaks, what the news feed says, the jobs at each tier, what it does to the ship, and how it can go well or poorly. Built in Pillar 6, after Pillar 5's Step 4. v4 (2026-10-19) splits the work into two build phases and re-times the storm, Space Creature and Loss of Power; v3 put nine events inside the career arc; v2 applied the user's answers to v1. From the user's answers of 2026-10-18 (~23:25) and on v1, the design doc's "Ship-wide events", the Pillar 3 plan's list and the engine already in the game. Written by the Pillar 5 designer for lead 14.
 NAV:v4=What changed in v4|phases=The two phases|plain=In plain words|rules=The user's rules|cal=The calendar|how=How every event works|list=The events|links=The links|engine=Changes to what's built|clash=Clashes|q=Open questions
 
+<p class="note"><b>Approved by the user 2026-10-19</b> ("good for now"), with Space Creature on Day 8. Written into design-doc.md's "Ship-wide events". Nothing is built yet: Pillar 5's Step 3, then Step 4, then the rec deck merge, then events Phase 1.</p>
 <section id="v4">
   <h2>What changed in v4</h2>
   <p class="note"><b>The user (2026-10-19):</b> "Ion storm should be two days. 4 and 5. Give you your first full weekend free. Space creature pulls up a day and your test has more breathing room. Loss of power should stick you in the elevator for 4 game hours after your first meal. You will not be penalized for missing work. All the events [the nine in the career arc] are the ones we will make first. The others later."</p>
@@ -281,6 +282,7 @@ NAV:v4=What changed in v4|phases=The two phases|plain=In plain words|rules=The u
 
 <section id="q">
   <h2>Open questions for the user (with my recommendations)</h2>
+  <p class="note"><b>Answered:</b> Space Creature on Day 8 alone (the user, 2026-10-19: "fine, keep it"). The questions below stay open; until they're answered, the recommendations are the plan.</p>
   <ol>
     <li><b>The comet on Day 2 or Day 3?</b> Day 2 is your first proper day of rounds. <i>Recommended: Day 2; it's an evening, and it introduces Sato before her storm.</i></li>
     <li><b>The inspector watching your first team job as lead</b> (Day 25)? <i>Recommended: yes; it makes the inspection about your real work. A small nudge, if wanted: M24 could move to Day 24 so the inspector sees a normal day (I'd keep it as is).</i></li>
@@ -290,6 +292,6 @@ NAV:v4=What changed in v4|phases=The two phases|plain=In plain words|rules=The u
     <li><b>The inspector's findings:</b> read out in a meeting, plus a Mail. <i>Recommended: yes, short and kind.</i></li>
     <li><b>Halden</b> (Echo Signal): a mystery, a seed for the story pillar. <i>Recommended: yes.</i></li>
     <li><b>After the last event (Day 100):</b> nothing more until later pillars? <i>Recommended: yes, as "never repeat" says.</i></li>
-      <li><b>Space Creature's day (short):</b> "a day earlier" would put it in your free first weekend, so v4 makes it <b>Day 8 alone</b>, gone by 18:40, which leaves the evening and night before the Day 9 test. Or: Day 7 (Sunday), if a cozy event on the weekend is fine. <i>Recommended: Day 8 alone, as here.</i></li>
+  
 </ol>
 </section>
