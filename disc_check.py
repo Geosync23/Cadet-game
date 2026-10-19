@@ -24,6 +24,10 @@ def check(cond, msg):
 
 build = sys.argv[1]; GAMES = int(sys.argv[2]) if len(sys.argv) > 2 else 40
 src = pathlib.Path(build).read_text()
+if re.search(r'^const REC_DECK = false;', src, re.M):   # 0.63.2r: the rec deck is dormant in the main build; Lightdisc is checked with it switched on
+    src = re.sub(r'^const REC_DECK = false;', 'const REC_DECK = true; ', src, count=1, flags=re.M)
+    build = str(WORK / 'test' / ('_recon_' + pathlib.Path(build).name)); pathlib.Path(build).write_text(src)
+    print('     (REC_DECK is off in this build: checking a copy with it switched on)')
 i = src.find('// 23b. LIGHTDISC'); j = src.find('// 24. WORK', i); sec = src[i:j] if i >= 0 and j > i else ''
 check(len(sec) > 1000, 'section 23b is there')
 code = re.sub(r'//[^\n]*', '', sec)   # the comments say so; the code mustn't
