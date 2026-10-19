@@ -296,3 +296,4 @@ The user went to bed ~03:40: **overnight mode ON** until they check in in the mo
 | ~10:13 | Lead 18 at ~43% with the 0.63.5 publish and the rec deck combine ahead | Started lead 19 (session_01FsGspstkG61e9AWadSi36y) from the handover in plans/handover-lead.md | Hand over before memory fills; each big step fits in one lead |
 | ~10:24 | Auditorium piano (RB2 0.84.9) | Turned side-on, pianist seen in profile: no room for a bench facing the seats on the stage's curve | Fits the stage as built; easy to revisit |
 | ~10:24 | When rec deck gets switched on | RB2 makes the switch its own last commit, without waiting; the build master adds it last, after rec engineer A's traditions and the writer's words | Keeps the order in the brief and saves a wait |
+| ~10:26 | Engine room crew clock-out wait (X3 0.71.7) | 20 minutes (was 6): fixes the leave check; crew are out by about 17:35, evenings nearly as before | Smallest change that fixes it |
