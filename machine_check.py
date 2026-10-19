@@ -1287,7 +1287,7 @@ with sync_playwright() as pw:
     # with panel places, all three on; on a ship with every line machine put right, one machine faulty at a time: the flow
     # reads full above it and on the other branch, and low at it and below it (its twin side by side too), and the reading
     # before it is full; Day 12's training fault (5-valve-2) is found reading the middle (5-pump-1: full) then 5-valve-2 (low
-    # after, full before). Traced faults, with you an Officer trained in tracing (a stand-in worksTrained) and the real crew
+    # after, full before). Traced faults, with you an Officer trained in tracing (SHIP.works.tr.m9 set) and the real crew
     # for twice DAYS days: about half (25-75%) of the line repairs at your tier are traced; each one's cause cuts its line, its card
     # names the symptom and not the machine, openJobs shows no place; none before you're trained; traceMark keeps its readings
     # and finds it at its own machine (which reads low there); finishing it puts the machine right and closes it; the same twice
@@ -1314,11 +1314,11 @@ with sync_playwright() as pw:
         if not all(ln['on'].values()) or ln['notReal'] or ln['noPanel'] or ln['bad'] or ln['train'] != ['full', 'full', 'low', 'full']:
             fail('the lines and lineFlow')
         TR = r"""((trained) => {
-          window.__sc("window.__wt = typeof worksTrained === 'function' ? worksTrained : undefined; worksTrained = id => " + (trained ? "id === 'm9' || (window.__wt ? window.__wt(id) : false)" : "id === 'm9' ? false : (window.__wt ? window.__wt(id) : false)"));
           window.__sc("window.__evTr = [typeof eventNow === 'function' ? eventNow : undefined, typeof eventMod === 'function' ? eventMod : undefined]; if (window.__evTr[0]) eventNow = () => null; if (window.__evTr[1]) eventMod = () => null");
           const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min, end = t0 + 2 * DAYS * 1440, out = { line: 0, traced: 0, badCause: [], showsMachine: [], placeShown: [], decks: [] };
           JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; SHIP.works = null; setShipNow(t0); machinesNow();
           if (typeof worksInit === 'function') worksInit(WORKS_START); if (!SHIP.works) SHIP.works = {}; SHIP.works.tier = 2; SHIP.works.rank = 'officer';   // an Officer from the start
+          SHIP.works.tr = { ...(SHIP.works.tr || {}) }; if (trained) SHIP.works.tr.m9 = 1; else delete SHIP.works.tr.m9;   // trained in tracing (24's record) or not
           const seen = new Map();
           for (let t = t0; t <= end; t += 60) {
             setShipNow(t); machinesNow();
@@ -1340,7 +1340,7 @@ with sync_playwright() as pw:
           out.sig = JSON.stringify([...seen.values()].filter(x => x.symptom).map(x => x.id + ':' + x.cause + ':' + x.symptom.deck).sort());
           for (const x of SHIP.jobs) if (x.claimedBy === 'you') { x.claimedBy = null; x.status = 'open'; }
           SHIP.works = null;
-          window.__sc("if (window.__wt) worksTrained = window.__wt; if (window.__evTr[0]) eventNow = window.__evTr[0]; if (window.__evTr[1]) eventMod = window.__evTr[1]");
+          window.__sc("if (window.__evTr[0]) eventNow = window.__evTr[0]; if (window.__evTr[1]) eventMod = window.__evTr[1]");
           setShipNow(t0);
           return out;
         })"""
