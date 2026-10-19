@@ -10,6 +10,7 @@ The user said GO for Step 3 (~23:10), then Step 4, and only after that the rec d
 - **Report to lead 15** (send_message to session_01TfFnwP88RmL4MhCWAMdSGn; was lead 14): one line when you start; one per finished piece (hash, build number, what, checks); at once if blocked or a design call is needed. No narration. Send each finished piece's hash to the build master BM6 (session_01F8k6hqdBRoxDJMzqAuiHqR) and the reviewer R3 (session_01AR6tGFiSZF7hL1LfVpWgng).
 - **Coordinate sideways** directly with the seat that owns code you need. A design gap → the lead (the designer D2 session_01VAVLL8kQNeQwiZ7TJZ6GMF answers page questions).
 - **Never** contact the user, start sessions, or push outside your branch.
+- **Long check runs:** log each result as it finishes; after a container restart resume from the first missing result; keep a ~20-min send_later reminder while a run goes (TEAM.md, "Long check runs survive restarts").
 - **Memory:** tell the lead at ~60%; at ~70% write `plans/handover-<seat>.md`, push, stop.
 
 ## Seats
