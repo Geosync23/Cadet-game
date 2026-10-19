@@ -285,7 +285,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.73.0
+   STARSHIP CADET: CSV Wren                           build 0.73.1
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8698,7 +8698,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.73.0';                           // keep in step with the header's build line
+const GAME_BUILD = '0.73.1';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -10567,6 +10567,12 @@ function devDay(d) {
   for (const x of DEV_WEEK[weekday(d)]) if (!x.tradition) out.push({ from: x.at, to: x.at + x.len, title: x.title, where: x.where, kind: 'ship' });
   for (const x of devTraditions(B, B + 1439)) out.push({ from: x.at - B, to: x.at - B + 60, title: x.title, where: x.where, kind: 'tradition', id: x.id, tkind: x.kind, deck: x.deck, room: x.room });
   for (const o of devOccasions(B, B + 1439)) out.push({ from: o.at - B, to: o.at - B + o.len, title: o.title, where: o.where, kind: 'occasion', deck: o.deck, room: o.room });
+  // playtest 2 (0.72.5, items 10-11): tea and biscuits on your shift days (section 14's crew tea times, else section 15's), and
+  // the week's supply delivery to the cargo hold (section 17's DELIVERY, a day or two late some weeks: deliveryLate)
+  try { const T = typeof WORKS_TEA !== 'undefined' && WORKS_TEA && Number.isFinite(WORKS_TEA.at) ? WORKS_TEA : typeof TEA_FROM !== 'undefined' ? { at: TEA_FROM, until: TEA_TO } : null;
+    if (T && devShiftOn(d)) out.push({ from: T.at, to: T.until, title: 'Tea and biscuits', where: 'the Tea corner, Deck 5', kind: 'tea' }); } catch (e) { /* not yet */ }
+  try { if (typeof DELIVERY !== 'undefined' && typeof deliveryLate === 'function') { const due = DELIVERY.day + deliveryLate(d);
+    if (weekday(d) === due) out.push({ from: DELIVERY.hour * 60, to: DELIVERY.hour * 60 + 60, title: 'Supply delivery', where: 'the cargo hold, Deck 5', kind: 'delivery' }); } } catch (e) { /* not yet */ }
   return out.sort((x, y) => x.from - y.from);
 }
 const devWhen = t => hhmm(((t % 1440) + 1440) % 1440);
@@ -10617,6 +10623,8 @@ function devItemGoal(x) {
   if (x.kind === 'appt' && x.place) return devPlaceGoal(x.place);
   if (x.kind === 'meal') return { deck: 3, room: 'M', label: 'The mess hall, Deck 3' };
   if (x.kind === 'shift') return { deck: 5, room: 'w', label: 'The Works bay, Deck 5' };
+  if (x.kind === 'tea') return { deck: 5, room: 't', label: 'The Tea corner, Deck 5' };   // 0.72.5
+  if (x.kind === 'delivery') return { deck: 5, room: 'c', label: 'The cargo hold, Deck 5' };
   if ((x.kind === 'tradition' || x.kind === 'occasion') && Number.isInteger(x.deck) && x.room) return { deck: x.deck, room: x.room, label: x.where };
   return null;
 }
@@ -10635,7 +10643,7 @@ function devHeadsTick(t) {
     const at = (d - 1) * 1440 + x.from, key = x.kind + '|' + at + '|' + (x.kind === 'appt' ? x.aid : x.title);   // an appointment by its id: a group that grows isn't new
     if (x.kind === 'off' || at - R.ahead > t || at + 3 <= t) continue;
     if (!R.on && x.kind !== 'appt') continue;            // 0.35.33 (the lead): what you're booked for still comes with heads-ups off
-    if ((x.kind === 'meal' || x.kind === 'shift') && !R.everyday) continue;
+    if ((x.kind === 'meal' || x.kind === 'shift' || x.kind === 'tea') && !R.everyday) continue;   // tea like the meals (0.72.5)
     if (x.kind === 'tradition' && R.per[x.tkind] === false) continue;
     const stage = t < at ? 'soon' : 'start', k = key + '|' + stage;
     if (devHeard(k) || (stage === 'soon' && at - t < 3)) continue;   // a 'soon' with under 3 minutes left waits for the start
@@ -10643,6 +10651,16 @@ function devHeadsTick(t) {
     if (x.kind === 'tradition' && devOnShift() && R.per[x.tkind] !== true) { DEV.notes.calendar = (DEV.notes.calendar || 0) + 1; continue; }   // on shift: a quiet badge
     for (let i = HU_Q.length - 1; i >= 0; i--) if (HU_Q[i].key === key) HU_Q.splice(i, 1);   // the start replaces a waiting 'soon'
     HU_Q.push({ key, stage, at, title: devHuName(x), where: x.where, goal: devItemGoal(x) });
+  }
+  for (const a of SHIP.device.appts) if (a && a.kind === 'invite' && a.status === 'asked' && a.by && Number.isFinite(a.at)) {   // 0.72.6 (playtest 2, item 12): an invitation still waiting for your answer reminds you too, like an appointment
+    const at = a.at, key = 'invite|' + a.id; if (at - R.ahead > t || at + 3 <= t) continue;
+    const stage = t < at ? 'soon' : 'start', k = key + '|' + stage;
+    if (devHeard(k) || (stage === 'soon' && at - t < 3)) continue;
+    devHear(k);
+    for (let i = HU_Q.length - 1; i >= 0; i--) if (HU_Q[i].key === key) HU_Q.splice(i, 1);
+    let who = a.by; try { who = apptName(a.by); } catch (e) { /* the id */ }
+    let where = ''; try { where = apptWhereName(a.where); } catch (e) { where = ''; }
+    HU_Q.push({ key, stage, at, title: 'Invitation from ' + who, where, goal: devPlaceGoal(a.where) });
   }
   for (let i = HU_Q.length - 1; i >= 0; i--) { const h = HU_Q[i]; if (h.stage === 'soon' ? t >= h.at : t >= h.at + 10) { if (i === 0 && DEV.hu) { DEV.hu = null; DEVICE_SKIN.heads(null); } HU_Q.splice(i, 1); } }
   if (HU_Q.length > 4) HU_Q.splice(DEV.hu ? 1 : 0, HU_Q.length - 4);   // never a backlog: the newest four
@@ -12025,8 +12043,8 @@ const teachMeal = m => m >= MEALS.breakfast[0] && m < MEALS.breakfast[1] || m >=
 const TEACH = [   // text: head writer 3. A 4th element { sure: true }: shown when due whatever the 3-minute and 60 s pacing says
   // playtest 2 (0.72.5, HUD U; texts: the head writer's tip.device and tip.laundry.day2, read when shown): item 9, once on your
   // training day while you're on shift; item 19, the laundry tip at the start of Day 2 (from 06:00, before 09:00's shift)
-  ['t:device-work', c => c.d === 1 && c.work && c.min >= 9 * 60 + 30 && c.min < 17 * 60 && !c.app, () => careerText('tip.device') || 'Working is a good chance to check out your device. Schedule, Jobs and Tracked are a tap away.'],
-  ['t:laundry-d2', c => c.d === 2 && c.min >= 6 * 60 && c.min < 9 * 60, () => careerText('tip.laundry.day2') || 'New day: fresh clothes from your wardrobe. When they run out, take your hamper to the laundry on Deck 4.', { sure: true }],
+  ['t:devwork', c => c.d === 1 && c.work && c.min >= 9 * 60 + 30 && c.min < 17 * 60 && !c.app, () => careerText('tip.device') || 'Working is a good chance to check out your device. Schedule, Jobs and Tracked are a tap away.'],
+  ['t:laund2', c => c.d === 2 && c.min >= 6 * 60 && c.min < 9 * 60, () => careerText('tip.laundry.day2') || 'New day: fresh clothes from your wardrobe. When they run out, take your hamper to the laundry on Deck 4.', { sure: true }],
   ['t:rep', c => c.d >= 1 && (c.S.turnin !== undefined && shipNow() - c.S.turnin >= 30 || c.min >= 1020 || c.d >= 2), 'Not just jobs: kindness and joining in count too. Each department has its own view of you, and so does the ship.', { sure: true }],   // the user's: on the 2nd day (Monday), after your first job's turned in or at the shift's end; half an hour after the turn-in, so Zeke says his part first (0.28.50)
   // free time (0.28.63, the 0.60.7 plan's "Tips for your first evenings"; the plan's approved words): off shift, then one an evening, Days 1-4
   ['t:offshift', c => c.d >= 1 && c.min >= 1020 && c.min < 1290, 'Off shift. Your evening is yours: call home from the booths on Deck 3, go to a ship tradition (Calendar), talk a while with someone, or try a hobby.', { sure: true }],
@@ -13808,7 +13826,7 @@ function teaHere(A) {                                    // in the Tea corner (D
   return (pl ? pl.room : s ? roomAt(...cellAt(s.x, s.z)) : null) === 't';
 }
 function teaBegin(A) {
-  A.def = { ...A.def, need: 'hunger', gain: 10, mins: Math.max(6, A.def.mins || 0), title: 'Tea and biscuits', done: 'Tea and a biscuit or two. Just the thing.' }; A.o.biscuits = true;
+  A.def = { ...A.def, need: 'hunger', gain: 4, mins: Math.max(6, A.def.mins || 0), title: 'Tea and biscuits',   /* 0.72.5 (playtest 2, item 10): only a little food (was 10) */ done: 'Tea and a biscuit or two. Just the thing.' }; A.o.biscuits = true;
   if (A.kind === 'ixLounge') A.o.pose = 'sit:drink';     // in a seat there: a cup in your hand
   SHIP.player.teaDay = SHIP.time.day; teaDismiss(); if (typeof simNote === 'function') simNote('tea', { day: SHIP.time.day, who: 'you' });
 }
@@ -45524,7 +45542,7 @@ function goToDeck(n, at) {
 
 // ---- the main lift: tap a lift door for the deck panel. A ride opens the doors, you step in, they close,
 // the view fades, the new deck is built behind the black, and the doors open on it. Timed by the game clock. ----
-const DECK_NAMES = { 1: 'Bridge', 2: 'Command & Science', 3: 'Commons', 4: 'Quarters', 5: 'Operations', 6: 'Engineering', 7: 'Recreation' };
+const DECK_NAMES = { 1: 'Bridge', 2: 'Officers\' quarters and science',   /* 0.72.5 (playtest 2, item 18): was 'Command & Science' */ 3: 'Commons', 4: 'Quarters', 5: 'Operations', 6: 'Engineering', 7: 'Recreation' };
 const liftEl = document.getElementById('lift'), liftList = document.getElementById('liftList'), fadeEl = document.getElementById('fade');
 let ride = null, liftReturn = null;
 const inLift = () => roomAt(...player.here()) === '@';

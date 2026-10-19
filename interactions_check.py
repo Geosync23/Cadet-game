@@ -458,12 +458,24 @@ with sync_playwright() as pw:
         check(r[0] is None and r[1] == 'Clock in at the time clock' and r[2] == 'Take a job at the job board', f'Day 1 in the Works bay: no arrow at 08:40, the time clock at 08:51, the job board once clocked in ({r})')
         r = g.ev("""(() => { const out = {}, D = SHIP.device; D.settings.tips = true; SHIP.intro.on = false; clearGoal();
           const run = (day, min) => { setShipNow((day - 1) * 1440 + min); POP.busy = false; POP.toast = POP.tip = POP.card = POP.warn = -1e9; TEACH_CK = -1e9; TIP_Q.length = 0; if (DEV.open) deviceClose(); return teachTick(performance.now() + 1e7); };
-          for (const [id] of TEACH) D.tipsSeen[id] = true; delete D.tipsSeen['t:device-work']; delete D.tipsSeen['t:laundry-d2'];
+          for (const [id] of TEACH) D.tipsSeen[id] = true; delete D.tipsSeen['t:devwork']; delete D.tipsSeen['t:laund2'];
           out.d1 = run(1, 10 * 60); out.d2 = run(2, 6 * 60 + 30); out.again = [run(1, 11 * 60), run(2, 7 * 60)];
           delete D.tipsSeen['career.late']; TIP_Q.length = 0; out.ct = [careerTip('late'), (TIP_Q.length = 0, careerTip('late')), !!D.tipsSeen['career.late']];
           return out; })()""")
-        check(r['d1'] == 't:device-work' and r['d2'] == 't:laundry-d2' and r['again'] == [None, None], f'the training-day device tip and the Day 2 laundry tip, each once ({r})')
+        check(r['d1'] == 't:devwork' and r['d2'] == 't:laund2' and r['again'] == [None, None], f'the training-day device tip and the Day 2 laundry tip, each once ({r})')
         check(r['ct'][0] is not False and r['ct'][1] is False and r['ct'][2], f'a career warning shows once a save, saved like the other tips ({r["ct"]})')
+        if g.ev("typeof devDay === 'function' && typeof DECK_NAMES !== 'undefined'"):   # batch B (0.72.6): tea and the delivery on the Schedule, tea a little food, Deck 2's lift label
+            r = g.ev("""(() => { const k = d => devDay(d).filter(x => x.kind === 'tea' || x.kind === 'delivery').map(x => x.title + ' ' + hhmm(x.from) + (devItemGoal(x) ? '' : ' (no goal)'));
+              const wed = [1, 2, 3, 4, 5, 6, 7].find(d => weekday(d) === DELIVERY.day + deliveryLate(d)), sat = [1, 2, 3, 4, 5, 6, 7].find(d => !devShiftOn(d));
+              const A = { def: { mins: 6 }, o: {}, kind: 'ixTea' }; teaBegin(A);
+              return { wed: k(wed), sat: sat ? k(sat) : [], gain: A.def.gain, lift: DECK_NAMES[2] }; })()""")
+            check(any(t.startswith('Supply delivery') for t in r['wed']) and any(t.startswith('Tea and biscuits') for t in r['wed']) and not any('no goal' in t for t in r['wed']) and r['sat'] == [], f'the Schedule lists tea on shift days and the week\'s delivery, each with an arrow; none on a day off ({r})')
+            r2 = g.ev("""(() => { const t0 = (SHIP.time.day - 1) * 1440 + 19 * 60, P = DECKS[3].places.find(x => x.type === 'lounge-seat') || DECKS[3].places[0]; SHIP.device.calendarRemind.heard = []; HU_Q.length = 0;
+              SHIP.device.appts.push({ id: 9999, with: ['tomas'], at: t0 + 30, len: 30, where: P.id, kind: 'invite', status: 'asked', by: 'tomas' });
+              const at = m => { setShipNow(t0 + m); devTickMin = -1; deviceTick(); return HU_Q.filter(h => h.key === 'invite|9999').map(h => h.stage + (h.goal ? '+goal' : '')); };
+              const out = [at(16), at(31)]; SHIP.device.appts = SHIP.device.appts.filter(a => a.id !== 9999); return out; })()""")
+            check(r2 == [['soon+goal'], ['start+goal']], f'an invitation still waiting for your answer reminds you 15 minutes before and at its start (item 12) ({r2})')
+            check(r['gain'] <= 5 and r['lift'] == "Officers' quarters and science", f'tea and biscuits is only a little food; the lift says Officers\' quarters and science ({r["gain"]}, {r["lift"]})')
         check(not g.errors, f'no console errors ({g.errors[:3]})')
     g.close()
 
