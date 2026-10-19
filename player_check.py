@@ -207,7 +207,7 @@ with sync_playwright() as pw:
     p = g.ev(f"({PAPER})({{ normal: true }})"); print('  lowest', p['lo'], 'slow minutes', p['slowMins'], 'energy at bedtime', p['ends'])
     # 0.73.0 (playtest 2, the lead's tuning): a normal 16-hour day ends near 20-25 energy, so you're tired (80% walking)
     # for the last hour or two; never near 0. Work wears leisure down; an evening hobby brings it back
-    for k, v in p['lo'].items(): check(v >= (15 if k == 'energy' else 25 if k in ('bathroom', 'leisure') else 30), f'normal week: {k} fell to {v}')
+    for k, v in p['lo'].items(): check(v > 0 if k == 'leisure' else v >= (15 if k == 'energy' else 25 if k == 'bathroom' else 30), f'normal week: {k} fell to {v}')   # leisure: work takes 40 a shift, so it runs low by Friday's shift and comes back at the weekend
     check(18 <= sum(p['ends']) / len(p['ends']) <= 30, f"normal week: energy at bedtime should average 18-30: {p['ends']}")
     check(p['slowMins'] <= 7 * 150, f"normal week: slowed for {p['slowMins']} minutes (only tired, late in the evening)")
     print('On paper, a week of neglect:')
@@ -486,13 +486,13 @@ with sync_playwright() as pw:
     check(asked and card[0].endswith('06:00') and '100%' in card[1] and card[2] is True and card[4] == '06:00', f'the bunk at night should open the alarm clock at 06:00: {asked} {card}')
     al = g.ev(r"""(() => { const out = {}; const e = SHIP.player.needs.energy, t0 = shipNow(); alarmUp.click(); alarmUp.click(); out.up2 = hhmm(ALARM_PICK); alarmDn.click(); alarmDn.click(); out.back = hhmm(ALARM_PICK);
       out.span = [hhmm(alarmChoices()[0]), hhmm(alarmChoices().slice(-1)[0])];
-      SHIP.player.needs.energy = 10; out.e = [alarmEnergy(360), alarmEnergy(480), alarmEnergy(720)]; SHIP.player.needs.energy = e;   // later gives more
+      const t1 = shipNow(); setShipNow(Math.floor(t1 / 1440) * 1440 + 1440 + 120); SHIP.player.needs.energy = 10; out.e = [alarmEnergy(360), alarmEnergy(480), alarmEnergy(720)]; SHIP.player.needs.energy = e; setShipNow(t1);   // to bed at 02:00: later gives more
       const D = Math.floor(alarmAt(360) / 1440) + 1; out.shift = playerShiftOn(D); out.late = [alarmLate(510), alarmLate(540), alarmLate(600)];
       ALARM_PICK = 600; alarmDraw(); out.warn = [alarmW.hidden, alarmW.textContent]; ALARM_PICK = 360; alarmDraw();
       out.still = [shipNow() === t0, Math.round(SHIP.player.needs.energy)]; return out; })()""")
-    print('  alarm: steps, the times on offer, energy by wake time (from 10 at 21:00: 06:00, 08:00, 12:00), late warnings:', al)
+    print('  alarm: steps, the times on offer, energy by wake time (to bed at 02:00 with 10: 06:00, 08:00, 12:00), late warnings:', al)
     check(al['up2'] == '07:00' and al['back'] == '06:00' and al['span'] == ['04:00', '12:00'], f'the alarm steps half an hour, 04:00 to 12:00: {al}')
-    check(al['e'][0] < al['e'][1] <= al['e'][2] and al['e'][0] >= 10, f'a later alarm should wake you with more energy: {al["e"]}')
+    check(al['e'][0] < al['e'][1] <= al['e'][2] and al['e'][0] == 60, f'a later alarm should wake you with more energy: {al["e"]}')
     check(not al['shift'] or (al['late'] == [0, 540, 540] and al['warn'][0] is False and '09:00' in al['warn'][1]), f'an alarm at or after the shift starts should warn: {al}')
     check(al['still'] == [True, 30], f'looking at the alarm should not change the time or your energy: {al["still"]}')
     g.ev("sleepYes.click()")

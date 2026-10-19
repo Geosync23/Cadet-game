@@ -476,6 +476,21 @@ with sync_playwright() as pw:
               const out = [at(16), at(31)]; SHIP.device.appts = SHIP.device.appts.filter(a => a.id !== 9999); return out; })()""")
             check(r2 == [['soon+goal'], ['start+goal']], f'an invitation still waiting for your answer reminds you 15 minutes before and at its start (item 12) ({r2})')
             check(r['gain'] <= 5 and r['lift'] == "Officers' quarters and science", f'tea and biscuits is only a little food; the lift says Officers\' quarters and science ({r["gain"]}, {r["lift"]})')
+        if g.ev("typeof roundGuide === 'function'"):   # 0.73.0 (U2, item 1): the first round's arrow and tips, on E1's roundTrainStep (a stand-in when it's missing)
+            r = g.ev("""(() => { const D = SHIP.device, real = typeof roundTrainStep === 'function' ? roundTrainStep : null; D.settings.tips = true; TIP_Q.length = 0; DEVICE_SKIN.tip(null); clearGoal(); RG_LAST = ''; RG_N = 0;
+              for (const k in D.tipsSeen) if (/^rg:/.test(k)) delete D.tipsSeen[k];
+              const seq = [{ step: 'take' }, { step: 'take' }, { step: 'go', machine: 'Washer 2' }, { step: 'look', machine: 'Washer 2' }, { step: 'mark', machine: 'Washer 2' }, { step: 'next', machine: 'Light relays 1' }, { step: 'look', machine: 'Light relays 1' }, { step: 'done' }, null];
+              const out = []; let k = 0; window.roundTrainStep = () => seq[k];
+              for (; k < seq.length; k++) { roundGuide(); out.push([IX_GOAL && IX_GOAL.label, TIP_Q.map(t => t.id).join(','), (TIP_Q[0] || {}).text || '']); }
+              setGoal({ deck: 3, room: 'M', label: 'Someone else' }); RG_LAST = 'take|'; k = 0; roundGuide(); roundGuide(); const other = IX_GOAL && IX_GOAL.label; clearGoal();
+              k = 2; RG_LAST = ''; roundGuide(); const again = TIP_Q.length; TIP_Q.length = 0; DEVICE_SKIN.tip(null);
+              if (real) window.roundTrainStep = real; else delete window.roundTrainStep; return { out, other, again }; })()""")
+            o = r['out']; print('  the first round, step by step [arrow, tips queued, tip]:'); [print('   ', x) for x in o]
+            check(o[0][0] == 'Take your first round at the job board' and o[0][1] == 'rg:take:0' and o[1][1] == 'rg:take:0', f'take: the arrow to the job board and its tip, once ({o[:2]})')
+            check(o[2][0] is None and o[2][1] == 'rg:go:0' and 'Washer 2' in o[2][2], f'go: the board arrow gives way to the job\'s, the tip names the machine and replaces the last ({o[2]})')
+            check([x[1] for x in o[3:8]] == ['rg:look:0', 'rg:mark:0', 'rg:next:1', 'rg:look:1', 'rg:done:0'] and o[8][1] == '', f'look, mark, next, look, done: one tip at a time, gone once it is turned in ({[x[1] for x in o]})')
+            check(r['other'] == 'Someone else', f'the board arrow is never put over another section\'s once the walk-through is under way ({r["other"]})')
+            check(r['again'] == 0, f'each round tip shows once a save ({r["again"]})')
         check(not g.errors, f'no console errors ({g.errors[:3]})')
     g.close()
 

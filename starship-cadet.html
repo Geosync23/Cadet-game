@@ -14426,7 +14426,7 @@ function ixJobStep() {
     if (nx && nx.s.step === 'fetch' && need.length) return { deck: 5, room: 'r', place: ixShelf(need).place, label: 'Fetch ' + partList(need) + ixShelf(need).say };
     const st = nx && nx.s.step === 'fetch' ? jobStops(j)[nx.k + 1] : nx && nx.s;
     const rm = j.kind === 'rounds' && nx && nx.s === st && typeof machineById === 'function' ? machineById((j.route || [])[nx.k]) : null;   // a round: the machine by name (0.73.0)
-    if (st && rm) return { deck: st.deck, place: st.places[0] || null, label: 'Look at ' + machineName(rm) };
+    if (st && rm) return { deck: st.deck, place: st.places[0] || null, label: 'Look at ' + (typeof machineLabel === 'function' ? machineLabel(rm).split(',')[0] : machineName(rm)) };
     return st ? { deck: st.deck, place: st.places[0] || null, label: st.step === 'pickup' ? 'Pick up ' + (j.bring || 'the delivery') : st.step === 'inspect' ? j.title + ': the next stop' : j.title } : null;
   }
   if (typeof traceHidden === 'function' && traceHidden(j)) return typeof traceGoal === 'function' ? traceGoal(j) : null;   // a traced fault not yet found: the line, never the machine (24i)
@@ -14487,16 +14487,16 @@ const RG_GOAL = 'Take your first round at the job board';
 let RG_LAST = '', RG_N = 0;
 function roundGuide() {
   let r = null; try { r = typeof roundTrainStep === 'function' ? roundTrainStep() : null; } catch (e) { r = null; }
-  const ours = IX_GOAL && IX_GOAL.label === RG_GOAL;
-  if (!r || r.step !== 'take') { if (ours) clearGoal(); } else if (!IX_GOAL) setGoal({ deck: 5, item: /job board/i, room: 'w', label: RG_GOAL });
-  if (!r) { RG_LAST = ''; return; }
+  const ours = IX_GOAL && IX_GOAL.label === RG_GOAL, rgTips = () => { if (TIP_Q.length && /^rg:/.test(TIP_Q[0].id)) tipDone(); for (let i = TIP_Q.length - 1; i > 0; i--) if (/^rg:/.test(TIP_Q[i].id)) TIP_Q.splice(i, 1); };
+  if (!r || r.step !== 'take') { if (ours) clearGoal(); }
+  else if (!IX_GOAL || !RG_LAST) setGoal({ deck: 5, item: /job board/i, room: 'w', label: RG_GOAL });   // straight after Torres's talk it takes over (his meeting's arrow is done); later, never over another
+  if (!r) { if (RG_LAST) rgTips(); RG_LAST = ''; return; }   // turned in: the last tip goes too
   const key = r.step + '|' + (r.machine || ''); if (key === RG_LAST) return;
   if (r.step === 'next' || r.step === 'look' && !/^(go|next)\|/.test(RG_LAST)) RG_N++;   // a new machine: next, or a look we walked up to without a go
   RG_LAST = key;
   const id = 'rg:' + r.step + ':' + (r.step === 'take' || r.step === 'done' ? 0 : RG_N);
   if (SHIP.device.tipsSeen[id]) return;
-  if (TIP_Q.length && /^rg:/.test(TIP_Q[0].id)) tipDone();   // the last step's tip gives way
-  for (let i = TIP_Q.length - 1; i > 0; i--) if (/^rg:/.test(TIP_Q[i].id)) TIP_Q.splice(i, 1);
+  rgTips();                                              // the last step's tip gives way
   const t = ((typeof careerText === 'function' && careerText('tip.round.' + r.step)) || RG_TIPS[r.step] || '').replace(/\{machine\}/g, r.machine || 'the machine');
   ixTip(id, t);
 }
