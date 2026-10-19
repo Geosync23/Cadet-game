@@ -2,6 +2,13 @@
 
 Brief: plans/brief-recdeck.md on claude/lead-pillar1 ("R" section). Lead 18 session_01CBur9nrJ411pFkHopF96RL. Build master BM8 session_01YGy9FDmcbkySMJpVPYJaAo. Earlier verdicts: R6's, in plans/reviews-p5-step4.md ("Rec deck activation"). Newest first.
 
+### RB2 claude/rec-works 0ab43cd + 11fb633 (0.84.8 recShow, W3's keys; 0.84.9 stage poses, crew perform/address, juggling balls, mic stand, piano side-on), R7: PASS (my 0.84.7 fix 1 still open)
+- Read by hand; no code after `//`; no duplicate declarations; load-time adds are plain tables, two scratch objects and col() colours (no R()). Kit on R only: the music room's micStand/pianoBench (MUS, shared, no R()), the piano moved; the light pools' quad sits 3 cm over the stage top (.58 vs .55: not coplanar), additive, hidden with no show; the film cloth on its own noMerge pivot.
+- `recShow(state)` (null/film/talk/allhands/talent), RB's to own, RA only calls it. House lights: applyLight sets intensities fresh each frame, so the `*= (1 - dim)` doesn't compound; it dims only in the auditorium (lastRoom 'A'). Ticks only while a show, a dim or the screen is on.
+- 0.84.9: perform { act } loops the act + a 3 s bow; piano sits (`sit:play`, which exists); one juggler's balls at a time (one InstancedMesh, 3 instances, made at the first juggle). Fix 2 of my 0.84.7 verdict done (rec.shut.float/net/belays, trace.pool.drip + .up through worksText).
+- **Still open, fix 1:** a climb on the taped route or under a tagged-out belay isn't refused yet.
+- Checks: dormant cadet_test vs aa4f42c ALL IDENTICAL (0.84.8 and 0.84.9), machine_check OK (0.84.8); REC_DECK=true copy: deck_check OK (Deck 7 178 calls by the lift, unchanged; 74 items with the microphone), interactions_check OK (both).
+
 ### W3 claude/writer-rec 2cc8056 (0.48.126, mail.rec.talk.you names the day), R7: PASS
 One Mail text ("It's on {weekday}, at seven.") + keys notes; bake unchanged, lines_check PASS. **RA: pass {weekday}** when you send it, or "{weekday}" shows as written.
 
