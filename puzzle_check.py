@@ -403,6 +403,7 @@ P1FIRST = r"""(() => {
   for (let t = 9 * 1440; t <= 10 * 1440 + 900; t += 60) { setShipNow(t); machinesNow(); caseTick(); }
   out.before = !!C.p1;
   W.rank = 'officer'; W.tier = 2;
+  if (ladderRow('m9')) W.tr = { m9: 11 };               // a build with M3's tracing row: the lesson's done (P1's first waits for it; P1M9 checks the wait)
   setShipNow(10 * 1440 + 961); machinesNow(); caseTick();
   const c = caseById(C.p1), j = c && caseJob(c); out.staged = !!c; out.p1 = C.p1; if (!c) return out;
   out.machine = j.machine; out.cause = c.cause; out.sus = c.sus.slice().sort(); out.train = c.train; out.reserved = j.reserved; out.hidden = caseHidden(j); out.wait = c.wait;
