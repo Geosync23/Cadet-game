@@ -9,6 +9,9 @@ Lines skimmed. In a fresh archive content_gen bakes 9342 lines; lines_check PASS
 
 ## Step 4
 
+### W2 claude/writer-p5 418b8c9 (0.48.108, M10 lines on E3's names): PASS
+`works.order.ask.<id>` / `works.order.thanks.<id>` for E3's eight ids (guitar-hook ... tablet-stand, as in E3's WIP 2d90d7ec's order table) and `works.order.lapse`; the first lesson's crew lines move to Calder, Halloran and Torres under `flag:train.m10.lead` (E3's code must set that flag: checked at E3's M10 review). Bakes 9569 lines; lines_check PASS.
+
 ### E1 claude/mech-rounds b68e236 (0.45.7, round 1: 24 core tool wear, the side-job cap, Bunk 1 texts): PASS WITH FIXES (wear before Day 12)
 Base 0.63.3 7a6e137. Pages: m11-tool-upkeep, step4-stages.
 - One owner: toolWear/toolState/toolSlow/toolCharge, worksSide/worksSideXp/WORKS_SIDE_KINDS, myBedRoom/bedText are E1's alone. E2 (0df09137) and E3 (b809339) carry the base's one-line `const toolWear` untouched, so a merge takes E1's `function toolWear` cleanly. E2's `WORKS_SIDE_KINDS.add('leak')` (24o) comes after the core in the file. Good.
