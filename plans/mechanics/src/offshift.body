@@ -34,7 +34,7 @@ NAV:plain=In plain words|grow=How it grows|b=Builder|tests=Tests|ranges=Seat and
     <tr><td>DECKS[4], [2]</td><td><code>4-23-rug</code>, <code>-desk</code>, <code>-shelf</code>, <code>-sill</code>; <code>2-telescope</code> (use the observatory's existing place if it has one)</td><td>E3 (places turn)</td></tr>
   </table></div>
   <ul>
-    <li><b>Keys:</b> <code>schedU(day, 0, 1014)</code> where the three points are, <code>1015</code> which is new.</li>
+    <li><b>Keys:</b> <code>schedU(day, 0, 1024)</code> where the three points are, <code>1025</code> which is new.</li>
     <li><b>Data:</b> <code>SHIP.works.side.cabin = { rug, desk, shelf, sill }</code> (item ids), <code>SHIP.works.side.stars = { n, last }</code>. Saved under <code>SHIP.works.side</code>; read defensively (a missing field is the default), so old saves load.</li>
     <li><b>Phone:</b> at most 4 extra draw calls in the cabin (one per spot, shared kit); the star view uses the existing sky with the three marks as screen overlay.</li>
   </ul>
@@ -49,7 +49,7 @@ NAV:plain=In plain words|grow=How it grows|b=Builder|tests=Tests|ranges=Seat and
 
 <section id="ranges" class="builder">
   <h2>Seat and size</h2>
-  <ul><li>Seat <b>E3</b>. <b>Build size: S + S.</b> Hash keys from the second range (1000-1049; check the key list first): <b>1014-1015</b>.</li></ul>
+  <ul><li>Seat <b>E3</b>. <b>Build size: S + S.</b> Hash keys from the second range (1010-1049; 1000-1004 are H2's, checked 2026-10-19): <b>1024-1025</b>.</li></ul>
 </section>
 
 <section id="faq">

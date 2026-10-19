@@ -34,7 +34,7 @@ NAV:plain=In plain words|grow=How it grows|b=Builder|tests=Tests|ranges=Seat and
     <tr><td>DECKS[3-5]</td><td>leak joint places by the valves (<code>n-leak-k</code>, four per deck)</td><td>E3 (places turn)</td></tr>
   </table></div>
   <ul>
-    <li><b>Which joint and when:</b> <code>schedU(week, 0, 1003)</code> and <code>schedU(week, 1, 1004)</code>, from the valves real today (the fault tables).</li>
+    <li><b>Which joint and when:</b> <code>schedU(week, 0, 1013)</code> and <code>schedU(week, 1, 1014)</code>, from the valves real today (the fault tables).</li>
     <li><b>Data:</b> <code>SHIP.works.side.leaks = [{ id, joint, room, day, found }]</code>. Saved under <code>SHIP.works.side</code>; read defensively (a missing field is the default), so old saves load.</li>
     <li><b>Phone:</b> the puddle decal is shared with M6 (1 draw call, only while a leak is open); the wall patch is the same decal (1 more).</li>
   </ul>
@@ -49,7 +49,7 @@ NAV:plain=In plain words|grow=How it grows|b=Builder|tests=Tests|ranges=Seat and
 
 <section id="ranges" class="builder">
   <h2>Seat and size</h2>
-  <ul><li>Seat <b>E2</b> (M2's seat, <code>claude/mech-incidents</code>, 0.51.x). <b>Build size: M.</b> Hash keys from the second range (1000-1049; check the key list first): <b>1003-1004</b> (which joint, which day).</li></ul>
+  <ul><li>Seat <b>E2</b> (M2's seat, <code>claude/mech-incidents</code>, 0.51.x). <b>Build size: M.</b> Hash keys from the second range (1010-1049; 1000-1004 are H2's, checked 2026-10-19): <b>1013-1014</b> (which joint, which day).</li></ul>
 </section>
 
 <section id="faq">

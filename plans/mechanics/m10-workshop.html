@@ -108,7 +108,7 @@ td code{white-space:normal}
   </table></div>
   <ul>
     <li><b>Data:</b> <code>SHIP.works.side.shop = { orders: [{ id, who, what, day, state }], made: n, tinkered: [ids] }</code>. Saved under <code>SHIP.works.side</code>; read defensively (a missing field is the default), so old saves load.</li>
-    <li><b>Who orders:</b> crew at friendship "acquainted" or better, picked with <code>schedU(week, 0, 1000)</code>; the thing with <code>schedU(week, 1, 1001)</code>. The lathe and fabricator are places here, not wearing machines (simplest; wear can come later).</li>
+    <li><b>Who orders:</b> crew at friendship "acquainted" or better, picked with <code>schedU(week, 0, 1010)</code>; the thing with <code>schedU(week, 1, 1011)</code>. The lathe and fabricator are places here, not wearing machines (simplest; wear can come later).</li>
     <li><b>Phone:</b> made things are small props from the existing kit, drawn only where placed (1 draw call each; the cabin cap is 4).</li>
   </ul>
 </section>
@@ -123,7 +123,7 @@ td code{white-space:normal}
 
 <section id="ranges" class="builder">
   <h2>Seat and size</h2>
-  <ul><li>Seat <b>E3</b> (M3's seat, <code>claude/mech-diagnose</code>, 0.53.x). <b>Build size: M.</b> Hash keys from the second range (1000-1049; check the key list first): <b>1000-1001</b> (who, what).</li></ul>
+  <ul><li>Seat <b>E3</b> (M3's seat, <code>claude/mech-diagnose</code>, 0.53.x). <b>Build size: M.</b> Hash keys from the second range (1010-1049; 1000-1004 are H2's, checked 2026-10-19): <b>1010-1011</b> (who, what).</li></ul>
 </section>
 
 <section id="faq">

@@ -35,7 +35,7 @@ NAV:plain=In plain words|grow=Loose ends|b=Builder|tests=Tests|ranges=Seat and s
     <tr><td>DECKS[5]</td><td>stocktake count spots on the storage shelves (one per aisle)</td><td>E3 (places turn)</td></tr>
   </table></div>
   <ul>
-    <li><b>Keys:</b> <code>schedU(week, 0, 1016)</code> the short shelf; the rest deterministic.</li>
+    <li><b>Keys:</b> <code>schedU(week, 0, 1026)</code> the short shelf; the rest deterministic.</li>
     <li><b>Data:</b> <code>SHIP.works.side.round = { pick }</code>, <code>SHIP.works.side.stock = { week, found }</code>, <code>SHIP.works.side.parts = n</code>. Saved under <code>SHIP.works.side</code>; read defensively (a missing field is the default), so old saves load.</li>
   </ul>
 </section>
@@ -50,7 +50,7 @@ NAV:plain=In plain words|grow=Loose ends|b=Builder|tests=Tests|ranges=Seat and s
 
 <section id="ranges" class="builder">
   <h2>Seat and size</h2>
-  <ul><li>Seats <b>E1</b> and <b>E2</b> (24h). <b>Build size: S each (five small stages, two data lines).</b> Hash keys from the second range (1000-1049; check the key list first): <b>1016</b>.</li></ul>
+  <ul><li>Seats <b>E1</b> and <b>E2</b> (24h). <b>Build size: S each (five small stages, two data lines).</b> Hash keys from the second range (1010-1049; 1000-1004 are H2's, checked 2026-10-19): <b>1026</b>.</li></ul>
 </section>
 
 <section id="faq">

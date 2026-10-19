@@ -34,7 +34,7 @@ NAV:plain=In plain words|grow=How it grows|b=Builder|tests=Tests|ranges=Seat and
   </table></div>
   <ul>
     <li><b>Data:</b> <code>SHIP.works.side.log = [{ day, pick, jobs: [ids], flag }]</code>, the last 30 kept. Saved under <code>SHIP.works.side</code>; read defensively (a missing field is the default), so old saves load.</li>
-    <li><b>Order of the three:</b> <code>schedU(day, 0, 1002)</code>. The terminal is an existing Works bay place (use it; else <code>5-works-terminal</code> in the places turn).</li>
+    <li><b>Order of the three:</b> <code>schedU(day, 0, 1012)</code>. The terminal is an existing Works bay place (use it; else <code>5-works-terminal</code> in the places turn).</li>
     <li><b>Phone:</b> none (a device view).</li>
   </ul>
 </section>
@@ -48,7 +48,7 @@ NAV:plain=In plain words|grow=How it grows|b=Builder|tests=Tests|ranges=Seat and
 
 <section id="ranges" class="builder">
   <h2>Seat and size</h2>
-  <ul><li>Seat <b>E1</b>. <b>Build size: S.</b> Hash keys from the second range (1000-1049; check the key list first): <b>1002</b> (the order of the three).</li></ul>
+  <ul><li>Seat <b>E1</b>. <b>Build size: S.</b> Hash keys from the second range (1010-1049; 1000-1004 are H2's, checked 2026-10-19): <b>1012</b> (the order of the three).</li></ul>
 </section>
 
 <section id="faq">

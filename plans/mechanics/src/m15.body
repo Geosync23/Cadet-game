@@ -33,7 +33,7 @@ NAV:plain=In plain words|grow=How it grows|b=Builder|tests=Tests|ranges=Seat and
     <tr><td>15</td><td><code>choose</code> steps (exist)</td><td>P (exists)</td></tr>
   </table></div>
   <ul>
-    <li><b>Which junction, which colour fades:</b> <code>schedU(week, 0, 1006)</code>, <code>schedU(week, 1, 1007)</code>. <b>Data:</b> <code>SHIP.works.side.rewire = { done, wrongs }</code>. Saved under <code>SHIP.works.side</code>; read defensively (a missing field is the default), so old saves load.</li>
+    <li><b>Which junction, which colour fades:</b> <code>schedU(week, 0, 1016)</code>, <code>schedU(week, 1, 1017)</code>. <b>Data:</b> <code>SHIP.works.side.rewire = { done, wrongs }</code>. Saved under <code>SHIP.works.side</code>; read defensively (a missing field is the default), so old saves load.</li>
     <li><b>Phone:</b> none (a device view).</li>
   </ul>
 </section>
@@ -47,7 +47,7 @@ NAV:plain=In plain words|grow=How it grows|b=Builder|tests=Tests|ranges=Seat and
 
 <section id="ranges" class="builder">
   <h2>Seat and size</h2>
-  <ul><li>Seat <b>E2</b>. <b>Build size: M.</b> Hash keys from the second range (1000-1049; check the key list first): <b>1006-1007</b>.</li></ul>
+  <ul><li>Seat <b>E2</b>. <b>Build size: M.</b> Hash keys from the second range (1010-1049; 1000-1004 are H2's, checked 2026-10-19): <b>1016-1017</b>.</li></ul>
 </section>
 
 <section id="faq">
