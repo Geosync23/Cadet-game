@@ -53,5 +53,7 @@ NAV:plain=In plain words|grow=How it grows|b=Builder|tests=Tests|ranges=Seat and
 
 <section id="faq">
   <h2>Builders' questions</h2>
-  <p class="note">None yet.</p>
+  <ul>
+    <li><b>E3, 2026-10-19:</b> no Works bay terminal exists. <i>Yes: <code>5-works-terminal</code> by the notice board ([17, 1]), type 'event' (inert for crew).</i></li>
+  </ul>
 </section>

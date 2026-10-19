@@ -54,5 +54,7 @@ NAV:plain=In plain words|grow=How it grows|b=Builder|tests=Tests|ranges=Seat and
 
 <section id="faq">
   <h2>Builders' questions</h2>
-  <p class="note">None yet.</p>
+  <ul>
+    <li><b>E3, 2026-10-19:</b> only Deck 5 has valves (<code>5-valve-1/-2</code>). <i>Yes to E3's default: Deck 5 has 2 joints by the gallery valves and 2 public ones (the Works washroom, the main corridor); Decks 3 and 4 have 4 each at plumbing in public rooms (washrooms, laundry, galley and garden pipes), ids <code>3-leak-1..4</code> etc., each with a <code>joint: [x, y, z]</code> wall point. For E2: a leak on Decks 3-4 is not a valve fault but a small fault on the joint place itself (24o's own, worn by <code>schedU</code>, no machine); on Deck 5 it can come from the valves as written.</i></li>
+  </ul>
 </section>
