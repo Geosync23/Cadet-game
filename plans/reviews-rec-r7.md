@@ -2,6 +2,12 @@
 
 Brief: plans/brief-recdeck.md on claude/lead-pillar1 ("R" section). Lead 18 session_01CBur9nrJ411pFkHopF96RL. Build master BM8 session_01YGy9FDmcbkySMJpVPYJaAo. Earlier verdicts: R6's, in plans/reviews-p5-step4.md ("Rec deck activation"). Newest first.
 
+### 0.64.0 candidate claude/rec-cand-s1 3add6bf (BM8/BM9, on the 0.63.5 final be3d7ee), R7: PASS (merges; the full round is the build master's)
+- Order: f319ab3 (rec-works to 0.84.10, the switch not yet) -> 9dfe971 (rec-crew) -> a095799 (writer-rec) -> 87e3c5f (rec-works with 0.84.11's switch and 0.84.12): **the switch comes last**. `const REC_DECK = true;`, GAME_BUILD 0.64.0. No conflict markers left; node --check OK; no duplicate declarations (whole-file scan vs aa4f42c); the combined-diff lines are each branch's own, already reviewed.
+- Court tap (15044-15046): RB2's net-down refusal first, then RA's Cup / WSO, then RA's queue and discAsk(recCourtWaiting()): right order.
+- Climbing (15133-15138): RA's pick (the free belay route nearest your tap; recBelaysFree already leaves out a tagged-out belay and the taped route) then RB2's two refusals, which now only back it up. The crew side (10056) leaves out the same belays. Consistent.
+- Note (rare, no fix needed now): with two faults at once (one belay tagged out and the other's route taped) recFreeFor('climb') is false with nobody on the wall, so a tap queues you for a turn that never comes; a refusal there (like "Both auto-belays...") would be kinder. For the next rec engineer.
+
 ### RA claude/rec-crew bd3db3f (0.83.1-0.83.2: the traditions engine, R6's four fixes, events_check days 92/99; +9dfe971's rename), R7: PASS (notes)
 - Read: the rec traditions (REC_TRADS: rules in one place, the writer's .trad brings the words; deck-7-only ones load only with REC_DECK), WSO/Cup/regatta on paper via ldPaper (keys 1035-1039, RA's block), the talks' rota and cards, film's move and the first all-hands (on the first ship-wide event's address), the show cue to RB2's recShow (renamed in 9dfe971: the only cross-branch clash, now gone), Maeve's round, crew pick-ups and the lone player at 7-disc-2 (R6's fix 1). Every time in REC_TRADS matches the agreed list. No R()/Math.random in the added lines; no duplicate declarations; no code after `//` (8 comment hits read).
 - SHIP.rec: `recClean` reads save.rec defensively (old saves start empty), SAVE_EXTRA writes it, newGame resets it.
