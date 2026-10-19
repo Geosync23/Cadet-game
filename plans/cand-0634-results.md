@@ -76,3 +76,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - ~06:13 E1 013f53e (0.45.13 = 0.45.12 + hauling stage 2 in 24d; E1's last build; the rest of round 3 (stocktake, rounds stages 2-3) to a fresh seat via plans/handover-mech-rounds-e1.md). R5's 633eade fixes (night crew, right-first +1 side kinds): not in this? ask.
 - ~06:14 lead 17: E1 retired (final 013f53e). Successor E6 = session_018cZuXpb4XdFs47zXoPcF8B: R5's 2 fixes first, then stocktake + rounds stages 2-3.
 - ~06:14 R5: E1 013f53e PASS WITH FIXES (load-stop order, small); 3 E1 fixes open for E6.
+- t7: interactions OK (t7 done: career, mech, interactions OK). t8: lines PASS, mech, career, machine OK, cadet ALL IDENTICAL, social, food OK; deck, interactions running.
