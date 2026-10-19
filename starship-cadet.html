@@ -269,7 +269,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.63.2r
+   STARSHIP CADET: CSV Wren                           build 0.33.60
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -4406,7 +4406,7 @@ DECKS[5] = {
   },
   // which room each shut door or hatch leads into (its tap text is that room's 'tap')
   sealed: {
-    'v,13,1': 'o', 'h,8,13': 'b', 'v,34,7': 'F', 'h,2,12': 'd', 'h,38,5': 'F', 'h,38,11': 'F',
+    'v,13,1': 'o', 'h,8,13': 'b', 'v,34,7': 'F', 'h,2,12': 'd', 'h,38,11': 'F',
 
   },
   plates: [
@@ -4432,7 +4432,7 @@ DECKS[5] = {
     o: { name: 'Works Chief\'s office', floor: 'plate', tap: 'Glass on two sides, so the Chief can see the whole bay and the shuttle pad. Locked while the Chief is out.' },
     b: { name: 'Bay control booth', floor: 'plate', tap: 'Launch and landing controls, behind glass over the pad. Watch staff only.' },
     d: { name: 'Bay door gear', floor: 'grate', tap: 'Giant gears and hydraulic rams. When the bay opens, the doors slide into a pocket here. Watch the gears through the window.' },
-    F: { name: 'Fan hall', floor: 'grate', tap: 'The ship\'s lungs: one huge fan pushing air under the main corridor and up the spine to every deck. Tier 2 access. You can watch it through the window.' },
+    F: { name: 'Fan hall', floor: 'grate', tap: 'The ship\'s lungs: one huge fan pushing air under the main corridor and up the spine to every deck. Tier 2 access, through the hatch from the air plant. You can watch it through the corridor window too.' },
     // utility rooms (Pillar 2, 0.30.3): floors that draw no random numbers, so the rest of the deck is unchanged
     c: { name: 'Cargo hold', floor: 'steel', still: true },
     m: { name: 'Cart bay', floor: 'steel', still: true },
@@ -4447,11 +4447,12 @@ DECKS[5] = {
   closedDoors: {},
   hull: { sternX: 1, stern: 1.5, bowFrom: 34, bowLen: 9.6, byFace: true },   // one hull piece per facing (0.30.11)
   // service hatches into the utility rooms (0.30.3): the player and Works crew pass (see hatchPassable)
-  // (the air plant and manifold room open off the pipe galleries; their hatches into the locked Fan hall stay sealed)
+  // (the air plant and manifold room open off the pipe galleries; since 0.47.3 the air plant's hatch opens into the Fan hall, the manifold room's stays sealed)
   // (0.30.12) with a tier each: 1 closets, stores and the cargo hold, 2 plant rooms and pipe galleries, 3 batteries. The cargo hold's
   // shuttle-bay hatch (v,10,12) is open to the player and Works crew; everyone else still goes round by the haulway.
   service: [{ key: 'v,34,0', tier: 2 }, { key: 'v,34,15', tier: 2 }, { key: 'h,30,9', tier: 3 }, { key: 'h,19,10', tier: 1 }, { key: 'v,19,13', tier: 1 },
-    { key: 'h,32,1', tier: 2 }, { key: 'h,25,15', tier: 2 }, { key: 'v,10,12', tier: 1 }],   // air plant, manifold, batteries, closet, cart bay, galleries, hold
+    { key: 'h,32,1', tier: 2 }, { key: 'h,25,15', tier: 2 }, { key: 'v,10,12', tier: 1 },   // air plant, manifold, batteries, closet, cart bay, galleries, hold
+    { key: 'h,38,5', tier: 2 }],                         // 0.47.3 (Pillar 5 Step 3, the air line): the Fan hall, through the air plant
   // machines (Pillar 2; format as on Deck 4): wall-mounted ones have `at` on their panel tile
   machines: [
     { id: '5-o2-1', kind: 'o2cell', at: [35, 0], room: 'a', face: 's', panel: [35, 1], look: { lamp: [0.5, 1.2, 0.37], drip: [0.5, 0.9, 0.42] } },
@@ -4472,6 +4473,10 @@ DECKS[5] = {
     { id: '5-cartdock-2', kind: 'cartdock', at: [20, 15], room: 'm', face: 'w', panel: [19, 15], look: { lamp: [-0.5, 1.08, 0.51], drip: [-0.5, 0.9, 0.56] } },
     { id: '5-valve-1', kind: 'valve', at: [28, 0], room: 'g', face: 's', panel: [28, 0] },
     { id: '5-valve-2', kind: 'valve', at: [29, 15], room: 'h', face: 'n', panel: [29, 15] },
+    // 0.47.3 (Pillar 5 Step 3, plans/mechanics/architect-air-line.html): the air line's middle and its two branches
+    { id: '5-fan-1', kind: 'fan', at: [36, 8], room: 'F', face: 's', panel: [36, 9] },
+    { id: '5-damper-1', kind: 'damper', at: [34, 6], room: 'F', face: 'e', panel: [34, 6] },   // Upper decks, 1-3
+    { id: '5-damper-2', kind: 'damper', at: [34, 9], room: 'F', face: 'e', panel: [34, 9] },   // Lower decks, 4-6
   ],
   // places (Pillar 1): every spot where a crew member does something, for the schedules. Data only: nothing draws them.
   // { id, type, at: [col, row], face, pose, room }. Seats and beds sit on furniture tiles and are reached from the tile beside them;
@@ -4540,8 +4545,11 @@ DECKS[5] = {
     { id: '5-cartdock-2-svc', machine: '5-cartdock-2', type: 'work:works', at: [19, 15], face: 'e', pose: 'work', room: 'm' },
     { id: '5-valve-1-svc', machine: '5-valve-1', type: 'work:works', at: [28, 0], face: 'n', pose: 'work', room: 'g' },
     { id: '5-valve-2-svc', machine: '5-valve-2', type: 'work:works', at: [29, 15], face: 's', pose: 'work', room: 'h' },
+    { id: '5-fan-1-svc', machine: '5-fan-1', type: 'work:works', at: [36, 9], face: 'n', pose: 'work', room: 'F' },
+    { id: '5-damper-1-svc', machine: '5-damper-1', type: 'work:works', at: [34, 6], face: 'w', pose: 'work', room: 'F' },
+    { id: '5-damper-2-svc', machine: '5-damper-2', type: 'work:works', at: [34, 9], face: 'w', pose: 'work', room: 'F' },
   ],
-  markings: [[21, 10, 2, 3], [25, 9, 3, 2], [26, 11, 2, 2]],   // keep-clear outlines: lathe, fabricator, welding bench
+  markings: [[21, 10, 2, 3], [25, 9, 3, 2], [26, 11, 2, 2], [35, 7, 3, 2]],   // keep-clear outlines: lathe, fabricator, welding bench, the main fan (0.47.3)
   dress(d) {
     for (const [key, tw, text] of d.plates) placeOnEdge('plate', key, tw, { text });
     for (const [key, tw] of d.workLights) placeOnEdge('workLight', key, tw);
@@ -4612,7 +4620,7 @@ DECKS[5] = {
     // the spine: the ladder below the car, as on Deck 4. The trunks run behind the car's back wall here.
     NO_FADE.add('Z');
     place('Z', 'spineLadder', 1, .5, 'n', { it: SPINE_IT.ladder });
-    place('F', 'bigFan', 2.6, 3.0, 'n');                 // faces the default camera; the corridor window sees it side-on
+    place('F', 'bigFan', 2.6, 3.0, 'n', { block: [[1, 2], [2, 2], [3, 2], [1, 3], [2, 3], [3, 3]], it: IT('Main fan', 'The ship\'s lungs. Every deck\'s air comes through these five blades. Its panel is on the walkway in front.') });   // faces the default camera; the corridor window sees it side-on (0.47.3: you can walk in, so it blocks its tiles)
     // ---- utility rooms (Pillar 2, 0.30.3). Last in dress() and free of R(), so nothing above them changes ----
     // air plant: the electrolyser on the stern wall feeds two banks of oxygen cells on the port hull; two scrubber stacks on the Fan hall wall
     place('a', 'electrolyser', 1.02, 3.0, 'w', { it: IT('Electrolyser', 'Splits water into oxygen and hydrogen. The oxygen goes to the cells; the hydrogen goes somewhere you are told not to worry about.') });
@@ -4638,6 +4646,8 @@ DECKS[5] = {
     wallFixed('w', 'bulkheadWheel', 's', 8.5, { hitW: .5, it: { ...IT('Bulkhead wheel', 'Four turns closes and dogs the bulkhead door by the bay. You turn it for the pressure drill, and hope never for real.'), drill: 'door' } });
     wallFixed('u', 'liftBrake', 'w', .5, { hitW: .6, it: { ...IT('Lift brake', 'The main lift\'s manual brake release, by the ladder. Turn it to let a stuck car down to the next deck.'), brake: true } });   // 0.47.0: incidents (m6)
     wallFixed('=', 'valvePanel', 'n', VALVE_PANELS[5].along, { hitW: 1.5, it: { ...IT('Pipe valves', 'Three valves on the main water line, numbered from upstream. Close the one before a leak.'), valves: 5 } });
+    wallFixed('F', 'ductDamper', 'w', 1.5, { n: 1, hitW: .8, it: IT('Duct damper 1', 'Upper decks, 1-3. The flap that sends the fan\'s air up the spine to the decks above.') });   // 0.47.3: the air line (Step 3)
+    wallFixed('F', 'ductDamper', 'w', 4.5, { n: 2, hitW: .8, it: IT('Duct damper 2', 'Lower decks, 4-6. The flap that sends the fan\'s air down to the decks below.') });
     placeWall('u', 'relayBoard', 'n', 1.5, { it: IT('Light relays', 'Deck 5\'s lights. The shuttle bay floods have a relay to themselves.') });
     // cart bay: two docks with a cart charging on each
     for (const [z, n] of [[1.0, 1], [3.0, 2]]) place('m', 'cartDock', 1.45, z, 'e', { dock: n, it: IT('Cart dock ' + n, n === 1 ? 'A hover hand cart, charging. The sticker says I BRAKE FOR NOBODY.' : 'A hover hand cart, charging, with a crate strap still hooked on.') });
@@ -7541,6 +7551,13 @@ function wallFixed(rk, kind, wall, along, o = {}) {
   return g;
 }
 Object.assign(WALL_KIT, {                               // each stands on the floor against its wall, so it reads as furniture when the wall is lowered
+  ductDamper(g, o = {}) {                                // 0.47.3: a square duct section out of the wall on two legs, its flap lever, a plate with o.n red ticks
+    for (const x of [-.3, .3]) box(.06, 1.62, .06, M.slateDark, x, .81, .32, g);
+    box(.6, .6, .5, UT.duct, 0, 1.92, .25, g); box(.68, .68, .04, WM.steel, 0, 1.92, .51, g);   // the duct and its flange (proud of the duct's face)
+    cyl(.03, .03, .1, WM.steel, .38, 1.92, .3, g, 8).rotation.z = Math.PI / 2; box(.04, .34, .04, WM.red, .45, 1.8, .3, g).rotation.z = .35;   // the flap's spindle and lever
+    box(.66, .05, .05, M.slateDark, 0, 1.45, .32, g); box(.34, .12, .015, WM.steel, 0, 1.45, .353, g);   // a crossbar and its plate, standing off it
+    for (let t = 0; t < (o.n || 1); t++) box(.025, .08, .012, WM.red, (t - ((o.n || 1) - 1) / 2) * .045, 1.45, .364, g);
+  },
   extBracket(g) {                                        // an extinguisher stand: a post with a red sign, the extinguisher in its bracket
     box(.06, 1.42, .06, M.slateDark, 0, .71, .05, g); box(.3, .03, .2, M.slateDark, 0, .015, .1, g);
     box(.22, .04, .14, M.slateDark, 0, .62, .12, g); box(.24, .12, .02, WM.red, 0, 1.32, .09, g);
@@ -8613,7 +8630,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.63.2r';                           // keep in step with the header's build line
+const GAME_BUILD = '0.33.60';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -15498,6 +15515,7 @@ const MACHINE_KINDS = {
   relay:       { name: 'Bridge relays',     sys: 'comms',      life: 24, time: .7, use: 'heads',  scope: 'ship', w: 2, tier: 3, part: 'relay' },
   databus:     { name: 'Bridge data bus',   sys: 'comms',      life: 24, time: 1,                 scope: 'ship', w: 1, tier: 3, part: 'signal card' },
   array:       { name: 'Sensor array',      sys: 'comms',      life: 40, time: 1,                 scope: 'ship', w: 2, tier: 3, part: 'signal card' },
+  damper:      { name: 'Duct dampers',      sys: 'air',        life: 30, time: 1,                 scope: 'ship', w: 1, tier: 2, part: 'relay' },   // the air line's two duct dampers (0.33.55, plans/mechanics/architect-air-line.html)
   doorgear:    { name: 'Bay door gear',     sys: 'hull',       life: 40, time: 1,                 scope: 'ship', w: 1, tier: 2, part: 'seal' },
   hullseal:    { name: 'Hull seals',        sys: 'hull',       life: 32, time: 1,                 scope: 'ship', w: 2, tier: 3, part: 'seal' },
   reactor:     { name: 'Reactor',           sys: 'power',      life: 60, time: 1,                 scope: 'ship', w: 3, tier: 4, part: 'control rod' },
@@ -15628,6 +15646,7 @@ function eventWear(key, h) {
 
 // ---- the machines' state: SHIP.machines[id] = { cond, state, lastService }, brought up to date hour by hour ----
 SHIP.machines = {};
+SHIP.upkeep = {};                                        // the ship meters' upkeep left undone, by system (0.33.57; machinesReset fills it)
 const CART_RUNS = new Map(), CART_PENDING = [];         // food runs set by cartClaim (by hour), and those not yet on the job list
 // ship notes from section 17 (simNote, section 13's bus) wait here and go out once the hours have run or your action is
 // done (simFlush), never from inside jobsHour: a listener may read the jobs or the schedules
@@ -15641,7 +15660,7 @@ const machFresh = m => Math.round((70 + 30 * schedU(m.seed, 0, 1)) * 10) / 10;  
 function machinesReset(hour) {
   SHIP.machines = {};
   for (const m of machineList()) { const c = machFresh(m); SHIP.machines[m.id] = { cond: c, state: machineState(c), lastService: null }; }
-  jobsReset(); MACH_HIST.clear(); MACH_HOUR = hour; MACH_REV++;
+  jobsReset(); MACH_HIST.clear(); MACH_HOUR = hour; MACH_REV++; SHIP.upkeep = { ...UPKEEP_START };
   SHIP.short = {}; for (const k in MACH_EXTRA) delete MACH_EXTRA[k]; for (const k in MACH_RUN) delete MACH_RUN[k];
 }
 // a new game (section 13's newGameStart, 0.26.31): the machines and jobs start afresh at once, whichever way the clock
@@ -15679,7 +15698,7 @@ function machinesNow() {
       s.state = machineState(s.cond);
       driftHour(m, s, MACH_HOUR);
     }
-    machRecord(MACH_HOUR);
+    machRecord(MACH_HOUR); upkeepHour();
     for (const k in MACH_EXTRA) delete MACH_EXTRA[k];
   } } finally { MACH_IN = false; }
   SIM_AT = null;
@@ -15716,7 +15735,7 @@ const driftOn = () => !!JOB_KINDS.tune;
 const machEff = s => Math.max(0, s.cond - DRIFT_COND * Math.abs(s.drift || 0));
 const machineDrift = id => { const s = SHIP.machines[id]; return s && s.drift || 0; };
 function tuneSet(id, v) {
-  const s = SHIP.machines[id], m = machineById(id); if (!s || !m || !TUNABLE.has(m.kind) || !Number.isFinite(v)) return false;
+  const s = SHIP.machines[id], m = machineById(id); if (!s || !m || !(TUNABLE.has(m.kind) || s.drift && Math.round(v) === 0) || !Number.isFinite(v)) return false;   // any drift can be settled (0.33.58: the test job's fan)
   const was = s.drift || 0, d = Math.max(-3, Math.min(3, Math.round(v)));
   if (d) s.drift = d; else delete s.drift;
   MACH_REV++; if (MACH_HOUR !== null) machRecord(MACH_HOUR - 1);   // the effects follow at once
@@ -15762,6 +15781,8 @@ function shipHealth(sys = shipSystems()) {
 // gives back (a shower's hygiene), drain = how fast a need runs down, walk = walking speed, cook = cooking time,
 // lift = ride time, spoil = how fast the cold store's food spoils. mood = points off a 0-100 mood. local: felt
 // only on the machine's own deck.
+// the decks a branch machine feeds (the air line's dampers: architect-air-line.html)
+const MACH_BRANCH = { '5-damper-1': [1, 2, 3], '5-damper-2': [4, 5, 6] };
 const MACHINE_FX = {
   oven:        { cook: .5, restore: { hunger: .15 }, mood: 2, text: 'Meals run late' },
   range:       { cook: .4, restore: { hunger: .1 }, mood: 2, text: 'Meals run late' },
@@ -15782,6 +15803,7 @@ const MACHINE_FX = {
   filter:      { restore: { hygiene: .2 }, mood: 2, text: 'The water runs cloudy' },
   pump:        { restore: { hygiene: .4 }, mood: 3, text: 'Showers run weak' },
   valve:       { mood: 1, text: 'A pipe drips somewhere' },
+  damper:      { mood: 1, text: 'The duct air is weak', branch: true },   // as the valves, on its branch's decks only (MACH_BRANCH)
   o2cell:      { drain: { energy: .2 }, mood: 3, text: 'The air feels thin' },
   electrolyser: { drain: { energy: .15 }, mood: 2, text: 'The air feels thin' },
   heatpump:    { restore: { energy: .15 }, mood: 2, text: 'The radiators run lukewarm' },
@@ -15802,6 +15824,7 @@ function fxFrom(deck, c) {
   for (const m of machineList()) {
     const F = MACHINE_FX[m.kind]; if (!F) continue;
     if ((MACHINE_KINDS[m.kind].scope === 'deck' || F.local) && m.deck !== deck) continue;
+    if (F.branch && MACH_BRANCH[m.id] && !MACH_BRANCH[m.id].includes(deck)) continue;   // a duct damper reaches its own decks (0.33.55)
     if (!groups.has(m.kind)) groups.set(m.kind, []); groups.get(m.kind).push(m);
   }
   const stateOf = id => machineState(c[id] ?? 100);
@@ -15936,13 +15959,70 @@ function deckLook(deck) {
 // machineLook's; worst: the system's worst machine that isn't fine, as 'Air scrubber 2, Deck 4', or null
 const SYSTEM_NAME = { air: 'Air', water: 'Water', power: 'Power', heat: 'Heat', food: 'Galley and food', waste: 'Waste and laundry', hull: 'Hull',
                       comms: 'Comms and sensors', propulsion: 'Drive', transport: 'Lift and doors' };
+// ---- the ship meters (0.33.57, Pillar 5 Step 3; the user, 2026-10-18: ship health "starts a little lower, so you can see your
+// impact", and every job you do helps at least one meter, often several) ----
+// A meter is a Ship health board row: its system's score from the machines (shipSystems, which every effect reads, as
+// before) less its upkeep, SHIP.upkeep[sys]: points of small upkeep left undone (scuffed panels, dusty ducts, loose
+// fittings) that the machines' effects never feel. A new game starts with UPKEEP_START (ship health about 75: most systems
+// worn, a few fine, none failing); upkeep builds up again UPKEEP_CREEP points a day per system (a share each ship hour, up
+// to UPKEEP_CAP), and each job you do takes a step off its systems (UPKEEP_STEP by size: [main, each related]): its main
+// system (a registered kind's def.sys, else its machine's, else its stops' machines', else JOB_SYS by kind) and the
+// related ones (SYS_RELATED); what they can't take (their upkeep all done) goes to the system with the most left.
+// j.meters = [{ key, name, gain }] (biggest first, the main system first on a tie; gain: what the meter rose, upkeep and
+// machine together, one decimal) is kept on the job for the turn-in (C2) and the panel's "+N" (U). The crew's jobs put machines
+// right, as before, but leave the upkeep: that's what you add. shipMeters(sys?) -> { sys: 0-100 }. An older save starts
+// with no upkeep (its meters read as before).
+const UPKEEP_START = { air: 28, water: 30, power: 30, heat: 34, food: 8, waste: 32, hull: 6, comms: 30, propulsion: 4, transport: 30 };
+const UPKEEP_CREEP = 1, UPKEEP_CAP = 40;
+const UPKEEP_STEP = { small: [3, 2], repair: [5, 2], overhaul: [7, 3] };
+const SYS_RELATED = { air: ['heat'], water: ['food', 'waste'], power: ['transport'], heat: ['air'], food: ['waste'], waste: ['water'],
+  hull: ['air'], comms: ['power'], propulsion: ['power'], transport: ['power'] };
+const JOB_SYS = { lamp: 'power', vent: 'air', delivery: 'transport', joint: 'water', restock: 'transport', haul: 'transport', drill: 'hull',
+  rounds: 'power', incident: 'hull', garden: 'food', secure: 'hull', clean: 'waste', tea: 'food', check: 'hull', fetch: 'transport', carry: 'transport',
+  set: 'hull', patch: 'hull', team: 'water' };
+function shipMeters(sys = shipSystems()) { const out = {}; for (const k of SYSTEMS) out[k] = Math.round(Math.max(0, sys[k] - (SHIP.upkeep[k] || 0)) * 10) / 10; return out; }
+function upkeepHour() { for (const k of SYSTEMS) SHIP.upkeep[k] = Math.min(UPKEEP_CAP, (SHIP.upkeep[k] || 0) + UPKEEP_CREEP / 24); }
+// the systems a job helps: [main, ...related]
+function jobMeterSys(j) {
+  const K = jobKindOf(j), sysOf = id => { const m = id && machineById(id); return m ? MACHINE_KINDS[m.kind].sys : null; };
+  let main = K && K.sys || sysOf(j.machine);
+  if (!main) { const c = {}; for (const x of j.stops || []) { const pl = x.placeId && placeById(x.placeId), k = pl && sysOf(pl.machine); if (k) c[k] = (c[k] || 0) + 1; }
+    main = Object.keys(c).sort((a, b) => c[b] - c[a] || SYSTEMS.indexOf(a) - SYSTEMS.indexOf(b))[0] || null; }
+  if (!main) main = j.cargo === 'meals' ? 'food' : JOB_SYS[j.chore] || JOB_SYS[j.kind] || 'hull';
+  return [main, ...(SYS_RELATED[main] || [])];
+}
+function meterStep(j, before) {
+  const sys = jobMeterSys(j), [a, b] = UPKEEP_STEP[j.kind === 'repair' ? 'repair' : j.kind === 'overhaul' || j.kind === 'team' ? 'overhaul' : 'small'];
+  const order = sys.slice(), up = k => SHIP.upkeep[k] || 0, take = (k, n) => { const x = Math.min(up(k), n); SHIP.upkeep[k] = up(k) - x; return n - x; };
+  let left = 0; sys.forEach((k, i) => { left += take(k, i ? b : a); });
+  while (left > 1e-9) {                                  // what its own systems can't take (their upkeep's done) goes where most is left
+    const k = SYSTEMS.reduce((best, x) => up(x) > up(best) ? x : best, SYSTEMS[0]); if (!(up(k) > 0)) break;
+    if (!order.includes(k)) order.push(k); left = take(k, left);
+  }
+  MACH_REV++;
+  const after = shipMeters(), keys = order.concat(SYSTEMS.filter(k => !order.includes(k)));
+  j.meters = keys.map(k => ({ key: k, name: SYSTEM_NAME[k], gain: Math.round((after[k] - before[k]) * 10) / 10 })).filter(x => x.gain >= .5).sort((x, y) => y.gain - x.gain || keys.indexOf(x.key) - keys.indexOf(y.key));
+  return j.meters;
+}
+// the bridge room (Deck 1's 'B') is closed to you till you're invited (the user, 2026-10-18; C2's SHIP.bridgeInvited, false in
+// older saves): no job there is offered to you or can be taken by you, unless it's held for you; the crew take them as before;
+// the Wednesday manifest leaves the bridge's crate out till then (0.33.57)
+const bridgeShut = () => !SHIP.bridgeInvited;
+const inBridge = (deck, room) => deck === 1 && room === 'B';
+function bridgeJob(j) {
+  if (inBridge(j.deck, j.room)) return true;
+  const m = j.machine && machineById(j.machine); if (m && inBridge(m.deck, m.room)) return true;
+  for (const x of j.stops || []) { const pl = x.placeId && placeById(x.placeId); if (pl && inBridge(pl.deck, pl.room)) return true; }
+  return false;
+}
+const bridgeBars = j => bridgeShut() && !heldForYou(j) && bridgeJob(j);
 const healthState = v => v >= 90 ? 'fine' : v >= 70 ? 'worn' : v >= 45 ? 'poor' : 'failing';
 function machineLabel(m) {
   const K = MACHINE_KINDS[m.kind], n = machineList().filter(x => x.kind === m.kind && x.deck === m.deck).length > 1 ? ' ' + m.id.split('-').pop() : '';
   return K.name + n + ', Deck ' + m.deck;
 }
 function shipHealthRows() {
-  const sys = shipSystems(), st = machinesNow(), health = shipHealth(sys);
+  const sys = shipMeters(), st = machinesNow(), health = shipHealth(sys);   // the meters: the machines less the upkeep (0.33.57)
   const rows = SYSTEMS.map(k => {
     const ms = machineList().filter(m => MACHINE_KINDS[m.kind].sys === k && st[m.id].state !== 'healthy').sort((a, b) => st[a.id].cond - st[b.id].cond);
     return { key: k, name: SYSTEM_NAME[k], value: Math.round(sys[k]), state: healthState(sys[k]), worst: ms.length ? machineLabel(ms[0]) : null };
@@ -16152,13 +16232,92 @@ const FAULT_CAUSES = {
     { id: 'lamp', part: 'lamp', w: 3, shows: 'a rack is dim', sign: 'a row of pink lamps gone pale', when: 'always', still: 'New relay. Still pale along that row.' },
     { id: 'relay', part: 'relay', w: 2, shows: 'a rack is dim', sign: 'the whole rack flickers off and on', when: 'warm', still: 'New lamps. The rack still cuts out.' },
     { id: 'drift', setting: true, w: 1, shows: 'lights at the wrong hours', sign: 'on at night, off at noon', when: 'at-time', from: 4 } ],
+  // Tier 2 (0.33.55): the air line's duct dampers (fault-tables.html; line: 'air' marks a cause tracing reads along the air line)
+  damper: [
+    { id: 'relay', part: 'relay', w: 3, shows: 'stuffy air on its decks', sign: 'the flap clicks but stays half shut, worse once warm', when: 'warm', still: 'New bearing. The flap still clicks and stays half shut.', line: 'air' },
+    { id: 'bearing', part: 'bearing', w: 2, shows: 'stuffy air on its decks', sign: 'the flap judders and sits half open, all day', when: 'always', still: 'New relay. The flap still judders.', line: 'air' },
+    { id: 'seal', part: 'seal', w: 1, shows: 'a whistle in the duct', sign: 'a whistle at the duct mouth', when: 'always', still: 'New relay. Still whistles.' } ],
+  // the rest of Tier 2 (0.33.56, fault-tables.html, approved by the user 2026-10-18). No `band` on their part causes: the page's
+  // "never before T2" is the player meeting them, and a Tier 2 machine's jobs are above you till then anyway (jobTier); the
+  // crew's causes come from the same table ("before that Tier 2 machines still fault as now"). A load is never picked
+  scrubber: [
+    { id: 'filter', part: 'filter', w: 3, shows: 'stuffy air|rattles', sign: 'a grey grille; the intake buzzes all day', when: 'always', still: 'Clean filter. Still rattles once it\'s run all day.', line: 'air' },
+    { id: 'bearing', part: 'bearing', w: 2, shows: 'rattles', sign: 'a whine that builds through the evening', when: 'warm', still: 'New bearing. Still rattles when the door goes.' },
+    { id: 'panel', part: 'seal', w: 1, shows: 'rattles', sign: 'the housing buzzes when the door goes', when: 'touched', still: 'Fresh gasket on the panel. Still rattles, door or no door.' },
+    { id: 'drift', setting: true, w: 2, shows: 'stuffy air', sign: 'the hum\'s off pitch; the grille\'s clean', when: 'always', from: 4, band: 2 } ],   // M5 stage 2; till then the filter fixes it
+  heater: [
+    { id: 'valve', part: 'valve', w: 3, shows: 'cold cabins', sign: 'one branch\'s pipe cold to the touch, the rest warm', when: 'always', still: 'New valve. Still lukewarm everywhere, and it knocks.', line: 'heat' },
+    { id: 'pump', part: 'pump', w: 2, shows: 'cold cabins', sign: 'every pipe lukewarm; a knock in the plant', when: 'always', still: 'New pump. That one branch is still cold.', line: 'heat' },
+    { id: 'relay', part: 'relay', w: 1, shows: 'cold cabins', sign: 'warm, then cold for an hour: it clicks off and on', when: 'warm', still: 'New valve. Still goes cold after it\'s run a while.', line: 'heat' } ],
+  recycler: [
+    { id: 'membrane', part: 'membrane', w: 3, shows: 'low output', sign: 'the output gauge low all day; a brown film in the sight glass', when: 'always', still: 'New membrane. Output still sinks after 18:00.', line: 'water' },
+    { id: 'pump', part: 'pump', w: 2, shows: 'low output', sign: 'fine in the morning; the gauge sinks after 18:00', when: 'peak', still: 'New pump. Output still low all day; the glass is brown.', line: 'water' },
+    { id: 'valve', part: 'valve', w: 1, shows: 'low output', sign: 'the outlet pipe shudders; the gauge flickers', when: 'always', still: 'New valve. Output still low; the glass is brown.', line: 'water' },
+    { id: 'seal', part: 'seal', w: 1, shows: 'a drip', sign: 'a wet ring on the floor under it', when: 'after-use', still: 'Fresh seal. Still a wet ring under it.' } ],
+  filter: [
+    { id: 'cartridge', part: 'cartridge', w: 3, shows: 'low flow', sign: 'one housing\'s gauge in the red, all day', when: 'always', still: 'New cartridge. Flow still low: the floor\'s damp.', line: 'water' },
+    { id: 'seal', part: 'seal', w: 2, shows: 'low flow', sign: 'a damp floor under one housing, a faint hiss', when: 'after-use', still: 'Fresh seal. Flow still low; one gauge\'s in the red.', line: 'water' },
+    { id: 'valve', part: 'valve', w: 1, shows: 'cloudy water', sign: 'clear first thing, cloudy by the busy hours', when: 'peak', still: 'New valve. Still clouds by the afternoon.' } ],
+  uv: [
+    { id: 'lamp', part: 'uv lamp', w: 3, shows: 'water tastes off', sign: 'a dull blue glow in the window', when: 'always', still: 'New relay. The glow\'s still dull.' },
+    { id: 'relay', part: 'relay', w: 2, shows: 'water tastes off', sign: 'the glow blinks off and on once it\'s warm', when: 'warm', still: 'New lamp. It still blinks off once it\'s warm.' },
+    { id: 'seal', part: 'seal', w: 1, shows: 'low flow', sign: 'water beading on the housing, a drip', when: 'after-use', still: 'Fresh seal. Flow still low.', line: 'water' } ],
+  pump: [
+    { id: 'pump', part: 'pump', w: 3, shows: 'low flow', sign: 'fine in the morning; labours after 18:00', when: 'peak', still: 'New seal. Still labours in the evening.', line: 'water' },
+    { id: 'seal', part: 'seal', w: 2, shows: 'low flow', sign: 'a drip under the shaft, low all day', when: 'always', still: 'New pump. Still drips under the shaft.', line: 'water' },
+    { id: 'bearing', part: 'bearing', w: 1, shows: 'noisy', sign: 'a grinding, worse after a long run', when: 'warm', still: 'New pump. Still grinding.' },
+    { id: 'irrigation', load: '3-irrigation-1', w: 1, shows: 'low flow', sign: 'low only while the garden\'s being watered', when: 'with:irrigation', line: 'water', band: 2 } ],   // P1's later form only
+  valve: [
+    { id: 'valve', part: 'valve', w: 3, shows: 'low flow on its branch', sign: 'its branch\'s decks weak; the handle\'s stiff', when: 'always', still: 'Fresh seal. That branch is still weak.', line: 'water' },
+    { id: 'seal', part: 'seal', w: 2, shows: 'a drip', sign: 'a drip from the gland, a wet floor', when: 'always', still: 'New valve. Still drips.' } ],
+  heatpump: [
+    { id: 'pump', part: 'pump', w: 3, shows: 'cold cabins', sign: 'a knock; both outlets lukewarm all day', when: 'always', still: 'New valve. Both outlets still lukewarm; it knocks.', line: 'heat' },
+    { id: 'bearing', part: 'bearing', w: 2, shows: 'cold cabins', sign: 'a whine, and the radiators cool off after hours of running', when: 'warm', still: 'New pump. Still cools off by evening, and whines.', line: 'heat' },
+    { id: 'valve', part: 'valve', w: 2, shows: 'cold cabins', sign: 'one outlet hot, the other cold', when: 'always', still: 'New pump. One outlet still cold.', line: 'heat' } ],
+  manifold: [
+    { id: 'valve', part: 'valve', w: 3, shows: 'one deck cold', sign: 'that deck\'s pipe cold at the manifold, all day', when: 'always', still: 'Fresh seal. That deck\'s still cold.', line: 'heat' },
+    { id: 'regulator', part: 'regulator', w: 2, shows: 'cabins cold at night', sign: 'fine by day; the gauge drops after 22:00', when: 'at-time', still: 'New valve. Still cold after 22:00.', line: 'heat' },
+    { id: 'seal', part: 'seal', w: 1, shows: 'a drip', sign: 'a hiss and a wet floor under a joint', when: 'always', still: 'New valve. Still hisses.' } ],
+  o2cell: [
+    { id: 'cell', part: 'oxygen cell', w: 3, shows: 'air thin', sign: 'one cell\'s lamp amber; the gauge low all day', when: 'always', still: 'New regulator. One lamp\'s still amber.', line: 'air' },
+    { id: 'regulator', part: 'regulator', w: 2, shows: 'air thin', sign: 'a hiss, then the gauge jumps; worst at the busy hours', when: 'peak', still: 'New cell. Still hisses and jumps when everyone\'s up.', line: 'air' },
+    { id: 'relay', part: 'relay', w: 1, shows: 'stops and starts', sign: 'the cells click off and on once warm', when: 'warm', still: 'New cell. Still clicks off and on.' } ],
+  electrolyser: [
+    { id: 'membrane', part: 'membrane', w: 3, shows: 'air thin', sign: 'bubbles slow in the sight glass, all day', when: 'always', still: 'New cell. Bubbles still slow.', line: 'air' },
+    { id: 'cell', part: 'cell', w: 2, shows: 'air thin', sign: 'strong in the morning, fading by evening', when: 'warm', still: 'New membrane. Still fades by evening.', line: 'air' },
+    { id: 'relay', part: 'relay', w: 1, shows: 'stops and starts', sign: 'clicks off, then on again', when: 'warm', still: 'New membrane. Still stops and starts.' } ],
+  irrigation: [
+    { id: 'pump', part: 'pump', w: 3, shows: 'dry beds', sign: 'every bed damp, none wet; the pump hums low', when: 'always', still: 'New valve. Every bed\'s still only damp.' },
+    { id: 'valve', part: 'valve', w: 2, shows: 'dry beds', sign: 'one bed bone dry, the rest fine', when: 'always', still: 'New pump. That one bed\'s still dry.' },
+    { id: 'nozzles', part: 'filter', w: 1, shows: 'dry beds', sign: 'spits, then nothing', when: 'after-use', still: 'New pump. Still spits, then nothing.' } ],   // the strainer in the line (M14 cleans them)
+  nutrient: [
+    { id: 'pack', part: 'nutrient pack', w: 3, shows: 'yellow leaves', sign: 'the pack\'s window empty', when: 'always', still: 'New pump. The window\'s still empty.' },
+    { id: 'pump', part: 'pump', w: 2, shows: 'yellow leaves', sign: 'the pack full, the dosing line barely ticks', when: 'always', still: 'New pack. The line still barely ticks.' },
+    { id: 'regulator', part: 'regulator', w: 1, shows: 'brown leaf tips', sign: 'a white crust on the tray edges', when: 'always', still: 'New pack. Still a crust on the trays.' } ],
+  airplant: [
+    { id: 'filter', part: 'filter', w: 3, shows: 'stuffy air ship-wide', sign: 'a grey filter face; the intake pulls hard', when: 'always', still: 'New belt. Filter face still grey.', line: 'air' },
+    { id: 'belt', part: 'fan belt', w: 2, shows: 'stuffy air ship-wide', sign: 'a squeal at shift change, weak for the next hour', when: 'peak', still: 'Clean filter. Still squeals at shift change.', line: 'air' },
+    { id: 'bearing', part: 'bearing', w: 1, shows: 'noisy', sign: 'a rumble from the plant', when: 'warm', still: 'New belt. Still rumbles.' } ],
+  fan: [
+    { id: 'bearing', part: 'bearing', w: 3, shows: 'stuffy air ship-wide', sign: 'a rumble in the duct', when: 'warm', still: 'New belt. Still rumbles.', line: 'air' },
+    { id: 'belt', part: 'fan belt', w: 2, shows: 'stuffy air ship-wide', sign: 'a squeal; the belt shiny', when: 'always', still: 'New bearing. Still squeals.', line: 'air' },
+    { id: 'relay', part: 'relay', w: 1, shows: 'stops', sign: 'stops, clicks, starts', when: 'warm', still: 'New bearing. Still stops.', line: 'air' } ],
+  gasplant: [
+    { id: 'regulator', part: 'regulator', w: 3, shows: 'low lab gas', sign: 'the gauge wanders all day', when: 'always', still: 'Fresh seal. The gauge still wanders.' },
+    { id: 'seal', part: 'seal', w: 2, shows: 'low lab gas', sign: 'a hiss at a joint; soapy water bubbles', when: 'always', still: 'New regulator. Still hisses at the joint.' },
+    { id: 'valve', part: 'valve', w: 1, shows: 'low lab gas', sign: 'fine until someone opens a bench tap, then it drops', when: 'touched', still: 'New regulator. Still drops when a tap opens.' } ],
+  doorgear: [                                            // no door gear in DECKS today (a stand-in on Deck 5); kept for when one is real
+    { id: 'seal', part: 'seal', w: 3, shows: 'bay doors slow', sign: 'a draught at the frame', when: 'always', still: 'New bearing. Still a draught at the frame.' },
+    { id: 'bearing', part: 'bearing', w: 2, shows: 'bay doors slow', sign: 'a judder as they move, worse after a few runs', when: 'after-use', still: 'Fresh seal. Still judders.' },
+    { id: 'relay', part: 'relay', w: 1, shows: 'doors stop halfway', sign: 'stop halfway, click, then go', when: 'warm', still: 'New bearing. Still stops halfway.' } ],
 };
+const FAULT_T2 = ['scrubber', 'heater', 'recycler', 'filter', 'uv', 'pump', 'valve', 'heatpump', 'manifold', 'o2cell', 'electrolyser', 'irrigation', 'nutrient', 'airplant', 'fan', 'damper', 'gasplant', 'doorgear'];
 // a real fault's cause (17.4): picked when its repair or overhaul is posted (from Day 2), from the causes allowed that day
 // (a setting from its `from` day, a band from that tier; never a load), weighted by w; schedU key 855. faultCause(j) -> the
 // cause or null; faultShows(j) -> the job card's symptom (one of a setting's two, by the job)
-function faultPick(m, h) {
+function faultPick(m, h, only) {                         // only(c): a further test (0.33.59: a traced fault's causes on its line)
   const C = FAULT_CAUSES[m.kind], d = Math.floor(h / 24) + 1; if (!C || d < WORKS_REAL_FROM) return null;
-  const ok = C.filter(c => !c.load && (!c.from || d >= c.from) && (!c.band || playerTier() >= c.band)), sum = ok.reduce((a, c) => a + c.w, 0);
+  const ok = C.filter(c => !c.load && (!c.from || d >= c.from) && (!c.band || playerTier() >= c.band) && (!only || only(c))), sum = ok.reduce((a, c) => a + c.w, 0);
   if (!sum) return null;
   let u = schedU(m.seed, h, 855) * sum; for (const c of ok) if ((u -= c.w) < 0) return c;
   return ok[ok.length - 1];
@@ -16269,7 +16428,7 @@ const HOLD_MAX = 4;                                      // small jobs held for 
 // SHARE_KEEP held on the board: so you see the Works crew doing the jobs you do ("Bea on it")
 const SHARE_EVERY = 3, SHARE_KEEP = 2;
 let SHARE_ON = true;                                    // machine_check turns it off where it needs a job left for you
-const forYou = j => j.urgency < 2 && jobTier(j) <= playerTier() && !(j.machine && ENGINE_KINDS.has(machineById(j.machine).kind)) && rankOk('you', j) && (!j.junior || playerRank() === 'junior');
+const forYou = j => j.urgency < 2 && jobTier(j) <= playerTier() && !(j.machine && ENGINE_KINDS.has(machineById(j.machine).kind)) && rankOk('you', j) && (!j.junior || playerRank() === 'junior') && !bridgeBars(j);
 function leaveEnd(j) {
   if (!forYou(j) || j.released) return j.found;
   if (j.cargo === 'meals') return j.found + 60;
@@ -16367,7 +16526,11 @@ function jobFinish(j, t, by) {
   if (!j.workDone) jobEffect(j, t, by);                  // a job you turn in already did its work (0.33.23)
 }
 // what finishing a job does to the ship: its machine put right, its cargo moved, a chore's effect
-function jobEffect(j, t, by) {
+function jobEffect(j, t, by) {                           // your job (not a favour) also steps up the ship meters it helps (0.33.57)
+  if (by !== 'you' || j.kind === 'favour' || j.meters) return jobDo(j, t, by);
+  const before = shipMeters(); jobDo(j, t, by); meterStep(j, before);
+}
+function jobDo(j, t, by) {
   if (j.chore === 'garden' && by === 'you' && j.dropAt === undefined && typeof galleyCarryLand === 'function') galleyCarryLand(j.id);   // finished without ticking off the drop: they land now
   if (jobKindOf(j)) { try { jobKindOf(j).done(j, t, by); } catch (e) { console.warn('job kind ' + j.kind, e); } return; }   // a registered kind does its own (0.33.47)
   if (j.kind === 'chore' || j.kind === 'favour') { choreDone(j, t); return; }
@@ -16388,6 +16551,7 @@ function jobEffect(j, t, by) {
 const jobCrew = p => p.work && (p.work.place === 'work:works' ? 'works' : p.work.place === 'work:engine' ? 'engine' : null);
 function jobsHour(h) {
   const t = h * 60, jobs = SHIP.jobs, d = Math.floor(h / 24) + 1;
+  for (const j of jobs) if (j.kind === 'team' && j.claimedBy === 'you' && j.status === 'claimed' && !j.youIn && !j.workDone && t >= j.start + TEAM_WAIT) teamYouOut(j.id);   // you didn't come (0.33.58)
   // 1. finished jobs (the crew's; yours finish when you finish them, or go back on the board after YOU_KEEP)
   for (const j of jobs) if (j.status === 'claimed' && j.claimedBy !== 'you' && j.done <= t) jobFinish(j, j.done, j.claimedBy);
   for (const j of jobs) if (j.kind === 'favour' && j.status !== 'done' && j.expires && t >= j.expires && !j.workDone) { j.status = 'done'; j.doneAt = t; j.doneBy = null; j.lapsed = true; }
@@ -16421,14 +16585,15 @@ function jobsHour(h) {
     // REAL_SHARE of them wore on unseen: found as a fault (the machine at the top of faulty), its cause picked now
     const late = kind === 'service' && realFor(m, d) && schedU(m.seed, h, 856) < REAL_SHARE && !jobs.some(x => x.machine === m.id && heldForYou(x));   // never a machine kept for a reserved (training, test) job
     if (late) { const s = SHIP.machines[m.id]; s.cond = Math.min(s.cond, 49); s.state = machineState(s.cond); }
-    const kd = late ? 'repair' : kind, cause = kd === 'service' ? null : faultPick(m, h);
+    const kd = late ? 'repair' : kind, tl = kd === 'repair' ? traceFor(m, h) : null, cause = kd === 'service' ? null : faultPick(m, h, tl ? c => c.line === tl : null);   // traced: a cause on the line (0.33.59)
     jobs.push({ id: m.id + '@' + h, machine: m.id, deck: m.deck, kind: kd, urgency: JOB_URGENCY[late ? 'faulty' : st], posted: t, found, claimedBy: null,
-                parts: faultParts(m, kd, cause), status: 'open', ...(cause ? { cause: cause.id } : {}), ...(late ? { late: true } : {}) });
+                parts: faultParts(m, kd, cause), status: 'open', ...(cause ? { cause: cause.id } : {}), ...(late ? { late: true } : {}), ...(tl && cause ? { symptom: traceSymptom(tl, m.id) } : {}) });
+    if (tl && cause) simLater('traced', { line: tl, machine: m.id, id: m.id + '@' + h });
     if (cause && typeof caseOffer === 'function') caseOffer(jobs[jobs.length - 1], h);   // 24k's case engine may make it a head-scratcher (0.33.47)
   }
   const restock = (cargo, deck) => { if (!open.has('restock:' + cargo)) jobs.push({ id: 'restock-' + cargo + '@' + h, machine: null, deck, kind: 'restock', cargo, urgency: 1, posted: t, found: t, claimedBy: null, parts: [], status: 'open' }); };
   if (Object.keys(SHIP.hold).some(k => k !== 'meals' && SHIP.hold[k] > 0)) restock('stores', 5);
-  if (driftOn()) for (const m of machineList()) if (Math.abs(machineDrift(m.id)) >= 2) tunePost(m, h, jobs, t + 60 * (1 + Math.floor(6 * schedU(m.seed, h, 869))));   // drift: a tune job (0.33.48)
+  if (driftOn()) for (const m of machineList()) if (Math.abs(machineDrift(m.id)) >= 2 && !jobs.some(x => x.machine === m.id && x.drift && heldForYou(x))) tunePost(m, h, jobs, t + 60 * (1 + Math.floor(6 * schedU(m.seed, h, 869))));   // drift: a tune job (0.33.48)
   // (food runs come from cartClaim, the one rule the galley and the job list share: see cartPost)
   choresHour(h, jobs);
   for (const k in JOB_KINDS) if (JOB_KINDS[k].post) { try { JOB_KINDS[k].post(h, jobs); } catch (e) { console.warn('job kind ' + k, e); } }   // registered kinds post their own (0.33.47)
@@ -16438,7 +16603,7 @@ function jobsHour(h) {
   // 4. the crew on shift claim jobs: the most urgent first; each goes to the free crew member with the lowest
   // tier that may do it. Easy routine jobs wait CREW_LEAVE for you first.
   // busy till their last job's route ends, the walk back included: a job done at j.done still has them walking to j.end (0.33.38)
-  const busy = new Map(); for (const j of jobs) if (j.claimedBy && j.claimedBy !== 'you' && j.end > t) busy.set(j.claimedBy, Math.max(busy.get(j.claimedBy) || 0, j.end));
+  const busy = new Map(); for (const j of jobs) if (j.claimedBy && j.claimedBy !== 'you' && j.end > t && j.kind !== 'team') busy.set(j.claimedBy, Math.max(busy.get(j.claimedBy) || 0, j.end));   // a team job's crew: by its window (teamClash)
   const crew = schedPeople().filter(jobCrew).sort((a, b) => (CREW_TIER[a.rank] || 0) - (CREW_TIER[b.rank] || 0) || (a.id < b.id ? -1 : 1));
   showHour(h, jobs);
   shareOut(t, jobs);
@@ -16466,7 +16631,7 @@ function jobsHour(h) {
       if (jobKindOf(j) && !(jobKindOf(j).crew && jobKindOf(j).crew.can && jobKindOf(j).crew.can(p))) continue;   // a registered kind: who may (0.33.47)
       if ((busy.get(p.id) || 0) > t || jobCrew(p) !== (engine ? 'engine' : 'works') || (!engine && (CREW_TIER[p.rank] || 0) < tier) || !rankOk(p, j)) continue;   // a job kept for a rank waits for one (0.33.45)
       const run = jobRun(p, j, t, missing.length * JOB_MAKE);
-      if (!run) continue;
+      if (!run || teamClash(p.id, t, run.end)) continue;   // not into a team job they're in (0.33.58)
       for (const k of j.parts) if (SHIP.stores[k] > 0) SHIP.stores[k]--;
       if (SHIP.misplaced && j.parts.includes(SHIP.misplaced.part)) SHIP.misplaced = null;   // a fetch finds it on the wrong shelf and puts it right
       Object.assign(j, { claimedBy: p.id, status: 'claimed', start: t, segs: run.segs, done: run.done, end: run.end, made: missing.length });
@@ -16678,10 +16843,11 @@ function jobWhere(person, t) {
   machinesNow();
   if (JOB_IDX_REV !== MACH_REV) {
     JOB_IDX = new Map(); JOB_IDX_REV = MACH_REV;
-    for (const j of SHIP.jobs) if (j.segs && j.claimedBy !== 'you') { if (!JOB_IDX.has(j.claimedBy)) JOB_IDX.set(j.claimedBy, []); JOB_IDX.get(j.claimedBy).push(j); }
+    for (const j of SHIP.jobs) if (j.segsBy && j.status !== 'done') { for (const c in j.segsBy) { if (!JOB_IDX.has(c)) JOB_IDX.set(c, []); JOB_IDX.get(c).push(j); } }   // a team job: each member at their spot (0.33.58)
+    else if (j.segs && j.claimedBy !== 'you') { if (!JOB_IDX.has(j.claimedBy)) JOB_IDX.set(j.claimedBy, []); JOB_IDX.get(j.claimedBy).push(j); }
   }
   const js = JOB_IDX.get(person.id); if (!js) return null;   // most people: no job, and no empty list made for them (0.26.40)
-  for (let i = 0; i < js.length; i++) { const j = js[i]; for (let k = 0; k < j.segs.length; k++) { const s = j.segs[k]; if (s.from <= t && t < s.to)
+  for (let i = 0; i < js.length; i++) { const j = js[i], sg = j.segsBy ? j.segsBy[person.id] : j.segs; for (let k = 0; k < sg.length; k++) { const s = sg[k]; if (s.from <= t && t < s.to)
     return { deck: s.deck, act: s.act, type: s.type, placeId: s.placeId, moving: s.act === 'commute', fromDeck: s.fromDeck, from: s.from, until: s.to, tag: s.tag, job: j.id, hold: s.hold }; } }
   return null;
 }
@@ -16700,7 +16866,7 @@ function jobNote(j, step, o) { if (j.kind !== 'favour') simLater('job', { id: j.
 const abandonNote = j => { if (j.kind !== 'favour' && !j.workDone) simLater('jobAbandoned', { machine: j.machine || null, dept: null, id: j.id }); };
 function claimJob(id) {
   const j = jobsBoard().find(x => x.id === id);
-  if (!j || j.claimedBy || (!jobSide(j) && SHIP.jobs.some(x => x.claimedBy === 'you' && x.status === 'claimed' && x.kind !== 'favour' && !jobSide(x))) || (playerTier() < jobTier(j) && !heldForYou(j)) || !rankOk('you', j) || (j.machine && ENGINE_KINDS.has(machineById(j.machine).kind))) return false;
+  if (!j || j.claimedBy || (!jobSide(j) && SHIP.jobs.some(x => x.claimedBy === 'you' && x.status === 'claimed' && x.kind !== 'favour' && !jobSide(x))) || (playerTier() < jobTier(j) && !heldForYou(j)) || !rankOk('you', j) || (j.machine && ENGINE_KINDS.has(machineById(j.machine).kind)) || bridgeBars(j)) return false;
   j.claimedBy = 'you'; j.status = 'claimed'; j.start = shipNow(); delete j.segs; delete j.done; delete j.end; MACH_REV++; jobNote(j, 'take'); simFlush(); return true;   // no crew route left on it
 }
 function dropJob(id) {
@@ -16969,8 +17135,160 @@ function jobReserve(kind, day, at, slot = 1, o = {}) {
                    claimedBy: null, parts: [MACHINE_KINDS[pick.kind].part, RESERVE_MAKE], status: 'open', ...(o.train ? { train: o.train } : {}) });
   const oc = o.cause && (FAULT_CAUSES[pick.kind] || []).find(c => c.id === o.cause);   // o.cause (24k, 0.33.47): a reserved fault with that cause, its part, nothing to make
   if (oc) { const J = SHIP.jobs[SHIP.jobs.length - 1]; J.cause = oc.id; J.parts = faultParts(pick, 'repair', oc); delete J.make; delete J.makeMins; }
+  if (Number.isFinite(o.drift) && Math.round(o.drift)) SHIP.jobs[SHIP.jobs.length - 1].drift = Math.max(-3, Math.min(3, Math.round(o.drift)));   // o.drift (0.33.58, the Tier 2 test job): a setting off too, from when it faults (any kind; tuneSet settles it)
   MACH_REV++; return id;
 }
+// ---- the lines: water, heat and air (0.33.59, plans/mechanics/m9-tracing.html and architect-air-line.html; section 17's part
+// of M9: 24i, seat M3, has the pipe kit, the reading step and the training) ----
+// MACHINE_LINKS[line] = the machines in order, upstream to downstream: an id, [ids side by side] (one step: the lower of
+// them), or { id: [decks] } (the branches at the end: each feeds those decks). LINE_ENDS[line][branch id] = the deck
+// machines after a branch (the air line's deck scrubbers). Where the pipes run (seat S's check, 2026-10-19): water from the
+// Deck 3 water recycler room (recycler, filter bank, UV steriliser, the Deck 3 pump) down the spine's trunks to the Deck 5
+// manifold room (the two Deck 5 pumps), then the port pipe gallery (5-valve-1, up to Decks 1-3) and the starboard pipe
+// gallery (5-valve-2, Decks 4-6); the garden's irrigation pump (3-irrigation-1, Deck 3 irrigation room) draws on the Deck
+// 3 pipe after 3-pump-1 (LINE_DRAWS: P1's load, never a step of the line). Heat from the Deck 4 heating plant (the heater
+// and its two pumps) down the spine to the Deck 5 manifold room (5-manifold-1), which splits it to every deck's loop. Air
+// from the Deck 5 air plant (electrolyser, oxygen cells, the two air plant stacks) through the hatch to the Fan hall
+// (5-fan-1, the dampers), then the ducts under the main corridor and up and down the spine: damper 1 to Decks 1-3 (Deck
+// 2's scrubber in the lab gas plant room at its end), damper 2 to Decks 4-6 (Deck 4's air scrubbers). lineOn(line): every
+// machine on it is real (else the line is skipped: tracing works with the others). lineOf(id) -> line | null.
+// lineFlow(line, id, before?) -> 0-1: the flow read at a machine, the product of every step's share from the top through its
+// own (before: up to the step before it; lineShare: worn passes it all, a fault on the line at most LINE_CUT), null off the line; flowWord(f): 'full' (.8+), 'low' (.5+), 'very
+// low'. lineDecks(line, id): the decks it feeds. Traced faults (M9): a Tier 2 repair on a line machine, posted while
+// you're an Officer or above and trained in tracing (section 24's SHIP.works.tr.m9 set; worksTrained is its setter), at your tier, is traced about half
+// the time (schedU(machSeed(id), day, 878) < .5): its cause is picked only among causes with that `line`, and j.symptom
+// = { line, decks, deck } (deck: the one the card names, Deck 4 if it's among them) makes the card name the symptom
+// ("Showers weak on Deck 4", SYMPTOM_TEXT; the Works writer's lines can replace it), with no machine or place shown until
+// traceMark finds it. traceMark(jobId, machineId) -> { before, after, word } | null (24i, at each reading): kept in j.read
+// (saved); reading the job's own machine sets j.traceFound. Fixing it is an ordinary repair, which closes the symptom's
+// job. simNote('traced', { line, machine, id }) when one posts
+const MACHINE_LINKS = {
+  water: ['3-recycler-1', '3-filter-1', '3-uv-1', '3-pump-1', ['5-pump-1', '5-pump-2'], { '5-valve-1': [1, 2, 3], '5-valve-2': [4, 5, 6] }],
+  heat: ['4-heater-1', ['4-pump-1', '4-pump-2'], '5-manifold-1'],
+  air: ['5-electrolyser-1', ['5-o2-1', '5-o2-2'], ['5-scrubber-1', '5-scrubber-2'], '5-fan-1', { '5-damper-1': [1, 2, 3], '5-damper-2': [4, 5, 6] }],
+};
+const LINE_ENDS = { air: { '5-damper-1': ['2-extractor-1'], '5-damper-2': ['4-scrubber-1', '4-scrubber-2'] } };
+const LINE_DRAWS = { '3-irrigation-1': { line: 'water', after: '3-pump-1' } };
+const LINE_DECKS = [1, 2, 3, 4, 5, 6];
+const SYMPTOM_TEXT = { water: 'Showers weak', heat: 'Cold cabins', air: 'Stuffy air' };
+// a line's ids, in order (branches and ends included)
+const lineIds = line => (MACHINE_LINKS[line] || []).flatMap(s => typeof s === 'string' ? [s] : Array.isArray(s) ? s : Object.keys(s).flatMap(b => [b, ...((LINE_ENDS[line] || {})[b] || [])]));
+const lineOn = line => !!MACHINE_LINKS[line] && lineIds(line).every(id => { const m = machineById(id); return !!m && !m.stub; });
+const lineOf = id => Object.keys(MACHINE_LINKS).find(l => lineIds(l).includes(id)) || null;
+// the steps from the top of the line through the one with `id`: [[ids], ...], or null
+function linePath(line, id) {
+  const out = [];
+  for (const s of MACHINE_LINKS[line] || []) {
+    if (typeof s === 'string' || Array.isArray(s)) { const ids = typeof s === 'string' ? [s] : s; out.push(ids); if (ids.includes(id)) return out; continue; }
+    for (const b of Object.keys(s)) { if (b === id) return out.concat([[b]]); const ends = (LINE_ENDS[line] || {})[b] || []; if (ends.includes(id)) return out.concat([[b], ends]); }
+  }
+  return null;
+}
+function lineDecks(line, id) {
+  const S = (MACHINE_LINKS[line] || []).find(s => s && typeof s === 'object' && !Array.isArray(s));
+  if (S) for (const b of Object.keys(S)) { if (b === id) return S[b].slice(); const ends = (LINE_ENDS[line] || {})[b] || []; if (ends.includes(id)) { const m = machineById(id); return m ? [m.deck] : S[b].slice(); } }
+  return LINE_DECKS.slice();
+}
+// one machine's share of the flow on `line`: healthy or worn, all of it (a worn machine still works); faulty or worse, as well as
+// it works (machWorks); with an open job whose cause cuts this line, at most LINE_CUT (so the reading at it says low even
+// just past worn); with a cause that doesn't (a bearing, a drip), all of it: that cause only ever shows on its own machine
+const LINE_CUT = .6;
+function lineShare(line, id, c) {
+  const cond = c[id] ?? 100; if (cond >= 50) return 1;
+  const j = SHIP.jobs.find(x => x.machine === id && x.cause && x.status !== 'done' && !jobByStops(x)), cs = j && faultCause(j);
+  if (cs) return cs.line === line ? Math.min(machWorks(cond) / 100, LINE_CUT) : 1;
+  return machWorks(cond) / 100;
+}
+function lineFlow(line, id, before) {
+  const p = linePath(line, id); if (!p) return null;
+  const c = machConds(); let f = 1;
+  for (let k = 0; k < p.length - (before ? 1 : 0); k++) f *= Math.min(...p[k].map(x => lineShare(line, x, c)));
+  return Math.round(f * 1000) / 1000;
+}
+const flowWord = f => f >= .8 ? 'full' : f >= .5 ? 'low' : 'very low';
+// is a repair on m, posted in hour h, traced? (a line machine, the line real, you an Officer trained in tracing, at your tier, about half)
+function traceFor(m, h) {
+  const line = lineOf(m.id), d = Math.floor(h / 24) + 1;
+  return !!line && lineOn(line) && playerTier() >= 2 && !!(SHIP.works && SHIP.works.tr && SHIP.works.tr.m9 !== undefined) && jobTier({ machine: m.id }) <= playerTier()
+    && (FAULT_CAUSES[m.kind] || []).some(c => c.line === line) && schedU(machSeed(m.id), d, 878) < .5 ? line : null;
+}
+function traceSymptom(line, id) { const decks = lineDecks(line, id); return { line, decks, deck: decks.includes(4) ? 4 : decks[0] }; }
+const traceHidden = j => !!(j && j.symptom && !j.traceFound);
+function traceTitle(j) {                                 // the Works writer's trace.symptom.<line> line when it's in (M3's ask)
+  const fb = (SYMPTOM_TEXT[j.symptom.line] || 'A fault') + ' on Deck ' + j.symptom.deck;
+  return typeof worksText === 'function' ? worksText('trace.symptom.' + j.symptom.line, fb, { deck: j.symptom.deck, where: '' }) : fb;
+}
+function traceMark(jobId, id) {
+  const j = SHIP.jobs.find(x => x.id === jobId && x.symptom && x.status !== 'done'); if (!j) return null;
+  const line = j.symptom.line, after = lineFlow(line, id); if (after === null) return null;
+  const before = lineFlow(line, id, true);
+  j.read = [...new Set([...(j.read || []), id])].slice(-12); if (id === j.machine) j.traceFound = true; MACH_REV++;   // the last 12 readings
+  return { before, after, word: flowWord(after) };
+}
+// ---- team jobs (0.33.58, plans/mechanics/m8-team-jobs.html, section 17's part; 24h, seat M2, plans the week's and runs the steps) ----
+// A big job three or four Works crew do together at a set time. teamJobPost({ machine, start, mins, team: [crew ids], lead?,
+// you?, spots?, steps?, title?, found?, parts? }) -> id | null posts kind 'team' on `machine` (an id): j.team (the crew in it),
+// j.lead (o.lead, else the first), j.start, j.mins, j.spots ({ crew id | 'you': place id }; default the machine's team spots
+// '<machine id less its number>-team-<k>' in order, yours the next, else its panel place), j.segsBy ({ crew id: segments }:
+// the lift by `start`, their spot till it's done, the lift back), j.done, j.end. Anyone not at work all through it, or
+// already in a team job then, is left out (fewer than two left: null). With `you` (24h asks for Officers and up) it's
+// yours (claimedBy 'you', a side job: beside your board job, it never lapses) and your stops are `steps` (24h's: [{ deck,
+// placeId, mins, tag, how, opts }]) or one hold at your spot; else it's the lead's. teamYouOut(id): you didn't come (24h
+// calls it 15 minutes after the start; jobsHour does it by the next hour, TEAM_WAIT): your steps go to the lead and it
+// takes TEAM_SLOW longer. The crew in a team job take no other job that would overlap it (teamClash), and jobWhere puts
+// each at their spot. Finishing it (the lead's, at j.done; yours, when your stops are done) puts the machine right
+// (TEAM_RESTORE, an overhaul's); with j.youIn set (24h: you were at your spot) you get the meters' step (an overhaul's)
+// even when the lead finishes it. simNote('team', ...) is 24h's. Nothing here posts a team job by itself
+const TEAM_WAIT = 15, TEAM_SLOW = 1.2, TEAM_RESTORE = 90;
+function teamSpots(id) {
+  const m = machineById(id), pre = id.replace(/-\d+$/, '') + '-team-'; if (!m) return [];
+  return (DECKS[m.deck].places || []).filter(p => p.id.startsWith(pre)).map(p => p.id).sort((a, b) => parseInt(a.slice(pre.length), 10) - parseInt(b.slice(pre.length), 10));
+}
+// a crew id already in a team job that overlaps minutes [a, b)
+const teamClash = (cid, a, b) => SHIP.jobs.some(j => j.kind === 'team' && j.status !== 'done' && j.segsBy && j.segsBy[cid] && j.segsBy[cid][0].from < b && a < j.end);
+function teamSegs(p, deck, placeId, a, b) {
+  const w = planWhere(p, a - JOB_RIDE), w2 = planWhere(p, b - 1);
+  if (!w || w.act !== 'work' || w.moving || !w2 || w2.act !== 'work') return null;
+  const home = w.deck, segs = [];
+  if (home !== deck) segs.push({ from: a - JOB_RIDE, to: a, act: 'commute', deck, fromDeck: home, type: 'lift', placeId: null });
+  segs.push({ from: a, to: b, act: 'work', deck, type: 'job', placeId, tag: 'team' });
+  if (home !== deck) segs.push({ from: b, to: b + JOB_RIDE, act: 'commute', deck: home, fromDeck: deck, type: 'lift', placeId: null });
+  return segs;
+}
+function teamJobPost(o = {}) {
+  machinesNow(); const m = o.machine && machineById(o.machine); if (!m || !Number.isFinite(o.start) || !(o.mins > 0)) return null;
+  const id = o.id || 'team:' + m.id + '@' + Math.floor(o.start);
+  if (SHIP.jobs.some(j => j.id === id)) return id;
+  const ppl = new Map(schedPeople().map(p => [p.id, p])), spots = teamSpots(m.id), panel = panelPlace(m.id), done = o.start + Math.round(o.mins), team = [], segsBy = {}, at = {};
+  for (const cid of o.team || []) {
+    const p = ppl.get(cid); if (!p || team.includes(cid) || teamClash(cid, o.start - JOB_RIDE, done + JOB_RIDE)) continue;
+    const pl = o.spots && o.spots[cid] || spots[team.length] || panel, sg = teamSegs(p, m.deck, pl, o.start, done); if (!sg) continue;
+    team.push(cid); segsBy[cid] = sg; at[cid] = pl;
+  }
+  if (team.length < 2) return null;
+  const lead = o.lead && team.includes(o.lead) ? o.lead : team[0], you = !!o.you, t = shipNow(), found = Number.isFinite(o.found) ? o.found : t;
+  if (you) at.you = o.spots && o.spots.you || spots[team.length] || spots[spots.length - 1] || panel;
+  const j = { id, machine: m.id, deck: m.deck, room: m.room, kind: 'team', title: o.title || 'Team job: ' + machineTitle(m.id), tier: 2, team, lead, spots: at, segsBy, segs: segsBy[lead],
+              start: o.start, mins: done - o.start, done, end: Math.max(...team.map(c => segsBy[c][segsBy[c].length - 1].to)), urgency: 0, leave: null, posted: found, found,
+              claimedBy: you ? 'you' : lead, status: 'claimed', parts: (o.parts || []).slice(), ...(o.steps ? { steps: o.steps.map(x => ({ ...x })) } : {}), ...(you ? { you: true } : {}) };
+  j.stops = kindStops(j).map(plainStop);
+  SHIP.jobs.push(j); MACH_REV++; return id;
+}
+function teamYouOut(id) {
+  const j = SHIP.jobs.find(x => x.id === id && x.kind === 'team' && x.claimedBy === 'you' && x.status === 'claimed' && !x.workDone); if (!j) return false;
+  const ext = Math.round(j.mins * (TEAM_SLOW - 1));
+  for (const c of j.team) { let past = false; for (const s of j.segsBy[c]) { if (past) { s.from += ext; s.to += ext; } else if (s.tag === 'team') { s.to += ext; past = true; } } }
+  j.done += ext; j.end += ext; j.claimedBy = j.lead; j.youOut = true; MACH_REV++; return true;
+}
+jobKindAdd('team', { tier: 2, side: true, work: 0, text: 'Team job', veto: true,   // veto + stepDone: 24h keeps your turns in the lead's order (M2's teamStepDone)
+  stepDone: (j, k, res, t) => typeof teamStepDone === 'function' ? teamStepDone(j, k, res, t) : true,
+  stops: j => j.steps || (j.spots && j.spots.you ? [{ deck: j.deck, placeId: j.spots.you, mins: Math.min(j.mins || 10, 10), tag: 'team', how: 'hold' }] : []),
+  done(j, t, by) {
+    const before = by !== 'you' && j.youIn && !j.meters ? shipMeters() : null, s = SHIP.machines[j.machine];
+    if (s) { s.cond = Math.max(s.cond, TEAM_RESTORE); s.state = machineState(s.cond); s.lastService = t; }
+    if (before) meterStep(j, before);
+  },
+  crew: { can: () => false, mins: 0 } });   // the crew never claim one: they're put in it (teamJobPost)
 // machineFound(id, by = 'you') -> { id, fresh } | null (0.33.47, for 24a's rounds: m1-rounds.html): you noticed a machine
 // that isn't healthy. Its job is found now (one not yet seen, a service's 2-24 hours or a fault worn on unseen), or posted
 // if it has none; fresh: it wasn't on the board till now (then j.foundBy = by, and simNote('found', { machine, by, id })).
@@ -16996,7 +17314,7 @@ function jobRelease(slot) { let n = 0; for (const j of SHIP.jobs) if (heldForYou
 // each hour (jobsHour): a reserved job's machine goes faulty in the hour it's due; one not taken by its `until` is released
 function reservedHour(t, jobs) {
   for (const j of jobs) if (j.reserved && heldForYou(j)) {   // reserved jobs only (a case's held job is 24k's)
-    if (!j.faulted && j.found < t + 60) { const s = SHIP.machines[j.machine]; if (s) { s.cond = Math.min(s.cond, 40); s.state = machineState(s.cond); } j.faulted = true; }
+    if (!j.faulted && j.found < t + 60) { const s = SHIP.machines[j.machine]; if (s) { s.cond = Math.min(s.cond, 40); s.state = machineState(s.cond); if (j.drift) s.drift = j.drift; } j.faulted = true; }
     if (!j.claimedBy && t >= j.until) j.freed = j.released = true;   // an ordinary job now, for the crew at once (leaveEnd)
   }
 }
@@ -17054,6 +17372,7 @@ function jobStopsBase(j, known, st) {
   if (j.kind === 'chore' || j.kind === 'favour') return (j.parts.length ? [st('fetch', shelvesFor(j.parts[0]), 5)] : []).concat(j.stops.map(x => ({ step: x.tag, places: x.placeId && known.has(x.placeId) ? [x.placeId] : [], deck: x.deck, mins: x.mins, at: x.at || null })),
     j.kind === 'favour' ? [{ step: 'return', places: [], deck: null, person: j.from }] : []);
   if (j.kind === 'restock') { const meals = j.cargo === 'meals'; return [st('cart', CART_AT, 5), st('load', loadAt(j), 5), st('unload', meals ? COLD_AT : FETCH_AT, meals ? 3 : 5), st('return', CART_AT, 5)]; }
+  if (traceHidden(j) && typeof traceStops === 'function') return traceStops(j, known);   // 24i: a traced fault's reading stop till it's found (0.33.60)
   const m = machineById(j.machine); if (!m) return [];
   const pp = panelPlace(m.id);
   return [st('fetch', shelvesFor(j.parts[0]), 5)].concat(j.make ? [{ ...st('make', MAKE_AT, 5), part: j.make }] : [], [{ step: 'job', places: pp ? [pp] : [], deck: m.deck, at: m.panel, room: m.room }]);
@@ -17063,7 +17382,7 @@ function jobsSection(el) {
   const button = (txt, fn) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = txt; b.style.cssText = 'margin:0 2px 8px;padding:4px 10px;font-size:12.5px'; b.onclick = () => { fn(); device.refresh(); }; el.appendChild(b); return b; };
   const board = jobsBoard(), mine = myJob();
   if (mine) {
-    const [title, where, state] = jobCard(mine), m = mine.machine && machineById(mine.machine);
+    const [title, where, state] = jobCard(mine), m = mine.machine && !traceHidden(mine) && machineById(mine.machine);   // a traced fault: no room till it's found
     line('Yours: ' + title + ', ' + where + '.', 'devtime');
     if (jobByStops(mine) && mine.kind !== 'favour') {
       const stops = mine.stops.map(st => { const p = placeById(st.placeId); return (st.tag === 'pickup' ? 'pick up ' + (mine.bring || 'the load') + ' in the ' : st.tag === 'drop' ? 'drop it in the ' : '') + (p ? roomName(p.deck, p.room) || 'room' : 'room') + ' on Deck ' + st.deck; });
@@ -17092,14 +17411,16 @@ if (typeof device !== 'undefined' && device.addSection) device.addSection('jobs'
 // its place id or null. Take one with claimJob(id); finish it with finishJob(id); jobStops(job) gives the way there.
 function openJobs(forWho = 'you') {
   const you = forWho === 'you', tier = you ? playerTier() : hatchTier(forWho);
-  return jobsBoard().filter(j => !j.claimedBy && j.status !== 'waiting' && (jobTier(j) <= tier || (you && heldForYou(j))) && rankOk(forWho, j) && !(you && j.machine && ENGINE_KINDS.has(machineById(j.machine).kind)) && (you || !heldForYou(j))).map(j => {
+  return jobsBoard().filter(j => !j.claimedBy && j.status !== 'waiting' && (jobTier(j) <= tier || (you && heldForYou(j))) && rankOk(forWho, j) && !(you && j.machine && ENGINE_KINDS.has(machineById(j.machine).kind)) && (you || !heldForYou(j)) && !(you && bridgeBars(j))).map(j => {
     const [title, where, state] = jobCard(j), m = j.machine && machineById(j.machine);
     const stops = jobStops(j).filter(x => x.step !== 'fetch'), main = jobByStops(j) ? stops[stops.length - 1] : j.kind === 'restock' ? stops[2] : stops[0];
     const place = main && main.places[0] || null, pl = placeById(place);
     const mins = jobKindOf(j) ? kindStops(j).reduce((a, x) => a + (x.mins || 0), 0) : j.kind === 'chore' ? j.stops.reduce((a, x) => a + x.mins, 0) : j.kind === 'restock' ? 33 : Math.round(JOB_TYPES[j.kind].work * (1 + .25 * (jobTier(j) - 1)));
     const verb = { service: 'Service', repair: 'Repair', overhaul: 'Overhaul' }[j.kind];
-    return { id: j.id, title: jobByStops(j) ? j.title : verb ? verb + ': ' + title : title, kind: j.chore || j.kind, deck: main ? main.deck : j.deck, at: pl ? pl.at.slice() : m ? m.panel.slice() : main && main.at ? main.at.slice() : null,
+    const o = { id: j.id, title: jobByStops(j) ? j.title : verb ? verb + ': ' + title : title, kind: j.chore || j.kind, deck: main ? main.deck : j.deck, at: pl ? pl.at.slice() : m ? m.panel.slice() : main && main.at ? main.at.slice() : null,
              room: pl ? pl.room : m ? m.room : j.room || null, place, tier: jobTier(j), mins, parts: j.parts.slice(), bring: j.bring || (j.kind === 'restock' ? 'a hover cart' : null), urgency: j.urgency, state, where, event: j.event || null, asked: heldForYou(j) };
+    if (traceHidden(j)) Object.assign(o, { deck: j.symptom.deck, at: null, room: null, place: null, symptom: { ...j.symptom } });   // a traced fault: where it shows, not the machine (0.33.59)
+    return o;
   });
 }
 
@@ -17185,7 +17506,7 @@ function holdCrates() { return partsCrates() + manifestCrates(); }
 const haulOn = () => !!JOB_KINDS.haul;
 const MANIFEST_DROP = { linen: '4-laundry-drop', medical: '3-infirmary-drop', store: '3-store-drop', galley: '3-galley-drop', bridge: '1-bridge-drop' };
 function manifestFor(d) {
-  const wk = Math.floor((d - 1) / 7), seed = machSeed('manifest'), all = DELIVERIES.filter(r => placeById(MANIFEST_DROP[r.key]) || placeById(r.to));
+  const wk = Math.floor((d - 1) / 7), seed = machSeed('manifest'), all = DELIVERIES.filter(r => (placeById(MANIFEST_DROP[r.key]) || placeById(r.to)) && !(r.key === 'bridge' && bridgeShut()));   // the bridge's crate waits for your invite (0.33.57)
   const pool = all.slice(), out = [], n = Math.min(pool.length, 2 + Math.floor(3 * schedU(seed, wk, 866)));
   for (let k = 0; k < n; k++) { const r = pool.splice(Math.floor(pool.length * schedU(seed, wk * 8 + k + 1, 866)), 1)[0]; out.push({ id: r.key, dest: placeById(MANIFEST_DROP[r.key]) ? MANIFEST_DROP[r.key] : r.to, n: 1 }); }
   return out;
@@ -17239,6 +17560,7 @@ function jobCard(j) {
     j.status === 'waiting' ? j.why : who ? who + ' on it' : (CHORES[j.chore] || {}).text || 'chore', j.leave ? 'soon' : 'routine'];
   if (j.kind === 'restock') return [j.cargo === 'meals' ? 'Food to the cold store' : weekday(Math.floor(j.found / 1440) + 1) === DELIVERY.day ? 'Unload the Wednesday delivery' : 'Unload the delivery', j.cargo === 'meals' ? 'Hold to Deck 3' : 'Deck 5 · cargo hold', who ? who + ' on it' : j.cargo === 'meals' ? 'hover cart' : 'hover cart, ' + partsCrates() + (partsCrates() === 1 ? ' crate' : ' crates'), JOB_PRI[j.urgency]];
   const m = machineById(j.machine), room = (DECKS[m.deck].rooms[m.room] || {}).name;
+  if (traceHidden(j)) return [traceTitle(j), 'Deck ' + j.symptom.deck + ' · the ' + j.symptom.line + ' line', (j.urgency === 2 ? 'failing: urgent' : JOB_WORD[j.kind]) + (who ? ', ' + who + ' on it' : ''), JOB_PRI[j.urgency]];   // a traced fault (0.33.59)
   const state = j.status === 'waiting' ? j.why : (j.urgency === 2 ? 'failing: urgent' : JOB_WORD[j.kind]) + (who ? ', ' + who + ' on it' : heldForYou(j) ? ', asked for you' : '');
   return [machineTitle(m.id) + (faultShows(j) ? ' (' + faultShows(j) + ')' : ''), 'Deck ' + m.deck + (room ? ' · ' + room.toLowerCase() : ''), state, JOB_PRI[j.urgency]];   // a real fault says what everyone notices (0.33.46)
 }
@@ -17305,6 +17627,7 @@ SAVE_EXTRA.push(s => {
   s.ship.jobs = SHIP.jobs; s.ship.stores = SHIP.stores; s.ship.hold = SHIP.hold;
   if (SHIP.manifest && SHIP.manifest.length) s.ship.manifest = SHIP.manifest; if (SHIP.misplaced) s.ship.misplaced = SHIP.misplaced;   // 0.33.50
   s.ship.short = SHIP.short; s.ship.machineUse = { ...MACH_EXTRA };   // 0.33.18: what Stores has told you; your use not yet worn in
+  s.ship.upkeep = { ...SHIP.upkeep };                    // 0.33.57: the ship meters' upkeep
 });
 // a save without machines (or with nonsense) leaves them to start afresh; machines the save doesn't know start
 // fresh; ids it has that are gone are dropped
@@ -17330,6 +17653,7 @@ function machinesLoad(s) {
   for (const k of ['stores', 'hold']) if (obj(sh[k])) for (const [p, n] of Object.entries(sh[k])) if (Number.isInteger(n) && n >= 0) SHIP[k][p] = n;
   if (obj(sh.short)) for (const [p, n] of Object.entries(sh.short)) if (Number.isFinite(n)) SHIP.short[p] = n;
   if (obj(sh.machineUse)) for (const [id0, n] of Object.entries(sh.machineUse)) { const id = MACH_RENAMED[id0] || id0; if (SHIP.machines[id] && n > 0 && n < 50) MACH_EXTRA[id] = n; }
+  SHIP.upkeep = {}; if (obj(sh.upkeep)) for (const k of SYSTEMS) if (Number.isFinite(sh.upkeep[k])) SHIP.upkeep[k] = Math.max(0, Math.min(UPKEEP_CAP, sh.upkeep[k]));   // 0.33.57; an older save: none (its meters read as before)
   JOBS_TIDY = false; return true;
 }
 machinesLoad(SAVED);
