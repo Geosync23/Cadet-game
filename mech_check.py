@@ -45,7 +45,7 @@ TRAIN = r"""((id) => {
   const seen = [], doJob = jid => { const j0 = SHIP.jobs.find(x => x.id === jid); if (j0 && j0.kind === 'team') return teamDo(jid); if (!claimJob(jid)) return false; const j = SHIP.jobs.find(x => x.id === jid);
     const cs = SHIP.works && SHIP.works.cases && (SHIP.works.cases.open || []).find(c => c.job === jid);   // a head-scratcher (24k): call it right first
     if (cs && typeof caseCall === 'function') caseCall(cs.id, cs.cause);
-    jobStops(j).forEach((s, k) => jobStepDone(jid, k, j.kind === 'rewire' && s.step === 'wire' ? { pick: 'T' + (k - rewFirst(j) + 1) } : undefined)); return turnInJob(jid); };   // 24q: a rewire's pairs answered from its chart
+    jobStops(j).forEach((s, k) => jobStepDone(jid, k, j.kind === 'rewire' && s.step === 'wire' ? { pick: rewRight(j, k) } : undefined)); return turnInJob(jid); };   // 24q: a rewire's pairs answered from its chart
   let teacher = null, yours = null;
   for (let m = 360; m < 1020; m += 10) {
     const t = (d - 1) * 1440 + m; setShipNow(t); machinesNow(); worksCareerTick(t);
@@ -658,16 +658,16 @@ M15 = r"""(() => { const out = {}, W0 = JSON.stringify(SHIP.works);
  const tick = (a, b) => { for (let t = a; t <= b; t += 10) { setShipNow(t); machinesNow(); for (const f of WORK_TICKS) f(t, false); } };
  let W = reset(20 * 1440 + 300); const seen = new Map(); for (let t = 20 * 1440 + 360; t <= 41 * 1440 + 500; t += 10) { setShipNow(t); machinesNow(); for (const f of WORK_TICKS) f(t, false); for (const x of SHIP.jobs) if (x.kind === 'rewire') seen.set(x.id, x); }
  const js = [...seen.values()]; out.weeks = js.map(x => [worksDay(x.posted), weekday(worksDay(x.posted)), Math.round(x.posted % 1440), x.machine, jobTier(x), x.chart.length, x.status]);
- const right = (j, k) => ({ pick: 'T' + (k - rewFirst(j) + 1) });
+ const right = (j, k) => ({ pick: rewRight(j, k) });
  W = reset(22 * 1440 + 480); let j = rewJob('4-junction-1', shipNow(), { key: 99 }); SHIP.jobs.push(j); SHIP.machines['4-junction-1'].cond = 40;
  out.board = !!openJobs().find(x => x.id === j.id); out.claimed = claimJob(j.id);
- let S = jobStops(j); out.stops = S.map(s => s.step + ':' + s.how);
+ let S = jobStops(j); out.stops = S.map(s => s.step + ':' + s.how); out.ordered = [90, 91, 92, 93, 94, 95].some(k => { const x = rewChart(k, 0).order; return x.some((v, i) => v !== i); });
  out.early = jobStepDone(j.id, 1, right(j, 1)).ok;
  jobStepDone(j.id, 0, {}); S.forEach((s, k) => { if (s.step === 'wire') jobStepDone(j.id, k, right(j, k)); });
  out.test = jobStepDone(j.id, S.length - 1, {}).ok; out.turnin = turnInJob(j.id); out.right = [j.rightFirst, j.wrongs, SHIP.machines['4-junction-1'].cond >= 90, worksSide().rewire.done];
  // a wrong pair: the fuse pops, only that pair opens again
  j = rewJob('4-junction-2', shipNow(), { key: 98 }); SHIP.jobs.push(j); claimJob(j.id); S = jobStops(j); jobStepDone(j.id, 0, {});
- S.forEach((s, k) => { if (s.step === 'wire') jobStepDone(j.id, k, k === 2 ? { pick: 'T1' } : right(j, k)); });
+ S.forEach((s, k) => { if (s.step === 'wire') jobStepDone(j.id, k, k === 2 ? { pick: rewRight(j, 2) === 'T1' ? 'T2' : 'T1' } : right(j, k)); });
  out.pop = jobStepDone(j.id, S.length - 1, {}).ok; out.open = S.map((s, k) => (j.stepsDone || []).includes(k) ? 1 : 0); out.wrongs = j.wrongs;
  jobStepDone(j.id, 2, right(j, 2)); out.retest = jobStepDone(j.id, S.length - 1, {}).ok; out.turnin2 = turnInJob(j.id); out.after = [j.rightFirst, worksSide().rewire.wrongs];
  // stage 1: a faded chart, the lights first
@@ -688,7 +688,8 @@ def part_m15(g):
     check(a['test'] and a['turnin'] and a['right'][0] is True and a['right'][1] == 0 and a['right'][2] and a['right'][3] == 1, 'm15: right first time, the junction put right')
     check(not a['pop'] and a['wrongs'] == 1 and a['open'][2] == 0 and sum(a['open']) == len(a['open']) - 2, 'm15: a wrong pair pops at the test, only that pair opens again')
     check(a['retest'] and a['turnin2'] and a['after'][0] is False and a['after'][1] == 1, 'm15: redone, finished, not right first time (never a fail)')
-    check(a['faded'] == [2, 'check', False, True, True], 'm15: a faded chart from 3: the lights first')
+    check(a['faded'] == [1, 'check', False, True, True], 'm15: a faded chart from 3 (one colour): the lights first')
+    check(a.get('ordered'), 'm15: the wires come in a seeded order, not the chart\'s (the chart must be read)')
     check(a['held'] == 1440 + 600 and a['crew'] == ['done', True], 'm15: not taken, the crew\'s the next day')
     check(json.loads(a['save']) == {'done': 0, 'wrongs': 0, 'week': -1} and json.loads(a['save2']) == {'done': 3, 'wrongs': 1, 'week': 4}, 'm15: the save read back, junk cleaned')
     check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'm15: differs the second time')
@@ -705,7 +706,7 @@ FC = r"""(() => { const out = {}, W0 = JSON.stringify(SHIP.works), R0 = JSON.str
  out.scripts = FC_IDS.map(c => { const j = { fcase: c, bed: schedPeople().find(p => p.bed && placeById(p.bed)).bed, order: [3, 1, 2], from: 'calder' }, S = fcStops(j);
    return [c, S.length, S.slice(0, 3).every(x => x.how === 'look' && placeById(x.placeId)), S[3].how, S[3].opts.options.map(o => o.id).includes('sus1')]; });
  const friends = schedPeople().filter(p => p.bed && placeById(p.bed)).sort((a, b) => (a.id < b.id ? -1 : 1)).slice(0, 6);
- for (const p of friends) { const r = relGet(p.id); r.pts = Math.max(r.pts, REL_TIERS[2]); r.tier = Math.max(r.tier, 2); }
+ for (const p of friends) { const r = relGet(p.id); r.pts = Math.max(r.pts, REL_TIERS[FC_TIER]); r.tier = Math.max(r.tier, FC_TIER); }
  let W = reset(14 * 1440 + 300); const w = incWeek(15), P = fcPlan(w); out.plan = P && [P.d, P.at];
  tick(14 * 1440 + 360, (P.d - 1) * 1440 + P.at + 10);
  let e = worksSide().favours[0]; out.asked = e ? [e.case, e.state, e.day, !!SHIP.mail.length] : null; if (!e) return out;
@@ -783,10 +784,19 @@ SIDE_SET = r"""(() => { if (typeof worksSide !== 'function') window.worksSide = 
   S.nozzles = { day: 20, clogged: ['0.1', '2.3'], cleared: ['0.1'], flushed: 1, harvests: 2, stage: 1, bonus: .05, told: 20 };
   S.rewire = { done: 2, wrongs: 1, week: 3 }; S.favours = [{ id: 'favour:cruz-tove@1', who: 'cruz-tove', case: 'lamp', day: 15, state: 'done' }]; S.ff = { grade: 1, tries: 1, next: 22, job: null, mail: 1 };
   for (const k of ['leaksOk', 'nozOk', 'rewOk', 'fcOk', 'ffOk']) delete S[k];
-  const read = () => JSON.stringify([leakList(), nozState(), rewState(), fcList(), ffState()]); const before = read(); saveGame();
+  SHIP.jobs = []; const rj = rewJob('4-junction-1', shipNow(), { key: 99 }); SHIP.jobs.push(rj); claimJob(rj.id); jobStepDone(rj.id, 0, {});
+  jobStops(rj).forEach((x, k) => { if (x.step === 'wire') jobStepDone(rj.id, k, { pick: k === 1 ? (rewRight(rj, 1) === 'T1' ? 'T2' : 'T1') : rewRight(rj, k) }); }); jobStepDone(rj.id, jobStops(rj).length - 1, {});   // a wrong pair popped
+  const P = schedPeople().find(p => p.bed && placeById(p.bed)), fid = favourPost({ from: P.id, title: 'x', stops: [{ deck: placeById(P.bed).deck, placeId: null, mins: 10, tag: 'fcase' }] }), F = favourById(fid); F.fcase = 'lamp'; favourAccept(fid);
+  const fj = jobMake('fcase', { id: 'fcase:' + fid, deck: placeById(P.bed).deck, h: 300, title: 'x', fcase: 'lamp', favour: fid, from: P.id, bed: P.bed, order: [2, 3, 1] }); fj.claimedBy = 'you'; fj.status = 'claimed'; SHIP.jobs.push(fj); jobStepDone(fj.id, 0, {});
+  S.favours.push({ id: fid, who: P.id, case: 'lamp', day: 13, state: 'taken' });
+  window.__ids = [rj.id, fid, fj.id];
+  const read = () => { const r = SHIP.jobs.find(x => x.kind === 'rewire'), f = SHIP.jobs.find(x => x.kind === 'favour'), q = SHIP.jobs.find(x => x.kind === 'fcase');
+    return JSON.stringify([leakList(), nozState(), rewState(), fcList(), ffState(), r && [r.pairs, r.wrongs, r.stepsDone, r.order, r.chart, r.claimedBy], f && [f.fcase, f.status, f.claimedBy], q && [q.fcase, q.order, q.stepsDone, q.claimedBy, q.favour]]); };
+  window.__read = read; const before = read(); saveGame();
   return { before, keeps: JSON.stringify(worksClean({ v: 1, side: { a: 1 } }) || {}).includes('side') }; })()"""
 SIDE_GET = r"""(() => { if (typeof worksSide !== 'function') window.worksSide = () => SHIP.works ? (SHIP.works.side = SHIP.works.side || {}) : null;
-  return SHIP.works ? JSON.stringify([leakList(), nozState(), rewState(), fcList(), ffState()]) : null; })()"""
+  const r = SHIP.jobs.find(x => x.kind === 'rewire'), f = SHIP.jobs.find(x => x.kind === 'favour'), q = SHIP.jobs.find(x => x.kind === 'fcase');
+  return SHIP.works ? JSON.stringify([leakList(), nozState(), rewState(), fcList(), ffState(), r && [r.pairs, r.wrongs, r.stepsDone, r.order, r.chart, r.claimedBy], f && [f.fcase, f.status, f.claimedBy], q && [q.fcase, q.order, q.stepsDone, q.claimedBy, q.favour]]) : null; })()"""
 def side_save(pw):
     tmp = WORK / 'test' / '_mech_save.html'
     tmp.write_text(instrument(pathlib.Path(sys.argv[1]).read_text()))
@@ -801,7 +811,9 @@ def side_save(pw):
     a = ev2(SIDE_SET); ev2 = load(); after = ev2(SIDE_GET)
     b.close()
     print('  side save: before', a['before'][:160], '... after', (after or '')[:160])
-    if not a['keeps']: print("  side save: (24 core's worksClean doesn't keep `side` in this build: E1's; not checked)"); return
+    A, B = json.loads(a['before']), json.loads(after or 'null') or [None] * 8
+    check(A[5:] == B[5:] and A[5] and A[7], 'side save: a rewire job after a wrong pair, an accepted favour and its side job through a real save and reload')
+    if not a['keeps']: print("  side save: (24 core's worksClean doesn't keep `side` in this build: E1's; side not checked)"); return
     if after != a['before']:
         for x, y in zip(json.loads(a['before']), json.loads(after or '[]')):
             if x != y: print('   differs:', x, '|', y)
