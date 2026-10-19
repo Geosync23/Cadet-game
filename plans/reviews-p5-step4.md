@@ -11,6 +11,9 @@ R4 succeeds R3 (whose verdicts are in `plans/reviews-p5-step2.md`). R5 (session_
 
 ## Playtest update 2 (brief: plans/brief-playtest2.md on claude/lead-pillar1; build master BM7 session_01QbuzvT3TwzMwSWRmakzX8Z)
 
+### X3 claude/crew-pt1 79959ff (check only over X2's 6c26c72), R6: PASS — and 6c26c72 / 693e4f4 PASS with it
+interactions_check's "tap at the stop" now taps the floor at the stop or within JOB_REACH (1.5) of it where no crew member is in front on screen (`crewAtScreen`, offsets up to 0.8): a tap on a person talks to them first (section 10), and after 0.71.5's mornings Sol waits near Deck 3's lift at the check's time. That's the game working as designed, so the FAIL on 0.71.5/0.71.6 was the check's. My isolated run on 79959ff: interactions_check OK (all parts). So X2's 0.71.5 (693e4f4) and 0.71.6 (6c26c72) stand as PASS, with the notes below.
+
 ### X2 claude/crew-pt1 6c26c72 (0.71.6: R5's queue fixes, queue.join), R6: FAIL (interactions_check; X3 fixing)
 - Read: queueJoin ends the current activity first (R5's fix); past the line's last spot crew keep their old goal and you walk just inside the washroom door; newGameStart leaves any line (guarded at load); queue.join fallbacks by X2 in style ("Both showers are busy..." assumes two showers a washroom, true of the built washrooms); deck_check fails when nothing was compared. No code after `//`.
 - **interactions_check FAIL `ixtap-3-lift-1`**: "a tap at the stop (lamp, Deck 3) starts the work" gets no activity, only the job's toast. Bisect (isolated runs): passes on 056f8d8 (0.71.3) and ec0cbc36 (0.71.4), fails on 693e4f4 (0.71.5) and 6c26c72. So it came with 0.71.5 (the mornings or withHold), which I passed without running interactions_check: my miss. X2 has handed over; X3 (session_01KWHQN4wymqpEZSbsHkDE43) is fixing it.
