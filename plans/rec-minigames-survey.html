@@ -1,0 +1,110 @@
+<title>Rec Mini-games Survey</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+/* One column of decision cards, like a rec dec notice board at night; dark by choice (matches the plan pages). */
+:root{
+  --bg:#0f1622; --card:#172233; --ink:#e8eef0; --muted:#97a9b1; --line:rgba(150,200,196,.22);
+  --teal:#4cc3b5; --gold:#e9c46a; --pick:#1d3b3c; --pickline:#4cc3b5;
+  --display:"Chakra Petch","Segoe UI",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Avenir Next","Segoe UI",system-ui,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 120px}
+.wrap{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+h1{font-family:var(--display);font-weight:600;font-size:24px;margin:0;text-wrap:balance;letter-spacing:.01em}
+.lede{color:var(--muted);margin:0;font-size:15px}
+.lede a{color:var(--teal)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card .k{font-family:var(--display);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
+.card h2{font-family:var(--display);font-weight:500;font-size:18px;margin:0;text-wrap:balance}
+.card p{margin:0;color:var(--muted);font-size:14.5px}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{display:block;width:100%;text-align:left;font:inherit;color:var(--ink);background:transparent;border:1.5px solid var(--line);border-radius:10px;padding:12px 14px;min-height:52px;cursor:pointer}
+.opt small{display:block;color:var(--muted);font-size:13.5px;margin-top:2px}
+.opt .rec{display:inline-block;font-size:11.5px;font-weight:700;color:#14202a;background:var(--gold);border-radius:999px;padding:1px 8px;margin-left:6px;vertical-align:2px}
+.opt[aria-pressed="true"]{background:var(--pick);border-color:var(--pickline)}
+.opt[aria-pressed="true"]::before{content:"✓ ";color:var(--teal);font-weight:700}
+.opt:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+label.nl{font-size:13px;color:var(--muted)}
+textarea{width:100%;font:inherit;font-size:15px;color:var(--ink);background:#0f1825;border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-height:44px;resize:vertical}
+.cond{border-style:dashed}
+.bar{position:fixed;left:0;right:0;bottom:0;background:rgba(15,22,34,.96);border-top:1px solid var(--line);
+  padding:10px max(16px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.bar div{max-width:640px;margin:0 auto;display:flex;gap:12px;align-items:center}
+#submit{font-family:var(--display);font-size:17px;font-weight:600;background:var(--teal);color:#0d1a1c;border:0;border-radius:10px;padding:12px 22px;min-height:50px;cursor:pointer}
+#submit:disabled{opacity:.5;cursor:default}
+#status{font-size:14px;color:var(--muted);flex:1;min-width:0}
+@media (prefers-reduced-motion:no-preference){.opt{transition:background .15s,border-color .15s}}
+</style>
+
+<div class="wrap">
+  <h1>Rec dec mini-games: your answers</h1>
+  <p class="lede">My recommendation is already ticked on each card. Change any you like, add a note if you want, then tap <b>Send answers</b> at the bottom. Full detail is on the <a href="https://claude.ai/artifact/Ubn2MJvidnuK1awcx2gKMP" target="_blank" rel="noopener">mini-games plan page</a>.</p>
+  <div id="cards" class="wrap" style="max-width:none"></div>
+</div>
+<div class="bar"><div><button id="submit" type="button">Send answers</button><span id="status" role="status">Connecting…</span></div></div>
+
+<script>
+const CARDS=[
+ {id:"q1_wall",k:"Question 1 · Climbing wall",h:"Which mini-game for the climbing wall?",
+  o:[["reach","Reach","Drag your thumb to the next glowing hold and let go to grab it. A grip bar drains on small holds; ring the bell at the top. Four coloured routes, 1-3 min."],["bellrush","Bell rush","Timing only: tap when the swinging marker is in the green to make each move. About 1 min."],["other","Something else (say in the note)",""]],rec:"reach"},
+ {id:"q2_pool",k:"Question 2 · Pool",h:"Which mini-game for the pool?",
+  o:[["lengths","Lengths","Four lengths in rhythm: tap as the ring meets the beat, hold to breathe, swipe at the wall to turn. About 1 min."],["ringdive","Ring dive","Dive and steer underwater to pick up rings on the Wren mosaic before your breath runs out. 1-2 min."],["other","Something else (say in the note)",""]],rec:"lengths"},
+ {id:"q3_kayak",k:"Question 3 · Kayaks",h:"Which mini-game for the kayaks?",
+  o:[["whitewater","White water","One lap: steer with your thumb, tap for a strong stroke, through the slalom gates on the fast run. 60-90 s. Used at Paddle club and the regatta."],["ducks","Duck rescue","Paddle the slow loop scooping up Pell's loose rubber ducks. No clock, a calm toy."],["other","Something else (say in the note)",""]],rec:"whitewater"},
+ {id:"q4_times",k:"Question 4",h:"Show times, or only your bests in words?",
+  o:[["words","Bests in words","\u201cYour best climb yet.\u201d Real placings only at the regatta, plus the bell board."],["times","Show times and scores",""]],rec:"words"},
+ {id:"q5_clock",k:"Question 5",h:"Does the ship's clock stop during a go, as it does in Lightdisc?",
+  o:[["yes","Yes, it stops",""],["no","No, time keeps running",""]],rec:"yes"},
+ {id:"q6_crew",k:"Question 6",h:"Crew beside you, or racing you?",
+  o:[["beside","Beside you at their own pace","A race only when you ask (\u201cRace me?\u201d) or at the regatta."],["race","Always a race",""]],rec:"beside"},
+ {id:"q7_order",k:"Question 7",h:"Which gets built first?",
+  o:[["kwp","Kayaks, then wall, then pool","The kayaks carry two traditions and reuse Lightdisc's steering most."],["wkp","Wall, then kayaks, then pool",""],["other","Another order (say in the note)",""]],rec:"kwp"}
+];
+const state={};let saving=false;
+try{Object.assign(state,JSON.parse(localStorage.getItem("recGamesDraft")||"{}"))}catch(e){}
+const box=document.getElementById("cards");
+for(const c of CARDS){
+  if(!state[c.id])state[c.id]={pick:c.rec,note:""};
+  const el=document.createElement("section");el.className="card"+(c.cond?" cond":"");
+  const k=document.createElement("div");k.className="k";k.textContent=c.k;
+  const h=document.createElement("h2");h.textContent=c.h;el.append(k,h);
+  if(c.p){const p=document.createElement("p");p.textContent=c.p;el.append(p)}
+  const opts=document.createElement("div");opts.className="opts";
+  for(const [v,label,sub] of c.o){
+    const b=document.createElement("button");b.type="button";b.className="opt";b.dataset.v=v;b.id=c.id+"-"+v;
+    b.append(label);
+    if(v===c.rec){const r=document.createElement("span");r.className="rec";r.textContent="my pick";b.append(r)}
+    if(sub){const s=document.createElement("small");s.textContent=sub;b.append(s)}
+    b.addEventListener("click",()=>{state[c.id].pick=v;paint(opts,c.id);draft()});
+    opts.append(b)}
+  el.append(opts);
+  const lab=document.createElement("label");lab.className="nl";lab.htmlFor=c.id+"-note";lab.textContent="Note (optional)";
+  const ta=document.createElement("textarea");ta.id=c.id+"-note";ta.rows=1;ta.value=state[c.id].note||"";
+  ta.addEventListener("input",()=>{state[c.id].note=ta.value;draft()});
+  el.append(lab,ta);box.append(el);paint(opts,c.id);
+}
+function paint(opts,id){for(const b of opts.children)b.setAttribute("aria-pressed",String(b.dataset.v===state[id].pick))}
+function draft(){try{localStorage.setItem("recGamesDraft",JSON.stringify(state))}catch(e){}}
+const btn=document.getElementById("submit"),st=document.getElementById("status");
+let db=null,user=null;
+btn.disabled=true;
+(async()=>{
+  try{db=await window.claude?.use?.("db");user=await window.claude?.use?.("user")}catch(e){db=null}
+  if(db){btn.disabled=false;st.textContent="Ready. Your answers are saved for the lead to read."}
+  else st.textContent="Saving isn't available in this view. Open the page signed in to claude.ai to send your answers.";
+})();
+btn.addEventListener("click",async()=>{
+  if(!db||saving)return;saving=true;btn.disabled=true;st.textContent="Sending…";
+  const answers={};for(const c of CARDS)answers[c.id]={pick:state[c.id].pick,recommended:c.rec,note:(state[c.id].note||"").trim()};
+  try{
+    let who=null;try{who=user?await user.id():null}catch(e){}
+    await db.collection("answers").add({survey:"rec-minigames-v1",sentAt:new Date().toISOString(),by:who,answers});
+    st.textContent="Sent. Thank you! You can change anything and send again; the newest one counts.";
+  }catch(e){st.textContent="That didn't send ("+(e&&e.code||"error")+"). Check you're signed in and try again."}
+  saving=false;btn.disabled=false;
+});
+</script>
