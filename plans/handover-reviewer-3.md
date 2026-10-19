@@ -9,9 +9,10 @@ Brief: `plans/brief-p5s3.md` on claude/lead-pillar1. Base: 0.63.2r = claude/ship
 
 Passed (tips for 0.63.3): S2 claude/ship-systems **0d0aa59**, C2 claude/works-career **f3b744c**, M2 claude/mech-incidents **b3e5cf9**, M3 claude/mech-diagnose **42c76cc**, H2 claude/mech-cases **8161cbe**, DA5 claude/deck-p5s3 **25dbfce** (DA5 has stopped), U claude/hud-pt1 **9fa60da**, W2 claude/writer-p5 **a21487e** (its newest; 995af0f and bc9724b are inside it).
 
-Still open when I stopped (see the verdicts file for whatever I finished after writing this):
-- X claude/crew-pt1 **3a494c8** (0.71.2, the crew side of the promotion: playerBed from SHIP.works.home, crewScene/crewGather, worksGather cheers, boxCarry, ceremonySeat's `places` on the appointment, team-job talk). Read: fine. Checks were running: on X alone cadet_test, social_check, day_check 10; on a scratch merge of X with C2 f3b744c (only build lines conflict, `node --check` OK) career_check, day_check 10 and 11.
-- H2's p1Stage one-word fix (WORK_MECH.m9), and U's Tracked device app: not yet sent.
+Finished after the first draft of this note: **X 3a494c8 PASS** (alone and merged with C2 f3b744c), **H2 935b1d9 PASS** (0.55.17, H2's tip now).
+
+Still open when I stopped:
+- U's Tracked device app: not yet sent to me. Review it like 0.72.0-0.72.3 (interactions_check, device_check; DOM only, nothing saved).
 
 Merge notes already sent to BM6: S2 (0.33.59-60) and H2 (0.55.16) both put a hook on the first line of section 17's jobCard and jobStopsBase: keep both, S2's `traceHidden` first, then H2's `caseCard` / `caseAt`. C2 and X both add your cabin to `doorOpenFor` (harmless, both true). mech_check m4's frame fix (SHIP.bridgeInvited around the hand-made manifest) is in C2's tip.
 
