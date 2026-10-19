@@ -15014,7 +15014,7 @@ function turnInShow(j, a) {
 // section 8c's mover (RA1's actStart(kind, place, { move }): REC_MOVES, recMoveStep), its rec kit (playerKit) and its
 // locker change (PLAYER_ACTS.recChange). The pool and the kayaks need rec kit: in uniform you go to a locker first, and
 // when you're done you come back for a quick shower (a towel over your shoulder after) and change back; the first time a
-// tip says so. Leaving the deck puts your uniform back on. Outside 06:00-midnight: "The rec dec's closed till six."
+// tip says so. Leaving the deck puts your uniform back on. Outside 06:00-midnight: "The rec deck's closed till six."
 // Lightdisc's court, scoreboard and its Ask someone to play panel say it's coming soon. Nothing here calls R().
 // =====================================================================
 Object.assign(PLAYER_ACTS, {
@@ -41177,7 +41177,7 @@ Object.assign(PLAYER_ACTS, { disc: { need: null, mins: 30, pose: 'stand', title:
 const LD_WAIT = 40;                                      // ship minutes to come down before they give up
 function discAsk(who) {   // who: someone in particular (Winner Stays On's champion, 0.83.1 RA), else whoever discFind picks
   if (DISC.g) return;
-  if (!recOpen()) { toast('Lightdisc', 'The rec dec\'s closed till six.'); return; }
+  if (!recOpen()) { toast('Lightdisc', 'The rec deck\'s closed till six.'); return; }
   const p = who || discFind();
   if (!p) { toast('Lightdisc', 'Nobody\'s around to play right now. Try in the evening, or on a day off.'); return; }
   actStart('disc', '7-disc-1', { title: 'Lightdisc', st: 'wait', opp: p.id, since: shipNow(), here: false });
