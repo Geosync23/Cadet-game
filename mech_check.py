@@ -566,6 +566,11 @@ MRUN = r"""(() => {
   for (let m = 1; m <= 40; m++) { const t = shipNow() + 1; setShipNow(t); for (const f of WORK_TICKS) f(t, true); }
   out.withdrawn = [j2.status, j2.doneBy || null, manifestRunDelivered(id2)];
   out.bad = [manifestRun([], '4-washer-1'), manifestRun(['lamp'], 'nowhere')];
+  // R5 (0.45.17): a part with none on its shelf isn't on the run; one emptied after asking says so at its load and isn't in the note
+  SHIP.stores.valve = 0; SHIP.stores.filter = 2; SHIP.stores.pump = 1; SHIP.notes = [];
+  const id3 = manifestRun(['valve', 'filter', 'pump'], '5-scrubber-1', { for: 'team-y' }), j3 = SHIP.jobs.find(x => x.id === id3);
+  claimJob(id3); SHIP.stores.pump = 0; const says = jobStops(j3).map((x, k) => (jobStepDone(id3, k) || {}).say || '');
+  out.empty = [j3.crates.map(c => c.id), says.filter(x => x.startsWith('No ')), SHIP.notes.filter(n => n.kind === 'manifestRun').map(n => n.parts.join('+'))];
   SHIP.works = null; return out;
 })()"""
 def part_mrun(g):
@@ -576,6 +581,7 @@ def part_mrun(g):
     check(jb and jb[0] == 'haul' and jb[1] == 'stores' and jb[3] and jb[4] == 2 and jb[5][0].startswith('cart') and jb[5][-1].startswith('return') and sum(1 for x in jb[5] if x.startswith('deliver:5-scrubber-1')) == 2, f"manifestRun: a held parts run, shelves to the scrubber's panel ({jb})")
     check(a['claimed'] and a['took'] == [1, 1], f"manifestRun: each part off its shelf once ({a['took']})")
     check(a['delivered'][0] and a['delivered'][1] == ['team-x:5-scrubber-1-svc:filter+pump'] or (a['delivered'][0] and len(a['delivered'][1]) == 1 and a['delivered'][1][0].startswith('team-x:')), f"manifestRun: delivered, the note ({a['delivered']})")
+    check(a['empty'] == [['filter', 'pump'], ['No pump on the shelf.'], ['filter']], f"manifestRun: an empty shelf's part not carried, said, not in the note ({a['empty']})")
     check(a['turnin'], 'manifestRun: turned in')
     check(a['withdrawn'] == ['done', None, False], f"manifestRun: one nobody takes is withdrawn at its time ({a['withdrawn']})")
     check(a['bad'] == [None, None], 'manifestRun: nothing for an empty list or an unknown place')
@@ -593,6 +599,13 @@ HAUL2 = r"""(() => {
   out.before = deliver(j); j.order = ['store', 'linen', 'galley']; out.after = deliver(j);
   const x0 = W.xp; j.order = ['linen', 'store', 'galley']; out.tidy = [haulTidy(j), W.xp - x0];
   j.order = ['store', 'linen', 'galley']; out.untidy = [haulTidy(j), W.xp - x0];
+  // R5 (0.45.17): the load stops never move; the picks become j.order only when complete and before any delivery
+  const loads = x => jobStops(x).filter(s => s.step === 'load').map(s => s.places[0] + ':' + (kindStops(x)[jobStops(x).indexOf(s)] || {}).crate);
+  const dc = deviceChoose, stt = simTimeout; let pend = null; simTimeout = fn => fn(); deviceChoose = (v, f) => { pend = f; return true; };
+  const j5 = mk(); j5.claimedBy = 'you'; j5.status = 'claimed'; const l0 = loads(j5); haulOrderAsk(j5); const mid = j5.order; pend(1); pend(0);
+  out.order = [JSON.stringify(l0) === JSON.stringify(loads(j5)), mid === undefined, j5.order];
+  const j6 = mk(); j6.claimedBy = 'you'; j6.status = 'claimed'; haulOrderAsk(j6); pend(2); const kd = jobStops(j6).findIndex(s => s.step === 'deliver'); j6.stepsDone = [0, 1, 2, 3, kd]; pend(0); out.order.push(j6.order === undefined);
+  deviceChoose = dc; simTimeout = stt; SHIP.jobs = SHIP.jobs.filter(x => x !== j5 && x !== j6);
   W.rank = 'junior'; j.order = ['linen', 'galley', 'store']; const x1 = W.xp; out.junior = [haulTidy(j), W.xp - x1]; W.rank = 'officer';
   // the Wednesday run after promotion: held for you at stage 2, the crew's before it
   const post = use => { SHIP.jobs = []; W.use.m4 = use; SHIP.manifest = [{ id: 'linen', dest: '4-laundry-drop', n: 1 }, { id: 'store', dest: '3-store-drop', n: 1 }]; JOB_KINDS.haul.post(9 * 24 + 14, SHIP.jobs); const h = SHIP.jobs.find(x => x.kind === 'haul'); return h ? (h.released ? 'crew' : 'held') : null; };
@@ -688,6 +701,7 @@ def part_haul2(g):
     check(a['free'] == [True, False], f"haul2: from 2 runs and Day 10 ({a['free']})")
     check(a['before'] != a['after'] and a['after'] == ['3-store-drop', '4-laundry-drop', '3-galley-drop'], f"haul2: the stops follow your order ({a['after']})")
     check(a['tidy'] == [True, 1] and a['untidy'] == [False, 1] and a['junior'] == [True, 0], f"haul2: tidy +1 as an officer, untidy nothing, a junior's tidy no +1 ({a['tidy']}, {a['untidy']}, {a['junior']})")
+    check(a['order'] == [True, True, ['store', 'linen', 'galley'], True], f"haul2: the load stops never move; the order set only when complete, never after a delivery ({a['order']})")
     check(a['posts'] == ['held', 'crew'], f"haul2: an officer's run held at stage 2, the crew's before ({a['posts']})")
     check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'haul2: differs the second time')
 

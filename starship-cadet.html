@@ -281,7 +281,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.45.16
+   STARSHIP CADET: CSV Wren                           build 0.45.17
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8694,7 +8694,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.45.16';                           // keep in step with the header's build line
+const GAME_BUILD = '0.45.17';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -40001,7 +40001,7 @@ function roundPickAsk(j) {                               // one machine at a tim
   if (j.pick.length >= 6 || !pool.length) return roundPicked(j);
   pool.sort((a, b) => (Number.isFinite(L[a]) ? L[a] : -1) - (Number.isFinite(L[b]) ? L[b] : -1) || (a < b ? -1 : 1));
   const choices = pool.map(id => machineLabel(machineById(id)).split(',')[0] + ' · ' + roundLastText(id, d)).concat(j.pick.length >= 4 ? ['That\'s my round'] : []);
-  const shown = deviceChoose({ title: 'Round', text: j.pick.length ? 'And next?' : roundText('round.pick', 'Pick four to six to look at today.'), choices }, i => {
+  const shown = deviceChoose({ title: 'Round', text: j.pick.length ? 'And next?' : roundText('round.pick.some', 'Pick a handful to look at today: four to six.'), choices }, i => {
     if (!pool[i]) return roundPicked(j);
     j.pick.push(pool[i]); if (typeof simTimeout === 'function') simTimeout(() => roundPickAsk(j), 400); else roundPickAsk(j);
   });
@@ -40268,7 +40268,7 @@ function haulStops(j) {
   out.push({ deck: 5, placeId: dock, mins: 2, tag: 'cart', hold: 'cart', opts: { text: 'You take a hover cart from its dock.' } });
   cs.forEach(c => out.push({ deck: 5, placeId: from(c), mins: 1, tag: 'load', hold: 'cartfull', crate: c.key || c.id, opts: { text: haulName(c) + ' for ' + haulWhere(c) + ': on the cart.' } }));
   if (j.only !== 'load') {
-    if (Array.isArray(j.order)) cs.sort((a, b) => j.order.indexOf(a.key || a.id) - j.order.indexOf(b.key || b.id));   // stage 2: your order (cs is a copy below)
+    if (Array.isArray(j.order) && j.order.length === cs.length) cs.sort((a, b) => j.order.indexOf(a.key || a.id) - j.order.indexOf(b.key || b.id));   // stage 2: your order (cs is a copy below)
     cs.forEach(c => { const p = placeById(c.dest); if (p) out.push({ deck: p.deck, placeId: c.dest, mins: 2, tag: 'deliver', hold: 'cartfull', crate: c.key || c.id, opts: { text: haulName(c) + ' delivered.' } }); });
     out.push({ deck: 5, placeId: dock, mins: 2, tag: 'return', hold: 'cart', opts: { text: 'The cart back on its dock.' } });
   }
@@ -40277,7 +40277,7 @@ function haulStops(j) {
 function haulTake(j, id) {                               // a crate off the hold's stack onto this run's cart (once); a part from its shelf (manifestRun)
   if (!id || (j.got || []).includes(id)) return false;
   (j.got = j.got || []).push(id); const c = (j.crates || []).find(x => (x.key || x.id) === id);
-  if (c && c.part) { if (typeof takePart === 'function') takePart(c.id); } else if (typeof manifestTake === 'function') manifestTake(id);
+  if (c && c.part) { if (typeof takePart === 'function' && !takePart(c.id)) (j.empty = j.empty || []).push(id); } else if (typeof manifestTake === 'function') manifestTake(id);
   return true;
 }
 if (typeof jobKindAdd === 'function' && typeof haulOn === 'function') jobKindAdd('haul', { tier: 1, junior: true, work: 0, text: 'Manifest run',
@@ -40296,11 +40296,11 @@ if (typeof jobKindAdd === 'function' && typeof haulOn === 'function') jobKindAdd
   stepDone(j, k, res, t) {
     const st = haulStops(j), s = st[k]; if (!s) return null;
     const c = (j.crates || []).find(x => (x.key || x.id) === s.crate);
-    if (s.tag === 'load') { haulTake(j, s.crate); return c ? haulName(c) + ' on the cart.' : null; }
+    if (s.tag === 'load') { haulTake(j, s.crate); return c ? ((j.empty || []).includes(s.crate) ? 'No ' + c.id + ' on the shelf.' : haulName(c) + ' on the cart.') : null; }
     if (s.tag === 'deliver' && c) {
       simNote('haul', { stop: c.dest, id: c.id });
       if (j.src && !j.delivered && st.every((x, i) => x.tag !== 'deliver' || i === k || (j.stepsDone || []).includes(i))) {   // a parts run: all there
-        j.delivered = t; simNote('manifestRun', { job: j.id, for: j.for || null, to: c.dest, parts: (j.crates || []).map(x => x.id) });
+        j.delivered = t; simNote('manifestRun', { job: j.id, for: j.for || null, to: c.dest, parts: (j.crates || []).filter(x => !(j.empty || []).includes(x.key || x.id)).map(x => x.id) });   // what really came (an empty shelf's part didn't, 0.45.17)
       }
       return haulName(c) + ' delivered to ' + haulWhere(c) + '.';
     }
@@ -40325,19 +40325,21 @@ function haulTidy(j) {
   if (SHIP.works && SHIP.works.rank !== 'junior') worksSideXp(1, 'haul');
   simNote('haulTidy', { job: j.id, moves }); return true;
 }
-function haulOrderAsk(j) {                               // pick the next stop until all are placed; Cancel keeps the rest as they are
-  const cs = (j.crates || []).filter(c => !(j.order || []).includes(c.key || c.id));
-  if (cs.length <= 1) { j.order = (j.order || []).concat(cs.map(c => c.key || c.id)); return; }
-  deviceChoose({ title: 'Manifest run', text: (j.order || []).length ? 'And next?' : 'Which stop first? Fewer lift rides makes a tidy run.', choices: cs.map(c => haulName(c) + ' · ' + haulWhere(c)) }, i => {
-    if (!cs[i]) { j.order = (j.order || []).concat(cs.map(c => c.key || c.id)); return; }
-    j.order = (j.order || []).concat([cs[i].key || cs[i].id]); if (typeof simTimeout === 'function') simTimeout(() => haulOrderAsk(j), 400); else haulOrderAsk(j);
+function haulOrderAsk(j, got = []) {                     // pick the next stop until all are placed; Cancel keeps the rest as they are. The picks build up
+  const cs = (j.crates || []).filter(c => !got.includes(c.key || c.id));   // apart and become j.order only when complete and nothing's delivered yet: the load
+  const set = o => { if (!jobStops(j).some(s => s.step === 'deliver' && s.done)) j.order = o; };   // stops never move, the deliver stops only before the first (R5, 0.45.17)
+  if (cs.length <= 1) return set(got.concat(cs.map(c => c.key || c.id)));
+  const shown = deviceChoose({ title: 'Manifest run', text: got.length ? 'And next?' : 'Which stop first? Fewer lift rides makes a tidy run.', choices: cs.map(c => haulName(c) + ' · ' + haulWhere(c)) }, i => {
+    if (!cs[i]) return set(got.concat(cs.map(c => c.key || c.id)));
+    const next = got.concat([cs[i].key || cs[i].id]); if (typeof simTimeout === 'function') simTimeout(() => haulOrderAsk(j, next), 400); else haulOrderAsk(j, next);
   });
+  if (!shown && got.length) set(got.concat(cs.map(c => c.key || c.id)));
 }
 if (typeof jobKindAdd === 'function' && typeof haulOn === 'function') WORK_TICKS.push((now, skip) => {
   if (skip || typeof myJob !== 'function') return; const j = myJob();
   if (!j || j.kind !== 'haul' || j.src || j.only || j.orderAsked || !haulFree(worksDay(now))) return;
   const st = jobStops(j); if (st.some(s => s.step === 'deliver' && s.done) || new Set((j.crates || []).map(c => c.dest)).size < 2) return;
-  j.orderAsked = true; j.order = []; haulOrderAsk(j);
+  j.orderAsked = true; haulOrderAsk(j);
 });
 // manifestRun(list, to, o) -> job id | null (Step 4, 0.45.12; E2's 24h team parts call it): a run of parts (names, up to
 // CART_CRATES) from their shelves in main storage to `to` (a place id, or a machine id: its panel), the cart there and back,
@@ -40347,7 +40349,7 @@ if (typeof jobKindAdd === 'function' && typeof haulOn === 'function') WORK_TICKS
 const MANIFEST_SLOT = 30;
 function manifestRun(list, to, o = {}) {
   if (typeof jobMake !== 'function' || !JOB_KINDS.haul) return null;
-  const parts = (Array.isArray(list) ? list : []).filter(p => typeof p === 'string' && p).slice(0, CART_CRATES);
+  const parts = (Array.isArray(list) ? list : []).filter(p => typeof p === 'string' && p && !(p in STOCK && !(SHIP.stores[p] > 0))).slice(0, CART_CRATES);   // none on its shelf: not on the run (R5, 0.45.17)
   const m = typeof machineById === 'function' && to ? machineById(to) : null, dest = m ? panelPlace(m.id) : to;
   if (!parts.length || !dest || !placeById(dest) || !haulDock()) return null;
   const t = Number.isFinite(o.at) ? Math.floor(o.at) : Math.floor(shipNow()), until = Number.isFinite(o.until) ? o.until : Math.floor(t / 1440) * 1440 + DAY_SHIFT[1];
@@ -40442,7 +40444,7 @@ if (typeof jobKindAdd === 'function' && typeof haulOn === 'function' && JOB_KIND
 // `work` line upkeep.rack). Saved: SHIP.works.side.upkeep = { done, kept, rack, charge } (read defensively). Only with
 // E3's places in the build. Nothing drawn, no keys.
 // =====================================================================
-const TOOL_UPKEEP = { scanner: { wait: true, mins: 5, label: 'Recharge the scanner' }, pipekit: { mins: 2, label: 'Clean and re-seal the pipe kit' }, logger: { mins: 1, label: 'Check the logger' } }, RACK_MINS = 3;
+const TOOL_UPKEEP = { scanner: { wait: true, mins: 5, label: 'Recharge the scanner' }, pipekit: { mins: 2, label: 'Clean and re-seal the pipe kit' }, logger: { mins: 1, label: 'Check the logger' }, tester: { mins: 1, label: 'Check the circuit tester' } }, RACK_MINS = 3;   // the tester (m15) too, so "all charged" counts it (R5, 0.45.17)
 const benchOn = () => (DECKS[5].places || []).some(p => p.id === '5-bench-you');   // (not placeById at load: its index is built once)
 const benchWeek = (t = shipNow()) => Math.floor((worksDay(t) - 1) / 7);
 const benchTools = () => Object.keys(TOOL_UPKEEP).filter(hasTool);
