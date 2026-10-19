@@ -408,7 +408,7 @@ P1FIRST = r"""(() => {
   const c = caseById(C.p1), j = c && caseJob(c); out.staged = !!c; out.p1 = C.p1; if (!c) return out;
   out.machine = j.machine; out.cause = c.cause; out.sus = c.sus.slice().sort(); out.train = c.train; out.reserved = j.reserved; out.hidden = caseHidden(j); out.wait = c.wait;
   out.logs = c.clues.map(k => [k.src.m, k.src.log, k.kills.slice(), k.at]);
-  setShipNow(11 * 1440 + 540); machinesNow(); caseTick(); out.waitingNoRow = c.wait;
+  setShipNow(11 * 1440 + 540); machinesNow(); caseTick(); out.waitingNoRow = c.wait; out.rowSelf = caseOpened('p1');   // with the lesson done the ladder may open the row itself
   W.op = { 12: ['m9', 'p1'] }; setShipNow(11 * 1440 + 560); machinesNow(); caseTick();
   out.shown = !c.wait; out.title = j.title; out.by = c.by; out.card = caseCard(j); out.cardBoard = jobCard(j); out.parts = j.parts.slice();
   out.at0 = caseAt(j); out.stop0 = (jobStops(j).slice(-1)[0] || {}).places;
@@ -703,7 +703,7 @@ def run(path):
         check(not F1.get('before') and F1.get('staged') and F1.get('machine') == '3-pump-1' and F1.get('cause') == 'pump' and F1.get('train') and F1.get('reserved') == 21 and F1.get('hidden') and F1.get('wait'), f"P1's first: 3-pump-1 from Day 11 16:00, slot 21, hidden: {F1}")
         if F1.get('staged'):
             check(F1['sus'] == sorted(['pump', '3-recycler-1:membrane', '3-filter-1:cartridge', '5-valve-2:valve']), f"the page's suspects: {F1['sus']}")
-            check(F1['waitingNoRow'] and F1['shown'] and F1['by'] in ('calder', 'halloran-emeka'), f"shown once the p1 row opens, with {F1.get('by')}")
+            check((F1['waitingNoRow'] or F1['rowSelf']) and F1['shown'] and F1['by'] in ('calder', 'halloran-emeka'), f"shown once the p1 row opens, with {F1.get('by')}")
             check('Showers on Deck 4' in F1['title'] and 'evening' in F1['title'] and 'pump' not in F1['title'].lower(), f"the card: {F1['title']!r}")
             check(F1['cardBoard'] == F1['card'] or not st.get('hookCard', True), f"the board card is the case's (section 17's jobCard hook): {F1['cardBoard']}")
             check(F1['at0'] == '3-recycler-1' and F1['scan'] is None and F1['parts'] == [], f"the arrow to the top of the line, no scanner, no part: {F1['at0']} {F1['scan']}")
