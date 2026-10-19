@@ -13,7 +13,7 @@ Passed tips (take these):
 - Lines: W2 **c058947** (0.48.110; contains the playtest-2 lines 6a5d34a and Step 4 batch 1 b00e08b).
 
 Open:
-- E3 626a907 (0.53.6, M10 workshop + tinkering): PASS WITH FIXES, waiting for E3's next hash. Fix 1: shopFetch with an empty shelf skips the make stop (it clears j.parts, then ticks index k). Fix 2: the made thing must go into your hands (SHIP.player.carry) and be handed over in person (the page); or the lead accepts the chat-button shortcut. Also check that E3 sets flag train.m10.lead (it does, through worksTeach).
+- E3 626a907 (0.53.6, M10 workshop + tinkering): PASS WITH FIXES, waiting for E3's next hash. Fix 1: shopFetch with an empty shelf skips the make stop (it clears j.parts, then ticks index k). Fix 2: the made thing must go into your hands (SHIP.player.carry) and be handed over in person (the page). Lead 17 decided ~05:50: follow the page, no chat-button shortcut. Also check that E3 sets flag train.m10.lead (it does, through worksTeach).
 - E2 b6130f6 (0.51.6, 24o leaks + 24r irrigation + the one-owner ladder-row fix): see the reviews file (it may be finished there).
 - E2 dd0ec46 (0.51.7, 24q rewiring): not reviewed yet.
 - Later rounds (summary page step4-summary.html): E1 M11 bench/M12 logbook, stages 2-3; E2 M8 team parts, favour cases, tickets; E3 cabin touches + stars (24t), M17 lift roof. Playtest 2 items from U and X (brief-playtest2.md).
