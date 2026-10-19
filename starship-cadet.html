@@ -37385,7 +37385,7 @@ const TL_CSS = `
 .tlx{margin:2px 0 8px}
 .tlx .tl-sc{display:flex;flex-wrap:wrap;justify-content:space-between;gap:2px 8px;margin:2px 0 2px;font-variant-numeric:tabular-nums}
 .tlx .tl-sc b{color:var(--crt-hot);font-weight:700}
-.tlx .tl-pz{width:max-content;max-width:100%;margin:2px auto 4px;padding:1px 10px;border:1px solid var(--crt-dim);border-radius:999px;font-size:.8em;line-height:1.4;text-align:center}   /* 0.72.2 (HUD U): the paused clock, as Lightdisc's line under its score */
+.tlx .tl-pz{width:max-content;max-width:100%;margin:2px auto 4px;padding:1px 10px;border:1px solid var(--crt-dim);border-radius:10px;font-size:15px;line-height:1.35;text-align:center}   /* 0.72.2 (HUD U): the paused clock, as Lightdisc's line under its score */
 .tlx .tl-pz[hidden]{display:none}
 .tlx .tl-bd{display:grid;grid-template-columns:repeat(6,1fr);width:min(100%,336px,max(264px,calc(66vh - 230px)));margin:4px auto 8px;border:2px solid var(--crt-dim);border-radius:10px;overflow:hidden;touch-action:manipulation}
 .tlx .tl-c{position:relative;min-height:44px;aspect-ratio:1;padding:0;margin:0;border:0;border-radius:0;background:transparent}
@@ -37458,7 +37458,7 @@ function tilesDraw() {   // draw the game into its persistent element (the devic
   const pts = document.createElement('span'), B = n => Object.assign(document.createElement('b'), { textContent: n });
   pts.append('You ', B(s.sc[0]), ' · ' + G.name + ' ', B(s.sc[1]));
   const clk = Object.assign(document.createElement('span'), { textContent: 'Ship time ' + hhmm(SHIP.time.min) });   // held while you play (PAUSE.tiles, below); it runs again on the result screen
-  { let pz = false; try { pz = !!(PAUSE.tiles && PAUSE.tiles()); } catch (e) { pz = false; } root.querySelector('.tl-pz').hidden = !pz; }   // 0.72.2 (HUD U, the user's Step 3 ask): say so under the score, exactly while it's held
+  { let pz = false; try { pz = !!(PAUSE.tiles && PAUSE.tiles()); } catch (e) { pz = false; } const pe = root.querySelector('.tl-pz'); pe.hidden = !pz; if (pz && !pe.dataset.t) { let t = null; try { t = careerText('tiles.paused'); } catch (e) { t = null; } pe.dataset.t = 1; if (t) pe.textContent = (/^⏸/.test(t) ? '' : '⏸ ') + t; } }   // 0.72.2 (HUD U, the user's Step 3 ask): say so under the score, exactly while it's held
   sc.append(pts,
             Object.assign(document.createElement('span'), { textContent: turnTxt + ' · ' + Math.min(R.turns, Math.floor(s.plies / 2) + 1) + '/' + R.turns }), clk);
   for (const b of root.querySelectorAll('.tl-c')) {
