@@ -2460,6 +2460,21 @@ They checked:
 **deck_check.py** (0.6.8) does that: `CADET_CHROME=/opt/pw-browsers/chromium python3 deck_check.py BUILD.html` visits every deck in `DECKS` and checks every room tile and every tappable item can be reached from the lift, lists the rooms nobody can get into yet (locked cabins, sealed rooms; not failures), flags any room you can only partly get into, lists the active crew and draw calls, and checks Deck 4's memory over round trips. Run it on every turn alongside cadet_test.py.
 
 
+## Kayak prototype (White water, seat K1, 2026-10-19)
+
+A standalone page, `kayak-proto.html`, like `lightdisc-proto.html`: NOT part of the game. The user tries it on its own link and approves it before it's built into the rec deck. Brief: `plans/brief-kayak-proto.md` (claude/lead-pillar1); design: `plans/rec-minigames-plan.html` "Kayaks" (claude/p5-design).
+
+- **What it is:** one lap of the river hall's loop (start and finish at the dock): west along the slow channel, up the stern end, east down the fast white-water run under the windows, through the wave gate's standing waves, round the bend at the bow end (it runs against you, except right on the inside), back to the dock. No gates, no failing, no times on screen: bests are said in words ("your best lap yet"), kept in `localStorage` per mode.
+- **Controls:** the thumb's left-right is where you head (left edge = hard left of the channel, about 70°); lift and you hold your line; a tap is a strong stroke (a second finger's tap strokes without moving your aim). Mouse and arrow keys aim, a click or Space strokes.
+- **Stamina:** strokes and every second fighting the current cost it; eddies (behind the five rock banks and the island's bow corner) refill it fast, riding the current a little. Empty: you stop paddling and drift with the current, slumped, until it's back to half (about 4 s).
+- **The rules (section 5), pure:** `kyNew`, `kyStep`, `kyPaper`, `kyClone`, fixed 60 steps a second, one seeded stream as plain state (`g.rs`), no `Math.random`, no DOM. The water is a function of place (section 4: `loc` gives distance round the loop `s` and distance out from the island `d`; `water` gives the flow there). Crew are the same rules with an autopilot (`aiInput`: a line by skill, a seeded wobble, strokes when the water's against them). Events go in `g.ev` for the page to show. When it's integrated, the game keys for seeds are proposed as 833-838 (the lead confirms then).
+- **Look:** the game's RIV numbers (room-local), the game's water shader (one opaque water; the fast run adds foam), rock banks, island, ferns, wave gate, dock, rack and climbing wall, all in two merged meshes. The kayak is the game's hull at 0.8 size (2.2 m: the channels are 1.6 wide), the 1.3 m paddle, a helmet, rec kit. Foam streaks ride the current (one buffer, 3 cm above the water). The stamina meter and the stroke ring are screen overlay. Draw calls in a go: about 10-16.
+- **Judgement calls (told to the lead):** "slow loop only" is the same loop with the pumps low (no white water, no standing waves, a gentle bend); "fast run open" turns them up; Holt's notch makes the standing waves bigger. Paddling with crew takes up to two (the lead's call); the regatta heat demo starts all four in two rows, with the next heat worked out on paper. The kayak is 0.8 of the game's size. The dock sits on the bank beside the slow channel rather than over it.
+- **Pace:** a racing lap about 50 s, a steady lap with no strokes about 90 s.
+- **Check:** `NODE_PATH=$(npm root -g) node tools/kayak_proto_check.js` (about a minute and a half; paths come from the repo, three.js r128 from `/tmp/cadet-work` or `THREE_JS`). It drives a real thumb (steer, lift, taps, a full lap), the stamina rules, frame rates (60, 30, 20 fps and a live go cloned mid-way all equal the go on paper), seeded crew and regatta orders, draw calls, and takes shots into `plans/shots-kayak/` (phone upright and sideways, desktop).
+- **Test hooks:** `window.KY` (start, steps, paper, fps, state, set, water, advice, rate, calls, pause, leave). `?seed=N`, `?debug`.
+- **Chat lines** in `CREW[...].lines` are stand-ins until the writers' `kayak.<kind>` lines arrive.
+
 ## Working method
 
 - Edit the build in place and never rewrite the whole file. Make small exact-string edits, each matching once.

@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Kayak Prototype</title>
+<!--
+  White water: the kayak mini-game prototype for Starship Cadet. A standalone test page, NOT part of the game file.
+  Follows plans/rec-minigames-plan.html ("Kayaks") and plans/brief-kayak-proto.md: one lap of the river hall's loop
+  (the slow channel, then the fast white-water run along the windows), steering where your thumb is, a tap for a
+  strong stroke, currents, standing waves, the bend, eddies and a stamina meter. No gates, no failing, no times.
+  The rules (section 5) are pure: kyNew, kyStep, kyPaper, kyClone; fixed 60 steps a second, one seeded stream per go
+  kept as plain state (g.rs), no Math.random, no DOM. Rules from the game kept here: 1 unit = 1 tile, room-local
+  river numbers (RIV), every colour through col(), no coplanar surfaces, one opaque water plus foam on the fast run.
+  Test hooks: window.KY. ?seed=N sets the default seed, ?debug shows draw calls.
+-->
+<style>
+  :root { --cy: #50e6ff; --co: #ff7a5c; --ink: #e8f2f5; --dim: #9fb2b8; --panel: rgba(8, 12, 20, .9); --line: rgba(255,255,255,.14); }
+  html, body { margin: 0; height: 100%; background: #05070d; color: var(--ink); font: 15px/1.35 system-ui, -apple-system, "Segoe UI", sans-serif; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; }
+  canvas { display: block; }
+  .hide { display: none !important; }
+  button { font: inherit; color: var(--ink); background: rgba(255,255,255,.08); border: 1px solid var(--line); border-radius: 999px; padding: 8px 16px; cursor: pointer; }
+  button:active { transform: scale(.97); }
+  button.go { background: #0f3440; border-color: var(--cy); color: #dffaff; font-weight: 600; }
+  #hud { position: fixed; left: 0; right: 0; top: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: calc(env(safe-area-inset-top) + 8px) 12px 0; pointer-events: none; }
+  .pill { background: rgba(5,8,14,.7); border: 1px solid var(--line); border-radius: 999px; padding: 4px 14px; font-weight: 600; font-size: 14px; }
+  .pz { background: rgba(5,8,14,.62); border: 1px solid rgba(80,230,255,.35); border-radius: 10px; padding: 3px 10px; font-size: 12px; color: #bfefff; }
+  #leave { position: fixed; right: 12px; bottom: calc(env(safe-area-inset-bottom) + 12px); font-size: 13px; padding: 6px 14px; background: rgba(5,8,14,.6); }
+  #call { position: fixed; left: 0; right: 0; top: 30%; text-align: center; font-size: 26px; font-weight: 700; text-shadow: 0 0 12px rgba(0,0,0,.9); pointer-events: none; }
+  #stam { position: fixed; width: 180px; transform: translate(-50%, -100%); pointer-events: none; text-align: center; }
+  #stam .bar { height: 12px; border-radius: 8px; background: rgba(5,8,14,.75); border: 1px solid rgba(255,255,255,.35); overflow: hidden; }
+  #stam .fill { height: 100%; width: 100%; border-radius: 8px; background: #5ee06a; transition: background .3s; }
+  #stam .lab { font-size: 11px; font-weight: 600; color: #e8f2f5; text-shadow: 0 0 6px #000, 0 0 2px #000; margin-bottom: 2px; letter-spacing: .03em; }
+  #stam.tired .fill { animation: puff 1s ease-in-out infinite; }
+  @keyframes puff { 50% { opacity: .45; } }
+  .ring { position: fixed; width: 70px; height: 70px; margin: -35px 0 0 -35px; border-radius: 50%; border: 3px solid #dffaff; pointer-events: none; animation: ring .45s ease-out forwards; }
+  @keyframes ring { from { transform: scale(.35); opacity: 1; } to { transform: scale(1.25); opacity: 0; } }
+  .tag { position: fixed; transform: translate(-50%, -100%); font-size: 12px; font-weight: 600; padding: 1px 7px; border-radius: 6px; background: rgba(5,8,14,.55); pointer-events: none; white-space: nowrap; }
+  .say { position: fixed; transform: translate(-50%, -100%); font-size: 13px; padding: 4px 9px; border-radius: 10px; background: #f3efe4; color: #1b1f24; pointer-events: none; white-space: nowrap; }
+  #how { position: fixed; left: 10px; right: 10px; top: calc(env(safe-area-inset-top) + 74px); display: flex; align-items: center; gap: 8px; background: var(--panel); border: 1px solid var(--cy); border-radius: 14px; padding: 9px 10px 9px 14px; pointer-events: none; max-width: 520px; margin: 0 auto; }
+  #how .t { flex: 1; } #how .n { color: var(--cy); font-size: 12px; display: block; } #how button { pointer-events: auto; padding: 6px 12px; font-size: 13px; }
+  .over { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; padding: 16px; overflow-y: auto; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 18px; width: 100%; max-width: 440px; box-sizing: border-box; margin: auto; }
+  h1 { margin: 0 0 2px; font-size: 30px; letter-spacing: .06em; background: linear-gradient(90deg, var(--cy), #fff 50%, var(--co)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .sub { color: var(--dim); font-size: 13px; margin-bottom: 12px; }
+  .modes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .mode { text-align: left; border-radius: 12px; padding: 9px 10px; }
+  .mode b { display: block; } .mode small { color: var(--dim); display: block; font-size: 12px; margin-top: 2px; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; margin-top: 10px; font-size: 13px; color: var(--dim); }
+  .row label { display: flex; gap: 6px; align-items: center; }
+  .row input[type=number] { width: 64px; background: #0b111b; color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 4px 6px; font: inherit; }
+  select { background: #0b111b; color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 5px; font: inherit; }
+  h2 { font-size: 14px; margin: 14px 0 6px; color: var(--ink); }
+  .res h2 { font-size: 23px; margin: 0 0 6px; }
+  .res p { margin: 4px 0; color: var(--dim); font-size: 14px; }
+  .btns { display: flex; gap: 10px; margin-top: 14px; }
+  #dbg { position: fixed; left: 8px; bottom: 6px; font: 11px monospace; color: #6f8a92; pointer-events: none; }
+</style>
+</head>
+<body>
+<div id="hud" class="hide"><div class="pill" id="status"></div><div class="pz">⏸ The ship's clock is paused while you paddle</div></div>
+<div id="call" class="hide"></div>
+<div id="stam" class="hide"><div class="lab">Stamina</div><div class="bar"><div class="fill"></div></div></div>
+<button id="leave" class="hide">Leave</button>
+<div id="how" class="hide"><div class="t"><span class="n"></span><span class="x"></span></div><button id="howNext">Next</button><button id="howSkip">Skip</button></div>
+
+<div id="menu" class="over">
+  <div class="card">
+    <h1>WHITE WATER</h1>
+    <div class="sub">The river hall, CSV Wren. A prototype to feel the kayak game: one lap of the loop, the slow channel, then the white water along the windows. No gates: the water is the challenge.</div>
+    <div class="modes">
+      <button class="mode" data-m="alone"><b>Paddle alone</b><small>Just you and the river.</small></button>
+      <button class="mode" data-m="crew"><b>Paddle with crew</b><small>They keep their own pace.</small></button>
+      <button class="mode" data-m="race"><b>Race me?</b><small>The same crew, racing you.</small></button>
+      <button class="mode" data-m="regatta"><b>Regatta heat</b><small>A heat of four (a demo).</small></button>
+    </div>
+    <h2>Who comes along? (up to two)</h2>
+    <div class="row" style="margin-top:0" id="crewPick"></div>
+    <h2>Your progress (prototype only)</h2>
+    <div class="row" style="margin-top:0">
+      <label><input type="checkbox" id="fastOn" checked> Fast run open <small>(Holt opens it after three Paddle club visits)</small></label>
+      <label><input type="checkbox" id="gateUp"> Wave gate up a notch <small>(Holt, as you get better)</small></label>
+    </div>
+    <div class="row">
+      <label><input type="checkbox" id="howOn" checked> How to play</label>
+      <label><input type="checkbox" id="rm"> Reduced motion</label>
+      <label><input type="checkbox" id="snd" checked> Sound</label>
+      <label>Seed <input type="number" id="seed" value="1" min="1"></label>
+    </div>
+    <div class="row" id="rec"></div>
+  </div>
+</div>
+
+<div id="result" class="over hide">
+  <div class="card res">
+    <h2 id="resT"></h2>
+    <div id="resS"></div>
+    <div class="btns"><button class="go" id="again">Again</button><button id="done">Done</button></div>
+  </div>
+</div>
+<div id="dbg"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+'use strict';
+// =====================================================================
+// 1. SETUP (the game's conventions: sRGB colours through col(), 1 unit = 1 tile)
+// =====================================================================
+const col = h => new THREE.Color(h).convertSRGBToLinear();
+const Q = new URLSearchParams(location.search);
+const DEBUG = Q.has('debug');
+const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+document.body.prepend(renderer.domElement);
+const scene = new THREE.Scene();
+scene.background = col('#05070d');
+const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, .1, 120);
+scene.add(new THREE.HemisphereLight(col('#cfe6f0'), col('#2a2620'), .85));
+const sun = new THREE.DirectionalLight(col('#ffffff'), .6); sun.position.set(-3, 10, 7); scene.add(sun);
+
+// The river hall, room-local, as in the game (KIT.recRiver): the loop round a rock island. Bow is +x, the hull
+// windows are on the north side (small z), the concourse glass on the south. The fast run is along the windows.
+const RIV = { x0: 3.0, x1: 13.6, z0: .5, z1: 5.6, in0: 4.6, in1: 12.0, iz0: 2.1, iz1: 4.0 };
+const HALL = { w: 16, d: 7, h: 3.2 };
+const WY = .36;                 // the water's surface (the banks' tops are at .46, the island's at .62)
+const YOU_C = '#3fbf5a';        // the green kayak ("the green one is always out")
+
+// --- small helpers: merged vertex-coloured meshes (one draw call each) ---
+function partsToGeo(parts) {
+  const P = [], N = [], C = [];
+  for (const p of parts) {
+    const g = (p.g.index ? p.g.toNonIndexed() : p.g.clone()).applyMatrix4(p.m);
+    const c = col(p.c), pa = g.attributes.position.array, na = g.attributes.normal.array;
+    for (let i = 0; i < pa.length; i += 3) { P.push(pa[i], pa[i + 1], pa[i + 2]); N.push(na[i], na[i + 1], na[i + 2]); C.push(c.r, c.g, c.b); }
+    g.dispose();
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(P, 3));
+  geo.setAttribute('normal', new THREE.Float32BufferAttribute(N, 3));
+  geo.setAttribute('color', new THREE.Float32BufferAttribute(C, 3));
+  geo.computeBoundingSphere();
+  return geo;
+}
+const M4 = (x, y, z, sx = 1, sy = 1, sz = 1, rx = 0, ry = 0, rz = 0) => new THREE.Matrix4().compose(new THREE.Vector3(x, y, z), new THREE.Quaternion().setFromEuler(new THREE.Euler(rx, ry, rz)), new THREE.Vector3(sx, sy, sz));
+const BOX = new THREE.BoxGeometry(1, 1, 1);
+const cyl = (rt, rb, h, s = 10) => new THREE.CylinderGeometry(rt, rb, h, s);
+const SPH = new THREE.SphereGeometry(1, 16, 10);
+const ICO = new THREE.IcosahedronGeometry(1, 0);
+const LAMB = new THREE.MeshLambertMaterial({ vertexColors: true });
+const GLOWV = new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false });
+function mulberry(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const hash = (a, b, c) => { const s = Math.sin(a * 127.1 + b * 311.7 + c * 74.7) * 43758.5453; return s - Math.floor(s); };   // fixed scenery (the game's recHash idea)
+
+// =====================================================================
+// 2. THE RIVER HALL (one merged lit mesh, one glow mesh, the water, the stars)
+// =====================================================================
+const roomParts = [], glowParts = [];
+const rbox = (c, x, y, z, sx, sy, sz, rx = 0, ry = 0, rz = 0) => roomParts.push({ g: BOX, c, m: M4(x, y, z, sx, sy, sz, rx, ry, rz) });
+const rsph = (c, x, y, z, sx, sy, sz, ry = 0) => roomParts.push({ g: SPH, c, m: M4(x, y, z, sx, sy, sz, 0, ry, 0) });
+const rico = (c, x, y, z, sx, sy, sz, ry = 0) => roomParts.push({ g: ICO, c, m: M4(x, y, z, sx, sy, sz, 0, ry, 0) });
+const gbox = (c, x, y, z, sx, sy, sz) => glowParts.push({ g: BOX, c, m: M4(x, y, z, sx, sy, sz) });
+const ROCK = '#6f8a7c', ROCKD = '#4f6559', FERN = '#3f8a4a', STEEL = '#8a959c';
+function hall() {                                    // built after section 4 (it needs KY_ROCKS)
+  const R = RIV, rh = .46, t = .2;
+  rbox('#3a4a52', HALL.w / 2, -.05, HALL.d / 2, HALL.w + .4, .1, HALL.d + .4);                // the deck floor (top at 0)
+  rbox('#4c5c63', 8, .005 + .02, 6.35, 16, .04, 1.3);                                          // the walkway along the concourse glass
+  // the north wall with the hull windows (wall pieces round three big windows)
+  const WZ = -.1, wy0 = .8, wy1 = 2.6;
+  rbox('#2c3a44', 8, wy0 / 2, WZ, 16, wy0, .2); rbox('#2c3a44', 8, (wy1 + HALL.h) / 2, WZ, 16, HALL.h - wy1, .2);
+  for (const x of [.6, 5.35, 10.65, 15.4]) rbox('#33434e', x, (wy0 + wy1) / 2, WZ, x < 1 || x > 15 ? 1.2 : .5, wy1 - wy0, .24);
+  for (const x of [2.97, 8, 13.03]) { rbox('#56656e', x, (wy0 + wy1) / 2, WZ + .06, .06, wy1 - wy0, .1); }   // mullions
+  // the stern wall (the climbing wall's), the bow wall (the rack and the changing rooms' door), low glass on the south
+  rbox('#2c3a44', -.1, HALL.h / 2, HALL.d / 2, .2, HALL.h, HALL.d + .2); rbox('#2c3a44', 16.1, HALL.h / 2, HALL.d / 2, .2, HALL.h, HALL.d + .2);
+  rbox('#2a3c46', 15.98, 1.0, 5.9, .06, 2.0, .9); rbox('#d9a441', 15.94, 1.0, 5.6, .04, .08, .04);           // the door and its handle
+  rbox('#5a6578', 8, .55, 7.0, 16, .06, .06); for (let x = .5; x < 16; x += 2.5) rbox('#5a6578', x, .28, 7.0, .06, .56, .06);   // the rail at the concourse glass
+  // the outer bank, grey-green rock, and the river bed under the water
+  rbox(ROCK, (R.x0 + R.x1) / 2, rh / 2, R.z0 - t / 2, R.x1 - R.x0, rh, t); rbox(ROCK, (R.x0 + R.x1) / 2, rh / 2, R.z1 + t / 2, R.x1 - R.x0 + 2 * t, rh, t);
+  rbox(ROCK, R.x0 - t / 2, rh / 2, (R.z0 + R.z1) / 2 - t / 2, t, rh, R.z1 - R.z0 + t); rbox(ROCK, R.x1 + t / 2, rh / 2, (R.z0 + R.z1) / 2 - t / 2, t, rh, R.z1 - R.z0 + t);
+  rbox('#6fc3c9', (R.x0 + R.x1) / 2, .015, (R.z0 + R.z1) / 2, R.x1 - R.x0, .03, R.z1 - R.z0);
+  // the island: a long rock bank with boulders and ferns
+  rbox(ROCK, (R.in0 + R.in1) / 2, .31, (R.iz0 + R.iz1) / 2, R.in1 - R.in0, .62, R.iz1 - R.iz0);
+  for (let k = 0; k < 9; k++) { const x = R.in0 + .5 + k * .85, z = R.iz0 + .35 + hash(k, 1, 7) * 1.2, s = .28 + hash(k, 2, 7) * .22; rsph(k % 3 ? ROCK : ROCKD, x, .62, z, s * 1.4, s, s); }
+  for (let k = 0; k < 7; k++) { const x = R.in0 + .9 + k * 1.05, z = R.iz0 + .5 + hash(k, 3, 7) * .9;
+    for (let q = 0; q < 5; q++) { const a = q * 1.257 + k; rbox(FERN, x + Math.sin(a) * .18, .72, z + Math.cos(a) * .18, .07, .02, .5, -.5 * Math.cos(a), a, .5 * Math.sin(a)); } }
+  // the rock banks that stick out into the water (KY_ROCKS, the rules' obstacles): boulder clusters, tops above the water
+  for (const o of KY_ROCKS) for (let k = 0; k < 4; k++) {
+    const a = k * 1.7 + o.x, r = o.r * (k ? .55 : .85);
+    rico(k % 2 ? ROCKD : ROCK, o.x + (k ? Math.cos(a) * o.r * .45 : 0), .3 + (k ? .02 : .1), o.z + (k ? Math.sin(a) * o.r * .45 : 0), r, .32 + (k ? 0 : .12), r, a);
+  }
+  rico(ROCKD, R.in1 + .05, .55, R.iz0 + .05, .3, .3, .3, .4);                                  // the boulder on the island's bow corner
+  // the wave gate across the fast run near the bow end: two posts, a beam with its lights, a ramp under the water
+  for (const z of [R.z0 - .05, R.iz0 + .05]) rbox(STEEL, 11.3, .85, z, .16, 1.7, .16);
+  rbox(STEEL, 11.3, 1.7, (R.z0 + R.iz0) / 2, .22, .2, R.iz0 - R.z0 + .3); gbox('#50e6ff', 11.19, 1.66, (R.z0 + R.iz0) / 2, .04, .05, R.iz0 - R.z0);
+  rbox(STEEL, 11.5, .26, (R.z0 + R.iz0) / 2, .9, .1, R.iz0 - R.z0 - .04, 0, 0, .12);
+  // the kayak dock on the inboard bank (the finish), a pennant pole
+  rbox('#a0703f', 10.4, .5, 5.95, 2.4, .08, .9); for (let k = 0; k < 8; k++) rbox('#5a3d22', 9.3 + k * .3, .545, 5.95, .02, .012, .86);
+  rbox(STEEL, 11.5, 1.1, 6.3, .05, 1.2, .05); roomParts.push({ g: new THREE.ConeGeometry(.22, .6, 3), c: '#ffd23f', m: M4(11.5 + .3, 1.55, 6.3, 1, 1, .1, 0, 0, -Math.PI / 2) });
+  // the kayak rack on the bow wall: red, yellow and blue kayaks, paddles alongside
+  for (const z of [2.7, 4.7]) { rbox(STEEL, 15.75, .8, z, .08, 1.6, .08); for (const y of [.45, .85, 1.25]) rbox(STEEL, 15.55, y, z, .5, .05, .06); }
+  ['#e0412f', '#f2c230', '#2f6fe0'].forEach((c, k) => { rsph(c, 15.5, .52 + k * .4, 3.7, .27, .12, 1.1); });
+  // the climbing wall at the stern: ochre panels, holds in four colours, the bell at the top
+  rbox('#c08a3e', .35, (HALL.h - .1) / 2, 4.3, .3, HALL.h - .1, 4.6);
+  for (let k = 0; k < 6; k++) rbox('#9a4a28', .52, .6 + k * .4, 2.5 + hash(k, 5, 9) * 3.6, .06, .7 + hash(k, 4, 9) * .9, .9);
+  ['#ff4f6d', '#ffd23f', '#3fa9ff', '#5ee06a'].forEach((c, r) => { for (let k = 0; k < 9; k++) rico(c, .56, .35 + k * .3, 2.0 + 4.6 * (r + .5) / 4 + (hash(r, k, 11) - .5) * .7, .07, .06, .08); });
+  roomParts.push({ g: cyl(.09, .2, .26, 14), c: '#d9a441', m: M4(.65, HALL.h - .35, 4.3) });
+  // glow trim: the deck's teal line along the walls, coral over the door
+  gbox('#50e6ff', 8, .9, .01, 16, .04, .04); gbox('#ff7a5c', 15.9, 2.15, 5.9, .04, .05, .9);
+  scene.add(new THREE.Mesh(partsToGeo(roomParts), LAMB));
+  scene.add(new THREE.Mesh(partsToGeo(glowParts), GLOWV));
+}
+// stars outside the hull windows (fixed, from a fixed stream)
+(function stars() {
+  const r = mulberry(4242), P = [];
+  for (let i = 0; i < 420; i++) P.push(-6 + r() * 28, -2 + r() * 8, -2.5 - r() * 10);
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3));
+  scene.add(new THREE.Points(g, new THREE.PointsMaterial({ color: col('#dfe8ff'), size: 1.6, sizeAttenuation: false })));
+})();
+// the water (the game's recWater): slow caustics; the fast run adds white foam streaming with the flow. Opaque.
+function recWater(deep, shallow, o = {}) {
+  const U = { uT: { value: 0 }, uDeep: { value: col(deep) }, uShallow: { value: col(shallow) }, uFoam: { value: o.foam || 0 }, uFlow: { value: o.flow || 0 }, uA: { value: 1 } };
+  const m = new THREE.ShaderMaterial({ uniforms: U,
+    vertexShader: 'varying vec3 vW; void main() { vec4 w = modelMatrix * vec4(position, 1.0); vW = w.xyz; gl_Position = projectionMatrix * viewMatrix * w; }',
+    fragmentShader: `uniform float uT, uFoam, uFlow, uA; uniform vec3 uDeep, uShallow; varying vec3 vW;
+      void main() {
+        vec2 p = vW.xz * 1.6; p.x -= uT * uFlow;
+        float a = sin(p.x * 1.3 + uT * .8 + sin(p.y * 1.1 + uT * .5)) + sin(p.y * 1.7 - uT * .6 + sin(p.x * .9 - uT * .4));
+        float b = sin(p.x * 2.3 - p.y * 1.4 + uT * 1.1) * .5;
+        float caus = smoothstep(.35, 0.0, abs(a + b));
+        vec3 c = mix(uDeep, uShallow, .5 + .25 * a) + caus * .28;
+        if (uFoam > 0.0) {
+          float f = sin(p.x * 3.1 + sin(p.y * 4.3) * 1.5) * sin(p.y * 6.7 + p.x * .7) + sin(p.x * 5.3 - p.y * 2.1);
+          c = mix(c, vec3(.95, .98, 1.0), clamp(uFoam * smoothstep(.6, 1.6, f), 0.0, .85));
+        }
+        gl_FragColor = vec4(c, uA);
+        #include <tonemapping_fragment>
+        #include <encodings_fragment>
+      }` });
+  m.userData.U = U; return m;
+}
+function quads(rects, y) {
+  const P = [], N = [], I = [];
+  rects.forEach(([a, b, c, d], k) => { P.push(a, y, b, c, y, b, c, y, d, a, y, d); for (let q = 0; q < 4; q++) N.push(0, 1, 0); const o = k * 4; I.push(o, o + 2, o + 1, o, o + 3, o + 2); });
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(N, 3)); g.setIndex(I); return g;
+}
+const WATER = { slow: recWater('#1f8fa6', '#4fd0dc'), fast: recWater('#1f8fa6', '#4fd0dc', { foam: .9, flow: 1.4 }) };
+scene.add(new THREE.Mesh(quads([[RIV.x0, RIV.z0, RIV.x1, RIV.iz0], [RIV.in1, RIV.iz0, RIV.x1, RIV.iz1]], WY), WATER.fast));
+scene.add(new THREE.Mesh(quads([[RIV.x0, RIV.iz1, RIV.x1, RIV.z1], [RIV.x0, RIV.iz0, RIV.in0, RIV.iz1]], WY), WATER.slow));
+
+// =====================================================================
+// 3. THE KAYAKS AND THEIR PADDLERS (the game's recKayak hull at .8 size, the 1.3 m paddle, a helmet, rec kit)
+// =====================================================================
+const SKIN = ['#f3cfae', '#e3b08a', '#c98f66', '#a46c4b', '#7d4f35', '#573626'];
+const REC_TEAL = '#2f9fb0', REC_CORAL = '#ff7a5c';
+const KS = .8;                                   // the hull at .8 of the game's (2.2 m): the channels are 1.6 wide
+// The crew. Paces from the plan's people; chat lines are STAND-INS until the writers' kayak.<kind> lines arrive.
+const CREW = {
+  holt:  { name: 'Holt', full: 'Chief Bram Holt', blurb: 'Runs Paddle club. Reads the water like a book.', skin: 2, helm: '#e0412f', boat: '#e0412f',
+           cruise: .173, power: 1.0, rate: 1.0, skill: .92, reserve: .35, wob: .1,
+           lines: { go: ['Easy does it.', 'Read the water, Cadet.'], tired: ['Breathe. The eddies are there for a reason.'], bend: ['Hug the inside on the bend.'], fin: ['Tidy.'] } },
+  pell:  { name: 'Pell', full: 'Pell Okafor', blurb: 'All strokes, no plan. Great fun.', skin: 5, helm: '#f2c230', boat: '#f2c230',
+           cruise: .157, power: 1.08, rate: 1.6, skill: .45, reserve: .05, wob: .4,
+           lines: { go: ['Wheee!', 'Last one round buys tea!'], tired: ['I have no arms left.', 'Floating. On purpose.'], bend: ['Why is it going backwards?'], fin: ['Again! Again!'] } },
+  rina:  { name: 'Rina', full: 'Rina Deshi', blurb: 'Quick and neat. Says "fine" a lot.', skin: 3, helm: '#2f6fe0', boat: '#2f6fe0',
+           cruise: .184, power: 1.1, rate: 1.15, skill: .96, reserve: .3, wob: .05,
+           lines: { go: ['Fine. Let\'s go.'], tired: ['Mm. Pace yourself.'], bend: ['Inside line.'], fin: ['Fine.', 'Not bad.'] } },
+  vance: { name: 'Vance', full: 'Commander Teo Vance', blurb: 'Strong, and tells you about it.', skin: 1, helm: '#ffffff', boat: '#e0412f',
+           cruise: .178, power: 1.18, rate: 1.35, skill: .8, reserve: .2, wob: .12,
+           lines: { go: ['By the book, Cadet.'], tired: ['Regulation breather.'], bend: ['Power through the bend.'], fin: ['Textbook.'] } },
+  // paper-only paddlers for the regatta's other heats (never drawn)
+  tomas: { name: 'Tomas', cruise: .173, power: 1.05, rate: 1.2, skill: .8, reserve: .25, wob: .15 },
+  maeve: { name: 'Maeve', cruise: .162, power: 1.0, rate: 1.0, skill: .85, reserve: .3, wob: .1 },
+  calder:{ name: 'Calder', cruise: .167, power: 1.02, rate: 1.1, skill: .7, reserve: .2, wob: .2 },
+  sato:  { name: 'Sato', cruise: .167, power: 1.0, rate: .9, skill: .9, reserve: .4, wob: .08 },
+};
+const YOU = { name: 'You', full: 'You', skin: 2, helm: '#ffd23f', boat: YOU_C, cruise: .167, power: 1.0 };
+const AUTO = { cruise: .167, power: 1.0, rate: 1.2, skill: .85, reserve: .25, wob: .12 };   // your side on autopilot (the tests)
+const who = k => k === 'you' ? YOU : CREW[k];
+
+function makeBoat(look) {
+  const root = new THREE.Group();
+  const hull = new THREE.Mesh(partsToGeo([
+    { g: SPH, c: look.boat, m: M4(0, 0, 0, .34 * KS, .15, 1.38 * KS) }, { g: SPH, c: '#f4f4ee', m: M4(0, .06, 0, .2 * KS, .09, 1.2 * KS) },
+    { g: new THREE.TorusGeometry(.21, .03, 6, 16), c: '#2b2f33', m: M4(0, .13, .02, 1, 1, 1.3, Math.PI / 2) },
+  ]), LAMB);
+  root.add(hull);
+  const body = new THREE.Group(); body.position.set(0, .1, .02); body.scale.setScalar(.85); root.add(body);   // the hips, in the cockpit; leans forward when tired
+  const torso = new THREE.Mesh(partsToGeo([
+    { g: cyl(.12, .14, .42), c: REC_TEAL, m: M4(0, .24, 0) }, { g: cyl(.135, .135, .05), c: REC_CORAL, m: M4(0, .34, 0) },
+    { g: SPH, c: REC_TEAL, m: M4(0, .44, 0, .16, .06, .11) }, { g: cyl(.05, .06, .08), c: SKIN[look.skin], m: M4(0, .5, 0) },
+    { g: SPH, c: SKIN[look.skin], m: M4(0, .63, 0, .12, .13, .12) },
+    { g: new THREE.SphereGeometry(1, 14, 8, 0, Math.PI * 2, 0, Math.PI * .56), c: look.helm, m: M4(0, .66, -.01, .135, .14, .14, -.2) },
+    { g: BOX, c: '#2b2f33', m: M4(0, .7, .12, .2, .02, .06, .3) },
+  ]), LAMB);
+  body.add(torso);
+  const paddle = new THREE.Group(); paddle.position.set(0, .36, .26); body.add(paddle);   // at the hands: arms and paddle turn together
+  const arms = [];
+  for (const s of [1, -1]) arms.push({ g: cyl(.035, .03, .34), c: REC_TEAL, m: M4(s * .17, .02, -.12, 1, 1, 1, Math.PI / 2 - .3, 0, s * .4) });
+  paddle.add(new THREE.Mesh(partsToGeo([
+    { g: BOX, c: '#2b2f33', m: M4(0, 0, 0, 1.3, .024, .024) },
+    { g: SPH, c: '#e9c46a', m: M4(.69, 0, 0, .13, .065, .02, 0, .5, 0) }, { g: SPH, c: '#e9c46a', m: M4(-.69, 0, 0, .13, .065, .02, 0, -.5, 0) },
+    { g: SPH, c: SKIN[look.skin], m: M4(.22, 0, 0, .045, .045, .045) }, { g: SPH, c: SKIN[look.skin], m: M4(-.22, 0, 0, .045, .045, .045) },
+    ...arms,
+  ]), LAMB));
+  root.userData = { body, paddle, ph: 0, slump: 0 };
+  scene.add(root);
+  return root;
+}
+
+// The standing waves at the wave gate: white crests across the fast run (one merged mesh, bobbing; hidden when flat)
+const crests = new THREE.Mesh(partsToGeo([0, 1].flatMap(k => [0, 1, 2, 3].map(q => ({ g: SPH, c: '#f2f8fb', m: M4(10.95 + k * .55 + (q % 2) * .06, 0, .78 + q * .38, .16, .08, .26) })))), LAMB);
+scene.add(crests);
+
+// Flow tracers: short white streaks riding the current (and turning slowly in the eddies), one buffer, one draw.
+// They sit 3 cm above the water (never on its plane). Visual only: their own fixed stream, never the game's.
+const TRN = 150;
+const trGeo = new THREE.BufferGeometry();
+trGeo.setAttribute('position', new THREE.Float32BufferAttribute(new Float32Array(TRN * 4 * 3), 3));
+trGeo.setAttribute('color', new THREE.Float32BufferAttribute(new Float32Array(TRN * 4 * 3), 3));
+{ const idx = []; for (let i = 0; i < TRN; i++) { const a = i * 4; idx.push(a, a + 2, a + 1, a, a + 3, a + 2); } trGeo.setIndex(idx); }
+const tracers = new THREE.Mesh(trGeo, new THREE.MeshBasicMaterial({ vertexColors: true, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, toneMapped: false }));
+tracers.frustumCulled = false; scene.add(tracers);
+const TR = [], trR = mulberry(77);
+for (let i = 0; i < TRN; i++) TR.push({ x: 0, z: 0, age: 0, life: 0 });
+
+// =====================================================================
+// 4. THE LOOP: where a point is along it, and the water there (pure: shared by the rules and the drawing)
+// =====================================================================
+// The centreline runs .8 off the island (the middle of a 1.6 channel), round corners of radius .8. Along it, s goes
+// 0 at the bow end of the slow channel, west along the slow channel, north up the stern end, east down the fast run,
+// south through the bend at the bow end, and back. d is the distance out from the island (0 at its bank).
+const IN0 = RIV.in0, IN1 = RIV.in1, IZ0 = RIV.iz0, IZ1 = RIV.iz1, CW = 1.6;
+const LS = IN1 - IN0, LW = IZ1 - IZ0, LC = Math.PI / 2 * .8;
+const S_SW = LS, S_W = LS + LC, S_NW = S_W + LW, S_N = S_NW + LC, S_NE = S_N + LS, S_E = S_NE + LC, S_SE = S_E + LW, LOOP = S_SE + LC;
+const CORNERS = [
+  { s: S_SW, px: IN0, pz: IZ1, ix: 0, iz: 1, ox: -1, oz: 0 }, { s: S_NW, px: IN0, pz: IZ0, ix: -1, iz: 0, ox: 0, oz: -1 },
+  { s: S_NE, px: IN1, pz: IZ0, ix: 0, iz: -1, ox: 1, oz: 0 }, { s: S_SE, px: IN1, pz: IZ1, ix: 1, iz: 0, ox: 0, oz: 1 },
+];
+const sAtX = { south: x => IN1 - x, north: x => S_N + (x - IN0) };
+// The rock banks that stick out into the water: each has a calm eddy downstream of it, on its own side.
+// side 'in' sticks out from the island, 'out' from the outer bank. fast: on the fast run (scales with the pumps).
+const KY_ROCKS = [
+  { x: 8.2, z: RIV.z1, r: .42, side: 'out', fast: 0 }, { x: 5.8, z: IZ1, r: .45, side: 'in', fast: 0 },
+  { x: 6.6, z: IZ0, r: .55, side: 'in', fast: 1 }, { x: 8.9, z: RIV.z0, r: .5, side: 'out', fast: 1 }, { x: 10.2, z: IZ0, r: .45, side: 'in', fast: 1 },
+];
+for (const o of KY_ROCKS) o.s = o.z > 3 ? sAtX.south(o.x) : sAtX.north(o.x);
+const GATE0 = sAtX.north(10.82), GATE1 = sAtX.north(12.0), GATEP = .55;   // the standing waves: two crests across the run
+const FIN_X = 10.4;                                                     // the dock: where a go starts and ends
+const LOC = { s: 0, d: 0, nx: 0, nz: 1 };
+function loc(x, z, o = LOC) {
+  let nx, nz, d, s;
+  if (x >= IN0 && x <= IN1 && (z >= IZ1 || z <= IZ0)) {
+    if (z >= IZ1) { d = z - IZ1; nx = 0; nz = 1; s = IN1 - x; } else { d = IZ0 - z; nx = 0; nz = -1; s = S_N + (x - IN0); }
+  } else if (z >= IZ0 && z <= IZ1 && (x < IN0 || x > IN1)) {
+    if (x < IN0) { d = IN0 - x; nx = -1; nz = 0; s = S_W + (IZ1 - z); } else { d = x - IN1; nx = 1; nz = 0; s = S_E + (z - IZ0); }
+  } else if (x >= IN0 && x <= IN1) {                       // inside the island (only mid-collision): the nearest bank
+    const ds = [z - IZ0, IZ1 - z]; if (ds[0] < ds[1]) { d = 0; nx = 0; nz = -1; s = S_N + (x - IN0); } else { d = 0; nx = 0; nz = 1; s = IN1 - x; }
+  } else {
+    const c = CORNERS[x < IN0 ? (z > IZ1 ? 0 : 1) : (z < IZ0 ? 2 : 3)];
+    const rx = x - c.px, rz = z - c.pz; d = Math.hypot(rx, rz) || 1e-6; nx = rx / d; nz = rz / d;
+    const f = Math.max(0, Math.min(1, Math.atan2(rx * c.ox + rz * c.oz, rx * c.ix + rz * c.iz) / (Math.PI / 2)));
+    s = c.s + f * LC;
+  }
+  o.s = s; o.d = d; o.nx = nx; o.nz = nz; return o;
+}
+// the point at (s, d), for placing boats and tracers
+function posAt(s, d) {
+  s = ((s % LOOP) + LOOP) % LOOP;
+  if (s < S_SW) return [IN1 - s, IZ1 + d];
+  if (s < S_W) return cornerPos(CORNERS[0], (s - S_SW) / LC, d);
+  if (s < S_NW) return [IN0 - d, IZ1 - (s - S_W)];
+  if (s < S_N) return cornerPos(CORNERS[1], (s - S_NW) / LC, d);
+  if (s < S_NE) return [IN0 + (s - S_N), IZ0 - d];
+  if (s < S_E) return cornerPos(CORNERS[2], (s - S_NE) / LC, d);
+  if (s < S_SE) return [IN1 + d, IZ0 + (s - S_E)];
+  return cornerPos(CORNERS[3], (s - S_SE) / LC, d);
+}
+function cornerPos(c, f, d) { const a = f * Math.PI / 2, ca = Math.cos(a), sa = Math.sin(a); return [c.px + (c.ix * ca + c.ox * sa) * d, c.pz + (c.iz * ca + c.oz * sa) * d]; }
+const sm = (a, b, x) => { const t = Math.max(0, Math.min(1, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+const lerp = (a, b, t) => a + (b - a) * t;
+const wrapS = ds => ds > LOOP / 2 ? ds - LOOP : ds < -LOOP / 2 ? ds + LOOP : ds;
+const wrapA = a => { while (a > Math.PI) a -= 2 * Math.PI; while (a < -Math.PI) a += 2 * Math.PI; return a; };
+// The water at a point: along (vs, + is the way round), out (vn, + is away from the island), eddy (0-1), white (0-1).
+// w: { pump (1 with the fast run open, .35 slow loop only), gate (0 flat, 1 Holt's normal, 2 up a notch), t, ph1, ph2 }
+const FL = { vs: 0, vn: 0, eddy: 0, white: 0, fx: 0, fz: 0 };
+function water(w, x, z, L = loc(x, z), o = FL) {
+  const s = L.s, d = L.d, p = w.pump, dd = Math.min(d, CW);
+  const prof = .75 + .25 * Math.sin(Math.PI * dd / CW);
+  const pulse = 1 + .1 * Math.sin(w.t * .9 + w.ph1) + .06 * Math.sin(w.t * 2.3 + w.ph2);   // the pumps' pulse
+  const fast = .5 * p * prof * pulse;
+  const against = .07 * (1 - sm(.35, .85, d)) - .3 * p * pulse * sm(.5, 1.25, d);       // the bend: back up the bow end, but for the inside
+  let vs, vn = 0, eddy = 0, white = 0;
+  if (s < S_SW) vs = .07 * prof;
+  else if (s < S_NW) vs = .09 * prof;
+  else if (s < S_N) { const f = (s - S_NW) / LC; vs = lerp(.09 * prof, fast, f * f); }
+  else if (s < S_NE) { vs = fast; white = p > .5 ? 1 : .2; }
+  else if (s < S_E) { vs = lerp(fast, against, sm(0, 1, (s - S_NE) / LC)); white = p > .5 ? 1 - sm(0, 1, (s - S_NE) / LC) * .5 : .2; }
+  else if (s < S_SE) vs = against;
+  else vs = lerp(against, .07 * prof, sm(0, 1, (s - S_SE) / LC));
+  // round the stern corner into the fast run the water swings out toward the windows
+  if (s > S_NW + .4 && s < S_N + 2.2) vn += .15 * p * Math.sin(Math.PI * (s - S_NW - .4) / (LC + 1.8));
+  if (s > S_N && s < S_NE && d > 1.2) vn -= .09 * p * sm(1.2, 1.5, d);                   // and off the window bank
+  if (s > S_NE + .4 && s < S_SE + .3) vn -= .1 * p * sm(.6, 1.2, d);                   // the bend's backwash turns in along the bow wall (a drifting boat ends up inside, where it's with you)
+  for (const r of KY_ROCKS) {
+    const ds = wrapS(s - r.s), k = r.fast ? p : .35, mine = r.side === 'in' ? 1 - sm(.4, 1.0, d) : sm(.6, 1.2, d);
+    if (ds > -1.5 && ds < -.1) vn += (r.side === 'in' ? 1 : -1) * .26 * k * mine * Math.sin(Math.PI * (ds + 1.5) / 1.4);   // pushed off the rock's face
+    if (ds > .2 && ds < 1.9) {                                                              // the eddy behind it: calm, a little back the other way
+      const e = sm(.2, .55, ds) * (1 - sm(1.4, 1.9, ds)) * (r.side === 'in' ? 1 - sm(r.r * 1.1, r.r * 1.5, d) : sm(CW - r.r * 1.5, CW - r.r * 1.1, d));
+      if (e > eddy) eddy = e;
+    }
+  }
+  if (s > S_NE + .25 && s < S_E + .9 && d < .7) eddy = Math.max(eddy, sm(S_NE + .25, S_NE + .7, s) * (1 - sm(S_E + .5, S_E + .9, s)) * (1 - sm(.4, .7, d)));   // behind the island's bow corner
+  vs = lerp(vs, -.04, eddy); vn *= 1 - eddy;
+  if (w.gate && p > .5 && s > GATE0 && s < GATE1) {                                         // the standing waves: shoved sideways, held back on each face
+    const ph = 2 * Math.PI * (s - GATE0) / GATEP, A = w.gate === 2 ? .48 : .3, edge = sm(GATE0, GATE0 + .2, s) * (1 - sm(GATE1 - .2, GATE1, s));
+    vn += A * edge * Math.sin(ph + .8 * Math.sin(w.t * 1.3 + w.ph2)); vs -= .3 * A * edge * Math.max(0, Math.cos(ph)); white = 1;
+  }
+  const tx = -L.nz, tz = L.nx;
+  o.vs = vs; o.vn = vn; o.eddy = eddy; o.white = white; o.fx = tx * vs + L.nx * vn; o.fz = tz * vs + L.nz * vn; return o;
+}
+
+hall();
+
+// =====================================================================
+// 5. THE RULES (fixed 60 steps a second, one seeded stream per go, plain state; no DOM, no drawing, no Math.random)
+// =====================================================================
+const DT = 1 / 60, BOAT_R = .3, STROKE = .25, UMAX = .8, TURN = 1.9, TURN_TIRED = .45, AIM = 1.15;
+const ST_STROKE = .07, ST_FIGHT = .4, ST_EDDY = .16, ST_RIDE = .05, ST_EASY = .02, ST_REST = .12, ST_BACK = .5;
+function rnd(g) { let a = g.rs = g.rs + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }
+function kyNew(o) {
+  const g = { seed: o.seed >>> 0 || 1, step: 0, t: 0, phase: 'count', timer: 3, race: !!(o.race || o.regatta), regatta: !!o.regatta,
+    pump: o.fast === false ? .35 : 1, gate: o.fast === false ? 0 : (o.gateUp ? 2 : 1), inp: { a: 0, stroke: 0 }, ev: [], evOn: !o.paper, b: [] };
+  g.rs = Math.imul(g.seed, 2654435761) | 0;
+  g.ph1 = rnd(g) * 6.283; g.ph2 = rnd(g) * 6.283;
+  const keys = ['you'].concat(o.crew || []);
+  // start places, just short of the dock: one abreast pair, then the next row behind
+  const n = keys.length, spots = n === 1 ? [[.9, .8]] : [[.9, .45], [.9, 1.15], [.05, .45], [.05, 1.15]];
+  if (n === 3) spots[2] = [.05, .8];
+  keys.forEach((k, i) => {
+    const s0 = sAtX.south(FIN_X) - spots[i][0], [x, z] = posAt(s0, spots[i][1]);
+    const ai = k === 'you' ? (o.autoYou ? 'auto' : null) : k;
+    g.b.push({ k, ai, x, z, h: Math.PI, u: 0, S: 1, tired: 0, cd: 0, acd: 0, s: s0, p: 0, d: spots[i][1], done: 0, ls: -99, side: 0,
+      wob: 0, wt: 0, eddy: 0, along: 0, fight: 0, strokes: 0, tiredN: 0, bumps: 0, touch: 0, eddyT: 0 });
+  });
+  return g;
+}
+function kyClone(g) { return JSON.parse(JSON.stringify(g)); }
+function ev(g, k, i) { if (g.evOn) g.ev.push({ k, i }); }
+const W_ = { pump: 1, gate: 1, t: 0, ph1: 0, ph2: 0 };
+function kyStep(g) {
+  if (g.phase === 'over') return;
+  g.step++; g.t += DT;
+  if (g.phase === 'count') { if ((g.timer -= DT) <= 0) { g.phase = 'go'; ev(g, 'go', -1); } return; }
+  for (let i = 0; i < g.b.length; i++) if (!g.b[i].done) boatStep(g, g.b[i], i);
+  separate(g);
+  for (let i = 0; i < g.b.length; i++) { const b = g.b[i]; if (!b.done && b.p >= LOOP) { b.done = g.step; ev(g, 'fin', i); } }
+  if (g.b.every(b => b.done) || g.step > 60 * 300) { g.phase = 'over'; ev(g, 'over', -1); }
+}
+function boatStep(g, b, i) {
+  const L = loc(b.x, b.z), F = water(g, b.x, b.z, L), c = b.ai ? (b.ai === 'auto' ? AUTO : CREW[b.ai]) : YOU;
+  const ref = Math.atan2(L.nx, -L.nz);                     // the way round here (the tangent, (-nz, nx))
+  let hdT, stroke = 0;
+  let easy = 0;
+  if (b.ai) { const a = aiInput(g, b, c, L, F); hdT = a.h; stroke = a.stroke; easy = a.easy; }
+  else { hdT = ref + Math.max(-1, Math.min(1, g.inp.a)) * AIM; stroke = g.inp.stroke; g.inp.stroke = 0; }
+  // turn toward where you're heading (slowly when tired: you drift with the current)
+  const dh = wrapA(hdT - b.h), rate = (b.tired ? TURN_TIRED : TURN) * DT;
+  b.h = wrapA(b.h + Math.max(-rate, Math.min(rate, dh)));
+  b.cd = Math.max(0, b.cd - DT);
+  if (stroke && !b.tired && b.cd <= 0) { b.u = Math.min(UMAX, b.u + STROKE * c.power); b.S -= ST_STROKE; b.cd = .32; b.ls = g.step; b.side ^= 1; b.strokes++; ev(g, 'stroke', i); }
+  const uT = b.tired ? 0 : c.cruise * (easy ? .6 : 1);
+  b.u += (uT - b.u) * Math.min(1, DT * (b.u > uT ? .9 : 2));
+  const cx = Math.cos(b.h), cz = Math.sin(b.h);
+  b.along = F.fx * cx + F.fz * cz; b.eddy = F.eddy;
+  if (F.eddy > .5) b.eddyT++;
+  if (!b.tired) {
+    b.fight = b.along < -.05 ? 1 : 0;
+    if (b.fight) b.S -= (.06 + -b.along * ST_FIGHT) * DT;
+    else b.S += (F.eddy > .5 ? ST_EDDY : b.along > .2 ? ST_RIDE : ST_EASY) * DT;
+    if (b.S <= 0) { b.S = 0; b.tired = 1; b.tiredN++; b.fight = 0; ev(g, 'tired', i); }
+  } else {
+    b.S += (ST_REST + ST_REST * F.eddy) * DT;
+    if (b.S >= ST_BACK) { b.tired = 0; ev(g, 'rec', i); }
+  }
+  b.S = Math.min(1, b.S);
+  b.x += (cx * b.u + F.fx) * DT; b.z += (cz * b.u + F.fz) * DT;
+  const hit = collide(b);
+  if (hit) { b.u *= 1 - 2 * DT; if (!b.touch) { b.bumps++; ev(g, 'bump', i); } }
+  b.touch = hit;
+  const L2 = loc(b.x, b.z);
+  b.p += wrapS(L2.s - b.s); b.s = L2.s; b.d = L2.d;
+}
+// Keep a boat on the water: the outer banks, the island, the rocks (its middle as a circle; the long hull may brush a bank)
+function collide(b) {
+  let hit = 0;
+  const R = RIV, r = BOAT_R;
+  if (b.x < R.x0 + r) { b.x = R.x0 + r; hit = 1; } if (b.x > R.x1 - r) { b.x = R.x1 - r; hit = 1; }
+  if (b.z < R.z0 + r) { b.z = R.z0 + r; hit = 1; } if (b.z > R.z1 - r) { b.z = R.z1 - r; hit = 1; }
+  const qx = Math.max(IN0, Math.min(IN1, b.x)), qz = Math.max(IZ0, Math.min(IZ1, b.z)), dx = b.x - qx, dz = b.z - qz, dl = Math.hypot(dx, dz);
+  if (dl < r) {
+    if (dl > 1e-6) { b.x = qx + dx / dl * r; b.z = qz + dz / dl * r; }
+    else { const pen = [b.x - IN0, IN1 - b.x, b.z - IZ0, IZ1 - b.z], m = pen.indexOf(Math.min(...pen));
+      if (m === 0) b.x = IN0 - r; else if (m === 1) b.x = IN1 + r; else if (m === 2) b.z = IZ0 - r; else b.z = IZ1 + r; }
+    hit = 1;
+  }
+  for (const o of KY_ROCKS) { const ex = b.x - o.x, ez = b.z - o.z, el = Math.hypot(ex, ez); if (el < o.r + r && el > 1e-6) { b.x = o.x + ex / el * (o.r + r); b.z = o.z + ez / el * (o.r + r); hit = 1; } }
+  return hit;
+}
+// Boats bump softly: three circles along each hull (nose, middle, tail), pushed apart equally. No capsizing.
+function separate(g) {
+  const B = g.b, rr = .26, off = .62 * KS / .8;
+  for (let i = 0; i < B.length; i++) for (let j = i + 1; j < B.length; j++) {
+    const a = B[i], c = B[j]; if (a.done || c.done) continue;
+    if (Math.abs(a.x - c.x) > 2.6 || Math.abs(a.z - c.z) > 2.6) continue;
+    for (const ka of [-1, 0, 1]) for (const kc of [-1, 0, 1]) {
+      const ax = a.x + Math.cos(a.h) * off * ka, az = a.z + Math.sin(a.h) * off * ka, bx = c.x + Math.cos(c.h) * off * kc, bz = c.z + Math.sin(c.h) * off * kc;
+      const dx = bx - ax, dz = bz - az, dl = Math.hypot(dx, dz);
+      if (dl < 2 * rr && dl > 1e-6) { const push = (2 * rr - dl) * .5, ux = dx / dl * push, uz = dz / dl * push, ka = a.p >= c.p ? .25 : .75;   // the one behind gives way
+        a.x -= ux * ka; a.z -= uz * ka; c.x += ux * (1 - ka); c.z += uz * (1 - ka); }
+    }
+    collide(a); collide(c);
+  }
+}
+// The crew's autopilot: a line through the water by skill (wide of the rocks, into the eddies, the inside of the bend),
+// a seeded wobble, and strokes when the water's against them (or when racing) while they've stamina to spare.
+function lineD(s, c) {
+  let d = .8;
+  if (s >= S_N && s < S_NE) d = .7;
+  if (s >= S_NE - .3) d = lerp(1.0, .38, c.skill);
+  if (s >= S_SE + .3) d = .75;
+  for (const r of KY_ROCKS) { const ds = wrapS(s - r.s); if (ds > -1.3 && ds < .4) d = r.side === 'in' ? 1.12 : .48; }
+  return d;
+}
+function aiInput(g, b, c, L, F) {
+  if (g.step % 48 === (b.k.length * 7) % 48) b.wt = rnd(g) * 2 - 1;
+  b.wob += (b.wt - b.wob) * DT * 1.2;
+  const relaxed = !g.race && b.ai !== 'auto';
+  const look = Math.min(.9, Math.max(.4, b.u + .3)), s2 = b.s + look;
+  let dT = lineD(s2, c) + b.wob * c.wob * 1.2;
+  if (b.S < c.reserve + .1) for (const r of KY_ROCKS) { const ds = wrapS(r.s - b.s); if (ds > -1.2 && ds < 1.0) dT = r.side === 'in' ? .3 : CW - .3; }   // tired: duck in behind the rock
+  const tx = -L.nz, tz = L.nx, err = (L.d - dT) * 1.5;
+  const vx = tx - L.nx * err - L.nx * F.vn * 1.3 * c.skill, vz = tz - L.nz * err - L.nz * F.vn * 1.3 * c.skill;
+  let stroke = 0, easy = 0;
+  for (const o of g.b) if (o !== b && !o.done) { const ax = o.x - b.x, az = o.z - b.z, fw = ax * Math.cos(b.h) + az * Math.sin(b.h), sd = Math.abs(-ax * Math.sin(b.h) + az * Math.cos(b.h)); if (fw > 0 && fw < 1.7 && sd < .5) easy = 1; }   // someone right in front: ease off, no strokes
+  if (b.acd > 0) b.acd--;
+  else if (easy) b.acd = 6;
+  else {
+    const fighting = b.along < -.04 || (F.white && F.vs < .12), spare = b.S > c.reserve + (relaxed ? .25 : 0);
+    if (spare && (fighting || (!relaxed && b.S > .55) || (relaxed && b.S > .9 && rnd(g) < .15))) { stroke = 1; b.acd = Math.round(60 / c.rate * (relaxed ? 1.8 : 1) * (.85 + rnd(g) * .3)); }
+    else b.acd = 6;
+  }
+  return { h: Math.atan2(vz, vx), stroke, easy };
+}
+// a whole go on paper (no drawing): how the regatta's other heats, and off-screen crew laps, are worked out
+function kyPaper(o) {
+  const g = kyNew(Object.assign({ seed: 1, autoYou: true }, o, { paper: true }));
+  while (g.phase !== 'over') kyStep(g);
+  return kySummary(g);
+}
+function kyOrder(g) { return g.b.map((b, i) => i).sort((i, j) => { const a = g.b[i], c = g.b[j]; return (a.done || 1e9) - (c.done || 1e9) || c.p - a.p || i - j; }); }
+function kySummary(g) { return { steps: g.step, order: kyOrder(g).map(i => g.b[i].k), laps: g.b.map(b => ({ k: b.k, done: b.done, strokes: b.strokes, tired: b.tiredN, bumps: b.bumps, x: +b.x.toFixed(4), z: +b.z.toFixed(4) })) }; }
+
+// =====================================================================
+// 6. EVENTS: sound, talk, How to play
+// =====================================================================
+let AC = null;
+function blip(f, d = .08, type = 'sine', v = .12, f2) {
+  if (!$('snd').checked || !AC || FAST) return;
+  const t = AC.currentTime, o = AC.createOscillator(), gn = AC.createGain();
+  o.type = type; o.frequency.setValueAtTime(f, t); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + d);
+  gn.gain.setValueAtTime(v, t); gn.gain.exponentialRampToValueAtTime(.001, t + d);
+  o.connect(gn).connect(AC.destination); o.start(t); o.stop(t + d + .02);
+}
+const chatR = mulberry(7);      // chatter only: its own stream so talk never shifts the go
+const SAY = [];
+function say(i, kind) { if (FAST) return; const w = who(G.b[i].k); if (!w.lines || !w.lines[kind]) return; const L = w.lines[kind]; SAY[i] = { text: L[Math.floor(chatR() * L.length)], t: 2.4 }; }
+let FAST = false, saidBend = {};
+function drainEvents() {
+  for (const e of G.ev) {
+    const b = G.b[e.i], me = e.i === 0 && !b.ai;
+    if (e.k === 'go') { callout(G.regatta ? 'Holt sounds the horn. Go!' : 'Go!', '#dffaff'); blip(G.regatta ? 196 : 523, G.regatta ? .9 : .25, G.regatta ? 'sawtooth' : 'sine', .1); for (let i = 1; i < G.b.length; i++) if (chatR() < .6) say(i, 'go'); }
+    if (e.k === 'stroke') { if (me) { strokeRing(); blip(180, .12, 'triangle', .08, 90); if (G.how === 1 && ++howStrokes >= 2) howDone(1); } }
+    if (e.k === 'tired') { if (me) { callout('Out of puff: you drift with the current', '#ffd2a0'); blip(300, .5, 'sine', .07, 150); for (let i = 1; i < G.b.length; i++) if (chatR() < .5) { say(i, 'tired'); break; } } else if (chatR() < .6) say(e.i, 'tired'); }
+    if (e.k === 'rec' && me) { callout('Got your breath back', '#c8ffd0'); blip(440, .2, 'sine', .07, 660); }
+    if (e.k === 'bump' && !FAST) blip(120, .06, 'square', .04);
+    if (e.k === 'fin') { if (me) { callout(G.b.length > 1 ? 'Back at the dock!' : 'Round the loop!', '#dffaff'); blip(660, .3, 'sine', .1, 990); } else if (chatR() < .7) say(e.i, 'fin'); }
+    if (e.k === 'over') showResult();
+  }
+  G.ev.length = 0;
+  // a word from the crew at the bend, once each
+  for (let i = 1; i < G.b.length; i++) { const b = G.b[i]; if (!saidBend[i] && b.s > S_NE && b.s < S_E && b.p > LOOP / 2) { saidBend[i] = 1; if (chatR() < .5) say(i, 'bend'); } }
+}
+let callT = 0;
+function callout(t, c) { if (FAST) return; const e = $('call'); e.textContent = t; e.style.color = c; e.classList.remove('hide'); callT = 1.6; }
+const TOUCH = matchMedia('(pointer: coarse)').matches;
+const HOW_TXT = [
+  TOUCH ? 'Put your thumb down and slide it left or right: your kayak heads that way. Lift it and you hold your line.' : 'Move the mouse left or right (or use the arrow keys): your kayak heads that way.',
+  TOUCH ? 'Tap for a strong stroke. Strokes, and fighting the current, use up the meter by your thumb.' : 'Click (or press Space) for a strong stroke. Strokes, and fighting the current, use up your stamina.',
+  'Rest in the calm water behind the rocks, or ride the current, to get your breath back. Run out and you just drift until you have.',
+];
+let howStrokes = 0, howSteer = 0;
+function howShow() {
+  const e = $('how');
+  if (!G || G.how < 0 || G.how > 2) { e.classList.add('hide'); return; }
+  e.classList.remove('hide'); e.querySelector('.n').textContent = 'How to play · ' + (G.how + 1) + ' of 3'; e.querySelector('.x').textContent = HOW_TXT[G.how];
+  $('howNext').textContent = G.how === 2 ? 'Done' : 'Next';
+}
+function howDone(k) { if (!G || G.how !== k) return; G.how = k === 2 ? -1 : k + 1; if (G.how === -1) try { localStorage.setItem('ky.how', '1'); } catch (e) {} howShow(); }
+
+// =====================================================================
+// 7. CAMERA: the menu overview and the chase view behind your kayak (eased in as a dolly-zoom)
+// =====================================================================
+const camFrom = { pos: new THREE.Vector3(), target: new THREE.Vector3(), fov: 50 }, camCur = { pos: new THREE.Vector3(), target: new THREE.Vector3(), fov: 50 };
+const chase = { pos: new THREE.Vector3(), target: new THREE.Vector3(), fov: 60, yaw: Math.PI, init: false };
+let camMode = 'menu', camT = 1, menuA = 0;
+function overview(t) {
+  const a = (RM ? 0 : t * .05) + .9, r = 8.5;
+  return { pos: new THREE.Vector3(8.3 + Math.sin(a) * r * .7, 8.2, 3 + Math.cos(a) * r), target: new THREE.Vector3(8.3, 0, 3), fov: 50 };
+}
+// behind and above your kayak, looking along the channel (its way round, smoothed), not the kayak's nose, so that the
+// thumb's left and right stay the channel's left and right
+function chaseView(dtR, snap) {
+  const b = G.b[0], port = innerWidth < innerHeight;
+  const L = loc(b.x, b.z), ref = Math.atan2(L.nx, -L.nz);
+  const want = wrapA(ref + .35 * wrapA(b.h - ref));
+  chase.yaw = snap || !chase.init ? want : wrapA(chase.yaw + wrapA(want - chase.yaw) * Math.min(1, dtR * 2.2));
+  const fx = Math.cos(chase.yaw), fz = Math.sin(chase.yaw), dist = port ? 3.9 : 3.9, hgt = port ? 3.3 : 2.6, ahead = port ? 2.2 : 2.0;
+  const px = b.x - fx * dist, pz = b.z - fz * dist, tx = b.x + fx * ahead, tz = b.z + fz * ahead;
+  const cxp = Math.max(.7, Math.min(HALL.w - .7, px)), czp = Math.max(.35, Math.min(HALL.d - .1, pz));   // kept inside the hall (the walls would cut the view)
+  if (snap || !chase.init) { chase.pos.set(cxp, hgt, czp); chase.target.set(tx, .2, tz); chase.init = true; }
+  else { const k = Math.min(1, dtR * 6); chase.pos.lerp(V.set(cxp, hgt, czp), k); chase.target.lerp(V.set(tx, .2, tz), k); }
+  chase.fov = port ? 62 : 50;
+}
+function setCam(mode) { camFrom.pos.copy(camCur.pos); camFrom.target.copy(camCur.target); camFrom.fov = camCur.fov; camMode = mode; camT = RM ? 1 : 0; }
+
+// =====================================================================
+// 8. FLOW: menu, start, result, bests in words
+// =====================================================================
+const $ = id => document.getElementById(id);
+let G = null, RM = matchMedia('(prefers-reduced-motion: reduce)').matches, lastOpts = null, boats = [];
+const PICK = ['holt', 'pell', 'rina', 'vance'];
+function bests() { try { return JSON.parse(localStorage.getItem('ky.best') || '{}'); } catch (e) { return {}; } }
+function buildMenu() {
+  const box = $('crewPick');
+  if (!box.children.length) for (const k of PICK) {
+    const l = document.createElement('label'); l.innerHTML = `<input type="checkbox" data-k="${k}" ${k === 'holt' ? 'checked' : ''}> ${CREW[k].name}`; box.appendChild(l);
+    l.querySelector('input').onchange = e => { const on = [...box.querySelectorAll('input:checked')]; if (on.length > 2) { on.find(x => x !== e.target).checked = false; } };
+  }
+  let how = true; try { how = !localStorage.getItem('ky.how'); } catch (e) {}
+  $('howOn').checked = how;
+  const b = bests(), n = Object.keys(b).length;
+  $('rec').textContent = n ? 'Your best laps are remembered (in words, no times).' : '';
+}
+function picked() { return [...$('crewPick').querySelectorAll('input:checked')].map(x => x.dataset.k).slice(0, 2); }
+function modeKey(g) { return g.pump < .5 ? 'slow' : 'fast' + g.gate; }
+function clearBoats() { for (const m of boats) scene.remove(m); boats = []; }
+function startGo(o) {
+  if (!AC) try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {}
+  RM = $('rm').checked;
+  const m = o.mode || 'alone';
+  const crew = o.crew || (m === 'regatta' ? ['pell', 'rina', 'vance'] : m === 'alone' ? [] : picked());
+  const opts = Object.assign({ seed: +$('seed').value || 1, fast: $('fastOn').checked, gateUp: $('gateUp').checked, how: $('howOn').checked, race: m === 'race', regatta: m === 'regatta' }, o, { crew });
+  if (opts.regatta) opts.fast = true;
+  lastOpts = opts;
+  clearBoats();
+  G = kyNew(opts); G.how = opts.how ? 0 : -1; G.mode = m; howStrokes = howSteer = 0; saidBend = {};
+  boats = G.b.map(b => { const w = who(b.k); return makeBoat(w); });
+  SAY.length = 0;
+  for (const id of ['menu', 'result']) $(id).classList.add('hide');
+  for (const id of ['hud', 'leave', 'stam']) $(id).classList.remove('hide');
+  INPUT.a = 0; INPUT.thumb = null; chase.init = false;
+  tags.forEach((t, i) => { t.textContent = G.b[i] ? who(G.b[i].k).name : ''; t.classList.add('hide'); });
+  chaseView(0, true); setCam('game'); howShow(); acc = 0; FAST = false;
+  $('status').textContent = statusText();
+  callout(G.regatta ? 'The regatta: heat 1' : 'Ready…', '#dffaff');
+  return G;
+}
+function statusText() {
+  if (!G) return '';
+  const names = G.b.slice(1).map(b => who(b.k).name), mode = G.pump < .5 ? 'The slow loop' : 'White water';
+  if (G.regatta) return 'Regatta heat · ' + place(0) + ' of 4';
+  if (G.race) return 'Race v ' + names.join(' and ') + ' · ' + (place(0) === '1st' ? 'you\'re in front' : 'you\'re ' + place(0));
+  return mode + (names.length ? ' · with ' + names.join(' and ') : '');
+}
+const ORD = ['1st', '2nd', '3rd', '4th'];
+function place(i) { const o = G.phase === 'over' || G.b[i].done ? kyOrder(G) : G.b.map((b, k) => k).sort((a, c) => (G.b[a].done || 1e9) - (G.b[c].done || 1e9) || G.b[c].p - G.b[a].p); return ORD[o.indexOf(i)]; }
+function lapWords(g) {
+  const b = g.b[0], key = modeKey(g), best = bests(), prev = best[key], st = b.done || g.step;
+  let t;
+  if (!prev) t = g.pump < .5 ? 'Your first lap of the slow loop.' : 'Your first lap of the white water.';
+  else if (st < prev) t = 'Your best lap yet.';
+  else if (st < prev * 1.06) t = 'Close to your best lap.';
+  else t = 'A steady lap. Your best was quicker.';
+  if (!prev || st < prev) { best[key] = st; try { localStorage.setItem('ky.best', JSON.stringify(best)); } catch (e) {} }
+  return t;
+}
+function showResult() {
+  const g = G, b = g.b[0], ord = kyOrder(g), names = ord.map(i => who(g.b[i].k).name);
+  let t, lines = [];
+  const words = lapWords(g);
+  if (g.regatta) {
+    const p = ord.indexOf(0); t = p === 0 ? 'You won your heat!' : 'You came ' + ORD[p] + ' in your heat.';
+    lines.push('Heat 1: ' + names.map((n, i) => ORD[i] + ' ' + n).join(', ') + '.');
+    const h2 = kyPaper({ seed: g.seed * 7 + 1, crew: ['tomas', 'maeve', 'sato'], fast: true, regatta: true, autoYou: true });   // the next heat, on paper (Holt in "your" boat)
+    lines.push('Heat 2 (worked out on paper): ' + h2.order.map((k, i) => ORD[i] + ' ' + (k === 'you' ? 'Holt' : CREW[k].name)).join(', ') + '.');
+    lines.push(words + (p === 0 ? ' The pennant could be yours.' : ''));
+  } else if (g.race) {
+    const p = ord.indexOf(0);
+    t = p === 0 ? 'You won the race!' : names[0] + ' won the race.';
+    if (g.b.length > 2) lines.push('Then ' + names.slice(1).join(', then ') + '.');
+    else lines.push(p === 0 ? 'You beat ' + names[1] + ' back to the dock.' : 'Just behind ' + names[0] + '. Next time.');
+    lines.push(words);
+  } else {
+    t = 'Round the loop!';
+    lines.push(words);
+    if (g.b.length > 1) lines.push(names.filter(n => n !== 'You').join(' and ') + ' paddled with you.');
+  }
+  if (b.tiredN) lines.push(b.tiredN === 1 ? 'You ran out of puff once and drifted a while.' : 'You ran out of puff ' + b.tiredN + ' times.');
+  else if (b.eddyT > 60) lines.push('You used the eddies well.');
+  $('resT').textContent = t; $('resS').innerHTML = lines.map(l => '<p>' + l + '</p>').join('');
+  $('result').classList.remove('hide'); $('how').classList.add('hide'); $('leave').classList.add('hide'); $('stam').classList.add('hide');
+  $('status').textContent = statusText();
+}
+function leave() {
+  clearBoats(); G = null;
+  for (const id of ['hud', 'leave', 'how', 'result', 'call', 'stam']) $(id).classList.add('hide');
+  $('menu').classList.remove('hide'); buildMenu(); setCam('menu');
+  SAY.length = 0;
+}
+$('leave').onclick = leave; $('done').onclick = leave;
+$('again').onclick = () => { const o = Object.assign({}, lastOpts); o.how = false; o.seed = (o.seed || 1) + 1; $('seed').value = o.seed; startGo(o); };
+for (const b of document.querySelectorAll('.mode')) b.onclick = () => startGo({ mode: b.dataset.m });
+$('howNext').onclick = e => { e.stopPropagation(); if (G) howDone(G.how); };
+$('howSkip').onclick = e => { e.stopPropagation(); if (G) { G.how = -1; try { localStorage.setItem('ky.how', '1'); } catch (er) {} howShow(); } };
+for (const id of ['howNext', 'howSkip']) $(id).addEventListener('pointerdown', e => e.stopPropagation());
+$('rm').onchange = () => { RM = $('rm').checked; };
+if (Q.get('seed')) $('seed').value = Q.get('seed');
+$('rm').checked = RM;
+buildMenu();
+
+// =====================================================================
+// 9. INPUT: the thumb's left-right is where you head (left edge = hard left of the channel); a tap is a stroke;
+// lifting the thumb holds your line. A second finger's tap strokes without moving your aim. Mouse and keys too.
+// =====================================================================
+const INPUT = { a: 0, thumb: null, keys: {} };
+const cv = renderer.domElement;
+let drag = null;
+const aimOf = cx => Math.max(-1, Math.min(1, (cx / innerWidth * 2 - 1) * 1.2));
+function stroke() { if (G && G.phase === 'go') G.inp.stroke = 1; }
+function setAim(a) { if (!G) return; howSteer += Math.abs(a - INPUT.a); INPUT.a = a; if (G.how === 0 && howSteer > .6) howDone(0); }
+cv.addEventListener('pointerdown', e => {
+  if (!G || G.phase === 'over') return;
+  if (drag && drag.id !== e.pointerId) { stroke(); return; }
+  drag = { id: e.pointerId, x0: e.clientX, y0: e.clientY, t0: performance.now(), moved: 0 };
+  INPUT.thumb = [e.clientX, e.clientY]; setAim(aimOf(e.clientX));
+  try { cv.setPointerCapture(e.pointerId); } catch (er) {}
+});
+cv.addEventListener('pointermove', e => {
+  if (!G) return;
+  if (drag && drag.id === e.pointerId) { drag.moved = Math.max(drag.moved, Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0)); INPUT.thumb = [e.clientX, e.clientY]; setAim(aimOf(e.clientX)); }
+  else if (e.pointerType === 'mouse') setAim(aimOf(e.clientX));
+});
+const lift = e => {
+  if (!drag || drag.id !== e.pointerId) return;
+  if (performance.now() - drag.t0 < 260 && drag.moved < 14) stroke();      // a tap
+  drag = null;                                                              // lifting holds your line: the aim stays
+};
+cv.addEventListener('pointerup', lift); cv.addEventListener('pointercancel', lift);
+const KEYS = { ArrowLeft: 'l', a: 'l', A: 'l', ArrowRight: 'r', d: 'r', D: 'r' };
+addEventListener('keydown', e => {
+  if (KEYS[e.key]) { INPUT.keys[KEYS[e.key]] = true; e.preventDefault(); }
+  if ((e.key === ' ' || e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') && !e.repeat) { stroke(); e.preventDefault(); }
+  if (e.key === 'Escape' && G) leave();
+});
+addEventListener('keyup', e => { if (KEYS[e.key]) INPUT.keys[KEYS[e.key]] = false; if (KEYS[e.key] && !INPUT.keys.l && !INPUT.keys.r) setAim(0); });
+addEventListener('blur', () => { INPUT.keys = {}; });
+addEventListener('resize', () => { renderer.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); });
+
+// =====================================================================
+// 10. DRAWING EACH FRAME
+// =====================================================================
+const tags = [0, 1, 2, 3].map(() => { const e = document.createElement('div'); e.className = 'tag hide'; document.body.appendChild(e); return e; });
+const says = [0, 1, 2, 3].map(() => { const e = document.createElement('div'); e.className = 'say hide'; document.body.appendChild(e); return e; });
+const V = new THREE.Vector3();
+function toScreen(x, y, z, el) {
+  V.set(x, y, z).project(camera);
+  if (V.z > 1 || Math.abs(V.x) > 1.1 || Math.abs(V.y) > 1.1) { el.classList.add('hide'); return; }
+  const top = (1 - V.y) / 2 * innerHeight; if (top < 120) { el.classList.add('hide'); return; }   // clear of the pills at the top
+  el.style.left = ((V.x + 1) / 2 * innerWidth) + 'px'; el.style.top = top + 'px'; el.classList.remove('hide');
+}
+function strokeRing() {
+  if (RM) return;
+  const th = INPUT.thumb || [innerWidth / 2, innerHeight * .82], e = document.createElement('div'); e.className = 'ring';
+  e.style.left = th[0] + 'px'; e.style.top = th[1] + 'px'; document.body.appendChild(e); setTimeout(() => e.remove(), 500);
+}
+function drawBoats(dtR, tR) {
+  for (let i = 0; i < G.b.length; i++) {
+    const b = G.b[i], m = boats[i], u = m.userData;
+    const F = water(G, b.x, b.z), fastW = F.white * (G.pump > .5 ? 1 : .3);
+    const bob = RM ? 0 : (.02 + .03 * fastW) * Math.sin(tR * 2.1 + i * 1.7);
+    m.position.set(b.x, WY + .03 + bob, b.z);
+    m.rotation.set(0, Math.PI / 2 - b.h, 0);
+    if (!RM) { m.rotation.z = (.04 + .1 * fastW) * Math.sin(tR * 1.5 + i); m.rotation.x = (.015 + .05 * fastW) * Math.sin(tR * 2.4 + i * .7); }
+    // the paddle: dip one side then the other; quicker and deeper on a stroke; at rest across the deck when tired
+    const sinceStroke = (G.step - b.ls) / 60, hard = Math.max(0, 1 - sinceStroke / .5);
+    u.slump += ((b.tired ? 1 : 0) - u.slump) * Math.min(1, dtR * 3);
+    if (!b.done && !b.tired && G.phase === 'go') u.ph += dtR * (2.2 + 5 * hard) * (RM ? .5 : 1);
+    const w = Math.sin(u.ph), k = 1 - u.slump;
+    u.paddle.rotation.set(0, .55 * w * k, .42 * w * k * (1 + .4 * hard));
+    u.body.rotation.set(.1 + .7 * u.slump + .1 * hard, .3 * w * k, .12 * u.slump);
+    u.paddle.position.y = .36 - .12 * u.slump;
+    if (!RM && u.slump > .5) u.body.position.y = .1 + .015 * Math.sin(tR * 3);   // breathing hard
+    if (i > 0) {
+      toScreen(b.x, WY + 1.25, b.z, tags[i]);
+      if (SAY[i] && (SAY[i].t -= dtR) > 0) { says[i].textContent = SAY[i].text; toScreen(b.x, WY + 1.7, b.z, says[i]); } else { SAY[i] = null; says[i].classList.add('hide'); }
+    }
+  }
+}
+function drawStamina() {
+  const b = G.b[0], e = $('stam'), th = INPUT.thumb;
+  const x = th ? Math.max(70, Math.min(innerWidth - 70, th[0])) : innerWidth / 2, y = th ? Math.max(80, th[1] - 54) : innerHeight - 70;
+  e.style.left = x + 'px'; e.style.top = y + 'px';
+  const f = e.querySelector('.fill'); f.style.width = (b.S * 100).toFixed(1) + '%';
+  f.style.background = b.tired ? '#ff9a6a' : b.S > .5 ? '#5ee06a' : b.S > .22 ? '#ffd23f' : '#ff7a5c';
+  e.classList.toggle('tired', !!b.tired);
+  e.querySelector('.lab').textContent = b.tired ? 'Getting your breath back…' : b.fight ? 'Stamina · against the current' : b.eddy > .5 ? 'Stamina · resting in the eddy' : 'Stamina';
+}
+// the tracers ride the water; spawned at random places on the loop from their own stream
+function spawnTracer(t) { const s = trR() * LOOP, d = .1 + trR() * (CW - .2), [x, z] = posAt(s, d); t.x = x; t.z = z; t.age = 0; t.life = 1.2 + trR() * 1.8; }
+TR.forEach(t => { spawnTracer(t); t.age = trR() * t.life; });
+const WV = { pump: 1, gate: 1, t: 0, ph1: 0, ph2: 0 };
+function drawTracers(dtR, tR) {
+  const w = G || Object.assign(WV, { pump: $('fastOn').checked ? 1 : .35, gate: $('fastOn').checked ? ($('gateUp').checked ? 2 : 1) : 0, t: tR });
+  const pa = trGeo.attributes.position.array, ca = trGeo.attributes.color.array, y = WY + .03, step = RM ? dtR * .3 : dtR;
+  for (let i = 0; i < TRN; i++) {
+    const t = TR[i], L = loc(t.x, t.z), F = water(w, t.x, t.z, L);
+    let vx = F.fx, vz = F.fz;
+    if (F.eddy > .2) { const sw = .22 * F.eddy; vx += Math.sin(tR * 1.3 + i) * sw; vz += Math.cos(tR * 1.3 + i) * sw; }   // turning slowly in the eddies
+    t.x += vx * step; t.z += vz * step; t.age += dtR;
+    const inside = t.x > RIV.x0 + .05 && t.x < RIV.x1 - .05 && t.z > RIV.z0 + .05 && t.z < RIV.z1 - .05 && !(t.x > IN0 && t.x < IN1 && t.z > IZ0 && t.z < IZ1);
+    if (t.age > t.life || !inside) spawnTracer(t);
+    const sp = Math.hypot(vx, vz), len = .06 + Math.min(.5, sp * .45), dx = sp > 1e-4 ? vx / sp : 1, dz = sp > 1e-4 ? vz / sp : 0, wd = .022 + .02 * F.white;
+    const fade = Math.sin(Math.PI * Math.min(1, t.age / t.life)), k = fade * (.25 + .5 * Math.min(1, sp * 1.3) + .25 * F.white + .2 * F.eddy);
+    const ax = t.x - dx * len, az = t.z - dz * len, nx = -dz * wd, nz = dx * wd;
+    pa.set([ax + nx, y, az + nz, t.x + nx, y, t.z + nz, t.x - nx, y, t.z - nz, ax - nx, y, az - nz], i * 12);
+    for (let q = 0; q < 4; q++) { const kk = q === 0 || q === 3 ? k * .2 : k; ca[i * 12 + q * 3] = kk * .9; ca[i * 12 + q * 3 + 1] = kk; ca[i * 12 + q * 3 + 2] = kk; }
+  }
+  trGeo.attributes.position.needsUpdate = trGeo.attributes.color.needsUpdate = true;
+}
+let acc = 0, last = performance.now(), tR = 0;
+function frame(now) {
+  requestAnimationFrame(frame);
+  const dtR = Math.min(.1, (now - last) / 1000); last = now; tR += dtR;
+  if (G && !G.paused && G.phase !== 'over') {
+    // after you're in, the others' finish runs on quickly (the same steps, just more of them a frame)
+    const sp = (G.b[0].done ? 6 : 1) * KY.rate;
+    acc += dtR * sp; let n = 0;
+    FAST = sp > 1;
+    while (acc >= DT && n < 6 * sp) { if (!G.b[0].ai && !G.b[0].done) G.inp.a = aimNow(dtR); kyStep(G); acc -= DT; n++; }
+    if (n === 6 * sp) acc = 0;
+    FAST = false;
+  }
+  if (G) drainEvents();
+  // camera
+  camT = Math.min(1, camT + dtR / .8);
+  let want;
+  if (camMode === 'game' && G) { chaseView(dtR); want = chase; } else want = overview(tR);
+  const e = camT * camT * (3 - 2 * camT);
+  camCur.pos.lerpVectors(camFrom.pos, want.pos, e); camCur.target.lerpVectors(camFrom.target, want.target, e); camCur.fov = camFrom.fov + (want.fov - camFrom.fov) * e;
+  camera.position.copy(camCur.pos); camera.lookAt(camCur.target);
+  if (camera.fov !== camCur.fov) { camera.fov = camCur.fov; camera.updateProjectionMatrix(); }
+  // the water and the gate
+  const w = G || { pump: $('fastOn').checked ? 1 : .35, gate: $('fastOn').checked ? ($('gateUp').checked ? 2 : 1) : 0 };
+  WATER.slow.userData.U.uT.value = WATER.fast.userData.U.uT.value = RM ? 0 : tR;
+  WATER.fast.userData.U.uFoam.value = w.pump > .5 ? .9 : .12; WATER.fast.userData.U.uFlow.value = w.pump > .5 ? 1.4 : .45;
+  crests.visible = w.gate > 0 && w.pump > .5;
+  const cs = w.gate === 2 ? 1.35 : 1; crests.scale.set(1, cs, 1); crests.position.y = WY + (RM ? 0 : .015 * Math.sin(tR * 4.2)) - .01;
+  drawTracers(dtR, tR);
+  if (callT > 0 && (callT -= dtR) <= 0) $('call').classList.add('hide');
+  if (G && boats.length) { drawBoats(dtR, tR); if (G.phase !== 'over') { drawStamina(); $('status').textContent = statusText(); } }
+  else { tags.forEach(t => t.classList.add('hide')); says.forEach(t => t.classList.add('hide')); }
+  if (G && G.phase === 'over') { tags.forEach(t => t.classList.add('hide')); says.forEach(t => t.classList.add('hide')); }
+  renderer.render(scene, camera);
+  if (DEBUG) $('dbg').textContent = `calls ${renderer.info.render.calls} · tris ${renderer.info.render.triangles} · ${G ? G.phase + ' step ' + G.step + ' p ' + G.b[0].p.toFixed(1) + '/' + LOOP.toFixed(1) + ' S ' + G.b[0].S.toFixed(2) : 'menu'}`;
+}
+function aimNow(dtR) {                                       // the keys turn your aim; the thumb or the mouse set it
+  const k = (INPUT.keys.r ? 1 : 0) - (INPUT.keys.l ? 1 : 0);
+  if (k) setAim(Math.max(-1, Math.min(1, INPUT.a + k * 1.6 * DT)));
+  return INPUT.a;
+}
+{ const o = overview(0); camCur.pos.copy(o.pos); camCur.target.copy(o.target); camCur.fov = o.fov; camFrom.pos.copy(o.pos); camFrom.target.copy(o.target); camFrom.fov = o.fov; }
+requestAnimationFrame(frame);
+document.addEventListener('visibilitychange', () => { last = performance.now(); acc = 0; });
+
+// =====================================================================
+// 11. TEST HOOKS (Playwright): start goes, run steps fast, read state, paper, clones at other frame rates
+// =====================================================================
+window.KY = {
+  start: o => { startGo(o || {}); return KY.state(); },
+  // run n fixed steps right now (no sound or callouts); stops at the end of the go
+  steps: (n, inp) => { if (!G) return null; FAST = true; for (let i = 0; i < n && G.phase !== 'over'; i++) { if (inp) Object.assign(G.inp, inp); kyStep(G); } drainEvents(); FAST = false; return KY.state(); },
+  paper: o => kyPaper(o),
+  // the same go run frame by frame at fps (the live loop's own accumulator), from a clone of the live go or a new one
+  fps: (o, fps, fromLive) => {
+    const g = fromLive && G ? kyClone(G) : kyNew(Object.assign({ seed: 1, autoYou: true }, o, { paper: true }));
+    g.evOn = false; g.ev = [];
+    let a = 0, frames = 0; const dt = 1 / fps;
+    while (g.phase !== 'over' && frames < fps * 600) { a += dt; frames++; while (a >= DT - 1e-12) { kyStep(g); a -= DT; } }
+    return kySummary(g);
+  },
+  summary: () => G && kySummary(G),
+  state: () => G && { phase: G.phase, step: G.step, how: G.how, pump: G.pump, gate: G.gate,
+    b: G.b.map(b => ({ k: b.k, x: b.x, z: b.z, h: b.h, u: b.u, S: b.S, tired: b.tired, p: b.p, s: b.s, d: b.d, done: b.done, strokes: b.strokes, tiredN: b.tiredN, eddy: b.eddy, fight: b.fight, along: b.along })),
+    a: INPUT.a, loop: LOOP },
+  set: o => { if (G) Object.assign(G.b[0], o); },
+  water: (x, z, o) => Object.assign({}, water(Object.assign({ pump: 1, gate: 1, t: 0, ph1: 0, ph2: 0 }, o || {}), x, z)),
+  posAt, loc: (x, z) => Object.assign({}, loc(x, z)),
+  calls: () => renderer.info.render.calls,
+  rate: 1,                                                   // tests only: more steps a frame (the same steps)
+  // what the autopilot would do in your seat right now (for a test thumb): worked out on a copy, so the go isn't touched
+  advice: () => { if (!G) return null; const g = kyClone(G), b = g.b[0], L = loc(b.x, b.z), F = water(g, b.x, b.z, L), r = aiInput(g, b, AUTO, L, F);
+    return { a: Math.max(-1, Math.min(1, wrapA(r.h - Math.atan2(L.nx, -L.nz)) / AIM)), stroke: r.stroke }; },
+  pause: v => { if (G) G.paused = v; },
+  leave,
+};
+</script>
+</body>
+</html>
