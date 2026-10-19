@@ -6,3 +6,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - ~05:12 lead 16: also expect Playtest update 2 pieces (plans/brief-playtest2.md on claude/lead-pillar1) from X (claude/crew-pt1), U (claude/hud-pt1), E1 (rounds rework): fold into 0.63.4 if R4-passed by the final, else build them as 0.63.5 after Step 4. Merge order: 24 core → mechanics → cases → places → X → U → W2.
 - ~05:14 W2 6a5d34a (0.48.104 playtest 2 lines, text + lines_check placeholders; on 0.63.3 0faa870); with R4? Step 4 lines to follow.
 - ~05:15 R4 PASS W2 6a5d34a. E3 9d179e9 PASS WITH FIXES (5 leak joints move): wait for E3's next hash. Trial t0 = 0.63.3 (7325c7a) + W2 6a5d34a: lines check.
+- trial t0 (0.63.3 7325c7a + W2 6a5d34a): merges clean, bake 9342 lines / 434 conversations / 37 meetings / 35 traditions, NAMES OK, lines PASS (0 errors, 2 warnings).
