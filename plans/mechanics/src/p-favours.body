@@ -1,0 +1,60 @@
+TITLE:Favour Cases Spec
+H1:Favour cases and fault-finder tickets (from Day 13) <span class="draft">Step 4 · draft for review</span>
+SUB:Crew bring you their own little mysteries off shift, and Calder sets your first fault-finder ticket. Both use the case engine. Step 4, sub-block 24l. Plan Part 4.
+NAV:plain=In plain words|grow=How it grows|b=Builder|tests=Tests|ranges=Seat and size|faq=FAQ
+
+<p class="note"><b>Lead's call, for the user's morning review:</b> with no H seat tonight, E2 builds these inside 24l from H's handover note, and H reviews later.</p>
+<section id="plain">
+  <h2>In plain words</h2>
+  <ul>
+    <li><b>Favour cases</b> (off shift, about one a week: an evening 18:00-21:00 or a weekend): a crew friend asks in chat or Mail: "My lamp flickers only when Pell plays guitar next door." It goes on the Jobs app as a favour (the existing favours system).</li>
+    <li>In their cabin it's a small case (the T1/T2 bands, two or three clues, Fault notes): look at the lamp, ask Pell, check the junction. Solve it, then fix it (a Tier 1 job there). A friendship step, sometimes a small thank-you gift. Not taken in 3 days, they ask someone else: no harm.</li>
+    <li><b>Fault-finder tickets:</b> on Day 13 Calder's Mail: "A ticket case, when you're ready." On any workday shift after, take it from the Works board: a harder case on Tier 2 machines (one more clue; hints only after your third look).</li>
+    <li>Solve it and you're a <b>Fault-finder</b>: a small pin on your uniform and a Record line. A wrong answer only delays it: "Not yet. Next week." The second and third grades (Days 19 and 24) come in Steps 5 and 6 on this same machinery.</li>
+  </ul>
+</section>
+
+<section id="grow">
+  <h2>How it grows</h2>
+  <div class="grid">
+    <div class="card"><b>Favours · first</b><span>Day 13 on, from crew at "friendly" or better.</span></div>
+    <div class="card"><b>Ticket · Fault-finder</b><span>Day 13 on.</span></div>
+    <div class="card"><b>Later grades</b><span>Trusted fault-finder (Day 19, Step 5), the ship's fault-finder (Day 24, Step 6).</span></div>
+  </div>
+</section>
+
+<section id="b" class="builder">
+  <h2>For the builder</h2>
+  <p class="note">One owner per function: the seat in the last column builds it; everyone else calls it, one line, typeof-guarded, listed in DEV_NOTES' hook register.</p>
+  <div class="tablewrap"><table>
+    <tr><th>Section</th><th>What</th><th>Owner</th></tr>
+    <tr><td>24l (new part)</td><td><code>FAVOUR_CASES</code> (six to start), <code>favourCasePost(week)</code>, the ticket, the grades, the pin</td><td>E2 (stands in for H tonight, from H's handover)</td></tr>
+    <tr><td>24k</td><td>cases made by the case engine with a <code>place</code> of a cabin (exists: kinds and bands)</td><td>H's code (exists, no change)</td></tr>
+    <tr><td>Pillar 4 favours</td><td><code>typeof favourAdd === 'function' &amp;&amp; favourAdd(...)</code></td><td>social (exists)</td></tr>
+    <tr><td>15c / uniform</td><td>the pin drawn into the uniform texture (no extra draw call)</td><td>E2, one line in M2's uniform code</td></tr>
+    <tr><td>content/</td><td>the six favour cases' lines; Calder's ticket Mail</td><td>writer</td></tr>
+  </table></div>
+  <ul>
+    <li><b>The six to start:</b> the lamp and the guitar (a shared circuit); a cold cabin (a box over the vent); a door that squeaks only at night (it cools and shrinks); a shower that runs cold when the laundry runs (a shared line); a clock that runs slow (power dips); a speaker that buzzes near the scrubber (interference).</li>
+    <li><b>Keys:</b> <code>schedU(week, 0, 1009)</code> who asks, <code>1010</code> which case, <code>1011</code> which evening; tickets <code>1012</code> the machine, <code>1013</code> the fault.</li>
+    <li><b>Data:</b> <code>SHIP.works.side.favours = [{ id, who, case, day, state }]</code>, <code>SHIP.works.side.ff = { grade, tries, next }</code>. Saved under <code>SHIP.works.side</code>; read defensively (a missing field is the default), so old saves load.</li>
+  </ul>
+</section>
+
+<section id="tests" class="builder">
+  <h2>Tests</h2>
+  <ul>
+    <li><code>puzzle_check</code>: every favour case and ticket is solvable from its clues; a wrong ticket answer delays a week, never fails; the pin appears; the same twice.</li>
+    <li><code>mech_check</code>: a favour lapses harmlessly; friendship step on solving.</li>
+  </ul>
+</section>
+
+<section id="ranges" class="builder">
+  <h2>Seat and size</h2>
+  <ul><li>Seat <b>E2</b> (on H's behalf; H's seat <code>claude/mech-cases</code> 0.55.x if H is seated). <b>Build size: M (favours) + M (tickets).</b> Hash keys from the second range (1000-1049; check the key list first): <b>1009-1013</b>.</li></ul>
+</section>
+
+<section id="faq">
+  <h2>Builders' questions</h2>
+  <p class="note">None yet.</p>
+</section>

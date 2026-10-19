@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Optional Stages Spec</title>
+<style>
+:root{--ink:#e8eef0;--muted:#93a6ae;--teal:#4cc3b5;--gold:#e9c46a;--rose:#e58f7a;--glass:rgba(13,21,33,.78);--line:rgba(150,200,196,.22);--chip:rgba(76,195,181,.14)}
+*{box-sizing:border-box}
+html,body{margin:0;background:#121a27;color:var(--ink);font-family:"Avenir Next","Segoe UI",system-ui,sans-serif}
+body{background:radial-gradient(ellipse at 50% 20%,#22304a 0%,#141c2b 60%,#0c111b 100%) fixed;line-height:1.5}
+header{padding:18px 16px 4px;max-width:1100px;margin:0 auto}
+h1{font-size:21px;font-weight:600;margin:0}
+h2{font-size:17px;font-weight:600;margin:0 0 8px;color:#bdeee6}
+h3{font-size:14.5px;font-weight:600;margin:12px 0 4px;color:#d9eeea}
+.sub{font-size:13.5px;color:var(--muted);margin-top:4px}
+.draft{display:inline-block;font-size:11.5px;color:#14202a;background:var(--gold);border-radius:999px;padding:2px 9px;margin-left:6px;vertical-align:2px}
+nav{position:sticky;top:0;z-index:5;background:rgba(14,20,31,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+nav div{display:flex;gap:6px;overflow-x:auto;padding:8px 16px;max-width:1100px;margin:0 auto;-webkit-overflow-scrolling:touch}
+nav a{flex:none;text-decoration:none;border:1px solid var(--line);background:var(--glass);color:var(--ink);font-size:13px;padding:6px 11px;border-radius:999px}
+nav a:focus-visible,nav a:hover{border-color:var(--teal);color:#bdeee6;outline:none}
+main{max-width:1100px;margin:0 auto;padding:6px 16px 40px}
+section{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:14px 0;scroll-margin-top:56px}
+p{margin:6px 0;font-size:14px;color:#d6e0e3}
+ul{margin:6px 0;padding-left:20px;font-size:14px;color:#d6e0e3}
+li{margin:3px 0}
+.note{font-size:12.5px;color:var(--muted)}
+.grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.card{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.025)}
+.card b{display:block;color:#bdeee6;font-size:14px;margin-bottom:2px}
+.card span{font-size:13px;color:#cfd9dc}
+.card .meta{display:block;font-size:12px;color:var(--muted);margin-top:4px}
+.tag{display:inline-block;font-size:11.5px;border-radius:999px;padding:1px 8px;margin:2px 4px 0 0;background:var(--chip);color:#bdeee6;border:1px solid var(--line)}
+.tag.new{background:rgba(233,196,106,.16);color:#f1dca0}
+.tag.old{opacity:.75}
+.steps{list-style:none;padding:0;margin:8px 0;counter-reset:s}
+.steps li{position:relative;padding:8px 10px 8px 46px;border-left:2px solid rgba(76,195,181,.35);margin:0 0 0 14px}
+.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:-15px;top:8px;width:28px;height:28px;border-radius:50%;background:#183040;border:1px solid var(--teal);color:#bdeee6;font-size:12.5px;display:flex;align-items:center;justify-content:center}
+.steps time{display:block;font-size:12px;color:var(--gold)}
+.steps b{color:#e4f3f0;font-weight:600}
+.steps span{display:block;font-size:13.5px;color:#cfd9dc}
+.week{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.day{border:1px solid var(--line);border-radius:12px;padding:9px 10px;background:rgba(255,255,255,.02)}
+.day h4{margin:0 0 4px;font-size:13.5px;color:var(--gold);font-weight:600}
+.day p{font-size:12.5px;margin:4px 0;color:#cfd9dc}
+.day .who{color:#bdeee6;font-weight:600}
+.lines{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;background:#0b141c;border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:#9fe7dc;white-space:pre-wrap;overflow-x:auto;margin:8px 0}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0}
+.flow .box{border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:13px;background:rgba(255,255,255,.03)}
+.flow .arrow{color:var(--teal)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:12px}
+.tablewrap{overflow-x:auto}
+.waves{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+.wave{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.025)}
+.wave b{color:var(--gold);display:block}
+.wave .ci{display:block;margin-top:6px;font-size:12.5px;color:#f1dca0}
+ol.q{padding-left:22px;font-size:14px;color:#d6e0e3}
+ol.q li{margin:6px 0}
+ol.q em{color:var(--muted);font-style:normal;font-size:12.5px}
+svg text{font-family:inherit}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;color:#9fe7dc;background:rgba(0,0,0,.25);padding:0 4px;border-radius:4px;word-break:break-word}
+section.builder{border-color:rgba(233,196,106,.45)}
+section.builder h2{color:var(--gold)}
+.status{display:inline-block;font-size:11.5px;color:#14202a;background:var(--teal);border-radius:999px;padding:2px 9px;margin-left:6px;vertical-align:2px}
+td code{white-space:normal}
+</style>
+</head>
+<body>
+<header>
+  <h1>Step 2-3's optional stages, and two loose ends <span class="draft">Step 4 · draft for review</span></h1>
+  <div class="sub">The stages the user moved into Step 4 (2026-10-18): your own rounds, rounds from the doorway, your own hauling order, the Thursday stocktake, bringing a team job's parts. Plus the Tier 2 reputation numbers and the Bunk 1 texts. Plan Part 2, M1, M4, M8.</div>
+</header>
+<nav><div><a href="#plain">In plain words</a><a href="#grow">Loose ends</a><a href="#b">Builder</a><a href="#tests">Tests</a><a href="#ranges">Seat and size</a><a href="#faq">FAQ</a></div></nav>
+<main>
+
+<section id="plain">
+  <h2>In plain words</h2>
+  <ul>
+    <li><b>Rounds stage 2</b> (after 5 rounds): the clipboard lists the deck's machines with "last looked" days; you pick 4 to 6. Finding two or more worn ones on a round earns a word from Torres and Works reputation +1.</li>
+    <li><b>Rounds stage 3</b> (with the scanner, from Day 5, after stage 2): from a room's doorway one scan reads every machine in it (one <code>look</code>; it costs the scanner's charge, M11).</li>
+    <li><b>Hauling stage 2</b> (after 2 manifest runs, Day 10 on): the manifest's stops come unordered; you choose the order; fewer lift rides makes "A tidy run".</li>
+    <li><b>Hauling stage 3, the stocktake</b> (Thursdays 13:30, from Day 18): walk the storage aisles and count the shelves (a short <code>hold</code> each); one shelf is short; finding it posts a restock job before a repair is blocked.</li>
+    <li><b>Team jobs stage 2</b> (after 2 team jobs, from Day 18): the team job's Mail asks you to bring the parts: a manifest run from stores to the machine before the start. If you don't, the lead fetches them and it starts 10 minutes late. Never a fail.</li>
+  </ul>
+</section>
+
+<section id="grow">
+  <h2>Two loose ends</h2>
+  <div class="grid">
+    <div class="card"><b>Loose end 1 · Tier 2 reputation</b><span><code>WORK_BANDS[2] = [0, 12, 28, 45, 60]</code> (C2's numbers) kept; tuned so <code>career_check</code>'s steady player is "Trusted" by the end of Day 14 and not before Day 13. Side jobs give at most +2 a day in all, so they help but never rush a promotion.</span></div>
+    <div class="card"><b>Loose end 2 · Bunk 1 in the texts</b><span>Section 15's locker and hobby texts still name Bunk 1 after you move to 4-23: they read <code>playerBed()</code> / <code>SHIP.works.home</code> for the room's name.</span></div>
+  </div>
+</section>
+
+<section id="b" class="builder">
+  <h2>For the builder</h2>
+  <p class="note">One owner per function: the seat in the last column builds it; everyone else calls it, one line, typeof-guarded, listed in DEV_NOTES' hook register.</p>
+  <div class="tablewrap"><table>
+    <tr><th>Section</th><th>What</th><th>Owner</th></tr>
+    <tr><td>24a</td><td>rounds stages 2 and 3 (the pick list, the doorway scan)</td><td>E1</td></tr>
+    <tr><td>24d</td><td><code>manifestRun(list, to)</code> (the run, reused by team jobs), the free order, the stocktake</td><td>E1</td></tr>
+    <tr><td>24h</td><td><code>teamParts(job)</code>: the parts ask on team job Mail, calling <code>manifestRun</code></td><td>E2 (M8 is M2's seat)</td></tr>
+    <tr><td>24 core</td><td><code>WORK_BANDS[2]</code>; the side-job cap (+2 a day)</td><td>E1, in core's slot on C's behalf</td></tr>
+    <tr><td>15</td><td>the locker and hobby texts read <code>playerBed()</code></td><td>E1, on P's behalf (texts only)</td></tr>
+    <tr><td>DECKS[5]</td><td>stocktake count spots on the storage shelves (one per aisle)</td><td>E3 (places turn)</td></tr>
+  </table></div>
+  <ul>
+    <li><b>Keys:</b> <code>schedU(week, 0, 1016)</code> the short shelf; the rest deterministic.</li>
+    <li><b>Data:</b> <code>SHIP.works.side.round = { pick }</code>, <code>SHIP.works.side.stock = { week, found }</code>, <code>SHIP.works.side.parts = n</code>. Saved under <code>SHIP.works.side</code>; read defensively (a missing field is the default), so old saves load.</li>
+  </ul>
+</section>
+
+<section id="tests" class="builder">
+  <h2>Tests</h2>
+  <ul>
+    <li><code>mech_check</code>: the pick list; the doorway scan reads every machine in the room once; a free-order run delivers each stop once; the stocktake finds the planted short shelf; team parts arrive before the start or the start is 10 minutes late; the same twice.</li>
+    <li><code>career_check</code>: Tier 2 bands reached on the right days; side jobs capped at +2 a day; <code>player_check</code>: the texts name 4-23 after the move.</li>
+  </ul>
+</section>
+
+<section id="ranges" class="builder">
+  <h2>Seat and size</h2>
+  <ul><li>Seats <b>E1</b> and <b>E2</b> (24h). <b>Build size: S each (five small stages, two data lines).</b> Hash keys from the second range (1000-1049; check the key list first): <b>1016</b>.</li></ul>
+</section>
+
+<section id="faq">
+  <h2>Builders' questions</h2>
+  <p class="note">None yet.</p>
+</section>
+
+</main>
+</body>
+</html>

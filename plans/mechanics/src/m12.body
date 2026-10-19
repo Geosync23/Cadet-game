@@ -1,0 +1,57 @@
+TITLE:Logbook Spec
+H1:M12 · The logbook (from Day 12, Calder) <span class="draft">Step 4 · draft for review</span>
+SUB:At the end of a shift you write one line in the Works log, chosen from three summaries of your real shift. Step 4, sub-block 24n. Plan Part 2, M12.
+NAV:plain=In plain words|grow=How it grows|b=Builder|tests=Tests|ranges=Seat and size|faq=FAQ
+
+<section id="plain">
+  <h2>In plain words</h2>
+  <ul>
+    <li><b>When:</b> 16:30-17:30 on a workday, at the Works bay terminal: "Write the log".</li>
+    <li><b>What:</b> choose one of three summaries made from your shift (what you fixed, what you found, what's still open), e.g. "Washer 2 pump replaced; Washer 3 sounds rough, left for tomorrow."</li>
+    <li><b>What it does:</b> an open job you wrote up is finished 10% faster by whoever takes it next; Calder mentions your lines at progress talks.</li>
+    <li><b>Taught:</b> Calder, the first time from Day 12: "Officers write it down." <b>You get:</b> Works reputation +1 per entry (at most one a day).</li>
+  </ul>
+</section>
+
+<section id="grow">
+  <h2>How it grows</h2>
+  <div class="grid">
+    <div class="card"><b>Stage 1 · A line a shift</b><span>Day 12 on.</span></div>
+    <div class="card"><b>Stage 2 · Flag a machine</b><span>After 5 entries: flag one machine for the night crew to watch; they look at it at 22:00 (on paper) and a worn one is serviced early.</span></div>
+    <div class="card"><b>Stage 3 · Your notes come back</b><span>After 10: your lines turn up as clues in later P3 "What's been tried?" cases.</span></div>
+  </div>
+</section>
+
+<section id="b" class="builder">
+  <h2>For the builder</h2>
+  <p class="note">One owner per function: the seat in the last column builds it; everyone else calls it, one line, typeof-guarded, listed in DEV_NOTES' hook register.</p>
+  <div class="tablewrap"><table>
+    <tr><th>Section</th><th>What</th><th>Owner</th></tr>
+    <tr><td>24n (new)</td><td><code>logChoices(day)</code> (the three summaries from the shift's job history), the entry, the flag, the 10% handover bonus</td><td>E1</td></tr>
+    <tr><td>24 core</td><td>progress talks read the last lines: <code>typeof logLast === 'function' &amp;&amp; logLast(3)</code></td><td>E1 (core's slot)</td></tr>
+    <tr><td>24k</td><td>P3 reads <code>SHIP.works.side.log</code> for clues (stage 3): one line</td><td>H's code; the line added by E2 with the favour cases</td></tr>
+    <tr><td>content/</td><td>summary templates <code>works.log.*</code></td><td>writer</td></tr>
+  </table></div>
+  <ul>
+    <li><b>Data:</b> <code>SHIP.works.side.log = [{ day, pick, jobs: [ids], flag }]</code>, the last 30 kept. Saved under <code>SHIP.works.side</code>; read defensively (a missing field is the default), so old saves load.</li>
+    <li><b>Order of the three:</b> <code>schedU(day, 0, 1002)</code>. The terminal is an existing Works bay place (use it; else <code>5-works-terminal</code> in the places turn).</li>
+    <li><b>Phone:</b> none (a device view).</li>
+  </ul>
+</section>
+
+<section id="tests" class="builder">
+  <h2>Tests</h2>
+  <ul>
+    <li><code>mech_check</code> (24n): the three summaries match the shift; the entry reaches the next shift (10% faster) and the progress talk; one rep a day at most; the same twice.</li>
+  </ul>
+</section>
+
+<section id="ranges" class="builder">
+  <h2>Seat and size</h2>
+  <ul><li>Seat <b>E1</b>. <b>Build size: S.</b> Hash keys from the second range (1000-1049; check the key list first): <b>1002</b> (the order of the three).</li></ul>
+</section>
+
+<section id="faq">
+  <h2>Builders' questions</h2>
+  <p class="note">None yet.</p>
+</section>

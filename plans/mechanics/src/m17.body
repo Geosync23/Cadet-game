@@ -1,0 +1,59 @@
+TITLE:Lift Roof Spec
+H1:M17 · On the lift roof (from Day 18; built last) <span class="draft">Step 4 · draft for review</span>
+SUB:For an hour the main lift is held for maintenance; you ride its roof slowly down the spine and grease each guide. The riskiest Step 4 piece, so it's built last. Step 4, sub-block 24s. Plan Part 2, M17.
+NAV:plain=In plain words|grow=How it grows|b=Builder|tests=Tests|ranges=Seat and size|faq=FAQ
+
+<p class="note"><b>Lead's call, for the user's morning review:</b> Thursdays 15:30-16:30 (the plan said mid-morning, but mornings hold the team jobs and the tea); crew wait for the lift instead of using the ladder (the ladder needs new crew paths).</p>
+<section id="plain">
+  <h2>In plain words</h2>
+  <ul>
+    <li><b>When:</b> Thursdays 15:30-16:30 (after the stocktake), from Day 18.</li>
+    <li><b>What:</b> at the top deck, climb onto the car's roof (<code>hold</code>); the car rides slowly down the spine; at each deck it stops at a guide and you grease it (<code>hold</code>, 1 ship minute). A view of the spine nobody else gets.</li>
+    <li><b>The crew:</b> the Wren has no second lift, so for the hour crew who need another deck <b>wait</b> until 16:30 (mid-afternoon is quiet); nobody uses the ladder.</li>
+    <li><b>Taught:</b> Emeka Halloran (who looks after the lift) rides with you the first time. <b>You get:</b> Works reputation +1, and the lift runs a little smoother (fewer judders).</li>
+  </ul>
+</section>
+
+<section id="grow">
+  <h2>How it grows</h2>
+  <div class="grid">
+    <div class="card"><b>Stage 1 · With Halloran</b><span>Day 18.</span></div>
+    <div class="card"><b>Stage 2 · Alone</b><span>After 2 rides.</span></div>
+    <div class="card"><b>Stage 3 · A judder</b><span>Later: a lift head-scratcher you trace from the roof (H, a later band).</span></div>
+  </div>
+</section>
+
+<section id="b" class="builder">
+  <h2>For the builder</h2>
+  <p class="note">One owner per function: the seat in the last column builds it; everyone else calls it, one line, typeof-guarded, listed in DEV_NOTES' hook register.</p>
+  <div class="tablewrap"><table>
+    <tr><th>Section</th><th>What</th><th>Owner</th></tr>
+    <tr><td>11 (the lift)</td><td><code>liftHold(on)</code> (no calls while held), <code>liftRoofRide(speed)</code> (the car's existing ride, slowed, stopping at each deck)</td><td>E3, in section 11 on the lift owner's behalf</td></tr>
+    <tr><td>14</td><td>crew wanting another deck wait while <code>typeof liftHeld === 'function' &amp;&amp; liftHeld()</code>: one line where crew call the lift</td><td>sim's code; the line added by E3, in the register</td></tr>
+    <tr><td>24s (new)</td><td>the schedule, the climb, the guides, the release at 16:30 (always, even if you leave)</td><td>E3</td></tr>
+    <tr><td>8b</td><td>a <code>grease</code> pose (falls back to <code>work</code>)</td><td>E3</td></tr>
+    <tr><td>camera</td><td>the camera inside the shaft, above the car roof</td><td>E3 (perf on call)</td></tr>
+  </table></div>
+  <ul>
+    <li><b>The shaft:</b> if the spine isn't drawn between decks, a simple shaft (four walls, the trunks, a slab at each deck) built lazily on the first ride, about 12 draw calls, hidden after.</li>
+    <li><b>Data:</b> <code>SHIP.works.side.roof = { rides, last }</code>. A save mid-ride loads with you on the top deck, the lift released. Saved under <code>SHIP.works.side</code>; read defensively (a missing field is the default), so old saves load.</li>
+    <li><b>If it slips:</b> it ships after the rest of Step 4 on its own; nothing else depends on it.</li>
+  </ul>
+</section>
+
+<section id="tests" class="builder">
+  <h2>Tests</h2>
+  <ul>
+    <li><code>mech_check</code> (24s): the hold and the release at 16:30 every time; the ride ends at every deck; <code>day_check</code> on a Thursday: crew reach their places (late by at most the hour); <code>deck_check</code>/<code>perf_check</code>: draw calls in the ride under budget; save mid-ride.</li>
+  </ul>
+</section>
+
+<section id="ranges" class="builder">
+  <h2>Seat and size</h2>
+  <ul><li>Seat <b>E3</b>. <b>Build size: L.</b> No keys.</li></ul>
+</section>
+
+<section id="faq">
+  <h2>Builders' questions</h2>
+  <p class="note">None yet.</p>
+</section>

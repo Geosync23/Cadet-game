@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Workshop Spec</title>
+<style>
+:root{--ink:#e8eef0;--muted:#93a6ae;--teal:#4cc3b5;--gold:#e9c46a;--rose:#e58f7a;--glass:rgba(13,21,33,.78);--line:rgba(150,200,196,.22);--chip:rgba(76,195,181,.14)}
+*{box-sizing:border-box}
+html,body{margin:0;background:#121a27;color:var(--ink);font-family:"Avenir Next","Segoe UI",system-ui,sans-serif}
+body{background:radial-gradient(ellipse at 50% 20%,#22304a 0%,#141c2b 60%,#0c111b 100%) fixed;line-height:1.5}
+header{padding:18px 16px 4px;max-width:1100px;margin:0 auto}
+h1{font-size:21px;font-weight:600;margin:0}
+h2{font-size:17px;font-weight:600;margin:0 0 8px;color:#bdeee6}
+h3{font-size:14.5px;font-weight:600;margin:12px 0 4px;color:#d9eeea}
+.sub{font-size:13.5px;color:var(--muted);margin-top:4px}
+.draft{display:inline-block;font-size:11.5px;color:#14202a;background:var(--gold);border-radius:999px;padding:2px 9px;margin-left:6px;vertical-align:2px}
+nav{position:sticky;top:0;z-index:5;background:rgba(14,20,31,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+nav div{display:flex;gap:6px;overflow-x:auto;padding:8px 16px;max-width:1100px;margin:0 auto;-webkit-overflow-scrolling:touch}
+nav a{flex:none;text-decoration:none;border:1px solid var(--line);background:var(--glass);color:var(--ink);font-size:13px;padding:6px 11px;border-radius:999px}
+nav a:focus-visible,nav a:hover{border-color:var(--teal);color:#bdeee6;outline:none}
+main{max-width:1100px;margin:0 auto;padding:6px 16px 40px}
+section{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:14px 0;scroll-margin-top:56px}
+p{margin:6px 0;font-size:14px;color:#d6e0e3}
+ul{margin:6px 0;padding-left:20px;font-size:14px;color:#d6e0e3}
+li{margin:3px 0}
+.note{font-size:12.5px;color:var(--muted)}
+.grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.card{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.025)}
+.card b{display:block;color:#bdeee6;font-size:14px;margin-bottom:2px}
+.card span{font-size:13px;color:#cfd9dc}
+.card .meta{display:block;font-size:12px;color:var(--muted);margin-top:4px}
+.tag{display:inline-block;font-size:11.5px;border-radius:999px;padding:1px 8px;margin:2px 4px 0 0;background:var(--chip);color:#bdeee6;border:1px solid var(--line)}
+.tag.new{background:rgba(233,196,106,.16);color:#f1dca0}
+.tag.old{opacity:.75}
+.steps{list-style:none;padding:0;margin:8px 0;counter-reset:s}
+.steps li{position:relative;padding:8px 10px 8px 46px;border-left:2px solid rgba(76,195,181,.35);margin:0 0 0 14px}
+.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:-15px;top:8px;width:28px;height:28px;border-radius:50%;background:#183040;border:1px solid var(--teal);color:#bdeee6;font-size:12.5px;display:flex;align-items:center;justify-content:center}
+.steps time{display:block;font-size:12px;color:var(--gold)}
+.steps b{color:#e4f3f0;font-weight:600}
+.steps span{display:block;font-size:13.5px;color:#cfd9dc}
+.week{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.day{border:1px solid var(--line);border-radius:12px;padding:9px 10px;background:rgba(255,255,255,.02)}
+.day h4{margin:0 0 4px;font-size:13.5px;color:var(--gold);font-weight:600}
+.day p{font-size:12.5px;margin:4px 0;color:#cfd9dc}
+.day .who{color:#bdeee6;font-weight:600}
+.lines{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;background:#0b141c;border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:#9fe7dc;white-space:pre-wrap;overflow-x:auto;margin:8px 0}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0}
+.flow .box{border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:13px;background:rgba(255,255,255,.03)}
+.flow .arrow{color:var(--teal)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:12px}
+.tablewrap{overflow-x:auto}
+.waves{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+.wave{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.025)}
+.wave b{color:var(--gold);display:block}
+.wave .ci{display:block;margin-top:6px;font-size:12.5px;color:#f1dca0}
+ol.q{padding-left:22px;font-size:14px;color:#d6e0e3}
+ol.q li{margin:6px 0}
+ol.q em{color:var(--muted);font-style:normal;font-size:12.5px}
+svg text{font-family:inherit}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;color:#9fe7dc;background:rgba(0,0,0,.25);padding:0 4px;border-radius:4px;word-break:break-word}
+section.builder{border-color:rgba(233,196,106,.45)}
+section.builder h2{color:var(--gold)}
+.status{display:inline-block;font-size:11.5px;color:#14202a;background:var(--teal);border-radius:999px;padding:2px 9px;margin-left:6px;vertical-align:2px}
+td code{white-space:normal}
+</style>
+</head>
+<body>
+<header>
+  <h1>M10 · The workshop and tinkering (from Day 12; tinkering from Day 6) <span class="draft">Step 4 · draft for review</span></h1>
+  <div class="sub">Crew order small things at the machine shop; you make them and hand them over. Off shift you tinker for gifts or your cabin. Step 4, sub-block 24j. Plan Part 2, M10 and "Off shift".</div>
+</header>
+<nav><div><a href="#plain">In plain words</a><a href="#grow">How it grows</a><a href="#b">Builder</a><a href="#tests">Tests</a><a href="#ranges">Seat and size</a><a href="#faq">FAQ</a></div></nav>
+<main>
+
+<section id="plain">
+  <h2>In plain words</h2>
+  <ul>
+    <li><b>The order board</b> in Deck 5's machine shop gets one or two orders a week (posted Mondays 08:00) from crew you know: "A hook for my guitar, please. Pell." Each order names a thing and a person.</li>
+    <li><b>Make it:</b> take the order (tap the board), then at the lathe or the fabricator a <code>wait</code> (10 ship minutes) and a short <code>hold</code> to finish. The thing goes into a hand.</li>
+    <li><b>Hand it over</b> in person (tap them): a thank-you line and a friendship step. An order you never take lapses after 7 days ("I made do, don't worry"): no harm.</li>
+    <li><b>Tinkering</b> (from Day 6, off shift): at the same machines, make one thing from a short list (a lamp, a mug rack, a toy rocket, a plant pot) for a gift (Pillar 4's gifts) or for your cabin (cabin touches). Scrap is free; one at a time.</li>
+    <li><b>Who:</b> the machine shop tech on shift teaches the first order (a by-list, first on shift). <b>You get:</b> Works reputation +1 per order handed over (at most one a day), a friendship step, and leisure while tinkering.</li>
+  </ul>
+</section>
+
+<section id="grow">
+  <h2>How it grows</h2>
+  <div class="grid">
+    <div class="card"><b>Stage 1 · Simple orders</b><span>Day 12 on.</span></div>
+    <div class="card"><b>Stage 2 · A part from stores</b><span>After 3 orders: some need a part fetched from a storage shelf first (M4's carry).</span></div>
+    <div class="card"><b>Stage 3 · Your own designs</b><span>After 6 orders: two more things on the tinkering list.</span></div>
+  </div>
+</section>
+
+<section id="b" class="builder">
+  <h2>For the builder</h2>
+  <p class="note">One owner per function: the seat in the last column builds it; everyone else calls it, one line, typeof-guarded, listed in DEV_NOTES' hook register.</p>
+  <div class="tablewrap"><table>
+    <tr><th>Section</th><th>What</th><th>Owner</th></tr>
+    <tr><td>24j (new)</td><td><code>WORKSHOP_ORDERS</code> (data: thing, who can ask, which machine), <code>shopOrderPost(week)</code>, take, make, hand over, lapse; the tinkering list</td><td>E3 (M3's seat)</td></tr>
+    <tr><td>15</td><td><code>wait</code> and <code>hold</code> steps (exist); the made thing in a hand (<code>carry</code>, exists)</td><td>P (exists, no change)</td></tr>
+    <tr><td>Pillar 4 gifts</td><td>a made thing given as a gift: <code>typeof giftGive === 'function' &amp;&amp; giftGive(id, item)</code></td><td>social (exists)</td></tr>
+    <tr><td>DECKS[5]</td><td>places <code>5-shop-board</code>, <code>5-shop-lathe</code>, <code>5-shop-fab</code></td><td>E3 (the Step 4 places turn)</td></tr>
+    <tr><td>content/</td><td>order lines and thank-yous (<code>works.order.*</code>)</td><td>writer</td></tr>
+  </table></div>
+  <ul>
+    <li><b>Data:</b> <code>SHIP.works.side.shop = { orders: [{ id, who, what, day, state }], made: n, tinkered: [ids] }</code>. Saved under <code>SHIP.works.side</code>; read defensively (a missing field is the default), so old saves load.</li>
+    <li><b>Who orders:</b> crew at friendship "acquainted" or better, picked with <code>schedU(week, 0, 1000)</code>; the thing with <code>schedU(week, 1, 1001)</code>. The lathe and fabricator are places here, not wearing machines (simplest; wear can come later).</li>
+    <li><b>Phone:</b> made things are small props from the existing kit, drawn only where placed (1 draw call each; the cabin cap is 4).</li>
+  </ul>
+</section>
+
+<section id="tests" class="builder">
+  <h2>Tests</h2>
+  <ul>
+    <li><code>mech_check</code> (24j): an order posted, taken, made, handed over; the friendship step; a lapse does no harm; tinkering one at a time; a gift reaches the gifts system; the same twice.</li>
+    <li><code>interactions_check</code>: the board, lathe and fabricator are usable places.</li>
+  </ul>
+</section>
+
+<section id="ranges" class="builder">
+  <h2>Seat and size</h2>
+  <ul><li>Seat <b>E3</b> (M3's seat, <code>claude/mech-diagnose</code>, 0.53.x). <b>Build size: M.</b> Hash keys from the second range (1000-1049; check the key list first): <b>1000-1001</b> (who, what).</li></ul>
+</section>
+
+<section id="faq">
+  <h2>Builders' questions</h2>
+  <p class="note">None yet.</p>
+</section>
+
+</main>
+</body>
+</html>

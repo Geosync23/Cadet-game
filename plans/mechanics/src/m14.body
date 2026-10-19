@@ -1,0 +1,57 @@
+TITLE:Irrigation Spec
+H1:M14 · Garden irrigation (harvest mornings from Day 13) <span class="draft">Step 4 · draft for review</span>
+SUB:While the garden crew pick, you clear the grow racks' nozzles, and the next harvest is a little bigger. Off shift, optional. Step 4, sub-block 24p. Plan Part 2, M14.
+NAV:plain=In plain words|grow=How it grows|b=Builder|tests=Tests|ranges=Seat and size|faq=FAQ
+
+<p class="note"><b>Lead's call, for the user's morning review:</b> is Day 13 a harvest Saturday? If harvest falls on Days 6, 20 ..., the first is Day 20. The first harvest on or after Day 13 either way.</p>
+<section id="plain">
+  <h2>In plain words</h2>
+  <ul>
+    <li><b>When:</b> harvest morning (every other Saturday, the Pillar 4 tradition), while the crew pick.</li>
+    <li><b>What:</b> walk the garden's three grow racks; a few nozzles on each are clogged (2 to 4 in all); at each rack a short <code>hold</code> per clogged nozzle clears it.</li>
+    <li><b>What it does:</b> the next harvest is a little bigger (up to a tenth more), and that evening's salad gets a mention.</li>
+    <li><b>Taught:</b> the gardener on the rota shows you the first rack. <b>You get:</b> a friendship step with the gardeners over a few harvests, Works reputation +1.</li>
+  </ul>
+</section>
+
+<section id="grow">
+  <h2>How it grows</h2>
+  <div class="grid">
+    <div class="card"><b>Stage 1 · Clear the nozzles</b><span>The first harvest from Day 13.</span></div>
+    <div class="card"><b>Stage 2 · Flush a line</b><span>After 2 harvests: flush a rack's line (<code>wait</code>, 5 ship minutes).</span></div>
+    <div class="card"><b>Stage 3 · The irrigation machine</b><span>After 4: service the real irrigation machine on Deck 3 (its Tier 2 job, open to you then).</span></div>
+  </div>
+</section>
+
+<section id="b" class="builder">
+  <h2>For the builder</h2>
+  <p class="note">One owner per function: the seat in the last column builds it; everyone else calls it, one line, typeof-guarded, listed in DEV_NOTES' hook register.</p>
+  <div class="tablewrap"><table>
+    <tr><th>Section</th><th>What</th><th>Owner</th></tr>
+    <tr><td>24p (new)</td><td>the clogged nozzles, the clearing, <code>irrigationBonus()</code> (0 to 0.1)</td><td>E2</td></tr>
+    <tr><td>17 (the garden)</td><td>the harvest reads <code>typeof irrigationBonus === 'function' ? irrigationBonus() : 0</code>, one line</td><td>S's code; the line added by E2, in the register</td></tr>
+    <tr><td>14</td><td>reads the garden rota (you join the harvest; nothing changes for the crew)</td><td>sim (exists, no change)</td></tr>
+    <tr><td>DECKS[3]</td><td><code>3-rack-1..3</code>, one place per rack</td><td>E3 (places turn)</td></tr>
+  </table></div>
+  <ul>
+    <li><b>Which nozzles:</b> <code>schedU(day, 0, 1005)</code>. <b>Data:</b> <code>SHIP.works.side.nozzles = { day, clogged: [..], cleared: [..], harvests: n }</code>. Saved under <code>SHIP.works.side</code>; read defensively (a missing field is the default), so old saves load.</li>
+    <li><b>Phone:</b> none new.</li>
+  </ul>
+</section>
+
+<section id="tests" class="builder">
+  <h2>Tests</h2>
+  <ul>
+    <li><code>mech_check</code> (24p): cleared nozzles lift the next harvest a little, uncleared ones don't lower it; <code>day_check</code> on a harvest Saturday: the crew's harvest still flows.</li>
+  </ul>
+</section>
+
+<section id="ranges" class="builder">
+  <h2>Seat and size</h2>
+  <ul><li>Seat <b>E2</b>. <b>Build size: S.</b> Hash keys from the second range (1000-1049; check the key list first): <b>1005</b> (which nozzles).</li></ul>
+</section>
+
+<section id="faq">
+  <h2>Builders' questions</h2>
+  <p class="note">None yet.</p>
+</section>

@@ -1,0 +1,56 @@
+TITLE:Rewiring Spec
+H1:M15 · Rewiring (from Day 17, Calder; Tier 2) <span class="draft">Step 4 · draft for review</span>
+SUB:Replace a junction box's wiring by following the colour chart on its panel. A wrong pair shows at the test; never a fail. Step 4, sub-block 24q. Plan Part 2, M15.
+NAV:plain=In plain words|grow=How it grows|b=Builder|tests=Tests|ranges=Seat and size|faq=FAQ
+
+<p class="note"><b>Lead's call, for the user's morning review:</b> the first rewiring is Day 17 (Days 13-14 are a weekend and 15-16 the second test days).</p>
+<section id="plain">
+  <h2>In plain words</h2>
+  <ul>
+    <li><b>About once a week</b> (posted 08:00 on a weekday): "Rewire junction 4-J2."</li>
+    <li><b>What:</b> open the box; the device shows the colour chart (4 to 6 wires). Choose a wire, then its terminal (<code>choose</code> steps), until all are in; close up and test.</li>
+    <li><b>A wrong pair:</b> a fuse pops at the test; open it and redo only that pair. "Right first time" if none.</li>
+    <li><b>Taught:</b> Calder, on an officers' corridor junction, on the first one (Day 17, Wednesday morning). <b>You get:</b> Works reputation +1 (+1 more right first time).</li>
+  </ul>
+</section>
+
+<section id="grow">
+  <h2>How it grows</h2>
+  <div class="grid">
+    <div class="card"><b>Stage 1 · A clear chart</b><span>Day 17 on.</span></div>
+    <div class="card"><b>Stage 2 · A faded chart</b><span>After 3: one colour has faded; check it against the room's lights (flip a switch, see which light goes).</span></div>
+    <div class="card"><b>Stage 3 · Faded labels</b><span>Leads into P7 (Day 23, Step 6).</span></div>
+  </div>
+</section>
+
+<section id="b" class="builder">
+  <h2>For the builder</h2>
+  <p class="note">One owner per function: the seat in the last column builds it; everyone else calls it, one line, typeof-guarded, listed in DEV_NOTES' hook register.</p>
+  <div class="tablewrap"><table>
+    <tr><th>Section</th><th>What</th><th>Owner</th></tr>
+    <tr><td>24q (new)</td><td><code>rewirePost</code>, the chart, the choose sequence, the test and the redo</td><td>E2</td></tr>
+    <tr><td>17</td><td>a rewiring job is a <code>junction</code> job set to <b>Tier 2</b> on the job itself (junction is Tier 3 in code)</td><td>S's data; set by E2 when posting (<code>j.tier = 2</code>), no 17 change</td></tr>
+    <tr><td>15</td><td><code>choose</code> steps (exist)</td><td>P (exists)</td></tr>
+  </table></div>
+  <ul>
+    <li><b>Which junction, which colour fades:</b> <code>schedU(week, 0, 1006)</code>, <code>schedU(week, 1, 1007)</code>. <b>Data:</b> <code>SHIP.works.side.rewire = { done, wrongs }</code>. Saved under <code>SHIP.works.side</code>; read defensively (a missing field is the default), so old saves load.</li>
+    <li><b>Phone:</b> none (a device view).</li>
+  </ul>
+</section>
+
+<section id="tests" class="builder">
+  <h2>Tests</h2>
+  <ul>
+    <li><code>mech_check</code> (24q): a right sequence finishes; a wrong pair costs one redo, never a fail; a rewiring job is offered at Tier 2; the same twice.</li>
+  </ul>
+</section>
+
+<section id="ranges" class="builder">
+  <h2>Seat and size</h2>
+  <ul><li>Seat <b>E2</b>. <b>Build size: M.</b> Hash keys from the second range (1000-1049; check the key list first): <b>1006-1007</b>.</li></ul>
+</section>
+
+<section id="faq">
+  <h2>Builders' questions</h2>
+  <p class="note">None yet.</p>
+</section>

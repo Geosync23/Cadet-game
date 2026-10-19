@@ -1,7 +1,7 @@
 TITLE:Pillar 5 Spec Pages
 H1:Pillar 5 · the spec pages <span class="draft">Steps 1 and 2</span>
 SUB:One page per mechanic, each in plain words with a precise "for the builder" part. From the approved plan (<code>plans/pillar5-plan.md</code>, v9, and <code>plans/pillar5-plan.html</code>). Written 2026-10-18 by the Pillar 5 designer; approved or sent back by the lead.
-NAV:s1=Step 1|s2=Step 2|s3=Step 3|data=Data
+NAV:s1=Step 1|s2=Step 2|s3=Step 3|s4=Step 4|data=Data
 
 <section id="s1">
   <h2>Step 1 · Foundation</h2>
@@ -33,6 +33,21 @@ NAV:s1=Step 1|s2=Step 2|s3=Step 3|data=Data
     <div class="card"><b><a href="p2-who-saw-what.html" style="color:inherit">P2 Who saw what?</a></b><span>Day 15.</span><span class="meta"><span class="tag">H</span></span></div>
     <div class="card"><b><a href="case-engine.html#t2" style="color:inherit">The T2 band</a></b><span>On the case engine page.</span><span class="meta"><span class="tag">H</span></span></div>
     <div class="card"><b><a href="architect-air-line.html" style="color:inherit">The air line (for the deck architect)</a></b><span>Deck 5: the Fan hall hatch, the main fan's panel, two duct dampers.</span><span class="meta"><span class="tag">A · S</span></span></div>
+  </div>
+</section>
+<section id="s4">
+  <h2>Step 4 · Side jobs (drafts for the user's review, 2026-10-19)</h2>
+  <div class="grid">
+    <div class="card"><b><a href="m10-workshop.html" style="color:inherit">M10 The workshop and tinkering</a></b><span>From Day 12 (tinkering Day 6).</span><span class="meta"><span class="tag">E3 · 24j</span><span class="tag">size M</span></span></div>
+    <div class="card"><b><a href="m11-tool-upkeep.html" style="color:inherit">M11 Tool upkeep</a></b><span>From Day 12.</span><span class="meta"><span class="tag">E1 · 24m</span><span class="tag">size S</span></span></div>
+    <div class="card"><b><a href="m12-logbook.html" style="color:inherit">M12 The logbook</a></b><span>From Day 12, Calder.</span><span class="meta"><span class="tag">E1 · 24n</span><span class="tag">size S</span></span></div>
+    <div class="card"><b><a href="m13-leak-hunting.html" style="color:inherit">M13 Leak hunting</a></b><span>From Day 12.</span><span class="meta"><span class="tag">E2 · 24o</span><span class="tag">size M</span></span></div>
+    <div class="card"><b><a href="m14-irrigation.html" style="color:inherit">M14 Garden irrigation</a></b><span>Harvest mornings from Day 13.</span><span class="meta"><span class="tag">E2 · 24p</span><span class="tag">size S</span></span></div>
+    <div class="card"><b><a href="m15-rewiring.html" style="color:inherit">M15 Rewiring</a></b><span>From Day 17, Calder.</span><span class="meta"><span class="tag">E2 · 24q</span><span class="tag">size M</span></span></div>
+    <div class="card"><b><a href="favour-cases.html" style="color:inherit">Favour cases and fault-finder tickets</a></b><span>From Day 13.</span><span class="meta"><span class="tag">E2 · 24l</span><span class="tag">size M</span></span></div>
+    <div class="card"><b><a href="off-shift.html" style="color:inherit">Cabin touches and star logging</a></b><span>Off shift.</span><span class="meta"><span class="tag">E3 · 24t</span><span class="tag">size S</span></span></div>
+    <div class="card"><b><a href="step4-stages.html" style="color:inherit">Optional stages and loose ends</a></b><span>Rounds 2-3, hauling 2-3, team parts; WORK_BANDS[2]; Bunk 1 texts.</span><span class="meta"><span class="tag">E1 · E2</span><span class="tag">size S</span></span></div>
+    <div class="card"><b><a href="m17-lift-roof.html" style="color:inherit">M17 On the lift roof</a></b><span>From Day 18; built last.</span><span class="meta"><span class="tag">E3 · 24s</span><span class="tag">size L</span></span></div>
   </div>
 </section>
 <section id="data">

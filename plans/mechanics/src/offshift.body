@@ -1,0 +1,58 @@
+TITLE:Off Shift Spec
+H1:Cabin touches and star logging (off shift) <span class="draft">Step 4 · draft for review</span>
+SUB:Small cozy things for your own time: dress your cabin with what you bought or made, and log stars for Survey at the observatory. Step 4, a new sub-block 24t (proposed). Plan Part 2, "Off shift".
+NAV:plain=In plain words|grow=How it grows|b=Builder|tests=Tests|ranges=Seat and size|faq=FAQ
+
+<p class="note"><b>Lead's call, for the user's morning review:</b> no seat was named for these: E3 takes them (tinkering lives with the workshop), as a new sub-block 24t.</p>
+<section id="plain">
+  <h2>In plain words</h2>
+  <ul>
+    <li><b>Cabin touches</b> (once you have cabin 4-23, Days 10-11): four spots, the floor (a rug), the desk (a lamp), the shelf (keepsakes), the sill (a plant). Tap a spot and pick from your things that fit it (bought at the crew store or made by tinkering). Things placed there count as put away (the locker's tidy).</li>
+    <li><b>What it does:</b> with two or more touches, you wake a little happier (mood); visitors notice ("Nice lamp. Did you make that?").</li>
+    <li><b>Star logging</b> (from Day 6, any evening 20:00-23:30): at Deck 2's observatory telescope, a short look: three marked points in the sky, one is new; pick it and log it (30-60 s). One a night.</li>
+    <li><b>What it does:</b> Survey warms to you (a friendship step with Dr. Sato or the Deputy Survey Chief every three logs); after ten, a Record line, "Star logger"; on Day 19 the sensor array lesson says your logging paid off.</li>
+  </ul>
+</section>
+
+<section id="grow">
+  <h2>How it grows</h2>
+  <div class="grid">
+    <div class="card"><b>Cabin · four spots</b><span>From your cabin.</span></div>
+    <div class="card"><b>Stars · a log a night</b><span>From Day 6.</span></div>
+    <div class="card"><b>Stars · ten logged</b><span>A Record line; M20 (Day 19) remembers.</span></div>
+  </div>
+</section>
+
+<section id="b" class="builder">
+  <h2>For the builder</h2>
+  <p class="note">One owner per function: the seat in the last column builds it; everyone else calls it, one line, typeof-guarded, listed in DEV_NOTES' hook register.</p>
+  <div class="tablewrap"><table>
+    <tr><th>Section</th><th>What</th><th>Owner</th></tr>
+    <tr><td>24t (new, proposed)</td><td>the cabin spots and choosing; star logging (the three points, the log, the counts)</td><td>E3</td></tr>
+    <tr><td>15b</td><td>placed things: <code>typeof cabinPlaced === 'function' &amp;&amp; cabinPlaced(id)</code> read by <code>lockerTidy()</code>, one line</td><td>M1's 24c (M3 page); the line added by E3</td></tr>
+    <tr><td>mood (15)</td><td>a waking bonus <code>cabinMood()</code> read once at 06:00, one line</td><td>P's code; the line added by E3, in the register</td></tr>
+    <tr><td>DECKS[4], [2]</td><td><code>4-23-rug</code>, <code>-desk</code>, <code>-shelf</code>, <code>-sill</code>; <code>2-telescope</code> (use the observatory's existing place if it has one)</td><td>E3 (places turn)</td></tr>
+  </table></div>
+  <ul>
+    <li><b>Keys:</b> <code>schedU(day, 0, 1014)</code> where the three points are, <code>1015</code> which is new.</li>
+    <li><b>Data:</b> <code>SHIP.works.side.cabin = { rug, desk, shelf, sill }</code> (item ids), <code>SHIP.works.side.stars = { n, last }</code>. Saved under <code>SHIP.works.side</code>; read defensively (a missing field is the default), so old saves load.</li>
+    <li><b>Phone:</b> at most 4 extra draw calls in the cabin (one per spot, shared kit); the star view uses the existing sky with the three marks as screen overlay.</li>
+  </ul>
+</section>
+
+<section id="tests" class="builder">
+  <h2>Tests</h2>
+  <ul>
+    <li><code>mech_check</code>: a placed thing shows and counts as put away; mood bonus with two or more; one star log a night, ten gives the Record line; the same twice; <code>deck_check</code> Deck 4 draw calls with all four spots.</li>
+  </ul>
+</section>
+
+<section id="ranges" class="builder">
+  <h2>Seat and size</h2>
+  <ul><li>Seat <b>E3</b>. <b>Build size: S + S.</b> Hash keys from the second range (1000-1049; check the key list first): <b>1014-1015</b>.</li></ul>
+</section>
+
+<section id="faq">
+  <h2>Builders' questions</h2>
+  <p class="note">None yet.</p>
+</section>

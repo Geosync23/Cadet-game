@@ -1,0 +1,58 @@
+TITLE:Tool Upkeep Spec
+H1:M11 · Tool upkeep (from Day 12) <span class="draft">Step 4 · draft for review</span>
+SUB:Your tools wear with use and you look after them at your bench. Never blocks a job. Step 4, sub-block 24m. Plan Part 2, M11.
+NAV:plain=In plain words|grow=How it grows|b=Builder|tests=Tests|ranges=Seat and size|faq=FAQ
+
+<p class="note"><b>Lead's call, for the user's morning review:</b> Torres is off on Thursdays and Fridays, so "his Friday routine" is taught by whoever is on shift, the first time you use the bench.</p>
+<section id="plain">
+  <h2>In plain words</h2>
+  <ul>
+    <li><b>Wear:</b> the scanner's charge runs down with each scan, the pipe kit's seals get grubby with each trace, the logger's clip with each use (once you have it). In words on the Works app's Tools page: "Charged", "Getting low", "Due".</li>
+    <li><b>Due still works, just slower</b>: a step with a due tool takes a quarter longer, and once a day a toast says so ("Your scanner's charge is low"). It never stops a job.</li>
+    <li><b>At your bench</b> in the Works bay: recharge the scanner (<code>wait</code>, 5 ship minutes), clean and re-seal the pipe kit (<code>hold</code>, 2), check the logger (<code>hold</code>, 1). Friday afternoons are the custom, but any time works.</li>
+    <li><b>Who teaches:</b> the first time you use your bench from Day 12, the Works officer on shift (by-list <code>['torres-zeke', 'halloran-emeka']</code>) shows you "Torres's Friday routine". <b>You get:</b> Works reputation +1 for a week with your tools kept up.</li>
+  </ul>
+</section>
+
+<section id="grow">
+  <h2>How it grows</h2>
+  <div class="grid">
+    <div class="card"><b>Stage 1 · The scanner</b><span>Day 12 on.</span></div>
+    <div class="card"><b>Stage 2 · The pipe kit and the logger</b><span>As each arrives (the pipe kit Day 12, the logger later).</span></div>
+    <div class="card"><b>Stage 3 · The team's tools</b><span>After 4 upkeeps: the Works team's shared rack, once a week (<code>hold</code>, 3); Calder notices.</span></div>
+  </div>
+</section>
+
+<section id="b" class="builder">
+  <h2>For the builder</h2>
+  <p class="note">One owner per function: the seat in the last column builds it; everyone else calls it, one line, typeof-guarded, listed in DEV_NOTES' hook register.</p>
+  <div class="tablewrap"><table>
+    <tr><th>Section</th><th>What</th><th>Owner</th></tr>
+    <tr><td>24 core</td><td><code>toolWear(id, n)</code>, <code>toolState(id)</code>, <code>toolSlow(id)</code> on <code>SHIP.works.tools[id].wear</code> (the foundation page's tools)</td><td>E1, in core's slot on C's behalf (C isn't seated tonight)</td></tr>
+    <tr><td>24m (new)</td><td>the bench actions, the lesson (ladder row <code>m11</code>), the team rack</td><td>E1 (M1's seat)</td></tr>
+    <tr><td>24g, 24i</td><td>one line each where the scanner and pipe kit are used: <code>typeof toolWear === 'function' &amp;&amp; toolWear('scanner', 4)</code></td><td>H and M3 seats' code; the line added by E1, listed in the register</td></tr>
+    <tr><td>DECKS[5]</td><td><code>5-bench-you</code> (your bench place) and <code>5-tool-rack</code></td><td>E3 (places turn)</td></tr>
+  </table></div>
+  <ul>
+    <li><b>Numbers:</b> wear starts at 100; scanner -4 a scan, pipe kit -5 a trace, logger -3 a use; "Due" under 30; upkeep restores 100. Deterministic, no keys.</li>
+    <li><b>Data:</b> the core's <code>SHIP.works.tools</code> plus <code>SHIP.works.side.upkeep = { done: n, week }</code>. Saved under <code>SHIP.works.side</code>; read defensively (a missing field is the default), so old saves load.</li>
+    <li><b>Phone:</b> nothing new drawn.</li>
+  </ul>
+</section>
+
+<section id="tests" class="builder">
+  <h2>Tests</h2>
+  <ul>
+    <li><code>mech_check</code> (24m): tools wear with use; upkeep restores them; a due tool slows a step by a quarter and never blocks; the toast once a day; the same twice.</li>
+  </ul>
+</section>
+
+<section id="ranges" class="builder">
+  <h2>Seat and size</h2>
+  <ul><li>Seat <b>E1</b> (M1's seat, <code>claude/mech-rounds</code>, 0.45.x). <b>Build size: S.</b> No keys.</li></ul>
+</section>
+
+<section id="faq">
+  <h2>Builders' questions</h2>
+  <p class="note">None yet.</p>
+</section>

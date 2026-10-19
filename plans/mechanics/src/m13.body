@@ -1,0 +1,58 @@
+TITLE:Leak Hunting Spec
+H1:M13 · Leak hunting (from Day 12) <span class="draft">Step 4 · draft for review</span>
+SUB:"A pipe drips somewhere." Follow the puddle and the damp to the joint, then fix it. Step 4, sub-block 24o. Plan Part 2, M13.
+NAV:plain=In plain words|grow=How it grows|b=Builder|tests=Tests|ranges=Seat and size|faq=FAQ
+
+<section id="plain">
+  <h2>In plain words</h2>
+  <ul>
+    <li><b>About one a week</b> (a weekday, posted at 08:00): a worn valve starts to drip; the job says only "A pipe drips somewhere on Deck 4".</li>
+    <li><b>Find it:</b> a puddle on the floor (M6's decal) and a damp patch on the wall show the room. Tap the puddle: "It's coming from above, towards the door" (a <code>look</code>), and walk that way to the joint. Sound comes later: then the drip gets louder as you close in.</li>
+    <li><b>Fix it:</b> at the joint, tighten it (<code>turn</code>), or if it's worn through, replace it (a joint from stores).</li>
+    <li><b>Taught:</b> the Works officer on shift (by-list Torres, Halloran) finds the first with you: "Follow the wet, not the noise. Well, both."</li>
+    <li><b>Not taken by the end of your shift:</b> the crew find it the next day the long way. <b>You get:</b> "found by you", Works reputation +1.</li>
+  </ul>
+</section>
+
+<section id="grow">
+  <h2>How it grows</h2>
+  <div class="grid">
+    <div class="card"><b>Stage 1 · One room</b><span>Day 12 on: a joint in a public room.</span></div>
+    <div class="card"><b>Stage 2 · The pipe galleries</b><span>After 3 leaks: behind a panel in the Tier 2 pipe galleries (Deck 5).</span></div>
+    <div class="card"><b>Stage 3 · The damp reading</b><span>With the pipe kit in your locker: the device shows "damper this way" as you walk.</span></div>
+  </div>
+</section>
+
+<section id="b" class="builder">
+  <h2>For the builder</h2>
+  <p class="note">One owner per function: the seat in the last column builds it; everyone else calls it, one line, typeof-guarded, listed in DEV_NOTES' hook register.</p>
+  <div class="tablewrap"><table>
+    <tr><th>Section</th><th>What</th><th>Owner</th></tr>
+    <tr><td>24o (new)</td><td><code>leakPost(week)</code>, the clue chain (puddle → wall → joint), the fix</td><td>E2 (M2's seat)</td></tr>
+    <tr><td>17</td><td>a valve at "faulty" already has a drip line; the job via <code>jobKindAdd('leak', ...)</code> (exists)</td><td>S (exists, no change)</td></tr>
+    <tr><td>8b</td><td>the puddle decal <code>puddleAt</code> (M6's) and a damp tint of it on the wall</td><td>E2 (M6 is the same seat)</td></tr>
+    <tr><td>DECKS[3-5]</td><td>leak joint places by the valves (<code>n-leak-k</code>, four per deck)</td><td>E3 (places turn)</td></tr>
+  </table></div>
+  <ul>
+    <li><b>Which joint and when:</b> <code>schedU(week, 0, 1003)</code> and <code>schedU(week, 1, 1004)</code>, from the valves real today (the fault tables).</li>
+    <li><b>Data:</b> <code>SHIP.works.side.leaks = [{ id, joint, room, day, found }]</code>. Saved under <code>SHIP.works.side</code>; read defensively (a missing field is the default), so old saves load.</li>
+    <li><b>Phone:</b> the puddle decal is shared with M6 (1 draw call, only while a leak is open); the wall patch is the same decal (1 more).</li>
+  </ul>
+</section>
+
+<section id="tests" class="builder">
+  <h2>Tests</h2>
+  <ul>
+    <li><code>mech_check</code> (24o): every joint place is reachable; a leak found and fixed; the puddle goes; not taken, the crew fix it the next day; the same twice.</li>
+  </ul>
+</section>
+
+<section id="ranges" class="builder">
+  <h2>Seat and size</h2>
+  <ul><li>Seat <b>E2</b> (M2's seat, <code>claude/mech-incidents</code>, 0.51.x). <b>Build size: M.</b> Hash keys from the second range (1000-1049; check the key list first): <b>1003-1004</b> (which joint, which day).</li></ul>
+</section>
+
+<section id="faq">
+  <h2>Builders' questions</h2>
+  <p class="note">None yet.</p>
+</section>
