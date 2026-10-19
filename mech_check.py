@@ -36,7 +36,12 @@ TRAIN = r"""((id) => {
   if (row.needs) for (const n of [].concat(row.needs)) { if (n.flag) flagSet(n.flag, 1); if (n.rep) W.xp = 999; }
   W.tier = Math.max(W.tier, row.tier || 1); if (row.rank) W.rank = row.rank;   // a Tier 2 row needs an Officer
   if (row.needs) for (const n of [].concat(row.needs)) if (n.trained && !ladderRow(n.trained)) W.tr[n.trained] = 1;   // a row it needs that isn't in this build
-  const seen = [], doJob = jid => { if (!claimJob(jid)) return false; const j = SHIP.jobs.find(x => x.id === jid);
+  const teamDo = jid => {                                   // a team job (24h): your turns as the lead calls them, the clock running
+    const j = SHIP.jobs.find(x => x.id === jid); let t = Math.max(shipNow(), j.start - 5);
+    for (let n = 0; n < 240 && j.status !== 'done'; n++, t++) { setShipNow(t); machinesNow(); worksCareerTick(t); for (const f of WORK_TICKS) f(t, false); if (j.seq && t >= j.start - 5) j.youIn = true; const mine = (j.seq || []).map((s, i) => s.who === 'you' ? i : -1).filter(i => i >= 0), k = mine.indexOf(j.cur); if (k >= 0 && !(j.stepsDone || []).includes(k)) jobStepDone(jid, k, j.seq[j.cur].how === 'turn' ? { value: 3 } : {}); }
+    return j.status === 'done';
+  };
+  const seen = [], doJob = jid => { const j0 = SHIP.jobs.find(x => x.id === jid); if (j0 && j0.kind === 'team') return teamDo(jid); if (!claimJob(jid)) return false; const j = SHIP.jobs.find(x => x.id === jid);
     const cs = SHIP.works && SHIP.works.cases && (SHIP.works.cases.open || []).find(c => c.job === jid);   // a head-scratcher (24k): call it right first
     if (cs && typeof caseCall === 'function') caseCall(cs.id, cs.cause);
     jobStops(j).forEach((s, k) => jobStepDone(jid, k)); return turnInJob(jid); };
@@ -48,7 +53,7 @@ TRAIN = r"""((id) => {
     if (c) seen.push(c.st);
     if (c && c.st === 'meet') { const r = SHIP.occasions.find(x => x.key === c.occ); if (r && t >= r.at) { r.met = true; worksCareerTick(t + 1); } }
     if (c && c.st === 'watch') { c.w = TRAIN_WATCH; worksCareerTick(t + 2); const dj = SHIP.jobs.filter(x => x.train === id && x.status === 'done').pop(); teacher = dj ? dj.doneBy : null; }
-    if (c && c.st === 'do' && !myJob() && doJob(c.j)) yours = (SHIP.jobs.find(x => x.id === c.j) || {}).doneBy;
+    if (c && c.st === 'do' && (!myJob() || (SHIP.jobs.find(x => x.id === c.j) || {}).kind === 'team') && doJob(c.j)) yours = (SHIP.jobs.find(x => x.id === c.j) || {}).doneBy;
     if (row.size === 'small' && worksOpened().has(id) && W.tr[id] === undefined) worksUse(id);
     if (W.tr[id] !== undefined) break;
   }
@@ -374,6 +379,48 @@ def part_m6(g):
                 else: print('   ', k, json.dumps(a[k], sort_keys=True)[:300], '|', json.dumps(b[k], sort_keys=True)[:300])
 PARTS['m6'] = part_m6
 
+# ---- M8 team jobs (24h, seat M2): the rota over four weeks (Day 11 the recycler, Day 12 free, Tue/Thu 09:30, Fri 14:00 in
+# even ship weeks, never one machine twice a week, a busy day moved within the week); a crew-only job runs on paper and
+# puts the machines right; with you: your turns in order (out of turn refused), finished by you, +rep; late: your steps go
+# to the lead and it runs slower; the save's part read back; the same twice
+M8 = r"""(() => { const out = {}, W0 = JSON.stringify(SHIP.works);
+ const reset = t => { machinesNew(); SHIP.jobs = []; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t); machinesNow(); SHIP.works = null; worksInit(t); SHIP.works.team = { plan: {} }; SHIP.works.inc = { plan: {}, open: null }; };
+ reset(9 * 1440 + 300);
+ out.plans = [1, 2, 3, 4].map(w => teamPlan(w).map(e => [e[0], weekday(e[0]), e[1], e[3]]));
+ SHIP.works.team.plan = {}; out.again = JSON.stringify([1, 2, 3, 4].map(w => teamPlan(w).map(e => [e[0], weekday(e[0]), e[1], e[3]])));
+ const run = (rank, act) => { reset(15 * 1440 + 900); SHIP.works.rank = rank; const r = {};
+   for (let t = 15 * 1440 + 900; t <= 16 * 1440 + 760; t += 5) { setShipNow(t); machinesNow(); for (const f of WORK_TICKS) f(t, false); const j = SHIP.jobs.find(x => x.kind === 'team'); if (j && act) act(j, t, r); }
+   const j = SHIP.jobs.find(x => x.kind === 'team');
+   r.job = j && { team: j.team.length + (j.you ? 1 : 0), you: !!j.you && !j.youOut, status: j.status, by: j.doneBy, late: j.late, mins: j.doneAt - j.start, posted: j.posted - j.start };
+   r.right = j ? j.machines.every(id => SHIP.machines[id].cond >= 90) : null; r.rep = SHIP.works.xp; r.uses = SHIP.works.use.m8 || 0; return r; };
+ out.crew = run('junior');
+ out.late = run('officer');
+ out.you = run('officer', (j, t, r) => { if (j.status === 'done') return; if (t >= j.start - 5) j.youIn = true; const mine = j.seq.map((s, i) => s.who === 'you' ? i : -1).filter(i => i >= 0), k = mine.indexOf(j.cur);
+   if (!r.early && JOB_KINDS.team.veto && j.cur >= 0 && k !== 0) r.early = jobStepDone(j.id, 0, {}).ok === false;
+   if (k >= 0) { (r.turns = r.turns || []).push(jobStepDone(j.id, k, j.seq[j.cur].how === 'turn' ? { value: 3 } : {}).ok); for (const f of WORK_TICKS) f(t, false); } });
+ SHIP.works.team.plan[9] = [[64, 570, 'x', 'washer']]; SHIP.works.team.plan[1] = [[11, 570, 'y', 'recycler']];
+ out.save = JSON.stringify(teamClean(JSON.parse(JSON.stringify(SHIP.works.team)), 60)); out.saveOld = JSON.stringify(teamClean(undefined));
+ SHIP.works = JSON.parse(W0); return out; })()"""
+def part_m8(g):
+    a, b = g.ev(M8), g.ev(M8)
+    print('  m8 plan:', a['plans'])
+    print('  m8 crew:', a['crew']['job'], 'late:', a['late']['job'], 'you:', a['you']['job'], a['you'].get('turns'), 'early refused', a['you'].get('early'))
+    P = a['plans']
+    check(P[0] == [[11, 3, 570, 'recycler']], 'm8: Day 11 the recycler at 09:30, Day 12 free')
+    for w, wk in zip([2, 3, 4], P[1:]):
+        check(2 <= len(wk) <= 3 and len(set(e[3] for e in wk)) == len(wk) and all(e[1] <= 4 for e in wk), f'm8: week {w + 1}: {wk}')
+        check(any(e[2] == 840 and e[1] == 4 for e in wk) == ((w + 1) % 2 == 0) or (w + 1) % 2 == 0, f'm8: week {w + 1}: Fridays only in even ship weeks')
+    check(P == json.loads(a['again']), 'm8: the plan the same when made again')
+    c, l, y = a['crew'], a['late'], a['you']
+    check(c['job'] and c['job']['status'] == 'done' and not c['job']['you'] and c['right'], 'm8: a crew-only team job runs and puts the machines right')
+    check(l['job'] and l['job']['status'] == 'done' and l['job']['late'] and l['job']['mins'] > c['job']['mins'], 'm8: without you it starts after 15 minutes and runs slower')
+    check(y['job'] and y['job']['by'] == 'you' and y.get('turns') == [True, True, True] and y['uses'] == 1 and y['rep'] >= 2, 'm8: your three turns in order, finished by you, +2')
+    if not y.get('early'): print('  m8: (a turn out of order is not refused: section 17\'s stepDone hook not in this build)')
+    s = json.loads(a['save'])
+    check('9' in s['plan'] and '1' not in s['plan'] and json.loads(a['saveOld']) == {'plan': {}}, 'm8: the save read back (old weeks dropped)')
+    check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'm8: differs the second time')
+PARTS['m8'] = part_m8
+
 only = set(sys.argv[2:])
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
@@ -391,7 +438,7 @@ with sync_playwright() as pw:
         b = ev(f"({TRAIN})('{r['id']}')")
         print(f"{r['id']} ({r['name']}, {r['size']}): opened Day {a['day']}, trained Day {a['trained']}, steps {a['states']}, teacher's job by {a['teacher']}, yours by {a['yours']}, stage {a['stage']}")
         check(a['opened'] and a['trained'] is not None, f"{r['id']}: never trained")
-        if r['size'] == 'big' and not ev(f"!!WORK_MECH['{r['id']}'].noJob"):
+        if r['size'] == 'big' and not ev(f"!!WORK_MECH['{r['id']}'].noJob") and not ev(f"!!WORK_MECH['{r['id']}'].oneJob"):
             check(a['states'][:3] == ['meet', 'watch', 'do'] or 'meet' in a['states'], f"{r['id']}: the training's steps {a['states']}")
             check(a['teacher'] not in (None, 'you') and a['yours'] == 'you', f"{r['id']}: the teacher's job, then yours")
         check(a['stage'] == 0, f"{r['id']}: stage {a['stage']} once trained (0 expected)")
