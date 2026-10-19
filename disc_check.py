@@ -76,7 +76,7 @@ with sync_playwright() as pw:
     s = wait_game(g)
     check(s['g'] and s['view'], 'they come down by lift to the stern baseline and the game starts')
     crew = json.loads(g.ev("JSON.stringify(DECK_CREW.map(a => a.p.id))"))
-    check(crew == [who], 'just the one crew member on the rec deck (%s)' % crew)
+    check(who in crew and crew.count(who) == 1, 'the one you asked is on the rec deck, once (%s)' % crew)   # 0.64.0: with the rec deck's crew use on, others are there too (their own visits)
     m0 = s['min']; g.step(300); s2 = json.loads(g.ev(STATE))
     check(s2['frozen'] and s2['min'] == m0 and s2['step'] > s['step'] + 500, "the ship's clock stands still while you play (%s, game step %d)" % (hhmm if False else s2['min'], s2['step']))
     check('paused while you play' in g.ev("document.querySelector('#ld .pz').textContent") and g.ev("getComputedStyle(document.querySelector('#ld .pz')).display") != 'none', 'the notice says the clock is paused')
