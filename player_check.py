@@ -913,6 +913,7 @@ with sync_playwright() as pw:
             check(g.ev(TAPS % shelf) is True, 'job loop: a tap on a storage shelf should fetch'); s2 = jrun()
             print('  fetched:', s2[1], s2[3][:100]); check(s2[1] == mj[0][:2], f'job loop: should carry {mj[0]}, carries {s2[1]}')
             check(g.ev(f"SHIP.stores[{json.dumps(mj[0][0])}]") == mj[3] - 1, 'job loop: one off the storage shelf')
+            g.step(1)                                  # what's in hand follows the carry on the next frame (the fetch can end after this frame's player update)
             check(g.ev("player.holding") is True, 'job loop: carrying parts should show the crate (player.holding)')
             g.ev(f"goToDeck({mj[1]})"); g.step(5)
             check(g.ev(TAPI) is True, 'job loop: back at the machine')
