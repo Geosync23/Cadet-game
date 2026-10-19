@@ -685,3 +685,4 @@ Read: CLAUDE.md, TEAM.md (Lead line, "Released" and "Step 3" lines), plans/brief
 - ~00:07 rec deck 0.82.8 (claude/lightdisc-proto 0ef4c46, sign on the lift's stern side) published to the Rec Dec Preview v5 without waiting for checks (the user's call); checks still running with the rec deck owner.
 - ~00:08 D2: events plan marked approved + design-doc 'Ship-wide events' updated (claude/p5-design 71fe06b, artifact v5). D2 standing by. Waiting on the user's GO for Step 3.
 - 00:54 check-in: all 13 seats idle, none ≥60% (DA5 57, D2 55, rec owner 54); 0.63.2r (lightdisc-proto 7734894) checks running since ~00:18; lead 15 low memory.
+- 01:53 check-in: 0.63.2r checks (lightdisc-proto 898d58d) at 01:34: cadet_test ALL IDENTICAL, deck_check OK, day_check 0-8 OK; interactions/player/disc_check still running. Other seats idle on hold (no change since 00:54).
