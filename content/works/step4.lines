@@ -76,6 +76,14 @@
 - Clean and re-seal the pipe kit
 == bench.logger
 - Check the logger
+== bench.charging
+- The scanner's on charge. Ready at {time}. No need to wait.
+== bench.charging.now
+- on charge
+== bench.rack
+- The team's tools
+== bench.rack.done
+- Rack's tidy. Someone's been busy.
 == bench.done
 - Good as new. Well, good as yesterday.
 
@@ -367,6 +375,8 @@
 - Star logger
 
 // ---- Step 4 stages (E1): rounds stage 2 and 3, hauling, the stocktake; team parts (E2)
+== round.title.first
+- Your first round, Deck {deck}
 == round.last
 - last looked {n} days ago
 == round.last.never
