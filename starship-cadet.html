@@ -281,7 +281,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.51.9
+   STARSHIP CADET: CSV Wren                           build 0.51.10
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8694,7 +8694,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.51.9';                           // keep in step with the header's build line
+const GAME_BUILD = '0.51.10';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -40810,6 +40810,7 @@ function caseFitted(j) {
 // one decoy out with you (no clever fix); the long way fits each suspect in turn (always ends)
 function caseHint(caseId) {
   const c = caseById(caseId); if (!c) return null; const K = CASE_KINDS[c.kind];
+  if (c.ticket && c.got.length < 3) return worksText('ticket.nohint', 'It\'s a ticket: no hints till you\'ve looked at three things yourself.');   // 24l (E2, standing in for H): a ticket's hints after your third clue
   const miss = c.clues.find(k => !c.got.includes(k.id));
   if (!miss) return 'You\'ve got every clue there is. Cross out what they rule out.';
   try { const h = K.hint && K.hint(c); if (h) return h; } catch (e) { /* the plain words */ }
@@ -42158,7 +42159,7 @@ function leakDone(j, t, by) {
     try { toast(j.title, worksText('leak.done', 'Dry. Found it yourself.')); } catch (e) { /* no UI */ }
     if (j.worn && typeof jointJobPost === 'function') {
       const p = placeById(j.joint), F = jointJobPost({ placeId: j.joint, title: worksText('leak.fix.replace', 'Replace the joint ({part})', { part: 'a seal' }) + ': ' + ((p && roomName(p.deck, p.room)) || 'corridor') }), J = F && SHIP.jobs.find(x => x.id === F);
-      if (J) { J.leave = Math.max(60, (worksDay(t) - 1) * 1440 + DAY_SHIFT[1] - t); J.foundBy = 'you'; j.fix = F; }
+      if (J) { J.leave = Math.max(60, (worksDay(t) - 1) * 1440 + DAY_SHIFT[1] - t); J.xp = 0; j.fix = F; }   // no rep of its own: the leak's +1 covers it (24 core skips j.xp === 0; lead 17)
     }
   } else if (SHIP.works.tr.m13 !== undefined && t >= shipNow() - 1) try { toast(worksText('leak.card', 'A pipe drips somewhere on Deck {deck}', { deck: j.deck }), worksText('leak.found.crew', 'The crew found the drip on Deck {deck}. The long way.', { deck: j.deck })); } catch (e) { /* no UI */ }
   simNote('leak', { id: j.id, step: 'fixed', by: by || null });
@@ -42346,7 +42347,7 @@ if (WORK_MECH.m15) WORK_TICKS.push((now, skip) => {
 // gardener leading the harvest, the writer's meeting train.m14.<id>). That evening's salad gets a mention. Stages: 0 the nozzles; 1 after 2 harvests flush a rack's line (a wait, 5 ship
 // minutes); 2 after 4 the irrigation plant (3-irrigation-1) gets a look, and a worn one is found by you. Nobody else
 // clears them: the job goes at midnight, no harm. A friendship step with the gardeners on duty each time. Saved:
-// SHIP.works.side.nozzles = { day, clogged: [rack, nozzle] pairs as 'r.n', cleared: [...], flushed, harvests, bonus }
+// SHIP.works.side.nozzles = { day, clogged: [rack, nozzle] pairs as 'r.n', cleared: [...], flushed, harvests, stage (that day's job's), bonus }
 // (bonus: what this harvest's pick gets, from the one before; told: the day its salad was mentioned). Hash key 1015 (which nozzles). No R().
 const NOZ_BY = ['cruz-tove', 'oneill-imani', 'hart-ravi'];   // the gardeners (the writer's meetings train.m14.<id>)
 const NOZ_FROM = 13, NOZ_PER = 4, NOZ_HOLD = 2, NOZ_FLUSH = 5, NOZ_MAX = .1, NOZ_PLANT = '3-irrigation-1';
@@ -42356,7 +42357,7 @@ function nozState() {                                    // side.nozzles, cleane
   const N = s.nozzles, ok = a => Array.isArray(a) ? a.filter(x => typeof x === 'string' && /^\d\.\d$/.test(x)).slice(0, 12) : [];
   if (!N || typeof N !== 'object' || !s.nozOk) {
     s.nozzles = { day: N && Number.isInteger(N.day) ? N.day : 0, clogged: ok(N && N.clogged), cleared: ok(N && N.cleared), flushed: N && N.flushed ? 1 : 0,
-      harvests: N && Number.isInteger(N.harvests) ? Math.max(0, Math.min(999, N.harvests)) : 0, told: N && Number.isInteger(N.told) ? N.told : 0, bonus: N && Number.isFinite(N.bonus) ? Math.max(0, Math.min(NOZ_MAX, N.bonus)) : 0 };
+      harvests: N && Number.isInteger(N.harvests) ? Math.max(0, Math.min(999, N.harvests)) : 0, stage: N && Number.isInteger(N.stage) ? Math.max(0, Math.min(2, N.stage)) : 0, told: N && Number.isInteger(N.told) ? N.told : 0, bonus: N && Number.isFinite(N.bonus) ? Math.max(0, Math.min(NOZ_MAX, N.bonus)) : 0 };
     Object.defineProperty(s, 'nozOk', { value: true, enumerable: false, configurable: true });
   }
   return s.nozzles;
@@ -42374,11 +42375,11 @@ const nozLead = d => { try { const c = gardenCrew(d) || []; return (c.find(x => 
 function nozPost(t) {
   const N = nozState(), d = worksDay(t); if (!N || N.day === d) return null;
   const was = N.clogged.length ? N.cleared.length / N.clogged.length : 0, fl = N.flushed;
-  N.bonus = Math.round(NOZ_MAX * Math.min(1, was) * (worksStage('m14') >= 1 && N.day ? (fl ? 1 : .8) : 1) * 1000) / 1000;   // stage 1 on: flushing the line makes up the last fifth
-  N.day = d; N.clogged = nozClogged(d); N.cleared = []; N.flushed = 0;
+  N.bonus = Math.round(NOZ_MAX * Math.min(1, was) * (N.stage >= 1 && N.day ? (fl ? 1 : .8) : 1) * 1000) / 1000;   // that harvest's job offered a flush (stage 1 on): flushing makes up the last fifth
+  N.day = d; N.clogged = nozClogged(d); N.cleared = []; N.flushed = 0; N.stage = Math.max(0, worksStage('m14'));
   if (!N.clogged.length) return null;
   const j = jobMake('nozzle', { id: 'nozzle:3@' + Math.floor(t / 60), deck: 3, room: (placeById(nozRacks()[0].place) || {}).room || null, h: Math.floor(t / 60), urgency: 0,
-    title: worksText('irr.clear', 'Clear the nozzles'), clogged: N.clogged.slice(), stage: worksStage('m14'), leave: 1440 });
+    title: worksText('irr.clear', 'Clear the nozzles'), clogged: N.clogged.slice(), stage: N.stage, leave: 1440 });
   j.posted = j.found = t; SHIP.jobs.push(j);
   if (typeof MACH_REV !== 'undefined') MACH_REV++;
   return j.id;
@@ -43055,6 +43056,7 @@ function makeCharacter(spec, finish = bake) {          // finish: what to do wit
       part(rig.chest, GEO.box, bd.inlay, bx, .2, bz + .006, .012, .012, .012);
     }
   }
+  if (s.pin && !plain) part(rig.chest, cylG(.022, .022, .014, 14), gold, -.085 * bw, .21, .168 * bw, 1, 1, 1, Math.PI / 2, 0, 0);   // 24l (E2): the fault-finder pin, right breast opposite the badge (merged in the chest)
   part(rig.chest, cylG(.075, .085, .05, 16), uniDk, 0, .33, 0);
   for (let i = 0; i < (plain ? 0 : Math.min(4, s.rank + 1)); i++) { const a = .55 + i * .32; part(rig.chest, GEO.sph, gold, Math.sin(a) * .083, .33, Math.cos(a) * .083, .011, .011, .011); }
   part(rig.chest, cylG(.05, .055, .08, 12), skin, 0, .37, 0);

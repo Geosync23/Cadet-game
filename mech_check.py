@@ -544,7 +544,7 @@ M13 = r"""(() => { const out = {}, W0 = JSON.stringify(SHIP.works);
  // a worn joint: its replacement posted, held for you
  W = reset(15 * 1440 + 480); leakPost(15 * 1440 + 480, 2); j = SHIP.jobs.find(x => x.kind === 'leak'); j.worn = 1; claimJob(j.id);
  jobStops(j).forEach((s, k) => jobStepDone(j.id, k, {})); turnInJob(j.id);
- const F = SHIP.jobs.find(x => x.id === j.fix); out.worn = F ? [F.chore, F.target === j.joint, F.parts.join(), F.foundBy, forYou(F) && leaveEnd(F) > shipNow()] : null;
+ const F = SHIP.jobs.find(x => x.id === j.fix); out.worn = F ? [F.chore, F.target === j.joint, F.parts.join(), F.xp, forYou(F) && leaveEnd(F) > shipNow()] : null;
  // not taken: held to 10:00 the next workday, then the crew's (the long way)
  W = reset(15 * 1440 + 480); leakPost(15 * 1440 + 480, 2); j = SHIP.jobs.find(x => x.kind === 'leak'); out.held = leaveEnd(j) - 15 * 1440;
  tick(15 * 1440 + 490, 16 * 1440 + 900); out.crew = [j.status, j.doneBy && j.doneBy !== 'you', (worksSide().leaks[0] || {}).found !== null, leakOpen()];
@@ -578,7 +578,7 @@ def part_m13(g):
     check(a['damp'] and a['joint'] and a['turnin'] and a['entry']['found'] == 'you' and a['open'] is None, 'm13: found by you, fixed, the puddle gone')
     check(a['trained'] is not None and a['uses'] == 1, 'm13: trained on the first')
     print('  m13 worn:', a['worn'], 'held', a['held'], 'crew', a['crew'], 'galleries', a['gal0'], '->', a['gal3'], 'stage', a['stage'])
-    check(a['worn'] and a['worn'][0] == 'joint' and a['worn'][1] and a['worn'][2] == 'seal' and a['worn'][3] == 'you' and a['worn'][4], 'm13: a worn joint posts its replacement, held for you')
+    check(a['worn'] and a['worn'][0] == 'joint' and a['worn'][1] and a['worn'][2] == 'seal' and a['worn'][3] == 0 and a['worn'][4], 'm13: a worn joint posts its replacement, held for you, no rep of its own')
     check(a['held'] == 1440 + 600, f"m13: held till 10:00 the next day ({a['held']})")
     check(a['crew'][0] == 'done' and a['crew'][1] and a['crew'][2] and a['crew'][3] is None, 'm13: not taken, the crew fix it the next day')
     check(a['gal0'] == 0 and a['gal3'] > 0 and a['stage'] == 1, 'm13: the galleries only after 3 leaks')
@@ -606,6 +606,7 @@ M14 = r"""(() => { const out = {}, W0 = JSON.stringify(SHIP.works);
  let j = SHIP.jobs.find(x => x.kind === 'nozzle'); out.posted = j ? [Math.round(j.posted % 1440), j.title, j.clogged.length, jobStops(j).map(s => s.step + ':' + s.how + ':' + (s.places[0] || '-'))] : null; if (!j) return out;
  out.claimed = claimJob(j.id); jobStops(j).forEach((s, k) => jobStepDone(j.id, k, {})); out.turnin = turnInJob(j.id);
  let N = worksSide().nozzles; out.after = [N.cleared.length, N.clogged.length, N.harvests, W.tr.m14 !== undefined, W.use.m14];
+ W.use.m14 = 2;                                         // the stage rose since (R4's fix 1): no flush was offered, so no penalty
  tick((d - 1) * 1440 + 670, (d2 - 1) * 1440 + 660); N = worksSide().nozzles;
  out.bonus = [irrigationBonus(d2), irrigationBonus(d2 + 1), N.day === d2];
  const j2 = SHIP.jobs.find(x => x.kind === 'nozzle' && worksDay(x.posted) === d2); tick((d2 - 1) * 1440 + 670, d2 * 1440 + 20);
@@ -773,6 +774,39 @@ def extra_ff(g):
     check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'ff: differs the second time')
 EXTRA['ff'] = extra_ff
 
+# ---- E2's saved parts through a real save and reload (R4's fix 2): SHIP.works.side's leaks, nozzles, rewire, favours
+# and ff, written by saveGame (saving on) and read back by the sub-blocks after a reload; needs 24 core's worksClean to
+# keep `side` (E1), else it says so
+SIDE_SET = r"""(() => { if (typeof worksSide !== 'function') window.worksSide = () => SHIP.works ? (SHIP.works.side = SHIP.works.side || {}) : null;
+  setShipNow(12 * 1440 + 600); machinesNow(); const W = worksInit(); W.tier = 2; W.rank = 'officer';
+  const S = worksSide(); S.leaks = [{ id: 'leak:4-leak-1@300', joint: '4-leak-1', room: 'k', deck: 4, day: 12, worn: 1, found: 'you' }];
+  S.nozzles = { day: 20, clogged: ['0.1', '2.3'], cleared: ['0.1'], flushed: 1, harvests: 2, stage: 1, bonus: .05, told: 20 };
+  S.rewire = { done: 2, wrongs: 1, week: 3 }; S.favours = [{ id: 'favour:cruz-tove@1', who: 'cruz-tove', case: 'lamp', day: 15, state: 'done' }]; S.ff = { grade: 1, tries: 1, next: 22, job: null, mail: 1 };
+  for (const k of ['leaksOk', 'nozOk', 'rewOk', 'fcOk', 'ffOk']) delete S[k];
+  const read = () => JSON.stringify([leakList(), nozState(), rewState(), fcList(), ffState()]); const before = read(); saveGame();
+  return { before, keeps: JSON.stringify(worksClean({ v: 1, side: { a: 1 } }) || {}).includes('side') }; })()"""
+SIDE_GET = r"""(() => { if (typeof worksSide !== 'function') window.worksSide = () => SHIP.works ? (SHIP.works.side = SHIP.works.side || {}) : null;
+  return SHIP.works ? JSON.stringify([leakList(), nozState(), rewState(), fcList(), ffState()]) : null; })()"""
+def side_save(pw):
+    tmp = WORK / 'test' / '_mech_save.html'
+    tmp.write_text(instrument(pathlib.Path(sys.argv[1]).read_text()))
+    b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
+    page = b.new_page(viewport={'width': 600, 'height': 500})
+    page.route(re.compile(r'.*three\.min\.js'), lambda r: r.fulfill(body=THREE, content_type='application/javascript'))
+    page.add_init_script(INIT)
+    def load():
+        page.goto('file://' + str(tmp)); page.wait_for_function('window.__sc !== undefined', timeout=60000)
+        return lambda s: page.evaluate('s => window.__sc(s)', s)
+    ev2 = load(); ev2("localStorage.clear()"); ev2 = load()
+    a = ev2(SIDE_SET); ev2 = load(); after = ev2(SIDE_GET)
+    b.close()
+    print('  side save: before', a['before'][:160], '... after', (after or '')[:160])
+    if not a['keeps']: print("  side save: (24 core's worksClean doesn't keep `side` in this build: E1's; not checked)"); return
+    if after != a['before']:
+        for x, y in zip(json.loads(a['before']), json.loads(after or '[]')):
+            if x != y: print('   differs:', x, '|', y)
+    check(after == a['before'], 'side save: leaks, nozzles, rewire, favours and ff through a real save and reload')
+
 only = set(sys.argv[2:])
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
@@ -804,6 +838,8 @@ with sync_playwright() as pw:
     ev("SHIP.works = null")
     if g.errors: fail('page errors: ' + ' | '.join(g.errors[:5]))
     g.close()
+    if not only or only & {'m13', 'm14', 'm15', 'fcase', 'ff', 'side'}:
+        print('side (E2\'s saved parts):'); side_save(pw)
 
 print('MECH CHECK OK' if ok else 'MECH CHECK FAILED')
 sys.exit(0 if ok else 1)
