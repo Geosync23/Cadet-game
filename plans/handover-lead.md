@@ -680,3 +680,4 @@ Read: CLAUDE.md, TEAM.md (Lead line, "Released" and "Step 3" lines), plans/brief
 - **Weekly allowance:** 'allowed_warning' (resets ~Oct 22). Keep seats lean; idle seats cost nothing but archive finished ones.
 - ~00:15 lead 14 started lead 15 session_01TfFnwP88RmL4MhCWAMdSGn (depth 5). Lead 14 stays reachable until lead 15 says hello.
 - ~23:56 lead 15 took over: TEAM.md Lead line, check-in trig_015E9MEvPTj86vLZpGcjN4VN, lead 14's trigger disabled, seats told.
+- ~00:05 lead 15 published rec deck 0.82.7 (claude/lightdisc-proto abb958d, game file = bc43691; all checks pass) to the Rec Dec Preview https://claude.ai/artifact/9oG8Dq5kqFp1DUasKHZ62n version 4; user notified. Lightdisc engineer stopped (handover plans/handover-lightdisc.md). Events v4 asked of D2.
