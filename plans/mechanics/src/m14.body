@@ -1,6 +1,6 @@
 TITLE:Irrigation Spec
 H1:M14 · Garden irrigation (harvest mornings from Day 13) <span class="draft">Step 4 · draft for review</span>
-SUB:While the garden crew pick, you clear the grow racks' nozzles, and the next harvest is a little bigger. Off shift, optional. Step 4, sub-block 24p. Plan Part 2, M14.
+SUB:While the garden crew pick, you clear the grow racks' nozzles, and the next harvest is a little bigger. Off shift, optional. Step 4, sub-block 24r. Plan Part 2, M14.
 NAV:plain=In plain words|grow=How it grows|b=Builder|tests=Tests|ranges=Seat and size|faq=FAQ
 
 <p class="note"><b>Lead's call, for the user's morning review:</b> is Day 13 a harvest Saturday? If harvest falls on Days 6, 20 ..., the first is Day 20. The first harvest on or after Day 13 either way.</p>
@@ -28,7 +28,7 @@ NAV:plain=In plain words|grow=How it grows|b=Builder|tests=Tests|ranges=Seat and
   <p class="note">One owner per function: the seat in the last column builds it; everyone else calls it, one line, typeof-guarded, listed in DEV_NOTES' hook register.</p>
   <div class="tablewrap"><table>
     <tr><th>Section</th><th>What</th><th>Owner</th></tr>
-    <tr><td>24p (new)</td><td>the clogged nozzles, the clearing, <code>irrigationBonus()</code> (0 to 0.1)</td><td>E2</td></tr>
+    <tr><td>24r (new)</td><td>the clogged nozzles, the clearing, <code>irrigationBonus()</code> (0 to 0.1)</td><td>E2</td></tr>
     <tr><td>17 (the garden)</td><td>the harvest reads <code>typeof irrigationBonus === 'function' ? irrigationBonus() : 0</code>, one line</td><td>S's code; the line added by E2, in the register</td></tr>
     <tr><td>14</td><td>reads the garden rota (you join the harvest; nothing changes for the crew)</td><td>sim (exists, no change)</td></tr>
     <tr><td>DECKS[3]</td><td><code>3-rack-1..3</code>, one place per rack</td><td>E3 (places turn)</td></tr>
@@ -42,7 +42,7 @@ NAV:plain=In plain words|grow=How it grows|b=Builder|tests=Tests|ranges=Seat and
 <section id="tests" class="builder">
   <h2>Tests</h2>
   <ul>
-    <li><code>mech_check</code> (24p): cleared nozzles lift the next harvest a little, uncleared ones don't lower it; <code>day_check</code> on a harvest Saturday: the crew's harvest still flows.</li>
+    <li><code>mech_check</code> (24r): cleared nozzles lift the next harvest a little, uncleared ones don't lower it; <code>day_check</code> on a harvest Saturday: the crew's harvest still flows.</li>
   </ul>
 </section>
 
@@ -53,5 +53,7 @@ NAV:plain=In plain words|grow=How it grows|b=Builder|tests=Tests|ranges=Seat and
 
 <section id="faq">
   <h2>Builders' questions</h2>
-  <p class="note">None yet.</p>
+  <ul>
+    <li><b>E2, 2026-10-19:</b> "24p" is already C2's first promotion in the Step 3 code; label this block <b>24r IRRIGATION</b>? <i>Yes: 24r (the plan's old coolant-rounds slot; M16 merged into M23, which uses <code>// 24.M23</code>). And each seat adds its own ladder rows (m13, m14, m15, the fault-finder ticket row) from its own block with push-if-missing, as H2 did for p1/p2; E1 doesn't add them in 24 core.</i></li>
+  </ul>
 </section>
