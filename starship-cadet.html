@@ -269,7 +269,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.33.55
+   STARSHIP CADET: CSV Wren                           build 0.33.56
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8630,7 +8630,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.33.55';                           // keep in step with the header's build line
+const GAME_BUILD = '0.33.56';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -16179,7 +16179,81 @@ const FAULT_CAUSES = {
     { id: 'relay', part: 'relay', w: 3, shows: 'stuffy air on its decks', sign: 'the flap clicks but stays half shut, worse once warm', when: 'warm', still: 'New bearing. The flap still clicks and stays half shut.', line: 'air' },
     { id: 'bearing', part: 'bearing', w: 2, shows: 'stuffy air on its decks', sign: 'the flap judders and sits half open, all day', when: 'always', still: 'New relay. The flap still judders.', line: 'air' },
     { id: 'seal', part: 'seal', w: 1, shows: 'a whistle in the duct', sign: 'a whistle at the duct mouth', when: 'always', still: 'New relay. Still whistles.' } ],
+  // the rest of Tier 2 (0.33.56, fault-tables.html, approved by the user 2026-10-18). No `band` on their part causes: the page's
+  // "never before T2" is the player meeting them, and a Tier 2 machine's jobs are above you till then anyway (jobTier); the
+  // crew's causes come from the same table ("before that Tier 2 machines still fault as now"). A load is never picked
+  scrubber: [
+    { id: 'filter', part: 'filter', w: 3, shows: 'stuffy air|rattles', sign: 'a grey grille; the intake buzzes all day', when: 'always', still: 'Clean filter. Still rattles once it\'s run all day.', line: 'air' },
+    { id: 'bearing', part: 'bearing', w: 2, shows: 'rattles', sign: 'a whine that builds through the evening', when: 'warm', still: 'New bearing. Still rattles when the door goes.' },
+    { id: 'panel', part: 'seal', w: 1, shows: 'rattles', sign: 'the housing buzzes when the door goes', when: 'touched', still: 'Fresh gasket on the panel. Still rattles, door or no door.' },
+    { id: 'drift', setting: true, w: 2, shows: 'stuffy air', sign: 'the hum\'s off pitch; the grille\'s clean', when: 'always', from: 4, band: 2 } ],   // M5 stage 2; till then the filter fixes it
+  heater: [
+    { id: 'valve', part: 'valve', w: 3, shows: 'cold cabins', sign: 'one branch\'s pipe cold to the touch, the rest warm', when: 'always', still: 'New valve. Still lukewarm everywhere, and it knocks.', line: 'heat' },
+    { id: 'pump', part: 'pump', w: 2, shows: 'cold cabins', sign: 'every pipe lukewarm; a knock in the plant', when: 'always', still: 'New pump. That one branch is still cold.', line: 'heat' },
+    { id: 'relay', part: 'relay', w: 1, shows: 'cold cabins', sign: 'warm, then cold for an hour: it clicks off and on', when: 'warm', still: 'New valve. Still goes cold after it\'s run a while.', line: 'heat' } ],
+  recycler: [
+    { id: 'membrane', part: 'membrane', w: 3, shows: 'low output', sign: 'the output gauge low all day; a brown film in the sight glass', when: 'always', still: 'New membrane. Output still sinks after 18:00.', line: 'water' },
+    { id: 'pump', part: 'pump', w: 2, shows: 'low output', sign: 'fine in the morning; the gauge sinks after 18:00', when: 'peak', still: 'New pump. Output still low all day; the glass is brown.', line: 'water' },
+    { id: 'valve', part: 'valve', w: 1, shows: 'low output', sign: 'the outlet pipe shudders; the gauge flickers', when: 'always', still: 'New valve. Output still low; the glass is brown.', line: 'water' },
+    { id: 'seal', part: 'seal', w: 1, shows: 'a drip', sign: 'a wet ring on the floor under it', when: 'after-use', still: 'Fresh seal. Still a wet ring under it.' } ],
+  filter: [
+    { id: 'cartridge', part: 'cartridge', w: 3, shows: 'low flow', sign: 'one housing\'s gauge in the red, all day', when: 'always', still: 'New cartridge. Flow still low: the floor\'s damp.', line: 'water' },
+    { id: 'seal', part: 'seal', w: 2, shows: 'low flow', sign: 'a damp floor under one housing, a faint hiss', when: 'after-use', still: 'Fresh seal. Flow still low; one gauge\'s in the red.', line: 'water' },
+    { id: 'valve', part: 'valve', w: 1, shows: 'cloudy water', sign: 'clear first thing, cloudy by the busy hours', when: 'peak', still: 'New valve. Still clouds by the afternoon.' } ],
+  uv: [
+    { id: 'lamp', part: 'uv lamp', w: 3, shows: 'water tastes off', sign: 'a dull blue glow in the window', when: 'always', still: 'New relay. The glow\'s still dull.' },
+    { id: 'relay', part: 'relay', w: 2, shows: 'water tastes off', sign: 'the glow blinks off and on once it\'s warm', when: 'warm', still: 'New lamp. It still blinks off once it\'s warm.' },
+    { id: 'seal', part: 'seal', w: 1, shows: 'low flow', sign: 'water beading on the housing, a drip', when: 'after-use', still: 'Fresh seal. Flow still low.', line: 'water' } ],
+  pump: [
+    { id: 'pump', part: 'pump', w: 3, shows: 'low flow', sign: 'fine in the morning; labours after 18:00', when: 'peak', still: 'New seal. Still labours in the evening.', line: 'water' },
+    { id: 'seal', part: 'seal', w: 2, shows: 'low flow', sign: 'a drip under the shaft, low all day', when: 'always', still: 'New pump. Still drips under the shaft.', line: 'water' },
+    { id: 'bearing', part: 'bearing', w: 1, shows: 'noisy', sign: 'a grinding, worse after a long run', when: 'warm', still: 'New pump. Still grinding.' },
+    { id: 'irrigation', load: '3-irrigation-1', w: 1, shows: 'low flow', sign: 'low only while the garden\'s being watered', when: 'with:irrigation', line: 'water', band: 2 } ],   // P1's later form only
+  valve: [
+    { id: 'valve', part: 'valve', w: 3, shows: 'low flow on its branch', sign: 'its branch\'s decks weak; the handle\'s stiff', when: 'always', still: 'Fresh seal. That branch is still weak.', line: 'water' },
+    { id: 'seal', part: 'seal', w: 2, shows: 'a drip', sign: 'a drip from the gland, a wet floor', when: 'always', still: 'New valve. Still drips.' } ],
+  heatpump: [
+    { id: 'pump', part: 'pump', w: 3, shows: 'cold cabins', sign: 'a knock; both outlets lukewarm all day', when: 'always', still: 'New valve. Both outlets still lukewarm; it knocks.', line: 'heat' },
+    { id: 'bearing', part: 'bearing', w: 2, shows: 'cold cabins', sign: 'a whine, and the radiators cool off after hours of running', when: 'warm', still: 'New pump. Still cools off by evening, and whines.', line: 'heat' },
+    { id: 'valve', part: 'valve', w: 2, shows: 'cold cabins', sign: 'one outlet hot, the other cold', when: 'always', still: 'New pump. One outlet still cold.', line: 'heat' } ],
+  manifold: [
+    { id: 'valve', part: 'valve', w: 3, shows: 'one deck cold', sign: 'that deck\'s pipe cold at the manifold, all day', when: 'always', still: 'Fresh seal. That deck\'s still cold.', line: 'heat' },
+    { id: 'regulator', part: 'regulator', w: 2, shows: 'cabins cold at night', sign: 'fine by day; the gauge drops after 22:00', when: 'at-time', still: 'New valve. Still cold after 22:00.', line: 'heat' },
+    { id: 'seal', part: 'seal', w: 1, shows: 'a drip', sign: 'a hiss and a wet floor under a joint', when: 'always', still: 'New valve. Still hisses.' } ],
+  o2cell: [
+    { id: 'cell', part: 'oxygen cell', w: 3, shows: 'air thin', sign: 'one cell\'s lamp amber; the gauge low all day', when: 'always', still: 'New regulator. One lamp\'s still amber.', line: 'air' },
+    { id: 'regulator', part: 'regulator', w: 2, shows: 'air thin', sign: 'a hiss, then the gauge jumps; worst at the busy hours', when: 'peak', still: 'New cell. Still hisses and jumps when everyone\'s up.', line: 'air' },
+    { id: 'relay', part: 'relay', w: 1, shows: 'stops and starts', sign: 'the cells click off and on once warm', when: 'warm', still: 'New cell. Still clicks off and on.' } ],
+  electrolyser: [
+    { id: 'membrane', part: 'membrane', w: 3, shows: 'air thin', sign: 'bubbles slow in the sight glass, all day', when: 'always', still: 'New cell. Bubbles still slow.', line: 'air' },
+    { id: 'cell', part: 'cell', w: 2, shows: 'air thin', sign: 'strong in the morning, fading by evening', when: 'warm', still: 'New membrane. Still fades by evening.', line: 'air' },
+    { id: 'relay', part: 'relay', w: 1, shows: 'stops and starts', sign: 'clicks off, then on again', when: 'warm', still: 'New membrane. Still stops and starts.' } ],
+  irrigation: [
+    { id: 'pump', part: 'pump', w: 3, shows: 'dry beds', sign: 'every bed damp, none wet; the pump hums low', when: 'always', still: 'New valve. Every bed\'s still only damp.' },
+    { id: 'valve', part: 'valve', w: 2, shows: 'dry beds', sign: 'one bed bone dry, the rest fine', when: 'always', still: 'New pump. That one bed\'s still dry.' },
+    { id: 'nozzles', part: 'filter', w: 1, shows: 'dry beds', sign: 'spits, then nothing', when: 'after-use', still: 'New pump. Still spits, then nothing.' } ],   // the strainer in the line (M14 cleans them)
+  nutrient: [
+    { id: 'pack', part: 'nutrient pack', w: 3, shows: 'yellow leaves', sign: 'the pack\'s window empty', when: 'always', still: 'New pump. The window\'s still empty.' },
+    { id: 'pump', part: 'pump', w: 2, shows: 'yellow leaves', sign: 'the pack full, the dosing line barely ticks', when: 'always', still: 'New pack. The line still barely ticks.' },
+    { id: 'regulator', part: 'regulator', w: 1, shows: 'brown leaf tips', sign: 'a white crust on the tray edges', when: 'always', still: 'New pack. Still a crust on the trays.' } ],
+  airplant: [
+    { id: 'filter', part: 'filter', w: 3, shows: 'stuffy air ship-wide', sign: 'a grey filter face; the intake pulls hard', when: 'always', still: 'New belt. Filter face still grey.', line: 'air' },
+    { id: 'belt', part: 'fan belt', w: 2, shows: 'stuffy air ship-wide', sign: 'a squeal at shift change, weak for the next hour', when: 'peak', still: 'Clean filter. Still squeals at shift change.', line: 'air' },
+    { id: 'bearing', part: 'bearing', w: 1, shows: 'noisy', sign: 'a rumble from the plant', when: 'warm', still: 'New belt. Still rumbles.' } ],
+  fan: [
+    { id: 'bearing', part: 'bearing', w: 3, shows: 'stuffy air ship-wide', sign: 'a rumble in the duct', when: 'warm', still: 'New belt. Still rumbles.', line: 'air' },
+    { id: 'belt', part: 'fan belt', w: 2, shows: 'stuffy air ship-wide', sign: 'a squeal; the belt shiny', when: 'always', still: 'New bearing. Still squeals.', line: 'air' },
+    { id: 'relay', part: 'relay', w: 1, shows: 'stops', sign: 'stops, clicks, starts', when: 'warm', still: 'New bearing. Still stops.', line: 'air' } ],
+  gasplant: [
+    { id: 'regulator', part: 'regulator', w: 3, shows: 'low lab gas', sign: 'the gauge wanders all day', when: 'always', still: 'Fresh seal. The gauge still wanders.' },
+    { id: 'seal', part: 'seal', w: 2, shows: 'low lab gas', sign: 'a hiss at a joint; soapy water bubbles', when: 'always', still: 'New regulator. Still hisses at the joint.' },
+    { id: 'valve', part: 'valve', w: 1, shows: 'low lab gas', sign: 'fine until someone opens a bench tap, then it drops', when: 'touched', still: 'New regulator. Still drops when a tap opens.' } ],
+  doorgear: [                                            // no door gear in DECKS today (a stand-in on Deck 5); kept for when one is real
+    { id: 'seal', part: 'seal', w: 3, shows: 'bay doors slow', sign: 'a draught at the frame', when: 'always', still: 'New bearing. Still a draught at the frame.' },
+    { id: 'bearing', part: 'bearing', w: 2, shows: 'bay doors slow', sign: 'a judder as they move, worse after a few runs', when: 'after-use', still: 'Fresh seal. Still judders.' },
+    { id: 'relay', part: 'relay', w: 1, shows: 'doors stop halfway', sign: 'stop halfway, click, then go', when: 'warm', still: 'New bearing. Still stops halfway.' } ],
 };
+const FAULT_T2 = ['scrubber', 'heater', 'recycler', 'filter', 'uv', 'pump', 'valve', 'heatpump', 'manifold', 'o2cell', 'electrolyser', 'irrigation', 'nutrient', 'airplant', 'fan', 'damper', 'gasplant', 'doorgear'];
 // a real fault's cause (17.4): picked when its repair or overhaul is posted (from Day 2), from the causes allowed that day
 // (a setting from its `from` day, a band from that tier; never a load), weighted by w; schedU key 855. faultCause(j) -> the
 // cause or null; faultShows(j) -> the job card's symptom (one of a setting's two, by the job)
