@@ -36,6 +36,7 @@ Read with a helper agent against off-shift.html; 1-3 confirmed by hand.
 - **Fix 4: text keys don't match W2's step4.lines.** cabin.spot.<k> is read as the placement sentence but W2's are spot labels ("Rug"), and .desk/.ledge don't exist (W2 has .lamp/.plant); star.done is read as the ten-stars message but W2's is "One a night. The sky will keep."; star.wrong says "try again tomorrow night" but you can retry at once; star.pick has no {a}/{b}, dropping the chart's two stars. Agree names with W2 (e.g. cabin.put, star.ten).
 - **Fix 5 (the brief): mech_check has no real save round trip**, and its star part copies the relAdd logic instead of driving starLog/starTap (one a night, the hours and the Record line at ten untested).
 - Notes: cabinPlaced isn't wired into lockerTidy and visitors' cabin.remark isn't built (page items: the lead's call whether they wait); cabinMood's +4 leisure is 24t's own 06:00 tick (hook register) and CAB.woke isn't saved (a reload at 06:00 can repeat it); on an observatory-night evening the first telescope tap opens the star log, not the tradition; the ledge plank is drawn only when something is on it, in the thing's colour; CABIN_FITS repeats TINKER_LIST's cabin field; E1 shows "Star logger, Day {n}" vs W2's works.ms.stars "Star logger".
+- Lead 17 ~06:06: E4 (session_01PtXCwVBprdkJ6AcQisEyJq) owns E3's code and does these five first; lockerTidy and cabin.remark come after M17 (or in 0.63.5).
 - Checks: on d51c5edf (contains it), running.
 
 ### E2 claude/mech-incidents 3014b864 (0.51.10: R4's three fixes on 0.51.6, the pin, the ticket hint guard), R5: PASS WITH FIXES
@@ -44,6 +45,7 @@ Diff 51611e02..3014b864 (18 game lines, a mech_check save part).
 - **Fix A: two things lean on E1 code that doesn't exist on any branch.** (1) The worn-joint chore now sets `J.xp = 0` ("24 core skips j.xp === 0"), but E1's turn-in (mech-rounds 39740) never reads j.xp: it still pays WORK_XP||1 outside the cap. (2) ffPin still needs `playerRigRebuild` ("24 core's"), which no branch has, so the pin still never shows. Either E1 adds both (the lead to confirm with E1) or E2 does it locally (e.g. 'joint' through the cap, or not posting it as a paying chore; a rebuild path for the player rig in E2's own block, if the lead gives E2 that function).
 - **Fix B: a leak still pays 2, not the lead's +1.** leakDone (42158) still sets `j.foundBy = 'you'`, so E1's turn-in pays 1 + 1 (found). Drop the foundBy (keep e.found for the record), so a leak is +1.
 - Still open from 0.51.7/0.51.8/0.51.9 (sent after this hash was made): rewiring's three, favour cases' three (and the friend tier), tickets' 1 and 4 (a crossed-out suspect = a wrong call; flag ticket.solved).
+- Lead 17 ~06:05: the j.xp === 0 skip is E1's (fb499eb, 0.45.11); playerRigRebuild is E2's (E2 owns the pin); E2 makes a leak +1 in total.
 - Checks on 3014b864: queued.
 
 ### E2 claude/mech-incidents 51611e02 (0.51.9, 24l fault-finder tickets), R5: PASS WITH FIXES (four)
