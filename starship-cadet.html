@@ -281,7 +281,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.45.12
+   STARSHIP CADET: CSV Wren                           build 0.45.13
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8694,7 +8694,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.45.12';                           // keep in step with the header's build line
+const GAME_BUILD = '0.45.13';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -39367,7 +39367,7 @@ const WORKS_LOG = 30;                                    // the work log keeps y
 // xp: Works reputation for each use (the drill and the inspection, attended).
 const CAREER_LADDER = [
   { id: 'm1', name: 'Rounds', size: 'big', day: 2, tier: 1, rank: 'junior', needs: { intro: 'shadow' }, by: ['torres-zeke'], where: { deck: 5, room: 'w' }, job: 'round', tool: 'clipboard', stages: [{ uses: 0 }, { uses: 5 }, { mech: 'm7' }] },
-  { id: 'm4', name: 'Hauling and stores', size: 'big', day: 3, tier: 1, rank: 'junior', needs: { mech: 'm1', uses: 1 }, by: ['esposito-yara'], where: { deck: 5, room: 'r' }, job: 'haul', stages: [{ uses: 0 }, { uses: 5 }] },
+  { id: 'm4', name: 'Hauling and stores', size: 'big', day: 3, tier: 1, rank: 'junior', needs: { mech: 'm1', uses: 1 }, by: ['esposito-yara'], where: { deck: 5, room: 'r' }, job: 'haul', stages: [{ uses: 0 }, { uses: 2 }] },   // stage 1 (0.45.13, step4-stages): after 2 runs, from Day 10, you choose the order
   { id: 'm3d', name: 'The drill', size: 'small', day: 3, tier: 1, rank: 'junior', needs: null, by: ['calder'], fixed: { wd: 3, at: 900 }, xp: 1, stages: [{ uses: 0 }] },
   { id: 'm5', name: 'Tuning', size: 'big', day: 4, tier: 1, rank: 'junior', needs: { mech: 'm4', uses: 1 }, by: ['calder', 'brennan'], where: { deck: 3, room: 'K' }, job: 'tune', stages: [{ uses: 0 }, { uses: 5 }] },
   { id: 'm3i', name: 'The inspection', size: 'small', day: 4, tier: 1, rank: 'junior', needs: null, by: ['tomas'], fixed: { wd: 4, at: 390 }, xp: 1, stages: [{ uses: 0 }] },
@@ -40203,12 +40203,13 @@ function haulJob(t, crates, o = {}) {
 }
 // the stops: the cart, a load per crate, a drop per crate (unless o.only: the teacher's run is the cart and the first load), the cart back
 function haulStops(j) {
-  const dock = haulDock(), hold = haulLoadAt(), cs = j.crates || [], out = [];
+  const dock = haulDock(), hold = haulLoadAt(), cs = (j.crates || []).slice(), out = [];
   if (!dock || !hold) return out;
   const from = c => c.part ? (typeof shelfOf === 'function' && shelfOf(c.id) && placeById(shelfOf(c.id)) ? shelfOf(c.id) : FETCH_AT[0]) : hold;   // a parts run (manifestRun): from its shelf in main storage
   out.push({ deck: 5, placeId: dock, mins: 2, tag: 'cart', hold: 'cart', opts: { text: 'You take a hover cart from its dock.' } });
   cs.forEach(c => out.push({ deck: 5, placeId: from(c), mins: 1, tag: 'load', hold: 'cartfull', crate: c.key || c.id, opts: { text: haulName(c) + ' for ' + haulWhere(c) + ': on the cart.' } }));
   if (j.only !== 'load') {
+    if (Array.isArray(j.order)) cs.sort((a, b) => j.order.indexOf(a.key || a.id) - j.order.indexOf(b.key || b.id));   // stage 2: your order (cs is a copy below)
     cs.forEach(c => { const p = placeById(c.dest); if (p) out.push({ deck: p.deck, placeId: c.dest, mins: 2, tag: 'deliver', hold: 'cartfull', crate: c.key || c.id, opts: { text: haulName(c) + ' delivered.' } }); });
     out.push({ deck: 5, placeId: dock, mins: 2, tag: 'return', hold: 'cart', opts: { text: 'The cart back on its dock.' } });
   }
@@ -40230,7 +40231,7 @@ if (typeof jobKindAdd === 'function' && typeof haulOn === 'function') jobKindAdd
     if (unloading && m < HAUL_FROM) return;
     if (W && W.cur && W.cur.id === 'm4' && W.cur.d === d) return;   // Yara's training run has them today
     const crates = haulCrates(); if (!crates.length) return;
-    jobs.push(haulJob(h * 60, crates, { crew: !(W && W.tr.m4 !== undefined) || playerRank() !== 'junior' }));
+    jobs.push(haulJob(h * 60, crates, { crew: !(W && W.tr.m4 !== undefined) || playerRank() !== 'junior' && !haulFree(d) }));   // an officer at stage 2 keeps it to 16:00 (D3)
   },
   stops: haulStops,
   stepDone(j, k, res, t) {
@@ -40248,9 +40249,37 @@ if (typeof jobKindAdd === 'function' && typeof haulOn === 'function') jobKindAdd
   },
   done(j, t, by) {                                       // the crew's run takes what it hadn't loaded (Yara's load-only run leaves hers on the manifest: you deliver it); yours is a use of m4
     if (j.only !== 'load') for (const c of j.crates || []) haulTake(j, c.key || c.id);
-    if (by === 'you' && j.only !== 'load') { worksUse('m4'); return; }
+    if (by === 'you' && j.only !== 'load') { if (Array.isArray(j.order)) haulTidy(j); worksUse('m4'); return; }
   },
   crew: { can: p => !!p.work && p.work.place === 'work:works', mins: j => 15 + 10 * (j.crates || []).length } });
+// stage 2 (0.45.13; step4-stages and D3's answers): after 2 runs, from Day 10, the delivery stops are yours to order:
+// taking a manifest run with crates for two or more stops, you pick them in turn (j.order, the crate keys; before any
+// delivery). "A tidy run" (W2's haul.tidy) when your deck changes are the fewest possible; as an officer +1 (worksSideXp).
+// After promotion the run stays the crew's, but once you're at stage 2 it's held for you to 16:00 (haulFree)
+const haulFree = d => !!SHIP.works && worksStage('m4') >= 1 && d >= 10;
+const haulDeck = c => (placeById(c.dest) || { deck: 5 }).deck;
+function haulTidy(j) {
+  const ds = (j.order || []).map(k => (j.crates || []).find(c => (c.key || c.id) === k)).filter(Boolean).map(haulDeck);
+  let moves = 0, at = 5; for (const d of ds) { if (d !== at) moves++; at = d; }
+  const best = new Set(ds.filter(d => d !== 5)).size; if (moves > best) return false;
+  try { toast('Manifest run', worksText('haul.tidy', 'A tidy run.')); } catch (e) { /* no UI */ }
+  if (SHIP.works && SHIP.works.rank !== 'junior') worksSideXp(1, 'haul');
+  simNote('haulTidy', { job: j.id, moves }); return true;
+}
+function haulOrderAsk(j) {                               // pick the next stop until all are placed; Cancel keeps the rest as they are
+  const cs = (j.crates || []).filter(c => !(j.order || []).includes(c.key || c.id));
+  if (cs.length <= 1) { j.order = (j.order || []).concat(cs.map(c => c.key || c.id)); return; }
+  deviceChoose({ title: 'Manifest run', text: (j.order || []).length ? 'And next?' : 'Which stop first? Fewer lift rides makes a tidy run.', choices: cs.map(c => haulName(c) + ' · ' + haulWhere(c)) }, i => {
+    if (!cs[i]) { j.order = (j.order || []).concat(cs.map(c => c.key || c.id)); return; }
+    j.order = (j.order || []).concat([cs[i].key || cs[i].id]); if (typeof simTimeout === 'function') simTimeout(() => haulOrderAsk(j), 400); else haulOrderAsk(j);
+  });
+}
+if (typeof jobKindAdd === 'function' && typeof haulOn === 'function') WORK_TICKS.push((now, skip) => {
+  if (skip || typeof myJob !== 'function') return; const j = myJob();
+  if (!j || j.kind !== 'haul' || j.src || j.only || j.orderAsked || !haulFree(worksDay(now))) return;
+  const st = jobStops(j); if (st.some(s => s.step === 'deliver' && s.done) || new Set((j.crates || []).map(c => c.dest)).size < 2) return;
+  j.orderAsked = true; j.order = []; haulOrderAsk(j);
+});
 // manifestRun(list, to, o) -> job id | null (Step 4, 0.45.12; E2's 24h team parts call it): a run of parts (names, up to
 // CART_CRATES) from their shelves in main storage to `to` (a place id, or a machine id: its panel), the cart there and back,
 // as a 'haul' job (j.src 'stores') held for you only (reserved slot MANIFEST_SLOT, never the crew's) from o.at (default now)

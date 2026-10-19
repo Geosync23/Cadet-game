@@ -581,6 +581,34 @@ def part_mrun(g):
     check(a['bad'] == [None, None], 'manifestRun: nothing for an empty list or an unknown place')
     check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'manifestRun: differs the second time')
 
+# hauling stage 2 (seat E1, 0.45.13; D3's answers on step4-stages): from 2 runs and Day 10 the delivery order is yours
+# (j.order: the stops follow it); a tidy order (the fewest deck changes) says "A tidy run" and gives an officer +1, an
+# untidy one nothing; after promotion the Wednesday run is held for you at stage 2, the crew's before it
+HAUL2 = r"""(() => {
+  SHIP.works = null; SHIP.notes = []; SHIP.jobs = []; setShipNow(16 * 1440 + 700); machinesNow(); const W = worksInit(), out = {};
+  W.tr.m4 = 3; W.use.m4 = 2; (W.op[3] = []).push('m4'); W.rank = 'officer'; W.tier = 2;
+  out.free = [haulFree(17), haulFree(9)];
+  const mk = () => { const j = haulJob(shipNow(), [{ id: 'linen', dest: '4-laundry-drop' }, { id: 'store', dest: '3-store-drop' }, { id: 'galley', dest: '3-galley-drop' }], { yours: true }); SHIP.jobs.push(j); return j; };
+  const j = mk(), deliver = x => jobStops(x).filter(s => s.step === 'deliver').map(s => s.places[0]);
+  out.before = deliver(j); j.order = ['store', 'linen', 'galley']; out.after = deliver(j);
+  const x0 = W.xp; j.order = ['linen', 'store', 'galley']; out.tidy = [haulTidy(j), W.xp - x0];
+  j.order = ['store', 'linen', 'galley']; out.untidy = [haulTidy(j), W.xp - x0];
+  W.rank = 'junior'; j.order = ['linen', 'galley', 'store']; const x1 = W.xp; out.junior = [haulTidy(j), W.xp - x1]; W.rank = 'officer';
+  // the Wednesday run after promotion: held for you at stage 2, the crew's before it
+  const post = use => { SHIP.jobs = []; W.use.m4 = use; SHIP.manifest = [{ id: 'linen', dest: '4-laundry-drop', n: 1 }, { id: 'store', dest: '3-store-drop', n: 1 }]; JOB_KINDS.haul.post(9 * 24 + 14, SHIP.jobs); const h = SHIP.jobs.find(x => x.kind === 'haul'); return h ? (h.released ? 'crew' : 'held') : null; };
+  out.posts = [post(2), post(1)];
+  SHIP.works = null; SHIP.manifest = []; return out;
+})()"""
+def part_haul2(g):
+    a = g.ev(HAUL2)
+    b = g.ev(HAUL2)
+    print('  hauling stage 2:', json.dumps(a))
+    check(a['free'] == [True, False], f"haul2: from 2 runs and Day 10 ({a['free']})")
+    check(a['before'] != a['after'] and a['after'] == ['3-store-drop', '4-laundry-drop', '3-galley-drop'], f"haul2: the stops follow your order ({a['after']})")
+    check(a['tidy'] == [True, 1] and a['untidy'] == [False, 1] and a['junior'] == [True, 0], f"haul2: tidy +1 as an officer, untidy nothing, a junior's tidy no +1 ({a['tidy']}, {a['untidy']}, {a['junior']})")
+    check(a['posts'] == ['held', 'crew'], f"haul2: an officer's run held at stage 2, the crew's before ({a['posts']})")
+    check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'haul2: differs the second time')
+
 # 24m tool upkeep (seat E1, 0.45.11): Day 12, an officer with the scanner and pipe kit; worn by use to "Due" (a quarter
 # slower); at your bench: the pipe kit's hold puts it back, the scanner charges 5 minutes on its own; the first upkeep
 # trains m11; +1 for a week kept up, once; after 4 upkeeps the team's rack once a week; saved; the same twice
@@ -743,7 +771,7 @@ with sync_playwright() as pw:
     if (not only or 'side' in only) and ev("typeof worksSideXp === 'function'"):
         print('side (Step 4\'s core: tool wear, the side-job cap, the texts):'); part_side(g)
     if (not only or 'side' in only or 'm4' in only) and ev("typeof manifestRun === 'function' && !!JOB_KINDS.haul"):
-        part_mrun(g)
+        part_mrun(g); part_haul2(g)
     ev("SHIP.works = null")
     if g.errors: fail('page errors: ' + ' | '.join(g.errors[:5]))
     g.close()
