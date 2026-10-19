@@ -16,3 +16,4 @@ smoke | rc=0 | 74s | SMOKE OK
 newgame | rc=0 | 43s | NEWGAME OK
 leave | rc=1 | 26s | LEAVE CHECK FAILED
 arc | rc=0 | 25s | ARC CHECK OK
+bubble | rc=0 | 493s | BUBBLE CHECK OK
