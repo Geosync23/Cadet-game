@@ -476,6 +476,17 @@ with sync_playwright() as pw:
               const out = [at(16), at(31)]; SHIP.device.appts = SHIP.device.appts.filter(a => a.id !== 9999); return out; })()""")
             check(r2 == [['soon+goal'], ['start+goal']], f'an invitation still waiting for your answer reminds you 15 minutes before and at its start (item 12) ({r2})')
             check(r['gain'] <= 5 and r['lift'] == "Officers' quarters and science", f'tea and biscuits is only a little food; the lift says Officers\' quarters and science ({r["gain"]}, {r["lift"]})')
+        if g.ev("typeof DEV_BEATS !== 'undefined'"):   # 0.73.2 (U2, item 12 a): the arrival week's beats on the Schedule, with heads-ups and an arrow
+            r = g.ev("""(() => { const I = SHIP.intro, was = [I.on, I.ended]; I.on = true; I.ended = false; const out = [];
+              for (const d of [1, 2, 3]) for (const x of devDay(d)) if (x.kind === 'beat') { const g = devItemGoal(x), rooms = Object.values((DECKS[x.deck] || {}).rooms || {}).map(r => r.name);
+                out.push([d, hhmm(x.from), x.title, x.where, !!g && rooms.includes(x.room)]); }
+              const R = SHIP.device.calendarRemind, on = R.on; R.on = false; R.heard = R.heard.filter(k => !/^beat\|/.test(k)); HU_Q.length = 0;
+              const fl = SHIP.flags && SHIP.flags['intro.device']; flagSet('intro.device'); const b = INTRO_WEEK.find(x => x.id === 'd2-booths'); setShipNow(introAbs(2, b.at - 15)); devTickMin = -1; deviceTick(); if (!fl) delete SHIP.flags['intro.device'];
+              const hu = HU_Q.filter(h => /^beat\|/.test(h.key)).map(h => h.title + ' ' + h.stage + (h.goal ? '+goal' : '')); HU_Q.length = 0; R.on = on;
+              I.on = false; const off = devDay(2).filter(x => x.kind === 'beat').length; [I.on, I.ended] = was; return { out, hu, off }; })()""")
+            print('  the arrival week\'s beats [day, time, title, where, goal found]:', r['out'], '| heads-up:', r['hu'], '| intro over:', r['off'])
+            check(len(r['out']) == 4 and all(x[4] for x in r['out']) and r['off'] == 0, f'the briefing, the Chief\'s office, the booths and the store on the Schedule with a goal, only during the intro ({r})')
+            check(r['hu'] == ['Calling home soon+goal'], f'a beat gets its 15-minute heads-up with the arrow, even with heads-ups off ({r["hu"]})')
         if g.ev("typeof roundGuide === 'function'"):   # 0.73.0 (U2, item 1): the first round's arrow and tips, on E1's roundTrainStep (a stand-in when it's missing)
             r = g.ev("""(() => { const D = SHIP.device, real = typeof roundTrainStep === 'function' ? roundTrainStep : null; D.settings.tips = true; TIP_Q.length = 0; DEVICE_SKIN.tip(null); clearGoal(); RG_LAST = ''; RG_N = 0;
               for (const k in D.tipsSeen) if (/^rg:/.test(k)) delete D.tipsSeen[k];

@@ -285,7 +285,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.73.1
+   STARSHIP CADET: CSV Wren                           build 0.73.2
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8698,7 +8698,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.73.1';                           // keep in step with the header's build line
+const GAME_BUILD = '0.73.2';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -10573,8 +10573,16 @@ function devDay(d) {
     if (T && devShiftOn(d)) out.push({ from: T.at, to: T.until, title: 'Tea and biscuits', where: 'the Tea corner, Deck 5', kind: 'tea' }); } catch (e) { /* not yet */ }
   try { if (typeof DELIVERY !== 'undefined' && typeof deliveryLate === 'function') { const due = DELIVERY.day + deliveryLate(d);
     if (weekday(d) === due) out.push({ from: DELIVERY.hour * 60, to: DELIVERY.hour * 60 + 60, title: 'Supply delivery', where: 'the cargo hold, Deck 5', kind: 'delivery' }); } } catch (e) { /* not yet */ }
+  // playtest 2 item 12 (a) (0.73.2, U2; the lead's call): the arrival week's timed beats you go to that aren't booked as
+  // appointments (section 21's INTRO_WEEK: Monday's briefing, Calder's first job, the Day 2 booths, the crew store), while
+  // the intro runs, so the heads-ups, the Schedule and the Tracked list have them. Beats that come to you (Zeke walking
+  // up, a wash call at your bunk), the shift's own, meals, tea and traditions are listed already or need no heads-up.
+  try { if (typeof introOn === 'function' && introOn() && typeof INTRO_WEEK !== 'undefined') for (const b of INTRO_WEEK)
+    if (b.day === d && DEV_BEATS[b.id] && b.where && Number.isInteger(b.where.deck))
+      out.push({ from: b.at, to: b.until || b.at + 30, title: DEV_BEATS[b.id], where: b.where.room + ', Deck ' + b.where.deck, kind: 'beat', deck: b.where.deck, room: b.where.room }); } catch (e) { /* not yet */ }
   return out.sort((x, y) => x.from - y.from);
 }
+const DEV_BEATS = { 'd1-briefing': 'Morning briefing with the Chief', 'd2-solo': 'The Chief\'s office: your first job', 'd2-booths': 'Calling home', 'd3-store': 'The crew store' };   // titles (stand-ins; the beats' own words are section 21's)
 const devWhen = t => hhmm(((t % 1440) + 1440) % 1440);
 const devDayName = d => d === SHIP.time.day ? 'Today' : d === SHIP.time.day + 1 ? 'Tomorrow' : WEEKDAYS[weekday(d)] + ', Day ' + d;
 function devNow() {                                      // the strip: where you're expected right now, and what's next
@@ -10625,7 +10633,7 @@ function devItemGoal(x) {
   if (x.kind === 'shift') return { deck: 5, room: 'w', label: 'The Works bay, Deck 5' };
   if (x.kind === 'tea') return { deck: 5, room: 't', label: 'The Tea corner, Deck 5' };   // 0.72.5
   if (x.kind === 'delivery') return { deck: 5, room: 'c', label: 'The cargo hold, Deck 5' };
-  if ((x.kind === 'tradition' || x.kind === 'occasion') && Number.isInteger(x.deck) && x.room) return { deck: x.deck, room: x.room, label: x.where };
+  if ((x.kind === 'tradition' || x.kind === 'occasion' || x.kind === 'beat') && Number.isInteger(x.deck) && x.room) return { deck: x.deck, room: x.room, label: x.where };
   return null;
 }
 const devHuName = x => x.kind === 'shift' ? 'Your shift' : x.title;
@@ -10642,7 +10650,7 @@ function devHeadsTick(t) {
   for (let d = SHIP.time.day; d <= SHIP.time.day + 1; d++) for (const x of devDay(d)) {
     const at = (d - 1) * 1440 + x.from, key = x.kind + '|' + at + '|' + (x.kind === 'appt' ? x.aid : x.title);   // an appointment by its id: a group that grows isn't new
     if (x.kind === 'off' || at - R.ahead > t || at + 3 <= t) continue;
-    if (!R.on && x.kind !== 'appt') continue;            // 0.35.33 (the lead): what you're booked for still comes with heads-ups off
+    if (!R.on && x.kind !== 'appt' && x.kind !== 'beat') continue;   // the arrival week's beats like appointments (0.73.2); 0.35.33 (the lead): what you're booked for still comes with heads-ups off
     if ((x.kind === 'meal' || x.kind === 'shift' || x.kind === 'tea') && !R.everyday) continue;   // tea like the meals (0.72.5)
     if (x.kind === 'tradition' && R.per[x.tkind] === false) continue;
     const stage = t < at ? 'soon' : 'start', k = key + '|' + stage;
