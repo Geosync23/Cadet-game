@@ -34,6 +34,9 @@ Lines skimmed. In a fresh archive content_gen bakes 9342 lines; lines_check PASS
 
 ## Step 4
 
+### E6 claude/mech-rounds 1c40c7a (0.45.18, the doorway reads every machine in the room; lead 17's call on R6's note), R6: PASS
+`roundDoor` also reads the room's machines off the route (`roundPool(deck)` in the same room, sorted): each gets its doorway line and `roundLast`, an unhealthy one is found by you (worksXp(1) when fresh, as a marked one), still one scan's charge per doorway. A room with only off-route machines now triggers the scan too (consistent). mech_check round23: two on the route and one off it, both worn ones found by you, stops [0, 1, 2], 4 charge. Checks (isolated CADET_WORK): mech_check OK, machine_check OK, cadet_test vs 64a2b19b ALL IDENTICAL.
+
 ### E4 claude/mech-diagnose 4e6f6bca (0.53.11-0.53.14: mug tree, roof.wait, lockerTidy hook, cabin.remark, R5's two M17 fixes, E4's M17 lines), R6: PASS (notes)
 Read by hand (f431a794..4e6f6bca, ~60 game lines); 0.53.12's parse failure (above) fixed in 0.53.13/0.53.14, and E4 searched all its lines since d51c5ed for code behind a `//`.
 - 0.53.11: the tinkered mug rack is a **mug tree** (own look; an old save's ledge 'mug rack' loads as the mug tree), so no order shares a tinker thing's name. `lockerTidy` (section 15b) gets one guarded `|| cabinPutAway()` (listed in DEV_NOTES' hook register: one owner kept); `side.cabinPut = [bought, crafted]` at the placing. `cabinRemark` (crew in 4-23 with you, by flags, once a day each, one per 5 min) and `roofTalk` (waiting crew within 8 m, once a hold each, one per 6 min) are WORK_TICKs, not saved, no R(), deterministic (DECK_CREW order); both read W2's banks `cabin.remark` / `roof.wait` (on claude/writer-p5 0e8571a: silent until BM7's merge bakes them, no stand-ins).
