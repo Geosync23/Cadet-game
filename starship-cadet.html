@@ -285,7 +285,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.84.8
+   STARSHIP CADET: CSV Wren                           build 0.84.9
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -590,7 +590,7 @@ const shipDeck = n => SHIP.decks[n] || (SHIP.decks[n] = { open: new Set() });
 const REC_DECK = false;                                  // 0.63.2r: merged dormant (the user's, via lead 15); the rec work comes after Step 4
 const DECK_ORDER = REC_DECK ? [1, 2, 3, 4, 7, 5, 6] : [1, 2, 3, 4, 5, 6];
 // 0.84.8: the auditorium's show (section 8c's recShow); here so the deck's build can read them
-const REC_POOLS = [[8.85, 7.3, .95], [9.35, 9.6, 1.25], [9.5, 12.0, 1.0]];   // the stage's light pools [x, z, radius], the auditorium's coordinates
+const REC_POOLS = [[8.85, 7.3, .95], [9.35, 9.6, 1.25], [9.1, 11.6, 1.0]];   // the stage's light pools [x, z, radius], the auditorium's coordinates
 const REC_SHOWS = {
   film: { dim: .62, scr: 1, pools: [0, 0, 0] }, talk: { dim: .3, scr: 0, pools: [1, .25, 0] },
   allhands: { dim: .28, scr: 0, pools: [1, .5, 0] }, talent: { dim: .5, scr: 0, pools: [.45, 1, .8] },
@@ -8645,8 +8645,10 @@ DECKS[7] = {
     place('A', 'recHit', 9.3, 9, 'n', { w: 2.6, d: 9, hitH: .8, it: IT('Stage', 'A curved stage across the bow, and behind it nothing but the windows and the stars. Every show here is played against them.') });
     place('A', 'recTruss', 9.6, 9, 'n', { len: 8, it: IT('Lighting truss', 'A gold truss over the stage on two towers, with six lamps aimed down. The booth runs them.') });
     place('A', 'recScreen', 10.3, 9, 'n', { len: 6 });
+    place('A', 'micStand', 8.95, 9.6, 'e', { it: IT('Microphone', 'A mic stand at centre stage. Talent night\'s first act always adjusts it, and the second puts it back.') }).position.y = .55;   // 0.84.9: perform's mic (the music room's kit)
     place('A', 'recLectern', 8.8, 7.3, 'e', { it: IT('Lectern', 'The Captain\'s lectern, with the Wren\'s crest on the front. The microphone is bent at exactly her height.') });
-    place('A', 'grandPiano', 9.4, 12.4, 'w', { it: IT('Grand piano', 'A black grand piano at stage left, lid propped. Someone keeps it tuned, and nobody admits to it.') }).position.y = .55;
+    place('A', 'grandPiano', 9.0, 12.6, 's', { it: IT('Grand piano', 'A black grand piano at stage left, lid propped. Someone keeps it tuned, and nobody admits to it.') }).position.y = .55;
+    place('A', 'pianoBench', 9.0, 11.25, 's').position.y = .55;   // 0.84.9: talent night's pianist sits here (perform { act: 'piano' }); the piano turned side-on (was 9.4, 12.4 facing w: no room for a bench on the curve)
     // the foyer: the REC DEC neon over the four doors, the deck's poster, a bench
     placeWall('f', 'recNeon', 'e', 2.0, { hitW: 2.4, it: IT('REC DEC', 'A curved pink neon over the auditorium\'s doors. The official sign, RECREATION DECK, was too long to fit.') });
     placeWall('f', 'recPoster', 'n', 2.5, { it: IT('Poster', 'THE REC DEC: pool, rivers, climbing wall, float room, Lightdisc. Open 06:00 to midnight.') });
@@ -8795,7 +8797,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.84.8';                           // keep in step with the header's build line
+const GAME_BUILD = '0.84.9';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -47453,6 +47455,24 @@ const REC_ACTS = {
     const back = Math.floor(ph * 7) % 3 === 2;            // one in three: hands behind the head
     for (const a of r.arms) back ? armTo(a, s, -2.7, -2.35, .75, .3) : armTo(a, s, -.55, -1.5, -.1, .15);
   } },
+  // 0.84.9 (rec engineer B2): the stage. sing (at the mic stand), juggle (the balls are recCrewBalls'), bow, and address (the lectern)
+  sing: { f(r, s, t, b, ph) {                            // both hands up on the mic, a sway with the song
+    for (const a of r.arms) armTo(a, s, -1.25 + .06 * Math.sin(t * 1.7 + ph), -1.75, a.side * -.05, .2);
+    r.torso.rotation.z = L(r.torso.rotation.z, .07 * Math.sin(t * 1.6 + ph), s); r.head.rotation.x = L(r.head.rotation.x, -.12 + .06 * Math.sin(t * 3.2), s);
+  } },
+  juggle: { f(r, s, t, b, ph) {                          // forearms out, the hands taking turns to toss, eyes up on the balls
+    for (const a of r.arms) { const u = Math.sin(t * 2 * Math.PI * 1.1 + (a.side > 0 ? 0 : Math.PI)); armTo(a, s, -.8 - .22 * u, -1.05 + .2 * u, .14, -.2); }
+    r.head.rotation.x = L(r.head.rotation.x, -.38, s);
+  } },
+  bow: { f(r, s, t, b, ph) {                             // a deep bow, one hand across the waist
+    r.torso.rotation.x = L(r.torso.rotation.x, .85, s); r.head.rotation.x = L(r.head.rotation.x, .2, s);
+    for (const a of r.arms) a.side > 0 ? armTo(a, s, -.35, -1.9, -.25, 0) : armTo(a, s, .15, -.2, .1, 0);
+  } },
+  address: { f(r, s, t, b, ph) {                         // hands on the lectern, a slow look round the room; now and then a hand opens out
+    const g = pulse(t, 9, 2.4, ph * 9);
+    for (const a of r.arms) a.side > 0 && g > 0 ? armTo(a, s, L(-.7, -1.15, g), L(-.55, -.9, g), L(.12, .55, g), -.3 * g) : armTo(a, s, -.7, -.55, .12, .1);
+    r.head.rotation.y = L(r.head.rotation.y, .45 * Math.sin(t * .33 + ph * 6), s); r.head.rotation.x = L(r.head.rotation.x, -.05, s);
+  } },
 };
 // climbing legs: the `side` foot steps up as q goes 0 to 1, the other pushes down; feet toward the wall
 function recLegs(r, s, side, q) {
@@ -47658,6 +47678,17 @@ const REC_CREW = {
     o.x = c.x + r * Math.sin(T * .23 + a.fs % 5); o.z = c.z + r * .7 * Math.sin(T * .17 + 1 + a.fs % 3); o.f = a.spot.face + T * .22;
     return 'float';
   },
+  // 0.84.9 (rec engineer B2): on the stage. perform { act: 'sing' | 'juggle' | 'piano' | 'bow', len?: seconds } does the act,
+  // then a bow for its last 3 s and round again (piano: a seated place, pose 'sit'; bows standing up from the bench, no).
+  // address {} (the lectern: the Captain, the chief or a Wren talk's speaker). Both stay at the place, as it faces.
+  perform(a, M, T, o) {
+    const act = M.act || 'sing', per = (M.len || 40) + 3, u = (T + a.fs % 11) % per;
+    if (act === 'piano') return 'sit:play';
+    if (u >= per - 3) return 'bow';
+    if (act === 'juggle' && REC_JUGGLE.n < 1) { REC_JUGGLE.h = a.h; REC_JUGGLE.t = T; REC_JUGGLE.n = 1; }
+    return act;
+  },
+  address() { return 'address'; },
   fan(a, M, T, o) {                                      // watching; every six seconds the room may cheer a point or groan a miss, each a moment late
     const ct = clock.elapsedTime - a.fs % 7 * .09, n = Math.floor(ct / 6), m = recMix(n * 7919 + 13) % 20, me = recMix(n * 31 + a.fs) % 10;
     const sat = a.spot.pose === 'sit', still = sat ? (M.slump ? 'sit:slump' : 'sit') : 'stand';
@@ -47665,6 +47696,25 @@ const REC_CREW = {
     const x = m < 13 ? 'groan' : me < 6 ? 'cheer' : 'clap'; return sat ? 'sit:' + x : x;
   },
 };
+// 0.84.9: the juggler's three balls, one mesh of three instances, made at the first juggle; a cascade in front of the chest
+const REC_JUGGLE = { m: null, h: null, t: 0, n: 0 }, _jq = new THREE.Object3D(), _jv = new THREE.Vector3();
+function recCrewBalls() {
+  const J = REC_JUGGLE, on = J.n > 0 && crowd.visible && J.h && J.h.rig;
+  if (!J.m && on) {
+    J.m = new THREE.InstancedMesh(new THREE.SphereGeometry(.06, 10, 8), new THREE.MeshStandardMaterial({ roughness: .5 }), 3);
+    ['#ff5a4f', '#ffd23a', '#4fc3ff'].forEach((c, i) => J.m.setColorAt(i, col(c))); J.m.castShadow = true; J.m.raycast = () => {}; J.m.frustumCulled = false; scene.add(J.m);
+  }
+  if (J.m) J.m.visible = !!on;
+  if (on) {
+    for (let i = 0; i < 3; i++) {                        // ball i: up from one hand, across, down into the other; each a third of a beat apart
+      const u = (J.t * 1.1 + i / 3) % 1, k = u < .5 ? u * 2 : (u - .5) * 2, side = (Math.floor(J.t * 1.1 + i / 3) + (u < .5 ? 0 : 1)) % 2 ? 1 : -1;
+      _jv.set(side * L(-.16, .16, k), .5 + .4 * Math.sin(Math.PI * k), .34).applyMatrix4(J.h.rig.root.matrixWorld); _jv.y += Math.max(0, J.h.pos.y - J.h.rig.root.position.y);   // on a stage the root stays on the floor (the legs stand on it)
+      _jq.position.copy(_jv); _jq.updateMatrix(); J.m.setMatrixAt(i, _jq.matrix);
+    }
+    J.m.instanceMatrix.needsUpdate = true;
+  }
+  J.n = 0;
+}
 function recCrewRopes() {                                // after the crowd is posed (the main loop): harness to anchor, hidden when nobody's on
   for (let i = 0; i < 2; i++) {
     const m = REC_CREW_ROPES[i], c = REC_CLIMBERS[i], on = i < REC_CLIMB_N && crowd.visible && !!c.h.rig; m.visible = on; if (!on) continue;
@@ -48183,6 +48233,7 @@ function loop() {
   updateDeckCrew(dt);                                    // section 10: the scheduled crew
   crowd.update(dt, t);
   if (REC_CREW_ROPES) recCrewRopes();                    // 0.84.6: the crew's belay lines, on the posed bodies (8c)
+  if (REC_JUGGLE.m || REC_JUGGLE.n) recCrewBalls();      // 0.84.9: a juggler's balls (8c)
   simTimers();                                           // section 13's simTimeout (0.28.50)
   }
   shadowStep();                                          // 0.27.33: the shadow stand-ins, a slice a frame after a deck change
