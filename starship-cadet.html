@@ -285,7 +285,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.83.0
+   STARSHIP CADET: CSV Wren                           build 0.83.1
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8488,6 +8488,24 @@ const REC_CREW_PLACES = [
   // the changing rooms (crew change for the pool and the kayaks, as you do): two lockers either side of yours, two showers
   ...[[18.0, 18], [20.7, 20]].map(([x, c], k) => ({ id: '7-locker-' + (k + 1), type: 'rec:locker', at: [c, 1], xy: [x, 1.25], face: 'n', pose: 'stand', anim: 'browse', room: 'w' })),
   ...[17.65, 18.9].map((x, k) => ({ id: '7-rshower-' + (k + 1), type: 'rec:shower', at: [17, 2], xy: [x, 3.35], face: 's', pose: 'stand', anim: 'wash', room: 'w' })),
+  // the traditions' places (0.83.2): the Wren talks' ring of eight chairs on the stage (schedData's '7|rec-ring'; the
+  // chairs themselves are the auditorium's dressing), the chief's stool at the stage's front, the Captain's lectern and the
+  // Commander behind her, two acts' spots and the piano for talent night, and Maeve's chair at the booth's lighting desk
+  ...Array.from({ length: 8 }, (_, k) => { const a = k / 8 * 2 * Math.PI, x = 43.7 + Math.cos(a) * 1.05, z = 9.0 + Math.sin(a) * 1.05;
+    return { id: '7-ring-' + (k + 1), type: 'rec:seat', ring: true, at: [Math.floor(x), Math.floor(z)], walk: [41, Math.max(3, Math.min(14, Math.floor(z)))], xy: [+x.toFixed(2), +z.toFixed(2)], y: 1.0,
+      face: Math.round(Math.atan2(43.7 - x, 9.0 - z) * 180 / Math.PI), pose: 'sit', room: 'A' }; }),
+  { id: '7-stool-1', type: 'rec:stool', at: [42, 9], walk: [41, 9], xy: [42.35, 9.0], y: 1.05, face: 'w', pose: 'sit', room: 'A' },
+  { id: '7-lectern-1', type: 'rec:lectern', at: [43, 7], walk: [41, 7], xy: [43.35, 7.3], y: .55, face: 'w', pose: 'stand', room: 'A' },
+  { id: '7-lectern-2', type: 'rec:lectern', at: [43, 8], walk: [41, 8], xy: [43.95, 8.4], y: .55, face: 'w', pose: 'stand', room: 'A' },
+  { id: '7-act-1', type: 'rec:act', at: [42, 9], walk: [41, 9], xy: [42.85, 9.6], y: .55, face: 'w', pose: 'stand', room: 'A' },
+  { id: '7-act-2', type: 'rec:act', at: [42, 10], walk: [41, 10], xy: [42.85, 10.6], y: .55, face: 'w', pose: 'stand', room: 'A' },
+  { id: '7-act-piano', type: 'rec:act', at: [44, 12], walk: [41, 12], xy: [44.05, 12.4], y: 1.0, face: 'w', pose: 'sit', anim: 'play', room: 'A' },
+  { id: '7-booth-1', type: 'rec:booth', works: true, at: [32, 12], xy: [32.85, 12.6], y: .45, face: 'e', pose: 'sit', room: 'b' },
+  // the regatta's crowd (the gather venue 'river-banks', DECKS[7].gathers): the beach, the concourse's glass, the bank by the
+  // rack; Chief Holt's spot with his horn on the dock (lead 1)
+  { id: '7-river-banks-lead-1', type: 'event', gather: 'river-banks', lead: 1, at: [11, 6], xy: [11.6, 6.35], face: 0, pose: 'stand', room: 'K' },
+  ...[[2, 6], [3, 6], [4, 6], [5, 6], [7, 6], [9, 6], [12, 6], [15, 1], [15, 2], [15, 3], [15, 4], [15, 5], [16, 1], [16, 2], [16, 4], [16, 5]].map(([c, r], k) => ({ id: '7-river-banks-crowd-' + (k + 1), type: 'event', gather: 'river-banks', at: [c, r], face: r === 6 ? 'n' : 'w', pose: 'stand', room: 'K' })),
+  ...[5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15].map((c, k) => ({ id: '7-river-banks-crowd-' + (17 + k), type: 'event', gather: 'river-banks', at: [c, 7], face: 'n', pose: 'stand', room: '=' })),
 ];
 DECKS[7] = {
   num: 7, name: 'Recreation', seed: 70771, tall: 1.3, playerOnly: !REC_DECK, open: [6, 24],   // 0.83.0 (RA): the crew come when the deck is switched on
@@ -8682,6 +8700,9 @@ DECKS[7] = {
     REC_STANDS.forEach(([c0, c1], b) => place('T', 'recHit', (c0 + c1) / 2 - 4, 1, 'n', { w: c1 - c0, d: 2, hitH: 1.3, it: IT('Stands', ['Three stepped benches at the stern end, by the scoreboard.', 'The middle of the stands: three stepped benches, right on the net. The best seats for a close game.', 'Three stepped benches at the bow end, by the gate onto the court.'][b]) }));
   },
 };
+// the rec deck's gather venues (RA, 0.83.2): their spots are REC_CREW_PLACES' 'event' places with `gather` (section 4d's
+// loop that makes other decks' spots has run before this deck is defined, so these are written out)
+DECKS[7].gathers = { 'river-banks': { name: 'the river hall', focus: [9.0, 3.0], rooms: 'K=', seats: [], also: [], lead: [] } };
 // the rec deck's materials, made when the deck is built (so they are freed with it)
 let RK = null;
 function recMats() {
@@ -8768,7 +8789,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.83.0';                           // keep in step with the header's build line
+const GAME_BUILD = '0.83.1';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -9175,7 +9196,7 @@ function schedData() {
     for (const [ev, l] of evs) sub('@' + ev, l.sort(nat));
     if (n === 7) {                                       // the rec deck (RA, 0.83.0): its seats by room, and the court's queue (the stands' front row by the gate)
       const rs = shared.get('7|rec:seat') || [];
-      sub('rec-stand', rs.filter(pl => pl.room === 'T')); sub('rec-aud', rs.filter(pl => pl.room === 'A'));
+      sub('rec-stand', rs.filter(pl => pl.room === 'T')); sub('rec-aud', rs.filter(pl => pl.room === 'A' && !pl.ring)); sub('rec-ring', rs.filter(pl => pl.ring));
       sub('rec-courtq', rs.filter(pl => pl.room === 'T' && pl.at[1] === 11 && pl.at[0] >= 12));
     }
     sub('window', [...new Set([...shared.entries()].filter(([k]) => k.startsWith(n + '|') && !/\|work:/.test(k)).flatMap(([, l]) => l))].filter(pl => pl.window));   // answer 21: seats by a window
@@ -9650,6 +9671,7 @@ function schedFrame(p, d) {
   if (H.has('late-sleeper')) wake += 15 + 15 * U(12);
   if (!works) wake += 45 + 45 * U(13) + (shape.lieIn || 0);
   if (works && !f.night) wake = Math.min(wake, f.workStart - 45);
+  const rh = REC_ON && !f.night ? recHostEarly(p, d, works && f.workStart) : null; if (rh != null) wake = Math.min(wake, rh);   // a rec tradition's host is up for it (Rina's Dawn swim; RA, 0.83)
   f.wake = Math.round(wake);
   return f;
 }
@@ -9714,6 +9736,12 @@ const REC_DO = {
   climb: { type: 'rec:climb', q: 'rec:climbq' }, float: { type: 'rec:float', q: 'rec:floatq' },
   disc: { type: 'rec:disc', q: 'rec-courtq' }, watch: { type: 'rec-stand' }, bean: { type: 'lounge-seat' },
 };
+// the host of an early rec tradition (Dawn swim, Slow stretch) wakes in time for it: the latest wake that lets them go, or null
+function recHostEarly(p, d, shiftAt) {                  // shiftAt: their shift's start today (false on a day off): no use waking for one that clashes
+  if (typeof EV_READY === 'undefined' || !EV_READY || !REC_TRAD_ON) return null;   // section 18 not run yet (EV_READY is a var: safe to ask before)
+  for (const ev of REC_TRADS) if (ev.host === p.id && ev.at[0] < 600 && !(shiftAt && ev.at[1] > shiftAt - 15) && evDue(ev.when, d)) return ev.at[0] - (ev.wake != null ? ev.wake : 60) - 25;   // time for the toilet and a wash first
+  return null;
+}
 const REC_CAP = { busy: 15, quiet: 6 }, REC_Q = 10, REC_TURN = [20, 40];
 const recCap = (d, m) => weekday(d) >= 5 || m >= 1020 || m < 540 ? REC_CAP.busy : REC_CAP.quiet;   // weekday daytime (09:00-17:00) is quiet
 // a visit's odds from a rest block: with a habit, most of them; without, now and then the stands, a beanbag or the float room
@@ -10012,6 +10040,9 @@ function schedBuild(p, d, occ, S) {
       for (const e of meet) if (!e.done && e.meal && t > e.at && t < e.at + e.dur - (e.min || 20) && end - t >= (e.min || 20)) {   // late for a meal tradition (the handover ran on): join it while there's time to eat
         e.done = true; tradMeal(e, end);                 // through the line too (reviewer 1d, 0.26.42)
       }
+      if (REC_ON) for (const e of meet) if (!e.done && /^ev-rec-/.test(e.tag || '') && t >= e.at && t < e.at + (e.host ? Math.max(10, e.dur / 2) : 10) && end - t >= Math.min(25, e.dur)) {   // a rec tradition due right now goes first (0.83.1, RA: one starting the minute a block ended was missed)
+        e.done = true; take(e.act || 'leisure', e.where, e.dur, { wait: 5, by: end, min: e.min || (e.dur < 20 ? 5 : 15), tag: e.tag, anim: e.anim, event: true });
+      }
       if (end - t < 20) break;
       let to = Math.min(end, t + 30 + Math.round(70 * U(k + n * 3)));
       if (end - to < 20) to = end;
@@ -10096,7 +10127,7 @@ function schedBuild(p, d, occ, S) {
     if (U(k + 7) < .5) toilet(k + 7);
     wash(k);
     if (F.shape.inspect && /^4-B/.test(p.bed)) { go(bedDeck); seg('off', t + 10, 'bed', p.bed, { tag: 'inspection' }); }
-    const pre = meet.find(e => !e.meal && !e.done && e.at >= t && e.at + e.dur <= by - 25);   // a gathering before breakfast (Sunrise stretch, Pick-your-own; 0.36.86): to it, then breakfast
+    const pre = meet.find(e => !e.meal && !e.done && (e.at >= t || REC_ON && /^ev-rec-/.test(e.tag || '') && e.at + e.dur - t >= (e.min || 20)) && e.at + e.dur <= by - 25);   // a rec one (Dawn swim) already begun still counts (0.83.1)   // a gathering before breakfast (Sunrise stretch, Pick-your-own; 0.36.86): to it, then breakfast
     if (pre) leisureUntil(pre.at + pre.dur, k + 11);
     const mb = meet.find(e => e.meal === 'breakfast' && !e.done && e.at + 10 > t && e.at < by + 150);   // a meal tradition (the long breakfast) is their breakfast
     if (mb) { leisureUntil(mb.at + mb.dur, k + 9); if (segs.some(s => s.act === 'breakfast' && s.tag === mb.tag)) return; if (t >= by - 5) { grab('breakfast', k + 3); return; } }
@@ -10149,7 +10180,9 @@ function schedBuild(p, d, occ, S) {
     } else {
       morning(20, MEALS.breakfast[1]);
       const sp = specials(50, true);
-      leisureUntil(t + 30 + Math.round(60 * U(55)), 56);
+      let end0 = t + 30 + Math.round(60 * U(55)); const rg = REC_ON && meet.find(e => !e.done && /^ev-rec-/.test(e.tag || '') && e.at >= t && e.at < end0 + 30);   // a rec one this morning (the regatta, Slow stretch): the block runs on through it (0.83.1)
+      if (rg) end0 = Math.max(end0, rg.at + rg.dur);
+      leisureUntil(end0, 56);
       while (sp.length > 1) { const f = sp.shift(); if (clear(70)) f(); leisureUntil(t + 40 + Math.round(80 * U(57 + sp.length)), 58 + sp.length * 4); }
       evening(sp, F.bed, false);
     }
@@ -14895,7 +14928,7 @@ Object.assign(PLAYER_ACTS, {
   recShower: { need: 'hygiene', gain: 20, mins: 3, pose: 'stand', title: 'Shower' },
   recWait:   { need: 'leisure', gain: 4, mins: 40, pose: 'sit', title: 'Waiting your turn', done: 'You give up waiting.' },   // RA, 0.83.0: the queue (recQueue)
 });
-const REC = { chain: null, last: null, q: null };
+const REC = { chain: null, last: null, q: null, wso: null, cup: null };
 const recKitOn = () => PLAYER_SPEC.kit === 'rec';
 const recOpen = () => SHIP.time.min >= DECKS[7].open[0] * 60;   // 06:00 to midnight
 // where things are: spots in world units (from deck tile coordinates), moves in deck coordinates (section 8c's)
@@ -14907,6 +14940,7 @@ const REC_LOOP = [[11.4, 4.85], [4.8, 4.85], [4.8, 1.3], [13.8, 1.3, 1], [13.8, 
 function recTap(it, at, point) {
   if (typeof deckDef === 'undefined' || !deckDef || deckDef.num !== 7) return false;
   const t = it.t;
+  if ((t === 'Lightdisc court' || t === 'Ask someone to play') && (recCupTap() || recWsoTap())) return true;   // Winner Stays On: skip the line (0.83.1); Cup day: your match (0.83.2)
   if (t === 'Lightdisc court' || t === 'Ask someone to play') { if (!recQueue('disc', t, null)) discAsk(); return true; }   // section 23b (0.82.0); two crew already on the court: wait your turn (RA, 0.83.0)
   if (t === 'Scoreboard') { toast(t, it.x); return true; }
   const kind = t === 'Pool' ? 'swim' : /^(Kayak dock|River|White water|Kayak rack|Wave gate)$/.test(t) ? 'kayak' : t === 'Climbing wall' ? 'climb'
@@ -14924,7 +14958,7 @@ function recRoomIn(r) {
 function recGo(kind, point, title, flavour) {
   REC.chain = null;
   if (kind === 'seat' || kind === 'watch' || kind === 'bean') {   // the nearest free seat to your tap, in that room (a beanbag: the concourse's)
-    const room = kind === 'seat' ? 'A' : kind === 'bean' ? '=' : 'T', type = kind === 'bean' ? 'lounge-seat' : 'rec:seat', pl = [...PLACE_OF.values()].filter(p => p.type === type && p.room === room && !heldBy(p.id))
+    const room = kind === 'seat' ? 'A' : kind === 'bean' ? '=' : 'T', type = kind === 'bean' ? 'lounge-seat' : 'rec:seat', pl = [...PLACE_OF.values()].filter(p => p.type === type && p.room === room && !p.ring && !heldBy(p.id))
       .map(p => [p, placeSpot(p.id)]).filter(([, s]) => s).sort((a, b) => Math.hypot(a[1].x - point.x, a[1].z - point.z) - Math.hypot(b[1].x - point.x, b[1].z - point.z))[0];
     if (!pl) { toast(title, 'Every seat\'s taken.'); return; }
     if (kind === 'bean') { actStart('recBean', pl[0].id, { pose: 'sit', title, flavour, after: 'You flop into the beanbag. It swallows you whole.' }); return; }
@@ -14950,6 +14984,28 @@ const recCourtFree = () => !(heldBy('7-disc-1') && heldBy('7-disc-2'));
 const REC_QUEUE = { swim: ['rec:poolq', 'Every lane\'s taken. You wait on a lounger for one to come free.'], climb: ['rec:climbq', 'Both belays are in use. You wait on the pebble beach for your turn.'],
   disc: ['rec:seat', 'Two are playing. You wait on the bench by the gate: you\'re next.'] };
 const recFreeFor = kind => kind === 'swim' ? recLanesFree().length > 0 : kind === 'climb' ? recBelaysFree().length > 0 : kind === 'disc' ? recCourtFree() : true;
+// Winner Stays On (0.83.1): tap the court or its gate while it's on and you play the one who's on next ("Go on, you're
+// up"); win three in a row and your name goes on the foyer's board with the rest (REC.wso counts your run that day)
+// the Lightdisc Cup (0.83.2): you enter at the gate on Cup day and play your matches live, a round at a time against
+// each round's first winner on the bracket (cupBracket); lose one and you're out, win them all and the Cup's yours
+function recCupTap() {
+  if (!REC_DECK || typeof tradOn !== 'function' || !tradOn('rec-cup') || typeof cupBracket !== 'function') return false;
+  const d = SHIP.time.day, c = cupBracket(d); if (!c || !c.rounds.length) return false;
+  if (!REC.cup || REC.cup.day !== d) REC.cup = { day: d, round: 0, won: false, out: false, wins: SHIP.disc.won, played: SHIP.disc.played };
+  const C = REC.cup;
+  if (C.out || C.won) { toast('Lightdisc Cup', C.won ? 'The Cup\'s yours this time. Pell has already engraved it, badly.' : 'You\'re out of the Cup this time. Cheer from the stands.'); return true; }
+  const m = c.rounds[Math.min(C.round, c.rounds.length - 1)][0], opp = schedPeople().find(q => q.id === m[2]); if (!opp) return false;
+  toast('Lightdisc Cup', (C.round === c.rounds.length - 1 ? 'The final! ' : 'Round ' + (C.round + 1) + '. ') + 'You play ' + shortName(opp) + '.');
+  discAsk(opp); return true;
+}
+function recWsoTap() {
+  if (!REC_DECK || typeof tradOn !== 'function' || !tradOn('rec-wso') || typeof wsoCourt !== 'function') return false;
+  const d = SHIP.time.day, c = wsoCourt(d), m = SHIP.time.min, g = c && c.games.find(x => x.from <= m && m < x.to) || c && c.games.find(x => x.from > m);
+  const champ = g && schedPeople().find(q => q.id === g.a); if (!champ) return false;
+  if (!REC.wso || REC.wso.day !== d) REC.wso = { day: d, run: 0, won: SHIP.disc.won, played: SHIP.disc.played };
+  toast('Winner Stays On', 'Pell waves you through the gate. "Go on, you\'re up." You play ' + shortName(champ) + '.');
+  discAsk(champ); return true;
+}
 function recQueue(kind, title, p) {                      // true when you're now waiting (REC.q), false when there's room
   if (!REC_QUEUE[kind] || recFreeFor(kind)) return false;
   const [type, line] = REC_QUEUE[kind], gate = kind === 'disc';
@@ -14994,6 +15050,16 @@ function recFrame() {
   if (typeof deckDef === 'undefined' || !deckDef || typeof ACT === 'undefined') return;
   if (recKitOn() && deckDef.num !== 7 && !ACT && typeof playerKit === 'function') playerKit(null);   // off the deck: back in uniform
   const A = ACT;
+  const W = REC.wso; if (W && W.day === SHIP.time.day && SHIP.disc.played !== W.played && !DISC.g) {   // a Winner Stays On game of yours just ended
+    W.played = SHIP.disc.played; if (SHIP.disc.won === W.won) W.run = 0;
+    else { W.run++; if (W.run === 3 && typeof recBoardAdd === 'function') { recBoardAdd('wso', 'you', W.day); toast('Winner Stays On', 'Three in a row! Pell chalks your name on the board in the foyer.'); } }
+    W.won = SHIP.disc.won;
+  }
+  const Cc = REC.cup; if (Cc && Cc.day === SHIP.time.day && SHIP.disc.played !== Cc.played && !DISC.g) {   // a Cup match of yours just ended
+    Cc.played = SHIP.disc.played; const c = cupBracket(Cc.day);
+    if (SHIP.disc.won === Cc.wins) { Cc.out = true; toast('Lightdisc Cup', 'Out in round ' + (Cc.round + 1) + '. The stands give you a cheer anyway.'); }
+    else { Cc.wins = SHIP.disc.won; Cc.round++; if (c && Cc.round >= c.rounds.length) { Cc.won = true; toast('Lightdisc Cup', 'You win the Lightdisc Cup! Your name goes on the foyer\'s Cup board.'); } else toast('Lightdisc Cup', 'Through to round ' + (Cc.round + 1) + '. Tap the gate when you\'re ready.'); }
+  }
   if (A && A.kind === 'recWait' && REC.q && recFreeFor(REC.q.kind)) {   // your turn (RA, 0.83.0)
     const q = REC.q; REC.q = null; toast(q.title, 'You\'re up.');
     if (q.kind === 'disc') { actEnd(true); discAsk(); } else recStart(q.kind, q.title, null, q.p);
@@ -32722,7 +32788,7 @@ const SHIP_TRADITIONS = [
     who: (p, d) => evHas(p, d, 'musician') ? .95 : evHas(p, d, 'music') ? .65 : .04, anim: (p, d) => evHas(p, d, 'musician') ? 'play' : null,
     from: 'The music room', mail: 'Friday jam tomorrow from 19:45 in the music room, Deck 4. Bring an instrument, or just your ears.',
     ask: 'Jam in the music room tonight. Come and listen.', here: 'This is the good bit.', thanks: 'You sit in on the Friday jam. Somebody hands you a tambourine.' },
-  { id: 'film', name: 'Film night', k: 325, when: { weekday: 5 }, at: [1200, 1320], min: 30,
+  { id: 'film', name: 'Film night', k: 325, when: { weekday: 5 }, at: [1200, 1320], min: 30, unflag: 'rec.filmMoved',   // 0.83.2 (RA): to the rec deck's auditorium (rec-film) once the first all-hands is held
     where: [{ deck: 4, pool: 'common-room' }],
     who: (p, d) => p.rank !== 'junior' ? 0 : evHas(p, d, 'common-room') ? .8 : .3, anim: () => null,
     from: 'Pell Okafor', mail: 'Film night tomorrow, 20:00 in the junior common room. It\'s my turn to choose, so: the one with the space whales again.',
@@ -32789,6 +32855,7 @@ function evDue(w, d) {
   if (w.from != null && d < w.from || w.until != null && d > w.until) return false;
   if (w.season && ![].concat(w.season).includes(season(d))) return false;
   const wd = weekday(d), yd = shipYearDay(d);
+  if (w.rota) return !!(TRAD_ROTA[w.rota] && TRAD_ROTA[w.rota](d));   // 0.83 (RA): a rota the game keeps (the Wren talks)
   if (w.after) {                                         // personal: counted from the day you arrived
     const a = w.after === 'arrival' ? evArrival() : null; if (a == null || d < a) return false;
     if (w.days != null) return d === a + w.days;
@@ -32874,6 +32941,7 @@ function tradLoad(t) {
     id: t.id, name: t.name || t.id, k: t.k, when: t.when, at: t.at.slice(), min: t.min || 20, prio: t.prio || 0, jitter: t.jitter || 0, early: t.early || 0,
     hold: t.hold, cake: !!t.cake, decor: t.decor || null, host: t.host || null, ties: t.ties || null, invite: t.invite || null, trace: t.trace || null, meal: t.meal || null, flag: t.flag || null, text: t.text || {}, baked: true,
     wake: t.wake, afterShift: !!t.afterShift, spare: t.spare, venue: t.venue || null,   // 0.34.51: early mornings, straight from shift, places left free
+    unflag: t.unflag || null, stay: Array.isArray(t.stay) ? t.stay.slice() : null, quiet: t.quiet || null,   // 0.83 (RA): until a flag, drifting in and out, no Mail on the career's big days
     where: t.where.map(w => w.room ? { ...w, room: new RegExp(w.room), ids: w.ids ? new RegExp(w.ids) : undefined } : { ...w }),
     who: (p, d, c) => { words(); return tradRule(t.who, p, d, c, t.host, 0); },
     anim: (p, d) => typeof t.anim === 'string' ? t.anim : Array.isArray(t.anim) ? tradRule(t.anim, p, d, null, t.host, null) : null,
@@ -32883,10 +32951,252 @@ function tradLoad(t) {
     chatter: (c, p) => tradText(t, 'chatter', c, p),
   };
 }
+// ---- the rec deck's traditions (RA, 0.83.x; plans/rec-traditions-plan.html FINAL on claude/p5-design; brief-recdeck R11) ----
+// Hand-written here with stand-in words, so the rules live in one place; the writer's content/traditions/<id>.trad with
+// the same id (and the same rules) replaces each one's words when it's baked. Only with REC_DECK on. Hash keys k 486-499
+// (486-491 weekly, 492-499 the rest). They're budgeted among themselves (evBudget): one at a time in a room, and never
+// moving one of the ship's other traditions. REC_BIG: the career's big days and the storm (days after you arrive, the
+// traditions plan's skips): no talk then, and the weekly sport ones send no Mail nudge (quiet: 'career')
+const REC_BIG = [1, 4, 5, 9, 10, 11, 15, 16, 22, 23, 26];
+const recBigDay = d => REC_BIG.includes(d - evArrival());
+const TRAD_ROTA = {};                                     // when: { rota: name } -> TRAD_ROTA[name](d) (the Wren talks)
+// the Wren talks (the traditions plan's rota): small chats Mondays and Thursdays 19:00-19:40 in a ring of chairs on the stage,
+// a chief's talk every two weeks on a Thursday (from Day 18) 19:00-19:45 in the seats, and Day 8's one-off big Monday
+// (Sato, after the creature). None on REC_BIG days. Days after you arrive. Lead 17's call 4: the engine, and the rota's
+// first four talks for now; the rest of the rota (later: true) comes with its words. recTalk(d) -> { size, by, title } | null
+const REC_TALKS = [
+  [8, 'chief', 'sato', 'What lives between the stars'], [18, 'chief', 'calder', 'The Wren\'s first refit'], [25, 'small', 'tomas', 'Reading a route'],
+  [29, 'small', 'esposito-yara', 'Where every crate goes'],
+  [32, 'chief', 'holt', 'The oldest log in the Watch office', true], [36, 'small', 'volkov-maeve', 'How the float room floats', true],
+  [39, 'small', 'torres-zeke', 'How a drive coil sings', true], [43, 'small', 'brennan', 'A spice for every port', true], [46, 'chief', 'ferreira', 'Messages that came home late', true],
+];
+function recTalk(d) {
+  if (typeof SHIP !== 'undefined' && SHIP.rec && SHIP.rec.talk.mine === d) return { size: 'small', by: 'you', title: 'What I learned in my first month' };   // yours (recMyTalk)
+  const n = d - evArrival(), r = REC_TALKS.find(x => x[0] === n && !x[4]);
+  return r && schedPeople().some(p => p.id === r[2]) ? { size: r[1], by: r[2], title: r[3] } : null;
+}
+TRAD_ROTA['wren-small'] = d => { const t = recTalk(d); return !!t && t.size === 'small'; };
+TRAD_ROTA['wren-chief'] = d => { const t = recTalk(d); return !!t && t.size === 'chief'; };
+const recSpeaker = (p, d) => { const t = recTalk(d); return !!t && t.by === p.id; };
+const recIs = (p, d, h) => evHas(p, d, h);
+const REC_TRADS = [
+  { id: 'rec-wso', name: 'Winner Stays On', k: 486, when: { weekday: 6, from: 7 }, at: [690, 990], min: 30, stay: [40, 120], hold: [2],
+    where: [{ deck: 7, pool: 'rec-stand' }, { deck: 7, pool: 'lounge-seat' }, { deck: 7, pool: 'rec:disc' }], host: 'pell',   // the court itself held for it (nobody's pick-up game), its players put there by wsoWhere
+    whereFor: (p, d, o) => o.filter(([, k]) => k !== 'rec:disc'),
+    who: (p, d) => p.id === 'pell' ? 1 : recIs(p, d, 'disc-player') ? .9 : recIs(p, d, 'film-buff') ? .55 : .45, anim: () => 'cheer',
+    from: 'Pell Okafor', mail: 'Winner Stays On tomorrow, 11:30 to 16:30 on the Lightdisc court. Chalk your name on the board by the gate. I\'ll be on. I\'m always on.',
+    ask: 'Winner Stays On today. My name\'s already on the board.', here: 'Next! Who\'s next?', thanks: 'You find a spot in the stands for Winner Stays On. Pell rings his hand bell for every new game.' },
+  { id: 'rec-dawn-swim', name: 'Dawn swim', k: 487, when: { weekday: [1, 3], from: 2 }, at: [375, 405], min: 20, wake: 15, quiet: 'career',
+    where: [{ deck: 7, pool: 'rec:lane' }, { deck: 7, pool: 'rec:poolq' }], host: 'rina',
+    who: (p, d) => p.id === 'rina' ? 1 : recIs(p, d, 'swimmer') ? .85 : recIs(p, d, 'early-riser') ? .5 : .03, anim: () => null,
+    from: 'Rina Deshi', mail: 'Dawn swim tomorrow, 06:15 in the rec dec pool. Before the infirmary opens. The water\'s warm; getting in is the hard part.',
+    ask: 'Dawn swim in the morning? Before the infirmary opens.', here: 'Two more lengths. Then breakfast.', thanks: 'You swim a few lengths with Rina while the stars slide past the hull windows.' },
+  { id: 'rec-paddle-club', name: 'Paddle club', k: 488, when: { weekday: 2, from: 3 }, at: [1110, 1170], min: 25, quiet: 'career',
+    where: [{ deck: 7, pool: 'rec:kayak' }, { deck: 7, pool: 'rec:kayakq' }], host: 'holt',
+    who: (p, d) => p.id === 'holt' ? 1 : recIs(p, d, 'kayaker') ? .8 : .04, anim: () => null,
+    from: 'Chief Bram Holt', mail: 'Paddle club tomorrow, 18:30 in the river hall. The slow loop first. Helmets on. Yes, you.',
+    ask: 'Paddle club tonight. Holt counts the helmets.', here: 'Lean into it. Don\'t fight the water.', thanks: 'You paddle the slow loop with Paddle club while Chief Holt watches the water like a hawk.' },
+  { id: 'rec-wall-night', name: 'Wall night', k: 489, when: { weekday: 1, from: 2 }, at: [1110, 1185], min: 25, quiet: 'career',
+    where: [{ deck: 7, pool: 'rec:climb' }, { deck: 7, pool: 'rec:climbq' }], host: 'tomas',
+    who: (p, d) => p.id === 'tomas' ? 1 : recIs(p, d, 'climber') ? .85 : .05, anim: () => null,
+    from: 'Tomas Lind', mail: 'Wall night tomorrow, 18:30 at the climbing wall. I\'ll belay. Ring the bell and your name goes on the season\'s board.',
+    ask: 'Wall night later. Ring the bell and you\'re on the board.', here: 'Left foot. No, your other left.', thanks: 'You climb at Wall night with Tomas on the rope. The bell rings out across the river hall.' },
+  { id: 'rec-float-hour', name: 'Float hour', k: 490, when: { weekday: 2, from: 3 }, at: [1290, 1335], min: 20, quiet: 'career',
+    where: [{ deck: 7, pool: 'rec:float' }, { deck: 7, pool: 'rec:floatq' }], host: 'oduya',
+    who: (p, d) => p.id === 'oduya' ? 1 : recIs(p, d, 'floater') ? .85 : .04, anim: () => null,
+    from: 'Matthias Oduya', mail: 'Float hour tomorrow, 21:30 in the float room. The orbs go down, the music goes on, and nobody talks. You\'ll sleep better.',
+    ask: 'Float hour tonight. No talking. That\'s the whole point.', here: '...', thanks: 'You drift in the dimmed float room with quiet music. Nobody says a word, and it\'s lovely.' },
+  { id: 'rec-slow-stretch', name: 'Slow stretch', k: 491, when: { weekday: 6, from: 7 }, at: [510, 555], min: 20, wake: 15, quiet: 'career', spare: 0,
+    where: [{ deck: 7, pool: 'rec:float' }], host: 'nandakumar',
+    who: (p, d) => p.id === 'nandakumar' ? 1 : recIs(p, d, 'floater') ? .75 : recIs(p, d, 'early-riser') ? .3 : .08, anim: () => null,
+    from: 'Dr. Priya Nandakumar', mail: 'Slow stretch tomorrow, 08:30 in the float room: a gentle stretch at a fifth of a g. Doctor\'s orders, and the doctor\'s coming.',
+    ask: 'Slow stretch in the morning? At a fifth of a g, even I can touch my toes.', here: 'Slower. Slower still.', thanks: 'You stretch slowly at a fifth of a g with Dr. Nandakumar. Your back thanks you all day.' },
+  // every four weeks (0.83.2): the regatta (from Day 21), talent night (from Day 14), the Lightdisc Cup (from Day 28, in
+  // Winner Stays On's place: the higher prio wins the court)
+  { id: 'rec-regatta', name: 'River regatta', k: 492, when: { every: '4weeks', weekday: 6, week: 3 }, at: [570, 660], min: 30, hold: [], prio: 1,
+    venue: 'river-banks', where: [{ deck: 7, pool: 'rec:kayak' }, { deck: 7, pool: 'rec:kayakq' }], host: 'holt',
+    whereFor: (p, d, o) => regattaPaddler(p, d) ? o.filter(([, k]) => k !== 'ev:rec-regatta').concat(o.filter(([, k]) => k === 'ev:rec-regatta')) : o.filter(([, k]) => k === 'ev:rec-regatta'),   // the kayakers paddle the heats, everyone else watches from the banks
+    who: (p, d) => p.id === 'holt' ? 1 : recIs(p, d, 'kayaker') ? .9 : .3, anim: () => 'cheer',
+    from: 'Chief Bram Holt', mail: 'The river regatta tomorrow, 09:30 in the river hall. Heats of four round the loop; I start each one with the horn. Watch from the bank, or paddle the fun heat.',
+    ask: 'Regatta this morning. Holt\'s got the horn.', here: 'Go on! Paddle!', thanks: 'You cheer from the bank as the heats race round the loop. Holt\'s horn makes everyone jump.' },
+  { id: 'rec-talent-night', name: 'Talent night', k: 493, when: { every: '4weeks', weekday: 6, week: 2 }, at: [1170, 1290], min: 40, hold: [], prio: 1,
+    where: [{ deck: 7, pool: 'rec-aud' }, { deck: 7, pool: 'rec:act' }, { deck: 7, pool: 'rec:booth' }, { deck: 7, pool: 'rec:lectern' }], host: 'ferreira',
+    whereFor: (p, d, o) => o.filter(([, k]) => p.id === 'volkov-maeve' ? k === 'rec:booth' : p.id === 'ferreira' ? k === 'rec:lectern' : recIs(p, d, 'musician') ? k === 'rec:act' || k === 'rec-aud' : k === 'rec-aud'),
+    who: (p, d) => p.id === 'ferreira' || p.id === 'volkov-maeve' ? 1 : recIs(p, d, 'musician') ? .85 : recIs(p, d, 'film-buff') ? .7 : .4, anim: p => p.id === 'volkov-maeve' ? null : 'clap',
+    from: 'Comms Chief Lucia Ferreira', mail: 'Talent night tomorrow, 19:30 in the auditorium. Songs, the piano, a juggling Works tech, and whoever\'s brave. Sign up on the sheet in the foyer.',
+    ask: 'Talent night tonight! The sign-up sheet\'s nearly full.', here: 'Give them a big hand!', thanks: 'You find a seat for talent night. Every act gets a cheer, even the one that goes wrong.' },
+  { id: 'rec-cup', name: 'Lightdisc Cup', k: 494, when: { every: '4weeks', weekday: 6, week: 4 }, at: [690, 990], min: 30, stay: [60, 150], hold: [2], prio: 2,
+    where: [{ deck: 7, pool: 'rec-stand' }, { deck: 7, pool: 'lounge-seat' }, { deck: 7, pool: 'rec:disc' }], host: 'pell',
+    whereFor: (p, d, o) => o.filter(([, k]) => k !== 'rec:disc'),
+    who: (p, d) => p.id === 'pell' ? 1 : recIs(p, d, 'disc-player') ? .95 : .5, anim: () => 'cheer',
+    from: 'Pell Okafor', mail: 'The Lightdisc Cup tomorrow, 11:30 on the court, instead of Winner Stays On. Every department sends its best. Enter at the gate.',
+    ask: 'Cup day! Works has to beat the Watch this time.', here: 'That was in! That was IN!', thanks: 'You squeeze into the stands for the Cup. The department songs are louder than the games.' },
+  // Saturdays: film night in the auditorium, once it has moved (flag rec.filmMoved, set by the first Captain's all-hands)
+  { id: 'rec-film', name: 'Film night', k: 495, when: { weekday: 5 }, at: [1200, 1335], min: 30, flag: 'rec.filmMoved',
+    where: [{ deck: 7, pool: 'rec-aud' }], host: 'pell',
+    who: (p, d) => recIs(p, d, 'film-buff') ? .9 : p.rank === 'junior' ? (evHas(p, d, 'common-room') ? .8 : .35) : .2, anim: () => null,
+    from: 'Pell Okafor', mail: 'Film night tomorrow, 20:00 in the auditorium on the big screen. Popcorn from the galley. My pick, so: whales.',
+    ask: 'Film night in the auditorium. A screen that big!', here: 'Shh. This is the good bit.', thanks: 'You take a violet seat for film night. The screen comes down over the stars and the house lights go out.' },
+  // the Captain's all-hands: the first Monday of each season, once the first has been held (with the first ship-wide event)
+  { id: 'rec-allhands', name: 'Captain\'s all-hands', k: 496, when: { every: 'quarter', week: 1, weekday: 0 }, at: [1065, 1090], min: 20, flag: 'rec.allHands', prio: 3, hold: [],
+    where: [{ deck: 7, pool: 'rec:lectern' }, { deck: 7, pool: 'rec-aud' }], host: 'marrow',
+    whereFor: (p, d, o) => o.filter(([, k]) => (p.id === 'marrow' || p.id === 'vance') === (k === 'rec:lectern')),
+    who: (p, d) => p.id === 'marrow' || p.id === 'vance' ? 1 : p.rank === 'guest' ? 0 : .95, anim: () => null,
+    from: 'Captain Odile Marrow', mail: 'All hands tomorrow at 17:45 in the auditorium: the season ahead, and a few thank-yous. Dinner straight after.',
+    ask: 'All-hands before dinner. The Captain\'s doing the season.', here: 'Shh, she\'s starting.', thanks: 'You find a seat for the all-hands. The Captain looks round the room, and a few names get called out.' },
+  // the Wren talks (TRAD_ROTA above): the small ones in the ring on the stage, the chiefs' in the seats with the speaker on the stool
+  { id: 'rec-talk-small', name: 'Wren talk', k: 497, when: { rota: 'wren-small' }, at: [1140, 1180], min: 25,
+    where: [{ deck: 7, pool: 'rec-ring' }], spare: 1, first: (p, d) => recSpeaker(p, d),
+    who: (p, d) => recSpeaker(p, d) ? 1 : p.rank === 'junior' ? .14 : .08, anim: () => 'talk',
+    from: 'The Wren talks', mail: c => { const t = recTalk(c.day), q = t && schedPeople().find(p => p.id === t.by); return q ? 'A Wren talk tomorrow at 19:00, on the auditorium stage: ' + shortName(q) + ', "' + t.title + '". Tea from the kettle. Anyone can ask anything.' : 'A Wren talk tomorrow at 19:00 on the auditorium stage.'; },
+    ask: 'Coming to the talk tonight? On the stage, with tea.', here: 'Ooh, good question.', thanks: 'You pull up a chair in the ring on the stage. The talk is easy and the tea is hot.' },
+  { id: 'rec-talk-chief', name: 'Chief\'s talk', k: 498, when: { rota: 'wren-chief' }, at: [1140, 1185], min: 30, prio: 1,
+    where: [{ deck: 7, pool: 'rec:stool' }, { deck: 7, pool: 'rec-aud' }],
+    whereFor: (p, d, o) => o.filter(([, k]) => recSpeaker(p, d) === (k === 'rec:stool')),
+    who: (p, d) => recSpeaker(p, d) ? 1 : p.rank === 'guest' ? 0 : .5, anim: () => null,
+    from: 'The Wren talks', mail: c => { const t = recTalk(c.day), q = t && schedPeople().find(p => p.id === t.by); return q ? 'A chief\'s talk tomorrow at 19:00 in the auditorium: ' + shortName(q) + ', "' + t.title + '". About twenty-five minutes, then questions.' : 'A chief\'s talk tomorrow at 19:00 in the auditorium.'; },
+    ask: 'The chief\'s talk tonight. Everyone\'s going.', here: 'Shh. This is the best bit.', thanks: 'You find a seat for the chief\'s talk. The house lights are half up, and the story is a good one.' },
+];
+const REC_TRAD_ON = REC_DECK;                            // the rec deck's traditions with the deck (day_check flips this line to see the deck's everyday use alone)
+if (REC_TRAD_ON) for (const ev of REC_TRADS) SHIP_TRADITIONS.push(ev);
+// Winner Stays On's court (RA, 0.83.1): who plays whom, worked out on paper from who's in the stands. Games of WSO_GAME
+// ship minutes from the start; the winner stays on, the next challenger is whoever has waited longest in the stands
+// (Pell first, when he's there); each game is Lightdisc's own ldPaper, a quick game (to 5) between the two crew levels,
+// seeded by the day and the game (key 1037). Three wins in a row put a name on the foyer's board (recBoard('wso')).
+// wsoCourt(d) -> { games: [{ a, b, from, to, w }], three: [ids] } (minutes from midnight), pure and kept per day; tradWhere
+// puts the two on court at their baselines (7-disc-1 bow, 7-disc-2 stern) while their game is on. A day with no WSO: null
+const WSO_GAME = 15, WSO_COURT = new Map();               // a game with the walk on and off (0.83.2: 8 was shorter than the walk from the stands)
+function wsoCourt(d) {
+  if (WSO_COURT.has(d)) return WSO_COURT.get(d);
+  const e = REC_DECK && eventsOn(d).find(x => x.id === 'rec-wso' || x.id === 'rec-cup'), out = e && e.id === 'rec-wso' ? { games: [], three: [] } : null;
+  if (out) {
+    const B = (d - 1) * 1440, seg = new Map();
+    for (const p of schedPeople()) { const s = planDay(p, d).find(x => x.tag && x.tag.startsWith('ev-rec-wso')); if (s) seg.set(p.id, [s.from - B, s.to - B]); }
+    const here = (id, a, b) => { const x = seg.get(id); return !!x && x[0] <= a && x[1] >= b; };
+    const since = new Map(); let champ = null, run = 0, side = 1;   // side: the champion's end (1 = 7-disc-1 by the gate, 2 = the stern); the winner stays where they are
+    for (let T = e.from; T + WSO_GAME <= e.to; T += WSO_GAME) {
+      if (champ && !here(champ, T, T + WSO_GAME)) { champ = null; run = 0; }
+      const q = [...seg.keys()].filter(id => id !== champ && here(id, T, T + WSO_GAME)).sort((x, y) => (y === 'pell') - (x === 'pell') || (since.get(x) ?? seg.get(x)[0]) - (since.get(y) ?? seg.get(y)[0]) || (x < y ? -1 : 1));
+      if (!champ) { champ = q.shift() || null; run = 0; side = 1; }
+      const ch = q.shift(); if (!champ || !ch) continue;
+      const r = ldPaper({ seed: Math.floor(schedU(d, T, 1037) * 4294967296), quick: true, you: ldLevel(champ), them: ldLevel(ch) });
+      const w = r.winner === 0 ? champ : ch, l = w === champ ? ch : champ;
+      out.games.push({ a: champ, b: ch, from: T, to: T + WSO_GAME, w, at1: side === 1 ? champ : ch });
+      since.set(l, T + WSO_GAME);                          // back of the queue
+      if (w !== champ) side = 3 - side;
+      run = w === champ ? run + 1 : 1; champ = w;
+      if (run === 3 && !out.three.includes(w)) out.three.push(w);
+    }
+  }
+  WSO_COURT.set(d, out); if (WSO_COURT.size > 20) WSO_COURT.delete(WSO_COURT.keys().next().value);
+  return out;
+}
+// SHIP.rec (RA, 0.83.1): the rec deck's lasting state, saved as save.rec and read back defensively (recClean), so an older
+// save starts with nothing held yet. ah: the day of the first Captain's all-hands (null until then), film: the day film
+// night moved to the auditorium, wso / bell / cup: the boards' names, [[id, day], ...] ('you' for you; the bell board
+// keeps the season's), pc: your Paddle club visits, talk: { heard: [ids], asked: [ids], mine: day | null }
+function recClean(s) {
+  const r = s && typeof s === 'object' ? s : {}, day = v => Number.isInteger(v) && v >= 0 ? v : null;
+  const names = l => Array.isArray(l) ? l.filter(x => Array.isArray(x) && typeof x[0] === 'string' && x[0].length < 40 && Number.isInteger(x[1])).slice(-40) : [];
+  const ids = l => Array.isArray(l) ? l.filter(x => typeof x === 'string' && x.length < 40).slice(-40) : [];
+  const t = r.talk && typeof r.talk === 'object' ? r.talk : {};
+  return { ah: day(r.ah), film: day(r.film), wso: names(r.wso), bell: names(r.bell), cup: names(r.cup), reg: names(r.reg), pc: Number.isInteger(r.pc) && r.pc >= 0 ? r.pc : 0,
+    talk: { heard: ids(t.heard), asked: ids(t.asked), mine: day(t.mine) } };
+}
+SHIP.rec = recClean(SAVED && SAVED.rec);
+SAVE_EXTRA.push(sv => { sv.rec = JSON.parse(JSON.stringify(SHIP.rec)); });
+onSim('newGame', () => { SHIP.rec = recClean(null); });
+const recBoardAdd = (k, id, d) => { const l = SHIP.rec[k]; if (!l.some(x => x[0] === id && (k !== 'bell' || season(x[1]) === season(d)))) l.push([id, d]); if (l.length > 40) l.shift(); };
+// a board's names now: the foyer's Winner Stays On board (three in a row), the season's bell board (Wall night), the Cup's winners
+function recBoard(k, d = SHIP.time.day) { return (SHIP.rec[k] || []).filter(x => k !== 'bell' || season(x[1]) === season(d)).map(x => x[0]); }
+// at the end of each: the boards fill (the crew's from the day's plans; yours when you joined)
+onSim('tradition', x => {
+  if (!REC_DECK || !x || !/^rec-/.test(x.id || '')) return;
+  if (x.id === 'rec-wso') { const c = wsoCourt(x.day); for (const id of (c && c.three) || []) recBoardAdd('wso', id, x.day); }
+  if (x.id === 'rec-wall-night') { for (const p of schedPeople()) if (planDay(p, x.day).some(s => s.type === 'rec:climb' && evTagId(s.tag) === x.id)) recBoardAdd('bell', p.id, x.day); if (x.you) recBoardAdd('bell', 'you', x.day); }
+  if (x.id === 'rec-paddle-club' && x.you) SHIP.rec.pc++;
+  if (x.id === 'rec-regatta') { const w = regattaWinner(x.day); if (w) recBoardAdd('reg', w, x.day); }
+  if (x.id === 'rec-cup') { const c = cupBracket(x.day), you = REC.cup && REC.cup.day === x.day && REC.cup.won; if (you || c && c.winner) recBoardAdd('cup', you ? 'you' : c.winner, x.day); }
+});
+// the first Captain's all-hands (lead 17's call 1: no invented trigger): the first address of the first ship-wide event.
+// From then on the season's all-hands come on the first Monday of each season (rec-allhands, flag rec.allHands), and film
+// night moves to the auditorium for good (rec-film, flag rec.filmMoved), the junior common room a quiet Saturday after;
+// a note for the writers' Mail (simNote('recMoved'))
+function recFirstAllHands(at) {
+  const d = Math.floor(at / 1440) + 1; SHIP.rec.ah = d; SHIP.rec.film = d;
+  flagSet('rec.allHands', d); flagSet('rec.filmMoved', d);
+  if (typeof simNote === 'function') simNote('recMoved', { day: d, what: 'film' });
+}
+// the regatta's winner (heats of four on paper, the pennant): among those who paddled at it, seeded by the day (key 1038)
+const regattaPaddler = (p, d) => p.id !== 'holt' && (evHas(p, d, 'kayaker') || schedU(p.seed, d, 1038) < .4);   // the rest watch from the banks
+function regattaWinner(d) {
+  const ids = schedPeople().filter(p => regattaPaddler(p, d) && planDay(p, d).some(s => evTagId(s.tag) === 'rec-regatta')).map(p => p.id).sort();
+  return ids.length ? ids[Math.floor(schedU(d, 0, 1038) * ids.length)] : null;
+}
+// the Lightdisc Cup's bracket (lead 17's call 2: singles; you and a friend both enter): eight from those in the stands, the
+// disc-players first, then by hash (key 1039); three rounds of full games on paper (ldPaper, to 7). cupBracket(d) -> {
+// rounds: [[[a, b, w], ...], ...], winner } | null. Your matches are live (REC.cup); a win of yours takes your opponent's place
+const CUP_MEMO = new Map();
+function cupBracket(d) {
+  if (CUP_MEMO.has(d)) return CUP_MEMO.get(d);
+  const e = REC_DECK && eventsOn(d).find(x => x.id === 'rec-cup'); let out = null;
+  if (e) {
+    const went = schedPeople().filter(p => planDay(p, d).some(s => evTagId(s.tag) === 'rec-cup'));
+    let field = went.map(p => [evHas(p, d, 'disc-player') ? 0 : 1, schedU(p.seed, d, 1039), p.id]).sort((a, b) => a[0] - b[0] || a[1] - b[1]).slice(0, 8).map(x => x[2]);
+    if (field.length >= 2) {
+      out = { rounds: [], winner: null };
+      for (let r = 0; field.length > 1; r++) {
+        const next = [], round = [];
+        for (let i = 0; i < field.length; i += 2) {
+          if (i + 1 >= field.length) { next.push(field[i]); continue; }   // a bye
+          const g = ldPaper({ seed: Math.floor(schedU(d, r * 8 + i, 1039) * 4294967296), quick: false, you: ldLevel(field[i]), them: ldLevel(field[i + 1]) });
+          const w = g.winner === 0 ? field[i] : field[i + 1]; round.push([field[i], field[i + 1], w]); next.push(w);
+        }
+        out.rounds.push(round); field = next;
+      }
+      out.winner = field[0];
+    }
+  }
+  CUP_MEMO.set(d, out); if (CUP_MEMO.size > 8) CUP_MEMO.delete(CUP_MEMO.keys().next().value);
+  return out;
+}
+// crew v crew on the court (0.83.2): who's playing now, for the live game when you're watching (the drawing and the
+// poses are rec engineer B's: their code steps ldNew({ seed, quick: true, you: ldLevel(a), them: ldLevel(b) }) from `from`)
+// and the day's pick-up games on paper (two crew whose plans have them on the two baselines at once). recCourtNow(t) ->
+// { a (7-disc-1), b (7-disc-2), from, to, seed, wso } | null; recPickups(d) -> [{ a, b, from, to, w }] (ldPaper, key 1037)
+function recCourtNow(t = shipNow()) {
+  const d = Math.floor(t / 1440) + 1, B = (d - 1) * 1440, m = t - B;
+  const c = weekday(d) === 6 ? wsoCourt(d) : null, g = c && c.games.find(x => x.from <= m && m < x.to);
+  if (g) return { a: g.at1, b: g.at1 === g.a ? g.b : g.a, from: B + g.from, to: B + g.to, seed: Math.floor(schedU(d, g.from, 1037) * 4294967296), wso: true };
+  const x = recPickups(d).find(x => x.from <= m && m < x.to);
+  return x ? { a: x.a, b: x.b, from: B + x.from, to: B + x.to, seed: x.seed, wso: false } : null;
+}
+const PICKUPS = new Map();
+function recPickups(d) {
+  if (PICKUPS.has(d)) return PICKUPS.get(d);
+  const B = (d - 1) * 1440, at = id => schedPeople().flatMap(p => planDay(p, d).filter(s => s.placeId === id).map(s => [p.id, s.from - B, s.to - B])), out = [];
+  for (const [a, x, y] of at('7-disc-1')) for (const [b, u, v] of at('7-disc-2')) {
+    const from = Math.max(x, u), to = Math.min(y, v); if (to - from < 5) continue;
+    const seed = Math.floor(schedU(d, from, 1037) * 4294967296), r = ldPaper({ seed, quick: true, you: ldLevel(a), them: ldLevel(b) });
+    out.push({ a, b, from, to, seed, w: r.winner === 0 ? a : b });
+  }
+  PICKUPS.set(d, out); if (PICKUPS.size > 10) PICKUPS.delete(PICKUPS.keys().next().value);
+  return out;
+}
+function wsoWhere(p, t) {                                // the two on court now (null for anyone else)
+  const d = Math.floor(t / 1440) + 1; if (!REC_DECK || weekday(d) !== 6 || (typeof DISC !== 'undefined' && DISC.g)) return null;   // while you play, the pair waits in the stands
+  const c = wsoCourt(d); if (!c) return null;
+  const m = t - (d - 1) * 1440, g = c.games.find(x => x.from <= m && m < x.to && (x.a === p.id || x.b === p.id)); if (!g) return null;
+  return { deck: 7, act: 'leisure', type: 'rec:disc', placeId: g.at1 === p.id ? '7-disc-1' : '7-disc-2', moving: false, from: (d - 1) * 1440 + g.from, until: (d - 1) * 1440 + g.to, tag: 'ev-rec-wso-disc', anim: null };
+}
 const TRAD_SRC = (() => { try { if (typeof TRADITIONS !== 'undefined') return TRADITIONS; } catch (e) { /* not baked */ } TRAD_ERRORS.push('no TRADITIONS block in the build (section 22)'); return []; })();
 const TRAD_LIST = Array.isArray(TRAD_SRC) ? TRAD_SRC : Object.keys(TRAD_SRC).sort().map(id => ({ id, ...TRAD_SRC[id] }));
 for (const t of TRAD_LIST) {
   const ev = tradLoad(t); if (!ev) continue;
+  if (!REC_DECK && ev.where.every(w => w.deck === 7)) continue;   // the rec deck's own (0.83, RA): only with the deck switched on
+  if (REC_DECK && ev.id === 'talent-night') continue;     // the user's answer (2026-10-19): the rec deck's talent night (rec-talent-night) replaces the yearly one
+  const r = REC_TRADS.find(x => x.id === ev.id);           // one of the rec deck's: the writer's file brings the words; the rules stay REC_TRADS' (whereFor, first, the rota)
+  if (r) { for (const k of ['from', 'mail', 'ask', 'here', 'thanks', 'chatter', 'text', 'invite']) { const ds = Object.getOwnPropertyDescriptor(ev, k); if (ds && (ds.get || ds.value != null)) Object.defineProperty(r, k, ds); } r.baked = true; continue; }
   const i = SHIP_TRADITIONS.findIndex(x => x.id === ev.id);
   if (i >= 0) SHIP_TRADITIONS[i] = ev; else SHIP_TRADITIONS.push(ev);
 }
@@ -32921,7 +33231,7 @@ const evTable = () => SHIP_TRADITIONS.concat(EV_SHIPWIDE, evOneOffDefs());
 const EV_DAYS = new Map();
 let EV_ARR = null;
 function eventsOn(d) {
-  const arr = evArrival() + '|' + SHIP_TRADITIONS.filter(e => e.flag).map(e => typeof flag === 'function' && flag(e.flag) ? 1 : 0).join('');
+  const arr = evArrival() + '|' + SHIP_TRADITIONS.filter(e => e.flag || e.unflag).map(e => typeof flag === 'function' && (e.flag && flag(e.flag) ? 1 : 0) + (e.unflag && flag(e.unflag) ? 2 : 0)).join('');
   if (arr !== EV_ARR) {                                  // section 21 set the day you came aboard, or a tradition's flag was set
     if (EV_ARR !== null && typeof SHIP_DAYS !== 'undefined') { const today = Math.floor(shipNow() / 1440) + 1; for (const x of [...SHIP_DAYS.keys()]) if (x > today) SHIP_DAYS.delete(x); }   // later plans are made again
     EV_ARR = arr; EV_DAYS.clear(); EV_DROPPED.clear(); EV_GOERS.clear();
@@ -32937,6 +33247,7 @@ function eventsOn(d) {
     else if (w.date) { if (d !== w.date) continue; }
     else if (!evDue(w, d)) continue;
     if (ev.flag && !(typeof flag === 'function' && flag(ev.flag))) continue;   // waits for a story beat (bridge hour: 'bridge.invited')
+    if (ev.unflag && typeof flag === 'function' && flag(ev.unflag)) continue;   // 0.83 (RA): until a flag (film night in the junior common room, until it moves)
     if (!w.ship && typeof eventPauses === 'function' && eventPauses(ev, d)) continue;   // a ship-wide event's quiet days
     const names = honorees.map(p => p.name).join(', ').replace(/, ([^,]*)$/, ' and $1');   // 'A and B', 'A, B and C'
     out.push({ id: ev.id, name: ev.name, ev, day: d, from: ev.at[0], to: ev.at[1], honorees, names, first: honorees.length ? honorees[0].name.split(' ').slice(-2)[0] : '' });
@@ -32959,7 +33270,11 @@ const evRooms = ev => ev.where.map(w => w.deck + '|' + (w.room ? w.room.source.r
 // an evening's tradition starts at 17:00 or later and runs past 18:00 (one-week-aboard's tea after shift, 17:15-17:55, doesn't)
 const evEvening = e => e.from >= 1020 && e.to > 1080;
 function evBudget(list) {
-  const rank = e => SHIP_TRADITIONS.indexOf(e.ev), t = list.filter(e => rank(e) >= 0 && !e.ev.when.birthday);
+  const rank = e => SHIP_TRADITIONS.indexOf(e.ev), recOnly = e => e.ev.where.every(w => w.deck === 7);
+  // the rec deck's own (0.83, RA) are budgeted among themselves (one at a time in a room), so the ship's others never change
+  const rec = list.filter(e => rank(e) >= 0 && !e.ev.when.birthday && recOnly(e)), t = list.filter(e => rank(e) >= 0 && !e.ev.when.birthday && !recOnly(e));
+  const recDrop = []; if (rec.length) { rec.sort((a, b) => (b.ev.prio || 0) - (a.ev.prio || 0) || evRare(b.ev.when) - evRare(a.ev.when) || a.from - b.from || rank(a) - rank(b));
+    const kept = []; for (const e of rec) { const rooms = evRooms(e.ev); if (kept.some(k => k.from < e.to && e.from < k.to && evRooms(k.ev).some(r => rooms.includes(r)))) recDrop.push(e); else kept.push(e); } }
   t.sort((a, b) => (b.ev.prio || 0) - (a.ev.prio || 0) || evRare(b.ev.when) - evRare(a.ev.when) || a.from - b.from || rank(a) - rank(b));   // then the earlier start
   const keep = [], drop = [];
   for (const e of t) {
@@ -32968,7 +33283,7 @@ function evBudget(list) {
     const crowd = [e, ...over].some(x => x.from >= e.from && over.filter(k => k.from <= x.from && x.from < k.to).length >= 2);   // at most two at once
     if (clash || crowd) drop.push(e); else keep.push(e);
   }
-  return drop;
+  return drop.concat(recDrop);
 }
 // ties (Pillar 4): what a tradition asks of other sections, kept as data on it: ties = { galley: { dish, batch, meal },
 // garden: 'sow' | 'tend' | 'harvest', decor: '<id>', tally: { kind, choices } }. Each owner reads only its own kind:
@@ -33069,9 +33384,16 @@ function eventFree(p, d, a, b, wake = 60) {
 // up to 10 minutes late, so the clock, a wash and the toilet fit; a later start kept them waiting at the time clock,
 // which blocked it for the rest: leave_check), if `min` is still left; a host 15 minutes after, with 5 left (section
 // 14 seats a host first, and their end of shift can run past a 10-minute window)
+// stay (0.83, RA: Winner Stays On's five hours): each goer comes for ev.stay minutes somewhere in the window, so they need
+// be free for only that part of it (keys 1035, 1036 on the person's seed and the tradition's k)
+function evStay(p, d, e) {
+  const st = e.ev.stay, len = Math.min(e.to - e.from, st[0] + Math.round((st[1] - st[0]) * schedU(p.seed + e.ev.k, d, 1035)));
+  const from = e.from + Math.round((e.to - e.from - len) * schedU(p.seed + e.ev.k, d, 1036)); return [from, from + len];
+}
 function evArrive(p, d, e) {
   const ev = e.ev;
   if (!(schedU(p.seed, d, ev.k) < ev.who(p, d, e))) return null;
+  if (ev.stay && ev.host !== p.id) { const [a, b] = evStay(p, d, e); return eventFree(p, d, a, b, ev.wake) ? a : null; }
   if (eventFree(p, d, e.from, e.to, ev.wake)) return e.from;
   if (!ev.afterShift) return null;
   const F = schedFrame(p, d), gp = shiftBlocks(p, d);
@@ -33086,7 +33408,7 @@ function evGoers(e, d) {
   const key = e.id + '@' + d; if (EV_GOERS.has(key)) return EV_GOERS.get(key);
   const S = schedData(), ev = e.ev, n = Math.max(0, ev.where.reduce((s, w) => s + (S.shared.get(w.deck + '|' + (w.room ? 'ev:' + ev.id + ':' + ev.where.indexOf(w) : w.pool)) || []).length, 0) - ev.spare);
   const l = schedPeople().filter(p => !p.player && (p.rank !== 'guest' || typeof aboard !== 'function' || aboard(p, d)) && evArrive(p, d, e) != null)
-    .map(p => ({ p, x: p.id === ev.host ? -1 : schedU(p.seed, d, ev.k) / Math.max(.01, ev.who(p, d, e)) })).sort((a, b) => a.x - b.x || (a.p.id < b.p.id ? -1 : 1));
+    .map(p => ({ p, x: p.id === ev.host || (ev.first && ev.first(p, d)) ? -1 : schedU(p.seed, d, ev.k) / Math.max(.01, ev.who(p, d, e)) })).sort((a, b) => a.x - b.x || (a.p.id < b.p.id ? -1 : 1));
   const s = new Set(l.slice(0, n).map(o => o.p.id));
   if (EV_GOERS.size > 40) EV_GOERS.clear();
   EV_GOERS.set(key, s); return s;
@@ -33103,9 +33425,10 @@ function eventPlan(p, d) {
     const ev = e.ev, ctx = e;
     const at = evArrive(p, d, e); if (at == null) continue;
     if (ev.spare != null && !evGoers(e, d).has(p.id)) continue;
-    const opts = eventOpts(ev, p); if (!opts.length) continue;
+    const opts = ev.whereFor ? ev.whereFor(p, d, eventOpts(ev, p)) : eventOpts(ev, p); if (!opts.length) continue;   // whereFor (0.83.2, RA): who sits where (the speaker on the stool, Maeve in the booth)
     const anim = ev.anim(p, d) || null;
-    const from = at - (ev.early && e.honorees.includes(p) ? ev.early : 0), to = e.to - Math.round((ev.jitter || 0) * schedU(p.seed, d, ev.k + 100));   // 420-433
+    let from = at - (ev.early && e.honorees.includes(p) ? ev.early : 0), to = e.to - Math.round((ev.jitter || 0) * schedU(p.seed, d, ev.k + 100));   // 420-433
+    if (ev.stay && ev.host !== p.id) [from, to] = evStay(p, d, e);   // 0.83 (RA): drifting in and out
     out.push({ id: ev.id, from, to, opts, anim, tag: 'ev-' + ev.id + (anim ? '-' + anim : ''), min: ev.host === p.id ? Math.min(ev.min || 20, to - from) : ev.min || 20, prio: ev.prio || 0, host: !!(ev.host && ev.host === p.id), own: e.honorees.includes(p), meal: ev.meal || null });   // host: section 14 seats them first; meal: going IS their dinner or breakfast (section 14)
   }
   out.sort((x, y) => y.own - x.own || y.host - x.host || y.prio - x.prio || x.from - y.from);   // their own birthday, then one they host (0.34.52: Tomas's quiz on a birthday night), then prio
@@ -33117,7 +33440,7 @@ function eventPlan(p, d) {
 let EV_TAGS = false;
 function eventTags() {
   if (EV_TAGS) return;
-  try { for (const ev of evTable()) for (const a of ['talk', 'drink', 'play', 'water', 'wash', 'read']) TAG_ACT['ev-' + ev.id + '-' + a] = a; EV_TAGS = true; } catch (e) { /* section 10 not in yet */ }
+  try { for (const ev of evTable()) for (const a of ['talk', 'drink', 'play', 'water', 'wash', 'read', 'cheer', 'clap']) TAG_ACT['ev-' + ev.id + '-' + a] = a; EV_TAGS = true; } catch (e) { /* section 10 not in yet */ }
 }
 // the event someone is at, or going to later today, from their plan: { e, seg, now }
 function eventOf(p, t) {
@@ -33163,6 +33486,7 @@ function eventsMail(from, to, quiet) {   // quiet: no toast (after a sleep or sk
   for (let d = Math.floor(from / 1440) + 1; d <= Math.floor(to / 1440) + 2; d++) for (const e of eventsOn(d)) {
     const at = (d - 2) * 1440 + EV_MAIL_AT, key = e.id + '@' + d;
     if (at <= from || at > to || SHIP.events.sent.includes(key) || !e.ev.mail) continue;   // ship-wide gatherings and one-offs: no tradition Mail
+    if (e.ev.quiet === 'career' && recBigDay(d)) continue;   // 0.83 (RA): the weekly sport ones aren't pushed at you on the career's big days
     SHIP.events.sent.push(key);
     const m = { at, from: e.ev.from, subject: 'Ship tradition: ' + e.name + ', ' + WEEKDAYS[weekday(d)] + ' ' + hhmm(e.from), body: evText(e.ev.mail, e), event: key };   // the user's name for them: "ship traditions"
     EV_MAILBOX.push(m); if (EV_MAILBOX.length > 40) EV_MAILBOX.shift();
@@ -33178,7 +33502,7 @@ const EV_BUNDLE = {};
 // after each one (Pillar 4): simNote('tradition', { id, day, at, came: [crew ids whose plan took them there], you (you
 // joined), host, src: 'tradition' | 'shipwide' | 'oneoff' }) once its window has ended, in play or on a skip (at most
 // two days back); section 20 makes memories and cues of it. Once each (SHIP.events.noted, saved)
-const evTagId = tag => { const m = /^ev-(.+?)(?:-(?:talk|drink|play|water|wash|read))?$/.exec(tag || ''); return m && m[1]; };   // 'ev-quiz-drink' -> 'quiz'
+const evTagId = tag => { const m = /^ev-(.+?)(?:-(?:talk|drink|play|water|wash|read|cheer|clap|disc))?$/.exec(tag || ''); return m && m[1]; };   // 'ev-quiz-drink' -> 'quiz'
 function eventsNoted(from, to) {
   if (typeof simNote !== 'function') return;
   from = Math.max(from, to - 2 * 1440);
@@ -33267,7 +33591,41 @@ function eventJoin(e, d, now, notice) {
   toast(e.name, notice || evText(e.ev.thanks, e));
   if (typeof mailSend === 'function') mailSend({ at: now, from: e.ev.from, subject: 'Thanks for coming', body: 'Good to see you at ' + e.name.toLowerCase() + '. Same time next one?', quiet: true });   // the join toast says it already
   if (e.id === 'quiz') quizStart(d, now);
+  if (/^rec-talk-/.test(e.id)) recTalkCard(e, d, now);   // a Wren talk: listen, or ask one question (0.83.2, RA)
+  if (e.id === 'rec-talent-night') recActCard(e, d, now); // talent night: do an act, or watch (0.83.1, RA)
   return true;
+}
+// talent night's choice card (0.83.1): Lucia asks if you're on the sheet: play a tune, tell a ship joke, a Works trick, or
+// just watch. No failing: the crowd cheers whichever, and the ship talks about it for days (newsAdd, about you). Words:
+// Ferreira's lines (kinds talent.ask, talent.tune, talent.joke, talent.trick, talent.watch, the writer's), else stand-ins
+function recActCard(e, d, now) {
+  const q = schedPeople().find(p => p.id === 'ferreira'); if (!q || typeof dialogueShow !== 'function') return;
+  const say = (k, x) => { const L = typeof lineFor === 'function' ? lineFor(q.id, k, { t: now }) : null; return L && L.text || x; };
+  const did = k => { if (typeof leisureAdd === 'function') leisureAdd(10, 'talent');
+    if (typeof newsAdd === 'function') newsAdd({ id: 'rec-talent-you@' + d, about: 'you', lines: [['Did you see the new hand at talent night?', 'The new hand got up at talent night! Brave.', 'Talent night: the new hand\'s act. People are still talking about it.'][k]], seed: ['ferreira', 'volkov-maeve'], weight: .7, life: 4 }); };
+  MEETING_SCRIPTS['rec.talent'] = { title: 'Talent night', gist: 'Talent night in the auditorium.',
+    onPick: k => { if (k < 3) did(k); },
+    lines: [{ who: q.id, text: say('talent.ask', 'You\'re on the sheet if you want to be. One act. Nobody fails at talent night.') },
+      { choice: [{ text: 'Play a tune', rel: { [q.id]: 2 }, reply: { who: q.id, text: say('talent.tune', 'Lovely. Give them a big hand!') } },
+        { text: 'Tell a ship joke', rel: { [q.id]: 2 }, reply: { who: q.id, text: say('talent.joke', 'They laughed! Mostly at the right bit.') } },
+        { text: 'A Works trick', rel: { [q.id]: 2 }, reply: { who: q.id, text: say('talent.trick', 'A spanner, a bolt and a lot of nerve. Brilliant.') } },
+        { text: 'Just watch', reply: { who: q.id, text: say('talent.watch', 'Next time, then. Enjoy the show.') } }] }] };
+  dialogueShow('rec.talent', { id: 'rec.talent@' + d, who: [q.id], at: now });
+}
+// the Wren talks' panel (0.83.2): the speaker's opening, then a choice: ask one question (a friendship step with the
+// speaker; a chief remembers who asked) or just listen. Words: the speaker's own lines (kinds talk.open, talk.answer,
+// talk.listen, the writer's), else stand-ins. SHIP.rec.talk keeps the talks heard and the speakers asked, by day
+function recTalkCard(e, d, now) {
+  const t = recTalk(d), q = t && schedPeople().find(p => p.id === t.by); if (!q || typeof dialogueShow !== 'function') return;
+  const say = (k, x) => { const L = typeof lineFor === 'function' ? lineFor(q.id, k, { t: now }) : null; return L && L.text || x; };
+  const key = t.by + '@' + d, T = SHIP.rec.talk;
+  if (!T.heard.includes(key)) { T.heard.push(key); if (T.heard.length > 40) T.heard.shift(); }
+  MEETING_SCRIPTS['rec.talk'] = { title: '"' + t.title + '"', gist: shortName(q) + ' gave a talk: "' + t.title + '".',
+    onPick: k => { if (k === 0 && !T.asked.includes(key)) { T.asked.push(key); if (T.asked.length > 40) T.asked.shift(); if (t.size === 'chief' && typeof memAdd === 'function') memAdd(q.id, 'asked.talk'); } },
+    lines: [{ who: q.id, text: say('talk.open', 'So. ' + t.title + '. Stop me if you\'ve heard this one.') },
+      { choice: [{ text: 'Ask a question', rel: { [q.id]: 3 }, reply: { who: q.id, text: say('talk.answer', 'Good question. Nobody\'s asked me that before.') } },
+        { text: 'Just listen', reply: { who: q.id, text: say('talk.listen', 'Right, where was I?') } }] }] };
+  dialogueShow('rec.talk', { id: 'rec.talk@' + d, who: [q.id], at: now });
 }
 // ---- tap to join (playtest 1, the traditions engineer, 0.70.0; the user: "tap the leader or anyone taking part to
 // join; you then do the activity with them automatically") ----
@@ -33540,6 +33898,7 @@ function tradWalkFrame(dt) {
 }
 // section 14's whereIs, first after a visit: the walk's roles (escort-shaped, so section 10 walks them), else null
 function tradWhere(p, t) {
+  const ws = REC_DECK ? wsoWhere(p, t) : null; if (ws) return ws;   // Winner Stays On: the two on court (0.83.1, RA)
   if (TJ_FREE && t >= TJ_FREE.at) {                      // the beam's crowd breaks up: on to what comes after it
     if (t >= TJ_FREE.until) TJ_FREE = null;
     else { const end = TJ_FREE.ids.get(p.id); if (end != null && t < end) return planWhere(p, end); }
@@ -33648,6 +34007,29 @@ function eventsTick() {
   eventMomentsTick(prev, m); meetingsTick(now);          // its felt moments and meetings, in play
   eventsDress(now);                                      // its dressing and the traces left by past events
   occasionsTick(now);                                    // C10: summons, invitations, progress talks
+  if (REC_DECK) { recShowTick(now); recMyTalk(now); }    // the auditorium's show state for rec engineer B's recShow; your own talk's ask (0.83.1, RA)
+}
+// the auditorium's state for its dressing (the film screen down, the house lights, the stage pools: rec engineer B's
+// recShow(state), which RA only calls): 'film' | 'talent' | 'allhands' | 'talk' (a chief's, in the seats) | 'ring' (a small
+// one on the stage) | null, sent when it changes and again after a deck change (B's code draws it only on the rec deck)
+let REC_SHOW = { s: undefined, deck: null };
+function recShowTick(now) {
+  const on = id => tradOn(id, now), st = on('rec-film') ? 'film' : on('rec-talent-night') ? 'talent' : on('rec-allhands') ? 'allhands' : on('rec-talk-chief') ? 'talk' : on('rec-talk-small') ? 'ring' : null;
+  const dk = typeof deckDef !== 'undefined' && deckDef ? deckDef.num : null;
+  if (st === REC_SHOW.s && dk === REC_SHOW.deck) return;
+  REC_SHOW = { s: st, deck: dk };
+  if (typeof recShow === 'function') try { recShow(st); } catch (e) { /* B's to mend */ }
+}
+// your own talk (the traditions plan: once you're an Engine Specialist, after the career arc, you're asked to give a small
+// talk, "What I learned in my first month"): the first Monday or Thursday four or more days on with no talk and not a big
+// day; the ask by Mail (the writer's words: simNote('recTalkAsked') for the bus); plans from then are made again
+function recMyTalk(now) {
+  const T = SHIP.rec.talk; if (T.mine != null || !SHIP.works || SHIP.works.rank !== 'specialist') return;
+  const d0 = Math.floor(now / 1440) + 1; let d = d0 + 4;
+  while (!([0, 3].includes(weekday(d)) && !recBigDay(d) && !recTalk(d))) d++;
+  T.mine = d; EV_DAYS.clear(); for (const x of [...SHIP_DAYS.keys()]) if (x >= d) SHIP_DAYS.delete(x);
+  if (typeof mailSend === 'function') mailSend({ at: now, from: 'Comms Chief Lucia Ferreira', subject: 'A Wren talk from you?', body: 'Would you give one of the small Wren talks? ' + WEEKDAYS[weekday(d)] + ' at 19:00, on the auditorium stage. Call it "What I learned in my first month". Twenty minutes, then questions. Tea provided.' });
+  if (typeof simNote === 'function') simNote('recTalkAsked', { day: d });
 }
 // the deck architect's dressShow (0.38.1): the running event's dressing for its phase, plus every saved trace. It does
 // nothing when nothing changed and puts them back after a deck change
@@ -34076,6 +34458,7 @@ let ADDRESS_EL = null, ADDRESS_T = 0;
 const ADDRESSES = [];                                    // every address so far (for the checks and the Ship app)
 function captainAddress({ lines, at = shipNow(), from = 'Captain Odile Marrow', quiet = false }) {
   const text = (lines || []).join(' ');
+  if (REC_DECK && SHIP.event && SHIP.rec && SHIP.rec.ah == null) recFirstAllHands(at);   // the first ship-wide event's address is the first all-hands (0.83.2, RA)
   ADDRESSES.push({ at, from, text });
   if (typeof mailSend === 'function') mailSend({ at, from, subject: 'All hands', body: text, quiet: true });
   if (quiet || typeof document === 'undefined') return;
@@ -39801,10 +40184,10 @@ function discFind() {
 const DISC = { g: null, opp: null, name: '', agent: null, view: null, cam: null, acc: 0, last: 0, inp: { tx: null, tz: null, kx: 0, kz: 0 }, how: -1, ease: null, quick: false };
 Object.assign(PLAYER_ACTS, { disc: { need: null, mins: 30, pose: 'stand', title: 'Lightdisc', done: 'You step off the court.', until: A => discTick(A) } });
 const LD_WAIT = 40;                                      // ship minutes to come down before they give up
-function discAsk() {
+function discAsk(who) {   // who: someone in particular (Winner Stays On's champion, 0.83.1 RA), else whoever discFind picks
   if (DISC.g) return;
   if (!recOpen()) { toast('Lightdisc', 'The rec dec\'s closed till six.'); return; }
-  const p = discFind();
+  const p = who || discFind();
   if (!p) { toast('Lightdisc', 'Nobody\'s around to play right now. Try in the evening, or on a day off.'); return; }
   actStart('disc', '7-disc-1', { title: 'Lightdisc', st: 'wait', opp: p.id, since: shipNow(), here: false });
   const A = ACT; if (!A || A.kind !== 'disc') return;

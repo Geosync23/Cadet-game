@@ -17,7 +17,7 @@ WEEKDAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 
 TONES = ('light', 'funny', 'warm', 'serious')
 TEXT_KINDS = ('mail', 'ask', 'here', 'thanks', 'chatter')
 KEY_ORDER = ('id', 'k', 'name', 'when', 'at', 'min', 'prio', 'jitter', 'early', 'where', 'hold', 'who', 'anim', 'host',
-             'from', 'cake', 'decor', 'ties', 'invite', 'trace', 'meal', 'flag', 'wake', 'afterShift', 'spare', 'venue', 'text')
+             'from', 'cake', 'decor', 'ties', 'invite', 'trace', 'meal', 'flag', 'wake', 'afterShift', 'spare', 'venue', 'unflag', 'stay', 'quiet', 'text')
 
 
 class TradError(Exception):
@@ -88,6 +88,10 @@ def parse_when(v, where):
                 w['nth'], i = _int(t[2], where, 1, 52, 'which one after arrival'), 3
     elif low[:1] == ['birthday']:
         w, i = {'birthday': True}, 1
+    elif low[:1] == ['rota'] and len(t) >= 2:              # 0.83 (RA): a rota the game keeps (section 18's TRAD_ROTA, e.g. the Wren talks)
+        if not re.fullmatch(r'[a-z0-9-]+', low[1]):
+            raise TradError(f'{where}: a rota is named in lower-case letters, digits and dashes')
+        w, i = {'rota': low[1]}, 2
     elif low[:1] == ['rotation'] and len(t) >= 2:          # crew rotation days: rotation -1 (the leavers), rotation friday (the arrivals)
         if re.fullmatch(r'[+-]\d+', t[1]):
             n = int(t[1])
@@ -115,7 +119,7 @@ def parse_when(v, where):
 
 
 def parse_where(v, where):
-    m = re.fullmatch(r'(\d)\s+pool\s+(@?[\w-]+)', v.strip())   # @<tag>: the deck architect's places tagged event: '<tag>'
+    m = re.fullmatch(r'(\d)\s+pool\s+(@?[\w:-]+)', v.strip())   # 0.83: rec deck pools like rec:lane   # @<tag>: the deck architect's places tagged event: '<tag>'
     if m:
         return {'deck': int(m.group(1)), 'pool': m.group(2)}
     m = re.fullmatch(r'(\d)\s+room\s+([^:]+):\s*(.+)', v.strip())
@@ -203,10 +207,19 @@ def parse_field(tr, key, v, where):
         tr['who'] = parse_rules(v, where, _pct)
     elif key == 'anim':
         tr['anim'] = v.lower() if ' ' not in v else parse_rules(v, where, lambda s, w: None if s.lower() == 'none' else s.lower())
-    elif key == 'flag':
+    elif key in ('flag', 'unless-flag'):
         if not re.fullmatch(r'[a-zA-Z0-9_.:-]+', v):
-            raise TradError(f'{where}: flag is one flag name, e.g. bridge.invited')
-        tr['flag'] = v
+            raise TradError(f'{where}: {key} is one flag name, e.g. bridge.invited')
+        tr['flag' if key == 'flag' else 'unflag'] = v
+    elif key == 'stay':                                    # 0.83 (RA): each goer drifts in and stays this long (Winner Stays On)
+        m = re.fullmatch(r'(\d+)\s*-\s*(\d+)', v)
+        if not m or not 5 <= int(m.group(1)) <= int(m.group(2)):
+            raise TradError(f'{where}: stay is ship minutes from-to, e.g. 40-120')
+        tr['stay'] = [int(m.group(1)), int(m.group(2))]
+    elif key == 'quiet':                                   # 0.83 (RA): no Mail on the career's big days (the weekly sport ones)
+        if v.lower() != 'career':
+            raise TradError(f'{where}: quiet is "career"')
+        tr['quiet'] = 'career'
     elif key in ('host', 'from', 'decor', 'trace', 'venue'):
         tr[key] = v
     elif key == 'meal':
