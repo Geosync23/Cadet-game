@@ -24,5 +24,10 @@
 - E1×E2 key-order career FAIL → fixed by E1 fb499eb. X2 ec0cbc3 machine 'hauling misplaced part' FAIL → fixed in X2 693e4f4 (checked alone). X2's crew wake changes every cadet shot (all X2's; t11 = base+X2 alone, same px).
 - Trial t14 (E6 f36d81e, E5 2c513e6, E4 2b5979a, U 0335523, W2 0e8571a): see log.
 
-## Loose ends at handover
-(filled at handover time)
+## Loose ends at handover (~08:05 UTC)
+- **Lead is now lead 18** (session_01CBur9nrJ411pFkHopF96RL). E1, E2, E3, E4, E5, E6, W2, U retired/archived; X2 and U2 active.
+- **0.63.4 candidate WITHOUT X2 = `claude/p5-cand-s4` 92d40d5** (E6 5bd6f97, E5 2c513e6, E4 b0cb86c + the roofTalk guard merge fix, U2 0f34cfb (contains U 0335523), W2 0e8571a). Same game file as /tmp/cw/tf2.html. DEV_NOTES 0.63.4 row says "(in progress)": finish it with the results; the CADET_WORK Testing line is in.
+- **Full round running on 92d40d5:** CR2 (session_018xWmWkrtNWudZUgXygkW1u): events, device, clothes, food, deck, tiles, bubble, join, smoke, newgame, leave, arc, path, disc. Mine: tags tf2 (mech, career, machine, lines, cadet), tf2i (interactions), tfA (puzzle, social, day 0-8, intro --week), tfB (player, TMO 2700) in /tmp/cw/logs/summary.txt. If the container restarted, rerun what's missing from the summary (q3.sh, WT = a worktree at 92d40d5).
+- **X2 timebox ~08:55** (lead's call): X2 6c26c72 (0.71.6) breaks mech_check m12 (night crew / logbook) and tparts (team parts) in the combine (OK without X2; X2 alone base+X2 machine OK). X2 is bisecting on 92d40d5 for 0.71.7. Green by 08:55 → merge X2's tip on 92d40d5 and re-run cadet (vs base + X2 alone: X2's crew wake changes every shot), mech, interactions, day 0-8, intro, deck, food, events, machine; else 92d40d5 is 0.63.4 and X2's 0.71.3-0.71.x go to 0.63.5 (BM8).
+- **Open: t15 interactions FAIL** (with X2 + U2): 'ixtap-3-lift-1: a tap at the stop (lamp, Deck 3) starts the work' and the take/go/look tip-arrow lines all empty. t14 (U 0335523, no X2) was OK. tf2i (no X2, with U2) answers whether it's U2's or X2's. U2's 0f34cfb has no R6 verdict yet that BM7 saw: ask R6.
+- **Send lead 18 the final hash + summary** when the round is green.
