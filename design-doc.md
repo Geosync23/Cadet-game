@@ -340,7 +340,7 @@ Every crew member is a simulated agent with a job, a shift, a bed, needs and opi
 
 During the night, only urgent jobs and essential systems get attention. Routine work waits for morning, which is when the job list is busiest.
 
-**A day moves through three decks.** Crew wake on Deck 4, eat on Deck 3 and work wherever their department is, so the lift and the lobbies have rush hours.
+**A day moves through three decks.** Crew wake on Deck 4, eat on Deck 3 and work wherever their department is, so the lift and the lobbies have rush hours. The day crew wake between about 05:15 and 06:15 and spread breakfast across the morning, so the washrooms and the servery are busy but never all at once (the playtest answer, 2026-10-19).
 
 **Meals.** Two meals a day, breakfast and dinner, each served over a window rather than at a set time. Breakfast runs 06:00 to 09:00, catching the night shift coming off at 06:00 and the day shift before 09:00 (to 08:00 until the day shift moved to 09:00, 2026-10-18). Dinner runs 17:00 to 20:30, catching the day shift coming off at 17:00 and the night shift before 21:00. The galley also keeps a grab-and-go shelf for anyone running late.
 
