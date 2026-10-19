@@ -281,7 +281,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.45.8
+   STARSHIP CADET: CSV Wren                           build 0.45.9
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8694,7 +8694,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.45.8';                           // keep in step with the header's build line
+const GAME_BUILD = '0.45.9';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -39576,6 +39576,7 @@ function trainSpot(j) {                                  // where a training job
 function trainWatch(row, c, t, again) {                  // the teacher's training job: they lead, you watch
   const W = SHIP.works, d = worksDay(t), slot = 10 + Math.max(0, CAREER_LADDER.filter(r => r.size === 'big').indexOf(row)) % 10, M = WORK_MECH[row.id] || {};
   if (M.noJob) { worksTrained(row.id); return true; }
+  if (M.self) return trainDo(row, c, t);                 // the talk, then yours on the board, the arrow and tips leading (0.45.9: playtest 2, item 1)
   if (!M.reserve && !MACHINE_KINDS[row.job]) { worksTrained(row.id); return true; }   // no sub-block reserve and no machine kind: trained at the meeting (reviewer R: no stand-in faults)
   let id = null; try { id = M.reserve ? M.reserve(d, t - (d - 1) * 1440, slot, { train: row.id }) : jobReserve(row.job, d, t - (d - 1) * 1440, slot, { train: row.id }); } catch (e) { id = null; }
   if (!id) { c.st = 'again'; c.d = d; return false; }
@@ -39590,7 +39591,7 @@ function trainDo(row, c, t) {                            // your turn: the same 
   if (!id) { c.st = 'again'; return false; }
   c.st = 'do'; c.j = id; const j = SHIP.jobs.find(x => x.id === id); if (j) j.train = row.id;
   if (M.hold) c.hold = true;                             // the teacher stays with you until worksEscortEnd (24g's m7: until P3's case is called)
-  worksSayAll(c.by, worksVoice(c.by, 'train.' + row.id + '.lead.done') || ['Your turn. It\'s on the board for you; I\'ll be right behind you.']);
+  if (!M.self) worksSayAll(c.by, worksVoice(c.by, 'train.' + row.id + '.lead.done') || ['Your turn. It\'s on the board for you; I\'ll be right behind you.']);
   return true;
 }
 function trainNear(spot) {                               // you're watching: on its deck, in its room or within a few tiles of it
@@ -39657,6 +39658,7 @@ function worksEscort(p, t) {
   if (c.st === 'held') return spot ? { mode: 'follow', to: { deck: spot.deck, tile: spot.tile } } : null;   // they stay with you
   if (!j || j.status === 'done' || !spot || j.found > t) return null;   // (not before the job's due: 24p's test job is held from 09:00)
   if (c.st === 'do' && j.workDone && !c.hold) return null;   // done: they go back to their own work while you turn it in
+  if (c.st === 'do' && (WORK_MECH[c.id] || {}).self) return null;   // a self-led training (m1, 0.45.9): the arrow and tips lead you, not the teacher
   return { mode: c.st === 'watch' ? 'lead' : 'follow', to: { deck: spot.deck, tile: spot.tile } };
 }
 function worksSay(id, text) {                            // the teacher says it in a bubble if they're on your deck, else a toast
@@ -39925,14 +39927,15 @@ function roundDone(j, t, by) {
   if (by && by !== 'you') for (const id of j.route || []) if (roundState(id) !== 'healthy') roundFound(id, by);
   if (by === 'you') { worksUse('m1'); try { toast('Round', roundText('round.done', 'Round done. Anything worn is on the board, found by you.')); } catch (e) { /* no UI */ } }
 }
-// a round job on the list: { kind: 'rounds', route, marks, deck, room, title }. o.train: the training's (the teacher's
-// takes the first two stops, yours the rest), held for the teacher or you (reserved slot); else the morning round
+// a round job on the list: { kind: 'rounds', route, marks, deck, room, title }. o.train: the training's, held for you
+// (reserved slot): since 0.45.9 (playtest 2) the whole route is yours after Torres's talk (o.yours); a teacher's round
+// (no o.yours) would take the first two stops. Else the morning round
 function roundJob(day, at, o = {}) {
-  const all = roundRoute(day, !!o.train), route = o.train ? (o.yours ? all.slice(2) : all.slice(0, 2)) : all;
+  const all = roundRoute(day, !!o.train), route = o.train ? (o.yours ? all : all.slice(0, 2)) : all;
   if (route.length < (o.train ? 1 : 4)) return null;
   const m0 = machineById(route[0]), n = m0.deck, t = (day - 1) * 1440 + at;
   const j = jobMake('rounds', { id: 'round' + (o.slot ? o.slot : '') + '-d' + n + '@' + Math.floor(t / 60) + (o.yours ? 'y' : ''), deck: n, room: m0.room, h: Math.floor(t / 60),
-    title: roundText('round.title', 'Morning round, Deck {deck}', { deck: n }), route, marks: {}, ...(o.slot ? { reserved: o.slot, until: (day - 1) * 1440 + DAY_SHIFT[1] } : { leave: ROUND_HELD }) });
+    title: o.train ? roundText('round.title.first', 'Your first round, Deck {deck}', { deck: n }) : roundText('round.title', 'Morning round, Deck {deck}', { deck: n }), route, marks: {}, ...(o.slot ? { reserved: o.slot, until: (day - 1) * 1440 + DAY_SHIFT[1] } : { leave: ROUND_HELD }) });
   j.posted = j.found = t; j.shareSeen = true;            // held to 11:00 as the page says: never shared out early (section 17's shareOut)
   return j;
 }
@@ -39958,8 +39961,27 @@ if (typeof jobKindAdd === 'function') WORK_MECH.m1 = {
     SHIP.jobs.push(j); if (typeof MACH_REV !== 'undefined') MACH_REV++;
     return j.id;
   },
-  watch: 10,                                             // ship minutes watching Torres look at his two
+  watch: 10,                                             // ship minutes watching Torres look at his two (before 0.45.9)
+  self: true,                                            // playtest 2, item 1 (0.45.9): Torres explains at the meeting, then your first round is on the board; the arrow and green tips walk you through it
 };
+// the training round's walk-through (0.45.9, for U's arrow and green tips: the writer's tip.round.<step>, {machine}):
+// roundTrainStep() -> null, or { step: 'take' | 'go' | 'look' | 'mark' | 'next' | 'done', job, machine (its name), deck, place }
+// take: on the board, not yours yet; go / next: walk to the first / next machine; look: at it (tap to look, or looking);
+// mark: looked, choose a mark; done: every stop marked, turn it in at the board
+function roundTrainStep() {
+  const c = SHIP.works && SHIP.works.cur; if (!c || c.id !== 'm1' || c.st !== 'do') return null;
+  const j = SHIP.jobs.find(x => x.id === c.j && x.kind === 'rounds'); if (!j || j.status === 'done') return null;
+  const base = { job: j.id };
+  if (j.claimedBy !== 'you') return { ...base, step: 'take' };
+  const st = jobStops(j), k = st.findIndex(s => !s.done); if (k < 0 || j.workDone) return { ...base, step: 'done' };
+  const id = j.route[k], m = machineById(id), pid = panelPlace(id), name = machineLabel(m).split(',')[0];
+  const at = { ...base, machine: name, deck: m.deck, place: pid }, w = typeof wsFind === 'function' ? wsFind(j.id, k) : null;
+  if (typeof ACT !== 'undefined' && ACT && ACT.kind === 'workStep' && ACT.o.job === j.id) return { ...at, step: 'look' };
+  if (w && w.done > 0) return { ...at, step: 'mark' };
+  let near = false;
+  try { const s = PLACE_OF.has(pid) && placeSpot(pid), p = player.obj.position; near = !!s && deckDef && deckDef.num === m.deck && Math.hypot(s.x - p.x, s.z - p.z) < 2.5; } catch (e) { near = false; }
+  return { ...at, step: near ? 'look' : k ? 'next' : 'go' };
+}
 // while Torres leads (the teacher's round), his words at the machines once you're with him: the writer's train.m1.lead.look
 let ROUND_TAUGHT = null;
 if (WORK_MECH.m1) WORK_TICKS.push((now, skip) => {

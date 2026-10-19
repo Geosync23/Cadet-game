@@ -112,7 +112,43 @@ M1_RUN = r"""(() => {
 M1_ASK = r"""(() => { SHIP.works = null; SHIP.occasions.length = 0; SHIP.jobs = []; WORKS_TICK.m = WORKS_TICK.h = -1; setShipNow(1440 + 300); machinesNow();
   const W = worksInit(); W.log.push(['x', 1, 0, 'service']); for (let m = 1440 + 360; m <= 1440 + 700; m += 10) { setShipNow(m); machinesNow(); worksCareerTick(m); }
   const r = SHIP.occasions.find(x => x.id === 'works.m1'); return r ? r.at % 1440 : null; })()"""
+# the training since 0.45.9 (playtest 2, item 1): Torres's talk, then the first round is yours on the board (the whole
+# training route, a washer first), nobody's leading or following; roundTrainStep() walks it: take, go, mark, next, done
+M1_SELF = r"""(() => {
+  SHIP.works = null; SHIP.occasions.length = 0; SHIP.notes = []; SHIP.flags = {}; SHIP.jobs = []; SHIP.mail = [];
+  MACH_HOUR = null; MACH_SEEN = -1; WORKS_TICK.m = WORKS_TICK.h = -1;
+  setShipNow(1440 + 300); machinesNow(); const W = worksInit(); W.log.push(['x', 1, 0, 'service']); const out = { steps: [] };
+  for (let m = 1440 + 360; m <= 1440 + 900; m += 5) {
+    setShipNow(m); machinesNow(); worksCareerTick(m);
+    if (typeof DIALOGUE !== 'undefined' && DIALOGUE && typeof dialogueEnd === 'function') dialogueEnd(true);
+    const c = W.cur; if (c && c.st === 'meet') { const r = SHIP.occasions.find(x => x.key === c.occ); if (r && m >= r.at) { r.met = true; worksCareerTick(m + 1); } }
+    if (c && c.st === 'do') break;
+  }
+  const c = W.cur; out.st = c && c.st; if (!c || c.st !== 'do') return out;
+  setShipNow(shipNow() + 2); machinesNow();   // it's posted for the next minute
+  const j = SHIP.jobs.find(x => x.id === c.j); out.job = j && [j.kind, j.train, j.route.length, machineById(j.route[0]).kind, j.title, j.claimedBy || null, heldForYou(j)];
+  out.teacherJobs = SHIP.jobs.filter(x => x.train === 'm1' && x.id !== j.id).length;
+  out.board = openJobs('you').some(x => x.id === j.id);
+  const st = () => { const r = roundTrainStep(); out.steps.push(r ? r.step + (r.machine ? ':' + r.machine : '') : null); return r; };
+  st(); out.claimed = claimJob(j.id); st();
+  const p = SHIP.people && SHIP.people.find ? null : null; out.escort = worksEscort({ id: c.by }, shipNow());
+  for (let k = 0; k < j.route.length; k++) { jobStepDone(j.id, k, { pick: 'fine' }); st(); }
+  out.turnin = turnInJob(j.id); out.trained = W.tr.m1; out.after = roundTrainStep();
+  return out;
+})()"""
 def m1_part(g):
+    s1 = g.ev(M1_SELF)
+    s2 = g.ev(M1_SELF)
+    print('  24a training (0.45.9):', json.dumps(s1))
+    if check(s1.get('st') == 'do' and s1.get('job'), f"m1: after Torres's talk your first round is posted ({s1.get('st')})"):
+        jb = s1['job']
+        check(jb[0] == 'rounds' and jb[1] == 'm1' and 4 <= jb[2] <= 6 and jb[3] == 'washer' and jb[5] is None and jb[6], f"m1: the whole training route, a washer first, held for you, not yet taken ({jb})")
+        check(s1['teacherJobs'] == 0 and s1['board'], 'm1: no teacher\'s round; yours is on the board')
+        check(s1['claimed'] and s1['escort'] is None, 'm1: taken from the board; Torres doesn\'t follow')
+        stp = [x.split(':')[0] if x else x for x in s1['steps']]
+        check(stp[0] == 'take' and stp[1] == 'go' and all(x == 'next' for x in stp[2:-1]) and stp[-1] == 'done' and len(stp) == jb[2] + 2, f"m1: the walk-through steps {s1['steps']}")
+        check(s1['turnin'] and s1['trained'] == 2 and s1['after'] is None, 'm1: turned in, trained on Day 2, no more steps')
+    check(json.dumps(s1, sort_keys=True) == json.dumps(s2, sort_keys=True), 'm1: the training differs the second time')
     at = g.ev(M1_ASK)
     print('  24a: Day 2\'s meeting with Torres at', at)
     check(at is not None and at >= 635, f"m1: Day 2's meeting at {at} (after the 10:30 tea, 10:35 or later)")
@@ -589,7 +625,7 @@ with sync_playwright() as pw:
         b = ev(f"({TRAIN})('{r['id']}')")
         print(f"{r['id']} ({r['name']}, {r['size']}): opened Day {a['day']}, trained Day {a['trained']}, steps {a['states']}, teacher's job by {a['teacher']}, yours by {a['yours']}, stage {a['stage']}")
         check(a['opened'] and a['trained'] is not None, f"{r['id']}: never trained")
-        if r['size'] == 'big' and not ev(f"!!WORK_MECH['{r['id']}'].noJob") and not ev(f"!!WORK_MECH['{r['id']}'].oneJob"):
+        if r['size'] == 'big' and not ev(f"!!WORK_MECH['{r['id']}'].noJob") and not ev(f"!!WORK_MECH['{r['id']}'].oneJob") and not ev(f"!!WORK_MECH['{r['id']}'].self"):
             check(a['states'][:3] == ['meet', 'watch', 'do'] or 'meet' in a['states'], f"{r['id']}: the training's steps {a['states']}")
             check(a['teacher'] not in (None, 'you') and a['yours'] == 'you', f"{r['id']}: the teacher's job, then yours")
         check(a['stage'] == 0, f"{r['id']}: stage {a['stage']} once trained (0 expected)")
