@@ -703,3 +703,4 @@ Read: CLAUDE.md, TEAM.md (Lead line, "Released", session-chain rules incl. "Loos
 ## Lead 16 log
 - ~02:15 UTC 2026-10-19: lead 16 (session_01UMyfd16GqSdgNyz5PE8qSv, depth 0) took over. Check-in trig_01BoN7J97dm63qTxs64fwSbk (:47); lead 15 trig disabled; seats told to report to lead 16. Step 3 still ON HOLD.
 - ~02:20: the user said GO for Step 3; GO sent to S2 C2 M2 M3 H2 DA5 X U W2 BM6 R3. D2 briefed for plans/rec-traditions-plan.html (~12 rec traditions, plan only).
+- ~02:20: started: C2 (hash key 852 for the ceremony friend tie, 851 taken), U, R3, M3, W2, BM6 (65f10ff = base; results plans/cand-p5-s3-results.md; wants a 2nd check runner only for the final round, start it when most tips are in — needs final hash + half list from BM6). Not yet heard: S2, M2, H2, DA5, X.
