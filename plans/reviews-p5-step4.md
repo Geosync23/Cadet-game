@@ -20,6 +20,15 @@ Lines skimmed. In a fresh archive content_gen bakes 9342 lines; lines_check PASS
 
 ## Step 4
 
+### E2 claude/mech-incidents d0e6fe99 (0.51.8, 24l favour cases), R5: PASS WITH FIXES (three)
+Diff dd0ec462..d0e6fe99, read with a helper agent against favour-cases (D3's answer de012aae); fixes confirmed by hand.
+- Good: the six cases (lamp, cold, squeak, shower, clock, speaker), three clue looks then "What's causing it?" from three suspects shuffled per favour (key 1020), a wrong pick never fails. Day 13 on, not juniors, once a week at an evening minute, the friend's Mail, offered (not on the board), lapses after 3 days. Calls section 17's favourPost/favourById and the social chat hand-back; no copies. One owner: 18 new FAVOUR_CASES/FC_*/fc* names, none elsewhere. Keys 1019-1021, no R(), no meshes. Every line key exists on writer-p5 (with fallbacks).
+- **Fix 1 (the cap):** no `WORKS_SIDE_KINDS.add('fcase')` (24o/24q/24r each have one, e.g. 42082). The 'fcase' turn-in pays worksXp outside the +2/day cap, on top of the favour's own hand-back rep. Add the line after the jobKindAdd (41945). Better (the page: "hand it back in the chat card"): finish the side job with jobFinish when the case is solved, no Works-board turn-in.
+- **Fix 2 (bug):** an accepted favour still lapses at `expires` (section 17, 16790: `!j.workDone`), set at the ask (41916). Mid-case it lapses ("asked someone else" after you said yes) and the 'fcase' side job is left in your jobs for good. When the side job is made, push F.expires out (or null); in the lapse branch also close any `kind 'fcase' && favour === e.id` job.
+- **Fix 3 (the brief):** a real save round trip of side.favours, the side job and F.fcase (mech_check only cleans junk in memory).
+- Notes: "friendly or better" is `relTier >= 2`, but REL_NAMES[2] is 'colleague' (friend is 3): which was meant? Not built from the page: a weekend ask, a person as a clue, the occasional thank-you gift; W2's favour.thanks / favour.head / favour.<id>.ask are never read. The lamp lines name Pell's guitar next door, but Pell can be the asker.
+- Checks on d0e6fe99: mech_check OK (fcase part), social_check OK, cadet_test running.
+
 ### E2 claude/mech-incidents dd0ec462 (0.51.7, 24q M15 rewiring), R5: PASS WITH FIXES (three)
 Diff b6130f62..dd0ec462, read with a helper agent against m15-rewiring; the fixes confirmed by hand (line numbers in dd0ec462).
 - Good: weekly at 08:00 on a workday of yours (not the incident/leak/test day) from Day 17, Tier 2 on the job; a wrong pair re-opens only its stop (never a fail); faded charts from 3 uses with the lights first; left alone it's held to 10:00 next workday, then the crew take 45 min. Calder's demo on 4-junction-2 (the officers' corridor closet, the lead's call); yours is 4-junction-1. 'rewire' in WORKS_SIDE_KINDS (after E1's core, no TDZ). One owner: the 19 REW_*/rew* names are nowhere else; no m15 ladder push (E1's row matches, ROW_AGREE). Keys 1016/1017 only, no R(). No meshes. Every line key exists on writer-p5 (rewire.*, wire.*, train.m15.calder). node --check OK.
