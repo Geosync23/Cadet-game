@@ -58,3 +58,4 @@ Build master 6 (BM6, session_01F8k6hqdBRoxDJMzqAuiHqR) on claude/p5-cand-pt1 (th
 - FINAL cadet_test vs 0.63.2r 898d58d: every shot pixel-identical (no top-bar shift after all: '0.63.3' and '0.63.2r' take the same width); state differs only in items and wallDecor = DA5 0.47.11's 4-23 keepsake shelf (Deck 4). Explained.
 - final: career, mech, machine, puzzle, social OK; lines PASS (0 errors, 2 warnings); day0 OK. player and days 1-8 running.
 - final: day1, day2 OK. Runner s3 (session_01BSoMPjdgarCRc6bS5D1bmH): events, device, clothes, interactions OK.
+- final, runner s3: food, deck, tiles, join, smoke, newgame, arc, bubble, path OK; leave FAIL 'the reputation chip: None, once: False'. Placed: 0.63.2r + S2 + C2 f553607 OK; + U 1d602ff FAIL; U alone OK: leave_check (C2's) wants '+ Works reputation', U's turn-in shows 'Works reputation up'. Sent to C2 and U. Mine: day3, day4 OK.
