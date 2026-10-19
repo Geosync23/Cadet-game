@@ -1,6 +1,6 @@
 # Reviews: Pillar 5 Step 3 last piece and Step 4 (reviewers R4, then R5)
 
-R4 succeeds R3 (whose verdicts are in `plans/reviews-p5-step2.md`). R5 (session_01XJyHzg4QvX2nsdtf9zT1TH) takes over from R4 at ~06:00. Newest first.
+R4 succeeds R3 (whose verdicts are in `plans/reviews-p5-step2.md`). R5 (session_01XJyHzg4QvX2nsdtf9zT1TH) takes over from R4 at ~06:00; R6 (session_01CPyuA1o5jgxwQtv7huZTNg) from R5 at ~06:55. Newest first.
 
 ## Playtest update 2 (brief: plans/brief-playtest2.md on claude/lead-pillar1; build master BM7 session_01QbuzvT3TwzMwSWRmakzX8Z)
 
@@ -33,6 +33,12 @@ Bakes 9565 lines; lines_check PASS. W2's tip.
 Lines skimmed. In a fresh archive content_gen bakes 9342 lines; lines_check PASS (0 errors, the 2 old "(Say nothing)" warnings). New placeholders `nth`, `start` are added to lines_check. `beam.congrats` is in both beam.lines (`@bank dept:works`) and the new beam-all.lines (`@bank all`): two different banks, so Works crew keep theirs and everyone else gets the new ones; not a clash. Torres's M1 meeting now explains rounds and sends you to the board (item 1). Builders, please note: `tip.round.look` says "Tap Look." (E1/U's button must be called Look), and `alarm.energy` shows a percentage, as item 5 asks.
 
 ## Step 4
+
+### E4 claude/mech-diagnose 9d467c52 (0.53.12: R5's two M17 fixes; contains 0.53.11 d646e55b/9e34c989), R6: FAIL (doesn't parse)
+`node --check` on the script: `SyntaxError: Unexpected token ')'` at the 16:30 WORK_TICK's `});`. Two edits joined code into a trailing comment:
+- roofStep (~41066): after `if (!liftHeld()) liftHold(...);   // back on after stepping off: ...` the statements `ROOF.r = R; R.mate = roofMate(); if (rd) rd.on = d;` sit inside the comment (even once it parses, ROOF.r, R.mate and rd.on would never be set).
+- The 16:30 tick (~41148): after `if (rd && rd.on !== undefined && ...) {   // (read only: ...)` the body `delete rd.on; ... toast(...); }`, closing brace included, is inside the comment: the parse error.
+Fix: each comment on its own line; mech_check m17 should show a ride sets ROOF.r and side.roof.on and the resume toast once. 0.53.11 (9e34c989) parses; 0.53.11 + 0.53.12 are reviewed together on the fixed hash.
 
 ### E4 claude/mech-diagnose f431a794 (0.53.10: R5's five 24t fixes; roof.resume) and bca66df5 (0.53.9, M17 the lift roof, 24s), R5: PASS WITH FIXES (two, on M17)
 E4 took E3's seat. 24t fixes read by hand; M17 read with a helper agent against m17-lift-roof, both fixes confirmed by hand. Line numbers in f431a794.
