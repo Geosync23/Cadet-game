@@ -281,7 +281,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.63.3
+   STARSHIP CADET: CSV Wren                           build 0.71.3
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -1936,14 +1936,15 @@ const KIT = {
     box(.16, .08, 2.1, GYM.chrome, 0, .3, 0, g); box(.4, .1, .4, GYM.frame, 0, .26, .95, g);
     cyl(.24, .24, .16, GYM.frame, 0, .42, -.92, g, 20).rotation.z = Math.PI / 2; const seat = box(.3, .06, .3, GYM.rubber, 0, .4, .2, g);
     for (const x of [-.18, .18]) box(.12, .03, .2, GYM.frame, x, .3, -.55, g);
-    box(.5, .03, .03, GYM.accent, 0, .55, -.7, g);
-    if (o.place) {                                       // Pillar 2: the seat slides while someone rows (MOVERS)
-      seat.userData.noMerge = true;
+    const bar = box(.5, .03, .03, GYM.accent, 0, .55, -.7, g);
+    if (o.place) {                                       // Pillar 2: the seat slides while someone rows (MOVERS); the handle comes with them (playtest 2, 0.71.3)
+      seat.userData.noMerge = true; bar.userData.noMerge = true;
       let v = 0, ph = 0;
       MOVERS.push({ place: o.place, tick(dt, on) {
         if (!on && v === 0) return;
         v += ((on ? 1 : 0) - v) * Math.min(1, dt * 3); if (!on && v < .01) v = 0;
         ph += dt * 3.2; seat.position.z = .2 + Math.sin(ph) * .32 * v;
+        bar.position.z = -.7 + (Math.sin(ph) + 1) * .3 * v; bar.position.y = .55 + (Math.sin(ph) + 1) * .06 * v;   // pulled in to the chest as the seat slides back, out again on the return
       } });
     }
     return { w: .6, d: 2.2 };
@@ -8694,7 +8695,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.63.3';                           // keep in step with the header's build line
+const GAME_BUILD = '0.71.3';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -9518,7 +9519,7 @@ function schedFrame(p, d) {
   if (works && p.work && evRule(f.night ? d * 1440 + 360 : (d - 1) * 1440 + f.workEnd, 'doubleShift', p)) {   // a ship-wide event's double shift (C7)
     f.double = true; f.workEnd = f.night ? Math.max(f.workEnd, 435) : Math.max(f.workEnd, Math.min(1230, bed - 45));   // the gaps closed, never past the other shift's start (desks are shared)
   }
-  let wake = (gt ? gt.wake - 45 - 45 * U(13) : 375) + jit(10);            // about 06:15 (a guest's lie-in is in their template)
+  let wake = gt ? gt.wake - 45 - 45 * U(13) + jit(10) : 345 + Math.round(60 * U(10)) - 30;   // 05:15-06:15, about 05:45 (the user's playtest 2: up about half an hour earlier, spread evenly so the washrooms aren't all at once; a guest's lie-in is in their template)
   if (H.has('early-riser')) wake -= 30 + 15 * U(12);
   if (H.has('late-sleeper')) wake += 15 + 15 * U(12);
   if (!works) wake += 45 + 45 * U(13) + (shape.lieIn || 0);
@@ -9870,7 +9871,7 @@ function schedBuild(p, d, occ, S) {
     const mb = meet.find(e => e.meal === 'breakfast' && !e.done && e.at + 10 > t && e.at < by + 150);   // a meal tradition (the long breakfast) is their breakfast
     if (mb) { leisureUntil(mb.at + mb.dur, k + 9); if (segs.some(s => s.act === 'breakfast' && s.tag === mb.tag)) return; if (t >= by - 5) { grab('breakfast', k + 3); return; } }
     if (H.has('skips-breakfast') && U(k + 1) < .7) { if (!pre) linger(Math.max(t, by - 8 - Math.round(10 * U(k + 2)))); grab('breakfast', k + 3); return; }
-    const want = Math.max(MEALS.breakfast[0], by - 30 - Math.round(25 * U(k + 4)) - (H.has('lingers-at-meals') ? 15 : 0));
+    const want = Math.max(MEALS.breakfast[0], by - 30 - Math.round(100 * U(k + 4)) - (H.has('lingers-at-meals') ? 15 : 0));   // spread over the morning (playtest 2: not everyone at 08:00-08:30)
     if (want > t + C + 5 && !pre) linger(want - (deck !== 3 ? C : 0));   // after a gathering: straight to breakfast (waiting would only stretch the gathering)
     meal('breakfast', k + 5, by);
   };
@@ -10335,7 +10336,8 @@ function comeWhere(p, t) {
 const OFFICER_RANKS = new Set(['officer', 'senior', 'chief', 'xo', 'captain']);
 function withHold(p, w, job) {
   if (!w || w.hold) return w;
-  const h = job && p.dept === 'works' ? 'toolbox'
+  const h = job && (w.tag === 'load' || w.tag === 'unload') ? 'carry'   // loading or unloading cargo: a crate in their hands (the user's playtest 2, 0.71.3)
+    : job && p.dept === 'works' ? 'toolbox'
     : OFFICER_RANKS.has(p.rank) && (w.tag === 'handover' || w.tag === 'stroll' || w.tag === 'tea') ? 'datapad' : null;
   return h ? { ...w, hold: h } : w;
 }
@@ -36924,7 +36926,7 @@ const INTRO_STEPS = [
   { id: 'chief', day: 0, at: 18 * 60 + 20, who: 'calder', mode: 'meet', where: 'your table in the mess', meeting: 'introChief',
     checkpoint: { deck: 3, tile: [28, 1], room: 'Mess hall' }, rel: { calder: 3 }, flags: ['met.calder'],
     seats: { you: '3-mess-10', [INTRO_ESCORT]: '3-mess-12', calder: '3-mess-9' },   // you, Torres beside you, the Chief across
-    away: { calder: '3-mess-44' },   // (0.42.64, the user) she has her dinner at the far table and walks over at the end of the dinner chat (introCalderTick)
+    // (0.71.3, the user's playtest 2: "the Chief isn't at the dinner with Zeke") she sits across from you from the start of the dinner, not at the far table (0.42.64's away)
     fallback: { until: 19 * 60 + 30, later: 'free', mail: { from: 'I. Calder', subject: 'Tomorrow', body: 'Missed you at dinner. Torres has you tomorrow; ten to nine, the Works bay.' } } },
   { id: 'free', day: 0, at: 19 * 60 + 30, who: INTRO_ESCORT, mode: 'free', where: 'the mess', rel: { [INTRO_ESCORT]: 3 } },   // he lets you go after his goodnight (introNightTick), 19:30 at the latest (reviewer 1c: no fixed 19:00)
   { id: 'tomas', day: 0, at: 19 * 60 + 30, who: 'tomas', mode: 'free', where: 'the junior common room or Bunk 1', teaches: 'Chat and Ask about', seek: 22 * 60 },
@@ -37259,7 +37261,7 @@ function escortPlan(p, t) {
 function introBeats(id, d) {
   if (!introOn()) return [];
   const out = [];
-  for (const st of INTRO_STEPS) if (st.day === d && st.who === id && st.checkpoint) { const f = st.fallback || {}, seat = (st.away && st.away[id]) || st.seats && st.seats[id]; out.push({ id: st.id, at: st.at, until: f.until !== undefined ? f.until : st.at + (f.wait || 20), where: seat ? { ...st.checkpoint, placeId: seat } : st.checkpoint }); }
+  for (const st of INTRO_STEPS) if (st.day === d && st.who === id && st.checkpoint) { const f = st.fallback || {}, seat = (st.away && st.away[id]) || st.seats && st.seats[id], tb = st.id === 'chief' && st.seats && introStepById('table'); out.push({ id: st.id, at: tb && tb.at != null ? Math.min(st.at, tb.at) : st.at, until: f.until !== undefined ? f.until : st.at + (f.wait || 20), where: seat ? { ...st.checkpoint, placeId: seat } : st.checkpoint }); }
   for (const b of INTRO_WEEK) if (b.day === d && (b.who === id || (b.also || []).includes(id)) && b.until) out.push({ id: b.id, at: b.at, until: b.until, where: b.where });
   return out;
 }
