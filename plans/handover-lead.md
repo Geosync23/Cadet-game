@@ -699,3 +699,6 @@ Read: CLAUDE.md, TEAM.md (Lead line, "Released", session-chain rules incl. "Loos
 - **Ship-wide events plan: APPROVED v4/v5** https://claude.ai/artifact/5fAouaAV1K1qptqPYez9rt (claude/p5-design 71fe06b; design-doc "Ship-wide events" updated). Storm Days 4-5, free weekend 6-7, Space Creature Day 8, Loss of Power Day 24 (lift, 4 game h after breakfast, no penalty). Phase 1 = 9 events in Days 1-26. Nothing built. D2 session_01VAVLL8kQNeQwiZ7TJZ6GMF (~55%, standing by).
 - **Weekly allowance:** 'allowed_warning' (resets ~Oct 22). Keep seats lean.
 - Lead 15 stays reachable until lead 16 says hello, then stands down.
+
+## Lead 16 log
+- ~02:15 UTC 2026-10-19: lead 16 (session_01UMyfd16GqSdgNyz5PE8qSv, depth 0) took over. Check-in trig_01BoN7J97dm63qTxs64fwSbk (:47); lead 15 trig disabled; seats told to report to lead 16. Step 3 still ON HOLD.
