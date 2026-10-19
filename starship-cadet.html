@@ -269,7 +269,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.63.2r
+   STARSHIP CADET: CSV Wren                           build 0.55.13
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8613,7 +8613,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.63.2r';                           // keep in step with the header's build line
+const GAME_BUILD = '0.55.13';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -39240,7 +39240,7 @@ if (typeof WORK_MECH !== 'undefined') WORK_MECH.m7 = { reserve: scanTrainReserve
 // tick?(c, j) }; the engine knows none of them, and is inert until one is opened (its ladder row opened:
 // worksIsOpen(ladder)). Pure functions and state: nothing here calls R() or makes 3D objects.
 // Hash keys 880 (the rate roll), 881 (which kind), 882-889 (the eight sub-seeds), 892 (caseDecoys' order, for the
-// kinds), 893 (the order suspects are shown in); 890-891 are P3's.
+// kinds), 893 (the order suspects are shown in); 890-891 and 1002 are P3's, 1000-1001 and 894 P1's and P2's (1003-1004 spare).
 // =====================================================================
 const CASE_KINDS = {};
 const CASE_BANDS = {                                    // suspects, clues (reachable), the fewest clues that solve it, decks
@@ -39251,10 +39251,12 @@ const CASE_BANDS = {                                    // suspects, clues (reac
 const CASE_RANK_BAND = { junior: 'T1', officer: 'T2', senior: 'T3', specialist: 'T4' };
 const CASE_RATE = { junior: .1, officer: .2, senior: .25, specialist: .33 }, CASE_MAX = { junior: 1, officer: 1, senior: 2, specialist: 2 };
 const CASE_WAIT_MAX = 3 * 1440;                         // a case still waiting (P3's tries) after three days is a plain repair
-const CASE_TRIES = 8, CASE_DONE_KEEP = 20, CASE_SPENT = new Set(['seal', 'cartridge']);   // from Tier 2 a wrong seal or cartridge is used up
+const CASE_TRIES = 8, CASE_DONE_KEEP = 20, CASE_SPENT = new Set(['seal', 'cartridge', 'filter', 'membrane', 'oxygen cell', 'uv lamp']);   // from Tier 2 a wrong call's consumable is used up (the T2 band: the user's seal or cartridge, and the other NO_MAKE parts)
 const CASE_STATS = { offered: 0, rolled: 0, posted: 0, fallback: 0, ms: 0, why: {} };   // for puzzle_check
 const caseRank = () => (SHIP.works && SHIP.works.rank) || 'junior';
 const caseBand = rank => CASE_RANK_BAND[rank] || 'T1';
+// a band's limits for a kind: its own (kind.bands[band], from its page: P2's T2 needs two witnesses, P3 keeps T1's size), else the engine's
+const caseBandOf = (kid, band) => { const K = CASE_KINDS[kid]; return K && K.bands && K.bands[band] || CASE_BANDS[band] || CASE_BANDS.T1; };
 const caseRate = (rank, ownTier) => rank === 'senior' && ownTier >= 3 ? .33 : CASE_RATE[rank] || CASE_RATE.junior;
 const caseTier = () => typeof playerTier === 'function' ? playerTier() : PLAYER_TIER;
 const caseNow = () => SIM_AT != null ? SIM_AT : shipNow();   // inside section 17's hour, that hour
@@ -39341,9 +39343,12 @@ function caseOffer(j, h) {
   if (t0) CASE_STATS.ms = Math.max(CASE_STATS.ms, performance.now() - t0);
   if (!c) { CASE_STATS.fallback++; return; }             // no fair case: a plain fault
   CASE_STATS.posted++; C.n++;
+  if (c.band !== 'T1' && !c.by) c.by = caseTalker(d);    // from the T2 band you talk it through with Torres when he's on, else Calder or Halloran
   C.open.push(c); j.case = c.id;
   if (!c.wait) caseShow(c, j);
 }
+const CASE_TALK = ['torres-zeke', 'calder', 'halloran-emeka'];
+const caseTalker = d => CASE_TALK.find(id => { try { return occOnShift(id, d); } catch (e) { return false; } }) || 'calder';
 // one try at a case (k = 0..7, key 882 + k): suspects and clues from the kind, then the solver. -> { c } | { why }
 function caseMake(j, kid, k, d) {
   const K = CASE_KINDS[kid], seed = schedU(machSeed(j.machine), d, 882 + k) * 4294967296 | 0, band = caseBand(caseRank()), cause = j.cause;
@@ -39351,7 +39356,7 @@ function caseMake(j, kid, k, d) {
   try { sus = K.suspects(j, seed, band); clues = K.clues(j, cause, sus, seed, band); } catch (e) { return { why: 'kind' }; }
   if (!Array.isArray(sus) || !Array.isArray(clues)) return { why: 'kind' };
   sus = sus.map((s, i) => [schedU(seed, i, 893), s]).sort((a, b) => a[0] - b[0]).map(x => x[1]);   // shown in an order that gives nothing away (key 893)
-  const r = caseSolve(sus, clues, band, cause);
+  const r = caseSolve(sus, clues, band, cause, kid);
   if (r.why) return r;
   const t = caseNow();
   return { c: { id: 'c' + j.id, job: j.id, kind: kid, k, band, cause, sus: sus.slice(), fewest: r.fewest,
@@ -39370,8 +39375,8 @@ function caseShow(c, j) {
 }
 
 // ---- the solver: exactly one answer, needs thinking, every clue reachable, in its band. -> { fewest } | { why } ----
-function caseSolve(sus, clues, band, cause) {
-  const B = CASE_BANDS[band] || CASE_BANDS.T1, n = clues.length;
+function caseSolve(sus, clues, band, cause, kid) {
+  const B = caseBandOf(kid, band), n = clues.length;
   if (!sus.includes(cause) || new Set(sus).size !== sus.length || sus.length < B.sus[0] || sus.length > B.sus[1]) return { why: 'suspects' };
   if (n < B.clues[0] || n > B.clues[1] || n > 6 || clues.some(c => !c || !Array.isArray(c.kills))) return { why: 'clues' };
   if (clues.some(c => c.kills.includes(cause))) return { why: 'answer' };
@@ -39618,8 +39623,10 @@ else deviceApp({ id: 'faultnotes', title: 'Fault notes', short: 'Faults', icon: 
 // the crew's real try jobs once section 17's jobKindAdd is in. ----
 const P3_NOTE = (c, k) => {
   const j = caseJob(c), m = j && machineById(j.machine), s = caseSus(c, k.src.tried), f = m && caseCauses(m).find(x => x.id === c.cause), p = k.src.by && schedPeople().find(x => x.id === k.src.by);
-  const fb = (s.part ? 'New ' + s.part + ' in.' : 'Tried the ' + s.label + '.') + ' Still ' + (f && f.shows || 'acts up') + '.';
-  const t = (typeof worksText === 'function' && m ? worksText('fault.tried.' + m.kind + '.' + k.src.tried, fb) : fb) || fb;
+  const shows = f && f.shows || 'acts up', odd = k.src.odd;   // odd: the try that rules out less than it seems (the wrong size, never seated)
+  const fb = odd ? 'Put in ' + (s.part ? 'a ' + s.part : 'a new ' + s.label) + ' from the old stock: the wrong size, it never seated. Still ' + shows + '.'
+    : (s.part ? 'New ' + s.part + ' in.' : 'Tried the ' + s.label + '.') + ' Still ' + shows + '.';
+  const t = (typeof worksText === 'function' && m ? (odd ? worksText('fault.tried.odd', fb, { part: s.part || s.label, shows }) : worksText('fault.tried.' + m.kind + '.' + k.src.tried, fb)) : fb) || fb;
   return t + (p ? ' — ' + p.name.split(' ').slice(-1)[0] : '');
 };
 // who tries, and when: the times from 2 to 12 hours after `t`, in order; whoever of the Works crew is at work then
@@ -39642,13 +39649,21 @@ function p3Tries(j, decoys, seed, t) {
     return { id: 'n' + i, type: 'note', src: { by, t: x, tried: s, done: false }, at: i && pp ? pp : 'board', kills: [s] };   // the first on the job, the rest on the machine
   });
 }
+// a P3 case's notes: one per decoy; from the T2 band, half the time (key 1002) one more that rules out less than it
+// seems: a suspect's part tried but the wrong size (it never seated), so it kills nothing and takes nothing off the shelf
+function p3Clues(j, cause, sus, seed, band) {
+  const decoys = sus.filter(s => s !== cause), odd = band !== 'T1' && decoys.length < 3 && schedU(seed, 0, 1002) < .5;
+  const on = odd ? sus[Math.floor(schedU(seed, 1, 1002) * sus.length)] : null, notes = p3Tries(j, odd ? decoys.concat([on]) : decoys, seed, caseNow());
+  if (odd) { const k = notes[notes.length - 1]; k.kills = []; k.src.odd = 1; }   // the last try (p3Tries keeps the list's order)
+  return notes;
+}
 // once a ship minute (24k's caseTick): the tries whose time has come are done (the part comes off its shelf); when all
 // are, the case shows on the board, inside your shift (a training case once its ladder row has opened)
 function p3Tick(c, j) {
   if (!c.wait) return;
   const now = shipNow();
   for (const k of c.clues) if (!k.src.done && now >= k.src.t) {
-    k.src.done = true; const p = caseSus(c, k.src.tried).part;
+    k.src.done = true; const p = !k.src.odd && caseSus(c, k.src.tried).part;   // the wrong-size one wasn't from the shelf
     if (p && SHIP.stores[p] > 0) { SHIP.stores[p]--; MACH_REV++; }
   }
   if (c.clues.some(k => !k.src.done)) return;
@@ -39662,7 +39677,8 @@ function p3Tick(c, j) {
 CASE_KINDS.p3 = { name: 'What\'s been tried?', ladder: 'p3',
   fits: (cause, m) => !!cause.part && caseDecoys(m, cause.id, 0, x => !!x.part).length >= 2,
   suspects: (j, seed) => { const d = caseDecoys(machineById(j.machine), j.cause, seed, x => !!x.part); return [j.cause].concat(d.slice(0, d.length >= 3 && schedU(seed, 0, 890) < .4 ? 3 : 2)); },
-  clues: (j, cause, sus, seed) => p3Tries(j, sus.filter(s => s !== cause), seed, caseNow()),
+  clues: (j, cause, sus, seed, band) => p3Clues(j, cause, sus, seed, band),
+  bands: { T2: { sus: [3, 4], clues: [2, 3], fewest: 2, decks: 1 } },   // the gentle kind keeps its size for an Officer (a machine has at most three causes with one card)
   wait: () => true, tick: p3Tick, text: P3_NOTE, view: () => [],
   hint: c => (typeof worksText === 'function' && worksText('case.hint.p3.1', null)) || 'Have you read every note? One\'s on the machine.' };
 CHIEF_NOTES.p3 = { title: 'What\'s been tried', key: 'chief.p3', lines: [

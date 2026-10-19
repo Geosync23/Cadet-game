@@ -118,7 +118,7 @@ PAPER = r"""(() => {
       seen.add(c.id); const j = caseJob(c);
       out.cases.push({ id: c.id, day: Math.floor(c.posted / 1440) + 1, hour: Math.floor(c.posted % 1440 / 60), wd: weekday(Math.floor(c.posted / 1440) + 1), rank: SHIP.works.rank, band: c.band, cause: c.cause, sus: c.sus.slice(),
         clues: c.clues.map(k => ({ id: k.id, at: k.at, kills: k.kills.slice(), deck: caseClueDeck(k), reach: caseReachable(k), place: !k.at || k.at === 'board' || !!placeById(k.at) })), fewest: c.fewest,
-        kind: c.kind, parts: j.parts.slice(), title: j.title || '', machine: j.machine });
+        kind: c.kind, parts: j.parts.slice(), title: j.title || '', machine: j.machine, lim: caseBandOf(c.kind, c.band) });
     }
   }
   out.stats = { ...CASE_STATS, why: { ...CASE_STATS.why } };
@@ -140,7 +140,7 @@ SWEEP = r"""(() => {
     const r = out.perRank[rk] = out.perRank[rk] || { offered: 0, rolled: 0, posted: 0, fallback: 0 };
     for (const k in r) r[k] += CASE_STATS[k] - b[k];
     const c = caseOf(j);
-    if (c) out.cases.push({ id: c.id, band: c.band, cause: c.cause, sus: c.sus.slice(), fewest: c.fewest, clues: c.clues.map(k => ({ id: k.id, at: k.at, kills: k.kills.slice(), deck: caseClueDeck(k), reach: caseReachable(k), place: !k.at || k.at === 'board' || !!placeById(k.at) })) });
+    if (c) out.cases.push({ id: c.id, band: c.band, lim: caseBandOf(c.kind, c.band), cause: c.cause, sus: c.sus.slice(), fewest: c.fewest, clues: c.clues.map(k => ({ id: k.id, at: k.at, kills: k.kills.slice(), deck: caseClueDeck(k), reach: caseReachable(k), place: !k.at || k.at === 'board' || !!placeById(k.at) })) });
   }
   C.open = []; SHIP.jobs = keep; window.__ptOpen = false;
   return out;
@@ -177,38 +177,40 @@ SCAN = r"""(() => {
 })()"""
 
 # P3: a sweep through the real kind (opened by its ladder row), then Day 5's training case
-P3 = r"""(() => {
-  const out = { cases: [], bad: [] }, C = caseState(), keep = SHIP.jobs, op = SHIP.works.op; SHIP.jobs = []; SHIP.works.op = { 5: ['p3'] }; SHIP.works.rank = 'junior';
+P3 = r"""((rank) => {
+  const out = { cases: [], bad: [] }, C = caseState(), keep = SHIP.jobs, op = SHIP.works.op, rk0 = SHIP.works.rank; SHIP.jobs = []; SHIP.works.op = { 5: ['p3'] }; SHIP.works.rank = rank;
   const crewOk = (by, t) => { const p = schedPeople().find(x => x.id === by); return !!p && jobCrew(p) === 'works' && planWhere(p, t).act === 'work'; };
   for (let d = 5; d <= 40; d++) if (playerShiftOn(d)) for (const m of machineList()) {
     const fs = (FAULT_CAUSES[m.kind] || []).filter(f => f.part), f = fs[d % (fs.length || 1)]; if (!f || (m.tier || MACHINE_KINDS[m.kind].tier) > 1) continue;
     C.open = []; const t = (d - 1) * 1440 + 600, j = { id: m.id + '@p3' + d, machine: m.id, deck: m.deck, kind: 'repair', urgency: 1, posted: t, found: t, claimedBy: null, parts: [f.part], status: 'open', cause: f.id };
     SHIP.jobs.push(j); setShipNow(t);
-    const rate = CASE_RATE.junior; CASE_RATE.junior = 1; caseOffer(j, (d - 1) * 24 + 10); CASE_RATE.junior = rate;
+    const rate = CASE_RATE[rank]; CASE_RATE[rank] = 1; caseOffer(j, (d - 1) * 24 + 10); CASE_RATE[rank] = rate;
     const c = caseOf(j); if (!c) continue;
-    const notes = c.clues, decoys = c.sus.filter(s => s !== c.cause);
-    const r = { id: c.id, kind: c.kind, sus: c.sus.slice(), cause: c.cause, wait: c.wait, hidden: caseHidden(j), parts: j.parts.slice(), clues: notes.map(k => ({ id: k.id, at: k.at, kills: k.kills.slice(), by: k.src.by, t: k.src.t, tried: k.src.tried, crew: !!k.src.by && crewOk(k.src.by, k.src.t), dt: k.src.t - t })), fewest: c.fewest, band: c.band };
-    r.oneEach = notes.length === decoys.length && notes.every(k => k.kills.length === 1 && k.kills[0] === k.src.tried && decoys.includes(k.src.tried));
+    const notes = c.clues, decoys = c.sus.filter(s => s !== c.cause), odd = notes.filter(k => k.src.odd), real = notes.filter(k => !k.src.odd);
+    const r = { id: c.id, kind: c.kind, sus: c.sus.slice(), cause: c.cause, wait: c.wait, hidden: caseHidden(j), parts: j.parts.slice(), clues: notes.map(k => ({ id: k.id, at: k.at, kills: k.kills.slice(), by: k.src.by, t: k.src.t, tried: k.src.tried, odd: !!k.src.odd, crew: !!k.src.by && crewOk(k.src.by, k.src.t), dt: k.src.t - t })), fewest: c.fewest, band: c.band, lim: caseBandOf(c.kind, c.band), odd: odd.length };
+    r.oneEach = real.length === decoys.length && real.every(k => k.kills.length === 1 && k.kills[0] === k.src.tried && decoys.includes(k.src.tried)) && odd.every(k => !k.kills.length && c.sus.includes(k.src.tried)) && odd.length <= (rank === 'junior' ? 0 : 1);
+    if (odd.length) r.oddText = caseClueText(c, odd[0]);
     // the tries done: the parts come off the shelves; the case shows inside the shift
     const last = Math.max(...notes.map(k => k.src.t)), shelf = notes.map(k => SHIP.stores[caseSus(c, k.src.tried).part]);
     let s = last; while (true) { const dd = Math.floor(s / 1440) + 1, mm = s % 1440; if (playerShiftOn(dd) && mm >= DAY_SHIFT[0] && mm < 900) break; s += 30; }
     setShipNow(last - 1); caseTick(); r.early = !c.wait;
     setShipNow(s); caseTick(); r.shown = !c.wait && j.title === c.title && j.parts.length === 0 && !caseHidden(j);
-    r.used = notes.map((k, i) => shelf[i] - SHIP.stores[caseSus(c, k.src.tried).part]);
+    const want = {}; for (const k of real) { const p = caseSus(c, k.src.tried).part; want[p] = (want[p] || 0) + 1; }   // the wrong-size try takes nothing
+    r.used = notes.map((k, i) => { const p = caseSus(c, k.src.tried).part; return shelf[i] - SHIP.stores[p] === (want[p] || 0) ? 1 : 0; });
     r.text = caseClueText(c, notes[0]);
     { const tl = SHIP.works.tools; SHIP.works.tools = { scanner: [5, 0] }; delete j.scan; const a = JSON.stringify(scanRead(j.id)), cz = j.cause;
       j.cause = c.sus.find(x => x !== cz); delete j.scan; const b = JSON.stringify(scanRead(j.id)); j.cause = cz; delete j.scan; SHIP.works.tools = tl;
       r.scanBlind = a === b && a !== 'null'; }
     out.cases.push(r);
-    for (const k of notes) SHIP.stores[caseSus(c, k.src.tried).part] += 1;
+    for (const k of notes) if (!k.src.odd) SHIP.stores[caseSus(c, k.src.tried).part] += 1;
   }
   // a case still waiting three days on is a plain repair
   { C.open = []; const m = machineList().find(x => x.kind === 'washer'), t = 9 * 1440 + 600, j = { id: m.id + '@p3wait', machine: m.id, deck: m.deck, kind: 'repair', urgency: 1, posted: t, found: t, claimedBy: null, parts: ['pump'], status: 'open', cause: 'pump' };
     SHIP.jobs.push(j); setShipNow(t); let d = 10; const rate = CASE_RATE.junior; CASE_RATE.junior = 1; caseOffer(j, 9 * 24 + 10); CASE_RATE.junior = rate;
     const c = caseOf(j); if (c) { for (const k of c.clues) k.src.t = t + 9 * 1440; setShipNow(t + 3 * 1440 + 60); caseTick(); out.waitEnds = !caseOf(j); } }
-  C.open = []; SHIP.jobs = keep; SHIP.works.op = op;
+  C.open = []; SHIP.jobs = keep; SHIP.works.op = op; SHIP.works.rank = rk0;
   return out;
-})()"""
+})"""
 
 FIRST = r"""(() => {
   const out = {}, C = caseState(), op = SHIP.works.op; C.open = []; C.done = []; delete C.first; SHIP.works.op = {}; SHIP.works.tr = {}; SHIP.works.tools = { scanner: [5, 0] };
@@ -306,6 +308,11 @@ PLAY = r"""(() => {
   const k2 = fresh('pump'), c4 = caseOf(k2); claimJob(k2.id); caseTick(); caseLong(c4.id); let rounds = 0;
   while (!k2.workDone && rounds++ < 8) { const ns = jobStops(k2).length; for (let k = 0; k < ns; k++) jobStepDone(k2.id, k); }
   out.long = { done: !!k2.workDone, rounds, calls: c4.calls.slice(), causeAt: c4.sus.indexOf(c4.cause) };
+  // the T2 band: on a Tier 2 job a wrong call's consumable (the seal) is used up; its other parts still go back
+  turnInJob(k2.id); caseTick();
+  const k3 = fresh('pump'), c5 = caseOf(k3); k3.tier = 2; claimJob(k3.id); caseTick(); out.spent = {};
+  for (const s of c5.sus.filter(x => x !== 'pump')) { const p = caseSus(c5, s).part, s0 = SHIP.stores[p]; caseCall(c5.id, s); SHIP.stores[p]--;
+    const ns = jobStops(k3).length; for (let k = 0; k < ns; k++) jobStepDone(k3.id, k); out.spent[p] = [CASE_SPENT.has(p), SHIP.stores[p] === s0 - 1, !k3.workDone]; }
   // a junk save, and a save whose job is gone
   CASE_SAVED = { open: [{ id: 'cx', job: 'nope', kind: 'zz', cause: 'pump', sus: ['pump'], clues: [] }, 'junk'], done: 'x', n: -3 }; delete SHIP.works.cases; CASE_CLEAN = false;
   const cj = caseState(); out.junk = cj.open.length === 0 && cj.done.length === 0 && cj.n === 0;
@@ -348,8 +355,10 @@ def run(path):
         check(len(Sw['cases']) >= 20, f"the sweep made cases: {len(Sw['cases'])}")
         BAND = {'T1': ([3, 4], [2, 3], 2, 1), 'T2': ([3, 5], [3, 4], 3, 2), 'T3': ([5, 6], [4, 6], 3, 3), 'T4': ([5, 6], [4, 6], 3, 3)}
         from itertools import combinations
+        def lim(c):                                       # the band's limits for the case's kind (its page's), else the engine's
+            L = c.get('lim'); return (L['sus'], L['clues'], L['fewest'], L['decks']) if L else BAND[c['band']]
         for c in cs + Sw['cases']:
-            sus, clues, (sn, cn, few, decks) = c['sus'], c['clues'], BAND[c['band']]
+            sus, clues, (sn, cn, few, decks) = c['sus'], c['clues'], lim(c)
             left = lambda ks: [s for s in sus if not any(s in k['kills'] for k in ks)]
             check(left(clues) == [c['cause']], f"{c['id']}: every clue leaves exactly the cause: {left(clues)} vs {c['cause']}")
             check(all(len(left([k])) > 1 for k in clues), f"{c['id']}: no single clue solves it")
@@ -393,10 +402,17 @@ def run(path):
         check(Sc['pickWrong'] and Sc['partsAfterPick'][0] != 'pump', f"a pick puts that part on the job: {Sc['partsAfterPick']}")
         w = Sc['wrong']; check(not w['done'] and w['back'] and w['parts'] == ['pump'] and w['cond'] == 30, f"a wrong pick: not fixed, the part back, the job names the right part: {w}")
         check(Sc['right']['done'] and Sc['right']['cond'] > 30 and Sc['right']['first'] is False, f"then the right one fixes it (not right first time): {Sc['right']}")
-        Q = g.ev(P3)
+        Q = g.ev(P3 + "('junior')"); Q2 = g.ev(P3 + "('officer')")
         qc = Q['cases']; print(f"P3 sweep: {len(qc)} cases"); [print('  ', c) for c in qc[:2]]
-        check(len(qc) >= 20, f"P3 cases: {len(qc)}")
-        for c in qc:
+        q2 = Q2['cases']; nodd = sum(1 for c in q2 if c['odd']); print(f"P3 sweep as an Officer (T2): {len(q2)} cases, {nodd} with a wrong-size note"); [print('  ', c) for c in [x for x in q2 if x['odd']][:1]]
+        check(len(qc) >= 20 and len(q2) >= 20, f"P3 cases: {len(qc)}, as an Officer {len(q2)}")
+        check(all(c['band'] == 'T1' for c in qc) and all(c['band'] == 'T2' and c['lim']['fewest'] == 2 for c in q2), "P3's bands: T1 for a Junior, T2 (P3 keeps T1's size) for an Officer")
+        check(.25 * len(q2) <= nodd <= .75 * len(q2), f"about half of an Officer's P3 cases have a note that rules out less than it seems: {nodd}/{len(q2)}")
+        check(all('wrong size' in c['oddText'] and ' — ' in c['oddText'] for c in q2 if c['odd']), f"the wrong-size note says so: {[c.get('oddText') for c in q2 if c['odd']][:2]}")
+        for c in qc + q2:
+            lo, hi = c['lim']['clues']
+            check(lo <= len(c['clues']) <= hi and c['lim']['sus'][0] <= len(c['sus']) <= c['lim']['sus'][1], f"{c['id']}: within its band: {len(c['sus'])} suspects, {len(c['clues'])} notes")
+        for c in qc + q2:
             sus, clues = c['sus'], c['clues']
             left = lambda ks: [s for s in sus if not any(s in k['kills'] for k in ks)]
             check(c['kind'] == 'p3' and c['oneEach'] and left(clues) == [c['cause']] and all(len(left([k])) > 1 for k in clues), f"{c['id']}: one note per decoy, each kills only its decoy, one left: {c}")
@@ -437,6 +453,7 @@ def run(path):
         check(P['recall'] == ['pump'], f"calling again before fitting replaces the call: {P['recall']}")
         check(P['first'] == 6 and P['firstJob'] == [True, True], f"right first time and clever, flagged on the case and the job: {P['first']} {P['firstJob']}")
         check(P['long']['done'] and P['long']['rounds'] == P['long']['causeAt'] + 1 and P['long']['calls'][-1] == 'pump', f"the long way fits each in turn and always ends: {P['long']}")
+        check(P['spent'] and all(v[0] == v[1] and v[2] for v in P['spent'].values()) and any(v[0] for v in P['spent'].values()), f"T2: a wrong call's consumable is used up, other parts go back, the job not done: {P['spent']}")
         pos = {}
         for c in Sw['cases']: pos[c['sus'].index(c['cause'])] = pos.get(c['sus'].index(c['cause']), 0) + 1
         check(len(pos) >= 3 and max(pos.values()) < .6 * len(Sw['cases']), f"the cause isn't always in the same place among the suspects: {pos}")
