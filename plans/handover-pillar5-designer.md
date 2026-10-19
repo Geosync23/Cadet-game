@@ -1,6 +1,27 @@
-# Handover: Pillar 5 designer (seat D / "D2", design only, no game code)
+# Handover: Pillar 5 designer (seat D: D2, then D3)
 
-**Latest (2026-10-19 ~02:40, session_01VAVLL8kQNeQwiZ7TJZ6GMF, stopping at ~65% memory as the user's rule says).** Report to **lead 16, session_01UMyfd16GqSdgNyz5PE8qSv**: only finished pieces (with hashes), blockers and design calls; builders may ask directly. Never contact the user; never start sessions; stay inside `plans/` and `design-doc.md`; push only to `claude/p5-design`. Approval is the user's, relayed by the lead.
+**Latest (D3, session_0115ZiGhf9s3oYtFdjs7TgYS, 2026-10-19 ~03:20, standing by idle on lead 16's word).** Lead: **lead 16, session_01UMyfd16GqSdgNyz5PE8qSv**; report only to it with send_message. Never contact the user, never start sessions, push only to `claude/p5-design`, stay inside `plans/` and `design-doc.md`.
+
+## D3 did (all FINAL, all in design-doc's Ship traditions paragraph "Rec dec traditions" and two Answered bullets)
+| Piece | Files | Artifact | State |
+| --- | --- | --- | --- |
+| Rec dec traditions | `plans/rec-traditions-plan.html` (src `plans/mechanics/src/rectrad.body`) | https://claude.ai/artifact/4f8hTNDsaF9CdSiCMgy6xF (v3 → final, Version 4; v1/v2 were D2's JFMgkWEYAhoEa2HphtN4im) | FINAL: court Winner Stays On + Cup; pool Dawn swim; river Paddle club + regatta (Glow paddle out); wall Wall night (Ring the bell retired; a note for the rec owner on the page); float Float hour + Slow stretch; Wren talks small Mon+Thu 19:00 (stage ring, 4-10) + a chief's talk every 2 weeks (seats, 20-40), first Days 8, 18, 25, then every Mon/Thu |
+| Traditions survey | `plans/rec-traditions-survey.html` | https://claude.ai/artifact/KxGGxgHgDvJMCpA8HfJbbn (db collection `answers`, one doc) | answered 03:01 |
+| Rec dec mini-games | `plans/rec-minigames-plan.html` (src `minigames.body`) | https://claude.ai/artifact/Ubn2MJvidnuK1awcx2gKMP (Version 2) | FINAL: Reach, Lengths, White water (no gates, currents + stamina); rec deck phase, kayaks → wall → pool, each prototyped standalone, then integrated |
+| Mini-games survey | `plans/rec-minigames-survey.html` | https://claude.ai/artifact/UhfG1mAAFfLXPWMob71eaM (db `answers`) | answered 03:15 |
+
+## How the surveys work
+A plain page with a `CARDS` list (id, options, rec) that writes one doc per Send to collection `answers` (`{survey, sentAt, by, answers:{id:{pick,recommended,note}}}`), published with `capabilities: {db:{}, user:{}}`. Read answers with ArtifactData `list` on the artifact's url. To make a new one, copy `rec-minigames-survey.html` and replace `CARDS`, the title, the plan link, the draft key and the `survey` name. The user writes important changes in the notes: read every note.
+
+## Loose ends
+- The rec deck plan (`claude/recdeck-plan`, not ours) still lists Ring the bell and "No practice, no times"; the lead was asked to pass the changes to the rec owner (session_013LcEsgjMTDMMeiACKLj2bB).
+- Proposed seed keys 833-838 for the mini-games are unchecked against the key list.
+- design-doc's Pillar 4 line "talent night only once a year" disagrees with the rec plan's every four weeks (not mine; flag if asked).
+
+---
+
+
+**D2's latest (2026-10-19 ~02:40, session_01VAVLL8kQNeQwiZ7TJZ6GMF, stopping at ~65% memory as the user's rule says).** Report to **lead 16, session_01UMyfd16GqSdgNyz5PE8qSv**: only finished pieces (with hashes), blockers and design calls; builders may ask directly. Never contact the user; never start sessions; stay inside `plans/` and `design-doc.md`; push only to `claude/p5-design`. Approval is the user's, relayed by the lead.
 
 ## Where everything stands (this session)
 | Piece | File(s) | State |
@@ -13,7 +34,7 @@
 | Ship-wide events | `plans/events-plan.html` (src `events.body`), artifact https://claude.ai/artifact/5fAouaAV1K1qptqPYez9rt (v5 = plan v4 approved) | APPROVED 2026-10-19 and written into design-doc "Ship-wide events" (71fe06b). Phase 1 = the nine in Days 1-26 (comet 2, storm 4-5, Space Creature 8, visit 12-15, surge 17, Echo 18, distress 21, Loss of Power 24 07:40-11:40, inspector 25); Phase 2 = the other eleven. Remaining open questions: the recommendations stand as the plan |
 | TNG pitch | `plans/events-pitch-tng.html` (src `pitch.body`), published as a second file of the events artifact | matches events v4 |
 | Rec dec traditions | `plans/rec-traditions-plan.html` (src `rectrad.body`), artifact https://claude.ai/artifact/4f8hTNDsaF9CdSiCMgy6xF (FINAL, Version 4); survey https://claude.ai/artifact/KxGGxgHgDvJMCpA8HfJbbn | FINAL (the user's survey 2026-10-19 03:01), written into design-doc's Ship traditions: court Winner Stays On + Cup; pool Dawn swim only; river Paddle club + regatta (Glow paddle out); wall Wall night only (Ring the bell retired); float Float hour + Slow stretch; Wren talks small Mon+Thu + a chief's every 2 weeks |
-| Rec dec mini-games | `plans/rec-minigames-plan.html` (src `minigames.body`), artifact https://claude.ai/artifact/Ubn2MJvidnuK1awcx2gKMP; survey `plans/rec-minigames-survey.html` https://claude.ai/artifact/UhfG1mAAFfLXPWMob71eaM (db collection `answers`) | plan v1 (D3): wall ★Reach / Bell rush, pool ★Lengths / Ring dive, kayaks ★White water / Duck rescue; 7 questions awaiting the user |
+| Rec dec mini-games | `plans/rec-minigames-plan.html` (src `minigames.body`), artifact https://claude.ai/artifact/Ubn2MJvidnuK1awcx2gKMP; survey `plans/rec-minigames-survey.html` https://claude.ai/artifact/UhfG1mAAFfLXPWMob71eaM (db collection `answers`) | FINAL (the user's survey 2026-10-19 03:15, Version 2): Reach, Lengths, White water with no gates (currents + stamina meter); built in the rec deck phase, kayaks → wall → pool, each a standalone prototype first; in design-doc |
 
 ## Next
 1. When the user picks the rec dec's last five: update `rectrad.body` (mark approved, drop the rest, refresh the week view), rebuild, republish to the same artifact (`Artifact` publish of `plans/rec-traditions-plan.html`; it keeps the URL), then write the approved rec traditions into design-doc's traditions section (and the rec dec answers) in the same commit.
