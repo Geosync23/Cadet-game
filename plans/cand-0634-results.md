@@ -66,3 +66,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - ~06:09 E1 633eade (0.45.12 = 0.45.11 + manifestRun in 24d for E2's team parts; merge before E2's 24h team parts); with R5.
 - ~06:10 W2 FINAL 0e8571a (0.48.116, ticket.nohint; scratch bake 9560 lines / 48 meetings); with R5.
 - ~06:10 R5 PASS W2 0e8571a (W2's final).
+- ~06:11 lead 17: E2 retiring after 0.51.11 = claude/mech-incidents 6714448 (all R4/R5 fixes + calls). Successor E5 = session_01QsZymCraDjLzVDooLvigNk (pin via its own playerRigRebuild, then M8 team parts on E1's 633eade manifestRun).
