@@ -15,6 +15,7 @@
 | 0.84.4 | 3a1cc57 | `recShutAt(t)` (pure, for RA's schedules) / `recShut()`; `recSigns()` from worksTick (milky/green pool on `RK.poolOwn`, red tags and tape on the wall, FLOAT ROOM CLOSED sign, net off); refusal guard lines in 15r. |
 | 0.84.5 | d9aea96 | The pool leak trace: `line: 'pool'` on the poolfilter seal, `MACHINE_LINKS.pool` (REC-on only), `LINE_SHOWS`, `poolDripGoal`, the Deck 5 puddle; machine_check case "Pool leak". |
 | 0.84.6 | 4cfe651 | Crew rec moves via a place's `move` (swim, tread, kayak, climb + rope, float, fan) and the `sit:slump` pose (section 8c `REC_CREW`, `recCrewRopes`). |
+| 0.84.7 | b899519 | The rec causes' `still` lines in the house meaning (W3). |
 
 Naming (lead 18): signs and formal labels "Recreation Deck"; mid-sentence "the rec deck" (`deckIn`); a label's start "Rec deck" (`deckWord`); crew speech "rec dec" (W3).
 
@@ -45,7 +46,8 @@ Naming (lead 18): signs and formal labels "Recreation Deck"; mid-sentence "the r
 - Climbing a roped-off or tagged route is still allowed for you (only "both belays out" refuses); RA or RB2 can steer to an open route.
 - Walking into the shut float room toasts on every walk-in (`recRoomIn` starts floating on entry).
 - Crew climb to the player's `top` (~1.4 m); a third climber at once gets no rope; someone leaving mid-move jumps to the walk tile.
-- Refusal and fault words are first drafts: W3 has been told where (FAULT_CAUSES rec kinds; the toasts in 15r).
+- Fault words: W3's are in `content/works/faults-rec.lines` (claude/writer-rec 019dcd1). The three refusal toasts in 15r and the leak's 'trace.pool.*' toasts are plain strings: W3 will send RB2 keys to wire.
+- Reviewer is now R7 (session_01HCwvy5w432bhz41UYxHYwq); R6 passed up to e4c5da2.
 - Not yet run on the REC-on copy: day_check/events_check with real rec crew (RA's places don't exist yet), interactions_check (taps, job board, goal arrow on Deck 7), disc_check.
 
 ## Helpers
