@@ -619,7 +619,7 @@ def run(path):
         check(len(qc) >= 20 and len(q2) >= 20, f"P3 cases: {len(qc)}, as an Officer {len(q2)}")
         check(all(c['band'] == 'T1' for c in qc) and all(c['band'] == 'T2' and c['lim']['fewest'] == 2 for c in q2), "P3's bands: T1 for a Junior, T2 (P3 keeps T1's size) for an Officer")
         check(.25 * len(q2) <= nodd <= .75 * len(q2), f"about half of an Officer's P3 cases have a note that rules out less than it seems: {nodd}/{len(q2)}")
-        check(all('wrong size' in c['oddText'] and ' — ' in c['oddText'] for c in q2 if c['odd']), f"the wrong-size note says so: {[c.get('oddText') for c in q2 if c['odd']][:2]}")
+        check(all('wrong size' in c['oddText'].lower() and ' — ' in c['oddText'] for c in q2 if c['odd']), f"the wrong-size note says so: {[c.get('oddText') for c in q2 if c['odd']][:2]}")
         for c in qc + q2:
             lo, hi = c['lim']['clues']
             check(lo <= len(c['clues']) <= hi and c['lim']['sus'][0] <= len(c['sus']) <= c['lim']['sus'][1], f"{c['id']}: within its band: {len(c['sus'])} suspects, {len(c['clues'])} notes")
