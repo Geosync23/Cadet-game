@@ -2,6 +2,10 @@
 
 Brief: plans/brief-recdeck.md on claude/lead-pillar1 ("R" section). Lead 18 session_01CBur9nrJ411pFkHopF96RL. Build master BM8 session_01YGy9FDmcbkySMJpVPYJaAo. Earlier verdicts: R6's, in plans/reviews-p5-step4.md ("Rec deck activation"). Newest first.
 
+### RB2 for RA claude/rec-crew 9dfe971 (0.83.3, rename REC_SHOW/recShowTick -> REC_SHOW_CUE/recShowCue) and RB2 claude/rec-works 2f0eea6 (interactions_check: the Tracked test's tap outside the panel), R7: PASS
+- 9dfe971: the three sites renamed, nothing else left by the old names (one comment). Whole-file scan, rec-crew 9dfe971 against rec-works 2f0eea6 (vs aa4f42c): no name both branches add. A trial `git merge` of the two has 6 text conflicts (header, the auditorium's dress around 8511-8577 and 8775, the REC_LANES area, 15r) for BM8 to resolve; afterwards node --check and a duplicate-name scan on the combine.
+- 2f0eea6: check only; the tap moves to the first point clear of the Tracked panel that lands on the canvas (falls back to the old spot). Sound.
+
 ### RB2 claude/rec-works 2387479 (0.84.12: climb refusals, the talk's ring of chairs and stool, pool symptom words), R7: PASS (closes my fix 1)
 - recStart refuses the taped route (`sh.route === r`, W3's rec.shut.route) and route 1/2 under a tagged-out belay (`belayOff`, rec.shut.belay), the same reading the signs use; REC_OK carries `belayOff: [false, false]`. SYMPTOM_TEXT.pool matches W3's words.
 - The ring and stool: RB's kit (the auditorium's dress) for RA's places 7-ring-1..8 / 7-stool-1, one owner each; KIT.chair/stool don't call R(); shown only for 'talk', the mic stand hidden then (merged, noMerge). Note: the hidden microphone keeps its IT, so a tap there during a talk may still say "Microphone" (cosmetic).
