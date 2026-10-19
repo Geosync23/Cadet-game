@@ -1209,6 +1209,232 @@ def side_save(pw):
         for x, y in zip(json.loads(a['before']), json.loads(after or '[]')):
             if x != y: print('   differs:', x, '|', y)
     check(after == a['before'], 'side save: leaks, nozzles, rewire, favours and ff through a real save and reload')
+# 24j the workshop (seat E3, M10): on paper. Day 12, an Officer who knows three crew: one order goes up at 08:00 (from
+# one of them); you take it (your side job: a wait, then a hold, at the lathe or the fabricator); made, it's handed over
+# (a thank-you, a friendship step, a use, reputation once a day). Monday's orders: one left a week lapses with a Mail.
+# Stage 2 (3 made): an order with a part starts at the shelves. Tinkering's things are gifts. The same twice.
+M10 = r"""(() => {
+  SHIP.works = null; SHIP.occasions.length = 0; SHIP.notes = []; SHIP.flags = {}; SHIP.jobs = []; SHIP.mail = [];
+  MACH_HOUR = null; MACH_SEEN = -1; WORKS_TICK.m = WORKS_TICK.h = -1; socInit(); SHIP.rel = {};
+  const run = (from, to) => { for (let m = from; m <= to; m += 10) { setShipNow(m); machinesNow(); worksCareerTick(m); } };
+  setShipNow(11 * 1440 + 300); machinesNow(); const W = worksInit(); W.tier = 2; W.rank = 'officer';
+  const know = SOC.crew.filter(p => !p.player).map(p => p.id).sort().slice(0, 3); for (const id of know) relAdd(id, 'chat', 15);
+  const out = { side: typeof worksSide === 'function', know };
+  if (!out.side) return out;
+  run(11 * 1440 + 300, 11 * 1440 + 470); const s0 = worksSide().shop; out.before = s0 ? s0.orders.length : 0;
+  run(11 * 1440 + 480, 11 * 1440 + 500); const s = worksSide().shop;
+  out.posted = s.orders.map(o => [o.who, o.what, o.day, o.state]);
+  const o = s.orders[0]; if (!o) return out;
+  out.fromKnown = know.includes(o.who);
+  out.take = shopTake(o); const j = SHIP.jobs.find(x => x.id === o.job);
+  out.job = j ? [j.kind, j.claimedBy, j.status, jobSide(j), !myJob()] : null;
+  out.stops = j ? jobStops(j).map(x => [x.step, x.how, x.places[0] || null, x.mins]) : null;
+  const xp0 = W.xp; out.btn0 = shopGiveButton(socP(o.who));
+  jobStops(j).forEach((x, k) => jobStepDone(j.id, k)); if (j.status === 'claimed') jobFinish(j, shipNow(), 'you');
+  run(11 * 1440 + 510, 11 * 1440 + 520);
+  out.made = o.state; out.btnNoHands = shopGiveButton(socP(o.who)); const keep = SHIP.player.carry.slice(); SHIP.player.carry = [shopThing(o)];
+  out.btn = shopGiveButton(socP(o.who)); const r0 = SHIP.rel[o.who].pts;
+  out.thanks = shopGiveSay(socP(o.who)); out.after = [o.state, s.made, Math.round((SHIP.rel[o.who].pts - r0) * 10) / 10 > 0, W.use.m10 || 0, W.xp - xp0];
+  out.btnAfter = shopGiveButton(socP(o.who)); out.handsAfter = SHIP.player.carry.length; SHIP.player.carry = keep;
+  run(11 * 1440 + 530, 14 * 1440 + 500);                   // Monday, Day 15: one or two up
+  out.monday = s.orders.filter(x => x.day === 15).map(x => [x.who, x.what]);
+  const mail0 = SHIP.mail.length; run(14 * 1440 + 510, 21 * 1440 + 490);
+  out.lapsed = s.orders.filter(x => x.day === 15).map(x => x.state); out.mails = SHIP.mail.filter(m => s.orders.some(x => x.day === 15 && m.subject === 'The ' + shopThing(x))).length;
+  s.made = 3; const op = WORKSHOP_ORDERS.find(x => x.part); s.orders.push({ id: 'oT-0', who: know[1], what: op.id, day: 22, state: 'posted' });
+  const o2 = s.orders[s.orders.length - 1]; shopTake(o2); const j2 = SHIP.jobs.find(x => x.id === o2.job);
+  out.stage2 = [shopStage(s), j2 ? jobStops(j2).map(x => x.step) : null, o2.part || null];
+  if (j2) { const had = SHIP.stores[o2.part]; SHIP.stores[o2.part] = 0; shopFetch(j2, { t: 'Shelf' }, null); SHIP.stores[o2.part] = had; out.emptyShelf = jobStops(j2).map(x => [x.step, x.done]); }   // R4: an empty shelf ticks the fetch, not the lathe's wait
+  out.gifts = TINKER_LIST.map(t => !!giftOf(t.item)); out.tinker = TINKER_LIST.filter(t => !t.stage || shopStage({ made: 6 }) >= t.stage).length;
+  // an old save: no side.shop at all loads as empty; a junk one is cleaned
+  worksSide().shop = { orders: [{ id: 1 }, { id: 'x', who: 'y', what: 'nope', state: 'posted' }], made: -4, tinkered: 'z' }; const c = shopData();
+  out.clean = [c.orders.length, c.made, Array.isArray(c.tinkered)]; delete worksSide().shop; out.empty = shopData().orders.length;
+  return out;
+})()"""
+def part_m10(g):
+    a = g.ev(M10)
+    if not a.get('side'):
+        print('  m10: 24 core\'s worksSide is not in this build: skipped'); return
+    b = g.ev(M10)
+    print('  m10 posted:', a['posted'], 'job:', a['job'], 'stops:', a['stops'])
+    print('  m10 hand over:', a['btn'], a['thanks'], a['after'], '| Monday:', a['monday'], a['lapsed'], 'mails', a['mails'])
+    print('  m10 stage 2:', a['stage2'], 'tinker:', a['tinker'], a['gifts'], 'clean:', a['clean'], a['empty'])
+    check(a['before'] == 0 and len(a['posted']) == 1 and a['posted'][0][2] == 12 and a['fromKnown'], 'm10: one order at 08:00 on Day 12, from someone who knows you')
+    check(a['take'] and a['job'] and a['job'][0] == 'shop' and a['job'][1] == 'you' and a['job'][3] and a['job'][4], 'm10: taken, it\'s your side job, not your board job')
+    check(a['stops'] and [x[1] for x in a['stops']] == ['wait', 'hold'] and a['stops'][0][2] in ('5-shop-lathe', '5-shop-fab'), f"m10: a wait then a hold at the machine ({a['stops']})")
+    check(a['btn0'] is None and a['made'] == 'made' and a['btnNoHands'] is None and a['btn'] and a['btn']['id'] == 'shop-give', 'm10: Give appears once it\'s made and in your hands')
+    check(a.get('handsAfter') == 0, 'm10: handing it over takes it from your hands')
+    check(a.get('emptyShelf') == [['fetch', True], ['make', False], ['finish', False]], f"m10: an empty shelf ticks the fetch only ({a.get('emptyShelf')})")
+    check(a['after'][0] == 'given' and a['after'][1] == 1 and a['after'][2] and a['after'][3] == 1 and a['after'][4] in (1, 0) and a['btnAfter'] is None, f"m10: handed over: a friendship step, a use ({a['after']})")
+    check(1 <= len(a['monday']) <= 2 and all(x == 'lapsed' for x in a['lapsed']) and a['mails'] == len(a['lapsed']), 'm10: Monday\'s orders, a week untaken, lapse with a Mail')
+    check(a['stage2'][0] == 2 and a['stage2'][1][0] == 'fetch' and a['stage2'][2], 'm10: stage 2: a part from main storage first')
+    check(all(a['gifts']) and a['tinker'] == 6, 'm10: tinkering\'s things are gifts; stage 3 adds two')
+    check(a['clean'] == [0, 0, True] and a['empty'] == 0, 'm10: an odd or missing save part loads as empty')
+    check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'm10: differs the second time')
+PARTS['m10'] = part_m10
+
+# 24t off shift (seat E3, not a ladder row: run when its functions are in the build): cabin 4-23's spots take things that
+# fit from your hands and give them back; two touches give the waking bonus; an odd save part is cleaned. Star logging: one
+# a night from Day 6, 20:00-23:30; three points, the new one by keys 1024-1025; every third log a friendship step with Survey;
+# ten give the Record's 'stars'. The same twice.
+T24 = r"""(() => {
+  SHIP.works = null; SHIP.jobs = []; SHIP.rel = {}; setShipNow(12 * 1440 + 600); machinesNow(); const W = worksInit(); W.tier = 2; W.rank = 'officer'; W.home = '4-23';
+  const P = SHIP.player, out = {}, keep = P.carry.slice();
+  P.carry = ['little lamp', 'toy rocket']; const tap = k => cabinTap({ t: k, cabin: k }, null);
+  out.tap = [tap('rug'), P.carry.length, tap('desk'), tap('shelf'), P.carry.length, cabinTouches(), cabinMood(), cabinPlaced('toy rocket')];
+  P.carry = ['plant pot']; tap('ledge'); out.four = cabinTouches(); tap('desk'); out.back = [P.carry.slice(), cabinTouches()];
+  worksSide().cabin = { rug: 'banana', desk: 'little lamp', shelf: 7, nope: 'x' }; out.clean = JSON.stringify(cabinData());
+  W.home = 'bunk'; out.notMine = [cabinMine(), cabinMood()]; W.home = '4-23';
+  const s = starsData(); s.n = 0; s.last = 0; out.sky = [12, 13, 14].map(d => JSON.stringify(starSky(d)));
+  out.sato0 = relGet('sato').pts; for (let n = 0; n < 10; n++) { s.n++; if (s.n % 3 === 0) relAdd(['sato', 'mori'][(s.n / 3 - 1) % 2], 'help', 6); }
+  out.friends = [relGet('sato').pts > out.sato0, relGet('mori').pts > 0];
+  P.carry = keep; return out;
+})()"""
+T24B = r"""(() => {
+  SHIP.works = null; SHIP.jobs = []; SHIP.rel = {}; setShipNow(11 * 1440 + 1230); machinesNow(); const W = worksInit(); W.tier = 2; W.rank = 'officer'; W.home = '4-23'; W.ms = [];
+  const out = {}, s = starsData(); s.n = 0; s.last = 0;
+  goToDeck(2); const it = ITEMS.find(x => /telescope/i.test(x.t) && x.hit && (() => { const p = new THREE.Vector3(); x.hit.getWorldPosition(p); return roomAt(...cellAt(p.x, p.z)) === 'J'; })());
+  const at = new THREE.Vector3(); if (it) it.hit.getWorldPosition(at);
+  const tapAt = t => { setShipNow(t); const r = starTap(it, at.clone()); if (ACT) actEnd(true); player.stop(); return r; };
+  out.found = !!it;
+  out.hours = [tapAt(11 * 1440 + 1199), tapAt(4 * 1440 + 1230)];   // 19:59; Day 5 (before Day 6)
+  const pick = k => { if (!starLog(it)) return false; devChosen(k); return true; }, d = 12, sky = starSky(d);
+  setShipNow(11 * 1440 + 1230);
+  out.tap = tapAt(11 * 1440 + 1230);
+  out.wrong = [pick((sky.fresh + 1) % 3), s.n];
+  out.right = [pick(sky.fresh), s.n, s.last];
+  out.again = tapAt(11 * 1440 + 1300);                      // one a night
+  out.next = tapAt(12 * 1440 + 1230);
+  setShipNow(11 * 1440 + 1230); const sato0 = relGet('sato').pts; s.n = 2; s.last = 0; pick(sky.fresh); out.third = [s.n, relGet('sato').pts > sato0];
+  s.n = 9; s.last = 0; pick(sky.fresh); out.ten = [s.n, W.ms.some(x => x[0] === 'stars')];
+  // the save's own path: SAVE_EXTRA builds it, JSON, then worksClean as at load
+  worksSide().cabin = { rug: 'woven rug', shelf: 'metal puzzle' };
+  const save = { ship: {} }; for (const f of SAVE_EXTRA) { try { f(save); } catch (e) { /* not ours */ } }
+  const back = worksClean(JSON.parse(JSON.stringify(save.ship.works)));
+  out.trip = [JSON.stringify(back.side.cabin), JSON.stringify(back.side.stars)];
+  out.looks = CABIN_SPOTS.map(k => CABIN_FITS[k].every(x => !!CABIN_LOOK[x]));
+  out.clash = WORKSHOP_ORDERS.filter(o => TINKER_LIST.some(t => t.item === o.thing)).map(o => o.thing);   // R5: an order's thing never shares a tinkered thing's name
+  worksSide().cabin = { ledge: 'mug rack' }; out.oldRack = cabinData().ledge;
+  const P2 = SHIP.player, kc = P2.carry.slice(), ku = P2.untidy, kb = P2.bought; delete worksSide().cabinPut;
+  P2.untidy = true; P2.bought = (P2.bought || 0) + 1; const t0 = lockerTidy(); P2.carry = ['plant pot']; delete worksSide().cabin.ledge; cabinTap({ t: 'ledge', cabin: 'ledge' }, null);
+  const t1 = lockerTidy(); P2.bought++; out.tidy = [t0, t1, lockerTidy()]; P2.carry = kc; P2.untidy = ku; P2.bought = kb;
+  // visitors notice: a stand-in line and someone in your cabin (the writer's bank may not be baked in yet)
+  const keepL = LINES['cabin.remark'], keepB = bubbleSay, said = []; LINES['cabin.remark'] = [{ text: 'Nice lamp.', id: 'tst1', flag: 'cabin.lamp' }, { text: 'Good rug.', id: 'tst2', flag: 'cabin.rug' }];
+  bubbleSay = (h, t) => said.push(t); worksSide().cabin = { desk: 'little lamp' }; goToDeck(4); player.obj.position.copy(cellPos(40, 11));
+  const who = schedPeople()[0], fake = { p: who, h: {}, here: () => [40, 11], x: 0, z: 0 }; DECK_CREW.push(fake); CAB_REMARK.at = -99; CAB_REMARK.day = 0;
+  cabinRemark(shipNow()); cabinRemark(shipNow() + 10); DECK_CREW.splice(DECK_CREW.indexOf(fake), 1); LINES['cabin.remark'] = keepL; bubbleSay = keepB;
+  out.remark = said;
+  return out;
+})()"""
+def part_t24(g):
+    if not g.ev("typeof cabinTap === 'function' && typeof starTap === 'function'"):
+        print('24t (off shift): not in this build'); return
+    a = g.ev(T24); b = g.ev(T24)
+    print('24t cabin:', a['tap'], a['four'], a['back'], a['clean'], a['notMine'], '| stars:', a['sky'], a['friends'])
+    check(a['tap'] == [True, 2, True, True, 0, 2, 1, True] and a['four'] == 3 and a['back'] == [['little lamp'], 2], f"24t: spots take what fits and give it back ({a['tap']} {a['back']})")
+    check(a['clean'] == '{"desk":"little lamp"}' and a['notMine'] == [False, 0], '24t: an odd save part is cleaned; not your cabin, no bonus')
+    check(len(set(a['sky'])) == 3 and all(len(json.loads(x)['pts']) == 3 for x in a['sky']), '24t: three points a night, different nights differ')
+    check(all(a['friends']), '24t: Survey warms to you (Sato, then Mori)')
+    check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), '24t: differs the second time')
+    c = g.ev(T24B)
+    print('24t stars driven:', c)
+    check(c['found'] and c['hours'] == [False, False] and c['tap'], f"24t: the telescope offers the log from Day 6, 20:00 on ({c['hours']}, {c['tap']})")
+    check(c['wrong'] == [True, 0] and c['right'] == [True, 1, 12] and c['again'] is False and c['next'], f"24t: a wrong pick, look again; the right one logs; one a night ({c['wrong']} {c['right']} {c['again']})")
+    check(c['third'] == [3, True] and c['ten'] == [10, True], '24t: every third log Survey warms to you; ten give the Record line')
+    check(c['trip'] == ['{"rug":"woven rug","shelf":"metal puzzle"}', '{"n":10,"last":12}'], f"24t: cabin and stars round-trip through the save ({c['trip']})")
+    check(all(c['looks']), '24t: every thing that fits a spot has a look')
+    check(c['clash'] == [] and c['oldRack'] == 'mug tree', f"24t: no order shares a tinkered thing's name; an old save's mug rack on the ledge is the mug tree ({c['clash']}, {c['oldRack']})")
+    check(c['tidy'] == [False, True, False], f"24t: a thing placed in your cabin counts as put away, until you buy or make another ({c['tidy']})")
+    check(c['remark'] == ['Nice lamp.'], f"24t: a visitor in your cabin notices the lamp, once a day ({c['remark']})")
+
+# 24s the lift roof (M17, seat E4): on paper, when you can climb on (Thursdays from Day 18, trained, 15:30 till there's time for
+# the whole spine, once a day); the hold: crew whose plan takes them to another deck wait by the lift on the deck they were
+# on until 16:30, then follow their plan; the ride itself, frame by frame: a stop at every deck's guide, out on the bottom
+# deck, a ride and a use counted, the lift a little smoother, the car held till 16:30 and let go then; draw calls in the
+# shaft; stepping off part way leaves you on that deck; a save mid-ride has you on the top deck in the car, the hold not
+# saved; an old or odd save part loads as the default. The same twice.
+M17P = r"""(() => {
+  SHIP.works = null; SHIP.jobs = []; LIFT_HOLD = null; const B = 17 * 1440; setShipNow(B + 900); machinesNow(); const W = worksInit(); W.tier = 2; W.rank = 'officer';
+  const out = { untrained: roofOpen(B + 935) }; W.tr.m17 = 18; const r = roofData(); r.rides = 0; r.last = 0;
+  out.open = [roofOpen(B + 929), roofOpen(B + 930), roofOpen(B + 990 - roofLen()), roofOpen(B + 991 - roofLen()), roofOpen(B - 1440 + 935), roofOpen(B + 7 * 1440 + 935), roofOpen(B - 7 * 1440 + 935)];
+  r.last = 18; out.twice = roofOpen(B + 935); r.last = 0;
+  const ppl = schedPeople(), ts = []; for (let m = 935; m <= 1010; m += 5) ts.push(B + m);
+  const base = ppl.map(p => ts.map(t => { const w = whereIs(p, t); return w ? w.deck : null; }));
+  setShipNow(B + 935); liftHold(true, B + 990);
+  let movers = 0, bad = [], waiting = 0, after = 0;
+  ppl.forEach((p, i) => {
+    const d0 = base[i][0]; let moved = false;
+    ts.forEach((t, k) => { const w = whereIs(p, t), dk = w ? w.deck : null;
+      if (t < B + 990) { if (base[i][k] !== d0) { moved = true; if (dk !== d0 || w.type !== 'lift-wait') bad.push(p.id + '@' + hhmm(t % 1440)); else waiting++; } else if (dk !== base[i][k]) bad.push(p.id + '~' + hhmm(t % 1440)); }
+      else { if (dk !== base[i][k]) bad.push(p.id + '>' + hhmm(t % 1440)); else after++; } });
+    if (moved) movers++;
+  });
+  out.hold = { movers, waiting, bad: bad.slice(0, 6), held: [liftHeld(B + 935), liftHeld(B + 989), liftHeld(B + 990), liftHeld(B + 934)] };
+  let fake = null; const mover = ppl.find((p, i) => base[i].slice(0, 11).some(dk => dk !== base[i][0])), keepL = LINES['roof.wait'], keepB = bubbleSay, said = [];
+  if (mover) { fake = { p: mover, h: {}, x: player.obj.position.x, z: player.obj.position.z }; DECK_CREW.unshift(fake); DECK_CREW.splice(DECK_CREW.indexOf(fake), 1); LINES['roof.wait'] = [{ text: 'Lift\'s held again.', id: 'tstw' }]; bubbleSay = (h, t) => said.push(h === fake.h ? t : 'someone else'); ROOF.r = null; ROOF_TALK.at = -99;
+    const t1 = ppl.indexOf(mover), k = base[t1].findIndex(dk => dk !== base[t1][0]);
+    DECK_CREW.unshift(fake); roofTalk(ts[k]); roofTalk(ts[k] + 7); DECK_CREW.splice(DECK_CREW.indexOf(fake), 1); LINES['roof.wait'] = keepL; bubbleSay = keepB; }
+  out.talk = said.filter(x => x !== 'someone else');
+  LIFT_HOLD = null;
+  delete worksSide().roof; out.old = JSON.stringify(roofData()); worksSide().roof = { rides: -3, last: 'x', foo: 1 }; out.junk = JSON.stringify(roofData());
+  worksSide().roof = { rides: 2, last: 11 }; out.trip = JSON.stringify(worksClean(JSON.parse(JSON.stringify(SHIP.works))).side.roof);
+  return out;
+})()"""
+M17SET = r"""((day) => {
+  const B = (day - 1) * 1440; LIFT_HOLD = null; setShipNow(B + 935); machinesNow();
+  goToDeck(1); const c = nearestOpen(LIFT_AT[0] + 2.5, LIFT_AT[1], player); player.obj.position.copy(cellPos(...c));
+  window.__m17 = { cond: Math.round(SHIP.machines['5-mainlift-1'].cond), stops: [], calls: 0 };
+  const a = roofLiftTap(); devChosen(0); return [a, ACT && ACT.kind];
+})"""
+M17WATCH = r"""(() => { const A = ACT, R = A && A.kind === 'roofRide' && A.o.r, M = window.__m17;
+  if (R && R.st === 'grease' && !M.stops.includes(R.k)) M.stops.push(R.k);
+  if (R && R.inShaft && !R.off) M.calls = Math.max(M.calls, renderer.info.render.calls);
+  return R ? [R.st, R.k, !!R.inShaft, player.deck, roomAt(...player.here()), ROOF.r === R, roofData().on || 0] : A && A.kind === 'roofRide' ? ['in', 0, false, player.deck, roomAt(...player.here())] : null; })()"""
+def part_m17(g):
+    if not g.ev("typeof roofStep === 'function'"):
+        print('  m17: 24s is not in this build'); return
+    keep = g.ev("JSON.stringify({ t: shipNow(), deck: deckDef.num, pos: [player.obj.position.x, player.obj.position.z], needs: SHIP.player.needs, carry: SHIP.player.carry })")
+    a = g.ev(M17P); b = g.ev(M17P)
+    print('  m17 open:', a['untrained'], a['open'], a['twice'], '| hold:', a['hold'], '| saves:', a['old'], a['junk'], a['trip'])
+    check(a['untrained'] is False and a['open'] == [False, True, True, False, False, True, False] and a['twice'] is False, f"m17: you can climb on Thursdays from Day 18, 15:30 while there's time, once a day ({a['open']})")
+    h = a['hold']
+    check(h['held'] == [True, True, False, False] and not h['bad'], f"m17: held 15:35-16:30; crew who'd change deck wait by the lift, then follow their plan ({h['bad']})")
+    check(a['talk'] == ["Lift's held again."], f"m17: someone waiting by the held lift says so, once a hold ({a['talk']})")
+    check(a['old'] == '{"rides":0,"last":0}' and a['junk'] == '{"rides":0,"last":0}' and a['trip'] == '{"rides":2,"last":11}', 'm17: an old or odd save part loads as the default; it round-trips')
+    check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'm17: differs the second time')
+    runs = []
+    for day, off in ((18, None), (25, 2)):
+        g.ev("SHIP.works = null"); g.ev("(() => { setShipNow(17 * 1440 + 900); const W = worksInit(); W.tier = 2; W.rank = 'officer'; W.tr.m17 = 18; })()")
+        if day == 25: g.ev("(() => { const r = roofData(); r.rides = 1; r.last = 18; SHIP.works.use.m17 = 1; })()")
+        start = g.ev(f"({M17SET})({day})"); seen = []; mid = None
+        for n in range(200):
+            g.step(10); w = g.ev(M17WATCH)
+            if w and (not seen or seen[-1][:2] != w[:2]): seen.append(w)
+            if w and w[2] and mid is None: mid = w
+            if off is not None and w and w[0] == 'drop' and w[1] == off: g.ev("actEnd(true)"); g.step(60); break
+            if w is None: g.step(60); break
+        res = g.ev("[deckDef.num, ACT && ACT.kind, ROOF.g && ROOF.g.visible, JSON.stringify(roofData()), SHIP.works.use.m17 || 0, Math.round(SHIP.machines['5-mainlift-1'].cond), liftHeld(), Math.round(shipNow() % 1440), JSON.stringify(window.__m17), roofDecks()]")
+        held = g.ev(f"[liftHeld({(day - 1) * 1440 + 989}), liftHeld({(day - 1) * 1440 + 990}), 'LIFT_HOLD' in JSON.parse(JSON.stringify(SHIP.works))]")
+        runs.append([start, seen, mid, res, held])
+        print(f'  m17 ride Day {day}:', start, '| mid', mid, '| end', res, held)
+    (s1, seen1, mid1, r1, h1), (s2, seen2, mid2, r2, h2) = runs
+    m1 = json.loads(r1[8]); decks = r1[9]
+    check(s1 == [True, 'roofRide'] and mid1 and mid1[3] == 1 and mid1[4] == '@' and mid1[5] is True and mid1[6] == 18, f"m17: you climb on (the ride is the roof's, side.roof.on set); mid-ride a save has you on Deck 1 in the car ({mid1})")
+    check(m1['stops'] == list(range(len(decks))) and r1[0] == decks[-1] and r1[1] is None and not r1[2], f"m17: a stop at every deck's guide, out on the bottom deck ({m1['stops']}, Deck {r1[0]})")
+    check(r1[3] == '{"rides":1,"last":18}' and r1[4] == 1 and r1[5] > m1['cond'], f"m17: the ride counts, the lift runs smoother ({r1[3]} use {r1[4]} cond {m1['cond']} -> {r1[5]})")
+    check(r1[6] and h1[:2] == [True, False] and not h1[2], 'm17: the car is held till 16:30, let go then; the hold is not saved')
+    check(0 < m1['calls'] < 160, f"m17: draw calls in the shaft {m1['calls']}")
+    check(r2[0] == decks[2] and r2[1] is None and not r2[2] and r2[3] == '{"rides":1,"last":18}', f"m17: stepping off part way leaves you on that deck, no ride counted ({r2[0]}, {r2[3]})")
+    g.ev(f"({M17SET})(32)"); fade = None   # R5: walking off in the fade before the shaft: the fade goes, no "saved on the roof" left behind
+    for n in range(120):
+        g.step(5); w = g.ev(M17WATCH)
+        if w and w[0] == 'dark': g.ev("actEnd(true)"); g.step(20); fade = g.ev("[+fadeEl.style.opacity, ROOF.r.off, 'on' in roofData(), ACT && ACT.kind]"); break
+    check(fade == [0, True, False, None], f"m17: stepping away in the fade before the shaft undoes the fade ({fade})")
+    res = g.ev("(() => { const kt = toast, said = []; toast = (a, b) => said.push(b); ROOF.r = null; roofData().on = 32; const S = worksSide(); for (const f of WORK_TICKS) { try { f(shipNow(), false); } catch (e) {} } for (const f of WORK_TICKS) { try { f(shipNow() + 1, false); } catch (e) {} } toast = kt; return [said.filter(x => /saved on the lift roof|back at the top/i.test(x)).length, 'on' in roofData()]; })()")
+    check(res == [1, False], f"m17: loaded from a save made on the roof, roof.resume once ({res})")
+    a2 = g.ev(M17P)
+    check(json.dumps({**a2, 'talk': 0}, sort_keys=True) == json.dumps({**a, 'talk': 0}, sort_keys=True), 'm17: the paper part differs after the rides')
+    g.ev(f"(() => {{ const k = {keep}; LIFT_HOLD = null; setShipNow(k.t); if (deckDef.num !== k.deck) goToDeck(k.deck); player.obj.position.x = k.pos[0]; player.obj.position.z = k.pos[1]; Object.assign(SHIP.player.needs, k.needs); SHIP.player.carry = k.carry; }})()")   # as it was, for the parts after
+PARTS['m17'] = part_m17
 
 only = set(sys.argv[2:])
 with sync_playwright() as pw:
@@ -1245,6 +1471,7 @@ with sync_playwright() as pw:
         part_round23(g)
     for k, f in EXTRA.items():                             # parts that aren't ladder rows (24l's favour cases)
         if (not only or k in only) and ev(f"!!JOB_KINDS['{k}'] || (typeof ffState === 'function' && '{k}' === 'ff') || (typeof teamParts === 'function' && '{k}' === 'tparts')"): print(k + ':'); f(g)
+    if not only or 't24' in only: part_t24(g)
     ev("SHIP.works = null")
     if g.errors: fail('page errors: ' + ' | '.join(g.errors[:5]))
     g.close()
