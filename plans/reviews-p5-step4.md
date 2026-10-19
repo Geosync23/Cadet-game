@@ -20,6 +20,13 @@ Lines skimmed. In a fresh archive content_gen bakes 9342 lines; lines_check PASS
 
 ## Step 4
 
+### E1 claude/mech-rounds 013f53ec (0.45.13, hauling stage 2: haulFree, haulOrderAsk, haulTidy), R5: PASS WITH FIXES (one small; E1 has handed over, for the next E1 seat)
+Diff 633eade..013f53ec, read by hand against step4-stages (D3's answers).
+- Good: m4 stage 1 now after 2 runs; from Day 10 (haulFree) a manifest run with crates for 2+ stops asks you the order once (j.orderAsked), before any delivery, one deviceChoose per stop, Cancel keeps the rest; "A tidy run" (haul.tidy) when the deck changes are the fewest possible, +1 through worksSideXp for an officer only; an officer at stage 2 keeps the run held to 16:00. Parts runs (j.src) and load-only runs are left alone. New names haulFree/haulDeck/haulTidy/haulOrderAsk nowhere else. No R(); j.order/j.orderAsked live on the job (saved with the jobs).
+- **Fix (small): the order also reshuffles the load stops.** haulStops sorts `cs` by j.order and builds BOTH the load and the deliver stops from it; stepsDone holds stop indexes. If a load is done before (or while) the order is picked (the deviceChoose is async, and during it j.order is partial, so unplaced crates sort first), index 0 can name a different crate afterwards: the wrong crate shows as loaded and haulTake's j.got goes out of step. Sort only the deliver stops (keep the loads in manifest order), or ask before the first load.
+- Note: haulTidy doesn't count the trip back to the dock (fine, the same for every order).
+- Checks: on a merge with E3's places, queued.
+
 ### E1 claude/mech-rounds 633eade (0.45.12, manifestRun) and fb499eb8 (0.45.11, M11 tool upkeep + M12 logbook, flat side rep, key order), R5: PASS WITH FIXES (two)
 fb499eb8 read with a helper agent against m11/m12 (diff from b82c8e23); 633eade read by hand. Line numbers in 633eade.
 - Good, M11: the bench (scanner charging 5 min as a wait a tick finishes, pipe kit 2-min hold, logger 1), back to Charged; +1 a week through worksSideXp when all are charged; stages [0,2,4], the rack from stage 2 with Calder's upkeep.rack. M12: workdays 16:30-17:30 at the notice board by 5-works-terminal, three summaries from the real work log/found notes/open jobs, order by schedU(d, 0, 1012) (the only key), one entry a day +1 capped, j.logged = 10% quicker for you and the crew, the flag from stage 1, the last 30 kept.
