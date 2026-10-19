@@ -70,6 +70,7 @@ NAV:read=Your answer|rooms=Room by room|talks=Wren talks|week=The week|fit=Clash
   </table></div>
   <ul>
     <li><b>Skips:</b> the career's big days (1, 9-11, 15-16, 22-23, 26) and the storm (4-5), as v2 did. So the first four weeks have three talks (two of them chiefs'); from Day 29 there are two a week.</li>
+    <li><b>Every Monday and Thursday has a talk</b> unless it's one of those skip days. The rota lists every talk day: in Days 1-28 only 8, 18 and 25 are clear (Mondays 1, 15, 22 and Thursdays 4, 11 are skipped); from Day 29 it's every Monday and Thursday.</li>
     <li><b>Later</b> you may be asked to give a small talk yourself (question 7).</li>
   </ul>
   <h3>The rota, the first seven weeks</h3>
