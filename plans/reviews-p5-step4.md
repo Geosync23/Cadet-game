@@ -57,6 +57,9 @@ Lines skimmed. In a fresh archive content_gen bakes 9342 lines; lines_check PASS
 
 ## Step 4
 
+### BM8 claude/p5-cand-s5 4e0c385 (check only, 0.63.5 prep, on 0.63.4 final aa4f42c), R6: PASS
+mech_check.py, two lines: TPARTS' `reset` first puts back the works the part started with (`W0`, captured at the part's start), so the machine catch-up in `machinesNow` (jobsHour hooks) never sees the last run's tier-2 works; the M12 part resets `MACH_HOUR`/`MACH_SEEN` before `setShipNow`, like every other part, so it replays the machines from the start. Both only make the parts independent of what ran before; no game change. BM8: MECH CHECK OK on 92d40d5 alone and with X2 6c26c72.
+
 ### E4 claude/mech-diagnose 05bcbad (0.53.15, tip b0cb86c: no 'stairs' roof.wait line; the 4-23 shelf as wood on brackets), R6: FAIL (one line; E4 has stopped, so for the next seat or the build master)
 - **The bug: roofTalk's null guard is inside a comment again.** ~41168: `const l = lineFor(a.p.id, 'roof.wait', { t: now, keep: ... });   // (the lead's call: ... left out) if (!l || !l.text) return;`. The guard is commented out, so the next line's `bubbleSay(a.h, l.text, 5)` throws a TypeError whenever lineFor finds no line: on E4's own branch that's every time (roof.wait isn't baked there), and after the merge whenever no line fits. It parses (node --check passes), so only a play-through with crew waiting by a held lift and no line shows it. Fix: put `if (!l || !l.text) return;` on its own line before `ROOF_TALK.at = now;`. mech_check's m17 part should also run roofTalk once with no roof.wait line (expect no throw, nothing said).
 - **Closed in the merge:** BM7's 0.63.4 candidate claude/p5-cand-s4 92d40d5 puts the guard on its own line ("merge fix, 0.63.4"); confirmed by R6: parses, roof.wait baked.
