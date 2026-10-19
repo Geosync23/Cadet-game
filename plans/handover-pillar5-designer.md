@@ -45,6 +45,8 @@ Done and sent: plan v10 (9e26a58: Step 2's optional stages into Step 4, the cold
 
 - 71fe06b: events plan v4 APPROVED (2026-10-19), written into design-doc's Ship-wide events. Lead 16 (session_01UMyfd16GqSdgNyz5PE8qSv) from ~02:15: Step 3 seats route page questions via the lead or directly. Standing by.
 
+- 5f25fbd: `plans/rec-traditions-plan.html` (src `rectrad.body`), artifact https://claude.ai/artifact/JFMgkWEYAhoEa2HphtN4im: twelve rec dec traditions for the rec deck's activation phase (after Steps 3 and 4), for the user's approval (6 questions).
+
 ## Next (in order)
 1. ~~**Finish the Tier 2 fault tables**~~ (done, adc12e2) (`fault-tables.html`, `src/ft.body`): each Tier 2 kind's causes in the Tier 1 format (card, up close, when, how common, still, from), parts from `STOCK` only, same card needs different signs. Needed by: M9's lines (water: recycler, filter, uv, pump, valve; heat: heater, heatpump, manifold), P1's first case (3-pump-1 `peak`; filter `always`; membrane; valve), P2's first case (scrubber: filter `always`, bearing `warm`, a new `panel` cause, part seal, `touched`). Air plant and main fan are stand-ins without panels (no tracing for air yet).
 2. Whatever the user sends back on the Step 3 pages (fix, re-push, one line to the lead each).
