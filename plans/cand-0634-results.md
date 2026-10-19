@@ -49,3 +49,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - ~06:02 R5: E2 dd0ec46 (0.51.7 M15 rewiring) PASS WITH FIXES (double right-first pay, save round trip, the right terminal = stop position): hold for E2's next hash.
 - ~06:02 W2 1beddb1 (0.48.114: rewire.faded singular); with R5.
 - ~06:03 R5: E2 d0e6fe9 (0.51.8 favour cases) PASS WITH FIXES (fcase rep uncapped, mid-case lapse orphans the side job, save round trip): hold for E2's next hash.
+- ~06:03 R5 PASS W2 1beddb1 (W2's tip).
