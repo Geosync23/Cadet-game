@@ -293,18 +293,25 @@ with sync_playwright() as pw:
     else:
         SUM = PAPER.replace("      const W = SHIP.works, c = W && W.cur;\n", """      { const r = SHIP.occasions.find(x => x.id === 'promoSummons' && x.status === 'asked');   // the summons: there at 11:00 (t2: 'real'), or not ('away')
         if (r && t >= r.at && t < r.at + r.len && t2 === 'real' && !r.met) { r.met = true; const sc = MEETING_SCRIPTS['promo.officer']; sc.onPick(2, {}); sc.onEnd(true); }
-        if (r && t2 === 'away') for (let m = 0; m < 60; m += 5) worksCareerTick(t + m); }
+        if (r && t2 === 'away') for (let m = 0; m < 60; m += 5) worksCareerTick(t + m);
+        const q = SHIP.occasions.find(x => x.id === 'promoCeremony' && x.status === 'asked');   // the ceremony: there at 17:15, or not
+        if (q && t2 === 'real' && t >= q.at - 15 && t < q.at + q.len && !q.met) { worksCareerTick(q.at); q.met = true; const sc = MEETING_SCRIPTS['promo.ceremony']; sc.onPick(0, {}); sc.onEnd(true); }
+        if (q && t2 === 'away') for (let m = 0; m < 60; m += 5) worksCareerTick(t + m); }
       const W = SHIP.works, c = W && W.cur;\n""")
         def run(mode, days):
-            return ev(f"""(() => {{ window.__xpAt = null; const st = onSim('promoted', () => {{ window.__xpAt = [SHIP.works.xp, worksBandWord()]; }}); const out = ({SUM})({{ plan: 'steady', days: {days}, t2: '{mode}' }});
+            return ev(f"""(() => {{ window.__xpAt = null; const pn = {{ promoted: [], moved: [], commissioned: [] }}, keep = k => n => pn[k].push(n); const st = onSim('promoted', () => {{ window.__xpAt = [SHIP.works.xp, worksBandWord()]; }}), sts = Object.keys(pn).map(k => onSim(k, keep(k))); const out = ({SUM})({{ plan: 'steady', days: {days}, t2: '{mode}' }});
               out.rank = [SHIP.works.tier, SHIP.works.rank, Math.round(SHIP.works.xp), worksBandWord ? worksBandWord() : null, playerTier(), playerRank()];
-              out.plan = promoPlan(); out.reply = flag('promo.reply'); out.promoted = simNotes('promoted').map(n => [Math.floor(n.t / 1440) + 1, hhmm(n.t % 1440), n.how]);
+              out.plan = promoPlan(); out.reply = flag('promo.reply'); out.promoted = pn.promoted.map(n => [Math.floor(n.t / 1440) + 1, hhmm(n.t % 1440), n.how]);
               out.summ = SHIP.occasions.filter(r => r.id === 'promoSummons').map(r => [Math.floor(r.at / 1440) + 1, hhmm(r.at % 1440), r.status, !!(r.f && r.f.warn), r.f && r.f.seek ? hhmm(r.f.seek % 1440) : null]);
               out.juniorHeld = forYou({{ urgency: 0, kind: 'haul', junior: true, tier: 1 }}); out.mailC = SHIP.mail.filter(m => /Calder|Marrow/.test(m.from)).map(m => m.subject);
               out.home = [SHIP.works.home, SHIP.works.done.slice(), typeof worksHomeOpen === 'function' && worksHomeOpen(4, 'W'), doorOpenFor('W', 'player', shipNow(), 4), doorOpenFor('V', 'player', shipNow(), 4)];
-              out.moved = simNotes('moved').map(n => [Math.floor(n.t / 1440) + 1, hhmm(n.t % 1440), n.how]);
-              out.xpAt = window.__xpAt; st(); return out; }})()""")
-        sm = run('real', 11)
+              out.moved = pn.moved.map(n => [Math.floor(n.t / 1440) + 1, hhmm(n.t % 1440), n.how]);
+              out.cer = SHIP.occasions.filter(r => r.id === 'promoCeremony').map(r => [Math.floor(r.at / 1440) + 1, hhmm(r.at % 1440), r.deck + '/' + r.room, r.f && r.f.seek ? hhmm(r.f.seek % 1440) : null]);
+              out.com = pn.commissioned.map(n => [Math.floor(n.t / 1440) + 1, n.how]); out.pip = [PLAYER_SPEC.rank, player.spec.rank];
+              out.keep = (SHIP.social && SHIP.social.keepsakes || []).filter(k => k.from === 'marrow').map(k => k.what); out.guests = promoGuests(); out.head = (worksRecordHead() || {{}}).text;
+              out.mailCer = SHIP.mail.filter(m => /Captain/.test(m.from)).map(m => m.subject);
+              out.xpAt = window.__xpAt; st(); sts.forEach(f => f()); return out; }})()""")
+        sm = run('real', 12)
         print('   there:', sm['summ'], sm['promoted'], sm['rank'], 'reply', sm['reply'], sm['plan'])
         check(sm['summ'] and sm['summ'][0][:2] == [10, '11:00'] and sm['summ'][0][3], f"the summons: Day 10 at 11:00 in Calder's office, warned at 10:30: {sm['summ']}")
         check(sm['promoted'] and sm['promoted'][0][0] == 10 and sm['promoted'][0][2] == 'met' and len(sm['promoted']) == 1, f"promoted once, on Day 10 at the scene: {sm['promoted']}")
@@ -314,8 +321,15 @@ with sync_playwright() as pw:
         print('   the move:', sm['moved'], sm['home'])
         check(sm['home'][0] == '4-23' and 'move2' in sm['home'][1] and sm['home'][2] and sm['home'][3] and not sm['home'][4], f"the move: 4-23 is yours (home, done, its door opens for you, not the other spare's): {sm['home']}")
         check(sm['moved'] and sm['moved'][0][0] == 10 and sm['moved'][0][1] <= '17:30' and len(sm['moved']) == 1, f"moved once, on Day 10 by 17:30: {sm['moved']}")
-        aw = run('away', 11)
+        print('   the ceremony:', sm['cer'], sm['com'], 'pip', sm['pip'], sm['keep'], sm['guests'], sm['mailCer'])
+        check(sm['cer'] and sm['cer'][0][:3] == [11, '17:15', '1/O'] and sm['com'] == [[11, 'met']], f"the ceremony on Day 11 at 17:15 in the observation room, commissioned once: {sm['cer']}, {sm['com']}")
+        check(sm['pip'] == [1, 1] and sm['keep'] and 'Commissioned Officer, Day 11' in (sm['head'] or '') and 'ceremony2' in sm['works']['done'] and ['commissioned', 11] in sm['works']['ms'], f"the pip, the framed commission, the Record: {sm['pip']}, {sm['keep']}, {sm['head']}")
+        check(sm['guests'][:4] == ['marrow', 'vance', 'calder', 'torres-zeke'] and len(sm['guests']) <= 7, f"the ceremony's guests: {sm['guests']}")
+        aw = run('away', 12)
         print('   away:', aw['summ'], aw['promoted'], aw['mailC'])
+        print('   away, the ceremony:', aw['cer'], aw['com'])
+        check(aw['cer'] and aw['cer'][0][3] == '17:30' and aw['com'] == [[11, 'mail']], f"away: Calder sets off to walk you up at 17:30; commissioned by Mail by 19:00 anyway: {aw['cer']}, {aw['com']}")
+        ev("promoPip()")
         check(aw['summ'] and aw['summ'][0][4] == '11:15' and aw['promoted'] and aw['promoted'][0][0] == 10 and aw['promoted'][0][2] == 'mail' and aw['rank'][1] == 'officer', f"away: Calder sets off to find you at 11:15; promoted by Mail the same day anyway: {aw['summ']}, {aw['promoted']}")
 
     print('(h) The bridge, by invitation (Step 3):')

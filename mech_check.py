@@ -380,6 +380,9 @@ with sync_playwright() as pw:
         if not r['inBuild']:
             print(f"{r['id']} ({r['name']}): not in this build")
             continue
+        if r['id'] == 't2' and ev("typeof promoPassed === 'function'"):   # 24p's test job (0.44.18) is no training: career_check (i)-(j) tests it
+            print(f"t2 ({r['name']}): 24p's test job, not a training (career_check (i) and (j))")
+            continue
         a = ev(f"({TRAIN})('{r['id']}')")
         b = ev(f"({TRAIN})('{r['id']}')")
         print(f"{r['id']} ({r['name']}, {r['size']}): opened Day {a['day']}, trained Day {a['trained']}, steps {a['states']}, teacher's job by {a['teacher']}, yours by {a['yours']}, stage {a['stage']}")

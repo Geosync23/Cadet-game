@@ -269,7 +269,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.44.20
+   STARSHIP CADET: CSV Wren                           build 0.44.21
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8614,7 +8614,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.44.20';                           // keep in step with the header's build line
+const GAME_BUILD = '0.44.21';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -38605,7 +38605,7 @@ function worksEscortEnd(id) {
 onSim('caseCalled', n => { const c = SHIP.works && SHIP.works.cur; if (n && n.train && c && c.hold) worksEscortEnd(c.id); });   // 24k: the training case is called
 // the teacher's walk (section 14's escortPlanOf asks): lead you to the training job while you watch, follow you while you do one
 function worksEscort(p, t) {
-  { const pe = p && typeof promoEscort === 'function' ? promoEscort(p, t) || promoMoveEscort(p, t) : null; if (pe) return pe; }   // 24p: Calder comes to find you for the summons; the walk to your cabin
+  { const pe = p && typeof promoEscort === 'function' ? promoEscort(p, t) || promoMoveEscort(p, t) || promoCerEscort(p, t) : null; if (pe) return pe; }   // 24p: Calder comes to find you for the summons; the walk to your cabin; up to the ceremony
   const W = SHIP.works, c = W && W.cur; if (!c || !p || p.id !== c.by || (c.st !== 'watch' && c.st !== 'do' && c.st !== 'held') || worksDay(t) !== c.d) return null;
   const j = SHIP.jobs.find(x => x.id === c.j), spot = trainSpot(j);
   if (c.st === 'held') return spot ? { mode: 'follow', to: { deck: spot.deck, tile: spot.tile } } : null;   // they stay with you
@@ -38688,7 +38688,8 @@ function worksNext() {
 // the Record's first lines (section 19 asks): your rank, your Works reputation and "What's next"
 function worksRecordHead() {                             // null before SHIP.works (Days 0-1 keep the Record's old line)
   const W = SHIP.works; if (!W) return null; const tier = W.tier, v = { title: worksText('works.title.t' + tier, 'tier ' + tier), rank: worksRankTitle(W), band: worksBandWord(), next: worksNext() };
-  return { kind: 'text', mark: 'hot', text: worksText('works.record', '{rank}, {title}. Works reputation: {band}. What\'s next: {next}', v) };
+  const com = (W.ms.find(x => x[0] === 'commissioned') || [])[1];   // 24p: the ceremony
+  return { kind: 'text', mark: 'hot', text: worksText('works.record', '{rank}, {title}. Works reputation: {band}. What\'s next: {next}', v) + (com ? ' ' + worksText('works.record.commissioned', 'Commissioned Officer, Day {day}.', { day: com }) : '') };
 }
 // ---- the device's Works app: Training, Work log, Tools; other sections add tabs with worksTabAdd (24k: Fault notes and
 // the Chief's notes): worksTabAdd({ id, title, order, view() -> [blocks], act?(verb, arg), badge?() -> number }); the
@@ -40227,6 +40228,87 @@ function promoMoveEscort(p, t) {                         // worksEscort's 24p pa
   const W = SHIP.works; return W && W.mv && !promoDone('move2') && p.id === W.mv.by ? { mode: 'lead', to: { deck: PROMO.homeRoom.deck, room: PROMO.homeRoom.room } } : null;
 }
 WORK_TICKS.push((now, skip) => promoMoveTick(now));
+// Part 4, the officer ceremony (0.44.21): the day after your promotion, Mail from the Captain's office at 08:00, and at
+// 17:15 in Deck 1's observation room (OCCASIONS.promoCeremony, booked that morning) the Captain reads your commission,
+// pins your Officer's insignia (your collar shows a second pip: the character kit's rank pips, no new mesh), a
+// handshake, one line from you, the Captain's tea. Guests (promoGuests: the sim engineer walks them there 17:10-17:40):
+// the Captain, Vance, Calder, Torres, and up to three of your closest friends (relTier 2+, highest first; schedU key
+// 852 on a tie). Grubby? The stand-in has Calder's look; nothing else changes. Not there by 17:30: Calder comes to find
+// you and walks you up (worksEscort 'lead'; the window runs on to 18:30); never missed: by 19:00 the commission comes by
+// Mail. Then: ms ['commissioned', day], done 'ceremony2', the framed commission on your shelf (section 20's keepsakes,
+// from the Captain), the Record's line, simNote('commissioned', { day }).
+Object.assign(PROMO, { cerAt: 1035, cerLen: 25, cerSeek: 1050, cerLate: 1110, cerBy: 1140, cerMailAt: 480, guests: ['marrow', 'vance', 'calder', 'torres-zeke'], friends: 3 });
+OCCASIONS.promoCeremony = { title: 'Your commission', kind: 'meeting', by: 'marrow', with: ['vance', 'calder', 'torres-zeke'], deck: 1, room: 'O', at: PROMO.cerAt, len: PROMO.cerLen, script: 'promo.ceremony', due: () => false, mail: null };
+const promoCerDay = () => { const W = SHIP.works, od = W && (W.ms.find(x => x[0] === 'officer') || [])[1]; return od ? od + 1 : null; };
+function promoGuests(d = promoCerDay()) {                // who stands with you: the four, and up to three friends
+  if (!d) return [];
+  let fr = []; try { fr = (typeof SOC !== 'undefined' && typeof socInit === 'function' ? (socInit(), SOC.crew) : []).filter(p => !PROMO.guests.includes(p.id) && relTier(p.id) >= 2 && (typeof socAboard !== 'function' || socAboard(p)))
+    .sort((a, b) => relTier(b.id) - relTier(a.id) || schedU(machSeed(a.id), d, 852) - schedU(machSeed(b.id), d, 852) || (a.id < b.id ? -1 : 1)).slice(0, PROMO.friends).map(p => p.id); } catch (e) { fr = []; }
+  return PROMO.guests.concat(fr);
+}
+function promoCerScript() {                              // the writer's ceremony, or a stand-in; our hooks on it
+  if (!MEETING_SCRIPTS['promo.ceremony']) MEETING_SCRIPTS['promo.ceremony'] = { title: 'Your commission', from: 'Captain Odile Marrow', stub: true,
+    gist: 'Your commission was read in the observation room, and your Officer\'s insignia is on your collar. It\'s framed on your shelf.',
+    lines: [
+      { who: 'vance', text: 'Attention, please. The Captain.' },
+      { who: 'marrow', text: c => 'By the authority of the Concord Service, ' + c.you + ' is commissioned an Officer of the CSV Wren, Works Department.', pose: 'gesture' },
+      { who: 'calder', text: () => typeof uniformState === 'function' && uniformState() === 'grubby' ? '(Calder looks at your uniform, then at you, and says nothing.)' : 'Shoulders back.' },
+      { who: 'marrow', text: 'Your insignia. Hold still.', pin: true },
+      { choice: [
+        { text: 'Thank you, Captain. I\'m proud to serve on the Wren.', reply: { who: 'marrow', text: 'And the Wren is glad of you.' } },
+        { text: 'I\'ll do my best.', reply: { who: 'marrow', text: 'That\'s all any of us can do. It\'s usually enough.' } },
+        { text: '(A firm handshake.)', reply: { who: 'marrow', text: 'A good grip. Calder said you had one.' } },
+      ] },
+      { who: 'marrow', text: 'Tea, everyone. My own blend; be polite about it.' },
+    ] };
+  const sc = MEETING_SCRIPTS['promo.ceremony'];
+  if (!sc.promoHooked) { const pick = sc.onPick, end = sc.onEnd; sc.promoHooked = true;
+    sc.onPick = (k, c) => { promoCommission(shipNow(), 'met'); if (pick) pick(k, c); };   // the reply comes after the pin
+    sc.onEnd = finished => { if (end) end(finished); promoCommission(shipNow(), 'met'); }; }
+  return sc;
+}
+if (SHIP.occasions.some(r => r.id === 'promoCeremony')) promoCerScript();
+function promoCommission(now, how) {                     // commissioned: once
+  const W = SHIP.works; if (!W || W.tier < 2 || promoDone('ceremony2')) return false;
+  const d = worksDay(now), r = SHIP.occasions.find(x => x.id === 'promoCeremony' && x.status === 'asked'); if (r) r.met = true;
+  W.done.push('ceremony2'); if (!W.ms.some(x => x[0] === 'commissioned')) W.ms.push(['commissioned', d]);
+  if (typeof giftKeepsake === 'function') try { giftKeepsake({ id: 'marrow' }, worksText('promo.keepsake', 'your framed commission')); } catch (e) { /* no social */ }
+  if (how === 'mail' && typeof mailSend === 'function') { const t = worksText('promo.ceremony.mail', 'Your commission | We missed you in the observation room. Your commission is signed all the same, and framed on your shelf. Congratulations, Officer. — O. Marrow'), i = t.indexOf(' | ');
+    mailSend({ at: now, from: 'Captain Odile Marrow', subject: i > 0 ? t.slice(0, i) : 'Your commission', body: i > 0 ? t.slice(i + 3) : t }); }
+  promoPip();
+  simNote('commissioned', { day: d, how });
+  return true;
+}
+function promoPip() {                                    // your collar: one pip more once commissioned (the kit's rank pips: makeCharacter's s.rank)
+  const want = promoDone('ceremony2') ? 1 : 0;
+  try { if (typeof player === 'undefined' || !player || (PLAYER_SPEC.rank || 0) === want) return false;
+    PLAYER_SPEC.rank = player.spec.rank = want; const w = player, old = w.rig;
+    w.obj.remove(old.root); old.root.traverse(o => { if (o.isMesh) o.geometry.dispose(); });
+    w.rig = makeCharacter(w.spec); w.obj.add(w.rig.root); w.rig.root.traverse(o => { o.userData.walker = w; });
+    w.propMeshes = []; w.propKey = ''; w.bodyProps = null;
+    const grubby = typeof uniformState === 'function' && uniformState() === 'grubby' && !PLAYER_SPEC.kit;
+    if (typeof playerUniformTint === 'function' && (grubby || UNIFORM_MAT)) playerUniformTint(grubby ? 1 : 0);
+    return true; } catch (e) { return false; }
+}
+function promoCerTick(now) {
+  const d0 = promoCerDay(); if (!d0 || promoDone('ceremony2')) return;
+  const d = worksDay(now), m = now - (d - 1) * 1440;
+  let r = SHIP.occasions.find(x => x.id === 'promoCeremony');
+  if (d > d0 || (d === d0 && m >= PROMO.cerBy)) { promoCommission(Math.min(now, (d0 - 1) * 1440 + PROMO.cerBy), 'mail'); return; }
+  if (d < d0) return;
+  if (!r && m >= PROMO.cerMailAt - 60) { promoCerScript(); OCCASIONS.promoCeremony.with = promoGuests(d).filter(id => id !== 'marrow'); r = occasionAdd('promoCeremony', (d - 1) * 1440 + PROMO.cerAt, true, PROMO.cerLen); }
+  if (!r) return;
+  const f = r.f || (r.f = {});
+  if (m >= PROMO.cerMailAt && !f.mail && typeof mailSend === 'function') { f.mail = 1; const t = worksText('promo.ceremony.invite', 'Your commissioning | This evening at 17:15, the observation room, Deck 1. A clean uniform, please. — The Captain\'s office'), i = t.indexOf(' | ');
+    mailSend({ at: Math.max(now, (d - 1) * 1440 + PROMO.cerMailAt), from: 'The Captain\'s office', subject: i > 0 ? t.slice(0, i) : 'Your commissioning', body: i > 0 ? t.slice(i + 3) : t }); }
+  if (m >= PROMO.cerSeek && !f.seek && !r.met && r.status === 'asked') { f.seek = now; r.len = PROMO.cerLate - PROMO.cerAt + 20;   // 17:30: Calder walks you up; the room waits for you
+    if (typeof setGoal === 'function') setGoal({ deck: 1, room: 'O', label: 'Your commission, the observation room' }); }
+}
+function promoCerEscort(p, t) {                          // worksEscort's 24p part: Calder walking you up to the ceremony
+  const r = SHIP.occasions.find(x => x.id === 'promoCeremony' && x.status === 'asked');
+  return r && r.f && r.f.seek && !r.met && p.id === 'calder' && t < r.at + r.len ? { mode: 'lead', to: { deck: 1, room: 'O' } } : null;
+}
+WORK_TICKS.push((now, skip) => { promoCerTick(now); if (!skip && promoDone('ceremony2')) promoPip(); });
 
 
 // =====================================================================
