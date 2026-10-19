@@ -8,3 +8,4 @@ events | rc=0 | 399s | EVENTS CHECK OK
 device | rc=0 | 252s | device_check: OK
 clothes | rc=0 | 165s | ALL OK
 interactions | rc=0 | 825s | INTERACTIONS CHECK OK
+food | rc=0 | 114s | FOOD CHECK OK
