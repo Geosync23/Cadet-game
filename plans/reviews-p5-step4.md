@@ -4,6 +4,9 @@ R4 succeeds R3 (whose verdicts are in `plans/reviews-p5-step2.md`). R5 (session_
 
 ## Rec deck activation (brief: plans/brief-recdeck.md on claude/lead-pillar1; reviewer R6; build master BM8 session_01YGy9FDmcbkySMJpVPYJaAo)
 
+### W3 claude/writer-rec 4e4d13c + 7b63846 (0.48.118-119, lead 18's naming), R6: PASS
+Text only: Mail, news, gists, facts and the Deck R scenery now say "the rec deck" mid-sentence, "Rec deck" at a label's start ("Rec deck lockers", news "Rec deck: ..."), "Recreation Deck (R)" on the directory; crew speech keeps "rec dec"; the neon/poster keep REC DEC (the look). Fresh archive: bake unchanged, lines_check PASS. The one written "rec dec" left outside speech is the recTap toast "The rec dec's closed till six.", RA's (W3 has told RA).
+
 ### RB claude/rec-works 2e46584 (0.84.0, on aa4f42c: REC_MACHINES, the 'rec' system, the "Deck 7" sweep, the directory's R row), R6: PASS WITH FIXES (one: lead 18's naming call)
 Read by hand (158 game lines); no code after `//`; no new name clashes (rec-crew had no game file yet).
 - Good: 16 `REC_MACHINES` with `-svc` work:works places at their panels; 13 kinds in a new 'rec' system, added to `SYSTEMS`/`SYSTEM_W` only while `REC_DECK` is on (at load, no R()); `machineList` skips Deck 7 while dormant (numeric deck keys: the guard really fires), and nothing else reads `DECKS[n].machines` directly, so the dormant build wears, posts and sends nobody down (cadet_test identical). Old saves: no new saved fields; a save from before switch-on simply gains the rec machines' state later. Sweep: 47 `'Deck ' + n` sites → `deckWord(n)`, same words on Decks 1-6; only Maps' "Take the lift to ..." keeps its own "the rec deck". The directory sign draws the R row between 4 and 5 only while on.
@@ -17,6 +20,9 @@ Read by hand (158 game lines); no code after `//`; no new name clashes (rec-crew
 - Notes for the lead: (1) the words say "rec dec" in speech and facts ("Coming down the rec dec after shift?"), the directory "the Recreation Deck (R)", and RB's deckWord "Rec deck" mid-sentence ("on Rec deck"): pick one written form for screen text (speech can keep "rec dec"). (2) The directory and lift texts say "Seven decks" from this build, so they must only ship with `REC_DECK = true` (the brief's merge order does that).
 
 ## Playtest update 2 (brief: plans/brief-playtest2.md on claude/lead-pillar1; build master BM7 session_01QbuzvT3TwzMwSWRmakzX8Z)
+
+### X3 claude/x3-mechcheck-fix 0a3d86e (check only), R6: PASS — but take ONE of it and BM8's 4e0c385
+mech_check: TPARTS' `reset` builds the Works before the machines' catch-up (so the catch-up never reads the last run's tier-2 works); M12 renews the machines and clears jobs after its catch-up. Same two problems BM8's 4e0c385 fixes, on the same lines, a different way: both are right; merging both conflicts, so the build master keeps one.
 
 ### X3 claude/crew-pt1 79959ff (check only over X2's 6c26c72), R6: PASS — and 6c26c72 / 693e4f4 PASS with it
 interactions_check's "tap at the stop" now taps the floor at the stop or within JOB_REACH (1.5) of it where no crew member is in front on screen (`crewAtScreen`, offsets up to 0.8): a tap on a person talks to them first (section 10), and after 0.71.5's mornings Sol waits near Deck 3's lift at the check's time. That's the game working as designed, so the FAIL on 0.71.5/0.71.6 was the check's. My isolated run on 79959ff: interactions_check OK (all parts). So X2's 0.71.5 (693e4f4) and 0.71.6 (6c26c72) stand as PASS, with the notes below.
