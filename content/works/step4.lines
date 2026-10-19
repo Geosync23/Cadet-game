@@ -311,6 +311,11 @@
 == favour.speaker.solved
 - Interference. Moved it a metre away, and the buzz is gone.
 
+// choosing the cause, and a wrong pick (E2)
+== favour.call
+- What's causing it?
+== favour.not
+- Not that. Look again.
 // the lapse, after 3 days: they ask someone else (the game adds who)
 == favour.lapse
 - {name} asked someone else in the end. No harm done.
