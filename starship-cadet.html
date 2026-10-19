@@ -39780,8 +39780,8 @@ function worksNext() {
 // the Record's first lines (section 19 asks): your rank, your Works reputation and "What's next"
 function worksRecordHead() {                             // null before SHIP.works (Days 0-1 keep the Record's old line)
   const W = SHIP.works; if (!W) return null; const tier = W.tier, v = { title: worksText('works.title.t' + tier, 'tier ' + tier), rank: worksRankTitle(W), band: worksBandWord(), next: worksNext() };
-  const com = (W.ms.find(x => x[0] === 'commissioned') || [])[1];   // 24p: the ceremony
-  return { kind: 'text', mark: 'hot', text: worksText('works.record', '{rank}, {title}. Works reputation: {band}. What\'s next: {next}', v) + (com ? ' ' + worksText('works.ms.commissioned', worksText('works.record.commissioned', 'Commissioned Officer, Day {n}.', { day: com, n: com }), { n: com }) : '') };
+  const com = (W.ms.find(x => x[0] === 'commissioned') || [])[1], st = (W.ms.find(x => x[0] === 'stars') || [])[1];   // 24p: the ceremony; 24t: star logger (E3, 0.45.11)
+  return { kind: 'text', mark: 'hot', text: worksText('works.record', '{rank}, {title}. Works reputation: {band}. What\'s next: {next}', v) + (com ? ' ' + worksText('works.ms.commissioned', worksText('works.record.commissioned', 'Commissioned Officer, Day {n}.', { day: com, n: com }), { n: com }) : '') + (st ? ' ' + worksText('works.ms.stars', 'Star logger, Day {n}.', { n: st }) : '') };
 }
 // ---- the device's Works app: Training, Work log, Tools; other sections add tabs with worksTabAdd (24k: Fault notes and
 // the Chief's notes): worksTabAdd({ id, title, order, view() -> [blocks], act?(verb, arg), badge?() -> number }); the
