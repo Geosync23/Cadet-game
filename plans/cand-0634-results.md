@@ -154,3 +154,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - 92d40d5 (mine): puzzle OK, social OK; day 0-8 then intro running.
 - CR2 92d40d5: deck OK.
 - ~08:11 X2: tparts reproduced: the check's first run after load picks 4-scrubber-1 (fan belt), later runs 4-washer-1 (pump+bearing), so 'bring' (run first) differs; state the check's reset() doesn't clear, exposed by 0.71.5's crew usage (0.71.4 passes; reverting wake+morning passes). Suggests a warm-up run in TPARTS (mech_check, E5's/mech-incidents' check; E5 archived). m12 not reproduced by X2 (says needs a branch it lacks; m12 is E6's, in 92d40d5). X2 offers 0.71.4 ec0cbc3 (passes tparts) if the crew pieces wait. Lead 18 deciding.
+- ~08:11 lead 18 DECIDED: 0.63.4 = the no-X2 candidate (92d40d5 + any fixes the round needs); X2's crew pieces → 0.63.5 with BM8. CR2 92d40d5: path OK.
