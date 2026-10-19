@@ -152,3 +152,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - CR2 92d40d5: clothes OK.
 - CR2 92d40d5: arc OK.
 - 92d40d5 (mine): puzzle OK, social OK; day 0-8 then intro running.
+- CR2 92d40d5: deck OK.
