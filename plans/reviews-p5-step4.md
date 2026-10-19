@@ -34,6 +34,10 @@ Lines skimmed. In a fresh archive content_gen bakes 9342 lines; lines_check PASS
 
 ## Step 4
 
+### E4 claude/mech-diagnose 05bcbad (0.53.15, tip b0cb86c: no 'stairs' roof.wait line; the 4-23 shelf as wood on brackets), R6: FAIL (one line; E4 has stopped, so for the next seat or the build master)
+- **The bug: roofTalk's null guard is inside a comment again.** ~41168: `const l = lineFor(a.p.id, 'roof.wait', { t: now, keep: ... });   // (the lead's call: ... left out) if (!l || !l.text) return;`. The guard is commented out, so the next line's `bubbleSay(a.h, l.text, 5)` throws a TypeError whenever lineFor finds no line: on E4's own branch that's every time (roof.wait isn't baked there), and after the merge whenever no line fits. It parses (node --check passes), so only a play-through with crew waiting by a held lift and no line shows it. Fix: put `if (!l || !l.text) return;` on its own line before `ROOF_TALK.at = now;`. mech_check's m17 part should also run roofTalk once with no roof.wait line (expect no throw, nothing said).
+- Good: the `keep` filter is lineFor's own option (`ctx.keep(e)`), so the stairs line is left out without editing W2's bank. **The shelf, eyeballed again:** wood (#9a7350) on two dark brackets, clear of the rib, flat on the wall, the rocket on it: reads as a shelf now. The brackets overlap the shelf's underside by 5 mm (no shared faces).
+
 ### E6 claude/mech-rounds 5bd6f97 (0.45.19, "the conduit tester"), R6: PASS
 Two strings: WORK_TOOLS.tester.name and the bench label now say "conduit tester" (design-doc's and W2's name). Other tips (E5 2c513e6, E4 4e6f6bc) carry only the base's unchanged line, so a merge takes E6's. Read only; no game logic changed (checks as 1c40c7a).
 
