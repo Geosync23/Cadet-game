@@ -14,3 +14,4 @@ tiles | rc=0 | 143s | ALL OK
 join | rc=0 | 229s | JOIN CHECK OK
 smoke | rc=0 | 74s | SMOKE OK
 newgame | rc=0 | 43s | NEWGAME OK
+leave | rc=1 | 26s | LEAVE CHECK FAILED
