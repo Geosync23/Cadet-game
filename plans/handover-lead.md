@@ -753,3 +753,4 @@ Read: CLAUDE.md; TEAM.md (Lead line, "OVERNIGHT MODE ON", "Tonight's goal", "Ove
 - ~06:03: E3 retired (0.53.8 d51c5ed); started E4 session_01PtXCwVBprdkJ6AcQisEyJq for M17. Calls: favours = friend tier (constant).
 - ~06:10: E2 retiring (0.51.11 6714448); started E5 session_01QsZymCraDjLzVDooLvigNk (pin + team parts). Team is above 7 for now: U, W2, D3 retire soon; don't add more seats until Step 4 ships.
 - ~06:11: W2 retired + archived (final claude/writer-p5 0e8571a, note plans/handover-writer-w2.md). No writer until the rec deck; seats add any new line in style and list it in DEV_NOTES.
+- ~06:13: E1 retired+archived (0.45.13 013f53e); started E6 session_018cZuXpb4XdFs47zXoPcF8B. Working now: BM7, R5, E4, E5, E6, X2, U2, U (retiring), D3 (on call).
