@@ -269,7 +269,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.33.59
+   STARSHIP CADET: CSV Wren                           build 0.33.60
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8630,7 +8630,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.33.59';                           // keep in step with the header's build line
+const GAME_BUILD = '0.33.60';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -17155,7 +17155,7 @@ function jobReserve(kind, day, at, slot = 1, o = {}) {
 // lineFlow(line, id, before?) -> 0-1: the flow read at a machine, the product of every step's share from the top through its
 // own (before: up to the step before it; lineShare: worn passes it all, a fault on the line at most LINE_CUT), null off the line; flowWord(f): 'full' (.8+), 'low' (.5+), 'very
 // low'. lineDecks(line, id): the decks it feeds. Traced faults (M9): a Tier 2 repair on a line machine, posted while
-// you're an Officer or above and trained in tracing (section 24's worksTrained('m9')), at your tier, is traced about half
+// you're an Officer or above and trained in tracing (section 24's SHIP.works.tr.m9 set; worksTrained is its setter), at your tier, is traced about half
 // the time (schedU(machSeed(id), day, 878) < .5): its cause is picked only among causes with that `line`, and j.symptom
 // = { line, decks, deck } (deck: the one the card names, Deck 4 if it's among them) makes the card name the symptom
 // ("Showers weak on Deck 4", SYMPTOM_TEXT; the Works writer's lines can replace it), with no machine or place shown until
@@ -17209,17 +17209,20 @@ const flowWord = f => f >= .8 ? 'full' : f >= .5 ? 'low' : 'very low';
 // is a repair on m, posted in hour h, traced? (a line machine, the line real, you an Officer trained in tracing, at your tier, about half)
 function traceFor(m, h) {
   const line = lineOf(m.id), d = Math.floor(h / 24) + 1;
-  return !!line && lineOn(line) && playerTier() >= 2 && typeof worksTrained === 'function' && !!worksTrained('m9') && jobTier({ machine: m.id }) <= playerTier()
+  return !!line && lineOn(line) && playerTier() >= 2 && !!(SHIP.works && SHIP.works.tr && SHIP.works.tr.m9 !== undefined) && jobTier({ machine: m.id }) <= playerTier()
     && (FAULT_CAUSES[m.kind] || []).some(c => c.line === line) && schedU(machSeed(m.id), d, 878) < .5 ? line : null;
 }
 function traceSymptom(line, id) { const decks = lineDecks(line, id); return { line, decks, deck: decks.includes(4) ? 4 : decks[0] }; }
 const traceHidden = j => !!(j && j.symptom && !j.traceFound);
-const traceTitle = j => (SYMPTOM_TEXT[j.symptom.line] || 'A fault') + ' on Deck ' + j.symptom.deck;
+function traceTitle(j) {                                 // the Works writer's trace.symptom.<line> line when it's in (M3's ask)
+  const fb = (SYMPTOM_TEXT[j.symptom.line] || 'A fault') + ' on Deck ' + j.symptom.deck;
+  return typeof worksText === 'function' ? worksText('trace.symptom.' + j.symptom.line, fb, { deck: j.symptom.deck, where: '' }) : fb;
+}
 function traceMark(jobId, id) {
   const j = SHIP.jobs.find(x => x.id === jobId && x.symptom && x.status !== 'done'); if (!j) return null;
   const line = j.symptom.line, after = lineFlow(line, id); if (after === null) return null;
   const before = lineFlow(line, id, true);
-  j.read = [...new Set([...(j.read || []), id])]; if (id === j.machine) j.traceFound = true; MACH_REV++;
+  j.read = [...new Set([...(j.read || []), id])].slice(-12); if (id === j.machine) j.traceFound = true; MACH_REV++;   // the last 12 readings
   return { before, after, word: flowWord(after) };
 }
 // ---- team jobs (0.33.58, plans/mechanics/m8-team-jobs.html, section 17's part; 24h, seat M2, plans the week's and runs the steps) ----
@@ -17277,7 +17280,8 @@ function teamYouOut(id) {
   for (const c of j.team) { let past = false; for (const s of j.segsBy[c]) { if (past) { s.from += ext; s.to += ext; } else if (s.tag === 'team') { s.to += ext; past = true; } } }
   j.done += ext; j.end += ext; j.claimedBy = j.lead; j.youOut = true; MACH_REV++; return true;
 }
-jobKindAdd('team', { tier: 2, side: true, work: 0, text: 'Team job',
+jobKindAdd('team', { tier: 2, side: true, work: 0, text: 'Team job', veto: true,   // veto + stepDone: 24h keeps your turns in the lead's order (M2's teamStepDone)
+  stepDone: (j, k, res, t) => typeof teamStepDone === 'function' ? teamStepDone(j, k, res, t) : true,
   stops: j => j.steps || (j.spots && j.spots.you ? [{ deck: j.deck, placeId: j.spots.you, mins: Math.min(j.mins || 10, 10), tag: 'team', how: 'hold' }] : []),
   done(j, t, by) {
     const before = by !== 'you' && j.youIn && !j.meters ? shipMeters() : null, s = SHIP.machines[j.machine];
@@ -17368,6 +17372,7 @@ function jobStopsBase(j, known, st) {
   if (j.kind === 'chore' || j.kind === 'favour') return (j.parts.length ? [st('fetch', shelvesFor(j.parts[0]), 5)] : []).concat(j.stops.map(x => ({ step: x.tag, places: x.placeId && known.has(x.placeId) ? [x.placeId] : [], deck: x.deck, mins: x.mins, at: x.at || null })),
     j.kind === 'favour' ? [{ step: 'return', places: [], deck: null, person: j.from }] : []);
   if (j.kind === 'restock') { const meals = j.cargo === 'meals'; return [st('cart', CART_AT, 5), st('load', loadAt(j), 5), st('unload', meals ? COLD_AT : FETCH_AT, meals ? 3 : 5), st('return', CART_AT, 5)]; }
+  if (traceHidden(j) && typeof traceStops === 'function') return traceStops(j, known);   // 24i: a traced fault's reading stop till it's found (0.33.60)
   const m = machineById(j.machine); if (!m) return [];
   const pp = panelPlace(m.id);
   return [st('fetch', shelvesFor(j.parts[0]), 5)].concat(j.make ? [{ ...st('make', MAKE_AT, 5), part: j.make }] : [], [{ step: 'job', places: pp ? [pp] : [], deck: m.deck, at: m.panel, room: m.room }]);
@@ -17377,7 +17382,7 @@ function jobsSection(el) {
   const button = (txt, fn) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = txt; b.style.cssText = 'margin:0 2px 8px;padding:4px 10px;font-size:12.5px'; b.onclick = () => { fn(); device.refresh(); }; el.appendChild(b); return b; };
   const board = jobsBoard(), mine = myJob();
   if (mine) {
-    const [title, where, state] = jobCard(mine), m = mine.machine && machineById(mine.machine);
+    const [title, where, state] = jobCard(mine), m = mine.machine && !traceHidden(mine) && machineById(mine.machine);   // a traced fault: no room till it's found
     line('Yours: ' + title + ', ' + where + '.', 'devtime');
     if (jobByStops(mine) && mine.kind !== 'favour') {
       const stops = mine.stops.map(st => { const p = placeById(st.placeId); return (st.tag === 'pickup' ? 'pick up ' + (mine.bring || 'the load') + ' in the ' : st.tag === 'drop' ? 'drop it in the ' : '') + (p ? roomName(p.deck, p.room) || 'room' : 'room') + ' on Deck ' + st.deck; });
