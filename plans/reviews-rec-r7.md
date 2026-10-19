@@ -2,6 +2,9 @@
 
 Brief: plans/brief-recdeck.md on claude/lead-pillar1 ("R" section). Lead 18 session_01CBur9nrJ411pFkHopF96RL. Build master BM8 session_01YGy9FDmcbkySMJpVPYJaAo. Earlier verdicts: R6's, in plans/reviews-p5-step4.md ("Rec deck activation"). Newest first.
 
+### X3 claude/crew-pt1 6a4e153 (0.71.7, the 17:00 clock-out take waits 20 min, not 6), R7: PASS (forwarded by lead 18)
+One number in section 14 `shiftWithBreaks` (the evening clock-out; the morning one stays 6); no code after `//`. On BM8's 0.63.5 WIP (p5-cand-s5 1e70683): leave_check FAILS unpatched ("the Works crew don't use the clock: [2, 1, 2, ...]") and is OK with the one line. On crew-pt1 alone: cadet_test vs 6a4e153^ ALL IDENTICAL; leave_check there fails "the reputation chip: None", the branch's older HUD, not this line (OK on the combine).
+
 ### W3 claude/writer-rec 4f2dcdc (0.48.125, talk.open/answer/listen and talent.* for RA's panels), R7: PASS
 Content + bake: banks/talks.lines (anyone's fallback) and own talk lines for 9 speakers (the brief's four plus five for later talks); Lucia Ferreira (talent night's host) has talent.ask/tune/joke/trick/watch. In voice, short. Bake unchanged, lines_check PASS. Keys for RA to read when its panels land.
 
