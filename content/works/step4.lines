@@ -20,39 +20,45 @@
 == works.mech.tickets
 - fault-finder tickets
 
-// ---- M10 the workshop (E3, 24j): order notes on the shop board, Mondays 08:00. The game adds " — {first}".
-// {thing} the thing's name ("a guitar hook"). One note per thing; any acquainted crew can ask.
-== works.order.hook
+// ---- M10 the workshop (E3, 24j; E3's names): an order's ask (said by the crew member, on the order card) and their
+// thanks when you hand it over ({name} is them), per thing id; a quiet Mail when an order sat a week untaken.
+== works.order.ask.guitar-hook
 - A hook for my guitar, please. It keeps sliding off the bunk.
-- Could you make me a hook? Something to hang my bag on.
-== works.order.rack
+== works.order.thanks.guitar-hook
+- A guitar hook! It hasn't fallen once. Thank you.
+== works.order.ask.mug-rack
 - A little rack for mugs? Ours are stacked like a tower.
-- Could you make a rack for my tea tins? There are seven. Don't ask.
-== works.order.bracket
-- My shelf's leaning. A bracket would save it. And me.
-== works.order.stand
-- A stand for my reader, please. My arms are tired.
-- Could you make a stand for my plant? It wants to see the window.
-== works.order.clip
-- A clip for my cap lamp. The old one snapped.
-== works.order.frame
-- A frame for my letter from home. Plain is fine.
-== works.order.box
-- A small box with a lid, for screws. Pell says I need one.
-== works.order.hanger
-- A hanger for my jacket that isn't a chair. Please.
-// the card on the board, and a part to fetch first (stage 2)
-== works.order.card
-- Order: {thing} · {name}
-== works.order.fetch
-- Needs a {part} from stores first.
-== works.order.made
-- Made: {thing}. Take it to {name}.
+== works.order.thanks.mug-rack
+- The mug rack's perfect. The tower is no more.
+== works.order.ask.book-stand
+- A stand for my book, please. My arms get tired reading.
+== works.order.thanks.book-stand
+- A book stand! I read two chapters hands-free. Thank you.
+== works.order.ask.lamp-arm
+- Could you make an arm for my lamp? It lights the wall, not the page.
+== works.order.thanks.lamp-arm
+- The lamp arm works. I can see my page. Thank you.
+== works.order.ask.plant-hanger
+- A hanger for my plant? It wants to be nearer the light.
+== works.order.thanks.plant-hanger
+- The plant's up and happy. So am I. Thank you.
+== works.order.ask.fan-spindle
+- My desk fan's spindle snapped. Could you turn me a new one?
+== works.order.thanks.fan-spindle
+- The fan spins again. Better than new, honestly.
+== works.order.ask.drawer-pull
+- My drawer's lost its pull. I open it with a spoon.
+== works.order.thanks.drawer-pull
+- A proper drawer pull. Goodbye, spoon. Thank you.
+== works.order.ask.tablet-stand
+- A stand for my reader, please. I keep propping it on socks.
+== works.order.thanks.tablet-stand
+- The stand's lovely. My socks are free again. Thanks.
 == works.order.lapse
-- {name} made do. The order's off the board.
-// tinkering: your own things (the names on the list, and one line each)
+- I made do | I made do, don't worry. Thanks anyway.
+// tinkering: your own things (gifts). Names, and one line each.
 == tinker.lamp
-- a desk lamp
+- a little lamp
 == tinker.lamp.about
 - Bent pipe, a spare bulb, a shade you cut yourself.
 == tinker.mugrack
@@ -67,14 +73,14 @@
 - a plant pot
 == tinker.pot.about
 - A plant pot with a drip tray. The garden lent you soil.
-== tinker.own1
-- a pen holder
-== tinker.own1.about
-- Your own design. It holds pens. Mostly it holds bolts.
-== tinker.own2
-- a little clock
-== tinker.own2.about
-- Your own design. It ticks. It's nearly right.
+== tinker.ship
+- a model ship
+== tinker.ship.about
+- The Wren, a hand long. The windows are a bit wonky.
+== tinker.rug
+- a woven rug
+== tinker.rug.about
+- Offcut cord, woven on a frame you made. Warm underfoot.
 
 // ---- M11 tool upkeep (E1, 24m)
 == works.toolstate.charged

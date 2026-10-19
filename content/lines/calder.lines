@@ -634,3 +634,9 @@
 // tickets: her word when you solve your first
 ? flag:ticket.solved
 - A ticket, solved. That's a fault-finder. Wear the pin.
+
+// ---- Pillar 5 Step 4 (head writer W2): M10 the workshop (E3): the first lesson at the lathe. Kind work, in order.
+== work
+? flag:train.m10.lead
+- Set it going. Come back in ten. Not nine.
+- Finish it by hand. Machines don't do edges.
