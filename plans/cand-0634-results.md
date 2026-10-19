@@ -143,3 +143,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - ~08:02 lead 18: BM8 = session_01YGy9FDmcbkySMJpVPYJaAo shadows this round (no pushes to p5-cand-s4 unless BM7 hands over); at ~70% BM7 sends BM8 + lead the exact state and stops. After 0.63.4, BM8 does 0.63.5 on claude/p5-cand-s5.
 - CR2 92d40d5: smoke OK.
 - CR2 92d40d5: newgame OK.
+- ~08:04 BM8 shadowing; placing t15's interactions FAIL on 0.63.3 + X2 6c26c72 alone (mine: tf2i = no-X2 with U2).
