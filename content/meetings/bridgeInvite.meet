@@ -1,15 +1,17 @@
 @meeting bridgeInvite
 // The first invitation to the bridge (the user's ask, via the lead, 2026-10-17). Commander Vance at breakfast (he
-// breakfasts at 06:05), the day before your first bridge hour (bridge-hour.trad: every fourth Tuesday, so day 22, a
-// Monday). Every reply sets flag bridge.invited, which the traditions engineer's bridge-hour gate reads. When and where
-// it plays: social B and the traditions engineer. The head writer's lines.
+// breakfasts at 06:05), the day before your first bridge hour after the first ship-wide event (Pillar 5 Step 3, seat
+// C2: the bridge room is locked until you're invited; day 22 in a new game). Every reply sets flag bridge.invited, which
+// the traditions engineer's bridge-hour gate reads; C2's SHIP.bridgeInvited opens the bridge doors with it. Reworded by
+// head writer W2 for Step 3 (the storm behind us, the bridge itself open from now on).
 title: An invitation
 from: Commander Teo Vance
-gist: Commander Vance: the Captain invites you to bridge hour, tomorrow after the day shift, on Deck 1.
+gist: Commander Vance: the Captain invites you to the bridge, and to bridge hour tomorrow after the day shift, on Deck 1.
 == lines
-vance > you: Cadet. A moment. You may finish chewing.   [nod]
-vance: The Captain's compliments. You're invited to bridge hour. Tomorrow, after the day shift, Deck 1.
-vance: Juniors visit the bridge once every four weeks. No regulation requires it. I approve of it anyway.
+vance > you: {me}. A moment. You may finish chewing.   [nod]
+vance: The Captain's compliments. The storm's behind us. She has time for guests again.
+vance: You're invited to the bridge. From today the doors open for you. And bridge hour, tomorrow after the day shift.
+vance: Bridge hour comes once every four weeks. No regulation requires it. I approve of it anyway.
 vance: Three things. Clean boots. Hands behind your back at the helm. Nothing red is to be touched.
 ? choice
 * I'll be there.   flag:bridge.invited rel:vance+1

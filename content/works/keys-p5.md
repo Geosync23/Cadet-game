@@ -200,7 +200,7 @@ unsigned. Calder's flag lines also exist for Vance (`vance.lines`) where the pag
 | Key | What | Placeholders |
 | --- | --- | --- |
 | `bridge.locked` | tapping the bridge door before you're invited (C2 / DA5's hook) | |
-| `mail.bridge.invite` (+ meeting `bridgeInvite` reworded) | the invitation (placeholder trigger) | |
+| meeting `bridgeInvite` (reworded) | Vance's invitation at breakfast, the day before the first bridge hour after the first ship-wide event (C2's placeholder trigger); it opens the bridge too | |
 | `meter.<sys>` | short meter names: air water power heat food waste hull comms propulsion transport | |
 | `works.turnin.rep`, `works.turnin.meter`, `works.turnin.repN` | the turn-in: "Works reputation up" / "+{n} {system}" / "+{n} {dept} reputation" (U) | `{n}` `{system}` (the meter.<sys> name) `{dept}` |
 | `tiles.paused` | the Tiles notice under the score (U adds the pause sign) | |

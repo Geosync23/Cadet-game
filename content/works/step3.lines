@@ -50,11 +50,9 @@
 
 // ---- the bridge (C2; DA5's tap hook)
 == bridge.locked
-- The bridge. You'll need the Captain's invitation first.
-- Bridge crew only. Someone will invite you, in time.
-// the placeholder invitation, by Mail (with Vance's meeting bridgeInvite)
-== mail.bridge.invite
-- An invitation | The Captain invites you to the bridge. You're welcome up top from now on, and at bridge hour once a month. Clean boots. Nothing red is to be touched.
+- The bridge. You need the Captain's permission to go in.
+- Bridge crew only, for now. The Captain invites you in, in time.
+// the invitation itself is Vance's meeting bridgeInvite (content/meetings/bridgeInvite.meet)
 
 // ---- the turn-in (C2, U)
 == works.turnin.rep
