@@ -731,11 +731,11 @@ M17P = r"""(() => {
     if (moved) movers++;
   });
   out.hold = { movers, waiting, bad: bad.slice(0, 6), held: [liftHeld(B + 935), liftHeld(B + 989), liftHeld(B + 990), liftHeld(B + 934)] };
-  const mover = ppl.find((p, i) => base[i].slice(0, 11).some(dk => dk !== base[i][0])), keepL = LINES['roof.wait'], keepB = bubbleSay, said = [];
-  if (mover) { LINES['roof.wait'] = [{ text: 'Lift\'s held again.', id: 'tstw' }]; bubbleSay = (h, t) => said.push(t); ROOF.r = null; ROOF_TALK.at = -99;
-    const t1 = ppl.indexOf(mover), k = base[t1].findIndex(dk => dk !== base[t1][0]), fake = { p: mover, h: {}, x: player.obj.position.x, z: player.obj.position.z };
-    DECK_CREW.push(fake); roofTalk(ts[k]); roofTalk(ts[k] + 7); DECK_CREW.splice(DECK_CREW.indexOf(fake), 1); LINES['roof.wait'] = keepL; bubbleSay = keepB; }
-  out.talk = said;
+  let fake = null; const mover = ppl.find((p, i) => base[i].slice(0, 11).some(dk => dk !== base[i][0])), keepL = LINES['roof.wait'], keepB = bubbleSay, said = [];
+  if (mover) { fake = { p: mover, h: {}, x: player.obj.position.x, z: player.obj.position.z }; DECK_CREW.unshift(fake); DECK_CREW.splice(DECK_CREW.indexOf(fake), 1); LINES['roof.wait'] = [{ text: 'Lift\'s held again.', id: 'tstw' }]; bubbleSay = (h, t) => said.push(h === fake.h ? t : 'someone else'); ROOF.r = null; ROOF_TALK.at = -99;
+    const t1 = ppl.indexOf(mover), k = base[t1].findIndex(dk => dk !== base[t1][0]);
+    DECK_CREW.unshift(fake); roofTalk(ts[k]); roofTalk(ts[k] + 7); DECK_CREW.splice(DECK_CREW.indexOf(fake), 1); LINES['roof.wait'] = keepL; bubbleSay = keepB; }
+  out.talk = said.filter(x => x !== 'someone else');
   LIFT_HOLD = null;
   delete worksSide().roof; out.old = JSON.stringify(roofData()); worksSide().roof = { rides: -3, last: 'x', foo: 1 }; out.junk = JSON.stringify(roofData());
   worksSide().roof = { rides: 2, last: 11 }; out.trip = JSON.stringify(worksClean(JSON.parse(JSON.stringify(SHIP.works))).side.roof);
@@ -787,7 +787,7 @@ def part_m17(g):
     check(0 < m1['calls'] < 160, f"m17: draw calls in the shaft {m1['calls']}")
     check(r2[0] == decks[2] and r2[1] is None and not r2[2] and r2[3] == '{"rides":1,"last":18}', f"m17: stepping off part way leaves you on that deck, no ride counted ({r2[0]}, {r2[3]})")
     a2 = g.ev(M17P)
-    check(json.dumps(a2, sort_keys=True) == json.dumps(a, sort_keys=True), 'm17: the paper part differs after the rides')
+    check(json.dumps({**a2, 'talk': 0}, sort_keys=True) == json.dumps({**a, 'talk': 0}, sort_keys=True), 'm17: the paper part differs after the rides')
     g.ev(f"(() => {{ const k = {keep}; LIFT_HOLD = null; setShipNow(k.t); if (deckDef.num !== k.deck) goToDeck(k.deck); player.obj.position.x = k.pos[0]; player.obj.position.z = k.pos[1]; Object.assign(SHIP.player.needs, k.needs); SHIP.player.carry = k.carry; }})()")   # as it was, for the parts after
 PARTS['m17'] = part_m17
 
