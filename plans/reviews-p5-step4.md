@@ -20,6 +20,9 @@ Lines skimmed. In a fresh archive content_gen bakes 9342 lines; lines_check PASS
 
 ## Step 4
 
+### W2 claude/writer-p5 1beddb1 (0.48.114, rewire.faded singular, the lead's m15 call), R5: PASS
+"This one's faded. Which colour was it?" Bakes 9564 lines; lines_check PASS. W2's tip.
+
 ### E2 claude/mech-incidents d0e6fe99 (0.51.8, 24l favour cases), R5: PASS WITH FIXES (three)
 Diff dd0ec462..d0e6fe99, read with a helper agent against favour-cases (D3's answer de012aae); fixes confirmed by hand.
 - Good: the six cases (lamp, cold, squeak, shower, clock, speaker), three clue looks then "What's causing it?" from three suspects shuffled per favour (key 1020), a wrong pick never fails. Day 13 on, not juniors, once a week at an evening minute, the friend's Mail, offered (not on the board), lapses after 3 days. Calls section 17's favourPost/favourById and the social chat hand-back; no copies. One owner: 18 new FAVOUR_CASES/FC_*/fc* names, none elsewhere. Keys 1019-1021, no R(), no meshes. Every line key exists on writer-p5 (with fallbacks).
