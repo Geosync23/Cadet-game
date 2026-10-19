@@ -9520,6 +9520,7 @@ function schedFrame(p, d) {
     f.double = true; f.workEnd = f.night ? Math.max(f.workEnd, 435) : Math.max(f.workEnd, Math.min(1230, bed - 45));   // the gaps closed, never past the other shift's start (desks are shared)
   }
   let wake = gt ? gt.wake - 45 - 45 * U(13) + jit(10) : 345 + Math.round(60 * U(10)) - 30;   // 05:15-06:15, about 05:45 (the user's playtest 2: up about half an hour earlier, spread evenly so the washrooms aren't all at once; a guest's lie-in is in their template)
+  if (!gt && p.rota && (p.rota.team === 'bar' || p.rota.relief === 'bar')) wake += 45;   // the bar runs to 23:00: its staff keep their old lie-in (0.71.3; else under 6 hours' sleep)
   if (H.has('early-riser')) wake -= 30 + 15 * U(12);
   if (H.has('late-sleeper')) wake += 15 + 15 * U(12);
   if (!works) wake += 45 + 45 * U(13) + (shape.lieIn || 0);
@@ -32586,7 +32587,7 @@ function tradJoin(e, a) {
   const s = TRAD_JOIN[e.id], now = shipNow(), d = e.day, lead = TJ_NOW && TJ_NOW.e === e ? TJ_NOW.lead : tradLeader(e), name = tjFirst(lead || a.p.id);
   const notice = tradWords(e, 'notice', { name }) || e.name + ': ' + s.what + '. Social and leisure up.';
   player.stop(); a.talking = 2; player.face = Math.atan2(a.x - player.obj.position.x, a.z - player.obj.position.z);
-  if (s.act === 'beam') { if (beamPaint()) return true; toast(a.p.name, '"' + (tradWords(e, 'tell', { name }) || 'Go on, tap the beam. Your name goes up there, with ours.') + '"'); return true; }   // the leader hands you the pen (0.71.3)
+  if (s.act === 'beam') { toast(a.p.name, '"' + (tradWords(e, 'tell', { name }) || 'Go on, tap the beam. Your name goes up there, with ours.') + '"'); return true; }
   if (s.act === 'walk') { eventJoin(e, d, now, notice); tradWalkStart(e, lead); return true; }
   const near = tjAgent(lead) || a, sp = tradSpot(e, near.x, near.z);
   eventJoin(e, d, now, notice);
@@ -32625,7 +32626,7 @@ function tradJoinFrame() {
 const TJ_CHEER = ['Well done! Welcome to Works.', 'There it is. Up with the rest of us.', 'Looks good up there.', 'Big letters. Good.'];
 let TJ_FREE = null;                                      // { ids: Map(id -> the end of their tradition segment), at, until }
 // painting your name (0.71.3, the user's playtest 2: "couldn't tap the Name Beam": the beam is a thin target high on the
-// wall): a tap on the beam, on its leader, or on the floor within BEAM_REACH tiles of the beam's spot all start it
+// wall): a tap on the beam or on the floor within BEAM_REACH tiles of the beam's spot starts it (its leader still only says to)
 const BEAM_REACH = 2.5;
 const beamOn = () => !!TJ_NOW && TRAD_JOIN[TJ_NOW.e.id].act === 'beam' && PLACE_OF.has('5-beam-1') && !(typeof ACT !== 'undefined' && ACT && ACT.o && ACT.o.beam);
 function beamPaint() {
