@@ -12467,6 +12467,7 @@ const FLOOR_ACTS = { gym: pl => pl.anim === 'run' ? 'Treadmill' : pl.anim === 'r
 function playerFloorTap(point) {
   if (queueHeld()) return true;                          // in the line: ask first (0.28.31)
   if (bagLockerTap(point)) return true;                  // the kit bag into your locker (0.28.26)
+  if (typeof beamFloorTap === 'function' && beamFloorTap(point)) return true;   // section 18: by the beam at Name on the beam, paint your name (0.71.3)
   if (typeof crateTap === 'function' && crateTap(point)) return true;   // the crate you set down (Put down, 0.28.60)
   if (typeof clothesFloorTap === 'function' && clothesFloorTap(point)) return true;   // section 21b: your wardrobe, or the hamper you set down (0.42.40)
   if (typeof PLACE_OF === 'undefined' || typeof ray === 'undefined') return false;
@@ -32585,7 +32586,7 @@ function tradJoin(e, a) {
   const s = TRAD_JOIN[e.id], now = shipNow(), d = e.day, lead = TJ_NOW && TJ_NOW.e === e ? TJ_NOW.lead : tradLeader(e), name = tjFirst(lead || a.p.id);
   const notice = tradWords(e, 'notice', { name }) || e.name + ': ' + s.what + '. Social and leisure up.';
   player.stop(); a.talking = 2; player.face = Math.atan2(a.x - player.obj.position.x, a.z - player.obj.position.z);
-  if (s.act === 'beam') { toast(a.p.name, '"' + (tradWords(e, 'tell', { name }) || 'Go on, tap the beam. Your name goes up there, with ours.') + '"'); return true; }
+  if (s.act === 'beam') { if (beamPaint()) return true; toast(a.p.name, '"' + (tradWords(e, 'tell', { name }) || 'Go on, tap the beam. Your name goes up there, with ours.') + '"'); return true; }   // the leader hands you the pen (0.71.3)
   if (s.act === 'walk') { eventJoin(e, d, now, notice); tradWalkStart(e, lead); return true; }
   const near = tjAgent(lead) || a, sp = tradSpot(e, near.x, near.z);
   eventJoin(e, d, now, notice);
@@ -32623,23 +32624,34 @@ function tradJoinFrame() {
 // the gathering breaks up: everyone at it goes on to the rest of their evening (TJ_FREE, read by tradWhere).
 const TJ_CHEER = ['Well done! Welcome to Works.', 'There it is. Up with the rest of us.', 'Looks good up there.', 'Big letters. Good.'];
 let TJ_FREE = null;                                      // { ids: Map(id -> the end of their tradition segment), at, until }
-PLAYER_TAPS.push((it, at) => {
-  if (!it || it.t !== 'The beam' || !TJ_NOW || TRAD_JOIN[TJ_NOW.e.id].act !== 'beam' || !PLACE_OF.has('5-beam-1')) return false;
+// painting your name (0.71.3, the user's playtest 2: "couldn't tap the Name Beam": the beam is a thin target high on the
+// wall): a tap on the beam, on its leader, or on the floor within BEAM_REACH tiles of the beam's spot all start it
+const BEAM_REACH = 2.5;
+const beamOn = () => !!TJ_NOW && TRAD_JOIN[TJ_NOW.e.id].act === 'beam' && PLACE_OF.has('5-beam-1') && !(typeof ACT !== 'undefined' && ACT && ACT.o && ACT.o.beam);
+function beamPaint() {
+  if (!beamOn()) return false;
   const e = TJ_NOW.e;
   actStart('tj:' + e.id, '5-beam-1', { pose: 'work', title: e.name, beam: e.id + '@' + e.day, company: 0,
     after: tradWords(e, 'paint', {}) || 'Zeke hands you the pen. You paint your name, big letters, at the end of the row.' });
   return true;
-});
+}
+PLAYER_TAPS.push((it, at) => !!it && it.t === 'The beam' && beamPaint());
+function beamFloorTap(point) {                           // section 15's playerFloorTap asks first
+  if (!point || !beamOn() || deckDef.num !== 5) return false;
+  const sp = placeSpot('5-beam-1'); return !!sp && Math.hypot(point.x - sp.x, point.z - sp.z) <= BEAM_REACH && beamPaint();
+}
+let BEAM_CHEERS = [];                                    // [{ c: agent, text, at: real ms }]: the welcomes, said in turn
 function tradBeamFrame() {
+  while (BEAM_CHEERS.length && simNow() >= BEAM_CHEERS[0].at) { const b = BEAM_CHEERS.shift(); if (b.c.h && DECK_CREW.includes(b.c) && typeof bubbleSay === 'function') bubbleSay(b.c.h, b.text, 4); }
   const A = typeof ACT !== 'undefined' ? ACT : null;
   if (!A || !A.o.beam || A.o.painted || !(A.phase === 'do' || A.phase === 'out') || A.done < A.def.mins) return;
   A.o.painted = true;
   const now = shipNow(), d = Math.floor(now / 1440) + 1, e = eventsOn(d).find(x => x.id + '@' + d === A.o.beam); if (!e) return;
   eventJoin(e, d, now, tradWords(e, 'notice', {}) || 'Name on the beam: your name is up, beside everyone who has served in Works. The crew cheer. Social and leisure up.');
   const there = DECK_CREW.filter(c => c.p && c.p.id && (o => o && o.now && o.e.id === e.id)(eventOf(c.p, now)));
-  there.slice().sort((x, y) => Math.hypot(x.x - A.x, x.z - A.z) - Math.hypot(y.x - A.x, y.z - A.z)).slice(0, 4).forEach((c, k) => {
+  BEAM_CHEERS = there.slice().sort((x, y) => Math.hypot(x.x - A.x, x.z - A.z) - Math.hypot(y.x - A.x, y.z - A.z)).slice(0, 8).map((c, k) => {   // everyone there, one after another (playtest 2, 0.71.3; was the nearest four at once)
     let l = null; try { l = typeof lineFor === 'function' && lineFor(c.p.id, 'beam.congrats', {}); } catch (x) { l = null; }
-    if (c.h && typeof bubbleSay === 'function') bubbleSay(c.h, l && l.text || TJ_CHEER[k % TJ_CHEER.length], 4 + k);
+    return { c, text: l && l.text || TJ_CHEER[k % TJ_CHEER.length], at: simNow() + k * 1600 };
   });
   const ids = new Map();
   for (const c of there) { const sg = planDay(c.p, d).find(x => evTagId(x.tag) === e.id && x.from <= now && now < x.to); if (sg) ids.set(c.p.id, sg.to); }
