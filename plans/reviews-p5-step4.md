@@ -9,6 +9,9 @@ Lines skimmed. In a fresh archive content_gen bakes 9342 lines; lines_check PASS
 
 ## Step 4
 
+### W2 claude/writer-p5 b00e08b (0.48.105, Step 4 lines batch 1): PASS
+Skimmed: step4.lines (414 lines), workshop.lines, five crew banks, ten training meetings (M11-M17). In a fresh archive content_gen bakes 9569 lines and 47 meetings; lines_check PASS (the 2 old warnings). No reputation numbers. M11 follows the lead's call (Halloran teaches "Torres's Friday routine" on Day 12; Torres's own version for when he's on shift).
+
 ### E3 claude/mech-diagnose b809339 (0.53.5, the leak joints moved): PASS
 The five joints moved, same ids and order (3-leak-2 galley 35,3 'w'; 3-leak-4 promenade 23,9 'n'; 4-leak-2 starboard washroom 5,18 'e'; 4-leak-3 laundry 14,18 'e'; 4-leak-4 junior corridor 10,4 'n'), puddles with them. My edge probe on all 12: wall edge 'wall' or 'hull', place tile free, puddle tile free and in the same room. Screenshots look right. deck_check gains the line (leak tile free, wall edge wall/hull, puddle place free and in the room). Take this one, not 9d179e9.
 
