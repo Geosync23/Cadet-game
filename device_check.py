@@ -219,7 +219,7 @@ def run(path):
             check(jb == [False, True], f'Jobs: no taking on the device, points to the board: {jb}')
             # Maps: every deck draws; tap a room on the plan, Go there points the goal arrow at it
             mp = g.ev("""(() => { const out = {}; deviceShow('maps');
-              for (const n of Object.keys(DECKS)) { deviceDo({ app: 'maps', do: 'deck', arg: +n }); out[n] = document.querySelectorAll('#devBody .devmap rect[data-room]').length; }
+              for (const n of (typeof DECK_ORDER !== 'undefined' ? DECK_ORDER : Object.keys(DECKS).map(Number))) { deviceDo({ app: 'maps', do: 'deck', arg: +n }); out[n] = document.querySelectorAll('#devBody .devmap rect[data-room]').length; }
               deviceDo({ app: 'maps', do: 'deck', arg: 3 }); const r = [...document.querySelectorAll('#devBody .devmap rect[data-room]')].find(x => DECKS[3].rooms[x.dataset.room] && /galley|mess/i.test(DECKS[3].rooms[x.dataset.room].name));
               r.dispatchEvent(new MouseEvent('click', { bubbles: true }));
               const go = [...document.querySelectorAll('#devBody .btns .act')].find(b => b.textContent === 'Go there'); go && go.click();
@@ -230,7 +230,7 @@ def run(path):
             # Maps has no people (0.35.16, the user's answer); the plan is kept between ship minutes (0.35.14); appointments
             # keep fields other sections add (socKept)
             pp = g.ev("""(() => { deviceShow('maps'); const out = [];
-              for (const n of Object.keys(DECKS)) { deviceDo({ app: 'maps', do: 'deck', arg: +n }); out.push(document.querySelectorAll('#devBody .devmap circle.m-per').length); }
+              for (const n of (typeof DECK_ORDER !== 'undefined' ? DECK_ORDER : Object.keys(DECKS).map(Number))) { deviceDo({ app: 'maps', do: 'deck', arg: +n }); out.push(document.querySelectorAll('#devBody .devmap circle.m-per').length); }
               const s1 = document.querySelector('#devBody .devmap'); deviceRefresh(); DEVICE_SKIN.draw('maps', Object.assign(deviceView('maps'), { title: 'Maps again' }));
               const s2 = document.querySelector('#devBody .devmap'); deviceDo({ app: 'maps', do: 'deck', arg: deckDef.num }); deviceShow('home');
               return [out.every(x => x === 0), s1 === s2, !document.getElementById('devBody').textContent.includes('On duty on this deck'),
@@ -535,8 +535,8 @@ def run(path):
                   const days = []; for (const a of [1, 10, 100, 300, 359]) for (let k = 0; k < 7; k++) days.push(a + k);
                   for (const d of days) { SHIP.time.day = d; updateClock(); if (R(clock).height > 20 || clock.scrollWidth > clock.clientWidth + 1 || hits()) { bad.push('day ' + d + ': ' + clock.textContent); break; } }
                   SHIP.time.day = keep.day; updateClock();
-                  const names = new Set(); for (const n of Object.keys(DECKS)) for (const k in DECKS[n].rooms || {}) { const r = DECKS[n].rooms[k]; if (r && r.name) names.add(r.name + '|' + n); }
-                  for (const x of names) { const [nm, n] = x.split('|'); document.getElementById('room').textContent = nm; document.getElementById('deck').textContent = 'Deck ' + n + ', CSV Wren';
+                  const names = new Set(); for (const n of (typeof DECK_ORDER !== 'undefined' ? DECK_ORDER : Object.keys(DECKS).map(Number))) for (const k in DECKS[n].rooms || {}) { const r = DECKS[n].rooms[k]; if (r && r.name) names.add(r.name + '|' + n); }
+                  for (const x of names) { const [nm, n] = x.split('|'); document.getElementById('room').textContent = nm; document.getElementById('deck').textContent = (typeof deckWord === 'function' ? deckWord(+n) : 'Deck ' + n) + ', CSV Wren';
                     if (hits()) { bad.push(nm); if (bad.length > 3) break; } }
                   document.getElementById('room').textContent = keep.room; document.getElementById('deck').textContent = keep.deck;
                   return { n: names.size, bad, clock: clock.textContent }; })()"""

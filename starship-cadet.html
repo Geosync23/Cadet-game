@@ -285,7 +285,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.63.5
+   STARSHIP CADET: CSV Wren                           build 0.64.0
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -589,8 +589,16 @@ const shipDeck = n => SHIP.decks[n] || (SHIP.decks[n] = { open: new Set() });
 // or in Maps, goToDeck(7) does nothing, a save left on it wakes on Deck 4; DECKS[7] is playerOnly, so nothing else changes
 const REC_DECK = false;                                  // 0.63.2r: merged dormant (the user's, via lead 15); the rec work comes after Step 4
 const DECK_ORDER = REC_DECK ? [1, 2, 3, 4, 7, 5, 6] : [1, 2, 3, 4, 5, 6];
+// 0.84.8: the auditorium's show (section 8c's recShow); here so the deck's build can read them
+const REC_POOLS = [[8.85, 7.3, .95], [9.35, 9.6, 1.25], [9.1, 11.6, 1.0]];   // the stage's light pools [x, z, radius], the auditorium's coordinates
+const REC_SHOWS = {
+  film: { dim: .62, scr: 1, pools: [0, 0, 0] }, talk: { dim: .3, scr: 0, pools: [1, .25, 0] },
+  allhands: { dim: .28, scr: 0, pools: [1, .5, 0] }, talent: { dim: .5, scr: 0, pools: [.45, 1, .8] },
+};
+const REC_SHOW = { state: null, dim: 0, scr: 0, piv: null, pools: null };
 const deckLabel = n => +n === 7 ? 'R' : String(n);
 const deckWord = n => +n === 7 ? 'Rec deck' : 'Deck ' + n;
+const deckIn = n => +n === 7 ? 'the rec deck' : 'Deck ' + n;   // 0.84.2 (lead 18): a deck's name mid-sentence ("on the rec deck"); deckWord for labels and signs
 
 // =====================================================================
 // 4a. THE CURRENT DECK
@@ -2563,18 +2571,20 @@ const WALL_KIT = {
     const r = cyl(.025, .025, .9, WM.steelTop, 0, .95, .09, g, 10); r.rotation.z = Math.PI / 2;
     for (const x of [-.4, .4]) box(.03, .03, .08, WM.steel, x, .95, .045, g);
   },
-  // the deck directory by the lift: all six decks, top to bottom
+  // the deck directory by the lift: every deck, top to bottom (the rec deck's R row while it's on, 0.84.0)
   deckDirectory(g) {
     const t = tex(200, 260, (c, w, h) => {
       c.fillStyle = '#0d1a1f'; c.fillRect(0, 0, w, h);
       c.fillStyle = '#e8c06a'; c.font = '700 20px system-ui,sans-serif'; c.fillText('CSV WREN', 16, 30);
-      [['1', 'Bridge'], ['2', 'Command & Science'], ['3', 'Commons'], ['4', 'Quarters'], ['5', 'Operations'], ['6', 'Engineering']].forEach(([n, name], k) => {
-        const y = 62 + k * 32, here = n === String(deckDef.num);
-        if (here) { c.fillStyle = 'rgba(95,214,198,.18)'; c.fillRect(8, y - 21, w - 16, 29); }
+      const rows = [['1', 'Bridge'], ['2', 'Command & Science'], ['3', 'Commons'], ['4', 'Quarters'], ['5', 'Operations'], ['6', 'Engineering']], dy = REC_DECK ? 27 : 32;
+      if (REC_DECK) rows.splice(4, 0, ['R', 'Recreation']);   // 0.84.0 (rec engineer B): the rec deck's row, between 4 and 5
+      rows.forEach(([n, name], k) => {
+        const y = 62 + k * dy, here = n === deckLabel(deckDef.num);
+        if (here) { c.fillStyle = 'rgba(95,214,198,.18)'; c.fillRect(8, y - (REC_DECK ? 19 : 21), w - 16, REC_DECK ? 25 : 29); }
         c.fillStyle = here ? '#5fd6c6' : '#e8c06a'; c.font = '700 17px system-ui,sans-serif'; c.fillText(n, 16, y);
         c.fillStyle = here ? '#e8f4f1' : '#a9c4bf'; c.font = '500 15px system-ui,sans-serif'; c.fillText(name, 38, y);
       });
-      c.fillStyle = '#7fa9a3'; c.font = '500 12px system-ui,sans-serif'; c.fillText('You are on Deck ' + deckDef.num, 16, h - 12);
+      c.fillStyle = '#7fa9a3'; c.font = '500 12px system-ui,sans-serif'; c.fillText('You are on ' + (deckDef.num === 7 ? 'the Recreation Deck' : deckWord(deckDef.num)), 16, h - 12);
     });
     const p = new THREE.Mesh(new THREE.PlaneGeometry(.6, .78), new THREE.MeshBasicMaterial({ map: t, toneMapped: false })); p.position.set(0, 1.45, .045); g.add(p);
     box(.66, .84, .04, M.slateDark, 0, 1.45, .02, g);
@@ -3901,7 +3911,7 @@ Object.assign(KIT, {
 // ---- The answers pass (0.30.12): the Ship health board (machine wear is drawn by section 8b's machineFx) ----
 // healthBoard: a wall screen listing the ship's systems and their condition, from section 17's shipHealthRows() (or, until
 // that's in, shipSystems() and shipHealth()). Redrawn when the machines change or the ship hour turns; nothing else.
-const HEALTH_NAME = { air: 'Air', water: 'Water', power: 'Power', heat: 'Heat', food: 'Food', waste: 'Waste & laundry', hull: 'Hull', comms: 'Comms & sensors', propulsion: 'Propulsion', transport: 'Lift & doors' };
+const HEALTH_NAME = { air: 'Air', water: 'Water', power: 'Power', heat: 'Heat', food: 'Food', waste: 'Waste & laundry', hull: 'Hull', comms: 'Comms & sensors', propulsion: 'Propulsion', transport: 'Lift & doors', rec: 'Rec deck' };
 function healthRows() {
   if (typeof shipHealthRows === 'function') return shipHealthRows() || [];
   if (typeof shipSystems !== 'function') return [];
@@ -8157,6 +8167,13 @@ Object.assign(KIT, {
     for (let k = 0; k <= 24; k++) { const a = th - 2 * th * k / 24; sh.lineTo(S.back * Math.cos(a), 9 + S.rz * Math.sin(a)); }
     const geo = new THREE.ExtrudeGeometry(sh, { depth: .55, bevelEnabled: false, curveSegments: 16 });
     const m = new THREE.Mesh(geo, [RK.stageTop, RK.stageSide]); m.rotation.x = Math.PI / 2; m.position.y = .55; m.castShadow = m.receiveShadow = true; g.add(m);
+    // 0.84.8: the stage light pools (the lectern, centre stage, the piano), one mesh; recShow sets each pool's brightness
+    const P = REC_POOLS, pos = [], uv = [], ix = [];
+    P.forEach(([x, z, r], k) => { for (const [u, v] of [[0, 0], [1, 0], [1, 1], [0, 1]]) { pos.push(x + (u - .5) * 2 * r, .58, z + (v - .5) * 2 * r); uv.push(u, v); } ix.push(k * 4, k * 4 + 2, k * 4 + 1, k * 4, k * 4 + 3, k * 4 + 2); });
+    const pg = new THREE.BufferGeometry(); pg.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); pg.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+    pg.setAttribute('color', new THREE.Float32BufferAttribute(new Array(P.length * 12).fill(0), 3)); pg.setIndex(ix);
+    const pm = new THREE.Mesh(pg, new THREE.MeshBasicMaterial({ map: glowTex, vertexColors: true, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false }));
+    pm.raycast = () => {}; pm.renderOrder = 2; pm.userData.noMerge = true; g.add(pm); REC_SHOW.pools = pm; recPoolsSet();
     return { w: .1, d: .1, noBlock: true };
   },
   // the lighting truss over the stage on two gold towers, with six lamps aimed at the stage
@@ -8173,9 +8190,14 @@ Object.assign(KIT, {
     box(.3, .03, .22, RK.gold, 0, 1.18, .205, g);                       // the ship's crest on its front
     return { w: .62, d: .48 };
   },
-  // the film screen's housing, rolled up under the truss (it lowers for films, later)
+  // the film screen's housing, rolled up under the truss; 0.84.8: its cloth unrolls for films (recShow, section 8c)
   recScreen(g, o) {
     box(.24, .24, o.len, RK.black, 0, H - .3, 0, g); box(.04, .05, o.len - .2, RK.screen, .09, H - .45, 0, g);
+    const piv = new THREE.Group(), sh = H - 1.45; piv.position.set(.06, H - .45, 0); piv.userData.noMerge = true; g.add(piv);   // it moves: kept out of the deck's merge
+    RK.film = new THREE.MeshBasicMaterial({ color: col('#e8e6df'), toneMapped: false });
+    box(.02, sh, o.len - .3, RK.film, 0, -sh / 2, 0, piv); box(.05, .05, o.len - .25, RK.black, 0, -sh, 0, piv);   // the cloth and its weighted bottom bar
+    for (const c of piv.children) { c.userData.noMerge = true; c.castShadow = false; }   // the merge looks at each mesh, not its group
+    REC_SHOW.piv = piv; piv.scale.y = Math.max(.001, REC_SHOW.scr); piv.visible = REC_SHOW.scr > .002;
     return { w: .3, d: o.len, noBlock: true };
   },
   recHit(g, o) { return { w: o.w, d: o.d, noBlock: true }; },   // a tap target over something drawn elsewhere
@@ -8313,7 +8335,7 @@ Object.assign(KIT, {
     const floor = new THREE.Mesh(new THREE.BoxGeometry(L - 2 * t, .03, Wd - 2 * t), [RK.poolSide, RK.poolSide, RK.mosaic, RK.poolSide, RK.poolSide, RK.poolSide]);
     floor.position.set(cx, .015, cz); floor.userData.noMerge = true; g.add(floor);
     for (let k = 0; k < 3; k++) box(1.0, .3 - k * .1, .3, RK.poolSide, x0 + t + .5, (.3 - k * .1) / 2 + .03, z1 - t - .15 - k * .3, g);   // the steps, down from the inboard rim at the stern end
-    const water = recWaterMesh(new THREE.PlaneGeometry(L - 2 * t, Wd - 2 * t), RK.poolWater); water.rotation.x = -Math.PI / 2; water.position.set(cx, .35, cz); g.add(water);
+    const water = recWaterMesh(new THREE.PlaneGeometry(L - 2 * t, Wd - 2 * t), RK.poolOwn); water.rotation.x = -Math.PI / 2; water.position.set(cx, .35, cz); g.add(water);   // 0.84.4 (rec engineer B): its own copy of the water, so recSigns can cloud the pool and not the river
     for (const z of [1.8, 2.7, 3.6]) for (let k = 0; k < 16; k++) {   // the lane ropes: floats in runs of orange and white
       const s = (L - 2 * t) / 16, f = cyl(.045, .045, s * .9, k % 4 < 2 ? RK.ropeOrange : RK.ropeWhite, x0 + t + s * (k + .5), .35, z, g, 8); f.rotation.z = Math.PI / 2;
     }
@@ -8471,6 +8493,28 @@ Object.assign(WALL_KIT, {
     const p = new THREE.Mesh(new THREE.PlaneGeometry(W_, Hh), new THREE.MeshBasicMaterial({ map: t, toneMapped: false })); p.position.set(o.off || 0, o.y || 2.45, .03); g.add(p);
   },
 });
+// the rec deck's machines (0.84.0, rec engineer B; plans/recdeck-plan.html section 6): { id, kind, at, room, face, panel, look? }
+// like every deck's, each with a work:works place at its panel (pushed after DECKS[7]). section 17 lists them only while
+// REC_DECK is on (machineList), so a dormant rec deck wears nothing, posts nothing and sends nobody down
+const REC_MACHINES = [
+  { id: '7-pool-filter-1', kind: 'poolfilter', at: [33, 1], room: 'p', face: 'w', panel: [32, 1] },
+  { id: '7-pool-filter-2', kind: 'poolfilter', at: [33, 5], room: 'p', face: 'w', panel: [32, 5] },
+  { id: '7-pool-dosing', kind: 'pooldoser', at: [33, 3], room: 'p', face: 'w', panel: [32, 3], look: { lamp: [.25, 1.2, .45], drip: [.25, .9, .51], light: [.25, 2.1, .45] } },
+  { id: '7-pool-heat', kind: 'poolheat', at: [33, 3], room: 'p', face: 'w', panel: [32, 4], look: { lamp: [-.25, 1.2, .45], drip: [-.25, .9, .51], light: [-.25, 2.1, .45] } },
+  { id: '7-river-pump-1', kind: 'riverpump', at: [1, 7], room: 'r', face: 'e', panel: [2, 7] },
+  { id: '7-river-pump-2', kind: 'riverpump', at: [1, 10], room: 'r', face: 'e', panel: [2, 10] },
+  { id: '7-wave-gate', kind: 'wavegate', at: [12, 1], room: 'K', face: 'e', panel: [15, 1], look: { lamp: [0, 1.6, -.2], drip: [0, .5, -.15], light: [0, 2.4, -.2] } },
+  { id: '7-wall-holds', kind: 'wallholds', at: [1, 5], room: 'K', face: 'e', panel: [2, 5], look: { lamp: [0, 1.5, .15], drip: [0, .6, .2], light: [0, 2.6, .15] } },
+  { id: '7-belay-1', kind: 'belay', at: [1, 3], room: 'K', face: 'e', panel: [2, 3], look: { lamp: [0, 3.0, .2], drip: [0, 2.8, .25], light: [0, 3.4, .2] } },
+  { id: '7-belay-2', kind: 'belay', at: [1, 4], room: 'K', face: 'e', panel: [2, 4], look: { lamp: [0, 3.0, .2], drip: [0, 2.8, .25], light: [0, 3.4, .2] } },
+  { id: '7-aud-lights', kind: 'stagelights', at: [28, 13], room: 'b', face: 'e', panel: [29, 13] },
+  { id: '7-aud-sound', kind: 'soundrack', at: [28, 15], room: 'b', face: 'e', panel: [29, 15] },
+  { id: '7-aud-seats', kind: 'seathinges', at: [40, 7], room: 'A', face: 'e', panel: [41, 7], look: { lamp: [0, .6, .2], drip: [0, .4, .25], light: [0, 1.4, .2] } },
+  { id: '7-court-net', kind: 'courtnet', at: [1, 12], room: 'e', face: 'e', panel: [2, 12] },
+  { id: '7-court-board', kind: 'scoreboard', at: [1, 14], room: 'e', face: 'e', panel: [2, 14] },
+  { id: '7-grav-plates', kind: 'gravplate', at: [30, 17], room: 'b', face: 'n', panel: [30, 17] },
+];
+const REC_FACE_BACK = { n: 's', s: 'n', e: 'w', w: 'e' };
 DECKS[7] = {
   num: 7, name: 'Recreation', seed: 70771, tall: 1.3, playerOnly: true, open: [6, 24],
   blurb: 'Auditorium, court, pool, rivers', arrive: 'The concourse runs stern to bow: the rivers and the court aft, the pool and the auditorium forward.',
@@ -8550,7 +8594,7 @@ DECKS[7] = {
   },
   hull: { sternX: 1, stern: 2, bowFrom: 34, bowLen: 11.6, byFace: true },
   service: [{ key: 'v,4,8', tier: 2 }, { key: 'v,4,15', tier: 2 }, { key: 'v,32,3', tier: 1 }, { key: 'h,31,11', tier: 1 }, { key: 'v,34,11', tier: 1 }],
-  machines: [],                                          // TODO (phase 2, the systems engineer): the plan's section 6 machines
+  machines: REC_MACHINES,                                // 0.84.0 (rec engineer B): section 6's machines, above
   // the auditorium's seats (0.80.1): reached from the aisle beside their row; a type no crew code knows, so they stay the player's
   places: REC_SEATS.map((s, k) => ({ id: '7-seat-' + (k + 1), type: 'rec:seat', at: [s.col, Math.floor(s.z)], walk: [s.col, s.aisle], face: 'e', pose: 'sit', room: 'A', xy: [s.x, s.z], y: Math.round((s.h + .47) * 100) / 100 }))
     // the stands' 33 seats (0.80.2), facing the court, reached from the aisle at column 6 or 14
@@ -8602,8 +8646,10 @@ DECKS[7] = {
     place('A', 'recHit', 9.3, 9, 'n', { w: 2.6, d: 9, hitH: .8, it: IT('Stage', 'A curved stage across the bow, and behind it nothing but the windows and the stars. Every show here is played against them.') });
     place('A', 'recTruss', 9.6, 9, 'n', { len: 8, it: IT('Lighting truss', 'A gold truss over the stage on two towers, with six lamps aimed down. The booth runs them.') });
     place('A', 'recScreen', 10.3, 9, 'n', { len: 6 });
+    place('A', 'micStand', 8.95, 9.6, 'e', { it: IT('Microphone', 'A mic stand at centre stage. Talent night\'s first act always adjusts it, and the second puts it back.') }).position.y = .55;   // 0.84.9: perform's mic (the music room's kit)
     place('A', 'recLectern', 8.8, 7.3, 'e', { it: IT('Lectern', 'The Captain\'s lectern, with the Wren\'s crest on the front. The microphone is bent at exactly her height.') });
-    place('A', 'grandPiano', 9.4, 12.4, 'w', { it: IT('Grand piano', 'A black grand piano at stage left, lid propped. Someone keeps it tuned, and nobody admits to it.') }).position.y = .55;
+    place('A', 'grandPiano', 9.0, 12.6, 's', { it: IT('Grand piano', 'A black grand piano at stage left, lid propped. Someone keeps it tuned, and nobody admits to it.') }).position.y = .55;
+    place('A', 'pianoBench', 9.0, 11.25, 's').position.y = .55;   // 0.84.9: talent night's pianist sits here (perform { act: 'piano' }); the piano turned side-on (was 9.4, 12.4 facing w: no room for a bench on the curve)
     // the foyer: the REC DEC neon over the four doors, the deck's poster, a bench
     placeWall('f', 'recNeon', 'e', 2.0, { hitW: 2.4, it: IT('REC DEC', 'A curved pink neon over the auditorium\'s doors. The official sign, RECREATION DECK, was too long to fit.') });
     placeWall('f', 'recPoster', 'n', 2.5, { it: IT('Poster', 'THE REC DEC: pool, rivers, climbing wall, float room, Lightdisc. Open 06:00 to midnight.') });
@@ -8663,6 +8709,8 @@ DECKS[7] = {
     REC_STANDS.forEach(([c0, c1], b) => place('T', 'recHit', (c0 + c1) / 2 - 4, 1, 'n', { w: c1 - c0, d: 2, hitH: 1.3, it: IT('Stands', ['Three stepped benches at the stern end, by the scoreboard.', 'The middle of the stands: three stepped benches, right on the net. The best seats for a close game.', 'Three stepped benches at the bow end, by the gate onto the court.'][b]) }));
   },
 };
+// 0.84.0 (rec engineer B): a work:works place at each machine's panel, facing it (panelPlace finds them; schedules and placesOf skip them)
+DECKS[7].places.push(...REC_MACHINES.map(m => ({ id: m.id + '-svc', machine: m.id, type: 'work:works', at: m.panel.slice(), face: m.panel[0] === m.at[0] && m.panel[1] === m.at[1] ? REC_FACE_BACK[m.face] : m.panel[0] > m.at[0] ? 'w' : m.panel[0] < m.at[0] ? 'e' : m.panel[1] > m.at[1] ? 'n' : 's', pose: 'work', room: m.room })));
 // the rec deck's materials, made when the deck is built (so they are freed with it)
 let RK = null;
 function recMats() {
@@ -8671,7 +8719,7 @@ function recMats() {
     stageTop: M.wood, stageSide: std('#1d1630', .7), truss: std('#c9a24a', .4, .7), black: std('#16181c', .6, .3), wood: std('#6b4a32', .6), screen: std('#e8e6df', .9),
     standStep: std('#3a404a', .85), bench: std('#c9783a', .6),
     rim: std('#d8e6e4', .45), coping: std('#f2f0ea', .4), poolSide: std('#6fc3c9', .4), mosaic: new THREE.MeshStandardMaterial({ map: recMosaic(), roughness: .4 }),
-    poolWater: recWater('#1f8fa6', '#4fd0dc', { alpha: 1 }), ropeOrange: std('#ff8a3a', .5), ropeWhite: std('#f4f4f0', .5),
+    poolWater: recWater('#1f8fa6', '#4fd0dc', { alpha: 1 }), poolOwn: recWater('#1f8fa6', '#4fd0dc', { alpha: 1 }), ropeOrange: std('#ff8a3a', .5), ropeWhite: std('#f4f4f0', .5),
     rock: std('#6f8a7c', .9), rockDark: std('#4f6559', .9), riverBed: std('#6fc3c9', .4), fern: std('#3f8a4a', .8),
     riverFast: recWater('#1f8fa6', '#4fd0dc', { foam: .9, flow: 1.4, alpha: 1 }),   // 0.82.5 (the user's: still two looks): one water, opaque so the bed under it can't tint it; the fast run adds only its foam
       // 0.80.9: the pool's water (the user's: they didn't match)
@@ -8729,6 +8777,7 @@ function applyLight(k) {
   sun.color.copy(DAY.sun).lerp(NIGHT.sun, k); sun.intensity = lerp(DAY.sunI, NIGHT.sunI, k);
   const ml = deckDef && deckDef.light;                   // a deck's own mood (Deck 6 runs warm and dim)
   if (ml) { hemi.color.multiply(ml.sky); hemi.intensity *= ml.hemi; sun.color.multiply(ml.sun); sun.intensity *= ml.sunI; }
+  if (REC_SHOW.dim) { const q = 1 - REC_SHOW.dim; hemi.intensity *= q; sun.intensity *= q; }   // 0.84.8: the auditorium's house lights down for a show (8c)
   for (const L of LAMPS) L.l.intensity = lerp(L.day, L.night, k);
   renderer.toneMappingExposure = lerp(DAY.exp, NIGHT.exp, k);
   scene.background.copy(DAY.bg).lerp(NIGHT.bg, k);
@@ -8749,7 +8798,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.63.5';                           // keep in step with the header's build line
+const GAME_BUILD = '0.64.0';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -10589,7 +10638,7 @@ const DEV_WEEK = [
   [{ at: 900, title: 'Drill: off-duty crew muster by the lift', where: 'the lift lobby on each deck', len: 15 }],
   [{ at: 400, title: 'Bunk inspection: tidy your bunk', where: 'your bunk, Deck 4', len: 20 }],
   [], [], []];
-const devDeckOf = ev => { const w = ev && ev.where && ev.where[0]; return w ? 'Deck ' + w.deck : 'aboard'; };
+const devDeckOf = ev => { const w = ev && ev.where && ev.where[0]; return w ? deckWord(w.deck) : 'aboard'; };
 // the ship traditions between two absolute ship minutes: section 18's upcomingTraditions when it's there, else eventsOn
 function devTraditions(a, b) {
   if (typeof upcomingTraditions === 'function') {
@@ -10617,7 +10666,7 @@ function devOccasions(a, b) {
     const booked = new Set(SHIP.device.appts.map(x => x.occ).filter(Boolean));   // 0.35.32: those apptAdd booked are listed as appointments
     return SHIP.occasions.filter(r => r && r.status === 'asked' && r.at >= a && r.at <= b && OCCASIONS[r.id] && !OCCASIONS[r.id].chance && !booked.has(r.key)).map(r => {
       const rm = DECKS[r.deck] && DECKS[r.deck].rooms && DECKS[r.deck].rooms[r.room];
-      return { at: r.at, len: r.len || 30, title: OCCASIONS[r.id].title, deck: r.deck, room: rm ? r.room : null, where: (rm ? rm.name + ', ' : '') + 'Deck ' + r.deck };
+      return { at: r.at, len: r.len || 30, title: OCCASIONS[r.id].title, deck: r.deck, room: rm ? r.room : null, where: (rm ? rm.name + ', ' : '') + deckWord(r.deck) };
     });
   } catch (e) { return []; }
 }
@@ -10645,7 +10694,7 @@ function devDay(d) {
   // up, a wash call at your bunk), the shift's own, meals, tea and traditions are listed already or need no heads-up.
   try { if (typeof introOn === 'function' && introOn() && typeof INTRO_WEEK !== 'undefined') for (const b of INTRO_WEEK)
     if (b.day === d && DEV_BEATS[b.id] && b.where && Number.isInteger(b.where.deck))
-      out.push({ from: b.at, to: b.until || b.at + 30, title: DEV_BEATS[b.id], where: b.where.room + ', Deck ' + b.where.deck, kind: 'beat', deck: b.where.deck, room: b.where.room }); } catch (e) { /* not yet */ }
+      out.push({ from: b.at, to: b.until || b.at + 30, title: DEV_BEATS[b.id], where: b.where.room + ', ' + deckIn(b.where.deck), kind: 'beat', deck: b.where.deck, room: b.where.room }); } catch (e) { /* not yet */ }
   return out.sort((x, y) => x.from - y.from);
 }
 const DEV_BEATS = { 'd1-briefing': 'Morning briefing with the Chief', 'd2-solo': 'The Chief\'s office: your first job', 'd2-booths': 'Calling home', 'd3-store': 'The crew store' };   // titles (stand-ins; the beats' own words are section 21's)
@@ -11218,7 +11267,7 @@ deviceApp({ id: 'settle', title: 'Settling in', short: 'Settling', icon: 'record
     const L = settleList() || [], done = L.filter(x => settleDone(x.id)).length, B = [];
     B.push({ kind: 'text', text: done + ' of ' + L.length + ' done. Nothing here is required: people will show you as the week goes on.', mark: 'hot' });
     const rows = L.map(it => { const d = settleDone(it.id), p = it.teacher && apptPerson(it.teacher), g = !d && settleGoal(it);
-      return { text: (d ? '✓ ' : '') + it.title, sub: d ? 'Done' : (p ? 'Ask ' + p.name : '') + (it.place ? (p ? ' · ' : '') + it.place.room + ', Deck ' + it.place.deck : ''),
+      return { text: (d ? '✓ ' : '') + it.title, sub: d ? 'Done' : (p ? 'Ask ' + p.name : '') + (it.place ? (p ? ' · ' : '') + it.place.room + ', ' + deckIn(it.place.deck) : ''),
         mark: d ? 'past' : null, button: g ? 'Go there' : null, action: g ? { app: 'settle', do: 'go', arg: it.id } : null }; });
     B.push({ kind: 'list', rows });
     if (devTry(() => typeof introOn === 'function' && introOn()))
@@ -11327,17 +11376,17 @@ deviceApp({ id: 'jobs', title: 'Jobs', icon: 'wrench', order: 30,
       const [title, where] = jobCard(mine), m = mine.machine && machineById(mine.machine), tracked = SHIP.player.track !== null;   // a taken job is tracked until you switch it off (null)
       say('Yours: ' + title + ', ' + where + '.', 'hot');
       if (mine.kind === 'chore') {
-        const stops = mine.stops.map(st => { const p = placeById(st.placeId); return (st.tag === 'pickup' ? 'pick up ' + (mine.bring || 'the load') + ' in the ' : st.tag === 'drop' ? 'drop it in the ' : '') + (p ? roomName(p.deck, p.room) || 'room' : 'room') + ' on Deck ' + st.deck; });
+        const stops = mine.stops.map(st => { const p = placeById(st.placeId); return (st.tag === 'pickup' ? 'pick up ' + (mine.bring || 'the load') + ' in the ' : st.tag === 'drop' ? 'drop it in the ' : '') + (p ? roomName(p.deck, p.room) || 'room' : 'room') + ' on ' + deckIn(st.deck); });
         say(mine.title + '. ' + (mine.parts.length ? 'Bring ' + mine.parts.map(k => 'a ' + k).join(', ') + ' from main storage on Deck 5. ' : '') + 'Go to: ' + stops.join(', then ') + '.');
       } else if (typeof traceHidden === 'function' && traceHidden(mine)) {   // 24i: a traced job not yet found (the machine stays hidden)
         say(worksText('trace.how', 'Find where it starts: tap the machines on {line} with the pipe kit to read the flow. The Maps app marks them.', { line: traceLineName(mine.symptom.line) }));
       } else if (m) {
         const need = {}; for (const k of mine.parts) need[k] = (need[k] || 0) + 1;
-        say('Needs ' + Object.entries(need).map(([k, n]) => n + ' × ' + k + ' (' + (SHIP.stores[k] || 0) + ' in storage)').join(', ') + '. Parts are in main storage on Deck 5; the job is in the ' + ((DECKS[m.deck].rooms[m.room] || {}).name || 'room').toLowerCase() + ' on Deck ' + m.deck + '.');
+        say('Needs ' + Object.entries(need).map(([k, n]) => n + ' × ' + k + ' (' + (SHIP.stores[k] || 0) + ' in storage)').join(', ') + '. Parts are in main storage on Deck 5; the job is in the ' + ((DECKS[m.deck].rooms[m.room] || {}).name || 'room').toLowerCase() + ' on ' + deckIn(m.deck) + '.');
       } else say(mine.cargo === 'meals' ? 'Take a hover cart from the Cart bay on Deck 5, load ' + (mine.meals || 'the') + ' meals in the cargo hold, and take them up to the cold store on Deck 3. Then bring the cart back.'
         : 'Take a hover cart from the Cart bay on Deck 5, load the delivery in the cargo hold, and take it to main storage. Then bring the cart back.');
       const step = typeof ixJobStep === 'function' ? ixJobStep() : null;
-      if (step && step.label) say('Next step: ' + step.label + (step.deck ? ' (Deck ' + step.deck + ')' : '') + '.');
+      if (step && step.label) say('Next step: ' + step.label + (step.deck ? ' (' + deckIn(step.deck) + ')' : '') + '.');
       B.push({ kind: 'buttons', items: [{ label: tracked ? 'Tracking' : 'Track', on: tracked, action: { app: 'jobs', do: 'track', arg: mine.id } }] });
       say('Turn it in at the job board when it\'s done.');
     } else say('You take jobs at the job board in the Works bay (Deck 5), and turn them in there when they\'re done.');
@@ -11368,7 +11417,7 @@ deviceApp({ id: 'maps', title: 'Maps', icon: 'map', order: 25,
     else if (verb === 'pick') mapPick = mapPick === arg ? null : arg;
     else if (verb === 'go' && mapPick && typeof setGoal === 'function') {
       const n = mapDeck || deckDef.num, r = DECKS[n].rooms[mapPick];
-      SHIP.player.track = null; setGoal({ deck: n, room: mapPick, label: r.name + (n !== deckDef.num ? ', Deck ' + n : '') });
+      SHIP.player.track = null; setGoal({ deck: n, room: mapPick, label: r.name + (n !== deckDef.num ? ', ' + deckIn(n) : '') });
       deviceNotify({ app: 'maps', text: 'Follow the marker to the ' + r.name.toLowerCase() + '.', urgent: true }); delete DEV.notes.maps;
     }
     else if (verb === 'clear' && typeof clearGoal === 'function') clearGoal();
@@ -11426,11 +11475,11 @@ function rosterWhere(p, t = shipNow()) {                 // { line, deck, room }
   let w = null; try { w = typeof whereIs === 'function' ? whereIs(p, t) : null; } catch (e) { w = null; }
   if (!w) return { line: 'Not aboard right now.' };
   if (w.act === 'sleep' || w.act === 'wash') return { line: 'In their quarters.' };
-  if (w.moving) return { line: 'On the move' + (w.deck ? ', heading for Deck ' + w.deck : '') + '.' };
+  if (w.moving) return { line: 'On the move' + (w.deck ? ', heading for ' + deckIn(w.deck) : '') + '.' };
   const S = typeof schedData === 'function' ? schedData() : null, pl = w.placeId && S ? S.byId.get(w.placeId) : null;
   const room = pl && pl.deck === w.deck ? pl.room : null, r = room && DECKS[w.deck] && (DECKS[w.deck].rooms || {})[room], rn = r && r.name;
   if (rn && mapLocked(w.deck, room) && w.act !== 'work') return { line: 'In their quarters.' };   // a private cabin
-  const at = 'Deck ' + w.deck + (rn ? ', ' + rosterRoomName(rn) : '');
+  const at = deckWord(w.deck) + (rn ? ', ' + rosterRoomName(rn) : '');
   return { line: (ROSTER_ACT[w.act] ? ROSTER_ACT[w.act] + ': ' : '') + at + '.', deck: w.deck, room: rn ? room : null, roomName: rn };
 }
 function rosterPeople() {                                // everyone aboard: [{ p, tier }]; guests only while aboard
@@ -11446,7 +11495,7 @@ deviceApp({ id: 'roster', title: 'Roster', icon: 'crew', order: 52,
     else if (verb === 'tab') { rosterTab = arg === 'known' ? 'known' : 'all'; rosterPick = null; }
     else if (verb === 'go' && rosterPick && typeof setGoal === 'function') {
       const p = apptPerson(rosterPick), w = p && rosterWhere(p); if (!w || !w.room) return;
-      SHIP.player.track = null; setGoal({ deck: w.deck, room: w.room, label: p.name.split(' ')[0] + ', ' + rosterRoomName(w.roomName) + (w.deck !== deckDef.num ? ', Deck ' + w.deck : '') });
+      SHIP.player.track = null; setGoal({ deck: w.deck, room: w.room, label: p.name.split(' ')[0] + ', ' + rosterRoomName(w.roomName) + (w.deck !== deckDef.num ? ', ' + deckIn(w.deck) : '') });
       deviceNotify({ app: 'roster', text: 'Follow the marker to ' + rosterRoomName(w.roomName) + '.', urgent: true }); delete DEV.notes.roster;
     }
   },
@@ -11620,7 +11669,7 @@ function apptRoomPlace(n, key) {
 const apptPerson = id => typeof schedPeople === 'function' ? schedPeople().find(p => p.id === id) : (typeof ROSTER !== 'undefined' ? ROSTER.find(p => p.id === id) : null);
 const apptName = id => { const p = apptPerson(id); return p ? p.name : String(id); };
 const apptWhereName = id => {                          // the room's name, for any place in it
-  for (const n of Object.keys(DECKS)) { const q = (DECKS[n].places || []).find(x => x.id === id); if (q) { const r = (DECKS[n].rooms || {})[q.room]; return (r ? r.name : 'there') + ', Deck ' + n; } }
+  for (const n of Object.keys(DECKS)) { const q = (DECKS[n].places || []).find(x => x.id === id); if (q) { const r = (DECKS[n].rooms || {})[q.room]; return (r ? r.name : 'there') + ', ' + deckIn(n); } }
   return 'there';
 };
 function apptPeople() {                                  // who you can ask: people you've met when section 20 says, else story and Works crew
@@ -11740,7 +11789,7 @@ deviceApp({ id: 'appointments', title: 'Appointments', short: 'Appts', icon: 'ca
           { kind: 'text', text: 'Where', mark: 'head' },
           { kind: 'buttons', items: [{ label: 'Pick on the map', action: { app: 'appointments', do: 'map' } }] },
           { kind: 'list', rows: (d.where && !apptPlaces().some(x => x.id === d.where) ? [{ text: apptWhereName(d.where), mark: 'hot', action: { app: 'appointments', do: 'where', arg: d.where } }] : [])
-            .concat(apptPlaces().map(x => ({ text: x.name + ', Deck ' + x.deck, mark: x.id === d.where ? 'hot' : null, action: { app: 'appointments', do: 'where', arg: x.id } }))) });
+            .concat(apptPlaces().map(x => ({ text: x.name + ', ' + deckIn(x.deck), mark: x.id === d.where ? 'hot' : null, action: { app: 'appointments', do: 'where', arg: x.id } }))) });
         if (d.where) B.push({ kind: 'buttons', items: [{ label: d.with.length > 1 ? 'Ask all ' + d.with.length : 'Ask ' + apptName(d.with[0]).split(' ').slice(-1)[0], action: { app: 'appointments', do: 'ask' } }] });
       }
       B.push({ kind: 'buttons', items: [{ label: 'Cancel', action: { app: 'appointments', do: 'cancel' } }] });
@@ -13310,7 +13359,7 @@ function jobNotice() {
   if (!JOB_SEEN) { JOB_SEEN = new Set(open.map(j => j.id)); return; }
   const fresh = open.filter(j => !JOB_SEEN.has(j.id)); for (const j of open) JOB_SEEN.add(j.id);
   if (!fresh.length || myJob() || ACT) return;           // not while you hold a job or are busy
-  const c = typeof jobCard === 'function' ? jobCard(fresh[0]) : [fresh[0].kind, 'Deck ' + fresh[0].deck];
+  const c = typeof jobCard === 'function' ? jobCard(fresh[0]) : [fresh[0].kind, deckWord(fresh[0].deck)];
   toast('Your device', 'New job: ' + c[0] + ', ' + c[1] + (fresh.length > 1 ? ', and ' + (fresh.length - 1) + ' more' : '') + '. Take it at the job board in the Works bay, Deck 5.');
 }
 function carryLoad(s) { const c = s && s.player && s.player.carry; return Array.isArray(c) ? c.filter(x => typeof x === 'string').slice(0, CARRY_MAX) : []; }
@@ -13431,7 +13480,7 @@ function jobTap(it, at) {
     }
     const need = shelfNeeds(mw.j, mw.w, P.carry);
     if (!need.length && jobNeeds(mw.j, mw.w, P.carry).length) { toast(it.t, 'The ' + mw.j.make + ' isn\'t kept on the shelves: you make it yourself in the machine shop next door.'); return true; }   // 0.28.24
-    if (!need.length) { toast(it.t, 'You have what the job needs: ' + partList(P.carry) + '. It\'s at the ' + machineName(machineById(mw.j.machine)) + ' on Deck ' + mw.j.deck + '.'); return true; }
+    if (!need.length) { toast(it.t, 'You have what the job needs: ' + partList(P.carry) + '. It\'s at the ' + machineName(machineById(mw.j.machine)) + ' on ' + deckIn(mw.j.deck) + '.'); return true; }
     if (P.carry.length >= CARRY_MAX) { toast(it.t, 'Your hands are full (' + partList(P.carry) + '). ' + handsFix('Fit those first') + ', then come back for ' + partList(need) + '.'); return true; }
     if (typeof shelfWrong === 'function' && shelfWrong(it)) return true;   // the right part from the right shelf (0.33.41): another shelf costs nothing
     const o = { title: it.t, flavour: it.x, after: 'You look for ' + partList(need) + '.' }, pl = jobPlaceNear('storage', 'r', at);
@@ -13735,7 +13784,7 @@ function jobEnd(A) {
     toast('Main storage', back.length ? 'You put back ' + partList(back) + '.' : 'Nothing to put back.');
   } else if (A.kind === 'make' && mw && P.work.make) {
     const part = P.work.make.part; P.work.make = null;
-    if (P.carry.length < CARRY_MAX) { P.carry.push(part); toast('Machine shop', 'You make ' + partList([part]) + '. ' + (shelfNeeds(mw.j, mw.w, P.carry).length ? 'Now ' + partList(shelfNeeds(mw.j, mw.w, P.carry)) + ' from main storage next door.' : 'Now to the ' + machineName(machineById(mw.j.machine)) + ' on Deck ' + mw.j.deck + '.')); }
+    if (P.carry.length < CARRY_MAX) { P.carry.push(part); toast('Machine shop', 'You make ' + partList([part]) + '. ' + (shelfNeeds(mw.j, mw.w, P.carry).length ? 'Now ' + partList(shelfNeeds(mw.j, mw.w, P.carry)) + ' from main storage next door.' : 'Now to the ' + machineName(machineById(mw.j.machine)) + ' on ' + deckIn(mw.j.deck) + '.')); }
     if (part === madeHere(mw.j)) jobStopMark(mw.j, 'make');   // the job's make stop (0.28.24)
   } else if (A.kind === 'fetch' && mw) {
     const need = shelfNeeds(mw.j, mw.w, P.carry), got = [], none = [];
@@ -13748,7 +13797,7 @@ function jobEnd(A) {
     toast('Main storage', (got.length ? 'You take ' + partList(got) + '.' : 'Nothing you need is on the shelves.')
       + (none.length ? ' None left: ' + none.join(', ') + '. ' + (none.some(p => typeof NO_MAKE !== 'undefined' && !NO_MAKE.has(p)) ? 'The machine shop next door can make one (about an hour at the lathe).' : 'It can\'t be made aboard; the next delivery is on Wednesday.') : '')
       + (rest.length && !none.length ? ' Your hands are full; you\'ll need another trip for ' + partList(rest) + '.' : '')
-      + (got.length ? toMake && !rest.length ? ' Now make the ' + mw.j.make + ' in the machine shop next door.' : ' Now to the ' + machineName(machineById(mw.j.machine)) + ' on Deck ' + mw.j.deck + '.' : ''));
+      + (got.length ? toMake && !rest.length ? ' Now make the ' + mw.j.make + ' in the machine shop next door.' : ' Now to the ' + machineName(machineById(mw.j.machine)) + ' on ' + deckIn(mw.j.deck) + '.' : ''));
   } else if (A.kind === 'job' && mw) {
     const name = machineName(machineById(mw.j.machine));
     if (A.o.repair) {
@@ -13870,7 +13919,7 @@ function needGoal(k) {
   const near = pl => pl.deck === here ? Math.hypot(cellPos(...pl.at).x - pos.x, cellPos(...pl.at).z - pos.z) : 1000 * (1 + Math.abs(pl.deck - here));
   const all = Object.keys(DECKS).flatMap(n => (DECKS[n].places || []).map(pl => ({ ...pl, deck: +n }))).filter(ok);
   const pl = all.sort((a, b) => near(a) - near(b) || (a.id < b.id ? -1 : 1))[0]; if (!pl) return false;
-  NEED_GOAL = { need: k, label: NEED_FIX_SAY[k] + (pl.deck !== here ? ', Deck ' + pl.deck : '') };
+  NEED_GOAL = { need: k, label: NEED_FIX_SAY[k] + (pl.deck !== here ? ', ' + deckIn(pl.deck) : '') };
   setGoal({ deck: pl.deck, place: pl.id, label: NEED_GOAL.label }); return true;
 }
 function needGoalClear() { if (NEED_GOAL && typeof IX_GOAL !== 'undefined' && IX_GOAL && IX_GOAL.label === NEED_GOAL.label) clearGoal(); NEED_GOAL = null; }
@@ -14149,7 +14198,7 @@ function ixChoreTap(it, at) {
   if (st.deck !== deckDef.num) return false;
   const pid = st.places[0], spot = pid && PLACE_OF.has(pid) ? placeSpot(pid) : null;
   if (!spot || !(it.hit ? ixDist(it, spot) < IX_NEAR + .6 : Math.hypot(spot.x - at.x, spot.z - at.z) < JOB_REACH) && PLACE_OF.get(pid).room !== room) return false;   // no thing (jobHere, 0.28.52): from the point
-  if (st.step === 'drop' && crateDown(j)) { toast(it.t, 'The crate is where you set it down, on Deck ' + SHIP.player.crate.deck + '. Pick it up first: follow the marker.'); return true; }   // Put down (0.28.60)
+  if (st.step === 'drop' && crateDown(j)) { toast(it.t, 'The crate is where you set it down, on ' + deckIn(SHIP.player.crate.deck) + '. Pick it up first: follow the marker.'); return true; }   // Put down (0.28.60)
   if (typeof workStep === 'function' && workStep(j, st, k, spot)) return true;   // look, choose, turn, wait (section 15, Pillar 5)
   const [title, pose] = IX_STOP[st.step] || ['Your job', 'work'];
   // the stop's spot, not the place: a lamp over the lift queue is yours to change even with someone waiting there
@@ -14792,6 +14841,7 @@ const REC_LOOP = [[11.4, 4.85], [4.8, 4.85], [4.8, 1.3], [13.8, 1.3, 1], [13.8, 
 function recTap(it, at, point) {
   if (typeof deckDef === 'undefined' || !deckDef || deckDef.num !== 7) return false;
   const t = it.t;
+  if ((t === 'Lightdisc court' || t === 'Ask someone to play') && recShut().court) { toast('Lightdisc', worksText('rec.shut.net', 'The net\'s down. No Lightdisc till Works fix the emitters.')); return true; }   // 0.84.4 (rec engineer B); 0.84.8 W3's key
   if (t === 'Lightdisc court' || t === 'Ask someone to play') { discAsk(); return true; }   // section 23b (0.82.0)
   if (t === 'Scoreboard') { toast(t, it.x); return true; }
   const kind = t === 'Pool' ? 'swim' : /^(Kayak dock|River|White water|Kayak rack|Wave gate)$/.test(t) ? 'kayak' : t === 'Climbing wall' ? 'climb'
@@ -14826,6 +14876,8 @@ function recGo(kind, point, title, flavour) {
   recStart(kind, title, flavour, point ? [point.x + OX, point.z + OZ] : null);
 }
 function recStart(kind, title, flavour, p) {             // p: the tap in deck coordinates (or null)
+  if (kind === 'float' && recShut().float) { toast('Float room', worksText('rec.shut.float', 'The float room\'s shut: the gravity plates are down. Works are on it.')); return; }   // 0.84.4 (rec engineer B); 0.84.8 W3's key
+  if (kind === 'climb' && !recShut().belays) { toast('Climbing wall', worksText('rec.shut.belays', 'Both auto-belays are tagged out. Works are on it.')); return; }   // 0.84.4 (rec engineer B); 0.84.8 W3's key
   const water = { pool: .35, river: .36 };
   if (kind === 'swim') {
     const lane = REC_LANES.reduce((m, z) => p && Math.abs(z - p[1]) < Math.abs(m - p[1]) ? z : m, REC_LANES[1]);
@@ -15964,6 +16016,20 @@ const MACHINE_KINDS = {
   hullseal:    { name: 'Hull seals',        sys: 'hull',       life: 32, time: 1,                 scope: 'ship', w: 2, tier: 3, part: 'seal' },
   reactor:     { name: 'Reactor',           sys: 'power',      life: 60, time: 1,                 scope: 'ship', w: 3, tier: 4, part: 'control rod' },
   coil:        { name: 'Drive coil',        sys: 'propulsion', life: 30, time: 1,                 scope: 'ship', w: 1, tier: 4, part: 'coil winding' },
+  // the rec deck's (0.84.0, rec engineer B; plan section 6): their own 'rec' system, felt on that deck only; use 'heads' (people on the deck)
+  poolfilter:  { name: 'Pool filter',       sys: 'rec',        life: 20, time: .4, use: 'heads',  scope: 'deck', w: 2, tier: 1, part: 'cartridge' },
+  pooldoser:   { name: 'Pool dosing',       sys: 'rec',        life: 24, time: .6, use: 'heads',  scope: 'deck', w: 1, tier: 2, part: 'relay' },
+  poolheat:    { name: 'Pool heat exchanger', sys: 'rec',      life: 28, time: .6, use: 'heads',  scope: 'deck', w: 1, tier: 2, part: 'valve' },
+  riverpump:   { name: 'River pump',        sys: 'rec',        life: 24, time: .5, use: 'heads',  scope: 'deck', w: 2, tier: 2, part: 'bearing' },
+  wavegate:    { name: 'Wave gate',         sys: 'rec',        life: 30, time: .5, use: 'heads',  scope: 'deck', w: 1, tier: 2, part: 'seal' },
+  wallholds:   { name: 'Climbing holds',    sys: 'rec',        life: 16, time: .3, use: 'heads',  scope: 'deck', w: 1, tier: 1, part: 'seal' },   // a chore: tighten and reset a route
+  belay:       { name: 'Auto-belay',        sys: 'rec',        life: 26, time: .4, use: 'heads',  scope: 'deck', w: 2, tier: 2, part: 'bearing' },
+  stagelights: { name: 'Stage lights',      sys: 'rec',        life: 26, time: .6, use: 'heads',  scope: 'deck', w: 1, tier: 1, part: 'lamp' },
+  soundrack:   { name: 'Sound rack',        sys: 'rec',        life: 32, time: .7, use: 'heads',  scope: 'deck', w: 1, tier: 2, part: 'cable' },
+  seathinges:  { name: 'Seat hinges',       sys: 'rec',        life: 20, time: .3, use: 'heads',  scope: 'deck', w: 1, tier: 1, part: 'bearing' },   // a chore: a few seats at a time
+  courtnet:    { name: 'Court emitters',    sys: 'rec',        life: 32, time: .7, use: 'heads',  scope: 'deck', w: 2, tier: 3, part: 'breaker' },
+  scoreboard:  { name: 'Scoreboard',        sys: 'rec',        life: 28, time: .7, use: 'heads',  scope: 'deck', w: 1, tier: 1, part: 'lamp' },
+  gravplate:   { name: 'Gravity plates',    sys: 'rec',        life: 40, time: .8, use: 'heads',  scope: 'deck', w: 2, tier: 3, part: 'signal card' },
 };
 MACHINE_KINDS.powerjunction = MACHINE_KINDS.junction;    // the old name for a power junction, still on Deck 2's 2-breaker-1
 const MACHINE_STATES = ['healthy', 'worn', 'faulty', 'failing', 'broken'];
@@ -15971,6 +16037,7 @@ const machineState = c => c >= 75 ? 'healthy' : c >= 50 ? 'worn' : c >= 25 ? 'fa
 const MACHINE_SEV = { healthy: 0, worn: 0, faulty: .35, failing: .7, broken: 1 };   // how hard a state is felt
 const SYSTEMS = ['air', 'water', 'power', 'heat', 'food', 'waste', 'hull', 'comms', 'propulsion', 'transport'];
 const SYSTEM_W = { air: 3, water: 2, power: 3, heat: 2, food: 2, waste: 1, hull: 2, comms: 1, propulsion: 1, transport: 1 };   // their weight in ship health
+if (REC_DECK) { SYSTEMS.push('rec'); SYSTEM_W.rec = 1; }   // 0.84.0 (rec engineer B, lead 18's call): the rec deck's machines, only while it's switched on
 // stand-ins until the architects add DECKS[n].machines with the utility rooms (A5): [id, kind, room]. Their
 // `at` and `panel` are the room's middle tile; the lift is at the lift. A stand-in drops out as soon as its deck
 // has a real machine with its id or in its room. Decks 1 and 3 use the bridge architect's agreed ids.
@@ -16001,6 +16068,7 @@ function machineList() {
   if (MACH_LIST) return MACH_LIST;
   MACH_LIST = [];
   for (const n of Object.keys(DECKS).map(Number).sort()) {
+    if (n === 7 && !REC_DECK) continue;                 // 0.84.0: a dormant rec deck has no machines (nothing wears, posts or sends crew down)
     const own = (DECKS[n].machines || []).map(m => ({ ...m })), ids = new Set(own.map(m => m.id)), rooms = new Set(own.map(m => m.room));
     const list = own.concat((STUB_MACHINES[n] || []).filter(([id, , room]) => !ids.has(id) && !rooms.has(room))
       .map(([id, kind, room]) => { const at = room ? machRoomTile(n, room) : DECKS[n].lift.slice(); return { id, kind, at, room, face: 's', panel: at, stub: true }; }));
@@ -16348,6 +16416,31 @@ function shipEffectsAt(deck, t) {
   if (!FX_AT.has(key)) FX_AT.set(key, fxFrom(deck, MACH_HIST.get(h) || null));
   return FX_AT.get(key);
 }
+// what crew notice on the rec deck (0.84.2, rec engineer B; plans/recdeck-plan.html section 6). recShutAt(t) -> { pool, river, belays,
+// route, court, board, float, lights, mic } at ship minute t: pool null | 'cloudy' (a filter) | 'sting' (the dosing) | 'cold' (the heat),
+// the first of those that's faulty or worse (under 50, machineState); river null | 'slack' (a pump) | 'flat' (the wave gate); belays,
+// how many auto-belays work (0-2); route 0-3, the route roped off while the holds want their chore (fixed till they're serviced), or
+// null; court, the emitters down (no Lightdisc); board null | 'pixels' (faulty) | 'nonsense' (failing or worse); float, the gravity
+// plates down (the float room shut); lights null | 'dim' | 'flicker' the board's way; mic, the sound rack down. Pure, like
+// shipEffectsAt: the hour-by-hour record (histHour), never machinesNow, so the schedules may ask while planning; cached on MACH_REV
+// and the hour; frozen (don't change it). All clear with no rec machines (REC_DECK off) or no record. recShut(): now (machinesNow first)
+const REC_OK = Object.freeze({ pool: null, river: null, belays: 2, route: null, court: false, board: null, float: false, lights: null, mic: false });
+let REC_SHUT = new Map(), REC_SHUT_REV = -1;
+function recShutAt(t) {
+  if (!REC_DECK) return REC_OK;
+  if (REC_SHUT_REV !== MACH_REV) { REC_SHUT = new Map(); REC_SHUT_REV = MACH_REV; }
+  const h = histHour(t); if (REC_SHUT.has(h)) return REC_SHUT.get(h);
+  const c = MACH_HIST.get(h); if (!c) { REC_SHUT.set(h, REC_OK); return REC_OK; }
+  const cd = id => Number.isFinite(c[id]) ? c[id] : 100, bad = id => cd(id) < 50, lvl = id => !bad(id) ? 0 : cd(id) < 25 ? 2 : 1;
+  const hs = SHIP.machines['7-wall-holds'], ls = hs && Number.isFinite(hs.lastService) ? Math.floor(hs.lastService / 60) : 0;
+  const r = Object.freeze({ pool: bad('7-pool-filter-1') || bad('7-pool-filter-2') ? 'cloudy' : bad('7-pool-dosing') ? 'sting' : bad('7-pool-heat') ? 'cold' : null,
+    river: bad('7-river-pump-1') || bad('7-river-pump-2') ? 'slack' : bad('7-wave-gate') ? 'flat' : null,
+    belays: (bad('7-belay-1') ? 0 : 1) + (bad('7-belay-2') ? 0 : 1), route: bad('7-wall-holds') ? ((machSeed('7-wall-holds') ^ ls) >>> 0) % REC_ROUTES : null,
+    court: bad('7-court-net'), board: [null, 'pixels', 'nonsense'][lvl('7-court-board')], float: bad('7-grav-plates'),
+    lights: [null, 'dim', 'flicker'][lvl('7-aud-lights')], mic: bad('7-aud-sound') });
+  REC_SHUT.set(h, r); return r;
+}
+function recShut() { machinesNow(); return recShutAt(shipNow()); }
 // one machine, for the job board and the device (B2): its definition, kind and state together
 function machineInfo(id) {
   const m = machineById(id); if (!m) return null;
@@ -16366,8 +16459,8 @@ function machineInfo(id) {
 // every frame, and never from inside the schedules' planning.
 const LOOK_OF = { healthy: 'fine', worn: 'worn', faulty: 'poor', failing: 'failing', broken: 'failing' };
 const LOOK_DIM = { fine: 0, worn: .15, poor: .35, failing: .65 };
-const LOOK_WET = new Set(['recycler', 'filter', 'pump', 'uv', 'valve', 'irrigation', 'manifold', 'heatpump']);
-const LOOK_LIT = { lights: 1, junction: .6, powerjunction: .6, relay: .5, databus: .4 };
+const LOOK_WET = new Set(['recycler', 'filter', 'pump', 'uv', 'valve', 'irrigation', 'manifold', 'heatpump', 'poolfilter', 'poolheat', 'riverpump', 'wavegate']);   // the rec deck's from 0.84.1
+const LOOK_LIT = { lights: 1, junction: .6, powerjunction: .6, relay: .5, databus: .4, stagelights: 1, courtnet: .6, scoreboard: .5, gravplate: .4 };   // the rec deck's from 0.84.1
 let LOOKS = new Map(), LOOKS_REV = -1;
 const MACH_RUN = {};                                     // id -> ship minute a tap-started run ends (machineUse)
 function machineLook(id) {
@@ -16402,7 +16495,7 @@ function deckLook(deck) {
 // then each system, worst first. shipHealthRows() -> [{ key, name, value 0-100, state, worst }]: state as
 // machineLook's; worst: the system's worst machine that isn't fine, as 'Air scrubber 2, Deck 4', or null
 const SYSTEM_NAME = { air: 'Air', water: 'Water', power: 'Power', heat: 'Heat', food: 'Galley and food', waste: 'Waste and laundry', hull: 'Hull',
-                      comms: 'Comms and sensors', propulsion: 'Drive', transport: 'Lift and doors' };
+                      comms: 'Comms and sensors', propulsion: 'Drive', transport: 'Lift and doors', rec: 'Rec deck' };
 // ---- the ship meters (0.33.57, Pillar 5 Step 3; the user, 2026-10-18: ship health "starts a little lower, so you can see your
 // impact", and every job you do helps at least one meter, often several) ----
 // A meter is a Ship health board row: its system's score from the machines (shipSystems, which every effect reads, as
@@ -16463,7 +16556,7 @@ const bridgeBars = j => bridgeShut() && !heldForYou(j) && bridgeJob(j);
 const healthState = v => v >= 90 ? 'fine' : v >= 70 ? 'worn' : v >= 45 ? 'poor' : 'failing';
 function machineLabel(m) {
   const K = MACHINE_KINDS[m.kind], n = machineList().filter(x => x.kind === m.kind && x.deck === m.deck).length > 1 ? ' ' + m.id.split('-').pop() : '';
-  return K.name + n + ', Deck ' + m.deck;
+  return K.name + n + ', ' + deckIn(m.deck);
 }
 function shipHealthRows() {
   const sys = shipMeters(), st = machinesNow(), health = shipHealth(sys);   // the meters: the machines less the upkeep (0.33.57)
@@ -16750,6 +16843,45 @@ const FAULT_CAUSES = {
     { id: 'regulator', part: 'regulator', w: 3, shows: 'low lab gas', sign: 'the gauge wanders all day', when: 'always', still: 'Fresh seal. The gauge still wanders.' },
     { id: 'seal', part: 'seal', w: 2, shows: 'low lab gas', sign: 'a hiss at a joint; soapy water bubbles', when: 'always', still: 'New regulator. Still hisses at the joint.' },
     { id: 'valve', part: 'valve', w: 1, shows: 'low lab gas', sign: 'fine until someone opens a bench tap, then it drops', when: 'touched', still: 'New regulator. Still drops when a tap opens.' } ],
+  // the rec deck's (0.84.1, rec engineer B; plans/recdeck-plan.html section 6). Deck 7 has no crew hours yet, so no 'peak' or
+  // 'after-use' causes (they'd never show); first drafts of the words, for the writers
+  poolfilter: [
+    { id: 'cartridge', part: 'cartridge', w: 3, shows: 'the pool is cloudy', sign: 'the gauge high, the water milky past the shallow end', when: 'always', still: 'Fresh cartridge. Still dripping.' },
+    { id: 'seal', part: 'seal', w: 2, shows: 'a drip under the housing', sign: 'a wet ring on the floor under the housing', when: 'always', still: 'New seal. The water\'s still milky.', line: 'pool' } ],   // line: 0.84.5 (rec engineer B), the pool line's traced leak
+  pooldoser: [
+    { id: 'drift', setting: true, w: 2, shows: 'stinging eyes|a green tinge', sign: 'the reading wanders; the swimmers come out red-eyed', when: 'always', from: 4 },
+    { id: 'relay', part: 'relay', w: 2, shows: 'the dose has stopped', sign: 'the pump clicks but doesn\'t run', when: 'touched', still: 'New relay. It runs, but the reading\'s still off.' } ],
+  poolheat: [
+    { id: 'valve', part: 'valve', w: 3, shows: 'the pool runs cold', sign: 'the return pipe barely warm', when: 'always', still: 'New valve. Still cold in the morning.' },
+    { id: 'regulator', part: 'regulator', w: 1, shows: 'the pool runs cold', sign: 'warm by day, cold first thing', when: 'at-time', still: 'New regulator. The pipe\'s still cold.' } ],
+  riverpump: [
+    { id: 'bearing', part: 'bearing', w: 3, shows: 'the current pulses', sign: 'a rumble you feel through the grating', when: 'always', still: 'New bearing. The current\'s still slack.' },
+    { id: 'impeller', part: 'pump', w: 2, shows: 'the fast run goes slack', sign: 'quiet, but the gauge reads low', when: 'warm', still: 'New impeller. Still rumbling.' } ],
+  wavegate: [
+    { id: 'relay', part: 'relay', w: 2, shows: 'no standing wave', sign: 'the gate lights blue but the gate doesn\'t move', when: 'touched', still: 'New relay. Still a slick by the post.' },
+    { id: 'seal', part: 'seal', w: 2, shows: 'a slick on the bank', sign: 'oily water round the gate\'s post', when: 'always', still: 'Fresh seal. Still no wave.' } ],
+  wallholds: [
+    { id: 'hold', part: 'seal', w: 3, shows: 'a hold spins underfoot', sign: 'a hold turns in your hand; its bolt\'s washer has split', when: 'always', still: 'New washer. Another hold\'s still loose.' } ],
+  belay: [
+    { id: 'brake', part: 'bearing', w: 3, shows: 'it lowers too fast', sign: 'the line pays out with a whine', when: 'always', still: 'New brake bearing. Still a bit fast: the tag\'s out too.' },
+    { id: 'tag', setting: true, w: 2, shows: 'inspection due', sign: 'the inspection tag has run out', when: 'always', from: 4 } ],
+  stagelights: [
+    { id: 'lamp', part: 'lamp', w: 3, shows: 'a stage light is out', sign: 'one lamp in the truss dark', when: 'always', still: 'New lamp. The rig still flickers.' },
+    { id: 'relay', part: 'relay', w: 2, shows: 'the whole rig flickers', sign: 'every lamp stutters at once', when: 'warm', still: 'New relay. That lamp\'s still dark.', band: 2 } ],
+  soundrack: [
+    { id: 'amp', part: 'regulator', w: 2, shows: 'a hum', sign: 'a low hum from every speaker, louder warm', when: 'warm', still: 'New regulator. The mic still cuts out.' },
+    { id: 'cable', part: 'cable', w: 3, shows: 'the lectern mic cuts out', sign: 'the mic drops when the cable\'s touched', when: 'touched', still: 'New cable. Still humming.' } ],
+  seathinges: [
+    { id: 'hinge', part: 'bearing', w: 3, shows: 'a seat won\'t fold', sign: 'a seat stuck down, and a squeak from its neighbours', when: 'always', still: 'New pin in. The next one along still squeaks.' } ],
+  courtnet: [
+    { id: 'coil', part: 'coil winding', w: 2, shows: 'the net flickers', sign: 'the net stutters, then drops for a breath', when: 'warm', still: 'New coil. The walls still fade.' },
+    { id: 'power', part: 'breaker', w: 2, shows: 'the side walls fade', sign: 'the side fields dim, the power units whine', when: 'always', still: 'New breaker. The net still flickers.' } ],
+  scoreboard: [
+    { id: 'panel', part: 'lamp', w: 3, shows: 'dead pixels in the scores', sign: 'a dark block in the home score', when: 'always', still: 'New panel. Still scrambled.' },
+    { id: 'driver', part: 'signal card', w: 2, shows: 'the board shows nonsense', sign: 'the names scramble', when: 'warm', still: 'New card. Still a dark block.', band: 2 } ],
+  gravplate: [
+    { id: 'controller', part: 'signal card', w: 2, shows: 'gravity creeps back up', sign: 'the gauge drifts toward 1 g', when: 'always', still: 'New controller. The cooling\'s still hot.' },
+    { id: 'cooling', part: 'pump', w: 2, shows: 'the room closes itself', sign: 'the cooling loop hot to the touch', when: 'warm', still: 'New pump. Gravity still creeps.' } ],
   doorgear: [                                            // no door gear in DECKS today (a stand-in on Deck 5); kept for when one is real
     { id: 'seal', part: 'seal', w: 3, shows: 'bay doors slow', sign: 'a draught at the frame', when: 'always', still: 'New bearing. Still a draught at the frame.' },
     { id: 'bearing', part: 'bearing', w: 2, shows: 'bay doors slow', sign: 'a judder as they move, worse after a few runs', when: 'after-use', still: 'Fresh seal. Still judders.' },
@@ -17123,10 +17255,10 @@ const CHORES = {
                  .map(m => ({ key: m.id, title: 'Calibrate the ' + machineLabel(m).split(',')[0].toLowerCase(), deck: m.deck, room: m.room, machine: m.id, tier: MACHINE_KINDS[m.kind].tier, stops: [panelStop(m, 15, 'calibrate')] })) },
   delivery:  { tier: 1, per: .6, parts: [], text: 'Delivery',
                where: () => DELIVERIES.filter(r => placeById(r.from) && placeById(r.to)).map(r => { const a = placeById(r.from), b = placeById(r.to);
-                 return { key: r.key, title: r.title + ', Deck ' + b.deck, deck: b.deck, room: b.room, bring: r.bring, stops: [{ deck: a.deck, placeId: a.id, mins: 5, tag: 'pickup' }, { deck: b.deck, placeId: b.id, mins: 10, tag: 'drop' }] }; }) },
+                 return { key: r.key, title: r.title + ', ' + deckIn(b.deck), deck: b.deck, room: b.room, bring: r.bring, stops: [{ deck: a.deck, placeId: a.id, mins: 5, tag: 'pickup' }, { deck: b.deck, placeId: b.id, mins: 10, tag: 'drop' }] }; }) },
   round:     { tier: 1, per: .4, parts: [], text: 'Inspection round', finds: true,
                where: () => [3, 4, 5].map(n => { const ms = choreMachines(['oven', 'range', 'chiller', 'galleyplant', 'cartdock', 'washer']).filter(m => m.deck === n), ps = ms.length >= 2 ? ms.slice(0, 3).map(m => panelStop(m, 5, 'inspect')) : lobbyish().filter(p => p.deck === n).slice(0, 3).map(p => ({ deck: n, placeId: p.id, mins: 5, tag: 'inspect' }));
-                 return ps.length ? { key: 'deck' + n, title: 'Inspection round, Deck ' + n, deck: n, room: (placeById(ps[0].placeId) || {}).room, stops: ps } : null; }).filter(Boolean) },
+                 return ps.length ? { key: 'deck' + n, title: 'Inspection round, ' + deckIn(n), deck: n, room: (placeById(ps[0].placeId) || {}).room, stops: ps } : null; }).filter(Boolean) },
   fault:     { tier: 1, per: .4, parts: [], text: 'Small fault', leave: 30,
                where: () => choreMachines(['lights', 'cartdock', 'washer', 'extractor']).map(m => ({ key: m.id, title: (m.kind === 'lights' ? 'Reset a tripped breaker: ' : m.kind === 'cartdock' ? 'Free a jammed cart dock: ' : 'Clear a fault: ') + machineLabel(m).split(',')[0].toLowerCase(), deck: m.deck, room: m.room, machine: m.id, stops: [panelStop(m, 10, 'fault')] })) },
   filter:    { tier: 2, per: 1.4, parts: ['filter'], text: 'Swap the filters', helps: { self: 10 },
@@ -17610,11 +17742,13 @@ const MACHINE_LINKS = {
   water: ['3-recycler-1', '3-filter-1', '3-uv-1', '3-pump-1', ['5-pump-1', '5-pump-2'], { '5-valve-1': [1, 2, 3], '5-valve-2': [4, 5, 6] }],
   heat: ['4-heater-1', ['4-pump-1', '4-pump-2'], '5-manifold-1'],
   air: ['5-electrolyser-1', ['5-o2-1', '5-o2-2'], ['5-scrubber-1', '5-scrubber-2'], '5-fan-1', { '5-damper-1': [1, 2, 3], '5-damper-2': [4, 5, 6] }],
+  ...(REC_DECK ? { pool: [['7-pool-filter-1', '7-pool-filter-2'], '7-pool-heat', '7-pool-dosing'] } : {}),   // 0.84.5 (rec engineer B): the rec deck's pool plant (room p), from the pool through the filters, the heat exchanger and the dosing back; only while REC_DECK is on
 };
 const LINE_ENDS = { air: { '5-damper-1': ['2-extractor-1'], '5-damper-2': ['4-scrubber-1', '4-scrubber-2'] } };
 const LINE_DRAWS = { '3-irrigation-1': { line: 'water', after: '3-pump-1' } };
 const LINE_DECKS = [1, 2, 3, 4, 5, 6];
-const SYMPTOM_TEXT = { water: 'Showers weak', heat: 'Cold cabins', air: 'Stuffy air' };
+const SYMPTOM_TEXT = { water: 'Showers weak', heat: 'Cold cabins', air: 'Stuffy air', pool: 'Water dripping from the ceiling' };   // pool: 0.84.5 (rec engineer B)
+const LINE_SHOWS = { pool: [5] };                        // 0.84.5 (rec engineer B): the decks a line's fault shows on when they aren't the ones it feeds (traceSymptom): the pool plant's leak drips through to Deck 5's main storage, under it
 // a line's ids, in order (branches and ends included)
 const lineIds = line => (MACHINE_LINKS[line] || []).flatMap(s => typeof s === 'string' ? [s] : Array.isArray(s) ? s : Object.keys(s).flatMap(b => [b, ...((LINE_ENDS[line] || {})[b] || [])]));
 const lineOn = line => !!MACHINE_LINKS[line] && lineIds(line).every(id => { const m = machineById(id); return !!m && !m.stub; });
@@ -17656,10 +17790,10 @@ function traceFor(m, h) {
   return !!line && lineOn(line) && playerTier() >= 2 && !!(SHIP.works && SHIP.works.tr && SHIP.works.tr.m9 !== undefined) && jobTier({ machine: m.id }) <= playerTier()
     && (FAULT_CAUSES[m.kind] || []).some(c => c.line === line) && schedU(machSeed(m.id), d, 878) < .5 ? line : null;
 }
-function traceSymptom(line, id) { const decks = lineDecks(line, id); return { line, decks, deck: decks.includes(4) ? 4 : decks[0] }; }
+function traceSymptom(line, id) { const decks = LINE_SHOWS[line] ? LINE_SHOWS[line].slice() : lineDecks(line, id); return { line, decks, deck: decks.includes(4) ? 4 : decks[0] }; }
 const traceHidden = j => !!(j && j.symptom && !j.traceFound);
 function traceTitle(j) {                                 // the Works writer's trace.symptom.<line> line when it's in (M3's ask)
-  const fb = (SYMPTOM_TEXT[j.symptom.line] || 'A fault') + ' on Deck ' + j.symptom.deck;
+  const fb = (SYMPTOM_TEXT[j.symptom.line] || 'A fault') + ' on ' + deckIn(j.symptom.deck);
   return typeof worksText === 'function' ? worksText('trace.symptom.' + j.symptom.line, fb, { deck: j.symptom.deck, where: '' }) : fb;
 }
 function traceMark(jobId, id) {
@@ -17829,11 +17963,11 @@ function jobsSection(el) {
     const [title, where, state] = jobCard(mine), m = mine.machine && !traceHidden(mine) && machineById(mine.machine);   // a traced fault: no room till it's found
     line('Yours: ' + title + ', ' + where + '.', 'devtime');
     if (jobByStops(mine) && mine.kind !== 'favour') {
-      const stops = mine.stops.map(st => { const p = placeById(st.placeId); return (st.tag === 'pickup' ? 'pick up ' + (mine.bring || 'the load') + ' in the ' : st.tag === 'drop' ? 'drop it in the ' : '') + (p ? roomName(p.deck, p.room) || 'room' : 'room') + ' on Deck ' + st.deck; });
+      const stops = mine.stops.map(st => { const p = placeById(st.placeId); return (st.tag === 'pickup' ? 'pick up ' + (mine.bring || 'the load') + ' in the ' : st.tag === 'drop' ? 'drop it in the ' : '') + (p ? roomName(p.deck, p.room) || 'room' : 'room') + ' on ' + deckIn(st.deck); });
       line(mine.title + '. ' + (mine.parts.length ? 'Bring ' + mine.parts.map(k => 'a ' + k).join(', ') + ' from ' + (shelfName(mine.parts[0]) ? 'the ' + shelfName(mine.parts[0]) + ' shelf in ' : '') + 'main storage on Deck 5. ' : '') + 'Go to: ' + stops.join(', then ') + '.');
     } else if (m) {
       const need = {}; for (const k of mine.parts) need[k] = (need[k] || 0) + 1;
-      line('Needs ' + Object.entries(need).map(([k, n]) => n + ' × ' + k + ' (' + (shelfName(k) ? 'the ' + shelfName(k) + ' shelf, ' + (SHIP.stores[k] || 0) + ' there' : k === mine.make ? 'you make it' : (SHIP.stores[k] || 0) + ' in storage') + ')').join(', ') + '. Parts are in main storage on Deck 5; the job is in the ' + ((DECKS[m.deck].rooms[m.room] || {}).name || 'room').toLowerCase() + ' on Deck ' + m.deck + '.');
+      line('Needs ' + Object.entries(need).map(([k, n]) => n + ' × ' + k + ' (' + (shelfName(k) ? 'the ' + shelfName(k) + ' shelf, ' + (SHIP.stores[k] || 0) + ' there' : k === mine.make ? 'you make it' : (SHIP.stores[k] || 0) + ' in storage') + ')').join(', ') + '. Parts are in main storage on Deck 5; the job is in the ' + ((DECKS[m.deck].rooms[m.room] || {}).name || 'room').toLowerCase() + ' on ' + deckIn(m.deck) + '.');
     } else line(mine.cargo === 'meals' ? 'Take a hover cart from the Cart bay on Deck 5, load ' + (mine.meals || 'the') + ' meals in the cargo hold, and take them up to the cold store on Deck 3. Then bring the cart back.'
       : 'Take a hover cart from the Cart bay on Deck 5. In the cargo hold tap the crates' + (partsCrates() ? ' (' + partsCrates() + ' there)' : '') + ' and the cart pulls them in; in main storage tap any shelf and it unloads itself. Then bring the cart back.');
     button('Drop it', () => dropJob(mine.id));
@@ -17998,16 +18132,16 @@ const JOB_WORD = { service: 'service due', repair: 'repair', overhaul: 'broken: 
 function machineTitle(id) { const m = machineById(id); if (!m) return null; return MACHINE_KINDS[m.kind].name + (machineList().filter(x => x.kind === m.kind && x.deck === m.deck).length > 1 ? ' ' + m.id.split('-').pop() : ''); }
 function jobCard(j) {
   const who = j.claimedBy === 'you' ? 'you' : j.claimedBy ? ((schedPeople().find(p => p.id === j.claimedBy) || {}).name || '').split(' ')[0] : null;
-  if (jobKindOf(j)) return [j.title.split(':')[0], 'Deck ' + j.deck + (j.room && roomName(j.deck, j.room) ? ' · ' + roomName(j.deck, j.room) : ''),
+  if (jobKindOf(j)) return [j.title.split(':')[0], deckWord(j.deck) + (j.room && roomName(j.deck, j.room) ? ' · ' + roomName(j.deck, j.room) : ''),
     j.status === 'waiting' ? j.why : who ? who + ' on it' : heldForYou(j) ? 'asked for you' : jobKindOf(j).text || j.kind, JOB_PRI[j.urgency] || 'routine'];
-  if (j.kind === 'chore') return [j.title.split(':')[0], 'Deck ' + j.deck + (j.room && roomName(j.deck, j.room) ? ' · ' + roomName(j.deck, j.room) : ''),
+  if (j.kind === 'chore') return [j.title.split(':')[0], deckWord(j.deck) + (j.room && roomName(j.deck, j.room) ? ' · ' + roomName(j.deck, j.room) : ''),
     j.status === 'waiting' ? j.why : who ? who + ' on it' : (CHORES[j.chore] || {}).text || 'chore', j.leave ? 'soon' : 'routine'];
   if (j.kind === 'restock') return [j.cargo === 'meals' ? 'Food to the cold store' : weekday(Math.floor(j.found / 1440) + 1) === DELIVERY.day ? 'Unload the Wednesday delivery' : 'Unload the delivery', j.cargo === 'meals' ? 'Hold to Deck 3' : 'Deck 5 · cargo hold', who ? who + ' on it' : j.cargo === 'meals' ? 'hover cart' : 'hover cart, ' + partsCrates() + (partsCrates() === 1 ? ' crate' : ' crates'), JOB_PRI[j.urgency]];
   if (j.case && typeof caseCard === 'function') { const cc = caseCard(j); if (cc) return cc; }   // 24k: a P1 case's card names the line's symptom, not the machine (0.55.16)
   const m = machineById(j.machine), room = (DECKS[m.deck].rooms[m.room] || {}).name;
-  if (traceHidden(j)) return [traceTitle(j), 'Deck ' + j.symptom.deck + ' · the ' + j.symptom.line + ' line', (j.urgency === 2 ? 'failing: urgent' : JOB_WORD[j.kind]) + (who ? ', ' + who + ' on it' : ''), JOB_PRI[j.urgency]];   // a traced fault (0.33.59)
+  if (traceHidden(j)) return [traceTitle(j), deckWord(j.symptom.deck) + ' · the ' + j.symptom.line + ' line', (j.urgency === 2 ? 'failing: urgent' : JOB_WORD[j.kind]) + (who ? ', ' + who + ' on it' : ''), JOB_PRI[j.urgency]];   // a traced fault (0.33.59)
   const state = j.status === 'waiting' ? j.why : (j.urgency === 2 ? 'failing: urgent' : JOB_WORD[j.kind]) + (who ? ', ' + who + ' on it' : heldForYou(j) ? ', asked for you' : '');
-  return [machineTitle(m.id) + (faultShows(j) ? ' (' + faultShows(j) + ')' : ''), 'Deck ' + m.deck + (room ? ' · ' + room.toLowerCase() : ''), state, JOB_PRI[j.urgency]];   // a real fault says what everyone notices (0.33.46)
+  return [machineTitle(m.id) + (faultShows(j) ? ' (' + faultShows(j) + ')' : ''), deckWord(m.deck) + (room ? ' · ' + room.toLowerCase() : ''), state, JOB_PRI[j.urgency]];   // a real fault says what everyone notices (0.33.46)
 }
 function drawJobBoard(t) {
   const { g: c, c: cv } = t.userData, w = cv.width, h = cv.height, now = shipNow() % 1440;
@@ -18038,10 +18172,52 @@ function worksTick() {
     const hr = Math.floor(shipNow() / 60);
     if (B.rev !== MACH_REV || B.min !== hr) { B.rev = MACH_REV; B.min = hr; drawJobBoard(B.t); }
   }
+  if (REC_DECK && deckDef && deckDef.num === 7) recSigns();   // 0.84.4 (rec engineer B): the rec deck's signs, when the machines change
   if (D.def === deckDef && D.groups.size) {                // a docked cart is hidden while it's out on a run
     const m = Math.floor(shipNow());
     if (m !== D.min) { D.min = m; const out = cartsOut(shipNow()); for (const [n, g] of D.groups) g.visible = !out.has(n); }
   }
+}
+// the rec deck's signs (0.84.2, rec engineer B; plans/recdeck-plan.html section 6, from recShut): the pool goes milky when it's cloudy (a
+// green tinge when it stings; its own water's uniforms, RK.poolOwn), a red tag on each tagged-out belay and at the foot of its route,
+// red-and-white tape across a roped-off route (one merged mesh per colour, remade when they change), FLOAT ROOM CLOSED on legs against the
+// float room's glass, the court's net and side fields off (their materials). Made the first time they
+// show, in deckRoot (the deck's unload frees them); nothing while all's well; checked when MACH_REV or the hour moves; no R()
+const REC_SIGNS = { root: null, rev: -1, hr: -1, key: '', tags: null, mats: null, plate: null };
+function recSigns() {
+  const S = REC_SIGNS, hr = Math.floor(shipNow() / 60);
+  if (S.root !== deckRoot) Object.assign(S, { root: deckRoot, rev: -1, key: '', tags: null, mats: null, plate: null });
+  if (S.rev === MACH_REV && S.hr === hr || !RK) return;
+  const r = recShut(), c = MACH_HIST.get(histHour(shipNow())) || {}; S.rev = MACH_REV; S.hr = hr;
+  const shut = [1, 2].filter(n => (c['7-belay-' + n] ?? 100) < 50);   // the belays tagged out (recShut's own reading): belay 1 is over route 1, belay 2 over route 2
+  const key = [r.pool, shut, r.route, r.court, r.float].join('|'); if (key === S.key) return; S.key = key;
+  const U = RK.poolOwn.userData.U, look = { cloudy: ['#8fb3b0', '#d6e4de'], sting: ['#2a9a86', '#86dcb0'] }[r.pool] || ['#1f8fa6', '#4fd0dc'];
+  U.uDeep.value.copy(col(look[0])); U.uShallow.value.copy(col(look[1]));
+  RK.net.visible = RK.field.visible = !r.court;
+  if (S.tags) { deckRoot.remove(S.tags); S.tags.traverse(o => { if (o.geometry) o.geometry.dispose(); }); S.tags = null; }
+  if (shut.length || r.route !== null) {
+    const M_ = S.mats || (S.mats = { red: std('#d8322e', .6), white: std('#f2f2ee', .6) }), b = ROOM_BOX.K, g = new THREE.Group(), W_ = REC_WALL, len = W_.z1 - W_.z0, top = H - .12;
+    g.position.set(X0(b.i0), 0, Z0(b.j0)); const zr = k => W_.z0 + len * (k + .5) / REC_ROUTES;
+    for (const n of shut) { box(.03, .2, .12, M_.red, W_.x + .43, top - .5, zr(n), g); box(.03, .26, .18, M_.red, W_.x + .22, 1.3, zr(n), g); }   // on the belay's front, and on the wall at eye height (clear of its panels)
+    if (r.route !== null) for (let k = 0; k < 6; k++) box(.02, .06, len / REC_ROUTES / 6 - .01, k % 2 ? M_.white : M_.red, W_.x + .62, 1.0, zr(r.route) - len / REC_ROUTES / 2 + len / REC_ROUTES * (k + .5) / 6, g);   // the tape, a hand in front of the holds
+    mergeMeshes(g); g.traverse(o => { if (o.isMesh) o.castShadow = false; }); g.userData.noMerge = true; deckRoot.add(g); S.tags = g;
+  }
+  if (r.float && !S.plate) {                             // a sign on legs against the float room's glass, by its door: both faces, so it reads from either side and stays up when the cutaway lowers the glass
+    const g = new THREE.Group(); g.position.set(X0(17) + .5, 0, Z0(12) - .22); recClosedSign(g, { text: 'FLOAT ROOM CLOSED', sub: 'gravity plates' });
+    mergeMeshes(g); g.traverse(o => { if (o.isMesh) o.castShadow = false; }); g.userData.noMerge = true; deckRoot.add(g); S.plate = g;
+  }
+  if (S.plate) S.plate.visible = r.float;
+}
+// a closed sign on two legs (recSigns): red-bordered, the words in two lines on both faces (one canvas, made when it's first shown), the board between them
+function recClosedSign(g, o) {
+  const t = tex(512, 160, (c, w, h) => {
+    c.fillStyle = '#1a1214'; c.fillRect(0, 0, w, h); c.strokeStyle = '#e0412f'; c.lineWidth = 10; c.strokeRect(8, 8, w - 16, h - 16);
+    c.textAlign = 'center'; c.fillStyle = '#ffe9e4'; c.font = '800 50px system-ui,sans-serif'; c.fillText(o.text, w / 2, 76, w - 44);
+    c.fillStyle = '#ff9a8a'; c.font = '600 32px system-ui,sans-serif'; c.fillText(o.sub || '', w / 2, 124, w - 44);
+  });
+  const m = new THREE.MeshBasicMaterial({ map: t, toneMapped: false }), geo = new THREE.PlaneGeometry(.9, .28);
+  for (const sd of [1, -1]) { const p = new THREE.Mesh(geo, m); p.position.set(0, 1.2, sd * .025); p.rotation.y = sd > 0 ? 0 : Math.PI; g.add(p); }   // 5 mm off the board's faces
+  box(.96, .34, .04, M.slateDark, 0, 1.2, 0, g); for (const x of [-.42, .42]) box(.04, 1.03, .04, M.slateDark, x, .515, 0, g);
 }
 // the Cart bay's two docks (0.33.15): the cartDock kit hands each parked cart's group to cartDockLive as Deck 5 is
 // built (the Deck 6 architect's inert hook); worksTick hides it while that dock's cart is out
@@ -33060,8 +33236,8 @@ const WEEK_MAILS = [];                                   // what was sent (the c
 const evWeekly = w => !w.after && !w.birthday && !w.ship && !w.date && (w.every === 'week' || (w.weekday != null && !w.every));
 function evPlaceName(ev) {
   const w = ev.where[0], pool = { gym: 'the gym', garden: 'the garden', 'garden-tend': 'the garden', 'common-room': 'the junior common room', music: 'the music room', 'mess-seat': 'the mess', 'lounge-seat': 'the bow lounge', bench: 'the promenade' };
-  const room = w.room ? 'the ' + w.room.source.replace(/^\^|\$$/g, '').replace(/\\/g, '').toLowerCase() : pool[w.pool] || 'Deck ' + w.deck;
-  return room + (w.room && w.deck <= 2 ? ', Deck ' + w.deck : '');
+  const room = w.room ? 'the ' + w.room.source.replace(/^\^|\$$/g, '').replace(/\\/g, '').toLowerCase() : pool[w.pool] || deckIn(w.deck);
+  return room + (w.room && w.deck <= 2 ? ', ' + deckIn(w.deck) : '');
 }
 function weekMail(d) {                                   // d: a Sunday; -> { at, from, subject, body } or null
   const arr = evArrival(); if (weekday(d) !== 6 || d < arr + 7) return null;
@@ -33621,7 +33797,7 @@ SHIP_EVENTS.ionStorm = {
     { id: 'storm-bridge', from: 'vance', phase: 'onset', at: [1, 900], seed: ['dept:command', 'dept:helm'], weight: 2,
       lines: ['The bridge is on double shifts.', 'Vance hasn\'t slept. You can tell.'] },
     { id: 'storm-dark', phase: 'escalation', at: [2, 420], seed: ['dept:watch'], weight: 2,
-      lines: c => [c.dark ? 'Deck ' + c.dark + ' went to emergency lights for a while.' : 'The lights held all morning. Fingers crossed.', 'I keep waiting for the next jolt.'] },
+      lines: c => [c.dark ? deckWord(c.dark) + ' went to emergency lights for a while.' : 'The lights held all morning. Fingers crossed.', 'I keep waiting for the next jolt.'] },
     { id: 'storm-stew', from: 'brennan', phase: 'escalation', at: [2, 660], seed: ['dept:galley'], weight: 1,
       lines: ['Storm stew again. One pot, no complaints.', 'Brennan\'s sending trays up to the bridge.'] },
     { id: 'storm-clear', from: 'marrow', phase: 'resolution', at: [3, 600], seed: ['all'], weight: 3,
@@ -34267,7 +34443,7 @@ function occasionsTick(now, quiet) {
   }
   for (const r of SHIP.occasions) {
     const o = OCCASIONS[r.id]; if (!o) continue;
-    if (r.status === 'asked' && now < r.at + r.len) meeting({ notify: o.chance || typeof deviceApp === 'function' || typeof apptAdd === 'function' ? null : o.title + ': ' + DECKS[r.deck].rooms[r.room].name + ', Deck ' + r.deck + ', at ' + hhmm(r.at % 1440) + '.', id: r.key, event: 'occasion', where: { deck: r.deck, room: new RegExp('^' + DECKS[r.deck].rooms[r.room].name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$') }, at: r.at, len: r.len, who: [r.by], script: o.script });
+    if (r.status === 'asked' && now < r.at + r.len) meeting({ notify: o.chance || typeof deviceApp === 'function' || typeof apptAdd === 'function' ? null : o.title + ': ' + DECKS[r.deck].rooms[r.room].name + ', ' + deckIn(r.deck) + ', at ' + hhmm(r.at % 1440) + '.', id: r.key, event: 'occasion', where: { deck: r.deck, room: new RegExp('^' + DECKS[r.deck].rooms[r.room].name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$') }, at: r.at, len: r.len, who: [r.by], script: o.script });
     if (r.status === 'asked' && now >= r.at + r.len) {
       r.status = r.met ? 'kept' : 'missed'; if (r.met && o.trace && !SHIP.traces.includes(o.trace)) SHIP.traces.push(o.trace);
       const f = r.f || (r.f = {}); if (!r.met && o.chance && !f['gist:' + r.key]) { f['gist:' + r.key] = 1; meetingGist(o.script); }   // missed before its meeting was ever registered
@@ -34367,7 +34543,7 @@ function upcomingTraditions(fromMin, toMin) {
     const at = (d - 1) * 1440 + e.from; if (at < fromMin || at > toMin) continue;
     const w = e.ev.where[0], pool = S.shared.get(w.deck + '|' + (w.room ? 'ev:' + e.id + ':0' : w.pool)) || [], pl = pool[0];
     const room = pl && DECKS[pl.deck].rooms && DECKS[pl.deck].rooms[pl.room], one = !!pl && pool.every(q => q.room === pl.room);
-    out.push({ id: e.id, title: e.name + (e.names ? ' (' + e.names + ')' : ''), at, to: (d - 1) * 1440 + e.to, where: (room ? room.name + ', ' : '') + 'Deck ' + w.deck,
+    out.push({ id: e.id, title: e.name + (e.names ? ' (' + e.names + ')' : ''), at, to: (d - 1) * 1440 + e.to, where: (room ? room.name + ', ' : '') + deckWord(w.deck),
       deck: pl ? pl.deck : w.deck, room: one ? pl.room : null });   // for the device's Go there (deck, room key; null: a pool over several rooms)
   }
   return out.sort((a, b) => a.at - b.at);
@@ -35886,10 +36062,10 @@ function socBorn(h, rooms) {
     const there = []; for (const [k, l] of rooms) if (k.startsWith(m.deck + '|')) there.push(...l.map(i => crew[i]));
     if (!there.length) continue;                         // nobody about to notice: it's news when someone is
     SHIP.social.fault[m.id] = lvl;
-    const name = MACHINE_KINDS[m.kind].name.toLowerCase(), s = SOC_SYMPTOM[m.kind] || 'playing up', where = 'the ' + name + ' on Deck ' + m.deck;
+    const name = MACHINE_KINDS[m.kind].name.toLowerCase(), s = SOC_SYMPTOM[m.kind] || 'playing up', where = 'the ' + name + ' on ' + deckIn(m.deck);
     newsAdd({ id: 'fault:' + m.id + ':' + h, about: m.id, kind: 'fault', weight: lvl === 'faulty' ? .5 : lvl === 'failing' ? .7 : .9, life: 3, born: t,
       seed: socPick(there, 3, socHash(m.id), h, 604).map(q => q.id),
-      lines: ['The ' + name + ' on Deck ' + m.deck + ' has been ' + s + ' all week.', 'Someone should look at ' + where + '. It keeps ' + s + '.', 'Have you heard? ' + where[0].toUpperCase() + where.slice(1) + ' is ' + s + ' again.'] });
+      lines: ['The ' + name + ' on ' + deckIn(m.deck) + ' has been ' + s + ' all week.', 'Someone should look at ' + where + '. It keeps ' + s + '.', 'Have you heard? ' + where[0].toUpperCase() + where.slice(1) + ' is ' + s + ' again.'] });
   }
 }
 // ---- one ship hour on paper: who spent time together, affinity drifting, news passing on ----
@@ -36246,7 +36422,7 @@ if (typeof deviceApp === 'function') deviceApp({ id: 'crew', title: 'Relationshi
       ...(typeof knowBlocks === 'function' ? knowBlocks(c.id) : [{ kind: 'list', rows: c.known.length ? c.known.map(k => ({ text: k })) : [{ text: 'Nothing yet. Ask them about themselves.' }] }]),   // what you know, by section (20c)
       { kind: 'buttons', items: [{ label: 'Where are they?', action: { app: 'roster', who: c.id } }].concat(c.met !== null ? [{ label: 'Meet up', action: { app: 'appointments', with: c.id } }] : [], [{ label: 'Back', action: { app: 'crew', do: 'back' } }]) }] };
     const cs = crewContacts(), mo = movedOn(), gone = mo.length ? [{ kind: 'text', text: 'Moved on', mark: 'head' }, { kind: 'list', rows: mo.map(x => ({ text: x.name, sub: x.to ? 'Now on the ' + x.to.replace(/^the /i, '') : 'Transferred', mark: 'past' })) }] : [];
-    return { title: 'Relationships', blocks: (cs.length ? [{ kind: 'list', rows: cs.map(x => ({ text: x.name, sub: x.tierName + (x.where ? ' · Deck ' + x.where.deck + (x.where.room ? ', ' + x.where.room : '') : ''), mark: x.tier >= 3 ? 'up' : null, action: { app: 'crew', do: 'show', arg: x.id } })) }]
+    return { title: 'Relationships', blocks: (cs.length ? [{ kind: 'list', rows: cs.map(x => ({ text: x.name, sub: x.tierName + (x.where ? ' · ' + deckWord(x.where.deck) + (x.where.room ? ', ' + x.where.room : '') : ''), mark: x.tier >= 3 ? 'up' : null, action: { app: 'crew', do: 'show', arg: x.id } })) }]
       : [{ kind: 'text', text: 'Nobody yet. Tap someone aboard to say hello.' }]).concat(gone) };
   },
   act: (verb, arg) => { CREW_PICK = verb === 'show' ? arg : null; } });
@@ -36417,7 +36593,7 @@ function favourOf(p) {
   if (left.length && U(625) < .6) {
     const pl = left[Math.floor(U(626) * left.length)], room = ((DECKS[pl.deck].rooms || {})[pl.room] || {}).name || 'the ' + pl.type, thing = FAVOUR_THINGS[Math.floor(U(627) * FAVOUR_THINGS.length)];
     return { idea: true, title: 'Fetch ' + shortName(p) + '\'s ' + thing, ask: 'I think I left my ' + thing + ' in the ' + room.toLowerCase() + ' yesterday. Could you bring it to me?',
-             post: { from: p.id, title: 'Fetch ' + shortName(p) + '\'s ' + thing + ' (' + room + ', Deck ' + pl.deck + ')', bring: thing, stops: [{ deck: pl.deck, placeId: pl.id, mins: 2, tag: 'pickup' }] } };
+             post: { from: p.id, title: 'Fetch ' + shortName(p) + '\'s ' + thing + ' (' + room + ', ' + deckIn(pl.deck) + ')', bring: thing, stops: [{ deck: pl.deck, placeId: pl.id, mins: 2, tag: 'pickup' }] } };
   }
   if (p.work && p.work.place && U(628) < .7)
     return { idea: true, title: 'A lamp for ' + shortName(p), ask: 'The lamp over my station keeps flickering. Could you swap it when you get a chance?',
@@ -37206,8 +37382,8 @@ function momentShow(id) {
 const storyPlace = (type, deck) => { const S = schedData(); for (const pl of S.byId.values()) if (pl.type === type && (deck === undefined || pl.deck === deck)) return pl; return null; };
 const STORY_FAVOURS = {
   brennanSage: p => { const pl = storyPlace('garden', 3); return pl && { from: p.id, title: 'Sage from the garden for ' + shortName(p) + ' (Deck 3)', bring: 'a bunch of sage', stops: [{ deck: pl.deck, placeId: pl.id, mins: 3, tag: 'pickup' }] }; },
-  pellPractice: p => { const pl = p.work && storyPlace(p.work.place, p.work.deck); return pl && { from: p.id, title: 'Help ' + shortName(p) + ' practise for his certification (Deck ' + pl.deck + ')', stops: [{ deck: pl.deck, placeId: pl.id, mins: 15, tag: 'favour' }] }; },
-  liftBrakes: p => { const pl = p.work && storyPlace(p.work.place, p.work.deck); return pl && { from: p.id, title: 'Check the lift brakes with ' + shortName(p) + ' (Deck ' + pl.deck + ')', stops: [{ deck: pl.deck, placeId: pl.id, mins: 15, tag: 'favour' }] }; },   // a stop at their station (reviewer 1: not a lamp swap)
+  pellPractice: p => { const pl = p.work && storyPlace(p.work.place, p.work.deck); return pl && { from: p.id, title: 'Help ' + shortName(p) + ' practise for his certification (' + deckIn(pl.deck) + ')', stops: [{ deck: pl.deck, placeId: pl.id, mins: 15, tag: 'favour' }] }; },
+  liftBrakes: p => { const pl = p.work && storyPlace(p.work.place, p.work.deck); return pl && { from: p.id, title: 'Check the lift brakes with ' + shortName(p) + ' (' + deckIn(pl.deck) + ')', stops: [{ deck: pl.deck, placeId: pl.id, mins: 15, tag: 'favour' }] }; },   // a stop at their station (reviewer 1: not a lamp swap)
 };
 function storyFavour(p, id) {
   const mk = STORY_FAVOURS[id]; if (!mk || typeof favourPost !== 'function') return false;
@@ -38629,7 +38805,7 @@ function wardrobeUse() {
   }
   if (h && h.at === 'hands') { toast('Wardrobe', 'Your hamper\'s full of dirty washing. Take it to a free washer in the laundry, past the washrooms in the junior wing.'); clothesGoal('washer'); return; }
   if (h && h.at === 'washer') { toast('Wardrobe', 'Your washing is in ' + washerName(h.washer) + ' in the laundry' + (h.done || shipNow() >= h.until ? ': it\'s done, take it out.' : ', done at ' + hhmm(h.until) + '.')); return; }
-  if (h && h.at === 'floor') { toast('Wardrobe', 'Your laundry hamper is where you set it down' + (h.deck !== deckDef.num ? ', on Deck ' + h.deck : '') + '. Pick it up again when you\'re ready.'); return; }
+  if (h && h.at === 'floor') { toast('Wardrobe', 'Your laundry hamper is where you set it down' + (h.deck !== deckDef.num ? ', on ' + deckIn(h.deck) : '') + '. Pick it up again when you\'re ready.'); return; }
   if (C.clean > 0 && C.changed >= today && C.grime < GRIME_GRUBBY) { toast('Wardrobe', 'You\'re in clean clothes today. ' + clothesLeft(C.clean)[0].toUpperCase() + clothesLeft(C.clean).slice(1) + ' in here.'); return; }
   if (C.clean > 0) {                                     // (grubby: always, even if you changed today)
     C.clean--; C.changed = today; C.grime = 0; uniformWatch(); simAct('clothes');
@@ -40241,7 +40417,7 @@ function trainOffer(row, c, d, t) {                      // the ask, or the ask 
   if (!r) return false;
   c.st = 'meet'; c.occ = r.key; c.told = false;
   const place = DECKS[o.deck] && DECKS[o.deck].rooms[o.room] ? DECKS[o.deck].rooms[o.room].name : 'the Works bay', when = hhmm(at);
-  const where = place.replace(/^Works Chief's office$/, 'the Chief\'s office') + ' on Deck ' + o.deck, ask = worksText('works.ask.' + row.id, '', { time: when, place: where, name: worksName(by) }), cut = ask.indexOf(' | ');
+  const where = place.replace(/^Works Chief's office$/, 'the Chief\'s office') + ' on ' + deckIn(o.deck), ask = worksText('works.ask.' + row.id, '', { time: when, place: where, name: worksName(by) }), cut = ask.indexOf(' | ');
   let subject = 'Training: ' + mechName(row.id), body = 'Meet me in the ' + where.replace(/^the /, '') + ' at ' + when + '. I\'ll show you ' + mechName(row.id).replace(/^./, x => x.toLowerCase()) + '.';
   if (cut > 0) { subject = ask.slice(0, cut); body = ask.slice(cut + 3); if (body.indexOf(when) < 0) body += ' (' + when + ', ' + where + '.)'; }   // the writer's words; the time and place if they don't say
   if (typeof mailSend === 'function') mailSend({ at: t, from: worksName(by), subject, body, quiet: true });
@@ -40939,7 +41115,7 @@ const haulDay = d => weekday(d) === DELIVERY.day + (typeof deliveryLate === 'fun
 const haulDock = () => CART_AT.find(id => placeById(id)) || null;
 const haulLoadAt = () => HOLD_AT.find(id => placeById(id)) || null;
 const haulName = c => c.part ? String(c.id).replace(/^./, x => x.toUpperCase()) : worksText('haul.crate.' + c.id, ({ laundry: 'Linen', medical: 'Medical supplies', infirmary: 'Medical supplies', store: 'Crew store stock', galley: 'Dry goods', bridge: 'Bridge spares' })[c.id] || 'A crate');
-const haulWhere = c => { const p = placeById(c.dest); return p ? (roomName(p.deck, p.room) || 'the room') + ', Deck ' + p.deck : 'its stop'; };
+const haulWhere = c => { const p = placeById(c.dest); return p ? (roomName(p.deck, p.room) || 'the room') + ', ' + deckIn(p.deck) : 'its stop'; };
 // a run's crates from what's left of the manifest: up to CART_CRATES, by deck from the hold upward (4, 3, 2, 1): fewest rides
 function haulCrates(max = CART_CRATES) {
   const out = []; for (const c of SHIP.manifest || []) for (let i = 0; i < (c.n || 0); i++) out.push({ id: c.id, dest: c.dest });
@@ -41450,7 +41626,7 @@ if (typeof WORK_MECH !== 'undefined') WORK_MECH.m7 = { reserve: scanTrainReserve
 // =====================================================================
 const TRACE_SLOT = 11, TRACE_SECS = 3, TRACE_READ_K = 63;   // TRACE_READ_K: the reading's own slot in SHIP.player.wsteps (section 17 keeps the job's stops)
 const TRACE_TRAIN = { line: 'water', machine: '5-valve-2', middle: '5-pump-1', cond: 40 };
-const TRACE_LINE = { water: 'the water line', heat: 'the heating line', air: 'the air line' };
+const TRACE_LINE = { water: 'the water line', heat: 'the heating line', air: 'the air line', pool: 'the pool line' };   // pool: 0.84.5 (rec engineer B)
 const TRACE_UI = { at: null, job: null, last: null };   // the machine being read; the job and reading the Pipe kit page shows
 const traceLinesOn = () => typeof MACHINE_LINKS === 'object' && !!MACHINE_LINKS && typeof linePath === 'function' && typeof lineFlow === 'function'
   && typeof lineOn === 'function' && typeof lineIds === 'function' && typeof lineDecks === 'function' && typeof traceMark === 'function' && typeof traceHidden === 'function';
@@ -41515,7 +41691,7 @@ function traceRead(j, id) {
   } else {
     const hint = r.after >= .8 ? worksText('trace.down', 'Full after it: the trouble is further down the line.') : r.before < .8 ? worksText('trace.up', 'Already low before it: the trouble is further up.') : '';
     toast(name, [words, hint].filter(Boolean).join(' '));
-    traceSay(j, 'read', r.after >= .8 ? 'Full here. So it\'s further down, toward Deck ' + s.deck + '. Halve it again.' : 'Low before it too. Back up the line.');
+    traceSay(j, 'read', r.after >= .8 ? 'Full here. So it\'s further down, toward ' + deckIn(s.deck) + '. Halve it again.' : 'Low before it too. Back up the line.');
   }
   if (typeof ixGoalAt !== 'undefined') ixGoalAt = -1;
   if (typeof deviceShow === 'function') deviceShow('pipekit');
@@ -41523,6 +41699,7 @@ function traceRead(j, id) {
 }
 // the goal pointer (15b's ixJobStep asks while traceHidden): the middle of the line first, among the machines not read yet
 function traceGoal(j) {
+  const dg = typeof poolDripGoal === 'function' ? poolDripGoal(j) : null; if (dg) return dg;   // 0.84.5 (rec engineer B): the pool leak's drip on Deck 5 first (24o's end)
   const steps = traceSteps(j), read = new Set(j.read || []), mid = Math.floor(steps.length / 2); if (!steps.length) return null;
   const ids = steps.map((x, k) => [x, Math.abs(k - mid)]).sort((a, b) => a[1] - b[1]).flatMap(([x]) => x).filter(id => !read.has(id) && panelPlace(id));
   const m = ids.length ? machineById(ids[0]) : null; if (!m) return null;
@@ -41555,7 +41732,7 @@ function traceMarks(n) {
   if (!s) return null;
   const ms = tracePath(s.line, s.deck).flat().map(id => machineById(id)).filter(m => m && m.at), here = ms.filter(m => m.deck === n);
   const decks = [...new Set(ms.map(m => m.deck))].sort(); if (!decks.length) return null;
-  return { tiles: here.map(m => m.at.slice()), text: traceLineName(s.line).replace(/^./, x => x.toUpperCase()) + (here.length ? ': its machines are marked.' : ' runs through Deck' + (decks.length > 1 ? 's ' + decks.slice(0, -1).join(', ') + ' and ' + decks[decks.length - 1] : ' ' + decks[0]) + '.') };
+  return { tiles: here.map(m => m.at.slice()), text: traceLineName(s.line).replace(/^./, x => x.toUpperCase()) + (here.length ? ': its machines are marked.' : ' runs through ' + (decks.length > 1 ? 'Decks ' + decks.slice(0, -1).join(', ') + ' and ' + decks[decks.length - 1] : deckIn(decks[0])) + '.') };   // deckIn: 0.84.5 (rec engineer B), the pool line runs through the rec deck
 }
 
 // ---- the training (ladder row m9, 24 core's flow): Calder reads the middle while you watch (this block's own small
@@ -42617,10 +42794,10 @@ function caseAct(verb, arg) {
   else if (v === 'yes') { CASE_UI.ask = null; if (caseCall(c.id, s)) { const p = caseSus(c, s).part; if (p && typeof toast === 'function') toast('Called it', 'A ' + p + ' from main storage, Deck 5. Follow the marker.'); } }
   else if (v === 'next') {
     const k = c.clues.find(x => !c.got.includes(x.id)), p = k && k.at && k.at !== 'board' && placeById(k.at);
-    if (p && typeof setGoal === 'function') { SHIP.player.track = null; setGoal({ deck: p.deck, place: p.id, label: (roomName(p.deck, p.room) || 'The clue') + (p.deck !== deckDef.num ? ', Deck ' + p.deck : '') }); }
+    if (p && typeof setGoal === 'function') { SHIP.player.track = null; setGoal({ deck: p.deck, place: p.id, label: (roomName(p.deck, p.room) || 'The clue') + (p.deck !== deckDef.num ? ', ' + deckIn(p.deck) : '') }); }
     else if (k && k.src && k.src.ask && typeof setGoal === 'function') {   // a person: where they are now
       const p = schedPeople().find(x => x.id === k.src.ask), w = p && whereIs(p, shipNow());
-      if (w && w.placeId && placeById(w.placeId)) { SHIP.player.track = null; setGoal({ deck: w.deck, place: w.placeId, label: shortName(p) + (w.deck !== deckDef.num ? ', Deck ' + w.deck : '') }); }
+      if (w && w.placeId && placeById(w.placeId)) { SHIP.player.track = null; setGoal({ deck: w.deck, place: w.placeId, label: shortName(p) + (w.deck !== deckDef.num ? ', ' + deckIn(w.deck) : '') }); }
       else if (typeof toast === 'function') toast('Fault notes', caseHint(c.id));
     }
     else if (k && k.at === 'board' && typeof setGoal === 'function') { SHIP.player.track = null; setGoal({ deck: 5, room: 'w', label: 'The job board, in the Works bay' }); }
@@ -42846,7 +43023,7 @@ function p1Title(c) {
 }
 function p1Card(c, j) {                                  // the board card: the line's symptom and where it's felt, never the machine
   const P = p1Where(c), who = j.claimedBy === 'you' ? 'you' : j.claimedBy ? ((schedPeople().find(p => p.id === j.claimedBy) || {}).name || '').split(' ')[0] : null;
-  return [c.title.replace(/^Head-scratcher: /, ''), 'Deck ' + P.deck + ' · the ' + P.line + ' line', 'head-scratcher' + (who ? ', ' + who + ' on it' : ', asked for you'), JOB_PRI[j.urgency] || 'routine'];
+  return [c.title.replace(/^Head-scratcher: /, ''), deckWord(P.deck) + ' · the ' + P.line + ' line', 'head-scratcher' + (who ? ', ' + who + ' on it' : ', asked for you'), JOB_PRI[j.urgency] || 'routine'];
 }
 function p1Start(c, j) { const { f } = p1Cause(c), ids = f && caseLine(j.machine, f.line) || []; return ids.find(id => id !== j.machine && panelPlace(id)) || null; }   // the top of the line
 function p1Wrong(c, s) { const x = p1Sus(c, s), P = p1Where(c); return caseText('case.wrong.p1', 'New {part} in. {where} still {shows}.', { part: x && x.part || 'part', where: P.where, shows: P.shows }); }
@@ -43990,6 +44167,35 @@ function leakFx() {
   } catch (err) { console.error(err); }
 }
 WORK_TICKS.push((now, skip) => { if (!skip) leakFx(); });
+// ---- the pool plant's leak (0.84.5, rec engineer B; plans/recdeck-plan.html section 6, "A Works story for tracing (tier 2)"):
+// section 17's pool line (MACHINE_LINKS.pool, only while REC_DECK is on) is traced like the others (traceFor; the filters'
+// seal is the only cause on it) and its symptom is named on Deck 5 (LINE_SHOWS): it shows first as a drip in main storage,
+// right under the pool plant. While a pool job is open a puddle (24o's puddleAt) lies in the aisle at POOL_DRIP, and 24i's
+// goal pointer (traceGoal asks poolDripGoal) takes you there first; once you've stood by it (j.drip, saved with the job)
+// it's an ordinary trace: up the spine ladder to the pool plant, the pipe kit's readings (traceMark), found at the job's
+// own filter. Nothing here runs without a pool job (none while REC_DECK is off). No R(), no hash keys
+const POOL_DRIP = { deck: 5, place: '5-aisle-2', spot: [30.55, 4.35], near: 1.6 };   // main storage's aisle by the Plumbing shelves, under 7-pool-filter-2 (Deck 7's tiles sit 2 columns and a row on from Deck 5's)
+const POOL_FX = { root: null, wet: null };
+const poolDripJob = () => SHIP.jobs.find(j => j.symptom && j.symptom.line === 'pool' && j.status !== 'done') || null;
+const poolDripDue = j => !!(j && j.symptom && j.symptom.line === 'pool' && traceHidden(j) && !j.drip && placeById(POOL_DRIP.place));   // your pool job, the drip not seen yet
+const poolDripGoal = j => poolDripDue(j) ? { deck: POOL_DRIP.deck, place: POOL_DRIP.place, label: worksText('trace.pool.goal', 'See where it drips: main storage') } : null;
+function poolDripSeen(j, t) {                            // you've stood by the drip: the goal pointer goes on up the line
+  j.drip = t; j.touched = t; if (typeof MACH_REV !== 'undefined') MACH_REV++; if (typeof ixGoalAt !== 'undefined') ixGoalAt = -1;
+  try { toast(traceTitle(j), worksText('trace.pool.drip', 'A slow drip from the ceiling, over the aisle. The pool plant is right above it.') + ' ' + worksText('trace.pool.up', 'Take the spine ladder up to the rec deck and read the pool line with the pipe kit.')); } catch (e) { /* no UI */ }
+}
+function poolDripFx() {                                  // the puddle, while a pool job is open and you're on Deck 5 (in deckRoot: the deck's unload frees it)
+  try {
+    if (typeof deckRoot === 'undefined' || !deckRoot || !deckDef) return;
+    const on = deckDef.num === POOL_DRIP.deck && !!poolDripJob(); if (POOL_FX.root === deckRoot && !!POOL_FX.wet === on) return;
+    if (POOL_FX.wet && POOL_FX.root === deckRoot) { deckRoot.remove(POOL_FX.wet); POOL_FX.wet.geometry.dispose(); POOL_FX.wet.material.dispose(); }
+    const [x, z] = POOL_DRIP.spot; POOL_FX.root = deckRoot; POOL_FX.wet = on ? puddleAt([[x, z, .8], [x + .22, z + .3, .4]]) : null;
+  } catch (err) { console.error(err); }
+}
+WORK_TICKS.push((now, skip) => {
+  if (skip) return; poolDripFx();
+  const j = typeof myJob === 'function' ? myJob() : null; if (!poolDripDue(j) || typeof player === 'undefined' || !player || !deckDef || deckDef.num !== POOL_DRIP.deck || !PLACE_OF.has(POOL_DRIP.place)) return;
+  const sp = placeSpot(POOL_DRIP.place), p = player.obj.position; if (sp && Math.hypot(sp.x - p.x, sp.z - p.z) < POOL_DRIP.near) poolDripSeen(j, now);
+});
 
 // ---------------------------------------------------------------------
 // 24q REWIRING (M15, seat E2, 0.51.x; plans/mechanics/m15-rewiring.html). From Day 17, an Officer's, about once a week
@@ -46698,7 +46904,7 @@ function placeSpot(id) {
     // facing: a compass letter, or a number in degrees (round tables, the curved bar, card tables; 0 = south, 90 = east,
     // as the letters); a place's own `y` (seat height) always wins over SEAT_Y, for the crew and the player alike
     s = { id, walk, x, z, y, face: typeof pl.face === 'number' ? pl.face * Math.PI / 180 : FACE_ANGLE[pl.face] || 0,
-      pose: pl.type === 'bed' ? 'lie' : pl.pose, anim: placeAnim(pl), room: pl.room, onTile: free(...pl.at) };
+      pose: pl.type === 'bed' ? 'lie' : pl.pose, anim: placeAnim(pl), room: pl.room, onTile: free(...pl.at), mv: pl.move || null };   // mv: 8c's crew moves (0.84.6)
   }
   SPOT_OF.set(id, s); return s;
 }
@@ -47011,7 +47217,7 @@ class CrewAgent {
     if (this.talking > 0) {                              // stopped for a word with you
       this.talking -= dt;
       if (!this.settled) { this.pose = 'stand'; this.face = Math.atan2(player.obj.position.x - this.x, player.obj.position.z - this.z); }
-      this.h.set({ x: this.x, y: this.y, z: this.z }, this.face, heldPose(this)); return true;
+      if (!((this.rk || this.settled && this.spot && this.spot.mv) && recCrewSet(this, dt))) this.h.set({ x: this.x, y: this.y, z: this.z }, this.face, heldPose(this)); return true;
     }
     let goalId;
     if (w.deck !== N) goalId = '@lift';
@@ -47052,6 +47258,7 @@ class CrewAgent {
     // stuck: meant to be going somewhere and not getting there (in ship minutes)
     const going = this.path.length > 0 || (this.spot && !this.settled);
     if (going && Math.hypot(this.x - ox, this.z - oz) < 1e-4) { this.stuck += dt * SHIP_RATE; this.stuckMax = Math.max(this.stuckMax, this.stuck); } else this.stuck = 0;
+    if ((this.rk || this.settled && this.spot && this.spot.mv) && recCrewSet(this, dt)) return true;   // 0.84.6: swimming the lane, up the wall (8c)
     this.h.set({ x: this.x, y: this.y, z: this.z }, this.face, heldPose(this));
     return true;
   }
@@ -47243,7 +47450,7 @@ FullPerson.prototype.update = CrowdPerson.prototype.update;
 // next natural end (back at the lane's start, the loop's start, the floor). Nothing here calls R().
 // =====================================================================
 Object.assign(HOLDS, { towel: { prop: 'towel', bone: 'C', one: 2 } });   // over the left shoulder; one: 2 is neither arm, so both swing as usual
-for (const a of ['cheer', 'clap', 'groan']) ACT_SEATED.add(a);
+for (const a of ['cheer', 'clap', 'groan', 'slump']) ACT_SEATED.add(a);
 Object.assign(PROP_KIT, {
   kayak(p) {                                             // on the body bone, in metres from the root: the hull's waterline at .66
     part(p, GEO.sph, '#f2a33a', 0, .66, .32, .34, .15, 1.38); part(p, GEO.sph, '#e05a3a', 0, .73, .32, .2, .09, 1.2);
@@ -47371,6 +47578,36 @@ const REC_ACTS = {
   groan: { f(r, s, t, b, ph) {                           // a near miss: hands on the head, a look down
     for (const a of r.arms) armTo(a, s, -2.55, -2.25, .6, .4);
     r.head.rotation.x = L(r.head.rotation.x, .3 + .05 * Math.sin(t * 2), s); r.torso.rotation.x = L(r.torso.rotation.x, .1, s);
+  } },
+  slump: { f(r, s, t, b, ph, h, sy) {                   // 0.84.6 (rec engineer B): sat back in the seat, legs out, hands on the belly or behind the head
+    if (b !== 'sit') return;                             // a seat with anim: 'slump' (poseOf gives 'sit:slump'); standing, nothing
+    const hy = r.hips.position.y - .03; r.hips.position.y = L(r.hips.position.y, hy, s); r.hips.position.z = L(r.hips.position.z, .06, s);
+    for (const leg of r.legs) {                          // the feet well out in front on the floor (a high seat: on the step half a metre down), knees a little apart
+      const t0 = leg.thigh.rotation.x, k0 = leg.knee.rotation.x, a0 = leg.ankle.rotation.x, ang = legIK(leg, ANK + (sy > .62 ? (sy - .5) / h : 0) - (hy - HIP_OFF), sy > .62 ? .4 : .5);
+      leg.thigh.rotation.x = L(t0, leg.thigh.rotation.x, s); leg.knee.rotation.x = L(k0, leg.knee.rotation.x, s);
+      leg.ankle.rotation.x = L(a0, -ang - .35, s); leg.thigh.rotation.z = L(leg.thigh.rotation.z, leg.side * .12, s);
+    }
+    r.torso.rotation.x = L(r.torso.rotation.x, -.3, s); r.head.rotation.x = L(r.head.rotation.x, .22 + .04 * Math.sin(t * .3 + ph), s);
+    const back = Math.floor(ph * 7) % 3 === 2;            // one in three: hands behind the head
+    for (const a of r.arms) back ? armTo(a, s, -2.7, -2.35, .75, .3) : armTo(a, s, -.55, -1.5, -.1, .15);
+  } },
+  // 0.84.9 (rec engineer B2): the stage. sing (at the mic stand), juggle (the balls are recCrewBalls'), bow, and address (the lectern)
+  sing: { f(r, s, t, b, ph) {                            // both hands up on the mic, a sway with the song
+    for (const a of r.arms) armTo(a, s, -1.25 + .06 * Math.sin(t * 1.7 + ph), -1.75, a.side * -.05, .2);
+    r.torso.rotation.z = L(r.torso.rotation.z, .07 * Math.sin(t * 1.6 + ph), s); r.head.rotation.x = L(r.head.rotation.x, -.12 + .06 * Math.sin(t * 3.2), s);
+  } },
+  juggle: { f(r, s, t, b, ph) {                          // forearms out, the hands taking turns to toss, eyes up on the balls
+    for (const a of r.arms) { const u = Math.sin(t * 2 * Math.PI * 1.1 + (a.side > 0 ? 0 : Math.PI)); armTo(a, s, -.8 - .22 * u, -1.05 + .2 * u, .14, -.2); }
+    r.head.rotation.x = L(r.head.rotation.x, -.38, s);
+  } },
+  bow: { f(r, s, t, b, ph) {                             // a deep bow, one hand across the waist
+    r.torso.rotation.x = L(r.torso.rotation.x, .85, s); r.head.rotation.x = L(r.head.rotation.x, .2, s);
+    for (const a of r.arms) a.side > 0 ? armTo(a, s, -.35, -1.9, -.25, 0) : armTo(a, s, .15, -.2, .1, 0);
+  } },
+  address: { f(r, s, t, b, ph) {                         // hands on the lectern, a slow look round the room; now and then a hand opens out
+    const g = pulse(t, 9, 2.4, ph * 9);
+    for (const a of r.arms) a.side > 0 && g > 0 ? armTo(a, s, L(-.7, -1.15, g), L(-.55, -.9, g), L(.12, .55, g), -.3 * g) : armTo(a, s, -.7, -.55, .12, .1);
+    r.head.rotation.y = L(r.head.rotation.y, .45 * Math.sin(t * .33 + ph * 6), s); r.head.rotation.x = L(r.head.rotation.x, -.05, s);
   } },
 };
 // climbing legs: the `side` foot steps up as q goes 0 to 1, the other pushes down; feet toward the wall
@@ -47505,6 +47742,151 @@ function recRope(A, ax, ay, az, on) {
   _ropeA.set(0, .71, .19); _ropeB.set(ax, ay, az); root.worldToLocal(_ropeB);   // the belay loop, in the root's own units
   const d = _ropeB.clone().sub(_ropeA), len = d.length(), rr = .016 / A.body.h;
   A.rope.position.copy(_ropeA).addScaledVector(d, .5); A.rope.quaternion.setFromUnitVectors(_ropeU, d.normalize()); A.rope.scale.set(rr, len, rr);
+}
+// ---- the crew's moves (0.84.6, rec engineer B). Whoever is settled at a place with `move` (the mover's specs above, deck
+// coordinates) does it as an endless loop, no counts, from their own clock (a.mt: real seconds since they settled there;
+// the first 1.5 s glide from the place's spot to the move's start). The agent stays at the spot (its tiles, getting up);
+// only the body moves. The place's fields (section 10's placeSpot passes `move` on as spot.mv):
+//   swim  { path: [a, b], y, speed?, phase? }  lengths, a tread at each end    tread { at, y, face }
+//   kayak { path: REC_LOOP, y, phase? }        the loop at the player's speeds  float { at, r, top }
+//   climb { at, face, top, rest? }  up, the bell, lowered, `rest` s at the foot (4): a belay line while on (two at once)
+//   fan   { slump? }  at a seat or standing: watching, and the room's cheers, claps and groans together (one shared clock)
+//   kit: 'rec' (swim, tread and kayak's default), 'socks' (float's), 'rec socks' or '' (in uniform): a new body for it
+// phase: 0-1 of the loop, so two on one loop or lane are apart. A seat with anim: 'slump' and no move sits back, legs out.
+// Nothing here calls R(); a place with no `move` never comes here.
+const REC_KITS = { swim: 'rec', tread: 'rec', kayak: 'rec', float: 'socks' };
+const _rcp = { x: 0, y: 0, z: 0, f: 0 }, _rcC = new WeakMap(), REC_CLIMBERS = [{}, {}]; let REC_CREW_ROPES = null, REC_CLIMB_N = 0;
+const recCrewC = M => _rcC.get(M) || (_rcC.set(M, { P: (M.path || [M.at || [0, 0]]).map(recXZ) }), _rcC.get(M));   // the move's points in world units, once
+const recMix = x => { x = Math.imul(x ^ x >>> 15, 2246822507); x = Math.imul(x ^ x >>> 13, 3266489909); return (x ^ x >>> 16) >>> 0; };
+function recCrewSet(a, dt) {                             // false: not a move (the agent sets the body as usual)
+  const M = a.settled && a.spot ? a.spot.mv : null, want = M ? (M.kit !== undefined ? M.kit : REC_KITS[M.kind] || '') : '';
+  if (want !== (a.rkH === a.h ? a.rk : '')) recCrewKit(a, want); else if (a.rkH !== a.h) a.rk = '';   // a new body since (crewDetail's): in uniform
+  const fn = M && REC_CREW[M.kind]; if (!fn) return false;
+  if (a.mtId !== a.spot.id) { a.mtId = a.spot.id; a.mt = 0; a.fs = idHash(a.p.id); }
+  a.mt += dt; const o = _rcp; o.x = a.x; o.y = a.y; o.z = a.z; o.f = a.face;
+  const pose = fn(a, M, a.mt, o, recCrewC(M));
+  if (a.mt < 1.5) { const k = ss(a.mt / 1.5); o.x = L(a.x, o.x, k); o.z = L(a.z, o.z, k); }
+  a.h.set(o, o.f, pose); return true;
+}
+function recCrewKit(a, k) {                              // into rec kit or grip socks and back: a new body of the same kind
+  const spec = Object.assign({}, rosterSpec(a.p)); if (/rec/.test(k)) spec.kit = 'rec'; if (/socks/.test(k)) spec.socks = true;
+  const full = !!a.h.full; a.remove(); a.h = full ? new FullPerson(spec, a.p.id) : crowd.add(spec); a.rk = k; a.rkH = a.h;
+}
+const REC_CREW = {
+  swim(a, M, T, o, C) {                                  // tread at a (facing b), swim to b, tread, swim back
+    const A = C.P[0], B = C.P[1], ts = Math.hypot(B.x - A.x, B.z - A.z) / (M.speed || .75), tt = 2 + a.fs % 15 / 10, per = 2 * (ts + tt);
+    let u = (T + (M.phase || 0) * per) % per; const bk = u >= ts + tt; if (bk) u -= ts + tt;
+    const p = bk ? B : A, q = bk ? A : B, sw = u >= tt, k = sw ? (u - tt) / ts : 0;
+    o.x = L(p.x, q.x, k); o.z = L(p.z, q.z, k); o.y = M.y || 0; o.f = Math.atan2(q.x - p.x, q.z - p.z);
+    return sw ? 'swim' : 'tread';
+  },
+  tread(a, M, T, o, C) { o.x = C.P[0].x; o.z = C.P[0].z; o.y = M.y || 0; o.f = (M.face !== undefined ? recFace(M.face) : a.spot.face) + .5 * Math.sin(T * .15 + a.fs % 7); return 'tread'; },
+  kayak(a, M, T, o, C) {                                 // round the loop at 1.05 m/s, 1.7 on the white water (a point's third number)
+    const P = C.P, n = P.length;
+    if (!C.T) { C.T = []; let t = 0; for (let i = 0; i < n; i++) { const q = P[(i + 1) % n]; t += Math.hypot(q.x - P[i].x, q.z - P[i].z) / (M.path[(i + 1) % n][2] ? 1.7 : 1.05); C.T.push(t); } }
+    const tot = C.T[n - 1]; let u = (T + (M.phase || 0) * tot) % tot, i = 0; while (i < n - 1 && C.T[i] < u) i++;
+    const t0 = i ? C.T[i - 1] : 0, p = P[i], q = P[(i + 1) % n], k = (u - t0) / (C.T[i] - t0 || 1);
+    o.x = L(p.x, q.x, k); o.z = L(p.z, q.z, k); o.y = M.y || 0; o.f = Math.atan2(q.x - p.x, q.z - p.z); a.h.fast = !!M.path[(i + 1) % n][2];
+    return 'kayak';
+  },
+  climb(a, M, T, o, C) {                                 // a rest at the foot, up (in bursts, as yours), the bell, lowered
+    const top = M.top || 3.2, w = .85 * Math.PI, Y = t => .34 * (.35 * t + .65 * (2 * Math.floor(w * t / Math.PI) + 1 - Math.cos(w * t % Math.PI)) / w);
+    if (!C.tu) { let t = 0; while (Y(t) < top) t += .05; C.tu = t; C.ys = top / Y(t); }
+    const rest = M.rest !== undefined ? M.rest : 4, tl = top / .6, per = rest + C.tu + 2.6 + tl, u = (T + (M.phase || 0) * per) % per, f = recFace(M.face), P = C.P[0];
+    o.f = f; o.x = P.x; o.z = P.z; let pose;
+    if (u < rest) { o.y = 0; pose = 'stand'; }
+    else if (u < rest + C.tu) { o.y = Math.min(top, Y(u - rest) * C.ys); pose = 'climb'; }
+    else if (u < rest + C.tu + 2.6) { o.y = top; pose = 'ring'; }
+    else { o.y = Math.max(0, top - .6 * (u - rest - C.tu - 2.6)); pose = 'lower'; }
+    if (u >= rest && REC_CLIMB_N < 2) {                  // on the line: the anchor above the route
+      if (!REC_CREW_ROPES) REC_CREW_ROPES = [0, 1].map(() => {
+        const m = new THREE.Mesh(cylG(1, 1, 1, 6).clone(), REC_ROPE_MAT || (REC_ROPE_MAT = new THREE.MeshStandardMaterial({ color: col('#3a7bd5'), roughness: .7 })));
+        m.castShadow = true; m.visible = false; m.raycast = () => {}; scene.add(m); return m;
+      });
+      const c = REC_CLIMBERS[REC_CLIMB_N++]; c.h = a.h; c.x = P.x + Math.sin(f) * .2; c.y = top + 1.1; c.z = P.z + Math.cos(f) * .2;
+    }
+    return pose;
+  },
+  float(a, M, T, o, C) {                                 // a slow bounce every five seconds; every third a somersault, else a star at the top
+    const r = M.r !== undefined ? M.r : 1.2, top = M.top || 2.2, n = Math.floor(T / 5), u = T % 5 / 5, flip = n % 3 === 2, c = C.P[0];
+    o.y = top * Math.sin(Math.PI * u) * (n === 0 ? ss(Math.min(1, T / 2)) : 1);
+    a.h.spin = flip ? 2 * Math.PI * ss(u) : 0; a.h.rig.star = flip ? 0 : Math.pow(Math.sin(Math.PI * u), 6);
+    o.x = c.x + r * Math.sin(T * .23 + a.fs % 5); o.z = c.z + r * .7 * Math.sin(T * .17 + 1 + a.fs % 3); o.f = a.spot.face + T * .22;
+    return 'float';
+  },
+  // 0.84.9 (rec engineer B2): on the stage. perform { act: 'sing' | 'juggle' | 'piano' | 'bow', len?: seconds } does the act,
+  // then a bow for its last 3 s and round again (piano: a seated place, pose 'sit'; bows standing up from the bench, no).
+  // address {} (the lectern: the Captain, the chief or a Wren talk's speaker). Both stay at the place, as it faces.
+  perform(a, M, T, o) {
+    const act = M.act || 'sing', per = (M.len || 40) + 3, u = (T + a.fs % 11) % per;
+    if (act === 'piano') return 'sit:play';
+    if (u >= per - 3) return 'bow';
+    if (act === 'juggle' && REC_JUGGLE.n < 1) { REC_JUGGLE.h = a.h; REC_JUGGLE.t = T; REC_JUGGLE.n = 1; }
+    return act;
+  },
+  address() { return 'address'; },
+  fan(a, M, T, o) {                                      // watching; every six seconds the room may cheer a point or groan a miss, each a moment late
+    const ct = clock.elapsedTime - a.fs % 7 * .09, n = Math.floor(ct / 6), m = recMix(n * 7919 + 13) % 20, me = recMix(n * 31 + a.fs) % 10;
+    const sat = a.spot.pose === 'sit', still = sat ? (M.slump ? 'sit:slump' : 'sit') : 'stand';
+    if (ct / 6 - n > .55 || m < 9 || me < 2) return still;
+    const x = m < 13 ? 'groan' : me < 6 ? 'cheer' : 'clap'; return sat ? 'sit:' + x : x;
+  },
+};
+// 0.84.9: the juggler's three balls, one mesh of three instances, made at the first juggle; a cascade in front of the chest
+const REC_JUGGLE = { m: null, h: null, t: 0, n: 0 }, _jq = new THREE.Object3D(), _jv = new THREE.Vector3();
+function recCrewBalls() {
+  const J = REC_JUGGLE, on = J.n > 0 && crowd.visible && J.h && J.h.rig;
+  if (!J.m && on) {
+    J.m = new THREE.InstancedMesh(new THREE.SphereGeometry(.06, 10, 8), new THREE.MeshStandardMaterial({ roughness: .5 }), 3);
+    ['#ff5a4f', '#ffd23a', '#4fc3ff'].forEach((c, i) => J.m.setColorAt(i, col(c))); J.m.castShadow = true; J.m.raycast = () => {}; J.m.frustumCulled = false; scene.add(J.m);
+  }
+  if (J.m) J.m.visible = !!on;
+  if (on) {
+    for (let i = 0; i < 3; i++) {                        // ball i: up from one hand, across, down into the other; each a third of a beat apart
+      const u = (J.t * 1.1 + i / 3) % 1, k = u < .5 ? u * 2 : (u - .5) * 2, side = (Math.floor(J.t * 1.1 + i / 3) + (u < .5 ? 0 : 1)) % 2 ? 1 : -1;
+      _jv.set(side * L(-.16, .16, k), .5 + .4 * Math.sin(Math.PI * k), .34).applyMatrix4(J.h.rig.root.matrixWorld); _jv.y += Math.max(0, J.h.pos.y - J.h.rig.root.position.y);   // on a stage the root stays on the floor (the legs stand on it)
+      _jq.position.copy(_jv); _jq.updateMatrix(); J.m.setMatrixAt(i, _jq.matrix);
+    }
+    J.m.instanceMatrix.needsUpdate = true;
+  }
+  J.n = 0;
+}
+function recCrewRopes() {                                // after the crowd is posed (the main loop): harness to anchor, hidden when nobody's on
+  for (let i = 0; i < 2; i++) {
+    const m = REC_CREW_ROPES[i], c = REC_CLIMBERS[i], on = i < REC_CLIMB_N && crowd.visible && !!c.h.rig; m.visible = on; if (!on) continue;
+    _ropeA.set(0, .71, .19).applyMatrix4(c.h.rig.root.matrixWorld); _ropeB.set(c.x, c.y, c.z).sub(_ropeA);
+    const len = _ropeB.length(); m.position.copy(_ropeA).addScaledVector(_ropeB, .5); m.quaternion.setFromUnitVectors(_ropeU, _ropeB.normalize()); m.scale.set(.016, len, .016);
+  }
+  REC_CLIMB_N = 0;
+}
+// 0.84.8 (rec engineer B2): the auditorium's show. RA's traditions engine calls recShow(state) whenever the show changes
+// (and may call it every tick: same state, no work): null (no show), 'film' (the screen down and lit, the house lights
+// well down), 'talk' (a Wren talk: the lectern's pool, the house lights a little down), 'allhands' (the same, a touch
+// brighter on the stage), 'talent' (all three pools, the house lights down). Looks only: nothing saved, nothing
+// random. The house lights dim only while you're in the auditorium; arriving mid-show, the screen and pools are set at once.
+// (REC_POOLS, REC_SHOWS and REC_SHOW are with REC_DECK at the top: the deck's build reads them)
+function recShow(state) {
+  const s = REC_SHOWS[state] ? state : null; if (s === REC_SHOW.state) return;
+  REC_SHOW.state = s; recPoolsSet();
+}
+function recPoolsSet() {                                 // each pool's colour from the show (warm white; talent night's centre a little pink)
+  const m = REC_SHOW.pools; if (!m || !m.parent) return;
+  const S = REC_SHOWS[REC_SHOW.state], a = m.geometry.attributes.color, tint = [[1, .9, .7], [1, .82, .86], [.85, .88, 1]];
+  for (let k = 0; k < REC_POOLS.length; k++) { const b = S ? S.pools[k] * 1.1 : 0; for (let v = 0; v < 4; v++) a.setXYZ(k * 4 + v, tint[k][0] * b, tint[k][1] * b, tint[k][2] * b); }
+  a.needsUpdate = true; m.visible = !!S && S.pools.some(x => x > 0);
+}
+const _recFilm = [col('#3a5b8c'), col('#c98a4a'), col('#5c8f6a'), col('#d9d2c4')], _recCloth = col('#e8e6df');   // the film's light on the screen: a slow drift through a few scenes' colours
+function recShowTick(dt, t) {
+  const S = REC_SHOWS[REC_SHOW.state], here = deckDef && deckDef.num === 7, ease = Math.min(1, dt * 1.2);
+  const scr = S ? S.scr : 0, dim = S && here && lastRoom === 'A' ? S.dim : 0;
+  REC_SHOW.scr = here ? (Math.abs(scr - REC_SHOW.scr) < .002 ? scr : REC_SHOW.scr + Math.sign(scr - REC_SHOW.scr) * Math.min(Math.abs(scr - REC_SHOW.scr), dt * .25)) : scr;   // the screen unrolls in about 4 s
+  REC_SHOW.dim = Math.abs(dim - REC_SHOW.dim) < .002 ? dim : REC_SHOW.dim + (dim - REC_SHOW.dim) * ease;
+  const p = here && REC_SHOW.piv; if (!p || !p.parent) return;
+  p.scale.y = Math.max(.001, REC_SHOW.scr); p.visible = REC_SHOW.scr > .002;
+  if (p.visible && RK && RK.film) {
+    const lit = REC_SHOW.state === 'film' && REC_SHOW.scr > .98, k = (t * .05) % _recFilm.length, i = Math.floor(k), f = k - i;
+    if (lit) RK.film.color.copy(_recFilm[i]).lerp(_recFilm[(i + 1) % _recFilm.length], f * f * (3 - 2 * f)).multiplyScalar(.75 + .1 * Math.sin(t * 2.3)); else RK.film.color.copy(_recCloth);
+  }
 }
 function crewDetail() {                                  // who gets a full rig: the nearest story crew to you
   const pp = player.obj.position;
@@ -47987,6 +48369,8 @@ function loop() {
   playerUpdate(dt, t);                                   // section 15: needs, walking speed, activities
   updateDeckCrew(dt);                                    // section 10: the scheduled crew
   crowd.update(dt, t);
+  if (REC_CREW_ROPES) recCrewRopes();                    // 0.84.6: the crew's belay lines, on the posed bodies (8c)
+  if (REC_JUGGLE.m || REC_JUGGLE.n) recCrewBalls();      // 0.84.9: a juggler's balls (8c)
   simTimers();                                           // section 13's simTimeout (0.28.50)
   }
   shadowStep();                                          // 0.27.33: the shadow stand-ins, a slice a frame after a deck change
@@ -48045,6 +48429,7 @@ function loop() {
     else for (let j = 0; j < d.leaves.length; j++) d.leaves[j].position.x = (j ? 1 : -1) * (d.span / 4 + d.open * d.span / 2 * .92);
   }
 
+  if (REC_SHOW.state || REC_SHOW.dim || REC_SHOW.scr) recShowTick(dt, t);   // 0.84.8: the auditorium's show (8c); nothing while there's none
   nightT += (nightAt() - nightT) * Math.min(1, dt * 1.8); applyLight(nightT);
   doorLeavesSync(); tallSync();                          // section 4: door leaves (0.27.21) and tall furniture (0.27.22), drawn together
   if (typeof machineFx !== 'undefined') { machineFx.lamps(t); shipFeelFrame(t, dt); }   // section 8b: lamps stutter while the deck's light relays flicker (0.27.10); a ship-wide event's feel (0.27.19)

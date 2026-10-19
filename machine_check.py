@@ -25,6 +25,7 @@
 #   the Works crew at work (0.33.40): the two placed jobs on Days 1 and 2, every third small job to the crew at once (5l)
 #   the shelves and the Wednesday delivery (0.33.41-0.33.42): the right shelf, the machine shop, crates, two trips, 14:00 (5m)
 #   your side: a job you claim is left to you, and finishing it puts the machine right
+#   the pool leak (0.84.5, rec engineer B; a REC_DECK = true build only): a traced pool-line repair shows as a drip on Deck 5 (5y)
 #   the save: machines, jobs and supplies written by the save hook and read back by machinesLoad come out the
 #   same, and run on the same afterwards
 #   play (the player's needs read shipEffects every ship minute) never runs the machines ahead of the clock, and
@@ -84,7 +85,7 @@ RUN = r"""(({ days, mode, crew, perHour, events }) => {
     if ((t - t0) % 1440 === 1080) {                      // every day at midnight: a snapshot
       const sys = shipSystems();
       out.daily.push({ day: SHIP.time.day, health: shipHealth(sys), sys, cond: Object.fromEntries(list.map(m => [m.id, Math.round(SHIP.machines[m.id].cond * 10) / 10])) });
-      for (const n of Object.keys(DECKS)) { const f = shipEffects(+n); out.fx.push({ deck: +n, t, restore: f.restore, drain: f.drain, walk: f.walk, cook: f.cook, lift: f.lift, spoil: f.spoil, mood: f.mood, notes: f.notes.length, json: JSON.stringify(f) }); }
+      for (const n of (typeof DECK_ORDER !== 'undefined' ? DECK_ORDER : Object.keys(DECKS).map(Number))) { const f = shipEffects(+n); out.fx.push({ deck: +n, t, restore: f.restore, drain: f.drain, walk: f.walk, cook: f.cook, lift: f.lift, spoil: f.spoil, mood: f.mood, notes: f.notes.length, json: JSON.stringify(f) }); }
     }
   }
   setShipNow(end); machinesNow(); look(end);
@@ -250,12 +251,12 @@ with sync_playwright() as pw:
           if (!L || !states.includes(L.state) || !(L.dim >= 0 && L.dim <= 1) || !(L.flicker >= 0 && L.flicker <= 1) || typeof L.drip !== 'boolean'
               || L.blink !== (st === 'failing' || st === 'broken') || (st === 'healthy' && (L.state !== 'fine' || L.dim || L.flicker || L.drip))) bad.push(day + ' ' + m.id + ' ' + JSON.stringify(L));
         }
-        for (const n of Object.keys(DECKS)) { const D = deckLook(+n); if (!(D.dim >= 0 && D.dim <= 1 && D.flicker >= 0 && D.flicker <= 1 && D.spray > 0 && D.spray <= 1 && D.wilt >= 0 && D.wilt <= 1)) bad.push(day + ' deck ' + n + ' ' + JSON.stringify(D)); }
+        for (const n of (typeof DECK_ORDER !== 'undefined' ? DECK_ORDER : Object.keys(DECKS).map(Number))) { const D = deckLook(+n); if (!(D.dim >= 0 && D.dim <= 1 && D.flicker >= 0 && D.flicker <= 1 && D.spray > 0 && D.spray <= 1 && D.wilt >= 0 && D.wilt <= 1)) bad.push(day + ' deck ' + n + ' ' + JSON.stringify(D)); }
       }
       const rows = shipHealthRows(), rowsOk = rows.length === SYSTEMS.length + 1 && rows[0].key === 'ship' && rows.every(r => r.value >= 0 && r.value <= 100 && states.includes(r.state));
       const rev = MACH_REV, hour = MACH_HOUR; let moodBad = 0, chill = [], about = null;
       for (let t = shipNow() - 5 * 1440; t <= shipNow(); t += 180) {
-        for (const n of Object.keys(DECKS)) { const M = shipMoodAt(+n, t); if (M.mood !== shipEffectsAt(+n, t).mood || M.mood < -30 || M.mood > 0 || (M.mood < 0 && !M.about && M.health >= 70)) moodBad++; if (+n === 4 && M.about) about = M.about; }
+        for (const n of (typeof DECK_ORDER !== 'undefined' ? DECK_ORDER : Object.keys(DECKS).map(Number))) { const M = shipMoodAt(+n, t); if (M.mood !== shipEffectsAt(+n, t).mood || M.mood < -30 || M.mood > 0 || (M.mood < 0 && !M.about && M.health >= 70)) moodBad++; if (+n === 4 && M.about) about = M.about; }
         chill.push(chillerAt(t));
       }
       const chillOk = chill.every(c => c.spoil >= 0 && c.spoil <= CHILL_SPOIL && (machWorks(c.cond) >= 85) === (c.spoil === 0));
@@ -760,8 +761,10 @@ with sync_playwright() as pw:
           // two trips: more than a cart's worth in the hold
           SHIP.hold.seal = (SHIP.hold.seal || 0) + 20; MACH_REV++; const crates = (typeof partsCrates === 'function' ? partsCrates() : holdCrates());
           out.took = claimJob(dj.id);
-          const l1 = cartLoadHold(dj.id), u1 = cartUnloadShelves(dj.id), l2 = cartLoadHold(dj.id), u2 = cartUnloadShelves(dj.id);
-          out.trips = [crates, l1, u1.left, l2, u2.left]; out.emptied = (typeof partsCrates === 'function' ? partsCrates() : holdCrates()) === 0 && !Object.keys(SHIP.hold).some(k => k !== 'meals' && SHIP.hold[k] > 0);
+          const l1 = cartLoadHold(dj.id), u1 = cartUnloadShelves(dj.id), l2 = cartLoadHold(dj.id);
+          // 0.84.1 (rec engineer B): a bigger hold (the rec deck's parts) takes more trips; keep going till it's empty (at most 3 more)
+          let u2 = cartUnloadShelves(dj.id), more = 0; while (u2.left > 0 && more < 3) { cartLoadHold(dj.id); u2 = cartUnloadShelves(dj.id); more++; }
+          out.trips = [crates, l1, u1.left, l2, u2.left, more]; out.emptied = (typeof partsCrates === 'function' ? partsCrates() : holdCrates()) === 0 && !Object.keys(SHIP.hold).some(k => k !== 'meals' && SHIP.hold[k] > 0);
           out.fin = finishJob(dj.id); if (typeof turnInJob === 'function') turnInJob(dj.id);
           // the next week's, left alone: the crew take it at 14:00 and it's done by the evening
           setShipNow(9 * 1440 + 10 * 60 + 5); machinesNow();
@@ -1137,7 +1140,7 @@ with sync_playwright() as pw:
           const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min;
           for (const id of ['5-damper-1', '5-damper-2']) {
             JOBS_ON = false; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t0); machinesNow(); machineFault(id, 5);
-            out.branch[id] = Object.keys(DECKS).map(Number).filter(n => shipEffects(n).notes.some(x => x.machine === id));
+            out.branch[id] = (typeof DECK_ORDER !== 'undefined' ? DECK_ORDER : Object.keys(DECKS).map(Number)).filter(n => shipEffects(n).notes.some(x => x.machine === id));
           }
           JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t0);
           return out;
@@ -1352,6 +1355,57 @@ with sync_playwright() as pw:
         if (not tr['line'] or not (25 <= share <= 75) or tr['badCause'] or tr['showsMachine'] or tr['placeShown'] or tu['traced'] or tr['sig'] != tr2['sig']
             or not tr.get('cardNow') or not tr.get('found') or (tr.get('own') or {}).get('word') == 'full' or not tr.get('fin') or (tr.get('cond') or 0) < 90 or not tr.get('closed')):
             fail('traced faults')
+
+    # 5y. the pool leak (0.84.5, rec engineer B; plans/recdeck-plan.html section 6, a Works story for tracing): only on a build
+    # with the rec deck's machines (REC_DECK = true), else skipped. You an Officer trained in tracing; on the first workday of
+    # yours from Day 2 that 7-pool-filter-1's repair would be traced (section 17's traceFor: schedU key 878), every machine put
+    # right and the board cleared, the filter made faulty at 09:00: its repair posts traced on the pool line, cause the seal;
+    # its card names the drip on Deck 5, never the machine; openJobs shows Deck 5 and no place; taken, the goal pointer is the
+    # drip in main storage (5-aisle-2) and on Deck 5 the puddle is down; standing by it (the drip's tick) sets j.drip and the
+    # pointer goes up the line (the middle, 7-pool-heat, on the rec deck); traceMark up the line: the heat exchanger low
+    # before and after, the other filter low after but not found, 7-pool-filter-1 found (full before, low after); fixing it
+    # puts it right and closes it, and the puddle goes. The same twice
+    if g.ev("typeof MACHINE_LINKS === 'object' && machineList().some(m => m.deck === 7)"):
+        PL = r"""(() => {
+          window.__sc("window.__evTr = [typeof eventNow === 'function' ? eventNow : undefined, typeof eventMod === 'function' ? eventMod : undefined]; if (window.__evTr[0]) eventNow = () => null; if (window.__evTr[1]) eventMod = () => null");
+          const id = '7-pool-filter-1', out = { on: lineOn('pool') }, m = machineById(id), home = deckDef.num;
+          const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min;
+          JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; SHIP.works = null; setShipNow(t0); machinesNow();
+          if (typeof worksInit === 'function') worksInit(WORKS_START); if (!SHIP.works) SHIP.works = {}; SHIP.works.tier = 2; SHIP.works.rank = 'officer';
+          SHIP.works.tr = { ...(SHIP.works.tr || {}), m9: 1 };
+          let d = Math.max(WORKS_REAL_FROM, SHIP_START.day + 1); while (d < 60 && !(schedU(machSeed(id), d, 878) < .5 && playerShiftOn(d))) d++;   // a workday of yours: the crew leave it for you
+          const h = (d - 1) * 24 + 9; out.day = d;
+          setShipNow(h * 60 - 30); machinesNow();
+          for (const x of machineList()) serviceMachine(x.id);   // every machine right and the board clear, so the crew leave this one for you (HOLD_MAX)
+          SHIP.jobs = SHIP.jobs.filter(x => x.status === 'done' || (x.claimedBy && x.claimedBy !== 'you'));
+          machineFault(id, 30); setShipNow(h * 60 + 5); machinesNow();
+          const j = SHIP.jobs.find(x => x.machine === id && x.status !== 'done'); if (!j) return out;
+          out.cause = j.cause; out.symptom = j.symptom ? { ...j.symptom } : null; out.card = jobCard(j)[0]; out.showsMachine = out.card.includes(machineTitle(id));
+          const o = openJobs('you').find(x => x.id === j.id); out.open = o ? [o.deck, o.place, o.room] : null;
+          out.claim = claimJob(j.id); const g0 = ixJobStep(); out.goal = g0 ? [g0.deck, g0.place] : null;
+          goToDeck(5); poolDripFx(); out.puddle = !!POOL_FX.wet && POOL_FX.wet.parent === deckRoot;
+          const sp = placeSpot(POOL_DRIP.place); player.obj.position.set(sp.x, 0, sp.z);
+          const tick = WORK_TICKS.find(f => /poolDripFx/.test(String(f))); setShipNow(h * 60 + 10); tick(shipNow(), false);
+          out.drip = j.drip === shipNow(); const g1 = ixJobStep(); out.goal2 = g1 ? [g1.deck, g1.place] : null;
+          const rd = x => { const r = traceMark(j.id, x); return r ? [x, flowWord(r.before), flowWord(r.after), !!j.traceFound] : [x, null]; };
+          out.reads = [rd('7-pool-heat'), rd('7-pool-filter-2'), rd(id)]; out.kept = (j.read || []).length;
+          jobStops(j).forEach((x, k) => jobStepDone(j.id, k)); out.fin = finishJob(j.id); out.cond = SHIP.machines[id].cond; out.closed = j.status === 'done';
+          poolDripFx(); out.dry = !POOL_FX.wet && !poolDripJob();
+          SHIP.works = null; goToDeck(home); player.steer = null; player.stop();
+          window.__sc("if (window.__evTr[0]) eventNow = window.__evTr[0]; if (window.__evTr[1]) eventMod = window.__evTr[1]");
+          JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t0);
+          return out;
+        })()"""
+        pl = g.ev(PL); pl2 = g.ev(PL)
+        want = [['7-pool-heat', 'low', 'low', False], ['7-pool-filter-2', 'full', 'low', False], ['7-pool-filter-1', 'full', 'low', True]]
+        print(f"Pool leak (0.84.5): line on {pl['on']}, day {pl.get('day')}, cause {pl.get('cause')}, symptom {pl.get('symptom')}, card '{pl.get('card')}' (shows the machine {pl.get('showsMachine')}), openJobs {pl.get('open')}; goal {pl.get('goal')}, puddle {pl.get('puddle')}, drip seen {pl.get('drip')}, then {pl.get('goal2')}; readings {pl.get('reads')}; fixed {pl.get('fin')} ({pl.get('cond')}), closed {pl.get('closed')}, dry {pl.get('dry')}; the same twice {pl == pl2}")
+        if (not pl['on'] or pl.get('cause') != 'seal' or not pl.get('symptom') or pl['symptom'].get('line') != 'pool' or pl['symptom'].get('deck') != 5 or 'Deck 5' not in (pl.get('card') or '')
+            or 'drip' not in (pl.get('card') or '') or pl.get('showsMachine') or pl.get('open') != [5, None, None] or not pl.get('claim') or pl.get('goal') != [5, '5-aisle-2'] or not pl.get('puddle')
+            or not pl.get('drip') or not pl.get('goal2') or pl['goal2'][0] != 7 or pl['goal2'][1] != '7-pool-heat-svc' or pl.get('reads') != want or pl.get('kept') != 3
+            or not pl.get('fin') or (pl.get('cond') or 0) < 90 or not pl.get('closed') or not pl.get('dry') or pl != pl2):
+            fail('the pool leak')
+    else:
+        print('Pool leak (0.84.5): no Deck 7 machines in this build (the rec deck is dormant): skipped')
 
     # 6. the save
     rt = g.ev("""(() => {
