@@ -166,3 +166,18 @@
 - Your uniform's grubby. Change at your wardrobe.
 == uniform.wait
 - While you wait: service {machine}
+
+// ---- Playtest 2 (item 1, head writer W2): the first round is a job on the board; the goal arrow and these green
+// tips walk you round, one per stop (seats E1 and U). Tips, 200 characters at most; {machine} the machine's name.
+== tip.round.take
+- Your first round is on the job board. Take it, and follow the arrow.
+== tip.round.go
+- Walk to {machine}. Follow the arrow.
+== tip.round.look
+- Look at {machine}. Listen to it. Then mark what you see.
+== tip.round.mark
+- Mark it: fine, worn, or something's off. Trust your eyes.
+== tip.round.next
+- Next one. Follow the arrow.
+== tip.round.done
+- Round done. Turn it in at the job board.

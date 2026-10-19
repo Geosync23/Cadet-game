@@ -1,0 +1,13 @@
+@bank all
+// Playtest 2 (items 15 and 20, head writer W2): your place in a queue (seat U shows it; X keeps the queue). TEXTS.
+// {nth} is "2nd", "3rd".
+== queue.booth
+- You're {nth} in line for a booth.
+== queue.shower
+- You're {nth} in line for the showers.
+== queue.next
+- You're next.
+== queue.go
+- Your turn.
+== queue.left
+- You left the line.

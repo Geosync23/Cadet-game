@@ -186,7 +186,7 @@ with sync_playwright() as pw:
       out.bands = [0, 7, 8, 17, 18, 29, 30, 39, 40, 90].map(x => { W.xp = x; return worksBand(); });
       W.rank = 'officer'; W.xp = 0; out.officer = worksBandWord(); W.rank = 'junior';
       out.words = [0, 4, 5, 14, 15].map(n => { W.sk.oven = n; return skillWord('oven'); });
-      out.give = toolGive('scanner'); out.again = toolGive('scanner'); out.has = hasTool('scanner'); W.tr.m7 = 5; for (let k = 0; k < 10; k++) worksUse('m7'); out.wear = toolWear('scanner');
+      out.give = toolGive('scanner'); out.again = toolGive('scanner'); out.has = hasTool('scanner'); W.tr.m7 = 5; for (let k = 0; k < 10; k++) worksUse('m7'); out.useWear = toolWear('scanner'); (W.op[99] = W.op[99] || []).push('m11'); for (let k = 0; k < 10; k++) toolWear('scanner', 2); delete W.op[99]; out.wear = toolWear('scanner');   // M11 (0.45.7): a use doesn't wear the scanner, a scan does (toolWear(id, n of 100))
       W.xp = 10; simNote('shiftMissed', { day: 2 }); out.missed = W.xp; simNote('jobAbandoned', { machine: null, id: 'x' }); out.aband = W.xp; W.xp = 1; simNote('shiftMissed', { day: 3 }); out.floor = W.xp;
       out.before = (() => { SHIP.works = null; setShipNow(1000); return worksInit(); })();
       SHIP.works = null; return out; })()""")
@@ -194,7 +194,7 @@ with sync_playwright() as pw:
     check(e['bands'] == ['new', 'new', 'steady', 'steady', 'reliable', 'reliable', 'trusted', 'trusted', 'relied', 'relied'], f"bands {e['bands']}")
     check(e['officer'] == 'New officer', 'after a promotion the band reads "New officer"')
     check(e['words'] == ['new to you', 'new to you', 'getting the hang of these', 'getting the hang of these', 'you know these well'], f"skill words {e['words']}")
-    check(e['give'] and not e['again'] and e['has'] and abs(e['wear'] - .2) < 1e-9, 'tools: given once, worn by use')
+    check(e['give'] and not e['again'] and e['has'] and e.get('useWear') == 0 and abs(e['wear'] - .2) < 1e-9, 'tools: given once, worn by its scans (toolWear), not again by worksUse')
     check(e['missed'] == 7 and e['aband'] == 5 and e['floor'] == 0, 'a missed shift -3, an abandoned job -2, never below 0')
     check(e['before'] is None, 'SHIP.works made before Day 1\'s shift ended')
 
