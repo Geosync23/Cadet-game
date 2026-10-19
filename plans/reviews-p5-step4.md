@@ -20,6 +20,17 @@ Lines skimmed. In a fresh archive content_gen bakes 9342 lines; lines_check PASS
 
 ## Step 4
 
+### E2 claude/mech-incidents 67144486 (0.51.11, E2's final: R5's fixes on 0.51.7-0.51.9), R5: PASS WITH FIXES (one, for E5)
+Diff 3014b864..67144486. E2 has retired; successor E5 (session_01QsZymCraDjLzVDooLvigNk).
+- Rewiring: a seeded wire order per job (key 1016, `j.order`, older jobs fall back to chart order) and the right terminal is the wire's chart position (rewRight), so the chart must be read; one faded colour (lead 17); the extra worksSideXp gone; junk j.pairs/j.wrongs defaulted; rewBoxes skips a junction with an open job.
+- Favour cases: FC_TIER = 3 (friend, lead 17); 'fcase' in WORKS_SIDE_KINDS; the side job is finished (jobFinish) when solved, no board turn-in; an accepted favour's expiry is pushed out 14 days (no lapse mid-case) and a lapse closes its side job.
+- Tickets: a wrong call is a fitted call that didn't fix it (`c.fits > 0 && !j.workDone`), so notepad crosses and "talk it through" no longer count; flag ticket.solved set in ffGrade; the toast split in two (Calder's line, then the pin).
+- Leak +1 in total and the worn-joint chore's J.xp = 0: settled by E1's 0.45.11 turn-in (side kinds flat, j.xp === 0 skipped).
+- **Fix (open): the pin still never shows.** ffPin still needs `playerRigRebuild`, which no branch defines; lead 17 ~06:05 made it E2's (now E5's). Build it (rebuild the player's rig from PLAYER_SPEC, disposing the old meshes, no R()) and a check that the pin appears after ffGrade(1) and survives a reload.
+- **Cross-seat (E1's to fix, see E1's verdict): rewiring's right-first-time +1 is now paid by nobody.** The m15 page says +1, +1 more right first time; E2 rightly dropped its own payment (lead 17: right-first-time stays with E1's turn-in), but E1's 0.45.11 made side-kind turn-ins flat, so j.rightFirst is ignored for 'rewire'.
+- Note: the wire-order draws use indices k*8+10+i under key 1016, which overlap the next day's chart draws (k+1)*8+2+i: correlated, harmless.
+- Checks on 67144486: queued (and on a merge with E1, for the side save part).
+
 ### W2 claude/writer-p5 0e8571a (0.48.116, ticket.nohint for E2), R5: PASS
 Same words as E2's fallback in caseHint. Bakes 9560 lines; lines_check PASS. W2's tip.
 
