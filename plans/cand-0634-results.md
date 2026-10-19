@@ -89,3 +89,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - ~06:39 E6 910131e (0.45.15: the Thursday stocktake, job kind 'stocktake' in 24d); with R5. Load-stop fix still to come.
 - t9 done: mech, career, machine OK, lines PASS, cadet ALL IDENTICAL (renderer noise only). All passed tips together are green on the quick set.
 - ~06:40 R5 PASS E6 910131e (stocktake; E6's tip).
+- trial t10 (wt4) = 2bc08d5 + E6 910131e + E5 60a418f + E3 d51c5ed + W2 0e8571a (all passed tips): same hand merges, same 6 explained; NAMES OK (3181), parses, bake 9560 / 48. Checks running: mech, career, machine, cadet, food.
