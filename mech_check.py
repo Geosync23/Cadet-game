@@ -693,6 +693,49 @@ def part_m15(g):
     check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'm15: differs the second time')
 PARTS['m15'] = part_m15
 
+# ---- favour cases (24l, seat E2 on H's behalf; not a ladder row, so it runs after the rows as EXTRA['fcase']): every
+# script has three clue places and its answer (sus.1) among the options; a friend asks (Mail, an offered favour) on the
+# week's evening; accepted, the side job: the clues before the call, a wrong pick refused (never a fail), the right one
+# gives the fix its place; fixed and handed back, done; another not taken lapses in 3 days, no harm; the same twice
+EXTRA = {}
+FC = r"""(() => { const out = {}, W0 = JSON.stringify(SHIP.works), R0 = JSON.stringify(SHIP.rel || {});
+ const reset = t => { machinesNew(); SHIP.jobs = []; SHIP.mail = []; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t); machinesNow(); SHIP.works = null; const W = worksInit(t); W.tier = 2; W.rank = 'officer'; W.tr.t2 = 10; delete worksSide().fcOk; worksSide().favours = []; W.inc = { plan: {}, open: null }; return W; };
+ const tick = (a, b) => { for (let t = a; t <= b; t += 10) { setShipNow(t); machinesNow(); for (const f of WORK_TICKS) f(t, false); } };
+ out.scripts = FC_IDS.map(c => { const j = { fcase: c, bed: schedPeople().find(p => p.bed && placeById(p.bed)).bed, order: [3, 1, 2], from: 'calder' }, S = fcStops(j);
+   return [c, S.length, S.slice(0, 3).every(x => x.how === 'look' && placeById(x.placeId)), S[3].how, S[3].opts.options.map(o => o.id).includes('sus1')]; });
+ const friends = schedPeople().filter(p => p.bed && placeById(p.bed)).sort((a, b) => (a.id < b.id ? -1 : 1)).slice(0, 6);
+ for (const p of friends) { const r = relGet(p.id); r.pts = Math.max(r.pts, REL_TIERS[2]); r.tier = Math.max(r.tier, 2); }
+ let W = reset(14 * 1440 + 300); const w = incWeek(15), P = fcPlan(w); out.plan = P && [P.d, P.at];
+ tick(14 * 1440 + 360, (P.d - 1) * 1440 + P.at + 10);
+ let e = worksSide().favours[0]; out.asked = e ? [e.case, e.state, e.day, !!SHIP.mail.length] : null; if (!e) return out;
+ let F = favourById(e.id); out.offered = [F.status, F.stops[0].placeId]; out.accept = favourAccept(e.id);
+ tick(shipNow() + 10, shipNow() + 20); let j = SHIP.jobs.find(x => x.kind === 'fcase'); out.side = j ? [j.claimedBy, j.status, jobStops(j).map(s => s.step + ':' + s.how + ':' + (s.places[0] ? 'P' : '-'))] : null; if (!j) return out;
+ out.early = jobStepDone(j.id, 3, { pick: 'sus1' }).ok;
+ for (let k = 0; k < 3; k++) jobStepDone(j.id, k, {});
+ out.wrong = jobStepDone(j.id, 3, { pick: 'sus2' }).ok; out.right = jobStepDone(j.id, 3, { pick: 'sus1' }).ok; out.sideDone = [j.workDone ? 1 : 0, turnInJob(j.id) || j.status];
+ F = favourById(e.id); out.fixPlace = F.stops[0].placeId; out.fix = jobStepDone(e.id, 0, {}).ok; out.turnin = favourTurnIn(e.id);
+ tick(shipNow() + 10, shipNow() + 20); out.state = worksSide().favours[0].state;
+ // another, never taken: lapses in 3 days
+ W = reset(21 * 1440 + 300); const w2 = incWeek(22), P2 = fcPlan(w2); tick(21 * 1440 + 360, (P2.d - 1) * 1440 + P2.at + 10);
+ const e2 = worksSide().favours[0]; tick(shipNow() + 10, shipNow() + 4 * 1440); out.lapse = e2 ? [e2.state, (favourById(e2.id) || { status: 'gone' }).status] : null;
+ worksSide().favours = [{ id: 'f1', who: 'calder', case: 'lamp', day: 15, state: 'weird' }, { id: 2 }, { id: 'f3', who: 'x', case: 'nope', day: 1 }]; delete worksSide().fcOk; out.save = JSON.stringify(fcList());
+ SHIP.works = JSON.parse(W0); SHIP.rel = JSON.parse(R0); return out; })()"""
+def extra_fcase(g):
+    a, b = g.ev(FC), g.ev(FC)
+    print('  fcase scripts', a['scripts'])
+    print('  fcase plan', a['plan'], 'asked', a.get('asked'), 'offered', a.get('offered'), 'side', a.get('side'), 'early', a.get('early'), 'wrong', a.get('wrong'), 'right', a.get('right'), a.get('sideDone'), 'fix', a.get('fixPlace'), a.get('fix'), a.get('turnin'), a.get('state'), 'lapse', a.get('lapse'))
+    check(all(x[1] == 4 and x[2] and x[3] == 'choose' and x[4] for x in a['scripts']), 'fcase: every script: three clue places, the answer among the options')
+    if not check(a.get('asked') and a['asked'][1] == 'asked' and a['asked'][3], 'fcase: a friend asks on the week\'s evening (Mail, an offered favour)'): return
+    check(a['offered'][0] == 'offered' and a['offered'][1] is None and a['accept'], 'fcase: offered; the fix has no place yet')
+    check(a['side'] and a['side'][0] == 'you' and a['side'][2][:3] == ['clue:look:P'] * 3, 'fcase: accepted, the side job with three clue places')
+    check(not a['early'] and not a['wrong'] and a['right'], 'fcase: the call after the clues; a wrong pick refused, the right one taken')
+    check(a['fixPlace'] and a['fix'] and a['turnin'] and a['state'] == 'done', 'fcase: the fix gets its place; fixed, handed back, done')
+    check(a['lapse'] and a['lapse'][0] == 'lapsed', 'fcase: not taken in 3 days, it lapses')
+    s = json.loads(a['save'])
+    check(len(s) == 1 and s[0]['state'] == 'asked', 'fcase: junk in the save cleaned')
+    check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'fcase: differs the second time')
+EXTRA['fcase'] = extra_fcase
+
 only = set(sys.argv[2:])
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
@@ -719,6 +762,8 @@ with sync_playwright() as pw:
         check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), f"{r['id']}: the training differs the second time")
         if r['id'] in PARTS:
             PARTS[r['id']](g)
+    for k, f in EXTRA.items():                             # parts that aren't ladder rows (24l's favour cases)
+        if (not only or k in only) and ev(f"!!JOB_KINDS['{k}']"): print(k + ':'); f(g)
     ev("SHIP.works = null")
     if g.errors: fail('page errors: ' + ' | '.join(g.errors[:5]))
     g.close()

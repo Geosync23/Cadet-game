@@ -281,7 +281,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.51.7
+   STARSHIP CADET: CSV Wren                           build 0.51.8
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8694,7 +8694,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.51.7';                           // keep in step with the header's build line
+const GAME_BUILD = '0.51.8';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -41859,6 +41859,116 @@ if (typeof teamJobPost === 'function') WORK_MECH.m8 = {
   watch: 0,
   oneJob: true,                                          // the teacher leads the same job you're in (no teacher's job first)
 };
+
+// ---------------------------------------------------------------------
+// 24l FAVOUR CASES (Pillar 5 Step 4, seat E2 on H's behalf; plans/mechanics/favour-cases.html: scripted cases on the
+// favours system, D3 de012aa, not the case engine). From Day 13, an Officer's, off shift: about once a week a crew
+// friend (friendly or better) brings you a little mystery of their own, at an evening minute (18:00-21:00): their Mail
+// (mail.favour.<id>) and their open favour in the chat card (section 17's favourPost: offered, never on the board; the
+// chat's "help" accepts it). Accepted: a side job (the 'fcase' kind, beside your board job) in and around their cabin:
+// three clues (a look each: favour.<id>.clue.1-3, at their bed, or the junction, the laundry or the scrubber the clue
+// is about), then "What's causing it?" (a choose from sus.1-3, shuffled; a wrong pick: "Not that.", pick again, never
+// a fail). Solved (favour.<id>.solved): the favour's own stop (the fix, a hold at their bed) gets its place, then hand
+// it back in the chat card as any favour (friendship, reputation). Not taken in 3 days, they ask someone else
+// (favour.lapse, no harm). The six scripts are FAVOUR_CASES (W2's lines); sus.1 is always the answer. Saved:
+// SHIP.works.side.favours = [{ id, who, case, day, state }] (the last 12; state: asked, taken, solved, done, lapsed),
+// cleaned on read; the side job in ship.jobs. Hash keys 1019 (who asks), 1020 (which case), 1021 (which evening). No R().
+const FAVOUR_CASES = {                                    // where each clue is looked at (bed: their cabin)
+  lamp: ['bed', 'bed', 'junction'], cold: ['bed', 'bed', 'bed'], squeak: ['bed', 'bed', 'bed'],
+  shower: ['bed', 'bed', 'laundry'], clock: ['bed', 'bed', 'bed'], speaker: ['bed', 'scrubber', 'bed'] };
+const FC_IDS = Object.keys(FAVOUR_CASES), FC_FROM = 13, FC_EVE = [1080, 1260], FC_KEEP = 12, FC_DAYS = 3, FC_FIX = 10;
+function fcList() {                                      // side.favours, cleaned (a save may hold junk)
+  const s = typeof worksSide === 'function' ? worksSide() : null; if (!s) return null;
+  if (!Array.isArray(s.favours) || !s.fcOk) {
+    s.favours = (Array.isArray(s.favours) ? s.favours : []).filter(e => e && typeof e.id === 'string' && typeof e.who === 'string' && FC_IDS.includes(e.case) && Number.isInteger(e.day))
+      .slice(-FC_KEEP).map(e => ({ id: e.id.slice(0, 80), who: e.who.slice(0, 40), case: e.case, day: e.day, state: ['asked', 'taken', 'solved', 'done', 'lapsed'].includes(e.state) ? e.state : 'asked' }));
+    Object.defineProperty(s, 'fcOk', { value: true, enumerable: false, configurable: true });
+  }
+  return s.favours;
+}
+const fcSeed = () => machSeed('favourcase');
+const fcText = (c, k, fb) => worksText('favour.' + c + '.' + k, fb);
+// the week's ask: an evening of week w (any day from Day 13), a friend with a cabin, a case not done yet (else any)
+function fcPlan(w) {
+  const seed = fcSeed(), d = Math.max(FC_FROM, w * 7 + 1 + Math.floor(schedU(seed, w, 1021) * 7) % 7);
+  if (incWeek(d) !== w) return null;
+  const at = FC_EVE[0] + Math.floor(schedU(seed, w * 7 + 1, 1021) * ((FC_EVE[1] - FC_EVE[0]) / 10)) * 10;
+  return { d, at };
+}
+function fcWho(w) {
+  let ps = []; try { ps = schedPeople().filter(p => p.bed && placeById(p.bed) && relTier(p.id) >= 2 && !(typeof favoursOf === 'function' && favoursOf(p.id).length)).sort((a, b) => (a.id < b.id ? -1 : 1)); } catch (e) { return null; }
+  return ps.length ? ps[Math.floor(schedU(fcSeed(), w, 1019) * ps.length) % ps.length] : null;
+}
+function fcCase(w) {
+  const L = fcList() || [], left = FC_IDS.filter(c => !L.some(e => e.case === c && e.state === 'done')), from = left.length ? left : FC_IDS;
+  return from[Math.floor(schedU(fcSeed(), w, 1020) * from.length) % from.length];
+}
+// a clue's place: their bed, or the deck's junction panel, the laundry's washer, the scrubber (else their bed)
+function fcPlace(where, bed) {
+  const B = placeById(bed), pp = id => machineById(id) ? panelPlace(id) : null;
+  const P = where === 'junction' ? (B && machineList().filter(m => /junction/.test(m.id) && m.deck === B.deck).map(m => panelPlace(m.id)).find(Boolean))
+    : where === 'laundry' ? pp('4-washer-1') : where === 'scrubber' ? pp('4-scrubber-1') : null;
+  return P && placeById(P) ? P : bed;
+}
+function fcAsk(w, t) {
+  const L = fcList(), p = fcWho(w); if (!L || !p || typeof favourPost !== 'function') return null;
+  const c = fcCase(w), B = placeById(p.bed);
+  const fid = favourPost({ from: p.id, title: fcText(c, 'title', 'A favour'), stops: [{ deck: B.deck, placeId: null, mins: FC_FIX, tag: 'fcase' }], expires: t + FC_DAYS * 1440 });
+  const F = fid && favourById(fid); if (!F) return null;
+  F.fcase = c;
+  L.push({ id: fid, who: p.id, case: c, day: worksDay(t), state: 'asked' }); if (L.length > FC_KEEP) L.splice(0, L.length - FC_KEEP);
+  const mail = worksText('mail.favour.' + c, 'A favour | ' + fcText(c, 'ask', 'Could you take a look at something for me?')), cut = mail.indexOf(' | ');
+  if (typeof mailSend === 'function') mailSend({ at: t, from: worksName(p.id), subject: cut > 0 ? mail.slice(0, cut) : 'A favour', body: cut > 0 ? mail.slice(cut + 3) : mail });
+  simNote('favourCase', { id: fid, case: c, from: p.id, step: 'ask' });
+  return fid;
+}
+// the side job (made when you accept): three clue looks, then the choose
+function fcStops(j) {
+  const S = FAVOUR_CASES[j.fcase], B = placeById(j.bed); if (!S || !B) return [];
+  const opts = (j.order || [1, 2, 3]).map(n => ({ id: 'sus' + n, label: fcText(j.fcase, 'sus.' + n, 'sus ' + n) }));
+  return [...S.map((where, k) => { const pl = fcPlace(where, j.bed), P = placeById(pl); return { deck: P.deck, placeId: pl, mins: 1, tag: 'clue', how: 'look', opts: { secs: 3, text: fcText(j.fcase, 'clue.' + (k + 1), '...') } }; }),
+    { deck: B.deck, placeId: j.bed, mins: 1, tag: 'call', how: 'choose', opts: { title: worksText('favour.call', 'What\'s causing it?'), text: fcText(j.fcase, 'title', ''), options: opts } }];
+}
+function fcStepDone(j, k, res, t) {
+  const st = fcStops(j)[k]; if (!st || st.tag !== 'call') return true;
+  if (![0, 1, 2].every(i => (j.stepsDone || []).includes(i))) return false;   // the clues first
+  if (!res || res.pick !== 'sus1') { j.wrong = (j.wrong || 0) + 1; try { toast(fcText(j.fcase, 'title', 'A favour'), worksText('favour.not', 'Not that. Look again.')); } catch (e) { /* no UI */ } return false; }
+  return true;
+}
+function fcDone(j, t, by) {
+  const F = typeof favourById === 'function' ? favourById(j.favour) : null, e = (fcList() || []).find(x => x.id === j.favour);
+  if (F && F.stops[0]) { F.stops[0].placeId = j.bed; if (typeof MACH_REV !== 'undefined') MACH_REV++; }   // the fix can be done now
+  if (e) e.state = 'solved';
+  try { toast(fcText(j.fcase, 'title', 'A favour'), fcText(j.fcase, 'solved', 'That\'s it.')); } catch (err) { /* no UI */ }
+  simNote('favourCase', { id: j.favour, case: j.fcase, from: j.from, step: 'solved', wrong: j.wrong || 0 });
+}
+if (typeof jobKindAdd === 'function') jobKindAdd('fcase', { tier: 1, work: 0, text: 'Favour', side: true, stops: fcStops, stepDone: fcStepDone, done: fcDone, veto: true, crew: { can: () => false, mins: 30 } });
+// the clock: the week's ask at its evening minute (an Officer, Day 13 on); an accepted favour gets its side job (yours at
+// once, the suspects shuffled by its id); a fixed and handed-back favour is done; one that lapsed, they ask someone else
+if (JOB_KINDS.fcase) WORK_TICKS.push((now, skip) => {
+  const W = SHIP.works, L = W && fcList(); if (!L || W.rank === 'junior') return;
+  const d = worksDay(now), m = now - (d - 1) * 1440, w = incWeek(d);
+  for (const e of L) {
+    if (e.state === 'done' || e.state === 'lapsed') continue;
+    const F = typeof favourById === 'function' ? favourById(e.id) : null;
+    if (!F || (F.status === 'done' && F.doneBy !== 'you')) {
+      e.state = 'lapsed';
+      if (!skip) try { toast(worksName(e.who), worksText('favour.lapse', '{name} asked someone else. No harm done.', { name: worksFirst(e.who) })); } catch (err) { /* no UI */ }
+      continue;
+    }
+    if (F.status === 'done') { e.state = 'done'; continue; }
+    if (e.state === 'asked' && F.status === 'claimed' && F.claimedBy === 'you' && !SHIP.jobs.some(x => x.kind === 'fcase' && x.favour === e.id)) {
+      const P = typeof schedPeople === 'function' ? schedPeople().find(p => p.id === e.who) : null; if (!P) continue;
+      const order = [1, 2, 3].map(n => [schedU(machSeed(e.id), n, 1020), n]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
+      const j = jobMake('fcase', { id: 'fcase:' + e.id, deck: placeById(P.bed).deck, h: Math.floor(now / 60), title: fcText(e.case, 'title', 'A favour'), fcase: e.case, favour: e.id, from: e.who, bed: P.bed, order });
+      j.posted = j.found = now; j.claimedBy = 'you'; j.status = 'claimed'; j.start = now; SHIP.jobs.push(j); e.state = 'taken';
+      if (typeof MACH_REV !== 'undefined') MACH_REV++;
+    }
+  }
+  if (d < FC_FROM || L.some(e => incWeek(e.day) === w)) return;
+  const P = fcPlan(w); if (!P || P.d !== d || m < P.at || m > FC_EVE[1]) return;
+  fcAsk(w, now);
+});
 
 // ---------------------------------------------------------------------
 // 24o LEAK HUNTING (M13, seat E2 (M2's), 0.51.x; plans/mechanics/m13-leak-hunting.html). A side job from Day 12, an
