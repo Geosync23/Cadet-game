@@ -14305,7 +14305,7 @@ addEventListener('resize', trkPlace); setTimeout(trkPlace, 0);
 // added to each ship meter the job helped"). The board's turnIn calls turnInShow(job, before) after its toast, which gets
 // a row of chips: reputation first (gold), then each ship meter ("+4 Power"). What it shows comes from the job:
 // j.gains = { rep: [{ dept, name?, add }], meters: [{ sys, name?, add, now? }] }, filled by whoever applies a gain (C2 the
-// rep, S2 the meters; at the repair or at the turn-in). Missing either list, a before/after look round turnInJob
+// rep); the meters come from S2's j.meters = [{ key, name, gain }] (0.33.57, set when the work is done) when j.gains has none. Missing either list, a before/after look round turnInJob
 // (turnInSnap: SHIP.rep's departments, shipHealthRows' systems) fills it in. Words: the head writer's works.turnin.repN
 // ({n} {dept}) or works.turnin.rep, works.turnin.meter ({n} {system}), meter.<sys>. Nothing saved; the job keeps j.gains.
 function turnInSnap() {
@@ -14318,6 +14318,7 @@ const tgDept = d => (typeof DEPT_NAME !== 'undefined' && DEPT_NAME[d]) || String
 function turnInGains(j, a) {
   const g = j && j.gains, T = (k, fb, ctx) => { let t = null; try { t = careerText(k); } catch (e) { t = null; } t = t || fb; for (const c in ctx || {}) t = t.split('{' + c + '}').join(ctx[c]); return t; };
   let reps = g && Array.isArray(g.rep) ? g.rep : null, mets = g && Array.isArray(g.meters) ? g.meters : null;
+  if (!mets && j && Array.isArray(j.meters)) mets = j.meters.map(m => m && ({ sys: m.key, fb: m.name, add: m.gain }));   // S2's (0.33.57): set when the work is done
   if (a && (!reps || !mets)) {
     const b = turnInSnap();
     if (!reps) reps = Object.keys(b.rep).filter(d => isFinite(a.rep[d]) && b.rep[d] - a.rep[d] >= .5).map(d => ({ dept: d, add: Math.round(b.rep[d] - a.rep[d]) }));
@@ -14326,7 +14327,7 @@ function turnInGains(j, a) {
   const out = [];
   for (const r of reps || []) { if (!r || !(r.add > 0) && r.add !== undefined) continue; const dn = r.name || tgDept(r.dept);
     out.push({ rep: true, text: r.add ? T('works.turnin.repN', '{dept} reputation +{n}', { n: Math.round(r.add), dept: dn }) : T('works.turnin.rep', 'Works reputation up') }); }
-  for (const m of mets || []) { if (!m || !(m.add >= .5)) continue; const nm = m.name || T('meter.' + m.sys, (typeof SYSTEM_NAME !== 'undefined' && SYSTEM_NAME[m.sys]) || String(m.sys));
+  for (const m of mets || []) { if (!m || !(m.add >= .5)) continue; const nm = m.name || T('meter.' + m.sys, m.fb || (typeof SYSTEM_NAME !== 'undefined' && SYSTEM_NAME[m.sys]) || String(m.sys));
     out.push({ rep: false, text: T('works.turnin.meter', '+{n} {system}', { n: Math.round(m.add), system: nm }) }); }
   return out;
 }
