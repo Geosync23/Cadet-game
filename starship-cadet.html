@@ -269,7 +269,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.44.18
+   STARSHIP CADET: CSV Wren                           build 0.44.19
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8614,7 +8614,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.44.18';                           // keep in step with the header's build line
+const GAME_BUILD = '0.44.19';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -33741,9 +33741,10 @@ const BRIDGE_LOCK = { deck: 1, room: 'B', behind: ['R'], standIn: 15, near: 1.3 
 SHIP.bridgeInvited = (() => { const s = SAVED && SAVED.ship; return !!(s && s.bridgeInvited === true) || !!(s && s.flags && s.flags['bridge.invited']); })();
 SAVE_EXTRA.push(s => { s.ship.bridgeInvited = !!SHIP.bridgeInvited; });
 const bridgeInviteReady = d => (SHIP.eventLog || []).some(e => e.endDay < d) || (!EVENT_ORDER.some(id => SHIP_EVENTS[id]) && d >= BRIDGE_LOCK.standIn);
-function bridgeBarred(e) {                               // is this door shut to you? (a door or hatch into the bridge, not yet invited: the
-  // crawl's hatch up by the Works station too, or the relay room and the crawl would be a way round)
-  if (SHIP.bridgeInvited || !e || (e.type !== 'door' && e.type !== 'hatch') || typeof deckDef === 'undefined' || deckDef.num !== BRIDGE_LOCK.deck) return false;
+function bridgeBarred(e) {                               // is this door shut to you? A door or hatch into the bridge while you're not invited
+  // (SHIP.bridgeInvited is false only once this section has set it at load), the crawl's hatch up by the Works station
+  // too, or the relay room and the crawl would be a way round
+  if (SHIP.bridgeInvited !== false || !e || (e.type !== 'door' && e.type !== 'hatch') || typeof deckDef === 'undefined' || deckDef.num !== BRIDGE_LOCK.deck) return false;
   const rs = edgeTiles(e.key).map(c => roomAt(...c)); if (!rs.includes(BRIDGE_LOCK.room) || rs.every(r => r === BRIDGE_LOCK.room)) return false;
   try { if (roomAt(...player.here()) === BRIDGE_LOCK.room) return false; } catch (x) { /* no player yet */ }   // already in there (an old save, a summons that ran over): never shut in
   return ![BRIDGE_LOCK.room, ...BRIDGE_LOCK.behind].some(r => doorOpenFor(r, 'player'));
@@ -38354,7 +38355,7 @@ const WORK_TOOLS = {
 };
 // your Works reputation in your rank: five words; numbers stay inside. Tier 1 is tuned by career_check (a steady
 // player reaches "Relied on" by the end of Day 8, a very busy one not before Day 5); later tiers get theirs on their steps' pages
-const WORK_BANDS = { 1: [[0, 'new'], [8, 'steady'], [18, 'reliable'], [30, 'trusted'], [40, 'relied']] };   // the page's; with section 17's real faults in (0.44.10): steady 45-48 by the end of Day 8, a very busy player 35 at the end of Day 4
+const WORK_BANDS = { 1: [[0, 'new'], [8, 'steady'], [18, 'reliable'], [30, 'trusted'], [40, 'relied']], 2: [[0, 'new'], [12, 'steady'], [28, 'reliable'], [45, 'trusted'], [60, 'relied']] };   // 2: provisional (0.44.19, C2: about a dozen steady workdays to "Relied on" as an officer) until Step 4's page sets it   // the page's; with section 17's real faults in (0.44.10): steady 45-48 by the end of Day 8, a very busy player 35 at the end of Day 4
 const BAND_WORD = { new: 'New', steady: 'Steady', reliable: 'Reliable', trusted: 'Trusted', relied: 'Relied on' };
 const WORK_XP = { service: 1, repair: 2, overhaul: 3, missed: -3, abandoned: -2 };
 const WORKS_RIGHT_FROM = 5;                              // "right first time" counts from Day 5 (the scanner)
@@ -38603,6 +38604,7 @@ function worksEscortEnd(id) {
 onSim('caseCalled', n => { const c = SHIP.works && SHIP.works.cur; if (n && n.train && c && c.hold) worksEscortEnd(c.id); });   // 24k: the training case is called
 // the teacher's walk (section 14's escortPlanOf asks): lead you to the training job while you watch, follow you while you do one
 function worksEscort(p, t) {
+  { const pe = p && typeof promoEscort === 'function' ? promoEscort(p, t) : null; if (pe) return pe; }   // 24p: Calder comes to find you for the summons
   const W = SHIP.works, c = W && W.cur; if (!c || !p || p.id !== c.by || (c.st !== 'watch' && c.st !== 'do' && c.st !== 'held') || worksDay(t) !== c.d) return null;
   const j = SHIP.jobs.find(x => x.id === c.j), spot = trainSpot(j);
   if (c.st === 'held') return spot ? { mode: 'follow', to: { deck: spot.deck, tile: spot.tile } } : null;   // they stay with you
@@ -40097,6 +40099,89 @@ onSim('job', n => {                                      // Calder's word at eac
   worksTeach('t2', c.by, key, { take: 'Right. Your job; I\'m only watching.', done: 'That\'s it settled. Turn it in at the board.' }[n.step] || null);
 });
 WORK_TICKS.push((now, skip) => { promoAnnounce(now); promoDelay(now); });
+// Part 2, the summons and the promotion (0.44.19): the first workday after the test is passed (one Calder is on shift),
+// an appointment in her office at 11:00 (OCCASIONS.promoSummons, booked at 06:00), an urgent toast at 10:30 with the goal
+// arrow and Torres's nudge; not in the Works bay by 11:15 and she comes to find you (worksEscort 'follow') and says it
+// where you are. The scene (MEETING_SCRIPTS['promo.officer'], the writer's; a stand-in here): she tells you you've
+// passed, the badge and the pip, one reply of three that she remembers (flag promo.reply: 1 proud, 2 surprised, 3 about
+// time). At its end, or by 12:00 whatever happens (asleep, a day off: her words by Mail), you're promoted: Tier 2,
+// rank officer, xp 0 ("New officer"), simNote('promoted', { tier: 2, rank: 'officer' }), done 'summons2', ms
+// ['officer', day]. promoPlan() says, from the save alone, when each step is (for the sim's gathering at the board
+// 11:10-11:25, and the move and the ceremony to come): the crew side is the sim engineer's.
+Object.assign(PROMO, { summonsAt: 660, warnAt: 630, seekAt: 675, latest: 720, gather: [670, 685], by: ['calder', 'vance'] });
+OCCASIONS.promoSummons = { title: 'The Chief\'s office', kind: 'summons', by: 'calder', deck: 5, room: 'o', at: PROMO.summonsAt, len: 30, script: 'promo.officer', due: () => false, mail: null };
+const promoDone = k => !!(SHIP.works && SHIP.works.done.includes(k));
+function promoSummonsDay() {                             // the first workday after the test with Calder on shift (Vance if she's away a week)
+  const W = SHIP.works; if (!W || !W.test || !W.test.passed) return null;
+  for (let d = W.test.day + 1, n = 0; n < 14; d++, n++) if (playerShiftOn(d) && (n >= 7 || occOnShift('calder', d))) return d;
+  return null;
+}
+function promoPlan() {                                   // pure, from the save: { summons, gather, move, ceremony } as { day, at } (or null)
+  const W = SHIP.works, sd = promoSummonsDay(); if (!W || !sd) return null;
+  const ms = d => (W.ms.find(x => x[0] === d) || [])[1];
+  const od = ms('officer') || sd;
+  return { summons: { day: sd, at: PROMO.summonsAt }, gather: { day: od, from: PROMO.gather[0], to: PROMO.gather[1] }, move: { day: od, at: DAY_SHIFT[1] }, ceremony: { day: od + 1, at: 1035 }, done: W.done.slice() };
+}
+function promoScript() {                                 // the writer's scene, or a stand-in; either way our hooks on it
+  if (!MEETING_SCRIPTS['promo.officer']) MEETING_SCRIPTS['promo.officer'] = { title: 'The Chief\'s office', from: 'Chief Ines Calder', stub: true,
+    gist: 'Chief Calder: you passed your test job. You\'re a Works Officer now, Technician, Tier 2. Your badge and your pip are with Torres.',
+    lines: [
+      { who: 'calder', text: 'Sit down. You passed. The scrubber, the filter, the fan: all of it.', to: 'you' },
+      { who: 'calder', text: 'So. Technician\'s badge. And this is your Officer\'s pip. Collar, left side.', pose: 'gesture' },
+      { choice: [
+        { text: 'Thank you, Chief. I won\'t let you down.', reply: { who: 'calder', text: 'I know. That\'s why you\'ve got it.' } },
+        { text: 'Me? Already?', reply: { who: 'calder', text: 'Already. Don\'t make me explain it twice.' } },
+        { text: 'About time.', reply: { who: 'calder', text: 'Ha. Don\'t push your luck, Officer.' } },
+      ] },
+      { who: 'calder', text: 'The bay\'s waiting for you. Go on.' },
+    ] };
+  const sc = MEETING_SCRIPTS['promo.officer'];
+  if (!sc.promoHooked) { const pick = sc.onPick, end = sc.onEnd; sc.promoHooked = true;
+    sc.onPick = (k, c) => { if (typeof flagSet === 'function') flagSet('promo.reply', k + 1); if (pick) pick(k, c); };
+    sc.onEnd = finished => { if (end) end(finished); promoPromote(shipNow(), finished ? 'met' : 'left'); }; }
+  return sc;
+}
+if (SHIP.occasions.some(r => r.id === 'promoSummons')) promoScript();   // a reload with the summons booked
+function promoPromote(now, how) {                        // you're an officer
+  const W = SHIP.works; if (!W || W.tier !== 1 || !W.test || !W.test.passed) return false;
+  const d = worksDay(now), r = SHIP.occasions.find(x => x.id === 'promoSummons' && x.status === 'asked'); if (r) r.met = true;
+  W.tier = 2; W.rank = 'officer'; W.xp = 0;
+  if (!W.done.includes('summons2')) W.done.push('summons2'); if (!W.ms.some(x => x[0] === 'officer')) W.ms.push(['officer', d]);
+  if (how === 'mail' && typeof mailSend === 'function') { const t = worksText('promo.mail', 'You\'re an officer | You passed your test job: you\'re a Works Officer now, Technician, Tier 2. Your badge and pip are waiting in my office. Well done. — C.'), i = t.indexOf(' | ');
+    mailSend({ at: now, from: 'Chief Ines Calder', subject: i > 0 ? t.slice(0, i) : 'You\'re an officer', body: i > 0 ? t.slice(i + 3) : t }); }
+  if (typeof newsAdd === 'function') try { newsAdd({ id: 'promo.officer', about: 'you', lines: [worksText('promo.news', '{me}\'s been made a Works Officer. Calder says it was about time.')], seed: ['dept:works'], kind: 'gossip' }); } catch (e) { /* no social */ }
+  if (typeof mailSend === 'function') { const t = worksText('promo.captain', 'Congratulations | Chief Calder tells me you\'ve passed your Tier 2 test. Congratulations, Officer. I look forward to the ceremony. — O. Marrow'), i = t.indexOf(' | ');
+    mailSend({ at: now + 30, from: 'Captain Odile Marrow', subject: i > 0 ? t.slice(0, i) : 'Congratulations', body: i > 0 ? t.slice(i + 3) : t, quiet: true }); }
+  if (typeof MACH_REV !== 'undefined') MACH_REV++;       // the board: Tier 2 jobs for you now, junior ones no longer held (forYou)
+  simNote('promoted', { tier: 2, rank: 'officer', how });
+  return true;
+}
+function promoSummonsTick(now) {                         // book it, warn at 10:30, find you at 11:15, promote by 12:00
+  const W = SHIP.works; if (!W || W.tier !== 1 || !W.test || !W.test.passed) return;
+  const sd = promoSummonsDay(), d = worksDay(now), m = now - (d - 1) * 1440; if (!sd || d < sd) return;
+  let r = SHIP.occasions.find(x => x.id === 'promoSummons');
+  if (!r && d === sd && m < PROMO.latest) { promoScript(); r = occasionAdd('promoSummons', (d - 1) * 1440 + PROMO.summonsAt, true, 30); }
+  if (d > sd || m >= PROMO.latest || (r && r.status === 'missed')) { promoPromote(now, 'mail'); return; }   // never missed: by noon it's done
+  if (!r) return;
+  const f = r.f || (r.f = {});
+  if (m >= PROMO.warnAt && !f.warn && now >= shipNow() - 1) { f.warn = 1;
+    const text = worksText('promo.summons', 'Chief Calder: My office, 11:00. — C.');
+    if (typeof deviceNotify === 'function') try { deviceNotify({ app: 'calendar', text, urgent: true }); } catch (e) { /* no device */ }
+    try { toast('Chief Calder', text); } catch (e) { /* no UI */ }
+    if (typeof setGoal === 'function') setGoal({ deck: 5, room: 'o', label: 'The Chief\'s office, 11:00' });
+    if (promoInBay()) promoSay('torres-zeke', 'summons.torres', 'Go on. She doesn\'t bite. Usually.'); }
+  if (m >= PROMO.seekAt && !f.seek && !r.met && !promoInBay() && !(typeof DIALOGUE !== 'undefined' && DIALOGUE)) f.seek = now;   // 11:15: she comes to you
+}
+function promoSeekTick(now) {                            // she's found you: the scene where you are
+  const r = SHIP.occasions.find(x => x.id === 'promoSummons' && x.status === 'asked'); if (!r || !r.f || !r.f.seek || r.met || (typeof DIALOGUE !== 'undefined' && DIALOGUE)) return;
+  try { const a = DECK_CREW.find(x => x.p && x.p.id === r.by), p = player.obj.position;
+    if (a && Math.hypot(a.x - p.x, a.z - p.z) < 2.2) { promoScript(); r.met = true; dialogueShow('promo.officer', { id: r.key, who: [r.by], at: now }); } } catch (e) { /* not in play */ }
+}
+function promoEscort(p, t) {                             // worksEscort's 24p part: Calder walking over to find you
+  const r = SHIP.occasions.find(x => x.id === 'promoSummons' && x.status === 'asked');
+  return r && r.f && r.f.seek && !r.met && p.id === r.by && t < r.at + r.len ? { mode: 'follow', to: null } : null;
+}
+WORK_TICKS.push((now, skip) => { promoSummonsTick(now); if (!skip) promoSeekTick(now); });
 
 
 // =====================================================================

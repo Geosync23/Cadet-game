@@ -276,7 +276,7 @@ with sync_playwright() as pw:
     print('(i) The Tier 2 test job (24p, Step 3):')
     if not ev("typeof promoPassed === 'function'"): print('  not in this build')
     else:
-        tr = ev(f"({PAPER})({{ plan: 'steady', days: 10, t2: 'real' }})")
+        tr = ev(f"({PAPER})({{ plan: 'steady', days: 9, t2: 'real' }})")
         print('   steady:', tr['promo'], tr['test'], tr['testJob'], 'Mail', [m for m in tr['mail'] if 'test' in m.lower()])
         check(tr['test'] and tr['test']['passed'] and tr['test']['day'] == 9 and tr['test']['tries'] == 1, f"steady: the test job passed on Day 9, first try: {tr['test']}")
         check(any(p[0] == 'set' and p[1] == 8 for p in tr['promo']), f"steady: told \"tomorrow, your test job\" on Day 8: {tr['promo']}")
@@ -287,6 +287,31 @@ with sync_playwright() as pw:
         dl = [p for p in lt['promo'] if p[0] == 'delayed']
         check(dl and dl[0][1] == 9 and dl[0][2] == 11 and lt['test']['passed'] and lt['test']['tries'] == 2 and lt['test']['day'] == 11, f"late: the test left on Day 9 is set again two workdays on (Day 11) and passed then: {lt['promo']}, {lt['test']}")
         check(all(p[1] >= 9 for p in lt['promo'] if p[0] == 'start'), 'a test job before Day 9')
+
+    print('(j) The summons and the promotion (24p):')
+    if not ev("typeof promoPromote === 'function'"): print('  not in this build')
+    else:
+        SUM = PAPER.replace("      const W = SHIP.works, c = W && W.cur;\n", """      { const r = SHIP.occasions.find(x => x.id === 'promoSummons' && x.status === 'asked');   // the summons: there at 11:00 (t2: 'real'), or not ('away')
+        if (r && t >= r.at && t < r.at + r.len && t2 === 'real' && !r.met) { r.met = true; const sc = MEETING_SCRIPTS['promo.officer']; sc.onPick(2, {}); sc.onEnd(true); }
+        if (r && t2 === 'away') for (let m = 0; m < 60; m += 5) worksCareerTick(t + m); }
+      const W = SHIP.works, c = W && W.cur;\n""")
+        def run(mode, days):
+            return ev(f"""(() => {{ window.__xpAt = null; const st = onSim('promoted', () => {{ window.__xpAt = [SHIP.works.xp, worksBandWord()]; }}); const out = ({SUM})({{ plan: 'steady', days: {days}, t2: '{mode}' }});
+              out.rank = [SHIP.works.tier, SHIP.works.rank, Math.round(SHIP.works.xp), worksBandWord ? worksBandWord() : null, playerTier(), playerRank()];
+              out.plan = promoPlan(); out.reply = flag('promo.reply'); out.promoted = simNotes('promoted').map(n => [Math.floor(n.t / 1440) + 1, hhmm(n.t % 1440), n.how]);
+              out.summ = SHIP.occasions.filter(r => r.id === 'promoSummons').map(r => [Math.floor(r.at / 1440) + 1, hhmm(r.at % 1440), r.status, !!(r.f && r.f.warn), r.f && r.f.seek ? hhmm(r.f.seek % 1440) : null]);
+              out.juniorHeld = forYou({{ urgency: 0, kind: 'haul', junior: true, tier: 1 }}); out.mailC = SHIP.mail.filter(m => /Calder|Marrow/.test(m.from)).map(m => m.subject);
+              out.xpAt = window.__xpAt; st(); return out; }})()""")
+        sm = run('real', 11)
+        print('   there:', sm['summ'], sm['promoted'], sm['rank'], 'reply', sm['reply'], sm['plan'])
+        check(sm['summ'] and sm['summ'][0][:2] == [10, '11:00'] and sm['summ'][0][3], f"the summons: Day 10 at 11:00 in Calder's office, warned at 10:30: {sm['summ']}")
+        check(sm['promoted'] and sm['promoted'][0][0] == 10 and sm['promoted'][0][2] == 'met' and len(sm['promoted']) == 1, f"promoted once, on Day 10 at the scene: {sm['promoted']}")
+        check(sm['rank'][:2] == [2, 'officer'] and sm['xpAt'] == [0, 'New officer'] and sm['rank'][4] == 2 and sm['rank'][5] == 'officer' and sm['reply'] == 3, f"Tier 2 officer, xp from 0 (New officer), the reply remembered: {sm['rank']}, {sm['xpAt']}, {sm['reply']}")
+        check(sm['works']['done'] == ['summons2'] and ['officer', 10] in sm['works']['ms'] and sm['plan']['move']['day'] == 10 and sm['plan']['ceremony']['day'] == 11, f"done and milestones, the plan: {sm['works']['done']}, {sm['works']['ms']}, {sm['plan']}")
+        check(not sm['juniorHeld'], 'a junior job is still held for you as an officer')
+        aw = run('away', 11)
+        print('   away:', aw['summ'], aw['promoted'], aw['mailC'])
+        check(aw['summ'] and aw['summ'][0][4] == '11:15' and aw['promoted'] and aw['promoted'][0][0] == 10 and aw['promoted'][0][2] == 'mail' and aw['rank'][1] == 'officer', f"away: Calder sets off to find you at 11:15; promoted by Mail the same day anyway: {aw['summ']}, {aw['promoted']}")
 
     print('(h) The bridge, by invitation (Step 3):')
     br = ev("""(() => {
