@@ -69,3 +69,13 @@
 | B build master | BM7 session_01QbuzvT3TwzMwSWRmakzX8Z (or successor) | claude/p5-cand-s4 | 0.64.0 | its own notes |
 | R reviewer | R5 session_01XJyHzg4QvX2nsdtf9zT1TH (or successor) | its review branch | — | this brief |
 | D3 designer (on call) | session_0115ZiGhf9s3oYtFdjs7TgYS | claude/p5-design | — | (wrote the traditions and mini-games pages) |
+
+## Lead 17's calls on the open questions (~06:55, overnight; all flagged for the user's morning review)
+1. First all-hands: no invented trigger. Film night stays where it is until ship-wide events exist; then it moves.
+2. Lightdisc Cup "enter with a friend": singles bracket; you and the friend both enter (no doubles). Flag for the user.
+3. Paddle club fast run and regatta heats: not gated now; they arrive with White water's integration.
+4. Wren talks: build the engine and ship the first 4 talks; the rest come later.
+5. Deck 7 machines do NOT join Step 4's rounds/logbook in this release (flag for the user).
+6. River width: keep the deck as built; the prototype and deck allow up to 2 crew kayaks beside you.
+7. Talent night Day 14: RA checks it against the career's busy days and moves it to the next free evening if it clashes.
+8. The plan page's Ring the bell mentions stay; this brief and design-doc win.
