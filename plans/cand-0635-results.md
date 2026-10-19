@@ -23,3 +23,4 @@ Merge clean, verify_merge 0, parses, NAMES OK, bake up to date. Re-runs of what 
 ## Final: ee9f9ed + X3 claude/crew-pt1 84fb217 (player_check only, R7 PASS; merged with git so only X3's two hunks came in, the base's 0.73.0 energy checks stay)
 - X3: PLAYER CHECK OK on 1e70683 + 6a4e153 + 84fb217's player_check (same game file).
 - BM8: player_check on the final (own CADET_WORK, TMO 2700): see the last line below.
+- BM8: PLAYER CHECK OK on the final (be3d7ee's game, own CADET_WORK, 1881 s). **0.63.5 ROUND GREEN**: every check OK.
