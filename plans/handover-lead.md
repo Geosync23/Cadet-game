@@ -684,3 +684,4 @@ Read: CLAUDE.md, TEAM.md (Lead line, "Released" and "Step 3" lines), plans/brief
 - ~00:05 events plan v4 published by D2 (claude/p5-design 563dc35, artifact 5fAouaAV1K1qptqPYez9rt v4); user notified. Rec sign 'wrong side of the lift' fix (0.82.8) asked of the rec deck owner.
 - ~00:07 rec deck 0.82.8 (claude/lightdisc-proto 0ef4c46, sign on the lift's stern side) published to the Rec Dec Preview v5 without waiting for checks (the user's call); checks still running with the rec deck owner.
 - ~00:08 D2: events plan marked approved + design-doc 'Ship-wide events' updated (claude/p5-design 71fe06b, artifact v5). D2 standing by. Waiting on the user's GO for Step 3.
+- 00:54 check-in: all 13 seats idle, none ≥60% (DA5 57, D2 55, rec owner 54); 0.63.2r (lightdisc-proto 7734894) checks running since ~00:18; lead 15 low memory.
