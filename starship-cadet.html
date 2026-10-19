@@ -269,7 +269,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.44.23
+   STARSHIP CADET: CSV Wren                           build 0.44.24
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8682,7 +8682,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.44.23';                           // keep in step with the header's build line
+const GAME_BUILD = '0.44.24';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -38773,7 +38773,7 @@ function worksNext() {
 function worksRecordHead() {                             // null before SHIP.works (Days 0-1 keep the Record's old line)
   const W = SHIP.works; if (!W) return null; const tier = W.tier, v = { title: worksText('works.title.t' + tier, 'tier ' + tier), rank: worksRankTitle(W), band: worksBandWord(), next: worksNext() };
   const com = (W.ms.find(x => x[0] === 'commissioned') || [])[1];   // 24p: the ceremony
-  return { kind: 'text', mark: 'hot', text: worksText('works.record', '{rank}, {title}. Works reputation: {band}. What\'s next: {next}', v) + (com ? ' ' + worksText('works.record.commissioned', 'Commissioned Officer, Day {day}.', { day: com }) : '') };
+  return { kind: 'text', mark: 'hot', text: worksText('works.record', '{rank}, {title}. Works reputation: {band}. What\'s next: {next}', v) + (com ? ' ' + worksText('works.ms.commissioned', 'Commissioned Officer, Day {n}.', { n: com }) : '') };
 }
 // ---- the device's Works app: Training, Work log, Tools; other sections add tabs with worksTabAdd (24k: Fault notes and
 // the Chief's notes): worksTabAdd({ id, title, order, view() -> [blocks], act?(verb, arg), badge?() -> number }); the
@@ -40148,7 +40148,7 @@ WORK_MECH.t2 = {
   offer(row, c, d, t) {                                  // the test, on its day: the job held for you, Calder with you
     const W = SHIP.works; if (!W || !W.test || W.test.passed || d < W.test.day) return false;
     const m = t - (d - 1) * 1440; if (m >= PROMO.until - 60) return false;
-    let id = null; try { id = jobReserve(promoMachine(), d, Math.max(m, PROMO.jobAt), PROMO.slot, { tier: 2, train: 't2', until: (d - 1) * 1440 + PROMO.until, cause: 'filter' }); } catch (e) { id = null; }
+    let id = null; try { id = jobReserve(promoMachine(), d, Math.max(m, PROMO.jobAt), PROMO.slot, { tier: 2, train: 't2', until: (d - 1) * 1440 + PROMO.until, cause: 'filter', drift: 2 }); } catch (e) { id = null; }
     if (!id) return false;
     c.st = 'do'; c.j = id; c.occ = null; c.told = true; W.test.tries++; W.test.day = d;
     const j = SHIP.jobs.find(x => x.id === id); if (j) j.train = 't2';
@@ -40182,6 +40182,9 @@ const dayName = d => { try { return ['Monday', 'Tuesday', 'Wednesday', 'Thursday
 onSim('job', n => {                                      // Calder's word at each step of the test
   const c = SHIP.works && SHIP.works.cur; if (!n || !c || c.id !== 't2' || c.st !== 'do' || n.id !== c.j) return;
   const key = n.step === 'stop' ? 'step.' + (n.tag || 'stop') : 'step.' + n.step;
+  if (n.step === 'stop' && n.tag === 'job') { const j = SHIP.jobs.find(x => x.id === c.j);   // the filter in: then the fan's setting (S2's drift +2), settled as part of the job
+    if (j && j.machine && typeof tuneSet === 'function') try { tuneSet(j.machine, 0); } catch (e) { /* no drift in this build */ }
+    worksTeach('t2', c.by, 'step.tune', 'Filter\'s in. Now settle the fan: bring the setting back to the middle. That\'s it.'); }
   worksTeach('t2', c.by, key, { take: 'Right. Your job; I\'m only watching.', done: 'That\'s it settled. Turn it in at the board.' }[n.step] || null);
 });
 WORK_TICKS.push((now, skip) => { promoAnnounce(now); promoDelay(now); });
@@ -40275,9 +40278,23 @@ function promoEscort(p, t) {                             // worksEscort's 24p pa
   return r && r.f && r.f.seek && !r.met && p.id === r.by && t < r.at + r.len ? { mode: 'follow', to: null } : null;
 }
 WORK_TICKS.push((now, skip) => { promoSummonsTick(now); if (!skip) promoSeekTick(now); });
+// Brennan's cake (the lead's: part of the promotion): on the promotion's day, 16:30-17:00 at the Works tea corner, before
+// Calder's walk to your cabin. Brennan stands there with it (the sim engineer's crewScene, if it's in the build); a toast
+// tells you, and coming within 3 m of her plays her lines (flag promo.cake, once). Optional: nothing waits on it.
+Object.assign(PROMO, { cake: [990, 1020], cakeAt: '5-tea-3' });
+function promoCakeTick(now) {
+  const W = SHIP.works, od = W && (W.ms.find(x => x[0] === 'officer') || [])[1]; if (!od || promoDone('cake2')) return;
+  const d = worksDay(now), m = now - (d - 1) * 1440; if (d > od || (d === od && m >= PROMO.cake[1])) { W.done.push('cake2'); return; }
+  if (d < od || m < PROMO.cake[0]) return;
+  if (!W.cake) { W.cake = 1; if (typeof crewScene === 'function') try { crewScene('brennan', { mode: 'wait', to: PROMO.cakeAt, until: (d - 1) * 1440 + PROMO.cake[1], hold: 'tray' }); } catch (e) { /* no scene */ }
+    try { toast('Chef Auda Brennan', worksText('promo.cake.toast', 'There\'s cake at the Works tea corner. Your cake, Officer.')); } catch (e) { /* no UI */ } }
+  try { const a = DECK_CREW.find(x => x.p && x.p.id === 'brennan'), p = player.obj.position;
+    if (a && Math.hypot(a.x - p.x, a.z - p.z) < 3) { W.done.push('cake2'); worksSayAll('brennan', worksVoice('brennan', 'promo.cake') || ['Lemon, because Calder said you liked it. Don\'t tell her I asked.']); } } catch (e) { /* not in play */ }
+}
+WORK_TICKS.push((now, skip) => { if (!skip) promoCakeTick(now); });
 // Part 3, the move to 4-23 (0.44.20): on the promotion's day at 17:00 (up to 30 minutes later if you're mid-job) Calder,
 // or Commander Vance if she's off, walks you from wherever you are to cabin 4-23 at the quiet end of the officers' corridor
-// (worksEscort 'lead' to Deck 4's spare W), talking about officers' ways as you go (promo.walk). It's yours when you get
+// (worksEscort 'lead' to Deck 4's spare W), talking about officers' ways as you go (promo.walk.*). It's yours when you get
 // there, or at 17:30 at the latest whatever happens (her lines by Mail if you're asleep or away): SHIP.works.home =
 // '4-23', done 'move2', simNote('moved', { home }) (Tomas and Pell with your box at the door, and his goodbye: the sim engineer's, on
 // simNote('moveStart')). From then the cabin's door opens for you
@@ -40303,20 +40320,24 @@ function promoMoveTick(now) {
     if (myJob() && m < DAY_SHIFT[1] + PROMO.moveWait) return;   // mid-job: she waits a while
     W.mv = { by: promoMoveBy(), at: Math.floor(now), s: [] };
     if (!promoInBay()) promoWalkSay('promo.fetch.move', 'There you are. Come on: your cabin.');
-    promoWalkSay('promo.walk', worksText('promo.walk', 'Right, Officer. Your cabin. Follow me.'), ['Your own door now. Quiet hours after eleven; people knock, they don\'t walk in.', 'And when someone says "come over", they mean it.']);   // her lines in order (W2's flag promo.walk)
+    promoWalkSay('promo.walk.start', 'Right, Officer. Your cabin. Follow me.');
     simNote('moveStart', { by: W.mv.by });   // the sim engineer's box carry (Tomas and Pell at 4-23's door)
     if (typeof setGoal === 'function') setGoal({ deck: PROMO.homeRoom.deck, room: PROMO.homeRoom.room, label: 'Your cabin, ' + PROMO.home });
   }
-  try { if (deckDef.num === PROMO.homeRoom.deck && roomAt(...player.here()) === PROMO.homeRoom.room) promoMoved(now, 'walked'); } catch (e) { /* not in play */ }
+  try { const rm = roomAt(...player.here()), n = deckDef.num, M = PROMO.homeRoom, bed = typeof PLACE_OF !== 'undefined' && PLACE_OF.get(PROMO.home), [c, r] = player.here();   // her lines along the way (W2's promo.walk.*)
+    if (rm === '@') promoWalkSay('promo.walk.lift', 'Officers\' corridor\'s on Four, the far side from the bunks.');
+    if (n === M.deck && rm !== M.room && ROOMS[rm] && ROOMS[rm].hall) promoWalkSay('promo.walk.corridor', 'Quiet hours after eleven up here. People knock; they don\'t walk in.');
+    if (n === M.deck && bed && Math.hypot(c - bed.at[0], r - bed.at[1]) < 5) promoWalkSay('promo.walk.door', 'Your door. Your name\'s on it.');
+    if (n === M.deck && rm === M.room) { promoWalkSay('promo.walk.inside', 'And when someone says "come over", they mean it. Goodnight, Officer.'); promoMoved(now, 'walked'); } } catch (e) { /* not in play */ }
 }
-function promoWalkSay(flagKey, fallback, more) {         // her lines under a flag once (her VOICE lines, else the stand-ins)
+function promoWalkSay(flagKey, fallback) {               // each of her walk lines once (her VOICE lines under that flag, else the stand-in)
   const W = SHIP.works, m = W && W.mv; if (!m || m.s.includes(flagKey)) return; m.s.push(flagKey);
-  worksSayAll(m.by, worksVoice(m.by, flagKey) || [fallback].concat(more || []));
+  worksSayAll(m.by, worksVoice(m.by, flagKey) || [fallback]);
 }
 function promoMoved(now, how) {                          // 4-23 is yours
   const W = SHIP.works; if (!W || promoDone('move2')) return false;
   W.home = PROMO.home; W.done.push('move2'); const by = (W.mv && W.mv.by) || promoMoveBy(); delete W.mv;
-  if (how !== 'walked' && typeof mailSend === 'function') { const t = worksText('promo.move.mail', 'Your cabin | Cabin 4-23 is yours from tonight: your things are in, your name\'s on the door. Officers\' corridor, the quiet end. — C.'), i = t.indexOf(' | ');
+  if (how !== 'walked' && typeof mailSend === 'function') { const t = worksText('mail.promo.move', 'Your cabin | Cabin 4-23 is yours from tonight: your things are in, your name\'s on the door. Officers\' corridor, the quiet end. — C.'), i = t.indexOf(' | ');
     mailSend({ at: now, from: worksName(by), subject: i > 0 ? t.slice(0, i) : 'Your cabin', body: i > 0 ? t.slice(i + 3) : t }); }
   simNote('moved', { home: W.home, how, t: now });
   return true;
@@ -40369,8 +40390,8 @@ function promoCommission(now, how) {                     // commissioned: once
   const W = SHIP.works; if (!W || W.tier < 2 || promoDone('ceremony2')) return false;
   const d = worksDay(now), r = SHIP.occasions.find(x => x.id === 'promoCeremony' && x.status === 'asked'); if (r) r.met = true;
   W.done.push('ceremony2'); if (!W.ms.some(x => x[0] === 'commissioned')) W.ms.push(['commissioned', d]);
-  if (typeof giftKeepsake === 'function') try { giftKeepsake({ id: 'marrow' }, worksText('promo.keepsake', 'your framed commission')); } catch (e) { /* no social */ }
-  if (how === 'mail' && typeof mailSend === 'function') { const t = worksText('promo.ceremony.mail', 'Your commission | We missed you in the observation room. Your commission is signed all the same, and framed on your shelf. Congratulations, Officer. — O. Marrow'), i = t.indexOf(' | ');
+  if (typeof giftKeepsake === 'function') try { giftKeepsake({ id: 'marrow' }, worksText('works.keepsake.commission', 'your framed commission')); } catch (e) { /* no social */ }
+  if (how === 'mail' && typeof mailSend === 'function') { const t = worksText('mail.promo.ceremony', 'Your commission | We missed you in the observation room. Your commission is signed all the same, and framed on your shelf. Congratulations, Officer. — O. Marrow'), i = t.indexOf(' | ');
     mailSend({ at: now, from: 'Captain Odile Marrow', subject: i > 0 ? t.slice(0, i) : 'Your commission', body: i > 0 ? t.slice(i + 3) : t }); }
   promoPip();
   simNote('commissioned', { day: d, how });
