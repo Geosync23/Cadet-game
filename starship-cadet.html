@@ -281,7 +281,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.45.17
+   STARSHIP CADET: CSV Wren                           build 0.45.18
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8694,7 +8694,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.45.17';                           // keep in step with the header's build line
+const GAME_BUILD = '0.45.18';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -39980,8 +39980,8 @@ if (typeof jobKindAdd === 'function') WORK_MECH.m1 = {
 // round.last.never; SHIP.works.side.round.last = { machine id: ship day }, kept by your marks); you pick 4 to 6 (j.pick,
 // then j.route in walking order; refused before 4: the day's route stays). Two or more worn ones found on a round of
 // yours: Torres's round.two and +1 through worksSideXp. Stage 3 (the scanner: stage 2 and 5 rounds): at a room's first
-// machine one look reads every machine of the route in that room (round.doorway, each marked as it is, the unhealthy
-// found by you; their stops done), for one scan's charge (toolWear('scanner', 4)). The training round is neither
+// machine one look reads every machine in that room (round.doorway; the route's marked as they are, their stops done;
+// the room's others too, 0.45.18; the unhealthy found by you), for one scan's charge (toolWear('scanner', 4)). The training round is neither
 const roundLast = () => { const S = worksSide(); if (!S) return {}; const r = S.round && typeof S.round === 'object' && !Array.isArray(S.round) ? S.round : (S.round = {}); return r.last && typeof r.last === 'object' && !Array.isArray(r.last) ? r.last : (r.last = {}); };
 const roundPicks = () => !!SHIP.works && worksStage('m1') >= 1;
 const roundDoorway = () => !!SHIP.works && worksStage('m1') >= 2 && (SHIP.works.use.m1 || 0) >= 5 && typeof toolState === 'function' && !!toolState('scanner');
@@ -40016,13 +40016,19 @@ if (WORK_MECH.m1) WORK_TICKS.push((now, skip) => {
 function roundDoor(j, k, said) {
   const id = (j.route || [])[k], m = id && machineById(id); if (!m || j.reserved || j.train || !roundDoorway()) return said;
   const done = new Set(j.stepsDone || []), ks = j.route.map((x, i) => i).filter(i => i !== k && !done.has(i) && !(j.marks || {})[j.route[i]] && machineById(j.route[i]) && machineById(j.route[i]).deck === m.deck && machineById(j.route[i]).room === m.room);
-  if (!ks.length) return said;
-  const out = said ? [said] : [];
+  const off = roundPool(m.deck).filter(x => x.room === m.room && !j.route.includes(x.id)).map(x => x.id).sort();   // the room's machines off the route: read too (the page: "every machine in it"; lead 17, 0.45.18)
+  if (!ks.length && !off.length) return said;
+  const out = said ? [said] : [], pickOf = x => { const st = roundState(x); return st === 'healthy' ? 'fine' : st === 'worn' ? 'worn' : 'off'; };
+  const line = (x, pick) => roundText('round.doorway', 'From the doorway: {machine}, {word}.', { machine: machineLabel(machineById(x)).split(',')[0], word: roundText('round.mark.' + pick, ROUND_MARKS.find(r => r[0] === pick)[1]).toLowerCase() });
   for (const i of ks) {
-    const x = j.route[i], st = roundState(x), pick = st === 'healthy' ? 'fine' : st === 'worn' ? 'worn' : 'off', f = roundMark(j, i, pick);
+    const x = j.route[i], pick = pickOf(x), f = roundMark(j, i, pick);
     (j.res || (j.res = {}))[i] = { pick, door: true }; done.add(i);
-    out.push(roundText('round.doorway', 'From the doorway: {machine}, {word}.', { machine: machineLabel(machineById(x)).split(',')[0], word: roundText('round.mark.' + pick, ROUND_MARKS.find(r => r[0] === pick)[1]).toLowerCase() }));
-    if (f) out.push(f);
+    out.push(line(x, pick)); if (f) out.push(f);
+  }
+  for (const x of off) {                                 // no stop of the round's: read, last looked, the unhealthy found by you
+    const pick = pickOf(x); out.push(line(x, pick)); roundLast()[x] = worksDay(shipNow());
+    const f = pick !== 'fine' ? roundFound(x, 'you') : null;
+    if (f && f.fresh) { worksXp(1); out.push(roundText('round.found', 'Found by you: {machine}.', { machine: machineLabel(machineById(x)).split(',')[0] })); }
   }
   j.stepsDone = [...done].sort((a, b) => a - b); toolWear('scanner', 4);
   return out.join(' ');

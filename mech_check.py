@@ -659,10 +659,10 @@ ROUND23 = r"""(() => {
   toolGive('scanner'); W.tr.m7 = 5; out.door = [roundDoorway()];
   setShipNow(12 * 1440 + 430); machinesNow(); const room = machineList().filter(m => m.deck === 4 && m.kind === 'washer' && panelPlace(m.id)).map(m => m.id).sort();
   for (const id in SHIP.machines) { const x = SHIP.machines[id]; x.cond = 95; x.state = 'healthy'; }
-  SHIP.machines[room[1]].cond = 60; SHIP.machines[room[1]].state = machineState(60);
-  const j3 = roundJob(13, 420); j3.route = room.concat(j3.route.filter(id => !room.includes(id)).slice(0, 1)); j3.stops = kindStops(j3).map(plainStop); j3.picked = true; claim(j3);
+  for (const k of [1, 3]) { SHIP.machines[room[k]].cond = 60; SHIP.machines[room[k]].state = machineState(60); }   // room[3]: off the route, read from the doorway too (0.45.18)
+  const j3 = roundJob(13, 420); j3.route = room.slice(0, 3).concat(j3.route.filter(id => !room.includes(id)).slice(0, 1)); j3.stops = kindStops(j3).map(plainStop); j3.picked = true; claim(j3);
   const c0 = toolCharge('scanner'), r3 = jobStepDone(j3.id, 0, { pick: 'fine' });
-  out.door.push(room.length, r3.say || '', (j3.stepsDone || []).slice(), c0 - toolCharge('scanner'), (SHIP.jobs.find(x => x.machine === room[1] && x.status !== 'done') || {}).foundBy || null);
+  out.door.push(room.length, r3.say || '', (j3.stepsDone || []).slice(), c0 - toolCharge('scanner'), (SHIP.jobs.find(x => x.machine === room[1] && x.status !== 'done') || {}).foundBy || null, (SHIP.jobs.find(x => x.machine === room[3] && x.status !== 'done') || {}).foundBy || null);
   // the training round: no doorway
   const jt = roundJob(13, 430, { train: 'm1', yours: true, slot: 1 }); jt.route = room.slice(); jt.stops = kindStops(jt).map(plainStop); claim(jt); jobStepDone(jt.id, 0, { pick: 'fine' }); out.train = (jt.stepsDone || []).slice();
   out.saved = JSON.stringify(worksClean(JSON.parse(JSON.stringify(W))).side.round) === JSON.stringify(W.side.round);
@@ -676,7 +676,7 @@ def part_round23(g):
     check(a['route'] == [4, True, True, 4, True, True], f"round23: your four picks are the route, in walking order ({a['route']})")
     check(a['two'][0] and a['two'][1] == ['round1'] and a['two'][2] == 4, f"round23: two worn found: +1; last looked kept ({a['two']})")
     d = a['door']
-    check(d[0] and d[1] >= 3 and d[2].count('From the doorway') == d[1] - 1 and ', worn.' in d[2] and d[3] == list(range(d[1])) and d[4] == 4 and d[5] == 'you', f"round23: one look reads the room, its worn one found by you, one scan's charge ({d})")
+    check(d[0] and d[1] == 4 and d[2].count('From the doorway') == 3 and d[2].count(', worn.') == 2 and d[3] == [0, 1, 2] and d[4] == 4 and d[5] == 'you' and d[6] == 'you', f"round23: one look reads every machine in the room (two on the route, one off it), the worn ones found by you, one scan's charge ({d})")
     check(a['train'] == [0], f"round23: the training round has no doorway ({a['train']})")
     check(a['saved'], 'round23: side.round kept by the save')
     check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'round23: differs the second time')
