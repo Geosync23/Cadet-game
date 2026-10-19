@@ -59,3 +59,7 @@ Session: session_013LcEsgjMTDMMeiACKLj2bB. Lead: lead 14 (session_01RHtJv7GJDi4q
 - Lightdisc chat lines: `LD_TALK` holds stand-ins until the writers' `disc.<kind>` lines arrive.
 - Held sideways (landscape), the game view is a little far.
 - The court's gate leaves stay as DA6 left them.
+- Lead 16, 2026-10-19 (for the rec deck phase, after Step 4):
+  - The user agreed the rec traditions: the final plan is on `claude/p5-design` 421ac2b, the artifact is https://claude.ai/artifact/4f8hTNDsaF9CdSiCMgy6xF, and design-doc has a "Rec dec traditions" section.
+  - Ring the bell is RETIRED; Wall night keeps the bell board. The regatta's Sundays stand alone.
+  - The user's new goal: each rec sport except floating becomes a mini-game like Lightdisc, reusing the Lightdisc kit. That plan is in progress: https://claude.ai/artifact/Ubn2MJvidnuK1awcx2gKMP.
