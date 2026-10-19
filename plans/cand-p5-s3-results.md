@@ -60,3 +60,4 @@ Build master 6 (BM6, session_01F8k6hqdBRoxDJMzqAuiHqR) on claude/p5-cand-pt1 (th
 - final: day1, day2 OK. Runner s3 (session_01BSoMPjdgarCRc6bS5D1bmH): events, device, clothes, interactions OK.
 - final, runner s3: food, deck, tiles, join, smoke, newgame, arc, bubble, path OK; leave FAIL 'the reputation chip: None, once: False'. Placed: 0.63.2r + S2 + C2 f553607 OK; + U 1d602ff FAIL; U alone OK: leave_check (C2's) wants '+ Works reputation', U's turn-in shows 'Works reputation up'. Sent to C2 and U. Mine: day3, day4 OK.
 - runner s3 DONE on 7a6e137: 14/15 OK (disc OK), 1 FAIL = leave (log plans/cand-0633-runner.md on claude/check-runner-s3 454a5fc). Lead 16: the leave fix goes to U (C2 archived); when it passes R4, rebuild the final with it and rerun leave, interactions, cadet.
+- final: days 5, 6 OK; player OK (1885 s). intro --week queued alone after days 7-8.
