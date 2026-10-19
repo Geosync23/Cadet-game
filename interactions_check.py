@@ -438,5 +438,72 @@ with sync_playwright() as pw:
         check(not g.errors, f'no console errors ({g.errors[:3]})')
     g.close()
 
+# playtest 2 (HUD U, 0.72.5+): the first night's call-home arrow over the bunk arrow (item 3); Day 1's time clock arrow
+# from 08:50 in the Works bay, then the job board's (6, 7); the training-day device tip and Day 2's laundry tip (9, 19);
+# career warnings once a save like every other tip (17)
+with sync_playwright() as pw:
+    g = Game(pw, sys.argv[1], 390, 844); g.step(3)
+    if g.ev("typeof INTRO_CLOCK_AUTO !== 'undefined'"):
+        print('== playtest 2')
+        r = g.ev("""(() => { const I = SHIP.intro; I.on = true; I.ended = false; setShipNow(introAbs(0, 19 * 60));
+          I.done['call:track'] = I.done['call:tip'] = Math.floor(shipNow()); delete I.done['call:end'];
+          setGoal({ deck: 4, place: playerBed(), label: INTRO_BED_GOAL }); INTRO_UI.bed = true; INTRO_UI.arrowAt = 0;
+          introArrowTick(); const out = [IX_GOAL && IX_GOAL.label]; I.done['call:end'] = Math.floor(shipNow()); clearGoal(); return out; })()""")
+        check(r[0] == g.ev("INTRO_ARROWS.call.label"), f'"Track it" on the first night: the call-home arrow takes over from the bunk arrow ({r})')
+        g.ev("goToDeck(5)"); g.step(5)
+        r = g.ev("""(() => { const I = SHIP.intro; for (const k of ['told:clock','arrow:clock','arrow:board','d1-opener','d1-briefing:met']) delete I.done[k];
+          const c = cellPos(...(() => { for (let j = 0; j < D; j++) for (let i = 0; i < W; i++) if (MAP[j][i] === 'w') return [i, j]; })()); player.obj.position.copy(c); player.stop();
+          const tick = m => { setShipNow(introAbs(1, m)); INTRO_UI.arrowAt = 0; introArrowTick(); return IX_GOAL && IX_GOAL.label; };
+          clearGoal(); const a = [tick(8 * 60 + 40), tick(8 * 60 + 51)]; careerClock(Math.floor(shipNow())); a.push(tick(8 * 60 + 52)); return a; })()""")
+        check(r[0] is None and r[1] == 'Clock in at the time clock' and r[2] == 'Take a job at the job board', f'Day 1 in the Works bay: no arrow at 08:40, the time clock at 08:51, the job board once clocked in ({r})')
+        r = g.ev("""(() => { const out = {}, D = SHIP.device; D.settings.tips = true; SHIP.intro.on = false; clearGoal();
+          const run = (day, min) => { setShipNow((day - 1) * 1440 + min); POP.busy = false; POP.toast = POP.tip = POP.card = POP.warn = -1e9; TEACH_CK = -1e9; TIP_Q.length = 0; if (DEV.open) deviceClose(); return teachTick(performance.now() + 1e7); };
+          for (const [id] of TEACH) D.tipsSeen[id] = true; delete D.tipsSeen['t:devwork']; delete D.tipsSeen['t:laund2'];
+          out.d1 = run(1, 10 * 60); out.d2 = run(2, 6 * 60 + 30); out.again = [run(1, 11 * 60), run(2, 7 * 60)];
+          delete D.tipsSeen['career.late']; TIP_Q.length = 0; out.ct = [careerTip('late'), (TIP_Q.length = 0, careerTip('late')), !!D.tipsSeen['career.late']];
+          return out; })()""")
+        check(r['d1'] == 't:devwork' and r['d2'] == 't:laund2' and r['again'] == [None, None], f'the training-day device tip and the Day 2 laundry tip, each once ({r})')
+        check(r['ct'][0] is not False and r['ct'][1] is False and r['ct'][2], f'a career warning shows once a save, saved like the other tips ({r["ct"]})')
+        if g.ev("typeof devDay === 'function' && typeof DECK_NAMES !== 'undefined'"):   # batch B (0.72.6): tea and the delivery on the Schedule, tea a little food, Deck 2's lift label
+            r = g.ev("""(() => { const k = d => devDay(d).filter(x => x.kind === 'tea' || x.kind === 'delivery').map(x => x.title + ' ' + hhmm(x.from) + (devItemGoal(x) ? '' : ' (no goal)'));
+              const wed = [1, 2, 3, 4, 5, 6, 7].find(d => weekday(d) === DELIVERY.day + deliveryLate(d)), sat = [1, 2, 3, 4, 5, 6, 7].find(d => !devShiftOn(d));
+              const A = { def: { mins: 6 }, o: {}, kind: 'ixTea' }; teaBegin(A);
+              return { wed: k(wed), sat: sat ? k(sat) : [], gain: A.def.gain, lift: DECK_NAMES[2] }; })()""")
+            check(any(t.startswith('Supply delivery') for t in r['wed']) and any(t.startswith('Tea and biscuits') for t in r['wed']) and not any('no goal' in t for t in r['wed']) and r['sat'] == [], f'the Schedule lists tea on shift days and the week\'s delivery, each with an arrow; none on a day off ({r})')
+            r2 = g.ev("""(() => { const t0 = (SHIP.time.day - 1) * 1440 + 19 * 60, P = DECKS[3].places.find(x => x.type === 'lounge-seat') || DECKS[3].places[0]; SHIP.device.calendarRemind.heard = []; HU_Q.length = 0;
+              SHIP.device.appts.push({ id: 9999, with: ['tomas'], at: t0 + 30, len: 30, where: P.id, kind: 'invite', status: 'asked', by: 'tomas' });
+              const at = m => { setShipNow(t0 + m); devTickMin = -1; deviceTick(); return HU_Q.filter(h => h.key === 'invite|9999').map(h => h.stage + (h.goal ? '+goal' : '')); };
+              const out = [at(16), at(31)]; SHIP.device.appts = SHIP.device.appts.filter(a => a.id !== 9999); return out; })()""")
+            check(r2 == [['soon+goal'], ['start+goal']], f'an invitation still waiting for your answer reminds you 15 minutes before and at its start (item 12) ({r2})')
+            check(r['gain'] <= 5 and r['lift'] == "Officers' quarters and science", f'tea and biscuits is only a little food; the lift says Officers\' quarters and science ({r["gain"]}, {r["lift"]})')
+        if g.ev("typeof DEV_BEATS !== 'undefined'"):   # 0.73.2 (U2, item 12 a): the arrival week's beats on the Schedule, with heads-ups and an arrow
+            r = g.ev("""(() => { const I = SHIP.intro, was = [I.on, I.ended]; I.on = true; I.ended = false; const out = [];
+              for (const d of [1, 2, 3]) for (const x of devDay(d)) if (x.kind === 'beat') { const g = devItemGoal(x), rooms = Object.values((DECKS[x.deck] || {}).rooms || {}).map(r => r.name);
+                out.push([d, hhmm(x.from), x.title, x.where, !!g && rooms.includes(x.room)]); }
+              const R = SHIP.device.calendarRemind, on = R.on; R.on = false; R.heard = R.heard.filter(k => !/^beat\|/.test(k)); HU_Q.length = 0;
+              const fl = SHIP.flags && SHIP.flags['intro.device']; flagSet('intro.device'); const b = INTRO_WEEK.find(x => x.id === 'd2-booths'); setShipNow(introAbs(2, b.at - 15)); devTickMin = -1; deviceTick(); if (!fl) delete SHIP.flags['intro.device'];
+              const hu = HU_Q.filter(h => /^beat\|/.test(h.key)).map(h => h.title + ' ' + h.stage + (h.goal ? '+goal' : '')); HU_Q.length = 0; R.on = on;
+              I.on = false; const off = devDay(2).filter(x => x.kind === 'beat').length; [I.on, I.ended] = was; return { out, hu, off }; })()""")
+            print('  the arrival week\'s beats [day, time, title, where, goal found]:', r['out'], '| heads-up:', r['hu'], '| intro over:', r['off'])
+            check(len(r['out']) == 4 and all(x[4] for x in r['out']) and r['off'] == 0, f'the briefing, the Chief\'s office, the booths and the store on the Schedule with a goal, only during the intro ({r})')
+            check(r['hu'] == ['Calling home soon+goal'], f'a beat gets its 15-minute heads-up with the arrow, even with heads-ups off ({r["hu"]})')
+        if g.ev("typeof roundGuide === 'function'"):   # 0.73.0 (U2, item 1): the first round's arrow and tips, on E1's roundTrainStep (a stand-in when it's missing)
+            r = g.ev("""(() => { const D = SHIP.device, real = typeof roundTrainStep === 'function' ? roundTrainStep : null; D.settings.tips = true; TIP_Q.length = 0; DEVICE_SKIN.tip(null); clearGoal(); RG_LAST = ''; RG_N = 0;
+              for (const k in D.tipsSeen) if (/^rg:/.test(k)) delete D.tipsSeen[k];
+              const seq = [{ step: 'take' }, { step: 'take' }, { step: 'go', machine: 'Washer 2' }, { step: 'look', machine: 'Washer 2' }, { step: 'mark', machine: 'Washer 2' }, { step: 'next', machine: 'Light relays 1' }, { step: 'look', machine: 'Light relays 1' }, { step: 'done' }, null];
+              const out = []; let k = 0; window.roundTrainStep = () => seq[k];
+              for (; k < seq.length; k++) { roundGuide(); out.push([IX_GOAL && IX_GOAL.label, TIP_Q.map(t => t.id).join(','), (TIP_Q[0] || {}).text || '']); }
+              setGoal({ deck: 3, room: 'M', label: 'Someone else' }); RG_LAST = 'take|'; k = 0; roundGuide(); roundGuide(); const other = IX_GOAL && IX_GOAL.label; clearGoal();
+              k = 2; RG_LAST = ''; RG_N = 0; roundGuide(); const again = TIP_Q.length; TIP_Q.length = 0; DEVICE_SKIN.tip(null);
+              if (real) window.roundTrainStep = real; else delete window.roundTrainStep; return { out, other, again }; })()""")
+            o = r['out']; print('  the first round, step by step [arrow, tips queued, tip]:'); [print('   ', x) for x in o]
+            check(o[0][0] == 'Take your first round at the job board' and o[0][1] == 'rg:take:0' and o[1][1] == 'rg:take:0', f'take: the arrow to the job board and its tip, once ({o[:2]})')
+            check(o[2][0] is None and o[2][1] == 'rg:go:0' and 'Washer 2' in o[2][2], f'go: the board arrow gives way to the job\'s, the tip names the machine and replaces the last ({o[2]})')
+            check([x[1] for x in o[3:8]] == ['rg:look:0', 'rg:mark:0', 'rg:next:1', 'rg:look:1', 'rg:done:0'] and o[8][1] == '', f'look, mark, next, look, done: one tip at a time, gone once it is turned in ({[x[1] for x in o]})')
+            check(r['other'] == 'Someone else', f'the board arrow is never put over another section\'s once the walk-through is under way ({r["other"]})')
+            check(r['again'] == 0, f'each round tip shows once a save ({r["again"]})')
+        check(not g.errors, f'no console errors ({g.errors[:3]})')
+    g.close()
+
 print('INTERACTIONS CHECK OK' if ok else 'INTERACTIONS CHECK FAILED')
 sys.exit(0 if ok else 1)
