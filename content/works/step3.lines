@@ -14,15 +14,29 @@
 - who saw what?
 
 // ---- the test job and the first promotion (C2)
-// Day 8: the Mail if you weren't at the board by 10:00 (Calder sends it)
-== works.ask.t2
+// C2's keys (worksText): Calder's words in the bay, Day 8
+== promo.announce
+- Tomorrow, your test job. Tier 2, a real one. I'll follow. I won't help. Sleep tonight.
+// ... by Mail, if you're not in the bay by 10:00 (Calder sends it)
+== promo.announce.mail
 - Your test job | Tomorrow, your test job. A real Tier 2 job. I'll be watching. Sleep.
-// delayed: another one in two work days
-== works.ask.t2.again
-- Another go | Another test job on {weekday}. Same rules. Get a few more filters under your belt first.
-// Day 10, 10:30: the urgent toast
+// Calder as the test job goes up, 09:00 Day 9
+== promo.test.start
+- There it is. Yours. I'm watching, not helping.
+// passed: the scrubber's put right
+== promo.test.passed
+- Filter in, fan settled. That'll do. Go and have your tea.
+// not done: another in two work days ({day}: the weekday)
+== promo.test.again
+- Not done isn't failed. Another on {day}. Get a few more filters under your belt.
+// Day 10, 10:30: the urgent toast, and Torres's nudge
 == promo.summons
 - Chief Calder: My office, 11:00. — C.
+== promo.summons.torres
+- Go on. She doesn't bite. Usually.
+// the office scene's words by Mail, if you never came (Calder sends it)
+== promo.mail
+- Your promotion | You weren't about, so you'll read it instead. You passed. As of today you're an Officer: Technician, Tier 2. Your badge and your pip are on my desk; collect them. You move to cabin 4-23 tonight. The Captain commissions you tomorrow at 17:15. Clean uniform. Well done.
 // the Record's milestones and the keepsake
 == works.ms.officer
 - Promoted to Officer, day {n}.
@@ -34,7 +48,7 @@
 == works.plate
 - {name} · {rank}
 // the Captain's Mail on Day 10 (Mail, up to 400)
-== mail.promo.captain
+== promo.captain
 - Congratulations | Chief Calder tells me you've earned your pip. Well done. The ceremony is tomorrow at 17:15, in the observation room on Deck 1. Bring one honest answer: what should an officer never forget? I'll ask.
 // Day 11, morning: from the Captain's office
 == mail.promo.ceremony
@@ -42,8 +56,8 @@
 // the move, if you were asleep or away (Calder's words by Mail)
 == mail.promo.move
 - Your cabin | You weren't about, so we moved you anyway. Cabin 4-23, officers' corridor. Your things are there. Your key opens it. Quiet hours after 23:00. Your door's your own now: use it. Tomas says don't be a stranger.
-// the Ship app's news item
-== news.promoted
+// the Ship app's news item (one gossip line)
+== promo.news
 - Works news: {me} made Officer today. Cake at the tea corner, while it lasts.
 
 // ---- what's next: see next.lines

@@ -541,33 +541,25 @@
 // ---- Pillar 5 Step 3 (head writer W2): the test job and the first promotion (seat C2), team jobs (M2), tracing (M3),
 // P1 (H2). Kind 'work', flags as in content/works/keys-p5.md "Step 3". Every line under a flag plays in order.
 == work
-// Day 8 at the board: "Tomorrow, your test job"
-? flag:promo.t2.tell
-- Tomorrow, your test job. Tier 2. A real one.
-- I'll follow. I won't help. Sleep tonight.
-// Day 9: the test job, Calder following you
-? flag:train.t2.follow.look
+// Day 9: the test job, Calder following you (C2: train.t2.step.take / .<stop tag> / .done / .turnin)
+? flag:train.t2.step.look
 - Round first. Find it yourself.
-? flag:train.t2.follow.take
-- It's yours. I'm watching, not helping.
-? flag:train.t2.follow.hold
+? flag:train.t2.step.take
+- Take it from the board. Go on.
+? flag:train.t2.step.hold
 - Scan it. Read me the lowest.
-? flag:train.t2.follow.fetch
+? flag:train.t2.step.fetch
 - One filter. You know the shelf.
-? flag:train.t2.follow.wrong
+? flag:train.t2.step.wrong
 - Not that one. Walk back. No harm done.
-? flag:train.t2.follow.make
+? flag:train.t2.step.make
 - Old filter out. Mind the dust. New one seated.
-? flag:train.t2.follow.turn
+? flag:train.t2.step.turn
 - Fan's off true. Settle it. Listen to the hum.
-? flag:train.t2.follow.done
+? flag:train.t2.step.done
 - Filter in. Fan settled. Turn it in.
-- That'll do.
-// not taken by 15:00, or dropped
-? flag:promo.t2.delay
-- No test today. Not done isn't failed.
-- Get a few more scrubbers' worth of filters under your belt.
-- Another in two work days. Same rules.
+? flag:train.t2.step.turnin
+- That'll do. I'll write it up.
 // she comes to find you
 ? flag:promo.fetch.summons
 - There you are. My office was the plan. Here will do.

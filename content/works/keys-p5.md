@@ -118,21 +118,23 @@ unsigned. Calder's flag lines also exist for Vance (`vance.lines`) where the pag
 
 | When | Key | Who / kind | Placeholders |
 | --- | --- | --- | --- |
-| Day 8 at the board, "Tomorrow, your test job" | `flag:promo.t2.tell` | calder, kind `work` (2-3 lines in order) | |
-| ... the Mail if you're not there by 10:00 | `works.ask.t2` | text, Mail | |
-| Test job steps, Calder following | `flag:train.t2.follow.<step>` | calder `work`: `look` `take` `hold` `fetch` `wrong` (a wrong pick) `make` `turn` `done` | |
+| Day 8 in the bay, "Tomorrow, your test job" (C2's names, worksText) | `promo.announce` | text, Calder's words | |
+| ... the Mail if you're not in the bay by 10:00 | `promo.announce.mail` | text, Mail (lines_check gives C2's three Mail keys the Mail limit) | |
+| Day 9, 09:00, as the test job goes up | `promo.test.start` | text | |
+| Test job steps, Calder following | `flag:train.t2.step.<take\|stop tag\|done\|turnin>` | calder `work`: stop tags written `look` `hold` `fetch` `wrong` `make` `turn` (C2 to confirm) | |
 | Torres comes by at the end (Tuesday) | `flag:train.t2.torres` | torres-zeke `work` | |
-| Delayed (not taken by 15:00 / dropped) | `flag:promo.t2.delay` + Mail `works.ask.t2.again` | calder `work`; text | |
+| Passed / not done | `promo.test.passed`, `promo.test.again` | text | `{day}` (weekday) |
 | What's next | `next.t2` (have), `next.wait.t2` (test set, not done), `next.summons`, `next.move`, `next.ceremony` | `next.lines` | |
 | The summons toast (urgent) | `promo.summons` | text: "Chief Calder: My office, 11:00. — C." | |
-| Torres nudges you | `flag:promo.summons.go` | torres-zeke `work` | |
+| Torres nudges you | `promo.summons.torres` | text | |
 | Calder finds you at 11:15 / 17:30 / ceremony | `flag:promo.fetch.summons`, `.fetch.move`, `.fetch.ceremony` | calder `work` (vance too for move) | |
-| The office scene | meeting `promo.officer` | Calder; choice sets `flag:promo.reply.proud\|surprised\|about` | |
+| The office scene | meeting `promo.officer` | Calder; one choice of three (C2 stores flag promo.reply 1-3) | |
+| The scene by Mail, if you never came | `promo.mail` | text, Mail | |
 | The crew at the board | kind `promoted` (X's name; 50 characters) | `banks/promo-works.lines` + torres-zeke, pell ("Told you"), kovac-zainab, halloran-emeka | `{nick}` |
 | All day: people who know you | `@reactions promoted` (`content/reactions/promoted.lines`), cue `promoted.you` | crew bank by tier | |
 | Mail from friends | kind `mail.promo.friend` in `content/banks/promo.lines` | crew bank by tier ("Subject \| body") | `{me}` |
-| Mail from the Captain | `mail.promo.captain` | text | `{me}` |
-| Ship app news | `news.promoted` | text | `{me}` |
+| Mail from the Captain | `promo.captain` | text, Mail | |
+| Ship app news (one gossip line) | `promo.news` | text | `{me}` |
 | Brennan's cake (tea corner, after shift) | `flag:promo.cake` | brennan `cue` | |
 | Calder's walk to 4-23 (in order) | `flag:promo.walk.start`, `.lift`, `.corridor`, `.box`, `.door`, `.inside` | calder `work`; same flags in vance `work` | |
 | Tomas and Pell with your box | `flag:promo.box` | tomas, pell `work` (bubbles) | |

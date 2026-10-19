@@ -857,9 +857,6 @@
 // Day 9 (Tuesday): he comes by at the end of your test job
 ? flag:train.t2.torres
 - Saw that. Don't tell her, but that was tidy.
-// Day 10: the summons
-? flag:promo.summons.go
-- Go on. She doesn't bite. Usually.
 // M8: his calls when he leads
 ? flag:team.call.start
 - Right, team. Spots. Wait for your name.
