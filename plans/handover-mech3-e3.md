@@ -14,7 +14,7 @@ Session_01WkkCvj4yxnMALMQYG2DsWM, 2026-10-19 (overnight). Written at about 55-60
 | 0.53.5 | b809339 | five leak joints moved; deck_check's leak-joint line | R4 PASS |
 | 0.53.6 | 626a907 | M10 workshop + tinkering (24j), merged E1's 0.45.8 7a9a942 | sent to R4 |
 | 0.53.7 | 2ce8e9e | 24t cabin touches + star logging | sent to R4 |
-| 0.53.8 | see the last commit | R4's two M10 fixes (empty shelf; the made thing in your hands) | sent to R4 |
+| 0.53.8 | the commit after 043b085 | R4's two M10 fixes (empty shelf; the made thing in your hands) | sent to R4 |
 
 ## What I own and built
 - **Places (0.53.4-5):** one block after Step 3's places (search `0.53.4 (Pillar 5 Step 4, seat E3`). All type `event` with `event: 'side'` / `'leak'` / `'leakp'` (inert for the crew). `DECKS[n].leakJoints`, `DECKS[3].growRacks`, `DECKS[4].cabinSpots['4-23']`. Props: the machine shop's order board (`wallFixed`), your bench under the Works bay window. Full list in DEV_NOTES "Places for Pillar 5 Step 4".
