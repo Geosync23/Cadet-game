@@ -20,7 +20,7 @@ Lines skimmed. In a fresh archive content_gen bakes 9342 lines; lines_check PASS
 
 ## Step 4
 
-### E1 claude/mech-rounds 013f53ec (0.45.13, hauling stage 2: haulFree, haulOrderAsk, haulTidy), R5: PASS WITH FIXES (one small; E1 has handed over, for the next E1 seat)
+### E1 claude/mech-rounds 013f53ec (0.45.13, hauling stage 2: haulFree, haulOrderAsk, haulTidy), R5: PASS WITH FIXES (one small; E1 has handed over: E6 session_018cZuXpb4XdFs47zXoPcF8B does it, with the two on 0.45.11)
 Diff 633eade..013f53ec, read by hand against step4-stages (D3's answers).
 - Good: m4 stage 1 now after 2 runs; from Day 10 (haulFree) a manifest run with crates for 2+ stops asks you the order once (j.orderAsked), before any delivery, one deviceChoose per stop, Cancel keeps the rest; "A tidy run" (haul.tidy) when the deck changes are the fewest possible, +1 through worksSideXp for an officer only; an officer at stage 2 keeps the run held to 16:00. Parts runs (j.src) and load-only runs are left alone. New names haulFree/haulDeck/haulTidy/haulOrderAsk nowhere else. No R(); j.order/j.orderAsked live on the job (saved with the jobs).
 - **Fix (small): the order also reshuffles the load stops.** haulStops sorts `cs` by j.order and builds BOTH the load and the deliver stops from it; stepsDone holds stop indexes. If a load is done before (or while) the order is picked (the deviceChoose is async, and during it j.order is partial, so unplaced crates sort first), index 0 can name a different crate afterwards: the wrong crate shows as loaded and haulTake's j.got goes out of step. Sort only the deliver stops (keep the loads in manifest order), or ask before the first load.
