@@ -231,3 +231,4 @@ The user went to bed ~03:40: **overnight mode ON** until they check in in the mo
 
 | Time (UTC) | The question you'd normally have been asked | What was done | Why |
 |---|---|---|---|
+| ~03:45 | Step 4 has no spec pages yet (the plan says each mechanic gets a short page the user reviews first). Wait for the morning, or write them now? | D3 writes the Step 4 pages now from the approved Pillar 5 plan v11; the lead checks them against the plan and builds Step 4 to its OWN preview link; every page and every lead call is flagged for your morning review | You asked for Step 4 on its own link tonight; a preview link is easy to undo and never touches main, so building from the approved plan is not a big call. Anything outside the plan waits for you |

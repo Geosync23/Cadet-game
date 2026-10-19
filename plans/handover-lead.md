@@ -721,3 +721,4 @@ Read: CLAUDE.md, TEAM.md (Lead line, "Released", session-chain rules incl. "Loos
 - ~03:25: Step 3 addition: U moves Tracked into a device app (first). BM6 told. U 9fa60da 0.72.3 turn-in chips done. M2 b3e5cf9 0.51.3 (62%). S2 0d0aa59 0.33.60 waiting for M3 cleaned hash.
 - ~03:39: PASS & done: C2 f3b744c (0.44.17-26), H2 8161cbe (+ p1Stage switch pending), M2 b3e5cf9 (handover 15c247c), S2 (1f2e08f, cb4f2bb; pair 0d0aa59) , M3 42c76cc pair in review, W2 995af0f, DA5 25dbfce, U 114bd49 (+9fa60da in review, +Tracked app coming). X final pending. Step 4 loose end: section 15 locker/hobby texts naming Bunk 1.
 - ~03:40: OVERNIGHT MODE ON (the user to bed). Ends only when the user checks in in the morning and asks for the report.
+- ~03:45: Step 3: all R3 PASS except X (chased), H2 p1Stage + "P1 cases ... 3" fix, U Tracked app. Step 4: no pages exist; D3 writing them (summary + seat split for small team).
