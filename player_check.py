@@ -66,19 +66,24 @@ PAPER = r"""(({ normal }) => {
     if (d.need) n[d.need] = needClamp(n[d.need] + d.gain / d.mins + NEED_DRAIN[d.need][0] / 60);
     if (d.cost) for (const k in d.cost) n[k] = needClamp(n[k] - d.cost[k] / d.mins); look(); } };
   const sleep = mins => { needsDrain(mins, true); look(); };
+  const work = mins => { for (let m = 0; m < mins; m++) { needsDrain(1, false); if (typeof WORK_LEISURE !== 'undefined') n.leisure = needClamp(n.leisure - WORK_LEISURE / 60);   // work wears leisure down (0.73.0)
+    if (playerSpeed() < 1) slowMins++; look(); } };
+  const ends = [];                                        // energy at bedtime, each day
   for (let day = 1; day <= 7; day++) {                    // 06:00 to 06:00
     if (normal) {
       act('toilet'); awake(57); act('shower'); awake(5); act('eat'); awake(25);   // 06:00-08:00 (the toilet: 0.28.19)
-      awake(4 * 60); act('toilet'); awake(5 * 60 - 3);                            // the shift, 08:00-17:00, with a break at noon
+      const sh = day <= 5 ? work : awake;                                         // Monday to Friday on shift, the weekend off (0.73.0)
+      awake(60); sh(3 * 60); act('toilet'); sh(5 * 60 - 3);                        // the shift, 09:00-17:00, with a break at noon
       awake(30); act('eat'); act('toilet'); awake(37);                            // dinner about 17:30
-      if (day % 2) act('gym'); else { act('call'); act('hobby'); }                // a hobby every other evening keeps leisure up (0.28.63)
-      awake(22 * 60 - (18 * 60 + 30) - (day % 2 ? 30 : 45) - 3); act('toilet');   // to 22:00, and before bed
-      sleep(8 * 60);
+      if (day % 2) act('gym'); else act('call'); act('hobby');                    // a hobby every evening keeps leisure up after work (0.28.63; every evening from 0.73.0)
+      if (typeof WORK_LEISURE !== 'undefined') n.leisure = needClamp(n.leisure + 15);   // and something fun: a tradition, Tiles or a talk (0.73.0: work wears leisure down)
+      awake(22 * 60 - (18 * 60 + 30) - (day % 2 ? 60 : 45) - 3); act('toilet');   // to 22:00, and before bed
+      ends.push(Math.round(n.energy * 10) / 10); sleep(8 * 60);
     } else { awake(16 * 60); sleep(8 * 60); }                                     // no meals, no shower, no gym, no calls
   }
   const r = x => Math.round(x * 10) / 10;
   for (const k of NEED_KEYS) { lo[k] = r(lo[k]); hi[k] = r(hi[k]); }
-  return { lo, hi, slowMins, end: Object.fromEntries(NEED_KEYS.map(k => [k, r(n[k])])) };
+  return { lo, hi, slowMins, ends, end: Object.fromEntries(NEED_KEYS.map(k => [k, r(n[k])])) };
 })"""
 
 # tap a thing on the current deck by its title (and, if several, the one nearest a tile), as section 11 would
@@ -199,9 +204,12 @@ with sync_playwright() as pw:
     errors = g.errors
 
     print('On paper, a week of normal days:')
-    p = g.ev(f"({PAPER})({{ normal: true }})"); print('  lowest', p['lo'], 'slow minutes', p['slowMins'])
-    for k, v in p['lo'].items(): check(v >= (25 if k in ('energy', 'bathroom') else 30), f'normal week: {k} fell to {v}')
-    check(p['slowMins'] == 0, f"normal week: slowed for {p['slowMins']} minutes")
+    p = g.ev(f"({PAPER})({{ normal: true }})"); print('  lowest', p['lo'], 'slow minutes', p['slowMins'], 'energy at bedtime', p['ends'])
+    # 0.73.0 (playtest 2, the lead's tuning): a normal 16-hour day ends near 20-25 energy, so you're tired (80% walking)
+    # for the last hour or two; never near 0. Work wears leisure down; an evening hobby brings it back
+    for k, v in p['lo'].items(): check(v >= (15 if k == 'energy' else 25 if k in ('bathroom', 'leisure') else 30), f'normal week: {k} fell to {v}')
+    check(18 <= sum(p['ends']) / len(p['ends']) <= 30, f"normal week: energy at bedtime should average 18-30: {p['ends']}")
+    check(p['slowMins'] <= 7 * 150, f"normal week: slowed for {p['slowMins']} minutes (only tired, late in the evening)")
     print('On paper, a week of neglect:')
     p = g.ev(f"({PAPER})({{ normal: false }})"); print('  end', p['end'], 'lowest', p['lo'], 'highest', p['hi'])
     check(all(0 <= p['lo'][k] and p['hi'][k] <= 100 for k in p['lo']), 'neglect: a need left 0-100')
@@ -406,8 +414,9 @@ with sync_playwright() as pw:
         out[f] = Math.round(m / 6) / 10; }
       Object.assign(n, NEEDS_FRESH); return out; })()""")
     print('  hours awake by fitness (food, hygiene, social held at 50):', ld)
-    check(abs(ld['50'] - 17) <= .3, f"average fitness should last about 17 hours, not {ld['50']}")
-    check(15.8 <= ld['20'] <= 18.2 and 15.8 <= ld['80'] <= 18.2 and ld['20'] < ld['50'] < ld['80'], f'16 to 18 hours whatever your fitness: {ld}')
+    # 0.73.0 (playtest 2, the lead's tuning, energy 4.8 an hour): about 15.6 hours at average fitness (17 before)
+    check(abs(ld['50'] - 15.6) <= .3, f"average fitness should last about 15.6 hours, not {ld['50']}")
+    check(14.5 <= ld['20'] <= 17 and 14.5 <= ld['80'] <= 17 and ld['20'] < ld['50'] < ld['80'], f'14.5 to 17 hours whatever your fitness: {ld}')
 
     print('Needs give bonuses and penalties (needEffects):')
     ne = g.ev(r"""(() => { const r = x => Math.round(x * 1000) / 1000, f = n => { const e = needEffects(n); return [r(e.walk), r(e.task), r(e.drain), r(e.socialGain), Object.keys(e.marks).sort().join(',')]; };
@@ -467,13 +476,32 @@ with sync_playwright() as pw:
     up = g.ev("[!!ACT, player.obj.visible]"); print('  walking off:', up)
     check(up == [False, True], f'walking off should get you up: {up}')
     g.ev("setShipNow(Math.floor(shipNow() / 1440) * 1440 + 21 * 60); needsT = null; SHIP.player.needs.energy = 30"); g.step(3)
-    day0 = g.ev("SHIP.time.day"); tp = g.ev(BTAP); asked = g.ev("!sleepEl.hidden")
+    day0 = g.ev("SHIP.time.day"); tp = g.ev(BTAP)
+    # the alarm clock (0.73.0, playtest 2): at night lying down opens it; the saved time (06:00 by default), the energy
+    # you'd wake with, no warning before the shift; Set alarm sleeps until then
+    for j in range(60):
+        g.step(10)
+        if g.ev("!sleepEl.hidden || sleeping"): break
+    asked = g.ev("!sleepEl.hidden"); card = g.ev("[alarmT.textContent, alarmE.textContent, alarmW.hidden, sleepYes.textContent, hhmm(ALARM_PICK)]"); print('  the alarm clock at 21:00:', card)
+    check(asked and card[0].endswith('06:00') and '100%' in card[1] and card[2] is True and card[4] == '06:00', f'the bunk at night should open the alarm clock at 06:00: {asked} {card}')
+    al = g.ev(r"""(() => { const out = {}; const e = SHIP.player.needs.energy, t0 = shipNow(); alarmUp.click(); alarmUp.click(); out.up2 = hhmm(ALARM_PICK); alarmDn.click(); alarmDn.click(); out.back = hhmm(ALARM_PICK);
+      out.span = [hhmm(alarmChoices()[0]), hhmm(alarmChoices().slice(-1)[0])];
+      SHIP.player.needs.energy = 10; out.e = [alarmEnergy(360), alarmEnergy(480), alarmEnergy(720)]; SHIP.player.needs.energy = e;   // later gives more
+      const D = Math.floor(alarmAt(360) / 1440) + 1; out.shift = playerShiftOn(D); out.late = [alarmLate(510), alarmLate(540), alarmLate(600)];
+      ALARM_PICK = 600; alarmDraw(); out.warn = [alarmW.hidden, alarmW.textContent]; ALARM_PICK = 360; alarmDraw();
+      out.still = [shipNow() === t0, Math.round(SHIP.player.needs.energy)]; return out; })()""")
+    print('  alarm: steps, the times on offer, energy by wake time (from 10 at 21:00: 06:00, 08:00, 12:00), late warnings:', al)
+    check(al['up2'] == '07:00' and al['back'] == '06:00' and al['span'] == ['04:00', '12:00'], f'the alarm steps half an hour, 04:00 to 12:00: {al}')
+    check(al['e'][0] < al['e'][1] <= al['e'][2] and al['e'][0] >= 10, f'a later alarm should wake you with more energy: {al["e"]}')
+    check(not al['shift'] or (al['late'] == [0, 540, 540] and al['warn'][0] is False and '09:00' in al['warn'][1]), f'an alarm at or after the shift starts should warn: {al}')
+    check(al['still'] == [True, 30], f'looking at the alarm should not change the time or your energy: {al["still"]}')
+    g.ev("sleepYes.click()")
     for j in range(60):
         g.step(10)
         if g.ev("sleeping || !!ACT && ACT.o.slept"): break
     g.page.wait_for_function("window.__sc('!sleeping')", timeout=10000, polling=200); g.step(3)
     bed = g.ev("[SHIP.time.day, hhmm(SHIP.time.min), Math.round(SHIP.player.needs.energy), document.getElementById('tt').textContent, ACT && ACT.kind, ACT && ACT.phase]"); print('  at 21:00:', tp, bed, 'dialog shown:', asked)
-    check(tp is True and not asked and bed[0] == day0 + 1 and bed[1] == '06:00' and bed[2] == 100 and bed[3] == 'Good morning' and bed[4:] == ['lie', 'do'], f'the bunk at 21:00 should lie you down and sleep you to 06:00, still in it: {bed}')
+    check(tp is True and asked and bed[0] == day0 + 1 and bed[1] == '06:00' and bed[2] == 100 and bed[3] == 'Good morning' and bed[4:] == ['lie', 'do'], f'the bunk at 21:00 should lie you down and sleep you to 06:00, still in it: {bed}')
     g.ev("actEnd(true)")
     # lay down by day (19:40, a few minutes' walk from the bunk) and still there at 20:00 (reviewer 1, 0.28.37): you fall asleep, as if you'd lain down at night
     g.ev("setShipNow(Math.floor(shipNow() / 1440) * 1440 + 19 * 60 + 40); needsT = null"); g.step(3); day0 = g.ev("SHIP.time.day"); tp = g.ev(BTAP)
@@ -481,6 +509,10 @@ with sync_playwright() as pw:
         g.step(10)
         if g.ev("!!ACT && ACT.kind === 'lie' && ACT.phase === 'do'"): break
     by = g.ev("[ACT && ACT.kind, !!(ACT && ACT.o.sleep), hhmm(SHIP.time.min)]"); g.ev("setShipNow(Math.floor(shipNow() / 1440) * 1440 + 20 * 60 + 1)")
+    for j in range(60):
+        g.step(10)
+        if g.ev("!sleepEl.hidden || sleeping"): break
+    g.ev("sleepYes.click()")                              # the alarm clock (0.73.0): 06:00, as set last night
     for j in range(60):
         g.step(10)
         if g.ev("sleeping || !!ACT && ACT.o.slept"): break
@@ -780,8 +812,8 @@ with sync_playwright() as pw:
         check(sat[0] == 'sit' and sat[1] == st[0] and sat[2] == 'sit' and not sat[4] and 'sit down' in sat[5], f'sit anywhere: sitting at the seat ({sat})')
         rest = g.ev(r"""(() => { const n = SHIP.player.needs; Object.assign(n, { energy: 60, fitness: 50, hunger: 50, social: 50 }); FX_MIN = Math.floor(shipNow()); FX_NOW = { deck: deckDef.num, restore: {}, drain: {}, notes: [] };
           needsT = shipNow() - 60; playerUpdate(0, 0); FX_MIN = -1; return [Math.round((60 - n.energy) * 100) / 100, !!ACT]; })()""")
-        print('  an hour sitting: energy drained', rest[0], '(awake, standing: 4.4)')
-        check(abs(rest[0] - 4.4 * .6) < .01 and rest[1], f'sitting should rest you: energy -{rest[0]} in an hour, want {4.4 * .6:.2f}')
+        ed = g.ev("NEED_DRAIN.energy[0]"); print('  an hour sitting: energy drained', rest[0], f'(awake, standing: {ed})')
+        check(abs(rest[0] - ed * .6) < .01 and rest[1], f'sitting should rest you: energy -{rest[0]} in an hour, want {ed * .6:.2f}')
         g.ev("playerGo(nearestOpen(LIFT_AT[0], LIFT_AT[1], player))"); g.step(5)
         up = g.ev("[!!ACT, player.obj.visible]"); print('  walked off:', up)
         check(up == [False, True], f'walking away should get you up ({up})')
@@ -1292,25 +1324,28 @@ with sync_playwright() as pw:
     ev = load()
     ev("localStorage.setItem(SAVE_KEY, JSON.stringify({ v: 1, build: '0.25.2', time: { day: 2, min: 600 }, player: { deck: 4, tile: [7, 3], facing: 0 }, ship: { decks: {} }, crew: {} })); Storage.prototype.setItem = () => {}")
     ev = load()
-    v1 = json.loads(ev("JSON.stringify([SHIP.time.day, SHIP.player.needs])")); print('  v 1 save:', v1)
+    v1 = json.loads(ev("JSON.stringify([SHIP.time.day, SHIP.player.needs, SHIP.player.alarm])")); print('  v 1 save:', v1)
+    check(v1[2] == 360, f'an old save should set the alarm for 06:00 (0.73.0): {v1[2]}')
+    v1 = v1[:2]
     check(v1[0] == 2 and all(v == (70 if k == 'leisure' else 80) for k, v in v1[1].items()), f'a v 1 save should load with needs at 80 (leisure 70, as new): {v1}')
     ev("Object.assign(SHIP.player.needs, { hunger: 11, energy: 22, hygiene: 33, fitness: 44, social: 55, bathroom: 66 }); saveGame()")
     raw = json.loads(ev("localStorage.getItem(SAVE_KEY)")); print('  saved:', raw['v'], raw['player'].get('needs'))
     check(raw['v'] == 2 and {k: v for k, v in raw['player']['needs'].items() if k != 'leisure'} == {'hunger': 11, 'energy': 22, 'hygiene': 33, 'fitness': 44, 'social': 55, 'bathroom': 66}, f"v 2 save should hold the needs: {raw['player']['needs']}")
     ev = load()
     v2 = json.loads(ev("JSON.stringify(SHIP.player.needs)")); print('  v 2 save:', v2)
-    ev("mailSend({ from: 'Test', subject: 'Kept', body: 'b', play: 'home:gran' }); SHIP.player.credits = 77; SHIP.player.locker = ['a deck of cards']; SHIP.player.chats = { x: SHIP.time.day }; playerNameSet('Ada'); stripFold(true); saveGame()")
+    ev("mailSend({ from: 'Test', subject: 'Kept', body: 'b', play: 'home:gran' }); SHIP.player.credits = 77; SHIP.player.locker = ['a deck of cards']; SHIP.player.chats = { x: SHIP.time.day }; playerNameSet('Ada'); stripFold(true); SHIP.player.alarm = 450; saveGame()")
     ev = load()
-    kept = json.loads(ev("JSON.stringify([SHIP.mail.map(m => m.subject + (m.play ? '|' + m.play : '')), SHIP.player.credits, SHIP.player.locker, Object.keys(SHIP.player.chats), SHIP.player.name])")); print('  mail, credits, locker, chats, name kept:', kept)
+    kept = json.loads(ev("JSON.stringify([SHIP.mail.map(m => m.subject + (m.play ? '|' + m.play : '')), SHIP.player.credits, SHIP.player.locker, Object.keys(SHIP.player.chats), SHIP.player.name, SHIP.player.alarm])")); print('  mail, credits, locker, chats, name, alarm kept:', kept)
     fold = json.loads(ev("(() => { const el = needStrip(), r = [SHIP.player.stripFold, el.classList.contains('fold')]; el.click(); r.push(SHIP.player.stripFold, el.classList.contains('fold')); el.querySelector('.nsFold').click(); r.push(SHIP.player.stripFold); stripFold(false); return JSON.stringify(r); })()"))
     print('  the needs strip folded, kept, tapped open, folded again (0.28.33):', fold)
     check(fold == [True, True, False, False, True], f'the needs strip folds away, stays folded after a reload and a tap opens it: {fold}')
-    check(kept == [['Kept|home:gran'], 77, ['a deck of cards'], ['x'], 'Ada'], f'the save should keep mail, credits, locker, chats and your name: {kept}')
+    check(kept == [['Kept|home:gran'], 77, ['a deck of cards'], ['x'], 'Ada', 450], f'the save should keep mail, credits, locker, chats, your name and the alarm: {kept}')
     check({k: v for k, v in v2.items() if k != 'leisure'} == {'hunger': 11, 'energy': 22, 'hygiene': 33, 'fitness': 44, 'social': 55, 'bathroom': 66}, f'a v 2 save should load its needs: {v2}')
-    ev("localStorage.setItem(SAVE_KEY, JSON.stringify({ v: 2, build: 'x', time: { day: 2, min: 600 }, player: { deck: 4, tile: [7, 3], facing: 0, needs: { hunger: 'x', energy: 500 }, name: { x: 1 } }, ship: { decks: {} }, crew: {} })); Storage.prototype.setItem = () => {}")
+    ev("localStorage.setItem(SAVE_KEY, JSON.stringify({ v: 2, build: 'x', time: { day: 2, min: 600 }, player: { deck: 4, tile: [7, 3], facing: 0, needs: { hunger: 'x', energy: 500 }, name: { x: 1 }, alarm: 'x' }, ship: { decks: {} }, crew: {} })); Storage.prototype.setItem = () => {}")
     ev = load()
     bad = json.loads(ev("Storage.prototype.setItem = () => {}; JSON.stringify(SHIP.player.needs)")); print('  junk needs:', bad)
     check(ev("SHIP.player.name") is None, 'a junk name in the save should load as no name')
+    check(ev("SHIP.player.alarm") == 360, 'a junk alarm in the save should load as 06:00')
     check(bad == {'hunger': 80, 'energy': 100, 'hygiene': 80, 'fitness': 80, 'social': 80, 'bathroom': 80, 'leisure': 70}, f'junk needs should be clamped or filled at 80 (leisure 70): {bad}')
     raw0 = ev("localStorage.getItem(SAVE_KEY)")
     ev = load('?nosave')

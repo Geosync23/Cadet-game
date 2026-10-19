@@ -96,6 +96,16 @@ with sync_playwright() as pw:
     nd = g.ev(f"""(() => {{ const out = []; for (const hm of [390, 720, 1140, 1380]) {{ const all = schedPeople().filter(p => aboardAllDay(p, {DAY})).map(p => crewNeeds(p, ({DAY} - 1) * 1440 + hm));
       out.push(hhmm(hm) + '  ' + NEEDS.map(k => {{ const v = all.map(n => n[k]).sort((a, b) => a - b); return k + ' ' + v[0] + '/' + v[v.length >> 1]; }}).join('  ')); }} return out; }})()""")
     print('Crew needs (lowest/middle):'); [print('  ' + l) for l in nd]
+    # energy at the end of the day (0.73.0, playtest 2: nobody, you included, ends a day at 0 by default play): the crew at
+    # 23:59 on paper, and you awake from 06:00 at full energy to midnight, on shift if it's a workday for you
+    en = g.ev(f"""(() => {{ const B = ({DAY} - 1) * 1440, crew = schedPeople().filter(p => aboardAllDay(p, {DAY})).map(p => [crewNeeds(p, B + 1439).energy, p.id]).sort((a, b) => a[0] - b[0]);
+      const n = SHIP.player.needs, keep = {{ ...n }}, out = {{ crewLow: crew[0] }}; Object.assign(n, NEEDS_FRESH, {{ energy: 100 }});
+      const shift = typeof playerShiftOn === 'function' && playerShiftOn({DAY}), wl = typeof WORK_LEISURE !== 'undefined' ? WORK_LEISURE : 0;
+      for (let m = 360; m < 1440; m++) {{ needsDrain(1, false); if (shift && m >= DAY_SHIFT[0] && m < DAY_SHIFT[1]) n.leisure = needClamp(n.leisure - wl / 60); if (m === 22 * 60) out.you22 = Math.round(n.energy); }}
+      out.you24 = Math.round(n.energy); out.leisure = Math.round(n.leisure); out.shift = shift; Object.assign(n, keep); return out; }})()""")
+    print('Energy at the end of the day: crew lowest', en['crewLow'], '| you (no meals, nothing): at 22:00', en['you22'], 'at midnight', en['you24'], '| leisure', en['leisure'], '| your workday', en['shift'])
+    if en['crewLow'][0] <= 0: fail(f"someone ends the day with no energy: {en['crewLow']}")
+    if en['you22'] <= 0 or en['you24'] <= 0: fail(f"you end the day with no energy: {en}")
     # a crew-change day: where each leaver waits in the shuttle bay from 14:30. The spot is one of Deck 5's
     # shuttle-bay crowd places, picked by the leaver's id (bay[strSeed(id) % count]), so it moves whenever the bay's
     # crowd places change (the walkable Tern, decks 0.38.19: 120 -> 108 places). A plan difference here alone is expected

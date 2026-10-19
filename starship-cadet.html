@@ -58,6 +58,8 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 .lift .deckbtn em{flex:none;margin-left:auto;font-style:normal;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;border-radius:999px;background:#e8c06a;color:#1a1408}
 .lift .deckbtn.here i{background:#2a9d8f;color:#08201d;border-color:#2a9d8f}
 .lift .stay{margin:10px auto 0;padding:7px 16px}
+#sleepAsk .alarm{display:flex;align-items:center;gap:8px;margin:0 0 8px}#sleepAsk .alarm b{flex:1;text-align:center;font-size:17px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}   /* the alarm clock (0.73.0) */
+#sleepAsk .alarm .deckbtn{width:48px;min-height:44px;flex:none;justify-content:center;text-align:center;font-size:20px;padding:6px 0}#sleepAsk #alarmW{color:#e8c06a}#sleepAsk #sleepYes{justify-content:center;text-align:center}
 .devbtn{position:fixed;left:14px;top:86px;z-index:2;padding:6px 11px;font-size:12.5px}
 .devbtn b{min-width:16px;padding:0 4px;border-radius:8px;background:var(--teal);color:#08201d;font-size:11px;line-height:16px;margin-left:2px}
 .devbtn.compact span{display:none}                        /* 0.28.59: the narrowest phones, so Pause fits beside it (its aria-label still says Device) */
@@ -259,8 +261,10 @@ body.dlgon .devhu{display:none}
   <button class="stay" id="liftStay">Stay here</button>
 </div>
 <div class="lift" id="sleepAsk" role="dialog" aria-labelledby="sleepT" hidden>
-  <h2 id="sleepT">Your bunk</h2><p id="sleepX">Sleep until 06:00?</p>
-  <div class="decks"><button class="deckbtn" id="sleepYes">Sleep until 06:00</button></div>
+  <h2 id="sleepT">Alarm</h2><p id="sleepX">Your bunk. When should your alarm wake you?</p>
+  <div class="alarm"><button class="deckbtn" id="alarmDn" aria-label="Earlier">&minus;</button><b id="alarmT" aria-live="polite">Wake at 06:00</b><button class="deckbtn" id="alarmUp" aria-label="Later">+</button></div>
+  <p id="alarmE"></p><p id="alarmW" hidden></p>
+  <div class="decks"><button class="deckbtn" id="sleepYes">Set alarm</button></div>
   <button class="stay" id="sleepNo">Not yet</button>
 </div>
 <button class="devbtn" id="devBtn" aria-label="Your device: the time and your needs"><svg viewBox="0 0 24 24"><rect x="6" y="3" width="12" height="18" rx="2.5"/><path d="M10 17.5h4"/></svg><span>Device</span><b id="devMail" hidden></b></button>
@@ -281,7 +285,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.72.5
+   STARSHIP CADET: CSV Wren                           build 0.73.0
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8694,7 +8698,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.72.5';                           // keep in step with the header's build line
+const GAME_BUILD = '0.73.0';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -8908,8 +8912,9 @@ function newGameStart(arrival) {
   updateClock(); saveGame();
   if (!arr) toast('Deck 4, CSV Wren', 'A new game. You wake in Bunk 1, in the junior wing, at 06:00 on a Monday.');
 }
-// Going to sleep: tap your own bunk (playerBed(), ROSTER_PLAYER's bed, by its place on Deck 4) from 20:00 to 05:30 (0.28.9: no dialog).
-// The view fades out, time skips to 06:00 (sleepUntil), and it fades back in.
+// Going to sleep: tap your own bunk (playerBed(), ROSTER_PLAYER's bed, by its place on Deck 4) from 20:00 to 05:30.
+// The alarm clock opens (0.73.0; no dialog from 0.28.9 to then); Set alarm fades the view out, skips to the wake time
+// (sleepUntil) and fades back in. Unwell by day (the nap) you sleep at once, as before.
 const playerBed = () => { const h = typeof SHIP !== 'undefined' && SHIP.works && SHIP.works.home; return typeof h === 'string' && (DECKS[4].places || []).some(q => q.id === h && q.type === 'bed') ? h : ROSTER_PLAYER.bed; }, WAKE_AT = 6 * 60, CLOCK_EARLY = 7;   // CLOCK_EARLY: minutes the Works crew arrive early to clock in (the clock's queue wait, 6, and the clocking, 1)   // read when used: ROSTER_PLAYER comes later in the file
 const sleepEl = document.getElementById('sleepAsk'); let sleeping = false;
 const bedtime = () => SHIP.time.min >= 20 * 60 || SHIP.time.min < 5 * 60 + 30;
@@ -8917,20 +8922,66 @@ function offerSleep(at) {                                // at: where the tapped
   const id = playerBed(), bed = (DECKS[deckOf(id)].places || []).find(p => p.id === id);
   if (!bed || deckDef.num !== deckOf(id) || at.distanceTo(cellPos(...bed.at)) > 1.2) return false;
   if (!bedtime() && !(typeof sickNow === 'function' && sickNow())) { toast('Your bunk', 'Too early to turn in. You can sleep here from 20:00.'); return true; }
-  toastEl.classList.remove('show'); document.getElementById('sleepYes').onclick();   // 0.28.9, the user's rule: no dialog, you just sleep
+  toastEl.classList.remove('show');
+  if (!bedtime()) sleepGo(null); else alarmOpen();       // the nap (unwell by day) at once; at night the alarm clock (0.73.0)
   return true;
 }
+// the alarm clock (0.73.0, playtest 2, the user's): pick the wake time with − / + (ALARM_STEP minutes, ALARM_FROM to
+// ALARM_TO and at least ALARM_SOON ahead), see the energy you'll wake with (alarmEnergy: the overnight skip's own
+// needsDrain on a copy of your needs, so later gives more) and a warning when it's at or after your shift's start that
+// morning (alarmLate). Set alarm sleeps until then; Not yet closes it (lying in your bunk you stay lying). The time is
+// kept for next night as SHIP.player.alarm (minute of the day; save.player.alarm; old saves and New game: WAKE_AT,
+// 06:00, what bedtime always did). Texts: the head writer's alarm.* (stand-ins until baked). No R().
+const ALARM_STEP = 30, ALARM_FROM = 4 * 60, ALARM_TO = 12 * 60, ALARM_SOON = 30;
+const alarmOk = m => Number.isInteger(m) && m >= ALARM_FROM && m <= ALARM_TO && m % ALARM_STEP === 0;
+let ALARM_PICK = WAKE_AT;
+const alarmText = (k, fb, v = {}) => ((typeof careerText === 'function' && careerText(k)) || fb).replace(/\{(\w+)\}/g, (x, n) => v[n] !== undefined ? v[n] : x);
+function alarmAt(m) { const now = shipNow(), t = (SHIP.time.day - 1) * 1440 + m; return t > now ? t : t + 1440; }   // as sleepUntil
+function alarmChoices() {                                // the wake times on offer now, soonest first
+  const out = [], now = shipNow();
+  for (let m = ALARM_FROM; m <= ALARM_TO; m += ALARM_STEP) { const d = alarmAt(m) - now; if (d >= ALARM_SOON && d <= 18 * 60) out.push(m); }
+  return out.sort((a, b) => alarmAt(a) - alarmAt(b));
+}
+function alarmEnergy(m) {                                // the energy you'd wake with, rounded
+  const n = SHIP.player.needs, keep = { ...n }, d = typeof deckDef !== 'undefined' && deckDef ? deckDef.num : 0;
+  let fx = null; try { fx = typeof shipEffectsAt === 'function' && d ? shipEffectsAt(d, shipNow()) : null; } catch (e) { fx = null; }
+  try { needsDrain(alarmAt(m) - shipNow(), true, fx); return Math.round(n.energy); } finally { Object.assign(n, keep); }
+}
+function alarmLate(m) {                                  // your shift's start that morning if the alarm is at or after it, else 0
+  const d = Math.floor(alarmAt(m) / 1440) + 1;
+  return typeof DAY_SHIFT !== 'undefined' && typeof playerShiftOn === 'function' && playerShiftOn(d) && m >= DAY_SHIFT[0] ? DAY_SHIFT[0] : 0;
+}
+function alarmDraw() {
+  const ch = alarmChoices(), k = ch.indexOf(ALARM_PICK), $ = id => document.getElementById(id), late = alarmLate(ALARM_PICK);
+  $('sleepT').textContent = alarmText('alarm.title', 'Alarm');
+  $('alarmT').textContent = alarmText('alarm.wake', 'Wake at {time}', { time: hhmm(ALARM_PICK) });
+  $('alarmDn').disabled = k <= 0; $('alarmUp').disabled = k < 0 || k >= ch.length - 1;
+  $('alarmE').textContent = alarmText('alarm.energy', 'You\'ll wake with about {n}% energy.', { n: alarmEnergy(ALARM_PICK) }) + ' ' + alarmText('alarm.more', 'Sleep longer, wake fresher.');
+  $('alarmW').hidden = !late; $('alarmW').textContent = late ? alarmText('alarm.late', 'That\'s after your shift starts at {start}. Set it earlier?', { start: hhmm(late) }) : '';
+  $('sleepYes').textContent = alarmText('alarm.set', 'Set alarm');
+}
+function alarmOpen() {                                   // the saved time, or the nearest one on offer
+  const ch = alarmChoices(), a = SHIP.player.alarm, gap = m => Math.min(Math.abs(m - a), 1440 - Math.abs(m - a));
+  ALARM_PICK = ch.includes(a) ? a : ch.slice().sort((x, y) => gap(x) - gap(y))[0];
+  if (ALARM_PICK === undefined) { sleepGo(WAKE_AT); return; }   // nothing on offer (can't happen in bedtime's hours): as before
+  alarmDraw(); sleepEl.hidden = false;
+}
+function alarmStep(by) { const ch = alarmChoices(), k = ch.indexOf(ALARM_PICK) + by; if (k >= 0 && k < ch.length) { ALARM_PICK = ch[k]; alarmDraw(); } }
+document.getElementById('alarmDn').onclick = () => alarmStep(-1);
+document.getElementById('alarmUp').onclick = () => alarmStep(1);
 document.getElementById('sleepNo').onclick = () => { sleepEl.hidden = true; };
-document.getElementById('sleepYes').onclick = () => {
+document.getElementById('sleepYes').onclick = () => sleepGo(ALARM_PICK);
+function sleepGo(wake) {                                 // wake: the alarm (minute of the day), or null for the nap
   sleepEl.hidden = true; if (sleeping || ride) return;
   sleeping = true; fadeEl.style.transition = 'opacity .8s'; fadeEl.style.opacity = 1;
   const nap = !bedtime() && typeof sickNow === 'function' && sickNow();   // unwell by day: sleep it off for a few hours (0.61.5)
+  if (!nap) { if (!alarmOk(wake)) wake = WAKE_AT; SHIP.player.alarm = wake; toast(alarmText('alarm.title', 'Alarm'), alarmText('alarm.toast', 'Alarm set for {time}.', { time: hhmm(wake) })); }
   setTimeout(() => {
-    if (nap) { skipTo(shipNow() + SICK.nap); sickCure(3); } else sleepUntil(WAKE_AT); nightT = nightAt();
+    if (nap) { skipTo(shipNow() + SICK.nap); sickCure(3); } else sleepUntil(wake); nightT = nightAt();
     fadeEl.style.opacity = 0;
-    setTimeout(() => { fadeEl.style.transition = ''; sleeping = false; if (!nap) toast('Good morning', clockText() + '. You slept until ' + hhmm(WAKE_AT) + '.'); }, 850);
+    setTimeout(() => { fadeEl.style.transition = ''; sleeping = false; if (!nap) toast('Good morning', alarmText('alarm.ring', 'Morning. Your alarm\'s going.') + ' ' + clockText() + '.'); }, 850);
   }, 900);
-};
+}
 addEventListener('keydown', e => { if (e.key === 'Escape' && !sleepEl.hidden) sleepEl.hidden = true; });
 // the Night/Day button is a debug control now: Night skips to 21:40, Day sleeps until 07:40
 function debugSkip() {
@@ -11757,7 +11808,7 @@ const NEED_LABEL = { hunger: 'Food', energy: 'Energy', hygiene: 'Hygiene', fitne
 // about six hours, so it comes up three or four times a day (on waking, midday, dinner, bedtime); 3 asleep.
 // Leisure (0.28.61, the 0.60.7 plan): 0.8 an hour awake, none asleep, so about 6 ship days from full to the low line;
 // hobbies, traditions, Tiles, the bar, a full talk, calling home and a few places fill it (leisureAdd, below)
-const NEED_DRAIN = { hunger: [4, 2], energy: [4.4, 0], hygiene: [2.5, 1], fitness: [.6, .3], social: [1, .25], bathroom: [6, 1.5], leisure: [.8, 0] };   // bathroom halved in 0.28.62 (the 0.60.7 plan: about two visits a day)
+const NEED_DRAIN = { hunger: [4, 2], energy: [4.8, 0], hygiene: [2.5, 1], fitness: [.6, .3], social: [1, .25], bathroom: [6, 1.5], leisure: [.8, 0] };   // bathroom halved in 0.28.62 (the 0.60.7 plan: about two visits a day); energy 4.4 -> 4.8 in 0.73.0 (playtest 2, the lead's tuning: a normal 16-hour day ends near 20-25)
 const SLEEP_GAIN = 12.5;                                 // energy per ship hour asleep: 8 hours fills it
 const NEEDS_FRESH = { hunger: 60, energy: 100, hygiene: 60, fitness: 70, social: 70, bathroom: 60, leisure: 70 };   // a new game: just woken, before breakfast
 const NEEDS_OLD = 80;                                    // a v 1 save had no needs: start them here
@@ -11898,6 +11949,24 @@ const NEED_WARN = {   // need: [[title, text] under 25, [title, text] under 10] 
   leisure: [['Restless', 'All work lately. Try a hobby on your device, go to a tradition, or play a game of Tiles.'],
     ['Very restless', 'You really need some time to yourself: tasks are 10% slower. A hobby, a tradition or a game of Tiles will help.']],
 };
+// work wears leisure down (0.73.0, playtest 2 item 23, the user's "work needs to hit leisure a good bit harder"; the
+// lead's tuning: a full shift takes 40-50 off; 5 an hour in all, 40 a shift): WORK_LEISURE an hour on top of NEED_DRAIN's while you're at work
+// (workingNow: clocked in at the time clock and not out yet, or doing a job's activity), not while something is
+// filling leisure. Shown like a gain, a "−5 Leisure" note each time WORK_LS_NOTE has gone (WORK_LS: what's gone since
+// the last note; nothing saved). No R().
+const WORK_LEISURE = 4.2, WORK_LS_NOTE = 5, WORK_ACTS = new Set(['job', 'fetch', 'make', 'workStep', 'ixStop', 'cartTake', 'cartLoad', 'cartUnload', 'cartBack']);
+let WORK_LS = 0;
+function workingNow() {
+  const A = typeof ACT !== 'undefined' ? ACT : null;
+  if (A && A.phase === 'do' && WORK_ACTS.has(A.kind)) return true;
+  return typeof careerClockedIn === 'function' && careerClockedIn() && !careerClockedOut() && typeof DAY_SHIFT !== 'undefined' && SHIP.time.min < DAY_SHIFT[1] + 60;
+}
+function workLeisure(mins, fx, except) {                 // mins awake (playerUpdate); fx the ship's effects
+  if (except === 'leisure' || !(mins > 0) || !workingNow()) return;
+  const N = SHIP.player.needs, b = N.leisure; N.leisure = needClamp(N.leisure - WORK_LEISURE / 60 * mins * fxD(fx, 'leisure'));
+  WORK_LS += b - N.leisure;
+  if (WORK_LS >= WORK_LS_NOTE) { needFloat('\u2212' + Math.round(WORK_LS) + ' ' + NEED_LABEL.leisure, 'leisure', -WORK_LS); WORK_LS = 0; }
+}
 // leisureAdd(n, why) (0.28.61, for every section: section 18's traditions, 20's Talk a while, the bar, calling home):
 // adds n leisure (times the ship's restore, like any gain) and returns what it added. why is a short word for the notes
 function leisureAdd(n, why) {
@@ -12574,6 +12643,7 @@ function actEnd(abort) {
   if (A.release) try { A.release(); } catch (e) { /* theirs */ }   // whoever stepped aside for you goes back (crewMakeWay, 0.28.40)
   if (A.kind === 'queue' && !A.o.dish && typeof galleyLeave === 'function') try { galleyLeave('player'); } catch (e) { /* not ours to mend */ }   // out of the galley's queue and the real line (galley 0.29.32; the owner's ruling: only section 16 joins or leaves you)
   if (A.body) { A.body.dispose(); player.obj.visible = true; }
+  if (A.o.cost) for (const k in A.o.cost) if (A.o.cost[k] >= .5) needFloat('\u2212' + Math.round(A.o.cost[k]) + ' ' + NEED_LABEL[k], k, -A.o.cost[k]);   // what it cost, like a gain's note: the toilet's "−3 Hygiene" (playtest 2, 0.73.0)
   if ((A.phase === 'do' || A.phase === 'out') && A.done > 0) {   // the note bus (0.28.22): done, or walked away part way
     const act = { shower: 'wash', eat: 'eat', grab: 'eat', call: 'call' }[A.kind];
     if (A.kind === 'call' && A.done >= A.def.mins) leisureAdd(5, 'call');   // a whole call home: +5 leisure (0.28.64)
@@ -12836,6 +12906,8 @@ const RISES = {};                                         // need -> { v, at }: 
 const STRIP_HEART = 'M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.5-7 10-7 10z';
 SHIP.player.stripFold = !!(SAVED && SAVED.player && SAVED.player.stripFold === true);
 SAVE_EXTRA.push(s => { (s.player || (s.player = {})).stripFold = !!SHIP.player.stripFold; });
+SHIP.player.alarm = SAVED && SAVED.player && alarmOk(SAVED.player.alarm) ? SAVED.player.alarm : WAKE_AT;   // section 13's alarm clock (0.73.0), kept here where SHIP.player is
+SAVE_EXTRA.push(s => { (s.player || (s.player = {})).alarm = SHIP.player.alarm; });
 function stripFold(on) { SHIP.player.stripFold = !!on; const el = needStrip(); el.classList.toggle('fold', !!on); if (on) el.classList.remove('open'); el.setAttribute('aria-label', on ? 'Your needs (folded): tap to show' : 'Your needs: tap for names and numbers'); STRIP_SIG = ''; }
 let STRIP_SIG = '', STRIP_G = '';
 function needStrip() {
@@ -12867,8 +12939,8 @@ function needStrip() {
   return el;
 }
 function stripRise(k, v) {                               // a rise beside its icon; a new one while it shows adds to it
-  const now = performance.now(), r = RISES[k];
-  RISES[k] = { v: (r && now - r.at < RISE_SECS * 1000 ? r.v : 0) + v, at: now, txt: '' };
+  const now = performance.now(), r = RISES[k], keep = r && now - r.at < RISE_SECS * 1000 && (r.v < 0) === (v < 0);   // a drop (v < 0, 0.73.0) never merges with a rise
+  RISES[k] = { v: (keep ? r.v : 0) + v, at: now, txt: '' };
 }
 function stripTick(now, still) {
   const el = needStrip(), n = SHIP.player.needs, low = NEED_KEYS.filter(k => n[k] < NEED_LOW);
@@ -12895,7 +12967,7 @@ function stripTick(now, still) {
     if (!r) { if (em.style.opacity !== '0' && em.style.opacity) em.style.opacity = '0'; continue; }
     const f = (now - r.at) / (RISE_SECS * 1000);
     if (f >= 1) { delete RISES[k]; em.style.opacity = '0'; continue; }
-    const txt = '+' + Math.round(r.v); if (r.txt !== txt) { r.txt = txt; em.textContent = txt; }
+    const txt = (r.v < 0 ? '\u2212' : '+') + Math.round(Math.abs(r.v)); if (r.txt !== txt) { r.txt = txt; em.textContent = txt; }
     em.style.opacity = (f < .1 ? f / .1 : f > .7 ? (1 - f) / .3 : 1).toFixed(3);
   }
 }
@@ -12963,7 +13035,7 @@ function playerUpdate(dt, t) {
     if (sat) fx = { ...fx, drain: { ...fx.drain, energy: fxD(fx, 'energy') * SIT_REST } };   // sitting rests you (0.28.12)
     const lay = A && A.kind === 'lie' && A.phase === 'do';
     if (lay) fx = { ...fx, drain: { ...fx.drain, energy: 0 } };   // lying in your bunk: no tiring, a little rest (0.28.29)
-    needsT = now; needsDrain(dm, false, fx, doing || null);
+    needsT = now; needsDrain(dm, false, fx, doing || null); workLeisure(dm, fx, doing);
     if (lay) n.energy = needClamp(n.energy + LIE_GAIN * dm);
     if (sat) n.social = needClamp(n.social + SIT_GAIN * sitCompany(A) * needEffects(n).socialGain * dm);
     if (A && A.phase === 'do') {
@@ -12973,7 +13045,7 @@ function playerUpdate(dt, t) {
       if (A.kind === 'make' && SHIP.player.work && SHIP.player.work.make) SHIP.player.work.make.done += m;   // and making a part
       const bm = A.def.need === 'social' && A.o.opp ? bondMult(A.o.opp) : 1;   // a game of Tiles: by your bond with them (0.28.43)
       if (A.def.need) n[A.def.need] = needClamp(n[A.def.need] + A.def.gain / A.def.mins * fxR(fx, A.def.need) * bm * m);
-      if (A.def.cost) for (const k in A.def.cost) n[k] = needClamp(n[k] - A.def.cost[k] / A.def.mins * m);   // a workout tires you (0.28.17)
+      if (A.def.cost) for (const k in A.def.cost) { const was = n[k]; n[k] = needClamp(n[k] - A.def.cost[k] / A.def.mins * m); (A.o.cost || (A.o.cost = {}))[k] = (A.o.cost[k] || 0) + was - n[k]; }   // a workout tires you (0.28.17); A.o.cost: what it took, shown at the end (0.73.0)
       if (A.kind === 'eat' && m > 0) {                   // company at your table (0.28.10, 0.28.43): by the bond, up to COMPANY_CAP
         const c = company(A); A.o.company = Math.max(A.o.company || 0, c);   // bond-weighted, capped (0.28.43)
         n.social = needClamp(n.social + COMPANY_GAIN * c * needEffects(n).socialGain * m);
@@ -13105,6 +13177,7 @@ function playerNew() {
   actEnd(true); basket = null; SHIP.player.needs = needsLoad(null); NEED_SEEN = null; SHIP.player.carry = []; SHIP.player.work = null; SHIP.player.wsteps = []; SHIP.player.bedMade = null; SHIP.player.untidy = false; SHIP.player.teaDay = null; NEED_GOAL = null; PUSH = null; SHIP.player.tray = null; SHIP.player.crate = null; needsT = null; slowWas = {}; WARN_SAID = {}; TEACH_ST = null; POP.tip = -1e9; Object.assign(SHIP, { news: [], newsUsed: [], newsAt: null, newsRows: {} });
   Object.assign(SHIP.player, walletLoad(null)); SHIP.player.bought = 0; SHIP.player.cart = null; SHIP.player.name = null; SHIP.mail = []; mailWelcome(); device.refresh();
   DINNER_SAT = false; DINNER_TRY = -1;                   // a new arrival dinner seats you again (reviewer 1, 0.28.37)
+  SHIP.player.alarm = WAKE_AT;                           // the alarm clock back at 06:00 (0.73.0)
 }
 
 // ---- your job (Pillar 2, B2): the player's side of section 17's job list. Take a job on the device (17's jobs
@@ -14334,6 +14407,8 @@ function ixJobStep() {
     const P = SHIP.player, need = jobNeeds(j, { fitted: [] }, P.carry), nx = typeof jobStops === 'function' ? ixNextStop(j) : null;
     if (nx && nx.s.step === 'fetch' && need.length) return { deck: 5, room: 'r', place: ixShelf(need).place, label: 'Fetch ' + partList(need) + ixShelf(need).say };
     const st = nx && nx.s.step === 'fetch' ? jobStops(j)[nx.k + 1] : nx && nx.s;
+    const rm = j.kind === 'rounds' && nx && nx.s === st && typeof machineById === 'function' ? machineById((j.route || [])[nx.k]) : null;   // a round: the machine by name (0.73.0)
+    if (st && rm) return { deck: st.deck, place: st.places[0] || null, label: 'Look at ' + machineName(rm) };
     return st ? { deck: st.deck, place: st.places[0] || null, label: st.step === 'pickup' ? 'Pick up ' + (j.bring || 'the delivery') : st.step === 'inspect' ? j.title + ': the next stop' : j.title } : null;
   }
   if (typeof traceHidden === 'function' && traceHidden(j)) return typeof traceGoal === 'function' ? traceGoal(j) : null;   // a traced fault not yet found: the line, never the machine (24i)
@@ -14378,6 +14453,34 @@ function ixTips() {
     if (s && Math.hypot(s.x - p.x, s.z - p.z) < 2.5) ixTip('machine', 'Tap the machine to inspect. You may need parts from storage or the machine shop.');
   }
   if (j && j.workDone) ixTip('turnin', 'Head back to the board to turn it in.');
+  roundGuide();
+}
+// the first round's walk-through (0.73.0, playtest 2 item 1, with E1's 24a): after Torres explains rounds, the round is a
+// job on the board, and the goal arrow and green tips take you through it. E1's roundTrainStep() (once a second, no side
+// effects) -> null or { step: 'take' | 'go' | 'look' | 'mark' | 'next' | 'done', job, machine, deck, place }. 'take': the
+// arrow to the job board (our own goal, RG_GOAL; never over another section's arrow); once it's yours the job's own arrow
+// (ixJobStep) walks each stop, naming the machine. Each new step shows its tip (the head writer's tip.round.<step>,
+// {machine} filled; stand-ins until baked), replacing a round tip still showing, once a save (tipsSeen 'rg:<step>:<n>',
+// n counting the machines). Nothing else saved; without roundTrainStep, nothing.
+const RG_TIPS = { take: 'Your first round is on the job board. Take it, and follow the arrow.', go: 'Walk to {machine}. Follow the arrow.',
+  look: 'Look at {machine}. Listen to it. Then mark what you see.', mark: 'Mark it: fine, worn, or something\'s off. Trust your eyes.',
+  next: 'Next one. Follow the arrow.', done: 'Round done. Turn it in at the job board.' };
+const RG_GOAL = 'Take your first round at the job board';
+let RG_LAST = '', RG_N = 0;
+function roundGuide() {
+  let r = null; try { r = typeof roundTrainStep === 'function' ? roundTrainStep() : null; } catch (e) { r = null; }
+  const ours = IX_GOAL && IX_GOAL.label === RG_GOAL;
+  if (!r || r.step !== 'take') { if (ours) clearGoal(); } else if (!IX_GOAL) setGoal({ deck: 5, item: /job board/i, room: 'w', label: RG_GOAL });
+  if (!r) { RG_LAST = ''; return; }
+  const key = r.step + '|' + (r.machine || ''); if (key === RG_LAST) return;
+  if (r.step === 'next' || r.step === 'look' && !/^(go|next)\|/.test(RG_LAST)) RG_N++;   // a new machine: next, or a look we walked up to without a go
+  RG_LAST = key;
+  const id = 'rg:' + r.step + ':' + (r.step === 'take' || r.step === 'done' ? 0 : RG_N);
+  if (SHIP.device.tipsSeen[id]) return;
+  if (TIP_Q.length && /^rg:/.test(TIP_Q[0].id)) tipDone();   // the last step's tip gives way
+  for (let i = TIP_Q.length - 1; i > 0; i--) if (/^rg:/.test(TIP_Q[i].id)) TIP_Q.splice(i, 1);
+  const t = ((typeof careerText === 'function' && careerText('tip.round.' + r.step)) || RG_TIPS[r.step] || '').replace(/\{machine\}/g, r.machine || 'the machine');
+  ixTip(id, t);
 }
 const ixV = new THREE.Vector3();
 let ixLast = '';
