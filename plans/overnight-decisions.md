@@ -224,3 +224,10 @@ All 8 packages approved (Zeke: "all good except he still walks and talks" → he
 | ~03:35 (the user) | Tonight's goal | (1) Step 3 (0.63.3) published to its OWN new version link; (2) Step 4 to its own new link; (3) rec mini-game prototypes built standalone, separate from the rest of rec deck activation; the user approves the prototypes, then integration. Lead may keep going through these without waiting (main build and main game link untouched; anything touching main still needs the user first) |
 | ~03:37 (the user) | Order tonight | Step 3 (own link) → Step 4 (own link) → rec deck activation (full rec work incl. traditions, switched on) → then the mini-game prototypes (standalone) → the user approves → integration |
 | ~03:38 (the user) | Links | Rec deck activation also gets its own link; then the prototypes (each with a link) |
+
+## Overnight 2026-10-19 (from ~03:40 UTC, lead 16)
+
+The user went to bed ~03:40: **overnight mode ON** until they check in in the morning AND ask for the report (questions in between do not end it). Goal: Step 3 (0.63.3) on its own new link → Step 4 on its own link → rec deck activation on its own link → mini-game prototypes (kayak, wall, pool), each its own link; the user approves prototypes before integration. Main and the main game link untouched. Team shrinks gradually to 6-7 incl. the lead as seats finish (never mid-piece). Calls the user would normally make are logged below.
+
+| Time (UTC) | The question you'd normally have been asked | What was done | Why |
+|---|---|---|---|
