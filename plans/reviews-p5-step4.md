@@ -9,6 +9,9 @@ Lines skimmed. In a fresh archive content_gen bakes 9342 lines; lines_check PASS
 
 ## Step 4
 
+### W2 claude/writer-p5 7a5825b (0.48.109): PASS
+works.order.lapse is a Mail body only; the tinker.* texts go (E3's WIP 2d90d7ec reads no tinker.* key). Bakes 9557 lines; lines_check PASS. W2's tip, contains 418b8c9.
+
 ### W2 claude/writer-p5 418b8c9 (0.48.108, M10 lines on E3's names): PASS
 `works.order.ask.<id>` / `works.order.thanks.<id>` for E3's eight ids (guitar-hook ... tablet-stand, as in E3's WIP 2d90d7ec's order table) and `works.order.lapse`; the first lesson's crew lines move to Calder, Halloran and Torres under `flag:train.m10.lead` (E3's code must set that flag: checked at E3's M10 review). Bakes 9569 lines; lines_check PASS.
 
