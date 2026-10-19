@@ -2,6 +2,11 @@
 
 Brief: plans/brief-recdeck.md on claude/lead-pillar1 ("R" section). Lead 18 session_01CBur9nrJ411pFkHopF96RL. Build master BM8 session_01YGy9FDmcbkySMJpVPYJaAo. Earlier verdicts: R6's, in plans/reviews-p5-step4.md ("Rec deck activation"). Newest first.
 
+### RB2 claude/rec-works 2387479 (0.84.12: climb refusals, the talk's ring of chairs and stool, pool symptom words), R7: PASS (closes my fix 1)
+- recStart refuses the taped route (`sh.route === r`, W3's rec.shut.route) and route 1/2 under a tagged-out belay (`belayOff`, rec.shut.belay), the same reading the signs use; REC_OK carries `belayOff: [false, false]`. SYMPTOM_TEXT.pool matches W3's words.
+- The ring and stool: RB's kit (the auditorium's dress) for RA's places 7-ring-1..8 / 7-stool-1, one owner each; KIT.chair/stool don't call R(); shown only for 'talk', the mic stand hidden then (merged, noMerge). Note: the hidden microphone keeps its IT, so a tap there during a talk may still say "Microphone" (cosmetic).
+- No code after `//`, no duplicate declarations. Checks: deck_check OK (Deck 7 178 calls), interactions_check OK, cadet_test vs 32f7710 ALL IDENTICAL (noise).
+
 ### RB2 claude/rec-works f319ab3 + 32f7710 (0.84.10 checks loop over DECK_ORDER; 0.84.11 the switch, REC_DECK = true), R7: PASS (merge the switch last, as the brief says)
 - 0.84.10: device_check and machine_check walk `DECK_ORDER` (falls back to the DECKS keys for older builds); device_check's room-name fit now writes the HUD line with deckWord. Check code only.
 - 0.84.11: the one line, `REC_DECK = true` (DECK_ORDER puts R between 4 and 5). Grep of the switched-on build: no "Deck 7" literal outside comments; every `'Deck ' + n` goes through deckWord/deckIn except Maps' goal, which has its own "the rec deck". The `{deck}` fills (rounds, team Mail, 24o leaks, the p2 case title) can't see 7 today: rounds and the logbook skip the rec deck (lead 17's call 5), leaks and team jobs are fixed machines on Decks 1-6, and p2 needs 3+ causes (rec kinds have 2 at most). **Keep that true:** a future rec fault with 3 causes would read "Deck 7" in a p2 card.
