@@ -37,3 +37,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - ~05:49 lead handover: BM7 now reports to lead 17 (session_016bN7x175WBwBL7S9xc2Lpb; confirmed in TEAM.md on claude/lead-pillar1 802fe1b).
 - ~05:50 W2 d1e62d3 (0.48.111, E2's favour.call / favour.not); with R4. X claude/crew-pt1 056f8d8 (0.71.3 playtest 2 items 21, 22, 2, 8, 16, 13, 14, on 7a6e137; cadet differs by the earlier crew wake; deck_check Deck 4 memory 373↔389 = crew at 06:02, not a leak; intro_check updated: run it on the combine); with R4? Merge order: after places, before U and W2.
 - ~05:51 R4 PASS W2 d1e62d3 (W2's tip).
+- ~05:54 W2 606e204 (0.48.112, queue.left for X2); with R4.
