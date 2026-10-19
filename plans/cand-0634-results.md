@@ -38,3 +38,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - ~05:50 W2 d1e62d3 (0.48.111, E2's favour.call / favour.not); with R4. X claude/crew-pt1 056f8d8 (0.71.3 playtest 2 items 21, 22, 2, 8, 16, 13, 14, on 7a6e137; cadet differs by the earlier crew wake; deck_check Deck 4 memory 373↔389 = crew at 06:02, not a leak; intro_check updated: run it on the combine); with R4? Merge order: after places, before U and W2.
 - ~05:51 R4 PASS W2 d1e62d3 (W2's tip).
 - ~05:54 W2 606e204 (0.48.112, queue.left for X2); with R4.
+- t3 player: hit my 1800 s limit (rc 124, no FAIL lines before it; player needs ~2700 s): not a result; player runs again with TMO=2700 on the next full trial. t5 checks started.
