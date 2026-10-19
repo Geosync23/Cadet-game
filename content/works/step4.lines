@@ -164,7 +164,7 @@
 == rewire.done
 - Junction {junction} rewired. Lights steady.
 == rewire.faded
-- These two have faded. Which is which?
+- This one's faded. Which colour was it?
 == rewire.check
 - Flick the lights. See which one goes off.
 == wire.red

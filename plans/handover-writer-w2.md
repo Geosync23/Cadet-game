@@ -3,7 +3,7 @@
 **Session:** session_01866TWKzGRgZmFcxiYRi4db. Succeeded seat W (read `plans/handover-writer-p5.md` first: tone,
 formats, gotchas still hold). **Lead:** lead 17, session_016bN7x175WBwBL7S9xc2Lpb (was lead 16) (leads change often: check the
 latest brief on `claude/lead-pillar1`). **Branch:** `claude/writer-p5` (text, `lines_check.py`, `content_gen.py`'s
-small meeting change, DEV_NOTES rows). Build rows 0.48.92-0.48.113 so far; the next is **0.48.114**.
+small meeting change, DEV_NOTES rows). Build rows 0.48.92-0.48.114 so far; the next is **0.48.115**.
 
 ## What I built
 - **Step 3 (0.63.3), final 995af0f + bc9724b + a21487e, all R3 PASS.** `content/works/step3.lines` (promotion,
