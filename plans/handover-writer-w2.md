@@ -49,3 +49,7 @@ session_01QbuzvT3TwzMwSWRmakzX8Z) and the reviewer (R5 session_01XJyHzg4QvX2nsdt
 - **Next writer's job (lead 17):** the rec deck writing (R12, the "six decks" texts). W2 takes only E2's ticket and
   team-parts extras, then hands over at ~70%. The rec deck lives in the base dormant (REC_DECK=false; deck key 7,
   `disc`, `DECK_ORDER`, `deckLabel()`): read the lead's rec-deck brief on `claude/lead-pillar1` first.
+- **24t cabin and stars (E3's code, not yet on claude/mech-diagnose d51c5ed; R5's note):** E3 reads `cabin.spot.<rug|desk|shelf|ledge>`
+  as the placement sentence (W2 wrote labels for rug/lamp/shelf/plant), `star.done` as the ten-stars message, `star.pick`
+  with `{a}`/`{b}` (the chart's two stars), and you can retry a wrong star at once (star.wrong says "tomorrow"). Agree
+  the names with E3's successor (one full list), then rewrite those keys.
