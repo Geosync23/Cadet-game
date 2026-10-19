@@ -67,7 +67,7 @@ SETUP = r"""(() => {
     range: [{ id: 'element', part: 'element', w: 3, shows: 'a ring is weak' }, { id: 'relay', part: 'relay', w: 2, shows: 'a ring is weak' }] };
   if (!SHIP.works) { if (out.realWorks) { if (typeof WORKS_START !== 'undefined' && shipNow() < WORKS_START) setShipNow(WORKS_START); worksInit(); } if (!SHIP.works) SHIP.works = { v: 1, tier: 1, rank: 'junior', xp: 0, tr: {}, op: {}, tools: {} }; }
   out.realTools = typeof hasTool === 'function'; if (!out.realTools) window.hasTool = id => !!(SHIP.works && SHIP.works.tools && SHIP.works.tools[id]);
-  caseState().first = 'none';                            // Day 5's training case only in its own part, below
+  caseState().first = 'none'; caseState().p1 = 'none'; caseState().p2 = 'none';   // the training cases only in their own parts, below
   window.__ptOpen = false;
   CASE_KINDS.zz = { name: 'Stand-in', ladder: 'zz', open: () => window.__ptOpen,
     // the cause, its same-card decoys, and stand-in wiring suspects up to the band's fewest suspects (one note each)
@@ -518,6 +518,25 @@ P2GATE = r"""(() => {
   return out;
 })()"""
 
+# P1's first with an m9 row (M3's tracing lesson reads this line on Day 12): nothing at 16:00 on Day 11; staged once
+# m9 is trained, the pump's fault from then
+P1M9 = r"""(() => {
+  const out = {}, C = caseState(), W = SHIP.works, keep = { op: W.op, rank: W.rank, tier: W.tier, tr: W.tr, test: W.test }, had = !!ladderRow('m9');
+  if (!had) CAREER_LADDER.push({ id: 'm9', name: 'Tracing', size: 'big', day: 12, tier: 2, rank: 'officer', needs: null, by: ['calder'], stages: [{ uses: 0 }] });
+  C.open = []; delete C.p1; W.op = {}; W.tr = {}; W.rank = 'officer'; W.tier = 2; W.test = { tier: 2, day: 9, tries: 1, passed: true };
+  MACH_HOUR = null; MACH_SEEN = -1; setShipNow(9 * 1440); machinesNow();
+  for (let t = 9 * 1440; t <= 10 * 1440 + 1000; t += 60) { setShipNow(t); machinesNow(); caseTick(); }
+  out.day11 = C.p1 || null;
+  for (const id of Object.values(P1_LINES).flat()) if (SHIP.machines[id]) { SHIP.machines[id].cond = 90; SHIP.machines[id].state = 'healthy'; }
+  for (let t = 10 * 1440 + 1020; t <= 11 * 1440 + 600; t += 60) { setShipNow(t); machinesNow(); }
+  const now = 11 * 1440 + 650; W.tr = { m9: 12 }; setShipNow(now); machinesNow(); caseTick();
+  const c = C.p1 && caseById(C.p1), j = c && caseJob(c); out.staged = !!c; out.now = now; out.p1 = C.p1;
+  if (j) { out.due = j.posted; out.logDay = c.clues[0] && c.clues[0].src.d; SHIP.jobs = SHIP.jobs.filter(x => x !== j); }
+  if (!had) CAREER_LADDER.splice(CAREER_LADDER.findIndex(r => r.id === 'm9'), 1);
+  Object.assign(W, keep); C.open = []; delete C.p1;
+  return out;
+})()"""
+
 def run(path):
     with sync_playwright() as pw:
         g = Game(pw, path, 390, 844)
@@ -687,12 +706,16 @@ def run(path):
             check('Showers on Deck 4' in F1['title'] and 'evening' in F1['title'] and 'pump' not in F1['title'].lower(), f"the card: {F1['title']!r}")
             check(F1['cardBoard'] == F1['card'] or not st.get('hookCard', True), f"the board card is the case's (section 17's jobCard hook): {F1['cardBoard']}")
             check(F1['at0'] == '3-recycler-1' and F1['scan'] is None and F1['parts'] == [], f"the arrow to the top of the line, no scanner, no part: {F1['at0']} {F1['scan']}")
+            if st.get('hookAt'): check(F1['stop0'] == ['3-recycler-1-panel'] and F1['stopWrong'] == ['3-filter-1-panel'], f"section 17's stops follow: the top of the line, then the called machine: {F1['stop0']} {F1['stopWrong']}")
             check(len(F1['strip']) == 3 and all(r['bars'] == 24 and r['pins'] == 5 and r['w'] >= 12 and r['low'] == 0 for r in F1['strip']), f"the day strip: three logs, 24 bars of 12px+, the evening outlined, all fine: {F1['strip']}")
             check(F1['stripFallback'], 'a skin without strips: the logs as a list')
             check(all('log: full output every hour' in t for t in F1['texts']), f"the logs in words: {F1['texts']}")
             check(F1['atWrong'] == '3-filter-1' and F1['wrongFit']['spent'] and not F1['wrongFit']['done'] and F1['wrongFit']['known'], f"a wrong call: to the filter bank, its cartridge used up, not fixed: {F1['atWrong']} {F1['wrongFit']}")
             check(F1['saveSame'] and F1['savedP1'] and F1['saveBytes'] < 1100, f"the save mid-case reads back the same ({F1['saveBytes']} bytes)")
             check(F1['atRight'] is None and F1['fixed'] and F1['closed'] and F1['done'] == 0, f"the right call: the pump, fixed, closed (one wrong call: not right first time): {F1}")
+        M9 = g.ev(P1M9)
+        print('P1 after the tracing lesson:', M9)
+        check(M9['day11'] is None and M9['staged'] and M9['due'] == M9['now'] and M9['logDay'] == 11, f"with an m9 row, P1's first waits for the tracing lesson, then the pump goes from then, its logs from the day before: {M9}")
         # P2 (0.55.15)
         R2 = g.ev(P2); R2b = g.ev(P2)
         p2c = R2['cases']; print(f"P2 sweep: {len(p2c)} cases ({R2['fit']} fitted)"); [print('  ', c) for c in p2c[:1]]
