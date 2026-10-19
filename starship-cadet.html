@@ -39389,6 +39389,7 @@ const CAREER_LADDER = [
   { id: 'm12', name: 'The logbook', size: 'small', day: 12, tier: 2, rank: 'officer', needs: null, by: ['calder'], where: { deck: 5, room: 'w' }, stages: [{ uses: 0 }, { uses: 5 }, { uses: 10 }] },   // E1's 24n: a line a shift; flag a machine after 5; your notes come back after 10
   { id: 'm13', name: 'Leak hunting', size: 'small', day: 12, tier: 2, rank: 'officer', needs: null, by: ['torres-zeke', 'halloran-emeka', 'calder'], job: 'leak', stages: [{ uses: 0 }, { uses: 3 }] },   // E2's 24o
   { id: 'm14', name: 'Garden irrigation', size: 'small', day: 13, tier: 2, rank: 'officer', needs: null, by: ['cruz-tove', 'oneill-imani', 'hart-ravi'], job: 'nozzle', stages: [{ uses: 0 }, { uses: 2 }, { uses: 4 }] },   // E2's 24q (the garden crew; 24r may set its own at its first posting)
+  { id: 'm15', name: 'Rewiring', size: 'big', day: 17, tier: 2, rank: 'officer', needs: null, by: ['calder'], where: { deck: 4, room: '-' }, job: 'rewire', tool: 'tester', stages: [{ uses: 0 }, { uses: 3 }] },   // E2's 24q (0.45.11)
   { id: 'm17', name: 'The lift roof', size: 'big', day: 18, tier: 2, rank: 'officer', needs: null, by: ['halloran-emeka'], stages: [{ uses: 0 }, { uses: 2 }] },   // E3's 24s
 ];
 const WORK_MECH = {};                                    // the sub-blocks: WORK_MECH[ladder id] = { open?(row, day), offer?(row, cur, day, t) -> bool (its own ask), at?(day) -> earliest meeting minute, reserve?(day, at, slot, o) -> job id, noJob?, watch? (minutes), hold? }
