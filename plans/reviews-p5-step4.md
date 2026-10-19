@@ -20,6 +20,13 @@ Lines skimmed. In a fresh archive content_gen bakes 9342 lines; lines_check PASS
 
 ## Step 4
 
+### E6 claude/mech-rounds 2edb69c8 (0.45.14, R5's two fixes on E1's 0.45.11/0.45.12), R5: PASS
+E6 took E1's seat. Diff 013f53ec..2edb69c8.
+- logbookTick: only a worn flagged machine is serviced, never a faulty one, never a job held for you (heldForYou, section 17, defined earlier in the file).
+- Turn-in: side kinds pay (WORK_XP ?? 1) + 1 if right first time, still capped. Only rewiring sets j.rightFirst among side kinds (the other setters are scanFitted and 24k's cases, both repairs), so a leak stays +1 and the joint chore (j.xp 0) 0; mech_check side pays [2, 0, 1] and m12 leaves a failing machine and a held job open.
+- Still open on E6: 0.45.13's load-stop order (haulStops).
+- Checks: on a merge with E3's places, queued.
+
 ### E5 claude/mech-incidents 60a418fe (0.51.13; contains 93fbdb5d 0.51.12), R5: PASS
 E5 took E2's seat. Diff 67144486..60a418fe.
 - The pin: `playerRigRebuild()` in 24l (lead 17: E2's, now E5's), the same steps as 24p's promoPip (old rig removed and its geometry freed, makeCharacter(spec) again, props reset, the grubby tint put back) plus the stand-in at a place (recBody). makeCharacter draws no R(), so no determinism change. ffPin can now show the pin; mech_check checks it merged into the chest and back after a reload.
