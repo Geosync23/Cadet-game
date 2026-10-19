@@ -269,7 +269,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.82.7
+   STARSHIP CADET: CSV Wren                           build 0.82.8
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8445,7 +8445,7 @@ DECKS[7] = {
     // the concourse: a towel bin by the lobby (0.80.2: its two benches went; the stands fill that glass now)
     // 0.80.8 (the user's: livelier, busier): the REC DEC gantry sign by the lift, bunting, murals, beanbags, plants, benches,
     // a water station and a drinks fridge, a trophy case, a signpost; all along the edges, clear of every door and the lanes' middle
-    place('=', 'recBigSign', 21.5, 2.0, 'n', { span: 3.5,   // 0.82.5 (the user's): east of the lift, where the default view looks (was 12.3, behind the lobby wall)
+    place('+', 'recBigSign', .6, 3.0, 'n', { span: 3.4,   // 0.82.8 (the user's): the lift's stern side again, but in the lobby, in front of the wall that hid it (0.82.5 had it east of the lift)
       it: IT('REC DEC', 'A gantry across the concourse with REC DEC in pink neon, two storeys up. You can see it the moment the lift doors open.') });
     place('=', 'recBunting', 8.5, 2.0, 'n', { span: 3.8 });   // 0.80.9 (the user's: a little too busy): one string, and fewer things below
     for (const [x, z, f] of [[1.5, .5, RK.padA], [2.6, .6, RK.kayak[1]]]) place('=', 'beanbag', x, z, 'n', { fab: f, it: IT('Beanbag', 'A big squashy beanbag, still warm. Someone is always about to get up from it.') });
@@ -8613,7 +8613,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.82.7';                           // keep in step with the header's build line
+const GAME_BUILD = '0.82.8';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
