@@ -483,7 +483,7 @@ with sync_playwright() as pw:
               const out = []; let k = 0; window.roundTrainStep = () => seq[k];
               for (; k < seq.length; k++) { roundGuide(); out.push([IX_GOAL && IX_GOAL.label, TIP_Q.map(t => t.id).join(','), (TIP_Q[0] || {}).text || '']); }
               setGoal({ deck: 3, room: 'M', label: 'Someone else' }); RG_LAST = 'take|'; k = 0; roundGuide(); roundGuide(); const other = IX_GOAL && IX_GOAL.label; clearGoal();
-              k = 2; RG_LAST = ''; roundGuide(); const again = TIP_Q.length; TIP_Q.length = 0; DEVICE_SKIN.tip(null);
+              k = 2; RG_LAST = ''; RG_N = 0; roundGuide(); const again = TIP_Q.length; TIP_Q.length = 0; DEVICE_SKIN.tip(null);
               if (real) window.roundTrainStep = real; else delete window.roundTrainStep; return { out, other, again }; })()""")
             o = r['out']; print('  the first round, step by step [arrow, tips queued, tip]:'); [print('   ', x) for x in o]
             check(o[0][0] == 'Take your first round at the job board' and o[0][1] == 'rg:take:0' and o[1][1] == 'rg:take:0', f'take: the arrow to the job board and its tip, once ({o[:2]})')
