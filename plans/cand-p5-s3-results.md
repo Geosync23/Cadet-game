@@ -11,3 +11,4 @@ Build master 6 (BM6, session_01F8k6hqdBRoxDJMzqAuiHqR) on claude/p5-cand-pt1 (th
 - ~02:33 H2 043d20b (0.55.13 T2 band; with R3): trial s3b = base + S2 + H2 + W2 merges clean, NAMES OK, checks running (cadet vs base with build label 0.63.3). DA5 dd70a6f (0.47.3 air line + 0.47.11 places + bridge hook; needs S2's damper kind and C2's bridgeInvitedNow(); if C2 edits edgeBlocks keep DA5's YOU_LOCKS); with R3.
 - R3 PASS S2 5cc7646. trial s3b (base + S2 + H2 043d20b + W2): cadet_test vs base-with-0.63.3-label ALL IDENTICAL; puzzle, mech, machine OK.
 - ~02:36 U 114bd49 (0.72.2 Tiles 'clock is paused' line; with R3): trial s3c = base + S2 + H2 + U + W2.
+- R3 PASS H2 043d20b. trial s3c (base + S2 + H2 + U 114bd49 + W2): cadet_test vs base-0.63.3-label ALL IDENTICAL; tiles ALL OK.
