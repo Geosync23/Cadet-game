@@ -384,3 +384,93 @@
 - A perfect round. I'm genuinely impressed.
 == quiz.done.zero
 - None this time. Still, you came. That's the best part.   #warm
+
+// W3, rec deck R12: Tomas's new questions about the rec dec (true to the built deck: 76 seats, four lanes, four routes,
+// a fifth of a g, the R button, open 06:00 to midnight)
+== quiz.q33.text
+- How many seats are there in the auditorium?
+== quiz.q33.a1
+- 76
+== quiz.q33.a2
+- 12
+== quiz.q33.a3
+- 300
+== quiz.q33.a4
+- One, and it's Vance's
+
+== quiz.q34.text
+- What does the lift say for the rec dec?
+== quiz.q34.a1
+- R
+== quiz.q34.a2
+- 7
+== quiz.q34.a3
+- 4 and a half
+== quiz.q34.a4
+- Wheee
+
+== quiz.q35.text
+- How many lanes does the pool have?
+== quiz.q35.a1
+- Four
+== quiz.q35.a2
+- Two
+== quiz.q35.a3
+- Nine
+== quiz.q35.a4
+- Just the one, very wide
+
+== quiz.q36.text
+- How strong is the gravity in the float room?
+== quiz.q36.a1
+- About a fifth of normal
+== quiz.q36.a2
+- Twice normal
+== quiz.q36.a3
+- None at all
+== quiz.q36.a4
+- Depends on the mood
+
+== quiz.q37.text
+- What do you ring at the top of the climbing wall?
+== quiz.q37.a1
+- A brass bell
+== quiz.q37.a2
+- The Captain
+== quiz.q37.a3
+- A doorbell
+== quiz.q37.a4
+- A cowbell
+
+== quiz.q38.text
+- What colours are the climbing wall's four routes?
+== quiz.q38.a1
+- Red, yellow, blue and green
+== quiz.q38.a2
+- Black, white, grey and beige
+== quiz.q38.a3
+- All orange
+== quiz.q38.a4
+- Tartan
+
+== quiz.q39.text
+- When does the rec dec close for the night?
+== quiz.q39.a1
+- Midnight
+== quiz.q39.a2
+- Six in the evening
+== quiz.q39.a3
+- Never
+== quiz.q39.a4
+- When Holt says so
+
+== quiz.q40.text
+- Which two decks is the rec dec between?
+== quiz.q40.a1
+- Quarters and Operations
+== quiz.q40.a2
+- The bridge and the Commons
+== quiz.q40.a3
+- Engineering and the stars
+== quiz.q40.a4
+- It's on the roof

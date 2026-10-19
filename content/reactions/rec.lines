@@ -1,0 +1,62 @@
+@reactions tradition
+// W3, rec deck: the day after each rec tradition (social's cue tradition.<id>, one day), past tense; .you to someone
+// who came. The ids are the proposed rec ids (content/trad-words/*.words; RA confirms).
+
+? cue:tradition.winner-stays-on !cue:tradition.winner-stays-on.you
+- Pell stayed on the court for three hours yesterday. He ate lunch between points.   #funny
+- Winner Stays On was packed. The stands were louder than the mess at dinner.
+? cue:tradition.winner-stays-on.you tier>=acquaintance
+- Saw you on the court yesterday! You've got a proper backhand coming.
+- You put your name on Pell's board. Brave. He rubs out the brave ones first.   #funny
+
+? cue:tradition.lightdisc-cup !cue:tradition.lightdisc-cup.you
+- That Cup final! I shouted so much I've got no voice left.   #funny
+- The Cup board has a new name. My department's furious. In a nice way.
+? cue:tradition.lightdisc-cup.you tier>=acquaintance
+- You played in the Cup! How far did you get? Doesn't matter. You played.   #warm
+
+? cue:tradition.dawn-swim.you tier>=acquaintance
+- You came to dawn swim! Rina noticed. She said "Hm." That's good, from Rina.   #funny
+- Early swim yesterday? You looked very awake at breakfast. Suspiciously awake.   #funny
+
+? cue:tradition.paddle-club !cue:tradition.paddle-club.you
+- Holt took paddle club round the loop twice. Nobody fell in. He looked almost pleased.
+? cue:tradition.paddle-club.you tier>=acquaintance
+- Holt says you held your paddle properly at paddle club. He told me. Unprompted.   #warm
+
+? cue:tradition.river-regatta !cue:tradition.river-regatta.you
+- Who got the pennant? I was cheering from the concourse glass. Couldn't see a thing.   #funny
+- The regatta horn went off under the officers' corridor. Vance says he wasn't startled.   #funny
+? cue:tradition.river-regatta.you tier>=acquaintance
+- You paddled the fun heat! You went round the bend sideways. It looked brilliant.   #funny
+
+? cue:tradition.wall-night !cue:tradition.wall-night.you
+- Wall night was busy. The bell rang so often Tomas stopped counting. Vance didn't.   #funny
+? cue:tradition.wall-night.you tier>=acquaintance
+- I heard you rang the bell on Wall night! Your name's on the board now.   #warm
+- My arms are still dead from Wall night. Are yours? Tell me yours are.   #funny
+
+? cue:tradition.float-hour.you tier>=acquaintance
+- Did you sleep well after float hour? I slept like a stone. A floating stone.   #funny
+- Float hour was lovely, wasn't it? Nobody said a word. Not one.   #warm
+
+? cue:tradition.slow-stretch.you tier>=acquaintance
+- You came to slow stretch. How's your back? Mine's never been better.
+
+? cue:tradition.rec-talent-night !cue:tradition.rec-talent-night.you
+- Talent night was brilliant. The duet! And the spanner juggling. Mostly the spanners.   #funny
+- Lucia's a born host. She made every act sound like the best thing aboard.   #warm
+? cue:tradition.rec-talent-night.you tier>=acquaintance
+- You did an act at talent night! People are still talking about it.   #warm
+- Your act! I clapped till my hands hurt. Do another one next time.   #warm
+- I saw you at talent night. You were braver than me. I just clapped.
+
+? cue:tradition.all-hands !cue:tradition.all-hands.you
+- Did you hear the Captain at the all-hands? Short, kind, then dinner. Perfect.
+? cue:tradition.all-hands.you tier>=acquaintance
+- Good to see you at the all-hands. The Captain looks round the room. She noticed.   #warm
+
+? cue:tradition.wren-talk !cue:tradition.wren-talk.you
+- Good Wren talk last night. I learned a thing. I've already forgotten it, but I learned it.   #funny
+? cue:tradition.wren-talk.you tier>=acquaintance
+- You were at the talk last night! Did you ask anything? I always think of mine after.

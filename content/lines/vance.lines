@@ -454,3 +454,31 @@
 - Your name. Spelled correctly. I checked.
 ? flag:promo.walk.inside
 - Cabin 4-23. Yours. Goodnight, Officer.
+
+// W3, rec deck R12: has rung the bell more than anyone, and counts
+== chat
+- I have rung the climbing wall bell more than anyone aboard. I keep a count. Naturally.
+- The red route has eleven holds, three of them unhelpful. Regrettable, but fair.   #funny
+- Lightdisc, by the book: watch the disc, move early, return clean. Carry on.
+? tier>=friend
+- If you ring the bell on Wall night, I will add you to the count. Gladly.   #warm
+== smalltalk
+- Three hundred and four rings. Correct.   #funny
+
+== disc.charged
+- By the book, Cadet.
+- Page forty: the charged return.
+- Keep up.
+== disc.curve
+- A curve, as the rules allow.
+- Lateral motion. Correct.
+== disc.point
+- Point. Noted.
+- Regrettable. For you.   #funny
+- Three things: watch, move, return.
+== disc.win
+- Regulation result.
+- Well contested. Carry on.
+== disc.lose
+- Impressive. I'll note it.
+- Hm. Correct. Rematch.   #funny

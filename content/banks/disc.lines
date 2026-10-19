@@ -1,0 +1,19 @@
+@bank all
+// W3, Lightdisc: anyone's fallback for section 23b's discTalk (lineFor(opp, 'disc.<kind>')), for opponents with no
+// own lines: charged, curve, point, win (they win the game), lose (you win; proposed to 23b).
+== disc.charged
+- Charged one!
+- Here it comes!
+== disc.curve
+- Curve!
+- Watch it bend.
+== disc.point
+- Point!
+- Ooh, close.
+- That one's mine.
+== disc.win
+- Good game!
+- That's the game. Again?
+== disc.lose
+- Well played!
+- You got me. Rematch?

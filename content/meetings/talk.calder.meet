@@ -1,0 +1,21 @@
+@meeting talk.calder
+// W3, Wren talks: Day 18, Thursday 19:00-19:45, a chief's talk in the auditorium seats (ends before Echo Signal at
+// 20:30). Chief Ines Calder, Works: "The Wren's first refit", the one that put the rec dec in (the lore: "They ran out of numbers").
+title: The Wren's first refit
+from: Chief Ines Calder
+gist: Chief Calder's talk on the Wren's refit, the one that added the rec dec between two old decks.
+== lines
+calder: Evening. This will take twenty-five minutes. I've timed it.   [nod]
+calder: You're sitting in it. The rec dec went in at the last refit, between Quarters and Operations. The Wren had six. Now she has seven.
+calder: Everyone asks why the lift says R. Simple. Decks 5 and 6 had a thousand labels with their numbers on. We ran out of numbers.   [laugh]
+calder: A whole pool of water above Deck 5 storage. Every pipe in this room was a drawing on my desk for a year.
+calder: The pool leaked on the first day. One drip. I found it in eleven minutes. It's on a card in my office.
+calder: Lesson: build it, then watch it. Nothing's finished. That's not bad news. That's Works. Questions.
+? choice
+* Was the pool your idea?   rel:calder+2 flavour:listen mem:talk.calder.asked
+  calder: No. The crew voted. I'd have built a bigger engine room. I was outvoted. It was the right call.   [laugh]
+* Where was the first drip?   rel:calder+2 flavour:practical mem:talk.calder.asked
+  calder: Pool plant, the second filter's seal. It still drips, now and then. Good question. Look there first.   [nod]
+* (Just listen)
+  calder: No questions. Good. Then the board's waiting for you in the morning.
+calder: That's all. Thank you.

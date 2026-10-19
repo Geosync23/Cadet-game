@@ -562,3 +562,37 @@
 - Something on tonight. Bring water.
 ? trad:hull-lights
 - Fine. It's pretty.
+
+// W3, rec deck R12: annoyingly good at Lightdisc; Dawn swim before the infirmary opens
+== chat
+- Lightdisc's just Tiles with running. I'm good at Tiles. Work it out.   #funny
+- Dawn swim, Tuesdays and Thursdays. Quarter past six. Lanes are empty and so is your head.
+- I've beaten Pell at Lightdisc eleven times. He says nine. He's wrong. I keep count.   #funny
+? weekday:tue|thu time:morning
+- Swam before the infirmary opened. Do it with me one morning. It's an order, sort of.
+? tier>=friend
+- Swimming's good for you. Not a suggestion. Lane three, Thursday, quarter past six.   #warm
+== smalltalk
+- Eleven nil. I keep count.   #funny
+- Lanes are empty at six. Bliss.
+
+// W3, Lightdisc (section 23b's discTalk: lineFor(opp, 'disc.<kind>')): charged (her charged return), curve (her curve),
+// point (she wins a point), win (she wins the game), lose (you win the game: proposed to 23b)
+== disc.charged
+- Charged. Duck.   #funny
+- That one's got your name on.
+- Three in a row. You know what's coming.
+== disc.curve
+- Bend it. Like that.
+- Didn't see it coming? No.   #funny
+== disc.point
+- Fine.
+- Again?
+- You'll get there.
+- That's one. I'm counting.   #funny
+== disc.win
+- That's the game. I kept count.   #funny
+- Undefeated. Still.   #funny
+== disc.lose
+- Fine. Best of three.   #funny
+- Don't tell Pell.   #funny

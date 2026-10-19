@@ -1,0 +1,18 @@
+@tradition all-hands
+// W3 rec deck words. The first Monday of each season 17:45-18:10 (and the first one with the first ship-wide event: lead 17's call 1), the auditorium; Captain Marrow at the lectern, Commander Vance behind her. The night shift gets it in Mail.
+== mail
+- The Captain's all-hands is tomorrow, {time} in the auditorium. A new season, a few thanks, and then dinner. Everyone off duty, please come.
+== mail.night
+- You slept through the Captain's all-hands, as you should. She said: a good season behind us, a busy one ahead, and thank you, all of you. Especially the night shift, who kept the lights on while we talked.   #warm
+== ask
+- All-hands before dinner. Comb your hair. The Captain notices. Well, Vance does.   #funny
+- Coming to the all-hands? The Captain names a few people. You never know.
+== here
+- Shh. The Captain's on.
+- Good turnout. She'll like that.
+== thanks
+- You find a seat as Captain Marrow steps to the lectern. Commander Vance stands behind her, very straight.
+== chatter
+- Did you hear the Captain at the all-hands? She named the whole galley.   #warm
+- The Captain tapped the mic three times. Somebody fix the mic.   #funny
+- I like the all-hands. It's short, and then there's dinner.   #funny

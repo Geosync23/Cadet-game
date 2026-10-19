@@ -1,0 +1,26 @@
+@bank all
+// W3, rec deck R12: the News feed's rec dec posts (banks/news.lines' format: one kind per source, 90 characters).
+// trad: ids are the rec traditions' proposed ids (content/trad-words/*.words; RA confirms).
+
+== news.works
+- Rec dec: pool filter changed. Maeve did it in nine minutes forty. She wants it known.
+- Court net back up after a flicker. The Sunday crowd cheered the repair. Works bowed.
+- A route's taped off on the climbing wall while a loose hold gets tightened. Sorry, blue.
+- Gravity plates checked. The float room is floating exactly as much as it should.
+
+== news.notice
+- Rec dec: wet towels in the returns bin, please. Not on the beanbags.
+- Kit hire is self-serve. So is putting it back. The sign says so. In capitals.
+- Found on the kit hire counter: one flipper. Owner, please collect. It's lonely.
+- The rec dec closes at midnight, for Deck 4's sleep. Night swimmers, sorry.
+- The season's bell board is in the rec dec foyer. Ring the bell on Wall night to join it.
+
+== news.gossip
+- Someone left the float room on "moon" again. We have suspects. We have no proof.
+- Chief Holt was seen leaving the float room. Twice. He says it was for his back.
+- Overheard on the court: "Pell 11, You banana." The scoreboard needs Works.
+- Rina says she's beaten Pell at Lightdisc eleven times. Pell says nine. Ask Rina.
+
+== news.crew
+- Commander Vance has rung the climbing wall bell more than anyone. He has the number.
+- {name} rang the bell on Wall night. Their name's on the season's board in the foyer.

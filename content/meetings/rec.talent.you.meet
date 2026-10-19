@@ -1,0 +1,16 @@
+@meeting rec.talent.you
+// W3, rec talent night: your act, when you've signed up (the choice card). No failing: the crowd cheers either way,
+// and people mention it for days (reactions/rec-talent-night.lines, .you). Lucia Ferreira hosts.
+title: Talent night: your act
+from: Lucia Ferreira
+gist: You did an act at talent night, and the crowd cheered.
+== lines
+ferreira: And now, a first-timer. Be kind, everyone. Here's {me}!   [gesture]
+? choice
+* (Play a tune on the piano)   flavour:share mem:talent.tune
+  ferreira: Lovely! Not a single wrong note. Well, one. It was the best one.   [laugh]
+* (Tell a ship joke)   flavour:cheer mem:talent.joke
+  ferreira: Oh, that's terrible. They're all laughing. That's a win, {me}.   [laugh]
+* (Do a Works trick with a spanner)   flavour:practical mem:talent.trick
+  ferreira: Spinning a spanner on one finger! Chief Calder's clapping. Mark the day.   [laugh]
+ferreira: Give it up for {me}, everybody!   [gesture]
