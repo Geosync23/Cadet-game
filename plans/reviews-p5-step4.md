@@ -20,6 +20,9 @@ Lines skimmed. In a fresh archive content_gen bakes 9342 lines; lines_check PASS
 
 ## Step 4
 
+### W2 claude/writer-p5 4e0d212 (0.48.115, 24t lines matched to the code), R5: PASS
+cabin.spot.rug/desk/shelf/ledge are now the placing sentences; star.title/pick ({a} {b})/right ({star})/wrong (look again)/name ({n})/done (ten stars) match every worksText call in d51c5edf; the unread cabin.item.* go. Bakes 9559 lines; lines_check PASS. This settles fix 4 of E3's 0.53.7 on the writer's side (E4 still checks the code side). W2's tip.
+
 ### E3 claude/mech-diagnose d51c5edf (0.53.8: R4's two M10 fixes; same game as WIP 95d3737a), R5: PASS
 - Fix 1 done: shopFetch with an empty shelf keeps j.parts and sets j.offcuts, then ticks the fetch stop, so the make stop stays (mech_check: an empty shelf ticks the fetch only). The make stop takes the part from your hands only if you have it, so stores never go below 0.
 - Fix 2 done (the lead's call, in person): the finish hold puts the thing in SHIP.player.carry (refused at the start if your hands are full); "Give the <thing>" shows only while you hold it, and handing it over takes it from your hands; a made order not in your hands (old save, reload, put down) is given back at the order board; main storage won't take it.
