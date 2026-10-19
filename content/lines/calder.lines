@@ -541,20 +541,20 @@
 // ---- Pillar 5 Step 3 (head writer W2): the test job and the first promotion (seat C2), team jobs (M2), tracing (M3),
 // P1 (H2). Kind 'work', flags as in content/works/keys-p5.md "Step 3". Every line under a flag plays in order.
 == work
-// Day 9: the test job, Calder following you (C2: train.t2.step.take / .<stop tag> / .done / .turnin)
+// Day 9: the test job, Calder following you (C2: train.t2.step.take/fetch/make/job/tune/done/turnin; look and scan if 24a/24g add stops)
 ? flag:train.t2.step.look
 - Round first. Find it yourself.
 ? flag:train.t2.step.take
 - Take it from the board. Go on.
-? flag:train.t2.step.hold
+? flag:train.t2.step.scan
 - Scan it. Read me the lowest.
 ? flag:train.t2.step.fetch
 - One filter. You know the shelf.
-? flag:train.t2.step.wrong
-- Not that one. Walk back. No harm done.
 ? flag:train.t2.step.make
+- Steady hands. Nobody's timing you. I am, but ignore me.   #funny
+? flag:train.t2.step.job
 - Old filter out. Mind the dust. New one seated.
-? flag:train.t2.step.turn
+? flag:train.t2.step.tune
 - Fan's off true. Settle it. Listen to the hum.
 ? flag:train.t2.step.done
 - Filter in. Fan settled. Turn it in.
@@ -567,16 +567,18 @@
 - Five o'clock was the plan. Down tools. Walk with me.
 ? flag:promo.fetch.ceremony
 - The Captain's waiting. Nobody keeps the Captain waiting.
-// at the ceremony in a grubby uniform (a look, then nothing more)
-? flag:promo.grubby
-- That uniform. Never mind. Too late now.
-// Day 10, about 17:00: the walk to 4-23 (C2: flag promo.walk, said in order; the first line is the text promo.walk)
-? flag:promo.walk
+// Day 10, about 17:00: the walk to 4-23 (C2 0.44.22: flags promo.walk.start/lift/corridor/door/inside; the box is X's)
+? flag:promo.walk.start
+- Right. Your things are already moving. With me.
+? flag:promo.walk.lift
 - Officers' corridor. You'll know it in a week.
+? flag:promo.walk.corridor
 - Your door's your own now. Knock on other people's.
 - Quiet hours after 23:00. Officers set the example.
 - People will ask you over. Go. Ask them back.
+? flag:promo.walk.door
 - Your name's already up. Don't make me change it.
+? flag:promo.walk.inside
 - Your things. Your key. Your cabin. Goodnight, Officer.
 // M8 team jobs: her calls when she leads
 ? flag:team.call.start

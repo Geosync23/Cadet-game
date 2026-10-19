@@ -116,37 +116,36 @@ unsigned. Calder's flag lines also exist for Vance (`vance.lines`) where the pag
 
 ### The test job and the first promotion (C2; X for the walks and crowds)
 
+Matched to C2 0.44.22 (C2's own names for the first half, W2's for the move and ceremony; agreed so they stop crossing).
+
 | When | Key | Who / kind | Placeholders |
 | --- | --- | --- | --- |
-| Day 8 in the bay, "Tomorrow, your test job" (C2's names, worksText) | `promo.announce` | text, Calder's words | |
-| ... the Mail if you're not in the bay by 10:00 | `promo.announce.mail` | text, Mail (lines_check gives C2's three Mail keys the Mail limit) | |
+| Day 8 in the bay, "Tomorrow, your test job" | `promo.announce` | text (worksText) | |
+| ... the Mail if you're not in the bay by 10:00 | `promo.announce.mail` | text, Mail | |
 | Day 9, 09:00, as the test job goes up | `promo.test.start` | text | |
-| Test job steps, Calder following | `flag:train.t2.step.<take\|stop tag\|done\|turnin>` | calder `work`: stop tags written `look` `hold` `fetch` `wrong` `make` `turn` (C2 to confirm) | |
+| Test job steps, Calder following | `flag:train.t2.step.<take\|fetch\|make\|job\|tune\|done\|turnin>` (+ `look`, `scan` if 24a/24g add stops) | calder `work` | |
 | Torres comes by at the end (Tuesday) | `flag:train.t2.torres` | torres-zeke `work` | |
 | Passed / not done | `promo.test.passed`, `promo.test.again` | text | `{day}` (weekday) |
-| What's next | `next.t2` (have), `next.wait.t2` (test set, not done), `next.summons`, `next.move`, `next.ceremony` | `next.lines` | |
-| The summons toast (urgent) | `promo.summons` | text: "Chief Calder: My office, 11:00. — C." | |
-| Torres nudges you | `promo.summons.torres` | text | |
-| Calder finds you at 11:15 / 17:30 / ceremony (written, not wired yet) | `flag:promo.fetch.summons`, `.fetch.move`, `.fetch.ceremony` | calder `work` (vance too for move) | |
-| The office scene | meeting `promo.officer` | Calder; one choice of three (C2 stores flag promo.reply 1-3) | |
+| The summons toast (urgent), Torres's nudge | `promo.summons`, `promo.summons.torres` | text | |
+| Calder finds you at 11:15 / 17:30 / the ceremony | `flag:promo.fetch.summons`, `.fetch.move`, `.fetch.ceremony` | calder `work` (vance for move and ceremony) | |
+| The office scene | meeting `promo.officer` | Calder; one choice of three in this order: proud, surprised, about time (C2 stores promo.reply 1-3) | |
 | The scene by Mail, if you never came | `promo.mail` | text, Mail | |
-| The crew at the board | kind `promoted` (X's name; 50 characters) | `banks/promo-works.lines` + torres-zeke, pell ("Told you"), kovac-zainab, halloran-emeka | `{nick}` |
+| The crew at the board | kind `promoted` (X; 50 characters) | `banks/promo-works.lines` + torres-zeke, pell ("Told you"), kovac-zainab, halloran-emeka | `{nick}` |
 | All day: people who know you | `@reactions promoted` (`content/reactions/promoted.lines`), cue `promoted.you` | crew bank by tier | |
-| Mail from friends | kind `mail.promo.friend` in `content/banks/promo.lines` | crew bank by tier ("Subject \| body") | `{me}` |
+| Mail from friends | kind `mail.promo.friend` (`content/banks/promo.lines`) | crew bank by tier; up to two friends | `{me}` `{nick}` |
 | Mail from the Captain | `promo.captain` | text, Mail | |
 | Ship app news (one gossip line) | `promo.news` | text | `{me}` |
-| Brennan's cake (tea corner, after shift; written, not wired yet) | `flag:promo.cake` | brennan `cue` | |
-| Calder sets off (17:00), then her walk to 4-23 (C2) | text `promo.walk`; then `flag:promo.walk` (lines in order) | calder `work`; the same flag in vance `work` | |
-| Tomas and Pell with your box (X) | `flag:promo.box` | tomas, pell `work` (bubbles) | |
-| Tomas's goodbye as a bunkmate | text `promo.move.tomas` (C2); `flag:promo.bye` tomas `work` (X) | | |
-| Move by Mail (without you) | `promo.move.mail` | text, Mail | |
-| The door plate | `works.plate` | text: "{name} · {rank}" | `{name}` `{rank}` |
-| Ceremony Mail (Day 11 08:00) | `promo.ceremony.invite` | text, Mail | |
+| Brennan's cake (written; nobody plays it yet) | `flag:promo.cake` | brennan `cue` | |
+| Calder's walk to 4-23 | `flag:promo.walk.start`, `.lift`, `.corridor`, `.door`, `.inside` | calder `work` (C2); the same flags in vance `work` | |
+| Tomas and Pell with your box; Tomas's goodbye (X) | `flag:promo.box`; `flag:promo.bye` | tomas, pell `work` | |
+| Move by Mail (without you) | `mail.promo.move` | text | |
+| The door plate (DA5) | `works.plate` | text: "{name} · {rank}" | `{name}` `{rank}` |
+| Ceremony Mail (Day 11, 08:00) | `mail.promo.ceremony` | text | |
+| The ceremony | meeting `promo.ceremony` | marrow, vance, calder, torres-zeke (guests are walk-ons); the line ending ` {pin}` bakes `pin: true` (content_gen), then one choice for your line | |
 | The ceremony by Mail, if you never came | `promo.ceremony.mail` | text, Mail | |
-| The ceremony | meeting `promo.ceremony` | marrow, vance, calder, torres-zeke (guests are walk-ons, no lines); the line ending ` {pin}` bakes `pin: true` (content_gen), then one choice for your line | |
-| Grubby at the ceremony | `flag:promo.grubby` | calder `work` (a look, one line) | |
 | Guests after the ceremony | `@reactions ceremony`, cue `ceremony.you` | guests / friends | |
-| Keepsake, the Record | `promo.keepsake` (its name), `works.record.commissioned` | text | `{day}` (day number) |
+| The keepsake, the Record | `works.keepsake.commission` (its name), `works.ms.commissioned` | text | `{n}` (day) |
+| What's next | `next.t2` (have), `next.wait.t2` (the test set, not done), `next.summons`, `next.move`, `next.ceremony` | `next.lines` | |
 
 ### Team jobs (M2 24h; X for the crew)
 
@@ -206,5 +205,5 @@ unsigned. Calder's flag lines also exist for Vance (`vance.lines`) where the pag
 | `bridge.locked` | tapping the bridge door before you're invited (C2 / DA5's hook) | |
 | meeting `bridgeInvite` (reworded) | Vance's invitation at breakfast, the day before the first bridge hour after the first ship-wide event (C2's placeholder trigger); it opens the bridge too | |
 | `meter.<sys>` | short meter names: air water power heat food waste hull comms propulsion transport | |
-| `works.turnin.rep`, `works.turnin.meter`, `works.turnin.repN` | the turn-in: "Works reputation up" / "+{n} {system}" / "+{n} {dept} reputation" (U) | `{n}` `{system}` (the meter.<sys> name) `{dept}` |
+| `works.turnin.rep`, `works.turnin.meter`, `works.turnin.repN` | the turn-in (C2 and U): "Works reputation up" (words only; C2 passes `{dept}`, unused) / "+{n} {system}" / "+{n} {dept} reputation" (U) | `{n}` `{system}` (the meter.<sys> name) `{dept}` |
 | `tiles.paused` | the Tiles notice under the score (U adds the pause sign) | |
