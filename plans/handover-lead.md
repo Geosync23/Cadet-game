@@ -743,3 +743,4 @@ Read: CLAUDE.md; TEAM.md (Lead line, "OVERNIGHT MODE ON", "Tonight's goal", "Ove
 - **Lessons tonight:** two Step 3 clashes came from two seats building the same function (bridge lock, traced faults): every brief names ONE owner per function; reviewers check for duplicate declarations. Fresh seats for big pieces beat stretched ones. Publishing a 4.7 MB build: git show <hash>:starship-cadet.html to scratchpad, change line-6 <title> (e.g. "Starship Cadet Step 4"), grep for external URLs (only cdnjs three.js r128 is expected), publish as a NEW artifact (no url), then push-notify the user once.
 - **Weekly allowance:** 'allowed_warning' (resets ~Oct 22). Keep seats lean.
 - Lead 16 stays reachable until lead 17 says hello, then stands down.
+- ~05:48: started lead 17 session_016bN7x175WBwBL7S9xc2Lpb (depth 1). Lead 16 forwards any seat messages until lead 17 says hello, then stands down.
