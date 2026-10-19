@@ -46,5 +46,7 @@ rep("  const m = machineById(j.machine); if (!m) return [];\n  const pp = panelP
     "  if (typeof traceHidden === 'function' && traceHidden(j)) return traceStops(j, known);\n  const m = machineById(j.machine); if (!m) return [];\n  const pp = panelPlace(m.id);")
 rep("    const [title, where, state] = jobCard(j), m = j.machine && machineById(j.machine);\n    const stops = jobStops(j)",
     "    const [title, where, state] = jobCard(j), m = j.machine && !(typeof traceHidden === 'function' && traceHidden(j)) && machineById(j.machine);\n    const stops = jobStops(j)")
+if "  damper:" not in s:   # S2's kind (0.33.55, e82abed) when the copy doesn't have it yet
+    rep("  fan:         { name: 'Main fan',", "  damper:      { name: 'Duct dampers',      sys: 'air',        life: 30, time: 1,                 scope: 'ship', w: 1, tier: 2, part: 'relay' },\n  fan:         { name: 'Main fan',")
 open(dst, 'w').write(s)
 print('stub applied')

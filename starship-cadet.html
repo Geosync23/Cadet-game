@@ -270,7 +270,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.53.0
+   STARSHIP CADET: CSV Wren                           build 0.53.1
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -641,8 +641,23 @@ function roomLocked(rk) {
   return true;
 }
 // who: the player (or a crew member) a path or a collision is for; a service hatch is open only to those it lets through
-const edgeBlocks = (e, who) => e && e.type !== 'door' && e.type !== 'open' && e.type !== 'lift' && !(e.service && hatchPassable(e.key, who))
-  && !(e.type === 'closed' && who && typeof doorOpenFor === 'function' && (e.horiz ? [[e.i, e.j - 1], [e.i, e.j]] : [[e.i - 1, e.j], [e.i, e.j]]).some(c => doorOpenFor(roomAt(...c), who)));   // section 14: invited in
+// 0.47.11 (Pillar 5 Step 3, for the career seat C2): doors shut to you, and only you, until something lets you in. YOU_LOCKS[deck]:
+// [{ keys, open(key), tap(key) }]. Deck 1's bridge doors ask C2's bridgeBarred(edge) (section 20: not invited, no appointment, not
+// already inside); without it, a bridgeInvitedNow() if defined; with neither they
+// are open, as before (h,14,10: the floor hatch up from the sub-floor crawl, the back way in). A locked one blocks your walking and your paths (edgeBlocks), doesn't slide open as you come up to it, and
+// a tap on it says why (youLockTap(key) -> { t, x }; the line is W2's `bridge.permission` when it's baked). The crew pass as ever
+const YOU_LOCKS = { 1: [{ keys: ['v,10,5', 'v,10,6', 'h,14,10'], open: key => typeof bridgeBarred === 'function' ? !bridgeBarred(EDGES.get(key)) : (typeof bridgeInvitedNow !== 'function' || !!bridgeInvitedNow()),   // 0.47.12: C2's rule (section 20) when it's there
+  tap: key => { let r = null; try { r = typeof bridgeDoorTap === 'function' ? bridgeDoorTap(key) : null; } catch (e) { r = null; } if (r) return r;   // C2's words first (section 20)
+    let x = null; try { x = typeof careerText === 'function' && careerText('bridge.permission'); } catch (e) { x = null; } return { t: 'Bridge', x: x || 'The bridge is for the watch on duty. You\'ll need an invitation before you can go in.' }; } }] };
+function youLock(key, who) {
+  if (!who || !(who === 'player' || who.isPlayer || (typeof player !== 'undefined' && who === player)) || !deckDef) return null;
+  const L = YOU_LOCKS[deckDef.num]; if (!L) return null;
+  for (let k = 0; k < L.length; k++) if (L[k].keys.includes(key) && !L[k].open(key)) return L[k];
+  return null;
+}
+const youLockTap = key => { const L = youLock(key, 'player'); return L ? L.tap(key) : null; };
+const edgeBlocks = (e, who) => e && (!!youLock(e.key, who) || e.type !== 'door' && e.type !== 'open' && e.type !== 'lift' && !(e.service && hatchPassable(e.key, who))
+  && !(e.type === 'closed' && who && typeof doorOpenFor === 'function' && (e.horiz ? [[e.i, e.j - 1], [e.i, e.j]] : [[e.i - 1, e.j], [e.i, e.j]]).some(c => doorOpenFor(roomAt(...c), who))));   // section 14: invited in
 // Service hatches (Pillar 2): a deck lists in `service` the hatches into utility rooms whose insides are built.
 // The player and Works crew pass them; everyone else, and every other hatch (the spine ladder's), treats them as walls.
 // crewPath (section 10) asks this for each person. Tier locks (answer 4): a hatch with a `tier` lets through only
@@ -3346,6 +3361,7 @@ function buildDeck(def) {
     }
     const hit = new THREE.Mesh(new THREE.BoxGeometry(span, 2.2, .3), new THREE.MeshBasicMaterial({ visible: false })); hit.position.y = 1.1; g.add(hit);
     if (CLOSED_DOORS[e.key]) hit.userData.closedDoor = e.key;
+    if ((YOU_LOCKS[def.num] || []).some(L => L.keys.includes(e.key))) hit.userData.youLock = e.key;   // 0.47.11: shut to you until let in
     if (e.type === 'lift') hit.userData.liftDoor = e.key;
     DOOR_OBJS.push({ e, g, leaves, open: 0, passable: e.type === 'door' || e.type === 'lift', svc: !!e.service, cx, cz, span });
   }
@@ -4291,7 +4307,8 @@ DECKS[4] = {
     // ---- door plates, corridor lights, the lift ----
     // (0.30.12) an officer's cabin plate carries their name, with the cabin number and rank underneath (ROSTER's plate: { rank, name }; before
     // that's in, their name and role)
-    for (const [key, tw, text] of d.plates) { const who = d.officer(text); placeOnEdge(who ? 'namePlate' : 'plate', key, tw, who ? { text: (who.plate || who).name, sub: text + '  ·  ' + (who.plate ? who.plate.rank : who.role.split(',')[0]) } : { text }); }
+    let home = null; try { home = SHIP.works && SHIP.works.home; } catch (e) { home = null; }   // 0.47.11: your own cabin's plate (Step 3: 4-23 once you're an officer)
+    for (const [key, tw, text] of d.plates) { if (home && text === 'Spare ' + home) { let nm = 'Cadet'; try { nm = (SHIP.player && SHIP.player.name) || nm; } catch (e) {} placeOnEdge('namePlate', key, tw, { text: nm, sub: home + '  ·  Works Officer' }); continue; } const who = d.officer(text); placeOnEdge(who ? 'namePlate' : 'plate', key, tw, who ? { text: (who.plate || who).name, sub: text + '  ·  ' + (who.plate ? who.plate.rank : who.role.split(',')[0]) } : { text }); }
     for (const [key, tw] of d.sconces) placeOnEdge('sconce', key, tw);
     // more lights wherever a corridor wall is free: at least two tiles apart, never on a door or plate
     {
@@ -4349,6 +4366,7 @@ DECKS[4] = {
     placeWall('s', 'calendar', 'w', 3.2, { upTo: 16, ring: 20 });
     // Pillar 4 (seat 8, 0.38.9): the keepsake shelf above berth 4's bunk (yours), last so nothing above moves
     placeWall('a', 'keepsakeShelf', 'n', 2.5, { hitW: .9, it: IT('Your shelf', 'A plank above your bunk, just within reach from the top berth. Empty for now. People on the Wren tend to fill theirs.') });
+    placeWall('W', 'keepsakeShelf', 'n', .5, { hitW: .9, it: IT('Shelf', 'A plank above the bed, waiting for whoever moves in.') });   // 0.47.11: 4-23, the officer's cabin you move to (Step 3)
   },
 };
 'abcdefgh'.split('').forEach((k, n) => { DECKS[4].rooms[k] = { name: 'Bunk ' + (n + 1) + (k === 'h' ? ', night shift' : ''), floor: 'plate' }; });
@@ -4407,7 +4425,7 @@ DECKS[5] = {
   },
   // which room each shut door or hatch leads into (its tap text is that room's 'tap')
   sealed: {
-    'v,13,1': 'o', 'h,8,13': 'b', 'v,34,7': 'F', 'h,2,12': 'd', 'h,38,5': 'F', 'h,38,11': 'F',
+    'v,13,1': 'o', 'h,8,13': 'b', 'v,34,7': 'F', 'h,2,12': 'd', 'h,38,11': 'F',
 
   },
   plates: [
@@ -4433,7 +4451,7 @@ DECKS[5] = {
     o: { name: 'Works Chief\'s office', floor: 'plate', tap: 'Glass on two sides, so the Chief can see the whole bay and the shuttle pad. Locked while the Chief is out.' },
     b: { name: 'Bay control booth', floor: 'plate', tap: 'Launch and landing controls, behind glass over the pad. Watch staff only.' },
     d: { name: 'Bay door gear', floor: 'grate', tap: 'Giant gears and hydraulic rams. When the bay opens, the doors slide into a pocket here. Watch the gears through the window.' },
-    F: { name: 'Fan hall', floor: 'grate', tap: 'The ship\'s lungs: one huge fan pushing air under the main corridor and up the spine to every deck. Tier 2 access. You can watch it through the window.' },
+    F: { name: 'Fan hall', floor: 'grate', tap: 'The ship\'s lungs: one huge fan pushing air under the main corridor and up the spine to every deck. Tier 2 access, through the hatch from the air plant. You can watch it through the corridor window too.' },
     // utility rooms (Pillar 2, 0.30.3): floors that draw no random numbers, so the rest of the deck is unchanged
     c: { name: 'Cargo hold', floor: 'steel', still: true },
     m: { name: 'Cart bay', floor: 'steel', still: true },
@@ -4448,11 +4466,12 @@ DECKS[5] = {
   closedDoors: {},
   hull: { sternX: 1, stern: 1.5, bowFrom: 34, bowLen: 9.6, byFace: true },   // one hull piece per facing (0.30.11)
   // service hatches into the utility rooms (0.30.3): the player and Works crew pass (see hatchPassable)
-  // (the air plant and manifold room open off the pipe galleries; their hatches into the locked Fan hall stay sealed)
+  // (the air plant and manifold room open off the pipe galleries; since 0.47.3 the air plant's hatch opens into the Fan hall, the manifold room's stays sealed)
   // (0.30.12) with a tier each: 1 closets, stores and the cargo hold, 2 plant rooms and pipe galleries, 3 batteries. The cargo hold's
   // shuttle-bay hatch (v,10,12) is open to the player and Works crew; everyone else still goes round by the haulway.
   service: [{ key: 'v,34,0', tier: 2 }, { key: 'v,34,15', tier: 2 }, { key: 'h,30,9', tier: 3 }, { key: 'h,19,10', tier: 1 }, { key: 'v,19,13', tier: 1 },
-    { key: 'h,32,1', tier: 2 }, { key: 'h,25,15', tier: 2 }, { key: 'v,10,12', tier: 1 }],   // air plant, manifold, batteries, closet, cart bay, galleries, hold
+    { key: 'h,32,1', tier: 2 }, { key: 'h,25,15', tier: 2 }, { key: 'v,10,12', tier: 1 },   // air plant, manifold, batteries, closet, cart bay, galleries, hold
+    { key: 'h,38,5', tier: 2 }],                         // 0.47.3 (Pillar 5 Step 3, the air line): the Fan hall, through the air plant
   // machines (Pillar 2; format as on Deck 4): wall-mounted ones have `at` on their panel tile
   machines: [
     { id: '5-o2-1', kind: 'o2cell', at: [35, 0], room: 'a', face: 's', panel: [35, 1], look: { lamp: [0.5, 1.2, 0.37], drip: [0.5, 0.9, 0.42] } },
@@ -4473,6 +4492,10 @@ DECKS[5] = {
     { id: '5-cartdock-2', kind: 'cartdock', at: [20, 15], room: 'm', face: 'w', panel: [19, 15], look: { lamp: [-0.5, 1.08, 0.51], drip: [-0.5, 0.9, 0.56] } },
     { id: '5-valve-1', kind: 'valve', at: [28, 0], room: 'g', face: 's', panel: [28, 0] },
     { id: '5-valve-2', kind: 'valve', at: [29, 15], room: 'h', face: 'n', panel: [29, 15] },
+    // 0.47.3 (Pillar 5 Step 3, plans/mechanics/architect-air-line.html): the air line's middle and its two branches
+    { id: '5-fan-1', kind: 'fan', at: [36, 8], room: 'F', face: 's', panel: [36, 9] },
+    { id: '5-damper-1', kind: 'damper', at: [34, 6], room: 'F', face: 'e', panel: [34, 6] },   // Upper decks, 1-3
+    { id: '5-damper-2', kind: 'damper', at: [34, 9], room: 'F', face: 'e', panel: [34, 9] },   // Lower decks, 4-6
   ],
   // places (Pillar 1): every spot where a crew member does something, for the schedules. Data only: nothing draws them.
   // { id, type, at: [col, row], face, pose, room }. Seats and beds sit on furniture tiles and are reached from the tile beside them;
@@ -4541,8 +4564,11 @@ DECKS[5] = {
     { id: '5-cartdock-2-svc', machine: '5-cartdock-2', type: 'work:works', at: [19, 15], face: 'e', pose: 'work', room: 'm' },
     { id: '5-valve-1-svc', machine: '5-valve-1', type: 'work:works', at: [28, 0], face: 'n', pose: 'work', room: 'g' },
     { id: '5-valve-2-svc', machine: '5-valve-2', type: 'work:works', at: [29, 15], face: 's', pose: 'work', room: 'h' },
+    { id: '5-fan-1-svc', machine: '5-fan-1', type: 'work:works', at: [36, 9], face: 'n', pose: 'work', room: 'F' },
+    { id: '5-damper-1-svc', machine: '5-damper-1', type: 'work:works', at: [34, 6], face: 'w', pose: 'work', room: 'F' },
+    { id: '5-damper-2-svc', machine: '5-damper-2', type: 'work:works', at: [34, 9], face: 'w', pose: 'work', room: 'F' },
   ],
-  markings: [[21, 10, 2, 3], [25, 9, 3, 2], [26, 11, 2, 2]],   // keep-clear outlines: lathe, fabricator, welding bench
+  markings: [[21, 10, 2, 3], [25, 9, 3, 2], [26, 11, 2, 2], [35, 7, 3, 2]],   // keep-clear outlines: lathe, fabricator, welding bench, the main fan (0.47.3)
   dress(d) {
     for (const [key, tw, text] of d.plates) placeOnEdge('plate', key, tw, { text });
     for (const [key, tw] of d.workLights) placeOnEdge('workLight', key, tw);
@@ -4613,7 +4639,7 @@ DECKS[5] = {
     // the spine: the ladder below the car, as on Deck 4. The trunks run behind the car's back wall here.
     NO_FADE.add('Z');
     place('Z', 'spineLadder', 1, .5, 'n', { it: SPINE_IT.ladder });
-    place('F', 'bigFan', 2.6, 3.0, 'n');                 // faces the default camera; the corridor window sees it side-on
+    place('F', 'bigFan', 2.6, 3.0, 'n', { block: [[1, 2], [2, 2], [3, 2], [1, 3], [2, 3], [3, 3]], it: IT('Main fan', 'The ship\'s lungs. Every deck\'s air comes through these five blades. Its panel is on the walkway in front.') });   // faces the default camera; the corridor window sees it side-on (0.47.3: you can walk in, so it blocks its tiles)
     // ---- utility rooms (Pillar 2, 0.30.3). Last in dress() and free of R(), so nothing above them changes ----
     // air plant: the electrolyser on the stern wall feeds two banks of oxygen cells on the port hull; two scrubber stacks on the Fan hall wall
     place('a', 'electrolyser', 1.02, 3.0, 'w', { it: IT('Electrolyser', 'Splits water into oxygen and hydrogen. The oxygen goes to the cells; the hydrogen goes somewhere you are told not to worry about.') });
@@ -4639,6 +4665,8 @@ DECKS[5] = {
     wallFixed('w', 'bulkheadWheel', 's', 8.5, { hitW: .5, it: { ...IT('Bulkhead wheel', 'Four turns closes and dogs the bulkhead door by the bay. You turn it for the pressure drill, and hope never for real.'), drill: 'door' } });
     wallFixed('u', 'liftBrake', 'w', .5, { hitW: .6, it: { ...IT('Lift brake', 'The main lift\'s manual brake release, by the ladder. Turn it to let a stuck car down to the next deck.'), brake: true } });   // 0.47.0: incidents (m6)
     wallFixed('=', 'valvePanel', 'n', VALVE_PANELS[5].along, { hitW: 1.5, it: { ...IT('Pipe valves', 'Three valves on the main water line, numbered from upstream. Close the one before a leak.'), valves: 5 } });
+    wallFixed('F', 'ductDamper', 'w', 1.5, { n: 1, hitW: .8, it: IT('Duct damper 1', 'Upper decks, 1-3. The flap that sends the fan\'s air up the spine to the decks above.') });   // 0.47.3: the air line (Step 3)
+    wallFixed('F', 'ductDamper', 'w', 4.5, { n: 2, hitW: .8, it: IT('Duct damper 2', 'Lower decks, 4-6. The flap that sends the fan\'s air down to the decks below.') });
     placeWall('u', 'relayBoard', 'n', 1.5, { it: IT('Light relays', 'Deck 5\'s lights. The shuttle bay floods have a relay to themselves.') });
     // cart bay: two docks with a cart charging on each
     for (const [z, n] of [[1.0, 1], [3.0, 2]]) place('m', 'cartDock', 1.45, z, 'e', { dock: n, it: IT('Cart dock ' + n, n === 1 ? 'A hover hand cart, charging. The sticker says I BRAKE FOR NOBODY.' : 'A hover hand cart, charging, with a crate strap still hooked on.') });
@@ -7239,6 +7267,40 @@ DECKS[2].visits = { 'captain-table': { name: 'the Captain\'s table', room: 'C', 
 // where people sit and talk (the social plan's where: ['calm']): seats of those types, unless a place says calm: false.
 DECKS[4].places.push({ id: '4-B1-4-keepsake', type: 'event', at: [9, 0], xy: [9.25, .8], face: -127, pose: 'stand', room: 'a' });
 DECKS[4].keepsakes = { room: 'a', bed: '4-B1-4', place: '4-B1-4-keepsake', slots: [8.14, 8.28, 8.43, 8.57, 8.72, 8.86].map(x => [x, 2.17, .2]), trophy: [8.79, 2.17, .13] };   // trophy: the Tiles trophy's spot, at the back (0.38.17)
+// 0.47.11 (Pillar 5 Step 3, seat A): the places the Step 3 pages ask for. All type `event` (inert: nobody's day plan uses them).
+// Team jobs (m8-team-jobs): spots by each machine, `event: 'team-job'`, `works: true` (Works crew and you), `team: <machine id>`;
+// spot 1 is the lead's (by the panel or between the machines), the others round the machine. DECKS[n].teamSpots[machine] lists them.
+// The office meeting (promotion-officer, the summons): `5-office-visit-1` (you, beside Calder's desk) and `5-office-stand-1`
+// (Calder, standing, to hand you the badge); her chair is `5-office-1`. The ceremony (Deck 1's observation room, by the stern
+// windows): `1-ceremony-captain`, `1-ceremony-you`, `1-ceremony-guest-1..6` (Vance and Calder first, at your sides), `event: 'ceremony'`.
+// Your cabin as an officer (4-23): `4-23-keepsake` and DECKS[4].homeKeepsakes['4-23'] (the shelf above its bed, the same shape as
+// DECKS[4].keepsakes, for section 8b when your things move); its door plate shows your name once SHIP.works.home is '4-23'.
+{
+  const team = (n, room, machine, spots) => {
+    (DECKS[n].teamSpots = DECKS[n].teamSpots || {})[machine] = spots.map((_, k) => `${machine.replace(/-\d+$/, '')}-team-${k + 1}`);
+    spots.forEach(([c, r, face], k) => DECKS[n].places.push({ id: DECKS[n].teamSpots[machine][k], type: 'event', event: 'team-job', team: machine, works: true, at: [c, r], face, pose: 'stand', anim: 'work', room }));
+  };
+  team(3, 'R', '3-recycler-1', [[14, 15, 'w'], [14, 17, 'w'], [13, 14, 's'], [15, 15, 'w']]);
+  team(4, 'l', '4-washer-1', [[14, 18, 'n'], [12, 18, 'n'], [11, 18, 'n']]);   // all four washers in a row
+  team(5, 'n', '5-manifold-1', [[35, 14, 's'], [37, 14, 's'], [36, 13, 's']]);
+  team(4, 't', '4-heater-1', [[21, 17, 'e'], [21, 19, 'e'], [20, 17, 'e']]);
+  team(4, 's', '4-scrubber-1', [[22, 2, 'n'], [21, 3, 'n'], [23, 3, 'n']]);      // both stacks: spot 1 stands between them
+}
+DECKS[5].places.push(
+  { id: '5-office-visit-1', type: 'event', event: 'office', at: [12, 1], xy: [12.4, 1.35], face: 'w', pose: 'stand', room: 'o' },
+  { id: '5-office-stand-1', type: 'event', event: 'office', at: [10, 1], xy: [10.6, 1.35], face: 'e', pose: 'stand', room: 'o' },
+);
+{
+  const fx = 2.95, fz = 2.5, at = (c, r, x, z) => ({ at: [c, r], xy: [x, z], face: Math.round(Math.atan2(fx - x, fz - z) * 180 / Math.PI) });
+  DECKS[1].places.push(
+    { id: '1-ceremony-captain', type: 'event', event: 'ceremony', at: [2, 2], xy: [2.45, 2.5], face: 'e', pose: 'stand', room: 'O' },
+    { id: '1-ceremony-you', type: 'event', event: 'ceremony', at: [3, 2], xy: [3.4, 2.5], face: 'w', pose: 'stand', room: 'O' },
+    ...[[3, 1, 3.45, 1.45], [3, 3, 3.45, 3.55], [4, 1, 4.4, 1.6], [4, 3, 4.4, 3.4], [4, 2, 4.5, 2.5], [5, 2, 5.4, 2.5]].map(([c, r, x, z], k) =>
+      ({ id: '1-ceremony-guest-' + (k + 1), type: 'event', event: 'ceremony', ...at(c, r, x, z), pose: 'stand', room: 'O' })),
+  );
+}
+DECKS[4].places.push({ id: '4-23-keepsake', type: 'event', at: [40, 10], xy: [40.1, 10.8], face: -139, pose: 'stand', room: 'W' });
+DECKS[4].homeKeepsakes = { '4-23': { room: 'W', bed: '4-23', place: '4-23-keepsake', slots: [39.14, 39.28, 39.43, 39.57, 39.72, 39.86].map(x => [x, 2.17, 10.2]), trophy: [39.79, 2.17, 10.13] } };
 DECKS[5].mugRack = { room: 't', yours: [21.8, 1.44, 2.83] };
 const CALM_TYPES = ['lounge-seat', 'common-room', 'garden', 'bench', 'mess-seat', 'music'];
 const placeCalm = p => !!p && (p.calm !== undefined ? !!p.calm : CALM_TYPES.includes(p.type) && p.pose === 'sit' && !p.machine);
@@ -7542,6 +7604,13 @@ function wallFixed(rk, kind, wall, along, o = {}) {
   return g;
 }
 Object.assign(WALL_KIT, {                               // each stands on the floor against its wall, so it reads as furniture when the wall is lowered
+  ductDamper(g, o = {}) {                                // 0.47.3: a square duct section out of the wall on two legs, its flap lever, a plate with o.n red ticks
+    for (const x of [-.3, .3]) box(.06, 1.62, .06, M.slateDark, x, .81, .32, g);
+    box(.6, .6, .5, UT.duct, 0, 1.92, .25, g); box(.68, .68, .04, WM.steel, 0, 1.92, .51, g);   // the duct and its flange (proud of the duct's face)
+    cyl(.03, .03, .1, WM.steel, .38, 1.92, .3, g, 8).rotation.z = Math.PI / 2; box(.04, .34, .04, WM.red, .45, 1.8, .3, g).rotation.z = .35;   // the flap's spindle and lever
+    box(.66, .05, .05, M.slateDark, 0, 1.45, .32, g); box(.34, .12, .015, WM.steel, 0, 1.45, .353, g);   // a crossbar and its plate, standing off it
+    for (let t = 0; t < (o.n || 1); t++) box(.025, .08, .012, WM.red, (t - ((o.n || 1) - 1) / 2) * .045, 1.45, .364, g);
+  },
   extBracket(g) {                                        // an extinguisher stand: a post with a red sign, the extinguisher in its bracket
     box(.06, 1.42, .06, M.slateDark, 0, .71, .05, g); box(.3, .03, .2, M.slateDark, 0, .015, .1, g);
     box(.22, .04, .14, M.slateDark, 0, .62, .12, g); box(.24, .12, .02, WM.red, 0, 1.32, .09, g);
@@ -8614,7 +8683,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.53.0';                            // keep in step with the header's build line
+const GAME_BUILD = '0.53.1';                            // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -43300,6 +43369,7 @@ function tap(cx, cy) {
     return;
   }
   if (ud.liftDoor) { enterLift(); return; }
+  if (ud.youLock) { const c = youLockTap(ud.youLock); if (c) { const e = EDGES.get(ud.youLock); approach(new THREE.Vector3(e.cx, 0, e.cz), reachableSide(e)[2], 0, () => toast(c.t, c.x)); return; } }   // 0.47.11
   if (ud.closedDoor) {
     const e = EDGES.get(ud.closedDoor), c = CLOSED_DOORS[ud.closedDoor];
     approach(new THREE.Vector3(e.cx, 0, e.cz), reachableSide(e)[2], 0, () => toast(c.t, c.x));
@@ -43596,7 +43666,7 @@ function loop() {
   for (let k = 0; k < DOOR_OBJS.length; k++) {
     const d = DOOR_OBJS[k], crewAt = d.force === undefined && crewNearDoor(d);   // section 10: crew open doors (and their own locked ones)
     if (!d.passable && !d.svc && d.force === undefined && d.open < 1e-4 && !crewAt) continue;
-    let walk = false; if (d.force === undefined && !crewAt && (d.passable || d.svc)) for (let j = 0; j < walkers.length && !walk; j++) { const w = walkers[j]; walk = w.active && Math.hypot(w.obj.position.x - d.cx, w.obj.position.z - d.cz) < 1.15 + (d.span - SEG) / 2; }
+    let walk = false; if (d.force === undefined && !crewAt && (d.passable || d.svc)) for (let j = 0; j < walkers.length && !walk; j++) { const w = walkers[j]; walk = w.active && !youLock(d.e.key, w) && Math.hypot(w.obj.position.x - d.cx, w.obj.position.z - d.cz) < 1.15 + (d.span - SEG) / 2; }
     const near = d.force !== undefined ? d.force > 0 : crewAt || walk;
     d.open += ((near ? 1 : 0) - d.open) * Math.min(1, dt * (d.force !== undefined ? 5 : d.svc ? 4 : 8));   // a service hatch is heavier
     if (d.e.type === 'lift') for (let j = 0; j < d.leaves.length; j++) { const l = d.leaves[j]; l.position.y = 1.1 - d.open * 2.3; l.visible = d.open < .995; }   // lift doors sink into the floor
