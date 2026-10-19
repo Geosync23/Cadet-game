@@ -110,3 +110,12 @@
 - The station has a lab and a window. The tea here is weak. I've brought my own. Obviously.
 ? tier>=friend
 - Found a good rock today. Labelled it in my own hand. Thought of the Wren's specimen store.
+
+// ---- Pillar 5 Step 4 (head writer W2): star logging (24t, E3). Every third log; and Day 19 (the sensor array),
+// your logging paid off. Kind 'cue', flags stars.talk / stars.paid.
+== cue
+? flag:stars.talk
+- You've been logging! Three new points. Do you know what that's worth?
+- Your logs are good. Neat. Better than mine, frankly.   #funny
+? flag:stars.paid
+- Your star logs helped calibrate the array. Your name's on the report.   #warm

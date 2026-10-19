@@ -211,3 +211,21 @@
 
 == promoted
 - Lovely. Lovely! Well done, you.   #warm
+
+// ---- Pillar 5 Step 4 (head writer W2): M17 the lift roof (E3), his words on the first ride. Kind 'work', in order.
+== work
+? flag:roof.climb
+- Up you get. Harness clipped? Lovely.
+? flag:roof.grease
+- Rail, then grease, then a wipe. Next deck.
+- Mind your sleeve. The rails love sleeves.   #funny
+? flag:roof.view
+- Look up. That's the whole spine. Nobody sees it but us.   #warm
+? flag:roof.done
+- Smoother already. Can you feel it? Lovely work.
+
+// ---- Pillar 5 Step 4 (head writer W2): M10 the workshop (E3): the first lesson at the lathe. Kind work, in order.
+== work
+? flag:train.m10.lead
+- Set the lathe going. Come back in ten. Lovely.
+- Now the hand work. Slow strokes. There.

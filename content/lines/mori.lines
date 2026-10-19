@@ -112,3 +112,11 @@
 - The charts office is very tidy. Too tidy. I've taped a star chart over my nameplate again.
 ? tier>=friend
 - I named a tiny rock on the last survey. After the Wren's tea corner. That's all I'll say.
+
+// ---- Pillar 5 Step 4 (head writer W2): star logging (24t, E3). Every third log. Kind 'cue', flag stars.talk.
+== cue
+? flag:stars.talk
+- I saw your logs. They're very tidy. Thank you.
+- Three more points. The charts are a bit fuller because of you.   #warm
+? flag:stars.paid
+- The array uses your logs now. I checked them twice. They're right.

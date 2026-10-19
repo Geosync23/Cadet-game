@@ -887,3 +887,15 @@
 == promoted
 - There you are! Officer {nick}!   #warm
 - Knew it. Knew it on your first day.
+
+// ---- Pillar 5 Step 4 (head writer W2): rounds stage 2 (E1): when you find two or more worn machines on one round.
+== work
+? flag:round.two
+- Two worn on one round? You've got the eye now.
+- That's the job. Catch them worn. Proud of you.   #warm
+
+// ---- Pillar 5 Step 4 (head writer W2): M10 the workshop (E3): the first lesson at the lathe. Kind work, in order.
+== work
+? flag:train.m10.lead
+- Set it spinning. Go and have a tea. Ten minutes.
+- Now finish it by hand. That's where it gets good.

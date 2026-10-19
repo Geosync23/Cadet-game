@@ -214,3 +214,25 @@ unsigned. Calder's flag lines also exist for Vance (`vance.lines`) where the pag
 | `meter.<sys>` | short meter names: air water power heat food waste hull comms propulsion transport | |
 | `works.turnin.rep`, `works.turnin.meter`, `works.turnin.repN` | the turn-in (C2 and U): "Works reputation up" (words only; C2 passes `{dept}`, unused) / "+{n} {system}" / "+{n} {dept} reputation" (U) | `{n}` `{system}` (the meter.<sys> name) `{dept}` |
 | `tiles.paused` | the Tiles notice under the score (U adds the pause sign) | |
+
+## Step 4 (0.63.4; lead 16's brief plans/brief-p5s4.md; D3's pages; head writer W2)
+
+Proposed by W2. **Send W2 your full list in ONE message if your code uses other names; W2 adopts it as is** (Step 3
+lesson: no back-and-forth). Texts in `content/works/step4.lines` (`@bank all`); crew words in `content/banks/workshop.lines`
+and people's own lines; meetings `train.<id>.<teacher>`.
+
+| Seat | Keys |
+| --- | --- |
+| all | `works.mech.m10/m11/m12/m13/m14/m15/m17/tickets` (ladder names) |
+| E3 M10 workshop (E3's names) | `works.order.ask.<id>`, `works.order.thanks.<id>` ({name}) for guitar-hook mug-rack book-stand lamp-arm plant-hanger fan-spindle drawer-pull tablet-stand; `works.order.lapse` (the Mail's body; E3 adds the subject); the first lesson `work` flag `train.m10.lead` (torres-zeke, halloran-emeka, calder; two lines in order); tinkering has no texts |
+| E1 M11 tool upkeep | `works.toolstate.charged/low/due`, `tool.due.<scanner\|pipekit\|logger>`, `bench.<scanner\|pipekit\|logger>`, `bench.done`, `bench.charging` ({time}), `bench.charging.now`, `bench.rack`, `bench.rack.done`; meetings `train.m11.halloran-emeka`, `train.m11.torres-zeke`; Calder `work` flag `upkeep.rack` (stage 3) |
+| E1 M12 logbook | `works.log.write`, `works.log.pick`, parts `log.fixed` ({machine} {part}), `log.serviced`, `log.found` ({machine} {shows}), `log.open`, `log.quiet`, `log.saved`; stage 2 `log.flag`, `log.flagged`; stage 3 `case.log.note` ({n} {text}); meeting `train.m12.calder`; Calder `work` flag `log.talk` ({machine}) |
+| E2 M13 leaks (matched to E2's code) | `leak.card` ({deck}), `leak.look.above` ({place} = "the north wall"), `leak.look.warmer/here`, `leak.worn`, `leak.turning`, `leak.tight` (the turn), `leak.fix.tighten`, `leak.fix.replace` ({part}), `leak.done`, `leak.found.crew` ({deck}); meetings `train.m13.torres-zeke`, `train.m13.halloran-emeka`, `train.m13.calder` (with a meeting, E2 doesn't read `train.m13.puddle`) |
+| E2 M14 irrigation | `noz.plant` (stage 2's plant check), `irr.title` ({n}), `irr.clear`, `irr.cleared`, `irr.flush`, `irr.flushed`, `irr.salad`; meetings `train.m14.cruz-tove`, `train.m14.oneill-imani`, `train.m14.hart-ravi` |
+| E2 M15 rewiring | `rewire.card` ({junction}), `rewire.pop`, `rewire.right`, `rewire.done` ({junction}), `rewire.faded`, `rewire.check`, `wire.<red\|blue\|yellow\|green\|white\|black>`; meeting `train.m15.calder` |
+| E2 favours | per case id `lamp cold squeak shower clock speaker`: `favour.<id>.ask` (chat), `mail.favour.<id>` (Mail), `.title`, `.sus.1-3` (1 is the real cause), `.clue.1-3`, `.solved`; `favour.call` (the choose card), `favour.not` (a wrong pick), `favour.lapse` ({name}), `favour.head` ({name}); crew kind `favour.thanks` |
+| E2 tickets | `mail.ticket.first` (Calder, Day 13), `ticket.card` ({machine} {shows}), `ticket.nohint` (a hint asked before three clues), `ticket.wrong`, `ticket.solved`, `works.grade.1/2/3`, `works.ms.grade` ({grade} {n}), `works.pin`; Calder `work` flag `ticket.solved` |
+| E2 team parts | `mail.team.parts` ({job} {time} {name} {parts}), `team.parts.late` ({name}) |
+| E1 stages | `round.title.first` ({deck}; playtest item 1's training round), `round.last` ({n}), `round.last.never`, `round.doorway` ({machine} {word}), Torres `work` flag `round.two`; `haul.tidy`; stocktake `stock.count`, `stock.short` ({shelf} {part}), `stock.job`, `stock.fine` ({shelf}) |
+| E4 (was E3) cabin, stars (matched to 24t's code) | `cabin.spot.rug/desk/shelf/ledge` (the sentence when you put a thing there); crew kind `cabin.remark` (not read yet); `star.title`, `star.pick` ({a} {b}), `star.right` ({star}), `star.wrong` (retry at once), `star.name` ({n}), `star.done` (ten logged), `works.ms.stars`; sato and mori kind `cue` flag `stars.talk` (every third log; `stars.paid` not read yet) |
+| E3 M17 lift roof | meeting `train.m17.halloran-emeka`; Halloran `work` flags `roof.climb`, `roof.grease`, `roof.view`, `roof.done`; `roof.held`, `roof.result`, `roof.resume`; crew kind `roof.wait` |
