@@ -310,6 +310,7 @@ with sync_playwright() as pw:
               out.com = pn.commissioned.map(n => [Math.floor(n.t / 1440) + 1, n.how]); out.pip = [PLAYER_SPEC.rank, player.spec.rank];
               out.keep = (SHIP.social && SHIP.social.keepsakes || []).filter(k => k.from === 'marrow').map(k => k.what); out.guests = promoGuests(); out.head = (worksRecordHead() || {{}}).text;
               out.mailCer = SHIP.mail.filter(m => /Captain/.test(m.from)).map(m => m.subject);
+              const W = SHIP.works, C = worksClean(JSON.parse(JSON.stringify(W))); out.clean = ['tier', 'rank', 'xp', 'test', 'home', 'done', 'ms'].every(k => JSON.stringify(C[k]) === JSON.stringify(W[k]));
               out.xpAt = window.__xpAt; st(); sts.forEach(f => f()); return out; }})()""")
         sm = run('real', 12)
         print('   there:', sm['summ'], sm['promoted'], sm['rank'], 'reply', sm['reply'], sm['plan'])
@@ -325,6 +326,9 @@ with sync_playwright() as pw:
         check(sm['cer'] and sm['cer'][0][:3] == [11, '17:15', '1/O'] and sm['com'] == [[11, 'met']], f"the ceremony on Day 11 at 17:15 in the observation room, commissioned once: {sm['cer']}, {sm['com']}")
         check(sm['pip'] == [1, 1] and sm['keep'] and 'Commissioned Officer, Day 11' in (sm['head'] or '') and 'ceremony2' in sm['works']['done'] and ['commissioned', 11] in sm['works']['ms'], f"the pip, the framed commission, the Record: {sm['pip']}, {sm['keep']}, {sm['head']}")
         check(sm['guests'][:4] == ['marrow', 'vance', 'calder', 'torres-zeke'] and len(sm['guests']) <= 7, f"the ceremony's guests: {sm['guests']}")
+        check(sm['clean'], 'the save: worksClean keeps tier, rank, xp, test, home, done and ms after the promotion')
+        sm2 = run('real', 12)
+        check(json.dumps([sm2[k] for k in ('summ', 'promoted', 'moved', 'cer', 'com', 'guests', 'test')], sort_keys=True) == json.dumps([sm[k] for k in ('summ', 'promoted', 'moved', 'cer', 'com', 'guests', 'test')], sort_keys=True), 'the promotion run twice differs')
         aw = run('away', 12)
         print('   away:', aw['summ'], aw['promoted'], aw['mailC'])
         print('   away, the ceremony:', aw['cer'], aw['com'])
