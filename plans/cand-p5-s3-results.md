@@ -5,3 +5,4 @@ Build master 6 (BM6, session_01F8k6hqdBRoxDJMzqAuiHqR) on claude/p5-cand-pt1 (th
 - ~23:10 Step 3 GO (lead 14). Tools as for 0.63.2 (/tmp/cw rebuilt from plans/build-master/, build number 0.63.3).
 - ~02:10 lead 15: the Step 3 base is now 0.63.2r = claude/ship-integration 898d58d (0.63.2 + the rec deck dormant; cadet_test vs 0.63.2 ALL IDENTICAL). Still on hold.
 - ~02:20 GO (lead 16, the user). Merged 0.63.2r 898d58d into claude/p5-cand-pt1 (7493776, clean; game file = 898d58d). New in the base: disc_check.py (rec deck, REC_DECK off). Waiting for R3-passed tips.
+- ~02:27 W2 batch 1: claude/writer-p5 6d2a4f8 (0.48.92, text + lines_check placeholders; last in order; follow-up may come); with R3.
