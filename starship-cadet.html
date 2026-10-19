@@ -640,8 +640,7 @@ function roomLocked(rk) {
   return true;
 }
 // who: the player (or a crew member) a path or a collision is for; a service hatch is open only to those it lets through
-const edgeBlocks = (e, who) => (!!e && (e.type === 'door' || e.type === 'hatch') && (who === 'player' || (!!who && who.isPlayer)) && typeof bridgeBarred === 'function' && bridgeBarred(e))   // section 20: the bridge, shut to you until you're invited
-  || e && e.type !== 'door' && e.type !== 'open' && e.type !== 'lift' && !(e.service && hatchPassable(e.key, who))
+const edgeBlocks = (e, who) => e && e.type !== 'door' && e.type !== 'open' && e.type !== 'lift' && !(e.service && hatchPassable(e.key, who))
   && !(e.type === 'closed' && who && typeof doorOpenFor === 'function' && (e.horiz ? [[e.i, e.j - 1], [e.i, e.j]] : [[e.i - 1, e.j], [e.i, e.j]]).some(c => doorOpenFor(roomAt(...c), who)));   // section 14: invited in
 // Service hatches (Pillar 2): a deck lists in `service` the hatches into utility rooms whose insides are built.
 // The player and Works crew pass them; everyone else, and every other hatch (the spine ladder's), treats them as walls.
@@ -33731,8 +33730,8 @@ OCCASIONS.careerSendoff = { title: 'Your send-off', kind: 'meeting', by: 'torres
 // ---- the bridge, by invitation (Pillar 5 Step 3, the user's): until you're invited (SHIP.bridgeInvited, saved; old
 // saves false, or true if they already hold bridge.invited), the bridge itself is shut to you. Only you: the crew come and go
 // as before, and the lobby, the washroom, the observation room and Deck 1's other hatches are as they were. The doors stay shut as
-// you come up (bridgeBarred, asked by section 4's edgeBlocks and section 11's door loop), a tap on them or walking up to
-// them says why (bridgeDoorTap, the deck architect's door hook; BRIDGE_LOCK.near), and an appointment or job in there or in
+// you come up (bridgeBarred, asked by the deck architect's YOU_LOCKS[1] in section 4's edgeBlocks and section 11's door loop,
+// 0.47.12), a tap on them or walking up to them says why (bridgeDoorTap, YOU_LOCKS' tap; BRIDGE_LOCK.near), and an appointment or job in there or in
 // the ready room behind it still lets you through (doorOpenFor). The invite: Vance's chance meeting (OCCASIONS.bridgeInvite,
 // the day before a bridge hour) once the first ship-wide event has ended (SHIP.eventLog), or from BRIDGE_LOCK.standIn in a
 // build with no events; it sets bridge.invited, which opens bridge hour's gate, and SHIP.bridgeInvited follows it.
@@ -43696,7 +43695,7 @@ function loop() {
   for (let k = 0; k < DOOR_OBJS.length; k++) {
     const d = DOOR_OBJS[k], crewAt = d.force === undefined && crewNearDoor(d);   // section 10: crew open doors (and their own locked ones)
     if (!d.passable && !d.svc && d.force === undefined && d.open < 1e-4 && !crewAt) continue;
-    let walk = false; if (d.force === undefined && !crewAt && (d.passable || d.svc)) for (let j = 0; j < walkers.length && !walk; j++) { const w = walkers[j]; walk = w.active && Math.hypot(w.obj.position.x - d.cx, w.obj.position.z - d.cz) < 1.15 + (d.span - SEG) / 2 && !(w.isPlayer && typeof bridgeBarred === 'function' && bridgeBarred(d.e)); }
+    let walk = false; if (d.force === undefined && !crewAt && (d.passable || d.svc)) for (let j = 0; j < walkers.length && !walk; j++) { const w = walkers[j]; walk = w.active && Math.hypot(w.obj.position.x - d.cx, w.obj.position.z - d.cz) < 1.15 + (d.span - SEG) / 2; }
     const near = d.force !== undefined ? d.force > 0 : crewAt || walk;
     d.open += ((near ? 1 : 0) - d.open) * Math.min(1, dt * (d.force !== undefined ? 5 : d.svc ? 4 : 8));   // a service hatch is heavier
     if (d.e.type === 'lift') for (let j = 0; j < d.leaves.length; j++) { const l = d.leaves[j]; l.position.y = 1.1 - d.open * 2.3; l.visible = d.open < .995; }   // lift doors sink into the floor
