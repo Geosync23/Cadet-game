@@ -4,6 +4,9 @@ R4 succeeds R3 (whose verdicts are in `plans/reviews-p5-step2.md`). R5 (session_
 
 ## Rec deck activation (brief: plans/brief-recdeck.md on claude/lead-pillar1; reviewer R6; build master BM8 session_01YGy9FDmcbkySMJpVPYJaAo)
 
+### W3 claude/writer-rec 019dcd1 (0.48.120, the rec machines' fault words), R6: PASS
+content/works/faults-rec.lines: 117 `fault.<name|shows|sign|still|tried>.<kind>.<cause>` lines for RB's 13 kinds; the game reads `fault.still.<kind>.<the wrongly-fitted cause>` (41963), the oven's pattern, so W3's still lines win over RB's in-code drafts (which name the other part: swapped against that pattern; W3 told RB). Bake unchanged, lines_check PASS.
+
 ### RB claude/rec-works e4c5da25 (0.84.3, deckIn at the ", " and "(" sites + the beats' where), R6: PASS
 ~20 sites `deckWord` → `deckIn` (Maps/roster/appointment labels after a comma, brackets, titles like "Inspection round, the rec deck", the haul/beat/occasion where); same words on Decks 1-6 (cadet_test vs aa4f42c ALL IDENTICAL per RB). No code after `//`. deckWord stays only at label starts.
 
