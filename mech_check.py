@@ -594,9 +594,10 @@ M10 = r"""(() => {
   const xp0 = W.xp; out.btn0 = shopGiveButton(socP(o.who));
   jobStops(j).forEach((x, k) => jobStepDone(j.id, k)); if (j.status === 'claimed') jobFinish(j, shipNow(), 'you');
   run(11 * 1440 + 510, 11 * 1440 + 520);
-  out.made = o.state; out.btn = shopGiveButton(socP(o.who)); const r0 = SHIP.rel[o.who].pts;
+  out.made = o.state; out.btnNoHands = shopGiveButton(socP(o.who)); const keep = SHIP.player.carry.slice(); SHIP.player.carry = [shopThing(o)];
+  out.btn = shopGiveButton(socP(o.who)); const r0 = SHIP.rel[o.who].pts;
   out.thanks = shopGiveSay(socP(o.who)); out.after = [o.state, s.made, Math.round((SHIP.rel[o.who].pts - r0) * 10) / 10 > 0, W.use.m10 || 0, W.xp - xp0];
-  out.btnAfter = shopGiveButton(socP(o.who));
+  out.btnAfter = shopGiveButton(socP(o.who)); out.handsAfter = SHIP.player.carry.length; SHIP.player.carry = keep;
   run(11 * 1440 + 530, 14 * 1440 + 500);                   // Monday, Day 15: one or two up
   out.monday = s.orders.filter(x => x.day === 15).map(x => [x.who, x.what]);
   const mail0 = SHIP.mail.length; run(14 * 1440 + 510, 21 * 1440 + 490);
@@ -604,6 +605,7 @@ M10 = r"""(() => {
   s.made = 3; const op = WORKSHOP_ORDERS.find(x => x.part); s.orders.push({ id: 'oT-0', who: know[1], what: op.id, day: 22, state: 'posted' });
   const o2 = s.orders[s.orders.length - 1]; shopTake(o2); const j2 = SHIP.jobs.find(x => x.id === o2.job);
   out.stage2 = [shopStage(s), j2 ? jobStops(j2).map(x => x.step) : null, o2.part || null];
+  if (j2) { const had = SHIP.stores[o2.part]; SHIP.stores[o2.part] = 0; shopFetch(j2, { t: 'Shelf' }, null); SHIP.stores[o2.part] = had; out.emptyShelf = jobStops(j2).map(x => [x.step, x.done]); }   // R4: an empty shelf ticks the fetch, not the lathe's wait
   out.gifts = TINKER_LIST.map(t => !!giftOf(t.item)); out.tinker = TINKER_LIST.filter(t => !t.stage || shopStage({ made: 6 }) >= t.stage).length;
   // an old save: no side.shop at all loads as empty; a junk one is cleaned
   worksSide().shop = { orders: [{ id: 1 }, { id: 'x', who: 'y', what: 'nope', state: 'posted' }], made: -4, tinkered: 'z' }; const c = shopData();
@@ -621,7 +623,9 @@ def part_m10(g):
     check(a['before'] == 0 and len(a['posted']) == 1 and a['posted'][0][2] == 12 and a['fromKnown'], 'm10: one order at 08:00 on Day 12, from someone who knows you')
     check(a['take'] and a['job'] and a['job'][0] == 'shop' and a['job'][1] == 'you' and a['job'][3] and a['job'][4], 'm10: taken, it\'s your side job, not your board job')
     check(a['stops'] and [x[1] for x in a['stops']] == ['wait', 'hold'] and a['stops'][0][2] in ('5-shop-lathe', '5-shop-fab'), f"m10: a wait then a hold at the machine ({a['stops']})")
-    check(a['btn0'] is None and a['made'] == 'made' and a['btn'] and a['btn']['id'] == 'shop-give', 'm10: Give appears once it\'s made')
+    check(a['btn0'] is None and a['made'] == 'made' and a['btnNoHands'] is None and a['btn'] and a['btn']['id'] == 'shop-give', 'm10: Give appears once it\'s made and in your hands')
+    check(a.get('handsAfter') == 0, 'm10: handing it over takes it from your hands')
+    check(a.get('emptyShelf') == [['fetch', True], ['make', False], ['finish', False]], f"m10: an empty shelf ticks the fetch only ({a.get('emptyShelf')})")
     check(a['after'][0] == 'given' and a['after'][1] == 1 and a['after'][2] and a['after'][3] == 1 and a['after'][4] in (1, 0) and a['btnAfter'] is None, f"m10: handed over: a friendship step, a use ({a['after']})")
     check(1 <= len(a['monday']) <= 2 and all(x == 'lapsed' for x in a['lapsed']) and a['mails'] == len(a['lapsed']), 'm10: Monday\'s orders, a week untaken, lapse with a Mail')
     check(a['stage2'][0] == 2 and a['stage2'][1][0] == 'fetch' and a['stage2'][2], 'm10: stage 2: a part from main storage first')

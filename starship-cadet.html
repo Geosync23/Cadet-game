@@ -281,7 +281,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.53.7
+   STARSHIP CADET: CSV Wren                           build 0.53.8
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8744,7 +8744,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.53.7';                           // keep in step with the header's build line
+const GAME_BUILD = '0.53.8';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -40593,7 +40593,7 @@ if (typeof WORK_TICKS !== 'undefined') WORK_TICKS.push(() => { if (typeof CHIEF_
 // Mondays at 08:00, each from crew who know you (an acquaintance or better; schedU(week, 0 | 2, 1010)) for a thing off
 // WORKSHOP_ORDERS (schedU(week, 1 | 3, 1011)). Tap the board and take one: it becomes your side job (kind 'shop',
 // beside your board job): at the lathe or the fabricator (5-shop-lathe / 5-shop-fab) a wait (10 ship minutes: set it
-// going, come back) and a short hold to finish. Then the thing is yours to hand over: their chat card shows Give <thing>
+// going, come back) and a short hold to finish. Then the thing is in your hands to hand over: their chat card shows Give <thing>
 // (section 20's two hook lines: shopGiveButton, shopGiveSay): a thank-you, a friendship step, and Works reputation +1
 // (at most one a day here, and through 24 core's side-job cap, worksSideXp). An order you never take lapses after 7 days
 // ("I made do"), no harm. The first order is ladder row m10 (small): the Works officer on shift (the row's by-list) says
@@ -40632,6 +40632,8 @@ function shopData() {
   s.orders = s.orders.filter(o => o && typeof o.id === 'string' && shopDef(o.what) && typeof o.who === 'string' && /^(posted|taken|made|given|lapsed)$/.test(o.state)).slice(-20);
   if (!Number.isInteger(s.made) || s.made < 0) s.made = 0;
   if (!Array.isArray(s.tinkered)) s.tinkered = []; s.tinkered = s.tinkered.filter(x => typeof x === 'string').slice(-20);
+  for (const k of ['xpDay', 'taught', 'posted']) if (k in s && !Number.isInteger(s[k])) delete s[k];
+  for (const o of s.orders) { if (!Number.isInteger(o.day)) o.day = 0; if (o.job !== undefined && typeof o.job !== 'string') delete o.job; if (o.part !== undefined && typeof o.part !== 'string') delete o.part; }
   return s;
 }
 const shopStage = s => s && s.made >= SHOP_STAGE[1] ? 3 : s && s.made >= SHOP_STAGE[0] ? 2 : 1;
@@ -40676,7 +40678,8 @@ function shopTake(o) {
 // the board: the orders up, to take one
 function shopBoard(it) {
   const s = shopData(); if (!s) return false;
-  const up = s.orders.filter(o => o.state === 'posted'), mine = s.orders.filter(o => o.state === 'taken' || o.state === 'made');
+  const up = s.orders.filter(o => o.state === 'posted'), mine = s.orders.filter(o => o.state === 'taken' || o.state === 'made'), P = SHIP.player;
+  for (const o of mine) if (o.state === 'made' && !P.carry.includes(shopThing(o)) && P.carry.length < CARRY_MAX) { P.carry.push(shopThing(o)); toast(it.t, 'The ' + shopThing(o) + ' for ' + shopName(o.who) + ' was waiting by the board. It\'s in your hands.'); return true; }
   const yours = mine.length ? ' Yours: ' + mine.map(o => 'the ' + shopThing(o) + ' for ' + shopName(o.who) + (o.state === 'made' ? ' (made: hand it over)' : '')).join('; ') + '.' : '';
   if (!shopOn()) { toast(it.t, 'Little orders from the crew, for the machine shop. Officers take them.'); return true; }
   if (!up.length) { toast(it.t, 'Nothing new pinned up. Orders go up on Mondays.' + yours); return true; }
@@ -40703,6 +40706,7 @@ function shopStep(j, it, at) {                           // your order's next st
   if (shopMachineOf(it) !== j.place) return false;
   const pid = x.places[0], spot = pid && PLACE_OF.has(pid) ? placeSpot(pid) : null;
   shopTeach(s);
+  if (x.step === 'finish' && P.carry.length >= CARRY_MAX) { toast(it.t, 'Your hands are full (' + partList(P.carry) + '): free one to take the ' + j.thing + '.'); return true; }
   if (x.step === 'make') {
     const w = typeof wsFind === 'function' && wsFind(j.id, k);
     if (j.parts.length && !(w && w.at !== null)) { const i = P.carry.indexOf(j.parts[0]); if (i >= 0) P.carry.splice(i, 1); }   // the part goes in as you set it going
@@ -40713,7 +40717,7 @@ function shopStep(j, it, at) {                           // your order's next st
     if (A.done < SHOP_HOLD) return false; if (A.o.fin) return true; A.o.fin = true;
     const r = jobStepDone(A.o.job, A.o.ws);
     if (r && r.done) { const jj = SHIP.jobs.find(y => y.id === A.o.job); if (jj && jj.status === 'claimed') jobFinish(jj, shipNow(), 'you');
-      if (o) toast('Machine shop', 'The ' + shopThing(o) + ' is done. Hand it to ' + shopName(o.who) + ' in person.'); }
+      if (o) { SHIP.player.carry.push(shopThing(o)); toast('Machine shop', 'The ' + shopThing(o) + ' is done, and in your hands. Hand it to ' + shopName(o.who) + ' in person.'); } }
     if (typeof device === 'object' && device && device.refresh) device.refresh();
     return true;
   };
@@ -40725,7 +40729,7 @@ function shopFetch(j, it, at) {                          // stage 2: the order's
   if (P.carry.includes(part)) { jobStepDone(j.id, k); toast(it.t, 'You have the ' + part + '. Now the ' + (j.place === '5-shop-fab' ? 'fabricator' : 'lathe') + '.'); return true; }
   if (P.carry.length >= CARRY_MAX) { toast(it.t, 'Your hands are full (' + partList(P.carry) + ').'); return true; }
   if (takePart(part)) { P.carry.push(part); toast(it.t, 'You take ' + partList([part]) + ' for the ' + j.thing + '.'); }
-  else { j.parts = []; toast(it.t, 'No ' + part + ' left on the shelf. You\'ll make do with offcuts.'); }
+  else { j.offcuts = true; toast(it.t, 'No ' + part + ' left on the shelf. You\'ll make do with offcuts.'); }   // the part list stays, so the stops don't shift
   jobStepDone(j.id, k); return true;
 }
 // tinkering: a short list, one at a time, from offcuts
@@ -40753,16 +40757,18 @@ function shopTap(it, at, mw) {
   if (room === 'f' && /^order board$/i.test(it.t)) return shopBoard(it);
   const j = s && s.orders.map(shopJobOf).find(Boolean);
   if (j && room === 'r' && !(mw && typeof shelfNeeds === 'function' && shelfNeeds(mw.j, mw.w, P.carry).length) && shopFetch(j, it, at)) return true;
+  const held = room === 'r' && !mw && s && s.orders.find(o => o.state === 'made' && P.carry.includes(shopThing(o)));
+  if (held) { toast(it.t, 'The ' + shopThing(held) + ' isn\'t for the shelves: it\'s ' + shopName(held.who) + '\'s. Hand it over in person.'); return true; }
   if (room !== 'f') return false;
   if (j && !(mw && (mw.w.make || typeof jobNeeds === 'function' && jobNeeds(mw.j, mw.w, P.carry).length)) && shopStep(j, it, at)) return true;
   return !mw && shopTinker(it, at);
 }
 Object.assign(PLAYER_ACTS, { shopFinish: { mins: SHOP_HOLD, pose: 'work', title: 'Machine shop' } });
 // section 20's chat card: Give <thing> to whoever ordered it, once it's made
-function shopGiveButton(p) { const s = shopData(), o = s && p && s.orders.find(x => x.who === p.id && x.state === 'made'); return o ? { id: 'shop-give', label: 'Give the ' + shopThing(o) } : null; }
+function shopGiveButton(p) { const s = shopData(), o = s && p && s.orders.find(x => x.who === p.id && x.state === 'made' && SHIP.player.carry.includes(shopThing(x))); return o ? { id: 'shop-give', label: 'Give the ' + shopThing(o) } : null; }
 function shopGiveSay(p) {
-  const s = shopData(), o = s && p && s.orders.find(x => x.who === p.id && x.state === 'made'); if (!o) return null;
-  const d = worksDay(shipNow()); o.state = 'given'; o.given = d; s.made++;
+  const s = shopData(), P = SHIP.player, o = s && p && s.orders.find(x => x.who === p.id && x.state === 'made' && P.carry.includes(shopThing(x))); if (!o) return null;
+  const d = worksDay(shipNow()); o.state = 'given'; o.given = d; s.made++; P.carry.splice(P.carry.indexOf(shopThing(o)), 1);
   if (typeof relAdd === 'function') relAdd(p.id, 'favour', 6);
   if (s.xpDay !== d) { s.xpDay = d; if (typeof worksSideXp === 'function') worksSideXp(1, 'shop'); }
   worksUse('m10');

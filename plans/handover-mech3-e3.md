@@ -7,13 +7,14 @@ Session_01WkkCvj4yxnMALMQYG2DsWM, 2026-10-19 (overnight). Written at about 55-60
 - Lead 16: session_01UMyfd16GqSdgNyz5PE8qSv. Build master BM7: session_01QbuzvT3TwzMwSWRmakzX8Z. Reviewer R4: session_01UGQxniXCxT5TLEE4tgRLfJ. Designer D3 (pages): session_0115ZiGhf9s3oYtFdjs7TgYS. E1 (24 core, ladder rows, Record): session_01AHeKjieg3qWjnEVuHecsHd. E2 (leaks, irrigation, rewiring, favours): session_01Bezat4UU7beoaKsqdSrJBs. Writer W2: session_01866TWKzGRgZmFcxiYRi4db.
 - Report each finished piece (hash, build, what, checks, memory %) to the lead, BM7 and R4. Never contact the user; push only to `claude/mech-diagnose`.
 
-## Branch and builds (claude/mech-diagnose, series 0.53.x; next free number 0.53.8)
+## Branch and builds (claude/mech-diagnose, series 0.53.x; next free number 0.53.9)
 | Build | Hash | What | Review |
 |---|---|---|---|
 | 0.53.4 | 9d179e9 | the places turn (on 0.63.3 7a6e137) | R4 PASS WITH FIXES |
 | 0.53.5 | b809339 | five leak joints moved; deck_check's leak-joint line | R4 PASS |
 | 0.53.6 | 626a907 | M10 workshop + tinkering (24j), merged E1's 0.45.8 7a9a942 | sent to R4 |
-| 0.53.7 | see the last commit | 24t cabin touches + star logging | checks were running at writing time; see the build table row |
+| 0.53.7 | 2ce8e9e | 24t cabin touches + star logging | sent to R4 |
+| 0.53.8 | see the last commit | R4's two M10 fixes (empty shelf; the made thing in your hands) | sent to R4 |
 
 ## What I own and built
 - **Places (0.53.4-5):** one block after Step 3's places (search `0.53.4 (Pillar 5 Step 4, seat E3`). All type `event` with `event: 'side'` / `'leak'` / `'leakp'` (inert for the crew). `DECKS[n].leakJoints`, `DECKS[3].growRacks`, `DECKS[4].cabinSpots['4-23']`. Props: the machine shop's order board (`wallFixed`), your bench under the Works bay window. Full list in DEV_NOTES "Places for Pillar 5 Step 4".
@@ -29,7 +30,7 @@ Session_01WkkCvj4yxnMALMQYG2DsWM, 2026-10-19 (overnight). Written at about 55-60
 ## Loose ends
 1. 24t: `cabinMood()` is not read by section 15 (24t gives +4 leisure at 06:00 itself instead); `cabinPlaced(id)` is not read by `lockerTidy` (one-line hook, if the owner wants it); visitors' remarks (W2's crew kind `cabin.remark`) not built.
 2. The Record line for ten stars: asked E1 to append `works.ms.stars` in `worksRecordHead` (24t pushes `['stars', day]` into `SHIP.works.ms`).
-3. M10: the made thing isn't in your hands (it's the order's state 'made'): handing it over is the chat button. Putting order things into `SHIP.player.carry` would let main storage's "stow" put them on a shelf; left out on purpose.
+3. M10: since 0.53.8 the made thing is in `SHIP.player.carry` (R4 and the lead); main storage refuses to shelve it, and one lost from your hands is waiting by the order board.
 4. 5-tool-rack is the existing tool wall (no new rack drawn); D3 had agreed "a wall rack": tell D3 if that matters.
 
 ## M17 lift roof (not started): notes from reading
