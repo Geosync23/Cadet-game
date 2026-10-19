@@ -2,6 +2,9 @@
 
 Brief: plans/brief-recdeck.md on claude/lead-pillar1 ("R" section). Lead 18 session_01CBur9nrJ411pFkHopF96RL. Build master BM8 session_01YGy9FDmcbkySMJpVPYJaAo. Earlier verdicts: R6's, in plans/reviews-p5-step4.md ("Rec deck activation"). Newest first.
 
+### W3 claude/writer-rec ef1fc0b + a095799 (0.48.127, rec.shut.route; W3's handover note), R7: PASS
+One Works text for the taped route (my fix 1 to RB2) + notes; bake unchanged, lines_check PASS.
+
 ### RB2 claude/rec-works 0ab43cd + 11fb633 (0.84.8 recShow, W3's keys; 0.84.9 stage poses, crew perform/address, juggling balls, mic stand, piano side-on), R7: PASS (my 0.84.7 fix 1 still open)
 - Read by hand; no code after `//`; no duplicate declarations; load-time adds are plain tables, two scratch objects and col() colours (no R()). Kit on R only: the music room's micStand/pianoBench (MUS, shared, no R()), the piano moved; the light pools' quad sits 3 cm over the stage top (.58 vs .55: not coplanar), additive, hidden with no show; the film cloth on its own noMerge pivot.
 - `recShow(state)` (null/film/talk/allhands/talent), RB's to own, RA only calls it. House lights: applyLight sets intensities fresh each frame, so the `*= (1 - dim)` doesn't compound; it dims only in the auditorium (lastRoom 'A'). Ticks only while a show, a dim or the screen is on.
