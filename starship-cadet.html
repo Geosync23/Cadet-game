@@ -281,7 +281,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.53.12
+   STARSHIP CADET: CSV Wren                           build 0.53.13
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8744,7 +8744,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.53.12';                           // keep in step with the header's build line
+const GAME_BUILD = '0.53.13';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -29572,6 +29572,14 @@ const LINES = JSON.parse([
   '{"text":"Not quite. It\'s {answer}. Good guess, though.","id":"1ib9umg"},',
   '{"text":"Ooh, no. {answer}. I\'d have said the same, honestly.","id":"1qvry0q"},',
   '{"text":"It\'s {answer}. Next one\'s yours.","id":"1x2kioj"}]',
+  ',"roof.card":[',
+  '{"text":"Lift hour. Ride the roof down the spine and grease each guide?","id":"3ahn3v"}]',
+  ',"roof.free":[',
+  '{"text":"Half four. The lift\'s back in service.","id":"1ui3zdx"}]',
+  ',"roof.shut":[',
+  '{"text":"The lift is held for maintenance until 16:30. Everyone waits, even you.","id":"ldyidq"}]',
+  ',"roof.up":[',
+  '{"text":"Hatch up, harness clipped. You\'re on the roof.","id":"g5vt9h"}]',
   ',"roster.acq":[',
   '{"text":"Acquaintances ({n})","id":"cfz7a1"}]',
   ',"roster.friends":[',
@@ -30685,6 +30693,8 @@ const LINES = JSON.parse([
   '{"text":"Works","id":"d28u1s"}]',
   ',"works.ask.m1":[',
   '{"text":"Fancy a walk? | Fancy a walk? I\'ll show you my round. Tea corner, or the bay till half eleven.","id":"1dgg5pe"}]',
+  ',"works.ask.m17":[',
+  '{"text":"The lift roof | Thursday is lift day. Meet me at the lift, {place}, at {time}. Bring your gloves.","id":"1indey2"}]',
   ',"works.ask.m2":[',
   '{"text":"Your uniform | Saw you after that job. Change before tea. A shower won\'t shift it. The wardrobe will.","id":"sy8vm1"}]',
   ',"works.ask.m3d":[',
@@ -40997,7 +41007,7 @@ function roofLiftTap() {
       choices: ['Climb onto the roof', 'Ride inside'] }, i => { if (i === 0) roofClimb(); else if (i === 1 && !liftHeld()) toPanel(openLiftPanel); });
     if (shown) return true;
   }
-  if (liftHeld()) { toast('Main lift', worksText('roof.held', 'Held for maintenance till 16:30. Nobody\'s going anywhere for a bit.')); return true; }
+  if (liftHeld()) { toast('Main lift', worksText('roof.shut', 'Held for maintenance till 16:30. Nobody\'s going anywhere for a bit.')); return true; }
   return false;
 }
 function roofClimb() {                                   // into the car (its tile nearest the middle), then up through the hatch
@@ -41145,7 +41155,8 @@ function roofFrame() {
 requestAnimationFrame(roofFrame);
 if (typeof WORK_TICKS !== 'undefined') WORK_TICKS.push(now => {   // 16:30: the car's let go (section 11 keeps the hold's record); loaded from a save made on the roof: back at the top
   if (LIFT_HOLD && LIFT_HOLD.until <= now && LIFT_HOLD.until > now - 2 && !LIFT_HOLD.said && !SIM_AT) { LIFT_HOLD.said = true; toast('Main lift', worksText('roof.free', 'Half four: the lift\'s back in service.')); }
-  const S = worksSide(), rd = S && S.roof && S.roof.on !== undefined ? roofData() : null; if (rd && rd.on !== undefined && !(ROOF.r && !ROOF.r.off)) {   // (read only: no side.roof in saves that never rode) delete rd.on; if (!SIM_AT) toast(mechName('m17'), worksText('roof.resume', 'You\'d saved on the lift roof. You\'re back at the top deck.')); }
+  // (read only: no side.roof in saves that never rode)
+  const S = worksSide(), rd = S && S.roof && S.roof.on !== undefined ? roofData() : null; if (rd && rd.on !== undefined && !(ROOF.r && !ROOF.r.off)) { delete rd.on; if (!SIM_AT) toast(mechName('m17'), worksText('roof.resume', 'You\'d saved on the lift roof. You\'re back at the top deck.')); }
   const o = typeof OCCASIONS !== 'undefined' && OCCASIONS['works.m17']; if (o && (o.deck !== 1 || o.room !== '+')) { o.deck = 1; o.room = '+'; }   // after a reload trainSetup makes it in the Works bay
 });
 // crew waiting by the held lift say so now and then (the writer's bank roof.wait): someone roofWait keeps on your deck,
