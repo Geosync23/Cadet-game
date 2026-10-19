@@ -750,7 +750,7 @@ M17SET = r"""((day) => {
 M17WATCH = r"""(() => { const A = ACT, R = A && A.kind === 'roofRide' && A.o.r, M = window.__m17;
   if (R && R.st === 'grease' && !M.stops.includes(R.k)) M.stops.push(R.k);
   if (R && R.inShaft && !R.off) M.calls = Math.max(M.calls, renderer.info.render.calls);
-  return R ? [R.st, R.k, !!R.inShaft, player.deck, roomAt(...player.here())] : A && A.kind === 'roofRide' ? ['in', 0, false, player.deck, roomAt(...player.here())] : null; })()"""
+  return R ? [R.st, R.k, !!R.inShaft, player.deck, roomAt(...player.here()), ROOF.r === R, roofData().on || 0] : A && A.kind === 'roofRide' ? ['in', 0, false, player.deck, roomAt(...player.here())] : null; })()"""
 def part_m17(g):
     if not g.ev("typeof roofStep === 'function'"):
         print('  m17: 24s is not in this build'); return
@@ -780,7 +780,7 @@ def part_m17(g):
         print(f'  m17 ride Day {day}:', start, '| mid', mid, '| end', res, held)
     (s1, seen1, mid1, r1, h1), (s2, seen2, mid2, r2, h2) = runs
     m1 = json.loads(r1[8]); decks = r1[9]
-    check(s1 == [True, 'roofRide'] and mid1 and mid1[3] == 1 and mid1[4] == '@', f"m17: you climb on; mid-ride a save has you on Deck 1 in the car ({mid1})")
+    check(s1 == [True, 'roofRide'] and mid1 and mid1[3] == 1 and mid1[4] == '@' and mid1[5] is True and mid1[6] == 18, f"m17: you climb on (the ride is the roof's, side.roof.on set); mid-ride a save has you on Deck 1 in the car ({mid1})")
     check(m1['stops'] == list(range(len(decks))) and r1[0] == decks[-1] and r1[1] is None and not r1[2], f"m17: a stop at every deck's guide, out on the bottom deck ({m1['stops']}, Deck {r1[0]})")
     check(r1[3] == '{"rides":1,"last":18}' and r1[4] == 1 and r1[5] > m1['cond'], f"m17: the ride counts, the lift runs smoother ({r1[3]} use {r1[4]} cond {m1['cond']} -> {r1[5]})")
     check(r1[6] and h1[:2] == [True, False] and not h1[2], 'm17: the car is held till 16:30, let go then; the hold is not saved')
@@ -791,6 +791,8 @@ def part_m17(g):
         g.step(5); w = g.ev(M17WATCH)
         if w and w[0] == 'dark': g.ev("actEnd(true)"); g.step(20); fade = g.ev("[+fadeEl.style.opacity, ROOF.r.off, 'on' in roofData(), ACT && ACT.kind]"); break
     check(fade == [0, True, False, None], f"m17: stepping away in the fade before the shaft undoes the fade ({fade})")
+    res = g.ev("(() => { const kt = toast, said = []; toast = (a, b) => said.push(b); ROOF.r = null; roofData().on = 32; const S = worksSide(); for (const f of WORK_TICKS) { try { f(shipNow(), false); } catch (e) {} } for (const f of WORK_TICKS) { try { f(shipNow() + 1, false); } catch (e) {} } toast = kt; return [said.filter(x => /saved on the lift roof|back at the top/i.test(x)).length, 'on' in roofData()]; })()")
+    check(res == [1, False], f"m17: loaded from a save made on the roof, roof.resume once ({res})")
     a2 = g.ev(M17P)
     check(json.dumps({**a2, 'talk': 0}, sort_keys=True) == json.dumps({**a, 'talk': 0}, sort_keys=True), 'm17: the paper part differs after the rides')
     g.ev(f"(() => {{ const k = {keep}; LIFT_HOLD = null; setShipNow(k.t); if (deckDef.num !== k.deck) goToDeck(k.deck); player.obj.position.x = k.pos[0]; player.obj.position.z = k.pos[1]; Object.assign(SHIP.player.needs, k.needs); SHIP.player.carry = k.carry; }})()")   # as it was, for the parts after
