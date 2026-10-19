@@ -18,11 +18,12 @@ gotchas, how to test); this note adds only what E5 did.
   mech_check `tparts` (only with manifestRun) and `side.parts` in the `side` save round trip.
 
 ## Loose ends
-- **Rewiring right first time pays 1, not 2, on a merge with E1** (E1's flat side pay `WORK_XP[kind] ?? 1` ignores
-  `j.rightFirst`; 0.51.11 dropped 24q's own +1). One line in 24 core's turn-in fixes it:
-  `xp = side ? (WORK_XP[kind] ?? 1) + (right ? 1 : 0) : ...`. Asked of lead 17 (E1 inactive). mech_check m15 FAILs on
-  merged builds until it's in.
-- R5's verdicts on 6714448 (0.51.11), 93fbdb5, 60a418f, 2c513e6: asked, not yet posted.
+- None open. Rewiring's right-first +1 is paid by 24 core's turn-in (E6, claude/mech-rounds 2edb69c, R5 PASS; lead 17: nothing
+  for this seat). R5: 0.51.11 PASS WITH FIXES (the pin, done), 60a418f (0.51.13) PASS; 2c513e6 (0.51.14) asked, not yet posted.
+- Trial with E6 910131e: mech_check m8 m4 m13 m15 ff tparts side OK.
+- E1 retired: manifestRun's owner is now E6 (session_018cZuXpb4XdFs47zXoPcF8B). W2 retired: new lines go on this branch in
+  W2's style, listed in the DEV_NOTES row (plans/handover-writer-w2.md on claude/writer-p5).
+- R5's note: promoPip could call playerRigRebuild later (E6's code, not this seat's).
 
 ## Trial merge with E1 (how E5 did it)
 Worktree from HEAD, `git merge origin/claude/mech-rounds`: the two build-number lines in the game (take ours) and two
