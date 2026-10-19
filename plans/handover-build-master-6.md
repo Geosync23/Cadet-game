@@ -26,4 +26,4 @@
 
 ## Loose ends at handover
 - 0.63.3 final round: see the last lines of plans/cand-p5-s3-results.md for what finished; DEV_NOTES 0.63.3 row added with the green hash.
-- Step 4 (E1-E3 start on 7a6e137) is for the next build master; BM6 did no Step 4 merges.
+- Step 4 (E1-E3 start on 7a6e137) is for the next build master; BM6 did no Step 4 merges. Already sent to BM6 (redirected to lead 16): E3 claude/mech-diagnose 9d179e9 (0.53.4 places turn, on 7a6e137; deck_check OK, cadet ALL IDENTICAL vs 0.63.3, interactions OK; merge after the 24 core and the round's mechanics).
