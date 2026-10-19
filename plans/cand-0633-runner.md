@@ -5,3 +5,4 @@ Build: claude/p5-cand-pt1 7a6e137 (0.63.3, baked). Chromium /opt/pw-browsers/chr
 check | rc | seconds | last line
 ---|---|---|---
 events | rc=0 | 399s | EVENTS CHECK OK
+device | rc=0 | 252s | device_check: OK
