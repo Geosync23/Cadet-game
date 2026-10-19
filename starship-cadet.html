@@ -39,6 +39,9 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 .toast.show{opacity:1;transform:translate(-50%,0)}
 .toast b{display:block;font-size:14.5px;margin-bottom:3px;color:#bdeee6;font-weight:600}
 .toast span{font-size:13.5px;color:#cfd9dc;line-height:1.45}
+.toast .tgain{display:flex;flex-wrap:wrap;gap:5px 6px;margin-top:7px}   /* 0.72.3 (HUD U): a job's gains at the turn-in, one chip each */
+.toast .tgain b{display:inline-block;font-size:12.5px;font-weight:600;line-height:1.3;padding:2px 9px;border-radius:999px;background:rgba(95,214,198,.14);border:1px solid rgba(95,214,198,.4);color:#bdeee6;margin:0}
+.toast .tgain b.rep{background:rgba(232,192,106,.14);border-color:rgba(232,192,106,.45);color:#f1d79a}
 @media (prefers-reduced-motion:reduce){.toast,#bg{transition:none}}
 .lift{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:3;width:min(340px,calc(100% - 28px));background:rgba(13,21,33,.9);border:1px solid var(--line);border-radius:16px;padding:14px 14px 12px;box-shadow:0 12px 40px rgba(0,0,0,.45)}
 .lift[hidden]{display:none}
@@ -269,7 +272,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.72.2
+   STARSHIP CADET: CSV Wren                           build 0.72.3
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8613,7 +8616,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.72.2';                           // keep in step with the header's build line
+const GAME_BUILD = '0.72.3';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -14093,12 +14096,14 @@ const ixBoard = (() => {
       return true;
     },
     turnIn(id) {
+      const g0 = typeof turnInSnap === 'function' ? turnInSnap() : null;   // 0.72.3: before, for the gains' fallback
       const j = myJob(); if (!j || j.id !== id || !turnInJob(id)) { toast('Job board', 'Nothing to turn in.'); api.draw(); return false; }
       // pay: section 15 pays machine jobs and cart runs when it finishes them; chores are paid here
       const pay = j.kind === 'chore' && !j.machine && typeof JOB_PAY !== 'undefined' ? JOB_PAY : 0;
       if (pay) SHIP.player.credits = (SHIP.player.credits || 0) + pay;
       api.draw(); device.refresh(); ixGoalAt = -1;
       toast('Job complete', (j.title || jobCard(j)[0]) + ': signed off on the board.' + (pay ? ' +' + pay + ' credits.' : '') + ' That\'s one more on your record.');
+      if (typeof turnInShow === 'function') turnInShow(j, g0);   // what it did for your name and the ship (0.72.3)
       return true;
     },
   };
@@ -14296,6 +14301,42 @@ function trkPlace() {
   put(); if (hits()) { trkBtn.classList.add('compact'); put(); }
 }
 addEventListener('resize', trkPlace); setTimeout(trkPlace, 0);
+// ---- the turn-in's gains (0.72.3, HUD U; Pillar 5 Step 3, the user's: "the job turn-in shows rep going up AND the points
+// added to each ship meter the job helped"). The board's turnIn calls turnInShow(job, before) after its toast, which gets
+// a row of chips: reputation first (gold), then each ship meter ("+4 Power"). What it shows comes from the job:
+// j.gains = { rep: [{ dept, name?, add }], meters: [{ sys, name?, add, now? }] }, filled by whoever applies a gain (C2 the
+// rep, S2 the meters; at the repair or at the turn-in). Missing either list, a before/after look round turnInJob
+// (turnInSnap: SHIP.rep's departments, shipHealthRows' systems) fills it in. Words: the head writer's works.turnin.repN
+// ({n} {dept}) or works.turnin.rep, works.turnin.meter ({n} {system}), meter.<sys>. Nothing saved; the job keeps j.gains.
+function turnInSnap() {
+  const out = { rep: {}, sys: {} };
+  try { const R = typeof repInit === 'function' ? repInit() : null; if (R) out.rep = { ...R.dept }; } catch (e) { /* none */ }
+  try { for (const r of shipHealthRows()) if (r.key !== 'ship') out.sys[r.key] = r.value; } catch (e) { /* none */ }
+  return out;
+}
+const tgDept = d => (typeof DEPT_NAME !== 'undefined' && DEPT_NAME[d]) || String(d || 'works').charAt(0).toUpperCase() + String(d || 'works').slice(1);
+function turnInGains(j, a) {
+  const g = j && j.gains, T = (k, fb, ctx) => { let t = null; try { t = careerText(k); } catch (e) { t = null; } t = t || fb; for (const c in ctx || {}) t = t.split('{' + c + '}').join(ctx[c]); return t; };
+  let reps = g && Array.isArray(g.rep) ? g.rep : null, mets = g && Array.isArray(g.meters) ? g.meters : null;
+  if (a && (!reps || !mets)) {
+    const b = turnInSnap();
+    if (!reps) reps = Object.keys(b.rep).filter(d => isFinite(a.rep[d]) && b.rep[d] - a.rep[d] >= .5).map(d => ({ dept: d, add: Math.round(b.rep[d] - a.rep[d]) }));
+    if (!mets) mets = Object.keys(b.sys).filter(k => isFinite(a.sys[k]) && b.sys[k] - a.sys[k] >= 1).map(k => ({ sys: k, add: b.sys[k] - a.sys[k] }));
+  }
+  const out = [];
+  for (const r of reps || []) { if (!r || !(r.add > 0) && r.add !== undefined) continue; const dn = r.name || tgDept(r.dept);
+    out.push({ rep: true, text: r.add ? T('works.turnin.repN', '{dept} reputation +{n}', { n: Math.round(r.add), dept: dn }) : T('works.turnin.rep', 'Works reputation up') }); }
+  for (const m of mets || []) { if (!m || !(m.add >= .5)) continue; const nm = m.name || T('meter.' + m.sys, (typeof SYSTEM_NAME !== 'undefined' && SYSTEM_NAME[m.sys]) || String(m.sys));
+    out.push({ rep: false, text: T('works.turnin.meter', '+{n} {system}', { n: Math.round(m.add), system: nm }) }); }
+  return out;
+}
+function turnInShow(j, a) {
+  let list = []; try { list = turnInGains(j, a); } catch (e) { list = []; }
+  if (!list.length) return list;
+  const x = document.getElementById('tx'), row = document.createElement('span'); row.className = 'tgain';
+  for (const c of list) { const b = document.createElement('b'); b.textContent = c.text; if (c.rep) b.className = 'rep'; row.appendChild(b); }
+  x.appendChild(row); return list;
+}
 let trkAt = 0;
 (function trkFrame() {                                   // the button's dot while an arrow's up; its place (the Device button and Pause move); the panel kept current while open
   requestAnimationFrame(trkFrame);
