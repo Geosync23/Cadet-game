@@ -553,5 +553,5 @@ introduces them), unless noted.
   twice this week, for his back); the Counsellor prescribes the float room ("Twenty minutes. Counsellor's orders.").
 - **Traditions there:** Winner Stays On (Sun), the Lightdisc Cup (every 4 weeks), Dawn swim (Tue, Thu, Rina), Paddle
   club (Wed, Holt), the river regatta (every 4 weeks), Wall night (Tue, Tomas belays), Float hour (Wed, Matthias Oduya),
-  Slow stretch (Sun, Dr. Nandakumar), Wren talks (Mon, Thu), film night (Sat; moves from the junior common room after
+  Slow stretch (Sun 08:00, Dr. Nandakumar), Wren talks (Mon, Thu), film night (Sat; moves from the junior common room after
   the first all-hands), talent night (every 4 weeks, Lucia Ferreira hosts, Maeve on lights), the Captain's all-hands.

@@ -1,16 +1,36 @@
-@tradition dawn-swim
-// W3 rec deck words. Tuesdays and Thursdays 06:15-06:45 from Day 2, the pool; Rina, before the infirmary opens. Tap a lane.
+@tradition rec-dawn-swim
+// W3 (rec writer; lead 18: fields from plans/rec-traditions-plan.html FINAL and the brief; RA owns the format).
+// Dawn swim: Tuesdays and Thursdays 06:15-06:45 from Day 2, the pool; Rina, before the infirmary opens. Tap a lane.
+// FOR RA: the pool's lane type is yours (written here as rec:lane; four lanes, then the loungers / pool edge as waiting
+// spots). Intended who: swimmer (RA's habit) 80%.
+k: 488
+title: Dawn swim
+when: weekly tuesday,thursday from day 2
+at: 06:15-06:45
+min: 20
+wake: 15
+where: 7 room Pool: rec:lane
+who: rina always, infirmary 25%, juniors 15%, everyone 5%
+anim: everyone water
+host: rina
+from: rina
+flag: rec.on
+
 == mail
 - Dawn swim tomorrow, {time} at the pool. Empty lanes, quiet water, done before the infirmary opens. Rina will be there. She always is.
+
 == ask
 - Dawn swim in the morning. Quarter past six. Don't think about it. Just come.
 - Swim before breakfast? You feel brilliant all day. Annoyingly brilliant.   #funny
+
 == here
 - Lanes are lovely at this hour.
 - Four lengths, then breakfast. That's the deal.
 - Nobody talks. It's the best bit.   #warm
+
 == thanks
 - You slip into an empty lane while the ship's still waking. The water's warm and the stars are right there.   #warm
+
 == chatter
 - Dawn swim's the best start to a day. Ask Rina. Actually don't, she'll make you come.   #funny
 - I went to dawn swim once. Once. My alarm still hasn't forgiven me.   #funny

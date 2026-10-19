@@ -1,15 +1,34 @@
-@tradition float-hour
-// W3 rec deck words. Wednesdays 21:30-22:15 from Day 3, the float room; Matthias Oduya dims the orbs, quiet music, no talking. Tap to float: rest, mood.
+@tradition rec-float-hour
+// W3 (rec writer; lead 18: fields from plans/rec-traditions-plan.html FINAL and the brief; RA owns the format).
+// Float hour: Wednesdays 21:30-22:15 from Day 3, the float room (about 6); Matthias Oduya dims the orbs, quiet music, no
+// talking. Tap to float: rest and mood. FOR RA: the float room's places are yours (written as rec:float). Intended who:
+// floater (RA's habit) 70%.
+k: 492
+title: Float hour
+when: weekly wednesday from day 3
+at: 21:30-22:15
+min: 25
+where: 7 room Float room: rec:float
+who: oduya always, holt 40%, infirmary 15%, everyone 8%
+anim: everyone talk
+host: oduya
+from: oduya
+flag: rec.on
+
 == mail
 - Float hour tomorrow, {time} in the float room. Matthias dims the orbs, someone plays something quiet, and nobody talks. Come and drift.
+
 == ask
 - Float hour tonight. No talking. You'll love it.   #warm
 - Coming to float hour? You sleep like a baby after. A tired, floaty baby.   #funny
+
 == here
 - Shh.   #warm
 - Just drift.   #warm
+
 == thanks
 - You step into a fifth of a g as the orbs dim. Nobody says a word. You drift, and the day goes quiet.   #warm
+
 == chatter
 - I slept so well after float hour. Best sleep all week.   #warm
 - Someone hummed at float hour. Matthias gave them a look. A kind look, but a look.   #funny

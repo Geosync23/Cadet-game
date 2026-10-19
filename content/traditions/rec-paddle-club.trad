@@ -1,16 +1,36 @@
-@tradition paddle-club
-// W3 rec deck words. Wednesdays 18:30-19:30 from Day 3, the river hall; Chief Holt. The slow loop; the fast run arrives with White water's integration (lead 17's call 3).
+@tradition rec-paddle-club
+// W3 (rec writer; lead 18: fields from plans/rec-traditions-plan.html FINAL and the brief; RA owns the format).
+// Paddle club: Wednesdays 18:30-19:30 from Day 3, the river hall; Chief Holt, the slow loop (the fast run comes with White
+// water's integration, lead 17's call 3). FOR RA: kayak places are yours (written as rec:kayak; 3-4 kayaks, the dock
+// beach to wait). Intended who: kayaker 80%.
+k: 489
+title: Paddle club
+when: weekly wednesday from day 3
+at: 18:30-19:30
+min: 30
+after-shift: yes
+where: 7 room River hall: rec:kayak
+who: holt always, watch 35%, juniors 15%, everyone 8%
+anim: everyone play
+host: holt
+from: holt
+flag: rec.on
+
 == mail
 - Paddle club tomorrow, {time} in the river hall. Chief Holt takes you round the slow loop. Helmets on, everyone, no exceptions.
+
 == ask
 - Paddle club tonight. Holt watches the water like a hawk. It's oddly calming.
 - Coming paddling? The slow loop, then a cup of tea on the beach.
+
 == here
 - Paddle on the left. Now the right. Now stop going in circles.   #funny
 - Helmet straight. Holt will check.
 - Steady. Watch the water. It tells you first.
+
 == thanks
 - You take a kayak from the dock and fall in behind Chief Holt round the slow loop. He nods. That's a lot, from him.   #warm
+
 == chatter
 - Holt said "adequate" at paddle club. To me! I've told everyone.   #funny
 - Paddle club's good for the arms. Mine are still complaining.
