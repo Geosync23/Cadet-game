@@ -186,6 +186,7 @@ with sync_playwright() as pw:
     same = {}
     for m in mem[len(decks) - 1:]: v = json.loads(m); same.setdefault(','.join(v[1]), set()).add(json.dumps(v[0]))
     if any(len(v) > 1 for v in same.values()): ok = False; print('  memory changes between round trips')
+    if not any(sum(1 for m in mem[len(decks) - 1:] if ','.join(json.loads(m)[1]) == k) > 1 for k in same): ok = False; print('  no two round trips to compare')
     print('errors', g.errors)
     if g.errors: ok = False
     print('DECK CHECK OK' if ok else 'DECK CHECK FAILED')
