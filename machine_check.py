@@ -25,7 +25,7 @@
 #   the Works crew at work (0.33.40): the two placed jobs on Days 1 and 2, every third small job to the crew at once (5l)
 #   the shelves and the Wednesday delivery (0.33.41-0.33.42): the right shelf, the machine shop, crates, two trips, 14:00 (5m)
 #   your side: a job you claim is left to you, and finishing it puts the machine right
-#   the pool leak (0.84.3, rec engineer B; a REC_DECK = true build only): a traced pool-line repair shows as a drip on Deck 5 (5y)
+#   the pool leak (0.84.5, rec engineer B; a REC_DECK = true build only): a traced pool-line repair shows as a drip on Deck 5 (5y)
 #   the save: machines, jobs and supplies written by the save hook and read back by machinesLoad come out the
 #   same, and run on the same afterwards
 #   play (the player's needs read shipEffects every ship minute) never runs the machines ahead of the clock, and
@@ -1356,7 +1356,7 @@ with sync_playwright() as pw:
             or not tr.get('cardNow') or not tr.get('found') or (tr.get('own') or {}).get('word') == 'full' or not tr.get('fin') or (tr.get('cond') or 0) < 90 or not tr.get('closed')):
             fail('traced faults')
 
-    # 5y. the pool leak (0.84.3, rec engineer B; plans/recdeck-plan.html section 6, a Works story for tracing): only on a build
+    # 5y. the pool leak (0.84.5, rec engineer B; plans/recdeck-plan.html section 6, a Works story for tracing): only on a build
     # with the rec deck's machines (REC_DECK = true), else skipped. You an Officer trained in tracing; on the first workday of
     # yours from Day 2 that 7-pool-filter-1's repair would be traced (section 17's traceFor: schedU key 878), every machine put
     # right and the board cleared, the filter made faulty at 09:00: its repair posts traced on the pool line, cause the seal;

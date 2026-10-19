@@ -285,7 +285,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.84.5
+   STARSHIP CADET: CSV Wren                           build 0.84.6
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8775,7 +8775,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.84.5';                           // keep in step with the header's build line
+const GAME_BUILD = '0.84.6';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -44117,7 +44117,7 @@ function leakFx() {
   } catch (err) { console.error(err); }
 }
 WORK_TICKS.push((now, skip) => { if (!skip) leakFx(); });
-// ---- the pool plant's leak (0.84.3, rec engineer B; plans/recdeck-plan.html section 6, "A Works story for tracing (tier 2)"):
+// ---- the pool plant's leak (0.84.5, rec engineer B; plans/recdeck-plan.html section 6, "A Works story for tracing (tier 2)"):
 // section 17's pool line (MACHINE_LINKS.pool, only while REC_DECK is on) is traced like the others (traceFor; the filters'
 // seal is the only cause on it) and its symptom is named on Deck 5 (LINE_SHOWS): it shows first as a drip in main storage,
 // right under the pool plant. While a pool job is open a puddle (24o's puddleAt) lies in the aisle at POOL_DRIP, and 24i's
@@ -46854,7 +46854,7 @@ function placeSpot(id) {
     // facing: a compass letter, or a number in degrees (round tables, the curved bar, card tables; 0 = south, 90 = east,
     // as the letters); a place's own `y` (seat height) always wins over SEAT_Y, for the crew and the player alike
     s = { id, walk, x, z, y, face: typeof pl.face === 'number' ? pl.face * Math.PI / 180 : FACE_ANGLE[pl.face] || 0,
-      pose: pl.type === 'bed' ? 'lie' : pl.pose, anim: placeAnim(pl), room: pl.room, onTile: free(...pl.at) };
+      pose: pl.type === 'bed' ? 'lie' : pl.pose, anim: placeAnim(pl), room: pl.room, onTile: free(...pl.at), mv: pl.move || null };   // mv: 8c's crew moves (0.84.6)
   }
   SPOT_OF.set(id, s); return s;
 }
@@ -47060,7 +47060,7 @@ class CrewAgent {
     if (this.talking > 0) {                              // stopped for a word with you
       this.talking -= dt;
       if (!this.settled) { this.pose = 'stand'; this.face = Math.atan2(player.obj.position.x - this.x, player.obj.position.z - this.z); }
-      this.h.set({ x: this.x, y: this.y, z: this.z }, this.face, heldPose(this)); return true;
+      if (!((this.rk || this.settled && this.spot && this.spot.mv) && recCrewSet(this, dt))) this.h.set({ x: this.x, y: this.y, z: this.z }, this.face, heldPose(this)); return true;
     }
     let goalId;
     if (w.deck !== N) goalId = '@lift';
@@ -47100,6 +47100,7 @@ class CrewAgent {
     // stuck: meant to be going somewhere and not getting there (in ship minutes)
     const going = this.path.length > 0 || (this.spot && !this.settled);
     if (going && Math.hypot(this.x - ox, this.z - oz) < 1e-4) { this.stuck += dt * SHIP_RATE; this.stuckMax = Math.max(this.stuckMax, this.stuck); } else this.stuck = 0;
+    if ((this.rk || this.settled && this.spot && this.spot.mv) && recCrewSet(this, dt)) return true;   // 0.84.6: swimming the lane, up the wall (8c)
     this.h.set({ x: this.x, y: this.y, z: this.z }, this.face, heldPose(this));
     return true;
   }
@@ -47291,7 +47292,7 @@ FullPerson.prototype.update = CrowdPerson.prototype.update;
 // next natural end (back at the lane's start, the loop's start, the floor). Nothing here calls R().
 // =====================================================================
 Object.assign(HOLDS, { towel: { prop: 'towel', bone: 'C', one: 2 } });   // over the left shoulder; one: 2 is neither arm, so both swing as usual
-for (const a of ['cheer', 'clap', 'groan']) ACT_SEATED.add(a);
+for (const a of ['cheer', 'clap', 'groan', 'slump']) ACT_SEATED.add(a);
 Object.assign(PROP_KIT, {
   kayak(p) {                                             // on the body bone, in metres from the root: the hull's waterline at .66
     part(p, GEO.sph, '#f2a33a', 0, .66, .32, .34, .15, 1.38); part(p, GEO.sph, '#e05a3a', 0, .73, .32, .2, .09, 1.2);
@@ -47419,6 +47420,18 @@ const REC_ACTS = {
   groan: { f(r, s, t, b, ph) {                           // a near miss: hands on the head, a look down
     for (const a of r.arms) armTo(a, s, -2.55, -2.25, .6, .4);
     r.head.rotation.x = L(r.head.rotation.x, .3 + .05 * Math.sin(t * 2), s); r.torso.rotation.x = L(r.torso.rotation.x, .1, s);
+  } },
+  slump: { f(r, s, t, b, ph, h, sy) {                   // 0.84.6 (rec engineer B): sat back in the seat, legs out, hands on the belly or behind the head
+    if (b !== 'sit') return;                             // a seat with anim: 'slump' (poseOf gives 'sit:slump'); standing, nothing
+    const hy = r.hips.position.y - .03; r.hips.position.y = L(r.hips.position.y, hy, s); r.hips.position.z = L(r.hips.position.z, .06, s);
+    for (const leg of r.legs) {                          // the feet well out in front on the floor (a high seat: on the step half a metre down), knees a little apart
+      const t0 = leg.thigh.rotation.x, k0 = leg.knee.rotation.x, a0 = leg.ankle.rotation.x, ang = legIK(leg, ANK + (sy > .62 ? (sy - .5) / h : 0) - (hy - HIP_OFF), sy > .62 ? .4 : .5);
+      leg.thigh.rotation.x = L(t0, leg.thigh.rotation.x, s); leg.knee.rotation.x = L(k0, leg.knee.rotation.x, s);
+      leg.ankle.rotation.x = L(a0, -ang - .35, s); leg.thigh.rotation.z = L(leg.thigh.rotation.z, leg.side * .12, s);
+    }
+    r.torso.rotation.x = L(r.torso.rotation.x, -.3, s); r.head.rotation.x = L(r.head.rotation.x, .22 + .04 * Math.sin(t * .3 + ph), s);
+    const back = Math.floor(ph * 7) % 3 === 2;            // one in three: hands behind the head
+    for (const a of r.arms) back ? armTo(a, s, -2.7, -2.35, .75, .3) : armTo(a, s, -.55, -1.5, -.1, .15);
   } },
 };
 // climbing legs: the `side` foot steps up as q goes 0 to 1, the other pushes down; feet toward the wall
@@ -47553,6 +47566,92 @@ function recRope(A, ax, ay, az, on) {
   _ropeA.set(0, .71, .19); _ropeB.set(ax, ay, az); root.worldToLocal(_ropeB);   // the belay loop, in the root's own units
   const d = _ropeB.clone().sub(_ropeA), len = d.length(), rr = .016 / A.body.h;
   A.rope.position.copy(_ropeA).addScaledVector(d, .5); A.rope.quaternion.setFromUnitVectors(_ropeU, d.normalize()); A.rope.scale.set(rr, len, rr);
+}
+// ---- the crew's moves (0.84.6, rec engineer B). Whoever is settled at a place with `move` (the mover's specs above, deck
+// coordinates) does it as an endless loop, no counts, from their own clock (a.mt: real seconds since they settled there;
+// the first 1.5 s glide from the place's spot to the move's start). The agent stays at the spot (its tiles, getting up);
+// only the body moves. The place's fields (section 10's placeSpot passes `move` on as spot.mv):
+//   swim  { path: [a, b], y, speed?, phase? }  lengths, a tread at each end    tread { at, y, face }
+//   kayak { path: REC_LOOP, y, phase? }        the loop at the player's speeds  float { at, r, top }
+//   climb { at, face, top, rest? }  up, the bell, lowered, `rest` s at the foot (4): a belay line while on (two at once)
+//   fan   { slump? }  at a seat or standing: watching, and the room's cheers, claps and groans together (one shared clock)
+//   kit: 'rec' (swim, tread and kayak's default), 'socks' (float's), 'rec socks' or '' (in uniform): a new body for it
+// phase: 0-1 of the loop, so two on one loop or lane are apart. A seat with anim: 'slump' and no move sits back, legs out.
+// Nothing here calls R(); a place with no `move` never comes here.
+const REC_KITS = { swim: 'rec', tread: 'rec', kayak: 'rec', float: 'socks' };
+const _rcp = { x: 0, y: 0, z: 0, f: 0 }, _rcC = new WeakMap(), REC_CLIMBERS = [{}, {}]; let REC_CREW_ROPES = null, REC_CLIMB_N = 0;
+const recCrewC = M => _rcC.get(M) || (_rcC.set(M, { P: (M.path || [M.at || [0, 0]]).map(recXZ) }), _rcC.get(M));   // the move's points in world units, once
+const recMix = x => { x = Math.imul(x ^ x >>> 15, 2246822507); x = Math.imul(x ^ x >>> 13, 3266489909); return (x ^ x >>> 16) >>> 0; };
+function recCrewSet(a, dt) {                             // false: not a move (the agent sets the body as usual)
+  const M = a.settled && a.spot ? a.spot.mv : null, want = M ? (M.kit !== undefined ? M.kit : REC_KITS[M.kind] || '') : '';
+  if (want !== (a.rkH === a.h ? a.rk : '')) recCrewKit(a, want); else if (a.rkH !== a.h) a.rk = '';   // a new body since (crewDetail's): in uniform
+  const fn = M && REC_CREW[M.kind]; if (!fn) return false;
+  if (a.mtId !== a.spot.id) { a.mtId = a.spot.id; a.mt = 0; a.fs = idHash(a.p.id); }
+  a.mt += dt; const o = _rcp; o.x = a.x; o.y = a.y; o.z = a.z; o.f = a.face;
+  const pose = fn(a, M, a.mt, o, recCrewC(M));
+  if (a.mt < 1.5) { const k = ss(a.mt / 1.5); o.x = L(a.x, o.x, k); o.z = L(a.z, o.z, k); }
+  a.h.set(o, o.f, pose); return true;
+}
+function recCrewKit(a, k) {                              // into rec kit or grip socks and back: a new body of the same kind
+  const spec = Object.assign({}, rosterSpec(a.p)); if (/rec/.test(k)) spec.kit = 'rec'; if (/socks/.test(k)) spec.socks = true;
+  const full = !!a.h.full; a.remove(); a.h = full ? new FullPerson(spec, a.p.id) : crowd.add(spec); a.rk = k; a.rkH = a.h;
+}
+const REC_CREW = {
+  swim(a, M, T, o, C) {                                  // tread at a (facing b), swim to b, tread, swim back
+    const A = C.P[0], B = C.P[1], ts = Math.hypot(B.x - A.x, B.z - A.z) / (M.speed || .75), tt = 2 + a.fs % 15 / 10, per = 2 * (ts + tt);
+    let u = (T + (M.phase || 0) * per) % per; const bk = u >= ts + tt; if (bk) u -= ts + tt;
+    const p = bk ? B : A, q = bk ? A : B, sw = u >= tt, k = sw ? (u - tt) / ts : 0;
+    o.x = L(p.x, q.x, k); o.z = L(p.z, q.z, k); o.y = M.y || 0; o.f = Math.atan2(q.x - p.x, q.z - p.z);
+    return sw ? 'swim' : 'tread';
+  },
+  tread(a, M, T, o, C) { o.x = C.P[0].x; o.z = C.P[0].z; o.y = M.y || 0; o.f = (M.face !== undefined ? recFace(M.face) : a.spot.face) + .5 * Math.sin(T * .15 + a.fs % 7); return 'tread'; },
+  kayak(a, M, T, o, C) {                                 // round the loop at 1.05 m/s, 1.7 on the white water (a point's third number)
+    const P = C.P, n = P.length;
+    if (!C.T) { C.T = []; let t = 0; for (let i = 0; i < n; i++) { const q = P[(i + 1) % n]; t += Math.hypot(q.x - P[i].x, q.z - P[i].z) / (M.path[(i + 1) % n][2] ? 1.7 : 1.05); C.T.push(t); } }
+    const tot = C.T[n - 1]; let u = (T + (M.phase || 0) * tot) % tot, i = 0; while (i < n - 1 && C.T[i] < u) i++;
+    const t0 = i ? C.T[i - 1] : 0, p = P[i], q = P[(i + 1) % n], k = (u - t0) / (C.T[i] - t0 || 1);
+    o.x = L(p.x, q.x, k); o.z = L(p.z, q.z, k); o.y = M.y || 0; o.f = Math.atan2(q.x - p.x, q.z - p.z); a.h.fast = !!M.path[(i + 1) % n][2];
+    return 'kayak';
+  },
+  climb(a, M, T, o, C) {                                 // a rest at the foot, up (in bursts, as yours), the bell, lowered
+    const top = M.top || 3.2, w = .85 * Math.PI, Y = t => .34 * (.35 * t + .65 * (2 * Math.floor(w * t / Math.PI) + 1 - Math.cos(w * t % Math.PI)) / w);
+    if (!C.tu) { let t = 0; while (Y(t) < top) t += .05; C.tu = t; C.ys = top / Y(t); }
+    const rest = M.rest !== undefined ? M.rest : 4, tl = top / .6, per = rest + C.tu + 2.6 + tl, u = (T + (M.phase || 0) * per) % per, f = recFace(M.face), P = C.P[0];
+    o.f = f; o.x = P.x; o.z = P.z; let pose;
+    if (u < rest) { o.y = 0; pose = 'stand'; }
+    else if (u < rest + C.tu) { o.y = Math.min(top, Y(u - rest) * C.ys); pose = 'climb'; }
+    else if (u < rest + C.tu + 2.6) { o.y = top; pose = 'ring'; }
+    else { o.y = Math.max(0, top - .6 * (u - rest - C.tu - 2.6)); pose = 'lower'; }
+    if (u >= rest && REC_CLIMB_N < 2) {                  // on the line: the anchor above the route
+      if (!REC_CREW_ROPES) REC_CREW_ROPES = [0, 1].map(() => {
+        const m = new THREE.Mesh(cylG(1, 1, 1, 6).clone(), REC_ROPE_MAT || (REC_ROPE_MAT = new THREE.MeshStandardMaterial({ color: col('#3a7bd5'), roughness: .7 })));
+        m.castShadow = true; m.visible = false; m.raycast = () => {}; scene.add(m); return m;
+      });
+      const c = REC_CLIMBERS[REC_CLIMB_N++]; c.h = a.h; c.x = P.x + Math.sin(f) * .2; c.y = top + 1.1; c.z = P.z + Math.cos(f) * .2;
+    }
+    return pose;
+  },
+  float(a, M, T, o, C) {                                 // a slow bounce every five seconds; every third a somersault, else a star at the top
+    const r = M.r !== undefined ? M.r : 1.2, top = M.top || 2.2, n = Math.floor(T / 5), u = T % 5 / 5, flip = n % 3 === 2, c = C.P[0];
+    o.y = top * Math.sin(Math.PI * u) * (n === 0 ? ss(Math.min(1, T / 2)) : 1);
+    a.h.spin = flip ? 2 * Math.PI * ss(u) : 0; a.h.rig.star = flip ? 0 : Math.pow(Math.sin(Math.PI * u), 6);
+    o.x = c.x + r * Math.sin(T * .23 + a.fs % 5); o.z = c.z + r * .7 * Math.sin(T * .17 + 1 + a.fs % 3); o.f = a.spot.face + T * .22;
+    return 'float';
+  },
+  fan(a, M, T, o) {                                      // watching; every six seconds the room may cheer a point or groan a miss, each a moment late
+    const ct = clock.elapsedTime - a.fs % 7 * .09, n = Math.floor(ct / 6), m = recMix(n * 7919 + 13) % 20, me = recMix(n * 31 + a.fs) % 10;
+    const sat = a.spot.pose === 'sit', still = sat ? (M.slump ? 'sit:slump' : 'sit') : 'stand';
+    if (ct / 6 - n > .55 || m < 9 || me < 2) return still;
+    const x = m < 13 ? 'groan' : me < 6 ? 'cheer' : 'clap'; return sat ? 'sit:' + x : x;
+  },
+};
+function recCrewRopes() {                                // after the crowd is posed (the main loop): harness to anchor, hidden when nobody's on
+  for (let i = 0; i < 2; i++) {
+    const m = REC_CREW_ROPES[i], c = REC_CLIMBERS[i], on = i < REC_CLIMB_N && crowd.visible && !!c.h.rig; m.visible = on; if (!on) continue;
+    _ropeA.set(0, .71, .19).applyMatrix4(c.h.rig.root.matrixWorld); _ropeB.set(c.x, c.y, c.z).sub(_ropeA);
+    const len = _ropeB.length(); m.position.copy(_ropeA).addScaledVector(_ropeB, .5); m.quaternion.setFromUnitVectors(_ropeU, _ropeB.normalize()); m.scale.set(.016, len, .016);
+  }
+  REC_CLIMB_N = 0;
 }
 function crewDetail() {                                  // who gets a full rig: the nearest story crew to you
   const pp = player.obj.position;
@@ -48034,6 +48133,7 @@ function loop() {
   playerUpdate(dt, t);                                   // section 15: needs, walking speed, activities
   updateDeckCrew(dt);                                    // section 10: the scheduled crew
   crowd.update(dt, t);
+  if (REC_CREW_ROPES) recCrewRopes();                    // 0.84.6: the crew's belay lines, on the posed bodies (8c)
   simTimers();                                           // section 13's simTimeout (0.28.50)
   }
   shadowStep();                                          // 0.27.33: the shadow stand-ins, a slice a frame after a deck change
