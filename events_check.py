@@ -134,6 +134,8 @@ STORM = r"""(() => {
   const run = () => {
     const keep = { e: SHIP.event, log: SHIP.eventLog.slice(), tr: SHIP.traces.slice() };
     SHIP.event = null; SHIP.eventLog.length = 0; SHIP.traces.length = 0; const m0 = MEETINGS.splice(0);
+    const recKeep = typeof recClean === 'function' ? { rec: JSON.stringify(SHIP.rec), f: ['rec.allHands', 'rec.filmMoved'].map(k => [k, SHIP.flags && SHIP.flags[k]]) } : null;   // the rec deck's first all-hands comes with the storm's first address (0.83): from a clean slate each run
+    if (recKeep) { SHIP.rec = recClean(null); for (const [k] of recKeep.f) if (SHIP.flags) delete SHIP.flags[k]; }
     const due = eventDueDay();                           // as in a new game
     eventStart('ionStorm', 10); EV_DAYS.clear();
     const a0 = ADDRESSES.length, mails = [], ms = MEETINGS.length, send = typeof mailSend === 'function' ? mailSend : null;
@@ -161,6 +163,7 @@ STORM = r"""(() => {
     const res = { steps, sig: sig.join('|'), mods, log: JSON.parse(JSON.stringify(SHIP.eventLog)), traces: SHIP.traces.slice(), left: SHIP.event, addr, mails, meets, paused, news, on, gath, due,
       scripts: Object.keys(MEETING_SCRIPTS), lines: Object.values(MEETING_SCRIPTS).map(sc => sc.lines.length), modAfter: eventMod('wear', 'power', 12 * 1440) };
     SHIP.event = keep.e; SHIP.eventLog.length = 0; SHIP.eventLog.push(...keep.log); SHIP.traces.length = 0; SHIP.traces.push(...keep.tr);
+    if (recKeep) { SHIP.rec = recClean(JSON.parse(recKeep.rec)); for (const [k, v] of recKeep.f) if (SHIP.flags) { if (v === undefined) delete SHIP.flags[k]; else SHIP.flags[k] = v; } EV_DAYS.clear(); }
     return res;
   };
   const a = run(), b = run();
