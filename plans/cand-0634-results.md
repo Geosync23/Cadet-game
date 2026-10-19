@@ -30,3 +30,6 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - ~05:36 W2 c058947 (0.48.110, E1's five extra texts); with R4.
 - ~05:36 R4 PASS W2 c058947 (W2's tip).
 - ~05:39 R4: E3 626a907 PASS WITH FIXES: hold for E3's next hash; b809339 stays E3's passed tip.
+- t4: lines PASS, mech, career, machine OK, day2 OK (407 s); intro --week running.
+- ~05:46 E2 b6130f6 (0.51.6 on 7a6e137: 24o M13 leak hunting, 24r M14 irrigation with one typeof-guarded line in 16's garden harvest pick; mech_check m13/m14 + ROW_STAND/ROW_AGREE); with R4. Next from E2: dd0ec46 (0.51.7 24q M15 rewiring).
+- trial t5 (wt3) = 2bc08d5 + E1 b82c8e2 + E2 b6130f6 + E3 b809339 + W2 c058947 = round 1 complete. Hand merge: mech_check.py, E1's side part and E2's m13/m14 + ROW_STAND/ROW_AGREE added at the same spot (after part_m9): both kept, E1's first (unionall.py). Game file: build lines only. verify_merge 0 problems, NAMES OK (3061), parses, one toolWear, bake 9562 lines / 47 meetings. Checks queued after t3: lines, mech, career, machine, cadet, food, interactions.
