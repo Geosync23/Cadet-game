@@ -20,6 +20,9 @@ Lines skimmed. In a fresh archive content_gen bakes 9342 lines; lines_check PASS
 
 ## Step 4
 
+### W2 claude/writer-p5 0e8571a (0.48.116, ticket.nohint for E2), R5: PASS
+Same words as E2's fallback in caseHint. Bakes 9560 lines; lines_check PASS. W2's tip.
+
 ### W2 claude/writer-p5 4e0d212 (0.48.115, 24t lines matched to the code), R5: PASS
 cabin.spot.rug/desk/shelf/ledge are now the placing sentences; star.title/pick ({a} {b})/right ({star})/wrong (look again)/name ({n})/done (ten stars) match every worksText call in d51c5edf; the unread cabin.item.* go. Bakes 9559 lines; lines_check PASS. This settles fix 4 of E3's 0.53.7 on the writer's side (E4 still checks the code side). W2's tip.
 
