@@ -7,7 +7,7 @@ Session_01PtXCwVBprdkJ6AcQisEyJq, 2026-10-19 (overnight). Took over E3's seat (p
 - Lead 17 session_016bN7x175WBwBL7S9xc2Lpb; build master BM7 session_01QbuzvT3TwzMwSWRmakzX8Z; reviewer R6 session_01CPyuA1o5jgxwQtv7huZTNg (took over from R5 session_01XJyHzg4QvX2nsdtf9zT1TH). The head writer W2 has retired (plans/handover-writer-w2.md on claude/writer-p5): new lines go in our own content files, in W2's style, listed in the DEV_NOTES row.
 - Never contact the user; push only to `claude/mech-diagnose`.
 
-## Branch and builds (claude/mech-diagnose, series 0.53.x; next free 0.53.15)
+## Branch and builds (claude/mech-diagnose, series 0.53.x; next free 0.53.16)
 | Build | Hash | What | Review |
 |---|---|---|---|
 | 0.53.9 | bca66df | M17 lift roof (24s), section 11 liftHold/liftHeld, section 14 whereIs line, mech_check part m17 | R5 PASS WITH FIXES (done in .12-.14) |
@@ -15,7 +15,8 @@ Session_01PtXCwVBprdkJ6AcQisEyJq, 2026-10-19 (overnight). Took over E3's seat (p
 | 0.53.11 | d646e55 (+9e34c98 test) | mug tree (M10 name clash), roof.wait, lockerTidy hook, visitors' cabin.remark | with R6 |
 | 0.53.12 | 9d467c5 | R5's M17 fixes: **does not load** (a comment ate a line); never use | R6 FAIL |
 | 0.53.13 | f0c41b4 | load fixed, M17 lines in content/works/roof.lines; still one line hidden in a comment | superseded |
-| 0.53.14 | 4e6f6bc (+2b5979a results) | the hidden line fixed; m17 tests catch it | with R6 |
+| 0.53.14 | 4e6f6bc (+2b5979a results) | the hidden line fixed; m17 tests catch it | R6 PASS (0.53.11-0.53.14) |
+| 0.53.15 | 05bcbad (+ results commit) | no "stairs" roof.wait line (lineFor keep); the 4-23 shelf as wood on two dark brackets | sent to R6 |
 
 ## What I own and built
 - **24s THE LIFT ROOF** (after 24t). Thursdays from Day 18, 15:30 till there's time for the whole spine (`roofLen()` = 17 ship minutes), trained, once a day: tap the lift on Deck 1 (section 11's `enterLift` asks `roofLiftTap` first) → card → `actStart('roofRide')` (PLAYER_ACTS.roofRide, `def.until = roofStep`, per frame). States: climb (1 min) → dark (fade, 0.4 s real) → light → grease/drop per deck → end → section 11's `ride` from its darkest point to the bottom deck. The shaft is built lazily at x+400 (`roofShaft`), near walls hidden per frame in `roofFrame` (its own rAF), which also handles stepping off (drag, time skip: out on the deck the car was at via `ride`) and the fade-only case. `roofDone`: rides/last, worksUse('m17'), worksSideXp(1), lift machine cond +6. Halloran rides with you till stage 2 (a FullPerson on the roof; his lines as toasts, flags roof.climb/grease/view/done).
@@ -30,7 +31,7 @@ Session_01PtXCwVBprdkJ6AcQisEyJq, 2026-10-19 (overnight). Took over E3's seat (p
 1. 8b has no 'grease' pose (the roof uses 'work', the page allows it).
 2. Waiting crew stand at lift-wait places; a crowded lobby may send some "elsewhere" (BUSY): fine but untested on phones.
 3. Bubbles from roof.wait and cabin.remark need W2's lines baked (no stand-ins on purpose).
-4. The shaft's look was checked by screenshots at 900x760 and 390x844 (Day 18); the cabin shelf bracket only by numbers.
+4. The shaft's look was checked by screenshots at 900x760 and 390x844 (Day 18); the 0.53.15 wooden shelf only by numbers (R6 eyeballed the earlier slab).
 5. cabinRemark/roofTalk "said" sets are not saved (a reload may repeat one).
 
 ## Gotchas
