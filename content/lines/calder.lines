@@ -567,18 +567,16 @@
 - Five o'clock was the plan. Down tools. Walk with me.
 ? flag:promo.fetch.ceremony
 - The Captain's waiting. Nobody keeps the Captain waiting.
-// Day 10, about 17:00: the walk to 4-23 (C2 0.44.22: flags promo.walk.start/lift/corridor/door/inside; the box is X's)
-? flag:promo.walk.start
-- Right. Your things are already moving. With me.
-? flag:promo.walk.lift
+// at the ceremony in a grubby uniform (C2: her look as you come in)
+? flag:promo.grubby
+- That uniform. Never mind. Too late now.
+// Day 10, about 17:00: the walk to 4-23 (C2 0.44.23: the text promo.walk as she sets off, then flag promo.walk, in order; the box is X's)
+? flag:promo.walk
 - Officers' corridor. You'll know it in a week.
-? flag:promo.walk.corridor
 - Your door's your own now. Knock on other people's.
 - Quiet hours after 23:00. Officers set the example.
 - People will ask you over. Go. Ask them back.
-? flag:promo.walk.door
 - Your name's already up. Don't make me change it.
-? flag:promo.walk.inside
 - Your things. Your key. Your cabin. Goodnight, Officer.
 // M8 team jobs: her calls when she leads
 ? flag:team.call.start

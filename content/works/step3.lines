@@ -57,6 +57,21 @@
 // the ceremony's words by Mail, if you never came (the Captain's office)
 == promo.ceremony.mail
 - Your commission | We missed you at the ceremony, so the Captain signed it anyway. You are commissioned an Officer of the Wren. Your framed commission is on your shelf in 4-23. The Captain asks you to drop by the observation room some evening. She still has a question for you.
+// C2 0.44.23 reads these names (edf3223's); the 0.44.22 names above stay too, so either works
+// Day 10, 17:00: Calder sets off with you (her walk lines follow, kind work flag promo.walk)
+== promo.walk
+- Right. Your things are already moving. With me.
+// Tomas's goodbye as you reach 4-23 (X plays Tomas's own promo.bye; this is the text form)
+== promo.move.tomas
+- Don't be a stranger, Officer.
+== promo.move.mail
+- Your cabin | You weren't about, so we moved you anyway. Cabin 4-23, officers' corridor. Your things are there, and your key opens it. Quiet hours after 23:00. Your door's your own now: use it. Tomas says don't be a stranger.
+== promo.ceremony.invite
+- Your commission, 17:15 | The officer ceremony is at 17:15 today, in the observation room on Deck 1. Clean uniform, please. It takes ten minutes, and there will be tea.
+== promo.keepsake
+- your framed commission
+== works.record.commissioned
+- Commissioned Officer, Day {day}.
 // the Ship app's news item (one gossip line)
 == promo.news
 - Works news: {me} made Officer today. Cake at the tea corner, while it lasts.

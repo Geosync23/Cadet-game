@@ -116,7 +116,7 @@ unsigned. Calder's flag lines also exist for Vance (`vance.lines`) where the pag
 
 ### The test job and the first promotion (C2; X for the walks and crowds)
 
-Matched to C2 0.44.22 (C2's own names for the first half, W2's for the move and ceremony; agreed so they stop crossing).
+Matched to C2 0.44.23 (our renames crossed twice; C2's newest list wins). Where a text had two names, both are kept (different kinds), so either reads.
 
 | When | Key | Who / kind | Placeholders |
 | --- | --- | --- | --- |
@@ -136,16 +136,18 @@ Matched to C2 0.44.22 (C2's own names for the first half, W2's for the move and 
 | Mail from the Captain | `promo.captain` | text, Mail | |
 | Ship app news (one gossip line) | `promo.news` | text | `{me}` |
 | Brennan's cake (written; nobody plays it yet) | `flag:promo.cake` | brennan `cue` | |
-| Calder's walk to 4-23 | `flag:promo.walk.start`, `.lift`, `.corridor`, `.door`, `.inside` | calder `work` (C2); the same flags in vance `work` | |
+| Calder sets off (17:00), then her walk to 4-23 | text `promo.walk`; then `flag:promo.walk` (lines in order) | calder `work` (C2); the same flag in vance `work` | |
 | Tomas and Pell with your box; Tomas's goodbye (X) | `flag:promo.box`; `flag:promo.bye` | tomas, pell `work` | |
-| Move by Mail (without you) | `mail.promo.move` | text | |
+| Move by Mail (without you) | `promo.move.mail` (C2 0.44.23; also `mail.promo.move`) | text, Mail | |
 | The door plate (DA5) | `works.plate` | text: "{name} · {rank}" | `{name}` `{rank}` |
-| Ceremony Mail (Day 11, 08:00) | `mail.promo.ceremony` | text | |
+| Ceremony Mail (Day 11, 08:00) | `promo.ceremony.invite` (C2 0.44.23; also `mail.promo.ceremony`) | text, Mail | |
 | The ceremony | meeting `promo.ceremony` | marrow, vance, calder, torres-zeke (guests are walk-ons); the line ending ` {pin}` bakes `pin: true` (content_gen), then one choice for your line | |
 | The ceremony by Mail, if you never came | `promo.ceremony.mail` | text, Mail | |
 | Guests after the ceremony | `@reactions ceremony`, cue `ceremony.you` | guests / friends | |
-| The keepsake, the Record | `works.keepsake.commission` (its name), `works.ms.commissioned` | text | `{n}` (day) |
-| What's next | `next.t2` (have), `next.wait.t2` (the test set, not done), `next.summons`, `next.move`, `next.ceremony` | `next.lines` | |
+| The keepsake, the Record | `promo.keepsake` (its name), `works.record.commissioned` (C2 0.44.23; also `works.keepsake.commission`, `works.ms.commissioned` {n}) | text | `{day}` (day number) |
+| Calder's look at a grubby uniform, as you come in | `flag:promo.grubby` | calder `work` | |
+| Tomas's goodbye, text form (X plays tomas `promo.bye`) | `promo.move.tomas` | text | |
+| What's next | `next.t2` (have), `next.wait.t2` (the test set, not done), `next.summons`, `next.move`, `next.ceremony` (C2 reads these or `next.wait.*`) | `next.lines` | |
 
 ### Team jobs (M2 24h; X for the crew)
 
