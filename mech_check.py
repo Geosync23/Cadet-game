@@ -599,6 +599,88 @@ HAUL2 = r"""(() => {
   out.posts = [post(2), post(1)];
   SHIP.works = null; SHIP.manifest = []; return out;
 })()"""
+# hauling stage 3, the stocktake (seat E6, 0.45.15; step4-stages): Thursdays from Day 18, an officer trained in hauling:
+# a side job at 13:30 held to 16:00; counting the aisles finds the week's short one (2 of its part move from stores to
+# the hold's order, +1 capped), Thursday's misplaced part goes back, the turn-in pays nothing more; side.stock kept; one
+# nobody takes is withdrawn at 16:00; a junior, a Wednesday and Day 11 get none
+STOCKT = r"""(() => {
+  SHIP.works = null; SHIP.notes = []; SHIP.jobs = []; setShipNow(17 * 1440 + 700); machinesNow(); SHIP.stores = { ...STOCK }; SHIP.hold = {};
+  const W = worksInit(), out = {}; W.tr.m4 = 3; W.use.m4 = 2; (W.op[3] = []).push('m4'); W.rank = 'officer'; W.tier = 2;
+  const post = (d, rank) => { W.rank = rank; const js = []; JOB_KINDS.stocktake.post((d - 1) * 24 + 13, js); W.rank = 'officer'; return js[0] || null; };
+  out.none = [post(17, 'officer'), post(11, 'officer'), post(18, 'junior')].map(x => !!x);
+  const j = post(18, 'officer'); SHIP.jobs.push(j);
+  out.job = [j.posted - 17 * 1440, j.until - 17 * 1440, j.reserved, JOB_KINDS.stocktake.side, jobStops(j).map(s => s.places[0]), j.short && j.short.part];
+  const p = j.short.part, s0 = SHIP.stores[p], aisle = FETCH_AT[j.short.aisle], other = FETCH_AT.find(x => x !== aisle);
+  const mp = ((placeById(FETCH_AT.find(x => x !== other)) || {}).stock || []).find(k => k in STOCK);   // a part from another shelf, sitting on this one
+  setShipNow(17 * 1440 + 840); machinesNow(); SHIP.misplaced = { part: mp, on: other }; j.claimedBy = 'you'; j.status = 'claimed'; j.start = shipNow();
+  const x0 = W.xp, says = jobStops(j).map((st, k) => (jobStepDone(j.id, k, null) || {}).say || '');
+  out.says = says; out.moved = [s0 - SHIP.stores[p], SHIP.hold[p] || 0, SHIP.misplaced]; out.xp = W.xp - x0;
+  setShipNow(17 * 1440 + 900); machinesNow(); out.restock = SHIP.jobs.some(x => x.kind === 'restock' && x.cargo === 'stores');
+  const x1 = W.xp; out.turnin = [turnInJob(j.id), W.xp - x1, JSON.stringify(W.side.stock)];
+  const j2 = post(25, 'officer'); SHIP.jobs.push(j2); stockWithdraw(24 * 1440 + 959); const a = j2.status; stockWithdraw(24 * 1440 + 960); out.withdrawn = [a, j2.status, j2.doneBy];
+  out.saved = JSON.stringify(worksClean(JSON.parse(JSON.stringify(W))).side.stock) === JSON.stringify(W.side.stock);
+  SHIP.works = null; SHIP.misplaced = null; return out;
+})()"""
+# rounds stages 2 and 3 (seat E6, 0.45.16; step4-stages): after 5 rounds, taking a morning round asks you to pick 4-6 of
+# the deck's machines, the longest unlooked first with "last looked" days; the route becomes your picks in walking
+# order; two worn found on it: +1 (capped) and Torres's word. With the scanner (stage 2 and 5 rounds) the look at a
+# room's first machine reads the rest of the route in that room (their stops done, the worn found by you, one scan's
+# charge); the training round neither
+ROUND23 = r"""(() => {
+  SHIP.works = null; SHIP.notes = []; SHIP.jobs = []; setShipNow(11 * 1440 + 430); machinesNow(); ACT = null;
+  const W = worksInit(), out = {}; W.tr.m1 = 2; W.use.m1 = 5; (W.op[2] = []).push('m1'); (W.op[12] = []).push('m11');
+  for (const id in SHIP.machines) { const x = SHIP.machines[id]; x.cond = 95; x.state = 'healthy'; }
+  const dc = deviceChoose, st = simTimeout, asked = []; simTimeout = (fn) => fn();
+  deviceChoose = (v, f) => { asked.push(v.choices.slice()); const k = v.choices.indexOf("That's my round"); f(k >= 0 ? k : 0); return true; };
+  const claim = j => { SHIP.jobs.push(j); j.claimedBy = 'you'; j.status = 'claimed'; j.start = shipNow(); };
+  const pool = roundPool(4).map(m => m.id); roundLast()[pool[0]] = 10;
+  const j = roundJob(12, 420); j.deck = 4; claim(j); out.before = j.route.slice();
+  for (const f of WORK_TICKS) try { f(shipNow(), false); } catch (e) { }
+  out.asked = asked.map(c => c.length); out.first = asked[0] && [asked[0][0], asked[0].find(x => x.includes(pool[0] ? machineLabel(machineById(pool[0])).split(',')[0] : '?'))];
+  out.route = [j.route.length, j.route.every(id => machineById(id).deck === 4), JSON.stringify(j.route) === JSON.stringify(roundWalk(j.route.map(id => machineById(id)), DECKS[4])), j.stops.length, !!j.picked, j.pick === undefined];
+  // two worn found: +1 and Torres
+  for (const id of j.route.slice(0, 2)) { const x = SHIP.machines[id]; x.cond = 60; x.state = machineState(60); }
+  const x0 = W.xp; jobStops(j).forEach((s, k) => jobStepDone(j.id, k, { pick: roundState(j.route[k]) === 'healthy' ? 'fine' : 'worn' }));
+  out.two = [!!j.workDone, SHIP.notes.filter(n => n.kind === 'sideXp').map(n => n.why + n.n), Object.keys(roundLast()).filter(id => roundLast()[id] === 12).length];
+  // stage 3: the doorway
+  toolGive('scanner'); W.tr.m7 = 5; out.door = [roundDoorway()];
+  const room = machineList().filter(m => m.deck === 4 && m.kind === 'washer' && panelPlace(m.id)).map(m => m.id).sort();
+  for (const id in SHIP.machines) { const x = SHIP.machines[id]; x.cond = 95; x.state = 'healthy'; }
+  SHIP.machines[room[1]].cond = 60; SHIP.machines[room[1]].state = machineState(60);
+  const j3 = roundJob(13, 420); j3.route = room.concat(j3.route.filter(id => !room.includes(id)).slice(0, 1)); j3.stops = kindStops(j3).map(plainStop); j3.picked = true; setShipNow(12 * 1440 + 430); claim(j3);
+  const c0 = toolCharge('scanner'), r3 = jobStepDone(j3.id, 0, { pick: 'fine' });
+  out.door.push(room.length, r3.say || '', (j3.stepsDone || []).slice(), c0 - toolCharge('scanner'), (SHIP.jobs.find(x => x.machine === room[1] && x.status !== 'done') || {}).foundBy || null);
+  // the training round: no doorway
+  const jt = roundJob(13, 430, { train: 'm1', yours: true, slot: 1 }); jt.route = room.slice(); jt.stops = kindStops(jt).map(plainStop); claim(jt); jobStepDone(jt.id, 0, { pick: 'fine' }); out.train = (jt.stepsDone || []).slice();
+  out.saved = JSON.stringify(worksClean(JSON.parse(JSON.stringify(W))).side.round) === JSON.stringify(W.side.round);
+  deviceChoose = dc; simTimeout = st; SHIP.works = null; SHIP.jobs = []; return out;
+})()"""
+def part_round23(g):
+    a = g.ev(ROUND23)
+    b = g.ev(ROUND23)
+    print('  rounds stages 2-3:', json.dumps(a))
+    check(len(a['asked']) == 4 and a['asked'][0] > 4 and a['first'][0].endswith('not looked at yet') and a['first'][1] and a['first'][1].endswith('last looked 2 days ago'), f"round23: four asks, the unlooked first, last looked days ({a['asked']}, {a['first']})")
+    check(a['route'] == [4, True, True, 4, True, True], f"round23: your four picks are the route, in walking order ({a['route']})")
+    check(a['two'][0] and a['two'][1] == ['round1'] and a['two'][2] == 4, f"round23: two worn found: +1; last looked kept ({a['two']})")
+    d = a['door']
+    check(d[0] and d[1] >= 3 and d[2].count('From the doorway') == d[1] - 1 and ', worn.' in d[2] and d[3] == list(range(d[1])) and d[4] == 4 and d[5] == 'you', f"round23: one look reads the room, its worn one found by you, one scan's charge ({d})")
+    check(a['train'] == [], f"round23: the training round has no doorway ({a['train']})")
+    check(a['saved'], 'round23: side.round kept by the save')
+    check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'round23: differs the second time')
+
+def part_stock(g):
+    a = g.ev(STOCKT)
+    b = g.ev(STOCKT)
+    print('  stocktake:', json.dumps(a))
+    check(a['none'] == [False, False, False], f"stock: none on a Wednesday, before Day 18, for a junior ({a['none']})")
+    jb = a['job']
+    check(jb[0] == 810 and jb[1] == 960 and jb[2] and jb[3] and jb[4] == ['5-stock-1', '5-stock-2', '5-stock-3', '5-stock-4'] and jb[5], f"stock: a side job at 13:30 held to 16:00, one hold per aisle ({jb})")
+    check(sum('is short of' in x for x in a['says']) == 1 and sum('all present' in x for x in a['says']) == 3 and sum('not where it lives' in x for x in a['says']) == 1, f"stock: one aisle short, three fine, the misplaced part found ({a['says']})")
+    check(a['moved'] == [2, 2, None] and a['xp'] == 1 and a['restock'], f"stock: two of the part on the hold's order, the misplaced part back, +1 ({a['moved']}, {a['xp']})")
+    check(a['turnin'][0] and a['turnin'][1] == 0 and a['turnin'][2] == '{"week": 2, "found": true}'.replace(' ', '') and a['saved'], f"stock: the turn-in pays nothing more; side.stock kept ({a['turnin']})")
+    check(a['withdrawn'] == ['open', 'done', None], f"stock: withdrawn at 16:00 if nobody takes it ({a['withdrawn']})")
+    check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'stock: differs the second time')
+
 def part_haul2(g):
     a = g.ev(HAUL2)
     b = g.ev(HAUL2)
@@ -783,6 +865,9 @@ with sync_playwright() as pw:
         print('side (Step 4\'s core: tool wear, the side-job cap, the texts):'); part_side(g)
     if (not only or 'side' in only or 'm4' in only) and ev("typeof manifestRun === 'function' && !!JOB_KINDS.haul"):
         part_mrun(g); part_haul2(g)
+        if ev("!!JOB_KINDS.stocktake"): part_stock(g)
+    if (not only or 'side' in only or 'm1' in only) and ev("typeof roundDoor === 'function'"):
+        part_round23(g)
     ev("SHIP.works = null")
     if g.errors: fail('page errors: ' + ' | '.join(g.errors[:5]))
     g.close()

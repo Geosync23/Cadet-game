@@ -281,7 +281,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.45.14
+   STARSHIP CADET: CSV Wren                           build 0.45.15
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8694,7 +8694,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.45.14';                           // keep in step with the header's build line
+const GAME_BUILD = '0.45.15';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -40179,8 +40179,8 @@ if (typeof jobKindAdd === 'function' && drillPlace('ext') && drillPlace('hatch')
 // Yara Esposito teaches it on Day 3 once the delivery's in (ladder row m4: she takes the cart and loads the first crate
 // while you watch; you take the rest). Once trained, each Wednesday's run is held for you to 16:00 after the unload
 // (or from 13:00), then the crew's; before that the crew do it. Saved on the job: j.crates ([{ id, dest }]), j.got
-// (crate ids loaded). Hash keys: section 17's 866-867 (the manifest, the misplaced part). Not yet: stage 2 (choose the
-// order) and stage 3 (the Thursday stocktake: SHIP.misplaced).
+// (crate ids loaded). Hash keys: section 17's 866-867 (the manifest, the misplaced part). Stage 2 (choose the order,
+// 0.45.13) and stage 3 (the Thursday stocktake, 0.45.15, with SHIP.misplaced) below; 1026 the stocktake's short shelf.
 const HAUL_FROM = 780, HAUL_UNTIL = 960, HAUL_TRAIN = 660;   // posted by 13:00 (after the unload), held to 16:00; Yara's meeting from 11:00
 const haulDay = d => weekday(d) === DELIVERY.day + (typeof deliveryLate === 'function' ? deliveryLate(d) : 0);
 const haulDock = () => CART_AT.find(id => placeById(id)) || null;
@@ -40308,6 +40308,55 @@ function manifestRunEnd(id, t = shipNow()) {             // withdrawn (not deliv
 if (typeof jobKindAdd === 'function' && typeof haulOn === 'function') WORK_TICKS.push(now => {   // a parts run past its time: withdrawn
   for (const j of SHIP.jobs) if (j.kind === 'haul' && j.src && j.status !== 'done' && !j.delivered && now >= j.until) manifestRunEnd(j.id, now);
 });
+// stage 3, the stocktake (0.45.15, E6; step4-stages): Thursdays from Day 18, once you're an officer trained in hauling, a
+// side job on the board at 13:30, held for you to 16:00 and then withdrawn (never the crew's): count each storage aisle
+// (E3's 5-stock-1..4, a short hold each; W2's stock.count). One aisle is short of a part (schedU(week, 0..1, 1026),
+// kept on the job: j.short = { aisle, part }): finding it (stock.short) moves what isn't there to the hold's order
+// (SHIP.stores down, SHIP.hold up: section 17 posts the restock run, stock.job) and pays +1 through worksSideXp; the
+// rest read stock.fine. Thursday's misplaced part (SHIP.misplaced) on an aisle you count goes back (stock.wrong,
+// misplacedFix). Saved: SHIP.works.side.stock = { week, found } (read defensively).
+const STOCK_AT = 810, STOCK_UNTIL = 960, STOCK_FROM = 18, STOCK_SLOT = 31, STOCK_SHORT = 2;
+const STOCK_AISLES = FETCH_AT.map(id => SHELF_NAME[id]);   // the aisles of 5-parts-1..4 (section 17's shelf names), in order
+const stockSpots = () => [1, 2, 3, 4].map(k => '5-stock-' + k).filter(id => placeById(id));
+function stockShortFor(d) {                              // the week's short aisle and part (a part that's on its shelf), or null
+  const wk = Math.floor((d - 1) / 7), a = Math.floor(STOCK_AISLES.length * schedU(wk, 0, 1026)) % STOCK_AISLES.length;
+  const parts = ((placeById(FETCH_AT[a]) || {}).stock || []).filter(k => k in STOCK && SHIP.stores[k] > 0);
+  return parts.length ? { aisle: a, part: parts[Math.floor(parts.length * schedU(wk, 1, 1026)) % parts.length] } : null;
+}
+function stockFound(j) {                                 // the short aisle found: the missing ones go on the hold's order; +1
+  const s = j.short; if (!s || j.shortFound) return false; j.shortFound = true;
+  const n = Math.min(STOCK_SHORT, SHIP.stores[s.part] || 0);
+  if (n > 0) { SHIP.stores[s.part] -= n; SHIP.hold[s.part] = (SHIP.hold[s.part] || 0) + n; if (typeof MACH_REV !== 'undefined') MACH_REV++; }
+  worksSideXp(1, 'stock'); simNote('stocktake', { job: j.id, aisle: s.aisle, part: s.part, n });
+  try { toast('Stocktake', roundText('stock.job', 'Restock: {shelf}', { shelf: STOCK_AISLES[s.aisle] })); } catch (e) { /* no UI */ }
+  return true;
+}
+if (typeof jobKindAdd === 'function' && typeof haulOn === 'function' && JOB_KINDS.haul && jobKindAdd('stocktake', { tier: 1, work: 0, side: true, text: 'Stocktake', hold: 'datapad',
+  post(h, jobs) {                                        // Thursdays 13:00's hour, found at 13:30
+    const d = Math.floor(h / 24) + 1, W = SHIP.works;
+    if ((h % 24 + 24) % 24 !== 13 || weekday(d) !== 3 || d < STOCK_FROM || !W || W.tr.m4 === undefined || playerRank() === 'junior' || !stockSpots().length) return;
+    if (jobs.some(x => x.kind === 'stocktake' && Math.floor(x.posted / 1440) + 1 === d)) return;
+    const t = (d - 1) * 1440 + STOCK_AT, j = jobMake('stocktake', { id: 'stocktake@' + d, deck: 5, room: 'r', h, title: roundText('stock.title', 'Stocktake'),
+      short: stockShortFor(d), reserved: STOCK_SLOT, until: (d - 1) * 1440 + STOCK_UNTIL, xp: 0 });   // xp 0: the +1 is the find's (stockFound)
+    j.posted = j.found = t; j.shareSeen = true; jobs.push(j);
+  },
+  stops: j => stockSpots().map(id => { const a = +id.slice(-1) - 1; return { deck: 5, placeId: id, mins: 2, tag: 'count', opts: { text: roundText('stock.count', '{shelf}: count what\'s there.', { shelf: STOCK_AISLES[a] }) } }; }),
+  stepDone(j, k) {
+    const id = (kindStops(j)[k] || {}).placeId || '', a = +String(id).slice(-1) - 1, shelf = STOCK_AISLES[a]; if (!shelf) return null;
+    const out = [], M = SHIP.misplaced;
+    if (j.short && j.short.aisle === a && stockFound(j)) out.push(roundText('stock.short', '{shelf} is short of {part}.', { shelf, part: j.short.part }));
+    else out.push(roundText('stock.fine', '{shelf}: all present.', { shelf }));
+    if (M && M.on === FETCH_AT[a] && typeof misplacedFix === 'function') { out.push(roundText('stock.wrong', 'A {part} on the {shelf} shelf? That\'s not where it lives.', { part: M.part, shelf }), worksText('stock.moved', 'Back on its own shelf.')); misplacedFix(); }
+    return out.join(' ');
+  },
+  done(j, t, by) { if (by !== 'you') return; const S = worksSide(); if (S) S.stock = { week: Math.floor(Math.floor(j.posted / 1440) / 7), found: !!j.shortFound }; },
+  crew: { can: () => false, mins: 20 } })) {
+  WORKS_SIDE_KINDS.add('stocktake');
+  WORK_TICKS.push(stockWithdraw);
+}
+function stockWithdraw(now) {                            // 16:00 and not taken: withdrawn quietly
+  for (const j of SHIP.jobs) if (j.kind === 'stocktake' && j.status === 'open' && !j.claimedBy && now >= j.until) { j.status = 'done'; j.doneAt = now; j.doneBy = null; if (typeof MACH_REV !== 'undefined') MACH_REV++; }
+}
 // the ladder row (m4): Yara's run is the cart and the first crate (you watch); yours is the rest, in the same slot
 if (typeof jobKindAdd === 'function' && typeof haulOn === 'function' && JOB_KINDS.haul) WORK_MECH.m4 = {
   at: d => HAUL_TRAIN,                                   // after the 10:00 delivery's unload
