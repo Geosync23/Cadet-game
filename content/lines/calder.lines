@@ -570,20 +570,13 @@
 // at the ceremony in a grubby uniform (a look, then nothing more)
 ? flag:promo.grubby
 - That uniform. Never mind. Too late now.
-// Day 10, about 17:00: the walk to 4-23
-? flag:promo.walk.start
-- Right. Your things are already moving. With me.
-? flag:promo.walk.lift
+// Day 10, about 17:00: the walk to 4-23 (C2: flag promo.walk, said in order; the first line is the text promo.walk)
+? flag:promo.walk
 - Officers' corridor. You'll know it in a week.
-? flag:promo.walk.corridor
 - Your door's your own now. Knock on other people's.
 - Quiet hours after 23:00. Officers set the example.
 - People will ask you over. Go. Ask them back.
-? flag:promo.walk.box
-- Mind out. That's your box, I think.
-? flag:promo.walk.door
 - Your name's already up. Don't make me change it.
-? flag:promo.walk.inside
 - Your things. Your key. Your cabin. Goodnight, Officer.
 // M8 team jobs: her calls when she leads
 ? flag:team.call.start

@@ -127,7 +127,7 @@ unsigned. Calder's flag lines also exist for Vance (`vance.lines`) where the pag
 | What's next | `next.t2` (have), `next.wait.t2` (test set, not done), `next.summons`, `next.move`, `next.ceremony` | `next.lines` | |
 | The summons toast (urgent) | `promo.summons` | text: "Chief Calder: My office, 11:00. — C." | |
 | Torres nudges you | `promo.summons.torres` | text | |
-| Calder finds you at 11:15 / 17:30 / ceremony | `flag:promo.fetch.summons`, `.fetch.move`, `.fetch.ceremony` | calder `work` (vance too for move) | |
+| Calder finds you at 11:15 / 17:30 / ceremony (written, not wired yet) | `flag:promo.fetch.summons`, `.fetch.move`, `.fetch.ceremony` | calder `work` (vance too for move) | |
 | The office scene | meeting `promo.officer` | Calder; one choice of three (C2 stores flag promo.reply 1-3) | |
 | The scene by Mail, if you never came | `promo.mail` | text, Mail | |
 | The crew at the board | kind `promoted` (X's name; 50 characters) | `banks/promo-works.lines` + torres-zeke, pell ("Told you"), kovac-zainab, halloran-emeka | `{nick}` |
@@ -135,17 +135,18 @@ unsigned. Calder's flag lines also exist for Vance (`vance.lines`) where the pag
 | Mail from friends | kind `mail.promo.friend` in `content/banks/promo.lines` | crew bank by tier ("Subject \| body") | `{me}` |
 | Mail from the Captain | `promo.captain` | text, Mail | |
 | Ship app news (one gossip line) | `promo.news` | text | `{me}` |
-| Brennan's cake (tea corner, after shift) | `flag:promo.cake` | brennan `cue` | |
-| Calder's walk to 4-23 (in order) | `flag:promo.walk.start`, `.lift`, `.corridor`, `.box`, `.door`, `.inside` | calder `work`; same flags in vance `work` | |
-| Tomas and Pell with your box | `flag:promo.box` | tomas, pell `work` (bubbles) | |
-| Tomas's goodbye as a bunkmate | `flag:promo.bye` | tomas `work` | |
-| Move by Mail (asleep / off plan) | `mail.promo.move` | text | |
+| Brennan's cake (tea corner, after shift; written, not wired yet) | `flag:promo.cake` | brennan `cue` | |
+| Calder sets off (17:00), then her walk to 4-23 (C2) | text `promo.walk`; then `flag:promo.walk` (lines in order) | calder `work`; the same flag in vance `work` | |
+| Tomas and Pell with your box (X) | `flag:promo.box` | tomas, pell `work` (bubbles) | |
+| Tomas's goodbye as a bunkmate | text `promo.move.tomas` (C2); `flag:promo.bye` tomas `work` (X) | | |
+| Move by Mail (without you) | `promo.move.mail` | text, Mail | |
 | The door plate | `works.plate` | text: "{name} · {rank}" | `{name}` `{rank}` |
-| Ceremony Mail (Day 11 morning) | `mail.promo.ceremony` | text | |
-| The ceremony | meeting `promo.ceremony` | marrow, vance, calder, torres-zeke (guests are walk-ons, no lines); one choice for your line | |
+| Ceremony Mail (Day 11 08:00) | `promo.ceremony.invite` | text, Mail | |
+| The ceremony by Mail, if you never came | `promo.ceremony.mail` | text, Mail | |
+| The ceremony | meeting `promo.ceremony` | marrow, vance, calder, torres-zeke (guests are walk-ons, no lines); the line ending ` {pin}` bakes `pin: true` (content_gen), then one choice for your line | |
 | Grubby at the ceremony | `flag:promo.grubby` | calder `work` (a look, one line) | |
 | Guests after the ceremony | `@reactions ceremony`, cue `ceremony.you` | guests / friends | |
-| Keepsake, Record milestones | `works.keepsake.commission`, `works.ms.officer`, `works.ms.commissioned` | text | `{n}` (day) |
+| Keepsake, the Record | `promo.keepsake` (its name), `works.record.commissioned` | text | `{day}` (day number) |
 
 ### Team jobs (M2 24h; X for the crew)
 

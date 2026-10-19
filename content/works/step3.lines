@@ -37,25 +37,32 @@
 // the office scene's words by Mail, if you never came (Calder sends it)
 == promo.mail
 - Your promotion | You weren't about, so you'll read it instead. You passed. As of today you're an Officer: Technician, Tier 2. Your badge and your pip are on my desk; collect them. You move to cabin 4-23 tonight. The Captain commissions you tomorrow at 17:15. Clean uniform. Well done.
-// the Record's milestones and the keepsake
-== works.ms.officer
-- Promoted to Officer, day {n}.
-== works.ms.commissioned
-- Commissioned Officer, day {n}.
-== works.keepsake.commission
-- Your commission, framed. The Captain's signature is very neat.
+// the Record's line and the keepsake's name
+== works.record.commissioned
+- Commissioned Officer, Day {day}.
+== promo.keepsake
+- your framed commission
 // the door plate of 4-23
 == works.plate
 - {name} · {rank}
 // the Captain's Mail on Day 10 (Mail, up to 400)
 == promo.captain
 - Congratulations | Chief Calder tells me you've earned your pip. Well done. The ceremony is tomorrow at 17:15, in the observation room on Deck 1. Bring one honest answer: what should an officer never forget? I'll ask.
-// Day 11, morning: from the Captain's office
-== mail.promo.ceremony
+// Day 11, 08:00: from the Captain's office
+== promo.ceremony.invite
 - Your commission, 17:15 | The officer ceremony is today at 17:15, observation room, Deck 1. Clean uniform. It takes ten minutes. There will be tea.
-// the move, if you were asleep or away (Calder's words by Mail)
-== mail.promo.move
+// the move, if it happened without you (Calder's words by Mail)
+== promo.move.mail
 - Your cabin | You weren't about, so we moved you anyway. Cabin 4-23, officers' corridor. Your things are there. Your key opens it. Quiet hours after 23:00. Your door's your own now: use it. Tomas says don't be a stranger.
+// Day 10, 17:00: Calder sets off with you (her walk lines follow, kind work flag promo.walk)
+== promo.walk
+- Right. Your things are already moving. With me.
+// Tomas's goodbye as you reach 4-23
+== promo.move.tomas
+- Don't be a stranger, Officer.
+// the ceremony's words by Mail, if you never came (the Captain's office)
+== promo.ceremony.mail
+- Your commission | We missed you at the ceremony, so the Captain signed it anyway. You are commissioned an Officer of the Wren. Your framed commission is on your shelf in 4-23. The Captain asks you to drop by the observation room some evening. She still has a question for you.
 // the Ship app's news item (one gossip line)
 == promo.news
 - Works news: {me} made Officer today. Cake at the tea corner, while it lasts.

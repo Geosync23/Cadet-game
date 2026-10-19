@@ -442,17 +442,10 @@
 - The Chief's off. I'm your escort. Shall we?
 ? flag:promo.fetch.ceremony
 - The Captain is waiting. Walk briskly. Not a run.
-? flag:promo.walk.start
-- Your things are already moving. Follow me, please.
-? flag:promo.walk.lift
+? flag:promo.walk
 - Officers' corridor. I timed it once: ninety seconds.
-? flag:promo.walk.corridor
 - Your door is your own now. Others' doors are theirs.
 - Quiet hours from 23:00. I will hear about it if not.
 - You'll be asked over. Accept. It's good for the ship.
-? flag:promo.walk.box
-- Your box. Carried by two. Inefficient, but kind.
-? flag:promo.walk.door
 - Your name. Spelled correctly. I checked.
-? flag:promo.walk.inside
 - Cabin 4-23. Yours. Goodnight, Officer.

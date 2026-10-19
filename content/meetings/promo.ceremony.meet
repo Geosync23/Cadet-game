@@ -3,7 +3,8 @@
 // table and the stern windows. The Captain, Commander Vance, Calder, Torres, and up to three friends (walk-ons, no
 // lines). The Captain reads the commission and pins the insignia ("pins": the colour change), a handshake, one line from
 // you, a toast with the Captain's tea. Her Mail on Day 10 asked you to bring an answer: what should an officer never
-// forget? Seat C2 plays it. Head writer W2.
+// forget? Seat C2 plays it: the line marked {pin} bakes pin: true (the insignia goes on; C2's onPick), and the one
+// choice comes after it. Head writer W2.
 title: Your commission
 from: Captain Odile Marrow
 gist: The Captain commissioned you as an Officer of the Wren. The framed commission is on your cabin shelf.
@@ -12,7 +13,7 @@ vance: Attention, please. The Captain.   [nod]
 marrow: Thank you, Teo. Sit, everyone, if there are chairs. There never are.   [laugh]
 marrow > you: Cadet. Chief Calder tells me you're ready. The Chief doesn't say that often.
 marrow: By the Survey Service, I commission you an Officer of the Wren. With all that comes with it.
-marrow: Hold still. Pins are not my strong point.   [gesture]
+marrow: Hold still. Pins are not my strong point.   [gesture] {pin}
 marrow > you: There. Now, my question. What should an officer never forget?
 ? choice
 * The people. Everyone aboard.   rel:marrow+2 mem:promo.answer.people

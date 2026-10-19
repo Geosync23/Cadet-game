@@ -317,7 +317,8 @@ def parse_voice_file(path, rel, out):
 
 
 def parse_meeting(path, rel, out):
-    """@meeting <id>; title/from/gist/notify: fields; == lines; 'who: text [pose]' or 'who > to: text';
+    """@meeting <id>; title/from/gist/notify: fields; == lines; 'who: text [pose]' or 'who > to: text' (a trailing ' {pin}'
+    bakes pin: true on that line);
     '? choice' then '* reply text  rel:calder+2,tech2+1 job:x flavour:listen mem:k flag:k favour:k' with an
     indented 'who: text [pose]' under each choice as its reply."""
     lines = read_lines(path)
@@ -363,10 +364,15 @@ def parse_meeting(path, rel, out):
                     ch[k] = v
             choice['choice'].append(ch)
             continue
+        pin = s.endswith(' {pin}')                      # Pillar 5 Step 3: the line where the insignia is pinned (seat C2's pin: true)
+        if pin:
+            s = s[:-len(' {pin}')].rstrip()
         m = re.fullmatch(r'([\w-]+)(?:\s*>\s*([\w-]+))?:\s*(.+?)(?:\s+\[(\w+)\])?', s)
         if not m:
             raise GenError(f'{where}: meeting lines are "who: text [pose]"')
         ln = {'who': m.group(1), 'text': m.group(3)}
+        if pin:
+            ln['pin'] = True
         if m.group(4):
             ln['pose'] = m.group(4)
         if m.group(2):
