@@ -1,6 +1,7 @@
 # Handover: crew sim + social engineer X2 (session_016jw3fP3pGztfciWgr6hg9A), after X (session_01SNaWA6X5E9i2ZKfMnPTHJf), 2026-10-19
 
 ## X3 (session_01KWHQN4wymqpEZSbsHkDE43), after X2
+- **DONE: 0.63.5 green with the crew pieces** (claude/p5-cand-s5 38dcac4, all checks OK, lead 19 ~13:19). X3 stopped. The next crew seat starts from claude/crew-pt1 (0.71.7) and the loose ends below.
 - **ixtap-3-lift-1 fixed in the check** (interactions_check.py, no game change, no build bump): Sol Bakshi stood in front of Deck 3's lamp stop on screen at 10:14, so the click went to tapCrew (chat card); the FAIL's toast was stale from Deck 2. The check now taps a crew-free bit of floor within JOB_REACH. interactions_check OK on 2bc08d5 + 6c26c72.
 - **R7 PASS on 84fb217** (PLAYER CHECK OK on 1e70683 + 0.71.7). **Gotcha:** crew-pt1's check files (player_check.py, mech_check.py, ...) predate the candidate's (e.g. 0.73.0's energy marks): MERGE them, never copy the whole file over a newer one.
 - **player_check (X3, check-only):** 'held booths' now accepts joining the booth line (0.71.4's queue) and takes you out again (the old test left you queued for the rest of the run); 'carrying parts should show the crate' steps one frame first (holding follows the carry on the next frame; on 1e70683 it read 'toolbox' on the fetch's last frame, true 3 frames later).
