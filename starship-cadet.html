@@ -2576,7 +2576,7 @@ const WALL_KIT = {
         c.fillStyle = here ? '#5fd6c6' : '#e8c06a'; c.font = '700 17px system-ui,sans-serif'; c.fillText(n, 16, y);
         c.fillStyle = here ? '#e8f4f1' : '#a9c4bf'; c.font = '500 15px system-ui,sans-serif'; c.fillText(name, 38, y);
       });
-      c.fillStyle = '#7fa9a3'; c.font = '500 12px system-ui,sans-serif'; c.fillText('You are on ' + (deckDef.num === 7 ? 'the rec deck' : deckWord(deckDef.num)), 16, h - 12);
+      c.fillStyle = '#7fa9a3'; c.font = '500 12px system-ui,sans-serif'; c.fillText('You are on ' + (deckDef.num === 7 ? 'the Recreation Deck' : deckWord(deckDef.num)), 16, h - 12);
     });
     const p = new THREE.Mesh(new THREE.PlaneGeometry(.6, .78), new THREE.MeshBasicMaterial({ map: t, toneMapped: false })); p.position.set(0, 1.45, .045); g.add(p);
     box(.66, .84, .04, M.slateDark, 0, 1.45, .02, g);
