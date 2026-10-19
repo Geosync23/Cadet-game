@@ -867,9 +867,11 @@ with sync_playwright() as pw:
     held = g.ev(r"""(() => { const ids = ['3-callhome-1', '3-callhome-2', '3-callhome-3', '3-callhome-4'];
       const fake = ids.map(id => ({ goalId: id, p: { name: 'Test ' + id } })); DECK_CREW.push(...fake);
       const it = ITEMS.find(i => i.t === 'Booth 2'); it.hit.getWorldPosition(_wp); const r = playerTap(it, _wp.clone(), _wp.clone());
-      DECK_CREW.splice(DECK_CREW.length - 4, 4); return [r, !!ACT, document.getElementById('tx').textContent]; })()""")
+      const q = typeof QUEUE_YOU !== 'undefined' ? !!(QUEUE_YOU && QUEUE_YOU.type === 'callhome') : null; if (typeof queueOut === 'function') queueOut(false);   // out of the line again, for what follows
+      DECK_CREW.splice(DECK_CREW.length - 4, 4); return [r, !!ACT, document.getElementById('tx').textContent, q]; })()""")
     print(' ', held)
-    check(held[0] is True and held[1] is False and held[2].startswith('In use'), f'held booths: {held}')
+    # every booth held: "In use", or since 0.71.4 (the user's playtest 2 item 15) you join the booth line and are told so
+    check(held[0] is True and held[1] is False and (held[2].startswith('In use') or held[3] is True and 'line' in held[2]), f'held booths: {held}')
     g.ev("setShipNow(Math.floor(shipNow() / 1440) * 1440 + 1440 + 12 * 60); needsT = null"); g.step(2)
     t = g.ev(f"({TAP})({json.dumps({'title': 'Servery'})})"); g.step(2); s = state(g)
     print('  servery at 12:00 the next day:', s['toast'][:70])
@@ -943,6 +945,7 @@ with sync_playwright() as pw:
             check(g.ev(TAPS % shelf) is True, 'job loop: a tap on a storage shelf should fetch'); s2 = jrun()
             print('  fetched:', s2[1], s2[3][:100]); check(s2[1] == mj[0][:2], f'job loop: should carry {mj[0]}, carries {s2[1]}')
             check(g.ev(f"SHIP.stores[{json.dumps(mj[0][0])}]") == mj[3] - 1, 'job loop: one off the storage shelf')
+            g.step(1)                                  # what's in hand follows the carry on the next frame (the fetch can end after this frame's player update)
             check(g.ev("player.holding") is True, 'job loop: carrying parts should show the crate (player.holding)')
             g.ev(f"goToDeck({mj[1]})"); g.step(5)
             check(g.ev(TAPI) is True, 'job loop: back at the machine')
