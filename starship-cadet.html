@@ -269,7 +269,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.44.24
+   STARSHIP CADET: CSV Wren                           build 0.44.25
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8682,7 +8682,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.44.24';                           // keep in step with the header's build line
+const GAME_BUILD = '0.44.25';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -38773,7 +38773,7 @@ function worksNext() {
 function worksRecordHead() {                             // null before SHIP.works (Days 0-1 keep the Record's old line)
   const W = SHIP.works; if (!W) return null; const tier = W.tier, v = { title: worksText('works.title.t' + tier, 'tier ' + tier), rank: worksRankTitle(W), band: worksBandWord(), next: worksNext() };
   const com = (W.ms.find(x => x[0] === 'commissioned') || [])[1];   // 24p: the ceremony
-  return { kind: 'text', mark: 'hot', text: worksText('works.record', '{rank}, {title}. Works reputation: {band}. What\'s next: {next}', v) + (com ? ' ' + worksText('works.ms.commissioned', 'Commissioned Officer, Day {n}.', { n: com }) : '') };
+  return { kind: 'text', mark: 'hot', text: worksText('works.record', '{rank}, {title}. Works reputation: {band}. What\'s next: {next}', v) + (com ? ' ' + worksText('works.ms.commissioned', worksText('works.record.commissioned', 'Commissioned Officer, Day {n}.', { day: com, n: com }), { n: com }) : '') };
 }
 // ---- the device's Works app: Training, Work log, Tools; other sections add tabs with worksTabAdd (24k: Fault notes and
 // the Chief's notes): worksTabAdd({ id, title, order, view() -> [blocks], act?(verb, arg), badge?() -> number }); the
@@ -40332,12 +40332,12 @@ function promoMoveTick(now) {
 }
 function promoWalkSay(flagKey, fallback) {               // each of her walk lines once (her VOICE lines under that flag, else the stand-in)
   const W = SHIP.works, m = W && W.mv; if (!m || m.s.includes(flagKey)) return; m.s.push(flagKey);
-  worksSayAll(m.by, worksVoice(m.by, flagKey) || [fallback]);
+  worksSayAll(m.by, worksVoice(m.by, flagKey) || (flagKey === 'promo.walk.start' && worksVoice(m.by, 'promo.walk')) || [flagKey === 'promo.walk.start' ? worksText('promo.walk', fallback) : fallback]);   // (the writer's one-flag set reads too)
 }
 function promoMoved(now, how) {                          // 4-23 is yours
   const W = SHIP.works; if (!W || promoDone('move2')) return false;
   W.home = PROMO.home; W.done.push('move2'); const by = (W.mv && W.mv.by) || promoMoveBy(); delete W.mv;
-  if (how !== 'walked' && typeof mailSend === 'function') { const t = worksText('mail.promo.move', 'Your cabin | Cabin 4-23 is yours from tonight: your things are in, your name\'s on the door. Officers\' corridor, the quiet end. — C.'), i = t.indexOf(' | ');
+  if (how !== 'walked' && typeof mailSend === 'function') { const t = worksText('mail.promo.move', worksText('promo.move.mail', 'Your cabin | Cabin 4-23 is yours from tonight: your things are in, your name\'s on the door. Officers\' corridor, the quiet end. — C.')), i = t.indexOf(' | ');
     mailSend({ at: now, from: worksName(by), subject: i > 0 ? t.slice(0, i) : 'Your cabin', body: i > 0 ? t.slice(i + 3) : t }); }
   simNote('moved', { home: W.home, how, t: now });
   return true;
@@ -40390,8 +40390,8 @@ function promoCommission(now, how) {                     // commissioned: once
   const W = SHIP.works; if (!W || W.tier < 2 || promoDone('ceremony2')) return false;
   const d = worksDay(now), r = SHIP.occasions.find(x => x.id === 'promoCeremony' && x.status === 'asked'); if (r) r.met = true;
   W.done.push('ceremony2'); if (!W.ms.some(x => x[0] === 'commissioned')) W.ms.push(['commissioned', d]);
-  if (typeof giftKeepsake === 'function') try { giftKeepsake({ id: 'marrow' }, worksText('works.keepsake.commission', 'your framed commission')); } catch (e) { /* no social */ }
-  if (how === 'mail' && typeof mailSend === 'function') { const t = worksText('mail.promo.ceremony', 'Your commission | We missed you in the observation room. Your commission is signed all the same, and framed on your shelf. Congratulations, Officer. — O. Marrow'), i = t.indexOf(' | ');
+  if (typeof giftKeepsake === 'function') try { giftKeepsake({ id: 'marrow' }, worksText('works.keepsake.commission', worksText('promo.keepsake', 'your framed commission'))); } catch (e) { /* no social */ }
+  if (how === 'mail' && typeof mailSend === 'function') { const t = worksText('mail.promo.ceremony', worksText('promo.ceremony.mail', 'Your commission | We missed you in the observation room. Your commission is signed all the same, and framed on your shelf. Congratulations, Officer. — O. Marrow')), i = t.indexOf(' | ');
     mailSend({ at: now, from: 'Captain Odile Marrow', subject: i > 0 ? t.slice(0, i) : 'Your commission', body: i > 0 ? t.slice(i + 3) : t }); }
   promoPip();
   simNote('commissioned', { day: d, how });
