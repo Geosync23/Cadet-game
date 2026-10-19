@@ -1,7 +1,7 @@
 # Handover: head writer W2 (Pillar 5 Steps 3-4, playtest 2)
 
 **Session:** session_01866TWKzGRgZmFcxiYRi4db. Succeeded seat W (read `plans/handover-writer-p5.md` first: tone,
-formats, gotchas still hold). **Lead:** lead 16, session_01UMyfd16GqSdgNyz5PE8qSv (leads change often: check the
+formats, gotchas still hold). **Lead:** lead 17, session_016bN7x175WBwBL7S9xc2Lpb (was lead 16) (leads change often: check the
 latest brief on `claude/lead-pillar1`). **Branch:** `claude/writer-p5` (text, `lines_check.py`, `content_gen.py`'s
 small meeting change, DEV_NOTES rows). Build rows 0.48.92-0.48.110 so far; the next is **0.48.111**.
 
@@ -42,5 +42,5 @@ session_01QbuzvT3TwzMwSWRmakzX8Z) and the reviewer (R4 session_01UGQxniXCxT5TLEE
 ## Loose ends
 - Step 4 names settled: E2 and E3 (E3's own M10 names; cabin, stars, M17 on W2's) and E1 (W2's + 5 extras) all
   confirmed; everything through c058947 (0.48.110) is R4 PASS.
-- Playtest 2: U confirmed; waiting on X (beam.congrats, queue.*) and E1 (does rounds read tip.round.*?).
+- Playtest 2: U confirmed; waiting on X (beam.congrats, queue.*); E1 confirmed U2 shows tip.round.* from roundTrainStep().
 - `promo.ceremony.mail`, `works.plate` (DA5) and some Step 3 lines are written but may not be wired.
