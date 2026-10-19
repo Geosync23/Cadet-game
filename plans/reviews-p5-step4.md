@@ -24,6 +24,9 @@ Base 0.63.3 7a6e137. Diff: one places block after Step 3's, two Deck 5 props (yo
 
 ## Step 3: U's Tracked device app
 
+### U claude/hud-pt1 cf1348c (check only, on 1d602ff7): PASS
+leave_check's reputation-chip test follows C2's careerJobIn: with the turn-in card (turnInShow) there's no floating chip, and the card's words are works.turnin.rep; without the card the old test runs. No game change.
+
 ### C2 claude/works-career f553607 (0.44.27): PASS (for BM6, over f3b744c)
 One game line: careerJobIn pushes a department's rep entry into j.gains.rep only if none is there yet; plus build lines, career_check (calls it twice, expects one entry), C2's handover. No lines shared with U 1d602ff7.
 
