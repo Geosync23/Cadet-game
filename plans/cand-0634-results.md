@@ -40,3 +40,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - ~05:54 W2 606e204 (0.48.112, queue.left for X2); with R4.
 - t3 player: hit my 1800 s limit (rc 124, no FAIL lines before it; player needs ~2700 s): not a result; player runs again with TMO=2700 on the next full trial. t5 checks started.
 - ~05:55 R4 PASS W2 606e204 (W2's tip).
+- ~05:55 R4: E2 b6130f6 PASS WITH FIXES: hold for E2's next hash (merge note matches t5's: mech_check keep both after part_m9). t5 checks continue as a preview.
