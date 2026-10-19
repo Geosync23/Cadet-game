@@ -81,3 +81,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - ~06:26 E5 60a418f (0.51.13 on E2's 0.51.12 93fbdb5: pin shows via playerRigRebuild in 24l; a leak +1 in all; mech_check pin/pay). Known with E1 633eade: mech m15 FAIL 'right first time pays +2' (gets 1) until 24 core's side pay reads j.rightFirst (E6 / lead deciding). With R5.
 - ~06:27 E6 2edb69c (0.45.14: R5's two fixes on 0.45.11/0.45.12); with R5.
 - trial t9 (wt2) = 2bc08d5 + E6 2edb69c + E5 60a418f + E3 d51c5ed + W2 0e8571a: mech_check hand merges as before (keep both); verify_merge: the same 6 explained under d51c5ed; NAMES OK (3175), parses, bake 9560 / 48. Checks queued after t8's set: mech (m15 right-first +2 should pass with E6's fix), career, machine, lines, cadet.
+- ~06:27 R5 PASS E5 60a418f (contains 0.51.12): the 24o/q/r/l tip (pin works, leak +1).
