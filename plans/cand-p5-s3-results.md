@@ -21,3 +21,4 @@ Build master 6 (BM6, session_01F8k6hqdBRoxDJMzqAuiHqR) on claude/p5-cand-pt1 (th
 - ~02:57 R3 PASS W2 edf3223. W2 newer b4630d4 (0.48.98, promotion keys with C2 0.44.22; with R3). S2 1f2e08f (0.33.58 team job kind, jobReserve drift; with R3; same mech m4 FAIL till C2's test fix).
 - R3 PASS W2 b4630d4. W2 newer 0cdde89 (0.48.99, H2's P1/P2 texts; with R3).
 - ~03:00 M3 46994a9 (0.53.0 24i tracing; with R3). trial s3e = base + S2 1f2e08f + M3 46994a9 + H2 828fc3a + DA5 25dbfce + U 114bd49 + W2 0cdde89 (no C2/M2/X yet): merges clean, verify_merge 0 problems, NAMES OK, parses; bake 9304 lines, 434 conversations (W2's 6d2a4f8 had 444; edf3223 on bakes 434 alone: asked W2 if intended). Checks running.
+- W2: the 444→434 is intended (batch 1's 10 @overheard teamjob conversations rewritten as kind 'team' lines in banks/team.lines for X). R3 PASS W2 dd1f177 (0.48.100).
