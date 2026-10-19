@@ -285,7 +285,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.63.4
+   STARSHIP CADET: CSV Wren                           build 0.83.0
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8470,8 +8470,27 @@ Object.assign(WALL_KIT, {
     const p = new THREE.Mesh(new THREE.PlaneGeometry(W_, Hh), new THREE.MeshBasicMaterial({ map: t, toneMapped: false })); p.position.set(o.off || 0, o.y || 2.45, .03); g.add(p);
   },
 });
+// the crew's places (RA, 0.83.0, plan v5 section 9 "Capacity and busyness"): what they do here and where they wait for a
+// turn. Swimming: one per lane (4), at the shallow end; kayaks: 3 on the slow channel (you make the 4th); the wall: 2
+// auto-belays (routes red and blue); the float room: 6; and the waiting spots: the loungers and the pool's edge, the dock's
+// beach, the pebble beach under the wall, the lobby glass by the float room. The stands' seats by the gate are the court's
+// queue (schedData's '7|rec-courtq'). anim is section 8c's pose (section 8b's ACTS) for whoever is there
+const REC_CREW_PLACES = [
+  ...[1.35, 2.25, 3.15, 4.05].map((z, k) => ({ id: '7-lane-' + (k + 1), type: 'rec:lane', at: [24, Math.floor(z)], walk: [23, Math.floor(z)], xy: [24.6, z], y: .35, face: 'e', pose: 'stand', anim: 'swim', room: 'P' })),
+  ...[[24.4, 6.55], [27.6, 6.55], [29.6, 6.55]].map(([x, z], k) => ({ id: '7-lounger-' + (k + 1), type: 'rec:poolq', at: [Math.floor(x), 6], walk: [Math.floor(x), 5], xy: [x, z - .1], y: .42, face: 'n', pose: 'sit', room: 'P' })),
+  ...[25.6, 28.6].map((x, k) => ({ id: '7-pooledge-' + (k + 1), type: 'rec:poolq', at: [Math.floor(x), 5], xy: [x, 5.05], y: .42, face: 'n', pose: 'sit', room: 'P' })),
+  ...[9.4, 7.4, 5.4].map((x, k) => ({ id: '7-kayak-' + (k + 1), type: 'rec:kayak', at: [Math.floor(x), 4], walk: [Math.floor(x) + 1, 6], xy: [x, 4.85], y: .36, face: 'w', pose: 'stand', anim: 'kayak', room: 'K' })),
+  ...[13, 14].map((c, k) => ({ id: '7-dockq-' + (k + 1), type: 'rec:kayakq', at: [c, 6], face: 'n', pose: 'stand', room: 'K' })),
+  ...[2.575, 4.875].map((z, k) => ({ id: '7-climb-' + (k + 1), type: 'rec:climb', at: [2, Math.floor(z)], xy: [1.95, z], face: 'w', pose: 'stand', anim: 'climb', room: 'K' })),
+  ...[3, 5].map((r, k) => ({ id: '7-beach-' + (k + 1), type: 'rec:climbq', at: [3, r], face: 'w', pose: 'stand', room: 'K' })),
+  ...[[18.5, 13.5], [20.5, 13.3], [22.5, 13.5], [18.5, 16.2], [20.5, 16.4], [22.5, 16.2]].map(([x, z], k) => ({ id: '7-float-' + (k + 1), type: 'rec:float', at: [Math.floor(x), Math.floor(z)], xy: [x, z], face: k < 3 ? 's' : 'n', pose: 'stand', anim: 'float', room: 'F' })),
+  ...[20, 21].map((c, k) => ({ id: '7-floatq-' + (k + 1), type: 'rec:floatq', at: [c, 11], face: 's', pose: 'stand', room: '+' })),
+  // the changing rooms (crew change for the pool and the kayaks, as you do): two lockers either side of yours, two showers
+  ...[[18.0, 18], [20.7, 20]].map(([x, c], k) => ({ id: '7-locker-' + (k + 1), type: 'rec:locker', at: [c, 1], xy: [x, 1.25], face: 'n', pose: 'stand', anim: 'browse', room: 'w' })),
+  ...[17.65, 18.9].map((x, k) => ({ id: '7-rshower-' + (k + 1), type: 'rec:shower', at: [17, 2], xy: [x, 3.35], face: 's', pose: 'stand', anim: 'wash', room: 'w' })),
+];
 DECKS[7] = {
-  num: 7, name: 'Recreation', seed: 70771, tall: 1.3, playerOnly: true, open: [6, 24],
+  num: 7, name: 'Recreation', seed: 70771, tall: 1.3, playerOnly: !REC_DECK, open: [6, 24],   // 0.83.0 (RA): the crew come when the deck is switched on
   blurb: 'Auditorium, court, pool, rivers', arrive: 'The concourse runs stern to bow: the rivers and the court aft, the pool and the auditorium forward.',
   lift: [20, 9],
   // car on columns 19-20, rows 7-9; trunks behind glass on row 6, the ladder on row 10: the same world spot as every deck
@@ -8555,7 +8574,8 @@ DECKS[7] = {
     // the stands' 33 seats (0.80.2), facing the court, reached from the aisle at column 6 or 14
     .concat(REC_STAND_SEATS.map((s, k) => ({ id: '7-stand-' + (k + 1), type: 'rec:seat', at: [s.col, s.tier ? 12 : 11], walk: [s.aisle, s.tier ? 12 : 11], face: 's', pose: 'sit', room: 'T', xy: [s.col + .5, s.z + .02], y: Math.round((s.h + .45) * 100) / 100 })))
     // the concourse's two beanbags (0.80.9, the user's): lounge seats like the music room's, so crew can use them in phase 2
-    .concat([[5, 5.5, 7.45], [6, 6.6, 7.55]].map(([c, x, z], k) => ({ id: '7-beanbag-' + (k + 1), type: 'lounge-seat', at: [c, 7], walk: [c, 8], face: 's', pose: 'sit', room: '=', xy: [x, z], y: .42, cush: .32 }))),
+    .concat([[5, 5.5, 7.45], [6, 6.6, 7.55]].map(([c, x, z], k) => ({ id: '7-beanbag-' + (k + 1), type: 'lounge-seat', at: [c, 7], walk: [c, 8], face: 's', pose: 'sit', room: '=', xy: [x, z], y: .42, cush: .32 })))
+    .concat(REC_CREW_PLACES),
   dress(d) {
     recMats();
     for (const [key, tw, text] of d.plates) placeOnEdge('plate', key, tw, { text });
@@ -8748,7 +8768,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.63.4';                           // keep in step with the header's build line
+const GAME_BUILD = '0.83.0';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -9153,6 +9173,11 @@ function schedData() {
     // and a venue's crowd spots (the deck architect's `gather` places, not the lead's) as n|@gather-<venue>: the shuttle bay's for farewell friends (0.26.38)
     for (const pl of places) if (pl.deck === n && pl.gather && !pl.lead) { const k = 'gather-' + pl.gather; if (!evs.has(k)) evs.set(k, []); evs.get(k).push(pl); }
     for (const [ev, l] of evs) sub('@' + ev, l.sort(nat));
+    if (n === 7) {                                       // the rec deck (RA, 0.83.0): its seats by room, and the court's queue (the stands' front row by the gate)
+      const rs = shared.get('7|rec:seat') || [];
+      sub('rec-stand', rs.filter(pl => pl.room === 'T')); sub('rec-aud', rs.filter(pl => pl.room === 'A'));
+      sub('rec-courtq', rs.filter(pl => pl.room === 'T' && pl.at[1] === 11 && pl.at[0] >= 12));
+    }
     sub('window', [...new Set([...shared.entries()].filter(([k]) => k.startsWith(n + '|') && !/\|work:/.test(k)).flatMap(([, l]) => l))].filter(pl => pl.window));   // answer 21: seats by a window
   }
   if (typeof eventPools === 'function') eventPools(shared);   // section 18: the events' own place lists
@@ -9516,6 +9541,7 @@ function habitsOn(p, d) {
     if (c.drop) hs = hs.filter(h => h !== c.drop);
     if (c.add && !hs.includes(c.add)) hs = hs.concat(c.add);
   }
+  const rh = REC_ON && recHabit(p); if (rh && !hs.includes(rh)) hs = hs.concat(rh);   // the rec deck's habits (RA, 0.83.0): never in HABIT_TAKE or HABIT_DROP, so the weekly changes are as before
   return hs;
 }
 Object.defineProperty(SHIP, 'habitLog', { get: () => { const d = SHIP.time.day, out = []; for (let w = 1; w <= Math.floor((d - 1) / 7); w++) out.push(...habitWeek(w).filter(c => c.day <= d)); return out; }, enumerable: false });
@@ -9646,6 +9672,52 @@ function schedWants(p, d, k, base) {
   const did = dd => schedU(p.seed, dd, k) < base(dd);
   return did(d) || (base(d) > .2 && !did(d - 1) && !did(d - 2) && !did(d - 3));
 }
+
+// ---- the rec deck's crew (RA, 0.83.x; plans/recdeck-plan.html v5 section 9; brief-recdeck "RA") ----
+// Only with REC_DECK on (DECKS[7].playerOnly lifted); with it off nothing here runs and every plan is as before.
+// Habits: about a third of the crew (and the story crew who host a rec tradition) have one of REC_HABITS, layered over
+// section 9's in habitsOn (recHabit: schedU key 1030, the person's seed, so the same people every game; never a guest).
+// A visit (schedBuild's recVisit) only ever takes the place of time they'd have spent resting in their own bunk or
+// cabin (a leisure block whose pick was 'rest'), starting and ending exactly when that rest would, so nobody's day off
+// the rec deck moves and the Commons keep every visitor they had (the user's "Commons needs to be busy"). A visit: the
+// ride down, for the pool and kayaks a locker (rec kit, 2 minutes), a turn of 20-40 minutes at a free place of the kind
+// (REC_DO), waiting up to REC_Q minutes at its waiting spots first, else something else or back to rest; a shower and
+// the locker after the wet ones; the ride up. Open 06:00 to midnight (DECKS[7].open). At most REC_CAP on the deck (the
+// plans' count, occ.rec): 15 on evenings (17:00 on) and weekends, 6 on weekday daytimes; gatherings are exempt.
+// Keys: 1030 (who has a habit, and which), 1031-1034 (a visit: go or not, what, how long, which place first)
+const REC_ON = REC_DECK;
+const REC_HABITS = { swimmer: 'swim', kayaker: 'kayak', climber: 'climb', 'disc-player': 'disc', floater: 'float', 'film-buff': 'watch' };
+const REC_HABIT_TEXT = {
+  swimmer: 'Swims lengths in the rec dec pool, mornings or evenings.', kayaker: 'Paddles the rec dec rivers after shift.',
+  climber: 'Climbs the rec dec wall and rings the bell.', 'disc-player': 'A Lightdisc pick-up game on the rec dec after shift.',
+  floater: 'Unwinds in the rec dec float room.', 'film-buff': 'Never misses film night; watches from the stands in between.',
+};
+// the story crew who host the rec traditions keep theirs; Maeve Volkov's is her round of the deck's machines (round 2)
+const REC_HABIT_FIX = { rina: 'swimmer', holt: 'kayaker', tomas: 'climber', vance: 'climber', pell: 'disc-player', oduya: 'floater', nandakumar: 'floater' };
+// a habit by what the person already likes: gym-regulars and runners to the pool, wall and rivers; musicians and the
+// common room to the films; the rest to anything. [habit, weight]
+const REC_LIKES = [[h => h.includes('gym-regular') || h.includes('runner'), [['swimmer', 3], ['climber', 3], ['kayaker', 2], ['disc-player', 2]]],
+  [h => h.includes('music') || h.includes('musician') || h.includes('common-room'), [['film-buff', 3], ['disc-player', 1], ['floater', 1]]],
+  [() => true, [['swimmer', 2], ['kayaker', 1.5], ['climber', 1.5], ['disc-player', 2], ['floater', 1.5], ['film-buff', 1]]]];
+const REC_SHARE = .3;                                    // with the fixed ones, about a third of the crew
+function recHabit(p) {
+  if (!REC_ON || !p || p.guest || p.rank === 'guest' || p.player) return null;
+  if (REC_HABIT_FIX[p.id]) return REC_HABIT_FIX[p.id];
+  if (schedU(p.seed, 0, 1030) >= REC_SHARE) return null;
+  const opts = REC_LIKES.find(([f]) => f(p.habits || []))[1], tot = opts.reduce((a, o) => a + o[1], 0);
+  let r = schedU(p.seed, 1, 1030) * tot; for (const [h, w] of opts) if ((r -= w) < 0) return h;
+  return opts[opts.length - 1][0];
+}
+// what a visit does: the place type, its waiting spots' type, the anim (the place's own when null), wet: rec kit first
+const REC_DO = {
+  swim: { type: 'rec:lane', q: 'rec:poolq', wet: true }, kayak: { type: 'rec:kayak', q: 'rec:kayakq', wet: true },
+  climb: { type: 'rec:climb', q: 'rec:climbq' }, float: { type: 'rec:float', q: 'rec:floatq' },
+  disc: { type: 'rec:disc', q: 'rec-courtq' }, watch: { type: 'rec-stand' }, bean: { type: 'lounge-seat' },
+};
+const REC_CAP = { busy: 15, quiet: 6 }, REC_Q = 10, REC_TURN = [20, 40];
+const recCap = (d, m) => weekday(d) >= 5 || m >= 1020 || m < 540 ? REC_CAP.busy : REC_CAP.quiet;   // weekday daytime (09:00-17:00) is quiet
+// a visit's odds from a rest block: with a habit, most of them; without, now and then the stands, a beanbag or the float room
+const REC_ODDS = { habit: .9, habitOff: .9, casual: .35, away: .6 };   // away: the share of those for a pick on another deck than the Commons (Deck 4's rooms, the officers' lounges)
 
 // ---- seating by friendship: section 20's affinityPlan (pure, memoised); nothing changes without it ----
 const SEAT_SOCIAL = new Set(['mess-seat', 'lounge-seat', 'bench']);
@@ -9863,6 +9935,63 @@ function schedBuild(p, d, occ, S) {
     while (i < opts.length - 1 && (r -= opts[i][2]) > 0) i++;
     return opts.slice(i).concat(opts.slice(0, i)).map(o => [o[0], o[1]]);   // the pick first, then the rest
   };
+  // a visit to the rec deck in place of a rest block that would run to `to` (RA, 0.83.0; see REC_HABITS): true when one
+  // is planned (then t is where the ride back up starts). Never past the deck's hours, never over the deck's cap
+  let recN = 0;
+  const recVisit = (to, odds = 1, ride = null) => {   // ride: { a0, go } when the ride down is already planned (recSwap)
+    if (!REC_ON || !occ.rec || p.rank === 'guest' || p.guest) return false;
+    const n = recN++, vu = j => schedU(p.seed + 7919 * n, d, 1031 + j), hab = Object.keys(REC_HABITS).find(h => H.has(h));
+    let kind = null;
+    if (hab && vu(0) < odds * (F.works ? REC_ODDS.habit : REC_ODDS.habitOff)) kind = REC_HABITS[hab];
+    else if (vu(0) > 1 - odds * REC_ODDS.casual) kind = ['watch', 'bean', 'float'][Math.floor(vu(1) * 3)];
+    if (!kind) return false;
+    const R = REC_DO[kind], wet = !!R.wet, pre = wet ? 2 : 0, post = wet ? 6 : 0, dur = REC_TURN[0] + Math.round((REC_TURN[1] - REC_TURN[0]) * vu(2));
+    const a0 = ride ? ride.a0 : t + C, open = DECKS[7].open, last = Math.min(to - C - post, open[1] * 60 - 15);
+    if (a0 < open[0] * 60 || last - (a0 + pre) < 15) return false;
+    const pool = S.shared.get('7|' + R.type) || []; if (!pool.length) return false;
+    const capOk = (a, b) => { for (let m = a; m < b; m++) if (occ.rec[m] + 1 > recCap(d, m)) return false; return true; };
+    const free1 = (type, a, b) => (S.shared.get('7|' + type) || []).find(pl => isFree(pl.id, a, b)) || null;
+    // the place and the turn: the earliest start within REC_Q minutes; Lightdisc: the challenger's end of a game already
+    // planned (7-disc-1 booked, 7-disc-2 free for the same minutes) first, else the first end, waiting for someone
+    let pl = null, s0 = 0, e0 = 0;
+    if (kind === 'disc') {
+      const d2 = pool.find(q => q.id === '7-disc-2'), d1 = pool.find(q => q.id === '7-disc-1');
+      for (const [x, y] of (d1 && occ.get(d1.id)) || []) { const a = x - B, b = Math.min(y - B, last); if (a >= a0 && a <= a0 + REC_Q && b - a >= 15 && isFree(d2.id, a, b)) { pl = d2; s0 = a; e0 = b; break; } }
+      if (!pl && d1 && isFree(d1.id, a0, Math.min(a0 + dur, last))) { pl = d1; s0 = a0; e0 = Math.min(a0 + dur, last); }
+    } else {
+      const off = Math.floor(pool.length * vu(3));
+      for (let s = a0 + pre; s <= a0 + pre + REC_Q && !pl; s++) {
+        const e = Math.min(s + dur, last); if (e - s < 15) break;
+        for (let i = 0; i < pool.length; i++) { const q = pool[(off + i) % pool.length]; if (isFree(q.id, s, e)) { pl = q; s0 = s; e0 = e; break; } }
+      }
+    }
+    if (!pl || !capOk(a0, e0 + post)) return false;       // full, or a long wait: they go elsewhere (rest as before)
+    if (ride) ride.go(); else if (deck !== bedDeck) go(7); else { deck = 7; seg('commute', t + C, 'lift', null, { fromDeck: bedDeck }); }   // from their bunk: the ride alone (no wait by Deck 4's lift, so nobody else's day moves)
+    const stop = (act, until, type, tag, anim) => {      // a short stop at a free place of that type, else standing about
+      const q = type && free1(type, t, until); if (q) hold(q.id, t, until);
+      seg(act, until, q ? q.type : null, q ? q.id : null, anim ? { tag, anim } : { tag });
+    };
+    if (wet) stop('wash', t + 2, 'rec:locker', 'rec-change', 'browse');
+    if (s0 > t + 1 && R.q) stop('leisure', s0, R.q, 'rec-wait'); else if (s0 > t) linger(s0);
+    hold(pl.id, s0, e0); seg('leisure', e0, pl.type, pl.id, { tag: 'rec-' + kind, ...(placeAnim(pl) ? { anim: placeAnim(pl) } : {}) });
+    if (wet) { stop('wash', t + 4, 'rec:shower', 'rec-shower', 'wash'); stop('wash', t + 2, 'rec:locker', 'rec-change', 'browse'); }
+    // time left before the ride up: stay on, watching from the stands or on a beanbag (under the cap), else head back
+    const end = Math.min(to - C, open[1] * 60 - 15);
+    if (end - t >= 15 && capOk(t, end)) { const q = free1(vu(4) < .6 ? 'rec-stand' : 'lounge-seat', t, end) || free1('rec-stand', t, end); if (q) { hold(q.id, t, end); seg('leisure', end, q.type, q.id, { tag: 'rec-watch' }); } }
+    return true;
+  };
+  // a leisure block taken off the Commons (Deck 4's rooms, the officers' lounges): sometimes the rec deck instead. The place
+  // stays held for the block and the ride back ends there, so everyone else's day and this person's own afterwards come
+  // out exactly as without the rec deck; only the block itself is spent on the rec deck (RA, 0.83.0)
+  const recSwap = L => {
+    if (!L || L.act !== 'leisure' || !L.placeId || L.deck === 3 || L.deck === 7 || L.to - L.from < 2 * C + 25) return;
+    segs.pop(); const pv = segs[segs.length - 1], rode = pv && pv.act === 'commute' && pv.to === L.from && pv.deck === L.deck, t0 = t, d0 = deck;
+    t = L.from; const a0 = rode ? L.from : L.from + C;
+    const ok = recVisit(L.to, REC_ODDS.away, { a0, go: () => { const f = deck; deck = 7; if (rode) pv.deck = 7; else seg('commute', t + C, 'lift', null, { fromDeck: f }); } });
+    if (!ok) { segs.push(L); t = t0; deck = d0; return; }
+    const from = deck; deck = L.deck; seg('commute', t + C, 'lift', null, { fromDeck: from });
+    if (t < L.to) seg(L.act, L.to, L.type, L.placeId, { ...(L.tag ? { tag: L.tag } : {}), ...(L.anim ? { anim: L.anim } : {}) });
+  };
   // leisure until `end`: blocks of 30-100 minutes; the Wednesday drill musters anyone off duty by the lift, and a
   // block stops for a gathering (a birthday, observatory night) when one is due
   const meet = gatherings(p, d, F);
@@ -9897,9 +10026,10 @@ function schedBuild(p, d, occ, S) {
         if (ru && !called && t >= ra[0] && t < ra[1] - 20 && evOwed(p, evAt(B + t), d)) { called = true; rang = !!take('callhome', [[3, 'callhome']], 20 + Math.round(15 * U(63)), { wait: 30, min: 12, by: to, tag: 'rush' }); }
       }
       const si = !rang && EVD && evRule(B + t, 'stayIn', p);
+      const n0 = segs.length;
       if (!rang && ((si && schedU(p.seed, d, 700 + k + n) < si.share) || pick[1] === 'rest' || !take('leisure', opts.filter(o => o[1] !== 'rest'), 1440, { by: to, min: 15 }))) {
-        if (deck !== bedDeck && to - t < C + 15) linger(to); else { go(bedDeck); seg('leisure', Math.max(t, to), 'bed', p.bed, { tag: 'rest' }); }
-      }
+        if (deck !== bedDeck && to - t < C + 15) linger(to); else { if (pick[1] === 'rest' && !si) recVisit(to); go(bedDeck); seg('leisure', Math.max(t, to), 'bed', p.bed, { tag: 'rest' }); }   // rest, or the rec deck in its place (RA, 0.83.0)
+      } else if (REC_ON && !rang && !si && segs.length > n0) recSwap(segs[segs.length - 1]);
       if (F.shape.drill && t === F.shape.drill) { if (!take('off', [[deck, 'lift-wait']], 15, { tag: 'drill' })) seg('off', t + 15, null, null, { tag: 'drill' }); }
       for (const e of meet) if (!e.done && t >= e.at && t < e.at + (e.host ? Math.max(10, e.dur / 2) : 10) && end - t >= Math.min(25, e.dur)) {
         e.done = true;
@@ -10170,6 +10300,7 @@ function shipDay(d) {
   const host = typeof eventsOn === 'function' && eventsOn(d).some(e => e.ev.host) ? new Set(S.people.filter(p => eventPlan(p, d).some(e => e.host)).map(p => p.id)) : null;
   const order = S.people.slice().sort((a, b) => (host ? host.has(b.id) - host.has(a.id) : 0) || wakeAt(a) - wakeAt(b) || (a.id < b.id ? -1 : 1));
   occ.heads = new Int16Array(1440);                      // how many the plans so far put on Deck 3, minute by minute
+  if (REC_ON) occ.rec = new Int16Array(1440);            // and on the rec deck (RA, 0.83.0: its cap, REC_CAP)
   // section 18's events: each event's own places are held for it (occ.res: placeId -> [[from, to, eventId]], not a
   // booking, so dayReport never counts them) from 5 minutes before it starts until it ends (releasing them 15 minutes
   // in let early planners take seats later guests wanted: the jam stayed empty). The places: eventPlaces(e)
@@ -10225,7 +10356,7 @@ function shipDay(d) {
       for (const [id, rs] of occ.res) occ.res.set(id, rs.filter(([x, y, ev]) => !mealEv.has(ev)));
     }
     const plan = introLay(p, d, occ, guestTrim(p, d, aboard(p, d) ? schedBuild(p, d, occ, S) : [], leave.get(p.id))); plans.set(p.id, plan);   // a guest away has no day here
-    for (const s of plan) if (s.deck === 3) for (let m = Math.max(0, s.from - (d - 1) * 1440); m < s.to - (d - 1) * 1440; m++) occ.heads[m]++;
+    for (const s of plan) if (s.deck === 3 || s.deck === 7 && occ.rec) for (let m = Math.max(0, s.from - (d - 1) * 1440); m < Math.min(1440, s.to - (d - 1) * 1440); m++) (s.deck === 3 ? occ.heads : occ.rec)[m]++;
   }
   const day = { d, plans, occ };
   SHIP_DAYS.set(d, day);
@@ -14762,8 +14893,9 @@ Object.assign(PLAYER_ACTS, {
   recWatch:  { need: 'leisure', gain: 8, mins: 15, pose: 'sit', title: 'Stands', done: 'You get up and stretch.' },
   recBean:   { need: 'leisure', gain: 8, mins: 15, pose: 'sit', title: 'Beanbag', done: 'You haul yourself out of the beanbag. It takes two goes.' },
   recShower: { need: 'hygiene', gain: 20, mins: 3, pose: 'stand', title: 'Shower' },
+  recWait:   { need: 'leisure', gain: 4, mins: 40, pose: 'sit', title: 'Waiting your turn', done: 'You give up waiting.' },   // RA, 0.83.0: the queue (recQueue)
 });
-const REC = { chain: null, last: null };
+const REC = { chain: null, last: null, q: null };
 const recKitOn = () => PLAYER_SPEC.kit === 'rec';
 const recOpen = () => SHIP.time.min >= DECKS[7].open[0] * 60;   // 06:00 to midnight
 // where things are: spots in world units (from deck tile coordinates), moves in deck coordinates (section 8c's)
@@ -14775,7 +14907,7 @@ const REC_LOOP = [[11.4, 4.85], [4.8, 4.85], [4.8, 1.3], [13.8, 1.3, 1], [13.8, 
 function recTap(it, at, point) {
   if (typeof deckDef === 'undefined' || !deckDef || deckDef.num !== 7) return false;
   const t = it.t;
-  if (t === 'Lightdisc court' || t === 'Ask someone to play') { discAsk(); return true; }   // section 23b (0.82.0)
+  if (t === 'Lightdisc court' || t === 'Ask someone to play') { if (!recQueue('disc', t, null)) discAsk(); return true; }   // section 23b (0.82.0); two crew already on the court: wait your turn (RA, 0.83.0)
   if (t === 'Scoreboard') { toast(t, it.x); return true; }
   const kind = t === 'Pool' ? 'swim' : /^(Kayak dock|River|White water|Kayak rack|Wave gate)$/.test(t) ? 'kayak' : t === 'Climbing wall' ? 'climb'
     : t === 'Float room' ? 'float' : t === 'Seats' ? 'seat' : t === 'Stands' ? 'watch' : t === 'Beanbag' ? 'bean' : t === 'Lockers' && recKitOn() ? 'unchange' : null;
@@ -14808,17 +14940,37 @@ function recGo(kind, point, title, flavour) {
   }
   recStart(kind, title, flavour, point ? [point.x + OX, point.z + OZ] : null);
 }
+// the crew are here too (RA, 0.83.0): a lane or a belay the crew are using (or walking to) isn't yours. When every one is
+// taken you wait your turn at its waiting spot (the loungers, the pebble beach, the stands' gate bench), and when one comes
+// free: "You're up." The kayaks (3 crew and you) and the float room (6 and you) always have room
+const REC_BELAYS = [['7-climb-1', 0], ['7-climb-2', 2]];   // the two auto-belays: on the red route and the blue
+const recLanesFree = () => REC_LANES.filter((z, i) => !heldBy('7-lane-' + (i + 1)));
+const recBelaysFree = () => REC_BELAYS.filter(([id]) => !heldBy(id)).map(([, r]) => r);
+const recCourtFree = () => !(heldBy('7-disc-1') && heldBy('7-disc-2'));
+const REC_QUEUE = { swim: ['rec:poolq', 'Every lane\'s taken. You wait on a lounger for one to come free.'], climb: ['rec:climbq', 'Both belays are in use. You wait on the pebble beach for your turn.'],
+  disc: ['rec:seat', 'Two are playing. You wait on the bench by the gate: you\'re next.'] };
+const recFreeFor = kind => kind === 'swim' ? recLanesFree().length > 0 : kind === 'climb' ? recBelaysFree().length > 0 : kind === 'disc' ? recCourtFree() : true;
+function recQueue(kind, title, p) {                      // true when you're now waiting (REC.q), false when there's room
+  if (!REC_QUEUE[kind] || recFreeFor(kind)) return false;
+  const [type, line] = REC_QUEUE[kind], gate = kind === 'disc';
+  const pl = [...PLACE_OF.values()].filter(q => q.type === type && !heldBy(q.id) && (!gate || q.room === 'T' && q.at[1] === 11 && q.at[0] >= 12))[0];
+  REC.q = { kind, title, p };
+  actStart('recWait', pl ? pl.id : null, { title: 'Waiting your turn', pose: pl ? pl.pose : 'stand', after: line, ...(pl ? {} : { spot: recSpot(kind === 'swim' ? [26, 5] : kind === 'climb' ? [3, 4] : [14, 12], kind === 'swim' ? 26.5 : kind === 'climb' ? 3.5 : 14.5, kind === 'swim' ? 5.5 : kind === 'climb' ? 4.5 : 12.5, 0, 'stand') }) });
+  return true;
+}
 function recStart(kind, title, flavour, p) {             // p: the tap in deck coordinates (or null)
   const water = { pool: .35, river: .36 };
+  if (recQueue(kind, title, p)) return;
   if (kind === 'swim') {
-    const lane = REC_LANES.reduce((m, z) => p && Math.abs(z - p[1]) < Math.abs(m - p[1]) ? z : m, REC_LANES[1]);
+    const free = recLanesFree(), lane = free.reduce((m, z) => p && Math.abs(z - p[1]) < Math.abs(m - p[1]) ? z : m, free.includes(REC_LANES[1]) ? REC_LANES[1] : free[0]);
     actStart('recSwim', null, { title, flavour, spot: recSpot([23, Math.min(4, Math.floor(lane))], 23.55, lane, Math.PI / 2, 'stand'),
       move: { kind: 'swim', path: [[24.5, lane], [30.5, lane]], y: water.pool, lengths: 4 }, after: 'You slip in at the shallow end and start your lengths.' });
   } else if (kind === 'kayak') {
     actStart('recKayak', null, { title, flavour, spot: recSpot([11, 6], 11.4, 5.75, Math.PI, 'stand'),
       move: { kind: 'kayak', path: REC_LOOP, y: water.river, laps: 2 }, follow: true, after: 'You take a kayak from the dock and push off into the slow channel.' });
   } else if (kind === 'climb') {
-    const len = REC_WALL.z1 - REC_WALL.z0, r = Math.max(0, Math.min(REC_ROUTES - 1, Math.floor(((p ? p[1] : 4.3) - REC_WALL.z0) / len * REC_ROUTES)));
+    const len = REC_WALL.z1 - REC_WALL.z0, r0 = Math.max(0, Math.min(REC_ROUTES - 1, Math.floor(((p ? p[1] : 4.3) - REC_WALL.z0) / len * REC_ROUTES)));
+    const r = REC_DECK ? recBelaysFree().reduce((m, x) => Math.abs(x - r0) < Math.abs(m - r0) ? x : m, recBelaysFree()[0]) : r0;   // a free belay's route nearest your tap (0.83.0: two belays)
     const z = REC_WALL.z0 + len * (r + .5) / REC_ROUTES;
     actStart('recClimb', null, { title, flavour, spot: recSpot([2, Math.max(2, Math.min(6, Math.floor(z)))], 2.5, z, -Math.PI / 2, 'stand'),
       move: { kind: 'climb', at: [1.95, z], face: 'w', top: Math.max(.8, H - 2.25), onRing: () => toast('The bell', 'Ding! You ring the brass bell at the top of the wall. The whole river hall hears it.') },
@@ -14842,6 +14994,10 @@ function recFrame() {
   if (typeof deckDef === 'undefined' || !deckDef || typeof ACT === 'undefined') return;
   if (recKitOn() && deckDef.num !== 7 && !ACT && typeof playerKit === 'function') playerKit(null);   // off the deck: back in uniform
   const A = ACT;
+  if (A && A.kind === 'recWait' && REC.q && recFreeFor(REC.q.kind)) {   // your turn (RA, 0.83.0)
+    const q = REC.q; REC.q = null; toast(q.title, 'You\'re up.');
+    if (q.kind === 'disc') { actEnd(true); discAsk(); } else recStart(q.kind, q.title, null, q.p);
+  } else if (REC.q && (!A || A.kind !== 'recWait')) REC.q = null;   // gave up waiting, or went off to do something else
   if (A !== REC.last) { const was = REC.last; REC.last = A; if (was && was.kind.startsWith('rec') && !A) recAfter(was); }
   if (A && A.kind.startsWith('rec') && A.phase === 'do' && A.def.also) {   // the second gains (a swim washes you, all of them keep you fit), as the minutes go by
     const d = Math.max(0, Math.min(A.done, A.def.mins) - (A.alsoDone || 0)), n = SHIP.player.needs; A.alsoDone = (A.alsoDone || 0) + d;
