@@ -464,6 +464,13 @@ with sync_playwright() as pw:
           return out; })()""")
         check(r['d1'] == 't:device-work' and r['d2'] == 't:laundry-d2' and r['again'] == [None, None], f'the training-day device tip and the Day 2 laundry tip, each once ({r})')
         check(r['ct'][0] is not False and r['ct'][1] is False and r['ct'][2], f'a career warning shows once a save, saved like the other tips ({r["ct"]})')
+        if g.ev("typeof devDay === 'function' && typeof DECK_NAMES !== 'undefined'"):   # batch B (0.72.6): tea and the delivery on the Schedule, tea a little food, Deck 2's lift label
+            r = g.ev("""(() => { const k = d => devDay(d).filter(x => x.kind === 'tea' || x.kind === 'delivery').map(x => x.title + ' ' + hhmm(x.from) + (devItemGoal(x) ? '' : ' (no goal)'));
+              const wed = [1, 2, 3, 4, 5, 6, 7].find(d => weekday(d) === DELIVERY.day + deliveryLate(d)), sat = [1, 2, 3, 4, 5, 6, 7].find(d => !devShiftOn(d));
+              const A = { def: { mins: 6 }, o: {}, kind: 'ixTea' }; teaBegin(A);
+              return { wed: k(wed), sat: sat ? k(sat) : [], gain: A.def.gain, lift: DECK_NAMES[2] }; })()""")
+            check(any(t.startswith('Supply delivery') for t in r['wed']) and any(t.startswith('Tea and biscuits') for t in r['wed']) and not any('no goal' in t for t in r['wed']) and r['sat'] == [], f'the Schedule lists tea on shift days and the week\'s delivery, each with an arrow; none on a day off ({r})')
+            check(r['gain'] <= 5 and r['lift'] == "Officers' quarters and science", f'tea and biscuits is only a little food; the lift says Officers\' quarters and science ({r["gain"]}, {r["lift"]})')
         check(not g.errors, f'no console errors ({g.errors[:3]})')
     g.close()
 
