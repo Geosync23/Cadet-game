@@ -2,6 +2,12 @@
 
 Brief: plans/brief-recdeck.md on claude/lead-pillar1 ("R" section). Lead 18 session_01CBur9nrJ411pFkHopF96RL. Build master BM8 session_01YGy9FDmcbkySMJpVPYJaAo. Earlier verdicts: R6's, in plans/reviews-p5-step4.md ("Rec deck activation"). Newest first.
 
+### W3 claude/writer-rec 4f2dcdc (0.48.125, talk.open/answer/listen and talent.* for RA's panels), R7: PASS
+Content + bake: banks/talks.lines (anyone's fallback) and own talk lines for 9 speakers (the brief's four plus five for later talks); Lucia Ferreira (talent night's host) has talent.ask/tune/joke/trick/watch. In voice, short. Bake unchanged, lines_check PASS. Keys for RA to read when its panels land.
+
+### W3 claude/writer-rec 3b96ca3 (0.48.124, symptom.pool -> trace.symptom.pool with {deck}), R7: PASS
+Matches S2's traceTitle key (`trace.symptom.<line>`, {deck} = the drip's Deck 5, like air/heat). Bake unchanged, lines_check PASS.
+
 ### W3 claude/writer-rec ef14088 (0.48.123, the 13 rec .trad files), R7: PASS (W3's part); events_check needs RA's fix before BM8 merges it
 - Content + bake: 13 `content/traditions/rec-*.trad` (k 486-498, the next free numbers after 485; no duplicate k; trad k's are their own number space, not the 1030-1049 code keys), trad-words/rec folded in, reactions/news on the new ids, Slow stretch 08:00 (lead 18). Every one has `flag: rec.on` (film night: `rec.film.moved`), and eventsOn skips a flagged-off tradition before anything else (eventPools only builds place lists, no R()), so nothing happens until RA sets the flag. Fresh archive: bake unchanged; lines_check PASS.
 - Days and times against the agreed list (Day 1 a Monday): WSO Sun 11:30-16:30 from 7; Cup 4-weekly Sun (28, 56...); dawn swim Tue+Thu 06:15 from 2; paddle club Wed 18:30 from 3; regatta 4-weekly Sun 09:30 (21...); wall night Tue 18:30 from 2; float hour Wed 21:30 from 3; slow stretch Sun 08:00-08:45 from 7; small talks Mon+Thu 19:00-19:40; chiefs' 2-weekly Thu 19:00-19:45 (18, 32...); film night Sat 20:00; talent night 4-weekly Sun 19:30 (14...); all-hands first Monday of a season 17:45-18:10 (from Day 2, so Day 92; Day 1's is the first ship-wide event's). All right.
