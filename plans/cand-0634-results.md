@@ -150,3 +150,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - 92d40d5 (mine): cadet_test vs 0.63.3 (label 0.63.4) ALL IDENTICAL (0 px in every shot).
 - CR2 92d40d5: food OK.
 - CR2 92d40d5: clothes OK.
+- CR2 92d40d5: arc OK.
