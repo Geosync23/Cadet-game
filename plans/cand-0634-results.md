@@ -168,3 +168,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - CR2 92d40d5: bubble OK.
 - CR2 92d40d5: join OK (left: leave).
 - CR2 DONE on 92d40d5: 14/14 OK (smoke, newgame, events, device, food, clothes, arc, deck, path, tiles, disc, bubble, join, leave); note claude/p5-cand-s4-checks 26be4a3 plans/cand-0634-cr2.md. X2 is out of 0.63.4 (no re-run needed).
+- ~08:24 BM7 at ~65%: HANDOVER to BM8 (session_01YGy9FDmcbkySMJpVPYJaAo). Final candidate c336170; still to run: interactions (U2 also), day 1-8, intro --week, player. See plans/handover-build-master-7.md 'STATE AT HANDOVER'.
