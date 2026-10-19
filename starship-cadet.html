@@ -281,7 +281,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.63.3
+   STARSHIP CADET: CSV Wren                           build 0.45.19
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8694,7 +8694,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.63.3';                           // keep in step with the header's build line
+const GAME_BUILD = '0.45.19';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -11858,8 +11858,15 @@ const NEED_SAY = {
 };
 function needsLine() {
   const n = SHIP.player.needs, k = NEED_KEYS.slice().sort((a, b) => n[a] - n[b])[0];
-  return n[k] < SLOW_BELOW ? NEED_SAY[k][0] : n[k] < 50 ? NEED_SAY[k][1] : 'You feel fine.';
+  return bedText(n[k] < SLOW_BELOW ? NEED_SAY[k][0] : n[k] < 50 ? NEED_SAY[k][1] : 'You feel fine.');
 }
+// your bed's room by name for the texts that say "Bunk 1" (0.45.7, Step 4's loose end): after the move to your cabin
+// (SHIP.works.home, which playerBed() follows) they name its room instead
+function myBedRoom() {
+  const id = typeof playerBed === 'function' ? playerBed() : null, pl = id && (DECKS[4].places || []).find(q => q.id === id), r = pl && DECKS[4].rooms[pl.room];
+  return r && r.name ? r.name.replace(/^(Spare|Guest) cabin /, 'Cabin ') : 'Bunk 1';   // 'Cabin 4-23', as the move's Mail says
+}
+const bedText = s => typeof s === 'string' && s.includes('Bunk 1') ? s.replace(/Bunk 1/g, myBedRoom()) : s;
 // quiet moments (0.28.41): what's on screen. popupBusy: a panel, a card, a dialogue, sleep, the lift or a fade is up,
 // so nothing new should pop up (the panels are looked at four times a second, the rest every frame). POP.toast / POP.card:
 // when an ordinary toast / a tip card or dialogue was last on screen, or a heads-up came up (performance.now(), so virtual in tests).
@@ -11916,7 +11923,7 @@ function needWarnTick(now) {
   }
   if (!pick || POP.busy || DEV.open || Math.max(POP.toast, POP.card, POP.warn) > now - WARN_GAP) return null;
   const w = NEED_WARN[pick][lvl - 1]; WARN_SAID[pick] = lvl; POP.warn = POP.toast = now;
-  if (lvl === 1) needPop(pick); else toast(w[0], w[1] + (needGoal(pick) ? ' Follow the marker.' : ''));  // the first one: a pop-up in plain words (0.28.62); the firm one stays a toast, with the way (playtest 1)
+  if (lvl === 1) needPop(pick); else toast(w[0], bedText(w[1]) + (needGoal(pick) ? ' Follow the marker.' : ''));  // the first one: a pop-up in plain words (0.28.62); the firm one stays a toast, with the way (playtest 1)
   return pick;
 }
 // the low-need pop-up (0.28.62, the user's "in plain words: 'You need to pee'"): one line beside the need's icon on the
@@ -11927,7 +11934,7 @@ const NEED_LOW_SAY = { bathroom: 'You need to pee.', hunger: 'You\'re hungry.', 
 const NEED_POP = { el: null, t: 0 };
 function needPop(k) {
   let txt = null; try { txt = careerText('need.low.' + k); } catch (e) { txt = null; }
-  txt = txt || NEED_LOW_SAY[k] || NEED_WARN[k][0][1];
+  txt = bedText(txt || NEED_LOW_SAY[k] || NEED_WARN[k][0][1]);
   let el = NEED_POP.el;
   if (!el) {
     el = NEED_POP.el = document.createElement('div'); el.id = 'needPop'; el.setAttribute('role', 'status'); el.setAttribute('aria-live', 'polite');
@@ -12026,7 +12033,7 @@ function teachTick(now) {
     trad: teachTry(() => typeof eventsOn === 'function' && eventsOn(d).some(e => min >= e.from - 60 && min < e.to)) };
   for (const [id, test, text, o] of TEACH) {
     if (D.tipsSeen[id] || !paced && !(o && o.sure) || id.startsWith('t:a-') !== !!DEV.open || !teachTry(() => test(c))) continue;
-    if (tipShow(id, text)) { POP.tip = POP.card = now; return id; }
+    if (tipShow(id, bedText(text))) { POP.tip = POP.card = now; return id; }
   }
   return null;
 }
@@ -12579,6 +12586,7 @@ function actEnd(abort) {
   if (abort) return;
   if (A.kind === 'bedMake' && A.done >= A.def.mins) { SHIP.player.bedMade = SHIP.time.day; toast('Your bunk', 'Bed made, corners and all.'); }   // the inspection's berth (m3)
   if (A.kind === 'tidy' && A.done >= A.def.mins) { SHIP.player.untidy = false; toast('Your locker', 'All put away. Tidy.'); }
+  if (typeof A.def.onDone === 'function' && A.done >= A.def.mins) try { A.def.onDone(A); } catch (e) { console.error(e); }   // a sub-block's own timed hold (24m's bench, 0.45.11)
   player.face = player.obj.rotation.y = A.face;
   if (A.def.done) toast(A.def.title, A.def.done + (A.kind === 'eat' && A.o.company ? ' Good company, too.' : '') + (A.def.need ? ' ' + NEED_LABEL[A.def.need] + ' ' + Math.round(SHIP.player.needs[A.def.need]) + '.' : ''));
   if (A.kind === 'browse') {
@@ -13150,7 +13158,7 @@ function careerSpeed(kind) {
   return n >= 15 ? .65 : n >= 5 ? .8 : 1;
 }
 const jobKindOfMachine = j => j && j.machine && typeof machineById === 'function' ? (machineById(j.machine) || {}).kind || null : null;
-const jobMins = j => JOB_TYPES[j.kind].work * (1 + .25 * ((typeof jobTier === 'function' ? jobTier(j) : 1) - 1)) * careerSpeed(jobKindOfMachine(j));
+const jobMins = j => JOB_TYPES[j.kind].work * (1 + .25 * ((typeof jobTier === 'function' ? jobTier(j) : 1) - 1)) * careerSpeed(jobKindOfMachine(j)) * (j.logged ? .9 : 1);   // j.logged: written up in the Works log (24n), 10% quicker
 function myWork() {                                      // the job you hold, and how far you've got with it (null: none)
   const j = jobsOn() ? myJob() : null, P = SHIP.player;
   if (!j || !j.machine) { P.work = null; return null; }
@@ -13539,7 +13547,7 @@ function jobBegin(A) {
     return true;
   }
   if (!w.seen) {
-    w.seen = true; A.def = { mins: INSPECT_MINS, pose: 'work', title: 'Inspecting' };
+    w.seen = true; A.def = { mins: INSPECT_MINS * (j.cause && typeof scanHave === 'function' && scanHave() && typeof toolSlow === 'function' ? toolSlow('scanner') : 1), pose: 'work', title: 'Inspecting' };   // a due scanner: a quarter longer (M11)
     A.o.after = fitted + 'You open the panel on the ' + name + ' and look it over.'; A.o.need = need;
     return true;
   }
@@ -13608,7 +13616,7 @@ function workStep(j, st, k, spot) {
     const at = wsUntil(w, o); if (shipNow() < at) { toast(title, 'Not ready yet: ready at ' + hhmm(at) + '.'); return true; }
     wsFinish(j, k, {}, title); return true;
   }
-  const secs = Number.isFinite(o.secs) && o.secs > 0 ? o.secs : 4, mins = how === 'look' ? secs * SHIP_RATE : 1;
+  const secs = (Number.isFinite(o.secs) && o.secs > 0 ? o.secs : 4) * (o.tool && typeof toolSlow === 'function' ? toolSlow(o.tool) : 1), mins = how === 'look' ? secs * SHIP_RATE : 1;   // o.tool: a due tool, a quarter longer (M11)
   actStart('workStep', null, { title, job: j.id, ws: k, how, pose: how === 'look' ? WS_POSE('look', 'stand') : how === 'turn' ? WS_POSE('tune', 'work') : 'work',
     spot: spot ? { ...spot, id: null, pose: 'stand' } : null, after: o.text || (how === 'look' ? 'You stand and look it over.' : '') });
   if (ACT && ACT.kind === 'workStep') {
@@ -16747,7 +16755,7 @@ function jobRun(p, j, t, makeMin) {
     const shelves = shelvesFor(j.parts[0]);
     if (makeMin) { at(JOB_FETCH, 'fetch', storagePlace(shelves, c, c + JOB_FETCH)); at(makeMin, 'make', storagePlace(MAKE_AT, c, c + makeMin)); }
     else at(JOB_FETCH, 'fetch', storagePlace(shelves, c, c + JOB_FETCH));
-    go(m.deck); at(Math.round(JOB_TYPES[j.kind].work * (1 + .25 * (K.tier - 1))), 'job', panelPlace(m.id));
+    go(m.deck); at(Math.round(JOB_TYPES[j.kind].work * (1 + .25 * (K.tier - 1)) * (j.logged ? .9 : 1)), 'job', panelPlace(m.id));   // j.logged: 24n's handover, 10% quicker
   }
   const done = c; go(home);
   return c <= w.until ? { segs, done, end: c } : null;
@@ -39359,7 +39367,7 @@ const WORKS_LOG = 30;                                    // the work log keeps y
 // xp: Works reputation for each use (the drill and the inspection, attended).
 const CAREER_LADDER = [
   { id: 'm1', name: 'Rounds', size: 'big', day: 2, tier: 1, rank: 'junior', needs: { intro: 'shadow' }, by: ['torres-zeke'], where: { deck: 5, room: 'w' }, job: 'round', tool: 'clipboard', stages: [{ uses: 0 }, { uses: 5 }, { mech: 'm7' }] },
-  { id: 'm4', name: 'Hauling and stores', size: 'big', day: 3, tier: 1, rank: 'junior', needs: { mech: 'm1', uses: 1 }, by: ['esposito-yara'], where: { deck: 5, room: 'r' }, job: 'haul', stages: [{ uses: 0 }, { uses: 5 }] },
+  { id: 'm4', name: 'Hauling and stores', size: 'big', day: 3, tier: 1, rank: 'junior', needs: { mech: 'm1', uses: 1 }, by: ['esposito-yara'], where: { deck: 5, room: 'r' }, job: 'haul', stages: [{ uses: 0 }, { uses: 2 }] },   // stage 1 (0.45.13, step4-stages): after 2 runs, from Day 10, you choose the order
   { id: 'm3d', name: 'The drill', size: 'small', day: 3, tier: 1, rank: 'junior', needs: null, by: ['calder'], fixed: { wd: 3, at: 900 }, xp: 1, stages: [{ uses: 0 }] },
   { id: 'm5', name: 'Tuning', size: 'big', day: 4, tier: 1, rank: 'junior', needs: { mech: 'm4', uses: 1 }, by: ['calder', 'brennan'], where: { deck: 3, room: 'K' }, job: 'tune', stages: [{ uses: 0 }, { uses: 5 }] },
   { id: 'm3i', name: 'The inspection', size: 'small', day: 4, tier: 1, rank: 'junior', needs: null, by: ['tomas'], fixed: { wd: 4, at: 390 }, xp: 1, stages: [{ uses: 0 }] },
@@ -39374,19 +39382,28 @@ const CAREER_LADDER = [
   { id: 'm9', name: 'Tracing', size: 'big', day: 12, tier: 2, rank: 'officer', needs: null, by: ['calder', 'halloran-emeka'], where: { deck: 5, room: 'w' }, job: 'trace', tool: 'pipekit', stages: [{ uses: 0 }] },   // M3's 24i
   { id: 'p1', name: 'When does it happen?', size: 'small', day: 12, tier: 2, rank: 'officer', needs: { trained: 'm9' }, by: ['calder', 'halloran-emeka'], stages: [{ uses: 0 }] },
   { id: 'p2', name: 'Who saw what?', size: 'small', day: 15, tier: 2, rank: 'officer', needs: null, by: ['tomas', 'torres-zeke'], stages: [{ uses: 0 }] },
+  // Step 4's side jobs (0.45.8, E1 in 24 core's slot; each row as its seat sent it, inert until its sub-block registers WORK_MECH[id]).
+  // m15 (rewiring, E2) and the fault-finder ticket's row come with their builds; cabin touches and star logging (24t) have none
+  { id: 'm10', name: 'The workshop', size: 'small', day: 12, tier: 2, rank: 'officer', needs: null, by: ['torres-zeke', 'halloran-emeka', 'calder'], where: { deck: 5, room: 'f' }, stages: [{ uses: 0 }, { uses: 3 }, { uses: 6 }] },   // E3's 24j
+  { id: 'm11', name: 'Tool upkeep', size: 'small', day: 12, tier: 2, rank: 'officer', needs: null, by: ['torres-zeke', 'halloran-emeka'], where: { deck: 5, room: 'w' }, stages: [{ uses: 0 }, { uses: 2 }, { uses: 4 }] },   // E1's 24m: the scanner; the pipe kit and logger (as each arrives); the team's rack after 4 upkeeps
+  { id: 'm12', name: 'The logbook', size: 'small', day: 12, tier: 2, rank: 'officer', needs: null, by: ['calder'], where: { deck: 5, room: 'w' }, stages: [{ uses: 0 }, { uses: 5 }, { uses: 10 }] },   // E1's 24n: a line a shift; flag a machine after 5; your notes come back after 10
+  { id: 'm13', name: 'Leak hunting', size: 'small', day: 12, tier: 2, rank: 'officer', needs: null, by: ['torres-zeke', 'halloran-emeka', 'calder'], job: 'leak', stages: [{ uses: 0 }, { uses: 3 }] },   // E2's 24o
+  { id: 'm14', name: 'Garden irrigation', size: 'small', day: 13, tier: 2, rank: 'officer', needs: null, by: ['cruz-tove', 'oneill-imani', 'hart-ravi'], job: 'nozzle', stages: [{ uses: 0 }, { uses: 2 }, { uses: 4 }] },   // E2's 24q (the garden crew; 24r may set its own at its first posting)
+  { id: 'm15', name: 'Rewiring', size: 'big', day: 17, tier: 2, rank: 'officer', needs: null, by: ['calder'], where: { deck: 4, room: '-' }, job: 'rewire', tool: 'tester', stages: [{ uses: 0 }, { uses: 3 }] },   // E2's 24q (0.45.11)
+  { id: 'm17', name: 'The lift roof', size: 'big', day: 18, tier: 2, rank: 'officer', needs: null, by: ['halloran-emeka'], stages: [{ uses: 0 }, { uses: 2 }] },   // E3's 24s
 ];
 const WORK_MECH = {};                                    // the sub-blocks: WORK_MECH[ladder id] = { open?(row, day), offer?(row, cur, day, t) -> bool (its own ask), at?(day) -> earliest meeting minute, reserve?(day, at, slot, o) -> job id, noJob?, watch? (minutes), hold? }
 const WORK_TOOLS = {
   clipboard: { name: 'the round clipboard', mech: 'm1', wearPerUse: .01 },
-  scanner: { name: 'the scanner', mech: 'm7', wearPerUse: .02 },
-  pipekit: { name: 'the pipe kit', mech: 'm9', wearPerUse: .02 },   // with tracing (M3's m9, Day 12; was m13, leak hunting, Step 4)
-  logger: { name: 'the data logger', mech: 'p5', wearPerUse: .02 },
-  tester: { name: 'the circuit tester', mech: 'm15', wearPerUse: .02 },
+  scanner: { name: 'the scanner', mech: 'm7', wearPerUse: 0 },     // these three wear at the use (toolWear: a scan 4, a trace 5,
+  pipekit: { name: 'the pipe kit', mech: 'm9', wearPerUse: 0 },     // a use 3 of 100; M11, 0.45.7), not again on worksUse (with tracing, M3's m9, Day 12)
+  logger: { name: 'the data logger', mech: 'p5', wearPerUse: 0 },
+  tester: { name: 'the conduit tester', mech: 'm15', wearPerUse: .02 },
   calrig: { name: 'the test rig', mech: 'm10', wearPerUse: 0, bench: true },   // a bench in the machine shop, not carried
 };
 // your Works reputation in your rank: five words; numbers stay inside. Tier 1 is tuned by career_check (a steady
 // player reaches "Relied on" by the end of Day 8, a very busy one not before Day 5); later tiers get theirs on their steps' pages
-const WORK_BANDS = { 1: [[0, 'new'], [8, 'steady'], [18, 'reliable'], [30, 'trusted'], [40, 'relied']], 2: [[0, 'new'], [12, 'steady'], [28, 'reliable'], [45, 'trusted'], [60, 'relied']] };   // 2: provisional (0.44.19, C2: about a dozen steady workdays to "Relied on" as an officer) until Step 4's page sets it   // the page's; with section 17's real faults in (0.44.10): steady 45-48 by the end of Day 8, a very busy player 35 at the end of Day 4
+const WORK_BANDS = { 1: [[0, 'new'], [8, 'steady'], [18, 'reliable'], [30, 'trusted'], [40, 'relied']], 2: [[0, 'new'], [12, 'steady'], [28, 'reliable'], [45, 'trusted'], [60, 'relied']] };   // 2: C2's 0.44.19 numbers, kept by Step 4's page (0.45.7): about a dozen steady workdays to "Relied on" as an officer; side jobs add +2 a day at most (worksSideXp)   // the page's; with section 17's real faults in (0.44.10): steady 45-48 by the end of Day 8, a very busy player 35 at the end of Day 4
 const BAND_WORD = { new: 'New', steady: 'Steady', reliable: 'Reliable', trusted: 'Trusted', relied: 'Relied on' };
 const WORK_XP = { service: 1, repair: 2, overhaul: 3, missed: -3, abandoned: -2 };
 const WORKS_RIGHT_FROM = 5;                              // "right first time" counts from Day 5 (the scanner)
@@ -39431,7 +39448,8 @@ function worksClean(s) {
       tr: days(s.tr), use: (() => { const u = {}; if (obj(s.use)) for (const k in s.use) if (ids.has(k) && Number.isInteger(s.use[k])) u[k] = Math.max(0, Math.min(9999, s.use[k])); return u; })(),
       op, tools, sk, log, test, home: typeof s.home === 'string' ? s.home.slice(0, 16) : 'bunk',
       done: Array.isArray(s.done) ? s.done.filter(x => typeof x === 'string').slice(0, 40) : [], said: days(s.said),   // said: { ladder id: day } (24k's P2: Tomas's word; 0.44.22)
-      ms: Array.isArray(s.ms) ? s.ms.filter(e => Array.isArray(e) && typeof e[0] === 'string' && Number.isInteger(e[1])).slice(0, 40).map(e => [e[0].slice(0, 40), e[1]]) : [], cur };
+      ms: Array.isArray(s.ms) ? s.ms.filter(e => Array.isArray(e) && typeof e[0] === 'string' && Number.isInteger(e[1])).slice(0, 40).map(e => [e[0].slice(0, 40), e[1]]) : [], cur,
+      side: obj(s.side) && JSON.stringify(s.side).length < 65536 ? s.side : {} };   // side: Step 4's side jobs, kept whole (each sub-block reads its own key defensively; E1 0.45.7)
   } catch (e) { return null; }
 }
 SAVE_EXTRA.push(s => { if (SHIP.works) s.ship.works = SHIP.works; });
@@ -39439,7 +39457,7 @@ onSim('newGame', () => { SHIP.works = null; WORKS_TICK.h = -1; WORKS_TICK.m = -1
 function worksInit(now = shipNow()) {
   if (SHIP.works) return SHIP.works;
   if (now < WORKS_START) return null;                    // not before Day 1's shift has ended
-  return SHIP.works = { v: 1, tier: 1, rank: 'junior', xp: 0, tr: {}, use: {}, op: {}, tools: {}, sk: {}, log: [], test: null, home: 'bunk', done: [], said: {}, ms: [], cur: null };
+  return SHIP.works = { v: 1, tier: 1, rank: 'junior', xp: 0, tr: {}, use: {}, op: {}, tools: {}, sk: {}, log: [], test: null, home: 'bunk', done: [], said: {}, ms: [], cur: null, side: {} };   // side: Step 4's side jobs, right after cur so a reload keeps the key order (BM7, 0.45.11)
 }
 // ---- the ladder ----
 const worksOpened = (W = SHIP.works) => new Set(W ? Object.values(W.op).flat() : []);
@@ -39560,6 +39578,7 @@ function trainSpot(j) {                                  // where a training job
 function trainWatch(row, c, t, again) {                  // the teacher's training job: they lead, you watch
   const W = SHIP.works, d = worksDay(t), slot = 10 + Math.max(0, CAREER_LADDER.filter(r => r.size === 'big').indexOf(row)) % 10, M = WORK_MECH[row.id] || {};
   if (M.noJob) { worksTrained(row.id); return true; }
+  if (M.self) return trainDo(row, c, t);                 // the talk, then yours on the board, the arrow and tips leading (0.45.9: playtest 2, item 1)
   if (!M.reserve && !MACHINE_KINDS[row.job]) { worksTrained(row.id); return true; }   // no sub-block reserve and no machine kind: trained at the meeting (reviewer R: no stand-in faults)
   let id = null; try { id = M.reserve ? M.reserve(d, t - (d - 1) * 1440, slot, { train: row.id }) : jobReserve(row.job, d, t - (d - 1) * 1440, slot, { train: row.id }); } catch (e) { id = null; }
   if (!id) { c.st = 'again'; c.d = d; return false; }
@@ -39574,7 +39593,7 @@ function trainDo(row, c, t) {                            // your turn: the same 
   if (!id) { c.st = 'again'; return false; }
   c.st = 'do'; c.j = id; const j = SHIP.jobs.find(x => x.id === id); if (j) j.train = row.id;
   if (M.hold) c.hold = true;                             // the teacher stays with you until worksEscortEnd (24g's m7: until P3's case is called)
-  worksSayAll(c.by, worksVoice(c.by, 'train.' + row.id + '.lead.done') || ['Your turn. It\'s on the board for you; I\'ll be right behind you.']);
+  if (!M.self) worksSayAll(c.by, worksVoice(c.by, 'train.' + row.id + '.lead.done') || ['Your turn. It\'s on the board for you; I\'ll be right behind you.']);
   return true;
 }
 function trainNear(spot) {                               // you're watching: on its deck, in its room or within a few tiles of it
@@ -39641,6 +39660,7 @@ function worksEscort(p, t) {
   if (c.st === 'held') return spot ? { mode: 'follow', to: { deck: spot.deck, tile: spot.tile } } : null;   // they stay with you
   if (!j || j.status === 'done' || !spot || j.found > t) return null;   // (not before the job's due: 24p's test job is held from 09:00)
   if (c.st === 'do' && j.workDone && !c.hold) return null;   // done: they go back to their own work while you turn it in
+  if (c.st === 'do' && (WORK_MECH[c.id] || {}).self) return null;   // a self-led training (m1, 0.45.9): the arrow and tips lead you, not the teacher
   return { mode: c.st === 'watch' ? 'lead' : 'follow', to: { deck: spot.deck, tile: spot.tile } };
 }
 function worksSay(id, text) {                            // the teacher says it in a bubble if they're on your deck, else a toast
@@ -39650,7 +39670,43 @@ function worksSay(id, text) {                            // the teacher says it 
 // ---- tools: they come with their training, live on the device's Tools page and in your locker; never in your hands ----
 const hasTool = id => !!(SHIP.works && SHIP.works.tools[id]);
 function toolGive(id, t = shipNow()) { const W = worksInit(t); if (!W || !WORK_TOOLS[id] || W.tools[id]) return false; W.tools[id] = [worksDay(t), 0]; simNote('tool', { id }); return true; }
-const toolWear = id => hasTool(id) ? SHIP.works.tools[id][1] : 0;   // 0-1: kept, no effect until M11 tool upkeep
+// ---- tool wear (M11 tool upkeep's core, Step 4; built by E1 on C's behalf, 0.45.7). Wear stays 0-1 used (0 like new, so
+// old saves load as they were); the page's numbers are charge = 100 - 100 x wear: the scanner 4 a scan, the pipe kit 5 a
+// trace, the logger 3 a use; "Due" under 30, "Getting low" under 60. toolWear(id, n) wears it by n of 100 (none: just reads)
+// and returns the wear; toolState(id) 'charged' | 'low' | 'due' (null: not yours); toolSlow(id) 1.25 for a due tool (a step
+// takes a quarter longer, never blocked) and says so once a ship day. Upkeep at your bench (24m) puts the wear back to 0 ----
+const toolUpkeepOn = () => !!SHIP.works && worksOpened().has('m11');   // wear counts only once M11 tool upkeep is open (Day 12, its row; reviewer R4 on 0.45.7): tools arrive charged
+function toolWear(id, n) {
+  if (!hasTool(id)) return 0; const v = SHIP.works.tools[id];
+  if (n > 0 && toolUpkeepOn()) v[1] = Math.min(1, v[1] + n / 100);
+  return v[1];
+}
+const TOOL_DUE = 30, TOOL_LOW = 60;
+const toolCharge = id => hasTool(id) ? Math.round(100 - 100 * SHIP.works.tools[id][1]) : null;
+const toolState = id => { const c = toolCharge(id); return c === null ? null : c < TOOL_DUE ? 'due' : c < TOOL_LOW ? 'low' : 'charged'; };
+const toolStateWord = id => { const s = toolState(id); return s ? worksText('works.toolstate.' + s, { charged: 'Charged', low: 'Getting low', due: 'Due' }[s]) : ''; };
+const TOOL_SLOW_SAY = { scanner: 'Your scanner\'s charge is low.', pipekit: 'Your pipe kit\'s seals are grubby.', logger: 'Your data logger\'s clip is worn.' };
+function toolSlow(id) {
+  if (toolState(id) !== 'due' || !toolUpkeepOn()) return 1;
+  const S = worksSide(), d = worksDay(shipNow()), said = S && (S.slow && typeof S.slow === 'object' ? S.slow : (S.slow = {}));
+  if (said && said[id] !== d && !SIM_AT) {
+    said[id] = d;
+    toast(toolName(id).replace(/^the /, '').replace(/^./, x => x.toUpperCase()), worksText('tool.due.' + id, (TOOL_SLOW_SAY[id] || 'Your ' + toolName(id).replace(/^the /, '') + ' wants looking after.') + ' Bench, when you can.'));   // W2's tool.due.<id>
+  }
+  return 1.25;
+}
+// ---- Step 4's side jobs (E1 on C's behalf, 0.45.7): their data lives under SHIP.works.side (worksClean keeps it whole;
+// each sub-block reads its own key defensively, a missing one is its default). worksSideXp(n, why): Works reputation from a
+// side job, +2 a ship day at most across all of them (so they help but never rush a promotion); returns what it gave
+const SIDE_XP_DAY = 2, WORKS_SIDE_KINDS = new Set();   // side-job kinds (sub-blocks add theirs at load: WORKS_SIDE_KINDS.add('leak')): their turn-in reputation goes through the cap
+const worksSide = () => { const W = SHIP.works; if (!W) return null; if (!W.side || typeof W.side !== 'object' || Array.isArray(W.side)) W.side = {}; return W.side; };
+function worksSideXp(n, why) {
+  const S = worksSide(); if (!S || !(n > 0)) return 0;
+  const d = worksDay(shipNow()), x = S.xp && S.xp.day === d && Number.isFinite(S.xp.n) ? S.xp : (S.xp = { day: d, n: 0 }), give = Math.min(n, SIDE_XP_DAY - x.n);
+  if (give <= 0) return 0;
+  x.n += give; worksXp(give); simNote('sideXp', { why: String(why || '').slice(0, 24), n: give });
+  return give;
+}
 const toolWord = w => w < .25 ? worksText('works.toolwear.new', 'like new') : w < .5 ? worksText('works.toolwear.good', 'in good order') : w < .75 ? worksText('works.toolwear.worn', 'well used') : worksText('works.toolwear.tired', 'wants looking after');
 const toolName = id => worksText('works.tool.' + id, WORK_TOOLS[id] ? WORK_TOOLS[id].name : id);
 function worksLockerText() {                             // section 15b's locker tap, one line (or null)
@@ -39681,7 +39737,8 @@ onSim('job', n => {
   const kind = n.job || (j && (j.chore || j.kind)) || '', m = n.machine && typeof machineById === 'function' ? machineById(n.machine) : null;
   const found = !!(j && (j.foundBy === 'you' || (n.machine && simNotes('found', (j.posted || 0) - 1).some(x => x.machine === n.machine && x.by === 'you'))));
   const right = !!(j && j.rightFirst && d >= WORKS_RIGHT_FROM), clever = !!(j && j.clever);
-  worksXp((WORK_XP[kind] || 1) + (found ? 1 : 0) + (right ? 1 : 0) + (clever ? 1 : 0));
+  const side = WORKS_SIDE_KINDS.has(kind) || j && WORKS_SIDE_KINDS.has(j.kind), xp = side ? (WORK_XP[kind] ?? 1) + (right ? 1 : 0) : (WORK_XP[kind] || 1) + (found ? 1 : 0) + (right ? 1 : 0) + (clever ? 1 : 0);
+  if (j && j.xp === 0) { /* paid elsewhere (E2's leak joint: the leak's +1) */ } else if (side) worksSideXp(xp, j && j.kind || kind); else worksXp(xp);   // a side job's: flat (+1 more right first time: rewiring, 0.45.14), capped, +2 a day in all (0.45.7; flat 0.45.11, E2/R4)
   if (m) W.sk[m.kind] = (W.sk[m.kind] || 0) + 1;
   W.log.push([String(n.id).slice(0, 80), d, (found ? 1 : 0) | (right ? 2 : 0) | (clever ? 4 : 0), String(kind).slice(0, 24)]); if (W.log.length > WORKS_LOG) W.log.splice(0, W.log.length - WORKS_LOG);
   const c = W.cur; if (c && c.st === 'do' && c.j === n.id) worksDone(c.id, n.t);
@@ -39723,8 +39780,9 @@ function worksNext() {
 // the Record's first lines (section 19 asks): your rank, your Works reputation and "What's next"
 function worksRecordHead() {                             // null before SHIP.works (Days 0-1 keep the Record's old line)
   const W = SHIP.works; if (!W) return null; const tier = W.tier, v = { title: worksText('works.title.t' + tier, 'tier ' + tier), rank: worksRankTitle(W), band: worksBandWord(), next: worksNext() };
-  const com = (W.ms.find(x => x[0] === 'commissioned') || [])[1];   // 24p: the ceremony
-  return { kind: 'text', mark: 'hot', text: worksText('works.record', '{rank}, {title}. Works reputation: {band}. What\'s next: {next}', v) + (com ? ' ' + worksText('works.ms.commissioned', worksText('works.record.commissioned', 'Commissioned Officer, Day {n}.', { day: com, n: com }), { n: com }) : '') };
+  const com = (W.ms.find(x => x[0] === 'commissioned') || [])[1], st = (W.ms.find(x => x[0] === 'stars') || [])[1];   // 24p: the ceremony; 24t: star logger (E3, 0.45.11)
+  const ff = W.ms.filter(x => /^ff[1-3]$/.test(x[0])).sort((a, b) => a[0] < b[0] ? 1 : -1)[0], gr = ff ? +ff[0][2] : 0;   // E2's fault-finder grade (the highest)
+  return { kind: 'text', mark: 'hot', text: worksText('works.record', '{rank}, {title}. Works reputation: {band}. What\'s next: {next}', v) + (com ? ' ' + worksText('works.ms.commissioned', worksText('works.record.commissioned', 'Commissioned Officer, Day {n}.', { day: com, n: com }), { n: com }) : '') + (st ? ' ' + worksText('works.ms.stars', 'Star logger, Day {n}.', { n: st }) : '') + (gr ? ' ' + worksText('works.ms.grade', 'Fault-finder grade: {grade}.', { grade: worksText('works.grade.' + gr, ['', 'Fault-finder', 'Senior fault-finder', 'Master fault-finder'][gr]), n: ff[1] }) : '') };
 }
 // ---- the device's Works app: Training, Work log, Tools; other sections add tabs with worksTabAdd (24k: Fault notes and
 // the Chief's notes): worksTabAdd({ id, title, order, view() -> [blocks], act?(verb, arg), badge?() -> number }); the
@@ -39769,7 +39827,7 @@ worksTabAdd({ id: 'log', title: worksText('works.tab.log', 'Work log'), order: 2
 worksTabAdd({ id: 'tools', title: worksText('works.tab.tools', 'Tools'), order: 30, view() {
   const W = SHIP.works, ts = W ? Object.keys(W.tools) : [];
   if (!ts.length) return [{ kind: 'text', text: worksText('works.tools.none', 'No tools of your own yet. They come with the work that needs them.') }];
-  return [{ kind: 'list', rows: ts.map(k => ({ text: toolName(k).replace(/^the /, '').replace(/^./, x => x.toUpperCase()), sub: (WORK_TOOLS[k].bench ? 'In the machine shop' : 'In your locker') + ' · ' + toolWord(W.tools[k][1]) + ' · since Day ' + W.tools[k][0] })) }];
+  return [{ kind: 'list', rows: ts.map(k => ({ text: toolName(k).replace(/^the /, '').replace(/^./, x => x.toUpperCase()), sub: (WORK_TOOLS[k].bench ? 'In the machine shop' : 'In your locker') + ' · ' + (TOOL_SLOW_SAY[k] ? toolStateWord(k) : toolWord(W.tools[k][1])) + ' · since Day ' + W.tools[k][0] })) }];
 } });
 function worksView() {
   const T = WORKS_TABS || [], tab = T.find(x => x.id === WORKS_TAB) || T[0], B = [{ kind: 'buttons', items: T.map(x => { const n = worksBadge(x); return { label: x.title + (n ? ' (' + n + ')' : ''), on: x === tab, action: { app: 'works', do: 'tab', arg: x.id } }; }) }];
@@ -39829,13 +39887,17 @@ function roundRoute(day, train) {
   const n = roundDeck(day, train), pool = roundPool(n), D = DECKS[n];
   const want = Math.min(pool.length, 4 + Math.floor(schedU(day, 0, 860) * 3));
   const pick = pool.slice().sort((a, b) => schedU(a.seed, day, 860) - schedU(b.seed, day, 860) || (a.id < b.id ? -1 : 1)).slice(0, want);
-  const out = []; let at = D && D.lift ? D.lift : pick.length ? pick[0].panel : [0, 0];
-  while (pick.length) {                                  // the nearest next, from the lift
+  const out = roundWalk(pick, D);
+  const w = train ? out.findIndex(id => machineById(id).kind === 'washer') : -1;   // Torres starts at a washer (his first line is about one)
+  if (w > 0) out.unshift(out.splice(w, 1)[0]);
+  return out;
+}
+function roundWalk(ms, D) {                              // machines in walking order: the nearest next, from the lift (0.45.16: roundRoute's own, shared with stage 2's picks)
+  const pick = ms.slice(), out = []; let at = D && D.lift ? D.lift : pick.length ? pick[0].panel : [0, 0];
+  while (pick.length) {
     let k = 0; pick.forEach((m, i) => { const a = Math.hypot(m.panel[0] - at[0], m.panel[1] - at[1]), b = Math.hypot(pick[k].panel[0] - at[0], pick[k].panel[1] - at[1]); if (a < b || a === b && m.id < pick[k].id) k = i; });
     out.push(pick[k].id); at = pick[k].panel; pick.splice(k, 1);
   }
-  const w = train ? out.findIndex(id => machineById(id).kind === 'washer') : -1;   // Torres starts at a washer (his first line is about one)
-  if (w > 0) out.unshift(out.splice(w, 1)[0]);
   return out;
 }
 const roundState = id => { const s = SHIP.machines[id]; return s ? s.state : 'healthy'; };
@@ -39858,7 +39920,7 @@ const roundFound = (id, by) => typeof machineFound === 'function' ? machineFound
 function roundMark(j, k, pick) {
   const id = (j.route || [])[k]; if (!id || !ROUND_MARKS.some(x => x[0] === pick)) return null;
   const st = roundState(id), right = roundRight(pick, st), first = !(j.marks && j.marks[id]);
-  (j.marks = j.marks || {})[id] = pick;
+  (j.marks = j.marks || {})[id] = pick; if (!j.train && typeof roundLast === 'function') roundLast()[id] = worksDay(shipNow());   // stage 2's "last looked" (0.45.16)
   const f = right && first ? roundFound(id, 'you') : null;
   let said = null;
   if (f && f.fresh) { worksXp(1); said = roundText('round.found', 'Found by you: {machine}.', { machine: machineLabel(machineById(id)).split(',')[0] }); }
@@ -39872,15 +39934,19 @@ function roundMark(j, k, pick) {
 function roundDone(j, t, by) {
   if (by && by !== 'you') for (const id of j.route || []) if (roundState(id) !== 'healthy') roundFound(id, by);
   if (by === 'you') { worksUse('m1'); try { toast('Round', roundText('round.done', 'Round done. Anything worn is on the board, found by you.')); } catch (e) { /* no UI */ } }
+  if (by === 'you' && !j.train && typeof roundPicks === 'function' && roundPicks() && (j.route || []).filter(id => roundState(id) === 'worn' && roundRight((j.marks || {})[id], 'worn')).length >= 2) {   // stage 2: two or more worn found (0.45.16)
+    worksSayAll('torres-zeke', worksVoice('torres-zeke', 'round.two') || ['Two worn on one round? You\'ve got the eye now.']); worksSideXp(1, 'round');
+  }
 }
-// a round job on the list: { kind: 'rounds', route, marks, deck, room, title }. o.train: the training's (the teacher's
-// takes the first two stops, yours the rest), held for the teacher or you (reserved slot); else the morning round
+// a round job on the list: { kind: 'rounds', route, marks, deck, room, title }. o.train: the training's, held for you
+// (reserved slot): since 0.45.9 (playtest 2) the whole route is yours after Torres's talk (o.yours); a teacher's round
+// (no o.yours) would take the first two stops. Else the morning round
 function roundJob(day, at, o = {}) {
-  const all = roundRoute(day, !!o.train), route = o.train ? (o.yours ? all.slice(2) : all.slice(0, 2)) : all;
+  const all = roundRoute(day, !!o.train), route = o.train ? (o.yours ? all : all.slice(0, 2)) : all;
   if (route.length < (o.train ? 1 : 4)) return null;
   const m0 = machineById(route[0]), n = m0.deck, t = (day - 1) * 1440 + at;
   const j = jobMake('rounds', { id: 'round' + (o.slot ? o.slot : '') + '-d' + n + '@' + Math.floor(t / 60) + (o.yours ? 'y' : ''), deck: n, room: m0.room, h: Math.floor(t / 60),
-    title: roundText('round.title', 'Morning round, Deck {deck}', { deck: n }), route, marks: {}, ...(o.slot ? { reserved: o.slot, until: (day - 1) * 1440 + DAY_SHIFT[1] } : { leave: ROUND_HELD }) });
+    title: o.train ? roundText('round.title.first', 'Your first round, Deck {deck}', { deck: n }) : roundText('round.title', 'Morning round, Deck {deck}', { deck: n }), route, marks: {}, ...(o.slot ? { reserved: o.slot, until: (day - 1) * 1440 + DAY_SHIFT[1] } : { leave: ROUND_HELD }) });
   j.posted = j.found = t; j.shareSeen = true;            // held to 11:00 as the page says: never shared out early (section 17's shareOut)
   return j;
 }
@@ -39893,7 +39959,7 @@ if (typeof jobKindAdd === 'function') jobKindAdd('rounds', { tier: 1, junior: fa
   },
   stops: j => (j.route || []).map(id => { const m = machineById(id); return { deck: m.deck, placeId: panelPlace(id), mins: ROUND_LOOK, tag: 'look', how: 'look',
     opts: { secs: 4, text: roundSign(id, worksDay(shipNow())), marks: ROUND_MARKS.map(([x, label]) => ({ id: x, label: roundText('round.mark.' + x, label) })) } }; }),
-  stepDone: (j, k, res) => roundMark(j, k, res && res.pick),
+  stepDone: (j, k, res) => { const said = roundMark(j, k, res && res.pick); return typeof roundDoor === 'function' ? roundDoor(j, k, said) : said; },   // stage 3: the doorway (0.45.16)
   done: roundDone,
   crew: { can: p => !!p.work && p.work.place === 'work:works', mins: 25 } });
 // the ladder row (m1): the training's two rounds are this block's own (reserve), held in the teacher's slot. Only
@@ -39906,8 +39972,85 @@ if (typeof jobKindAdd === 'function') WORK_MECH.m1 = {
     SHIP.jobs.push(j); if (typeof MACH_REV !== 'undefined') MACH_REV++;
     return j.id;
   },
-  watch: 10,                                             // ship minutes watching Torres look at his two
+  watch: 10,                                             // ship minutes watching Torres look at his two (before 0.45.9)
+  self: true,                                            // playtest 2, item 1 (0.45.9): Torres explains at the meeting, then your first round is on the board; the arrow and green tips walk you through it
 };
+// stages 2 and 3 (0.45.16, E6; step4-stages). Stage 2 (row m1's stage 1, after 5 rounds): taking a morning round, the
+// clipboard lists the deck's machines, the longest unlooked first, with "last looked" days (W2's round.last /
+// round.last.never; SHIP.works.side.round.last = { machine id: ship day }, kept by your marks); you pick 4 to 6 (j.pick,
+// then j.route in walking order; refused before 4: the day's route stays). Two or more worn ones found on a round of
+// yours: Torres's round.two and +1 through worksSideXp. Stage 3 (the scanner: stage 2 and 5 rounds): at a room's first
+// machine one look reads every machine in that room (round.doorway; the route's marked as they are, their stops done;
+// the room's others too, 0.45.18; the unhealthy found by you), for one scan's charge (toolWear('scanner', 4)). The training round is neither
+const roundLast = () => { const S = worksSide(); if (!S) return {}; const r = S.round && typeof S.round === 'object' && !Array.isArray(S.round) ? S.round : (S.round = {}); return r.last && typeof r.last === 'object' && !Array.isArray(r.last) ? r.last : (r.last = {}); };
+const roundPicks = () => !!SHIP.works && worksStage('m1') >= 1;
+const roundDoorway = () => !!SHIP.works && worksStage('m1') >= 2 && (SHIP.works.use.m1 || 0) >= 5 && typeof toolState === 'function' && !!toolState('scanner');
+function roundLastText(id, d) {
+  const L = roundLast(), n = Number.isFinite(L[id]) ? d - L[id] : null;
+  return n === null ? worksText('round.last.never', 'not looked at yet') : n <= 0 ? 'looked at today' : roundText('round.last', 'last looked {n} days ago', { n }).replace(/\b1 days\b/, '1 day');
+}
+function roundPicked(j) {                                // your picks as the route, in walking order (before any look)
+  if ((j.pick || []).length >= 4 && !(j.stepsDone || []).length) {
+    j.route = roundWalk(j.pick.map(id => machineById(id)).filter(Boolean), DECKS[j.deck]); j.marks = {};
+    j.stops = kindStops(j).map(plainStop); if (typeof MACH_REV !== 'undefined') MACH_REV++;
+  }
+  delete j.pick;
+}
+function roundPickAsk(j) {                               // one machine at a time; from the fourth, "That's my round"
+  const d = worksDay(shipNow()), L = roundLast(), pool = roundPool(j.deck).map(m => m.id).filter(id => !j.pick.includes(id));
+  if (j.pick.length >= 6 || !pool.length) return roundPicked(j);
+  pool.sort((a, b) => (Number.isFinite(L[a]) ? L[a] : -1) - (Number.isFinite(L[b]) ? L[b] : -1) || (a < b ? -1 : 1));
+  const choices = pool.map(id => machineLabel(machineById(id)).split(',')[0] + ' · ' + roundLastText(id, d)).concat(j.pick.length >= 4 ? ['That\'s my round'] : []);
+  const shown = deviceChoose({ title: 'Round', text: j.pick.length ? 'And next?' : roundText('round.pick.some', 'Pick a handful to look at today: four to six.'), choices }, i => {
+    if (!pool[i]) return roundPicked(j);
+    j.pick.push(pool[i]); if (typeof simTimeout === 'function') simTimeout(() => roundPickAsk(j), 400); else roundPickAsk(j);
+  });
+  if (!shown) roundPicked(j);                            // the device busy: what you've picked if it's four, else the day's route
+}
+if (WORK_MECH.m1) WORK_TICKS.push((now, skip) => {
+  if (skip || typeof myJob !== 'function') return; const j = myJob();
+  if (!j || j.kind !== 'rounds' || j.reserved || j.train || j.picked || !roundPicks() || (j.stepsDone || []).length) return;
+  j.picked = true; j.pick = []; roundPickAsk(j);
+});
+// stage 3: the look at stop k reads the rest of its room from the doorway; returns the words after the step
+function roundDoor(j, k, said) {
+  const id = (j.route || [])[k], m = id && machineById(id); if (!m || j.reserved || j.train || !roundDoorway()) return said;
+  const done = new Set(j.stepsDone || []), ks = j.route.map((x, i) => i).filter(i => i !== k && !done.has(i) && !(j.marks || {})[j.route[i]] && machineById(j.route[i]) && machineById(j.route[i]).deck === m.deck && machineById(j.route[i]).room === m.room);
+  const off = roundPool(m.deck).filter(x => x.room === m.room && !j.route.includes(x.id)).map(x => x.id).sort();   // the room's machines off the route: read too (the page: "every machine in it"; lead 17, 0.45.18)
+  if (!ks.length && !off.length) return said;
+  const out = said ? [said] : [], pickOf = x => { const st = roundState(x); return st === 'healthy' ? 'fine' : st === 'worn' ? 'worn' : 'off'; };
+  const line = (x, pick) => roundText('round.doorway', 'From the doorway: {machine}, {word}.', { machine: machineLabel(machineById(x)).split(',')[0], word: roundText('round.mark.' + pick, ROUND_MARKS.find(r => r[0] === pick)[1]).toLowerCase() });
+  for (const i of ks) {
+    const x = j.route[i], pick = pickOf(x), f = roundMark(j, i, pick);
+    (j.res || (j.res = {}))[i] = { pick, door: true }; done.add(i);
+    out.push(line(x, pick)); if (f) out.push(f);
+  }
+  for (const x of off) {                                 // no stop of the round's: read, last looked, the unhealthy found by you
+    const pick = pickOf(x); out.push(line(x, pick)); roundLast()[x] = worksDay(shipNow());
+    const f = pick !== 'fine' ? roundFound(x, 'you') : null;
+    if (f && f.fresh) { worksXp(1); out.push(roundText('round.found', 'Found by you: {machine}.', { machine: machineLabel(machineById(x)).split(',')[0] })); }
+  }
+  j.stepsDone = [...done].sort((a, b) => a - b); toolWear('scanner', 4);
+  return out.join(' ');
+}
+// the training round's walk-through (0.45.9, for U's arrow and green tips: the writer's tip.round.<step>, {machine}):
+// roundTrainStep() -> null, or { step: 'take' | 'go' | 'look' | 'mark' | 'next' | 'done', job, machine (its name), deck, place }
+// take: on the board, not yours yet; go / next: walk to the first / next machine; look: at it (tap to look, or looking);
+// mark: looked, choose a mark; done: every stop marked, turn it in at the board
+function roundTrainStep() {
+  const c = SHIP.works && SHIP.works.cur; if (!c || c.id !== 'm1' || c.st !== 'do') return null;
+  const j = SHIP.jobs.find(x => x.id === c.j && x.kind === 'rounds'); if (!j || j.status === 'done') return null;
+  const base = { job: j.id };
+  if (j.claimedBy !== 'you') return { ...base, step: 'take' };
+  const st = jobStops(j), k = st.findIndex(s => !s.done); if (k < 0 || j.workDone) return { ...base, step: 'done' };
+  const id = j.route[k], m = machineById(id), pid = panelPlace(id), name = machineLabel(m).split(',')[0];
+  const at = { ...base, machine: name, deck: m.deck, place: pid }, w = typeof wsFind === 'function' ? wsFind(j.id, k) : null;
+  if (typeof ACT !== 'undefined' && ACT && ACT.kind === 'workStep' && ACT.o.job === j.id) return { ...at, step: 'look' };
+  if (w && w.done > 0) return { ...at, step: 'mark' };
+  let near = false;
+  try { const s = PLACE_OF.has(pid) && placeSpot(pid), p = player.obj.position; near = !!s && deckDef && deckDef.num === m.deck && Math.hypot(s.x - p.x, s.z - p.z) < 2.5; } catch (e) { near = false; }
+  return { ...at, step: near ? 'look' : k ? 'next' : 'go' };
+}
 // while Torres leads (the teacher's round), his words at the machines once you're with him: the writer's train.m1.lead.look
 let ROUND_TAUGHT = null;
 if (WORK_MECH.m1) WORK_TICKS.push((now, skip) => {
@@ -40101,13 +40244,13 @@ if (typeof jobKindAdd === 'function' && drillPlace('ext') && drillPlace('hatch')
 // Yara Esposito teaches it on Day 3 once the delivery's in (ladder row m4: she takes the cart and loads the first crate
 // while you watch; you take the rest). Once trained, each Wednesday's run is held for you to 16:00 after the unload
 // (or from 13:00), then the crew's; before that the crew do it. Saved on the job: j.crates ([{ id, dest }]), j.got
-// (crate ids loaded). Hash keys: section 17's 866-867 (the manifest, the misplaced part). Not yet: stage 2 (choose the
-// order) and stage 3 (the Thursday stocktake: SHIP.misplaced).
+// (crate ids loaded). Hash keys: section 17's 866-867 (the manifest, the misplaced part). Stage 2 (choose the order,
+// 0.45.13) and stage 3 (the Thursday stocktake, 0.45.15, with SHIP.misplaced) below; 1026 the stocktake's short shelf.
 const HAUL_FROM = 780, HAUL_UNTIL = 960, HAUL_TRAIN = 660;   // posted by 13:00 (after the unload), held to 16:00; Yara's meeting from 11:00
 const haulDay = d => weekday(d) === DELIVERY.day + (typeof deliveryLate === 'function' ? deliveryLate(d) : 0);
 const haulDock = () => CART_AT.find(id => placeById(id)) || null;
 const haulLoadAt = () => HOLD_AT.find(id => placeById(id)) || null;
-const haulName = c => worksText('haul.crate.' + c.id, ({ laundry: 'Linen', medical: 'Medical supplies', infirmary: 'Medical supplies', store: 'Crew store stock', galley: 'Dry goods', bridge: 'Bridge spares' })[c.id] || 'A crate');
+const haulName = c => c.part ? String(c.id).replace(/^./, x => x.toUpperCase()) : worksText('haul.crate.' + c.id, ({ laundry: 'Linen', medical: 'Medical supplies', infirmary: 'Medical supplies', store: 'Crew store stock', galley: 'Dry goods', bridge: 'Bridge spares' })[c.id] || 'A crate');
 const haulWhere = c => { const p = placeById(c.dest); return p ? (roomName(p.deck, p.room) || 'the room') + ', Deck ' + p.deck : 'its stop'; };
 // a run's crates from what's left of the manifest: up to CART_CRATES, by deck from the hold upward (4, 3, 2, 1): fewest rides
 function haulCrates(max = CART_CRATES) {
@@ -40115,7 +40258,7 @@ function haulCrates(max = CART_CRATES) {
   const dk = c => (placeById(c.dest) || { deck: 0 }).deck;
   return out.sort((a, b) => dk(b) - dk(a) || (a.id < b.id ? -1 : 1)).slice(0, max);
 }
-const haulOpen = () => SHIP.jobs.some(j => j.kind === 'haul' && j.status !== 'done');
+const haulOpen = () => SHIP.jobs.some(j => j.kind === 'haul' && !j.src && j.status !== 'done');   // (a parts run, j.src, isn't the manifest's)
 function haulJob(t, crates, o = {}) {
   const j = jobMake('haul', { id: 'haul' + (o.slot || '') + '@' + Math.floor(t / 60) + (o.yours ? 'y' : ''), deck: 5, room: 'r', h: Math.floor(t / 60),
     title: roundText('haul.title', 'Manifest run: {n} crates', { n: crates.length }).replace(/: 1 crates$/, ': 1 crate'), crates, got: [],
@@ -40125,45 +40268,162 @@ function haulJob(t, crates, o = {}) {
 }
 // the stops: the cart, a load per crate, a drop per crate (unless o.only: the teacher's run is the cart and the first load), the cart back
 function haulStops(j) {
-  const dock = haulDock(), hold = haulLoadAt(), cs = j.crates || [], out = [];
+  const dock = haulDock(), hold = haulLoadAt(), cs = (j.crates || []).slice(), out = [];
   if (!dock || !hold) return out;
+  const from = c => c.part ? (typeof shelfOf === 'function' && shelfOf(c.id) && placeById(shelfOf(c.id)) ? shelfOf(c.id) : FETCH_AT[0]) : hold;   // a parts run (manifestRun): from its shelf in main storage
   out.push({ deck: 5, placeId: dock, mins: 2, tag: 'cart', hold: 'cart', opts: { text: 'You take a hover cart from its dock.' } });
-  cs.forEach(c => out.push({ deck: 5, placeId: hold, mins: 1, tag: 'load', hold: 'cartfull', crate: c.id, opts: { text: haulName(c) + ' for ' + haulWhere(c) + ': on the cart.' } }));
+  cs.forEach(c => out.push({ deck: 5, placeId: from(c), mins: 1, tag: 'load', hold: 'cartfull', crate: c.key || c.id, opts: { text: haulName(c) + ' for ' + haulWhere(c) + ': on the cart.' } }));
   if (j.only !== 'load') {
-    cs.forEach(c => { const p = placeById(c.dest); if (p) out.push({ deck: p.deck, placeId: c.dest, mins: 2, tag: 'deliver', hold: 'cartfull', crate: c.id, opts: { text: haulName(c) + ' delivered.' } }); });
+    if (Array.isArray(j.order) && j.order.length === cs.length) cs.sort((a, b) => j.order.indexOf(a.key || a.id) - j.order.indexOf(b.key || b.id));   // stage 2: your order (cs is a copy below)
+    cs.forEach(c => { const p = placeById(c.dest); if (p) out.push({ deck: p.deck, placeId: c.dest, mins: 2, tag: 'deliver', hold: 'cartfull', crate: c.key || c.id, opts: { text: haulName(c) + ' delivered.' } }); });
     out.push({ deck: 5, placeId: dock, mins: 2, tag: 'return', hold: 'cart', opts: { text: 'The cart back on its dock.' } });
   }
   return out;
 }
-function haulTake(j, id) {                               // a crate off the hold's stack onto this run's cart (once)
+function haulTake(j, id) {                               // a crate off the hold's stack onto this run's cart (once); a part from its shelf (manifestRun)
   if (!id || (j.got || []).includes(id)) return false;
-  (j.got = j.got || []).push(id); if (typeof manifestTake === 'function') manifestTake(id); return true;
+  (j.got = j.got || []).push(id); const c = (j.crates || []).find(x => (x.key || x.id) === id);
+  if (c && c.part) { if (typeof takePart === 'function' && !takePart(c.id)) (j.empty = j.empty || []).push(id); } else if (typeof manifestTake === 'function') manifestTake(id);
+  return true;
 }
 if (typeof jobKindAdd === 'function' && typeof haulOn === 'function') jobKindAdd('haul', { tier: 1, junior: true, work: 0, text: 'Manifest run',
   hold: j => { const st = jobStops(j), last = st.reduce((a, s, k) => s.step === 'deliver' ? k : a, -1), first = st.findIndex(s => s.step === 'load');
     return first >= 0 && st[first].done && !(last >= 0 && st[last].done) ? 'cartfull' : 'cart'; },
   post(h, jobs) {                                        // delivery days: once the unload's done (or from 13:00), the manifest's run
     const d = Math.floor(h / 24) + 1, m = (h % 24 + 24) % 24 * 60, W = SHIP.works;
-    if (!haulDay(d) || m < DELIVERY.hour * 60 + 60 || m > DAY_SHIFT[1] || !(SHIP.manifest || []).length || jobs.some(j => j.kind === 'haul' && j.status !== 'done')) return;
+    if (!haulDay(d) || m < DELIVERY.hour * 60 + 60 || m > DAY_SHIFT[1] || !(SHIP.manifest || []).length || jobs.some(j => j.kind === 'haul' && !j.src && j.status !== 'done')) return;
     const unloading = jobs.some(j => j.kind === 'restock' && j.cargo === 'stores' && j.status !== 'done');
     if (unloading && m < HAUL_FROM) return;
     if (W && W.cur && W.cur.id === 'm4' && W.cur.d === d) return;   // Yara's training run has them today
     const crates = haulCrates(); if (!crates.length) return;
-    jobs.push(haulJob(h * 60, crates, { crew: !(W && W.tr.m4 !== undefined) || playerRank() !== 'junior' }));
+    jobs.push(haulJob(h * 60, crates, { crew: !(W && W.tr.m4 !== undefined) || playerRank() !== 'junior' && !haulFree(d) }));   // an officer at stage 2 keeps it to 16:00 (D3)
   },
   stops: haulStops,
   stepDone(j, k, res, t) {
-    const s = haulStops(j)[k]; if (!s) return null;
-    const c = (j.crates || []).find(x => x.id === s.crate);
-    if (s.tag === 'load') { haulTake(j, s.crate); return c ? haulName(c) + ' on the cart.' : null; }
-    if (s.tag === 'deliver' && c) { simNote('haul', { stop: c.dest, id: c.id }); return haulName(c) + ' delivered to ' + haulWhere(c) + '.'; }
+    const st = haulStops(j), s = st[k]; if (!s) return null;
+    const c = (j.crates || []).find(x => (x.key || x.id) === s.crate);
+    if (s.tag === 'load') { haulTake(j, s.crate); return c ? ((j.empty || []).includes(s.crate) ? 'No ' + c.id + ' on the shelf.' : haulName(c) + ' on the cart.') : null; }
+    if (s.tag === 'deliver' && c) {
+      simNote('haul', { stop: c.dest, id: c.id });
+      if (j.src && !j.delivered && st.every((x, i) => x.tag !== 'deliver' || i === k || (j.stepsDone || []).includes(i))) {   // a parts run: all there
+        j.delivered = t; simNote('manifestRun', { job: j.id, for: j.for || null, to: c.dest, parts: (j.crates || []).filter(x => !(j.empty || []).includes(x.key || x.id)).map(x => x.id) });   // what really came (an empty shelf's part didn't, 0.45.17)
+      }
+      return haulName(c) + ' delivered to ' + haulWhere(c) + '.';
+    }
     return null;
   },
   done(j, t, by) {                                       // the crew's run takes what it hadn't loaded (Yara's load-only run leaves hers on the manifest: you deliver it); yours is a use of m4
-    if (j.only !== 'load') for (const c of j.crates || []) haulTake(j, c.id);
-    if (by === 'you' && j.only !== 'load') { worksUse('m4'); return; }
+    if (j.only !== 'load') for (const c of j.crates || []) haulTake(j, c.key || c.id);
+    if (by === 'you' && j.only !== 'load') { if (Array.isArray(j.order)) haulTidy(j); worksUse('m4'); return; }
   },
   crew: { can: p => !!p.work && p.work.place === 'work:works', mins: j => 15 + 10 * (j.crates || []).length } });
+// stage 2 (0.45.13; step4-stages and D3's answers): after 2 runs, from Day 10, the delivery stops are yours to order:
+// taking a manifest run with crates for two or more stops, you pick them in turn (j.order, the crate keys; before any
+// delivery). "A tidy run" (W2's haul.tidy) when your deck changes are the fewest possible; as an officer +1 (worksSideXp).
+// After promotion the run stays the crew's, but once you're at stage 2 it's held for you to 16:00 (haulFree)
+const haulFree = d => !!SHIP.works && worksStage('m4') >= 1 && d >= 10;
+const haulDeck = c => (placeById(c.dest) || { deck: 5 }).deck;
+function haulTidy(j) {
+  const ds = (j.order || []).map(k => (j.crates || []).find(c => (c.key || c.id) === k)).filter(Boolean).map(haulDeck);
+  let moves = 0, at = 5; for (const d of ds) { if (d !== at) moves++; at = d; }
+  const best = new Set(ds.filter(d => d !== 5)).size; if (moves > best) return false;
+  try { toast('Manifest run', worksText('haul.tidy', 'A tidy run.')); } catch (e) { /* no UI */ }
+  if (SHIP.works && SHIP.works.rank !== 'junior') worksSideXp(1, 'haul');
+  simNote('haulTidy', { job: j.id, moves }); return true;
+}
+function haulOrderAsk(j, got = []) {                     // pick the next stop until all are placed; Cancel keeps the rest as they are. The picks build up
+  const cs = (j.crates || []).filter(c => !got.includes(c.key || c.id));   // apart and become j.order only when complete and nothing's delivered yet: the load
+  const set = o => { if (!jobStops(j).some(s => s.step === 'deliver' && s.done)) j.order = o; };   // stops never move, the deliver stops only before the first (R5, 0.45.17)
+  if (cs.length <= 1) return set(got.concat(cs.map(c => c.key || c.id)));
+  const shown = deviceChoose({ title: 'Manifest run', text: got.length ? 'And next?' : 'Which stop first? Fewer lift rides makes a tidy run.', choices: cs.map(c => haulName(c) + ' · ' + haulWhere(c)) }, i => {
+    if (!cs[i]) return set(got.concat(cs.map(c => c.key || c.id)));
+    const next = got.concat([cs[i].key || cs[i].id]); if (typeof simTimeout === 'function') simTimeout(() => haulOrderAsk(j, next), 400); else haulOrderAsk(j, next);
+  });
+  if (!shown && got.length) set(got.concat(cs.map(c => c.key || c.id)));
+}
+if (typeof jobKindAdd === 'function' && typeof haulOn === 'function') WORK_TICKS.push((now, skip) => {
+  if (skip || typeof myJob !== 'function') return; const j = myJob();
+  if (!j || j.kind !== 'haul' || j.src || j.only || j.orderAsked || !haulFree(worksDay(now))) return;
+  const st = jobStops(j); if (st.some(s => s.step === 'deliver' && s.done) || new Set((j.crates || []).map(c => c.dest)).size < 2) return;
+  j.orderAsked = true; haulOrderAsk(j);
+});
+// manifestRun(list, to, o) -> job id | null (Step 4, 0.45.12; E2's 24h team parts call it): a run of parts (names, up to
+// CART_CRATES) from their shelves in main storage to `to` (a place id, or a machine id: its panel), the cart there and back,
+// as a 'haul' job (j.src 'stores') held for you only (reserved slot MANIFEST_SLOT, never the crew's) from o.at (default now)
+// to o.until (default the shift's end), then withdrawn quietly if it isn't delivered. o.title, o.for (the asker's id).
+// Delivered: j.delivered and simNote('manifestRun', { job, for, to, parts }); manifestRunDelivered(id), manifestRunEnd(id)
+const MANIFEST_SLOT = 30;
+function manifestRun(list, to, o = {}) {
+  if (typeof jobMake !== 'function' || !JOB_KINDS.haul) return null;
+  const parts = (Array.isArray(list) ? list : []).filter(p => typeof p === 'string' && p && !(p in STOCK && !(SHIP.stores[p] > 0))).slice(0, CART_CRATES);   // none on its shelf: not on the run (R5, 0.45.17)
+  const m = typeof machineById === 'function' && to ? machineById(to) : null, dest = m ? panelPlace(m.id) : to;
+  if (!parts.length || !dest || !placeById(dest) || !haulDock()) return null;
+  const t = Number.isFinite(o.at) ? Math.floor(o.at) : Math.floor(shipNow()), until = Number.isFinite(o.until) ? o.until : Math.floor(t / 1440) * 1440 + DAY_SHIFT[1];
+  const j = jobMake('haul', { id: 'parts' + (o.for ? '-' + String(o.for).replace(/[^a-z0-9-]/gi, '').slice(0, 30) : '') + '@' + t, deck: 5, room: 'r', h: Math.floor(t / 60),
+    title: typeof o.title === 'string' ? o.title : roundText('haul.parts', 'Bring the parts: {parts}', { parts: parts.join(', ') }),
+    crates: parts.map((p, i) => ({ id: p, dest, part: true, key: 'p' + i })), got: [], src: 'stores', ...(o.for ? { for: String(o.for) } : {}), reserved: MANIFEST_SLOT, until });
+  j.posted = j.found = t; j.shareSeen = true;
+  SHIP.jobs.push(j); if (typeof MACH_REV !== 'undefined') MACH_REV++;
+  return j.id;
+}
+const manifestRunDelivered = id => !!(SHIP.jobs.find(x => x.id === id && x.src) || {}).delivered;
+function manifestRunEnd(id, t = shipNow()) {             // withdrawn (not delivered): off the board, nothing more taken
+  const j = SHIP.jobs.find(x => x.id === id && x.src && x.status !== 'done'); if (!j) return false;
+  j.status = 'done'; j.doneAt = t; j.doneBy = null; if (SHIP.player && SHIP.player.work && SHIP.player.work.job === id) SHIP.player.work = null;
+  if (typeof MACH_REV !== 'undefined') MACH_REV++; return true;
+}
+if (typeof jobKindAdd === 'function' && typeof haulOn === 'function') WORK_TICKS.push(now => {   // a parts run past its time: withdrawn
+  for (const j of SHIP.jobs) if (j.kind === 'haul' && j.src && j.status !== 'done' && !j.delivered && now >= j.until) manifestRunEnd(j.id, now);
+});
+// stage 3, the stocktake (0.45.15, E6; step4-stages): Thursdays from Day 18, once you're an officer trained in hauling, a
+// side job on the board at 13:30, held for you to 16:00 and then withdrawn (never the crew's): count each storage aisle
+// (E3's 5-stock-1..4, a short hold each; W2's stock.count). One aisle is short of a part (schedU(week, 0..1, 1026),
+// kept on the job: j.short = { aisle, part }): finding it (stock.short) moves what isn't there to the hold's order
+// (SHIP.stores down, SHIP.hold up: section 17 posts the restock run, stock.job) and pays +1 through worksSideXp; the
+// rest read stock.fine. Thursday's misplaced part (SHIP.misplaced) on an aisle you count goes back (stock.wrong,
+// misplacedFix). Saved: SHIP.works.side.stock = { week, found } (read defensively).
+const STOCK_AT = 810, STOCK_UNTIL = 960, STOCK_FROM = 18, STOCK_SLOT = 31, STOCK_SHORT = 2;
+const STOCK_AISLES = FETCH_AT.map(id => SHELF_NAME[id]);   // the aisles of 5-parts-1..4 (section 17's shelf names), in order
+const stockSpots = () => [1, 2, 3, 4].map(k => '5-stock-' + k).filter(id => placeById(id));
+function stockShortFor(d) {                              // the week's short aisle and part (a part that's on its shelf), or null
+  const wk = Math.floor((d - 1) / 7), a = Math.floor(STOCK_AISLES.length * schedU(wk, 0, 1026)) % STOCK_AISLES.length;
+  const parts = ((placeById(FETCH_AT[a]) || {}).stock || []).filter(k => k in STOCK && SHIP.stores[k] > 0);
+  return parts.length ? { aisle: a, part: parts[Math.floor(parts.length * schedU(wk, 1, 1026)) % parts.length] } : null;
+}
+function stockFound(j) {                                 // the short aisle found: the missing ones go on the hold's order; +1
+  const s = j.short; if (!s || j.shortFound) return false; j.shortFound = true;
+  const n = Math.min(STOCK_SHORT, SHIP.stores[s.part] || 0);
+  if (n > 0) { SHIP.stores[s.part] -= n; SHIP.hold[s.part] = (SHIP.hold[s.part] || 0) + n; if (typeof MACH_REV !== 'undefined') MACH_REV++; }
+  worksSideXp(1, 'stock'); simNote('stocktake', { job: j.id, aisle: s.aisle, part: s.part, n });
+  try { toast('Stocktake', roundText('stock.job', 'Restock: {shelf}', { shelf: STOCK_AISLES[s.aisle] })); } catch (e) { /* no UI */ }
+  return true;
+}
+if (typeof jobKindAdd === 'function' && typeof haulOn === 'function' && JOB_KINDS.haul && jobKindAdd('stocktake', { tier: 1, work: 0, side: true, text: 'Stocktake', hold: 'datapad',
+  post(h, jobs) {                                        // Thursdays 13:00's hour, found at 13:30
+    const d = Math.floor(h / 24) + 1, W = SHIP.works;
+    if ((h % 24 + 24) % 24 !== 13 || weekday(d) !== 3 || d < STOCK_FROM || !W || W.tr.m4 === undefined || playerRank() === 'junior' || !stockSpots().length) return;
+    if (jobs.some(x => x.kind === 'stocktake' && Math.floor(x.posted / 1440) + 1 === d)) return;
+    const t = (d - 1) * 1440 + STOCK_AT, j = jobMake('stocktake', { id: 'stocktake@' + d, deck: 5, room: 'r', h, title: roundText('stock.title', 'Stocktake'),
+      short: stockShortFor(d), reserved: STOCK_SLOT, until: (d - 1) * 1440 + STOCK_UNTIL, xp: 0 });   // xp 0: the +1 is the find's (stockFound)
+    j.posted = j.found = t; j.shareSeen = true; jobs.push(j);
+  },
+  stops: j => stockSpots().map(id => { const a = +id.slice(-1) - 1; return { deck: 5, placeId: id, mins: 2, tag: 'count', opts: { text: roundText('stock.count', '{shelf}: count what\'s there.', { shelf: STOCK_AISLES[a] }) } }; }),
+  stepDone(j, k) {
+    const id = (kindStops(j)[k] || {}).placeId || '', a = +String(id).slice(-1) - 1, shelf = STOCK_AISLES[a]; if (!shelf) return null;
+    const out = [], M = SHIP.misplaced;
+    if (j.short && j.short.aisle === a && stockFound(j)) out.push(roundText('stock.short', '{shelf} is short of {part}.', { shelf, part: j.short.part }));
+    else out.push(roundText('stock.fine', '{shelf}: all present.', { shelf }));
+    if (M && M.on === FETCH_AT[a] && typeof misplacedFix === 'function') { out.push(roundText('stock.wrong', 'A {part} on the {shelf} shelf? That\'s not where it lives.', { part: M.part, shelf }), worksText('stock.moved', 'Back on its own shelf.')); misplacedFix(); }
+    return out.join(' ');
+  },
+  done(j, t, by) { if (by !== 'you') return; const S = worksSide(); if (S) S.stock = { week: Math.floor(Math.floor(j.posted / 1440) / 7), found: !!j.shortFound }; },
+  crew: { can: () => false, mins: 20 } })) {
+  WORKS_SIDE_KINDS.add('stocktake');
+  WORK_TICKS.push(stockWithdraw);
+}
+function stockWithdraw(now) {                            // 16:00 and not taken: withdrawn quietly
+  for (const j of SHIP.jobs) if (j.kind === 'stocktake' && j.status === 'open' && !j.claimedBy && now >= j.until) { j.status = 'done'; j.doneAt = now; j.doneBy = null; if (typeof MACH_REV !== 'undefined') MACH_REV++; }
+}
 // the ladder row (m4): Yara's run is the cart and the first crate (you watch); yours is the rest, in the same slot
 if (typeof jobKindAdd === 'function' && typeof haulOn === 'function' && JOB_KINDS.haul) WORK_MECH.m4 = {
   at: d => HAUL_TRAIN,                                   // after the 10:00 delivery's unload
@@ -40177,6 +40437,188 @@ if (typeof jobKindAdd === 'function' && typeof haulOn === 'function' && JOB_KIND
   },
   watch: 10,
 };
+
+// =====================================================================
+// 24m. TOOL UPKEEP (M11, seat E1, 0.45.x; plans/mechanics/m11-tool-upkeep.html on claude/p5-design)
+// From Day 12 (the m11 row, an officer's) your tools wear with use (24 core's toolWear: the scanner 4 a scan, the pipe
+// kit 5 a trace, the logger 3 a use) and you look after them at your bench in the Works bay (E3's 5-bench-you, "Your
+// bench"): recharge the scanner (a wait: on charge for 5 ship minutes, you needn't stay), clean and re-seal the pipe kit
+// (2 minutes there), check the logger (1). Each puts the tool back to "Charged". Never blocks a job. Your first upkeep is
+// the lesson (24 core's small row: the Works officer on shift's train.m11.<id>; Torres is off Thursdays and Fridays). A
+// week with your tools kept up (all charged after an upkeep): Works reputation +1, once a week (worksSideXp). Stage 3,
+// after 4 upkeeps: the team's rack (the tool wall, E3's 5-tool-rack) once a week, 3 minutes there; Calder notices (her
+// `work` line upkeep.rack). Saved: SHIP.works.side.upkeep = { done, kept, rack, charge } (read defensively). Only with
+// E3's places in the build. Nothing drawn, no keys.
+// =====================================================================
+const TOOL_UPKEEP = { scanner: { wait: true, mins: 5, label: 'Recharge the scanner' }, pipekit: { mins: 2, label: 'Clean and re-seal the pipe kit' }, logger: { mins: 1, label: 'Check the logger' }, tester: { mins: 1, label: 'Check the conduit tester' } }, RACK_MINS = 3;   // the tester (m15) too, so "all charged" counts it (R5, 0.45.17)
+const benchOn = () => (DECKS[5].places || []).some(p => p.id === '5-bench-you');   // (not placeById at load: its index is built once)
+const benchWeek = (t = shipNow()) => Math.floor((worksDay(t) - 1) / 7);
+const benchTools = () => Object.keys(TOOL_UPKEEP).filter(hasTool);
+function benchData() {
+  const S = worksSide(); if (!S) return null;
+  const u = S.upkeep && typeof S.upkeep === 'object' && !Array.isArray(S.upkeep) ? S.upkeep : (S.upkeep = {});
+  if (!Number.isInteger(u.done) || u.done < 0) u.done = 0;
+  if (u.charge && !(Number.isFinite(u.charge.at) && hasTool('scanner'))) delete u.charge;
+  return u;
+}
+Object.assign(PLAYER_ACTS, { benchHold: { mins: 2, pose: 'work', title: 'Your bench' } });
+function benchDone(id, t = shipNow(), quiet = false) {   // the tool back to charged; the week's +1 if they're all kept up
+  const u = benchData(); if (!u || !hasTool(id)) return;
+  SHIP.works.tools[id][1] = 0; u.done++;
+  const wk = benchWeek(t);
+  if (u.kept !== wk && benchTools().every(k => toolState(k) === 'charged')) { u.kept = wk; worksSideXp(1, 'upkeep'); }
+  simNote('upkeep', { tool: id });
+  if (!quiet) try { toast(toolName(id).replace(/^the /, '').replace(/^./, x => x.toUpperCase()), worksText('bench.done', 'Good as new. Well, good as yesterday.')); } catch (e) { /* no UI */ }
+  if (typeof MACH_REV !== 'undefined') MACH_REV++;
+}
+function benchStart(id) {                                // you chose a tool at the bench
+  const u = benchData(), U = TOOL_UPKEEP[id]; if (!u || !U || !hasTool(id)) return false;
+  worksUse('m11');                                       // a use (the first: the lesson, 24 core's small-row training)
+  if (U.wait) {
+    u.charge = { at: shipNow() + U.mins };
+    toast('Your bench', worksText('bench.charging', 'The scanner\'s on charge. Ready at {time}; no need to wait.', { time: hhmm(u.charge.at % 1440) }));
+    return true;
+  }
+  actStart('benchHold', '5-bench-you', { title: 'Your bench' });
+  if (ACT && ACT.kind === 'benchHold') { ACT.def.mins = U.mins; ACT.def.title = worksText('bench.' + id, U.label); ACT.def.onDone = () => benchDone(id); }
+  return true;
+}
+function benchTap() {                                    // "Your bench": which tool to see to
+  const u = benchData(), ts = benchTools(); if (!u || !ts.length || typeof deviceChoose !== 'function') return false;
+  const label = k => worksText('bench.' + k, TOOL_UPKEEP[k].label) + ' · ' + (k === 'scanner' && u.charge ? worksText('bench.charging.now', 'on charge') : toolStateWord(k));
+  const open = ts.filter(k => !(k === 'scanner' && u.charge));
+  if (!open.length) { toast('Your bench', worksText('bench.charging', 'The scanner\'s on charge. Ready at {time}; no need to wait.', { time: hhmm(u.charge.at % 1440) })); return true; }
+  return deviceChoose({ title: 'Your bench', text: ts.map(label).join('. ') + '.', choices: open.map(k => worksText('bench.' + k, TOOL_UPKEEP[k].label)) }, i => { if (open[i]) benchStart(open[i]); }) || false;
+}
+function rackTap() {                                     // the team's rack (stage 3): once a week
+  const u = benchData(); if (!u || worksStage('m11') < 2 || u.rack === benchWeek() || !(DECKS[5].places || []).some(p => p.id === '5-tool-rack')) return false;
+  actStart('benchHold', '5-tool-rack', { title: 'The tool wall' });
+  if (ACT && ACT.kind === 'benchHold') { ACT.def.mins = RACK_MINS; ACT.def.title = worksText('bench.rack', 'The team\'s tools'); ACT.def.onDone = () => {
+    const v = benchData(); if (!v) return; v.rack = benchWeek(); simNote('upkeep', { tool: 'rack' });
+    worksSayAll('calder', worksVoice('calder', 'upkeep.rack') || [worksText('bench.rack.done', 'Rack\'s tidy. Someone\'s been busy.')]); }; }
+  return true;
+}
+if (typeof jobKindAdd === 'function' && benchOn()) {
+  WORK_MECH.m11 = { noJob: true };                       // a small row: trained at your first upkeep
+  WORK_TICKS.push((now, skip) => {                       // the scanner's charge
+    const u = SHIP.works && worksSide() && benchData(); if (!u || !u.charge || now < u.charge.at) return;
+    delete u.charge; benchDone('scanner', now, skip);
+  });
+  if (typeof PLAYER_TAPS !== 'undefined') PLAYER_TAPS.unshift((it, at) => {
+    if (!it || !SHIP.works || !worksOpened().has('m11') || typeof deckDef === 'undefined' || !deckDef || deckDef.num !== 5) return false;
+    if (it.t === 'Your bench') return benchTap();
+    if (it.t === 'Tool wall') return rackTap();
+    return false;
+  });
+}
+
+// =====================================================================
+// 24n. THE LOGBOOK (M12, seat E1, 0.45.x; plans/mechanics/m12-logbook.html on claude/p5-design)
+// From Day 12 (the m12 row; Calder teaches it the first time: "Officers write it down"): on a workday 16:30-17:30, at
+// the Works bay terminal (E3's 5-works-terminal, by the notice board: tap the board), "Write the log": one of three
+// summaries of your real shift (logChoices: what you fixed, what you found, what's still open, from 24 core's work log
+// and the found notes; the writer's log.* parts joined with "; "; their order schedU(day, 0, 1012)). An open job you wrote
+// up is finished 10% faster by whoever takes it next (j.logged: section 15's jobMins and section 17's crew minutes).
+// Works reputation +1 an entry (one a day, worksSideXp). Calder reads it at your progress talks (logLast(n), her `work`
+// line log.talk). Stage 2, after 5 entries: flag one machine for the night crew, who look at it at 22:00 (on paper: a
+// worn or faulty one's open job is done by them, else found). Stage 3, after 10: P3 reads SHIP.works.side.log for clues
+// (24k's line, E2's). Saved: SHIP.works.side.log = [{ day, pick, jobs, flag }], the last 30 (read defensively).
+// =====================================================================
+const LOGBOOK = { from: 16 * 60 + 30, to: 17 * 60 + 30, keep: 30, bonus: .9, flagAt: 22 * 60 };
+const logbookOn = () => (DECKS[5].places || []).some(p => p.id === '5-works-terminal');
+function logbookData() {
+  const S = worksSide(); if (!S) return null;
+  if (!Array.isArray(S.log)) S.log = [];
+  else if (S.log.some(e => !e || typeof e !== 'object' || !Number.isInteger(e.day) || typeof e.pick !== 'string')) S.log = S.log.filter(e => e && typeof e === 'object' && Number.isInteger(e.day) && typeof e.pick === 'string');
+  if (S.log.length > LOGBOOK.keep) S.log.splice(0, S.log.length - LOGBOOK.keep);
+  return S.log;
+}
+const logbookName = id => { const m = typeof machineById === 'function' && machineById(id); return m ? machineLabel(m).split(',')[0] : String(id); };
+function logbookShows(j) {                               // what it does, in a few words, for log.found
+  const m = j && j.machine && machineById(j.machine);
+  try { const f = m && j.cause && typeof caseCauses === 'function' ? caseCauses(m).find(x => x.id === j.cause) : null; if (f && f.shows) return f.shows; } catch (e) { /* the plain words below */ }
+  return m && SHIP.machines[m.id] && SHIP.machines[m.id].state === 'worn' ? 'is wearing' : 'is acting up';
+}
+// the shift's facts for day d: { fixed: [text], found: [[text, jobId, machine]], open: [[text, jobId, machine]] }
+function logbookFacts(d) {
+  const W = SHIP.works, t0 = (d - 1) * 1440, out = { fixed: [], found: [], open: [] }, seen = new Set();
+  if (!W) return out;
+  for (const e of W.log) {
+    if (e[1] !== d) continue;
+    const j = SHIP.jobs.find(x => x.id === e[0]), mid = j && j.machine || (String(e[0]).match(/^(\d-[a-z0-9-]+)@/) || [])[1];
+    if (!mid || !machineById(mid)) continue;
+    const part = j && Array.isArray(j.parts) && j.parts[0], kind = e[3] || (j && j.kind) || '';
+    out.fixed.push(part && kind !== 'service' ? worksText('log.fixed', '{machine}: {part} replaced', { machine: logbookName(mid), part }) : worksText('log.serviced', '{machine} serviced', { machine: logbookName(mid) }));
+  }
+  const live = j => j && j.machine && j.status !== 'done';
+  for (const n of simNotes('found', t0)) {
+    if (n.by !== 'you' || n.t >= t0 + 1440 || seen.has(n.machine)) continue;
+    const j = SHIP.jobs.find(x => x.machine === n.machine && live(x)); if (!j) continue;
+    seen.add(n.machine); out.found.push([worksText('log.found', '{machine} {shows}, left for tomorrow', { machine: logbookName(n.machine), shows: logbookShows(j) }), j.id, n.machine]);
+  }
+  for (const j of SHIP.jobs) {
+    if (!live(j) || seen.has(j.machine) || !(j.claimedBy === 'you' || j.foundBy === 'you')) continue;
+    seen.add(j.machine); out.open.push([worksText('log.open', '{machine} still open', { machine: logbookName(j.machine) }), j.id, j.machine]);
+  }
+  return out;
+}
+// logChoices(day) -> three { text, jobs, machines }: fixed + found, fixed + open, found + open (three parts at most each)
+function logChoices(d) {
+  const F = logbookFacts(d), mk = (a, b) => {
+    const parts = a.concat(b).slice(0, 3), txt = parts.map(p => Array.isArray(p) ? p[0] : p);
+    return { text: txt.length ? txt.join('; ') : worksText('log.quiet', 'A quiet day. Nothing to report'), jobs: parts.filter(Array.isArray).map(p => p[1]), machines: parts.filter(Array.isArray).map(p => p[2]) };
+  };
+  const all = [mk(F.fixed, F.found), mk(F.fixed, F.open), mk(F.found, F.open)], k = Math.floor(schedU(d, 0, 1012) * 3) % 3;
+  return all.slice(k).concat(all.slice(0, k));
+}
+const logLast = (n = 3) => { const L = SHIP.works && logbookData(); return L ? L.slice(-n).map(e => e.pick) : []; };
+const logbookToday = d => (logbookData() || []).find(e => e.day === d) || null;
+function logbookWrite(c, d = worksDay(shipNow())) {      // your entry: the handover bonus on its open jobs, the use, +1
+  const L = logbookData(); if (!L || !c || logbookToday(d)) return null;
+  const e = { day: d, pick: String(c.text).slice(0, 240), jobs: c.jobs.slice(0, 6), flag: null }; L.push(e); logbookData();
+  for (const id of e.jobs) { const j = SHIP.jobs.find(x => x.id === id); if (j && j.status !== 'done') j.logged = d; }
+  worksUse('m12'); worksSideXp(1, 'log'); simNote('logbook', { day: d, jobs: e.jobs.length });
+  return e;
+}
+function logbookOpen() {                                 // "Write the log": the three, then (stage 2) a machine to flag
+  const d = worksDay(shipNow()), cs = logChoices(d);
+  return deviceChoose({ title: worksText('works.log.write', 'Write the log'), text: worksText('works.log.pick', 'Which one\'s your log for today?'), choices: cs.map(c => c.text) }, i => {
+    const e = cs[i] && logbookWrite(cs[i], d); if (!e) return;
+    toast('Works log', worksText('log.saved', 'Logged. Calder will read it. She reads everything.'));
+    const ms = cs[i].machines.filter((m, k, a) => a.indexOf(m) === k);
+    if (worksStage('m12') >= 1 && ms.length && typeof simTimeout === 'function') simTimeout(() => deviceChoose({ title: 'Works log', text: '', choices: ms.map(m => worksText('log.flag', 'Flag {machine} for the night crew', { machine: logbookName(m) })) }, k => {
+      if (!ms[k]) return; e.flag = ms[k]; toast('Works log', worksText('log.flagged', 'Flagged. The night crew will look at 22:00.')); }), 600);
+  }) || false;
+}
+const nightWorks = () => { try { const p = ROSTER.find(x => x.dept === 'works' && x.shift === 'night'); return p ? p.id : 'night crew'; } catch (e) { return 'night crew'; } };
+function logbookTick(now, skip) {                        // 22:00: the night crew look at the flagged machine; Calder at your progress talk
+  const L = SHIP.works && logbookData(); if (!L) return;
+  const d = worksDay(now), e = L.find(x => x.day === d && x.flag && !x.looked);
+  if (e && now % 1440 >= LOGBOOK.flagAt) {
+    e.looked = true; const id = e.flag, st = SHIP.machines[id] && SHIP.machines[id].state, by = nightWorks();
+    if (st === 'worn') {                                   // a worn one is serviced early (m12); never a faulty one, never a job held for you (R5, 0.45.14)
+      const j = SHIP.jobs.find(x => x.machine === id && x.status !== 'done' && !x.claimedBy && !heldForYou(x));
+      if (j && typeof jobFinish === 'function') jobFinish(j, now, by); else if (typeof machineFound === 'function') machineFound(id, by);
+      if (typeof MACH_REV !== 'undefined') MACH_REV++;
+    }
+    simNote('logFlag', { machine: id, by, state: st || null });
+  }
+  const S = worksSide(), r = L.length && SHIP.occasions.find(x => x.id === 'progressTalk' && (x.met || x.status === 'kept') && Math.floor(x.at / 1440) + 1 === d);
+  if (r && S.logTalk !== r.key && !skip) {
+    S.logTalk = r.key; const last = L[L.length - 1], m = last.jobs.length ? (SHIP.jobs.find(x => x.id === last.jobs[0]) || {}).machine : null, name = m ? logbookName(m) : 'the washers';
+    worksSayAll('calder', (worksVoice('calder', 'log.talk') || ['I read your log. {machine}: good catch.']).map(l => String(l).replace(/\{machine\}/g, name)));
+  }
+}
+if (typeof jobKindAdd === 'function' && logbookOn()) {
+  WORK_MECH.m12 = { noJob: true };                       // a small row: Calder's word at your first entry
+  WORK_TICKS.push(logbookTick);
+  if (typeof PLAYER_TAPS !== 'undefined') PLAYER_TAPS.unshift((it, at) => {
+    if (!it || it.t !== 'Notice board' || !SHIP.works || !worksOpened().has('m12') || typeof deckDef === 'undefined' || !deckDef || deckDef.num !== 5) return false;
+    const s = placeSpot('5-works-terminal'), d = worksDay(shipNow()), m = shipNow() % 1440;
+    if (!s || !at || Math.hypot(s.x - at.x, s.z - at.z) > 3.5 || !playerShiftOn(d) || m < LOGBOOK.from || m >= LOGBOOK.to || logbookToday(d)) return false;
+    return logbookOpen();
+  });
+}
 
 // =====================================================================
 // 24g. THE SCANNER (M7, seat H, 0.55.x; plans/mechanics/m7-scanner.html on claude/p5-design)
@@ -40220,7 +40662,7 @@ function scanRead(jobId) {
   if (tr) sus.sus.filter(x => x !== sus.cause).forEach((x, i) => { tr[caseSus(sus, x).part] = [44, 49, 52][i] || 50; });   // first puzzle doesn't teach "pick the lowest bar"
   const val = (p, u) => tr && p in tr ? tr[p] : sp ? (sp.has(p) ? 40 + Math.round(u * 20) : 70 + Math.round(u * 26)) : p === f.part ? 12 + Math.round(u * 23) : p === worn ? 40 + Math.round(u * 20) : 70 + Math.round(u * 26);
   j.scan = parts.slice(0, 5).map((p, i) => [p, val(p, schedU(seed ^ Math.imul(i + 1, 40503), d, 875))]);
-  if (typeof toolWear === 'function' && SHIP.works && SHIP.works.tools && SHIP.works.tools.scanner) SHIP.works.tools.scanner[1] = Math.min(1, SHIP.works.tools.scanner[1] + .01);
+  if (typeof toolWear === 'function') toolWear('scanner', 4);   // M11: 4 of 100 a scan (E1, 0.45.7; in the hook register)
   MACH_REV++;
   return j.scan;
 }
@@ -40366,7 +40808,7 @@ function traceTap(it, at) {
   if (!spot || typeof workStep !== 'function') return false;
   if (TRACE_UI.at !== id) SHIP.player.wsteps = SHIP.player.wsteps.filter(w => !(w.job === j.id && w.k === TRACE_READ_K));   // a fresh look at a new machine
   TRACE_UI.at = id;
-  const st = { step: 'read', places: [pid], deck: m[0].deck, how: 'look', opts: { secs: TRACE_SECS, title: worksText('trace.kit', 'Pipe kit'), text: worksText('trace.clip', 'You clip the pipe kit on and read the flow.') } };
+  const st = { step: 'read', places: [pid], deck: m[0].deck, how: 'look', opts: { secs: TRACE_SECS, tool: 'pipekit', title: worksText('trace.kit', 'Pipe kit'), text: worksText('trace.clip', 'You clip the pipe kit on and read the flow.') } };
   if (!workStep(j, st, TRACE_READ_K, spot)) return false;
   if (ACT && ACT.kind === 'workStep') ACT.o.read = id;
   return true;
@@ -40379,7 +40821,7 @@ function traceRead(j, id) {
   const words = worksText('trace.before', 'Before: {word}', { word: traceWord(r.before) }) + ' · ' + worksText('trace.after', 'After: {word}', { word: traceWord(r.after) }) + '.';
   if (j.traceFound) {
     simNote('traceFound', { line: s.line, machine: j.machine, id: j.id });
-    worksUse('m9');
+    worksUse('m9'); if (typeof toolWear === 'function') toolWear('pipekit', 5);   // M11: 5 of 100 a trace (E1, 0.45.7)
     toast(name, words + ' ' + worksText('trace.found', 'Fine before {machine}, low after: that\'s where it starts.', { machine: traceName(j.machine) }));
     traceSay(j, 'found', 'There\'s your problem.');
   } else {
