@@ -19,3 +19,5 @@ arc | rc=0 | 25s | ARC CHECK OK
 bubble | rc=0 | 493s | BUBBLE CHECK OK
 path | rc=0 | 102s | PATH CHECK OK
 disc | rc=0 | 127s | ALL OK
+
+All 15 done: 14 OK, 1 FAIL (leave: "FAIL the reputation chip: None, once: False").
