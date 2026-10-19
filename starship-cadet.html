@@ -281,7 +281,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.51.12
+   STARSHIP CADET: CSV Wren                           build 0.51.13
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8694,7 +8694,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.51.12';                           // keep in step with the header's build line
+const GAME_BUILD = '0.51.13';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -42038,6 +42038,7 @@ function playerRigRebuild() {
   w.obj.remove(old.root); old.root.traverse(o => { if (o.isMesh) o.geometry.dispose(); });
   w.rig = makeCharacter(w.spec); w.obj.add(w.rig.root); w.rig.root.traverse(o => { o.userData.walker = w; });
   w.propMeshes = []; w.propKey = ''; w.bodyProps = null;
+  if (typeof ACT !== 'undefined' && ACT && ACT.body && typeof recBody === 'function') recBody(ACT);   // the stand-in at a place too (as playerKit does; E5)
   const grubby = typeof uniformState === 'function' && uniformState() === 'grubby' && !PLAYER_SPEC.kit;
   if (typeof playerUniformTint === 'function' && (grubby || (typeof UNIFORM_MAT !== 'undefined' && UNIFORM_MAT))) playerUniformTint(grubby ? 1 : 0);
   return true;

@@ -540,7 +540,7 @@ M13 = r"""(() => { const out = {}, W0 = JSON.stringify(SHIP.works);
  out.early = jobStepDone(j.id, 2, { value: 3 }).ok;
  out.puddle = jobStepDone(j.id, 0, {}).ok; out.after = jobStops(j).map(s => s.places[0] || '-');
  out.damp = jobStepDone(j.id, 1, {}).ok; out.joint = jobStepDone(j.id, 2, j.worn ? {} : { value: 3 }).ok;
- out.turnin = turnInJob(j.id); out.entry = JSON.parse(JSON.stringify(worksSide().leaks[0])); out.open = leakOpen(); out.trained = W.tr.m13; out.uses = W.use.m13; out.wornFix = j.fix || null;
+ const xp0 = W.xp; out.turnin = turnInJob(j.id); out.xp = [W.xp - xp0, typeof WORKS_SIDE_KINDS !== 'undefined']; out.entry = JSON.parse(JSON.stringify(worksSide().leaks[0])); out.open = leakOpen(); out.trained = W.tr.m13; out.uses = W.use.m13; out.wornFix = j.fix || null;
  // a worn joint: its replacement posted, held for you
  W = reset(15 * 1440 + 480); leakPost(15 * 1440 + 480, 2); j = SHIP.jobs.find(x => x.kind === 'leak'); j.worn = 1; claimJob(j.id);
  jobStops(j).forEach((s, k) => jobStepDone(j.id, k, {})); turnInJob(j.id);
@@ -577,6 +577,8 @@ def part_m13(g):
     check(not a['early'] and a['puddle'] and '-' not in a['after'], 'm13: the joint refused before the puddle; then the trail shows')
     check(a['damp'] and a['joint'] and a['turnin'] and a['entry']['found'] == 'you' and a['open'] is None, 'm13: found by you, fixed, the puddle gone')
     check(a['trained'] is not None and a['uses'] == 1, 'm13: trained on the first')
+    if a['xp'][1]: check(a['xp'][0] == 1, f"m13: a leak found by you pays +1 reputation in all (the page; {a['xp'][0]})")
+    else: print(f"  m13: (the leak's +1 not checked: 24 core's side-job turn-in not in this build; paid {a['xp'][0]} here)")
     print('  m13 worn:', a['worn'], 'held', a['held'], 'crew', a['crew'], 'galleries', a['gal0'], '->', a['gal3'], 'stage', a['stage'])
     check(a['worn'] and a['worn'][0] == 'joint' and a['worn'][1] and a['worn'][2] == 'seal' and a['worn'][3] == 0 and a['worn'][4], 'm13: a worn joint posts its replacement, held for you, no rep of its own')
     check(a['held'] == 1440 + 600, f"m13: held till 10:00 the next day ({a['held']})")
@@ -664,7 +666,7 @@ M15 = r"""(() => { const out = {}, W0 = JSON.stringify(SHIP.works);
  let S = jobStops(j); out.stops = S.map(s => s.step + ':' + s.how); out.ordered = [90, 91, 92, 93, 94, 95].some(k => { const x = rewChart(k, 0).order; return x.some((v, i) => v !== i); });
  out.early = jobStepDone(j.id, 1, right(j, 1)).ok;
  jobStepDone(j.id, 0, {}); S.forEach((s, k) => { if (s.step === 'wire') jobStepDone(j.id, k, right(j, k)); });
- out.test = jobStepDone(j.id, S.length - 1, {}).ok; out.turnin = turnInJob(j.id); out.right = [j.rightFirst, j.wrongs, SHIP.machines['4-junction-1'].cond >= 90, worksSide().rewire.done];
+ out.test = jobStepDone(j.id, S.length - 1, {}).ok; const xp0 = W.xp; out.turnin = turnInJob(j.id); out.xp = [W.xp - xp0, typeof WORKS_SIDE_KINDS !== 'undefined']; out.right = [j.rightFirst, j.wrongs, SHIP.machines['4-junction-1'].cond >= 90, worksSide().rewire.done];
  // a wrong pair: the fuse pops, only that pair opens again
  j = rewJob('4-junction-2', shipNow(), { key: 98 }); SHIP.jobs.push(j); claimJob(j.id); S = jobStops(j); jobStepDone(j.id, 0, {});
  S.forEach((s, k) => { if (s.step === 'wire') jobStepDone(j.id, k, k === 2 ? { pick: rewRight(j, 2) === 'T1' ? 'T2' : 'T1' } : right(j, k)); });
@@ -687,6 +689,8 @@ def part_m15(g):
     check(a['board'] and a['claimed'] and not a['early'], 'm15: offered to an Officer; the box opened first')
     check(a['test'] and a['turnin'] and a['right'][0] is True and a['right'][1] == 0 and a['right'][2] and a['right'][3] == 1, 'm15: right first time, the junction put right')
     check(not a['pop'] and a['wrongs'] == 1 and a['open'][2] == 0 and sum(a['open']) == len(a['open']) - 2, 'm15: a wrong pair pops at the test, only that pair opens again')
+    if a['xp'][1]: check(a['xp'][0] == 2, f"m15: right first time pays +1, +1 more (the page; {a['xp'][0]})")
+    else: print(f"  m15: (the pay not checked: 24 core's side-job turn-in not in this build; paid {a['xp'][0]} here)")
     check(a['retest'] and a['turnin2'] and a['after'][0] is False and a['after'][1] == 1, 'm15: redone, finished, not right first time (never a fail)')
     check(a['faded'] == [1, 'check', False, True, True], 'm15: a faded chart from 3 (one colour): the lights first')
     check(a.get('ordered'), 'm15: the wires come in a seeded order, not the chart\'s (the chart must be read)')
@@ -749,20 +753,23 @@ FF = r"""(() => { const out = {}, W0 = JSON.stringify(SHIP.works);
  const solve = (j, right) => { const c = caseState().open.find(x => x.job === j.id); if (!c) return 'nocase';
    if (c.wait) { c.wait = false; caseShow(c, j); } claimJob(j.id); caseCall(c.id, right ? c.cause : c.sus.find(x => x !== c.cause));
    jobStops(j).forEach((s, k) => jobStepDone(j.id, k)); return [c.band, c.kind, !!c.ticket, turnInJob(j.id)]; };
+ const rigN = () => { let m = 0, v = 0; player.rig.root.traverse(o => { if (o.isMesh) { m++; v += o.geometry.attributes.position.count; } }); return [m, v]; };
+ delete PLAYER_SPEC.pin; delete player.spec.pin; playerRigRebuild(); out.rig0 = rigN();
  let W = reset(12 * 1440 + 300); out.kinds = caseKindsOpen();
  tick(12 * 1440 + 480, 12 * 1440 + 500); out.mail = [SHIP.mail.filter(x => /Calder/.test(x.from || '')).length, worksSide().ff.mail];
  tick(14 * 1440 + 470, 14 * 1440 + 490); let j = SHIP.jobs.find(x => x.ticket);
  out.posted = j ? [worksDay(j.posted), Math.round(j.posted % 1440), j.reserved, jobTier(j), j.title] : null; if (!j) return out;
  out.solved = solve(j, true); tick(shipNow() + 10, shipNow() + 20);
  out.grade = [worksSide().ff.grade, W.ms.find(x => x[0] === 'ff1') || null];
- out.pin = [PLAYER_SPEC.pin || 0, player.spec.pin || 0, !!player.rig.root.parent]; PLAYER_SPEC.pin = player.spec.pin = 0; playerRigRebuild();   // the pin on, then off again for the rest
+ out.pin = [PLAYER_SPEC.pin || 0, player.spec.pin || 0, !!player.rig.root.parent, rigN()]; delete PLAYER_SPEC.pin; delete player.spec.pin; playerRigRebuild();   // the pin on, then off
+ for (const f of WORK_TICKS) f(shipNow(), false); out.pinBack = [PLAYER_SPEC.pin || 0, rigN()];   // a reload: back on from the grade (24l's tick)
  tick(15 * 1440 + 470, 15 * 1440 + 490); out.after = SHIP.jobs.filter(x => x.ticket && worksDay(x.posted) === 16).length;
  W = reset(14 * 1440 + 300); tick(14 * 1440 + 470, 14 * 1440 + 490); j = SHIP.jobs.find(x => x.ticket);
  out.wrong = j ? solve(j, false) : null; tick(shipNow() + 10, shipNow() + 20);
  out.wrongAfter = [worksSide().ff.grade, worksSide().ff.tries, worksSide().ff.next, worksSide().ff.job];
  tick(15 * 1440 + 470, 15 * 1440 + 490); out.notYet = SHIP.jobs.filter(x => x.ticket && worksDay(x.posted) === 16).length;
  worksSide().ff = { grade: 9, tries: 'x', next: 22, job: 5 }; delete worksSide().ffOk; out.save = JSON.stringify(ffState());
- SHIP.works = JSON.parse(W0); return out; })()"""
+ SHIP.works = JSON.parse(W0); delete PLAYER_SPEC.pin; delete player.spec.pin; playerRigRebuild(); out.rig1 = rigN(); return out; })()"""
 def extra_ff(g):
     a, b = g.ev(FF), g.ev(FF)
     print('  ff kinds', a['kinds'], 'mail', a['mail'], 'posted', a.get('posted'), 'solved', a.get('solved'), 'grade', a.get('grade'), 'after', a.get('after'), 'wrong', a.get('wrong'), a.get('wrongAfter'), 'notYet', a.get('notYet'))
@@ -771,7 +778,11 @@ def extra_ff(g):
     check(a['solved'][0] == 'T2' and a['solved'][2] and a['solved'][3], 'ff: a T2 case, solved and turned in')
     check(a['grade'][0] == 1 and a['grade'][1], 'ff: right first time: grade 1, the Record\'s ff1')
     check(a['after'] == 0, 'ff: no more tickets once graded (grades 2-3 are later steps)')
-    check(a.get('pin') == [1, 1, True], f"ff: the pin on your uniform ({a.get('pin')})")
+    print('  ff pin: rig before', a['rig0'], 'graded', a['pin'], 'after a reload', a['pinBack'], 'cleared', a['rig1'])
+    check(a['pin'][:3] == [1, 1, True], f"ff: the pin on your uniform ({a.get('pin')})")
+    check(a['pin'][3][0] == a['rig0'][0] and a['pin'][3][1] > a['rig0'][1], 'ff: the pin merged into the chest (no extra mesh, so no extra draw call)')
+    check(a['pinBack'][0] == 1 and a['pinBack'][1] == a['pin'][3], 'ff: the pin back on after a reload (the grade)')
+    check(a['rig1'] == a['rig0'], 'ff: no grade, no pin')
     check(a['wrongAfter'][0] == 0 and a['wrongAfter'][1] == 1 and a['wrongAfter'][2] == 22 and a['wrongAfter'][3] is None and a['notYet'] == 0, 'ff: a wrong call: not yet, the next a week on')
     check(json.loads(a['save']) == {'grade': 3, 'tries': 0, 'next': 22, 'job': None, 'mail': 0}, f"ff: the save cleaned ({a['save']})")
     check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'ff: differs the second time')
