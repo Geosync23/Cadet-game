@@ -28,10 +28,10 @@ Merge order inside a round: 24 core → mechanics in ladder order → cases → 
 ## Seats
 | Seat | Session | Branch | Series | Takes over from (read their note) |
 |---|---|---|---|---|
-| E1 mechanic engineer 1 | (lead fills in) | claude/mech-rounds | 0.45.x | C2 `plans/handover-works-career.md` (claude/works-career 48efbd6), M1 notes on claude/mech-rounds, P `plans/handover-player.md` (claude/player-p5) |
-| E2 mechanic engineer 2 | (lead fills in) | claude/mech-incidents | 0.51.x | M2 `plans/handover-mech2.md` (15c247c), H2 `plans/handover-puzzles-h2.md` (claude/mech-cases) |
-| E3 mechanic engineer 3 | (lead fills in) | claude/mech-diagnose | 0.53.x | M3 (claude/mech-diagnose notes), DA5 `plans/handover-deck-architect-5.md` (claude/deck-p5s3) |
-| B build master | (lead fills in) | claude/p5-cand-s4 | 0.63.4 | BM6 notes on claude/p5-cand-pt1 (`plans/cand-p5-s3-results.md`) |
-| R reviewer | (lead fills in) | claude/reviews-p5-step4 | — | R3 `plans/handover-reviewer-3.md` (claude/reviews-p5-step2 be4cea4) |
+| E1 mechanic engineer 1 | session_01AHeKjieg3qWjnEVuHecsHd | claude/mech-rounds | 0.45.x | C2 `plans/handover-works-career.md` (claude/works-career 48efbd6), M1 notes on claude/mech-rounds, P `plans/handover-player.md` (claude/player-p5) |
+| E2 mechanic engineer 2 | session_01Bezat4UU7beoaKsqdSrJBs | claude/mech-incidents | 0.51.x | M2 `plans/handover-mech2.md` (15c247c), H2 `plans/handover-puzzles-h2.md` (claude/mech-cases) |
+| E3 mechanic engineer 3 | session_01WkkCvj4yxnMALMQYG2DsWM | claude/mech-diagnose | 0.53.x | M3 (claude/mech-diagnose notes), DA5 `plans/handover-deck-architect-5.md` (claude/deck-p5s3) |
+| B build master | (started when the first Step 4 piece lands; until then BM6 session_01F8k6hqdBRoxDJMzqAuiHqR) | claude/p5-cand-s4 | 0.63.4 | BM6 notes on claude/p5-cand-pt1 (`plans/cand-p5-s3-results.md`) |
+| R reviewer | (started when the first Step 4 piece lands) | claude/reviews-p5-step4 | — | R3 `plans/handover-reviewer-3.md` (claude/reviews-p5-step2 be4cea4) |
 | W2 head writer | session_01866TWKzGRgZmFcxiYRi4db | claude/writer-p5 | content/ | (continues) |
 | D3 designer (on call) | session_0115ZiGhf9s3oYtFdjs7TgYS | claude/p5-design | — | (wrote the pages) |
