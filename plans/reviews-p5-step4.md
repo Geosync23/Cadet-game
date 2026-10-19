@@ -20,6 +20,24 @@ Lines skimmed. In a fresh archive content_gen bakes 9342 lines; lines_check PASS
 
 ## Step 4
 
+### E3 claude/mech-diagnose d51c5edf (0.53.8: R4's two M10 fixes; same game as WIP 95d3737a), R5: PASS
+- Fix 1 done: shopFetch with an empty shelf keeps j.parts and sets j.offcuts, then ticks the fetch stop, so the make stop stays (mech_check: an empty shelf ticks the fetch only). The make stop takes the part from your hands only if you have it, so stores never go below 0.
+- Fix 2 done (the lead's call, in person): the finish hold puts the thing in SHIP.player.carry (refused at the start if your hands are full); "Give the <thing>" shows only while you hold it, and handing it over takes it from your hands; a made order not in your hands (old save, reload, put down) is given back at the order board; main storage won't take it.
+- shopData now cleans xpDay/taught/posted and an order's day/job/part (R4's note).
+- Note (small exploit, no fix asked): the order thing "mug rack" has the same name as TINKER_LIST's mug rack (a SOC_GIFTS gift and a cabin ledge thing in 24t), so the order's rack can be given as a gift to anyone or put on your cabin ledge; the board then hands you another. Renaming the order's thing (W2's thanks line names "mug rack") or marking the held order thing would close it.
+- Checks: running (mech_check, deck_check, interactions_check, cadet_test vs 626a907c).
+
+### E3 claude/mech-diagnose 2ce8e9e7 (0.53.7, 24t cabin touches and star logging), R5: PASS WITH FIXES (five; E3 has retired, so for E3's successor)
+Read with a helper agent against off-shift.html; 1-3 confirmed by hand.
+- Good: one owner (24 new CABIN_*/CAB/cabin*/STAR_*/star* names, none elsewhere; calls playerBed()/worksHome(), no copies). Keys 1024/1025 via schedU, no R(). Saved in side.cabin / side.stars, cleaned on read, defaults. E1's cad17046 reads W.ms 'stars', which E3 pushes. Stars give friendship only (no rep). Phones: dressMat/col(), each spot one merged mesh (max 4 draw calls), +.002 off the surface, the rug's underside at .012, disposed in unloadDeck. Star logging 20:00-23:30 from Day 6, room J on Deck 2, one a night.
+- **Fix 1: the shelf thing floats.** cabinSpots 4-23 shelf at [40.2, 2.17, 10.2] (7363) is past the end of the 4-23 keepsake plank (placeWall 'n' at .5, 0.92 wide, about x 39.04-39.96). Move the spot onto the plank or draw a small bracket shelf there.
+- **Fix 2: some shelf things are invisible.** CABIN_FITS.shelf has 'paper novel', 'puzzle book', 'pocket puzzle', 'metal puzzle'; CABIN_LOOK has none of them, so they leave your hands, count as a touch and draw nothing. Add their looks.
+- **Fix 3: cabin spots work from anywhere.** cabinTap (40849) never calls approach(); every other tap (starTap too) walks you there first.
+- **Fix 4: text keys don't match W2's step4.lines.** cabin.spot.<k> is read as the placement sentence but W2's are spot labels ("Rug"), and .desk/.ledge don't exist (W2 has .lamp/.plant); star.done is read as the ten-stars message but W2's is "One a night. The sky will keep."; star.wrong says "try again tomorrow night" but you can retry at once; star.pick has no {a}/{b}, dropping the chart's two stars. Agree names with W2 (e.g. cabin.put, star.ten).
+- **Fix 5 (the brief): mech_check has no real save round trip**, and its star part copies the relAdd logic instead of driving starLog/starTap (one a night, the hours and the Record line at ten untested).
+- Notes: cabinPlaced isn't wired into lockerTidy and visitors' cabin.remark isn't built (page items: the lead's call whether they wait); cabinMood's +4 leisure is 24t's own 06:00 tick (hook register) and CAB.woke isn't saved (a reload at 06:00 can repeat it); on an observatory-night evening the first telescope tap opens the star log, not the tradition; the ledge plank is drawn only when something is on it, in the thing's colour; CABIN_FITS repeats TINKER_LIST's cabin field; E1 shows "Star logger, Day {n}" vs W2's works.ms.stars "Star logger".
+- Checks: on d51c5edf (contains it), running.
+
 ### E2 claude/mech-incidents 3014b864 (0.51.10: R4's three fixes on 0.51.6, the pin, the ticket hint guard), R5: PASS WITH FIXES
 Diff 51611e02..3014b864 (18 game lines, a mech_check save part).
 - Done: R4's fix 1 (the flush penalty uses N.stage, the stage of that harvest's job, saved and cleaned); fix 2 (mech_check `side` part: leaks, nozzles, rewire, favours and ff through a real saveGame and reload; on E2's branch alone it prints "not checked" because worksClean there doesn't keep `side`, so it proves itself only on a merge with E1); the ticket hint guard is one line in caseHint (c.ticket, under 3 clues: ticket.nohint); the pin is one line in section 8's builder (`s.pin`: a gold cylinder merged into rig.chest, right breast, no extra draw call; the gold is a literal colour like the rest of that builder).
