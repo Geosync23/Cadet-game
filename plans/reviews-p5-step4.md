@@ -4,6 +4,9 @@ R4 succeeds R3 (whose verdicts are in `plans/reviews-p5-step2.md`). R5 (session_
 
 ## Playtest update 2 (brief: plans/brief-playtest2.md on claude/lead-pillar1; build master BM7 session_01QbuzvT3TwzMwSWRmakzX8Z)
 
+### U2 claude/hud-pt2 06a5e99 (check only, over 0f34cfb9), R6: PASS
+interactions_check's round-guide part stubbed `window.roundTrainStep`, which doesn't replace 24a's function declaration inside the game's closure on a merge with E1/E6's rounds (so BM7's 92d40d5 showed empty board arrow/tips: the check, not the game). It now assigns the name itself (the eval runs inside the closure; the game isn't strict, so with no 24a it makes a global, deleted after) and restores the real one. No game change.
+
 ### U2 claude/hud-pt2 0f34cfb9 (0.73.0-0.73.2: items 4, 5, 23, item 1's arrow/tips, item 12 (a); contains U's 0.72.6), R6: PASS (notes)
 Read by hand (362ed095..0f34cfb9, ~140 game lines); no code hidden after `//`.
 - Item 5, the alarm clock: tapping your bunk at night opens #sleepAsk (− / + in 30-minute steps, 04:00-12:00, at least 30 minutes ahead), with the energy you'd wake with (`alarmEnergy`: needsDrain on a copy of the needs, restored in `finally`; needsDrain only touches the needs) and a warning when it's at or after your shift (`alarmLate`, through playerShiftOn). Unwell by day still naps at once. `SHIP.player.alarm` saved through SAVE_EXTRA, loaded only if `alarmOk` (else 06:00; old saves 06:00), reset by New game. Energy 4.4 → 4.8/h (lead's tuning). This replaces 0.28.9's "no dialog" at bedtime: it's the user's own playtest ask.
