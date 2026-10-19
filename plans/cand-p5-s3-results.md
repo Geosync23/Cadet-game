@@ -62,3 +62,4 @@ Build master 6 (BM6, session_01F8k6hqdBRoxDJMzqAuiHqR) on claude/p5-cand-pt1 (th
 - runner s3 DONE on 7a6e137: 14/15 OK (disc OK), 1 FAIL = leave (log plans/cand-0633-runner.md on claude/check-runner-s3 454a5fc). Lead 16: the leave fix goes to U (C2 archived); when it passes R4, rebuild the final with it and rerun leave, interactions, cadet.
 - final: days 5, 6 OK; player OK (1885 s). intro --week queued alone after days 7-8.
 - final: days 7, 8 OK (day_check 0-8 all OK); intro_check --week OK alone (180 s, every beat). My half all green. Only red: leave (U fixing, then rebuild + rerun leave, interactions, cadet).
+- leave fixed by U cf1348c (leave_check.py only): merged (752a794, game file = 7a6e137): LEAVE CHECK OK. Every check green; DEV_NOTES 0.63.3 row added. Waiting on R4's pass of cf1348c, then the hash goes to lead 16.
