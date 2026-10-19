@@ -60,3 +60,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - ~06:06 R5: E3 d51c5ed PASS for M10 (0.53.8 fixes). But 0.53.7 cabin + stars (2ce8e9e, inside d51c5ed) PASS WITH FIXES (5: floating shelf spot, invisible shelf things, no approach, key mismatches with W2, no save round trip): lead finds an owner. So d51c5ed carries known 24t problems; ask lead whether to take it or a cut without 24t.
 - ~06:07 lead 17: (a) take E3 d51c5ed + E4's (session_01PtXCwVBprdkJ6AcQisEyJq) fix commit on top; E4 does the 5 cabin+stars fixes before M17. If not passed when everything else is ready, tell the lead.
 - t5: interactions OK. t5 done: all OK except the career key-order FAIL (E1's fb499eb fix; retest on t7). t6: lines PASS, mech OK.
+- ~06:08 W2 4e0d212 (0.48.115: 24t cabin/star lines matched to the code); with R5.
