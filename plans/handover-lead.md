@@ -758,3 +758,4 @@ Read: CLAUDE.md; TEAM.md (Lead line, "OVERNIGHT MODE ON", "Tonight's goal", "Ove
 - ~06:52: R6 session_01CPyuA1o5jgxwQtv7huZTNg started (R5 ~60%). E5 all passed, idle. E6 0.45.16 rounds done (load-stop fix still unconfirmed). Rec deck + kayak briefs being drafted by a subagent (plans/brief-recdeck.md, plans/brief-kayak-proto.md).
 - ~06:53: briefs final (brief-recdeck.md with lead calls; brief-kayak-proto.md). E5 archived; K1 session_014EJhZSVqwXBxzuKH5sqdbh started on the kayak prototype in parallel.
 - ~06:54: R5 retired+archived (final note 9764b4d on claude/reviews-p5-step4); R6 owns review. Step 4 final waits on E4 M17 fix (0.53.11), X2 0.71.5, E6 0.45.16/17 review.
+- ~07:01: U retired+archived (0.72.6 0335523, R5 PASS; note 362ed09). U2 owns remaining HUD items incl. item 12(a). Working seats: BM7, R6, E4, E6, X2, U2, K1 (+ D3 on call, rec owner idle).
