@@ -281,7 +281,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.51.8
+   STARSHIP CADET: CSV Wren                           build 0.51.9
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8694,7 +8694,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.51.8';                           // keep in step with the header's build line
+const GAME_BUILD = '0.51.9';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -41969,6 +41969,94 @@ if (JOB_KINDS.fcase) WORK_TICKS.push((now, skip) => {
   const P = fcPlan(w); if (!P || P.d !== d || m < P.at || m > FC_EVE[1]) return;
   fcAsk(w, now);
 });
+
+// ---- fault-finder tickets (24l, E2 on H's behalf; favour-cases.html "Fault-finder tickets"). Day 13: Calder's Mail
+// (mail.ticket.first). From then, on a workday shift of yours, a ticket on the Works board at 08:00: a Tier 2 machine's
+// real fault (key 1022 the machine, 1023 the fault) held for you in slot 23 till 17:00, with a T2 head-scratcher made
+// by 24k's caseMake for a kind that's open (c.ticket: hints only after your third clue, 24k's caseHint). Solved right
+// first time: you're a Fault-finder (grade 1): W.ms ['ff1', day] (24 core's Record line, E1), the pin on your uniform
+// (section 8's s.pin, rebuilt by 24 core's playerRigRebuild), ticket.solved and works.pin. A wrong call: "Not yet. Next
+// week." (ticket.wrong): the ticket's over for this week, the job a plain repair; the next one a week on. Not taken: the
+// crew fix it at 17:00 and it's back the next workday. Saved: SHIP.works.side.ff = { grade, tries, next, job, mail }
+// (cleaned on read). Grades 2 and 3 (Days 19 and 24) are Steps 5 and 6 on this machinery.
+const FF_FROM = 13, FF_SLOT = 23, FF_POST = 480, FF_MAIL = 490, FF_HINT = 3;
+function ffState() {
+  const s = typeof worksSide === 'function' ? worksSide() : null; if (!s) return null;
+  const F = s.ff, n = (v, lo, hi, d) => Number.isInteger(v) ? Math.max(lo, Math.min(hi, v)) : d;
+  if (!F || typeof F !== 'object' || !s.ffOk) {
+    s.ff = { grade: n(F && F.grade, 0, 3, 0), tries: n(F && F.tries, 0, 999, 0), next: n(F && F.next, 0, 9999, FF_FROM), job: F && typeof F.job === 'string' ? F.job.slice(0, 80) : null, mail: F && F.mail ? 1 : 0 };
+    Object.defineProperty(s, 'ffOk', { value: true, enumerable: false, configurable: true });
+  }
+  return s.ff;
+}
+const ffSeed = () => machSeed('ticket');
+// the machine and its fault: a Tier 2 machine with no job of yours, the crew's or a case on it, a part fault that an open
+// case kind fits
+function ffPick(d) {
+  const kinds = caseKindsOpen(), ok = (m, f) => f.part && kinds.some(id => { try { return !!CASE_KINDS[id].fits(f, m); } catch (e) { return false; } });
+  const ms = machineList().filter(m => (m.tier || MACHINE_KINDS[m.kind].tier) === 2 && !ENGINE_KINDS.has(m.kind) && caseCauses(m).some(f => ok(m, f))
+    && !SHIP.jobs.some(j => j.machine === m.id && j.status !== 'done' && (j.claimedBy || j.case || j.reserved))).sort((a, b) => (a.id < b.id ? -1 : 1));
+  if (!ms.length) return null;
+  const m = ms[Math.floor(schedU(ffSeed(), d, 1022) * ms.length) % ms.length], fs = caseCauses(m).filter(f => ok(m, f));
+  return { m, f: fs[Math.floor(schedU(ffSeed(), d, 1023) * fs.length) % fs.length] };
+}
+function ffPost(t) {
+  const F = ffState(), C = typeof caseState === 'function' ? caseState() : null, d = worksDay(t); if (!F || !C || typeof jobReserve !== 'function') return null;
+  const P = ffPick(d); if (!P) return null;
+  const { m, f } = P, id = jobReserve(m.id, d, t % 1440, FF_SLOT, { tier: 2, until: (d - 1) * 1440 + DAY_SHIFT[1], cause: f.id }), j = id && SHIP.jobs.find(x => x.id === id);
+  if (!j) return null;
+  delete j.make; delete j.makeMins; j.cause = f.id; j.parts = [f.part]; j.ticket = true;
+  const kinds = caseKindsOpen().filter(k => { try { return !!CASE_KINDS[k].fits(f, m); } catch (e) { return false; } });
+  let c = null;
+  for (const kid of kinds) for (let k = 0; k < CASE_TRIES && !c; k++) { const r = caseMake(j, kid, k, d); if (!r.why) c = r.c; }
+  if (!c) { jobRelease(FF_SLOT); return null; }         // no fair case on it today: a plain repair; a ticket tomorrow
+  c.ticket = true; c.by = c.by || caseTalker(d); C.n++; C.open.push(c); j.case = c.id; F.job = j.id;
+  if (!c.wait) caseShow(c, j);
+  j.title = worksText('ticket.card', 'Ticket: {machine} ({shows})', { machine: caseMachName(j), shows: String(f.shows || '').split('|')[0] });
+  if (typeof MACH_REV !== 'undefined') MACH_REV++;
+  return j.id;
+}
+function ffGrade(n, t) {                                 // a grade: the Record's line, the pin, the words
+  const W = SHIP.works, F = ffState(); if (!W || !F || F.grade >= n) return false;
+  F.grade = n; if (!W.ms.some(x => x[0] === 'ff' + n)) W.ms.push(['ff' + n, worksDay(t)]);
+  ffPin();
+  try { toast(worksText('works.grade.' + n, 'Fault-finder'), worksText('ticket.solved', 'Calder signs it off. You\'re a Fault-finder.') + ' ' + worksText('works.pin', 'A small pin for your uniform.')); } catch (e) { /* no UI */ }
+  simNote('faultFinder', { grade: n });
+  return true;
+}
+function ffPin() {                                       // your uniform's pin (section 8's s.pin), from your grade
+  const F = ffState(), g = F ? F.grade : 0;
+  try { if (typeof player === 'undefined' || !player || (PLAYER_SPEC.pin || 0) === g || typeof playerRigRebuild !== 'function') return false;
+    PLAYER_SPEC.pin = player.spec.pin = g; playerRigRebuild(); return true; } catch (e) { return false; }
+}
+// the clock: Calder's Mail on Day 13 (or the first day after, for an Officer); a ticket at 08:00 on a workday of yours
+// once it's due; a wrong call ends this week's; solved, grade 1
+if (typeof caseMake === 'function') WORK_TICKS.push((now, skip) => {
+  const W = SHIP.works, F = W && W.rank !== 'junior' && ffState(); if (!F) return;
+  const d = worksDay(now), m = now - (d - 1) * 1440, C = caseState();
+  if (!F.mail && d >= FF_FROM && m >= FF_MAIL && m < 1260) {
+    F.mail = 1;
+    const mail = worksText('mail.ticket.first', 'A ticket | A ticket case, when you\'re ready. On the Works board, any shift. — Calder'), cut = mail.indexOf(' | ');
+    if (typeof mailSend === 'function') mailSend({ at: now, from: worksName('calder'), subject: cut > 0 ? mail.slice(0, cut) : 'A ticket', body: cut > 0 ? mail.slice(cut + 3) : mail });
+  }
+  const j = F.job && SHIP.jobs.find(x => x.id === F.job), c = j && C && (C.open.find(x => x.job === j.id) || null);
+  if (F.job && j) {
+    if (c && c.crossed.length) {                         // a wrong call: not yet, next week (the job a plain repair)
+      F.tries++; F.next = d + 7; F.job = null; if (typeof caseRelease === 'function') caseRelease(c, j); jobRelease(FF_SLOT);
+      if (!skip) try { toast(j.title, worksText('ticket.wrong', 'Not yet. Next week.')); } catch (e) { /* no UI */ }
+      simNote('ticket', { step: 'wrong', tries: F.tries });
+      return;
+    }
+    if (j.status === 'done') { F.job = null; if (j.doneBy === 'you' && j.rightFirst !== false && !(c && c.crossed.length)) ffGrade(1, now); return; }
+    if (!heldForYou(j) && j.claimedBy !== 'you') F.job = null;   // released at 17:00: the crew's; back tomorrow
+    return;
+  }
+  if (F.job && !j) F.job = null;
+  if (F.grade >= 1 || d < Math.max(FF_FROM, F.next) || !playerShiftOn(d) || m < FF_POST || m > DAY_SHIFT[1] - 120) return;
+  if (SHIP.jobs.some(x => x.ticket && worksDay(x.posted) === d)) return;   // one a day
+  ffPost(now);
+});
+WORK_TICKS.push(() => { if (SHIP.works && SHIP.works.side && SHIP.works.side.ff && SHIP.works.side.ff.grade && typeof player !== 'undefined' && player && (PLAYER_SPEC.pin || 0) !== SHIP.works.side.ff.grade) ffPin(); });   // a reload: the pin back on
 
 // ---------------------------------------------------------------------
 // 24o LEAK HUNTING (M13, seat E2 (M2's), 0.51.x; plans/mechanics/m13-leak-hunting.html). A side job from Day 12, an

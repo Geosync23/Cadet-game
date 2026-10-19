@@ -736,6 +736,43 @@ def extra_fcase(g):
     check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'fcase: differs the second time')
 EXTRA['fcase'] = extra_fcase
 
+# ---- fault-finder tickets (24l, seat E2): Calder's Mail on Day 13; a ticket at 08:00 on a workday (a Tier 2 machine's
+# fault, held in slot 23, a T2 case); solved right first time: grade 1 (W.ms ff1); a wrong call: "Not yet. Next week."
+# (the next a week on, the job a plain repair); junk in the save cleaned; the same twice
+FF = r"""(() => { const out = {}, W0 = JSON.stringify(SHIP.works);
+ const reset = t => { machinesNew(); SHIP.jobs = []; SHIP.mail = []; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t); machinesNow(); SHIP.works = null; const W = worksInit(t); W.tier = 2; W.rank = 'officer'; W.tr.t2 = 10;
+   for (const r of CAREER_LADDER) if (r.tier === 1 || ['p1', 'p2', 'm9'].includes(r.id)) { W.tr[r.id] = 5; (W.op[5] = W.op[5] || []).push(r.id); }
+   delete worksSide().ffOk; worksSide().ff = null; W.inc = { plan: {}, open: null }; W.cases = { open: [], done: [], n: 0 }; return W; };
+ const tick = (a, b) => { for (let t = a; t <= b; t += 10) { setShipNow(t); machinesNow(); for (const f of WORK_TICKS) f(t, false); } };
+ const solve = (j, right) => { const c = caseState().open.find(x => x.job === j.id); if (!c) return 'nocase';
+   if (c.wait) { c.wait = false; caseShow(c, j); } claimJob(j.id); caseCall(c.id, right ? c.cause : c.sus.find(x => x !== c.cause));
+   jobStops(j).forEach((s, k) => jobStepDone(j.id, k)); return [c.band, c.kind, !!c.ticket, turnInJob(j.id)]; };
+ let W = reset(12 * 1440 + 300); out.kinds = caseKindsOpen();
+ tick(12 * 1440 + 480, 12 * 1440 + 500); out.mail = [SHIP.mail.filter(x => /Calder/.test(x.from || '')).length, worksSide().ff.mail];
+ tick(14 * 1440 + 470, 14 * 1440 + 490); let j = SHIP.jobs.find(x => x.ticket);
+ out.posted = j ? [worksDay(j.posted), Math.round(j.posted % 1440), j.reserved, jobTier(j), j.title] : null; if (!j) return out;
+ out.solved = solve(j, true); tick(shipNow() + 10, shipNow() + 20);
+ out.grade = [worksSide().ff.grade, W.ms.find(x => x[0] === 'ff1') || null];
+ tick(15 * 1440 + 470, 15 * 1440 + 490); out.after = SHIP.jobs.filter(x => x.ticket && worksDay(x.posted) === 16).length;
+ W = reset(14 * 1440 + 300); tick(14 * 1440 + 470, 14 * 1440 + 490); j = SHIP.jobs.find(x => x.ticket);
+ out.wrong = j ? solve(j, false) : null; tick(shipNow() + 10, shipNow() + 20);
+ out.wrongAfter = [worksSide().ff.grade, worksSide().ff.tries, worksSide().ff.next, worksSide().ff.job];
+ tick(15 * 1440 + 470, 15 * 1440 + 490); out.notYet = SHIP.jobs.filter(x => x.ticket && worksDay(x.posted) === 16).length;
+ worksSide().ff = { grade: 9, tries: 'x', next: 22, job: 5 }; delete worksSide().ffOk; out.save = JSON.stringify(ffState());
+ SHIP.works = JSON.parse(W0); return out; })()"""
+def extra_ff(g):
+    a, b = g.ev(FF), g.ev(FF)
+    print('  ff kinds', a['kinds'], 'mail', a['mail'], 'posted', a.get('posted'), 'solved', a.get('solved'), 'grade', a.get('grade'), 'after', a.get('after'), 'wrong', a.get('wrong'), a.get('wrongAfter'), 'notYet', a.get('notYet'))
+    check(a['mail'] == [1, 1], "ff: Calder's Mail on Day 13")
+    if not check(a.get('posted') and a['posted'][0] == 15 and a['posted'][1] == 480 and a['posted'][2] == 23 and a['posted'][3] == 2, 'ff: a ticket at 08:00 on the next workday, Tier 2, held in slot 23'): return
+    check(a['solved'][0] == 'T2' and a['solved'][2] and a['solved'][3], 'ff: a T2 case, solved and turned in')
+    check(a['grade'][0] == 1 and a['grade'][1], 'ff: right first time: grade 1, the Record\'s ff1')
+    check(a['after'] == 0, 'ff: no more tickets once graded (grades 2-3 are later steps)')
+    check(a['wrongAfter'][0] == 0 and a['wrongAfter'][1] == 1 and a['wrongAfter'][2] == 22 and a['wrongAfter'][3] is None and a['notYet'] == 0, 'ff: a wrong call: not yet, the next a week on')
+    check(json.loads(a['save']) == {'grade': 3, 'tries': 0, 'next': 22, 'job': None, 'mail': 0}, f"ff: the save cleaned ({a['save']})")
+    check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'ff: differs the second time')
+EXTRA['ff'] = extra_ff
+
 only = set(sys.argv[2:])
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
@@ -763,7 +800,7 @@ with sync_playwright() as pw:
         if r['id'] in PARTS:
             PARTS[r['id']](g)
     for k, f in EXTRA.items():                             # parts that aren't ladder rows (24l's favour cases)
-        if (not only or k in only) and ev(f"!!JOB_KINDS['{k}']"): print(k + ':'); f(g)
+        if (not only or k in only) and ev(f"!!JOB_KINDS['{k}'] || (typeof ffState === 'function' && '{k}' === 'ff')"): print(k + ':'); f(g)
     ev("SHIP.works = null")
     if g.errors: fail('page errors: ' + ' | '.join(g.errors[:5]))
     g.close()
