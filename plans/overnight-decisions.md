@@ -307,3 +307,4 @@ The user went to bed ~03:40: **overnight mode ON** until they check in in the mo
 - Later Wren talks (after the first four): no full meetings.
 - Pool stroke timing and putting the prototypes in the game: the user will test and say. Prototypes stay out of the game until then.
 - No survey needed for these.
+| ~12:12 | Rec engineer A out of memory; its build clashes with rec engineer B's (two things share a name, so the combined game would not load) | Rec engineer B renames A's two (on A's branch, with the lead's OK); B's stay as they are | One small rename; the seat with room does it |
