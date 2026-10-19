@@ -94,3 +94,5 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - ~06:41 X2: the loaders' crate fix is not in ec0cbc3; coming in 0.71.5 with the items 21+22 wake/breakfast redo; X2 runs intro --week on that tip.
 - t10: mech, career, machine OK, cadet ALL IDENTICAL; food running.
 - ~06:46 E4 claude/mech-diagnose 85a4cb6: 0.53.9 bca66df M17 lift roof (24s); 0.53.10 f431a79 R5's five 24t fixes; E4's checks OK (mech, deck, interactions, cadet ALL IDENTICAL vs 0.53.8); with R5.
+- t10 done: mech, career, machine, food OK, cadet ALL IDENTICAL (all passed tips: E6 910131e, E5 60a418f, E3 d51c5ed, W2 0e8571a).
+- trial t11 (wt2) = 2bc08d5 + E6 910131e + E5 60a418f + E4 85a4cb6 (= E3 d51c5ed + M17 lift roof 24s + R5's five 24t fixes) + X2 ec0cbc3 + W2 0e8571a (E4/X2 with R5): mech_check hand merges as before (E4's part_m17 joins E3's parts; keep both). verify_merge: the same 6 under 85a4cb6 (E1 rewrites). NAMES OK (3222), parses, bake 9560 / 48. Checks running: mech, career, machine, cadet (expect X's earlier crew wake), deck, interactions, food, events.
