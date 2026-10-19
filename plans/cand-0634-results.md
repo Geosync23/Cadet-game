@@ -41,3 +41,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - t3 player: hit my 1800 s limit (rc 124, no FAIL lines before it; player needs ~2700 s): not a result; player runs again with TMO=2700 on the next full trial. t5 checks started.
 - ~05:55 R4 PASS W2 606e204 (W2's tip).
 - ~05:55 R4: E2 b6130f6 PASS WITH FIXES: hold for E2's next hash (merge note matches t5's: mech_check keep both after part_m9). t5 checks continue as a preview.
+- ~05:56 lead 17: new reviewer R5 = session_01XJyHzg4QvX2nsdtf9zT1TH (R4 retires after X's 0.71.3 review). Crew seat X is now X2 = session_016jw3fP3pGztfciWgr6hg9A. Calls: M13 leak = +1 rep (the page); E2 fixing R4's 3 items on b6130f6.
