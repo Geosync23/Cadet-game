@@ -15,3 +15,5 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - ~05:19 R4 PASS W2 b00e08b. trial t2 (2bc08d5 + E3 b809339 + W2 b00e08b): merges clean, bake 9569 lines / 434 conversations / 47 meetings / 35 traditions, NAMES OK, lines PASS (0 errors, 2 warnings). (writer-p5 tip is now 7dffd32: not sent yet.)
 - ~05:20 W2 8879ee3 (0.48.107 on b00e08b: tip.round.look reworded, leak.worn for E2); with R4.
 - trial t1: deck OK, cadet_test vs 0.63.3-with-0.63.4-label ALL IDENTICAL; interactions running.
+- ~05:21 R4 PASS W2 8879ee3 (W2's tip, contains b00e08b). E1 b68e236 (0.45.7 round 1 24 core: tool wear, worksSide/worksSideXp/WORKS_SIDE_KINDS, section 15 Bunk 1 texts; career_check + mech_check changed; on 7a6e137); with R4.
+- trial t3 (wt2) = 2bc08d5 + E1 b68e236 + E3 b809339 + W2 8879ee3: merges clean (only build lines), verify_merge 0 problems, NAMES OK (3027), parses, bake 9570 lines / 47 meetings. Checks running: lines, mech, career, cadet, player.
