@@ -269,7 +269,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.47.11
+   STARSHIP CADET: CSV Wren                           build 0.47.12
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -641,16 +641,17 @@ function roomLocked(rk) {
 }
 // who: the player (or a crew member) a path or a collision is for; a service hatch is open only to those it lets through
 // 0.47.11 (Pillar 5 Step 3, for the career seat C2): doors shut to you, and only you, until something lets you in. YOU_LOCKS[deck]:
-// [{ keys, open(), tap() }]. Deck 1's bridge doors wait for C2's bridgeInvitedNow() (SHIP.bridgeInvited); until C2 defines it they
+// [{ keys, open(key), tap(key) }]. Deck 1's bridge doors ask C2's bridgeBarred(edge) (section 20: not invited, no appointment, not
+// already inside); without it, a bridgeInvitedNow() if defined; with neither they
 // are open, as before (h,14,10: the floor hatch up from the sub-floor crawl, the back way in). A locked one blocks your walking and your paths (edgeBlocks), doesn't slide open as you come up to it, and
 // a tap on it says why (youLockTap(key) -> { t, x }; the line is W2's `bridge.permission` when it's baked). The crew pass as ever
-const YOU_LOCKS = { 1: [{ keys: ['v,10,5', 'v,10,6', 'h,14,10'], open: () => typeof bridgeInvitedNow !== 'function' || !!bridgeInvitedNow(),
+const YOU_LOCKS = { 1: [{ keys: ['v,10,5', 'v,10,6', 'h,14,10'], open: key => typeof bridgeBarred === 'function' ? !bridgeBarred(EDGES.get(key)) : (typeof bridgeInvitedNow !== 'function' || !!bridgeInvitedNow()),   // 0.47.12: C2's rule (section 20) when it's there
   tap: key => { let r = null; try { r = typeof bridgeDoorTap === 'function' ? bridgeDoorTap(key) : null; } catch (e) { r = null; } if (r) return r;   // C2's words first (section 20)
     let x = null; try { x = typeof careerText === 'function' && careerText('bridge.permission'); } catch (e) { x = null; } return { t: 'Bridge', x: x || 'The bridge is for the watch on duty. You\'ll need an invitation before you can go in.' }; } }] };
 function youLock(key, who) {
   if (!who || !(who === 'player' || who.isPlayer || (typeof player !== 'undefined' && who === player)) || !deckDef) return null;
   const L = YOU_LOCKS[deckDef.num]; if (!L) return null;
-  for (let k = 0; k < L.length; k++) if (L[k].keys.includes(key) && !L[k].open()) return L[k];
+  for (let k = 0; k < L.length; k++) if (L[k].keys.includes(key) && !L[k].open(key)) return L[k];
   return null;
 }
 const youLockTap = key => { const L = youLock(key, 'player'); return L ? L.tap(key) : null; };
@@ -8681,7 +8682,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.47.11';                           // keep in step with the header's build line
+const GAME_BUILD = '0.47.12';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
