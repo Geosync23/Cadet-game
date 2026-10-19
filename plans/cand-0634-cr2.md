@@ -20,3 +20,17 @@ Second check runner (CR2), final round, 2026-10-19 ~08:01-08:25. Each check ran 
 | leave | PASS | 17s | LEAVE CHECK OK |
 
 All 14 PASS. BM7 ran the other half (interactions, cadet, career, mech, machine, puzzle, social, lines, player, day 0-8, intro --week).
+
+## Second half for BM8: claude/p5-cand-s4 c336170 (game file = 92d40d5)
+
+Run one after another, each with its own CADET_WORK, from a detached worktree of c336170, ~08:27-08:45.
+
+| check | result | time | last line |
+|---|---|---|---|
+| day_check 5 | PASS | 205s | DAY CHECK OK |
+| day_check 6 | PASS | 209s | DAY CHECK OK |
+| day_check 7 | PASS | 199s | DAY CHECK OK |
+| day_check 8 | PASS | 209s | DAY CHECK OK |
+| intro_check --week | PASS | 212s | OK |
+
+All 5 PASS.
