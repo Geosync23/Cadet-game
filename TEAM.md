@@ -59,6 +59,8 @@ The project lead session keeps this file current. A new lead session reads it fi
 
 **Playable build (from 0.60.3, 2026-10-17 ~15:06): https://claude.ai/artifact/SmL8Na1iTB2JQZDP4dYdou** (0.60.2 was on V4DydXnczhPGHdGVJLe2nq).
 
+**Overnight team size (the user, ~03:08 2026-10-19):** when overnight mode is on, about 6-7 sessions work at once INCLUDING the lead. Lead 16's plan: lead; build master (combines and runs checks; a 2nd check runner only for a final round, counted in the 7); reviewer; engineer A = systems + mechanics (today's S2, M2, M3, H2); engineer B = career + crew + HUD (today's C2, X, U); head writer; a designer only when a plan page is needed (else 6). Seats finish their current piece, write their handover, and the merged seats start fresh from those notes. Overnight mode itself is not on (the user, ~02:52).
+
 ## Chain of command (the user, 2026-10-17)
 
 **The user → the lead → everyone else.** The lead is directly under the user, reports only to the user, and is the ONLY session that talks to the user. No helper ever contacts the user (no messages, no notifications); anything for the user goes to the lead.
