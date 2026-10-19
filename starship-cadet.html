@@ -10192,48 +10192,38 @@ function worksGather(until = shipNow() + 15) {
 }
 // your box on the way to 4-23 (Day 10, 17:05): Tomas and Pell wait by its door on Deck 4 holding it
 function boxCarry(until = shipNow() + 40) { return crewGather(['tomas', 'pell'], [41, 14], { deck: 4, until, hold: 'carry' }); }
-// the officer ceremony's guests (Day 11, 17:15, Deck 1's observation room): one appointment with the Captain, Vance,
-// Calder, Torres and up to three friends, each at their own seat at the conference table (a.places), so section 14's
-// apptWhere brings them by lift and seats them; booked once (its occ id), saved with the device's appointments
+// the officer ceremony's guests (Day 11, 17:15, Deck 1's observation room): C2's occasion books one appointment at
+// 07:00 (id 'promoCeremony@<day>', with the Captain, Vance, Calder, Torres and promoGuests' friends); this gives each of
+// them their own seat at the conference table (a.places, saved with the appointment), so section 14's apptWhere brings
+// them by lift and seats them instead of piling onto one place
 const CEREMONY_SEATS = ['1-conf-1', '1-conf-2', '1-conf-3', '1-conf-4', '1-conf-5', '1-conf-6', '1-conf-7', '1-conf-8'];
-function ceremonyBook(day, at = 1035, len = 25) {
-  if (typeof apptAdd !== 'function') return null;
-  const ids = ['marrow', 'vance', 'calder', 'torres-zeke'].concat(ceremonyGuests(3, day)).filter(id => SOC.idx.has(id) && socAboard(SOC.crew[SOC.idx.get(id)], day));
-  const places = {}; ids.forEach((id, k) => { if (CEREMONY_SEATS[k]) places[id] = CEREMONY_SEATS[k]; });
-  const a = apptAdd({ id: 'promo:ceremony2', with: ids, at: (day - 1) * 1440 + at, len, where: CEREMONY_SEATS[0], kind: 'meeting', title: 'Officer ceremony' });
-  if (a && !a.places) a.places = places;
-  return a;
+function ceremonySeat(day) {
+  const a = apptList().find(x => /^promoCeremony@/.test(String(x.occ || x.id)) && Math.floor(x.at / 1440) + 1 === day); if (!a || a.places) return a || null;
+  const places = {}; a.with.forEach((id, k) => { if (CEREMONY_SEATS[k]) places[id] = CEREMONY_SEATS[k]; }); a.places = places; return a;
 }
-// the sim side of the first promotion, a ship minute at a time (section 20's social tick): C2's promoPlan() (pure, from
-// the save) says when; this sets the crew going. Live and once a day per step (PROMO_LIVE), except the ceremony's
-// appointment, which is saved. The steps: the Works crew round the board (gather), Tomas and Pell with your box by
-// 4-23 from the move's time (box) and Tomas's goodbye once 4-23 is yours (bye), the ceremony's guests booked
-const PROMO_LIVE = new Set();
+// the sim side of the first promotion (plans/mechanics/promotion-officer.html; C2's 24 core says when): the Works crew
+// round the board for a quarter of an hour from simNote('promoted'); Tomas and Pell with your box by 4-23 from
+// simNote('moveStart'); Tomas's goodbye once 4-23 is yours; the ceremony's seats (promoTick, each ship minute, from
+// section 20's social tick). Live and once a day per step (PROMO_LIVE), except the seats, saved with the appointment
+const PROMO_LIVE = new Set(), promoOnce = k => { const key = k + '@' + SHIP.time.day; if (PROMO_LIVE.has(key)) return false; PROMO_LIVE.add(key); return true; };
+if (typeof onSim === 'function') {
+  onSim('promoted', n => { const t = Number.isFinite(n && n.t) ? n.t : shipNow(); if (shipNow() - t <= 15 && promoOnce('gather')) worksGather(t + 15); });
+  onSim('moveStart', n => { const t = Number.isFinite(n && n.t) ? n.t : shipNow(); if (shipNow() - t <= 45 && playerBed() !== '4-23' && promoOnce('box')) boxCarry(t + 45); });
+}
 function promoTick() {
-  const P = typeof promoPlan === 'function' ? (() => { try { return promoPlan(); } catch (e) { return null; } })() : null; if (!P) return;
-  const day = SHIP.time.day, m = SHIP.time.min, B = (day - 1) * 1440, once = k => !PROMO_LIVE.has(k + '@' + day) && !!PROMO_LIVE.add(k + '@' + day);
-  if (P.gather && P.gather.day === day && m >= P.gather.from && m < P.gather.to && once('gather')) worksGather(B + P.gather.to);
-  if (P.move && P.move.day === day && m >= P.move.at && m < P.move.at + 45 && playerBed() !== '4-23' && once('box')) boxCarry(B + P.move.at + 45);
-  if (P.move && P.move.day === day && PROMO_LIVE.has('box@' + day) && playerBed() === '4-23' && typeof DECK_CREW !== 'undefined') {
-    const a = DECK_CREW.find(x => x.p.id === 'tomas'), pp = player.obj.position;
-    if (a && Math.hypot(a.x - pp.x, a.z - pp.z) < 5 && once('bye')) {
-      const l = socLine(a.p, 'work', { t: shipNow(), flags: { 'promo.bye': true } }); bubbleSay(a.h, l ? l.text : 'Don\'t be a stranger, Officer.', 6);
-      crewScene('tomas', { mode: 'wait', to: { deck: 4, tile: [40, 14] }, until: shipNow() + 2, hold: null }); crewScene('pell', { mode: 'wait', to: { deck: 4, tile: [42, 14] }, until: shipNow() + 2, hold: null });   // the box is in: a minute, then off they go
-    }
+  const day = SHIP.time.day;
+  if (SHIP.time.min >= 420 && apptList().length && !PROMO_LIVE.has('seat@' + day) && ceremonySeat(day)) PROMO_LIVE.add('seat@' + day);
+  if (!PROMO_LIVE.has('box@' + day) || typeof DECK_CREW === 'undefined') return;
+  const pp = player.obj.position, near = id => { const a = DECK_CREW.find(x => x.p.id === id); return a && Math.hypot(a.x - pp.x, a.z - pp.z) < 4 ? a : null; };
+  if (!PROMO_LIVE.has('boxsaid@' + day)) {             // Tomas or Pell says a word as you come up to them with the box
+    const a = [near('tomas'), near('pell')].find(x => x && x.hold === 'carry');
+    if (a && promoOnce('boxsaid')) { const l = socLine(a.p, 'work', { t: shipNow(), flags: { 'promo.box': true } }); if (l) bubbleSay(a.h, l.text, 5); }
   }
-  if (P.ceremony && P.ceremony.day === day && m < P.ceremony.at && once('ceremony')) ceremonyBook(day, P.ceremony.at);
-  if (PROMO_LIVE.has('box@' + day) && typeof DECK_CREW !== 'undefined' && !PROMO_LIVE.has('boxsaid@' + day)) {   // Tomas or Pell says a word as you come up to them with the box
-    const pp = player.obj.position, a = DECK_CREW.find(x => (x.p.id === 'tomas' || x.p.id === 'pell') && x.hold === 'carry' && Math.hypot(x.x - pp.x, x.z - pp.z) < 4);
-    if (a && once('boxsaid')) { const l = socLine(a.p, 'work', { t: shipNow(), flags: { 'promo.box': true } }); if (l) bubbleSay(a.h, l.text, 5); }
+  const a = playerBed() === '4-23' && near('tomas');
+  if (a && promoOnce('bye')) {                           // the box is in: Tomas's goodbye as a bunkmate, then off they go
+    const l = socLine(a.p, 'work', { t: shipNow(), flags: { 'promo.bye': true } }); bubbleSay(a.h, l ? l.text : 'Don\'t be a stranger, Officer.', 6);
+    for (const [id, tile] of [['tomas', [40, 14]], ['pell', [42, 14]]]) crewScene(id, { mode: 'wait', to: { deck: 4, tile }, until: shipNow() + 2 });
   }
-}
-// the officer ceremony's friends (Day 11): up to n crew you're closest to (relTier, highest first; ties by the
-// ceremony's hash key 851), aboard, not the fixed party
-function ceremonyGuests(n = 3, d = SHIP.time.day) {
-  if (typeof socInit !== 'function') return []; socInit();
-  const fixed = new Set(['marrow', 'vance', 'calder', 'torres-zeke', 'you']);
-  return SOC.crew.filter(p => !fixed.has(p.id) && relTier(p.id) >= 2 && socAboard(p, d) && p.rank !== 'guest')
-    .map(p => [p.id, relTier(p.id), (SHIP.rel[p.id] || {}).pts || 0, schedU(p.seed, d, 851)]).sort((a, b) => b[1] - a[1] || b[2] - a[2] || a[3] - b[3]).slice(0, n).map(x => x[0]);
 }
 // crewComeTo(p, placeId, onArrive, { until }) (Pillar 4: visits, friends walking over): a crew member walks to a
 // place on the deck you're on (by lift if they're elsewhere), onArrive(agent) is called once when they get there, and
