@@ -2445,7 +2445,7 @@ They checked:
 
 **puzzle_check.py** (0.55.0, seat H): `CADET_CHROME=/opt/pw-browsers/chromium python3 puzzle_check.py BUILD.html` checks the head-scratchers (section 24k, plans/mechanics/case-engine.html). The device's chips block and its buttons fallback; the case engine with a stand-in kind (a sweep of cases through every band, the rate roll, a case in play, the save); about 2 minutes. With 24 core in the build it opens Fault notes as the Works app's tab (checked on a trial combine with C's 2ea7ab2: puzzle_check and device_check OK). Run it whenever section 24k, the chips block or the fault tables change.
 
-**interactions_check.py** (0.37.0): the player's extra interactions, the job board and the goal pointer (section 15b); see "Player interactions". Run it with player_check whenever sections 15, 15b or the places change.
+**interactions_check.py** (0.37.0): the player's extra interactions, the job board and the goal pointer (section 15b); see "Player interactions". Run it with player_check whenever sections 15, 15b or the places change. Its "tap at the stop" taps the floor at the stop, or within JOB_REACH of it, where no crew member is in front on screen (X3, after 0.71.6: Sol waiting by Deck 3's lift took the tap as a chat; a tap on a person talks to them by design).
 
 **clothes_check.py** (0.42.40): `CADET_CHROME=/opt/pw-browsers/chromium python3 clothes_check.py BUILD.html` (about 2 minutes) switches clothes on in a test game and taps through a week's clothes: the arrival's spare, yesterday's clothes, the hamper, Put down, the washers (busy, all busy, done), putting it away, the save mid-wash, new games. Run it whenever section 21b, the bunk rooms, the laundry, Put down or the needs change.
 
