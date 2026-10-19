@@ -203,3 +203,4 @@ All 8 packages approved (Zeke: "all good except he still walks and talks" → he
 | | Rec staff | None: self-serve, no lifeguard; Maeve Volkov keeps the machines |
 | | Film night | Moves to the auditorium after the first all-hands; the junior common room becomes a quiet Saturday hangout |
 | | Rec opening | When switched on: open from Day 1 (06:00-midnight) |
+| ~00:30 (the user) | Session depth | Loosened: lead 15 (depth 5) may start helper seats at depth 6 (helpers never start sessions); the user starts a fresh level-0 chain (lead 16) before Step 3 |
