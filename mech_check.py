@@ -45,7 +45,7 @@ TRAIN = r"""((id) => {
   const seen = [], doJob = jid => { const j0 = SHIP.jobs.find(x => x.id === jid); if (j0 && j0.kind === 'team') return teamDo(jid); if (!claimJob(jid)) return false; const j = SHIP.jobs.find(x => x.id === jid);
     const cs = SHIP.works && SHIP.works.cases && (SHIP.works.cases.open || []).find(c => c.job === jid);   // a head-scratcher (24k): call it right first
     if (cs && typeof caseCall === 'function') caseCall(cs.id, cs.cause);
-    jobStops(j).forEach((s, k) => jobStepDone(jid, k)); return turnInJob(jid); };
+    jobStops(j).forEach((s, k) => jobStepDone(jid, k, j.kind === 'rewire' && s.step === 'wire' ? { pick: 'T' + (k - rewFirst(j) + 1) } : undefined)); return turnInJob(jid); };   // 24q: a rewire's pairs answered from its chart
   let teacher = null, yours = null;
   for (let m = 360; m < 1020; m += 10) {
     const t = (d - 1) * 1440 + m; setShipNow(t); machinesNow(); worksCareerTick(t);
@@ -638,13 +638,61 @@ def part_m14(g):
 PARTS['m14'] = part_m14
 
 ROW_STAND = r"""(() => { const out = [];
+  if (typeof worksSide !== 'function') { window.worksSide = () => SHIP.works ? (SHIP.works.side = SHIP.works.side || {}) : null; out.push('worksSide'); }
   if (typeof LEAK_FROM !== 'undefined' && !ladderRow('m13')) { CAREER_LADDER.push({ id: 'm13', name: 'Leak hunting', size: 'small', day: LEAK_FROM, tier: 2, rank: 'officer', needs: null, by: LEAK_BY.slice(), job: 'leak', stages: [{ uses: 0 }, { uses: LEAK_GALLERY }] }); out.push('m13'); }
   if (typeof NOZ_FROM !== 'undefined' && !ladderRow('m14')) { CAREER_LADDER.push({ id: 'm14', name: 'Garden irrigation', size: 'small', day: NOZ_FROM, tier: 2, rank: 'officer', needs: null, by: NOZ_BY.slice(), job: 'nozzle', stages: [{ uses: 0 }, { uses: 2 }, { uses: 4 }] }); out.push('m14'); }
+  if (typeof REW_FROM !== 'undefined' && !ladderRow('m15')) { CAREER_LADDER.push({ id: 'm15', name: 'Rewiring', size: 'big', day: REW_FROM, tier: 2, rank: 'officer', needs: null, by: ['calder'], where: { deck: 4, room: '-' }, job: 'rewire', tool: 'tester', stages: [{ uses: 0 }, { uses: REW_FADE }] }); out.push('m15'); }
   return out; })()"""
 # the rows (24 core's, E1) and E2's sub-blocks agree: a retune on either side fails here instead of drifting (R4)
 ROW_AGREE = r"""(() => { const r13 = ladderRow('m13'), r14 = ladderRow('m14'), same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
   return { m13: !r13 || (r13.day === LEAK_FROM && r13.tier === 2 && r13.size === 'small' && (r13.stages || [])[1] && r13.stages[1].uses === LEAK_GALLERY && same(r13.by, LEAK_BY)),
+           m15: typeof REW_FROM === 'undefined' || !ladderRow('m15') || (ladderRow('m15').day === REW_FROM && ladderRow('m15').size === 'big' && ladderRow('m15').tier === 2 && (ladderRow('m15').stages || [])[1] && ladderRow('m15').stages[1].uses === REW_FADE && ladderRow('m15').by[0] === 'calder'),
            m14: !r14 || (r14.day === NOZ_FROM && r14.tier === 2 && r14.size === 'small' && same((r14.stages || []).map(x => x.uses), [0, 2, 4]) && same(r14.by, NOZ_BY)) }; })()"""
+# ---- M15 rewiring (24q, seat E2): one a week from Day 17 once trained, 08:00 on a workday of yours, a junction job at Tier
+# 2; open the box, a pair per wire, test: right first time puts the junction right; a wrong pair pops at the test and
+# only that pair opens again (never a fail); from 3 a faded chart wants the lights flicked first; not taken, the crew's
+# the next day; junk in the save cleaned; the same twice
+M15 = r"""(() => { const out = {}, W0 = JSON.stringify(SHIP.works);
+ const reset = t => { machinesNew(); SHIP.jobs = []; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t); machinesNow(); SHIP.works = null; const W = worksInit(t); W.tier = 2; W.rank = 'officer'; W.tr.t2 = 10; W.tr.m15 = 17; W.use.m15 = 1; delete worksSide().rewOk; worksSide().rewire = null; W.inc = { plan: {}, open: null }; return W; };
+ const tick = (a, b) => { for (let t = a; t <= b; t += 10) { setShipNow(t); machinesNow(); for (const f of WORK_TICKS) f(t, false); } };
+ let W = reset(20 * 1440 + 300); const seen = new Map(); for (let t = 20 * 1440 + 360; t <= 41 * 1440 + 500; t += 10) { setShipNow(t); machinesNow(); for (const f of WORK_TICKS) f(t, false); for (const x of SHIP.jobs) if (x.kind === 'rewire') seen.set(x.id, x); }
+ const js = [...seen.values()]; out.weeks = js.map(x => [worksDay(x.posted), weekday(worksDay(x.posted)), Math.round(x.posted % 1440), x.machine, jobTier(x), x.chart.length, x.status]);
+ const right = (j, k) => ({ pick: 'T' + (k - rewFirst(j) + 1) });
+ W = reset(22 * 1440 + 480); let j = rewJob('4-junction-1', shipNow(), { key: 99 }); SHIP.jobs.push(j); SHIP.machines['4-junction-1'].cond = 40;
+ out.board = !!openJobs().find(x => x.id === j.id); out.claimed = claimJob(j.id);
+ let S = jobStops(j); out.stops = S.map(s => s.step + ':' + s.how);
+ out.early = jobStepDone(j.id, 1, right(j, 1)).ok;
+ jobStepDone(j.id, 0, {}); S.forEach((s, k) => { if (s.step === 'wire') jobStepDone(j.id, k, right(j, k)); });
+ out.test = jobStepDone(j.id, S.length - 1, {}).ok; out.turnin = turnInJob(j.id); out.right = [j.rightFirst, j.wrongs, SHIP.machines['4-junction-1'].cond >= 90, worksSide().rewire.done];
+ // a wrong pair: the fuse pops, only that pair opens again
+ j = rewJob('4-junction-2', shipNow(), { key: 98 }); SHIP.jobs.push(j); claimJob(j.id); S = jobStops(j); jobStepDone(j.id, 0, {});
+ S.forEach((s, k) => { if (s.step === 'wire') jobStepDone(j.id, k, k === 2 ? { pick: 'T1' } : right(j, k)); });
+ out.pop = jobStepDone(j.id, S.length - 1, {}).ok; out.open = S.map((s, k) => (j.stepsDone || []).includes(k) ? 1 : 0); out.wrongs = j.wrongs;
+ jobStepDone(j.id, 2, right(j, 2)); out.retest = jobStepDone(j.id, S.length - 1, {}).ok; out.turnin2 = turnInJob(j.id); out.after = [j.rightFirst, worksSide().rewire.wrongs];
+ // stage 1: a faded chart, the lights first
+ W.use.m15 = 3; j = rewJob('4-junction-1', shipNow(), { key: 97, stage: worksStage('m15') }); SHIP.jobs.push(j); claimJob(j.id); S = jobStops(j); jobStepDone(j.id, 0, {});
+ out.faded = [j.faded.length, S[1].step, jobStepDone(j.id, 2, right(j, 2)).ok, jobStepDone(j.id, 1, {}).ok, jobStepDone(j.id, 2, right(j, 2)).ok];
+ // not taken: the crew's the next day
+ W = reset(22 * 1440 + 480); j = rewJob('4-junction-1', shipNow(), { key: 96 }); SHIP.jobs.push(j); out.held = leaveEnd(j) - 22 * 1440;
+ tick(22 * 1440 + 490, 23 * 1440 + 900); out.crew = [j.status, j.doneBy !== 'you' && !!j.doneBy];
+ worksSide().rewire = { done: 'x', wrongs: -4 }; delete worksSide().rewOk; out.save = JSON.stringify(rewState()); worksSide().rewire = { done: 3, wrongs: 1, week: 4 }; delete worksSide().rewOk; out.save2 = JSON.stringify(rewState());
+ SHIP.works = JSON.parse(W0); return out; })()"""
+def part_m15(g):
+    check(g.ev(ROW_AGREE)['m15'], 'm15: the ladder row (24 core) and 24q disagree (day, stages, by)')
+    a, b = g.ev(M15), g.ev(M15)
+    print('  m15 weeks:', a['weeks'])
+    print('  m15 stops', a['stops'], 'right', a['right'], 'pop', a['pop'], a['open'], 'wrongs', a['wrongs'], 'after', a['after'], 'faded', a['faded'], 'held', a['held'], 'crew', a['crew'])
+    check(3 <= len(a['weeks']) <= 4 and all(e[1] <= 4 and e[2] == 480 and e[4] == 2 and 4 <= e[5] <= 6 for e in a['weeks']), 'm15: one a week, 08:00 on a weekday, Tier 2, 4-6 wires')
+    check(a['board'] and a['claimed'] and not a['early'], 'm15: offered to an Officer; the box opened first')
+    check(a['test'] and a['turnin'] and a['right'][0] is True and a['right'][1] == 0 and a['right'][2] and a['right'][3] == 1, 'm15: right first time, the junction put right')
+    check(not a['pop'] and a['wrongs'] == 1 and a['open'][2] == 0 and sum(a['open']) == len(a['open']) - 2, 'm15: a wrong pair pops at the test, only that pair opens again')
+    check(a['retest'] and a['turnin2'] and a['after'][0] is False and a['after'][1] == 1, 'm15: redone, finished, not right first time (never a fail)')
+    check(a['faded'] == [2, 'check', False, True, True], 'm15: a faded chart from 3: the lights first')
+    check(a['held'] == 1440 + 600 and a['crew'] == ['done', True], 'm15: not taken, the crew\'s the next day')
+    check(json.loads(a['save']) == {'done': 0, 'wrongs': 0, 'week': -1} and json.loads(a['save2']) == {'done': 3, 'wrongs': 1, 'week': 4}, 'm15: the save read back, junk cleaned')
+    check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'm15: differs the second time')
+PARTS['m15'] = part_m15
+
 only = set(sys.argv[2:])
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])

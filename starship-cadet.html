@@ -281,7 +281,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.51.6
+   STARSHIP CADET: CSV Wren                           build 0.51.7
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8694,7 +8694,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.51.6';                           // keep in step with the header's build line
+const GAME_BUILD = '0.51.7';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -42014,6 +42014,129 @@ function leakFx() {
   } catch (err) { console.error(err); }
 }
 WORK_TICKS.push((now, skip) => { if (!skip) leakFx(); });
+
+// ---------------------------------------------------------------------
+// 24q REWIRING (M15, seat E2, 0.51.x; plans/mechanics/m15-rewiring.html). From Day 17, an Officer's, about once a week
+// (posted 08:00 on a workday of yours): "Rewire junction 4-J2" (a junction job set to Tier 2 on the job itself; the
+// junction kind is Tier 3 in section 17). At the box's panel: open it (a look: the colour chart, 4-6 wires), then a
+// choose step a wire (this wire: which terminal?), then close up and test (a hold). A wrong pair pops a fuse at the
+// test: only that pair's stop opens again (never a fail); "right first time" if none. Done by you: the junction put
+// right (section 17's machine to 90 at least), a use. Stage 1 (after 3): two colours on the chart have faded; flick the
+// room's lights first (a look) and the chart's filled in. Stage 2 leads into P7 (Step 6). Ladder row m15 (24 core's
+// table, E1: big, Day 17 = REW_FROM, Calder, the tester; the lesson is W2's meeting train.m15.calder at the officers'
+// corridor's starboard utility closet: Calder rewires 4-junction-2 while you watch, then 4-junction-1 is yours). Not
+// taken: held to the end of your shift and an hour of the next, then the crew's (45 minutes). Saved:
+// SHIP.works.side.rewire = { done, wrongs, week } (jobs turned in, wrong pairs ever, the last week posted), cleaned on read; the job's own chart
+// in ship.jobs (j.chart: colours by terminal, j.faded, j.pairs: the pick per pair). Hash keys 1016 (which junction,
+// the wire count and chart), 1017 (which colours fade). No R().
+const REW_FROM = 17, REW_POST = 480, REW_CREW = 45, REW_FADE = 3, REW_KEEP = 90;
+const REW_TRAIN = ['4-junction-2', '4-junction-1'];      // Calder's, then yours (the officers' corridor's closet first)
+const REW_COLS = ['red', 'blue', 'yellow', 'green', 'white', 'black'];
+const rewSeed = () => machSeed('rewire');
+const rewBoxes = () => machineList().filter(m => /junction/.test(m.id) && panelPlace(m.id));
+function rewState() {                                    // side.rewire, cleaned (a save may hold junk)
+  const s = typeof worksSide === 'function' ? worksSide() : null; if (!s) return null;
+  const R = s.rewire;
+  if (!R || typeof R !== 'object' || !s.rewOk) {
+    s.rewire = { done: R && Number.isInteger(R.done) ? Math.max(0, Math.min(9999, R.done)) : 0, wrongs: R && Number.isInteger(R.wrongs) ? Math.max(0, Math.min(9999, R.wrongs)) : 0, week: R && Number.isInteger(R.week) ? R.week : -1 };
+    Object.defineProperty(s, 'rewOk', { value: true, enumerable: false, configurable: true });
+  }
+  return s.rewire;
+}
+const rewName = id => { const m = id.match(/^(\d)-junction-(\d+)$/); return m ? m[1] + '-J' + m[2] : id; };   // 4-junction-2 -> 4-J2
+const rewWire = c => worksText('wire.' + c, c);
+// the chart for a key (week, or a training's day): 4-6 colours in terminal order, and (stage 1 on) two that have faded
+function rewChart(k, stage) {
+  const seed = rewSeed(), n = 4 + Math.floor(schedU(seed, k, 1016) * 3) % 3;
+  const chart = REW_COLS.map((c, i) => [schedU(seed, k * 8 + i, 1016), c]).sort((a, b) => a[0] - b[0]).slice(0, n).map(x => x[1]);
+  const faded = stage >= 1 ? chart.map((c, i) => [schedU(seed, k * 8 + i, 1017), i]).sort((a, b) => a[0] - b[0]).slice(0, 2).map(x => x[1]).sort() : [];
+  return { chart, faded };
+}
+// the week's day: a workday of yours from Day 17, not the incident's, the leak's or a test job's
+function rewDay(w) {
+  const W = SHIP.works; if (!W) return null; const P = incState() ? incPlan(w) : null, L = typeof leakDay === 'function' ? leakDay(w) : null;
+  const days = [0, 1, 2, 3, 4].map(k => w * 7 + 1 + k).filter(d => d >= REW_FROM && playerShiftOn(d) && !(P && P.length && P[1] === d) && d !== L && !(W.test && W.test.day === d));
+  return days.length ? days[Math.floor(schedU(rewSeed(), w, 1017) * days.length) % days.length] : null;
+}
+function rewJob(id, t, o = {}) {
+  const m = machineById(id); if (!m) return null;
+  const k = o.key !== undefined ? o.key : worksDay(t), { chart, faded } = rewChart(k, o.stage || 0);
+  const j = jobMake('rewire', { id: 'rewire' + (o.slot || '') + ':' + id + '@' + Math.floor(t / 60), machine: id, deck: m.deck, room: m.room, h: Math.floor(t / 60), tier: 2, urgency: 0,
+    title: worksText('rewire.card', 'Rewire junction {junction}', { junction: rewName(id) }), chart, faded, pairs: {}, wrongs: 0,
+    ...(o.slot ? { reserved: o.slot, until: (worksDay(t) - 1) * 1440 + DAY_SHIFT[1] } : { leave: Math.max(60, (worksDay(t) - 1) * 1440 + DAY_SHIFT[1] - Math.max(t, (worksDay(t) - 1) * 1440 + DAY_SHIFT[0])) + 60 }),
+    ...(o.train ? { train: o.train } : {}) });
+  j.posted = j.found = t;
+  return j;
+}
+// the stops, all at the box's panel: open it (the chart), flick the lights (faded charts only), a pair per wire, test
+function rewStops(j) {
+  const m = machineById(j.machine), pp = m && panelPlace(m.id); if (!pp) return [];
+  const chart = j.chart || [], fadedOpen = (j.faded || []).length && !(j.stepsDone || []).includes(1);
+  const shown = chart.map((c, i) => 'T' + (i + 1) + ' ' + ((j.faded || []).includes(i) && fadedOpen ? '?' : rewWire(c))).join(' · ');
+  const out = [{ deck: m.deck, placeId: pp, mins: 1, tag: 'open', how: 'look', opts: { secs: 3, text: shown + ((j.faded || []).length ? ' ' + worksText('rewire.faded', 'These two have faded. Which is which?') : '') } }];
+  if ((j.faded || []).length) out.push({ deck: m.deck, placeId: pp, mins: 1, tag: 'check', how: 'look', opts: { secs: 3, text: worksText('rewire.check', 'Flick the lights. See which one goes off.') + ' ' + chart.map((c, i) => 'T' + (i + 1) + ' ' + rewWire(c)).join(' · ') } });
+  for (const c of chart) out.push({ deck: m.deck, placeId: pp, mins: 1, tag: 'wire', how: 'choose', opts: { title: rewWire(c).replace(/^./, x => x.toUpperCase()),
+    text: shown, options: chart.map((_, i) => ({ id: 'T' + (i + 1), label: 'T' + (i + 1) })) } });
+  out.push({ deck: m.deck, placeId: pp, mins: 2, tag: 'test', how: 'hold' });
+  return out;
+}
+const rewFirst = j => (j.faded || []).length ? 2 : 1;   // the first pair's stop
+function rewStepDone(j, k, res, t) {
+  const st = rewStops(j)[k]; if (!st) return true;
+  const done = new Set(j.stepsDone || []);
+  if (st.tag !== 'open' && !done.has(0)) return false;   // open the box first
+  if (st.tag === 'wire') { if (rewFirst(j) === 2 && !done.has(1)) return false; j.pairs[k] = res && res.pick || null; return true; }   // a faded chart: the lights first
+  if (st.tag === 'test') {
+    const S = rewStops(j), wires = S.map((s, i) => s.tag === 'wire' ? i : -1).filter(i => i >= 0);
+    if (wires.some(i => !done.has(i))) return false;     // every pair in first
+    const wrong = wires.filter(i => j.pairs[i] !== 'T' + (i - rewFirst(j) + 1));
+    if (wrong.length) {                                  // a fuse pops: only those pairs open again
+      j.wrongs += wrong.length; j.stepsDone = (j.stepsDone || []).filter(i => !wrong.includes(i));
+      for (const i of wrong) delete j.pairs[i];
+      try { toast(j.title, worksText('rewire.pop', 'Pop. That pair\'s wrong. Swap them and try again.')); } catch (e) { /* no UI */ }
+      return false;
+    }
+    if (!j.wrongs) try { toast(j.title, worksText('rewire.right', 'Right first time.')); } catch (e) { /* no UI */ }
+  }
+  return true;
+}
+function rewDone(j, t, by) {
+  const s = SHIP.machines && SHIP.machines[j.machine];
+  if (s) { s.cond = Math.max(s.cond, REW_KEEP); s.state = machineState(s.cond); }
+  if (by === 'you') {
+    const R = rewState(); if (R) { R.done++; R.wrongs += j.wrongs || 0; }
+    worksUse('m15'); j.rightFirst = !j.wrongs;
+    if (!j.wrongs && typeof worksSideXp === 'function') worksSideXp(1, 'rewire');   // right first time: +1 more (the cap)
+    try { toast(j.title, worksText('rewire.done', 'Junction {junction} rewired. Lights steady.', { junction: rewName(j.machine) })); } catch (e) { /* no UI */ }
+  }
+  simNote('rewire', { id: j.id, machine: j.machine, by: by || null, wrongs: j.wrongs || 0 });
+  if (typeof MACH_REV !== 'undefined') MACH_REV++;
+}
+if (typeof jobKindAdd === 'function') jobKindAdd('rewire', { tier: 2, work: 0, text: 'Rewire', stops: rewStops, stepDone: rewStepDone, done: rewDone, veto: true,
+  crew: { can: incWorks, mins: REW_CREW } });
+if (typeof WORKS_SIDE_KINDS !== 'undefined' && WORKS_SIDE_KINDS.add) WORKS_SIDE_KINDS.add('rewire');
+// the lesson (ladder row m15, big): Calder's job on 4-junction-2 while you watch, then 4-junction-1 is yours (both held in
+// the row's slot, a clear chart)
+if (JOB_KINDS.rewire) WORK_MECH.m15 = {
+  reserve(d, at, slot, o = {}) {
+    const id = REW_TRAIN[o.yours ? 1 : 0], t = (d - 1) * 1440 + at; if (!machineById(id)) return null;
+    SHIP.jobs = SHIP.jobs.filter(x => !(x.reserved === slot && heldForYou(x) && !x.claimedBy) && !(x.kind === 'rewire' && x.machine === id && x.claimedBy !== 'you' && x.status !== 'done'));
+    const j = rewJob(id, t, { slot, train: o.train || 'm15', key: d * 2 + (o.yours ? 1 : 0) }); if (!j) return null;
+    SHIP.jobs.push(j); if (typeof MACH_REV !== 'undefined') MACH_REV++;
+    return j.id;
+  },
+  watch: 10,
+};
+// the clock: the week's rewiring at 08:00 on its day once you're trained (a week with one already, none)
+if (WORK_MECH.m15) WORK_TICKS.push((now, skip) => {
+  const W = SHIP.works; if (!W || W.tr.m15 === undefined || !rewState()) return;
+  const d = worksDay(now), m = now - (d - 1) * 1440, w = incWeek(d);
+  if (d <= W.tr.m15 || m < REW_POST || !playerShiftOn(d) || rewDay(w) !== d) return;
+  const R = rewState(); if (R.week >= w) return;
+  const boxes = rewBoxes(); if (!boxes.length) return;
+  const id = boxes[Math.floor(schedU(rewSeed(), w, 1016) * boxes.length) % boxes.length].id, j = rewJob(id, now, { key: w * 7 + 3, stage: worksStage('m15') });
+  if (j) { SHIP.jobs.push(j); R.week = w; if (typeof MACH_REV !== 'undefined') MACH_REV++; }
+});
 
 // ---------------------------------------------------------------------
 // 24r IRRIGATION (M14, seat E2, 0.51.x; plans/mechanics/m14-irrigation.html; 24r, not the page's old 24p, which is C2's
