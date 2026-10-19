@@ -41980,10 +41980,10 @@ if (WORK_MECH.m13) WORK_TICKS.push((now, skip) => {
   leakPost(now, w);
 });
 // ---- the look: puddleAt(spots) (the puddle decal, M6's look: flat discs 1.2 cm off the floor, 3 mm apart) and the damp patch on the
-// wall (discs 1.5 cm off its face), each one instanced draw call, made the first time a leak is open on your deck (in
+// wall (discs 1.5 cm off its face, hidden with its wall when the cutaway lowers it), each one instanced draw call, made the first time a leak is open on your deck (in
 // deckRoot, so the deck's unload frees them) ----
-const LEAK_FX = { root: null, wet: null, damp: null, at: null };
-function puddleAt(spots, o = {}) {                       // spots: [[x, z, scale]] in tiles; one instanced mesh in deckRoot
+const LEAK_FX = { root: null, wet: null, damp: null, decor: null, at: null };
+function puddleAt(spots, o = {}) {                       // spots: [[x, z, scale]] (tile units, a spot's centre); one instanced mesh in deckRoot
   const g = new THREE.CircleGeometry(.5, 18); g.rotateX(-Math.PI / 2);
   const im = new THREE.InstancedMesh(g, new THREE.MeshBasicMaterial({ color: col(o.color || '#4f86a8'), transparent: true, opacity: o.opacity || .5, depthWrite: false }), spots.length), M4 = new THREE.Matrix4();
   spots.forEach(([x, z, s], k) => { M4.makeScale(s || 1, 1, (s || 1) * .85); M4.setPosition(X0(x), .012 + .003 * k, Z0(z)); im.setMatrixAt(k, M4); });
@@ -41995,15 +41995,18 @@ function leakFx() {
     const e = leakOpen(), J = e && e.deck === deckDef.num ? leakJoint(e.joint) : null;
     if (LEAK_FX.root !== deckRoot || LEAK_FX.at !== (J && J.place)) {
       for (const k of ['wet', 'damp']) if (LEAK_FX[k] && LEAK_FX.root === deckRoot) { deckRoot.remove(LEAK_FX[k]); LEAK_FX[k].geometry.dispose(); LEAK_FX[k].material.dispose(); }
-      LEAK_FX.root = deckRoot; LEAK_FX.wet = LEAK_FX.damp = null; LEAK_FX.at = J ? J.place : null;
-      if (J && J.puddle) LEAK_FX.wet = puddleAt([[J.puddle[0] + .5, J.puddle[1] + .5, 1.05], [J.puddle[0] + .85, J.puddle[1] + .3, .5]]);
-      if (J && J.damp && FACING[J.damp[2]] !== undefined) {
-        const [x, z, wall] = J.damp, y = Math.max(.8, ((J.joint && J.joint[1]) || 1.6) - .35);
-        const pos = { n: [X0(x + .5), Z0(z) + T / 2], s: [X0(x + .5), Z0(z + 1) - T / 2], w: [X0(x) + T / 2, Z0(z + .5)], e: [X0(x + 1) - T / 2, Z0(z + .5)] }[wall];
-        const g = new THREE.CircleGeometry(.32, 16), im = new THREE.InstancedMesh(g, new THREE.MeshBasicMaterial({ color: col('#5d6b70'), transparent: true, opacity: .35, depthWrite: false }), 2), M4 = new THREE.Matrix4(), Q = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, FACING[wall], 0));
+      if (LEAK_FX.decor) WALL_DECOR = WALL_DECOR.filter(x => x !== LEAK_FX.decor);
+      LEAK_FX.root = deckRoot; LEAK_FX.wet = LEAK_FX.damp = LEAK_FX.decor = null; LEAK_FX.at = J ? J.place : null;
+      if (J && J.puddle) LEAK_FX.wet = puddleAt([[J.puddle[0], J.puddle[1], 1.05], [J.puddle[0] + .35, J.puddle[1] - .2, .5]]);   // E3's puddle: a floor spot (tile units, centred)
+      const dk = J && J.damp && FACING[J.damp[2]] !== undefined ? (([x, z, w]) => w === 'n' || w === 's' ? `h,${Math.floor(x)},${w === 'n' ? Math.floor(z) : Math.ceil(z)}` : `v,${w === 'w' ? Math.floor(x) : Math.ceil(x)},${Math.floor(z)}`)(J.damp) : null, de = dk && EDGES.get(dk);
+      if (de && (de.type === 'wall' || de.type === 'hull')) {   // only on a solid wall (never a door or open floor)
+        const [x, z, wall] = J.damp, y = Math.max(1.15, ((J.joint && J.joint[1]) || 1.2) + .5);   // on the wall's light panel above the joint, streaking down to it
+        const pos = { n: [X0(x), Z0(Math.floor(z)) + T / 2], s: [X0(x), Z0(Math.ceil(z)) - T / 2], w: [X0(Math.floor(x)) + T / 2, Z0(z)], e: [X0(Math.ceil(x)) - T / 2, Z0(z)] }[wall];   // E3's damp: the joint's spot by its wall; the patch on the wall's face
+        const g = new THREE.CircleGeometry(.32, 16), im = new THREE.InstancedMesh(g, new THREE.MeshBasicMaterial({ color: col('#3f4a4e'), transparent: true, opacity: .42, depthWrite: false }), 2), M4 = new THREE.Matrix4(), Q = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, FACING[wall], 0));
         const ax = new THREE.Vector3(1, 0, 0).applyQuaternion(Q), nx = new THREE.Vector3(0, 0, 1).applyQuaternion(Q);   // along the wall, out of it
-        [[0, 0, 1, 1.3, .015], [.1, -.35, .7, .9, .02]].forEach(([dx, dy, sx, sy, off], k) => { M4.compose(new THREE.Vector3(pos[0] + ax.x * dx + nx.x * off, y + dy, pos[1] + ax.z * dx + nx.z * off), Q, new THREE.Vector3(sx, sy, 1)); im.setMatrixAt(k, M4); });   // never coplanar: 5 mm apart
+        [[0, 0, 1, 1.2, .015], [.05, -.4, .55, 1.1, .02]].forEach(([dx, dy, sx, sy, off], k) => { M4.compose(new THREE.Vector3(pos[0] + ax.x * dx + nx.x * off, y + dy, pos[1] + ax.z * dx + nx.z * off), Q, new THREE.Vector3(sx, sy, 1)); im.setMatrixAt(k, M4); });   // never coplanar: 5 mm apart
         im.userData.noMerge = true; deckRoot.add(im); LEAK_FX.damp = im;
+        WALL_DECOR.push(LEAK_FX.decor = { g: im, e: de });   // the main loop hides it while the cutaway lowers its wall, as any wall piece
       }
     }
   } catch (err) { console.error(err); }
