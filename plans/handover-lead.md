@@ -751,3 +751,4 @@ Read: CLAUDE.md; TEAM.md (Lead line, "OVERNIGHT MODE ON", "Tonight's goal", "Ove
 - ~05:56: started R5 session_01XJyHzg4QvX2nsdtf9zT1TH (reviewer; R4 ~65% retiring); M13 = +1 rep (page).
 - ~06:02: R4 archived (final note c5294ce); R5 running. M15 call: one faded colour.
 - ~06:03: E3 retired (0.53.8 d51c5ed); started E4 session_01PtXCwVBprdkJ6AcQisEyJq for M17. Calls: favours = friend tier (constant).
+- ~06:10: E2 retiring (0.51.11 6714448); started E5 session_01QsZymCraDjLzVDooLvigNk (pin + team parts). Team is above 7 for now: U, W2, D3 retire soon; don't add more seats until Step 4 ships.
