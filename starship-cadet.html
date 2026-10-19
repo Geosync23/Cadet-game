@@ -285,7 +285,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.84.7
+   STARSHIP CADET: CSV Wren                           build 0.84.8
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -589,6 +589,13 @@ const shipDeck = n => SHIP.decks[n] || (SHIP.decks[n] = { open: new Set() });
 // or in Maps, goToDeck(7) does nothing, a save left on it wakes on Deck 4; DECKS[7] is playerOnly, so nothing else changes
 const REC_DECK = false;                                  // 0.63.2r: merged dormant (the user's, via lead 15); the rec work comes after Step 4
 const DECK_ORDER = REC_DECK ? [1, 2, 3, 4, 7, 5, 6] : [1, 2, 3, 4, 5, 6];
+// 0.84.8: the auditorium's show (section 8c's recShow); here so the deck's build can read them
+const REC_POOLS = [[8.85, 7.3, .95], [9.35, 9.6, 1.25], [9.5, 12.0, 1.0]];   // the stage's light pools [x, z, radius], the auditorium's coordinates
+const REC_SHOWS = {
+  film: { dim: .62, scr: 1, pools: [0, 0, 0] }, talk: { dim: .3, scr: 0, pools: [1, .25, 0] },
+  allhands: { dim: .28, scr: 0, pools: [1, .5, 0] }, talent: { dim: .5, scr: 0, pools: [.45, 1, .8] },
+};
+const REC_SHOW = { state: null, dim: 0, scr: 0, piv: null, pools: null };
 const deckLabel = n => +n === 7 ? 'R' : String(n);
 const deckWord = n => +n === 7 ? 'Rec deck' : 'Deck ' + n;
 const deckIn = n => +n === 7 ? 'the rec deck' : 'Deck ' + n;   // 0.84.2 (lead 18): a deck's name mid-sentence ("on the rec deck"); deckWord for labels and signs
@@ -8159,6 +8166,13 @@ Object.assign(KIT, {
     for (let k = 0; k <= 24; k++) { const a = th - 2 * th * k / 24; sh.lineTo(S.back * Math.cos(a), 9 + S.rz * Math.sin(a)); }
     const geo = new THREE.ExtrudeGeometry(sh, { depth: .55, bevelEnabled: false, curveSegments: 16 });
     const m = new THREE.Mesh(geo, [RK.stageTop, RK.stageSide]); m.rotation.x = Math.PI / 2; m.position.y = .55; m.castShadow = m.receiveShadow = true; g.add(m);
+    // 0.84.8: the stage light pools (the lectern, centre stage, the piano), one mesh; recShow sets each pool's brightness
+    const P = REC_POOLS, pos = [], uv = [], ix = [];
+    P.forEach(([x, z, r], k) => { for (const [u, v] of [[0, 0], [1, 0], [1, 1], [0, 1]]) { pos.push(x + (u - .5) * 2 * r, .58, z + (v - .5) * 2 * r); uv.push(u, v); } ix.push(k * 4, k * 4 + 2, k * 4 + 1, k * 4, k * 4 + 3, k * 4 + 2); });
+    const pg = new THREE.BufferGeometry(); pg.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); pg.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+    pg.setAttribute('color', new THREE.Float32BufferAttribute(new Array(P.length * 12).fill(0), 3)); pg.setIndex(ix);
+    const pm = new THREE.Mesh(pg, new THREE.MeshBasicMaterial({ map: glowTex, vertexColors: true, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false }));
+    pm.raycast = () => {}; pm.renderOrder = 2; pm.userData.noMerge = true; g.add(pm); REC_SHOW.pools = pm; recPoolsSet();
     return { w: .1, d: .1, noBlock: true };
   },
   // the lighting truss over the stage on two gold towers, with six lamps aimed at the stage
@@ -8175,9 +8189,14 @@ Object.assign(KIT, {
     box(.3, .03, .22, RK.gold, 0, 1.18, .205, g);                       // the ship's crest on its front
     return { w: .62, d: .48 };
   },
-  // the film screen's housing, rolled up under the truss (it lowers for films, later)
+  // the film screen's housing, rolled up under the truss; 0.84.8: its cloth unrolls for films (recShow, section 8c)
   recScreen(g, o) {
     box(.24, .24, o.len, RK.black, 0, H - .3, 0, g); box(.04, .05, o.len - .2, RK.screen, .09, H - .45, 0, g);
+    const piv = new THREE.Group(), sh = H - 1.45; piv.position.set(.06, H - .45, 0); piv.userData.noMerge = true; g.add(piv);   // it moves: kept out of the deck's merge
+    RK.film = new THREE.MeshBasicMaterial({ color: col('#e8e6df'), toneMapped: false });
+    box(.02, sh, o.len - .3, RK.film, 0, -sh / 2, 0, piv); box(.05, .05, o.len - .25, RK.black, 0, -sh, 0, piv);   // the cloth and its weighted bottom bar
+    for (const c of piv.children) { c.userData.noMerge = true; c.castShadow = false; }   // the merge looks at each mesh, not its group
+    REC_SHOW.piv = piv; piv.scale.y = Math.max(.001, REC_SHOW.scr); piv.visible = REC_SHOW.scr > .002;
     return { w: .3, d: o.len, noBlock: true };
   },
   recHit(g, o) { return { w: o.w, d: o.d, noBlock: true }; },   // a tap target over something drawn elsewhere
@@ -8755,6 +8774,7 @@ function applyLight(k) {
   sun.color.copy(DAY.sun).lerp(NIGHT.sun, k); sun.intensity = lerp(DAY.sunI, NIGHT.sunI, k);
   const ml = deckDef && deckDef.light;                   // a deck's own mood (Deck 6 runs warm and dim)
   if (ml) { hemi.color.multiply(ml.sky); hemi.intensity *= ml.hemi; sun.color.multiply(ml.sun); sun.intensity *= ml.sunI; }
+  if (REC_SHOW.dim) { const q = 1 - REC_SHOW.dim; hemi.intensity *= q; sun.intensity *= q; }   // 0.84.8: the auditorium's house lights down for a show (8c)
   for (const L of LAMPS) L.l.intensity = lerp(L.day, L.night, k);
   renderer.toneMappingExposure = lerp(DAY.exp, NIGHT.exp, k);
   scene.background.copy(DAY.bg).lerp(NIGHT.bg, k);
@@ -8775,7 +8795,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.84.7';                           // keep in step with the header's build line
+const GAME_BUILD = '0.84.8';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -14802,7 +14822,7 @@ const REC_LOOP = [[11.4, 4.85], [4.8, 4.85], [4.8, 1.3], [13.8, 1.3, 1], [13.8, 
 function recTap(it, at, point) {
   if (typeof deckDef === 'undefined' || !deckDef || deckDef.num !== 7) return false;
   const t = it.t;
-  if ((t === 'Lightdisc court' || t === 'Ask someone to play') && recShut().court) { toast('Lightdisc', 'The net\'s down. No Lightdisc till Works fix the emitters.'); return true; }   // 0.84.4 (rec engineer B)
+  if ((t === 'Lightdisc court' || t === 'Ask someone to play') && recShut().court) { toast('Lightdisc', worksText('rec.shut.net', 'The net\'s down. No Lightdisc till Works fix the emitters.')); return true; }   // 0.84.4 (rec engineer B); 0.84.8 W3's key
   if (t === 'Lightdisc court' || t === 'Ask someone to play') { discAsk(); return true; }   // section 23b (0.82.0)
   if (t === 'Scoreboard') { toast(t, it.x); return true; }
   const kind = t === 'Pool' ? 'swim' : /^(Kayak dock|River|White water|Kayak rack|Wave gate)$/.test(t) ? 'kayak' : t === 'Climbing wall' ? 'climb'
@@ -14837,8 +14857,8 @@ function recGo(kind, point, title, flavour) {
   recStart(kind, title, flavour, point ? [point.x + OX, point.z + OZ] : null);
 }
 function recStart(kind, title, flavour, p) {             // p: the tap in deck coordinates (or null)
-  if (kind === 'float' && recShut().float) { toast('Float room', 'The float room\'s shut: the gravity plates are down. Works are on it.'); return; }   // 0.84.4 (rec engineer B)
-  if (kind === 'climb' && !recShut().belays) { toast('Climbing wall', 'Both auto-belays are tagged out. Works are on it.'); return; }   // 0.84.4 (rec engineer B)
+  if (kind === 'float' && recShut().float) { toast('Float room', worksText('rec.shut.float', 'The float room\'s shut: the gravity plates are down. Works are on it.')); return; }   // 0.84.4 (rec engineer B); 0.84.8 W3's key
+  if (kind === 'climb' && !recShut().belays) { toast('Climbing wall', worksText('rec.shut.belays', 'Both auto-belays are tagged out. Works are on it.')); return; }   // 0.84.4 (rec engineer B); 0.84.8 W3's key
   const water = { pool: .35, river: .36 };
   if (kind === 'swim') {
     const lane = REC_LANES.reduce((m, z) => p && Math.abs(z - p[1]) < Math.abs(m - p[1]) ? z : m, REC_LANES[1]);
@@ -44131,7 +44151,7 @@ const poolDripDue = j => !!(j && j.symptom && j.symptom.line === 'pool' && trace
 const poolDripGoal = j => poolDripDue(j) ? { deck: POOL_DRIP.deck, place: POOL_DRIP.place, label: worksText('trace.pool.goal', 'See where it drips: main storage') } : null;
 function poolDripSeen(j, t) {                            // you've stood by the drip: the goal pointer goes on up the line
   j.drip = t; j.touched = t; if (typeof MACH_REV !== 'undefined') MACH_REV++; if (typeof ixGoalAt !== 'undefined') ixGoalAt = -1;
-  try { toast(traceTitle(j), worksText('trace.pool.drip', 'A slow drip from the ceiling, right over the aisle. The pool plant\'s up there: take the spine ladder up to the rec deck and read the pool line with the pipe kit.')); } catch (e) { /* no UI */ }
+  try { toast(traceTitle(j), worksText('trace.pool.drip', 'A slow drip from the ceiling, over the aisle. The pool plant is right above it.') + ' ' + worksText('trace.pool.up', 'Take the spine ladder up to the rec deck and read the pool line with the pipe kit.')); } catch (e) { /* no UI */ }
 }
 function poolDripFx() {                                  // the puddle, while a pool job is open and you're on Deck 5 (in deckRoot: the deck's unload frees it)
   try {
@@ -47653,6 +47673,35 @@ function recCrewRopes() {                                // after the crowd is p
   }
   REC_CLIMB_N = 0;
 }
+// 0.84.8 (rec engineer B2): the auditorium's show. RA's traditions engine calls recShow(state) whenever the show changes
+// (and may call it every tick: same state, no work): null (no show), 'film' (the screen down and lit, the house lights
+// well down), 'talk' (a Wren talk: the lectern's pool, the house lights a little down), 'allhands' (the same, a touch
+// brighter on the stage), 'talent' (all three pools, the house lights down). Looks only: nothing saved, nothing
+// random. The house lights dim only while you're in the auditorium; arriving mid-show, the screen and pools are set at once.
+// (REC_POOLS, REC_SHOWS and REC_SHOW are with REC_DECK at the top: the deck's build reads them)
+function recShow(state) {
+  const s = REC_SHOWS[state] ? state : null; if (s === REC_SHOW.state) return;
+  REC_SHOW.state = s; recPoolsSet();
+}
+function recPoolsSet() {                                 // each pool's colour from the show (warm white; talent night's centre a little pink)
+  const m = REC_SHOW.pools; if (!m || !m.parent) return;
+  const S = REC_SHOWS[REC_SHOW.state], a = m.geometry.attributes.color, tint = [[1, .9, .7], [1, .82, .86], [.85, .88, 1]];
+  for (let k = 0; k < REC_POOLS.length; k++) { const b = S ? S.pools[k] * 1.1 : 0; for (let v = 0; v < 4; v++) a.setXYZ(k * 4 + v, tint[k][0] * b, tint[k][1] * b, tint[k][2] * b); }
+  a.needsUpdate = true; m.visible = !!S && S.pools.some(x => x > 0);
+}
+const _recFilm = [col('#3a5b8c'), col('#c98a4a'), col('#5c8f6a'), col('#d9d2c4')], _recCloth = col('#e8e6df');   // the film's light on the screen: a slow drift through a few scenes' colours
+function recShowTick(dt, t) {
+  const S = REC_SHOWS[REC_SHOW.state], here = deckDef && deckDef.num === 7, ease = Math.min(1, dt * 1.2);
+  const scr = S ? S.scr : 0, dim = S && here && lastRoom === 'A' ? S.dim : 0;
+  REC_SHOW.scr = here ? (Math.abs(scr - REC_SHOW.scr) < .002 ? scr : REC_SHOW.scr + Math.sign(scr - REC_SHOW.scr) * Math.min(Math.abs(scr - REC_SHOW.scr), dt * .25)) : scr;   // the screen unrolls in about 4 s
+  REC_SHOW.dim = Math.abs(dim - REC_SHOW.dim) < .002 ? dim : REC_SHOW.dim + (dim - REC_SHOW.dim) * ease;
+  const p = here && REC_SHOW.piv; if (!p || !p.parent) return;
+  p.scale.y = Math.max(.001, REC_SHOW.scr); p.visible = REC_SHOW.scr > .002;
+  if (p.visible && RK && RK.film) {
+    const lit = REC_SHOW.state === 'film' && REC_SHOW.scr > .98, k = (t * .05) % _recFilm.length, i = Math.floor(k), f = k - i;
+    if (lit) RK.film.color.copy(_recFilm[i]).lerp(_recFilm[(i + 1) % _recFilm.length], f * f * (3 - 2 * f)).multiplyScalar(.75 + .1 * Math.sin(t * 2.3)); else RK.film.color.copy(_recCloth);
+  }
+}
 function crewDetail() {                                  // who gets a full rig: the nearest story crew to you
   const pp = player.obj.position;
   const near = DECK_CREW.filter(a => a.p.story).map(a => [a, Math.hypot(a.x - pp.x, a.z - pp.z)])
@@ -48192,6 +48241,7 @@ function loop() {
     else for (let j = 0; j < d.leaves.length; j++) d.leaves[j].position.x = (j ? 1 : -1) * (d.span / 4 + d.open * d.span / 2 * .92);
   }
 
+  if (REC_SHOW.state || REC_SHOW.dim || REC_SHOW.scr) recShowTick(dt, t);   // 0.84.8: the auditorium's show (8c); nothing while there's none
   nightT += (nightAt() - nightT) * Math.min(1, dt * 1.8); applyLight(nightT);
   doorLeavesSync(); tallSync();                          // section 4: door leaves (0.27.21) and tall furniture (0.27.22), drawn together
   if (typeof machineFx !== 'undefined') { machineFx.lamps(t); shipFeelFrame(t, dt); }   // section 8b: lamps stutter while the deck's light relays flicker (0.27.10); a ship-wide event's feel (0.27.19)
