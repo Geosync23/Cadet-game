@@ -1698,7 +1698,7 @@ The case engine (plans/mechanics/case-engine.html on `claude/p5-design`). A real
 - **The training (row m9):** `open` holds 5-valve-2's traced job (made faulty, cond 40, slot 11, a valve, nothing to make); the watch job is 24i's `tracedemo` kind at 5-pump-1's panel (never the crew's; done by Calder after 10 minutes); yours is the valve. Calder's `work` flags `train.m9.follow.read|wrong|found|done` (W2's) as you go.
 - **Maps:** `traceMarks(n)` → `{ tiles, text }` for your traced job's line (or the training's), drawn by the map block's new `marks: [[i, j], ...]` (hollow squares).
 - **Saved:** on the job (`symptom`, `traced`, `read`), `ship.works.tools.pipekit`, `ship.works.use.m9`. Keys 878, 879. No `R()`, no 3D objects.
-- **Test:** `mech_check.py BUILD.html m9` (needs section 17's lines; prints "not in this build" otherwise).
+- **Test:** `mech_check.py BUILD.html m9` (needs section 17's lines; prints "not in this build" otherwise). Until S2's pieces land: `python3 tools/trace_stub.py starship-cadet.html /tmp/t.html` makes a test copy with a stand-in for them (test only, never the game).
 
 ## Hook register
 
