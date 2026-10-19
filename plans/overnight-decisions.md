@@ -207,3 +207,5 @@ All 8 packages approved (Zeke: "all good except he still walks and talks" → he
 | ~02:05 (the user) | Big moves | OK on the 0.63.2r merge to main; from now on inform the user and give them a chance for input before big moves (CLAUDE.md) |
 | ~02:20 (the user, to lead 16) | Step 3 | GO (lead 16 sent each seat "GO") |
 | | Order of work | Step 3 → Step 4 → rec deck activation; activation adds rec-deck-specific traditions (~a dozen, e.g. a Sunday Lightdisc tournament), built in that phase. Plan now in parallel with Step 3: D2 writes plans/rec-traditions-plan.html (plan only) for the user to approve |
+| ~02:30 (the user, on rec traditions plan v1 https://claude.ai/artifact/JFMgkWEYAhoEa2HphtN4im) | Approved | Lightdisc Cup, Dawn swim, Wall night, Paddle club, Float hour, Wren talks (plus other talks: a rota of speakers), Glow paddle (but earlier) |
+| | Dropped | Rookie court, Open stage, Lanes night, Zero-G games, Season splash: D2 pitches ~8 more for the remainder (v2) |
