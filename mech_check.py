@@ -34,6 +34,8 @@ TRAIN = r"""((id) => {
   W.log.push(['earlier', 1, 0, 'service']);                 // a job of yours already turned in (Day 1's shadow shift, for m1)
   for (const r of CAREER_LADDER.slice(0, CAREER_LADDER.indexOf(row))) { W.tr[r.id] = 1; W.use[r.id] = 9; (W.op[1] = W.op[1] || []).push(r.id); }   // everything before it, done
   if (row.needs) for (const n of [].concat(row.needs)) { if (n.flag) flagSet(n.flag, 1); if (n.rep) W.xp = 999; }
+  W.tier = Math.max(W.tier, row.tier || 1); if (row.rank) W.rank = row.rank;   // a Tier 2 row needs an Officer
+  if (row.needs) for (const n of [].concat(row.needs)) if (n.trained && !ladderRow(n.trained)) W.tr[n.trained] = 1;   // a row it needs that isn't in this build
   const seen = [], doJob = jid => { if (!claimJob(jid)) return false; const j = SHIP.jobs.find(x => x.id === jid);
     const cs = SHIP.works && SHIP.works.cases && (SHIP.works.cases.open || []).find(c => c.job === jid);   // a head-scratcher (24k): call it right first
     if (cs && typeof caseCall === 'function') caseCall(cs.id, cs.cause);
@@ -194,6 +196,7 @@ PARTS['m3i'] = m3i_part
 # manifest empty, the cart never over 4, a use of m4. Then a planted manifest of 5: two runs (4, then 1). Then Day 17 with
 # nobody taking it: the crew do it by evening. The same twice.
 M4_RUN = r"""(() => {
+  const invited = SHIP.bridgeInvited; SHIP.bridgeInvited = true;   // the planted manifest has a bridge crate: yours only once invited (S2's 0.33.57, C2's 0.44.17)
   SHIP.works = null; SHIP.notes = []; SHIP.flags = {}; SHIP.jobs = []; SHIP.mail = []; SHIP.manifest = [];
   MACH_HOUR = null; MACH_SEEN = -1; WORKS_TICK.m = WORKS_TICK.h = -1;
   const run = (from, to, f) => { for (let m = from; m <= to; m += 10) { setShipNow(m); machinesNow(); worksCareerTick(m); if (f) f(m); } };
@@ -224,6 +227,7 @@ M4_RUN = r"""(() => {
   const m2 = manifestCrates(); out.d17 = [haulDay(d2), SHIP.jobs.filter(x => x.kind === 'restock').map(x => [x.id, x.status]), SHIP.manifest]; run(t2 + 620, t2 + 1300);
   const j2 = SHIP.jobs.filter(x => x.kind === 'haul' && Math.floor(x.posted / 1440) + 1 === d2);
   out.crew = [m2, j2.map(x => [x.status, x.doneBy]), manifestCrates()];
+  SHIP.bridgeInvited = invited;
   return out;
 })()"""
 def m4_part(g):
@@ -379,6 +383,9 @@ with sync_playwright() as pw:
         if only and r['id'] not in only: continue
         if not r['inBuild']:
             print(f"{r['id']} ({r['name']}): not in this build")
+            continue
+        if r['id'] == 't2' and ev("typeof promoPassed === 'function'"):   # 24p's test job (0.44.18) is no training: career_check (i)-(j) tests it
+            print(f"t2 ({r['name']}): 24p's test job, not a training (career_check (i) and (j))")
             continue
         a = ev(f"({TRAIN})('{r['id']}')")
         b = ev(f"({TRAIN})('{r['id']}')")
