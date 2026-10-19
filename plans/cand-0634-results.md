@@ -19,3 +19,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - trial t3 (wt2) = 2bc08d5 + E1 b68e236 + E3 b809339 + W2 8879ee3: merges clean (only build lines), verify_merge 0 problems, NAMES OK (3027), parses, bake 9570 lines / 47 meetings. Checks running: lines, mech, career, cadet, player.
 - ~05:24 R4: E1 b68e236 PASS WITH FIXES (tool wear must wait for Day 12): hold for E1's next hash. Merge note: E1 replaces the base's one-line const toolWear with function toolWear; check no second toolWear survives. t3 has one (E1's function). t3 checks continue as a preview.
 - ~05:25 W2 418b8c9 (0.48.108: M10 workshop lines on E3's names); with R4.
+- t3: lines PASS, mech OK, career OK, cadet_test vs 0.63.3-with-0.63.4-label ALL IDENTICAL (renderer noise: some pixels 1 level off); player running.
