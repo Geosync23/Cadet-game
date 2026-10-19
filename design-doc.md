@@ -246,12 +246,13 @@ Every machine aboard has a condition that wears down with use and time, and wear
   - Water feeds the garden, and the garden feeds the galley.
   - Air needs scrubbers, and scrubbers need filters from the Deck 5 hold.
 - **Ship health** is a blend of all the systems. A Ship health board on the bridge (Deck 1) and in the Works bay (Deck 5) lists each system and its condition.
+- **The ship meters and your impact** (the user, 2026-10-18; built in 0.33.57). Each system's meter on the boards is its machines' score less some **upkeep** left undone (scuffed panels, dusty ducts, loose fittings) that the machines' effects never feel. A new game starts with ship health **about 75**: most systems worn or a little poor, a few fine (food, hull, drive), none failing. Upkeep builds up again slowly (about a point a day per system), and **every job you do helps at least one meter, often several**: a step of a few points on its main system (a repair more, an overhaul or team job most) and smaller steps on related ones (water helps food and waste, power the lift, air and heat each other); when those have no upkeep left, the step goes where the most is left. Turning a job in shows the points each meter gained. The crew's jobs keep the machines right but leave the upkeep: that's what you add. A steady player lifts the boards from about 75 to about 90 over the first two weeks. Tunable after the user plays.
 
 ### Machines
 
 Each machine is a real object in a room, with a condition from 100% to 0%, a wear rate and the effect it has on the ship when it falters. Wear depends on use: the galley oven wears fastest around mealtimes, the laundry washers on the morning after a busy shift, the lift whenever people ride it.
 
-Wear is measured against an average day, so the ship's machines last the same whatever the crew's routines; busy days wear them faster and quiet days slower. Condition bands: healthy 75–100, worn 50–75, faulty 25–50, failing 10–25, broken under 10. A fresh ship starts every machine at 70–100. Ship health measures how well things work, so a well-kept ship reads close to 100 (agreed 2026-10-15).
+Wear is measured against an average day, so the ship's machines last the same whatever the crew's routines; busy days wear them faster and quiet days slower. Condition bands: healthy 75–100, worn 50–75, faulty 25–50, failing 10–25, broken under 10. A fresh ship starts every machine at 70–100. The machines' own health measures how well things work, so a well-kept ship's machines read close to 100 (agreed 2026-10-15); the boards' meters also count the upkeep above, so a new game reads about 75.
 
 A machine's life runs through five states:
 
