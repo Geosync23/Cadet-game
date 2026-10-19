@@ -197,3 +197,9 @@ All 8 packages approved (Zeke: "all good except he still walks and talks" → he
 | ~00:08 (the user, on events v4) | Space Creature day | Day 8 is fine (keeps the free weekend) |
 | ~00:08 (the user) | Rec sign fix 0.82.8 | Make the change, no need for the checks |
 | ~00:10 (the user) | Events plan v4 | APPROVED ("good for now"). Built after Step 3 → Step 4 → rec deck merge: Phase 1 first (the 9 in Days 1-26), Phase 2 later. D2 records it in design-doc |
+| ~00:20 (the user) | Rec deck merge | Merge the rec deck into the main build NOW, switched off (REC_DECK=false); then Step 3, Step 4; the full rec work (crew use R7, machines R10, traditions R11, writing R12, other decks' "six decks" text, poses/auditorium, checks) comes later. Replaces the ~23:10 "merge after Step 4" |
+| | Lift order | 1, 2, 3, 4, R, 5, 6 (decks 1-6 keep their numbers) |
+| | Talent night | The rec version wins: every four weeks in the auditorium, Lucia hosts; the yearly one (Mira, Deck 3) is retired |
+| | Rec staff | None: self-serve, no lifeguard; Maeve Volkov keeps the machines |
+| | Film night | Moves to the auditorium after the first all-hands; the junior common room becomes a quiet Saturday hangout |
+| | Rec opening | When switched on: open from Day 1 (06:00-midnight) |
