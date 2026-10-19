@@ -194,3 +194,5 @@ All 8 packages approved (Zeke: "all good except he still walks and talks" → he
 | | Space Creature | Pulls up a day so the Day 9 test has more breathing room (exact day: D2 proposes in v4) |
 | | Loss of Power | Stuck in the lift ~4 game hours after your first meal; not penalized for missed work |
 | | Build phases | Phase 1 = the 9 events in the career arc (Days 1-26), built first; Phase 2 = the other 11, later. D2 writes v4 showing the phases ("and we're there") |
+| ~00:08 (the user, on events v4) | Space Creature day | Day 8 is fine (keeps the free weekend) |
+| ~00:08 (the user) | Rec sign fix 0.82.8 | Make the change, no need for the checks |
