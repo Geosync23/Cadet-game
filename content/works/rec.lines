@@ -2,7 +2,7 @@
 // W3, rec deck: Works texts on the rec deck (rec engineer B's section 15r and the pool leak trace, claude/rec-works).
 // TEXTS. rec.shut.<what>: the toast when you tap something a fault has shut (proposed keys for RB2 to wire; the
 // fallbacks in the code are RB's first drafts). trace.pool.*: the leak that drips into Deck 5 main storage (wired as
-// worksText). symptom.pool: the traced-fault symptom (SYMPTOM_TEXT.pool; proposed key).
+// worksText). trace.symptom.pool: the traced fault's title (S2's traceTitle; {deck} is the drip's deck).
 
 == rec.shut.float
 - The float room's shut: the gravity plates are down. Works are on it.
@@ -21,5 +21,5 @@
 - A slow drip from the ceiling, over the aisle. The pool plant is right above it.
 == trace.pool.up
 - Take the spine ladder up to the rec deck and read the pool line with the pipe kit.
-== symptom.pool
-- Water dripping from the ceiling in main storage
+== trace.symptom.pool
+- Water dripping from the ceiling in main storage on Deck {deck}

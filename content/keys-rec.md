@@ -17,6 +17,6 @@ proposals until the seat that reads them confirms; renames are adopted and logge
 | Wren talks | meetings talk.sato (Day 8, chief's), talk.calder (Day 18, chief's), talk.tomas (Day 25, small), talk.esposito-yara (Day 29, small), talk.you (your talk); each choice sets `mem:talk.<id>.asked` | RA's talks engine |
 | Talent night | banks/talent.lines: talent.open, talent.intro ({name}, {thing}), talent.act.song/piano/duet/juggle/poem/trick/joke, talent.after, talent.close, talent.crowd; meeting rec.talent.you (your act's choice card) | RA (show) / RB (recShow) |
 | Machine faults | content/works/faults-rec.lines: fault.name/shows/sign/still/tried.<kind>.<cause> for RB's 13 rec kinds | section 17 / the scanner (as is) |
-| Works texts | content/works/rec.lines: rec.shut.float/net/belays/belay/pool, trace.pool.goal/drip/up, symptom.pool | RB2 (section 15r, the leak trace) |
+| Works texts | content/works/rec.lines: rec.shut.float/net/belays/belay/pool, trace.pool.goal/drip/up (wired: .drip + ' ' + .up), trace.symptom.pool; rec.shut.float/net/belays wired (RB2 0ab43cd), .belay/.pool spare | RB2 (section 15r, the leak trace) |
 | "Six decks" | game texts: the five Deck directory ITs, the spine ladder, the lift tip, Halloran's roof.view fallback; torres-zeke walk.lift.2 | — |
 | Canon | facts.md "The rec dec" | writers |
