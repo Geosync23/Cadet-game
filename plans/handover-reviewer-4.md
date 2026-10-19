@@ -10,11 +10,12 @@
 Passed tips (take these):
 - Step 3: U **cf1348c** (0.72.4: Tracked app first in the device AND the HUD button kept, per the user's ~04:00; leave_check follows the turn-in card), C2 **f553607** (0.44.27). BM6 built the 0.63.3 final with them (base for Step 4: claude/p5-cand-pt1 7a6e137 + its last fix 752a794).
 - Step 4: E1 **b82c8e2** (0.45.7-0.45.10: tool wear from Day 12 only, the side-job cap worksSideXp +2/day, WORKS_SIDE_KINDS, SHIP.works.side kept by worksClean, Bunk 1 texts, ladder rows m10-m14/m17, playtest-2 item 1 rounds training with roundTrainStep()); E3 **b809339** (0.53.5, the places turn, leak joints on real walls).
-- Lines: W2 **c058947** (0.48.110; contains the playtest-2 lines 6a5d34a and Step 4 batch 1 b00e08b).
+- Lines: W2 **606e204** (0.48.112; contains everything before it: playtest-2 lines 6a5d34a, Step 4 batch 1 b00e08b, the M10 renames, bench texts, favour.call/not, queue.left).
 
 Open:
 - E3 626a907 (0.53.6, M10 workshop + tinkering): PASS WITH FIXES, waiting for E3's next hash. Fix 1: shopFetch with an empty shelf skips the make stop (it clears j.parts, then ticks index k). Fix 2: the made thing must go into your hands (SHIP.player.carry) and be handed over in person (the page). Lead 17 decided ~05:50: follow the page, no chat-button shortcut. Also check that E3 sets flag train.m10.lead (it does, through worksTeach).
-- E2 b6130f6 (0.51.6, 24o leaks + 24r irrigation + the one-owner ladder-row fix): see the reviews file (it may be finished there).
+- E2 b6130f6 (0.51.6, leaks + irrigation): PASS WITH FIXES, waiting for E2's next hash. Fixes: the nozzle bonus uses the stage now, not the job's (no-flush penalty without a flush offered); a real save round-trip test for side.leaks/side.nozzles; the worn-joint chore pays rep outside the cap. Lead 17's call: M13 rep +1 a leak as the page says (no extra found-by-you +1). Key mismatches between E2 and W2 sent to both.
+- X 056f8d8 (0.71.3, crew-sim playtest 2): PASS WITH FIXES. X has handed over (plans/handover-crew-sim.md); the next crew-sim seat answers. Fixes: item 8's crate never shows (withHold returns when the stop already has a hold); items 15/20 (booth and shower queues) are not built and need an owner (tell lead 17). **Still to read:** intro_check and cadet_test on 056f8d8 were running when R4 stopped (scratchpad e.g. /tmp/claude-0/-home-user-Cadet-game/6e65b96c-.../scratchpad/log_x.txt, likely gone in a new container: re-run them).
 - E2 dd0ec46 (0.51.7, 24q rewiring): not reviewed yet.
 - Later rounds (summary page step4-summary.html): E1 M11 bench/M12 logbook, stages 2-3; E2 M8 team parts, favour cases, tickets; E3 cabin touches + stars (24t), M17 lift roof. Playtest 2 items from U and X (brief-playtest2.md).
 

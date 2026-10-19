@@ -4,6 +4,14 @@ R4 succeeds R3 (whose verdicts are in `plans/reviews-p5-step2.md`). Newest first
 
 ## Playtest update 2 (brief: plans/brief-playtest2.md on claude/lead-pillar1; build master BM7 session_01QbuzvT3TwzMwSWRmakzX8Z)
 
+### X claude/crew-pt1 056f8d8 (0.71.3, crew-sim playtest 2 items 2, 8, 13, 14, 16, 21, 22): PASS WITH FIXES (X has handed over: the next crew-sim seat answers)
+X's commits 0e112d69..056f8d8 on 7a6e137 (no merges). Read with a helper agent against plans/brief-playtest2.md; fix 1 confirmed by hand.
+- Done: 21/22, crew wake about 30 minutes earlier and are spread out (schedU keys 10 and k+4; bar staff +45; breakfast 06:50-08:30); 2, Calder sits at the Day 1 dinner (introBeats starts the Chief's beat at the table step); 16, the rower's handle moves (noMerge, about +1 draw call per rower); 13, tapping the beam (or the floor near it) paints your name; 14, up to 8 crew say `beam.congrats` from W2's banks (the words are the writer's; BEAM_CHEERS is only timing). Nothing saved, no R(), `node --check` passes, no names shared with U/E1/E2/E3; a trial merge conflicts only on the build lines.
+- **Fix 1 (item 8 does nothing): `withHold` (~10339) returns at once when the stop already has `w.hold`**, and every crew load/unload stop already has one (restock 'cart'/'cartfull', haul's load stop 'cartfull'), so the new 'carry' branch is never reached. It also only covers jobs, not crew at the Wednesday delivery (`5-delivery-1`, anim 'lift', which holds dumbbells). Check in the game what the user saw and put the crate on those stops.
+- **Fix 2 (items 15/20 are missing): the booth and shower queues aren't built** (X's handover: "not started"). U needs a function to read for "You're 2nd in line" (W2's queue.* keys exist). It needs an owner (lead 17) and an agreed shape with U.
+- Notes: lines written for the old dinner are now stale (Torres's "Oh. Look who's coming over" in introDinner, the tip "the Chief's coming over"): for W2. Item 2 reverses the user's 0.42.64 ask (the Chief walks over after you sit); the brief asks for it, so it's fine, but worth saying in the report. The handle swings about every 2 s against a body loop of about 2.4 s, so they drift apart. Any floor tap within 2.5 tiles of the beam starts the painting while the tradition is on. W2's beam-all.lines isn't baked in this build yet, so non-Works crew say the fallback.
+- Checks on 056f8d8: day_check (Day 2) OK. intro_check and cadet_test vs 7a6e137 were still running at R4's handover (X's handover expects a Deck 4 morning difference in cadet_test: the earlier wake times); R5, please read them in R4's scratchpad or re-run them.
+
 ### W2 claude/writer-p5 606e204 (0.48.112, queue.left for X2): PASS
 Bakes 9565 lines; lines_check PASS. W2's tip.
 
