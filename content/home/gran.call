@@ -371,3 +371,17 @@ them: Bring them home one day. I'll make my chutney. That'll test them.
 them: If they like it, they're a keeper. If they don't, be kind. Not everybody has taste.   [laugh]
 them: Eat together, you two. Friends who eat together stay friends. That's a fact. I made it up, but it's a fact.
 them: Bye, petal. Love to {friend}. And to you. Mostly to you.
+--
+// W3, rec deck R12: Gran wants to know if you've been swimming
+them: Light's on? Good. Now. Your mum says the Wren has a swimming pool. A swimming pool! In space!
+them: Have you been in? You have to go in. I didn't pay for all those lessons for you to sit on the edge.
+them: You were a lovely swimmer. Like a little frog. A determined little frog.   [laugh]
+them: Is it warm? It'd better be warm. Number Fourteen says space is cold. Number Fourteen knows nothing.
+them: Go in, do a length for your gran, and tell me all about it. Bye, petal.
+--
+when: weekday:wed|thu|fri
+them: Is it on? It's on. Have you been swimming yet? Don't fib. I can hear a fib down the relay.
+them: Your Grandad used to swim in the sea every New Year. Daft man. Came out blue and grinning.   [sigh]
+them: I'd like to think of you swimming past the stars. That's a nice picture. I'll keep it.
+them: Mind you dry your hair properly after. You'll catch a chill. Even in space. Especially in space.
+them: Off you go. Love to you, petal.

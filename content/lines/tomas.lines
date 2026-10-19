@@ -617,3 +617,21 @@
 ? flag:train.p2.word
 - You're asking around about the scrubber?
 - Ask who sleeps near it. And check they were in.
+
+// W3, rec deck R12: Wall night and the routes; new quiz questions about the deck
+== chat
+- Wall night on Tuesday! I belay, you climb, you ring the bell. That's the whole plan.   #warm
+- The hold colours mean something, you know. Sort of. Red's hard. Green's harder. I think.
+- I've put rec dec questions in the quiz. How many seats in the auditorium? Don't count.   #funny
+? weekday:tue time:evening
+- Wall night tonight, half six. I've chalked my hands already. Too early. Very white.   #funny
+== smalltalk
+- Climb on! Oh, you are. Sorry.   #funny
+
+// W3, Wren talks (RA's talk panel): when they give a talk
+== talk.open
+- Oh! People came. Hi. Sit anywhere. I made too much tea. This is {title}.
+== talk.answer
+- Oh, good question! I think. Sort of. Yes. Here's what I know.
+== talk.listen
+- Thanks for coming. Really. You can keep the tea. Not the cups.

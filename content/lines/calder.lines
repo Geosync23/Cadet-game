@@ -640,3 +640,19 @@
 ? flag:train.m10.lead
 - Set it going. Come back in ten. Not nine.
 - Finish it by hand. Machines don't do edges.
+
+// W3, rec deck R12: the pool filters; the court net on a Sunday morning
+== chat
+- Pool filters. Seventy-five people and they all shed.
+- The court net, Sunday morning. Most popular job aboard. Forty people watch you fix it.   #funny
+- The pool sits over Deck 5 storage. If storage drips, look up.
+? rep:known
+- The rec dec is Maeve's round. Take a job down there and she'll time you. Ignore her.   #funny
+
+// W3, Wren talks (RA's talk panel): when they give a talk
+== talk.open
+- Evening. This will take twenty-five minutes. I've timed it. {title}.
+== talk.answer
+- Good question. Short answer: look there first.
+== talk.listen
+- No questions. Good. The board's waiting in the morning.

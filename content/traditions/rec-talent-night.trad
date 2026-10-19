@@ -1,0 +1,43 @@
+@tradition rec-talent-night
+// W3 (rec writer; lead 18: fields from plans/rec-traditions-plan.html FINAL and the brief; RA owns the format).
+// Talent night on the rec deck: every 4 weeks on a Sunday 19:30-21:30 from Day 14 (14, 42, 70...), the auditorium; Lucia
+// Ferreira hosts, Maeve Volkov runs the lights; the sign-up sheet goes up in the foyer a week before (mail.rec.talent.
+// signup). FOR RA: skip any date within a week of the yearly talent-night (day 152) (lead 18); move Day 14 to the next
+// free evening if the career clashes (lead 17's call 7). Your act: meeting rec.talent.you. A gathering.
+k: 497
+title: Talent night
+when: every 4 weeks sunday week 2
+at: 19:30-21:30
+min: 45
+prio: 1
+jitter: 20
+where: 7 room Auditorium: rec:seat
+hold: none
+who: ferreira always, volkov-maeve always, musician 80%, juniors 45%, everyone 40%
+anim: musician play, everyone talk
+host: ferreira
+from: ferreira
+flag: rec.on
+
+== mail
+- Talent night tomorrow, {time} in the auditorium. Lucia Ferreira hosts and Maeve Volkov runs the lights. Songs, the piano, juggling, whatever you've got. The sign-up sheet's in the foyer.
+
+== ask
+- Talent night later! I'm singing. I've practised in the music room all week. Sorry, Deck 4.   #funny
+- Coming to talent night? You don't have to do anything. Clapping counts.
+- Have you signed up for talent night? Go on. Lucia will make you sound brilliant.
+
+== here
+- A big hand, everyone!
+- Shh, this one's beautiful.   #warm
+- Next, someone very brave indeed.   #funny
+- Lights down, please, Maeve.
+
+== thanks
+- You find a seat as the house lights dim. Lucia steps into the stage light and grins. Every act gets a cheer.   #warm
+
+== chatter
+- Did you hear the duet at talent night? I had goosebumps.   #warm
+- Someone juggled spanners at talent night. Calder watched every spanner.   #funny
+- They were rehearsing in the music room upstairs all week. We heard every note.   #funny
+- The sign-up sheet for talent night is in the foyer. Brave people only. And me.   #funny

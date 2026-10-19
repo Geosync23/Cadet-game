@@ -273,7 +273,7 @@
 ? flag:walk.lift.1
 - The lift. Runs right up the spine of the ship.
 ? flag:walk.lift.2
-- Six decks. Bridge at the top, engines at the bottom.
+- Seven decks. Bridge at the top, engines at the bottom. R is the fun one.
 ? flag:walk.lift.3
 - Four, please. Go on, the panel's all yours.
 ? flag:walk.lift.4
@@ -899,3 +899,11 @@
 ? flag:train.m10.lead
 - Set it spinning. Go and have a tea. Ten minutes.
 - Now finish it by hand. That's where it gets good.
+
+// W3, Wren talks (RA's talk panel): when they give a talk
+== talk.open
+- Hey, everyone! This is {title}. Coil three sends its regards.
+== talk.answer
+- Great question! Right, so, picture a coil. A moody one.
+== talk.listen
+- Thanks for listening! Right, onward. Mind the coils.

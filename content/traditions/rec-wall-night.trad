@@ -1,0 +1,38 @@
+@tradition rec-wall-night
+// W3 (rec writer; lead 18: fields from plans/rec-traditions-plan.html FINAL and the brief; RA owns the format).
+// Wall night: Tuesdays 18:30-19:45 from Day 2, the climbing wall (two belays; waiting on the pebble beach); Tomas belays.
+// Climb and ring the bell; the season's bell board in the foyer. FOR RA: the wall's places are yours (written as
+// rec:belay). Intended who: climber (RA's habit) 80%.
+k: 491
+title: Wall night
+when: weekly tuesday from day 2
+at: 18:30-19:45
+min: 30
+after-shift: yes
+where: 7 room River hall: rec:belay
+who: tomas always, vance 70%, juniors 20%, everyone 8%
+anim: everyone play
+host: tomas
+from: tomas
+flag: rec.on
+
+== mail
+- Wall night tomorrow, {time} at the climbing wall. Tomas will belay. Climb any route, ring the bell at the top, and your name goes on the season's bell board in the foyer.
+
+== ask
+- Wall night tonight! Tomas is belaying. He's very careful. Slightly too careful.   #funny
+- Come and ring the bell later. Everyone cheers. Even for me.
+- Climbing tonight. Red, yellow, blue or green. Pick one and go up.
+
+== here
+- Climb on! You've got it.
+- Ding! Another one on the bell board.
+- Feet first, then hands. Always feet.
+
+== thanks
+- You clip into a belay at the foot of the wall. Tomas gives you a thumbs up. The bell's a long way up.
+
+== chatter
+- My arms are dead. I rang the bell, though.   #funny
+- The season's bell board's filling up. Has your name gone on yet?
+- Vance has rung that bell more than anyone. He has a number. He'll tell you.   #funny

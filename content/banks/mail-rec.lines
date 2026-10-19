@@ -1,0 +1,31 @@
+@bank all
+// W3, rec deck R12: Mail the traditions engine sends (RA's section 18) beyond each tradition's own == mail.
+// Unsigned (the game adds the sender). {text} the names, {name} one person, {trad} the tradition, {season} the season.
+// mail.rec.film.moved: the first Saturday after the first all-hands. mail.rec.bellboard: the Monday after Wall night.
+// mail.rec.regatta.won / mail.rec.cup.won: the evening after. mail.rec.talent.signup: a week before talent night.
+// mail.rec.talk.next: the evening before a Wren talk ({name} the speaker, {title} the talk).
+// mail.rec.talk.you: the invitation to give your own talk, once you're an Engine Specialist.
+
+== mail.rec.film.moved
+- Film night has moved! From this Saturday it's in the auditorium: a proper screen, the house lights down, and popcorn from the galley. The junior common room stays open on Saturdays for a quiet evening.
+== mail.rec.bellboard
+- The season's bell board in the rec deck foyer has new names on it from Wall night. Rang the bell this week: {text}. Well climbed, all of you.
+== mail.rec.bellboard.you
+- Your name is on the season's bell board in the rec deck foyer. You rang the bell on Wall night. Tomas says it was the loudest ring of the night.
+== mail.rec.regatta.won
+- The river regatta is done for another four weeks. The winner's pennant over the dock goes to {name}. Chief Holt says the heats were "adequate". That's high praise.
+== mail.rec.cup.won
+- The Lightdisc Cup has a winner: {name}. Their name goes on the Cup board in the foyer. Pell says he let them win. He didn't.
+== mail.rec.talent.signup
+- The talent night sign-up sheet is up in the rec deck foyer. Songs, tunes, jokes, tricks, poems: all welcome. Nobody fails. Lucia Ferreira hosts.
+== mail.rec.talk.next
+- Wren talk tomorrow, 19:00 in the auditorium: {name}, "{title}". Come and listen, and bring a question.
+== mail.rec.talk.you
+- Would you give a Wren talk? A small one, on the stage, with tea: "What I learned in my first month". It's on {weekday}, at seven. Nobody expects a speech. Just tell it as it was.
+== mail.rec.allhands.night
+- You slept through the Captain's all-hands, as you should. She said: a good season behind us, a busy one ahead, and thank you, all of you. Especially the night shift, who kept the lights on while we talked.   #warm
+== rec.wso.up
+- Go on, you're up.
+- Your turn. Don't let them stay on.   #funny
+== rec.wso.win
+- Three in a row! Your name's going on the foyer board.   #warm

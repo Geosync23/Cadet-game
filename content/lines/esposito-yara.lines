@@ -220,3 +220,11 @@
 == haul.goodroute
 - Good route. Fewer lifts. I'd have done it that way.
 - You found the short way round. I'm almost proud.   #funny
+
+// W3, Wren talks (RA's talk panel): when they give a talk
+== talk.open
+- Hello. There's tea, and biscuits. I know who'll take two. {title}.
+== talk.answer
+- Good question. I guessed you'd ask that. Here's the answer.
+== talk.listen
+- No question? You're thinking about socks. Everyone does.

@@ -1,0 +1,21 @@
+@meeting talk.esposito-yara
+// W3, Wren talks: Day 29, Monday 19:00-19:40, a small talk on the auditorium stage. Yara Esposito (Stores, they/them),
+// "Where every crate goes": the Wednesday delivery, crate by crate.
+title: Where every crate goes
+from: Yara Esposito
+gist: Yara's small talk on the Wednesday delivery, and where every crate on the Wren ends up.
+== lines
+esposito-yara: Hello. Sit down. There's tea. I brought biscuits, and I know exactly who'll take two.   [laugh]
+esposito-yara: Every Wednesday a delivery comes up from the hold. Linen, medical, store stock, galley tins. Forty crates, give or take.
+esposito-yara: Each one has a stop. I know every stop. I also know who's run out of what before they ask.
+esposito-yara: I never say who bought what. That's the one rule of the store. You'd be amazed how many people buy socks.   [laugh]
+esposito-yara: The trick is the order. Heavy first, near stops first, the galley before the cold store gets cross.
+esposito-yara: That's it. Questions? I'll guess yours first.
+? choice
+* What's the oddest thing in a crate?   rel:esposito-yara+2 flavour:listen mem:talk.esposito-yara.asked
+  esposito-yara: A single flipper. No crate list. Nobody's claimed it. It lives on the kit hire counter now.   [laugh]
+* How do you know who's run out?   rel:esposito-yara+2 flavour:practical mem:talk.esposito-yara.asked
+  esposito-yara: People buy the same things in the same order. When the order changes, something's run out.   [nod]
+* (Just listen)
+  esposito-yara: No question? You're thinking it. You're going to ask about socks. Everyone does.   [laugh]
+esposito-yara: Thank you all. Come back when you run out.

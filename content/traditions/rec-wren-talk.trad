@@ -1,0 +1,34 @@
+@tradition rec-wren-talk
+// W3 (rec writer; lead 18: fields from plans/rec-traditions-plan.html FINAL and the brief; RA owns the format).
+// Wren talks, the small ones: Mondays and Thursdays 19:00-19:40 on the auditorium stage (a ring of eight chairs, 4 to 10
+// people, extras on the stage edge). FOR RA (the format can't say these): skip the career's big days (1, 9-11, 15-16,
+// 22-23, 26) and the storm (4-5); skip the Thursdays that have a chief's talk (rec-chiefs-talk); the first small talk is
+// Day 25 (Tomas), then every Monday and Thursday from Day 29. The rota (speaker, title, meeting): 25 Thu tomas 'Reading a
+// route' talk.tomas; 29 Mon esposito-yara 'Where every crate goes' talk.esposito-yara; later ones to come. The host is
+// the day's speaker (the rota), so no host: here. Your own talk: talk.you, once you're an Engine Specialist.
+k: 494
+title: Wren talk
+when: weekly monday,thursday from day 25
+at: 19:00-19:40
+min: 30
+where: 7 room Auditorium: rec:seat
+who: juniors 10%, everyone 7%
+anim: everyone talk
+from: The Wren talks
+flag: rec.on
+
+== mail
+- Wren talk tomorrow, {time} on the auditorium stage. A ring of chairs, tea from the kettle, and one of the crew talking about something they love. Ask anything.
+== ask
+- There's a Wren talk tonight. Small, on the stage. Bring a question.
+- Coming to the talk later? There's tea. There's always tea.   #funny
+== here
+- Pull up a chair. There's room.
+- Shh, they're starting.
+- Ooh, good question.
+== thanks
+- You take a chair in the ring on the stage. The house is dark and the stars are right behind you.   #warm
+== chatter
+- I went to a Wren talk. I learned what the hold colours mean. Sort of.   #funny
+- The small talks are the best bit of the week. Twelve people and a teapot.   #warm
+- Anyone can give a Wren talk. Even a junior. Even me, maybe.

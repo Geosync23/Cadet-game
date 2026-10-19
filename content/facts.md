@@ -530,3 +530,28 @@ introduces them), unless noted.
 | Career lines (0.48.61): Calder keeps a note on every tech she's trained (her certified list's sibling); Pell gives a let-go friend a screw from the Wren "for your tin"; at the send-off Calder "came to check the ramp seals"; Vance's regulation nine is rest (Marrow jokes about it) | Calder, Pell, Marrow | head writer 4 |
 | Calls home are one-sided scenes (the user, 2026-10-17): Mum's pottery teacher **Rolf** (forty years at it; sells her his old wheel; packs "like he's posting a baby"); **Mrs Ellery** next door (the hedge, buys a bowl for her keys); old **Mr Pask** the number nine waits for; Mum's Saturday market stall (after beat 6) | Mum | head writer 4 |
 | Pillar 5 (design-doc "Works progression"): titles **Junior Technician** (Tier 1), **Technician** (Tier 2, Officer), **Senior Technician** (Tier 3), **Engine Specialist** (Tier 4); Works reputation words New, Steady, Reliable, Trusted, Relied on; Torres gives you his old scanner (Day 5, through Calder: he is off on Fridays) with a note "Mine's older than you. Look after it. Z."; the Chief's notes (a page per kind of head-scratcher) | Works | head writer, seat W |
+
+## The rec dec (W3, rec deck R12; plans/recdeck-plan.html v5 and plans/rec-traditions-plan.html)
+
+- **Where:** between Deck 4 (Quarters) and Deck 5 (Operations). The lift says **R** ("Recreation Deck"); crew say
+  **"the rec dec"** (their nickname, in speech only). Written texts (lead 18): signs and formal texts "Recreation
+  Deck" (the directory: "Recreation Deck (R)"); narration, Mail, news and UI mid-sentence "the rec deck". Never "Deck 7" (that's only the code's number). It went in at the Wren's **last refit**, between
+  two old decks, which is why it has a letter: **"They ran out of numbers."** Seven decks in all now.
+- **Open 06:00 to midnight**; closed for quiet overnight (it lies under Deck 4's officers' corridor).
+- **Rooms:** the **auditorium** (76 violet seats, a stage with the stars behind; the music room is right above it),
+  the **Lightdisc court** (glowing lines, a force-field net, a scoreboard) and its **stands**, the **pool** (four short
+  lanes under the hull windows, the Wren in mosaic on the bottom), the **river hall** (a slow channel and white water,
+  kayaks from the dock, a pebble beach, the **climbing wall**: four routes in red, yellow, blue and green holds, an
+  auto-belay each, a **brass bell** at the top), the **float room** (a fifth of a g, coral padding, slow light orbs),
+  the foyer (the season's **bell board**, the **Cup board**), kit hire (self-serve; a lone flipper on the counter),
+  changing rooms. Rec kit: teal with a coral stripe.
+- **Lightdisc** is the court's game (one disc, returned by standing in its way; move as it meets you and it curves;
+  three returns in a row and the next is charged).
+- **Who:** nobody staffs it. **Maeve Volkov** looks after its machines ("Maeve's deck"). Pell keeps the chalkboard for
+  **Winner Stays On**; Rina is annoyingly good at Lightdisc; Commander Vance has rung the wall's bell more than anyone,
+  and counts; Chief Holt runs **Paddle club** and starts the regatta heats with a horn (he has been in the float room
+  twice this week, for his back); the Counsellor prescribes the float room ("Twenty minutes. Counsellor's orders.").
+- **Traditions there:** Winner Stays On (Sun), the Lightdisc Cup (every 4 weeks), Dawn swim (Tue, Thu, Rina), Paddle
+  club (Wed, Holt), the river regatta (every 4 weeks), Wall night (Tue, Tomas belays), Float hour (Wed, Matthias Oduya),
+  Slow stretch (Sun 08:00, Dr. Nandakumar), Wren talks (Mon, Thu), film night (Sat; moves from the junior common room after
+  the first all-hands), talent night (every 4 weeks, Lucia Ferreira hosts, Maeve on lights), the Captain's all-hands.

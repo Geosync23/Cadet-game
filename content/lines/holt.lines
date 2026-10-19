@@ -434,3 +434,41 @@
 - Something on. Doors open. Watch posted.
 ? trad:hull-lights
 - Hm. Lights. Good.
+
+// W3, rec deck R12: Paddle club and the regatta horn; the float room "is not a toy" (he's been in it twice this week)
+== chat
+- The float room is not a toy.
+- Paddle club. Wednesdays, half six. Bring a helmet. Wear it.
+- A kayak teaches you to watch the water. The water always tells you first.
+? tier>=friend
+- Hm. I may have been in the float room. Twice. For my back. Not a word.   #funny
+? weekday:sun time:morning
+- Regatta mornings, I start the heats. One horn. Nobody goes before it. Nobody.
+== smalltalk
+- Helmets on. All of you.
+- The float room is not a toy.   #funny
+
+== disc.charged
+- Brace.
+- Hm. Charged.
+== disc.curve
+- Watch the disc, not me.
+- It turns. Learn that.
+== disc.point
+- Steady.
+- Hm.
+- Straight and simple.
+== disc.win
+- Good game, Cadet.
+- Adequate effort. Again sometime.
+== disc.lose
+- Hm. Well played.
+- Adequate. More than.   #warm
+
+// W3, Wren talks (RA's talk panel): when they give a talk
+== talk.open
+- Sit. This is {title}. It's a true story. Hm.
+== talk.answer
+- Hm. Fair question. The answer is: procedure. And luck.
+== talk.listen
+- Right. That's all. Off with you. Safely.

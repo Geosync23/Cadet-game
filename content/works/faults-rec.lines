@@ -1,0 +1,285 @@
+@bank all
+// W3, rec deck: the fault words for the rec machines (RB's FAULT_CAUSES, claude/rec-works 0.84.1), in
+// faults.lines' shape: fault.name/shows/sign/still/tried.<kind>.<cause>. still: you fitted THIS cause's part and it
+// wasn't the problem (it never names the real cause). Settings (drift, tag) have no part, so no still or tried.
+
+// poolfilter · cartridge
+== fault.name.poolfilter.cartridge
+- The filter cartridge is clogged
+== fault.shows.poolfilter.cartridge
+- the pool is cloudy
+== fault.sign.poolfilter.cartridge
+- The gauge reads high. The water is milky past the shallow end.
+== fault.still.poolfilter.cartridge
+- Fresh cartridge in. The water is still milky.
+== fault.tried.poolfilter.cartridge
+- New cartridge in. Still cloudy.
+
+// poolfilter · seal
+== fault.name.poolfilter.seal
+- The housing seal is worn
+== fault.shows.poolfilter.seal
+- a drip under the housing
+== fault.sign.poolfilter.seal
+- A wet ring on the floor under the filter housing.
+== fault.still.poolfilter.seal
+- New seal fitted. Still a drip under the housing.
+== fault.tried.poolfilter.seal
+- New seal in. Still dripping.
+
+// pooldoser · drift
+== fault.name.pooldoser.drift
+- The dosing sensor has drifted
+== fault.shows.pooldoser.drift
+- stinging eyes
+- a green tinge
+== fault.sign.pooldoser.drift
+- The reading wanders. Swimmers come out red-eyed.
+
+// pooldoser · relay
+== fault.name.pooldoser.relay
+- The pump relay has failed
+== fault.shows.pooldoser.relay
+- the dose has stopped
+== fault.sign.pooldoser.relay
+- The pump clicks but doesn't run.
+== fault.still.pooldoser.relay
+- New relay fitted. The pump runs, but the dose is still off.
+== fault.tried.pooldoser.relay
+- New relay in. Dose still off.
+
+// poolheat · valve
+== fault.name.poolheat.valve
+- The heat valve is sticking
+== fault.shows.poolheat.valve
+- the pool runs cold
+== fault.sign.poolheat.valve
+- The return pipe is barely warm.
+== fault.still.poolheat.valve
+- New valve in. The return pipe is still cold.
+== fault.tried.poolheat.valve
+- New valve in. Pool still cold.
+
+// poolheat · regulator
+== fault.name.poolheat.regulator
+- The heat regulator is failing
+== fault.shows.poolheat.regulator
+- the pool runs cold
+== fault.sign.poolheat.regulator
+- Warm by day, cold first thing in the morning.
+== fault.still.poolheat.regulator
+- New regulator fitted. Still cold first thing.
+== fault.tried.poolheat.regulator
+- New regulator in. Still cold in the mornings.
+
+// riverpump · bearing
+== fault.name.riverpump.bearing
+- A pump bearing is worn
+== fault.shows.riverpump.bearing
+- the current pulses
+== fault.sign.riverpump.bearing
+- A rumble you can feel through the grating.
+== fault.still.riverpump.bearing
+- New bearing in. Still a rumble through the grating.
+== fault.tried.riverpump.bearing
+- New bearing in. Current still pulsing.
+
+// riverpump · impeller
+== fault.name.riverpump.impeller
+- The impeller is worn
+== fault.shows.riverpump.impeller
+- the fast run goes slack
+== fault.sign.riverpump.impeller
+- Quiet, but the flow gauge reads low.
+== fault.still.riverpump.impeller
+- New impeller in. The flow still reads low.
+== fault.tried.riverpump.impeller
+- New impeller in. Fast run still slack.
+
+// wavegate · relay
+== fault.name.wavegate.relay
+- The gate relay has failed
+== fault.shows.wavegate.relay
+- no standing wave
+== fault.sign.wavegate.relay
+- The gate light shows blue, but the gate doesn't move.
+== fault.still.wavegate.relay
+- New relay fitted. The gate still won't move.
+== fault.tried.wavegate.relay
+- New relay in. Still no wave.
+
+// wavegate · seal
+== fault.name.wavegate.seal
+- A hydraulic seal is leaking
+== fault.shows.wavegate.seal
+- a slick on the bank
+== fault.sign.wavegate.seal
+- Oily water round the gate's post.
+== fault.still.wavegate.seal
+- New seal in. Still a slick by the post.
+== fault.tried.wavegate.seal
+- New seal in. Still leaking.
+
+// wallholds · hold
+== fault.name.wallholds.hold
+- A hold has worked loose
+== fault.shows.wallholds.hold
+- a hold spins underfoot
+== fault.sign.wallholds.hold
+- A hold turns in your hand. The washer on its bolt has split.
+== fault.still.wallholds.hold
+- New washer on. That hold still turns.
+== fault.tried.wallholds.hold
+- New washer on. Another hold's still loose.
+
+// belay · brake
+== fault.name.belay.brake
+- The belay brake is worn
+== fault.shows.belay.brake
+- it lowers too fast
+== fault.sign.belay.brake
+- The line pays out with a whine.
+== fault.still.belay.brake
+- New brake bearing in. It still lowers too fast.
+== fault.tried.belay.brake
+- New brake bearing in. Still too fast.
+
+// belay · tag
+== fault.name.belay.tag
+- The belay's inspection is due
+== fault.shows.belay.tag
+- inspection due
+== fault.sign.belay.tag
+- The inspection tag has run out.
+
+// stagelights · lamp
+== fault.name.stagelights.lamp
+- A stage lamp has blown
+== fault.shows.stagelights.lamp
+- a stage light is out
+== fault.sign.stagelights.lamp
+- One lamp in the truss is dark.
+== fault.still.stagelights.lamp
+- New lamp in. That spot on the stage is still dark.
+== fault.tried.stagelights.lamp
+- New lamp in. Still dark.
+
+// stagelights · relay
+== fault.name.stagelights.relay
+- A dimmer relay is failing
+== fault.shows.stagelights.relay
+- the whole rig flickers
+== fault.sign.stagelights.relay
+- Every lamp stutters at once.
+== fault.still.stagelights.relay
+- New relay fitted. The rig still flickers.
+== fault.tried.stagelights.relay
+- New relay in. Rig still flickering.
+
+// soundrack · amp
+== fault.name.soundrack.amp
+- The amplifier is failing
+== fault.shows.soundrack.amp
+- a hum
+== fault.sign.soundrack.amp
+- A low hum from every speaker, louder when it's warm.
+== fault.still.soundrack.amp
+- New regulator in the amp. Still humming.
+== fault.tried.soundrack.amp
+- New amp regulator in. Still a hum.
+
+// soundrack · cable
+== fault.name.soundrack.cable
+- The mic cable is damaged
+== fault.shows.soundrack.cable
+- the lectern mic cuts out
+== fault.sign.soundrack.cable
+- The mic drops out when the cable is touched.
+== fault.still.soundrack.cable
+- New cable run. The mic still cuts out.
+== fault.tried.soundrack.cable
+- New cable in. Mic still cutting out.
+
+// seathinges · hinge
+== fault.name.seathinges.hinge
+- A seat hinge is worn
+== fault.shows.seathinges.hinge
+- a seat won't fold
+== fault.sign.seathinges.hinge
+- A seat stuck down, and a squeak from its neighbours.
+== fault.still.seathinges.hinge
+- New hinge pin in. That seat still sticks.
+== fault.tried.seathinges.hinge
+- New pin in. The next seat still squeaks.
+
+// courtnet · coil
+== fault.name.courtnet.coil
+- An emitter coil is failing
+== fault.shows.courtnet.coil
+- the net flickers
+== fault.sign.courtnet.coil
+- The net stutters, then drops for a breath.
+== fault.still.courtnet.coil
+- New coil winding in. The net still flickers.
+== fault.tried.courtnet.coil
+- New coil in. Net still flickering.
+
+// courtnet · power
+== fault.name.courtnet.power
+- A power unit is failing
+== fault.shows.courtnet.power
+- the side walls fade
+== fault.sign.courtnet.power
+- The side fields dim. The power units whine.
+== fault.still.courtnet.power
+- New breaker fitted. The side walls still fade.
+== fault.tried.courtnet.power
+- New breaker in. Walls still fading.
+
+// scoreboard · panel
+== fault.name.scoreboard.panel
+- A scoreboard panel has failed
+== fault.shows.scoreboard.panel
+- dead pixels in the scores
+== fault.sign.scoreboard.panel
+- A dark block in the home score.
+== fault.still.scoreboard.panel
+- New panel lamp in. Still a dark block in the score.
+== fault.tried.scoreboard.panel
+- New panel in. Still a dark block.
+
+// scoreboard · driver
+== fault.name.scoreboard.driver
+- The board's driver has failed
+== fault.shows.scoreboard.driver
+- the board shows nonsense
+== fault.sign.scoreboard.driver
+- The names scramble. "Pell 11, You banana."
+== fault.still.scoreboard.driver
+- New signal card in. The board still talks nonsense.
+== fault.tried.scoreboard.driver
+- New card in. Still scrambled.
+
+// gravplate · controller
+== fault.name.gravplate.controller
+- The gravity controller has drifted
+== fault.shows.gravplate.controller
+- gravity creeps back up
+== fault.sign.gravplate.controller
+- The gauge drifts towards a full g.
+== fault.still.gravplate.controller
+- New signal card in. Gravity still creeps up.
+== fault.tried.gravplate.controller
+- New card in. Gravity still creeping.
+
+// gravplate · cooling
+== fault.name.gravplate.cooling
+- The plates' cooling pump is failing
+== fault.shows.gravplate.cooling
+- the room closes itself
+== fault.sign.gravplate.cooling
+- The cooling loop is hot to the touch.
+== fault.still.gravplate.cooling
+- New pump in. The cooling loop is still hot.
+== fault.tried.gravplate.cooling
+- New pump in. Still running hot.

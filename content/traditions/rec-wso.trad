@@ -1,0 +1,43 @@
+@tradition rec-wso
+// W3 (rec writer; lead 18: fields from plans/rec-traditions-plan.html FINAL and the brief; RA owns the format).
+// Winner Stays On: Sundays 11:30-16:30 from Day 7, the Lightdisc court and stands. Pell keeps the chalkboard and rings a
+// hand bell for each new game; tap the gate to play next (RA's recTap). FOR RA: skip the Lightdisc Cup's Sundays (days 28,
+// 56, ...: the Cup takes this slot; the format has no 'except', so the Cup's prio is higher). The stands are a gathering
+// (exempt from the deck's cap). Intended who: disc-player (RA's new habit) 90% once it exists.
+k: 486
+title: Winner Stays On
+when: weekly sunday from day 7
+at: 11:30-16:30
+min: 30
+prio: 0
+jitter: 60
+where: 7 room Stands: rec:seat
+hold: none
+who: pell always, juniors 40%, works 35%, everyone 25%
+anim: everyone talk
+host: pell
+from: pell
+flag: rec.on
+
+== mail
+- Winner Stays On tomorrow, {time} at the Lightdisc court. Pell's chalkboard by the gate: write your name, wait your turn, win and stay on. Sandwiches from the grab shelf.
+
+== ask
+- Winner Stays On today. I'm putting my name on the board. Low down. Very modest.   #funny
+- Coming to the court later? Pell's been on since half eleven. Somebody has to stop him.   #funny
+- Lightdisc this afternoon. Even if you just watch, the stands are the best seats aboard.
+
+== here
+- Next! Name on the board, wait for the bell.
+- Oh, that curve! Did you see that curve?
+- Winner stays on. Loser gets a sandwich. Everyone wins, really.   #funny
+- Shh, it's a long rally. Don't jinx it.
+
+== thanks
+- You find a spot in the stands. Pell rings the hand bell, two more step up, and the disc starts to fly.
+
+== chatter
+- Three wins in a row and your name goes on the foyer board. Pell's on it four times.   #funny
+- I lasted two games at Winner Stays On. Two! A personal best.   #funny
+- Who was on longest on Sunday? Pell. It's always Pell.
+- The stands get loud on a Sunday. Bring your voice.
