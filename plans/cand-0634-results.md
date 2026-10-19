@@ -85,3 +85,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - ~06:28 R5 PASS E6 2edb69c (contains 0.45.11-13); one small fix open (load-stop order); fine to build on. So t9 = all passed tips (E6 2edb69c, E5 60a418f, E3 d51c5ed, W2 0e8571a); open: E6 load-stop fix, E4's 5 cabin+stars fixes, X2 crew, round 3-4 pieces.
 - t8: interactions OK. t9 checks started.
 - ~06:37 R5's own checks: E3 d51c5ed mech/deck/interactions OK, cadet ALL IDENTICAL; E5 60a418f mech OK, cadet ALL IDENTICAL; E6 2edb69c (+E3 places) mech/career OK, cadet ALL IDENTICAL.
+- t9: mech OK (m15 right-first +2 passes with E6's fix), career OK.
