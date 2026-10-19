@@ -470,6 +470,11 @@ with sync_playwright() as pw:
               const A = { def: { mins: 6 }, o: {}, kind: 'ixTea' }; teaBegin(A);
               return { wed: k(wed), sat: sat ? k(sat) : [], gain: A.def.gain, lift: DECK_NAMES[2] }; })()""")
             check(any(t.startswith('Supply delivery') for t in r['wed']) and any(t.startswith('Tea and biscuits') for t in r['wed']) and not any('no goal' in t for t in r['wed']) and r['sat'] == [], f'the Schedule lists tea on shift days and the week\'s delivery, each with an arrow; none on a day off ({r})')
+            r2 = g.ev("""(() => { const t0 = (SHIP.time.day - 1) * 1440 + 19 * 60, P = DECKS[3].places.find(x => x.type === 'lounge-seat') || DECKS[3].places[0]; SHIP.device.calendarRemind.heard = []; HU_Q.length = 0;
+              SHIP.device.appts.push({ id: 9999, with: ['tomas'], at: t0 + 30, len: 30, where: P.id, kind: 'invite', status: 'asked', by: 'tomas' });
+              const at = m => { setShipNow(t0 + m); devTickMin = -1; deviceTick(); return HU_Q.filter(h => h.key === 'invite|9999').map(h => h.stage + (h.goal ? '+goal' : '')); };
+              const out = [at(16), at(31)]; SHIP.device.appts = SHIP.device.appts.filter(a => a.id !== 9999); return out; })()""")
+            check(r2 == [['soon+goal'], ['start+goal']], f'an invitation still waiting for your answer reminds you 15 minutes before and at its start (item 12) ({r2})')
             check(r['gain'] <= 5 and r['lift'] == "Officers' quarters and science", f'tea and biscuits is only a little food; the lift says Officers\' quarters and science ({r["gain"]}, {r["lift"]})')
         check(not g.errors, f'no console errors ({g.errors[:3]})')
     g.close()

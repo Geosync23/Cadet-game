@@ -10601,6 +10601,16 @@ function devHeadsTick(t) {
     for (let i = HU_Q.length - 1; i >= 0; i--) if (HU_Q[i].key === key) HU_Q.splice(i, 1);   // the start replaces a waiting 'soon'
     HU_Q.push({ key, stage, at, title: devHuName(x), where: x.where, goal: devItemGoal(x) });
   }
+  for (const a of SHIP.device.appts) if (a && a.kind === 'invite' && a.status === 'asked' && a.by && Number.isFinite(a.at)) {   // 0.72.6 (playtest 2, item 12): an invitation still waiting for your answer reminds you too, like an appointment
+    const at = a.at, key = 'invite|' + a.id; if (at - R.ahead > t || at + 3 <= t) continue;
+    const stage = t < at ? 'soon' : 'start', k = key + '|' + stage;
+    if (devHeard(k) || (stage === 'soon' && at - t < 3)) continue;
+    devHear(k);
+    for (let i = HU_Q.length - 1; i >= 0; i--) if (HU_Q[i].key === key) HU_Q.splice(i, 1);
+    let who = a.by; try { who = apptName(a.by); } catch (e) { /* the id */ }
+    let where = ''; try { where = apptWhereName(a.where); } catch (e) { where = ''; }
+    HU_Q.push({ key, stage, at, title: 'Invitation from ' + who, where, goal: devPlaceGoal(a.where) });
+  }
   for (let i = HU_Q.length - 1; i >= 0; i--) { const h = HU_Q[i]; if (h.stage === 'soon' ? t >= h.at : t >= h.at + 10) { if (i === 0 && DEV.hu) { DEV.hu = null; DEVICE_SKIN.heads(null); } HU_Q.splice(i, 1); } }
   if (HU_Q.length > 4) HU_Q.splice(DEV.hu ? 1 : 0, HU_Q.length - 4);   // never a backlog: the newest four
   devHeadsShow(t);
