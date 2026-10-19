@@ -9,6 +9,14 @@ Lines skimmed. In a fresh archive content_gen bakes 9342 lines; lines_check PASS
 
 ## Step 4
 
+### E1 claude/mech-rounds b68e236 (0.45.7, round 1: 24 core tool wear, the side-job cap, Bunk 1 texts): PASS WITH FIXES (wear before Day 12)
+Base 0.63.3 7a6e137. Pages: m11-tool-upkeep, step4-stages.
+- One owner: toolWear/toolState/toolSlow/toolCharge, worksSide/worksSideXp/WORKS_SIDE_KINDS, myBedRoom/bedText are E1's alone. E2 (0df09137) and E3 (b809339) carry the base's one-line `const toolWear` untouched, so a merge takes E1's `function toolWear` cleanly. E2's `WORKS_SIDE_KINDS.add('leak')` (24o) comes after the core in the file. Good.
+- Saves: `SHIP.works.side` kept whole by worksClean (< 64 KB, an object), an old save without it loads, junk dropped (mech_check side part). E1's keys: `side.slow` (the toast's day per tool), `side.xp` ({ day, n }). No R().
+- Behaviour against m11: numbers as the page (4/5/3, Due < 30, Getting low < 60, a quarter slower, never blocked, toast once a day, words on the Tools page); worksUse no longer wears the three again. Cap +2 a ship day across side jobs; side kinds at the board go through it. WORK_BANDS[2] kept as C2's. Bunk 1 texts name the cabin after the move.
+- **Fix: wear starts too early.** The page has M11 "from Day 12" ("Stage 1 · The scanner Day 12 on"; the pipe kit Day 12; the logger later). In 0.45.7 `scanRead` wears the scanner 4 a scan from the scanner's arrival (m7, Day 5), and `toolSlow` only looks at the charge: by Day 12 a busy player can have a Due scanner, slowing every inspection and toasting "Bench, when you can" before the bench lesson exists (and before 24m's bench upkeep is built at all). Gate it on M11 being open (Day 12 / the m11 ladder row): no wear before it (simplest: toolWear(id, n) only adds wear once M11 is open, so tools arrive at Day 12 charged), and a test line for it.
+- Checks on b68e236: mech_check OK, career_check OK, cadet_test vs 7a6e137 ALL IDENTICAL.
+
 ### W2 claude/writer-p5 8879ee3 (0.48.106-107): PASS
 tip.round.look no longer names a button; new `leak.worn` for E2 (in keys-p5.md). Bakes 9570 lines; lines_check PASS. Plus W2's handover note.
 
