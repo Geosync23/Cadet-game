@@ -748,3 +748,4 @@ Read: CLAUDE.md; TEAM.md (Lead line, "OVERNIGHT MODE ON", "Tonight's goal", "Ove
 ## Lead 17 log (session_016bN7x175WBwBL7S9xc2Lpb, depth 1)
 - ~05:50: took over. Check-in trig_01Qgn2FB8SBGQVPmBPCbaAtD (:07); lead 16's trig_01BoN7J97dm63qTxs64fwSbk disabled; TEAM.md Lead line + both briefs now say lead 17; seats messaged.
 - ~05:53: X retired at ~70% (archived); started X2 session_016jw3fP3pGztfciWgr6hg9A (depth 2) for items 15+20 + X's loose ends. M10 call: hand over in person (E3 did it in 0.53.8 95d3737 WIP).
+- ~05:56: started R5 session_01XJyHzg4QvX2nsdtf9zT1TH (reviewer; R4 ~65% retiring); M13 = +1 rep (page).
