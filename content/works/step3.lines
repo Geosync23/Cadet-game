@@ -72,6 +72,9 @@
 - your framed commission
 == works.record.commissioned
 - Commissioned Officer, Day {day}.
+// Brennan's cake (C2's optional toast)
+== promo.cake.toast
+- Brennan's made a cake. Works tea corner, before five.
 // the Ship app's news item (one gossip line)
 == promo.news
 - Works news: {me} made Officer today. Cake at the tea corner, while it lasts.

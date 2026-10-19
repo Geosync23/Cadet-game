@@ -116,7 +116,7 @@ unsigned. Calder's flag lines also exist for Vance (`vance.lines`) where the pag
 
 ### The test job and the first promotion (C2; X for the walks and crowds)
 
-Matched to C2 0.44.23 (our renames crossed twice; C2's newest list wins). Where a text had two names, both are kept (different kinds), so either reads.
+**Final: C2 0.44.24 uses the b4630d4 names** (our renames crossed three times; agreed final by both). The 0.44.23 text names are kept too (different kinds), so either reads.
 
 | When | Key | Who / kind | Placeholders |
 | --- | --- | --- | --- |
@@ -135,8 +135,8 @@ Matched to C2 0.44.23 (our renames crossed twice; C2's newest list wins). Where 
 | Mail from friends | kind `mail.promo.friend` (`content/banks/promo.lines`) | crew bank by tier; up to two friends | `{me}` `{nick}` |
 | Mail from the Captain | `promo.captain` | text, Mail | |
 | Ship app news (one gossip line) | `promo.news` | text | `{me}` |
-| Brennan's cake (written; nobody plays it yet) | `flag:promo.cake` | brennan `cue` | |
-| Calder sets off (17:00), then her walk to 4-23 | text `promo.walk`; then `flag:promo.walk` (lines in order) | calder `work` (C2); the same flag in vance `work` | |
+| Brennan's cake (C2 0.44.24, the lead's call: within 3 m of her at the tea corner, 16:30-17:00) | `flag:promo.cake`; toast `promo.cake.toast` | brennan `work` (and `cue`) ; text | |
+| Calder's walk to 4-23 | `flag:promo.walk.start`, `.lift`, `.corridor`, `.door`, `.inside` (C2 0.44.24); text `promo.walk` also there | calder `work`; the same flags in vance `work` | |
 | Tomas and Pell with your box; Tomas's goodbye (X) | `flag:promo.box`; `flag:promo.bye` | tomas, pell `work` | |
 | Move by Mail (without you) | `promo.move.mail` (C2 0.44.23; also `mail.promo.move`) | text, Mail | |
 | The door plate (DA5) | `works.plate` | text: "{name} · {rank}" | `{name}` `{rank}` |
