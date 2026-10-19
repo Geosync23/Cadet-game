@@ -64,3 +64,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - ~06:09 R5 PASS W2 4e0d212 (W2's tip).
 - t6: career OK, machine OK. t7: career OK (the key-order FAIL is gone with E1 fb499eb).
 - ~06:09 E1 633eade (0.45.12 = 0.45.11 + manifestRun in 24d for E2's team parts; merge before E2's 24h team parts); with R5.
+- ~06:10 W2 FINAL 0e8571a (0.48.116, ticket.nohint; scratch bake 9560 lines / 48 meetings); with R5.
