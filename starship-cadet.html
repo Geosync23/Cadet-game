@@ -8907,7 +8907,7 @@ function newGameStart(arrival) {
 }
 // Going to sleep: tap your own bunk (playerBed(), ROSTER_PLAYER's bed, by its place on Deck 4) from 20:00 to 05:30 (0.28.9: no dialog).
 // The view fades out, time skips to 06:00 (sleepUntil), and it fades back in.
-const playerBed = () => ROSTER_PLAYER.bed, WAKE_AT = 6 * 60, CLOCK_EARLY = 7;   // CLOCK_EARLY: minutes the Works crew arrive early to clock in (the clock's queue wait, 6, and the clocking, 1)   // read when used: ROSTER_PLAYER comes later in the file
+const playerBed = () => { const h = typeof SHIP !== 'undefined' && SHIP.works && SHIP.works.home; return typeof h === 'string' && (DECKS[4].places || []).some(q => q.id === h && q.type === 'bed') ? h : ROSTER_PLAYER.bed; }, WAKE_AT = 6 * 60, CLOCK_EARLY = 7;   // CLOCK_EARLY: minutes the Works crew arrive early to clock in (the clock's queue wait, 6, and the clocking, 1)   // read when used: ROSTER_PLAYER comes later in the file
 const sleepEl = document.getElementById('sleepAsk'); let sleeping = false;
 const bedtime = () => SHIP.time.min >= 20 * 60 || SHIP.time.min < 5 * 60 + 30;
 function offerSleep(at) {                                // at: where the tapped item is. True if it was your bunk
@@ -9198,6 +9198,9 @@ const APPT_WAIT = 15;
 const apptList = () => typeof SHIP !== 'undefined' && SHIP.device && Array.isArray(SHIP.device.appts) ? SHIP.device.appts : [];
 const apptOn = a => !!a && (a.status === 'yes' || a.status === 'kept') && isFinite(a.at) && !!a.where && Array.isArray(a.with);
 const apptPlace = a => { const d = deckOf(a.where), pl = (DECKS[d] && DECKS[d].places || []).find(q => q.id === a.where); return pl ? { ...pl, deck: d } : null; };
+// each person's own place at it (0.71.2, for the officer ceremony's guests): a.places = { [id]: placeId } on the same
+// deck, else the appointment's place as before
+const apptPlaceOf = (a, id) => { const w = a.places && typeof a.places[id] === 'string' ? a.places[id] : null; if (!w) return apptPlace(a); const d = deckOf(w), pl = (DECKS[d] && DECKS[d].places || []).find(q => q.id === w); return pl ? { ...pl, deck: d } : apptPlace(a); };
 // is p free from a to b (absolute minutes)? Free time, standing about, or (for work, a check-up or a summons) their
 // own shift on the appointment's deck; never asleep, eating, at an event or at another appointment
 function apptFree(p, a, from, to) {
@@ -9223,7 +9226,7 @@ function apptReply(p, a) {
 function apptWhere(p, t) {
   for (const a of apptList()) {
     if (!apptOn(a) || !a.with.includes(p.id)) continue;
-    const end = a.at + (a.status === 'kept' || a.occ ? (a.len || 30) : APPT_WAIT), pl = apptPlace(a); if (!pl) continue;   // an occasion's host (section 18 via apptAdd, `occ`) stays the whole time, you or no you (0.26.34)
+    const end = a.at + (a.status === 'kept' || a.occ ? (a.len || 30) : APPT_WAIT), pl = apptPlaceOf(a, p.id); if (!pl) continue;   // an occasion's host (section 18 via apptAdd, `occ`) stays the whole time, you or no you (0.26.34)
     // they set off in time to be there at a.at: the walk from the lift (about 1.3 x the straight line, at CREW_SPEED)
     const lift = DECKS[pl.deck].lift || pl.at, walk = Math.ceil(1.3 * Math.hypot(pl.at[0] - lift[0], pl.at[1] - lift[1]) / 1.15 * SHIP_RATE) + 1;   // ship minutes
     const go = a.at - walk, C = SCHED_COMMUTE;
@@ -9253,6 +9256,7 @@ function apptTick() {
 // accepted invitation or summons to a place in it runs (from 15 minutes before to 15 after it ends). False otherwise:
 // with no appointments it changes nothing. Section 4's edgeBlocks asks it for 'closed' doors; section 10 opens the door.
 function doorOpenFor(room, who, t = shipNow(), deck = typeof deckDef !== 'undefined' ? deckDef.num : null) {
+  if ((who === 'player' || who === 'you' || (who && who.isPlayer)) && deck === 4 && room && room === ((DECKS[4].places || []).find(q => q.id === playerBed()) || {}).room) return true;   // your own cabin (0.71.2: 4-23 once you're an Officer, SHIP.works.home): your key opens it
   if ((who === 'player' || who === 'you' || (who && who.isPlayer)) && typeof occasionDoorOpen === 'function' && occasionDoorOpen(deck, room, t)) return true;   // section 18's occasions: a summons, the Captain's table
   if ((who === 'player' || who === 'you' || (who && who.isPlayer)) && typeof jobDoorOpen === 'function' && jobDoorOpen(deck, room)) return true;   // section 15: your job's next stop is in there (0.28.52)
   if ((who === 'player' || who === 'you' || (who && who.isPlayer)) && typeof worksHomeOpen === 'function' && worksHomeOpen(deck, room)) return true;   // section 24p: your own cabin, once you're an officer
@@ -10214,14 +10218,93 @@ function whereIs(person, t) {
 // for someone, they're on your deck (crossing decks with you: they step out of the lift after you), at `to` if it's a
 // place there. Only in play (the deck you're on); plans never see it. Section 10's CrewAgent walks them (escortStep)
 function escortPlanOf(p, t) {
-  if (typeof escortPlan !== 'function' && typeof worksEscort !== 'function') return null;     // (before section 10 has run, deckDef and player don't exist yet)
-  try { if (!deckDef || !player) return null; const e = (typeof escortPlan === 'function' ? escortPlan(p, t) : null) || (typeof worksEscort === 'function' ? worksEscort(p, t) : null); return e && /^(lead|follow|wait)$/.test(e.mode) ? e : null; } catch (e) { return null; }   // worksEscort: section 24's teachers (0.44.3)
+  if (typeof escortPlan !== 'function' && typeof worksEscort !== 'function' && !CREW_SCENE.size) return null;     // (before section 10 has run, deckDef and player don't exist yet)
+  try { if (!deckDef || !player) return null; const e = (typeof escortPlan === 'function' ? escortPlan(p, t) : null) || (typeof worksEscort === 'function' ? worksEscort(p, t) : null) || crewSceneOf(p, t); return e && /^(lead|follow|wait)$/.test(e.mode) ? e : null; } catch (e) { return null; }   // worksEscort: section 24's teachers (0.44.3); crewScene: stage directions (0.71.2)
 }
 function escortWhere(p, t) {
   const e = escortPlanOf(p, t); if (!e) return null;
   let pl = null; try { pl = typeof e.to === 'string' ? PLACE_OF.get(e.to) : null; } catch (x) { pl = null; }   // a place id here (or a { deck, tile | room })
   const deck = e.mode === 'wait' && e.to && e.to.deck != null ? e.to.deck : deckDef.num;   // waiting on another deck: there; else with you
-  return { deck, act: 'intro', type: pl ? pl.type : null, placeId: pl ? e.to : null, moving: false, from: t - 1, until: t + 1, tag: 'escort', escort: e };
+  return { deck, act: 'intro', type: pl ? pl.type : null, placeId: pl ? e.to : null, moving: false, from: t - 1, until: t + 1, tag: 'escort', escort: e, hold: e.hold || null };
+}
+// stage directions (0.71.2, the sim side of the first promotion, plans/mechanics/promotion-officer.html): crewScene(id,
+// { mode, to, until, hold }) has someone lead, follow or wait (escortStep's modes) until `until` (absolute ship minutes),
+// e.g. holding 'carry' (the box). `to`: a place id, or { deck, tile } (a tile on another deck: they're there when you
+// come). Asked by escortPlanOf after section 21's escortPlan and section 24's worksEscort. Live only, nothing saved
+const CREW_SCENE = new Map();
+function crewScene(id, o = {}) {
+  id = id && (id.id || id); if (!id || !/^(lead|follow|wait)$/.test(o.mode || 'wait')) return false;
+  CREW_SCENE.set(id, { mode: o.mode || 'wait', to: o.to || null, until: Number.isFinite(o.until) ? o.until : shipNow() + 30, hold: o.hold || null, pace: o.pace });
+  return true;
+}
+function crewSceneEnd(id) { CREW_SCENE.delete(id && (id.id || id)); }
+function crewSceneOf(p, t) {
+  const s = CREW_SCENE.size && CREW_SCENE.get(p.id); if (!s) return null;
+  if (t >= s.until) { CREW_SCENE.delete(p.id); return null; }
+  let to = s.to;                                         // a place on another deck: there, by its tile (escortWhere only looks places up on this deck)
+  if (typeof to === 'string' && typeof deckOf === 'function') { const d = deckOf(to), pl = DECKS[d] && (DECKS[d].places || []).find(q => q.id === to); if (pl && (typeof deckDef === 'undefined' || d !== deckDef.num)) to = { deck: d, tile: pl.at }; }
+  return { mode: s.mode, to, hold: s.hold, pace: s.pace, scene: true };
+}
+// crewGather(ids, focus, { deck, until, hold }) -> the ids placed: each waits on their own open tile in a ring round
+// `focus` (a place id: its walk-to tile; or a [c, r] tile on `deck`), in its room, nearest first, facing you. The tiles
+// are picked from the deck's map when it's the deck you're on, else from DECKS (walls aside, never a blocked tile)
+function crewGather(ids, focus, o = {}) {
+  const sp = typeof focus === 'string' ? (Object.keys(DECKS).map(Number).map(n => [n, (DECKS[n].places || []).find(q => q.id === focus)]).find(x => x[1]) || []) : [];
+  const deck = Number.isFinite(o.deck) ? o.deck : sp[0], at = Array.isArray(focus) ? focus : sp[1] ? (typeof placeSpot === 'function' && deckDef.num === deck && placeSpot(focus) ? placeSpot(focus).walk : sp[1].at) : null;
+  if (!Number.isFinite(deck) || !at) return [];
+  const here = typeof deckDef !== 'undefined' && deckDef.num === deck;
+  const D = DECKS[deck], rm = (i, j) => here ? roomAt(i, j) : (D.map && D.map[j] && D.map[j][i] && D.map[j][i] !== '.' ? D.map[j][i] : null), open = (i, j) => here ? free(i, j) : !!rm(i, j);   // off this deck: any tile of the room (section 10 walks them to the nearest open one)
+  const room = rm(at[0], at[1]), tiles = [];
+  for (let k = 1; k <= 3 && tiles.length < ids.length; k++) for (let dj = -k; dj <= k; dj++) for (let di = -k; di <= k; di++) {
+    if (Math.max(Math.abs(di), Math.abs(dj)) !== k) continue;
+    const c = at[0] + di, r = at[1] + dj; if (open(c, r) && rm(c, r) === room) tiles.push([c, r]);
+  }
+  tiles.sort((a, b) => Math.hypot(a[0] - at[0], a[1] - at[1]) - Math.hypot(b[0] - at[0], b[1] - at[1]) || a[1] - b[1] || a[0] - b[0]);
+  const out = [];
+  ids.forEach((id, k) => { if (tiles[k] && crewScene(id, { mode: 'wait', to: { deck, tile: tiles[k] }, until: o.until, hold: o.hold })) out.push(id && (id.id || id)); });
+  return out;
+}
+// the Works crew cheer you by the job board after Calder's office (Day 10, about 11:10-11:25): those on shift who are
+// on Deck 5 at work and not out on a job. Returns their ids
+function worksGather(until = shipNow() + 15) {
+  const t = shipNow();
+  const ids = ROSTER.filter(p => p.dept === 'works' && p.id !== 'you').filter(p => { const w = whereIs(p, t); return w && w.deck === 5 && w.act === 'work' && !w.moving && !w.job; }).map(p => p.id);
+  const out = crewGather(ids, '5-jobboard-1', { until }); CHEER = out.length ? { ids: out, until, said: new Set() } : null; return out;
+}
+// your box on the way to 4-23 (Day 10, 17:05): Tomas and Pell wait by its door on Deck 4 holding it
+function boxCarry(until = shipNow() + 40) { return crewGather(['tomas', 'pell'], [41, 14], { deck: 4, until, hold: 'carry' }); }
+// the officer ceremony's guests (Day 11, 17:15, Deck 1's observation room): C2's occasion books one appointment at
+// 07:00 (id 'promoCeremony@<day>', with the Captain, Vance, Calder, Torres and promoGuests' friends); this gives each of
+// them their own seat at the conference table (a.places, saved with the appointment), so section 14's apptWhere brings
+// them by lift and seats them instead of piling onto one place
+const CEREMONY_SEATS = ['1-conf-1', '1-conf-2', '1-conf-3', '1-conf-4', '1-conf-5', '1-conf-6', '1-conf-7', '1-conf-8'];
+function ceremonySeat(day) {
+  const a = apptList().find(x => /^promoCeremony@/.test(String(x.occ || x.id)) && Math.floor(x.at / 1440) + 1 === day); if (!a || a.places) return a || null;
+  const places = {}; a.with.forEach((id, k) => { if (CEREMONY_SEATS[k]) places[id] = CEREMONY_SEATS[k]; }); a.places = places; return a;
+}
+// the sim side of the first promotion (plans/mechanics/promotion-officer.html; C2's 24 core says when): the Works crew
+// round the board for a quarter of an hour from simNote('promoted'); Tomas and Pell with your box by 4-23 from
+// simNote('moveStart'); Tomas's goodbye once 4-23 is yours; the ceremony's seats (promoTick, each ship minute, from
+// section 20's social tick). Live and once a day per step (PROMO_LIVE), except the seats, saved with the appointment
+const PROMO_LIVE = new Set(), promoOnce = k => { const key = k + '@' + SHIP.time.day; if (PROMO_LIVE.has(key)) return false; PROMO_LIVE.add(key); return true; };
+if (typeof onSim === 'function') {
+  onSim('promoted', n => { const t = Number.isFinite(n && n.t) ? n.t : shipNow(); if (shipNow() - t <= 15 && promoOnce('gather')) worksGather(t + 15); });
+  onSim('moveStart', n => { const t = Number.isFinite(n && n.t) ? n.t : shipNow(); if (shipNow() - t <= 45 && playerBed() !== '4-23' && promoOnce('box')) boxCarry(t + 45); });
+}
+function promoTick() {
+  const day = SHIP.time.day;
+  if (SHIP.time.min >= 420 && apptList().length && !PROMO_LIVE.has('seat@' + day) && ceremonySeat(day)) PROMO_LIVE.add('seat@' + day);
+  if (!PROMO_LIVE.has('box@' + day) || typeof DECK_CREW === 'undefined') return;
+  const pp = player.obj.position, near = id => { const a = DECK_CREW.find(x => x.p.id === id); return a && Math.hypot(a.x - pp.x, a.z - pp.z) < 4 ? a : null; };
+  if (!PROMO_LIVE.has('boxsaid@' + day)) {             // Tomas or Pell says a word as you come up to them with the box
+    const a = [near('tomas'), near('pell')].find(x => x && x.hold === 'carry');
+    if (a && promoOnce('boxsaid')) { const l = socLine(a.p, 'work', { t: shipNow(), flags: { 'promo.box': true } }); if (l) bubbleSay(a.h, l.text, 5); }
+  }
+  const a = playerBed() === '4-23' && near('tomas');
+  if (a && promoOnce('bye')) {                           // the box is in: Tomas's goodbye as a bunkmate, then off they go
+    const l = socLine(a.p, 'work', { t: shipNow(), flags: { 'promo.bye': true } }); bubbleSay(a.h, l ? l.text : 'Don\'t be a stranger, Officer.', 6);
+    for (const [id, tile] of [['tomas', [40, 14]], ['pell', [42, 14]]]) crewScene(id, { mode: 'wait', to: { deck: 4, tile }, until: shipNow() + 2 });
+  }
 }
 // crewComeTo(p, placeId, onArrive, { until }) (Pillar 4: visits, friends walking over): a crew member walks to a
 // place on the deck you're on (by lift if they're elsewhere), onArrive(agent) is called once when they get there, and
@@ -10356,7 +10439,7 @@ function deviceLoad(s) {
   const appts = (Array.isArray(d.appts) ? d.appts : []).filter(a => a && typeof a === 'object' && Number.isInteger(a.id) && isFinite(a.at) && Array.isArray(a.with) && typeof a.where === 'string')
     .slice(-60).map(a => ({ ...a, id: a.id, with: a.with.filter(x => typeof x === 'string').slice(0, 8), at: +a.at, len: isFinite(a.len) ? +a.len : 30, where: a.where,
       kind: typeof a.kind === 'string' ? a.kind : 'social', status: ['asked', 'yes', 'no', 'kept', 'missed'].includes(a.status) ? a.status : 'no', by: typeof a.by === 'string' ? a.by : null,
-      ...(Number.isInteger(a.grp) ? { grp: a.grp } : {}) }));
+      ...(Number.isInteger(a.grp) ? { grp: a.grp } : {}), ...(a.places && typeof a.places === 'object' ? { places: Object.fromEntries(Object.entries(a.places).filter(([k, v]) => typeof v === 'string').slice(0, 8)) } : { places: undefined }) }));   // places: each person's seat (0.71.2)
   return { memos, tipsSeen, appts, booted: d.booted === true, settings: { phosphor: PHOSPHORS[st.phosphor] ? st.phosphor : 'cyan', fx: st.fx !== false, tips: st.tips !== false, quiet: st.quiet === true },
     calendarRemind: { on: r.on !== false, ahead: [15, 30, 60].includes(r.ahead) ? r.ahead : 15, morning: r.morning !== false, per, everyday: r.everyday !== false,
       heard: (Array.isArray(r.heard) ? r.heard : []).filter(k => typeof k === 'string' && k.length < 120).slice(-80) } };   // 0.35.29: heads-ups
@@ -34747,7 +34830,7 @@ function socialTick() {                                  // the main loop: the c
   if (typeof linesTick === 'function') linesTick();       // section 22: overheard conversations (0.43.12)
   const m = Math.floor(shipNow()); if (m === SOC_MIN) return;
   const step = SOC_MIN >= 0 && m > SOC_MIN && m - SOC_MIN < 30 ? m - SOC_MIN : 0;
-  SOC_MIN = m; socialTo(m); socialTogether(step); socialSeek(m); socialChatter(m); socialMail(m); socialAppts(); socInviteMail(m); socialVisit(m);
+  SOC_MIN = m; socialTo(m); socialTogether(step); promoTick(); socialSeek(m); socialChatter(m); socialMail(m); socialAppts(); socInviteMail(m); socialVisit(m);
 }
 // chatter you overhear (0.36.5) in the performance engineer's speech bubbles (section 8b: bubbleSay(who, text, secs),
 // at most two on screen; inert without it). Now and then (CHATTER_ODDS a ship minute, at most one every CHATTER_GAP
@@ -34758,9 +34841,27 @@ const CHATTER_NEAR = 7, CHATTER_ODDS = .35, CHATTER_GAP = 12;
 const CHATTER_IDLE = linesLegacy('smalltalk');            // small talk between crew, by what they're doing (content/banks/old.lines)
 let CHATTER_AT = -1e9;
 const CHATTER_LAST = [];                                 // the last few lines said, so nobody repeats one
+// the Works crew's cheer (0.71.2, worksGather): one of them a ship minute says well done, as they stand by the board;
+// team jobs (m8): the team talk while they work (section 22's kind 'team', else TEAM_TALK), ahead of news and small talk
+const TEAM_TALK = ['Mind your fingers.', 'Nearly there.', 'Hold it... hold it...', 'Easy does it.', 'Who\'s got the spanner?', 'That\'s it. Lovely.'];
+const CHEER_LINES = ['Well done, Officer!', 'Told you you\'d do it.', 'Officer! Look at you.', 'About time too. Well done.', 'Three cheers, then!'];
+let CHEER = null;                                        // { ids, until, said: Set }
+function cheerTick(m) {
+  const C = CHEER; if (!C) return false; if (shipNow() >= C.until) { CHEER = null; return false; }
+  const P = player.obj.position;
+  for (const id of C.ids) {
+    if (C.said.has(id)) continue;
+    const a = DECK_CREW.find(x => x.p.id === id); if (!a || !a.h || a.pose !== 'stand' || Math.hypot(a.x - P.x, a.z - P.z) > CHATTER_NEAR) continue;
+    const l = socLine(a.p, 'promoted', { t: shipNow(), tier: relTier(id), bubble: true, flags: { 'promo.gather': true } });
+    bubbleSay(a.h, l ? l.text : CHEER_LINES[(Math.floor(schedU(a.p.seed, m, 640) * CHEER_LINES.length) + C.said.size) % CHEER_LINES.length]); C.said.add(id); CHATTER_AT = simNow(); return true;
+  }
+  return false;
+}
+const teamJobOf = (w) => w && w.job && (SHIP.jobs || []).find(j => j.id === w.job && Array.isArray(j.team)) || null;
 function socialChatter(m) {
   if (typeof bubbleSay !== 'function' || typeof DECK_CREW === 'undefined') return;
   if (typeof bubbles !== 'undefined' && bubbles) bubbles.hidden = !!CHAT;
+  if (!CHAT && !sleeping && cheerTick(m)) return;
   if (CHAT || sleeping || simNow() - CHATTER_AT < CHATTER_GAP * 1000 || schedU(m, 0, 635) >= CHATTER_ODDS) return;
   const t = shipNow(), heard = new Set(SHIP.heard.map(x => x.id)), P = player.obj.position;
   const v = new THREE.Vector3(), onScreen = a => { v.set(a.x, (a.y || 0) + 1.6, a.z).project(camera); return Math.abs(v.x) < .7 && v.y < .8 && v.y > -.9; };   // well inside the screen, so the bubble fits
@@ -34768,6 +34869,10 @@ function socialChatter(m) {
     .sort((a, b) => schedU(a.p.seed, m, 636) - schedU(b.p.seed, m, 636));
   for (const a of near) {
     const w = whereIs(a.p, t); if (!w || w.act === 'sleep' || w.act === 'wash') continue;
+    const tj = teamJobOf(w); if (tj) {                   // at a team job: work talk first (m8, 0.71.2)
+      const l = socLine(a.p, 'team', { t, act: 'work', bubble: true, flags: { 'team.on': true } }), text = l ? l.text : TEAM_TALK[Math.floor(schedU(a.p.seed, m, 641) * TEAM_TALK.length)];
+      if (!CHATTER_LAST.includes(text) && bubbleSay(a.h, text)) { CHATTER_AT = simNow(); CHATTER_LAST.push(text); if (CHATTER_LAST.length > 8) CHATTER_LAST.shift(); return; }
+    }
     const n = newsKnownBy(a.p, t).find(x => !heardIt(x) && !(x.about === a.p.id && x.kind !== 'fault'));
     let text = n ? n.lines[Math.floor(schedU(a.p.seed, m, 637) * n.lines.length)] : null;
     if (!text && schedU(a.p.seed, m, 638) < .3) { const k = w.act === 'breakfast' || w.act === 'dinner' ? 'meal' : w.act === 'work' ? 'work' : w.act === 'leisure' || w.act === 'off' ? 'free' : null;
@@ -44058,6 +44163,7 @@ class CrewAgent {
   // tiles from you; 'wait' stands at `to` (or where they are). Paths are made again when the goal moves (you, or a new
   // `to`), at most twice a second. They may go anywhere you can (the rooms on their way are allowed)
   escortStep(dt, e) {
+    if (e.scene) this.hold = e.hold || null;             // a stage direction's box (crewScene, 0.71.2); escorts as before
     const pp = e.after ? e.after : player.obj.position, dist = Math.hypot(pp.x - this.x, pp.z - this.z), you = cellAt(pp.x, pp.z);
     const goal = e.mode === 'follow' ? you : escortGoal(e, this);
     const key = e.mode + '|' + (goal ? goal.join(',') : '-');
