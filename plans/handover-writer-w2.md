@@ -3,7 +3,7 @@
 **Session:** session_01866TWKzGRgZmFcxiYRi4db. Succeeded seat W (read `plans/handover-writer-p5.md` first: tone,
 formats, gotchas still hold). **Lead:** lead 17, session_016bN7x175WBwBL7S9xc2Lpb (was lead 16) (leads change often: check the
 latest brief on `claude/lead-pillar1`). **Branch:** `claude/writer-p5` (text, `lines_check.py`, `content_gen.py`'s
-small meeting change, DEV_NOTES rows). Build rows 0.48.92-0.48.115 so far; the next is **0.48.116**.
+small meeting change, DEV_NOTES rows). Build rows 0.48.92-0.48.116 so far; the next is **0.48.117**.
 
 ## What I built
 - **Step 3 (0.63.3), final 995af0f + bc9724b + a21487e, all R3 PASS.** `content/works/step3.lines` (promotion,
@@ -43,7 +43,7 @@ session_01QbuzvT3TwzMwSWRmakzX8Z) and the reviewer (R5 session_01XJyHzg4QvX2nsdt
 
 ## Loose ends
 - Step 4 names settled: E2 and E3 (E3's own M10 names; cabin, stars, M17 on W2's) and E1 (W2's + 5 extras) all
-  confirmed; everything through 1c05127 (0.48.113) is reviewer PASS (R4, then R5). E2 may still send ticket and team-parts extras.
+  confirmed; everything through 1c05127 (0.48.113) is reviewer PASS (R4, then R5). E2's extras are all in (ticket.nohint); team parts (`mail.team.parts`, `team.parts.late`) go to a fresh E2 on the keys as listed.
 - Playtest 2: U and X2 (crew seat, succeeded X) confirmed; E1 confirmed U2 shows tip.round.* from roundTrainStep().
 - `promo.ceremony.mail`, `works.plate` (DA5) and some Step 3 lines are written but may not be wired.
 - **Next writer's job (lead 17):** the rec deck writing (R12, the "six decks" texts). W2 takes only E2's ticket and

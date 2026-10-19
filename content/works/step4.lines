@@ -325,6 +325,8 @@
 - A ticket case | A ticket case, when you're ready. It's on the Works board. Harder than the others. Take your time.
 == ticket.card
 - Ticket case: {machine} {shows}
+== ticket.nohint
+- It's a ticket: no hints till you've looked at three things yourself.
 == ticket.wrong
 - Not yet. Next week.
 == ticket.solved
