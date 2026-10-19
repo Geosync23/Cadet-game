@@ -601,3 +601,19 @@
 == inc.mop
 - Is this a new tradition? Mopping Monday?   #funny
 - I'll walk round. Very carefully. Sort of carefully.   #funny
+
+// ---- Pillar 5 Step 3 (head writer W2): your promotion (C2, X) and P2's word (H2). Kind 'work', flags as in
+// content/works/keys-p5.md "Step 3". Earnest, a little lost, thanks people too much.
+== work
+// Day 10, 17:05: carrying your box along the officers' corridor, with Pell
+? flag:promo.box
+- Your box! We've got it. Mostly got it.
+- Is it left here? It's left. It's probably left.   #funny
+// at 4-23: his goodbye as your bunkmate
+? flag:promo.bye
+- Don't be a stranger, Officer.   #warm
+- The bunk'll be weird. Quieter. Worse, I think.
+// P2 (Day 15, breakfast): his word
+? flag:train.p2.word
+- You're asking around about the scrubber?
+- Ask who sleeps near it. And check they were in.

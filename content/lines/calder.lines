@@ -537,3 +537,97 @@
 ? flag:clothes.grubby
 - Change before you go near the galley.
 - Uniform. Wardrobe. Today.
+
+// ---- Pillar 5 Step 3 (head writer W2): the test job and the first promotion (seat C2), team jobs (M2), tracing (M3),
+// P1 (H2). Kind 'work', flags as in content/works/keys-p5.md "Step 3". Every line under a flag plays in order.
+== work
+// Day 8 at the board: "Tomorrow, your test job"
+? flag:promo.t2.tell
+- Tomorrow, your test job. Tier 2. A real one.
+- I'll follow. I won't help. Sleep tonight.
+// Day 9: the test job, Calder following you
+? flag:train.t2.follow.look
+- Round first. Find it yourself.
+? flag:train.t2.follow.take
+- It's yours. I'm watching, not helping.
+? flag:train.t2.follow.hold
+- Scan it. Read me the lowest.
+? flag:train.t2.follow.fetch
+- One filter. You know the shelf.
+? flag:train.t2.follow.wrong
+- Not that one. Walk back. No harm done.
+? flag:train.t2.follow.make
+- Old filter out. Mind the dust. New one seated.
+? flag:train.t2.follow.turn
+- Fan's off true. Settle it. Listen to the hum.
+? flag:train.t2.follow.done
+- Filter in. Fan settled. Turn it in.
+- That'll do.
+// not taken by 15:00, or dropped
+? flag:promo.t2.delay
+- No test today. Not done isn't failed.
+- Get a few more scrubbers' worth of filters under your belt.
+- Another in two work days. Same rules.
+// she comes to find you
+? flag:promo.fetch.summons
+- There you are. My office was the plan. Here will do.
+? flag:promo.fetch.move
+- Five o'clock was the plan. Down tools. Walk with me.
+? flag:promo.fetch.ceremony
+- The Captain's waiting. Nobody keeps the Captain waiting.
+// at the ceremony in a grubby uniform (a look, then nothing more)
+? flag:promo.grubby
+- That uniform. Never mind. Too late now.
+// Day 10, about 17:00: the walk to 4-23
+? flag:promo.walk.start
+- Right. Your things are already moving. With me.
+? flag:promo.walk.lift
+- Officers' corridor. You'll know it in a week.
+? flag:promo.walk.corridor
+- Your door's your own now. Knock on other people's.
+- Quiet hours after 23:00. Officers set the example.
+- People will ask you over. Go. Ask them back.
+? flag:promo.walk.box
+- Mind out. That's your box, I think.
+? flag:promo.walk.door
+- Your name's already up. Don't make me change it.
+? flag:promo.walk.inside
+- Your things. Your key. Your cabin. Goodnight, Officer.
+// M8 team jobs: her calls when she leads
+? flag:team.call.start
+- Spots. Nobody moves until I say.
+? flag:team.call.brace
+- {me}. Brace. Hold it there.
+? flag:team.call.pass
+- {me}. Pass it. Both hands.
+? flag:team.call.hold
+- {me}. Hold. Steady.
+? flag:team.call.crank
+- {me}. Crank. Slowly.
+? flag:team.call.tip
+- {me}. Tip it. Hold it there.
+? flag:team.call.valves
+- {me}. Valves. One, two, three. In order.
+? flag:team.call.open
+- {me}. Open them. Same order.
+? flag:team.call.drain
+- {me}. Drain it down. Watch the gauge.
+? flag:team.call.done
+- Done. Good. Clean up before you go.
+// M9 tracing (Day 12): the walk along the water line
+? flag:train.m9.follow.give
+- Clip it on. Panel first, then read.
+? flag:train.m9.follow.map
+- The middle's the Deck 5 pumps. Start there.
+? flag:train.m9.follow.read
+- Full here. So it's downstream. Next.
+? flag:train.m9.follow.wrong
+- That's upstream. We know it's fine there. Walk.
+? flag:train.m9.follow.found
+- Full before, low after. There's your problem.
+? flag:train.m9.follow.done
+- Valve's in. Showers on Four run full. That's tracing.
+// P1 (Day 12, after tracing): her word
+? flag:train.p1.word
+- Here's one the pipe kit won't settle.
+- When does it happen? That's the question.

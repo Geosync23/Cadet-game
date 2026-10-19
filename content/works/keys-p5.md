@@ -120,7 +120,7 @@ unsigned. Calder's flag lines also exist for Vance (`vance.lines`) where the pag
 | --- | --- | --- | --- |
 | Day 8 at the board, "Tomorrow, your test job" | `flag:promo.t2.tell` | calder, kind `work` (2-3 lines in order) | |
 | ... the Mail if you're not there by 10:00 | `works.ask.t2` | text, Mail | |
-| Test job steps, Calder following | `flag:train.t2.follow.<step>` | calder `work`: `look` `take` `hold` `fetch` `make` `turn` `done` | |
+| Test job steps, Calder following | `flag:train.t2.follow.<step>` | calder `work`: `look` `take` `hold` `fetch` `wrong` (a wrong pick) `make` `turn` `done` | |
 | Torres comes by at the end (Tuesday) | `flag:train.t2.torres` | torres-zeke `work` | |
 | Delayed (not taken by 15:00 / dropped) | `flag:promo.t2.delay` + Mail `works.ask.t2.again` | calder `work`; text | |
 | What's next | `next.t2` (have), `next.wait.t2` (test set, not done), `next.summons`, `next.move`, `next.ceremony` | `next.lines` | |
@@ -130,7 +130,7 @@ unsigned. Calder's flag lines also exist for Vance (`vance.lines`) where the pag
 | The office scene | meeting `promo.officer` | Calder; choice sets `flag:promo.reply.proud\|surprised\|about` | |
 | The crew at the board | `flag:promo.gather` | kind `cue` in works crew lines + torres-zeke, pell ("Told you"), kovac, halloran | |
 | All day: people who know you | `@reactions promoted` (`content/reactions/promoted.lines`), cue `promoted.you` | crew bank by tier | |
-| Mail from friends | kind `promo.mail` in `content/banks/promo.lines` | crew bank by tier ("Subject \| body") | `{me}` |
+| Mail from friends | kind `mail.promo.friend` in `content/banks/promo.lines` | crew bank by tier ("Subject \| body") | `{me}` |
 | Mail from the Captain | `mail.promo.captain` | text | `{me}` |
 | Ship app news | `news.promoted` | text | `{me}` |
 | Brennan's cake (tea corner, after shift) | `flag:promo.cake` | brennan `cue` | |
@@ -153,12 +153,13 @@ unsigned. Calder's flag lines also exist for Vance (`vance.lines`) where the pag
 | meeting `train.m8.halloran-emeka` (+ `.torres-zeke`, `.calder`) | at the recycler: spots, your part | |
 | `team.name.<job>` | job names: `recycler`, `washer`, `manifold`, `heater`, `scrubber` | |
 | `team.card` | the board card | `{job}` `{time}` `{deck}` `{n}` |
-| `team.mail` | the 16:00 posting Mail ("Subject \| body") | `{job}` `{time}` `{deck}` |
+| `mail.team` | the 16:00 posting Mail ("Subject \| body") | `{job}` `{time}` `{deck}` |
 | `team.turn.<part>` | your toast: `brace` `pass` `hold` `crank` `tip` `valves` `open` `drain` | |
 | `team.start`, `team.wait`, `team.late`, `team.done` | texts: started, waiting for you, started without you, done | `{job}` |
 | `flag:team.call.<part>` + `team.call.start/.done` | the lead's calls, kind `work` in halloran-emeka, torres-zeke, calder, and a works bank fallback (`content/banks/team.lines`) | |
 | `@overheard teamjob` | crew talk while they work, gated `? flag:team.on` (X passes the flag) | |
 | `next.m8`, `next.wait.m8` | What's next | |
+| `@bank dept:works` fallbacks | `content/banks/team.lines` (calls), `content/banks/promo-works.lines` (the gathering) | |
 
 ### Tracing (M3 24i)
 
@@ -181,6 +182,7 @@ unsigned. Calder's flag lines also exist for Vance (`vance.lines`) where the pag
 | Key | What | Placeholders |
 | --- | --- | --- |
 | `works.mech.p1`, `works.mech.p2` | ladder names | |
+| `next.p1`, `next.wait.p1`, `next.p2`, `next.wait.p2` | What's next | |
 | `flag:train.p1.word` | calder / halloran-emeka `work`: "When does it happen?" | |
 | `flag:train.p2.word` | tomas `work` (+ torres-zeke): ask who was there | |
 | `chief.p1.1-2`, `chief.p2.1-2` | the Chief's notes pages | |
@@ -197,6 +199,6 @@ unsigned. Calder's flag lines also exist for Vance (`vance.lines`) where the pag
 | Key | What | Placeholders |
 | --- | --- | --- |
 | `bridge.locked` | tapping the bridge door before you're invited (C2 / DA5's hook) | |
-| `bridge.invite` (+ meeting `bridgeInvite` reworded) | the invitation (placeholder trigger) | |
+| `mail.bridge.invite` (+ meeting `bridgeInvite` reworded) | the invitation (placeholder trigger) | |
 | `meter.<sys>` | short meter names: air water power heat food waste hull comms propulsion transport | |
-| `works.turnin.rep`, `works.turnin.meter` | the turn-in: "Works reputation up" / "+{n} {meter}" | `{n}` `{meter}` |
+| `works.turnin.rep`, `works.turnin.meter` | the turn-in: "Works reputation up" / "+{n} {system}" | `{n}` `{system}` (the meter.<sys> name) |

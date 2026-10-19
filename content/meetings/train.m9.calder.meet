@@ -1,0 +1,21 @@
+@meeting train.m9.calder
+// Pillar 5 Step 3, M9 tracing (Day 12, Friday): the main version. Calder at the board gives you the pipe kit and shows
+// you the water line on the Maps app; the card says "Showers weak on Deck 4". Torres is off on Fridays. Seat M3 plays
+// it; her words on the walk are her kind work, flags train.m9.follow.<step>. Head writer W2.
+title: The pipe kit
+from: Chief Ines Calder
+gist: Calder gave you the pipe kit. Read the flow along a line; fine before and low after is your machine.
+== lines
+calder > you: Here. Your first proper Tier 2 tool. Don't drop it in the manifold.   [gesture]
+calder: Clip it on a panel. It reads the flow there. Full, low, very low.
+calder: "Showers weak on Deck 4." The card says where it hurts. Not where it starts.
+calder: Open your Maps. The water line. Recycler to pumps to valves to your shower.
+calder: Read the middle first. Fine there, the trouble's downstream. Low, it's upstream.
+calder: Then halve it again. Fine before a machine, low after. That's your machine.
+? choice
+* Why not start at the showers?   rel:calder+2 flavour:practical
+  calder: Because then you read every machine on the ship. Halve it. Always halve it.   [nod]
+* Which is the middle?   rel:calder+1 flavour:listen
+  calder: The Deck 5 pumps. We'll start there. Together, this once.
+* (Clip the kit to your belt)
+  calder: Good. Deck 5. Walk.

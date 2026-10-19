@@ -1,0 +1,27 @@
+@meeting promo.ceremony
+// Pillar 5 Step 3, the officer ceremony (Day 11, Thursday, 17:15): the observation room on Deck 1, the conference
+// table and the stern windows. The Captain, Commander Vance, Calder, Torres, and up to three friends (walk-ons, no
+// lines). The Captain reads the commission and pins the insignia ("pins": the colour change), a handshake, one line from
+// you, a toast with the Captain's tea. Her Mail on Day 10 asked you to bring an answer: what should an officer never
+// forget? Seat C2 plays it. Head writer W2.
+title: Your commission
+from: Captain Odile Marrow
+gist: The Captain commissioned you as an Officer of the Wren. The framed commission is on your cabin shelf.
+== lines
+vance: Attention, please. The Captain.   [nod]
+marrow: Thank you, Teo. Sit, everyone, if there are chairs. There never are.   [laugh]
+marrow > you: Cadet. Chief Calder tells me you're ready. The Chief doesn't say that often.
+marrow: By the Survey Service, I commission you an Officer of the Wren. With all that comes with it.
+marrow: Hold still. Pins are not my strong point.   [gesture]
+marrow > you: There. Now, my question. What should an officer never forget?
+? choice
+* The people. Everyone aboard.   rel:marrow+2 mem:promo.answer.people
+  marrow: Good answer. The ship is the people in it. The rest is metal.   [nod]
+* To ask when I don't know.   rel:marrow+2 mem:promo.answer.ask
+  marrow: Good answer. The ones who stop asking are the ones who worry me.   [nod]
+* To mind the step in the ready room.   rel:marrow+1 mem:promo.answer.step
+  marrow: Ha. Calder warned me about you. Also correct.   [laugh]
+calder: Well done.   [nod]
+torres-zeke: Told everyone. Didn't I tell everyone?   [laugh]
+marrow: Tea, then. Mine's the good stuff. Don't tell the galley.
+marrow > you: Welcome, Officer. My door is open. Mind the step.

@@ -1,0 +1,22 @@
+@bank all
+// Pillar 5 Step 3 (head writer W2): P2 "Who saw what?" (seat H2). A witness's answer to "Ask about the fault" on
+// their chat card. Read only after Tomas's word (SHIP.works.said.p2). {time} is when they were there ("22:00"),
+// {place} the room ("the junior common room"), {machine} the machine's plain name.
+// ask.saw: it was showing then. ask.quiet: it wasn't. ask.mixup: an honest mix-up (their plan had them by a different
+// machine); it reads like a sighting and gives no place, so the Roster is how you spot it.
+== ask.saw
+- It was playing up about {time}. I was in {place}.
+- {time}, in {place}. It was at it. Couldn't miss it.
+- About {time}. I was in {place}, and {machine} was playing up.
+? tier>=colleague
+- Oh, it was going at {time}. I was in {place}, trying to read. Trying.   #funny
+== ask.quiet
+- I was in {place} about {time}. Quiet as anything.
+- {time}? I was in {place}. {machine} was fine then.
+- Nothing at {time}. I was in {place}. Not a peep.
+? tier>=colleague
+- Quiet at {time}. I'd have noticed. I notice everything in {place}.   #funny
+== ask.mixup
+- It was going at {time}! I'm sure of it.
+- {time}, it was playing up. Definitely. I think.
+- About {time}. Plain as day. I'm certain.

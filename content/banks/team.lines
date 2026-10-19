@@ -1,0 +1,24 @@
+@bank dept:works
+// Pillar 5 Step 3 (head writer W2): team jobs (seat M2), the lead's calls when whoever leads has no line of their own
+// (Halloran, Torres and Calder have theirs). Kind 'work', flags team.call.<part>. Bubbles, 60 characters or fewer.
+== work
+? flag:team.call.start
+- Spots, everyone. Wait for your name.
+? flag:team.call.brace
+- {me}, brace it. Hold there.
+? flag:team.call.pass
+- {me}, pass it across.
+? flag:team.call.hold
+- {me}, hold it steady.
+? flag:team.call.crank
+- {me}, crank. Nice and slow.
+? flag:team.call.tip
+- {me}, tip it and hold.
+? flag:team.call.valves
+- {me}, the valves. In order.
+? flag:team.call.open
+- {me}, open them up.
+? flag:team.call.drain
+- {me}, drain it down.
+? flag:team.call.done
+- That's it. Good work, everyone.
