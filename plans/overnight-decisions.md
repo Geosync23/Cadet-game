@@ -211,3 +211,5 @@ All 8 packages approved (Zeke: "all good except he still walks and talks" → he
 | | Dropped | Rookie court, Open stage, Lanes night, Zero-G games, Season splash: D2 pitches ~8 more for the remainder (v2) |
 | ~02:42 (the user, on rec traditions v2) | Shape | "2 for each room total (sports)"; talks closer together; talks are small attendance, nothing like captain addresses. Lead reading: each sport room gets exactly 2 traditions incl. approved ones; Wren talks much more often, small informal (4-10 listeners). New designer D3 writes v3 |
 | ~02:47 (the user) | Wren talks size | "Some talks are bigger though, for chiefs etc.": two sizes, most small and informal, some bigger ones by department chiefs in a larger room, less often; still not captain addresses. Sent to D3 |
+| ~02:52 (the user) | Overnight mode | No (not on) |
+| | Rec traditions | The user picks them once the design is done (D3 finishing v3 + chief talks) |
