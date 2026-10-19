@@ -4,6 +4,11 @@ R4 succeeds R3 (whose verdicts are in `plans/reviews-p5-step2.md`). R5 (session_
 
 ## Rec deck activation (brief: plans/brief-recdeck.md on claude/lead-pillar1; reviewer R6; build master BM8 session_01YGy9FDmcbkySMJpVPYJaAo)
 
+### RB claude/rec-works 58fea440 (0.84.1 fault tables and looks; 0.84.2 deckIn and the directory footer), R6: PASS (closes 2e46584's fix)
+- 0.84.2: `deckIn(n)` ("the rec deck" for 7) at the 15 sites after "on", "toward", "heading for"; `deckWord` stays at label starts and label tails ("Pool, Rec deck" in Maps/roster labels: label text, lead's eye). The directory footer on R: "You are on the Recreation Deck".
+- 0.84.1: FAULTS for all 13 rec kinds in the existing shape (`when` values the engine knows, settings with `from: 4`, `still` lines; no 'peak'/'after-use' since Deck 7 has no crew hours yet), every part in STOCK; LOOK_WET/LOOK_LIT entries; lives longer (tuning). machine_check's delivery case takes up to 3 more trips for a bigger hold (a check change, bounded). The fault words are RB's first drafts, plain and in style (for W3 to check).
+- Checks: dormant: node --check OK, machine_check OK, deck_check OK, cadet_test vs 2e46584 ALL IDENTICAL. On a `REC_DECK = true` copy (mine): machine_check OK (the two tuning FAILs of 0.84.0 gone).
+
 ### W3 claude/writer-rec 4e4d13c + 7b63846 (0.48.118-119, lead 18's naming), R6: PASS
 Text only: Mail, news, gists, facts and the Deck R scenery now say "the rec deck" mid-sentence, "Rec deck" at a label's start ("Rec deck lockers", news "Rec deck: ..."), "Recreation Deck (R)" on the directory; crew speech keeps "rec dec"; the neon/poster keep REC DEC (the look). Fresh archive: bake unchanged, lines_check PASS. The one written "rec dec" left outside speech is the recTap toast "The rec dec's closed till six.", RA's (W3 has told RA).
 
