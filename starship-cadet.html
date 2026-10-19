@@ -285,7 +285,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.84.4
+   STARSHIP CADET: CSV Wren                           build 0.84.5
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8775,7 +8775,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.84.4';                           // keep in step with the header's build line
+const GAME_BUILD = '0.84.5';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -16808,7 +16808,7 @@ const FAULT_CAUSES = {
   // 'after-use' causes (they'd never show); first drafts of the words, for the writers
   poolfilter: [
     { id: 'cartridge', part: 'cartridge', w: 3, shows: 'the pool is cloudy', sign: 'the gauge high, the water milky past the shallow end', when: 'always', still: 'New seal. The water\'s still milky.' },
-    { id: 'seal', part: 'seal', w: 2, shows: 'a drip under the housing', sign: 'a wet ring on the floor under the housing', when: 'always', still: 'Fresh cartridge. Still dripping.' } ],
+    { id: 'seal', part: 'seal', w: 2, shows: 'a drip under the housing', sign: 'a wet ring on the floor under the housing', when: 'always', still: 'Fresh cartridge. Still dripping.', line: 'pool' } ],   // line: 0.84.5 (rec engineer B), the pool line's traced leak
   pooldoser: [
     { id: 'drift', setting: true, w: 2, shows: 'stinging eyes|a green tinge', sign: 'the reading wanders; the swimmers come out red-eyed', when: 'always', from: 4 },
     { id: 'relay', part: 'relay', w: 2, shows: 'the dose has stopped', sign: 'the pump clicks but doesn\'t run', when: 'touched', still: 'New relay. It runs, but the reading\'s still off.' } ],
@@ -17703,11 +17703,13 @@ const MACHINE_LINKS = {
   water: ['3-recycler-1', '3-filter-1', '3-uv-1', '3-pump-1', ['5-pump-1', '5-pump-2'], { '5-valve-1': [1, 2, 3], '5-valve-2': [4, 5, 6] }],
   heat: ['4-heater-1', ['4-pump-1', '4-pump-2'], '5-manifold-1'],
   air: ['5-electrolyser-1', ['5-o2-1', '5-o2-2'], ['5-scrubber-1', '5-scrubber-2'], '5-fan-1', { '5-damper-1': [1, 2, 3], '5-damper-2': [4, 5, 6] }],
+  ...(REC_DECK ? { pool: [['7-pool-filter-1', '7-pool-filter-2'], '7-pool-heat', '7-pool-dosing'] } : {}),   // 0.84.5 (rec engineer B): the rec deck's pool plant (room p), from the pool through the filters, the heat exchanger and the dosing back; only while REC_DECK is on
 };
 const LINE_ENDS = { air: { '5-damper-1': ['2-extractor-1'], '5-damper-2': ['4-scrubber-1', '4-scrubber-2'] } };
 const LINE_DRAWS = { '3-irrigation-1': { line: 'water', after: '3-pump-1' } };
 const LINE_DECKS = [1, 2, 3, 4, 5, 6];
-const SYMPTOM_TEXT = { water: 'Showers weak', heat: 'Cold cabins', air: 'Stuffy air' };
+const SYMPTOM_TEXT = { water: 'Showers weak', heat: 'Cold cabins', air: 'Stuffy air', pool: 'Water dripping from the ceiling' };   // pool: 0.84.5 (rec engineer B)
+const LINE_SHOWS = { pool: [5] };                        // 0.84.5 (rec engineer B): the decks a line's fault shows on when they aren't the ones it feeds (traceSymptom): the pool plant's leak drips through to Deck 5's main storage, under it
 // a line's ids, in order (branches and ends included)
 const lineIds = line => (MACHINE_LINKS[line] || []).flatMap(s => typeof s === 'string' ? [s] : Array.isArray(s) ? s : Object.keys(s).flatMap(b => [b, ...((LINE_ENDS[line] || {})[b] || [])]));
 const lineOn = line => !!MACHINE_LINKS[line] && lineIds(line).every(id => { const m = machineById(id); return !!m && !m.stub; });
@@ -17749,7 +17751,7 @@ function traceFor(m, h) {
   return !!line && lineOn(line) && playerTier() >= 2 && !!(SHIP.works && SHIP.works.tr && SHIP.works.tr.m9 !== undefined) && jobTier({ machine: m.id }) <= playerTier()
     && (FAULT_CAUSES[m.kind] || []).some(c => c.line === line) && schedU(machSeed(m.id), d, 878) < .5 ? line : null;
 }
-function traceSymptom(line, id) { const decks = lineDecks(line, id); return { line, decks, deck: decks.includes(4) ? 4 : decks[0] }; }
+function traceSymptom(line, id) { const decks = LINE_SHOWS[line] ? LINE_SHOWS[line].slice() : lineDecks(line, id); return { line, decks, deck: decks.includes(4) ? 4 : decks[0] }; }
 const traceHidden = j => !!(j && j.symptom && !j.traceFound);
 function traceTitle(j) {                                 // the Works writer's trace.symptom.<line> line when it's in (M3's ask)
   const fb = (SYMPTOM_TEXT[j.symptom.line] || 'A fault') + ' on ' + deckIn(j.symptom.deck);
@@ -41574,7 +41576,7 @@ if (typeof WORK_MECH !== 'undefined') WORK_MECH.m7 = { reserve: scanTrainReserve
 // =====================================================================
 const TRACE_SLOT = 11, TRACE_SECS = 3, TRACE_READ_K = 63;   // TRACE_READ_K: the reading's own slot in SHIP.player.wsteps (section 17 keeps the job's stops)
 const TRACE_TRAIN = { line: 'water', machine: '5-valve-2', middle: '5-pump-1', cond: 40 };
-const TRACE_LINE = { water: 'the water line', heat: 'the heating line', air: 'the air line' };
+const TRACE_LINE = { water: 'the water line', heat: 'the heating line', air: 'the air line', pool: 'the pool line' };   // pool: 0.84.5 (rec engineer B)
 const TRACE_UI = { at: null, job: null, last: null };   // the machine being read; the job and reading the Pipe kit page shows
 const traceLinesOn = () => typeof MACHINE_LINKS === 'object' && !!MACHINE_LINKS && typeof linePath === 'function' && typeof lineFlow === 'function'
   && typeof lineOn === 'function' && typeof lineIds === 'function' && typeof lineDecks === 'function' && typeof traceMark === 'function' && typeof traceHidden === 'function';
@@ -41647,6 +41649,7 @@ function traceRead(j, id) {
 }
 // the goal pointer (15b's ixJobStep asks while traceHidden): the middle of the line first, among the machines not read yet
 function traceGoal(j) {
+  const dg = typeof poolDripGoal === 'function' ? poolDripGoal(j) : null; if (dg) return dg;   // 0.84.5 (rec engineer B): the pool leak's drip on Deck 5 first (24o's end)
   const steps = traceSteps(j), read = new Set(j.read || []), mid = Math.floor(steps.length / 2); if (!steps.length) return null;
   const ids = steps.map((x, k) => [x, Math.abs(k - mid)]).sort((a, b) => a[1] - b[1]).flatMap(([x]) => x).filter(id => !read.has(id) && panelPlace(id));
   const m = ids.length ? machineById(ids[0]) : null; if (!m) return null;
@@ -41679,7 +41682,7 @@ function traceMarks(n) {
   if (!s) return null;
   const ms = tracePath(s.line, s.deck).flat().map(id => machineById(id)).filter(m => m && m.at), here = ms.filter(m => m.deck === n);
   const decks = [...new Set(ms.map(m => m.deck))].sort(); if (!decks.length) return null;
-  return { tiles: here.map(m => m.at.slice()), text: traceLineName(s.line).replace(/^./, x => x.toUpperCase()) + (here.length ? ': its machines are marked.' : ' runs through Deck' + (decks.length > 1 ? 's ' + decks.slice(0, -1).join(', ') + ' and ' + decks[decks.length - 1] : ' ' + decks[0]) + '.') };
+  return { tiles: here.map(m => m.at.slice()), text: traceLineName(s.line).replace(/^./, x => x.toUpperCase()) + (here.length ? ': its machines are marked.' : ' runs through ' + (decks.length > 1 ? 'Decks ' + decks.slice(0, -1).join(', ') + ' and ' + decks[decks.length - 1] : deckIn(decks[0])) + '.') };   // deckIn: 0.84.5 (rec engineer B), the pool line runs through the rec deck
 }
 
 // ---- the training (ladder row m9, 24 core's flow): Calder reads the middle while you watch (this block's own small
@@ -44114,6 +44117,35 @@ function leakFx() {
   } catch (err) { console.error(err); }
 }
 WORK_TICKS.push((now, skip) => { if (!skip) leakFx(); });
+// ---- the pool plant's leak (0.84.3, rec engineer B; plans/recdeck-plan.html section 6, "A Works story for tracing (tier 2)"):
+// section 17's pool line (MACHINE_LINKS.pool, only while REC_DECK is on) is traced like the others (traceFor; the filters'
+// seal is the only cause on it) and its symptom is named on Deck 5 (LINE_SHOWS): it shows first as a drip in main storage,
+// right under the pool plant. While a pool job is open a puddle (24o's puddleAt) lies in the aisle at POOL_DRIP, and 24i's
+// goal pointer (traceGoal asks poolDripGoal) takes you there first; once you've stood by it (j.drip, saved with the job)
+// it's an ordinary trace: up the spine ladder to the pool plant, the pipe kit's readings (traceMark), found at the job's
+// own filter. Nothing here runs without a pool job (none while REC_DECK is off). No R(), no hash keys
+const POOL_DRIP = { deck: 5, place: '5-aisle-2', spot: [30.55, 4.35], near: 1.6 };   // main storage's aisle by the Plumbing shelves, under 7-pool-filter-2 (Deck 7's tiles sit 2 columns and a row on from Deck 5's)
+const POOL_FX = { root: null, wet: null };
+const poolDripJob = () => SHIP.jobs.find(j => j.symptom && j.symptom.line === 'pool' && j.status !== 'done') || null;
+const poolDripDue = j => !!(j && j.symptom && j.symptom.line === 'pool' && traceHidden(j) && !j.drip && placeById(POOL_DRIP.place));   // your pool job, the drip not seen yet
+const poolDripGoal = j => poolDripDue(j) ? { deck: POOL_DRIP.deck, place: POOL_DRIP.place, label: worksText('trace.pool.goal', 'See where it drips: main storage') } : null;
+function poolDripSeen(j, t) {                            // you've stood by the drip: the goal pointer goes on up the line
+  j.drip = t; j.touched = t; if (typeof MACH_REV !== 'undefined') MACH_REV++; if (typeof ixGoalAt !== 'undefined') ixGoalAt = -1;
+  try { toast(traceTitle(j), worksText('trace.pool.drip', 'A slow drip from the ceiling, right over the aisle. The pool plant\'s up there: take the spine ladder up to the rec deck and read the pool line with the pipe kit.')); } catch (e) { /* no UI */ }
+}
+function poolDripFx() {                                  // the puddle, while a pool job is open and you're on Deck 5 (in deckRoot: the deck's unload frees it)
+  try {
+    if (typeof deckRoot === 'undefined' || !deckRoot || !deckDef) return;
+    const on = deckDef.num === POOL_DRIP.deck && !!poolDripJob(); if (POOL_FX.root === deckRoot && !!POOL_FX.wet === on) return;
+    if (POOL_FX.wet && POOL_FX.root === deckRoot) { deckRoot.remove(POOL_FX.wet); POOL_FX.wet.geometry.dispose(); POOL_FX.wet.material.dispose(); }
+    const [x, z] = POOL_DRIP.spot; POOL_FX.root = deckRoot; POOL_FX.wet = on ? puddleAt([[x, z, .8], [x + .22, z + .3, .4]]) : null;
+  } catch (err) { console.error(err); }
+}
+WORK_TICKS.push((now, skip) => {
+  if (skip) return; poolDripFx();
+  const j = typeof myJob === 'function' ? myJob() : null; if (!poolDripDue(j) || typeof player === 'undefined' || !player || !deckDef || deckDef.num !== POOL_DRIP.deck || !PLACE_OF.has(POOL_DRIP.place)) return;
+  const sp = placeSpot(POOL_DRIP.place), p = player.obj.position; if (sp && Math.hypot(sp.x - p.x, sp.z - p.z) < POOL_DRIP.near) poolDripSeen(j, now);
+});
 
 // ---------------------------------------------------------------------
 // 24q REWIRING (M15, seat E2, 0.51.x; plans/mechanics/m15-rewiring.html). From Day 17, an Officer's, about once a week
