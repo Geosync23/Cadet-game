@@ -2,6 +2,9 @@
 
 Brief: plans/brief-recdeck.md on claude/lead-pillar1 ("R" section). Lead 18 session_01CBur9nrJ411pFkHopF96RL. Build master BM8 session_01YGy9FDmcbkySMJpVPYJaAo. Earlier verdicts: R6's, in plans/reviews-p5-step4.md ("Rec deck activation"). Newest first.
 
+### 0.64.0 candidate claude/rec-cand-s1 50d55ef (BM9: the closed toast), R7: PASS
+Game file: the two strings only (discAsk's toast at 41180 and the 15017 comment now say "The rec deck's closed till six."); no "rec dec's closed" left. The rest is BM8's notes and scripts under plans/. Closes my 3add6bf note.
+
 ### 0.64.0 candidate claude/rec-cand-s1 3add6bf (BM8/BM9, on the 0.63.5 final be3d7ee), R7: PASS (merges; the full round is the build master's)
 - Order: f319ab3 (rec-works to 0.84.10, the switch not yet) -> 9dfe971 (rec-crew) -> a095799 (writer-rec) -> 87e3c5f (rec-works with 0.84.11's switch and 0.84.12): **the switch comes last**. `const REC_DECK = true;`, GAME_BUILD 0.64.0. No conflict markers left; node --check OK; no duplicate declarations (whole-file scan vs aa4f42c); the combined-diff lines are each branch's own, already reviewed.
 - Court tap (15044-15046): RB2's net-down refusal first, then RA's Cup / WSO, then RA's queue and discAsk(recCourtWaiting()): right order.
