@@ -269,7 +269,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.44.26
+   STARSHIP CADET: CSV Wren                           build 0.44.27
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8682,7 +8682,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.44.26';                           // keep in step with the header's build line
+const GAME_BUILD = '0.44.27';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -33925,7 +33925,7 @@ function careerJobIn(n) {
   if (!n.machine && typeof repAdd === 'function') repAdd(dept, 1, { work: 1 }, 'jobs');   // a job with no machine: section 20 has no repair for it
   const j = (SHIP.jobs || []).find(x => x.id === n.id);   // Step 3 (0.44.22, the user's): the HUD engineer's turn-in card reads j.gains (it runs after turnInJob, which flushes this note)
   if (j) { const g = j.gains || (j.gains = {});
-    (g.rep || (g.rep = [])).push({ dept, name: worksText('works.turnin.rep', '{dept} reputation', { dept: dept[0].toUpperCase() + dept.slice(1) }) });   // words only, never a number (0.61.15)
+    const R = g.rep || (g.rep = []); if (!R.some(x => x.dept === dept)) R.push({ dept, name: worksText('works.turnin.rep', '{dept} reputation', { dept: dept[0].toUpperCase() + dept.slice(1) }) });   // words only, never a number (0.61.15); once a department, however often the note comes
     if (!g.meters && Array.isArray(j.meters)) g.meters = j.meters.filter(m => m && m.gain > 0).map(m => ({ sys: m.key, name: m.name, add: m.gain })); }   // the systems engineer's points per ship meter (0.33.57)
   if (typeof turnInShow === 'function') { if (typeof DEV !== 'undefined' && DEV.notes && !DEV.notes.record) DEV.notes.record = 1; return; }   // the card says it: no chip as well
   const now = performance.now(); if (now - REP_CHIP_AT < REP_CHIP_GAP * 1000 || (typeof DIALOGUE !== 'undefined' && DIALOGUE) || CHAT || typeof needFloat !== 'function') return;
