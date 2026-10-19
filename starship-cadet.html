@@ -281,7 +281,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.45.10
+   STARSHIP CADET: CSV Wren                           build 0.45.11
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8694,7 +8694,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.45.10';                           // keep in step with the header's build line
+const GAME_BUILD = '0.45.11';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -12586,6 +12586,7 @@ function actEnd(abort) {
   if (abort) return;
   if (A.kind === 'bedMake' && A.done >= A.def.mins) { SHIP.player.bedMade = SHIP.time.day; toast('Your bunk', 'Bed made, corners and all.'); }   // the inspection's berth (m3)
   if (A.kind === 'tidy' && A.done >= A.def.mins) { SHIP.player.untidy = false; toast('Your locker', 'All put away. Tidy.'); }
+  if (typeof A.def.onDone === 'function' && A.done >= A.def.mins) try { A.def.onDone(A); } catch (e) { console.error(e); }   // a sub-block's own timed hold (24m's bench, 0.45.11)
   player.face = player.obj.rotation.y = A.face;
   if (A.def.done) toast(A.def.title, A.def.done + (A.kind === 'eat' && A.o.company ? ' Good company, too.' : '') + (A.def.need ? ' ' + NEED_LABEL[A.def.need] + ' ' + Math.round(SHIP.player.needs[A.def.need]) + '.' : ''));
   if (A.kind === 'browse') {
@@ -13157,7 +13158,7 @@ function careerSpeed(kind) {
   return n >= 15 ? .65 : n >= 5 ? .8 : 1;
 }
 const jobKindOfMachine = j => j && j.machine && typeof machineById === 'function' ? (machineById(j.machine) || {}).kind || null : null;
-const jobMins = j => JOB_TYPES[j.kind].work * (1 + .25 * ((typeof jobTier === 'function' ? jobTier(j) : 1) - 1)) * careerSpeed(jobKindOfMachine(j));
+const jobMins = j => JOB_TYPES[j.kind].work * (1 + .25 * ((typeof jobTier === 'function' ? jobTier(j) : 1) - 1)) * careerSpeed(jobKindOfMachine(j)) * (j.logged ? .9 : 1);   // j.logged: written up in the Works log (24n), 10% quicker
 function myWork() {                                      // the job you hold, and how far you've got with it (null: none)
   const j = jobsOn() ? myJob() : null, P = SHIP.player;
   if (!j || !j.machine) { P.work = null; return null; }
@@ -16754,7 +16755,7 @@ function jobRun(p, j, t, makeMin) {
     const shelves = shelvesFor(j.parts[0]);
     if (makeMin) { at(JOB_FETCH, 'fetch', storagePlace(shelves, c, c + JOB_FETCH)); at(makeMin, 'make', storagePlace(MAKE_AT, c, c + makeMin)); }
     else at(JOB_FETCH, 'fetch', storagePlace(shelves, c, c + JOB_FETCH));
-    go(m.deck); at(Math.round(JOB_TYPES[j.kind].work * (1 + .25 * (K.tier - 1))), 'job', panelPlace(m.id));
+    go(m.deck); at(Math.round(JOB_TYPES[j.kind].work * (1 + .25 * (K.tier - 1)) * (j.logged ? .9 : 1)), 'job', panelPlace(m.id));   // j.logged: 24n's handover, 10% quicker
   }
   const done = c; go(home);
   return c <= w.until ? { segs, done, end: c } : null;
@@ -39384,7 +39385,7 @@ const CAREER_LADDER = [
   // Step 4's side jobs (0.45.8, E1 in 24 core's slot; each row as its seat sent it, inert until its sub-block registers WORK_MECH[id]).
   // m15 (rewiring, E2) and the fault-finder ticket's row come with their builds; cabin touches and star logging (24t) have none
   { id: 'm10', name: 'The workshop', size: 'small', day: 12, tier: 2, rank: 'officer', needs: null, by: ['torres-zeke', 'halloran-emeka', 'calder'], where: { deck: 5, room: 'f' }, stages: [{ uses: 0 }, { uses: 3 }, { uses: 6 }] },   // E3's 24j
-  { id: 'm11', name: 'Tool upkeep', size: 'small', day: 12, tier: 2, rank: 'officer', needs: null, by: ['torres-zeke', 'halloran-emeka'], where: { deck: 5, room: 'w' }, stages: [{ uses: 0 }, { uses: 1 }, { uses: 4 }] },   // E1's 24m: the scanner; the pipe kit and logger as each arrives; the team's rack after 4
+  { id: 'm11', name: 'Tool upkeep', size: 'small', day: 12, tier: 2, rank: 'officer', needs: null, by: ['torres-zeke', 'halloran-emeka'], where: { deck: 5, room: 'w' }, stages: [{ uses: 0 }, { uses: 2 }, { uses: 4 }] },   // E1's 24m: the scanner; the pipe kit and logger (as each arrives); the team's rack after 4 upkeeps
   { id: 'm12', name: 'The logbook', size: 'small', day: 12, tier: 2, rank: 'officer', needs: null, by: ['calder'], where: { deck: 5, room: 'w' }, stages: [{ uses: 0 }, { uses: 5 }, { uses: 10 }] },   // E1's 24n: a line a shift; flag a machine after 5; your notes come back after 10
   { id: 'm13', name: 'Leak hunting', size: 'small', day: 12, tier: 2, rank: 'officer', needs: null, by: ['torres-zeke', 'halloran-emeka', 'calder'], job: 'leak', stages: [{ uses: 0 }, { uses: 3 }] },   // E2's 24o
   { id: 'm14', name: 'Garden irrigation', size: 'small', day: 13, tier: 2, rank: 'officer', needs: null, by: ['cruz-tove', 'oneill-imani', 'hart-ravi'], job: 'nozzle', stages: [{ uses: 0 }, { uses: 2 }, { uses: 4 }] },   // E2's 24q (the garden crew; 24r may set its own at its first posting)
@@ -40252,6 +40253,188 @@ if (typeof jobKindAdd === 'function' && typeof haulOn === 'function' && JOB_KIND
   },
   watch: 10,
 };
+
+// =====================================================================
+// 24m. TOOL UPKEEP (M11, seat E1, 0.45.x; plans/mechanics/m11-tool-upkeep.html on claude/p5-design)
+// From Day 12 (the m11 row, an officer's) your tools wear with use (24 core's toolWear: the scanner 4 a scan, the pipe
+// kit 5 a trace, the logger 3 a use) and you look after them at your bench in the Works bay (E3's 5-bench-you, "Your
+// bench"): recharge the scanner (a wait: on charge for 5 ship minutes, you needn't stay), clean and re-seal the pipe kit
+// (2 minutes there), check the logger (1). Each puts the tool back to "Charged". Never blocks a job. Your first upkeep is
+// the lesson (24 core's small row: the Works officer on shift's train.m11.<id>; Torres is off Thursdays and Fridays). A
+// week with your tools kept up (all charged after an upkeep): Works reputation +1, once a week (worksSideXp). Stage 3,
+// after 4 upkeeps: the team's rack (the tool wall, E3's 5-tool-rack) once a week, 3 minutes there; Calder notices (her
+// `work` line upkeep.rack). Saved: SHIP.works.side.upkeep = { done, kept, rack, charge } (read defensively). Only with
+// E3's places in the build. Nothing drawn, no keys.
+// =====================================================================
+const TOOL_UPKEEP = { scanner: { wait: true, mins: 5, label: 'Recharge the scanner' }, pipekit: { mins: 2, label: 'Clean and re-seal the pipe kit' }, logger: { mins: 1, label: 'Check the logger' } }, RACK_MINS = 3;
+const benchOn = () => (DECKS[5].places || []).some(p => p.id === '5-bench-you');   // (not placeById at load: its index is built once)
+const benchWeek = (t = shipNow()) => Math.floor((worksDay(t) - 1) / 7);
+const benchTools = () => Object.keys(TOOL_UPKEEP).filter(hasTool);
+function benchData() {
+  const S = worksSide(); if (!S) return null;
+  const u = S.upkeep && typeof S.upkeep === 'object' && !Array.isArray(S.upkeep) ? S.upkeep : (S.upkeep = {});
+  if (!Number.isInteger(u.done) || u.done < 0) u.done = 0;
+  if (u.charge && !(Number.isFinite(u.charge.at) && hasTool('scanner'))) delete u.charge;
+  return u;
+}
+Object.assign(PLAYER_ACTS, { benchHold: { mins: 2, pose: 'work', title: 'Your bench' } });
+function benchDone(id, t = shipNow(), quiet = false) {   // the tool back to charged; the week's +1 if they're all kept up
+  const u = benchData(); if (!u || !hasTool(id)) return;
+  SHIP.works.tools[id][1] = 0; u.done++;
+  const wk = benchWeek(t);
+  if (u.kept !== wk && benchTools().every(k => toolState(k) === 'charged')) { u.kept = wk; worksSideXp(1, 'upkeep'); }
+  simNote('upkeep', { tool: id });
+  if (!quiet) try { toast(toolName(id).replace(/^the /, '').replace(/^./, x => x.toUpperCase()), worksText('bench.done', 'Good as new. Well, good as yesterday.')); } catch (e) { /* no UI */ }
+  if (typeof MACH_REV !== 'undefined') MACH_REV++;
+}
+function benchStart(id) {                                // you chose a tool at the bench
+  const u = benchData(), U = TOOL_UPKEEP[id]; if (!u || !U || !hasTool(id)) return false;
+  worksUse('m11');                                       // a use (the first: the lesson, 24 core's small-row training)
+  if (U.wait) {
+    u.charge = { at: shipNow() + U.mins };
+    toast('Your bench', worksText('bench.charging', 'The scanner\'s on charge. Ready at {time}; no need to wait.', { time: hhmm(u.charge.at % 1440) }));
+    return true;
+  }
+  actStart('benchHold', '5-bench-you', { title: 'Your bench' });
+  if (ACT && ACT.kind === 'benchHold') { ACT.def.mins = U.mins; ACT.def.title = worksText('bench.' + id, U.label); ACT.def.onDone = () => benchDone(id); }
+  return true;
+}
+function benchTap() {                                    // "Your bench": which tool to see to
+  const u = benchData(), ts = benchTools(); if (!u || !ts.length || typeof deviceChoose !== 'function') return false;
+  const label = k => worksText('bench.' + k, TOOL_UPKEEP[k].label) + ' · ' + (k === 'scanner' && u.charge ? worksText('bench.charging.now', 'on charge') : toolStateWord(k));
+  const open = ts.filter(k => !(k === 'scanner' && u.charge));
+  if (!open.length) { toast('Your bench', worksText('bench.charging', 'The scanner\'s on charge. Ready at {time}; no need to wait.', { time: hhmm(u.charge.at % 1440) })); return true; }
+  return deviceChoose({ title: 'Your bench', text: ts.map(label).join('. ') + '.', choices: open.map(k => worksText('bench.' + k, TOOL_UPKEEP[k].label)) }, i => { if (open[i]) benchStart(open[i]); }) || false;
+}
+function rackTap() {                                     // the team's rack (stage 3): once a week
+  const u = benchData(); if (!u || worksStage('m11') < 2 || u.rack === benchWeek() || !(DECKS[5].places || []).some(p => p.id === '5-tool-rack')) return false;
+  actStart('benchHold', '5-tool-rack', { title: 'The tool wall' });
+  if (ACT && ACT.kind === 'benchHold') { ACT.def.mins = RACK_MINS; ACT.def.title = worksText('bench.rack', 'The team\'s tools'); ACT.def.onDone = () => {
+    const v = benchData(); if (!v) return; v.rack = benchWeek(); simNote('upkeep', { tool: 'rack' });
+    worksSayAll('calder', worksVoice('calder', 'upkeep.rack') || [worksText('bench.rack.done', 'Rack\'s tidy. Someone\'s been busy.')]); }; }
+  return true;
+}
+if (typeof jobKindAdd === 'function' && benchOn()) {
+  WORK_MECH.m11 = { noJob: true };                       // a small row: trained at your first upkeep
+  WORK_TICKS.push((now, skip) => {                       // the scanner's charge
+    const u = SHIP.works && worksSide() && benchData(); if (!u || !u.charge || now < u.charge.at) return;
+    delete u.charge; benchDone('scanner', now, skip);
+  });
+  if (typeof PLAYER_TAPS !== 'undefined') PLAYER_TAPS.unshift((it, at) => {
+    if (!it || !SHIP.works || !worksOpened().has('m11') || typeof deckDef === 'undefined' || !deckDef || deckDef.num !== 5) return false;
+    if (it.t === 'Your bench') return benchTap();
+    if (it.t === 'Tool wall') return rackTap();
+    return false;
+  });
+}
+
+// =====================================================================
+// 24n. THE LOGBOOK (M12, seat E1, 0.45.x; plans/mechanics/m12-logbook.html on claude/p5-design)
+// From Day 12 (the m12 row; Calder teaches it the first time: "Officers write it down"): on a workday 16:30-17:30, at
+// the Works bay terminal (E3's 5-works-terminal, by the notice board: tap the board), "Write the log": one of three
+// summaries of your real shift (logChoices: what you fixed, what you found, what's still open, from 24 core's work log
+// and the found notes; the writer's log.* parts joined with "; "; their order schedU(day, 0, 1012)). An open job you wrote
+// up is finished 10% faster by whoever takes it next (j.logged: section 15's jobMins and section 17's crew minutes).
+// Works reputation +1 an entry (one a day, worksSideXp). Calder reads it at your progress talks (logLast(n), her `work`
+// line log.talk). Stage 2, after 5 entries: flag one machine for the night crew, who look at it at 22:00 (on paper: a
+// worn or faulty one's open job is done by them, else found). Stage 3, after 10: P3 reads SHIP.works.side.log for clues
+// (24k's line, E2's). Saved: SHIP.works.side.log = [{ day, pick, jobs, flag }], the last 30 (read defensively).
+// =====================================================================
+const LOGBOOK = { from: 16 * 60 + 30, to: 17 * 60 + 30, keep: 30, bonus: .9, flagAt: 22 * 60 };
+const logbookOn = () => (DECKS[5].places || []).some(p => p.id === '5-works-terminal');
+function logbookData() {
+  const S = worksSide(); if (!S) return null;
+  if (!Array.isArray(S.log)) S.log = [];
+  else if (S.log.some(e => !e || typeof e !== 'object' || !Number.isInteger(e.day) || typeof e.pick !== 'string')) S.log = S.log.filter(e => e && typeof e === 'object' && Number.isInteger(e.day) && typeof e.pick === 'string');
+  if (S.log.length > LOGBOOK.keep) S.log.splice(0, S.log.length - LOGBOOK.keep);
+  return S.log;
+}
+const logbookName = id => { const m = typeof machineById === 'function' && machineById(id); return m ? machineLabel(m).split(',')[0] : String(id); };
+function logbookShows(j) {                               // what it does, in a few words, for log.found
+  const m = j && j.machine && machineById(j.machine);
+  try { const f = m && j.cause && typeof caseCauses === 'function' ? caseCauses(m).find(x => x.id === j.cause) : null; if (f && f.shows) return f.shows; } catch (e) { /* the plain words below */ }
+  return m && SHIP.machines[m.id] && SHIP.machines[m.id].state === 'worn' ? 'is wearing' : 'is acting up';
+}
+// the shift's facts for day d: { fixed: [text], found: [[text, jobId, machine]], open: [[text, jobId, machine]] }
+function logbookFacts(d) {
+  const W = SHIP.works, t0 = (d - 1) * 1440, out = { fixed: [], found: [], open: [] }, seen = new Set();
+  if (!W) return out;
+  for (const e of W.log) {
+    if (e[1] !== d) continue;
+    const j = SHIP.jobs.find(x => x.id === e[0]), mid = j && j.machine || (String(e[0]).match(/^(\d-[a-z0-9-]+)@/) || [])[1];
+    if (!mid || !machineById(mid)) continue;
+    const part = j && Array.isArray(j.parts) && j.parts[0], kind = e[3] || (j && j.kind) || '';
+    out.fixed.push(part && kind !== 'service' ? worksText('log.fixed', '{machine}: {part} replaced', { machine: logbookName(mid), part }) : worksText('log.serviced', '{machine} serviced', { machine: logbookName(mid) }));
+  }
+  const live = j => j && j.machine && j.status !== 'done';
+  for (const n of simNotes('found', t0)) {
+    if (n.by !== 'you' || n.t >= t0 + 1440 || seen.has(n.machine)) continue;
+    const j = SHIP.jobs.find(x => x.machine === n.machine && live(x)); if (!j) continue;
+    seen.add(n.machine); out.found.push([worksText('log.found', '{machine} {shows}, left for tomorrow', { machine: logbookName(n.machine), shows: logbookShows(j) }), j.id, n.machine]);
+  }
+  for (const j of SHIP.jobs) {
+    if (!live(j) || seen.has(j.machine) || !(j.claimedBy === 'you' || j.foundBy === 'you')) continue;
+    seen.add(j.machine); out.open.push([worksText('log.open', '{machine} still open', { machine: logbookName(j.machine) }), j.id, j.machine]);
+  }
+  return out;
+}
+// logChoices(day) -> three { text, jobs, machines }: fixed + found, fixed + open, found + open (three parts at most each)
+function logChoices(d) {
+  const F = logbookFacts(d), mk = (a, b) => {
+    const parts = a.concat(b).slice(0, 3), txt = parts.map(p => Array.isArray(p) ? p[0] : p);
+    return { text: txt.length ? txt.join('; ') : worksText('log.quiet', 'A quiet day. Nothing to report'), jobs: parts.filter(Array.isArray).map(p => p[1]), machines: parts.filter(Array.isArray).map(p => p[2]) };
+  };
+  const all = [mk(F.fixed, F.found), mk(F.fixed, F.open), mk(F.found, F.open)], k = Math.floor(schedU(d, 0, 1012) * 3) % 3;
+  return all.slice(k).concat(all.slice(0, k));
+}
+const logLast = (n = 3) => { const L = SHIP.works && logbookData(); return L ? L.slice(-n).map(e => e.pick) : []; };
+const logbookToday = d => (logbookData() || []).find(e => e.day === d) || null;
+function logbookWrite(c, d = worksDay(shipNow())) {      // your entry: the handover bonus on its open jobs, the use, +1
+  const L = logbookData(); if (!L || !c || logbookToday(d)) return null;
+  const e = { day: d, pick: String(c.text).slice(0, 240), jobs: c.jobs.slice(0, 6), flag: null }; L.push(e); logbookData();
+  for (const id of e.jobs) { const j = SHIP.jobs.find(x => x.id === id); if (j && j.status !== 'done') j.logged = d; }
+  worksUse('m12'); worksSideXp(1, 'log'); simNote('logbook', { day: d, jobs: e.jobs.length });
+  return e;
+}
+function logbookOpen() {                                 // "Write the log": the three, then (stage 2) a machine to flag
+  const d = worksDay(shipNow()), cs = logChoices(d);
+  return deviceChoose({ title: worksText('works.log.write', 'Write the log'), text: worksText('works.log.pick', 'Which one\'s your log for today?'), choices: cs.map(c => c.text) }, i => {
+    const e = cs[i] && logbookWrite(cs[i], d); if (!e) return;
+    toast('Works log', worksText('log.saved', 'Logged. Calder will read it. She reads everything.'));
+    const ms = cs[i].machines.filter((m, k, a) => a.indexOf(m) === k);
+    if (worksStage('m12') >= 1 && ms.length && typeof simTimeout === 'function') simTimeout(() => deviceChoose({ title: 'Works log', text: '', choices: ms.map(m => worksText('log.flag', 'Flag {machine} for the night crew', { machine: logbookName(m) })) }, k => {
+      if (!ms[k]) return; e.flag = ms[k]; toast('Works log', worksText('log.flagged', 'Flagged. The night crew will look at 22:00.')); }), 600);
+  }) || false;
+}
+const nightWorks = () => { try { const p = ROSTER.find(x => x.dept === 'works' && x.shift === 'night'); return p ? p.id : 'night crew'; } catch (e) { return 'night crew'; } };
+function logbookTick(now, skip) {                        // 22:00: the night crew look at the flagged machine; Calder at your progress talk
+  const L = SHIP.works && logbookData(); if (!L) return;
+  const d = worksDay(now), e = L.find(x => x.day === d && x.flag && !x.looked);
+  if (e && now % 1440 >= LOGBOOK.flagAt) {
+    e.looked = true; const id = e.flag, st = SHIP.machines[id] && SHIP.machines[id].state, by = nightWorks();
+    if (st && st !== 'healthy') {
+      const j = SHIP.jobs.find(x => x.machine === id && x.status !== 'done' && !x.claimedBy);
+      if (j && typeof jobFinish === 'function') jobFinish(j, now, by); else if (typeof machineFound === 'function') machineFound(id, by);
+      if (typeof MACH_REV !== 'undefined') MACH_REV++;
+    }
+    simNote('logFlag', { machine: id, by, state: st || null });
+  }
+  const S = worksSide(), r = L.length && SHIP.occasions.find(x => x.id === 'progressTalk' && (x.met || x.status === 'kept') && Math.floor(x.at / 1440) + 1 === d);
+  if (r && S.logTalk !== r.key && !skip) {
+    S.logTalk = r.key; const last = L[L.length - 1], m = last.jobs.length ? (SHIP.jobs.find(x => x.id === last.jobs[0]) || {}).machine : null, name = m ? logbookName(m) : 'the washers';
+    worksSayAll('calder', (worksVoice('calder', 'log.talk') || ['I read your log. {machine}: good catch.']).map(l => String(l).replace(/\{machine\}/g, name)));
+  }
+}
+if (typeof jobKindAdd === 'function' && logbookOn()) {
+  WORK_MECH.m12 = { noJob: true };                       // a small row: Calder's word at your first entry
+  WORK_TICKS.push(logbookTick);
+  if (typeof PLAYER_TAPS !== 'undefined') PLAYER_TAPS.unshift((it, at) => {
+    if (!it || it.t !== 'Notice board' || !SHIP.works || !worksOpened().has('m12') || typeof deckDef === 'undefined' || !deckDef || deckDef.num !== 5) return false;
+    const s = placeSpot('5-works-terminal'), d = worksDay(shipNow()), m = shipNow() % 1440;
+    if (!s || !at || Math.hypot(s.x - at.x, s.z - at.z) > 3.5 || !playerShiftOn(d) || m < LOGBOOK.from || m >= LOGBOOK.to || logbookToday(d)) return false;
+    return logbookOpen();
+  });
+}
 
 // =====================================================================
 // 24g. THE SCANNER (M7, seat H, 0.55.x; plans/mechanics/m7-scanner.html on claude/p5-design)

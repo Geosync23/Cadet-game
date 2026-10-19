@@ -550,6 +550,78 @@ def part_m9(g):
     check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'm9: differs the second time')
 PARTS['m9'] = part_m9
 
+# 24m tool upkeep (seat E1, 0.45.11): Day 12, an officer with the scanner and pipe kit; worn by use to "Due" (a quarter
+# slower); at your bench: the pipe kit's hold puts it back, the scanner charges 5 minutes on its own; the first upkeep
+# trains m11; +1 for a week kept up, once; after 4 upkeeps the team's rack once a week; saved; the same twice
+M11 = r"""(() => {
+  SHIP.works = null; SHIP.notes = []; SHIP.jobs = []; setShipNow(11 * 1440 + 600); machinesNow(); ACT = null;
+  const W = worksInit(), out = {}; W.tier = 2; W.rank = 'officer'; W.op[12] = ['m11']; toolGive('scanner'); toolGive('pipekit');
+  for (let i = 0; i < 18; i++) { toolWear('scanner', 4); toolWear('pipekit', 5); }
+  out.due = [toolState('scanner'), toolState('pipekit'), toolSlow('pipekit')];
+  const hold = () => { const a = ACT; const r = a && a.kind === 'benchHold' ? [a.def.mins, a.placeId] : null; if (a && a.def.onDone) a.def.onDone(a); ACT = null; return r; };
+  const x0 = W.xp; out.tap = benchTools(); out.kit = [benchStart('pipekit'), hold(), toolState('pipekit'), W.tr.m11 || null];
+  out.charge = [benchStart('scanner'), benchData().charge.at - shipNow()];
+  const tick = t => { setShipNow(t); for (const f of WORK_TICKS) f(t, true); };
+  tick(shipNow() + 4); out.mid = toolState('scanner'); tick(shipNow() + 1); out.end = [toolState('scanner'), !!benchData().charge];
+  out.xp = W.xp - x0; benchStart('pipekit'); hold(); out.xp2 = W.xp - x0;
+  out.rack0 = rackTap(); ACT = null; W.use.m11 = 4; out.stage = worksStage('m11');
+  out.rack = [rackTap(), hold(), benchData().rack, rackTap()]; ACT = null;
+  const c = worksClean(JSON.parse(JSON.stringify(W))); out.saved = JSON.stringify(c.side.upkeep) === JSON.stringify(W.side.upkeep);
+  out.notes = SHIP.notes.filter(n => n.kind === 'upkeep').map(n => n.tool);
+  SHIP.works = null; return out;
+})()"""
+def part_m11(g):
+    a = g.ev(M11)
+    b = g.ev(M11)
+    print('  24m:', json.dumps(a))
+    check(a['due'] == ['due', 'due', 1.25], f"m11: worn to due by use, a quarter slower ({a['due']})")
+    check(a['tap'] == ['scanner', 'pipekit'], 'm11: the bench offers your two tools')
+    check(a['kit'][0] and a['kit'][1] == [2, '5-bench-you'] and a['kit'][2] == 'charged' and a['kit'][3] == 12, f"m11: the pipe kit's 2 minutes at your bench, charged, trained Day 12 ({a['kit']})")
+    check(a['charge'] == [True, 5] and a['mid'] == 'due' and a['end'] == ['charged', False], f"m11: the scanner on charge 5 minutes, you needn't stay ({a['charge']}, {a['mid']}, {a['end']})")
+    check(a['xp'] == 1 and a['xp2'] == 1, f"m11: +1 for the week's tools kept up, once ({a['xp']}, {a['xp2']})")
+    check(a['rack0'] is False and a['stage'] == 2 and a['rack'][0] and a['rack'][1] == [3, '5-tool-rack'] and a['rack'][2] == 1 and a['rack'][3] is False, f"m11: the team's rack after 4 upkeeps, once a week ({a['rack0']}, {a['stage']}, {a['rack']})")
+    check(a['saved'] and a['notes'] == ['pipekit', 'scanner', 'pipekit', 'rack'], f"m11: saved, notes {a['notes']}")
+    check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'm11: differs the second time')
+PARTS['m11'] = part_m11
+
+# 24n the logbook (seat E1, 0.45.11): Day 12 an officer's shift (a pump fitted on Washer 2, Washer 3 found and left, Washer
+# 1 still yours): three summaries from it in the day's order; an entry once a day (+1, a use, the open jobs logged and 10%
+# quicker for whoever takes them); stage 2's flag looked at by the night crew at 22:00; logLast; saved; the same twice
+M12 = r"""(() => {
+  SHIP.works = null; SHIP.notes = []; SHIP.jobs = []; setShipNow(11 * 1440 + 990); machinesNow(); ACT = null;
+  const W = worksInit(), out = {}, t = shipNow(); W.tier = 2; W.rank = 'officer'; W.op[12] = ['m12'];
+  SHIP.jobs.push({ id: '4-washer-2@x', machine: '4-washer-2', deck: 4, kind: 'repair', parts: ['pump'], status: 'done', doneBy: 'you', posted: t - 300, found: t - 300 });
+  W.log.push(['4-washer-2@x', 12, 0, 'repair']);
+  SHIP.jobs.push({ id: '4-washer-3@x', machine: '4-washer-3', deck: 4, kind: 'service', parts: [], status: 'open', claimedBy: null, posted: t - 100, found: t - 100, urgency: 1 });
+  simNote('found', { machine: '4-washer-3', by: 'you' });
+  SHIP.jobs.push({ id: '4-washer-1@x', machine: '4-washer-1', deck: 4, kind: 'repair', parts: ['belt'], status: 'claimed', claimedBy: 'you', posted: t - 200, found: t - 200, urgency: 1 });
+  out.choices = logChoices(12).map(c => c.text);
+  const x0 = W.xp, j3 = SHIP.jobs.find(x => x.id === '4-washer-3@x'), m0 = jobMins(j3);
+  const cs = logChoices(12), pick = cs.find(c => c.jobs.includes('4-washer-3@x')) || cs[0];
+  out.entry = logbookWrite(pick, 12); out.again = logbookWrite(pick, 12);
+  out.logged = [j3.logged || null, Math.round(jobMins(j3) / m0 * 100) / 100]; out.xp = W.xp - x0; out.trained = W.tr.m12 || null;
+  out.last = logLast(1);
+  W.use.m12 = 5; out.stage = worksStage('m12'); out.entry.flag = '4-washer-3';
+  const s = SHIP.machines['4-washer-3']; s.cond = 60; s.state = 'worn';
+  for (let m = 1000; m <= 1330; m += 10) { setShipNow(11 * 1440 + m); logbookTick(shipNow(), true); }
+  out.night = [j3.status, j3.doneBy, SHIP.notes.filter(n => n.kind === 'logFlag').map(n => n.machine)];
+  const c = worksClean(JSON.parse(JSON.stringify(W))); out.saved = JSON.stringify(c.side.log) === JSON.stringify(W.side.log);
+  SHIP.works = null; return out;
+})()"""
+def part_m12(g):
+    a = g.ev(M12)
+    b = g.ev(M12)
+    print('  24n:', json.dumps(a))
+    ch = a['choices']
+    check(len(ch) == 3 and any('Washer 2' in c and 'pump' in c for c in ch) and any('Washer 3' in c for c in ch) and any('Washer 1' in c for c in ch), f"m12: three summaries of the real shift ({ch})")
+    check(a['entry'] and a['again'] is None and a['xp'] == 1 and a['trained'] == 12, f"m12: one entry a day, +1, trained Day 12 ({a['again']}, {a['xp']}, {a['trained']})")
+    check(a['logged'] == [12, 0.9], f"m12: the open job written up is 10% quicker ({a['logged']})")
+    check(a['last'] and a['last'][0] == a['entry']['pick'], 'm12: logLast reads it back')
+    check(a['stage'] == 1 and a['night'][0] == 'done' and a['night'][1] not in (None, 'you') and a['night'][2] == ['4-washer-3'], f"m12: the flagged machine seen to by the night crew at 22:00 ({a['night']})")
+    check(a['saved'], 'm12: saved')
+    if not check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'm12: differs the second time'): print('  m12 twice:', [k for k in a if a[k] != b.get(k)], json.dumps(b)[:600])
+PARTS['m12'] = part_m12
+
 # Step 4's core (seat E1, 0.45.7, on C's behalf): tool wear in the page's numbers (charge 100 - wear: the scanner 4 a
 # scan; "Getting low" under 60, "Due" under 30), a due tool a quarter slower with its toast once a day, never blocking;
 # worksUse no longer wears the three again; the side-job cap (+2 Works reputation a ship day in all); SHIP.works.side kept
