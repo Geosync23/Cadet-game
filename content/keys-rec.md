@@ -18,6 +18,6 @@ proposals until the seat that reads them confirms; renames are adopted and logge
 | Talk panel (RA) | talk.open ({title}) / talk.answer / talk.listen: banks/talks.lines (anyone) and own lines for sato, calder, tomas, esposito-yara, holt, volkov-maeve, torres-zeke, brennan, ferreira; Ferreira's talent.ask / talent.tune / talent.joke / talent.trick / talent.watch | RA (section 18 REC_TRADS); or the meetings below |
 | Talent night | banks/talent.lines: talent.open, talent.intro ({name}, {thing}), talent.act.song/piano/duet/juggle/poem/trick/joke, talent.after, talent.close, talent.crowd; meeting rec.talent.you (your act's choice card) | RA (show) / RB (recShow) |
 | Machine faults | content/works/faults-rec.lines: fault.name/shows/sign/still/tried.<kind>.<cause> for RB's 13 rec kinds | section 17 / the scanner (as is) |
-| Works texts | content/works/rec.lines: rec.shut.float/net/belays/belay/pool, trace.pool.goal/drip/up (wired: .drip + ' ' + .up), trace.symptom.pool; rec.shut.float/net/belays wired (RB2 0ab43cd), .belay/.pool spare | RB2 (section 15r, the leak trace) |
+| Works texts | content/works/rec.lines: rec.shut.float/net/belays/belay/pool, trace.pool.goal/drip/up (wired: .drip + ' ' + .up), trace.symptom.pool; rec.shut.float/net/belays/belay/route wired (RB2 0ab43cd, 0.84.12), .pool spare | RB2 (section 15r, the leak trace) |
 | "Six decks" | game texts: the five Deck directory ITs, the spine ladder, the lift tip, Halloran's roof.view fallback; torres-zeke walk.lift.2 | — |
 | Canon | facts.md "The rec dec" | writers |
