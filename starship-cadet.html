@@ -39686,7 +39686,7 @@ function toolSlow(id) {
 // ---- Step 4's side jobs (E1 on C's behalf, 0.45.7): their data lives under SHIP.works.side (worksClean keeps it whole;
 // each sub-block reads its own key defensively, a missing one is its default). worksSideXp(n, why): Works reputation from a
 // side job, +2 a ship day at most across all of them (so they help but never rush a promotion); returns what it gave
-const SIDE_XP_DAY = 2;
+const SIDE_XP_DAY = 2, WORKS_SIDE_KINDS = new Set();   // side-job kinds (sub-blocks add theirs at load: WORKS_SIDE_KINDS.add('leak')): their turn-in reputation goes through the cap
 const worksSide = () => { const W = SHIP.works; if (!W) return null; if (!W.side || typeof W.side !== 'object' || Array.isArray(W.side)) W.side = {}; return W.side; };
 function worksSideXp(n, why) {
   const S = worksSide(); if (!S || !(n > 0)) return 0;
@@ -39725,7 +39725,8 @@ onSim('job', n => {
   const kind = n.job || (j && (j.chore || j.kind)) || '', m = n.machine && typeof machineById === 'function' ? machineById(n.machine) : null;
   const found = !!(j && (j.foundBy === 'you' || (n.machine && simNotes('found', (j.posted || 0) - 1).some(x => x.machine === n.machine && x.by === 'you'))));
   const right = !!(j && j.rightFirst && d >= WORKS_RIGHT_FROM), clever = !!(j && j.clever);
-  worksXp((WORK_XP[kind] || 1) + (found ? 1 : 0) + (right ? 1 : 0) + (clever ? 1 : 0));
+  const xp = (WORK_XP[kind] || 1) + (found ? 1 : 0) + (right ? 1 : 0) + (clever ? 1 : 0);
+  if (WORKS_SIDE_KINDS.has(kind) || j && WORKS_SIDE_KINDS.has(j.kind)) worksSideXp(xp, j && j.kind || kind); else worksXp(xp);   // a side job's: capped, +2 a day in all (0.45.7)
   if (m) W.sk[m.kind] = (W.sk[m.kind] || 0) + 1;
   W.log.push([String(n.id).slice(0, 80), d, (found ? 1 : 0) | (right ? 2 : 0) | (clever ? 4 : 0), String(kind).slice(0, 24)]); if (W.log.length > WORKS_LOG) W.log.splice(0, W.log.length - WORKS_LOG);
   const c = W.cur; if (c && c.st === 'do' && c.j === n.id) worksDone(c.id, n.t);

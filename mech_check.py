@@ -538,7 +538,9 @@ SIDE = r"""(() => {
   const a = look(null), b = look('pipekit'); out.look = [a[0], b[0], a[1] && b[1] ? Math.round(b[1] / a[1] * 100) / 100 : null];
   // the cap
   const x0 = W.xp; out.xp = [worksSideXp(1, 'a'), worksSideXp(3, 'b'), worksSideXp(1, 'c'), worksSideXp(-1, 'd')]; out.gain = W.xp - x0;
-  setShipNow(12 * 1440 + 540); out.xp2 = worksSideXp(3, 'e'); out.notes = SHIP.notes.filter(n => n.kind === 'sideXp').map(n => n.why + n.n);
+  setShipNow(12 * 1440 + 540); out.xp2 = worksSideXp(3, 'e');
+  WORKS_SIDE_KINDS.add('probe'); setShipNow(13 * 1440 + 540); const x1 = W.xp; for (const k of ['p1', 'p2', 'p3']) simNote('job', { step: 'turnin', id: k, job: 'probe' });
+  simNote('job', { step: 'turnin', id: 'p4', job: 'service' }); out.turnin = W.xp - x1; WORKS_SIDE_KINDS.delete('probe'); out.notes = SHIP.notes.filter(n => n.kind === 'sideXp').map(n => n.why + n.n);
   // the save's tidy
   const c = worksClean(JSON.parse(JSON.stringify(W))); out.kept = !!c && JSON.stringify(c.side) === JSON.stringify(W.side) && JSON.stringify(c.tools) === JSON.stringify(W.tools);
   const old = JSON.parse(JSON.stringify(W)); delete old.side; const c2 = worksClean(old); out.old = !!c2 && !('side' in c2) && JSON.stringify(worksSide()) === JSON.stringify(W.side);
@@ -563,7 +565,8 @@ def part_side(g):
     check(a['uses'] == [100, 28], f"side: worksUse doesn't wear the scanner or the pipe kit again ({a['uses']})")
     check(a['look'][0] and a['look'][1] and a['look'][2] == 1.25, f"side: a look step with a due tool takes a quarter longer and still starts ({a['look']})")
     check(a['xp'] == [1, 1, 0, 0] and a['gain'] == 2 and a['xp2'] == 2, f"side: side jobs give at most +2 a day ({a['xp']}, {a['xp2']})")
-    check(a['notes'] == ['a1', 'b1', 'e2'], f"side: the sideXp notes ({a['notes']})")
+    check(a['notes'] == ['a1', 'b1', 'e2', 'probe1', 'probe1'], f"side: the sideXp notes ({a['notes']})")
+    check(a['turnin'] == 3, f"side: side-job kinds turned in at the board are capped too (+2), an ordinary job isn't (+1) ({a['turnin']})")
     check(a['kept'] and a['old'] and a['junk'], 'side: SHIP.works.side kept by the save\'s tidy; an old save loads without it; junk dropped')
     check(a['bunk'][0] == 'Your bunk\'s in Bunk 1 on Deck 4.' and a['bunk'][1] and a['bunk'][2] == '4-23' and a['bunk'][3] == 'Your bunk\'s in Cabin 4-23 on Deck 4.' and not a['bunk'][4] and a['bunk'][5],
           f"side: the texts name Bunk 1 before the move and your cabin after ({a['bunk']})")
