@@ -321,7 +321,7 @@ with sync_playwright() as pw:
         g.step(200); check(g.ev("document.getElementById('ixHealth').hidden"), 'it never opens by itself')
     # real machines: their taps are section 15's machineTap (machineUse), never one of ours
     over = []
-    for n in g.ev("Object.keys(DECKS).map(Number)"):
+    for n in g.ev("typeof DECK_ORDER !== 'undefined' ? DECK_ORDER.slice().sort((a, b) => a - b) : Object.keys(DECKS).map(Number)"):
         g.ev(f"goToDeck({n})"); g.step(3)
         over += g.ev(r"""(() => { const out = []; if (typeof machineList !== 'function') return out; const near = typeof MACHINE_NEAR !== 'undefined' ? MACHINE_NEAR : 1;
           for (const it of ITEMS) { if (/job board/i.test(it.t) || it.lift || it.see) continue; it.hit.getWorldPosition(_wp); const at = _wp.clone();
