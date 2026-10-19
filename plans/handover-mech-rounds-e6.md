@@ -16,7 +16,7 @@ Written 2026-10-19 ~07:20 UTC by E6 (session_018cZuXpb4XdFs47zXoPcF8B) at ~50% m
 
 ## Loose ends
 - R6 to review 0.45.17 and 0.45.18.
-- New lines with no writer (listed in rows 0.45.16-0.45.17): "looked at today", "That's my round", `round.pick.some`, "No {part} on the shelf.", `bench.tester`. The next writer checks them; W2's old `round.pick` ("Pick five") is no longer read by stage 2.
+- New lines with no writer (listed in rows 0.45.16-0.45.17): "looked at today", "That's my round", `round.pick.some`, "No {part} on the shelf.", `bench.tester` ("Check the conduit tester": design-doc's name, 0.45.19). The next writer checks them; W2's old `round.pick` ("Pick five") is no longer read by stage 2.
 - `logLast(n)` is still unused (for whoever builds Calder's progress-talk read-out).
 - R5's other notes not acted on: benchStart counts the use before the hold ends; the three log choices read the same on a quiet day; the flag question is a second deviceChoose (lost if refused); the works.ms.stars / grade names vs W2's.
 
