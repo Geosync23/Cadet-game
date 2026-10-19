@@ -268,6 +268,32 @@ with sync_playwright() as pw:
     print('  identical:', same)
     check(same, 'the steady run differs the second time')
 
+    print('(h) The bridge, by invitation (Step 3):')
+    br = ev("""(() => {
+      if (typeof bridgeBarred !== 'function') return null;
+      const out = {}, was = SHIP.bridgeInvited, log = SHIP.eventLog.slice();
+      goToDeck(1); const lob = ROOM_TILES['+'][0], into = ROOM_TILES['B'].find(c => c[0] >= 14 && c[1] >= 4 && c[1] <= 7) || ROOM_TILES['B'][5];
+      player.obj.position.copy(cellPos(...lob));
+      SHIP.bridgeInvited = false; SHIP.flags['bridge.invited'] = undefined; delete SHIP.flags['bridge.invited'];
+      out.youShut = !findPath(lob, into, null, player);
+      const crew = { p: { id: 'marrow', dept: 'command' } }; out.crewOpen = !!findPath(lob, into, null, crew);
+      out.obsOpen = !!findPath(lob, ROOM_TILES['O'][3], null, player); out.washOpen = !!findPath(lob, ROOM_TILES['w'][0], null, player);
+      const bk = [...EDGES.values()].find(e => bridgeBarred(e)); out.tap = bk ? bridgeDoorTap(bk.key) : null; out.tapLobby = bridgeDoorTap('v,6,5');
+      SHIP.eventLog = []; out.readyNoEvent = bridgeInviteReady(30); SHIP.eventLog = [{ id: 'ionStorm', startDay: 10, endDay: 16 }]; out.readyAfter = [bridgeInviteReady(16), bridgeInviteReady(17)];
+      flagSet('bridge.invited', true); bridgeTick(shipNow()); out.invited = SHIP.bridgeInvited; out.youOpen = !!findPath(lob, into, null, player);
+      const sv = {}; SAVE_EXTRA.forEach(f => { try { f(sv.ship ? sv : Object.assign(sv, { ship: {}, player: {} })); } catch (e) {} }); out.saved = sv.ship.bridgeInvited;
+      SHIP.bridgeInvited = false; player.obj.position.copy(cellPos(...into)); out.insideOut = !!findPath(into, lob, null, player);
+      SHIP.bridgeInvited = was; SHIP.eventLog = log; goToDeck(4);
+      return out; })()""")
+    print('  ', br)
+    if br is None: print('  not in this build')
+    else:
+        check(br['youShut'] and br['crewOpen'] and br['obsOpen'] and br['washOpen'], f"the bridge shut to you only (crew, the observation room and the washroom open): {br}")
+        check(br['tap'] and 'permission' in br['tap']['x'] and br['tapLobby'] is None, f"the bridge door's tap says you need permission (and only that door): {br['tap']}")
+        check(br['readyAfter'] == [False, True], f"the invite waits for the first ship-wide event to end: {br['readyAfter']}")
+        check(br['invited'] and br['youOpen'] and br['saved'] is True, 'invited: SHIP.bridgeInvited follows bridge.invited, the bridge opens, the save keeps it')
+        check(br['insideOut'], 'never shut in: already on the bridge, you can walk out')
+
     ev("for (const k in WORK_MECH) delete WORK_MECH[k]; SHIP.works = null")
     if errors: fail('page errors: ' + ' | '.join(errors[:5]))
     g.close()
