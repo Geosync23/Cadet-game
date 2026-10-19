@@ -269,7 +269,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.82.8
+   STARSHIP CADET: CSV Wren                           build 0.63.2r
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -571,7 +571,7 @@ const shipDeck = n => SHIP.decks[n] || (SHIP.decks[n] = { open: new Set() });
 // or loop over decks for the player go in DECK_ORDER; a deck's name on screen comes from deckWord (never "Deck 7")
 // REC_DECK (0.82.7, the user's order via lead 14): the one switch for the rec deck. false keeps it dormant: no R on the lift
 // or in Maps, goToDeck(7) does nothing, a save left on it wakes on Deck 4; DECKS[7] is playerOnly, so nothing else changes
-const REC_DECK = true;
+const REC_DECK = false;                                  // 0.63.2r: merged dormant (the user's, via lead 15); the rec work comes after Step 4
 const DECK_ORDER = REC_DECK ? [1, 2, 3, 4, 7, 5, 6] : [1, 2, 3, 4, 5, 6];
 const deckLabel = n => +n === 7 ? 'R' : String(n);
 const deckWord = n => +n === 7 ? 'Rec deck' : 'Deck ' + n;
@@ -8613,7 +8613,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.82.8';                           // keep in step with the header's build line
+const GAME_BUILD = '0.63.2r';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -41591,7 +41591,7 @@ const POSE_DEMO = (() => {
 // 10:30 and shows every rec pose on the concourse in rec kit, labelled, with a swimmer, a kayaker, a climber and a
 // floater going round on stand-in water and wall (the movers, 8c). A test spot only: never saves; remove with the rooms' own. ----
 const REC_DEMO = (() => {
-  if (urlFlag('recposes') === null) return null;
+  if (!REC_DECK || urlFlag('recposes') === null) return null;   // dev only, and never while the rec deck is dormant
   const STILL = [['tread', .9], ['kayak', .45], ['climb', .7], ['ring', 1.1], ['lower', .8], ['float', 1.0], ['sit:cheer', .48], ['sit:clap', .48], ['sit:groan', .48], ['walk+towel', 0], ['stand', 0], ['stand', 0, 'grip socks']];
   const MOVES = [{ kind: 'swim', path: [[5.6, 9.6], [15.4, 9.6]], y: .35 }, { kind: 'kayak', path: [[24.4, 7.9], [28.6, 7.9, 1], [28.6, 10.1], [24.4, 10.1]], y: .35 },
     { kind: 'climb', at: [4.35, 8.5], face: 'w', top: 2.3 }, { kind: 'float', at: [11.5, 8.4], r: .5, top: 1.4 }];

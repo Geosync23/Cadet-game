@@ -141,7 +141,7 @@ TAGS = r"""(() => {
 
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
-    decks = g.ev("Object.keys(DECKS).map(Number)")
+    decks = g.ev("typeof DECK_ORDER !== 'undefined' ? DECK_ORDER.slice().sort((a, b) => a - b) : Object.keys(DECKS).map(Number)")
     ok = True
     allIds = {}
     allMachines = {}
