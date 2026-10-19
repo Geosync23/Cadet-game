@@ -281,7 +281,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.71.4
+   STARSHIP CADET: CSV Wren                           build 0.71.5
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8695,7 +8695,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.71.4';                           // keep in step with the header's build line
+const GAME_BUILD = '0.71.5';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -9519,7 +9519,7 @@ function schedFrame(p, d) {
   if (works && p.work && evRule(f.night ? d * 1440 + 360 : (d - 1) * 1440 + f.workEnd, 'doubleShift', p)) {   // a ship-wide event's double shift (C7)
     f.double = true; f.workEnd = f.night ? Math.max(f.workEnd, 435) : Math.max(f.workEnd, Math.min(1230, bed - 45));   // the gaps closed, never past the other shift's start (desks are shared)
   }
-  let wake = gt ? gt.wake - 45 - 45 * U(13) + jit(10) : 345 + Math.round(60 * U(10)) - 30;   // 05:15-06:15, about 05:45 (the user's playtest 2: up about half an hour earlier, spread evenly so the washrooms aren't all at once; a guest's lie-in is in their template)
+  let wake = gt ? gt.wake - 45 - 45 * U(13) + jit(10) : 330 + Math.round(105 * U(10));   // 05:30-07:15 (the user's playtest 2, 0.71.5: earlier and varied, spread evenly so the washrooms aren't all at once; was 05:15-06:15 in 0.71.3; a guest's lie-in is in their template)
   if (!gt && p.rota && (p.rota.team === 'bar' || p.rota.relief === 'bar')) wake += 45;   // the bar runs to 23:00: its staff keep their old lie-in (0.71.3; else under 6 hours' sleep)
   if (H.has('early-riser')) wake -= 30 + 15 * U(12);
   if (H.has('late-sleeper')) wake += 15 + 15 * U(12);
@@ -9866,7 +9866,17 @@ function schedBuild(p, d, occ, S) {
   };
   const morning = (k, by) => {                           // the toilet, a wash, tidy for inspection, breakfast (sit-down or grab)
     if (U(k + 7) < .5) toilet(k + 7);
+    // not everyone goes the same way to breakfast (the user's playtest 2, 0.71.5): about 3 in 10 straight there and
+    // wash after, 2 in 10 a short workout first, 2 in 10 a coffee or a read after the wash, the rest wash and go
+    const sty = U(k + 13), quiet = !F.shape.inspect && !H.has('skips-breakfast') && !meet.some(e => !e.done && e.at < by + 150 && e.at + e.dur > t);
+    if (quiet && sty < .3 && by - t >= 100) {
+      meal('breakfast', k + 5, by - 45);
+      if (by - t >= 45) wash(k); else if (by - t >= 15) take('wash', [[bedDeck, 'basin']], 5, { wait: 5 });
+      return;
+    }
+    if (quiet && sty < .5 && by - t >= 80) take('gym', [[3, 'gym']], 15 + Math.round(10 * U(k + 14)), { wait: 5, min: 12, by: by - 50 });
     wash(k);
+    if (quiet && sty >= .5 && sty < .7 && by - t >= 95) leisureUntil(t + 20 + Math.round(20 * U(k + 14)), k + 15);
     if (F.shape.inspect && /^4-B/.test(p.bed)) { go(bedDeck); seg('off', t + 10, 'bed', p.bed, { tag: 'inspection' }); }
     const pre = meet.find(e => !e.meal && !e.done && e.at >= t && e.at + e.dur <= by - 25);   // a gathering before breakfast (Sunrise stretch, Pick-your-own; 0.36.86): to it, then breakfast
     if (pre) leisureUntil(pre.at + pre.dur, k + 11);
@@ -10337,7 +10347,7 @@ function comeWhere(p, t) {
 // the Captain's walk or on a tea break. A meal's tray isn't planned: section 10 hands it over at the servery (mealStep)
 const OFFICER_RANKS = new Set(['officer', 'senior', 'chief', 'xo', 'captain']);
 function withHold(p, w, job) {
-  if (!w || w.hold) return w;
+  if (!w || w.hold && !(job && (w.tag === 'load' || w.tag === 'unload'))) return w;   // at the hold or the shelves the crate is in their hands, not the cart (the reviewer's fix to 0.71.3, 0.71.5)
   const h = job && (w.tag === 'load' || w.tag === 'unload') ? 'carry'   // loading or unloading cargo: a crate in their hands (the user's playtest 2, 0.71.3)
     : job && p.dept === 'works' ? 'toolbox'
     : OFFICER_RANKS.has(p.rank) && (w.tag === 'handover' || w.tag === 'stroll' || w.tag === 'tea') ? 'datapad' : null;
