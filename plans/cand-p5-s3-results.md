@@ -19,3 +19,4 @@ Build master 6 (BM6, session_01F8k6hqdBRoxDJMzqAuiHqR) on claude/p5-cand-pt1 (th
 - ~02:50 S2 cb4f2bb (0.33.57 ship meters/upkeep, bridge-room gate; with R3). S2 says mech_check m4 'five crates in two runs' fails on it (the test's manifest has a bridge crate, no longer yours before the invite); fix asked of C2 in mech_check's frame.
 - ~02:52 W2 edf3223 (0.48.92-97; content_gen ' {pin}' change), H2 828fc3a (0.55.14 P1, day strip, Chief's notes pages): both with R3.
 - ~02:57 R3 PASS W2 edf3223. W2 newer b4630d4 (0.48.98, promotion keys with C2 0.44.22; with R3). S2 1f2e08f (0.33.58 team job kind, jobReserve drift; with R3; same mech m4 FAIL till C2's test fix).
+- R3 PASS W2 b4630d4. W2 newer 0cdde89 (0.48.99, H2's P1/P2 texts; with R3).
