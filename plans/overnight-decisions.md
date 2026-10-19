@@ -196,3 +196,4 @@ All 8 packages approved (Zeke: "all good except he still walks and talks" → he
 | | Build phases | Phase 1 = the 9 events in the career arc (Days 1-26), built first; Phase 2 = the other 11, later. D2 writes v4 showing the phases ("and we're there") |
 | ~00:08 (the user, on events v4) | Space Creature day | Day 8 is fine (keeps the free weekend) |
 | ~00:08 (the user) | Rec sign fix 0.82.8 | Make the change, no need for the checks |
+| ~00:10 (the user) | Events plan v4 | APPROVED ("good for now"). Built after Step 3 → Step 4 → rec deck merge: Phase 1 first (the 9 in Days 1-26), Phase 2 later. D2 records it in design-doc |
