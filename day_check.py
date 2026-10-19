@@ -121,7 +121,7 @@ with sync_playwright() as pw:
     if wt and (wt['outside'] or wt['peak'] > 3 or (wt['on'] and wt['went'] < wt['on'] // 3)): fail(f'Works tea wrong: {wt}')
 
     # 3. every deck through the day
-    decks = g.ev("Object.keys(DECKS).map(Number)")
+    decks = g.ev("typeof DECK_ORDER !== 'undefined' ? DECK_ORDER.slice().sort((a, b) => a - b) : Object.keys(DECKS).map(Number)")
     for n in decks:
         o = g.page.evaluate(f"s => window.__sc(s)({{ n: {n}, day: {DAY}, step: {STEP}, draw: true }})", SIM)
         peak = max([c[2] for c in o['calls']] or [0])
