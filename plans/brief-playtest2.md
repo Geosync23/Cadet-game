@@ -5,7 +5,7 @@ The user's playtest notes (~05:12). Goal: fold into Step 4 (0.63.4) if ready whe
 ## Items and owners
 | # | The user's note | What to build | Owner |
 |---|---|---|---|
-| 1 | "This training is bugged" (Day 2 rounds with Torres) | Replace the walk-along: Torres **explains** rounds (a short talk), then the first round is **a new job on the job board**; taking it, the **goal arrow and green tips walk you through** each stop (look, mark). Same rounds code after that. | E1 (owns rounds, 24a) with U for the arrow/tips |
+| 1 | "This training is bugged" (Day 2 rounds with Torres) | Replace the walk-along: Torres **explains** rounds (a short talk), then the first round is **a new job on the job board**; taking it, the **goal arrow and green tips walk you through** each stop (look, mark). Same rounds code after that. | E1 (owns rounds, 24a) with U2 for the arrow/tips |
 | 2 | The Chief isn't at the Day 1 dinner with Zeke | Calder (the Chief) sits at that dinner as written | X |
 | 3 | Call-home marker doesn't appear after meeting the Chief | The call-home goal/marker shows right after the Chief's table visit (0.42.62 flow) | U |
 | 4 | Toilet use should drop hygiene | Using a toilet lowers hygiene a little, shown with the usual pop-up "−N Hygiene" numbers | U |
@@ -29,3 +29,5 @@ The user's playtest notes (~05:12). Goal: fold into Step 4 (0.63.4) if ready whe
 | 22 | Too many crew wake and go to breakfast at once | Stagger wake and breakfast times across the crew (deterministic, seeded) | X |
 
 U's list is long: do 3, 6, 7, 17, 9, 19 (onboarding and tips) first, then 10-12, 18, then 4-5 (needs and the alarm clock; the biggest). Tell the lead at ~60% memory; unfinished items move to a fresh seat.
+
+**Update ~05:22:** U (0.72.5 93194ef: items 3, 6, 7, 9, 17, 19) does batch B (10-12, 18) and hands over; **U2 session_012TFwzt5eZoNZKrXrXTzN2w** (claude/hud-pt2, 0.73.x) takes items 4-5 and the arrow/tips half of item 1.

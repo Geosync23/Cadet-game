@@ -729,3 +729,4 @@ Read: CLAUDE.md, TEAM.md (Lead line, "Released", session-chain rules incl. "Loos
 - ~05:06: BM7 session_01QbuzvT3TwzMwSWRmakzX8Z started (claude/p5-cand-s4) for Step 4. E3 round 1 places 9d179e9 (0.53.4). 0.63.3 final: only leave_check FAIL (old chip text; U fixing the check).
 - ~05:18: **0.63.3 RELEASED to its own link** https://claude.ai/artifact/BKRhQBKyqhCEz91MqqvuDG v1 = claude/p5-cand-pt1 2bc08d5 (game = tested 7a6e137; title "Starship Cadet Step 3" in the published copy). All checks green. Main and the main game link untouched.
 - ~05:20: archived S2, M3, check runner (Step 3 done). Working: BM7, R4, W2, D3 (on call), E1-E3 (Step 4), X + U (playtest 2), BM6 writing handover then archive. Rec owner idle.
+- ~05:22: U 0.72.5 93194ef (playtest items 3,6,7,9,17,19), near 60%; U2 session_012TFwzt5eZoNZKrXrXTzN2w started for items 4-5 + item 1 tips. E1 0.45.7 b68e236 round 1 done.
