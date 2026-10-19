@@ -281,7 +281,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.51.13
+   STARSHIP CADET: CSV Wren                           build 0.51.14
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8694,7 +8694,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.51.13';                           // keep in step with the header's build line
+const GAME_BUILD = '0.51.14';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -41763,7 +41763,10 @@ function teamPost(P, w, t) {                             // a plan entry posted 
   const [d, at, , kind] = P; if (P[2] && SHIP.jobs.some(j => j.id === P[2])) return null;
   const j = teamJob(kind, d, at); if (!j) { P[2] = 'none'; return null; }
   P[2] = j.id; if (typeof MACH_REV !== 'undefined') MACH_REV++;
-  if (j.claimedBy === 'you' && typeof mailSend === 'function') mailSend({ at: t, from: worksName(j.lead), subject: teamText('team.name.' + kind, TEAM_NAME[kind]),
+  const pr = teamParts(j, t);                            // stage 2: bring the parts (the Mail says so instead)
+  if (pr && typeof mailSend === 'function') { const m = teamText('mail.team.parts', 'Bring the parts | {job} tomorrow at {time}. {name} asks you to bring the parts from stores: {parts}.', { job: teamLabel(j), time: hhmm(at), name: worksFirst(j.lead), parts: TEAM_PARTS[kind].join(', ') }), i = m.indexOf(' | ');
+    mailSend({ at: t, from: worksName(j.lead), subject: i > 0 ? m.slice(0, i) : teamLabel(j), body: i > 0 ? m.slice(i + 3) : m }); }
+  else if (j.claimedBy === 'you' && typeof mailSend === 'function') mailSend({ at: t, from: worksName(j.lead), subject: teamText('team.name.' + kind, TEAM_NAME[kind]),
     body: teamText('mail.team', '{job}, {time} tomorrow, Deck {deck}. You\'re one of the team. — {name}', { job: teamText('team.name.' + kind, TEAM_NAME[kind]), time: hhmm(at), deck: j.deck, name: worksFirst(j.lead) }) });
   return j;
 }
@@ -41808,13 +41811,15 @@ function teamTick(j, now, skip) {
   if (teamYours(j) && !j.youIn && !skip && teamAtSpot(j)) j.youIn = true;
   if (j.youOut && !j.late) teamLate(j, now);
   if (now < j.start) return;
-  if (j.cur < 0) { simNote('team', { id: j.id, step: 0, by: j.lead, kind: 'start' }); if (teamYours(j) && !skip) worksTeach('m8', j.lead, 'call.start', null); teamNext(j, j.start); }
+  if (j.partsRun && j.partsLate === undefined) teamPartsCheck(j, j.start, skip);
+  if (j.cur < 0 && now < teamT0(j)) return;
+  if (j.cur < 0) { simNote('team', { id: j.id, step: 0, by: j.lead, kind: 'start' }); if (teamYours(j) && !skip) worksTeach('m8', j.lead, 'call.start', null); teamNext(j, teamT0(j)); }
   for (let guard = 0; guard < 20 && j.status !== 'done' && j.cur < j.seq.length; guard++) {
     const s = j.seq[j.cur];
     if (s.who === 'you') {
       const k = j.seq.slice(0, j.cur).filter(x => x.who === 'you').length;   // your stop for this step: done already (no stepDone hook)? on with the job
       if ((j.stepsDone || []).includes(k)) { j.youIn = true; teamNext(j, now); continue; }
-      if (skip || now >= j.start + TEAM_WAIT && !j.youIn) { teamLate(j, now); continue; } break; }
+      if (skip || now >= teamT0(j) + TEAM_WAIT && !j.youIn) { teamLate(j, now); continue; } break; }
     const t = j.stepAt + teamStepMins(j, s); if (now < t) break;
     teamNext(j, t);
   }
@@ -41827,6 +41832,27 @@ function teamStepDone(j, k, res, t) {
   j.youIn = true; simNote('team', { id: j.id, step: i, by: 'you', kind: 'step' });
   teamNext(j, t !== undefined ? t : shipNow());
   return true;
+}
+// ---- team parts (M8 stage 2, Step 4; plans/mechanics/step4-stages.html; seat E5 for M2): from Day 18, once you've done
+// two team jobs (m8's stage 1), the Mail of a team job you're in asks you to bring the parts: a manifest run (24d's
+// manifestRun, E1) from stores to the machine, held for you till the start. Not there at the start: the run withdrawn,
+// the lead fetches them and it starts TEAM_PARTS_LATE minutes late (team.parts.late). Never a fail. j.partsRun the run's
+// id, j.partsLate (false: brought) on the job; SHIP.works.side.parts = how many times you've brought them. No R().
+const TEAM_PARTS = { recycler: ['membrane', 'seal'], washer: ['pump', 'bearing'], manifold: ['valve', 'seal'], heater: ['pump', 'seal'], scrubber: ['filter', 'fan belt'] };
+const TEAM_PARTS_DAY = 18, TEAM_PARTS_LATE = 10;
+const teamT0 = j => j.start + (j.partsLate ? TEAM_PARTS_LATE : 0);   // when the first step starts
+const teamPartsN = () => { const S = typeof worksSide === 'function' && worksSide(), n = S && S.parts; return Number.isInteger(n) && n > 0 ? Math.min(n, 9999) : 0; };
+function teamParts(j, t) {                               // the parts ask on a team job you're in -> the run's id | null
+  if (typeof manifestRun !== 'function' || !j || j.claimedBy !== 'you' || j.partsRun || !TEAM_PARTS[j.team_kind]) return null;
+  if (worksDay(j.start) < TEAM_PARTS_DAY || typeof worksStage !== 'function' || worksStage('m8') < 1) return null;
+  const id = manifestRun(TEAM_PARTS[j.team_kind], j.machine, { at: t, until: j.start, for: j.lead }); if (id) j.partsRun = id;
+  return id || null;
+}
+function teamPartsCheck(j, t, skip) {                    // at the start: brought (one more), or the lead fetches them
+  j.partsLate = !(typeof manifestRunDelivered === 'function' && manifestRunDelivered(j.partsRun));
+  if (!j.partsLate) { const S = typeof worksSide === 'function' && worksSide(); if (S) S.parts = teamPartsN() + 1; return; }
+  if (typeof manifestRunEnd === 'function') manifestRunEnd(j.partsRun, t);
+  if (!skip) try { toast(teamLabel(j), teamText('team.parts.late', '{name} fetched the parts. Ten minutes late. Nobody minds. Much.', { name: worksFirst(j.lead) })); } catch (e) { /* no UI */ }
 }
 // the clock: the week's plan posted at 16:00 the day before; each team job's steps run
 if (typeof teamJobPost === 'function') WORK_TICKS.push((now, skip) => {

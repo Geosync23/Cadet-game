@@ -788,14 +788,56 @@ def extra_ff(g):
     check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'ff: differs the second time')
 EXTRA['ff'] = extra_ff
 
+# ---- M8 stage 2, team parts (24h, seat E5 for M2; step4-stages): from Day 18 after two team jobs, the team job's Mail
+# asks you to bring the parts (24d's manifestRun, E1: held for you till the start); brought: on time, side.parts + 1;
+# not brought: the run withdrawn, the lead fetches them, 10 minutes late, never a fail; before stage 2 or Day 18 the
+# old Mail and no run; the same twice
+TPARTS = r"""(() => { const out = {}, W0 = JSON.stringify(SHIP.works);
+ const reset = (t, uses) => { machinesNew(); SHIP.jobs = []; SHIP.mail = []; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t); machinesNow(); SHIP.works = null; const W = worksInit(t);
+   W.team = { plan: {} }; W.inc = { plan: {}, open: null }; W.tier = 2; W.rank = 'officer'; W.tr.t2 = 10; W.tr.m8 = 11; W.use.m8 = uses; if (worksSide()) worksSide().parts = 0; return W; };
+ const run = (t0, t1, uses, bring, d0 = 18) => { const W = reset(t0, uses), r = {}; let j = null;
+   for (let t = t0; t <= t1; t += 5) { setShipNow(t); machinesNow(); for (const f of WORK_TICKS) f(t, false);
+     j = j || SHIP.jobs.find(x => x.kind === 'team' && x.claimedBy === 'you' && worksDay(x.start) >= d0); if (!j || j.status === 'done') continue;
+     const R = j.partsRun && SHIP.jobs.find(x => x.id === j.partsRun);
+     if (R && !r.run) r.run = [R.kind, R.reserved, R.until === j.start, (R.crates || []).map(c => c.id).join('+'), R.crates.every(c => c.dest === panelPlace(j.machine))];
+     if (bring && R && !R.delivered && t >= j.start - 60 && R.status !== 'done') { claimJob(R.id); jobStops(R).forEach((s, k) => jobStepDone(R.id, k, {})); r.delivered = manifestRunDelivered(R.id); turnInJob(R.id); }
+     if (t >= j.start - 5) j.youIn = true;
+     const mine = j.seq.map((s, i) => s.who === 'you' ? i : -1).filter(i => i >= 0), k = mine.indexOf(j.cur);
+     if (k >= 0) { if (r.first === undefined) r.first = j.stepAt - j.start; jobStepDone(j.id, k, j.seq[j.cur].how === 'turn' ? { value: 3 } : {}); for (const f of WORK_TICKS) f(t, false); } }
+   const R = j && j.partsRun && SHIP.jobs.find(x => x.id === j.partsRun);
+   r.job = j && { day: worksDay(j.start), status: j.status, by: j.doneBy, late: j.late, partsLate: j.partsLate === undefined ? null : j.partsLate, mins: j.doneAt - j.start, run: !!j.partsRun };
+   r.left = R ? [R.status, !!R.delivered] : null; r.parts = worksSide() ? worksSide().parts || 0 : null;
+   r.mail = SHIP.mail.filter(m => j && m.from === worksName(j.lead) && (m.subject === 'Bring the parts' || Object.values(TEAM_NAME).includes(m.subject))).map(m => m.subject); return r; };
+ out.bring = run(16 * 1440 + 900, 18 * 1440 + 800, 2, true);
+ out.not = run(16 * 1440 + 900, 18 * 1440 + 800, 2, false);
+ out.stage0 = run(16 * 1440 + 900, 18 * 1440 + 800, 0, false);
+ out.early = run(14 * 1440 + 900, 16 * 1440 + 800, 2, false, 0);
+ worksSide().parts = 'x'; out.junk = teamPartsN(); worksSide().parts = 3; out.three = teamPartsN();
+ SHIP.works = JSON.parse(W0); return out; })()"""
+def extra_tparts(g):
+    if not g.ev("typeof manifestRun === 'function' && !!JOB_KINDS.haul && typeof worksSide === 'function'"):
+        print("  tparts: (not checked: 24d's manifestRun (E1) not in this build)"); return
+    a, b = g.ev(TPARTS), g.ev(TPARTS)
+    for k in ('bring', 'not', 'stage0', 'early'): print('  tparts', k, a[k])
+    B, N, S, E = a['bring'], a['not'], a['stage0'], a['early']
+    if not check(B['job'] and B['job']['run'] and B['job']['day'] >= 18, f"tparts: a team job from Day 18 you're in asks for the parts ({B['job']})"): return
+    check(B['run'][0] == 'haul' and B['run'][2] and B['run'][4] and B['run'][3] and 'Bring the parts' in B['mail'], f"tparts: the Mail asks you; a manifest run to the machine, held till the start ({B['run']}, {B['mail']})")
+    check(B['delivered'] and B['job']['partsLate'] is False and S['first'] == B['first'] and B['parts'] == 1 and B['job']['status'] == 'done', 'tparts: brought: it starts on time, side.parts 1')
+    check(N['job']['partsLate'] is True and N['first'] == B['first'] + 10 and N['left'] == ['done', False] and N['parts'] == 0 and N['job']['status'] == 'done' and N['job']['mins'] == B['job']['mins'] + 10, 'tparts: not brought: the run withdrawn, the lead fetches them, 10 minutes late, never a fail')
+    check(S['job'] and not S['job']['run'] and S['job']['partsLate'] is None and 'Bring the parts' not in S['mail'], 'tparts: before two team jobs, the old Mail and no run')
+    check(E['job'] and E['job']['day'] < 18 and not E['job']['run'], 'tparts: none before Day 18')
+    check(a['junk'] == 0 and a['three'] == 3, 'tparts: side.parts read defensively')
+    check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'tparts: differs the second time')
+EXTRA['tparts'] = extra_tparts
+
 # ---- E2's saved parts through a real save and reload (R4's fix 2): SHIP.works.side's leaks, nozzles, rewire, favours
-# and ff, written by saveGame (saving on) and read back by the sub-blocks after a reload; needs 24 core's worksClean to
+# and ff (and 24h's team parts count), written by saveGame (saving on) and read back by the sub-blocks after a reload; needs 24 core's worksClean to
 # keep `side` (E1), else it says so
 SIDE_SET = r"""(() => { if (typeof worksSide !== 'function') window.worksSide = () => SHIP.works ? (SHIP.works.side = SHIP.works.side || {}) : null;
   setShipNow(12 * 1440 + 600); machinesNow(); const W = worksInit(); W.tier = 2; W.rank = 'officer';
   const S = worksSide(); S.leaks = [{ id: 'leak:4-leak-1@300', joint: '4-leak-1', room: 'k', deck: 4, day: 12, worn: 1, found: 'you' }];
   S.nozzles = { day: 20, clogged: ['0.1', '2.3'], cleared: ['0.1'], flushed: 1, harvests: 2, stage: 1, bonus: .05, told: 20 };
-  S.rewire = { done: 2, wrongs: 1, week: 3 }; S.favours = [{ id: 'favour:cruz-tove@1', who: 'cruz-tove', case: 'lamp', day: 15, state: 'done' }]; S.ff = { grade: 1, tries: 1, next: 22, job: null, mail: 1 };
+  S.rewire = { done: 2, wrongs: 1, week: 3 }; S.favours = [{ id: 'favour:cruz-tove@1', who: 'cruz-tove', case: 'lamp', day: 15, state: 'done' }]; S.ff = { grade: 1, tries: 1, next: 22, job: null, mail: 1 }; S.parts = 2;
   for (const k of ['leaksOk', 'nozOk', 'rewOk', 'fcOk', 'ffOk']) delete S[k];
   SHIP.jobs = []; const rj = rewJob('4-junction-1', shipNow(), { key: 99 }); SHIP.jobs.push(rj); claimJob(rj.id); jobStepDone(rj.id, 0, {});
   jobStops(rj).forEach((x, k) => { if (x.step === 'wire') jobStepDone(rj.id, k, { pick: k === 1 ? (rewRight(rj, 1) === 'T1' ? 'T2' : 'T1') : rewRight(rj, k) }); }); jobStepDone(rj.id, jobStops(rj).length - 1, {});   // a wrong pair popped
@@ -804,12 +846,12 @@ SIDE_SET = r"""(() => { if (typeof worksSide !== 'function') window.worksSide = 
   S.favours.push({ id: fid, who: P.id, case: 'lamp', day: 13, state: 'taken' });
   window.__ids = [rj.id, fid, fj.id];
   const read = () => { const r = SHIP.jobs.find(x => x.kind === 'rewire'), f = SHIP.jobs.find(x => x.kind === 'favour'), q = SHIP.jobs.find(x => x.kind === 'fcase');
-    return JSON.stringify([leakList(), nozState(), rewState(), fcList(), ffState(), r && [r.pairs, r.wrongs, r.stepsDone, r.order, r.chart, r.claimedBy], f && [f.fcase, f.status, f.claimedBy], q && [q.fcase, q.order, q.stepsDone, q.claimedBy, q.favour]]); };
+    return JSON.stringify([leakList(), nozState(), rewState(), fcList(), ffState(), r && [r.pairs, r.wrongs, r.stepsDone, r.order, r.chart, r.claimedBy], f && [f.fcase, f.status, f.claimedBy], q && [q.fcase, q.order, q.stepsDone, q.claimedBy, q.favour], typeof teamPartsN === 'function' ? teamPartsN() : null]); };
   window.__read = read; const before = read(); saveGame();
   return { before, keeps: JSON.stringify(worksClean({ v: 1, side: { a: 1 } }) || {}).includes('side') }; })()"""
 SIDE_GET = r"""(() => { if (typeof worksSide !== 'function') window.worksSide = () => SHIP.works ? (SHIP.works.side = SHIP.works.side || {}) : null;
   const r = SHIP.jobs.find(x => x.kind === 'rewire'), f = SHIP.jobs.find(x => x.kind === 'favour'), q = SHIP.jobs.find(x => x.kind === 'fcase');
-  return SHIP.works ? JSON.stringify([leakList(), nozState(), rewState(), fcList(), ffState(), r && [r.pairs, r.wrongs, r.stepsDone, r.order, r.chart, r.claimedBy], f && [f.fcase, f.status, f.claimedBy], q && [q.fcase, q.order, q.stepsDone, q.claimedBy, q.favour]]) : null; })()"""
+  return SHIP.works ? JSON.stringify([leakList(), nozState(), rewState(), fcList(), ffState(), r && [r.pairs, r.wrongs, r.stepsDone, r.order, r.chart, r.claimedBy], f && [f.fcase, f.status, f.claimedBy], q && [q.fcase, q.order, q.stepsDone, q.claimedBy, q.favour], typeof teamPartsN === 'function' ? teamPartsN() : null]) : null; })()"""
 def side_save(pw):
     tmp = WORK / 'test' / '_mech_save.html'
     tmp.write_text(instrument(pathlib.Path(sys.argv[1]).read_text()))
@@ -825,7 +867,7 @@ def side_save(pw):
     b.close()
     print('  side save: before', a['before'][:160], '... after', (after or '')[:160])
     A, B = json.loads(a['before']), json.loads(after or 'null') or [None] * 8
-    check(A[5:] == B[5:] and A[5] and A[7], 'side save: a rewire job after a wrong pair, an accepted favour and its side job through a real save and reload')
+    check(A[5:8] == B[5:8] and A[5] and A[7], 'side save: a rewire job after a wrong pair, an accepted favour and its side job through a real save and reload')
     if not a['keeps']: print("  side save: (24 core's worksClean doesn't keep `side` in this build: E1's; side not checked)"); return
     if after != a['before']:
         for x, y in zip(json.loads(a['before']), json.loads(after or '[]')):
@@ -859,11 +901,11 @@ with sync_playwright() as pw:
         if r['id'] in PARTS:
             PARTS[r['id']](g)
     for k, f in EXTRA.items():                             # parts that aren't ladder rows (24l's favour cases)
-        if (not only or k in only) and ev(f"!!JOB_KINDS['{k}'] || (typeof ffState === 'function' && '{k}' === 'ff')"): print(k + ':'); f(g)
+        if (not only or k in only) and ev(f"!!JOB_KINDS['{k}'] || (typeof ffState === 'function' && '{k}' === 'ff') || (typeof teamParts === 'function' && '{k}' === 'tparts')"): print(k + ':'); f(g)
     ev("SHIP.works = null")
     if g.errors: fail('page errors: ' + ' | '.join(g.errors[:5]))
     g.close()
-    if not only or only & {'m13', 'm14', 'm15', 'fcase', 'ff', 'side'}:
+    if not only or only & {'m13', 'm14', 'm15', 'fcase', 'ff', 'side', 'tparts'}:
         print('side (E2\'s saved parts):'); side_save(pw)
 
 print('MECH CHECK OK' if ok else 'MECH CHECK FAILED')
