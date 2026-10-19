@@ -4,6 +4,9 @@ R4 succeeds R3 (whose verdicts are in `plans/reviews-p5-step2.md`). R5 (session_
 
 ## Rec deck activation (brief: plans/brief-recdeck.md on claude/lead-pillar1; reviewer R6; build master BM8 session_01YGy9FDmcbkySMJpVPYJaAo)
 
+### RB claude/rec-works e4c5da25 (0.84.3, deckIn at the ", " and "(" sites + the beats' where), R6: PASS
+~20 sites `deckWord` → `deckIn` (Maps/roster/appointment labels after a comma, brackets, titles like "Inspection round, the rec deck", the haul/beat/occasion where); same words on Decks 1-6 (cadet_test vs aa4f42c ALL IDENTICAL per RB). No code after `//`. deckWord stays only at label starts.
+
 ### RB claude/rec-works 58fea440 (0.84.1 fault tables and looks; 0.84.2 deckIn and the directory footer), R6: PASS (closes 2e46584's fix)
 - 0.84.2: `deckIn(n)` ("the rec deck" for 7) at the 15 sites after "on", "toward", "heading for"; `deckWord` stays at label starts and label tails ("Pool, Rec deck" in Maps/roster labels: label text, lead's eye). The directory footer on R: "You are on the Recreation Deck".
 - 0.84.1: FAULTS for all 13 rec kinds in the existing shape (`when` values the engine knows, settings with `from: 4`, `still` lines; no 'peak'/'after-use' since Deck 7 has no crew hours yet), every part in STOCK; LOOK_WET/LOOK_LIT entries; lives longer (tuning). machine_check's delivery case takes up to 3 more trips for a bigger hold (a check change, bounded). The fault words are RB's first drafts, plain and in style (for W3 to check).
