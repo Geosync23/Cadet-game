@@ -51,3 +51,4 @@ Build master 6 (BM6, session_01F8k6hqdBRoxDJMzqAuiHqR) on claude/p5-cand-pt1 (th
 - s3j day11 OK (the ceremony day).
 - ~04:10 lead 16: U's Tracked piece now KEEPS the main-screen button and adds the device app (the user, ~04:00); wait for U's hash after 94a1b12, reviewed by R4 (session_01UGQxniXCxT5TLEE4tgRLfJ; R3 stopped). Main-screen shots should match 0.72.3.
 - ~04:14 U 1d602ff (one rep chip per department/system; the Tracked device app; main-screen button kept; U's checks running; R4 to review). trial s3l (wt4) = s3j + H2 935b1d9 + U 1d602ff = the expected final set: merges clean, NAMES OK, parses; cadet, interactions, device running.
+- ~04:15 C2 f553607 (0.44.27: a department's rep entry added to j.gains once; R4 to review). C2 reports interactions 'a tap on your job tracks it again' FAILs on U's hud-pt1 tip alone (U's).
