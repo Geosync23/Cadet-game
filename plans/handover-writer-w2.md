@@ -39,10 +39,10 @@ both name sets kept for texts). Step 4 names were proposed to E1/E2/E3 and may b
 ## How to test
 `python3 lines_check.py` (only "baked blocks out of date" expected); a scratch bake: copy starship-cadet.html to the
 scratchpad, `python3 content_gen.py <copy>` then `--check`. Send each hash to the lead, the build master (BM7
-session_01QbuzvT3TwzMwSWRmakzX8Z) and the reviewer (R4 session_01UGQxniXCxT5TLEE4tgRLfJ).
+session_01QbuzvT3TwzMwSWRmakzX8Z) and the reviewer (R5 session_01XJyHzg4QvX2nsdtf9zT1TH; was R4).
 
 ## Loose ends
 - Step 4 names settled: E2 and E3 (E3's own M10 names; cabin, stars, M17 on W2's) and E1 (W2's + 5 extras) all
-  confirmed; everything through d1e62d3 (0.48.111) is R4 PASS. E2 may still send ticket and team-parts extras.
+  confirmed; everything through 1c05127 (0.48.113) is reviewer PASS (R4, then R5). E2 may still send ticket and team-parts extras.
 - Playtest 2: U and X2 (crew seat, succeeded X) confirmed; E1 confirmed U2 shows tip.round.* from roundTrainStep().
 - `promo.ceremony.mail`, `works.plate` (DA5) and some Step 3 lines are written but may not be wired.
