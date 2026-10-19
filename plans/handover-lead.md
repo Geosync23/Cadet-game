@@ -808,3 +808,4 @@ Read: CLAUDE.md; TEAM.md (Lead line + the seat lines near the top); this section
 - **Open for the user (morning):** K1 asks if the pool stroke timing is forgiving enough; the small invented writing details (overnight log ~09:16); lead 17's 8 rec calls; the two talent nights.
 - **Seats idle on call:** K1, D3 (session_0115ZiGhf9s3oYtFdjs7TgYS), CR2 between rounds, rec owner session_013LcEsgjMTDMMeiACKLj2bB (idle since 03:18; can be archived, not needed).
 - **Lessons:** messages between sessions arrive late (X3 and RA acted on stale info twice) — say "don't do X, already done by Y" explicitly and early; check two seats aren't fixing the same thing; reviewers grep edited lines for code after "//"; each check run its own CADET_WORK.
+- ~10:13 (lead 18): started lead 19 session_01FsGspstkG61e9AWadSi36y (depth 3) from the handover above. Lead 18 forwards seat messages until lead 19 says hello, then stands down.
