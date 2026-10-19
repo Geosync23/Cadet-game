@@ -4,7 +4,7 @@ Session_01WkkCvj4yxnMALMQYG2DsWM, 2026-10-19 (overnight). Written at about 55-60
 
 ## Role and chain
 - Seat E3 for Step 4: the places turn, M10 (24j), cabin touches + star logging (24t), M17 lift roof (24s, not started).
-- Lead 16: session_01UMyfd16GqSdgNyz5PE8qSv. Build master BM7: session_01QbuzvT3TwzMwSWRmakzX8Z. Reviewer R4: session_01UGQxniXCxT5TLEE4tgRLfJ. Designer D3 (pages): session_0115ZiGhf9s3oYtFdjs7TgYS. E1 (24 core, ladder rows, Record): session_01AHeKjieg3qWjnEVuHecsHd. E2 (leaks, irrigation, rewiring, favours): session_01Bezat4UU7beoaKsqdSrJBs. Writer W2: session_01866TWKzGRgZmFcxiYRi4db.
+- Lead 17: session_016bN7x175WBwBL7S9xc2Lpb (took over from lead 16, session_01UMyfd16GqSdgNyz5PE8qSv, at 05:49). Build master BM7: session_01QbuzvT3TwzMwSWRmakzX8Z. Reviewer R4: session_01UGQxniXCxT5TLEE4tgRLfJ. Designer D3 (pages): session_0115ZiGhf9s3oYtFdjs7TgYS. E1 (24 core, ladder rows, Record): session_01AHeKjieg3qWjnEVuHecsHd. E2 (leaks, irrigation, rewiring, favours): session_01Bezat4UU7beoaKsqdSrJBs. Writer W2: session_01866TWKzGRgZmFcxiYRi4db.
 - Report each finished piece (hash, build, what, checks, memory %) to the lead, BM7 and R4. Never contact the user; push only to `claude/mech-diagnose`.
 
 ## Branch and builds (claude/mech-diagnose, series 0.53.x; next free number 0.53.9)
