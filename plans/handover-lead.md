@@ -777,3 +777,4 @@ Read: CLAUDE.md; TEAM.md (Lead line + the ~05:50-07:45 notes in it); this sectio
 - **Seats now:** BM7, CR2, R6, X2, U2 (done, on call; archive after R6 passes 0f34cfb), K1 session_018UqUAihUx3VEpAvBwds2on (wall prototype on claude/kayak-proto, ~30%), D3 session_0115ZiGhf9s3oYtFdjs7TgYS (idle, on call), rec owner session_013LcEsgjMTDMMeiACKLj2bB (idle; can be archived — the rec deck gets fresh seats).
 - **Lessons tonight:** messages between sessions arrive late — after any seat change, the lead forwards hashes to the new reviewer itself; code hidden after "//" on an edited line bit us 3 times (reviewers grep for it); parallel check runs must each have their own CADET_WORK.
 - Lead 17 stays reachable until lead 18 says hello, then stands down.
+- ~07:55: started lead 18 session_01CBur9nrJ411pFkHopF96RL (depth 2). Lead 17 forwards seat messages until lead 18 says hello, then stands down.
