@@ -13,3 +13,4 @@ deck | rc=0 | 176s | DECK CHECK OK
 tiles | rc=0 | 143s | ALL OK
 join | rc=0 | 229s | JOIN CHECK OK
 smoke | rc=0 | 74s | SMOKE OK
+newgame | rc=0 | 43s | NEWGAME OK
