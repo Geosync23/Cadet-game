@@ -742,8 +742,8 @@ PARTS['m11'] = part_m11
 # 24n the logbook (seat E1, 0.45.11): Day 12 an officer's shift (a pump fitted on Washer 2, Washer 3 found and left, Washer
 # 1 still yours): three summaries from it in the day's order; an entry once a day (+1, a use, the open jobs logged and 10%
 # quicker for whoever takes them); stage 2's flag looked at by the night crew at 22:00; logLast; saved; the same twice
-M12 = r"""(() => {
-  SHIP.works = null; SHIP.notes = []; SHIP.jobs = []; setShipNow(11 * 1440 + 990); machinesNow(); ACT = null;
+M12 = r"""(() => {   // the machines afresh, then only the jobs staged here: the catch-up can post its own (X3: a real Washer 3 job with 0.71.5's crew)
+  SHIP.works = null; setShipNow(11 * 1440 + 990); machinesNew(); MACH_HOUR = null; MACH_SEEN = -1; setShipNow(11 * 1440 + 990); machinesNow(); SHIP.jobs = []; SHIP.notes = []; ACT = null;
   const W = worksInit(), out = {}, t = shipNow(); W.tier = 2; W.rank = 'officer'; W.op[12] = ['m12'];
   SHIP.jobs.push({ id: '4-washer-2@x', machine: '4-washer-2', deck: 4, kind: 'repair', parts: ['pump'], status: 'done', doneBy: 'you', posted: t - 300, found: t - 300 });
   W.log.push(['4-washer-2@x', 12, 0, 'repair']);
@@ -1129,8 +1129,10 @@ EXTRA['ff'] = extra_ff
 # not brought: the run withdrawn, the lead fetches them, 10 minutes late, never a fail; before stage 2 or Day 18 the
 # old Mail and no run; the same twice
 TPARTS = r"""(() => { const out = {}, W0 = JSON.stringify(SHIP.works);
- const reset = (t, uses) => { machinesNew(); SHIP.jobs = []; SHIP.mail = []; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t); machinesNow(); SHIP.works = null; const W = worksInit(t);
-   W.team = { plan: {} }; W.inc = { plan: {}, open: null }; W.tier = 2; W.rank = 'officer'; W.tr.t2 = 10; W.tr.m8 = 11; W.use.m8 = uses; if (worksSide()) worksSide().parts = 0; return W; };
+ // the Works first, then the machines' catch-up: it runs the jobs hour by hour, and read the last run's (or the fresh game's) Works before (X3: the first run picked another team job)
+ const reset = (t, uses) => { setShipNow(t); SHIP.works = null; const W = worksInit(t);
+   W.team = { plan: {} }; W.inc = { plan: {}, open: null }; W.tier = 2; W.rank = 'officer'; W.tr.t2 = 10; W.tr.m8 = 11; W.use.m8 = uses;
+   machinesNew(); SHIP.jobs = []; SHIP.mail = []; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t); machinesNow(); if (worksSide()) worksSide().parts = 0; return W; };
  const run = (t0, t1, uses, bring, d0 = 18) => { const W = reset(t0, uses), r = {}; let j = null;
    for (let t = t0; t <= t1; t += 5) { setShipNow(t); machinesNow(); for (const f of WORK_TICKS) f(t, false);
      j = j || SHIP.jobs.find(x => x.kind === 'team' && x.claimedBy === 'you' && worksDay(x.start) >= d0); if (!j || j.status === 'done') continue;
