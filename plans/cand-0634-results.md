@@ -147,3 +147,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - CR2 92d40d5: events OK.
 - 92d40d5 (mine): MECH CHECK OK; career OK, machine OK, lines PASS (0 errors, 2 warnings).
 - CR2 92d40d5: device OK.
+- 92d40d5 (mine): cadet_test vs 0.63.3 (label 0.63.4) ALL IDENTICAL (0 px in every shot).
