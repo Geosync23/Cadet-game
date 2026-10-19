@@ -77,3 +77,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - ~06:14 lead 17: E1 retired (final 013f53e). Successor E6 = session_018cZuXpb4XdFs47zXoPcF8B: R5's 2 fixes first, then stocktake + rounds stages 2-3.
 - ~06:14 R5: E1 013f53e PASS WITH FIXES (load-stop order, small); 3 E1 fixes open for E6.
 - t7: interactions OK (t7 done: career, mech, interactions OK). t8: lines PASS, mech, career, machine OK, cadet ALL IDENTICAL, social, food OK; deck, interactions running.
+- t8: deck OK; interactions and player (TMO 2700) running, then day2, intro --week.
