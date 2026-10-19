@@ -755,6 +755,7 @@ FF = r"""(() => { const out = {}, W0 = JSON.stringify(SHIP.works);
  out.posted = j ? [worksDay(j.posted), Math.round(j.posted % 1440), j.reserved, jobTier(j), j.title] : null; if (!j) return out;
  out.solved = solve(j, true); tick(shipNow() + 10, shipNow() + 20);
  out.grade = [worksSide().ff.grade, W.ms.find(x => x[0] === 'ff1') || null];
+ out.pin = [PLAYER_SPEC.pin || 0, player.spec.pin || 0, !!player.rig.root.parent]; PLAYER_SPEC.pin = player.spec.pin = 0; playerRigRebuild();   // the pin on, then off again for the rest
  tick(15 * 1440 + 470, 15 * 1440 + 490); out.after = SHIP.jobs.filter(x => x.ticket && worksDay(x.posted) === 16).length;
  W = reset(14 * 1440 + 300); tick(14 * 1440 + 470, 14 * 1440 + 490); j = SHIP.jobs.find(x => x.ticket);
  out.wrong = j ? solve(j, false) : null; tick(shipNow() + 10, shipNow() + 20);
@@ -770,6 +771,7 @@ def extra_ff(g):
     check(a['solved'][0] == 'T2' and a['solved'][2] and a['solved'][3], 'ff: a T2 case, solved and turned in')
     check(a['grade'][0] == 1 and a['grade'][1], 'ff: right first time: grade 1, the Record\'s ff1')
     check(a['after'] == 0, 'ff: no more tickets once graded (grades 2-3 are later steps)')
+    check(a.get('pin') == [1, 1, True], f"ff: the pin on your uniform ({a.get('pin')})")
     check(a['wrongAfter'][0] == 0 and a['wrongAfter'][1] == 1 and a['wrongAfter'][2] == 22 and a['wrongAfter'][3] is None and a['notYet'] == 0, 'ff: a wrong call: not yet, the next a week on')
     check(json.loads(a['save']) == {'grade': 3, 'tries': 0, 'next': 22, 'job': None, 'mail': 0}, f"ff: the save cleaned ({a['save']})")
     check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'ff: differs the second time')

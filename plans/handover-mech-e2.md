@@ -7,7 +7,7 @@ and H's/H2's notes on claude/mech-cases (the case engine) first. Pages: `git sho
 
 ## Role, branch, builds, people
 
-- Branch `claude/mech-incidents`, builds 0.51.4-0.51.11 on the Step 3 base 0.63.3 (claude/p5-cand-pt1 7a6e137). Next build: 0.51.12.
+- Branch `claude/mech-incidents`, builds 0.51.4-0.51.12 on the Step 3 base 0.63.3 (claude/p5-cand-pt1 7a6e137). Next build: 0.51.13. Last: 0.51.12 (a leak +1 in all; `playerRigRebuild` is 24l's, so the pin shows).
 - Lead 17 session_016bN7x175WBwBL7S9xc2Lpb (was 16). Build master BM7 session_01QbuzvT3TwzMwSWRmakzX8Z. Reviewer R5
   session_01XJyHzg4QvX2nsdtf9zT1TH (R4 before). E1 session_01AHeKjieg3qWjnEVuHecsHd (24 core, claude/mech-rounds), E3
   session_01WkkCvj4yxnMALMQYG2DsWM (places, claude/mech-diagnose), D3 session_0115ZiGhf9s3oYtFdjs7TgYS (pages), W2
@@ -42,8 +42,9 @@ and H's/H2's notes on claude/mech-cases (the case engine) first. Pages: `git sho
   `manifestRunEnd(id)` to withdraw. Saved count: `SHIP.works.side.parts = n` (the page). W2's keys: `mail.team.parts`
   ({job} {time} {name} {parts}), `team.parts.late` ({name}). Hook it at 24h's posting (`teamJobPost` at 16:00 the day
   before, `mail.team`) and at the start (`teamTick`: not delivered → `team.parts.late`, start + 10, `manifestRunEnd`).
-- E1 (done in 0.45.11): flat side-kind pay, `j.xp === 0` skipped, the Record line for `W.ms` 'ffN'. Still to come (round 4):
-  `playerRigRebuild()`: the pin shows only once it's in (24l's `ffPin` sets `PLAYER_SPEC.pin` and calls it).
+- E1 (done in fb499eb, 0.45.11): flat side-kind pay, `j.xp === 0` skipped, the Record line for `W.ms` 'ffN'. `manifestRun` is
+  final in claude/mech-rounds 633eade (0.45.12; also `j.src === 'stores'`, reserved slot 30, `j.for = o.for`).
+  `playerRigRebuild()` is E2's (24l), lead 17's call.
 - W2: keys all present (1c05127, d1e62d3); tickets' `ticket.nohint` and team parts' `mail.team.parts`/`team.parts.late`
   are W2's names; send W2 any new key in one message.
 
