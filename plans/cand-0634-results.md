@@ -79,3 +79,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - t7: interactions OK (t7 done: career, mech, interactions OK). t8: lines PASS, mech, career, machine OK, cadet ALL IDENTICAL, social, food OK; deck, interactions running.
 - t8: deck OK; interactions and player (TMO 2700) running, then day2, intro --week.
 - ~06:26 E5 60a418f (0.51.13 on E2's 0.51.12 93fbdb5: pin shows via playerRigRebuild in 24l; a leak +1 in all; mech_check pin/pay). Known with E1 633eade: mech m15 FAIL 'right first time pays +2' (gets 1) until 24 core's side pay reads j.rightFirst (E6 / lead deciding). With R5.
+- ~06:27 E6 2edb69c (0.45.14: R5's two fixes on 0.45.11/0.45.12); with R5.
