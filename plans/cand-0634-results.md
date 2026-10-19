@@ -117,3 +117,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - ~07:13 E6 64a2b19 (0.45.17: R5's third fix, the hauling load-stop order, + R5's notes; manifestRun's note lists only parts actually carried); with R6.
 - t8: intro --week OK. t8 done: all 12 OK (lines, mech, career, machine, cadet, social, food, deck, interactions, player, day2, intro).
 - t11 done: mech, career, deck, interactions, food, events OK; machine FAIL = X2's (placed, sent); cadet differences (X2 crew wake + E4 roof: to place per piece). t14 checks started.
+- t11 cadet placed: 2bc08d5 + X2 ec0cbc3 alone gives exactly t11's differences (same px counts, geometries 461 vs 442, textures 36 vs 35): all X2's (X's earlier crew wake, per X's DEV_NOTES row: a reverted-wake copy is ALL IDENTICAL). E4's roof adds nothing to these shots.
