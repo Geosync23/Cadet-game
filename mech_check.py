@@ -674,6 +674,17 @@ T24B = r"""(() => {
   const back = worksClean(JSON.parse(JSON.stringify(save.ship.works)));
   out.trip = [JSON.stringify(back.side.cabin), JSON.stringify(back.side.stars)];
   out.looks = CABIN_SPOTS.map(k => CABIN_FITS[k].every(x => !!CABIN_LOOK[x]));
+  out.clash = WORKSHOP_ORDERS.filter(o => TINKER_LIST.some(t => t.item === o.thing)).map(o => o.thing);   // R5: an order's thing never shares a tinkered thing's name
+  worksSide().cabin = { ledge: 'mug rack' }; out.oldRack = cabinData().ledge;
+  const P2 = SHIP.player, kc = P2.carry.slice(), ku = P2.untidy, kb = P2.bought; delete worksSide().cabinPut;
+  P2.untidy = true; P2.bought = (P2.bought || 0) + 1; const t0 = lockerTidy(); P2.carry = ['plant pot']; delete worksSide().cabin.ledge; cabinTap({ t: 'ledge', cabin: 'ledge' }, null);
+  const t1 = lockerTidy(); P2.bought++; out.tidy = [t0, t1, lockerTidy()]; P2.carry = kc; P2.untidy = ku; P2.bought = kb;
+  // visitors notice: a stand-in line and someone in your cabin (the writer's bank may not be baked in yet)
+  const keepL = LINES['cabin.remark'], keepB = bubbleSay, said = []; LINES['cabin.remark'] = [{ text: 'Nice lamp.', id: 'tst1', flag: 'cabin.lamp' }, { text: 'Good rug.', id: 'tst2', flag: 'cabin.rug' }];
+  bubbleSay = (h, t) => said.push(t); worksSide().cabin = { desk: 'little lamp' }; goToDeck(4); player.obj.position.copy(cellPos(40, 11));
+  const who = schedPeople()[0], fake = { p: who, h: {}, here: () => [40, 11], x: 0, z: 0 }; DECK_CREW.push(fake); CAB_REMARK.at = -99; CAB_REMARK.day = 0;
+  cabinRemark(shipNow()); cabinRemark(shipNow() + 10); DECK_CREW.splice(DECK_CREW.indexOf(fake), 1); LINES['cabin.remark'] = keepL; bubbleSay = keepB;
+  out.remark = said;
   return out;
 })()"""
 def part_t24(g):
@@ -693,6 +704,9 @@ def part_t24(g):
     check(c['third'] == [3, True] and c['ten'] == [10, True], '24t: every third log Survey warms to you; ten give the Record line')
     check(c['trip'] == ['{"rug":"woven rug","shelf":"metal puzzle"}', '{"n":10,"last":12}'], f"24t: cabin and stars round-trip through the save ({c['trip']})")
     check(all(c['looks']), '24t: every thing that fits a spot has a look')
+    check(c['clash'] == [] and c['oldRack'] == 'mug tree', f"24t: no order shares a tinkered thing's name; an old save's mug rack on the ledge is the mug tree ({c['clash']}, {c['oldRack']})")
+    check(c['tidy'] == [False, True, False], f"24t: a thing placed in your cabin counts as put away, until you buy or make another ({c['tidy']})")
+    check(c['remark'] == ['Nice lamp.'], f"24t: a visitor in your cabin notices the lamp, once a day ({c['remark']})")
 
 # 24s the lift roof (M17, seat E4): on paper, when you can climb on (Thursdays from Day 18, trained, 15:30 till there's time for
 # the whole spine, once a day); the hold: crew whose plan takes them to another deck wait by the lift on the deck they were
@@ -717,6 +731,11 @@ M17P = r"""(() => {
     if (moved) movers++;
   });
   out.hold = { movers, waiting, bad: bad.slice(0, 6), held: [liftHeld(B + 935), liftHeld(B + 989), liftHeld(B + 990), liftHeld(B + 934)] };
+  const mover = ppl.find((p, i) => base[i].slice(0, 11).some(dk => dk !== base[i][0])), keepL = LINES['roof.wait'], keepB = bubbleSay, said = [];
+  if (mover) { LINES['roof.wait'] = [{ text: 'Lift\'s held again.', id: 'tstw' }]; bubbleSay = (h, t) => said.push(t); ROOF.r = null; ROOF_TALK.at = -99;
+    const t1 = ppl.indexOf(mover), k = base[t1].findIndex(dk => dk !== base[t1][0]), fake = { p: mover, h: {}, x: player.obj.position.x, z: player.obj.position.z };
+    DECK_CREW.push(fake); roofTalk(ts[k]); roofTalk(ts[k] + 7); DECK_CREW.splice(DECK_CREW.indexOf(fake), 1); LINES['roof.wait'] = keepL; bubbleSay = keepB; }
+  out.talk = said;
   LIFT_HOLD = null;
   delete worksSide().roof; out.old = JSON.stringify(roofData()); worksSide().roof = { rides: -3, last: 'x', foo: 1 }; out.junk = JSON.stringify(roofData());
   worksSide().roof = { rides: 2, last: 11 }; out.trip = JSON.stringify(worksClean(JSON.parse(JSON.stringify(SHIP.works))).side.roof);
@@ -741,6 +760,7 @@ def part_m17(g):
     check(a['untrained'] is False and a['open'] == [False, True, True, False, False, True, False] and a['twice'] is False, f"m17: you can climb on Thursdays from Day 18, 15:30 while there's time, once a day ({a['open']})")
     h = a['hold']
     check(h['held'] == [True, True, False, False] and not h['bad'], f"m17: held 15:35-16:30; crew who'd change deck wait by the lift, then follow their plan ({h['bad']})")
+    check(a['talk'] == ["Lift's held again."], f"m17: someone waiting by the held lift says so, once a hold ({a['talk']})")
     check(a['old'] == '{"rides":0,"last":0}' and a['junk'] == '{"rides":0,"last":0}' and a['trip'] == '{"rides":2,"last":11}', 'm17: an old or odd save part loads as the default; it round-trips')
     check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'm17: differs the second time')
     runs = []

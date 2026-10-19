@@ -281,7 +281,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.53.10
+   STARSHIP CADET: CSV Wren                           build 0.53.11
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8744,7 +8744,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.53.10';                           // keep in step with the header's build line
+const GAME_BUILD = '0.53.11';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -12427,7 +12427,7 @@ function bunkLie(id) {
 // your bunk asks: Make the bed (SHIP.player.bedMade = the day; saved; cleared when you next sleep in it), Tidy your locker
 // (puts away what you bought since, SHIP.player.untidy; lockerTidy()) or Lie down. Each a 1-minute hold. Any other time: lie down
 const bunkMorning = () => weekday(SHIP.time.day) === 3 && SHIP.time.min >= 330 && SHIP.time.min < 480 && !(typeof sickNow === 'function' && sickNow());
-const lockerTidy = () => !SHIP.player.untidy;
+const lockerTidy = () => !SHIP.player.untidy || typeof cabinPutAway === 'function' && cabinPutAway();   // 24t: things placed in your cabin count as put away (E4, 0.53.11)
 Object.assign(PLAYER_ACTS, { bedMake: { mins: 1, pose: 'work', title: 'Your bunk' }, tidy: { mins: 1, pose: 'work', title: 'Your locker' } });
 function bunkPick(id) {
   const P = SHIP.player, made = P.bedMade === SHIP.time.day;
@@ -40620,7 +40620,7 @@ const WORKSHOP_ORDERS = [
 ];
 // tinkering: what you can make from offcuts (the last two from stage 3); all gifts (SOC_GIFTS) and cabin things (24t's cabin: the spot each fits)
 const TINKER_LIST = [
-  { item: 'little lamp', mins: 20, cabin: 'desk' }, { item: 'mug rack', mins: 15, cabin: 'ledge' }, { item: 'toy rocket', mins: 15, cabin: 'shelf' },
+  { item: 'little lamp', mins: 20, cabin: 'desk' }, { item: 'mug tree', mins: 15, cabin: 'ledge' }, { item: 'toy rocket', mins: 15, cabin: 'shelf' },
   { item: 'plant pot', mins: 10, cabin: 'ledge' }, { item: 'model ship', mins: 30, cabin: 'shelf', stage: 3 }, { item: 'woven rug', mins: 30, cabin: 'rug', stage: 3 },
 ];
 if (typeof SOC_GIFTS === 'object' && SOC_GIFTS) for (const t of TINKER_LIST) if (!SOC_GIFTS[t.item]) SOC_GIFTS[t.item] = { tag: 'made', from: 'made' };
@@ -40804,12 +40804,12 @@ if (typeof WORK_MECH !== 'undefined') WORK_MECH.m10 = { open() { /* the word com
 // Saved in SHIP.works.side.cabin = { rug, desk, shelf, ledge } (item names) and .stars = { n, last } (24 core's
 // worksSide(); read defensively). No R(); every colour through col() (dressMat); keys 1024-1025.
 const CABIN_SPOTS = ['rug', 'desk', 'shelf', 'ledge'];
-const CABIN_FITS = { rug: ['woven rug'], desk: ['little lamp'], shelf: ['toy rocket', 'model ship', 'paper novel', 'puzzle book', 'pocket puzzle', 'metal puzzle'], ledge: ['plant pot', 'little plant', 'mug rack', 'flower'] };
+const CABIN_FITS = { rug: ['woven rug'], desk: ['little lamp'], shelf: ['toy rocket', 'model ship', 'paper novel', 'puzzle book', 'pocket puzzle', 'metal puzzle'], ledge: ['plant pot', 'little plant', 'mug tree', 'flower'] };
 const CABIN_NAME = { rug: 'The floor', desk: 'The desk', shelf: 'The shelf', ledge: 'The ledge' };
 const CABIN_LOOK = {                                     // each thing's shape: [w, h, d] boxes or [r, h] cylinders from its spot's point, and its colour
   'woven rug': { c: '#b5603d', box: [[1.1, .012, .75, 0, .006, 0]] }, 'little lamp': { c: '#e3c27a', cyl: [[.06, .03, 0, .017], [.012, .26, 0, .16], [.09, .1, 0, .31]] },
   'toy rocket': { c: '#d9534f', cyl: [[.035, .16, 0, .08], [.012, .05, 0, .185]] }, 'model ship': { c: '#9aa7b4', box: [[.24, .06, .08, 0, .03, 0], [.08, .05, .06, .02, .085, 0]] },
-  'plant pot': { c: '#c0703e', cyl: [[.06, .1, 0, .05]] }, 'little plant': { c: '#5c9a4a', cyl: [[.06, .09, 0, .045], [.08, .1, 0, .14]] }, 'mug rack': { c: '#8a6a4a', box: [[.2, .16, .05, 0, .08, 0]] },
+  'plant pot': { c: '#c0703e', cyl: [[.06, .1, 0, .05]] }, 'little plant': { c: '#5c9a4a', cyl: [[.06, .09, 0, .045], [.08, .1, 0, .14]] }, 'mug tree': { c: '#8a6a4a', cyl: [[.03, .02, 0, .01], [.008, .16, 0, .1]], box: [[.1, .01, .01, 0, .13, 0]] },   // (0.53.11: was 'mug rack', which an M10 order makes too)
   'flower': { c: '#d98bb0', cyl: [[.03, .14, 0, .07]] },
   'paper novel': { c: '#3f6e8c', box: [[.1, .15, .03, 0, .075, -.03]] }, 'puzzle book': { c: '#c9a24a', box: [[.14, .025, .1, 0, .0125, -.05]] },   // (E4, R5's fix 2: these four had no look)
   'pocket puzzle': { c: '#d9534f', box: [[.06, .06, .06, 0, .03, -.05]] }, 'metal puzzle': { c: '#9aa7b4', cyl: [[.045, .02, 0, .01]], box: [[.02, .07, .02, 0, .055, 0]] },
@@ -40818,10 +40818,13 @@ const cabinMine = () => typeof worksHome === 'function' && worksHome() === '4-23
 function cabinData() {
   const S = typeof worksSide === 'function' ? worksSide() : null; if (!S) return null;
   const c = S.cabin && typeof S.cabin === 'object' && !Array.isArray(S.cabin) ? S.cabin : (S.cabin = {});
+  if (c.ledge === 'mug rack') c.ledge = 'mug tree';      // a save from before 0.53.11
   for (const k of Object.keys(c)) if (!CABIN_SPOTS.includes(k) || typeof c[k] !== 'string' || !CABIN_FITS[k].includes(c[k])) delete c[k];
   return c;
 }
 const cabinPlaced = id => { const c = cabinData(); return !!c && Object.values(c).includes(id); };   // for section 15b's locker
+// things placed in your cabin count as put away (the page): tidy if you've bought or made nothing since you last placed one
+const cabinPutAway = () => { const S = typeof worksSide === 'function' ? worksSide() : null, a = S && S.cabinPut, P = SHIP.player; return cabinMine() && Array.isArray(a) && (P.bought || 0) <= a[0] && (P.crafted || 0) <= a[1]; };
 const cabinTouches = () => { const c = cabinData(); return c ? Object.keys(c).length : 0; };
 const cabinMood = () => cabinMine() && cabinTouches() >= 2 ? 1 : 0;
 // the spots' taps and the things on them, rebuilt when the deck or what's placed changes
@@ -40867,6 +40870,7 @@ function cabinPut(it) {
   if (fit) {
     if (had && P.carry.length >= CARRY_MAX && !P.carry.includes(fit)) { toast(it.t, 'Your hands are full.'); return true; }
     P.carry.splice(P.carry.indexOf(fit), 1); c[k] = fit; if (had) P.carry.push(had);
+    worksSide().cabinPut = [P.bought || 0, P.crafted || 0];   // put away: section 15b's lockerTidy asks cabinPutAway()
     toast(it.t, worksText('cabin.spot.' + k, 'You put the ' + fit + ' there. It looks like yours now.') + (had ? ' The ' + had + ' is back in your hands.' : ''));
   } else if (had) {
     if (P.carry.length >= CARRY_MAX) { toast(it.t, 'Your ' + had + ' is here. Your hands are full, so it stays.'); return true; }
@@ -40919,6 +40923,21 @@ if (typeof WORK_TICKS !== 'undefined') WORK_TICKS.push(now => {   // the cabin's
   const d = worksDay(now), m = Math.floor(now - (d - 1) * 1440), c = cabinData();
   if (m === 360 && c && CAB.woke !== d && cabinMood() && typeof playerBed === 'function' && playerBed() === '4-23') { CAB.woke = d; if (typeof leisureAdd === 'function') leisureAdd(4, 'cabin'); }
 });
+// visitors notice (E4, 0.53.11): crew in your cabin while you're there say something about what's in it (the writer's bank
+// cabin.remark, by flag: cabin.lamp, .rug, .plant, .shelf, .made with two or more things you made), each once a day, one
+// every few minutes at most; a bubble. Not saved (a reload may let someone say it again)
+const CAB_REMARK = { day: 0, said: new Set(), at: -99 };
+function cabinRemark(now) {
+  if (typeof deckDef === 'undefined' || deckDef.num !== 4 || !cabinMine() || typeof DECK_CREW === 'undefined' || typeof lineFor !== 'function' || now - CAB_REMARK.at < 5) return;
+  const c = cabinData(), room = DECKS[4].cabinSpots['4-23'].room || 'W'; if (!c || !Object.keys(c).length || roomAt(...player.here()) !== room) return;
+  const d = worksDay(now); if (CAB_REMARK.day !== d) { CAB_REMARK.day = d; CAB_REMARK.said = new Set(); }
+  const a = DECK_CREW.find(x => x.p && !CAB_REMARK.said.has(x.p.id) && roomAt(...x.here()) === room); if (!a) return;
+  const made = Object.values(c).filter(x => TINKER_LIST.some(t => t.item === x)).length;
+  const flags = { 'cabin.lamp': !!c.desk, 'cabin.rug': !!c.rug, 'cabin.plant': /plant/.test(c.ledge || ''), 'cabin.shelf': !!c.shelf, 'cabin.made': made >= 2 };
+  const l = lineFor(a.p.id, 'cabin.remark', { t: now, flags }); CAB_REMARK.said.add(a.p.id); if (!l || !l.text) return;
+  CAB_REMARK.at = now; if (typeof bubbleSay === 'function') bubbleSay(a.h, l.text, 5);
+}
+if (typeof WORK_TICKS !== 'undefined') WORK_TICKS.push((now, skip) => { if (!skip && !SIM_AT) cabinRemark(now); });
 
 // =====================================================================
 // 24s. THE LIFT ROOF (M17, seat E4, 0.53.x; plans/mechanics/m17-lift-roof.html on claude/p5-design)
@@ -41126,6 +41145,17 @@ if (typeof WORK_TICKS !== 'undefined') WORK_TICKS.push(now => {   // 16:30: the 
   const rd = roofData(); if (rd && rd.on !== undefined && !(ROOF.r && !ROOF.r.off)) { delete rd.on; if (!SIM_AT) toast(mechName('m17'), worksText('roof.resume', 'You\'d saved on the lift roof. You\'re back at the top deck.')); }
   const o = typeof OCCASIONS !== 'undefined' && OCCASIONS['works.m17']; if (o && (o.deck !== 1 || o.room !== '+')) { o.deck = 1; o.room = '+'; }   // after a reload trainSetup makes it in the Works bay
 });
+// crew waiting by the held lift say so now and then (the writer's bank roof.wait): someone roofWait keeps on your deck,
+// within 8 m of you, one every 6 ship minutes at most, each once a hold; a bubble (E4, 0.53.11)
+const ROOF_TALK = { of: null, said: new Set(), at: -99 };
+function roofTalk(now) {
+  if (!liftHeld(now) || ROOF.r && !ROOF.r.off || typeof DECK_CREW === 'undefined' || typeof lineFor !== 'function' || now - ROOF_TALK.at < 6) return;
+  if (ROOF_TALK.of !== LIFT_HOLD) { ROOF_TALK.of = LIFT_HOLD; ROOF_TALK.said = new Set(); }
+  const p = player.obj.position, a = DECK_CREW.find(x => x.p && !ROOF_TALK.said.has(x.p.id) && Math.hypot(x.x - p.x, x.z - p.z) < 8 && roofWait(x.p, now)); if (!a) return;
+  ROOF_TALK.said.add(a.p.id); const l = lineFor(a.p.id, 'roof.wait', { t: now }); if (!l || !l.text) return;
+  ROOF_TALK.at = now; if (typeof bubbleSay === 'function') bubbleSay(a.h, l.text, 5);
+}
+if (typeof WORK_TICKS !== 'undefined') WORK_TICKS.push((now, skip) => { if (!skip && !SIM_AT && LIFT_HOLD) roofTalk(now); });
 onSim('newGame', () => { LIFT_HOLD = null; ROOF.r = null; ROOF.say = null; });
 // the ladder row: Halloran's ask is for a Thursday he's on shift, at the lift on Deck 1 at 15:30; trained at the meeting
 if (typeof WORK_MECH !== 'undefined') WORK_MECH.m17 = {
