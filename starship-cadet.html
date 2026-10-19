@@ -8483,7 +8483,8 @@ const REC_CREW_PLACES = [
   ...[9.4, 7.4, 5.4].map((x, k) => ({ id: '7-kayak-' + (k + 1), type: 'rec:kayak', at: [Math.floor(x), 4], walk: [Math.floor(x) + 1, 6], xy: [x, 4.85], y: .36, face: 'w', pose: 'stand', anim: 'kayak', room: 'K',
     move: { kind: 'kayak', path: [[11.4, 4.85], [4.8, 4.85], [4.8, 1.3], [13.8, 1.3, 1], [13.8, 4.85, 1]], y: .36, phase: k / 3 } })),   // 15r's REC_LOOP (not readable yet here)
   ...[13, 14].map((c, k) => ({ id: '7-dockq-' + (k + 1), type: 'rec:kayakq', at: [c, 6], face: 'n', pose: 'stand', room: 'K' })),
-  ...[2.575, 4.875].map((z, k) => ({ id: '7-climb-' + (k + 1), type: 'rec:climb', at: [2, Math.floor(z)], xy: [1.95, z], face: 'w', pose: 'stand', anim: 'climb', room: 'K',
+  ...[3.725, 4.875].map((z, k) => ({ id: '7-climb-' + (k + 1),   // under the two belays (routes 2 and 3 of 4: B2's)
+   type: 'rec:climb', at: [2, Math.floor(z)], xy: [1.95, z], face: 'w', pose: 'stand', anim: 'climb', room: 'K',
     move: { kind: 'climb', at: [1.95, z], face: 'w', top: 1.39, rest: 4, phase: k * .5 } })),   // top: 15r's H - 2.25 with the deck's 1.3 walls
   ...[3, 5].map((r, k) => ({ id: '7-beach-' + (k + 1), type: 'rec:climbq', at: [3, r], face: 'w', pose: 'stand', room: 'K' })),
   ...[[18.5, 13.5], [20.5, 13.3], [22.5, 13.5], [18.5, 16.2], [20.5, 16.4], [22.5, 16.2]].map(([x, z], k) => ({ id: '7-float-' + (k + 1), type: 'rec:float', at: [Math.floor(x), Math.floor(z)], xy: [x, z], face: k < 3 ? 's' : 'n', pose: 'stand', anim: 'float', room: 'F',
@@ -8496,14 +8497,14 @@ const REC_CREW_PLACES = [
   // chairs themselves are the auditorium's dressing), the chief's stool at the stage's front, the Captain's lectern and the
   // Commander behind her, two acts' spots and the piano for talent night, and Maeve's chair at the booth's lighting desk
   ...Array.from({ length: 8 }, (_, k) => { const a = k / 8 * 2 * Math.PI, x = 43.7 + Math.cos(a) * 1.05, z = 9.0 + Math.sin(a) * 1.05;
-    return { id: '7-ring-' + (k + 1), type: 'rec:seat', ring: true, at: [Math.floor(x), Math.floor(z)], walk: [41, Math.max(3, Math.min(14, Math.floor(z)))], xy: [+x.toFixed(2), +z.toFixed(2)], y: 1.0,
+    return { id: '7-ring-' + (k + 1), type: 'rec:seat', ring: true, at: [Math.floor(x), Math.floor(z)], walk: [41, Math.max(3, Math.min(14, Math.floor(z)))], xy: [+x.toFixed(2), +z.toFixed(2)], y: 1.05,
       face: Math.round(Math.atan2(43.7 - x, 9.0 - z) * 180 / Math.PI), pose: 'sit', room: 'A' }; }),
-  { id: '7-stool-1', type: 'rec:stool', at: [42, 9], walk: [41, 9], xy: [42.35, 9.0], y: 1.05, face: 'w', pose: 'sit', room: 'A' },
+  { id: '7-stool-1', type: 'rec:stool', at: [42, 9], walk: [41, 9], xy: [42.35, 9.0], y: 1.04, face: 'w', pose: 'sit', room: 'A' },
   { id: '7-lectern-1', type: 'rec:lectern', at: [43, 7], walk: [41, 7], xy: [43.3, 7.3], y: .55, face: 'w', pose: 'stand', room: 'A', move: { kind: 'address' } },   // the spots and moves: rec engineer B2's (0.84.9)
   { id: '7-lectern-2', type: 'rec:lectern', at: [43, 8], walk: [41, 8], xy: [43.95, 8.4], y: .55, face: 'w', pose: 'stand', room: 'A' },
   { id: '7-act-1', type: 'rec:act', at: [43, 9], walk: [41, 9], xy: [43.3, 9.6], y: .55, face: 'w', pose: 'stand', room: 'A', move: { kind: 'perform', act: 'sing' } },   // at the mic
   { id: '7-act-2', type: 'rec:act', at: [43, 10], walk: [41, 10], xy: [43.3, 10.2], y: .55, face: 'w', pose: 'stand', room: 'A', move: { kind: 'perform', act: 'juggle' } },
-  { id: '7-act-piano', type: 'rec:act', at: [43, 11], walk: [41, 11], xy: [43.0, 11.25], y: 1.0, face: 's', pose: 'sit', anim: 'play', room: 'A', move: { kind: 'perform', act: 'piano' } },   // the bench by the side-on piano
+  { id: '7-act-piano', type: 'rec:act', at: [43, 11], walk: [41, 11], xy: [43.0, 11.3], y: 1.1, face: 's', pose: 'sit', anim: 'play', room: 'A', move: { kind: 'perform', act: 'piano' } },   // the bench by the side-on piano
   { id: '7-booth-1', type: 'rec:booth', works: true, at: [32, 12], xy: [32.85, 12.6], y: .45, face: 'e', pose: 'sit', room: 'b' },
   // the regatta's crowd (the gather venue 'river-banks', DECKS[7].gathers): the beach, the concourse's glass, the bank by the
   // rack; Chief Holt's spot with his horn on the dock (lead 1)
@@ -9985,7 +9986,7 @@ function schedBuild(p, d, occ, S) {
     const R = REC_DO[kind], wet = !!R.wet, pre = wet ? 2 : 0, post = wet ? 6 : 0, dur = REC_TURN[0] + Math.round((REC_TURN[1] - REC_TURN[0]) * vu(2));
     const a0 = ride ? ride.a0 : t + C, open = DECKS[7].open, last = Math.min(to - C - post, open[1] * 60 - 15);
     if (a0 < open[0] * 60 || last - (a0 + pre) < 15) return false;
-    const pool = (S.shared.get('7|' + R.type) || []).slice(0, kind === 'climb' && sh ? sh.belays : 99); if (!pool.length) return false;   // a belay out: one climber at a time
+    const pool = (S.shared.get('7|' + R.type) || []).filter((q, b) => !(kind === 'climb' && sh && ((sh.belayOff || [])[b] || sh.route === b + 1))); if (!pool.length) return false;   // not under a tagged-out belay or a taped route
     const capOk = (a, b) => { for (let m = a; m < b; m++) if (occ.rec[m] + 1 > recCap(d, m)) return false; return true; };
     const free1 = (type, a, b) => (S.shared.get('7|' + type) || []).find(pl => isFree(pl.id, a, b)) || null;
     // the place and the turn: the earliest start within REC_Q minutes; Lightdisc: the bow end (7-disc-1, your baseline) only
@@ -14997,9 +14998,9 @@ function recGo(kind, point, title, flavour) {
 // the crew are here too (RA, 0.83.0): a lane or a belay the crew are using (or walking to) isn't yours. When every one is
 // taken you wait your turn at its waiting spot (the loungers, the pebble beach, the stands' gate bench), and when one comes
 // free: "You're up." The kayaks (3 crew and you) and the float room (6 and you) always have room
-const REC_BELAYS = [['7-climb-1', 0], ['7-climb-2', 2]];   // the two auto-belays: on the red route and the blue
+const REC_BELAYS = [['7-climb-1', 1], ['7-climb-2', 2]];   // the two auto-belays, over routes 1 and 2 (0-based: yellow and blue; rec engineer B2's)
 const recLanesFree = () => REC_LANES.filter((z, i) => !heldBy('7-lane-' + (i + 1)));
-const recBelaysFree = () => REC_BELAYS.filter(([id]) => !heldBy(id)).map(([, r]) => r);
+const recBelaysFree = () => { const sh = typeof recShut === 'function' ? recShut() : null; return REC_BELAYS.filter(([id, r], b) => !heldBy(id) && !(sh && ((sh.belayOff || [])[b] || sh.route === r))).map(([, r]) => r); };   // not one tagged out or roped off
 const recCourtFree = () => !heldBy('7-disc-1');           // your baseline: crew there means a game of theirs is on (0.83.2)
 const REC_QUEUE = { swim: ['rec:poolq', 'Every lane\'s taken. You wait on a lounger for one to come free.'], climb: ['rec:climbq', 'Both belays are in use. You wait on the pebble beach for your turn.'],
   disc: ['rec:seat', 'Two are playing. You wait on the bench by the gate: you\'re next.'] };
