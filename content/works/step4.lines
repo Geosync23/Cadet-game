@@ -340,39 +340,31 @@
 == works.pin
 - your fault-finder pin
 
-// ---- off shift: cabin touches (E3, 24t). The spots and the things you can put there.
+// ---- off shift: cabin touches (24t; E4, was E3): the sentence when you put a thing in a spot (rug desk shelf ledge).
+// E4's code adds " The <old thing> is back in your hands." when it swaps one.
 == cabin.spot.rug
-- Rug
-== cabin.spot.lamp
-- Desk lamp
+- Down it goes. The floor feels like yours now.
+== cabin.spot.desk
+- On the desk it goes. It looks like yours now.
 == cabin.spot.shelf
-- Shelf
-== cabin.spot.plant
-- Plant
-== cabin.item.rug.woven
-- a woven rug
-== cabin.item.rug.stripe
-- a striped rug
-== cabin.item.lamp.plain
-- a plain desk lamp
-== cabin.item.plant.fern
-- a fern from the garden
-== cabin.item.plant.herb
-- a pot of mint
+- On the shelf, where you'll see it. It looks like yours now.
+== cabin.spot.ledge
+- On the ledge by the door. It looks like yours now.
 
-// ---- star logging (E3, 24t): the observatory telescope, 20:00-23:30, one a night
+// ---- star logging (24t; E4): the observatory telescope, 20:00-23:30, one a night. {a} {b} the chart's two stars.
 == star.title
-- Telescope · tonight's field
+- Star log
 == star.pick
-- Three marked points. One's new. Which?
+- Your chart shows two stars here: {a} and {b}. Through the eyepiece there are three. Which one is new?
 == star.right
-- Logged. That one's new. It's yours: {star}.
+- Logged: {star}. Survey will see it in the morning.
 == star.wrong
-- That one's on the charts already. Try again tomorrow night.
+- That one's already on the chart. Look again.
 == star.name
 - Wren {n}
+// ten stars logged
 == star.done
-- One a night. The sky will keep.
+- Ten stars logged. Survey has put your name in the catalogue.
 == works.ms.stars
 - Star logger
 
