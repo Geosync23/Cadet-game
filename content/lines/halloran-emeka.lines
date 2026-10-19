@@ -178,21 +178,21 @@
 ? flag:team.call.start
 - Spots, everyone. On my call. Lovely.
 ? flag:team.call.brace
-- {me}, brace. Feet wide. There.
+- Brace. Feet wide. There.
 ? flag:team.call.pass
-- {me}, the cartridge, please. Both hands.
+- Pass it here, please. Both hands.
 ? flag:team.call.hold
-- {me}, hold it. Nearly. Nearly.
+- Hold it. Nearly. Nearly.
 ? flag:team.call.crank
-- {me}, crank away. Slow and steady.
+- Crank away. Slow and steady.
 ? flag:team.call.tip
-- {me}, tip it. Gently. Hold.
+- Tip it. Gently. Hold.
 ? flag:team.call.valves
-- {me}, the valves. One, two, three.
+- The valves. One, two, three.
 ? flag:team.call.open
-- {me}, open them again. Same order.
+- Open them again. Same order.
 ? flag:team.call.drain
-- {me}, drain it down. The bucket's there.
+- Drain it down. The bucket's there.
 ? flag:team.call.done
 - And seated. Lovely work, everyone.   #warm
 ? flag:train.m9.follow.give
@@ -209,6 +209,5 @@
 - Here's a puzzle the pipe kit can't solve.
 - It only happens sometimes. When? That's the clue.
 
-== cue
-? flag:promo.gather
+== promoted
 - Lovely. Lovely! Well done, you.   #warm

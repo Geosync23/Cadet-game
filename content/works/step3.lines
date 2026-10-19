@@ -61,6 +61,8 @@
 - Works reputation up
 == works.turnin.meter
 - +{n} {system}
+== works.turnin.repN
+- +{n} {dept} reputation
 == meter.air
 - Air
 == meter.water
@@ -100,7 +102,7 @@
 - {job}, {time}, Deck {deck}. A team of {n}.
 // the 16:00 Mail the day before
 == mail.team
-- Team job, {time} | {job} tomorrow at {time}, Deck {deck}. You're on the team. Be at your spot when it starts.
+- Team job, {time} | {job} tomorrow at {time}, Deck {deck}. {name} leads. You're on the team: be at your spot when it starts.
 // your turn (a toast)
 == team.turn.brace
 - Your turn: brace the housing
@@ -119,13 +121,13 @@
 == team.turn.drain
 - Your turn: drain it down
 == team.start
-- {job}: the team's here. Find your spot.
+- The team's here. Find your spot.
 == team.wait
-- {job}: they're waiting for you.
+- {name}'s team is waiting for you. Your spot's free.
 == team.late
-- {job}: they started without you.
+- {name} started without you. They'll manage. Slower.
 == team.done
-- {job}: done. Good work, all of you.
+- Team job done. Good work, all of you.
 
 // ---- tracing (M3)
 == works.ask.m9
@@ -144,10 +146,12 @@
 - After: {word}
 == trace.found
 - Full before, low after. It's {machine}.
+== trace.wrongline
+- Not on this line.
 == trace.symptom.water
 - Showers weak on Deck {deck}
 == trace.symptom.heat
-- Cold cabins, {where}
+- Cold cabins on Deck {deck}
 == trace.symptom.air
 - Stuffy air on Deck {deck}
 == trace.line.water
@@ -192,3 +196,7 @@
 - Nobody lies. Somebody's mixed up. The Roster knows which.
 == case.ask
 - Ask about the fault
+
+// ---- the Tiles game (U): a small line under the score (U adds the pause sign)
+== tiles.paused
+- The ship's clock is paused while you play

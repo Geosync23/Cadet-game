@@ -597,21 +597,21 @@
 ? flag:team.call.start
 - Spots. Nobody moves until I say.
 ? flag:team.call.brace
-- {me}. Brace. Hold it there.
+- Brace. Hold it there.
 ? flag:team.call.pass
-- {me}. Pass it. Both hands.
+- Pass it. Both hands.
 ? flag:team.call.hold
-- {me}. Hold. Steady.
+- Hold. Steady.
 ? flag:team.call.crank
-- {me}. Crank. Slowly.
+- Crank. Slowly.
 ? flag:team.call.tip
-- {me}. Tip it. Hold it there.
+- Tip it. Hold it there.
 ? flag:team.call.valves
-- {me}. Valves. One, two, three. In order.
+- Valves. One, two, three. In order.
 ? flag:team.call.open
-- {me}. Open them. Same order.
+- Open them. Same order.
 ? flag:team.call.drain
-- {me}. Drain it down. Watch the gauge.
+- Drain it down. Watch the gauge.
 ? flag:team.call.done
 - Done. Good. Clean up before you go.
 // M9 tracing (Day 12): the walk along the water line

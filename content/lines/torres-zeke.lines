@@ -864,21 +864,21 @@
 ? flag:team.call.start
 - Right, team. Spots. Wait for your name.
 ? flag:team.call.brace
-- {me}! Brace. That's it.
+- Brace. That's it.
 ? flag:team.call.pass
-- {me}, pass it over. Lovely.
+- Pass it over. Lovely.
 ? flag:team.call.hold
-- {me}, hold it there. Don't sneeze.   #funny
+- Hold it there. Don't sneeze.   #funny
 ? flag:team.call.crank
-- {me}, crank. Steady does it.
+- Crank. Steady does it.
 ? flag:team.call.tip
-- {me}, tip it back. Hold.
+- Tip it back. Hold.
 ? flag:team.call.valves
-- {me}, valves. Left to right.
+- Valves. Left to right.
 ? flag:team.call.open
-- {me}, open them up again.
+- Open them up again.
 ? flag:team.call.drain
-- {me}, drain it. Mind your boots.
+- Drain it. Mind your boots.
 ? flag:team.call.done
 - Done! Tea's on me. Well. Tea's on the kettle.   #funny
 // P2 (Day 15): his word, if Tomas's isn't given
@@ -887,7 +887,6 @@
 - And check they were in. The Roster knows.
 
 // the crew at the board after your promotion (seat X plays them as you come out)
-== cue
-? flag:promo.gather
-- There they are! Officer {nick}!   #warm
+== promoted
+- There you are! Officer {nick}!   #warm
 - Knew it. Knew it on your first day.

@@ -128,7 +128,7 @@ unsigned. Calder's flag lines also exist for Vance (`vance.lines`) where the pag
 | Torres nudges you | `flag:promo.summons.go` | torres-zeke `work` | |
 | Calder finds you at 11:15 / 17:30 / ceremony | `flag:promo.fetch.summons`, `.fetch.move`, `.fetch.ceremony` | calder `work` (vance too for move) | |
 | The office scene | meeting `promo.officer` | Calder; choice sets `flag:promo.reply.proud\|surprised\|about` | |
-| The crew at the board | `flag:promo.gather` | kind `cue` in works crew lines + torres-zeke, pell ("Told you"), kovac, halloran | |
+| The crew at the board | kind `promoted` (X's name; 50 characters) | `banks/promo-works.lines` + torres-zeke, pell ("Told you"), kovac-zainab, halloran-emeka | `{nick}` |
 | All day: people who know you | `@reactions promoted` (`content/reactions/promoted.lines`), cue `promoted.you` | crew bank by tier | |
 | Mail from friends | kind `mail.promo.friend` in `content/banks/promo.lines` | crew bank by tier ("Subject \| body") | `{me}` |
 | Mail from the Captain | `mail.promo.captain` | text | `{me}` |
@@ -153,11 +153,11 @@ unsigned. Calder's flag lines also exist for Vance (`vance.lines`) where the pag
 | meeting `train.m8.halloran-emeka` (+ `.torres-zeke`, `.calder`) | at the recycler: spots, your part | |
 | `team.name.<job>` | job names: `recycler`, `washer`, `manifold`, `heater`, `scrubber` | |
 | `team.card` | the board card | `{job}` `{time}` `{deck}` `{n}` |
-| `mail.team` | the 16:00 posting Mail ("Subject \| body") | `{job}` `{time}` `{deck}` |
+| `mail.team` | the 16:00 posting Mail ("Subject \| body") | `{job}` `{time}` `{deck}` `{name}` (the lead) |
 | `team.turn.<part>` | your toast: `brace` `pass` `hold` `crank` `tip` `valves` `open` `drain` | |
-| `team.start`, `team.wait`, `team.late`, `team.done` | texts: started, waiting for you, started without you, done | `{job}` |
-| `flag:team.call.<part>` + `team.call.start/.done` | the lead's calls, kind `work` in halloran-emeka, torres-zeke, calder, and a works bank fallback (`content/banks/team.lines`) | |
-| `@overheard teamjob` | crew talk while they work, gated `? flag:team.on` (X passes the flag) | |
+| `team.start`, `team.wait`, `team.late`, `team.done` | texts: started, waiting for you, started without you, done | `{name}` (the lead) in wait and late |
+| `flag:team.call.<part>` + `team.call.start/.done` | the lead's calls, kind `work` in halloran-emeka, torres-zeke, calder, and a works bank fallback (`content/banks/team.lines`); said for the crew's steps too, so they never name you | |
+| kind `team` (X's name) | crew talk while they work, one bubble each (`content/banks/team.lines`, works bank + Pell, Kovac, Torres) | |
 | `next.m8`, `next.wait.m8` | What's next | |
 | `@bank dept:works` fallbacks | `content/banks/team.lines` (calls), `content/banks/promo-works.lines` (the gathering) | |
 
@@ -172,7 +172,8 @@ unsigned. Calder's flag lines also exist for Vance (`vance.lines`) where the pag
 | `trace.full`, `trace.low`, `trace.verylow` | the reading word | |
 | `trace.before`, `trace.after` | "Before: {word}" / "After: {word}" | `{word}` |
 | `trace.found` | flow fine before, low after | `{machine}` |
-| `trace.symptom.water`, `.heat`, `.air` | the card ("Showers weak on Deck {deck}") | `{deck}` `{where}` |
+| `trace.wrongline` | reading a machine that isn't on the job's line | |
+| `trace.symptom.water`, `.heat`, `.air` | the card ("Showers weak on Deck {deck}", "Cold cabins on Deck {deck}") | `{deck}` |
 | `trace.line.water/heat/air` | line names (Maps app) | |
 | `chief.m9.1-2` | the Chief's notes page | |
 | `next.m9`, `next.wait.m9` | What's next | |
@@ -201,4 +202,5 @@ unsigned. Calder's flag lines also exist for Vance (`vance.lines`) where the pag
 | `bridge.locked` | tapping the bridge door before you're invited (C2 / DA5's hook) | |
 | `mail.bridge.invite` (+ meeting `bridgeInvite` reworded) | the invitation (placeholder trigger) | |
 | `meter.<sys>` | short meter names: air water power heat food waste hull comms propulsion transport | |
-| `works.turnin.rep`, `works.turnin.meter` | the turn-in: "Works reputation up" / "+{n} {system}" | `{n}` `{system}` (the meter.<sys> name) |
+| `works.turnin.rep`, `works.turnin.meter`, `works.turnin.repN` | the turn-in: "Works reputation up" / "+{n} {system}" / "+{n} {dept} reputation" (U) | `{n}` `{system}` (the meter.<sys> name) `{dept}` |
+| `tiles.paused` | the Tiles notice under the score (U adds the pause sign) | |
