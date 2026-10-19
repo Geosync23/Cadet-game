@@ -778,3 +778,4 @@ Read: CLAUDE.md; TEAM.md (Lead line + the ~05:50-07:45 notes in it); this sectio
 - **Lessons tonight:** messages between sessions arrive late — after any seat change, the lead forwards hashes to the new reviewer itself; code hidden after "//" on an edited line bit us 3 times (reviewers grep for it); parallel check runs must each have their own CADET_WORK.
 - Lead 17 stays reachable until lead 18 says hello, then stands down.
 - ~07:55: started lead 18 session_01CBur9nrJ411pFkHopF96RL (depth 2). Lead 17 forwards seat messages until lead 18 says hello, then stands down.
+- ~07:57 (lead 18): took over. get_session: depth 2. Check-in trig_01MasUJq3QJAv3V5PuL3Pnhn (:07) live, lead 17's trig_01Qgn2FB8SBGQVPmBPCbaAtD disabled. Told BM7, CR2, R6, X2, K1, D3 and lead 17. Note: local clone had a stale claude/lead-pillar1 (d0d0b82, on origin/claude/pillar3-plan); kept as local branch old-local-d0d0b82, now tracking origin.
