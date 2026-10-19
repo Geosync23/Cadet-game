@@ -1116,6 +1116,243 @@ with sync_playwright() as pw:
             or not h1.get('take') or h1['after'] != h1['crates'][2] - 1 or not (1 <= len(h1['misplaced']) <= 3) or h1 != h2 or h1.get('saved') is not True or h1.get('fetchFixes') is not True):
             fail('hauling: the manifest and the misplaced part')
 
+    # 5u. the air line's dampers and the Tier 2 fault tables (Step 3, 0.33.56; architect-air-line.html, fault-tables.html Tier 2):
+    # 5-fan-1 and both dampers are real machines with panel places; a broken damper is felt on its own branch's decks only
+    # (damper 1: Decks 1-3, damper 2: Decks 4-6) and the other's decks are as before; every Tier 2 kind in MACHINE_KINDS has
+    # a table; every cause's line is water, heat or air; within a kind no two causes share both card and sign (5o checks
+    # every kind); and on paper over 40 days every Tier 2 machine's part causes all come up, the commonest most, never a load
+    if g.ev("typeof FAULT_T2 === 'object'"):
+        t2 = g.ev("""(() => {
+          const out = { real: {}, panels: {}, branch: {}, missing: [], badLine: [], noShow: [], order: [], loads: 0, kinds: 0 };
+          for (const id of ['5-fan-1', '5-damper-1', '5-damper-2']) { const m = machineById(id); out.real[id] = !!m && !m.stub; out.panels[id] = !!panelPlace(id); }
+          for (const k of FAULT_T2) if (MACHINE_KINDS[k] && !FAULT_CAUSES[k]) out.missing.push(k);
+          for (const k of FAULT_T2) for (const c of FAULT_CAUSES[k] || []) if (c.line && !['water', 'heat', 'air'].includes(c.line)) out.badLine.push(k + '.' + c.id);
+          for (const k of FAULT_T2) { const m = machineList().find(x => x.kind === k); if (!m || !FAULT_CAUSES[k]) continue; out.kinds++;
+            const n = {}; for (let h = 24; h < 24 * 41; h++) { const c = faultPick(m, h); if (!c) continue; if (c.load) out.loads++; n[c.id] = (n[c.id] || 0) + 1; }
+            const allowed = FAULT_CAUSES[k].filter(c => !c.load && !c.band);
+            for (const c of allowed) if (!n[c.id]) out.noShow.push(k + '.' + c.id);
+            const top = allowed.filter(c => c.w === Math.max(...allowed.map(x => x.w))).map(c => c.id), most = Object.entries(n).sort((a, b) => b[1] - a[1])[0];
+            if (most && !top.includes(most[0])) out.order.push(k + ': ' + most[0]); }
+          // the dampers' reach: each broken in turn on a fresh ship, the notes per deck
+          const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min;
+          for (const id of ['5-damper-1', '5-damper-2']) {
+            JOBS_ON = false; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t0); machinesNow(); machineFault(id, 5);
+            out.branch[id] = Object.keys(DECKS).map(Number).filter(n => shipEffects(n).notes.some(x => x.machine === id));
+          }
+          JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t0);
+          return out;
+        })()""")
+        print(f"Air line and Tier 2 tables (0.33.56): real {t2['real']}, panels {t2['panels']}; a broken damper is felt on decks {t2['branch']}")
+        print(f"  {t2['kinds']} Tier 2 kinds with a machine; missing tables {t2['missing']}, bad lines {t2['badLine']}, causes never picked {t2['noShow']}, commonest not the most often {t2['order']}, loads picked {t2['loads']}")
+        if (not all(t2['real'].values()) or not all(t2['panels'].values()) or t2['branch'].get('5-damper-1') != [1, 2, 3] or t2['branch'].get('5-damper-2') != [4, 5, 6]
+            or t2['missing'] or t2['badLine'] or t2['noShow'] or t2['order'] or t2['loads']):
+            fail('the air line and the Tier 2 fault tables')
+
+    # 5v. the ship meters and the bridge room (Step 3, 0.33.57; the user's "starts a little lower, so you can see your impact"):
+    # a fresh ship's board reads about 75 (72-79), none failing, one or more fine, while the machines' own health (what the
+    # effects read) is 90+; untended, every meter only falls a little each day; a steady player (5o's) gets j.meters on every
+    # job they finish, biggest first, the biggest a visible step (1+), and the board rises well above its start (85+ by the
+    # end); the same twice. A job in the bridge room (Deck 1, B) isn't offered to you or yours to take till SHIP.bridgeInvited,
+    # then it is; the crew can take it; the Wednesday manifest has no bridge crate till then. The save keeps the upkeep, and a
+    # save without it loads with none
+    if g.ev("typeof shipMeters === 'function'"):
+        MV = r"""(() => {
+          window.__sc("window.__evMv = [typeof eventNow === 'function' ? eventNow : undefined, typeof eventMod === 'function' ? eventMod : undefined]; if (window.__evMv[0]) eventNow = () => null; if (window.__evMv[1]) eventMod = () => null");
+          const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min, end = t0 + DAYS * 1440, out = { jobs: 0, noMeters: [], small: [], notMain: [], byDay: [] };
+          JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; SHIP.works = null; setShipNow(t0); machinesNow();
+          const rows = shipHealthRows(); out.start = rows[0].value; out.startRows = rows.slice(1).map(r => r.name + ' ' + r.value + ' ' + r.state); out.machine0 = shipHealth();
+          out.failing = rows.filter(r => r.state === 'failing').length; out.fine = rows.slice(1).filter(r => r.state === 'fine').length;
+          const m0 = shipMeters(); JOBS_ON = false; setShipNow(t0 + 1440); machinesNow(); const m1 = shipMeters();
+          out.creep = SYSTEMS.filter(k => SHIP.upkeep[k] < UPKEEP_START[k] - 1e-9 || SHIP.upkeep[k] > UPKEEP_START[k] + UPKEEP_CREEP * 26 / 24 + 1e-9);   // the start hour's share too
+          out.creepDrop = Math.round((shipHealth(m0) - shipHealth(m1)) * 10) / 10;
+          JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t0); machinesNow();
+          let mine = null, until = 0;
+          for (let t = t0; t <= end; t += 30) {
+            setShipNow(t); machinesNow();
+            if (mine && t >= until) { const j = SHIP.jobs.find(x => x.id === mine); if (j && j.claimedBy === 'you' && j.status === 'claimed') { jobStops(j).forEach((x, k) => jobStepDone(j.id, k)); finishJob(j.id);
+                out.jobs++; const ms = j.meters || [], main = jobMeterSys(j)[0];
+                if (!ms.length) out.noMeters.push(j.id); else { if (!SYSTEMS.includes(main)) out.notMain.push(j.id + ' ' + main); if (ms[0].gain < 1) out.small.push(j.id + ' ' + ms[0].gain); } } mine = null; }
+            const d = SHIP.time.day, md = t % 1440;
+            if (md === 1080) out.byDay.push(Math.round(shipHealthRows()[0].value));
+            if (!mine && d >= 2 && playerShiftOn(d) && md >= DAY_SHIFT[0] && md < DAY_SHIFT[1]) { const o = openJobs('you')[0]; if (o && claimJob(o.id)) { mine = o.id; until = t + Math.max(30, o.mins + 20); } }
+          }
+          out.end = shipHealthRows()[0].value; out.sig = JSON.stringify([SHIP.upkeep, out.byDay]);
+          for (const j of SHIP.jobs) if (j.claimedBy === 'you') { j.claimedBy = null; j.status = 'open'; }
+          window.__sc("if (window.__evMv[0]) eventNow = window.__evMv[0]; if (window.__evMv[1]) eventMod = window.__evMv[1]");
+          return out;
+        })()""".replace('DAYS', str(DAYS))
+        mv = g.ev(MV); mv2 = g.ev(MV)
+        print(f"Ship meters (0.33.57): a fresh ship reads {mv['start']} (machines {mv['machine0']}), failing {mv['failing']}, fine {mv['fine']}: {mv['startRows']}")
+        print(f"  untended a day: upkeep out of step {mv['creep']}, the board down {mv['creepDrop']}; a steady player: {mv['jobs']} jobs, without meters {mv['noMeters'][:4]}, main system unknown {mv['notMain'][:4]}, a step under 1 {mv['small'][:4]}")
+        print(f"  the board by day {mv['byDay']}, at the end {mv['end']}; the same twice {mv['sig'] == mv2['sig']}")
+        if not (72 <= mv['start'] <= 79) or mv['failing'] or not mv['fine'] or mv['machine0'] < 90 or mv['creep'] or not (0 < mv['creepDrop'] < 4):
+            fail('the ship meters at the start')
+        if not mv['jobs'] or mv['noMeters'] or mv['notMain'] or mv['small'] or mv['end'] < 85 or mv['sig'] != mv2['sig']:
+            fail('the ship meters: your jobs')
+        br = g.ev("""(() => {
+          const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min, out = {};
+          JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; SHIP.works = null; setShipNow(t0 + 1440 + 180); machinesNow();
+          const was = SHIP.bridgeInvited, pl = placeById('1-works-1'), id = 'chore-test:bridge';
+          SHIP.jobs.push({ id, machine: null, deck: 1, room: 'B', kind: 'chore', chore: 'delivery', title: 'Test: spares to the bridge', bring: null, tier: 1, stops: [{ deck: 1, placeId: pl.id, mins: 10, tag: 'drop' }], urgency: 0, leave: null, posted: shipNow(), found: shipNow(), claimedBy: null, parts: [], status: 'open' });
+          SHIP.bridgeInvited = false; out.offeredShut = openJobs('you').some(o => o.id === id); out.forYouShut = forYou(SHIP.jobs.find(j => j.id === id)); out.claimShut = claimJob(id);
+          out.crew = openJobs('teague-theo').some(o => o.id === id) || openJobs(schedPeople().find(p => jobCrew(p) === 'works').id).some(o => o.id === id);
+          SHIP.bridgeInvited = true; out.offeredOpen = openJobs('you').some(o => o.id === id); out.claimOpen = claimJob(id);
+          dropJob(id); SHIP.jobs = SHIP.jobs.filter(j => j.id !== id);
+          const weeks = n => [...Array(n).keys()].map(w => manifestFor(w * 7 + 3).map(c => c.id));
+          SHIP.bridgeInvited = false; out.manShut = weeks(8).flat().filter(k => k === 'bridge').length;
+          SHIP.bridgeInvited = true; out.manOpen = weeks(8).flat().filter(k => k === 'bridge').length;
+          if (was === undefined) delete SHIP.bridgeInvited; else SHIP.bridgeInvited = was;
+          // the save: the upkeep goes out and comes back; an older save (no upkeep) loads with none
+          SHIP.upkeep.air = 12.345;
+          const s = { player: { deck: 4, tile: [0, 0], facing: 0 }, ship: { decks: {} }, crew: {} }; SAVE_EXTRA.forEach(f => f(s));
+          const before = JSON.stringify(SHIP.upkeep); MACH_HOUR = null; machinesLoad(JSON.parse(JSON.stringify(s))); out.saved = JSON.stringify(SHIP.upkeep) === before;
+          const old = JSON.parse(JSON.stringify(s)); delete old.ship.upkeep; MACH_HOUR = null; machinesLoad(old); out.oldNone = Object.keys(SHIP.upkeep).length === 0;
+          MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t0);
+          return out;
+        })()""")
+        print(f"  the bridge room: shut {[br['offeredShut'], br['forYouShut'], br['claimShut']]} (offered, for you, taken), the crew's {br['crew']}; invited {[br['offeredOpen'], br['claimOpen']]}; bridge crates in 8 weeks shut {br['manShut']}, invited {br['manOpen']}; save keeps the upkeep {br['saved']}, an older save none {br['oldNone']}")
+        if br['offeredShut'] or br['forYouShut'] or br['claimShut'] or not br['crew'] or not br['offeredOpen'] or not br['claimOpen'] or br['manShut'] or not br['manOpen'] or not br['saved'] or not br['oldNone']:
+            fail('the bridge room and the upkeep in the save')
+
+    # 5w. team jobs (m8-team-jobs.html, section 17's part, 0.33.58): a team job posted the day before (Day 11, the recycler, 09:30,
+    # 40 minutes, four Works crew at work then, with you): each member is at their spot through it (jobWhere), takes no other
+    # job that overlaps it, and is back to their own plan after; you not coming: by the next hour it's the lead's and takes
+    # 20% longer, then the lead finishes it and the machine is put right (90+); with you: your stop done puts it right and
+    # gives the meters an overhaul's step; you at your spot (j.youIn) and the lead finishing: the step too; the save keeps it
+    # (jobWhere the same after a reload); the same twice. And the Tier 2 test job (promotion-officer.html): jobReserve on
+    # 4-scrubber-1 with cause filter and drift +2: faulty and drifted at 08:00, its part the filter, no tune job of its own,
+    # tuneSet settles the drift (and won't set a scrubber's)
+    if g.ev("typeof teamJobPost === 'function'"):
+        TM = r"""((mode) => {
+          const out = { mode }, d = 11, start = (d - 1) * 1440 + 570, mins = 40;
+          JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; SHIP.works = null; setShipNow((d - 2) * 1440 + 960); machinesNow();
+          const crew = schedPeople().filter(p => jobCrew(p) === 'works' && (CREW_TIER[p.rank] || 0) >= 2).filter(p => { const a = planWhere(p, start - 5), b = planWhere(p, start + mins + 15); return a && a.act === 'work' && !a.moving && b && b.act === 'work'; }).slice(0, 3).map(p => p.id);
+          machineFault('3-recycler-1', 45);
+          const id = teamJobPost({ machine: '3-recycler-1', start, mins, team: crew, you: mode !== 'crew', title: 'Recycler membrane change' });
+          const j = () => SHIP.jobs.find(x => x.id === id);
+          out.id = id; out.team = j() && j().team.length; out.lead = j() && j().lead; out.claimed = j() && j().claimedBy; out.stops = j() && jobStops(j()).length;
+          const ppl = new Map(schedPeople().map(p => [p.id, p]));
+          out.atSpot = (j() ? j().team : []).every(c => { const w = jobWhere(ppl.get(c), start + 10); return w && w.job === id && w.deck === 3 && w.placeId === j().spots[c]; });
+          out.after = (j() ? j().team : []).every(c => { const w = jobWhere(ppl.get(c), j().end + 1); return !w || w.job !== id; });
+          // the save keeps it, and jobWhere reads the same after a reload
+          const s = { player: { deck: 4, tile: [0, 0], facing: 0 }, ship: { decks: {} }, crew: {} }; SAVE_EXTRA.forEach(f => f(s));
+          MACH_HOUR = null; machinesLoad(JSON.parse(JSON.stringify(s)));
+          out.saved = !!j() && j().team.every(c => { const w = jobWhere(ppl.get(c), start + 10); return w && w.job === id; });
+          // run through the day; your side by mode
+          for (let t = (d - 2) * 1440 + 1020; t <= start + 300; t += 30) {
+            setShipNow(t); machinesNow();
+            if (mode === 'you' && t >= start && j()) j().youIn = true;   // at your spot from the start
+            if (mode === 'you' && t >= start + 30 && j() && j().claimedBy === 'you' && !j().workDone) { jobStops(j()).forEach((x, k) => jobStepDone(id, k)); jobFinish(j(), shipNow(), 'you'); }
+            if (mode === 'in' && t >= start && j() && !j().youIn) { j().youIn = true; teamYouOut(id); }
+          }
+          const J = j(); out.status = J && J.status; out.doneBy = J && J.doneBy; out.youOut = !!(J && J.youOut); out.long = J ? J.done - J.start : 0; out.cond = SHIP.machines['3-recycler-1'].cond;
+          out.meters = J && J.meters ? J.meters.length : 0;
+          // nobody in it on another job that overlaps it
+          out.overlap = SHIP.jobs.filter(x => x.id !== id && x.segs && J && J.team.includes(x.claimedBy) && x.start < J.end && J.segsBy[x.claimedBy][0].from < x.end).map(x => x.id + ' ' + x.claimedBy);
+          out.sig = JSON.stringify(J);
+          MACH_HOUR = null; MACH_SEEN = -1; setShipNow((SHIP_START.day - 1) * 1440 + SHIP_START.min);
+          return out;
+        })"""
+        tc = g.ev(TM + "('crew')"); tc2 = g.ev(TM + "('crew')"); ty = g.ev(TM + "('you')"); ti = g.ev(TM + "('in')"); tn = g.ev(TM + "('out')")
+        for r in (tc, ty, ti, tn):
+            print(f"Team job ({r['mode']}): {r['id']}, team {r['team']}, lead {r['lead']}, claimed by {r['claimed']}, your stops {r['stops']}; at their spots {r['atSpot']}, back after {r['after']}, kept in the save {r['saved']}; "
+                  f"{r['status']} by {r['doneBy']} (you out {r['youOut']}, {r['long']} min), recycler {r['cond']:.0f}, meters {r['meters']}, overlapping jobs {r['overlap'][:3]}")
+        print(f"  the same twice {tc['sig'] == tc2['sig']}")
+        bad = []
+        for r in (tc, ty, ti, tn):
+            if not r['id'] or (r['team'] or 0) < 2 or not r['atSpot'] or not r['after'] or not r['saved'] or r['status'] != 'done' or r['cond'] < 90 or r['overlap']: bad.append(r['mode'])
+        if tc['claimed'] == 'you' or tc['doneBy'] != tc['lead'] or tc['meters'] or tc['long'] != 40: bad.append('crew only')
+        if ty['claimed'] != 'you' or ty['doneBy'] != 'you' or not ty['meters'] or ty['youOut']: bad.append('with you')
+        if ti['doneBy'] != ti['lead'] or not ti['meters'] or ti['long'] != 48: bad.append('you at your spot, the lead finishing')
+        if not tn['youOut'] or tn['doneBy'] != tn['lead'] or tn['meters'] or tn['long'] != 48: bad.append('you not coming')
+        if tc['sig'] != tc2['sig']: bad.append('not the same twice')
+        if bad: fail('team jobs: ' + ', '.join(bad))
+        tj = g.ev("""(() => {
+          const out = {}, d = 9, t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min;
+          JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; SHIP.works = null; setShipNow((d - 1) * 1440 + 360); machinesNow();
+          const id = jobReserve('4-scrubber-1', d, 480, 20, { tier: 2, train: 't2', until: (d - 1) * 1440 + 900, cause: 'filter', drift: 2 });
+          setShipNow((d - 1) * 1440 + 490); machinesNow();
+          const j = SHIP.jobs.find(x => x.id === id), s = SHIP.machines['4-scrubber-1'];
+          out.id = id; out.state = s.state; out.drift = s.drift || 0; out.cause = j && j.cause; out.parts = j && j.parts; out.held = j && heldForYou(j);
+          out.tune = SHIP.jobs.some(x => x.kind === 'tune' && x.machine === '4-scrubber-1');
+          out.setOne = tuneSet('4-scrubber-1', 1); out.settle = tuneSet('4-scrubber-1', 0); out.after = machineDrift('4-scrubber-1'); out.again = tuneSet('4-scrubber-1', 2);
+          jobRelease(20); MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t0);
+          return out;
+        })()""")
+        print(f"Tier 2 test job: {tj['id']}, {tj['state']}, drift {tj['drift']}, cause {tj['cause']}, parts {tj['parts']}, held {tj['held']}, its own tune job {tj['tune']}; tuneSet to 1 {tj['setOne']}, to 0 {tj['settle']} (then {tj['after']}), to 2 again {tj['again']}")
+        if not tj['id'] or tj['state'] != 'faulty' or tj['drift'] != 2 or tj['cause'] != 'filter' or not tj['parts'] or tj['parts'][0] != 'filter' or not tj['held'] or tj['tune'] or tj['setOne'] or not tj['settle'] or tj['after'] or tj['again']:
+            fail('the Tier 2 test job')
+
+    # 5x. the lines and traced faults (m9-tracing.html, architect-air-line.html; 0.33.59): every line names only real machines
+    # with panel places, all three on; on a ship with every line machine put right, one machine faulty at a time: the flow
+    # reads full above it and on the other branch, and low at it and below it (its twin side by side too), and the reading
+    # before it is full; Day 12's training fault (5-valve-2) is found reading the middle (5-pump-1: full) then 5-valve-2 (low
+    # after, full before). Traced faults, with you an Officer trained in tracing (a stand-in worksTrained) and the real crew
+    # for twice DAYS days: about half (25-75%) of the line repairs at your tier are traced; each one's cause cuts its line, its card
+    # names the symptom and not the machine, openJobs shows no place; none before you're trained; traceMark keeps its readings
+    # and finds it at its own machine (which reads low there); finishing it puts the machine right and closes it; the same twice
+    if g.ev("typeof MACHINE_LINKS === 'object'"):
+        ln = g.ev("""(() => {
+          const out = { on: {}, notReal: [], noPanel: [], bad: [], train: null };
+          const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min;
+          for (const l in MACHINE_LINKS) { out.on[l] = lineOn(l); for (const id of lineIds(l)) { const m = machineById(id); if (!m || m.stub) out.notReal.push(id); else if (!panelPlace(id)) out.noPanel.push(id); } }
+          JOBS_ON = false; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t0); machinesNow();
+          for (const l in MACHINE_LINKS) for (const x of lineIds(l)) {
+            for (const id of lineIds(l)) serviceMachine(id);
+            machineFault(x, 30);
+            const px = linePath(l, x), step = px[px.length - 1], below = id => { const p = linePath(l, id); return p.length >= px.length && JSON.stringify(p.slice(0, px.length - 1)) === JSON.stringify(px.slice(0, -1)) && p[px.length - 1].some(y => step.includes(y)); };
+            for (const id of lineIds(l)) { const f = lineFlow(l, id), low = below(id) || step.includes(id); if (low ? f >= .8 : f < .99) out.bad.push(l + ': ' + x + ' bad, ' + id + ' reads ' + f); }
+            if (lineFlow(l, x, true) < .99) out.bad.push(l + ': before ' + x + ' ' + lineFlow(l, x, true));
+          }
+          for (const id of lineIds('water')) serviceMachine(id);
+          machineFault('5-valve-2', 35);
+          out.train = [flowWord(lineFlow('water', '5-pump-1')), flowWord(lineFlow('water', '5-valve-2', true)), flowWord(lineFlow('water', '5-valve-2')), flowWord(lineFlow('water', '5-valve-1'))];
+          JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t0);
+          return out;
+        })()""")
+        print(f"Lines (0.33.59): on {ln['on']}, not real {ln['notReal']}, no panel {ln['noPanel']}; one bad machine at a time: wrong readings {ln['bad'][:5]}; Day 12's (5-pump-1, before/after 5-valve-2, 5-valve-1): {ln['train']}")
+        if not all(ln['on'].values()) or ln['notReal'] or ln['noPanel'] or ln['bad'] or ln['train'] != ['full', 'full', 'low', 'full']:
+            fail('the lines and lineFlow')
+        TR = r"""((trained) => {
+          window.__sc("window.__wt = typeof worksTrained === 'function' ? worksTrained : undefined; worksTrained = id => " + (trained ? "id === 'm9' || (window.__wt ? window.__wt(id) : false)" : "id === 'm9' ? false : (window.__wt ? window.__wt(id) : false)"));
+          window.__sc("window.__evTr = [typeof eventNow === 'function' ? eventNow : undefined, typeof eventMod === 'function' ? eventMod : undefined]; if (window.__evTr[0]) eventNow = () => null; if (window.__evTr[1]) eventMod = () => null");
+          const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min, end = t0 + 2 * DAYS * 1440, out = { line: 0, traced: 0, badCause: [], showsMachine: [], placeShown: [], decks: [] };
+          JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; SHIP.works = null; setShipNow(t0); machinesNow();
+          if (typeof worksInit === 'function') worksInit(WORKS_START); if (!SHIP.works) SHIP.works = {}; SHIP.works.tier = 2; SHIP.works.rank = 'officer';   // an Officer from the start
+          const seen = new Map();
+          for (let t = t0; t <= end; t += 60) {
+            setShipNow(t); machinesNow();
+            for (const j of SHIP.jobs) if (!seen.has(j.id)) seen.set(j.id, j);
+            for (const o of openJobs('you')) { const j = seen.get(o.id); if (j && j.symptom && (o.at || o.place || o.room)) out.placeShown.push(o.id); }
+            const j = !out.cardNow && SHIP.jobs.find(x => x.symptom && x.status === 'open' && !x.claimedBy && x.found <= t && !SHIP.jobs.some(y => y.claimedBy === 'you' && y.status === 'claimed'));
+            if (j) {                                       // the first one open: readings, then fixing it
+              out.cardNow = jobCard(j)[0]; const ids = lineIds(j.symptom.line); out.mid = traceMark(j.id, ids[Math.floor(ids.length / 2)]); out.own = traceMark(j.id, j.machine); out.read = j.read.length; out.found = !!j.traceFound;
+              out.claim = claimJob(j.id); jobStops(j).forEach((x, k) => jobStepDone(j.id, k)); out.fin = finishJob(j.id); out.cond = SHIP.machines[j.machine].cond; out.closed = j.status === 'done';
+            }
+          }
+          for (const j of seen.values()) if (j.machine && j.kind === 'repair' && !j.reserved && Math.floor(j.posted / 1440) + 1 >= WORKS_REAL_FROM) {
+            const m = machineById(j.machine), l = lineOf(m.id); if (!l || jobTier(j) > 2 || !(FAULT_CAUSES[m.kind] || []).some(c => c.line === l)) continue;
+            out.line++; if (!j.symptom) continue; out.traced++;
+            const c = faultCause(j); if (!c || c.line !== j.symptom.line || j.symptom.line !== l) out.badCause.push(j.id + ' ' + (c && c.id));
+            const card = jobCard(j); if (!j.traceFound && j.status !== 'done' && card[0].includes(machineTitle(m.id))) out.showsMachine.push(j.id);
+            out.decks.push(j.symptom.deck);
+          }
+          out.sig = JSON.stringify([...seen.values()].filter(x => x.symptom).map(x => x.id + ':' + x.cause + ':' + x.symptom.deck).sort());
+          for (const x of SHIP.jobs) if (x.claimedBy === 'you') { x.claimedBy = null; x.status = 'open'; }
+          SHIP.works = null;
+          window.__sc("if (window.__wt) worksTrained = window.__wt; if (window.__evTr[0]) eventNow = window.__evTr[0]; if (window.__evTr[1]) eventMod = window.__evTr[1]");
+          setShipNow(t0);
+          return out;
+        })"""
+        TR = TR.replace('DAYS', str(DAYS))
+        tr = g.ev(TR + "(true)"); tr2 = g.ev(TR + "(true)"); tu = g.ev(TR + "(false)")
+        share = 100 * tr['traced'] / tr['line'] if tr['line'] else 0
+        print(f"  traced faults ({2 * DAYS} days, an Officer): {tr['traced']} of {tr['line']} line repairs at your tier ({share:.0f}%), decks named {sorted(set(tr['decks']))}; cause off its line {tr['badCause'][:3]}, card shows the machine {tr['showsMachine'][:3]}, openJobs shows a place {tr['placeShown'][:3]}")
+        print(f"  one: '{tr.get('cardNow')}', read the middle {tr.get('mid')}, its own {tr.get('own')}, readings kept {tr.get('read')}, found {tr.get('found')}; claimed {tr.get('claim')}, fixed {tr.get('fin')} ({tr.get('cond')}), closed {tr.get('closed')}; untrained: {tu['traced']} traced; the same twice {tr['sig'] == tr2['sig']}")
+        if (not tr['line'] or not (25 <= share <= 75) or tr['badCause'] or tr['showsMachine'] or tr['placeShown'] or tu['traced'] or tr['sig'] != tr2['sig']
+            or not tr.get('cardNow') or not tr.get('found') or (tr.get('own') or {}).get('word') == 'full' or not tr.get('fin') or (tr.get('cond') or 0) < 90 or not tr.get('closed')):
+            fail('traced faults')
+
     # 6. the save
     rt = g.ev("""(() => {
       JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(6 * 1440 + 11 * 60 + 17); machinesNow();
