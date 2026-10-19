@@ -564,6 +564,7 @@ M13_FX = r"""(() => { if (typeof deckDef === 'undefined' || !deckDef || ![3, 4, 
  S.leaks[0].found = 'you'; leakFx(); const off = [!!LEAK_FX.wet, !!LEAK_FX.damp];
  SHIP.works = JSON.parse(W0); leakFx(); return { deck: n, on, off }; })()"""
 def part_m13(g):
+    check(g.ev(ROW_AGREE)['m13'], 'm13: the ladder row (24 core) and 24o disagree (day, stages, by)')
     st = g.ev(M13_STAND)
     if st: print('  m13 stand-ins:', st)
     a, b = g.ev(M13), g.ev(M13)
@@ -618,6 +619,7 @@ M14 = r"""(() => { const out = {}, W0 = JSON.stringify(SHIP.works);
  out.save = JSON.stringify(nozState());
  SHIP.works = JSON.parse(W0); return out; })()"""
 def part_m14(g):
+    check(g.ev(ROW_AGREE)['m14'], 'm14: the ladder row (24 core) and 24r disagree (day, stages, by)')
     st = g.ev(M14_STAND)
     if st: print('  m14 stand-ins:', st)
     a, b = g.ev(M14), g.ev(M14)
@@ -635,10 +637,20 @@ def part_m14(g):
     check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'm14: differs the second time')
 PARTS['m14'] = part_m14
 
+ROW_STAND = r"""(() => { const out = [];
+  if (typeof LEAK_FROM !== 'undefined' && !ladderRow('m13')) { CAREER_LADDER.push({ id: 'm13', name: 'Leak hunting', size: 'small', day: LEAK_FROM, tier: 2, rank: 'officer', needs: null, by: LEAK_BY.slice(), job: 'leak', stages: [{ uses: 0 }, { uses: LEAK_GALLERY }] }); out.push('m13'); }
+  if (typeof NOZ_FROM !== 'undefined' && !ladderRow('m14')) { CAREER_LADDER.push({ id: 'm14', name: 'Garden irrigation', size: 'small', day: NOZ_FROM, tier: 2, rank: 'officer', needs: null, by: NOZ_BY.slice(), job: 'nozzle', stages: [{ uses: 0 }, { uses: 2 }, { uses: 4 }] }); out.push('m14'); }
+  return out; })()"""
+# the rows (24 core's, E1) and E2's sub-blocks agree: a retune on either side fails here instead of drifting (R4)
+ROW_AGREE = r"""(() => { const r13 = ladderRow('m13'), r14 = ladderRow('m14'), same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+  return { m13: !r13 || (r13.day === LEAK_FROM && r13.tier === 2 && r13.size === 'small' && (r13.stages || [])[1] && r13.stages[1].uses === LEAK_GALLERY && same(r13.by, LEAK_BY)),
+           m14: !r14 || (r14.day === NOZ_FROM && r14.tier === 2 && r14.size === 'small' && same((r14.stages || []).map(x => x.uses), [0, 2, 4]) && same(r14.by, NOZ_BY)) }; })()"""
 only = set(sys.argv[2:])
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     ev = g.ev
+    sr = ev(ROW_STAND)                                     # E2's rows (m13, m14) live in 24 core's table (E1); a stand-in only in a build without it
+    if sr: print('stand-in ladder rows (24 core\'s table not in this build):', sr)
     rows = ev("CAREER_LADDER.map(r => ({ id: r.id, name: r.name, size: r.size, inBuild: !!WORK_MECH[r.id], stages: (r.stages || []).length }))")
     for r in rows:
         if only and r['id'] not in only: continue

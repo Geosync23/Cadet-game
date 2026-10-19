@@ -281,7 +281,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.51.5
+   STARSHIP CADET: CSV Wren                           build 0.51.6
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8694,7 +8694,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.51.5';                           // keep in step with the header's build line
+const GAME_BUILD = '0.51.6';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -41865,7 +41865,7 @@ if (typeof teamJobPost === 'function') WORK_MECH.m8 = {
 // Officer's: about once a week (a workday of yours, posted 08:00) a pipe joint starts to drip and the board says only "A
 // pipe drips somewhere on Deck 4". Find it: a puddle on the floor and a damp patch on the wall show the room; look at the
 // puddle ("coming from above, along the north wall"), then the damp, then the joint: tighten it (a turn), or if it's worn
-// through, a joint from stores (section 17's jointJobPost, held for you). Ladder row m13 (small: its first use is the
+// through, a joint from stores (section 17's jointJobPost, held for you). Ladder row m13 (24 core's table, E1: small, Day 12 = LEAK_FROM, stages at 0 and LEAK_GALLERY uses, by LEAK_BY; its first use is the
 // training, at the puddle: the Works officer on shift finds it with you, the writer's meeting train.m13.<id>). Not taken
 // by the end of your shift: held till 09:00 the next workday, then the crew find it the long way (an hour). Stages: 0 a
 // public room; 1 after 3 leaks also the Deck 5 pipe galleries (works: true places behind their panels); with the pipe kit
@@ -41945,7 +41945,7 @@ function leakStops(j) {
 function leakStepDone(j, k, res, t) {
   if (k > 0 && !(j.stepsDone || []).includes(0)) return false;   // the puddle first
   if (k === 0 && SHIP.works.tr.m13 === undefined) {      // your first: the Works officer on shift finds it with you (the writer's meeting train.m13.<id>, else a word); trained here
-    const by = ladderTeacher(ladderRow('m13'), worksDay(t)) || LEAK_BY[0];
+    const row = ladderRow('m13'), by = (row && ladderTeacher(row, worksDay(t))) || LEAK_BY[0];
     if (!MEETING_SCRIPTS['train.m13.' + by] && !MEETING_SCRIPTS['train.m13']) worksTeach('m13', by, 'puddle', ['Follow the wet, not the noise. Well, both.']);
     worksTrained('m13', t);
   }
@@ -41970,7 +41970,6 @@ function leakDone(j, t, by) {
 if (typeof jobKindAdd === 'function') jobKindAdd('leak', { tier: 2, work: 0, text: 'Leak', stops: leakStops, stepDone: leakStepDone, done: leakDone, veto: true,
   crew: { can: incWorks, mins: LEAK_CREW } });
 if (typeof WORKS_SIDE_KINDS !== 'undefined' && WORKS_SIDE_KINDS.add) WORKS_SIDE_KINDS.add('leak');   // 24 core: a side job's reputation, capped
-if (!ladderRow('m13')) CAREER_LADDER.push({ id: 'm13', name: 'Leak hunting', size: 'small', day: LEAK_FROM, tier: 2, rank: 'officer', needs: null, by: LEAK_BY, job: 'leak', stages: [{ uses: 0 }, { uses: LEAK_GALLERY }] });
 if (JOB_KINDS.leak) WORK_MECH.m13 = {};
 // the clock: the first leak once the row is open (that day by 15:00, else the next workday's 08:00), then the week's on its
 // day at 08:00 (a week with one already, none). After a skip the crew have it in time
@@ -42022,7 +42021,7 @@ WORK_TICKS.push((now, skip) => { if (!skip) leakFx(); });
 // first on or after Day 13) while the garden crew pick, walk the garden's three grow racks (E3's DECKS[3].growRacks,
 // 3-rack-1..3) and clear the clogged nozzles (2 to 4 in all, a short hold each at its rack). The next harvest is a little
 // bigger: irrigationBonus(d), 0 to 0.1, by the share you cleared (section 16's harvest pick reads it, one typeof-guarded
-// line; uncleared nozzles never lower it). Ladder row m14 (small: the first is the training, at the first rack: the
+// line; uncleared nozzles never lower it). Ladder row m14 (24 core's table, E1: small, Day 13 = NOZ_FROM, stages at 0, 2, 4 uses, by NOZ_BY; the first is the training, at the first rack: the
 // gardener leading the harvest, the writer's meeting train.m14.<id>). That evening's salad gets a mention. Stages: 0 the nozzles; 1 after 2 harvests flush a rack's line (a wait, 5 ship
 // minutes); 2 after 4 the irrigation plant (3-irrigation-1) gets a look, and a worn one is found by you. Nobody else
 // clears them: the job goes at midnight, no harm. A friendship step with the gardeners on duty each time. Saved:
@@ -42096,7 +42095,6 @@ function nozDone(j, t, by) {
 }
 if (typeof jobKindAdd === 'function') jobKindAdd('nozzle', { tier: 2, work: 0, text: 'Nozzles', stops: nozStops, stepDone: nozStepDone, done: nozDone, crew: { can: () => false, mins: 30 } });
 if (typeof WORKS_SIDE_KINDS !== 'undefined' && WORKS_SIDE_KINDS.add) WORKS_SIDE_KINDS.add('nozzle');
-if (!ladderRow('m14')) CAREER_LADDER.push({ id: 'm14', name: 'Garden irrigation', size: 'small', day: NOZ_FROM, tier: 2, rank: 'officer', needs: null, by: NOZ_BY, job: 'nozzle', stages: [{ uses: 0 }, { uses: 2 }, { uses: 4 }] });
 if (JOB_KINDS.nozzle) WORK_MECH.m14 = {};
 // the clock: on a harvest morning once the row is open, the job goes up when the crew start picking (the harvest
 // gardeners' first minute, else 10:00) and stays till midnight; a job left from an earlier day goes
