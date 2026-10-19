@@ -281,7 +281,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.45.15
+   STARSHIP CADET: CSV Wren                           build 0.45.16
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8694,7 +8694,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.45.15';                           // keep in step with the header's build line
+const GAME_BUILD = '0.45.16';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -39887,13 +39887,17 @@ function roundRoute(day, train) {
   const n = roundDeck(day, train), pool = roundPool(n), D = DECKS[n];
   const want = Math.min(pool.length, 4 + Math.floor(schedU(day, 0, 860) * 3));
   const pick = pool.slice().sort((a, b) => schedU(a.seed, day, 860) - schedU(b.seed, day, 860) || (a.id < b.id ? -1 : 1)).slice(0, want);
-  const out = []; let at = D && D.lift ? D.lift : pick.length ? pick[0].panel : [0, 0];
-  while (pick.length) {                                  // the nearest next, from the lift
+  const out = roundWalk(pick, D);
+  const w = train ? out.findIndex(id => machineById(id).kind === 'washer') : -1;   // Torres starts at a washer (his first line is about one)
+  if (w > 0) out.unshift(out.splice(w, 1)[0]);
+  return out;
+}
+function roundWalk(ms, D) {                              // machines in walking order: the nearest next, from the lift (0.45.16: roundRoute's own, shared with stage 2's picks)
+  const pick = ms.slice(), out = []; let at = D && D.lift ? D.lift : pick.length ? pick[0].panel : [0, 0];
+  while (pick.length) {
     let k = 0; pick.forEach((m, i) => { const a = Math.hypot(m.panel[0] - at[0], m.panel[1] - at[1]), b = Math.hypot(pick[k].panel[0] - at[0], pick[k].panel[1] - at[1]); if (a < b || a === b && m.id < pick[k].id) k = i; });
     out.push(pick[k].id); at = pick[k].panel; pick.splice(k, 1);
   }
-  const w = train ? out.findIndex(id => machineById(id).kind === 'washer') : -1;   // Torres starts at a washer (his first line is about one)
-  if (w > 0) out.unshift(out.splice(w, 1)[0]);
   return out;
 }
 const roundState = id => { const s = SHIP.machines[id]; return s ? s.state : 'healthy'; };
@@ -39916,7 +39920,7 @@ const roundFound = (id, by) => typeof machineFound === 'function' ? machineFound
 function roundMark(j, k, pick) {
   const id = (j.route || [])[k]; if (!id || !ROUND_MARKS.some(x => x[0] === pick)) return null;
   const st = roundState(id), right = roundRight(pick, st), first = !(j.marks && j.marks[id]);
-  (j.marks = j.marks || {})[id] = pick;
+  (j.marks = j.marks || {})[id] = pick; if (!j.train && typeof roundLast === 'function') roundLast()[id] = worksDay(shipNow());   // stage 2's "last looked" (0.45.16)
   const f = right && first ? roundFound(id, 'you') : null;
   let said = null;
   if (f && f.fresh) { worksXp(1); said = roundText('round.found', 'Found by you: {machine}.', { machine: machineLabel(machineById(id)).split(',')[0] }); }
@@ -39930,6 +39934,9 @@ function roundMark(j, k, pick) {
 function roundDone(j, t, by) {
   if (by && by !== 'you') for (const id of j.route || []) if (roundState(id) !== 'healthy') roundFound(id, by);
   if (by === 'you') { worksUse('m1'); try { toast('Round', roundText('round.done', 'Round done. Anything worn is on the board, found by you.')); } catch (e) { /* no UI */ } }
+  if (by === 'you' && !j.train && typeof roundPicks === 'function' && roundPicks() && (j.route || []).filter(id => roundState(id) === 'worn' && roundRight((j.marks || {})[id], 'worn')).length >= 2) {   // stage 2: two or more worn found (0.45.16)
+    worksSayAll('torres-zeke', worksVoice('torres-zeke', 'round.two') || ['Two worn on one round? You\'ve got the eye now.']); worksSideXp(1, 'round');
+  }
 }
 // a round job on the list: { kind: 'rounds', route, marks, deck, room, title }. o.train: the training's, held for you
 // (reserved slot): since 0.45.9 (playtest 2) the whole route is yours after Torres's talk (o.yours); a teacher's round
@@ -39952,7 +39959,7 @@ if (typeof jobKindAdd === 'function') jobKindAdd('rounds', { tier: 1, junior: fa
   },
   stops: j => (j.route || []).map(id => { const m = machineById(id); return { deck: m.deck, placeId: panelPlace(id), mins: ROUND_LOOK, tag: 'look', how: 'look',
     opts: { secs: 4, text: roundSign(id, worksDay(shipNow())), marks: ROUND_MARKS.map(([x, label]) => ({ id: x, label: roundText('round.mark.' + x, label) })) } }; }),
-  stepDone: (j, k, res) => roundMark(j, k, res && res.pick),
+  stepDone: (j, k, res) => { const said = roundMark(j, k, res && res.pick); return typeof roundDoor === 'function' ? roundDoor(j, k, said) : said; },   // stage 3: the doorway (0.45.16)
   done: roundDone,
   crew: { can: p => !!p.work && p.work.place === 'work:works', mins: 25 } });
 // the ladder row (m1): the training's two rounds are this block's own (reserve), held in the teacher's slot. Only
@@ -39968,6 +39975,58 @@ if (typeof jobKindAdd === 'function') WORK_MECH.m1 = {
   watch: 10,                                             // ship minutes watching Torres look at his two (before 0.45.9)
   self: true,                                            // playtest 2, item 1 (0.45.9): Torres explains at the meeting, then your first round is on the board; the arrow and green tips walk you through it
 };
+// stages 2 and 3 (0.45.16, E6; step4-stages). Stage 2 (row m1's stage 1, after 5 rounds): taking a morning round, the
+// clipboard lists the deck's machines, the longest unlooked first, with "last looked" days (W2's round.last /
+// round.last.never; SHIP.works.side.round.last = { machine id: ship day }, kept by your marks); you pick 4 to 6 (j.pick,
+// then j.route in walking order; refused before 4: the day's route stays). Two or more worn ones found on a round of
+// yours: Torres's round.two and +1 through worksSideXp. Stage 3 (the scanner: stage 2 and 5 rounds): at a room's first
+// machine one look reads every machine of the route in that room (round.doorway, each marked as it is, the unhealthy
+// found by you; their stops done), for one scan's charge (toolWear('scanner', 4)). The training round is neither
+const roundLast = () => { const S = worksSide(); if (!S) return {}; const r = S.round && typeof S.round === 'object' && !Array.isArray(S.round) ? S.round : (S.round = {}); return r.last && typeof r.last === 'object' && !Array.isArray(r.last) ? r.last : (r.last = {}); };
+const roundPicks = () => !!SHIP.works && worksStage('m1') >= 1;
+const roundDoorway = () => !!SHIP.works && worksStage('m1') >= 2 && (SHIP.works.use.m1 || 0) >= 5 && typeof toolState === 'function' && !!toolState('scanner');
+function roundLastText(id, d) {
+  const L = roundLast(), n = Number.isFinite(L[id]) ? d - L[id] : null;
+  return n === null ? worksText('round.last.never', 'not looked at yet') : n <= 0 ? 'looked at today' : roundText('round.last', 'last looked {n} days ago', { n }).replace(/\b1 days\b/, '1 day');
+}
+function roundPicked(j) {                                // your picks as the route, in walking order (before any look)
+  if ((j.pick || []).length >= 4 && !(j.stepsDone || []).length) {
+    j.route = roundWalk(j.pick.map(id => machineById(id)).filter(Boolean), DECKS[j.deck]); j.marks = {};
+    j.stops = kindStops(j).map(plainStop); if (typeof MACH_REV !== 'undefined') MACH_REV++;
+  }
+  delete j.pick;
+}
+function roundPickAsk(j) {                               // one machine at a time; from the fourth, "That's my round"
+  const d = worksDay(shipNow()), L = roundLast(), pool = roundPool(j.deck).map(m => m.id).filter(id => !j.pick.includes(id));
+  if (j.pick.length >= 6 || !pool.length) return roundPicked(j);
+  pool.sort((a, b) => (Number.isFinite(L[a]) ? L[a] : -1) - (Number.isFinite(L[b]) ? L[b] : -1) || (a < b ? -1 : 1));
+  const choices = pool.map(id => machineLabel(machineById(id)).split(',')[0] + ' · ' + roundLastText(id, d)).concat(j.pick.length >= 4 ? ['That\'s my round'] : []);
+  const shown = deviceChoose({ title: 'Round', text: j.pick.length ? 'And next?' : roundText('round.pick', 'Pick four to six to look at today.'), choices }, i => {
+    if (!pool[i]) return roundPicked(j);
+    j.pick.push(pool[i]); if (typeof simTimeout === 'function') simTimeout(() => roundPickAsk(j), 400); else roundPickAsk(j);
+  });
+  if (!shown) roundPicked(j);                            // the device busy: what you've picked if it's four, else the day's route
+}
+if (WORK_MECH.m1) WORK_TICKS.push((now, skip) => {
+  if (skip || typeof myJob !== 'function') return; const j = myJob();
+  if (!j || j.kind !== 'rounds' || j.reserved || j.train || j.picked || !roundPicks() || (j.stepsDone || []).length) return;
+  j.picked = true; j.pick = []; roundPickAsk(j);
+});
+// stage 3: the look at stop k reads the rest of its room from the doorway; returns the words after the step
+function roundDoor(j, k, said) {
+  const id = (j.route || [])[k], m = id && machineById(id); if (!m || j.reserved || j.train || !roundDoorway()) return said;
+  const done = new Set(j.stepsDone || []), ks = j.route.map((x, i) => i).filter(i => i !== k && !done.has(i) && !(j.marks || {})[j.route[i]] && machineById(j.route[i]) && machineById(j.route[i]).deck === m.deck && machineById(j.route[i]).room === m.room);
+  if (!ks.length) return said;
+  const out = said ? [said] : [];
+  for (const i of ks) {
+    const x = j.route[i], st = roundState(x), pick = st === 'healthy' ? 'fine' : st === 'worn' ? 'worn' : 'off', f = roundMark(j, i, pick);
+    (j.res || (j.res = {}))[i] = { pick, door: true }; done.add(i);
+    out.push(roundText('round.doorway', 'From the doorway: {machine}, {word}.', { machine: machineLabel(machineById(x)).split(',')[0], word: roundText('round.mark.' + pick, ROUND_MARKS.find(r => r[0] === pick)[1]).toLowerCase() }));
+    if (f) out.push(f);
+  }
+  j.stepsDone = [...done].sort((a, b) => a - b); toolWear('scanner', 4);
+  return out.join(' ');
+}
 // the training round's walk-through (0.45.9, for U's arrow and green tips: the writer's tip.round.<step>, {machine}):
 // roundTrainStep() -> null, or { step: 'take' | 'go' | 'look' | 'mark' | 'next' | 'done', job, machine (its name), deck, place }
 // take: on the board, not yours yet; go / next: walk to the first / next machine; look: at it (tap to look, or looking);
