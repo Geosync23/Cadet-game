@@ -162,3 +162,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - CR2 92d40d5: disc OK (left: bubble, join, leave). BM8 placing the tip-arrow FAIL on 2bc08d5 + U2 and 2bc08d5 + E6 + U2.
 - ~08:14 R6 PASS U2 0f34cfb (0.73.2) and X2 693e4f4 (0.71.5; cadet diffs = morning crew only). R6 asks for the merge hash with the roofTalk guard fix: 92d40d5.
 - ~08:15 lead 18: U2 has till ~08:50 to fix the tip-arrow FAIL on 92d40d5; else 0.63.4 = U 0335523 instead of U2 0f34cfb (t14 green), U2's extras → 0.63.5; X2 entirely out (no 0.71.4). Fallback prepared: tf3 (wt5, local commit a8f5a5b) = 2bc08d5 + E6 5bd6f97 + E5 2c513e6 + E4 b0cb86c + roofTalk merge fix + U 0335523 + W2 0e8571a: NAMES OK (3225), parses, verify 11 explained, bake 9565/48. Not run yet (box full).
+- ~08:15 R6 confirms 92d40d5: roofTalk guard on its own line, parses, roof.wait baked; E4 0.53.15 good as merged (same fix in tf3).
