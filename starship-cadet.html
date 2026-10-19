@@ -269,7 +269,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.63.2r
+   STARSHIP CADET: CSV Wren                           build 0.51.2
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8613,7 +8613,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.63.2r';                           // keep in step with the header's build line
+const GAME_BUILD = '0.51.2';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -39990,6 +39990,190 @@ function incFx() {
   } catch (e) { console.error(e); }
 }
 WORK_TICKS.push((now, skip) => { if (!skip) incFx(); });
+
+// ---------------------------------------------------------------------
+// 24h TEAM JOBS (M8, seat M2, 0.51.x; plans/mechanics/m8-team-jobs.html). A big job three or four Works crew do at once at
+// a set time: each step names who does it; a crew member's step takes its minutes on paper, yours waits for you (a toast
+// and the goal pointer) and you do it at your spot (section 15's hold or turn). As an Officer you're one pair of hands.
+// It waits for you 15 minutes at the start; then your steps go to the lead and it runs 20% slower. Never a fail.
+// The rota (the user, 2026-10-18): Tuesdays and Thursdays 09:30, and Fridays 14:00 in even ship weeks (Day 12 skipped:
+// the tracing lesson); from Day 11 (the recycler, the training). A day with an incident, a ship-wide event or your test
+// job moves to the next free workday that week, or drops; never one machine twice a week. Posted at 16:00 the day before,
+// with Mail if you're in it. Finishing puts the machines right (an overhaul). Ladder row m8 (24 core's table): the
+// training is the Day 11 recycler with Halloran (or the first Works officer on shift). Saved: SHIP.works.team = { plan:
+// { week: [[day, minute, job id, kind], ...] } } (ship.works.team, old weeks dropped); the job itself in ship.jobs (j.team,
+// j.steps, j.cur, j.stepAt, j.late). Section 17's side: teamKind() (S2's 'team' kind, else this block's own), teamBlock
+// (the crew's plans, S2), teamOverhaul. Hash keys 876 (the machine on ties), 877 (the team). No R().
+const TEAM_JOBS = {                                      // steps: [who (0 the lead, 1.. the crew, 'you'), part, how, minutes]
+  recycler: { machines: ['3-recycler-1'], n: 4, deck: 3, steps: [[1, 'drain', 'turn', 6], ['you', 'brace', 'hold', 2], [0, 'hold', 'hold', 8], ['you', 'pass', 'hold', 2], [2, 'hold', 'hold', 10], ['you', 'brace', 'hold', 2], [0, 'open', 'turn', 5]] },
+  washer: { machines: ['4-washer-1', '4-washer-2', '4-washer-3', '4-washer-4'], n: 3, deck: 4, steps: [[0, 'drain', 'turn', 6], ['you', 'tip', 'hold', 2], [1, 'hold', 'hold', 8], ['you', 'pass', 'hold', 2], [0, 'hold', 'hold', 10], ['you', 'crank', 'turn', 3], [1, 'open', 'turn', 4]] },
+  manifold: { machines: ['5-manifold-1'], n: 3, deck: 5, steps: [['you', 'valves', 'turn', 3], [0, 'hold', 'hold', 8], ['you', 'hold', 'hold', 2], [1, 'pass', 'hold', 8], [0, 'hold', 'hold', 8], ['you', 'open', 'turn', 3]] },
+  heater: { machines: ['4-heater-1'], n: 3, deck: 4, steps: [['you', 'drain', 'turn', 3], [0, 'hold', 'hold', 6], ['you', 'hold', 'hold', 2], [1, 'pass', 'hold', 8], ['you', 'pass', 'hold', 2], [0, 'open', 'turn', 6]] },
+  scrubber: { machines: ['4-scrubber-1', '4-scrubber-2'], n: 3, deck: 4, steps: [[0, 'drain', 'turn', 4], ['you', 'hold', 'hold', 2], [1, 'pass', 'hold', 8], ['you', 'pass', 'hold', 2], [0, 'hold', 'hold', 10], ['you', 'hold', 'hold', 2], [1, 'open', 'turn', 4]] } };
+const TEAM_NAME = { recycler: 'Recycler membrane change', washer: 'Washer overhaul', manifold: 'Manifold valve bank', heater: 'Heating plant pump swap', scrubber: 'Scrubber fan change' };
+const TEAM_PART = { brace: 'brace the housing', pass: 'pass the part', hold: 'hold it steady', crank: 'crank the drum', tip: 'tip and hold', valves: 'close the valves in order', open: 'open up again', drain: 'drain it down' };
+const TEAM_ROTA = [[1, 570], [3, 570]], TEAM_FRI = [4, 840];   // Tue and Thu 09:30; Fri 14:00 in even ship weeks
+const TEAM_FIRST = { day: 11, kind: 'recycler', at: 570 }, TEAM_SKIP = [12];
+const TEAM_POST = 960, TEAM_WAIT = 15, TEAM_SLOW = 1.2;  // posted 16:00 the day before; waits 15 minutes for you; 20% slower without you
+const teamWeek = d => Math.floor((d - 1) / 7);           // (ship week number = this + 1; "even weeks" are odd here)
+const teamText = (key, fb, v) => worksText(key, fb, v);
+function teamState() { const W = SHIP.works; if (!W) return null; if (!W.team || typeof W.team !== 'object') W.team = { plan: {} }; return W.team; }
+function teamClean(s, d = worksDay(shipNow())) {
+  const out = { plan: {} }; if (!s || typeof s !== 'object' || !s.plan || typeof s.plan !== 'object') return out;
+  for (const w in s.plan) if (/^\d{1,4}$/.test(w) && +w >= teamWeek(d) && Array.isArray(s.plan[w])) out.plan[w] = s.plan[w].filter(e => Array.isArray(e) && Number.isInteger(e[0]) && Number.isInteger(e[1]) && TEAM_JOBS[e[3]]).slice(0, 4).map(e => [e[0], e[1], typeof e[2] === 'string' ? e[2].slice(0, 80) : null, e[3]]);
+  return out;
+}
+(() => { const s = SAVED && SAVED.ship && SAVED.ship.works; if (SHIP.works && s && s.team) SHIP.works.team = teamClean(s.team); })();
+// ---- the adapter to section 17 (seat S2): its 'team' kind and crew plans when it has them, else this block's own ----
+const teamBlock = (j) => { if (typeof teamCrewBlock === 'function') try { teamCrewBlock(j); } catch (e) { console.error(e); } };
+function teamOverhaul(j, t) {                            // the machines put right (an overhaul: 90)
+  if (typeof teamMachinesRight === 'function') return teamMachinesRight(j, t);
+  machinesNow();
+  for (const id of j.machines || []) { const s = SHIP.machines[id]; if (s) { s.cond = Math.max(s.cond, 90); s.state = machineState(s.cond); s.lastService = t; } }
+  if (typeof MACH_REV !== 'undefined') MACH_REV++;
+}
+// ---- the plan ----
+const teamYouIn = (W = SHIP.works) => !!W && (W.rank !== 'junior' || W.tr.m8 !== undefined || !!(W.cur && W.cur.id === 'm8'));
+const teamBusy = (d, W) => (typeof incPlan === 'function' && (() => { const P = incPlan(teamWeek(d)); return P && P.length && P[1] === d; })()) || (typeof incShipEvent === 'function' && incShipEvent(d)) || !!(W.test && W.test.day === d);
+function teamNeed(kind) { const ms = TEAM_JOBS[kind].machines.filter(id => SHIP.machines[id]); return ms.length ? ms.reduce((a, id) => a + SHIP.machines[id].cond, 0) / ms.length : 101; }
+// teamPlan(w): [[day, minute, job id | null, kind], ...]: the rota's days that week (from Day 11), a clash moved to the
+// next free workday or dropped, each the TEAM_JOBS machine most in need not yet used that week (key 876 on ties)
+function teamPlan(w) {
+  const T = teamState(), W = SHIP.works; if (!T) return [];
+  if (T.plan[w]) return T.plan[w];
+  const slots = TEAM_ROTA.slice(); if ((w + 1) % 2 === 0) slots.push(TEAM_FRI);
+  const out = [], used = new Set(), taken = new Set();
+  for (const [wd, at] of slots) {
+    let d = w * 7 + 1 + wd; if (d < TEAM_FIRST.day || TEAM_SKIP.includes(d)) continue;
+    while (d <= w * 7 + 5 && (taken.has(d) || TEAM_SKIP.includes(d) || teamBusy(d, W))) d++;
+    if (d > w * 7 + 5) continue;
+    let kind = d === TEAM_FIRST.day ? TEAM_FIRST.kind : null;
+    if (!kind) { const ks = Object.keys(TEAM_JOBS).filter(k => !used.has(k) && TEAM_JOBS[k].machines.some(id => SHIP.machines[id])); if (!ks.length) continue;
+      kind = ks.sort((a, b) => teamNeed(a) - teamNeed(b) || schedU(machSeed(a), w, 876) - schedU(machSeed(b), w, 876))[0]; }
+    used.add(kind); taken.add(d); out.push([d, d === TEAM_FIRST.day ? TEAM_FIRST.at : at, null, kind]);
+  }
+  return T.plan[w] = out;
+}
+// the team: Works crew on shift that day, not busy at another team job, in the key-877 order; n (one fewer when you're in)
+function teamCrew(d, n, w) {
+  const busy = new Set(SHIP.jobs.filter(j => j.kind === 'team' && j.status !== 'done' && Math.floor(j.at / 1440) + 1 === d).flatMap(j => j.team || []));
+  const ps = schedPeople().filter(p => jobCrew(p) === 'works' && !busy.has(p.id) && (() => { try { return occOnShift(p.id, d); } catch (e) { return false; } })());
+  const os = ps.filter(p => OFFICER_RANKS.has(p.rank)), lead = (typeof ladderRow === 'function' && ladderRow('m8') ? ladderRow('m8').by : ['torres-zeke', 'halloran-emeka', 'calder']).find(id => ps.some(p => p.id === id)) || (os[0] && os[0].id) || (ps[0] && ps[0].id);
+  const rest = ps.filter(p => p.id !== lead).sort((a, b) => schedU(machSeed(a.id), d, 877) - schedU(machSeed(b.id), d, 877) || (a.id < b.id ? -1 : 1)).map(p => p.id);
+  return lead ? [lead].concat(rest).slice(0, n) : [];
+}
+// a team job, ready to push: j.team (crew ids, the lead first, and 'you' if you're in), j.steps [{ who, part, how, mins,
+// placeId }], j.at, j.end; yours: claimed for you at once (a side job: beside your board job, never the crew's to take)
+function teamJob(kind, d, at, o = {}) {
+  const T = TEAM_JOBS[kind], ms = T.machines.filter(id => machineById(id)); if (!ms.length) return null;
+  const you = o.you !== undefined ? o.you : teamYouIn() && playerShiftOn(d), crew = teamCrew(d, T.n - (you ? 1 : 0)); if (crew.length < 2) return null;
+  const team = you ? crew.concat('you') : crew.slice(), m0 = machineById(ms[0]), t = (d - 1) * 1440 + at;
+  const spot = k => { const id = kind === 'washer' ? '4-washer-team-' + (k + 1) : ms[0] + '-team-' + (k + 1), alt = (kind === 'washer' ? '4-washer' : ms[0].replace(/-\d+$/, '')) + '-team-' + (k + 1); return placeById(id) ? id : placeById(alt) ? alt : panelPlace(ms[0]); };
+  const steps = T.steps.map(([who, part, how, mins]) => { const k = who === 'you' ? team.length - 1 : Math.min(who, crew.length - 1); return { who: who === 'you' ? (you ? 'you' : crew[0]) : crew[k], part, how, mins, placeId: spot(who === 'you' ? team.length - 1 : k) }; });
+  const mins = steps.reduce((a, s) => a + s.mins, 0);
+  const j = jobMake('team', { id: 'team:' + kind + '@' + d, machine: ms[0], machines: ms, deck: m0.deck, room: m0.room, h: Math.floor(t / 60),
+    title: teamText('team.card', '{job}, {time}, Deck {deck}, a team of {n}', { job: teamText('team.name.' + kind, TEAM_NAME[kind]), time: hhmm(at), deck: m0.deck, n: team.length }),
+    team, steps, team_kind: kind, at: t, end: t + mins, cur: -1, stepAt: null, late: false, urgency: 1, only: 'officer', ...(o.train ? { train: o.train } : {}), ...(o.slot ? { reserved: o.slot, until: (d - 1) * 1440 + DAY_SHIFT[1] } : {}) });
+  j.posted = j.found = Math.min(shipNow(), t);
+  if (you) { j.claimedBy = 'you'; j.status = 'claimed'; j.start = j.posted; }
+  return j;
+}
+function teamPost(P, w, t) {                             // a plan entry posted (16:00 the day before): the job, the crew's plans, Mail
+  const [d, at, , kind] = P; if (P[2] && SHIP.jobs.some(j => j.id === P[2])) return null;
+  const j = teamJob(kind, d, at); if (!j) { P[2] = 'none'; return null; }
+  SHIP.jobs.push(j); P[2] = j.id; teamBlock(j); if (typeof MACH_REV !== 'undefined') MACH_REV++;
+  if (j.team.includes('you') && typeof mailSend === 'function') mailSend({ at: t, from: worksName(j.team[0]), subject: teamText('team.name.' + kind, TEAM_NAME[kind]),
+    body: teamText('mail.team', '{job}, {time} tomorrow, Deck {deck}. You\'re one of the team. — {name}', { job: teamText('team.name.' + kind, TEAM_NAME[kind]), time: hhmm(at), deck: j.deck, name: worksFirst(j.team[0]) }) });
+  return j;
+}
+// ---- the run: the steps in order; a crew step its minutes on paper, yours waits for you ----
+function teamStepMins(j, s) { return Math.ceil(s.mins * (j.late ? TEAM_SLOW : 1)); }
+function teamNext(j, t) {                                // move to the next step (or finish)
+  j.cur++; j.stepAt = t;
+  if (j.cur >= j.steps.length) return teamFinish(j, t);
+  const s = j.steps[j.cur];
+  simNote('team', { id: j.id, step: j.cur, by: s.who, kind: s.who === 'you' ? 'turn' : 'step' });
+  if (s.who === 'you') {
+    try { toast(teamText('team.name.' + j.team_kind, TEAM_NAME[j.team_kind]), teamText('team.turn.' + s.part, 'Your turn: ' + TEAM_PART[s.part] + '.', { job: teamText('team.name.' + j.team_kind, TEAM_NAME[j.team_kind]) })); } catch (e) { /* no UI */ }
+    const pl = placeById(s.placeId); if (pl && typeof setGoal === 'function') setGoal({ deck: pl.deck, room: pl.room, label: TEAM_PART[s.part] });
+  } else if (j.team.includes('you')) worksTeach('m8', j.team[0], 'call.' + s.part, null);
+  return true;
+}
+function teamFinish(j, t) {
+  teamOverhaul(j, t); j.cur = j.steps.length;
+  const you = j.team.includes('you') && j.steps.some(s => s.who === 'you');
+  simNote('team', { id: j.id, step: j.steps.length, by: you ? 'you' : j.team[0], kind: 'done' });
+  if (j.team.includes('you')) { worksTeach('m8', j.team[0], 'done', [teamText('team.done', 'That\'s it. Good work, all.')]); }
+  jobFinish(j, t, you ? 'you' : j.team[0]);
+  if (you) { worksXp(2); worksUse('m8'); const c = SHIP.works.cur; if (c && c.id === 'm8' && c.j === j.id) worksTrained('m8', t); }   // (trained here: the finished job can be tidied off the list before the training's minute)
+  if (typeof MACH_REV !== 'undefined') MACH_REV++;
+  return true;
+}
+// you're late: 15 minutes after the start without your first step done, yours go to the lead and the job runs slower
+function teamLate(j, t) {
+  j.late = true; for (const s of j.steps) if (s.who === 'you') s.who = j.team[0];
+  j.team = j.team.filter(x => x !== 'you'); if (j.claimedBy === 'you') { j.claimedBy = j.team[0]; }
+  simNote('team', { id: j.id, step: j.cur, by: j.team[0], kind: 'late' });
+  try { toast(teamText('team.name.' + j.team_kind, TEAM_NAME[j.team_kind]), teamText('team.late', '{name} started without you.', { name: worksFirst(j.team[0]) })); } catch (e) { /* no UI */ }
+}
+function teamTick(j, now, skip) {
+  if (j.status === 'done' || now < j.at) return;
+  if (j.cur < 0) { simNote('team', { id: j.id, step: 0, by: j.team[0], kind: 'start' }); if (j.team.includes('you') && !skip) worksTeach('m8', j.team[0], 'call.start', null); j.cur = -1; teamNext(j, j.at); }
+  for (let guard = 0; guard < 20 && j.status !== 'done'; guard++) {
+    const s = j.steps[j.cur]; if (!s) break;
+    if (s.who === 'you') { if (skip || now >= j.at + TEAM_WAIT && !j.youBegan) { teamLate(j, now); continue; } break; }
+    const t = j.stepAt + teamStepMins(j, s); if (now < t) break;
+    teamNext(j, t);
+  }
+}
+// your stops: your steps, in order; one done out of turn is refused (section 17's def.veto) with a word
+function teamStops(j) { return (j.steps || []).filter(s => s.who === 'you').map((s, k) => ({ deck: (placeById(s.placeId) || { deck: j.deck }).deck, placeId: s.placeId, mins: s.how === 'hold' ? s.mins : 1, tag: 'team', how: s.how,
+  opts: s.how === 'turn' ? { label: TEAM_PART[s.part], v: 0, min: 0, max: 3, by: 1, onTurn: v => v >= 3 ? null : teamText('team.turning', 'Keep going.'), ok: v => v >= 3, gauge: null } : null })); }
+function teamStepDone(j, k, res, t) {
+  const mine = j.steps.map((s, i) => s.who === 'you' ? i : -1).filter(i => i >= 0), i = mine[k];
+  if (i === undefined || i !== j.cur) { try { toast(j.title, teamText('team.wait', 'Not yet: wait for {name}\'s call.', { name: worksFirst(j.team[0]) })); } catch (e) { /* no UI */ } return false; }
+  j.youBegan = true; simNote('team', { id: j.id, step: i, by: 'you', kind: 'step' });
+  teamNext(j, t !== undefined ? t : shipNow());
+  return true;
+}
+function teamKindDef() {
+  return { tier: 2, work: 0, side: true, veto: true, text: 'Team job', stops: teamStops, stepDone: teamStepDone,
+    done(j, t, by) { if (j.cur < j.steps.length) teamOverhaul(j, t); },   // (finished from outside: the machines still put right)
+    crew: { can: () => false, mins: 0 } };
+}
+if (typeof jobKindAdd === 'function' && !JOB_KINDS.team) jobKindAdd('team', teamKindDef());
+// the clock: the week's plan posted at 16:00 the day before; each team job's steps run
+if (JOB_KINDS.team) WORK_TICKS.push((now, skip) => {
+  if (!teamState()) return;
+  const d = worksDay(now), m = now - (d - 1) * 1440, w = teamWeek(d);
+  for (const ww of [w, w + 1]) for (const P of teamPlan(ww)) if (!P[2] && (P[0] - 2) * 1440 + TEAM_POST <= now && now < (P[0] - 1) * 1440 + P[1]) teamPost(P, ww, Math.max(now, (P[0] - 2) * 1440 + TEAM_POST));
+  for (const j of SHIP.jobs) if (j.kind === 'team' && j.status !== 'done') teamTick(j, now, skip);
+});
+// the ladder row (m8, 24 core's table): the teacher's Mail at 08:05 (works.ask.m8) and the meeting at the recycler at 09:30;
+// the training's job is the Day 11 team job itself (you in it), held in the slot; trained when it's done with you in it
+function teamOffer(row, c, d, t) {
+  const by = ladderTeacher(row, d); if (!by) return false;
+  const o = trainSetup(row); o.by = by; o.script = trainScript(row, by); o.deck = 3; o.room = 'R';
+  const r = occasionAdd('works.' + row.id, (d - 1) * 1440 + TEAM_FIRST.at - 10, true, 15); if (!r) return false;
+  c.by = by; c.d = d; c.w = 0; c.st = 'meet'; c.occ = r.key;
+  if (typeof mailSend === 'function') mailSend({ at: Math.max(t, (d - 1) * 1440 + 485), from: worksName(by), subject: mechName('m8'),
+    body: worksText('works.ask.m8', 'Recycler\'s membrane bank, 09:30, Deck 3. Need four. You\'re the fourth. — {name}', { name: worksFirst(by) }) });
+  return true;
+}
+if (JOB_KINDS.team) WORK_MECH.m8 = {
+  offer: teamOffer,
+  reserve(d, at, slot, o = {}) {
+    const P = teamPlan(teamWeek(d)).find(e => e[0] === d) || null;
+    let j = P && P[2] && SHIP.jobs.find(x => x.id === P[2] && x.status !== 'done');
+    if (j && !j.team.includes('you')) { SHIP.jobs = SHIP.jobs.filter(x => x !== j); j = null; }
+    if (!j) { j = teamJob(P ? P[3] : TEAM_FIRST.kind, d, P ? P[1] : Math.max(at + 20, TEAM_FIRST.at), { you: true, slot, train: 'm8' }); if (!j) return null; SHIP.jobs.push(j); teamBlock(j); if (P) P[2] = j.id; }
+    j.reserved = slot; j.until = (d - 1) * 1440 + DAY_SHIFT[1]; j.train = 'm8';
+    if (typeof MACH_REV !== 'undefined') MACH_REV++;
+    return j.id;
+  },
+  watch: 0,
+  oneJob: true,                                          // the teacher leads the same job you're in (no teacher's job first)
+};
 
 
 // =====================================================================
