@@ -255,9 +255,13 @@ with sync_playwright() as pw:
     r = ev("""(() => { SHIP.rep = null; const w0 = careerWork(), d0 = repInit().dept.works, n0 = FLOATS.length; REP_CHIP_AT = -1e9; if (DEV.notes) delete DEV.notes.record;
       simNote('job', { id: 'x1', step: 'turnin', job: 'restock', machine: null }); const n1 = FLOATS.length, text = n1 > n0 ? FLOATS[n1 - 1][0].textContent : null;
       simNote('job', { id: 'x2', step: 'turnin', job: 'restock', machine: null }); const n2 = FLOATS.length;
-      return { text, once: n1 === n0 + 1 && n2 === n1, work: careerWork() > w0, dept: repInit().dept.works > d0, badge: DEV.notes && DEV.notes.record === 1 }; })()""")
+      const card = typeof turnInShow === 'function', words = card ? turnInGains({ gains: { rep: [{ dept: 'works' }] } }, null).map(c => c.text) : null, want = card ? (careerText('works.turnin.rep') || 'Works reputation up') : null;   // Step 3 (HUD 0.72.3): the turn-in's chips say it instead
+      return { text, once: n1 === n0 + 1 && n2 === n1, none: n1 === n0 && n2 === n0, card, words, want, work: careerWork() > w0, dept: repInit().dept.works > d0, badge: DEV.notes && DEV.notes.record === 1 }; })()""")
     print('  ', r)
-    check(r['text'] == '+ Works reputation' and r['once'], f"the reputation chip: {r['text']}, once: {r['once']}")
+    if r['card']:   # since Step 3 the board's turn-in shows the rep as a chip in its card (HUD 0.72.3); no floating chip as well
+        check(r['none'] and r['words'] == [r['want']], f"the reputation on the turn-in card: {r['words']} (the head writer's works.turnin.rep: {r['want']}), no floating chip as well: {r['none']}")
+    else:
+        check(r['text'] == '+ Works reputation' and r['once'], f"the reputation chip: {r['text']}, once: {r['once']}")
     check(r['work'] and r['dept'], 'turning in a job without a machine gave no reputation')
     check(r['badge'], 'the Record app got no mark')
 
