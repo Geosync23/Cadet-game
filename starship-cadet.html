@@ -10162,7 +10162,9 @@ function crewSceneEnd(id) { CREW_SCENE.delete(id && (id.id || id)); }
 function crewSceneOf(p, t) {
   const s = CREW_SCENE.size && CREW_SCENE.get(p.id); if (!s) return null;
   if (t >= s.until) { CREW_SCENE.delete(p.id); return null; }
-  return { mode: s.mode, to: s.to, hold: s.hold, pace: s.pace, scene: true };
+  let to = s.to;                                         // a place on another deck: there, by its tile (escortWhere only looks places up on this deck)
+  if (typeof to === 'string' && typeof deckOf === 'function') { const d = deckOf(to), pl = DECKS[d] && (DECKS[d].places || []).find(q => q.id === to); if (pl && (typeof deckDef === 'undefined' || d !== deckDef.num)) to = { deck: d, tile: pl.at }; }
+  return { mode: s.mode, to, hold: s.hold, pace: s.pace, scene: true };
 }
 // crewGather(ids, focus, { deck, until, hold }) -> the ids placed: each waits on their own open tile in a ring round
 // `focus` (a place id: its walk-to tile; or a [c, r] tile on `deck`), in its room, nearest first, facing you. The tiles
