@@ -664,6 +664,11 @@ M12 = r"""(() => {
   const s = SHIP.machines['4-washer-3']; s.cond = 60; s.state = 'worn';
   for (let m = 1000; m <= 1330; m += 10) { setShipNow(11 * 1440 + m); logbookTick(shipNow(), true); }
   out.night = [j3.status, j3.doneBy, SHIP.notes.filter(n => n.kind === 'logFlag').map(n => n.machine)];
+  const again = (id, st, held) => {                      // R5 (0.45.14): only a worn machine, never a job held for you
+    const jx = { id: id + '@y', machine: id, deck: 4, kind: 'repair', parts: [], status: 'open', claimedBy: null, posted: t - 50, found: t - 50, urgency: 1, ...(held ? { reserved: 30 } : {}) };
+    SHIP.jobs.push(jx); SHIP.machines[id].state = st; out.entry.flag = id; out.entry.looked = false;
+    setShipNow(11 * 1440 + 1330); logbookTick(shipNow(), true); return jx.status; };
+  out.night2 = [again('4-washer-1', 'failing', false), again('4-washer-2', 'worn', true)];
   const c = worksClean(JSON.parse(JSON.stringify(W))); out.saved = JSON.stringify(c.side.log) === JSON.stringify(W.side.log);
   SHIP.works = null; return out;
 })()"""
@@ -676,6 +681,7 @@ def part_m12(g):
     check(a['entry'] and a['again'] is None and a['xp'] == 1 and a['trained'] == 12, f"m12: one entry a day, +1, trained Day 12 ({a['again']}, {a['xp']}, {a['trained']})")
     check(a['logged'] == [12, 0.9], f"m12: the open job written up is 10% quicker ({a['logged']})")
     check(a['last'] and a['last'][0] == a['entry']['pick'], 'm12: logLast reads it back')
+    check(a['night2'] == ['open', 'open'], f"m12: the night crew leave a faulty machine and a job held for you ({a['night2']})")
     check(a['stage'] == 1 and a['night'][0] == 'done' and a['night'][1] not in (None, 'you') and a['night'][2] == ['4-washer-3'], f"m12: the flagged machine seen to by the night crew at 22:00 ({a['night']})")
     check(a['saved'], 'm12: saved')
     if not check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'm12: differs the second time'): print('  m12 twice:', [k for k in a if a[k] != b.get(k)], json.dumps(b)[:600])
@@ -711,6 +717,10 @@ SIDE = r"""(() => {
   setShipNow(12 * 1440 + 540); out.xp2 = worksSideXp(3, 'e');
   WORKS_SIDE_KINDS.add('probe'); setShipNow(13 * 1440 + 540); const x1 = W.xp; for (const k of ['p1', 'p2', 'p3']) simNote('job', { step: 'turnin', id: k, job: 'probe' });
   simNote('job', { step: 'turnin', id: 'p4', job: 'service' }); out.turnin = W.xp - x1; WORKS_SIDE_KINDS.delete('probe'); out.notes = SHIP.notes.filter(n => n.kind === 'sideXp').map(n => n.why + n.n);
+  // R5 (0.45.14): a side kind turned in right first time pays +1 more; j.xp 0 pays nothing; found by you adds nothing to a side kind
+  WORKS_SIDE_KINDS.add('probe'); const pay = (day, j) => { setShipNow(day * 1440 + 540); SHIP.jobs.push({ status: 'done', ...j }); const x = W.xp; simNote('job', { step: 'turnin', id: j.id, job: 'probe' }); return W.xp - x; };
+  out.right = [pay(14, { id: 'q1', kind: 'probe', rightFirst: true }), pay(15, { id: 'q2', kind: 'probe', rightFirst: true, xp: 0 }), pay(16, { id: 'q3', kind: 'probe', foundBy: 'you' })];
+  WORKS_SIDE_KINDS.delete('probe'); SHIP.jobs = SHIP.jobs.filter(x => !/^q\d$/.test(x.id));
   // the save's tidy
   const c = worksClean(JSON.parse(JSON.stringify(W))); out.kept = !!c && JSON.stringify(c.side) === JSON.stringify(W.side) && JSON.stringify(c.tools) === JSON.stringify(W.tools);
   const old = JSON.parse(JSON.stringify(W)); delete old.side; const c2 = worksClean(old); out.old = !!c2 && JSON.stringify(c2.side) === '{}' && Object.keys(c2).indexOf('side') === Object.keys(c2).indexOf('cur') + 1;   // an old save: side {} right after cur (BM7: the key order)
@@ -738,6 +748,7 @@ def part_side(g):
     check(a['xp'] == [1, 1, 0, 0] and a['gain'] == 2 and a['xp2'] == 2, f"side: side jobs give at most +2 a day ({a['xp']}, {a['xp2']})")
     check(a['notes'] == ['a1', 'b1', 'e2', 'probe1', 'probe1'], f"side: the sideXp notes ({a['notes']})")
     check(a['turnin'] == 3, f"side: side-job kinds turned in at the board are capped too (+2), an ordinary job isn't (+1) ({a['turnin']})")
+    check(a['right'] == [2, 0, 1], f"side: a side kind right first time pays 2, j.xp 0 pays 0, found by you pays 1 ({a['right']})")
     check(a.get('order') == 'cur,side', f"side: a new SHIP.works has side right after cur ({a.get('order')})")
     check(a['kept'] and a['old'] and a['junk'], 'side: SHIP.works.side kept by the save\'s tidy; an old save loads without it; junk dropped')
     check(a['bunk'][0] == 'Your bunk\'s in Bunk 1 on Deck 4.' and a['bunk'][1] and a['bunk'][2] == '4-23' and a['bunk'][3] == 'Your bunk\'s in Cabin 4-23 on Deck 4.' and not a['bunk'][4] and a['bunk'][5],
