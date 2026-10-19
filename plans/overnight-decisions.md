@@ -219,3 +219,4 @@ All 8 packages approved (Zeke: "all good except he still walks and talks" → he
 | ~03:16 (the user, mini-games survey) | Rec mini-games | Wall Reach, pool Lengths, kayak White water (no gates: currents make it hard to steer around, a stamina meter to manage); times in words; clock stops; crew beside you; build order kayak, wall, pool |
 | | When | Not now: built in the rec deck phase, prototypes first then integration. Now: Step 3 then Step 4 |
 | ~03:25 (the user) | Tracked button | Move the main-screen Tracked button (0.72.0) into the personal device as its own app "Tracked", first in the list, same functionality; main-screen button removed; Track switches in other apps stay. Added to Step 3 (U) |
+| ~03:30 (the user) | Lead handover | Lead 16 starts the next lead itself (fresh chain, permission given). Keep old lead logs in handover-lead.md (leads need context); optimise the process later, not now |
