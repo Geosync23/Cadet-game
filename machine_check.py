@@ -760,8 +760,10 @@ with sync_playwright() as pw:
           // two trips: more than a cart's worth in the hold
           SHIP.hold.seal = (SHIP.hold.seal || 0) + 20; MACH_REV++; const crates = (typeof partsCrates === 'function' ? partsCrates() : holdCrates());
           out.took = claimJob(dj.id);
-          const l1 = cartLoadHold(dj.id), u1 = cartUnloadShelves(dj.id), l2 = cartLoadHold(dj.id), u2 = cartUnloadShelves(dj.id);
-          out.trips = [crates, l1, u1.left, l2, u2.left]; out.emptied = (typeof partsCrates === 'function' ? partsCrates() : holdCrates()) === 0 && !Object.keys(SHIP.hold).some(k => k !== 'meals' && SHIP.hold[k] > 0);
+          const l1 = cartLoadHold(dj.id), u1 = cartUnloadShelves(dj.id), l2 = cartLoadHold(dj.id);
+          // 0.84.1 (rec engineer B): a bigger hold (the rec deck's parts) takes more trips; keep going till it's empty (at most 3 more)
+          let u2 = cartUnloadShelves(dj.id), more = 0; while (u2.left > 0 && more < 3) { cartLoadHold(dj.id); u2 = cartUnloadShelves(dj.id); more++; }
+          out.trips = [crates, l1, u1.left, l2, u2.left, more]; out.emptied = (typeof partsCrates === 'function' ? partsCrates() : holdCrates()) === 0 && !Object.keys(SHIP.hold).some(k => k !== 'meals' && SHIP.hold[k] > 0);
           out.fin = finishJob(dj.id); if (typeof turnInJob === 'function') turnInJob(dj.id);
           // the next week's, left alone: the crew take it at 14:00 and it's done by the evening
           setShipNow(9 * 1440 + 10 * 60 + 5); machinesNow();
