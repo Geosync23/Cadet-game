@@ -281,7 +281,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.45.7
+   STARSHIP CADET: CSV Wren                           build 0.45.8
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8694,7 +8694,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.45.7';                           // keep in step with the header's build line
+const GAME_BUILD = '0.45.8';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -39381,6 +39381,14 @@ const CAREER_LADDER = [
   { id: 'm9', name: 'Tracing', size: 'big', day: 12, tier: 2, rank: 'officer', needs: null, by: ['calder', 'halloran-emeka'], where: { deck: 5, room: 'w' }, job: 'trace', tool: 'pipekit', stages: [{ uses: 0 }] },   // M3's 24i
   { id: 'p1', name: 'When does it happen?', size: 'small', day: 12, tier: 2, rank: 'officer', needs: { trained: 'm9' }, by: ['calder', 'halloran-emeka'], stages: [{ uses: 0 }] },
   { id: 'p2', name: 'Who saw what?', size: 'small', day: 15, tier: 2, rank: 'officer', needs: null, by: ['tomas', 'torres-zeke'], stages: [{ uses: 0 }] },
+  // Step 4's side jobs (0.45.8, E1 in 24 core's slot; each row as its seat sent it, inert until its sub-block registers WORK_MECH[id]).
+  // m15 (rewiring, E2) and the fault-finder ticket's row come with their builds; cabin touches and star logging (24t) have none
+  { id: 'm10', name: 'The workshop', size: 'small', day: 12, tier: 2, rank: 'officer', needs: null, by: ['torres-zeke', 'halloran-emeka', 'calder'], where: { deck: 5, room: 'f' }, stages: [{ uses: 0 }, { uses: 3 }, { uses: 6 }] },   // E3's 24j
+  { id: 'm11', name: 'Tool upkeep', size: 'small', day: 12, tier: 2, rank: 'officer', needs: null, by: ['torres-zeke', 'halloran-emeka'], where: { deck: 5, room: 'w' }, stages: [{ uses: 0 }, { uses: 1 }, { uses: 4 }] },   // E1's 24m: the scanner; the pipe kit and logger as each arrives; the team's rack after 4
+  { id: 'm12', name: 'The logbook', size: 'small', day: 12, tier: 2, rank: 'officer', needs: null, by: ['calder'], where: { deck: 5, room: 'w' }, stages: [{ uses: 0 }, { uses: 5 }, { uses: 10 }] },   // E1's 24n: a line a shift; flag a machine after 5; your notes come back after 10
+  { id: 'm13', name: 'Leak hunting', size: 'small', day: 12, tier: 2, rank: 'officer', needs: null, by: ['torres-zeke', 'halloran-emeka', 'calder'], job: 'leak', stages: [{ uses: 0 }, { uses: 3 }] },   // E2's 24o
+  { id: 'm14', name: 'Garden irrigation', size: 'small', day: 13, tier: 2, rank: 'officer', needs: null, by: ['cruz-tove', 'oneill-imani', 'hart-ravi'], job: 'nozzle', stages: [{ uses: 0 }, { uses: 2 }, { uses: 4 }] },   // E2's 24q (the garden crew; 24r may set its own at its first posting)
+  { id: 'm17', name: 'The lift roof', size: 'big', day: 18, tier: 2, rank: 'officer', needs: null, by: ['halloran-emeka'], stages: [{ uses: 0 }, { uses: 2 }] },   // E3's 24s
 ];
 const WORK_MECH = {};                                    // the sub-blocks: WORK_MECH[ladder id] = { open?(row, day), offer?(row, cur, day, t) -> bool (its own ask), at?(day) -> earliest meeting minute, reserve?(day, at, slot, o) -> job id, noJob?, watch? (minutes), hold? }
 const WORK_TOOLS = {
