@@ -29,3 +29,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - ~05:35 E3 626a907 (0.53.6 round 2: M10 workshop + tinkering, sub-block 24j between 24i and 24k; hooks in 15's jobTap and 20's chatShow/chatDo; mech_check part m10; contains b809339 + E1 7a9a942; lines = W2 7a5825b); with R4. Round 1 still waits on E2.
 - ~05:36 W2 c058947 (0.48.110, E1's five extra texts); with R4.
 - ~05:36 R4 PASS W2 c058947 (W2's tip).
+- ~05:39 R4: E3 626a907 PASS WITH FIXES: hold for E3's next hash; b809339 stays E3's passed tip.
