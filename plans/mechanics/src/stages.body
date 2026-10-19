@@ -57,5 +57,6 @@ NAV:plain=In plain words|grow=Loose ends|b=Builder|tests=Tests|ranges=Seat and s
   <h2>Builders' questions</h2>
   <ul>
     <li><b>E3, 2026-10-19:</b> <i>Stocktake spots <code>5-stock-1..4</code>, one per aisle (Lights, Filters, Plumbing, Galley parts); your bench <code>5-bench-you</code> a new short bench in the Works bay; <code>5-tool-rack</code> a wall rack beside the tool wall. All type 'event'. Agreed.</i></li>
+    <li><b>E1, 2026-10-19:</b> the Wednesday manifest run goes to the crew once you're an Officer (24d), so stage 2 would only ever happen on Day 10. <i>Agreed with E1's plan: (a) stage 2 applies to any run you take, junior or officer; after promotion the run is still the crew's by default, but once you've reached stage 2 it's held for you until 16:00 (an officer who likes hauling keeps it); (b) "choose the order" means the stops can be done in any order (the arrow suggests the nearest); "A tidy run" when your deck changes equal the fewest possible, with <code>worksSideXp(1, 'haul')</code> as an officer (nothing extra as a junior).</i></li>
   </ul>
 </section>
