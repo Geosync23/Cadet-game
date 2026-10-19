@@ -1,6 +1,6 @@
-# Reviews: Pillar 5 Step 3 last piece and Step 4 (reviewer R4)
+# Reviews: Pillar 5 Step 3 last piece and Step 4 (reviewers R4, then R5)
 
-R4 succeeds R3 (whose verdicts are in `plans/reviews-p5-step2.md`). Newest first.
+R4 succeeds R3 (whose verdicts are in `plans/reviews-p5-step2.md`). R5 (session_01XJyHzg4QvX2nsdtf9zT1TH) takes over from R4 at ~06:00. Newest first.
 
 ## Playtest update 2 (brief: plans/brief-playtest2.md on claude/lead-pillar1; build master BM7 session_01QbuzvT3TwzMwSWRmakzX8Z)
 
@@ -19,6 +19,9 @@ Bakes 9565 lines; lines_check PASS. W2's tip.
 Lines skimmed. In a fresh archive content_gen bakes 9342 lines; lines_check PASS (0 errors, the 2 old "(Say nothing)" warnings). New placeholders `nth`, `start` are added to lines_check. `beam.congrats` is in both beam.lines (`@bank dept:works`) and the new beam-all.lines (`@bank all`): two different banks, so Works crew keep theirs and everyone else gets the new ones; not a clash. Torres's M1 meeting now explains rounds and sends you to the board (item 1). Builders, please note: `tip.round.look` says "Tap Look." (E1/U's button must be called Look), and `alarm.energy` shows a percentage, as item 5 asks.
 
 ## Step 4
+
+### W2 claude/writer-p5 1c051274 (0.48.113, M13/M14 lines matched to E2's code), R5: PASS
+leak.turning, leak.tight, noz.plant and the meeting train.m13.calder added; leak.look.wall/floor/colder and leak.hint go (E2 reads none of them). Fresh archive: content_gen bakes 9564 lines, 48 meetings; lines_check PASS (the 2 old warnings). W2's tip.
 
 ### W2 claude/writer-p5 d1e62d3 (0.48.111, favour.call and favour.not for E2): PASS
 Bakes 9564 lines; lines_check PASS. W2's tip.
