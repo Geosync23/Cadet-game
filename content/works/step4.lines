@@ -119,18 +119,16 @@
 - A pipe drips somewhere on Deck {deck}
 == leak.look.above
 - It's coming from above, towards {place}.
-== leak.look.wall
-- It's running down the wall, from {place}'s side.
-== leak.look.floor
-- Spreading along the floor, from {place}.
 == leak.look.warmer
 - Wetter here. You're close.
-== leak.look.colder
-- Drier here. Wrong way.
 == leak.look.here
 - There. A joint, weeping.
 == leak.worn
 - Worn right through. Tightening won't hold it. It needs a new joint from stores.
+== leak.turning
+- A quarter turn. Still a bead of water. A bit more.
+== leak.tight
+- Snug. The drip stops.
 == leak.fix.tighten
 - Tighten the joint
 == leak.fix.replace
@@ -139,11 +137,10 @@
 - Dry. Found it yourself.
 == leak.found.crew
 - The crew found the drip on Deck {deck}. The long way.
-// stage 3: the device's hint
-== leak.hint
-- The {machine}'s this way.
 
 // ---- M14 irrigation (E2, 24r): harvest mornings, the garden's three racks
+== noz.plant
+- The irrigation plant hums along. You check its filter and the pressure while you're here.
 == irr.title
 - Rack {n} · nozzles
 == irr.clear
