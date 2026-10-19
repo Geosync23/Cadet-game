@@ -123,6 +123,7 @@ html[data-ph="green"] body #seek,.devhu[data-ph="green"],.devaddr[data-ph="green
 .device .devmap .m-hl{stroke:var(--crt-dim);stroke-width:.22}
 .device .devmap .goal{fill:var(--crt-ink);opacity:.55}
 .device .devmap .pick{fill:var(--crt-hot);opacity:.8}
+.device .devmap .m-mark{fill:none;stroke:var(--crt-hot);stroke-width:.45;opacity:1;pointer-events:none}
 .device .devmap .m-wall{fill:none;stroke:var(--crt-ink);stroke-width:.14;stroke-linecap:square}
 .device .devmap .m-you{fill:var(--crt-hot);stroke:var(--crt-bg);stroke-width:.3}
 .device .devmap .m-per{fill:var(--crt-bg);stroke:var(--crt-ink);stroke-width:.28;cursor:pointer}
@@ -10743,7 +10744,7 @@ const DEVICE_SKIN = (() => {
           if (ds.who && b.whoAction) { e.stopPropagation(); deviceDo({ ...b.whoAction, arg: ds.who }); } else if (k && b.action) { e.stopPropagation(); deviceDo({ ...b.action, arg: k }); } };
         return svg;
       };
-      const pk = JSON.stringify([b.rooms, b.pick, b.goal]);
+      const pk = JSON.stringify([b.rooms, b.pick, b.goal, b.marks || null]);
       if (mapCache && mapCache.grid === g && mapCache.key === pk) return dots(mapCache.svg);
       const svg = sv('svg', { viewBox: '-0.5 -0.5 ' + (W + 1) + ' ' + (H + 1), class: 'devmap', role: 'img', 'aria-label': 'Deck plan' });
       const pat = sv('pattern', { id: 'devhatch', patternUnits: 'userSpaceOnUse', width: .8, height: .8, patternTransform: 'rotate(45)' });
@@ -10762,6 +10763,7 @@ const DEVICE_SKIN = (() => {
         if (k !== at(i, j + 1) && (k !== '.' || at(i, j + 1) !== '.')) d += 'M' + i + ' ' + (j + 1) + 'h1';
       }
       svg.appendChild(sv('path', { d, class: 'm-wall' }));
+      for (const t of Array.isArray(b.marks) ? b.marks : []) if (Array.isArray(t)) svg.appendChild(sv('rect', { x: t[0] - .45, y: t[1] - .45, width: 1.9, height: 1.9, class: 'm-mark' }));   // marks: [[i, j], ...] (24i's line)
       mapCache = { grid: g, key: pk, svg };
       return dots(svg);
     },
@@ -11071,6 +11073,8 @@ deviceApp({ id: 'jobs', title: 'Jobs', icon: 'wrench', order: 30,
       if (mine.kind === 'chore') {
         const stops = mine.stops.map(st => { const p = placeById(st.placeId); return (st.tag === 'pickup' ? 'pick up ' + (mine.bring || 'the load') + ' in the ' : st.tag === 'drop' ? 'drop it in the ' : '') + (p ? roomName(p.deck, p.room) || 'room' : 'room') + ' on Deck ' + st.deck; });
         say(mine.title + '. ' + (mine.parts.length ? 'Bring ' + mine.parts.map(k => 'a ' + k).join(', ') + ' from main storage on Deck 5. ' : '') + 'Go to: ' + stops.join(', then ') + '.');
+      } else if (typeof traceHidden === 'function' && traceHidden(mine)) {   // 24i: a traced job not yet found (the machine stays hidden)
+        say(worksText('trace.how', 'Find where it starts: tap the machines on {line} with the pipe kit to read the flow. The Maps app marks them.', { line: traceLineName(mine.symptom.line) }));
       } else if (m) {
         const need = {}; for (const k of mine.parts) need[k] = (need[k] || 0) + 1;
         say('Needs ' + Object.entries(need).map(([k, n]) => n + ' × ' + k + ' (' + (SHIP.stores[k] || 0) + ' in storage)').join(', ') + '. Parts are in main storage on Deck 5; the job is in the ' + ((DECKS[m.deck].rooms[m.room] || {}).name || 'room').toLowerCase() + ' on Deck ' + m.deck + '.');
@@ -11127,9 +11131,11 @@ deviceApp({ id: 'maps', title: 'Maps', icon: 'map', order: 25,
     }
     const you = n === deckDef.num && typeof player !== 'undefined' ? player.here() : null;
     const g = typeof IX_GOAL !== 'undefined' && IX_GOAL && IX_GOAL.deck === n ? IX_GOAL : null;
+    let mk = null; try { mk = typeof traceMarks === 'function' ? traceMarks(n) : null; } catch (e) { mk = null; }   // 24i: your traced job's line
     const B = [{ kind: 'text', text: 'Deck' }, { kind: 'buttons', items: DECK_ORDER.filter(d => DECKS[d]).map(d => ({ label: deckLabel(d), on: d === n, action: { app: 'maps', do: 'deck', arg: d } })) },
       { kind: 'text', text: deckWord(n) + ': ' + def.name + (n === deckDef.num ? ' (you are here)' : ''), mark: 'head' },
-      { kind: 'map', grid: def.map, rooms, you, pick: mapPick, goal: g ? (g.room && typeof g.room === 'string' ? g.room : null) : null, action: { app: 'maps', do: 'pick' } }];
+      { kind: 'map', grid: def.map, rooms, you, pick: mapPick, goal: g ? (g.room && typeof g.room === 'string' ? g.room : null) : null, marks: mk && mk.tiles.length ? mk.tiles : null, action: { app: 'maps', do: 'pick' } }];
+    if (mk) B.push({ kind: 'text', text: mk.text, mark: 'hot' });
     if (mapFor === 'appointments') {
       if (!apptDraft) mapFor = null;
       else {
@@ -13119,6 +13125,7 @@ const machineName = m => (typeof MACHINE_KINDS !== 'undefined' && MACHINE_KINDS[
 // a tap (section 11, through playerTap): main storage, or the machine of the job you hold. False: not the job's business
 function jobTap(it, at) {
   if (!jobsOn() || typeof deckDef === 'undefined') return false;
+  if (typeof traceHidden === 'function' && traceTap(it, at)) return true;   // 24i: a traced job not yet found: the pipe kit's reading (Pillar 5, M3)
   const P = SHIP.player, mw = myWork(), c = cellAt(at.x, at.z);
   if (deckDef.num === 5 && roomAt(...c) === 'r' && !/tarp/i.test(it.t)) {      // main storage, Deck 5: a shelf or the counter
     if (!mw) {
@@ -13531,6 +13538,7 @@ function workStepEnd(A, abort) {
   if (!w) return;
   w.done += Math.min(A.done, A.def.mins);
   if (abort && A.done < A.def.mins) return;              // walked away: the look so far is kept
+  if (A.o.read && typeof traceRead === 'function') { SHIP.player.wsteps = SHIP.player.wsteps.filter(x => x !== w); traceRead(j, A.o.read); device.refresh(); return; }   // 24i's pipe kit (the act's o.read: a machine id): its reading, never jobStepDone
   const st = jobStops(j)[A.o.ws], marks = st && st.opts && Array.isArray(st.opts.marks) ? st.opts.marks.slice(0, 6) : null;
   if (!marks || !marks.length) { wsFinish(j, A.o.ws, {}, A.o.title); return; }
   if (!deviceChoose({ title: st.opts.title || A.o.title, text: [st.opts.text, st.opts.ask || 'How does it look?'].filter(Boolean).join(' '), choices: marks.map(x => x.label) }, i => { if (marks[i]) wsFinish(j, A.o.ws, { pick: marks[i].id }, A.o.title); })) toast(A.o.title, 'Your device is busy; tap it again to mark it.');
@@ -14208,6 +14216,7 @@ function ixJobStep() {
     const st = nx && nx.s.step === 'fetch' ? jobStops(j)[nx.k + 1] : nx && nx.s;
     return st ? { deck: st.deck, place: st.places[0] || null, label: st.step === 'pickup' ? 'Pick up ' + (j.bring || 'the delivery') : st.step === 'inspect' ? j.title + ': the next stop' : j.title } : null;
   }
+  if (typeof traceHidden === 'function' && traceHidden(j)) return typeof traceGoal === 'function' ? traceGoal(j) : null;   // a traced fault not yet found: the line, never the machine (24i)
   const m = machineById(j.machine); if (!m) return null;
   const P = SHIP.player, w = P.work && P.work.job === j.id ? P.work : { fitted: [], make: null };
   const need = jobNeeds(j, w, P.carry), name = machineName(m);
@@ -39655,6 +39664,186 @@ function scanTrainReserve(d, at, slot, o) {
     return id;
 }
 if (typeof WORK_MECH !== 'undefined') WORK_MECH.m7 = { reserve: scanTrainReserve };
+
+// =====================================================================
+// 24i. TRACING (M9, seat M3, 0.53.x; plans/mechanics/m9-tracing.html on claude/p5-design)
+// Tier 2's new kind of thinking: a fault that shows in one place and starts somewhere else. Section 17 (seat S2,
+// 0.33.59) keeps the lines (MACHINE_LINKS water, heat, air; lineOn, lineIds, lineDecks, linePath(line, id), lineFlow,
+// flowWord) and posts traced faults: about half of an Officer's Tier 2 line repairs once you're trained in m9 carry
+// j.symptom = { line, decks, deck }, and while traceHidden(j) its card names the symptom ("Showers weak on Deck 4") and
+// no machine or place shows. This block is the doing of it. With the pipe kit you tap any machine on the line: a look
+// at its panel (3 real seconds; section 15's workStep with the act's o.read) reads the flow there through section 17's
+// traceMark(jobId, id) (before and after; kept in j.read; reading the job's own machine sets j.traceFound), shown in
+// words and on the Pipe kit page; then it's an ordinary repair. A wrong turn costs a walk. The goal pointer leads to
+// the line (the middle first among what you haven't read). Taught on Day 12 (ladder row m9, big, Officer, Calder): the
+// row's opening holds 5-valve-2's traced repair for you (faulty, jobReserve slot 11); Calder reads the middle (the Deck
+// 5 pumps, this block's small `tracedemo` kind) while you watch, then you read on and find it. The Maps app marks the
+// line's machines (traceMarks). Removable: without this block nothing reads a traced job (the crew still fix them) and
+// m9 never opens. Saved: nothing of its own (the job's symptom, read and traceFound are section 17's; ship.works.tools
+// .pipekit, ship.works.use.m9). No R(), no 3D objects, no hash keys of its own (878 is section 17's; 879 spare).
+// =====================================================================
+const TRACE_SLOT = 11, TRACE_SECS = 3, TRACE_READ_K = 63;   // TRACE_READ_K: the reading's own slot in SHIP.player.wsteps (section 17 keeps the job's stops)
+const TRACE_TRAIN = { line: 'water', machine: '5-valve-2', middle: '5-pump-1', cond: 40 };
+const TRACE_LINE = { water: 'the water line', heat: 'the heating line', air: 'the air line' };
+const TRACE_UI = { at: null, job: null, last: null };   // the machine being read; the job and reading the Pipe kit page shows
+const traceLinesOn = () => typeof MACHINE_LINKS === 'object' && !!MACHINE_LINKS && typeof linePath === 'function' && typeof lineFlow === 'function'
+  && typeof lineOn === 'function' && typeof lineIds === 'function' && typeof lineDecks === 'function' && typeof traceMark === 'function' && typeof traceHidden === 'function';
+const traceHave = () => typeof hasTool === 'function' && hasTool('pipekit');
+const traceWord = v => { const w = typeof flowWord === 'function' ? flowWord(v) : v >= .8 ? 'full' : v >= .5 ? 'low' : 'very low'; return worksText('trace.' + w.replace(' ', ''), w); };
+const traceLineName = line => worksText('trace.line.' + line, TRACE_LINE[line] || 'the ' + line + ' line');
+const traceName = id => (typeof machineTitle === 'function' && machineTitle(id)) || id;
+// a line's steps from the top to a deck's end ([[ids], ...]; a side-by-side pair or a deck's two scrubbers is one step);
+// [] when the line isn't on (section 17's lineOn: every machine on it real)
+function tracePath(line, deck) {
+  if (!traceLinesOn() || !lineOn(line)) return [];
+  const ids = lineIds(line).filter(id => (lineDecks(line, id) || []).includes(deck)); if (!ids.length) return [];
+  let p = null; try { p = linePath(line, ids[ids.length - 1]); } catch (e) { p = null; }
+  return Array.isArray(p) ? p.map(s => [].concat(s)) : [];
+}
+const traceSteps = j => j && j.symptom ? tracePath(j.symptom.line, j.symptom.deck) : [];
+const traceTraining = j => { const c = SHIP.works && SHIP.works.cur; return c && c.id === 'm9' && j && (c.j === j.id || j.train === 'm9') ? c : null; };
+function traceSay(j, key, fallback) { const c = traceTraining(j); if (c && c.by) worksTeach('m9', c.by, 'follow.' + key, fallback); }
+
+// ---- the reading (section 15's jobTap asks traceTap first; its workStepEnd hands a finished look whose act has o.read
+// to traceRead, never to jobStepDone) ----
+function traceTap(it, at) {
+  const j = typeof myJob === 'function' ? myJob() : null;
+  if (!traceLinesOn() || !traceHidden(j) || j.workDone || typeof deckDef === 'undefined' || !deckDef) return false;
+  if (deckDef.num === 5 && roomAt(...cellAt(at.x, at.z)) === 'r' && !/tarp/i.test(it.t)) {   // main storage: no parts until you know the machine
+    toast(it.t, worksText('trace.first', 'Find where it starts first: read the line with the pipe kit.')); return true;
+  }
+  const near = typeof MACHINE_NEAR !== 'undefined' ? MACHINE_NEAR : 1;
+  const m = machineList().filter(x => x.deck === deckDef.num && !x.stub && x.at).map(x => {
+    const p = cellPos(...x.at), pid = panelPlace(x.id), s = pid && PLACE_OF.has(pid) ? placeSpot(pid) : null;
+    return [x, Math.min(Math.hypot(p.x - at.x, p.z - at.z), s ? Math.hypot(s.x - at.x, s.z - at.z) : Infinity)];
+  }).filter(([, d]) => d < near).sort((a, b) => a[1] - b[1])[0];
+  if (!m) return false;
+  const id = m[0].id;
+  if (!traceSteps(j).some(x => x.includes(id))) {
+    if (!(typeof lineOf === 'function' && lineOf(id))) return false;   // nothing to do with the job: the machine's own tap
+    toast(it.t, worksText('trace.wrongline', 'Not on this line. The job\'s on {line}.', { line: traceLineName(j.symptom.line) }));
+    traceSay(j, 'wrong', 'Wrong line. Check the map: it\'s the ' + j.symptom.line + ' we want.');
+    return true;
+  }
+  if (!traceHave()) { toast(it.t, worksText('trace.nokit', 'You need the pipe kit to read the flow.')); return true; }
+  const pid = panelPlace(id), spot = pid && PLACE_OF.has(pid) ? placeSpot(pid) : null;
+  if (!spot || typeof workStep !== 'function') return false;
+  if (TRACE_UI.at !== id) SHIP.player.wsteps = SHIP.player.wsteps.filter(w => !(w.job === j.id && w.k === TRACE_READ_K));   // a fresh look at a new machine
+  TRACE_UI.at = id;
+  const st = { step: 'read', places: [pid], deck: m[0].deck, how: 'look', opts: { secs: TRACE_SECS, title: worksText('trace.kit', 'Pipe kit'), text: worksText('trace.clip', 'You clip the pipe kit on and read the flow.') } };
+  if (!workStep(j, st, TRACE_READ_K, spot)) return false;
+  if (ACT && ACT.kind === 'workStep') ACT.o.read = id;
+  return true;
+}
+function traceRead(j, id) {
+  if (TRACE_UI.at === id) TRACE_UI.at = null;
+  const r = traceLinesOn() && traceHidden(j) ? traceMark(j.id, id) : null; if (!r) return false;
+  const s = j.symptom, name = traceName(id); j.touched = shipNow();
+  TRACE_UI.job = j.id; TRACE_UI.last = { id, before: r.before, after: r.after };
+  const words = worksText('trace.before', 'Before: {word}', { word: traceWord(r.before) }) + ' · ' + worksText('trace.after', 'After: {word}', { word: traceWord(r.after) }) + '.';
+  if (j.traceFound) {
+    simNote('traceFound', { line: s.line, machine: j.machine, id: j.id });
+    worksUse('m9');
+    toast(name, words + ' ' + worksText('trace.found', 'Fine before {machine}, low after: that\'s where it starts.', { machine: traceName(j.machine) }));
+    traceSay(j, 'found', 'There\'s your problem.');
+  } else {
+    const hint = r.after >= .8 ? worksText('trace.down', 'Full after it: the trouble is further down the line.') : r.before < .8 ? worksText('trace.up', 'Already low before it: the trouble is further up.') : '';
+    toast(name, [words, hint].filter(Boolean).join(' '));
+    traceSay(j, 'read', r.after >= .8 ? 'Full here. So it\'s further down, toward Deck ' + s.deck + '. Halve it again.' : 'Low before it too. Back up the line.');
+  }
+  if (typeof ixGoalAt !== 'undefined') ixGoalAt = -1;
+  if (typeof deviceShow === 'function') deviceShow('pipekit');
+  return true;
+}
+// the goal pointer (15b's ixJobStep asks while traceHidden): the middle of the line first, among the machines not read yet
+function traceGoal(j) {
+  const steps = traceSteps(j), read = new Set(j.read || []), mid = Math.floor(steps.length / 2); if (!steps.length) return null;
+  const ids = steps.map((x, k) => [x, Math.abs(k - mid)]).sort((a, b) => a[1] - b[1]).flatMap(([x]) => x).filter(id => !read.has(id) && panelPlace(id));
+  const m = ids.length ? machineById(ids[0]) : null; if (!m) return null;
+  return { deck: m.deck, place: panelPlace(m.id), label: worksText('trace.goal', 'Read {line}: try {machine}', { line: traceLineName(j.symptom.line), machine: traceName(m.id) }) };
+}
+// the Pipe kit page (opened by a reading, never from the grid): the last reading's two bars, then the line in order
+// with what you've read on it
+function traceView() {
+  const j = SHIP.jobs.find(x => x.id === TRACE_UI.job), L = TRACE_UI.last; if (!j || !j.symptom || !L) return null;
+  const s = j.symptom, title = typeof traceTitle === 'function' ? traceTitle(j) : '';
+  const B = [{ kind: 'text', text: worksText('trace.title', 'Pipe kit · {machine}', { machine: traceName(L.id) }), mark: 'big' },
+    { kind: 'text', text: [title, traceLineName(s.line)].filter(Boolean).join(' · ') },
+    { kind: 'bars', items: [['before', L.before], ['after', L.after]].map(([k, v]) => ({ label: worksText('trace.' + k, (k === 'before' ? 'Before' : 'After') + ': {word}', { word: traceWord(v) }), value: Math.round(v * 100), level: v < .5 ? 'low' : v < .8 ? 'mid' : '' })) }];
+  const read = new Set(j.read || []), rows = traceSteps(j).map(x => {
+    const r = x.find(id => read.has(id)), v = r ? lineFlow(s.line, r) : null;
+    return { text: x.map(traceName).join(' & '), sub: v === null ? 'not read' : traceWord(v), mark: x.includes(L.id) ? 'hot' : null };
+  });
+  B.push({ kind: 'text', text: worksText('trace.order', 'The line, upstream first'), mark: 'head' }, { kind: 'list', rows });
+  if (j.traceFound) B.push({ kind: 'text', text: worksText('trace.found', 'Fine before {machine}, low after: that\'s where it starts.', { machine: traceName(j.machine) }), mark: 'hot' });
+  return B;
+}
+deviceApp({ id: 'pipekit', title: 'Pipe kit', short: 'Pipe kit', icon: 'wrench', order: 34, hidden: () => true,
+  view: () => ({ title: 'Pipe kit', blocks: traceView() || [{ kind: 'text', text: 'Nothing read yet. Tap a machine on the job\'s line to read the flow there.' }] }) });
+// the Maps app (section 19): the machines of your traced job's line on this deck, marked ({ tiles, text } | null);
+// the training's line from the row's opening
+function traceMarks(n) {
+  if (!traceLinesOn()) return null;
+  const j = typeof myJob === 'function' ? myJob() : null, c = SHIP.works && SHIP.works.cur;
+  const s = traceHidden(j) ? j.symptom : c && c.id === 'm9' && /^(watch|do)$/.test(c.st) ? { line: TRACE_TRAIN.line, deck: 4 } : null;
+  if (!s) return null;
+  const ms = tracePath(s.line, s.deck).flat().map(id => machineById(id)).filter(m => m && m.at), here = ms.filter(m => m.deck === n);
+  const decks = [...new Set(ms.map(m => m.deck))].sort(); if (!decks.length) return null;
+  return { tiles: here.map(m => m.at.slice()), text: traceLineName(s.line).replace(/^./, x => x.toUpperCase()) + (here.length ? ': its machines are marked.' : ' runs through Deck' + (decks.length > 1 ? 's ' + decks.slice(0, -1).join(', ') + ' and ' + decks[decks.length - 1] : ' ' + decks[0]) + '.') };
+}
+
+// ---- the training (ladder row m9, 24 core's flow): Calder reads the middle while you watch (this block's own small
+// job kind, never the crew's), then the traced valve is yours ----
+if (traceLinesOn() && typeof jobKindAdd === 'function') jobKindAdd('tracedemo', { tier: 2, work: 5, text: 'Read the line',
+  stops: () => [{ deck: (machineById(TRACE_TRAIN.middle) || { deck: 5 }).deck, placeId: panelPlace(TRACE_TRAIN.middle), mins: 5, tag: 'read', how: 'look' }],
+  done(j, t, by) {                                       // you did Calder's reading yourself: on to the valve
+    const c = SHIP.works && SHIP.works.cur; if (by !== 'you' || !c || c.id !== 'm9' || c.j !== j.id) return;
+    const id = traceTrainJob(worksDay(t), t - (worksDay(t) - 1) * 1440); if (id) { c.j = id; c.st = 'do'; }
+  },
+  crew: { can: () => false, mins: 5 } });
+// the training's traced job: 5-valve-2 faulty (if it isn't already worse) with a cause that cuts the water line, held
+// for you in slot 11; its symptom from section 17 (Deck 4's showers)
+function traceTrainJob(d, at) {
+  const ex = SHIP.jobs.find(x => x.reserved === TRACE_SLOT && x.train === 'm9' && x.machine === TRACE_TRAIN.machine && x.status !== 'done');
+  if (ex) return ex.id;
+  if (!lineOn(TRACE_TRAIN.line) || !machineById(TRACE_TRAIN.machine)) return null;
+  const s = SHIP.machines[TRACE_TRAIN.machine];
+  if (typeof machineFault === 'function' && (!s || s.cond > TRACE_TRAIN.cond)) machineFault(TRACE_TRAIN.machine, TRACE_TRAIN.cond);
+  const kind = machineById(TRACE_TRAIN.machine).kind, cause = (FAULT_CAUSES[kind] || []).find(c => c.line === TRACE_TRAIN.line && c.part);
+  const id = jobReserve(TRACE_TRAIN.machine, d, at, TRACE_SLOT, { train: 'm9', tier: 2, ...(cause ? { cause: cause.id } : {}) }), j = id && SHIP.jobs.find(x => x.id === id); if (!j) return null;
+  delete j.make; delete j.makeMins; if (!cause) j.parts = [MACHINE_KINDS[kind].part]; j.train = 'm9';
+  j.symptom = typeof traceSymptom === 'function' ? traceSymptom(TRACE_TRAIN.line, TRACE_TRAIN.machine) : { line: TRACE_TRAIN.line, decks: [4, 5, 6], deck: 4 };
+  if (typeof MACH_REV !== 'undefined') MACH_REV++;
+  return id;
+}
+function traceDemoJob(d, at) {
+  const t = (d - 1) * 1440 + at, pid = panelPlace(TRACE_TRAIN.middle); if (!pid || !JOB_KINDS.tracedemo) return null;
+  SHIP.jobs = SHIP.jobs.filter(x => !(x.kind === 'tracedemo' && x.status !== 'done'));
+  const j = jobMake('tracedemo', { id: 'tracedemo:' + TRACE_TRAIN.middle + '@' + t, deck: 5, room: (machineById(TRACE_TRAIN.middle) || {}).room || null, h: Math.floor(t / 60),
+    title: worksText('trace.demo', 'Read the line with Calder'), tier: 2, reserved: TRACE_SLOT, until: (d - 1) * 1440 + DAY_SHIFT[1], train: 'm9' });
+  j.posted = j.found = t; SHIP.jobs.push(j);
+  if (typeof MACH_REV !== 'undefined') MACH_REV++;
+  return j.id;
+}
+if (traceLinesOn() && JOB_KINDS.tracedemo && typeof CAREER_LADDER !== 'undefined') {
+  if (!ladderRow('m9')) CAREER_LADDER.push({ id: 'm9', name: 'Tracing', size: 'big', day: 12, tier: 2, rank: 'officer', needs: null, by: ['calder', 'halloran-emeka'], where: { deck: 5, room: 'w' }, job: 'trace', tool: 'pipekit', stages: [{ uses: 0 }] });   // (24 core has it from 0.44.23)
+  WORK_MECH.m9 = {
+    open(row, d) { traceTrainJob(d, 360); },          // the showers on Deck 4 run weak from the row's opening (06:00 at the earliest)
+    reserve(d, at, slot, o = {}) {
+      if (typeof toolGive === 'function') toolGive('pipekit');   // handed over at the board, at the meeting
+      if (!traceTrainJob(d, at)) return null;
+      return o.yours ? traceTrainJob(d, at) : traceDemoJob(d, at);
+    },
+    watch: 10,                                           // ship minutes watching Calder read the Deck 5 pumps
+  };
+  if (typeof WORK_TOOLS !== 'undefined' && WORK_TOOLS.pipekit) WORK_TOOLS.pipekit.mech = 'm9';   // the pipe kit wears with tracing (24 core's own from 0.44.23)
+  onSim('job', n => { const j = n && SHIP.jobs.find(x => x.id === n.id); if (n.step === 'done' && j && j.symptom && traceTraining(j)) traceSay(j, 'done', 'Showers on Deck 4 back to full. Good work.'); });
+}
+// the Chief's notes page (24k's CHIEF_NOTES, made after this block: added on the first tick); open once you're trained
+const TRACE_CHIEF = { title: 'Tracing', key: 'chief.m9', open: () => !!(SHIP.works && SHIP.works.tr.m9 !== undefined), lines: [
+  'Read the middle first. Halve the line each time.',
+  'Fine before a machine and low after it: that machine is the cause. The symptom is only where it shows.'] };
+if (typeof WORK_TICKS !== 'undefined') WORK_TICKS.push(() => { if (typeof CHIEF_NOTES === 'object' && CHIEF_NOTES && !CHIEF_NOTES.m9) CHIEF_NOTES.m9 = TRACE_CHIEF; });
 
 // =====================================================================
 // 24k. CASES: head-scratchers (Pillar 5, seat H, 0.55.x; plans/mechanics/case-engine.html on claude/p5-design)
