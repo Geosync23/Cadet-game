@@ -11,3 +11,4 @@ interactions | rc=0 | 825s | INTERACTIONS CHECK OK
 food | rc=0 | 114s | FOOD CHECK OK
 deck | rc=0 | 176s | DECK CHECK OK
 tiles | rc=0 | 143s | ALL OK
+join | rc=0 | 229s | JOIN CHECK OK
