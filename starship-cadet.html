@@ -285,7 +285,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.84.3
+   STARSHIP CADET: CSV Wren                           build 0.84.4
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8315,7 +8315,7 @@ Object.assign(KIT, {
     const floor = new THREE.Mesh(new THREE.BoxGeometry(L - 2 * t, .03, Wd - 2 * t), [RK.poolSide, RK.poolSide, RK.mosaic, RK.poolSide, RK.poolSide, RK.poolSide]);
     floor.position.set(cx, .015, cz); floor.userData.noMerge = true; g.add(floor);
     for (let k = 0; k < 3; k++) box(1.0, .3 - k * .1, .3, RK.poolSide, x0 + t + .5, (.3 - k * .1) / 2 + .03, z1 - t - .15 - k * .3, g);   // the steps, down from the inboard rim at the stern end
-    const water = recWaterMesh(new THREE.PlaneGeometry(L - 2 * t, Wd - 2 * t), RK.poolWater); water.rotation.x = -Math.PI / 2; water.position.set(cx, .35, cz); g.add(water);
+    const water = recWaterMesh(new THREE.PlaneGeometry(L - 2 * t, Wd - 2 * t), RK.poolOwn); water.rotation.x = -Math.PI / 2; water.position.set(cx, .35, cz); g.add(water);   // 0.84.4 (rec engineer B): its own copy of the water, so recSigns can cloud the pool and not the river
     for (const z of [1.8, 2.7, 3.6]) for (let k = 0; k < 16; k++) {   // the lane ropes: floats in runs of orange and white
       const s = (L - 2 * t) / 16, f = cyl(.045, .045, s * .9, k % 4 < 2 ? RK.ropeOrange : RK.ropeWhite, x0 + t + s * (k + .5), .35, z, g, 8); f.rotation.z = Math.PI / 2;
     }
@@ -8697,7 +8697,7 @@ function recMats() {
     stageTop: M.wood, stageSide: std('#1d1630', .7), truss: std('#c9a24a', .4, .7), black: std('#16181c', .6, .3), wood: std('#6b4a32', .6), screen: std('#e8e6df', .9),
     standStep: std('#3a404a', .85), bench: std('#c9783a', .6),
     rim: std('#d8e6e4', .45), coping: std('#f2f0ea', .4), poolSide: std('#6fc3c9', .4), mosaic: new THREE.MeshStandardMaterial({ map: recMosaic(), roughness: .4 }),
-    poolWater: recWater('#1f8fa6', '#4fd0dc', { alpha: 1 }), ropeOrange: std('#ff8a3a', .5), ropeWhite: std('#f4f4f0', .5),
+    poolWater: recWater('#1f8fa6', '#4fd0dc', { alpha: 1 }), poolOwn: recWater('#1f8fa6', '#4fd0dc', { alpha: 1 }), ropeOrange: std('#ff8a3a', .5), ropeWhite: std('#f4f4f0', .5),
     rock: std('#6f8a7c', .9), rockDark: std('#4f6559', .9), riverBed: std('#6fc3c9', .4), fern: std('#3f8a4a', .8),
     riverFast: recWater('#1f8fa6', '#4fd0dc', { foam: .9, flow: 1.4, alpha: 1 }),   // 0.82.5 (the user's: still two looks): one water, opaque so the bed under it can't tint it; the fast run adds only its foam
       // 0.80.9: the pool's water (the user's: they didn't match)
@@ -8775,7 +8775,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.84.3';                           // keep in step with the header's build line
+const GAME_BUILD = '0.84.4';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -14802,6 +14802,7 @@ const REC_LOOP = [[11.4, 4.85], [4.8, 4.85], [4.8, 1.3], [13.8, 1.3, 1], [13.8, 
 function recTap(it, at, point) {
   if (typeof deckDef === 'undefined' || !deckDef || deckDef.num !== 7) return false;
   const t = it.t;
+  if ((t === 'Lightdisc court' || t === 'Ask someone to play') && recShut().court) { toast('Lightdisc', 'The net\'s down. No Lightdisc till Works fix the emitters.'); return true; }   // 0.84.4 (rec engineer B)
   if (t === 'Lightdisc court' || t === 'Ask someone to play') { discAsk(); return true; }   // section 23b (0.82.0)
   if (t === 'Scoreboard') { toast(t, it.x); return true; }
   const kind = t === 'Pool' ? 'swim' : /^(Kayak dock|River|White water|Kayak rack|Wave gate)$/.test(t) ? 'kayak' : t === 'Climbing wall' ? 'climb'
@@ -14836,6 +14837,8 @@ function recGo(kind, point, title, flavour) {
   recStart(kind, title, flavour, point ? [point.x + OX, point.z + OZ] : null);
 }
 function recStart(kind, title, flavour, p) {             // p: the tap in deck coordinates (or null)
+  if (kind === 'float' && recShut().float) { toast('Float room', 'The float room\'s shut: the gravity plates are down. Works are on it.'); return; }   // 0.84.4 (rec engineer B)
+  if (kind === 'climb' && !recShut().belays) { toast('Climbing wall', 'Both auto-belays are tagged out. Works are on it.'); return; }   // 0.84.4 (rec engineer B)
   const water = { pool: .35, river: .36 };
   if (kind === 'swim') {
     const lane = REC_LANES.reduce((m, z) => p && Math.abs(z - p[1]) < Math.abs(m - p[1]) ? z : m, REC_LANES[1]);
@@ -16374,6 +16377,31 @@ function shipEffectsAt(deck, t) {
   if (!FX_AT.has(key)) FX_AT.set(key, fxFrom(deck, MACH_HIST.get(h) || null));
   return FX_AT.get(key);
 }
+// what crew notice on the rec deck (0.84.2, rec engineer B; plans/recdeck-plan.html section 6). recShutAt(t) -> { pool, river, belays,
+// route, court, board, float, lights, mic } at ship minute t: pool null | 'cloudy' (a filter) | 'sting' (the dosing) | 'cold' (the heat),
+// the first of those that's faulty or worse (under 50, machineState); river null | 'slack' (a pump) | 'flat' (the wave gate); belays,
+// how many auto-belays work (0-2); route 0-3, the route roped off while the holds want their chore (fixed till they're serviced), or
+// null; court, the emitters down (no Lightdisc); board null | 'pixels' (faulty) | 'nonsense' (failing or worse); float, the gravity
+// plates down (the float room shut); lights null | 'dim' | 'flicker' the board's way; mic, the sound rack down. Pure, like
+// shipEffectsAt: the hour-by-hour record (histHour), never machinesNow, so the schedules may ask while planning; cached on MACH_REV
+// and the hour; frozen (don't change it). All clear with no rec machines (REC_DECK off) or no record. recShut(): now (machinesNow first)
+const REC_OK = Object.freeze({ pool: null, river: null, belays: 2, route: null, court: false, board: null, float: false, lights: null, mic: false });
+let REC_SHUT = new Map(), REC_SHUT_REV = -1;
+function recShutAt(t) {
+  if (!REC_DECK) return REC_OK;
+  if (REC_SHUT_REV !== MACH_REV) { REC_SHUT = new Map(); REC_SHUT_REV = MACH_REV; }
+  const h = histHour(t); if (REC_SHUT.has(h)) return REC_SHUT.get(h);
+  const c = MACH_HIST.get(h); if (!c) { REC_SHUT.set(h, REC_OK); return REC_OK; }
+  const cd = id => Number.isFinite(c[id]) ? c[id] : 100, bad = id => cd(id) < 50, lvl = id => !bad(id) ? 0 : cd(id) < 25 ? 2 : 1;
+  const hs = SHIP.machines['7-wall-holds'], ls = hs && Number.isFinite(hs.lastService) ? Math.floor(hs.lastService / 60) : 0;
+  const r = Object.freeze({ pool: bad('7-pool-filter-1') || bad('7-pool-filter-2') ? 'cloudy' : bad('7-pool-dosing') ? 'sting' : bad('7-pool-heat') ? 'cold' : null,
+    river: bad('7-river-pump-1') || bad('7-river-pump-2') ? 'slack' : bad('7-wave-gate') ? 'flat' : null,
+    belays: (bad('7-belay-1') ? 0 : 1) + (bad('7-belay-2') ? 0 : 1), route: bad('7-wall-holds') ? ((machSeed('7-wall-holds') ^ ls) >>> 0) % REC_ROUTES : null,
+    court: bad('7-court-net'), board: [null, 'pixels', 'nonsense'][lvl('7-court-board')], float: bad('7-grav-plates'),
+    lights: [null, 'dim', 'flicker'][lvl('7-aud-lights')], mic: bad('7-aud-sound') });
+  REC_SHUT.set(h, r); return r;
+}
+function recShut() { machinesNow(); return recShutAt(shipNow()); }
 // one machine, for the job board and the device (B2): its definition, kind and state together
 function machineInfo(id) {
   const m = machineById(id); if (!m) return null;
@@ -18103,10 +18131,52 @@ function worksTick() {
     const hr = Math.floor(shipNow() / 60);
     if (B.rev !== MACH_REV || B.min !== hr) { B.rev = MACH_REV; B.min = hr; drawJobBoard(B.t); }
   }
+  if (REC_DECK && deckDef && deckDef.num === 7) recSigns();   // 0.84.4 (rec engineer B): the rec deck's signs, when the machines change
   if (D.def === deckDef && D.groups.size) {                // a docked cart is hidden while it's out on a run
     const m = Math.floor(shipNow());
     if (m !== D.min) { D.min = m; const out = cartsOut(shipNow()); for (const [n, g] of D.groups) g.visible = !out.has(n); }
   }
+}
+// the rec deck's signs (0.84.2, rec engineer B; plans/recdeck-plan.html section 6, from recShut): the pool goes milky when it's cloudy (a
+// green tinge when it stings; its own water's uniforms, RK.poolOwn), a red tag on each tagged-out belay and at the foot of its route,
+// red-and-white tape across a roped-off route (one merged mesh per colour, remade when they change), FLOAT ROOM CLOSED on legs against the
+// float room's glass, the court's net and side fields off (their materials). Made the first time they
+// show, in deckRoot (the deck's unload frees them); nothing while all's well; checked when MACH_REV or the hour moves; no R()
+const REC_SIGNS = { root: null, rev: -1, hr: -1, key: '', tags: null, mats: null, plate: null };
+function recSigns() {
+  const S = REC_SIGNS, hr = Math.floor(shipNow() / 60);
+  if (S.root !== deckRoot) Object.assign(S, { root: deckRoot, rev: -1, key: '', tags: null, mats: null, plate: null });
+  if (S.rev === MACH_REV && S.hr === hr || !RK) return;
+  const r = recShut(), c = MACH_HIST.get(histHour(shipNow())) || {}; S.rev = MACH_REV; S.hr = hr;
+  const shut = [1, 2].filter(n => (c['7-belay-' + n] ?? 100) < 50);   // the belays tagged out (recShut's own reading): belay 1 is over route 1, belay 2 over route 2
+  const key = [r.pool, shut, r.route, r.court, r.float].join('|'); if (key === S.key) return; S.key = key;
+  const U = RK.poolOwn.userData.U, look = { cloudy: ['#8fb3b0', '#d6e4de'], sting: ['#2a9a86', '#86dcb0'] }[r.pool] || ['#1f8fa6', '#4fd0dc'];
+  U.uDeep.value.copy(col(look[0])); U.uShallow.value.copy(col(look[1]));
+  RK.net.visible = RK.field.visible = !r.court;
+  if (S.tags) { deckRoot.remove(S.tags); S.tags.traverse(o => { if (o.geometry) o.geometry.dispose(); }); S.tags = null; }
+  if (shut.length || r.route !== null) {
+    const M_ = S.mats || (S.mats = { red: std('#d8322e', .6), white: std('#f2f2ee', .6) }), b = ROOM_BOX.K, g = new THREE.Group(), W_ = REC_WALL, len = W_.z1 - W_.z0, top = H - .12;
+    g.position.set(X0(b.i0), 0, Z0(b.j0)); const zr = k => W_.z0 + len * (k + .5) / REC_ROUTES;
+    for (const n of shut) { box(.03, .2, .12, M_.red, W_.x + .43, top - .5, zr(n), g); box(.03, .26, .18, M_.red, W_.x + .22, 1.3, zr(n), g); }   // on the belay's front, and on the wall at eye height (clear of its panels)
+    if (r.route !== null) for (let k = 0; k < 6; k++) box(.02, .06, len / REC_ROUTES / 6 - .01, k % 2 ? M_.white : M_.red, W_.x + .62, 1.0, zr(r.route) - len / REC_ROUTES / 2 + len / REC_ROUTES * (k + .5) / 6, g);   // the tape, a hand in front of the holds
+    mergeMeshes(g); g.traverse(o => { if (o.isMesh) o.castShadow = false; }); g.userData.noMerge = true; deckRoot.add(g); S.tags = g;
+  }
+  if (r.float && !S.plate) {                             // a sign on legs against the float room's glass, by its door: both faces, so it reads from either side and stays up when the cutaway lowers the glass
+    const g = new THREE.Group(); g.position.set(X0(17) + .5, 0, Z0(12) - .22); recClosedSign(g, { text: 'FLOAT ROOM CLOSED', sub: 'gravity plates' });
+    mergeMeshes(g); g.traverse(o => { if (o.isMesh) o.castShadow = false; }); g.userData.noMerge = true; deckRoot.add(g); S.plate = g;
+  }
+  if (S.plate) S.plate.visible = r.float;
+}
+// a closed sign on two legs (recSigns): red-bordered, the words in two lines on both faces (one canvas, made when it's first shown), the board between them
+function recClosedSign(g, o) {
+  const t = tex(512, 160, (c, w, h) => {
+    c.fillStyle = '#1a1214'; c.fillRect(0, 0, w, h); c.strokeStyle = '#e0412f'; c.lineWidth = 10; c.strokeRect(8, 8, w - 16, h - 16);
+    c.textAlign = 'center'; c.fillStyle = '#ffe9e4'; c.font = '800 50px system-ui,sans-serif'; c.fillText(o.text, w / 2, 76, w - 44);
+    c.fillStyle = '#ff9a8a'; c.font = '600 32px system-ui,sans-serif'; c.fillText(o.sub || '', w / 2, 124, w - 44);
+  });
+  const m = new THREE.MeshBasicMaterial({ map: t, toneMapped: false }), geo = new THREE.PlaneGeometry(.9, .28);
+  for (const sd of [1, -1]) { const p = new THREE.Mesh(geo, m); p.position.set(0, 1.2, sd * .025); p.rotation.y = sd > 0 ? 0 : Math.PI; g.add(p); }   // 5 mm off the board's faces
+  box(.96, .34, .04, M.slateDark, 0, 1.2, 0, g); for (const x of [-.42, .42]) box(.04, 1.03, .04, M.slateDark, x, .515, 0, g);
 }
 // the Cart bay's two docks (0.33.15): the cartDock kit hands each parked cart's group to cartDockLive as Deck 5 is
 // built (the Deck 6 architect's inert hook); worksTick hides it while that dock's cart is out
