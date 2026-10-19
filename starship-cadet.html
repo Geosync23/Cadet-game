@@ -269,7 +269,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.44.19
+   STARSHIP CADET: CSV Wren                           build 0.44.20
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8614,7 +8614,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.44.19';                           // keep in step with the header's build line
+const GAME_BUILD = '0.44.20';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -9178,6 +9178,7 @@ function apptTick() {
 function doorOpenFor(room, who, t = shipNow(), deck = typeof deckDef !== 'undefined' ? deckDef.num : null) {
   if ((who === 'player' || who === 'you' || (who && who.isPlayer)) && typeof occasionDoorOpen === 'function' && occasionDoorOpen(deck, room, t)) return true;   // section 18's occasions: a summons, the Captain's table
   if ((who === 'player' || who === 'you' || (who && who.isPlayer)) && typeof jobDoorOpen === 'function' && jobDoorOpen(deck, room)) return true;   // section 15: your job's next stop is in there (0.28.52)
+  if ((who === 'player' || who === 'you' || (who && who.isPlayer)) && typeof worksHomeOpen === 'function' && worksHomeOpen(deck, room)) return true;   // section 24p: your own cabin, once you're an officer
   for (const a of apptList()) {
     if (!apptOn(a) || !/^(invite|summons|meeting|checkup|work|social)$/.test(a.kind || 'social')) continue;
     const pl = apptPlace(a); if (!pl || pl.deck !== deck || pl.room !== room) continue;
@@ -38604,7 +38605,7 @@ function worksEscortEnd(id) {
 onSim('caseCalled', n => { const c = SHIP.works && SHIP.works.cur; if (n && n.train && c && c.hold) worksEscortEnd(c.id); });   // 24k: the training case is called
 // the teacher's walk (section 14's escortPlanOf asks): lead you to the training job while you watch, follow you while you do one
 function worksEscort(p, t) {
-  { const pe = p && typeof promoEscort === 'function' ? promoEscort(p, t) : null; if (pe) return pe; }   // 24p: Calder comes to find you for the summons
+  { const pe = p && typeof promoEscort === 'function' ? promoEscort(p, t) || promoMoveEscort(p, t) : null; if (pe) return pe; }   // 24p: Calder comes to find you for the summons; the walk to your cabin
   const W = SHIP.works, c = W && W.cur; if (!c || !p || p.id !== c.by || (c.st !== 'watch' && c.st !== 'do' && c.st !== 'held') || worksDay(t) !== c.d) return null;
   const j = SHIP.jobs.find(x => x.id === c.j), spot = trainSpot(j);
   if (c.st === 'held') return spot ? { mode: 'follow', to: { deck: spot.deck, tile: spot.tile } } : null;   // they stay with you
@@ -40182,6 +40183,50 @@ function promoEscort(p, t) {                             // worksEscort's 24p pa
   return r && r.f && r.f.seek && !r.met && p.id === r.by && t < r.at + r.len ? { mode: 'follow', to: null } : null;
 }
 WORK_TICKS.push((now, skip) => { promoSummonsTick(now); if (!skip) promoSeekTick(now); });
+// Part 3, the move to 4-23 (0.44.20): on the promotion's day at 17:00 (up to 30 minutes later if you're mid-job) Calder,
+// or Commander Vance if she's off, walks you from wherever you are to cabin 4-23 at the quiet end of the officers' corridor
+// (worksEscort 'lead' to Deck 4's spare W), talking about officers' ways as you go (promo.walk). It's yours when you get
+// there, or at 17:30 at the latest whatever happens (her lines by Mail if you're asleep or away): SHIP.works.home =
+// '4-23', done 'move2', Tomas's goodbye, simNote('moved', { home }). From then the cabin's door opens for you
+// (worksHomeOpen, asked by section 14's doorOpenFor); your bed, wardrobe, door plate and things follow SHIP.works.home
+// (the sim engineer's playerBed(), the player engineer's wardrobe, the deck architect's plate and shelf).
+Object.assign(PROMO, { home: '4-23', homeRoom: { deck: 4, room: 'W' }, moveWait: 30, moveBy: 1050 });
+const worksHome = () => (SHIP.works && SHIP.works.home !== 'bunk' && SHIP.works.home) || null;   // your cabin's number, or null in the bunk room
+function worksHomeOpen(deck, room) {                     // is this your own cabin? (section 14's doorOpenFor)
+  const W = SHIP.works; if (!W) return false;
+  const walking = W.mv && !promoDone('move2');           // on the walk there: open as you arrive
+  return (W.home === PROMO.home || walking) && deck === PROMO.homeRoom.deck && room === PROMO.homeRoom.room;
+}
+function promoMoveBy() {                                 // who walks you: Calder, or Vance on her day off
+  const d = worksDay(shipNow()); try { return occOnShift('calder', d) ? 'calder' : 'vance'; } catch (e) { return 'calder'; }
+}
+function promoMoveTick(now) {
+  const W = SHIP.works; if (!W || W.tier < 2 || promoDone('move2')) return;
+  const od = (W.ms.find(x => x[0] === 'officer') || [])[1]; if (!od) return;
+  const d = worksDay(now), m = now - (d - 1) * 1440;
+  if (d > od || m >= PROMO.moveBy) { promoMoved(Math.min(now, (od - 1) * 1440 + PROMO.moveBy), W.mv ? 'late' : 'mail'); return; }   // never missed: by 17:30 it's done (a skip past it: at 17:30)
+  if (d < od || m < DAY_SHIFT[1]) return;
+  if (!W.mv) {
+    if (myJob() && m < DAY_SHIFT[1] + PROMO.moveWait) return;   // mid-job: she waits a while
+    W.mv = { by: promoMoveBy(), at: Math.floor(now) };
+    worksSayAll(W.mv.by, (worksVoice(W.mv.by, 'promo.walk') || [worksText('promo.walk', 'Right, Officer. Your cabin. Follow me.'), 'Your own door now. Quiet hours after eleven; people knock, they don\'t walk in.', 'And when someone says "come over", they mean it. Go.']));
+    if (typeof setGoal === 'function') setGoal({ deck: PROMO.homeRoom.deck, room: PROMO.homeRoom.room, label: 'Your cabin, ' + PROMO.home });
+  }
+  try { if (deckDef.num === PROMO.homeRoom.deck && roomAt(...player.here()) === PROMO.homeRoom.room) promoMoved(now, 'walked'); } catch (e) { /* not in play */ }
+}
+function promoMoved(now, how) {                          // 4-23 is yours
+  const W = SHIP.works; if (!W || promoDone('move2')) return false;
+  W.home = PROMO.home; W.done.push('move2'); const by = (W.mv && W.mv.by) || promoMoveBy(); delete W.mv;
+  if (how === 'walked') promoSay('tomas', 'move.tomas', 'Don\'t be a stranger, Officer.');
+  else if (typeof mailSend === 'function') { const t = worksText('promo.move.mail', 'Your cabin | Cabin 4-23 is yours from tonight: your things are in, your name\'s on the door. Officers\' corridor, the quiet end. — C.'), i = t.indexOf(' | ');
+    mailSend({ at: now, from: worksName(by), subject: i > 0 ? t.slice(0, i) : 'Your cabin', body: i > 0 ? t.slice(i + 3) : t }); }
+  simNote('moved', { home: W.home, how, t: now });
+  return true;
+}
+function promoMoveEscort(p, t) {                         // worksEscort's 24p part: the walk to your cabin
+  const W = SHIP.works; return W && W.mv && !promoDone('move2') && p.id === W.mv.by ? { mode: 'lead', to: { deck: PROMO.homeRoom.deck, room: PROMO.homeRoom.room } } : null;
+}
+WORK_TICKS.push((now, skip) => promoMoveTick(now));
 
 
 // =====================================================================

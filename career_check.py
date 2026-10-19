@@ -301,14 +301,19 @@ with sync_playwright() as pw:
               out.plan = promoPlan(); out.reply = flag('promo.reply'); out.promoted = simNotes('promoted').map(n => [Math.floor(n.t / 1440) + 1, hhmm(n.t % 1440), n.how]);
               out.summ = SHIP.occasions.filter(r => r.id === 'promoSummons').map(r => [Math.floor(r.at / 1440) + 1, hhmm(r.at % 1440), r.status, !!(r.f && r.f.warn), r.f && r.f.seek ? hhmm(r.f.seek % 1440) : null]);
               out.juniorHeld = forYou({{ urgency: 0, kind: 'haul', junior: true, tier: 1 }}); out.mailC = SHIP.mail.filter(m => /Calder|Marrow/.test(m.from)).map(m => m.subject);
+              out.home = [SHIP.works.home, SHIP.works.done.slice(), typeof worksHomeOpen === 'function' && worksHomeOpen(4, 'W'), doorOpenFor('W', 'player', shipNow(), 4), doorOpenFor('V', 'player', shipNow(), 4)];
+              out.moved = simNotes('moved').map(n => [Math.floor(n.t / 1440) + 1, hhmm(n.t % 1440), n.how]);
               out.xpAt = window.__xpAt; st(); return out; }})()""")
         sm = run('real', 11)
         print('   there:', sm['summ'], sm['promoted'], sm['rank'], 'reply', sm['reply'], sm['plan'])
         check(sm['summ'] and sm['summ'][0][:2] == [10, '11:00'] and sm['summ'][0][3], f"the summons: Day 10 at 11:00 in Calder's office, warned at 10:30: {sm['summ']}")
         check(sm['promoted'] and sm['promoted'][0][0] == 10 and sm['promoted'][0][2] == 'met' and len(sm['promoted']) == 1, f"promoted once, on Day 10 at the scene: {sm['promoted']}")
         check(sm['rank'][:2] == [2, 'officer'] and sm['xpAt'] == [0, 'New officer'] and sm['rank'][4] == 2 and sm['rank'][5] == 'officer' and sm['reply'] == 3, f"Tier 2 officer, xp from 0 (New officer), the reply remembered: {sm['rank']}, {sm['xpAt']}, {sm['reply']}")
-        check(sm['works']['done'] == ['summons2'] and ['officer', 10] in sm['works']['ms'] and sm['plan']['move']['day'] == 10 and sm['plan']['ceremony']['day'] == 11, f"done and milestones, the plan: {sm['works']['done']}, {sm['works']['ms']}, {sm['plan']}")
+        check(sm['works']['done'][:1] == ['summons2'] and ['officer', 10] in sm['works']['ms'] and sm['plan']['move']['day'] == 10 and sm['plan']['ceremony']['day'] == 11, f"done and milestones, the plan: {sm['works']['done']}, {sm['works']['ms']}, {sm['plan']}")
         check(not sm['juniorHeld'], 'a junior job is still held for you as an officer')
+        print('   the move:', sm['moved'], sm['home'])
+        check(sm['home'][0] == '4-23' and 'move2' in sm['home'][1] and sm['home'][2] and sm['home'][3] and not sm['home'][4], f"the move: 4-23 is yours (home, done, its door opens for you, not the other spare's): {sm['home']}")
+        check(sm['moved'] and sm['moved'][0][0] == 10 and sm['moved'][0][1] <= '17:30' and len(sm['moved']) == 1, f"moved once, on Day 10 by 17:30: {sm['moved']}")
         aw = run('away', 11)
         print('   away:', aw['summ'], aw['promoted'], aw['mailC'])
         check(aw['summ'] and aw['summ'][0][4] == '11:15' and aw['promoted'] and aw['promoted'][0][0] == 10 and aw['promoted'][0][2] == 'mail' and aw['rank'][1] == 'officer', f"away: Calder sets off to find you at 11:15; promoted by Mail the same day anyway: {aw['summ']}, {aw['promoted']}")
