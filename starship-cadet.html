@@ -285,7 +285,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.83.2
+   STARSHIP CADET: CSV Wren                           build 0.83.3
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8794,7 +8794,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.83.2';                           // keep in step with the header's build line
+const GAME_BUILD = '0.83.3';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -34047,16 +34047,16 @@ function eventsTick() {
   eventMomentsTick(prev, m); meetingsTick(now);          // its felt moments and meetings, in play
   eventsDress(now);                                      // its dressing and the traces left by past events
   occasionsTick(now);                                    // C10: summons, invitations, progress talks
-  if (REC_DECK) { recShowTick(now); recMyTalk(now); }    // the auditorium's show state for rec engineer B's recShow; your own talk's ask (0.83.1, RA)
+  if (REC_DECK) { recShowCue(now); recMyTalk(now); }    // the auditorium's show state for rec engineer B's recShow; your own talk's ask (0.83.1, RA)
 }
 // the auditorium's state for its dressing (the film screen down, the house lights, the stage pools: rec engineer B's
 // recShow(state), which RA only calls): 'film' | 'talent' | 'allhands' | 'talk' (either Wren talk) | null, every ship minute
 // (RB2: the same state again does nothing; null ends the show; looks only)
-let REC_SHOW = { s: undefined, deck: null };
-function recShowTick(now) {
+let REC_SHOW_CUE = { s: undefined, deck: null };            // (0.83.3: renamed from REC_SHOW / recShowTick, which are rec engineer B's in 8c)
+function recShowCue(now) {
   const on = id => tradOn(id, now), st = on('rec-film-night') ? 'film' : on('rec-talent-night') ? 'talent' : on('rec-all-hands') ? 'allhands' : on('rec-chiefs-talk') || on('rec-wren-talk') ? 'talk' : null;
   const dk = typeof deckDef !== 'undefined' && deckDef ? deckDef.num : null;
-  REC_SHOW = { s: st, deck: dk };                        // sent every ship minute (RB2's recShow does nothing for the same state)
+  REC_SHOW_CUE = { s: st, deck: dk };                    // sent every ship minute (RB2's recShow does nothing for the same state)
   if (typeof recShow === 'function') try { recShow(st); } catch (e) { /* B's to mend */ }
 }
 // your own talk (the traditions plan: once you're an Engine Specialist, after the career arc, you're asked to give a small
