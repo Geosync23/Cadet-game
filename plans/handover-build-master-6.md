@@ -4,7 +4,7 @@
 
 ## Builds done
 - **0.63.2** (playtest update 1) = `claude/p5-cand-pt1` 86dcda1, green; log plans/cand-p5-pt1-results.md; DEV_NOTES row.
-- **0.63.3** (Pillar 5 Step 3) on 0.63.2r (ship-integration 898d58d) = `claude/p5-cand-pt1` 7a6e137 (game file; later commits only add notes). In merge order: S2 `claude/ship-systems` 0d0aa59, C2 `claude/works-career` f553607, M2 `claude/mech-incidents` b3e5cf9, M3 `claude/mech-diagnose` 42c76cc, H2 `claude/mech-cases` 935b1d9, DA5 `claude/deck-p5s3` 25dbfce, X `claude/crew-pt1` 3a494c8, U `claude/hud-pt1` 1d602ff, W2 `claude/writer-p5` a21487e. Log: plans/cand-p5-s3-results.md (every trial, every fail and whose it was).
+- **0.63.3** (Pillar 5 Step 3) on 0.63.2r (ship-integration 898d58d) = `claude/p5-cand-pt1` 2bc08d5, green (game file = 7a6e137; later commits add U cf1348c's leave_check.py and notes). In merge order: S2 `claude/ship-systems` 0d0aa59, C2 `claude/works-career` f553607, M2 `claude/mech-incidents` b3e5cf9, M3 `claude/mech-diagnose` 42c76cc, H2 `claude/mech-cases` 935b1d9, DA5 `claude/deck-p5s3` 25dbfce, X `claude/crew-pt1` 3a494c8, U `claude/hud-pt1` 1d602ff (+ cf1348c, leave_check only), W2 `claude/writer-p5` a21487e. Log: plans/cand-p5-s3-results.md (every trial, every fail and whose it was).
 
 ## Recipe (plans/build-master/)
 - Container setup (fresh each session): `pip install playwright`; three.js r128: `mkdir -p /tmp/cadet-work/three && cd /tmp/cadet-work/three && npm pack three@0.128.0 && tar xzf three-0.128.0.tgz`; `export CADET_CHROME=/opt/pw-browsers/chromium`. BM6 kept tools in the scratchpad with `/tmp/cw` symlinked to it: `cp -r plans/build-master /tmp/cw/bm`, `cp plans/build-master/union24.py /tmp/cw/union.py`, mg.sh = mergep5.sh with the build number edited, q2.sh = checks2.sh (takes `WT=<worktree>` and `OLD=<base html>`), logs in /tmp/cw/logs, one line per check in /tmp/cw/logs/summary.txt (watch it with Monitor `tail -n0 -f`).
@@ -25,5 +25,5 @@
 - At most 2 browser checks at once on one box (a third gives "game failed to start"). Never pgrep -f/pkill by pattern (BM5: it killed its own shell); find PIDs with `ps -eo pid,args` and kill by number.
 
 ## Loose ends at handover
-- 0.63.3 final round: see the last lines of plans/cand-p5-s3-results.md for what finished; DEV_NOTES 0.63.3 row added with the green hash.
+- **0.63.3 is green: claude/p5-cand-pt1 2bc08d5** (game file = 7a6e137; plus U cf1348c's leave_check.py). Hash and summary sent to lead 16, who copies it to claude/p5-cand-s3 / ship-integration and publishes it. DEV_NOTES 0.63.3 row in.
 - Step 4 (E1-E3 start on 7a6e137) is for the next build master; BM6 did no Step 4 merges. Already sent to BM6 (redirected to lead 16): E3 claude/mech-diagnose 9d179e9 (0.53.4 places turn, on 7a6e137; deck_check OK, cadet ALL IDENTICAL vs 0.63.3, interactions OK; merge after the 24 core and the round's mechanics). R4 (05:10): 9d179e9 PASS WITH FIXES, hold for E3's next hash (5 leak joints moving, same ids).

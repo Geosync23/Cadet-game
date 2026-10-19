@@ -63,3 +63,4 @@ Build master 6 (BM6, session_01F8k6hqdBRoxDJMzqAuiHqR) on claude/p5-cand-pt1 (th
 - final: days 5, 6 OK; player OK (1885 s). intro --week queued alone after days 7-8.
 - final: days 7, 8 OK (day_check 0-8 all OK); intro_check --week OK alone (180 s, every beat). My half all green. Only red: leave (U fixing, then rebuild + rerun leave, interactions, cadet).
 - leave fixed by U cf1348c (leave_check.py only): merged (752a794, game file = 7a6e137): LEAVE CHECK OK. Every check green; DEV_NOTES 0.63.3 row added. Waiting on R4's pass of cf1348c, then the hash goes to lead 16.
+- R4 PASS U cf1348c. **0.63.3 GREEN = claude/p5-cand-pt1 2bc08d5** (game file = 7a6e137). Hash and summary sent to lead 16.
