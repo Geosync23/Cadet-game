@@ -281,7 +281,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.53.14
+   STARSHIP CADET: CSV Wren                           build 0.53.15
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8744,7 +8744,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.53.14';                           // keep in step with the header's build line
+const GAME_BUILD = '0.53.15';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -40858,7 +40858,10 @@ function cabinDraw() {
       for (const [w, h, d, ox, oy, oz] of L.box || []) { const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); b.position.set(ox, oy + .002, oz); s.add(b); }
       for (const [r, h, ox, oy] of L.cyl || []) { const b = new THREE.Mesh(new THREE.CylinderGeometry(r * .8, r, h, 12), m); b.position.set(ox, oy + .002, 0); s.add(b); }
       if (k === 'ledge') { const b = new THREE.Mesh(new THREE.BoxGeometry(.13, .03, .32), m); b.position.set(.03, -.015, 0); s.add(b); }   // the ledge, on the west wall
-      if (k === 'shelf') { const b = new THREE.Mesh(new THREE.BoxGeometry(.3, .04, .25), m); b.position.set(.05, -.02, -.115); s.add(b); }   // a little bracket shelf beside the keepsake plank (E4, R5's fix 1: the spot is past the plank's end)
+      if (k === 'shelf') {                               // a little wooden shelf on two dark brackets beside the keepsake plank, clear of the wall's rib (R5's fix 1; the lead's look, 0.53.15)
+        const b = new THREE.Mesh(new THREE.BoxGeometry(.3, .035, .24), dressMat('#9a7350')); b.position.set(.09, -.0175, -.1); s.add(b);   // back edge a little into the wall
+        for (const x of [-.02, .2]) { const br = new THREE.Mesh(new THREE.BoxGeometry(.025, .1, .2), dressMat('#2f3640')); br.position.set(x, -.08, -.11); s.add(br); }
+      }
       if (typeof mergeMeshes === 'function') mergeMeshes(s);
       s.traverse(o => { if (o.isMesh) { o.castShadow = false; o.receiveShadow = true; } });
     }
@@ -41167,7 +41170,7 @@ function roofTalk(now) {
   if (!liftHeld(now) || ROOF.r && !ROOF.r.off || typeof DECK_CREW === 'undefined' || typeof lineFor !== 'function' || now - ROOF_TALK.at < 6) return;
   if (ROOF_TALK.of !== LIFT_HOLD) { ROOF_TALK.of = LIFT_HOLD; ROOF_TALK.said = new Set(); }
   const p = player.obj.position, a = DECK_CREW.find(x => x.p && !ROOF_TALK.said.has(x.p.id) && Math.hypot(x.x - p.x, x.z - p.z) < 8 && roofWait(x.p, now)); if (!a) return;
-  ROOF_TALK.said.add(a.p.id); const l = lineFor(a.p.id, 'roof.wait', { t: now }); if (!l || !l.text) return;
+  ROOF_TALK.said.add(a.p.id); const l = lineFor(a.p.id, 'roof.wait', { t: now, keep: e => !/stairs/i.test(e.text || '') });   // (the lead's call: nobody takes the ladder, so W2's "Stairs it is" line is left out) if (!l || !l.text) return;
   ROOF_TALK.at = now; if (typeof bubbleSay === 'function') bubbleSay(a.h, l.text, 5);
 }
 if (typeof WORK_TICKS !== 'undefined') WORK_TICKS.push((now, skip) => { if (!skip && !SIM_AT && LIFT_HOLD) roofTalk(now); });
