@@ -338,9 +338,9 @@ with sync_playwright() as pw:
 
     print('(k) The turn-in card\'s gains (Step 3, for the HUD engineer):')
     tg = ev("""(() => { const j = { id: 'gaintest@1', kind: 'chore', machine: null, title: 'Test', stops: [], parts: [], status: 'claimed', claimedBy: 'you', workDone: true, meters: [{ key: 'air', name: 'Air', gain: 2.5 }, { key: 'power', name: 'Power', gain: 0 }] };
-      SHIP.jobs.push(j); careerJobIn({ id: j.id, step: 'turnin', machine: null }); const g = j.gains; SHIP.jobs = SHIP.jobs.filter(x => x !== j); return g || null; })()""")
+      SHIP.jobs.push(j); careerJobIn({ id: j.id, step: 'turnin', machine: null }); careerJobIn({ id: j.id, step: 'turnin', machine: null }); const g = j.gains; SHIP.jobs = SHIP.jobs.filter(x => x !== j); return g || null; })()""")
     print('  ', tg)
-    check(tg and tg['rep'] and tg['rep'][0]['dept'] == 'works' and 'add' not in tg['rep'][0] and tg['meters'] == [{'sys': 'air', 'name': 'Air', 'add': 2.5}], f"turn-in gains: rep in words (no number), the ship meters it raised: {tg}")
+    check(tg and tg['rep'] and len(tg['rep']) == 1 and tg['rep'][0]['dept'] == 'works' and 'add' not in tg['rep'][0] and tg['meters'] == [{'sys': 'air', 'name': 'Air', 'add': 2.5}], f"turn-in gains: rep in words (no number), the ship meters it raised: {tg}")
 
     print('(h) The bridge, by invitation (Step 3):')
     br = ev("""(() => {

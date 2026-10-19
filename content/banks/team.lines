@@ -1,0 +1,47 @@
+@bank dept:works
+// Pillar 5 Step 3 (head writer W2): team jobs (seat M2), the lead's calls when whoever leads has no line of their own
+// (Halloran, Torres and Calder have theirs). Kind 'work', flags team.call.<part>. Bubbles, 60 characters or fewer.
+== work
+? flag:team.call.start
+- Spots, everyone. Wait for your name.
+? flag:team.call.brace
+- Brace it. Hold there.
+? flag:team.call.pass
+- Pass it across.
+? flag:team.call.hold
+- Hold it steady.
+? flag:team.call.crank
+- Crank. Nice and slow.
+? flag:team.call.tip
+- Tip it and hold.
+? flag:team.call.valves
+- The valves. In order.
+? flag:team.call.open
+- Open them up.
+? flag:team.call.drain
+- Drain it down.
+? flag:team.call.done
+- That's it. Good work, everyone.
+
+// the crew chatting while a team job runs (seat X reads kind 'team': one bubble each, 60 characters or fewer)
+== team
+- Mind your fingers.
+- Nearly there.
+- Who's got the spanner? Oh. Me.   #funny
+- Last time this took two hours.
+- My arms are going. Don't tell anyone.   #funny
+- Tea after this. I've decided.
+- Hear that? That's a happy machine.
+- Steady. No rushing in here.
+- Is it seated? Properly seated?
+- Does anyone know a song for this? No? Fine.   #funny
+- Nearly there is my favourite place.
+- Four pairs of hands and one spanner. Typical.   #funny
+- Careful. It's heavier than it looks.
+- Good. That's the hard bit done.
+? who:pell
+- Is it lunch yet? It feels like lunch.   #funny
+? who:kovac-zainab
+- Third bolt's a hair loose. Got it.
+? who:torres-zeke
+- Lovely. Like it was made for it. It was.   #funny

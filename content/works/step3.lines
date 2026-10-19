@@ -1,0 +1,265 @@
+@bank all
+// Pillar 5 Step 3 (head writer W2): texts said by nobody, for the test job and the first promotion (seat C2), team
+// jobs (M2), tracing (M3), the T2 band, P1 and P2 (H2), the bridge lock and the turn-in meters (C2, U). Keys in
+// content/works/keys-p5.md, "Step 3". Mails are "Subject | body", unsigned (the game adds the sender).
+
+// ---- the ladder rows
+== works.mech.m8
+- team jobs
+== works.mech.m9
+- tracing
+== works.mech.p1
+- when does it happen?
+== works.mech.p2
+- who saw what?
+
+// ---- the test job and the first promotion (C2)
+// C2's keys (worksText): Calder's words in the bay, Day 8
+== promo.announce
+- Tomorrow, your test job. Tier 2, a real one. I'll follow. I won't help. Sleep tonight.
+// ... by Mail, if you're not in the bay by 10:00 (Calder sends it)
+== promo.announce.mail
+- Your test job | Tomorrow, your test job. A real Tier 2 job. I'll be watching. Sleep.
+// Calder as the test job goes up, 09:00 Day 9
+== promo.test.start
+- There it is. Yours. I'm watching, not helping.
+// passed: the scrubber's put right
+== promo.test.passed
+- Filter in, fan settled. That'll do. Go and have your tea.
+// not done: another in two work days ({day}: the weekday)
+== promo.test.again
+- Not done isn't failed. Another on {day}. Get a few more filters under your belt.
+// Day 10, 10:30: the urgent toast, and Torres's nudge
+== promo.summons
+- Chief Calder: My office, 11:00. — C.
+== promo.summons.torres
+- Go on. She doesn't bite. Usually.
+// the office scene's words by Mail, if you never came (Calder sends it)
+== promo.mail
+- Your promotion | You weren't about, so you'll read it instead. You passed. As of today you're an Officer: Technician, Tier 2. Your badge and your pip are on my desk; collect them. You move to cabin 4-23 tonight. The Captain commissions you tomorrow at 17:15. Clean uniform. Well done.
+// the Record's milestone and the keepsake (C2 0.44.22)
+== works.ms.commissioned
+- Commissioned Officer, Day {n}.
+== works.keepsake.commission
+- your framed commission
+// the door plate of 4-23
+== works.plate
+- {name} · {rank}
+// the Captain's Mail on Day 10 (Mail, up to 400)
+== promo.captain
+- Congratulations | Chief Calder tells me you've earned your pip. Well done. The ceremony is tomorrow at 17:15, in the observation room on Deck 1. Bring one honest answer: what should an officer never forget? I'll ask.
+// Day 11, 08:00: from the Captain's office
+== mail.promo.ceremony
+- Your commission, 17:15 | The officer ceremony is today at 17:15, observation room, Deck 1. Clean uniform. It takes ten minutes. There will be tea.
+// the move, if it happened without you (Calder's words by Mail)
+== mail.promo.move
+- Your cabin | You weren't about, so we moved you anyway. Cabin 4-23, officers' corridor. Your things are there. Your key opens it. Quiet hours after 23:00. Your door's your own now: use it. Tomas says don't be a stranger.
+// the ceremony's words by Mail, if you never came (the Captain's office)
+== promo.ceremony.mail
+- Your commission | We missed you at the ceremony, so the Captain signed it anyway. You are commissioned an Officer of the Wren. Your framed commission is on your shelf in 4-23. The Captain asks you to drop by the observation room some evening. She still has a question for you.
+// C2 0.44.23 reads these names (edf3223's); the 0.44.22 names above stay too, so either works
+// Day 10, 17:00: Calder sets off with you (her walk lines follow, kind work flag promo.walk)
+== promo.walk
+- Right. Your things are already moving. With me.
+// Tomas's goodbye as you reach 4-23 (X plays Tomas's own promo.bye; this is the text form)
+== promo.move.tomas
+- Don't be a stranger, Officer.
+== promo.move.mail
+- Your cabin | You weren't about, so we moved you anyway. Cabin 4-23, officers' corridor. Your things are there, and your key opens it. Quiet hours after 23:00. Your door's your own now: use it. Tomas says don't be a stranger.
+== promo.ceremony.invite
+- Your commission, 17:15 | The officer ceremony is at 17:15 today, in the observation room on Deck 1. Clean uniform, please. It takes ten minutes, and there will be tea.
+== promo.keepsake
+- your framed commission
+== works.record.commissioned
+- Commissioned Officer, Day {day}.
+// Brennan's cake (C2's optional toast)
+== promo.cake.toast
+- Brennan's made a cake. Works tea corner, before five.
+// the Ship app's news item (one gossip line)
+== promo.news
+- Works news: {me} made Officer today. Cake at the tea corner, while it lasts.
+
+// ---- what's next: see next.lines
+
+// ---- the bridge (C2; DA5's tap hook)
+== bridge.locked
+- The bridge. You need the Captain's permission to go in.
+- Bridge crew only, for now. The Captain invites you in, in time.
+// the invitation itself is Vance's meeting bridgeInvite (content/meetings/bridgeInvite.meet)
+
+// ---- the turn-in (C2, U)
+== works.turnin.rep
+- Works reputation up
+== works.turnin.meter
+- +{n} {system}
+== works.turnin.repN
+- +{n} {dept} reputation
+== meter.air
+- Air
+== meter.water
+- Water
+== meter.power
+- Power
+== meter.heat
+- Heat
+== meter.food
+- Food
+== meter.waste
+- Waste & laundry
+== meter.hull
+- Hull
+== meter.comms
+- Comms & sensors
+== meter.propulsion
+- Propulsion
+== meter.transport
+- Lift & doors
+
+// ---- team jobs (M2)
+== works.ask.m8
+- Recycler, 09:30 | Recycler's membrane bank, 09:30, Deck 3. Need four. You're the fourth. — E.H.
+== team.name.recycler
+- Recycler membrane change
+== team.name.washer
+- Washer overhaul
+== team.name.manifold
+- Manifold valve bank
+== team.name.heater
+- Heating pump swap
+== team.name.scrubber
+- Scrubber fan change
+// the board card
+== team.card
+- {job}, {time}, Deck {deck}. A team of {n}.
+// the 16:00 Mail the day before
+== mail.team
+- Team job, {time} | {job} tomorrow at {time}, Deck {deck}. {name} leads. You're on the team: be at your spot when it starts.
+// your turn (a toast)
+== team.turn.brace
+- Your turn: brace the housing
+== team.turn.pass
+- Your turn: pass the new part
+== team.turn.hold
+- Your turn: hold it steady
+== team.turn.crank
+- Your turn: crank the drum
+== team.turn.tip
+- Your turn: tip it and hold
+== team.turn.valves
+- Your turn: close the valves, in order
+== team.turn.open
+- Your turn: open the valves again
+== team.turn.drain
+- Your turn: drain it down
+== team.start
+- The team's here. Find your spot.
+== team.wait
+- {name}'s team is waiting for you. Your spot's free.
+== team.late
+- {name} started without you. They'll manage. Slower.
+== team.done
+- Team job done. Good work, all of you.
+
+// ---- tracing (M3)
+== works.ask.m9
+- The pipe kit | Board, first thing. Showers on Four are weak. You'll find out why.
+== trace.title
+- Pipe kit · {machine}
+== trace.full
+- full
+== trace.low
+- low
+== trace.verylow
+- very low
+== trace.before
+- Before: {word}
+== trace.after
+- After: {word}
+== trace.found
+- Full before, low after. It's {machine}.
+== trace.wrongline
+- Not on this line.
+== trace.symptom.water
+- Showers weak on Deck {deck}
+== trace.symptom.heat
+- Cold cabins on Deck {deck}
+== trace.symptom.air
+- Stuffy air on Deck {deck}
+== trace.line.water
+- the water line
+== trace.line.heat
+- the heat line
+== trace.line.air
+- the air line
+== chief.m9.1
+- Read the middle first. Halve the line each time.
+== chief.m9.2
+- Fine before, low after: that's your machine. A walk is cheaper than a guess.
+
+// ---- head-scratchers: T2, P1, P2 (H2)
+== case.wrong.t2
+- Not that. The {part} is spent, but now you know.
+== chief.p1.1
+- Bad all day: something's worn. Bad at the busy hours: something can't keep up.
+== chief.p1.2
+- Read the logs. A part that's fine in the morning can't be bad all day.
+== case.title.p1
+- {machine} {shows}, but only {when}.
+== case.when.evening
+- in the evening
+== case.when.morning
+- in the morning
+== case.when.night
+- at night
+== case.when.peak
+- at the busy hours
+== case.when.after
+- after it's been used
+== case.strip.title
+- {machine}'s log
+== case.strip.fine
+- Fine {from}-{to}
+== case.strip.low
+- Low {from}-{to}
+== chief.p2.1
+- Ask who was there, and check they were.
+== chief.p2.2
+- Nobody lies. Somebody's mixed up. The Roster knows which.
+== case.ask
+- Ask about the fault
+// P2's card (H2 adds "Head-scratcher: " and drops a final full stop); {machine} capitalised ("Air scrubber 2")
+== case.title.p2
+- {machine} on Deck {deck} {shows} now and then
+// the Fault notes heading for what people said
+== case.p2.head
+- What people said (tap a name if it doesn't fit)
+// the first hints (the teacher's later ones are their own lines)
+== case.hint.p1.1
+- Read the logs. Which machines were fine at the hours it happens?
+== case.hint.p2.1
+- Ask the people who were near it. Then check the Roster: were they?
+// a wrong call in P1: {where} the line's end ("Showers on Deck 4")
+== case.wrong.p1
+- New {part} in. {where} still {shows}.
+// the day strip: a machine fine all day, and the heading
+== case.strip.allday
+- full output every hour, evenings too
+== case.strip.head
+- Yesterday, hour by hour (the hours it shows outlined)
+// P1's card: the end of the line, and what it does (H2 fills {deck})
+== case.line.water
+- Showers on Deck {deck}
+== case.line.heat
+- Cabins on Deck {deck}
+== case.line.air
+- The air on Deck {deck}
+== case.line.water.shows
+- run weak
+== case.line.heat.shows
+- run cold
+== case.line.air.shows
+- is stuffy
+
+// ---- the Tiles game (U): a small line under the score (U adds the pause sign)
+== tiles.paused
+- The ship's clock is paused while you play
