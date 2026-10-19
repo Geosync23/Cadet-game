@@ -269,7 +269,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.63.2r
+   STARSHIP CADET: CSV Wren                           build 0.72.2
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8613,7 +8613,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.63.2r';                           // keep in step with the header's build line
+const GAME_BUILD = '0.72.2';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -37385,6 +37385,8 @@ const TL_CSS = `
 .tlx{margin:2px 0 8px}
 .tlx .tl-sc{display:flex;flex-wrap:wrap;justify-content:space-between;gap:2px 8px;margin:2px 0 2px;font-variant-numeric:tabular-nums}
 .tlx .tl-sc b{color:var(--crt-hot);font-weight:700}
+.tlx .tl-pz{width:max-content;max-width:100%;margin:2px auto 4px;padding:1px 10px;border:1px solid var(--crt-dim);border-radius:999px;font-size:.8em;line-height:1.4;text-align:center}   /* 0.72.2 (HUD U): the paused clock, as Lightdisc's line under its score */
+.tlx .tl-pz[hidden]{display:none}
 .tlx .tl-bd{display:grid;grid-template-columns:repeat(6,1fr);width:min(100%,336px,max(264px,calc(66vh - 230px)));margin:4px auto 8px;border:2px solid var(--crt-dim);border-radius:10px;overflow:hidden;touch-action:manipulation}
 .tlx .tl-c{position:relative;min-height:44px;aspect-ratio:1;padding:0;margin:0;border:0;border-radius:0;background:transparent}
 .tlx .tl-c.dk{background:rgba(255,255,255,.045)}
@@ -37434,7 +37436,7 @@ function tilesDraw() {   // draw the game into its persistent element (the devic
   if (!TL_UI.root) {
     const st = document.createElement('style'); st.textContent = TL_CSS; document.head.appendChild(st);
     const root = document.createElement('div'); root.className = 'tlx';
-    root.innerHTML = '<p class="tl-sc"></p><p class="tl-now hot" aria-live="polite"></p><div class="btns tl-end"></div><div class="tl-bd" role="grid" aria-label="Tiles board"></div><div class="tl-tut" role="status" aria-live="polite" aria-label="How to play" hidden></div><div class="tl-hd"></div><div class="tl-log"></div><div class="btns tl-play"></div><p class="tl-card">STEP diagonally forward · JUMP to take a tile · LAUNCH from your hold · 3 of a mark touching = DOCK. First to <span></span>.</p>';
+    root.innerHTML = '<p class="tl-sc"></p><p class="tl-pz" hidden>⏸ The ship\'s clock is paused while you play</p><p class="tl-now hot" aria-live="polite"></p><div class="btns tl-end"></div><div class="tl-bd" role="grid" aria-label="Tiles board"></div><div class="tl-tut" role="status" aria-live="polite" aria-label="How to play" hidden></div><div class="tl-hd"></div><div class="tl-log"></div><div class="btns tl-play"></div><p class="tl-card">STEP diagonally forward · JUMP to take a tile · LAUNCH from your hold · 3 of a mark touching = DOCK. First to <span></span>.</p>';
     const bd = root.querySelector('.tl-bd');
     for (let y = 5; y >= 0; y--) for (let x = 0; x < 6; x++) {
       const c = y * 6 + x, b = document.createElement('button'); b.type = 'button'; b.className = 'tl-c' + ((x + y) % 2 ? '' : ' dk') + (y < 2 ? ' home' : '');
@@ -37455,7 +37457,8 @@ function tilesDraw() {   // draw the game into its persistent element (the devic
   const turnTxt = s.over ? 'Game over' : s.p === 0 ? 'Your turn' : G.name + '’s turn';
   const pts = document.createElement('span'), B = n => Object.assign(document.createElement('b'), { textContent: n });
   pts.append('You ', B(s.sc[0]), ' · ' + G.name + ' ', B(s.sc[1]));
-  const clk = Object.assign(document.createElement('span'), { textContent: 'Ship time ' + hhmm(SHIP.time.min) });   // the ship keeps time while you play (a game is about 1.5 ship hours)
+  const clk = Object.assign(document.createElement('span'), { textContent: 'Ship time ' + hhmm(SHIP.time.min) });   // held while you play (PAUSE.tiles, below); it runs again on the result screen
+  { let pz = false; try { pz = !!(PAUSE.tiles && PAUSE.tiles()); } catch (e) { pz = false; } root.querySelector('.tl-pz').hidden = !pz; }   // 0.72.2 (HUD U, the user's Step 3 ask): say so under the score, exactly while it's held
   sc.append(pts,
             Object.assign(document.createElement('span'), { textContent: turnTxt + ' · ' + Math.min(R.turns, Math.floor(s.plies / 2) + 1) + '/' + R.turns }), clk);
   for (const b of root.querySelectorAll('.tl-c')) {
