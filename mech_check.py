@@ -630,6 +630,34 @@ def part_m10(g):
     check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'm10: differs the second time')
 PARTS['m10'] = part_m10
 
+# 24t off shift (seat E3, not a ladder row: run when its functions are in the build): cabin 4-23's spots take things that
+# fit from your hands and give them back; two touches give the waking bonus; an odd save part is cleaned. Star logging: one
+# a night from Day 6, 20:00-23:30; three points, the new one by keys 1024-1025; every third log a friendship step with Survey;
+# ten give the Record's 'stars'. The same twice.
+T24 = r"""(() => {
+  SHIP.works = null; SHIP.jobs = []; SHIP.rel = {}; setShipNow(12 * 1440 + 600); machinesNow(); const W = worksInit(); W.tier = 2; W.rank = 'officer'; W.home = '4-23';
+  const P = SHIP.player, out = {}, keep = P.carry.slice();
+  P.carry = ['little lamp', 'toy rocket']; const tap = k => cabinTap({ t: k, cabin: k }, null);
+  out.tap = [tap('rug'), P.carry.length, tap('desk'), tap('shelf'), P.carry.length, cabinTouches(), cabinMood(), cabinPlaced('toy rocket')];
+  P.carry = ['plant pot']; tap('ledge'); out.four = cabinTouches(); tap('desk'); out.back = [P.carry.slice(), cabinTouches()];
+  worksSide().cabin = { rug: 'banana', desk: 'little lamp', shelf: 7, nope: 'x' }; out.clean = JSON.stringify(cabinData());
+  W.home = 'bunk'; out.notMine = [cabinMine(), cabinMood()]; W.home = '4-23';
+  const s = starsData(); s.n = 0; s.last = 0; out.sky = [12, 13, 14].map(d => JSON.stringify(starSky(d)));
+  out.sato0 = relGet('sato').pts; for (let n = 0; n < 10; n++) { s.n++; if (s.n % 3 === 0) relAdd(['sato', 'mori'][(s.n / 3 - 1) % 2], 'help', 6); }
+  out.friends = [relGet('sato').pts > out.sato0, relGet('mori').pts > 0];
+  P.carry = keep; return out;
+})()"""
+def part_t24(g):
+    if not g.ev("typeof cabinTap === 'function' && typeof starTap === 'function'"):
+        print('24t (off shift): not in this build'); return
+    a = g.ev(T24); b = g.ev(T24)
+    print('24t cabin:', a['tap'], a['four'], a['back'], a['clean'], a['notMine'], '| stars:', a['sky'], a['friends'])
+    check(a['tap'] == [True, 2, True, True, 0, 2, 1, True] and a['four'] == 3 and a['back'] == [['little lamp'], 2], f"24t: spots take what fits and give it back ({a['tap']} {a['back']})")
+    check(a['clean'] == '{"desk":"little lamp"}' and a['notMine'] == [False, 0], '24t: an odd save part is cleaned; not your cabin, no bonus')
+    check(len(set(a['sky'])) == 3 and all(len(json.loads(x)['pts']) == 3 for x in a['sky']), '24t: three points a night, different nights differ')
+    check(all(a['friends']), '24t: Survey warms to you (Sato, then Mori)')
+    check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), '24t: differs the second time')
+
 only = set(sys.argv[2:])
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
@@ -656,6 +684,7 @@ with sync_playwright() as pw:
             PARTS[r['id']](g)
     if (not only or 'side' in only) and ev("typeof worksSideXp === 'function'"):
         print('side (Step 4\'s core: tool wear, the side-job cap, the texts):'); part_side(g)
+    if not only or 't24' in only: part_t24(g)
     ev("SHIP.works = null")
     if g.errors: fail('page errors: ' + ' | '.join(g.errors[:5]))
     g.close()

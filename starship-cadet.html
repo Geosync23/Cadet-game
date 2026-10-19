@@ -281,7 +281,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.53.6
+   STARSHIP CADET: CSV Wren                           build 0.53.7
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8744,7 +8744,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.53.6';                           // keep in step with the header's build line
+const GAME_BUILD = '0.53.7';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -40779,6 +40779,132 @@ if (typeof WORK_TICKS !== 'undefined') WORK_TICKS.push(now => {   // Day 12 and 
   for (const o of s.orders) if (o.state === 'taken' && !SHIP.jobs.some(j => j.id === o.job && j.status !== 'done')) o.state = SHIP.jobs.some(j => j.id === o.job) ? 'made' : 'posted';   // a job lost to a reload: back on the board
 });
 if (typeof WORK_MECH !== 'undefined') WORK_MECH.m10 = { open() { /* the word comes at the machine, with your first order (shopTeach) */ } };
+
+// =====================================================================
+// 24t. OFF SHIFT: CABIN TOUCHES AND STAR LOGGING (seat E3, 0.53.x; plans/mechanics/off-shift.html on claude/p5-design)
+// Cabin touches: once cabin 4-23 is yours (SHIP.works.home), its four spots (DECKS[4].cabinSpots['4-23']: rug, desk,
+// shelf beside the keepsakes, ledge) take things from your hands that fit them (CABIN_FITS: what you tinker at 24j's
+// machine shop, a few things from the crew store). Tap a spot: what's in your hands goes there (what was there comes
+// back to your hands if there's room); with nothing that fits, a spot with a thing gives it back. Each placed thing is
+// drawn small (one merged mesh per spot in the thing's colour, so at most 4 draw calls; built when you're on Deck 4 and
+// 4-23 is yours, after a deck change within a ship minute). Two or more touches: you wake a little happier (leisure at
+// 06:00 if you slept in 4-23; cabinMood() for section 15 to read).
+// Star logging: from Day 6, 20:00-23:30, at the observatory's telescope (Deck 2), one a night: three points through the
+// eyepiece, two on your chart, pick the new one (schedU(day, k, 1024) the points, schedU(day, 0, 1025) the new one); a
+// wrong pick, look again. Every third log Survey warms to you (a friendship step with Dr. Sato, then Mori, in turn, and
+// their cue line stars.talk); ten logs: a Record line (SHIP.works.ms 'stars'; 24 core shows works.ms.stars). starsLogged()
+// for Day 19's lesson (M20). The writer's keys: cabin.spot.*, star.* (claude/writer-p5 b00e08b).
+// Saved in SHIP.works.side.cabin = { rug, desk, shelf, ledge } (item names) and .stars = { n, last } (24 core's
+// worksSide(); read defensively). No R(); every colour through col() (dressMat); keys 1024-1025.
+const CABIN_SPOTS = ['rug', 'desk', 'shelf', 'ledge'];
+const CABIN_FITS = { rug: ['woven rug'], desk: ['little lamp'], shelf: ['toy rocket', 'model ship', 'paper novel', 'puzzle book', 'pocket puzzle', 'metal puzzle'], ledge: ['plant pot', 'little plant', 'mug rack', 'flower'] };
+const CABIN_NAME = { rug: 'The floor', desk: 'The desk', shelf: 'The shelf', ledge: 'The ledge' };
+const CABIN_LOOK = {                                     // each thing's shape: [w, h, d] boxes or [r, h] cylinders from its spot's point, and its colour
+  'woven rug': { c: '#b5603d', box: [[1.1, .012, .75, 0, .006, 0]] }, 'little lamp': { c: '#e3c27a', cyl: [[.06, .03, 0, .017], [.012, .26, 0, .16], [.09, .1, 0, .31]] },
+  'toy rocket': { c: '#d9534f', cyl: [[.035, .16, 0, .08], [.012, .05, 0, .185]] }, 'model ship': { c: '#9aa7b4', box: [[.24, .06, .08, 0, .03, 0], [.08, .05, .06, .02, .085, 0]] },
+  'plant pot': { c: '#c0703e', cyl: [[.06, .1, 0, .05]] }, 'little plant': { c: '#5c9a4a', cyl: [[.06, .09, 0, .045], [.08, .1, 0, .14]] }, 'mug rack': { c: '#8a6a4a', box: [[.2, .16, .05, 0, .08, 0]] },
+  'flower': { c: '#d98bb0', cyl: [[.03, .14, 0, .07]] },
+};
+const cabinMine = () => typeof worksHome === 'function' && worksHome() === '4-23' && !!(DECKS[4].cabinSpots && DECKS[4].cabinSpots['4-23']);
+function cabinData() {
+  const S = typeof worksSide === 'function' ? worksSide() : null; if (!S) return null;
+  const c = S.cabin && typeof S.cabin === 'object' && !Array.isArray(S.cabin) ? S.cabin : (S.cabin = {});
+  for (const k of Object.keys(c)) if (!CABIN_SPOTS.includes(k) || typeof c[k] !== 'string' || !CABIN_FITS[k].includes(c[k])) delete c[k];
+  return c;
+}
+const cabinPlaced = id => { const c = cabinData(); return !!c && Object.values(c).includes(id); };   // for section 15b's locker
+const cabinTouches = () => { const c = cabinData(); return c ? Object.keys(c).length : 0; };
+const cabinMood = () => cabinMine() && cabinTouches() >= 2 ? 1 : 0;
+// the spots' taps and the things on them, rebuilt when the deck or what's placed changes
+const CAB = { root: null, key: '', g: null, items: [], woke: 0 };
+function cabinClear() {
+  if (CAB.g) { CAB.g.parent && CAB.g.parent.remove(CAB.g); CAB.g.traverse(o => { if (o.geometry) o.geometry.dispose(); }); }
+  if (CAB.items.length) { ITEMS = ITEMS.filter(it => !CAB.items.includes(it)); if (typeof refreshPickables === 'function') refreshPickables(); }
+  CAB.g = null; CAB.items = []; CAB.key = '';
+}
+function cabinDraw() {
+  if (typeof deckRoot === 'undefined' || !deckRoot || typeof deckDef === 'undefined') return;
+  const on = deckDef.num === 4 && cabinMine(), c = on ? cabinData() : null, key = on ? JSON.stringify(c) : '';
+  if (CAB.root === deckRoot && CAB.key === key) return;
+  if (CAB.root !== deckRoot) { CAB.g = null; CAB.items = []; CAB.root = deckRoot; }   // a new deck: the old group went with it
+  cabinClear(); if (!on || !c) return;
+  const spots = DECKS[4].cabinSpots['4-23'], g = new THREE.Group(); CAB.g = g; CAB.key = key; deckRoot.add(g);
+  for (const k of CABIN_SPOTS) {
+    const sp = spots[k], [x, y, z] = sp.at, wx = x - OX, wz = z - OZ, s = new THREE.Group(); s.position.set(wx, y, wz); g.add(s);
+    const L = c[k] && CABIN_LOOK[c[k]], m = L && dressMat(L.c);
+    if (L) {
+      for (const [w, h, d, ox, oy, oz] of L.box || []) { const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); b.position.set(ox, oy + .002, oz); s.add(b); }
+      for (const [r, h, ox, oy] of L.cyl || []) { const b = new THREE.Mesh(new THREE.CylinderGeometry(r * .8, r, h, 12), m); b.position.set(ox, oy + .002, 0); s.add(b); }
+      if (k === 'ledge') { const b = new THREE.Mesh(new THREE.BoxGeometry(.13, .03, .32), m); b.position.set(.03, -.015, 0); s.add(b); }   // the ledge, on the west wall
+      if (typeof mergeMeshes === 'function') mergeMeshes(s);
+      s.traverse(o => { if (o.isMesh) { o.castShadow = false; o.receiveShadow = true; } });
+    }
+    const hit = new THREE.Mesh(new THREE.BoxGeometry(k === 'rug' ? 1.0 : .5, k === 'rug' ? .1 : .5, k === 'rug' ? .7 : .4), HIT_MAT); hit.userData.noMerge = true;
+    hit.position.set(0, k === 'rug' ? .05 : .2, 0); s.add(hit);
+    const it = { t: CABIN_NAME[k], x: c[k] ? 'Your ' + c[k] + '.' : 'A spot for something of yours.', hit, g: s, front: 0, depth: .6, wall: false, cabin: k }; hit.userData.item = it;
+    ITEMS.push(it); CAB.items.push(it);
+  }
+  if (typeof refreshPickables === 'function') refreshPickables();
+}
+function cabinTap(it, at) {
+  if (!it || !it.cabin || !cabinMine()) return false;
+  const k = it.cabin, c = cabinData(), P = SHIP.player; if (!c) return false;
+  const fit = P.carry.find(x => CABIN_FITS[k].includes(x)), had = c[k] || null;
+  if (fit) {
+    if (had && P.carry.length >= CARRY_MAX && !P.carry.includes(fit)) { toast(it.t, 'Your hands are full.'); return true; }
+    P.carry.splice(P.carry.indexOf(fit), 1); c[k] = fit; if (had) P.carry.push(had);
+    toast(it.t, worksText('cabin.spot.' + k, 'You put the ' + fit + ' there. It looks like yours now.') + (had ? ' The ' + had + ' is back in your hands.' : ''));
+  } else if (had) {
+    if (P.carry.length >= CARRY_MAX) { toast(it.t, 'Your ' + had + ' is here. Your hands are full, so it stays.'); return true; }
+    delete c[k]; P.carry.push(had); toast(it.t, 'You take the ' + had + ' down. It\'s in your hands.');
+  } else toast(it.t, 'Nothing in your hands fits here. Something like ' + CABIN_FITS[k].slice(0, 2).map(x => 'a ' + x).join(' or ') + ': make one in the machine shop or buy one at the crew store.');
+  cabinDraw(); return true;
+}
+// ---- star logging ----
+const STAR_FROM = 6, STAR_HOURS = [1200, 1410], STAR_TEN = 10, STAR_FRIENDS = ['sato', 'mori'];
+const STAR_POINTS = ['high on the left', 'low on the left', 'just above the middle', 'just below the middle', 'high on the right', 'low on the right', 'right at the top', 'near the bottom edge'];
+function starsData() {
+  const S = typeof worksSide === 'function' ? worksSide() : null; if (!S) return null;
+  const s = S.stars && typeof S.stars === 'object' && !Array.isArray(S.stars) ? S.stars : (S.stars = {});
+  if (!Number.isInteger(s.n) || s.n < 0) s.n = 0; if (!Number.isInteger(s.last)) s.last = 0;
+  return s;
+}
+const starsLogged = () => { const s = starsData(); return s ? s.n : 0; };   // Day 19's lesson (M20) reads it
+function starSky(d) {                                    // tonight's three points (in the eyepiece's order) and which one is new
+  const idx = STAR_POINTS.map((p, i) => [schedU(d, i, 1024), i]).sort((a, b) => a[0] - b[0]).slice(0, 3).map(x => x[1]);
+  return { pts: idx.map(i => STAR_POINTS[i]), fresh: Math.floor(schedU(d, 0, 1025) * 3) };
+}
+function starCue(id, flag, fb) {                         // their own cue line (the writer's kind 'cue'), else the stand-in
+  try { const v = typeof VOICE !== 'undefined' && VOICE[id], e = v && v.lines && (v.lines.cue || []).find(x => x.flag === flag), who = typeof linesWho === 'function' ? linesWho(id) : null;
+    if (e) return who && typeof linesFill === 'function' ? linesFill(e.text, who, { t: shipNow(), flags: { [flag]: true } }) : e.text; } catch (e) { /* the stand-in */ }
+  return fb;
+}
+function starLog(it) {
+  const s = starsData(), d = worksDay(shipNow()); if (!s) return false;
+  const sky = starSky(d), chart = sky.pts.filter((p, i) => i !== sky.fresh);
+  return deviceChoose({ title: worksText('star.title', 'Star log'), text: worksText('star.pick', 'Your chart shows two stars here: {a} and {b}. Through the eyepiece there are three. Which one is new?', { a: chart[0], b: chart[1] }),
+    choices: sky.pts.map(p => p.charAt(0).toUpperCase() + p.slice(1)) }, i => {
+    if (i < 0) return;
+    if (i !== sky.fresh) { toast(worksText('star.title', 'Star log'), worksText('star.wrong', 'That one\'s already on the chart. Look again.')); return; }
+    s.n++; s.last = d; const name = worksText('star.name', 'Wren {n}', { n: s.n });
+    toast(worksText('star.title', 'Star log'), worksText('star.right', 'Logged: {star}. Survey will see it in the morning.', { star: name }));
+    if (s.n % 3 === 0) { const id = STAR_FRIENDS[(s.n / 3 - 1) % 2]; if (typeof relAdd === 'function') relAdd(id, 'help', 6); worksSay(id, starCue(id, 'stars.talk', 'Your star log came through. Keep them coming: you\'ve a good eye.')); }
+    if (s.n >= STAR_TEN && SHIP.works && Array.isArray(SHIP.works.ms) && !SHIP.works.ms.some(x => x[0] === 'stars')) { SHIP.works.ms.push(['stars', d]); toast(worksText('star.title', 'Star log'), worksText('star.done', 'Ten stars logged. Survey has put your name in the catalogue.')); }
+  });
+}
+function starTap(it, at) {
+  if (typeof deckDef === 'undefined' || deckDef.num !== 2 || !/telescope/i.test(it.t) || roomAt(...cellAt(at.x, at.z)) !== 'J') return false;
+  const s = starsData(), now = shipNow(), d = worksDay(now), m = now - (d - 1) * 1440;
+  if (!s || d < STAR_FROM || m < STAR_HOURS[0] || m > STAR_HOURS[1] || s.last === d) return false;   // not now: the telescope does what it always did
+  approach(at.clone(), it.front, it.depth, () => { if (!starLog(it)) toast(it.t, 'Your device is busy; try again in a moment.'); });
+  return true;
+}
+if (typeof PLAYER_TAPS !== 'undefined') PLAYER_TAPS.unshift(cabinTap, starTap);
+if (typeof WORK_TICKS !== 'undefined') WORK_TICKS.push(now => {   // the cabin's things on the deck; 06:00: waking in a cabin that feels like yours
+  cabinDraw();
+  const d = worksDay(now), m = Math.floor(now - (d - 1) * 1440), c = cabinData();
+  if (m === 360 && c && CAB.woke !== d && cabinMood() && typeof playerBed === 'function' && playerBed() === '4-23') { CAB.woke = d; if (typeof leisureAdd === 'function') leisureAdd(4, 'cabin'); }
+});
 
 // =====================================================================
 // 24k. CASES: head-scratchers (Pillar 5, seat H, 0.55.x; plans/mechanics/case-engine.html on claude/p5-design)
