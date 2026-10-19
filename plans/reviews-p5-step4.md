@@ -34,6 +34,9 @@ Lines skimmed. In a fresh archive content_gen bakes 9342 lines; lines_check PASS
 
 ## Step 4
 
+### E6 claude/mech-rounds 5bd6f97 (0.45.19, "the conduit tester"), R6: PASS
+Two strings: WORK_TOOLS.tester.name and the bench label now say "conduit tester" (design-doc's and W2's name). Other tips (E5 2c513e6, E4 4e6f6bc) carry only the base's unchanged line, so a merge takes E6's. Read only; no game logic changed (checks as 1c40c7a).
+
 ### E6 claude/mech-rounds 1c40c7a (0.45.18, the doorway reads every machine in the room; lead 17's call on R6's note), R6: PASS
 `roundDoor` also reads the room's machines off the route (`roundPool(deck)` in the same room, sorted): each gets its doorway line and `roundLast`, an unhealthy one is found by you (worksXp(1) when fresh, as a marked one), still one scan's charge per doorway. A room with only off-route machines now triggers the scan too (consistent). mech_check round23: two on the route and one off it, both worn ones found by you, stops [0, 1, 2], 4 charge. Checks (isolated CADET_WORK): mech_check OK, machine_check OK, cadet_test vs 64a2b19b ALL IDENTICAL.
 
