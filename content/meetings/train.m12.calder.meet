@@ -1,0 +1,16 @@
+@meeting train.m12.calder
+// Pillar 5 Step 4, M12 the logbook (from Day 12, workdays 16:30-17:30): Calder at the new Works terminal by the
+// notice board, the first time. Seat E1. Head writer W2.
+title: The logbook
+from: Chief Ines Calder
+gist: Calder showed you the logbook: at the end of each shift, write what you fixed, what you found, what's still open.
+== lines
+calder > you: Officers write it down.   [gesture]
+calder: What you fixed. What you found. What you left for tomorrow. One line.
+calder: The night crew read it. I read it. Next week, you'll read it.
+? choice
+* Every day?   rel:calder+1 flavour:practical
+  calder: Every working day. Before half five. It takes a minute.
+* What if nothing happened?   rel:calder+2 flavour:listen
+  calder: Then write that. A quiet day is worth knowing too.
+calder: Go on. Today's.

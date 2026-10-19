@@ -621,3 +621,16 @@
 ? flag:train.p1.word
 - Here's one the pipe kit won't settle.
 - When does it happen? That's the question.
+
+// ---- Pillar 5 Step 4 (head writer W2): side jobs. Kind 'work', flags as in content/works/keys-p5.md "Step 4".
+== work
+// M11 stage 3: she notices you looking after the team's tool rack
+? flag:upkeep.rack
+- Somebody's been keeping the tool rack. It shows. Thank you.
+// M12: talking about your recent log entries ({machine} from your log)
+? flag:log.talk
+- Read your log. {machine}, good catch.
+- Your log's tidy. The night crew noticed. So did I.
+// tickets: her word when you solve your first
+? flag:ticket.solved
+- A ticket, solved. That's a fault-finder. Wear the pin.

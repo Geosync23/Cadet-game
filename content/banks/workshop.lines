@@ -1,0 +1,44 @@
+@bank all
+// Pillar 5 Step 4 (head writer W2): side jobs said by crew. order.thanks: the asker when you hand over the thing you
+// made (M10, seat E3; {thing} its name). cabin.remark: a visitor noticing something in your cabin (24t, E3; the flag
+// names the spot). favour.thanks: the friend whose favour you solved (E2). roof.wait: crew waiting for the lift while it's held (M17, E3). Bubbles, 60 characters or fewer.
+== order.thanks
+- Oh, {thing}! That's perfect. Thank you.   #warm
+- You made this? It's better than the shop ones.
+- {thing}! It fits. It actually fits.
+- Thank you. I'll think of you every time I use it.   #warm
+? tier>=colleague
+- Look at that. Proper work. I owe you a tea.
+- You're a star. A useful star.   #funny
+== favour.thanks
+- You fixed it! I knew you would. Thank you.   #warm
+- That's brilliant. I'd never have worked that out.
+- Thank you. I owe you one. A big one.
+? tier>=friend
+- You're the best. Have this. No arguing.   #warm
+== cabin.remark
+? flag:cabin.lamp
+- Nice lamp. Did you make that?
+- That lamp's lovely. Very you.
+? flag:cabin.rug
+- Good rug. Warm under the feet.
+- Ooh, a rug. Shoes off?   #funny
+? flag:cabin.plant
+- A plant! Is that from the garden? It looks happy.
+? flag:cabin.shelf
+- Look at your shelf. You've been busy.
+? flag:cabin.made
+- Did you make all this? In the shop?   #warm
+== roof.wait
+- Lift's held again. Thursday, isn't it.
+- Stairs it is. Good for the legs, they say.   #funny
+- Half four, the notice says. I'll wait.
+- Somebody's up on the roof. Rather them than me.
+
+@bank dept:works
+// M10 (E3, 24j): the machine shop tech on shift, your first order. Kind work, flag train.m10.word, in order.
+== work
+? flag:train.m10.word
+- First order? The lathe for round things, the fabricator for the rest.
+- Measure twice. The offcut bin is for everyone's mistakes.
+- Done? Take it to them yourself. That's the best bit.

@@ -1,0 +1,17 @@
+@meeting train.m11.halloran-emeka
+// Pillar 5 Step 4, M11 tool upkeep (from Day 12; the first time you use the bench): "Torres's Friday routine", taught
+// by the Works officer on shift. Day 12 is a Friday, so usually Halloran (Torres is off Thu, Fri). Seat E1. Head
+// writer W2.
+title: Torres's Friday routine
+from: Emeka Halloran
+gist: Emeka showed you tool upkeep at your bench: charge the scanner, clean and re-seal the pipe kit, check the logger.
+== lines
+halloran-emeka: Ah, the bench. Zeke calls this his Friday routine. He'd want you to have it.   [gesture]
+halloran-emeka > you: Scanner on the charger. Pipe kit: wipe it, new seal. Logger: check the clock.
+halloran-emeka: Ten minutes a week. Saves an hour when it matters.
+? choice
+* Why Friday?   rel:halloran-emeka+1 flavour:listen
+  halloran-emeka: So it's ready Monday. And so Zeke can have biscuits after. Lovely system.   [laugh]
+* Ten minutes. Easy.   rel:halloran-emeka+1 flavour:practical
+  halloran-emeka: Easy to say. Easy to skip, too. Don't.
+halloran-emeka: Your tools will tell you when they're due. Listen to them.

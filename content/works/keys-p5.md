@@ -214,3 +214,25 @@ unsigned. Calder's flag lines also exist for Vance (`vance.lines`) where the pag
 | `meter.<sys>` | short meter names: air water power heat food waste hull comms propulsion transport | |
 | `works.turnin.rep`, `works.turnin.meter`, `works.turnin.repN` | the turn-in (C2 and U): "Works reputation up" (words only; C2 passes `{dept}`, unused) / "+{n} {system}" / "+{n} {dept} reputation" (U) | `{n}` `{system}` (the meter.<sys> name) `{dept}` |
 | `tiles.paused` | the Tiles notice under the score (U adds the pause sign) | |
+
+## Step 4 (0.63.4; lead 16's brief plans/brief-p5s4.md; D3's pages; head writer W2)
+
+Proposed by W2. **Send W2 your full list in ONE message if your code uses other names; W2 adopts it as is** (Step 3
+lesson: no back-and-forth). Texts in `content/works/step4.lines` (`@bank all`); crew words in `content/banks/workshop.lines`
+and people's own lines; meetings `train.<id>.<teacher>`.
+
+| Seat | Keys |
+| --- | --- |
+| all | `works.mech.m10/m11/m12/m13/m14/m15/m17/tickets` (ladder names) |
+| E3 M10 workshop | `works.order.<thing>` (hook rack bracket stand clip frame box hanger; the game adds " — {first}"), `works.order.card` ({thing} {name}), `.fetch` ({part}), `.made` ({thing} {name}), `.lapse` ({name}); crew kind `order.thanks` ({thing}); shop tech kind `work` flag `train.m10.word` (works bank, lines in order); tinkering `tinker.<lamp\|mugrack\|rocket\|pot\|own1\|own2>` and `.about` |
+| E1 M11 tool upkeep | `works.toolstate.charged/low/due`, `tool.due.<scanner\|pipekit\|logger>`, `bench.<scanner\|pipekit\|logger>`, `bench.done`; meetings `train.m11.halloran-emeka`, `train.m11.torres-zeke`; Calder `work` flag `upkeep.rack` (stage 3) |
+| E1 M12 logbook | `works.log.write`, `works.log.pick`, parts `log.fixed` ({machine} {part}), `log.serviced`, `log.found` ({machine} {shows}), `log.open`, `log.quiet`, `log.saved`; stage 2 `log.flag`, `log.flagged`; stage 3 `case.log.note` ({n} {text}); meeting `train.m12.calder`; Calder `work` flag `log.talk` ({machine}) |
+| E2 M13 leaks | `leak.card` ({deck}), `leak.look.above/wall/floor` ({place}), `leak.look.warmer/colder/here`, `leak.fix.tighten`, `leak.fix.replace` ({part}), `leak.done`, `leak.found.crew` ({deck}), `leak.hint` ({machine}); meetings `train.m13.torres-zeke`, `train.m13.halloran-emeka` |
+| E2 M14 irrigation | `irr.title` ({n}), `irr.clear`, `irr.cleared`, `irr.flush`, `irr.flushed`, `irr.salad`; meetings `train.m14.cruz-tove`, `train.m14.oneill-imani`, `train.m14.hart-ravi` |
+| E2 M15 rewiring | `rewire.card` ({junction}), `rewire.pop`, `rewire.right`, `rewire.done` ({junction}), `rewire.faded`, `rewire.check`, `wire.<red\|blue\|yellow\|green\|white\|black>`; meeting `train.m15.calder` |
+| E2 favours | per case id `lamp cold squeak shower clock speaker`: `favour.<id>.ask` (chat), `mail.favour.<id>` (Mail), `.title`, `.sus.1-3` (1 is the real cause), `.clue.1-3`, `.solved`; `favour.lapse` ({name}), `favour.head` ({name}); crew kind `favour.thanks` |
+| E2 tickets | `mail.ticket.first` (Calder, Day 13), `ticket.card` ({machine} {shows}), `ticket.wrong`, `ticket.solved`, `works.grade.1/2/3`, `works.ms.grade` ({grade} {n}), `works.pin`; Calder `work` flag `ticket.solved` |
+| E2 team parts | `mail.team.parts` ({job} {time} {name} {parts}), `team.parts.late` ({name}) |
+| E1 stages | `round.last` ({n}), `round.last.never`, `round.doorway` ({machine} {word}), Torres `work` flag `round.two`; `haul.tidy`; stocktake `stock.count`, `stock.short` ({shelf} {part}), `stock.job`, `stock.fine` ({shelf}) |
+| E3 cabin, stars | `cabin.spot.rug/lamp/shelf/plant`, `cabin.item.rug.woven/.stripe`, `cabin.item.lamp.plain`, `cabin.item.plant.fern/.herb`; crew kind `cabin.remark` (flags `cabin.lamp/rug/plant/shelf/made`); `star.title`, `star.pick`, `star.right` ({star}), `star.wrong`, `star.name` ({n}), `star.done`, `works.ms.stars`; sato and mori kind `cue` flags `stars.talk` (every third log), `stars.paid` (Day 19) |
+| E3 M17 lift roof | meeting `train.m17.halloran-emeka`; Halloran `work` flags `roof.climb`, `roof.grease`, `roof.view`, `roof.done`; `roof.held`, `roof.result`, `roof.resume`; crew kind `roof.wait` |
