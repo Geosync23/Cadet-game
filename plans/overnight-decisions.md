@@ -239,3 +239,4 @@ The user went to bed ~03:40: **overnight mode ON** until they check in in the mo
 | ~05:15 | Day 2 rounds training | Torres explains, then a job on the board, then arrow + green tips guide you (the user) | The user's words |
 | ~05:15 | Energy balance numbers | Lead's tuning: a normal 16 h day ends near 20-25% energy; the alarm shows the energy you will wake with; a warning if the alarm is after your shift | "Burns faster" without a number; easy to tune in the morning |
 | ~05:15 | Crew wake time | About 30 minutes earlier, staggered and seeded | "Wake earlier" without a number |
+| ~05:20 (the user) | Crew mornings | Wake earlier and varied (lead: day shift ~05:30-07:15, seeded per person); not all go straight to breakfast (wash, dress, exercise, coffee first); everyone eats and is at work by 09:00. Sent to X |
