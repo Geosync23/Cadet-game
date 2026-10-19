@@ -1,4 +1,35 @@
-# Handover: Pillar 5 designer (seat D, no game code)
+# Handover: Pillar 5 designer (seat D / "D2", design only, no game code)
+
+**Latest (2026-10-19 ~02:40, session_01VAVLL8kQNeQwiZ7TJZ6GMF, stopping at ~65% memory as the user's rule says).** Report to **lead 16, session_01UMyfd16GqSdgNyz5PE8qSv**: only finished pieces (with hashes), blockers and design calls; builders may ask directly. Never contact the user; never start sessions; stay inside `plans/` and `design-doc.md`; push only to `claude/p5-design`. Approval is the user's, relayed by the lead.
+
+## Where everything stands (this session)
+| Piece | File(s) | State |
+| --- | --- | --- |
+| Tier 2 fault tables | `plans/mechanics/fault-tables.html` (src `ft.body`) | APPROVED (7e4c17b); a `Line` column (water/heat/air), damper table |
+| Step 3 pages | promotion-officer, m8, m9, p1, p2, case-engine#t2 | APPROVED with changes (e6b6601): M8 2-3 team jobs a week (rota on the page), stage 2 in Step 4; P2 gated on `SHIP.works.said.p2`; the full air line in Step 3 |
+| Air line for the deck architect | `plans/mechanics/architect-air-line.html` (src `air.body`) | sent to DA5 (session_01CHRbUTZc18m7eBck8eWhXj, branch claude/deck-p5s3) |
+| Plan v11 | `plans/pillar5-plan.md` + `.html` | the Step 3 survey answers |
+| Holidays | `plans/holidays-plan.html` (src `holidays.body`) | ON HOLD (user); 7 questions unanswered; design-doc untouched for it |
+| Ship-wide events | `plans/events-plan.html` (src `events.body`), artifact https://claude.ai/artifact/5fAouaAV1K1qptqPYez9rt (v5 = plan v4 approved) | APPROVED 2026-10-19 and written into design-doc "Ship-wide events" (71fe06b). Phase 1 = the nine in Days 1-26 (comet 2, storm 4-5, Space Creature 8, visit 12-15, surge 17, Echo 18, distress 21, Loss of Power 24 07:40-11:40, inspector 25); Phase 2 = the other eleven. Remaining open questions: the recommendations stand as the plan |
+| TNG pitch | `plans/events-pitch-tng.html` (src `pitch.body`), published as a second file of the events artifact | matches events v4 |
+| Rec dec traditions | `plans/rec-traditions-plan.html` (src `rectrad.body`), artifact https://claude.ai/artifact/JFMgkWEYAhoEa2HphtN4im (Version 2, 842a638) | 7 APPROVED (Cup, Dawn swim, Wall night, Paddle club, Float hour, Wren talks with a 6-speaker rota, Glow paddle every 4 weeks from Day 27); 8 candidates for 5 places awaiting the user (my ★: Junior night, Birthday bell, Sing-along, Kit mend night, Night-shift matinee) |
+
+## Next
+1. When the user picks the rec dec's last five: update `rectrad.body` (mark approved, drop the rest, refresh the week view), rebuild, republish to the same artifact (`Artifact` publish of `plans/rec-traditions-plan.html`; it keeps the URL), then write the approved rec traditions into design-doc's traditions section (and the rec dec answers) in the same commit.
+2. Builders' questions on Step 3 pages: answer, and record each in the page's "Builders' questions" section.
+3. Step 4 pages (side jobs, Step 2's optional stages, M8 stage 2, favours, fault-finder tickets, cabin touches, star logging) when the lead asks; then Step 5.
+
+## How pages are made
+Edit `plans/mechanics/src/<name>.body` directly (4 header lines TITLE/H1/SUB/NAV, then sections), then `python3 mk.py X.body ../OUT.html base.css` (pages outside mechanics/: `../../OUT.html`), then check `NODE_PATH=$(npm root -g) node chk.js $(realpath OUT.html)` (390 px, no sideways scroll). The scratchpad generator scripts used for events v1-v3 are gone: edit the bodies by hand now. Republishing an artifact from another session needs an `Artifact` read of it first (and a read of each extra published file you replace).
+
+## Gotchas found this session
+- The newest game file is on `claude/p5-cand-s2` (0.63.1), not this branch; `lead-pillar1` is old (0.41.4).
+- `ROSTER_ROTATIONS` already has crew rotations on Days 35, 77, 119; `bridgeInvite` is due the day before bridge hour (Day 22 now); events need a fixed-day `earliest` with `spread: 0, gap: 0`.
+- Bridge hour: every 4 weeks, Tuesday of week 4 (Day 23 first); talent night every 4 weeks from Day 14 (the rec plan).
+- Deck 5's air plants are `5-scrubber-1/-2` (kind airplant); `5-fan-1` is a stand-in inside the locked Fan hall.
+
+---
+
 
 - **Role:** design only. Reports ONLY to the lead (TEAM.md names it; from 2026-10-18 ~15:53 lead 13, session_015UkCGSS9FyGoBdkePhrKbC (report only finished pieces, blockers, design calls; Step 3 paused by the user until Step 2 is out); on 2026-10-18 ~10:14 lead 12, session_01GjWhU9Z9V8RNoR8yyELA9V; before that lead 11, session_01YKC3CGA9VS4b7wuqLbPT7V) with send_message: one line when starting, one per finished page with its commit hash, at once if blocked. Never contacts the user. Never starts sessions. Stay inside `plans/` and `design-doc.md`.
 - **Branch:** `claude/p5-design` (made from `claude/pillar5-plan` 93a5a7f). Predecessor: session_01FDy4na3u2FS8L8vEjR6gAR (archived), then session_01VXENaUt4vdyYtr3KjVZk9z (this note's writer, 2026-10-18).
