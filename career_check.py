@@ -122,7 +122,7 @@ def pacing(r, name):
     for x in r['days']:
         sizes = Counter()
         for i in dict.fromkeys(x['op']):
-            sizes[next(s for s in (('big' if i in ('m1', 'm4', 'm5', 'm7', 'm6', 't2') else 'small'),))] += 1
+            sizes[next(s for s in (('big' if i in ('m1', 'm4', 'm5', 'm7', 'm6', 't2', 'm8', 'm9') else 'small'),))] += 1
         check(sizes['big'] <= 1 and sizes['small'] <= 1, f"{name}: Day {x['d']} opened {x['op']} (more than one big or one small)")
         check(x['work'] or not x['op'], f"{name}: Day {x['d']} is a day off and opened {x['op']}")
 
@@ -335,6 +335,12 @@ with sync_playwright() as pw:
         check(aw['cer'] and aw['cer'][0][3] == '17:30' and aw['com'] == [[11, 'mail']], f"away: Calder sets off to walk you up at 17:30; commissioned by Mail by 19:00 anyway: {aw['cer']}, {aw['com']}")
         ev("promoPip()")
         check(aw['summ'] and aw['summ'][0][4] == '11:15' and aw['promoted'] and aw['promoted'][0][0] == 10 and aw['promoted'][0][2] == 'mail' and aw['rank'][1] == 'officer', f"away: Calder sets off to find you at 11:15; promoted by Mail the same day anyway: {aw['summ']}, {aw['promoted']}")
+
+    print('(k) The turn-in card\'s gains (Step 3, for the HUD engineer):')
+    tg = ev("""(() => { const j = { id: 'gaintest@1', kind: 'chore', machine: null, title: 'Test', stops: [], parts: [], status: 'claimed', claimedBy: 'you', workDone: true, meters: [{ key: 'air', name: 'Air', gain: 2.5 }, { key: 'power', name: 'Power', gain: 0 }] };
+      SHIP.jobs.push(j); careerJobIn({ id: j.id, step: 'turnin', machine: null }); const g = j.gains; SHIP.jobs = SHIP.jobs.filter(x => x !== j); return g || null; })()""")
+    print('  ', tg)
+    check(tg and tg['rep'] and tg['rep'][0]['dept'] == 'works' and 'add' not in tg['rep'][0] and tg['meters'] == [{'sys': 'air', 'name': 'Air', 'add': 2.5}], f"turn-in gains: rep in words (no number), the ship meters it raised: {tg}")
 
     print('(h) The bridge, by invitation (Step 3):')
     br = ev("""(() => {
