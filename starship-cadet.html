@@ -62,17 +62,6 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 .devbtn b{min-width:16px;padding:0 4px;border-radius:8px;background:var(--teal);color:#08201d;font-size:11px;line-height:16px;margin-left:2px}
 .devbtn.compact span{display:none}                        /* 0.28.59: the narrowest phones, so Pause fits beside it (its aria-label still says Device) */
 .devbtn.low::after{content:"";width:7px;height:7px;border-radius:50%;background:#e8a04c;margin-left:2px}
-/* 0.72.0 (HUD U): the Tracked button, in the Device button's row (section 15b's trkPlace lines it up), and its panel */
-.trkbtn{position:fixed;left:140px;top:86px;z-index:2;padding:6px 11px;font-size:12.5px}
-.trkbtn.compact span{display:none}
-.trkbtn.on{border-color:#e8c06a}
-.trkbtn.on::after{content:"";width:7px;height:7px;border-radius:50%;background:#e8c06a;margin-left:2px}
-.trkbtn::before{content:"";position:absolute;inset:-7px -3px}  /* a 44px tap target */
-#trkPanel{max-height:calc(100% - 28px);overflow-y:auto;overscroll-behavior:contain}
-#trkPanel h3{margin:10px 2px 5px;font-size:11.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-#trkPanel .deckbtn i{width:auto;min-width:26px;padding:0 6px;border-radius:13px;font-size:12px}
-#trkPanel .deckbtn span{min-width:0;flex:1}
-#trkPanel .deckbtn b,#trkPanel .deckbtn small{overflow-wrap:anywhere}
 /* 19. the device's skin (0.35.1): an old-school phosphor screen in a bezel. CSS and DOM only: no canvas, blur or backdrop-filter. */
 .device,.devtip,.devhu,.devdlg,.devaddr,#chat.devchat,body #seek{--crt-ink:#6ff0dc;--crt-dim:#4ab1a3;--crt-bg:#03141a;--crt-hot:#e8fffb;--crt-glow:rgba(95,227,208,.45);--crt-scan:rgba(0,0,0,.2);--crt-radius:18px;--crt-font:ui-monospace,"Cascadia Mono",Menlo,Consolas,monospace;--crt-size:17px;--bezel:#1b1f24}
 html[data-ph="amber"] body #seek,.devhu[data-ph="amber"],.devaddr[data-ph="amber"],.devdlg[data-ph="amber"],#chat.devchat[data-ph="amber"],.devtip[data-ph="amber"],.device[data-ph="amber"]{--crt-ink:#ffb347;--crt-dim:#d09142;--crt-bg:#140c03;--crt-hot:#fff1d6;--crt-glow:rgba(255,170,60,.5)}
@@ -255,12 +244,6 @@ body.dlgon .devhu{display:none}
   <button class="stay" id="sleepNo">Not yet</button>
 </div>
 <button class="devbtn" id="devBtn" aria-label="Your device: the time and your needs"><svg viewBox="0 0 24 24"><rect x="6" y="3" width="12" height="18" rx="2.5"/><path d="M10 17.5h4"/></svg><span>Device</span><b id="devMail" hidden></b></button>
-<button class="trkbtn" id="trkBtn" aria-label="Tracked: what's on and coming up, and where to go" aria-haspopup="dialog"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="2.5"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3"/></svg><span>Tracked</span></button>
-<div class="lift" id="trkPanel" role="dialog" aria-labelledby="trkT" hidden>
-  <h2 id="trkT">Tracked</h2><p>Tap one to follow the arrow there. Tap it again to stop.</p>
-  <div id="trkList"></div>
-  <button class="stay" id="trkClose">Close</button>
-</div>
 <div class="device" id="device" role="dialog" aria-labelledby="devT" data-ph="cyan" hidden>
   <div class="bez" id="devBez"><span class="led" id="devLed" title="New mail"></span><span>CSV WREN · CREW PDA</span><span class="grip"></span></div>
   <div class="crt"><div class="devhead"><h2 id="devT">Your device</h2></div><div id="devBody"></div></div>
@@ -272,7 +255,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.72.3
+   STARSHIP CADET: CSV Wren                           build 0.72.4
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8616,7 +8599,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.72.3';                           // keep in step with the header's build line
+const GAME_BUILD = '0.72.4';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -10597,7 +10580,7 @@ function deviceRefresh() {
 const DEVICE_SKIN = (() => {
   const $ = id => document.getElementById(id);
   const el = $('device'), body = $('devBody'), btn = $('devBtn'), badge = $('devMail'), head = $('devT'), backB = $('devBack'), led = $('devLed');
-  const GLYPH = { hobby: '✿', home: '⌂', needs: '♥', wrench: '⚒', mail: '✉', wallet: '¤', schedule: '◷', calendar: '▦', memo: '✎', map: '⌖', ship: '◈', news: '☰', record: '★', crew: '☺', people: '♡', gear: '✲', dot: '•' };
+  const GLYPH = { hobby: '✿', home: '⌂', needs: '♥', wrench: '⚒', mail: '✉', wallet: '¤', schedule: '◷', calendar: '▦', memo: '✎', map: '⌖', ship: '◈', news: '☰', record: '★', crew: '☺', people: '♡', gear: '✲', dot: '•', track: '◎' };
   const mk = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
   const act = (b, action) => { b.type = 'button'; b.onclick = e => { e.stopPropagation(); deviceDo(action); }; return b; };
   let back = null, drawn = null, drawnKey = null, mapCache = null;
@@ -10804,7 +10787,7 @@ const DEVICE_SKIN = (() => {
       const tx = mk('span', '', ''); tx.append(mk('b', '', h.text), mk('small', '', h.where || '')); c.appendChild(tx);
       if (h.go) { const g = mk('button', 'act', 'Go there'); g.type = 'button'; g.onclick = e => { e.stopPropagation(); devHeadsDo('go'); }; c.appendChild(g); }
       c.style.top = ''; const me = c.getBoundingClientRect(); let top = me.top;   // 0.35.31: below section 15's needs strip and activity bar when they'd overlap (a phone)
-      for (const id of ['needStrip', 'actBar', 'trkBtn']) { const e = document.getElementById(id); if (!e || e.hidden || !e.offsetWidth) continue;   // 0.72.0: and the Tracked button
+      for (const id of ['needStrip', 'actBar']) { const e = document.getElementById(id); if (!e || e.hidden || !e.offsetWidth) continue;
         const r = e.getBoundingClientRect(); if (r.right > me.left && r.left < me.right && r.bottom + 8 > top) top = r.bottom + 8; }
       if (top !== me.top) c.style.top = Math.round(top) + 'px';
       c._t = simTimeout(() => devHeadsDo('done'), h.soft ? 6000 : 9000);
@@ -14219,7 +14202,7 @@ function ixFrame() {
   if (label !== ixLast) { lab.textContent = ixLast = label; }
 }
 requestAnimationFrame(ixFrame);
-// ---- the Tracked button and panel (0.72.0, HUD U; the user's playtest note): everything on or coming up (the rest of
+// ---- Tracked (0.72.0, HUD U; the user's playtest note; a device app since 0.72.4, first in its list): everything on or coming up (the rest of
 // today and tomorrow morning from the Schedule's devDay: traditions, appointments, meals, your shift, ship items), your
 // job, and a few fixed places (the job board, your bunk, the call booths). A tap tracks one with the goal arrow
 // (setGoal, the goal carrying trk, its key, so the panel knows it's on; your job with SHIP.player.track, as the Jobs app
@@ -14250,57 +14233,29 @@ function trkItems() {
   return out;
 }
 const trkOn = it => { if (!it.job) return !!(IX_GOAL && IX_GOAL.trk === it.key); const j = typeof myJob === 'function' ? myJob() : null; return !IX_GOAL && SHIP.player.track !== null && !!j && j.id === it.job; };
-const trkEl = document.getElementById('trkPanel'), trkList = document.getElementById('trkList'), trkBtn = document.getElementById('trkBtn');
-const trkKey = () => Math.floor(shipNow()) + '|' + (IX_GOAL ? IX_GOAL.trk || IX_GOAL.label : '') + '|' + SHIP.player.track;
-let trkSig = '';
-function trkTap(it) {
-  if (trkOn(it)) { if (it.job) SHIP.player.track = null; else clearGoal(); trkDraw(); return; }   // tap again: stop
+function trkTap(key) {                                  // the app's tap: track it, or stop if it's the one tracked
+  const it = trkItems().find(x => x.key === key); if (!it) return false;
+  if (trkOn(it)) { if (it.job) SHIP.player.track = null; else clearGoal(); return false; }
   if (it.job) { SHIP.player.track = it.job; clearGoal(); }
   else if (it.goal) { SHIP.player.track = null; setGoal({ ...it.goal, trk: it.key }); }
-  else return;
-  trkClose();                                            // on its way: the arrow shows
+  else return false;
+  return true;
 }
-function trkDraw() {
-  const items = trkItems(); trkList.textContent = ''; trkSig = trkKey();
-  for (const [sec, head] of [['job', 'Your job'], ['on', 'On and coming up'], ['place', 'Places']]) {
-    const rows = items.filter(x => x.sec === sec); if (!rows.length) continue;
-    const h = document.createElement('h3'), box = document.createElement('div'); h.textContent = head; box.className = 'decks'; trkList.append(h, box);
-    for (const it of rows) {
-      const on = trkOn(it), b = document.createElement('button'), sp = document.createElement('span'), t = document.createElement('b'), sm = document.createElement('small');
-      b.type = 'button'; b.className = 'deckbtn' + (on ? ' goal' : ''); b.disabled = !on && !it.job && !it.goal; b.setAttribute('aria-pressed', String(on));
-      if (it.tag) { const i = document.createElement('i'); i.textContent = it.tag; b.appendChild(i); }
-      t.textContent = it.title; sm.textContent = it.sub + (b.disabled ? ' · no arrow for this one' : ''); sp.append(t, sm); b.appendChild(sp);
-      if (on) { const e = document.createElement('em'); e.textContent = 'Tracking'; b.appendChild(e); }
-      b.onclick = e => { e.stopPropagation(); trkTap(it); };
-      box.appendChild(b);
+// the device app (0.72.4, the user's: "move it into the personal device as its own app, first in the list"); its glyph
+// is the skin's 'track'
+deviceApp({ id: 'tracked', title: 'Tracked', icon: 'track', order: 1,
+  act(verb, key) { if (verb === 'track' && trkTap(key)) deviceClose(); },   // on its way: the device closes so the arrow shows
+  view: () => {
+    const items = trkItems(), B = [{ kind: 'text', text: 'Tap one to follow the arrow there. Tap it again to stop.' }];
+    for (const [sec, head] of [['job', 'Your job'], ['on', 'On and coming up'], ['place', 'Places']]) {
+      const rows = items.filter(x => x.sec === sec); if (!rows.length) continue;
+      B.push({ kind: 'text', text: head, mark: 'head' });
+      B.push({ kind: 'list', rows: rows.map(it => { const on = trkOn(it), can = on || it.job || it.goal;
+        return { text: it.title, sub: (sec === 'on' && it.tag ? it.tag + ' · ' : '') + it.sub + (on ? ' · Tracking' : can ? '' : ' · no arrow for this one'), mark: on ? 'hot' : null,
+          action: can ? { app: 'tracked', do: 'track', arg: it.key } : null }; }) });
     }
-  }
-}
-function trkOpen() { if (!trkEl.hidden) return trkClose(); trkDraw(); trkEl.hidden = false; trkBtn.setAttribute('aria-expanded', 'true');
-  try { (trkList.querySelector('button.goal') || trkList.querySelector('button:not(:disabled)') || document.getElementById('trkClose')).focus({ preventScroll: true }); } catch (e) { /* no focus */ } }
-function trkClose() { trkEl.hidden = true; trkBtn.setAttribute('aria-expanded', 'false'); }
-trkBtn.addEventListener('pointerdown', e => e.stopPropagation());
-trkBtn.onclick = e => { e.stopPropagation(); trkOpen(); };
-document.getElementById('trkClose').onclick = trkClose;
-addEventListener('keydown', e => { if (e.key === 'Escape' && !trkEl.hidden) trkClose(); });
-addEventListener('pointerdown', e => { if (!trkEl.hidden && !trkEl.contains(e.target) && !trkBtn.contains(e.target)) { e.stopPropagation(); e.preventDefault(); trkClose(); } }, true);   // a tap outside closes it, and goes no further
-// where it sits: on phones (narrow or short, section 15's pausePlace's test) under the needs strip's right end, clear of
-// the activity bar under its left end, so it stays put as the Device button grows (mail, a low need) and Pause moves;
-// elsewhere, or with no needs strip, in the Device button's row after Device (or Pause beside it), without its word
-// when it would touch the round buttons
-function trkPlace() {
-  const d = document.getElementById('devBtn'), pb = document.getElementById('pauseBtn'), ns = document.getElementById('needStrip'); if (!d) return;
-  const dr = d.getBoundingClientRect();
-  trkBtn.classList.remove('compact'); trkBtn.style.height = Math.round(dr.height) + 'px';
-  if (matchMedia('(max-width:720px),(max-height:500px)').matches && ns && !ns.hidden && ns.offsetWidth) {
-    const r = ns.getBoundingClientRect(); trkBtn.style.left = Math.round(Math.min(r.right, innerWidth - 12) - trkBtn.offsetWidth) + 'px'; trkBtn.style.top = Math.round(r.bottom + 8) + 'px'; return;
-  }
-  const pr = pb && pb.style.left ? pb.getBoundingClientRect() : null, anchor = pr && Math.abs(pr.top - dr.top) < 4 ? pr : dr;
-  const put = () => { trkBtn.style.left = Math.round(anchor.right + 8) + 'px'; trkBtn.style.top = Math.round(dr.top) + 'px'; };
-  const hits = () => { const q = trkBtn.getBoundingClientRect(); return q.right > innerWidth - 8 || [...document.querySelectorAll('.controls button')].some(o => { if (o === pb || !o.offsetWidth) return false; const r = o.getBoundingClientRect(); return r.left < q.right + 4 && q.left < r.right && r.top < q.bottom && q.top < r.bottom; }); };
-  put(); if (hits()) { trkBtn.classList.add('compact'); put(); }
-}
-addEventListener('resize', trkPlace); setTimeout(trkPlace, 0);
+    return { title: 'Tracked', blocks: B };
+  } });
 // ---- the turn-in's gains (0.72.3, HUD U; Pillar 5 Step 3, the user's: "the job turn-in shows rep going up AND the points
 // added to each ship meter the job helped"). The board's turnIn calls turnInShow(job, before) after its toast, which gets
 // a row of chips: reputation first (gold), then each ship meter ("+4 Power"). What it shows comes from the job:
@@ -14338,14 +14293,6 @@ function turnInShow(j, a) {
   for (const c of list) { const b = document.createElement('b'); b.textContent = c.text; if (c.rep) b.className = 'rep'; row.appendChild(b); }
   x.appendChild(row); return list;
 }
-let trkAt = 0;
-(function trkFrame() {                                   // the button's dot while an arrow's up; its place (the Device button and Pause move); the panel kept current while open
-  requestAnimationFrame(trkFrame);
-  const now = performance.now(); if (now - trkAt < 400) return; trkAt = now;
-  const on = typeof goalNow === 'function' && !!goalNow(); if (trkBtn.classList.contains('on') !== on) trkBtn.classList.toggle('on', on);
-  trkPlace();
-  if (!trkEl.hidden && trkSig !== trkKey()) trkDraw();
-})();
 
 // =====================================================================
 // 15r. THE REC DECK'S ACTIVITIES (the rec deck architect, 0.80.6-0.80.7; plans/recdeck-plan.html section 9 "For you: tap and do")
