@@ -435,7 +435,6 @@ with sync_playwright() as pw:
     rec_on = g.ev("typeof REC_DECK !== 'undefined' && REC_DECK")
     for i in want_ids:
         if i.startswith('rec-') and not rec_on: continue    # the rec deck's own load only with the deck switched on (0.83)
-        if i == 'talent-night' and rec_on: continue          # replaced by the rec deck's talent night when it's on (the user's answer, 2026-10-19)
         if i not in loaded: fail(f"content/traditions has {i}, but the game didn't load it (bake the TRADITIONS block again)")
     # every decor and trace id a tradition names is one the deck architect built (DECK_DRESS) or has announced, or one
     # a designer has asked for (it shows nothing until built); anything else is a typo
@@ -457,15 +456,15 @@ with sync_playwright() as pw:
     if g.ev("typeof REC_TRADS !== 'undefined' && REC_DECK && REC_TRAD_ON"):
         PLAN = {'rec-wso': [7, 14, 21, 35, 42], 'rec-cup': [28], 'rec-dawn-swim': [d for d in range(2, 43) if (d - 1) % 7 in (1, 3)],
                 'rec-paddle-club': list(range(3, 43, 7)), 'rec-wall-night': list(range(2, 43, 7)), 'rec-float-hour': list(range(3, 43, 7)),
-                'rec-slow-stretch': list(range(7, 43, 7)), 'rec-regatta': [21], 'rec-talent-night': [14, 42], 'rec-talk-chief': [8, 18], 'rec-talk-small': [25, 29],
-                'rec-film': [], 'rec-allhands': []}
+                'rec-slow-stretch': list(range(7, 43, 7)), 'rec-regatta': [21], 'rec-talent-night': [14, 42], 'rec-chiefs-talk': [8, 18], 'rec-wren-talk': [25, 29],
+                'rec-film-night': [], 'rec-all-hands': []}
         rc = g.ev("""(() => { const out = { on: {}, n: {}, hosts: [], talks: [] };
           for (let d = 1; d <= 42; d++) for (const e of eventsOn(d)) if (/^rec-/.test(e.id)) {
             (out.on[e.id] = out.on[e.id] || []).push(d);
             const went = schedPeople().filter(p => planDay(p, d).some(s => evTagId(s.tag) === e.id)).map(p => p.id);
             (out.n[e.id] = out.n[e.id] || []).push(went.length);
             if (e.ev.host && !went.includes(e.ev.host)) { const h = schedPeople().find(p => p.id === e.ev.host); if (h && eventFree(h, d, e.from, e.to, e.ev.wake)) out.hosts.push(d + ' ' + e.id + ' without its host ' + e.ev.host); }
-            const t = /^rec-talk/.test(e.id) && recTalk(d); if (t) out.talks.push([d, t.size, t.by, went.includes(t.by)]);
+            const t = /^rec-(wren|chiefs)-talk$/.test(e.id) && recTalk(d); if (t) out.talks.push([d, t.size, t.by, went.includes(t.by)]);
           }
           return out; })()""")
         for k, want in PLAN.items():
@@ -477,13 +476,13 @@ with sync_playwright() as pw:
         for d, size, by, ok_ in rc['talks']:
             if not ok_: fail(f"day {d}: the {size} talk without its speaker {by}")
         print('  the talks:', rc['talks'])
-        mv = g.ev("""(() => { const sat = d => eventsOn(d).map(e => e.id).filter(i => i === 'film' || i === 'rec-film');
+        mv = g.ev("""(() => { const sat = d => eventsOn(d).map(e => e.id).filter(i => i === 'film' || i === 'rec-film-night');
           const before = [6, 13].map(sat); recFirstAllHands(9 * 1440 + 600); const after = [13, 20].map(sat);
-          const ah = eventsOn(92).filter(e => e.id === 'rec-allhands').length, g92 = schedPeople().filter(p => planDay(p, 92).some(s => evTagId(s.tag) === 'rec-allhands'));
+          const ah = eventsOn(92).filter(e => e.id === 'rec-all-hands').length, g92 = schedPeople().filter(p => planDay(p, 92).some(s => evTagId(s.tag) === 'rec-all-hands'));
           const lect = schedPeople().filter(p => planDay(p, 92).some(s => s.placeId === '7-lectern-1')).map(p => p.id);
           return { before, after, ah, n: g92.length, lect, flagA: flag('rec.allHands'), day: SHIP.rec.ah }; })()""")
         print('  film night and the all-hands:', mv)
-        if mv['before'] != [['film'], ['film']] or mv['after'] != [['rec-film'], ['rec-film']]: fail(f"film night's move: {mv}")
+        if mv['before'] != [['film'], ['film']] or mv['after'] != [['rec-film-night'], ['rec-film-night']]: fail(f"film night's move: {mv}")
         if mv['ah'] != 1 or mv['n'] < 30 or mv['lect'] != ['marrow'] or mv['day'] != 10: fail(f"the season's all-hands: {mv}")
         bd = g.ev("""(() => { SHIP.rec.wso.length = 0; SHIP.rec.bell.length = 0; for (const [id, d] of [['rec-wso', 7], ['rec-wall-night', 9], ['rec-regatta', 21], ['rec-cup', 28]]) simNote('tradition', { id, day: d, at: 0, came: [], you: false });
           return { wso: recBoard('wso', 7), bell: recBoard('bell', 9), reg: recBoard('reg', 21), cup: recBoard('cup', 28), three: (wsoCourt(7) || {}).three }; })()""")

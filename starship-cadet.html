@@ -8476,14 +8476,18 @@ Object.assign(WALL_KIT, {
 // beach, the pebble beach under the wall, the lobby glass by the float room. The stands' seats by the gate are the court's
 // queue (schedData's '7|rec-courtq'). anim is section 8c's pose (section 8b's ACTS) for whoever is there
 const REC_CREW_PLACES = [
-  ...[1.35, 2.25, 3.15, 4.05].map((z, k) => ({ id: '7-lane-' + (k + 1), type: 'rec:lane', at: [24, Math.floor(z)], walk: [23, Math.floor(z)], xy: [24.6, z], y: .35, face: 'e', pose: 'stand', anim: 'swim', room: 'P' })),
+  ...[1.35, 2.25, 3.15, 4.05].map((z, k) => ({ id: '7-lane-' + (k + 1), type: 'rec:lane', at: [24, Math.floor(z)], walk: [23, Math.floor(z)], xy: [24.6, z], y: .35, face: 'e', pose: 'stand', anim: 'swim', room: 'P',
+    move: { kind: 'swim', path: [[24.6, z], [30.5, z]], y: .35, phase: k * .25 } })),   // move: rec engineer B's crew moves (0.84.6), looped while settled
   ...[[24.4, 6.55], [27.6, 6.55], [29.6, 6.55]].map(([x, z], k) => ({ id: '7-lounger-' + (k + 1), type: 'rec:poolq', at: [Math.floor(x), 6], walk: [Math.floor(x), 5], xy: [x, z - .1], y: .42, face: 'n', pose: 'sit', room: 'P' })),
   ...[25.6, 28.6].map((x, k) => ({ id: '7-pooledge-' + (k + 1), type: 'rec:poolq', at: [Math.floor(x), 5], xy: [x, 5.05], y: .42, face: 'n', pose: 'sit', room: 'P' })),
-  ...[9.4, 7.4, 5.4].map((x, k) => ({ id: '7-kayak-' + (k + 1), type: 'rec:kayak', at: [Math.floor(x), 4], walk: [Math.floor(x) + 1, 6], xy: [x, 4.85], y: .36, face: 'w', pose: 'stand', anim: 'kayak', room: 'K' })),
+  ...[9.4, 7.4, 5.4].map((x, k) => ({ id: '7-kayak-' + (k + 1), type: 'rec:kayak', at: [Math.floor(x), 4], walk: [Math.floor(x) + 1, 6], xy: [x, 4.85], y: .36, face: 'w', pose: 'stand', anim: 'kayak', room: 'K',
+    move: { kind: 'kayak', path: [[11.4, 4.85], [4.8, 4.85], [4.8, 1.3], [13.8, 1.3, 1], [13.8, 4.85, 1]], y: .36, phase: k / 3 } })),   // 15r's REC_LOOP (not readable yet here)
   ...[13, 14].map((c, k) => ({ id: '7-dockq-' + (k + 1), type: 'rec:kayakq', at: [c, 6], face: 'n', pose: 'stand', room: 'K' })),
-  ...[2.575, 4.875].map((z, k) => ({ id: '7-climb-' + (k + 1), type: 'rec:climb', at: [2, Math.floor(z)], xy: [1.95, z], face: 'w', pose: 'stand', anim: 'climb', room: 'K' })),
+  ...[2.575, 4.875].map((z, k) => ({ id: '7-climb-' + (k + 1), type: 'rec:climb', at: [2, Math.floor(z)], xy: [1.95, z], face: 'w', pose: 'stand', anim: 'climb', room: 'K',
+    move: { kind: 'climb', at: [1.95, z], face: 'w', top: 1.39, rest: 4, phase: k * .5 } })),   // top: 15r's H - 2.25 with the deck's 1.3 walls
   ...[3, 5].map((r, k) => ({ id: '7-beach-' + (k + 1), type: 'rec:climbq', at: [3, r], face: 'w', pose: 'stand', room: 'K' })),
-  ...[[18.5, 13.5], [20.5, 13.3], [22.5, 13.5], [18.5, 16.2], [20.5, 16.4], [22.5, 16.2]].map(([x, z], k) => ({ id: '7-float-' + (k + 1), type: 'rec:float', at: [Math.floor(x), Math.floor(z)], xy: [x, z], face: k < 3 ? 's' : 'n', pose: 'stand', anim: 'float', room: 'F' })),
+  ...[[18.5, 13.5], [20.5, 13.3], [22.5, 13.5], [18.5, 16.2], [20.5, 16.4], [22.5, 16.2]].map(([x, z], k) => ({ id: '7-float-' + (k + 1), type: 'rec:float', at: [Math.floor(x), Math.floor(z)], xy: [x, z], face: k < 3 ? 's' : 'n', pose: 'stand', anim: 'float', room: 'F',
+    move: { kind: 'float', at: [x, z], r: .6, top: 2.0 } })),
   ...[20, 21].map((c, k) => ({ id: '7-floatq-' + (k + 1), type: 'rec:floatq', at: [c, 11], face: 's', pose: 'stand', room: '+' })),
   // the changing rooms (crew change for the pool and the kayaks, as you do): two lockers either side of yours, two showers
   ...[[18.0, 18], [20.7, 20]].map(([x, c], k) => ({ id: '7-locker-' + (k + 1), type: 'rec:locker', at: [c, 1], xy: [x, 1.25], face: 'n', pose: 'stand', anim: 'browse', room: 'w' })),
@@ -8588,11 +8592,11 @@ DECKS[7] = {
   service: [{ key: 'v,4,8', tier: 2 }, { key: 'v,4,15', tier: 2 }, { key: 'v,32,3', tier: 1 }, { key: 'h,31,11', tier: 1 }, { key: 'v,34,11', tier: 1 }],
   machines: [],                                          // TODO (phase 2, the systems engineer): the plan's section 6 machines
   // the auditorium's seats (0.80.1): reached from the aisle beside their row; a type no crew code knows, so they stay the player's
-  places: REC_SEATS.map((s, k) => ({ id: '7-seat-' + (k + 1), type: 'rec:seat', at: [s.col, Math.floor(s.z)], walk: [s.col, s.aisle], face: 'e', pose: 'sit', room: 'A', xy: [s.x, s.z], y: Math.round((s.h + .47) * 100) / 100 }))
+  places: REC_SEATS.map((s, k) => ({ id: '7-seat-' + (k + 1), type: 'rec:seat', at: [s.col, Math.floor(s.z)], walk: [s.col, s.aisle], face: 'e', pose: 'sit', anim: 'slump', room: 'A', xy: [s.x, s.z], y: Math.round((s.h + .47) * 100) / 100 }))   // slump: rec engineer B's seated pose (0.83.2)
     // the stands' 33 seats (0.80.2), facing the court, reached from the aisle at column 6 or 14
-    .concat(REC_STAND_SEATS.map((s, k) => ({ id: '7-stand-' + (k + 1), type: 'rec:seat', at: [s.col, s.tier ? 12 : 11], walk: [s.aisle, s.tier ? 12 : 11], face: 's', pose: 'sit', room: 'T', xy: [s.col + .5, s.z + .02], y: Math.round((s.h + .45) * 100) / 100 })))
+    .concat(REC_STAND_SEATS.map((s, k) => ({ id: '7-stand-' + (k + 1), type: 'rec:seat', at: [s.col, s.tier ? 12 : 11], walk: [s.aisle, s.tier ? 12 : 11], face: 's', pose: 'sit', room: 'T', xy: [s.col + .5, s.z + .02], y: Math.round((s.h + .45) * 100) / 100, move: { kind: 'fan' } })))   // fan: B's cheer, clap and groan together
     // the concourse's two beanbags (0.80.9, the user's): lounge seats like the music room's, so crew can use them in phase 2
-    .concat([[5, 5.5, 7.45], [6, 6.6, 7.55]].map(([c, x, z], k) => ({ id: '7-beanbag-' + (k + 1), type: 'lounge-seat', at: [c, 7], walk: [c, 8], face: 's', pose: 'sit', room: '=', xy: [x, z], y: .42, cush: .32 })))
+    .concat([[5, 5.5, 7.45], [6, 6.6, 7.55]].map(([c, x, z], k) => ({ id: '7-beanbag-' + (k + 1), type: 'lounge-seat', at: [c, 7], walk: [c, 8], face: 's', pose: 'sit', anim: 'slump', room: '=', xy: [x, z], y: .42, cush: .32 })))
     .concat(REC_CREW_PLACES),
   dress(d) {
     recMats();
@@ -9742,6 +9746,7 @@ function recHostEarly(p, d, shiftAt) {                  // shiftAt: their shift'
   for (const ev of REC_TRADS) if (ev.host === p.id && ev.at[0] < 600 && !(shiftAt && ev.at[1] > shiftAt - 15) && evDue(ev.when, d)) return ev.at[0] - (ev.wake != null ? ev.wake : 60) - 25;   // time for the toilet and a wash first
   return null;
 }
+const REC_ROUND = { who: 'volkov-maeve', at: [600, 690], stops: 5, mins: 6 };   // her round: from 10:00-11:30, five machines, six minutes each
 const REC_CAP = { busy: 15, quiet: 6 }, REC_Q = 10, REC_TURN = [20, 40];
 const recCap = (d, m) => weekday(d) >= 5 || m >= 1020 || m < 540 ? REC_CAP.busy : REC_CAP.quiet;   // weekday daytime (09:00-17:00) is quiet
 // a visit's odds from a rest block: with a habit, most of them; without, now and then the stands, a beanbag or the float room
@@ -9893,6 +9898,7 @@ function schedBuild(p, d, occ, S) {
     else if (H.has('tea-break') || U(31) < .35) br.push([600 + Math.round(240 * U(30)), 'tea']);
     if (U(32) < .6) br.push([540 + Math.round(400 * U(33)), 'toilet']);
     if (F.double) br.push([1050 + Math.round(30 * U(36)), 'staff']);   // a double shift (C7): dinner at the station
+    if (REC_ON && p.id === REC_ROUND.who && wd === 5) br.push([REC_ROUND.at[0] + Math.round((REC_ROUND.at[1] - REC_ROUND.at[0]) * schedU(p.seed, d, 1039)), 'recRound']);   // Maeve's round of the rec deck's machines (0.83.2, RA)
     const ru = EVD && evRule(B + 600, 'rush'), ra = ru && (ru.at || [600, 1080]);
     if (ru && !called && evOwed(p, evAt(B + 600), d)) br.push([Math.max(ra[0], t + 15) + Math.round((Math.min(ra[1], to) - 60 - Math.max(ra[0], t + 15)) * U(37)), 'call']);
     for (const [bt, kind] of br.sort((a, b) => a[0] - b[0])) {
@@ -9901,6 +9907,7 @@ function schedBuild(p, d, occ, S) {
       if (kind === 'tea') { if (!take('leisure', [[wd, 'lounge-seat'], [wd, 'bench']], 15, { tag: 'tea' })) work(t + 15); }
       else if (kind === 'wtea') { if (!take('leisure', [[5, 'lounge-seat']], WORKS_TEA.dur, { tag: 'tea', wait: WORKS_TEA.wait, min: 8, anim: 'drink' })) work(t + 5); }   // the tea corner full: back to the job
       else if (kind === 'staff') seg('dinner', t + 20, wtype, desk, { tag: 'staff' });
+      else if (kind === 'recRound') recRound(to);
       else if (kind === 'call') {                       // to the booths and back on the shift's time (tag 'rush')
         called = true; const n0 = segs.length;
         if (take('callhome', [[3, 'callhome']], 20, { wait: 20, min: 10, tag: 'rush' })) { go(wd); for (let i = n0; i < segs.length; i++) if (segs[i].act === 'commute' || segs[i].tag === 'lift') segs[i].tag = 'rush'; }
@@ -9973,19 +9980,22 @@ function schedBuild(p, d, occ, S) {
     if (hab && vu(0) < odds * (F.works ? REC_ODDS.habit : REC_ODDS.habitOff)) kind = REC_HABITS[hab];
     else if (vu(0) > 1 - odds * REC_ODDS.casual) kind = ['watch', 'bean', 'float'][Math.floor(vu(1) * 3)];
     if (!kind) return false;
+    const sh = typeof recShutAt === 'function' ? recShutAt(B + t + C) : null;   // rec engineer B's machines (0.84.6): what's shut or off now
+    if (sh && (kind === 'disc' && sh.court || kind === 'float' && sh.float || kind === 'climb' && !sh.belays || kind === 'swim' && sh.pool && vu(5) < .7 || kind === 'kayak' && sh.river && vu(5) < .5)) return false;
     const R = REC_DO[kind], wet = !!R.wet, pre = wet ? 2 : 0, post = wet ? 6 : 0, dur = REC_TURN[0] + Math.round((REC_TURN[1] - REC_TURN[0]) * vu(2));
     const a0 = ride ? ride.a0 : t + C, open = DECKS[7].open, last = Math.min(to - C - post, open[1] * 60 - 15);
     if (a0 < open[0] * 60 || last - (a0 + pre) < 15) return false;
-    const pool = S.shared.get('7|' + R.type) || []; if (!pool.length) return false;
+    const pool = (S.shared.get('7|' + R.type) || []).slice(0, kind === 'climb' && sh ? sh.belays : 99); if (!pool.length) return false;   // a belay out: one climber at a time
     const capOk = (a, b) => { for (let m = a; m < b; m++) if (occ.rec[m] + 1 > recCap(d, m)) return false; return true; };
     const free1 = (type, a, b) => (S.shared.get('7|' + type) || []).find(pl => isFree(pl.id, a, b)) || null;
-    // the place and the turn: the earliest start within REC_Q minutes; Lightdisc: the challenger's end of a game already
-    // planned (7-disc-1 booked, 7-disc-2 free for the same minutes) first, else the first end, waiting for someone
+    // the place and the turn: the earliest start within REC_Q minutes; Lightdisc: the bow end (7-disc-1, your baseline) only
+    // to join a game already waiting (someone on 7-disc-2 for the same minutes), else the stern end, waiting for someone
+    // (reviewer R6's fix, 0.83.2: a lone player had stood on your baseline)
     let pl = null, s0 = 0, e0 = 0;
     if (kind === 'disc') {
       const d2 = pool.find(q => q.id === '7-disc-2'), d1 = pool.find(q => q.id === '7-disc-1');
-      for (const [x, y] of (d1 && occ.get(d1.id)) || []) { const a = x - B, b = Math.min(y - B, last); if (a >= a0 && a <= a0 + REC_Q && b - a >= 15 && isFree(d2.id, a, b)) { pl = d2; s0 = a; e0 = b; break; } }
-      if (!pl && d1 && isFree(d1.id, a0, Math.min(a0 + dur, last))) { pl = d1; s0 = a0; e0 = Math.min(a0 + dur, last); }
+      for (const [x, y] of (d2 && occ.get(d2.id)) || []) { const a = x - B, b = Math.min(y - B, last); if (a >= a0 && a <= a0 + REC_Q && b - a >= 15 && isFree(d1.id, a, b)) { pl = d1; s0 = a; e0 = b; break; } }
+      if (!pl && d2 && isFree(d2.id, a0, Math.min(a0 + dur, last))) { pl = d2; s0 = a0; e0 = Math.min(a0 + dur, last); }
     } else {
       const off = Math.floor(pool.length * vu(3));
       for (let s = a0 + pre; s <= a0 + pre + REC_Q && !pl; s++) {
@@ -10007,6 +10017,16 @@ function schedBuild(p, d, occ, S) {
     const end = Math.min(to - C, open[1] * 60 - 15);
     if (end - t >= 15 && capOk(t, end)) { const q = free1(vu(4) < .6 ? 'rec-stand' : 'lounge-seat', t, end) || free1('rec-stand', t, end); if (q) { hold(q.id, t, end); seg('leisure', end, q.type, q.id, { tag: 'rec-watch' }); } }
     return true;
+  };
+  // Maeve Volkov's round (the plan's "Maeve's deck"; RA, 0.83.2): mid-morning on her workdays, down to the rec deck and a look
+  // at REC_ROUND.stops of its machines' work places (rec engineer B's '<machine>-svc', in id order from a seeded start, key
+  // 1039), a few minutes each (tag 'round'), then back to her own desk; work time all of it. None while those aren't built
+  const recRound = to => {
+    const svc = ((DECKS[7] && DECKS[7].places) || []).filter(pl => pl.type === 'work:works' && pl.machine).sort((a, b) => a.id.localeCompare(b.id, 'en', { numeric: true }));
+    const n = Math.min(REC_ROUND.stops, svc.length), need = 2 * C + n * REC_ROUND.mins; if (!n || to - t < need + 20) return;
+    const k0 = Math.floor(schedU(p.seed + 1, d, 1039) * svc.length);
+    go(7); for (let i = 0; i < n; i++) { const pl = svc[(k0 + i) % svc.length]; if (isFree(pl.id, t, t + REC_ROUND.mins)) hold(pl.id, t, t + REC_ROUND.mins); seg('work', t + REC_ROUND.mins, pl.type, pl.id, placeAnim(pl) ? { tag: 'round', anim: placeAnim(pl) } : { tag: 'round' }); }
+    go(wd);
   };
   // a leisure block taken off the Commons (Deck 4's rooms, the officers' lounges): sometimes the rec deck instead. The place
   // stays held for the block and the ride back ends there, so everyone else's day and this person's own afterwards come
@@ -14941,12 +14961,12 @@ function recTap(it, at, point) {
   if (typeof deckDef === 'undefined' || !deckDef || deckDef.num !== 7) return false;
   const t = it.t;
   if ((t === 'Lightdisc court' || t === 'Ask someone to play') && (recCupTap() || recWsoTap())) return true;   // Winner Stays On: skip the line (0.83.1); Cup day: your match (0.83.2)
-  if (t === 'Lightdisc court' || t === 'Ask someone to play') { if (!recQueue('disc', t, null)) discAsk(); return true; }   // section 23b (0.82.0); two crew already on the court: wait your turn (RA, 0.83.0)
+  if (t === 'Lightdisc court' || t === 'Ask someone to play') { if (!recQueue('disc', t, null)) discAsk(recCourtWaiting()); return true; }   // section 23b (0.82.0); two crew already on the court: wait your turn (RA, 0.83.0)
   if (t === 'Scoreboard') { toast(t, it.x); return true; }
   const kind = t === 'Pool' ? 'swim' : /^(Kayak dock|River|White water|Kayak rack|Wave gate)$/.test(t) ? 'kayak' : t === 'Climbing wall' ? 'climb'
     : t === 'Float room' ? 'float' : t === 'Seats' ? 'seat' : t === 'Stands' ? 'watch' : t === 'Beanbag' ? 'bean' : t === 'Lockers' && recKitOn() ? 'unchange' : null;
   if (!kind) return false;
-  if (!recOpen() && kind !== 'unchange') { toast(t, 'The rec dec\'s closed till six.'); return true; }
+  if (!recOpen() && kind !== 'unchange') { toast(t, 'The rec deck\'s closed till six.'); return true; }
   recGo(kind, point, t, it.x); return true;
 }
 PLAYER_TAPS.push(recTap);
@@ -14980,7 +15000,7 @@ function recGo(kind, point, title, flavour) {
 const REC_BELAYS = [['7-climb-1', 0], ['7-climb-2', 2]];   // the two auto-belays: on the red route and the blue
 const recLanesFree = () => REC_LANES.filter((z, i) => !heldBy('7-lane-' + (i + 1)));
 const recBelaysFree = () => REC_BELAYS.filter(([id]) => !heldBy(id)).map(([, r]) => r);
-const recCourtFree = () => !(heldBy('7-disc-1') && heldBy('7-disc-2'));
+const recCourtFree = () => !heldBy('7-disc-1');           // your baseline: crew there means a game of theirs is on (0.83.2)
 const REC_QUEUE = { swim: ['rec:poolq', 'Every lane\'s taken. You wait on a lounger for one to come free.'], climb: ['rec:climbq', 'Both belays are in use. You wait on the pebble beach for your turn.'],
   disc: ['rec:seat', 'Two are playing. You wait on the bench by the gate: you\'re next.'] };
 const recFreeFor = kind => kind === 'swim' ? recLanesFree().length > 0 : kind === 'climb' ? recBelaysFree().length > 0 : kind === 'disc' ? recCourtFree() : true;
@@ -15006,6 +15026,8 @@ function recWsoTap() {
   toast('Winner Stays On', 'Pell waves you through the gate. "Go on, you\'re up." You play ' + shortName(champ) + '.');
   discAsk(champ); return true;
 }
+// someone waiting on the stern baseline for a game (a crew pick-up with nobody yet): they play you (R6's fix, 0.83.2)
+const recCourtWaiting = () => { const a = heldBy('7-disc-2'); return a && a.p && !heldBy('7-disc-1') ? schedPeople().find(q => q.id === a.p.id) || null : null; };
 function recQueue(kind, title, p) {                      // true when you're now waiting (REC.q), false when there's room
   if (!REC_QUEUE[kind] || recFreeFor(kind)) return false;
   const [type, line] = REC_QUEUE[kind], gate = kind === 'disc';
@@ -15062,7 +15084,7 @@ function recFrame() {
   }
   if (A && A.kind === 'recWait' && REC.q && recFreeFor(REC.q.kind)) {   // your turn (RA, 0.83.0)
     const q = REC.q; REC.q = null; toast(q.title, 'You\'re up.');
-    if (q.kind === 'disc') { actEnd(true); discAsk(); } else recStart(q.kind, q.title, null, q.p);
+    if (q.kind === 'disc') { actEnd(true); discAsk(recCourtWaiting()); } else recStart(q.kind, q.title, null, q.p);
   } else if (REC.q && (!A || A.kind !== 'recWait')) REC.q = null;   // gave up waiting, or went off to do something else
   if (A !== REC.last) { const was = REC.last; REC.last = A; if (was && was.kind.startsWith('rec') && !A) recAfter(was); }
   if (A && A.kind.startsWith('rec') && A.phase === 'do' && A.def.also) {   // the second gains (a swim washes you, all of them keep you fit), as the minutes go by
@@ -17668,7 +17690,7 @@ function blackoutHour(h) {
   if (typeof eventMod !== 'function' || eventMod('effect', 'blackouts', h * 60) !== true) return null;
   const c = MACH_HIST.get(histHour((h - 1) * 60)), power = c ? systemsFrom(c).power : 100, u = k => schedU(BLACKOUT_SEED, h, k);
   if (u(1) >= .15 + .45 * (1 - power / 100)) return null;
-  const decks = Object.keys(DECKS).map(Number).filter(n => !DECKS[n].playerOnly).sort(), deck = decks[Math.floor(u(2) * decks.length)], len = 15 + Math.floor(46 * u(3));
+  const decks = Object.keys(DECKS).map(Number).filter(n => !DECKS[n].playerOnly && n !== 7).sort(), deck = decks[Math.floor(u(2) * decks.length)], len = 15 + Math.floor(46 * u(3));
   const from = h * 60 + Math.floor(u(4) * (61 - len));
   return { deck, from, to: from + len };
 }
@@ -32986,71 +33008,71 @@ const REC_TRADS = [
     who: (p, d) => p.id === 'pell' ? 1 : recIs(p, d, 'disc-player') ? .9 : recIs(p, d, 'film-buff') ? .55 : .45, anim: () => 'cheer',
     from: 'Pell Okafor', mail: 'Winner Stays On tomorrow, 11:30 to 16:30 on the Lightdisc court. Chalk your name on the board by the gate. I\'ll be on. I\'m always on.',
     ask: 'Winner Stays On today. My name\'s already on the board.', here: 'Next! Who\'s next?', thanks: 'You find a spot in the stands for Winner Stays On. Pell rings his hand bell for every new game.' },
-  { id: 'rec-dawn-swim', name: 'Dawn swim', k: 487, when: { weekday: [1, 3], from: 2 }, at: [375, 405], min: 20, wake: 15, quiet: 'career',
+  { id: 'rec-dawn-swim', name: 'Dawn swim', k: 488, when: { weekday: [1, 3], from: 2 }, at: [375, 405], min: 20, wake: 15, quiet: 'career',
     where: [{ deck: 7, pool: 'rec:lane' }, { deck: 7, pool: 'rec:poolq' }], host: 'rina',
     who: (p, d) => p.id === 'rina' ? 1 : recIs(p, d, 'swimmer') ? .85 : recIs(p, d, 'early-riser') ? .5 : .03, anim: () => null,
     from: 'Rina Deshi', mail: 'Dawn swim tomorrow, 06:15 in the rec dec pool. Before the infirmary opens. The water\'s warm; getting in is the hard part.',
     ask: 'Dawn swim in the morning? Before the infirmary opens.', here: 'Two more lengths. Then breakfast.', thanks: 'You swim a few lengths with Rina while the stars slide past the hull windows.' },
-  { id: 'rec-paddle-club', name: 'Paddle club', k: 488, when: { weekday: 2, from: 3 }, at: [1110, 1170], min: 25, quiet: 'career',
+  { id: 'rec-paddle-club', name: 'Paddle club', k: 489, when: { weekday: 2, from: 3 }, at: [1110, 1170], min: 25, quiet: 'career',
     where: [{ deck: 7, pool: 'rec:kayak' }, { deck: 7, pool: 'rec:kayakq' }], host: 'holt',
     who: (p, d) => p.id === 'holt' ? 1 : recIs(p, d, 'kayaker') ? .8 : .04, anim: () => null,
     from: 'Chief Bram Holt', mail: 'Paddle club tomorrow, 18:30 in the river hall. The slow loop first. Helmets on. Yes, you.',
     ask: 'Paddle club tonight. Holt counts the helmets.', here: 'Lean into it. Don\'t fight the water.', thanks: 'You paddle the slow loop with Paddle club while Chief Holt watches the water like a hawk.' },
-  { id: 'rec-wall-night', name: 'Wall night', k: 489, when: { weekday: 1, from: 2 }, at: [1110, 1185], min: 25, quiet: 'career',
+  { id: 'rec-wall-night', name: 'Wall night', k: 491, when: { weekday: 1, from: 2 }, at: [1110, 1185], min: 25, quiet: 'career',
     where: [{ deck: 7, pool: 'rec:climb' }, { deck: 7, pool: 'rec:climbq' }], host: 'tomas',
     who: (p, d) => p.id === 'tomas' ? 1 : recIs(p, d, 'climber') ? .85 : .05, anim: () => null,
     from: 'Tomas Lind', mail: 'Wall night tomorrow, 18:30 at the climbing wall. I\'ll belay. Ring the bell and your name goes on the season\'s board.',
     ask: 'Wall night later. Ring the bell and you\'re on the board.', here: 'Left foot. No, your other left.', thanks: 'You climb at Wall night with Tomas on the rope. The bell rings out across the river hall.' },
-  { id: 'rec-float-hour', name: 'Float hour', k: 490, when: { weekday: 2, from: 3 }, at: [1290, 1335], min: 20, quiet: 'career',
+  { id: 'rec-float-hour', name: 'Float hour', k: 492, when: { weekday: 2, from: 3 }, at: [1290, 1335], min: 20, quiet: 'career',
     where: [{ deck: 7, pool: 'rec:float' }, { deck: 7, pool: 'rec:floatq' }], host: 'oduya',
     who: (p, d) => p.id === 'oduya' ? 1 : recIs(p, d, 'floater') ? .85 : .04, anim: () => null,
     from: 'Matthias Oduya', mail: 'Float hour tomorrow, 21:30 in the float room. The orbs go down, the music goes on, and nobody talks. You\'ll sleep better.',
     ask: 'Float hour tonight. No talking. That\'s the whole point.', here: '...', thanks: 'You drift in the dimmed float room with quiet music. Nobody says a word, and it\'s lovely.' },
-  { id: 'rec-slow-stretch', name: 'Slow stretch', k: 491, when: { weekday: 6, from: 7 }, at: [510, 555], min: 20, wake: 15, quiet: 'career', spare: 0,
+  { id: 'rec-slow-stretch', name: 'Slow stretch', k: 493, when: { weekday: 6, from: 7 }, at: [480, 525], min: 20, wake: 15, quiet: 'career', spare: 0,
     where: [{ deck: 7, pool: 'rec:float' }], host: 'nandakumar',
     who: (p, d) => p.id === 'nandakumar' ? 1 : recIs(p, d, 'floater') ? .75 : recIs(p, d, 'early-riser') ? .3 : .08, anim: () => null,
-    from: 'Dr. Priya Nandakumar', mail: 'Slow stretch tomorrow, 08:30 in the float room: a gentle stretch at a fifth of a g. Doctor\'s orders, and the doctor\'s coming.',
+    from: 'Dr. Priya Nandakumar', mail: 'Slow stretch tomorrow, 08:00 in the float room: a gentle stretch at a fifth of a g. Doctor\'s orders, and the doctor\'s coming.',
     ask: 'Slow stretch in the morning? At a fifth of a g, even I can touch my toes.', here: 'Slower. Slower still.', thanks: 'You stretch slowly at a fifth of a g with Dr. Nandakumar. Your back thanks you all day.' },
   // every four weeks (0.83.2): the regatta (from Day 21), talent night (from Day 14), the Lightdisc Cup (from Day 28, in
   // Winner Stays On's place: the higher prio wins the court)
-  { id: 'rec-regatta', name: 'River regatta', k: 492, when: { every: '4weeks', weekday: 6, week: 3 }, at: [570, 660], min: 30, hold: [], prio: 1,
+  { id: 'rec-regatta', name: 'River regatta', k: 490, when: { every: '4weeks', weekday: 6, week: 3 }, at: [570, 660], min: 30, hold: [], prio: 1,
     venue: 'river-banks', where: [{ deck: 7, pool: 'rec:kayak' }, { deck: 7, pool: 'rec:kayakq' }], host: 'holt',
     whereFor: (p, d, o) => regattaPaddler(p, d) ? o.filter(([, k]) => k !== 'ev:rec-regatta').concat(o.filter(([, k]) => k === 'ev:rec-regatta')) : o.filter(([, k]) => k === 'ev:rec-regatta'),   // the kayakers paddle the heats, everyone else watches from the banks
     who: (p, d) => p.id === 'holt' ? 1 : recIs(p, d, 'kayaker') ? .9 : .3, anim: () => 'cheer',
     from: 'Chief Bram Holt', mail: 'The river regatta tomorrow, 09:30 in the river hall. Heats of four round the loop; I start each one with the horn. Watch from the bank, or paddle the fun heat.',
     ask: 'Regatta this morning. Holt\'s got the horn.', here: 'Go on! Paddle!', thanks: 'You cheer from the bank as the heats race round the loop. Holt\'s horn makes everyone jump.' },
-  { id: 'rec-talent-night', name: 'Talent night', k: 493, when: { every: '4weeks', weekday: 6, week: 2 }, at: [1170, 1290], min: 40, hold: [], prio: 1,
+  { id: 'rec-talent-night', name: 'Talent night', k: 497, when: { every: '4weeks', weekday: 6, week: 2 }, skip: d => Math.abs(shipYearDay(d) - 152) < 7,   // never within a week of the yearly one (lead 18) at: [1170, 1290], min: 40, hold: [], prio: 1,
     where: [{ deck: 7, pool: 'rec-aud' }, { deck: 7, pool: 'rec:act' }, { deck: 7, pool: 'rec:booth' }, { deck: 7, pool: 'rec:lectern' }], host: 'ferreira',
     whereFor: (p, d, o) => o.filter(([, k]) => p.id === 'volkov-maeve' ? k === 'rec:booth' : p.id === 'ferreira' ? k === 'rec:lectern' : recIs(p, d, 'musician') ? k === 'rec:act' || k === 'rec-aud' : k === 'rec-aud'),
     who: (p, d) => p.id === 'ferreira' || p.id === 'volkov-maeve' ? 1 : recIs(p, d, 'musician') ? .85 : recIs(p, d, 'film-buff') ? .7 : .4, anim: p => p.id === 'volkov-maeve' ? null : 'clap',
     from: 'Comms Chief Lucia Ferreira', mail: 'Talent night tomorrow, 19:30 in the auditorium. Songs, the piano, a juggling Works tech, and whoever\'s brave. Sign up on the sheet in the foyer.',
     ask: 'Talent night tonight! The sign-up sheet\'s nearly full.', here: 'Give them a big hand!', thanks: 'You find a seat for talent night. Every act gets a cheer, even the one that goes wrong.' },
-  { id: 'rec-cup', name: 'Lightdisc Cup', k: 494, when: { every: '4weeks', weekday: 6, week: 4 }, at: [690, 990], min: 30, stay: [60, 150], hold: [2], prio: 2,
+  { id: 'rec-cup', name: 'Lightdisc Cup', k: 487, when: { every: '4weeks', weekday: 6, week: 4 }, at: [690, 990], min: 30, stay: [60, 150], hold: [2], prio: 2,
     where: [{ deck: 7, pool: 'rec-stand' }, { deck: 7, pool: 'lounge-seat' }, { deck: 7, pool: 'rec:disc' }], host: 'pell',
     whereFor: (p, d, o) => o.filter(([, k]) => k !== 'rec:disc'),
     who: (p, d) => p.id === 'pell' ? 1 : recIs(p, d, 'disc-player') ? .95 : .5, anim: () => 'cheer',
     from: 'Pell Okafor', mail: 'The Lightdisc Cup tomorrow, 11:30 on the court, instead of Winner Stays On. Every department sends its best. Enter at the gate.',
     ask: 'Cup day! Works has to beat the Watch this time.', here: 'That was in! That was IN!', thanks: 'You squeeze into the stands for the Cup. The department songs are louder than the games.' },
   // Saturdays: film night in the auditorium, once it has moved (flag rec.filmMoved, set by the first Captain's all-hands)
-  { id: 'rec-film', name: 'Film night', k: 495, when: { weekday: 5 }, at: [1200, 1335], min: 30, flag: 'rec.filmMoved',
+  { id: 'rec-film-night', name: 'Film night', k: 496, when: { weekday: 5 }, at: [1200, 1335], min: 30, flag: 'rec.filmMoved',
     where: [{ deck: 7, pool: 'rec-aud' }], host: 'pell',
     who: (p, d) => recIs(p, d, 'film-buff') ? .9 : p.rank === 'junior' ? (evHas(p, d, 'common-room') ? .8 : .35) : .2, anim: () => null,
     from: 'Pell Okafor', mail: 'Film night tomorrow, 20:00 in the auditorium on the big screen. Popcorn from the galley. My pick, so: whales.',
     ask: 'Film night in the auditorium. A screen that big!', here: 'Shh. This is the good bit.', thanks: 'You take a violet seat for film night. The screen comes down over the stars and the house lights go out.' },
   // the Captain's all-hands: the first Monday of each season, once the first has been held (with the first ship-wide event)
-  { id: 'rec-allhands', name: 'Captain\'s all-hands', k: 496, when: { every: 'quarter', week: 1, weekday: 0 }, at: [1065, 1090], min: 20, flag: 'rec.allHands', prio: 3, hold: [],
+  { id: 'rec-all-hands', name: 'Captain\'s all-hands', k: 498, when: { every: 'quarter', week: 1, weekday: 0 }, at: [1065, 1090], min: 20, flag: 'rec.allHands', prio: 3, hold: [],
     where: [{ deck: 7, pool: 'rec:lectern' }, { deck: 7, pool: 'rec-aud' }], host: 'marrow',
     whereFor: (p, d, o) => o.filter(([, k]) => (p.id === 'marrow' || p.id === 'vance') === (k === 'rec:lectern')),
     who: (p, d) => p.id === 'marrow' || p.id === 'vance' ? 1 : p.rank === 'guest' ? 0 : .95, anim: () => null,
     from: 'Captain Odile Marrow', mail: 'All hands tomorrow at 17:45 in the auditorium: the season ahead, and a few thank-yous. Dinner straight after.',
     ask: 'All-hands before dinner. The Captain\'s doing the season.', here: 'Shh, she\'s starting.', thanks: 'You find a seat for the all-hands. The Captain looks round the room, and a few names get called out.' },
   // the Wren talks (TRAD_ROTA above): the small ones in the ring on the stage, the chiefs' in the seats with the speaker on the stool
-  { id: 'rec-talk-small', name: 'Wren talk', k: 497, when: { rota: 'wren-small' }, at: [1140, 1180], min: 25,
+  { id: 'rec-wren-talk', name: 'Wren talk', k: 494, when: { rota: 'wren-small' }, at: [1140, 1180], min: 25,
     where: [{ deck: 7, pool: 'rec-ring' }], spare: 1, first: (p, d) => recSpeaker(p, d),
     who: (p, d) => recSpeaker(p, d) ? 1 : p.rank === 'junior' ? .14 : .08, anim: () => 'talk',
     from: 'The Wren talks', mail: c => { const t = recTalk(c.day), q = t && schedPeople().find(p => p.id === t.by); return q ? 'A Wren talk tomorrow at 19:00, on the auditorium stage: ' + shortName(q) + ', "' + t.title + '". Tea from the kettle. Anyone can ask anything.' : 'A Wren talk tomorrow at 19:00 on the auditorium stage.'; },
     ask: 'Coming to the talk tonight? On the stage, with tea.', here: 'Ooh, good question.', thanks: 'You pull up a chair in the ring on the stage. The talk is easy and the tea is hot.' },
-  { id: 'rec-talk-chief', name: 'Chief\'s talk', k: 498, when: { rota: 'wren-chief' }, at: [1140, 1185], min: 30, prio: 1,
+  { id: 'rec-chiefs-talk', name: 'Chief\'s talk', k: 495, when: { rota: 'wren-chief' }, at: [1140, 1185], min: 30, prio: 1,
     where: [{ deck: 7, pool: 'rec:stool' }, { deck: 7, pool: 'rec-aud' }],
     whereFor: (p, d, o) => o.filter(([, k]) => recSpeaker(p, d) === (k === 'rec:stool')),
     who: (p, d) => recSpeaker(p, d) ? 1 : p.rank === 'guest' ? 0 : .5, anim: () => null,
@@ -33119,8 +33141,8 @@ onSim('tradition', x => {
   if (x.id === 'rec-cup') { const c = cupBracket(x.day), you = REC.cup && REC.cup.day === x.day && REC.cup.won; if (you || c && c.winner) recBoardAdd('cup', you ? 'you' : c.winner, x.day); }
 });
 // the first Captain's all-hands (lead 17's call 1: no invented trigger): the first address of the first ship-wide event.
-// From then on the season's all-hands come on the first Monday of each season (rec-allhands, flag rec.allHands), and film
-// night moves to the auditorium for good (rec-film, flag rec.filmMoved), the junior common room a quiet Saturday after;
+// From then on the season's all-hands come on the first Monday of each season (rec-all-hands, flag rec.allHands), and film
+// night moves to the auditorium for good (rec-film-night, flag rec.filmMoved), the junior common room a quiet Saturday after;
 // a note for the writers' Mail (simNote('recMoved'))
 function recFirstAllHands(at) {
   const d = Math.floor(at / 1440) + 1; SHIP.rec.ah = d; SHIP.rec.film = d;
@@ -33194,7 +33216,6 @@ const TRAD_LIST = Array.isArray(TRAD_SRC) ? TRAD_SRC : Object.keys(TRAD_SRC).sor
 for (const t of TRAD_LIST) {
   const ev = tradLoad(t); if (!ev) continue;
   if (!REC_DECK && ev.where.every(w => w.deck === 7)) continue;   // the rec deck's own (0.83, RA): only with the deck switched on
-  if (REC_DECK && ev.id === 'talent-night') continue;     // the user's answer (2026-10-19): the rec deck's talent night (rec-talent-night) replaces the yearly one
   const r = REC_TRADS.find(x => x.id === ev.id);           // one of the rec deck's: the writer's file brings the words; the rules stay REC_TRADS' (whereFor, first, the rota)
   if (r) { for (const k of ['from', 'mail', 'ask', 'here', 'thanks', 'chatter', 'text', 'invite']) { const ds = Object.getOwnPropertyDescriptor(ev, k); if (ds && (ds.get || ds.value != null)) Object.defineProperty(r, k, ds); } r.baked = true; continue; }
   const i = SHIP_TRADITIONS.findIndex(x => x.id === ev.id);
@@ -33247,7 +33268,8 @@ function eventsOn(d) {
     else if (w.date) { if (d !== w.date) continue; }
     else if (!evDue(w, d)) continue;
     if (ev.flag && !(typeof flag === 'function' && flag(ev.flag))) continue;   // waits for a story beat (bridge hour: 'bridge.invited')
-    if (ev.unflag && typeof flag === 'function' && flag(ev.unflag)) continue;   // 0.83 (RA): until a flag (film night in the junior common room, until it moves)
+    if (ev.unflag && typeof flag === 'function' && flag(ev.unflag)) continue;
+    if (ev.skip && ev.skip(d)) continue;                   // 0.83.2 (RA): a day it stands down (the rec talent night near the yearly one)   // 0.83 (RA): until a flag (film night in the junior common room, until it moves)
     if (!w.ship && typeof eventPauses === 'function' && eventPauses(ev, d)) continue;   // a ship-wide event's quiet days
     const names = honorees.map(p => p.name).join(', ').replace(/, ([^,]*)$/, ' and $1');   // 'A and B', 'A, B and C'
     out.push({ id: ev.id, name: ev.name, ev, day: d, from: ev.at[0], to: ev.at[1], honorees, names, first: honorees.length ? honorees[0].name.split(' ').slice(-2)[0] : '' });
@@ -33591,7 +33613,7 @@ function eventJoin(e, d, now, notice) {
   toast(e.name, notice || evText(e.ev.thanks, e));
   if (typeof mailSend === 'function') mailSend({ at: now, from: e.ev.from, subject: 'Thanks for coming', body: 'Good to see you at ' + e.name.toLowerCase() + '. Same time next one?', quiet: true });   // the join toast says it already
   if (e.id === 'quiz') quizStart(d, now);
-  if (/^rec-talk-/.test(e.id)) recTalkCard(e, d, now);   // a Wren talk: listen, or ask one question (0.83.2, RA)
+  if (/^rec-(wren|chiefs)-talk$/.test(e.id)) recTalkCard(e, d, now);   // a Wren talk: listen, or ask one question (0.83.2, RA)
   if (e.id === 'rec-talent-night') recActCard(e, d, now); // talent night: do an act, or watch (0.83.1, RA)
   return true;
 }
@@ -34010,14 +34032,13 @@ function eventsTick() {
   if (REC_DECK) { recShowTick(now); recMyTalk(now); }    // the auditorium's show state for rec engineer B's recShow; your own talk's ask (0.83.1, RA)
 }
 // the auditorium's state for its dressing (the film screen down, the house lights, the stage pools: rec engineer B's
-// recShow(state), which RA only calls): 'film' | 'talent' | 'allhands' | 'talk' (a chief's, in the seats) | 'ring' (a small
-// one on the stage) | null, sent when it changes and again after a deck change (B's code draws it only on the rec deck)
+// recShow(state), which RA only calls): 'film' | 'talent' | 'allhands' | 'talk' (either Wren talk) | null, every ship minute
+// (RB2: the same state again does nothing; null ends the show; looks only)
 let REC_SHOW = { s: undefined, deck: null };
 function recShowTick(now) {
-  const on = id => tradOn(id, now), st = on('rec-film') ? 'film' : on('rec-talent-night') ? 'talent' : on('rec-allhands') ? 'allhands' : on('rec-talk-chief') ? 'talk' : on('rec-talk-small') ? 'ring' : null;
+  const on = id => tradOn(id, now), st = on('rec-film-night') ? 'film' : on('rec-talent-night') ? 'talent' : on('rec-all-hands') ? 'allhands' : on('rec-chiefs-talk') || on('rec-wren-talk') ? 'talk' : null;
   const dk = typeof deckDef !== 'undefined' && deckDef ? deckDef.num : null;
-  if (st === REC_SHOW.s && dk === REC_SHOW.deck) return;
-  REC_SHOW = { s: st, deck: dk };
+  REC_SHOW = { s: st, deck: dk };                        // sent every ship minute (RB2's recShow does nothing for the same state)
   if (typeof recShow === 'function') try { recShow(st); } catch (e) { /* B's to mend */ }
 }
 // your own talk (the traditions plan: once you're an Engine Specialist, after the career arc, you're asked to give a small
@@ -40524,7 +40545,7 @@ function discEvent(e) {
     discBoard(); V.pose[e.w].pump = 1.2;                 // a fist pump
     V.call.textContent = G.over ? (e.w === 0 ? 'Game: You' : 'Game: ' + DISC.short) : 'Point: ' + (e.w === 0 ? 'You' : DISC.short);
     V.call.style.color = e.w === 0 ? '#50e6ff' : '#ffa03c'; V.call.classList.remove('hide'); V.callT = 1.1;
-    if (e.w === 1) { if (G.over) discTalk('win'); else if (V.chat() < .45) discTalk('point'); }
+    if (e.w === 1) { if (G.over) discTalk('win'); else if (V.chat() < .45) discTalk('point'); } else if (G.over) discTalk('lose');   // lose: W3's disc.lose (0.83.2)
   }
   if (e.k === 'over') { discOver(); discBoard(); discResult(); }
 }

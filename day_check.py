@@ -139,7 +139,8 @@ with sync_playwright() as pw:
             mean = lambda l: sum(l) / max(1, len(l))
             print(f"The Commons and the rec deck, 17:00-24:00 (from the plans): Deck 3 mean {mean(off['h']):.1f} peak {max(off['h'])} without the rec deck;"
                   f" {mean(bare['h']):.1f} / {max(bare['h'])} with its everyday use; {mean(on['h']):.1f} / {max(on['h'])} with its traditions too ({', '.join(on['trads']) or 'none today'})")
-            if on['r']: print(f"  the rec deck: mean {mean(on['r']):.1f} peak {max(on['r'])} (everyday use alone: mean {mean(bare['r']):.1f} peak {max(bare['r'])})")
+            if on['r'] and bare['r']: print(f"  the rec deck: mean {mean(on['r']):.1f} peak {max(on['r'])} (everyday use alone: mean {mean(bare['r']):.1f} peak {max(bare['r'])})")
+            if not on['r'] or not bare['r'] or max(bare['r']) == 0: fail('the rec deck is on but nobody came to it in the evening (no rec counts): the comparison would prove nothing')   # R6
             lower = [i for i in range(420) if bare['h'][i] < off['h'][i]]
             if lower: fail(f"the Commons hold fewer with the rec deck's everyday use at {len(lower)} minutes, first {1020 + lower[0]} ({bare['h'][lower[0]]} v {off['h'][lower[0]]})")
             if on['r'] and on['cap']:
