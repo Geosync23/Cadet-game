@@ -10148,7 +10148,7 @@ function schedBuild(p, d, occ, S) {
     if (U(k + 7) < .5) toilet(k + 7);
     wash(k);
     if (F.shape.inspect && /^4-B/.test(p.bed)) { go(bedDeck); seg('off', t + 10, 'bed', p.bed, { tag: 'inspection' }); }
-    const pre = meet.find(e => !e.meal && !e.done && (e.at >= t || REC_ON && /^ev-rec-/.test(e.tag || '') && e.at + e.dur - t >= (e.min || 20)) && e.at + e.dur <= by - 25);   // a rec one (Dawn swim) already begun still counts (0.83.1)   // a gathering before breakfast (Sunrise stretch, Pick-your-own; 0.36.86): to it, then breakfast
+    const pre = meet.find(e => !e.meal && !e.done && (e.at >= t || REC_ON && /^ev-rec-/.test(e.tag || '') && e.at + e.dur - t >= (e.min || 20)) && e.at + e.dur <= by - (REC_ON && /^ev-rec-/.test(e.tag || '') ? 8 : 25));   // a rec one (Dawn swim) already begun still counts (0.83.1)   // a gathering before breakfast (Sunrise stretch, Pick-your-own; 0.36.86): to it, then breakfast
     if (pre) leisureUntil(pre.at + pre.dur, k + 11);
     const mb = meet.find(e => e.meal === 'breakfast' && !e.done && e.at + 10 > t && e.at < by + 150);   // a meal tradition (the long breakfast) is their breakfast
     if (mb) { leisureUntil(mb.at + mb.dur, k + 9); if (segs.some(s => s.act === 'breakfast' && s.tag === mb.tag)) return; if (t >= by - 5) { grab('breakfast', k + 3); return; } }
@@ -33536,7 +33536,7 @@ const EV_BUNDLE = {};
 // after each one (Pillar 4): simNote('tradition', { id, day, at, came: [crew ids whose plan took them there], you (you
 // joined), host, src: 'tradition' | 'shipwide' | 'oneoff' }) once its window has ended, in play or on a skip (at most
 // two days back); section 20 makes memories and cues of it. Once each (SHIP.events.noted, saved)
-const evTagId = tag => { const m = /^ev-(.+?)(?:-(?:talk|drink|play|water|wash|read|cheer|clap|disc))?$/.exec(tag || ''); return m && m[1]; };   // 'ev-quiz-drink' -> 'quiz'
+const evTagId = tag => { const m = /^ev-(.+?)(?:-(?:talk|drink|play|water|wash|read|cheer|clap|disc))?$/.exec(tag || ''); return m && (REC_DECK && /^ev-rec-.*-talk$/.test(tag) && SHIP_TRADITIONS.some(e => e.id === tag.slice(3)) ? tag.slice(3) : m[1]); };   // rec-chiefs-talk (0.83.2): an id ending like an anim   // 'ev-quiz-drink' -> 'quiz'
 function eventsNoted(from, to) {
   if (typeof simNote !== 'function') return;
   from = Math.max(from, to - 2 * 1440);
