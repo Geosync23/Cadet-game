@@ -407,7 +407,13 @@ with sync_playwright() as pw:
             check(g.ev("document.getElementById('trkPanel').hidden") and g.ev("IX_GOAL && IX_GOAL.trk") == 'place:bed', 'a tap in the panel tracks it and closes the panel')
             g.page.click('#trkBtn'); g.step(2); g.page.click('#trkList button:has-text("Your bunk")'); g.step(3)
             check(g.ev("IX_GOAL") is None and not g.ev("document.getElementById('trkPanel').hidden"), 'a second tap stops it, the panel stays')
-            g.page.mouse.click(160, 620); g.step(2)
+            # a tap outside: (160, 620) unless the panel reaches it (a longer Tracked list with the rec traditions on, lead 19), else
+            # the first point near it that lands on the scene itself, clear of the panel
+            ox, oy = g.ev("""(() => { const r = document.getElementById('trkPanel').getBoundingClientRect(), H = innerHeight;
+              const c = [[160, 620], [160, r.top - 30], [160, r.bottom + 30], [20, r.top - 30], [160, 200], [r.left / 2, H / 2], [(r.right + innerWidth) / 2, H / 2], [160, (r.bottom + H) / 2]].filter(([x, y]) => y > 0 && y < H);   // the last three: the margins round a panel that fills the screen
+              const ok = ([x, y]) => { const e = document.elementFromPoint(x, y); return e && e.tagName === 'CANVAS' && !(x >= r.left && x <= r.right && y >= r.top && y <= r.bottom); };
+              return c.find(ok) || [160, 620]; })()""")
+            g.page.mouse.click(ox, oy); g.step(2)
             b = json.loads(g.ev("JSON.stringify(document.getElementById('trkBtn').getBoundingClientRect())"))
             hit = g.ev(f"[...document.querySelectorAll('.controls button,#devBtn,#needStrip')].filter(o => o.offsetWidth).map(o => o.getBoundingClientRect()).some(r => r.left < {b['right']} && {b['left']} < r.right && r.top < {b['bottom']} && {b['top']} < r.bottom)")
             check(g.ev("document.getElementById('trkPanel').hidden") and not hit and b['right'] <= 320, f'a tap outside closes it; the button clears the other HUD buttons on a 320 px phone ({b})')

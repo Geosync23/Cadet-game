@@ -587,7 +587,7 @@ const shipDeck = n => SHIP.decks[n] || (SHIP.decks[n] = { open: new Set() });
 // or loop over decks for the player go in DECK_ORDER; a deck's name on screen comes from deckWord (never "Deck 7")
 // REC_DECK (0.82.7, the user's order via lead 14): the one switch for the rec deck. false keeps it dormant: no R on the lift
 // or in Maps, goToDeck(7) does nothing, a save left on it wakes on Deck 4; DECKS[7] is playerOnly, so nothing else changes
-const REC_DECK = false;                                  // 0.63.2r: merged dormant (the user's, via lead 15); the rec work comes after Step 4
+const REC_DECK = true;                                   // 0.63.2r: merged dormant (the user's, via lead 15); 0.84.11 (rec engineer B2, the brief's last step): switched on, open from Day 1
 const DECK_ORDER = REC_DECK ? [1, 2, 3, 4, 7, 5, 6] : [1, 2, 3, 4, 5, 6];
 // 0.84.8: the auditorium's show (section 8c's recShow); here so the deck's build can read them
 const REC_POOLS = [[8.85, 7.3, .95], [9.35, 9.6, 1.25], [9.1, 11.6, 1.0]];   // the stage's light pools [x, z, radius], the auditorium's coordinates
@@ -595,7 +595,7 @@ const REC_SHOWS = {
   film: { dim: .62, scr: 1, pools: [0, 0, 0] }, talk: { dim: .3, scr: 0, pools: [1, .25, 0] },
   allhands: { dim: .28, scr: 0, pools: [1, .5, 0] }, talent: { dim: .5, scr: 0, pools: [.45, 1, .8] },
 };
-const REC_SHOW = { state: null, dim: 0, scr: 0, piv: null, pools: null };
+const REC_SHOW = { state: null, dim: 0, scr: 0, piv: null, pools: null, ring: null, mic: null };
 const deckLabel = n => +n === 7 ? 'R' : String(n);
 const deckWord = n => +n === 7 ? 'Rec deck' : 'Deck ' + n;
 const deckIn = n => +n === 7 ? 'the rec deck' : 'Deck ' + n;   // 0.84.2 (lead 18): a deck's name mid-sentence ("on the rec deck"); deckWord for labels and signs
@@ -8200,6 +8200,18 @@ Object.assign(KIT, {
     REC_SHOW.piv = piv; piv.scale.y = Math.max(.001, REC_SHOW.scr); piv.visible = REC_SHOW.scr > .002;
     return { w: .3, d: o.len, noBlock: true };
   },
+  // 0.84.12 (RA's places 7-ring-1..8 and 7-stool-1): a ring of eight chairs for a small Wren talk and the chief's stool,
+  // out on the stage only while the show is 'talk' (recShowSet); merged into a mesh or two, kept out of the deck's merge
+  recRing(g, o) {
+    const rg = new THREE.Group(); g.add(rg);
+    for (let k = 0; k < 8; k++) {
+      const a = 2 * Math.PI * k / 8, c = new THREE.Group(), x = o.r * Math.cos(a), z = o.r * Math.sin(a); c.position.set(x, 0, z); c.rotation.y = Math.atan2(-x, -z); rg.add(c); KIT.chair(c);
+    }
+    const st = new THREE.Group(); st.position.set(o.stool[0], 0, o.stool[1]); rg.add(st); KIT.stool(st);
+    mergeMeshes(rg); for (const m of rg.children) { m.userData.noMerge = true; m.raycast = () => {}; }
+    REC_SHOW.ring = rg; rg.visible = REC_SHOW.state === 'talk';
+    return { w: .1, d: .1, noBlock: true };
+  },
   recHit(g, o) { return { w: o.w, d: o.d, noBlock: true }; },   // a tap target over something drawn elsewhere
 });
 Object.assign(WALL_KIT, {
@@ -8689,7 +8701,9 @@ DECKS[7] = {
     place('A', 'recHit', 9.3, 9, 'n', { w: 2.6, d: 9, hitH: .8, it: IT('Stage', 'A curved stage across the bow, and behind it nothing but the windows and the stars. Every show here is played against them.') });
     place('A', 'recTruss', 9.6, 9, 'n', { len: 8, it: IT('Lighting truss', 'A gold truss over the stage on two towers, with six lamps aimed down. The booth runs them.') });
     place('A', 'recScreen', 10.3, 9, 'n', { len: 6 });
-    place('A', 'micStand', 8.95, 9.6, 'e', { it: IT('Microphone', 'A mic stand at centre stage. Talent night\'s first act always adjusts it, and the second puts it back.') }).position.y = .55;   // 0.84.9: perform's mic (the music room's kit)
+    place('A', 'recRing', 9.7, 9, 'n', { r: 1.05, stool: [-1.35, 0] }).position.y = .55;   // 0.84.12: RA's ring (deck 43.7, 9.0) and stool (42.35, 9.0)
+    { const ms = place('A', 'micStand', 8.95, 9.6, 'e', { it: IT('Microphone', 'A mic stand at centre stage. Talent night\'s first act always adjusts it, and the second puts it back.') });   // 0.84.9: perform's mic (the music room's kit)
+      ms.position.y = .55; mergeMeshes(ms); ms.traverse(m => { if (m.isMesh) m.userData.noMerge = true; }); REC_SHOW.mic = ms; ms.visible = REC_SHOW.state !== 'talk'; }   // 0.84.12: put aside for a talk (it stood in the ring)
     place('A', 'recLectern', 8.8, 7.3, 'e', { it: IT('Lectern', 'The Captain\'s lectern, with the Wren\'s crest on the front. The microphone is bent at exactly her height.') });
     place('A', 'grandPiano', 9.0, 12.6, 's', { it: IT('Grand piano', 'A black grand piano at stage left, lid propped. Someone keeps it tuned, and nobody admits to it.') }).position.y = .55;
     place('A', 'pianoBench', 9.0, 11.25, 's').position.y = .55;   // 0.84.9: talent night's pianist sits here (perform { act: 'piano' }); the piano turned side-on (was 9.4, 12.4 facing w: no room for a bench on the curve)
@@ -15119,7 +15133,9 @@ function recStart(kind, title, flavour, p) {             // p: the tap in deck c
   } else if (kind === 'climb') {
     const len = REC_WALL.z1 - REC_WALL.z0, r0 = Math.max(0, Math.min(REC_ROUTES - 1, Math.floor(((p ? p[1] : 4.3) - REC_WALL.z0) / len * REC_ROUTES)));
     const r = REC_DECK ? recBelaysFree().reduce((m, x) => Math.abs(x - r0) < Math.abs(m - r0) ? x : m, recBelaysFree()[0]) : r0;   // a free belay's route nearest your tap (0.83.0: two belays)
-    const z = REC_WALL.z0 + len * (r + .5) / REC_ROUTES;
+    const z = REC_WALL.z0 + len * (r + .5) / REC_ROUTES, sh = recShut();   // 0.84.12 (R7): not up a taped route, nor under a tagged-out belay (belay n is over route n)
+    if (sh.route === r) { toast('Climbing wall', worksText('rec.shut.route', 'That route\'s taped off: a loose hold. Try another one.')); return; }
+    if ((r === 1 || r === 2) && sh.belayOff[r - 1]) { toast('Climbing wall', worksText('rec.shut.belay', 'That route\'s auto-belay is tagged out. Try the other one.')); return; }
     actStart('recClimb', null, { title, flavour, spot: recSpot([2, Math.max(2, Math.min(6, Math.floor(z)))], 2.5, z, -Math.PI / 2, 'stand'),
       move: { kind: 'climb', at: [1.95, z], face: 'w', top: Math.max(.8, H - 2.25), onRing: () => toast('The bell', 'Ding! You ring the brass bell at the top of the wall. The whole river hall hears it.') },
       after: 'You clip into an auto-belay on the ' + ['red', 'yellow', 'blue', 'green'][r] + ' route and start up.' });
@@ -16669,7 +16685,7 @@ function shipEffectsAt(deck, t) {
 // plates down (the float room shut); lights null | 'dim' | 'flicker' the board's way; mic, the sound rack down. Pure, like
 // shipEffectsAt: the hour-by-hour record (histHour), never machinesNow, so the schedules may ask while planning; cached on MACH_REV
 // and the hour; frozen (don't change it). All clear with no rec machines (REC_DECK off) or no record. recShut(): now (machinesNow first)
-const REC_OK = Object.freeze({ pool: null, river: null, belays: 2, route: null, court: false, board: null, float: false, lights: null, mic: false });
+const REC_OK = Object.freeze({ pool: null, river: null, belays: 2, belayOff: Object.freeze([false, false]), route: null, court: false, board: null, float: false, lights: null, mic: false });   // belayOff (0.84.12): belay 1, belay 2 tagged out (belay n is over route n)
 let REC_SHUT = new Map(), REC_SHUT_REV = -1;
 function recShutAt(t) {
   if (!REC_DECK) return REC_OK;
@@ -16680,7 +16696,7 @@ function recShutAt(t) {
   const hs = SHIP.machines['7-wall-holds'], ls = hs && Number.isFinite(hs.lastService) ? Math.floor(hs.lastService / 60) : 0;
   const r = Object.freeze({ pool: bad('7-pool-filter-1') || bad('7-pool-filter-2') ? 'cloudy' : bad('7-pool-dosing') ? 'sting' : bad('7-pool-heat') ? 'cold' : null,
     river: bad('7-river-pump-1') || bad('7-river-pump-2') ? 'slack' : bad('7-wave-gate') ? 'flat' : null,
-    belays: (bad('7-belay-1') ? 0 : 1) + (bad('7-belay-2') ? 0 : 1), route: bad('7-wall-holds') ? ((machSeed('7-wall-holds') ^ ls) >>> 0) % REC_ROUTES : null,
+    belays: (bad('7-belay-1') ? 0 : 1) + (bad('7-belay-2') ? 0 : 1), belayOff: Object.freeze([bad('7-belay-1'), bad('7-belay-2')]), route: bad('7-wall-holds') ? ((machSeed('7-wall-holds') ^ ls) >>> 0) % REC_ROUTES : null,
     court: bad('7-court-net'), board: [null, 'pixels', 'nonsense'][lvl('7-court-board')], float: bad('7-grav-plates'),
     lights: [null, 'dim', 'flicker'][lvl('7-aud-lights')], mic: bad('7-aud-sound') });
   REC_SHUT.set(h, r); return r;
@@ -17992,7 +18008,7 @@ const MACHINE_LINKS = {
 const LINE_ENDS = { air: { '5-damper-1': ['2-extractor-1'], '5-damper-2': ['4-scrubber-1', '4-scrubber-2'] } };
 const LINE_DRAWS = { '3-irrigation-1': { line: 'water', after: '3-pump-1' } };
 const LINE_DECKS = [1, 2, 3, 4, 5, 6];
-const SYMPTOM_TEXT = { water: 'Showers weak', heat: 'Cold cabins', air: 'Stuffy air', pool: 'Water dripping from the ceiling' };   // pool: 0.84.5 (rec engineer B)
+const SYMPTOM_TEXT = { water: 'Showers weak', heat: 'Cold cabins', air: 'Stuffy air', pool: 'Water dripping from the ceiling in main storage' };   // pool: 0.84.5 (rec engineer B)
 const LINE_SHOWS = { pool: [5] };                        // 0.84.5 (rec engineer B): the decks a line's fault shows on when they aren't the ones it feeds (traceSymptom): the pool plant's leak drips through to Deck 5's main storage, under it
 // a line's ids, in order (branches and ends included)
 const lineIds = line => (MACHINE_LINKS[line] || []).flatMap(s => typeof s === 'string' ? [s] : Array.isArray(s) ? s : Object.keys(s).flatMap(b => [b, ...((LINE_ENDS[line] || {})[b] || [])]));
@@ -49184,6 +49200,8 @@ function recPoolsSet() {                                 // each pool's colour f
   const S = REC_SHOWS[REC_SHOW.state], a = m.geometry.attributes.color, tint = [[1, .9, .7], [1, .82, .86], [.85, .88, 1]];
   for (let k = 0; k < REC_POOLS.length; k++) { const b = S ? S.pools[k] * 1.1 : 0; for (let v = 0; v < 4; v++) a.setXYZ(k * 4 + v, tint[k][0] * b, tint[k][1] * b, tint[k][2] * b); }
   a.needsUpdate = true; m.visible = !!S && S.pools.some(x => x > 0);
+  if (REC_SHOW.ring) REC_SHOW.ring.visible = REC_SHOW.state === 'talk';   // 0.84.12: the talk's chairs and stool; the mic put aside
+  if (REC_SHOW.mic) REC_SHOW.mic.visible = REC_SHOW.state !== 'talk';
 }
 const _recFilm = [col('#3a5b8c'), col('#c98a4a'), col('#5c8f6a'), col('#d9d2c4')], _recCloth = col('#e8e6df');   // the film's light on the screen: a slow drift through a few scenes' colours
 function recShowTick(dt, t) {
