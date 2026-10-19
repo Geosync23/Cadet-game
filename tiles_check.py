@@ -210,6 +210,8 @@ def seat(pw, path):
     t1 = gg.ev("[SHIP.time.min, FREEZE.frozen, DEV.open, DEV.app, document.getElementById('tx').textContent]")
     check(t1[0] == t0[0] and t0[1] and t1[1], f'while you play, ship time stands still (5 seconds: {t0[0]} -> {t1[0]})')
     check(t1[2] and t1[3] == 'tiles' and 'is waiting' in t1[4], f'a tap on the deck mid-game brings the board back: {t1[2:]}')
+    pz = gg.ev("(() => { const e = document.querySelector('#devBody .tl-pz'); return e ? (e.hidden ? 'hidden' : e.textContent) : null; })()")
+    check(bool(pz) and 'paused while you play' in pz, f'the board says the ship\'s clock is paused while you play (0.72.2): {pz}')
     # How to play: your first game runs it; steps move on with Next, and by themselves when you do the thing
     tu = gg.ev("""(() => { const G = TL_GAME, txt = () => { const e = document.querySelector('#devBody .tl-tut'); return e && !e.hidden ? e.textContent : ''; }, out = [G.tut, txt()];
       document.querySelector('#devBody .tl-tut button[data-end="tnext"]').click(); out.push(G.tut);
@@ -235,6 +237,8 @@ def seat(pw, path):
     check(res[6] >= min(100, t0[2] + 9), f'the game\'s social comes when it ends (no ship minutes passed): {t0[2]} -> {res[6]}')
     gg.step(30); t2 = gg.ev("[SHIP.time.min, FREEZE.frozen]")
     check(t2[0] > t1[0] and not t2[1], f'time runs again once the game is over: {t1[0]} -> {t2}')
+    pz = gg.ev("(deviceShow('tiles'), (() => { const e = document.querySelector('#devBody .tl-pz'); return e ? (e.hidden ? 'hidden' : e.textContent) : null; })())"); gg.step(1)
+    check(pz in (None, 'hidden'), f'once it\'s over the paused line goes (0.72.2): {pz}')
     again = gg.ev("""(() => { const id = window.__opp, p0 = (SHIP.rel[id] || {}).pts, f0 = SHIP.tiles.first[id]; SHIP.player.needs.social = 20; const s0 = SHIP.player.needs.social;
       tilesPlay(id, null, 'quick'); const G = TL_GAME, first = G.s.first; let n = 0;
       while (!G.s.over && n++ < 80) { if (G.timer) { clearTimeout(G.timer); G.timer = 0; } if (G.s.p === 0) tilesDo(tilesAI(G.s, 'medium', G.rng)); else tilesCrewMove(); }
