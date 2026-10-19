@@ -1,92 +1,132 @@
 TITLE:Rec Dec Traditions
-H1:Rec dec traditions: seven approved, eight to pick from <span class="draft">pitch v2 · plan only</span>
-SUB:The user (2026-10-19): when the rec dec is switched on (after Pillar 5's Steps 3 and 4), it comes with about a dozen traditions of its own. v1 pitched twelve; the user kept seven and dropped five. v2 shows the seven as approved (with Glow paddle earlier and a rota for Wren talks), and pitches eight new candidates for the five remaining places, with my top five marked. Written by the Pillar 5 designer for lead 16. No game code.
-NAV:v2=What changed|week=The week|ok=The seven approved|pick=Eight to pick from|fit=How they fit|q=Questions
+H1:Rec dec traditions: two per sport room <span class="draft">plan v3 · plan only</span>
+SUB:The rec dec's own traditions, for when the deck is switched on (after Pillar 5's Steps 3 and 4). v1 pitched twelve; the user kept seven. v2 offered eight more; the user answered: "2 for each room total (sports) and the talks should be closer together. Also they are small attendance. Nothing like captain addresses etc." v3 applies that: every sport room gets exactly two traditions, with two options for each empty place, and Wren talks become small, frequent chats. Written by the Pillar 5 designer for lead 16. No game code.
+NAV:read=Your answer|rooms=Room by room|talks=Wren talks|week=The week|fit=Clash check|cut=What no longer fits|q=Questions
 
-<section id="v2">
-  <h2>What changed in v2</h2>
+<style>
+.reading{border:1px solid var(--gold);background:rgba(233,196,106,.10);border-radius:10px;padding:10px 12px;font-size:14px}
+.reading b{color:#f1dca0}
+.full{color:#8fe0b0}.gap{color:#f1dca0}.over{color:var(--rose)}
+</style>
+
+<section id="read">
+  <h2>The lead's reading of your answer</h2>
+  <p class="reading"><b>Lead's reading (correct it if it's wrong):</b> each sport room (Lightdisc court, pool, river hall, climbing wall, float room) has exactly <b>two traditions in all</b>, counting the ones the rec deck plan already had, and Wren talks become <b>small chats for 4 to 10 people, twice a week</b>, never like a Captain's address; the auditorium's film night and talent night are not sport rooms, so the rule leaves them alone.</p>
   <ul>
-    <li><b>Approved</b> (the user, ~02:30): the Lightdisc Cup, Dawn swim, Wall night, Paddle club, Float hour, Wren talks, Glow paddle.</li>
-    <li><b>Glow paddle comes earlier:</b> first on <b>Day 27</b> (the Saturday after Calder's question, the first quiet Saturday evening after the arc), and every four weeks from then (Days 27, 55, 83 ...) instead of once a season.</li>
-    <li><b>Wren talks, "do other talks too":</b> a rota of six speakers from six departments (below); about every two weeks after the first.</li>
-    <li><b>Dropped:</b> Rookie court, Open stage, Lanes night, Zero-G games, Season splash.</li>
-    <li><b>New:</b> eight candidates for the five places left. My top five are marked ★.</li>
+    <li><b>Still approved, unchanged:</b> the Lightdisc Cup, Dawn swim, Wall night, Paddle club, Float hour, Glow paddle.</li>
+    <li><b>Approved, changed by your answer:</b> Wren talks (small, twice a week, a new rota below).</li>
+    <li><b>Two places to fill:</b> one at the pool, one in the float room. Two options each, my pick marked ★.</li>
+    <li><b>One room over:</b> the river hall's kayaks have three (Paddle club, Glow paddle and the rec plan's regatta). Nothing dropped; question 2 asks.</li>
   </ul>
+</section>
+
+<section id="rooms">
+  <h2>Room by room</h2>
+  <p class="note"><span class="tag new">gold</span> approved by you · <span class="tag">teal</span> already in the rec deck plan (v5) · <span class="tag old">grey</span> option for an empty place (★ my pick)</p>
+  <div class="tablewrap"><table>
+    <tr><th>Room</th><th>Tradition 1</th><th>Tradition 2</th><th>Count</th></tr>
+    <tr><td><b>Lightdisc court</b></td><td><span class="tag">Winner Stays On</span> Sundays 11:30-16:30</td><td><span class="tag new">Lightdisc Cup</span> every 4 weeks, in Winner Stays On's slot</td><td class="full">2, full</td></tr>
+    <tr><td><b>Pool</b></td><td><span class="tag new">Dawn swim</span> Tue + Thu 06:15</td><td><span class="tag old">★ Ring dive</span> or <span class="tag old">Captain's lengths</span></td><td class="gap">1, one to pick</td></tr>
+    <tr><td><b>River hall (kayaks)</b></td><td><span class="tag new">Paddle club</span> Wed 18:30 · <span class="tag new">Glow paddle</span> every 4 weeks, Sat 22:30</td><td><span class="tag">River regatta</span> every 4 weeks, Sun 09:30</td><td class="over">3, one over (question 2)</td></tr>
+    <tr><td><b>Climbing wall</b></td><td><span class="tag new">Wall night</span> Tue 18:30</td><td><span class="tag">Ring the bell</span> every 4 weeks, Sun 09:30 (two weeks after each regatta)</td><td class="full">2, full</td></tr>
+    <tr><td><b>Float room</b></td><td><span class="tag new">Float hour</span> Wed 21:30</td><td><span class="tag old">★ Triple tries</span> or <span class="tag old">Slow stretch</span></td><td class="gap">1, one to pick</td></tr>
+  </table></div>
+
+  <h3>The pool's second place</h3>
+  <div class="tablewrap"><table>
+    <tr><th>Option</th><th>When</th><th>Who</th><th>What you do</th><th>You get</th><th>First</th></tr>
+    <tr><td><b>★ Ring dive</b> <span class="note">new · playful</span></td><td>Saturdays 10:00-10:45</td><td>Rina drops weighted rings onto the Wren mosaic; four divers at a time, one a lane; 4 to 8 people</td><td>Tap a lane: you dive and come up with a ring (the swimming animation, plus a dive). Everyone gets some.</td><td>leisure and hygiene; a friendship step with whoever's in the next lane</td><td>Day 6 (your first free Saturday)</td></tr>
+    <tr><td><b>Captain's lengths</b> <span class="note">from v2 · rare, quiet</span></td><td>Every 4 weeks, Saturday 07:00-07:30</td><td>Captain Marrow swims lengths; anyone may take the next lane (2 to 4 people)</td><td>Tap the next lane: a few lengths beside the Captain, then a line or two from her.</td><td>hygiene; a little friendship with the Captain</td><td>Day 27</td></tr>
+  </table></div>
+  <p class="note">Why Ring dive: Dawn swim is the pool's quiet one, so the second should be playful, and weekly gives the pool a Saturday crowd. Captain's lengths is lovely but the Captain-centred kind of thing your answer steered away from.</p>
+
+  <h3>The float room's second place</h3>
+  <div class="tablewrap"><table>
+    <tr><th>Option</th><th>When</th><th>Who</th><th>What you do</th><th>You get</th><th>First</th></tr>
+    <tr><td><b>★ Triple tries</b> <span class="note">new · silly</span></td><td>Fridays 19:00-19:45</td><td>Pell holds up score cards (1 to 10) while people try the triple somersault at a fifth of gravity; 4 to 8 people, the lobby watches through the glass</td><td>Tap to have a go: the float animation with a tumble. Nobody lands a triple until, one day, someone does (a ship note).</td><td>leisure and social; a friendship step with Pell</td><td>Day 12 (the Veyli guests may watch through the glass)</td></tr>
+    <tr><td><b>Slow stretch</b> <span class="note">from v2 · gentle</span></td><td>Sundays 08:30-09:15</td><td>Dr. Nandakumar leads a stretch at a fifth of gravity; 3 to 6 people</td><td>Tap to join: the float animation, slower.</td><td>energy and mood for the day</td><td>Day 7</td></tr>
+  </table></div>
+  <p class="note">Why Triple tries: Float hour is already the calm one; a lively one gives the room its other side (the rec plan's "someone always tries a triple somersault").</p>
+
+  <h3>If you didn't mean to count the rec plan's own three</h3>
+  <p>Then Winner Stays On, the regatta and Ring the bell sit outside the count, the river hall is exactly full (Paddle club, Glow paddle), and two more places open. Options ready, so you needn't wait for a v4:</p>
+  <div class="tablewrap"><table>
+    <tr><th>Room</th><th>★ My pick</th><th>Other option</th></tr>
+    <tr><td><b>Lightdisc court</b></td><td><b>First serves</b>: Thursdays 18:30-19:15, Pell teaches 2 to 4 beginners on the easy level; first on Day 18</td><td><b>Rally club</b>: Tuesdays 20:00, pairs keep the disc going as long as they can; the longest rally goes on the foyer board</td></tr>
+    <tr><td><b>Climbing wall</b></td><td><b>Birthday bell</b> (from v2): on any crew birthday, 18:30-18:45, the birthday person climbs and rings the bell, friends cheer</td><td><b>New route night</b>: every 4 weeks, Tomas sets a new route; the first to top it names it</td></tr>
+  </table></div>
+</section>
+
+<section id="talks">
+  <h2>Wren talks, small and often</h2>
+  <ul>
+    <li><b>Twice a week:</b> Mondays and Thursdays, 19:00-19:40 (after dinner opens, before Thursday's quiz night).</li>
+    <li><b>Small:</b> 4 to 10 people. A ring of eight chairs on the auditorium stage, the house dark, the stars through the bow windows behind; anyone extra sits on the stage edge. Tea from the utility room's kettle.</li>
+    <li><b>Informal:</b> one crew member shares something they know or love, then chat. No chair, no lectern, no Commander introducing anyone (v2's "Vance chairs" is gone).</li>
+    <li><b>Skips:</b> the career's big days (1, 9-11, 15-16, 22-23, 26) and the storm (4-5), as v2 did. So the first four weeks have three talks, and from Day 29 it's twice every week.</li>
+    <li><b>You:</b> listen (the short meeting panel), ask one question if you like (a friendship step with the speaker). Later you may be asked to give one (question 6).</li>
+  </ul>
+  <h3>The rota, first five weeks and a bit</h3>
+  <div class="tablewrap"><table>
+    <tr><th>Day</th><th>Speaker</th><th>The talk</th></tr>
+    <tr><td>8 Mon</td><td>Dr. Imra Sato (Survey)</td><td>"What lives between the stars": the creature that swam off at dinner (it left at 18:40)</td></tr>
+    <tr><td>18 Thu</td><td>Yara Esposito (Stores)</td><td>"Where every crate goes": the Wednesday delivery, crate by crate (ends before Echo Signal at 20:30)</td></tr>
+    <tr><td>25 Thu</td><td>Tomas (a junior, climbing)</td><td>"Reading a route": what the hold colours mean, with a hold passed round</td></tr>
+    <tr><td>29 Mon</td><td>Chef Auda Brennan (Galley)</td><td>"A spice for every port": three jars to sniff</td></tr>
+    <tr><td>32 Thu</td><td>Zeke Torres (Works, engine)</td><td>"How a drive coil sings": why the engine room hums in three notes</td></tr>
+    <tr><td>36 Mon</td><td>Maeve Volkov (rec dec machines)</td><td>"How the float room floats": the gravity plates, and why a fifth</td></tr>
+    <tr><td>39 Thu</td><td>Comms Chief Lucia Ferreira</td><td>"Messages that came home late"</td></tr>
+  </table></div>
+  <p class="note">Then, about one new speaker a talk: Pell ("Every disc trick I know"), Chief Holt ("The oldest log in the Watch office"), Rina and Dr. Nandakumar (after the Wren cough, Days 50-53), Chief Calder ("The Wren's first refit"), Envoy Saruth (a Veyli story, if you know them well), and you. Speakers repeat with a new topic after about six weeks. Day 36's talk is the evening after crew rotation day (Day 35), an easy first evening for the new crew.</p>
 </section>
 
 <section id="week">
   <h2>The week</h2>
-  <p class="note"><span class="tag new">gold</span> approved rec dec tradition · <span class="tag">teal</span> rec dec tradition already planned · <span class="tag old">grey</span> candidate (★ my pick) · plain text: the ship's other traditions. "2-wk" and "4-wk" run every two or four weeks.</p>
+  <p class="note">Only the rec dec. <span class="tag new">gold</span> approved · <span class="tag">teal</span> rec deck plan · <span class="tag old">grey</span> my pick for an empty place. "4-wk" runs every four weeks.</p>
   <div class="week">
-    <div class="day"><h4>Monday</h4><p>Gym club · Lap of the Wren · Sunrise stretch · Book circle (2-wk) · Department cup (4-wk) · the Captain's all-hands (first Monday of a season)</p><p><span class="tag new">Wren talks 20:00 (about 2-wk)</span></p></div>
-    <div class="day"><h4>Tuesday</h4><p>Knit and natter · Spice shelf supper · Tiles night · Open lab (4-wk) · Bridge hour (4-wk)</p><p><span class="tag new">Dawn swim 06:15</span> <span class="tag new">Wall night 18:30</span></p></div>
-    <div class="day"><h4>Wednesday</h4><p>Pick-your-own breakfast · Sunrise stretch · Brennan's tasting table · Open door · Late piano</p><p><span class="tag new">Paddle club 18:30</span> <span class="tag new">Float hour 21:30</span></p></div>
-    <div class="day"><h4>Thursday</h4><p>Postcard night · Late piano · Quiz night 20:00</p><p><span class="tag new">Dawn swim 06:15</span> <span class="tag old">★ Kit mend night 18:00 (4-wk)</span></p></div>
-    <div class="day"><h4>Friday</h4><p>Sunrise stretch · Works Friday tea · Music jam · Tap night</p><p><span class="tag old">★ Junior night 19:00 (2-wk)</span> <span class="tag old">★ Sing-along 21:00</span></p></div>
-    <div class="day"><h4>Saturday</h4><p>Long breakfast · Garden hour · Cook-along · Tiles ladder · Harvest morning (2-wk) · Sowing morning (season) · Observatory night</p><p><span class="tag">Film night 20:00</span> <span class="tag old">Captain's lengths 07:00 (4-wk)</span> <span class="tag new">Glow paddle 22:30 (4-wk)</span></p></div>
-    <div class="day"><h4>Sunday</h4><p>Sunday swap meet · Sunday long table · Reading corner</p><p><span class="tag old">Slow stretch 08:30</span> <span class="tag">Regatta / Ring the bell 09:30 (4-wk)</span> <span class="tag">Winner Stays On 11:30</span> <span class="tag new">Lightdisc Cup 11:30 (4-wk, in its place)</span> <span class="tag old">★ Night-shift matinee 15:00</span> <span class="tag old">Beach stories 16:00 (4-wk)</span> <span class="tag">Talent night 19:30 (4-wk)</span></p></div>
+    <div class="day"><h4>Monday</h4><p><span class="tag new">Wren talk 19:00</span></p><p>the Captain's all-hands 17:45 (first Monday of a season only)</p></div>
+    <div class="day"><h4>Tuesday</h4><p><span class="tag new">Dawn swim 06:15</span> <span class="tag new">Wall night 18:30</span></p></div>
+    <div class="day"><h4>Wednesday</h4><p><span class="tag new">Paddle club 18:30</span> <span class="tag new">Float hour 21:30</span></p></div>
+    <div class="day"><h4>Thursday</h4><p><span class="tag new">Dawn swim 06:15</span> <span class="tag new">Wren talk 19:00</span></p></div>
+    <div class="day"><h4>Friday</h4><p><span class="tag old">★ Triple tries 19:00</span></p></div>
+    <div class="day"><h4>Saturday</h4><p><span class="tag old">★ Ring dive 10:00</span> <span class="tag">Film night 20:00</span> <span class="tag new">Glow paddle 22:30 (4-wk)</span></p></div>
+    <div class="day"><h4>Sunday</h4><p><span class="tag">Regatta or Ring the bell 09:30 (4-wk each, two weeks apart)</span> <span class="tag">Winner Stays On 11:30</span> <span class="tag new">Lightdisc Cup 11:30 (4-wk, in its place)</span> <span class="tag">Talent night 19:30 (4-wk)</span></p></div>
   </div>
-  <p class="note">Plus <span class="tag old">★ Birthday bell</span>: on any crew birthday, 18:30 at the climbing wall. No two rec dec traditions share a room at once; the evening ones end before quiz night, and each draws 6-12 people, inside the rec dec's evening cap of about 15 (the Cup and Junior night are gatherings, exempt like talent night).</p>
-</section>
-
-<section id="ok">
-  <h2>The seven approved</h2>
-  <div class="tablewrap"><table>
-    <tr><th>Tradition</th><th>When · where</th><th>Who</th><th>What you do</th><th>You get</th><th>First</th></tr>
-    <tr><td><b>The Lightdisc Cup</b></td><td>Every four weeks, Sunday 11:30-16:30 (between a regatta and Ring the bell) · court and stands</td><td>Pell runs the bracket; pairs from each department; full stands (a gathering)</td><td>Enter with a partner (tap Pell, pick a friend) and play your matches in the Lightdisc game, or cheer.</td><td>leisure and social; a friendship step with your partner; department reputation if you go far; names on the foyer's Cup board</td><td>Day 28; takes Winner Stays On's slot that Sunday</td></tr>
-    <tr><td><b>Dawn swim</b></td><td>Tuesdays and Thursdays 06:15-06:45 · the pool</td><td>Rina, before the infirmary opens</td><td>Tap a lane: the swimming animation under the hull windows.</td><td>hygiene and energy; a friendship step with Rina over a few weeks</td><td>Day 2</td></tr>
-    <tr><td><b>Wall night</b></td><td>Tuesdays 18:30-19:45 · the climbing wall</td><td>Tomas belays</td><td>Tap the wall to climb; ring the bell at the top.</td><td>leisure; a friendship step with Tomas; your name on the season's bell board</td><td>Day 2</td></tr>
-    <tr><td><b>Paddle club</b></td><td>Wednesdays 18:30-19:30 · the river hall</td><td>Chief Holt</td><td>Tap the kayak dock: the slow loop, then the fast run once Holt says you're ready (after three visits).</td><td>leisure; Holt warms to you</td><td>Day 3</td></tr>
-    <tr><td><b>Float hour</b></td><td>Wednesdays 21:30-22:15 · the float room</td><td>Matthias Oduya dims the orbs; quiet music; no talking</td><td>Tap to float.</td><td>rest and mood (a calmer night's sleep)</td><td>Day 3</td></tr>
-    <tr><td><b>Wren talks</b></td><td>About every two weeks, Monday 20:00-20:45 · the auditorium</td><td>A speaker from a different department each time (the rota below); Commander Vance chairs</td><td>Listen (a short meeting panel) and ask one question if you like. Later you can be asked to give one.</td><td>a little social, a "learned" note in the Ship app; a friendship step with the speaker if you ask</td><td>Day 8</td></tr>
-    <tr><td><b>Glow paddle</b> <span class="note">(earlier, v2)</span></td><td>Every four weeks, Saturday 22:30-23:30 (after film night) · the river hall, lights off</td><td>Holt leads; kayaks with little lanterns on the slow loop, stars through the port windows</td><td>Tap the dock to paddle with a lantern, or watch from the pebble beach.</td><td>mood and social; a quiet friendship step with whoever paddles beside you</td><td><b>Day 27</b> (then 55, 83 ...)</td></tr>
-  </table></div>
-  <h3>The Wren talks rota (the first six)</h3>
-  <div class="tablewrap"><table>
-    <tr><th>Day</th><th>Speaker</th><th>Department</th><th>The talk</th></tr>
-    <tr><td>8 Mon</td><td>Dr. Imra Sato</td><td>Survey</td><td>"What lives between the stars": the creature that swam off at dinner that evening</td></tr>
-    <tr><td>29 Mon</td><td>Zeke Torres</td><td>Works (engine)</td><td>"How a drive coil sings": why the engine room hums in three notes</td></tr>
-    <tr><td>43 Mon</td><td>Chef Auda Brennan</td><td>Galley</td><td>"A spice for every port": the spice shelf, jar by jar (with tasting)</td></tr>
-    <tr><td>57 Mon</td><td>Comms Chief Lucia Ferreira</td><td>Comms</td><td>"Messages that came home late": the longest a letter has taken to reach the Wren</td></tr>
-    <tr><td>71 Mon</td><td>Rina and Dr. Nandakumar</td><td>Infirmary</td><td>"What the Wren cough taught us" (after the cough, Days 50-53)</td></tr>
-    <tr><td>85 Mon</td><td>Chief Bram Holt</td><td>Watch</td><td>"The oldest log in the Watch office": the night the Wren's first crew nearly lost the lift</td></tr>
-  </table></div>
-  <p class="note">Then Chief Calder ("The Wren's first refit"), Yara Esposito ("Where every crate goes"), Envoy Saruth (a Veyli talk, if you know them well), and you, once you're an Engine Specialist ("What I learned in my first month"). Day 8 is the only Monday inside the career arc that isn't a career day (1, 15 and 22 are), so the rota starts again after the arc.</p>
-</section>
-
-<section id="pick">
-  <h2>Eight to pick from (five places)</h2>
-  <div class="tablewrap"><table>
-    <tr><th>Candidate</th><th>When · where</th><th>Who</th><th>What you do</th><th>You get</th><th>First</th></tr>
-    <tr><td><b>★ Junior night</b><br><span class="note">social · your peers</span></td><td>Every two weeks, Friday 19:00-21:00 · the whole rec dec</td><td>The juniors take over the deck: Tomas, Pell and Rina organise, the bunkmates come (a gathering)</td><td>Tap anything: the court, the pool, the kayaks, the float room; hang about with the bunk rooms.</td><td>lots of social; friendship steps with your bunkmates; it still counts as yours after you're promoted ("once a junior")</td><td>Day 12</td></tr>
-    <tr><td><b>★ Birthday bell</b><br><span class="note">social · ties to birthdays</span></td><td>On every crew birthday, 18:30-18:45 · the climbing wall</td><td>The birthday person climbs and rings the bell; their friends cheer; then the cake at 20:15 as now</td><td>Cheer (be there), or belay for a friend (tap them). On your own birthday, you ring it.</td><td>social; a friendship step with the birthday person if you're there</td><td>the first crew birthday after Day 1</td></tr>
-    <tr><td><b>★ Sing-along</b><br><span class="note">creative · music</span></td><td>Fridays 21:00-22:00 · the auditorium (after the jam)</td><td>Lucia Ferreira leads; Maeve Volkov on the lights; songs from everyone's home</td><td>Sing along (be there), or pick a song to lead (the talent night act picker: three songs from home).</td><td>social and mood; a friendship step with Lucia; your song becomes "yours" in chatter</td><td>Day 5 (the evening the storm ends)</td></tr>
-    <tr><td><b>★ Kit mend night</b><br><span class="note">Works · cozy</span></td><td>Every four weeks, Thursday 18:00-19:30 · the kit hire desk</td><td>Maeve Volkov (who keeps the rec dec's machines) and whoever wants to help</td><td>Fix rec kit: split paddles, torn disc gloves, a stiff harness (short Tier 1 work steps at the desk, no board jobs).</td><td>reputation with Works and the rec crowd; Maeve's friendship; your initials on a paddle</td><td>Day 18</td></tr>
-    <tr><td><b>★ Night-shift matinee</b><br><span class="note">kind · quiet</span></td><td>Sundays 15:00-17:00 · the auditorium</td><td>Maeve runs the projector; the night shift, who sleep through Saturday's film night, and anyone else</td><td>Take a seat: Saturday's film again, for the people who missed it.</td><td>leisure; friendship with the night-shift crew (who you'll work beside on Days 19-20)</td><td>Day 7</td></tr>
-    <tr><td><b>Captain's lengths</b><br><span class="note">rare · a quiet moment</span></td><td>Every four weeks, Saturday 07:00-07:30 · the pool</td><td>Captain Marrow swims lengths; anyone may take the next lane</td><td>Tap the next lane: a few lengths beside the Captain, then a line or two from her.</td><td>hygiene; a little friendship with the Captain (a rare chance)</td><td>Day 27 (with Glow paddle that night: a rec dec Saturday)</td></tr>
-    <tr><td><b>Beach stories</b><br><span class="note">quiet · stories</span></td><td>Every four weeks, Sunday 16:00-16:45 · the river hall's pebble beach</td><td>Someone reads aloud: Envoy Saruth's Veyli tales first, then crew from home</td><td>Sit on the beach and listen.</td><td>mood and a little social</td><td>Day 14 (with the Veyli guests aboard)</td></tr>
-    <tr><td><b>Slow stretch</b><br><span class="note">active · gentle</span></td><td>Sundays 08:30-09:15 · the float room</td><td>Dr. Nandakumar leads a stretch at a fifth of gravity</td><td>Tap to join: the float animation, slower.</td><td>energy and mood for the day</td><td>Day 7</td></tr>
-  </table></div>
-  <p class="note">Why these five: Junior night and the Birthday bell are about people you already know; Sing-along and Kit mend night add music and Works (the rec dec had neither); the matinee gives the night shift something, before your own night shift. Captain's lengths is the close sixth.</p>
+  <p class="note">Every day of the week now has something on the rec dec, and no evening has more than two.</p>
 </section>
 
 <section id="fit">
-  <h2>How they fit (traditions, events, career)</h2>
+  <h2>Clash check</h2>
   <ul>
-    <li><b>What they move or replace:</b> the Cup takes Winner Stays On's slot one Sunday in four. Nothing else moves.</li>
-    <li><b>The events plan (approved v4):</b> the storm (Days 4-5) pauses Thursday's traditions after 14:00, and its all-clear (Friday 18:30) comes before Day 5's Sing-along. Day 8's creature leaves at 18:40, before Sato's talk about it. Day 14's Beach stories has the Veyli aboard. Day 18's Kit mend night ends before Echo Signal (20:30). Day 21's distress call (11:30-16:30) pauses that Sunday's afternoon traditions. Day 24's Loss of Power is a morning. Day 27's Glow paddle and Captain's lengths have no event near them.</li>
-    <li><b>The career's big days:</b> nothing is aimed at you on Days 9-11, 15-16, 22-23 or 26; the Monday rota skips them. Day 12's Junior night is your first Friday as an Officer.</li>
-    <li><b>Buildable with what exists:</b> the tradition engine's rhythms (weekly, two-weekly, four-weekly, birthdays), tap-to-join, gatherings, the rec dec's planned animations and Lightdisc game, the talent night act picker, the meeting panel and work steps. New: the Cup's bracket, the boards' names, a speaker rota table, and kit mend's three small work steps.</li>
+    <li><b>Rooms:</b> no two share a room at once. The river hall's three are on different days; the regatta and Ring the bell (the wall is at the river hall's stern) alternate Sundays. The auditorium has talks Mon and Thu 19:00-19:40, the all-hands Mon 17:45-18:10 (ends first), film night Sat, talent night Sun.</li>
+    <li><b>Numbers:</b> each draws 2 to 10, inside the rec dec's evening cap of about 15; only the Cup, Winner Stays On and the shows are gatherings.</li>
+    <li><b>Events plan (approved v4):</b> Day 4-5 storm: no talk that week; Dawn swim on Day 4 is before the storm. Day 8: the creature leaves 18:40, Sato's talk is 19:00. Day 12: Triple tries during the Veyli visit (guests watch). Day 18: the talk ends 19:40, Echo Signal is 20:30. Day 21: the distress call (11:30-16:30) pauses Winner Stays On. Day 24: Loss of Power is a morning; Paddle club and Float hour run that evening. Day 25: the inspector is daytime; Tomas's talk is the evening. Day 27: Glow paddle, nothing near it.</li>
+    <li><b>Career:</b> talks skip the big days; the weekly sport ones run as usual but aren't pushed at you on those days (no Mail nudge).</li>
+    <li><b>Buildable with what exists:</b> the tradition engine's weekly and four-weekly rhythms, tap-to-join, the rec dec's animations (Ring dive adds a dive, Triple tries a tumble), the meeting panel, a speaker rota table.</li>
   </ul>
+</section>
+
+<section id="cut">
+  <h2>What from v2 no longer fits</h2>
+  <div class="tablewrap"><table>
+    <tr><th>v2 candidate</th><th>Why it doesn't fit now</th></tr>
+    <tr><td>Junior night</td><td>Takes over every room at once and is a big gathering; your answer asked for small.</td></tr>
+    <tr><td>Birthday bell</td><td>A third at the climbing wall (unless the rec plan's three don't count, above).</td></tr>
+    <tr><td>Beach stories</td><td>The pebble beach is in the river hall, already over.</td></tr>
+    <tr><td>Sing-along, Night-shift matinee</td><td>Auditorium, not a sport room: outside the rule, held for now (question 5).</td></tr>
+    <tr><td>Kit mend night</td><td>At the kit hire desk, not a sport room: outside the rule, held for now (question 5).</td></tr>
+    <tr><td>Captain's lengths, Slow stretch</td><td>Still fit: offered above as the second option for the pool and the float room.</td></tr>
+  </table></div>
 </section>
 
 <section id="q">
   <h2>Questions for the user (with my recommendations)</h2>
   <ol>
-    <li><b>Which five of the eight?</b> <i>Recommended: the five marked ★ (Junior night, Birthday bell, Sing-along, Kit mend night, Night-shift matinee).</i></li>
-    <li><b>Glow paddle every four weeks from Day 27</b>, or more often? <i>Recommended: every four weeks, so it stays special.</i></li>
-    <li><b>Wren talks every two weeks after the arc</b>, with a speaker from a different department each time? <i>Recommended: yes.</i></li>
-    <li><b>Do you play your Cup matches yourself</b> (the live Lightdisc game)? <i>Recommended: yes; the other pairs' results are seeded.</i></li>
-    <li><b>Can you give a Wren talk later</b> (as an Engine Specialist)? <i>Recommended: yes, once, after the arc.</i></li>
+    <li><b>Do the rec plan's own three count</b> (Winner Stays On, the regatta, Ring the bell)? <i>Recommended: yes, they're traditions in those rooms; then only the pool and the float room have a place to fill.</i></li>
+    <li><b>The river hall has three</b> (Paddle club, Glow paddle, the regatta). <i>Recommended: keep all three; the regatta is a race you watch, on one Sunday morning in four. To make it exactly two, Glow paddle could become Paddle club's lantern night (every fourth Wednesday, lights off).</i></li>
+    <li><b>The pool:</b> Ring dive or Captain's lengths? <i>Recommended: Ring dive.</i></li>
+    <li><b>The float room:</b> Triple tries or Slow stretch? <i>Recommended: Triple tries.</i></li>
+    <li><b>Any non-sport traditions</b> (Sing-along, Night-shift matinee, Kit mend night)? <i>Recommended: none for now; Kit mend night is the one to bring back later if the rec dec wants a Works night.</i></li>
+    <li><b>Still open from v2:</b> do you play your own Cup matches (the live Lightdisc game), and can you give a Wren talk once you're an Engine Specialist? <i>Recommended: yes to both.</i></li>
   </ol>
 </section>
