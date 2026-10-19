@@ -72,3 +72,4 @@ Build master 7 (BM7, session_01QbuzvT3TwzMwSWRmakzX8Z) on claude/p5-cand-s4 (thi
 - ~06:11 lead 17: W2 retired; final lines = 0e8571a (R5 PASS).
 - ~06:12 R5: E2 6714448 (final) PASS WITH FIXES: take it for 24o/q/r/l; one fix open for E5 (the pin: playerRigRebuild missing, pin never shows; harmless till then). Rewiring's right-first +1 needs E1's turn-in change (E1 verdict pending).
 - t6: deck OK. t6 done: lines, mech, career, machine, cadet (ALL IDENTICAL), social, deck all OK. t8 checks started.
+- ~06:13 R5: E1 633eade (contains fb499eb) PASS WITH FIXES (night crew finish held-for-you jobs; right-first-time +1 for side kinds): hold for E1's next hash. Merge note matches t8's hand merges.
