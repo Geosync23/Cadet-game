@@ -269,7 +269,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.33.56
+   STARSHIP CADET: CSV Wren                           build 0.33.57
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8630,7 +8630,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.33.56';                           // keep in step with the header's build line
+const GAME_BUILD = '0.33.57';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -15646,6 +15646,7 @@ function eventWear(key, h) {
 
 // ---- the machines' state: SHIP.machines[id] = { cond, state, lastService }, brought up to date hour by hour ----
 SHIP.machines = {};
+SHIP.upkeep = {};                                        // the ship meters' upkeep left undone, by system (0.33.57; machinesReset fills it)
 const CART_RUNS = new Map(), CART_PENDING = [];         // food runs set by cartClaim (by hour), and those not yet on the job list
 // ship notes from section 17 (simNote, section 13's bus) wait here and go out once the hours have run or your action is
 // done (simFlush), never from inside jobsHour: a listener may read the jobs or the schedules
@@ -15659,7 +15660,7 @@ const machFresh = m => Math.round((70 + 30 * schedU(m.seed, 0, 1)) * 10) / 10;  
 function machinesReset(hour) {
   SHIP.machines = {};
   for (const m of machineList()) { const c = machFresh(m); SHIP.machines[m.id] = { cond: c, state: machineState(c), lastService: null }; }
-  jobsReset(); MACH_HIST.clear(); MACH_HOUR = hour; MACH_REV++;
+  jobsReset(); MACH_HIST.clear(); MACH_HOUR = hour; MACH_REV++; SHIP.upkeep = { ...UPKEEP_START };
   SHIP.short = {}; for (const k in MACH_EXTRA) delete MACH_EXTRA[k]; for (const k in MACH_RUN) delete MACH_RUN[k];
 }
 // a new game (section 13's newGameStart, 0.26.31): the machines and jobs start afresh at once, whichever way the clock
@@ -15697,7 +15698,7 @@ function machinesNow() {
       s.state = machineState(s.cond);
       driftHour(m, s, MACH_HOUR);
     }
-    machRecord(MACH_HOUR);
+    machRecord(MACH_HOUR); upkeepHour();
     for (const k in MACH_EXTRA) delete MACH_EXTRA[k];
   } } finally { MACH_IN = false; }
   SIM_AT = null;
@@ -15958,13 +15959,70 @@ function deckLook(deck) {
 // machineLook's; worst: the system's worst machine that isn't fine, as 'Air scrubber 2, Deck 4', or null
 const SYSTEM_NAME = { air: 'Air', water: 'Water', power: 'Power', heat: 'Heat', food: 'Galley and food', waste: 'Waste and laundry', hull: 'Hull',
                       comms: 'Comms and sensors', propulsion: 'Drive', transport: 'Lift and doors' };
+// ---- the ship meters (0.33.57, Pillar 5 Step 3; the user, 2026-10-18: ship health "starts a little lower, so you can see your
+// impact", and every job you do helps at least one meter, often several) ----
+// A meter is a Ship health board row: its system's score from the machines (shipSystems, which every effect reads, as
+// before) less its upkeep, SHIP.upkeep[sys]: points of small upkeep left undone (scuffed panels, dusty ducts, loose
+// fittings) that the machines' effects never feel. A new game starts with UPKEEP_START (ship health about 75: most systems
+// worn, a few fine, none failing); upkeep builds up again UPKEEP_CREEP points a day per system (a share each ship hour, up
+// to UPKEEP_CAP), and each job you do takes a step off its systems (UPKEEP_STEP by size: [main, each related]): its main
+// system (a registered kind's def.sys, else its machine's, else its stops' machines', else JOB_SYS by kind) and the
+// related ones (SYS_RELATED); what they can't take (their upkeep all done) goes to the system with the most left.
+// j.meters = [{ key, name, gain }] (biggest first, the main system first on a tie; gain: what the meter rose, upkeep and
+// machine together, one decimal) is kept on the job for the turn-in (C2) and the panel's "+N" (U). The crew's jobs put machines
+// right, as before, but leave the upkeep: that's what you add. shipMeters(sys?) -> { sys: 0-100 }. An older save starts
+// with no upkeep (its meters read as before).
+const UPKEEP_START = { air: 28, water: 30, power: 30, heat: 34, food: 8, waste: 32, hull: 6, comms: 30, propulsion: 4, transport: 30 };
+const UPKEEP_CREEP = 1, UPKEEP_CAP = 40;
+const UPKEEP_STEP = { small: [3, 2], repair: [5, 2], overhaul: [7, 3] };
+const SYS_RELATED = { air: ['heat'], water: ['food', 'waste'], power: ['transport'], heat: ['air'], food: ['waste'], waste: ['water'],
+  hull: ['air'], comms: ['power'], propulsion: ['power'], transport: ['power'] };
+const JOB_SYS = { lamp: 'power', vent: 'air', delivery: 'transport', joint: 'water', restock: 'transport', haul: 'transport', drill: 'hull',
+  rounds: 'power', incident: 'hull', garden: 'food', secure: 'hull', clean: 'waste', tea: 'food', check: 'hull', fetch: 'transport', carry: 'transport',
+  set: 'hull', patch: 'hull', team: 'water' };
+function shipMeters(sys = shipSystems()) { const out = {}; for (const k of SYSTEMS) out[k] = Math.round(Math.max(0, sys[k] - (SHIP.upkeep[k] || 0)) * 10) / 10; return out; }
+function upkeepHour() { for (const k of SYSTEMS) SHIP.upkeep[k] = Math.min(UPKEEP_CAP, (SHIP.upkeep[k] || 0) + UPKEEP_CREEP / 24); }
+// the systems a job helps: [main, ...related]
+function jobMeterSys(j) {
+  const K = jobKindOf(j), sysOf = id => { const m = id && machineById(id); return m ? MACHINE_KINDS[m.kind].sys : null; };
+  let main = K && K.sys || sysOf(j.machine);
+  if (!main) { const c = {}; for (const x of j.stops || []) { const pl = x.placeId && placeById(x.placeId), k = pl && sysOf(pl.machine); if (k) c[k] = (c[k] || 0) + 1; }
+    main = Object.keys(c).sort((a, b) => c[b] - c[a] || SYSTEMS.indexOf(a) - SYSTEMS.indexOf(b))[0] || null; }
+  if (!main) main = j.cargo === 'meals' ? 'food' : JOB_SYS[j.chore] || JOB_SYS[j.kind] || 'hull';
+  return [main, ...(SYS_RELATED[main] || [])];
+}
+function meterStep(j, before) {
+  const sys = jobMeterSys(j), [a, b] = UPKEEP_STEP[j.kind === 'repair' ? 'repair' : j.kind === 'overhaul' || j.kind === 'team' ? 'overhaul' : 'small'];
+  const order = sys.slice(), up = k => SHIP.upkeep[k] || 0, take = (k, n) => { const x = Math.min(up(k), n); SHIP.upkeep[k] = up(k) - x; return n - x; };
+  let left = 0; sys.forEach((k, i) => { left += take(k, i ? b : a); });
+  while (left > 1e-9) {                                  // what its own systems can't take (their upkeep's done) goes where most is left
+    const k = SYSTEMS.reduce((best, x) => up(x) > up(best) ? x : best, SYSTEMS[0]); if (!(up(k) > 0)) break;
+    if (!order.includes(k)) order.push(k); left = take(k, left);
+  }
+  MACH_REV++;
+  const after = shipMeters(), keys = order.concat(SYSTEMS.filter(k => !order.includes(k)));
+  j.meters = keys.map(k => ({ key: k, name: SYSTEM_NAME[k], gain: Math.round((after[k] - before[k]) * 10) / 10 })).filter(x => x.gain >= .5).sort((x, y) => y.gain - x.gain || keys.indexOf(x.key) - keys.indexOf(y.key));
+  return j.meters;
+}
+// the bridge room (Deck 1's 'B') is closed to you till you're invited (the user, 2026-10-18; C2's SHIP.bridgeInvited, false in
+// older saves): no job there is offered to you or can be taken by you, unless it's held for you; the crew take them as before;
+// the Wednesday manifest leaves the bridge's crate out till then (0.33.57)
+const bridgeShut = () => !SHIP.bridgeInvited;
+const inBridge = (deck, room) => deck === 1 && room === 'B';
+function bridgeJob(j) {
+  if (inBridge(j.deck, j.room)) return true;
+  const m = j.machine && machineById(j.machine); if (m && inBridge(m.deck, m.room)) return true;
+  for (const x of j.stops || []) { const pl = x.placeId && placeById(x.placeId); if (pl && inBridge(pl.deck, pl.room)) return true; }
+  return false;
+}
+const bridgeBars = j => bridgeShut() && !heldForYou(j) && bridgeJob(j);
 const healthState = v => v >= 90 ? 'fine' : v >= 70 ? 'worn' : v >= 45 ? 'poor' : 'failing';
 function machineLabel(m) {
   const K = MACHINE_KINDS[m.kind], n = machineList().filter(x => x.kind === m.kind && x.deck === m.deck).length > 1 ? ' ' + m.id.split('-').pop() : '';
   return K.name + n + ', Deck ' + m.deck;
 }
 function shipHealthRows() {
-  const sys = shipSystems(), st = machinesNow(), health = shipHealth(sys);
+  const sys = shipMeters(), st = machinesNow(), health = shipHealth(sys);   // the meters: the machines less the upkeep (0.33.57)
   const rows = SYSTEMS.map(k => {
     const ms = machineList().filter(m => MACHINE_KINDS[m.kind].sys === k && st[m.id].state !== 'healthy').sort((a, b) => st[a.id].cond - st[b.id].cond);
     return { key: k, name: SYSTEM_NAME[k], value: Math.round(sys[k]), state: healthState(sys[k]), worst: ms.length ? machineLabel(ms[0]) : null };
@@ -16370,7 +16428,7 @@ const HOLD_MAX = 4;                                      // small jobs held for 
 // SHARE_KEEP held on the board: so you see the Works crew doing the jobs you do ("Bea on it")
 const SHARE_EVERY = 3, SHARE_KEEP = 2;
 let SHARE_ON = true;                                    // machine_check turns it off where it needs a job left for you
-const forYou = j => j.urgency < 2 && jobTier(j) <= playerTier() && !(j.machine && ENGINE_KINDS.has(machineById(j.machine).kind)) && rankOk('you', j) && (!j.junior || playerRank() === 'junior');
+const forYou = j => j.urgency < 2 && jobTier(j) <= playerTier() && !(j.machine && ENGINE_KINDS.has(machineById(j.machine).kind)) && rankOk('you', j) && (!j.junior || playerRank() === 'junior') && !bridgeBars(j);
 function leaveEnd(j) {
   if (!forYou(j) || j.released) return j.found;
   if (j.cargo === 'meals') return j.found + 60;
@@ -16468,7 +16526,11 @@ function jobFinish(j, t, by) {
   if (!j.workDone) jobEffect(j, t, by);                  // a job you turn in already did its work (0.33.23)
 }
 // what finishing a job does to the ship: its machine put right, its cargo moved, a chore's effect
-function jobEffect(j, t, by) {
+function jobEffect(j, t, by) {                           // your job (not a favour) also steps up the ship meters it helps (0.33.57)
+  if (by !== 'you' || j.kind === 'favour' || j.meters) return jobDo(j, t, by);
+  const before = shipMeters(); jobDo(j, t, by); meterStep(j, before);
+}
+function jobDo(j, t, by) {
   if (j.chore === 'garden' && by === 'you' && j.dropAt === undefined && typeof galleyCarryLand === 'function') galleyCarryLand(j.id);   // finished without ticking off the drop: they land now
   if (jobKindOf(j)) { try { jobKindOf(j).done(j, t, by); } catch (e) { console.warn('job kind ' + j.kind, e); } return; }   // a registered kind does its own (0.33.47)
   if (j.kind === 'chore' || j.kind === 'favour') { choreDone(j, t); return; }
@@ -16801,7 +16863,7 @@ function jobNote(j, step, o) { if (j.kind !== 'favour') simLater('job', { id: j.
 const abandonNote = j => { if (j.kind !== 'favour' && !j.workDone) simLater('jobAbandoned', { machine: j.machine || null, dept: null, id: j.id }); };
 function claimJob(id) {
   const j = jobsBoard().find(x => x.id === id);
-  if (!j || j.claimedBy || (!jobSide(j) && SHIP.jobs.some(x => x.claimedBy === 'you' && x.status === 'claimed' && x.kind !== 'favour' && !jobSide(x))) || (playerTier() < jobTier(j) && !heldForYou(j)) || !rankOk('you', j) || (j.machine && ENGINE_KINDS.has(machineById(j.machine).kind))) return false;
+  if (!j || j.claimedBy || (!jobSide(j) && SHIP.jobs.some(x => x.claimedBy === 'you' && x.status === 'claimed' && x.kind !== 'favour' && !jobSide(x))) || (playerTier() < jobTier(j) && !heldForYou(j)) || !rankOk('you', j) || (j.machine && ENGINE_KINDS.has(machineById(j.machine).kind)) || bridgeBars(j)) return false;
   j.claimedBy = 'you'; j.status = 'claimed'; j.start = shipNow(); delete j.segs; delete j.done; delete j.end; MACH_REV++; jobNote(j, 'take'); simFlush(); return true;   // no crew route left on it
 }
 function dropJob(id) {
@@ -17193,7 +17255,7 @@ if (typeof device !== 'undefined' && device.addSection) device.addSection('jobs'
 // its place id or null. Take one with claimJob(id); finish it with finishJob(id); jobStops(job) gives the way there.
 function openJobs(forWho = 'you') {
   const you = forWho === 'you', tier = you ? playerTier() : hatchTier(forWho);
-  return jobsBoard().filter(j => !j.claimedBy && j.status !== 'waiting' && (jobTier(j) <= tier || (you && heldForYou(j))) && rankOk(forWho, j) && !(you && j.machine && ENGINE_KINDS.has(machineById(j.machine).kind)) && (you || !heldForYou(j))).map(j => {
+  return jobsBoard().filter(j => !j.claimedBy && j.status !== 'waiting' && (jobTier(j) <= tier || (you && heldForYou(j))) && rankOk(forWho, j) && !(you && j.machine && ENGINE_KINDS.has(machineById(j.machine).kind)) && (you || !heldForYou(j)) && !(you && bridgeBars(j))).map(j => {
     const [title, where, state] = jobCard(j), m = j.machine && machineById(j.machine);
     const stops = jobStops(j).filter(x => x.step !== 'fetch'), main = jobByStops(j) ? stops[stops.length - 1] : j.kind === 'restock' ? stops[2] : stops[0];
     const place = main && main.places[0] || null, pl = placeById(place);
@@ -17286,7 +17348,7 @@ function holdCrates() { return partsCrates() + manifestCrates(); }
 const haulOn = () => !!JOB_KINDS.haul;
 const MANIFEST_DROP = { linen: '4-laundry-drop', medical: '3-infirmary-drop', store: '3-store-drop', galley: '3-galley-drop', bridge: '1-bridge-drop' };
 function manifestFor(d) {
-  const wk = Math.floor((d - 1) / 7), seed = machSeed('manifest'), all = DELIVERIES.filter(r => placeById(MANIFEST_DROP[r.key]) || placeById(r.to));
+  const wk = Math.floor((d - 1) / 7), seed = machSeed('manifest'), all = DELIVERIES.filter(r => (placeById(MANIFEST_DROP[r.key]) || placeById(r.to)) && !(r.key === 'bridge' && bridgeShut()));   // the bridge's crate waits for your invite (0.33.57)
   const pool = all.slice(), out = [], n = Math.min(pool.length, 2 + Math.floor(3 * schedU(seed, wk, 866)));
   for (let k = 0; k < n; k++) { const r = pool.splice(Math.floor(pool.length * schedU(seed, wk * 8 + k + 1, 866)), 1)[0]; out.push({ id: r.key, dest: placeById(MANIFEST_DROP[r.key]) ? MANIFEST_DROP[r.key] : r.to, n: 1 }); }
   return out;
@@ -17406,6 +17468,7 @@ SAVE_EXTRA.push(s => {
   s.ship.jobs = SHIP.jobs; s.ship.stores = SHIP.stores; s.ship.hold = SHIP.hold;
   if (SHIP.manifest && SHIP.manifest.length) s.ship.manifest = SHIP.manifest; if (SHIP.misplaced) s.ship.misplaced = SHIP.misplaced;   // 0.33.50
   s.ship.short = SHIP.short; s.ship.machineUse = { ...MACH_EXTRA };   // 0.33.18: what Stores has told you; your use not yet worn in
+  s.ship.upkeep = { ...SHIP.upkeep };                    // 0.33.57: the ship meters' upkeep
 });
 // a save without machines (or with nonsense) leaves them to start afresh; machines the save doesn't know start
 // fresh; ids it has that are gone are dropped
@@ -17431,6 +17494,7 @@ function machinesLoad(s) {
   for (const k of ['stores', 'hold']) if (obj(sh[k])) for (const [p, n] of Object.entries(sh[k])) if (Number.isInteger(n) && n >= 0) SHIP[k][p] = n;
   if (obj(sh.short)) for (const [p, n] of Object.entries(sh.short)) if (Number.isFinite(n)) SHIP.short[p] = n;
   if (obj(sh.machineUse)) for (const [id0, n] of Object.entries(sh.machineUse)) { const id = MACH_RENAMED[id0] || id0; if (SHIP.machines[id] && n > 0 && n < 50) MACH_EXTRA[id] = n; }
+  SHIP.upkeep = {}; if (obj(sh.upkeep)) for (const k of SYSTEMS) if (Number.isFinite(sh.upkeep[k])) SHIP.upkeep[k] = Math.max(0, Math.min(UPKEEP_CAP, sh.upkeep[k]));   // 0.33.57; an older save: none (its meters read as before)
   JOBS_TIDY = false; return true;
 }
 machinesLoad(SAVED);

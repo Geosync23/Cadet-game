@@ -1148,6 +1148,72 @@ with sync_playwright() as pw:
             or t2['missing'] or t2['badLine'] or t2['noShow'] or t2['order'] or t2['loads']):
             fail('the air line and the Tier 2 fault tables')
 
+    # 5v. the ship meters and the bridge room (Step 3, 0.33.57; the user's "starts a little lower, so you can see your impact"):
+    # a fresh ship's board reads about 75 (72-79), none failing, one or more fine, while the machines' own health (what the
+    # effects read) is 90+; untended, every meter only falls a little each day; a steady player (5o's) gets j.meters on every
+    # job they finish, biggest first, the biggest a visible step (1+), and the board rises well above its start (85+ by the
+    # end); the same twice. A job in the bridge room (Deck 1, B) isn't offered to you or yours to take till SHIP.bridgeInvited,
+    # then it is; the crew can take it; the Wednesday manifest has no bridge crate till then. The save keeps the upkeep, and a
+    # save without it loads with none
+    if g.ev("typeof shipMeters === 'function'"):
+        MV = r"""(() => {
+          window.__sc("window.__evMv = [typeof eventNow === 'function' ? eventNow : undefined, typeof eventMod === 'function' ? eventMod : undefined]; if (window.__evMv[0]) eventNow = () => null; if (window.__evMv[1]) eventMod = () => null");
+          const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min, end = t0 + DAYS * 1440, out = { jobs: 0, noMeters: [], small: [], notMain: [], byDay: [] };
+          JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; SHIP.works = null; setShipNow(t0); machinesNow();
+          const rows = shipHealthRows(); out.start = rows[0].value; out.startRows = rows.slice(1).map(r => r.name + ' ' + r.value + ' ' + r.state); out.machine0 = shipHealth();
+          out.failing = rows.filter(r => r.state === 'failing').length; out.fine = rows.slice(1).filter(r => r.state === 'fine').length;
+          const m0 = shipMeters(); JOBS_ON = false; setShipNow(t0 + 1440); machinesNow(); const m1 = shipMeters();
+          out.creep = SYSTEMS.filter(k => SHIP.upkeep[k] < UPKEEP_START[k] - 1e-9 || SHIP.upkeep[k] > UPKEEP_START[k] + UPKEEP_CREEP * 26 / 24 + 1e-9);   // the start hour's share too
+          out.creepDrop = Math.round((shipHealth(m0) - shipHealth(m1)) * 10) / 10;
+          JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t0); machinesNow();
+          let mine = null, until = 0;
+          for (let t = t0; t <= end; t += 30) {
+            setShipNow(t); machinesNow();
+            if (mine && t >= until) { const j = SHIP.jobs.find(x => x.id === mine); if (j && j.claimedBy === 'you' && j.status === 'claimed') { jobStops(j).forEach((x, k) => jobStepDone(j.id, k)); finishJob(j.id);
+                out.jobs++; const ms = j.meters || [], main = jobMeterSys(j)[0];
+                if (!ms.length) out.noMeters.push(j.id); else { if (!SYSTEMS.includes(main)) out.notMain.push(j.id + ' ' + main); if (ms[0].gain < 1) out.small.push(j.id + ' ' + ms[0].gain); } } mine = null; }
+            const d = SHIP.time.day, md = t % 1440;
+            if (md === 1080) out.byDay.push(Math.round(shipHealthRows()[0].value));
+            if (!mine && d >= 2 && playerShiftOn(d) && md >= DAY_SHIFT[0] && md < DAY_SHIFT[1]) { const o = openJobs('you')[0]; if (o && claimJob(o.id)) { mine = o.id; until = t + Math.max(30, o.mins + 20); } }
+          }
+          out.end = shipHealthRows()[0].value; out.sig = JSON.stringify([SHIP.upkeep, out.byDay]);
+          for (const j of SHIP.jobs) if (j.claimedBy === 'you') { j.claimedBy = null; j.status = 'open'; }
+          window.__sc("if (window.__evMv[0]) eventNow = window.__evMv[0]; if (window.__evMv[1]) eventMod = window.__evMv[1]");
+          return out;
+        })()""".replace('DAYS', str(DAYS))
+        mv = g.ev(MV); mv2 = g.ev(MV)
+        print(f"Ship meters (0.33.57): a fresh ship reads {mv['start']} (machines {mv['machine0']}), failing {mv['failing']}, fine {mv['fine']}: {mv['startRows']}")
+        print(f"  untended a day: upkeep out of step {mv['creep']}, the board down {mv['creepDrop']}; a steady player: {mv['jobs']} jobs, without meters {mv['noMeters'][:4]}, main system unknown {mv['notMain'][:4]}, a step under 1 {mv['small'][:4]}")
+        print(f"  the board by day {mv['byDay']}, at the end {mv['end']}; the same twice {mv['sig'] == mv2['sig']}")
+        if not (72 <= mv['start'] <= 79) or mv['failing'] or not mv['fine'] or mv['machine0'] < 90 or mv['creep'] or not (0 < mv['creepDrop'] < 4):
+            fail('the ship meters at the start')
+        if not mv['jobs'] or mv['noMeters'] or mv['notMain'] or mv['small'] or mv['end'] < 85 or mv['sig'] != mv2['sig']:
+            fail('the ship meters: your jobs')
+        br = g.ev("""(() => {
+          const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min, out = {};
+          JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; SHIP.works = null; setShipNow(t0 + 1440 + 180); machinesNow();
+          const was = SHIP.bridgeInvited, pl = placeById('1-works-1'), id = 'chore-test:bridge';
+          SHIP.jobs.push({ id, machine: null, deck: 1, room: 'B', kind: 'chore', chore: 'delivery', title: 'Test: spares to the bridge', bring: null, tier: 1, stops: [{ deck: 1, placeId: pl.id, mins: 10, tag: 'drop' }], urgency: 0, leave: null, posted: shipNow(), found: shipNow(), claimedBy: null, parts: [], status: 'open' });
+          SHIP.bridgeInvited = false; out.offeredShut = openJobs('you').some(o => o.id === id); out.forYouShut = forYou(SHIP.jobs.find(j => j.id === id)); out.claimShut = claimJob(id);
+          out.crew = openJobs('teague-theo').some(o => o.id === id) || openJobs(schedPeople().find(p => jobCrew(p) === 'works').id).some(o => o.id === id);
+          SHIP.bridgeInvited = true; out.offeredOpen = openJobs('you').some(o => o.id === id); out.claimOpen = claimJob(id);
+          dropJob(id); SHIP.jobs = SHIP.jobs.filter(j => j.id !== id);
+          const weeks = n => [...Array(n).keys()].map(w => manifestFor(w * 7 + 3).map(c => c.id));
+          SHIP.bridgeInvited = false; out.manShut = weeks(8).flat().filter(k => k === 'bridge').length;
+          SHIP.bridgeInvited = true; out.manOpen = weeks(8).flat().filter(k => k === 'bridge').length;
+          if (was === undefined) delete SHIP.bridgeInvited; else SHIP.bridgeInvited = was;
+          // the save: the upkeep goes out and comes back; an older save (no upkeep) loads with none
+          SHIP.upkeep.air = 12.345;
+          const s = { player: { deck: 4, tile: [0, 0], facing: 0 }, ship: { decks: {} }, crew: {} }; SAVE_EXTRA.forEach(f => f(s));
+          const before = JSON.stringify(SHIP.upkeep); MACH_HOUR = null; machinesLoad(JSON.parse(JSON.stringify(s))); out.saved = JSON.stringify(SHIP.upkeep) === before;
+          const old = JSON.parse(JSON.stringify(s)); delete old.ship.upkeep; MACH_HOUR = null; machinesLoad(old); out.oldNone = Object.keys(SHIP.upkeep).length === 0;
+          MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t0);
+          return out;
+        })()""")
+        print(f"  the bridge room: shut {[br['offeredShut'], br['forYouShut'], br['claimShut']]} (offered, for you, taken), the crew's {br['crew']}; invited {[br['offeredOpen'], br['claimOpen']]}; bridge crates in 8 weeks shut {br['manShut']}, invited {br['manOpen']}; save keeps the upkeep {br['saved']}, an older save none {br['oldNone']}")
+        if br['offeredShut'] or br['forYouShut'] or br['claimShut'] or not br['crew'] or not br['offeredOpen'] or not br['claimOpen'] or br['manShut'] or not br['manOpen'] or not br['saved'] or not br['oldNone']:
+            fail('the bridge room and the upkeep in the save')
+
     # 6. the save
     rt = g.ev("""(() => {
       JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(6 * 1440 + 11 * 60 + 17); machinesNow();
