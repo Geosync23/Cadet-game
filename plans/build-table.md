@@ -1078,3 +1078,9 @@ Deck 4's static screenshots are pixel-identical from 0.5.0 through 0.5.7. The on
 | Build | What it added |
 | --- | --- |
 | 0.64.3 | **Dev mode Stop 1a merged** (claude/devmode fa394b3, DB1; reviewed by DR1; lead 20's go). The rows above under "Dev mode" (D1 to D4 and their fixes) as one build: `#dev` switch (off: the game unchanged), section 25, the Dev save, Undo, Copy my real game, Clear, the Clock tab, Take me to, Mark here / Back to mark; devmode_check.py. Clean merge, no clashes. Checks: see the merge commit's message. |
+
+### Patch batch E, part 2 (patch builder DB1, on claude/devmode from claude/integration 0.64.3; plans/patch-plan.html #30, #29, #26)
+
+| Build | What it added |
+| --- | --- |
+| (patch #30) | **The mug in your hands**, behind `MUG_ON` (section 15; off, the game is unchanged; `#mug` on the link turns it on for a test until the switch-on step). A cocoa or tea from the bar is a mug in your hand: `PROP_KIT.mug` (8b: a cream mug at about 1.6x life size, the cocoa .005 below a torus rim, the handle sunk into the wall), held one-handed at the chest (`HOLDS.mug`), and drunk at a stool in `ACTS.cocoa` (the drink pose with the mug). You keep it walking, standing and in the lift; after 20 ship minutes (`MUG_MINS`) you've drunk it as you go (the stool's gains, "You finish your cocoa. Warm all the way down."); Put down sets it down; parts, a tray, the hamper, a cart or sitting to eat finish it first. Not saved (as the drink in hand never was). Hook commits: section 15 (`mugTick` in the player tick, `mugHeld` at the end of the hold) and 15b (`putWhat`/`putDown`, `ixPose`). Draw calls 180 -> 181 while held. Words with stand-ins until the writers add them: `bar.finish.cocoa`, `bar.finish.tea`, `bar.putdown`. |

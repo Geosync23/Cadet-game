@@ -1822,6 +1822,10 @@ A hidden testing panel for the user, opened only with the Dev link (the game's l
 - **The card and sheet:** `.devmode .hud` takes taps (gold outline, `#dmTag` DEV); `#dmSheet` across the lower 56vh (on the right in landscape), tabs Quick, Clock, then Traditions (Stop 1b), Career and Set career (Stop 2), Big events (Stop 3). CSS is made by section 25.
 - **Check:** `devmode_check.py` (about 2.5 minutes, real saving, 390 x 844): off, real, card, store, clock, move.
 
+## The mug in your hands (patch #30, DB1 for the player and performance engineers)
+
+`MUG_ON` (section 15's slot; `#mug` on the link until the switch-on step). `SHIP.player.drink` (the bar's, not saved) of cocoa or tea is a mug: `mugTick` (each frame, from the player tick) keeps `MUG = { drink, from }` and finishes it after `MUG_MINS` (20) ship minutes, or at once when your hands are wanted (parts, a tray, the hamper, a cart, eating), with the stool's gains; `mugHeld()` is the hold ('mug') while walking or standing; `mugPose()` gives 15b's stool the 'cocoa' pose; `mugPut()` is Put down's. 8b's slot adds `PROP_KIT.mug`, `HOLDS.mug`, `ACTS.cocoa` (the drink pose with the mug; crowd mugs ride in the crowd's meshes) only when `MUG_ON`. The mug's top is the cylinder's +z end in the hand's space (it shows upright from the camera). cadet_test's first shot (a_start) once differed with the state identical; rerun, identical.
+
 ## Leave, missed shifts and being let go (the career engineer, 0.61.x)
 
 The career section sits in section 20, after crew come and go (`movedOff`). It reads section 20's reputation, section 18's occasions and section 14's plans, and nothing in it calls `R()`. All the numbers are in `CAREER`.
