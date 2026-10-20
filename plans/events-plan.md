@@ -1,8 +1,8 @@
-# Ship-wide events plan: summary (version 2)
+# Ship-wide events plan: summary (version 2.1)
 
 Events planner EP1, 2026-10-20. Branch `claude/events-plan`; build 0.64.2.
 
-The full page is `plans/events-plan.html`, with screenshots in `plans/events-plan-shots/` and the run log in `plans/events-plan-run-log.json`. Version 2 takes in reviewer ER1's review (`claude/events-plan-review`, `plans/events-plan-review.md`) and lead 20's two asks: a parked list, and answer slots for each question. This is planning only; the game is unchanged.
+The full page is `plans/events-plan.html`, with screenshots in `plans/events-plan-shots/` and the run log in `plans/events-plan-run-log.json`. Version 2.1 takes in reviewer ER1's review and re-review (`claude/events-plan-review`, `plans/events-plan-review.md`) and lead 20's two asks: a parked list, and answer slots for each question. This is planning only; the game is unchanged.
 
 ## When the career ends
 - **Day 26 (a Friday), "Calder's question"**, from the Pillar 5 plan v11:
@@ -19,11 +19,15 @@ The full page is `plans/events-plan.html`, with screenshots in `plans/events-pla
 ## In scope (recommended dates)
 1. **Ion storm** (main). Built and on. Keep Days 10-15, with a career-beat guard and the commendation at the all-clear.
 2. **Comet viewing** (short). Drafted. Tuesday Day 16, 21:30, one day long. Sato works weekdays only.
-3. **Diplomatic visit** (main). Built, kept off. Shortened to fit:
-   - warning Friday Day 19
-   - greeting Monday Day 22, after the Monday briefing
-   - one dinner Tuesday Day 23
-   - farewell Friday Day 26
+3. **Diplomatic visit** (main). Built, kept off. Recommended as a weekend finale:
+   - named as next week's business at the Day 22 Monday briefing (a senior memo)
+   - warning Friday Day 26, after Calder's question
+   - greeting Saturday 27 at 10:00
+   - one dinner Sunday 28
+   - farewell Monday 29 at 10:00
+   - afterglow Tuesday 30
+
+   That's 4 days from warning to farewell, which leaves Pillar 5's Tier 4 week (Days 22-26) alone. The Days 19-26 option is kept, not recommended: it would take over that week and land the warning on the night-shift weekend.
 
 **The game's own scheduling can't produce these dates** (its rules give the comet Day 22 and the visit Day 26 or 33), so the first framework piece, F0, sets the dates directly.
 
@@ -67,7 +71,7 @@ In design order. Each full breakdown is in `plans/pillar3-plan.md` at the line g
 ## Shared base F0-F8
 | Piece | What it does |
 | --- | --- |
-| F0 | The event calendar |
+| F0 | The event calendar: storm Day 10, comet Day 16, visit warning Day 26; the comet's gatherings registered in `EV_SHIPWIDE` (built when the game loads) |
 | F1 | `eventDay` and the career-beat guard |
 | F2 | Phase notes |
 | F3 | The device |
@@ -100,11 +104,11 @@ Each event is built switched off, tested in Dev mode, then switched on.
 
 ## Questions for the user (answer slots on the page: ids ev-q1 to ev-q9, plus ev-general)
 1. **Are the storm, the comet and the visit the right three?** Recommended: yes.
-2. **What should happen where the storm meets the first promotion?** Recommended: (a) keep Days 10-15 with the hours kept apart. The other options are (b) one day later, or (c) the Senior week.
+2. **What should happen where the storm meets the first promotion?** Recommended: (a) keep Days 10-15 with the hours kept apart. The other options are (b) one day later, or (c) the Senior week, which would mean moving the comet and the visit as well.
 3. **When is the comet?** Recommended: Tuesday Day 16, rather than Sunday Day 21.
-4. **Should the visit be shortened to Days 19-26?** Recommended: yes.
+4. **When and how long is the visit?** Recommended: the weekend finale on Days 26-30 (options: finale, short, long).
 5. **Should events follow the calendar or the player's rank?** Recommended: the calendar, with small rank parts.
 6. **What should helping in the storm change?** Recommended: prep jobs and help move the threads; left alone it comes out bumpy, and with good help smooth.
 7. **What should the rec deck do in the storm?** Recommended: unhook its first all-hands from the storm and close the rec deck from the front to the all-clear.
-8. **What about the repeated scenes?** Recommended: fold them. The commendation comes at the all-clear and is mentioned on Day 16, and the Day 17 toast counts as that month's Captain's table.
+8. **What about the repeated scenes?** Recommended: fold them. The commendation comes at the all-clear and is mentioned on Day 16 (no summons on Day 15), and the Day 17 toast counts as that month's Captain's table.
 9. **Who is the junior you mentor on Day 26?** Recommended: a small arrival on Day 21 using the rotation traditions.
