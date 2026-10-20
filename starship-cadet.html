@@ -10093,8 +10093,9 @@ function schedBuild(p, d, occ, S) {
     const svc = ((DECKS[7] && DECKS[7].places) || []).filter(pl => pl.type === 'work:works' && pl.machine).sort((a, b) => a.id.localeCompare(b.id, 'en', { numeric: true }));
     const n = Math.min(REC_ROUND.stops, svc.length), need = 2 * C + n * REC_ROUND.mins; if (!n || to - t < need + 20) return;
     const k0 = Math.floor(schedU(p.seed + 1, d, 1039) * svc.length);
+    const n0 = segs.length;                                // the rides down and back are on her shift's time too (tag 'round'; RE20, 0.64.1)
     go(7); for (let i = 0; i < n; i++) { const pl = svc[(k0 + i) % svc.length]; if (isFree(pl.id, t, t + REC_ROUND.mins)) hold(pl.id, t, t + REC_ROUND.mins); seg('work', t + REC_ROUND.mins, pl.type, pl.id, placeAnim(pl) ? { tag: 'round', anim: placeAnim(pl) } : { tag: 'round' }); }
-    go(wd);
+    go(wd); for (let i = n0; i < segs.length; i++) if (segs[i].act === 'commute') segs[i].tag = 'round';
   };
   // a leisure block taken off the Commons (Deck 4's rooms, the officers' lounges): sometimes the rec deck instead. The place
   // stays held for the block and the ride back ends there, so everyone else's day and this person's own afterwards come
@@ -10734,7 +10735,7 @@ function dayReport(day) {
     const gp = shiftBlocks(p, day), gb = gp && gp.blocks;
     if (gb || (isWorkDay(p, day) && !(galleyRotaOn() && p.dept === 'galley'))) {   // the whole shift worked (breaks and a galley staff meal count)
       const iv = gb ? gb.map(([a, b]) => [B + a, B + Math.min(b, 1440)]) : [p.shift === 'night' ? [B + 1260, B + 1440 + 360] : [B + SHIFTS.day[0], B + SHIFTS.day[1]]];
-      const both = planDay(p, day).concat(planDay(p, day + 1)).filter(s => s.act === 'work' || ['tea', 'toilet', 'hands', 'staff', 'patrol', 'rush'].includes(s.tag) || /^intro/.test(s.tag || ''));   // an intro beat on shift is work too
+      const both = planDay(p, day).concat(planDay(p, day + 1)).filter(s => s.act === 'work' || ['tea', 'toilet', 'hands', 'staff', 'patrol', 'rush', 'round'].includes(s.tag) || /^intro/.test(s.tag || ''));   // an intro beat on shift is work too
       for (const [a, b] of iv) {
         const worked = both.reduce((n, s) => n + Math.max(0, Math.min(s.to, b) - Math.max(s.from, a)), 0);
         if (worked < b - a) rep.work.push(p.id + ' ' + worked + '/' + (b - a));
@@ -41609,6 +41610,7 @@ const WORK_TOOLS = {
 const WORK_BANDS = { 1: [[0, 'new'], [8, 'steady'], [18, 'reliable'], [30, 'trusted'], [40, 'relied']], 2: [[0, 'new'], [12, 'steady'], [28, 'reliable'], [45, 'trusted'], [60, 'relied']] };   // 2: C2's 0.44.19 numbers, kept by Step 4's page (0.45.7): about a dozen steady workdays to "Relied on" as an officer; side jobs add +2 a day at most (worksSideXp)   // the page's; with section 17's real faults in (0.44.10): steady 45-48 by the end of Day 8, a very busy player 35 at the end of Day 4
 const BAND_WORD = { new: 'New', steady: 'Steady', reliable: 'Reliable', trusted: 'Trusted', relied: 'Relied on' };
 const WORK_XP = { service: 1, repair: 2, overhaul: 3, missed: -3, abandoned: -2 };
+const REC_JOB_XP = .5;                                    // a rec deck machine's job pays half its reputation: its 16 machines' extra jobs brought a very busy player to "Relied on" by Day 4 (lead 19's call; RE20, 0.64.1)
 const WORKS_RIGHT_FROM = 5;                              // "right first time" counts from Day 5 (the scanner)
 const ladderRow = id => CAREER_LADDER.find(r => r.id === id) || null;
 const worksDay = t => Math.floor(t / 1440) + 1;
@@ -41940,8 +41942,8 @@ onSim('job', n => {
   const kind = n.job || (j && (j.chore || j.kind)) || '', m = n.machine && typeof machineById === 'function' ? machineById(n.machine) : null;
   const found = !!(j && (j.foundBy === 'you' || (n.machine && simNotes('found', (j.posted || 0) - 1).some(x => x.machine === n.machine && x.by === 'you'))));
   const right = !!(j && j.rightFirst && d >= WORKS_RIGHT_FROM), clever = !!(j && j.clever);
-  const side = WORKS_SIDE_KINDS.has(kind) || j && WORKS_SIDE_KINDS.has(j.kind), xp = side ? (WORK_XP[kind] ?? 1) + (right ? 1 : 0) : (WORK_XP[kind] || 1) + (found ? 1 : 0) + (right ? 1 : 0) + (clever ? 1 : 0);
-  if (j && j.xp === 0) { /* paid elsewhere (E2's leak joint: the leak's +1) */ } else if (side) worksSideXp(xp, j && j.kind || kind); else worksXp(xp);   // a side job's: flat (+1 more right first time: rewiring, 0.45.14), capped, +2 a day in all (0.45.7; flat 0.45.11, E2/R4)
+  const side = WORKS_SIDE_KINDS.has(kind) || j && WORKS_SIDE_KINDS.has(j.kind), xp = side ? (WORK_XP[kind] ?? 1) + (right ? 1 : 0) : (WORK_XP[kind] || 1) + (found ? 1 : 0) + (right ? 1 : 0) + (clever ? 1 : 0), rec = !side && m && m.deck === 7;
+  if (j && j.xp === 0) { /* paid elsewhere (E2's leak joint: the leak's +1) */ } else if (side) worksSideXp(xp, j && j.kind || kind); else worksXp(rec ? xp * REC_JOB_XP : xp);   // a side job's: flat (+1 more right first time: rewiring, 0.45.14), capped, +2 a day in all (0.45.7; flat 0.45.11, E2/R4)
   if (m) W.sk[m.kind] = (W.sk[m.kind] || 0) + 1;
   W.log.push([String(n.id).slice(0, 80), d, (found ? 1 : 0) | (right ? 2 : 0) | (clever ? 4 : 0), String(kind).slice(0, 24)]); if (W.log.length > WORKS_LOG) W.log.splice(0, W.log.length - WORKS_LOG);
   const c = W.cur; if (c && c.st === 'do' && c.j === n.id) worksDone(c.id, n.t);
