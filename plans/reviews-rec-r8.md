@@ -14,6 +14,31 @@ Needs, then Tracked (fixed, never moves), then the activity bar at the very bott
 overlap with the activity bar, heads-up/tip cards or the round buttons at 390 and 320 px; Tracked doesn't move at all as the bar
 shows/hides; the bar sits below Tracked; non-phone layout unchanged (cadet_test shots at 900 px should be 0 px different).
 
+## bf71e7a (claude/rc-wip, 0.64.2, vs claude/rec-cand-s1 cf55b35): PASS
+
+Note: the candidate ships with `REC_DECK = true` (0.84.11), so "on" is the build as is; "off" = a copy flipped to false.
+- **0.64.1 determinism (recPlanShut)**: as reviewed at 1030f4d, plus my machUseDay fix exactly as asked (`occ.use`;
+  a replan makes a new occ, machinesReset drops those SHIP_DAYS entries and their MACH_USE).
+- **Maeve's rides (item A)**: the commute segs her recRound adds get tag 'round' (commute segs had no tag before, so
+  nothing is overwritten; no other code reads a 'round' tag); dayReport counts 'round' as work. Deck-on only.
+- **capOk from a0 - C** in recVisit: the ride down counts on the rec deck. Deck-on only. Fine.
+- **Item C (climbing wall)**: recBelaysUsable() (free or busy, not tagged out nor roped off); recStart refuses after the
+  "both tagged out" line ('rec.shut.wall', fallback text fine: "One auto-belay's tagged out and the other one's route is
+  taped off. No climbing till Works are done."); recFrame ends a climb wait with actEnd(true) + the right toast (both
+  tagged out -> 'rec.shut.belays'). All guarded by REC_DECK. interactions_check's new case: OK switched on (tap refused,
+  mid-wait released, both with the reason); off: skipped, INTERACTIONS CHECK OK.
+- **Item D (Tracked on phones)**: measured at 390x844 and 320x568 (needs strip shown; cadet_test hides it), an activity
+  bar forced on and off: needs 14,124-302,160; Tracked 14,168-107,198 in all three states (never moves); the bar
+  14,204-302,238 under Tracked; no overlap with Device/Pause (y 86-116) or the round buttons. On cf55b35 Tracked sat at
+  209-302 x 168-198 and the bar at 166-200: they overlapped, so this also fixes that. Heads-up cards are placed under
+  the lowest of needStrip/actBar/trkBtn (line ~11375), so they clear both. Non-phone: actBar's y and trkPlace's other
+  branch unchanged.
+- **Regression**: cadet_test cf55b35 vs bf71e7a, on: ALL IDENTICAL; both flipped off: ALL IDENTICAL.
+- One owner, no duplicate names (recBelaysUsable once), naming fine in new text.
+
+Note, no fix asked: REC_HABIT_TEXT (unused, pre-existing) still says "rec dec" four times (lines ~9784-9786); harmless
+while unused, worth fixing if it's ever shown.
+
 ## 1030f4d (claude/rc-wip, WIP 0.64.1, vs 50d55ef): PASS WITH FIXES (pre-review of work in progress)
 
 What it does: crew rec plans read `recPlanShut(d, occ)` (the 22:00 record the evening before, once settled) instead of
