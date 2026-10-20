@@ -1,12 +1,12 @@
 # Starship Cadet: dev notes 3
 
-Read this first in any new session, together with **design-doc.md** and **starship-cadet.html** (build 0.14.0). The design doc is the source of truth for what the game is (update it when a design decision is made); these notes cover the build: what's in it, how the code works, the rules, testing and what's next.
+Read this first in any new session, together with **design-doc.md** and **starship-cadet.html**. The design doc is the source of truth for what the game is (update it when a design decision is made); these notes cover the build: what's in it, how the code works, the rules, testing and what's next.
 
-This file replaces DEV_NOTES_2. The repo holds it with design-doc.md, the build, the deck plans in `plans/` and cadet_test.py. Git keeps every earlier version, so files keep stable names (no version suffixes).
+**Where things stand (2026-10-20).** The game is at **0.64.2, the Rec Deck, published 2026-10-20**: https://claude.ai/artifact/7ZHXGUSvgJzAc1mYmfPt1K, built from claude/rec-cand-s1 c575a8e. `main` and the main game link are untouched; merging to main needs the user's go. The whole one-file game is kept at `archive/starship-cadet-0.64.2-whole.html` and on the frozen branch `claude/whole-file-0.64.2` (sha256 e4897023…27624).
 
-**Deck 3 is complete (0.7.0, with the promenade dressed and review fixes) and signed off ("ok for now").** **Decks 6, 1 and 2 are built** (0.7.x, 0.8.x, 0.9.x by three architect sessions, merged as 0.10.0) and are waiting for the user's review. All six decks are now in the game. See TEAM.md and section 6e.
+**Now: step 2, the new ways of working on the one file (no cut; the user's call, 2026-10-20),** on claude/ways-of-working: check_fast.sh before every push, names_check.js, every check exits 1 on failure, one labelled slot per seat, the build master sets the build number, early merging into `claude/integration`, `plans/owners.md`, `plans/map.md`, `plans/backlog.md`, the build table in `plans/build-table.md` (CLAUDE.md "How we work"; `plans/roadmap-after-recdeck.md`).
 
-The nine small updates once listed here for the design doc (Chef Brennan, Deck 3's rooms and layout, two meals a day, no freight lift and the Cart bay, the one-floor lounge, the music room, the walk-in lift car, the spine behind glass, Pell on Deck 5) are now in design-doc.md.
+**Next:** Dev mode (a hidden testing panel: move the clock, set career progress, start any tradition; plan page first, built switched off), then Pillar 5 Steps 5 and 6, then the ship-wide events up to the end of the promotions (plan on claude/events-plan, awaiting the user's answers). TEAM.md has who's working on what. The "Next" section further down is older history (Decks and the Living Ship's start).
 
 
 ## Builds
