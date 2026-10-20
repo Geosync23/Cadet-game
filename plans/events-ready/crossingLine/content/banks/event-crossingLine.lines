@@ -1,0 +1,46 @@
+@bank all
+// EW1 (events writer), Crossing the Line (events plan v3.2, section 3: Sunday Day 7). The event's own words in EV1's
+// keys (see content/banks/event-ionStorm.lines). Mail is "Subject | body", unsigned (the warning is Vance's).
+// Gatherings: event.crossingLine.gather.<id>.<...>; the ceremony is the meeting crossingCeremony.
+== event.crossingLine.mail.warning
+- Tomorrow we cross the Line | Tomorrow at 14:30 the Wren crosses into the Veyli reach. The horn will sound on every deck. First crossing? The ceremony is on the plaza, 14:30. Then the Line supper in the mess at 18:00, in place of the Sunday table. Attendance is not required. It is, however, expected.
+== event.crossingLine.status.warning
+- Tomorrow at 14:30 we cross the Line into the Veyli reach.
+// the banner at 14:30, after the horn: the Captain is called in on her day off
+== event.crossingLine.address.onset.1
+- This is the Captain, on my day off. We have just crossed the Line.
+== event.crossingLine.address.onset.2
+- Welcome to the Veyli reach. Look out of a window. Everything out there is new to us.
+== event.crossingLine.address.onset.3
+- First-timers, to the plaza. The rest of you, be kind. Marrow out.
+== event.crossingLine.status.onset
+- We've crossed the Line. Ceremony on the plaza; the Line supper at 18:00.
+== event.crossingLine.status.afterglow
+- First day in the Veyli reach.
+// tap lines on the plaza during the ceremony (crew, not first-timers)
+== event.crossingLine.gather.ceremony.here
+- Front row's for first-timers. We old hands stand at the back and laugh.   #funny
+- Watch their faces when the punch goes round. Best bit.   #funny
+- I cried at my first Line. Don't tell anyone.   #warm
+// the Line supper, 18:00-19:15, the mess, in place of the Sunday table (an extra batch and a cake; Brennan is on duty)
+== event.crossingLine.gather.lineSupper.name
+- The Line supper
+== event.crossingLine.gather.lineSupper.mail
+- The Line supper | The Line supper tonight at six, in the mess, in place of the Sunday table. A proper roast, and cake. No punch. I promise.
+== event.crossingLine.gather.lineSupper.ask
+- Line supper at six. Brennan's done a cake to make up for the punch.   #funny
+- Everyone's at the Line supper tonight. Come and find a seat. Or a wall.
+== event.crossingLine.gather.lineSupper.here
+- To the Line, and everyone who crossed it today.   #warm
+- The cake's to get rid of the taste. It's working.   #funny
+- First-timers eat first. That's the rule tonight.
+== event.crossingLine.gather.lineSupper.thanks
+- The mess is full to the walls. Someone hands you a plate, and someone else saves you a corner of the bench.   #warm
+== event.crossingLine.gather.lineSupper.chatter
+- Best Sunday table we've had. And it wasn't even the Sunday table.   #funny
+- The Line supper ran out of cake in ten minutes. Brennan was thrilled.
+// tap texts: the certificate on your shelf (a keepsake) and the plaque on the plaza (the deck architect's props)
+== event.crossingLine.keepsake
+- Your Line certificate, signed by the Captain: "Crossed into the Veyli reach, Day 7. This reach knows your name."
+== event.crossingLine.plaque
+- A small brass plaque: "The CSV Wren crossed the Line into the Veyli reach on Day 7." Someone has already polished it.

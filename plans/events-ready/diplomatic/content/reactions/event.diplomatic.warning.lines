@@ -1,0 +1,12 @@
+@reactions event.diplomatic.warning
+// EW1 (events writer), the Veyli visit (events plan v3.2: Days 26-30).
+? cue:event.diplomatic.warning
+- The Veyli tomorrow. Don't bow. Apparently we all do it wrong.   #funny
+- Envoy Saruth's been very calm all week. Which means a lot is going on.
+- I've never seen a Veyli ship up close. I'll be at the front.
+? cue:event.diplomatic.warning dept:works
+- Works is in tomorrow morning. Day off or not. For heaters.   #funny
+? cue:event.diplomatic.warning dept:galley
+- Herbs, herbs and more herbs. The Veyli dinner's on Sunday.
+? cue:event.diplomatic.warning dept:watch
+- Watch is doubling up on Deck 2. Chief Holt's orders. Politely.

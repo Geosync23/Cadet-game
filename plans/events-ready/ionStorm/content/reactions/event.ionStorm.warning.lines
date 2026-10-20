@@ -1,0 +1,7 @@
+@reactions event.ionStorm.warning
+// EW1 (events writer), the storm update: more for the warning day (Thursday Day 11, also your officer ceremony at
+// 17:15). The 37 lines in content/reactions/storm.lines stay as they are.
+? cue:event.ionStorm.warning flag:promoted
+- Storm tomorrow and a ceremony tonight. Busy Thursday, Officer.   #funny
+? cue:event.ionStorm.warning dept:works time:afternoon
+- Board's full of storm jobs. Pick one before Pell takes the easy ones.   #funny

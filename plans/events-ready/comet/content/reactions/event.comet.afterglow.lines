@@ -1,0 +1,9 @@
+@reactions event.comet.afterglow
+// EW1 (events writer), comet viewing: Wednesday Day 17 onward (a crew sketch of it pinned up for a week).
+? cue:event.comet.afterglow
+- Did you see the tail last night? Green all the way along.
+- Half the ship was at the bow windows. Best seat on the ship.
+- Someone pinned a sketch of the comet up in the mess. It's good.   #warm
+- I stayed at the window till it was gone. Worth being tired today.   #warm
+? cue:event.comet.afterglow dept:survey
+- We got two hundred readings off it. Sato wants two hundred more.   #funny

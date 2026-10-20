@@ -1,0 +1,23 @@
+@reactions calledIn
+// EW1 (events writer): people called in on their day off (the user: "They are not working but are called in and there
+// are comments about it"). cue:calledIn@me: the speaker was called in today; cue:calledIn: crew chatter about who was
+// (F0 marks the cast). First the storm's all-clear (Day 14: the Captain, Calder, Sato, Holt), then the Captain on
+// Days 7 (Crossing the Line) and 27 (the Veyli greeting).
+? cue:calledIn@me who:marrow
+- I'm not here, officially. It's my day off. Carry on.   #funny
+- Day off. Here anyway. Don't tell the counsellor.   #funny
+? cue:calledIn@me who:calder
+- I'm off today. I'm also here. Don't make it a thing.
+? cue:calledIn@me who:sato
+- Day off, they said. Nobody misses the end of a storm.
+? cue:calledIn@me who:holt
+- Off duty. Watch doesn't really do off duty. Ask me.   #funny
+? cue:calledIn@me !who:marrow|calder|sato|holt
+- Called in on my day off. I'll take it back later. Somehow.   #funny
+- My day off, apparently. Nobody told the ship.   #funny
+? cue:calledIn !cue:calledIn@me
+- The Captain came in on her day off. Of course she did.
+? cue:calledIn !cue:calledIn@me cue:event.ionStorm.resolution
+- Calder was in at ten on a Sunday. On her day off. Of course.
+- Holt was called in on his day off. He'd have come anyway.
+- Dr. Sato came in early to watch the storm go. She waved at it.   #funny

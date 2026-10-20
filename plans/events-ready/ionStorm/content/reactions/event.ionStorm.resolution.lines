@@ -1,0 +1,5 @@
+@reactions event.ionStorm.resolution
+// EW1 (events writer), the storm update: Sunday Day 14 (the all-clear at 10:00, the booths' rush, the party at 19:00).
+? cue:event.ionStorm.resolution
+- Talent night's moved to next week. Tonight's for the party.
+- The lounge is open again. I'm going to sit in every chair.   #funny

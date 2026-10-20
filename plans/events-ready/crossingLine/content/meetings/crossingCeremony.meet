@@ -1,0 +1,28 @@
+@meeting crossingCeremony
+// EW1 (events writer), Crossing the Line (events plan v3.2), Sunday Day 7, 14:30-15:15, the plaza (about 50).
+// Sunday 14:30-15:15, the plaza, about 50. The Captain reads the old oath; the first-timers stand at the front (you,
+// and the meeting's stand-ins first1, first2: crew on their first crossing). One reply (proud, nervous, joking). Then
+// Brennan's Line punch. Three replies at most. Vance stays with the bridge's own line (he's on duty).
+title: Crossing the Line
+from: Captain Odile Marrow
+gist: You crossed the Line into the Veyli reach. The Captain read the old oath, and you drank Brennan's Line punch. Your certificate is on your shelf.
+== lines
+marrow: Thank you all for coming. I'm off duty, so this is unofficial. Very old, and unofficial.   [gesture]
+marrow: First-timers, step forward. Don't be shy. Everyone here stood where you're standing once.
+first1: Do we have to say anything?
+marrow: Only at the end. I do the hard part. Listen.   [laugh]
+marrow: "We have crossed the Line. We left the near stars behind us, and we did not go alone."
+marrow: "Whatever is out here, we meet it as one crew, and we bring each other home."   [gesture]
+marrow: "From today, this reach knows our names." There. That's the oath. It's older than the ship.
+marrow > you: {me}. A week ago you came up the Tern's ramp. How does it feel?   [listen]
+? choice
+* Proud. I'm really here.   rel:marrow+1 flavour:share mem:line.proud
+  marrow: You are. And now the reach knows it too.   [nod]
+* Honestly? A bit nervous.   rel:marrow+1 flavour:listen mem:line.nervous
+  marrow: Good. Nervous means you're paying attention. Keep it.   [nod]
+* Is this the part with the punch?   rel:marrow+1,brennan+1 flavour:funny mem:line.punch
+  marrow: It is. I'm so sorry.   [laugh]
+brennan: Line punch. One mug each. You drink it all. That's the dunking. No complaints.   [gesture]
+first2: It's... green. Why is it green?
+brennan: Tradition. Drink.   [nod]
+marrow: There. You're Line-crossers now. Supper's at six. Brennan made a cake to take the taste away.   [laugh]

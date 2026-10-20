@@ -1,0 +1,10 @@
+@reactions event.comet.onset
+// EW1 (events writer), comet viewing, Tuesday Day 16 from 21:30 (Tiles night and Knit and natter end at 21:30).
+? cue:event.comet.onset
+- Have you seen it? Go to a window. Any window.
+- I came straight from Tiles. Lost the game. Worth it.   #funny
+- First comet I've seen out here. It's bigger than I thought.
+? cue:event.comet.onset dept:survey
+- Sato's been tracking it for weeks. She'd never say so, but she's thrilled.
+? cue:event.comet.onset rank:senior
+- My cabin has a window. I'm not leaving it tonight.   #funny

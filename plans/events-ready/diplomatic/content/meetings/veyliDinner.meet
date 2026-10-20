@@ -1,0 +1,28 @@
+@meeting veyliDinner
+// EW1 (events writer), the visit (events plan v3.2): new, Sunday Day 28.
+// Sunday, the Captain's quarters (Deck 2): the one formal dinner. Small: the Captain, Vance, Holt, the four Veyli,
+// Envoy Saruth; a Senior Officer (or above) gets a seat, anyone else hears it in chatter and the gist by Mail. Holt and
+// the pilot Ithra clash over who stands where at the door (the game's news line). Your one choice can ease it (the
+// courtesy thread). Three replies at most.
+// FOR EV1: the .meet reader has no thread: key; the first two replies ease the courtesy thread (discourtesy -1), as the
+// game's veyliGreeting choice does today.
+title: The Veyli dinner
+from: Captain Odile Marrow
+gist: The formal dinner in the Captain's quarters. Chief Holt and the pilot Ithra had words about the Watch at the door. The Speaker praised the herbs.
+== lines
+marrow: Please, sit. Chef Brennan has cooked with herbs from our own garden tonight.   [gesture]
+teshavi: Fresh herbs, so far out. That is a courtesy. We notice courtesies.   [nod]
+moleth: Captain, may I ask about your engines? I have a list.
+vance: Of course you do.   [laugh]
+ithra: Chief Holt. Your guard stood inside our door last night. Among us that is rude.
+holt: Among us it's a guard doing their job. I won't apologise for keeping people safe.
+saruth: Both of you are right. That is what makes it difficult.
+marrow > you: {me}. You've been in every corner of this ship. How would you settle it?   [listen]
+? choice
+* Outside the door, where both of you can see them.   rel:marrow+1,holt+1
+  ithra: Outside. Yes. That we can accept.   [nod]
+* Ask the Envoy. They've lived with both of us.   rel:saruth+1
+  saruth: Outside the door, and a knock before every change of watch. Two knocks.   [nod]
+* I'd rather not take sides.   rel:holt+1
+  holt: Fair enough. Neither would I, normally.   [sigh]
+teshavi: Good. Now. Captain, the herbs. Tell me which one this is.   [gesture]

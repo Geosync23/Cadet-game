@@ -1,0 +1,34 @@
+@bank all
+// EW1 (events writer), comet viewing (events plan v3.2: Tuesday Day 16, 21:30-22:30, one day, no score). EV1's keys
+// (see content/banks/event-ionStorm.lines). Mail "Subject | body", unsigned (Dr. Imra Sato's, at 08:00).
+== event.comet.mail.warning
+- A comet tonight | A comet passes us tonight from about 21:30, close enough to see its tail from any window. The observatory will be open for anyone who wants a look through the scope. It's gone by half ten, so don't be late. I've been waiting for this one.
+== event.comet.news.warning
+- There's a comet tonight. Sato says the tail will fill the bow windows.
+- Comet at half nine. Get a window seat early.
+- Sato hasn't stopped smiling since breakfast. It's the comet.   #funny
+== event.comet.status.warning
+- A comet tonight from 21:30. Any window; the observatory's open.
+== event.comet.status.onset
+- The comet is passing. Any window.
+// the two gatherings, 21:30-22:30
+== event.comet.gather.cometLounge.name
+- Comet viewing
+== event.comet.gather.cometLounge.ask
+- Comet tonight at half nine. The bow windows are the place.
+- After the storm, a comet. I'll take it.   #warm
+== event.comet.gather.cometLounge.here
+- Look at the tail on it. All the way across the glass.
+- Quiet, everyone. You'll want to remember this.   #warm
+- It's moving. You can see it move. Look.
+== event.comet.gather.cometLounge.thanks
+- You find a spot at the bow windows as the comet slides past, its tail lit pale green from end to end.   #warm
+== event.comet.gather.cometObservatory.name
+- Comet viewing (observatory)
+== event.comet.gather.cometObservatory.ask
+- Sato's opening the observatory for the comet tonight. Scope and all.
+== event.comet.gather.cometObservatory.here
+- Through the scope you can see the ice boiling off it.
+- One look each, then back of the line. Sato's rules.   #funny
+== event.comet.gather.cometObservatory.thanks
+- You take a turn at the observatory scope. The comet's head is a fizzing ball of ice, and Dr. Sato is grinning.   #warm

@@ -1,0 +1,8 @@
+@reactions event.diplomatic.escalation
+// EW1 (events writer), the Veyli visit (events plan v3.2: Days 26-30).
+? cue:event.diplomatic.escalation
+- Moleth asked me what the blue crate in the bay is. I said ask Calder.   #funny
+- The Veyli eat very slowly. It's a sign of respect, apparently. I'm trying it.   #funny
+- Their pilot and Holt had words. Then they shook hands. Sort of.
+? cue:event.diplomatic.escalation dept:galley
+- The Speaker asked for the herb list. Brennan's never been happier.   #warm

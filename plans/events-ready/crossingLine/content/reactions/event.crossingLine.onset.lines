@@ -1,0 +1,5 @@
+@reactions event.crossingLine.onset
+// EW1 (events writer), Crossing the Line: Sunday afternoon and evening (One week aboard at 17:15 is about your crossing).
+? cue:event.crossingLine.onset
+- A week aboard and a Line crossed. Not a bad first week.   #warm
+- How was the punch? Be honest. I won't tell Brennan.   #funny

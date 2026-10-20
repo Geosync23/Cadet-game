@@ -1,0 +1,7 @@
+@reactions event.diplomatic.afterglow
+// EW1 (events writer), the Veyli visit (events plan v3.2: Days 26-30).
+? cue:event.diplomatic.afterglow
+- Quiet without them. I keep looking for Moleth round corners.
+- Three days. Felt like a month. A good month.   #warm
+? cue:event.diplomatic.afterglow tier>=acquaintance
+- You did well with the Veyli, {nick}. People noticed.   #warm

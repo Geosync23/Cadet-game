@@ -1,0 +1,7 @@
+@reactions event.ionStorm.escalation
+// EW1 (events writer), the storm update: Saturday Day 13 (the surge at 11:20, storm stew, the lantern supper at 18:00).
+? cue:event.ionStorm.escalation time:evening
+- Lantern supper tonight. I've saved you a spot on the bench.   #warm
+? cue:event.ionStorm.escalation dept:works weekday:sat
+- Called in on a Saturday. The board doesn't know what a weekend is.
+- My day off, they said. Then the surge, they said.   #funny

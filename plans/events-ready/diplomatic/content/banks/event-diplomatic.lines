@@ -1,0 +1,39 @@
+@bank all
+// EW1 (events writer), the Veyli visit for its weekend shape (events plan v3.2: Days 22-30, three days aboard). EV1's
+// keys (see content/banks/event-ionStorm.lines). Mail "Subject | body", unsigned (Commander Teo Vance's). Keys not here
+// keep today's words in SHIP_EVENTS.diplomatic (the two addresses, the news lines, VEYLI_RETELL, the debrief); the gift
+// exchange meeting stands as written. The Veyli are they/them (facts.md 4c).
+// Day 22, the memo (Pillar 5's Monday briefing takes it over later)
+== event.diplomatic.mail.memo
+- Next week's business | A Veyli delegation will be aboard from Saturday Day 27 to Monday Day 29. Three things before then: dress uniforms cleaned, guest cabins made up, manners reviewed. Details on Friday.
+// Day 26, the warning (Friday evening, after the Captain's address)
+== event.diplomatic.mail.warning
+- A Veyli delegation | The delegation arrives tomorrow at 10:00 in the shuttle bay: Speaker Teshavi and three others. Dress uniforms for the greeting. The visitors' cabin and the guest cabins on Deck 4 need making up, and the Veyli like it warm: heaters up. Visit jobs are on the Works board tonight and tomorrow morning.
+== event.diplomatic.news.warning
+- They're here tomorrow at ten. I've ironed my uniform twice.   #funny
+- Weekend visit jobs on the board. Works is in on Saturday again.
+== event.diplomatic.status.warning
+- A Veyli delegation arrives tomorrow at 10:00, the shuttle bay.
+== event.diplomatic.status.onset
+- The Veyli delegation is aboard until Monday.
+== event.diplomatic.status.resolution
+- The delegation leaves at 10:00 from the shuttle bay.
+// the greeting line along the shuttle bay, Saturday 10:00
+== event.diplomatic.gather.greetingLine.name
+- The Veyli greeting
+== event.diplomatic.gather.greetingLine.ask
+- The Veyli land at ten. I want a spot at the front of the line.
+- Dress uniform, ten o'clock, shuttle bay. Day off or not.
+== event.diplomatic.gather.greetingLine.here
+- Stand up straight. They notice everything.
+- That's the Speaker, in the middle. Don't stare. Well, a little.
+== event.diplomatic.gather.greetingLine.thanks
+- You take your place in the line along the shuttle bay as the Veyli ship settles on the pad.   #warm
+// Sunday, the dinner: a summary for the ship (Vance, Sunday evening)
+== event.diplomatic.mail.dinner
+- The Veyli dinner | Dinner in the Captain's quarters went late. The Speaker asked for the herb list. Chief Holt and the pilot have agreed where the Watch stands. Carry on.
+// Monday 10:00, the farewell (the moment 'farewell': these join its ask/here)
+== event.diplomatic.gather.farewell.ask
+- Last chance to wave at the Speaker. I'm going.
+== event.diplomatic.gather.farewell.here
+- I'll miss Moleth's questions. Not all of them.   #funny

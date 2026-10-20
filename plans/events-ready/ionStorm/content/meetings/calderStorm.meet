@@ -1,0 +1,25 @@
+@meeting calderStorm
+// EW1 (events writer), the storm update: Calder's briefing, Day 11 at 14:00 in the Works bay (moved from 09:15, after
+// the 13:00 tea). The jobs go up as it ends and your pick is held for you. A junior's version; calderStorm.officer is
+// the Officer's (on track, you're promoted on Day 10). Replaces MEETING_SCRIPTS.calderStorm. tech1, tech2: two Works
+// crew on shift there (its who: 'works:2'). Three replies at most, so the lounge goes to tech2.
+title: Storm briefing
+from: Chief Ines Calder
+gist: Briefing notes: the ion storm reaches us tomorrow about 14:00, and Survey says it's a big one. In order: the lounge glassware and bar, shielded ballasts on the main lamps, battery packs up to the bridge. Storm jobs are on the board now.
+== lines
+calder: Tea's over. Gather round. Two minutes, then the board.   [gesture]
+calder: Survey's tracking an ion storm. Dr. Sato says it reaches us tomorrow at two, and it's a big one.
+tech1: How big is big?   [nod]
+calder: Big enough that the lights flicker for two days and comms go dark. So we get ahead of it.
+calder: Loose fittings secured. Shielded ballasts on the lamps that matter. Battery packs where they're needed.   [gesture]
+tech2: The lounge bar's the worst for loose glass. Last storm we swept it up for a week.
+calder: Then the lounge is yours. Somebody takes battery packs up to the bridge before the front hits.
+calder > you: {me}, this is your first storm. Anything you want to take on?
+? choice
+* I'll take the battery run to the bridge.   rel:calder+2 job:stormBatteries
+  calder: Good. The packs are in main storage. Mind the lift.   [nod]
+* I'll fit the ballasts. Decks 3 and 4.   rel:calder+2 job:stormBallasts
+  calder: Good. Two lamps, two decks. Shielded side faces out.   [nod]
+* (Say nothing)
+  calder: Fine. The board's there when you want it.
+calder: Right. Storm jobs are on the board. Off you go.   [gesture]
