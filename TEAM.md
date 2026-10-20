@@ -142,3 +142,12 @@ When the user approves the Deck 2 plan, the lead does this without waiting for t
 ## Queue
 
 - **Pillar 2:** agreed 2026-10-15 in `plans/pillar2-plan.md`. Half A and B1 start now. (Pillar 1 is done: 0.25.2.) Earlier: **Pillar 1 of the Living Ship:** the plan is agreed in `plans/pillar1-plan.md`. Workstreams 1, 2, 3 and 5 started 2026-10-15 (no cap on parallel sessions). Next check-in with the user: the roster page plus a crowd demo, once 2 and 5 are done.
+
+## Lead 20 (new account, started 2026-10-20) — finishing the rec deck 0.64.0
+Lead: session_019UJSCUCdtC1kTpYiABWKhs, branch `claude/start-here-review-3qoht9`. Briefs from `plans/start-prompts-lead20.md` (on `claude/lead-pillar1`).
+| Seat | Session | Branch | Job |
+|---|---|---|---|
+| Rec engineer RE20 | session_019auXkZkQG3gnNjmArAauLx | `claude/rc-wip` → `claude/rec-cand-s1` | RC's fix, day_check 3-8, item A (Maeve's rides on-shift), item B (career pace), rebase |
+| Build master BM10 | session_01KpcQGJvrAz57dmKp6AFg4w | `claude/rec-cand-s1` | the full 0.64.0 check round, DEV_NOTES row, green hash |
+| Reviewer R8 | session_01GdhqdLeZuGFQSTX7RL92U5 | `claude/reviews-r8` | reviews RE20's hashes |
+After the green hash: the lead has the file read in full and publishes it as a new page "Starship Cadet Rec Deck", then stops and asks the user.
