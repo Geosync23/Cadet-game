@@ -109,3 +109,19 @@ Harness gotcha (new): speech bubbles pop in with a real-time CSS animation (`.bu
 - career_check's spot test is back to 39/40. machine_check's range is 3-7 (6.2 measured).
 - check_fast OK (280 s).
 - 16df5bd adds #31's reason line in the design doc.
+
+## EW1 event lines: claude/events-lines b8c2ee8 (content review for lead 21). PASS WITH FIXES
+
+- **Clean:** no arc spoilers; the Veyli are always they/them; days, rotas and traditions are correct.
+- **Fixes:**
+  - "deck R" in Mail/speech should be "the rec deck" / "rec dec".
+  - The engineer's note in ionStorm:108's gist.
+  - d19:48 (asleep), d19:35 (this week), d12:29 (yesterday), crossingLine:30 ("I'm flying it").
+  - {stormjobs}/{myjobs} plurals.
+  - {me} lines near 90 characters; the banner ionStorm:60 is 91.
+  - New conditions and headers not yet agreed with EV1 (mine.jobs is JS, not a condition).
+- **Judgement calls for the user:**
+  - d19:41 "Chief Calder has plans for you".
+  - d26:47 the surprise after dinner.
+  - Crossing the Line's own cake.
+- The cross-check was done with a helper agent and its key points verified by me. Its `flag:promoted` finding was wrong: the flag exists.
