@@ -51,3 +51,22 @@ DB1 01R4RFu3mPaq4qj1L2TXEoza (working) · DR1 01WfFmjT31bVcy4mvsNVi5Mz (working)
 - Branch heads: patch-a e9d9022 (batch A: #1 #2 #28 done; PP1 reviewing, PB owner-reviewing hooks 47b3dba/6e9e86d; next batch B), patch-b 5baa5b8 (WIP batch D, check_fast pending), patch-e 2e2575d (#25 #21 #6 #24: PP1 PASS WITH FIXES, DR1 PASS; ladder #5 next), devmode 05314b6 (#30 mug behind MUG_ON; PP1 reviewing; #29 next, then DB1 may hand over before #26).
 - Merge plan: BM11 merges each reviewed branch into claude/integration (next 0.64.5), then the full round of checks from Day 1, then publish the patch build as a new page (Dev page can be republished too) and notify.
 - Answered for the user: first big gathering = Day 6 Crossing the Line (plaza ~50) per the events plan; then ion storm all-hands Days 9-11; Founders' Day festival (70+) after the phone test.
+
+## FINAL STATE at handover, ~18:15 UTC (lead 20 memory 56%)
+Lead 21 takes over from here. Read, in order: CLAUDE.md, this note, TEAM.md (bottom = newest), plans/roadmap-after-recdeck.md (incl. the newest section on short Fridays), DEV_NOTES.md.
+
+**Seats now (all `session_...`):**
+- PA 01Jka314UJ2Yto5XxbcQnB8H, claude/patch-a: batch A (#1 #2 #28) done e9d9022, PP1 PASS (pending PA's intro_check part 10 re-run), PB OK'd the section 14 hooks. Now on batch B (#3 #4 #14 #15), then C.
+- PB 01FWW2piuXkFYaRRzLXZiqYb, claude/patch-b: batch D (#7 #9 #10 #8) built; #9 reworked after events_check; checks running; full report pending. Then batch F (#16 #20 #22 #27, repair factor 0.72).
+- PE 01H7weuTSkTfuSAqhxvdx1EK, claude/patch-e: #25 #21 #6 #24 #5 done (ab685bb; PP1 PASS WITH FIXES on first four, fixes in; DR1 PASS on all hooks; PP1 reviewing #5). Now building #26 First Light Cocoa, after merging claude/devmode up to ada4c5c (the mug #30 + cocoa #29; PP1 PASS on #30, #29 under review; DR1 PASS on those hooks). PE now owns the mug code.
+- DB1 01R4RFu3mPaq4qj1L2TXEoza: stopped at its memory line; handover plans/handover-patch-e2.md on claude/devmode. Don't give it more work.
+- PP1 01QfLuMmrJSgMQ3A4tBtXAmf (patch planner + reviewer, ~39%): reviewing #29 and #5; then writing the plan for **short Fridays + weekly Captain's address** (the user: off work 15:30, address 16:00, dinner 17:00 every Friday, first in week one, dialogue explaining it; place not named, lead recommended the plaza). Publish that plan with an answer form (save script as for the other pages: scratchpad pages had it injected before </body> plus savestate paragraphs around form#answers; doc id answers/<plan-name>), notify the user.
+- DR1 01WfFmjT31bVcy4mvsNVi5Mz (owner stand-in reviewer, 47%): handover already written (plans/handover-devmode-reviewer.md on claude/devmode-review-1 56a8027); 1-2 more small reviews, then a fresh owner-reviewer is needed.
+- BM11 01W7NHRM4JjqaNEJQUWNxgcE (build master, ~13%): idle, ready. Next build 0.64.5.
+- Idle/done: TE1, TW1, TR1 (stopped), WW1, PR1, DP1, DR2, EP1, ER1, R8, BM10.
+
+**Merge plan:** each branch goes to BM11 once its reviews pass (PP1 + DR1 for hooks): claude/patch-e (after #26), claude/patch-a (after batch C), claude/patch-b (after F). Then the full round of checks from Day 1, then publish the patch build as a NEW page (game page = integration starship-cadet.html; also republish the Dev page https://claude.ai/artifact/EWB21cTQnXc8ZT71zCeEzf, whose scratch file adds a first-line script forcing #dev) and notify the user with what changed.
+
+**Open with the user:** (1) full team with occasional 5-hour-limit pauses, or 3-4 seats steady? (asked ~16:50, no answer yet); (2) the short-Fridays plan when PP1 finishes.
+**Usage:** at ~16:12 every seat hit the 5-hour limit at once (6-7 seats ~2.5 h). Watch rate_limit_info in get_session; "allowed_warning" means close.
+**Hourly check-in scheduled task:** lead 20's (trig_015zr2FPnqC1CV3XuMfyr35L) is being disabled; lead 21 should create its own.
