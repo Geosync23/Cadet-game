@@ -6,7 +6,7 @@ dk, t0, secs = (int(x) for x in (sys.argv[1:4] if len(sys.argv) > 3 else (4, 400
 g = start('?nosave&debug')
 g.step(5)
 g.ev(f"(() => {{ skipTo({t0}); goToDeck({dk}); return 1; }})()")
-g.secs(1)
+g.ev("window.__skip = true"); g.secs(1)   # no drawing: the crew logic still runs every frame
 seen = {}
 for i in range(int(secs * 2)):
     g.secs(0.5)

@@ -10789,9 +10789,9 @@ SIM_ADVANCE.push((from, to) => { shipDay(Math.floor(to / 1440) + 1); });
 
 // ---- slot: Sim engineer (section 14). New code of this seat's goes here, above the end line (plans/owners.md) ----
 // the walk to a place, in ship minutes, for a plan (#9, the patch): from the decks' own data (the straight line between
-// the tiles, times a detour factor, at the crew's walking pace), never the loaded deck's paths, because a day is planned
+// the tiles, times a detour factor of 1.6 (1.3 left about a quarter short on the deck), at the crew's walking pace), never the loaded deck's paths, because a day is planned
 // for every deck while only one is loaded. WALK_LEAD is take()'s switch (o.lead): the toilets and the basin after them
-const WALK_LEAD = true, WALK_DETOUR = 1.3;
+const WALK_LEAD = true, WALK_DETOUR = 1.6;
 function walkLead(from, pl) {
   if (!from || !pl || !pl.at) return 0;
   const [x, z] = pl.xy || [pl.at[0] + .5, pl.at[1] + .5];

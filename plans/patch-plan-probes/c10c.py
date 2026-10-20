@@ -6,7 +6,7 @@ from pp import *
 g = start('?nosave&debug')
 g.step(5)
 g.ev("(() => { skipTo(1080 + 7); goToDeck(3); player.obj.position.copy(cellPos(20, 13)); target.copy(player.obj.position).setY(.7); return 1; })()")
-g.secs(2)
+g.ev("window.__skip = true"); g.secs(2)   # no drawing: the crew logic still runs every frame
 run = {'tile': {}, 'drawn': {}}; best = {'tile': {}, 'drawn': {}}; walkers = 0
 for i in range(240):
     g.secs(0.5)
