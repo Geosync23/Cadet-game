@@ -13,6 +13,8 @@
 #   move:  Take me to every room on every deck lands you in that room (rooms nobody can walk into are listed, not
 #          failed), the testing spots and your next appointment; the clock doesn't move; refused during the escort and
 #          inside a meeting; Mark here then Back to mark reloads into the same save, byte for byte
+#   slow:  the reload after Undo and Back to mark held back 6 s (a phone on a weak link; DR1's probe): the kept save stays
+#          put while the old page waits, and the new page has it (the Undo happened, its record used up)
 #   card:  in Dev mode the place-and-clock card has the DEV tag and opens the sheet "Dev mode: not your real game"
 # Setup and environment as for cadet_test.py (CADET_WORK, CADET_CHROME).
 # Run:  python3 devmode_check.py BUILD.html          Good is DEVMODE CHECK OK (exit 0); a failure exits 1.
@@ -280,13 +282,55 @@ def part_move(b):
     pg.close(); ctx.close()
     print(f'  move: {n_all} rooms on {len(rooms)} decks, clock unmoved' + (f' (no walking way from the lift: {", ".join(shut)})' if shut else '') + f'; refused in the escort and a meeting; {lad} | {appt}; Mark and Back to mark byte for byte, twice')
 
+def part_slow(b):
+    import threading, http.server, functools, time
+    d = WORK / 'test'; name = '_devmode_slow.html'; (d / name).write_text(TMP.read_text())
+    loads = {'slow': False}
+    class Quiet(http.server.SimpleHTTPRequestHandler):  # the server holds the page back (its own thread, so the old page runs on)
+        def log_message(self, *a): pass
+        def do_GET(self):
+            if loads['slow'] and name in self.path: time.sleep(6)
+            return super().do_GET()
+    srv = http.server.ThreadingHTTPServer(('127.0.0.1', 0), functools.partial(Quiet, directory=str(d)))
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    ctx = b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1)
+    pg = ctx.new_page(); errs = []
+    pg.on('pageerror', lambda e: errs.append(str(e)))
+    pg.route(re.compile(r'.*three\.min\.js'), lambda r: r.fulfill(body=THREE, content_type='application/javascript'))
+    pg.add_init_script(INIT)
+    pg.goto(f'http://127.0.0.1:{srv.server_address[1]}/{name}#dev'); pg.wait_for_function('window.__sc !== undefined', timeout=90000)
+    ev = lambda src: pg.evaluate('s => window.__sc(s)', src)
+    ev('(() => { renderer.render = () => {}; })()'); pg.evaluate('window.__step(10, 33)')
+    ev('(INTRO_BOOT = false, newGameStart(false), introSkip(), saveGame(), 0)')
+    def held(src, want_save):
+        loads['slow'] = True                               # the old page notes, at 4.6 s, its Dev save and message (sessionStorage outlives the reload)
+        pg.evaluate('s => { setTimeout(() => sessionStorage.setItem("probe", JSON.stringify([localStorage.getItem("starship-cadet-save-dev"), window.__sc("DM_UI.msg")])), 4600); window.__sc(s); }', src)
+        pg.wait_for_function('window.__sc !== undefined && performance.getEntriesByType("navigation")[0].type === "reload"', timeout=90000, polling=250)
+        loads['slow'] = False
+        first = pg.evaluate('() => localStorage.getItem("starship-cadet-save-dev")')
+        mid, msg = json.loads(pg.evaluate('() => sessionStorage.getItem("probe") || "[null, \\"(no note: reloaded before 4.6 s)\\"]"'))
+        pg.evaluate('() => sessionStorage.removeItem("probe")')
+        ev('(() => { renderer.render = () => {}; })()'); pg.evaluate('window.__step(10, 33)')
+        return mid, msg, first
+    before = ev('clockText()'); s0 = pg.evaluate('() => localStorage.getItem("starship-cadet-save-dev")')
+    ev("devmodeRun('Clock: +3 hours', () => devmodeSkipTo(shipNow() + 180))")
+    mid, msg, _ = held('devmodeUndo()', s0)
+    check(mid == s0 and 'still reloading' in msg, f'slow: during a slow reload the kept save didn\'t stay put ({msg})')
+    check(ev('clockText()') == before and not ev('devmodeRead(DM_KEY.undo)'), f'slow: after a slow reload the Undo didn\'t happen ({ev("clockText()")}, not {before}) or its record is still there')
+    ev('devmodeMark()'); mark = ev('devmodeRead(DM_KEY.mark)'); ev("devmodeRun('Clock: +1 day', () => devmodeSkipTo(shipNow() + 1440))")
+    mid, msg, first = held('devmodeBack()', mark['save'])
+    check(mid == mark['save'] and first == mark['save'], f'slow: Back to mark: the marked save didn\'t stay put through a slow reload ({msg})')
+    check(not errs, f'slow: errors {errs[:3]}')
+    ctx.close(); srv.shutdown()
+    print(f'  slow: Undo and Back to mark with the reload held back 6 s: the kept save stayed put; the Undo happened and was used up')
+
 with sync_playwright() as pw:
     b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
     ctx = b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1)
     for name, part in (('off', part_off), ('real', part_real), ('card', part_card), ('store', part_store)):
         try: part(ctx)
         except Exception as e: fail(f'{name}: stopped: {str(e)[:300]}')
-    for name, part in (('clock', part_clock), ('move', part_move)):
+    for name, part in (('clock', part_clock), ('move', part_move), ('slow', part_slow)):
         try: part(b)
         except Exception as e: fail(f'{name}: stopped: {str(e)[:300]}')
     b.close()

@@ -49827,6 +49827,7 @@ function devmodeBuild() {                                // the card's tag and t
   }
   document.body.appendChild(el);
   document.body.classList.add('devmode');
+  try { if (sessionStorage.getItem(DM_KEY.undo)) { sessionStorage.removeItem(DM_KEY.undo); localStorage.removeItem(DM_KEY.undo); } } catch (e) { /* kept */ }   // an Undo just used (devmodeUndo)
 }
 function devmodeOpen(on) {
   if (!DEVMODE || !DM_UI.el) return;
@@ -49872,7 +49873,6 @@ addEventListener('hashchange', () => {
   bar.lastChild.onclick = () => location.reload();
   document.body.appendChild(bar);
 });
-if (DEVMODE) { devmodeCss(); devmodeBuild(); devmodeState(); }
 // ---- slot: Dev mode engineer (section 25). New code of this seat's goes here, above the end line (plans/owners.md) ----
 // ---- D2: storage, Undo, Copy my real game, Clear, and every Dev action frozen and settled ----
 // Dev mode keeps three things: its save (SAVE_KEY, with INTRO_KEY), one Mark and one Undo (DM_KEY: { label, at, save,
@@ -49902,9 +49902,9 @@ function devmodeCopy(label) {                             // the Dev game as it 
   return JSON.stringify({ label, at: clockText(), save: localStorage.getItem(SAVE_KEY), arrived: localStorage.getItem(INTRO_KEY) });
 }
 function devmodeKeep(label) { return devmodeWrite(DM_KEY.undo, devmodeCopy(label)); }   // the Undo, before a Dev action: null, or why not
-function devmodeReload(why) {                             // reload; if the browser hasn't after 4 s, carry on as you were and say so
-  devmodeSay(why + ': reloading…'); location.reload();
-  setTimeout(() => { DM_HOLD = false; saveGame(); devmodeSay('The page didn\'t reload, so ' + why + ' didn\'t happen. Try again.'); }, 4000);
+function devmodeReload(why) {                             // reload. The hold stays on however long it takes (DR1: a slow reload on a
+  devmodeSay(why + ': reloading…'); location.reload();     // phone keeps this page running, and letting go would save over the kept save)
+  setTimeout(() => devmodeSay(why + ': still reloading. If the page doesn\'t come back, reload it yourself: nothing is lost.'), 4000);
 }
 // (no space check here on purpose: the kept save replaces one of about the same size)
 function devmodeLoad(rec, why) {                          // reload into a kept record (Undo, Back to mark, Copy my real game)
@@ -49955,7 +49955,7 @@ function devmodeTwice(b, ask, fn) {
 function devmodeUndo() {
   const u = devmodeRead(DM_KEY.undo); if (!u) return devmodeSay('Nothing to undo yet.');
   const why = devmodeBusy(); if (why) return devmodeSay(why);
-  try { localStorage.removeItem(DM_KEY.undo); } catch (e) { /* the reload brings it back as it was */ }
+  try { sessionStorage.setItem(DM_KEY.undo, '1'); } catch (e) { /* then it stays: a second Undo is harmless */ }   // the Undo is used: the new page drops it (devmodeBuild)
   devmodeLoad(u, 'Undo (' + u.label + ')');
 }
 function devmodeCopyReal() {                              // your real game into the Dev save: read, never written
@@ -50127,6 +50127,7 @@ function devmodeQuick(body) {
     ['Clear Dev save', b => devmodeTwice(b, 'Tap again to clear', devmodeClear)]]);
   if (u) devmodeText(body, 'Undo goes back to before: ' + u.label + ' (' + u.at + ').');
 }
+if (DEVMODE) { devmodeCss(); devmodeBuild(); devmodeState(); }   // last, once every Dev mode name above exists
 // ---- end of slot: Dev mode engineer ----
 
 // =====================================================================
