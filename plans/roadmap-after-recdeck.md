@@ -40,3 +40,19 @@ Plan page: https://claude.ai/artifact/9v7C1oRCJUUTGkAujsAoUt (claude/split-plan 
 - Owners: small edits in another seat's piece are fine, the owner reviews before merge; changes to a shared function's inputs or a shared table's shape go to the owner first.
 - GitHub Releases tag: skip; the frozen branch + archive copy keep the whole file.
 - Public or private: open, the user's call (the plan covers both).
+
+## The user's playtest patch and next steps (2026-10-20, from the user's playtest of 0.64.2)
+New order after Dev mode (the user): **Dev mode → playtest patch → "Talk a while" dialogue pack → the first ship event** (the ion storm's deeper fixes can come later). Where Pillar 5 steps 5-6 go: to confirm with the user.
+
+**Playtest patch (after Dev mode):**
+1. **Day 2, "Your first solo job":** the meeting never started when the user walked into the Chief's office; Calder wasn't there, a red-haired crew member was. Fix so Calder is in her office for it and the meeting starts reliably on arrival. No cutscenes, but the conversation may auto-play, and the player may auto-sit.
+2. **Naming:** everything about it says "first solo job" (e.g. the Schedule/heads-up title "The Chief's office: your first job" → "…your first solo job"; Mail, Tracked, Settling-in, lines).
+3. **Welcome tour / intro to the Chief:** Calder is there but doesn't walk up to you. She should.
+4. **Zeke's line after the dinner with the Chief** ("the evening's ours" or similar) should be a speech bubble over Zeke, not the green text at the bottom of the screen.
+5. **Maintenance access:** no more tiered (rank-based) access to maintenance areas like the ladder. And the ladder must work: tap it and a panel like the lift's comes up, with up/down and which deck is which.
+6. **Clocking in/out:** it's too easy to clock in and out by accident; add a way to undo a clock-out (and clock-in) right after punching.
+
+**"Talk a while" dialogue pack (after the patch):**
+- First rule: **no repeats** — once a conversation fires, it's done for that save.
+- A **shared pool** any character can draw from (unless it really doesn't fit them), plus **a few of their own** per character.
+- Shorter talks are fine, but **keep the question** (your three replies and their answer).
