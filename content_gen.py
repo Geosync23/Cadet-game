@@ -766,7 +766,11 @@ def splice(html, name, body):
 def main(argv):
     check = '--check' in argv
     args = [a for a in argv if not a.startswith('--')]
-    game = args[0] if args else os.path.join(ROOT, 'starship-cadet.html')
+    piece = os.path.join(ROOT, 'pieces', 'content', 's22-words.gen.js')
+    game = args[0] if args else (piece if os.path.exists(piece) else os.path.join(ROOT, 'starship-cadet.html'))
+    if not check and os.path.exists(piece) and os.path.basename(game) == 'starship-cadet.html':
+        print('content_gen: the words live in pieces/content/s22-words.gen.js now; run python3 content_gen.py (no file), then python3 build.py')
+        return 2
     try:
         out = bake()
         with open(game, encoding='utf-8') as f:

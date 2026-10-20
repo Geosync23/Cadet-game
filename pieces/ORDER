@@ -1,0 +1,47 @@
+# The game's pieces, in glue order. build.py joins them into starship-cadet.html; split.py cuts that file back into them.
+# Order is part of the game (load order, and the R() sequence): never move a line without a full check run.
+# Each line: PIECE  PICK  BACK  MARKER
+#   MARKER: a regular expression for one line of the game file; the piece starts BACK lines before that line
+#           (1 = at the ==== banner above a "// 19. DEVICE" title; -1 = the line after the marker).
+#   PICK:   once = the marker must be found exactly once; first / last = take the first / last of several.
+# The first piece has no marker (it starts the file). A section heading named here is load-bearing: rename it here too.
+page/head.html
+page/css.css                     once   -1  ^<style>$
+page/body.html                   once    0  ^</style>$
+js/s01-setup-materials.js        first  -1  ^\(\(\) => \{$
+js/s04-deck-kit.js               once    1  ^// 4\. DECK:\s
+js/s04c-deck-build.js            once    1  ^// 4c\.\s
+js/s04d-utility-kit.js           once    1  ^// 4d\.\s
+js/s04d-deck4-quarters.js        once    1  ^// DECK 4: QUARTERS
+js/s04d-deck5-operations.js      once    1  ^// DECK 5: OPERATIONS
+js/s04d-deck3-commons.js         once    1  ^// DECK 3: COMMONS
+js/s04d-deck2-command.js         once    1  ^// DECK 2: COMMAND
+js/s04d-deck6-engineering.js     once    1  ^// DECK 6: ENGINEERING
+js/s04d-deck1-bridge.js          once    1  ^// DECK 1: BRIDGE
+js/s04d-places-all-decks.js      once    0  ^// ---- Big gatherings\s
+js/s04e-rec-deck.js              once    1  ^// 4e\.\s
+js/s05-lighting.js               once    1  ^// 5\. LIGHTING
+js/s13-time-save.js              once    1  ^// 13\. SHIP TIME
+js/s14-schedules.js              once    1  ^// 14\. SCHEDULES
+js/s19-device.js                 once    1  ^// 19\. DEVICE
+js/s15-player-needs.js           once    1  ^// 15\. PLAYER NEEDS
+js/s15b-interactions.js          once    1  ^// 15b\.\s
+js/s15r-rec-activities.js        once    1  ^// 15r\.\s
+js/s16-galley.js                 once    1  ^// 16\. GALLEY
+js/s17-machines-jobs.js          once    1  ^// 17\. MACHINES
+js/s22-lines-engine-1.js         once    1  ^// 22\. LINES
+content/s22-words.gen.js         once    0  ^// ---- BEGIN LINES\s
+js/s22-lines-engine-2.js         once   -1  ^// ---- END TRADITIONS ----$
+js/s18-events.js                 once    1  ^// 18\. SHIP EVENTS
+js/s20-social.js                 once    1  ^// 20\. SOCIAL
+js/s21-arrival-clothes.js        once    1  ^// 21\. ARRIVAL
+js/s23-tiles-lightdisc.js        once    1  ^// 23\. TILES
+js/s24-work.js                   once    1  ^// 24\. WORK
+js/s24k-cases.js                 once    1  ^// 24k\.\s
+js/s06-camera-grid.js            once    1  ^// 6\. CAMERA
+js/s08-characters-crowd.js       once    1  ^// 8\. CHARACTER KIT
+js/s09-crew-data.js              once    1  ^// 9\. CREW DATA
+js/s10-walkers.js                once    1  ^// 10\. WALKERS
+js/s08c-rec-moves.js             once    1  ^// 8c\.\s
+js/s11-ui-main-loop.js           once    1  ^// 11\. INTERACTION
+page/tail.html                   last    0  ^\}\)\(\);$

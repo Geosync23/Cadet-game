@@ -1,0 +1,48 @@
+</style>
+</head>
+<body>
+<div id="bg"></div>
+<div class="hud">
+  <div class="room" id="room">Bunk 1</div>
+  <div class="sub" id="deck">Deck 4, CSV Wren</div>
+  <div class="clock" id="clock">Day 1, Monday 06:00</div>
+</div>
+<div class="controls">
+  <button id="pauseBtn" aria-pressed="false" aria-label="Pause the game"><svg viewBox="0 0 24 24"><path d="M9 5v14"/><path d="M15 5v14"/></svg><span>Pause</span></button>
+  <button id="rot" aria-label="Rotate view"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v5h-5"/></svg>Rotate</button>
+  <button id="shad" aria-pressed="true" aria-label="Turn shadows off"><svg viewBox="0 0 24 24"><circle cx="9" cy="10" r="5"/><path d="M13 19c3 0 7-1 8-3"/></svg><span>Shadows</span></button>
+  <button id="walls" aria-label="Walls: auto. Tap for all walls down"><svg viewBox="0 0 24 24"><path d="M3 20h18"/><path d="M5 20v-6h5v6"/><path d="M14 20V8h5v12"/></svg><span>Walls</span></button>
+  <button id="crew" aria-pressed="true" aria-label="Show or hide visiting crew"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c.8-3.6 3.2-5.5 6-5.5s5.2 1.9 6 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M16.5 14.6c2.4.2 4 1.9 4.5 4.6"/></svg><span>Crew</span></button>
+  <button id="light" aria-label="Switch to night lighting"><svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg><span>Night</span></button>
+  <button id="newgame" aria-label="New game: tap twice to start again"><svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>New game</span></button>
+</div>
+<div class="toast" id="toast"><b id="tt"></b><span id="tx"></span></div>
+<div class="lift" id="lift" role="dialog" aria-modal="true" aria-labelledby="liftT" hidden>
+  <h2 id="liftT">Main lift</h2><p>Choose a deck. Deck 1 is at the top of the ship.</p>
+  <div class="decks" id="liftList"></div>
+  <button class="stay" id="liftStay">Stay here</button>
+</div>
+<div class="lift" id="sleepAsk" role="dialog" aria-labelledby="sleepT" hidden>
+  <h2 id="sleepT">Alarm</h2><p id="sleepX">Your bunk. When should your alarm wake you?</p>
+  <div class="alarm"><button class="deckbtn" id="alarmDn" aria-label="Earlier">&minus;</button><b id="alarmT" aria-live="polite">Wake at 06:00</b><button class="deckbtn" id="alarmUp" aria-label="Later">+</button></div>
+  <p id="alarmE"></p><p id="alarmW" hidden></p>
+  <div class="decks"><button class="deckbtn" id="sleepYes">Set alarm</button></div>
+  <button class="stay" id="sleepNo">Not yet</button>
+</div>
+<button class="devbtn" id="devBtn" aria-label="Your device: the time and your needs"><svg viewBox="0 0 24 24"><rect x="6" y="3" width="12" height="18" rx="2.5"/><path d="M10 17.5h4"/></svg><span>Device</span><b id="devMail" hidden></b></button>
+<button class="trkbtn" id="trkBtn" aria-label="Tracked: what's on and coming up, and where to go" aria-haspopup="dialog"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="2.5"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3"/></svg><span>Tracked</span></button>
+<div class="lift" id="trkPanel" role="dialog" aria-labelledby="trkT" hidden>
+  <h2 id="trkT">Tracked</h2><p>Tap one to follow the arrow there. Tap it again to stop.</p>
+  <div id="trkList"></div>
+  <button class="stay" id="trkClose">Close</button>
+</div>
+<div class="device" id="device" role="dialog" aria-labelledby="devT" data-ph="cyan" hidden>
+  <div class="bez" id="devBez"><span class="led" id="devLed" title="New mail"></span><span>CSV WREN · CREW PDA</span><span class="grip"></span></div>
+  <div class="crt"><div class="devhead"><h2 id="devT">Your device</h2></div><div id="devBody"></div></div>
+  <div class="keys"><button id="devBack" aria-label="Back">Back</button><button id="devHome" aria-label="Home screen">Home</button><button id="devClose" aria-label="Close your device">Close</button></div>
+</div>
+<div id="fade"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(() => {

@@ -1320,7 +1320,9 @@ if __name__ == '__main__':
              '// crew rotation days (Sundays): `out` crew leave (the sim picks who, 10 days ahead) and the reserve ids in `in` arrive\n'
              'const ROSTER_ROTATIONS = ' + json.dumps(rotations, ensure_ascii=False, separators=(', ', ': ')) + ';\n'
              '// ---- END ROSTER ----\n')
-    game = os.path.join(here, '..', 'starship-cadet.html'); g = open(game).read()
+    game = os.path.join(here, '..', 'pieces', 'js', 's09-crew-data.js')   # the crew data piece; then python3 build.py
+    if not os.path.exists(game): game = os.path.join(here, '..', 'starship-cadet.html')
+    g = open(game).read()
     a = g.index('// ---- BEGIN ROSTER'); b = g.index('// ---- END ROSTER ----\n') + len('// ---- END ROSTER ----\n')
     open(game, 'w').write(g[:a] + block + g[b:])
     open(os.path.join(here, 'crew-roster.html'), 'w').write(page(entries, visits, reserve_pool, rotations))
