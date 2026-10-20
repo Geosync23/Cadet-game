@@ -160,7 +160,7 @@ with sync_playwright() as pw:
         print('recorded message: open after 1 s', m1, '| after the lift', m2)
         if m1 != 'home:msg:gran' or m2 != 'home:msg:gran': bad.append('message')
         print('BOOTH CHECK OK' if not bad else 'BOOTH CHECK: ' + ', '.join(bad) + ' (the picker closed, or the call never ended with Mum\'s beat 1)')
-        sys.exit(0)
+        sys.exit(1 if bad else 0)   # so a failing check fails for the computer too (check_fast.sh, GitHub; R8)
     g = ct.Game(pw, sys.argv[1]); g.step(3)
     if MODE == 'calls':
         r = g.ev(CALLS); g.close()
@@ -173,7 +173,7 @@ with sync_playwright() as pw:
         bad = [k for k, v in r['solo'].items() if v['end'] != 6 or v['failed']] + [k + ' in turn' for k, v in r['beats'].items() if v != 6] + [k + ' has more news scenes than HOME_NEWS_MAX' for k, v in r['news'].items() if v > r['newsMax']]
         print('errors', g.errors[:5])
         print('CALLS CHECK OK' if not bad and not g.errors and not any(r['unheard'].values()) else 'CALLS CHECK: ' + (', '.join(bad) or 'scenes never heard'))
-        sys.exit(0)
+        sys.exit(0 if (not bad and not g.errors and not any(r['unheard'].values())) else 1)   # (R8)
     r = g.page.evaluate('([s, a]) => window.__sc("(" + s + ")(" + JSON.stringify(a) + ")")', [JS, [DAYS, MODE]])
     g.close()
     print('Finished:', ', '.join(f"{k} {v}/{r['last'][k]}" for k, v in r['done'].items()))
