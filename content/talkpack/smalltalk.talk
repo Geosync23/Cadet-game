@@ -1,0 +1,37 @@
+@talks smalltalk
+// TW1, the Talk a while pack: when someone's own talks and the pool are both used up. No question, no buttons:
+// three or four lines from == small over the 15 minutes (these may repeat, unlike talks). About one talk in four
+// opens with a line from == done, never twice running with the same person. Anyone may say them, guests included,
+// so no "my bunk", no "my shift": neutral and light. Voice tokens are fine here.
+
+== small
+- Nice to just sit a minute, isn't it?
+- The ship's quiet tonight. I like her quiet.
+- I think the mess is doing something with onions later. I can smell hope.   #funny
+- Busy day? You don't have to tell me. I can see it.
+- Funny how fast a week goes out here.
+- I keep meaning to go to the observatory more. Next week. I say that every week.   #funny
+- Did you get dinner? Good. Just checking.
+- That lamp's been flickering. Someone's on it, I expect. Someone always is.
+- I like this spot. You can see who's coming and going.
+- Do you hear that? The hum's changed. Probably nothing. Works will know.
+- I'm not even tired. I'm just sitting. Sitting's lovely.   #funny
+- It's good, this. Not talking about anything. Just talking.   #warm
+- Someone's whistling down the corridor. Badly. Wonderfully.   #funny
+- The tea's better than usual today. Don't tell anyone, they'll all want some.   #funny
+- I lost track of the day again. Is it nearly the weekend? It's always nearly something.   #funny
+- You seem settled these days. Good. That's good to see.   #warm
+- I could stay here all evening. Shame about bedtime.   #funny
+- Quiet company's the best kind, I reckon.   #warm
+- The garden smells of rain again. I went in just to breathe.
+- I keep saying I'll learn Tiles properly. Then I watch a real game.   #funny
+- Mm. Where was I? Doesn't matter.
+- Good to see you. That's all. No news. Just good.   #warm
+
+== done
+- We've talked about everything, haven't we? I don't mind. It's nice just sitting.   #warm
+- I think we've run out of things to say. Good. Means we've said them.   #warm
+- We've covered the lot, you and me. Now we just get to sit.   #warm
+- I've told you all my stories. You'll have to make me some new ones.   #funny
+- Nothing left to tell you. Funny. It still feels like a good chat.   #warm
+- Talked ourselves out, haven't we? Best kind of quiet, this.   #warm

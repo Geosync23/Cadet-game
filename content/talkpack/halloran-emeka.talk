@@ -1,0 +1,55 @@
+@talks halloran-emeka
+// TW1, the Talk a while pack: Emeka Halloran's own talks (he/him). Works systems officer; warm and unhurried; laughs
+// before the punchline; "lovely"; asks if you've eaten; a terrible joke every breakfast (never at anyone's expense).
+// Never says no (his thread); not the mug-giving itself (that's the Day 5 meeting).
+
+== joke
+topic: day
+them: Want this morning's joke? You've no choice, really. Here it is.
+them: What do you call a spanner that tells jokes? A wrench-ed comedian. Ha! I know. I know.   #funny
+ask: Go on. Have you got one? Everyone's got one.
+listen: Where do you find them?
+  them: I make them up in the lift. That's why they're so bad. It's a short lift.   #funny
+share: One from home. It's worse than yours.
+  them: Lovely! Nothing's worse than mine. Tell it at breakfast. I'll laugh first.   #warm
+cheer: That was my joke. You stole it.
+  them: Ha! Then we're both guilty. Lovely. Partners in crime.   #funny
+
+== oven-visa
+topic: food
+when: tier>=acquaintance
+them: Brennan let me bake on my rest day. One oven. Supervised. I need a visa for that galley.   #funny
+them: Scones, this week. She took one bite and said "Hm." I've been floating since.
+ask: Have you eaten? Properly, I mean. Not a biscuit standing up.
+listen: Is "Hm." good, from Brennan?
+  them: From Brennan, "Hm." is a medal. "Lovely" is the cup. I'll get there.   #funny
+share: Not properly. It's been busy.
+  them: Ah, no. Grab shelf, then. Go on. I'll walk you. Lovely.   #warm
+cheer: A biscuit, standing up. Twice.
+  them: Ha! That's two biscuits. Close enough to lunch. Have a scone as well.   #funny
+
+== mug-rack
+topic: work
+when: tier>=colleague aboard>=5
+them: Every mug at the tea corner has a hook. I keep the rack. Somebody has to.
+them: The end hook's yours. Always will be. That's how it works. Well. That's how I work it.   #warm
+ask: Is there a little job you do that nobody asked you to?
+listen: Why do you keep the rack?
+  them: Someone kept it when I was new. Never said a word. I just found my mug there.   #warm
+share: Wiping down the bench after.
+  them: Lovely. That's the Works way. Nobody notices. Everybody's glad.
+cheer: Eating the last biscuit. For the team.
+  them: Ha! The sacrifice. We all thank you. Quietly.   #funny
+
+== no
+topic: plans
+when: tier>=friend
+them: Can I tell you a funny thing? I've never said no to anyone aboard. Not once.
+them: Tea rota, a shift swap, an oven. Yes, yes, yes. I'm a bit tired, honestly. Ha.
+ask: Do you find it easy to say no?
+listen: What would you say no to, first?
+  them: The tea rota. Two years, every week. I'd love one week off it. Ha.
+share: Not really. I'm learning.
+  them: Then we'll learn together. You say one, I'll say one. Deal?   #warm
+cheer: No. See? Easy.
+  them: Ha! Show-off. Lovely. I'll practise on you.   #funny

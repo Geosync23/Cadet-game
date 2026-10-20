@@ -1,0 +1,55 @@
+@talks sato
+// TW1, the Talk a while pack: Dr. Imra Sato's own talks (she/her). Fast, clever bursts; starts in the middle; drifts
+// mid-thought; explains the tea at length; "No." is a sentence; forgets names, remembers sample numbers. Never that
+// the survey she's proudest of was luck (until close); never admits the third comet matters.
+
+== the-tea
+topic: food
+them: No, the other tea. The good one. Smoked leaf, dried kelp, a pinch of pepper.
+them: Nobody else drinks it. I offer it to everyone. It's a test. Mostly of them.   #funny
+ask: Will you try it? Honestly. I'll know if you're being polite.
+listen: Why kelp, of all things?
+  them: Salt, body, and it reminds me of a shore I've never been to. Interesting, no?
+share: Go on. One sip.
+  them: Good. Brave. Your face is doing something very honest. Write that down. No, I will.   #funny
+cheer: Only if I can add a biscuit.
+  them: No. Well. Yes, fine. Mori does that too. Mori's wrong. Have a biscuit.   #funny
+
+== comets
+topic: work
+when: tier>=acquaintance
+them: Three comets named. Two of them count. The third one doesn't count.
+them: Why not? Because it was small. And late. And. Never mind. It doesn't count.   #funny
+ask: What would you name a comet, if you found one?
+listen: Why doesn't the third count?
+  them: It. Hm. It just doesn't. Next question. Better question.   #funny
+share: After someone at home.
+  them: Good. That's what most people do. That's what I. Never mind. Good choice.
+cheer: Gerald. Obviously.
+  them: Ha! The cactus lobby would be thrilled. I'd allow it. Probably.   #funny
+
+== labels
+topic: crew
+when: tier>=colleague
+them: Someone labelled a sample in my store in their own handwriting. Not mine.
+them: I've re-labelled it. And the twelve beside it. Mori runs the labs. I run the labels.   #funny
+ask: Is there something you're particular about? Very particular?
+listen: Does Mori mind?
+  them: Mori runs the labs while I run everyone. It works. Don't tell Mori I said "runs".   #funny
+share: My toolbelt. Everything in its place.
+  them: Good. Order is how you notice the odd thing. The odd thing is the science.
+cheer: My place in the dinner queue.
+  them: Sensible. Queues are data. I've a chart somewhere. I'll find it. I won't.   #funny
+
+== frontier
+topic: plans
+when: tier>=friend
+them: I turned down a university post to come out here. Everyone said I was mad.
+them: Some days I still think they were right. Then I look out of the observatory.   #warm
+ask: What made you choose this, out of everything?
+listen: Do you ever regret it?
+  them: No. Not yet. I say "yet" about most things. It keeps me honest.
+share: I wanted to see what's out there.
+  them: Good. Same. Now you're in it. Keep looking. Don't stop looking.   #warm
+cheer: The tea, clearly. Yours, specifically.
+  them: Liar. Kind liar. I'll make you a cup anyway.   #funny

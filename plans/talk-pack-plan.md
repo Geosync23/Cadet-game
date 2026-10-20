@@ -19,10 +19,27 @@ game and `content_gen.py --check` are unchanged until the engineer bakes them.
 | File | What | Talks | Lines |
 | --- | --- | --- | --- |
 | `content/talkpack/pool-<topic>.talk` (10 files) | the shared pool, 10 talks on each of the ten topics | 100 | 900 |
-| `content/talkpack/<crewId>.talk` (15 files) | each named character's own talks | (see below) | |
-| `content/talkpack/smalltalk.talk` | small talk with no question, and the "talked about everything" lines | | |
+| `content/talkpack/<crewId>.talk` (15 files) | each named character's own talks, 4 each | 60 | 540 |
+| `content/talkpack/smalltalk.talk` | `== small` (22 lines, no question) and `== done` (6 "talked about everything" lines) | | 28 |
+| **Total** | | **160** | **1,468** |
 
-A **line** here is one card line, one button text or one answer (a talk is about nine).
+A **line** here is one card line, one button text or one answer (a talk is nine: 2 `them:`, the ask, 3 replies, 3
+answers). Pool tiers: 29 talks at any tier (strangers too), 39 from acquaintance, 20 from colleague, 12 from friend.
+
+### Who has their own talks, and why (15)
+
+| Crew | Why |
+| --- | --- |
+| Torres, Calder, Tomas, Pell, Rina, Brennan, Vance, Marrow, Holt, Kovac | the ten story crew (the voices the user approved, with arcs); every one's talks keep clear of beats not yet told |
+| Envoy Saruth | the guest who lives aboard: doesn't draw the pool (it's crew life), so needs their own; no-contractions voice |
+| Kofi Mensah | Holt's deputy and the night Watch; a strong, warm voice the player meets on rounds |
+| Dr. Nandakumar | Rina's chief and the infirmary; "drink some water"; the player sees her from Day 2 |
+| Dr. Sato | Head of Survey, a distinct voice (the tea, the comets); a named "story crew" in the design doc |
+| Emeka Halloran | the Works officer the player works beside daily (the mug, the joke at breakfast) |
+
+Each set is four talks on four different topics, laddered: one at any tier or acquaintance, one acquaintance or
+colleague, one colleague, one friend. Arc-gated: `rina.gran` waits for `beat:rina.4`, `holt.saruth` for `beat:holt.2`;
+`halloran-emeka.mug-rack` for `aboard>=5` (after the Day 5 mug). The file comments name what each must never say.
 
 ## The file format (`.talk`)
 
@@ -116,7 +133,20 @@ then end.
 - **lines_check:** the same rules as `.lines` (lengths, banned words, British spelling, names, `#serious` earned), plus
   the shape (1-3 `them:`, one `ask:`, three replies each with an answer, replies 44 characters and no tokens), unique
   ids across the pack, and the two new condition words. TW1 checked the pack with a scratch script that does exactly
-  that (all clean); it's in the handover note if you want it.
+  that (all clean); the notes below list what it checked.
 - **The +2 for the matching reply** works as today (`needs:` on the voice card). Answers are written so any reply is
   welcome.
 - **Save:** the set of fired ids. Small talk doesn't fire.
+
+## Notes for the engineer and the next writer
+
+- **A talk's pool is "fired per save":** with ~100 pool talks, the friend-tier ones (12) arrive late in a save, by
+  design. If the playtest shows the pool running dry too soon, the next writer adds more (ids never reused).
+- **Placeholders that may not fill:** `{friend}` (crew topic, 4 talks), `{boss}` (`pool.work.well-done`, skipped for
+  the Captain), `{trad}` (`pool.tradition.coming`), `{dish}`, `{hobby}`, `{home}`. Skip the whole talk if one won't fill.
+- **`!who:`** is used a lot: a pool talk that mentions a named crew member skips that person (and the people a shared
+  quirk belongs to, e.g. the four lost-property keepers). Keep doing this when adding talks.
+- **Smalltalk** is said by anyone, guests included, so it's neutral; it's the only part of the pack that repeats.
+- **Checked:** every file passes a scratch checker with lines_check's own lists (lengths, banned words, US spellings,
+  one "!" a line, the talk shape, unique ids, known condition words). `content_gen.py --check` is unchanged and
+  `lines_check.py` passes, because neither reads `.talk` yet.
