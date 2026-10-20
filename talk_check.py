@@ -14,7 +14,8 @@ import sys, json, os
 exec(open(__file__.replace('talk_check.py', 'cadet_test.py')).read().split("a, shots = run(")[0])
 from playwright.sync_api import sync_playwright
 
-SAVE_MAX = 9000          # the whole pack fired, every crew member's small talk noted (bytes of save.talks)
+SAVE_PER = 48            # bytes a fired talk takes in save.talks (an id, its day and crew id); the cap is the whole pack fired
+SAVE_SMALL = 2500        # every crew member's small talk noted
 ok = True
 def fail(msg):
     global ok
@@ -33,7 +34,8 @@ HELP = r"""(() => {
     whenOk: (tk, p, t) => !tk.when || linesOk(tk.when, p, { t, trad: talkPackTrad(t) || undefined }),
     // what's ready for p at t, before the pick: own talks and pool talks unfired, passing when: and filling
     ready: (p, t) => { const T = SHIP.talks, ok = tk => !T.fired[tk.id] && __TC.whenOk(tk, p, t) && !!__TC.filled(tk, p, t);
-      return { own: (TALKS.own[p.id] || []).filter(ok).map(tk => tk.id), pool: p.rank === 'guest' ? [] : TALKS.pool.filter(ok).map(tk => tk.id) }; },
+      return { own: (TALKS.own[p.id] || []).filter(ok).map(tk => tk.id), pool: p.rank === 'guest' ? [] : TALKS.pool.filter(ok).map(tk => tk.id),
+        work: TALK_SOURCES.find(s => s.id === 'work').talks(p).filter(ok).map(tk => tk.id) }; },
   };
 })()"""
 
@@ -54,6 +56,7 @@ RUN = r"""(({ days, min, tier, check, start }) => {
         if (a.src === 'pool' && p.rank === 'guest') bad.push(`${p.id} (a guest) drew the pool: ${id}`);
         if (before && a.src === 'own' && before.own[0] !== id) bad.push(`${p.id} day ${d}: own talk ${id}, but ${before.own[0]} was first in file order`);
         if (before && a.src === 'pool' && before.own.length) bad.push(`${p.id} day ${d}: pool ${id} while own ${before.own.join(',')} was ready`);
+        if (before && a.src === 'work' && !before.work.includes(id)) bad.push(`${p.id} day ${d}: work ${id} wasn't ready`);
         if (before && a.src === 'work' && before.own.length) bad.push(`${p.id} day ${d}: work ${id} while own ${before.own.join(',')} was ready`);
         if (before && a.src === 'pool' && !before.pool.includes(id)) bad.push(`${p.id} day ${d}: pool ${id} wasn't ready`);
         if (!__TC.whenOk(a.talk, p, t)) bad.push(`${p.id} day ${d}: ${id}'s when: fails`);
@@ -61,7 +64,7 @@ RUN = r"""(({ days, min, tier, check, start }) => {
         if (words.some(w => typeof w !== 'string' || !w || /[{}]/.test(w))) bad.push(`${p.id} day ${d}: ${id} has a hole or an unfilled placeholder`);
         log.push({ d, p: p.id, id, src: a.src, topic: a.talk.topic, rank: p.rank, thread: (voiceOf(p.id).thread || p.thread || ''), tier: relTier(p.id) });
       } else {
-        if (before && (before.own.length || before.pool.length)) bad.push(`${p.id} day ${d}: small talk while ${before.own.length} own and ${before.pool.length} pool talks were ready`);
+        if (before && (before.own.length || before.pool.length || before.work.length)) bad.push(`${p.id} day ${d}: small talk while ${before.own.length} own, ${before.work.length} work and ${before.pool.length} pool talks were ready`);
         if (a.small.length < 3 || a.small.length > 4) bad.push(`${p.id} day ${d}: ${a.small.length} small talk lines`);
         if (new Set(a.small.map(x => x.text)).size !== a.small.length) bad.push(`${p.id} day ${d}: a small talk line twice`);
         const last = SHIP.talks.small[p.id];
@@ -99,7 +102,8 @@ with sync_playwright() as pw:
     talks = [x for x in r['log'] if 'id' in x]
     small = [x for x in r['log'] if 'small' in x]
     pool = [x for x in talks if x['src'] == 'pool']
-    print(f"  {len(talks)} talks fired ({len(pool)} pool, {len(talks) - len(pool)} own), {len(small)} small talks; record {r['fired']}")
+    work = [x for x in talks if x['src'] == 'work']
+    print(f"  {len(talks)} talks fired ({len(pool)} pool, {len(work)} work, {len(talks) - len(pool) - len(work)} own), {len(small)} small talks; record {r['fired']}")
     check(len(pool) == len(set(x['id'] for x in pool)), 'a pool talk fired twice')
     first_small = min((x['d'] for x in small if x['rank'] != 'guest'), default=None)
     print(f"  the pool ran out on day {max(x['d'] for x in pool) if pool else None}; crew small talk from day {first_small}")
@@ -122,7 +126,7 @@ with sync_playwright() as pw:
         check(ids == [i for i in files[p] if i in ids], f'{p}: own talks out of file order: {ids}')
 
     print('(d) Conditions, strangers to friends:')
-    cond = ev("""(() => { const by = Object.fromEntries(TALKS.pool.concat(...Object.values(TALKS.own)).map(t => [t.id, t.when || {}])); return by; })()""")
+    cond = ev("""(() => { const by = Object.fromEntries(TALKS.pool.concat(...Object.values(TALKS.own), ...Object.values(TALKS.work || {})).map(t => [t.id, t.when || {}])); return by; })()""")
     allbad = []
     for tier in (0, 1, 2):
         r = ev(f"({RUN})({{ days: 6, min: 720, tier: {tier}, check: true }})")
@@ -172,7 +176,9 @@ with sync_playwright() as pw:
     check(r['none'] and r['none2'], 'save.talks is written before any talk happened')
     check(r['same'] and r['reload'] and r['fromNone'], 'the record does not load back the same')
     check(r['junk'] == {'fired': {'a': [1, 'x']}, 'small': {'x': [3, 1], 'z': [4, 1]}}, f"bad entries not dropped: {r['junk']}")
-    check(r['size'] <= SAVE_MAX, f"save.talks is {r['size']} bytes (at most {SAVE_MAX})")
+    cap = SAVE_PER * ev("TALKS.pool.length + Object.values(TALKS.own).flat().length + Object.values(TALKS.work || {}).flat().length") + SAVE_SMALL
+    check(r['size'] <= cap, f"save.talks is {r['size']} bytes (at most {cap}: {SAVE_PER} a talk in the pack, {SAVE_SMALL} for small talk)")
+    print(f"  the cap with this pack: {cap} bytes")
     check(r['cleared'], 'New game (linesNew) does not clear the record')
 
     print('(h) Work pools (plans/work-pools-plan.md): own, then work and shared taking turns, then small talk:')
@@ -182,10 +188,11 @@ with sync_playwright() as pw:
       const w = __TC.people().filter(p => TALK_WORK_POOLS[p.dept] && TALKS.work[TALK_WORK_POOLS[p.dept]] && !TALKS.own[p.id]);
       const p = w[0], other = __TC.people().find(q => q.rank !== 'guest' && !TALK_WORK_POOLS[q.dept] || (TALK_WORK_POOLS[q.dept] && !TALKS.work[TALK_WORK_POOLS[q.dept]]));
       out.p = p && p.id; out.pool = p && TALK_WORK_POOLS[p.dept];
-      for (let d = 1; p && d <= 30; d++) { const t = (d - 1) * 1440 + 720, a = talkPackPick(p, t); if (!a) break; out.seq.push(a.talk ? a.src : 'small'); talkPackFire(p, a, t); }
-      const n = p ? TALKS.work[TALK_WORK_POOLS[p.dept]].length : 0, seq = out.seq, firstWork = seq.slice(0, 2 * n);
-      out.alternates = firstWork.every((s, i) => s === (i % 2 ? 'pool' : 'work'));   // work first (neither had), then turns
-      out.allWork = seq.filter(s => s === 'work').length === n;
+      const ready = p ? TALK_SOURCES.find(s => s.id === 'work').talks(p).filter(tk => __TC.whenOk(tk, p, 720) && __TC.filled(tk, p, 720)).length : 0; out.ready = ready;
+      for (let d = 1; p && d <= 2 * ready + 6; d++) { const t = (d - 1) * 1440 + 720, a = talkPackPick(p, t); if (!a) break; out.seq.push(a.talk ? a.src : 'small'); talkPackFire(p, a, t); }
+      const seq = out.seq, k = seq.filter(s => s === 'work').length;
+      out.alternates = seq.slice(0, 2 * k).every((s, i) => s === (i % 2 ? 'pool' : 'work')) && !seq.slice(2 * k).includes('work');   // work first (neither had), then turns
+      out.allWork = k >= ready && new Set(Object.keys(SHIP.talks.fired).filter(id => id.startsWith('work.'))).size === k;   // every one ready at the start (more may open with time)
       out.workIds = Object.keys(SHIP.talks.fired).filter(id => id.startsWith('work.')).every(id => SHIP.talks.fired[id][1] === p.id);
       out.guest = (typeof ROSTER_GUESTS !== 'undefined' ? ROSTER_GUESTS : []).every(g => !TALK_SOURCES.find(s => s.id === 'work').talks(g).length);
       out.other = other ? [other.id, other.dept, TALK_SOURCES.find(s => s.id === 'work').talks(other).length] : null;
@@ -193,7 +200,7 @@ with sync_playwright() as pw:
       const again = talkPackPick(p, 10 * 1440 + 720); out.shared = Object.keys(SHIP.talks.fired).filter(id => id.startsWith('work.')).length;
       out.notTwice = !again || !again.talk || !SHIP.talks.fired[again.talk.id];
       TALKS.work = keep; return out; })()""")
-    print(f"  {'the real pools' if r['real'] else 'stand-ins'} {r['pools']}; {r['p']} ({r['pool']}), 30 days: {r['seq'][:14]}...")
+    print(f"  {'the real pools' if r['real'] else 'stand-ins'} {r['pools']}; {r['p']} ({r['pool']}, {r['ready']} work talks ready), {len(r['seq'])} days: {r['seq'][:12]}... {r['seq'][-6:]}")
     print(f"  alternates {r['alternates']}, every work talk once {r['allWork']}, only from them {r['workIds']}; guests none {r['guest']}; no pool for {r['other']}")
     check(r['p'] and all(r['pools'].values()), f"nobody to test the work pool with, or an empty pool: {r['pools']}")
     check(r['alternates'], f"work and shared don't take turns: {r['seq'][:12]}")
@@ -218,7 +225,7 @@ with sync_playwright() as pw:
             os.makedirs(shots, exist_ok=True); g.shot(os.path.join(shots, name + '.png'))
     PLAY = r"""(({ id, tier, fireAll }) => {
       const p = SOC.crew[SOC.idx.get(id)], r = relGet(p.id), t0 = shipNow(); r.tier = tier; r.talkDay = 0; r.chatDay = 0;
-      if (fireAll) { SHIP.talks = { fired: {}, small: {} }; for (const tk of TALKS.pool.concat(TALKS.own[id] || [])) SHIP.talks.fired[tk.id] = [1, 'x']; }
+      if (fireAll) { SHIP.talks = { fired: {}, small: {} }; for (const tk of TALKS.pool.concat(TALKS.own[id] || [], ...Object.values(TALKS.work || {}))) SHIP.talks.fired[tk.id] = [1, 'x']; }
       const a = DECK_CREW.find(x => x.p === p); if (a) { player.obj.position.set(a.x + .9, 0, a.z + .9); target.copy(player.obj.position).setY(.7); }
       chatClose(); CHAT = { p, line: { text: '', say: true }, ask: false, fav: null, at: shipNow(), reach: 99, checked: Math.floor(shipNow()) + 999 }; chatShow();
       chatDo('talk'); const T = CHAT.talk, card = () => [...document.querySelectorAll('#chat button, #chat .btns button')].map(b => b.textContent).filter(x => x !== '×'), said = () => CHAT.line.text;
