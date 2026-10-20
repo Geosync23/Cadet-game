@@ -14,6 +14,13 @@ Needs, then Tracked (fixed, never moves), then the activity bar at the very bott
 overlap with the activity bar, heads-up/tip cards or the round buttons at 390 and 320 px; Tracked doesn't move at all as the bar
 shows/hides; the bar sits below Tracked; non-phone layout unchanged (cadet_test shots at 900 px should be 0 px different).
 
+## claude/ways-of-working 4bcbaa9 (docs only, DEV_NOTES' top paragraphs): PASS
+
+The facts check out: archive/starship-cadet-0.64.2-whole.html is there, claude/whole-file-0.64.2 is at c575a8e, the
+sha256 matches. Note only: `plans/roadmap-after-recdeck.md` is on claude/lead-pillar1, not on this branch (say so, or
+bring it across when merging); `claude/integration` doesn't exist yet (fine, the build master makes it). The arc_check
+fix from 928d49a is still open.
+
 ## claude/ways-of-working 928d49a (step 2, WW1 session_0192KVdPtywdv7sp3mXUXGHU) vs c575a8e: PASS WITH FIXES
 
 1. **Slots (ff32ddd)**: 17 inserts, 51 lines, all `// ---- slot:` / `// ---- end of slot:` comment pairs plus a blank;
