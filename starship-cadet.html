@@ -33935,7 +33935,8 @@ function linesHeard(id, day, tone) {
   L.ring.push([id, day]); if (L.ring.length > LINES_RING_MAX) L.ring.shift();
   if (tone === 'serious') L.serious = day;
 }
-const linesHush = () => (typeof CHAT !== 'undefined' && !!CHAT) || (typeof DIALOGUE !== 'undefined' && !!DIALOGUE) || (typeof sleeping !== 'undefined' && sleeping);
+const linesHush = () => (typeof CHAT !== 'undefined' && !!CHAT) || (typeof DIALOGUE !== 'undefined' && !!DIALOGUE) || (typeof sleeping !== 'undefined' && sleeping)
+  || (typeof introHush === 'function' && introHush());   // section 21: Zeke's goodnight bubbles on the arrival evening (the patch, #4)
 // the minute's tries (goodbyes, reactions, then conversations) are worked in the minute's own frame, before section 20's
 // chatter rolls (0.43.28, reviewer 2b: 0.43.26 spread them over frames, so the chatter could speak in between and a
 // conversation was lost). Each try is about half the cost it was (0.43.26), and performance engineer 2 found section 22
