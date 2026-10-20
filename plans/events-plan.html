@@ -5,15 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Ship-wide Events Plan</title>
 <style>
-:root{--ink:#e8eef0;--muted:#93a6ae;--teal:#4cc3b5;--gold:#e9c46a;--rose:#e07a7a;--glass:rgba(13,21,33,.78);--line:rgba(150,200,196,.22);--bg:#121a27}
-:root[data-theme="light"]{--ink:#1d2a30;--muted:#55666d;--teal:#1f8a7e;--gold:#a67c12;--rose:#b54848;--glass:rgba(255,255,255,.85);--line:rgba(40,80,80,.2);--bg:#eef2f3}
-@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--ink:#1d2a30;--muted:#55666d;--teal:#1f8a7e;--gold:#a67c12;--rose:#b54848;--glass:rgba(255,255,255,.85);--line:rgba(40,80,80,.2);--bg:#eef2f3}}
+:root{--ink:#e8eef0;--muted:#93a6ae;--teal:#4cc3b5;--gold:#e9c46a;--rose:#e07a7a;--glass:rgba(13,21,33,.78);--line:rgba(150,200,196,.22);--bg:#121a27;--field:#0e1520}
+:root[data-theme="light"]{--ink:#1d2a30;--muted:#55666d;--teal:#1f8a7e;--gold:#a67c12;--rose:#b54848;--glass:rgba(255,255,255,.85);--line:rgba(40,80,80,.2);--bg:#eef2f3;--field:#fff}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--ink:#1d2a30;--muted:#55666d;--teal:#1f8a7e;--gold:#a67c12;--rose:#b54848;--glass:rgba(255,255,255,.85);--line:rgba(40,80,80,.2);--bg:#eef2f3;--field:#fff}}
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Avenir Next","Segoe UI",system-ui,sans-serif;line-height:1.5}
 main{max-width:1000px;margin:0 auto;padding:16px}
 h1{font-size:21px;margin:4px 0 2px;font-weight:600}
 h2{font-size:17px;margin:26px 0 8px;color:var(--teal);font-weight:600}
-h3{font-size:15px;margin:14px 0 6px}
 .sub{font-size:13px;color:var(--muted)}
 .card{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin:10px 0}
 .card.key{border-color:var(--teal)}
@@ -29,9 +28,7 @@ th{color:var(--muted);font-weight:600}
 .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .tag{display:inline-block;font-size:11.5px;padding:1px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted);margin-right:4px}
 .tag.in{border-color:var(--teal);color:var(--teal)}
-.tag.out{opacity:.7}
 .tag.warn{border-color:var(--rose);color:var(--rose)}
-/* the timeline */
 .tl{min-width:760px;position:relative;margin:8px 0 4px}
 .row{display:grid;grid-template-columns:110px repeat(31,1fr);align-items:center;min-height:30px}
 .row .lab{font-size:12px;color:var(--muted);padding-right:6px}
@@ -39,16 +36,26 @@ th{color:var(--muted);font-weight:600}
 .days span.we{opacity:.55}
 .bar{height:22px;border-radius:6px;font-size:11px;display:flex;align-items:center;padding:0 6px;white-space:nowrap;overflow:hidden;color:#0c1118;font-weight:600}
 .r1{background:#7d8f99}.r2{background:#4cc3b5}.r3{background:#6aa7e0}.r4{background:#b49be8}.end{background:#e9c46a}
-.ev-storm{background:#e07a7a}.ev-storm-old{background:transparent;border:1.5px dashed var(--rose);color:var(--rose)}
-.ev-comet{background:#e9c46a}.ev-dip{background:#9fd17a}.ev-out{background:transparent;border:1.5px dashed var(--muted);color:var(--muted)}
+.ev-storm{background:#e07a7a}.ev-comet{background:#e9c46a}.ev-dip{background:#9fd17a}.ev-warn{background:#9fd17a;opacity:.45}
+.ev-out{background:transparent;border:1.5px dashed var(--muted);color:var(--muted)}
 .beat{font-size:10px;color:var(--muted);text-align:center;line-height:1.15}
 figure{margin:8px 0}
 .shots{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
 .shots img{width:100%;border-radius:10px;border:1px solid var(--line);display:block}
 figcaption{font-size:12px;color:var(--muted);margin-top:4px}
-.q{border-left:3px solid var(--gold);padding-left:10px;margin:10px 0}
-.q b{display:block}
-.rec{display:block;color:var(--teal);font-size:13.5px;margin-top:3px}
+/* questions: one block per question; data-qid is the question's id for saving */
+.q{background:var(--glass);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:12px;padding:10px 14px;margin:12px 0}
+.q h3{font-size:14.5px;margin:0 0 4px}
+.q .why{font-size:13px;color:var(--muted);margin:0 0 6px}
+.q fieldset{border:0;margin:0;padding:0}
+.q legend{position:absolute;left:-9999px}
+.q label.opt{display:flex;gap:8px;align-items:flex-start;font-size:13.5px;padding:5px 0;cursor:pointer}
+.q label.opt input{margin-top:3px;accent-color:var(--teal)}
+.q .recd{font-size:11px;color:var(--teal);border:1px solid var(--teal);border-radius:999px;padding:0 6px;margin-left:4px;white-space:nowrap}
+.q .rec{display:block;color:var(--teal);font-size:13px;margin:4px 0 6px}
+.q textarea{width:100%;min-height:54px;background:var(--field);color:var(--ink);border:1px solid var(--line);border-radius:8px;font:inherit;font-size:13px;padding:6px 8px}
+.q textarea:focus-visible{outline:2px solid var(--teal)}
+.q .cl{font-size:12px;color:var(--muted);display:block;margin:4px 0 2px}
 .theme{float:right;appearance:none;border:1px solid var(--line);background:var(--glass);color:var(--ink);font:inherit;font-size:12px;padding:5px 10px;border-radius:999px;cursor:pointer}
 code{font-size:12.5px}
 </style>
@@ -57,159 +64,210 @@ code{font-size:12.5px}
 <main>
 <button class="theme" id="theme" aria-label="Switch light or dark">Light / dark</button>
 <h1>Ship-wide events: the plan</h1>
-<div class="sub">Events planner EP1, 2026-10-20, from build 0.64.2 (branch <code>claude/events-plan</code>). Planning only: nothing in the game has changed. Your scope: only the events up to the end of the career (the promotions). The rest are cut.</div>
+<div class="sub">Events planner EP1, 2026-10-20, version 2, after the adversarial review (ER1, <code>claude/events-plan-review</code>, <code>plans/events-plan-review.md</code>). Based on build 0.64.2, branch <code>claude/events-plan</code>. This is planning only: the game itself hasn't changed. Your scope is the events up to the end of the career (the promotions). The rest are parked for later, not deleted.</div>
 
 <div class="card key">
 <b>In short</b>
 <ul>
-<li><b>When the career ends:</b> on <b>Day 26</b> (a Friday), with "Calder's question". It's the same day for a steady player and a busy one, because each promotion step has a first possible day and working harder can't bring it forward. Promotions: Officer on Day 10, Senior Officer on Day 16, Engine Specialist on Day 23. Today's game only has the first. The other two come in Pillar 5 steps 5 and 6, which are built before the events.</li>
-<li><b>So three events are in scope:</b> the <b>ion storm</b> (already built), <b>comet viewing</b> (a short one, drafted) and the <b>diplomatic visit</b> (mostly built, kept switched off). Everything else on the design list (rotation day, the garden creature, power surge, illness, Founders' Day, nebula, supply shuttle, salvage, the Veyli vessel, déjà vu) falls after Day 26 and is cut.</li>
-<li><b>The ion storm is switched on today</b> and it works. I ran it from start to finish (screenshots below): Calder's briefing, the jolt and the Captain's address, storm stew, blackouts, the all-clear and a full party in the bow lounge. But it was built before most of the game existed. It now lands on <b>the same day as your first promotion</b>. It also doesn't show on your device's Schedule. The crew's 89 storm lines never play. Calls home still work while comms are down. And it clashes with the rec deck and the Works career. That's 14 things to update, listed below.</li>
-<li><b>Build order:</b> a shared base built once, then the storm update, then the comet, then the diplomatic visit. Each one is built switched off, tested with Dev mode, then switched on. That's about <b>26-33 build turns</b> in all.</li>
-<li><b>I need your answer on 7 questions</b> (at the bottom). Each has my recommended answer.</li>
+<li><b>The career ends on Day 26</b> (a Friday) with "Calder's question". The dates come from the approved Pillar 5 plan:
+<ul>
+<li>Officer on Day 10</li>
+<li>Senior Officer on Day 16</li>
+<li>Engine Specialist on Day 23</li>
+</ul>
+These are the earliest days possible, and a busy player can't get there sooner. Today's game has only the first promotion; Pillar 5 steps 5 and 6 build the rest, and they need day limits so the later promotions can't come early.</li>
+<li><b>Three events are in scope:</b> the <b>ion storm</b> (built and switched on), <b>comet viewing</b> (a short event, drafted) and the <b>diplomatic visit</b> (built but switched off). The rest are <b>parked for later</b> with their outlines (section 6).</li>
+<li><b>The ion storm works:</b> I ran it from start to finish (pictures below). But it was built before most of the game existed, and 13 things need updating. The main ones:
+<ul>
+<li>It lands on your first promotion.</li>
+<li>The crew's 89 storm lines never play.</li>
+<li>Nothing you do changes how it turns out.</li>
+<li>Your device's Schedule misses its meetings.</li>
+<li>A long sleep or a reload can lose parts of it.</li>
+<li>It's tangled up with the rec deck's film night.</li>
+</ul></li>
+<li><b>The game can't yet put events on chosen days.</b> It picks days by its own rules, so the comet would land on a Monday and the visit on Day 33. The first piece of work is "the event calendar": fixed days for all three.</li>
+<li><b>About 31-40 build turns</b>, plus the writers' time. The order is: a shared base built once, then the storm update, the comet, and the visit. Each one is built switched off, tested in Dev mode, then switched on.</li>
+<li><b>9 questions for you</b> are at the bottom (section 5), each with my recommendation and a box for your comments.</li>
 </ul>
 </div>
 
 <h2>1. The timeline</h2>
-<p>Ship days 0-30. Day 1 is a Monday, and the faded days are weekends. The career rows follow the approved Pillar 5 plan for a steady player, and a busy player gets the same days. Coloured event bars show my recommended dates. The dashed red bar shows where the storm falls today.</p>
+<p>This covers ship days 0-30. Day 1 is a Monday, and the faded days are weekends. The rank rows follow the Pillar 5 plan for a steady player. The event bars show my recommended dates (questions 2-4). The pale green bar is the visit's warning.</p>
 <div class="scroll"><div class="tl" id="tl"></div></div>
-<div class="sub">Key: grey = Junior Technician, teal = Officer, blue = Senior Officer, violet = Engine Specialist, gold flag = Calder's question (the end). Event bars: red = ion storm, gold = comet, green = diplomatic visit, dashed grey = out of scope.</div>
+<div class="sub">Key: grey = Junior Technician, teal = Officer, blue = Senior Officer, violet = Engine Specialist, gold = Calder's question (the end). Events: red = ion storm, gold = comet, green = diplomatic visit, dashed = parked.</div>
 
 <details>
 <summary>How I got Day 26, and the steady, busy and slow players</summary>
 <ul>
-<li><b>Built today (0.64.2):</b> one promotion, Junior Technician to Officer (Tier 2). It needs "Relied on" reputation plus training in m6, which opens no earlier than Day 8. The test job is never before Day 9. The summons comes at 11:00 on Day 10, Calder walks you to cabin 4-23 at 17:00, and the ceremony is Day 11 at 17:15. I ran career_check on 0.64.2: the steady player passes the test on Day 9, is promoted on Day 10 and has the ceremony on Day 11. The busy player reaches "Relied on" a day earlier (Day 4, which the check now flags because it expects Day 5 or later: a small tuning drift worth telling the career seat about) but still gets promoted on Day 10. The gates are calendar days. Nothing in the code sets Tier 3 or 4 yet.</li>
-<li><b>Planned (Pillar 5 plan v11, approved):</b> Tier 3 test on Day 15 (Mon), Senior Officer on Day 16 (Tue), the Captain's table toast on Day 17, the night shift on the nights of Days 19 and 20, the Monday briefing and Tier 4 test on Day 22, Engine Specialist on Day 23, the reactor on Day 24, leading a team on Day 25, then mentoring and "Calder's question" on Day 26 (Fri). Its rule: "if you're slower, the next thing waits", so every date is the earliest possible. A busy player can't get there sooner.</li>
-<li><b>A slow player</b> (barely working) gets there later. By the gates, Officer comes around Day 25-28 and the end is well past Day 40. Events are tied to the calendar, not to your rank (question 4), so a slow player lives the storm as a Junior. That's what "what you see depends on rank" is for.</li>
-<li><b>Two events fit in 27 days</b> at the design's pace of "one main event every 1-2 ship weeks": the storm and the diplomatic visit, with the comet (the only short event slotted between them) in the gap.</li>
+<li><b>Built today (0.64.2):</b> one promotion, Junior Technician to Officer. Calder announces your test no earlier than Day 8, and only once you're "Relied on" and trained in making things safe. The test is never before Day 9. The summons is at 11:00 the next workday Calder is on, and the ceremony is the day after at 17:15. career_check's steady player passes on Day 9, is promoted on Day 10 and has the ceremony on Day 11. Its busy player run stops at Day 8, so it doesn't show a promotion day, but the gates above mean the busy player can't be promoted before Day 10 either. One line fails in 0.64.2: the busy player reaches "Relied on" on Day 4, and the check expects Day 5 or later. That's a tuning drift for the career seat.</li>
+<li><b>Planned (Pillar 5 v11):</b>
+<ul>
+<li>Day 15: Tier 3 test</li>
+<li>Day 16: Senior Officer</li>
+<li>Day 17: the toast at the Captain's table</li>
+<li>Nights of Days 19 and 20: the night shift</li>
+<li>Day 22: the Monday briefing and the Tier 4 test</li>
+<li>Day 23: Engine Specialist</li>
+<li>Day 24: the reactor</li>
+<li>Day 25: leading a team</li>
+<li>Day 26: mentoring, then Calder's question</li>
+</ul>
+<b>Day 26 is a target, not yet a proven date.</b> The plan sets no "not before" day for the Tier 3 and Tier 4 tests. Also, your reputation starts again from zero after each promotion, so a steady new Officer would need "Relied on" within about 2½ workdays to make the Day 15 test. That's half the time a Junior gets. Pillar 5 steps 5 and 6 should add both "not before" days (Tier 3 test on Day 15 at the earliest, Tier 4 on Day 22) and a reachable pace. The events are tied to the calendar either way.</li>
+<li><b>A slow player</b> (career_check's lazy run) passes the test on Friday Day 26 and is promoted on Monday Day 29. <b>A player who skips work</b> gets Calder's "My office" talk on Day 10, the Captain's warning on Day 15, and is let go on Day 20. So events must also work for a Junior, and for no player at all after Day 20.</li>
+<li><b>Two main events fit in 27 days</b> at the design's pace of "one every 1-2 ship weeks": the storm and the visit, with the comet in between.</li>
 </ul>
 </details>
 
 <details>
-<summary>The in-scope list, and what's cut</summary>
+<summary>The in-scope list</summary>
 <table>
-<tr><th>Event</th><th>Kind</th><th>Today</th><th>Recommended days</th><th></th></tr>
-<tr><td>1 · Ion storm</td><td>Main</td><td>Built, <b>on</b>, Days 10-15</td><td>Days 11-16 (warning Thu 11, front Fri 12, all-clear Sun 14)</td><td><span class="tag in">in</span></td></tr>
-<tr><td>— Comet viewing</td><td>Short</td><td>Drafted (<code>plans/comet-viewing-draft.js</code>), not in the game</td><td>Sun Day 21, 21:00 (the draft's own date)</td><td><span class="tag in">in</span></td></tr>
-<tr><td>2 · Diplomatic visit</td><td>Main</td><td>Built, <b>off</b> (<code>draft: true</code>), would start about Day 25</td><td>Warning Mon Day 22 (at the Monday briefing), greeting Wed Day 24, farewell about Day 29</td><td><span class="tag in">in</span> <span class="tag warn">runs past Day 26</span></td></tr>
-<tr><td>— Crew rotation day</td><td>Short</td><td>Its traditions are built and run (farewell supper, send-off and welcome tea; first on Days 34-40)</td><td>unchanged: the traditions stay, no event</td><td><span class="tag out">cut</span></td></tr>
-<tr><td>3-7 and the other short events</td><td colspan="3">Garden creature, power surge, illness, Founders' Day festival, nebula, late supply shuttle, salvage, the Veyli vessel, déjà vu: all after Day 26. Nothing of these is built except a few guest entries in <code>GUESTS</code> and the Founding Day tradition (Day 100), which stay as they are.</td><td><span class="tag out">cut</span></td></tr>
+<tr><th>Event</th><th>Kind</th><th>Today</th><th>Recommended</th></tr>
+<tr><td>1 · Ion storm</td><td>Main</td><td>Built and <b>on</b>. Warning Day 10, front Day 11, all-clear and party Day 13, afterglow to the end of Day 15.</td><td>Keep Days 10-15, with the career-beat guard and the commendation at the all-clear (question 2)</td></tr>
+<tr><td>— Comet viewing</td><td>Short</td><td>Drafted (<code>plans/comet-viewing-draft.js</code>), not in the game. The game's own rules would place it on Monday Day 22.</td><td>Tuesday Day 16 at 21:30, one day long (question 3)</td></tr>
+<tr><td>2 · Diplomatic visit</td><td>Main</td><td>Built, <b>off</b> (<code>draft: true</code>). The game's rules would start it on Day 26, or Day 33 with the comet in. About 8 days aboard.</td><td>Shortened: warning Friday Day 19, greeting Monday Day 22, farewell Friday Day 26 (question 4)</td></tr>
 </table>
 </details>
 
 <h2>2. The ion storm today</h2>
-<p><b>Is it on?</b> Yes. It has been on since 0.34.12, with no switch other than the <code>draft</code> flag, which the diplomatic visit has and the storm doesn't. It starts by itself on Day 10 (the first day Calder's on shift from Day 10). Only the diplomatic visit is off. There's no way to start it by hand in the normal game. Tests do it through the test hook (<code>eventStart('ionStorm', day)</code>), and Dev mode will need to do the same.</p>
-<p><b>What I saw when I ran it</b> (phone size, 390 × 844, new game, clock skipped forward, me standing where each moment happens):</p>
+<p><b>Is it on?</b> Yes. It's been on since 0.34.12, and the only switch is a <code>draft</code> flag, which the storm doesn't have and the diplomatic visit does. It starts by itself on Day 10, the first day from Day 10 that Calder is on shift. There's no way to start it by hand in the normal game; tests use <code>eventStart('ionStorm', day)</code>, and Dev mode will need to do the same.</p>
+<p><b>What I saw when I ran it</b> at phone size (390 × 844). I started a new game, skipped the clock forward and stood where each moment happens:</p>
 <div class="shots">
-<figure><img src="events-plan-shots/1-day10-briefing-works-bay.png" alt="Calder's storm briefing panel in the Works bay"><figcaption>Day 10, 09:15: Calder's briefing in the Works bay, 10 lines and a choice. (The HUD clock lags because the test steps the clock directly.)</figcaption></figure>
-<figure><img src="events-plan-shots/2-day11-onset-front-deck3.png" alt="The Captain's address banner over the mess"><figcaption>Day 11, 14:00: the front. The jolt, the lights dip and the Captain's address. The banner covers the HUD's top-left (clock, deck, device) on phones.</figcaption></figure>
-<figure><img src="events-plan-shots/4-day12-escalation-mess-lunch.png" alt="Mess during the escalation"><figcaption>Day 12, lunch: storm stew on the menu, 13 crew on Deck 3 (22 on a normal day). The banner is still up because tests run on a virtual clock and it hides after 20 real seconds.</figcaption></figure>
-<figure><img src="events-plan-shots/5-day13-all-clear-observation-room.png" alt="The all-clear in the observation room"><figcaption>Day 13, 10:00: the all-clear address, and the Captain's meeting in the observation room.</figcaption></figure>
-<figure><img src="events-plan-shots/6-day13-party-bow-lounge.png" alt="The party in the bow lounge"><figcaption>Day 13, 19:30: the party. The bow lounge is full, bunting and an "All clear" sign are up, and it takes 307 draw calls (the limit is 450).</figcaption></figure>
+<figure><img src="events-plan-shots/1-day10-briefing-works-bay.png" alt="Calder's storm briefing panel in the Works bay"><figcaption><b>Day 10, 09:15:</b> Calder's briefing in the Works bay, 10 lines and a choice. The HUD clock lags because the test sets the clock directly.</figcaption></figure>
+<figure><img src="events-plan-shots/2-day11-onset-front-deck3.png" alt="The Captain's address banner over the mess"><figcaption><b>Day 11, 14:00:</b> the front, with a jolt, the lights dipping and the Captain's address. On phones the banner covers the clock, the deck and the device button.</figcaption></figure>
+<figure><img src="events-plan-shots/4-day12-escalation-mess-lunch.png" alt="The mess during the escalation"><figcaption><b>Day 12, lunch:</b> storm stew on the menu. The banner is still showing only because the test runs on a pretend clock, and it hides after 20 real seconds.</figcaption></figure>
+<figure><img src="events-plan-shots/5-day13-all-clear-observation-room.png" alt="The all-clear in the observation room"><figcaption><b>Day 13, 10:00:</b> the all-clear address, and the Captain's meeting in the observation room.</figcaption></figure>
+<figure><img src="events-plan-shots/6-day13-party-bow-lounge.png" alt="The party in the bow lounge"><figcaption><b>Day 13, 19:30:</b> the party. The lounge is full, and the "All clear" bunting is up. Draw calls: 236 in portrait, 367 zoomed out (the budget is 450).</figcaption></figure>
 </div>
-<p><b>The result</b> with me doing nothing: <b>rough</b>. That came from 405 minutes of blackout, 17 meals spoiled, the bridge hungry for 12 hours and a call-home backlog of 6. It left a scorch mark and a taped panel. An earlier run came out bumpy, so the result flips between runs. No commendation, even though I'd signed up for the battery run at the briefing: the crew did it first. No errors on the page.</p>
+<p><b>How it turns out today:</b> rough, every time the ship is left alone. The reviewer ran it many ways and got rough on every full run. Rough comes from the numbers, not from what you do:
+<ul>
+<li>The call-home thread is a fixed sum that always lands exactly on its "rough" line.</li>
+<li>Blackouts reach "rough" whenever power is below about 87%, and even a perfect ship can't get down to "smooth".</li>
+<li>Spoiled meals start counting at the warning, before the storm arrives.</li>
+<li>The storm's prep jobs don't feed any thread at all.</li>
+</ul>
+So <b>nothing you do changes how it turns out yet</b>. That's new design (question 6). One correction from version 1: Calder's "My office" Mail in my run wasn't about the storm. It was the missed-shifts talk, because my test player never went to work.</p>
 
 <details>
 <summary>What's built (the full list)</summary>
 <ul>
-<li><b>Data:</b> <code>SHIP_EVENTS.ionStorm</code> (section 18, about line 35092). It runs 6 days, starts on Day 10 at the earliest, needs Calder on shift and is next in <code>EVENT_ORDER = ['ionStorm','diplomatic']</code>.</li>
-<li><b>Phases:</b> warning on day 0 at 06:00, onset on day 1 at 14:00, escalation on day 2 at 06:00, resolution on day 3 at 10:00 and afterglow from day 3 at 22:00 to the end of day 5. The resolution and afterglow put everything back to normal.</li>
+<li><b>Data:</b> <code>SHIP_EVENTS.ionStorm</code> (section 18, about line 35092). It lasts 6 days, starts on Day 10 at the earliest, needs Calder on shift, and is first in <code>EVENT_ORDER</code>.</li>
+<li><b>Phases:</b>
+<ul>
+<li>Warning: day 0, 06:00</li>
+<li>Onset (the front): day 1, 14:00</li>
+<li>Escalation: day 2, 06:00</li>
+<li>Resolution (the all-clear): day 3, 10:00</li>
+<li>Afterglow: from day 3, 22:00, to the end of day 5</li>
+</ul>
+The last two put everything back to normal.</li>
 <li><b>Threads</b> (lower is better):
 <ul>
-<li><code>blackout</code> minutes: section 17 (machines), smooth up to 60, rough from 200.</li>
-<li><code>spoiled</code> meals: the galley, 10 / 60.</li>
-<li><code>bridgeHungry</code> hours: the galley, 6 / 14.</li>
-<li><code>calls</code> backlog: section 18, 3 / 6.</li>
+<li>Blackout minutes: smooth at 60 or less, rough at 200 or more</li>
+<li>Spoiled meals: 10 / 60</li>
+<li>Hours the bridge goes hungry: 6 / 14</li>
+<li>The call-home backlog: 3 / 6</li>
 </ul>
-These blend into smooth, bumpy or rough, and each result has its own traces: the signed roster in the tea corner, a scorch mark in the relay room, or a taped panel.</li>
-<li><b>Machines:</b> power, comms and chiller wear 1.5-3× faster. Rolling blackouts go one deck at a time (Decks 1, 4 and 5 were seen). Storm jobs go on the board: the lounge, the ballasts, battery packs to the bridge, the Tier 3 junctions, and a tidy-up in the afterglow.</li>
-<li><b>Galley:</b> storm stew, slower cooking, more grab-and-go, 6 trays to the bridge.</li>
-<li><b>Crew:</b> double shifts for command and helm, and the Watch patrols. The bow lounge and call booths close. 40-50% of the crew stay in, there's a rush on the booths on the all-clear day, and needs shift (energy refills slower, social drains faster).</li>
+The traces depend on the result: the signed roster in the tea corner, a scorch mark in the relay room, or the scorch mark plus a taped panel.</li>
+<li><b>Machines:</b> power, comms and the chiller wear 1.5 to 3 times faster. Rolling blackouts hit one deck at a time. Storm jobs go up on the board at 08:30 on the warning day: the lounge, the ballasts, battery packs for the bridge and the Tier 3 junctions. A tidy-up job comes in the afterglow.</li>
+<li><b>Galley:</b> storm stew, slower cooking, more grab-and-go, and 6 trays to the bridge.</li>
+<li><b>Crew:</b>
+<ul>
+<li>Command and helm work double shifts, and the Watch patrols.</li>
+<li>The bow lounge and the call booths close.</li>
+<li>40-50% of the crew stay in.</li>
+<li>There's a rush on the booths on the all-clear day.</li>
+<li>Energy refills more slowly and social drains faster.</li>
+</ul></li>
 <li><b>Moments:</b>
 <ul>
-<li>The front: a jolt, the lights dip, flickers.</li>
-<li>The surge on day 2 at 11:20.</li>
-<li>The Captain's address at the front, and again at the all-clear, worded by how it went.</li>
+<li>The front (a jolt, the lights dip, flickers) and a surge on day 2 at 11:20.</li>
+<li>Two Captain's addresses.</li>
 <li>Calder's briefing, a meeting with a choice of reply.</li>
 <li>The Captain's all-clear, a meeting.</li>
-<li>The party in the bow lounge, a gathering (37 crew planned).</li>
+<li>The party, a gathering.</li>
 </ul></li>
-<li><b>Mail and news:</b> Calder's warning, Vance's "Storm stations", the debrief worded by how it went, the commendation, and notes on any meeting you missed. 7 news items feed the social feed.</li>
-<li><b>Traditions:</b> paused at the onset and in the escalation (birthdays still happen).</li>
-<li><b>After it:</b> a commendation (two storm jobs, or one job and a meeting). That leads to the Captain's ready room, the Captain's table (Day 20, every 28 days) and the bridge invite (Day 22, waiting for the first event to end).</li>
-<li><b>Checks:</b> <code>events_check</code> parts 5-9 (on paper, live, occasions, hooks, the diplomatic visit), food_check 4h/4i, machine_check 4c, interactions_check, career_check (bridge invite).</li>
+<li><b>Mail and news:</b> Calder's warning, Vance's "Storm stations", the debrief (worded by the result), the commendation, and notes for any meeting you missed. Seven news items go to the social feed.</li>
+<li><b>Traditions:</b> they pause during the onset and escalation. Birthdays still happen.</li>
+<li><b>After it:</b> a commendation, for two storm jobs or one job plus a meeting. That leads on to the ready room, the Captain's table (Day 20, then every 28 days) and the bridge invite (Day 22).</li>
+<li><b>Checks:</b> events_check parts 5-9, food_check 4h and 4i, machine_check 4c, interactions_check, and career_check (the bridge invite).</li>
 </ul>
 </details>
 
 <details open>
-<summary>What needs updating for everything added since (14 items, plus what is fine)</summary>
+<summary>What needs updating (13 items, checked by the reviewer)</summary>
 <table>
-<tr><th>#</th><th>What</th><th>Found how</th><th>Fix (whose part)</th></tr>
-<tr><td>1</td><td><b>It lands on your promotion.</b> The warning day (Day 10) is the Officer summons day. The front (Day 11, 14:00) comes three hours before the officer ceremony. The afterglow covers the Tier 3 test (Day 15).</td><td>dates from both plans</td><td>Move it one day (question 2), and add a career-beat guard so an event's meetings never land in the same hour as a promotion step (framework F1).</td></tr>
-<tr><td>2</td><td><b>The crew's 89 storm lines never play.</b> They're written as storm cues, but the event never sends the note that triggers them.</td><td>code + probe</td><td>Send a phase note at each phase (section 18, one line; framework F2).</td></tr>
-<tr><td>3</td><td><b>Calls home still work while comms are down</b> in the escalation (I was offered 4 calls). Mail from home and the "Outside" news carry on.</td><td>probe</td><td>One "comms down" check that the call booths, home Mail and Outside news all read (F8; social and device).</td></tr>
-<tr><td>4</td><td><b>Your device doesn't know about it.</b> The Schedule for Day 10 shows the pressure drill and the delivery, but not the 09:15 briefing. On storm days it lists tea and biscuits and the bunk inspection, but not the all-clear or the party. Tracked and heads-ups get nothing except a 15-minute toast. There's no "Ion storm: day 2 of 4" line, and commendations aren't on your Record.</td><td>probe of the Schedule</td><td>Event items in the Schedule, Tracked and heads-ups, a status line in the Ship app, and commendations on your Record (F3; device seat).</td></tr>
-<tr><td>5</td><td><b>A long sleep or skip can jump right past the end.</b> Then the all-clear, the calls score and the afterglow never happen.</td><td>probe (skip from Day 12 to Day 16)</td><td>Catch up any missed phases quietly (F4; section 18).</td></tr>
-<tr><td>6</td><td><b>The Works career mostly ignores it.</b> Incidents and team jobs only skip the party day. The pressure drill (Wed 15:00) runs on the warning day, the Thursday inspection on the onset morning, and the Wednesday delivery and morning trainings never check. Pillar 5 says puzzles and incidents never happen "on event days", but nobody has defined an event day.</td><td>code + Schedule</td><td>One shared answer to "is an event on now, and how strongly" (F1). Pillar 5 reads it, and the drill on a storm day becomes a real storm muster instead.</td></tr>
-<tr><td>7</td><td><b>The rec deck isn't in it.</b> It stays open and the rec deck has no blackouts. Pell's cheerful "Film night has moved" Mail arrives at the very moment of the front. On the party night (Day 13) rec film night (20:00) and observatory night (21:15) run against the party. The dawn swim runs on the onset morning (allowed, but odd).</td><td>run + calendar</td><td>Close the rec deck during the onset and escalation like the bow lounge (question 6), include it in the blackouts, send Pell's Mail after the all-clear, and pause rec traditions on the party evening (rec seats).</td></tr>
-<tr><td>8</td><td><b>Your briefing choice usually comes to nothing.</b> By 10:00 the crew have done 3 of the 4 prep jobs. So you don't get a commendation even after signing up.</td><td>run</td><td>Hold the job you chose for you until noon (the career's "held for you" already exists).</td></tr>
-<tr><td>9</td><td><b>The result flips</b> between bumpy and rough when nobody helps: blackout minutes are now 405 against a "rough from 200" line, because there are many more machines than when it was tuned.</td><td>two runs</td><td>Retune the threads so a ship left to itself comes out bumpy (question 5). Check over 5 seeds.</td></tr>
-<tr><td>10</td><td><b>The Captain's banner covers the HUD</b> on phones (clock, deck, device button) for 20 seconds, and in one shot a second panel showed under it.</td><td>shots</td><td>Put it under the HUD's top row on phones, or shrink it to two lines with "more in Mail" (HUD seat).</td></tr>
-<tr><td>11</td><td><b>Rank isn't used.</b> The design says a junior carries filters while a senior is in the Captain's briefing. Today everyone gets the same scenes, and the Tier 3 junction job is out of reach for everyone the storm reaches.</td><td>code</td><td>Rank-aware parts (F5). As a new Officer you're "first on the scene" at storm incidents and muster the Works team at the drill.</td></tr>
-<tr><td>12</td><td><b>Two ready rooms and two Captain's tables.</b> The commendation's ready-room summons and Pillar 5's Senior Officer ready room (Day 16) are separate scenes. The regular Captain's table (Day 20) comes three days after Pillar 5's Captain's table toast (Day 17).</td><td>both plans</td><td>Fold them together (question 7).</td></tr>
-<tr><td>13</td><td><b>Supplies ran out</b> in my skip run (filters, cells, membranes). That's partly a test effect, since no supply carts run on paper. But storm wear makes it worse: check it in real play.</td><td>run Mail</td><td>Add a storm case to food_check and machine_check that plays at real speed.</td></tr>
-<tr><td>14</td><td><b>Old stand-ins</b> (a plain address banner, a plain dialogue strip, the old camera shake) are still there behind the real versions. The Captain's table keepsake (framed menu) has nothing to show on the deck.</td><td>code</td><td>Remove them in step 2's clean-up, and give the framed menu a shelf prop (deck architect).</td></tr>
-<tr><td>15</td><td><b>Fine as it is:</b> traditions pause correctly (Day 12 has none), the social news items arrive, the party crowd stays within the phone budget, and clothes, laundry, Lightdisc and tiles aren't touched by it. Tiles night and the Tiles ladder pause with the other traditions.</td><td>run + calendar</td><td>none</td></tr>
+<tr><th>#</th><th>What</th><th>Fix (and whose part)</th></tr>
+<tr><td>1</td><td><b>It lands on your promotion.</b> The warning day (Day 10) is the Officer summons day. The front (Day 11, 14:00) comes three hours before the officer ceremony. If the storm moves a day later, the clash just moves with it: the briefing lands next to Day 11's first team job, and the afterglow covers the Tier 3 test (Day 15) and the Senior Officer promotion (Day 16).</td><td>The event calendar (F0) and the career-beat guard (F1) keep the hours apart. Question 2.</td></tr>
+<tr><td>2</td><td><b>The 89 storm lines never play.</b> They're written for storm moments, but the event never sends the note that would trigger them.</td><td>A phase note at each phase (F2).</td></tr>
+<tr><td>3</td><td><b>Nothing you do changes the result</b> (see above).</td><td>New design inside the storm update: prep jobs that lower a thread, threads that count from the front, and blackout odds where a full-power ship comes out smooth. Question 6.</td></tr>
+<tr><td>4</td><td><b>Your device misses parts of it.</b> The Schedule shows the party but not the 09:15 briefing or the 10:00 all-clear meeting. Tracked offers "the call booths" at the front, while they're closed. There's no "Ion storm: day 2" line, and commendations aren't on your Record.</td><td>Meetings in the Schedule and Tracked, closed places hidden, a status line in the Ship app, commendations on the Record (F3, the device seat).</td></tr>
+<tr><td>5</td><td><b>Skips and reloads lose parts of it.</b> A sleep or skip past the end drops the all-clear, the calls score and the afterglow. One jump from before it starts to after it ends runs the whole storm in a single step: no addresses, no Mail, and it comes out "smooth". Reloading in the middle of a meeting loses that meeting for good, and its summary Mail never comes.</td><td>Every phase replayed in order, quietly, and a meeting brought back (or its summary sent) after a reload (F4).</td></tr>
+<tr><td>6</td><td><b>Calls home</b> are blocked only on the front day, and for <i>any</i> event, so the visit's greeting day would cut them too. Nothing reads the storm's "comms down" setting.</td><td>One "comms down" check, read by the call booths (F8).</td></tr>
+<tr><td>7</td><td><b>Works puzzles and incidents have no proper storm check.</b> The puzzle code asks for an "event day" check that doesn't exist, so it never fires. Incidents and team jobs only skip the party day. Meanwhile, if every day of an event counted, puzzles would lose 15 of Days 11-30. (The drill and the inspection only apply to Juniors, so a steady player isn't affected.)</td><td><code>eventDay(d)</code> with a narrow meaning: the front, the escalation and the all-clear only. Agree it with the Pillar 5 seats (F1).</td></tr>
+<tr><td>8</td><td><b>The rec deck is tied into the storm.</b> The storm's first address is what moves film night to the rec deck "from this Saturday", which is the party night. So with the storm switched off, film night never moves. Pell's cheerful Mail about it arrives at the front. Two different film-night flags exist, and only one is ever set. Blackouts skip the rec deck on purpose (a lead's call in 0.83.2). The crew already stay off it during the storm.</td><td>Give the rec deck's first all-hands its own date, flag the two flags to the rec seat, and keep blackouts as they are. Question 7.</td></tr>
+<tr><td>9</td><td><b>Your briefing choice can never hold a job.</b> The storm jobs go up at 08:30, and the crew have taken three by 09:00, before the 09:15 briefing. So you don't earn a commendation.</td><td>Post the storm jobs when the briefing ends, holding the one you chose.</td></tr>
+<tr><td>10</td><td><b>The Captain's banner covers the HUD</b> on phones: the clock, the deck, the device button and the Tracked title.</td><td>Put it below the HUD's top row on phones, or make it two lines with "more in Mail" (the HUD seat).</td></tr>
+<tr><td>11</td><td><b>Rank isn't used.</b> The design says a Junior carries filters while a senior attends the Captain's briefing. Today everyone gets the same scenes, and the Tier 3 junction job is out of reach.</td><td>Small rank-aware parts (F5). The new lines are the head writer's.</td></tr>
+<tr><td>12</td><td><b>The ready room and the Captain's table are used too often.</b> The ready room hosts four scenes: the commendation summons, Pillar 5's Senior Officer scene on Day 16, and the two missed-shifts talks. The Captain's table comes on Day 20, three days after Pillar 5's Day 17 toast. And the commendation arrives only when the afterglow ends (Day 16 00:00), so it can't be part of the Day 16 scene if the storm moves.</td><td>Send the commendation at the all-clear. Question 8.</td></tr>
+<tr><td>13</td><td><b>Small things.</b> Three old placeholder versions (address, dialogue, camera shake) are still in the code. The framed menu has no prop. A reload inside the front's 3 minutes could replay the jolt. Day 13's evening has three traditions plus the party, over the limit of two. A blackout in Deck 4's junior common room reads 454 draw calls zoomed out (an ordinary Friday there already reads 452). Tiles and Lightdisc stop the clock, so you can sit out a blackout in a game (fine).</td><td>Clear-out in step 2. The framed menu goes to the deck architect, and the 452 to the performance seat. Storm scenes added to perf_check (F7).</td></tr>
 </table>
-<p class="sub">Rough size of the storm update: <b>6-8 build turns</b> on top of the shared base (most of items 1-8 are done through the base). Risk: items 3, 4, 6 and 7 are in other seats' parts of the file, so step 2's owners map decides who makes each edit.</p>
+<p class="sub"><b>Fine as it is:</b> traditions pause correctly, the news items arrive, two fresh runs are identical, the storm never uses random numbers, every dressing and trace exists except the framed menu, clothes and laundry aren't touched, and the visit's cabins match (Teshavi in 2-U, the second visitors' cabin, not your future suite). <b>Dropped from version 1:</b> "supplies run out" happened with the storm off too; it's a test effect, because no supply carts run on paper.</p>
+<p class="sub"><b>Size of the storm update:</b> 8-10 turns on top of the shared base (including the threads you can move: 1-2, and unhooking the rec deck: 1).</p>
 </details>
 
 <h2>3. The events after the storm</h2>
 
 <details>
-<summary>Shared base, built once (F1-F8)</summary>
+<summary>Shared base, built once (F0-F8), about 12-15 turns</summary>
 <table>
-<tr><th></th><th>Piece</th><th>Why</th><th>Size</th></tr>
-<tr><td>F1</td><td><b>The event calendar guard:</b> one shared answer to "is an event on now, and how strongly" (<code>eventLevel(t)</code>: none, warning, active or after), plus a list of the day's career beats that event moments steer around. Pillar 5, the rec deck, traditions and incidents all read it.</td><td>Today each system guesses (items 1, 6, 7).</td><td>2</td></tr>
-<tr><td>F2</td><td><b>Phase notes:</b> each phase sends a ship note, so crew lines, tap lines and chatter react.</td><td>Item 2. The comet and the visit need it too.</td><td>1</td></tr>
-<tr><td>F3</td><td><b>On your device:</b> event meetings and gatherings in the Schedule, Tracked and heads-ups, a status line in the Ship app, and commendations on your Record.</td><td>Item 4, and the "at most a gentle note 15 minutes before" rule.</td><td>2</td></tr>
-<tr><td>F4</td><td><b>Skip-safe phases:</b> a long sleep or skip still runs every phase, quietly.</td><td>Item 5.</td><td>1</td></tr>
-<tr><td>F5</td><td><b>Parts by rank:</b> an event can give a meeting, job or line only to Juniors, Officers or Seniors, with the gist by Mail to the others.</td><td>Item 11, and the visit's senior briefing.</td><td>1-2</td></tr>
-<tr><td>F6</td><td><b>Dev mode hooks:</b> start any event (even one switched off) now or at a chosen phase, end it, and show its threads live.</td><td>The user's ask; each event is tested before it's switched on.</td><td>1 (inside Dev mode)</td></tr>
-<tr><td>F7</td><td><b>One table-driven events check:</b> the same paper, live and phone checks for each event from its data, with the right exit code.</td><td>So the comet and visit don't each need a new check.</td><td>2</td></tr>
-<tr><td>F8</td><td><b>Comms down:</b> one check read by the call booths, home Mail and Outside news.</td><td>Item 3.</td><td>1</td></tr>
+<tr><th></th><th>Piece</th><th>Why</th><th>Turns</th></tr>
+<tr><td>F0</td><td><b>The event calendar:</b> fixed start days for the three events, one main event at a time, a short event allowed beside a main one when they don't overlap, and casts checked against who's on shift (Calder is off Sundays, Vance Wednesdays and Thursdays, Sato weekends).</td><td>The game's own rules can't give the agreed dates.</td><td>1-2</td></tr>
+<tr><td>F1</td><td><b><code>eventDay(d)</code> and the career-beat guard:</b> a narrow "event day" (front, escalation, all-clear), plus the day's career beats that event moments steer around.</td><td>Items 1 and 7.</td><td>2</td></tr>
+<tr><td>F2</td><td><b>Phase notes:</b> each phase sends a ship note, so crew lines, tap lines and chatter can react.</td><td>Item 2.</td><td>1</td></tr>
+<tr><td>F3</td><td><b>On your device:</b> meetings and gatherings in the Schedule and Tracked, closed places hidden, a status line in the Ship app, and commendations on your Record.</td><td>Item 4.</td><td>2</td></tr>
+<tr><td>F4</td><td><b>Safe through skips and reloads:</b> every phase replays in order, quietly. A meeting comes back, or its summary is sent, after a reload. Moments don't replay.</td><td>Items 5 and 13.</td><td>2</td></tr>
+<tr><td>F5</td><td><b>Parts by rank:</b> a meeting, job or line can go only to Juniors, Officers or Seniors, with the summary by Mail to everyone else. Kept small.</td><td>Item 11, and the visit's senior briefing.</td><td>1</td></tr>
+<tr><td>F6</td><td><b>Dev mode hooks:</b> start any event (even one switched off) now or at a chosen phase, end it, and see its threads live.</td><td>Your ask, and the way every event is tested before it's switched on.</td><td>1</td></tr>
+<tr><td>F7</td><td><b>One events check driven by each event's data:</b> on paper, live and at phone size, with a proper pass or fail. It includes the jump test, the reload test, casts on shift, and the front, a blackout and the party added to perf_check.</td><td>So the comet and the visit don't each need a new check.</td><td>2-3</td></tr>
+<tr><td>F8</td><td><b>Comms down:</b> read from the event's own setting, not from the phase.</td><td>Item 6.</td><td>1</td></tr>
 </table>
-<p class="sub">About 10-12 turns. Hash keys: Pillar 6's range is 950-999, skipping 951-952 (the time clock's).</p>
+<p class="sub">Hash keys: Pillar 6's range is 950-999, skipping 951-952. Who writes the new lines: the head writer, for the storm's rank parts, Sato's comet lines, and the visit's dinner and briefing.</p>
 </details>
 
 <details>
-<summary>Comet viewing (short) · Sunday Day 21, 21:00 · about 3 turns</summary>
+<summary>Comet viewing (short) · Tuesday Day 16, 21:30 · about 2-3 turns</summary>
 <ul>
-<li><b>Warning:</b> on Saturday Day 20, Dr. Sato's Mail at 08:00 and a news item. Crew mention it at dinner.</li>
-<li><b>Onset:</b> at 21:00 the comet is in every window. It's a "felt everywhere" moment: crew stop and look up. There are two gatherings, at the observatory (Deck 2) and the bow lounge windows. Joining works by turning up, or by tapping Sato.</li>
-<li><b>Escalation:</b> none (a short event).</li>
-<li><b>Resolution:</b> about 22:15. It fades, and the crowd goes home.</li>
-<li><b>Afterglow:</b> a sketch by the crew artist is pinned in the lounge for a week (a trace), plus a day of chatter. There's no score: a short event always goes smoothly.</li>
-<li><b>Threads:</b> none. The design's 3-5 threads are for main events.</li>
-<li><b>Touches:</b> Deck 2 observatory and Deck 3 bow lounge. The sky (the performance engineer's): a comet streak that only exists while it's on, so tests with it off stay pixel-identical. Traditions: Lap of the Wren (Sun 20:30) ends just as it starts. It falls between your night shifts (the nights of Days 19 and 20) and the Monday briefing.</li>
-<li><b>Reuse:</b> almost all of it: the draft is ready to paste (tested on paper: due Day 21, 18 in the lounge and 2 in the observatory). <b>New:</b> the comet in the sky and Sato's lines.</li>
-<li><b>Risks:</b> the observatory pulls only 2 people, because Saturday's observatory night is the habit. Give it a stronger pull. The sky change must not touch the normal sky.</li>
+<li><b>Warning:</b> the same morning. Dr. Sato's Mail at 08:00 (she's on shift on Tuesdays) and a news item. Crew mention it at dinner.</li>
+<li><b>Onset:</b> at 21:30 the comet appears in every window, a "felt everywhere" moment: crew stop and look up. There are two gatherings, at the observatory (Deck 2) and at the bow lounge windows. You join by turning up, or by tapping Sato. It's also your first night in the Deck 2 suite, which has a window.</li>
+<li><b>Escalation:</b> none. <b>Resolution:</b> it fades around 22:30. <b>Afterglow:</b> a crew sketch pinned up in the lounge for a week, and a day of chatter. One day long, with no score: short events always go smoothly.</li>
+<li><b>Touches:</b> Decks 2 and 3, and the sky. A comet streak exists only while the event is on, so the "off" tests stay pixel-identical. It starts after Tiles night and Knit and natter end, so neither is cancelled.</li>
+<li><b>Reuse:</b> nearly all of it is in the draft. <b>New:</b> the comet in the sky, a stronger pull to the observatory (the draft drew only 2 people), Sato's lines, and the change from 2 days to 1.</li>
+<li><b>Risks:</b> it's on your Senior Officer promotion day. That's fine because it's optional and in the evening, but it's a busy day (question 3 offers Sunday Day 21 instead). The sky change must leave the normal sky untouched.</li>
 </ul>
 </details>
 
 <details>
-<summary>The diplomatic visit (main) · Days 22-30 · about 8-10 turns</summary>
+<summary>The diplomatic visit (main), shortened · Days 19-27 · about 9-11 turns</summary>
 <ul>
-<li><b>Warning</b> (Mon Day 22): Vance's Mail, and it's the subject of <b>your first Monday briefing</b> (Pillar 5's M21, 08:30, at the conference table: the senior briefing the design promised). Jobs: make up the second visitors' cabin, fix the dining lamp, fetch the gift crates. Laundry wears faster.</li>
-<li><b>Onset</b> (Wed Day 24, 10:00): the greeting in the shuttle bay (Deck 5). It's a meeting with the Veyli Speaker Teshavi, and the Watch patrols. Three more guests take Deck 4's guest cabins. It's moved after the reactor visit that morning (the career-beat guard).</li>
-<li><b>Escalation</b> (Days 25-27): formal dinners in the Captain's quarters (Thursday 25 and Saturday 27), with herbs from the garden, and crew Lieutenant Holt clashing with a delegate. Seniors get a seat at one dinner, the others hear about it.</li>
-<li><b>Resolution</b> (about Mon Day 29): the gift exchange in the observation room, then the farewell gathering in the shuttle bay.</li>
-<li><b>Afterglow:</b> the Veyli cord sculpture in the bow lounge (a lasting trace), plus chatter and the debrief.</li>
+<li><b>Warning</b> (Friday Day 19): Vance's Mail. Weekend jobs: make up the second visitors' cabin, fix the dining lamp, fetch the gift crates. Laundry wears faster.</li>
+<li><b>Onset</b> (Monday Day 22): your first <b>Monday briefing</b> at 08:30 at the conference table is about the visit. That's the senior briefing the design promised. The greeting in the shuttle bay (Deck 5) is in the afternoon, after the Tier 4 test. Speaker Teshavi takes 2-U, and three more guests take Deck 4's guest cabins. The Watch patrols.</li>
+<li><b>Escalation</b> (Days 23-25): one formal dinner in the Captain's quarters on Tuesday Day 23 (Vance is on; you get a seat as a Senior). Herbs from the garden. Lieutenant Holt clashes with a delegate.</li>
+<li><b>Resolution</b> (Friday Day 26, 10:00): the gift exchange in the observation room, then the farewell in the shuttle bay. Calder's question at the Friday tea that evening closes the career.</li>
+<li><b>Afterglow:</b> the Veyli cord sculpture in the bow lounge, chatter, and the debrief on Day 27.</li>
 <li><b>Threads (built):</b> dinners late, cold cabins, no herbs, discourtesy.</li>
-<li><b>Touches:</b> Decks 1, 2, 3, 4 and 5, the galley (formal dinners, an extra batch), the garden, the Watch and guests.</li>
-<li><b>Reuse:</b> the phases, threads, meetings, gatherings, the guest system (Teshavi in 2-U, the others in 4-01 to 4-03) and the shuttle bay's 124 crowd spots. The Captain's-table galley batch.</li>
-<li><b>New:</b> how the guests walk (escorted between decks), a Veyli look (a colour and robe variant, no new models if it can be avoided), the dinner meeting with choices, the senior briefing (F5), and catching the draft up on everything listed for the storm.</li>
-<li><b>Risks:</b> it's 8 days long and runs past "Calder's question" (question 3). It falls in Pillar 5's busiest week (Engine Specialist on Day 23, reactor 24, team lead 25, mentoring 26). The guests' routines are new. Dinners on Deck 1 add draw calls. Saruth's cabin is kept as is.</li>
+<li><b>Touches:</b> Decks 1-5, the galley's formal dinner, the garden, the Watch, and the guests.</li>
+<li><b>Reuse:</b> phases, threads, meetings, gatherings, the guest system, the shuttle bay's 124 crowd spots, and the galley's Captain's-table batch.</li>
+<li><b>New:</b>
+<ul>
+<li>Guests escorted between decks.</li>
+<li>A Veyli look: a colour and robe variant, with no new models if possible.</li>
+<li>The dinner as a meeting with choices.</li>
+<li>The senior briefing (F5).</li>
+<li>Shortening it from about 8 days aboard to 4.</li>
+<li>Everything on the storm's list again.</li>
+</ul></li>
+<li><b>Risks:</b> it falls in Pillar 5's busiest week (Engine Specialist, the reactor, leading a team, mentoring), so every moment needs the career-beat guard. Guest routines are new. The dinner adds draw calls on Deck 1.</li>
 </ul>
 </details>
 
@@ -217,10 +275,27 @@ These blend into smooth, bumpy or rough, and each result has its own traces: the
 <details open>
 <summary>Step 2, Dev mode and Pillar 5</summary>
 <ul>
-<li><b>Step 2 (new ways of working on the one file):</b> events reach into about ten other parts of the file (crew, galley, machines, device, social, Works career, rec deck, HUD). So the <b>owners map</b> decides who makes each edit; I'd say section 18 owns the shared base, and other seats make the small reads in their own parts. <b>The fast check and the GitHub check</b> must include the events check with a correct pass/fail result. <b>The section finder and map</b> keep section 18 easy to find. Build the events on the <b>shared branch, merged early</b>, because they touch everyone.</li>
-<li><b>Dev mode (the user's ask):</b> it needs to (a) start any event now, even one still switched off, (b) jump to a chosen phase (front, escalation, all-clear, party), (c) end it and see the result, (d) set the rank, to see each rank's parts, and (e) move the clock. The game can already start an event in tests (<code>eventStart</code>), so Dev mode just needs a button for it. It must work on a build where the event is switched off, because that's how each event is checked before you switch it on.</li>
-<li><b>Pillar 5 steps 5-6:</b> they set the calendar the events fit around: Senior Officer on Day 16, Engine Specialist on Day 23, the Monday briefing and the conference-table seat. Pillar 5 also needs F1's shared "event day" answer for its "never on event days" rule, and the two ready rooms and two Captain's tables need folding together (question 7). Build the events after steps 5-6 (as the roadmap says), but agree F1 with the Pillar 5 seats first.</li>
-<li><b>Order:</b> step 2, then Dev mode, then Pillar 5 steps 5-6, then the shared base (F1-F8), then the storm update (switch off, test, switch on), then the comet (built off, then on), then the diplomatic visit (built off, then on). Stop for your review after each event.</li>
+<li><b>Step 2 (new ways of working on the one file):</b> events reach into about ten other seats' parts of the file: crew, galley, machines, device, social, Works career, rec deck and HUD. The <b>owners map</b> decides who makes each edit: section 18 owns the shared base, and other seats make the small changes that read it in their own parts. <b>The fast check and the GitHub check</b> must include the events check with a proper pass or fail. Build on the <b>shared branch, merged early</b>.</li>
+<li><b>Dev mode (your ask):</b> it needs to:
+<ul>
+<li>start any event now, even one switched off (with events off, nothing is ever due, so it must start them directly);</li>
+<li>jump to a phase (the front, the escalation, the all-clear, the party);</li>
+<li>end the event and show its result;</li>
+<li>set your rank, so each rank's parts can be seen;</li>
+<li>move the clock.</li>
+</ul></li>
+<li><b>Pillar 5 steps 5-6:</b> they set the dates the events fit around, and they need to add the "not before" days and a reachable reputation pace (see "How I got Day 26"). Agree <code>eventDay(d)</code> with them before either side builds. Two more things to settle with them: the shared ready-room and Captain's-table scenes (question 8), and the new junior for Day 26's mentoring (question 9).</li>
+<li><b>Order:</b>
+<ol>
+<li>Step 2</li>
+<li>Dev mode</li>
+<li>Pillar 5 steps 5-6</li>
+<li>Shared base F0-F8</li>
+<li>Storm update: switch it off, test, switch it on</li>
+<li>Comet: build it switched off, then switch it on</li>
+<li>Visit: build it switched off, then switch it on</li>
+</ol>
+Stop for your review after each event.</li>
 </ul>
 </details>
 
@@ -228,30 +303,154 @@ These blend into smooth, bumpy or rough, and each result has its own traces: the
 <summary>Turn estimate</summary>
 <table>
 <tr><th>Piece</th><th>Turns</th></tr>
-<tr><td>Shared base F1-F8 (F6 inside Dev mode)</td><td>10-12</td></tr>
-<tr><td>Ion storm update (items 1-14)</td><td>6-8</td></tr>
+<tr><td>Shared base F0-F8 (F6 inside Dev mode)</td><td>12-15</td></tr>
+<tr><td>Ion storm update</td><td>8-10</td></tr>
 <tr><td>Comet viewing</td><td>2-3</td></tr>
-<tr><td>Diplomatic visit</td><td>8-10</td></tr>
-<tr><td><b>Total</b></td><td><b>about 26-33</b></td></tr>
+<tr><td>Diplomatic visit (shortened)</td><td>9-11</td></tr>
+<tr><td><b>Total</b></td><td><b>about 31-40</b>, plus the head writer's lines</td></tr>
 </table>
 </details>
 
 <h2>5. Questions for you</h2>
-<div class="q"><b>1. Is the list right: the ion storm, comet viewing and the diplomatic visit?</b><span class="rec">Recommended: yes, all three. The visit starts before Day 26 and pays off your Senior rank (the briefing at the conference table).</span></div>
-<div class="q"><b>2. The storm falls on your first promotion. Move it?</b> Today it runs Days 10-15, and the warning lands on the promotion day.<span class="rec">Recommended: one day later: warning Thu Day 11 (after the morning), the front Fri Day 12 at 14:00, the escalation over the weekend, the all-clear and party on Sun Day 14, the afterglow to Tue Day 16. You live the whole storm as a brand-new Officer, and the weekend means you choose how much to help.</span></div>
-<div class="q"><b>3. The diplomatic visit runs past "Calder's question" (to about Day 30). Is that OK?</b><span class="rec">Recommended: yes. It starts at your first Monday briefing (Day 22), and the farewell around Day 29 is a calm close after the career's end. (Squeezing it in by Day 26 would crowd Pillar 5's busiest week.)</span></div>
-<div class="q"><b>4. Events come by the calendar, not by your rank. A slow player may meet the storm as a Junior. OK?</b><span class="rec">Recommended: yes, by the calendar (the ship doesn't wait). Rank-aware parts mean a Junior carries filters and an Officer musters the team.</span></div>
-<div class="q"><b>5. If you don't help at all, how should the storm turn out?</b><span class="rec">Recommended: bumpy (never rough on its own). Helping can make it smooth, and rough only comes from things going badly.</span></div>
-<div class="q"><b>6. Should the rec deck close during the storm, like the bow lounge?</b><span class="rec">Recommended: yes, from the front until the all-clear. Its traditions pause, and it reopens with Pell's "Film night has moved" Mail.</span></div>
-<div class="q"><b>7. Two ready-room scenes and two Captain's tables fall close together (Days 16-20). Fold them?</b><span class="rec">Recommended: yes. Your storm commendation is mentioned in the Senior Officer ready-room scene on Day 16 (no separate summons), and the Day 17 toast counts as that month's Captain's table (no extra dinner on Day 20 for you).</span></div>
+<p class="sub">Pick an option and add a comment if you like. Each question has an id for saving. My recommendation is marked.</p>
+
+<form id="answers" onsubmit="return false">
+
+<div class="q" data-qid="ev-q1">
+<h3>1. Are the three in-scope events right: the ion storm, comet viewing and the diplomatic visit?</h3>
+<p class="why">They're the ones that fall before Day 26. Everything else is parked (section 6), not deleted.</p>
+<fieldset><legend>Question 1</legend>
+<label class="opt"><input type="radio" name="ev-q1" value="yes"> Yes, those three <span class="recd">recommended</span></label>
+<label class="opt"><input type="radio" name="ev-q1" value="storm-comet"> Only the storm and the comet (park the visit)</label>
+<label class="opt"><input type="radio" name="ev-q1" value="other"> Something else (say below)</label>
+</fieldset>
+<span class="rec">Recommended: yes. The visit is where your Senior rank pays off, at the briefing at the conference table.</span>
+<label class="cl" for="ev-q1-c">Your comment</label><textarea id="ev-q1-c" name="ev-q1-comment"></textarea>
+</div>
+
+<div class="q" data-qid="ev-q2">
+<h3>2. The storm lands on your first promotion. What should we do?</h3>
+<p class="why">Today: briefing at 09:15 and the promotion summons at 11:00 on Day 10. The front comes at 14:00 on Day 11, before the ceremony at 17:15. Moving the storm a day only moves the clash.</p>
+<fieldset><legend>Question 2</legend>
+<label class="opt"><input type="radio" name="ev-q2" value="a"> (a) Keep Days 10-15, and keep the hours apart (the briefing, then the summons; nothing storm-related during the ceremony hour). The ceremony is held by emergency lighting, with one line about the storm. <span class="recd">recommended</span></label>
+<label class="opt"><input type="radio" name="ev-q2" value="b"> (b) One day later (Days 11-15, a shorter afterglow). The briefing comes after Day 11's team job, and the all-clear is on Sunday without Calder.</label>
+<label class="opt"><input type="radio" name="ev-q2" value="c"> (c) Move it to your Senior week (Days 17-21), so you live it as a Senior Officer and your first night shift is in the storm. The comet and the visit then move later.</label>
+</fieldset>
+<span class="rec">Recommended: (a). It changes the least, keeps the "about a week and a half in" timing and Calder's days, and two big moments a day apart make a memorable first week as an Officer.</span>
+<label class="cl" for="ev-q2-c">Your comment</label><textarea id="ev-q2-c" name="ev-q2-comment"></textarea>
+</div>
+
+<div class="q" data-qid="ev-q3">
+<h3>3. When is the comet?</h3>
+<p class="why">Dr. Sato works weekdays, so the game's own rules can't put it on a Sunday.</p>
+<fieldset><legend>Question 3</legend>
+<label class="opt"><input type="radio" name="ev-q3" value="d16"> Tuesday Day 16 at 21:30: your Senior Officer day and your first night in the suite with a window <span class="recd">recommended</span></label>
+<label class="opt"><input type="radio" name="ev-q3" value="d21"> Sunday Day 21 at 21:15, after your night shifts: Sato comes off duty for it, and it starts after Lap of the Wren so that isn't cancelled</label>
+</fieldset>
+<span class="rec">Recommended: Day 16. Nothing else event-related is happening then, Sato is on shift, and it doesn't touch the visit's warning.</span>
+<label class="cl" for="ev-q3-c">Your comment</label><textarea id="ev-q3-c" name="ev-q3-comment"></textarea>
+</div>
+
+<div class="q" data-qid="ev-q4">
+<h3>4. The diplomatic visit: shorten it to fit before Day 26?</h3>
+<p class="why">As built, it's about 8 days aboard (9 with the afterglow). The design says events run over 2-4 days. With the game's own rules it would start on Day 26, or Day 33 with the comet in.</p>
+<fieldset><legend>Question 4</legend>
+<label class="opt"><input type="radio" name="ev-q4" value="short"> Shorten it: warning Friday Day 19, greeting Monday Day 22, one dinner on Tuesday Day 23, farewell Friday Day 26 <span class="recd">recommended</span></label>
+<label class="opt"><input type="radio" name="ev-q4" value="long"> Keep the full visit (two dinners) on Days 22-30, past the career's end</label>
+</fieldset>
+<span class="rec">Recommended: shorten it. It fits the design's length, ends on the career's last day, and Vance is on duty for each moment.</span>
+<label class="cl" for="ev-q4-c">Your comment</label><textarea id="ev-q4-c" name="ev-q4-comment"></textarea>
+</div>
+
+<div class="q" data-qid="ev-q5">
+<h3>5. Events come by the calendar, not by your rank. OK?</h3>
+<p class="why">A slow player may meet the storm as a Junior. A player who skips work is let go on Day 20, before the visit.</p>
+<fieldset><legend>Question 5</legend>
+<label class="opt"><input type="radio" name="ev-q5" value="calendar"> By the calendar, with small parts that depend on your rank <span class="recd">recommended</span></label>
+<label class="opt"><input type="radio" name="ev-q5" value="rank"> Wait for your rank (the storm comes once you're an Officer, and so on)</label>
+</fieldset>
+<span class="rec">Recommended: by the calendar. The ship doesn't wait, and you hear about whatever you miss.</span>
+<label class="cl" for="ev-q5-c">Your comment</label><textarea id="ev-q5-c" name="ev-q5-comment"></textarea>
+</div>
+
+<div class="q" data-qid="ev-q6">
+<h3>6. What should helping in the storm change?</h3>
+<p class="why">Today nothing you do moves the result, and a ship left alone always comes out rough.</p>
+<fieldset><legend>Question 6</legend>
+<label class="opt"><input type="radio" name="ev-q6" value="jobs"> Your prep jobs and help count: fitting the ballasts shortens the blackouts, taking the batteries to the bridge keeps the bridge fed, and helping run a rota for the call booths shortens the queue. Left alone, it comes out bumpy; with good help, smooth. <span class="recd">recommended</span></label>
+<label class="opt"><input type="radio" name="ev-q6" value="crew"> Only the whole crew's work counts. You're one pair of hands, and your part only shows in your commendation.</label>
+</fieldset>
+<span class="rec">Recommended: the first option. It matches "you count as one good pair of hands" while making your choices visible. It's new design, counted in the storm update.</span>
+<label class="cl" for="ev-q6-c">Your comment</label><textarea id="ev-q6-c" name="ev-q6-comment"></textarea>
+</div>
+
+<div class="q" data-qid="ev-q7">
+<h3>7. The rec deck and the storm</h3>
+<p class="why">The storm's first address is what moves film night to the rec deck, so switching the storm off breaks film night. The crew already stay off the rec deck during the storm.</p>
+<fieldset><legend>Question 7</legend>
+<label class="opt"><input type="radio" name="ev-q7" value="unhook-close"> Give the rec deck's first all-hands its own date (not the storm), and close the rec deck from the front to the all-clear, like the bow lounge <span class="recd">recommended</span></label>
+<label class="opt"><input type="radio" name="ev-q7" value="unhook-open"> Give it its own date, but keep the rec deck open during the storm (somewhere to shelter)</label>
+</fieldset>
+<span class="rec">Recommended: the first option. Blackouts still skip the rec deck, as the lead decided.</span>
+<label class="cl" for="ev-q7-c">Your comment</label><textarea id="ev-q7-c" name="ev-q7-comment"></textarea>
+</div>
+
+<div class="q" data-qid="ev-q8">
+<h3>8. Too many scenes in the ready room and at the Captain's table</h3>
+<p class="why">The ready room hosts the commendation summons, the Senior Officer scene (Day 16) and the two missed-shifts talks. The Captain's table falls on Day 20, three days after the Day 17 toast.</p>
+<fieldset><legend>Question 8</legend>
+<label class="opt"><input type="radio" name="ev-q8" value="fold"> Send the commendation at the all-clear and mention it in the Day 16 Senior scene (no separate summons). The Day 17 toast counts as that month's Captain's table. The missed-shifts talks stay separate, never on the same day. <span class="recd">recommended</span></label>
+<label class="opt"><input type="radio" name="ev-q8" value="keep"> Keep them all separate</label>
+</fieldset>
+<span class="rec">Recommended: fold them. Fewer repeats, and the storm still gets its thank-you.</span>
+<label class="cl" for="ev-q8-c">Your comment</label><textarea id="ev-q8-c" name="ev-q8-comment"></textarea>
+</div>
+
+<div class="q" data-qid="ev-q9">
+<h3>9. The new junior you mentor on Day 26</h3>
+<p class="why">Pillar 5's mentoring day needs a junior who arrived "with Sunday's crew rotation" on Day 21. But the first rotation isn't until Day 35.</p>
+<fieldset><legend>Question 9</legend>
+<label class="opt"><input type="radio" name="ev-q9" value="rotation"> A small arrival on Sunday Day 21, using the rotation traditions that are already built (the new-hands tea): one person in, nobody out <span class="recd">recommended</span></label>
+<label class="opt"><input type="radio" name="ev-q9" value="shuttle"> They arrive on the delegation's shuttle on Day 22</label>
+</fieldset>
+<span class="rec">Recommended: Day 21, with the built traditions. It's Pillar 5's to build, and it isn't a ship-wide event.</span>
+<label class="cl" for="ev-q9-c">Your comment</label><textarea id="ev-q9-c" name="ev-q9-comment"></textarea>
+</div>
+
+<div class="q" data-qid="ev-general">
+<h3>Anything else?</h3>
+<label class="cl" for="ev-general-c">Your comment</label><textarea id="ev-general-c" name="ev-general-comment"></textarea>
+</div>
+</form>
+
+<h2>6. Parked for later (out of scope, kept on record)</h2>
+<p>Your rule: the events after the career's end are out of scope but kept, in case the game grows. This is the full design list in its order. Each full breakdown is in <code>plans/pillar3-plan.md</code>, and <code>design-doc.md</code> will mark these as parked (never deleted) when it's next updated.</p>
+<details open>
+<summary>The parked events, in order</summary>
+<table>
+<tr><th>Order</th><th>Event</th><th>Kind</th><th>In one line</th><th>Breakdown</th></tr>
+<tr><td>after 2</td><td>Crew rotation day</td><td>Short</td><td>Five crew leave on a transport and five new faces arrive, with goodbyes in the lounge. (Its traditions are already built and keep running; the first is on Days 34-40. The game rotates 1-3 people each time, not 5.)</td><td>pillar3-plan.md line 396</td></tr>
+<tr><td>3</td><td>Something in the garden</td><td>Main</td><td>A creature eats the crops. Traps from the machine shop and a volunteer garden watch follow, and it becomes the ship's pet.</td><td>line 350</td></tr>
+<tr><td>after 3</td><td>Power surge</td><td>Short</td><td>A junction on Deck 6 trips, and two decks lose power for a while.</td><td>line 393</td></tr>
+<tr><td>4</td><td>Shipboard illness ("the Wren cough")</td><td>Main</td><td>The infirmary fills, sick crew stay in their bunks, more jobs are left for you, and soup goes round by cart.</td><td>line 358</td></tr>
+<tr><td>after 4</td><td>Founders' Day festival</td><td>Short</td><td>The whole crew together on the plaza. It's the big-crowd test, built only once a real phone handles crowds over 70. (The Founding Day tradition on Day 100 is built and stays.)</td><td>line 392</td></tr>
+<tr><td>5</td><td>Nebula drift</td><td>Main</td><td>Every window fills with colour, the sensor array overloads, and strange dreams leave the crew sleepy and chatty. A visiting scientist comes aboard.</td><td>line 365</td></tr>
+<tr><td>after 5</td><td>The late supply shuttle</td><td>Short</td><td>Rationing, a bland menu and a busy machine shop, all from the numbers.</td><td>line 395</td></tr>
+<tr><td>6</td><td>Salvage</td><td>Main</td><td>The Tern flies out to a derelict, and the hold fills with odd finds. It ends in an auction in the lounge.</td><td>line 373</td></tr>
+<tr><td>after 6</td><td>A Veyli vessel needs help</td><td>Short</td><td>Works sends parts, and a Veyli engineer comes aboard as a guest.</td><td>line 394</td></tr>
+<tr><td>7</td><td>The déjà vu day</td><td>Main</td><td>A time anomaly replays one day, and what you change the second time counts.</td><td>line 381</td></tr>
+</table>
+<p class="sub">Already in the game data for them (left as it is): guest entries in <code>GUESTS</code> (Dr. Lindgren, Mara Quill, Jonah Petrie, Taavek), and the illness hook <code>careerSick</code>. The shared base (F0-F8) is built so any of these can be added later without new machinery.</p>
+</details>
 
 <details>
-<summary>Notes for the builders and the reviewer</summary>
+<summary>Notes for the builders, the reviewer and the lead</summary>
 <ul>
-<li>The run script is in the planner's scratchpad. It loads the game through cadet_test's <code>Game</code> class at 390 × 844, skips to each moment, stands the player in the room and ticks the ship minutes. The full log is in <code>plans/events-plan-run-log.json</code>. Mail days in that log count from 0 (log "9" is Day 10).</li>
-<li>The "13 vs 22 crew on Deck 3 at lunch" figure comes from the crew's plans (whereIs at 12:15, Day 12 against Day 8).</li>
-<li>Calder must be on shift on the warning day (the storm's <code>need</code>). That's fine for Thursday Day 11 if she works weekdays, but check it when moving it.</li>
-<li>Small finds to pass on: career_check fails one line in 0.64.2 (the busy player reaches "Relied on" on Day 4, and the check expects Day 5 or later). DEV_NOTES' header still says 0.60.7. The design doc's crew rotation ("five leave, five arrive") disagrees with the built rotations (1-3 people each).</li>
+<li><b>For the lead, not the user</b> (the reviewer's question D): with the recommended dates, no short event overlaps a main event, so F0 doesn't need "a short event beside a main one's warning" yet. If question 3 picks Day 21, it does, because Day 21 falls inside the visit's warning.</li>
+<li>The run script loads the game through cadet_test's <code>Game</code> at 390 × 844, skips to each moment, puts the player in the room and ticks the ship minutes. The log is in <code>plans/events-plan-run-log.json</code>. Mail days there count from 0 ("9" is Day 10). Its "crew3: 8" is the crew drawn around the camera. The crew's plans for 12:15 give 13 people on Deck 3 on Day 12, against 22 on Day 8.</li>
+<li>The reviewer's evidence is in <code>plans/events-review-shots/</code> on <code>claude/events-plan-review</code>. Version 2 takes all 4 blockers, all 17 should-fix items and the nits on board.</li>
+<li>Day 26 has no Works Friday tea in the calendar: the "four weeks aboard" tradition (18:40) takes its slot. Pillar 5's "Calder's question at the Friday tea" needs checking against that.</li>
+<li>To pass on: career_check fails one line on 0.64.2 (the busy player is "Relied on" on Day 4). DEV_NOTES' header still says 0.60.7.</li>
 </ul>
 </details>
 </main>
@@ -267,12 +466,11 @@ These blend into smooth, bumpy or rough, and each result has its own traces: the
   const r0=document.createElement('div');r0.className='row days';r0.innerHTML='<div class="lab">Ship day</div>'+days;tl.appendChild(r0);
   const bar=(from,to,cls,text,title)=>'<div class="bar '+cls+'" title="'+(title||text)+'" style="grid-column:'+(from+2)+' / '+(to+3)+'">'+text+'</div>';
   row('Rank',bar(0,9,'r1','Junior Technician')+bar(10,15,'r2','Officer')+bar(16,22,'r3','Senior Officer')+bar(23,25,'r4','Eng. Specialist')+bar(26,26,'end','End','Calder\'s question'));
-  const beats={9:'test',10:'Officer',11:'ceremony',15:'T3 test',16:'Senior',17:'toast',19:'night',20:'night',22:'brief + T4',23:'Eng. Sp.',24:'reactor',26:'Calder\'s Q'};
+  const beats={9:'test',10:'Officer',11:'ceremony',15:'T3 test',16:'Senior',17:'toast',19:'night',20:'night',22:'brief + T4',23:'Eng. Sp.',24:'reactor',25:'lead',26:'Calder\'s Q'};
   let bc='';for(let d=0;d<N;d++)bc+='<span class="beat">'+(beats[d]||'')+'</span>';
   row('Career beats',bc);
-  row('Storm today',bar(10,15,'ev-storm-old','Ion storm (Days 10-15)'));
-  row('Recommended',bar(11,16,'ev-storm','Ion storm 11-16','Warning 11, front 12, all-clear + party 14, afterglow to 16')+bar(21,21,'ev-comet','☄','Comet viewing, Sun 21 at 21:00')+bar(22,30,'ev-dip','Diplomatic visit 22-30','Warning 22 (Monday briefing), greeting 24, dinners 25 + 27, farewell 29'));
-  row('Out of scope',bar(27,30,'ev-out','rest cut (first: rotation, Day 34) →'));
+  row('Events',bar(10,15,'ev-storm','Ion storm 10-15','Warning 10, front 11, all-clear + party 13, afterglow to 15')+bar(16,16,'ev-comet','☄','Comet viewing, Tue 16 at 21:30')+bar(19,21,'ev-warn','warning','The visit\'s warning, from Fri 19')+bar(22,27,'ev-dip','Diplomatic visit','Greeting 22, dinner 23, farewell 26, afterglow 27'));
+  row('Parked',bar(28,30,'ev-out','parked →','Crew rotation day (first on Day 34) and all later events'));
 })();
 </script>
 </body>
