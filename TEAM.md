@@ -209,3 +209,5 @@ PP1 now reviews patch turns. Batch E (small features incl. First Light Cocoa, th
 **~15:40 UTC: Dev mode PUBLISHED.** Build 0.64.3 (claude/integration da5e2aa, GitHub check #32 green) as a new page: https://claude.ai/artifact/EWB21cTQnXc8ZT71zCeEzf (published copy only adds a first-line script that sets #dev, so Dev mode is always on there; repo unchanged). Smoke-tested at 390x844: DEV tag shown, only starship-cadet-save-dev written, no errors. DB1 now on patch #30 → #29 → #26 (claude/patch-e2). BM11 next merges claude/talk-wire 6484d3e as 0.64.4.
 
 **~15:53 UTC: 0.64.4 in claude/integration** (5d6ee1c = talk-wire 6484d3e: Talk a while pack, 280 talks incl. nine work pools; GitHub check #35 green; all checks OK). TE1, TW1 idle; TR1 stopped (handover cb6dd07 on claude/talk-pack-review). DB1 builds patch #30/#29 on claude/devmode (its only push branch), maybe #26.
+
+**~16:12-16:47 UTC: every seat stopped on the 5-hour usage limit ("You've hit your session limit · resets 4:40pm UTC").** Resumed at 16:48 on the user's "Resume": PA, PB, PE, DB1, DR1 each told to push WIP first, then carry on. Lesson: 6-7 seats at once use up the 5-hour allowance in about 2.5 h.
