@@ -49856,8 +49856,10 @@ function devmodeDraw() {
   else if (DM_UI.tab === 'quick') devmodeQuick(body);
   else if (DM_UI.tab === 'clock') devmodeClock(body);
   DM_UI.el.querySelector('.dmFoot').textContent = devmodeFoot();
+  const to = DM_UI.scroll && body.querySelector(DM_UI.scroll); DM_UI.scroll = null;   // a list just opened: into view
+  if (to) body.scrollTop = to.offsetTop - body.offsetTop - 8;
 }
-function devmodeFoot() { const u = devmodeRead(DM_KEY.undo); return 'Dev save: ' + clockText() + (u ? ' · Undo: ' + u.label : ''); }
+function devmodeFoot() { const m = devmodeRead(DM_KEY.mark); return m ? 'Mark: ' + m.label : 'No mark yet'; }
 // the Dev link changed in an open page (a hash change doesn't reload): offer a reload, both ways
 addEventListener('hashchange', () => {
   const on = location.hash.slice(1).split('.').some(t => t === 'dev');
@@ -49963,15 +49965,6 @@ function devmodeClear() {                                 // the Dev save, Mark 
   try { for (const k of [SAVE_KEY, INTRO_KEY, DM_KEY.mark, DM_KEY.undo]) localStorage.removeItem(k); } catch (e) { /* the reload says what's left */ }
   devmodeSay('Dev save cleared: a new Dev game…'); location.reload();
 }
-function devmodeQuick(body) {
-  const u = devmodeRead(DM_KEY.undo);
-  devmodeHead(body, 'This moment');
-  devmodeRow(body, [['Undo my last Dev action', devmodeUndo, { off: !u, aria: u ? 'Undo my last Dev action: ' + u.label : 'Nothing to undo yet' }]]);
-  devmodeRow(body, [['Top up needs', () => devmodeTopUp()],
-    ['Copy my real game', b => devmodeTwice(b, 'Tap again to copy', devmodeCopyReal)],
-    ['Clear Dev save', b => devmodeTwice(b, 'Tap again to clear', devmodeClear)]]);
-  if (u) devmodeText(body, 'Undo goes back to before: ' + u.label + ' (' + u.at + ').');
-}
 // ---- D3: the clock (Clock tab), workdays excused, needs kept, Top up ----
 // The game's own time jump (skipTo, what sleeping uses) in DM_STEP-minute steps, frozen and unsaved until the end
 // (devmodeRun). A workday whose clock-in window (the shift's start, DAY_SHIFT[0], to CAREER.missBy) the jump crosses, with you not clocked in, is
@@ -50034,6 +50027,97 @@ function devmodeClock(body) {
   devmodeRow(body, DM_TIMES.map(([l, m]) => [l, () => devmodeGo(l.slice(3), () => devmodeNext(m))]));
   devmodeRow(body, [['+1 day', () => devmodeGo('+1 day', () => shipNow() + 1440)], ['+7 days', () => devmodeGo('+7 days', () => shipNow() + 7 * 1440)], ['+3 hours', () => devmodeGo('+3 hours', () => shipNow() + 180)]]);
   devmodeText(body, 'Workdays you skip are excused. Needs kept as a normal day. Undo my last Dev action (Quick) puts the clock back.');
+}
+// ---- D4: Take me to… (refused during the arrival evening and inside a meeting), Mark here / Back to mark ----
+// Take me to moves you as the lift does (goToDeck when it's another deck), to a free tile you could walk to from the
+// lift, nearest the spot: in the room asked for, or the spot's own room; the clock doesn't move. The spots: your next
+// appointment (the first thing on or coming up in Tracked, 15b's trkItems, but meals), any room of any deck, and the
+// testing spots (the spine ladder's hatch on this deck, else Deck 4's; the time clock; the job board). Mark here keeps
+// one moment (DM_KEY.mark); Back to mark keeps an Undo, then reloads into it, exactly as it was.
+const DM_SPOTS = [
+  ['The time clock', () => ({ deck: 5, place: '5-timeclock-1', label: 'The time clock' })],
+  ['The job board', () => ({ deck: 5, item: /job board/i, room: 'w', label: 'The job board' })],
+];
+function devmodeStory() {                                // why you can't be moved just now, or null
+  if (typeof introOn === 'function' && introOn() && (SHIP.time.day < 1 || SHIP.intro.step)) return 'Not during the arrival: Zeke is walking you through it, step by step. Play it through first.';
+  if (typeof DIALOGUE !== 'undefined' && DIALOGUE && !/^moment:/.test(DIALOGUE.id)) return 'Not inside a meeting: it needs you in the room. Walk out to end it (its notes come by Mail), then try again.';
+  return null;
+}
+const devmodeSpine = (n, k) => k === '@' || !!(DECKS[n].rooms && DECKS[n].rooms[k] && (DECKS[n].rooms[k].spine || DECKS[n].rooms[k].void));   // the lift car, the spine: not rooms to be taken to
+// to deck n, then the free tile nearest the world spot aim() (worked out on deck n), in a room ok(key) accepts
+function devmodeMove(n, aim, ok) {
+  if (!DECKS[n] || (n === 7 && !REC_DECK)) return null;
+  if (deckDef.num !== n) { if (!liftEl.hidden) closeLiftPanel(); goToDeck(n); } else { endSteer(); player.stop(); }
+  const w = aim(); if (!w) return null;
+  const want = roomAt(...cellAt(w.x, w.z)), taken = occupiedBy(player), here = player.here(), list = [];
+  for (let a = 0; a < W; a++) for (let b = 0; b < D; b++) {
+    if (!free(a, b) || taken.has(a + ',' + b)) continue;
+    const r = roomAt(a, b); if (ok ? !ok(r) : devmodeSpine(n, r)) continue;
+    const p = cellPos(a, b); list.push([a, b, (ok || r === want ? 0 : 1e6) + (p.x - w.x) ** 2 + (p.z - w.z) ** 2]);
+  }
+  list.sort((p, q) => p[2] - q[2]);
+  let c = null; for (const k of list.slice(0, 40)) if (findPath(here, [k[0], k[1]], null, player)) { c = [k[0], k[1]]; break; }
+  if (!c && list.length) c = [list[0][0], list[0][1]];   // nowhere you could walk to (a locked room): put you there anyway
+  if (!c) return null;
+  player.obj.position.copy(cellPos(...c)); target.copy(player.obj.position).setY(.7); lastRoom = null;
+  return c;
+}
+function devmodeTake(label, n, aim, ok) {
+  devmodeDo('Take me to: ' + label, () => {
+    const c = devmodeMove(n, aim, ok); if (!c) return 'Couldn\'t find a free spot for ' + label + '.';
+    const r = roomAt(...c), nm = r && ROOMS[r] ? ROOMS[r].name : label;
+    return 'You\'re at ' + nm + ', ' + deckIn(n) + '. The clock hasn\'t moved.';
+  }, () => devmodeStory());
+}
+function devmodeGoal(label, g) { if (!g || !g.deck) return devmodeSay('Nowhere to go for ' + label + '.'); devmodeTake(label, g.deck, () => ixGoalWorld(g)); }
+function devmodeAppt() {                                  // the first thing on or coming up (Tracked), but meals
+  let items = []; try { items = trkItems(); } catch (e) { items = []; }
+  const it = items.find(x => x.sec === 'on' && x.goal && x.goal.deck && !/^(meal|off):/.test(x.key));
+  if (!it) return devmodeSay('Nothing on or coming up before tomorrow noon.');
+  devmodeGoal(it.title + (it.tag ? ' (' + it.tag + ')' : ''), it.goal);
+}
+function devmodeLadder() {                                // the spine ladder's hatch: this deck's, else Deck 4's
+  const n = DECKS[deckDef.num].rooms && DECKS[deckDef.num].rooms.Z ? deckDef.num : 4;
+  devmodeTake('the spine ladder', n, () => {
+    const it = ITEMS.find(i => i.t === 'Spine ladder'); if (it) { const v = new THREE.Vector3(); it.hit.getWorldPosition(v); return { x: v.x, z: v.z }; }
+    return ixGoalWorld({ room: 'Z' });
+  }, r => !!r && !devmodeSpine(n, r));
+}
+function devmodeRooms(body) {                             // A room…: the deck first, then its rooms
+  const n = DM_UI.rooms;
+  devmodeRow(body, DECK_ORDER.slice(0, 3).map(d => [deckWord(d), () => { DM_UI.rooms = d; DM_UI.scroll = '.dmRoom'; devmodeDraw(); }, { ask: d === n }])).classList.add('dmDecks');
+  devmodeRow(body, DECK_ORDER.slice(3, 6).map(d => [deckWord(d), () => { DM_UI.rooms = d; DM_UI.scroll = '.dmRoom'; devmodeDraw(); }, { ask: d === n }]));
+  if (DECK_ORDER.length > 6) devmodeRow(body, DECK_ORDER.slice(6).map(d => [deckWord(d), () => { DM_UI.rooms = d; DM_UI.scroll = '.dmRoom'; devmodeDraw(); }, { ask: d === n }]));
+  if (!DECKS[n]) return;
+  const rooms = Object.keys(DECKS[n].rooms || {}).filter(k => !devmodeSpine(n, k) && DECKS[n].rooms[k].name).sort((a, b) => DECKS[n].rooms[a].name.localeCompare(DECKS[n].rooms[b].name));
+  for (let i = 0; i < rooms.length; i += 3)
+    devmodeRow(body, rooms.slice(i, i + 3).map(k => [DECKS[n].rooms[k].name, () => { DM_UI.rooms = null; devmodeTake(DECKS[n].rooms[k].name, n, () => ixGoalWorld({ room: k }), r => r === k); }])).classList.add('dmRoom');
+}
+function devmodeHere() { const r = roomAt(...player.here()); return clockText() + ', ' + (r && ROOMS[r] ? ROOMS[r].name : deckIn(deckDef.num)); }
+function devmodeMark() {
+  const why = devmodeBusy(); if (why) return devmodeSay(why);
+  const label = devmodeHere(), w = devmodeWrite(DM_KEY.mark, devmodeCopy(label));
+  devmodeSay(w ? 'Not marked: ' + w : 'Marked: ' + label + '.');
+}
+function devmodeBack() {
+  const m = devmodeRead(DM_KEY.mark); if (!m) return devmodeSay('No mark yet: Mark here first.');
+  const why = devmodeBusy(); if (why) return devmodeSay(why);
+  const kept = devmodeKeep('Back to mark'); if (kept) return devmodeSay('Not done: ' + kept);
+  devmodeLoad(m, 'Back to mark (' + m.label + ')');
+}
+function devmodeQuick(body) {
+  const u = devmodeRead(DM_KEY.undo), m = devmodeRead(DM_KEY.mark);
+  devmodeHead(body, 'Take me to…');
+  devmodeRow(body, [['Next appointment', devmodeAppt], ['A room…', () => { DM_UI.rooms = DM_UI.rooms ? null : deckDef.num; DM_UI.scroll = DM_UI.rooms ? '.dmDecks' : null; devmodeDraw(); }, { ask: !!DM_UI.rooms }], ['The ladder', devmodeLadder]]);
+  devmodeRow(body, DM_SPOTS.map(([l, g]) => [l, () => devmodeGoal(l.toLowerCase(), g())]));
+  if (DM_UI.rooms) devmodeRooms(body);
+  devmodeHead(body, 'This moment');
+  devmodeRow(body, [['Mark here', devmodeMark], ['Back to mark', devmodeBack, { off: !m, aria: m ? 'Back to mark: ' + m.label : 'No mark yet' }],
+    ['Undo my last Dev action', devmodeUndo, { off: !u, aria: u ? 'Undo my last Dev action: ' + u.label : 'Nothing to undo yet' }]]);
+  devmodeRow(body, [['Top up needs', () => devmodeTopUp()],
+    ['Copy my real game', b => devmodeTwice(b, 'Tap again to copy', devmodeCopyReal)],
+    ['Clear Dev save', b => devmodeTwice(b, 'Tap again to clear', devmodeClear)]]);
+  if (u) devmodeText(body, 'Undo goes back to before: ' + u.label + ' (' + u.at + ').');
 }
 // ---- end of slot: Dev mode engineer ----
 

@@ -10,6 +10,9 @@
 #   clock: refused during the arrival evening; from a Skip-to-Monday Dev game, +7 days and +1 day pass with every
 #          workday excused (no miss, no leave spent), needs kept, the crew on the deck; a jump frozen under its fade;
 #          clocked in you stay clocked in; Top up needs; a jump past a first-week meeting leaves the notice
+#   move:  Take me to every room on every deck lands you in that room (rooms nobody can walk into are listed, not
+#          failed), the testing spots and your next appointment; the clock doesn't move; refused during the escort and
+#          inside a meeting; Mark here then Back to mark reloads into the same save, byte for byte
 #   card:  in Dev mode the place-and-clock card has the DEV tag and opens the sheet "Dev mode: not your real game"
 # Setup and environment as for cadet_test.py (CADET_WORK, CADET_CHROME).
 # Run:  python3 devmode_check.py BUILD.html          Good is DEVMODE CHECK OK (exit 0); a failure exits 1.
@@ -216,14 +219,67 @@ def part_clock(b):
     pg.close(); ctx.close()
     print(f'  clock: arrival refused; meeting notice; +7 days in {secs:.1f} s, +1 day in {secs1:.1f} s; excused {C["ex"]}, no miss, leave kept, needs kept; clocked in kept; Top up frozen under the fade')
 
+TAKE = r'''(({ n, k }) => {
+  const t0 = shipNow(), ok = devmodeRun('Take me to', () => { const c = devmodeMove(n, () => ixGoalWorld({ room: k }), r => r === k); return c ? null : 'none'; }, devmodeStory);
+  const here = player.here();
+  return { ok, msg: DM_UI.msg, deck: deckDef.num, room: roomAt(...here), clock: shipNow() === t0,
+    walk: !!findPath(here, (() => { const c = nearestOpen(LIFT_AT[0], LIFT_AT[1], player); return c; })(), null, player) };
+})'''
+
+def part_move(b):
+    ctx = b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1)
+    pg = Page(ctx, '#dev'); pg.sign()
+    # the escort: the manifest signed, Zeke walking you through the arrival
+    check(pg.ev('!!SHIP.intro.step') and pg.ev("devmodeRun('Take me to', () => null, devmodeStory)") is False and 'arrival' in pg.ev('DM_UI.msg'), f'move: not refused during the escort: {pg.ev("DM_UI.msg")}')
+    pg.ev('newGameStart(false); introSkip()'); pg.step(10)
+    # inside a meeting
+    pg.ev("dialogueShow(Object.keys(MEETING_SCRIPTS).find(k => !/^moment:/.test(k)))")
+    check(pg.ev("devmodeRun('Take me to', () => null, devmodeStory)") is False and 'meeting' in pg.ev('DM_UI.msg'), f'move: not refused inside a meeting: {pg.ev("DM_UI.msg")}')
+    pg.ev('dialogueEnd(true)')
+    # every room on every deck
+    rooms = pg.ev("DECK_ORDER.map(n => [n, Object.keys(DECKS[n].rooms || {}).filter(k => !devmodeSpine(n, k) && DECKS[n].rooms[k].name)])")
+    n_all = 0; shut = []; bad = []
+    for n, keys in rooms:
+        for k in keys:
+            r = pg.page.evaluate('a => window.__sc(' + json.dumps(TAKE) + ')(a)', {'n': n, 'k': k}); n_all += 1
+            if not (r['ok'] and r['deck'] == n and r['clock']): bad.append((n, k, r['msg'])); continue
+            if r['room'] != k: bad.append((n, k, 'landed in ' + str(r['room'])))
+            elif not r['walk']: shut.append(f'{n}:{k}')
+    check(not bad, f'move: Take me to a room failed: {bad[:6]}')
+    pg.step(5); check(not pg.errors, f'move: errors after the rooms {pg.errors[:3]}')
+    # the testing spots and the next appointment, through the panel's own functions
+    def spot(src, deck):
+        pg.ev(src); pg.page.wait_for_timeout(700); pg.step(3)
+        check(pg.ev('deckDef.num') == deck and "You're at" in pg.ev('DM_UI.msg'), f'move: {src}: {pg.ev("DM_UI.msg")}, on deck {pg.ev("deckDef.num")}')
+        return pg.ev('DM_UI.msg')
+    pg.ev('goToDeck(4)')
+    lad = spot('devmodeLadder()', 4)
+    spot("devmodeGoal('the time clock', DM_SPOTS[0][1]())", 5)
+    spot("devmodeGoal('the job board', DM_SPOTS[1][1]())", 5)
+    pg.ev("devmodeRun('Clock: to 08:30', () => devmodeSkipTo(devmodeNext(8 * 60 + 30)))")
+    appt = spot('devmodeAppt()', 5)
+    # Mark here, Back to mark
+    pg.ev('devmodeMark()'); mark = pg.ev('devmodeRead(DM_KEY.mark)')
+    check(mark and mark['label'].startswith(pg.ev('clockText()')), f'move: Mark here: {pg.ev("DM_UI.msg")}')
+    pg.ev("devmodeRun('Clock: +1 day', () => devmodeSkipTo(shipNow() + 1440))")
+    got = pg.ev_reload('devmodeBack()')
+    check(got == mark['save'], 'move: Back to mark did not reload the marked save byte for byte')
+    check(pg.ev('devmodeRead(DM_KEY.undo).label') == 'Back to mark' and pg.ev('!!devmodeRead(DM_KEY.mark)'), 'move: Back to mark kept no Undo, or lost the mark')
+    got2 = pg.ev_reload('devmodeBack()')
+    check(got2 == mark['save'], 'move: a second Back to mark differs')
+    check(not pg.errors, f'move: errors {pg.errors[:3]}')
+    pg.close(); ctx.close()
+    print(f'  move: {n_all} rooms on {len(rooms)} decks, clock unmoved' + (f' (no walking way from the lift: {", ".join(shut)})' if shut else '') + f'; refused in the escort and a meeting; {lad} | {appt}; Mark and Back to mark byte for byte, twice')
+
 with sync_playwright() as pw:
     b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
     ctx = b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1)
     for name, part in (('off', part_off), ('real', part_real), ('card', part_card), ('store', part_store)):
         try: part(ctx)
         except Exception as e: fail(f'{name}: stopped: {str(e)[:300]}')
-    try: part_clock(b)
-    except Exception as e: fail(f'clock: stopped: {str(e)[:300]}')
+    for name, part in (('clock', part_clock), ('move', part_move)):
+        try: part(b)
+        except Exception as e: fail(f'{name}: stopped: {str(e)[:300]}')
     b.close()
 
 print('DEVMODE CHECK OK' if ok else 'DEVMODE CHECK FAILED')
