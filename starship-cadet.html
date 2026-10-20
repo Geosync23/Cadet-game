@@ -49768,7 +49768,7 @@ function liftHeld(t) { if (!LIFT_HOLD) return false; if (!Number.isFinite(t)) t 
 const DM_TABS = [['quick', 'Quick'], ['clock', 'Clock'], ['trad', 'Traditions'], ['career', 'Career'], ['set', 'Set career'], ['events', 'Big events']];
 const DM_LATER = { trad: 'Start any ship tradition: coming in Stop 1b.', career: 'Your career by hand: coming in Stop 2.', set: 'Set career to a day: coming in Stop 2.', events: 'Big events: start, phases, threads, End and undo. Coming in Stop 3.' };
 var DM_ST = null;                                         // the Dev state (save.dev): { ex: [excused days], note, last }; var: section 20 may ask before this line runs
-const DM_UI = { el: null, tab: 'quick', open: false };
+const DM_UI = { el: null, tab: 'quick', open: false, msg: '' };
 function devmodeState() {                                // the Dev state, from the Dev save the first time
   if (!DEVMODE) return null;
   if (!DM_ST) { const s = typeof SAVED !== 'undefined' && SAVED && SAVED.dev; DM_ST = { ex: s && Array.isArray(s.ex) ? s.ex.filter(Number.isInteger).slice(-60) : [], note: s && typeof s.note === 'string' ? s.note : '', last: s && typeof s.last === 'string' ? s.last : '' }; }
@@ -49850,15 +49850,15 @@ function devmodeDraw() {
   const st = devmodeState(), body = DM_UI.el.querySelector('.dmBody');
   for (const b of DM_UI.el.querySelectorAll('.dmTabs button')) { const on = b.dataset.tab === DM_UI.tab; b.classList.toggle('on', on); b.setAttribute('aria-selected', on ? 'true' : 'false'); }
   body.textContent = '';
+  if (DM_UI.msg) devmodeText(body, DM_UI.msg, 'dmNote');
   if (st.note) devmodeText(body, st.note, 'dmNote');
   if (DM_LATER[DM_UI.tab]) devmodeText(body, DM_LATER[DM_UI.tab]);
   else if (DM_UI.tab === 'quick') devmodeQuick(body);
   else if (DM_UI.tab === 'clock') devmodeClock(body);
   DM_UI.el.querySelector('.dmFoot').textContent = devmodeFoot();
 }
-function devmodeQuick(body) { devmodeText(body, 'Take me to, Mark, Undo and the rest arrive in the next turns of Stop 1a.'); }
 function devmodeClock(body) { devmodeText(body, 'Now: ' + clockText() + '. Moving the clock arrives in turn D3.'); }
-function devmodeFoot() { return 'Dev save: ' + clockText(); }
+function devmodeFoot() { const u = devmodeRead(DM_KEY.undo); return 'Dev save: ' + clockText() + (u ? ' · Undo: ' + u.label : ''); }
 // the Dev link changed in an open page (a hash change doesn't reload): offer a reload, both ways
 addEventListener('hashchange', () => {
   const on = location.hash.slice(1).split('.').some(t => t === 'dev');
@@ -49872,6 +49872,106 @@ addEventListener('hashchange', () => {
 });
 if (DEVMODE) { devmodeCss(); devmodeBuild(); devmodeState(); }
 // ---- slot: Dev mode engineer (section 25). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- D2: storage, Undo, Copy my real game, Clear, and every Dev action frozen and settled ----
+// Dev mode keeps three things: its save (SAVE_KEY, with INTRO_KEY), one Mark and one Undo (DM_KEY: { label, at, save,
+// arrived }, each about the size of a save). Before every write, a space check (devmodeWrite): what's stored plus the
+// new copy plus room for the real save to grow (twice its size, at least DM_KEEP) must stay under DM_ROOM characters
+// (browsers give a site about 5 million); it never removes anything, and the real game's keys are only ever read.
+// Undo and Mark go back by writing the kept save over the Dev save and reloading, held (devmodeHold) so the page's
+// last save doesn't write over it.
+const DM_KEY = { mark: 'starship-cadet-dev-mark', undo: 'starship-cadet-dev-undo' }, DM_REAL = { save: 'starship-cadet-save', arrived: 'starship-cadet-arrived' };
+const DM_ROOM = 4.5e6, DM_KEEP = 3e5;
+var DM_HOLD = false;                                      // a Dev action at work, or a reload on its way: frozen and unsaved (section 13 asks devmodeHold)
+function devmodeHold() { return DEVMODE && DM_HOLD; }
+function devmodeUsed() {                                  // characters stored by this site (keys and values)
+  let n = 0; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); n += k.length + (localStorage.getItem(k) || '').length; } return n;
+}
+function devmodeWrite(key, text) {                        // null, or why it can't be stored
+  try {
+    const old = localStorage.getItem(key), real = (localStorage.getItem(DM_REAL.save) || '').length;
+    if (devmodeUsed() - (old === null ? 0 : key.length + old.length) + key.length + text.length + Math.max(DM_KEEP, 2 * real) > DM_ROOM)
+      return 'Not enough space in this browser for that. Clear Dev save frees Dev mode\'s space; your real game\'s room is kept.';
+    localStorage.setItem(key, text); return null;
+  } catch (e) { return 'The browser wouldn\'t store it (storage full or off). Clear Dev save frees Dev mode\'s space.'; }
+}
+function devmodeRead(key) { try { const r = JSON.parse(localStorage.getItem(key)); return r && typeof r.label === 'string' ? r : null; } catch (e) { return null; } }
+function devmodeCopy(label) {                             // the Dev game as it is now, as a kept record (saved first)
+  saveGame();
+  return JSON.stringify({ label, at: clockText(), save: localStorage.getItem(SAVE_KEY), arrived: localStorage.getItem(INTRO_KEY) });
+}
+function devmodeKeep(label) { return devmodeWrite(DM_KEY.undo, devmodeCopy(label)); }   // the Undo, before a Dev action: null, or why not
+function devmodeLoad(rec, why) {                          // reload into a kept record (Undo, Back to mark, Copy my real game)
+  DM_HOLD = true;
+  try {
+    if (typeof rec.save === 'string') localStorage.setItem(SAVE_KEY, rec.save); else localStorage.removeItem(SAVE_KEY);
+    if (rec.arrived) localStorage.setItem(INTRO_KEY, rec.arrived); else localStorage.removeItem(INTRO_KEY);
+  } catch (e) { DM_HOLD = false; return devmodeSay('The browser wouldn\'t store it: ' + why + ' didn\'t happen.'); }
+  devmodeSay(why + ': reloading…'); location.reload();
+}
+function devmodeSay(text) { DM_UI.msg = text || ''; devmodeDraw(); return false; }
+function devmodeBusy() {                                  // why a Dev action can't run just now, or null
+  if (DM_HOLD) return 'Dev mode is still working on the last one.';
+  if (typeof ride !== 'undefined' && ride) return 'Not during a lift ride. Try again when the doors open.';
+  if (typeof sleeping !== 'undefined' && sleeping) return 'Not while you\'re falling asleep.';
+  return null;
+}
+function devmodeSettle() {                                // what's in progress ends as if you walked away (a meeting's gist goes to Mail)
+  if (typeof DIALOGUE !== 'undefined' && DIALOGUE && typeof dialogueEnd === 'function') dialogueEnd(false);
+  if (typeof CHAT !== 'undefined' && CHAT && typeof chatClose === 'function') chatClose();
+  if (typeof TL_GAME !== 'undefined' && TL_GAME && typeof tilesEnd === 'function') tilesEnd(TL_GAME.s && TL_GAME.s.over ? 'done' : 'leave');
+  if (typeof DISC !== 'undefined' && DISC.g && typeof discEnd === 'function') discEnd(false);
+  if (typeof ACT !== 'undefined' && ACT && ACT.kind !== 'lie' && typeof actEnd === 'function') actEnd(true);
+  if (typeof deviceClose === 'function') deviceClose();
+}
+// an action on the Dev game: refused with a reason, else the Undo kept, what's in progress settled, then fn() under a
+// short fade with the ship frozen (so frames drawn meanwhile change nothing), then one save. fn returns a message or null.
+// devmodeRun is the same without the fade (devmode_check calls it).
+function devmodeRun(label, fn, refuse) {
+  const why = devmodeBusy() || (refuse ? refuse() : null); if (why) { devmodeSay(why); return false; }
+  const kept = devmodeKeep(label); if (kept) { devmodeSay('Not done: ' + kept); return false; }
+  devmodeSettle(); DM_HOLD = true; let out = null;
+  try { out = fn(); } catch (e) { console.error(e); out = 'Something went wrong (' + e.message + '). Undo my last Dev action puts it back.'; }
+  DM_HOLD = false; devmodeState().last = label; saveGame();
+  devmodeSay(out || label + ': done.'); return true;
+}
+function devmodeDo(label, fn, refuse) {
+  const why = devmodeBusy() || (refuse ? refuse() : null); if (why) return devmodeSay(why);
+  DM_HOLD = true; fadeEl.style.transition = 'opacity .25s'; fadeEl.style.opacity = 1;
+  setTimeout(() => { DM_HOLD = false; devmodeRun(label, fn, refuse); fadeEl.style.opacity = 0; setTimeout(() => { fadeEl.style.transition = ''; }, 300); }, 280);
+}
+// two taps for the ones that throw something away: the first asks, a second within 4 seconds does it
+function devmodeTwice(b, ask, fn) {
+  if (!b.dataset.ask) { const t = b.textContent; b.dataset.ask = '1'; b.textContent = ask; b.classList.add('dmAsk'); setTimeout(() => { if (b.isConnected) { delete b.dataset.ask; b.textContent = t; b.classList.remove('dmAsk'); } }, 4000); return; }
+  fn();
+}
+function devmodeUndo() {
+  const u = devmodeRead(DM_KEY.undo); if (!u) return devmodeSay('Nothing to undo yet.');
+  const why = devmodeBusy(); if (why) return devmodeSay(why);
+  try { localStorage.removeItem(DM_KEY.undo); } catch (e) { /* the reload brings it back as it was */ }
+  devmodeLoad(u, 'Undo (' + u.label + ')');
+}
+function devmodeCopyReal() {                              // your real game into the Dev save: read, never written
+  let real = null, arr = null; try { real = localStorage.getItem(DM_REAL.save); arr = localStorage.getItem(DM_REAL.arrived); } catch (e) { real = null; }
+  if (!real) return devmodeSay('There\'s no real game saved in this browser to copy.');
+  const why = devmodeBusy(); if (why) return devmodeSay(why);
+  const kept = devmodeKeep('Copy my real game'); if (kept) return devmodeSay('Not done: ' + kept);
+  const w = devmodeWrite(SAVE_KEY, real); if (w) return devmodeSay('Not done: ' + w);
+  devmodeLoad({ save: real, arrived: arr }, 'Copy my real game');
+}
+function devmodeClear() {                                 // the Dev save, Mark and Undo gone; a new Dev game starts
+  const why = devmodeBusy(); if (why) return devmodeSay(why);
+  DM_HOLD = true;
+  try { for (const k of [SAVE_KEY, INTRO_KEY, DM_KEY.mark, DM_KEY.undo]) localStorage.removeItem(k); } catch (e) { /* the reload says what's left */ }
+  devmodeSay('Dev save cleared: a new Dev game…'); location.reload();
+}
+function devmodeQuick(body) {
+  const u = devmodeRead(DM_KEY.undo);
+  devmodeHead(body, 'This moment');
+  devmodeRow(body, [['Undo my last Dev action', devmodeUndo, { off: !u, aria: u ? 'Undo my last Dev action: ' + u.label : 'Nothing to undo yet' }],
+    ['Copy my real game', b => devmodeTwice(b, 'Tap again to copy', devmodeCopyReal)],
+    ['Clear Dev save', b => devmodeTwice(b, 'Tap again to clear', devmodeClear)]]);
+  if (u) devmodeText(body, 'Undo goes back to before: ' + u.label + ' (' + u.at + ').');
+}
 // ---- end of slot: Dev mode engineer ----
 
 // =====================================================================

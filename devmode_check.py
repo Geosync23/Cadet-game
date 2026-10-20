@@ -4,6 +4,9 @@
 #          #dev is not Dev mode either (Dev mode needs its own save)
 #   real:  a real game saved first stays byte for byte the same through a Dev session (#dev, then #dev.debug), every
 #          Dev key ends in "-dev" or is one of Dev mode's own, and the real game still writes its save afterwards
+#   store: the space check refuses a Dev copy that would crowd the real save (nothing removed, the real game still
+#          writes); Undo my last Dev action brings the save back exactly; Copy my real game copies it byte for byte
+#          and leaves it alone; Clear Dev save takes every Dev key away and starts a new Dev game
 #   card:  in Dev mode the place-and-clock card has the DEV tag and opens the sheet "Dev mode: not your real game"
 # Setup and environment as for cadet_test.py (CADET_WORK, CADET_CHROME).
 # Run:  python3 devmode_check.py BUILD.html          Good is DEVMODE CHECK OK (exit 0); a failure exits 1.
@@ -46,6 +49,12 @@ class Page:
         self.step(20)
     def reload(self):
         self.page.reload(); self.ready()
+    def ev_reload(self, src):                         # a Dev action that reloads the page itself
+        with self.page.expect_navigation(timeout=90000):
+            self.page.evaluate('s => window.__sc(s)', src)
+        self.page.wait_for_function('window.__sc !== undefined', timeout=90000)
+        first = self.page.evaluate('() => localStorage.getItem("starship-cadet-save-dev")')   # before any frame
+        self.ready(); return first
     def ev(self, src):
         return self.page.evaluate('s => window.__sc(s)', src)
     def step(self, n, dt=1000 / 30):
@@ -117,10 +126,50 @@ def part_card(ctx):
     pg.close()
     print('  card: DEV tag, the sheet opens and closes, six tabs, buttons 44px')
 
+def part_store(ctx):
+    pg = Page(ctx, '#dev'); pg.sign(); pg.step(30)
+    real0 = store(pg).get('starship-cadet-save')
+    # the space check: junk fills the site up to just short of what Dev mode leaves free; the Undo copy is refused
+    used = pg.ev('devmodeUsed()'); room = pg.ev('DM_ROOM - Math.max(DM_KEEP, 2 * (localStorage.getItem(DM_REAL.save) || "").length)')
+    pg.page.evaluate(f'n => localStorage.setItem("zz-junk", "x".repeat(n))', max(0, room - used - 5000))
+    before = store(pg)
+    check(pg.ev("devmodeRun('Test', () => null)") is False and 'space' in pg.ev('DM_UI.msg'), f'store: a Dev copy over the space limit was not refused: {pg.ev("DM_UI.msg")}')
+    after = store(pg)
+    check(set(after) == set(before) and 'starship-cadet-dev-undo' not in after, 'store: the space check changed what is stored')
+    real_pg = Page(ctx, ''); real_pg.ev('SHIP.time.min = (SHIP.time.min + 37) % 1440; saveGame()')
+    r1 = store(real_pg).get('starship-cadet-save'); real_pg.close()
+    check(r1 and r1 != real0, 'store: with Dev mode\'s storage full, the real game could not write its save')
+    pg.page.evaluate('() => localStorage.removeItem("zz-junk")')
+    # the real save as it is now is the one Copy my real game must copy
+    real0 = r1
+    # Undo my last Dev action, round trip
+    pg.ev('saveGame()'); s0 = store(pg)['starship-cadet-save-dev']
+    check(pg.ev("devmodeRun('Test: an hour on', () => { SHIP.time.min = Math.min(1439, SHIP.time.min + 60); return null; })") is True, f'store: a Dev action was refused: {pg.ev("DM_UI.msg")}')
+    s1 = store(pg)['starship-cadet-save-dev']
+    check(s1 != s0, 'store: the Dev action changed nothing in the Dev save')
+    check(pg.ev('devmodeRead(DM_KEY.undo).label') == 'Test: an hour on', 'store: no Undo kept')
+    back = pg.ev_reload('devmodeUndo()')
+    check(back == s0, 'store: Undo did not bring the Dev save back byte for byte')
+    check(pg.ev('!devmodeRead(DM_KEY.undo)'), 'store: the Undo is still there after undoing')
+    # Copy my real game
+    got = pg.ev_reload('devmodeCopyReal()')
+    check(got == real0, 'store: Copy my real game did not copy the real save byte for byte')
+    check(store(pg).get('starship-cadet-save') == real0, 'store: Copy my real game changed the real save')
+    check(pg.ev('!!devmodeRead(DM_KEY.undo)'), 'store: Copy my real game kept no Undo')
+    # Clear Dev save
+    pg.ev_reload('devmodeClear()')
+    st = store(pg)
+    check('starship-cadet-dev-undo' not in st and 'starship-cadet-dev-mark' not in st and st.get('starship-cadet-save') == real0, f'store: Clear left Dev keys or touched the real save: {sorted(st)}')
+    check(pg.ev('SHIP.time.day') == 0, 'store: Clear did not start a new Dev game (by shuttle)')
+    dev_keys_ok(st, 'store')
+    check(not pg.errors, f'store: errors {pg.errors[:3]}')
+    pg.close()
+    print(f'  store: space check refused at {round(used / 1e3)}k + junk, real save still writes; Undo, Copy my real game, Clear')
+
 with sync_playwright() as pw:
     b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
     ctx = b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1)
-    for name, part in (('off', part_off), ('real', part_real), ('card', part_card)):
+    for name, part in (('off', part_off), ('real', part_real), ('card', part_card), ('store', part_store)):
         try: part(ctx)
         except Exception as e: fail(f'{name}: stopped: {str(e)[:300]}')
     b.close()
