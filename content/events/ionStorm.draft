@@ -1,0 +1,191 @@
+// EW1 (events writer), 2026-10-20. The ion storm's words for the update (events plan v3.2: Days 11-15). DRAFT, not
+// baked: the storm's words live in the game's SHIP_EVENTS.ionStorm and MEETING_SCRIPTS (section 18), so the events
+// engineer moves these in when building the storm update. Formats: meetings as .meet; "? conditions" over lines as
+// in .lines (new words marked * in content/addresses/README.md, plus calledin*, below); tradition-shaped gatherings
+// as .trad text sections; reactions in .lines syntax, ready to go into content/reactions/storm.lines.
+// The calendar (F0): Thu 11 warning 06:00, team job 09:30, tea 13:00-14:00, Calder's briefing 14:00, jobs up after it,
+// the officer ceremony 17:15 (nothing from the storm 17:00-18:30). Fri 12 the front 14:00 (and the Friday address at
+// 16:00: content/addresses/friday-d12.address). Sat 13 escalation, the surge 11:20, storm stew, the lantern supper
+// 18:00-19:30 in the mess. Sun 14 the all-clear 10:00 (the Captain, Calder, Sato and Holt called in; Vance on duty),
+// the commendation letter, the booths' rush, the party 19:00-21:00. Mon 15 the debrief Mail 18:00; Lap of the Wren
+// 20:30, led by Tomas. Rotas: Vance is off on Day 11, so the warning Mail is Calder's.
+// Kept as it is (already right): the 37 reaction lines in content/reactions/storm.lines, the news lines, the
+// STORM_RETELL lines, the debrief texts, the resolution address. Changed or new: below.
+
+// =============================================================================================== warning, Day 11
+== mail.warning
+// from: Chief Ines Calder (06:00). Was "due tomorrow afternoon ... Storm jobs are on the board."
+- Storm prep | Ion storm due tomorrow, about 14:00. Briefing at the job board, 14:00 today, after tea. Storm jobs go up when it ends. Until then, the usual board.
+
+@meeting calderStorm
+// Day 11, 14:00, the Works bay (moved from 09:15, after the 13:00 tea). The jobs go up as it ends, and the one you
+// pick is held for you. On Day 11 a player on track is already an Officer (the summons was Day 10; the ceremony is
+// at 17:15 today, so she doesn't spoil it). Three replies at most (lines_check), so the lounge goes to tech2.
+title: Storm briefing
+from: Chief Ines Calder
+gist: Briefing notes: the ion storm reaches us tomorrow about 14:00, and Survey says it's a big one. In order: the lounge glassware and bar, shielded ballasts on the main lamps, battery packs up to the bridge. Storm jobs are on the board now.
+== lines
+calder: Tea's over. Gather round. Two minutes, then the board.   [gesture]
+calder: Survey's tracking an ion storm. Dr. Sato says it reaches us tomorrow at two, and it's a big one.
+tech1: How big is big?   [nod]
+calder: Big enough that the lights flicker for two days and comms go dark. So we get ahead of it.
+calder: Loose fittings secured. Shielded ballasts on the lamps that matter. Battery packs where they're needed.   [gesture]
+tech2: The lounge bar's the worst for loose glass. Last storm we swept it up for a week.
+calder: Then the lounge is yours. Somebody takes battery packs up to the bridge before the front hits.
+? myrank:junior
+calder > you: {me}, this is your first storm. Anything you want to take on?
+? myrank:officer|senior|specialist
+calder > you: Officer {me}. First storm with a pip. Pick one. Pick well.
+?
+? choice
+* I'll take the battery run to the bridge.   rel:calder+2 job:stormBatteries
+  calder: Good. The packs are in main storage. Mind the lift.   [nod]
+* I'll fit the ballasts. Decks 3 and 4.   rel:calder+2 job:stormBallasts
+  calder: Good. Two lamps, two decks. Shielded side faces out.   [nod]
+* (Say nothing)
+  calder: Fine. The board's there when you want it.
+calder: Right. Storm jobs are on the board. Off you go.   [gesture]
+
+== reactions.warning
+// new, for content/reactions/storm.lines: the Thursday is also your ceremony day (17:15)
+? cue:event.ionStorm.warning flag:promoted
+- Storm tomorrow and a ceremony tonight. Busy Thursday, Officer.   #funny
+? cue:event.ionStorm.warning dept:works time:afternoon
+- Board's full of storm jobs. Pick one before Pell takes the easy ones.   #funny
+
+// ================================================================================================ onset, Day 12
+== address.onset
+// the banner at 14:00 (SHIP_EVENTS.ionStorm.address.onset). One change: she points to the 16:00 Friday address.
+- This is the Captain. We're in it.
+- Expect flickers, and no calls home for a while. The bow lounge and the rec deck are closed.
+- Look after each other. I'll say more at four. Marrow out.
+
+== mail.onset
+// from: Commander Teo Vance (Day 12, at the front). Adds the rec deck (closed from the front to the all-clear).
+- Storm stations | The bridge is on double shifts. The bow lounge and the rec deck are closed, except the auditorium for the Captain's address at 16:00. The call-home booths are off line until it's over.
+
+// ========================================================================================== escalation, Day 13
+// The lantern supper: a gathering in the mess by emergency light, 18:00-19:30, everyone staying in (up to about 60:
+// the 44 seats and standing places). Saturday: Brennan is off (Lukas Dlamini covers Fri-Sat), so the galley's weekend
+// team cooks it. Shaped like a tradition, for EV_SHIPWIDE. The notice goes out at noon (no evening-before Mail: the
+// Friday address announced it).
+@gathering lanternSupper
+title: Lantern supper
+from: Lukas Dlamini
+== mail
+- Lantern supper tonight at six in the mess. Emergency lights, storm stew, all the bread we've got. Come and sit with everyone.
+== ask
+- Lantern supper at six. Bring a jumper. The mess is cold with the lights low.
+- Supper by lantern light tonight. First time I've wanted the lights to stay off.   #funny
+- Everyone's going to the mess tonight. Come and squeeze in.   #warm
+== here
+- Budge up. There's room on this bench if we all breathe in.   #funny
+- Pass the bread. Not that one. The good one.
+- It's nice like this. Quiet. Everyone's faces in the lamp light.   #warm
+== thanks
+- You squeeze in at a long table in the lamp light. Someone passes you a bowl of stew and a heel of bread.   #warm
+== chatter
+- The lantern supper was the best meal of the storm. It was also the only meal of the storm.   #funny
+- Sixty people in the mess by lamp light. Nobody wanted to leave.   #warm
+- Lukas cut the bread so thin you could read through it. We still ran out.   #funny
+
+== reactions.escalation
+// new, for content/reactions/storm.lines
+? cue:event.ionStorm.escalation time:evening
+- Lantern supper tonight. I've saved you a spot on the bench.   #warm
+? cue:event.ionStorm.escalation dept:works weekday:sat
+- Called in on a Saturday. The board doesn't know what a weekend is.
+- My day off, they said. Then the surge, they said.   #funny
+
+// ========================================================================================== resolution, Day 14
+@meeting captainAllClear
+// Sunday 10:00, the observation room. Four of the five are called in on their day off: the Captain, Calder, Sato and
+// Holt (Vance is on duty). The user: "They are not working but are called in and there are comments about it". Your
+// commendation letter comes now (the user's answer 8); `commended` = it was earned (two storm jobs, or one and a
+// meeting). band: as the game's c.band. Three replies at most.
+title: The all-clear
+from: Commander Teo Vance
+gist: Notes from the observation room: the storm passed at 09:40. (The debrief line for the band.) Comms are back; expect a queue at the booths. Party in the bow lounge at 19:00.
+== lines
+vance: The Captain. Who is, for the record, off duty today.   [nod]
+marrow: So is most of this room. Thank you for coming in. Dr. Sato?   [gesture]
+sato: The front passed us at 09:40. Readings are back to background. It's over.
+sato: I'd have come in anyway. You don't sleep through the end of a storm.
+? band:smooth
+marrow: Then let's say so. That went about as well as a storm can.   [nod]
+calder: The lights only went a few times. The prep paid off.
+? band:bumpy
+marrow: Then let's say so. Not our smoothest two days, but nobody got hurt.   [nod]
+calder: We lost a relay on the bridge. I'll have it patched by the end of the week.
+? band:rough
+marrow: Then let's say so. That was a hard one, and the ship shows it.   [nod]
+calder: The relay room's a mess. We'll be patching for a week.
+?
+holt: Watch reports no injuries. Some short tempers. Mine included. It's my day off.   [sigh]
+calder: Mine too. Nobody tell my rota.   [laugh]
+? commended
+marrow > you: And our newest Works hand did more than their share. There's a letter in your Mail. A commendation.
+? !commended mine.jobs
+marrow > you: And I'm told our newest Works hand did their share. Thank you, {me}.
+? !commended !mine.jobs
+marrow: Comms are back. Expect a queue at the booths.
+?
+? choice
+* It was good to be useful.   rel:marrow+1,calder+1
+  marrow: It always is. Remember that on the dull days.   [nod]
+* Is there a party?   rel:vance+1
+  vance: Bow lounge, 19:00. The Captain insists.   [gesture]
+* (Just nod)
+marrow: Right. I'll tell the ship. Then I'm going back to my Sunday.   [laugh]
+
+== commendation.mail
+// from: Captain Odile Marrow, at the all-clear (was: "For your work during the ion storm, noted on your record with
+// thanks. Chief Calder spoke well of you.")
+- Commendation: Ion storm | For your work during the ion storm, noted on your record with thanks. Chief Calder spoke well of you. I'd like to say so in person this week; Commander Vance will find a time.
+
+// The party, 19:00-21:00, the bow lounge (the moment 'party', "All-clear party"): its tap texts, for EV_SHIPWIDE.
+@gathering party
+title: All-clear party
+== ask
+- Party in the bow lounge at seven. The whole ship's going.
+- All clear! The lounge is open again, and there's a party in it.   #funny
+== here
+- To the Wren, and everyone who kept her lit.   #warm
+- I haven't sat down since Friday. This chair is the best chair.   #funny
+- Talent night's moved to next week. Tonight's for doing nothing.
+== thanks
+- The bow lounge is full and loud and warm. Somebody puts a drink in your hand and the windows are clear again.   #warm
+
+== reactions.calledin
+// new condition calledin*: the speaker was called in on their day off (F0 marks the cast). For the four in the
+// all-clear scene, as greet or near lines on Day 14 (their own files, @crew), and crew chatter about them (a bank).
+// @crew marrow
+? calledin
+- I'm not here, officially. It's my day off. Carry on.   #funny
+// @crew calder
+? calledin
+- I'm off today. I'm also here. Don't make it a thing.
+// @crew sato
+? calledin
+- Day off, they said. It's the end of a storm. Nobody misses the end of a storm.
+// @crew holt
+? calledin
+- Off duty. Watch doesn't really do off duty. Ask anyone. Ask me.   #funny
+// @bank all (chatter on Days 14-15: smalltalk/rumour, 60 characters)
+? cue:event.ionStorm.resolution
+- The Captain came in on her day off. So did Holt. Thrilled.   #funny
+- Calder was in at ten on a Sunday. On her day off. Of course.
+- Dr. Sato came in early to watch the storm leave. She waved.   #funny
+
+// ========================================================================================== afterglow, Day 15
+// The debrief Mail (Calder, 18:00): the game's debrief texts stand. Lap of the Wren moves to Monday Day 15 at 20:30,
+// led by Tomas (the user's answer): its words that day (lap-of-the-wren.trad, under a day condition the traditions
+// engineer picks).
+@tradition-day lap-of-the-wren day 15
+== mail
+- Lap of the Wren tomorrow night instead of Sunday, 20:30 round the promenade. Tomas leads. A slow walk to stretch the legs after the storm.
+== ask
+- Lap of the Wren tonight. Monday, for once. My legs need it after that storm.
+- Tomas is leading the lap tonight. He's promised to walk slowly. He won't.   #funny
+== thanks
+- You fall in with the walkers behind Tomas. After three days indoors, the long way round feels like a holiday.   #warm

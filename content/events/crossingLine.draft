@@ -1,0 +1,126 @@
+// EW1 (events writer), 2026-10-20. Crossing the Line's words (events plan v3.2, section 3: Sunday Day 7, your second
+// day off; Saturday stays free). DRAFT, not baked: the event is new (built third, after the storm), so the events
+// engineer moves these in as it's built. Formats as in ionStorm.draft. Event id here: crossingLine (the engineer's to
+// change).
+// What it is: the Wren crosses into the Veyli reach, the first new border in months. An old spacers' custom welcomes
+// everyone crossing for the first time: you, and anyone who's never been this far out. One day, no score.
+// The day: the market ends 12:30; 14:30 the ship's horn on every deck and gold hull lights until the supper ends (felt
+// everywhere), then the Captain's short address (called in on her day off, and she jokes about it); 14:30-15:15 the
+// ceremony on the plaza (about 50): first-timers called forward, she reads the old oath, you choose one reply, then
+// the "dunking": a mug of Brennan's famously awful Line punch. 16:00 the reading corner and 17:15 One week aboard
+// (bow lounge) carry on. 18:00-19:15 the Line supper in the mess (replaces the Sunday table; an extra batch and a
+// cake; Brennan is on duty; up to about 60). 20:30 Lap of the Wren as usual. Monday: your Line certificate on your
+// shelf, a small plaque on the plaza with the date, and crew retelling who pulled the worst face.
+// Rotas on Day 7: Vance and Brennan work; the Captain, Calder and Sato are off; Zeke works until 17:00.
+// No Veyli at the ceremony and nothing of the visit: the reach is just where the Wren is going (the Envoy may watch).
+
+// ================================================================================================= warning
+// From the Friday new-hand's tea (Day 5) onward, crew talk about "the Line"; tapping them, some ask "first crossing?".
+== reactions.warning
+? cue:event.crossingLine.warning
+- We cross the Line on Sunday. First time? You'll love it. Mostly.   #funny
+- First crossing? Lucky you. Don't drink the punch. You'll drink the punch.   #funny
+- The Line's on Sunday. The horn goes on every deck. Don't jump.
+- Sunday we cross into the Veyli reach. New stars out of the windows.
+? cue:event.crossingLine.warning tier>=acquaintance
+- First crossing, {nick}? Stand at the front on Sunday. That's the rule.
+? cue:event.crossingLine.warning dept:galley
+- Line punch on Sunday. Brennan's recipe. We don't ask what's in it.   #funny
+? cue:event.crossingLine.warning dept:helm
+- Sunday at half two we cross the Line. I'm flying it. Gently.
+? cue:event.crossingLine.warning dept:survey
+- New reach, new charts. Survey's been waiting months for Sunday.
+? cue:event.crossingLine.warning tier>=friend
+- I'll stand with you on Sunday. Everyone needs someone at their first Line.   #warm
+
+== mail.warning
+// from: Commander Teo Vance, Saturday Day 6 at 18:00
+- Tomorrow we cross the Line | Tomorrow at 14:30 the Wren crosses into the Veyli reach. The horn will sound on every deck. First crossing? The ceremony is on the plaza, 14:30. Then the Line supper in the mess at 18:00, in place of the Sunday table. Attendance is not required. It is, however, expected.
+
+// ================================================================================================= the moment
+== address.onset
+// the banner at 14:30, after the horn. She's called in on her day off.
+- This is the Captain, on my day off. We have just crossed the Line.
+- Welcome to the Veyli reach. Look out of a window. Everything out there is new to us.
+- First-timers, to the plaza. The rest of you, be kind. Marrow out.
+
+// ================================================================================================= the ceremony
+@meeting crossingCeremony
+// Sunday 14:30-15:15, the plaza, about 50. The Captain reads the old oath; the first-timers stand at the front (you,
+// and the meeting's stand-ins first1, first2: crew on their first crossing). One reply (proud, nervous, joking). Then
+// Brennan's Line punch. Three replies at most. Vance stays with the bridge's own line (he's on duty).
+title: Crossing the Line
+from: Captain Odile Marrow
+gist: You crossed the Line into the Veyli reach. The Captain read the old oath, and you drank Brennan's Line punch. Your certificate is on your shelf.
+== lines
+marrow: Thank you all for coming. I'm off duty, so this is unofficial. Very old, and unofficial.   [gesture]
+marrow: First-timers, step forward. Don't be shy. Everyone here stood where you're standing once.
+first1: Do we have to say anything?
+marrow: Only at the end. I do the hard part. Listen.   [laugh]
+marrow: "We have crossed the Line. We left the near stars behind us, and we did not go alone."
+marrow: "Whatever is out here, we meet it as one crew, and we bring each other home."   [gesture]
+marrow: "From today, this reach knows our names." There. That's the oath. It's older than the ship.
+marrow > you: {me}. A week ago you came up the Tern's ramp. How does it feel?   [listen]
+? choice
+* Proud. I'm really here.   rel:marrow+1 flavour:share mem:line.proud
+  marrow: You are. And now the reach knows it too.   [nod]
+* Honestly? A bit nervous.   rel:marrow+1 flavour:listen mem:line.nervous
+  marrow: Good. Nervous means you're paying attention. Keep it.   [nod]
+* Is this the part with the punch?   rel:marrow+1,brennan+1 flavour:funny mem:line.punch
+  marrow: It is. I'm so sorry.   [laugh]
+brennan: Line punch. One mug each. You drink it all. That's the dunking. No complaints.   [gesture]
+first2: It's... green. Why is it green?
+brennan: Tradition. Drink.   [nod]
+marrow: There. You're Line-crossers now. Supper's at six. Brennan made a cake to take the taste away.   [laugh]
+
+== ceremony.here
+// tap lines on the plaza during it (crew, not first-timers)
+- Front row's for first-timers. We old hands stand at the back and laugh.   #funny
+- Watch their faces when the punch goes round. Best bit.   #funny
+- I cried at my first Line. Don't tell anyone.   #warm
+
+// ================================================================================================= one week aboard (17:15)
+// One week aboard falls on the same Sunday (bow lounge, Zeke). Extra here lines for that day, about your crossing.
+? cue:event.crossingLine.onset
+- A week aboard and a Line crossed. Not a bad first week.   #warm
+- How was the punch? Be honest. I won't tell Brennan.   #funny
+
+// ================================================================================================= the Line supper
+@gathering lineSupper
+// 18:00-19:15, the mess, in place of the Sunday table (an extra batch and a cake; Brennan is on duty). Up to about 60:
+// the 44 seats and standing places.
+title: The Line supper
+from: brennan
+== mail
+- The Line supper tonight at six, in the mess, in place of the Sunday table. A proper roast, and cake. No punch. I promise.
+== ask
+- Line supper at six. Brennan's done a cake to make up for the punch.   #funny
+- Everyone's at the Line supper tonight. Come and find a seat. Or a wall.
+== here
+- To the Line, and everyone who crossed it today.   #warm
+- The cake's to get rid of the taste. It's working.   #funny
+- First-timers eat first. That's the rule tonight.
+== thanks
+- The mess is full to the walls. Someone hands you a plate, and someone else saves you a corner of the bench.   #warm
+== chatter
+- Best Sunday table we've had. And it wasn't even the Sunday table.   #funny
+- The Line supper ran out of cake in ten minutes. Brennan was thrilled.
+
+// ================================================================================================= afterglow (Monday)
+== reactions.afterglow
+? cue:event.crossingLine.afterglow
+- Did you see the first-timers' faces at the punch? I'll remember that for years.   #funny
+- Somebody pulled the worst face at the punch. I think it was me.   #funny
+- There's a plaque on the plaza now. With the date. We were there.   #warm
+- First morning in the Veyli reach. The stars look different from the mess.
+? cue:event.crossingLine.afterglow tier>=acquaintance
+- Your first Line, {nick}. Keep the certificate. Everyone does.   #warm
+? cue:event.crossingLine.afterglow dept:survey
+- New reach. Survey's had their noses to the windows since yesterday.   #funny
+
+== keepsake
+// the certificate on your shelf (a keepsake; the deck architect's prop), its tap text
+- Your Line certificate, signed by the Captain: "Crossed into the Veyli reach, Day 7. This reach knows your name."
+== plaque
+// the small plaque on the plaza, its tap text
+- A small brass plaque: "The CSV Wren crossed the Line into the Veyli reach on Day 7." Someone has already polished it.

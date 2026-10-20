@@ -1,0 +1,144 @@
+// EW1 (events writer), 2026-10-20. The diplomatic visit's words for its new shape (events plan v3.2: a weekend finale,
+// Days 26-30, shortened from five days aboard to three). DRAFT, not baked: the visit's words live in the game's
+// SHIP_EVENTS.diplomatic and MEETING_SCRIPTS.veyliGreeting / veyliGiftExchange (section 18); the events engineer moves
+// these in when building it. Formats as in ionStorm.draft.
+// The calendar: Mon 22 Vance's memo (Pillar 5's Monday briefing takes it over later); Fri 26 the Captain's Friday
+// address points to it (content/addresses/friday-d26.address), then Vance's warning Mail that evening and weekend
+// jobs; Sat 27 10:00 the greeting, the crew line the shuttle bay (up to about 60), the Captain called in on her day
+// off; Sun 28 one formal dinner in the Captain's quarters (small; Seniors get a seat), where Chief Holt and the pilot
+// clash; Mon 29 08:30 Pillar 5's senior briefing, 09:00 the gift exchange (observation room), 10:00 the farewell
+// (shuttle bay, a big crowd again); Tue 30 the afterglow, the cord sculpture in the bow lounge, the debrief.
+// The delegation (four): Speaker Teshavi, the aide Kesrin, the scholar Moleth and the pilot Ithra. Envoy Saruth lives
+// aboard. All Veyli are they/them (facts.md 4c): the game's veyliGreeting gist says "her aide"; this draft fixes it.
+// Holt's distrust is voiced and argued with, never a slur or a joke about the Veyli as a people; nothing of his past.
+
+// ================================================================================================= Day 22, the memo
+== mail.memo
+// from: Commander Teo Vance, Monday Day 22 (morning)
+- Next week's business | A Veyli delegation will be aboard from Saturday Day 27 to Monday Day 29. Three things before then: dress uniforms cleaned, guest cabins made up, manners reviewed. Details on Friday.
+
+// ================================================================================================= Day 26, the warning
+== mail.warning
+// from: Commander Teo Vance, Friday Day 26, evening (after the Captain's address). Was "arrives in two days".
+- A Veyli delegation | The delegation arrives tomorrow at 10:00 in the shuttle bay: Speaker Teshavi and three others. Dress uniforms for the greeting. The visitors' cabin and the guest cabins on Deck 4 need making up, and the Veyli like it warm: heaters up. Visit jobs are on the Works board tonight and tomorrow morning.
+
+== news.warning
+// the game's two lines stand ("A Veyli delegation is coming aboard. Four of them." / "Dress uniforms. Everyone. Vance
+// was very clear."); two more for the weekend shape
+- They're here tomorrow at ten. I've ironed my uniform twice.   #funny
+- Weekend visit jobs on the board. Works is in on Saturday again.
+
+== reactions.warning
+// for a new content/reactions/visit.lines (@reactions event.diplomatic)
+? cue:event.diplomatic.warning
+- The Veyli tomorrow. Don't bow. Apparently we all do it wrong.   #funny
+- Envoy Saruth's been very calm all week. Which means a lot is going on.
+- I've never seen a Veyli ship up close. I'll be at the front.
+? cue:event.diplomatic.warning dept:works weekday:sat
+- Called in on a Saturday. For heaters. The Veyli like it warm.   #funny
+? cue:event.diplomatic.warning dept:galley
+- Herbs, herbs and more herbs. The Veyli dinner's on Sunday.
+? cue:event.diplomatic.warning dept:watch
+- Watch is doubling up on Deck 2. Chief Holt's orders. Politely.
+
+// ================================================================================================= Day 27, the greeting
+@meeting veyliGreeting
+// Saturday 10:00, the shuttle bay; the crew line the bay. The Captain is called in (off on Saturdays) and says so.
+title: The Veyli greeting
+from: Commander Teo Vance
+gist: The Veyli delegation came aboard at 10:00: Speaker Teshavi, their aide Kesrin, the scholar Moleth and their pilot Ithra. They're in the visitors' cabin and the guest cabins on Deck 4 until Monday.
+== lines
+vance: Dress uniforms, everyone. Straight lines. The Captain.   [nod]
+marrow: Speaker Teshavi. Welcome aboard the Wren.   [gesture]
+teshavi: Captain. Your ship is warmer than the reports said. That is a compliment.   [nod]
+teshavi: And your whole crew is here. On a rest day, I am told.
+marrow: Mine too. You're worth it.   [laugh]
+saruth: Speaker. It has been too long.
+teshavi: Saruth. You look well fed. The humans are treating you kindly, then.
+kesrin > you: The Speaker would like to meet the crew who keep the ship running. Informally.
+teshavi > you: You. The young one in Works. What do you do aboard?
+? choice
+* I keep the lights on, Speaker. Mostly.   rel:marrow+1
+  teshavi: Mostly. An honest answer. I like it.   [nod]
+* Welcome aboard. Ask me anything about the ship.   rel:vance+1 thread:discourtesy-1
+  kesrin: Careful. Moleth has forty questions.
+* (A respectful nod)
+  teshavi: Quiet. Good. Most of your crew talk too much.
+marrow: Commander Vance will show you to your cabins. Dinner is tomorrow, in my quarters.
+
+== address.onset
+// the banner after the greeting: the game's stands ("Our Veyli guests are aboard. They are here as friends...")
+
+@gathering greetingLine
+// the crowd lining the bay, its tap texts (the moment shaped like the farewell's)
+title: The Veyli greeting
+== ask
+- The Veyli land at ten. I want a spot at the front of the line.
+- Dress uniform, ten o'clock, shuttle bay. Day off or not.
+== here
+- Stand up straight. They notice everything.
+- That's the Speaker, in the middle. Don't stare. Well, a little.
+== thanks
+- You take your place in the line along the shuttle bay as the Veyli ship settles on the pad.   #warm
+
+// ================================================================================================= Day 28, the dinner
+@meeting veyliDinner
+// Sunday, the Captain's quarters (Deck 2): the one formal dinner. Small: the Captain, Vance, Holt, the four Veyli,
+// Envoy Saruth; a Senior Officer (or above) gets a seat, anyone else hears it in chatter and the gist by Mail. Holt and
+// the pilot Ithra clash over who stands where at the door (the game's news line). Your one choice can ease it (the
+// courtesy thread). Three replies at most.
+title: The Veyli dinner
+from: Captain Odile Marrow
+gist: The formal dinner in the Captain's quarters. Chief Holt and the pilot Ithra had words about the Watch at the door. The Speaker praised the herbs.
+== lines
+marrow: Please, sit. Chef Brennan has cooked with herbs from our own garden tonight.   [gesture]
+teshavi: Fresh herbs, so far out. That is a courtesy. We notice courtesies.   [nod]
+moleth: Captain, may I ask about your engines? I have a list.
+vance: Of course you do.   [laugh]
+ithra: Chief Holt. Your guard stood inside our door last night. Among us that is rude.
+holt: Among us it's a guard doing their job. I won't apologise for keeping people safe.
+saruth: Both of you are right. That is what makes it difficult.
+marrow > you: {me}. You've been in every corner of this ship. How would you settle it?   [listen]
+? choice
+* Outside the door, where both of you can see them.   rel:marrow+1,holt+1 thread:discourtesy-1
+  ithra: Outside. Yes. That we can accept.   [nod]
+* Ask the Envoy. They've lived with both of us.   rel:saruth+1 thread:discourtesy-1
+  saruth: Outside the door, and a knock before every change of watch. Two knocks.   [nod]
+* I'd rather not take sides.   rel:holt+1
+  holt: Fair enough. Neither would I, normally.   [sigh]
+teshavi: Good. Now. Captain, the herbs. Tell me which one this is.   [gesture]
+
+== mail.dinner
+// for anyone not at the dinner (or a summary for the ship), from Commander Teo Vance, Sunday evening
+- The Veyli dinner | Dinner in the Captain's quarters went late. The Speaker asked for the herb list. Chief Holt and the pilot have agreed where the Watch stands. Carry on.
+
+== reactions.escalation
+? cue:event.diplomatic.escalation
+- Moleth asked me what the blue crate in the bay is. I said ask Calder.   #funny
+- The Veyli eat very slowly. It's a sign of respect, apparently. I'm trying it.   #funny
+- Their pilot and Holt had words. Then they shook hands. Sort of.
+? cue:event.diplomatic.escalation dept:galley
+- The Speaker asked for the herb list. Brennan's never been happier.   #warm
+
+// ================================================================================================= Day 29, the farewell
+// The gift exchange (09:00) stands as written in the game, with "Seven knots, tied by seven hands." Its gist is fine.
+// The farewell moment (10:00, the shuttle bay) has the game's ask/here/thanks; one more each:
+@gathering farewell
+title: The Veyli farewell
+== ask
+- The Veyli leave at ten. I want to see them off.
+- Last chance to wave at the Speaker. I'm going.
+== here
+- Safe travels.
+- I'll miss Moleth's questions. Not all of them.   #funny
+== thanks
+- You line the shuttle bay to see the delegation off.
+
+// ================================================================================================= Day 30, afterglow
+== reactions.afterglow
+// the game's VEYLI_RETELL lines stand; a few more
+? cue:event.diplomatic.afterglow
+- Quiet without them. I keep looking for Moleth round corners.
+- Three days. Felt like a month. A good month.   #warm
+? cue:event.diplomatic.afterglow tier>=acquaintance
+- You did well with the Veyli, {nick}. People noticed.   #warm

@@ -1,0 +1,60 @@
+// EW1 (events writer), 2026-10-20. Comet viewing's words (events plan v3.2, section 4: Tuesday Day 16, one day, no
+// score). DRAFT, not baked: it builds on plans/comet-viewing-draft.js, whose words are updated here for the new times
+// (it said 21:00 and two days). Sato's Mail at 08:00; at 21:30 the comet is in every window; two gatherings, the
+// observatory and the bow lounge windows (about 25); it fades about 22:30. Tiles night and Knit and natter end at 21:30,
+// so people come straight on. Afterglow: a crew sketch of it pinned up for a week. For a Senior Officer it's the first
+// night in the Deck 2 suite, which has a window (Pillar 5, Day 16).
+
+== mail.warning
+// from: Dr. Imra Sato, Day 16 at 08:00
+- A comet tonight | A comet passes us tonight from about 21:30, close enough to see its tail from any window. The observatory will be open for anyone who wants a look through the scope. It's gone by half ten, so don't be late. I've been waiting for this one.
+
+== news.warning
+// the morning's rumours (seed: Survey)
+- There's a comet tonight. Sato says the tail will fill the bow windows.
+- Comet at half nine. Get a window seat early.
+- Sato hasn't stopped smiling since breakfast. It's the comet.   #funny
+
+@gathering cometLounge
+// 21:30-22:30, the bow lounge windows
+title: Comet viewing
+== ask
+- Comet tonight at half nine. The bow windows are the place.
+- After the storm, a comet. I'll take it.   #warm
+== here
+- Look at the tail on it. All the way across the glass.
+- Quiet, everyone. You'll want to remember this.   #warm
+- It's moving. You can see it move. Look.
+== thanks
+- You find a spot at the bow windows as the comet slides past, its tail lit pale green from end to end.   #warm
+
+@gathering cometObservatory
+// 21:30-22:30, the observatory (Deck 2), Sato's
+title: Comet viewing (observatory)
+== ask
+- Sato's opening the observatory for the comet tonight. Scope and all.
+== here
+- Through the scope you can see the ice boiling off it.
+- One look each, then back of the line. Sato's rules.   #funny
+== thanks
+- You take a turn at the observatory scope. The comet's head is a fizzing ball of ice, and Dr. Sato is grinning.   #warm
+
+== reactions.onset
+// for a new content/reactions/comet.lines (@reactions event.comet)
+? cue:event.comet.onset
+- Have you seen it? Go to a window. Any window.
+- I came straight from Tiles. Lost the game. Worth it.   #funny
+- First comet I've seen out here. It's bigger than I thought.
+? cue:event.comet.onset dept:survey
+- Sato's been tracking it for weeks. She'd never say so, but she's thrilled.
+? cue:event.comet.onset rank:senior
+- My cabin has a window. I'm not leaving it tonight.   #funny
+
+== reactions.afterglow
+? cue:event.comet.afterglow
+- Did you see the tail last night? Green all the way along.
+- Half the ship was at the bow windows. Best seat on the ship.
+- Someone pinned a sketch of the comet up in the mess. It's good.   #warm
+- I stayed at the window till it was gone. Worth being tired today.   #warm
+? cue:event.comet.afterglow dept:survey
+- We got two hundred readings off it. Sato wants two hundred more.   #funny
