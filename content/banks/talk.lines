@@ -466,3 +466,23 @@
 == talk.plans.ans.cheer
 - Now that's a plan I can get behind.   #funny
 - Best plan on the ship. What's on tonight?
+
+// ---------------------------------------------------------------- the rank on a crew card (patch #21; texts)
+// Shown before the title ("Junior Officer · Storekeeper"), not where the title already says it (Captain, XO, Head of …).
+== card.rank.captain
+- Captain
+
+== card.rank.xo
+- Commander
+
+== card.rank.chief
+- Department Chief
+
+== card.rank.senior
+- Senior Officer
+
+== card.rank.officer
+- Officer
+
+== card.rank.junior
+- Junior Officer

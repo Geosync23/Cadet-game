@@ -1,0 +1,22 @@
+# patch #26, PR2's fixes: Zeke's invite bubble shows; the meeting plays once (a saved flag); busy from the invite to the end unless declined
+import sys, os; sys.path.insert(0, '/home/user/Cadet-game/plans/patch-plan-probes')
+from pp import *
+OUT = sys.argv[1] if len(sys.argv) > 1 else '/tmp'
+g = start('?nosave&debug&firstlight&mug'); g.step(5)
+g.ev("(() => { const st = document.createElement('style'); st.textContent = '.bub{animation:none!important}'; document.head.appendChild(st); })()")
+g.ev("skipTo(18*60+10)"); g.ev("goToDeck(3)"); g.step(5)
+z = g.ev("(() => { const a = DECK_CREW.find(a => a.p.id === 'torres-zeke'); return [a.x, a.z]; })()")
+g.ev(f"(() => {{ const c = nearestOpen({z[0]} + .8, {z[1]} + .8, player); player.obj.position.copy(cellPos(...c)); target.copy(player.obj.position).setY(.7); }})()")
+g.ev("skipTo(18*60+16)"); g.step(20)
+print('bubble:', g.ev("bubbles.list.filter(b => /First Light/.test(b.el.innerText)).map(b => [b.el.innerText.slice(0, 40), getComputedStyle(b.el).display])"))
+g.page.screenshot(path=OUT + '/26-invite-bubble.png')
+print('busy 19:10 (asked):', g.ev("flcBusy((1-1)*1440 + 19*60+10)"), '| 20:50:', g.ev("flcBusy(20*60+50)"))
+g.ev("SHIP.device.appts.filter(a => a.trad === 'first-light').forEach(a => a.status = 'no')")
+print('busy 19:10 after declining:', g.ev("flcBusy(19*60+10)"))
+g.ev("SHIP.device.appts.filter(a => a.trad === 'first-light').forEach(a => a.status = 'asked')")
+g.ev("skipTo(20*60+5)"); g.ev("goToDeck(3)"); g.step(5)
+g.ev("(() => { const t = (ROOM_TILES['L'] || []).find(c => free(...c) && !occupiedBy(player).has(K(c))); player.obj.position.copy(cellPos(...t)); target.copy(player.obj.position).setY(.7); })()"); g.secs(3)
+print('join:', g.ev("(() => { const a = DECK_CREW.find(a => a.p.id === 'raman'); return tradJoinTap(a); })()"), g.ev("DIALOGUE && DIALOGUE.id"), 'shown flag:', g.ev("flag('firstlight.shown')"))
+g.ev("dialogueEnd(false)"); g.step(3)
+print('again (as after a reload):', g.ev("flcShow(1, shipNow())"), g.ev("DIALOGUE && DIALOGUE.id"))
+print('errors', g.errors[:5]); g.close()
