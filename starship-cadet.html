@@ -10911,7 +10911,7 @@ function devNow() {                                      // the strip: where you
 // aboard" line. SHIP.device.calendarRemind = { on, ahead, morning, per: { <kind>: true | false } }, saved. ----
 let devTickMin = -1, devMorning = SHIP.time.day;
 function deviceTick() {
-  if (!DEV.live return;                                 // not while the script is still loading (section 18 comes later)
+  if (!DEV.live) return;                                 // not while the script is still loading (section 18 comes later)
   if (devLocked()) { SHIP.device.booted = false; if (DEV.open) deviceClose(); }
   const t = shipNow(); if (t === devTickMin) return; devTickMin = t;
   if (typeof sleeping !== 'undefined' && sleeping) return;
@@ -35900,6 +35900,7 @@ function upcomingTraditions(fromMin, toMin) {
 var EV_READY = true;                                     // section 14's hooks wait for this (it's read before section 18 runs)
 if (SCHED_DATA) { SCHED_DATA = null; SHIP_DAYS.clear(); EV_DAYS.clear(); }   // anything planned before now is planned again, with the events
 
+function recShowTick(now) { return now; }   // DELIBERATE duplicate (split rehearsal: the GitHub check must go red)
 // =====================================================================
 // 20. SOCIAL
 // The crew as people you know, and as people who know each other (plans/pillar3-plan.md, Part 3 and "How news
