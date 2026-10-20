@@ -110,7 +110,10 @@ with sync_playwright() as pw:
     dn = [v for vs in r['smalls'].values() for v in vs]
     share = sum(dn) / len(dn) if dn else 0
     print(f"  small talk opening with \"done\": {sum(dn)} of {len(dn)} ({share:.0%})")
-    check(dn and .12 <= share <= .35, f'"done" opens {share:.0%} of small talk (about one in four wanted)')
+    # (since TR1's W1 "done" waits until nothing is left to come, and a few talks wait on a friend or a story beat here,
+    # so its one-in-four share is checked below with everything used)
+    never = ev("TALKS.pool.concat(...Object.values(TALKS.work || {})).map(t => t.id).filter(id => !SHIP.talks.fired[id])")
+    print(f"  never fired with everyone a friend ({len(never)}): {', '.join(never)}")
     sar = [x for x in r['log'] if x['p'] == 'saruth']
     print(f"  Saruth: {[x.get('id') or ('small: ' + x['small'][0]) for x in sar[:6]]}")
     check(sar and all(x.get('src') != 'pool' for x in sar), 'Saruth drew the pool')
@@ -153,9 +156,20 @@ with sync_playwright() as pw:
     print(f"  {{trad}}: the next tradition is {r['name']!r}: {r['line']!r}")
     check(not r['name'] or (r['line'] and r['name'] in r['line']), '{trad} not filled with the next tradition')
 
+    print('"Talked about everything" only once nothing is left to come (TR1\'s W1): a stranger, 60 days, the pool still waiting:')
+    r = ev("""(() => { __TC.reset(0); const p = __TC.people().find(q => q.id === 'abara-rosa') || __TC.people().find(q => !TALKS.own[q.id] && q.rank !== 'guest'); let dn = 0, smalls = 0;
+      for (let d = 1; d <= 60; d++) { const t = (d - 1) * 1440 + 720, a = talkPackPick(p, t); if (a && !a.talk) { smalls++; if (a.done) dn++; } talkPackFire(p, a, t); }
+      const waiting = TALK_SOURCES.flatMap(s => s.talks(p)).filter(tk => !SHIP.talks.fired[tk.id] && talkPackFits(tk, p, { t: 60 * 1440 })).length;
+      for (const s of TALK_SOURCES) for (const tk of s.talks(p)) SHIP.talks.fired[tk.id] = SHIP.talks.fired[tk.id] || [1, 'x'];   // then everything used
+      let dn2 = 0; for (let d = 61; d <= 120; d++) { const t = (d - 1) * 1440 + 720, a = talkPackPick(p, t); if (a && a.done) dn2++; talkPackFire(p, a, t); }
+      return { p: p.id, smalls, dn, waiting, dn2 }; })()""")
+    print(f"  {r['p']}: {r['smalls']} small talks with {r['waiting']} talks still waiting, {r['dn']} \"done\" openers; with everything used, {r['dn2']} in 60 days")
+    check(r['waiting'] > 0 and r['dn'] == 0, '"talked about everything" while talks were still waiting')
+    check(.12 <= r['dn2'] / 60 <= .35, f'with everything used "done" opens {r["dn2"]} of 60 small talks (about one in four wanted, never twice running)')
+
     print('(e) A topic talked about lately goes behind the others:')
     r = ev("""(() => { __TC.reset(3); const p = __TC.people().find(q => !TALKS.own[q.id] && q.rank !== 'guest'), t = 5 * 1440 + 720, out = [];
-      for (let k = 0; k < 6; k++) { const a = talkPackPick(p, t + k * 1440); if (!a || !a.talk) break; out.push(a.talk.topic); talkPackFire(p, a, t + k * 1440); }
+      for (let k = 0; out.length < 6 && k < 14; k++) { const a = talkPackPick(p, t + k * 1440); if (!a || !a.talk) break; if (a.src === 'pool') out.push(a.talk.topic); talkPackFire(p, a, t + k * 1440); }   // the shared pool's topics (work talks take turns in between)
       return { p: p.id, topics: out }; })()""")
     print(f"  {r['p']}, six days running: {r['topics']}")
     check(len(r['topics']) == 6 and len(set(r['topics'])) == 6, 'the same pool topic twice within TALK_TOPIC_DAYS')
