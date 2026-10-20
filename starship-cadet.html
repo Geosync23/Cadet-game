@@ -39634,7 +39634,9 @@ const INTRO_STEPS = [
   { id: 'chief', day: 0, at: 18 * 60 + 20, who: 'calder', mode: 'meet', where: 'your table in the mess', meeting: 'introChief',
     checkpoint: { deck: 3, tile: [28, 1], room: 'Mess hall' }, rel: { calder: 3 }, flags: ['met.calder'],
     seats: { you: '3-mess-10', [INTRO_ESCORT]: '3-mess-12', calder: '3-mess-9' },   // you, Torres beside you, the Chief across
-    // (0.71.3, the user's playtest 2: "the Chief isn't at the dinner with Zeke") she sits across from you from the start of the dinner, not at the far table (0.42.64's away)
+    // (0.71.3, the user's playtest 2: "the Chief isn't at the dinner with Zeke") she's at the dinner from its start; (the patch, #3: "she should
+    // walk up to you") she eats at the next table, facing yours, and walks over on Zeke's "Look who's coming over" (introTick's calderGo)
+    away: { calder: '3-mess-26' },
     fallback: { until: 19 * 60 + 30, later: 'free', mail: { from: 'I. Calder', subject: 'Tomorrow', body: 'Missed you at dinner. Torres has you tomorrow; ten to nine, the Works bay.' } } },
   { id: 'free', day: 0, at: 19 * 60 + 30, who: INTRO_ESCORT, mode: 'free', where: 'the mess', rel: { [INTRO_ESCORT]: 3 } },   // he lets you go after his goodnight (introNightTick), 19:30 at the latest (reviewer 1c: no fixed 19:00)
   { id: 'tomas', day: 0, at: 19 * 60 + 30, who: 'tomas', mode: 'free', where: 'the junior common room or Bunk 1', teaches: 'Chat and Ask about', seek: 22 * 60 },
