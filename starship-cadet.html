@@ -14426,9 +14426,9 @@ if (LADDER_ON) {
   for (const [n, key] of LADDER.open) { DECKS[n].doors[key] = 'door'; delete DECKS[n].closedDoors[key]; }
   for (const n of DECK_ORDER) {                          // the tier wording out of the deck texts (the Reactor: sealed for safety)
     const d = DECKS[n]; if (!d) continue;
-    for (const k in d.closedDoors || {}) if (d.closedDoors[k].t === 'Spine ladder') d.closedDoors[k] = { ...d.closedDoors[k], x: ladderText(n) };
-    for (const r in d.rooms) { const R_ = d.rooms[r]; if (typeof R_.tap !== 'string') continue;
-      R_.tap = R_.tap.replace(/Tier 4 access, and only on a team job\./, 'Sealed for safety: only on a team job.').replace(/\s*Tier \d access(, [^.]*)?\./g, '').trim(); }
+    const noTier = t => t.replace(/Tier 4 access, and only on a team job\./, 'Sealed for safety: only on a team job.').replace(/\s*Tier \d access(, [^.]*)?\./g, '').trim();
+    for (const k in d.closedDoors || {}) d.closedDoors[k] = { ...d.closedDoors[k], x: d.closedDoors[k].t === 'Spine ladder' ? ladderText(n) : noTier(d.closedDoors[k].x || '') };   // the sealed doors copied their room's words at load
+    for (const r in d.rooms) if (typeof d.rooms[r].tap === 'string') d.rooms[r].tap = noTier(d.rooms[r].tap);
   }
   Object.assign(SPINE_IT.ladder, { x: 'The maintenance ladder, top to bottom of the ship beside the lift. Tap it to climb.' });   // also backlog #7's "seven decks" here
 }
