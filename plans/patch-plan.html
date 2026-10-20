@@ -66,13 +66,13 @@ a{color:var(--teal)}
 <body>
 <main>
 <h1>Playtest Patch Plan</h1>
-<div class="sub">The 28 notes from your playtest of 0.64.2. Each one was tried in the real game (claude/integration 5dd740c, phone size 390×844), with its cause, the fix, who builds it and the risk. <b>Revision 2</b> (2026-10-20): your answers are in as decisions, and so are the points from reviewer PR1's check (<code>plans/patch-plan-review.md</code> on claude/patch-plan-review). <b>One question is left</b>, at the bottom: which new tradition for your first Monday. Nothing is built yet. The patch comes after Dev mode, whose day jump and tradition start make every item quick to test.</div>
+<div class="sub">The 28 notes from your playtest of 0.64.2. Each one was tried in the real game (claude/integration 5dd740c, phone size 390×844), with its cause, the fix, who builds it and the risk. <b>Revision 2</b> (2026-10-20): your answers are in as decisions, and so are the points from reviewer PR1's check (<code>plans/patch-plan-review.md</code> on claude/patch-plan-review). <b>Revision 3</b> (later that day): your pick for the first Monday, <b>First Light Cocoa</b>, with its draft words, and your two new asks: cocoa at the bar (#29) and the mug in your hands (#30). <b>Two small questions</b> about the cocoa are at the bottom. Nothing is built yet. The patch comes after Dev mode, whose day jump and tradition start make every item quick to test.</div>
 
 <div class="card">
 <h3>At a glance</h3>
 <ul>
 <li><b>27 of 28 reproduced.</b> #25 is a wording change, so there was nothing to reproduce. #13 and #18 were confirmed from the code and the words, and #17 is partly reproduced. The reviewer re-ran #1, #7, #9 and #12 and got the same results.</li>
-<li><b>Six batches, about 20 turns:</b> the arrival week (A, B, C), the crew's life (D), small features (E), and the four needs numbers (F). #23 goes to the events plan, as you chose.</li>
+<li><b>Six batches, about 21 turns:</b> the arrival week (A, B, C), the crew's life (D), small features (E), and the four needs numbers (F). #23 goes to the events plan, as you chose.</li>
 <li><b>What changed from your answers and the review:</b>
   <ul>
   <li>Day 2: the Chief gets her own desk back and leaves in good time (#1).</li>
@@ -80,6 +80,7 @@ a{color:var(--teal)}
   <li>The crew keep a gap when they step out of the lift (#10).</li>
   <li>The time clock: an early clock-out is confirmed, and everything else gets a 5-second Undo (#6).</li>
   <li>Training day: Zeke keeps you in the bay, sends you to clock out, then the beam at 17:05 (#18, #19).</li>
+  <li>Your first Monday ends with First Light Cocoa in the bow lounge, and you can see your cocoa mug in your hands (#26, #29, #30).</li>
   <li>The tuning shows what a repair really takes once all four needs numbers are in, and it lands on your 30 minutes (#16).</li>
   </ul></li>
 </ul>
@@ -104,9 +105,9 @@ a{color:var(--teal)}
 <div class="meta">Sim engineer, crew designer, deck architect, performance engineer · about 4 turns · changes the crew's plans: day_check and cadet_test differences are expected and checked one by one</div>
 <p>The Captain on Deck 4 on Thursday plus about one evening. Crew reach the toilet and hold it from when they arrive. Crew leaving the lift keep a gap. The stall light turns red when a stall is taken.</p></div>
 
-<div class="card batch"><h3>E. Small features (#25, #21, #6, #24, #5, #26)</h3>
-<div class="meta">HUD seat, social, device, player and traditions engineers, deck architect, rec engineer, writers · about 7.5 turns · each new feature behind its own switch</div>
-<p>"Officer's Quarters - Science" on the lift. "Junior Officer" and the other ranks on crew cards. The time clock's confirm and Undo. A buy menu at the shop. A working ladder with Engine control and the Sensor array open. A one-off tradition on your first Monday (your pick, below).</p></div>
+<div class="card batch"><h3>E. Small features (#25, #21, #6, #24, #5, #30, #29, #26)</h3>
+<div class="meta">HUD seat, social, device, player, performance and traditions engineers, deck architect, rec engineer, writers · about 8.5 turns · each new feature behind its own switch</div>
+<p>"Officer's Quarters - Science" on the lift. "Junior Officer" and the other ranks on crew cards. The time clock's confirm and Undo. A buy menu at the shop. A working ladder with Engine control and the Sensor array open. The mug in your hands, then cocoa at the bar, then First Light Cocoa on your first Monday: in that order, because the tradition hands you the mug.</p></div>
 
 <div class="card batch"><h3>F. Needs tuning (#16, #20, #22, #27)</h3>
 <div class="meta">Player engineer; systems engineer reviews · about 2 turns · numbers only; player_check's expectations are updated in the same turn</div>
@@ -114,7 +115,7 @@ a{color:var(--teal)}
 
 <div class="card"><p><span class="k">Why this order.</span> A, B and C are what every new player meets first, and they mostly run only in the arrival week, so they're the safest start. D changes the crew's day and gets its own careful check round. E's features each come with a switch. F comes last, so the career numbers that Dev mode's "Set career" table records are only re-measured once (see #16).</p></div>
 
-<h2>The 28 items</h2>
+<h2>The 28 items, and your two new asks (#29, #30)</h2>
 <p class="legend">Tap an item to open it. Your note comes first, word for word; "Revision 2" says what changed.</p>
 
 <!-- ============ A ============ -->
@@ -439,26 +440,90 @@ a{color:var(--teal)}
 <div class="shots"><figure><a href="patch-plan-shots/05-ladder-hatch.png"><img src="patch-plan-shots/05-ladder-hatch.png" alt="the ladder hatch's Tier 2 text"></a><figcaption>"Tier 2 access" today</figcaption></figure></div>
 </div></details>
 
-<details class="item"><summary><span class="n">#26</span><span class="t">One more tradition on your first Monday</span><span class="s">E · 1-1½ turns</span></summary><div class="body">
+<details class="item"><summary><span class="n">#26</span><span class="t">First Light Cocoa: one more tradition, on your first Monday</span><span class="s">E · 1½ turns</span></summary><div class="body">
 <blockquote><b>YOUR NOTE</b>One more tradition on Day 1, so a new player sees how traditions flow.</blockquote>
-<p><span class="k">Day 1 today:</span> Sunrise stretch (06:30), Name on the beam (17:05, a one-off), Gym club (19:15-20:00). Monday's Mail goes out on Day 0 at 18:00 with no pop-up (section 18, line 34522). Nothing invites you to Gym club, so the first tradition with the whole flow (Mail, heads-up, invite, tap to join) is Tuesday's Spice shelf supper.</p>
-<p><span class="k">Fix</span> <span class="dec">decided: a new one, not the bow lounge with Pell</span>:</p>
+<p><span class="k">Day 1 today:</span> Sunrise stretch (06:30), Name on the beam (17:05, a one-off) and Gym club (19:15-20:00). Monday's Mail goes out on Day 0 at 18:00 with no pop-up (section 18, line 34522), and nothing invites you to Gym club. So the first tradition with the whole flow (Mail, heads-up, invite, tap to join) is Tuesday's Spice shelf supper.</p>
+<p><span class="k">Decided</span> <span class="dec">First Light Cocoa</span> (your words: "Mix 1 and 3. Mostly just the tips from 3. I like 1. Also need a cocoa at the bar and you can see the mug in your hands."):</p>
 <ul>
-<li><b>A one-off on your first Monday</b> (<code>when: arrival monday</code>, like Name on the beam). It never clashes with a weekly tradition, and only Day 1's crew plans change.</li>
-<li><b>When:</b> 20:00-20:45. That's after Gym club and dinner. The other Monday-evening traditions (Book circle, Department cup, the Wren talk, Lantern walk) don't run on Day 1.</li>
-<li><b>Zeke's bed and call-home arrows</b> wait until it's over (section 21, <code>introBedTick</code>, line 39677).</li>
-<li><b>It shows the flow on purpose:</b>
+<li><b>When and where:</b> a one-off on your first Monday (<code>when: arrival monday</code>), 20:00-20:45 in the bow lounge, after Gym club. It never clashes with a weekly Monday tradition, and only Day 1's crew plans change.</li>
+<li><b>The flow, on purpose:</b>
   <ul>
-  <li>a Mail pop-up at the end of your shift;</li>
-  <li>an invite at dinner, using the tradition's own invite line;</li>
-  <li>tap to join;</li>
+  <li>Its Mail comes the evening before, like every tradition's.</li>
+  <li>A reminder pops up at the end of your shift.</li>
+  <li>Zeke invites you at dinner ("Cocoa in the bow lounge at eight. First Light. It's for you, really. Come."), with tap to join.</li>
+  <li>Zeke's bed and call-home arrows wait until it's over (section 21, <code>introBedTick</code>, line 39677).</li>
   <li>Settling-in's "Join a tradition" ticks.</li>
   </ul></li>
-<li><b>Which tradition:</b> the one question below.</li>
+<li><b>What happens:</b>
+  <ol>
+  <li>The lounge lights go down. <b>Dev Raman</b>, the Senior Helm Officer who flew you in on the Tern, shows everyone through the big windows where the Wren has been and where she's heading.</li>
+  <li>Mugs of cocoa go round, and you hold yours (#30).</li>
+  <li>Three long-serving crew each give the one tip they wish they'd had on their first day. They're picked per save from Holt ("Never sit in my chair…"), Kowalczyk, Brennan, Halloran and Sato. Apart from Holt's (your example), each tip is true in the game: Tracked's arrow, the grab shelf, the Works log, the windows.</li>
+  <li>This season's newcomers each say one thing they've noticed: Tomas, a week aboard, says his.</li>
+  <li>You pick yours from three replies, Talk a while style. No wrong answer; the crew can mention it later.</li>
+  <li>Mugs up: "To the next season, and the new faces in it."</li>
+  </ol></li>
+<li><b>No pin gift.</b></li>
 </ul>
-<div class="chips"><span class="chip">Traditions engineer (18), writers, onboarding engineer</span><span class="chip">1-1½ turns, behind its own switch</span><span class="chip q">question pp-v2-q1</span><span class="chip">events_check, join_check, day_check (Day 1), intro_check, cadet_test, perf_check if it draws a crowd</span></div>
+<p><span class="k">The words:</span> drafted in the writers' formats in <code>plans/patch-plan-first-light-cocoa.md</code>: the tradition's Mail, ask, here, thanks and chatter lines, and the moment's script. The head writer checks the tone, and they go in through <code>content/</code> when built. The two place names out of the window are placeholders for the Wren's real route.</p>
+<p><span class="k">New pieces it needs</span> (the traditions engineer's, asked first):</p>
+<ul>
+<li>A way for a tradition to play a moment when you join (<code>ties: meeting</code>).</li>
+<li>The cocoa pose (#30).</li>
+<li>An invite from someone who isn't the host (Zeke).</li>
+<li>Dimming the lounge, with the performance engineer: a few warm lamps (at most 6 draw calls), or a new light tie.</li>
+<li>The dialogue engineer: picking three tips from five.</li>
+</ul>
+<div class="chips"><span class="chip">Traditions engineer (18), writers, onboarding engineer (Zeke's invite, the arrows), dialogue engineer</span><span class="chip">1½ turns, behind its own switch</span><span class="chip">events_check, join_check, day_check (Day 1), intro_check, lines_check, cadet_test, perf_check (a lounge scene)</span></div>
 <p><span class="k">Dev mode:</span> jump to Day 1 17:00 as a new arrival, and start the tradition on demand.</p>
-<div class="rev"><b>Revision 2:</b> your answer, and the review's clash list: a one-off on your first Monday, clear of Gym club.</div>
+<div class="rev"><b>Revision 3:</b> your pick, with the draft words.</div>
+</div></details>
+
+<details class="item"><summary><span class="n">#29</span><span class="t">Cocoa at the bar (new ask)</span><span class="s">E · ¼ turn</span></summary><div class="body">
+<blockquote><b>YOUR NOTE</b>Also need a cocoa at the bar.</blockquote>
+<p><span class="k">Today:</span> the bow lounge bar already sells cocoa (section 15, <code>BAR_DRINKS</code>, line 13835).</p>
+<ul>
+<li>Tea, juice, fizz and cocoa, 2 credits each, 17:30-23:00 (<code>BAR_OPEN</code>), served by Ivo Madsen (Tamsin Haddad on his days off). Order the same thing three times and you get "The usual?".</li>
+<li>You're then told to "take it to a stool". Sitting there plays the drink pose for 20 ship minutes: hunger +10, social +4, leisure +5, and +6 social with company (15b, <code>ixDrink</code>, line 14308).</li>
+<li>What's missing: you can't see the drink while you carry it. At the stool every drink shows the same orange glass (8b, <code>ACTS.drink</code>, line 46837), and cocoa does nothing a juice doesn't.</li>
+</ul>
+<p><span class="k">Fix (kept small):</span></p>
+<ul>
+<li><b>Cocoa gets its own look and a little more comfort.</b> It's carried and drunk in a mug (#30). Its leisure is +8 instead of +5, a treat. The rest is as other drinks.</li>
+<li><b>Its own serve line:</b> "One cocoa. Careful, it's hot." Tea comes in a mug too; juice and fizz keep the glass.</li>
+<li><b>At First Light Cocoa</b> the mug is handed to you free.</li>
+<li><b>Other drink spots:</b> the Tea corner kettle (Deck 5), the watch room kettle (Deck 6) and the mess drinks station stay tea. That keeps cocoa something you get at the bar, or at the tradition. Question pp-v3-q1.</li>
+</ul>
+<div class="chips"><span class="chip">Player engineer (15: the bar, ixDrink); writers (one line)</span><span class="chip">¼ turn, after #30</span><span class="chip q">question pp-v3-q1</span><span class="chip">player_check, interactions_check, content_gen --check</span></div>
+<p><span class="k">Dev mode:</span> jump to 18:00 any day, with credits.</p>
+</div></details>
+
+<details class="item"><summary><span class="n">#30</span><span class="t">The mug in your hands (new ask)</span><span class="s">E · 1 turn</span></summary><div class="body">
+<blockquote><b>YOUR NOTE</b>…and you can see the mug in your hands.</blockquote>
+<p><span class="k">What the game already has to build on:</span></p>
+<ul>
+<li><b>Held things.</b> The player's "in hand" poses: the parts crate, the mess tray, the hover cart, a job's toolbox, the laundry hamper and your device (section 15, line 13424, sets <code>player.holding</code>; section 8b's <code>HOLDS</code>, line 46669, gives each its arms and prop). One-handed holds keep the other arm swinging (the toolbox, the datapad).</li>
+<li><b>Props.</b> They're made from the character kit's simple shapes (<code>PROP_KIT</code>, 8b line 46878), with colours through <code>col()</code> and no random calls. The seated drink pose already has a glass in the hand.</li>
+<li><b>The camera.</b> The game has one camera: the fixed-angle third-person view from above (section 6, orthographic). There is no first-person view, so the check is that view at phone size, at the phone's usual zoom (1.5) and the widest (0.7).</li>
+</ul>
+<p><span class="k">The plan:</span></p>
+<ol>
+<li><b>A mug prop</b> (<code>PROP_KIT.mug</code>, performance engineer): a cream mug, the cocoa a little below the rim, and a handle that overlaps the mug's wall, so no two surfaces share a plane.</li>
+<li><b>Bigger than life:</b> about 1.6× life size. At the phone's usual zoom a tile is about 50 pixels, so a true-size mug would be only about 5 pixels tall; this makes it about 8.</li>
+<li><b>Held in one hand at the chest</b> (<code>HOLDS.mug</code>), the other arm swinging. The seated drink pose shows the mug instead of the glass for cocoa and tea (a <code>cocoa</code> pose), and so do the crew at First Light Cocoa.</li>
+<li><b>Draw calls:</b> +1-2 while you hold it (your prop is its own mesh); the crew's mugs are packed into the crowd's meshes, so no more.</li>
+</ol>
+<p><span class="k">How long it's held</span> (pp-v3-q2):</p>
+<ul>
+<li><b>From the bar:</b> you hold it from being served until you sit and drink it (20 ship minutes, about half a real minute), or put it down (Put down), or 20 ship minutes of walking about, when you've drunk it as you go ("You finish your cocoa. Warm all the way down.", with its gain).</li>
+<li><b>Riding the lift:</b> you keep it.</li>
+<li><b>Picking up something that needs both hands</b> (parts, a tray, the hamper, a cart): you finish it first.</li>
+<li><b>At First Light Cocoa:</b> you hold it for the whole moment and hand it back as it ends.</li>
+<li><b>Saving:</b> a drink isn't saved today, so a reload clears it. Unchanged.</li>
+</ul>
+<p><span class="k">Mock-up</span> (a scratch run, the game file unchanged; probe <code>mug.py</code>): the player holding a true-size mug, close up. The draw calls went 180 → 182.</p>
+<div class="chips"><span class="chip">Performance engineer (8b: the prop, the hold, the pose); player engineer (15: when you hold it)</span><span class="chip">1 turn</span><span class="chip q">question pp-v3-q2</span><span class="chip">perf_check, cadet_test (identical unless holding), player_check, interactions_check, screenshots at zoom 1.5 and 0.7</span></div>
+<div class="shots"><figure><a href="patch-plan-shots/30-mug-mockup.png"><img src="patch-plan-shots/30-mug-mockup.png" alt="mock-up: the player holding a cream mug"></a><figcaption>mock-up, close up (true size)</figcaption></figure></div>
 </div></details>
 
 <!-- ============ F ============ -->
@@ -528,7 +593,7 @@ a{color:var(--teal)}
 <div class="card tw"><table>
 <tr><th>Item</th><th>You chose</th></tr>
 <tr><td>#25 lift label</td><td>Deck 2, as you wrote it: "Officer's Quarters - Science"</td></tr>
-<tr><td>#26 a tradition on Day 1</td><td>A different new one (not the bow lounge with Pell): ideas below</td></tr>
+<tr><td>#26 a tradition on Day 1</td><td>First Light Cocoa: idea 1 with the tips from idea 3; plus cocoa at the bar (#29) and the mug in your hands (#30)</td></tr>
 <tr><td>#6 time clock</td><td>Both: confirm only an early clock-out, Undo for the rest (5 s)</td></tr>
 <tr><td>#24 shop</td><td>Today's goods</td></tr>
 <tr><td>#5 shut rooms</td><td>The ladder, Engine control and the Sensor array open; the Reactor stays sealed</td></tr>
@@ -551,21 +616,26 @@ a{color:var(--teal)}
 <li>Backlog #15: the goal arrow's label lowercases a person's name: "Take the lift to Deck 3: zeke Torres" (section 15b, line 14872).</li>
 </ul>
 
-<h2>The one question left</h2>
+<h2>Two questions about the cocoa</h2>
 <form id="answers">
 
-<div class="q" data-qid="pp-v2-q1"><div class="qh">PP-V2-Q1 · #26 YOUR FIRST MONDAY'S TRADITION</div><div class="qt">Which new tradition on your first Monday evening (20:00-20:45, a one-off)?</div>
-<label><input type="radio" name="pp-v2-q1" value="star-call"><span><b>Star call</b>, on the Deck 3 promenade's benches by the big windows. Dr. Imra Sato, Head of Survey, points out what the Wren is passing this week, and the crew who come turn the lights down to watch. It's a calm, mixed crowd (officers and juniors, the ship's stargazers), on a deck you've seen at dinner, and it leads into star logging later.<span class="rec">recommended</span></span></label>
-<label><input type="radio" name="pp-v2-q1" value="cocoa-round"><span><b>Cocoa round</b>, in the junior common room on Deck 4, next to your bunk. Tomas brings a big jug and everyone in the junior wing says one thing about their week. It's the cosiest and smallest, and it ends where you go to bed.</span></label>
-<label><input type="radio" name="pp-v2-q1" value="mug-hook"><span><b>Your mug on the hook</b>, at a new mug rack by the mess hall's drinks station (Deck 3, 18:40-19:10, just after dinner; the rack is new kit). Chef Brennan hangs a new mug for you and whoever's at dinner raises theirs. It has the biggest crowd and you can't miss it, but it's another "your name goes up" moment on the same day as the beam.</span></label>
-<div class="why">Why Star call: it's a real "come along" moment in a new place, it shows the whole flow (Mail, an invite at dinner, tap to join), it mixes the ship's ranks, and it doesn't repeat the beam. All three are one-offs on your first Monday, so they don't change any later week.</div>
-<textarea name="pp-v2-q1-comment" placeholder="Comment (optional), e.g. another idea, or a change to one of these"></textarea></div>
+<div class="q" data-qid="pp-v3-q1"><div class="qh">PP-V3-Q1 · #29 WHERE YOU CAN GET COCOA</div><div class="qt">Besides the bow lounge bar (and First Light Cocoa), should anywhere else offer cocoa?</div>
+<label><input type="radio" name="pp-v3-q1" value="bar-only"><span>Only the bar (2 credits, 17:30-23:00), and free at First Light Cocoa. The kettles stay tea, so cocoa stays a little treat<span class="rec">recommended</span></span></label>
+<label><input type="radio" name="pp-v3-q1" value="kettles-too"><span>The kettles too (the Tea corner on Deck 5, the watch room on Deck 6), any time</span></label>
+<label><input type="radio" name="pp-v3-q1" value="mess-too"><span>The mess drinks station too, at breakfast and dinner</span></label>
+<textarea name="pp-v3-q1-comment" placeholder="Comment (optional)"></textarea></div>
 
-<div class="q" data-qid="pp-v2-general"><div class="qh">ANYTHING ELSE</div><div class="qt">Anything about revision 2, the order, or an item?</div>
-<textarea name="pp-v2-general" placeholder="Your thoughts"></textarea></div>
+<div class="q" data-qid="pp-v3-q2"><div class="qh">PP-V3-Q2 · #30 THE MUG</div><div class="qt">If you walk about with your cocoa instead of sitting down, how long do you keep the mug?</div>
+<label><input type="radio" name="pp-v3-q2" value="20min"><span>About 20 ship minutes (half a real minute), then you've drunk it as you go, with its gain<span class="rec">recommended</span></span></label>
+<label><input type="radio" name="pp-v3-q2" value="until-sit"><span>Until you sit down with it or put it down, however long</span></label>
+<label><input type="radio" name="pp-v3-q2" value="10min"><span>About 10 ship minutes</span></label>
+<textarea name="pp-v3-q2-comment" placeholder="Comment (optional)"></textarea></div>
+
+<div class="q" data-qid="pp-v3-general"><div class="qh">ANYTHING ELSE</div><div class="qt">Anything about First Light Cocoa, its words, or the plan?</div>
+<textarea name="pp-v3-general" placeholder="Your thoughts"></textarea></div>
 
 </form>
-<p class="legend">Planned on claude/patch-plan from claude/integration 5dd740c; revision 2 with the user's answers and reviewer PR1's review. The reproduction scripts are in plans/patch-plan-probes/; the screenshots are in plans/patch-plan-shots/.</p>
+<p class="legend">Planned on claude/patch-plan from claude/integration 5dd740c; revision 2 with the user's answers and reviewer PR1's review; revision 3 with First Light Cocoa, #29 and #30. The reproduction scripts are in plans/patch-plan-probes/; the screenshots are in plans/patch-plan-shots/.</p>
 </main>
 </body>
 </html>
