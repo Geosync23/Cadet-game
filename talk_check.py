@@ -86,9 +86,9 @@ with sync_playwright() as pw:
 
     print('(a) The pack, baked:')
     r = ev("""(() => ({ pool: TALKS.pool.length, topics: [...new Set(TALKS.pool.map(t => t.topic))].sort(), own: Object.fromEntries(Object.entries(TALKS.own).map(([k, v]) => [k, v.length])),
-      small: Object.fromEntries(Object.entries(TALKS.small).map(([k, v]) => [k, v.length])), fns: [typeof talkPackPick, typeof talkPackFire, typeof talksClean].join(' '),
+      work: Object.fromEntries(Object.entries(TALKS.work || {}).map(([k, v]) => [k, v.length])), small: Object.fromEntries(Object.entries(TALKS.small).map(([k, v]) => [k, v.length])), fns: [typeof talkPackPick, typeof talkPackFire, typeof talksClean].join(' '),
       ownersAboard: Object.keys(TALKS.own).filter(id => !linesWho(id)) }))()""")
-    print(f"  {r['pool']} pool talks on {len(r['topics'])} topics; own: {r['own']}; small: {r['small']}")
+    print(f"  {r['pool']} pool talks on {len(r['topics'])} topics; own: {r['own']}; work: {r['work']}; small: {r['small']}")
     check(r['fns'] == 'function function function', 'the picker is missing: ' + r['fns'])
     check(r['pool'] >= 100 and len(r['topics']) == 10, 'the pool is not baked (100 talks on ten topics)')
     check(len(r['own']) >= 15 and all(n >= 4 for n in r['own'].values()), 'own talks missing')
