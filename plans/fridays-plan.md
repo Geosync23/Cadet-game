@@ -47,3 +47,35 @@ The first address is Friday Day 5. It's a separate plan from the playtest patch 
 5. **fp-q5, what she says:** a fixed shape with parts that change. Alternatives: short and fixed; mostly news.
 6. **fp-q6, a ship-wide event on a Friday:** the address becomes its briefing. Alternatives: skipped; both.
 7. **fp-q7, the Friday auto sign-out:** 16:00. Alternative: 18:00.
+
+## Revision 2 (2026-10-20): the user's answers
+
+| Question | Decision |
+|---|---|
+| fp-q1 Where | **The rec deck auditorium** (76 seats and the lectern; about 60-70 come, so all can sit) |
+| fp-q2 Who keeps working | A skeleton: helm and watch ratings on the bridge, a medic on call, the dinner cooks |
+| fp-q3 How it plays | Bubbles over the crowd, plus the banner and a Mail. The user's comment: "Need to write interesting, fairly substantial addresses that take us through the progression. 3 or 4? Or do the math" |
+| fp-q4 Skipping it | **Expected:** missing it gives a small work-reputation dip (the size of being late; set with the Works career engineer). No dip on leave, sick, a rota day off, a Dev-mode excuse, or on nights (Pillar 5's Day 19) |
+| fp-q5 What she says | The weekly shape with parts that change |
+| fp-q6 Events on a Friday | **Both happen** |
+| fp-q7 Friday sign-out | 16:00 |
+
+**What the auditorium and "both" change:**
+- **The address runs 16:00-16:40** (it was 16:25). 12-16 lines at one every 5 real seconds is 60-80 real seconds, which is 36-48 ship minutes.
+- **The ride up to dinner:** the crew leave the auditorium in seeded waves, ride up to Deck 3 (some to Deck 4 to wash first), and their dinner is spread over 17:00-17:50. The sim engineer checks the rec deck's lift queue with about 60 leaving.
+- **perf_check scenes:** the auditorium at 16:10 with about 65 seated, and the rec lift lobby at 16:42.
+- **The four addresses**, outlined on the page for a writer seat:
+  - **Day 5, welcome aboard:** your first week, Crossing the Line on Sunday Day 7.
+  - **Day 12, steady in the storm:** the ion storm (Days 11-15) is on; your Officer promotion (Day 10).
+  - **Day 19, after the storm:** the all-clear (Day 14), the comet (Day 16), the commendation (Day 18), Senior Officer (Day 16), your night shifts from tonight, the new junior on Day 21.
+  - **Day 26, four weeks, and guests:** the career's end and the Veyli visit's warning.
+  - Each address has a fixed core plus slots filled from what really happened (read when she speaks, never by the planner), with a version for a player who's behind.
+- **"Both":**
+  - Day 12: the address is the Captain's storm update, and a storm phase between 16:00 and 16:40 waits for the address (or the address waits for an emergency phase).
+  - Day 26: the address refers to the visit's warning, which keeps its own time.
+  - The events plan's F0 marks Friday 15:30-17:00 as taken.
+- Parts C and E now read "the auditorium". About 9 turns.
+
+**New question:** fp-v2-q1. Day 12's address falls during the storm, and the storm was settled with no auditorium all-hands. Recommended: hold it as usual in the auditorium as the regular Friday address. Alternatives: ship's speakers that week; the plaza that week. Plus fp-v2-general.
+
+`design-doc.md` is updated in the same commit: the shifts section (Short Fridays), the weekly traditions (the Captain's Friday address) and the weekday shapes (a short Friday).
