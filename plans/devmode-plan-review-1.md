@@ -324,3 +324,18 @@ Stop 1a's six hooks, final: 13 (`DEVMODE`, `SAVE_KEY`; `freezeSync`/`saveGame` a
   - C, a clock-in at 08:58 with frames played on: the window had closed by 09:00. Undo then does nothing; the shift counts, and the next morning shows no miss. If an Undo ever lands after `shiftStart`, `flag('shiftSent') === u.keep.sent` keeps `c.on`, as the comment says.
   - careerOff is untouched by the patch. Dev mode's excuse checks `careerClockedIn`, and a punch counts at once, so a jump straight after clocking in is never excused.
 - **Nit:** the held side effects run at settle time, so the `clock` note is stamped then (C: `in@09:00` for an 08:58 punch). It's at most the window's 5 ship minutes, and nothing reads the note's minute today. Leave it, or note it in the comment.
+
+## Owner stand-in reviews: patch #5 hooks (claude/patch-e ab685bb) and the mug/cocoa hooks (claude/devmode 375827b)
+
+**Both PASS.**
+
+**Patch E (#5, the spine ladder, and 274a31f).** cadet_test against integration: the only difference is `state ['items']`, #25's directory text, the same as the earlier PASS, with 0 px. names_check OK.
+- f1757b0 (section 11): both taps ask `ladderTap`, which returns false at once with `LADDER_ON` off (or during a ride). `updateRide` hands over only rides with `r.ladder`, which only `ladderStep`'s own rides carry.
+- 1218845 (section 4d): the Deck 5 east call panel and the two tier texts are skipped only under `LADDER_ON`. The line sits inside Deck 5's `dress()`, run at deck build, long after section 15b's `LADDER_ON` exists (line 14422), so it's safe at load.
+- 274a31f: the section 20 lines are now `typeof`-guarded (`rankCardRole`, `shopMenuButton`, `shopMenuOpen`), with the same results when off. No shared function's inputs or results change.
+
+**Mug and cocoa (#30, #29) on claude/devmode.** cadet_test against integration: **ALL IDENTICAL**. names_check OK.
+- c6f1158 (15): `mugTick` returns at once when off, and the hold falls through to `mugHeld()`, which is null when off.
+- 4420bff (15b): `mugPose()` is null when off, so the drink pose is `drink` as before. `putWhat` and Put down get `mugHeld`/`mugPut`, both null when off.
+- c1036ae (15b): `A.def.also = mugAlso(...)` returns a copy with the same values when off. `ACT.def` is a fresh copy per activity (`{ ...PLAYER_ACTS[kind] }`, line 12962), so cocoa's +8 leisure never leaks into the shared definition. `mugFinish` uses `mugAlso` too, so "drunk as you go" gets it as well.
+- 05314b6 (8b slot): `HOLDS.mug` and `ACTS.cocoa` are added in the performance engineer's slot, and only used through `mugHeld`/`mugPose`.
