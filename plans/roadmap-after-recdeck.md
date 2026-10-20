@@ -89,3 +89,6 @@ New order after Dev mode (the user): **Dev mode → playtest patch → "Talk a w
 6. Character arcs (content/arcs/).
 7. Optimization.
 8. Balancing and polish (incl. the career-pace numbers parked earlier).
+
+## Dev mode: the user's answers (2026-10-20 ~12:05) and the lean version
+The user answered the Dev mode plan (artifact https://claude.ai/artifact/2ugbTkkAFkEsgTZa3bbFdH, db answers/devmode-plan) and, after talking it through, chose a **lean Dev mode**: Stop 1 (patch kit: clock with "excused" shifts, needs kept + top up, Take me to, Mark/Back, Undo, Copy my real game; then traditions) as planned; **Stop 2 = "Set career"** (pick a day; rank, trainings and reputation set from a table of what a steady player has by that day, marked approximate) instead of the steady-player replay; Stop 3 events. The full steady-player replay is **parked**, its design kept on record. Dev mode stays in published builds behind the Dev link (q10); every Dev action undoable (q11).
