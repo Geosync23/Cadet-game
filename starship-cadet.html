@@ -14580,7 +14580,7 @@ function flcTick() {                                     // each frame (section 
   }
   const on = typeof tradOn === 'function' && !!tradOn(FLC.id, now);
   if (on && SHIP.events && SHIP.events.joined.includes(FLC.id + '@' + d) && FLC_SHOWN !== d && deckDef.num === 3 && roomAt(...player.here()) === FLC.room) flcShow(d, now);   // joined while another card was open
-  const want = on && deckDef.num === 3 && roomAt(...player.here()) === FLC.room ? FLC.dim : 0, was = FLC_DIM;
+  const want = flcBusy(now) && deckDef.num === 3 && roomAt(...player.here()) === FLC.room ? FLC.dim : 0, was = FLC_DIM;   // down till the meeting's over too
   FLC_DIM = Math.abs(want - FLC_DIM) < .01 ? want : FLC_DIM + (want - FLC_DIM) * .05;
   if (FLC_DIM !== was && typeof applyLight === 'function') applyLight(nightT);
 }
