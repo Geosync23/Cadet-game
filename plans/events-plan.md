@@ -77,3 +77,9 @@ The order runs after Dev mode, the playtest patch and the Talk-a-while pack.
 
 ## Parked (kept on record, never deleted)
 The crew rotation day, then the garden creature, power surge, illness, the Founders' Day festival, nebula, the late supply shuttle, salvage, the Veyli vessel and déjà vu. They're marked parked in design-doc's events table, and the full breakdowns are in `plans/pillar3-plan.md`.
+
+## Pending for v3.1 (to fold in with ER1's review)
+- **F6 gets smaller** (lead 20, 2026-10-20). Dev mode plan v2's Stop 3 already builds starting an event, the threads view and "End and undo". F6 keeps only two things:
+  - jumping to a phase;
+  - "End and keep", once the ending is split out of `eventAdvance`.
+- **The estimate changes to match** (about 1 turn less).
