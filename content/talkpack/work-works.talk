@@ -1,0 +1,447 @@
+@talks work:works
+// TW1, the Talk a while work pools: Works (plans/work-pools-plan.html, decided 2026-10-20). Your own department:
+// these talk to you as a workmate. Topic is always "work"; ids work.works.<slug>.
+// Tiers: acquaintance = the job up close; colleague = why this job, who taught them, the part nobody sees;
+// friend = what it means, who they do it for, a proud moment, a habit it gave them. Never a struggle theme's story
+// (mistakes that haunt, doubts, leaving, can't say no); never ahead of an arc (Torres's list, Pell's practical,
+// Calder's first chief, Kovac's lift). Calder has her own talks and skips almost all of these.
+// Engine crew: torres-zeke reyes-alejandro keane-davi jovanovic-petra amadi-asha salo-saad kowal-priya.
+// Night Works: navarro-mateo reyes-alejandro keane-davi jovanovic-petra kowal-priya. Cadet: bramwell-basil.
+
+// ---------------------------------------------------------------- acquaintance: the job up close
+
+== hands
+when: tier>=acquaintance rank:junior
+them: Machine oil. Two washes, and my hands still smell of it at dinner.
+them: My bunkmates call me "the engine room". I've stopped arguing.   #funny
+ask: What does the job leave on you, at the end of a day?
+listen: Do you mind it?
+  them: No. It's proof I did something. Only the soap minds.
+share: Sore feet. And a head full of numbers.
+  them: That's Works. The numbers go quiet after dinner. Mostly.
+cheer: Grease. In places I can't explain.
+  them: Welcome. That never stops either.   #funny
+
+== board-first
+when: tier>=acquaintance !who:calder
+them: First thing I do every morning? Read the board. Before tea, before anything.
+them: You can tell the whole day from it. Long list, short list, one red card.
+ask: How do you pick your first job of the day?
+listen: What does a red card mean to you?
+  them: Something somebody's waiting on. Those go first. Always.
+share: The one nearest the lift.
+  them: Practical. Calder would approve. She'd never say so.   #funny
+cheer: Whichever one has the shortest name.
+  them: That's how I started too. "Lamp." Lovely job, "lamp".   #funny
+
+== favourite-machine
+when: tier>=acquaintance !who:calder
+them: Have you got a favourite machine yet? Everyone in Works has one. Nobody admits it.
+them: Mine's the old washer on Deck 4. Loud, honest, never sulks.
+ask: Which machine aboard do you like working on most?
+listen: Why the washer?
+  them: You can hear exactly what's wrong with it. No guessing. I like a machine that tells you.
+share: Scrubbers. You can see them get better.
+  them: Good choice. Before and after, plain as day. Very satisfying.
+cheer: The kettle. It always works.
+  them: That's because we all fix it first. Every time.   #funny
+
+== tea-corner
+when: tier>=acquaintance
+them: Tea at one, behind the parts racks. Best ten minutes of the shift.
+them: Nobody talks about work at the tea corner. Rule. Well. We try.   #funny
+ask: What do you talk about at tea, if not work?
+listen: Who made the rule?
+  them: Nobody remembers. Probably someone who'd just had a very long morning.
+share: Home, mostly. And what's for dinner.
+  them: Same as everyone. Then someone mentions a scrubber and it's over.   #funny
+cheer: Biscuit rankings. It's serious.
+  them: It is. I've seen friendships tested over the ginger ones.   #funny
+
+== tool-wall
+when: tier>=acquaintance !who:kovac-zainab
+them: The tool wall. Every spanner has an outline. You can see what's missing from the door.
+them: Somebody always puts the seventeen back in the fourteen's place. Somebody always fixes it.
+ask: Are you a put-it-back-right-away person, or later?
+listen: Who fixes the spanners?
+  them: Nobody says. They're just right again by morning. Like magic. Tidy magic.   #warm
+share: Right away. I hate hunting for things.
+  them: Good. Half of Works is finding the right thing. The other half's using it.
+cheer: Later. Much later. Sorry, wall.
+  them: The wall forgives you. Whoever tidies it might not.   #funny
+
+== loud-bay
+when: tier>=acquaintance
+them: The bay's loud in the morning. Compressor, the Cart, six people asking where the tape is.
+them: Then everyone's out on jobs and it goes quiet. I like both. Odd, that.
+ask: Do you work better with noise, or quiet?
+listen: Where is the tape, honestly?
+  them: Second drawer. It's always the second drawer. Nobody ever looks there first.   #funny
+share: Quiet. I like to hear the machine.
+  them: That's the Works ear starting. Calder has the best one aboard.
+cheer: Noise. Quiet makes me nervous.
+  them: Then the morning bay's yours. Bring a cup and enjoy it.   #funny
+
+== night-works
+when: tier>=acquaintance who:navarro-mateo|reyes-alejandro|keane-davi|jovanovic-petra|kowal-priya
+them: Night Works is a different job. Same board, half the people, twice the quiet.
+them: We leave the day lot notes. They leave us biscuits. Fair trade.   #funny
+ask: Could you see yourself on nights, one day?
+listen: What's the best bit of nights?
+  them: Walking a deck with nobody on it. The ship sounds like herself.   #warm
+share: Maybe. I'd miss breakfast with everyone.
+  them: You'd get it at the other end of the day. It's still breakfast. Sort of.   #funny
+cheer: Only if the biscuits keep coming.
+  them: They do. It's in the notes. Every single shift.   #funny
+
+== coil-moods
+when: tier>=acquaintance who:keane-davi|jovanovic-petra|amadi-asha|salo-saad|kowal-priya
+them: The coils have moods. I know how that sounds. Come down to Deck 6 and listen.
+them: One hums higher when she's cold. One goes quiet before she needs looking at.
+ask: Have you got a machine you could tell apart with your eyes shut?
+listen: Which one goes quiet?
+  them: Coil three. Torres says she sulks. Reyes says she's shy. I say she's thinking.   #funny
+share: Not yet. I'm still learning their names.
+  them: Spend an evening at the overlook. They'll introduce themselves.   #warm
+cheer: The tea urn. It sighs at me.
+  them: That's not a mood. That's the thermostat. Report it.   #funny
+
+== cart
+when: tier>=acquaintance !who:pell
+them: Took the Cart out for parts this morning. It pulls left. It's always pulled left.
+them: Nobody's fixed it because we'd all miss it. It's character.   #funny
+ask: Is there something aboard you'd never fix, just because you're fond of it?
+listen: Has anyone ever tried to fix it?
+  them: Once. It pulled right after. Everyone hated it. We put it back.   #funny
+share: A squeak in my bunk ladder. It's mine.
+  them: Keep it. Every bunk should have one sound that's yours.   #warm
+cheer: Pell's sleep schedule. It's a classic.
+  them: Some things are beyond Works. Even us.   #funny
+
+== tea-rota-mug
+when: tier>=acquaintance flag:mug !who:halloran-emeka
+them: Your mug's on the end hook. I checked this morning. Still there.
+them: First week, nobody's sure they'll stay. Then your mug's on the rack and that's that.
+ask: When did the Wren start to feel like your place?
+listen: When did it feel like yours?
+  them: When someone asked me where the tape was, and I knew. Silly. True, though.   #warm
+share: When my mug went on the rack.
+  them: That's the one. Halloran knows what he's doing with that rack.   #warm
+cheer: When I stopped getting lost. Mostly.
+  them: Mostly's good. The rest of us still take wrong turns on Deck 2.   #funny
+
+== briefing
+when: tier>=acquaintance !who:calder|pell
+them: Monday briefing, ten to nine. Calder says everything once. You'd better be listening.
+them: Twelve minutes, every week. I've timed it. Never thirteen.   #funny
+ask: Are you a listen-once person, or a write-it-down person?
+listen: Has she ever gone to thirteen?
+  them: Once. The day the new scrubbers came. Everyone still talks about minute thirteen.   #funny
+share: Write it down. My memory's terrible.
+  them: Smart. Half the bay does. The other half asks the half that did.   #funny
+cheer: Listen once, then ask Pell.
+  them: Pell writes nothing down. Pell remembers everything. Nobody knows how.   #funny
+
+// ---------------------------------------------------------------- colleague: why this job
+
+== first-fault
+when: tier>=colleague !who:calder|bramwell-basil !thread:notgood
+them: Do you remember your first proper fault? Not a job off the board. A real one.
+them: Mine was a pump on Deck 6 at two in the morning. I was shaking. It was a loose clip.   #funny
+ask: What's the job that made you feel you belong here?
+listen: Did anyone come to help?
+  them: Nobody. I fixed it, wrote it up, and went back to bed grinning.
+share: The first one I didn't check twice.
+  them: Good. That's the day it stops being a test and starts being yours.   #warm
+cheer: Any job that ends at the tea corner.
+  them: Fair. That's most of them, if you plan it right.   #funny
+
+== why-works
+when: tier>=colleague !who:calder|bramwell-basil !thread:stuck|leaving
+them: I chose Works because I took a clock apart when I was six. It never went back together.
+them: I've been trying to make up for that clock ever since.   #funny
+ask: What made you pick Works? The real reason.
+listen: Did you ever fix the clock?
+  them: Years later. It runs four minutes fast. I keep it that way. For luck.   #warm
+share: I like seeing a thing work again.
+  them: That's it, isn't it? Broken, then not. Never gets old.   #warm
+cheer: The orange. It suits me.
+  them: It suits everyone. That's the secret of Works orange.   #funny
+
+== who-taught
+when: tier>=colleague !who:calder|bramwell-basil|pell
+them: The tech who taught me never told me the answer. Not once. Just "What do you hear?"
+them: I hated it for a year. Now I say it to everyone. Annoying, isn't it?   #funny
+ask: Who taught you the most, before you came aboard?
+listen: What did you hear, in the end?
+  them: Everything. A bearing, a loose panel, a fan that's tired. You can't unhear it now.
+share: Someone at home who fixed everything.
+  them: Then you came in already half taught. It shows, you know.   #warm
+cheer: Trial and error. Mostly error.
+  them: The best teacher there is. Harsh, but thorough.   #funny
+
+== nobody-sees
+when: tier>=colleague !who:calder
+them: Do you know what nobody sees? The jobs that never happen. The filter changed a week early.
+them: Nothing breaks. Nobody notices. That's the best work we do.
+ask: What's the work you do that nobody notices?
+listen: Doesn't it bother you, nobody noticing?
+  them: Not really. The air's clean. That's my thank-you, every breath.   #warm
+share: Checking things that turn out fine.
+  them: That's not wasted. That's the job. Fine is the point.
+cheer: Eating the last biscuit so nobody fights.
+  them: A hero's work. Thankless. Crumby.   #funny
+
+== proud-skill
+when: tier>=colleague !who:kovac-zainab
+them: I can tell a scrubber's filter is due by the smell. Not the gauge. The smell.
+them: Took me two years. Calder can do it from the corridor.   #funny
+ask: What's a skill you're quietly proud of?
+listen: What does a due filter smell like?
+  them: Like a cupboard nobody's opened in a while. You'll know it the first time.
+share: I'm good at finding things fast.
+  them: That's half the job. Don't let anyone tell you it isn't.
+cheer: Carrying four cups without a tray.
+  them: That's a Works skill. Tea run, full marks.   #funny
+
+== engine-room
+when: tier>=colleague who:reyes-alejandro|keane-davi|jovanovic-petra|amadi-asha|salo-saad|kowal-priya
+them: Down on Deck 6 it's warm and loud and the floor hums through your boots.
+them: First week, I couldn't sleep without it. Now I can't sleep without it. Opposite reasons.   #funny
+ask: Is there a place aboard that feels like it's yours?
+listen: What's the engine watch room like?
+  them: Two armchairs and a kettle. The best room on the ship. Don't tell the lounge.   #funny
+share: My bunk. Small, but it's mine.
+  them: Good. Everyone needs one spot that's theirs. Mine just happens to hum.   #warm
+cheer: The tea corner. I've claimed a stool.
+  them: The good stool? The one that doesn't wobble? Bold.   #funny
+
+== clean-engine
+when: tier>=colleague who:keane-davi|salo-saad|kowal-priya|jovanovic-petra
+them: You could eat off the engine room floor. I'd know. I clean it every shift.
+them: A clean engine room tells you things. A drip shows up straight away. A smear means a leak.
+ask: Are you a tidy-as-you-go person, or a big tidy at the end?
+listen: Has anyone actually eaten off it?
+  them: Once. A biscuit, dropped. Five-second rule. I stand by it.   #funny
+share: As I go. I lose things otherwise.
+  them: Good. Clean as you go and the job tells you its secrets.
+cheer: Big tidy. Once a season.
+  them: I'm going to pretend I didn't hear that.   #funny
+
+== learning-curve
+when: tier>=colleague !who:calder|pell !thread:exams
+them: Most of what I know, I learnt my first year. The rest, from getting it slightly wrong.
+them: Not badly. Slightly. Slightly wrong teaches you more than right.
+ask: What's the most useful thing you've learnt in Works so far?
+listen: What did slightly wrong teach you?
+  them: To look at the whole machine, not just the bit that's shouting.
+share: Check twice, then switch it on.
+  them: That's the Works prayer. Calder would sign it.   #funny
+cheer: Where the good spanners hide.
+  them: Second drawer, behind the tape. Don't spread it about.   #funny
+
+== handover-notes
+when: tier>=colleague who:navarro-mateo|reyes-alejandro|keane-davi|jovanovic-petra|kowal-priya|torres-zeke|amadi-asha|salo-saad
+them: Shift change, we leave notes. "Coil three moody." "Lamp on 4 flickers if you look at it."
+them: I keep the funny ones. I've got a box of them now.   #warm
+ask: Do you keep anything from work? Notes, bits, anything?
+listen: What's the best note in the box?
+  them: "Fixed the thing. Don't ask about the thing." I still don't know what the thing was.   #funny
+share: A spare part from my first job.
+  them: Good. Keep it somewhere you'll see it. It's a reminder you can.   #warm
+cheer: Only the grease. It follows me.
+  them: Grease is a souvenir. A very loyal one.   #funny
+
+== works-orange
+when: tier>=colleague
+them: First time I put on the Works orange, I looked in the mirror for ages.
+them: Not because it suited me. Because it meant somebody thought I could do this.   #warm
+ask: Do you remember your first day in the uniform?
+listen: Did it suit you, though?
+  them: No. Orange suits nobody. That's how you know it's for the work, not the look.   #funny
+share: I felt like I was borrowing it.
+  them: Everyone does. Then one day it's just yours. Give it a month.   #warm
+cheer: It's very easy to find in a crowd.
+  them: That's the idea. You can spot Works across the mess. Handy at dinner.   #funny
+
+== calder-clock
+when: tier>=colleague !who:calder
+them: In Works we say "Calder is the clock". You can set your day by her.
+them: Ten to nine, briefing. One, she skips her tea. Five past five, last walk round the bay.
+ask: Who aboard do you set your day by?
+listen: Does she ever break the pattern?
+  them: Once. She stayed late helping a junior with a stuck valve. Nobody said. Everybody knew.   #warm
+share: My bunkmate. Up first, every day.
+  them: Good to have one. They're the ship's real alarm.   #funny
+cheer: The smell of toast at six.
+  them: Brennan, then. The other clock aboard. Just as exact.   #funny
+
+== spare-part
+when: tier>=colleague !who:pell
+them: Everyone in Works keeps one thing from a job. A screw, a washer, a bit of wire.
+them: Mine's a fuse from my first job on the Wren. It blew. I didn't. Proud day.   #funny
+ask: What's the first thing you ever fixed?
+listen: Where do you keep it?
+  them: Tucked in my locker door. I tap it on the way out. Every shift.   #warm
+share: Something at home. It still works.
+  them: Then there's a bit of you back there, still running. That's nice.   #warm
+cheer: My own bunk ladder. Twice.
+  them: The ladder knows you now. That's a working relationship.   #funny
+
+// ---------------------------------------------------------------- friend: what it means
+
+== asleep-upstairs
+when: tier>=friend !who:calder
+them: Know what I think about on a long shift? Who's asleep upstairs because the air's right.
+them: Seventy-odd people. Not one of them knows my name was on that job. I like that.   #warm
+ask: Who do you do the job for, really?
+listen: Doesn't it bother you, nobody knowing?
+  them: No. I know. Calder knows. That's plenty of people.
+share: My family. And the crew, now.
+  them: Both is right. Out here they're the same thing, nearly.   #warm
+cheer: Whoever's on the tea rota.
+  them: Honest. Tea's a fine reason to keep a ship running.   #funny
+
+== proud-moment
+when: tier>=friend !who:calder|pell|torres-zeke
+them: Want to know my proudest moment in Works? It's tiny. You'll laugh.
+them: A junior asked me something. I knew the answer without thinking. Then I knew I'd got it.   #warm
+ask: What's a small moment you've been proud of, aboard?
+listen: What did they ask?
+  them: Which way the washer belt goes. Over, then under. I just knew.
+share: Fixing something with nobody checking.
+  them: That's a big one, wearing small clothes. Well done, you.   #warm
+cheer: Finding the good biscuits first.
+  them: Instincts. Can't teach that. Well done.   #funny
+
+== hear-it-everywhere
+when: tier>=friend !who:pell
+them: The job gets into you. I hear a fan bearing going in the mess and I can't eat.
+them: My family thinks I'm odd at home. I tap the boiler. I listen to the fridge.   #funny
+ask: Has the job given you a habit you can't switch off?
+listen: What does the fridge at home say?
+  them: That it's tired and nobody's listening. I listened. I fixed it. Mum cried a bit.   #warm
+share: I check every lamp I walk past.
+  them: Ha. Welcome to Works. You'll be checking lamps on leave.   #funny
+cheer: I say "nice" to well-fitted panels.
+  them: Everyone does. They deserve it. Panels have feelings.   #funny
+
+== teach-you
+when: tier>=friend !who:calder|bramwell-basil|pell
+them: If I had you for a week, I'd teach you the one thing nobody wrote down.
+them: How a machine sounds a day before it breaks. It's a bit different. A bit tired.
+ask: If you could learn one thing properly this year, what would it be?
+listen: Can that really be taught?
+  them: Slowly. You stand next to enough tired machines and one day you just hear it.
+share: The engine room. All of it.
+  them: Then get yourself down to Deck 6. Bring tea. They'll teach you.   #warm
+cheer: How to nap upright, like Pell.
+  them: That's not taught. That's a gift. Pell's very gifted.   #funny
+
+== what-it-means
+when: tier>=friend !who:calder
+them: Can I tell you what Works means to me? It means nobody on this ship is ever cold.
+them: That's it. That's the whole thing. Warm water, warm air, warm dinner. Us.   #warm
+ask: What does your work mean to you, when you strip it right down?
+listen: Is that why you stayed in Works?
+  them: Partly. And the people. Mostly the people. Don't tell them.   #warm
+share: That people can rely on me.
+  them: They can. I've watched. That's not nothing, out here.   #warm
+cheer: That I'm allowed to carry a big spanner.
+  them: The big spanner is a privilege. Use it wisely.   #funny
+
+== night-shift-meaning
+when: tier>=friend who:navarro-mateo|reyes-alejandro|keane-davi|jovanovic-petra|kowal-priya
+them: On nights, I walk past the bunk rooms at three. Everyone asleep. Air humming.
+them: That's when I know what the job's for. Everyone sleeping like nothing could go wrong.   #warm
+ask: When do you feel what your work is for?
+listen: Does it ever feel lonely, on nights?
+  them: Sometimes. Then I think of everyone asleep. It's the opposite of lonely, really.   #warm
+share: When someone thanks me. Rare, but it lands.
+  them: It does. Keep the rare ones. They add up.   #warm
+cheer: When dinner's hot. That's us.
+  them: That's very much us. Tell Brennan the heating's ours.   #funny
+
+== bay-quiet
+when: tier>=friend
+them: Best moment of my week? Friday, five o'clock. The board's clear. The bay's quiet.
+them: Everyone just stands there for a second. Nobody says anything. We all know.   #warm
+ask: What's the best feeling your work gives you?
+listen: Does that happen every Friday?
+  them: No. Maybe one in three. That's why it's the best one.
+share: Finishing a job properly.
+  them: That's the one, isn't it? Properly. Not quickly. Properly.   #warm
+cheer: Clocking off on time.
+  them: A Works miracle. Treasure it.   #funny
+
+== wouldnt-swap
+when: tier>=friend !who:calder|amadi-asha !thread:stuck|leaving
+them: People ask why I don't go for the bridge, or Survey. Something with a view.
+them: I've got the best view aboard. The inside of the ship, all of it, working.   #warm
+ask: What would you miss most, if you ever left your job?
+listen: Don't you miss the stars?
+  them: I see them from the shuttle bay window. Best on Deck 5. Amadi says so too.
+share: The people I work with.
+  them: Same. It's always the people, in the end.   #warm
+cheer: The tea corner stool.
+  them: Understandable. It's a very good stool.   #funny
+
+== your-name-on-it
+when: tier>=friend rep:known !who:calder|bramwell-basil
+them: I saw your name on a job card today. Signed off, clean, no notes from Calder.
+them: I just stood there and smiled at a job card. That's where I'm at.   #warm
+ask: Do you remember the first job you signed off on your own?
+listen: Is "no notes" good, from Calder?
+  them: "No notes" from Calder is a parade. You just can't hear the band.   #funny
+share: I do. I checked it three times.
+  them: Everyone does. Next time, twice. Then once. That's how it goes.   #warm
+cheer: Barely. It was a lamp.
+  them: Lamps count. Every one of us started with a lamp.   #warm
+
+== family-trade
+when: tier>=friend !who:pell|calder
+them: Nobody in my family fixed things. They thought I'd grow out of it.
+them: Now they send me their broken kettles by post. A whole shelf of them, waiting for leave.   #funny
+ask: Who back home is proudest of what you do?
+listen: Will you fix them all on leave?
+  them: Every one. With my feet up and a cup of tea in the one that works.   #warm
+share: My family. They tell everyone.
+  them: Good. Let them. You've earned the bragging. Well, they have.   #warm
+cheer: The neighbours. Free repairs.
+  them: Ha. Every Works tech has those neighbours.   #funny
+
+== light-on
+when: tier>=friend
+them: There's a lamp on Deck 4 I fixed in my first month. Every time I pass it, I check.
+them: Still on. Every time. Silly, isn't it? It feels like a friend.   #warm
+ask: Is there something aboard that feels like it's partly yours?
+listen: Has it ever gone out?
+  them: Once. I fixed it again before breakfast. Nobody knew. That was the best bit.   #warm
+share: Something I fixed in my first week.
+  them: Then you'll check it for years. Welcome to the club.   #warm
+cheer: My mug. And my seat at dinner.
+  them: Fair. Both fiercely defended territory.   #funny
+
+== coils-proud
+when: tier>=friend who:reyes-alejandro|keane-davi|jovanovic-petra|amadi-asha|salo-saad|kowal-priya
+them: When all three coils run sweet, you feel it through the floor. Like a kettle settling.
+them: I sit in the watch room and just listen. That's what I'd tell someone the job is.   #warm
+ask: What would you tell someone your job is, if you only had one line?
+listen: How often do all three run sweet?
+  them: A few times a week. Coil three makes us wait for it. Every time.   #funny
+share: Keeping things running so others can sleep.
+  them: That's it. That's exactly it. We're the same, you and me.   #warm
+cheer: Professional lamp-befriender.
+  them: Ha. Put it on your door. Calder won't notice. She will.   #funny
+
+== new-hand-memory
+when: tier>=friend !who:bramwell-basil !newhere
+them: I remember being the newest in Works. Every name a blur. The board a wall of words.
+them: Someone handed me a mug and said "You'll be fine." I was. They were right.   #warm
+ask: What would you tell the next new hand in Works?
+listen: Who said you'd be fine?
+  them: Not saying. They'd be embarrassed. They're still here, though. Still saying it.   #warm
+share: Ask everything. Nobody minds.
+  them: That's the one. Tell them that, and give them a mug. Done.   #warm
+cheer: Second drawer. For the tape.
+  them: The most important lesson in Works. In order.   #funny
