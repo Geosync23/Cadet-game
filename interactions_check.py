@@ -515,5 +515,35 @@ with sync_playwright() as pw:
         check(not g.errors, f'no console errors ({g.errors[:3]})')
     g.close()
 
+# the climbing wall with two faults at once (R7's note; RE20, 0.64.1): one auto-belay tagged out and the other belay's route
+# taped means no turn can ever come, so a tap is refused (not queued), and a player already waiting when the second fault
+# lands stops waiting with the same refusal. recShut is stood in for; the rec deck switched on only
+with sync_playwright() as pw:
+    g = Game(pw, sys.argv[1])
+    if g.ev("typeof REC_DECK !== 'undefined' && REC_DECK && typeof recQueue === 'function'"):
+        print('== the climbing wall, both belays out of use')
+        tap = lambda title, near=None, place=True: g.ev(f"({TAP})({json.dumps({'title': title, 'near': near, 'place': place})})")
+        g.ev("skipTo(600)"); g.step(3); g.ev("goToDeck(7)"); g.step(3)
+        g.ev("window.__recShut = recShut; recShut = () => ({ ...REC_OK, belays: 1, belayOff: [true, false], route: 2 })")   # belay 1 tagged out, belay 2's route (blue) taped
+        g.ev("actEnd(true); REC.q = null"); tap('Climbing wall'); g.step(3)
+        s = json.loads(g.ev(STATE)); q = g.ev("REC.q && REC.q.kind")
+        print('   tap:', s['act'], q, s['toast'][:110])
+        check(q is None and not (s['act'] and s['act'][0] in ('recWait', 'recClimb')), f"two faults: a wall tap is refused, not queued ({s['act']}, {q})")
+        check('tagged out' in s['toast'] and 'taped off' in s['toast'], f"two faults: the refusal says why ({s['toast'][:110]})")
+        # already waiting (belay 2 busy, belay 1 tagged out), then belay 2's route is taped
+        g.ev("recShut = () => ({ ...REC_OK, belays: 1, belayOff: [true, false], route: null })")
+        w = g.ev("(() => { const fake = { goalId: '7-climb-2' }; DECK_CREW.push(fake); const r = recQueue('climb', 'Climbing wall', null); DECK_CREW.splice(DECK_CREW.indexOf(fake), 1); return [r, ACT && ACT.kind, REC.q && REC.q.kind]; })()")
+        check(w == [True, 'recWait', 'climb'], f'one belay busy, the other tagged out: you wait your turn ({w})')
+        g.ev("recShut = () => ({ ...REC_OK, belays: 1, belayOff: [true, false], route: 2 })"); g.step(5)
+        s = json.loads(g.ev(STATE)); q = g.ev("REC.q && REC.q.kind")
+        print('   mid-wait:', s['act'], q, s['toast'][:110])
+        check(q is None and not (s['act'] and s['act'][0] == 'recWait'), f"the second fault mid-wait: the wait ends ({s['act']}, {q})")
+        check('tagged out' in s['toast'] and 'taped off' in s['toast'], f"the second fault mid-wait: the refusal says why ({s['toast'][:110]})")
+        g.ev("recShut = window.__recShut")
+        check(not g.errors, f'no console errors ({g.errors[:3]})')
+    else:
+        print('== the climbing wall: the rec deck is off in this build, skipped')
+    g.close()
+
 print('INTERACTIONS CHECK OK' if ok else 'INTERACTIONS CHECK FAILED')
 sys.exit(0 if ok else 1)

@@ -285,7 +285,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.64.0
+   STARSHIP CADET: CSV Wren                           build 0.64.2
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8858,7 +8858,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.64.0';                           // keep in step with the header's build line
+const GAME_BUILD = '0.64.2';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -10048,7 +10048,7 @@ function schedBuild(p, d, occ, S) {
     if (hab && vu(0) < odds * (F.works ? REC_ODDS.habit : REC_ODDS.habitOff)) kind = REC_HABITS[hab];
     else if (vu(0) > 1 - odds * REC_ODDS.casual) kind = ['watch', 'bean', 'float'][Math.floor(vu(1) * 3)];
     if (!kind) return false;
-    const sh = typeof recShutAt === 'function' ? recShutAt(B + t + C) : null;   // rec engineer B's machines (0.84.6): what's shut or off now
+    const sh = typeof recPlanShut === 'function' ? recPlanShut(d, occ) : null;   // rec engineer B's machines (0.84.6): what's shut or off, as the day's plan sees it (RC, 0.64.1)
     if (sh && (kind === 'disc' && sh.court || kind === 'float' && sh.float || kind === 'climb' && !sh.belays || kind === 'swim' && sh.pool && vu(5) < .7 || kind === 'kayak' && sh.river && vu(5) < .5)) return false;
     const R = REC_DO[kind], wet = !!R.wet, pre = wet ? 2 : 0, post = wet ? 6 : 0, dur = REC_TURN[0] + Math.round((REC_TURN[1] - REC_TURN[0]) * vu(2));
     const a0 = ride ? ride.a0 : t + C, open = DECKS[7].open, last = Math.min(to - C - post, open[1] * 60 - 15);
@@ -10071,7 +10071,7 @@ function schedBuild(p, d, occ, S) {
         for (let i = 0; i < pool.length; i++) { const q = pool[(off + i) % pool.length]; if (isFree(q.id, s, e)) { pl = q; s0 = s; e0 = e; break; } }
       }
     }
-    if (!pl || !capOk(a0, e0 + post)) return false;       // full, or a long wait: they go elsewhere (rest as before)
+    if (!pl || !capOk(a0 - C, e0 + post)) return false;   // full, or a long wait: they go elsewhere (rest as before). From the ride down: it's counted on the rec deck (RE20, 0.64.1: day 5 had 16 at 22:22)
     if (ride) ride.go(); else if (deck !== bedDeck) go(7); else { deck = 7; seg('commute', t + C, 'lift', null, { fromDeck: bedDeck }); }   // from their bunk: the ride alone (no wait by Deck 4's lift, so nobody else's day moves)
     const stop = (act, until, type, tag, anim) => {      // a short stop at a free place of that type, else standing about
       const q = type && free1(type, t, until); if (q) hold(q.id, t, until);
@@ -10093,8 +10093,9 @@ function schedBuild(p, d, occ, S) {
     const svc = ((DECKS[7] && DECKS[7].places) || []).filter(pl => pl.type === 'work:works' && pl.machine).sort((a, b) => a.id.localeCompare(b.id, 'en', { numeric: true }));
     const n = Math.min(REC_ROUND.stops, svc.length), need = 2 * C + n * REC_ROUND.mins; if (!n || to - t < need + 20) return;
     const k0 = Math.floor(schedU(p.seed + 1, d, 1039) * svc.length);
+    const n0 = segs.length;                                // the rides down and back are on her shift's time too (tag 'round'; RE20, 0.64.1)
     go(7); for (let i = 0; i < n; i++) { const pl = svc[(k0 + i) % svc.length]; if (isFree(pl.id, t, t + REC_ROUND.mins)) hold(pl.id, t, t + REC_ROUND.mins); seg('work', t + REC_ROUND.mins, pl.type, pl.id, placeAnim(pl) ? { tag: 'round', anim: placeAnim(pl) } : { tag: 'round' }); }
-    go(wd);
+    go(wd); for (let i = n0; i < segs.length; i++) if (segs[i].act === 'commute') segs[i].tag = 'round';
   };
   // a leisure block taken off the Commons (Deck 4's rooms, the officers' lounges): sometimes the rec deck instead. The place
   // stays held for the block and the ride back ends there, so everyone else's day and this person's own afterwards come
@@ -10416,7 +10417,7 @@ function jobVisits() {
 const SHIP_DAYS = new Map();
 function shipDay(d) {
   if (evChanged()) { EV_SIG = evSig(); EV_DAY.clear(); SHIP_DAYS.clear(); }   // a ship-wide event began or ended: plan again (C7)
-  if (SHIP_DAYS.has(d)) return SHIP_DAYS.get(d);
+  const was = SHIP_DAYS.get(d); if (was && !(was.occ.recAt != null && !was.occ.recSet && recSettled(was.occ.recAt))) return was;   // planned before its rec hour was settled: plan again (RC, 0.64.1)
   const S = schedData(), occ = new Map(), plans = new Map();
   // the day's stand-ins: for each spare station, one person from its department (day shift, working today) works there
   occ.rot = new Map();
@@ -10734,7 +10735,7 @@ function dayReport(day) {
     const gp = shiftBlocks(p, day), gb = gp && gp.blocks;
     if (gb || (isWorkDay(p, day) && !(galleyRotaOn() && p.dept === 'galley'))) {   // the whole shift worked (breaks and a galley staff meal count)
       const iv = gb ? gb.map(([a, b]) => [B + a, B + Math.min(b, 1440)]) : [p.shift === 'night' ? [B + 1260, B + 1440 + 360] : [B + SHIFTS.day[0], B + SHIFTS.day[1]]];
-      const both = planDay(p, day).concat(planDay(p, day + 1)).filter(s => s.act === 'work' || ['tea', 'toilet', 'hands', 'staff', 'patrol', 'rush'].includes(s.tag) || /^intro/.test(s.tag || ''));   // an intro beat on shift is work too
+      const both = planDay(p, day).concat(planDay(p, day + 1)).filter(s => s.act === 'work' || ['tea', 'toilet', 'hands', 'staff', 'patrol', 'rush', 'round'].includes(s.tag) || /^intro/.test(s.tag || ''));   // an intro beat on shift is work too
       for (const [a, b] of iv) {
         const worked = both.reduce((n, s) => n + Math.max(0, Math.min(s.to, b) - Math.max(s.from, a)), 0);
         if (worked < b - a) rep.work.push(p.id + ' ' + worked + '/' + (b - a));
@@ -13368,7 +13369,9 @@ function actBar() {
   if (txt !== BAR_TXT) { BAR_TXT = txt; el.children[0].textContent = txt; el.setAttribute('aria-label', txt); }
   el.children[1].children[0].style.transform = 'scaleX(' + pr.frac.toFixed(3) + ')'; el.setAttribute('aria-valuenow', Math.round(pr.frac * 100));
   floatV.set(A.x, A.y + BAR_Y, A.z).project(camera);
-  const sb = document.getElementById('needStrip'), y = sb ? sb.offsetTop + sb.offsetHeight + 6 : 124;   // under the needs strip (0.28.32)
+  const sb = document.getElementById('needStrip'), tb = document.getElementById('trkBtn');   // under the needs strip (0.28.32); on a phone under the Tracked button there (item D, the user's, 0.64.2: the bar always last)
+  const under = sb && sb.offsetWidth && tb && !tb.hidden && tb.offsetWidth && matchMedia('(max-width:720px),(max-height:500px)').matches ? tb.getBoundingClientRect().bottom : null;
+  const y = under !== null ? Math.round(under + 6) : sb ? sb.offsetTop + sb.offsetHeight + 6 : 124;
   el.style.transform = 'translateY(' + y + 'px)'; el.style.width = sb ? sb.offsetWidth + 'px' : '';
   el.hidden = typeof DEV !== 'undefined' && !!DEV.open;  // never over the device
 }
@@ -14934,8 +14937,9 @@ trkBtn.onclick = e => { e.stopPropagation(); trkOpen(); };
 document.getElementById('trkClose').onclick = trkClose;
 addEventListener('keydown', e => { if (e.key === 'Escape' && !trkEl.hidden) trkClose(); });
 addEventListener('pointerdown', e => { if (!trkEl.hidden && !trkEl.contains(e.target) && !trkBtn.contains(e.target)) { e.stopPropagation(); e.preventDefault(); trkClose(); } }, true);   // a tap outside closes it, and goes no further
-// where it sits: on phones (narrow or short, section 15's pausePlace's test) under the needs strip's right end, clear of
-// the activity bar under its left end, so it stays put as the Device button grows (mail, a low need) and Pause moves;
+// where it sits: on phones (narrow or short, section 15's pausePlace's test) under the needs strip's left end, lined up
+// with it, so the left column reads as one stack (card, Device and Pause, needs, Tracked, and section 15's activity bar
+// last, under Tracked; item D, the user's, 0.64.2); it never moves when an activity starts or ends;
 // elsewhere, or with no needs strip, in the Device button's row after Device (or Pause beside it), without its word
 // when it would touch the round buttons
 function trkPlace() {
@@ -14943,7 +14947,7 @@ function trkPlace() {
   const dr = d.getBoundingClientRect();
   trkBtn.classList.remove('compact'); trkBtn.style.height = Math.round(dr.height) + 'px';
   if (matchMedia('(max-width:720px),(max-height:500px)').matches && ns && !ns.hidden && ns.offsetWidth) {
-    const r = ns.getBoundingClientRect(); trkBtn.style.left = Math.round(Math.min(r.right, innerWidth - 12) - trkBtn.offsetWidth) + 'px'; trkBtn.style.top = Math.round(r.bottom + 8) + 'px'; return;
+    const r = ns.getBoundingClientRect(); trkBtn.style.left = Math.round(r.left) + 'px'; trkBtn.style.top = Math.round(r.bottom + 8) + 'px'; return;
   }
   const pr = pb && pb.style.left ? pb.getBoundingClientRect() : null, anchor = pr && Math.abs(pr.top - dr.top) < 4 ? pr : dr;
   const put = () => { trkBtn.style.left = Math.round(anchor.right + 8) + 'px'; trkBtn.style.top = Math.round(dr.top) + 'px'; };
@@ -15082,6 +15086,7 @@ function recGo(kind, point, title, flavour) {
 const REC_BELAYS = [['7-climb-1', 1], ['7-climb-2', 2]];   // the two auto-belays, over routes 1 and 2 (0-based: yellow and blue; rec engineer B2's)
 const recLanesFree = () => REC_LANES.filter((z, i) => !heldBy('7-lane-' + (i + 1)));
 const recBelaysFree = () => { const sh = typeof recShut === 'function' ? recShut() : null; return REC_BELAYS.filter(([id, r], b) => !heldBy(id) && !(sh && ((sh.belayOff || [])[b] || sh.route === r))).map(([, r]) => r); };   // not one tagged out or roped off
+const recBelaysUsable = () => { const sh = REC_DECK && typeof recShut === 'function' ? recShut() : null; return REC_BELAYS.filter(([, r], b) => !(sh && ((sh.belayOff || [])[b] || sh.route === r))).length; };   // free or busy, not tagged out or roped off: none means no turn will come (R7's note; RE20, 0.64.1)
 const recCourtFree = () => !heldBy('7-disc-1');           // your baseline: crew there means a game of theirs is on (0.83.2)
 const REC_QUEUE = { swim: ['rec:poolq', 'Every lane\'s taken. You wait on a lounger for one to come free.'], climb: ['rec:climbq', 'Both belays are in use. You wait on the pebble beach for your turn.'],
   disc: ['rec:seat', 'Two are playing. You wait on the bench by the gate: you\'re next.'] };
@@ -15121,6 +15126,7 @@ function recQueue(kind, title, p) {                      // true when you're now
 function recStart(kind, title, flavour, p) {             // p: the tap in deck coordinates (or null)
   if (kind === 'float' && recShut().float) { toast('Float room', worksText('rec.shut.float', 'The float room\'s shut: the gravity plates are down. Works are on it.')); return; }   // 0.84.4 (rec engineer B); 0.84.8 W3's key
   if (kind === 'climb' && !recShut().belays) { toast('Climbing wall', worksText('rec.shut.belays', 'Both auto-belays are tagged out. Works are on it.')); return; }   // 0.84.4 (rec engineer B); 0.84.8 W3's key
+  if (kind === 'climb' && REC_DECK && !recBelaysUsable()) { toast('Climbing wall', worksText('rec.shut.wall', 'One auto-belay\'s tagged out and the other one\'s route is taped off. No climbing till Works are done.')); return; }   // one tagged out, the other's route taped: no waiting for a turn that won't come (R7's note; RE20, 0.64.1)
   const water = { pool: .35, river: .36 };
   if (recQueue(kind, title, p)) return;
   if (kind === 'swim') {
@@ -15171,6 +15177,8 @@ function recFrame() {
   if (A && A.kind === 'recWait' && REC.q && recFreeFor(REC.q.kind)) {   // your turn (RA, 0.83.0)
     const q = REC.q; REC.q = null; toast(q.title, 'You\'re up.');
     if (q.kind === 'disc') { actEnd(true); discAsk(recCourtWaiting()); } else recStart(q.kind, q.title, null, q.p);
+  } else if (A && A.kind === 'recWait' && REC.q && REC.q.kind === 'climb' && REC_DECK && !recBelaysUsable()) {   // waiting, and now no belay can free up: stop waiting (RE20, 0.64.1)
+    REC.q = null; actEnd(true); toast('Climbing wall', recShut().belays ? worksText('rec.shut.wall', 'One auto-belay\'s tagged out and the other one\'s route is taped off. No climbing till Works are done.') : worksText('rec.shut.belays', 'Both auto-belays are tagged out. Works are on it.'));
   } else if (REC.q && (!A || A.kind !== 'recWait')) REC.q = null;   // gave up waiting, or went off to do something else
   if (A !== REC.last) { const was = REC.last; REC.last = A; if (was && was.kind.startsWith('rec') && !A) recAfter(was); }
   if (A && A.kind.startsWith('rec') && A.phase === 'do' && A.def.also) {   // the second gains (a swim washes you, all of them keep you fit), as the minutes go by
@@ -16350,7 +16358,8 @@ function machUseDay(d) {
   const B = (d - 1) * 1440, z = () => new Float32Array(24);
   const u = { meal: z(), cook: z(), ride: z(), water: z(), loads: z(), garden: z(), heads: {} };
   for (const n of Object.keys(DECKS)) u.heads[n] = z();
-  const { plans } = shipDay(d), byId = schedData().byId;
+  const { plans, occ } = shipDay(d), byId = schedData().byId;
+  if (occ.use) return occ.use;                           // a provisional plan's use, worked out once (planning it again makes a new occ; R8's fix, RE20 0.64.1)
   let workedYesterday = 0;
   for (const p of schedPeople()) if (isWorkDay(p, d - 1)) workedYesterday++;
   for (const segs of plans.values()) for (const s of segs) {
@@ -16372,6 +16381,7 @@ function machUseDay(d) {
   if (typeof galleyCooks === 'function') for (let m = 0; m < 1440; m++) u.cook[Math.floor(m / 60)] += galleyCooks(B + m) / 60;
   else for (let h = 0; h < 24; h++) u.cook[h] = u.meal[h] + (h < 23 ? u.meal[h + 1] : 0);
   for (let h = 6; h < 10; h++) u.loads[h] += workedYesterday / 4 / 6;           // a load holds about six uniforms
+  if (occ.recAt != null && !occ.recSet) return occ.use = u;   // a plan to be made again (recPlanShut): not kept (RC, 0.64.1)
   MACH_USE.set(d, u);
   for (const k of MACH_USE.keys()) if (k < d - 3 || k > d + 1) MACH_USE.delete(k);
   return u;
@@ -16434,6 +16444,7 @@ function machinesReset(hour) {
   SHIP.machines = {};
   for (const m of machineList()) { const c = machFresh(m); SHIP.machines[m.id] = { cond: c, state: machineState(c), lastService: null }; }
   jobsReset(); MACH_HIST.clear(); MACH_HOUR = hour; MACH_REV++; SHIP.upkeep = { ...UPKEEP_START };
+  for (const [k, v] of SHIP_DAYS) if (v.occ.recAt != null) { SHIP_DAYS.delete(k); MACH_USE.delete(k); }   // plans that read the old record (recPlanShut; RC, 0.64.1)
   SHIP.short = {}; for (const k in MACH_EXTRA) delete MACH_EXTRA[k]; for (const k in MACH_RUN) delete MACH_RUN[k];
 }
 // a new game (section 13's newGameStart, 0.26.31): the machines and jobs start afresh at once, whichever way the clock
@@ -16702,6 +16713,17 @@ function recShutAt(t) {
   REC_SHUT.set(h, r); return r;
 }
 function recShut() { machinesNow(); return recShutAt(shipNow()); }
+// the rec deck as the crew's plans for day d see it (RC, 0.64.1; BM9's find): recShutAt at 22:00 the evening before (hour
+// (d - 1) * 24 - 2), settled once the 23:00 hour has run (a repair rewrites the hour before the one running), so a day's
+// plan never depends on when it was made. Not settled yet (a day planned the day before, as the jobs and the evening
+// Mail do, a new game's first day, the days before a load): all clear, and the plan is made again once it is (occ.recAt,
+// occ.recSet; machUseDay doesn't keep its use till then). machinesReset drops the plans that read the old record
+const recSettled = h => MACH_HOUR !== null && h <= MACH_HOUR - 2 && MACH_HIST.has(h);
+function recPlanShut(d, occ) {
+  if (!REC_DECK) return REC_OK;
+  const h = (d - 1) * 24 - 2, ok = recSettled(h); if (occ) { occ.recAt = h; occ.recSet = ok; }
+  return ok ? recShutAt(h * 60) : REC_OK;
+}
 // one machine, for the job board and the device (B2): its definition, kind and state together
 function machineInfo(id) {
   const m = machineById(id); if (!m) return null;
