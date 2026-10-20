@@ -9315,7 +9315,7 @@ function schedDesks(people, shared) {
   // a place with `desk: '<id>'` is that person's own (the Chief's chair in her office, the patch #1): whoever was given it
   // trades with them, so nobody else's desk moves
   for (const pl of [...shared.values()].flat()) {
-    const mine = pl.desk && desks.has(pl.desk) ? desks.get(pl.desk) : undefined; if (mine === undefined || mine === pl.id) continue;
+    const mine = pl.desk && desks.has(pl.desk) ? desks.get(pl.desk) : undefined; if (mine == null || mine === pl.id) continue;   // no desk of their own: nobody's moved
     const sh = (order.find(q => q.id === pl.desk) || {}).shift;
     for (const q of order) if (q.id !== pl.desk && q.shift === sh && desks.get(q.id) === pl.id) desks.set(q.id, mine);
     desks.set(pl.desk, pl.id);
