@@ -35,7 +35,7 @@ DR1, session_01WfFmjT31bVcy4mvsNVi5Mz, 2026-10-20, written at about 47% memory, 
    - "End now" needs the ending split out of `eventAdvance` (section 18 owner first). Phase jumps wait for the events plan's F4.
    - The fixed seed was dropped in v3: devmode_check can only compare fields across two Set careers, not save bytes.
 2. **The lead's earlier ask (1):** once Dev mode and the patches are both merged into integration, re-run `undowin.py` on the real merge, plus a Dev jump past a held punch and PB's schedule changes.
-3. **The lead may send more owner stand-in reviews** for 13/14/15/20 hooks.
+3. **DR1 has stopped** (lead 21: patch #26 First Light Cocoa, claude/patch-e cf45e2a, PASS, was the last review). Owner stand-in reviews for patch hooks into unstaffed sections now need a fresh reviewer. The tools: `savecmp.py`, `evcmp.py` (the traditions calendar and plans, hashed, against integration) and cadet_test, one at a time.
 
 ## How to test (fresh container)
 ```

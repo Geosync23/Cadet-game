@@ -339,3 +339,12 @@ Stop 1a's six hooks, final: 13 (`DEVMODE`, `SAVE_KEY`; `freezeSync`/`saveGame` a
 - 4420bff (15b): `mugPose()` is null when off, so the drink pose is `drink` as before. `putWhat` and Put down get `mugHeld`/`mugPut`, both null when off.
 - c1036ae (15b): `A.def.also = mugAlso(...)` returns a copy with the same values when off. `ACT.def` is a fresh copy per activity (`{ ...PLAYER_ACTS[kind] }`, line 12962), so cocoa's +8 leisure never leaks into the shared definition. `mugFinish` uses `mugAlso` too, so "drunk as you go" gets it as well.
 - 05314b6 (8b slot): `HOLDS.mug` and `ACTS.cocoa` are added in the performance engineer's slot, and only used through `mugHeld`/`mugPose`.
+
+## Owner stand-in review: patch #26 First Light Cocoa hooks (claude/patch-e cf45e2a), my last
+
+**PASS.** Hooks: 1c4bc67 (18), 93bf4e5 (5), 57b77e5 (21), e720cea (section 15's slot functions made hoisted).
+- **cadet_test** against integration: only `state ['items']`, #25's directory text, the same as every earlier patch E run, with 0 px. names_check OK.
+- **`evcmp.py`:** `eventsOn` for Days 1-30, plus `eventPlan` for 40 crew on Day 4, hash **identical** to integration's (d1aae5144d0f), with no `first-light` listed while `FLC_ON` is off.
+- **Load order.** `TRAD_JOIN['first-light']` reads `MUG_ON` when the table is built; `MUG_ON` is declared at 14508, before `TRAD_JOIN` at 35475. `applyLight` (section 5) may run before section 15: `flcDim` is now a function declaration reading the `var FLC_DIM`, which is undefined then, so `|| 0` gives no dim. `flcBusy` is called only at run time (section 21's arrow), never before `FLC_ON` exists.
+- **Section 18 when off:** the tradition is skipped unless `FLC_ON`. The `'cocoa'` tag keys are added for every event, but only events that carry a cocoa tag use them, and none do with the switch off. `evTagId`'s widened suffix can't misread an id, since no tradition id ends in "-cocoa". `flcJoin` is reached only for `first-light`.
+- **Sections 5 and 21:** the light is multiplied by `1 - flcDim()`, which is 1 when off. The bed arrow's extra condition is false when off (`flcBusy` returns `FLC_ON && …`).
