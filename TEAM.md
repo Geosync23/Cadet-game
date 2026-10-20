@@ -150,6 +150,7 @@ Lead: session_019UJSCUCdtC1kTpYiABWKhs, branch `claude/start-here-review-3qoht9`
 | Rec engineer RE20 | session_019auXkZkQG3gnNjmArAauLx | `claude/rc-wip` → `claude/rec-cand-s1` | RC's fix, day_check 3-8, item A (Maeve's rides on-shift), item B (career pace), rebase |
 | Build master BM10 | session_01KpcQGJvrAz57dmKp6AFg4w | `claude/rec-cand-s1` | the full 0.64.0 check round, DEV_NOTES row, green hash |
 | Reviewer R8 | session_01GdhqdLeZuGFQSTX7RL92U5 | `claude/reviews-r8` | reviews RE20's hashes |
+| Split architect SA1 | session_019ZX8LqsYayXnK4baFaEs8C | `claude/split-plan` | the step 2 plan page (`plans/split-plan.html`) only; no game edits |
 After the green hash: the lead has the file read in full and publishes it as a new page "Starship Cadet Rec Deck", then stops and asks the user.
 **The user's calls (2026-10-20):** career pace / balance waits for a big balance pass later (item B dropped; career_check's busy-pace fail is known and accepted for now). Fix the wall climb queue bug in 0.64.0 (RE20, item C). The ways of working in `plans/roadmap-after-recdeck.md` are set up in step 2, alongside the file split.
 **More of the user's calls (2026-10-20):** a dev mode (move the clock, set career progress, start any ship tradition to test) comes after the split and clean-up; before the split, the whole one-file game is tagged and kept. Both are in `plans/roadmap-after-recdeck.md` (copied to this branch).
