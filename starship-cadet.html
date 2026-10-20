@@ -40158,11 +40158,11 @@ function introNightTick() {
   const p = player.obj.position, U = INTRO_UI, now = simNow(), a = introWalker(), near = !!a && Math.hypot(a.x - p.x, a.z - p.z) <= 6;
   if (!U.night) {
     if (U.tour.some(q => q.core.length)) return;          // his last tour lines first
-    if (!near) { I.done.goodnight = null; introDone('free'); return; }
+    if (!near) { I.done.goodnight = null; I.done['goodnight:owed'] = 1; introDone('free'); return; }   // the patch (#4): said later that evening, or by Mail (introNightOwedTick)
     U.night = []; for (let n = 1; n <= 4; n++) { const l = introWriterLine('walk.goodnight.' + n); if (!l) break; U.night.push(l[0]); }
     if (!U.night.length) U.night = INTRO_GOODNIGHT.slice();
   }
-  if (!a || Math.hypot(a.x - p.x, a.z - p.z) > 10) { I.done.goodnight = Math.floor(shipNow()); U.night = null; introDone('free'); return; }   // you went: the arrow anyway
+  if (!a || Math.hypot(a.x - p.x, a.z - p.z) > 10) { I.done.goodnight = Math.floor(shipNow()); I.done['goodnight:owed'] = 1; U.night = null; introDone('free'); return; }   // you went: the arrow anyway (and the rest later, introNightOwedTick)
   if (DIALOGUE || now < U.next || typeof bubbleSay !== 'function') return;
   bubbleSay(a.h, U.night.shift(), 4.5); U.next = now + INTRO_TOUR_GAP; U.hushTo = now + 4500;   // the crowd's chatter waits (introHush)
   if (!U.night.length) { I.done.goodnight = Math.floor(shipNow()); U.night = null; introDone('free'); }   // and he lets you go
@@ -40419,7 +40419,7 @@ function introArrowWant(now) {
     }
   }
   if (I.done['arrow:board'] === undefined && careerClockedIn(1)) {
-    if (out || typeof myJob === 'function' && myJob() || typeof I.done['d1-end:told'] === 'number') fin('board');   // (the patch, #19: or Zeke's said it's the end of the day)
+    if (out || typeof myJob === 'function' && myJob() || I.done['d1-end:start'] !== undefined) fin('board');   // (the patch, #19: or Zeke's begun his end of the day)
     else return 'board';
   }
   return introDayEndWant(now, m);                         // the patch (#19): after Zeke's end-of-day word, the clock, then the beam
@@ -40430,7 +40430,7 @@ function introArrowTick() {
   const id = introArrowWant(Math.floor(shipNow())), g = id && INTRO_ARROWS[id];
   const cur = typeof IX_GOAL !== 'undefined' ? IX_GOAL : null, ours = cur && (INTRO_ARROW_LABELS.has(cur.label) || cur.label === INTRO_BED_GOAL && id === 'call');   // 0.72.5 (playtest 2, item 3): the call-home arrow takes over from the first night's bunk arrow (up since the goodnight), which comes back once you're at the booths
   if (!g) { if (INTRO_UI.arrow) introArrowClear(); return; }
-  if (cur && !ours) return;                               // someone else's arrow is up: ours waits for it
+  if (cur && !ours && !((id === 'clockout' || id === 'beam') && introHoldNudges())) return;   // someone else's arrow is up: ours waits for it (not the end of training day's: the beam wins, the patch #19)
   if (!cur || cur.label !== g.label) setGoal(g);
   INTRO_UI.arrow = id;
 }
@@ -40542,7 +40542,7 @@ function introTick() {
   // his lines for a step once its time has come and no meeting is on ("I'm on Four if you need me" waits for 19:00)
   const cur = introStepById(I.step);
   if (I.step !== INTRO_UI.step && !DIALOGUE && (!cur || Math.floor(shipNow()) >= introAbs(cur.day, cur.at))) { INTRO_UI.step = I.step; }   // ('free' said walk.free here until 0.42.27: his goodnight, introNightTick, says it now)
-  introTourTick(); introNightTick(); introBedTick(); introTernTick(); introBeatTick(); introDayEndTick(); introFollowTick(); introArrowTick(); introDevGlowTick();
+  introTourTick(); introNightTick(); introBedTick(); introTernTick(); introBeatTick(); introDayEndTick(); introNightOwedTick(); introFollowTick(); introArrowTick(); introDevGlowTick();
   // the goal arrow points at him while he's leading you (section 15b's setGoal), and is cleared when he lets you go
   const st = introStep(), lead = !DIALOGUE && introEscorting(st) && !INTRO_UI.arrow;   // while he's yours, not over a meeting (nor over a first-time arrow: the servery after the Chief's "Eat something")
   if (lead) {
@@ -40940,7 +40940,8 @@ function introHush() {
 // the patch, #14: the device button the first time it's yours. From the handover (flag intro.device) until you first open
 // it (section 19's SHIP.device.booted), its ring pulses and a small "Tap your device" sits under it; both go on the first
 // open and never come back. Only with the intro on (test URLs never), so nothing changes elsewhere.
-const INTRO_DEV_POINT = 'Tap your device';
+const INTRO_DEV_POINT = 'Tap your device', INTRO_DEV_POINT_MS = 30000;
+const INTRO_DEV_SEEN = { ms: 0, at: 0, xy: '' };   // real ms the pointer has shown (not saved: a reload shows it again)
 let INTRO_DEV_GLOW = false;
 function introDevGlowTick() {
   const b = document.getElementById('devBtn'); if (!b) return;
@@ -40949,8 +40950,14 @@ function introDevGlowTick() {
   let pt = document.getElementById('devPoint');
   if (!on) { if (INTRO_DEV_GLOW) b.classList.remove('devglow'); INTRO_DEV_GLOW = false; if (pt) pt.remove(); return; }
   if (!INTRO_DEV_GLOW) b.classList.add('devglow'); INTRO_DEV_GLOW = true;
-  if (!pt) { pt = document.createElement('div'); pt.id = 'devPoint'; pt.textContent = (typeof LINES !== 'undefined' && Array.isArray(LINES['tip.device.first']) && LINES['tip.device.first'][0] && LINES['tip.device.first'][0].text) || INTRO_DEV_POINT; document.body.appendChild(pt); }
-  const r = b.getBoundingClientRect(); pt.style.left = Math.round(r.left) + 'px'; pt.style.top = Math.round(r.bottom + 8) + 'px';
+  // the pointer (PR2, phones first): it covers the needs strip, so never over a dialogue and about 30 real seconds in all; the glow stays
+  const now = performance.now(), dt = INTRO_DEV_SEEN.at ? Math.min(250, now - INTRO_DEV_SEEN.at) : 0; INTRO_DEV_SEEN.at = now;
+  const show = !(typeof DIALOGUE !== 'undefined' && DIALOGUE) && INTRO_DEV_SEEN.ms < INTRO_DEV_POINT_MS;
+  if (!show) { if (pt) pt.remove(); return; }
+  INTRO_DEV_SEEN.ms += dt;
+  if (!pt) { pt = document.createElement('div'); pt.id = 'devPoint'; pt.textContent = INTRO_DEV_POINT; document.body.appendChild(pt); INTRO_DEV_SEEN.xy = ''; }
+  const r = b.getBoundingClientRect(), xy = Math.round(r.left) + ',' + Math.round(r.bottom + 8);
+  if (xy !== INTRO_DEV_SEEN.xy) { INTRO_DEV_SEEN.xy = xy; pt.style.left = Math.round(r.left) + 'px'; pt.style.top = Math.round(r.bottom + 8) + 'px'; }
 }
 // the patch, #18 and #19: the end of training day. Name on the beam is at 17:05 (the Works crew's day is unchanged), so
 // at 16:50 Zeke comes to find you (INTRO_WEEK's d1-end, follow) and says good job, you're on your own tomorrow, clock out
@@ -40982,10 +40989,11 @@ function introDayEndTick() {
   }
   if (!a || DIALOGUE || simNow() < (U.next || 0) || typeof bubbleSay !== 'function') return;
   bubbleSay(a.h, U.endQ.shift(), 4.5); U.next = simNow() + INTRO_TOUR_GAP;
+  if (I.done['d1-end:start'] === undefined) I.done['d1-end:start'] = Math.floor(shipNow());   // his first line: the clock's arrow now (PR2)
   if (!U.endQ.length) { I.done['d1-end:told'] = Math.floor(shipNow()); U.endQ = null; }
 }
 function introDayEndWant(now, m) {                      // introArrowWant's last word on Day 1: 'clockout', 'beam' or null
-  const I = SHIP.intro; if (typeof I.done['d1-end:told'] !== 'number' || I.done['arrow:beam'] !== undefined) return null;
+  const I = SHIP.intro; if (typeof I.done['d1-end:told'] !== 'number' && I.done['d1-end:start'] === undefined || I.done['arrow:beam'] !== undefined) return null;
   if (introNamePainted() || m >= INTRO_DAYEND.end) { I.done['arrow:beam'] = Math.floor(now); return null; }
   return careerClockedIn(1) && !(typeof careerClockedOut === 'function' && careerClockedOut(1)) ? 'clockout' : 'beam';
 }
@@ -41015,6 +41023,39 @@ function tapBeside(to) {
   }
   return best || to;
 }
+// the patch (#4, lead 21): Zeke's goodnight is how a ship day runs, so it mustn't be missable. If you weren't near him
+// when he said it (or walked off before the end), he says it all the next time you're within 6 tiles of him that
+// evening; not by bedtime (22:00, or you go to sleep first), it comes as a short Mail. I.done 'goodnight:owed' (saved):
+// 1 owed, 2 said, 3 by Mail.
+const INTRO_NIGHT_BED = 22 * 60;
+function introNightLines() {
+  const out = []; for (let n = 1; n <= 4; n++) { const l = introWriterLine('walk.goodnight.' + n); if (!l) break; out.push(l[0]); }
+  return out.length ? out : INTRO_GOODNIGHT.slice();
+}
+function introNightOwedTick() {
+  const I = SHIP.intro, U = INTRO_UI; if (I.done['goodnight:owed'] !== 1 || U.night) return;
+  const now = Math.floor(shipNow());
+  if (now >= introAbs(0, INTRO_NIGHT_BED) || (typeof sleeping !== 'undefined' && sleeping)) {
+    I.done['goodnight:owed'] = 3; U.owedQ = null;
+    introMail({ from: 'Zeke Torres', subject: 'How a day runs', body: introNightLines().join(' ') + ' — Z.' }, now); return;
+  }
+  const a = introWalker(), p = player.obj.position;
+  if (!U.owedQ) { if (!a || DIALOGUE || Math.hypot(a.x - p.x, a.z - p.z) > 6) return; U.owedQ = introNightLines(); }
+  if (!a || Math.hypot(a.x - p.x, a.z - p.z) > 10) { U.owedQ = null; return; }   // gone again: all of it, next time
+  if (DIALOGUE || simNow() < (U.next || 0) || typeof bubbleSay !== 'function') return;
+  bubbleSay(a.h, U.owedQ.shift(), 4.5); U.next = simNow() + INTRO_TOUR_GAP; U.hushTo = U.next + 900;
+  if (!U.owedQ.length) { I.done['goodnight:owed'] = 2; U.owedQ = null; }
+}
+// the patch, #19's "the dinner nudges wait" (PP1, lead 21): from Zeke's 16:50 word until your name's up (painted, or 17:40)
+// the usual pulls elsewhere hold off: section 15's green tips and gentle low-need pop-ups (a firm one still shows, without
+// its marker), and section 19's meal heads-up; the arrows are this section's (clock, then the beam). Day 1, intro on only
+function introHoldNudges() {
+  if (!introOn() || SHIP.time.day !== 1) return false;
+  const I = SHIP.intro, m = SHIP.time.min;
+  return m >= INTRO_DAYEND.at && m < INTRO_DAYEND.end && I.done['d1-end:told'] !== null && I.done['arrow:beam'] === undefined && !introNamePainted();
+}
+// section 20's clock-out remark skips Zeke on training day once he's said his own good job (PR2: not twice)
+function introQuiet(id) { return introOn() && SHIP.time.day === 1 && id === SHIP.intro.escort && SHIP.intro.done['d1-end:start'] !== undefined; }
 // ---- end of slot: Onboarding engineer ----
 
 // =====================================================================
