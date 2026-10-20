@@ -105,7 +105,7 @@ A month aboard. Tomorrow a Veyli delegation comes aboard; Commander Vance's own 
 - **Marrow:** A month ago {me} came up the Tern's ramp. Since then: the Line, a storm, a comet.
 - *(if the storm went smoothly)* **Marrow:** The storm crew's roster is still pinned up in the tea corner. I read it some evenings.
 - *(if it was bumpy or rough)* **Marrow:** There's still a scorch mark in the relay room. Chief Calder wants to keep it. So do I.
-- *(if you're an Engine Specialist)* **Marrow:** {me}. Four weeks ago, a junior. Today, an Engine Specialist. That's rarely done so fast.
+- *(if you're an Engine Specialist)* **Marrow:** {me}. Four weeks ago, a junior. Today, an Engine Specialist. Rarely done so fast.
 - *(if you're a Senior Officer)* **Marrow:** {me}. Four weeks ago, a junior. Today, a Senior Officer with a cabin on Deck 2.
 - *(if you're an Officer)* **Marrow:** {me}. Four weeks ago, a junior. Today, an Officer of the Wren, with your own key.
 - *(if you're still a junior (behind))* **Marrow:** {me}. Four weeks with us. Not every road up is quick. The good ones rarely are.

@@ -24,7 +24,7 @@ marrow: The storm crew's roster is still pinned up in the tea corner. I read it 
 marrow: There's still a scorch mark in the relay room. Chief Calder wants to keep it. So do I.
 // beat 2: what you've become (your rank, your work)
 ? myrank:specialist
-marrow > you: {me}. Four weeks ago, a junior. Today, an Engine Specialist. That's rarely done so fast.   #warm
+marrow > you: {me}. Four weeks ago, a junior. Today, an Engine Specialist. Rarely done so fast.   #warm
 ? myrank:senior
 marrow > you: {me}. Four weeks ago, a junior. Today, a Senior Officer with a cabin on Deck 2.   #warm
 ? myrank:officer
