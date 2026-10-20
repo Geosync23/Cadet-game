@@ -112,3 +112,17 @@ Each event is built switched off, tested in Dev mode, then switched on.
 7. **What should the rec deck do in the storm?** Recommended: unhook its first all-hands from the storm and close the rec deck from the front to the all-clear.
 8. **What about the repeated scenes?** Recommended: fold them. The commendation comes at the all-clear and is mentioned on Day 16 (no summons on Day 15), and the Day 17 toast counts as that month's Captain's table.
 9. **Who is the junior you mentor on Day 26?** Recommended: a small arrival on Day 21 using the rotation traditions.
+
+## Pending for the final version (after the user's answers)
+- **Build order** (the user, via lead 20, 2026-10-20). The events are now built before Pillar 5 steps 5-6. The full order:
+  1. Dev mode
+  2. Playtest patch
+  3. Talk-a-while pack
+  4. Ship-wide events (ion storm first)
+  5. Pillar 5 steps 5-6
+  6. Character arcs
+  7. Optimisation
+  8. Balancing
+  
+  So F0 and F1 guard today's career beats: Officer on Day 10 and the ceremony on Day 11. They also leave clear hooks, so that the Tier 3 and Tier 4 beats, when they come later, fit around the events' fixed days.
+- **More large-group moments** (the user's playtest: "Love the moments with large groups — need more, especially in ship-wide events"). Add more gatherings to each event's moments when the plan is finalised.
