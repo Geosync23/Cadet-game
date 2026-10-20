@@ -38453,14 +38453,15 @@ function talkStart(C) {
   const seated = typeof ACT !== 'undefined' && ACT && ACT.phase === 'do' && (ACT.kind === 'eat' || ACT.kind === 'sit');   // already at a table: you talk from your seat, still eating (playtest 1)
   if (seated) { C.talk.sits = true; C.reach = Math.max(C.reach, 5); }
   else if (sits && typeof playerSitNear === 'function' && playerSitNear(deckDef.num, cellAt(a.x, a.z), 'Talking with ' + shortName(p))) { C.talk.sits = true; C.reach = Math.max(C.reach, 5); }   // a seat beside them
-  const open = topic && talkSays(C, 'talk.' + topic + '.open'), hi = talkSays(C, sits ? 'talk.sit' : 'talk.start');
+  const pk = typeof talkPackStart === 'function' ? talkPackStart(C) : null;   // section 22: the Talk a while pack's talk (TE1), fired now; it clears C.talk.topic
+  const open = pk || (C.talk.topic && talkSays(C, 'talk.' + topic + '.open')), hi = talkSays(C, sits ? 'talk.sit' : 'talk.start');
   if (typeof playerChat === 'function') playerChat(p);   // the hello's little social (section 15)
-  memAdd(p.id, 'talk' + (topic ? '.' + topic : ''));
+  const mt = C.talk.pack ? C.talk.pack.topic : topic; memAdd(p.id, 'talk' + (mt ? '.' + mt : ''));
   chatSay([hi, open].filter(Boolean).join(' ') || talkNext(C) || 'Go on then. What\'s new?');
 }
 function talkNext(C) {                                    // their next line while you talk: the topic's, a filler, else their usual chat
   const T = C.talk, p = C.p;
-  const l = (T.topic && talkSays(C, 'talk.' + T.topic + '.more')) || talkSays(C, 'talk.filler');
+  const l = (typeof talkPackNext === 'function' && talkPackNext(C)) || (T.topic && talkSays(C, 'talk.' + T.topic + '.more')) || talkSays(C, 'talk.filler');   // section 22: the pack's next line first
   if (l) return l;
   for (let k = 1; k <= 8; k++) { const c = chatLine(p, shipNow() + 60 * k, true); if (c && c.say !== false && !TALK_KEEP.has(c.kind) && c.kind !== 'greet' && c.kind !== 'go' && !T.said.includes(c.text)) { T.said.push(c.text); return c.text; } }
   return null;
@@ -38472,6 +38473,7 @@ function talkSuits(p) {                                   // the reply that suit
 }
 const TALK_REPLY_SAY = { listen: 'Tell me more.', share: 'That reminds me of home.', cheer: 'Ha! Go on.' };
 function talkReply(C, k) {
+  const pr = typeof talkPackReply === 'function' && talkPackReply(C, k); if (pr) return pr;   // section 22: the pack talk's own reply
   const tx = C.talk.topic && talkText('talk.' + C.talk.topic + '.reply.' + k, null, schedU(C.p.seed, SHIP.time.day, 670) * 7 | 0);
   return (tx || TALK_REPLY_SAY[k]).replace(/\{name\}/g, C.p.name).replace(/\{first\}/g, shortName(C.p));
 }
@@ -38480,7 +38482,7 @@ function talkAnswer(C, k) {
   T.ask = false; T.reply = k; T.last = shipNow();
   const good = talkSuits(C.p) === k, pts = REL_PTS.reply[good ? 1 : 0] * talkBoost();
   relAdd(C.p.id, 'talk', pts); T.pts += pts;
-  chatSay((T.topic && talkSays(C, 'talk.' + T.topic + '.ans.' + k)) || (good ? 'Exactly. You get it.' : 'Ha. Maybe.'));
+  chatSay((typeof talkPackAnswer === 'function' && talkPackAnswer(C, k)) || (T.topic && talkSays(C, 'talk.' + T.topic + '.ans.' + k)) || (good ? 'Exactly. You get it.' : 'Ha. Maybe.'));
 }
 const talkBoost = () => { const fx = typeof needEffects === 'function' ? needEffects() : null; return fx && fx.friendGain > 0 ? fx.friendGain : 1; };   // section 15's leisure: "In good spirits" talks warm faster
 function talkEnd(C, why, quiet) {                         // why: 'full' | 'stop' | 'walk' | 'go'
@@ -38498,7 +38500,7 @@ function talkStep(C) {                                    // every frame while y
   if (P && P.needs && typeof needClamp === 'function') { P.needs.social = needClamp(P.needs.social + g); T.gained += g; }
   for (let k = Math.floor(was / TALK_EVERY) + 1; k <= Math.floor(T.mins / TALK_EVERY); k++) { const pts = REL_PTS.talk * talkBoost(); relAdd(C.p.id, 'talk', pts); T.pts += pts; }
   if (T.mins >= TALK_MINS) { talkEnd(C, 'full'); return; }
-  if (!T.asked && T.mins >= TALK_ASK) { T.asked = true; T.ask = true; T.askAt = t; chatSay((T.topic && talkSays(C, 'talk.' + T.topic + '.ask')) || 'What do you think?'); return; }
+  if (!T.asked && T.mins >= TALK_ASK) { T.asked = true; T.ask = true; T.askAt = t; chatSay((typeof talkPackAsk === 'function' && talkPackAsk(C)) || (T.topic && talkSays(C, 'talk.' + T.topic + '.ask')) || 'What do you think?'); return; }
   if (T.mins - T.lineAt >= TALK_LINE) { T.lineAt = T.mins; const l = talkNext(C); if (l) { C.line = { text: l, say: true }; chatShow(); return; } }
   talkMeter(document.getElementById('chat'), T);
 }
