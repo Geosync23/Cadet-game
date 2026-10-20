@@ -35011,6 +35011,7 @@ const TRAD_SRC = (() => { try { if (typeof TRADITIONS !== 'undefined') return TR
 const TRAD_LIST = Array.isArray(TRAD_SRC) ? TRAD_SRC : Object.keys(TRAD_SRC).sort().map(id => ({ id, ...TRAD_SRC[id] }));
 for (const t of TRAD_LIST) {
   const ev = tradLoad(t); if (!ev) continue;
+  if (ev.id === 'first-light' && !(typeof FLC_ON !== 'undefined' && FLC_ON)) continue;   // patch #26: First Light Cocoa only with its switch (section 15's FLC_ON)
   if (!REC_DECK && ev.where.every(w => w.deck === 7)) continue;   // the rec deck's own (0.83, RA): only with the deck switched on
   const r = REC_TRADS.find(x => x.id === ev.id);           // one of the rec deck's: the writer's file brings the words; the rules stay REC_TRADS' (whereFor, first, the rota)
   if (r) { for (const k of ['from', 'mail', 'ask', 'here', 'thanks', 'chatter', 'text', 'invite']) { const ds = Object.getOwnPropertyDescriptor(ev, k); if (ds && (ds.get || ds.value != null)) Object.defineProperty(r, k, ds); } r.baked = true; continue; }
@@ -35258,7 +35259,7 @@ function eventPlan(p, d) {
 let EV_TAGS = false;
 function eventTags() {
   if (EV_TAGS) return;
-  try { for (const ev of evTable()) for (const a of ['talk', 'drink', 'play', 'water', 'wash', 'read', 'cheer', 'clap']) TAG_ACT['ev-' + ev.id + '-' + a] = a; EV_TAGS = true; } catch (e) { /* section 10 not in yet */ }
+  try { for (const ev of evTable()) for (const a of ['talk', 'drink', 'play', 'water', 'wash', 'read', 'cheer', 'clap', 'cocoa']) TAG_ACT['ev-' + ev.id + '-' + a] = a;   /* cocoa: patch #26's mugs (crewPose falls back to the seat's pose without MUG_ON) */ EV_TAGS = true; } catch (e) { /* section 10 not in yet */ }
 }
 // the event someone is at, or going to later today, from their plan: { e, seg, now }
 function eventOf(p, t) {
@@ -35320,7 +35321,7 @@ const EV_BUNDLE = {};
 // after each one (Pillar 4): simNote('tradition', { id, day, at, came: [crew ids whose plan took them there], you (you
 // joined), host, src: 'tradition' | 'shipwide' | 'oneoff' }) once its window has ended, in play or on a skip (at most
 // two days back); section 20 makes memories and cues of it. Once each (SHIP.events.noted, saved)
-const evTagId = tag => { const m = /^ev-(.+?)(?:-(?:talk|drink|play|water|wash|read|cheer|clap|disc))?$/.exec(tag || ''); return m && (REC_DECK && /^ev-rec-.*-talk$/.test(tag) && SHIP_TRADITIONS.some(e => e.id === tag.slice(3)) ? tag.slice(3) : m[1]); };   // rec-chiefs-talk (0.83.2): an id ending like an anim   // 'ev-quiz-drink' -> 'quiz'
+const evTagId = tag => { const m = /^ev-(.+?)(?:-(?:talk|drink|play|water|wash|read|cheer|clap|disc|cocoa))?$/.exec(tag || ''); return m && (REC_DECK && /^ev-rec-.*-talk$/.test(tag) && SHIP_TRADITIONS.some(e => e.id === tag.slice(3)) ? tag.slice(3) : m[1]); };   // rec-chiefs-talk (0.83.2): an id ending like an anim   // 'ev-quiz-drink' -> 'quiz'
 function eventsNoted(from, to) {
   if (typeof simNote !== 'function') return;
   from = Math.max(from, to - 2 * 1440);
@@ -35409,6 +35410,7 @@ function eventJoin(e, d, now, notice) {
   toast(e.name, notice || evText(e.ev.thanks, e));
   if (typeof mailSend === 'function') mailSend({ at: now, from: e.ev.from, subject: 'Thanks for coming', body: 'Good to see you at ' + e.name.toLowerCase() + '. Same time next one?', quiet: true });   // the join toast says it already
   if (e.id === 'quiz') quizStart(d, now);
+  if (e.id === 'first-light' && typeof flcJoin === 'function') flcJoin(e, d, now);   // patch #26: a free cocoa, then the meeting (section 15's slot)
   if (/^rec-(wren|chiefs)-talk$/.test(e.id)) recTalkCard(e, d, now);   // a Wren talk: listen, or ask one question (0.83.2, RA)
   if (e.id === 'rec-talent-night') recActCard(e, d, now); // talent night: do an act, or watch (0.83.1, RA)
   return true;
@@ -35474,6 +35476,7 @@ const TRAD_JOIN = {
   'lantern-walk': { act: 'walk', verb: 'join the lantern walk', what: 'walk the promenade under the lanterns together, in one line' },
   'sunrise-stretch': { host: 'rina', pose: 'stretch', need: 'fitness', gain: 10, also: { leisure: 8, social: 3 }, verb: 'stretch with them', what: 'stretch with the early risers' },
   'cook-along': { pose: 'cook', need: 'leisure', gain: 20, also: { social: 6 }, verb: 'cook along', what: 'cook along with the class' },
+  'first-light': { host: 'raman', pose: MUG_ON ? 'sit:cocoa' : 'talk', need: 'leisure', gain: 15, also: { social: 6 }, verb: 'join First Light', what: 'have a cocoa at the big windows' },   // patch #26 (loaded only with FLC_ON)
   'garden-hour': { act: 'ixGarden', verb: 'tend the beds with them', what: 'tend a bed with the gardeners' },
   'pick-your-own': { act: 'ixGarden', verb: 'pick with them', what: 'pick fresh fruit and greens with the gardeners' },
   sowing: { act: 'ixGarden', verb: 'sow with them', what: 'sow the new season\'s seeds with the gardeners' },
