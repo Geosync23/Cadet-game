@@ -185,7 +185,7 @@ Nine scripts never exit non-zero: day, deck, disc, food, machine, path, perf, ca
 | content_gen.py works on the words piece | **True.** `content_gen.py pieces/content/s22-words.gen.js --check`: "up to date" (10,017 lines, 442 conversations, 48 traditions), the same as on the whole file. It needs `plans/trad_parse.py` present, as the path filter now lists. |
 | "The scripts decide which case it is, so nobody has to remember the rule" | **False in two cases** (B1, B2), from a faithful sketch of the stated rule. |
 | Deck and machine checks report failure only in words; the repository is public and has no workflows | **True.** No `sys.exit` in deck_check.py or machine_check.py. GitHub: `private: false`, 0 workflow runs. |
-| The quick check takes about 4.5 minutes on 4 cores | See the timing note at the end. |
+| The quick check takes about 4.5 minutes on 4 cores | **True, just:** 4 min 39 s here, all passing (timing note at the end). |
 
 ## 4. If you still want the split: the minimum before turn 2
 1. Fix B1 and B2 in the scripts (required, since the glued file stays in git by the user's call).
@@ -223,4 +223,9 @@ All good. I agree with each.
 - **N1:** the other seven checks that exit 0.
 
 ## Timing note
-Re-timing the two-lane quick check on this 4-core container is still running; SR1 measured 4 min 26 s on 0.64.2 (deck 200 s, machine 46 s, leave 20 s, device 224 s alongside). Result to follow in the next commit.
+Re-timed on 0.64.2 in this 4-core container, two lanes side by side, each with its own CADET_WORK, waiting on each lane by name:
+- lane A: deck 206 s, then machine 51 s, then leave 22 s;
+- lane B: device 234 s alongside;
+- **4 min 39 s in all**, all four passing.
+
+SR1 measured 4 min 26 s. So the 5-minute goal holds, but with only about 20 s spare. The deck check alone is 3½ minutes of it. Any growth in the checks, or a slower GitHub machine, goes over. That's not a failure (GitHub doesn't stop a run at 5 minutes), but plan now which check moves out first.
