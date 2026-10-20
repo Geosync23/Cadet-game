@@ -10831,9 +10831,9 @@ function walkGap(a, ux, uz) {
 }
 // the lane: about a fifth of a tile to one side of the way they're walking, eased round corners; back to the middle
 // through a doorway, when stopping at their place or standing about
-function walkLaneStep(a, dt) {
+function walkLaneStep(a, dt, mid) {                    // mid: ease to the middle (escorting, coming over to you)
   let tx = 0, tz = 0;
-  if (a.pose === 'walk' && a.path.length && a.lane) {
+  if (!mid && a.pose === 'walk' && a.path.length && a.lane) {
     if (a.laneAt !== a.path[0]) {                        // a doorway on the next two steps? Looked up once a step, not every frame
       const h = a.here(), n = a.path[0], n2 = a.path[1];
       const door = (p, q) => (p[0] !== q[0]) !== (p[1] !== q[1]) && (e => !!e && e.type !== 'open')(EDGES.get(p[0] !== q[0] ? `v,${Math.max(p[0], q[0])},${p[1]}` : `h,${p[0]},${Math.max(p[1], q[1])}`));
@@ -49287,7 +49287,8 @@ class CrewAgent {
       this.pose = 'walk';
     } else { this.pose = 'stand'; this.face = Math.atan2(pp.x - this.x, pp.z - this.z); }   // waiting: look at you
     this.y = 0; this.stuck = 0; this.tag = 'escort';
-    this.h.set({ x: this.x, y: this.y, z: this.z }, this.face, heldPose(this));
+    walkLaneStep(this, dt, true);                        // #10's drawn lane eases back to the middle (no jump when someone starts escorting mid-walk)
+    this.h.set({ x: this.x + this.lx, y: this.y, z: this.z + this.lz }, this.face, heldPose(this));
     return true;
   }
   // section 20's walk-up (0.71.0): over to you (re-aimed as you move), then standing by you, facing you, while the chip is up
@@ -49310,7 +49311,8 @@ class CrewAgent {
     } else { this.pose = 'stand'; this.face = Math.atan2(pp.x - this.x, pp.z - this.z); }
     if (!go && SEEK_COME && SEEK_COME.p === this.p) seekArrive(this);
     this.y = 0; this.stuck = 0; this.settled = false; this.tag = null;
-    this.h.set({ x: this.x, y: this.y, z: this.z }, this.face, heldPose(this));
+    walkLaneStep(this, dt, true);                        // #10's drawn lane eases back to the middle (no jump when someone comes over mid-walk)
+    this.h.set({ x: this.x + this.lx, y: this.y, z: this.z + this.lz }, this.face, heldPose(this));
     return true;
   }
   remove() { if (this.h.full) this.h.dispose(); else crowd.remove(this.h); }
