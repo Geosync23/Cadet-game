@@ -102,3 +102,10 @@ Harness gotcha (new): speech bubbles pop in with a real-time CSS animation (`.bu
 - **Code:** INTRO_ASK_ON is false. A pending tour extra still plays on a tap; otherwise the tap is taken with no panel. The introAsk path and its lines stay parked.
 - **Checks:** check_fast OK (281 s). intro_check part 8 was flipped by PB.
 - **`rv31.py` at 390×844:** three real taps on Zeke on the ramp. Each reached introTap (true), with no dialogue, chat card or panel (`rv31_tap1.png`).
+
+## PB 319f541 (revert of 9e34423, the user's call). PASS
+
+- WORK_BANDS is byte-identical to integration 5d6ee1c.
+- career_check's spot test is back to 39/40. machine_check's range is 3-7 (6.2 measured).
+- check_fast OK (280 s).
+- 16df5bd adds #31's reason line in the design doc.
