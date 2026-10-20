@@ -35207,7 +35207,7 @@ function tradJoinMinute(now) {
   const here = deckDef.num + '|' + roomAt(...player.here()), name = tjFirst(TJ_NOW.lead), s = TRAD_JOIN[TJ_NOW.e.id];
   if (!TJ_NOW.e.rooms.has(here)) return;
   const beam = s.act === 'beam', label = tradWords(TJ_NOW.e, 'tip', { name }) || (beam ? 'Tap the beam to paint your name' : 'Tap ' + name + ' to ' + s.verb);
-  if (!g || g.tj === TJ_NOW.key || tradGoalHere(g, TJ_NOW.e)) { if (!g || g.tj !== TJ_NOW.key) setGoal(beam ? { deck: 5, item: /^The beam$/, label, tj: TJ_NOW.key } : { deck: deckDef.num, crew: TJ_NOW.lead, label, tj: TJ_NOW.key }); }
+  if (!g || g.tj === TJ_NOW.key || tradGoalHere(g, TJ_NOW.e)) { if (!g || g.tj !== TJ_NOW.key) setGoal(beam ? { deck: 5, item: /^The beam$/, beam: true, label, tj: TJ_NOW.key } : { deck: deckDef.num, crew: TJ_NOW.lead, label, tj: TJ_NOW.key }); }
   ixTip('t:join:' + TJ_NOW.e.id, label + (beam ? '. The Works crew are waiting to see it go up.' : '. Anyone taking part will do: you join in with them.'));
 }
 // a goal arrow pointing at this tradition's room (the device's heads-up, the Tracked list): { deck, room (key or name) }
@@ -35358,7 +35358,7 @@ SIM_ADVANCE.push((from, to) => { BEAM_ALL = false; beamTraces(to); });
 function tradGoal(x) {
   if (!x || !TJ_NOW || TJ_NOW.e.id !== (x.tkind || String(x.id || '').split('@')[0])) return null;
   const s = TRAD_JOIN[TJ_NOW.e.id], name = tjFirst(TJ_NOW.lead), label = tradWords(TJ_NOW.e, 'tip', { name }) || (s.act === 'beam' ? 'Tap the beam to paint your name' : 'Tap ' + name + ' to ' + s.verb);
-  return s.act === 'beam' ? { deck: 5, item: /^The beam$/, label, tj: TJ_NOW.key } : { deck: deckDef.num, crew: TJ_NOW.lead, label, tj: TJ_NOW.key };
+  return s.act === 'beam' ? { deck: 5, item: /^The beam$/, beam: true, label, tj: TJ_NOW.key } : { deck: deckDef.num, crew: TJ_NOW.lead, label, tj: TJ_NOW.key };
 }
 // the walks (Lap of the Wren, the Lantern walk): joined, the leader sets off round the promenade loop (the deck
 // architect's 3-lap-1..12, in walking order) and you fall in behind them, then up to TJ_LINE of the others at it, each
