@@ -14406,6 +14406,91 @@ function shopMenuBuy(p, item) {                          // into the basket, the
   actStart('pay', null, { title: 'Counter', after: p.name + ' rings it up.' });   // no counter in reach: pay where you stand
   return true;
 }
+// patch #5 (plans/patch-plan.html; decided: the ladder, Engine control and the Sensor array open, the Reactor sealed;
+// climbing 2 energy and +1 fitness a deck): no tiers on maintenance places, and a spine ladder that works. Tapping a
+// deck's ladder hatch (or the ladder behind its glass) walks you to the hatch and opens a "Spine ladder" panel in the
+// lift's style: Up and Down, nearest deck first, each deck's name, "You are here" and the goal mark. A climb is a ride
+// (section 11's `ride`, with `ladder` set; updateRide hands it to ladderStep): the view fades, about a ship minute a deck
+// passes (skipTo), 2 energy and +1 fitness a deck, and you land on that deck's lobby side of its ladder hatch. It works
+// while the lift is held. Deck 5 had no ladder hatch: its east spine wall (v,19,9, lobby tile (19,9) in front) becomes
+// one and that side's lift call panel is left off; a hatch blocks as the wall did, so paths don't change. Engine control
+// (Deck 6, v,22,5) and the Sensor array (Deck 2, v,45,9) open as doors; the Reactor stays sealed "for safety", not by
+// rank. The tier wording comes out of the deck texts. Off = identical; ?ladder.
+let LADDER_ON = URL_FLAGS.has('ladder');
+const LADDER = { energy: 2, fitness: 1, mins: 1, d5: 'v,19,9', open: [[6, 'v,22,5'], [2, 'v,45,9']], fade: .4 };
+const ladderText = n => +n === 1 ? 'The top of the maintenance ladder, beside the lift. Tap the hatch to climb down.'
+  : +n === 6 ? 'The bottom of the maintenance ladder, beside the lift. Tap the hatch to climb up.'
+  : 'The maintenance ladder runs the whole height of the ship, beside the lift. Tap the hatch to climb up or down.';
+if (LADDER_ON) {
+  DECKS[5].doors[LADDER.d5] = 'hatch'; DECKS[5].closedDoors[LADDER.d5] = { t: 'Spine ladder', x: ladderText(5) };
+  for (const [n, key] of LADDER.open) { DECKS[n].doors[key] = 'door'; delete DECKS[n].closedDoors[key]; }
+  for (const n of DECK_ORDER) {                          // the tier wording out of the deck texts (the Reactor: sealed for safety)
+    const d = DECKS[n]; if (!d) continue;
+    for (const k in d.closedDoors || {}) if (d.closedDoors[k].t === 'Spine ladder') d.closedDoors[k] = { ...d.closedDoors[k], x: ladderText(n) };
+    for (const r in d.rooms) { const R_ = d.rooms[r]; if (typeof R_.tap !== 'string') continue;
+      R_.tap = R_.tap.replace(/Tier 4 access, and only on a team job\./, 'Sealed for safety: only on a team job.').replace(/\s*Tier \d access(, [^.]*)?\./g, '').trim(); }
+  }
+  Object.assign(SPINE_IT.ladder, { x: 'The maintenance ladder, top to bottom of the ship beside the lift. Tap it to climb.' });   // also backlog #7's "seven decks" here
+}
+function ladderHatch() {                                 // this deck's ladder hatch edge, or null
+  for (const [k, c] of Object.entries(CLOSED_DOORS)) if (c && c.t === 'Spine ladder') { const e = EDGES.get(k); if (e && e.type === 'hatch') return e; }
+  return null;
+}
+function ladderTap(key) {                                // section 11's tap: a ladder hatch (key), or the ladder itself (null)
+  if (!LADDER_ON || (typeof ride !== 'undefined' && ride)) return false;
+  const e = key ? (CLOSED_DOORS[key] && CLOSED_DOORS[key].t === 'Spine ladder' ? EDGES.get(key) : null) : ladderHatch(); if (!e) return false;
+  approach(new THREE.Vector3(e.cx, 0, e.cz), reachableSide(e)[2], 0, () => ladderPanel()); return true;
+}
+function ladderPanel() {
+  let el = document.getElementById('ladderPanel');
+  if (!el) {
+    el = document.createElement('div'); el.id = 'ladderPanel'; el.className = 'lift'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'Spine ladder');
+    el.addEventListener('pointerdown', e => e.stopPropagation()); document.body.appendChild(el);
+    addEventListener('keydown', e => { if (e.key === 'Escape' && !el.hidden) el.hidden = true; });
+  }
+  const mk = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x !== undefined) e.textContent = x; return e; };
+  el.textContent = ''; el.hidden = false; toastEl.classList.remove('show');
+  el.append(mk('h2', '', 'Spine ladder'), mk('p', '', 'Up or down? Each deck takes about a minute and ' + LADDER.energy + ' energy. Good exercise.'));
+  const here = deckDef.num, at = DECK_ORDER.indexOf(here), gl = typeof goalNow === 'function' ? goalNow() : null;
+  const row = (n, k) => {
+    const built = !!DECKS[n], me = n === here, b = mk('button', 'deckbtn' + (me ? ' here' : '')); b.type = 'button'; b.disabled = me || !built;
+    const sp = mk('span'); sp.append(mk('b', '', DECK_NAMES[n]), mk('small', '', me ? 'You are here' : !built ? 'Not built yet' : k + (k > 1 ? ' decks ' : ' deck ') + (DECK_ORDER.indexOf(n) < at ? 'up' : 'down') + ' · ' + DECKS[n].blurb));
+    b.append(mk('i', '', deckLabel(n)), sp);
+    if (gl && gl.deck === n && !me && built) { b.classList.add('goal'); b.appendChild(mk('em', '', '→ Goal')); }
+    if (!me && built) b.onclick = () => { el.hidden = true; ladderClimb(n, k); };
+    return b;
+  };
+  const up = DECK_ORDER.slice(0, at).reverse(), down = DECK_ORDER.slice(at + 1), list = mk('div', 'decks');
+  if (up.length) { list.appendChild(mk('p', '', 'Up')); up.forEach((n, k) => list.appendChild(row(n, k + 1))); }
+  list.appendChild(row(here, 0));
+  if (down.length) { list.appendChild(mk('p', '', 'Down')); down.forEach((n, k) => list.appendChild(row(n, k + 1))); }
+  const stay = mk('button', 'stay', 'Stay here'); stay.type = 'button'; stay.onclick = () => { el.hidden = true; };
+  el.append(list, stay);
+  try { (list.querySelector('button.goal') || list.querySelector('button:not(:disabled)') || stay).focus(); } catch (e) { /* no focus */ }
+}
+function ladderClimb(n, k) {                             // k decks to deck n: a ride with `ladder` set (see ladderStep)
+  if (ride) return false;
+  endSteer(); player.stop(); toastEl.classList.remove('show');
+  ride = { n, t: 0, at: null, face: player.face, swapped: false, ladder: { k, from: deckDef.num } };
+  return true;
+}
+function ladderStep(r, dt) {                             // section 11's updateRide, for a ladder ride: fade, climb, land, fade back
+  const L = r.ladder, T_ = r.t;
+  if (!r.swapped) {
+    fadeEl.style.opacity = THREE.MathUtils.clamp(T_ / LADDER.fade, 0, 1);
+    if (T_ < LADDER.fade) return;
+    skipTo(shipNow() + L.k * LADDER.mins);               // about a ship minute a deck
+    const N = SHIP.player.needs; N.energy = needClamp(N.energy - LADDER.energy * L.k); N.fitness = needClamp(N.fitness + LADDER.fitness * L.k);
+    goToDeck(r.n, null);
+    const e = ladderHatch(), s = e && reachableSide(e);
+    if (s && free(s[0], s[1])) { player.obj.position.copy(cellPos(s[0], s[1])); player.face = player.obj.rotation.y = s[2] + Math.PI; target.copy(player.obj.position).setY(.7); }
+    r.swapped = true; r.t = LADDER.fade; return;
+  }
+  fadeEl.style.opacity = THREE.MathUtils.clamp(1 - (T_ - LADDER.fade) / LADDER.fade, 0, 1);
+  if (T_ < 2 * LADDER.fade) return;
+  fadeEl.style.opacity = 0; ride = null;
+  toast(deckWord(deckDef.num) + ', ' + deckDef.name, (DECK_ORDER.indexOf(deckDef.num) < DECK_ORDER.indexOf(L.from) ? 'Up' : 'Down') + ' the spine ladder, ' + L.k + (L.k > 1 ? ' decks' : ' deck') + '. Energy −' + LADDER.energy * L.k + ', fitness +' + LADDER.fitness * L.k + '.');
+}
 // ---- end of slot: Player engineer ----
 
 // =====================================================================
