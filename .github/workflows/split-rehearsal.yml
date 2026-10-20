@@ -21,7 +21,9 @@ jobs:
         run: pip install playwright numpy pillow
       - name: browser cache
         uses: actions/cache@v4
-        with: { path: ~/.cache/ms-playwright, key: pw-${{ runner.os }}-v1 }
+        with:
+          path: ~/.cache/ms-playwright
+          key: pw-${{ runner.os }}-v1
       - name: browser
         run: python -m playwright install --with-deps chromium
       - name: three.js r128 and acorn
@@ -30,9 +32,14 @@ jobs:
           cd "$RUNNER_TEMP/cw/three" && npm pack -q three@0.128.0 && tar xzf three-0.128.0.tgz
           cd "$RUNNER_TEMP/cw/acorn" && npm pack -q acorn@8.12.1 && tar xzf acorn-8.12.1.tgz
       - name: quick check
-        env: { CADET_CHROME: '', CADET_WORK: '${{ runner.temp }}/cw' }
+        env:
+          CADET_CHROME: ''
+          CADET_WORK: ${{ runner.temp }}/cw
         run: bash check_fast.sh
       - name: logs
         if: always()
         uses: actions/upload-artifact@v4
-        with: { name: check-logs, path: '${{ runner.temp }}/cw/check-fast', if-no-files-found: ignore }
+        with:
+          name: check-logs
+          path: ${{ runner.temp }}/cw/check-fast
+          if-no-files-found: ignore
