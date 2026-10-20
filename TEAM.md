@@ -183,3 +183,4 @@ GitHub check: ON for every push to claude/** and main (the user, 2026-10-20; the
 **Talk a while lines page (~12:30 UTC):** https://claude.ai/artifact/BEWR9Y2uywFZ7FjNDwuJE4 (from claude/talk-pack 95bb299 after TR1's review; comments in its db, collection `answers`, doc `talk-pack`).
 **Events plan COMPLETE (v3.2, claude/events-plan f6996d86; handover 5b679633).** All user questions answered; design-doc updated. Crossing the Line on Sun Day 7; storm Days 11-15; comet Tue Day 16; visit finale Days 26-30. EP1 idle (62% memory).
 | Patch plan reviewer PR1 | session_01J7kHfFrG8Syjmz8XYK9USU | `claude/patch-plan-review` | reviews PP1's patch plan (claude/patch-plan 2f8976c: 27/28 reproduced, 6 batches ~19 turns, 17 questions) |
+**Patch plan page (~12:47 UTC):** https://claude.ai/artifact/BrEniitA4gGKf1wFMvwy2s (claude/patch-plan 2f8976c; published before PR1's review at the user's request; answers in db answers/patch-plan).
