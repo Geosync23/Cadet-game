@@ -66,7 +66,7 @@ STORY = [
     dict(id='marrow', name='Captain Odile Marrow', story=True, rank='captain', dept='command', role='Captain', shift='day', bed='2-C', job='command',
          looks=dict(skin=4, hair='bun', hairColor='grey', height=1.03, build='slim', acc=['earrings']),
          bio='Calm, fair, and always testing you with questions.',
-         habits=['early-riser', 'music'], traits=['patient', 'curious', 'quietly funny'],
+         habits=['early-riser'], traits=['patient', 'curious', 'quietly funny'],
          life=['Plays the grand piano in the music room late on Thursdays.', 'Has commanded the Wren for six years and knows every captain in her portrait gallery by name.']),
     dict(id='vance', name='Commander Teo Vance', story=True, rank='xo', dept='command', role='Executive Officer', shift='day', bed='2-X', job='command',
          looks=dict(skin=1, hair='short', hairColor='black', height=1.08, build='average', acc=[]),
