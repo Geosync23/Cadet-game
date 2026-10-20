@@ -8960,7 +8960,7 @@ function sleepUntil(min) {
 const FREEZE = { frozen: false, at: 0, ms: 0 };
 function simNow() { return (FREEZE.frozen ? FREEZE.at : performance.now()) - FREEZE.ms; }
 function freezeSync() {
-  let f = false; try { f = !!(PAUSE.on || PAUSE.tiles && PAUSE.tiles() || PAUSE.disc && PAUSE.disc()); } catch (e) { f = false; }   // PAUSE.disc: a game of Lightdisc (section 23b, 0.82.0)
+  let f = false; try { f = !!(PAUSE.on || PAUSE.tiles && PAUSE.tiles() || PAUSE.disc && PAUSE.disc() || typeof devmodeHold === 'function' && devmodeHold()); } catch (e) { f = false; }   // PAUSE.disc: a game of Lightdisc (section 23b, 0.82.0)
   if (f === FREEZE.frozen) return f;
   const n = performance.now();
   if (f) FREEZE.at = n; else { const d = n - FREEZE.at; FREEZE.ms += d; if (typeof pauseShift === 'function') pauseShift(d); }
@@ -8997,7 +8997,7 @@ const NOSAVE = URL_FLAGS.has('nosave') || URL_FLAGS.has('crowd') || URL_FLAGS.ha
 const DEVMODE = URL_FLAGS.has('dev') && !NOSAVE;          // Dev mode (section 25; plans/devmode-plan.html): only with #dev, and its own save ("-dev" on the names); off, nothing changes
 const SAVE_KEY = 'starship-cadet-save' + (DEVMODE ? '-dev' : ''), SAVE_V = 2;
 function saveGame() {
-  if (NOSAVE) return;
+  if (NOSAVE || typeof devmodeHold === 'function' && devmodeHold()) return;   // Dev mode (section 25): not while a Dev action works, nor over a save it's reloading into
   try {
     const decks = {};
     for (const n in SHIP.decks) if (SHIP.decks[n].open.size) decks[n] = { open: [...SHIP.decks[n].open] };
