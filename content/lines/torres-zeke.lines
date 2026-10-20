@@ -154,8 +154,12 @@
 // 'free' step, or you leave the table after introChief); then the first-night bed arrow. Sim engineer 5's key; said IN
 // ORDER, one flag key per line. Replaces walk.free (removed 0.48.58).
 ? flag:walk.goodnight.1
-- Right, that's me. Evening's yours. Have a wander, explore.
+- Right, that's me. Breakfast from six, shift at nine, tea at one.
 ? flag:walk.goodnight.2
+- Off at five. Dinner till half eight. Weekends off, like most of Works.
+? flag:walk.goodnight.3
+- Then the evening's yours. Have a wander. Gym, lounge, Tiles, bed.
+? flag:walk.goodnight.4
 - Shift's at nine tomorrow. Get some sleep soon.   #warm
 
 // ---- Day 1: his talk-through on the shadow job (said as bubbles while you work; replaces INTRO_JOB_LINES on
