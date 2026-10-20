@@ -14369,7 +14369,7 @@ function ixPose(kind, pl, spot, company) {
   if (kind === 'ixMusic') return base === 'sit' ? 'sit:play' : 'play';
   if (kind === 'ixGarden' || kind === 'ixFold' || kind === 'ixWater') return IX_ACTS[kind].pose;
   if (kind === 'ixTea') return 'drink';
-  if (kind === 'ixDrink') return base === 'sit' ? 'sit:drink' : 'drink';
+  if (kind === 'ixDrink') { const d = typeof mugPose === 'function' && mugPose() || 'drink'; return base === 'sit' ? 'sit:' + d : d; }   // a cocoa or tea: the mug (15's mugPose, patch #30)
   if (base === 'sit' && own === 'sit') return company ? 'sit:talk' : kind === 'ixStars' ? 'sit' : 'sit:read';
   return own;
 }
@@ -14504,7 +14504,7 @@ function putDelivery() {                                 // your delivery job, w
 }
 const crateHeld = () => { const d = putDelivery(); return !!d && d.st[d.pick].done && !(d.drop >= 0 && d.st[d.drop].done) && !crateDown(d.j); };
 const trayHeld = () => !!SHIP.player.tray;
-const putWhat = () => putParts().length > 0 || trayHeld() || crateHeld() || typeof hamperHeld === 'function' && hamperHeld();   // section 21b's laundry hamper (0.42.40)
+const putWhat = () => putParts().length > 0 || trayHeld() || crateHeld() || typeof hamperHeld === 'function' && hamperHeld() || typeof mugHeld === 'function' && !!mugHeld();   // 15's mug (patch #30)   // section 21b's laundry hamper (0.42.40)
 function stepUndo(j, step) {                             // open a stop of your job again (section 17's stepsDone)
   const k = jobStops(j).findIndex(x => x.step === step); if (k < 0 || !Array.isArray(j.stepsDone)) return;
   j.stepsDone = j.stepsDone.filter(x => x !== k); if (typeof MACH_REV !== 'undefined') MACH_REV++;
@@ -14534,6 +14534,7 @@ function putDown() {
     said.push('You set the crate down here. Tap it to pick it up again; your job stays yours.');
   }
   if (typeof hamperPut === 'function') { const h = hamperPut(); if (h) said.push(h); }   // section 21b (0.42.40)
+  if (typeof mugPut === 'function') { const m = mugPut(); if (m) said.push(m); }   // section 15's mug (patch #30)
   if (typeof ixGoalAt !== 'undefined') ixGoalAt = -1;
   if (typeof device !== 'undefined' && device.refresh) device.refresh();
   toast('Put down', said.join(' ') + (P.carry.length ? ' Still in your hands: ' + partList(P.carry) + '.' : ''));
