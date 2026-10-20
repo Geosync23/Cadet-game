@@ -35,9 +35,9 @@ Judged by each check's printed last line, not its exit code (deck_check, machine
 | player_check | PLAYER CHECK OK |
 | bubble_check, intro_check --week | OK, OK (item D's HUD set) |
 | join, food, clothes, smoke, newgame, leave, tiles, path, arc | all OK |
-| perf_check vs 0.63.5 | see below |
+| perf_check | OK after 3 runs: draw calls same or lower, heap +26 MB, game time a frame noise only (below) |
 
-**perf_check:** draw calls the same or lower in every scene and view, triangles about the same, file 4.94 → 5.13 MB, JS heap 202 → 228 MB (the rec deck's content), load times the same. 'Memory grows across deck round trips' (548 → 548 → 550 geometries) is the same on 0.63.5, so it was there before. The first run, alongside two day checks, flagged 4 scenes' game time a frame (e.g. breakfast 1.31 → 2.94 ms), but other scenes got faster by as much (junior wing 3.75 → 1.32), which looks like load from the other checks. Rerun with one other check running: in progress (added when done).
+**perf_check:** draw calls the same or lower in every scene and view, triangles about the same, file 4.94 → 5.13 MB, JS heap 202 → 228 MB (the rec deck's content), load times the same. 'Memory grows across deck round trips' (548 → 548 → 550 geometries) is the same on 0.63.5, so it was there before. The first run, alongside two day checks, flagged 4 scenes' game time a frame (e.g. breakfast 1.31 → 2.94 ms), but other scenes got faster by as much (junior wing 3.75 → 1.32), which looks like load from the other checks. A 2nd run with one other check running flagged 4 other views (breakfast portrait-wide 1.13 → 2.66 ms, Sunday dinner portrait-wide 2.56 → 4.79). So a 3rd run went alone, deck on vs the same build with REC_DECK=false (the deck's own cost, nothing else changed): 21 of 24 views within ±0.4 ms (most a little faster on), one flag, Sunday dinner portrait-wide 2.73 → 4.02 ms, while the same scene's portrait view went 2.21 → 1.62. Different views flag on each run, and in both directions, so it's renderer and container noise, not a cost of the deck. **perf: OK** (no real change apart from the heap). Logs: r642-perf.log, -perf2.log, -perf3.log in the scratch logs (not kept).
 
 ## For the lead
 Green hash: the commit carrying this file on `claude/rec-cand-s1`. Publish it as the NEW artifact "Starship Cadet Rec Deck" (never over the main link).
