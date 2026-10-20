@@ -18,7 +18,7 @@ The first address is Friday Day 5. It's a separate plan from the playtest patch 
   - `DAY_SHIFT = [540, 1020]` (17, line 17305) is read in about 25 places.
   - leave_check's Friday (Day 12) is only a "missed by 12:30" case. career_check's steady player works 08:00-17:00 every workday.
 - **Friday traditions.** Works Friday tea 18:45, the Music jam 19:45, Tap night 20:00, Sunrise stretch 06:30, New hands' tea 18:40 (Day 5), Four weeks aboard 18:40 (Day 26), Crew welcome tea 18:40. **Nothing runs between 15:30 and 17:00.**
-- **Mechanics.** Team jobs: Fridays 14:00 in even weeks (`TEAM_FRI`, line 44981), the only Friday-afternoon mechanic. The arrival week: `d5-mug` 13:00 Day 5. "Crossing the Line" on Day 6: not found in the game or the docs.
+- **Mechanics.** Team jobs: Fridays 14:00 in even weeks (`TEAM_FRI`, line 44981), the only Friday-afternoon mechanic. The arrival week: `d5-mug` 13:00 Day 5. "Crossing the Line" is in the events plan, not the game yet (claude/events-plan f6996d86, `plans/events-plan.html`: Sunday Day 7, not a Friday), so fp-q6 covers ship-wide events on a Friday.
 - **Existing pieces.** `captainAddress()` (18, line 35495) is a broadcast only (banner and Mail). `rec-all-hands` is the season's all-hands: the first Monday of each season, 17:45, in the auditorium. It stays.
 - **Gathering spots** (4d, line 7209+): Deck 3 plaza and promenade 70, the bow lounge 60, the mess 22 plus seats, the Deck 5 bay 108, the auditorium 76 seats. perf_check has no all-hands scene; the closest is the storm party, 60 crew on Deck 3 peaking at 393 draw calls.
 - **Who's aboard.** 74 crew (59 day, 15 night). On a Friday 50 day-shift crew are working and 13 are off by rota. Expect about 60-70 at the address.
