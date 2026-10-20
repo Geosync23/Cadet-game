@@ -135,3 +135,4 @@ with sync_playwright() as pw:
         o = live(fps)
         check(o['same'] and abs(o['k'] - 2400) <= 3, '%d frames a second: %d steps in 40 s, the same game as on paper (%s)' % (fps, o['k'], o['score']))
 print('ALL OK' if ok else 'FAILED')
+sys.exit(0 if ok else 1)   # so a failing check fails for the computer too (split rehearsal SX1; SR2 N1)

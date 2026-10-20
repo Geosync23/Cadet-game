@@ -41,21 +41,50 @@ const body = iife.expression.callee.body.body, seen = new Map();
 const add = (n, i) => { if (seen.has(n)) bad.push(`name ${n} made twice: ${seen.get(n)} and ${at(i)}`); else seen.set(n, at(i)); };
 const ids = p => p.type === 'Identifier' ? [p] : p.type === 'ObjectPattern' ? p.properties.flatMap(q => ids(q.value || q.argument)) : p.type === 'ArrayPattern' ? p.elements.filter(Boolean).flatMap(ids) : p.type === 'AssignmentPattern' ? ids(p.left) : p.type === 'RestElement' ? ids(p.argument) : [];
 const keys = new Map();
-const addKeys = (t, obj) => { for (const p of obj.properties) if (p.type === 'Property' && !p.computed) { const k = t + '.' + (p.key.name ?? p.key.value); if (keys.has(k)) bad.push(`key ${k} added twice: ${keys.get(k)} and ${at(p.start)}`); else keys.set(k, at(p.start)); } };
-for (const s of body) {
-  if (s.type === 'FunctionDeclaration' || s.type === 'ClassDeclaration') add(s.id.name, s.start);
-  if (s.type === 'VariableDeclaration') for (const d of s.declarations) { for (const i of ids(d.id)) add(i.name, i.start); if (d.id.type === 'Identifier' && d.init && d.init.type === 'ObjectExpression' && /^[A-Z][A-Z0-9_]*$/.test(d.id.name)) addKeys(d.id.name, d.init); }
-  const e = s.type === 'ExpressionStatement' && s.expression;
-  if (e && e.type === 'CallExpression' && e.callee.type === 'MemberExpression' && e.callee.object.name === 'Object' && e.callee.property.name === 'assign' && e.arguments[0] && e.arguments[0].type === 'Identifier')
-    for (const o of e.arguments.slice(1)) if (o.type === 'ObjectExpression') addKeys(e.arguments[0].name, o);
+const SLOTS = new Set();   // TABLE = { x: null }: a slot that its owner fills once, later, with TABLE.x = ...
+const addKeys = (t, obj) => { for (const p of obj.properties) if (p.type === 'Property' && !p.computed) { const k = t + '.' + (p.key.name ?? p.key.value); if (p.value.type === 'Literal' && p.value.value === null) SLOTS.add(k); if (keys.has(k)) bad.push(`key ${k} added twice: ${keys.get(k)} and ${at(p.start)}`); else keys.set(k, at(p.start)); } };
+// repeats that are meant (each with why): a second registration replaces a shell on purpose, a table entry reset on load
+const MEANT = new Set([
+  'deviceApp:crew',   // section 19's shell, replaced by section 20's real app (the comment above the shell says so)
+  'SHIP.tiles',       // the empty record, then tilesLoad(SAVED) over it
+]);
+const cname = c => c.type === 'Identifier' ? c.name : c.type === 'MemberExpression' && !c.computed ? cname(c.object) + '.' + c.property.name : '?';
+const regs = new Map();
+const addReg = (k, i) => { if (MEANT.has(k)) return; if (regs.has(k)) bad.push(`${k.includes(':') ? 'registration' : 'key'} ${k} made twice: ${regs.get(k)} and ${at(i)}`); else regs.set(k, at(i)); };
+function walk(stmts, gated) {
+  for (const s of stmts) {
+    if (s.type === 'IfStatement') { for (const br of [s.consequent, s.alternate]) if (br) walk(br.type === 'BlockStatement' ? br.body : [br], true); continue; }
+    if (s.type === 'BlockStatement') { walk(s.body, true); continue; }
+    if (!gated) {   // names in a gated block are that block's own; table keys and registrations there are shared
+      if (s.type === 'FunctionDeclaration' || s.type === 'ClassDeclaration') add(s.id.name, s.start);
+      if (s.type === 'VariableDeclaration') for (const d of s.declarations) { for (const i of ids(d.id)) add(i.name, i.start); if (d.id.type === 'Identifier' && d.init && d.init.type === 'ObjectExpression' && /^[A-Z][A-Z0-9_]*$/.test(d.id.name)) addKeys(d.id.name, d.init); }
+    }
+    const e = s.type === 'ExpressionStatement' && s.expression;
+    if (!e) continue;
+    if (e.type === 'CallExpression' && e.callee.type === 'MemberExpression' && e.callee.object.name === 'Object' && e.callee.property.name === 'assign' && e.arguments[0] && e.arguments[0].type === 'Identifier')
+      for (const o of e.arguments.slice(1)) if (o.type === 'ObjectExpression') addKeys(e.arguments[0].name, o);
+    // registrations by id: deviceApp({ id: 'x', ... }), LIST.push({ id: 'x', ... }), worksTabAdd({ id: ... }) and the like
+    if (e.type === 'CallExpression' && e.arguments[0] && e.arguments[0].type === 'ObjectExpression') {
+      const id = e.arguments[0].properties.find(p => p.type === 'Property' && !p.computed && (p.key.name || p.key.value) === 'id' && p.value.type === 'Literal');
+      if (id) addReg(cname(e.callee) + ':' + id.value.value, s.start);
+    }
+    // TABLE.key = ... (a shared table's entry set by assignment; also clashes with a key from its literal)
+    if (e.type === 'AssignmentExpression' && e.operator === '=' && e.left.type === 'MemberExpression' && !e.left.computed && e.left.object.type === 'Identifier' && /^[A-Z][A-Z0-9_]*$/.test(e.left.object.name)) {
+      const k = e.left.object.name + '.' + e.left.property.name;
+      if (MEANT.has(k)) continue;
+      if (SLOTS.has(k)) { SLOTS.delete(k); continue; }   // filling its null slot, once
+      if (keys.has(k)) bad.push(`key ${k} added twice: ${keys.get(k)} and ${at(s.start)}`); else keys.set(k, at(s.start));
+    }
+  }
 }
+walk(body, false);
 let texts = 0;
 for (const t of acorn.tokenizer(src, { ecmaVersion: 2022 })) {
   if (t.type.label !== 'string' && t.type.label !== 'template') continue;
   texts++;
   if (/\bDeck 7\b/.test(String(t.value))) bad.push(`"Deck 7" in text that can reach the screen: ${at(t.start)}`);
 }
-console.log(`names_check: ${seen.size} top-level names, ${keys.size} shared-table keys, ${texts} strings` + (PIECES.length ? `, ${PIECES.length} pieces` : ' (no pieces in step: game lines only)'));
+console.log(`names_check: ${seen.size} top-level names, ${keys.size} shared-table keys, ${regs.size} registrations, ${texts} strings` + (PIECES.length ? `, ${PIECES.length} pieces` : ' (no pieces in step: game lines only)'));
 for (const x of bad) console.log('FAIL ' + x);
 if (!bad.length) console.log('names_check: OK');
 process.exit(bad.length ? 1 : 0);

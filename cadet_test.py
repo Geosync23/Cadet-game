@@ -12,6 +12,18 @@
 import json, sys, re, pathlib, hashlib, os
 from playwright.sync_api import sync_playwright
 
+def _pieces_guard():   # (split rehearsal) never test a game file that is behind its pieces: say so and stop
+    here = os.path.dirname(os.path.abspath(sys.argv[0])); game = os.path.join(here, 'starship-cadet.html')
+    order = os.path.join(here, 'pieces', 'ORDER')
+    if not os.path.exists(order) or not any(a.endswith('.html') and os.path.exists(a) and os.path.samefile(a, game) for a in sys.argv[1:]): return
+    names = [l.split()[0] for l in open(order, encoding='utf-8').read().split('\n') if l.strip() and not l.startswith('#')]
+    try: glued = b''.join(open(os.path.join(here, 'pieces', n), 'rb').read() for n in names)
+    except OSError: glued = None
+    if glued != open(game, 'rb').read():
+        print('STOPPED: starship-cadet.html does not match its pieces (an edit not glued yet?), so this would test old code. Run python3 build.py first.')
+        sys.exit(2)
+_pieces_guard()
+
 WORK = pathlib.Path(os.environ.get('CADET_WORK', '/tmp/cadet-work'))
 (WORK / 'test').mkdir(parents=True, exist_ok=True)
 THREE = (WORK / 'three/package/build/three.min.js').read_text()
@@ -164,3 +176,4 @@ for s in shots:
 print('errors A', a['errors'][:3], 'errors B', b['errors'][:3])
 print('taps', [a[f'tap{k}'][0] for k in range(5)])
 print(('ALL IDENTICAL' + (' (apart from renderer noise: some pixels 1 level off)' if noise else '')) if ok else 'DIFFERENCES FOUND')
+sys.exit(0 if ok else 1)   # so a failing check fails for the computer too (split rehearsal SX1; SR2 N1)

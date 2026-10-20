@@ -61,7 +61,7 @@ def make_base(work):
     old_cg = subprocess.run(['git', '-C', SRC, 'show', '1eeb99c:content_gen.py'], capture_output=True).stdout
     r.write('content_gen.py', old_cg)
     r.q('git init -q -b main && git config user.name t && git config user.email t@t && git config merge.conflictstyle merge && git add -A && git commit -qm "A: 0.64.2, one file"')
-    for f in ('build.py', 'split.py', 'names_check.js', '.gitattributes', 'content_gen.py'):
+    for f in ('build.py', 'split.py', 'names_check.js', '.gitattributes', 'content_gen.py', 'cadet_test.py', 'day_check.py'):
         shutil.copy(os.path.join(SRC, f), os.path.join(b, f))
     shutil.copytree(os.path.join(SRC, 'pieces'), os.path.join(b, 'pieces'))
     r.q('git add -A && git commit -qm "S: the split" && git branch integration && git tag A HEAD~1 && git tag S HEAD')
@@ -331,6 +331,47 @@ def rollback(W):
     b = b'MARK-gb' in r.read('starship-cadet.html')
     log(f'    seatA work in the one file: {a}; seatB (unglued) work in the one file: {b}')
     return dict(check_red=False, lost=not b, note='after a rollback, an unglued piece edit is lost unless every branch passes build.py --check first')
+
+@scenario
+def sr2_b2_committed_hand_edit(W):
+    """SR2 B2: a hand edit to the game file is committed (no check run); later the same seat edits a piece and runs build.py."""
+    r = fresh(W, 'sr2_b2_committed_hand_edit')
+    r.q('git checkout -q -b seat integration')
+    r.mark('starship-cadet.html', 25000, 'fix'); r.q('git commit -qam "a fix, in the game file by mistake"')
+    r.mark('pieces/js/s14-schedules.js', 70, 'later'); r.sh('python3 build.py')
+    ok = r.survived('fix', 'later'); rc = check(r)
+    return dict(check_red=True, lost=not ok, note='build.py looks back to the last commit where the two were in step (not just HEAD), so the committed fix is combined in, not glued away')
+
+@scenario
+def sr2_b3_stale_single_check(W):
+    """SR2 B3: a piece edited, not glued, and a single check run on the repo's game file."""
+    r = fresh(W, 'sr2_b3_stale_single_check')
+    r.mark('pieces/js/s14-schedules.js', 90, 'stale')
+    rc, o = r.sh('python3 day_check.py starship-cadet.html 0')
+    return dict(check_red=rc != 0, lost=False, note='cadet_test.py (loaded by every browser check) refuses an out-of-step game file before testing anything')
+
+@scenario
+def names_plants(W):
+    """SR2 S3 and the plan's cases: plant each kind of silent second winner and see whether names_check catches it."""
+    r = fresh(W, 'names_plants')
+    plants = {
+      'a second function': ('pieces/js/s20-social.js', 'function ternClear() { return 1; }\n'),
+      'a second deviceApp id': ('pieces/js/s20-social.js', "deviceApp({ id: 'ship', title: 'X', short: 'X', icon: 'x', order: 99, view: () => ({ title: 'X', blocks: [] }) });\n"),
+      'TABLE.key = twice': ('pieces/js/s24-work.js', 'PLAYER_ACTS.tidy = {};\n'),
+      'a second key inside if (REC_DECK)': ('pieces/js/s24-work.js', 'if (REC_DECK) { Object.assign(PLAYER_ACTS, { tidy: {} }); }\n'),
+      'a second .push id': ('pieces/js/s24-work.js', "CAREER_LADDER.push({ id: 'p1' });\n"),
+      'a repeated let': ('pieces/js/s24-work.js', 'let REC_DECK = 1;\n'),
+      '"Deck 7" on screen': ('pieces/js/s24-work.js', "const _x = () => toast('Deck 7', 'hi');\n"),
+    }
+    out = {}
+    for name, (piece, code) in plants.items():
+        r.q('git checkout -q -- . && git clean -qfd')
+        t = r.read(piece); r.write(piece, t + code.encode()); r.q('python3 build.py')
+        rc, o = r.q('CADET_WORK=/tmp/cadet-work node names_check.js')
+        fails = [l for l in o.split('\n') if l.startswith('FAIL')]
+        log(f'    {name}: ' + (fails[0][:220] if fails else 'NOT CAUGHT (' + o.split(chr(10))[-1][:100] + ')'))
+        out[name] = bool(fails)
+    return dict(check_red=all(out.values()), lost=False, note='caught: ' + ', '.join(k for k, v in out.items() if v) + '; missed: ' + (', '.join(k for k, v in out.items() if not v) or 'none'))
 
 def main(argv):
     W = os.path.abspath(argv[0]); os.makedirs(W, exist_ok=True)

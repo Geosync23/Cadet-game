@@ -634,3 +634,4 @@ with sync_playwright() as pw:
     if g.errors: ok = False
     print('SOCIAL CHECK OK' if ok else 'SOCIAL CHECK FAILED')
     g.close()
+    sys.exit(0 if ok else 1)   # so a failing check fails for the computer too (split rehearsal SX1; SR2 N1)

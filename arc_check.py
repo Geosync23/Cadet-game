@@ -186,4 +186,6 @@ with sync_playwright() as pw:
     print('Theme beats nobody can have (missing details):', json.dumps({k: v for k, v in r['sim']['partial'].items() if v}))
     print('Days each beat was told:', ' '.join(l.replace(' ', '/') for l in r['log']))
     print('errors', g.errors[:5])
-    print('ARC CHECK OK' if not r['stalled'] and not g.errors and (MODE == 'themes' or (all(h.endswith(' 6') for h in r['home']) and not home_bad)) else 'ARC CHECK: STALLS')
+    arc_ok = not r['stalled'] and not g.errors and (MODE == 'themes' or (all(h.endswith(' 6') for h in r['home']) and not home_bad))
+    print('ARC CHECK OK' if arc_ok else 'ARC CHECK: STALLS')
+    sys.exit(0 if arc_ok else 1)   # so a failing check fails for the computer too (split rehearsal SX1; SR2 N1)
