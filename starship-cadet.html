@@ -49857,7 +49857,6 @@ function devmodeDraw() {
   else if (DM_UI.tab === 'clock') devmodeClock(body);
   DM_UI.el.querySelector('.dmFoot').textContent = devmodeFoot();
 }
-function devmodeClock(body) { devmodeText(body, 'Now: ' + clockText() + '. Moving the clock arrives in turn D3.'); }
 function devmodeFoot() { const u = devmodeRead(DM_KEY.undo); return 'Dev save: ' + clockText() + (u ? ' · Undo: ' + u.label : ''); }
 // the Dev link changed in an open page (a hash change doesn't reload): offer a reload, both ways
 addEventListener('hashchange', () => {
@@ -49967,10 +49966,74 @@ function devmodeClear() {                                 // the Dev save, Mark 
 function devmodeQuick(body) {
   const u = devmodeRead(DM_KEY.undo);
   devmodeHead(body, 'This moment');
-  devmodeRow(body, [['Undo my last Dev action', devmodeUndo, { off: !u, aria: u ? 'Undo my last Dev action: ' + u.label : 'Nothing to undo yet' }],
+  devmodeRow(body, [['Undo my last Dev action', devmodeUndo, { off: !u, aria: u ? 'Undo my last Dev action: ' + u.label : 'Nothing to undo yet' }]]);
+  devmodeRow(body, [['Top up needs', () => devmodeTopUp()],
     ['Copy my real game', b => devmodeTwice(b, 'Tap again to copy', devmodeCopyReal)],
     ['Clear Dev save', b => devmodeTwice(b, 'Tap again to clear', devmodeClear)]]);
   if (u) devmodeText(body, 'Undo goes back to before: ' + u.label + ' (' + u.at + ').');
+}
+// ---- D3: the clock (Clock tab), workdays excused, needs kept, Top up ----
+// The game's own time jump (skipTo, what sleeping uses) in DM_STEP-minute steps, frozen and unsaved until the end
+// (devmodeRun). A workday whose clock-in window (the shift's start, DAY_SHIFT[0], to CAREER.missBy) the jump crosses, with you not clocked in, is
+// excused (DM_ST.ex, read by section 20's careerOff through devmodeExcused): no miss, no warning, like a leave day that
+// costs no leave. Clocked in, you stay clocked in. Your needs are kept as they were (section 15's skip step asks
+// devmodeHold); Top up needs fills them. A jump that passes one of the first week's meetings (INTRO_WEEK's meeting
+// beats) without you leaves a notice on the panel (DM_ST.note, kept in the Dev save), since a real player was there.
+const DM_STEP = 30, DM_MEETS = { 'd1-briefing': 'the Day 1 briefing', 'd2-solo': 'the Day 2 solo job meeting' };
+const DM_TIMES = [['To 08:55', 8 * 60 + 55], ['To 16:55', 16 * 60 + 55], ['To 21:40', 21 * 60 + 40]];
+function devmodeExcused(d) {                             // section 20's careerOff: a workday Dev mode skipped
+  if (!DEVMODE) return false;
+  const s = DM_ST || (typeof SAVED !== 'undefined' && SAVED && SAVED.dev);   // asked at load too, before section 25 runs
+  return !!s && Array.isArray(s.ex) && s.ex.includes(d);
+}
+const devmodeNext = m => { const now = shipNow(), t = (SHIP.time.day - 1) * 1440 + m; return t > now ? t : t + 1440; };   // the next time it's m o'clock
+function devmodeArrival() {                              // the arrival evening: the clock is the story's (section 21)
+  return typeof introOn === 'function' && introOn() && SHIP.time.day < 1 ? 'Not during the arrival evening: its clock belongs to the story. Play it through (or start a Dev game with Skip to Monday).' : null;
+}
+// the first week's meetings a jump from `from` to `to` passes with you away: section 21 marks them missed on its next frame
+function devmodeMissed(from, to) {
+  if (typeof introOn !== 'function' || !introOn() || typeof INTRO_WEEK === 'undefined') return [];
+  return INTRO_WEEK.filter(b => b.meeting && SHIP.intro.done[b.id + ':met'] === undefined && introAbs(b.day, b.until) > from && introAbs(b.day, b.until) <= to).map(b => b.id);
+}
+function devmodeSkipTo(to) {
+  const st = devmodeState(), from = shipNow(); if (!(to > from)) return 'The clock is already there.';
+  const miss = devmodeMissed(from, to), mail0 = SHIP.mail ? SHIP.mail.length : 0, ex = [];
+  if (typeof CAREER !== 'undefined' && typeof careerRota === 'function') {
+    for (let d = Math.floor(from / 1440) + 1; d <= Math.floor(to / 1440) + 1; d++) {
+      const a = (d - 1) * 1440 + DAY_SHIFT[0], b = (d - 1) * 1440 + CAREER.missBy;
+      if (to <= a || from >= b || !careerRota(d) || careerOff(d) || careerClockedIn(d)) continue;
+      st.ex.push(d); ex.push(d);
+    }
+    st.ex = [...new Set(st.ex)].sort((x, y) => x - y).slice(-60);
+  }
+  for (let t = from; t < to;) { t = Math.min(to, t + DM_STEP); skipTo(t); }
+  nightT = nightAt(); if (typeof deckCrewFill === 'function') deckCrewFill();   // everyone where they now are, once (section 11 skips it while held)
+  const out = ['Now ' + clockText() + '.'];
+  if (ex.length) out.push((ex.length === 1 ? 'Day ' + ex[0] + ' excused.' : 'Days ' + ex.join(', ') + ' excused.'));
+  for (const id of miss) { const n = 'Skipped: ' + (DM_MEETS[id] || 'a first-week meeting') + ' counted as missed. This isn\'t a real player\'s Day ' + SHIP.time.day + '.'; if (!st.note.includes(n)) st.note = (st.note ? st.note + ' ' : '') + n; }
+  const notes = (SHIP.mail || []).slice(mail0).map(m => m.subject).filter(s => / \(notes\)$/.test(s || ''));
+  if (notes.length) out.push('Skipped, with notes in Mail: ' + notes.map(s => s.replace(/ \(notes\)$/, '')).join(', ') + '.');
+  return out.join(' ');
+}
+function devmodeGo(label, to) { devmodeDo('Clock: ' + label, () => devmodeSkipTo(to()), devmodeArrival); }
+function devmodeTopUp() { devmodeDo('Top up needs', () => { for (const k of NEED_KEYS) SHIP.player.needs[k] = needClamp(100); return 'Needs topped up.'; }); }
+function devmodeClock(body) {
+  const d = SHIP.time.day, st = devmodeState();
+  const now = typeof careerClockedIn === 'function' && careerClockedIn(d) && !careerClockedOut(d) ? 'clocked in' : st.ex.includes(d) ? 'excused today'
+    : typeof playerShiftOn === 'function' && playerShiftOn(d) ? 'a workday' : 'no shift today';
+  devmodeHead(body, 'Now');
+  devmodeText(body, clockText() + ' · ' + now);
+  devmodeRow(body, [['Next morning', () => devmodeGo('next morning', () => devmodeNext(WAKE_AT))],
+    ['+1 hour', () => devmodeGo('+1 hour', () => shipNow() + 60)], ['To a time…', () => { DM_UI.pick = DM_UI.pick == null ? Math.ceil(SHIP.time.min / 30) * 30 % 1440 : null; devmodeDraw(); }]]);
+  if (DM_UI.pick != null) {
+    const p = DM_UI.pick;
+    devmodeRow(body, [['− 30 min', () => { DM_UI.pick = (p + 1410) % 1440; devmodeDraw(); }, { aria: 'Earlier' }],
+      ['Go to ' + hhmm(p), () => { DM_UI.pick = null; devmodeGo('to ' + hhmm(p), () => devmodeNext(p)); }, { ask: true }],
+      ['+ 30 min', () => { DM_UI.pick = (p + 30) % 1440; devmodeDraw(); }, { aria: 'Later' }]]);
+  }
+  devmodeRow(body, DM_TIMES.map(([l, m]) => [l, () => devmodeGo(l.slice(3), () => devmodeNext(m))]));
+  devmodeRow(body, [['+1 day', () => devmodeGo('+1 day', () => shipNow() + 1440)], ['+7 days', () => devmodeGo('+7 days', () => shipNow() + 7 * 1440)], ['+3 hours', () => devmodeGo('+3 hours', () => shipNow() + 180)]]);
+  devmodeText(body, 'Workdays you skip are excused. Needs kept as a normal day. Undo my last Dev action (Quick) puts the clock back.');
 }
 // ---- end of slot: Dev mode engineer ----
 

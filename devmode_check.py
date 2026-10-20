@@ -7,6 +7,9 @@
 #   store: the space check refuses a Dev copy that would crowd the real save (nothing removed, the real game still
 #          writes); Undo my last Dev action brings the save back exactly; Copy my real game copies it byte for byte
 #          and leaves it alone; Clear Dev save takes every Dev key away and starts a new Dev game
+#   clock: refused during the arrival evening; from a Skip-to-Monday Dev game, +7 days and +1 day pass with every
+#          workday excused (no miss, no leave spent), needs kept, the crew on the deck; a jump frozen under its fade;
+#          clocked in you stay clocked in; Top up needs; a jump past a first-week meeting leaves the notice
 #   card:  in Dev mode the place-and-clock card has the DEV tag and opens the sheet "Dev mode: not your real game"
 # Setup and environment as for cadet_test.py (CADET_WORK, CADET_CHROME).
 # Run:  python3 devmode_check.py BUILD.html          Good is DEVMODE CHECK OK (exit 0); a failure exits 1.
@@ -166,12 +169,61 @@ def part_store(ctx):
     pg.close()
     print(f'  store: space check refused at {round(used / 1e3)}k + junk, real save still writes; Undo, Copy my real game, Clear')
 
+def part_clock(b):
+    ctx = b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1)
+    pg = Page(ctx, '#dev')
+    run = lambda label, to: pg.ev(f"devmodeRun('Clock: {label}', () => devmodeSkipTo({to}), devmodeArrival)")
+    check(run('+1 hour', 'shipNow() + 60') is False and 'arrival' in pg.ev('DM_UI.msg'), f'clock: not refused during the arrival evening: {pg.ev("DM_UI.msg")}')
+    # the first week's meeting notice, on paper: the arrival evening over, Day 1 05:00, a jump to Day 2 10:00
+    pg.ev('SHIP.intro.step = null; setShipNow(5 * 60); updateClock()')
+    miss = pg.ev('devmodeMissed(shipNow(), 1440 + 600)')
+    check(miss == ['d1-briefing', 'd2-solo'], f'clock: the first week\'s meetings passed: {miss}')
+    pg.ev("devmodeRun('Clock: to Day 2', () => devmodeSkipTo(1440 + 600))")
+    check('Skipped: the Day 1 briefing counted as missed' in pg.ev('devmodeState().note') and 'solo job' in pg.ev('devmodeState().note'), f'clock: no skipped-meeting notice: {pg.ev("devmodeState().note")}')
+    # a Dev game the Skip to Monday way: Day 1, 06:00
+    pg.ev('newGameStart(false); introSkip(); devmodeState().ex = []; devmodeState().note = ""'); pg.step(10)
+    check(pg.ev('clockText()') == 'Day 1, Monday 06:00', f'clock: the Skip-to-Monday game starts at {pg.ev("clockText()")}')
+    t = pg.page.evaluate('() => { const t = performance.now(); return t; }')
+    import time as _t; t0 = _t.time()
+    check(run('+7 days', 'shipNow() + 7 * 1440') is True, f'clock: +7 days refused: {pg.ev("DM_UI.msg")}')
+    secs = _t.time() - t0; pg.step(10)
+    n0 = pg.ev('JSON.stringify(SHIP.player.needs)')
+    check(pg.ev('clockText()') == 'Day 8, Monday 06:00', f'clock: +7 days landed at {pg.ev("clockText()")}')
+    t0 = _t.time(); check(run('+1 day', 'shipNow() + 1440') is True, 'clock: +1 day refused'); secs1 = _t.time() - t0
+    check(pg.ev('JSON.stringify(SHIP.player.needs)') == n0, 'clock: needs changed over a Dev jump')
+    pg.step(30)
+    C = pg.ev('({ ms: SHIP.career.ms, l: SHIP.career.l, st: SHIP.career.st, ca: SHIP.career.ca, ex: devmodeState().ex, off8: careerOff(8), on8: playerShiftOn(8), crew: DECK_CREW.length, day: clockText() })')
+    check(C['day'].startswith('Day 9, Tuesday 06:0'), f'clock: +1 day landed at {C["day"]}')
+    check(C['ms'] == 0 and C['st'] == 0 and not C['ca'], f'clock: a skipped workday counted as missed: {C}')
+    check(C['l'] == 3, f'clock: leave was spent: {C}')
+    check(C['ex'] == [1, 2, 3, 4, 5, 8] and C['off8'] and not C['on8'], f'clock: the excused days: {C}')
+    check(C['crew'] > 0, 'clock: nobody on the deck after the jump')
+    missed = pg.ev("SHIP.mail.filter(m => /missed|summons|warning/i.test(m.subject || '')).map(m => m.subject)")
+    check(not missed, f'clock: Mail about missing work: {missed}')
+    # clocked in, you stay clocked in
+    pg.ev("devmodeRun('Clock: to 08:55', () => devmodeSkipTo(devmodeNext(8 * 60 + 55)))"); pg.ev('careerClock()')
+    pg.ev("devmodeRun('Clock: to 16:55', () => devmodeSkipTo(devmodeNext(16 * 60 + 55)))"); pg.step(60)
+    C = pg.ev('({ in9: careerClockedIn(9), out9: careerClockedOut(9), ex: devmodeState().ex, ms: SHIP.career.ms, day: clockText() })')
+    check(C['in9'] and not C['out9'] and 9 not in C['ex'] and C['ms'] == 0, f'clock: clocked in, the jump didn\'t keep you clocked in: {C}')
+    # Top up needs, through the panel's own way (the fade, frozen meanwhile)
+    pg.ev('SHIP.player.needs.hunger = 20; devmodeOpen(true); DM_UI.tab = "quick"; devmodeDraw()')
+    m0 = pg.ev('SHIP.time.min'); pg.page.evaluate("[...document.querySelectorAll('#dmSheet button')].find(b => b.textContent === 'Top up needs').click()"); pg.step(15)
+    check(pg.ev('SHIP.time.min') == m0 and pg.ev('freezeSync()'), 'clock: the ship ran under a Dev action\'s fade')
+    pg.page.wait_for_timeout(800); pg.step(5)
+    check(all(v > 99.9 for v in pg.ev('Object.values(SHIP.player.needs)')), f'clock: Top up needs: {pg.ev("JSON.stringify(SHIP.player.needs)")}')
+    check(pg.ev('!freezeSync()'), 'clock: still frozen after the action')
+    check(not pg.errors, f'clock: errors {pg.errors[:3]}')
+    pg.close(); ctx.close()
+    print(f'  clock: arrival refused; meeting notice; +7 days in {secs:.1f} s, +1 day in {secs1:.1f} s; excused {C["ex"]}, no miss, leave kept, needs kept; clocked in kept; Top up frozen under the fade')
+
 with sync_playwright() as pw:
     b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
     ctx = b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1)
     for name, part in (('off', part_off), ('real', part_real), ('card', part_card), ('store', part_store)):
         try: part(ctx)
         except Exception as e: fail(f'{name}: stopped: {str(e)[:300]}')
+    try: part_clock(b)
+    except Exception as e: fail(f'clock: stopped: {str(e)[:300]}')
     b.close()
 
 print('DEVMODE CHECK OK' if ok else 'DEVMODE CHECK FAILED')
