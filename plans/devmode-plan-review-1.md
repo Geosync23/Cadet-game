@@ -183,3 +183,40 @@ Scripts: `plans/devmode-review-1/setcareer.py` (by shuttle, beats marked done) a
 - **V3-4 (nit): with no fixed seed, two Set careers to the same day can differ.** About 57% of games have a sick day by Day 30 (`gs` random). Mark and Undo are exact, so for the user that's fine. But devmode_check can only compare fields, not save bytes, unless the one-line seed hook stays (Dev only, cheap). Say which.
 - **V3-5 (nit): the hooks list.** Add **20 (social)** for "friendships get a starting level" (that writes `SHIP.social`, so the social engineer's shapes apply), and **21** for `introSkip` + `INTRO_BOOT` (V3-1, V3-3). The rest (13, 15, 18, 20 excused, 24/24p, page) matches what v3 does. The pip: `promoPip()` isn't called by writing `W.done`, so the collar may show no pip until something calls it. Call it after Set career.
 - **Stop 1 and the dropped parts:** nothing in Stop 1 needed the replay, the kept days or IndexedDB. Mark, Undo and Copy my real game are plain localStorage saves, three at about 120 KB each, well inside the limit. The only thing that leaned on the dropped seed is devmode_check's repeatability (V3-4).
+
+## Owner review (standing in for the sim engineer, section 13, and the onboarding engineer, section 21): Dev mode D1 hooks, claude/devmode fffb8e2
+
+**PASS WITH FIXES** (none of the fixes blocks a merge; the game's behaviour with Dev off is proven unchanged).
+
+Reviewed: c9cc785 (13: `DEVMODE = URL_FLAGS.has('dev') && !NOSAVE`, `SAVE_KEY` moved below the switches with "-dev"), 55add3f (21: `INTRO_KEY` "-dev", `introWanted` reads `INTRO_KEY`), and the rest of D1 (section 25, devmode_check.py) for anything that could touch the real game.
+
+What I ran (scratch copies, 390 × 844):
+- **cadet_test** integration 5dd740c against devmode fffb8e2: **ALL IDENTICAL** (0 px everywhere, no errors).
+- **devmode_check** on fffb8e2: **DEVMODE CHECK OK**.
+- **names_check**: OK (3823 names).
+- **The real game's storage, byte for byte** (`savecmp.py`, `savecmp2.py`, `out_savecmp.txt`). The same session in both builds, starting from the same real save: no switch, `#debug`, `?nosave`, `#nosave.dev`, `#debug.nosave`, and again with `starship-cadet-arrived` present. Every storage key came out **identical** between the two builds, with the career's random `gs` zeroed (it's random in both). With `#nosave.dev`, `DEVMODE` is false. A `#dev` session over a real save plus the arrived key left both real keys unchanged and wrote only `starship-cadet-save-dev`.
+
+Checked by reading:
+- **Load order:** nothing reads `SAVE_KEY` or `SAVE_V` above their new line 8998 (first use: `saveGame`, 9005). `INTRO_KEY` (39124) is read by `introArrived`, `introMarkArrived` and `introWanted`. The only call at load is `INTRO_BOOT` at 39360, after 39124. The others are called at run time (New game, the career's end card).
+- **No other copy of the key texts:** in the game, each text appears once (8998, 39124). Outside it, they appear only in docs and in devmode_check's own list (`REAL`), which is right.
+- **The shared rule:** neither key is read outside its own section. No shared function's inputs or result change. `DEVMODE` is a new name owned by 13 and read by 21 and 25.
+- **Section 25:** every function returns at once with `DEVMODE` off, and only the `hashchange` listener is always registered. It acts only when the `dev` word appears and never writes storage. Its Dev state goes into the Dev save only (`SAVE_EXTRA` is pushed only under `DEVMODE`).
+
+Fixes (suggested patches; I don't push to claude/devmode):
+
+1. **Should fix: devmode_check doesn't test the intro key, and can't catch an added real key.** In `part_off` the real game never finishes the arrival, so `REAL` storage is only `starship-cadet-save`, and `real` (the bytes kept) has no `starship-cadet-arrived`. Also `dev_keys_ok` accepts any REAL key, and the loop only compares keys that existed before. So a Dev session that *wrote* the real arrived key would pass. Patch for `part_real`:
+   ```python
+   -    pg = Page(ctx, ''); pg.ev('saveGame()'); real = {k: v for k, v in store(pg).items() if k in REAL}; pg.close()
+   +    pg = Page(ctx, ''); pg.ev('saveGame()'); real = {k: v for k, v in store(pg).items() if k in REAL}; pg.close()
+   +    for gone in (False, True):     # both ways: the real arrived key absent (a Dev session must not add it) and present (must not change)
+   ```
+   Simpler and enough: run the Dev part twice, once as now and once after `pg.page.evaluate("localStorage.setItem('starship-cadet-arrived', '1')")`. In both runs, check `{k: v for k, v in st.items() if k in REAL} == real` (the same keys *and* bytes), not just `st.get(k) == v` for the old keys. In the Dev session, also call `introSkip()` so the Dev side writes its arrived key (`starship-cadet-arrived-dev` must appear, and the real one mustn't).
+2. **Nit: a stale comment in 21 (line 39382).** "(a function declaration reading the key directly: section 13 asks this at load, before this section has run)" is no longer true: it reads `INTRO_KEY`, and the only load-time call (39360) comes after it. Patch:
+   ```
+   -// (a function declaration reading the key directly: section 13 asks this at load, before this section has run)
+   +// (reads INTRO_KEY, so never call it above line ~39124: in the dead zone its try/catch would quietly say false and the arrival would never start)
+   ```
+3. **Should fix (docs, same commit per CLAUDE.md): owners.md and map.md.** Add section 25 (owner: the Dev mode engineer), its slot (map.md "Each seat's slot"), and `DEVMODE` as a shared name: owner 13, read by 21 and 25. `SAVE_KEY`/`INTRO_KEY` now depend on it.
+4. **Nit: the hashchange word test doesn't match the link parser.** Line 8994 reads a token's name up to its first "-" (so `#dev-1` turns Dev on), but the listener tests `t === 'dev'`, so it would offer "Dev link removed" in a Dev page opened with `#dev-…`. Patch: `const on = location.hash.slice(1).split('.').some(t => (t.includes('-') ? t.slice(0, t.indexOf('-')) : t) === 'dev');`.
+
+Waiting for D2's third hook (13: `freezeSync` and `saveGame` read `devmodeHold()`).
