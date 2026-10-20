@@ -7,7 +7,7 @@
 # A step passes only if it exits 0 AND prints its OK line (a check that only prints FAILED must not pass).
 set -u
 cd "$(dirname "$0")"
-export CADET_CHROME="${CADET_CHROME:-/opt/pw-browsers/chromium}"
+export CADET_CHROME="${CADET_CHROME-/opt/pw-browsers/chromium}"   # set but empty: Playwright's own Chromium (GitHub)
 BASE="${CADET_WORK:-/tmp/cadet-work}"
 LOGS="${CHECK_LOGS:-$BASE/check-fast}"; rm -rf "$LOGS"; mkdir -p "$LOGS"
 T0=$(date +%s); FAIL=0
