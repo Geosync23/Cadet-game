@@ -2195,4 +2195,3 @@ function upcomingTraditions(fromMin, toMin) {
 var EV_READY = true;                                     // section 14's hooks wait for this (it's read before section 18 runs)
 if (SCHED_DATA) { SCHED_DATA = null; SHIP_DAYS.clear(); EV_DAYS.clear(); }   // anything planned before now is planned again, with the events
 
-function recShowTick(now) { return now; }   // DELIBERATE duplicate (split rehearsal: the GitHub check must go red)
