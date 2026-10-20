@@ -39379,7 +39379,8 @@ function introBegin(name) {
 // for section 13's New game (newGameStart): whether a new game should arrive by shuttle (never on a test URL; once
 // you've arrived before, wave 2's choice will ask; until then a returning player starts on Monday as before), and the
 // intro's side of the fresh start, called after section 13 has cleared the flags and set the clock
-// (a function declaration reading the key directly: section 13 asks this at load, before this section has run)
+// (it reads INTRO_KEY, a const: never call it above INTRO_KEY's line near the top of this section, where its try/catch
+// would quietly return false and the arrival would never start)
 function introWanted() { try { return !NOSAVE && !localStorage.getItem(INTRO_KEY); } catch (e) { return false; } }
 function introNewGame(arriving) { try { introUiReset(); } catch (e) {} if (arriving) introBegin(); else SHIP.intro = introBlank(); }
 // what the evening in play keeps between frames, back to a fresh start on New game (reviewer 1: on a second arrival
