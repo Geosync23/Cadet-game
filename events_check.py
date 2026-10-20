@@ -394,6 +394,7 @@ with sync_playwright() as pw:
       for (const e of SHIP_TRADITIONS.filter(e => e.invite)) { const v = e.invite;
         if (!schedPeople().some(p => p.id === v.host) || !(v.odds > 0 && v.odds <= 1) || typeof v.line !== 'string' || !v.line || v.line.length > 140) out.bad.push(e.id + ': invite ' + JSON.stringify(v)); }
       for (const t of TRAD_LIST) {
+        if (t.id === 'first-light' && !(typeof FLC_ON !== 'undefined' && FLC_ON)) continue;   // patch #26: loaded only with its switch on (section 15's FLC_ON)
         const ev = SHIP_TRADITIONS.find(e => e.id === t.id); if (!ev || !ev.baked) { out.bad.push('baked ' + t.id + ' not loaded'); continue; }
         let n = 0; for (let d = 0; d <= 364; d++) if (eventsOn(d).some(e => e.id === t.id)) n++;
         if (!n && !t.when.birthday && !t.flag) out.bad.push('baked ' + t.id + ' never happens in a whole year');   // a flagged one waits for its story beat (tested above)
@@ -436,8 +437,10 @@ with sync_playwright() as pw:
     loaded = g.ev("SHIP_TRADITIONS.filter(e => e.baked).map(e => e.id)")
     print(f"Tradition files: {len(files)} ({', '.join(want_ids)}); loaded from the baked block or stand-in: {', '.join(loaded) or 'none'}")
     rec_on = g.ev("typeof REC_DECK !== 'undefined' && REC_DECK")
+    flc_on = g.ev("typeof FLC_ON !== 'undefined' && FLC_ON")
     for i in want_ids:
         if i.startswith('rec-') and not rec_on: continue    # the rec deck's own load only with the deck switched on (0.83)
+        if i == 'first-light' and not flc_on: continue      # First Light Cocoa (patch #26) loads only with FLC_ON
         if i not in loaded: fail(f"content/traditions has {i}, but the game didn't load it (bake the TRADITIONS block again)")
     # every decor and trace id a tradition names is one the deck architect built (DECK_DRESS) or has announced, or one
     # a designer has asked for (it shows nothing until built); anything else is a typo
