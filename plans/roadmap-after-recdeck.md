@@ -26,3 +26,6 @@ Set them up in step 2, alongside the split (the split's plan page shows the user
 3. Write `plans/owners.md`, `plans/map.md`, `plans/backlog.md` (start it from the list above), `check_fast.sh`; add the GitHub Action; create the integration branch.
 4. Add today's rules to DEV_NOTES "Rules that keep it working"; update CLAUDE.md "How we work" (fast check before every push, merge reviewed pieces into the integration branch, owners map) and the worker start messages (plans/start-prompts-lead20.md) to match.
 5. Light clean-up, one area at a time, each with checks and a review.
+
+## Check speed (talked through with the user, 2026-10-20)
+Keep the full checks as they are (play from Day 1). With the split, add the quick check on GitHub; also run checks side by side across helpers, and let number-only checks skip drawing. Saved starting points (e.g. start of Day 5, stamped with the game version and rebuilt whenever the game changes, with a full from-Day-1 run before every release) only if check time is still the bottleneck after the split.
