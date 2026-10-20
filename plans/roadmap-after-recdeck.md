@@ -1,4 +1,6 @@
-# Roadmap after the rec deck (agreed with the user, 2026-10-19)
+# Roadmap after the rec deck (agreed with the user, 2026-10-19; step 2 changed 2026-10-20)
+
+> **2026-10-20, the user: NO CUT for now.** After the split plan's two adversarial reviews (claude/split-plan `plans/split-plan-review.md`, claude/split-review-2 `plans/split-review-2.md`) and a full rehearsal (claude/split-rehearsal `plans/split-rehearsal-report.md`: 13 real merges replayed byte-identical, 689 merges swept, 20+ attack scenarios, a real GitHub check), both found the split brings no safety the new ways of working don't already give (clashes land in the same places; 393 of 508 past clashes were only the build number). Step 2 is now **the new ways of working on the one file** (option d): names_check.js, check_fast.sh, the exit-code fixes for 10 checks, cadet_test's stale-file refusal where it applies, the GitHub check, the build master sets the build number, early combining on a shared branch, labelled per-seat append slots in the file, a section finder (tools/section.py), plans/owners.md, plans/map.md, plans/backlog.md, DEV_NOTES' build table moved out, the whole-file copy kept. The rehearsal's tools are on claude/split-rehearsal; the split tools stay on the shelf and are reconsidered after Dev mode only if the numbers say so. GitHub emails the user on every failed run: settle the user's email setting before switching the check on.
 
 The user: "I don't care about usage, we will get it there." Order:
 1. Finish the rec deck 0.64.0 (see START-HERE.md).
