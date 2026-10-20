@@ -1,6 +1,13 @@
 # Reviews: R8 (the rec deck's 0.64.1 determinism fix), newest first
 
 R8 = reviewer started by lead 20 (session_019UJSCUCdtC1kTpYiABWKhs). Branch `claude/reviews-r8` (from R7's notes).
+Team (lead 20): lead session_019UJSCUCdtC1kTpYiABWKhs; rec engineer RE20 session_019auXkZkQG3gnNjmArAauLx (all game-file
+changes); build master BM10 session_01KpcQGJvrAz57dmKp6AFg4w (check round on claude/rec-cand-s1); R8 session_01GdhqdLeZuGFQSTX7RL92U5.
+Scope (lead 20, from the user): item B (career half-xp) dropped. Item C added: the climb queue (R7's note: one belay
+tagged out + the holds roping off the other route -> recShut().belays is 1 so recStart doesn't refuse, but recBelaysFree()
+is empty with nobody on the wall -> queued forever). Review C for: a refusal instead of queueing when no belay can free
+up; a player already queued released with the refusal if the second fault lands mid-wait; wording ("the rec deck");
+REC_DECK=false identical; the new check case.
 
 ## 1030f4d (claude/rc-wip, WIP 0.64.1, vs 50d55ef): PASS WITH FIXES (pre-review of work in progress)
 
