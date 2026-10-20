@@ -181,3 +181,4 @@ GitHub check: ON for every push to claude/** and main (the user, 2026-10-20; the
 | Talk pack reviewer TR1 | session_01T93VUcBukQwhBLu8vCNUhV | `claude/talk-pack-review` | reviews every line of TW1's pack (f6005cf: 160 talks, 1,468 lines) |
 **Dev mode plan v2.1 published (~12:00 UTC):** https://claude.ai/artifact/2ugbTkkAFkEsgTZa3bbFdH (from claude/devmode-plan 6c37f52; DR1 + DR2 re-checks passed; answers in its db, collection `answers`, doc `devmode-plan`).
 **Talk a while lines page (~12:30 UTC):** https://claude.ai/artifact/BEWR9Y2uywFZ7FjNDwuJE4 (from claude/talk-pack 95bb299 after TR1's review; comments in its db, collection `answers`, doc `talk-pack`).
+**Events plan COMPLETE (v3.2, claude/events-plan f6996d86; handover 5b679633).** All user questions answered; design-doc updated. Crossing the Line on Sun Day 7; storm Days 11-15; comet Tue Day 16; visit finale Days 26-30. EP1 idle (62% memory).
