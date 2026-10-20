@@ -49437,7 +49437,7 @@ function tapCrew(cx, cy) {
   if (typeof playerChat === 'function') playerChat(a.p);  // section 15: chatting raises social
   return true;
 }
-SIM_ADVANCE.push(() => { if (typeof deckDef !== 'undefined' && deckDef) deckCrewFill(); });   // after a sleep, everyone where they now are
+SIM_ADVANCE.push(() => { if (typeof deckDef !== 'undefined' && deckDef && !(typeof devmodeHold === 'function' && devmodeHold())) deckCrewFill(); });   // after a sleep, everyone where they now are (a Dev mode clock jump places them once, at its end: section 25)
 deckCrewFill();
 
 // =====================================================================
