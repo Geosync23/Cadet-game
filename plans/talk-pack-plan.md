@@ -182,3 +182,9 @@ night to the decks; Calder's slogan mug in the machine shop; Halloran's cup on C
 comets count"; Kovac's 42 beans; Vance's seven salutes; the lighthouse song's disputed line; Holt's airlock-secrets
 joke (Mensah's). Outside the pack: `traditions/new-hands-tea.trad`'s comment says Calder hangs your mug, facts 11 says
 Halloran gives it (a backlog row for the head writer).
+
+## The old topic lines: parked (2026-10-20)
+
+TR1's call, through lead 20: the old `talk.<topic>.*` lines in `content/banks/talk.lines` are **parked**, as a marking
+only: a comment in that file says they're unused while `TALK_PACK_ON` is on and kept for the switch-off path. Keys and
+lines unchanged, never deleted; recorded in `design-doc.md` ("Talking").
