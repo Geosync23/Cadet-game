@@ -259,3 +259,4 @@ PP1 now reviews patch turns. Batch E (small features incl. First Light Cocoa, th
 | Events writer EW1 | session_01KkAhg7eVhPenBBVfLufPU1 | `claude/events-lines` | the four Friday addresses (+ part E lines), then storm, Crossing the Line, comet, visit lines; names for Hollis Reach / Corvane Drift |
 Working: PA, BM11, EV1, EW1 (+ PR2/OR1 reviewing on call, PB finishing a small revert).
 **~23:28 UTC:** PB pushed claude/patch-b 319f541 (revert 9e34423, machine_check 3-7, backlog row 17; check_fast OK; career_check only row 12) → PR2 quick look; merges with patch-a. PB idle (~53%). EV1 and EW1 up.
+**~23:33 UTC:** PR2 PASS on 319f541; OR1 corrected its F review (relied 48 only hid row 12). claude/patch-b fully reviewed at 319f541 → BM11 merges it with patch-a. Only PA's list left.
