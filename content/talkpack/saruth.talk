@@ -44,12 +44,12 @@ cheer: Bring biscuits. Always biscuits.
 == exhausting
 topic: crew
 when: tier>=friend
-them: May I tell you something I have not said to the Captain? Your people are exhausting.
+them: Here is something I have not said to the Captain. Your people are exhausting.
 them: And very kind. Often at once. I did not expect both. I am still deciding what to do.
 ask: And the Veyli? What do you find hardest about my people? Be honest.
 listen: What's hardest about us, for you?
   them: The noise. Everyone speaks, all the time, kindly. I have learned to listen faster.
 share: I don't know you well enough yet.
   them: An honest answer. Then we are both still learning. I find that a comfort.   #warm
-cheer: The coffee. It has opinions.
-  them: Chief Holt says the same of me. I take it as a compliment. He does not.   #funny
+cheer: Knowing when you've made a joke.
+  them: Ah. We have the same trouble with you. A sentence late, every time. We are even.   #funny

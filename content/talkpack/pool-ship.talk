@@ -49,7 +49,7 @@ cheer: The way back to my bunk. Daily.
   them: The ship moves the corridors at night. Everyone knows.   #funny
 
 == lift
-when: tier>=acquaintance
+when: tier>=acquaintance !who:kovac-zainab|cruz-tove|keane-davi
 them: The lift's the heart of the ship, really. Everyone meets in it.
 them: "Four, please." I say it in my sleep.   #funny
 ask: Who's the best person you've shared the lift with?
@@ -77,8 +77,8 @@ when: tier>=acquaintance !who:marrow
 them: Have you looked at the portrait gallery on Deck 2?
 them: Every captain the Wren's had. All very serious.
 ask: Do you ever wonder about the people who were here before us?
-listen: Which one's your favourite?
-  them: The first one. Varga. Looks like they're about to laugh.
+listen: Which captain do you like best?
+  them: Varga. Started the gallery. Looks like they're about to laugh.
 share: Yes. Who sat in my bunk before me.
   them: Somebody who left it fine for you. That's the deal, really.   #warm
 cheer: Only whether they had better biscuits.
@@ -101,16 +101,16 @@ when: tier>=colleague !who:brennan
 them: She's old, but she's kind, the Wren. Like a good boot.   #funny
 them: She's had seventy-odd people at a time in her for years. You feel it.
 ask: What makes a ship good, do you think? Not the engines.
-listen: Have you served on other ships?
-  them: One or two. None felt like this. I can't say why.
+listen: Has she always been like this?
+  them: Longer than anyone aboard can say. Ask the portraits.
 share: The people. Always the people.
   them: Right answer. The engines are just how we get about.   #warm
 cheer: A good mess. Everything else follows.
   them: Brennan would agree. Loudly.   #funny
 
 == leave-her
-when: tier>=friend !who:tomas|marrow
-them: I think about how I'll feel the day I leave her. Silly.
+when: tier>=friend !who:tomas|marrow|brennan !thread:leaving
+them: Sometimes I wonder how I'll feel the day I leave her. Silly.
 them: Not soon. Not planning to. Just, one day. Everyone does.
 ask: Do you think you'll stay on the Wren a long time?
 listen: What would you miss most?

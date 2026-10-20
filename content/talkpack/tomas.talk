@@ -7,7 +7,7 @@ topic: ship
 them: I've counted the windows. Twenty-two. I think. I might've counted one twice.
 them: The Watch office has the best view of the lift. And so of everyone. Sort of a perk.
 ask: Have you got a favourite window yet? Or is that odd? It might be odd.
-listen: Which one's your favourite?
+listen: Which window do you like best?
   them: The junior common room, at night. You can see right out the back of us.   #warm
 share: Not yet. I'm still learning the doors.
   them: Me too. I took the long way round Deck 2 again today. On purpose. Mostly.   #funny
@@ -37,13 +37,13 @@ listen: Do you actually like running?
   them: I sort of do? Don't tell him. He'll make a new board.   #funny
 share: A few things. All good ones, so far.
   them: That's the Wren. You say yes to one thing and it's a whole life.   #warm
-cheer: Second helpings. Brennan's very persuasive.
-  them: She is! She just looks at the plate. And it's done.   #funny
+cheer: Taking the long way round Deck 2.
+  them: That's mine! You can share it. We'll be late together.   #funny
 
 == star-map
 topic: plans
 when: tier>=friend
-them: Can I show you something? My star map. That one, with the pencil circle.
+them: You know my star map? See the pencil circle? Top left.
 them: Never been. Nobody I know has. I just like it there, first thing every morning.
 ask: If you could go anywhere out there, where would it be?
 listen: Why that star?

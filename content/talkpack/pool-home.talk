@@ -3,6 +3,7 @@ topic: home
 // TW1, the Talk a while pack: shared pool, topic home. {home} is the roster's home ("Marra Station").
 
 == smell
+when: !thread:homesick !who:brennan|tomas
 them: Something in the mess smelt like {home} today. Took me right back.
 them: Funny what a smell can do. I had to sit down.
 ask: Is there a smell that takes you home?
@@ -14,6 +15,7 @@ cheer: Toast. Toast is always home.
   them: Then you're home three times a day. Lucky you.   #funny
 
 == letter
+when: !who:tomas
 them: Got a letter from {home}. Nothing much in it.
 them: Read it three times anyway.   #warm
 ask: Who writes to you from home?
@@ -37,8 +39,8 @@ cheer: Like a log. I was too tired to worry.
 
 == sky
 when: tier>=acquaintance
-them: Out here the sky's all stars. At {home} I mostly looked at the ground.   #funny
-them: Puddles, mainly. Pavements. Now look at me.
+them: Out here the sky's all stars. Back home I mostly looked at my feet.   #funny
+them: My shoes, mainly. Now look at me.
 ask: What was the sky like where you grew up?
 listen: Do you miss looking down?
   them: A bit. You know where you are, looking down.
@@ -48,7 +50,7 @@ cheer: Grey. Very grey. Excellent grey.
   them: Grey's underrated. It never shows off.   #funny
 
 == cooking-home
-when: tier>=acquaintance !who:brennan
+when: tier>=acquaintance !who:brennan|tomas
 them: There's a dish from {home} nobody aboard knows how to make.
 them: I've described it to Brennan twice. She's thinking about it.
 ask: What would you want from home, if Brennan could make anything?
@@ -80,15 +82,15 @@ listen: When did it change for you?
   them: I don't know. One day I was going "back to the ship". Then "home".
 share: Getting there. Some days more than others.
   them: That's honest. It sneaks up on you. Then it's done.   #warm
-cheer: It's got a canteen. That's most of home.
+cheer: It's got a mess. That's most of home.
   them: Can't argue. A kitchen and people. That's it, really.   #funny
 
 == leave-one-day
-when: tier>=colleague
+when: tier>=colleague !who:tomas
 them: I'll go back to {home} on leave one day.
 them: It'll all look smaller. People say it always does.
 ask: What would you do first, back home?
-listen: What would you do first?
+listen: What do you miss most?
   them: Walk. Just walk, somewhere without a corridor.   #warm
 share: See my family. Sit at the kitchen table.
   them: Good answer. The kitchen table's where it all happens.   #warm
@@ -108,8 +110,8 @@ cheer: I just shout louder. It's a method.
   them: Lag doesn't care how loud you are. Sadly.   #funny
 
 == homesick
-when: tier>=friend !newhere
-them: Can I tell you something? I was very homesick my first month.
+when: tier>=friend !newhere !thread:homesick !who:tomas
+them: I was very homesick my first month. Did you know?
 them: I hid it well. I think. I hope.   #serious
 ask: Do you get homesick? You can say.
 listen: What helped, in the end?

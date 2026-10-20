@@ -7,7 +7,7 @@ topic: tradition
 them: That's the thing about the Wren. There's always something on.
 them: You don't have to go to everything. Pick the ones you like.
 ask: Have you been to anything yet? Which one?
-listen: Which one's your favourite?
+listen: Which one do you never miss?
   them: Hard to pick. The quiet ones, maybe. Where nobody's in charge.
 share: Not yet. I'm a bit nervous, honestly.
   them: Don't be. Nobody minds a new face. They like it.   #warm
@@ -17,7 +17,7 @@ cheer: All of them. I'll sleep next month.
 == first-week
 when: !newhere
 them: My first week, I went to everything. I was so tired.   #funny
-them: Fell asleep at one. Someone put a blanket on me.
+them: Fell asleep at the third one. Someone put a blanket on me.
 ask: How are you finding the ship's evenings?
 listen: Who put the blanket on you?
   them: Never found out. That's the Wren for you.   #warm
@@ -64,8 +64,8 @@ cheer: I flip a coin. Then ignore it.
 
 == quiz
 when: tier>=acquaintance
-them: Do you do quizzes? There's a quiz night aboard.
-them: People take it very seriously. Too seriously. I love it.   #funny
+them: Been back to quiz night yet? People take it very seriously.
+them: Too seriously. I love it.   #funny
 ask: What would you be good at, in a quiz?
 listen: Who usually wins?
   them: Depends who's asking the questions. There are grudges.   #funny
@@ -94,7 +94,7 @@ ask: Go on. What would yours be?
 listen: Why slippers?
   them: Nobody can take themselves seriously in slippers. Even Vance.   #funny
 share: Something for the new hands. A welcome.
-  them: That's lovely. Tell someone. Things start that way here.   #warm
+  them: There's a new hand's tea already. Make it bigger. Tell someone.   #warm
 cheer: Second dinner night.
   them: Brennan would cry. Then do it. Then cry again.   #funny
 
@@ -119,5 +119,5 @@ listen: What happened that night?
   them: Nothing much. People were kind. That was enough.   #warm
 share: Talking to someone. Like this.
   them: Then come and find me. Any night. I mean it.   #warm
-cheer: Biscuits, then sleep.
-  them: The classic cure. Doctors hate it. Well, Rina does.   #funny
+cheer: A long shower. Before ten.
+  them: The classic cure. After ten it's character-building.   #funny

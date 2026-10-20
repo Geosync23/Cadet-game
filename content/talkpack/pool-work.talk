@@ -38,7 +38,7 @@ cheer: Which panel sticks on Deck 5.
   them: Ha! Pell got to you. Good.   #funny
 
 == mistake
-when: tier>=acquaintance
+when: tier>=acquaintance !thread:notgood
 them: I made a mistake last month. A proper one.
 them: I owned up, fixed it, and nobody shouted. That's the Wren.
 ask: Have you made one yet? Everyone does.
@@ -50,7 +50,7 @@ cheer: Not yet. I'm saving it for something big.
   them: Aim high. Just not the reactor.   #funny
 
 == well-done
-when: tier>=acquaintance !rank:captain !who:calder
+when: tier>=acquaintance !rank:captain !dept:works
 them: {boss} said "nice work" to me today. I'm still floating.   #warm
 them: Two words. I'll be living on them for a week.
 ask: What's the best thing anyone's said about your work?
@@ -62,7 +62,7 @@ cheer: "Is that it? Already?" Twice.
   them: The best review there is. Fast and finished.   #funny
 
 == run-the-place
-when: tier>=acquaintance rank:junior !who:halloran-emeka
+when: tier>=acquaintance rank:junior
 them: One day I'll run the place. Or a bit of it. A corner.   #funny
 them: A small corner. With a kettle.
 ask: Where do you want to be in a few years?
@@ -81,7 +81,7 @@ ask: Does it bother you, nobody noticing?
 listen: Do you ever wish they would?
   them: Sometimes. Then I remember that's how you know it's working.
 share: No. I like knowing I did it.
-  them: That's the Works way. You'll fit right in.   #warm
+  them: That's the Wren's way. You'll fit right in.   #warm
 cheer: I notice. I say thank you to the air.
   them: Ha! The air's grateful. Probably.   #funny
 
@@ -94,23 +94,23 @@ listen: What broke that was new?
   them: Something nobody had seen fail before. We all went to look.
 share: Learning. While I'm learning, it's fine.
   them: Then you've got years before it's the same. Good.
-cheer: Fixing things before they break. Show-off.
+cheer: Fixing things before they break. Smugly.
   them: That's the job, really. Prevention's just quiet showing off.   #funny
 
 == pressure
-when: tier>=friend
+when: tier>=friend !thread:notgood !who:pell
 them: I worry I'm not as good as people think I am.
 them: Silly. I know. Everyone does it. Doesn't help.
 ask: Do you ever feel like that?
 listen: What makes you think you're not?
   them: Nothing, really. A feeling. It's quieter when I say it out loud.
-share: All the time. I'm the newest here.
+share: All the time. I'm one of the newest.
   them: You're doing well. I'd tell you if you weren't. I mean that.   #warm
 cheer: Only on days ending in "day".
   them: Ha! Then we're in good company. All of us.   #funny
 
 == proud
-when: tier>=friend aboard>=14
+when: tier>=friend rep:known
 them: Can I say something? You've got good at this. Quickly.
 them: People talk. It's all good, what they say.   #warm
 ask: Are you proud of how it's going?
@@ -118,5 +118,5 @@ listen: What do people say?
   them: That you finish things. That you ask. That's high praise aboard.
 share: A bit. I try not to say it.
   them: Say it to me. I won't tell. Well, I might.   #funny
-cheer: Proud enough to have seconds.
-  them: Earned. Go and get them.   #funny
+cheer: Proud enough to tell my gran.
+  them: Tell her. Grans keep these things. Properly.   #warm

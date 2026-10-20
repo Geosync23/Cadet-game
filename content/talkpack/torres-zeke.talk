@@ -16,16 +16,16 @@ cheer: The coffee machine. Pure drama.
 
 == scarf-rows
 topic: hobby
-when: tier>=acquaintance
-them: Don't look in my bag. There's a scarf in it. It's not for you. It's a bit for you.   #funny
+when: tier>=colleague mem:moment.torres.scarf
+them: Two more rows on your scarf. Don't look. Fine, look. It's coming along.   #funny
 them: Kovac says my tension's "brave". I think that's a compliment.
 ask: Have you got a colour you'd wear every day, if you could?
 listen: Who taught you to knit?
   them: Kovac, mostly. Dahl tried first. Dahl gave up. Kovac doesn't give up.   #funny
 share: Something warm. Orange, maybe.
-  them: Orange! Works orange. Right. No reason. Forget I asked.   #funny
+  them: Orange! Works orange. Good. Because that's what it is. Too late now.   #funny
 cheer: Whatever hides the gravy.
-  them: Ha! Practical. I'll bear that in mind. Not that I'm making anything.   #funny
+  them: Ha! Practical. I'll knit a gravy row in at the end. For you.   #funny
 
 == record-cabinet
 topic: crew

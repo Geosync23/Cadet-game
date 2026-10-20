@@ -1,7 +1,7 @@
 @talks nandakumar
 // TW1, the Talk a while pack: Dr. Priya Nandakumar's own talks (she/her). Short, calm sentences, mostly instructions;
 // never raises her voice; asks one question and waits for the true answer. Warm and dry off duty. Never anyone's
-// medical details.
+// medical details. Her roster thread is burnout: hint at it, never resolve it.
 
 == sign
 topic: work
@@ -13,43 +13,43 @@ listen: Does anyone actually read it?
 share: Deck 3, past the mess.
   them: Good. Now you'll never need it. That's how it works.
 cheer: Follow the person saying "drink some water".
-  them: That's Rina. Reliable. Also correct.   #funny
+  them: That's me. Or Rina. Both correct.   #funny
 
 == chillies
 topic: hobby
 when: tier>=acquaintance
 them: My chillies are fruiting. Same seeds my mother grew. Third generation now.
-them: Brennan complains about every one. Then uses every one.   #funny
+them: Brennan calls them a hazard. She's asked for more twice.   #funny
 ask: Is there something you grow, or keep, from home?
-listen: Are they very hot?
-  them: Yes. Start with half. Then drink some water. That's medical advice.   #funny
+listen: How hot are they, honestly?
+  them: Hot. Start with half. Then drink some water. That's medical advice.   #funny
 share: A habit. Something my family did.
   them: Habits travel well. Better than seeds, sometimes. Keep it going.   #warm
 cheer: My sense of humour. It's thriving.
   them: Good. That's a health indicator. I'll note it.   #funny
 
-== water
-topic: day
+== silence
+topic: work
 when: tier>=colleague
-them: One question. Answer honestly. How much water have you had today?
-them: Tea counts half. Biscuits don't count. I'll wait.
-ask: Go on. How much, really?
-listen: Do you ask everyone this?
-  them: Everyone. The Captain. The Commander. The Envoy, once. They answered in a poem.   #funny
-share: Not enough. I'll fix it.
-  them: Thank you. That's the true answer. Now drink some water.
-cheer: Does soup count?
-  them: Soup counts. Brennan will be pleased. Drink some water anyway.   #funny
+them: I ask one question. Then I wait. People fill a silence. Then they say where it hurts.
+them: It works on everyone. Nearly everyone.
+ask: Do you find a silence easy, or do you fill it?
+listen: Who doesn't it work on?
+  them: Chief Holt. He outlasts me. We sit there like two clocks.   #funny
+share: I fill it. Every time.
+  them: Most people do. Count to five first. It's a kind thing to give someone.   #warm
+cheer: I fill it with biscuits.
+  them: Crumbs are a kind of answer. Not a good one. Drink some water.   #funny
 
 == garden-hour
 topic: plans
 when: tier>=friend
-them: Off duty, I sit in the garden. Near the chillies. I don't fix anybody for an hour.
-them: Nobody believes me when I say I like it. I like it.   #warm
+them: I'm meant to sit in the garden for an hour off duty. Oduya's orders.
+them: I manage ten minutes. Then I think of something. I'm working on it.   #funny
 ask: When do you get to stop looking after everyone?
 listen: Does anyone look after you?
   them: Oduya asks the right question once a week. And Rina tells me to drink water. Fair.   #funny
 share: Not often. I'm working on it.
-  them: Work on it, then. That's not a suggestion. Sit with me sometime.   #warm
+  them: Then we'll work on it together. Ten minutes. Then eleven.   #warm
 cheer: When I'm asleep. Mostly.
   them: Sleep counts. Eight hours. I'll know.   #funny
