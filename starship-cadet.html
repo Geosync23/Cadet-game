@@ -13354,7 +13354,7 @@ function actProgress(A = ACT) {
 function actBar() {
   let el = document.getElementById('actBar');
   const pr = actProgress();
-  if (!pr) { if (el && !el.hidden) { el.hidden = true; if (typeof trkPlace === 'function') trkPlace(); } return; }   // Tracked moves back up at once (item D, 0.64.1)
+  if (!pr) { if (el && !el.hidden) el.hidden = true; return; }
   if (!el) {
     needFxLayer();
     const st = document.createElement('style');
@@ -13363,16 +13363,17 @@ function actBar() {
       + '#actBar b{display:block;height:100%;background:var(--teal);transform-origin:left center}';
     document.head.appendChild(st);
     el = document.createElement('div'); el.id = 'actBar'; el.setAttribute('role', 'progressbar'); el.setAttribute('aria-valuemin', 0); el.setAttribute('aria-valuemax', 100);
-    el.innerHTML = '<span></span><i><b></b></i>'; el.hidden = true; document.body.appendChild(el); BAR_TXT = '';   // hidden till placed below (so its first showing moves Tracked)
+    el.innerHTML = '<span></span><i><b></b></i>'; document.body.appendChild(el); BAR_TXT = '';
   }
   const A = ACT, txt = pr.title + ' · ' + (pr.left < 1 ? 'nearly done' : Math.ceil(pr.left) + ' min');
   if (txt !== BAR_TXT) { BAR_TXT = txt; el.children[0].textContent = txt; el.setAttribute('aria-label', txt); }
   el.children[1].children[0].style.transform = 'scaleX(' + pr.frac.toFixed(3) + ')'; el.setAttribute('aria-valuenow', Math.round(pr.frac * 100));
   floatV.set(A.x, A.y + BAR_Y, A.z).project(camera);
-  const sb = document.getElementById('needStrip'), y = sb ? sb.offsetTop + sb.offsetHeight + 6 : 124;   // under the needs strip (0.28.32)
+  const sb = document.getElementById('needStrip'), tb = document.getElementById('trkBtn');   // under the needs strip (0.28.32); on a phone under the Tracked button there (item D, the user's, 0.64.2: the bar always last)
+  const under = sb && sb.offsetWidth && tb && !tb.hidden && tb.offsetWidth && matchMedia('(max-width:720px),(max-height:500px)').matches ? tb.getBoundingClientRect().bottom : null;
+  const y = under !== null ? Math.round(under + 6) : sb ? sb.offsetTop + sb.offsetHeight + 6 : 124;
   el.style.transform = 'translateY(' + y + 'px)'; el.style.width = sb ? sb.offsetWidth + 'px' : '';
-  const was = el.hidden; el.hidden = typeof DEV !== 'undefined' && !!DEV.open;  // never over the device
-  if (was !== el.hidden && typeof trkPlace === 'function') trkPlace();   // Tracked under the bar at once, from its settled place (item D, 0.64.1)
+  el.hidden = typeof DEV !== 'undefined' && !!DEV.open;  // never over the device
 }
 // once a frame from the main loop (section 12): needs over ship time, walking speed, the activity, the device
 function playerUpdate(dt, t) {
@@ -14937,8 +14938,8 @@ document.getElementById('trkClose').onclick = trkClose;
 addEventListener('keydown', e => { if (e.key === 'Escape' && !trkEl.hidden) trkClose(); });
 addEventListener('pointerdown', e => { if (!trkEl.hidden && !trkEl.contains(e.target) && !trkBtn.contains(e.target)) { e.stopPropagation(); e.preventDefault(); trkClose(); } }, true);   // a tap outside closes it, and goes no further
 // where it sits: on phones (narrow or short, section 15's pausePlace's test) under the needs strip's left end, lined up
-// with it, so the left column reads as one stack (card, Device and Pause, needs, Tracked; item D, the user's, 0.64.1); under
-// the activity bar instead while one shows (it sits under the strip at its full width), back up when it hides;
+// with it, so the left column reads as one stack (card, Device and Pause, needs, Tracked, and section 15's activity bar
+// last, under Tracked; item D, the user's, 0.64.2); it never moves when an activity starts or ends;
 // elsewhere, or with no needs strip, in the Device button's row after Device (or Pause beside it), without its word
 // when it would touch the round buttons
 function trkPlace() {
@@ -14946,8 +14947,7 @@ function trkPlace() {
   const dr = d.getBoundingClientRect();
   trkBtn.classList.remove('compact'); trkBtn.style.height = Math.round(dr.height) + 'px';
   if (matchMedia('(max-width:720px),(max-height:500px)').matches && ns && !ns.hidden && ns.offsetWidth) {
-    const r = ns.getBoundingClientRect(), ab = document.getElementById('actBar'), b = ab && !ab.hidden && ab.offsetWidth ? ab.getBoundingClientRect().bottom : r.bottom;
-    trkBtn.style.left = Math.round(r.left) + 'px'; trkBtn.style.top = Math.round(b + 8) + 'px'; return;
+    const r = ns.getBoundingClientRect(); trkBtn.style.left = Math.round(r.left) + 'px'; trkBtn.style.top = Math.round(r.bottom + 8) + 'px'; return;
   }
   const pr = pb && pb.style.left ? pb.getBoundingClientRect() : null, anchor = pr && Math.abs(pr.top - dr.top) < 4 ? pr : dr;
   const put = () => { trkBtn.style.left = Math.round(anchor.right + 8) + 'px'; trkBtn.style.top = Math.round(dr.top) + 'px'; };
