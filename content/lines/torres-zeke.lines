@@ -161,6 +161,14 @@
 - Then the evening's yours. Have a wander. Gym, lounge, Tiles, bed.
 ? flag:walk.goodnight.4
 - Shift's at nine tomorrow. Get some sleep soon.   #warm
+// step: the end of training day (the patch, #18/#19): at 16:50 on Day 1 he comes to find you and says these in order
+// (section 21b's introDayEndTick), then the arrow goes to the time clock and, once you've clocked out, to the beam.
+? flag:walk.trainend.1
+- Good job today. Proper work, that.   #warm
+? flag:walk.trainend.2
+- Tomorrow you're on your own. You'll be fine. Read the card twice.
+? flag:walk.trainend.3
+- Clock out first, then come to the beam. They're waiting for you.   #warm
 
 // ---- Day 1: his talk-through on the shadow job (said as bubbles while you work; replaces INTRO_JOB_LINES on
 // claude/arrival). Each step is gated by flag:walk.job.<step>, which the onboarding hook sets. 60 characters or fewer.
@@ -377,6 +385,7 @@
 
 // ---- Writer 2, batch 6: bubbles (smalltalk, rumour), at most one in five about work. 60 characters.
 == smalltalk
+? time:morning
 - Ten more minutes with the coils. Breakfast in five.
 ? mem:moment.torres.scarf
 - Row forty-two of the scarf. It's getting long.   #funny

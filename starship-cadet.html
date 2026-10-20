@@ -25950,7 +25950,7 @@ const VOICE = JSON.parse([
   ',"sick.getwell":[',
   '{"text":"Off you go, shipmate. Board\'ll keep. Coil three\'s had colds. She recovered.","id":"wefkzl","tone":"funny","tier":[1,4]}]',
   ',"smalltalk":[',
-  '{"text":"Ten more minutes with the coils. Breakfast in five.","id":"ykb3ua"},',
+  '{"text":"Ten more minutes with the coils. Breakfast in five.","id":"ykb3ua","time":"morning"},',
   '{"text":"Row forty-two of the scarf. It\'s getting long.","id":"q3pta1","tone":"funny","mem":"moment.torres.scarf"},',
   '{"text":"Hot water\'s gone. Character-building, that.","id":"82eqno","tone":"funny","time":"evening"},',
   '{"text":"Friday jam. I know every word. Every one.","id":"1ylfhz","tone":"funny","trad":"jam"},',
@@ -25981,6 +25981,9 @@ const VOICE = JSON.parse([
   '{"text":"Off at five. Dinner till half eight. Weekends off, like most of Works.","id":"d9nqgz","flag":"walk.goodnight.2"},',
   '{"text":"Then the evening\'s yours. Have a wander. Gym, lounge, Tiles, bed.","id":"4vcq7d","flag":"walk.goodnight.3"},',
   '{"text":"Shift\'s at nine tomorrow. Get some sleep soon.","id":"1o3qo2u","tone":"warm","flag":"walk.goodnight.4"},',
+  '{"text":"Good job today. Proper work, that.","id":"1ar7mfd","tone":"warm","flag":"walk.trainend.1"},',
+  '{"text":"Tomorrow you\'re on your own. You\'ll be fine. Read the card twice.","id":"1dma1m0","flag":"walk.trainend.2"},',
+  '{"text":"Clock out first, then come to the beam. They\'re waiting for you.","id":"a9poi3","tone":"warm","flag":"walk.trainend.3"},',
   '{"text":"Every fault on the ship lands on that board. Pick one.","id":"146xcvy","flag":"walk.job.take"},',
   '{"text":"Glass office is the Chief\'s. She sees the whole bay.","id":"1db2796","flag":"walk.job.take"},',
   '{"text":"That one\'s ours. It\'s on your device now, under Jobs.","id":"1x2e7ad","flag":"walk.job.take"},',
@@ -39671,6 +39674,7 @@ const INTRO_WEEK = [
     flags: ['intro.device', 'met.calder'] },   // if you missed them on Sunday, Torres hands you the device here
   { id: 'd1-shadow', day: 1, at: 9 * 60 + 5, until: 13 * 60, who: INTRO_ESCORT, where: { deck: 5, room: 'Works bay' }, escort: 'follow', job: 'reserved:1', settle: 'shadow' },   // he stays at your side and talks you through it (introJobLines); the arrow shows the way
   { id: 'd1-lead', day: 1, at: 13 * 60, until: 16 * 60 + 30, who: INTRO_ESCORT, where: { deck: 5, room: 'Works bay' }, escort: 'follow', job: 'reserved:2', settle: 'lead' },
+  { id: 'd1-end', day: 1, at: 16 * 60 + 50, until: 17 * 60 + 5, who: INTRO_ESCORT, where: { deck: 5, room: 'Works bay' }, escort: 'follow' },   // the patch (#18/#19): he comes to find you: good job, clock out, the beam (introDayEndTick)
   { id: 'd1-dinner', day: 1, at: 18 * 60, until: 19 * 60, who: 'brennan', where: { deck: 3, room: 'Mess hall' }, settle: 'eat' },
   { id: 'd1-zeke-dinner', day: 1, at: 18 * 60, until: 19 * 60, who: INTRO_ESCORT, where: { deck: 3, room: 'Mess hall' } },   // 0.42.41: he eats in the mess (section 21b's evening and laundry lines, CLOTHES_BEATS)
   { id: 'd2-solo', day: 2, at: 8 * 60 + 45, until: 10 * 60, who: 'calder', where: { deck: 5, room: 'Works Chief\'s office', placeId: '5-office-1' }, meeting: 'introSoloJob', settle: 'solo',
@@ -40400,7 +40404,7 @@ function introArrowWant(now) {
     if (out || typeof myJob === 'function' && myJob()) fin('board');
     else return 'board';
   }
-  return null;
+  return introDayEndWant(now, m);                         // the patch (#19): after Zeke's end-of-day word, the clock, then the beam
 }
 function introArrowTick() {
   const t = simNow(); if (t < (INTRO_UI.arrowAt || 0)) return; INTRO_UI.arrowAt = t + 250;   // four times a second
@@ -40520,7 +40524,7 @@ function introTick() {
   // his lines for a step once its time has come and no meeting is on ("I'm on Four if you need me" waits for 19:00)
   const cur = introStepById(I.step);
   if (I.step !== INTRO_UI.step && !DIALOGUE && (!cur || Math.floor(shipNow()) >= introAbs(cur.day, cur.at))) { INTRO_UI.step = I.step; }   // ('free' said walk.free here until 0.42.27: his goodnight, introNightTick, says it now)
-  introTourTick(); introNightTick(); introBedTick(); introTernTick(); introBeatTick(); introFollowTick(); introArrowTick(); introDevGlowTick();
+  introTourTick(); introNightTick(); introBedTick(); introTernTick(); introBeatTick(); introFollowTick(); introDayEndTick(); introArrowTick(); introDevGlowTick();
   // the goal arrow points at him while he's leading you (section 15b's setGoal), and is cleared when he lets you go
   const st = introStep(), lead = !DIALOGUE && introEscorting(st) && !INTRO_UI.arrow;   // while he's yours, not over a meeting (nor over a first-time arrow: the servery after the Chief's "Eat something")
   if (lead) {
@@ -40929,6 +40933,68 @@ function introDevGlowTick() {
   if (!INTRO_DEV_GLOW) b.classList.add('devglow'); INTRO_DEV_GLOW = true;
   if (!pt) { pt = document.createElement('div'); pt.id = 'devPoint'; pt.textContent = (typeof LINES !== 'undefined' && Array.isArray(LINES['tip.device.first']) && LINES['tip.device.first'][0] && LINES['tip.device.first'][0].text) || INTRO_DEV_POINT; document.body.appendChild(pt); }
   const r = b.getBoundingClientRect(); pt.style.left = Math.round(r.left) + 'px'; pt.style.top = Math.round(r.bottom + 8) + 'px';
+}
+// the patch, #18 and #19: the end of training day. Name on the beam is at 17:05 (the Works crew's day is unchanged), so
+// at 16:50 Zeke comes to find you (INTRO_WEEK's d1-end, follow) and says good job, you're on your own tomorrow, clock out
+// and come to the beam (the writers' walk.trainend.1-3, as bubbles). Then the arrow goes to the time clock and, once
+// you've clocked out (or if you never clocked in), to your name's spot on the beam (BEAM.slots[0], at the beam's height:
+// beamSlotWorld, which section 15b's goal arrow and section 18's own beam arrow ask through the goal's `beam: true`),
+// until your name's painted or the tradition's over. I.done 'd1-end:said' (saved): when he said it (null: never will).
+const INTRO_DAYEND = { at: 16 * 60 + 50, find: 14, trad: 'name-on-the-beam', end: 17 * 60 + 40,
+  lines: ['Good job today. Proper work, that.', 'Tomorrow you\'re on your own. You\'ll be fine. Read the card twice.', 'Clock out first, then come to the beam. They\'re waiting for you.'] };
+INTRO_ARROWS.clockout = { deck: 5, place: '5-timeclock-1', label: 'Clock out at the time clock' };
+INTRO_ARROWS.beam = { deck: 5, item: /^The beam$/, beam: true, label: 'Your name goes on the beam' };
+INTRO_ARROW_LABELS.add(INTRO_ARROWS.clockout.label); INTRO_ARROW_LABELS.add(INTRO_ARROWS.beam.label);
+const introNamePainted = () => (SHIP.traces || []).some(x => x && x.id === 'nameYours');
+function introBeamToday() { try { return typeof eventsOn === 'function' && eventsOn(1).some(e => e.id === INTRO_DAYEND.trad); } catch (e) { return false; } }
+function beamSlotWorld() {                              // your name's spot on the beam, in the world (Deck 5 only), or null
+  if (typeof deckDef === 'undefined' || deckDef.num !== 5 || !ROOM_BOX[BEAM.room]) return null;
+  const r = ROOM_BOX[BEAM.room], [sa, sy] = BEAM.slots[0];
+  return { x: X0(r.i0) + sa, z: Z0(r.j0) + T / 2 + .14, y: BEAM.y + sy };
+}
+function introDayEndTick() {
+  const I = SHIP.intro, U = INTRO_UI, d = SHIP.time.day, m = SHIP.time.min;
+  if (d !== 1 || m < INTRO_DAYEND.at || I.done['d1-end:said'] !== undefined) return;
+  if (m >= INTRO_DAYEND.end || introNamePainted() || !introBeamToday()) { I.done['d1-end:said'] = null; U.endQ = null; return; }
+  const a = introWalker(), p = player.obj.position, near = !!a && deckDef.num === 5 && Math.hypot(a.x - p.x, a.z - p.z) <= 4;
+  if (!U.endQ) {
+    if (!near && m < INTRO_DAYEND.at + INTRO_DAYEND.find) return;   // he's on his way over
+    if (!near) { I.done['d1-end:said'] = Math.floor(shipNow()); return; }   // he never found you: the arrows anyway
+    U.endQ = []; for (let n = 1; n <= 3; n++) { const l = introWriterLine('walk.trainend.' + n); U.endQ.push(l ? l[0] : INTRO_DAYEND.lines[n - 1]); }
+  }
+  if (!a || DIALOGUE || simNow() < (U.next || 0) || typeof bubbleSay !== 'function') return;
+  bubbleSay(a.h, U.endQ.shift(), 4.5); U.next = simNow() + INTRO_TOUR_GAP;
+  if (!U.endQ.length) { I.done['d1-end:said'] = Math.floor(shipNow()); U.endQ = null; }
+}
+function introDayEndWant(now, m) {                      // introArrowWant's last word on Day 1: 'clockout', 'beam' or null
+  const I = SHIP.intro; if (typeof I.done['d1-end:said'] !== 'number' || I.done['arrow:beam'] !== undefined) return null;
+  if (introNamePainted() || m >= INTRO_DAYEND.end) { I.done['arrow:beam'] = Math.floor(now); return null; }
+  return careerClockedIn(1) && !(typeof careerClockedOut === 'function' && careerClockedOut(1)) ? 'clockout' : 'beam';
+}
+// the patch, #17: Zeke and you never in the same spot. Walking you somewhere (lead, wait at a tile) he stops ESC_GAP short
+// of you (section 10's escortStep), and when his spot is yours (the tile the arrow sent you to) he takes the free tile
+// beside you, the one nearest him (escBeside). A tap that would end on someone standing there ends on the free tile
+// next to them instead (tapBeside, section 11's floor tap); paths still pass through people, as before.
+const ESC_GAP = .9;
+function escBeside(goal, pp, a) {
+  const g = cellPos(...goal); if (Math.hypot(g.x - pp.x, g.z - pp.z) >= ESC_GAP) return goal;
+  const you = cellAt(pp.x, pp.z), taken = occupiedBy(a); let best = null, bd = Infinity;
+  for (const [di, dj] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]]) {
+    const c = [you[0] + di, you[1] + dj]; if (!free(...c) || taken.has(K(c)) || !shuffleStep(you, c)) continue;
+    const q = cellPos(...c); if (Math.hypot(q.x - pp.x, q.z - pp.z) < ESC_GAP) continue;
+    const d = Math.hypot(q.x - a.x, q.z - a.z) + (di && dj ? .3 : 0); if (d < bd) { bd = d; best = c; }   // straight beside you first
+  }
+  return best || goal;
+}
+function tapBeside(to) {
+  if (!to || typeof DECK_CREW === 'undefined') return to;
+  const k = K(to), by = DECK_CREW.find(a => a.pose === 'stand' && K(cellAt(a.x, a.z)) === k); if (!by) return to;
+  const here = player.here(), taken = occupiedBy(player); let best = null, bd = Infinity;
+  for (const [di, dj] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]]) {
+    const c = [to[0] + di, to[1] + dj]; if (!free(...c) || taken.has(K(c)) || !shuffleStep(to, c) || DECK_CREW.some(a => a.pose === 'stand' && K(cellAt(a.x, a.z)) === K(c))) continue;
+    const d = Math.hypot(c[0] - here[0], c[1] - here[1]) + (di && dj ? .3 : 0); if (d < bd) { bd = d; best = c; }   // the side you're coming from
+  }
+  return best || to;
 }
 // ---- end of slot: Onboarding engineer ----
 
