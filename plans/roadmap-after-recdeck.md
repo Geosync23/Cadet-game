@@ -5,7 +5,7 @@
 The user: "I don't care about usage, we will get it there." Order:
 1. Finish the rec deck 0.64.0 (see START-HERE.md).
 2. **Split the game file** into pieces (crew, machines, decks, phone screens, content, ...) joined by a small build step into the one playable file. Proof: the joined file is byte-identical to today's. Plan page for the user first (it's a big move). Then a light clean-up of obviously unused code, one area at a time, with checks.
-3. **Dev mode** (the user, 2026-10-20), after the split and clean-up: a hidden testing panel to move the clock forward (hours, days), set career progress (xp / rank), and start any ship tradition on demand to test it. Plan page first. Built gated, so the normal game is unchanged with it off.
+3. **Dev mode** (the user, 2026-10-20), after the split and clean-up: a hidden testing panel to move the clock forward (hours, days), set career progress (xp / rank), and start any ship tradition on demand to test it. Also (the user, 2026-10-20): **jump to any day of the career progression** (Day 0 to the career's end, Day 26 plus the visit finale), arriving with the career, rank, jobs and ship state a player would have on that day; and start any ship-wide event or jump to one of its phases (events plan F6). Plan page first. Built gated, so the normal game is unchanged with it off.
 4. Pillar 5, Steps 5 and 6.
 5. Ship-wide events, only those up to the end of the promotions (the user cut the rest), one at a time, each built switched off, then switched on. They touch every system: do them after the split.
 6. Basic text-based stories for key crew members, written alongside 4 and 5 (mostly content/ files) and added when ready.
