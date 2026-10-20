@@ -220,3 +220,42 @@ Fixes (suggested patches; I don't push to claude/devmode):
 4. **Nit: the hashchange word test doesn't match the link parser.** Line 8994 reads a token's name up to its first "-" (so `#dev-1` turns Dev on), but the listener tests `t === 'dev'`, so it would offer "Dev link removed" in a Dev page opened with `#dev-…`. Patch: `const on = location.hash.slice(1).split('.').some(t => (t.includes('-') ? t.slice(0, t.indexOf('-')) : t) === 'dev');`.
 
 Waiting for D2's third hook (13: `freezeSync` and `saveGame` read `devmodeHold()`).
+
+## Owner review, round 2: Dev mode D2/D3 hooks (claude/devmode 78b4985)
+
+**PASS WITH FIXES.** With Dev off, all four hooks are proven no-ops. One should-fix concerns DB1's rule for excusing workdays.
+
+Hooks: 58d63a4 (13: `freezeSync` and `saveGame` ask `devmodeHold()`), e02c085 (20: `careerOff` reads `devmodeExcused(d)`), b1de9f6 (15: the skip step skips `needsDrain` while held), 9d96a16 (11: the SIM_ADVANCE `deckCrewFill` is skipped while held).
+
+Dev off (all run on 78b4985 against integration 5dd740c):
+- **cadet_test: ALL IDENTICAL.** **day_check: OK.** **leave_check: OK.**
+- **career_check:** fails `busy: "Relied on" before Day 5` with output **identical to integration's**. That's backlog row 12, known and accepted, so it isn't from Dev mode.
+- **Real storage byte for byte** (`savecmp.py`/`savecmp2.py`): identical between the builds with no switch, `#debug`, `?nosave`, `#nosave.dev` and `#debug.nosave`, and with the arrived key. A `#dev` session leaves both real keys untouched.
+- **By reading:** each hook short-circuits on `typeof devmodeHold === 'function' && devmodeHold()`, which is `DEVMODE && DM_HOLD` and false with Dev off. Both are hoisted (function declaration, `var`), so the hooks are safe at any load point. `devmodeExcused` returns false at once with Dev off, and at load it reads `SAVED.dev` (absent from a real save).
+
+**DB1's "no careerTick line needed": true.** Every miss and leave path goes through `careerOff`/`playerShiftOn`: the miss loop (`careerRota(k) && !careerOff(k)`), `careerDayEnd` (returns on `careerOff`), the run counter `c.ms` (only from the miss loop), `c.on` (needs `!careerOff`), the clock-in reminder and `shiftTick`'s shift-start note (both `playerShiftOn`). Leave earning and sick days are unaffected.
+
+**Should fix: the excuse rule turns a late start into a lost day, even when nothing could be missed.** DB1 excuses a day when a jump crosses any part of 09:00-12:30 with you not clocked in. Through `careerOff`, that makes the day a day off: no clocking in, no jobs held for you, no ladder row that day. Measured with `excuse.py` (Dev on, a fresh Dev save via Skip to Monday):
+
+| Jump | Excused | Can clock in after | Your jobs on the board by 16:00 |
+|---|---|---|---|
+| Day 2, 08:00 → 08:55 | no | yes ("in") | 4 |
+| Day 2, 08:00 → 09:30 | **yes** | **no** | **0** |
+| Day 9, 08:00 → 10:00 | **yes** | **no** | **0** |
+| Day 9, 09:30 → 09:40 (ten minutes) | **yes** | **no** | **0** |
+
+The normal game never reaches these states. Leave can't be booked after 08:30 the day before. Until 12:30 a player who arrives late can still clock in, and is only late. On Days 1-7 (`CAREER.grace`) a miss never counts at all. Excusing Day 2 is exactly what breaks the user's first real use (the Day 2 morning recipe): one hop past 09:00 and Day 2's work is gone. On Day 9 the Tier 2 test job stayed held for a player now "off" (`repair/20`).
+
+Patch (section 25, `devmodeSkipTo`): excuse only what the game would count as a miss. That's a day after the grace week, whose 12:30 the jump reaches or passes, with you not clocked in:
+```js
+-      const a = (d - 1) * 1440 + DAY_SHIFT[0], b = (d - 1) * 1440 + CAREER.missBy;
+-      if (to <= a || from >= b || !careerRota(d) || careerOff(d) || careerClockedIn(d)) continue;
++      const b = (d - 1) * 1440 + CAREER.missBy;           // the minute the game counts a miss (careerTick: m >= missBy)
++      if (d <= CAREER.grace || to < b || from >= b || !careerRota(d) || careerOff(d) || careerClockedIn(d)) continue;
+```
+A jump that ends before 12:30 leaves you late but able to clock in, as in the game. The Clock tab's text and devmode_check's expectations change to match ("excused once the jump passes 12:30, from Day 8").
+
+**Nits**
+- **`devmodeSettle` doesn't take you out of a shower or booth line** (`queueOut(false)`, as `newGameStart` does). Sleeping can't start from a line, but a Dev jump can, so you'd come back hours later still queued. Add `if (typeof queueOut === 'function') queueOut(false);`.
+- **A hold that never ends:** `devmodeLoad` and `devmodeClear` set `DM_HOLD = true` and then `location.reload()`. If the reload doesn't happen (blocked, cancelled), the game stays frozen and never saves. Add a safety: `setTimeout(() => { if (DM_HOLD) { DM_HOLD = false; devmodeSay('The reload didn\'t happen: nothing changed.'); } }, 4000);`. The Dev save was already written, so say "reload to see it".
+- **`devmodeLoad` writes the Dev save without `devmodeWrite`'s space check.** It's the same size as what it replaces, so that's fine, but say so in a comment.
