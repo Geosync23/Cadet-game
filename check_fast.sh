@@ -18,8 +18,12 @@ step() {   # step NAME OKPATTERN LOG cmd...
   if [ $rc -eq 0 ] && grep -q -- "$pat" "$log"; then say "$name" "OK ($(( $(date +%s) - t )) s)"
   else say "$name" "FAILED (exit $rc, $(( $(date +%s) - t )) s): $log"; grep -E 'FAIL|STOPPED|Error|error' "$log" | head -8 | sed 's/^/    /'; return 1; fi
 }
-step 'pieces = game file' 'build --check: OK' "$LOGS/build.txt" python3 build.py --check || FAIL=1
-step 'words baked' '^up to date' "$LOGS/words.txt" python3 content_gen.py pieces/content/s22-words.gen.js --check || FAIL=1
+if [ -f pieces/ORDER ]; then   # split: the pieces and the game file agree, and the words piece is baked
+  step 'pieces = game file' 'build --check: OK' "$LOGS/build.txt" python3 build.py --check || FAIL=1
+  step 'words baked' '^up to date' "$LOGS/words.txt" python3 content_gen.py pieces/content/s22-words.gen.js --check || FAIL=1
+else                         # one file (no split): the words in the game file are baked
+  step 'words baked' '^up to date' "$LOGS/words.txt" python3 content_gen.py starship-cadet.html --check || FAIL=1
+fi
 step 'parse, names, text' 'names_check: OK' "$LOGS/names.txt" env CADET_WORK="$BASE" node names_check.js || FAIL=1
 if [ $FAIL -ne 0 ]; then echo "QUICK CHECK FAILED (the fast steps; browser checks not run) in $(( $(date +%s) - T0 )) s"; exit 1; fi
 lane() {   # lane TAG step...; each lane its own CADET_WORK (parallel runs otherwise load each other's copies)

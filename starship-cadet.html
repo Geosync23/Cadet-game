@@ -10911,7 +10911,7 @@ function devNow() {                                      // the strip: where you
 // aboard" line. SHIP.device.calendarRemind = { on, ahead, morning, per: { <kind>: true | false } }, saved. ----
 let devTickMin = -1, devMorning = SHIP.time.day;
 function deviceTick() {
-  if (!DEV.live) return;                                 // not while the script is still loading (section 18 comes later)
+  if (!DEV.live return;                                 // not while the script is still loading (section 18 comes later)
   if (devLocked()) { SHIP.device.booted = false; if (DEV.open) deviceClose(); }
   const t = shipNow(); if (t === devTickMin) return; devTickMin = t;
   if (typeof sleeping !== 'undefined' && sleeping) return;

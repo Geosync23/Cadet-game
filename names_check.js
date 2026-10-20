@@ -22,8 +22,11 @@ try {
   for (const n of order) { const t = fs.readFileSync(path.join(ROOT, 'pieces', n), 'utf8'); PIECES.push({ n, line, t }); line += t.split('\n').length - 1; glued += t; }
   if (glued !== html) PIECES = [];
 } catch (e) { PIECES = []; }
+// without pieces (the one-file game): name the section a line is in, from the file's own "// 19. DEVICE ..." headings
+const SECTIONS = [];
+{ const L = html.split('\n'); for (let i = 0; i < L.length; i++) { const m = /^\/\/ (\d+[a-z]?)\. (.{0,40})/.exec(L[i]); if (m) SECTIONS.push({ line: i + 1, name: 'section ' + m[1] + ' (' + (m[2].length < 40 ? m[2].trim() : m[2].replace(/\s+\S*$/, '').trim() + '...') + ')' }); } }
 const where = gameLine => {
-  if (!PIECES.length) return `game line ${gameLine}`;
+  if (!PIECES.length) { let s = null; for (const x of SECTIONS) if (x.line <= gameLine) s = x; return s ? `${s.name}, game line ${gameLine}` : `game line ${gameLine}`; }
   let p = PIECES[0]; for (const q of PIECES) if (q.line <= gameLine) p = q;
   return `${p.n} line ${gameLine - p.line + 1} (game line ${gameLine})`;
 };
