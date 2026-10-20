@@ -187,3 +187,5 @@ GitHub check: ON for every push to claude/** and main (the user, 2026-10-20; the
 | Dev mode engineer DB1 | session_01R4RFu3mPaq4qj1L2TXEoza | `claude/devmode` (from claude/integration) | builds the lean Dev mode, Stop 1a first (D1-D4); the user answered all questions (12:58 UTC) |
 
 **Status ~13:25 UTC:** DB1 pushed Dev mode D1 (claude/devmode fffb8e2; cadet_test ALL IDENTICAL, new devmode_check.py OK, check_fast OK 387 s); now on D2. DR1 now also stands in as owner reviewer for the section 13 and 21 hooks (c9cc785, 55add3f; the D2 section 13 hook to follow). Waiting on the user's pick of the first-Monday bow-lounge tradition for the patch plan.
+
+**Handover protocol reinstated (the user, ~13:52 UTC):** every seat checks its memory (`get_session`, `context_usage.used_tokens` of 1,000,000) after each job: tell the lead at 500k; at 600k (or before a job big enough to reach it) write `plans/handover-<role>.md`, push, report, stay idle. The lead warns the user at 500k and hands over at 600k (`plans/handover-lead20.md`, written now). The hourly check-in checks this first. Patch plan rev 3 answered (cocoa: bar only; mug: ~20 ship min).
