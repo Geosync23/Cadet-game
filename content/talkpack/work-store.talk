@@ -11,8 +11,8 @@ listen: Who runs out of socks most?
   them: Can't say. Store's discreet. But they're in Works, and they're very tall.   #funny
 share: Patience, around five o'clock.
   them: Ha. We don't stock that. Tea's the closest thing. Second shelf.   #funny
-cheer: Biscuits. Every single week.
-  them: Then you're in good company. We order biscuits by the crate now.   #funny
+cheer: Socks. Every single week.
+  them: Then you're in good company. We order socks by the crate now.   #funny
 
 == ledger
 when: tier>=colleague who:ishikawa-orla
@@ -47,5 +47,5 @@ listen: How do you know what people want?
   them: I listen at the till. People tell you everything while they're paying.   #warm
 share: Something from home. Anything at all.
   them: Tell me where home is. I'll see what I can find. No promises. Some promises.   #warm
-cheer: An endless supply of good biscuits.
-  them: Everyone asks that. The answer's still no. Lovingly.   #funny
+cheer: An endless supply of socks.
+  them: Everyone asks that. The ship would still eat them. Lovingly.   #funny

@@ -5,7 +5,7 @@
 
 == first-light
 when: tier>=acquaintance !who:hart-ravi
-them: Hart waters the garden at first light, before anyone's up. Every day. Without fail.
+them: Hart does the first watering, start of the early team. Every day. Without fail.
 them: I came in early once and it was like walking into rain. Proper rain. I nearly cried.   #warm
 ask: What's the first thing you do, every morning?
 listen: Does the garden like the early water?
@@ -16,16 +16,16 @@ cheer: Hit the snooze. Twice.
   them: The garden forgives you. The tomatoes are judging, though.   #funny
 
 == gerald-nursery
-when: tier>=acquaintance !who:cruz-tove
-them: Every cactus aboard is called Gerald. They all come from our nursery tray.
-them: Cruz grows the cuttings. Hands them out. The name comes free.   #funny
-ask: Would you look after a plant, if we gave you one?
-listen: Who was the first Gerald?
-  them: Very old now. Still going. Nobody remembers who named it. Gerald knows.   #funny
-share: Yes. I'd love something green by my bunk.
-  them: Then come and pick one. They're all Gerald. Pick the one that looks at you.   #warm
-cheer: Only if it can't die.
-  them: It's a cactus. It's practically immortal. Water it monthly. Talk to it weekly.   #funny
+when: tier>=acquaintance
+them: The Gerald tray needs turning every morning, or they all lean the same way.
+them: Seventeen in there right now. Each one's somebody's, soon.   #warm
+ask: Is there a job you do that's really for someone you haven't met yet?
+listen: Who gets the next one?
+  them: Whoever needs one. You can always tell. They stand very still by the tray.   #warm
+share: Fixing things for the next shift.
+  them: Same thing. Somebody you'll never meet, glad it works. Lovely.   #warm
+cheer: Leaving the tape in the second drawer.
+  them: A gift to the future. Works will thank you. Silently.   #funny
 
 == herbs-galley
 when: tier>=acquaintance
@@ -33,7 +33,7 @@ them: Every evening I pick the galley's herbs. Brennan wants them fresh. Very fr
 them: I take them up with ten minutes to spare. If I'm late, I hear about it. Kindly. Loudly.   #funny
 ask: Who's the person you'd never want to keep waiting?
 listen: What does Brennan say if you're late?
-  them: "Lovely. Thank you SO much." Very polite. Terrifying. Never late again.   #funny
+  them: "Lovely. Thank you so very much." Very polite. Terrifying. Never late again.   #funny
 share: Calder. Never.
   them: Wise. Calder doesn't say anything. That's worse.   #funny
 cheer: My dinner. It waits for no one.
@@ -53,15 +53,15 @@ cheer: The mess. Specifically the pudding.
 
 == garden-means
 when: tier>=friend !who:cruz-tove
-them: Know what the garden means to me? Seventy-five people breathing air that we helped clean.
+them: Know what the garden means to me? A whole ship breathing air we helped clean.
 them: And eating herbs we grew. And smelling rain in a ship. That's a lot from a tray of soil.   #warm
 ask: What's the small thing you do that matters more than it looks?
 listen: Do people know how much the garden does?
-  them: No. And that's fine. They come in, they breathe, they feel better. That's enough.   #warm
+  them: No. And that's fine. They come in and breathe. We count that as applause.   #warm
 share: Keeping the air clean. Same as you.
   them: Ha. Then we're partners, aren't we? Plants and filters. The breathing team.   #warm
-cheer: Picking the tea corner's biscuits.
-  them: That matters. Don't let anyone tell you it doesn't.   #funny
+cheer: Switching the grow lamps on.
+  them: That matters. Light's half of growing.   #funny
 
 == green-hands
 when: tier>=friend
@@ -70,7 +70,7 @@ them: On leave, I did it in a shop. To a plastic plant. The shopkeeper stared.  
 ask: Has your work given you a habit that follows you around?
 listen: Do the plants notice?
   them: I like to think so. The basil grows faster near the path. Make of that what you will.   #warm
-share: I tap every panel I pass.
-  them: Ha. Then we're both saying hello to the ship. Different bits of her.   #warm
-cheer: I sniff every meal before eating.
-  them: That's not a habit. That's wisdom. Brennan approves.   #funny
+share: I water anything that looks thirsty.
+  them: Ha. Then you're one of us. Gerald approves.   #funny
+cheer: I hum at the lamps when they flicker.
+  them: Ha. They like it. Plants and lamps both. Keep humming.   #funny

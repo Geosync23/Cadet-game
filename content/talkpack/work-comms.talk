@@ -10,10 +10,10 @@ them: Some nights the relay's all static. You tune and tune and then, there. A v
 them: Like picking a lock with your ears. Best feeling in Comms.   #warm
 ask: What's the most satisfying fiddly thing you do?
 listen: Whose voice was it?
-  them: Somebody's gran, calling to say happy birthday. Twelve hours late. Still lovely.   #warm
+  them: Can't say. Comms rules. But it made my whole night.   #warm
 share: Getting a stuck bolt free.
   them: Same feeling. Fiddle, fiddle, then it gives. Very good.
-cheer: Opening a biscuit packet neatly.
+cheer: Untangling a headphone cable.
   them: Impossible. Nobody's ever done it. You're a legend if you have.   #funny
 
 == sorting
@@ -23,8 +23,8 @@ them: We never read them. We read the envelopes. Envelopes are lovely, actually.
 ask: Who do you write to most, back home?
 listen: What makes an envelope lovely?
   them: People draw on them. Little stars, little ships. Kids especially. Makes my day.   #warm
-share: My family. Not often enough.
-  them: Write one tonight. I'll send it with the morning bag. Quickest way home.   #warm
+share: My sibling. Every week, short.
+  them: Short and every week beats long and never. They'll keep them all.   #warm
 cheer: Nobody. They write to me. Badly.
   them: Bad letters are the best letters. Keep every one.   #funny
 
@@ -73,29 +73,30 @@ listen: Is it hard, keeping it in?
   them: Sometimes. Good news is hardest. I want to cheer and I can't. I cheer later. Quietly.   #funny
 share: Their machines. Fixing them right.
   them: That's big trust too. Every warm room aboard is somebody trusting you.   #warm
-cheer: The last biscuit. I always save it.
+cheer: The spare key to my locker.
   them: A sacred trust. I'm not sure I believe you.   #funny
 
 == comms-means
 when: tier>=friend
-them: Know what Comms means to me? A call home at three in the morning that gets through.
+them: Know what Comms means to me? A call home that finally gets through, after the storm queue.
 them: Somebody's dad says goodnight across all that dark. I put that call through. Me.   #warm
 ask: What part of your work do you hope people remember?
 listen: Does it ever not get through?
   them: Sometimes. Then we try again. And again. Until it does. That's the job.   #warm
 share: The things that just worked.
-  them: That's the best memory to leave. "It just worked." Nobody knows it was you. Lovely.   #warm
+  them: That's the best memory to leave. "It just worked." Sounds dull. It isn't.   #warm
 cheer: That I was nice at the tea corner.
   them: Underrated legacy. Very Wren.   #funny
 
 == comms-habit
 when: tier>=friend
-them: The job gave me a habit. I hear static in everything. The washer. The lift. Rain on leave.
-them: I keep wanting to tune it. My family thinks I'm humming. I'm tuning.   #funny
-ask: Has your work changed how you hear things?
-listen: What's the clearest sound aboard?
-  them: The mess at breakfast. Seventy people and no static at all. Just people.   #warm
-share: I hear every machine's mood now.
-  them: Then we're both tuning things. Just different channels.
-cheer: I hear "dinner's ready" from Deck 6.
-  them: That's not Comms. That's love. Of dinner.   #funny
+them: The job gave me patience. Everything we send waits hours in the dark before it lands.
+them: I used to hate the wait. Now I like it. It's a kind of hope, travelling.   #warm
+ask: What's the longest you've waited for good news?
+listen: Does the waiting ever end badly?
+  them: Hardly ever. Mostly it ends with someone grinning at the booths. I'll take those odds.   #warm
+share: A letter from home. Weeks, once.
+  them: Then you know the hope. Comms just gets to hold it for everyone.   #warm
+cheer: For the lift. On a Monday.
+  them: That's not a wait. That's a test of character.   #funny
+
