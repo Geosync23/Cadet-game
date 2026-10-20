@@ -45,3 +45,9 @@ DB1 01R4RFu3mPaq4qj1L2TXEoza (working) · DR1 01WfFmjT31bVcy4mvsNVi5Mz (working)
 - Patch: PA (patch-a, A-C) and PB (patch-b, D then F) slow, nothing pushed yet at 16:12 (asked to push WIP). PE (session_01H7weuTSkTfuSAqhxvdx1EK, patch-e): #25 #21 #6 #24 done (2e2575d, PP1 PASS WITH FIXES, DR1 owner review asked), #5 ladder next (Deck 5 hatch at v,19,9). DB1 builds #30 #29 on claude/devmode (its only push branch), maybe #26; else a fresh builder for #26.
 - Idle/done: TE1, TW1 (talk), TR1 stopped (handover on claude/talk-pack-review cb6dd07). BM11 build master ready (next build 0.64.5).
 - Usage: 5-hour limit showed "allowed_warning" at 16:11 (resets 16:40 UTC).
+
+## Update ~17:10 UTC (lead memory 50%: user warned)
+- 16:12-16:47 every seat stopped on the 5-hour usage limit; resumed at 16:48 on the user's "Resume". Asked the user: full team with pauses, or 3-4 seats steady (no answer yet).
+- Branch heads: patch-a e9d9022 (batch A: #1 #2 #28 done; PP1 reviewing, PB owner-reviewing hooks 47b3dba/6e9e86d; next batch B), patch-b 5baa5b8 (WIP batch D, check_fast pending), patch-e 2e2575d (#25 #21 #6 #24: PP1 PASS WITH FIXES, DR1 PASS; ladder #5 next), devmode 05314b6 (#30 mug behind MUG_ON; PP1 reviewing; #29 next, then DB1 may hand over before #26).
+- Merge plan: BM11 merges each reviewed branch into claude/integration (next 0.64.5), then the full round of checks from Day 1, then publish the patch build as a new page (Dev page can be republished too) and notify.
+- Answered for the user: first big gathering = Day 6 Crossing the Line (plaza ~50) per the events plan; then ion storm all-hands Days 9-11; Founders' Day festival (70+) after the phone test.
