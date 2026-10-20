@@ -26,7 +26,7 @@ Reviewer: second split reviewer SR2, 2026-10-20, branch `claude/split-review-2`.
 **Recommendation: option (d) below.**
 1. Now: all the new ways of working, plus labelled slots in the one file, two small tools for finding your way around, and a slimmer DEV_NOTES.
 2. Then: build one real step (Dev mode) that way and count the clashes.
-3. Then: decide on the cut. If we do cut, keep only the pieces in git (not the glued file), and fix the issues listed under "If you still want the split".
+3. Then: decide on the cut. If we do cut, fix the issues listed under "If you still want the split" first. You have decided to keep the glued file in git, so the script fixes for B1 and B2 below are required before the cut, not optional.
 
 You lose nothing by waiting: the cut is mechanical and can be done on any later build in half a day.
 
@@ -115,7 +115,8 @@ Ratings: **blocker** = loses work or hides a failure; **should fix** = a concret
 - **Fix:** before each merge, the build master reads the check result *for the exact commit being merged*, with the GitHub tool `actions_list` → `list_workflow_runs` on the branch. A result for an older push doesn't count.
 - Also, with "cancel-in-progress", a helper who pushes every few minutes never gets a finished run. The build master should wait for one, or run check_fast itself.
 
-### S2 (should fix): keep only the pieces in git, not the glued file (decision 2's other choice)
+### S2 (should fix, but the user has decided otherwise): keep only the pieces in git, not the glued file (decision 2's other choice)
+- **Update, 2026-10-20:** lead 20 passed on the user's call that the glued file stays committed. I leave the reasoning below for the record. With that call, B1 and B2 must be fixed in the scripts before the cut, and B3 (the checks refuse an out-of-step build) matters even more.
 - With the glued file in git:
   - every clash appears twice (B1);
   - there are two sources of truth, which needs the cut-or-glue rule (B1, B2) and makes helpers' grep hits double (`recShow`: 18 real hits become 36);
@@ -187,7 +188,7 @@ Nine scripts never exit non-zero: day, deck, disc, food, machine, path, perf, ca
 | The quick check takes about 4.5 minutes on 4 cores | See the timing note at the end. |
 
 ## 4. If you still want the split: the minimum before turn 2
-1. Keep only the pieces in git (S2), or fix B1 and B2 in the scripts.
+1. Fix B1 and B2 in the scripts (required, since the glued file stays in git by the user's call).
 2. Make the checks refuse an out-of-step build (B3).
 3. Write into the build master's brief: read the GitHub check result for the exact commit before merging (S1).
 4. Give new mechanic blocks their own pieces (S4).
