@@ -1,19 +1,19 @@
 @talks marrow
 // TW1, the Talk a while pack: Captain Odile Marrow's own talks. Calm, unhurried, curious; real questions, and she
 // remembers the answers; a quiet joke folded in; "we" for the ship. Never her daughter before friend; never retiring
-// before close; never what the Admiral is.
+// before close; never what the Admiral is. Not her one question or the Admiral's theories (beats 1-2).
 
-== one-question
+== the-step
 topic: ship
-them: I ask every new junior one question about the ship. Then I write it down.
-them: Today's is an easy one. Mind the step on your way in. Everyone trips.   #funny
-ask: What's one thing on the Wren you'd change, if it were up to you?
-listen: What do you do with the answers?
-  them: Read them again, on bad days. Sometimes I change things. Quietly.
-share: Nothing big. More windows on Deck 5.
-  them: Hm. Amadi says the same. I'll write it down twice.   #warm
-cheer: A slide from Deck 4 to the mess.
-  them: Commander Vance would need a regulation. I'm tempted, though.   #funny
+them: The ready room step. Everyone trips. I had it measured. A perfectly ordinary step.
+them: Commander Vance has tripped on it twice. He would like that kept quiet.   #funny
+ask: Is there a spot aboard that always catches you out?
+listen: Why not have it fixed?
+  them: It's older than I am. Some things you keep because they keep you humble.
+share: The lift doors. Every time.
+  them: They're quick. Step in like you mean it. That's most of command, too.   #warm
+cheer: My own feet, mostly.
+  them: Join the club. It's a large club. I'm in it.   #funny
 
 == portraits
 topic: crew
@@ -28,18 +28,18 @@ share: Someone at home. Kind to everyone.
 cheer: Whoever runs the biscuit tins.
   them: I'll tell Brennan. She'll be pleased. And worried about the tins.   #funny
 
-== admiral
-topic: news
+== quiz-third
+topic: tradition
 when: tier>=colleague
-them: Have the juniors decided what the Admiral is yet? I hear there are theories.
-them: I won't say. He outranks us all. That's all anyone needs to know.   #funny
-ask: Go on. What's your theory?
-listen: Has anyone ever guessed right?
-  them: One person came very close. I gave them extra leave. For being wrong.   #funny
-share: I haven't one yet. I'm listening.
-  them: Good. Listening first. You'll make a very good officer, one day.   #warm
-cheer: A very small, very old cat.
-  them: Officially there are no cats aboard. Officially.   #funny
+them: Our quiz team came third. Third. I have commanded this ship for six years.
+them: Commander Vance says third is a podium. He said it very quietly.   #funny
+ask: What would you be hopeless at, in a quiz? Be honest. I was.
+listen: What was your weak round?
+  them: Engines. Calder answered every one before I'd read it. I held the pencil.   #funny
+share: Anything with dates. I'm hopeless.
+  them: So am I. I remember people, not dates. It's a fair trade, most days.   #warm
+cheer: Every round. I'd bring moral support.
+  them: Then you'd be our most useful member. I'll save you a chair.   #funny
 
 == piano
 topic: hobby
@@ -51,5 +51,5 @@ listen: What do you play last, on Thursdays?
   them: The same piece, always. Someday I'll tell you why. Not tonight.
 share: Talking with people I like.
   them: Then I'm honoured to be one of them. Thank you. I mean that.   #warm
-cheer: The ship humming. And a biscuit.
+cheer: The ship humming. And a quiet corner.
   them: A good pairing. I may borrow it for Thursdays.   #funny

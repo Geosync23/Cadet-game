@@ -7,7 +7,7 @@
 topic: work
 them: Regulation two, section four. No saluting aboard. A nod will do.
 them: You'd be surprised how many people salute me anyway. Seven this month. I counted.
-ask: Is there a rule aboard you'd change, Cadet, if you could?
+ask: Is there a rule aboard you'd change, {nick}, if you could?
 listen: Have you really read them all?
   them: Twice. Cover to cover. The second time for pleasure. That was a joke. Partly.
 share: None yet. I'm still learning them.
@@ -19,7 +19,7 @@ cheer: Second helpings should be a regulation.
 topic: hobby
 when: tier>=acquaintance
 them: The rowing board in the gym. I taped it up myself. Level, clean, and in order.
-them: Three juniors are chasing my name. Lindqvist, Santos, Moreau. I am not worried. Noted.   #funny
+them: Three juniors are chasing my name. I am not worried. Noted.   #funny
 ask: Are you a competitive person, would you say?
 listen: Why move to the treadmill?
   them: A new board needs a first name. Someone has to set the standard. Correctly.
@@ -39,14 +39,14 @@ listen: Did the Captain really jump it?
 share: Something from home. To hear it here.
   them: Noted. I'll mark it. A good reason moves you up a place. Eighth.   #warm
 cheer: Whatever's loudest.
-  them: The record cabinet has one. I will not say which. Regulation nine: rest.   #funny
+  them: The cabinet has one. I will not say which. You will know it when it rattles the windows.   #funny
 
 == on-time
 topic: day
 when: tier>=friend
 them: I leave the bridge on time now. Counsellor's advice. I dislike it, accept it and do it.
 them: Evenings are very long. I have taken up the treadmill, the records and conversation.   #funny
-ask: What do you do with an evening, Cadet, when nothing is due?
+ask: What do you do with an evening, {nick}, when nothing is due?
 listen: Do you miss the late watches?
   them: Yes. Less each week. That may be the point. Oduya is annoyingly correct.
 share: Talk to people. Like this.

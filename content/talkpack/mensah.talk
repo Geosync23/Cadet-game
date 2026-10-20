@@ -11,9 +11,9 @@ ask: Do you have a little habit like that? Something just for you?
 listen: Does any deck answer back?
   them: Six hums. Every time. I take that as a good night back.   #warm
 share: I tap the bunk ladder twice before bed.
-  them: Ha! Good. Keep it. Little habits are how you tell a ship you live here.   #warm
+  them: Good. Keep it. Little habits are how you tell a ship you live here.   #warm
 cheer: I say good morning to the toaster.
-  them: Ha! Then the toaster's in good hands. Nights and mornings, covered.   #funny
+  them: Then the toaster's in good hands. Nights and mornings, covered.   #funny
 
 == the-count
 topic: crew
@@ -22,10 +22,10 @@ them: I keep a count. How many times I've made Holt laugh. Proper laughs. No sno
 them: I won't tell you the number. He'd find out. He finds everything out.   #funny
 ask: Who's the hardest person you've made laugh?
 listen: What was the best one?
-  them: The airlock and the hatch. Too many seals. He laughed for a whole three seconds.   #funny
+  them: One about a kettle. Long story, short punchline. Three whole seconds, he laughed.   #funny
 share: Someone back home. Took me years.
-  them: Ha! Then you know the feeling. Worth every year, those laughs.   #warm
-cheer: The Chief. Once. By accident.
+  them: Then you know the feeling. Worth every year, those laughs.   #warm
+cheer: Chief Calder. Once. By accident.
   them: Calder? Ha! Write it down. Date it. Nobody will believe you otherwise.   #funny
 
 == night-watch
@@ -37,19 +37,19 @@ ask: Would you ever work nights, do you think?
 listen: Don't you miss the daytime?
   them: Sometimes. Breakfast with the day crew. I get it as dinner. Funny old life.   #funny
 share: Maybe. The quiet sounds nice.
-  them: It is. Come on a round with me one night. Bring tea. I'll bring the laugh.   #warm
+  them: It is. The ship talks more at night. Softly. You'd hear it.   #warm
 cheer: Only if there's a night-time breakfast.
   them: Ha! There is. Six sharp. Brennan feeds the night lot first. Best kept secret aboard.   #funny
 
 == watching
 topic: day
 when: tier>=friend
-them: Can I tell you something about being on the Watch? You watch people, too. Not just doors.
+them: Here's a thing about the Watch. You watch people, too. Not just doors.
 them: Who's eating. Who's quiet. Who laughs too loud. Then you send someone kind. Or go.   #warm
 ask: Who looks out for you, when you're not all right?
-listen: Who looks out for you?
-  them: Holt. He'd never say it. He just turns up with tea he doesn't like. Ha.   #warm
+listen: And who watches the watcher?
+  them: Holt. He'd never say it. He just turns up with tea he doesn't like.   #warm
 share: A few people now. You, maybe.
   them: Me? Always. That's a promise, that. Write it down with the Holt count.   #warm
-cheer: The grab shelf. It never lets me down.
-  them: Ha! Fair. The grab shelf is the ship's kindest member of crew.   #funny
+cheer: Whoever left the light on for me.
+  them: Fair. A light left on is the ship's kindest habit.   #warm

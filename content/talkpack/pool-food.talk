@@ -26,7 +26,7 @@ cheer: Second breakfast.
   them: That's not a choice. That's a lifestyle. Fine, though.   #funny
 
 == tried-to-cook
-when: !who:brennan|dlamini-lukas|varga-tariq|madsen-ivo|walsh-esme|haddad-tamsin
+when: !who:brennan|dlamini-lukas|varga-tariq|madsen-ivo|walsh-esme|haddad-tamsin|halloran-emeka|tran-chloe|yilmaz-karin|mbeki-bo|mwangi-rafe|achebe-lumi|quaye-hiro|kowal-priya
 them: I tried to cook once, on leave. Never again.   #funny
 them: The smoke alarm and I are still not speaking.
 ask: Can you cook? Honestly?
@@ -78,7 +78,7 @@ when: tier>=acquaintance !who:brennan|nandakumar|holt
 them: Nandakumar grows chillies in the garden. Brennan complains about them.
 them: Then she uses every single one.   #funny
 ask: How do you like your food? Hot or mild?
-listen: Are they very hot?
+listen: Are they really that hot?
   them: Hot enough to make Holt blink. I've seen it.   #funny
 share: Mild, please. I'm new to the spicy ones.
   them: Start small. Brennan will notice. She notices everything.
@@ -86,8 +86,8 @@ cheer: Hot. Make my eyes water.
   them: Brave. Brennan will approve.   #funny
 
 == home-dish
-when: tier>=colleague !who:brennan
-them: Brennan made a dish from {home} last Friday. Just for me, I think.
+when: tier>=colleague !who:brennan|tomas
+them: Brennan made a dish from {home} last week. Just for me, I think.
 them: I didn't ask. She just knew. I nearly cried into it.   #warm
 ask: What's a food that means home to you?
 listen: How did she know?
@@ -111,11 +111,11 @@ cheer: One giant biscuit. Everyone gets a corner.
 
 == supper
 when: tier>=friend !who:pell
-them: Sometimes the best meal is the late one. Grab-shelf leftovers.
-them: Whoever's still up, all round one table. Lovely.   #warm
+them: Sometimes the best meal is a late one. A grab-shelf plate, whoever's still up.
+them: Two of us at one table, eating cold stew. Lovely.   #warm
 ask: Who do you like eating with, aboard?
 listen: Who do you eat late with?
-  them: Whoever's about. You should come. Bring your bunkmates.   #warm
+  them: Whoever's about. Not many. That's the nice bit.   #warm
 share: My bunkmates. And you, now.
   them: Good company makes it taste better. Fact.   #warm
 cheer: Anyone who doesn't steal my pudding.

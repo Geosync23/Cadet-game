@@ -32,7 +32,7 @@ cheer: Gerald. Obviously.
 topic: crew
 when: tier>=colleague
 them: Someone labelled a sample in my store in their own handwriting. Not mine.
-them: I've re-labelled it. And the twelve beside it. Mori runs the labs. I run the labels.   #funny
+them: I've re-labelled it. And the twelve beside it. My store, my handwriting.   #funny
 ask: Is there something you're particular about? Very particular?
 listen: Does Mori mind?
   them: Mori runs the labs while I run everyone. It works. Don't tell Mori I said "runs".   #funny

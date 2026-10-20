@@ -15,6 +15,7 @@ cheer: You. You're my best source.
   them: An honour. I'll try to be worth it.   #funny
 
 == knew-nobody
+when: tier>=acquaintance
 them: I knew nobody when I came aboard. Now look.
 them: I can't walk the length of Deck 3 without a chat.   #funny
 ask: Have you made any friends yet? Apart from me.   #funny
@@ -23,12 +24,12 @@ listen: Who was your first friend here?
 share: A few. It's getting easier.
   them: It does. Then one day you're the one sitting with the new face.
 cheer: The lift. We have an understanding.
-  them: The lift's everyone's friend. Ask the lift club.   #funny
+  them: Good choice. It never interrupts.   #funny
 
 == friend-funny
 when: tier>=acquaintance
 them: {friend} did the funniest thing this morning.
-them: Walked into the mess, sat down, and fell asleep in the porridge queue.   #funny
+them: Queued for porridge and fell asleep standing up.   #funny
 ask: Who makes you laugh, aboard?
 listen: How long have you two been friends?
   them: Feels like always. That happens fast out here.   #warm
@@ -54,7 +55,7 @@ when: tier>=acquaintance !who:brennan
 them: People look out for each other here. It's nice.
 them: You go quiet at dinner, someone asks. Every time.
 ask: Has anyone looked out for you yet?
-listen: Has someone looked out for you?
+listen: Who looked out for you, when you were new?
   them: Lots of times. I try to pay it back. Can't always.   #warm
 share: Yes. More than I expected.
   them: Good. That's the ship working properly.   #warm
@@ -87,21 +88,21 @@ cheer: Days until soup day.
 
 == friend-help
 when: tier>=colleague !who:brennan
-them: {friend} helped me through a bad patch last year. Never made a fuss.
+them: {friend} helped me through a bad patch a while back. Never made a fuss.
 them: Just turned up. Every evening, for a week.   #warm
 ask: Who would you go to, if you had a bad day?
 listen: Have you thanked them?
   them: Tried. They said "don't be daft". That's how you know.   #warm
 share: You, maybe. If that's all right.
   them: More than all right. Any day. I mean that.   #warm
-cheer: Brennan. With a spoon.
-  them: Good choice. A spoon fixes most things.   #funny
+cheer: Whoever has the best blanket.
+  them: Good choice. A blanket fixes most things.   #funny
 
 == new-faces
 when: tier>=colleague !newhere
 them: I like it when new people come aboard. The ship gets bigger.
 them: Not the corridors. The ship. You know what I mean.
-ask: What's it like, being one of the new faces?
+ask: Do you remember your first week aboard? What was it like?
 listen: Do you remember being new?
   them: Every bit. That's why I talk to new people. Someone talked to me.   #warm
 share: Strange. Lovely. A bit lonely sometimes.

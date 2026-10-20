@@ -4,6 +4,7 @@ topic: hobby
 // Anyone can say these (crew, not guests, unless a talk says so). {hobby} is the roster's phrase.
 
 == one-hour
+when: !thread:talent
 them: I've been {hobby} again. It's the one hour my head goes quiet.
 them: Nobody needs anything from me. Nobody even knows where I am.   #funny
 ask: Have you got a thing yet? Something you do just because?
@@ -15,7 +16,8 @@ cheer: Sleep. I'm very good at sleep.
   them: Underrated hobby. You'll go far.   #funny
 
 == bad-at-it
-them: Can I tell you a secret? I'm not very good at {hobby}.
+when: !thread:talent !who:rina|calder
+them: Here's a secret. I'm not very good at the thing I do for fun.
 them: Years at it. Still not good. Don't care.   #funny
 ask: Is there anything you love doing that you're bad at?
 listen: Why keep at it, then?
@@ -35,7 +37,7 @@ listen: What are you thinking of?
 share: Something with my hands. Making things.
   them: Works will sort that out for you. You'll be making things daily.
 cheer: Juggling. In the lift.
-  them: The lift club would never recover.   #funny
+  them: The lift would never recover. Nor would the people in it.   #funny
 
 == gerald
 when: tier>=acquaintance !who:cruz-tove
@@ -50,7 +52,7 @@ cheer: Only if I can call it Gerald Two.
   them: Bold. Cruz may refuse on principle.   #funny
 
 == comics-wall
-when: tier>=acquaintance !who:teague-theo|hart-ravi|abara-rosa
+when: tier>=acquaintance !who:teague-theo|hart-ravi|abara-rosa !moved:teague-theo
 them: Have you looked at the comics wall in the junior common room?
 them: Teague, Hart and Abara draw life aboard. Sometimes you're in one.
 ask: Would you want to turn up in one?
@@ -70,24 +72,24 @@ listen: Do you know who paints them?
   them: Three suspects. Bakshi, Strand, O'Neill. They all look innocent.   #funny
 share: Keep it. Probably show everyone.
   them: That's what I did. Now it's on my shelf, watching me.   #funny
-cheer: Check it was flattering, first.
+cheer: Check it got my good side.
   them: Mine was. Very generous with the hair.   #funny
 
 == starting-young
-when: tier>=colleague
-them: I've had {hobby} since I was small. It came with me from {home}.
+when: tier>=colleague !who:tomas|halloran-emeka
+them: Funny what you pack. I brought half of {home} in one small bag.
 them: Some things you pack without thinking.
 ask: What did you bring aboard that you couldn't leave behind?
-listen: What was it like, starting it at home?
-  them: Messy. Loud. Lots of people telling me how. I miss that, a bit.   #warm
+listen: What did you bring?
+  them: A cup that matches nothing aboard. It's perfect.   #warm
 share: Something small from home. It's by my bunk.
   them: Good. Everyone needs one thing that isn't the ship.   #warm
-cheer: My appetite. Still got it.
-  them: Brennan will be delighted. Truly.   #funny
+cheer: My bad jokes. Still got them.
+  them: Halloran will want to trade. Brace yourself.   #funny
 
 == teach-me
-when: tier>=colleague !who:pell
-them: I've been teaching {friend} a bit of {hobby}.
+when: tier>=colleague !who:pell|kowalczyk|achterberg-lars|moreau-signe|soto-marta|vasquez-uma|kim-yusuf|castellano-jem !thread:talent
+them: I've been teaching {friend} a bit of {hobbyNoun}.
 them: It's nice, showing someone. You see it fresh again.
 ask: Is there something you'd teach someone, if they asked?
 listen: Are they any good?
@@ -98,7 +100,7 @@ cheer: How to nap anywhere. Pell taught me.
   them: Pell's a master. You'd be second at best.   #funny
 
 == guitar-book
-when: tier>=acquaintance !who:lindqvist-isak|park-noor|larsen-hamid|haddad-tamsin
+when: tier>=acquaintance !who:lindqvist-isak|park-noor|larsen-hamid|haddad-tamsin !moved:lindqvist-isak !moved:haddad-tamsin
 them: There's a battered guitar book in the music room.
 them: Four people learn from it. They argue whose turn it is.   #funny
 ask: Would you ever learn an instrument?
@@ -110,8 +112,8 @@ cheer: Only the triangle. Low risk.
   them: Nobody's ever argued over the triangle. Smart.   #funny
 
 == rest-day
-when: tier>=friend
-them: Can I be honest? I nearly gave up {hobby} last year.
+when: tier>=friend !thread:talent
+them: I nearly gave up {hobby} last year. Honestly.
 them: Too tired after shifts. Then I missed it. Properly missed it.
 ask: Do you get enough time for yourself, out here?
 listen: What brought you back to it?

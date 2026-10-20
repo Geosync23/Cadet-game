@@ -17,14 +17,14 @@ cheer: I just make it up. Saves time.
 == gull
 when: !who:vance
 them: Did you read Gull this week? In the newsletter?
-them: The poem about the treadmill. "Thou belt of endless toil."   #funny
+them: The one about the lift doors. It rhymed "door" with "door". Twice.   #funny
 ask: Do you read the newsletter?
 listen: Who do you think Gull is?
   them: Nobody knows. The guesses get wilder every week.   #funny
 share: Sometimes. I like the poems, honestly.
   them: You do? Brave. Don't say it too loudly.   #funny
 cheer: Only for Gull. Gull's the best bit.
-  them: The best worst bit. Every Friday, I'm there.   #funny
+  them: The best worst bit. Every week, I'm there.   #funny
 
 == twins
 when: tier>=acquaintance !who:navarro-mateo|salo-saad|nakamura-bilal
@@ -35,11 +35,11 @@ listen: Do they look alike?
   them: I've no idea. Nobody's seen the Halcyon lot in ages.   #funny
 share: I have family back home. I miss them.
   them: Write to them. Tell them about the Wren. They'll love it.   #warm
-cheer: Not that I know of. I'll check.
-  them: Do check. Apparently it happens.   #funny
+cheer: One. Older. They think they're in charge.
+  them: They always will. It's in the rules.   #funny
 
 == lost-property
-when: tier>=acquaintance !who:navarro-mateo|tran-chloe|fonseca-arjun|grieve-thea
+when: tier>=acquaintance !who:navarro-mateo|tran-chloe|fonseca-arjun|grieve-thea !moved:grieve-thea
 them: There are four lost-property boxes now. On four decks.
 them: Four people each think they're the only one in charge.   #funny
 ask: Have you lost anything aboard yet?
@@ -63,7 +63,7 @@ cheer: That the coffee machine has feelings.
   them: Works says it does. Works would know.   #funny
 
 == bunk-moves
-when: tier>=acquaintance rank:junior !who:tomas
+when: tier>=acquaintance rank:junior !who:tomas|tran-chloe|santos-zofia|dlamini-lukas
 them: Someone in my bunk room snores. We're having a vote about it.   #funny
 them: Not to move them. To buy them a better pillow.
 ask: How are your bunkmates? Getting on all right?
@@ -71,11 +71,11 @@ listen: Will a pillow help?
   them: No. But it's a nice gesture. That's how we do things.   #funny
 share: Really well. I got lucky.
   them: You did. A good bunk room makes the whole ship easier.   #warm
-cheer: Tomas talks to the stars. Out loud.
+cheer: Tomas counts the windows. Out loud.
   them: That's lovely, actually. Don't tell him I said so.   #warm
 
 == delivery
-when: tier>=acquaintance
+when: tier>=acquaintance !who:esposito-yara|ishikawa-orla
 them: The store's getting new stock soon. Socks, apparently.
 them: Everyone's very excited about the socks.   #funny
 ask: What would you want from the store, if you could ask for anything?
@@ -111,7 +111,7 @@ cheer: I read it all, then forget it all.
   them: That's most of us. Your device remembers for you.   #funny
 
 == news-from-home
-when: tier>=friend
+when: tier>=friend !thread:family !who:rina|torres-zeke|pell
 them: I had some news from home. Good news. Small, but good.
 them: Someone I love is doing better. That's all. That's everything.   #warm
 ask: Has home had good news for you lately?
