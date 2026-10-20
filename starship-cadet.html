@@ -13535,7 +13535,7 @@ SIM_ADVANCE.push((from, to) => {
   if (!(ACT && ACT.kind === 'lie')) actEnd(true); JOB_SEEN = null; SHIP.player.tray = null;   // a tray doesn't last the night (0.28.38)   // asleep in your bunk you wake there, still lying (0.28.29)                        // jobs posted while you slept aren't announced one by one
   const d = typeof deckDef !== 'undefined' && deckDef ? deckDef.num : 0;   // a replay: section 17's pure record, never the live machines
   let fx = null; try { fx = typeof shipEffectsAt === 'function' && d ? shipEffectsAt(d, from) : null; } catch (e) { fx = null; }
-  needsDrain(to - from, sleeping || nightAt(from % 1440) > .5, fx);
+  if (!(typeof devmodeHold === 'function' && devmodeHold())) needsDrain(to - from, sleeping || nightAt(from % 1440) > .5, fx);   // a Dev mode clock jump keeps your needs (section 25)
   needsT = to;
 });
 // New game (section 13): fresh needs, nothing in hand
