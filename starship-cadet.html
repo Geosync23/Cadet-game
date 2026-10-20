@@ -64,6 +64,11 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 .devbtn b{min-width:16px;padding:0 4px;border-radius:8px;background:var(--teal);color:#08201d;font-size:11px;line-height:16px;margin-left:2px}
 .devbtn.compact span{display:none}                        /* 0.28.59: the narrowest phones, so Pause fits beside it (its aria-label still says Device) */
 .devbtn.low::after{content:"";width:7px;height:7px;border-radius:50%;background:#e8a04c;margin-left:2px}
+/* the patch, #14: the device just handed over, until you first open it (section 21's introDevGlowTick) */
+.devbtn.devglow{animation:devglow 1.6s ease-in-out infinite}
+@keyframes devglow{0%,100%{box-shadow:0 0 0 0 rgba(76,195,181,.6)}50%{box-shadow:0 0 0 7px rgba(76,195,181,0)}}
+#devPoint{position:fixed;z-index:3;pointer-events:none;padding:4px 9px;border-radius:9px;background:rgba(8,32,29,.9);border:1px solid var(--teal);color:#e8fffb;font-size:12px;white-space:nowrap}
+#devPoint::before{content:"";position:absolute;left:16px;top:-6px;border:6px solid transparent;border-top:0;border-bottom-color:var(--teal)}
 /* 0.72.0 (HUD U): the Tracked button, in the Device button's row (section 15b's trkPlace lines it up), and its panel */
 .trkbtn{position:fixed;left:140px;top:86px;z-index:2;padding:6px 11px;font-size:12.5px}
 .trkbtn.compact span{display:none}
