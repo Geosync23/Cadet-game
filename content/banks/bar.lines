@@ -23,6 +23,10 @@
 - Here's your {drink}. Find a stool, put your feet up.
 - Here you are. Careful, it's full.
 
+// patch #29 (cocoa at the bar, with the mug in your hands: #30): cocoa's own serve line, on the card
+== bar.serve.cocoa
+- One cocoa. Careful, it's hot.
+
 == bar.broke
 - Bit short? Come back when you've a few more credits.
 - Not enough credits, sorry. Water's free, though.
@@ -42,6 +46,16 @@
 
 == bar.closed
 - Back at 17:30.
+
+// patch #30 (the mug in your hands): drunk as you go, and Put down (TEXTS)
+== bar.finish.cocoa
+- You finish your cocoa. Warm all the way down.
+
+== bar.finish.tea
+- You finish your tea.
+
+== bar.putdown
+- You set your mug down. Someone will clear it.
 
 == bar.order
 - Order a drink (2 credits)

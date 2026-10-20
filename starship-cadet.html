@@ -13852,7 +13852,8 @@ function barTap(it, at) {
       const id = usual ? (i === 0 ? usual : ids[i - 1]) : ids[i]; if (!id) return;
       if (SHIP.player.credits < BAR_PRICE) { toast(name, barSays(who, 'bar.broke', 'That\'s ' + BAR_PRICE + ' credits, and you\'re a bit short. Next time.')); return; }
       SHIP.player.credits -= BAR_PRICE; SHIP.player.drink = id; B.run = B.last === id ? B.run + 1 : 1; B.last = id;
-      toast(name, barSays(who, 'bar.serve', 'One ' + BAR_DRINKS[id].short + '. Enjoy.', { drink: BAR_DRINKS[id].short }) + ' Take it to a stool.');
+      const mug = typeof MUG_ON !== 'undefined' && MUG_ON && MUG_DRINKS.has(id);   // patch #29/#30: cocoa's own line; a mug can be drunk as you go
+      toast(name, (mug && id === 'cocoa' ? barSays(who, 'bar.serve.cocoa', 'One cocoa. Careful, it\'s hot.') : barSays(who, 'bar.serve', 'One ' + BAR_DRINKS[id].short + '. Enjoy.', { drink: BAR_DRINKS[id].short })) + (mug ? ' Take it to a stool, or drink it as you go.' : ' Take it to a stool.'));
     };
     if (typeof deviceChoose === 'function') deviceChoose({ title: name, text: barSays(who, 'bar.ask', 'What\'ll it be?'), choices }, pick); else pick(usual ? 0 : 0);
   };
@@ -14297,9 +14298,11 @@ let MUG = null;                                          // { drink, from }: the
 const mugText = (k, fb, v = {}) => (typeof barSays === 'function' ? barSays(null, k, fb, v) : fb);
 function mugFinish(quiet) {                              // drunk as you go: the stool's gains, then it's gone
   const P = SHIP.player, d = MUG && MUG.drink, def = PLAYER_ACTS.ixDrink, n = P.needs; MUG = null; P.drink = null; if (!d) return;
-  if (def) { n[def.need] = needClamp(n[def.need] + def.gain); for (const k in def.also || {}) n[k] = needClamp(n[k] + def.also[k]); }
+  if (def) { const also = mugAlso(d, def.also); n[def.need] = needClamp(n[def.need] + def.gain); for (const k in also) n[k] = needClamp(n[k] + also[k]); }
   if (!quiet) toast(BAR_DRINKS[d].name, mugText('bar.finish.' + d, d === 'cocoa' ? 'You finish your cocoa. Warm all the way down.' : 'You finish your ' + BAR_DRINKS[d].short + '.'));
 }
+// patch #29: a cocoa from the bar is leisure +8 (the stool's +5 for the rest), at a stool (15b's ixSide asks) or as you go
+const mugAlso = (d, also) => MUG_ON && d === 'cocoa' ? { ...(also || {}), leisure: 8 } : { ...(also || {}) };
 function mugTick() {                                     // each frame (section 15's player tick): the mug's minutes, and hands wanted elsewhere
   if (!MUG_ON) return;
   const P = SHIP.player, d = P.drink;
@@ -27898,13 +27901,21 @@ const LINES = JSON.parse([
   '{"text":"Juice","id":"1i9s1b8"}]',
   ',"bar.drink.tea":[',
   '{"text":"Tea","id":"1d6iuxc"}]',
+  ',"bar.finish.cocoa":[',
+  '{"text":"You finish your cocoa. Warm all the way down.","id":"74tjry"}]',
+  ',"bar.finish.tea":[',
+  '{"text":"You finish your tea.","id":"ghteu2"}]',
   ',"bar.order":[',
   '{"text":"Order a drink (2 credits)","id":"a4iynu"}]',
+  ',"bar.putdown":[',
+  '{"text":"You set your mug down. Someone will clear it.","id":"kvz0ss"}]',
   ',"bar.serve":[',
   '{"text":"One {drink}. Enjoy.","id":"137tz96"},',
   '{"text":"There you go. One {drink}, nice and fresh.","id":"938j4o"},',
   '{"text":"Here\'s your {drink}. Find a stool, put your feet up.","id":"zbmvfu"},',
   '{"text":"Here you are. Careful, it\'s full.","id":"4pn7xq"}]',
+  ',"bar.serve.cocoa":[',
+  '{"text":"One cocoa. Careful, it\'s hot.","id":"18f53bx"}]',
   ',"bar.tap":[',
   '{"text":"Tap night! The drink of the week is {drink}. Go on.","id":"1o09367"},',
   '{"text":"Drink of the week: {drink}. I\'m very proud of it.","id":"83dork","tone":"funny"}]',
