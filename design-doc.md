@@ -612,8 +612,8 @@ Whatever you saw or missed, the crew retell it in chatter for a day or two, with
 
 **Commendations and occasions (the events engineer, build 0.34.11, from the Pillar 3 plan's Part 4):**
 
-- **A commendation** comes at an event's all-clear (the user, 2026-10-20; it used to come at the end) if you did two or more of its jobs, or one job and a meeting. It's a letter from the Captain, kept on your record. **The Captain's scenes stay separate** (the user, 2026-10-20): the commendation summons, the Senior Officer ready room, the toast, the Captain's table and the missed-shifts talks each keep their own scene. A career-beat guard spaces them: at most one Captain's scene a day, and none on a test day. After the storm that gives the letter on Day 14, the Senior Officer scene on Day 16, the toast on Day 17, the summons on Day 18 and the table on Day 20.
-- **The Captain's ready room:** your first commendation (or a close friendship with Commander Vance) gets you a summons at 11:00 on the next day the Captain is on shift. She thanks you, asks for a junior's view, and introduces the Admiral.
+- **A commendation** comes at an event's all-clear if you did two or more of its jobs, or one job and a meeting. It's a letter from the Captain, kept on your record. (Timing: the commendation used to come when the event ended. Moving it to the all-clear is the events planner's proposal, plans/events-plan.html v3.1, waiting on the user; see Open questions.) **The Captain's scenes stay separate** (the user, 2026-10-20): the commendation summons, the Senior Officer ready room, the toast, the Captain's table and the missed-shifts talks each keep their own scene. A career-beat guard spaces them, in hours as well as days: at most one Captain's scene a day, none on a test day, and never across a night shift. After the storm that gives the letter on Day 14, the Senior Officer scene on Day 16, the toast on Day 17, the summons on Day 18 (at an hour clear of that day's training) and the table on Day 20 (ending by 20:30, before the night shift).
+- **The Captain's ready room:** your first commendation (or a close friendship with Commander Vance) gets you a summons on the first day the career-beat guard leaves free, at an hour it leaves free (after the storm: Day 18). She thanks you, asks for a junior's view, and introduces the Admiral.
 - **The Captain's table:** a dinner in her quarters every four weeks (days 20, 48, ...) at 19:30. You're invited the day before if you were commended in the last four weeks, or have three close friends. The galley cooks an extra batch, and you keep a framed menu if you go.
 - **The bridge invite** (built in 0.34.35; the head writer's lines): bridge hour waits for it. At breakfast in the mess the day before your first bridge hour after the first ship-wide event has ended (day 22, a Monday, in a new game), Commander Vance stops by your table and passes on the Captain's invitation. It's a chance meeting, so there's no appointment or notice first. Any reply counts as a yes; if you miss him, his note comes by Mail and you're invited anyway. Bridge hour is then on the calendar from day 23.
 - **Progress talks** with Chief Calder are appointments you ask for. They take place in her office on any day she's on shift.
@@ -622,7 +622,7 @@ Whatever you saw or missed, the crew retell it in chatter for a day or two, with
 **Scope and calendar (the user, 2026-10-20; plans/events-plan.html v3).** Only the events up to the end of the career (the promotions, ending with "Calder's question" on Day 26) are built. **Every later event is parked**, not deleted: it stays in the table below and in `plans/pillar3-plan.md`, in case the game grows. Events come by the calendar, not by your rank, with small parts that depend on rank. The fixed days for a new game:
 - **Day 6 (Saturday):** a new one-day short event, the first chronologically. It's the user's "one more short one" (to be confirmed). Which event is still open; the recommendation is "Crossing the Line", a plaza ceremony and a supper.
 - **Days 11-15:** the ion storm, one day later than built, with a shorter afterglow.
-  - Thursday 11: the warning, and Calder's briefing after the first team job.
+  - Thursday 11: the warning, and Calder's briefing at 14:00, after the first team job and the tea break.
   - Friday 12, 14:00: the front.
   - Sunday 14, 10:00: the all-clear, with the party that evening.
 - **Tuesday Day 16, 21:30:** comet viewing, one day long.
@@ -637,7 +637,7 @@ Build order: the ion storm first, then the Day 6 event, the comet and the visit.
 
 **The storm, as decided (the user, 2026-10-20).** Your prep jobs and help move its threads: fitting the ballasts shortens the blackouts, taking the batteries up keeps the bridge fed, and a call-booth rota shortens the queue. Left alone, the storm comes out bumpy; with good help, smooth. The rec deck's first all-hands gets its own date, so it no longer rides on the storm. The rec deck closes from the front to the all-clear.
 
-**Large groups (the user's playtest, 2026-10-20: "Love the moments with large groups — need more, especially in ship-wide events").** Every event gets big gatherings:
+**Large groups (the user's playtest, relayed by lead 20, 2026-10-20: "Love the moments with large groups — need more, especially in ship-wide events").** Every event gets big gatherings:
 - the Day 6 event's two crowds;
 - the storm's lantern supper in the mess and its party;
 - the comet at the windows;
@@ -809,10 +809,10 @@ Done so far:
   - Is the Day 6 event the "one more short one", or are two wanted? [one]
   - Which Day 6 event? [Crossing the Line]
   - Saturday Day 6 or Friday Day 5? [Saturday]
-  - On the storm's Sunday all-clear, do the Captain and Calder come in on their day off? [yes]
-  - How big should crowds be for now? [about 60 per gathering until a phone test]
-  - Should rec talent night move off the party night? [yes]
-  - Is the bridge invite tied to the storm or to the first event? [the storm]
+  - On the storm's Sunday all-clear, do the four of its five people who are off that day come in? [yes]
+  - How big should crowds be for now? [about 60 per gathering until a phone test, with standing places in the 44-seat mess]
+  - Should rec talent night move and Lap of the Wren pause on the party night? [yes]
+  - Should the storm commendation arrive at the all-clear, the planner's proposal? [yes]
 
 **The decks:**
 
