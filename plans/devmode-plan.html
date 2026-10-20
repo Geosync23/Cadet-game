@@ -208,10 +208,10 @@ If a skip passes one of the first week's meetings, the panel says so in words ("
 <h3>4.1 What it does</h3>
 <ol>
 <li>Pick a day from 0 to 30. The shortcuts are the story's beats: Day 1, the Day 2 solo job, Day 5, the Day 9 test, Day 10, Day 12, Day 16, Day 26, Day 30.</li>
-<li>Dev mode starts a <b>new Dev game</b> by shuttle (new question 2), then moves the clock day by day to that day at 06:00, with every workday excused.</li>
-<li>Each morning, before that day runs, it sets the career to what a steady player has by then, from the table below. The ladder then sees those trainings as done and doesn't ask for them again.</li>
-<li>The ship itself (machines, jobs, galley, Mail, traditions, the ion storm, the crew's habits) runs through those days with the game's own catch-up code, as when you sleep. Your part in the storm is "none".</li>
-<li><b>Set career doesn't depend on the first week's meetings happening, so it works even while the Day 2 meeting is broken.</b> Before it sets rank and trainings, it marks the arrival week as attended: the Day 1 briefing, the Day 2 solo job, the Settling-in items, and the Day 1 shadow shift the career starts from. Later systems then treat you as having been there.</li>
+<li>Dev mode starts a <b>new Dev game</b> the "Skip to Monday" way (Day 1, 06:00; new question 2), then moves the clock day by day to that day at 06:00, with every workday excused. It doesn't start by shuttle, because the arrival holds the clock at Day 0 17:30 until you sign aboard (DR1 ran it). A new Dev save also has the arrival's start-up switched on, so Dev mode clears that when it starts its game (a section 21 hook).</li>
+<li>Each morning, before that day runs, it sets the career to what a steady player has by then, from the table below. It records each training as both <b>trained</b> and <b>opened</b> on its day (<code>W.tr</code> and <code>W.op</code>, since the ladder reads <code>W.op</code>), so the ladder doesn't open or ask for them again. After setting the rank it calls the game's own <code>promoPip()</code>, so your collar shows it.</li>
+<li>The ship itself (machines, jobs, galley, Mail, traditions, the ion storm, the crew's habits) runs through those days with the game's own catch-up code, as when you sleep. Your part in the storm is "none", and the storm's briefing notes arrive as Mail, as for anyone who missed the briefing.</li>
+<li><b>Set career doesn't depend on the first week's meetings happening, so it works even while the Day 2 meeting is broken.</b> Before the skip passes each one, it marks the arrival week as attended: the Day 1 briefing, the Day 2 solo job, the Settling-in items, and the Day 1 shadow shift the career starts from. Later systems then treat you as having been there.</li>
 <li>The first week's beats are marked as met, the promotion's beats as done (ceremony, cabin 4-23, the pip), and friendships with the people a steady player meets get a starting level (new question 1).</li>
 <li>You wake at 06:00 in your bed: the bunk room as a Junior, your cabin as an Officer.</li>
 </ol>
@@ -252,6 +252,7 @@ If a skip passes one of the first week's meetings, the panel says so in words ("
 <tr><td>Rank, trainings, tools, band, the promotion</td><td>Set from the table: right for a steady player</td></tr>
 <tr><td>Machines, jobs, galley, Mail, traditions, news, the ion storm</td><td>Real: the game ran those days (with you away)</td></tr>
 <tr><td>Friendships and stories</td><td>Thin: a starting level with the people a steady player meets (question 1), no story beats played</td></tr>
+<tr><td>The first week's small ticks (the mug, the seedling, the Settling-in list)</td><td>Ticked as done: listed in "What's set"</td></tr>
 <tr><td>Your work log, "right first time" counts, commendations</td><td>Empty: no jobs were really done</td></tr>
 <tr><td>The storm's result and your part</td><td>As if you weren't there: no commendation</td></tr>
 <tr><td>Tool wear, the Works app's history, tips already seen</td><td>Fresh</td></tr>
@@ -286,7 +287,7 @@ If a skip passes one of the first week's meetings, the panel says so in words ("
 <tr><td colspan="3"><b>Stop 1a, the patch kit:</b> your Dev link and phone screenshots.</td></tr>
 <tr><td>D5</td><td>Traditions</td><td>events_check and join_check unchanged; 5 kinds started; people go</td></tr>
 <tr><td colspan="3"><b>Stop 1b.</b></td></tr>
-<tr><td>D6</td><td>Set career: the table, the excused skip day by day, the beats set, waking in the right bed</td><td>Days 2, 10, 12 and 26 set; <b>Set career to Day 10 from a fresh Dev game: the career exists, rank Officer, no "missed meeting" Mail</b>; career_check and mech_check unchanged; the table's days match the ladder</td></tr>
+<tr><td>D6</td><td>Set career: the table, the excused skip day by day, the beats set, waking in the right bed</td><td>Days 2, 10, 12 and 26 set; <b>Set career to Day 10 from a fresh Dev game: the career exists, rank Officer, no "missed meeting" Mail; then play Day 11 and no trained row opens again</b>; two Set careers to Day 12, byte-identical (the Dev seed); career_check and mech_check unchanged; the table's days match the ladder</td></tr>
 <tr><td>D7</td><td>The Career tab</td><td>The promotion opened from Day 9 runs to the ceremony</td></tr>
 <tr><td colspan="3"><b>Stop 2.</b></td></tr>
 <tr><td>D8-D9</td><td>Big events</td><td>events_check unchanged; the storm started, through its phases, undone (later dates unchanged)</td></tr>
@@ -308,11 +309,12 @@ If a skip passes one of the first week's meetings, the panel says so in words ("
 <h3>6.3 Hooks in other sections (each owner reviews first)</h3>
 <ul>
 <li><b>13 (sim engineer):</b> <code>DEVMODE</code> read before <code>SAVE_KEY</code>, "-dev" added to the save's name; the freeze through <code>freezeSync</code>.</li>
-<li><b>21 (onboarding):</b> <code>INTRO_KEY</code> "-dev", and <code>introWanted</code> uses it. Set career marks the first week's beats as met through section 21's own records.</li>
-<li><b>20 (career engineer):</b> the excused list in <code>careerOff</code>, plus one line in <code>careerTick</code>.</li>
+<li><b>21 (onboarding):</b> <code>INTRO_KEY</code> "-dev", and <code>introWanted</code> uses it. Set career starts with <code>newGameStart(false)</code> + <code>introSkip()</code> and clears <code>INTRO_BOOT</code> for its game. Set career marks the first week's beats as met through section 21's own records.</li>
+<li><b>20 (career engineer):</b> the excused list in <code>careerOff</code>, plus one line in <code>careerTick</code>; and a one-line Dev seed for the career's random <code>gs</code>, so devmode_check can compare two Set careers byte for byte.</li>
+<li><b>20 (social engineer):</b> Set career gives the starting friendships through section 20's own <code>relAdd</code> (question 1).</li>
 <li><b>15 (player engineer):</b> needs kept in the skip step (<code>needsDrain</code>).</li>
 <li><b>18 (traditions engineer):</b> one line in <code>eventsOn</code>. Later, the ending split (events plan).</li>
-<li><b>24 and 24p (Works career engineer):</b> Set career writes <code>SHIP.works</code> (rank, tier, trained rows, tools, xp, the promotion's record) in the shape <code>worksClean</code> keeps; <code>ladderOpen</code> for the test.</li>
+<li><b>24 and 24p (Works career engineer):</b> Set career writes <code>SHIP.works</code> (rank, tier, trained rows, tools, xp, the promotion's record) in the shape <code>worksClean</code> keeps; <code>ladderOpen</code> for the test; <code>W.op</code> alongside <code>W.tr</code>; <code>promoPip()</code> after the rank.</li>
 <li><b>page (HUD seat):</b> the card's outline and tap target, and the sheet's CSS.</li>
 <li><b>New section 25 "DEV MODE":</b> the rest, inside <code>if (DEVMODE)</code>, with no <code>R()</code>.</li>
 </ul>
@@ -414,10 +416,17 @@ If a skip passes one of the first week's meetings, the panel says so in words ("
 <h2>8. What changed in version 3</h2>
 <ul>
 <li>Stop 2 is now <b>Set career</b>: a table, the excused skip and the beats set. It replaces the replay, which is parked in section 7.</li>
-<li>No kept days and no IndexedDB. No fixed career seed either, which was only needed for the replay's repeatability; Mark and Undo restore exactly.</li>
+<li>No kept days and no IndexedDB. A one-line Dev seed is kept, so devmode_check can compare two Set careers byte for byte (Mark and Undo restore exactly anyway).</li>
 <li>About 9-10 turns, down from 13-17.</li>
 <li>Your answers are recorded as decided (6.4), with 3 new questions (<code>dm-v3-q1</code> to <code>q3</code>, plus <code>dm-v3-general</code>; a fourth, about the Dev save, was answered: yes).</li>
 <li>Stop 1 (1a and 1b) and Stop 3 are as in version 2.1, with both reviewers' re-checks taken in.</li>
+</ul>
+<h3>Version 3.1 (DR1's check of Set career, run on a scratch copy: it works)</h3>
+<ul>
+<li>It starts the "Skip to Monday" way (<code>newGameStart(false)</code> + <code>introSkip()</code>), not by shuttle. The first-week meetings are marked met before the skip passes them.</li>
+<li>Trainings are written as opened (<code>W.op</code>) as well as trained (<code>W.tr</code>); devmode_check plays the next day and expects nothing re-opened.</li>
+<li>The arrival's start-up switch is cleared in a new Dev save (a section 21 hook).</li>
+<li>Also: the storm's briefing Mail is mentioned, the small first-week ticks are listed in "What's set", the Dev seed is kept for byte comparisons, <code>promoPip()</code> is called after the rank, and section 20 social and 21's <code>introSkip</code> / <code>INTRO_BOOT</code> are added to the hooks.</li>
 </ul>
 </main>
 <script>
