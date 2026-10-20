@@ -1,112 +1,80 @@
-# Dev mode plan: summary (version 2.1)
+# Dev mode plan: summary (version 3, the lean Dev mode)
 
-Dev mode planner DP1, 2026-10-20. Version 2 takes in:
-- DR1's technical review (`claude/devmode-review-1`, `plans/devmode-plan-review-1.md`)
-- DR2's phone-use review and its addendum (`claude/devmode-review-2`, `plans/devmode-plan-review-2.md`)
-- DJ1's day-jump measurements (`claude/devmode-dayjump`; marked *to be confirmed*)
-- lead 20's call on the order (the playtest kit first)
+Dev mode planner DP1, 2026-10-20. Written after the user's answers (12:05) and their talk with lead 20.
+- Branch `claude/devmode-plan`, based on `claude/integration` (0.64.2 + step 2).
+- The full page is `plans/devmode-plan.html`.
+- Version 2.1, with both reviews behind it, is in git (6c37f52).
+- Planning only: the game is unchanged.
 
-Branch `claude/devmode-plan`, based on `claude/integration` (0.64.2 + step 2). The full page is `plans/devmode-plan.html`; section 10 there lists every change since version 1. Planning only: the game is unchanged.
+## What it is
+- **Opening:** a ready Dev link (`#dev`). In Dev mode the place-and-clock card gets a gold outline and the word DEV, and tapping it opens the panel. Without the link, Dev mode doesn't exist in the game.
+- **Saving:** Dev mode keeps its own save (the real save's names with "-dev" added).
+  - The user answered "none" to q2. The lead's recommendation, kept here, is a separate save, because Mark, Undo and reloads need one. New question 4 confirms it.
+  - Only three small things are stored: the save, one Mark and one Undo (about 120 KB each).
+  - There's a space check before each write and a Clear button. A check proves the real save still writes and stays byte-identical.
+  - No IndexedDB is needed now.
 
-## Opening it and keeping the real game safe
-- **Opening:** a ready **Dev link** from the lead (the playable link with `#dev`), checked in the Claude app at Stop 1. The fallback is a separate Dev copy of the game. A change to the link in an open tab offers a reload.
-- **The way in:** in Dev mode the whole place-and-clock card (the `.hud`, `pointer-events:none` today) becomes the tap target. It has a gold outline and the word **DEV** in letters. The panel's title reads "Dev mode: not your real game".
-- **Names:** the switch is `DEVMODE` and the CSS is under `.devmode`. `DEV` is already section 19's device, and using it would stop the game loading. `SAVE_KEY` is declared before `URL_FLAGS`, so section 13's order needs fixing too.
-- **Its own save:** `SAVE_KEY` and `INTRO_KEY` get "-dev" added, and `introWanted` uses `INTRO_KEY`. Dev mode doesn't use `nosave`. With `#dev`, even `#dev.debug` only writes the Dev save; a plain `#debug` writing the real save goes on the backlog.
-- **Storage:** only the Dev save, one Mark and one Undo stay in localStorage (about 120 KB each). Kept days go in IndexedDB.
-  - There's a space check before every write, and Dev mode never removes anything of the real game's.
-  - "Clear Dev save" empties everything Dev mode stored.
-  - devmode_check fills Dev storage and proves the real save still writes and stays byte-identical.
-- **Copy my real game into Dev:** reads the real save, never writes it.
-- **A fixed seed:** `careerInit`'s `gs` (`Date.now ^ Math.random`) is the only random source, so Dev mode fixes it (default 1). DR1 saw two unfixed replays differ by a sick day.
-- **Every Dev action:**
-  - keeps an Undo first;
-  - settles what's in progress (a dialogue, an activity, a game);
-  - freezes the game through `freezeSync`, with pop-ups quiet rather than off;
-  - places the deck's crew once, at the end.
+## Stops (about 9-10 turns)
+- **Stop 1a, the patch kit (D1-D4):**
+  - Clock: 30-minute frozen steps; workdays are **excused** (q5), through a Dev list read by `careerOff` plus one line in `careerTick`.
+  - Needs kept as a normal day, plus Top up (q15), through a hook in section 15's skip step.
+  - Take me to… (q14), refused during the arrival evening and inside meetings.
+  - Mark / Back to mark (q14).
+  - Undo my last Dev action (q11), Copy my real game, Clear.
+  - The Day 2 recipe: play Day 0-1 once (or copy your real game), then Mark at Day 2 08:30. A notice appears when a skip passes a first-week meeting.
+- **Stop 1b (D5):** traditions (q16 split).
+  - A Dev list read by `eventsOn`; the traditions engineer reviews it first.
+  - Plans are remade under the lift's fade (q7).
+  - Refused on Day 0 and during a big event.
+- **Stop 2, Set career (D6-D7)**, which replaces the replay:
+  1. Pick a day from 0 to 30.
+  2. A new Dev game by shuttle starts.
+  3. The clock moves day by day with workdays excused. Each morning the career is set from a table of "what a steady player has by day N" (the ladder's days and the Pillar 5 dates: Officer 10, Senior 16, Engine Specialist 23, Calder's question 26).
+  4. The first-week and promotion beats are marked done, and friendships get a starting level (new question 1).
+  5. You wake at 06:00 in your bed.
+  - The result is marked **approximate**, and the panel's "What's set" list says what it gets wrong: thin friendships, an empty work log, no part in the storm, fresh tool wear.
+  - devmode_check compares the table with `CAREER_LADDER`.
+  - The Career tab (q8): the promotion test's needs with ticks; `ladderOpen` when only the day is missing (owner first); set rank marked approximate.
+- **Stop 3, Big events (D8-D9):** start by day, next phase, threads with −/+, End and undo (End and keep after the events plan splits the ending out of `eventAdvance`).
+- **D10:** fixes.
 
-## Stops and turns (about 13-17)
-**Stop 1: the playtest kit** (v2.1: published in two parts. **Stop 1a, the patch kit,** comes after D4: switch, Dev save and storage, clock and Top up, Take me to and Mark, Undo my last Dev action, Copy my real game. **Stop 1b** adds traditions in D5-D6, with the traditions engineer reviewing first; question 16.)
-- **D1:** the switch, the Dev save, the card as the way in, the empty sheet, section 25.
-- **D2:** IndexedDB, the space check, Clear, Undo, Copy my real game, the fixed seed.
-- **D3:** Clock:
-  - steps of 30 minutes, frozen;
-  - "Excused" by default, "Counts as missed" as a choice;
-  - needs kept as a normal day, plus Top up needs;
-  - buttons to 08:55 and to 16:55.
-- **D4:** Take me to… and Mark / Back to mark.
-- **D5-D6:** Traditions:
-  - started through a Dev list read by `eventsOn` (the traditions engineer reviews first);
-  - plans remade, so 20 of 74 crew move and 57 evenings change (DR1);
-  - a table of the ten readers of the traditions list;
-  - honorees, flags, fixed hours, and refusals on Day 0 and during a big event.
+## Hooks (owners review first)
+- **13:** `DEVMODE` read before `SAVE_KEY`; the freeze.
+- **21:** `INTRO_KEY`, `introWanted`, the first-week beats' records.
+- **20:** the excused list.
+- **15:** needs kept.
+- **18:** `eventsOn`; later, the ending split.
+- **24 / 24p:** `SHIP.works` written in the shape `worksClean` keeps; `ladderOpen`.
+- **page:** the card and the sheet.
+- **New section 25.**
 
-**Stop 2: the day jump**
-- **D7:** `DEV_PLAYER`'s frame, Days 0-2. The first week's meetings are attended in person, because `introWeekMeetings` needs the player in the room on the drawn deck with the speaker there. On paper they're marked missed and the career never starts.
-- **D8-D10:** each career row's line, written with its owner. The starting points are mech_check's `PARTS`, intro_check's happy player, arc_check's diligent player and DJ1's script. The milestone "Officer on Day 10" starts as "not yet".
-- **D11:** the Career tab:
-  - trainings shown by name;
-  - the promotion test's needs shown;
-  - "Open the test now" (calls `ladderOpen`, agreed with section 24's owner) only when just the day is missing;
-  - "Next step" through the beats;
-  - set rank, marked approximate.
-- **D12-D13:** Jump:
-  - the request goes into the tab's short-term storage, then a reload, because a replay after New game isn't repeatable (DJ1);
-  - frozen half-day pieces, progress and Stop;
-  - kept days stamped with **a fingerprint of the game's script + the steady player's version + the seed**, not the build number (DR1's blocker);
-  - loading in through the normal load path.
+## The user's answers, now decided
+| Question | Decided |
+|---|---|
+| q1 | the Dev link |
+| q2 | own Dev save, to be confirmed (v3-q4) |
+| q3, q4 | parked |
+| q5 | excused |
+| q6 | no longer applies |
+| q7 | fade |
+| q8 | labelled |
+| q9 | three stops |
+| q10 | keep |
+| q11 | Undo my last Dev action |
+| q12, q13 | no longer apply |
+| q14 | both |
+| q15 | kept + Top up |
+| q16 | split |
 
-**Stop 3: big events (the events plan's F6)**
-- **D14-D15:**
-  - Start sets the event's day (today if its first phase is still ahead, else tomorrow).
-  - Next phase, and the threads with − and +.
-  - **End and undo** (the default) restores a copy of the event state.
-  - **End and keep** waits for the ending to be split out of `eventAdvance` (section 18, owner first, with the events plan).
-  - Phase jumps are labelled unreliable until F4.
-  - The events plan's F6 turn shrinks to match.
-- **D16-D17:** fixes from the reviews.
+## New questions (dm-v3-q1..q4, plus dm-v3-general)
+1. Friendships after Set career. **Recommended: a starting level with the people a steady player meets, marked approximate.**
+2. Does Set career start a new Dev game or carry on? **Recommended: always new (Undo brings the old one back).**
+3. Where do you wake? **Recommended: 06:00 in your bed; the beat shortcuts go on to the beat's time and place.**
+4. A separate Dev save? **Recommended: yes, with Clear.**
 
-## Measured (headless, 4 cores, load not counted)
-| Run | Day 2 08:40 | Day 10 | Day 26 | Same twice |
-|---|---|---|---|---|
-| DP1 v2: from the Day 0 arrival, saving on, seed 1 | 1.2-1.4 s | 6.3-7.3 s | 15.7-17.1 s | yes |
-| DP1 v1: from Day 1, no saving | | 7.5-8.1 s | 18.9-20.5 s | yes |
-| DP1 v1, CPU slowed 4× | | 40.4 s | 101.9 s | yes |
-| DR1: saving on, seed not fixed (Day 14, ~12 s) | | | | **no** |
-| DJ1: careful player, from Day 1 (*tbc*) | Day 3: 2.0 s | ~11 s | ~43 s (Day 30 ~56 s) | yes, byte for byte |
-| DJ1's phone estimate (*tbc*) | | 35-55 s | Day 30: 3-5 min | |
-
-- **What the player reaches:**
-  - DJ1's careful player is an Officer by Day 16 and has 19 trainings by Day 26 (*tbc*).
-  - With hourly steps it stays a Junior; trainings need minute steps.
-  - The simple players (DP1's, DR1's) stay Juniors because they never answer m6's incident call.
-
-## Questions (dm-q1 to dm-q15, plus dm-general; 11-15 new)
-1. Opening: **a ready Dev link; tap the place-and-clock card.**
-2. Saving: **its own save, with Copy my real game and Clear.**
-3. The day jump: **(a) replay in a fresh page, with fingerprinted kept days.**
-4. Players: **steady now, busy and lazy later.**
-5. Shifts when skipping: **"Excused" by default, "Counts as missed" as a choice, "Play it steady" for whole days from Stop 2.**
-6. The arrival in a jump: **yes.**
-7. A tradition started today: **today, under the lift's fade.**
-8. Career by hand: **show the test's needs, open it early only when just the day is missing, set rank marked approximate.**
-9. The order: **three stops, playtest kit first.**
-10. Kept in the published game: **yes, behind the Dev link.**
-11. Undo: **"Undo last" for every Dev action.**
-12. Kept days: **every fifth day plus the last asked for (~0.8 MB).**
-13. A first long jump on a phone: **minutes is acceptable, with progress; then kept days.**
-14. Take me to and Mark in Stop 1: **yes, both.**
-15. Needs when skipping: **kept as a normal day would leave them, plus Top up.**
-16. Publish the patch kit first: **yes, Stop 1a then 1b.**
-
-## v2.1 (both reviewers' re-checks: DR1 fc40cfb, DR2 785d88d)
-- **DR2 R1:** Stop 1a / 1b, and question 16.
-- **DR2 R2:** the Day 2 recipe is now: play Day 0-1 once (or Copy my real game), then Mark at Day 2 08:30. When a skip passes a first-week meeting, the panel says so in words.
-- **DR2 R3:** Take me to is refused during the arrival evening and inside a meeting; devmode_check tries it during the escort's walk.
-- **DR2 R4:** the button is named "Undo my last Dev action" and stays inside the panel only.
-- **DR2 R5:** two rows of tabs, checked in the screenshot.
-- **DR2 R6:** Back to mark's reload is checked on a phone.
-- **DR1 V2-1:** "Excused" gets a mechanism: a Dev-only excused list read by `careerOff`, set before the day is planned, plus one line in `careerTick`'s missed-shift loop for today (section 20, owner first).
-- **DR1 V2-2:** "Needs kept" gets a mechanism: a Dev-only hook in section 15's skip step (`SIM_ADVANCE` → `needsDrain`), owner first.
-- **DR1 V2-3:** D7 measures the `goToDeck` time for the in-person meetings and checks memory.
-- **Copy my real game:** the copy's random seed is replaced with the Dev seed, so jumps from a copy are repeatable.
+## Parked: the steady-player replay
+- **Status:** parked 2026-10-20 (the user's call). Its design is kept in full in v2.1 (6c37f52) and in section 7 of the page.
+- **Design:** `DEV_PLAYER` with a line per career part; a fresh page, frozen, a fixed seed; first-week meetings attended in person; kept days in IndexedDB with a script fingerprint; 13-17 turns.
+- **Measured** (from the Day 0 arrival, saving on, seed 1): Day 2 08:40 in 1.2-1.4 s, Day 10 in 6.3-7.3 s, Day 26 in 15.7-17.1 s, the same twice.
+- **DJ1** (to be confirmed): Day 26 in ~43 s; Officer by Day 16.
+- **Unpark** when approximate state isn't enough (friendships and stories, the checks).
