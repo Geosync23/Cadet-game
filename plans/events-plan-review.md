@@ -227,3 +227,65 @@ The checks behind this re-review were run in the page (scratchpad `C/v2.py`): th
 - **Q8 (folding scenes):** agree. Under (a) the commendation comes at the all-clear on Day 13. The ready room would otherwise summon you on Monday Day 15, the Tier 3 test day, so folding it into the Day 16 scene is right. Say "no summons on Day 15" outright.
 - **Q5, Q6, Q7 and Q9:** no new findings. Q7 under (a): the rec deck is closed from Thursday Day 11 14:00 to Saturday Day 13 10:00.
 - **Nit:** in the shift check, `torres` isn't a roster id, so check his rota under his real id before F0's cast check.
+
+---
+
+## Review of version 3 (claude/events-plan f399143f), for lead 20
+
+**How this was checked:**
+- The user's saved v2 answers were read from the plan page's database (`answers/events-plan`, saved 05:47:54Z).
+- In the page (scratchpad `C/v3.py`, 0.64.2): the traditions on Days 5-7, 13-14 and 27-29 with no event on, who works which days (`isWorkDay`) for the casts, and the mess seats.
+- In the code: the bridge invite (`bridgeInviteReady` :36953, `OCCASIONS.bridgeInvite` :35751, the bridge-hour tradition :33247).
+
+Overall: the calendar is fine once F0 sets the dates directly, and nothing on the event days clashes badly. There's one wrong premise (question 7), one claim credited to the user who didn't make it (in the design doc), and four timing points.
+
+**The calendar:** F0 puts the events on these days directly, so the engine's own day rules no longer matter. Who works (checked):
+
+| Person | Works | Off on event days |
+| --- | --- | --- |
+| Marrow, Calder, Sato, Holt | Monday to Friday | Day 6 (Sat), Day 14 (Sun), Day 27 (Sat) |
+| Vance | 5-7, 12-16, 20, 22, 26-29 | — |
+| Brennan | — | Day 6 |
+| Torres (`torres-zeke`) | — | works Days 6 and 27 |
+
+So the call-ins are:
+- **Day 6:** the Captain, for the address and the oath.
+- **Day 14:** four of the five in the all-clear cast (Marrow, Calder, Sato, Holt); only Vance is on.
+- **Day 27:** the Captain.
+
+**By question:**
+- **ev-v3-q7 (the bridge invite): wrong premise. Recommend dropping the question and leaving the code as it is.**
+  - The invite only comes on the eve of a bridge hour: its `due` needs `occBridgeEve(d)`.
+  - Bridge hour happens every 4 weeks on the Tuesday of week 4 (Days 23, 51…).
+  - So with a Day 6 event already over, the invite still comes on Day 22, the same as tying it to the storm. "Around Day 8" can't happen.
+  - Tying it to the storm would only add a fault: while the storm is switched off for testing, the invite would never come.
+- **ev-v3-q1 (one more short one) and ev-v3-q2 (which event): agree with "one" and with A.**
+  - The user's words were, on q1, "I feel like we can get one more short one in", and on q2, "Early on (day 6?) is where a 1 day shipwide events should happen first. Lets plan one but still finish ion storm first". Reading those as the same event is fair, and asking is right.
+- **ev-v3-q3 (Day 6 or Day 5): agree, Saturday Day 6.**
+  - Checked: Saturday 17:00-19:30 is free (cook-along ends 16:30, film is at 20:00).
+  - Friday Day 5 is Pillar 5's scanner day and your first head-scratcher, with the new-hands tea at 18:40.
+  - Build note: the Day 6 event's pause phases must end by 19:59, or film night and observatory night are cancelled.
+- **ev-v3-q4 (Sunday all-clear call-ins): agree, yes.** Say on the page that four of the five people in the scene are called in. Today's all-clear already runs on Saturday Day 13 with the Captain off duty, so the meetings work.
+- **ev-v3-q5 (crowds of about 60): agree, with a correction about the mess.**
+  - The mess has 44 seats (`placesOf(['mess-seat'])`).
+  - The Line supper "about 60" and the lantern supper need either standing places in the mess or a cap of about 44. The plaza (71 places) and the shuttle bay (124) are fine.
+  - Phone cost is low. The party with 64 crew on the deck measured 236 / 367 draw calls and 1.9 ms of game code a frame. Draw calls barely change with crowd size.
+- **ev-v3-q6 (talent night): agree, but something else clashes that night.**
+  - Lap of the Wren (Sunday 20:30-21:15, the Deck 3 promenade) also runs into the party (19:00-21:00, Deck 3).
+  - With the Sunday table at 18:00 that's three gatherings in the evening, over the limit of two.
+  - Recommend: pause Lap of the Wren that night too, or end the party at 20:30.
+- **The guard's spacing (Days 14-20): the days are right, but it needs hours, and the night shift.**
+  - **Day 18:** the commendation summons at 11:00 lands on Pillar 5's Day 18, which has M18 Shutdowns (a big training) and Calder assigning your night shift. F1's reserved beats need their hours, not just their days.
+  - **Day 20:** the regular Captain's table (Saturday 19:30, 90 minutes) ends at 21:00, the minute your second night shift begins (Pillar 5 M22: Friday and Saturday nights from 21:00). Add the night shift to F1's beats. Then end the table invite by 20:30, or move the commended player's seat to the next table.
+  - **Day 29 (Monday):** Pillar 5's weekly senior briefing is at 08:30 in the observation room, and the gift exchange follows there at 09:00, then the farewell at 10:00. That works only if the guard keeps the order. Say so in F1.
+  - **A small point:** until Pillar 5 is built, the summons waits until Day 18 for days held for beats that don't exist yet. That's acceptable (the dates stay fixed between builds), but say it in the "off, then on" test notes.
+- **The design-doc edits:**
+  - **Should fix:** the "Commendations" line says the commendation comes at the all-clear "(the user, 2026-10-20)". The user didn't choose that. On question 8 they picked "keep them all separate", which turned down the option that proposed the all-clear letter. It's a sound planner's call (otherwise the letter lands at Day 16 00:00, on the Senior day), but it should be credited to the plan, or asked.
+  - **Should fix:** design-doc line 616 still says the ready-room summons comes "on the next day the Captain is on shift". With the guard it's Day 18. Update it.
+  - **Fine:** the storm on Days 11-15, the briefing after the team job, the comet on Day 16, the visit as a Days 26-30 finale, events by the calendar, help moving the threads, the rec deck unhooked and closed, the Day 21 arrival, and the parked list with nothing deleted. All of these match the saved answers.
+  - **Can't check here:** the playtest quote ("Love the moments with large groups…"). Confirm its source.
+- **The turn estimate (36-45):** reasonable. The Day 6 event is more likely 4-5 turns than 3-4. It has new pieces from other seats: the gold hull-light state (performance), the plaque and certificate props (deck architect), the oath scene with a choice (writer), and the galley batch on Brennan's day off.
+- **Small points:**
+  - The Day 11 briefing at 13:30 is during the tea break (13:00-14:00), not after it.
+  - The Day 6 event's Captain's address would be the "first all-hands" for the rec deck unless the storm update's unhooking lands first. It does, in this build order; keep that order.
+  - The commendation at the all-clear no longer counts the afterglow's tidy job, so say how it's earned. Stop the threads at the all-clear too, so the band and the debrief agree.
