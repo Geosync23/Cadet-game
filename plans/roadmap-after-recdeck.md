@@ -56,3 +56,13 @@ New order after Dev mode (the user): **Dev mode → playtest patch → "Talk a w
 - First rule: **no repeats** — once a conversation fires, it's done for that save.
 - A **shared pool** any character can draw from (unless it really doesn't fit them), plus **a few of their own** per character.
 - Shorter talks are fine, but **keep the question** (your three replies and their answer).
+
+## The order from here (the user, 2026-10-20, replaces earlier orders)
+1. Dev mode (planning now, with DJ1's measurements and two reviews).
+2. The playtest patch (above).
+3. The "Talk a while" dialogue pack. Talks run out in this order: the character's own talks first, then the shared pool; only when both are used up, light small talk with no question and an occasional "We've talked about everything, haven't we?".
+4. The ship-wide events in chronological order, starting with the first: the ion storm (its update per the events plan), then the comet, then the diplomatic visit. Events plan: https://claude.ai/artifact/Qi1Uvev6p4TbPwYFQvRB1P (the user's answers pending).
+5. Pillar 5 steps 5-6 (the later promotions). Note: built after the events, so Pillar 5 must fit around the events' fixed days (the events plan's calendar F0 and career-beat guard F1), not the other way round.
+6. Character arcs (content/arcs/).
+7. Optimization.
+8. Balancing and polish (incl. the career-pace numbers parked earlier).
