@@ -197,3 +197,5 @@ GitHub check: ON for every push to claude/** and main (the user, 2026-10-20; the
 | Patch builder PB | session_01FWW2piuXkFYaRRzLXZiqYb | `claude/patch-b` | batches D then F (crew life, needs tuning); sections 13/14/10 |
 | Build master BM11 | session_01W7NHRM4JjqaNEJQUWNxgcE | `claude/integration` | merges reviewed work, sets build numbers; first: Dev mode Stop 1a |
 PP1 now reviews patch turns. Batch E (small features incl. First Light Cocoa, the mug) waits for DB1 to finish Dev mode. Working: DB1, DR1, PA, PB (+ PP1/BM11 on call).
+
+**~14:17 UTC, the user: start the Talk a while wiring alongside the patch (it ships with the patch).** Talk pack engineer TE1, session_01MnQHVrsK5wnTwfEi2QFm4W, `claude/talk-wire` (from claude/integration + claude/talk-pack 8692459): T1 reader + content_gen check, T2 picker + save (shape to lead first) + talk_check.py, T3 hook into Talk a while + phone shots. Dev mode Stop 1a done (claude/devmode bb6e78a); DB1 doing the review-fixes commit, then BM11 merges as 0.64.3 and lead publishes. Working: DB1, DR1, PA, PB, TE1 (5); PP1 and BM11 on call.

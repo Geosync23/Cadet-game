@@ -33,3 +33,8 @@ DB1 01R4RFu3mPaq4qj1L2TXEoza (working) · DR1 01WfFmjT31bVcy4mvsNVi5Mz (working)
 - `git archive | tar` fails on a missing path; use `git show branch:path`.
 - Section owners for 11/13/15/20/21 have no live seats; DR1 stands in. Shared-function input/table-shape changes go to the owner first.
 - Dev mode switch is `DEVMODE` (`DEV` is already used).
+
+## Update ~14:17 UTC
+- Patch build started in parallel (the user: "Hire extra helpers"): PA session_01Jka314UJ2Yto5XxbcQnB8H (claude/patch-a, batches A-C), PB session_01FWW2piuXkFYaRRzLXZiqYb (claude/patch-b, D then F; PB now owns 13/14/10 and OKs PA's #1 formats), BM11 session_01W7NHRM4JjqaNEJQUWNxgcE (build master, next build 0.64.3 = Dev mode). PP1 reviews patch turns. Batch E waits for DB1.
+- Talk pack wiring started alongside (the user: ship it with the patch): TE1 session_01MnQHVrsK5wnTwfEi2QFm4W (claude/talk-wire).
+- Dev mode Stop 1a built (bb6e78a); DB1 doing DR1's round 1+2 fixes; then DR1 final pass, BM11 merge, publish a NEW page with #dev, notify. Check on the published page: #dev shows the DEV tag in the Claude app and a phone browser; Back to mark keeps the tag; the plain link shows the real game.
