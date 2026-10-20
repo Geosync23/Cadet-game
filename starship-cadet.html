@@ -12248,8 +12248,9 @@ const NEED_LABEL = { hunger: 'Food', energy: 'Energy', hygiene: 'Hygiene', fitne
 // about six hours, so it comes up three or four times a day (on waking, midday, dinner, bedtime); 3 asleep.
 // Leisure (0.28.61, the 0.60.7 plan): 0.8 an hour awake, none asleep, so about 6 ship days from full to the low line;
 // hobbies, traditions, Tiles, the bar, a full talk, calling home and a few places fill it (leisureAdd, below)
-const NEED_DRAIN = { hunger: [4, 2], energy: [4.8, 0], hygiene: [2.5, 1], fitness: [.6, .3], social: [1, .25], bathroom: [6, 1.5], leisure: [.8, 0] };   // bathroom halved in 0.28.62 (the 0.60.7 plan: about two visits a day); energy 4.4 -> 4.8 in 0.73.0 (playtest 2, the lead's tuning: a normal 16-hour day ends near 20-25)
+const NEED_DRAIN = { hunger: [4, 2], energy: [4.8, 0], hygiene: [2.5, 1], fitness: [.6, .3], social: [3, .25], bathroom: [6, 1.5], leisure: [.8, 0] };   // bathroom halved in 0.28.62 (the 0.60.7 plan: about two visits a day); energy 4.4 -> 4.8 in 0.73.0 (playtest 2, the lead's tuning: a normal 16-hour day ends near 20-25)
 const SLEEP_GAIN = 12.5;                                 // energy per ship hour asleep: 8 hours fills it
+const SLEEP_TAPER = [90, 1 / 3];                         // above 90, sleep gives a third as much (the patch's #27, the user's "100 after 8 hours"): bed at 22:00 wakes at 100, 23:00 at about 95
 const NEEDS_FRESH = { hunger: 60, energy: 100, hygiene: 60, fitness: 70, social: 70, bathroom: 60, leisure: 70 };   // a new game: just woken, before breakfast
 const NEEDS_OLD = 80;                                    // a v 1 save had no needs: start them here
 const SLOW_BELOW = 25, SLOW_SPEED = .8;                  // fitness or energy under this: walk at this speed (each one counts)
@@ -12331,7 +12332,7 @@ function needsDrain(mins, asleep, fx, except) {          // except: the need an 
   for (let left = mins; left > 0;) {                     // in steps of up to half an hour, so a long skip feels the bonuses change
     const step = Math.min(left, 30), h = step / 60, ed = asleep ? 1 : needEffects(n).drain; left -= step;
     for (const k of NEED_KEYS) if (k !== except) n[k] = needClamp(n[k] - NEED_DRAIN[k][asleep ? 1 : 0] * fxD(fx, k) * (k === 'energy' ? ed : 1) * h);
-    if (asleep) n.energy = needClamp(n.energy + SLEEP_GAIN * fxR(fx, 'energy') * h);
+    if (asleep) { const g = SLEEP_GAIN * fxR(fx, 'energy') * h, full = Math.max(0, Math.min(g, SLEEP_TAPER[0] - n.energy)); n.energy = needClamp(n.energy + full + (g - full) * SLEEP_TAPER[1]); }
   }
 }
 // walking speed (needEffects): SLOW_SPEED for low fitness, times SLOW_SPEED again for low energy; 105% when fit
@@ -12407,6 +12408,12 @@ function workingNow() {
   const A = typeof ACT !== 'undefined' ? ACT : null;
   if (A && A.phase === 'do' && WORK_ACTS.has(A.kind)) return true;
   return typeof careerClockedIn === 'function' && careerClockedIn() && !careerClockedOut() && typeof DAY_SHIFT !== 'undefined' && SHIP.time.min < DAY_SHIFT[1] + 60;
+}
+// and hunger (the patch's #20, the user's 7 an hour at work): WORK_HUNGER an hour on top of NEED_DRAIN's while working
+const WORK_HUNGER = 3;
+function workHunger(mins, fx, except) {
+  if (except === 'hunger' || !(mins > 0) || !workingNow()) return;
+  const N = SHIP.player.needs; N.hunger = needClamp(N.hunger - WORK_HUNGER / 60 * mins * fxD(fx, 'hunger'));
 }
 function workLeisure(mins, fx, except) {                 // mins awake (playerUpdate); fx the ship's effects
   if (except === 'leisure' || !(mins > 0) || !workingNow()) return;
@@ -13487,7 +13494,7 @@ function playerUpdate(dt, t) {
     if (sat) fx = { ...fx, drain: { ...fx.drain, energy: fxD(fx, 'energy') * SIT_REST } };   // sitting rests you (0.28.12)
     const lay = A && A.kind === 'lie' && A.phase === 'do';
     if (lay) fx = { ...fx, drain: { ...fx.drain, energy: 0 } };   // lying in your bunk: no tiring, a little rest (0.28.29)
-    needsT = now; needsDrain(dm, false, fx, doing || null); workLeisure(dm, fx, doing);
+    needsT = now; needsDrain(dm, false, fx, doing || null); workLeisure(dm, fx, doing); workHunger(dm, fx, doing);
     if (lay) n.energy = needClamp(n.energy + LIE_GAIN * dm);
     if (sat) n.social = needClamp(n.social + SIT_GAIN * sitCompany(A) * needEffects(n).socialGain * dm);
     if (A && A.phase === 'do') {
@@ -13680,7 +13687,8 @@ function careerSpeed(kind) {
   return n >= 15 ? .65 : n >= 5 ? .8 : 1;
 }
 const jobKindOfMachine = j => j && j.machine && typeof machineById === 'function' ? (machineById(j.machine) || {}).kind || null : null;
-const jobMins = j => JOB_TYPES[j.kind].work * (1 + .25 * ((typeof jobTier === 'function' ? jobTier(j) : 1) - 1)) * careerSpeed(jobKindOfMachine(j)) * (j.logged ? .9 : 1);   // j.logged: written up in the Works log (24n), 10% quicker
+const JOB_PACE = .72;                                    // your own machine jobs, every tier (the patch's #16, the user's 30 minutes for a Tier 1 repair on a normal day); the job board (17) shows the same
+const jobMins = j => JOB_TYPES[j.kind].work * JOB_PACE * (1 + .25 * ((typeof jobTier === 'function' ? jobTier(j) : 1) - 1)) * careerSpeed(jobKindOfMachine(j)) * (j.logged ? .9 : 1);   // j.logged: written up in the Works log (24n), 10% quicker
 function myWork() {                                      // the job you hold, and how far you've got with it (null: none)
   const j = jobsOn() ? myJob() : null, P = SHIP.player;
   if (!j || !j.machine) { P.work = null; return null; }
