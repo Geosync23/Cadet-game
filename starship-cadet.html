@@ -290,7 +290,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.64.4
+   STARSHIP CADET: CSV Wren                           build 0.64.5
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -2581,13 +2581,13 @@ const WALL_KIT = {
     const t = tex(200, 260, (c, w, h) => {
       c.fillStyle = '#0d1a1f'; c.fillRect(0, 0, w, h);
       c.fillStyle = '#e8c06a'; c.font = '700 20px system-ui,sans-serif'; c.fillText('CSV WREN', 16, 30);
-      const rows = [['1', 'Bridge'], ['2', 'Command & Science'], ['3', 'Commons'], ['4', 'Quarters'], ['5', 'Operations'], ['6', 'Engineering']], dy = REC_DECK ? 27 : 32;
+      const rows = [['1', 'Bridge'], ['2', 'Officer\'s Quarters - Science'], ['3', 'Commons'], ['4', 'Quarters'], ['5', 'Operations'], ['6', 'Engineering']], dy = REC_DECK ? 27 : 32;
       if (REC_DECK) rows.splice(4, 0, ['R', 'Recreation']);   // 0.84.0 (rec engineer B): the rec deck's row, between 4 and 5
       rows.forEach(([n, name], k) => {
         const y = 62 + k * dy, here = n === deckLabel(deckDef.num);
         if (here) { c.fillStyle = 'rgba(95,214,198,.18)'; c.fillRect(8, y - (REC_DECK ? 19 : 21), w - 16, REC_DECK ? 25 : 29); }
         c.fillStyle = here ? '#5fd6c6' : '#e8c06a'; c.font = '700 17px system-ui,sans-serif'; c.fillText(n, 16, y);
-        c.fillStyle = here ? '#e8f4f1' : '#a9c4bf'; c.font = '500 15px system-ui,sans-serif'; c.fillText(name, 38, y);
+        c.fillStyle = here ? '#e8f4f1' : '#a9c4bf'; c.font = '500 15px system-ui,sans-serif'; c.fillText(name, 38, y, ...(name.length > 20 ? [w - 46] : []));   // patch #25: Deck 2's long name squeezed to the sign
       });
       c.fillStyle = '#7fa9a3'; c.font = '500 12px system-ui,sans-serif'; c.fillText('You are on ' + (deckDef.num === 7 ? 'the Recreation Deck' : deckWord(deckDef.num)), 16, h - 12);
     });
@@ -4369,7 +4369,7 @@ DECKS[4] = {
     place('+', 'plant', .45, 9.55, 'w', { band: '#5fd6c6' });
     place('+', 'bench', 5.7, 3.0, 'e', { snug: true, it: IT('Bench', 'Officers wait here. They wait more upright than the juniors do.') });
     place('+', 'plant', 5.55, 9.55, 'e', { band: '#c45a3f' });
-    placeOnEdge('deckDirectory', 'v,24,8', 'w', { it: IT('Deck directory', 'Seven decks, top to bottom. Bridge, Command & Science, Commons, Quarters, the Recreation Deck (R), Operations, Engineering. You are here: Quarters.') });
+    placeOnEdge('deckDirectory', 'v,24,8', 'w', { it: IT('Deck directory', 'Seven decks, top to bottom. Bridge, Officer\'s Quarters - Science, Commons, Quarters, the Recreation Deck (R), Operations, Engineering. You are here: Quarters.') });
     // ---- utility rooms (Pillar 2, 0.30.2). Last in dress() and free of R(), so nothing above them changes ----
     // air scrubbers: two units on the port hull, a duct riser between them, the duct across the ceiling
     for (const [x, n] of [[.5, 1], [2.5, 2]]) place('s', 'utilScrubber', x, 1.0, 'n', { it: IT('Air scrubber ' + n, 'One of the two units that keep Deck 4\'s air clean. The filter drawer is at the front; the screen shows how full it is.') });
@@ -4603,7 +4603,7 @@ DECKS[5] = {
   dress(d) {
     for (const [key, tw, text] of d.plates) placeOnEdge('plate', key, tw, { text });
     for (const [key, tw] of d.workLights) placeOnEdge('workLight', key, tw);
-    for (const [key, tw] of [['v,17,9', 'w'], ['v,19,9', 'e']]) placeOnEdge('liftPanel', key, tw);
+    for (const [key, tw] of [['v,17,9', 'w'], ['v,19,9', 'e']]) if (!(LADDER_ON && key === LADDER.d5)) placeOnEdge('liftPanel', key, tw);   // patch #5: the east wall is the ladder hatch while LADDER_ON
 
     // Works bay: the job board and tool wall on the hull side, two benches, parts racks by the tea corner, kit lockers by the lobby doors
     placeWall('w', 'jobBoard', 'n', 5.6, { hitW: 2.6, cards: [
@@ -5315,7 +5315,7 @@ DECKS[3] = {
   dress(d) {
     for (const [key, tw, text] of d.plates) placeOnEdge('plate', key, tw, { text });
     for (const [key, tw] of [['v,19,12', 'w'], ['v,21,12', 'e']]) placeOnEdge('liftPanel', key, tw);
-    placeOnEdge('deckDirectory', 'h,20,9', 'n', { it: IT('Deck directory', 'Seven decks, top to bottom. Bridge, Command & Science, Commons, Quarters, the Recreation Deck (R), Operations, Engineering. You are here: Commons.') });
+    placeOnEdge('deckDirectory', 'h,20,9', 'n', { it: IT('Deck directory', 'Seven decks, top to bottom. Bridge, Officer\'s Quarters - Science, Commons, Quarters, the Recreation Deck (R), Operations, Engineering. You are here: Commons.') });
     placeOnEdge('notices', 'h,22,16', 'n', { it: IT('Notice board', 'The week\'s menu, a sign-up sheet for the gym rota, and a card that says CALL YOUR MOTHER in three different hands.') });
     // the ladder, behind glass below the car
     NO_FADE.add('Z');
@@ -6148,7 +6148,7 @@ Object.assign(WALL_KIT, {
   },
 });
 DECKS[2] = {
-  num: 2, name: 'Command & Science', seed: 20219,
+  num: 2, name: 'Officer\'s Quarters - Science', seed: 20219,   // patch #25: was 'Command & Science'
   blurb: 'Senior quarters, Survey labs, Watch office', arrive: 'Senior quarters out of the stern door, so keep it down. Science out of the bow door.',
   lift: [20, 11],                                  // car rows 9-11, trunks row 8 above it, ladder row 12: the same world spot as every deck
   map: [
@@ -6448,7 +6448,7 @@ DECKS[2] = {
     for (const [key, tw, text] of d.plates) placeOnEdge('plate', key, tw, { text });
     for (const [key, tw, text] of d.nameplates) placeOnEdge('brassPlate', key, tw, d2Plate(d.sealed[key], text));
     for (const [key, tw] of [['v,19,12', 'w'], ['v,21,12', 'e']]) placeOnEdge('liftPanel', key, tw);
-    placeOnEdge('deckDirectory', 'v,17,10', 'e', { it: IT('Deck directory', 'Seven decks, top to bottom. Bridge, Command & Science, Commons, Quarters, the Recreation Deck (R), Operations, Engineering. You are here: Command & Science, one below the bridge.') });
+    placeOnEdge('deckDirectory', 'v,17,10', 'e', { it: IT('Deck directory', 'Seven decks, top to bottom. Bridge, Officer\'s Quarters - Science, Commons, Quarters, the Recreation Deck (R), Operations, Engineering. You are here: Officer\'s Quarters - Science, one below the bridge.') });
     // the spine behind glass: the trunks above the car, the ladder below it
     for (const r of ['Y', 'Z']) NO_FADE.add(r);
     place('Y', 'spineTrunks', 1, .5, 'n', { it: SPINE_IT.trunks });
@@ -6574,7 +6574,7 @@ DECKS[2] = {
     for (const x of [.8, 2.0, 3.2]) place('P', 'launchTube', x, 7.6, 's');
     // ---- the sensor array (locked, seen through the window at the end of the corridor) ----
     NO_FADE.add('A');
-    place('A', 'sensorDish', 3.2, 10.5, 'n', { turn: Math.PI / 2, light: true, it: SEE('Sensor dish', 'The main sensor dish, turning slowly under blue light, listening to the whole frontier at once. Tier 3, when the array opens.') });
+    place('A', 'sensorDish', 3.2, 10.5, 'n', { turn: Math.PI / 2, light: true, it: SEE('Sensor dish', 'The main sensor dish, turning slowly under blue light, listening to the whole frontier at once.' + (LADDER_ON ? '' : ' Tier 3, when the array opens.')) });   // patch #5: the array is open while LADDER_ON
     place('A', 'signalRacks', 1.9, 3.8, 'n', { n: 3, it: SEE('Signal processors', 'Racks of them, blinking. Everything the dish hears goes through here before anyone on the bridge sees it.') });
     place('A', 'signalRacks', 1.9, 16.2, 's', { n: 3 });
     place('A', 'mastBase', 5.4, 10.5, 'n', { it: SEE('Comms mast', 'The base of the comms mast, running up through the bridge to the outside. Every call home leaves the ship up this.') });
@@ -6715,7 +6715,7 @@ DECKS[6] = {
   dress(d) {
     for (const [key, tw, text] of d.plates) placeOnEdge('plate', key, tw, { text });
     for (const [key, tw] of [['v,18,7', 'w'], ['v,20,7', 'e']]) placeOnEdge('liftPanel', key, tw);
-    placeOnEdge('deckDirectory', 'v,16,8', 'e', { it: IT('Deck directory', 'Seven decks, top to bottom. Bridge, Command & Science, Commons, Quarters, the Recreation Deck (R), Operations, Engineering. You are here: Engineering, the bottom of the line.') });
+    placeOnEdge('deckDirectory', 'v,16,8', 'e', { it: IT('Deck directory', 'Seven decks, top to bottom. Bridge, Officer\'s Quarters - Science, Commons, Quarters, the Recreation Deck (R), Operations, Engineering. You are here: Engineering, the bottom of the line.') });
     // the foot of the spine: the trunks start behind glass above the car, the ladder ends behind glass below it
     for (const r of ['Y', 'Z', 'K', 'R']) NO_FADE.add(r);             // the locked rooms behind glass stay solid
     place('Y', 'spineTrunks', 1, .5, 'n', { it: { t: 'Foot of the trunks', x: 'The power and air trunks start their climb here, insulated and warm to the touch through the glass. Everything every deck runs on goes up these.', see: true } });
@@ -6739,7 +6739,7 @@ DECKS[6] = {
     for (const z of [1.2, 2.8]) place('K', 'chair', 3.4, z, 'w');
     placeWall('K', 'mimicPanel', 'n', 2.5, { hitW: 3.0, it: { t: 'Mimic panel', x: 'The whole ship\'s power on one board: the reactor, both junctions and a line up to every deck. Deck 3\'s line is amber; the galley ovens are drawing hard.', see: true } });
     // the reactor door at the end of the alcove: a radiation sign either side
-    for (const [key, tw] of [['h,26,3', 's'], ['h,26,4', 'n']]) placeOnEdge('trefoil', key, tw, { it: IT('Radiation sign', 'Painted either side of the reactor\'s shielded door. Tier 4, and only ever on a team job.') });
+    for (const [key, tw] of [['h,26,3', 's'], ['h,26,4', 'n']]) placeOnEdge('trefoil', key, tw, { it: IT('Radiation sign', 'Painted either side of the reactor\'s shielded door. ' + (LADDER_ON ? 'Sealed for safety: only ever on a team job.' : 'Tier 4, and only ever on a team job.')) });   // patch #5
     // the watch room (4 x 4, the overlook's south end): two armchairs and a tea table at the window onto the coils,
     // the kettle in the corner, a lamp, a panel heater nobody needs and a shelf of old engine logs. The door is on the lobby side.
     place('S', 'rug', 1.9, 2.0, 'n', { tex: rugLounge, w: 2.8, d: 3.0 });
@@ -7144,7 +7144,7 @@ DECKS[1] = {
   dress(d) {
     for (const [key, tw, text] of d.plates) placeOnEdge('plate', key, tw, { text });
     for (const [key, tw] of [['v,7,7', 'w'], ['v,9,7', 'e']]) placeOnEdge('liftPanel', key, tw);
-    placeOnEdge('deckDirectory', 'h,8,2', 's', { it: IT('Deck directory', 'Seven decks, top to bottom. Bridge, Command & Science, Commons, Quarters, the Recreation Deck (R), Operations, Engineering. You are here: Bridge, the top of the line.') });
+    placeOnEdge('deckDirectory', 'h,8,2', 's', { it: IT('Deck directory', 'Seven decks, top to bottom. Bridge, Officer\'s Quarters - Science, Commons, Quarters, the Recreation Deck (R), Operations, Engineering. You are here: Bridge, the top of the line.') });
     // the top of the spine: the trunks end behind glass above the car, the ladder behind glass below it
     for (const r of ['Y', 'Z', 'R']) NO_FADE.add(r);
     place('Y', 'spineTrunks', 1, .5, 'n', { it: { t: 'Trunk head', x: 'The power and air trunks end here, in a trunk head with a brass plate: CSV WREN, TRUNK HEAD, DECK 1. Everything the bridge runs on comes up these.', see: true } });
@@ -8668,7 +8668,7 @@ DECKS[7] = {
     recMats();
     for (const [key, tw, text] of d.plates) placeOnEdge('plate', key, tw, { text });
     for (const [key, tw] of [['v,19,10', 'w'], ['v,21,10', 'e']]) placeOnEdge('liftPanel', key, tw);
-    placeOnEdge('deckDirectory', 'h,20,12', 'n', { it: IT('Deck directory', 'Seven decks, top to bottom. Bridge, Command & Science, Commons, Quarters, the Recreation Deck (R), Operations, Engineering. You are here: the Recreation Deck, between Quarters and Operations.') });
+    placeOnEdge('deckDirectory', 'h,20,12', 'n', { it: IT('Deck directory', 'Seven decks, top to bottom. Bridge, Officer\'s Quarters - Science, Commons, Quarters, the Recreation Deck (R), Operations, Engineering. You are here: the Recreation Deck, between Quarters and Operations.') });
     for (const r of ['Y', 'Z']) NO_FADE.add(r);
     place('Y', 'spineTrunks', 1, .5, 'n', { it: SPINE_IT.trunks });
     place('Z', 'spineLadder', 1, .5, 'n', { it: { t: 'Spine ladder', x: 'The maintenance ladder, passing through on its way from Quarters down to Operations.', see: true } });
@@ -8849,6 +8849,7 @@ function applyLight(k) {
   const ml = deckDef && deckDef.light;                   // a deck's own mood (Deck 6 runs warm and dim)
   if (ml) { hemi.color.multiply(ml.sky); hemi.intensity *= ml.hemi; sun.color.multiply(ml.sun); sun.intensity *= ml.sunI; }
   if (REC_SHOW.dim) { const q = 1 - REC_SHOW.dim; hemi.intensity *= q; sun.intensity *= q; }   // 0.84.8: the auditorium's house lights down for a show (8c)
+  if (typeof flcDim === 'function' && flcDim()) { const q = 1 - flcDim(); hemi.intensity *= q; sun.intensity *= q; }   // patch #26: the bow lounge's lights down for First Light Cocoa (section 15's slot)
   for (const L of LAMPS) L.l.intensity = lerp(L.day, L.night, k);
   renderer.toneMappingExposure = lerp(DAY.exp, NIGHT.exp, k);
   scene.background.copy(DAY.bg).lerp(NIGHT.bg, k);
@@ -8869,7 +8870,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.64.4';                           // keep in step with the header's build line
+const GAME_BUILD = '0.64.5';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -11730,7 +11731,7 @@ deviceApp({ id: 'roster', title: 'Roster', icon: 'crew', order: 52,
       if (title) B.push({ kind: 'text', text: title, mark: 'head' });
       let rows = [];
       for (const x of list) {
-        rows.push({ text: x.p.name, sub: (x.p.role || '') + (x.tier >= 1 && typeof REL_NAMES !== 'undefined' ? ' · ' + REL_NAMES[x.tier] : ''), mark: x.p.id === rosterPick ? 'hot' : null, action: { app: 'roster', do: 'pick', arg: x.p.id } });
+        rows.push({ text: x.p.name, sub: ((typeof rankCardRole === 'function' ? rankCardRole(x.p) : x.p.role) || '') + (x.tier >= 1 && typeof REL_NAMES !== 'undefined' ? ' · ' + REL_NAMES[x.tier] : ''), mark: x.p.id === rosterPick ? 'hot' : null, action: { app: 'roster', do: 'pick', arg: x.p.id } });
         if (x.p.id !== rosterPick) continue;
         const w = rosterWhere(x.p); B.push({ kind: 'list', rows }); rows = [];
         B.push({ kind: 'text', text: w.line, mark: 'hot' });
@@ -13443,8 +13444,10 @@ function playerUpdate(dt, t) {
   bagTick();                                             // the kit bag into your locker after the bunk step (0.28.26)
   handTick();                                            // the Repair button (0.28.52)
   dinnerTick();                                          // sit down at your table for the arrival dinner (0.28.28)
+  if (typeof mugTick === 'function') mugTick();          // the mug in your hands (patch #30, in this section's slot; off: nothing)
+  if (typeof flcTick === 'function') flcTick();          // First Light Cocoa (patch #26, in this section's slot; off: nothing)
   const P = SHIP.player, hold = P.cart ? (P.cart.stage === 'full' ? 'cartfull' : 'cart') : P.carry.length > 0 || typeof hamperHeld === 'function' && hamperHeld() ? true
-    : ACT && ACT.kind === 'eat' && ACT.o.fed && ACT.phase === 'walk' || !ACT && P.tray ? 'tray' : typeof ixHold === 'function' && ixHold() || false;   // a tray from the servery to your seat (0.28.15); 15b's ixHold: a job's toolbox or crate
+    : ACT && ACT.kind === 'eat' && ACT.o.fed && ACT.phase === 'walk' || !ACT && P.tray ? 'tray' : typeof ixHold === 'function' && ixHold() || typeof mugHeld === 'function' && mugHeld() || false;   // a tray from the servery to your seat (0.28.15); 15b's ixHold: a job's toolbox or crate
   if (hold || player.holding) player.holding = hold;   // in hand (Walker.update): parts (true, the crate) or a hover cart ('cart', 'cartfull')
   player.maxV = PLAYER_V0 * playerSpeed();
   const crouch = crawlTiles().has(K(player.here()));   // a crawlway (0.28.11): crouch-walk, slower
@@ -13872,7 +13875,8 @@ function barTap(it, at) {
       const id = usual ? (i === 0 ? usual : ids[i - 1]) : ids[i]; if (!id) return;
       if (SHIP.player.credits < BAR_PRICE) { toast(name, barSays(who, 'bar.broke', 'That\'s ' + BAR_PRICE + ' credits, and you\'re a bit short. Next time.')); return; }
       SHIP.player.credits -= BAR_PRICE; SHIP.player.drink = id; B.run = B.last === id ? B.run + 1 : 1; B.last = id;
-      toast(name, barSays(who, 'bar.serve', 'One ' + BAR_DRINKS[id].short + '. Enjoy.', { drink: BAR_DRINKS[id].short }) + ' Take it to a stool.');
+      const mug = typeof MUG_ON !== 'undefined' && MUG_ON && MUG_DRINKS.has(id);   // patch #29/#30: cocoa's own line; a mug can be drunk as you go
+      toast(name, (mug && id === 'cocoa' ? barSays(who, 'bar.serve.cocoa', 'One cocoa. Careful, it\'s hot.') : barSays(who, 'bar.serve', 'One ' + BAR_DRINKS[id].short + '. Enjoy.', { drink: BAR_DRINKS[id].short })) + (mug ? ' Take it to a stool, or drink it as you go.' : ' Take it to a stool.'));
     };
     if (typeof deviceChoose === 'function') deviceChoose({ title: name, text: barSays(who, 'bar.ask', 'What\'ll it be?'), choices }, pick); else pick(usual ? 0 : 0);
   };
@@ -14305,6 +14309,309 @@ SAVE_EXTRA.push(s => { const p = s.player || (s.player = {}); p.cart = SHIP.play
 // ---- the device: its screens (Home, Needs, Mail, Wallet and the rest) are section 19's apps (0.35.0) ----
 
 // ---- slot: Player engineer (section 15). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// patch #21 (plans/patch-plan.html, the user's "Junior Officer"): the rank before the title on a crew card and in the device's
+// crew lists ("Junior Officer · Storekeeper · stranger"). Left out where the title already says it (Captain, Executive Officer,
+// Head of …) and for guests. The words live in content/banks/talk.lines (card.rank.*). Off = identical; ?rankcard turns it on.
+let RANK_CARD_ON = URL_FLAGS.has('rankcard');
+const RANK_CARD_WORDS = { captain: 'Captain', xo: 'Commander', chief: 'Department Chief', senior: 'Senior Officer', officer: 'Officer', junior: 'Junior Officer' };
+function rankCardWord(p) {
+  if (!RANK_CARD_ON || !p || p.player || !RANK_CARD_WORDS[p.rank] || /^(Captain|Executive Officer|Head of )/.test(p.role || '')) return null;
+  return typeof talkText === 'function' ? talkText('card.rank.' + p.rank, RANK_CARD_WORDS[p.rank]) : RANK_CARD_WORDS[p.rank];
+}
+function rankCardRole(p) { const w = rankCardWord(p); return w ? w + (p.role ? ' · ' + p.role : '') : p && p.role; }
+// patch #6 (plans/patch-plan.html, the user chose "both"): the time clock. Every punch: taps are ignored for half a second
+// after the screen changes, and the next button is never where the last one was (two fixed halves, left and right). An
+// early clock-out (before 17:00) is confirmed, Cancel where "Clock out" was. Clocking in, and out at or after 17:00, get
+// Undo on the other side for 5 real seconds, or until you walk away, close the screen, change deck or ship time jumps
+// (Dev mode). The punch counts at once (careerClock); only its side effects (the remark, the clock note) wait, held in
+// CLOCK_UNDO.fx. Undo puts the kept copy of the clock record back. A save settles the window first. Off = identical; ?clockundo.
+// Held on purpose (PP1's review): the clock note waits too, so what listens to it (Day 1's intro arrow to the job board, the
+// at-work leisure drain) starts up to 5 s late; an Undo would otherwise leave the arrow on the board. Not a bug to fix.
+let CLOCK_UNDO_ON = URL_FLAGS.has('clockundo');
+const CLOCK_UNDO_S = 5, CLOCK_TAP_GUARD = 500, CLOCK_WALK = 1.5;   // real seconds of Undo; ms of the tap guard; tiles you may step away
+let CLOCK_UNDO = null, CLOCK_DRAWN = -1e9;               // the open window { what, t, d, keep, fx, said, at, deck, x, z }; the screen's last draw
+function clockPunch(early) {                             // a punch from the screen -> careerClock's result; held unless it's an early clock-out
+  const C = careerInit(), d = SHIP.time.day, keep = { ci: C.ci, co: C.co, on: C.on, log: SHIP.player.clockLog[d], sent: flag('shiftSent') };
+  clockUndoSettle();
+  let fx = null; const r = careerClock(shipNow(), true, early ? null : f => { fx = f; });
+  if (r && fx) { const p = player.obj.position; CLOCK_UNDO = { what: r, t: shipNow(), d, keep, fx, at: performance.now(), deck: deckDef.num, x: p.x, z: p.z }; requestAnimationFrame(clockUndoFrame); }
+  return r;
+}
+function clockUndo() {                                   // Undo: the kept copy back; the side effects never happen
+  const u = CLOCK_UNDO; if (!u) return null; CLOCK_UNDO = null;
+  const C = careerInit(); C.ci = u.keep.ci; C.co = u.keep.co; if (flag('shiftSent') === u.keep.sent) C.on = u.keep.on;   // section 14 started the shift in the window (its shiftStart note is out): that stands
+  if (u.keep.log === undefined) delete SHIP.player.clockLog[u.d]; else SHIP.player.clockLog[u.d] = u.keep.log;
+  return u.what;
+}
+function clockUndoSettle() {                             // the window ends: the punch's side effects run now; an open screen loses its Undo
+  const u = CLOCK_UNDO; if (!u) return; CLOCK_UNDO = null;
+  try { u.fx(); } catch (e) { /* the remark or a listener's problem; the punch stands */ }
+  const el = document.getElementById('clockScreen'); if (el && !el.hidden) clockScreen(u.said, false, 'settled-' + u.what);
+}
+function clockUndoFrame() {
+  const u = CLOCK_UNDO; if (!u) return;
+  const el = document.getElementById('clockScreen'), p = player.obj.position;
+  if (!el || el.hidden || performance.now() - u.at > CLOCK_UNDO_S * 1000 || deckDef.num !== u.deck || Math.hypot(p.x - u.x, p.z - u.z) > CLOCK_WALK
+      || Math.abs(shipNow() - u.t) > 5 || SHIP.time.day !== u.d) clockUndoSettle();
+  else requestAnimationFrame(clockUndoFrame);
+}
+SAVE_EXTRA.unshift(() => clockUndoSettle());       // a save ends the window first, so the note and the remark aren't lost
+function clockButtons(row, act, s) {                     // the screen's two halves, left and right: [Clock in | Close], [ | Undo] ...
+  const gap = () => { const b = act('', () => {}); b.disabled = true; b.style.visibility = 'hidden'; b.setAttribute('aria-hidden', 'true'); return b; };
+  const half = b => { b.style.flex = '1 1 0'; return b; }, close = () => act(csText('close', 'Close'), () => { document.getElementById('clockScreen').hidden = true; });
+  const u = CLOCK_UNDO && CLOCK_UNDO.d === SHIP.time.day ? CLOCK_UNDO : null, m = SHIP.time.min, ends = m >= CAREER.clockOut;
+  const said = (r, k) => r === 'in' ? (SHIP.time.min - DAY_SHIFT[0] > 5 ? csText('late', 'Clocked in at {time}. A little late. It happens.', { time: hhmm(SHIP.time.min) }) : csText('didin', 'Clocked in at {time}. Have a good shift.', { time: hhmm(SHIP.time.min) }))
+    : r === 'out' ? csText('didout', 'Clocked out at {time}. Evening\'s yours.', { time: hhmm(SHIP.time.min) }) : null;
+  const punch = early => () => { const r = clockPunch(early); const t = said(r); if (CLOCK_UNDO) CLOCK_UNDO.said = t; clockScreen(t); };
+  const undo = () => { const r = clockUndo(); clockScreen(r ? csText('undone.' + r, r === 'in' ? 'Undone. You\'re not clocked in.' : 'Undone. Still on shift.') : null, false, r && 'undone-' + r); };
+  const L = [], open = s.on && !s.out && !(s.inn ? false : ends || m < CAREER.clockIn);
+  if (u && !s.ask) { if (u.what === 'in') L.push(gap(), act(csText('undo', 'Undo'), undo)); else L.push(act(csText('undo', 'Undo'), undo), gap()); }   // Undo on the other side from the punch
+  else if (s.ask) L.push(act(csText('earlyyes', 'Clock out early'), punch(true)), act(csText('cancel', 'Cancel'), () => clockScreen()));   // Cancel where "Clock out" was
+  else if (s.after === 'settled-in') L.push(close(), gap());   // the window just ended: Close on the left, where Undo wasn't
+  else if (open && !s.inn) L.push(act(csText('in', 'Clock in'), punch(false)), s.after === 'undone-in' ? gap() : close());
+  else if (open) L.push(s.after === 'undone-out' ? gap() : close(), act(csText('out', 'Clock out'), ends ? punch(false) : () => clockScreen(null, true)));   // before 17:00 it asks first
+  else L.push(gap(), close());   // nothing to punch
+  L.forEach(half);
+}
+// patch #24 (plans/patch-plan.html, decided: today's goods): when a storekeeper is at the counter (the crew store's
+// work:store place, Deck 3), their card has "Buy something" (section 20's chat card asks shopMenuButton). It opens a simple
+// menu: your credits, then every shelf's goods (STORE, by shelf) and the hobby supplies you don't have yet, at today's
+// prices; what you can't afford is greyed out ("3 more credits"). Choosing one puts it in your basket and runs the
+// counter's pay step (playerTap on the counter: you step up to the till and the storekeeper rings it up), so eating,
+// the locker, gifts and hobbies work as before. The shelves keep browse-and-pick. Off = identical; ?shopmenu.
+let SHOP_MENU_ON = URL_FLAGS.has('shopmenu');
+const shopMenuText = (k, d, n) => (typeof talkText === 'function' ? talkText('shop.menu.' + k, d) : d).split('{n}').join(n);
+function shopMenuClerk(p) {                              // p is serving at the counter now: the work:store place on this deck, settled there
+  if (!SHOP_MENU_ON || !p || typeof DECK_CREW === 'undefined') return false;
+  const a = DECK_CREW.find(x => x.p === p), pl = a && PLACE_OF.get(a.goalId);
+  return !!(pl && pl.type === 'work:store' && a.settled);
+}
+function shopMenuButton(p) { return shopMenuClerk(p) ? { id: 'shop-menu', label: shopMenuText('button', 'Buy something') } : null; }
+function shopMenuGoods() {                               // [[shelf, [item as storePick gives it]]]: today's goods by shelf, then hobby supplies
+  const out = ['snack', 'drink', 'comfort'].map(k => [k, STORE[k].map(([name, price, gain, gift]) => ({ kind: k, name, price, gain, gift: gift || null }))]);
+  if (typeof HOBBIES !== 'undefined') {
+    const h = ['draw', 'puzzle', 'knit'].filter(id => HOBBIES[id] && !hobbyHas(id)).map(id => { let name = null; try { name = careerText('hobby.store.' + id); } catch (e) { name = null; }
+      return { kind: 'hobby', name: (name || HOBBIES[id].prop).replace(/\s*·\s*\d+ credits?$/i, ''), price: HOBBIES[id].price, gain: 0, gift: null, hobby: id }; });   // the store's name without its price (the menu shows it)
+    if (h.length) out.push(['hobby', h]);
+  }
+  return out;
+}
+const shopMenuName = n => { const t = n.replace(/^an? /i, ''); return t[0].toUpperCase() + t.slice(1); };   // 'a bag of dried apple' -> 'Bag of dried apple'
+function shopMenuOpen(p) {
+  let el = document.getElementById('shopMenu');
+  if (!el) {
+    el = document.createElement('div'); el.id = 'shopMenu'; el.className = 'devdlg'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'Crew store');
+    el.style.maxHeight = '72vh'; el.style.overflowY = 'auto';
+    el.addEventListener('pointerdown', e => e.stopPropagation()); document.body.appendChild(el);
+    addEventListener('keydown', e => { if (e.key === 'Escape' && !el.hidden) el.hidden = true; });
+  }
+  const mk = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x !== undefined) e.textContent = x; return e; }, cr = SHIP.player.credits;
+  el.dataset.ph = SHIP.device.settings.phosphor; el.textContent = ''; el.hidden = false;
+  const x = mk('button', 'x', '×'); x.type = 'button'; x.setAttribute('aria-label', shopMenuText('close', 'Close')); x.onclick = e => { e.stopPropagation(); el.hidden = true; };
+  el.append(x, mk('small', '', shopMenuText('title', 'CREW STORE') + ' · ' + p.name), mk('p', '', shopMenuText('credits', 'You have {n} credits.', cr)));
+  for (const [k, list] of shopMenuGoods()) {
+    el.appendChild(mk('small', '', shopMenuText(k, { snack: 'Snacks', drink: 'Drinks', comfort: 'Things for your locker', hobby: 'Hobby supplies' }[k]).toUpperCase()));
+    const row = mk('div', 'btns'); row.style.marginBottom = '10px';
+    for (const it of list) {
+      const short = it.price - cr, b = mk('button', 'act', shopMenuName(it.name) + ' · ' + it.price + (short > 0 ? ' (' + (short === 1 ? shopMenuText('short1', '1 more credit', 1) : shopMenuText('short', '{n} more credits', short)) + ')' : ''));
+      b.type = 'button'; b.style.flex = '1 1 100%'; b.style.textAlign = 'left';
+      if (short > 0) { b.disabled = true; b.style.opacity = '.45'; }
+      else b.onclick = e => { e.stopPropagation(); el.hidden = true; shopMenuBuy(p, it); };
+      row.appendChild(b);
+    }
+    el.appendChild(row);
+  }
+  try { x.focus(); } catch (e) { /* no focus */ }
+  return true;
+}
+function shopMenuBuy(p, item) {                          // into the basket, then the counter's own pay step
+  if (typeof chatClose === 'function') chatClose();
+  basket = { ...item };
+  const sp = placeSpot('3-store-1'), v = new THREE.Vector3();
+  const counter = ITEMS.filter(i => /^counter$/i.test(i.t) && i.hit).map(i => { i.hit.getWorldPosition(v); return [i, v.clone()]; })
+    .sort((m, n) => (sp ? Math.hypot(m[1].x - sp.x, m[1].z - sp.z) - Math.hypot(n[1].x - sp.x, n[1].z - sp.z) : 0))[0];
+  if (counter && playerTap(counter[0], counter[1].clone(), counter[1].clone())) return true;
+  actStart('pay', null, { title: 'Counter', after: p.name + ' rings it up.' });   // no counter in reach: pay where you stand
+  return true;
+}
+// patch #5 (plans/patch-plan.html; decided: the ladder, Engine control and the Sensor array open, the Reactor sealed;
+// climbing 2 energy and +1 fitness a deck): no tiers on maintenance places, and a spine ladder that works. Tapping a
+// deck's ladder hatch (or the ladder behind its glass) walks you to the hatch and opens a "Spine ladder" panel in the
+// lift's style: Up and Down, nearest deck first, each deck's name, "You are here" and the goal mark. A climb is a ride
+// (section 11's `ride`, with `ladder` set; updateRide hands it to ladderStep): the view fades, about a ship minute a deck
+// passes (skipTo), 2 energy and +1 fitness a deck, and you land on that deck's lobby side of its ladder hatch. It works
+// while the lift is held. Deck 5 had no ladder hatch: its east spine wall (v,19,9, lobby tile (19,9) in front) becomes
+// one and that side's lift call panel is left off; a hatch blocks as the wall did, so paths don't change. Engine control
+// (Deck 6, v,22,5) and the Sensor array (Deck 2, v,45,9) open as doors; the Reactor stays sealed "for safety", not by
+// rank. The tier wording comes out of the deck texts. Off = identical; ?ladder.
+let LADDER_ON = URL_FLAGS.has('ladder');
+const LADDER = { energy: 2, fitness: 1, mins: 1, d5: 'v,19,9', open: [[6, 'v,22,5'], [2, 'v,45,9']], fade: .4 };
+const ladderText = n => +n === 1 ? 'The top of the maintenance ladder, beside the lift. Tap the hatch to climb down.'
+  : +n === 6 ? 'The bottom of the maintenance ladder, beside the lift. Tap the hatch to climb up.'
+  : 'The maintenance ladder runs the whole height of the ship, beside the lift. Tap the hatch to climb up or down.';
+if (LADDER_ON) {
+  DECKS[5].doors[LADDER.d5] = 'hatch'; DECKS[5].closedDoors[LADDER.d5] = { t: 'Spine ladder', x: ladderText(5) };
+  for (const [n, key] of LADDER.open) { DECKS[n].doors[key] = 'door'; delete DECKS[n].closedDoors[key]; }
+  for (const n of DECK_ORDER) {                          // the tier wording out of the deck texts (the Reactor: sealed for safety)
+    const d = DECKS[n]; if (!d) continue;
+    const noTier = t => t.replace(/Tier 4 access, and only on a team job\./, 'Sealed for safety: only on a team job.').replace(/\s*Tier \d access(, [^.]*)?\./g, '').trim();
+    for (const k in d.closedDoors || {}) d.closedDoors[k] = { ...d.closedDoors[k], x: d.closedDoors[k].t === 'Spine ladder' ? ladderText(n) : noTier(d.closedDoors[k].x || '') };   // the sealed doors copied their room's words at load
+    for (const r in d.rooms) if (typeof d.rooms[r].tap === 'string') d.rooms[r].tap = noTier(d.rooms[r].tap);
+  }
+  Object.assign(SPINE_IT.ladder, { x: 'The maintenance ladder, top to bottom of the ship beside the lift. Tap it to climb.' });   // also backlog #7's "seven decks" here
+}
+function ladderHatch() {                                 // this deck's ladder hatch edge, or null
+  for (const [k, c] of Object.entries(CLOSED_DOORS)) if (c && c.t === 'Spine ladder') { const e = EDGES.get(k); if (e && e.type === 'hatch') return e; }
+  return null;
+}
+function ladderTap(key) {                                // section 11's tap: a ladder hatch (key), or the ladder itself (null)
+  if (!LADDER_ON || (typeof ride !== 'undefined' && ride)) return false;
+  const e = key ? (CLOSED_DOORS[key] && CLOSED_DOORS[key].t === 'Spine ladder' ? EDGES.get(key) : null) : ladderHatch(); if (!e) return false;
+  approach(new THREE.Vector3(e.cx, 0, e.cz), reachableSide(e)[2], 0, () => ladderPanel()); return true;
+}
+function ladderPanel() {
+  let el = document.getElementById('ladderPanel');
+  if (!el) {
+    el = document.createElement('div'); el.id = 'ladderPanel'; el.className = 'lift'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'Spine ladder');
+    el.addEventListener('pointerdown', e => e.stopPropagation()); document.body.appendChild(el);
+    addEventListener('keydown', e => { if (e.key === 'Escape' && !el.hidden) el.hidden = true; });
+  }
+  const mk = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x !== undefined) e.textContent = x; return e; };
+  el.textContent = ''; el.hidden = false; toastEl.classList.remove('show');
+  el.append(mk('h2', '', 'Spine ladder'), mk('p', '', 'Up or down? Each deck takes about a minute and ' + LADDER.energy + ' energy. Good exercise.'));
+  const here = deckDef.num, at = DECK_ORDER.indexOf(here), gl = typeof goalNow === 'function' ? goalNow() : null;
+  const row = (n, k) => {
+    const built = !!DECKS[n], me = n === here, b = mk('button', 'deckbtn' + (me ? ' here' : '')); b.type = 'button'; b.disabled = me || !built;
+    const sp = mk('span'); sp.append(mk('b', '', DECK_NAMES[n]), mk('small', '', me ? 'You are here' : !built ? 'Not built yet' : k + (k > 1 ? ' decks ' : ' deck ') + (DECK_ORDER.indexOf(n) < at ? 'up' : 'down') + ' · ' + DECKS[n].blurb));
+    b.append(mk('i', '', deckLabel(n)), sp);
+    if (gl && gl.deck === n && !me && built) { b.classList.add('goal'); b.appendChild(mk('em', '', '→ Goal')); }
+    if (!me && built) b.onclick = () => { el.hidden = true; ladderClimb(n, k); };
+    return b;
+  };
+  const up = DECK_ORDER.slice(0, at).reverse(), down = DECK_ORDER.slice(at + 1), list = mk('div', 'decks');
+  if (up.length) { list.appendChild(mk('p', '', 'Up')); up.forEach((n, k) => list.appendChild(row(n, k + 1))); }
+  list.appendChild(row(here, 0));
+  if (down.length) { list.appendChild(mk('p', '', 'Down')); down.forEach((n, k) => list.appendChild(row(n, k + 1))); }
+  const stay = mk('button', 'stay', 'Stay here'); stay.type = 'button'; stay.onclick = () => { el.hidden = true; };
+  el.append(list, stay);
+  try { (list.querySelector('button.goal') || list.querySelector('button:not(:disabled)') || stay).focus(); } catch (e) { /* no focus */ }
+}
+function ladderClimb(n, k) {                             // k decks to deck n: a ride with `ladder` set (see ladderStep)
+  if (ride) return false;
+  endSteer(); player.stop(); toastEl.classList.remove('show');
+  ride = { n, t: 0, at: null, face: player.face, swapped: false, ladder: { k, from: deckDef.num } };
+  return true;
+}
+function ladderStep(r, dt) {                             // section 11's updateRide, for a ladder ride: fade, climb, land, fade back
+  const L = r.ladder, T_ = r.t;
+  if (!r.swapped) {
+    fadeEl.style.opacity = THREE.MathUtils.clamp(T_ / LADDER.fade, 0, 1);
+    if (T_ < LADDER.fade) return;
+    skipTo(shipNow() + L.k * LADDER.mins);               // about a ship minute a deck
+    const N = SHIP.player.needs; N.energy = needClamp(N.energy - LADDER.energy * L.k); N.fitness = needClamp(N.fitness + LADDER.fitness * L.k);
+    goToDeck(r.n, null);
+    const e = ladderHatch(), s = e && reachableSide(e);
+    if (s && free(s[0], s[1])) { player.obj.position.copy(cellPos(s[0], s[1])); player.face = player.obj.rotation.y = s[2] + Math.PI; target.copy(player.obj.position).setY(.7); }
+    r.swapped = true; r.t = LADDER.fade; return;
+  }
+  fadeEl.style.opacity = THREE.MathUtils.clamp(1 - (T_ - LADDER.fade) / LADDER.fade, 0, 1);
+  if (T_ < 2 * LADDER.fade) return;
+  fadeEl.style.opacity = 0; ride = null;
+  toast(deckWord(deckDef.num) + ', ' + deckDef.name, (DECK_ORDER.indexOf(deckDef.num) < DECK_ORDER.indexOf(L.from) ? 'Up' : 'Down') + ' the spine ladder, ' + L.k + (L.k > 1 ? ' decks' : ' deck') + '. Energy −' + LADDER.energy * L.k + ', fitness +' + LADDER.fitness * L.k + '.');
+}
+// ---- the mug in your hands (patch plan #30; patch builder DB1 for the player engineer): a cocoa or tea from the bar
+// (barTap's SHIP.player.drink) is a mug in your hand, held one-handed at the chest (8b's HOLDS.mug) while you walk or
+// stand, and in the lift. You drink it at a stool as before (15b's ixDrink, with the mug: 8b's 'cocoa' pose), set it down
+// (15b's Put down), or after MUG_MINS ship minutes you've drunk it as you go (the stool's gains, without company).
+// Picking up something two-handed (parts, a tray, the hamper, a cart) or sitting down to eat finishes it first. Not
+// saved, as the drink in hand never was: a reload clears it. Behind MUG_ON (off: the game is unchanged; #mug on the link
+// turns it on for a test until the switch-on step). Nothing here calls R().
+const MUG_ON = URL_FLAGS.has('mug'), MUG_DRINKS = new Set(['cocoa', 'tea']), MUG_MINS = 20;
+let MUG = null;                                          // { drink, from }: the mug in hand and the ship minute it was served
+const mugText = (k, fb, v = {}) => (typeof barSays === 'function' ? barSays(null, k, fb, v) : fb);
+function mugFinish(quiet) {                              // drunk as you go: the stool's gains, then it's gone
+  const P = SHIP.player, d = MUG && MUG.drink, def = PLAYER_ACTS.ixDrink, n = P.needs; MUG = null; P.drink = null; if (!d) return;
+  if (def) { const also = mugAlso(d, def.also); n[def.need] = needClamp(n[def.need] + def.gain); for (const k in also) n[k] = needClamp(n[k] + also[k]); }
+  if (!quiet) toast(BAR_DRINKS[d].name, mugText('bar.finish.' + d, d === 'cocoa' ? 'You finish your cocoa. Warm all the way down.' : 'You finish your ' + BAR_DRINKS[d].short + '.'));
+}
+// patch #29: a cocoa from the bar is leisure +8 (the stool's +5 for the rest), at a stool (15b's ixSide asks) or as you go
+const mugAlso = (d, also) => MUG_ON && d === 'cocoa' ? { ...(also || {}), leisure: 8 } : { ...(also || {}) };
+function mugTick() {                                     // each frame (section 15's player tick): the mug's minutes, and hands wanted elsewhere
+  if (!MUG_ON) return;
+  const P = SHIP.player, d = P.drink;
+  if (!d || !MUG_DRINKS.has(d)) { MUG = null; return; }
+  if (!MUG || MUG.drink !== d) MUG = { drink: d, from: shipNow() };
+  const busy = P.cart || P.carry.length > 0 || P.tray || (typeof hamperHeld === 'function' && hamperHeld()) || ACT && ACT.kind === 'eat';
+  // PP1: asleep, a time skip, or another activity under way (a shower, a repair...): finished quietly, never a hidden mug
+  const quiet = (typeof sleeping !== 'undefined' && sleeping) || shipNow() - MUG.from > MUG_MINS + 5 || !!ACT && ACT.kind !== 'ixDrink' && ACT.phase !== 'walk';
+  if (quiet) mugFinish(true); else if (busy || shipNow() - MUG.from >= MUG_MINS) mugFinish(false);
+}
+// section 15's hold: 'mug' while it's in hand and you're walking or standing (an activity's own pose wins, but walking to it)
+const mugHeld = () => MUG_ON && MUG && SHIP.player.drink === MUG.drink && (!ACT || ACT.phase === 'walk') ? 'mug' : null;
+// 15b's drink at a stool: the pose with the mug (8b's ACTS.cocoa) for a cocoa or tea, else null (the glass)
+const mugPose = () => MUG_ON && MUG_DRINKS.has(SHIP.player.drink || ACT && ACT.o && ACT.o.drink || '') ? 'cocoa' : null;
+function mugPut() {                                      // 15b's Put down: the mug goes (someone clears it)
+  if (!mugHeld()) return null;
+  MUG = null; SHIP.player.drink = null;
+  return mugText('bar.putdown', 'You set your mug down. Someone will clear it.');
+}
+// patch #26 First Light Cocoa (plans/patch-plan-first-light-cocoa.md; decided: your first Monday 20:00-20:45, the bow
+// lounge, Dev Raman at the windows, 3 of 5 old hands' tips per save, Tomas, you pick 1 of 3 replies, mugs up, no pin, a
+// free cocoa). The tradition is content/traditions/first-light.trad (section 18 runs it; with the switch off section 18
+// doesn't load it, so nobody's plan changes). Zeke invites you at your Day 1 dinner
+// (flcTick: his line as a bubble when he's near you, and the invitation card). Tap to join is section 18's (TRAD_JOIN
+// 'first-light'); joining (section 18's eventJoin hands it here, flcJoin) gives you a free cocoa (the mug, #30, with
+// MUG_ON) and plays the meeting firstLightCocoa with three of the five tips, picked per save (flcScript). While it's on and
+// you're in the lounge the lights go down (flcDim, read by section 5's applyLight). The intro's bed arrow waits (flcBusy,
+// section 21). Off = identical; ?firstlight (with ?mug for the mugs).
+let FLC_ON = URL_FLAGS.has('firstlight');
+const FLC = { id: 'first-light', script: 'firstLightCocoa', asked: 'firstlight.asked', shown: 'firstlight.shown', tips: ['holt', 'kowalczyk', 'brennan', 'halloran-emeka', 'sato'], n: 3,
+  invite: [18 * 60 + 15, 19 * 60 + 45], late: 19 * 60 + 30, near: 4, dim: .35, room: 'L' };
+var FLC_DIM = 0;                                         // the lounge's dimming now (0..FLC.dim) (var: section 5 may ask first). The day the meeting played is the saved flag FLC.shown (PR2: a reload mustn't play it again)
+function flcDim() { return FLC_DIM || 0; }
+function flcScript() {                                    // the meeting with three of the five tips, the same three all save long
+  const sc = MEETING_SCRIPTS[FLC.script]; if (!sc) return null;
+  const salt = typeof seekSalt === 'function' ? seekSalt() : 0;
+  const keep = FLC.tips.map((id, i) => [id, schedU(salt, 0, 731 + i)]).sort((a, b) => a[1] - b[1]).slice(0, FLC.n).map(x => x[0]);
+  MEETING_SCRIPTS[FLC.script + '.today'] = { ...sc, lines: sc.lines.filter(l => !FLC.tips.includes(l.who) || keep.includes(l.who)) };
+  return keep;
+}
+function flcShow(d, now) {
+  if (!FLC_ON || flag(FLC.shown) === d || typeof dialogueShow !== 'function' || DIALOGUE) return false;
+  const keep = flcScript(); if (!keep) return false;
+  flagSet(FLC.shown, d);
+  return dialogueShow(FLC.script + '.today', { id: FLC.script + '@' + d, who: ['raman', 'tomas', ...keep], at: now, where: { deck: 3, room: /^Bow lounge$/ } });
+}
+function flcJoin(e, d, now) {                            // section 18's eventJoin: you're in
+  if (!FLC_ON) return false;
+  if (MUG_ON && !SHIP.player.drink && !SHIP.player.carry.length && !SHIP.player.tray) SHIP.player.drink = 'cocoa';   // a free cocoa (the mug, #30)
+  flcShow(d, now); return true;
+}
+function flcBusy(now) {                                 // it's on, or its meeting is; or (PR2) you've been asked and haven't said no, until it's over
+  if (!FLC_ON) return false;
+  if (typeof tradOn === 'function' && tradOn(FLC.id, now) || typeof DIALOGUE !== 'undefined' && DIALOGUE && DIALOGUE.id === FLC.script + '.today') return true;
+  const d = Math.floor(now / 1440) + 1, e = flag(FLC.asked) === d && typeof eventsOn === 'function' ? eventsOn(d).find(x => x.id === FLC.id) : null;
+  return !!e && now < (d - 1) * 1440 + e.to && !(SHIP.device && (SHIP.device.appts || []).some(a => a.trad === FLC.id && a.status === 'no'));
+}
+function flcTick() {                                     // each frame (section 15's player tick)
+  if (!FLC_ON || typeof SHIP === 'undefined' || !SHIP.time) return;
+  const d = SHIP.time.day, m = SHIP.time.min, now = shipNow();
+  if (d === 1 && m >= FLC.invite[0] && m < FLC.invite[1] && !flag(FLC.asked) && typeof socialInvite === 'function') {   // Zeke, at your Day 1 dinner
+    const z = typeof DECK_CREW !== 'undefined' && DECK_CREW.find(a => a.p && a.p.id === 'torres-zeke'), p = player.obj.position;
+    const near = z && Math.hypot(z.x - p.x, z.z - p.z) < FLC.near;
+    if (near || m >= FLC.late) {
+      flagSet(FLC.asked, d);
+      const ev = (typeof SHIP_TRADITIONS !== 'undefined' ? SHIP_TRADITIONS : []).find(t => t.id === FLC.id), line = ev && ev.invite && ev.invite.line;
+      if (near && line && z.h && typeof bubbleSay === 'function') bubbleSay(z.h, line);   // the crowd handle, as every caller passes (PR2)
+      socialInvite({ from: 'torres-zeke', trad: FLC.id, day: d });
+    }
+  }
+  const on = typeof tradOn === 'function' && !!tradOn(FLC.id, now);
+  if (on && SHIP.events && SHIP.events.joined.includes(FLC.id + '@' + d) && flag(FLC.shown) !== d && deckDef.num === 3 && roomAt(...player.here()) === FLC.room) flcShow(d, now);   // joined while another card was open
+  const want = flcBusy(now) && deckDef.num === 3 && roomAt(...player.here()) === FLC.room ? FLC.dim : 0, was = FLC_DIM;   // down till the meeting's over too
+  FLC_DIM = Math.abs(want - FLC_DIM) < .01 ? want : FLC_DIM + (want - FLC_DIM) * .05;
+  if (FLC_DIM !== was && typeof applyLight === 'function') applyLight(nightT);
+}
 // ---- end of slot: Player engineer ----
 
 // =====================================================================
@@ -14367,7 +14674,7 @@ const ixBond = s => typeof bondBest === 'function' ? bondBest(DECK_CREW.filter(c
 // the side gains as the minutes pass (ixFrame, below, each frame while one of ours runs): also{}, plus `with` more
 // social for company (scaled by needEffects' socialGain). They follow A.done, so needEffects' task speed applies
 function ixSide(A) {
-  if (A.kind === 'ixDrink' && !A.o.drink && SHIP.player.drink) { A.o.drink = SHIP.player.drink; SHIP.player.drink = null; A.def.done = 'You finish your ' + BAR_DRINKS[A.o.drink].short + '.'; }   // the drink from the bar goes as you drink it (0.28.62)
+  if (A.kind === 'ixDrink' && !A.o.drink && SHIP.player.drink) { A.o.drink = SHIP.player.drink; SHIP.player.drink = null; A.def.done = 'You finish your ' + BAR_DRINKS[A.o.drink].short + '.'; if (typeof mugAlso === 'function') A.def.also = mugAlso(A.o.drink, A.def.also); }   // the drink from the bar goes as you drink it (0.28.62)
   const d = A.def, f = Math.max(0, Math.min(1, A.done / d.mins));
   if (!A.o.ixSide) {
     let mult = 1; try { const e = typeof needEffects === 'function' ? needEffects(SHIP.player.needs) : null; if (e && isFinite(e.socialGain)) mult = e.socialGain; } catch (e) { mult = 1; }
@@ -14389,7 +14696,7 @@ function ixPose(kind, pl, spot, company) {
   if (kind === 'ixMusic') return base === 'sit' ? 'sit:play' : 'play';
   if (kind === 'ixGarden' || kind === 'ixFold' || kind === 'ixWater') return IX_ACTS[kind].pose;
   if (kind === 'ixTea') return 'drink';
-  if (kind === 'ixDrink') return base === 'sit' ? 'sit:drink' : 'drink';
+  if (kind === 'ixDrink') { const d = typeof mugPose === 'function' && mugPose() || 'drink'; return base === 'sit' ? 'sit:' + d : d; }   // a cocoa or tea: the mug (15's mugPose, patch #30)
   if (base === 'sit' && own === 'sit') return company ? 'sit:talk' : kind === 'ixStars' ? 'sit' : 'sit:read';
   return own;
 }
@@ -14524,7 +14831,7 @@ function putDelivery() {                                 // your delivery job, w
 }
 const crateHeld = () => { const d = putDelivery(); return !!d && d.st[d.pick].done && !(d.drop >= 0 && d.st[d.drop].done) && !crateDown(d.j); };
 const trayHeld = () => !!SHIP.player.tray;
-const putWhat = () => putParts().length > 0 || trayHeld() || crateHeld() || typeof hamperHeld === 'function' && hamperHeld();   // section 21b's laundry hamper (0.42.40)
+const putWhat = () => putParts().length > 0 || trayHeld() || crateHeld() || typeof hamperHeld === 'function' && hamperHeld() || typeof mugHeld === 'function' && !!mugHeld();   // 15's mug (patch #30)   // section 21b's laundry hamper (0.42.40)
 function stepUndo(j, step) {                             // open a stop of your job again (section 17's stepsDone)
   const k = jobStops(j).findIndex(x => x.step === step); if (k < 0 || !Array.isArray(j.stepsDone)) return;
   j.stepsDone = j.stepsDone.filter(x => x !== k); if (typeof MACH_REV !== 'undefined') MACH_REV++;
@@ -14554,6 +14861,7 @@ function putDown() {
     said.push('You set the crate down here. Tap it to pick it up again; your job stays yours.');
   }
   if (typeof hamperPut === 'function') { const h = hamperPut(); if (h) said.push(h); }   // section 21b (0.42.40)
+  if (typeof mugPut === 'function') { const m = mugPut(); if (m) said.push(m); }   // section 15's mug (patch #30)
   if (typeof ixGoalAt !== 'undefined') ixGoalAt = -1;
   if (typeof device !== 'undefined' && device.refresh) device.refresh();
   toast('Put down', said.join(' ') + (P.carry.length ? ' Still in your hands: ' + partList(P.carry) + '.' : ''));
@@ -27906,13 +28214,21 @@ const LINES = JSON.parse([
   '{"text":"Juice","id":"1i9s1b8"}]',
   ',"bar.drink.tea":[',
   '{"text":"Tea","id":"1d6iuxc"}]',
+  ',"bar.finish.cocoa":[',
+  '{"text":"You finish your cocoa. Warm all the way down.","id":"74tjry"}]',
+  ',"bar.finish.tea":[',
+  '{"text":"You finish your tea.","id":"ghteu2"}]',
   ',"bar.order":[',
   '{"text":"Order a drink (2 credits)","id":"a4iynu"}]',
+  ',"bar.putdown":[',
+  '{"text":"You set your mug down. Someone will clear it.","id":"kvz0ss"}]',
   ',"bar.serve":[',
   '{"text":"One {drink}. Enjoy.","id":"137tz96"},',
   '{"text":"There you go. One {drink}, nice and fresh.","id":"938j4o"},',
   '{"text":"Here\'s your {drink}. Find a stool, put your feet up.","id":"zbmvfu"},',
   '{"text":"Here you are. Careful, it\'s full.","id":"4pn7xq"}]',
+  ',"bar.serve.cocoa":[',
+  '{"text":"One cocoa. Careful, it\'s hot.","id":"18f53bx"}]',
   ',"bar.tap":[',
   '{"text":"Tap night! The drink of the week is {drink}. Go on.","id":"1o09367"},',
   '{"text":"Drink of the week: {drink}. I\'m very proud of it.","id":"83dork","tone":"funny"}]',
@@ -27996,6 +28312,18 @@ const LINES = JSON.parse([
   '{"text":"same time as {trad}","id":"1pjq9ag"}]',
   ',"cal.title":[',
   '{"text":"The next 7 days","id":"16gpefm"}]',
+  ',"card.rank.captain":[',
+  '{"text":"Captain","id":"11ebe8e"}]',
+  ',"card.rank.chief":[',
+  '{"text":"Department Chief","id":"1mr4t3i"}]',
+  ',"card.rank.junior":[',
+  '{"text":"Junior Officer","id":"1nmvw5e"}]',
+  ',"card.rank.officer":[',
+  '{"text":"Officer","id":"1s89kti"}]',
+  ',"card.rank.senior":[',
+  '{"text":"Senior Officer","id":"2zsk08"}]',
+  ',"card.rank.xo":[',
+  '{"text":"Commander","id":"5br9kx"}]',
   ',"career.back":[',
   '{"text":"{hi}. Back from leave? You look rested.","id":"1186734","tier":[1,4]},',
   '{"text":"Welcome back. The board missed you. Well, someone had to say it.","id":"1epolhb","tone":"funny","tier":[1,4]}]',
@@ -28277,6 +28605,8 @@ const LINES = JSON.parse([
   '{"text":"Save me a seat at dinner if you get there first.","id":"u89fbu","dept":"works","tier":[3,4]},',
   '{"text":"Rough one. Tomorrow\'s a fresh board.","id":"s6rni1","dept":"works","mood":"low"},',
   '{"text":"You fixed it today. I heard it start up. Lovely sound.","id":"1qd6a1y","tone":"warm","cue":"repair.you@dept","dept":"works"}]',
+  ',"clock.screen.cancel":[',
+  '{"text":"Cancel","id":"163j2u6"}]',
   ',"clock.screen.close":[',
   '{"text":"Close","id":"1kmpzga"}]',
   ',"clock.screen.day":[',
@@ -28289,6 +28619,10 @@ const LINES = JSON.parse([
   '{"text":"Shift done. See you tomorrow.","id":"1fmaekr"}]',
   ',"clock.screen.early":[',
   '{"text":"Before 17:00. Clock out early?","id":"16pe1pa"}]',
+  ',"clock.screen.earlyask":[',
+  '{"text":"Clock out early? It\'ll be noted.","id":"skklk3"}]',
+  ',"clock.screen.earlyyes":[',
+  '{"text":"Clock out early","id":"1j69f55"}]',
   ',"clock.screen.hours":[',
   '{"text":"YOUR HOURS","id":"hqtumr"}]',
   ',"clock.screen.in":[',
@@ -28315,6 +28649,12 @@ const LINES = JSON.parse([
   '{"text":"WORKS TIME CLOCK","id":"1xjlfe5"}]',
   ',"clock.screen.today":[',
   '{"text":"Today: {hours} h","id":"11a3kkj"}]',
+  ',"clock.screen.undo":[',
+  '{"text":"Undo","id":"vo5aa2"}]',
+  ',"clock.screen.undone.in":[',
+  '{"text":"Undone. You\'re not clocked in.","id":"bndb1r"}]',
+  ',"clock.screen.undone.out":[',
+  '{"text":"Undone. Still on shift.","id":"c9983z"}]',
   ',"clock.screen.week":[',
   '{"text":"This week: {hours} h","id":"1vao3qb"}]',
   ',"clock.screen.weekend":[',
@@ -31303,6 +31643,26 @@ const LINES = JSON.parse([
   '{"text":"Try a hobby","id":"1967191"}]',
   ',"settle.talk":[',
   '{"text":"Talk a while with someone","id":"1wlo0t3"}]',
+  ',"shop.menu.button":[',
+  '{"text":"Buy something","id":"9qzszg"}]',
+  ',"shop.menu.close":[',
+  '{"text":"Close","id":"tt0oto"}]',
+  ',"shop.menu.comfort":[',
+  '{"text":"Things for your locker","id":"4tekcz"}]',
+  ',"shop.menu.credits":[',
+  '{"text":"You have {n} credits.","id":"lhbxf7"}]',
+  ',"shop.menu.drink":[',
+  '{"text":"Drinks","id":"1gaofjh"}]',
+  ',"shop.menu.hobby":[',
+  '{"text":"Hobby supplies","id":"x59233"}]',
+  ',"shop.menu.short":[',
+  '{"text":"{n} more credits","id":"u51415"}]',
+  ',"shop.menu.short1":[',
+  '{"text":"1 more credit","id":"1ehjfqk"}]',
+  ',"shop.menu.snack":[',
+  '{"text":"Snacks","id":"o67ah5"}]',
+  ',"shop.menu.title":[',
+  '{"text":"CREW STORE","id":"oocg62"}]',
   ',"sick.better":[',
   '{"text":"Colour\'s back in your face. Good.","id":"otazkn","tier":[1,4]},',
   '{"text":"Better? Glad. You looked half-mopped yesterday.","id":"57yh3f","tier":[1,4]},',
@@ -33261,6 +33621,7 @@ const MEETINGS_BAKED = {
   "careerChief": {"title": "A word with the Chief", "from": "Chief Ines Calder", "gist": "You didn't come to my office. Missed shifts. Be in the bay at ten to nine, every workday. Need a day? Book leave.", "lines": [{"who": "calder", "text": "Door. Thank you. Sit.", "pose": "gesture"}, {"who": "calder", "text": "I'll be plain. You've missed shifts. Not one. Several.", "to": "you"}, {"who": "calder", "text": "The board doesn't wait. When you're not there, someone else takes your jobs. Then they're late on theirs."}, {"who": "calder", "text": "I'm not angry. I'm worried. Those are different, and I'd like you to know which."}, {"who": "calder", "text": "So. What's going on, {me}? Take your time.", "pose": "listen", "to": "you"}, {"choice": [{"text": "It's been hard. I've been tired.", "rel": {"calder": 1}, "flavour": "share", "mem": "career.chief.tired", "reply": {"who": "calder", "text": "Tired I can work with. If you're ill, the infirmary. Time there never counts against you."}}, {"text": "I don't have a good reason.", "rel": {"calder": 1}, "mem": "career.chief.honest", "reply": {"who": "calder", "text": "Honest. Good. I can work with honest.", "pose": "nod"}}, {"text": "It won't happen again.", "mem": "career.chief.promise", "reply": {"who": "calder", "text": "Don't promise me. Show the board."}}]}, {"who": "calder", "text": "Here's what changes. You're in the bay at ten to nine. Every workday."}, {"who": "calder", "text": "You take a job. You finish it. You turn it in at the board. Do that, and this goes away."}, {"who": "calder", "text": "Need a day? Book leave on your device. An empty slot on paper beats a surprise."}, {"who": "calder", "text": "If nothing changes, the Captain will want to see you. Neither of us wants that."}, {"who": "calder", "text": "Nobody thanks the air. But somebody has to turn up and keep it going. I'd like that to be you.", "to": "you"}, {"who": "calder", "text": "That's all. I won't say it twice. Board's there.", "pose": "nod"}]},
   "careerLetGo": {"title": "The Chief's office", "from": "Chief Ines Calder", "gist": "Chief Calder: the Wren is letting you go. The Tern leaves tomorrow.", "lines": [{"who": "calder", "text": "Sit. Please."}, {"who": "calder", "text": "I'll say it straight, because you'd want that. The Wren is letting you go.", "to": "you"}, {"who": "calder", "text": "The Tern leaves tomorrow. You'll be on it."}, {"who": "calder", "text": "This isn't about who you are. It's the shifts. Only the shifts."}, {"who": "calder", "text": "I keep a note on every tech I've trained. Yours isn't finished. That's the part I mind."}, {"who": "calder", "text": "Anything you want to say?", "pose": "listen", "to": "you"}, {"choice": [{"text": "I'm sorry.", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "I know. So am I."}}, {"text": "Thank you for trying.", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "You're welcome. I'd try again."}}, {"text": "(Say nothing)", "reply": {"who": "calder", "text": "Fine. Quiet's fine."}}]}, {"who": "calder", "text": "Wherever you go next, turn up. That's most of it. The rest you can learn."}, {"who": "calder", "text": "Go and say your goodbyes. People will want to.", "pose": "nod"}]},
   "careerSendoff": {"title": "The shuttle bay", "from": "Zeke Torres", "gist": "The Tern's ramp is down. Your friends came to see you off.", "lines": [{"who": "torres-zeke", "text": "Right where we started. Ramp down, Tern ticking over.", "pose": "gesture"}, {"who": "torres-zeke", "text": "I walked you up from here. Feels wrong walking you back.", "to": "you"}, {"who": "pell", "text": "Brought you a screw from the Wren. For your tin, when you start one. Every ship gets one.", "to": "you"}, {"who": "calder", "text": "The Tern's on time. It always is.", "pose": "nod"}, {"who": "torres-zeke", "text": "She came. She never comes to these."}, {"who": "calder", "text": "I came to check the ramp seals."}, {"who": "calder", "text": "Look after yourself, {me}.", "to": "you"}, {"choice": [{"text": "I'll miss this ship.", "flavour": "share", "reply": {"who": "torres-zeke", "text": "She'll miss you. Coil three most of all. She won't say so."}}, {"text": "Thank you. All of you.", "reply": {"who": "pell", "text": "Don't. You'll set me off.", "pose": "laugh"}}, {"text": "(Wave)", "reply": {"who": "torres-zeke", "text": "That'll do. That says it.", "pose": "nod"}}]}, {"who": "torres-zeke", "text": "Go on, then. Get a window seat. Every time."}, {"who": "pell", "text": "And write. I'll actually read it."}]},
+  "firstLightCocoa": {"title": "First Light Cocoa", "from": "Dev Raman", "gist": "First Light Cocoa: Dev Raman showed everyone where the Wren has been and where she's heading, the old hands gave their first-day tips, and you said what you've noticed.", "lines": [{"who": "raman", "text": "Lights down, please. Thank you. Right. Mugs up, everyone got one?", "pose": "gesture"}, {"who": "raman", "text": "Out there, port side. That smudge is the Hollis Reach. We left it six weeks ago."}, {"who": "raman", "text": "Dead ahead, too faint to see yet: the Corvane Drift. We'll be there before the season turns.", "pose": "gesture"}, {"who": "raman", "text": "And somewhere behind us, the little shuttle that brought you. I flew it. Gently.", "pose": "laugh", "to": "you"}, {"who": "raman", "text": "Old hands. One thing you wish you'd known on your first day. Go on."}, {"who": "holt", "text": "Never sit in my chair. Bridge lobby, by the door. That's the whole tip.", "pose": "nod"}, {"who": "kowalczyk", "text": "Track what matters. Tap it on your device and an arrow takes you there. Saved me years."}, {"who": "brennan", "text": "Breakfast is six till nine. Miss it and the grab shelf's always open. Nobody goes hungry on my ship."}, {"who": "halloran-emeka", "text": "Write your jobs up in the Works log. You're quicker at them next time. Ask me how I know."}, {"who": "sato", "text": "The big windows on the promenade. Five minutes there and the day sits better."}, {"who": "raman", "text": "Now the new faces. One thing you've noticed about her. Tomas?", "pose": "listen"}, {"who": "tomas", "text": "The lift hums a different note on every deck. Deck 4's is the friendliest.", "pose": "laugh"}, {"who": "raman", "text": "{me}. Your turn. What have you noticed?", "pose": "listen", "to": "you"}, {"choice": [{"text": "She never stops. Even at night you can feel her going.", "rel": {"raman": 1}, "flavour": "share", "mem": "firstlight.going", "reply": {"who": "raman", "text": "That's the drive. Zeke'll tell you it's coil three. It's always coil three.", "pose": "laugh"}}, {"text": "Everyone says hello. Even the ones who look busy.", "rel": {"raman": 1, "tomas": 1}, "flavour": "warm", "mem": "firstlight.hello", "reply": {"who": "raman", "text": "That's the Wren. Small ship, long way from anywhere. We look after each other."}}, {"text": "The cocoa's better than the coffee.", "rel": {"raman": 1}, "flavour": "funny", "mem": "firstlight.cocoa", "reply": {"who": "raman", "text": "Don't let Brennan hear you. Actually, do. She'll be thrilled.", "pose": "laugh"}}]}, {"who": "raman", "text": "Right. To the next season, and the new faces in it. Drink up, it's going cold.", "pose": "gesture"}]},
   "introAsk": {"title": "Ask Zeke", "from": "Zeke Torres", "gist": "You asked Zeke Torres about himself, Works and where the Wren is going.", "lines": [{"who": "torres-zeke", "text": "Go on, ask. Questions are the best bit.", "pose": "nod", "to": "you"}, {"choice": [{"text": "Who are you, then?", "flavour": "listen", "reply": {"who": "torres-zeke", "text": "Zeke. Engine officer, days. I mind the drive coils on Deck 6. And I'm your trainer this week. I talk a lot.", "pose": "laugh"}}, {"text": "What does Works do?", "flavour": "practical", "reply": {"who": "torres-zeke", "text": "Keeps her running. Air, water, lights, the lift, the engines. Faults go on the board; we fix them properly.", "pose": "gesture"}}, {"text": "Where's the ship going?", "flavour": "share", "reply": {"who": "torres-zeke", "text": "Out along the frontier, mapping. Survey picks the stars; we get her there. The Veyli share it. Their Envoy's aboard.", "pose": "nod"}}]}, {"who": "torres-zeke", "text": "Anything else, just tap me. Right, onward."}]},
   "introBriefing": {"title": "Monday briefing", "from": "Chief Ines Calder", "gist": "The Monday briefing: Calder put you with Torres for the day, gave three rules for the bay, and told you to join in aboard.", "lines": [{"who": "calder", "text": "Ten to nine. Good. Everyone's here.", "pose": "nod"}, {"who": "calder", "text": "Board's at twelve. Two scrubbers, a lamp on Deck 4, the dish pit. A usual Monday."}, {"who": "calder", "text": "{me}. Arrived last night. Works, from today.", "to": "you"}, {"who": "tech1", "text": "Morning, new hand.", "pose": "gesture", "to": "you"}, {"who": "tech2", "text": "Welcome to Works. Tea and biscuits at one. That's the important bit.", "to": "you"}, {"who": "calder", "text": "Torres. One job, end to end. Board to turn-in. Their hands, not yours."}, {"who": "torres-zeke", "text": "Their hands. Got it, Chief."}, {"who": "calder", "text": "Torres shadows you today. Every step. He'll talk you through it. He talks a lot. Listen anyway.", "to": "you"}, {"who": "torres-zeke", "text": "I do talk a lot. It's mostly useful.", "pose": "laugh"}, {"who": "calder", "text": "Three things. Gloves on before the panel comes off. Not after.", "to": "you"}, {"who": "calder", "text": "If you don't know, ask. Asking takes a minute. Guessing takes a shift.", "to": "you"}, {"who": "calder", "text": "And put tools back where you found them. The wall has outlines. Use them.", "to": "you"}, {"who": "tech2", "text": "She means it about the wall.", "pose": "gesture"}, {"who": "calder", "text": "Last thing. Work ends at five. The ship doesn't.", "to": "you"}, {"who": "calder", "text": "Sunday dinner at the long tables. Music on Fridays. Quiz nights. Observatory nights.", "to": "you"}, {"who": "calder", "text": "The garden, the lounge. Knitters, rowers, whoever's learning the guitar this month. Find your lot.", "to": "you"}, {"who": "calder", "text": "People who join in settle in. I've watched it for years. Go to things.", "to": "you"}, {"choice": [{"text": "Ready when you are.", "rel": {"torres-zeke": 1}, "flavour": "cheer", "reply": {"who": "torres-zeke", "text": "That's the spirit. Right, onward.", "pose": "laugh"}}, {"text": "What if I get something wrong?", "rel": {"calder": 1}, "flavour": "listen", "reply": {"who": "calder", "text": "Then you say so, and we fix it. That's the job."}}, {"text": "(Nod)", "reply": {"who": "calder", "text": "Good. Quiet's fine."}}]}, {"who": "calder", "text": "Right. Board's there. Back to it."}]},
   "introBunk": {"title": "Your bunk", "from": "Zeke Torres", "gist": "Torres showed you Bunk 1 and your wardrobe, and handed you your device. He sent you a Mail on it.", "lines": [{"who": "torres-zeke", "text": "Bunk 1. This is you. This is where you sleep.", "pose": "gesture", "to": "you"}, {"who": "torres-zeke", "text": "The top bunk in the middle is yours."}, {"who": "torres-zeke", "text": "Bag in your wardrobe. Go on, it's yours now.", "to": "you"}, {"who": "tomas", "text": "Oh! You're here! Hi. I'm Tomas. Watch. Bottom bunk, by the door."}, {"who": "tomas", "text": "I only got here last Sunday. So I'm not the newest any more. Sorry. I'm very pleased about that.", "to": "you"}, {"who": "tomas", "text": "I'll show you the washroom in the morning. It's left at the end. It's left. It's probably left."}, {"who": "torres-zeke", "text": "And this is yours. Your device.", "pose": "gesture", "to": "you"}, {"who": "torres-zeke", "text": "I've sent you a Mail on it. Open it when you've a minute. The rest is in there."}, {"choice": [{"text": "What do I do first?", "rel": {"torres-zeke": 1}, "flavour": "practical", "reply": {"who": "torres-zeke", "text": "Dinner. Always dinner first. Then everything else.", "pose": "nod"}}, {"text": "Is it always this much?", "rel": {"torres-zeke": 1}, "flavour": "share", "reply": {"who": "torres-zeke", "text": "First night, yes. By Thursday it's just home with a lift in it.", "pose": "nod"}}, {"text": "(Just nod)", "reply": {"who": "torres-zeke", "text": "Good. The quiet ones last longest."}}]}, {"who": "torres-zeke", "text": "Right, onward. The mess is on Deck 3, and Brennan doesn't hold plates for anyone.", "pose": "gesture"}]},
@@ -33321,6 +33682,7 @@ const TRADITIONS = [
   {"id": "department-cup", "k": 456, "name": "Department cup", "when": {"every": "4weeks", "weekday": 0, "week": 4}, "at": [1215, 1275], "min": 25, "where": [{"deck": 3, "pool": "gym"}], "who": [["vance", 1], ["gym-regular", 0.8], ["runner", 0.65], ["everyone", 0.2]], "host": "vance", "from": "vance", "ties": {"tally": {"kind": "cup", "choices": ["works", "watch", "survey", "bridge", "commons"], "mode": "teams"}, "decor": "cupBoard"}, "invite": {"host": "vance", "odds": 0.25, "line": "Department cup in the gym tonight. Works is a rower short."}, "text": {"mail": [{"t": "The department cup is tomorrow, {time} in the gym: a rowing relay, one team for each department. I keep the board. The board does not lie.", "tone": "light"}], "ask": [{"t": "Department cup tonight. Come and cheer for your lot.", "tone": "light"}, {"t": "Rowing relay tonight. My arms already hurt, and we haven't started.", "tone": "funny"}, {"t": "Vance has polished the cup again. It's a mug on a stand.", "tone": "funny"}], "here": [{"t": "Pull! Pull! Pull!", "tone": "light"}, {"t": "Change over, quick!", "tone": "light"}, {"t": "The board does not lie.", "tone": "funny"}], "thanks": [{"t": "You cheer your department through the relay. Vance chalks every time on the board, very neatly.", "tone": "light"}], "chatter": [{"t": "The department cup is just a mug. We'd still fight for it.", "tone": "funny"}, {"t": "Vance timed my row to a tenth of a second. I didn't ask him to.", "tone": "funny"}, {"t": "Whoever wins the cup won't stop talking about it for a month.", "tone": "funny"}]}},
   {"id": "farewell-supper", "k": 483, "name": "Farewell supper", "when": {"rotation": -1}, "at": [1080, 1160], "min": 30, "prio": 2, "jitter": 10, "early": 5, "where": [{"deck": 3, "room": "^Mess hall$", "types": ["mess-seat"]}, {"deck": 3, "room": "^Mess hall$", "types": ["@long-table"]}, {"deck": 3, "pool": "mess-seat"}], "hold": [0], "who": [["honoree", 1], ["friends-of-honoree", 0.85], ["everyone", 0.15]], "anim": "talk", "from": "brennan", "ties": {"galley": {"meal": "dinner", "dish": "favourite"}, "decor": "longTables"}, "text": {"mail": [{"t": "Sunday's shuttle takes {names} away from the Wren. Farewell supper tomorrow, {time}, in the mess. Come and say goodbye properly.", "tone": "light"}], "ask": [{"t": "Farewell supper for {first} tonight. I'm not ready.", "tone": "warm"}, {"t": "Supper for {first} at six. Sit with us?", "tone": "light"}, {"t": "I've written {first} a card. It's mostly jokes. Some of it isn't.", "tone": "warm"}], "here": [{"t": "To {names}. The Wren won't be the same.", "tone": "warm"}, {"t": "Remember the night the lift stuck? {first} sang the whole time.", "tone": "funny"}, {"t": "Write to us. Properly, not just one line.", "tone": "warm"}, {"t": "Save a seat for {first}. It's still theirs tonight.", "tone": "light"}], "thanks": [{"t": "You join the long table for the farewell supper for {names}. There's laughing, and one or two quiet bits.", "tone": "warm"}], "chatter": [{"t": "I'll miss {first}. The new posting sounds good, though.", "tone": "light"}, {"t": "The farewell supper always goes on later than anyone plans.", "tone": "warm"}]}},
   {"id": "first-fruits", "k": 475, "name": "First-fruit supper", "when": {"every": "quarter", "week": 7, "weekday": 0, "season": "greening"}, "at": [1095, 1145], "min": 25, "prio": 1, "jitter": 10, "where": [{"deck": 3, "room": "^Mess hall$", "types": ["mess-seat"]}], "hold": [], "who": [["cruz-tove", 1], ["garden", 1], ["gardener", 0.9], ["garden-lover", 0.8], ["galley", 0.6], ["everyone", 0.45]], "anim": "talk", "host": "cruz-tove", "from": "cruz-tove", "ties": {"galley": {"meal": "dinner", "dish": "first-fruits"}, "garden": "harvest"}, "invite": {"host": "oneill-imani", "odds": 0.3, "line": "The first fruits are in. There's a bowl on every table at dinner. Come and try one?"}, "meal": "dinner", "text": {"mail": [{"t": "The new beds have their first crop. First-fruit supper tomorrow at dinner, {time}: a bowl on every table in the mess. One each, please. The garden counted.", "tone": "light"}], "ask": [{"t": "First fruits at dinner tonight. I've been watching those plants for weeks.", "tone": "light"}, {"t": "Dinner in the mess tonight. The first strawberries are out.", "tone": "light"}, {"t": "Don't be late to dinner. The first fruits go fast.", "tone": "funny"}], "here": [{"t": "Try one. Go on. We grew those.", "tone": "warm"}, {"t": "Sweeter than last year. Don't tell the old beds.", "tone": "funny"}, {"t": "Six weeks from seed to this. Not bad for a ship.", "tone": "light"}], "thanks": [{"t": "You take one of the first fruits from the bowl. It tastes of summer, somewhere far away.", "tone": "warm"}], "chatter": [{"t": "Did you get a first fruit? I got two. Nobody saw.", "tone": "funny"}, {"t": "The first crop of {season} is always the best. Ask anyone in the garden.", "tone": "light"}, {"t": "Tove checks every plant twice before the first-fruit supper.", "tone": "light"}]}},
+  {"id": "first-light", "k": 453, "name": "First Light Cocoa", "when": {"after": "arrival", "weekday": 0}, "at": [1200, 1245], "min": 15, "where": [{"deck": 3, "room": "^Bow lounge$", "types": ["lounge-seat"]}], "who": [["raman", 1], ["tomas", 1], ["holt", 1], ["kowalczyk", 1], ["torres-zeke", 1], ["brennan", 0.8], ["halloran-emeka", 0.7], ["sato", 0.7], ["window-seat", 0.5], ["juniors", 0.35], ["everyone", 0.12]], "anim": "cocoa", "host": "raman", "from": "raman", "invite": {"host": "torres-zeke", "odds": 1.0, "line": "Cocoa in the bow lounge at eight. First Light. It's for you, really. Come."}, "text": {"mail": [{"t": "First Light Cocoa tomorrow at {time}, the bow lounge. Cocoa, the big windows, and where we're going next. New faces especially welcome. Dev Raman", "tone": "light"}], "ask": [{"t": "First Light tonight. Raman's doing the windows. I'm doing the cocoa.", "tone": "light"}, {"t": "Cocoa at eight, bow lounge. Bring yourself. Mugs provided.", "tone": "light"}, {"t": "First Light Cocoa tonight. It's for the new ones. Which is you.", "tone": "funny"}], "here": [{"t": "Mind the mug, it's hot. Window's that way.", "tone": "light"}, {"t": "He tells it better every year. Don't tell him I said so.", "tone": "funny"}, {"t": "Look at that. Never gets old.", "tone": "warm"}], "thanks": [{"t": "The lounge lights go down and someone puts a warm mug in your hands. Out of the big windows, the stars.", "tone": "warm"}], "chatter": [{"t": "First Light's tonight. I still remember mine.", "tone": "warm"}, {"t": "Raman always points at the wrong star first. On purpose, he says.", "tone": "funny"}, {"t": "Best cocoa of the season. Brennan won't say what she puts in it.", "tone": "light"}]}},
   {"id": "four-weeks-aboard", "k": 482, "name": "Four weeks aboard", "when": {"after": "arrival", "weekday": 4, "nth": 4}, "at": [1120, 1170], "min": 20, "prio": 2, "early": 5, "where": [{"deck": 5, "room": "^Tea corner$", "types": ["lounge-seat"]}, {"deck": 5, "room": "^Works bay$", "types": ["work:works"], "free": true}, {"deck": 5, "room": "^Machine shop$", "types": ["work:works"], "free": true}, {"deck": 5, "room": "^Main storage$", "types": ["work:works"], "free": true}], "hold": [0], "who": [["calder", 1], ["torres-zeke", 1], ["pell", 1], ["works", 0.9], ["friends-of-host", 0.4]], "anim": [["calder", "talk"], ["everyone", "drink"]], "host": "calder", "from": "The Works team", "cake": true, "text": {"mail": [{"t": "Friday tea tomorrow, {time}, is a special one: four weeks aboard. Someone in Works has asked the galley for a cake. We're not saying who.", "tone": "light"}], "ask": [{"t": "Friday tea tonight. Don't eat too much at dinner.", "tone": "funny"}, {"t": "Four weeks! That calls for cake. Works tea corner, after dinner.", "tone": "light"}, {"t": "You've been here a month. I can't believe it.", "tone": "warm"}], "here": [{"t": "Four weeks, and the board's never been cleaner.", "tone": "light"}, {"t": "Cut it yourself. The new hand cuts the four-week cake. It's the rule.", "tone": "funny"}, {"t": "You're one of us now. You were before, but now there's cake.", "tone": "warm"}], "thanks": [{"t": "The Works team has a cake for your four weeks aboard. Calder says a few words, and they're kind ones.", "tone": "warm"}], "chatter": [{"t": "Four weeks for the new hand. They had a cake at Friday tea.", "tone": "light"}, {"t": "The four-week cake is a Works thing. The Chief started it, years ago.", "tone": "light"}]}},
   {"id": "garden-hour", "k": 437, "name": "Garden hour", "when": {"weekday": 5}, "at": [840, 900], "min": 20, "jitter": 10, "where": [{"deck": 3, "pool": "garden-tend"}, {"deck": 3, "pool": "garden"}], "hold": [0], "who": [["cruz-tove", 1], ["gardener", 0.85], ["garden-lover", 0.6], ["everyone", 0.1]], "anim": "water", "host": "cruz-tove", "from": "cruz-tove", "ties": {"garden": "tend"}, "invite": {"host": "cruz-tove", "odds": 0.25, "line": "Garden hour this afternoon. Spare hands for the beans? They've got ambitions."}, "text": {"mail": [{"t": "Garden hour tomorrow, {time}, in the hydroponics garden: watering, tying in and a bit of weeding. No experience needed. The tomatoes won't judge.", "tone": "light"}], "ask": [{"t": "Garden hour this afternoon. Best way to spend a Saturday, honestly.", "tone": "warm"}, {"t": "I'm off to the garden at two. The beans need tying in again.", "tone": "light"}, {"t": "Garden hour later. Nothing smells as good as the garden after watering.", "tone": "warm"}], "here": [{"t": "Water at the roots, not the leaves.", "tone": "light"}, {"t": "Look, the new ones have come up. Tiny!", "tone": "warm"}, {"t": "Hand me the twine? This one's wandering off again.", "tone": "light"}], "thanks": [{"t": "You spend an hour with your hands in the beds. {host} shows you how to pinch out a tomato.", "tone": "warm"}, {"t": "You water a row of greens and tie in a bean that was making a run for it.", "tone": "funny"}], "chatter": [{"t": "I tied in a bean at garden hour and now I feel responsible for it.", "tone": "funny"}, {"t": "Garden hour is the only hour of the week nobody talks about engines.", "tone": "light"}, {"t": "The garden always looks its best the day after garden hour.", "tone": "light"}]}},
   {"id": "harvest-supper", "k": 476, "name": "Harvest supper", "when": {"every": "quarter", "week": 7, "weekday": 6, "season": "harvest"}, "at": [1080, 1170], "min": 30, "prio": 1, "jitter": 15, "where": [{"deck": 3, "room": "^Mess hall$", "types": ["mess-seat"]}, {"deck": 3, "room": "^Mess hall$", "types": ["@long-table"]}, {"deck": 3, "pool": "mess-seat"}], "hold": [], "who": [["cruz-tove", 1], ["brennan", 1], ["garden", 1], ["gardener", 0.95], ["garden-lover", 0.9], ["everyone", 0.7]], "anim": "talk", "host": "cruz-tove", "from": "brennan", "cake": true, "ties": {"galley": {"meal": "dinner", "dish": "harvest-supper", "batch": 60}, "tally": {"kind": "harvest-best", "choices": ["tomatoes", "beans", "squash", "herbs"]}, "decor": "harvestTables"}, "invite": {"host": "brennan", "odds": 0.35, "line": "Harvest supper tonight. Long tables, all from the garden. Sit by me and tell me what's best."}, "meal": "dinner", "text": {"mail": [{"t": "Harvest supper tomorrow, {time}, in the mess: long tables and everything from the garden. Vote for the best of the harvest with your token. Pie after.", "tone": "light"}], "ask": [{"t": "Harvest supper tonight. I've saved room since breakfast.", "tone": "funny"}, {"t": "Long tables in the mess tonight. Everything on them grew here.", "tone": "light"}, {"t": "Have you voted yet? I'm for the beans. The beans are underrated.", "tone": "funny"}, {"t": "Harvest supper at six. Sit with us?", "tone": "warm"}], "here": [{"t": "Pass the squash. No, the other squash.", "tone": "funny"}, {"t": "Every bit of this grew a deck away from where you sleep.", "tone": "light"}, {"t": "To the garden, and to the people who keep it.", "tone": "warm"}, {"t": "Leave room for the pie. Brennan made six.", "tone": "light"}], "thanks": [{"t": "You squeeze onto a long table for the harvest supper. Someone passes you a bowl, and then another.", "tone": "warm"}, {"t": "You drop your token in the jar for the best of the harvest. The table argues about it all the way to pie.", "tone": "funny"}], "chatter": [{"t": "The tomatoes won the harvest vote again. I'll never understand it.", "tone": "funny"}, {"t": "Harvest supper is the one night the whole mess eats the same thing.", "tone": "light"}, {"t": "Tove doesn't sit down at the harvest supper until everyone has a plate.", "tone": "warm"}]}},
@@ -34704,6 +35066,7 @@ const TRAD_SRC = (() => { try { if (typeof TRADITIONS !== 'undefined') return TR
 const TRAD_LIST = Array.isArray(TRAD_SRC) ? TRAD_SRC : Object.keys(TRAD_SRC).sort().map(id => ({ id, ...TRAD_SRC[id] }));
 for (const t of TRAD_LIST) {
   const ev = tradLoad(t); if (!ev) continue;
+  if (ev.id === 'first-light' && !(typeof FLC_ON !== 'undefined' && FLC_ON)) continue;   // patch #26: First Light Cocoa only with its switch (section 15's FLC_ON)
   if (!REC_DECK && ev.where.every(w => w.deck === 7)) continue;   // the rec deck's own (0.83, RA): only with the deck switched on
   const r = REC_TRADS.find(x => x.id === ev.id);           // one of the rec deck's: the writer's file brings the words; the rules stay REC_TRADS' (whereFor, first, the rota)
   if (r) { for (const k of ['from', 'mail', 'ask', 'here', 'thanks', 'chatter', 'text', 'invite']) { const ds = Object.getOwnPropertyDescriptor(ev, k); if (ds && (ds.get || ds.value != null)) Object.defineProperty(r, k, ds); } r.baked = true; continue; }
@@ -34951,7 +35314,7 @@ function eventPlan(p, d) {
 let EV_TAGS = false;
 function eventTags() {
   if (EV_TAGS) return;
-  try { for (const ev of evTable()) for (const a of ['talk', 'drink', 'play', 'water', 'wash', 'read', 'cheer', 'clap']) TAG_ACT['ev-' + ev.id + '-' + a] = a; EV_TAGS = true; } catch (e) { /* section 10 not in yet */ }
+  try { for (const ev of evTable()) for (const a of ['talk', 'drink', 'play', 'water', 'wash', 'read', 'cheer', 'clap', 'cocoa']) TAG_ACT['ev-' + ev.id + '-' + a] = a;   /* cocoa: patch #26's mugs (crewPose falls back to the seat's pose without MUG_ON) */ EV_TAGS = true; } catch (e) { /* section 10 not in yet */ }
 }
 // the event someone is at, or going to later today, from their plan: { e, seg, now }
 function eventOf(p, t) {
@@ -35013,7 +35376,7 @@ const EV_BUNDLE = {};
 // after each one (Pillar 4): simNote('tradition', { id, day, at, came: [crew ids whose plan took them there], you (you
 // joined), host, src: 'tradition' | 'shipwide' | 'oneoff' }) once its window has ended, in play or on a skip (at most
 // two days back); section 20 makes memories and cues of it. Once each (SHIP.events.noted, saved)
-const evTagId = tag => { const m = /^ev-(.+?)(?:-(?:talk|drink|play|water|wash|read|cheer|clap|disc))?$/.exec(tag || ''); return m && (REC_DECK && /^ev-rec-.*-talk$/.test(tag) && SHIP_TRADITIONS.some(e => e.id === tag.slice(3)) ? tag.slice(3) : m[1]); };   // rec-chiefs-talk (0.83.2): an id ending like an anim   // 'ev-quiz-drink' -> 'quiz'
+const evTagId = tag => { const m = /^ev-(.+?)(?:-(?:talk|drink|play|water|wash|read|cheer|clap|disc|cocoa))?$/.exec(tag || ''); return m && (REC_DECK && /^ev-rec-.*-talk$/.test(tag) && SHIP_TRADITIONS.some(e => e.id === tag.slice(3)) ? tag.slice(3) : m[1]); };   // rec-chiefs-talk (0.83.2): an id ending like an anim   // 'ev-quiz-drink' -> 'quiz'
 function eventsNoted(from, to) {
   if (typeof simNote !== 'function') return;
   from = Math.max(from, to - 2 * 1440);
@@ -35102,6 +35465,7 @@ function eventJoin(e, d, now, notice) {
   toast(e.name, notice || evText(e.ev.thanks, e));
   if (typeof mailSend === 'function') mailSend({ at: now, from: e.ev.from, subject: 'Thanks for coming', body: 'Good to see you at ' + e.name.toLowerCase() + '. Same time next one?', quiet: true });   // the join toast says it already
   if (e.id === 'quiz') quizStart(d, now);
+  if (e.id === 'first-light' && typeof flcJoin === 'function') flcJoin(e, d, now);   // patch #26: a free cocoa, then the meeting (section 15's slot)
   if (/^rec-(wren|chiefs)-talk$/.test(e.id)) recTalkCard(e, d, now);   // a Wren talk: listen, or ask one question (0.83.2, RA)
   if (e.id === 'rec-talent-night') recActCard(e, d, now); // talent night: do an act, or watch (0.83.1, RA)
   return true;
@@ -35167,6 +35531,7 @@ const TRAD_JOIN = {
   'lantern-walk': { act: 'walk', verb: 'join the lantern walk', what: 'walk the promenade under the lanterns together, in one line' },
   'sunrise-stretch': { host: 'rina', pose: 'stretch', need: 'fitness', gain: 10, also: { leisure: 8, social: 3 }, verb: 'stretch with them', what: 'stretch with the early risers' },
   'cook-along': { pose: 'cook', need: 'leisure', gain: 20, also: { social: 6 }, verb: 'cook along', what: 'cook along with the class' },
+  'first-light': { host: 'raman', pose: MUG_ON ? 'sit:cocoa' : 'talk', need: 'leisure', gain: 15, also: { social: 6 }, verb: 'join First Light', what: 'have a cocoa at the big windows' },   // patch #26 (loaded only with FLC_ON)
   'garden-hour': { act: 'ixGarden', verb: 'tend the beds with them', what: 'tend a bed with the gardeners' },
   'pick-your-own': { act: 'ixGarden', verb: 'pick with them', what: 'pick fresh fruit and greens with the gardeners' },
   sowing: { act: 'ixGarden', verb: 'sow with them', what: 'sow the new season\'s seeds with the gardeners' },
@@ -37510,7 +37875,8 @@ function careerAtWork() {
 const careerClockedIn = (d = SHIP.time.day) => !!SHIP.career && SHIP.career.ci > 0 && Math.floor(SHIP.career.ci / 1440) + 1 === d;
 const careerClockedOut = (d = SHIP.time.day) => careerClockedIn(d) && SHIP.career.co > SHIP.career.ci;
 const careerFullDay = d => d <= CAREER.grace || !careerClockedIn(d) || !careerClockedOut(d) || SHIP.career.co % 1440 >= CAREER.earlyOut;   // not a short shift (no clock record: the first week, or on paper)
-function careerClock(now = shipNow(), quiet) {           // -> 'in' | 'out' | null, with a toast (quiet: the time clock's screen says it instead, 0.28.63)
+function careerClock(now = shipNow(), quiet, hold) {     // -> 'in' | 'out' | null, with a toast (quiet: the time clock's screen says it instead, 0.28.63)
+  // hold (patch #6, the Undo window): f(fx) gets the punch's side effects (the remark, the clock note) to run later; the punch itself counts at once
   const toast = quiet ? () => {} : TOAST_FN;
   const c = careerInit(now), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
   if (!playerShiftOn(d)) { toast('Time clock', careerOn(d) ? 'You\'re on leave today. No need to clock in.' : sickToday(d) ? 'You\'re off sick. No need to clock in.' : 'No shift today. The clock can wait.'); return null; }
@@ -37518,14 +37884,14 @@ function careerClock(now = shipNow(), quiet) {           // -> 'in' | 'out' | nu
     if (m >= CAREER.clockOut) { toast('Time clock', 'The day shift is over. See you tomorrow.'); return null; }
     if (m < CAREER.clockIn) { toast('Time clock', 'Too early: the clock opens at 08:00. The shift starts at 09:00.'); return null; }   // reviewer 1e
     c.ci = Math.floor(now); c.co = 0; careerStarted(now); toast('Time clock', 'Clocked in at ' + hhmm(m) + '.');
-    careerRemark('in', now, m - DAY_SHIFT[0]); simNote('clock', { what: 'in' }); return 'in';
+    const fx = () => { careerRemark('in', now, m - DAY_SHIFT[0]); simNote('clock', { what: 'in' }); }; if (hold) hold(fx); else fx(); return 'in';
   }
   if (careerClockedOut(d)) { toast('Time clock', 'You\'re clocked out for the day.'); return null; }
   c.co = Math.floor(now); const h = c.co - c.ci, early = m < CAREER.earlyOut;
   if (SHIP.player.clockLog) SHIP.player.clockLog[d] = h;   // every clock-out counts for the screen's hours (0.28.65, reviewer 0607)
   if (early) repAdd(null, 0, { work: -2 }, 'early');   // a short shift: a small dip, like being late, never a missed shift (the user's choice, 0.61.18)
   toast('Time clock', 'Clocked out at ' + hhmm(m) + '. ' + Math.floor(h / 60) + 'h ' + String(h % 60).padStart(2, '0') + 'm today.' + (early ? ' An early finish: it\'s noted.' : ''));
-  careerRemark(early ? 'early' : 'out', now); simNote('clock', { what: 'out' }); return 'out';
+  const fx = () => { careerRemark(early ? 'early' : 'out', now); simNote('clock', { what: 'out' }); }; if (hold) hold(fx); else fx(); return 'out';
 }
 function careerClockTap(it, at) {                        // section 15's PLAYER_TAPS: walk up to the clock and use it
   if (it.t !== 'Time clock' || typeof approach !== 'function') return false;
@@ -37540,7 +37906,7 @@ const csText = (k, fb, ctx) => { let t = null; try { t = careerText('clock.scree
 SHIP.player.clockLog = (() => { const l = SAVED && SAVED.player && SAVED.player.clockLog, out = {}; if (l && typeof l === 'object') for (const k in l) if (/^\d+$/.test(k) && Number.isFinite(l[k]) && l[k] >= 0) out[k] = Math.min(1440, Math.floor(l[k])); return out; })();
 SAVE_EXTRA.push(s => { const L = SHIP.player.clockLog, d = SHIP.time.day; for (const k in L) if (+k < d - 14) delete L[k]; (s.player || (s.player = {})).clockLog = { ...L }; });
 const hrs = mins => (Math.round(mins / 6) / 10).toString();
-function clockScreen(said, ask) {
+function clockScreen(said, ask, after) {                // after (patch #6): 'undone-in' | 'undone-out' | 'settled-in' after Undo or its window, so the next button isn't where Undo was
   let el = document.getElementById('clockScreen');
   if (!el) {
     el = document.createElement('div'); el.id = 'clockScreen'; el.className = 'devdlg'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'Time clock');
@@ -37553,12 +37919,14 @@ function clockScreen(said, ask) {
     : out ? (wd === 4 ? csText('weekend', 'Shift done. See you Monday.') : csText('done', 'Shift done. See you tomorrow.')) : inn ? csText('onshift', 'On shift since {time}.', { time: hhmm(C.ci % 1440) })
     : m >= CAREER.clockOut ? csText('done', 'Shift done. See you tomorrow.') : csText('ready', 'Shift starts at {time}. Tap to clock in.', { time: hhmm(DAY_SHIFT[0]) }));
   el.dataset.ph = SHIP.device.settings.phosphor; el.textContent = ''; el.hidden = false;
+  if (CLOCK_UNDO_ON) CLOCK_DRAWN = performance.now();   // patch #6: the tap guard's start
   const x = mk('button', 'x', '×'); x.type = 'button'; x.setAttribute('aria-label', csText('close', 'Close')); x.onclick = e => { e.stopPropagation(); el.hidden = true; };
-  el.append(x, mk('small', '', csText('title', 'WORKS TIME CLOCK') + ' · ' + csText('sub', 'CSV Wren · Works bay')), mk('p', '', ask ? csText('early', 'Before 17:00. Clock out early?') : st));
+  el.append(x, mk('small', '', csText('title', 'WORKS TIME CLOCK') + ' · ' + csText('sub', 'CSV Wren · Works bay')), mk('p', '', ask ? (CLOCK_UNDO_ON ? csText('earlyask', 'Clock out early? It\'ll be noted.') : csText('early', 'Before 17:00. Clock out early?')) : st));
   const today = inn ? (out ? C.co : Math.floor(now)) - C.ci : 0;
   let week = today; for (let k = d - wd; k < d; k++) week += SHIP.player.clockLog[k] || 0;
   el.append(mk('small', '', csText('hours', 'YOUR HOURS')), mk('p', '', csText('today', 'Today: {hours} h', { hours: hrs(today) }) + ' · ' + csText('week', 'This week: {hours} h', { hours: hrs(week) })));
-  const row = mk('div', 'btns'), act = (label, f) => { const b = mk('button', 'act', label); b.type = 'button'; b.onclick = e => { e.stopPropagation(); f(); }; row.appendChild(b); return b; };
+  const row = mk('div', 'btns'), act = (label, f) => { const b = mk('button', 'act', label); b.type = 'button'; b.onclick = e => { e.stopPropagation(); if (CLOCK_UNDO_ON && performance.now() - CLOCK_DRAWN < CLOCK_TAP_GUARD) return; f(); }; row.appendChild(b); return b; };   // patch #6: taps just after a redraw are ignored
+  if (CLOCK_UNDO_ON) { clockButtons(row, act, { on, inn, out, m, ask, after }); el.appendChild(row); try { (row.querySelector('button:not([disabled])') || x).focus(); } catch (e) { /* no focus */ } return; }
   if (on && !out && !(inn ? false : m >= CAREER.clockOut || m < CAREER.clockIn)) {
     if (!inn) act(csText('in', 'Clock in'), () => { const r = careerClock(shipNow(), true); clockScreen(r ? (SHIP.time.min - DAY_SHIFT[0] > 5 ? csText('late', 'Clocked in at {time}. A little late. It happens.', { time: hhmm(SHIP.time.min) }) : csText('didin', 'Clocked in at {time}. Have a good shift.', { time: hhmm(SHIP.time.min) })) : null); });
     else if (SHIP.time.min < CAREER.clockOut && !ask) act(csText('out', 'Clock out'), () => clockScreen(null, true));   // before the shift ends (17:00): asks first
@@ -38284,7 +38652,7 @@ if (typeof deviceApp === 'function') deviceApp({ id: 'crew', title: 'Relationshi
   view: () => {
     const c = CREW_PICK && crewContacts({ all: true }).find(x => x.id === CREW_PICK);
     if (c) return { title: c.name, blocks: [
-      { kind: 'text', text: c.role + '. ' + c.tierName[0].toUpperCase() + c.tierName.slice(1) + (c.toNext !== null ? ' (' + c.toNext + ' more to ' + REL_NAMES[c.tier + 1] + ')' : '') + '.' },
+      { kind: 'text', text: (typeof rankCardRole === 'function' && rankCardRole(SOC.crew[SOC.idx.get(c.id)]) || c.role) + '. ' + c.tierName[0].toUpperCase() + c.tierName.slice(1) + (c.toNext !== null ? ' (' + c.toNext + ' more to ' + REL_NAMES[c.tier + 1] + ')' : '') + '.' },
       ...(typeof knowBlocks === 'function' ? knowBlocks(c.id) : [{ kind: 'list', rows: c.known.length ? c.known.map(k => ({ text: k })) : [{ text: 'Nothing yet. Ask them about themselves.' }] }]),   // what you know, by section (20c)
       { kind: 'buttons', items: [{ label: 'Where are they?', action: { app: 'roster', who: c.id } }].concat(c.met !== null ? [{ label: 'Meet up', action: { app: 'appointments', with: c.id } }] : [], [{ label: 'Back', action: { app: 'crew', do: 'back' } }]) }] };
     const cs = crewContacts(), mo = movedOn(), gone = mo.length ? [{ kind: 'text', text: 'Moved on', mark: 'head' }, { kind: 'list', rows: mo.map(x => ({ text: x.name, sub: x.to ? 'Now on the ' + x.to.replace(/^the /i, '') : 'Transferred', mark: 'past' })) }] : [];
@@ -38511,8 +38879,9 @@ function chatShow() {
   if (!C.ask && !C.offer && !talking && C.line.moment && typeof momentShow === 'function') buttons.splice(1, 0, { id: 'sit', label: 'Sit with them' });   // a moment is ready (20c)
   const gift = !C.ask && !C.offer && !talking && giftInHands(); if (gift) buttons.push(r.giftWeek === socWeek() + 1 ? { id: 'give', label: 'Given this week', off: true } : { id: 'give', label: 'Give ' + gift });
   if (!C.ask && !C.offer && !talking && typeof caseAskButton === 'function') { const cb = caseAskButton(p); if (cb) buttons.push(cb); }
+  if (!C.ask && !C.offer && !talking && typeof shopMenuButton === 'function') { const mb = shopMenuButton(p); if (mb) buttons.push(mb); }   // patch #24: Buy something, from a storekeeper at the counter
   if (!C.ask && !C.offer && !talking && typeof shopGiveButton === 'function') { const sb = shopGiveButton(p); if (sb) buttons.push(sb); }   // 24j: Give the thing you made them (M10)   // 24k P2: Ask about the fault (only a witness, only after Tomas's word)
-  const v = { who: p.name, role: p.role, tier: REL_NAMES[relTier(p.id)], line: C.line.text, say: C.line.say !== false, buttons };
+  const v = { who: p.name, role: typeof rankCardRole === 'function' ? rankCardRole(p) : p.role, tier: REL_NAMES[relTier(p.id)],   /* patch #21: the rank first (off: p.role) */ line: C.line.text, say: C.line.say !== false, buttons };
   const el = chatEl(); el.hidden = false;
   (CHAT_SKIN.draw || chatDraw)(el, v);
   if (C.talk) talkMeter(el, C.talk);                     // the Talk a while meter, over the buttons (either skin)
@@ -38568,6 +38937,7 @@ function chatDo(id) {
   else if (id === 'talk-stop') talkEnd(C, 'stop');
   else if (id.startsWith('reply:')) talkAnswer(C, id.slice(6));
   else if (id === 'ask') { C.ask = true; chatShow(); }
+  else if (id === 'shop-menu' && typeof shopMenuOpen === 'function') shopMenuOpen(p);   // patch #24
   else if (id === 'shop-give') chatSay((typeof shopGiveSay === 'function' && shopGiveSay(p)) || 'Thanks.');   // 24j: an order handed over (M10)
   else if (id === 'case-ask') chatSay((typeof caseAskSay === 'function' && caseAskSay(p)) || 'Didn\'t notice a thing. Sorry.');   // 24k P2: their witness line
   else if (id === 'give') { const g = giftInHands(), res = g && giftGive(p, g); if (res) chatSay(res.text); }
@@ -40171,7 +40541,7 @@ function introNightTick() {
 }
 function introBedTick() {
   const I = SHIP.intro; if (I.done.bed !== undefined || typeof setGoal !== 'function') return;
-  const now = Math.floor(shipNow()), on = (now < introAbs(1, 0) && I.done.goodnight !== undefined) || (now >= introAbs(1, 19 * 60) && now < introAbs(2, 0));
+  const now = Math.floor(shipNow()), on = ((now < introAbs(1, 0) && I.done.goodnight !== undefined) || (now >= introAbs(1, 19 * 60) && now < introAbs(2, 0))) && !(typeof flcBusy === 'function' && flcBusy(now));   // patch #26: not while First Light Cocoa is on
   const bed = typeof playerBed === 'function' ? playerBed() : '4-B1-4', pl = (DECKS[4].places || []).find(q => q.id === bed), me = player.here();
   // (reviewer 1: only when you have no arrow of your own, and it never clears one it didn't set)
   const mine = typeof IX_GOAL !== 'undefined' && IX_GOAL && IX_GOAL.label === INTRO_BED_GOAL;
@@ -48538,6 +48908,22 @@ const CROWD_DEMO = (() => {
 })();
 
 // ---- slot: Performance engineer (section 8b). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- the mug (patch plan #30; patch builder DB1 for the performance engineer), only with section 15's MUG_ON: a cream
+// mug at about 1.6x life size (8 px tall at a phone's usual zoom), its cocoa 0.005 below the rim and its handle sunk into
+// the wall (no shared faces); held one-handed at the chest (HOLDS.mug, the other arm swinging); ACTS.cocoa is the drink
+// pose with the mug in place of the glass, seated or standing, for you at a stool and for the crew at a tradition (their
+// mugs ride in the crowd's meshes: no draw calls). Built when first needed; colours through part's col(); no R().
+if (typeof MUG_ON !== 'undefined' && MUG_ON) {
+  PROP_KIT.mug = p => {
+    part(p, cylG(.061, .067, .152, 12), '#efe6d4', 0, -.12, .104, 1, 1, 1, -Math.PI / 2);   // the body; its top end (wider) at z .180
+    part(p, cylG(.058, .058, .006, 12), '#6b3e22', 0, -.12, .182, 1, 1, 1, -Math.PI / 2);   // the cocoa: its face at z .185, sunk .001 into the body
+    part(p, torG(.064, .008), '#efe6d4', 0, -.12, .182);                                    // the rim, its edge at z .190: .005 past the cocoa
+    part(p, GEO.box, '#efe6d4', .078, -.12, .104, .032, .025, .08);                         // the handle, overlapping the wall
+  };
+  HOLDS.mug = { prop: 'mug', bone: 'R', one: -1, sx: -.45, ex: -1.25, sz: .1, hx: .25, look: .12 };
+  ACTS.cocoa = { props: { R: 'mug' }, f: ACTS.drink.f };
+  ACT_SEATED.add('cocoa'); CROWD_ANIMS.add('cocoa');
+}
 // ---- end of slot: Performance engineer ----
 
 // =====================================================================
@@ -50156,6 +50542,7 @@ function tap(cx, cy) {
     return;
   }
   if (ud.item && ud.item.lift) { enterLift(); return; }
+  if (ud.item && ud.item.see && ud.item.t === 'Spine ladder' && typeof ladderTap === 'function' && ladderTap(null)) return;   // patch #5: the ladder behind its glass takes you to its hatch (LADDER_ON)
   if (ud.item && ud.item.see) { if (typeof jobSpotTap === 'function' && jobSpotTap(h.point)) return; toast(ud.item.t, ud.item.x); return; }   // seen through glass: nothing to walk to (but your job's stop past it: section 15, 0.28.52)
   if (ud.item) {
     const it = ud.item; it.hit.getWorldPosition(_wp);
@@ -50165,6 +50552,7 @@ function tap(cx, cy) {
   }
   if (ud.liftDoor) { enterLift(); return; }
   if (ud.youLock) { const c = youLockTap(ud.youLock); if (c) { const e = EDGES.get(ud.youLock); approach(new THREE.Vector3(e.cx, 0, e.cz), reachableSide(e)[2], 0, () => toast(c.t, c.x)); return; } }   // 0.47.11
+  if (ud.closedDoor && typeof ladderTap === 'function' && ladderTap(ud.closedDoor)) return;   // patch #5: a ladder hatch opens the Spine ladder panel (LADDER_ON)
   if (ud.closedDoor) {
     const e = EDGES.get(ud.closedDoor), c = CLOSED_DOORS[ud.closedDoor];
     approach(new THREE.Vector3(e.cx, 0, e.cz), reachableSide(e)[2], 0, () => toast(c.t, c.x));
@@ -50311,7 +50699,7 @@ function goToDeck(n, at) {
 
 // ---- the main lift: tap a lift door for the deck panel. A ride opens the doors, you step in, they close,
 // the view fades, the new deck is built behind the black, and the doors open on it. Timed by the game clock. ----
-const DECK_NAMES = { 1: 'Bridge', 2: 'Officers\' quarters and science',   /* 0.72.5 (playtest 2, item 18): was 'Command & Science' */ 3: 'Commons', 4: 'Quarters', 5: 'Operations', 6: 'Engineering', 7: 'Recreation' };
+const DECK_NAMES = { 1: 'Bridge', 2: 'Officer\'s Quarters - Science',   /* 0.72.5 (playtest 2, item 18): was 'Command & Science'; patch #25: the user's capitals and dash, as written */ 3: 'Commons', 4: 'Quarters', 5: 'Operations', 6: 'Engineering', 7: 'Recreation' };
 const liftEl = document.getElementById('lift'), liftList = document.getElementById('liftList'), fadeEl = document.getElementById('fade');
 let ride = null, liftReturn = null;
 const inLift = () => roomAt(...player.here()) === '@';
@@ -50380,6 +50768,7 @@ function startRide(n) {
 const RIDE = { shut: .55, dark: .95, light: 1.35, done: 1.8 };
 function updateRide(dt) {
   const r = ride; r.t += dt; const T_ = r.t;
+  if (r.ladder && typeof ladderStep === 'function') { ladderStep(r, dt); return; }   // patch #5: a climb on the spine ladder (section 15's slot): no lift doors
   for (const d of liftDoors()) d.force = T_ >= RIDE.light && r.swapped ? 1 : 0;
   if (!r.swapped) {
     fadeEl.style.opacity = THREE.MathUtils.clamp((T_ - RIDE.shut) / (RIDE.dark - RIDE.shut), 0, 1);

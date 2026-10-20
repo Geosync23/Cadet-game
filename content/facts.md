@@ -48,7 +48,7 @@ in section 20, the meetings in section 18) are canon too: never contradict a bea
 | Deck | What's there | How crew talk about it |
 | --- | --- | --- |
 | 1 Bridge | bridge, command ring, the Captain's ready room (mind the step; everyone trips on it), observation room | "up top", rare to visit |
-| 2 Command & Science | senior cabins on the looped corridor, the portrait gallery of past captains, Survey lab, chart room, observatory, comms, Watch office, the array | "the senior corridor", "the observatory" |
+| 2 Officer's Quarters - Science (was Command & Science; patch #25) | senior cabins on the looped corridor, the portrait gallery of past captains, Survey lab, chart room, observatory, comms, Watch office, the array | "the senior corridor", "the observatory" |
 | 3 Commons | mess and galley (Brennan's), cold store, bow lounge and bar (curved windows), infirmary, garden (hydroponics), gym, crew store, call-home booths | where everyone meets |
 | 4 Quarters | junior wing: Bunk 1-8, two washrooms, laundry, junior common room (stern windows); officers' corridor (cabins 4-05 to 4-22) and the music room with the record cabinet | "the junior wing", "the music room" |
 | 5 Operations | Works bay and the job board, the Chief's glass office, the tea corner behind the parts racks, main storage, machine shop, cargo hold, Cart bay, shuttle bay | "the bay", "below" for Works crew |

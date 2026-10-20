@@ -487,7 +487,7 @@ with sync_playwright() as pw:
               const at = m => { setShipNow(t0 + m); devTickMin = -1; deviceTick(); return HU_Q.filter(h => h.key === 'invite|9999').map(h => h.stage + (h.goal ? '+goal' : '')); };
               const out = [at(16), at(31)]; SHIP.device.appts = SHIP.device.appts.filter(a => a.id !== 9999); return out; })()""")
             check(r2 == [['soon+goal'], ['start+goal']], f'an invitation still waiting for your answer reminds you 15 minutes before and at its start (item 12) ({r2})')
-            check(r['gain'] <= 5 and r['lift'] == "Officers' quarters and science", f'tea and biscuits is only a little food; the lift says Officers\' quarters and science ({r["gain"]}, {r["lift"]})')
+            check(r['gain'] <= 5 and r['lift'] == "Officer's Quarters - Science", f'tea and biscuits is only a little food; the lift says Officer\'s Quarters - Science ({r["gain"]}, {r["lift"]})')
         if g.ev("typeof DEV_BEATS !== 'undefined'"):   # 0.73.2 (U2, item 12 a): the arrival week's beats on the Schedule, with heads-ups and an arrow
             r = g.ev("""(() => { const I = SHIP.intro, was = [I.on, I.ended]; I.on = true; I.ended = false; const out = [];
               for (const d of [1, 2, 3]) for (const x of devDay(d)) if (x.kind === 'beat') { const g = devItemGoal(x), rooms = Object.values((DECKS[x.deck] || {}).rooms || {}).map(r => r.name);
