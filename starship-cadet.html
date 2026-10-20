@@ -13422,8 +13422,9 @@ function playerUpdate(dt, t) {
   bagTick();                                             // the kit bag into your locker after the bunk step (0.28.26)
   handTick();                                            // the Repair button (0.28.52)
   dinnerTick();                                          // sit down at your table for the arrival dinner (0.28.28)
+  if (typeof mugTick === 'function') mugTick();          // the mug in your hands (patch #30, in this section's slot; off: nothing)
   const P = SHIP.player, hold = P.cart ? (P.cart.stage === 'full' ? 'cartfull' : 'cart') : P.carry.length > 0 || typeof hamperHeld === 'function' && hamperHeld() ? true
-    : ACT && ACT.kind === 'eat' && ACT.o.fed && ACT.phase === 'walk' || !ACT && P.tray ? 'tray' : typeof ixHold === 'function' && ixHold() || false;   // a tray from the servery to your seat (0.28.15); 15b's ixHold: a job's toolbox or crate
+    : ACT && ACT.kind === 'eat' && ACT.o.fed && ACT.phase === 'walk' || !ACT && P.tray ? 'tray' : typeof ixHold === 'function' && ixHold() || typeof mugHeld === 'function' && mugHeld() || false;   // a tray from the servery to your seat (0.28.15); 15b's ixHold: a job's toolbox or crate
   if (hold || player.holding) player.holding = hold;   // in hand (Walker.update): parts (true, the crate) or a hover cart ('cart', 'cartfull')
   player.maxV = PLAYER_V0 * playerSpeed();
   const crouch = crawlTiles().has(K(player.here()));   // a crawlway (0.28.11): crouch-walk, slower
