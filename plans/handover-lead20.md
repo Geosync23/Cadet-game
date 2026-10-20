@@ -38,3 +38,10 @@ DB1 01R4RFu3mPaq4qj1L2TXEoza (working) · DR1 01WfFmjT31bVcy4mvsNVi5Mz (working)
 - Patch build started in parallel (the user: "Hire extra helpers"): PA session_01Jka314UJ2Yto5XxbcQnB8H (claude/patch-a, batches A-C), PB session_01FWW2piuXkFYaRRzLXZiqYb (claude/patch-b, D then F; PB now owns 13/14/10 and OKs PA's #1 formats), BM11 session_01W7NHRM4JjqaNEJQUWNxgcE (build master, next build 0.64.3 = Dev mode). PP1 reviews patch turns. Batch E waits for DB1.
 - Talk pack wiring started alongside (the user: ship it with the patch): TE1 session_01MnQHVrsK5wnTwfEi2QFm4W (claude/talk-wire).
 - Dev mode Stop 1a built (bb6e78a); DB1 doing DR1's round 1+2 fixes; then DR1 final pass, BM11 merge, publish a NEW page with #dev, notify. Check on the published page: #dev shows the DEV tag in the Claude app and a phone browser; Back to mark keeps the tag; the plain link shows the real game.
+
+## Update ~16:15 UTC (lead memory 41%)
+- Published: Dev mode 0.64.3 https://claude.ai/artifact/EWB21cTQnXc8ZT71zCeEzf (scratch file scratchpad/dev/starship-cadet-dev.html = integration build + a first-line script forcing #dev; title "Starship Cadet Dev"). Work pools plan https://claude.ai/artifact/42zY17Rc3ePiKZEVHVv8KZ (answered: all recommended).
+- claude/integration: 0.64.3 da5e2aa (Dev mode), 0.64.4 5d6ee1c (Talk a while, 280 talks incl. nine work pools; TALK_PACK_ON committed ON, the user's call).
+- Patch: PA (patch-a, A-C) and PB (patch-b, D then F) slow, nothing pushed yet at 16:12 (asked to push WIP). PE (session_01H7weuTSkTfuSAqhxvdx1EK, patch-e): #25 #21 #6 #24 done (2e2575d, PP1 PASS WITH FIXES, DR1 owner review asked), #5 ladder next (Deck 5 hatch at v,19,9). DB1 builds #30 #29 on claude/devmode (its only push branch), maybe #26; else a fresh builder for #26.
+- Idle/done: TE1, TW1 (talk), TR1 stopped (handover on claude/talk-pack-review cb6dd07). BM11 build master ready (next build 0.64.5).
+- Usage: 5-hour limit showed "allowed_warning" at 16:11 (resets 16:40 UTC).
