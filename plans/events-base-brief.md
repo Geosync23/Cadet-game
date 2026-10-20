@@ -1,6 +1,7 @@
 # Events base brief: F0-F8 as build turns (Turn 0)
 
-Events engineer EV1 (session_014ckxYgG3KA6eHksEMi6Eru), 2026-10-20. Branch `claude/events-base`, from
+Events engineer EV1 (session_014ckxYgG3KA6eHksEMi6Eru), 2026-10-20. Revised for OR1's review (PASS WITH FIXES, 10 fixes,
+claude/owner-review-1 `plans/owner-review-1.md` part 5). Branch `claude/events-base`, from
 claude/integration 0.64.5 (7958332). Reports to lead 21. **Planning only: the game is unchanged by this page.**
 
 It turns the events plan's shared base (claude/events-plan f6996d86, `plans/events-plan.html` section 5, v3.2) into
@@ -66,8 +67,13 @@ master's. I merge claude/integration in at the start of each turn (0.64.6 and pa
 - Ship-wide gatherings (`EV_SHIPWIDE`) are still built at load from each event's `moments`. F0a lets a moment carry
   its own `name`, `ask`, `here`, `thanks`, `from`, places and hash key, so the lantern supper, the Line ceremony and
   supper, and the comet's two windows register the same way as the party (today it's hard-wired to the party's words
-  and the bow lounge's seat types). The party's row must come out unchanged (same k 340, same words).
-- **The Friday hold:** `evHeld(t)` is true from 15:30 to 17:00 on every Friday from Day 5. An event's phase, meeting
+  and the bow lounge's seat types). The party's row must come out unchanged (same k 340, same words). Each moment
+  gets an **explicit hash key** in its data (`k`), not 350 + the order it was pushed in. `EV_SHIPWIDE` feeds section
+  14's planner (through `evTable` and `eventsOn`), so with the switch off events_check compares its JSON with
+  0.64.5's: it must be byte-identical (OR1).
+- **The Friday hold:** `evHeld(t)` is true from 15:30 to 17:00 on every Friday from Day 5. **One source:** the hold is
+  `EV_BEATS`' Friday row (F1b); F0a adds that row to the table first and `evHeld` reads it, so there's never a second
+  copy. An event's phase, meeting
   or gathering that would start in it waits until 17:00 (the Fridays plan's "a storm phase waits for the address").
   None of today's dates fall in it (the front is 14:00 on Day 12); F7 checks that none ever does. The address itself
   is the Fridays builder's tradition; for both to happen on Day 12, the storm's `pause` must list it in `keep` (noted
@@ -75,7 +81,8 @@ master's. I merge claude/integration in at the start of each turn (0.64.6 and pa
 
 **F0b: called in on a day off.**
 - `eventCalledIn(p, d)`: true when an event's meeting or gathering on day d names p and it's p's rota day off
-  (`isWorkDay`). Pure, from the calendar and the rota. Days 7 (the Captain), 14 (Marrow, Calder, Sato, Holt) and 27
+  (`isWorkDay`). Pure, from `EV_CALENDAR`, the events' data and the rota only: never `eventNow`, `SHIP.event` or
+  anything saved. Days 7 (the Captain), 14 (Marrow, Calder, Sato, Holt) and 27
   (the Captain).
 - Section 14 already brings named people to a meeting on their day off (the all-clear works today), so no schedule
   change is needed; F0b only marks them.
@@ -83,13 +90,25 @@ master's. I merge claude/integration in at the start of each turn (0.64.6 and pa
   section 20's `SOC_CUE_OF` gains `calledIn` (a new key in a registry, plus `who` for `@me`): **social engineer's
   section, owner review (OR1)**. The cues: `cue:calledIn@me` (I was called in), `cue:calledIn` (crew chatter about it).
 
-Checks: events_check (whole), day_check on Days 7, 11 and 14 with the switch on, cadet_test off (ALL IDENTICAL).
+Checks: events_check (whole, with `EV_SHIPWIDE` byte-identical off), day_check on Days 7 and 14 with the switch on,
+cadet_test off (ALL IDENTICAL). **Day 11 with `EV_CAL_ON` alone** puts today's storm, with its old hours (the 09:15
+briefing, the 06:00 warning jobs), onto the 09:30 team job and the 17:15 ceremony. That's expected until the storm
+update gives it its new hours, so F0a checks Day 11 only on paper (the due day and the phases' minutes). day_check
+Day 11, career_check and leave_check with the switch on come with the storm update; F0a runs career_check and
+leave_check on as well, to note what they say. **At F0a I tell PB (the sim seat):** the storm's new day and the new
+gatherings reach section 14's planner; and `eventFree` (section 14) is shared between the Fridays plan's part A and
+the storm update, so neither changes it without the other.
+
+Before F0b, I bring in patch-a (it edits 18's `tradJoinMinute` and `tradGoal`, 20's `socialChatter` and 22) and
+patch-b's batch F (15 and 17), once they're in claude/integration.
 
 ### F1. `eventDay(d)` and the career-beat guard (2-3 turns: F1a, F1b, F1c if needed). Switch `EV_GUARD_ON`. Section 18, plus reads in 24k (already there).
 
 **F1a: `eventDay(d)`.** Section 24k already asks `typeof eventDay === 'function' && eventDay(d)` (cases skip event
 days) but nothing defines it. Defined here: true only on the days of the front, the escalation and the all-clear
-(Days 12-14 for the storm), never the warning or the afterglow. **When off it returns false**, which is what 24k sees
+(Days 12-14 for the storm), never the warning or the afterglow. **It comes only from `EV_CALENDAR` and the events'
+data**, never `eventNow`, `SHIP.event` or anything saved (24k's incidents plan is saved per day, OR1). An event the
+calendar skips (user question 1) is decided once at load, from the save's day, so it never changes during play. **When off it returns false**, which is what 24k sees
 today, so the game is unchanged.
 
 **F1b: the guard.** `EV_BEATS`, a table made at load: each beat with its day, hours and kind:
@@ -132,16 +151,17 @@ Checks: events_check (a reaction line plays on the front, within a ship hour), l
   that). One hook line in section 19 adds `eventItems` to the Schedule and the Tracked list.
 - `eventClosed(deck, room)`: a place an event has closed (the bow lounge, the call booths, the rec deck during the
   storm), from `eventRoutines`. Tracked and "show on map" skip a closed place (hook in 19; and 15b if the goal
-  pointer offers it: interactions engineer, OR1).
+  pointer offers it: interactions engineer, OR1). **The Day 12 auditorium exception (user question 3) is in
+  `eventClosed` from the start**, or Tracked would hide the address's room (OR1).
 
 **F3b: the Ship status line and the Record.**
-- `eventStatus(t)`: one plain line while an event runs ("Ion storm: the front has passed. Lights may flicker.") from
+- `eventStatus(t)`: one plain line, about 60 characters at most, while an event runs ("Ion storm: the front has passed. Lights may flicker.") from
   the event's data (new `status: { <phase>: text }`, the writer's words). Hook: the device's home screen (19).
 - `eventRecord()`: blocks for the Record app: each event you lived through, its result in words (never a score), and
   your commendation. Hook: Record's view (19), next to `worksRecordHead`.
 
 Checks: device_check, interactions_check, events_check, phone-size screenshots of the Schedule, the status line and the
-Record (390x844), cadet_test off.
+Record (at 390x844 and 360 px wide), cadet_test off.
 
 ### F4. Safe through skips and reloads (2 turns: F4a, F4b). Switch `EV_REPLAY_ON`. Section 18 (and 13's save, OR1).
 
@@ -176,7 +196,7 @@ event, the threads view and "End and undo". Question for the lead (below): the t
 
 Checks: devmode_check (the real save untouched; Undo after a jump), events_check.
 
-### F7. One events check driven by the data (2-3 turns: F7a, F7b, F7c). New file; perf_check scenes (performance engineer: OR1).
+### F7. One events check driven by the data (2-3 turns: F7a, F7b, F7c). **F7a is built straight after F1** (OR1), so F2-F6 are built against it; F7b-c come late. New file; perf_check scenes (performance engineer: OR1).
 
 A new `bigevents_check.py` (question for the lead: a new file, or more parts in events_check, which already takes
 6-10 minutes). It reads `SHIP_EVENTS` and `EV_CALENDAR` from the page and, for each event that's built:
@@ -186,7 +206,9 @@ A new `bigevents_check.py` (question for the lead: a new file, or more parts in 
 - **F7b, live:** jumps across each phase (skipTo forward, a Dev mode jump), a reload mid-phase and mid-meeting, the
   phase notes reach a reaction line, the device's Schedule shows the meeting, closed places hidden.
 - **F7c, crowds:** draw calls at every gathering with about 60 crew (budget 450), at phone size; perf_check gains the
-  storm's scenes (the front on Deck 3, the lantern supper in the mess, the party in the bow lounge).
+  storm's scenes (the front on Deck 3, the lantern supper in the mess, the party in the bow lounge), agreed with the
+  Fridays plan's part G (its auditorium and lift-lobby scenes), plus **Day 12's address during the storm's onset
+  routines**, the worst case.
 
 Checks: the new check itself, perf_check, deck_check, check_fast.
 
@@ -208,12 +230,13 @@ Checks: social_check, events_check (no call during the escalation; calls rush at
 | 2 | F0b called in | social (OR1): `SOC_CUE_OF.calledIn` | events_check, social_check |
 | 3 | F1a `eventDay` | none (24k already reads it) | events_check, puzzle_check |
 | 4-5 | F1b guard, F1c occasions | none (18) | career_check, leave_check, day_check 18/20 |
+| 6 | F7a the check on paper | none (a new file) | the check itself |
 | 6 | F2 phase notes | none | lines_check, social_check |
 | 7-8 | F3a, F3b device | device (OR1); interactions (OR1) | device_check, interactions_check, shots |
 | 9-10 | F4a, F4b skips, reloads | sim/save (OR1) | player_check, devmode_check |
 | 11 | F5 rank parts | Works career (OR1) | career_check |
 | 11 | F6 Dev mode | Dev mode (OR1) | devmode_check |
-| 12-14 | F7a-c the check | performance (OR1) for perf_check | perf_check, deck_check |
+| 12-14 | F7b-c the check, live and crowds | performance (OR1) for perf_check | perf_check, deck_check |
 | 15 | F8 comms down | social (OR1); player (OR1) for Mail | social_check |
 
 About 13-15 turns, within the plan's 12-15. Patch reviews by PR2. intro_check (over 2 hours) runs alone, in pieces
@@ -246,7 +269,10 @@ Nothing new for the writers' tools unless EW1 asks:
    says so ("we've opened the auditorium for this"). Other options: that week's address on the ship's speakers (banner
    and Mail), or on the plaza.
 
-## Questions for the lead
+## Questions for the lead (answered by lead 21, 23:39 UTC)
+
+Answers: F6's buttons come with Dev mode's Stop 3; F7 is a new `bigevents_check.py`, kept out of check_fast; F8 does
+calls home only. User questions 1-2 went to the user; question 3 is on EW1's addresses page (the same clash).
 
 1. F6: add the two Dev mode buttons (jump to phase, End and keep) now in a small "Big events" tab, or leave them for
    Dev mode's Stop 3 and test the functions from events_check? Recommended: with Stop 3, so two seats don't build
