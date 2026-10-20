@@ -26,6 +26,11 @@ After:
 > - **Owners** (`plans/owners.md`, the user's rule): small edits in another seat's section are fine, and the owner reviews them before they're merged. A change to a shared function's inputs or result, or to a shared table's shape, goes to its owner first. `python3 tools/section.py --diff` shows which sections (and owners) your branch touches.
 > - **Found a small bug outside your brief?** Add a row to `plans/backlog.md`; don't fix it on the side.
 
+## 3b. "How we work": add two of the user's rules (lead 20, 2026-10-20)
+
+> - **Every page published for the user leaves room for the user's answer.** A plan page, survey or results page has a place to comment and to answer its questions on the page itself (load the `artifact-capabilities` skill for a page that keeps what the user writes), so nothing the user says there is lost.
+> - **Cut things are parked, never deleted.** When something is cut from scope, mark it cut and keep it on record: in design-doc.md (its section, marked cut, with the date and the user's reason) and in the plan that held it (`plans/`). Its keys, ids and names stay retired, not reused. Code already built for it stays switched off; taking it out of the file is its own reviewed step, with the record kept.
+
 ## 4. "Determinism and regressions": extend
 
 Before:
