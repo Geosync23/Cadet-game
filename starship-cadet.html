@@ -33994,6 +33994,28 @@ function talkPackFire(who, pick, t = shipNow()) {         // a talk started: it'
   const d = Math.floor(t / 1440) + 1;
   if (pick.talk) T.fired[pick.talk.id] = [d, p.id]; else T.small[p.id] = [d, pick.done ? 1 : 0];
 }
+// ---- the pack in Talk a while (T3): section 20's talkStart asks talkPackStart(C) for the talk (fired as it starts:
+// the user's no-repeats rule, so walking off or "got to go" still uses it up), then talkNext / the ask / talkReply /
+// talkAnswer ask talkPackNext / Ask / Reply / Answer first. C.talk.pack = { id, topic, src, lines, ask, replies, i } for a
+// talk, { small: true, lines, done, i } for small talk (no question: asked is set, so no buttons and no reply's +2). The
+// old topic lines (talk.<topic>.*) aren't used while it's on (C.talk.topic is null). TALK_PACK_ON is the switch.
+const TALK_PACK_ON = true;
+function talkPackStart(C) {
+  if (!TALK_PACK_ON || !C || !C.talk) return null;
+  const pk = talkPackPick(C.p); if (!pk || (pk.small && !pk.small.length)) return null;
+  talkPackFire(C.p, pk);
+  const T = C.talk; T.topic = null;
+  T.pack = pk.talk ? { id: pk.talk.id, topic: pk.talk.topic, src: pk.src, lines: pk.said.lines, ask: pk.said.ask, replies: pk.said.replies, i: 1 }
+    : { small: true, lines: pk.small.map(x => x.text), done: pk.done, i: 1 };
+  if (T.pack.small) T.asked = true;                       // small talk: no question
+  const own = new Set(T.pack.lines); for (const e of (typeof LINES !== 'undefined' && LINES['talk.filler']) || []) if (own.has(e.text)) T.said.push(e.id);   // a filler line that's also one of these isn't said again
+  return T.pack.lines[0];
+}
+const talkPackOf = C => C && C.talk && C.talk.pack;
+const talkPackNext = C => { const P = talkPackOf(C); return P && P.i < P.lines.length && !(C.talk.asked && !P.small) ? P.lines[P.i++] : null; };   // the "more" lines before the question (all of small talk)
+const talkPackAsk = C => { const P = talkPackOf(C); return P && !P.small ? P.ask : null; };
+const talkPackReply = (C, k) => { const P = talkPackOf(C); return P && P.replies && P.replies[k] ? P.replies[k].text : null; };
+const talkPackAnswer = (C, k) => { const P = talkPackOf(C); return P && P.replies && P.replies[k] ? P.replies[k].ans : null; };
 // ---- end of slot: Dialogue engineer ----
 
 // =====================================================================

@@ -10,7 +10,7 @@
 #   (f) the save: save.talks only once a talk has happened, loads back the same, bad entries dropped, small, New game clears
 # Setup and environment as for cadet_test.py.
 # Run:  python3 talk_check.py BUILD.html
-import sys, json
+import sys, json, os
 exec(open(__file__.replace('talk_check.py', 'cadet_test.py')).read().split("a, shots = run(")[0])
 from playwright.sync_api import sync_playwright
 
@@ -175,6 +175,62 @@ with sync_playwright() as pw:
     check(r['cleared'], 'New game (linesNew) does not clear the record')
 
     for e in errors: fail(f'page error: {e}')
+    g.close()
+
+    # (g) in the game, on a phone (390 x 844): Talk a while through the chat card (section 20 asks section 22): the
+    # pack's opener, its more lines, the question with its three replies as buttons, the answer; small talk once
+    # everything's used (no buttons but Stop); --shots DIR saves the card at each step
+    print('(g) Talk a while on the chat card, on a phone:')
+    shots = sys.argv[sys.argv.index('--shots') + 1] if '--shots' in sys.argv else None
+    errors2 = []
+    g = Game(pw, sys.argv[1], w=390, h=844, errors=errors2)
+    g.ev("(() => { SHIP.time.day = 3; SHIP.time.min = 12 * 60 + 30; })()")
+    g.step(3)
+    def shot(name):
+        if shots:
+            os.makedirs(shots, exist_ok=True); g.shot(os.path.join(shots, name + '.png'))
+    PLAY = r"""(({ id, tier, fireAll }) => {
+      const p = SOC.crew[SOC.idx.get(id)], r = relGet(p.id), t0 = shipNow(); r.tier = tier; r.talkDay = 0; r.chatDay = 0;
+      if (fireAll) { SHIP.talks = { fired: {}, small: {} }; for (const tk of TALKS.pool.concat(TALKS.own[id] || [])) SHIP.talks.fired[tk.id] = [1, 'x']; }
+      const a = DECK_CREW.find(x => x.p === p); if (a) { player.obj.position.set(a.x + .9, 0, a.z + .9); target.copy(player.obj.position).setY(.7); }
+      chatClose(); CHAT = { p, line: { text: '', say: true }, ask: false, fav: null, at: shipNow(), reach: 99, checked: Math.floor(shipNow()) + 999 }; chatShow();
+      chatDo('talk'); const T = CHAT.talk, card = () => [...document.querySelectorAll('#chat button, #chat .btns button')].map(b => b.textContent).filter(x => x !== '×'), said = () => CHAT.line.text;
+      const out = { pack: T.pack ? { id: T.pack.id, small: !!T.pack.small, done: !!T.pack.done, lines: T.pack.lines, ask: T.pack.ask, replies: T.pack.replies } : null, steps: [[0, said(), card()]] };
+      for (let k = 1; k <= 40 && !T.end; k++) { setShipNow(t0 + k * .5); CHAT.checked = Math.floor(shipNow()) + 999; talkStep(CHAT);
+        const l = said(); if (l !== out.steps[out.steps.length - 1][1]) out.steps.push([T.mins, l, card()]);
+        if (T.ask) { out.asked = [T.mins, said(), card()]; break; } }
+      return out; })"""
+    r = g.ev(f"({PLAY})({{ id: 'tomas', tier: 1 }})")
+    P = r['pack']
+    print(f"  Tomas: {P['id'] if P else None}")
+    for st in r['steps']: print(f"    {st[0]:>5} min: {st[1]!r}")
+    check(P and not P['small'] and P['id'].startswith('tomas.'), f"Tomas's first talk isn't his own: {P}")
+    if P and not P['small']:
+        said = [x[1] for x in r['steps']]
+        check(any(P['lines'][0] in x for x in said[:1]), 'the opener is not the pack talk\'s first line')
+        check(all(l in said for l in P['lines'][1:]), "the pack's more lines were not said before the question")
+        check(r.get('asked') and r['asked'][1] == P['ask'], f"the question is not the pack's ask: {r.get('asked')}")
+        want = [P['replies'][k]['text'] for k in ('listen', 'share', 'cheer')]
+        check(r.get('asked') and r['asked'][2][:3] == want, f"the reply buttons are not the pack's: {r.get('asked') and r['asked'][2]} (want {want})")
+        print(f"    the question: {r['asked'][1]!r}; buttons {r['asked'][2]}")
+        shot('talk-question')
+        k = g.ev("talkSuits(CHAT.p)")
+        a = g.ev(f"(() => {{ chatDo('reply:{k}'); return [CHAT.line.text, CHAT.talk.pack.replies['{k}'].ans, Object.keys(SHIP.talks.fired).includes(CHAT.talk.pack.id)]; }})()")
+        print(f"    replied {k}: {a[0]!r}")
+        check(a[0] == a[1], f"the answer is not the pack's: {a[0]!r} (want {a[1]!r})")
+        check(a[2], 'the talk was not fired')
+        shot('talk-answer')
+    r = g.ev(f"({PLAY})({{ id: 'tomas', tier: 1 }})")
+    check(r['pack'] and r['pack']['id'] != P['id'], 'the same talk again the next time')
+    r = g.ev(f"({PLAY})({{ id: 'abara-rosa', tier: 2, fireAll: true }})")
+    print(f"  everything used, Abara: small talk {r['pack'] and r['pack']['small']}, done opener {r['pack'] and r['pack'].get('done')}")
+    for st in r['steps']: print(f"    {st[0]:>5} min: {st[1]!r} {st[2]}")
+    check(r['pack'] and r['pack']['small'], 'no small talk once everything is used')
+    said = [x[1] for x in r['steps']]
+    check(r['pack'] and all(sum(l in x for x in said) == 1 for l in r['pack']['lines']), 'a small talk line said twice in one talk')
+    check(not r.get('asked') and all(x[2][:1] == ['Stop'] for x in r['steps'] if x[0] < 15), 'small talk asked a question or showed reply buttons')
+    shot('talk-small')
+    for e in errors2: fail(f'page error: {e}')
     g.close()
 
 print('TALK CHECK OK' if ok else 'TALK CHECK FAILED')
