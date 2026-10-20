@@ -211,3 +211,5 @@ PP1 now reviews patch turns. Batch E (small features incl. First Light Cocoa, th
 **~15:53 UTC: 0.64.4 in claude/integration** (5d6ee1c = talk-wire 6484d3e: Talk a while pack, 280 talks incl. nine work pools; GitHub check #35 green; all checks OK). TE1, TW1 idle; TR1 stopped (handover cb6dd07 on claude/talk-pack-review). DB1 builds patch #30/#29 on claude/devmode (its only push branch), maybe #26.
 
 **~16:12-16:47 UTC: every seat stopped on the 5-hour usage limit ("You've hit your session limit · resets 4:40pm UTC").** Resumed at 16:48 on the user's "Resume": PA, PB, PE, DB1, DR1 each told to push WIP first, then carry on. Lesson: 6-7 seats at once use up the 5-hour allowance in about 2.5 h.
+
+**~17:55 UTC:** DB1 stopped at its memory line after #29 (handover plans/handover-patch-e2.md on claude/devmode 375827b). PE (half of batch E done incl. the ladder, ab685bb) takes #26 First Light Cocoa. User decision: weekly Captain's address on Fridays (off work 15:30, address 16:00, dinner 17:00, first in week one; dialogue explaining short Fridays); PP1 plans it. Lead memory 52%.
