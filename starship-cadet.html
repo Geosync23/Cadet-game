@@ -50109,7 +50109,7 @@ function tap(cx, cy) {
     return;
   }
   if (typeof playerFloorTap === 'function' && playerFloorTap(h.point)) return;   // section 15: a treadmill, seat or booth with no description of its own
-  playerGo(nearestOpen(h.point.x, h.point.z, player));
+  const to = nearestOpen(h.point.x, h.point.z, player); playerGo(typeof tapBeside === 'function' ? tapBeside(to) : to);   // the patch (#17): not onto someone standing there
 }
 
 // pointer: tap to walk somewhere, press and hold to walk toward your finger, pinch or wheel to zoom
