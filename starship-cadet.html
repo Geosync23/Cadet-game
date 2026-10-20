@@ -10906,7 +10906,7 @@ function devDay(d) {
       out.push({ from: b.at, to: b.until || b.at + 30, title: DEV_BEATS[b.id], where: b.where.room + ', ' + deckIn(b.where.deck), kind: 'beat', deck: b.where.deck, room: b.where.room }); } catch (e) { /* not yet */ }
   return out.sort((x, y) => x.from - y.from);
 }
-const DEV_BEATS = { 'd1-briefing': 'Morning briefing with the Chief', 'd2-solo': 'The Chief\'s office: your first job', 'd2-booths': 'Calling home', 'd3-store': 'The crew store' };   // titles (stand-ins; the beats' own words are section 21's)
+const DEV_BEATS = { 'd1-briefing': 'Morning briefing with the Chief', 'd2-solo': 'The Chief\'s office: your first solo job', 'd2-booths': 'Calling home', 'd3-store': 'The crew store' };   // titles (stand-ins; the beats' own words are section 21's)
 const devWhen = t => hhmm(((t % 1440) + 1440) % 1440);
 const devDayName = d => d === SHIP.time.day ? 'Today' : d === SHIP.time.day + 1 ? 'Tomorrow' : WEEKDAYS[weekday(d)] + ', Day ' + d;
 function devNow() {                                      // the strip: where you're expected right now, and what's next
