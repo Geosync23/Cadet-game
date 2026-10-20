@@ -1,16 +1,19 @@
 # Dev mode plan: summary (version 1)
 
-Dev mode planner DP1, 2026-10-20. Branch `claude/devmode-plan`, based on `claude/integration` (0.64.2 + step 2). The full page is `plans/devmode-plan.html`. Planning only: the game is unchanged.
+Dev mode planner DP1, 2026-10-20, version 1.1 (takes in reviewer DR1's early facts and the user's next steps). Branch `claude/devmode-plan`, based on `claude/integration` (0.64.2 + step 2). The full page is `plans/devmode-plan.html`. Planning only: the game is unchanged.
 
 ## What it is
 - **A hidden testing panel**, opened with `#dev` in the game's link. Without it, Dev mode doesn't exist in the game: no chip, no panel, no code running. Proof each turn: cadet_test ALL IDENTICAL.
 - **Its own save:** the two storage names (`starship-cadet-save`, `starship-cadet-arrived`) get "-dev" added in Dev mode. The real save is never touched, and devmode_check proves it byte for byte.
 - **It doesn't use `nosave`**, because that also switches off the arrival and the clothes.
-- **Always labelled:** a gold DEV chip under the clock. Anything set by hand is marked in the Dev save.
+- **No new button:** the phone's HUD has no room (DR1). With `#dev`, the clock gets a gold underline and a tap on it opens the panel.
+- **Always labelled:** the underline, and the panel's title "Dev mode: not your real game". Anything set by hand is marked in the Dev save.
+- **A fixed seed:** with saving on, the career's own seed (`SHIP.career.gs`) is random, so the Dev save fixes it (default 1, shown, changeable). One hook in `careerInit`. My measurements used `nosave` (seed 0).
 - **The panel:** a bottom sheet at phone size (on the right in landscape), with five tabs: **Clock, Career, Traditions, Jump, Events**. Sketches are on the page.
 
 ## The five functions (the user's asks)
 1. **Clock.** Moves time forward: +1 h, +3 h, to 17:00, to 21:40, next morning, +1 day, +7 days, or to a chosen time.
+   - A plain skip from Day 1 to Day 27 (DR1) leaves needs at 0, 15 missed shifts, the Captain's second warning, xp 0 and a storm run without you. So "Play it steady" is the default for days, and Skip asks first.
    - Two ways: "Skip (like sleeping)" is `skipTo`, where a skipped workday is a missed shift; "Play it steady" has the steady player work the hours.
    - It runs in 30-minute steps, a day at a time, with a progress bar.
    - Whatever's mid-flight is settled first (a conversation ends with its gist in Mail, an activity stops, a game closes). It refuses during a lift ride or sleep.
@@ -28,6 +31,7 @@ Dev mode planner DP1, 2026-10-20. Branch `claude/devmode-plan`, based on `claude
    - Start at a phase: the earlier phases pass as if slept through.
    - Threads live, with − and +, the bands and your part.
    - "End now" goes through the event's own ending (score, traces, log, debrief, commendation).
+   - Starting an event keeps a copy of the event state; "End and undo" (the default) puts it back so later events' dates don't move; "End and keep" is marked.
    - Phase jumps are only reliable after the events plan's F4; until then the panel says so.
 
 ## The day jump: recommended (a) replay + kept days
@@ -63,6 +67,11 @@ Dev mode planner DP1, 2026-10-20. Branch `claude/devmode-plan`, based on `claude
 - Exact for the steady player's choices: friendships.
 - Approximate (marked): your needs, clothes, what you carry and where you stand.
 
+## First real uses (the user's next steps)
+- A playtest patch, including the Day 2 "first solo job" meeting not starting: jump to Day 2. So D5's first steady-player lines cover Days 0-2, and can come before D3-D4 if the patch is wanted sooner.
+- Then the "Talk a while" dialogue pack, which needs days with real friendships.
+- Helper DJ1 (`claude/devmode-dayjump`) is measuring the options in more depth; its numbers go into the next version.
+
 ## Turns (about 8-10) and stops
 | Turn | Work |
 |---|---|
@@ -88,7 +97,7 @@ Dev mode planner DP1, 2026-10-20. Branch `claude/devmode-plan`, based on `claude
 - the page's CSS
 
 ## Questions for the user (answer slots dm-q1 to dm-q10, plus dm-general)
-1. How is it opened? **Recommended: `#dev` in the link.**
+1. How is it opened? **Recommended: `#dev` in the link, and a tap on the clock opens the panel.**
 2. How does it save? **Recommended: its own save** (not "no saving").
 3. How does the day jump work? **Recommended: (a) replay + kept days.**
 4. Which players can you jump as? **Recommended: steady now; busy and lazy later.**

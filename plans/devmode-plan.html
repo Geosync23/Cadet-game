@@ -38,7 +38,7 @@ code{font-size:12.5px}
 .ph .cap{font-size:12px;color:var(--muted);margin:6px 2px 0}
 .scr{border-radius:16px;overflow:hidden;background:linear-gradient(#1d3140,#0f1d27);height:420px;position:relative;font-size:10.5px;color:#e8eef0}
 .hud{display:flex;justify-content:space-between;padding:6px 8px;font-size:10px;opacity:.9}
-.devchip{position:absolute;top:24px;left:8px;background:#e9c46a;color:#1b1b1b;font-weight:700;font-size:9.5px;border-radius:999px;padding:2px 7px}
+.hud .dv{border-bottom:2px solid #e9c46a;padding-bottom:1px}
 .sheet{position:absolute;left:0;right:0;bottom:0;background:rgba(10,16,24,.94);border-top:1px solid rgba(150,200,196,.35);border-radius:14px 14px 0 0;padding:7px 8px 8px}
 .tabs{display:flex;gap:3px;margin-bottom:6px}
 .tabs span{flex:1;text-align:center;padding:3px 0;border-radius:7px;background:#1b2838;font-size:9.5px;color:#93a6ae}
@@ -112,13 +112,14 @@ code{font-size:12.5px}
 <h2>2. Opening it, and keeping your real game safe</h2>
 <div class="card">
 <ul>
-<li><b>Opening:</b> add <code>#dev</code> to the end of the game's link (the same way <code>#debug</code> already works; the game reads switches from the link). A small gold <b>DEV</b> chip then sits under the clock, and tapping it opens the panel. Without <code>#dev</code> there's no chip, no panel and no Dev code running. It also doesn't show up in the device's apps, the Mail, the tips or any text.</li>
+<li><b>Opening:</b> add <code>#dev</code> to the end of the game's link (the same way <code>#debug</code> already works; the game reads switches from the link). The clock then gets a gold underline, and <b>tapping the clock opens the panel</b>. The phone's HUD has no room for another button (reviewer DR1 checked at 390 × 844), so Dev mode adds none: the clock already sits there and does nothing when tapped today. Without <code>#dev</code> the clock is as it is now, and there's no panel and no Dev code running. It also doesn't show up in the device's apps, the Mail, the tips or any text.</li>
 <li><b>Its own save:</b> your game's save lives in the browser under one name. Dev mode saves under a different name, with "-dev" added, and does the same for the "you've already arrived" marker. So:
 <ul>
 <li>You can play your real game, open the <code>#dev</code> link, test anything, and go back to your real game exactly as you left it.</li>
 <li>Dev mode doesn't use the tests' "no saving" switch (<code>nosave</code>). That switch also turns off the arrival and the clothes, so testing with it wouldn't be testing the real game.</li>
 </ul></li>
-<li><b>Always labelled:</b> the DEV chip stays on screen while you're in Dev mode. A game that a jump or a setting has changed carries a mark in its own save (for example "set by Dev mode: xp", or "replayed to Day 14"), so a bug found later can be traced back to it.</li>
+<li><b>Always labelled:</b> the clock's gold underline stays while you're in Dev mode, and the panel's title says "Dev mode: not your real game". A game that a jump or a setting has changed carries a mark in its own save (for example "set by Dev mode: xp", or "replayed to Day 14"), so a bug found later can be traced back to it.</li>
+<li><b>A fixed seed, so a jump is repeatable:</b> with saving on, a new game makes its own random seed for a few rolls (sick days, who comes looking for you), from the time and a random number (<code>SHIP.career.gs</code>; with <code>nosave</code> it's 0). So two jumps to Day 14 in a normal save could differ. The Dev save fixes it: the seed is 1 by default, shown on the Jump tab, and you can change it to see a different run of luck. One hook in <code>careerInit</code>; with Dev mode off it's unchanged. (Reviewer DR1's find; my measurements ran with <code>nosave</code>, so seed 0.)</li>
 <li><b>It's yours to open, not hidden from you:</b> anyone who knows to type <code>#dev</code> can open it. The game is yours and the link is private by default, so I think that's enough (question 1).</li>
 </ul>
 </div>
@@ -126,7 +127,7 @@ code{font-size:12.5px}
 <h2>3. The panel at phone size</h2>
 <p class="sub">Sketches at about 390 × 844 points (an iPhone-sized screen). The panel is a sheet across the bottom third of the screen, so you can still see the deck above it, with five tabs. Each button is at least 26 points tall for thumbs. It works the same in landscape: the sheet moves to the right-hand side.</p>
 <div class="phones">
-<div class="ph"><div class="scr"><div class="hud"><span>Day 4, Thursday 10:20</span><span>☰</span></div><div class="devchip">DEV</div>
+<div class="ph"><div class="scr"><div class="hud"><span class="dv">Day 4, Thursday 10:20</span><span>☰</span></div>
 <div class="sheet"><div class="tabs"><span class="on">Clock</span><span>Career</span><span>Trad.</span><span>Jump</span><span>Events</span></div>
 <div class="ln"><span>Now</span><i>Day 4 Thu 10:20 · at work</i></div>
 <div class="lab2">Move time forward</div>
@@ -136,7 +137,7 @@ code{font-size:12.5px}
 <div class="note">Skipping a workday counts as a missed shift, as in the game.</div>
 </div></div><div class="cap">1. Clock: moving the clock forward.</div></div>
 
-<div class="ph"><div class="scr"><div class="hud"><span>Day 9, Tuesday 08:05</span><span>☰</span></div><div class="devchip">DEV</div>
+<div class="ph"><div class="scr"><div class="hud"><span class="dv">Day 9, Tuesday 08:05</span><span>☰</span></div>
 <div class="sheet"><div class="tabs"><span>Clock</span><span class="on">Career</span><span>Trad.</span><span>Jump</span><span>Events</span></div>
 <div class="ln"><span>Rank</span><i>Junior Technician · Tier 1</i></div>
 <div class="ln"><span>Works rep</span><i>Relied on (xp 41)</i></div>
@@ -148,7 +149,7 @@ code{font-size:12.5px}
 <div class="ln"><span>Ship rep</span><i>work 62 · kind 55 · spirit 51</i></div>
 </div></div><div class="cap">2. Career: reputation, training, promotion.</div></div>
 
-<div class="ph"><div class="scr"><div class="hud"><span>Day 3, Wednesday 15:40</span><span>☰</span></div><div class="devchip">DEV</div>
+<div class="ph"><div class="scr"><div class="hud"><span class="dv">Day 3, Wednesday 15:40</span><span>☰</span></div>
 <div class="sheet"><div class="tabs"><span>Clock</span><span>Career</span><span class="on">Trad.</span><span>Jump</span><span>Events</span></div>
 <div class="ln"><span>Today</span><i>Quiz night 20:00 · Jam 19:45</i></div>
 <div class="lab2">Find a tradition (60)</div>
@@ -159,7 +160,7 @@ code{font-size:12.5px}
 <div class="note">Today's plans are made again; the deck refreshes like a lift ride.</div>
 </div></div><div class="cap">3. Traditions: start one now or later.</div></div>
 
-<div class="ph"><div class="scr"><div class="hud"><span>Day 1, Monday 06:00</span><span>☰</span></div><div class="devchip">DEV</div>
+<div class="ph"><div class="scr"><div class="hud"><span class="dv">Day 1, Monday 06:00</span><span>☰</span></div>
 <div class="sheet"><div class="tabs"><span>Clock</span><span>Career</span><span>Trad.</span><span class="on">Jump</span><span>Events</span></div>
 <div class="lab2">Jump to day</div>
 <div class="btns"><b>0</b><b>1</b><b>5</b><b>9</b><b>10</b><b>16</b><b>23</b><b>26</b><b>30</b><b>Day…</b></div>
@@ -171,7 +172,7 @@ code{font-size:12.5px}
 <div class="btns"><b class="rose">Stop</b></div>
 </div></div><div class="cap">4. Jump: replaying to a day, with progress.</div></div>
 
-<div class="ph"><div class="scr"><div class="hud"><span>Day 11, Thursday 14:00</span><span>☰</span></div><div class="devchip">DEV</div>
+<div class="ph"><div class="scr"><div class="hud"><span class="dv">Day 11, Thursday 14:00</span><span>☰</span></div>
 <div class="sheet"><div class="tabs"><span>Clock</span><span>Career</span><span>Trad.</span><span>Jump</span><span class="on">Events</span></div>
 <div class="ln"><span>Ion storm</span><i>onset · day 1 of 6</i></div>
 <div class="btns"><b>Warning</b><b class="go">Onset</b><b>Escalation</b><b>Resolution</b><b>Afterglow</b></div>
@@ -197,6 +198,7 @@ code{font-size:12.5px}
 <li>Long skips go in steps of 30 ship minutes, with a pause between days so the phone stays responsive and a progress bar shows. One single jump over many days would skip the hourly things in between (the events plan found that a single jump over the whole storm came out "smooth").</li>
 <li>Before any jump, Dev mode settles what's mid-flight: a conversation on screen ends (its gist arrives in Mail, as when you walk away), an activity stops (as sleeping does), and a Lightdisc or Tiles game is closed. It refuses during a lift ride or while you're asleep.</li>
 </ul></li>
+<li><b>Why "Skip" isn't the default for days</b> (reviewer DR1, on the shared branch): a plain skip from Day 1 to Day 27 leaves your needs at 0, 15 missed shifts, the Captain's second warning, still a Junior with xp 0, and the storm run without you. That's what the game does to someone who's absent, so it's right for "Skip", but it isn't a player's day. Skip is offered for hours. Over a whole day it asks first ("You'll miss your shift. Skip anyway?"), and "Play it steady" is the default for days.</li>
 <li><b>Measured:</b> one plain 10-day skip from Day 1 takes 3 seconds in the test browser. Played steady, a day takes about 0.8 seconds.</li>
 </ul>
 
@@ -251,6 +253,7 @@ Each change goes through the career's own functions where they exist, so the ban
 <li>Each thread shows its number and band (smooth, bumpy, rough), with − and + buttons.</li>
 <li>Also shown: the overall band, "your part" (jobs and meetings, which decide the commendation) and today's effects (blackouts, comms down).</li>
 </ul></li>
+<li><b>Keeping the calendar clean</b> (reviewer DR1): an event in the log moves the dates of the events after it for good, and while a Dev-started event runs, the one that's due waits. So starting an event first keeps a copy of the event state: the running event, the log, the traces, the commendations and the event's Mail. "End now" then offers <b>End and undo</b> (the default: everything goes back to that copy, so the calendar is as it was) or <b>End and keep</b> (it counts, as if it had really happened; marked in the Dev save). No change to section 18's code is needed for this.</li>
 <li><b>End now:</b> brings the event to its end through its own ending. The result is scored, its traces are laid, it's logged, the debrief Mail goes out and a commendation comes if earned. So the threads' after-effects ("see its threads") show up as in play.</li>
 <li><b>A switched-off event</b> (the visit) can be started in Dev mode only. Starting it never switches it on in the real game.</li>
 <li><b>Under the hood:</b>
@@ -301,7 +304,7 @@ Each change goes through the career's own functions where they exist, so the ban
 <tr><td>10-minute steps</td><td></td><td>37.5 s</td><td>finer, twice as slow</td></tr>
 <tr><td>60-minute steps</td><td></td><td>13.9 s</td><td>faster, but misses more of the hourly moments</td></tr>
 <tr><td>Slow phone (the CPU slowed 4×)</td><td id="ph10">40.4 s</td><td id="ph26">101.9 s</td><td>a stand-in for an older phone: about 5× slower; the same fingerprint as the fast runs. So a first jump to Day 26 on an older phone takes up to 2 minutes, and later jumps start from a kept day. D7 also looks for speed-ups: for example, the drawn crew are refilled on every step and needn't be until the end</td></tr>
-<tr><td>The same replay twice</td><td colspan="2">identical saves (the same fingerprint, twice each for Day 10 and Day 26)</td><td>a replay is repeatable</td></tr>
+<tr><td>The same replay twice (with <code>nosave</code>, so seed 0)</td><td colspan="2">identical saves (the same fingerprint, twice each for Day 10 and Day 26)</td><td>a replay is repeatable</td></tr>
 <tr><td>Save size on Day 26</td><td colspan="2">118 KB (the job list is the biggest part, 32 KB)</td><td>(b) would need about 30 of these</td></tr>
 <tr><td>One plain 10-day skip</td><td colspan="2">3.0 s</td><td>no player, so a missed career; for comparison</td></tr>
 </table></div>
@@ -348,7 +351,7 @@ None of them is the whole game.</li>
 <h2>5. Risks, and what's done about each</h2>
 <div class="scroll"><table>
 <tr><th>Risk</th><th>What's done</th></tr>
-<tr><td><b>Dev mode changes the normal game</b></td><td>Every line of Dev mode sits behind one switch, <code>DEV</code>, read from the link. The hooks it adds elsewhere are empty when it's off. Proven every turn: cadet_test against the build before comes out ALL IDENTICAL (0 pixels apart from the known renderer noise); day_check gives the same days; names_check and check_fast pass. devmode_check also opens the game without <code>#dev</code> and checks there's no chip, no panel and no "-dev" storage.</td></tr>
+<tr><td><b>Dev mode changes the normal game</b></td><td>Every line of Dev mode sits behind one switch, <code>DEV</code>, read from the link. The hooks it adds elsewhere are empty when it's off. Proven every turn: cadet_test against the build before comes out ALL IDENTICAL (0 pixels apart from the known renderer noise); day_check gives the same days; names_check and check_fast pass. devmode_check also opens the game without <code>#dev</code> and checks there's no underline, no panel, a tap on the clock does nothing and no "-dev" storage.</td></tr>
 <tr><td><b>Your real save is touched</b></td><td>The two storage names change only in Dev mode. devmode_check writes a real save, plays in <code>#dev</code> (jumps, sets, events), and checks the real save is byte for byte unchanged.</td></tr>
 <tr><td><b>Determinism</b>: a jump's game isn't what a playthrough would produce</td><td>The replay is the game's own code with a fixed script and a fixed step. It's measured repeatable, and devmode_check repeats it each turn. Anything set by hand (xp, a rank, a thread) is marked "set by Dev mode" in the save, and the panel says "approximate" next to it.</td></tr>
 <tr><td><b>Big jumps on phones</b>: slow, or the page freezes</td><td>The replay runs one ship day at a time, with a pause between days so the screen keeps drawing, plus a progress bar and a Stop button. Kept days make repeat jumps instant. Measured on a phone-speed stand-in (section 4.3).</td></tr>
@@ -356,15 +359,25 @@ None of them is the whole game.</li>
 <tr><td><b>A tradition or event out of its slot</b></td><td>A tradition can always be started; the honorees, flags, fixed hours and storms are handled as in 3.3. An event can't start while another is running: end it first. A phase jump waits for F4 to be reliable and says so.</td></tr>
 <tr><td><b>Remade plans</b> break the "plans don't read live records" rule</td><td>The plans read only the Dev list, set once and saved, and the plans from that day on are dropped and made again. This is the one-off events' existing path. It's written into DEV_NOTES as a Dev-mode-only exception.</td></tr>
 <tr><td><b>A new system isn't in the steady player</b></td><td>The steady player lists the career rows that have no line yet, and devmode_check fails a row that's in the build with no line ("m6 has no steady-player line"). A seat building a new mechanic adds its line in the same turn.</td></tr>
+<tr><td><b>A random seed</b> makes jumps differ</td><td>The Dev save fixes the career's seed (default 1); devmode_check jumps twice with saving on and compares.</td></tr>
+<tr><td><b>A Dev-started event shifts later events</b></td><td>"End and undo" by default puts the event state back as it was before the start; "End and keep" is marked.</td></tr>
 <tr><td><b>Stale kept days after a game update</b></td><td>Stamped with the build number, and thrown away when it changes.</td></tr>
 <tr><td><b>Phone layout</b>: the panel covers the HUD or the deck</td><td>It's a bottom sheet (on the right in landscape), it can be pulled down to a strip, and it gets its own screenshots at 390 × 844 and 844 × 390 in devmode_check.</td></tr>
 <tr><td><b>Clashes with other seats</b></td><td>Dev mode is a new section with its own slot. The hooks in sections 13, 18, 21, 24 and 24p are one or two lines each, reviewed by their owners (owners.md). No shared function changes what it takes or returns.</td></tr>
 </table></div>
 
 <h2>6. The turns, and what you see at each stop</h2>
+<div class="card">
+<b>What Dev mode is first used for</b> (your next steps, from the roadmap):
+<ul>
+<li>Right after Dev mode comes a <b>playtest patch</b>. One of its items is the Day 2 "first solo job" meeting not starting. That's a good first real test for Dev mode: jump to Day 2, watch the meeting due, and see where it stops. So the steady player's first lines (D5) cover Days 0-2 first: the arrival, Day 1's shadow shift and Day 2's morning. If the patch is wanted sooner, D5-D7 for Days 0-2 can come before D3-D4.</li>
+<li>Then a <b>"Talk a while" dialogue pack</b>. Its writers can jump to a day with the right friendships and stories part-way along, which is what the replay keeps exact.</li>
+</ul>
+<p class="sub">A helper, DJ1 (<code>claude/devmode-dayjump</code>), is measuring the day-jump options, clock jumps, starting traditions and <code>eventStart</code> on the real game in more depth. Its numbers will be added to this page in the next version.</p>
+</div>
 <div class="scroll"><table>
 <tr><th>Turn</th><th>What's built</th><th>Proof</th></tr>
-<tr><td>D1</td><td>The switch (<code>#dev</code>), the Dev save, the DEV chip and an empty panel with its five tabs; the new section 25 and its slot; the owners.md row</td><td>cadet_test ALL IDENTICAL; devmode_check (new): the real save untouched, nothing without #dev; check_fast</td></tr>
+<tr><td>D1</td><td>The switch (<code>#dev</code>), the Dev save, the clock's underline and tap, and an empty panel with its five tabs; the new section 25 and its slot; the owners.md row</td><td>cadet_test ALL IDENTICAL; devmode_check (new): the real save untouched, nothing without #dev; check_fast</td></tr>
 <tr><td>D2</td><td>Clock: skip by hours and days, settling what's mid-flight, the progress bar</td><td>devmode_check: +1 day matches sleeping; a 7-day skip on a phone-sized screen; cadet_test identical</td></tr>
 <tr><td>D3</td><td>Career: show and set, "Start promotion now" and "Next step"</td><td>career_check, leave_check unchanged; devmode_check: the promotion runs from a set test day to the ceremony</td></tr>
 <tr><td>D4</td><td>Traditions: list, search, start (the section 18 hook), Mail, honorees</td><td>events_check and join_check unchanged; devmode_check: 5 traditions of different kinds started, people go, decor on the deck</td></tr>
@@ -388,8 +401,8 @@ None of them is the whole game.</li>
 <h3>1. How should Dev mode be opened?</h3>
 <p class="why">It has to stay out of the normal game. The game already reads switches like <code>#debug</code> from the link.</p>
 <fieldset><legend>Question 1</legend>
-<label class="opt"><input type="radio" name="dm-q1" value="hash"> Add <code>#dev</code> to the game's link <span class="recd">recommended</span></label>
-<label class="opt"><input type="radio" name="dm-q1" value="hash-press"> <code>#dev</code> in the link, and also a long press on the clock to show the chip</label>
+<label class="opt"><input type="radio" name="dm-q1" value="hash"> Add <code>#dev</code> to the game's link; then a tap on the clock opens the panel (no new button) <span class="recd">recommended</span></label>
+<label class="opt"><input type="radio" name="dm-q1" value="hash-press"> <code>#dev</code> in the link, and the panel opens with a long press anywhere on the deck</label>
 <label class="opt"><input type="radio" name="dm-q1" value="separate"> A separate Dev copy of the game with its own link</label>
 <label class="opt"><input type="radio" name="dm-q1" value="other"> Something else (say below)</label>
 </fieldset>
@@ -524,7 +537,7 @@ None of them is the whole game.</li>
 <li><b>18 (traditions engineer):</b> one line in <code>eventsOn</code> adds the Dev list's traditions for that day. Today's and later plans are dropped and made again, as <code>eventOneOff</code> does.</li>
 <li><b>24p (Works career engineer):</b> a way to set the Tier 2 test day to today, using the existing test-day record.</li>
 <li><b>Every career part (24a-24s):</b> one steady-player line in <code>DEV_PLAYER</code>, in that seat's slot.</li>
-<li><b>page (HUD seat):</b> the chip and the sheet's CSS, under a <code>.dev</code> class that's only used when DEV is on.</li>
+<li><b>page (HUD seat):</b> the clock's underline and the sheet's CSS, under a <code>.dev</code> class that's only used when DEV is on.</li>
 <li><b>New section 25 "DEV MODE"</b> (a new Dev mode seat): the panel, the replay, the kept days. Everything is inside <code>if (DEV)</code> and calls no <code>R()</code>.</li>
 </ul></details>
 <details><summary>Facts found in the code (0.64.2 + step 2)</summary>
