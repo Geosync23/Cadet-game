@@ -1432,6 +1432,7 @@ const KIT = {
     box(1.1, 1.9, .05, KM.partition, 0, 1.05, .525, g);                            // door
     box(.04, .14, .04, M.metal, .38, 1.05, .565, g);
     box(.12, .05, .02, KM.vacant, .38, 1.32, .555, g);                             // the trusted green light
+    if (typeof stallCapAdd === 'function') stallCapAdd(g);                          // its red cap while taken (#8, section 14's slot)
     box(.36, .36, .02, KM.wcSign, 0, 1.6, .555, g);                                // WC, so it doesn't read as a shower (0.27.42)
     for (const sx of [-.575, .575]) box(.06, .12, .06, M.metal, sx, .06, .45, g);
     cyl(.18, .14, .4, M.ceramic, 0, .2, -.15, g, 18); box(.36, .3, .14, M.ceramic, 0, .55, -.45, g);
