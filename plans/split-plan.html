@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Splitting the game file</title>
+<style>
+:root{--ink:#e8eef0;--muted:#93a6ae;--teal:#4cc3b5;--gold:#e9c46a;--rose:#e07a7a;--glass:rgba(13,21,33,.78);--line:rgba(150,200,196,.22)}
+*{box-sizing:border-box}
+html,body{margin:0;background:#121a27;color:var(--ink);font-family:"Avenir Next","Segoe UI",system-ui,sans-serif}
+body{background:radial-gradient(ellipse at 50% 30%,#22304a 0%,#141c2b 60%,#0c111b 100%) fixed;line-height:1.5}
+main{max-width:980px;margin:0 auto;padding:16px 16px 40px}
+h1{font-size:21px;font-weight:600;margin:4px 0 2px}
+h2{font-size:16px;font-weight:600;color:#bdeee6;margin:26px 0 8px}
+h3{font-size:14px;font-weight:600;margin:14px 0 4px}
+p,li{font-size:14px;color:#d5dfe2}
+.sub{font-size:13px;color:var(--muted)}
+.card{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin:10px 0}
+.decide{border-color:rgba(233,196,106,.55)}
+.decide b.q{color:var(--gold)}
+.tag{display:inline-block;font-size:11px;padding:1px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted);margin-left:6px}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:500}
+td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;background:rgba(255,255,255,.06);padding:1px 4px;border-radius:4px}
+pre{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;background:rgba(0,0,0,.3);border:1px solid var(--line);border-radius:10px;padding:10px;overflow-x:auto;color:#cfe3e0}
+details{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:10px 16px;margin:10px 0}
+summary{cursor:pointer;font-weight:600;color:#bdeee6;font-size:14px}
+#strip{display:flex;height:46px;border-radius:10px;overflow:hidden;border:1px solid var(--line);margin:8px 0 4px}
+#strip div{height:100%;cursor:pointer;border-right:1px solid rgba(0,0,0,.35);min-width:3px}
+#strip div:hover,#strip div.on{filter:brightness(1.35)}
+#piece{min-height:64px}
+#piece b{color:#bdeee6}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+ol.turns>li{margin-bottom:8px}
+.ok{color:#8fd9b0}
+</style>
+</head>
+<body>
+<main>
+<h1>Step 2: splitting the game into pieces</h1>
+<div class="sub">Plan page for the user's review (split architect, 2026-10-20). Nothing is cut until you sign this off. Based on the rec deck build 0.64.0 (branch <code>claude/rec-cand-s1</code>).</div>
+
+<div class="card">
+<b>In one breath.</b>
+<p>Today the whole game is one file of about 49,800 lines that every helper edits at once, which is how yesterday's late name clash and the long hand merges happened. We cut it into <b>39 smaller files ("pieces")</b> along the section lines the file already has: Deck 4, the galley, the device, the crew's schedules and so on. A tiny script then glues the pieces back, in order, into the <b>same single <code>starship-cadet.html</code></b> you play today. Your link, the published game and every check keep working exactly as now.</p>
+<p><b>The proof:</b> the glued file is identical to today's file down to the last letter, so it is the same game and every test result still holds. We already tried this on a copy of 0.64.0: <span class="ok">it came back identical</span>, and every piece can be checked on its own.</p>
+<p>Alongside the split we add the new ways of working you approved: who owns which piece, a quick check before every push, the same check run by GitHub on every push, and one shared branch everyone merges into early.</p>
+</div>
+
+<h2>What you need to decide</h2>
+<div class="card decide">
+<p><b class="q">1. The pieces and who owns them.</b> The list below follows the file's own sections, so the cut is mechanical and nothing is rewritten. Happy with this list? (We can split big pieces further later, during the clean-up.)</p>
+<p><b class="q">2. Keep the glued game file in git?</b> <i>Recommended: yes.</i> After each change the helper runs the glue script and saves both the piece and the glued file. <b>Good:</b> your link, the published game, every check, and "fetch an old version" all keep working with no change; anyone can grab the whole game in one file at any time. <b>Cost:</b> each change appears twice in the history (piece + glued file), and when two helpers' work is combined the glued file is never fixed by hand, just rebuilt by the script (the quick check refuses a glued file that doesn't match its pieces). The other choice, gluing only when needed, saves that duplication but means every check, every publish and every helper must remember to glue first, and an old version can't be opened directly.</p>
+<p><b class="q">3. Automatic checks on GitHub on every push.</b> Your repository is <b>public</b> (anyone with the link can read it), so GitHub runs these checks <b>free, with no monthly limit</b>. OK to switch it on? If you ever make the repository private, the free allowance (2,000 minutes a month) would last only a few days at our pace, and we'd limit it to the shared branch.</p>
+</div>
+
+<h2>1. The pieces</h2>
+<p>Tap a block to see what's in it. Widths are to scale: the big gold block is the crew's words, made by <code>content_gen.py</code> from the plain text files in <code>content/</code> (the writers never touch it by hand, and that stays true).</p>
+<div id="strip" role="list"></div>
+<div class="legend" id="legend"></div>
+<div class="card" id="piece"><b>Tap a piece</b><br><span class="sub">Its name, lines, what it holds and its owner.</span></div>
+
+<div class="tw"><table id="tbl"><thead><tr><th>#</th><th>Piece</th><th class="n">Lines</th><th>What's in it (file sections)</th><th>Owner seat</th></tr></thead><tbody></tbody></table></div>
+<p class="sub">Pieces live in a new <code>pieces/</code> folder: <code>pieces/page/</code> (the page around the game: its look and on-screen panels), <code>pieces/js/</code> (the game code, numbered in the order they're glued) and <code>pieces/content/</code> (generated words). The numbers keep today's order exactly, which is why the result is identical. The owners table goes into <code>plans/owners.md</code>, with each piece's shared functions and their exact inputs (e.g. <code>recShow(state)</code>); a change in someone else's piece goes through its owner.</p>
+
+<h2>2. The glue script</h2>
+<div class="card">
+<p><code>build.py</code>: about 30 lines of python3, nothing to install (the checks already use python3). It reads the list of pieces in order from <code>pieces/ORDER</code> and joins them into <code>starship-cadet.html</code>. It takes a quarter of a second, and the same pieces always give the same file. <code>python3 build.py --check</code> only compares and says whether the game file is up to date.</p>
+<p>A second small script, <code>split.py</code>, does the cut itself, by finding the section headings. It can be run again on any old whole file, which is how a helper's unfinished work from before the split is carried over (see Risks).</p>
+<p>Two writers' tools change one line each: <code>content_gen.py</code> writes the crew's words into <code>pieces/content/words.gen.js</code> instead of the game file (tested: it reads that piece unchanged and says "up to date"), and the crew roster generator writes into the crew data piece.</p>
+</div>
+
+<h2>3. The proof, and keeping the whole file</h2>
+<div class="card">
+<ol>
+<li><b>Keep the whole file first</b> (your rule): when 0.64.0 is signed off, tag it in git as <code>whole-file-0.64.0</code> and keep a copy at <code>archive/starship-cadet-0.64.0-whole.html</code>. The whole game can always be fetched in one piece from there.</li>
+<li>Cut, glue, and compare: the glued file must match 0.64.0 byte for byte. We show both files' fingerprints (a 64-letter code that changes if even one letter changes); they must be the same. Trial on 0.64.0 today: both <code>534ceeda…918aa</code>.</li>
+<li>Because the file is identical, every check's last result carries over; we still run the quick check once on GitHub to prove the new set-up works. Nothing new to publish: the game hasn't changed.</li>
+</ol>
+</div>
+
+<h2>4. The quick check before every push</h2>
+<div class="card">
+<p><code>check_fast.sh</code>, under 5 minutes. Every helper runs it before every push; GitHub runs it too.</p>
+<table>
+<tr><th>Step</th><th>What it catches</th><th class="n">Time</th></tr>
+<tr><td>Glued file matches its pieces</td><td>a forgotten glue, or a hand-edited game file</td><td class="n">&lt;1 s</td></tr>
+<tr><td>Words are up to date (<code>content_gen.py --check</code>)</td><td>a writer's change not baked in</td><td class="n">~5 s</td></tr>
+<tr><td>Every piece reads as valid code (<code>node --check</code>, piece by piece, then the whole)</td><td>a typo that stops the game loading, and says which piece</td><td class="n">~1 s</td></tr>
+<tr><td>No name made twice across the pieces (3,359 names today, no repeats)</td><td>yesterday's clash: two helpers making the same name</td><td class="n">~1 s</td></tr>
+<tr><td>On-screen text search (e.g. "Deck 7" in shown text, not notes)</td><td>words that must never reach the screen</td><td class="n">~1 s</td></tr>
+<tr><td><code>deck_check</code> then <code>machine_check</code> then <code>leave_check</code>, side by side with <code>device_check</code></td><td>the game loads; every deck reachable; machines, careers and the device behave</td><td class="n">~4 min</td></tr>
+</table>
+<p class="sub">Picked from measured times: deck ~2.5 min, device ~4, machines ~15 s, leave ~1 min. The events check (~5 min) and the full set stay for the build master's full runs before a release; it doesn't fit under 5 minutes. All full checks stay exactly as they are.</p>
+</div>
+
+<h2>5. One shared branch, merged into early</h2>
+<div class="card">
+<p>A new branch <code>claude/integration</code> starts from the split. Each helper works on its own branch, started from it. When a piece of work is reviewed, the build master merges it into <code>claude/integration</code> straight away (helpers can only push to their own branch), runs the glue and the quick check, and pushes. Helpers bring the shared branch into theirs often, so nobody drifts days apart. When you approve a milestone, it goes to <code>main</code> as today, with your OK.</p>
+<p>Two new notes keep everyone oriented: <code>plans/map.md</code> ("where things live": which piece holds what, kept current by whoever moves code), and <code>plans/backlog.md</code> (small known bugs, so things found in passing aren't lost), started from the roadmap's list: the unclosed style comment near the top, the hidden door gear, the double clock hold in the evenings, two wall faults leaving you queued, rec talent night only skipping day 152, the Tracked panel filling small phones, and the "seven decks" Deck 4 texts not gated.</p>
+</div>
+
+<h2>6. What could go wrong, and how we handle it</h2>
+<div class="tw"><table>
+<tr><th>Risk</th><th>How it's handled</th></tr>
+<tr><td>The game changes by accident during the cut</td><td>The byte-for-byte proof. The cut moves no line and changes no letter; anything else fails the proof.</td></tr>
+<tr><td>Same-looking ship, different random details (the "determinism" rule)</td><td>Since the file is identical, the random sequence is identical. Later, a piece must never be moved earlier or later in <code>ORDER</code> without a full check run: order is part of the game.</td></tr>
+<tr><td>Two pieces make the same name</td><td>The duplicate-name step in the quick check, on every push.</td></tr>
+<tr><td>Load order (a piece using something made in a later piece)</td><td>Today's order is kept exactly. The game's code all runs as one block, as now, so nothing new can break here.</td></tr>
+<tr><td>A piece edited in two places at once</td><td>The owners map: one owner per piece, changes elsewhere go through them. Combining early on the shared branch keeps any overlap small.</td></tr>
+<tr><td>The glued file gets out of step, or two helpers' glued files clash in a merge</td><td>Never fixed by hand: rerun <code>build.py</code>. The quick check and GitHub refuse a glued file that doesn't match its pieces.</td></tr>
+<tr><td>Checks and tools that read the single file</td><td>They keep reading <code>starship-cadet.html</code>, which still exists and is identical. Only the two writers' tools change (one line each).</td></tr>
+<tr><td>Helpers with unfinished work on the old whole file</td><td>The cut happens at a quiet moment, after 0.64.0, with nobody mid-change. Any branch that still has work is carried over by running <code>split.py</code> on its file and merging the pieces.</td></tr>
+<tr><td>Old notes say "around line 1724"</td><td><code>plans/map.md</code> turns old line numbers into piece names; new notes name the piece and section instead.</td></tr>
+<tr><td>GitHub may refuse a helper session adding the GitHub check's settings file</td><td>If it does, we give you the short file and one paste in GitHub's website adds it (once).</td></tr>
+</table></div>
+
+<h2>7. The order of work, and what you see at each stop</h2>
+<ol class="turns">
+<li><b>Now:</b> you review this page. <i>You:</i> the three decisions above.</li>
+<li><b>Turn 1, keep the whole file</b> (after 0.64.0 is signed off and on <code>main</code>): the tag <code>whole-file-0.64.0</code> and the archive copy. <i>You see:</i> a one-line note with the tag's name.</li>
+<li><b>Turn 2, the cut:</b> <code>split.py</code>, <code>build.py</code>, the <code>pieces/</code> folder, the two tools' one-line changes. <i>You see:</i> the two matching fingerprints and the piece list; the game is unchanged, so nothing new to play.</li>
+<li><b>Turn 3, the checks:</b> <code>check_fast.sh</code> and the GitHub check. <i>You see:</i> a green tick next to the push on GitHub (link sent). <i>You:</i> possibly nothing; if GitHub shows its checks ("Actions") as turned off, one switch in the repository's Settings, or one paste if the settings file is refused.</li>
+<li><b>Turn 4, the ways of working:</b> <code>plans/owners.md</code>, <code>plans/map.md</code>, <code>plans/backlog.md</code>, the shared branch; yesterday's rules written into DEV_NOTES "Rules that keep it working"; CLAUDE.md's "How we work" and the helpers' start messages updated. <i>You see:</i> a short summary and the owners table.</li>
+<li><b>Then (its own review):</b> the light clean-up of clearly unused code, one area at a time, each with checks; and splitting any still-big piece (the deck kit, work, social) if helpers find it useful. Then step 3, Dev mode, with its own plan page.</li>
+</ol>
+
+<details>
+<summary>Technical detail (for the team)</summary>
+<h3>Where the cuts fall</h3>
+<p>Each cut is at a section header (<code>// ====</code> line + numbered title) or a generated-block marker. The script's opening <code>(() =&gt; {</code> goes in <code>page/body.html</code> and the closing <code>})();</code> in <code>page/tail.html</code>, so every <code>.js</code> piece is whole and passes <code>node --check</code> on its own (verified on all 35). The file's sections aren't in numeric order (6, 7, 8 come after 24); the pieces keep file order, not section numbers. The FILE MAP comment stays at the top of <code>01-setup-materials.js</code>. Each piece file ends with a newline except <code>tail.html</code>; joining is plain concatenation, no separators.</p>
+<h3>build.py (sketch)</h3>
+<pre>order = [l for l in open('pieces/ORDER').read().split('\n') if l.strip()]
+data = b''.join(open('pieces/' + n, 'rb').read() for n in order)
+if '--check' in sys.argv: sys.exit(0 if open(GAME, 'rb').read() == data else 1)
+open(GAME, 'wb').write(data)</pre>
+<p>Bytes in, bytes out: no line-ending or encoding handling, so it can't alter a letter. Trial: 0.25 s for split + join on 0.64.0 (5,129,461 bytes, sha256 <code>534ceeda1449f7cb886b80b78ecffb75af257c7c177ac77889afad7319e918aa</code>).</p>
+<h3>Duplicate-name scan</h3>
+<p>All game code runs inside one function, so a repeated <code>const</code>/<code>let</code> stops the game loading, and a repeated <code>function</code> silently replaces the first (the dangerous one). The scan lists names declared at column 0 (<code>function</code>, <code>const</code>, <code>let</code>, <code>var</code>, <code>class</code>) across all pieces and fails on any repeat, naming both pieces. 0.64.0: 3,359 names (1,538 functions, 1,659 const), no repeats. Names added by <code>Object.assign(PLAYER_ACTS, …)</code>-style merges aren't covered; a later step can add a key-clash scan for the shared tables.</p>
+<h3>GitHub check (workflow sketch)</h3>
+<pre>on: push (paths: pieces/**, starship-cadet.html, build.py, split.py, *_check.py, check_fast.sh, content/**, .github/**)
+concurrency: one per branch, cancel-in-progress
+runs-on: ubuntu-latest
+steps: checkout; setup-python; pip install playwright;
+  python -m playwright install --with-deps chromium   (cached)
+  npm pack three@0.128.0 into $CADET_WORK/three        (cached)
+  CADET_CHROME=&lt;playwright's chromium&gt; bash check_fast.sh</pre>
+<p>About 6-7 minutes a run (1-2 min set-up, under 5 min checks). We push hundreds of commits a day (786 on 10-19 across all branches); the path filter skips notes-only pushes and the per-branch cancel drops runs a newer push replaces, so perhaps 100-300 runs a day, roughly 600-2,000 minutes a day. Public repository: standard runners are free and unmetered (up to 20 jobs at once). If it went private, that would exhaust the free 2,000 minutes a month in a day or two, so it would be limited to <code>claude/integration</code> and <code>main</code>. If the session's push token lacks permission for <code>.github/workflows/</code>, the user adds the file once through the website.</p>
+<h3>check_fast.sh parallel runs</h3>
+<p>The two lanes each get their own <code>CADET_WORK</code> (DEV_NOTES "Testing": parallel runs on one machine otherwise load each other's copies and pass falsely).</p>
+</details>
+</main>
+<script>
+const P = [
+ ['page/head.html',7,'page','The page\'s opening lines','HUD seat'],
+ ['page/css.css',231,'page','The look of every panel, button and screen (the style sheet)','HUD seat'],
+ ['page/body.html',48,'page','The on-screen panels\' layout, the three.js line, the opening of the game code','HUD seat'],
+ ['js/01-setup-materials.js',279,'look','The file map, 1 Setup (renderer, seeded random), 2 Textures, 3 Materials','Performance engineer'],
+ ['js/02-deck-kit.js',2537,'deck','4 the ship state, 4a the current deck and hull, 4b the shared art kit (furniture builders, room contents, room templates)','Deck architect'],
+ ['js/03-deck-build.js',507,'deck','4c Build and unload a deck','Deck architect'],
+ ['js/04-deck-utility-kit.js',346,'deck','4d Deck definitions start: the utility rooms kit','Deck architect'],
+ ['js/05-deck4-quarters.js',451,'deck','Deck 4: Quarters','Deck architect'],
+ ['js/06-deck5-operations.js',568,'deck','Deck 5: Operations','Deck architect'],
+ ['js/07-deck3-commons.js',556,'deck','Deck 3: Commons','Deck architect'],
+ ['js/08-deck2-command.js',1075,'deck','Deck 2: Command and Science, with its kit','Deck architect'],
+ ['js/09-deck6-engineering.js',379,'deck','Deck 6: Engineering','Deck architect'],
+ ['js/10-deck1-bridge.js',1101,'deck','Deck 1: Bridge, then the places added for traditions and jobs on every deck (moved to their decks in the clean-up)','Deck architect'],
+ ['js/11-rec-deck.js',715,'rec','4e The rec deck','Rec engineer'],
+ ['js/12-lighting.js',46,'look','5 Lighting, day and night','Performance engineer'],
+ ['js/13-time-save.js',307,'crew','13 Ship time and saving','Sim engineer (save size: player engineer)'],
+ ['js/14-schedules.js',1620,'crew','14 Schedules: the crew\'s days','Sim engineer'],
+ ['js/15-device.js',1340,'you','19 Your device and its apps','Device engineer'],
+ ['js/16-player-needs.js',2156,'you','15 Your needs, activities and the device\'s player side','Player engineer'],
+ ['js/17-interactions.js',739,'you','15b Using what the crew use, the job board, the goal pointer','Interactions engineer'],
+ ['js/18-rec-activities.js',182,'rec','15r The rec deck\'s activities','Rec engineer'],
+ ['js/19-galley.js',1024,'ship','16 Galley and food','Galley engineer'],
+ ['js/20-machines-jobs.js',2329,'ship','17 Machines, wear, jobs and supplies','Systems engineer'],
+ ['js/21-lines-engine-1.js',23,'words','22 Lines: the start of the dialogue engine','Dialogue engineer'],
+ ['content/words.gen.js',14707,'gen','The crew\'s words, meetings and traditions, made by content_gen.py from content/ (never hand-edited)','Writers, through content/ only'],
+ ['js/22-lines-engine-2.js',410,'words','22 Lines: the rest of the dialogue engine','Dialogue engineer'],
+ ['js/23-events.js',2197,'social','18 Ship events and traditions','Traditions engineer'],
+ ['js/24-social.js',3165,'social','20 Social life: friendships, news, favours','Social engineer'],
+ ['js/25-arrival-clothes.js',1306,'you','21 The arrival, 21b Clothes and laundry','Onboarding engineer'],
+ ['js/26-tiles-lightdisc.js',1171,'rec','23 Tiles, 23b Lightdisc','Games engineer (tiles, lightdisc)'],
+ ['js/27-work.js',2197,'work','24 Work: the career core, and mechanics 24m tool upkeep, 24n logbook, 24g scanner, 24i tracing, 24j workshop, 24t off shift, 24s lift roof','Works career engineer (mechanics: their seats)'],
+ ['js/28-cases.js',2343,'work','24k Cases: the head-scratchers','Puzzles seat H'],
+ ['js/29-camera-grid.js',181,'look','6 Camera, 7 Grid and pathfinding','Performance engineer'],
+ ['js/30-characters-crowd.js',1576,'look','8 Character kit, 8b Crowd','Performance engineer'],
+ ['js/31-crew-data.js',223,'crew','9 Crew data, with the roster made by the roster generator','Crew designer'],
+ ['js/32-walkers.js',710,'crew','10 Walkers: the crew moving on the deck','Sim engineer'],
+ ['js/33-rec-moves.js',619,'rec','8c The rec deck\'s moves (animation)','Rec engineer'],
+ ['js/34-ui-main-loop.js',432,'page','11 Interaction and the on-screen panels, 12 the main loop','HUD seat'],
+ ['page/tail.html',4,'page','The closing lines of the code and page','Build master'],
+];
+const C = {page:['#7aa7d8','Page and on-screen panels'],look:['#9a86c9','Drawing: setup, lights, camera, people'],deck:['#4cc3b5','Decks'],rec:['#58b0d6','Rec deck'],crew:['#8fd9b0','Crew life'],you:['#e0a96d','You: needs, device, arrival'],ship:['#c98a6a','Ship: galley, machines'],words:['#d9cf8f','Dialogue engine'],gen:['#e9c46a','Generated words'],social:['#e07a9a','Social and traditions'],work:['#b7c46a','Work and cases']};
+const strip = document.getElementById('strip'), tb = document.querySelector('#tbl tbody'), card = document.getElementById('piece');
+const total = P.reduce((s, p) => s + p[1], 0);
+function show(i) {
+  const p = P[i];
+  [...strip.children].forEach((d, k) => d.classList.toggle('on', k === i));
+  card.innerHTML = '<b>' + (i + 1) + '. ' + p[0] + '</b> <span class="tag">' + p[1].toLocaleString() + ' lines</span><br><span>' + p[3] + '</span><br><span class="sub">Owner: ' + p[4] + '</span>';
+}
+P.forEach((p, i) => {
+  const d = document.createElement('div');
+  d.style.flex = String(Math.max(p[1], 60)); d.style.background = C[p[2]][0];
+  d.title = p[0] + ' (' + p[1] + ' lines)'; d.setAttribute('role', 'listitem'); d.tabIndex = 0;
+  d.onclick = () => show(i); d.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') show(i); };
+  strip.appendChild(d);
+  const r = document.createElement('tr');
+  r.innerHTML = '<td>' + (i + 1) + '</td><td><code>' + p[0] + '</code></td><td class="n">' + p[1].toLocaleString() + '</td><td>' + p[3] + '</td><td>' + p[4] + '</td>';
+  tb.appendChild(r);
+});
+const tr = document.createElement('tr');
+tr.innerHTML = '<td></td><td><b>Total</b></td><td class="n"><b>' + total.toLocaleString() + '</b></td><td>= every line of 0.64.0</td><td></td>';
+tb.appendChild(tr);
+document.getElementById('legend').innerHTML = Object.values(C).map(c => '<span><i style="background:' + c[0] + '"></i>' + c[1] + '</span>').join('');
+</script>
+</body>
+</html>
