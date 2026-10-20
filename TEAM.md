@@ -176,3 +176,4 @@ GitHub check: ON for every push to claude/** and main (the user, 2026-10-20; the
 | Dev mode reviewer DR2 | session_012GxodCR3fkT9KyQCeLTd4D | `claude/devmode-review-2` | fresh-eyes review: usable on a phone for the user's real tests |
 | Patch planner PP1 | session_01QfLuMmrJSgMQ3A4tBtXAmf | `claude/patch-plan` | the user's 28 playtest notes: reproduce, cause, fix, owner, order, questions; `plans/patch-plan.html` |
 **Overnight mode (the user, ~05:35 UTC 2026-10-20): 5 working seats at most; no phone notifications; calls logged in `plans/overnight-decisions-lead20.md`.**
+| Head writer TW1 | session_019ek4xmi5Yp9xijbzuAo2kN | `claude/talk-pack` | Talk a while pack, content only (~1,300 lines; no repeats; pool + own; keep the question) |
