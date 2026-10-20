@@ -14543,8 +14543,8 @@ function mugPut() {                                      // 15b's Put down: the 
 let FLC_ON = URL_FLAGS.has('firstlight');
 const FLC = { id: 'first-light', script: 'firstLightCocoa', asked: 'firstlight.asked', tips: ['holt', 'kowalczyk', 'brennan', 'halloran-emeka', 'sato'], n: 3,
   invite: [18 * 60 + 15, 19 * 60 + 45], late: 19 * 60 + 30, near: 4, dim: .35, room: 'L' };
-let FLC_DIM = 0, FLC_SHOWN = -1;                         // the lounge's dimming now (0..FLC.dim); the day the meeting last played
-const flcDim = () => FLC_DIM;
+var FLC_DIM = 0, FLC_SHOWN = -1;                         // the lounge's dimming now (0..FLC.dim); the day the meeting last played (var: section 5 may ask first)
+function flcDim() { return FLC_DIM || 0; }
 function flcScript() {                                    // the meeting with three of the five tips, the same three all save long
   const sc = MEETING_SCRIPTS[FLC.script]; if (!sc) return null;
   const salt = typeof seekSalt === 'function' ? seekSalt() : 0;
@@ -14563,7 +14563,7 @@ function flcJoin(e, d, now) {                            // section 18's eventJo
   if (MUG_ON && !SHIP.player.drink && !SHIP.player.carry.length && !SHIP.player.tray) SHIP.player.drink = 'cocoa';   // a free cocoa (the mug, #30)
   flcShow(d, now); return true;
 }
-const flcBusy = now => FLC_ON && (typeof tradOn === 'function' && !!tradOn(FLC.id, now) || typeof DIALOGUE !== 'undefined' && !!DIALOGUE && DIALOGUE.id === FLC.script + '.today');
+function flcBusy(now) { return FLC_ON && (typeof tradOn === 'function' && !!tradOn(FLC.id, now) || typeof DIALOGUE !== 'undefined' && !!DIALOGUE && DIALOGUE.id === FLC.script + '.today'); }
 function flcTick() {                                     // each frame (section 15's player tick)
   if (!FLC_ON || typeof SHIP === 'undefined' || !SHIP.time) return;
   const d = SHIP.time.day, m = SHIP.time.min, now = shipNow();
