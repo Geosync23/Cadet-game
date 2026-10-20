@@ -14307,7 +14307,7 @@ const CLOCK_UNDO_S = 5, CLOCK_TAP_GUARD = 500, CLOCK_WALK = 1.5;   // real secon
 let CLOCK_UNDO = null, CLOCK_DRAWN = -1e9;               // the open window { what, t, d, keep, fx, said, at, deck, x, z }; the screen's last draw
 function clockPunch(early) {                             // a punch from the screen -> careerClock's result; held unless it's an early clock-out
   const C = careerInit(), d = SHIP.time.day, keep = { ci: C.ci, co: C.co, on: C.on, log: SHIP.player.clockLog[d], sent: flag('shiftSent') };
-  clockUndoSettle(false);
+  clockUndoSettle();
   let fx = null; const r = careerClock(shipNow(), true, early ? null : f => { fx = f; });
   if (r && fx) { const p = player.obj.position; CLOCK_UNDO = { what: r, t: shipNow(), d, keep, fx, at: performance.now(), deck: deckDef.num, x: p.x, z: p.z }; requestAnimationFrame(clockUndoFrame); }
   return r;
@@ -14318,19 +14318,19 @@ function clockUndo() {                                   // Undo: the kept copy 
   if (u.keep.log === undefined) delete SHIP.player.clockLog[u.d]; else SHIP.player.clockLog[u.d] = u.keep.log;
   return u.what;
 }
-function clockUndoSettle(redraw) {                       // the window ends: the punch's side effects run now
+function clockUndoSettle() {                             // the window ends: the punch's side effects run now; an open screen loses its Undo
   const u = CLOCK_UNDO; if (!u) return; CLOCK_UNDO = null;
   try { u.fx(); } catch (e) { /* the remark or a listener's problem; the punch stands */ }
-  const el = document.getElementById('clockScreen'); if (redraw && el && !el.hidden) clockScreen(u.said, false, 'settled-' + u.what);
+  const el = document.getElementById('clockScreen'); if (el && !el.hidden) clockScreen(u.said, false, 'settled-' + u.what);
 }
 function clockUndoFrame() {
   const u = CLOCK_UNDO; if (!u) return;
   const el = document.getElementById('clockScreen'), p = player.obj.position;
   if (!el || el.hidden || performance.now() - u.at > CLOCK_UNDO_S * 1000 || deckDef.num !== u.deck || Math.hypot(p.x - u.x, p.z - u.z) > CLOCK_WALK
-      || Math.abs(shipNow() - u.t) > 5 || SHIP.time.day !== u.d) clockUndoSettle(true);
+      || Math.abs(shipNow() - u.t) > 5 || SHIP.time.day !== u.d) clockUndoSettle();
   else requestAnimationFrame(clockUndoFrame);
 }
-SAVE_EXTRA.unshift(() => clockUndoSettle(false));       // a save ends the window first, so the note and the remark aren't lost
+SAVE_EXTRA.unshift(() => clockUndoSettle());       // a save ends the window first, so the note and the remark aren't lost
 function clockButtons(row, act, s) {                     // the screen's two halves, left and right: [Clock in | Close], [ | Undo] ...
   const gap = () => { const b = act('', () => {}); b.disabled = true; b.style.visibility = 'hidden'; b.setAttribute('aria-hidden', 'true'); return b; };
   const half = b => { b.style.flex = '1 1 0'; return b; }, close = () => act(csText('close', 'Close'), () => { document.getElementById('clockScreen').hidden = true; });
