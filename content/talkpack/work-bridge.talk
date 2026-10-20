@@ -1,0 +1,130 @@
+@talks work:bridge
+// TW1, the Talk a while work pools: Bridge (plans/work-pools-plan.html, decided 2026-10-20): helm and command.
+// Helm talks carry dept:helm, command talks dept:command. Ids work.bridge.<slug>; topic always "work".
+// Half the helm is on the leaving theme (Raman, Lindqvist, Strand): no staying-or-going talk. Command crew all
+// have job-shaped stories (the Captain's chair, Vance's rule, Kowalczyk lonely, Zielinski notgood): their talks stay on
+// plain work at acquaintance and colleague, and the Captain and Vance skip them (they have their own talks).
+
+// ---------------------------------------------------------------- helm
+
+== drift
+when: tier>=acquaintance dept:helm !who:lindqvist-isak
+them: You can feel a drift in the Wren before the console shows it. A lean. Like a ship sighing.
+them: Lindqvist feels it first. Every time. It's uncanny. We've tested it.   #funny
+ask: Is there something you can feel coming, before anyone tells you?
+listen: How did you test it?
+  them: Blindfold, a cup of tea, a long turn. Lindqvist called it before the tea moved.   #funny
+share: A machine about to fail. Sometimes.
+  them: Then you'd make a helm officer. Same sense, different machine.
+cheer: Dinner. I can feel dinner coming.
+  them: That's not a sense. That's a schedule. Still impressive.   #funny
+
+== night-helm
+when: tier>=acquaintance dept:helm who:janssen-hugo|bakshi-sol
+them: Night helm is one hand on the controls and one on a cup of tea. Both very steady.
+them: The stars hardly move. You watch them anyway. You'd be amazed how much you think.   #warm
+ask: What do you think about, when the work goes quiet?
+listen: Does the tea ever spill?
+  them: Never. Not once. It's a point of pride. The Wren's a very polite ship.   #funny
+share: Home. Then whatever's next.
+  them: Same. Home first, then the stars. Then home again.   #warm
+cheer: Whether there's toast left.
+  them: There is. The night galley knows. Ask nicely at six.   #funny
+
+== long-turn
+when: tier>=colleague dept:helm
+them: A long turn takes four hours. You hardly touch anything. You watch, wait, stay ready.
+them: People think helm is steering. It's mostly patience in a very big chair.   #funny
+ask: What's the most patient you've ever had to be?
+listen: What do you think about, all that time?
+  them: The numbers. Then home. Then the numbers again. It goes round.
+share: Waiting for news from home. Days, once.
+  them: That's harder than any turn. I'm glad the news came.   #warm
+cheer: Waiting for the lift on a Monday.
+  them: The longest wait aboard. Even the helm can't hurry it.   #funny
+
+== plot-for-fun
+when: tier>=colleague dept:helm !who:bakshi-sol
+them: Someone on the helm plots courses on their rest days. For fun. Imaginary trips.
+them: Last week's went round three moons and back by teatime. I checked it. It worked.   #funny
+ask: If you could go anywhere out there, how would you get there?
+listen: Where do the imaginary trips go?
+  them: Somewhere with a good view and a short queue. Mostly, home and back.   #warm
+share: Slowly. I'd want to see everything.
+  them: Good. Slow's how the helm likes it. Smooth and slow.
+cheer: Very fast, with snacks.
+  them: The helm can do fast. The snacks are on you.   #funny
+
+== flies-like-spill
+when: tier>=colleague dept:helm !who:raman
+them: Our senior helm officer flies the Wren like she might spill. Every turn, gentle.
+them: I used to think he was being fussy. Then I tried it. Nobody's tea moved. Nobody noticed.   #warm
+ask: Who taught you to do something gently?
+listen: Does he ever fly fast?
+  them: Never needs to. He says gentle is faster, in the end. He's usually right.
+share: Someone at home, fixing something delicate.
+  them: Then you know. Gentle is a skill, not a speed.   #warm
+cheer: My mum, with the last biscuit.
+  them: The gentlest operation there is. Respect.   #funny
+
+== helm-means
+when: tier>=friend dept:helm
+them: Know what the helm means to me? Seventy-five people asleep while I take them somewhere.
+them: They trust me with that and never think about it. That's the best trust there is.   #warm
+ask: Who trusts you without ever thinking about it?
+listen: Do you ever think about them, flying?
+  them: Every time. I fly for the ones asleep. Smooth enough not to wake them.   #warm
+share: Everyone who uses something I fixed.
+  them: Same trust. Quieter. I'd say it's the best kind.   #warm
+cheer: The kettle. It trusts me daily.
+  them: A noble responsibility. Don't let it down.   #funny
+
+// ---------------------------------------------------------------- command (plain work only)
+
+== status-lights
+when: tier>=acquaintance dept:command !who:marrow|vance
+them: The bridge has a hundred status lights. Green, green, green. I watch for the odd one.
+them: Most days it's a bulb. Works fixes it. I write it in the log. Very glamorous.   #funny
+ask: What's the one thing you keep an eye on all day?
+listen: What happens when one goes amber?
+  them: I check it, ask once, write it down. Nine times in ten it's nothing. I still check.
+share: The job board. I can't help it.
+  them: Then we're the same. Different board, same habit.
+cheer: The clock, near dinner.
+  them: Everyone on the bridge watches that one. It's the most honest light.   #funny
+
+== bridge-at-night
+when: tier>=colleague dept:command !who:marrow|vance|zielinski-oona
+them: At night the bridge is very quiet. Low lights, a helm officer, a cup of tea, me.
+them: The log, the rota, the long watch. The ship's mine for a few hours. Then I give her back.
+ask: What part of your day feels most like yours?
+listen: What do you write in the night log?
+  them: The course, the time, anything odd. Mostly "all quiet". I like writing "all quiet".
+share: The first hour of shift. Before it's busy.
+  them: Good hour. Guard it. It's the one that sets the rest.
+cheer: The walk to dinner.
+  them: That's a fine hour too. Shorter. Tastier.   #funny
+
+== rota
+when: tier>=colleague dept:command !who:marrow|vance
+them: I do the duty rota. Seventy-five people, two shifts, rest days, birthdays. It's a puzzle.
+them: Everyone wants Friday off. Nobody wants Tuesday. I've never once pleased everybody.   #funny
+ask: If you could pick your own two days off, which would they be?
+listen: Who's hardest to fit in?
+  them: Not telling. They know who they are. They bring me biscuits on Mondays.   #funny
+share: Saturday and Sunday. Like now.
+  them: Then you're easy to rota. I'll remember that kindly.
+cheer: Every day. Is that allowed?
+  them: Regulation nine says rest. It doesn't say that much rest.   #funny
+
+== command-proud
+when: tier>=colleague dept:command !who:marrow|vance
+them: Best bit of the bridge? A long shift where nothing happens. Everyone did their job.
+them: Nobody writes a report about that. I write it in my head. "Good shift."
+ask: What does a good shift look like, for you?
+listen: Does nothing ever happen?
+  them: Rarely. And when it does, it's small, because someone caught it early. Usually Works.
+share: The board cleared, nothing coming back.
+  them: Then we want the same shift. Nothing coming back. Perfect.
+cheer: Finishing on time. With tea.
+  them: The dream. Some days it even happens.   #funny
