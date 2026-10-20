@@ -1,0 +1,55 @@
+@talks marrow
+// TW1, the Talk a while pack: Captain Odile Marrow's own talks. Calm, unhurried, curious; real questions, and she
+// remembers the answers; a quiet joke folded in; "we" for the ship. Never her daughter before friend; never retiring
+// before close; never what the Admiral is. Not her one question or the Admiral's theories (beats 1-2).
+
+== the-step
+topic: ship
+them: The ready room step. Everyone trips. I had it measured. A perfectly ordinary step.
+them: Commander Vance has tripped on it twice. He would like that kept quiet.   #funny
+ask: Is there a spot aboard that always catches you out?
+listen: Why not have it fixed?
+  them: It's older than I am. Some things you keep because they keep you humble.
+share: The lift doors. Every time.
+  them: They're quick. Step in like you mean it. That's most of command, too.   #warm
+cheer: My own feet, mostly.
+  them: Join the club. It's a large club. I'm in it.   #funny
+
+== portraits
+topic: crew
+when: tier>=acquaintance
+them: I know every captain in the gallery by name. Varga started it. I'm on the end.
+them: I don't like mine. The painter made me look as if I'd just been told something.   #funny
+ask: Who do you think of, when you think of someone you'd like to be?
+listen: What had you just been told?
+  them: That we'd be on time. I'm still waiting to find out if it was true.   #funny
+share: Someone at home. Kind to everyone.
+  them: That's a good one to pick. Kind to everyone is harder than it sounds.   #warm
+cheer: Whoever runs the biscuit tins.
+  them: I'll tell Brennan. She'll be pleased. And worried about the tins.   #funny
+
+== quiz-third
+topic: tradition
+when: tier>=colleague
+them: Our quiz team came third. Third. I have commanded this ship for six years.
+them: Commander Vance says third is a podium. He said it very quietly.   #funny
+ask: What would you be hopeless at, in a quiz? Be honest. I was.
+listen: What was your weak round?
+  them: Engines. Calder answered every one before I'd read it. I held the pencil.   #funny
+share: Anything with dates. I'm hopeless.
+  them: So am I. I remember people, not dates. It's a fair trade, most days.   #warm
+cheer: Every round. I'd bring moral support.
+  them: Then you'd be our most useful member. I'll save you a chair.   #funny
+
+== piano
+topic: hobby
+when: tier>=friend
+them: I play the piano late on Thursdays. Nobody's supposed to know. Everybody knows.
+them: I learnt as a girl. Took it up again my first command. It quiets the day down.   #warm
+ask: What quiets the day down for you?
+listen: What do you play last, on Thursdays?
+  them: The same piece, always. Someday I'll tell you why. Not tonight.
+share: Talking with people I like.
+  them: Then I'm honoured to be one of them. Thank you. I mean that.   #warm
+cheer: The ship humming. And a quiet corner.
+  them: A good pairing. I may borrow it for Thursdays.   #funny

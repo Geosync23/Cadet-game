@@ -1,0 +1,55 @@
+@talks calder
+// TW1, the Talk a while pack: Chief Ines Calder's own talks. Few words, exact; numbers, not adjectives; statements;
+// humour a beat late. NEVER "well done" (before beat calder.5), "great job" or an exclamation mark. Not the toolbox's
+// owner, not her first chief.
+
+== serials
+topic: work
+them: Scrubber two on Deck 4. Serial ending four-one-seven. It's started to whistle.
+them: Not loud. A quarter-tone. You'll hear it now I've said it.
+ask: What's the first thing you notice when you walk into the bay?
+listen: How do you remember every serial?
+  them: I don't. I remember the ones that have let me down. That's most of them.
+share: The noise. It's still a lot of noise.
+  them: Give it a month. Then it's twelve noises. Then one of them's wrong.
+cheer: The tea corner. Every time.
+  them: Hm. Honest. Tea's at one.
+
+== mug
+topic: hobby
+when: tier>=acquaintance
+them: Pell asked again what my mug says. It says nothing. It's a mug.
+them: People want things to mean something. Sometimes a thing's just for tea.
+ask: Do you keep things for what they mean, or what they do?
+listen: Has anyone ever given you a mug?
+  them: Once. It had a slogan. It's in the machine shop. Holds screws. Useful now.
+share: What they mean. I've kept odd things.
+  them: Keep them. Small, though. Ships don't have much shelf.
+cheer: Both. My mug holds tea and means tea.
+  them: Hm. That's the right answer. I didn't expect it.
+
+== air
+topic: ship
+when: tier>=colleague rep:known
+them: Nobody thanks the air. That's how you know it's working.
+them: I'd rather that than the other kind of day. Prevention beats heroics. Every time.
+ask: Would you rather fix the big failure, or stop it happening?
+listen: Did you always think that way?
+  them: No. I learnt it. Slowly. Most useful things I know, I learnt slowly.
+share: Stop it. Nobody notices, but I'd know.
+  them: Good. That's the job. Keep thinking like that.
+cheer: Fix it. Then stop the next one.
+  them: Fair. Honest. Most people only say the second.
+
+== tea-break
+topic: day
+when: tier>=friend rep:well
+them: I gave up my tea break years ago. There was always one more job on the board.
+them: Halloran's started leaving a cup on my desk at one. I haven't said anything. I drink it.
+ask: What do you do when the board's never empty?
+listen: Do you ever miss the break?
+  them: Yes. Don't tell Halloran. He'll make a rota for it.
+share: Pick the right next job. Not every job.
+  them: Good. That's the answer most people take years to find.
+cheer: Hide behind the parts racks with a biscuit.
+  them: The tea corner's behind the parts racks. I've seen you. Carry on.

@@ -63,9 +63,10 @@ Section ids are the file's own headings (`// 19. DEVICE`, `// 24a ROUNDS`). Line
 | `10` | walkers: the crew moving on the deck | 48066-48775 | sim engineer | Sim engineer |
 | `8c` | rec deck moves, the auditorium's show (`recShow`) | 48776-49394 | rec deck animation engineer | Rec engineer |
 | `11` | interaction and UI: taps, `toast`, `goToDeck`, the lift | 49395-49706 | deck architects, HUD | HUD seat |
+| `25` | Dev mode: the hidden testing panel (`#dev`), its save, Undo, Mark, the Dev clock, Take me to | (new, after 11) | Dev mode engineer DB1 | Dev mode engineer |
 | `12` | the main loop | 49707-49830 | deck architects | HUD seat |
 
-Files outside the game: each check belongs with the seat of the section it checks (deck_check: deck architect; day_check: sim; food_check: galley; machine_check: systems; events_check and join_check: traditions; player_check: player; interactions_check: interactions; device_check: device; social_check: social; clothes_check and intro_check: onboarding; career_check, leave_check, mech_check: Works career; puzzle_check: puzzles; tiles_check and disc_check: games; perf_check, path_check, bubble_check: performance; lines_check, arc_check: dialogue). `names_check.js`, `check_fast.sh`, `tools/section.py`, `tools/shared.js`, `tools/add_slots.py`, `cadet_test.py` and the GitHub check: the build master. `content/`: the writers. `content_gen.py`: the dialogue engineer.
+Files outside the game: each check belongs with the seat of the section it checks (deck_check: deck architect; day_check: sim; food_check: galley; machine_check: systems; events_check and join_check: traditions; player_check: player; interactions_check: interactions; device_check: device; social_check: social; clothes_check and intro_check: onboarding; career_check, leave_check, mech_check: Works career; devmode_check: Dev mode engineer; puzzle_check: puzzles; tiles_check and disc_check: games; perf_check, path_check, bubble_check: performance; lines_check, arc_check: dialogue). `names_check.js`, `check_fast.sh`, `tools/section.py`, `tools/shared.js`, `tools/add_slots.py`, `cadet_test.py` and the GitHub check: the build master. `content/`: the writers. `content_gen.py`: the dialogue engineer.
 
 ## Seat-to-seat contracts to know by heart
 
@@ -73,6 +74,7 @@ These are used by only a few sections, so the generated list below doesn't show 
 
 | Contract | Owner | Who calls it |
 |---|---|---|
+| `const DEVMODE` (13), with `#dev`, never with nosave: Dev mode's switch; `SAVE_KEY` and `INTRO_KEY` (21) end in "-dev" when it's on | Sim engineer | 21 (`INTRO_KEY`), 25 (all of Dev mode); hooks reading `devmodeHold()` / `devmodeExcused(d)` (25, the Dev mode engineer) in 13, 15, 20, 11 |
 | `function recShow(state)` (8c) | Rec engineer | 18's traditions engine, whenever the show changes |
 | `function deviceApp(def)` (19), `def = { id, title, short, icon, order, hidden, view, ... }` | Device engineer | 15, 15b, 18, 20, 23, 24, 24g, 24i, 24k: one app each, by `id` (names_check fails a repeated id) |
 | `function worksTabAdd(def)` (24) | Works career engineer | 24k (Fault notes as the Works app's tab) |
