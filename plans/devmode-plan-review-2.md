@@ -193,3 +193,23 @@ Storm: the Events tab is D8, last, and the phase jump waits for F4. That's fine,
 | **Stop 1** | Published Dev link + phone screenshots | The playtest patch can be checked as it's built. |
 
 The plan's D3 (Career), D5-D7 (steady player, replay, kept days) and D8 (events) then follow unchanged, with S1, S7 and B2 folded in. It's the same total work, but the user gets the tools for the next job about four turns sooner.
+
+## Addendum: v1.1 (claude/devmode-plan 6c837fd)
+
+What v1.1 changes against my findings:
+
+| Finding | v1.1 | Status |
+|---|---|---|
+| B1 order | "First real uses": D5's first steady-player lines cover Days 0-2 and "can come before D3-D4 if the patch is wanted sooner". | **Half fixed.** The Day 2 jump can now come sooner. But "Take me to…", "Mark / back to mark" and "Top up needs" are still missing, and those are what make each retry take seconds, not minutes. The stops still put Career at Stop 1. Ask the user (or decide): the patch kit first. |
+| B2 storage | Not addressed. | **Still a blocker.** Kept days and the real save share one site's storage; when it's full the real game stops saving silently. |
+| S1 measured without the arrival | It now says the measurements used `nosave`, and adds the fixed seed (`SHIP.career.gs`). | **Acknowledged, not yet re-measured.** The arrival week's checkpoints still aren't named in DEV_PLAYER's lines. DJ1's numbers should include the arrival on. |
+| S2 needs | DR1's plain skip to Day 27 (needs 0, 15 missed shifts, the Captain's warning) is the reason for "Play it steady" as the default. | **Better for long moves.** Short moves inside a day (+1 h, to 08:55) still drain needs with no way to top them up. Add the button. |
+| S3 excused skip | "Play it steady" is the default for days, and Skip asks first. | **Fine.** Steady is the better default. "Skip, excused" is still worth keeping for quick hops, since steady takes jobs and changes the board you came to test. |
+| S4 opening | `#dev` in the link, then a **tap on the clock** (gold underline) opens the panel. No new button. | **New issue, below (S8).** The ready-link point stands. |
+| S5-S7, nits | Not addressed. | Stand. |
+| (new) events | "End and undo" (the default) puts the event state back. | Good: a test storm doesn't move later events. |
+
+**S8 (new, should fix): the clock as the way in is a very small target, and a miss walks you.**
+- In 0.64.2, `.hud` is `pointer-events: none` (line 15 of the style): a tap on the clock today goes through to the deck and walks the player there. With Dev on, only the clock line would catch taps. On a phone that's one 12 px line of text (`.hud .clock`, 12px at phone width). That's about 16 px tall, against the game's 44 px buttons.
+- A slightly-off tap moves the player instead of opening the panel. In the arrival evening that can step you off Zeke's tour.
+- **Fix:** in Dev, make the whole HUD box (room, deck, clock: about 60 px tall) the tap target, with a visible "DEV" word in the underline, not colour alone. The user also needs to be able to tell Dev from the real game at a glance, for example in a screenshot they send.
