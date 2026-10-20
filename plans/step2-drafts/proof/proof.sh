@@ -7,7 +7,7 @@ W=/tmp/pw-$c-$v; rm -rf $W; mkdir -p $W/test; ln -sfn /tmp/cadet-work/three $W/t
 cd $W
 if [ $c = cadet_test ]; then A="$G $G"; [ $v = plant ] && A="$G $SP/plant/look.html"
 else A=$G; [ $v = plant ] && A=$SP/plant/err.html; fi
-X=""; [ $c = arc_check ] && X=14
+X=""
 t=$(date +%s)
 CADET_WORK=$W CADET_CHROME=/opt/pw-browsers/chromium timeout 2400 python3 $D/$c.py $A $X > $SP/proof/$c.$v.txt 2>&1
 echo "exit $? ($(( $(date +%s) - t )) s)" >> $SP/proof/$c.$v.txt

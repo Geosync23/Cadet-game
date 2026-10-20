@@ -22,7 +22,22 @@
 
 ## Proof of the exit-code fixes
 
-Each of the 10 checks run three times on 0.64.2, each in its own CADET_WORK: the old copy (rec-cand-s1 1eeb99c), the new copy, and the new copy on a planted failure (a page error 4 s after load, `err.html`; cadet_test: the HUD room name's font size changed, `look.html`). Results table: filled in at the end of "Now" (see the commit message and the report to the lead). Scripts: `plans/step2-drafts/proof/proof.sh` (one check, old/new/plant; paths are this session's scratchpad: edit SP) and `plant.py` (the 8 planted name problems).
+Each of the 10 checks run three times on 0.64.2, each in its own CADET_WORK: the old copy (rec-cand-s1 1eeb99c), the new copy, and the new copy on a planted failure (a page error 4 s after load, `err.html`; cadet_test: the HUD room name's font size changed, `look.html`). Results (old and new print the same lines; the only differences are timings and cadet_test's 1-level renderer noise):
+
+| Check | Old | New | Planted failure |
+|---|---|---|---|
+| cadet_test | ALL IDENTICAL, exit 0 | ALL IDENTICAL, exit 0 | DIFFERENCES FOUND, exit 1 |
+| deck_check | OK, 0 | OK, 0 | FAILED, 1 |
+| machine_check | OK, 0 | OK, 0 | FAILED, 1 |
+| day_check (day 1) | OK, 0 | OK, 0 | FAILED, 1 |
+| food_check | OK, 0 | OK, 0 | FAILED, 1 |
+| social_check | OK, 0 | OK, 0 | FAILED, 1 |
+| path_check | OK, 0 | OK, 0 | 1 problem, 1 |
+| disc_check | ALL OK, 0 | ALL OK, 0 | FAILED, 1 |
+| arc_check (70 days) | OK, 0 | OK, 0 | (14 days: STALLS, 1) |
+| perf_check | **1 problem, exit 0** | **1 problem, exit 1** | 2 problems, 1 |
+
+**perf_check on 0.64.2 reports a problem in both copies:** "memory grows across deck round trips: geo 548, 548, 550" (two geometries over three round trips; tex and heap flat). The old copy printed it and exited 0; the new one exits 1. Earlier rounds' perf PASS was the performance engineer's judgement on the printed numbers. Reported to lead 20: either it's a real small leak on 0.64.x (rec deck round trips?) or perf_check's rule needs a tolerance; until settled, perf_check's exit 1 there is expected. arc_check run with 14 days stalls by design (arcs need the default 70); the planted run used 14. Scripts: `plans/step2-drafts/proof/proof.sh` (one check, old/new/plant; paths are this session's scratchpad: edit SP) and `plant.py` (the 8 planted name problems).
 
 ## "Later" (only when the lead says the rec deck is published)
 
