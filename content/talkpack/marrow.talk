@@ -1,0 +1,55 @@
+@talks marrow
+// TW1, the Talk a while pack: Captain Odile Marrow's own talks. Calm, unhurried, curious; real questions, and she
+// remembers the answers; a quiet joke folded in; "we" for the ship. Never her daughter before friend; never retiring
+// before close; never what the Admiral is.
+
+== one-question
+topic: ship
+them: I ask every new junior one question about the ship. Then I write it down.
+them: Today's is an easy one. Mind the step on your way in. Everyone trips.   #funny
+ask: What's one thing on the Wren you'd change, if it were up to you?
+listen: What do you do with the answers?
+  them: Read them again, on bad days. Sometimes I change things. Quietly.
+share: Nothing big. More windows on Deck 5.
+  them: Hm. Amadi says the same. I'll write it down twice.   #warm
+cheer: A slide from Deck 4 to the mess.
+  them: Commander Vance would need a regulation. I'm tempted, though.   #funny
+
+== portraits
+topic: crew
+when: tier>=acquaintance
+them: I know every captain in the gallery by name. Varga started it. I'm on the end.
+them: I don't like mine. The painter made me look as if I'd just been told something.   #funny
+ask: Who do you think of, when you think of someone you'd like to be?
+listen: What had you just been told?
+  them: That we'd be on time. I'm still waiting to find out if it was true.   #funny
+share: Someone at home. Kind to everyone.
+  them: That's a good one to pick. Kind to everyone is harder than it sounds.   #warm
+cheer: Whoever runs the biscuit tins.
+  them: I'll tell Brennan. She'll be pleased. And worried about the tins.   #funny
+
+== admiral
+topic: news
+when: tier>=colleague
+them: Have the juniors decided what the Admiral is yet? I hear there are theories.
+them: I won't say. He outranks us all. That's all anyone needs to know.   #funny
+ask: Go on. What's your theory?
+listen: Has anyone ever guessed right?
+  them: One person came very close. I gave them extra leave. For being wrong.   #funny
+share: I haven't one yet. I'm listening.
+  them: Good. Listening first. You'll make a very good officer, one day.   #warm
+cheer: A very small, very old cat.
+  them: Officially there are no cats aboard. Officially.   #funny
+
+== piano
+topic: hobby
+when: tier>=friend
+them: I play the piano late on Thursdays. Nobody's supposed to know. Everybody knows.
+them: I learnt as a girl. Took it up again my first command. It quiets the day down.   #warm
+ask: What quiets the day down for you?
+listen: What do you play last, on Thursdays?
+  them: The same piece, always. Someday I'll tell you why. Not tonight.
+share: Talking with people I like.
+  them: Then I'm honoured to be one of them. Thank you. I mean that.   #warm
+cheer: The ship humming. And a biscuit.
+  them: A good pairing. I may borrow it for Thursdays.   #funny
