@@ -33537,6 +33537,7 @@ function lineQ(name, ...a) {
       case 'season': f = typeof season === 'function' && season; break;
       case 'eventNow': f = typeof eventNow === 'function' && eventNow; break;
       case 'habitsOn': f = typeof habitsOn === 'function' && habitsOn; break;
+      case 'voiceOf': f = typeof voiceOf === 'function' && voiceOf; break;
     }
     if (f && name === 'cue') {                            // the same answer while the clock and the cue list stand still (0.43.26): one line pick asks it hundreds of times
       const now = shipNow(), arr = typeof SHIP !== 'undefined' && SHIP.social ? SHIP.social.cues : null;   // the list itself: section 20 replaces it on every new cue (0.43.28)
@@ -33600,6 +33601,7 @@ function lineCond(k, v, p, ctx) {
     case 'birthday': return any(v, x => x === 'me' ? !!(typeof isBirthday === 'function' && isBirthday(p, t)) : x === 'you' ? !!(typeof isBirthday === 'function' && typeof ROSTER_PLAYER !== 'undefined' && isBirthday(ROSTER_PLAYER, t)) : false);
     case 'topic': return !ctx.topic || any(v, x => ctx.topic === x);
     case 'pair': return linePair(v, p, ctx.other && linesWho(ctx.other));
+    case 'thread': { const c = lineQ('voiceOf', id), th = (c && c.thread) || p.thread || ''; return any(v, x => th === x); }   // their story theme (section 20's voice card, else the roster's): the Talk a while pack
   }
   return false;
 }
@@ -33771,7 +33773,7 @@ if (typeof SAVE_EXTRA !== 'undefined') SAVE_EXTRA.push(s => {
   for (const id in L.reacted || {}) if (L.reacted[id].day === day) reacted[id] = L.reacted[id];   // only today's count
   s.lines = { ring: L.ring.slice(-LINES_RING_MAX), serious: L.serious, reacted, bye: L.bye || {} };
 });
-function linesNew() { if (typeof SHIP !== 'undefined') SHIP.lines = { ring: [], serious: 0, reacted: {}, bye: {} }; OVH = null; OVH_SCAN = null; OVH_AT = -1e9; REACT_AT = -1e9; LINE_RECENT.length = 0; }   // a new game (section 13's simNote('newGame'))
+function linesNew() { if (typeof SHIP !== 'undefined') { SHIP.lines = { ring: [], serious: 0, reacted: {}, bye: {} }; SHIP.talks = { fired: {}, small: {} }; } OVH = null; OVH_SCAN = null; OVH_AT = -1e9; REACT_AT = -1e9; LINE_RECENT.length = 0; }   // a new game (section 13's simNote('newGame'))
 // the ids heard within the ring's days (an entry from a later day than today is from an earlier game: it doesn't count)
 function linesRing(day) { const L = linesState(); return L ? L.ring.filter(r => r[1] <= day && day - r[1] < LINES_RING_DAYS).map(r => r[0]) : []; }
 function linesHeard(id, day, tone) {
@@ -33910,6 +33912,81 @@ function linesLegacy(kind) {
 }
 
 // ---- slot: Dialogue engineer (section 22). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- the Talk a while pack (talk engineer TE1, T2; plans/talk-pack-plan.md "Picking a talk"). talkPackPick(p, t) ->
+// what they'd talk about today: { talk, src: 'own' | 'pool', said: { lines, ask, replies: { listen|share|cheer: { text,
+// ans } } } } (the pack's words, filled in for them), or { small: [3-4 lines], done } once their own talks and the pool
+// are used up (done: the first line is a "we've talked about everything"). The run-out order: their own talks in file
+// order, then the pool (not guests: it's the crew's life), preferring a topic not talked about with them in
+// TALK_TOPIC_DAYS days, then small talk. A talk whose when: fails waits; one with a placeholder that can't be filled is
+// skipped today. talkPackFire(p, pick, t) notes it: a talk fires once a save (the pool too, whoever said it). Seeded by
+// ship day and speaker (schedU k 755-758), so a reload picks the same; nothing calls R(), nothing runs at load.
+// Saved (SAVE_EXTRA, only once anything's noted): save.talks = { fired: { talkId: [day, crewId] }, small: { crewId:
+// [day, done 0|1] } }; a New game clears it (linesNew).
+const TALK_TOPIC_DAYS = 14, TALK_DONE_ODDS = .25;
+function talksClean(s) {                                  // save.talks read back defensively: bad entries dropped
+  const T = { fired: {}, small: {} };
+  const f = s && s.fired && typeof s.fired === 'object' ? s.fired : {}, m = s && s.small && typeof s.small === 'object' ? s.small : {};
+  for (const id in f) if (Array.isArray(f[id]) && Number.isInteger(f[id][0]) && typeof f[id][1] === 'string') T.fired[id] = [f[id][0], f[id][1]];
+  for (const id in m) if (Array.isArray(m[id]) && Number.isInteger(m[id][0])) T.small[id] = [m[id][0], m[id][1] ? 1 : 0];
+  return T;
+}
+function talksState() {
+  if (typeof SHIP === 'undefined') return null;
+  if (!SHIP.talks) SHIP.talks = talksClean(typeof SAVED !== 'undefined' && SAVED && SAVED.talks);
+  return SHIP.talks;
+}
+if (typeof SAVE_EXTRA !== 'undefined') SAVE_EXTRA.push(s => {
+  const T = SHIP.talks; if (!T || (!Object.keys(T.fired).length && !Object.keys(T.small).length)) return;
+  s.talks = { fired: { ...T.fired }, small: { ...T.small } };
+});
+const talkPackSeed = p => p.seed || lineHash(p.id);
+const talkPackVeyli = p => p.rank === 'guest' && /Veyli/.test(p.role || '');   // the Envoy, and any Veyli guest: no contractions
+function talkPackTrad(t) {                                // {trad}: the next tradition on the calendar (today's if it's still to come), not someone's own day
+  if (typeof eventsOn !== 'function') return null;
+  const d0 = Math.floor(t / 1440) + 1, m = t - (d0 - 1) * 1440;
+  for (let d = d0; d < d0 + 8; d++) for (const e of eventsOn(d) || []) {
+    if ((e.honorees && e.honorees.length) || !e.name || (/^rec-/.test(e.id || '') && !(typeof REC_DECK !== 'undefined' && REC_DECK))) continue;
+    if (d === d0 && Number.isFinite(e.from) && e.from <= m) continue;
+    return e.name;
+  }
+  return null;
+}
+function talkPackFill(tk, p, ctx) {                       // every line of a talk filled for them, or null if any can't be
+  const f = x => { if (!x) return null; if (/\{trad\}/.test(x.text) && !ctx.trad) return null; return linesFill(x.text, p, ctx); };
+  const lines = tk.lines.map(f), ask = f(tk.ask), replies = {};
+  if (lines.some(x => x == null) || ask == null) return null;
+  for (const k of ['listen', 'share', 'cheer']) { const r = tk.replies[k], a = r && f(r.ans); if (a == null) return null; replies[k] = { text: r.text, ans: a, tone: r.ans.tone || 'light' }; }
+  return { lines, tones: tk.lines.map(x => x.tone || 'light'), ask, askTone: tk.ask.tone || 'light', replies };
+}
+function talkPackPick(who, t = shipNow()) {
+  const p = linesWho(who), T = talksState(); if (!p || !T || typeof TALKS === 'undefined') return null;
+  const d = Math.floor(t / 1440) + 1, seed = talkPackSeed(p), ctx = { t, trad: talkPackTrad(t) || undefined };
+  const ok = tk => !T.fired[tk.id] && (!tk.when || linesOk(tk.when, p, ctx));
+  for (const tk of TALKS.own[p.id] || []) if (ok(tk)) { const said = talkPackFill(tk, p, ctx); if (said) return { talk: tk, src: 'own', said }; }
+  if (p.rank !== 'guest') {
+    const all = TALKS.pool.filter(ok), lately = new Set();
+    for (const id in T.fired) { const f = T.fired[id]; if (id.startsWith('pool.') && f[1] === p.id && f[0] > d - TALK_TOPIC_DAYS) lately.add(id.split('.')[1]); }   // pool.<topic>.<slug>
+    for (const c of TALKS.own[p.id] || []) if (T.fired[c.id] && T.fired[c.id][0] > d - TALK_TOPIC_DAYS) lately.add(c.topic);   // their own talks' topics count too
+    const fresh = all.filter(tk => !lately.has(tk.topic));
+    for (const list of [fresh, all.filter(tk => lately.has(tk.topic))]) {
+      const n = list.length, at = Math.floor(schedU(seed, d, 755) * n);
+      for (let i = 0; i < n; i++) { const tk = list[(at + i) % n], said = talkPackFill(tk, p, ctx); if (said) return { talk: tk, src: 'pool', said }; }
+    }
+  }
+  const S = TALKS.small, v = talkPackVeyli(p), pickFrom = k => S[k + '.' + p.id] || (v && S[k + '.saruth']) || S[k] || [];
+  const small = pickFrom('small'), dones = pickFrom('done'), last = T.small[p.id];
+  const done = dones.length > 0 && schedU(seed, d, 757) < TALK_DONE_ODDS && !(last && last[1] && last[0] < d);   // never twice running with one person
+  const order = small.map((e, i) => [schedU(seed, d * 64 + i, 756), e]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
+  const n = 3 + (schedU(seed, d, 758) < .5 ? 1 : 0), out = [];
+  if (done) { const e = dones[Math.floor(schedU(seed, d, 759) * dones.length)], x = linesFill(e.text, p, ctx); if (x) out.push({ text: x, tone: e.tone || 'light' }); }
+  for (const e of order) { if (out.length >= n) break; const x = linesFill(e.text, p, ctx); if (x) out.push({ text: x, tone: e.tone || 'light' }); }
+  return { small: out, done: done && out.length > 0 };
+}
+function talkPackFire(who, pick, t = shipNow()) {         // a talk started: it's used up for this save; small talk notes its day (and its "done")
+  const p = linesWho(who), T = talksState(); if (!p || !T || !pick) return;
+  const d = Math.floor(t / 1440) + 1;
+  if (pick.talk) T.fired[pick.talk.id] = [d, p.id]; else T.small[p.id] = [d, pick.done ? 1 : 0];
+}
 // ---- end of slot: Dialogue engineer ----
 
 // =====================================================================
