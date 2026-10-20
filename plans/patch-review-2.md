@@ -96,3 +96,9 @@ Harness gotcha (new): speech bubbles pop in with a real-time CSS animation (`.bu
   - Tier 1 "Relied on" 40→48.
   - The lower bands come about 1.4× sooner, untested.
   - player_check's steady player now has company at meals and two chats a day.
+
+## PB #31 "Ask Zeke" parked: claude/patch-b 95c22e7. PASS
+
+- **Code:** INTRO_ASK_ON is false. A pending tour extra still plays on a tap; otherwise the tap is taken with no panel. The introAsk path and its lines stay parked.
+- **Checks:** check_fast OK (281 s). intro_check part 8 was flipped by PB.
+- **`rv31.py` at 390×844:** three real taps on Zeke on the ramp. Each reached introTap (true), with no dialogue, chat card or panel (`rv31_tap1.png`).
