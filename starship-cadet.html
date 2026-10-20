@@ -10527,7 +10527,7 @@ function introPlan(p, d) {
     const near = w.tile ? cand.filter(q => q.type !== 'event').sort((a, b) => dist(a) - dist(b)) : cand;   // a tile: the places nearest it first
     const pl = w.placeId && S.byId.get(w.placeId) ? S.byId.get(w.placeId) : near[0];   // a named place (Calder's seat across from yours)
     const seat = !!(w.placeId && pl), alts = w.placeId ? null : near.map(q => q.id);   // introLay takes the first of these free then
-    return { from: seat ? x.at - INTRO_EARLY : x.at, to: x.until, deck: w.deck, placeId: pl ? pl.id : null, alts, tag: 'intro-' + x.id };   // a named seat: there and sitting when it starts
+    return { from: x.at - (x.early != null ? x.early : seat ? INTRO_EARLY : 0), to: x.until, deck: w.deck, placeId: pl ? pl.id : null, alts, tag: 'intro-' + x.id };   // a named seat: there and sitting when it starts; a beat's own `early` (the patch, #1: the Chief 20 minutes early at her desk)
   });
 }
 function introLay(p, d, occ, segs) {
