@@ -252,3 +252,9 @@ PP1 now reviews patch turns. Batch E (small features incl. First Light Cocoa, th
 **~23:15 UTC, the user: slow the early reputation words back to their old pace** (lead's recommendation; the user notes a full balancing pass comes later). PB does it as a small follow-up on claude/patch-b after 16df5bd (merged later with patch-a); PR2 + OR1 review. 0.64.5 push approved on intro parts 0-11 + 13 clean (part 12 in the final round).
 **~23:18 UTC: 0.64.5 PUSHED** (claude/integration 7958332 = patch-e batch E + events_check fix; GitHub check #55 green). BM11 now on patch-b 16df5bd as 0.64.6 (local 512ca3b, build-table clash settled, check_fast OK); cadet_test trace = OR1's plans/owner-review-1.md part 2.
 **~23:21 UTC:** PB measured before changing: the early reputation words did NOT speed up with batch F (same points every day before/after; timed play +3%; the board's supply of work is the limit). "Busy player Trusted on Day 3" and "Relied on Day 4" predate F (= backlog row 12, the user's "wait for the balance pass"). Lead's calls (consistent with the user's aim and row 12): leave the words; revert 9e34423 (relied back to 40, career_check shows row 12's known FAIL again); machine_check range 3-7. PB does it on patch-b after 16df5bd; merges with patch-a.
+**~23:27 UTC, the user: start step 4 (ship-wide events) alongside the patch's last steps.**
+| Seat | Session | Branch | Job |
+|---|---|---|---|
+| Events engineer EV1 | session_014ckxYgG3KA6eHksEMi6Eru | `claude/events-base` (from claude/integration 0.64.5) | shared base F0-F8; turn 0 = plans/events-base-brief.md (updated for Fridays + no storm all-hands), build only after lead's go |
+| Events writer EW1 | session_01KkAhg7eVhPenBBVfLufPU1 | `claude/events-lines` | the four Friday addresses (+ part E lines), then storm, Crossing the Line, comet, visit lines; names for Hollis Reach / Corvane Drift |
+Working: PA, BM11, EV1, EW1 (+ PR2/OR1 reviewing on call, PB finishing a small revert).
