@@ -49352,7 +49352,7 @@ class CrewAgent {
     if (this.path.length && !this.escHeld && !near) {
       const c = cellPos(...this.path[0]), dx = c.x - this.x, dz = c.z - this.z, d = Math.hypot(dx, dz), st = CREW_SPEED * (e.pace || 1) * dt;   // pace: section 21's stroll
       const nx = d <= st ? c.x : this.x + dx / d * st, nz = d <= st ? c.z : this.z + dz / d * st, nd = Math.hypot(pp.x - nx, pp.z - nz);
-      if (!e.after && typeof ESC_GAP !== 'undefined' && nd < ESC_GAP && nd < dist) { this.pose = 'stand'; this.face = Math.atan2(pp.x - this.x, pp.z - this.z); }   // the patch (#17): never closer than ESC_GAP to you
+      if (!e.after && e.mode !== 'lead' && typeof escToYou === 'function' && escToYou(this.path, pp) && nd < ESC_GAP && nd < dist) { this.pose = 'stand'; this.face = Math.atan2(pp.x - this.x, pp.z - this.z); }   // the patch (#17): never closer than ESC_GAP to you
       else { if (d <= st) { this.x = c.x; this.z = c.z; this.path.shift(); } else { this.x += dx / d * st; this.z += dz / d * st; this.face = Math.atan2(dx, dz); }
         this.pose = 'walk'; }
     } else { this.pose = 'stand'; this.face = Math.atan2(pp.x - this.x, pp.z - this.z); }   // waiting: look at you
