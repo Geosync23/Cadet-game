@@ -71,3 +71,13 @@ files. **Branch:** `claude/talk-pack-review` (push only there). My session: sess
 Blocker = spoils an arc or theme early, repeats an arc beat word for word, or broken text for many crew. Should fix =
 a fact that contradicts the game or canon, a condition missing, a repeat the player will notice, voice drift. Nit =
 wording, small consistency. Each finding has `file:line` and a proposed replacement in the speaker's voice.
+
+## Final state (TR1, 2026-10-20 15:25): the spot-check of TW1's fixes (df61ae2)
+
+`repeats.py` on `claude/talk-pack` df61ae2: 280 talks, ids unique, shape clean. Word-for-word repeats **8 → 2**: "Who
+said it?" (button text, kept on purpose, N2) and "The first hour of shift, before it's busy." (`work-bridge:103` and
+`work-watch:213`: the second came from my own P2 suggestion; change one). Work-pool cheers about food or tea **57 → 24**
+of 120; biscuit talks **25 → 5**; "habit" asks **6 → 3**; "nobody knows" talks **10 → 6**. Spot-checked fact fixes are in:
+`!moved:` for Lindqvist, Zamora and Ueda; onions, tea-corner and bay-quiet skips; night-survey is Ibarra's; Thursday
+checks `!rank:junior`; Hart's first watering; the player's gran's marrows; the engine-room line. TE1 fixed W1 and W7
+(910c257, 838aef0) and is adding `!moved:` to `talkPackFits`. Nothing open for TR1. I've stopped.
