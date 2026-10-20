@@ -1,0 +1,76 @@
+@talks work:garden
+// TW1, the Talk a while work pools: Garden (plans/work-pools-plan.html, decided 2026-10-20). Cruz, O'Neill, Hart.
+// Ids work.garden.<slug>; topic always "work". Never the blue sage (Brennan's arc, beat 2). Cruz is shy and on the
+// lonely theme; O'Neill notgood: no doubt talk.
+
+== first-light
+when: tier>=acquaintance !who:hart-ravi
+them: Hart waters the garden at first light, before anyone's up. Every day. Without fail.
+them: I came in early once and it was like walking into rain. Proper rain. I nearly cried.   #warm
+ask: What's the first thing you do, every morning?
+listen: Does the garden like the early water?
+  them: Plants like routine. Same time, same amount. Like the rest of us, really.
+share: Check the board. Then breakfast.
+  them: Good order. The garden's the other way round. Breakfast after.
+cheer: Hit the snooze. Twice.
+  them: The garden forgives you. The tomatoes are judging, though.   #funny
+
+== gerald-nursery
+when: tier>=acquaintance !who:cruz-tove
+them: Every cactus aboard is called Gerald. They all come from our nursery tray.
+them: Cruz grows the cuttings. Hands them out. The name comes free.   #funny
+ask: Would you look after a plant, if we gave you one?
+listen: Who was the first Gerald?
+  them: Very old now. Still going. Nobody remembers who named it. Gerald knows.   #funny
+share: Yes. I'd love something green by my bunk.
+  them: Then come and pick one. They're all Gerald. Pick the one that looks at you.   #warm
+cheer: Only if it can't die.
+  them: It's a cactus. It's practically immortal. Water it monthly. Talk to it weekly.   #funny
+
+== herbs-galley
+when: tier>=acquaintance
+them: Every evening I pick the galley's herbs. Brennan wants them fresh. Very fresh.
+them: I take them up with ten minutes to spare. If I'm late, I hear about it. Kindly. Loudly.   #funny
+ask: Who's the person you'd never want to keep waiting?
+listen: What does Brennan say if you're late?
+  them: "Lovely. Thank you SO much." Very polite. Terrifying. Never late again.   #funny
+share: Calder. Never.
+  them: Wise. Calder doesn't say anything. That's worse.   #funny
+cheer: My dinner. It waits for no one.
+  them: Correct. Dinner waits for nobody. Not even gardeners.   #funny
+
+== garden-why
+when: tier>=colleague
+them: I chose the garden because everything in it is trying. Every leaf, every root. All trying.
+them: It's hard to have a bad day surrounded by things trying that hard.   #warm
+ask: Is there a place aboard that makes your bad days lighter?
+listen: Do plants ever give up?
+  them: Some do. Then we try something else. You learn a lot from the ones that don't make it.
+share: Here, actually. The garden.
+  them: Then come more often. Sit by the big tree. Nobody minds.   #warm
+cheer: The mess. Specifically the pudding.
+  them: Pudding's a garden thing too, if you think about it. Very loosely.   #funny
+
+== garden-means
+when: tier>=friend !who:cruz-tove
+them: Know what the garden means to me? Seventy-five people breathing air that we helped clean.
+them: And eating herbs we grew. And smelling rain in a ship. That's a lot from a tray of soil.   #warm
+ask: What's the small thing you do that matters more than it looks?
+listen: Do people know how much the garden does?
+  them: No. And that's fine. They come in, they breathe, they feel better. That's enough.   #warm
+share: Keeping the air clean. Same as you.
+  them: Ha. Then we're partners, aren't we? Plants and filters. The breathing team.   #warm
+cheer: Picking the tea corner's biscuits.
+  them: That matters. Don't let anyone tell you it doesn't.   #funny
+
+== green-hands
+when: tier>=friend
+them: The garden gave me a habit. I touch every plant I walk past. Just a little. To say hello.
+them: On leave, I did it in a shop. To a plastic plant. The shopkeeper stared.   #funny
+ask: Has your work given you a habit that follows you around?
+listen: Do the plants notice?
+  them: I like to think so. The basil grows faster near the path. Make of that what you will.   #warm
+share: I tap every panel I pass.
+  them: Ha. Then we're both saying hello to the ship. Different bits of her.   #warm
+cheer: I sniff every meal before eating.
+  them: That's not a habit. That's wisdom. Brennan approves.   #funny
