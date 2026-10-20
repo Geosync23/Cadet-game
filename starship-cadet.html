@@ -10839,7 +10839,7 @@ function walkLaneStep(a, dt) {
 // the washroom stall's red light (#8, the patch): a red cap round the green light (not on its surfaces: it encloses it,
 // its back inside the door), shown only while someone (crew or you) is using that stall and the stall isn't faded.
 // Made at load with no random calls; one draw call for each taken stall in view
-const STALL_CAP = { geo: new THREE.BoxGeometry(.13, .06, .04), mat: std('#ff6a5a', .3, 0, { emissive: col('#d0352a'), emissiveIntensity: .9 }), list: [], of: null };
+const STALL_CAP = { geo: new THREE.BoxGeometry(.13, .06, .04), mat: std('#ff2a22', .3, 0, { emissive: col('#c81410'), emissiveIntensity: 1 }), list: [], of: null };
 function stallCapAdd(g) {                                // the toilet stall kit (4b), at build: g is placed already
   const m = new THREE.Mesh(STALL_CAP.geo, STALL_CAP.mat);
   m.position.set(.38, 1.32, .56); m.visible = false; m.castShadow = m.receiveShadow = false; m.raycast = () => {}; m.userData.noMerge = true;
