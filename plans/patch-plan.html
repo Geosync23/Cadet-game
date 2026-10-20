@@ -66,7 +66,7 @@ a{color:var(--teal)}
 <body>
 <main>
 <h1>Playtest Patch Plan</h1>
-<div class="sub">The 28 notes from your playtest of 0.64.2. Each one was tried in the real game (claude/integration 5dd740c, phone size 390×844), with its cause, the fix, who builds it and the risk. <b>Revision 2</b> (2026-10-20): your answers are in as decisions, and so are the points from reviewer PR1's check (<code>plans/patch-plan-review.md</code> on claude/patch-plan-review). <b>Revision 3</b> (later that day): your pick for the first Monday, <b>First Light Cocoa</b>, with its draft words, and your two new asks: cocoa at the bar (#29) and the mug in your hands (#30). <b>Two small questions</b> about the cocoa are at the bottom. Nothing is built yet. The patch comes after Dev mode, whose day jump and tradition start make every item quick to test.</div>
+<div class="sub">The 28 notes from your playtest of 0.64.2. Each one was tried in the real game (claude/integration 5dd740c, phone size 390×844), with its cause, the fix, who builds it and the risk. <b>Revision 2</b> (2026-10-20): your answers are in as decisions, and so are the points from reviewer PR1's check (<code>plans/patch-plan-review.md</code> on claude/patch-plan-review). <b>Revision 3</b> (later that day): your pick for the first Monday, <b>First Light Cocoa</b>, with its draft words, and your two new asks: cocoa at the bar (#29) and the mug in your hands (#30). Your answers to its two questions are in: cocoa only at the bar (and free at First Light Cocoa), and you keep the mug about 20 ship minutes. <b>The plan is final</b>; there's a box at the bottom for any last comment. Nothing is built yet. The patch comes after Dev mode, whose day jump and tradition start make every item quick to test.</div>
 
 <div class="card">
 <h3>At a glance</h3>
@@ -84,7 +84,7 @@ a{color:var(--teal)}
   <li>The tuning shows what a repair really takes once all four needs numbers are in, and it lands on your 30 minutes (#16).</li>
   </ul></li>
 </ul>
-<div class="legend">Chips: <span class="chip">owner seat</span> <span class="chip">size in turns</span> <span class="chip tune">tuning</span> <span class="dec">decided</span> <span class="chip q">your answer needed</span>. Lines are at 5dd740c; <code>python3 tools/section.py --where LINE</code> finds them later.</div>
+<div class="legend">Chips: <span class="chip">owner seat</span> <span class="chip">size in turns</span> <span class="chip tune">tuning</span> <span class="dec">decided</span>. Lines are at 5dd740c; <code>python3 tools/section.py --where LINE</code> finds them later.</div>
 </div>
 
 <h2>Build order</h2>
@@ -492,9 +492,9 @@ a{color:var(--teal)}
 <li><b>Cocoa gets its own look and a little more comfort.</b> It's carried and drunk in a mug (#30). Its leisure is +8 instead of +5, a treat. The rest is as other drinks.</li>
 <li><b>Its own serve line:</b> "One cocoa. Careful, it's hot." Tea comes in a mug too; juice and fizz keep the glass.</li>
 <li><b>At First Light Cocoa</b> the mug is handed to you free.</li>
-<li><b>Other drink spots:</b> the Tea corner kettle (Deck 5), the watch room kettle (Deck 6) and the mess drinks station stay tea. That keeps cocoa something you get at the bar, or at the tradition. Question pp-v3-q1.</li>
+<li><b>Other drink spots</b> <span class="dec">decided: bar only</span>: the Tea corner kettle (Deck 5), the watch room kettle (Deck 6) and the mess drinks station stay tea. Cocoa is something you get at the bar, or free at the tradition.</li>
 </ul>
-<div class="chips"><span class="chip">Player engineer (15: the bar, ixDrink); writers (one line)</span><span class="chip">¼ turn, after #30</span><span class="chip q">question pp-v3-q1</span><span class="chip">player_check, interactions_check, content_gen --check</span></div>
+<div class="chips"><span class="chip">Player engineer (15: the bar, ixDrink); writers (one line)</span><span class="chip">¼ turn, after #30</span><span class="dec">decided: bar only</span><span class="chip">player_check, interactions_check, content_gen --check</span></div>
 <p><span class="k">Dev mode:</span> jump to 18:00 any day, with credits.</p>
 </div></details>
 
@@ -513,7 +513,7 @@ a{color:var(--teal)}
 <li><b>Held in one hand at the chest</b> (<code>HOLDS.mug</code>), the other arm swinging. The seated drink pose shows the mug instead of the glass for cocoa and tea (a <code>cocoa</code> pose), and so do the crew at First Light Cocoa.</li>
 <li><b>Draw calls:</b> +1-2 while you hold it (your prop is its own mesh); the crew's mugs are packed into the crowd's meshes, so no more.</li>
 </ol>
-<p><span class="k">How long it's held</span> (pp-v3-q2):</p>
+<p><span class="k">How long it's held</span> <span class="dec">decided: about 20 ship minutes</span>:</p>
 <ul>
 <li><b>From the bar:</b> you hold it from being served until you sit and drink it (20 ship minutes, about half a real minute), or put it down (Put down), or 20 ship minutes of walking about, when you've drunk it as you go ("You finish your cocoa. Warm all the way down.", with its gain).</li>
 <li><b>Riding the lift:</b> you keep it.</li>
@@ -522,7 +522,7 @@ a{color:var(--teal)}
 <li><b>Saving:</b> a drink isn't saved today, so a reload clears it. Unchanged.</li>
 </ul>
 <p><span class="k">Mock-up</span> (a scratch run, the game file unchanged; probe <code>mug.py</code>): the player holding a true-size mug, close up. The draw calls went 180 → 182.</p>
-<div class="chips"><span class="chip">Performance engineer (8b: the prop, the hold, the pose); player engineer (15: when you hold it)</span><span class="chip">1 turn</span><span class="chip q">question pp-v3-q2</span><span class="chip">perf_check, cadet_test (identical unless holding), player_check, interactions_check, screenshots at zoom 1.5 and 0.7</span></div>
+<div class="chips"><span class="chip">Performance engineer (8b: the prop, the hold, the pose); player engineer (15: when you hold it)</span><span class="chip">1 turn</span><span class="dec">decided: 20 ship minutes walking</span><span class="chip">perf_check, cadet_test (identical unless holding), player_check, interactions_check, screenshots at zoom 1.5 and 0.7</span></div>
 <div class="shots"><figure><a href="patch-plan-shots/30-mug-mockup.png"><img src="patch-plan-shots/30-mug-mockup.png" alt="mock-up: the player holding a cream mug"></a><figcaption>mock-up, close up (true size)</figcaption></figure></div>
 </div></details>
 
@@ -589,7 +589,7 @@ a{color:var(--teal)}
 <div class="chips"><span class="chip">traditions engineer and writers, through the events plan</span><span class="chip">not in this patch</span></div>
 </div></details>
 
-<h2>Your decisions (from the first round)</h2>
+<h2>Your decisions</h2>
 <div class="card tw"><table>
 <tr><th>Item</th><th>You chose</th></tr>
 <tr><td>#25 lift label</td><td>Deck 2, as you wrote it: "Officer's Quarters - Science"</td></tr>
@@ -609,6 +609,8 @@ a{color:var(--teal)}
 <tr><td>#19 the beam</td><td>Keep 17:05; Zeke holds you from 16:50, tells you to clock out, an arrow to the clock</td></tr>
 <tr><td>#21 rank word</td><td>"Junior Officer"</td></tr>
 <tr><td>#23 big moments</td><td>In the ship-wide events</td></tr>
+<tr><td>#29 cocoa elsewhere</td><td>Only the bar, plus free at First Light Cocoa</td></tr>
+<tr><td>#30 the mug, walking about</td><td>About 20 ship minutes, then you've drunk it as you go</td></tr>
 </table></div>
 
 <h2>Found in passing (in the backlog, not in this patch)</h2>
@@ -616,24 +618,10 @@ a{color:var(--teal)}
 <li>Backlog #15: the goal arrow's label lowercases a person's name: "Take the lift to Deck 3: zeke Torres" (section 15b, line 14872).</li>
 </ul>
 
-<h2>Two questions about the cocoa</h2>
+<h2>Any last comment</h2>
 <form id="answers">
-
-<div class="q" data-qid="pp-v3-q1"><div class="qh">PP-V3-Q1 · #29 WHERE YOU CAN GET COCOA</div><div class="qt">Besides the bow lounge bar (and First Light Cocoa), should anywhere else offer cocoa?</div>
-<label><input type="radio" name="pp-v3-q1" value="bar-only"><span>Only the bar (2 credits, 17:30-23:00), and free at First Light Cocoa. The kettles stay tea, so cocoa stays a little treat<span class="rec">recommended</span></span></label>
-<label><input type="radio" name="pp-v3-q1" value="kettles-too"><span>The kettles too (the Tea corner on Deck 5, the watch room on Deck 6), any time</span></label>
-<label><input type="radio" name="pp-v3-q1" value="mess-too"><span>The mess drinks station too, at breakfast and dinner</span></label>
-<textarea name="pp-v3-q1-comment" placeholder="Comment (optional)"></textarea></div>
-
-<div class="q" data-qid="pp-v3-q2"><div class="qh">PP-V3-Q2 · #30 THE MUG</div><div class="qt">If you walk about with your cocoa instead of sitting down, how long do you keep the mug?</div>
-<label><input type="radio" name="pp-v3-q2" value="20min"><span>About 20 ship minutes (half a real minute), then you've drunk it as you go, with its gain<span class="rec">recommended</span></span></label>
-<label><input type="radio" name="pp-v3-q2" value="until-sit"><span>Until you sit down with it or put it down, however long</span></label>
-<label><input type="radio" name="pp-v3-q2" value="10min"><span>About 10 ship minutes</span></label>
-<textarea name="pp-v3-q2-comment" placeholder="Comment (optional)"></textarea></div>
-
-<div class="q" data-qid="pp-v3-general"><div class="qh">ANYTHING ELSE</div><div class="qt">Anything about First Light Cocoa, its words, or the plan?</div>
+<div class="q" data-qid="pp-v3-general"><div class="qh">ANYTHING ELSE</div><div class="qt">Every question is answered and the plan is final. Anything else before it's built after Dev mode?</div>
 <textarea name="pp-v3-general" placeholder="Your thoughts"></textarea></div>
-
 </form>
 <p class="legend">Planned on claude/patch-plan from claude/integration 5dd740c; revision 2 with the user's answers and reviewer PR1's review; revision 3 with First Light Cocoa, #29 and #30. The reproduction scripts are in plans/patch-plan-probes/; the screenshots are in plans/patch-plan-shots/.</p>
 </main>

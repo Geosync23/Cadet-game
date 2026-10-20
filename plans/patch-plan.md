@@ -1,10 +1,10 @@
-# Playtest patch plan: summary (revision 3)
+# Playtest patch plan: summary (revision 3, final)
 
 The page with all the details, screenshots and the open question is `plans/patch-plan.html` (shots in `plans/patch-plan-shots/`, probes in `plans/patch-plan-probes/`). Planned by PP1 for lead 20 on claude/integration 5dd740c (0.64.2 + slots), at phone size 390×844.
 
 **Revision 2 (2026-10-20)** adds the user's answers (db `answers/patch-plan`, 12:52 UTC) and reviewer PR1's review (`plans/patch-plan-review.md` on claude/patch-plan-review 77d930e, with lead 20's calls). The patch is built after Dev mode.
 
-27 of 28 reproduced. #25 is wording only. #13 and #18 were confirmed from the code and words, and #17 is partly reproduced. About 21 turns in six batches. **Open questions (revision 3):** `pp-v3-q1` (cocoa anywhere besides the bar; recommended: only the bar, and free at the tradition) and `pp-v3-q2` (how long you keep the mug walking about; recommended: about 20 ship minutes), plus `pp-v3-general`.
+27 of 28 reproduced. #25 is wording only. #13 and #18 were confirmed from the code and words, and #17 is partly reproduced. About 21 turns in six batches. **Every question is answered; the plan is final** (the user, 2026-10-20: pp-v3-q1 bar only, pp-v3-q2 20 minutes). `pp-v3-general` stays open for a last comment.
 
 ## Build order
 
@@ -78,6 +78,8 @@ The page with all the details, screenshots and the open question is `plans/patch
 | #19 | Keep 17:05; Zeke holds you from 16:50, tells you to clock out, arrow to the clock |
 | #21 | "Junior Officer" |
 | #23 | In the events |
+| #29 | Cocoa only at the bar, plus free at First Light Cocoa |
+| #30 | Walking about, you keep the mug about 20 ship minutes, then you've drunk it |
 | #26 | First Light Cocoa (idea 1 with the tips from idea 3), plus cocoa at the bar (#29) and the mug in your hands (#30) |
 
 ## Found in passing
@@ -91,11 +93,11 @@ Backlog #15: the goal arrow lowercases a name ("zeke Torres", 15b line 14872).
   - The flow: Mail the evening before, a reminder at the end of the shift, Zeke's invite at dinner, tap to join. The intro's bed arrows wait until it's over.
   - What happens: the lounge dims; Dev Raman (Senior Helm Officer, the pilot who flew you in) shows where the Wren has been and where she's heading; cocoa goes round; three of five long-serving crew (Holt, Kowalczyk, Brennan, Halloran, Sato) give a first-day tip, all true in the game except Holt's chair, the user's example; Tomas (a week aboard) and then you say one thing you've noticed (three replies); mugs up. No pin gift.
   - Words: drafted in `plans/patch-plan-first-light-cocoa.md` (the .trad and the .meet, for the writers). New pieces for the traditions engineer: `ties: meeting`, `anim: cocoa`, an invite from a non-host, the lounge dim; for the dialogue engineer: `? pick 3`. 1½ turns.
-- **#29 Cocoa at the bar.** It already exists: `BAR_DRINKS.cocoa` (15, line 13835), 2 credits, 17:30-23:00, drunk at a stool (`ixDrink`: hunger +10, social +4, leisure +5, +6 with company). The fix: cocoa (and tea) in a mug (#30), leisure +8 for cocoa, its own serve line; the kettles stay tea (pp-v3-q1). Player engineer, ¼ turn.
+- **#29 Cocoa at the bar.** It already exists: `BAR_DRINKS.cocoa` (15, line 13835), 2 credits, 17:30-23:00, drunk at a stool (`ixDrink`: hunger +10, social +4, leisure +5, +6 with company). The fix: cocoa (and tea) in a mug (#30), leisure +8 for cocoa, its own serve line; the kettles stay tea (decided: bar only). Player engineer, ¼ turn.
 - **#30 The mug in your hands.**
   - Built on the holds the game has (`HOLDS`, 8b line 46669: toolbox, datapad, tray, crate, cart, device) and the prop kit (`PROP_KIT`, 8b line 46878).
   - A cream mug with the cocoa 0.005 below the rim and a handle overlapping the wall (nothing coplanar), at about 1.6× life size: about 8 px tall at the phone's usual zoom (50 px a tile), instead of 5.
   - Held one-handed at the chest; at a stool the drink pose shows the mug instead of the glass; the crew at the tradition hold mugs too (packed into the crowd's meshes).
-  - Held until you sit and drink it (20 ship min), put it down, or after about 20 ship min walking (pp-v3-q2). You keep it in the lift. Picking up anything two-handed finishes it first. A reload clears it, as today.
+  - Held until you sit and drink it (20 ship min), put it down, or after about 20 ship min walking (decided). You keep it in the lift. Picking up anything two-handed finishes it first. A reload clears it, as today.
   - The game has one camera (third-person, orthographic), no first person: checked at phone size at zoom 1.5 and 0.7.
   - Mock-up probe `mug.py`: draw calls 180 → 182 while held; shot `30-mug-mockup.png`. Performance engineer (8b) and player engineer (15), 1 turn.
