@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Short Fridays Plan</title>
+<style>
+:root{--ink:#e8eef0;--muted:#93a6ae;--teal:#4cc3b5;--amber:#e9c46a;--rose:#e58f8f;--glass:rgba(13,21,33,.78);--line:rgba(150,200,196,.22);--bg:#121a27}
+:root[data-theme="light"]{--ink:#18232b;--muted:#4f6168;--teal:#167e72;--amber:#8a6510;--rose:#a33b3b;--glass:rgba(255,255,255,.86);--line:rgba(30,80,76,.22);--bg:#eef2f3}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--ink:#18232b;--muted:#4f6168;--teal:#167e72;--amber:#8a6510;--rose:#a33b3b;--glass:rgba(255,255,255,.86);--line:rgba(30,80,76,.22);--bg:#eef2f3}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Avenir Next","Segoe UI",system-ui,sans-serif}
+body{line-height:1.5}
+main{max-width:860px;margin:0 auto;padding:16px 16px 60px}
+h1{font-size:21px;font-weight:600;margin:4px 0 0}
+h2{font-size:17px;font-weight:600;margin:30px 0 8px;color:var(--teal)}
+h3{font-size:15px;font-weight:600;margin:0}
+p,li{font-size:14px}
+.sub{font-size:13px;color:var(--muted);margin-top:4px}
+.card{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:10px 0}
+.batch{border-left:3px solid var(--teal)}
+.batch .meta{font-size:12.5px;color:var(--muted)}
+details.item{background:var(--glass);border:1px solid var(--line);border-radius:12px;margin:8px 0;padding:0}
+details.item>summary{cursor:pointer;padding:10px 12px;list-style:none;display:flex;gap:8px;align-items:baseline}
+details.item>summary::-webkit-details-marker{display:none}
+details.item>summary .n{font-weight:700;color:var(--teal);min-width:30px}
+details.item>summary .t{flex:1;font-size:14.5px}
+details.item>summary .s{font-size:11.5px;color:var(--muted);white-space:nowrap}
+details.item[open]>summary{border-bottom:1px solid var(--line)}
+.body{padding:8px 12px 12px}
+.body p{margin:6px 0}
+blockquote{margin:6px 0 10px;padding:6px 10px;border-left:3px solid var(--amber);font-size:13.5px;color:var(--ink);background:rgba(233,196,106,.07);border-radius:0 8px 8px 0}
+blockquote b{color:var(--amber);font-weight:600;font-size:11.5px;letter-spacing:.04em;display:block}
+.k{font-weight:600;color:var(--teal)}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;background:rgba(127,160,170,.14);padding:0 4px;border-radius:4px;word-break:break-word}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.chip{font-size:12px;border:1px solid var(--line);border-radius:999px;padding:2px 9px;color:var(--muted)}
+.chip.tune{border-color:var(--amber);color:var(--amber)}
+.chip.q{border-color:var(--rose);color:var(--rose)}
+.shots{display:flex;gap:8px;overflow-x:auto;padding:4px 0}
+.shots a{flex:0 0 auto}
+.shots img{height:220px;border-radius:8px;border:1px solid var(--line);display:block}
+.shots figcaption{font-size:11.5px;color:var(--muted);max-width:110px}
+figure{margin:0}
+table{border-collapse:collapse;width:100%;font-size:13px;margin:6px 0}
+th,td{border-bottom:1px solid var(--line);padding:4px 6px;text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:600}
+.tw{overflow-x:auto}
+.q{background:var(--glass);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:12px 0}
+.q .qh{font-size:12px;color:var(--rose);font-weight:600;letter-spacing:.03em}
+.q .qt{font-size:14.5px;font-weight:600;margin:3px 0 8px}
+.q label{display:flex;gap:8px;align-items:flex-start;font-size:13.5px;padding:5px 0;cursor:pointer}
+.q input[type=radio]{margin-top:4px;accent-color:var(--teal)}
+.rec{font-size:11px;color:var(--bg);background:var(--teal);border-radius:999px;padding:0 7px;margin-left:4px;white-space:nowrap}
+textarea{width:100%;min-height:58px;background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font:inherit;font-size:13.5px;margin-top:6px}
+.why{font-size:12.5px;color:var(--muted);margin:2px 0 0 24px}
+a{color:var(--teal)}
+.legend{font-size:12.5px;color:var(--muted)}
+</style>
+<style>.dec{font-size:12px;border:1px solid var(--teal);color:var(--teal);border-radius:999px;padding:2px 9px}</style>
+</head>
+<body>
+<main>
+<h1>Short Fridays and the Captain's Address</h1>
+<div class="sub">A plan for your decision of 2026-10-20: <i>"Friday is good. Let's make it so everyone gets off work early on Friday. Get off at 1530, then meeting at 1600. Then dinner at 1700. We need dialog explaining the short work day Fridays."</i> Every Friday the day shift stops at 15:30, the Captain speaks to the whole crew at 16:00, and dinner is at 17:00, as it already is. The first is <b>Friday Day 5</b>, in your arrival week. Planned by PP1 for lead 21 on claude/integration (0.64.2 to 0.64.4). Nothing is built yet. The questions are at the bottom, each with a recommended answer.</div>
+
+<div class="card">
+<h3>At a glance</h3>
+<ul>
+<li><b>About 8 turns</b> across seven parts (A to G below), all behind one switch, <code>SHORT_FRIDAY</code>. With it off the game is unchanged. Turning it on is its own reviewed step.</li>
+<li><b>Dinner is already 17:00-20:30</b> (<code>MEALS.dinner</code>, section 14 line 9179), so the meal doesn't move. What changes is that about 60-70 people walk in at once instead of in ones and twos.</li>
+<li><b>The Friday afternoon is free today.</b> No tradition runs between 15:30 and 17:00. Friday's own traditions (Works Friday tea 18:45, the Music jam 19:45, Tap night 20:00, New hands' tea 18:40 on Day 5) stay where they are.</li>
+<li><b>Who comes.</b> 50 day-shift crew work on a Friday (9 have it as a day off), plus 11 of the night shift. So the address draws about 60-70 people, plus you.</li>
+<li><b>Where.</b> The Deck 3 lift plaza and promenade has 70 standing spots already built for big gatherings, right beside the mess for 17:00 (recommended; question fp-q1).</li>
+<li><b>The ion storm</b> keeps no all-hands in the auditorium (settled). The season's all-hands in the auditorium (the first Monday of each season, 17:45) is a separate, existing tradition and stays.</li>
+</ul>
+</div>
+
+<h2>What changes, part by part</h2>
+
+<div class="card batch"><h3>A. The crew's Friday (section 14)</h3>
+<div class="meta">Sim engineer · 1½ turns · every Friday's crew plans change: day_check on Fridays, events_check and cadet_test differences (cadet_test plays a Monday, so it should stay identical)</div>
+<ul>
+<li><b>The shift end:</b> the day shift's end is set in one place (<code>schedFrame</code>, line 9741: <code>f.workEnd = SHIFTS.day[1] …</code>). Friday's entry in <code>WEEK_SHAPE</code> (line 9187, today only <code>{ late: 30 }</code>, a later bedtime) gains <code>end: 930</code>, and <code>schedFrame</code> uses it. Workaholics still stay a few minutes extra.</li>
+<li><b>Crew on their own hours</b> get the same clip on Fridays: the garden (07:00-15:30 already, no change), the storekeepers (Orla's 14:30-21:00 stays open: the store is a service), and the galley (part D).</li>
+<li><b>What else follows:</b> the "worked a whole shift" window (line 10743) and the gathering rule (<code>eventFree</code>, line 10393, which keeps anyone on shift until 17:15 out of events) follow the new end, so a 16:00 address is possible.</li>
+<li><b>Who keeps working</b> (fp-q2). Today nobody keeps the bridge staffed in the evening, so this is a choice, not existing code. Recommended: a small skeleton (one helm and one watch rating on the bridge, one medic on call, and the galley's dinner cooks) hears the address on the device banner.</li>
+<li><b>The night shift</b> is up by 14:00-14:30, and the gathering rule already lets them come to a 16:00 event. About half come.</li>
+<li><b>The Captain and XO's</b> 17:55 handover on the bridge stays.</li>
+</ul></div>
+
+<div class="card batch"><h3>B. Your Friday clock (sections 20, 17, 19)</h3>
+<div class="meta">Social engineer (the clock, section 20) with the Works career engineer reviewing; systems engineer for the shared shift end (section 17) · 1½-2 turns · leave_check, career_check, mech_check, machine_check, interactions_check, device_check</div>
+<ul>
+<li><b>Today:</b> <code>CAREER</code> (line 36896) has clock-in from 08:00, clock-out from 17:00, early-out before 15:00 (−2 work reputation), the miss line at 12:30, and auto sign-out at 18:00 (it signs you out at 17:00). <code>DAY_SHIFT = [540, 1020]</code> (section 17, line 17305) is read in about 25 places: holds end at the shift end, the board's small jobs, rounds, team jobs, incidents, leaks, rewiring, favours and the promotion.</li>
+<li><b>Fix:</b> one shared <code>dayShiftEnd(d)</code> (17:00, or 15:30 on Fridays), owned by the systems engineer and asked of first, since it changes a shared value. The clock reads it:
+  <ul>
+  <li><b>Clock-out</b> opens at 15:30 on Fridays.</li>
+  <li><b>Auto sign-out</b> runs at 16:00 on Fridays ("signed you out at 15:30"), when the address starts.</li>
+  <li><b>The early-out line</b> (15:00) stays, so leaving between 15:00 and 15:30 isn't a short shift, and 15:30 is a full day.</li>
+  <li><b>Unchanged:</b> the miss line (12:30), clock-in and leave booking.</li>
+  </ul></li>
+<li><b>Jobs on a Friday</b> wrap up by 15:30.
+  <ul>
+  <li>The only Friday-afternoon mechanic, team jobs (Fridays 14:00 in even weeks, <code>TEAM_FRI</code>, line 44981), must fit in 90 minutes. If not, it moves to 13:30.</li>
+  <li>The places that read <code>DAY_SHIFT[1]</code> read <code>dayShiftEnd(d)</code> where the day matters. The Wednesday and Thursday mechanics are untouched.</li>
+  </ul></li>
+<li><b>The checks</b> are updated in the same turn.
+  <ul>
+  <li><b>leave_check</b>'s Friday (Day 12) is only a "missed by 12:30" case, which still holds.</li>
+  <li><b>career_check</b>'s steady player works 08:00-17:00 on every workday. Its Fridays become 08:00-15:30, so a few job counts shift.</li>
+  </ul></li>
+<li><b>The device:</b> the Schedule's "On shift" row (section 19, <code>DEV_SHIFT</code>, line 10836) reads "On shift 09:00-15:30 · short Friday".</li>
+</ul></div>
+
+<div class="card batch"><h3>C. The address itself (section 18, content/)</h3>
+<div class="meta">Traditions engineer (the tradition), writers (the words), dialogue engineer (rotating parts) · 2 turns · events_check, join_check, lines_check, content_gen --check</div>
+<p><b>A weekly tradition,</b> <code>captains-address.trad</code>, built like the existing season all-hands (<code>rec-all-hands</code>). It brings people together through the gathering spots, not the broadcast. <code>captainAddress()</code> (section 18, line 35495) only sends a banner and Mail today.</p>
+<ul>
+<li><code>when: weekly friday</code>, <code>at: 16:00-16:25</code>, <code>where: 3</code> the plaza gathering (fp-q1).</li>
+<li>Captain Marrow at the lead spot, Commander Vance beside her.</li>
+<li><code>who:</code> everyone 90%, the night shift 50%, the skeleton never. The skeleton gets the banner and the Mail.</li>
+</ul>
+<p><b>How it plays</b> (fp-q3, recommended):</p>
+<ul>
+<li>The Captain's lines are speech bubbles over her, one every few seconds, about 25 ship minutes.</li>
+<li>The crowd's bubbles are hushed while she speaks.</li>
+<li>Tap to join, as with any tradition.</li>
+<li>Anyone not there gets the banner and the Mail ("All hands: the Captain's Friday address").</li>
+<li>It ends with "Dinner's at five. Enjoy your weekend, those of you who have one."</li>
+</ul>
+<p><b>What she says</b> (fp-q5): the same shape every week, with parts that change.</p>
+<ol>
+<li><b>Hello,</b> and the week's headline: one line, from a pool.</li>
+<li><b>The week behind:</b> something that really happened, read when she speaks (never by the crew's planner). The ship's health from the machines; a repair that mattered; a tradition's winner (the tasting table, the Cup).</li>
+<li><b>Welcomes and goodbyes</b> from the rota's arrivals and leavers (<code>ROSTER_ROTATIONS</code>). In week one: you.</li>
+<li><b>A department nod,</b> taking turns week by week: Works, the galley, the watch, survey, the infirmary, the garden.</li>
+<li><b>The week ahead:</b> next week's traditions, and a ship-wide event if one is coming.</li>
+<li><b>Now and then, you:</b> your name on the beam, your first solo repair, a promotion.</li>
+<li><b>The close.</b></li>
+</ol>
+<p>When a ship-wide event falls on a Friday, the address becomes its briefing (fp-q6).</p>
+</div>
+
+<div class="card batch"><h3>D. Dinner at 17:00 with everyone at once (section 16)</h3>
+<div class="meta">Galley engineer · ½-1 turn · food_check (its Friday rush), events_check</div>
+<ul>
+<li><b>The galley keeps cooking through the address.</b> The cooks are on 14:30-16:30, and the bar hand preps 15:00-17:00 (<code>GALLEY_SHIFTS</code>, line 15255). Dinner still opens at 17:00 with at least 10 portions ready.</li>
+<li><b>The rush.</b> About 60 people walking from the plaza at 16:25-17:00 would queue far longer than food_check's 25-minute cap allows, and the mess has 44 seats and 22 benches.</li>
+<li><b>The fix:</b> the address ends at 16:25 and people linger, wash or change. Each attendee's dinner time is spread from 17:00 to about 17:45 (seeded per person, so the plan stays repeatable), so the queue fits.</li>
+<li><b>food_check</b> gains a Friday case (the rush from 17:00) to prove it.</li>
+<li><b>Fridays' pudding</b> stays.</li>
+</ul></div>
+
+<div class="card batch"><h3>E. Explaining short Fridays to you (writers, sections 21, 19, 20)</h3>
+<div class="meta">Writers, onboarding engineer, device engineer · 1 turn · intro_check, lines_check, device_check</div>
+<ol>
+<li><b>Day 0, Zeke's goodnight</b> (the "how a day runs" lines, now bubbles from patch #4). One line added: <b>"Fridays we knock off at half three. Captain talks to everyone at four, then dinner."</b></li>
+<li><b>Thursday 18:00 (Day 4), a Mail from the Captain</b> (the tradition's evening-before Mail): <b>"Tomorrow's a short Friday. The day shift stops at half past three; I'll see all of you in the plaza at four. Dinner at five. Our new hands especially. Captain Marrow."</b></li>
+<li><b>Day 5 at 13:00, Halloran at the tea corner</b> (your mug moment, <code>d5-mug</code>): <b>"Short day today. Half three, clock out, then the plaza at four. She'll say your name. Don't hide."</b></li>
+<li><b>Every Friday, the time clock's screen:</b> "Short Friday: clock out from 15:30." The device's Schedule row says the same. A heads-up at 15:20 reads "The Captain's address at 16:00 · the plaza, Deck 3".</li>
+<li><b>Day 5 at 16:00, the Captain's first address</b> welcomes you by name: <b>"And a welcome to our newest hand, {me}, five days aboard. You picked a good ship."</b></li>
+<li><b>Later Fridays:</b> now and then a crew member says it at Friday breakfast ("Short one today." / "Half three, then the Captain.").</li>
+</ol></div>
+
+<div class="card batch"><h3>F. Dev mode (section 25)</h3>
+<div class="meta">Dev mode engineer · ¼ turn · devmode_check</div>
+<ul>
+<li><b>The excuse rule is unchanged:</b> a jump past 12:30 on a workday you didn't clock in excuses it.</li>
+<li><b>The Clock tab's "To 16:55"</b> (line 50424) assumes a 17:00 end. On a Friday it becomes "To 15:25".</li>
+<li><b>The address</b> can be started from the tradition list like any other.</li>
+</ul></div>
+
+<div class="card batch"><h3>G. The crowd on phones (performance)</h3>
+<div class="meta">Performance engineer · ½ turn · perf_check (a new scene), deck_check</div>
+<p>A new perf_check scene: Deck 3's plaza on a Friday at 16:10, with about 65 crew, at zoom 1.5, at 0.7 and in landscape. The budget is 450 draw calls. The closest scene today is the storm party: 60 crew on Deck 3 peaked at 393. Over 70 people the crowd already draws more simply (<code>CROWD_MANY</code>).</p>
+<p><b>A sample of the first address</b> (Day 5, for the writers to finish; Captain Marrow: "calm, curious, a quiet joke folded in; 'we' for the ship"):</p>
+<blockquote><b>DRAFT</b>"Afternoon, everyone. Short Friday, so I'll be short too. Mostly."<br>"Good week. The chiller held at three degrees all week, and Brennan says that's a personal record."<br>"A welcome to our newest hand, {me}, five days aboard. You picked a good ship."<br>"This week's nod goes to the galley. Sixty dinners a night and nobody's waited more than five minutes. I checked."<br>"Next week: the tasting table's on Wednesday, and Raman tells me we pass the Hollis Reach on Thursday. Look out of a window."<br>"Dinner's at five. Enjoy your weekend, those of you who have one."</blockquote>
+</div>
+
+<div class="card"><p><span class="k">Order and size.</span> A (1½) and B (1½-2) first, together, since they share the 15:30 end; then C (2) and D (½-1); then E (1), F (¼) and G (½). About 8 turns, all behind <code>SHORT_FRIDAY</code>. My suggestion: build it after the playtest patch and before the first ship-wide event, so the event plan can treat 15:30-17:00 on Fridays as taken.</p>
+<p><span class="k">Risks.</span></p>
+<ul>
+<li>Every Friday's crew day changes, so day_check must run on Fridays; Day 5 and Day 12 are good cases.</li>
+<li>The galley rush must be proved by food_check.</li>
+<li>About 25 places read the shift's end, so the shared <code>dayShiftEnd(d)</code> goes to the systems engineer before any building.</li>
+<li>The crowd's draw calls need the new perf_check scene.</li>
+<li>Nothing in it calls <code>R()</code>.</li>
+<li>The address's "week behind" is read when she speaks, never by the planner.</li>
+</ul>
+<p><span class="k">design-doc.md</span> changes in the same commit as the build: the shifts table (lines 336-339), the weekday shapes (line 815) and the weekly traditions (line 441).</p></div>
+
+<h2>Questions</h2>
+<form id="answers" data-collection="answers" data-doc="fridays-plan">
+
+<div class="q" data-qid="fp-q1"><div class="qh">FP-Q1 · WHERE</div><div class="qt">Where does the Captain speak?</div>
+<label><input type="radio" name="fp-q1" value="plaza"><span>The Deck 3 lift plaza and promenade: 70 standing spots built for big gatherings, right by the mess for dinner at five<span class="rec">recommended</span></span></label>
+<label><input type="radio" name="fp-q1" value="bay"><span>The Deck 5 shuttle bay: the most room (108 spots), but two decks from dinner</span></label>
+<label><input type="radio" name="fp-q1" value="lounge"><span>The bow lounge on Deck 3: cosier (60 spots), the crowd spilling onto the plaza</span></label>
+<label><input type="radio" name="fp-q1" value="auditorium"><span>The rec deck auditorium: 76 seats, a lectern, but a lift ride from dinner</span></label>
+<textarea name="fp-q1-comment" placeholder="Comment (optional)"></textarea></div>
+
+<div class="q" data-qid="fp-q2"><div class="qh">FP-Q2 · WHO KEEPS WORKING</div><div class="qt">Does anyone keep working at 16:00?</div>
+<label><input type="radio" name="fp-q2" value="skeleton"><span>A small skeleton: one helm and one watch rating on the bridge, one medic on call, and the galley's dinner cooks. They hear it on the device<span class="rec">recommended</span></span></label>
+<label><input type="radio" name="fp-q2" value="galley-only"><span>Only the galley's dinner cooks</span></label>
+<label><input type="radio" name="fp-q2" value="everyone"><span>Everyone stops, the cooks too (dinner prep moves earlier)</span></label>
+<textarea name="fp-q2-comment" placeholder="Comment (optional)"></textarea></div>
+
+<div class="q" data-qid="fp-q3"><div class="qh">FP-Q3 · HOW IT PLAYS</div><div class="qt">How does the address play?</div>
+<label><input type="radio" name="fp-q3" value="bubbles"><span>The Captain speaks in bubbles over the crowd (the chatter hushed). Anyone not there gets the banner and a Mail<span class="rec">recommended</span></span></label>
+<label><input type="radio" name="fp-q3" value="panel"><span>In the dialogue panel, like a meeting, once you join</span></label>
+<label><input type="radio" name="fp-q3" value="banner"><span>A banner and a Mail only; the crowd gathers, but you read it</span></label>
+<textarea name="fp-q3-comment" placeholder="Comment (optional)"></textarea></div>
+
+<div class="q" data-qid="fp-q4"><div class="qh">FP-Q4 · MUST YOU GO?</div><div class="qt">What happens if you skip it?</div>
+<label><input type="radio" name="fp-q4" value="optional"><span>Nothing bad: you get the Mail. Going gives a little social, and the crew remember you were there<span class="rec">recommended</span></span></label>
+<label><input type="radio" name="fp-q4" value="expected"><span>It's expected: missing it is noted (a small work reputation dip, like being late)</span></label>
+<textarea name="fp-q4-comment" placeholder="Comment (optional)"></textarea></div>
+
+<div class="q" data-qid="fp-q5"><div class="qh">FP-Q5 · WHAT SHE SAYS</div><div class="qt">What should the Captain talk about each week?</div>
+<label><input type="radio" name="fp-q5" value="shape"><span>The same shape with parts that change: the week behind (real things that happened), welcomes and goodbyes, a department's turn, the week ahead, now and then you<span class="rec">recommended</span></span></label>
+<label><input type="radio" name="fp-q5" value="short"><span>A short, mostly fixed few lines each week</span></label>
+<label><input type="radio" name="fp-q5" value="news"><span>Mostly the ship's news, longer</span></label>
+<textarea name="fp-q5-comment" placeholder="Comment (optional), e.g. topics you'd like her to cover"></textarea></div>
+
+<div class="q" data-qid="fp-q6"><div class="qh">FP-Q6 · SHIP-WIDE EVENTS ON A FRIDAY</div><div class="qt">When a ship-wide event lands on a Friday, what happens to the address?</div>
+<label><input type="radio" name="fp-q6" value="briefing"><span>The address becomes the event's briefing that week<span class="rec">recommended</span></span></label>
+<label><input type="radio" name="fp-q6" value="skip"><span>It's skipped that week</span></label>
+<label><input type="radio" name="fp-q6" value="both"><span>Both happen</span></label>
+<textarea name="fp-q6-comment" placeholder="Comment (optional)"></textarea></div>
+
+<div class="q" data-qid="fp-q7"><div class="qh">FP-Q7 · THE CLOCK ON A FRIDAY</div><div class="qt">If you don't clock out on a Friday, when does the clock sign you out?</div>
+<label><input type="radio" name="fp-q7" value="1600"><span>At 16:00, as the address starts ("signed you out at 15:30")<span class="rec">recommended</span></span></label>
+<label><input type="radio" name="fp-q7" value="1800"><span>At 18:00, as on other days</span></label>
+<textarea name="fp-q7-comment" placeholder="Comment (optional)"></textarea></div>
+
+<div class="q" data-qid="fp-general"><div class="qh">ANYTHING ELSE</div><div class="qt">Anything about short Fridays, the address, or what she should say?</div>
+<textarea name="fp-general" placeholder="Your thoughts"></textarea></div>
+
+</form>
+<p class="legend">Planned on claude/patch-plan; code facts from claude/integration (0.64.2 to 0.64.4). Lines drift; <code>python3 tools/section.py --where LINE</code>.</p>
+</main>
+</body>
+</html>
