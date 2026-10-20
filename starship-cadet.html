@@ -33923,6 +33923,13 @@ function linesLegacy(kind) {
 // Saved (SAVE_EXTRA, only once anything's noted): save.talks = { fired: { talkId: [day, crewId] }, small: { crewId:
 // [day, done 0|1] } }; a New game clears it (linesNew).
 const TALK_TOPIC_DAYS = 14, TALK_DONE_ODDS = .25;
+// where talks come from, in the run-out order: each source's talks for speaker p, and how one is chosen ('file': the
+// first ready in file order; 'seeded': a seeded pick, a topic not had with them lately first, schedU k). Another tier
+// (TW1's work pools: work.<pool>.<slug>) slots in as one more entry, between own and pool
+const TALK_SOURCES = [
+  { id: 'own', talks: p => (typeof TALKS !== 'undefined' && TALKS.own[p.id]) || [], pick: 'file' },
+  { id: 'pool', talks: p => p.rank === 'guest' || typeof TALKS === 'undefined' ? [] : TALKS.pool, pick: 'seeded', k: 755 },   // the crew's life: not guests
+];
 function talksClean(s) {                                  // save.talks read back defensively: bad entries dropped
   const T = { fired: {}, small: {} };
   const f = s && s.fired && typeof s.fired === 'object' ? s.fired : {}, m = s && s.small && typeof s.small === 'object' ? s.small : {};
@@ -33962,15 +33969,15 @@ function talkPackPick(who, t = shipNow()) {
   const p = linesWho(who), T = talksState(); if (!p || !T || typeof TALKS === 'undefined') return null;
   const d = Math.floor(t / 1440) + 1, seed = talkPackSeed(p), ctx = { t, trad: talkPackTrad(t) || undefined };
   const ok = tk => !T.fired[tk.id] && (!tk.when || linesOk(tk.when, p, ctx));
-  for (const tk of TALKS.own[p.id] || []) if (ok(tk)) { const said = talkPackFill(tk, p, ctx); if (said) return { talk: tk, src: 'own', said }; }
-  if (p.rank !== 'guest') {
-    const all = TALKS.pool.filter(ok), lately = new Set();
-    for (const id in T.fired) { const f = T.fired[id]; if (id.startsWith('pool.') && f[1] === p.id && f[0] > d - TALK_TOPIC_DAYS) lately.add(id.split('.')[1]); }   // pool.<topic>.<slug>
-    for (const c of TALKS.own[p.id] || []) if (T.fired[c.id] && T.fired[c.id][0] > d - TALK_TOPIC_DAYS) lately.add(c.topic);   // their own talks' topics count too
-    const fresh = all.filter(tk => !lately.has(tk.topic));
-    for (const list of [fresh, all.filter(tk => lately.has(tk.topic))]) {
-      const n = list.length, at = Math.floor(schedU(seed, d, 755) * n);
-      for (let i = 0; i < n; i++) { const tk = list[(at + i) % n], said = talkPackFill(tk, p, ctx); if (said) return { talk: tk, src: 'pool', said }; }
+  let lately = null;                                      // topics had with them within TALK_TOPIC_DAYS (any source), made when a seeded source asks
+  for (const src of TALK_SOURCES) {
+    const all = src.talks(p).filter(ok);
+    if (src.pick === 'file') { for (const tk of all) { const said = talkPackFill(tk, p, ctx); if (said) return { talk: tk, src: src.id, said }; } continue; }
+    if (!lately) { lately = new Set(); const byId = new Map(); for (const s2 of TALK_SOURCES) for (const tk of s2.talks(p)) byId.set(tk.id, tk);
+      for (const id in T.fired) { const f = T.fired[id], tk = byId.get(id); if (tk && tk.topic && f[1] === p.id && f[0] > d - TALK_TOPIC_DAYS) lately.add(tk.topic); } }
+    for (const list of [all.filter(tk => !lately.has(tk.topic)), all.filter(tk => lately.has(tk.topic))]) {
+      const n = list.length, at = Math.floor(schedU(seed, d, src.k) * n);
+      for (let i = 0; i < n; i++) { const tk = list[(at + i) % n], said = talkPackFill(tk, p, ctx); if (said) return { talk: tk, src: src.id, said }; }
     }
   }
   const S = TALKS.small, v = talkPackVeyli(p), pickFrom = k => S[k + '.' + p.id] || (v && S[k + '.saruth']) || S[k] || [];
