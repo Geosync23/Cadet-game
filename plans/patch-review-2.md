@@ -40,4 +40,24 @@ Harness gotcha (new): speech bubbles pop in with a real-time CSS animation (`.bu
 ## PA batch C: claude/patch-a eb638e7 (#11, #12, #13, #17, #18, #19)
 
 - **Checks:** check_fast OK (297 s). cadet_test 8ee5d6b→eb638e7 ALL IDENTICAL.
-- intro_check and the probe: see below once run.
+- **FAIL: intro_check part 8.** The follower and Torres both sit at Deck 5 [6,11] from 17:40 ('haulway') to 19:20, so the table comes at 20:11. After that, no introChief, no goodnight, no bed arrow, and core tour lines 6/18. Batch B's run of the same part was clean.
+- Almost surely #17: escortStep's ESC_GAP stand and/or escBeside keep him off his spot, so the step never advances. Sent to PA with fix options.
+- OR1's scope note was passed on: #11, #12, #13 and the floor tap act in normal play.
+- To do on the fix: intro_check part 8, then `rvC.py` (the end of training day: #18/#19 arrows, Zeke's gap).
+
+## PE #26 fixes: claude/patch-e b3fed46. PASS
+
+- The invite bubble is on `z.h`; my shot `e26_invite.png` shows it by Zeke at 18:21.
+- "Shown" is kept in the save as the flag `firstlight.shown`.
+- flcBusy runs from the invite until the tradition ends, unless declined (`e.to` is minute of day, correct).
+- cadet_test cf45e2a→b3fed46 ALL IDENTICAL.
+
+## PB batch D: claude/patch-b 2e517ff (#7, #9, #10, #8). PASS
+
+- **Checks:** check_fast OK (307 s). day_check OK. events_check OK. food_check OK.
+- cadet_test 5d6ee1c→2e517ff shows differences, as expected: the crew's lanes and plans move the shots and taps. OR1 traced them with switch-off copies.
+- **#10:** c10c's longest pair run is 2.5 s (mark: 3 s).
+- **#8:** the red cap shows only on the taken stall (30/30 samples). My projected crop `08-red-crop.png`: about 4×2 px at phone zoom.
+- **Notes:**
+  - The Captain is 4.5 h a week on Deck 4 (the plan said about 3-4).
+  - 9 of 35 visits still miss the stall.
