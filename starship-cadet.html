@@ -8986,7 +8986,6 @@ function tickShip(dt) {
 
 // ---- saving: { v, build, time, player: { deck, tile, facing, needs }, ship: { decks: { n: { open } } }, crew: {} } ----
 // v 2 (0.28.1) adds player.needs (section 15, through SAVE_EXTRA); a v 1 save still loads, with needs at 80
-const SAVE_KEY = 'starship-cadet-save', SAVE_V = 2;
 const SAVE_EXTRA = [];                                   // other sections add their part: f(save) just before it's written (17: machines)
 const URL_FLAGS = new URLSearchParams(location.search);
 // 0.27.12: a claude.ai artifact page never gets the ?query, only a #hash of letters, digits and . _ ~ -, so the switches
@@ -8995,6 +8994,8 @@ for (const tok of location.hash.slice(1).split('.')) { const i = tok.indexOf('-'
 const urlFlag = name => URL_FLAGS.has(name) ? URL_FLAGS.get(name) : null;   // a switch's value ('' when it has none), or null
 const NOSAVE = URL_FLAGS.has('nosave') || URL_FLAGS.has('crowd') || URL_FLAGS.has('poses') || URL_FLAGS.has('seats'),   // the crowd, pose and seat demos (section 8b) never touch the save
       DEBUG = URL_FLAGS.has('debug');
+const DEVMODE = URL_FLAGS.has('dev') && !NOSAVE;          // Dev mode (section 25; plans/devmode-plan.html): only with #dev, and its own save ("-dev" on the names); off, nothing changes
+const SAVE_KEY = 'starship-cadet-save' + (DEVMODE ? '-dev' : ''), SAVE_V = 2;
 function saveGame() {
   if (NOSAVE) return;
   try {
