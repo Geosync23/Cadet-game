@@ -231,12 +231,13 @@ def parse_lines_file(path, rel, out):
 
 
 TALK_REPLY_KEYS = ('listen', 'share', 'cheer')       # the three replies a talk's question offers, in button order
+TALK_WORK_POOLS = ('works', 'watch', 'survey', 'bridge', 'comms', 'infirmary', 'galley', 'garden', 'store')   # @talks work:<pool> (plans/work-pools-plan.md)
 TALK_SMALL = re.compile(r'(small|done)(\.[a-z][a-z0-9-]*)?')   # smalltalk.talk's kinds: small, done, small.<crewId>, done.<crewId>
 
 
 def parse_talk_file(path, rel, out):
     """content/talkpack/*.talk, the "Talk a while" pack (plans/talk-pack-plan.md "The file format") into out['TALKS']:
-    { pool: [talk], own: { crewId: [talk] }, small: { small|done|small.<id>|done.<id>: [{ text, tone? }] } }, a talk being
+    { pool: [talk], own: { crewId: [talk] }, work: { <pool>: [talk] }, small: { small|done|small.<id>|done.<id>: [{ text, tone? }] } }, a talk being
     { id, topic, when?, lines: [{ text, tone? }], ask: { text, tone? }, replies: { listen|share|cheer: { text, ans: { text, tone? } } } }.
     Ids are written by hand (pool.<topic>.<slug>, <crewId>.<slug>), never hashed: they're what a save's fired list holds.
     The shape is checked here (1-3 them:, one ask:, all three replies each with one answer); style is lines_check's."""
@@ -268,10 +269,12 @@ def parse_talk_file(path, rel, out):
                 continue
             raise GenError(f'{where}: not understood (small talk lines start with "- ", after an "== small" or "== done")')
         return
-    pool = whose == 'pool'
-    if not pool and not re.fullmatch(r'[a-z][a-z0-9-]*', whose):
-        raise GenError(f'{path}: "@talks {whose}": pool, smalltalk or a crew id')
-    ftopic, cur, talks = None, None, []
+    pool, work = whose == 'pool', whose[5:] if whose.startswith('work:') else None
+    if work is not None and work not in TALK_WORK_POOLS:
+        raise GenError(f'{path}: "@talks {whose}": the work pools are {", ".join(TALK_WORK_POOLS)}')
+    if not pool and work is None and not re.fullmatch(r'[a-z][a-z0-9-]*', whose):
+        raise GenError(f'{path}: "@talks {whose}": pool, work:<pool>, smalltalk or a crew id')
+    ftopic, cur, talks = ('work' if work else None), None, []
 
     def said(s, where):
         text, tone = split_tone(s, where)
@@ -294,7 +297,7 @@ def parse_talk_file(path, rel, out):
                 raise GenError(f'{where}: talk "{cur["slug"]}" has no {k}: reply')
             if 'ans' not in t['replies'][k]:
                 raise GenError(f'{where}: talk "{cur["slug"]}": its {k}: reply has no answer (an indented "  them:" under it)')
-        t['id'] = f'pool.{t["topic"]}.{cur["slug"]}' if pool else f'{whose}.{cur["slug"]}'
+        t['id'] = f'pool.{t["topic"]}.{cur["slug"]}' if pool else f'work.{work}.{cur["slug"]}' if work else f'{whose}.{cur["slug"]}'
         talks.append({k: t[k] for k in ('id', 'topic', 'when', 'lines', 'ask', 'replies') if t.get(k)})
 
     for i, l in lines:
@@ -316,6 +319,8 @@ def parse_talk_file(path, rel, out):
         if key == 'topic':
             if not re.fullmatch(r'[a-z]+', val):
                 raise GenError(f'{where}: topic: takes one word')
+            if work:
+                raise GenError(f'{where}: a work pool\'s talks have no topic: line (their topic is always work)')
             if cur is None:
                 ftopic = val                               # a pool file's topic: every talk's, and frozen into its id
             elif pool:
@@ -373,6 +378,10 @@ def parse_talk_file(path, rel, out):
         raise GenError(f'{path}: no talks')
     if pool:
         T['pool'] += talks
+    elif work:
+        if work in T['work']:
+            raise GenError(f'{path}: a second file for the work pool {work}')
+        T['work'][work] = talks
     else:
         if whose in T['own']:
             raise GenError(f'{path}: a second file of talks for {whose}')
@@ -773,7 +782,7 @@ def parse_home_rest(lines, path, rel, cid, who, out):
 
 def bake():
     out = {'VOICE_TEMPLATES': {}, 'VOICE': {}, 'LINES': {}, 'CONVOS': [], 'MOMENTS': {}, 'MOMENT_THEMES': {}, 'HOME_CONTACTS': {}, 'HOME_MOMENTS': {}, 'HOME_SEND': {}, 'HOME_CHAT': {}, 'MEETINGS_BAKED': {}, 'TRADITIONS': [],
-           'TALKS': {'pool': [], 'own': {}, 'small': {}}}
+           'TALKS': {'pool': [], 'own': {}, 'work': {}, 'small': {}}}
     files = []
     for d, _, fs in os.walk(CONTENT):
         for f in fs:
@@ -804,7 +813,7 @@ def bake():
         except trad_parse.TradError as e:
             raise GenError('content/traditions/' + str(e))
     talk_ids = {}                                  # the pack's ids: unique across every file (a save's fired list holds them)
-    for t in out['TALKS']['pool'] + [t for ts in out['TALKS']['own'].values() for t in ts]:
+    for t in out['TALKS']['pool'] + [t for d in ('own', 'work') for ts in out['TALKS'][d].values() for t in ts]:
         if t['id'] in talk_ids:
             raise GenError(f'two talks share the id {t["id"]}: slugs are never reused (plans/talk-pack-plan.md "Talk ids")')
         talk_ids[t['id']] = 1
@@ -915,7 +924,7 @@ def blocks(out):
 
 
 def talks_parsed(name, T):
-    """TALKS (the Talk a while pack): { pool: [talk], own: { crewId: [talk] } (sorted), small: { kind: [lines] } (sorted);
+    """TALKS (the Talk a while pack): { pool: [talk], own: { crewId: [talk] } (sorted), work: { pool: [talk] } (sorted), small: { kind: [lines] } (sorted);
     one piece a talk, so rewording a talk changes one line of the file"""
     p = ['{"pool":[']
     p += [cj(t) + (',' if i < len(T['pool']) - 1 else '') for i, t in enumerate(T['pool'])]
@@ -923,6 +932,11 @@ def talks_parsed(name, T):
     for n, cid in enumerate(sorted(T['own'])):
         ts = T['own'][cid]
         p.append(('' if n == 0 else ',') + cj(cid) + ':[')
+        p += [cj(t) + (',' if i < len(ts) - 1 else ']') for i, t in enumerate(ts)]
+    p.append('},"work":{')
+    for n, w in enumerate(sorted(T['work'])):
+        ts = T['work'][w]
+        p.append(('' if n == 0 else ',') + cj(w) + ':[')
         p += [cj(t) + (',' if i < len(ts) - 1 else ']') for i, t in enumerate(ts)]
     p.append('},"small":' + cj({k: T['small'][k] for k in sorted(T['small'])}) + '}')
     return js_parsed(name, p)
@@ -953,7 +967,7 @@ def main(argv):
     n = sum(len(v) for v in out['LINES'].values()) + sum(len(es) for c in list(out['VOICE'].values()) + list(out['VOICE_TEMPLATES'].values()) for es in c.get('lines', {}).values())
     summary = (f'{n} lines, {len(out["VOICE"])} voice cards, {len(out["VOICE_TEMPLATES"])} templates, {len(out["CONVOS"])} conversations, '
                f'{len(out["MOMENTS"])} moments, {len(out["MOMENT_THEMES"])} themes, {len(out["HOME_CONTACTS"])} home contacts, {len(out["MEETINGS_BAKED"])} meetings, {len(out["TRADITIONS"])} traditions, '
-               f'{len(out["TALKS"]["pool"]) + sum(len(v) for v in out["TALKS"]["own"].values())} talks')
+               f'{len(out["TALKS"]["pool"]) + sum(len(v) for d in ("own", "work") for v in out["TALKS"][d].values())} talks')
     if check:
         print(('up to date: ' if new == html else 'OUT OF DATE: ') + summary)
         return 0 if new == html else 1

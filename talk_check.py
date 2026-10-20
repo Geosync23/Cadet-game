@@ -54,6 +54,7 @@ RUN = r"""(({ days, min, tier, check, start }) => {
         if (a.src === 'pool' && p.rank === 'guest') bad.push(`${p.id} (a guest) drew the pool: ${id}`);
         if (before && a.src === 'own' && before.own[0] !== id) bad.push(`${p.id} day ${d}: own talk ${id}, but ${before.own[0]} was first in file order`);
         if (before && a.src === 'pool' && before.own.length) bad.push(`${p.id} day ${d}: pool ${id} while own ${before.own.join(',')} was ready`);
+        if (before && a.src === 'work' && before.own.length) bad.push(`${p.id} day ${d}: work ${id} while own ${before.own.join(',')} was ready`);
         if (before && a.src === 'pool' && !before.pool.includes(id)) bad.push(`${p.id} day ${d}: pool ${id} wasn't ready`);
         if (!__TC.whenOk(a.talk, p, t)) bad.push(`${p.id} day ${d}: ${id}'s when: fails`);
         const words = [...a.said.lines, a.said.ask, ...['listen', 'share', 'cheer'].flatMap(k => [a.said.replies[k].text, a.said.replies[k].ans])];
@@ -173,6 +174,32 @@ with sync_playwright() as pw:
     check(r['junk'] == {'fired': {'a': [1, 'x']}, 'small': {'x': [3, 1], 'z': [4, 1]}}, f"bad entries not dropped: {r['junk']}")
     check(r['size'] <= SAVE_MAX, f"save.talks is {r['size']} bytes (at most {SAVE_MAX})")
     check(r['cleared'], 'New game (linesNew) does not clear the record')
+
+    print('(h) Work pools (plans/work-pools-plan.md): own, then work and shared taking turns, then small talk:')
+    r = ev("""(() => { const keep = TALKS.work, real = TALKS.work && Object.keys(TALKS.work).length;
+      if (!real) TALKS.work = { works: TALKS.pool.filter(t => !/[{}]/.test([...t.lines, t.ask, ...Object.values(t.replies).map(r => r.ans)].map(x => x.text).join(' '))).slice(0, 4).map((t, i) => ({ ...t, id: 'work.works.stand-in-' + i, topic: 'work', when: undefined })) };   // stand-ins until TW1's files are baked
+      __TC.reset(3); const out = { real: !!real, pools: Object.fromEntries(Object.entries(TALKS.work).map(([k, v]) => [k, v.length])), seq: [], bad: [] };
+      const w = __TC.people().filter(p => TALK_WORK_POOLS[p.dept] && TALKS.work[TALK_WORK_POOLS[p.dept]] && !TALKS.own[p.id]);
+      const p = w[0], other = __TC.people().find(q => q.rank !== 'guest' && !TALK_WORK_POOLS[q.dept] || (TALK_WORK_POOLS[q.dept] && !TALKS.work[TALK_WORK_POOLS[q.dept]]));
+      out.p = p && p.id; out.pool = p && TALK_WORK_POOLS[p.dept];
+      for (let d = 1; p && d <= 30; d++) { const t = (d - 1) * 1440 + 720, a = talkPackPick(p, t); if (!a) break; out.seq.push(a.talk ? a.src : 'small'); talkPackFire(p, a, t); }
+      const n = p ? TALKS.work[TALK_WORK_POOLS[p.dept]].length : 0, seq = out.seq, firstWork = seq.slice(0, 2 * n);
+      out.alternates = firstWork.every((s, i) => s === (i % 2 ? 'pool' : 'work'));   // work first (neither had), then turns
+      out.allWork = seq.filter(s => s === 'work').length === n;
+      out.workIds = Object.keys(SHIP.talks.fired).filter(id => id.startsWith('work.')).every(id => SHIP.talks.fired[id][1] === p.id);
+      out.guest = (typeof ROSTER_GUESTS !== 'undefined' ? ROSTER_GUESTS : []).every(g => !TALK_SOURCES.find(s => s.id === 'work').talks(g).length);
+      out.other = other ? [other.id, other.dept, TALK_SOURCES.find(s => s.id === 'work').talks(other).length] : null;
+      __TC.reset(3); const q = w[1] || w[0]; for (let d = 1; d <= 3; d++) { const t = (d - 1) * 1440 + 720; talkPackFire(q, talkPackPick(q, t), t); }
+      const again = talkPackPick(p, 10 * 1440 + 720); out.shared = Object.keys(SHIP.talks.fired).filter(id => id.startsWith('work.')).length;
+      out.notTwice = !again || !again.talk || !SHIP.talks.fired[again.talk.id];
+      TALKS.work = keep; return out; })()""")
+    print(f"  {'the real pools' if r['real'] else 'stand-ins'} {r['pools']}; {r['p']} ({r['pool']}), 30 days: {r['seq'][:14]}...")
+    print(f"  alternates {r['alternates']}, every work talk once {r['allWork']}, only from them {r['workIds']}; guests none {r['guest']}; no pool for {r['other']}")
+    check(r['p'] and all(r['pools'].values()), f"nobody to test the work pool with, or an empty pool: {r['pools']}")
+    check(r['alternates'], f"work and shared don't take turns: {r['seq'][:12]}")
+    check(r['allWork'] and r['workIds'], 'a work talk twice, or not all of them')
+    check(r['guest'], 'a guest drew a work pool')
+    check(r['notTwice'], 'a work talk fired with one person was offered by another')
 
     for e in errors: fail(f'page error: {e}')
     g.close()

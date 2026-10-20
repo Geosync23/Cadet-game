@@ -260,7 +260,7 @@ def main(argv):
     for cid in out['TALKS']['own']:
         if cid not in people:
             errors.append(f'talkpack/{cid}.talk: "@talks {cid}" is not a crew member or guest')
-    for t in out['TALKS']['pool'] + [t for ts in out['TALKS']['own'].values() for t in ts]:
+    for t in out['TALKS']['pool'] + [t for d in ('own', 'work') for ts in out['TALKS'][d].values() for t in ts]:
         where = f'talk {t["id"]}'
         if t.get('when'):
             allx.append((where, 'talk', dict(t['when'], text='', id=t['id']), None, 'talk'))
@@ -449,7 +449,7 @@ def main(argv):
     print(f'lines_check: {len(allx)} lines in {len(byfile)} places; {len(out["VOICE"])} voice cards '
           f'({with_card} with words) for {len(crew)} crew; {len(out["CONVOS"])} conversations; '
           f'{len(out["MOMENTS"])} moments; {len(out["MOMENT_THEMES"])} themes; {len(out["MEETINGS_BAKED"])} meetings; {len(out["TRADITIONS"])} traditions; '
-          f'{len(out["TALKS"]["pool"]) + sum(len(v) for v in out["TALKS"]["own"].values())} talks')
+          f'{len(out["TALKS"]["pool"]) + sum(len(v) for d in ("own", "work") for v in out["TALKS"][d].values())} talks')
     if not quiet:
         print('coverage (own lines / target), people with any:')
         for c in cov:
