@@ -10820,7 +10820,8 @@ function walkGap(a, ux, uz) {
   let f = 1;
   for (let i = 0; i < DECK_CREW.length; i++) {
     const o = DECK_CREW[i]; if (o === a || o.pose !== 'walk' || !o.spd) continue;
-    const rx = o.x - a.x, rz = o.z - a.z, d = Math.hypot(rx, rz); if (d >= WALK_GAP) continue;
+    const rx = o.x - a.x, rz = o.z - a.z; if (rx >= WALK_GAP || rx <= -WALK_GAP || rz >= WALK_GAP || rz <= -WALK_GAP) continue;
+    const d = Math.hypot(rx, rz); if (d >= WALK_GAP) continue;
     const ahead = rx * ux + rz * uz;
     if (ahead < -1e-3 || ahead <= 1e-3 && o.p.id > a.p.id) continue;   // behind (side by side: the first by id leads)
     if (o.ux * ux + o.uz * uz < .5) continue;            // not the same way
@@ -10833,10 +10834,12 @@ function walkGap(a, ux, uz) {
 function walkLaneStep(a, dt) {
   let tx = 0, tz = 0;
   if (a.pose === 'walk' && a.path.length && a.lane) {
-    const h = a.here(), n = a.path[0];
-    const door = (n[0] !== h[0]) !== (n[1] !== h[1]) && (e => e && e.type !== 'open')(EDGES.get(n[0] !== h[0] ? `v,${Math.max(h[0], n[0])},${h[1]}` : `h,${h[0]},${Math.max(h[1], n[1])}`));
-    const n2 = a.path[1], door2 = n2 && (n2[0] !== n[0]) !== (n2[1] !== n[1]) && (e => e && e.type !== 'open')(EDGES.get(n2[0] !== n[0] ? `v,${Math.max(n[0], n2[0])},${n[1]}` : `h,${n[0]},${Math.max(n[1], n2[1])}`));
-    if (!door && !door2) { tx = -a.uz * a.lane; tz = a.ux * a.lane; }
+    if (a.laneAt !== a.path[0]) {                        // a doorway on the next two steps? Looked up once a step, not every frame
+      const h = a.here(), n = a.path[0], n2 = a.path[1];
+      const door = (p, q) => (p[0] !== q[0]) !== (p[1] !== q[1]) && (e => !!e && e.type !== 'open')(EDGES.get(p[0] !== q[0] ? `v,${Math.max(p[0], q[0])},${p[1]}` : `h,${p[0]},${Math.max(p[1], q[1])}`));
+      a.laneAt = n; a.laneDoor = door(h, n) || !!n2 && door(n, n2);
+    }
+    if (!a.laneDoor) { tx = -a.uz * a.lane; tz = a.ux * a.lane; }
   }
   const k = Math.min(1, dt * 4);
   a.lx += (tx - a.lx) * k; a.lz += (tz - a.lz) * k;
