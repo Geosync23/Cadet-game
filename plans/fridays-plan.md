@@ -89,3 +89,9 @@ The first address is Friday Day 5. It's a separate plan from the playtest patch 
   - So while you're in the auditorium for it, the ship's clock runs at about a third (0.21 ship minutes a real second), and the speech fits 16:00-16:30. Elsewhere time runs as normal.
   - Owner: the sim engineer (a new rate multiplier in section 13, applied to the needs, the machines and Dev mode's jumps alike; nothing frozen).
   - The address now ends at 16:30, leaving 30 ship minutes to file out, wash and ride up. Dinner is still at 17:00, with arrivals spread to 17:50. The perf scene for the lift lobby is at 16:32.
+
+## Revision 4 (2026-10-20, 18:50): the user picked the normal clock
+
+- **No slow-down:** the address runs at normal speed, 16:00-16:50, with about 16 lines a speech (as full and substantial as 16 lines allow), one every 3 ship minutes (about 5 real seconds). The beats are trimmed to 5 an address, 2-3 lines each (on the page).
+- **Dinner:** leaving at 16:50, the first wave reaches Deck 3 about 17:00, and the later waves (and anyone washing first) arrive through about 17:50. The sim engineer checks that the rec lift queue clears by about 17:10. The lift-lobby perf scene is at 16:52. A storm phase that falls in 16:00-16:50 waits for the address.
+- **Parked** (on record, not built; CLAUDE.md's rule for cut things): revision 3's slowed clock, a third of the speed while you're in the auditorium so 25-30 lines fit 16:00-16:30. It was dropped for the normal clock on 2026-10-20 at 18:50, by the user's choice. The section 13 rate multiplier it needed is not built.
