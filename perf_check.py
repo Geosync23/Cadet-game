@@ -136,3 +136,4 @@ if __name__ == '__main__':
     bad = problems(new, old)
     for b in bad: print('PROBLEM', b)
     print('PERF CHECK OK' if not bad else f'PERF CHECK: {len(bad)} problem(s)')
+    sys.exit(1 if bad else 0)   # so a failing check fails for the computer too (check_fast.sh, GitHub)

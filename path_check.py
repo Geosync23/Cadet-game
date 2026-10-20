@@ -59,3 +59,4 @@ with sync_playwright() as pw:
     g.close()
 for b in bad: print('PROBLEM', b)
 print('PATH CHECK OK' if not bad else f'PATH CHECK: {len(bad)} problem(s)')
+sys.exit(1 if bad else 0)   # so a failing check fails for the computer too (check_fast.sh, GitHub)

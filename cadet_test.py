@@ -164,3 +164,4 @@ for s in shots:
 print('errors A', a['errors'][:3], 'errors B', b['errors'][:3])
 print('taps', [a[f'tap{k}'][0] for k in range(5)])
 print(('ALL IDENTICAL' + (' (apart from renderer noise: some pixels 1 level off)' if noise else '')) if ok else 'DIFFERENCES FOUND')
+sys.exit(0 if ok else 1)   # so a failing check fails for the computer too (check_fast.sh, GitHub)

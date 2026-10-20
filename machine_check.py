@@ -1427,3 +1427,4 @@ with sync_playwright() as pw:
     if g.errors: ok = False
     print('MACHINE CHECK OK' if ok else 'MACHINE CHECK FAILED')
     g.close()
+    sys.exit(0 if ok else 1)   # so a failing check fails for the computer too (check_fast.sh, GitHub)
