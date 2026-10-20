@@ -12358,8 +12358,9 @@ function needWarnTick(now) {
     if (l > (WARN_SAID[k] || 0) && (!pick || n[k] < n[pick])) { pick = k; lvl = l; }
   }
   if (!pick || POP.busy || DEV.open || Math.max(POP.toast, POP.card, POP.warn) > now - WARN_GAP) return null;
+  const hold = typeof introHoldNudges === 'function' && introHoldNudges(); if (hold && lvl === 1) return null;   // section 21: the end of training day (the patch, #19): only the firm one, and no marker over the beam's arrow
   const w = NEED_WARN[pick][lvl - 1]; WARN_SAID[pick] = lvl; POP.warn = POP.toast = now;
-  if (lvl === 1) needPop(pick); else toast(w[0], bedText(w[1]) + (needGoal(pick) ? ' Follow the marker.' : ''));  // the first one: a pop-up in plain words (0.28.62); the firm one stays a toast, with the way (playtest 1)
+  if (lvl === 1) needPop(pick); else toast(w[0], bedText(w[1]) + (!hold && needGoal(pick) ? ' Follow the marker.' : ''));  // the first one: a pop-up in plain words (0.28.62); the firm one stays a toast, with the way (playtest 1)
   return pick;
 }
 // the low-need pop-up (0.28.62, the user's "in plain words: 'You need to pee'"): one line beside the need's icon on the
@@ -12466,7 +12467,7 @@ if (typeof onSim === 'function') {
 }
 // the intro's arrival (day 0's scripted steps) teaches by itself: tips wait for it. Its first week runs on (introOn() till
 // day 8) with tips, which is when they're most use.
-const teachHeld = () => typeof introOn === 'function' && introOn() && (!!SHIP.intro.step || SHIP.time.day < 1);
+const teachHeld = () => typeof introOn === 'function' && introOn() && (!!SHIP.intro.step || SHIP.time.day < 1 || typeof introHoldNudges === 'function' && introHoldNudges());   // (the patch, #19: and the end of training day, till your name's on the beam)
 function teachTick(now) {
   if (now - TEACH_CK < 1000) return null; TEACH_CK = now;
   const S = teachWatch(now), D = SHIP.device;
