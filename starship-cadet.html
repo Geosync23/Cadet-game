@@ -49756,6 +49756,125 @@ function liftHeld(t) { if (!LIFT_HOLD) return false; if (!Number.isFinite(t)) t 
 // ---- end of slot: HUD seat ----
 
 // =====================================================================
+// 25. DEV MODE (the Dev mode engineer DB1, from 0.64.2 + step 2; plans/devmode-plan.html v3.1 on claude/devmode-plan)
+// A hidden testing panel for the user, opened only with the Dev link (#dev on the game's link; DEVMODE, section 13).
+// Without #dev nothing here runs: every function returns at once and nothing is drawn, stored or listened to (but the
+// hashchange line, which only offers a reload when #dev is added or taken away). In Dev mode the game keeps its own
+// save (section 13's SAVE_KEY and section 21's INTRO_KEY get "-dev"), so the real game is never written. The place-and-
+// clock card gets a gold outline and the word DEV, and tapping it opens the sheet ("Dev mode: not your real game"):
+// six tabs, two rows of three, 44px buttons. Stop 1a (D1-D4): Quick and Clock. Dev state rides in the Dev save
+// (save.dev, through SAVE_EXTRA), so Mark and Undo bring it back too. Nothing here calls R().
+// =====================================================================
+const DM_TABS = [['quick', 'Quick'], ['clock', 'Clock'], ['trad', 'Traditions'], ['career', 'Career'], ['set', 'Set career'], ['events', 'Big events']];
+const DM_LATER = { trad: 'Start any ship tradition: coming in Stop 1b.', career: 'Your career by hand: coming in Stop 2.', set: 'Set career to a day: coming in Stop 2.', events: 'Big events: start, phases, threads, End and undo. Coming in Stop 3.' };
+var DM_ST = null;                                         // the Dev state (save.dev): { ex: [excused days], note, last }; var: section 20 may ask before this line runs
+const DM_UI = { el: null, tab: 'quick', open: false };
+function devmodeState() {                                // the Dev state, from the Dev save the first time
+  if (!DEVMODE) return null;
+  if (!DM_ST) { const s = typeof SAVED !== 'undefined' && SAVED && SAVED.dev; DM_ST = { ex: s && Array.isArray(s.ex) ? s.ex.filter(Number.isInteger).slice(-60) : [], note: s && typeof s.note === 'string' ? s.note : '', last: s && typeof s.last === 'string' ? s.last : '' }; }
+  return DM_ST;
+}
+if (DEVMODE) SAVE_EXTRA.push(s => { const st = devmodeState(); s.dev = { ex: st.ex.slice(-60), note: st.note, last: st.last }; });
+function devmodeCss() {
+  const st = document.createElement('style');
+  st.textContent = '.devmode .hud{pointer-events:auto;cursor:pointer;border:2px solid #e8c06a;box-shadow:0 0 0 1px rgba(232,192,106,.35),0 0 14px rgba(232,192,106,.3)}'
+    + '.devmode .hud::after{content:"";position:absolute;inset:-6px}'   // a little more to tap, round the card
+    + '#dmTag{position:absolute;right:-2px;top:-9px;font:700 10px/1 system-ui,sans-serif;letter-spacing:.08em;padding:3px 6px;border-radius:999px;background:#e8c06a;color:#1a1408;text-shadow:none}'
+    + '#dmSheet{position:fixed;left:0;right:0;bottom:0;height:56vh;z-index:6;display:flex;flex-direction:column;background:rgba(13,21,33,.96);border-top:2px solid #e8c06a;border-radius:16px 16px 0 0;'
+    + 'padding:8px 12px calc(8px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px rgba(0,0,0,.45);font-size:14px;color:var(--ink)}'
+    + '#dmSheet[hidden]{display:none}'
+    + '#dmSheet .dmHead{display:flex;align-items:center;gap:8px;flex:none}'
+    + '#dmSheet .dmHead h2{flex:1;margin:0 2px;font-size:15px;font-weight:600;color:#e8c06a}'
+    + '#dmSheet button{min-height:44px;border-radius:12px;justify-content:center;text-align:center;font-size:13.5px;line-height:1.2;padding:6px 8px}'
+    + '#dmSheet .dmClose{width:44px;flex:none;padding:0;font-size:18px}'
+    + '#dmSheet .dmTabs,#dmSheet .dmRow{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:6px;flex:none}'
+    + '#dmSheet .dmTabs button.on{border-color:#e8c06a;color:#e8c06a;background:rgba(232,192,106,.12)}'
+    + '#dmSheet .dmTabs button.later{opacity:.6}'
+    + '#dmSheet .dmBody{flex:1;overflow:auto;margin-top:8px;padding-right:2px;-webkit-overflow-scrolling:touch}'
+    + '#dmSheet h3{margin:10px 2px 0;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}'
+    + '#dmSheet p{margin:8px 2px 0;font-size:13px;color:#cfd9dc;line-height:1.4}'
+    + '#dmSheet p.dmNote{color:#f1d79a}'
+    + '#dmSheet button.dmAsk{background:#e8c06a;color:#1a1408}'
+    + '#dmSheet button:disabled{opacity:.42}'
+    + '#dmSheet .dmFoot{flex:none;margin-top:6px;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
+    + 'body.dmOpen .toast{bottom:calc(56vh + 12px)}'
+    + '@media (orientation:landscape) and (max-height:500px),(min-width:900px){#dmSheet{left:auto;top:0;width:min(400px,52vw);height:auto;border-top:0;border-left:2px solid #e8c06a;border-radius:16px 0 0 16px}'
+    + 'body.dmOpen .toast{bottom:18px;left:calc(50% - min(200px,26vw))}}'
+    + '#dmLink{position:fixed;left:50%;top:10px;transform:translateX(-50%);z-index:7;display:flex;gap:10px;align-items:center;padding:8px 10px 8px 14px;border-radius:14px;border:2px solid #e8c06a;background:rgba(13,21,33,.96);color:var(--ink);font-size:13.5px}'
+    + '#dmLink button{min-height:44px}';
+  document.head.appendChild(st);
+}
+function devmodeBuild() {                                // the card's tag and the empty sheet (D1)
+  const hud = document.querySelector('.hud'), tag = document.createElement('b');
+  tag.id = 'dmTag'; tag.textContent = 'DEV'; hud.appendChild(tag);
+  hud.setAttribute('role', 'button'); hud.setAttribute('aria-label', 'Dev mode: open the Dev panel'); hud.tabIndex = 0;
+  hud.addEventListener('pointerdown', e => e.stopPropagation());
+  hud.addEventListener('click', () => devmodeOpen(!DM_UI.open));
+  hud.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); devmodeOpen(!DM_UI.open); } });
+  const el = DM_UI.el = document.createElement('div');
+  el.id = 'dmSheet'; el.hidden = true; el.setAttribute('role', 'dialog'); el.setAttribute('aria-labelledby', 'dmT');
+  el.innerHTML = '<div class="dmHead"><h2 id="dmT">Dev mode: not your real game</h2><button class="dmClose" aria-label="Close the Dev panel">&#9662;</button></div>'
+    + '<div class="dmTabs" role="tablist"></div><div class="dmBody"></div><div class="dmFoot"></div>';
+  el.addEventListener('pointerdown', e => e.stopPropagation());   // taps on the sheet never reach the deck
+  el.querySelector('.dmClose').onclick = () => devmodeOpen(false);
+  const tabs = el.querySelector('.dmTabs');
+  for (const [id, label] of DM_TABS) {
+    const b = document.createElement('button'); b.textContent = label; b.dataset.tab = id; b.setAttribute('role', 'tab');
+    if (DM_LATER[id]) b.classList.add('later');
+    b.onclick = () => { DM_UI.tab = id; devmodeDraw(); };
+    tabs.appendChild(b);
+  }
+  document.body.appendChild(el);
+  document.body.classList.add('devmode');
+}
+function devmodeOpen(on) {
+  if (!DEVMODE || !DM_UI.el) return;
+  if (on && typeof deviceClose === 'function') deviceClose();   // never over your device's sheet
+  DM_UI.open = !!on; DM_UI.el.hidden = !on; document.body.classList.toggle('dmOpen', !!on);
+  if (on) devmodeDraw();
+}
+// a row of up to three buttons: [[label, fn, { ask, off, aria }], ...]
+function devmodeRow(body, list) {
+  const row = document.createElement('div'); row.className = 'dmRow';
+  for (const [label, fn, o = {}] of list) {
+    const b = document.createElement('button'); b.textContent = label; b.disabled = !!o.off;
+    if (o.ask) b.classList.add('dmAsk'); if (o.aria) b.setAttribute('aria-label', o.aria);
+    b.onclick = () => fn(b); row.appendChild(b);
+  }
+  body.appendChild(row); return row;
+}
+function devmodeText(body, text, cls) { const p = document.createElement('p'); p.textContent = text; if (cls) p.className = cls; body.appendChild(p); return p; }
+function devmodeHead(body, text) { const h = document.createElement('h3'); h.textContent = text; body.appendChild(h); return h; }
+function devmodeDraw() {
+  if (!DM_UI.el || !DM_UI.open) return;
+  const st = devmodeState(), body = DM_UI.el.querySelector('.dmBody');
+  for (const b of DM_UI.el.querySelectorAll('.dmTabs button')) { const on = b.dataset.tab === DM_UI.tab; b.classList.toggle('on', on); b.setAttribute('aria-selected', on ? 'true' : 'false'); }
+  body.textContent = '';
+  if (st.note) devmodeText(body, st.note, 'dmNote');
+  if (DM_LATER[DM_UI.tab]) devmodeText(body, DM_LATER[DM_UI.tab]);
+  else if (DM_UI.tab === 'quick') devmodeQuick(body);
+  else if (DM_UI.tab === 'clock') devmodeClock(body);
+  DM_UI.el.querySelector('.dmFoot').textContent = devmodeFoot();
+}
+function devmodeQuick(body) { devmodeText(body, 'Take me to, Mark, Undo and the rest arrive in the next turns of Stop 1a.'); }
+function devmodeClock(body) { devmodeText(body, 'Now: ' + clockText() + '. Moving the clock arrives in turn D3.'); }
+function devmodeFoot() { return 'Dev save: ' + clockText(); }
+// the Dev link changed in an open page (a hash change doesn't reload): offer a reload, both ways
+addEventListener('hashchange', () => {
+  const on = location.hash.slice(1).split('.').some(t => t === 'dev');
+  if (on === DEVMODE || NOSAVE || document.getElementById('dmLink')) return;
+  const bar = document.createElement('div'); bar.id = 'dmLink';
+  bar.innerHTML = '<span></span><button>Reload</button>';
+  bar.firstChild.textContent = on ? 'The Dev link: reload to open Dev mode.' : 'Dev link removed: reload for your real game.';
+  bar.addEventListener('pointerdown', e => e.stopPropagation());
+  bar.lastChild.onclick = () => location.reload();
+  document.body.appendChild(bar);
+});
+if (DEVMODE) { devmodeCss(); devmodeBuild(); devmodeState(); }
+// ---- slot: Dev mode engineer (section 25). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- end of slot: Dev mode engineer ----
+
+// =====================================================================
 // 12. MAIN LOOP
 // =====================================================================
 const HRUN_EDGES = { of: null, n: -1, list: [] };          // 0.27.31: see the wall cut below
