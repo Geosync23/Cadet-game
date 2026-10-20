@@ -8,7 +8,7 @@
 > - **Checks never assume an empty deck or a free time slot.** Before a check places the player, books a seat or starts an event at a time, it looks for a free one (or clears it) and says which it used. A new tradition, a new place or a crew change must not break an unrelated check. (Two check fixes on 2026-10-19 were checks that assumed a slot nobody used; and interactions_check's floor tap that hit a crew member.)
 > - **New features are gated until they're switched on.** A new feature sits behind one named switch (like `REC_DECK`), and with the switch off the game is identical: cadet_test ALL IDENTICAL against the build before it, the same days in day_check. Texts that only make sense with the feature on (like "Seven decks") are gated too. Switching it on is its own reviewed step.
 > - **One owner per function and table** (`plans/owners.md`). No new top-level name that already exists anywhere in the file (names_check fails it); add to a shared table only through its owner's registry or slot.
-> - **New code goes in your seat's labelled slot** (`// ---- SLOT: <seat> ----` lines, see `plans/map.md`), not at the end of a neighbour's section, so two seats never add lines at the same spot.
+> - **New code goes in your seat's labelled slot** (between `// ---- slot: <seat> (section N) ... ----` and `// ---- end of slot: <seat> ----`; new lines go just above the end line; the list is in `plans/map.md`), not at the end of a neighbour's section, so two seats never add lines at the same spot.
 
 ## 2. "Testing": add at the top
 

@@ -6,7 +6,7 @@ Started by the ways-of-working engineer WW1 (2026-10-20, step 2 of `plans/roadma
 
 - **Small edits anywhere are fine.** Anyone may make a small edit in another seat's section. The owner reviews it before it's merged into the shared branch.
 - **Shared functions and shared tables go to the owner first.** Changing what a shared function takes or returns (its inputs, their order or meaning, its result), or the shape of a shared table (renaming or removing a key, changing what a key holds, changing a record's fields), is asked of the owner *before* the work, with `send_message` through the lead. Adding a new key to a table that is built to take additions (a registry such as `deviceApp(def)`, `jobKindAdd(kind, def)`, `SAVE_EXTRA`) is a small edit.
-- **New code goes in your seat's labelled slot** (once the slots are in the file: see `plans/step2-drafts/`), not at a neighbour's spot.
+- **New code goes in your seat's labelled slot** (the list is in `plans/map.md`), not at a neighbour's spot.
 - **Who owns a line?** `python3 tools/section.py --where LINE` names its section; this page names the section's owner. `python3 tools/section.py --diff A B` lists every section a change touches, with its owner, so a reviewer sees at once when a branch edits outside its seat.
 - One-line, `typeof`-guarded calls from one section into another stay in DEV_NOTES' **Hook register**, as before.
 
@@ -65,7 +65,7 @@ Section ids are the file's own headings (`// 19. DEVICE`, `// 24a ROUNDS`). Line
 | `11` | interaction and UI: taps, `toast`, `goToDeck`, the lift | 49395-49706 | deck architects, HUD | HUD seat |
 | `12` | the main loop | 49707-49830 | deck architects | HUD seat |
 
-Files outside the game: each check belongs with the seat of the section it checks (deck_check: deck architect; day_check: sim; food_check: galley; machine_check: systems; events_check and join_check: traditions; player_check: player; interactions_check: interactions; device_check: device; social_check: social; clothes_check and intro_check: onboarding; career_check, leave_check, mech_check: Works career; puzzle_check: puzzles; tiles_check and disc_check: games; perf_check, path_check, bubble_check: performance; lines_check, arc_check: dialogue). `names_check.js`, `check_fast.sh`, `tools/section.py`, `tools/shared.js`, `cadet_test.py` and the GitHub check: the build master. `content/`: the writers. `content_gen.py`: the dialogue engineer.
+Files outside the game: each check belongs with the seat of the section it checks (deck_check: deck architect; day_check: sim; food_check: galley; machine_check: systems; events_check and join_check: traditions; player_check: player; interactions_check: interactions; device_check: device; social_check: social; clothes_check and intro_check: onboarding; career_check, leave_check, mech_check: Works career; puzzle_check: puzzles; tiles_check and disc_check: games; perf_check, path_check, bubble_check: performance; lines_check, arc_check: dialogue). `names_check.js`, `check_fast.sh`, `tools/section.py`, `tools/shared.js`, `tools/add_slots.py`, `cadet_test.py` and the GitHub check: the build master. `content/`: the writers. `content_gen.py`: the dialogue engineer.
 
 ## Seat-to-seat contracts to know by heart
 

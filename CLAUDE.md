@@ -7,6 +7,7 @@ A cozy starship-life sim: a single-file three.js game (`starship-cadet.html`) se
 2. `design-doc.md`: what the game is. It's the single source of truth for the design (it replaces the old v4 PDF, now in `archive/`, and the Living Ship addendum), with all open questions in its last section.
 3. `plans/deckN-plan.html`: the agreed layout of each deck. A deck is only built from an agreed plan.
 4. `TEAM.md`: who's working on what. Several sessions work in parallel under a lead session; stay inside the files your brief names.
+5. `plans/map.md` (where things live, by section) and `plans/owners.md` (who owns which section, and the shared functions and tables). `python3 tools/section.py --where LINE` turns any line number into its section.
 
 ## Files
 - `starship-cadet.html`: the game (one file; three.js r128 from cdnjs).
@@ -20,13 +21,23 @@ A cozy starship-life sim: a single-file three.js game (`starship-cadet.html`) se
 - `clothes_check.py`: checks changing at your wardrobe, yesterday's clothes, the laundry hamper, the washers and saving mid-wash.
 - `interactions_check.py`: checks the places you can use, the job board and the goal pointer.
 - `bubble_check.py`: speech bubbles at phone size with uneven frames: they follow their speaker without shaking, jumping or swapping sides.
-- `plans/`: deck plan pages, pillar plans, and `handover-<role>.md` notes for each role.
+- `names_check.js`: reads the game's script the way the browser does: it must parse; no top-level name, shared-table key or registration (`deviceApp({ id })` and the like) made twice; no "Deck 7" on screen. Names the section and line of each problem.
+- `check_fast.sh`: the quick check (about 5 minutes): words baked, names_check, then the deck, machine and leave checks side by side with the device check. Run it before every push. GitHub runs the same (`.github/workflows/quick-check.yml`) once the lead switches it on.
+- `tools/section.py`: print a section, name the section of a line, list the sections (and owners) a change touches. `tools/shared.js`: which functions and tables are used outside their own section.
+- `archive/starship-cadet-0.64.2-whole.html`: the whole game as published with the rec deck (0.64.2), kept unchanged.
+- `plans/`: deck plan pages, pillar plans, `handover-<role>.md` notes for each role, `owners.md`, `map.md`, `backlog.md` (small known bugs) and `build-table.md` (every build's row).
 
 ## How we work
 - **One deck at a time, then review.** Work through all of a deck's turns, then stop and hand over for review: publish the build as a playable artifact, send screenshots, and summarise what was built, the judgement calls made and the test results. Don't start the next deck until the user signs off.
 - **New decks start with a plan page** in the style of `plans/deck3-plan.html`, reviewed before any building.
-- **Each turn:** small exact-string edits to the build (never rewrite the whole file), bump the build number in the HUD, add a row to the build table in DEV_NOTES, run the tests, commit and push.
-- **Determinism and regressions** (details in DEV_NOTES "Rules that keep it working"): shared kit made at load never calls `R()`; regressions on unchanged decks must be pixel-identical, and when they aren't, find out why before moving on.
+- **Each turn:** small exact-string edits to the build (never rewrite the whole file), add new code in your seat's labelled slot (`// ---- slot: <seat> ...`), add a row to the build table (`plans/build-table.md`) under your work's name, run your area's checks and then `bash check_fast.sh`, commit and push. **Never push when check_fast says FAILED.**
+- **The build number is the build master's.** Helpers don't change the two build-number lines (the header's `build` line and `GAME_BUILD`); the build master sets them when merging into the shared branch. (Nearly 8 in 10 past merge clashes were only those two lines.)
+- **Merge early, into one shared branch.** Each reviewed piece of work is merged by the build master into `claude/integration` straight away, with check_fast. Helpers start from it and bring it into their own branch often (at least at the start of each turn), so nobody drifts days apart and a clash shows up while it's small.
+- **Owners** (`plans/owners.md`, the user's rule): small edits in another seat's section are fine, and the owner reviews them before they're merged. A change to a shared function's inputs or result, or to a shared table's shape, goes to its owner first. `python3 tools/section.py --diff` shows which sections (and owners) your branch touches.
+- **Found a small bug outside your brief?** Add a row to `plans/backlog.md`; don't fix it on the side.
+- **Every page published for the user leaves room for the user's answer** (the user's rule). A plan page, survey or results page has a place to comment and to answer its questions on the page itself (load the `artifact-capabilities` skill for a page that keeps what the user writes), so nothing the user says there is lost.
+- **Cut things are parked, never deleted** (the user's rule). When something is cut from scope, mark it cut and keep it on record: in design-doc.md (its section, marked cut, with the date and the user's reason) and in the plan that held it (`plans/`). Its keys, ids and names stay retired, not reused. Code already built for it stays switched off; taking it out of the file is its own reviewed step, with the record kept.
+- **Determinism and regressions** (details in DEV_NOTES "Rules that keep it working"): shared kit made at load never calls `R()`; the crew's planner never reads records built while the game runs; new features stay switched off (identical game) until they're switched on; regressions on unchanged decks must be pixel-identical, and when they aren't, find out why before moving on.
 - **Phones first:** no coplanar surfaces, every colour through `col()`, watch draw calls.
 - Keep `DEV_NOTES.md` current so a fresh session can pick up from it.
 - **Update `design-doc.md` when a design decision is made,** in the same commit as the work that depends on it: edit the section it belongs to, and move answered questions out of its Open questions.

@@ -1,6 +1,6 @@
-# Draft: helper start messages for step 2 onwards (not applied)
+# Helper start messages from step 2 onwards
 
-For the lead's start-messages file (today `plans/start-prompts-lead20.md` on claude/lead-pillar1). The lead fills in <LEAD SESSION ID>, <SEAT>, <SECTIONS>, <BRANCH> and the job. What's new against lead 19's messages is marked **(new)**.
+Written by the ways-of-working engineer WW1 (2026-10-20) for the lead's start messages (lead 20's are `plans/start-prompts-lead20.md` on claude/lead-pillar1; this file replaces their common parts from step 2). The lead fills in <LEAD SESSION ID>, <SEAT>, <SECTIONS>, <BRANCH> and the job. What's new against lead 19's messages is marked **(new)**.
 
 ## The common block (every worker's message starts with it)
 
