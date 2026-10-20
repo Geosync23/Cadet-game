@@ -8,3 +8,4 @@ The user went to overnight mode (~05:35 UTC 2026-10-20): "5 worker cap". Overnig
 3. If the Dev mode plan is reviewed and sound: a builder starts Dev mode on claude/integration, gated (Dev mode off = cadet_test 0 px), so the user can try it in the morning. Never more than 5 working seats at once.
 
 ## Calls made (time UTC | situation | call | why)
+| 05:39 | DP1's Dev mode plan draft (2f7b9e4) ready | Sent to DR1 (technical) and DR2 (usability) in parallel; no building until both reviews are in | The user asked for a thorough review |
