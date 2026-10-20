@@ -14300,6 +14300,8 @@ function rankCardRole(p) { const w = rankCardWord(p); return w ? w + (p.role ? '
 // Undo on the other side for 5 real seconds, or until you walk away, close the screen, change deck or ship time jumps
 // (Dev mode). The punch counts at once (careerClock); only its side effects (the remark, the clock note) wait, held in
 // CLOCK_UNDO.fx. Undo puts the kept copy of the clock record back. A save settles the window first. Off = identical; ?clockundo.
+// Held on purpose (PP1's review): the clock note waits too, so what listens to it (Day 1's intro arrow to the job board, the
+// at-work leisure drain) starts up to 5 s late; an Undo would otherwise leave the arrow on the board. Not a bug to fix.
 let CLOCK_UNDO_ON = URL_FLAGS.has('clockundo');
 const CLOCK_UNDO_S = 5, CLOCK_TAP_GUARD = 500, CLOCK_WALK = 1.5;   // real seconds of Undo; ms of the tap guard; tiles you may step away
 let CLOCK_UNDO = null, CLOCK_DRAWN = -1e9;               // the open window { what, t, d, keep, fx, said, at, deck, x, z }; the screen's last draw
@@ -38491,7 +38493,7 @@ if (typeof deviceApp === 'function') deviceApp({ id: 'crew', title: 'Relationshi
   view: () => {
     const c = CREW_PICK && crewContacts({ all: true }).find(x => x.id === CREW_PICK);
     if (c) return { title: c.name, blocks: [
-      { kind: 'text', text: (RANK_CARD_ON ? rankCardRole(SOC.crew[SOC.idx.get(c.id)]) : c.role) + '. ' + c.tierName[0].toUpperCase() + c.tierName.slice(1) + (c.toNext !== null ? ' (' + c.toNext + ' more to ' + REL_NAMES[c.tier + 1] + ')' : '') + '.' },
+      { kind: 'text', text: (typeof rankCardRole === 'function' ? rankCardRole(SOC.crew[SOC.idx.get(c.id)]) : c.role) + '. ' + c.tierName[0].toUpperCase() + c.tierName.slice(1) + (c.toNext !== null ? ' (' + c.toNext + ' more to ' + REL_NAMES[c.tier + 1] + ')' : '') + '.' },
       ...(typeof knowBlocks === 'function' ? knowBlocks(c.id) : [{ kind: 'list', rows: c.known.length ? c.known.map(k => ({ text: k })) : [{ text: 'Nothing yet. Ask them about themselves.' }] }]),   // what you know, by section (20c)
       { kind: 'buttons', items: [{ label: 'Where are they?', action: { app: 'roster', who: c.id } }].concat(c.met !== null ? [{ label: 'Meet up', action: { app: 'appointments', with: c.id } }] : [], [{ label: 'Back', action: { app: 'crew', do: 'back' } }]) }] };
     const cs = crewContacts(), mo = movedOn(), gone = mo.length ? [{ kind: 'text', text: 'Moved on', mark: 'head' }, { kind: 'list', rows: mo.map(x => ({ text: x.name, sub: x.to ? 'Now on the ' + x.to.replace(/^the /i, '') : 'Transferred', mark: 'past' })) }] : [];
@@ -38718,9 +38720,9 @@ function chatShow() {
   if (!C.ask && !C.offer && !talking && C.line.moment && typeof momentShow === 'function') buttons.splice(1, 0, { id: 'sit', label: 'Sit with them' });   // a moment is ready (20c)
   const gift = !C.ask && !C.offer && !talking && giftInHands(); if (gift) buttons.push(r.giftWeek === socWeek() + 1 ? { id: 'give', label: 'Given this week', off: true } : { id: 'give', label: 'Give ' + gift });
   if (!C.ask && !C.offer && !talking && typeof caseAskButton === 'function') { const cb = caseAskButton(p); if (cb) buttons.push(cb); }
-  if (!C.ask && !C.offer && !talking && SHOP_MENU_ON) { const mb = shopMenuButton(p); if (mb) buttons.push(mb); }   // patch #24: Buy something, from a storekeeper at the counter
+  if (!C.ask && !C.offer && !talking && typeof shopMenuButton === 'function') { const mb = shopMenuButton(p); if (mb) buttons.push(mb); }   // patch #24: Buy something, from a storekeeper at the counter
   if (!C.ask && !C.offer && !talking && typeof shopGiveButton === 'function') { const sb = shopGiveButton(p); if (sb) buttons.push(sb); }   // 24j: Give the thing you made them (M10)   // 24k P2: Ask about the fault (only a witness, only after Tomas's word)
-  const v = { who: p.name, role: rankCardRole(p), tier: REL_NAMES[relTier(p.id)],   /* patch #21: the rank first (off: p.role) */ line: C.line.text, say: C.line.say !== false, buttons };
+  const v = { who: p.name, role: typeof rankCardRole === 'function' ? rankCardRole(p) : p.role, tier: REL_NAMES[relTier(p.id)],   /* patch #21: the rank first (off: p.role) */ line: C.line.text, say: C.line.say !== false, buttons };
   const el = chatEl(); el.hidden = false;
   (CHAT_SKIN.draw || chatDraw)(el, v);
   if (C.talk) talkMeter(el, C.talk);                     // the Talk a while meter, over the buttons (either skin)
@@ -38776,7 +38778,7 @@ function chatDo(id) {
   else if (id === 'talk-stop') talkEnd(C, 'stop');
   else if (id.startsWith('reply:')) talkAnswer(C, id.slice(6));
   else if (id === 'ask') { C.ask = true; chatShow(); }
-  else if (id === 'shop-menu') shopMenuOpen(p);   // patch #24
+  else if (id === 'shop-menu' && typeof shopMenuOpen === 'function') shopMenuOpen(p);   // patch #24
   else if (id === 'shop-give') chatSay((typeof shopGiveSay === 'function' && shopGiveSay(p)) || 'Thanks.');   // 24j: an order handed over (M10)
   else if (id === 'case-ask') chatSay((typeof caseAskSay === 'function' && caseAskSay(p)) || 'Didn\'t notice a thing. Sorry.');   // 24k P2: their witness line
   else if (id === 'give') { const g = giftInHands(), res = g && giftGive(p, g); if (res) chatSay(res.text); }

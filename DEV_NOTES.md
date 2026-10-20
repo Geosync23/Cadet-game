@@ -928,6 +928,16 @@ One-line, `typeof`-guarded calls from one section into another (plans/pillar4-pl
 | section 13 `freezeSync`, `saveGame`; section 15's skip step; section 11's SIM_ADVANCE `deckCrewFill` (Dev mode D2-D3) | `typeof devmodeHold === 'function' && devmodeHold()` (25): frozen, no save, needs kept, crew placed once at the jump's end | Dev mode engineer (sim, player, HUD review) | Dev mode D2-D3 |
 | section 20 `careerOff` (Dev mode D3) | `typeof devmodeExcused === 'function' && devmodeExcused(d)` (25): a workday the Dev clock excused | Dev mode engineer (career review) | Dev mode D3 |
 
+## Patch batch E, first half (patch builder PE, claude/patch-e; `plans/patch-plan.html`)
+
+Each feature has its own switch, off by default (off = identical game, cadet_test ALL IDENTICAL); a URL flag turns it on for tests. Code in the player engineer's slot (section 15) unless named. Probes in `plans/patch-e-probes/` (README there).
+
+- **#25** (no switch): Deck 2 is "Officer's Quarters - Science" everywhere it's shown (DECK_NAMES, DECKS[2].name, directory signs and texts).
+- **#21 `RANK_CARD_ON` (`?rankcard`)**: `rankCardRole(p)` puts the rank first on the chat card, the Relationships card and the device roster. Words `card.rank.*` (content/banks/talk.lines).
+- **#6 `CLOCK_UNDO_ON` (`?clockundo`)**: the time clock's two fixed button halves, the half-second tap guard, an early clock-out confirmed, a 5 s Undo on the other punches (`clockPunch`, `clockUndo`, `clockUndoSettle`). `careerClock(now, quiet, hold)`: with `hold`, the remark and the clock note are handed to `hold(fx)` and run when the window settles (5 real s, walking 1.5 tiles away, closing the screen, a deck change, the ship clock moving more than 5 minutes, or a save via `SAVE_EXTRA.unshift`). **The clock note is held on purpose**: its listeners (Day 1's intro arrow, the at-work leisure drain) start up to 5 s late.
+- **#24 `SHOP_MENU_ON` (`?shopmenu`)**: a storekeeper settled at `work:store` gets "Buy something"; the menu (`#shopMenu`) lists STORE by shelf plus hobby supplies; choosing sets `basket` and runs the counter's pay step through `playerTap`.
+- **#5 `LADDER_ON` (`?ladder`)**: the spine ladder. At load (switch on) Deck 5's east spine wall `v,19,9` becomes the ladder hatch (its lift call panel left off; a hatch blocks like the wall), Engine control (Deck 6 `v,22,5`) and the Sensor array (Deck 2 `v,45,9`) become doors, the tier wording comes out of rooms' and sealed doors' texts (the Reactor: "Sealed for safety"). Tapping a ladder hatch, or the ladder behind its glass, walks you to the hatch and opens `#ladderPanel` (Up/Down, nearest first). A climb is a `ride` with `ladder` set; section 11's `updateRide` hands it to `ladderStep`: fade, `skipTo` a ship minute a deck, energy −2 and fitness +1 a deck, `goToDeck`, then you stand on the lobby side of that deck's hatch. It works while the lift is held. On Deck 1 the relay racks' tap box covers the hatch's foot; a tap higher up hits the ladder, which does the same.
+
 ## Social life (section 20, the social engineer, 0.36.x)
 
 Pillar 3's workstreams C4 and C5 (plans/pillar3-plan.md, Part 3 and "How news spreads"). Section 20 sits after section 18. Everything in it waits for its first use (`socInit`), because ROSTER (section 9) comes later in the file. Nothing in it calls `R()`; every choice is `schedU` with k 600-619.
