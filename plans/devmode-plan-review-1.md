@@ -259,3 +259,12 @@ A jump that ends before 12:30 leaves you late but able to clock in, as in the ga
 - **`devmodeSettle` doesn't take you out of a shower or booth line** (`queueOut(false)`, as `newGameStart` does). Sleeping can't start from a line, but a Dev jump can, so you'd come back hours later still queued. Add `if (typeof queueOut === 'function') queueOut(false);`.
 - **A hold that never ends:** `devmodeLoad` and `devmodeClear` set `DM_HOLD = true` and then `location.reload()`. If the reload doesn't happen (blocked, cancelled), the game stays frozen and never saves. Add a safety: `setTimeout(() => { if (DM_HOLD) { DM_HOLD = false; devmodeSay('The reload didn\'t happen: nothing changed.'); } }, 4000);`. The Dev save was already written, so say "reload to see it".
 - **`devmodeLoad` writes the Dev save without `devmodeWrite`'s space check.** It's the same size as what it replaces, so that's fine, but say so in a comment.
+
+## D4 review: Take me to, Mark here / Back to mark (claude/devmode bb6e78a)
+
+**PASS.** No new hooks: every game change in bb6e78a is inside section 25 (diff hunks from line 49856 on), so the six hooks reviewed in rounds 1 and 2 are still the full list. Ran: cadet_test against integration **ALL IDENTICAL**, devmode_check **OK** (all six parts, including "move: 148 rooms" and "Mark and Back to mark byte for byte, twice"), names_check OK.
+
+- **Take me to** runs under `devmodeDo` (the Undo kept first, settled, frozen under the fade), refuses during the arrival and inside a meeting (`devmodeStory`), and closes the lift panel before `goToDeck`. Landing in a room where a meeting is due starts it, which is what "Next appointment" is for.
+- **Mark** goes through `devmodeWrite` (space check) and keeps the arrived key too. **Back to mark** keeps an Undo, then reloads through `devmodeLoad`. The real keys are only ever read.
+- **Nit: two rooms you can't walk out of.** `locked.py` took me to every room of every deck. All rooms except two have a walking way back to the lift: the **Probe bay (Deck 2, P)** and the **Bay door gear (Deck 5, d**, the hidden door gear already on the backlog). devmode_check lists the same two. Take me to works from anywhere, so it's never a dead end, but mark them in the room list ("no way out on foot: use Take me to").
+- Still open from round 2 (in DB1's fixes commit): the excuse rule, `queueOut` in `devmodeSettle`, and the reload safety. devmode_check's clock part expects `excused [1, 2, 3, 4, 5, 8]`; with the patch it becomes `[8]` (Days 1-5 are in the grace week), so the check changes with the fix.
