@@ -11015,6 +11015,7 @@ function devHeadsTick(t) {
 function devHeadsShow(t = shipNow()) {
   if (DEV.hu || !HU_Q.length) return;
   if (devHuBusy()) return;
+  if (typeof introHoldNudges === 'function' && introHoldNudges()) { const k = HU_Q.findIndex(h => !/^meal\|/.test(h.key)); if (k < 0) return; if (k > 0) HU_Q.unshift(HU_Q.splice(k, 1)[0]); }   // section 21: training day's end, the beam first: a meal's heads-up waits (the patch, #19)
   const h = HU_Q[0], left = Math.max(1, Math.round(h.at - t));
   DEV.hu = h; DEVICE_SKIN.heads({ text: h.stage === 'soon' ? h.title + ' starts in ' + left + ' min' : h.title + (h.title === 'Your shift' ? ' starts now' : ' is starting'),
     where: h.where, soft: h.stage === 'start', go: !!h.goal });
