@@ -9926,16 +9926,18 @@ function schedBuild(p, d, occ, S) {
           const i = j % pool.length, pass = Math.floor(j / pool.length);
           const pl = pool[(fav + i) % pool.length], mine = ownL.length > 0 && S.owner.get(pl.id).length === 1;
           if (pref && (pass === 0 ? !pref.has(pl.id) || avoid.has(pl.id) : pass === 1 ? pref.has(pl.id) || avoid.has(pl.id) : !avoid.has(pl.id))) continue;
-          const lead = fromXY ? walkLead(fromXY(dk), pl) : 0, s0 = s + lead, e0 = o.by !== undefined ? Math.min(s0 + dur, o.by) : s0 + dur;   // the place is held from arrival
-          if (lead && e0 - s0 < (o.min || Math.min(dur, 10))) continue;
-          if (!mine && !isFree(pl.id, s0, lead ? e0 : end, o.tag)) continue;
+          if (!mine && !isFree(pl.id, s, end, o.tag)) continue;
           if (shut && evClosed(pl, B + s)) continue;          // closed for the event
           if (act === 'leisure' && type.startsWith('work:') && (S.deskOf(pl.id) || (occ.rotIds && occ.rotIds.has(pl.id)))) continue;   // a guest at a work type: never someone's desk, nor today's stand-in's
           if (o.queue && s - arrive >= SHOWER_Q) { go(dk); seg('off', s, 'booth-queue', null, { tag: o.queue }); }   // a wait worth queueing for: in the line by the place (0.71.4, the booths)
           else { linger(s - (dk !== deck ? C : 0)); go(dk); }
-          if (!mine) hold(pl.id, s0, lead ? e0 : end);
+          if (fromXY && dk === deck) {                   // the walk comes out of the end of what they were doing: they set off earlier, and arrive at s
+            const l = segs[segs.length - 1], lead = l && l.to === t && l.deck === deck && l.act !== 'commute' ? Math.min(walkLead(fromXY(dk), pl), l.to - l.from - 1) : 0;
+            if (lead > 0) { l.to -= lead; t -= lead; }
+          }
+          if (!mine) hold(pl.id, s, end);
           const an = o.anim || placeAnim(pl), ex = {}; if (o.tag) ex.tag = o.tag; if (an) ex.anim = an;
-          seg(act, lead ? e0 : end, pl.type, pl.id, ex);
+          seg(act, end, pl.type, pl.id, ex);
           return pl.id;
         }
       }
@@ -10790,7 +10792,9 @@ SIM_ADVANCE.push((from, to) => { shipDay(Math.floor(to / 1440) + 1); });
 // ---- slot: Sim engineer (section 14). New code of this seat's goes here, above the end line (plans/owners.md) ----
 // the walk to a place, in ship minutes, for a plan (#9, the patch): from the decks' own data (the straight line between
 // the tiles, times a detour factor of 1.6 (1.3 left about a quarter short on the deck), at the crew's walking pace), never the loaded deck's paths, because a day is planned
-// for every deck while only one is loaded. WALK_LEAD is take()'s switch (o.lead): the toilets and the basin after them
+// for every deck while only one is loaded. WALK_LEAD is take()'s switch (o.lead): the toilets and the basin after them.
+// The stay keeps its planned time and place hold (from arrival); the walk is taken off the end of what came before, so
+// nothing after it moves
 const WALK_LEAD = true, WALK_DETOUR = 1.6;
 function walkLead(from, pl) {
   if (!from || !pl || !pl.at) return 0;
