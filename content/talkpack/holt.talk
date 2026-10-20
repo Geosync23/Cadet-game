@@ -1,0 +1,55 @@
+@talks holt
+// TW1, the Talk a while pack: Chief Bram Holt's own talks. Gruff, few words, statements; "Hm."; tests you with a
+// question; dry by accident; formal when uncomfortable. Never "sorry" plainly; never the bad day (beat holt.3); the
+// Veyli only as plain distrust, argued with, never a sneer. Not the suit-locker test (beat 1) or the Envoy's tea (beat 4).
+
+== doors
+topic: ship
+them: Hm. Cadet. Every door on this ship has a number. I know all of them.
+them: Not to show off. Because one night someone will need to know, and I'll be awake.
+ask: What do you check before you sleep? Everybody checks something.
+listen: Do you really know every door?
+  them: Every one. Ask me one. Go on. Thought not.   #funny
+share: That my boots are where I can find them.
+  them: Boots by the bunk, facing out. Adequate.
+cheer: Under the bunk. Just in case.
+  them: Fair. The Watch checks the rest. That's what we're for.   #funny
+
+== rounds
+topic: day
+when: tier>=acquaintance
+them: Walked every deck before breakfast. The long way. Every door where it should be.
+them: Five in the morning, the ship's honest. Nobody's pretending to be busy.
+ask: When's the ship at her best, in your view?
+listen: Every deck? Every morning?
+  them: Every one. Somebody should. I'd rather it was me.
+share: Evenings. When people stop to talk.
+  them: Softer answer than mine. Fair one, though.
+cheer: Breakfast. Obviously breakfast.
+  them: Hm. Mensah says that. You've been talking to Mensah.   #funny
+
+== mensah
+topic: crew
+when: tier>=colleague
+them: Mensah told me a joke yesterday. Why don't airlocks keep secrets.
+them: Too much pressure. I laughed. Don't spread it about. He keeps a count.   #funny
+ask: Who on this ship makes you laugh?
+listen: What's his count up to?
+  them: He won't say. Higher than I'd like. Lower than he'd like.   #funny
+share: My bunk room. Most nights.
+  them: Good. A bunk room that laughs is a bunk room that looks out for itself.
+cheer: You, Chief. Right now.
+  them: Hm. Then that's two of us surprised.   #funny
+
+== saruth
+topic: crew
+when: tier>=friend beat:holt.2
+them: The Envoy's door. Cord tied loose today. Means "you are expected". Didn't know I was.
+them: I don't trust the Veyli. Told them so. They thanked me. Don't know what to make of it.
+ask: You talk to the Envoy. What do you make of them?
+listen: Did you go in?
+  them: No. Stood at the door a while. Walked on. Another time, maybe.
+share: Courteous. Kind, under the formal bit.
+  them: Maybe. You see more of them than I let myself. That's fair to say.
+cheer: Exhausting and very kind. Like you.
+  them: That's their line about us. They'd laugh. Slowly.   #funny

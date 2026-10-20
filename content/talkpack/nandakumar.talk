@@ -1,0 +1,55 @@
+@talks nandakumar
+// TW1, the Talk a while pack: Dr. Priya Nandakumar's own talks (she/her). Short, calm sentences, mostly instructions;
+// never raises her voice; asks one question and waits for the true answer. Warm and dry off duty. Never anyone's
+// medical details. Her roster thread is burnout: hint at it, never resolve it.
+
+== sign
+topic: work
+them: You've seen my door sign. IF YOU ARE BLEEDING, DECK 3.
+them: People think it's a joke. It's directions. You'd be surprised who needs them.   #funny
+ask: Where's the infirmary? From here. Without looking.
+listen: Does anyone actually read it?
+  them: Everyone reads it. Then they come in anyway, to tell me it's funny. Fine.   #funny
+share: Deck 3, past the mess.
+  them: Good. Now you'll never need it. That's how it works.
+cheer: Follow the person saying "drink some water".
+  them: That's me. Or Rina. Both correct.   #funny
+
+== chillies
+topic: hobby
+when: tier>=acquaintance
+them: My chillies are fruiting. Same seeds my mother grew. Third generation now.
+them: Brennan calls them a hazard. She's asked for more twice.   #funny
+ask: Is there something you grow, or keep, from home?
+listen: How hot are they, honestly?
+  them: Hot. Start with half. Then drink some water. That's medical advice.   #funny
+share: A habit. Something my family did.
+  them: Habits travel well. Better than seeds, sometimes. Keep it going.   #warm
+cheer: My sense of humour. It's thriving.
+  them: Good. That's a health indicator. I'll note it.   #funny
+
+== silence
+topic: work
+when: tier>=colleague
+them: I ask one question. Then I wait. People fill a silence. Then they say where it hurts.
+them: It works on everyone. Nearly everyone.
+ask: Do you find a silence easy, or do you fill it?
+listen: Who doesn't it work on?
+  them: Chief Holt. He outlasts me. We sit there like two clocks.   #funny
+share: I fill it. Every time.
+  them: Most people do. Count to five first. It's a kind thing to give someone.   #warm
+cheer: I fill it with biscuits.
+  them: Crumbs are a kind of answer. Not a good one. Drink some water.   #funny
+
+== garden-hour
+topic: plans
+when: tier>=friend
+them: I'm meant to sit in the garden for an hour off duty. Oduya's orders.
+them: I manage ten minutes. Then I think of something. I'm working on it.   #funny
+ask: When do you get to stop looking after everyone?
+listen: Does anyone look after you?
+  them: Oduya asks the right question once a week. And Rina tells me to drink water. Fair.   #funny
+share: Not often. I'm working on it.
+  them: Then we'll work on it together. Ten minutes. Then eleven.   #warm
+cheer: When I'm asleep. Mostly.
+  them: Sleep counts. Eight hours. I'll know.   #funny

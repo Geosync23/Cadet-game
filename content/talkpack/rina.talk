@@ -1,0 +1,54 @@
+@talks rina
+// TW1, the Talk a while pack: Rina Deshi's own talks. Dry, quick, deadpan; teases the people she likes; health advice
+// as orders; keeps count. Never the qualifying exam (beat rina.5) or her hard year (close); never says she's scared.
+
+== the-count
+topic: hobby
+them: Forty-three. That's the count. Undefeated, junior common room, Tiles.
+them: It's in a notebook. Dated and signed. Don't look at me like that.   #funny
+ask: Do you play anything? You can lie. I'll find out.
+listen: Who came closest to beating you?
+  them: Pell. Once. He sneezed and knocked the board. We don't count that game.   #funny
+share: A bit. I'm not very good.
+  them: Good. I mean, that's a shame. Come and play. I'll be gentle. I won't.   #funny
+cheer: I'll be forty-four.
+  them: Bold. I like bold. I'll write your name in the notebook. In pencil.   #funny
+
+== water
+topic: day
+when: tier>=acquaintance
+them: Have you had any water today? Actual water. Tea doesn't count.
+them: That's not a suggestion. Nandakumar says it to me. Now I say it to everyone.
+ask: What are you worst at, looking after yourself?
+listen: Who looks after you, then?
+  them: Nandakumar. My gran, by message. You, apparently, right now. Weird.   #funny
+share: Sleep. I stay up too late.
+  them: Honestly. Bed by eleven. I'll check. I'm next door, I'll know.
+cheer: Not eating biscuits.
+  them: Biscuits are food. Technically. Drink some water with them.   #funny
+
+== sister
+topic: home
+when: tier>=colleague
+them: My sister's messaged again. She's a doctor on a station. She has opinions.
+them: We argue about everything. Today it was soup. Whether soup is a drink.   #funny
+ask: Have you got someone you argue with, just because?
+listen: Who's right about the soup?
+  them: Me. Obviously. Don't tell her I asked you. She'll want a vote.   #funny
+share: Yes. Someone back home. I miss it.
+  them: Yeah. Annoying, isn't it? Missing the arguing. Honestly.   #warm
+cheer: You, now. Starting today.
+  them: Fine. Soup is a drink. Prove me wrong.   #funny
+
+== gran
+topic: crew
+when: tier>=friend beat:rina.4
+them: Gran's back to cheating. Fully recovered. Took three tiles off me by message.
+them: She asked after you. "The friend who listened." She's very nosy. Gets it from me.   #warm
+ask: Who taught you the rules you actually live by?
+listen: How does she cheat by message?
+  them: She just says she won. Very confidently. It works on everyone except me.   #funny
+share: My family. Mostly by example.
+  them: Same. Gran's example is mostly cheating. But kindly.   #warm
+cheer: Nobody. I make them up as I go.
+  them: That's what Gran says. Then she cheats. Watch yourself.   #funny

@@ -9,6 +9,7 @@ starship-cadet.html), everything between these markers, which sit in section 22 
     // ---- BEGIN LINES ...       // ---- END LINES ----        VOICE_TEMPLATES, VOICE, LINES, CONVOS, MOMENTS, MOMENT_THEMES,
                                                                  HOME_CONTACTS, HOME_MOMENTS, HOME_SEND, HOME_CHAT
     // ---- BEGIN MEETINGS ...    // ---- END MEETINGS ----     MEETINGS_BAKED (merged into MEETING_SCRIPTS)
+    // ---- BEGIN TALKS ...       // ---- END TALKS ----        TALKS, the Talk a while pack (content/talkpack/*.talk)
     // ---- BEGIN TRADITIONS ...  // ---- END TRADITIONS ----   TRADITIONS, an array (section 18's loader; plans/trad-format.md)
 
 Nobody hand-edits a generated block. Running it again with no changes to content/ gives byte-identical output.
@@ -39,6 +40,7 @@ COND_KEYS = {
     'trad': 'lines', 'dept': 'lines', 'rank': 'lines', 'trait': 'lines', 'habit': 'lines', 'act': 'lines',
     'birthday': 'lines', 'pair': 'lines', 'topic': 'lines', 'who': 'lines', 'with': 'lines', 'gift': 'lines',
     'came': 'lines', 'friend': 'lines',
+    'thread': 'lines',                       # the speaker's roster thread (the struggle theme): the Talk a while pack's
 }
 NUM_KEYS = ('w', 'odds')                     # numbers, not conditions: a weight, and a seeded chance
 TONES = ('light', 'funny', 'warm', 'serious')
@@ -226,6 +228,164 @@ def parse_lines_file(path, rel, out):
             target.setdefault(kind, []).append(entry(rel, kind, text, tone, merge_conds(base, conds), extra))
             continue
         raise GenError(f'{where}: not understood (lines start with "- ", conditions with "? ", kinds with "== ")')
+
+
+TALK_REPLY_KEYS = ('listen', 'share', 'cheer')       # the three replies a talk's question offers, in button order
+TALK_WORK_POOLS = ('works', 'watch', 'survey', 'bridge', 'comms', 'infirmary', 'galley', 'garden', 'store')   # @talks work:<pool> (plans/work-pools-plan.md)
+TALK_SMALL = re.compile(r'(small|done)(\.[a-z][a-z0-9-]*)?')   # smalltalk.talk's kinds: small, done, small.<crewId>, done.<crewId>
+
+
+def parse_talk_file(path, rel, out):
+    """content/talkpack/*.talk, the "Talk a while" pack (plans/talk-pack-plan.md "The file format") into out['TALKS']:
+    { pool: [talk], own: { crewId: [talk] }, work: { <pool>: [talk] }, small: { small|done|small.<id>|done.<id>: [{ text, tone? }] } }, a talk being
+    { id, topic, when?, lines: [{ text, tone? }], ask: { text, tone? }, replies: { listen|share|cheer: { text, ans: { text, tone? } } } }.
+    Ids are written by hand (pool.<topic>.<slug>, <crewId>.<slug>), never hashed: they're what a save's fired list holds.
+    The shape is checked here (1-3 them:, one ask:, all three replies each with one answer); style is lines_check's."""
+    lines = read_lines(path)
+    hd = header(lines, path)
+    if hd[0] != 'talks' or len(hd) != 2:
+        raise GenError(f'{path}: a .talk file starts "@talks pool", "@talks <crewId>" or "@talks smalltalk"')
+    whose = hd[1]
+    T = out['TALKS']
+    if whose == 'smalltalk':
+        kind = None
+        for i, l in lines:
+            where, s = f'{path}:{i}', l.strip()
+            if not s or s.startswith('@'):
+                continue
+            if s.startswith('=='):
+                kind = s[2:].strip()
+                if not TALK_SMALL.fullmatch(kind):
+                    raise GenError(f'{where}: "{kind}" is not a small talk kind (small, done, small.<crewId>, done.<crewId>)')
+                if kind in T['small']:
+                    raise GenError(f'{where}: "== {kind}" twice')
+                T['small'][kind] = []
+                continue
+            if s.startswith('- ') and kind:
+                text, tone = split_tone(s[2:], where)
+                if not text or any(text == e['text'] for e in T['small'][kind]):
+                    raise GenError(f'{where}: an empty line, or the same line twice in one kind')
+                T['small'][kind].append(dict({'text': text}, **({'tone': tone} if tone != 'light' else {})))
+                continue
+            raise GenError(f'{where}: not understood (small talk lines start with "- ", after an "== small" or "== done")')
+        return
+    pool, work = whose == 'pool', whose[5:] if whose.startswith('work:') else None
+    if work is not None and work not in TALK_WORK_POOLS:
+        raise GenError(f'{path}: "@talks {whose}": the work pools are {", ".join(TALK_WORK_POOLS)}')
+    if not pool and work is None and not re.fullmatch(r'[a-z][a-z0-9-]*', whose):
+        raise GenError(f'{path}: "@talks {whose}": pool, work:<pool>, smalltalk or a crew id')
+    ftopic, cur, talks = ('work' if work else None), None, []
+
+    def said(s, where):
+        text, tone = split_tone(s, where)
+        if not text:
+            raise GenError(f'{where}: an empty line')
+        return dict({'text': text}, **({'tone': tone} if tone != 'light' else {}))
+
+    def close():
+        if not cur:
+            return
+        t, where = cur['t'], cur['where']
+        if not t['topic']:
+            raise GenError(f'{where}: talk "{cur["slug"]}" has no topic: (a "topic:" line under its "==")')
+        if not 1 <= len(t['lines']) <= 3:
+            raise GenError(f'{where}: talk "{cur["slug"]}" has {len(t["lines"])} them: lines before its ask: (1-3)')
+        if not t['ask']:
+            raise GenError(f'{where}: talk "{cur["slug"]}" has no ask:')
+        for k in TALK_REPLY_KEYS:
+            if k not in t['replies']:
+                raise GenError(f'{where}: talk "{cur["slug"]}" has no {k}: reply')
+            if 'ans' not in t['replies'][k]:
+                raise GenError(f'{where}: talk "{cur["slug"]}": its {k}: reply has no answer (an indented "  them:" under it)')
+        t['id'] = f'pool.{t["topic"]}.{cur["slug"]}' if pool else f'work.{work}.{cur["slug"]}' if work else f'{whose}.{cur["slug"]}'
+        talks.append({k: t[k] for k in ('id', 'topic', 'when', 'lines', 'ask', 'replies') if t.get(k)})
+
+    for i, l in lines:
+        where, s = f'{path}:{i}', l.strip()
+        if not s or s.startswith('@'):
+            continue
+        if s.startswith('=='):
+            close()
+            slug = s[2:].strip()
+            if not re.fullmatch(r'[a-z0-9][a-z0-9-]*', slug):
+                raise GenError(f'{where}: "{slug}" is not a talk slug (lower case, digits and -)')
+            cur = {'slug': slug, 'where': where, 'last': None,
+                   't': {'topic': ftopic, 'when': None, 'lines': [], 'ask': None, 'replies': {}}}
+            continue
+        m = re.fullmatch(r'([a-z]+):\s*(.*)', s)
+        if not m:
+            raise GenError(f'{where}: not understood (topic:, when:, them:, ask:, listen:, share:, cheer:, or "== slug")')
+        key, val = m.groups()
+        if key == 'topic':
+            if not re.fullmatch(r'[a-z]+', val):
+                raise GenError(f'{where}: topic: takes one word')
+            if work:
+                raise GenError(f'{where}: a work pool\'s talks have no topic: line (their topic is always work)')
+            if cur is None:
+                ftopic = val                               # a pool file's topic: every talk's, and frozen into its id
+            elif pool:
+                raise GenError(f'{where}: a pool talk takes its file\'s topic: (it\'s part of the id: never override it)')
+            elif cur['t']['lines'] or cur['t']['when']:
+                raise GenError(f'{where}: topic: goes first, straight under the "=="')
+            else:
+                cur['t']['topic'] = val
+            continue
+        if cur is None:
+            raise GenError(f'{where}: "{key}:" before any "== slug"')
+        t = cur['t']
+        if key == 'when':
+            if t['when'] is not None or t['lines']:
+                raise GenError(f'{where}: one when: line, before the them: lines')
+            c = parse_conds(val, where)
+            for k in NUM_KEYS:
+                if k in c:
+                    raise GenError(f'{where}: {k}: isn\'t used in talks')
+            t['when'] = entry(rel, 'talk', '', 'light', c)
+            for k in ('text', 'id'):
+                del t['when'][k]
+            continue
+        if key == 'them' and l.startswith(' '):            # an answer: indented under its reply
+            r = cur['last']
+            if not r or 'ans' in t['replies'][r]:
+                raise GenError(f'{where}: an indented answer goes once, under listen:, share: or cheer:')
+            t['replies'][r]['ans'] = said(val, where)
+            continue
+        if l.startswith(' '):
+            raise GenError(f'{where}: only an answer ("  them:") is indented')
+        if key == 'them':
+            if t['ask']:
+                raise GenError(f'{where}: them: lines come before the ask:')
+            t['lines'].append(said(val, where))
+        elif key == 'ask':
+            if t['ask']:
+                raise GenError(f'{where}: one ask: a talk')
+            t['ask'] = said(val, where)
+        elif key in TALK_REPLY_KEYS:
+            if not t['ask']:
+                raise GenError(f'{where}: the replies come after the ask:')
+            if key in t['replies']:
+                raise GenError(f'{where}: {key}: twice')
+            if re.search(r'[{}]|\s#\w+\s*$', val):
+                raise GenError(f'{where}: a reply is a button: no placeholders, voice tokens or tone')
+            if not val.strip():
+                raise GenError(f'{where}: an empty reply')
+            t['replies'][key] = {'text': val.strip()}
+            cur['last'] = key
+        else:
+            raise GenError(f'{where}: unknown "{key}:" (topic, when, them, ask, listen, share, cheer)')
+    close()
+    if not talks:
+        raise GenError(f'{path}: no talks')
+    if pool:
+        T['pool'] += talks
+    elif work:
+        if work in T['work']:
+            raise GenError(f'{path}: a second file for the work pool {work}')
+        T['work'][work] = talks
+    else:
+        if whose in T['own']:
+            raise GenError(f'{path}: a second file of talks for {whose}')
+        T['own'][whose] = talks
 
 
 def parse_overheard(lines, path, rel, topic, out):
@@ -621,7 +781,8 @@ def parse_home_rest(lines, path, rel, cid, who, out):
 
 
 def bake():
-    out = {'VOICE_TEMPLATES': {}, 'VOICE': {}, 'LINES': {}, 'CONVOS': [], 'MOMENTS': {}, 'MOMENT_THEMES': {}, 'HOME_CONTACTS': {}, 'HOME_MOMENTS': {}, 'HOME_SEND': {}, 'HOME_CHAT': {}, 'MEETINGS_BAKED': {}, 'TRADITIONS': []}
+    out = {'VOICE_TEMPLATES': {}, 'VOICE': {}, 'LINES': {}, 'CONVOS': [], 'MOMENTS': {}, 'MOMENT_THEMES': {}, 'HOME_CONTACTS': {}, 'HOME_MOMENTS': {}, 'HOME_SEND': {}, 'HOME_CHAT': {}, 'MEETINGS_BAKED': {}, 'TRADITIONS': [],
+           'TALKS': {'pool': [], 'own': {}, 'work': {}, 'small': {}}}
     files = []
     for d, _, fs in os.walk(CONTENT):
         for f in fs:
@@ -639,6 +800,8 @@ def bake():
             parse_arc(path, rel, out)
         elif ext == 'call':
             parse_arc(path, rel, out, home=True)
+        elif ext == 'talk':
+            parse_talk_file(path, rel, out)
     # traditions: the traditions engineer's grammar and shape (plans/trad-format.md), read by their trad_parse.read_all
     # (the interface is theirs and frozen). Baked as one array: const TRADITIONS = [ one tradition a line ];
     tdir = os.path.join(CONTENT, 'traditions')
@@ -649,6 +812,11 @@ def bake():
             out['TRADITIONS'] = trad_parse.read_all(tdir)
         except trad_parse.TradError as e:
             raise GenError('content/traditions/' + str(e))
+    talk_ids = {}                                  # the pack's ids: unique across every file (a save's fired list holds them)
+    for t in out['TALKS']['pool'] + [t for d in ('own', 'work') for ts in out['TALKS'][d].values() for t in ts]:
+        if t['id'] in talk_ids:
+            raise GenError(f'two talks share the id {t["id"]}: slugs are never reused (plans/talk-pack-plan.md "Talk ids")')
+        talk_ids[t['id']] = 1
     ids = {}
     for kind, es in out['LINES'].items():
         for e in es:
@@ -752,7 +920,26 @@ def blocks(out):
                for n in ('HOME_CONTACTS', 'HOME_MOMENTS', 'HOME_SEND', 'HOME_CHAT')), [])
     meet = ['const MEETINGS_BAKED = {'] + [f'  {js(k)}: {js(out["MEETINGS_BAKED"][k])},' for k in sorted(out['MEETINGS_BAKED'])] + ['};']
     trad = ['const TRADITIONS = ['] + [f'  {js(t)},' for t in out['TRADITIONS']] + ['];']
-    return {'LINES': lines, 'MEETINGS': meet, 'TRADITIONS': trad}
+    return {'LINES': lines, 'MEETINGS': meet, 'TRADITIONS': trad, 'TALKS': talks_parsed('TALKS', out['TALKS'])}
+
+
+def talks_parsed(name, T):
+    """TALKS (the Talk a while pack): { pool: [talk], own: { crewId: [talk] } (sorted), work: { pool: [talk] } (sorted), small: { kind: [lines] } (sorted);
+    one piece a talk, so rewording a talk changes one line of the file"""
+    p = ['{"pool":[']
+    p += [cj(t) + (',' if i < len(T['pool']) - 1 else '') for i, t in enumerate(T['pool'])]
+    p.append('],"own":{')
+    for n, cid in enumerate(sorted(T['own'])):
+        ts = T['own'][cid]
+        p.append(('' if n == 0 else ',') + cj(cid) + ':[')
+        p += [cj(t) + (',' if i < len(ts) - 1 else ']') for i, t in enumerate(ts)]
+    p.append('},"work":{')
+    for n, w in enumerate(sorted(T['work'])):
+        ts = T['work'][w]
+        p.append(('' if n == 0 else ',') + cj(w) + ':[')
+        p += [cj(t) + (',' if i < len(ts) - 1 else ']') for i, t in enumerate(ts)]
+    p.append('},"small":' + cj({k: T['small'][k] for k in sorted(T['small'])}) + '}')
+    return js_parsed(name, p)
 
 
 def splice(html, name, body):
@@ -779,7 +966,8 @@ def main(argv):
         return 2
     n = sum(len(v) for v in out['LINES'].values()) + sum(len(es) for c in list(out['VOICE'].values()) + list(out['VOICE_TEMPLATES'].values()) for es in c.get('lines', {}).values())
     summary = (f'{n} lines, {len(out["VOICE"])} voice cards, {len(out["VOICE_TEMPLATES"])} templates, {len(out["CONVOS"])} conversations, '
-               f'{len(out["MOMENTS"])} moments, {len(out["MOMENT_THEMES"])} themes, {len(out["HOME_CONTACTS"])} home contacts, {len(out["MEETINGS_BAKED"])} meetings, {len(out["TRADITIONS"])} traditions')
+               f'{len(out["MOMENTS"])} moments, {len(out["MOMENT_THEMES"])} themes, {len(out["HOME_CONTACTS"])} home contacts, {len(out["MEETINGS_BAKED"])} meetings, {len(out["TRADITIONS"])} traditions, '
+               f'{len(out["TALKS"]["pool"]) + sum(len(v) for d in ("own", "work") for v in out["TALKS"][d].values())} talks')
     if check:
         print(('up to date: ' if new == html else 'OUT OF DATE: ') + summary)
         return 0 if new == html else 1

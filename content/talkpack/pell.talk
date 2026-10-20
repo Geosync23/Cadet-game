@@ -1,0 +1,54 @@
+@talks pell
+// TW1, the Talk a while pack: Pell Okafor's own talks. Easygoing, chatty; "Oi oi", "Right, so"; stories that go
+// sideways; teases fondly about sleep and food. Mum's shop from tier friend only; not the opened messages (beat pell.6).
+
+== screw-tin
+topic: hobby
+them: Right, so. This tin. Screws from seven ships. One from every ship I've fixed something on.
+them: This one's from a ferry. I fixed a kettle. On a ferry. Long story. Bit long.   #funny
+ask: Do you keep anything like that? A little collection?
+listen: Which screw's your favourite?
+  them: The bent one. Holds the whole tin together, morally.   #funny
+share: Not yet. I might start one.
+  them: Do! I'll give you your first. A Wren one. Then you're official.   #warm
+cheer: I collect naps. Like you.
+  them: Oi oi! Slander. Accurate, but slander.   #funny
+
+== sticky-panel
+topic: work
+when: tier>=acquaintance
+them: Want a secret? The Deck 5 panel that sticks. You lift and push. Not push and lift.
+them: Calder doesn't know. She definitely knows. She knows everything. Lift and push, though.   #funny
+ask: What's the best trick anyone's taught you aboard?
+listen: Who taught you all this?
+  them: Nobody. An old manual and a lot of getting it wrong. Mostly the getting it wrong.
+share: Check the board before breakfast.
+  them: Smart. I check it after breakfast. Second breakfast, sometimes.   #funny
+cheer: Where the grab shelf is.
+  them: The most important room on the ship. Well. Shelf. You get it.   #funny
+
+== sleep
+topic: day
+when: tier>=colleague
+them: I can sleep anywhere. Parts store. Tea corner. Standing up in the lift, once.
+them: Except my bunk. At night. Rina says it's a medical mystery. She's writing it down.   #funny
+ask: Be honest. How much are you actually sleeping?
+listen: Do you really talk in your sleep?
+  them: About engines, apparently. Rina says I once told a pump it was "doing great".   #funny
+share: Not enough. The days are full.
+  them: Same. Grab a nap at tea. Nobody minds. I've checked. Extensively.   #funny
+cheer: Loads. I'm a champion sleeper.
+  them: Teach me! I'll give you a screw. A good one. Not the bent one.   #funny
+
+== mum-shop
+topic: home
+when: tier>=friend
+them: My mum's got a little mending shop back home. Kettles, radios, coats. Anything.
+them: There's a scrapyard out back. Found my first engine manual there. And a dog, mostly ears.   #warm
+ask: Who taught you the stuff that really stuck?
+listen: What was it like, growing up in a shop?
+  them: Loud. Everything ticking. One radio that only gets one station. I miss the station.   #warm
+share: My family. Little things, every day.
+  them: That's how it sticks. Little things, every day. Same as here.   #warm
+cheer: Trial and error. Mostly error.
+  them: Ha! Best teacher going. Bit rough. Very thorough.   #funny

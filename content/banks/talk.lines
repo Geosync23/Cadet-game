@@ -154,6 +154,11 @@
 == roster.none
 - Nobody yet. Say hello to someone.
 
+// ---------------------------------------------------------------- PARKED (2026-10-20, TR1's call via lead 20)
+// The talk.<topic>.open/more/ask/reply/ans lines below (ten topics, hobby to plans) are UNUSED while TALK_PACK_ON is on:
+// the "Talk a while" pack (content/talkpack/*.talk, plans/talk-pack-plan.md) replaces them. They are kept, keys and
+// lines unchanged, for the switch-off path (TALK_PACK_ON off plays them as before). Marked cut, never deleted; taking
+// them out of the file is its own reviewed step. Recorded in design-doc.md ("Talking") and plans/talk-pack-plan.md.
 // ---------------------------------------------------------------- topic: hobby
 == talk.hobby.open
 - I've been {hobby} again. Can't stop, honestly.

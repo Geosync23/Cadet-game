@@ -1,0 +1,54 @@
+@talks brennan
+// TW1, the Talk a while pack: Chef Auda Brennan's own talks. Warm, quick, in charge; "love"; asks if you've eaten
+// first; pans that talk back. Never the fire, Port Halloran or Nell Arrowby (beat brennan.3); never criticises a cook.
+
+== eaten
+topic: food
+them: Have you eaten? Don't make that face, love. Have you actually eaten?
+them: Right. There's a covered plate on the grab shelf. It's yours. Go after.
+ask: What did your family cook when someone was poorly?
+listen: Do you ask everyone that?
+  them: Everyone. The Captain. The Envoy. The cold store, if it'd answer.   #funny
+share: Soup. Always soup, at ours.
+  them: Course it was. Soup's a hug you can eat. I'll remember that.   #warm
+cheer: Toast. Lots of toast. Endless toast.
+  them: That's a family that knows what's what. Bless them.   #funny
+
+== cold-store
+topic: work
+when: tier>=acquaintance
+them: The cold store ran warm again last night. Two degrees, love. Two.
+them: I was very polite to it this morning. Very polite. It knows what that means.   #funny
+ask: What's the one thing that gets under your skin, every time?
+listen: Has Works looked at it?
+  them: Calder's lot are on it. Lovely people. I'll still be watching it.   #funny
+share: Things left half done.
+  them: Oh, you'd do well in a kitchen. Finish it or don't start it. That's my rule.
+cheer: Cold tea. Like you and warm stores.
+  them: Ha! We understand each other, you and me. Cold where it should be, hot where it should.   #funny
+
+== pans
+topic: hobby
+when: tier>=colleague
+them: Hear that? That's a pan nearly done. Three minutes from done, that one.
+them: My mum taught me to cook by ear. She used to sing to the pans. I hum. Close enough.   #warm
+ask: Is there something you just know how to do, without thinking?
+listen: What does "done" sound like?
+  them: Quieter. Like a crowd settling. You'll hear it if you stand with me a while.   #warm
+share: Fixing small things. My hands know.
+  them: That's the best kind of knowing. Don't let anyone talk you out of it.
+cheer: Finding food. Wherever it is.
+  them: I've noticed. Biscuit tin's on the left shelf. I didn't tell you that.   #funny
+
+== bread
+topic: day
+when: tier>=friend
+them: Sunday mornings I bake bread. The juniors come and knead. Badly. Wonderfully.
+them: Some weeks it's the best hour I have. Floury hands, everyone talking.   #warm
+ask: When do you feel most at home aboard, love?
+listen: Why bread, out of everything?
+  them: It takes its time. You can't hurry it. Good for me, that. I'm a hurrier.   #funny
+share: Right now, honestly. Here.
+  them: Oh, love. Well. Then stay as long as you like.   #warm
+cheer: Sunday mornings. Apparently.
+  them: Sunday mornings. Floury ones. The best kind.   #funny
