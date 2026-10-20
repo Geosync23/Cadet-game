@@ -27,8 +27,8 @@ listen: What happens on the tenth night?
   them: A blip. Usually dust. But for a minute, it might be anything. That minute's the job.
 share: A good book. Or a broken machine.
   them: The broken machine, I believe. Works can't leave one alone.   #funny
-cheer: Worrying about breakfast.
-  them: Breakfast will be there. That's one thing the ship guarantees.   #funny
+cheer: A noise I can't place.
+  them: Then you'd make a surveyor. Or a very tired Works tech.   #funny
 
 == sample-bag
 when: tier>=acquaintance
@@ -43,7 +43,7 @@ cheer: Other people's tea orders.
   them: The heaviest load aboard. I sympathise.   #funny
 
 == chart-room
-when: tier>=acquaintance !who:zamora-quinn
+when: tier>=acquaintance !who:zamora-quinn !moved:zamora-quinn
 them: The chart room's my favourite place. Quiet, paper smell, the whole frontier on one table.
 them: Someone's always arguing about a star's name in there. Usually Zamora. Usually right.   #funny
 ask: Is there a place aboard where you can think best?
@@ -51,11 +51,11 @@ listen: What do they argue about?
   them: Whether a faint one's a star or a smudge. It matters, honestly. To us.
 share: The bunk, after lights out.
   them: Good thinking spot. Bad for writing things down. Keep a pencil.
-cheer: The tea corner. Biscuits help.
-  them: Fuelled thinking. Very sound method. Survey approves.   #funny
+cheer: The lift. Up and down. Very calming.
+  them: Thinking in a lift. Brave. It's a short lift.   #funny
 
 == telescope-four
-when: tier>=acquaintance !who:zamora-quinn|mbeki-bo|rossi-femi|ueda-vera
+when: tier>=acquaintance !who:zamora-quinn|mbeki-bo|rossi-femi|ueda-vera !moved:zamora-quinn !moved:ueda-vera
 them: Four people brought telescopes from home. Observatory night, there are five in a row.
 them: The big one, and four small ones pointed at whatever their owners like best.   #warm
 ask: If you'd brought one thing from home for the stars, what would it be?
@@ -75,8 +75,8 @@ listen: Who taught the scanners a tune?
   them: Nobody admits it. Works says it's "just a chime". Works is lying.   #funny
 share: The job board alert. Even in my sleep.
   them: Poor thing. Hum the scanner tune over it. It's catchy.   #funny
-cheer: The dinner bell. Happily.
-  them: There isn't one. That's just your stomach. Very punctual.   #funny
+cheer: The lift chime.
+  them: Ha. Everybody's song, that. Up, up, ding.   #funny
 
 == first-look
 when: tier>=acquaintance !who:sato
@@ -87,7 +87,7 @@ listen: What do you usually see?
   them: Dust, mostly. Lovely dust. Occasionally something that makes me sit up straight.
 share: Opening a panel. You never know.
   them: Exactly that. Every panel's a little sample. Some of them bite.   #funny
-cheer: Lifting the lid on dinner.
+cheer: Opening a crate of new parts.
   them: The most reliable thrill aboard. Never disappoints.   #funny
 
 // ---------------------------------------------------------------- colleague: why this job
@@ -101,11 +101,11 @@ listen: Will you ever tell anyone?
   them: The day it's on a chart. You'll be the second to know. Survey gets first.   #warm
 share: Someone from home. So they're out here too.
   them: That's the nicest reason I've heard. Better than mine.   #warm
-cheer: "Gerald". Obviously.
-  them: The cactus lobby grows stronger every day.   #funny
+cheer: "Lamp." After my first job.
+  them: Sentimental. And very Works. I'd allow it.   #funny
 
 == why-survey
-when: tier>=colleague !who:sato|mori|achebe-lumi !thread:stuck|leaving
+when: tier>=colleague !who:sato|mori|achebe-lumi !thread:stuck|leaving|startover
 them: I chose Survey because I wanted to be the first to see something. Anything. A rock, even.
 them: Turns out I've been first to see quite a lot of rocks. Still thrilled every time.   #funny
 ask: Why did you pick the work you do? The honest version.
@@ -123,7 +123,7 @@ them: I thought it was a joke. It's the whole job. The second look is where thin
 ask: What's the best advice anyone gave you about your work?
 listen: Who said it?
   them: An old surveyor on my first ship. She'd looked at more rocks than anyone alive.   #warm
-share: "Check twice, then switch it on."
+share: "Measure it, then measure it again."
   them: That's Works's version of ours. Same advice, different tools.
 cheer: "Never lick the samples."
   them: Ha. Also very good advice. Also on a sign.   #funny
@@ -137,8 +137,8 @@ listen: What's the slow part, really?
   them: Labelling. Sorting. Writing it all down so someone in a hundred years can trust it.
 share: The steady ones. I like a rhythm.
   them: Me too. The exciting bits only mean something because of the steady ones.   #warm
-cheer: The bits with biscuits.
-  them: Every job has those. Ours are behind the sample fridge. Don't tell.   #funny
+cheer: The bits where nothing breaks.
+  them: Every job has those. Ours are rarer than we admit.   #funny
 
 == chart-gaps
 when: tier>=colleague !who:lemaire-nils
@@ -149,8 +149,8 @@ listen: Who keeps the names?
   them: I'll never tell. They're shy. And very hopeful. Both good things.   #warm
 share: Seeing more of the frontier.
   them: Then you're on the right ship. She goes where the gaps are.   #warm
-cheer: A gap in my stomach. Dinner-shaped.
-  them: Most urgent gap aboard. Go on, then.   #funny
+cheer: A gap on my bunk shelf.
+  them: Fill it. Something small from the ship. You'll treasure it.   #warm
 
 == sato-lab
 when: tier>=colleague !who:sato|mori
@@ -165,7 +165,7 @@ cheer: She doesn't make me drink odd tea.
   them: Lucky. Dr. Sato's tea is a rite of passage. I'm still recovering.   #funny
 
 == night-survey
-when: tier>=colleague who:ibarra-rafael|lemaire-nils
+when: tier>=colleague who:ibarra-rafael
 them: Night Survey's mostly waiting for the sweep and keeping the biscuits safe.
 them: I won't tell you where the good tin is. Someone found it anyway. They left a card.   #funny
 ask: Is there something you guard at work, more than you should?
@@ -199,7 +199,7 @@ listen: What was the grain?
   them: Something that shouldn't have been on that moon. We're still arguing about it. Happily.   #funny
 share: A noise in a pump, early. It saved a day.
   them: That's the same thing. Noticing. It's the best skill there is.   #warm
-cheer: That the biscuits had moved shelves.
+cheer: That the lift chimes twice on Deck 3.
   them: Observant. You'd be wasted anywhere but Survey.   #funny
 
 == stars-habit
@@ -209,8 +209,8 @@ them: Even on leave, at home, I look up. My family's stopped asking what I'm loo
 ask: Has your work changed how you see ordinary things?
 listen: What are you looking for?
   them: Nothing in particular. Something new. There's always a chance.   #warm
-share: I can't stop listening to machines.
-  them: Ha. The Works ear. You'll never hear a fridge the same way again.   #funny
+share: I count the windows on every deck.
+  them: Tomas does that. Twenty-two. Ask him to show you his favourite.   #warm
 cheer: I see broken things everywhere now.
   them: And I see rocks. Between us, we'd ruin any picnic.   #funny
 
@@ -223,8 +223,8 @@ listen: Whose face was best?
   them: A new hand, first time on the floor. Silent for ten minutes. Then "oh". Perfect.   #warm
 share: How something works, inside.
   them: Then you're like me. The showing's the best bit. Never lose it.   #warm
-cheer: Where the good biscuits are.
-  them: A sacred trust. Choose your people carefully.   #funny
+cheer: How to coil a cable properly.
+  them: A sacred skill. Choose your students carefully.   #funny
 
 == teach-a-week
 when: tier>=friend !who:sato|achebe-lumi
@@ -242,10 +242,11 @@ cheer: How to sleep through anything.
 when: tier>=friend !who:sato|mori
 them: Some people think Survey's for the Concord. A report, a file. It's not, for me.
 them: It's for the crew. Seventy-odd people out here so we can look. I don't want to waste it.   #warm
-ask: Who are you doing all this for, really?
+ask: Would you want your name on a chart one day?
 listen: Does anyone read the reports?
   them: The Captain reads every one. She sent a note once. "Lovely rock." I kept it.   #warm
-share: My family. And the crew, now.
-  them: Same. They overlap more every month, don't they?   #warm
-cheer: The tea corner. It keeps me going.
-  them: Then the tea corner deserves a credit in the next report.   #funny
+share: Maybe. Somewhere small.
+  them: Small's where the good names go. I'll remember you said that.   #warm
+cheer: Only if it's spelt right.
+  them: Survey spells everything right. Twice. Pencil, then ink.   #funny
+

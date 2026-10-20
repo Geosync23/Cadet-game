@@ -15,8 +15,8 @@ listen: Do you ever wish it was busier?
   them: Never. Bored is good, in here. Bored means everyone's well.
 share: A quiet board. Nothing breaking.
   them: Same as us, then. A quiet week's a kind week.   #warm
-cheer: Seconds at dinner, every night.
-  them: That's not a week. That's a dream. Drink some water with it.   #funny
+cheer: A clean bench at the end of it.
+  them: That's a good week too. A tidy one.   #funny
 
 == night-doctor
 when: tier>=acquaintance who:yoon-elif
@@ -85,23 +85,24 @@ cheer: Opening stuck jars.
 == infirmary-means
 when: tier>=friend !who:nandakumar|rina
 them: What does the infirmary mean to me? Nobody aboard is ever alone when they're poorly.
-them: Three in the morning, middle of a storm, there's always someone here. Tonight, maybe me.   #warm
+them: Any hour, any day, there's always someone here. Today, maybe me.   #warm
 ask: Who do you do the job for, if you had to say?
 listen: Does it ever feel like too much?
   them: Some days. Then someone says thanks with their eyes and it's light again.   #warm
 share: The people who'll never know I did it.
-  them: Then we're the same. Quiet care. The best kind.   #warm
-cheer: For the biscuits in the drawer.
-  them: Medical supplies. Strictly. Sometimes.   #funny
+  them: Quiet care. The best kind there is. Keep it up.   #warm
+cheer: For the quiet afternoons.
+  them: The rarest medicine aboard. Treasure them.   #funny
 
 == listening-habit
 when: tier>=friend !who:nandakumar
 them: The job gave me a habit. I listen to how people breathe. The mess, the lift, everywhere.
 them: Fast, slow, a sigh. You can tell a whole day from it. I try not to. I can't stop.   #warm
-ask: Has your work left you with a habit you can't switch off?
-listen: What does my breathing say?
-  them: That you've had a full day and you're glad to sit down. Good diagnosis, that.   #warm
-share: I check every lamp I walk past.
-  them: Same family of habit. We're both always on duty, a little.
-cheer: I count biscuits in tins.
-  them: That's not a habit. That's a calling.   #funny
+ask: What do you notice about people that you wish you didn't?
+listen: Do you notice it on yourself?
+  them: Never. Doctors are terrible patients. Aides are worse.   #funny
+share: When someone's tired before they say it.
+  them: Then you've got it too. Careful. It doesn't switch off.   #warm
+cheer: Who's skipped the washroom queue.
+  them: That's not medicine. That's the Watch. Report it.   #funny
+

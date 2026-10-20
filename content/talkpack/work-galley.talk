@@ -17,7 +17,7 @@ cheer: I don't. I just lean on things.
   them: Leaning's sitting for people with jobs. You'll do.   #funny
 
 == onions
-when: tier>=acquaintance !who:brennan|madsen-ivo
+when: tier>=acquaintance !who:brennan|madsen-ivo|varga-tariq|dlamini-lukas
 them: I chopped forty onions this morning. My eyes have given up crying. They've seen too much.
 them: There's a count, you know. Who's chopped the most this season. It's very serious.   #funny
 ask: Is there a bit of your job that's just repetition?
@@ -58,7 +58,7 @@ them: Brennan cooks by ear. She taught me to listen to a pan. I thought she was 
 them: Now I hear "done" from across the galley. It's a hiss that goes quiet. You'll laugh.   #funny
 ask: Who taught you to do something by feel, not by the book?
 listen: What does "nearly done" sound like?
-  them: A bit busier. Like a crowd before the speech. Then it settles. Then it's done.
+  them: Busier. Then a click, a sort of sigh. Then you take it off.
 share: Someone at home. Fixing things by ear.
   them: Same school, different pan. Everyone good learns that way eventually.   #warm
 cheer: Nobody. I use the timer.
@@ -84,7 +84,7 @@ ask: What's the simplest good thing your work gives people?
 listen: Does anyone ever skip dinner?
   them: Sometimes. Then there's a covered plate on the grab shelf with their name on it. Always.   #warm
 share: Hot water. Nobody thinks about it.
-  them: Then we're the same. Hot water, hot dinner. Nobody thinks. Everybody's glad.   #warm
+  them: Hot water, hot dinner. Nobody thinks about either. Everybody's glad.   #warm
 cheer: Working lamps. Very bright work.
   them: Ha. Bright work. We'll put that on a sign.   #funny
 
@@ -97,5 +97,5 @@ listen: What did the note say?
   them: "Lovely onions. Very even. Well done." I stand by it.   #funny
 share: Every machine that's slightly off.
   them: Ha. Then we'd be awful together on leave. Noticing everything.   #funny
-cheer: Which biscuit tin is fullest.
-  them: That's not a job habit. That's survival. Respect.   #funny
+cheer: Which knife is sharpest.
+  them: That's not a habit. That's survival. Respect.   #funny

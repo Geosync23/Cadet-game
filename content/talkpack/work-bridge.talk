@@ -8,7 +8,7 @@
 // ---------------------------------------------------------------- helm
 
 == drift
-when: tier>=acquaintance dept:helm !who:lindqvist-isak
+when: tier>=acquaintance dept:helm !who:lindqvist-isak !moved:lindqvist-isak
 them: You can feel a drift in the Wren before the console shows it. A lean. Like a ship sighing.
 them: Lindqvist feels it first. Every time. It's uncanny. We've tested it.   #funny
 ask: Is there something you can feel coming, before anyone tells you?
@@ -64,16 +64,16 @@ listen: Does he ever fly fast?
   them: Never needs to. He says gentle is faster, in the end. He's usually right.
 share: Someone at home, fixing something delicate.
   them: Then you know. Gentle is a skill, not a speed.   #warm
-cheer: My mum, with the last biscuit.
+cheer: My gran, potting seedlings.
   them: The gentlest operation there is. Respect.   #funny
 
 == helm-means
 when: tier>=friend dept:helm
-them: Know what the helm means to me? Seventy-five people asleep while I take them somewhere.
+them: What the helm means to me? A whole ship living its day while I take it somewhere.
 them: They trust me with that and never think about it. That's the best trust there is.   #warm
 ask: Who trusts you without ever thinking about it?
 listen: Do you ever think about them, flying?
-  them: Every time. I fly for the ones asleep. Smooth enough not to wake them.   #warm
+  them: Every time. Smooth enough that nobody spills their tea. That's the job.   #warm
 share: Everyone who uses something I fixed.
   them: Same trust. Quieter. I'd say it's the best kind.   #warm
 cheer: The kettle. It trusts me daily.
@@ -89,7 +89,7 @@ ask: What's the one thing you keep an eye on all day?
 listen: What happens when one goes amber?
   them: I check it, ask once, write it down. Nine times in ten it's nothing. I still check.
 share: The job board. I can't help it.
-  them: Then we're the same. Different board, same habit.
+  them: Ha. Different board, same habit. The ship's full of us.
 cheer: The clock, near dinner.
   them: Everyone on the bridge watches that one. It's the most honest light.   #funny
 
@@ -107,7 +107,7 @@ cheer: The walk to dinner.
 
 == rota
 when: tier>=colleague dept:command !who:marrow|vance
-them: I do the duty rota. Seventy-five people, two shifts, rest days, birthdays. It's a puzzle.
+them: I do the duty rota. Everyone, two shifts, rest days, birthdays. It's a puzzle.
 them: Everyone wants Friday off. Nobody wants Tuesday. I've never once pleased everybody.   #funny
 ask: If you could pick your own two days off, which would they be?
 listen: Who's hardest to fit in?

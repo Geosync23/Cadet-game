@@ -21,8 +21,8 @@ cheer: The kettle at the tea corner.
 
 == lift-view
 when: tier>=acquaintance !who:holt|tomas
-them: The Watch office has the best view of the lift. And so of everyone.
-them: You learn who's late, who's early, who holds the lift. Nice people hold the lift.   #warm
+them: From the Watch office you see the lift all day. Tomas says it's the best view aboard.
+them: He's not wrong. You learn who's late, who's early, who holds the lift for others.   #warm
 ask: What do you notice first about someone new?
 listen: Who's always late?
   them: I couldn't possibly say. Torres. Breakfast. Every day. Ten more minutes with the coils.   #funny
@@ -40,8 +40,8 @@ listen: Has anyone ever argued at an airlock?
   them: Once. Then they saw my face. It's a very patient face. They stopped.   #funny
 share: My toolkit. Nobody borrows it unasked.
   them: Good. Everyone needs one airlock. Yours is a toolbox.   #funny
-cheer: The last biscuit. Fiercely.
-  them: That's not an airlock. That's a siege.   #funny
+cheer: My bunk ladder. Nobody climbs it.
+  them: That's not an airlock. That's a border. Fair, though.   #funny
 
 == rounds-walk
 when: tier>=acquaintance !who:holt
@@ -76,25 +76,25 @@ listen: What's the oddest thing in the log?
   them: "02:14. Cactus in the corridor. Returned to owner. Owner asleep." It was a Gerald.   #funny
 share: A few notes on my device. Mostly jobs.
   them: Good. Notes are a kindness to tomorrow's you. Tomorrow's you is grateful.
-cheer: Only a list of good biscuits.
+cheer: Only a list of who owes me a favour.
   them: That's a log. A very important log. Keep it current.   #funny
 
 // ---------------------------------------------------------------- colleague: why this job
 
 == why-watch
-when: tier>=colleague !who:holt|tomas|dufresne-cora !thread:stuck|leaving
+when: tier>=colleague !who:holt|tomas|dufresne-cora !thread:stuck|leaving|startover
 them: I picked the Watch because I like knowing everyone's all right. That's all it is, really.
-them: Some people count stars. I count heads. Seventy-five, every night. All present.   #warm
+them: Some people count stars. I count heads. Seventy-five, every shift. All present.   #warm
 ask: What made you pick the job you do? The real reason.
 listen: What if a head's missing?
   them: Then I find them. Usually asleep in the observatory. Once, the garden.   #funny
 share: I like fixing things. Simple as that.
   them: Not so different. We both make sure the ship's all right. Different spanners.   #warm
 cheer: The orange was taken. Works got it.
-  them: Watch grey's very dignified. You'd look awful in it.   #funny
+  them: Ours is very dignified. You'd look awful in it.   #funny
 
 == holt-lectures
-when: tier>=colleague !who:holt|mensah
+when: tier>=colleague !who:holt|mensah|tomas|dufresne-cora|castellano-jem
 them: I learnt the Watch from Holt. One lecture at a time. There were a lot of lectures.
 them: "Name every door between here and the mess." Every day. For a month.   #funny
 ask: Who's the strictest teacher you've ever had?
@@ -118,12 +118,12 @@ cheer: Breakfast. I savour it.
   them: That's allowed. Breakfast's a kind of safety check too.   #funny
 
 == people-not-doors
-when: tier>=colleague !who:holt
-them: People think the Watch is doors and airlocks. It's mostly people.
-them: Someone's quiet at dinner, we notice. Someone skips the mess, we notice. Then we're kind.   #warm
+when: tier>=colleague !who:holt|mensah
+them: The best Watch tool isn't a scanner. It's a cup of tea, offered at the right door.
+them: Half our rounds end with a chat. Holt calls it "patrolling". We don't argue.   #funny
 ask: Who looks out for the people who look out for everyone?
 listen: Do people mind being noticed?
-  them: Some do. So we're subtle. A biscuit left on a bunk is very subtle.   #funny
+  them: Some do. So we're subtle. A cup left outside a door is very subtle.   #funny
 share: Each other. That's how it should work.
   them: That's exactly how it works. On a good ship. This is a good ship.   #warm
 cheer: The Captain. She notices everything.
@@ -138,8 +138,8 @@ listen: Did they serve together, do you think?
   them: Maybe. Nobody's checked. It's nicer not knowing, a bit. More possible.   #warm
 share: Not really. I'm the first.
   them: Then you're starting something. Somebody's going to find your name one day.   #warm
-cheer: My gran ran the school canteen. Very strict.
-  them: Then you come from security people. It's in the blood.   #funny
+cheer: My gran grows prize marrows. Very strict.
+  them: Then you come from careful people. Holt would approve.   #funny
 
 == patrol-chats
 when: tier>=colleague !who:holt
@@ -180,7 +180,7 @@ cheer: I don't. I bring it to dinner.
   them: Then sit with me. We'll worry about doors together.   #warm
 
 == all-present
-when: tier>=friend !who:holt
+when: tier>=friend who:mensah|achterberg-lars|garcia-greta|park-noor|castellano-jem
 them: End of a night round, I write two words in the log. "All present."
 them: Two words. Some nights they're the best two words I know.   #warm
 ask: What's the best thing your work lets you say, at the end of the day?
@@ -188,11 +188,11 @@ listen: Was there ever a night you couldn't?
   them: Not a real one. A late lift, a lost bunkmate. Found. Always found. That's the Wren.   #warm
 share: "It's fixed." I love saying that.
   them: Good words, those. We're in the same business, really. "It's fine now."   #warm
-cheer: "Is there pudding?"
-  them: That's the question, not the answer. Still. Good words.   #funny
+cheer: "All done. Bed."
+  them: Two good words as well. Close enough to mine.   #funny
 
 == proud-watch
-when: tier>=friend !who:holt|dufresne-cora
+when: tier>=friend !who:holt|dufresne-cora|tomas
 them: My proudest Watch moment? A junior got lost on Deck 2 their first week. Crying, a bit.
 them: I walked them back the long way, naming every door. They were laughing by the lift.   #warm
 ask: What's a small kindness you're proud of?
@@ -200,18 +200,18 @@ listen: Do they still remember?
   them: They say hello every morning. That's how I know.   #warm
 share: Helping someone find their way.
   them: Then it got passed on. That's the best a kindness can do.   #warm
-cheer: Sharing my biscuits. Twice.
-  them: Twice! A saint. A saint with crumbs.   #funny
+cheer: Holding the lift for a stranger.
+  them: That's a good one. Small and kind. That's the Wren.   #warm
 
 == what-watch-means
 when: tier>=friend !who:holt
 them: Can I tell you what the Watch means to me? It means somebody's always awake.
-them: Whatever happens, at any hour, there's a face in the Watch office. Tonight, it's mine.   #warm
-ask: Who do you do your job for, if you had to name them?
+them: Whatever happens, at any hour, there's a face in the Watch office. Today, it's mine.   #warm
+ask: What's the hour you'd least like to give up?
 listen: Doesn't that get tiring?
   them: Sometimes. Then I see the bunk rooms dark and quiet, and it's worth it.   #warm
-share: The people who'll never know I did it.
-  them: Same. That's the best kind of job. Invisible and kind.   #warm
+share: The first hour of shift, before it's busy.
+  them: Same. That's when the ship tells you how she slept.   #warm
 cheer: My future self. With a pension.
   them: Ha. Very sensible. Very Watch.   #funny
 
@@ -236,11 +236,11 @@ listen: Do you ever see the sunrise?
   them: No sun out here. But the lights warm up at six. Close enough. I watch it every day.   #warm
 share: Early morning, before anyone's up.
   them: Then we'd overlap. Say hello at six. I'll be just finishing.   #warm
-cheer: Second breakfast. Every day.
-  them: The finest hour aboard. Respect.   #funny
+cheer: The walk back from the gym.
+  them: Fine choice. Quiet corridors, sore legs. Lovely.   #funny
 
 == thursday-checks
-when: tier>=friend !who:holt|tomas
+when: tier>=friend !rank:junior !who:holt
 them: Thursday's bunk inspection. Juniors dread it. I love it, secretly.
 them: It's not about tidy. It's a chance to see everyone's all right. A bunk tells you a lot.   #warm
 ask: What would your bunk tell someone about you?
