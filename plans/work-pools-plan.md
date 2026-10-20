@@ -47,8 +47,11 @@ lines.** Two writer seats in parallel, about one session each, then TR1's review
 - Ids `work.<pool>.<slug>`, hand-written and frozen; fired in the same `{ id: [day, crewId] }` record.
 - Pool from the roster dept by a table: works, watch, survey, helm+command → bridge, comms, infirmary, galley, garden,
   store; guests none.
-- The picker takes an ordered list of sources, so the user's choice of order needs no new code.
-- Same condition words; a `role:` condition (engine crew, bartenders, Counsellor, command) would help, else `who:` lists.
+- TE1's picker already takes an ordered source list (`TALK_SOURCES`, claude/talk-wire aeef392): a work pool is one more
+  entry; "mixed" (taking turns) needs one small extra rule.
+- Same condition words plus `role:engine|bar|counsel` (a fixed list, mapped by a table from the roster's role text:
+  Engine officer/technician → engine; Bartender, relief bartender → bar; Ship's Counsellor → counsel). Command vs helm
+  in Bridge uses the existing `dept:`. The roster's `civilian` dept has nobody today: no pool.
 - Work talks count as topic `work` for the shared pool's variety rule.
 
 ## Questions for the user (answer on the page)

@@ -147,8 +147,9 @@ textarea{width:100%;min-height:64px;margin-top:6px;border-radius:10px;border:1px
   <li><b>Files:</b> <code>content/talkpack/work-&lt;pool&gt;.talk</code> with the header <code>@talks work:&lt;pool&gt;</code>. Same talk shape as the shared pool (opener, more lines, the ask, three replies with an answer each).</li>
   <li><b>Ids:</b> <code>work.&lt;pool&gt;.&lt;slug&gt;</code>, written by hand and frozen, fired in the same save record as the rest (<code>{ id: [day, crewId] }</code>).</li>
   <li><b>Who draws which pool:</b> a small table from the roster's department: works, watch, survey, helm and command → bridge, comms, infirmary, galley, garden, store; guests none.</li>
-  <li><b>Picker:</b> an ordered list of sources (own → work → shared → small talk), so the order can change with your answer to question 1 without new code.</li>
-  <li><b>Conditions:</b> the same words as now. One new word would help: <code>role:</code> (the roster's role, e.g. engine crew, bartenders, the Counsellor, command) for talks that only fit part of a team. Without it, the writers use long <code>who:</code> lists instead.</li>
+  <li><b>Picker:</b> TE1's picker already takes an ordered list of sources (own, then the shared pool); a work pool is one more entry between them, so the order can follow your answer to question 1. Taking turns (the "mixed" choice) would need one small extra rule.</li>
+  <li><b>Conditions:</b> the same words as now, plus one new word with a fixed list of values: <code>role:engine|bar|counsel</code>, mapped by a table from the roster's role text (Engine officer, Engine technician → <code>engine</code>; Bartender, Galley hand and relief bartender → <code>bar</code>; Ship's Counsellor → <code>counsel</code>). Command and helm inside the Bridge pool are told apart by the existing <code>dept:</code>. TE1 says this is cheap with a fixed list.</li>
+  <li><b>Departments:</b> the roster's list also has <code>civilian</code>; nobody aboard has it today, so it has no pool (a civilian would get the shared pool only).</li>
   <li><b>Topics:</b> work talks all count as topic "work", which already exists, so the shared pool's "vary the topic" rule keeps working.</li>
 </ul>
 </section>
