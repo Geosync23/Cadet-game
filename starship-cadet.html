@@ -37598,7 +37598,7 @@ function careerRemark(what, now, late = 0) {             // a Works crew member 
   if (typeof DECK_CREW === 'undefined' || typeof bubbleSay !== 'function') return null;
   const d = Math.floor(now / 1440) + 1; if (CLOCK_SAID[what] === d || schedU(CAREER.clockSeed, Math.floor(now), what === 'in' ? 951 : 952) >= CAREER.remarkOdds) return null;
   const P = player.obj.position, dist = x => Math.hypot(x.x - P.x, x.z - P.z);
-  const a = DECK_CREW.filter(x => x.p && x.p.dept === 'works' && dist(x) < 5).sort((x, y) => dist(x) - dist(y))[0]; if (!a) return null;
+  const a = DECK_CREW.filter(x => x.p && x.p.dept === 'works' && dist(x) < 5 && !(what !== 'in' && typeof introQuiet === 'function' && introQuiet(x.p.id))).sort((x, y) => dist(x) - dist(y))[0]; if (!a) return null;   // (section 21: not Zeke, just after his end-of-day good job; the patch #18)
   const wd = weekday(d), kinds = what === 'in' ? [careerBack(d) && 'clock.back', late >= 20 && 'clock.late', wd === 0 && 'clock.monday', 'clock.in'] : what === 'early' ? ['clock.early', 'clock.out'] : [wd === 4 && 'clock.friday', 'clock.out'];
   for (const k of kinds.filter(Boolean)) { const l = socLine(a.p, k, { t: now, tier: relTier(a.p.id) }); if (l) { CLOCK_SAID[what] = d; bubbleSay(a.h, l.text); return k; } }
   return null;
