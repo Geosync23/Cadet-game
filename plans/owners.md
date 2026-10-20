@@ -74,6 +74,7 @@ These are used by only a few sections, so the generated list below doesn't show 
 
 | Contract | Owner | Who calls it |
 |---|---|---|
+| `const DEVMODE` (13), with `#dev`, never with nosave: Dev mode's switch; `SAVE_KEY` and `INTRO_KEY` (21) end in "-dev" when it's on | Sim engineer | 21 (`INTRO_KEY`), 25 (all of Dev mode); hooks reading `devmodeHold()` / `devmodeExcused(d)` (25, the Dev mode engineer) in 13, 15, 20, 11 |
 | `function recShow(state)` (8c) | Rec engineer | 18's traditions engine, whenever the show changes |
 | `function deviceApp(def)` (19), `def = { id, title, short, icon, order, hidden, view, ... }` | Device engineer | 15, 15b, 18, 20, 23, 24, 24g, 24i, 24k: one app each, by `id` (names_check fails a repeated id) |
 | `function worksTabAdd(def)` (24) | Works career engineer | 24k (Fault notes as the Works app's tab) |

@@ -8,7 +8,7 @@ The Dev mode engineer DB1, 2026-10-20, branch `claude/devmode` (from `claude/int
 - **Quick tab:**
   - Take me to: Next appointment, A room… (the deck, then the room), The ladder, The time clock, The job board. The clock doesn't move.
   - This moment: Mark here, Back to mark, Undo my last Dev action, Top up needs, Copy my real game, Clear Dev save (two taps).
-- **Clock tab:** Next morning, +1 hour, To a time… (− / + 30 minutes, then Go), To 08:55, To 16:55, To 21:40, +1 day, +7 days, +3 hours. Workdays you skip are excused, and your needs are kept.
+- **Clock tab:** Next morning, +1 hour, To a time… (− / + 30 minutes, then Go), To 08:55, To 16:55, To 21:40, +1 day, +7 days, +3 hours. A workday you skip past 12:30 without clocking in is excused, not missed, and your needs are kept.
 - **Refusals, with the reason on the panel:**
   - Take me to: during the arrival evening and the escort, and inside a meeting.
   - The clock: during the arrival evening.
@@ -43,7 +43,7 @@ The Dev mode engineer DB1, 2026-10-20, branch `claude/devmode` (from `claude/int
 | 2-quick.png | The Quick tab |
 | 3-rooms.png, 3b-rooms-deck5.png | Take me to, A room…: the decks, then Deck 5's rooms |
 | 4-clock.png, 5-totime.png | The Clock tab; To a time… |
-| 6-after-skip.png | After +1 day: "Day 2 excused" |
+| 6-after-skip.png | +1 day from Day 9 08:30 to Day 10: "Day 9 excused" |
 | 7-later-tab.png | A later tab (Set career: Stop 2) |
 | 8-landscape.png | The sheet on the right, in landscape |
 
@@ -60,7 +60,7 @@ The Dev mode engineer DB1, 2026-10-20, branch `claude/devmode` (from `claude/int
 - check_fast: QUICK CHECK OK (438 s).
 
 ## Judgement calls
-- **Excused** means a jump crosses a workday's 09:00-12:30 while you're not clocked in. "To 08:55" leaves the day open, so you can clock in.
+- **Excused** means a jump passes a workday's 12:30 (when the game counts a miss) while you're not clocked in, from Day 8 on (the first week never counts misses). A short hop past 09:00 excuses nothing (DR1's review).
 - **Needs are kept** where they were during a jump. A normal day's ups and downs aren't modelled.
 - **Clear Dev save** also removes Mark and Undo. The next Dev game starts by shuttle.
 - **Copy my real game** keeps that game's own luck (its career seed), so it's not repeatable. Set career (Stop 2) brings the fixed Dev seed.

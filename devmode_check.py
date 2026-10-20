@@ -97,17 +97,19 @@ def part_off(ctx):
 
 def part_real(ctx):
     # the real game exists (part_off made it); play on a little so it's a real save, then keep its bytes
-    pg = Page(ctx, ''); pg.ev('saveGame()'); real = {k: v for k, v in store(pg).items() if k in REAL}; pg.close()
-    check('starship-cadet-save' in real, 'real: no real save to protect')
-    for suffix in ('#dev', '#dev.debug'):
+    for arrived, suffix in ((False, '#dev'), (True, '#dev.debug'), (True, '#dev')):   # DR1: with and without the real arrived key
+      pg = Page(ctx, '')
+      pg.page.evaluate('a => a ? localStorage.setItem("starship-cadet-arrived", "1") : localStorage.removeItem("starship-cadet-arrived")', arrived)
+      pg.ev('saveGame()'); real = {k: v for k, v in store(pg).items() if k in REAL}; pg.close()
+      check('starship-cadet-save' in real and ('starship-cadet-arrived' in real) == arrived, f'real: the real game to protect isn\'t there: {sorted(real)}')
+      if True:
         pg = Page(ctx, suffix)
         check(pg.ev('DEVMODE') is True, f'real: {suffix} did not turn Dev mode on')
         check(pg.ev("SAVE_KEY === 'starship-cadet-save-dev' && INTRO_KEY === 'starship-cadet-arrived-dev'"), f'real: {suffix}: the save names are not the Dev ones')
-        pg.sign(); pg.step(60); pg.ev('saveGame()'); pg.reload(); pg.step(30); pg.ev('saveGame()')
+        pg.sign(); pg.step(60); pg.ev('introSkip(); saveGame()'); pg.reload(); pg.step(30); pg.ev('saveGame()')
         st = store(pg); dev_keys_ok(st, suffix)
-        check('starship-cadet-save-dev' in st, f'real: {suffix}: no Dev save written')
-        for k, v in real.items():
-            check(st.get(k) == v, f'real: {suffix}: the real game\'s {k} changed in a Dev session')
+        check('starship-cadet-save-dev' in st and st.get('starship-cadet-arrived-dev') == '1', f'real: {suffix}: no Dev save or Dev arrived key written: {sorted(st)}')
+        check({k: v for k, v in st.items() if k in REAL} == real, f'real: {suffix} (real arrived key {arrived}): the real game\'s keys or bytes changed in a Dev session')
         check(not pg.errors, f'real: {suffix}: errors {pg.errors[:3]}')
         pg.close()
     pg = Page(ctx, ''); pg.step(200); pg.ev('SHIP.time.min += 90; saveGame()')
@@ -115,7 +117,7 @@ def part_real(ctx):
     check(after and after != real['starship-cadet-save'] and json.loads(after)['time']['min'] != json.loads(real['starship-cadet-save'])['time']['min'], 'real: the real game no longer writes its save after a Dev session')
     check(pg.ev('!SAVED || !SAVED.dev'), 'real: the real save carries Dev state')
     pg.close()
-    print('  real: the real save byte-identical through #dev and #dev.debug, and still writes after')
+    print('  real: the real keys (with and without the arrived key) byte-identical through #dev and #dev.debug, the Dev arrived key written, and the real game still writes after')
 
 def part_card(ctx):
     pg = Page(ctx, '#dev'); pg.sign()
@@ -199,15 +201,18 @@ def part_clock(b):
     check(C['day'].startswith('Day 9, Tuesday 06:0'), f'clock: +1 day landed at {C["day"]}')
     check(C['ms'] == 0 and C['st'] == 0 and not C['ca'], f'clock: a skipped workday counted as missed: {C}')
     check(C['l'] == 3, f'clock: leave was spent: {C}')
-    check(C['ex'] == [1, 2, 3, 4, 5, 8] and C['off8'] and not C['on8'], f'clock: the excused days: {C}')
+    check(C['ex'] == [8] and C['off8'] and not C['on8'], f'clock: the excused days (only past the first week, a jump past 12:30): {C}')
     check(C['crew'] > 0, 'clock: nobody on the deck after the jump')
     missed = pg.ev("SHIP.mail.filter(m => /missed|summons|warning/i.test(m.subject || '')).map(m => m.subject)")
     check(not missed, f'clock: Mail about missing work: {missed}')
+    # a short hop past 09:00 isn't a miss, so it excuses nothing (DR1)
+    pg.ev("devmodeRun('Clock: to 09:30', () => devmodeSkipTo(devmodeNext(9 * 60 + 30)))"); pg.ev("devmodeRun('Clock: +10 min', () => devmodeSkipTo(shipNow() + 10))")
+    check(9 not in pg.ev('devmodeState().ex') and pg.ev('playerShiftOn(9)'), f'clock: a hop to 09:40 excused the day: {pg.ev("devmodeState().ex")}')
     # clocked in, you stay clocked in
     pg.ev("devmodeRun('Clock: to 08:55', () => devmodeSkipTo(devmodeNext(8 * 60 + 55)))"); pg.ev('careerClock()')
     pg.ev("devmodeRun('Clock: to 16:55', () => devmodeSkipTo(devmodeNext(16 * 60 + 55)))"); pg.step(60)
-    C = pg.ev('({ in9: careerClockedIn(9), out9: careerClockedOut(9), ex: devmodeState().ex, ms: SHIP.career.ms, day: clockText() })')
-    check(C['in9'] and not C['out9'] and 9 not in C['ex'] and C['ms'] == 0, f'clock: clocked in, the jump didn\'t keep you clocked in: {C}')
+    C = pg.ev('({ in10: careerClockedIn(10), out10: careerClockedOut(10), ex: devmodeState().ex, ms: SHIP.career.ms, day: clockText() })')
+    check(C['day'].startswith('Day 10') and C['in10'] and not C['out10'] and 10 not in C['ex'] and 9 in C['ex'] and C['ms'] == 0, f'clock: clocked in, the jump didn\'t keep you clocked in (or Day 9, passed at 12:30, wasn\'t excused): {C}')
     # Top up needs, through the panel's own way (the fade, frozen meanwhile)
     pg.ev('SHIP.player.needs.hunger = 20; devmodeOpen(true); DM_UI.tab = "quick"; devmodeDraw()')
     m0 = pg.ev('SHIP.time.min'); pg.page.evaluate("[...document.querySelectorAll('#dmSheet button')].find(b => b.textContent === 'Top up needs').click()"); pg.step(15)

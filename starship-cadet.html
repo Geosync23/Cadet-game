@@ -49863,7 +49863,7 @@ function devmodeDraw() {
 function devmodeFoot() { const m = devmodeRead(DM_KEY.mark); return m ? 'Mark: ' + m.label : 'No mark yet'; }
 // the Dev link changed in an open page (a hash change doesn't reload): offer a reload, both ways
 addEventListener('hashchange', () => {
-  const on = location.hash.slice(1).split('.').some(t => t === 'dev');
+  const on = location.hash.slice(1).split('.').some(t => (t.includes('-') ? t.slice(0, t.indexOf('-')) : t) === 'dev');   // as section 13 reads the link
   if (on === DEVMODE || NOSAVE || document.getElementById('dmLink')) return;
   const bar = document.createElement('div'); bar.id = 'dmLink';
   bar.innerHTML = '<span></span><button>Reload</button>';
@@ -49902,13 +49902,18 @@ function devmodeCopy(label) {                             // the Dev game as it 
   return JSON.stringify({ label, at: clockText(), save: localStorage.getItem(SAVE_KEY), arrived: localStorage.getItem(INTRO_KEY) });
 }
 function devmodeKeep(label) { return devmodeWrite(DM_KEY.undo, devmodeCopy(label)); }   // the Undo, before a Dev action: null, or why not
+function devmodeReload(why) {                             // reload; if the browser hasn't after 4 s, carry on as you were and say so
+  devmodeSay(why + ': reloading…'); location.reload();
+  setTimeout(() => { DM_HOLD = false; saveGame(); devmodeSay('The page didn\'t reload, so ' + why + ' didn\'t happen. Try again.'); }, 4000);
+}
+// (no space check here on purpose: the kept save replaces one of about the same size)
 function devmodeLoad(rec, why) {                          // reload into a kept record (Undo, Back to mark, Copy my real game)
   DM_HOLD = true;
   try {
     if (typeof rec.save === 'string') localStorage.setItem(SAVE_KEY, rec.save); else localStorage.removeItem(SAVE_KEY);
     if (rec.arrived) localStorage.setItem(INTRO_KEY, rec.arrived); else localStorage.removeItem(INTRO_KEY);
   } catch (e) { DM_HOLD = false; return devmodeSay('The browser wouldn\'t store it: ' + why + ' didn\'t happen.'); }
-  devmodeSay(why + ': reloading…'); location.reload();
+  devmodeReload(why);
 }
 function devmodeSay(text) { DM_UI.msg = text || ''; devmodeDraw(); return false; }
 function devmodeBusy() {                                  // why a Dev action can't run just now, or null
@@ -49924,6 +49929,7 @@ function devmodeSettle() {                                // what's in progress 
   if (typeof DISC !== 'undefined' && DISC.g && typeof discEnd === 'function') discEnd(false);
   if (typeof ACT !== 'undefined' && ACT && ACT.kind !== 'lie' && typeof actEnd === 'function') actEnd(true);
   if (typeof deviceClose === 'function') deviceClose();
+  try { if (typeof queueOut === 'function') queueOut(false); } catch (e) { /* not in a queue */ }   // out of a booth or shower line, as New game does
 }
 // an action on the Dev game: refused with a reason, else the Undo kept, what's in progress settled, then fn() under a
 // short fade with the ship frozen (so frames drawn meanwhile change nothing), then one save. fn returns a message or null.
@@ -49964,12 +49970,12 @@ function devmodeClear() {                                 // the Dev save, Mark 
   const why = devmodeBusy(); if (why) return devmodeSay(why);
   DM_HOLD = true;
   try { for (const k of [SAVE_KEY, INTRO_KEY, DM_KEY.mark, DM_KEY.undo]) localStorage.removeItem(k); } catch (e) { /* the reload says what's left */ }
-  devmodeSay('Dev save cleared: a new Dev game…'); location.reload();
+  devmodeReload('Dev save cleared: a new Dev game');
 }
 // ---- D3: the clock (Clock tab), workdays excused, needs kept, Top up ----
 // The game's own time jump (skipTo, what sleeping uses) in DM_STEP-minute steps, frozen and unsaved until the end
-// (devmodeRun). A workday whose clock-in window (the shift's start, DAY_SHIFT[0], to CAREER.missBy) the jump crosses, with you not clocked in, is
-// excused (DM_ST.ex, read by section 20's careerOff through devmodeExcused): no miss, no warning, like a leave day that
+// (devmodeRun). A workday whose 12:30 (CAREER.missBy, when a missed shift is counted) the jump passes, with you not
+// clocked in and past the first week (CAREER.grace), is excused (DM_ST.ex, read by section 20's careerOff through devmodeExcused): no miss, no warning, like a leave day that
 // costs no leave. Clocked in, you stay clocked in. Your needs are kept as they were (section 15's skip step asks
 // devmodeHold); Top up needs fills them. A jump that passes one of the first week's meetings (INTRO_WEEK's meeting
 // beats) without you leaves a notice on the panel (DM_ST.note, kept in the Dev save), since a real player was there.
@@ -49994,8 +50000,8 @@ function devmodeSkipTo(to) {
   const miss = devmodeMissed(from, to), mail0 = SHIP.mail ? SHIP.mail.length : 0, ex = [];
   if (typeof CAREER !== 'undefined' && typeof careerRota === 'function') {
     for (let d = Math.floor(from / 1440) + 1; d <= Math.floor(to / 1440) + 1; d++) {
-      const a = (d - 1) * 1440 + DAY_SHIFT[0], b = (d - 1) * 1440 + CAREER.missBy;
-      if (to <= a || from >= b || !careerRota(d) || careerOff(d) || careerClockedIn(d)) continue;
+      const b = (d - 1) * 1440 + CAREER.missBy;   // only what the game would count as a miss (DR1): the jump passes 12:30 with you not clocked in
+      if (d <= CAREER.grace || to < b || from >= b || !careerRota(d) || careerOff(d) || careerClockedIn(d)) continue;
       st.ex.push(d); ex.push(d);
     }
     st.ex = [...new Set(st.ex)].sort((x, y) => x - y).slice(-60);
@@ -50027,7 +50033,7 @@ function devmodeClock(body) {
   }
   devmodeRow(body, DM_TIMES.map(([l, m]) => [l, () => devmodeGo(l.slice(3), () => devmodeNext(m))]));
   devmodeRow(body, [['+1 day', () => devmodeGo('+1 day', () => shipNow() + 1440)], ['+7 days', () => devmodeGo('+7 days', () => shipNow() + 7 * 1440)], ['+3 hours', () => devmodeGo('+3 hours', () => shipNow() + 180)]]);
-  devmodeText(body, 'Workdays you skip are excused. Needs kept as a normal day. Undo my last Dev action (Quick) puts the clock back.');
+  devmodeText(body, 'A workday you skip past 12:30 without clocking in is excused, not missed. Needs kept as a normal day. Undo my last Dev action (Quick) puts the clock back.');
 }
 // ---- D4: Take me to… (refused during the arrival evening and inside a meeting), Mark here / Back to mark ----
 // Take me to moves you as the lift does (goToDeck when it's another deck), to a free tile you could walk to from the
