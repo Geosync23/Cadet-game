@@ -10836,6 +10836,27 @@ function walkLaneStep(a, dt) {
   a.lx += (tx - a.lx) * k; a.lz += (tz - a.lz) * k;
   if (a.settled) { a.lx = 0; a.lz = 0; }
 }
+// the washroom stall's red light (#8, the patch): a red cap round the green light (not on its surfaces: it encloses it,
+// its back inside the door), shown only while someone (crew or you) is using that stall and the stall isn't faded.
+// Made at load with no random calls; one draw call for each taken stall in view
+const STALL_CAP = { geo: new THREE.BoxGeometry(.13, .06, .04), mat: std('#ff6a5a', .3, 0, { emissive: col('#d0352a'), emissiveIntensity: .9 }), list: [], of: null };
+function stallCapAdd(g) {                                // the toilet stall kit (4b), at build: g is placed already
+  const m = new THREE.Mesh(STALL_CAP.geo, STALL_CAP.mat);
+  m.position.set(.38, 1.32, .56); m.visible = false; m.castShadow = m.receiveShadow = false; m.raycast = () => {}; m.userData.noMerge = true;
+  g.add(m); STALL_CAP.list.push({ m, g, root: deckRoot, id: undefined, tall: undefined });
+}
+function stallCapsTick() {
+  const L = STALL_CAP.list; if (!L.length) return;
+  if (STALL_CAP.of !== deckRoot) {                       // a new deck: drop the old deck's, and match each stall to its toilet place (the nearest spot)
+    STALL_CAP.of = deckRoot; for (let i = L.length - 1; i >= 0; i--) if (L[i].root !== deckRoot) L.splice(i, 1);
+    const T = (deckDef.places || []).filter(q => q.type === 'toilet').map(q => [q.id, placeSpot(q.id)]).filter(x => x[1]);
+    for (const c of L) {
+      let best = null, bd = .9; for (const [id, sp] of T) { const d = Math.hypot(sp.x - c.g.position.x, sp.z - c.g.position.z); if (d < bd) { bd = d; best = id; } }
+      c.id = best; c.tall = null; for (let o = c.g.parent; o && !c.tall; o = o.parent) c.tall = TALL.find(t => t.g === o) || null;
+    }
+  }
+  for (let i = 0; i < L.length; i++) { const c = L[i]; c.m.visible = !!c.id && placeBusy(c.id) && (!c.tall || c.tall.o > .99); }
+}
 // ---- end of slot: Sim engineer ----
 
 // =====================================================================
@@ -49450,6 +49471,7 @@ function updateDeckCrew(dt) {
   for (let i = 0; i < DECK_CREW.length; i++) { const a = DECK_CREW[i]; if (a.h.full) { a.h.update(dt, clock.elapsedTime); a.h.rig.root.visible = crowd.visible; } }   // indexed: no iterator a frame (0.26.40)
   BUSY.clear(); for (let i = 0; i < DECK_CREW.length; i++) { const a = DECK_CREW[i]; if (a.settled && a.spot) BUSY.add(a.spot.id); }
   PLAYER_PLACE = typeof playerHolds === 'function' ? playerHolds() : null;
+  stallCapsTick();                                       // #8: the stalls' red lights
   if ((crewCheckT -= dt) > 0) return;
   crewCheckT = .25;
   crewDetail();
