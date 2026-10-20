@@ -1,0 +1,54 @@
+@address friday-d19
+// EW1 (events writer), 2026-10-20. Day 19: after the storm. Thanks, and what comes next. The all-clear was Sunday
+// (Day 14, 10:00), the debrief Mail Monday; the comet Tuesday (Day 16, 21:30); Senior Officer Tuesday (Day 16, Pillar
+// 5); your commendation summons yesterday (Day 18) in the ready room. Your night shifts start tonight (Days 19-20), so
+// a player on track is excused and asleep: they get this by Mail, and the night-watch line names them. A new junior
+// joins on Sunday (Day 21). This Sunday: the regatta (09:30) and talent night (19:30, moved a week).
+// Beats: the storm's tally and the people who carried it (Works first); the comet; commendations and ranks, yours among
+// them; tonight's night watch, a goodbye and a welcome; the week ahead, and the close.
+// Versions: band:smooth|bumpy|rough = the storm's result (as the debrief); commended = your storm commendation;
+// myrank:; myshift:night = your night shifts have started. Placeholders: {stormjobs} (storm jobs closed, all crew)
+// and {leavers} (first names of this week's leavers, from the rota): a line is left out when one can't be filled.
+day: 19
+from: Captain Odile Marrow
+mail: All hands: the Captain's Friday address | The storm's tally and my thanks, the comet, this week's commendations and ranks, and a welcome on Sunday for our new junior. To the night watch tonight: good watch.
+== lines
+vance: Settle, please. The Captain.   [nod]
+marrow: Afternoon, everyone. Full lights all week. I'd forgotten how bright this room is.   #funny
+// beat 1: the storm's tally, and the people who carried it (Works first)
+? band:smooth
+marrow: Last Sunday's all-clear came on time. The storm went about as well as storms go.
+marrow: The lights barely went, the cold store kept, and the bridge ate on time. That's good work.
+? band:bumpy
+marrow: The storm's five days behind us. It was bumpy. We came through it together.
+marrow: A relay burnt out on the bridge and some decks went dark. It's patched now. Thanks, Works.
+? band:rough
+marrow: The storm's five days behind us. It was a hard one, and parts of the ship still show it.
+marrow: Long blackouts, a scorched relay room, food lost. We're putting it right, together.   [sigh]
+?
+marrow: Works closed {stormjobs} storm jobs in four days. The Chief made it look easy. It wasn't.   [nod]
+marrow: And everyone who sat up with a neighbour by lantern light: that counted too.   #warm
+// beat 2: the comet, a gift after the storm
+marrow: Then on Tuesday, the comet. After a storm like that, I think the sky owed us one.   [gesture]
+marrow: Half of you were at the windows. The other half were asleep, and I don't blame you.   #funny
+// beat 3: commendations and ranks, yours among them
+marrow: My letters of thanks for the storm went to a long list this week. You know who you are.
+? commended
+marrow: {me} was on it. We talked in the ready room yesterday. Nobody tripped. A first.   #funny
+? myrank:senior|specialist
+marrow: And on Tuesday, Senior Officer {me} moved up to Deck 2. The senior corridor is lucky.   #warm
+? myrank:officer
+marrow: Officer {me}, a busy fortnight. Chief Calder has plans for you. That's a warning.   #funny
+? myrank:junior
+marrow: {me}, three weeks with us. The Chief says you're finding your feet. I can see it.
+// beat 4: tonight's night watch, a goodbye and a welcome
+?
+marrow: Tonight the night watch takes the ship. Thank you, all of you, for the hours nobody sees.
+? myshift:night
+marrow: That includes our newest night hand, {me}, who is asleep right now, I hope. Good.   #funny
+?
+marrow: This week we say goodbye to {leavers}. Wherever you go next, they're lucky to have you.   #warm
+marrow: And on Sunday a new junior comes up the Tern's ramp. Be to them what this ship was to you.   #warm
+// beat 5: the week ahead, and the close
+marrow: This Sunday, the regatta in the morning and talent night at half seven, a week late.
+marrow: Dinner's at five. Enjoy your weekend, those of you who have one.   [gesture]

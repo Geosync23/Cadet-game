@@ -1,0 +1,48 @@
+@address friday-d26
+// EW1 (events writer), 2026-10-20. Day 26: four weeks, and guests. The Veyli visit's warning is today (Vance's memo
+// was Monday, Day 22; his Mail comes this evening and keeps its own time: she points to it, she doesn't give it). The
+// greeting is tomorrow, Saturday Day 27, 10:00 in the shuttle bay (Deck 5): the crew line the bay. Speaker Teshavi
+// leads the delegation (Veyli: they/them; "the Speaker" is safe). Four weeks aboard is tonight at 18:40 in the Works
+// tea corner: its cake is a surprise ("We're not saying who"), so she doesn't say "cake". Calder's question (Pillar
+// 5) is at that tea too: not mentioned. Beats: a month of Fridays (who came, who went, the storm remembered); what
+// you've become (rank, work); the Veyli, who they are and how we host them; what she asks of everyone; four weeks
+// aboard tonight, and the close.
+// Versions: band: (the storm's result: the roster in the tea corner, or the scorch mark, both real traces);
+// myrank:; the placeholder {myjobs} (jobs you've closed since you came aboard).
+// A player let go on Day 20 has left on the Tern, so there's no version for them.
+day: 26
+from: Captain Odile Marrow
+mail: All hands: the Captain's Friday address | Four Fridays, a storm and a comet behind us. Tomorrow at ten a Veyli delegation comes aboard, led by Speaker Teshavi: line the shuttle bay with me if you're free. Commander Vance's Mail tonight has the details.
+== lines
+vance: Settle, please. The Captain.   [nod]
+marrow: Afternoon, everyone. Our fourth Friday. For some of you, that's every Friday you've had.
+// beat 1: a month of Fridays: who came, who went, the storm remembered
+marrow: A month ago {me} came up the Tern's ramp. Since then: the Line, a storm, a comet.   [gesture]
+? band:smooth
+marrow: The storm crew's roster is still pinned up in the tea corner. I read it some evenings.   #warm
+? band:bumpy|rough
+marrow: There's still a scorch mark in the relay room. Chief Calder wants to keep it. So do I.
+// beat 2: what you've become (your rank, your work)
+? myrank:specialist
+marrow > you: {me}. Four weeks ago, a junior. Today, an Engine Specialist. That's rarely done so fast.   #warm
+? myrank:senior
+marrow > you: {me}. Four weeks ago, a junior. Today, a Senior Officer with a cabin on Deck 2.   #warm
+? myrank:officer
+marrow > you: {me}. Four weeks ago, a junior. Today, an Officer of the Wren, with your own key.   #warm
+? myrank:junior
+marrow > you: {me}. Four weeks with us. Not every road up is quick. The good ones rarely are.   #warm
+?
+marrow: {myjobs} jobs on the Works board have your name on them. The ship runs better for it.
+marrow: Rank is nice. The people you sit with at dinner matter more. Find them. Keep them.
+// beat 3: the Veyli, who they are and how we host them
+marrow: Now, guests. Tomorrow at ten, a Veyli delegation comes aboard, led by Speaker Teshavi.
+marrow: The Veyli are our neighbours out here. Proud, careful, and very good at noticing things.
+marrow: Envoy Saruth asks me to remind you: do not bow. Most of us do it wrong.   #funny
+marrow: Commander Vance will brief you tonight. He has a list. Of course he has a list.   #funny
+vance: Three items. It's a short list.   [nod]
+// beat 4: what she asks of everyone
+marrow: What I ask: be yourselves, be kind, and answer their questions. They'll have a great many.
+marrow: Line the shuttle bay with me tomorrow, if you're free. Let's show them the ship we are.   #warm
+// beat 5: four weeks aboard tonight, and the close
+marrow: Works has something for {me} after dinner. I'm told I'm not allowed to say what.   #funny
+marrow: Dinner's at five. Enjoy your weekend, those of you who have one.   [gesture]

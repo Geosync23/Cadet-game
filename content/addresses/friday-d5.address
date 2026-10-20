@@ -1,0 +1,34 @@
+@address friday-d5
+// EW1 (events writer), 2026-10-20. The Captain's first Friday address: Day 5, 16:00-16:50, the rec deck auditorium
+// (plans/fridays-plan.md rev 4). Five beats: why Fridays are short; the Line on Sunday; the week behind, with the
+// galley's nod; new hands by name (you); the week ahead and the close.
+// DRAFT FORMAT (to agree with EV1; see plans/events-lines-addresses.md): lines as in a .meet; a "? conditions" line
+// applies to the lines under it until the next "?" (a bare "?" clears it); a line whose conditions fail, or whose
+// placeholder can't be filled, is left out. One line every 3 ship minutes. Bubbles: 90 characters at most.
+// No storm here: on Day 5 nobody aboard knows it's coming (the warning is Day 11).
+day: 5
+from: Captain Odile Marrow
+mail: All hands: the Captain's Friday address | Short Friday, short speech. Why we stop at half three, the Line on Sunday (14:30, the plaza: first-timers, come forward), the galley's nod, and a welcome to our newest hand, {me}. Dinner at five.
+== lines
+vance: Settle, please. The Captain.   [nod]
+marrow: Afternoon, everyone. Sit anywhere. Seventy-six seats, so nobody stands at the back.   [gesture]
+marrow: Short Friday, so I'll be short too. Mostly.   [laugh]
+// beat 1: why Fridays are short
+marrow: For our new hands: every Friday the day shift stops at half past three.
+marrow: We meet here at four, and dinner's at five. A week is long. We end it together.
+marrow: A few stay on duty: the bridge, a medic, the cooks. They get this by Mail, with my thanks.
+// beat 2: where the Wren is going, and the Line on Sunday
+marrow: On Sunday afternoon the Wren crosses the Line, into the Veyli reach.
+marrow: At half two the horn sounds on every deck and the hull lights go gold. Hold your mugs.   [gesture]
+marrow: First crossing? Come to the plaza. There's an old oath and Brennan's Line punch. Be brave.   #funny
+// beat 3: the week behind, and the galley's nod
+marrow: The week behind. The board was busy, and Works kept up with it. Thank you, Chief Calder.   [nod]
+marrow: This week's nod goes to the galley. Three meals a day, and the biscuit tin never ran dry.
+marrow: Somebody tell Chef Brennan I said so. She'll pretend not to be pleased.   #funny
+// beat 4: new hands by name
+marrow > you: And a welcome to our newest hand, {me}, five days aboard. You picked a good ship.   #warm
+marrow: The Chief tells me you're "fine". From Chief Calder, that's very nearly a medal.   [laugh]
+marrow: Works has a tea for you tonight, after dinner. Go. You'll see why.   #warm
+// beat 5: the week ahead, and the close
+marrow: Next week: the tasting table Wednesday, postcard night Thursday. And a quiet ship, I hope.
+marrow: Dinner's at five. Enjoy your weekend, those of you who have one.   [gesture]

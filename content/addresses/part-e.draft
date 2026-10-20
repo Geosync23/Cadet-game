@@ -1,0 +1,39 @@
+// EW1 (events writer), short Fridays part E (plans/fridays-plan.md): DRAFT lines, not baked. Each block says which
+// file it goes into when the onboarding / traditions engineer wires SHORT_FRIDAY (moving them in then keeps the game
+// identical until the switch is on, and keeps this writer seat out of the game file). The flag keys are new; nothing
+// sets them yet.
+
+// ======== into content/lines/torres-zeke.lines (@crew torres-zeke)
+// ---- EW1 (events writer), short Fridays part E (plans/fridays-plan.md): two goodnight lines on Day 0, said between
+// walk.goodnight.2 and walk.goodnight.3 (patch #4's order) only when SHORT_FRIDAY is on. The onboarding engineer sets
+// the new keys walk.goodnight.friday.1 and .2; nothing sets them yet, so nothing changes until then.
+== week1
+? flag:walk.goodnight.friday.1
+- Fridays we knock off at half three.
+? flag:walk.goodnight.friday.2
+- Captain talks to all of us at four, then dinner.
+
+// ======== into content/lines/halloran-emeka.lines (@crew halloran-emeka)
+// ---- EW1 (events writer), short Fridays part E: Day 5 at 13:00, after he hands you your mug (d5-mug), said in order
+// as bubbles while you're in the tea corner, only when SHORT_FRIDAY is on (the onboarding engineer's new keys
+// beat.d5-friday.1-3; nothing sets them yet). The plan's wording, split to bubbles of 60 or fewer.
+== week1
+? flag:beat.d5-friday.1
+- Short day today. Half three, clock out.
+? flag:beat.d5-friday.2
+- Then the auditorium at four. Deck R. She'll say your name.
+? flag:beat.d5-friday.3
+- Don't hide. Have a biscuit first. Have you eaten?   #funny
+
+// ======== a new file, content/banks/fridays.lines (as below, from its @bank line)
+@bank all
+// EW1 (events writer), short Fridays part E (plans/fridays-plan.md): now and then a crew member says it at Friday
+// breakfast. flag:shortFriday is a new key (the traditions or sim engineer sets it while SHORT_FRIDAY is on), so these
+// stay silent until then. Bubbles: 60 characters. Not in your first week: week 1 has its own lines (Zeke, Halloran).
+== smalltalk
+? weekday:fri act:breakfast flag:shortFriday !week1:true
+- Short one today.
+- Half three, then the Captain.
+- Short Friday. I've planned my whole afternoon. It's a nap.   #funny
+- Captain at four. I'm sitting at the back. Again.   #funny
+- Friday. Half a day's work and a whole speech.   #funny

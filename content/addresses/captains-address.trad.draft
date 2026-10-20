@@ -1,0 +1,44 @@
+@tradition captains-address
+// EW1 (events writer), 2026-10-20: DRAFT words for the Captain's Friday address (plans/fridays-plan.md, part C).
+// Not in content/traditions yet: the traditions engineer gives it its k:, checks the rules below against the plan and
+// moves it in when SHORT_FRIDAY is built. The speech itself is in content/addresses/friday-*.address (Days 5, 12, 19,
+// 26); after Day 26 the weekly shape takes over (not written yet).
+// Rules from the plan (rev 4), for the engineer: weekly friday, 16:00-16:50, the auditorium (rec-aud seats), Marrow at
+// rec:lectern with Vance beside her; everyone 90%, night shift 50%, the skeleton (helm and watch ratings on the bridge,
+// a medic on call, the dinner cooks) never; missing it is a small work-reputation dip (not on leave, sick, a rota day
+// off, Dev-mode excused or nights).
+k: (the traditions engineer's)
+title: The Captain's Friday address
+when: weekly friday
+at: 16:00-16:50
+where: 7 room Auditorium: rec:seat
+hold: none
+who: marrow always, vance always, night-shift 50%, everyone 90%
+host: marrow
+from: marrow
+
+== mail
+// the evening-before Mail, Thursdays at 18:00. The first one (Day 4, your first week) is the plan's own words.
+? week1:true
+- Tomorrow's a short Friday. The day shift stops at half past three; I'll see all of you in the auditorium at four. Dinner at five. Our new hands especially.
+?
+- Tomorrow's a short Friday: the day shift stops at half past three. The Captain's address is at four in the auditorium, deck R. Dinner at five.
+
+== ask
+- Captain at four. Back row's mine. Don't tell anyone.   #funny
+- Half three, clock out, then the auditorium. Coming?
+- She always says one thing you remember all week. Come and hear it.   #warm
+
+== here
+- Shh. She's starting.
+- Good turnout. She'll notice. She notices everything.
+- Budge up. There's a seat by me.
+
+== thanks
+- You find a seat in the auditorium as Captain Marrow steps up to the lectern. Commander Vance stands beside her.
+
+== chatter
+- Did you hear the Captain's address? She named the galley again.   #warm
+- "Those of you who have one." She says it every Friday. I wait for it.   #funny
+- Best part of a Friday: half three. Second best: the Captain.
+- Short Friday tomorrow. I've already planned my extra hour. It's a nap.   #funny

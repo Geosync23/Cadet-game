@@ -1,0 +1,55 @@
+@address friday-d12
+// EW1 (events writer), 2026-10-20. Day 12: steady in the storm. The regular Friday address, in the auditorium, with the
+// ion storm at its heart (the user's, fp-v2-q1). The front hit at 14:00, two hours before: the jolt, the lights, her
+// short "We're in it" banner (SHIP_EVENTS.ionStorm address.onset; this speech must not repeat it). Bridge and helm are
+// on double shifts, so they're not here. Comms are down, the booths and the bow lounge are shut. Lantern supper
+// Saturday 18:00. The all-clear is expected Sunday morning (Day 14, 10:00). Your Officer summons was Wednesday (Day 10)
+// and the ceremony Thursday (Day 11), so this is the first time she says "Officer {me}" in front of everyone.
+// Beats: calm first words, what the storm is and how long; what's broken, what's held, who's fixing it; what she needs
+// this weekend; your promotion, with a joke; the all-clear she expects, and dinner.
+// Versions: done:<jobId> = that storm prep job was done (by anyone) before 16:00; done:<jobId>.you = you did it.
+// myrank: your rank (playerRank()). A player who's behind (still a junior) hears the junior lines.
+// FOR EV1 / the lead: the rec deck is closed from the front to the all-clear (events plan, answer 7), but the user
+// put this address in the auditorium. Line 3 covers it (she opens it for the hour); the code needs the same exception.
+day: 12
+from: Captain Odile Marrow
+mail: All hands: the Captain's Friday address | The storm: what it is, what's held, and what I need this weekend. Stay in when you can, look after each other, and come to the lantern supper tomorrow at six. All-clear expected Sunday morning.
+== lines
+vance: Settle, please. The Captain. Quickly; I'm due back on the bridge.   [nod]
+marrow: Afternoon, everyone. If the lights dip while I talk, that's the storm. Not my speech.   #funny
+marrow: The rec deck is shut for the storm. I've borrowed this room for an hour, then it shuts.
+// beat 1: what the storm is, and how long
+marrow: At two we flew into an ion storm. Dr. Sato says it's bigger than a moon. She's thrilled.   #funny
+marrow: It can't hurt us. It can make the lights flicker, the comms go quiet, and Works very busy.
+marrow: We expect it to blow through by Sunday morning. Two nights, perhaps a little less.
+// beat 2: what's broken, what's held, and who's been fixing it
+marrow: What's down: calls home and outside Mail. The booths and the bow lounge are shut for now.
+marrow: I know that's hard. Your people will be there on Sunday. So, I'm afraid, will the queue.   #warm
+? done:stormBallasts
+marrow: What's held: the new lamp ballasts went in yesterday. That's why the lights only flicker.
+? !done:stormBallasts
+marrow: Not every lamp got its new ballast in time. Expect a dark corridor. Walk, don't run.
+? done:stormBatteries !done:stormBatteries.you
+marrow: The bridge has its spare battery packs, carried up from the bay by hand. Thank you.
+?
+marrow: Chief Calder's crew have been on the board since the jolt. They'll be on it all weekend.   [nod]
+? done:stormBatteries.you
+marrow: {me} carried the bridge its battery packs. It says thank you, between sandwiches.   #funny
+? done:stormBallasts.you
+marrow: {me} fitted some of those ballasts. If your corridor's bright, that's who to thank.
+// beat 3: what she needs from everyone this weekend
+?
+marrow: What I need from you. Stay in when you can. Check on your neighbours. Eat the stew.   #funny
+marrow: Some of you will be called in on your days off. I'm sorry. And thank you, in advance.
+marrow: Tomorrow at six, supper in the mess by lantern light. If you're staying in, come and sit.   #warm
+// beat 4: your promotion, said plainly, with a joke to let the room breathe
+? myrank:officer|senior|specialist
+marrow: Happier news. Works gained an Officer this week. Officer {me}, stand up a moment.   [gesture]
+marrow: There. First time I've said it in front of everyone. Sit down before the lights go.   #funny
+? myrank:junior
+marrow: Happier news. {me}, not two weeks aboard and learning fast. The Chief has noticed.   [nod]
+marrow: She says you ask good questions. Keep asking them. A storm is full of answers.
+// beat 5: the all-clear she expects, and dinner
+?
+marrow: The all-clear, I hope, on Sunday morning. I'll tell you myself. Until then: steady.
+marrow: Dinner's at five. Enjoy your weekend, those of you who have one.   [gesture]
