@@ -9,7 +9,7 @@ Dev mode planner DP1, 2026-10-20. Written after the user's answers (12:05) and t
 ## What it is
 - **Opening:** a ready Dev link (`#dev`). In Dev mode the place-and-clock card gets a gold outline and the word DEV, and tapping it opens the panel. Without the link, Dev mode doesn't exist in the game.
 - **Saving:** Dev mode keeps its own save (the real save's names with "-dev" added).
-  - The user answered "none" to q2. The lead's recommendation, kept here, is a separate save, because Mark, Undo and reloads need one. New question 4 confirms it.
+  - The user answered "none" to q2. The lead's recommendation, kept here, is a separate save, because Mark, Undo and reloads need one. The user confirmed it after the talk.
   - Only three small things are stored: the save, one Mark and one Undo (about 120 KB each).
   - There's a space check before each write and a Clear button. A check proves the real save still writes and stays byte-identical.
   - No IndexedDB is needed now.
@@ -30,10 +30,10 @@ Dev mode planner DP1, 2026-10-20. Written after the user's answers (12:05) and t
   1. Pick a day from 0 to 30.
   2. A new Dev game by shuttle starts.
   3. The clock moves day by day with workdays excused. Each morning the career is set from a table of "what a steady player has by day N" (the ladder's days and the Pillar 5 dates: Officer 10, Senior 16, Engine Specialist 23, Calder's question 26).
-  4. The first-week and promotion beats are marked done, and friendships get a starting level (new question 1).
+  4. Set career doesn't depend on the first week's meetings (it works while the Day 2 meeting is broken): it marks the arrival week as attended (Day 1 briefing, Day 2 solo job, Settling-in, the shadow shift) before setting the career. The promotion beats are marked done, and friendships get a starting level (new question 1).
   5. You wake at 06:00 in your bed.
   - The result is marked **approximate**, and the panel's "What's set" list says what it gets wrong: thin friendships, an empty work log, no part in the storm, fresh tool wear.
-  - devmode_check compares the table with `CAREER_LADDER`.
+  - devmode_check compares the table with `CAREER_LADDER`, and checks that Set career to Day 10 from a fresh Dev game gives a career, rank Officer and no missed-meeting Mail.
   - The Career tab (q8): the promotion test's needs with ticks; `ladderOpen` when only the day is missing (owner first); set rank marked approximate.
 - **Stop 3, Big events (D8-D9):** start by day, next phase, threads with −/+, End and undo (End and keep after the events plan splits the ending out of `eventAdvance`).
 - **D10:** fixes.
@@ -52,7 +52,7 @@ Dev mode planner DP1, 2026-10-20. Written after the user's answers (12:05) and t
 | Question | Decided |
 |---|---|
 | q1 | the Dev link |
-| q2 | own Dev save, to be confirmed (v3-q4) |
+| q2 | own Dev save (confirmed by the user) |
 | q3, q4 | parked |
 | q5 | excused |
 | q6 | no longer applies |
@@ -66,11 +66,10 @@ Dev mode planner DP1, 2026-10-20. Written after the user's answers (12:05) and t
 | q15 | kept + Top up |
 | q16 | split |
 
-## New questions (dm-v3-q1..q4, plus dm-v3-general)
+## New questions (dm-v3-q1..q3, plus dm-v3-general)
 1. Friendships after Set career. **Recommended: a starting level with the people a steady player meets, marked approximate.**
 2. Does Set career start a new Dev game or carry on? **Recommended: always new (Undo brings the old one back).**
 3. Where do you wake? **Recommended: 06:00 in your bed; the beat shortcuts go on to the beat's time and place.**
-4. A separate Dev save? **Recommended: yes, with Clear.**
 
 ## Parked: the steady-player replay
 - **Status:** parked 2026-10-20 (the user's call). Its design is kept in full in v2.1 (6c37f52) and in section 7 of the page.

@@ -87,7 +87,7 @@ code{font-size:12.5px}
 <li><b>Stop 3, Big events:</b> start, phases, threads, End and undo.</li>
 </ul></li>
 <li><b>The steady-player replay is parked, not deleted.</b> That's the exact day jump, where the game plays a player's days from Day 0. It's much bigger: 13-17 turns, with every career part's owner writing a line. Its design and measurements are kept in section 7 for later.</li>
-<li><b>4 new questions</b> are in section 6. Your earlier answers are recorded there as decided.</li>
+<li><b>3 new questions</b> are in section 6. Your earlier answers are recorded there as decided.</li>
 </ul>
 </div>
 
@@ -104,7 +104,7 @@ code{font-size:12.5px}
 <li>Your q2 answer was "no saving". After your talk with the lead, the plan keeps a <b>separate Dev save</b>, because "Mark / Back to mark", "Undo" and a page reload all need somewhere to keep your test.</li>
 <li>Your real save is never touched either way. The game's two storage names get "-dev" added in Dev mode.</li>
 <li>Dev mode doesn't use the tests' "no saving" switch, because that also turns off the arrival and the clothes.</li>
-<li>New question 4 confirms this.</li>
+<li>You confirmed this after the talk.</li>
 </ul></li>
 <li><b>Storage.</b>
 <ul>
@@ -211,6 +211,7 @@ If a skip passes one of the first week's meetings, the panel says so in words ("
 <li>Dev mode starts a <b>new Dev game</b> by shuttle (new question 2), then moves the clock day by day to that day at 06:00, with every workday excused.</li>
 <li>Each morning, before that day runs, it sets the career to what a steady player has by then, from the table below. The ladder then sees those trainings as done and doesn't ask for them again.</li>
 <li>The ship itself (machines, jobs, galley, Mail, traditions, the ion storm, the crew's habits) runs through those days with the game's own catch-up code, as when you sleep. Your part in the storm is "none".</li>
+<li><b>Set career doesn't depend on the first week's meetings happening, so it works even while the Day 2 meeting is broken.</b> Before it sets rank and trainings, it marks the arrival week as attended: the Day 1 briefing, the Day 2 solo job, the Settling-in items, and the Day 1 shadow shift the career starts from. Later systems then treat you as having been there.</li>
 <li>The first week's beats are marked as met, the promotion's beats as done (ceremony, cabin 4-23, the pip), and friendships with the people a steady player meets get a starting level (new question 1).</li>
 <li>You wake at 06:00 in your bed: the bunk room as a Junior, your cabin as an Officer.</li>
 </ol>
@@ -285,7 +286,7 @@ If a skip passes one of the first week's meetings, the panel says so in words ("
 <tr><td colspan="3"><b>Stop 1a, the patch kit:</b> your Dev link and phone screenshots.</td></tr>
 <tr><td>D5</td><td>Traditions</td><td>events_check and join_check unchanged; 5 kinds started; people go</td></tr>
 <tr><td colspan="3"><b>Stop 1b.</b></td></tr>
-<tr><td>D6</td><td>Set career: the table, the excused skip day by day, the beats set, waking in the right bed</td><td>Days 2, 10, 12 and 26 set; career_check and mech_check unchanged; the table's days match the ladder</td></tr>
+<tr><td>D6</td><td>Set career: the table, the excused skip day by day, the beats set, waking in the right bed</td><td>Days 2, 10, 12 and 26 set; <b>Set career to Day 10 from a fresh Dev game: the career exists, rank Officer, no "missed meeting" Mail</b>; career_check and mech_check unchanged; the table's days match the ladder</td></tr>
 <tr><td>D7</td><td>The Career tab</td><td>The promotion opened from Day 9 runs to the ceremony</td></tr>
 <tr><td colspan="3"><b>Stop 2.</b></td></tr>
 <tr><td>D8-D9</td><td>Big events</td><td>events_check unchanged; the storm started, through its phases, undone (later dates unchanged)</td></tr>
@@ -320,7 +321,7 @@ If a skip passes one of the first week's meetings, the panel says so in words ("
 <div class="scroll"><table>
 <tr><th>Question</th><th>Decided</th></tr>
 <tr><td>q1 opening</td><td>A ready Dev link (<code>#dev</code>); tap the card</td></tr>
-<tr><td>q2 saving</td><td>You chose "none"; after the talk, its own Dev save (confirm in new question 4)</td></tr>
+<tr><td>q2 saving</td><td>Its own Dev save (you chose "none" at first, then confirmed a separate Dev save after the talk)</td></tr>
 <tr><td>q3 day jump</td><td>Parked (the replay); Set career instead</td></tr>
 <tr><td>q4 player kinds</td><td>Parked with the replay</td></tr>
 <tr><td>q5 shifts</td><td>Excused</td></tr>
@@ -376,18 +377,6 @@ If a skip passes one of the first week's meetings, the panel says so in words ("
 <label class="cl" for="dm-v3-q3-c">Your comment</label><textarea id="dm-v3-q3-c" name="dm-v3-q3-comment"></textarea>
 </div>
 
-<div class="q" data-qid="dm-v3-q4">
-<h3>4. Is a separate Dev save all right?</h3>
-<p class="why">You chose "no saving" before. Mark, Undo and reloads need somewhere to keep your test. Your real save is never touched either way.</p>
-<fieldset><legend>Question 4</legend>
-<label class="opt"><input type="radio" name="dm-v3-q4" value="own"> Yes, a separate Dev save, with Clear Dev save <span class="recd">recommended</span></label>
-<label class="opt"><input type="radio" name="dm-v3-q4" value="none"> No saving: lose Mark, Undo and reloads</label>
-<label class="opt"><input type="radio" name="dm-v3-q4" value="session"> Keep it only until the tab closes</label>
-<label class="opt"><input type="radio" name="dm-v3-q4" value="other"> Something else (say below)</label>
-</fieldset>
-<label class="cl" for="dm-v3-q4-c">Your comment</label><textarea id="dm-v3-q4-c" name="dm-v3-q4-comment"></textarea>
-</div>
-
 <div class="q" data-qid="dm-v3-general">
 <h3>Anything else?</h3>
 <label class="cl" for="dm-v3-general-c">Your comment</label><textarea id="dm-v3-general-c" name="dm-v3-general-comment"></textarea>
@@ -427,7 +416,7 @@ If a skip passes one of the first week's meetings, the panel says so in words ("
 <li>Stop 2 is now <b>Set career</b>: a table, the excused skip and the beats set. It replaces the replay, which is parked in section 7.</li>
 <li>No kept days and no IndexedDB. No fixed career seed either, which was only needed for the replay's repeatability; Mark and Undo restore exactly.</li>
 <li>About 9-10 turns, down from 13-17.</li>
-<li>Your answers are recorded as decided (6.4), with 4 new questions (<code>dm-v3-q1</code> to <code>q4</code>, plus <code>dm-v3-general</code>).</li>
+<li>Your answers are recorded as decided (6.4), with 3 new questions (<code>dm-v3-q1</code> to <code>q3</code>, plus <code>dm-v3-general</code>; a fourth, about the Dev save, was answered: yes).</li>
 <li>Stop 1 (1a and 1b) and Stop 3 are as in version 2.1, with both reviewers' re-checks taken in.</li>
 </ul>
 </main>
