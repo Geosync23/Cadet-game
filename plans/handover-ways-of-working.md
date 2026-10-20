@@ -17,7 +17,7 @@
 | GitHub check | `.github/workflows/quick-check.yml` | **DISABLED: `on: workflow_dispatch` only** (runs only if started by hand). Two commented `on:` blocks for the lead: A = shared branch `claude/integration` only, B = every claude/ branch. Validated as YAML. Pushing it triggers nothing. |
 | Owners | `plans/owners.md` | the user's rule, sections → seats (the split plan's owners), contracts by hand, SHIP's records, the generated list (187 names used by 4+ other sections). |
 | Map | `plans/map.md` | how to find things, file order vs section numbers, a topic → section table. |
-| Backlog | `plans/backlog.md` | 13 rows + fixed. Item 3 (the double clock hold) is recorded as unconfirmed, to reproduce (lead 20's wording); lead 20 is asking the user. |
+| Backlog | `plans/backlog.md` | 13 rows + fixed. Item 3 (the "double clock hold") was dropped by lead 20 and the user: no record, probably the Day 0 evening's two designed holds (kept under "Dropped"). |
 | Drafts (not applied) | `plans/step2-drafts/` | README (order), claude-md.md, dev-notes-rules.md, build-table-move.md, slots.md + add_slots.py (tried on a scratch copy: 17 slots, names_check OK; merge test: clean with slots, clash without), whole-file.md, start-prompts.md. |
 
 ## Proof of the exit-code fixes

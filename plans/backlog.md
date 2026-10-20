@@ -8,7 +8,6 @@ Lines are at 0.64.2 (rec-cand-s1 1eeb99c); `python3 tools/section.py --where LIN
 |---|---|---|---|---|---|
 | 1 | **An unclosed CSS comment swallows two rules.** The comment that ends line 181 (`/* 0.72.0 (the user's playtest): a little smaller ...`) has no `*/` until the end of line 183's own comment, so `.device .app i{...}` (line 182, the app icons' size and colour) and `.device .app span{...}` (line 183, long labels wrapping inside their tile) never apply. | `page`, lines 181-183 | HUD seat | the 0.63.5 publish read (lead 19) | Fixing it changes how the device's app tiles look (icon size 26 px, labels wrap): needs screenshots and the user's eye, so it is a look change, not a silent fix. |
 | 2 | **A `//` comment hides the small door gear.** In `doorGear(g)` (Deck 5's bay door gear), line 1732: `... small.position.set(-1.0, 1.55, -.5);   // pitch circles touch small.castShadow = true; g.add(small);`: the `g.add(small)` is inside the comment, so the small gear is never added (it still spins in `SPINS`, unseen). | `4b`, line 1732 | Deck architect | the 0.63.5 publish read (lead 19) | Fixing it adds a mesh on Deck 5 (draw calls, Deck 5's screenshots change): cadet_test differences expected on Deck 5's bay only. |
-| 3 | **Unconfirmed: the clock seemed to hold twice in the evenings** (lead 19's note, no repro); to reproduce. | to find | Sim engineer (13) / onboarding (21)? | lead 19's roadmap list | Only that one line exists anywhere (lead 20 checked, 2026-10-20); lead 20 has asked the user whether they saw it. `FREEZE` / `freezeSync` (13) and the arrival's clock hold (`INTRO_START`, 21) are the two clock holds in the code. |
 | 4 | **Rec talent night only moves off the yearly talent night,** not other busy days. `rec-talent-night`'s `skip: d => Math.abs(shipYearDay(d) - 152) < 7` (line 34008) stands it down within a week of day 152, as lead 18 asked; lead 17's call 7 (it moves off a busy career day) isn't done. The 152 is also written in by hand: if the writers move the yearly one (`content/`, `dayOfYear: 152`), the two can land in the same week. | `18`, line 34008 | Traditions engineer (rec side: Rec engineer) | R7's review (`plans/reviews-rec-r7.md` on claude/reviews-r8), START-HERE | For the user to decide whether "busy days" matter. |
 | 5 | **The Tracked panel fills almost the whole screen on a small (320 px) phone.** | `page` CSS, `trkPlace` (15b) | HUD seat | lead 19, START-HERE | |
 | 6 | **On phones the tip card lies over the needs strip, Tracked and the activity bar** while it shows (`#devTip`, fixed at top 128 px). Pre-existing, not changed in 0.64.x. | `page` CSS, 19's `tipShow` | HUD seat (device engineer for the card) | RE20, lead 20 (told the user) | Not changed unless the user asks. |
@@ -19,6 +18,12 @@ Lines are at 0.64.2 (rec-cand-s1 1eeb99c); `python3 tools/section.py --where LIN
 | 11 | **Breakfast seat share on day 3:** day_check day 3 finds two crew settled in one seat ('3-mess-42 walsh-esme/kovac-zainab from 07:38'; 0.60.6a also '3-mess-16 dlamini-lukas/silva-bea from 18:24'). | `14` / `16` | Sim or galley engineer | the traditions engineer at 0.34.56 (DEV_NOTES "Known issues") | Not held for 0.60.7 (lead 11). |
 | 12 | **career_check fails 'busy: Relied on before Day 5'** (a busy player's career pace). | `24` | Works career engineer | BM9/BM10 | **Known and accepted** by the user (2026-10-20): waits for the big balance pass. Not a bug to fix now; listed so nobody "fixes" it by changing the check. |
 | 13 | **mech_check's parts share the game:** M8, M13, M14, M15, FC and FF run machinesNew/machinesNow before they rebuild the works, so their catch-up reads the last run's works. They pass today. | `mech_check.py` | Works career engineer | build master 8 (DEV_NOTES "Testing") | If one fails only on its first run, this is why. |
+
+## Dropped
+
+| Bug | Why |
+|---|---|
+| (was #3) "The double clock hold in the evenings" | Dropped 2026-10-20 (lead 20, the user): no record anywhere, probably a typo for the Day 0 evening's two designed clock holds (17:30 manifest until you sign; lead 13's call A while Zeke talks before dinner). |
 
 ## Fixed
 
