@@ -14379,7 +14379,7 @@ const ixBond = s => typeof bondBest === 'function' ? bondBest(DECK_CREW.filter(c
 // the side gains as the minutes pass (ixFrame, below, each frame while one of ours runs): also{}, plus `with` more
 // social for company (scaled by needEffects' socialGain). They follow A.done, so needEffects' task speed applies
 function ixSide(A) {
-  if (A.kind === 'ixDrink' && !A.o.drink && SHIP.player.drink) { A.o.drink = SHIP.player.drink; SHIP.player.drink = null; A.def.done = 'You finish your ' + BAR_DRINKS[A.o.drink].short + '.'; }   // the drink from the bar goes as you drink it (0.28.62)
+  if (A.kind === 'ixDrink' && !A.o.drink && SHIP.player.drink) { A.o.drink = SHIP.player.drink; SHIP.player.drink = null; A.def.done = 'You finish your ' + BAR_DRINKS[A.o.drink].short + '.'; if (typeof mugAlso === 'function') A.def.also = mugAlso(A.o.drink, A.def.also); }   // the drink from the bar goes as you drink it (0.28.62)
   const d = A.def, f = Math.max(0, Math.min(1, A.done / d.mins));
   if (!A.o.ixSide) {
     let mult = 1; try { const e = typeof needEffects === 'function' ? needEffects(SHIP.player.needs) : null; if (e && isFinite(e.socialGain)) mult = e.socialGain; } catch (e) { mult = 1; }
