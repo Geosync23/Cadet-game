@@ -10796,6 +10796,45 @@ function walkLead(from, pl) {
   const [x, z] = pl.xy || [pl.at[0] + .5, pl.at[1] + .5];
   return Math.ceil(WALK_DETOUR * Math.hypot(x - from[0], z - from[1]) / 1.15 * SHIP_RATE);   // 1.15: CREW_SPEED (section 10), tiles per real second
 }
+// crew walking apart (#10, the patch; section 10's walkers): out of the lift one at a time, a gap kept behind someone
+// going the same way, and a lane each, by seed, that moves only where the body is drawn (their tiles and paths are
+// unchanged, so being stuck, the doors and your bump test still go by the tile position)
+const WALK_GAP = .45, WALK_LANE = .18, LIFT_STEP = .3;   // tiles; tiles either side; ship minutes between two out of one lift tile (about half a real second)
+const LIFT_OUT = new Map();                              // lift tile -> when the last one stepped out of it (ship minutes)
+function liftOutOk(at, now) {
+  if (!at) return true;
+  const k = at[0] + ',' + at[1], t = LIFT_OUT.get(k);
+  if (t !== undefined && now >= t && now - t < LIFT_STEP) return false;
+  LIFT_OUT.set(k, now); return true;
+}
+// the pace (a fraction of CREW_SPEED) for a walker heading (ux, uz): closing on someone ahead going the same way, within
+// WALK_GAP, they take that walker's pace, and less as the gap shrinks (never under a third, so two can't hold each other up)
+function walkGap(a, ux, uz) {
+  let f = 1;
+  for (let i = 0; i < DECK_CREW.length; i++) {
+    const o = DECK_CREW[i]; if (o === a || o.pose !== 'walk' || !o.spd) continue;
+    const rx = o.x - a.x, rz = o.z - a.z, d = Math.hypot(rx, rz); if (d >= WALK_GAP) continue;
+    const ahead = rx * ux + rz * uz;
+    if (ahead < -1e-3 || ahead <= 1e-3 && o.p.id > a.p.id) continue;   // behind (side by side: the first by id leads)
+    if (o.ux * ux + o.uz * uz < .5) continue;            // not the same way
+    f = Math.min(f, Math.max(1 / 3, o.spd * Math.min(1, Math.max(0, (d - .2) / (WALK_GAP - .2)))));
+  }
+  return f;
+}
+// the lane: about a fifth of a tile to one side of the way they're walking, eased round corners; back to the middle
+// through a doorway, when stopping at their place or standing about
+function walkLaneStep(a, dt) {
+  let tx = 0, tz = 0;
+  if (a.pose === 'walk' && a.path.length && a.lane) {
+    const h = a.here(), n = a.path[0];
+    const door = (n[0] !== h[0]) !== (n[1] !== h[1]) && (e => e && e.type !== 'open')(EDGES.get(n[0] !== h[0] ? `v,${Math.max(h[0], n[0])},${h[1]}` : `h,${h[0]},${Math.max(h[1], n[1])}`));
+    const n2 = a.path[1], door2 = n2 && (n2[0] !== n[0]) !== (n2[1] !== n[1]) && (e => e && e.type !== 'open')(EDGES.get(n2[0] !== n[0] ? `v,${Math.max(n[0], n2[0])},${n[1]}` : `h,${n[0]},${Math.max(n[1], n2[1])}`));
+    if (!door && !door2) { tx = -a.uz * a.lane; tz = a.ux * a.lane; }
+  }
+  const k = Math.min(1, dt * 4);
+  a.lx += (tx - a.lx) * k; a.lz += (tz - a.lz) * k;
+  if (a.settled) { a.lx = 0; a.lz = 0; }
+}
 // ---- end of slot: Sim engineer ----
 
 // =====================================================================
@@ -48596,6 +48635,7 @@ class CrewAgent {
     this.face = idHash(p.id) % 628 / 100; this.pose = 'stand';
     this.path = []; this.spot = null; this.goalId = undefined; this.settled = false; this.talking = 0;
     this.stuck = 0; this.stuckMax = 0; this.lastX = this.x; this.lastZ = this.z; this.noPath = 0;
+    this.lx = 0; this.lz = 0; this.ux = 0; this.uz = 0; this.spd = 0; this.lane = WALK_LANE * ((idHash(p.id) >> 3) % 21 - 10) / 10;   // #10: the drawn lane, the last step's way and pace
     const bed = PLACE_OF.get(p.bed); this.bedRooms = bed ? [bed.room] : []; this.rooms = new Set(this.bedRooms);
     this.liftCell = (() => { const l = liftTiles(); return l.length ? l[idHash(p.id) % l.length] : cell; })();
   }
@@ -48630,7 +48670,7 @@ class CrewAgent {
     if (this.talking > 0) {                              // stopped for a word with you
       this.talking -= dt;
       if (!this.settled) { this.pose = 'stand'; this.face = Math.atan2(player.obj.position.x - this.x, player.obj.position.z - this.z); }
-      if (!((this.rk || this.settled && this.spot && this.spot.mv) && recCrewSet(this, dt))) this.h.set({ x: this.x, y: this.y, z: this.z }, this.face, heldPose(this)); return true;
+      if (!((this.rk || this.settled && this.spot && this.spot.mv) && recCrewSet(this, dt))) this.h.set({ x: this.x + this.lx, y: this.y, z: this.z + this.lz }, this.face, heldPose(this)); return true;
     }
     let goalId;
     if (w.deck !== N) goalId = '@lift';
@@ -48656,10 +48696,12 @@ class CrewAgent {
     }
     if (goalId !== this.goalId) this.retarget(goalId);
     const ox = this.x, oz = this.z;
+    this.spd = 0;
     if (this.path.length) {
-      const c = cellPos(...this.path[0]), dx = c.x - this.x, dz = c.z - this.z, d = Math.hypot(dx, dz), st = CREW_SPEED * dt;
+      const c = cellPos(...this.path[0]), dx = c.x - this.x, dz = c.z - this.z, d = Math.hypot(dx, dz), st = CREW_SPEED * dt * (d > 1e-6 ? walkGap(this, dx / d, dz / d) : 1);
       if (d <= st) { this.x = c.x; this.z = c.z; this.path.shift(); }
       else { this.x += dx / d * st; this.z += dz / d * st; this.face = Math.atan2(dx, dz); }
+      if (d > 1e-6) { this.ux = dx / d; this.uz = dz / d; this.spd = Math.min(d, st) / (CREW_SPEED * dt); }
       this.pose = 'walk'; this.y = 0;
     } else if (this.spot && !this.settled && spotTaken(this, this.spot.id)) { this.pose = 'stand';   // someone sat down in it first (this very frame, before BUSY knew: 0.36.91, day 3's 3-mess-42): wait on the walk-to tile; next frame finds another
     } else if (this.spot && !this.settled) {             // the last step, from the walk-to tile onto the spot itself
@@ -48672,7 +48714,8 @@ class CrewAgent {
     const going = this.path.length > 0 || (this.spot && !this.settled);
     if (going && Math.hypot(this.x - ox, this.z - oz) < 1e-4) { this.stuck += dt * SHIP_RATE; this.stuckMax = Math.max(this.stuckMax, this.stuck); } else this.stuck = 0;
     if ((this.rk || this.settled && this.spot && this.spot.mv) && recCrewSet(this, dt)) return true;   // 0.84.6: swimming the lane, up the wall (8c)
-    this.h.set({ x: this.x, y: this.y, z: this.z }, this.face, heldPose(this));
+    walkLaneStep(this, dt);
+    this.h.set({ x: this.x + this.lx, y: this.y, z: this.z + this.lz }, this.face, heldPose(this));
     return true;
   }
   // someone's in your place: a free seat of the same kind close by (kept while the plan's place stays the same), else
@@ -49320,7 +49363,7 @@ function crewDetail() {                                  // who gets a full rig:
 const BUSY = new Set(); let PLAYER_PLACE = null;
 const placeBusy = id => BUSY.has(id) || PLAYER_PLACE === id;
 let crewCheckT = 0;
-function deckCrewClear() { for (const a of DECK_CREW) a.remove(); DECK_CREW.length = 0; BUSY.clear(); LINE.length = 0; CREW_HELD.clear(); CREW_WAY.clear(); }
+function deckCrewClear() { for (const a of DECK_CREW) a.remove(); DECK_CREW.length = 0; BUSY.clear(); LINE.length = 0; CREW_HELD.clear(); CREW_WAY.clear(); LIFT_OUT.clear(); }
 // everyone whereIs puts on this deck, mid-activity: at their place, partway there, or still in the lift
 function deckCrewFill() {
   deckCrewClear();
@@ -49380,7 +49423,9 @@ function crewArrive(p, w, now, mid) {
   }
   if (w.act === 'commute') {                             // riding in: step out of the car when the ride's done
     if (now < w.until - .5) return;
-    const a = new CrewAgent(p, lift.length ? lift[idHash(p.id) % lift.length] : nearestOpen(LIFT_AT[0], LIFT_AT[1], null)); DECK_CREW.push(a); return;
+    const at = lift.length ? lift[idHash(p.id) % lift.length] : nearestOpen(LIFT_AT[0], LIFT_AT[1], null);
+    if (!mid && !liftOutOk(at, now)) return;             // #10: out of the car one at a time, about half a second apart
+    const a = new CrewAgent(p, at); DECK_CREW.push(a); return;
   }
   const spot = w.placeId && placeSpot(w.placeId);
   const prev = whereIs(p, w.from - .01);
