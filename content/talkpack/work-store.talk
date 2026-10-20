@@ -1,0 +1,51 @@
+@talks work:store
+// TW1, the Talk a while work pools: Store (plans/work-pools-plan.html, decided 2026-10-20). Esposito (mornings),
+// Ishikawa (afternoons). Ids work.store.<slug>; topic always "work". Esposito is on burnout: no "can't say no" talk.
+
+== who-ran-out
+when: tier>=acquaintance
+them: Running the store, you learn who's run out of what. Before they know it, sometimes.
+them: Socks, mostly. The ship eats socks. Nobody knows how. We order extra.   #funny
+ask: What do you always run out of first?
+listen: Who runs out of socks most?
+  them: Can't say. Store's discreet. But they're in Works, and they're very tall.   #funny
+share: Patience, around five o'clock.
+  them: Ha. We don't stock that. Tea's the closest thing. Second shelf.   #funny
+cheer: Biscuits. Every single week.
+  them: Then you're in good company. We order biscuits by the crate now.   #funny
+
+== ledger
+when: tier>=colleague who:ishikawa-orla
+them: The ledger's in perfect order. Every credit, every sock, every pencil. Since day one.
+them: Someone once said it was beautiful. I've never been prouder. Of a ledger.   #warm
+ask: What's something you keep that someone once called beautiful?
+listen: Who said it was beautiful?
+  them: An inspector from the Concord. Very stern. Then she smiled at page twelve.   #warm
+share: A neat repair. Somebody noticed.
+  them: Then you know the feeling. Small, neat, seen. Lovely.   #warm
+cheer: My bunk. Nobody, ever.
+  them: Bunks aren't meant to be beautiful. They're meant to be slept in. Fine.   #funny
+
+== haggling
+when: tier>=colleague who:esposito-yara
+them: Someone haggles with me every single day. Over a bar of soap. Daily.
+them: I never give a discount. Except once, on their birthday. They nearly fainted.   #funny
+ask: Is there a little daily game in your job?
+listen: Who haggles?
+  them: An officer. Very sarcastic. Very fond of soap. That's all I'll say.   #funny
+share: Guessing which job's next on the board.
+  them: Good game. I play "guess what they'll buy". I'm right nine in ten.   #funny
+cheer: Racing the lift to the next deck.
+  them: You'll lose. The lift's very committed. Still. Admirable.   #funny
+
+== store-means
+when: tier>=friend
+them: What the store means to me? Someone's homesick, and we've got the tea from their home.
+them: One small packet. Their whole face changes. That's why I order oddly. On purpose.   #warm
+ask: What would you want the store to keep, just for you?
+listen: How do you know what people want?
+  them: I listen at the till. People tell you everything while they're paying.   #warm
+share: Something from home. Anything at all.
+  them: Tell me where home is. I'll see what I can find. No promises. Some promises.   #warm
+cheer: An endless supply of good biscuits.
+  them: Everyone asks that. The answer's still no. Lovingly.   #funny
