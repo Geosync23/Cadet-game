@@ -189,3 +189,11 @@ GitHub check: ON for every push to claude/** and main (the user, 2026-10-20; the
 **Status ~13:25 UTC:** DB1 pushed Dev mode D1 (claude/devmode fffb8e2; cadet_test ALL IDENTICAL, new devmode_check.py OK, check_fast OK 387 s); now on D2. DR1 now also stands in as owner reviewer for the section 13 and 21 hooks (c9cc785, 55add3f; the D2 section 13 hook to follow). Waiting on the user's pick of the first-Monday bow-lounge tradition for the patch plan.
 
 **Handover protocol reinstated (the user, ~13:52 UTC):** every seat checks its memory (`get_session`, `context_usage.used_tokens` of 1,000,000) after each job: tell the lead at 500k; at 600k (or before a job big enough to reach it) write `plans/handover-<role>.md`, push, report, stay idle. The lead warns the user at 500k and hands over at 600k (`plans/handover-lead20.md`, written now). The hourly check-in checks this first. Patch plan rev 3 answered (cocoa: bar only; mug: ~20 ship min).
+
+**~14:00 UTC, the user: "Hire extra helpers".** Patch build started in parallel with Dev mode (both from claude/integration):
+| Seat | Session | Branch | Job |
+|---|---|---|---|
+| Patch builder PA | session_01Jka314UJ2Yto5XxbcQnB8H | `claude/patch-a` | batches A, B, C (Day 2, arrival evening, training day); sections 21/21b |
+| Patch builder PB | session_01FWW2piuXkFYaRRzLXZiqYb | `claude/patch-b` | batches D then F (crew life, needs tuning); sections 13/14/10 |
+| Build master BM11 | session_01W7NHRM4JjqaNEJQUWNxgcE | `claude/integration` | merges reviewed work, sets build numbers; first: Dev mode Stop 1a |
+PP1 now reviews patch turns. Batch E (small features incl. First Light Cocoa, the mug) waits for DB1 to finish Dev mode. Working: DB1, DR1, PA, PB (+ PP1/BM11 on call).
