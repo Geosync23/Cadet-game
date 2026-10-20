@@ -146,6 +146,14 @@ Pillar 1, workstream 3a; the format is in plans/pillar1-plan.md, "Places". Each 
 - **#8, the red light.** The toilet stall kit (4b) calls `stallCapAdd(g)`: a red cap enclosing the green light, a `noMerge` child of the stall, made from one geometry and material made at load. `stallCapsTick` (from `updateDeckCrew`) matches each stall to the nearest toilet place once a deck and shows it while `placeBusy` and the stall isn't faded.
 - **Probes:** `plans/patch-plan-probes/c9c.py` (toilet visits that reach the stall, on the deck) and `c10c.py` (pairs within 0.3 tiles for over 3 real seconds), with drawing skipped.
 
+## The playtest patch, batch F (section 15's numbers, patch builder B, 2026-10-20; plans/patch-plan.html #16, #20, #22, #27)
+
+- **#16:** `JOB_PACE = .72` (section 15) multiplies `jobMins` for your machine jobs at every tier (the 1.25 tier step kept): a Tier 1 repair is 32.4 base minutes, about 30 with a normal day's needs (PP1's fnet.py). The job board's minutes for you (`openJobs('you')`, section 17) use the same; the crew's job minutes are unchanged. With quicker jobs a very busy player reached "Relied on" on Day 4, so Tier 1's `WORK_BANDS` 'relied' is 48 (was 40; section 24, the Works career engineer's; career_check's band spot test follows).
+- **#20:** `WORK_HUNGER = 3` an hour on top of `NEED_DRAIN` while `workingNow()` (`workHunger`, beside `workLeisure`): 7 at work.
+- **#22:** `NEED_DRAIN.social` [3, .25] (was [1, .25]).
+- **#27:** `SLEEP_TAPER = [90, 1/3]` in `needsDrain`: above 90 sleep gives a third. 8 hours from 20 wakes at 100; 7 hours from 25 at 97.5. The alarm clock's preview uses `needsDrain`, so it shows the new number.
+- **player_check's paper week** now eats at a table of three and has two chats a day (as fnet.py's steady player) and the work hunger: social lowest 63, hunger lowest 36.5.
+
 ## Every room in use (sections 14 and 10, the sim engineer, 0.26.x)
 
 Pillar 2, workstream A1 (plans/pillar2-plan.md).
