@@ -40989,11 +40989,12 @@ function introDayEndWant(now, m) {                      // introArrowWant's last
   if (introNamePainted() || m >= INTRO_DAYEND.end) { I.done['arrow:beam'] = Math.floor(now); return null; }
   return careerClockedIn(1) && !(typeof careerClockedOut === 'function' && careerClockedOut(1)) ? 'clockout' : 'beam';
 }
-// the patch, #17: Zeke and you never in the same spot. Walking you somewhere (lead, wait at a tile) he stops ESC_GAP short
-// of you (section 10's escortStep), and when his spot is yours (the tile the arrow sent you to) he takes the free tile
+// the patch, #17: Zeke and you never in the same spot. Walking up to you (follow, or to a tile to wait at) he stops ESC_GAP
+// short of you (section 10's escortStep: only when his way ends by you, escToYou; never while leading), and when his spot is yours (the tile the arrow sent you to) he takes the free tile
 // beside you, the one nearest him (escBeside). A tap that would end on someone standing there ends on the free tile
 // next to them instead (tapBeside, section 11's floor tap); paths still pass through people, as before.
 const ESC_GAP = .9;
+const escToYou = (path, pp) => { const g = path.length && cellPos(...path[path.length - 1]); return !!g && Math.hypot(g.x - pp.x, g.z - pp.z) < ESC_GAP + 1.5; };   // walking up to you, not past you
 function escBeside(goal, pp, a) {
   const g = cellPos(...goal); if (Math.hypot(g.x - pp.x, g.z - pp.z) >= ESC_GAP) return goal;
   const you = cellAt(pp.x, pp.z), taken = occupiedBy(a); let best = null, bd = Infinity;
