@@ -1,25 +1,17 @@
 # The quick check on GitHub: runs check_fast.sh (the same as every helper runs before a push) and shows a tick or a cross.
-# SWITCHED OFF for now (the user's rule, 2026-10-20): it only runs when started by hand from the Actions tab
-# (workflow_dispatch). GitHub emails the repository's owner on every failed run, so the user settles that email setting
-# first; then the lead switches it on by replacing the `on:` block below with ONE of the two commented ones:
-#   A. every push to the shared branch only (fewest emails; the build master reads the result before merging on), or
-#   B. every push to any claude/ branch (helpers see their own result; one email per red push).
+# ON since 2026-10-20 (the user's call, via lead 20): every push to a claude/ branch or main that touches the game, the
+# checks or the words. Each branch's newest push cancels its older run still going. GitHub emails the repository's owner
+# on a failed run; the user has muted those emails. It can also be started by hand from the Actions tab.
 # Before pushing a change to this file, check it reads as YAML (a broken file shows only a red cross, no log):
 #   python3 -c "import yaml,sys; yaml.safe_load(open(sys.argv[1]))" .github/workflows/quick-check.yml
 # Ported from the split rehearsal's tested workflow (claude/split-rehearsal, runs 2-6: green ~5 min, red in ~30 s).
 name: quick check
 on:
+  push:
+    branches: ['claude/**', main]
+    paths: ['starship-cadet.html', 'names_check.js', 'check_fast.sh', 'cadet_test.py', '*_check.py',
+            'content_gen.py', 'content/**', '.github/**']
   workflow_dispatch:
-# A. (switch on: delete the three lines above from "on:" and remove the "# " in front of these)
-# on:
-#   push:
-#     branches: [claude/integration]
-# B.
-# on:
-#   push:
-#     branches: ['claude/**']
-#     paths: ['starship-cadet.html', 'names_check.js', 'check_fast.sh', 'cadet_test.py', '*_check.py',
-#             'content_gen.py', 'content/**', '.github/**']
 concurrency:
   group: quick-check-${{ github.ref }}
   cancel-in-progress: true

@@ -83,6 +83,6 @@ No slot for the crew designer (section 9's roster is generated). A new feature (
 ## Outside the game file
 
 - `content/`: the crew's words (the writers' guide is `content/README.md`); `content_gen.py` bakes them into section 22.
-- Checks: one `*_check.py` per area (see CLAUDE.md "Files" and DEV_NOTES "Testing"), `cadet_test.py` (two builds compared), `names_check.js` (names, keys, registrations, "Deck 7"), `check_fast.sh` (the quick check), `.github/workflows/quick-check.yml` (the GitHub check, off until the lead switches it on).
+- Checks: one `*_check.py` per area (see CLAUDE.md "Files" and DEV_NOTES "Testing"), `cadet_test.py` (two builds compared), `names_check.js` (names, keys, registrations, "Deck 7"), `check_fast.sh` (the quick check), `.github/workflows/quick-check.yml` (the GitHub check: check_fast on every push to a claude/ branch or main).
 - `tools/`: `section.py`, `shared.js` (this map's helpers), `add_slots.py` (the seats' slots); `resolve.py`, `fixrate.py` (old build-number clash helpers); `kitdup.py`, probes.
 - `plans/`: deck plans, pillar plans, `handover-<role>.md` notes, `owners.md`, `map.md`, `backlog.md`, `roadmap-after-recdeck.md`.
