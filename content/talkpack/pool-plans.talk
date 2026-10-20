@@ -1,0 +1,121 @@
+@talks pool
+topic: plans
+// TW1, the Talk a while pack: shared pool, topic plans (the future, small). Nothing about your promotion unless it's
+// gated on a flag the engine can check.
+
+== next-year
+them: I've been thinking about what I'll do next year.
+them: Maybe a course. Maybe nothing. It's nice to think about.
+ask: Got any plans, big or small?
+listen: What sort of course?
+  them: Something with my hands. Or my head. I'll know it when I see it.
+share: To be good at this job. Really good.
+  them: You will be. I can see it already.   #warm
+cheer: Dinner. I've planned dinner.
+  them: Now that's a plan I can get behind.   #funny
+
+== list
+them: I keep a list of things I want to do. It's mostly food.   #funny
+them: Some places, too. A few people to write to.
+ask: What's on your list?
+listen: What's at the top?
+  them: A proper bun. Then a sunset. Then a nap, probably.   #funny
+share: See a lot of the frontier. All of it, maybe.
+  them: Good list. You're on the right ship for it.
+cheer: I'll start one. Item one: start a list.
+  them: That's how all the best lists begin.   #funny
+
+== small-steps
+them: Small steps, someone told me once. They were usually right.
+them: I want big things. I just do them one bolt at a time.
+ask: Are you a big-plans person, or one-day-at-a-time?
+listen: What big thing are you working towards?
+  them: Being someone the juniors come to. One bolt at a time.   #warm
+share: One day at a time, for now.
+  them: Good. Out here that's plenty.
+cheer: Half a day at a time. Tea's a milestone.
+  them: Tea at one is a milestone. Put it on a poster.   #funny
+
+== bridge
+when: tier>=acquaintance rank:junior|officer !who:torres-zeke !dept:helm|command
+them: One day I'd like to see the bridge. Properly. Just once.
+them: Not to do anything. Just to stand there and look.
+ask: Is there anywhere aboard you'd love to see?
+listen: Why the bridge?
+  them: It's where the ship decides where to go. That's something.
+share: The engine room. Down below, with the coils.
+  them: Ask Torres. He'll take you. He'll talk to them, too.   #funny
+cheer: The ready room. To trip on the step.
+  them: A rite of passage. Everyone trips. Even the Captain.   #funny
+
+== five-years
+when: tier>=acquaintance !who:santos-zofia !moved:santos-zofia
+them: Someone aboard has a five-year plan. Written down.
+them: I have a five-minute plan. It's going well.   #funny
+ask: Where do you see yourself in a few years?
+listen: What's in a five-year plan?
+  them: Steps. Dates. A colour code. I was too scared to read it all.   #funny
+share: Still on the Wren. Better at the job.
+  them: That's a fine plan. Simple. Doable.
+cheer: Having a five-minute plan, like you.
+  them: Welcome to the club. Meetings are short.   #funny
+
+== learn
+when: tier>=acquaintance !who:pell|ferreira|holt|rossi-femi|lindqvist-isak|park-noor|larsen-hamid|haddad-tamsin
+them: I want to learn something new this season. Properly learn it.
+them: A language, maybe. Or the guitar, but the queue's long.   #funny
+ask: What would you like to learn, if you had the time?
+listen: Which language?
+  them: Some Veyli. A few words, at least. Ferreira's teaching people.
+share: Everything in Works. All of it.
+  them: Ha! Start with the board. Then everything else.
+cheer: Sleeping through Pell's sleep-talk.
+  them: Nobody's managed it. You'd be famous.   #funny
+
+== someone-to-be
+when: tier>=colleague
+them: Do you know who I want to be like, one day? The calm ones.
+them: When something goes wrong, they just put their tea down and go.
+ask: Who do you look up to aboard?
+listen: Who's the calmest person aboard?
+  them: Hard to say. The calm ones don't let you see the work.
+share: The people who teach me things.
+  them: Good choice. They'll be glad. Tell them, sometime.   #warm
+cheer: Whoever's tallest. Top shelves.
+  them: Practical. Very Works.   #funny
+
+== stay-or-go
+when: tier>=colleague !newhere !who:tomas|brennan|calder|marrow !thread:leaving
+them: People talk about the Halcyon a lot. Some go there, on transfer.
+them: I've never wanted to. I like it here too much.
+ask: Do you ever wonder what's out there? Other ships?
+listen: Has anyone you know gone?
+  them: A few. They write sometimes. They always miss the mess.   #funny
+share: Not really. I've only just got here.
+  them: Good. Settle in first. Wonder later.
+cheer: Only if their mess is better.
+  them: It's not. Nobody's is. Ask anyone who's left.   #funny
+
+== retire
+when: tier>=friend !who:marrow
+them: Sometimes I picture myself old, somewhere quiet. A little garden.
+them: Then I picture myself bored after a week.   #funny
+ask: What would make you happy, years from now?
+listen: What would you grow?
+  them: Something hard to grow. To keep me busy. Tomatoes, probably.
+share: Good people. A job I'm proud of.
+  them: You'll have both. You've got one already, look.   #warm
+cheer: A kettle and nobody asking me to fix it.
+  them: The dream. Every Works tech has it.   #funny
+
+== proud-of
+when: tier>=friend !who:calder
+them: What I really want? To do one thing that matters. Properly.
+them: Not famous. Just something I can point at. "That was me."
+ask: What would you want to point at, one day?
+listen: Have you found it yet?
+  them: Not yet. Maybe it's people, not things. I'm starting to think so.   #warm
+share: Something I fixed that kept people safe.
+  them: That's Works. You'll point at a dozen of them.   #warm
+cheer: A very tidy toolbox.
+  them: Calder would say that's enough. Honestly.   #funny

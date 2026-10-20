@@ -1,0 +1,54 @@
+@talks torres-zeke
+// TW1, the Talk a while pack: Zeke Torres's own talks. Quick, warm, tumbling; machines as moody people; asks back
+// and listens; "Right, onward"; "properly". Never his father (until beat torres.4) or the Specialist list (beat 2).
+
+== coil-three
+topic: work
+them: Coil three sulked all morning. Wouldn't settle. I sat with her a bit.
+them: Reyes leaves me notes. Today's said "She's not sulking. She's shy." Shy.   #funny
+ask: Go on, then. Which machine aboard do you think has the most personality?
+listen: Do you really talk to the coils?
+  them: Course. Properly, too. They don't answer. Well. They hum differently.   #funny
+share: The washer on Deck 4. It hates Tuesdays.
+  them: Ha! It does. You've been listening to it. That's the whole job, that.   #warm
+cheer: The coffee machine. Pure drama.
+  them: The coffee machine's not a machine, it's a character actor.   #funny
+
+== scarf-rows
+topic: hobby
+when: tier>=colleague mem:moment.torres.scarf
+them: Two more rows on your scarf. Don't look. Fine, look. It's coming along.   #funny
+them: Kovac says my tension's "brave". I think that's a compliment.
+ask: Have you got a colour you'd wear every day, if you could?
+listen: Who taught you to knit?
+  them: Kovac, mostly. Dahl tried first. Dahl gave up. Kovac doesn't give up.   #funny
+share: Something warm. Orange, maybe.
+  them: Orange! Works orange. Good. Because that's what it is. Too late now.   #funny
+cheer: Whatever hides the gravy.
+  them: Ha! Practical. I'll knit a gravy row in at the end. For you.   #funny
+
+== record-cabinet
+topic: crew
+when: tier>=colleague
+them: Settle something for me. The lighthouse song in the record cabinet. Second verse.
+them: I say "the light came home". Takahashi: "the night came home". A year, we've argued.   #funny
+ask: Is there a song that takes you right back somewhere?
+listen: Who's right, honestly?
+  them: Me. Probably. Farouk says it's both. Farouk's a diplomat.   #funny
+share: One from home. I'd know it anywhere.
+  them: Hum it at the jam on Friday. Someone'll pick it up. Someone always does.   #warm
+cheer: I'll just sing "came home" and mumble.
+  them: That's what the rest of the ship does. The mumble's very popular.   #funny
+
+== first-day
+topic: ship
+when: tier>=friend
+them: I still think about your first evening. Off the Tern, holding your bag like it might bolt.
+them: And look at you now. You know where the good spanners are.   #warm
+ask: What do you remember most, from that first day?
+listen: What was your first day like, here?
+  them: Calder had me on scrubbers for a month. Best month. Don't tell her.   #funny
+share: You meeting me. It helped.
+  them: Ah. Well. That's, er. Right. That's lovely. Right, onward.   #warm
+cheer: The lift. I said "Four, please" to a wall.
+  them: Ha! I remember. The wall was very understanding.   #funny
