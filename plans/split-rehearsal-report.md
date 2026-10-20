@@ -220,7 +220,7 @@ With the build number out of the way: 119 merges still clashed, with 606 clashes
 | 3 | SR2 fixes | **Green** | 5 min 4 s (cached setup 24 s; check 4 min 34 s) |
 | 4 | A missing bracket in `s19-device.js` | **Red**: "the game's script does not parse: Unexpected token at js/s19-device.js line 140 (game line 10914)" | 34 s from push to red |
 | 5 | A duplicate `function recShowTick` in the events piece | **Red**: "FAIL name recShowTick made twice: js/s18-events.js line 2198 (game line 35903) and js/s08c-rec-moves.js line 455 (game line 49230)" | 32 s |
-| 6 | Fixed and glued (the game is 0.64.2's again, byte for byte) | Expected green | (see below) |
+| 6 | Fixed and glued (the game is 0.64.2's again, byte for byte) | **Green** | 5 min 5 s (check 4 min 30 s) |
 
 **Each red run emailed the user**, who noticed runs 1, 4 and 5. In real use, every red push by any helper would email the repository's owner. **Decide before switching it on:**
 - the user turns off "Actions" emails in their GitHub notification settings; or
@@ -239,9 +239,11 @@ On the glued file (byte-identical to 0.64.2), each in its own CADET_WORK, at mos
 | machine_check | **OK** (50 s) |
 | events_check | **OK** (375 s) |
 | day_check, day 0 | **OK** (386 s) |
-| day_check, days 1 and 2; interactions_check | RESULTS_PENDING |
+| day_check, day 1 | **OK** (369 s) |
+| day_check, day 2 | **OK** (368 s) |
+| interactions_check | **OK** (357 s) |
 
-Local check_fast with the whole test set running alongside: **OK in 308 s**. On GitHub: 263 s and 274 s.
+All passed. Local check_fast with the whole test set running alongside: **OK in 308 s**. On GitHub the quick check took 263 s, 274 s and 270 s: inside 5 minutes, with about half a minute to spare.
 
 ## 4. Honest view: split, or the same safety without it?
 
