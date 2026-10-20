@@ -39212,7 +39212,8 @@ const INTRO_WEEK = [
   { id: 'd1-lead', day: 1, at: 13 * 60, until: 16 * 60 + 30, who: INTRO_ESCORT, where: { deck: 5, room: 'Works bay' }, escort: 'follow', job: 'reserved:2', settle: 'lead' },
   { id: 'd1-dinner', day: 1, at: 18 * 60, until: 19 * 60, who: 'brennan', where: { deck: 3, room: 'Mess hall' }, settle: 'eat' },
   { id: 'd1-zeke-dinner', day: 1, at: 18 * 60, until: 19 * 60, who: INTRO_ESCORT, where: { deck: 3, room: 'Mess hall' } },   // 0.42.41: he eats in the mess (section 21b's evening and laundry lines, CLOTHES_BEATS)
-  { id: 'd2-solo', day: 2, at: 8 * 60 + 45, until: 9 * 60, who: 'calder', where: { deck: 5, room: 'Works Chief\'s office' }, meeting: 'introSoloJob', settle: 'solo' },
+  { id: 'd2-solo', day: 2, at: 8 * 60 + 45, until: 10 * 60, who: 'calder', where: { deck: 5, room: 'Works Chief\'s office', placeId: '5-office-1' }, meeting: 'introSoloJob', settle: 'solo',
+    early: 20, release: true, hold: { till: 9 * 60 + 15, after: 20 }, stand: '5-office-visit-1' },   // the patch (#1): at her own desk from 08:25, free once it's done; you stand (introWeekBeat)
   { id: 'd2-tea', day: 2, at: 13 * 60, until: 13 * 60 + 45, who: INTRO_ESCORT, where: { deck: 5, room: 'Tea corner' }, says: 'walk.job3.tea' },   // his one check-in on your solo day
   { id: 'd2-health', day: 2, at: 14 * 60, until: 14 * 60 + 30, who: 'rina', where: { deck: 3, room: 'Infirmary' }, appt: 'intro-health', settle: 'health' },
   { id: 'd2-booths', day: 2, at: 18 * 60, until: 19 * 60, who: 'eklund-leila', where: { deck: 3, room: 'Call-home booths' }, settle: 'call' },
@@ -39400,7 +39401,7 @@ function introUiReset() {
   if ('pilotAt' in U) Object.assign(U, { pilotAt: 0, ternOpened: false, ternShut: false });
 }
 // section 14 plans the crew again when this changes (introBeats depends on nothing else)
-const introSig = () => (introOn() ? 'on' : 'off') + (SHIP.intro.skipped ? '|skipped' : '');
+const introSig = () => (introOn() ? 'on' : 'off') + (SHIP.intro.skipped ? '|skipped' : '') + introReleased();   // + a meeting done early frees its speaker (the patch, #1)
 
 // one step done: its points, its flags, its note; then the next step (the evening) or none (the week runs by the clock)
 function introDone(id, at = Math.floor(shipNow())) {
@@ -39520,7 +39521,7 @@ function introBeats(id, d) {
   if (!introOn()) return [];
   const out = [];
   for (const st of INTRO_STEPS) if (st.day === d && st.who === id && st.checkpoint) { const f = st.fallback || {}, seat = (st.away && st.away[id]) || st.seats && st.seats[id], tb = st.id === 'chief' && st.seats && introStepById('table'); out.push({ id: st.id, at: tb && tb.at != null ? Math.min(st.at, tb.at) : st.at, until: f.until !== undefined ? f.until : st.at + (f.wait || 20), where: seat ? { ...st.checkpoint, placeId: seat } : st.checkpoint }); }
-  for (const b of INTRO_WEEK) if (b.day === d && (b.who === id || (b.also || []).includes(id)) && b.until) out.push({ id: b.id, at: b.at, until: b.until, where: b.where });
+  for (const b of INTRO_WEEK) if (b.day === d && (b.who === id || (b.also || []).includes(id)) && b.until) out.push(introWeekBeat(b));
   return out;
 }
 
@@ -39872,6 +39873,7 @@ function introMoments(now) {
 }
 function introWeekMeetings(now) {
   const I = SHIP.intro;
+  introMeetEnded(now);
   for (const b of INTRO_WEEK) {
     if (!b.meeting || I.done[b.id + ':met'] !== undefined) continue;
     const at = introAbs(b.day, b.at), until = introAbs(b.day, b.until); if (now < at) continue;
@@ -39879,7 +39881,7 @@ function introWeekMeetings(now) {
     const m = { id: 'intro-' + b.id, who: INTRO_MEETINGS[b.meeting].cast.filter(w => !/:/.test(w)), where: { deck: b.where.deck, room }, at };
     // it starts once its speaker is there too (or 10 minutes on, so a late speaker never holds it up for good)
     const speakerIn = typeof DECK_CREW !== 'undefined' && DECK_CREW.some(a => a.p.id === b.who && room.test((ROOMS[roomAt(...cellAt(a.x, a.z))] || {}).name || ''));
-    if (now < until && (speakerIn || now >= at + 10) && !(typeof DIALOGUE !== 'undefined' && DIALOGUE) && typeof inMeeting === 'function' && inMeeting(m)) { I.done[b.id + ':met'] = now; dialogueShow(introScriptHere(b.meeting, m, b.who), m); }
+    if (now < until && (speakerIn || now >= introMeetFallback(b, at, m, now)) && !(typeof DIALOGUE !== 'undefined' && DIALOGUE) && typeof inMeeting === 'function' && inMeeting(m)) { I.done[b.id + ':met'] = now; dialogueShow(introScriptHere(b.meeting, m, b.who), m); introMeetStand(b); }
     else if (now >= until) { I.done[b.id + ':met'] = -1; if (typeof meetingGist === 'function') meetingGist(b.meeting); }
     else continue;
     if (b.id === 'd2-solo' && typeof jobReserved === 'function' && typeof claimJob === 'function') { const id = jobReserved(3); if (id) claimJob(id); }
@@ -40413,6 +40415,39 @@ function clothesRemark(C) {
 }
 
 // ---- slot: Onboarding engineer (section 21b). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// the patch, #1 (Day 2's first solo job, plans/patch-plan.html): a week beat's own timing. `early`: the speaker's block
+// starts that many minutes before `at` (section 14's introPlan reads it); `release`: their block ends when the meeting's
+// done (I.done '<id>:end', saved; introSig changes, so the day is planned again); `hold`: with the speaker not in the room
+// yet, it starts anyway only at the later of `till` and `after` minutes from when you came in (her walk is 14); `stand`:
+// the place you're walked to when it starts (the visitor's spot by her desk: "Come in. Don't sit.").
+const INTRO_MEET_IN = {};                                // beat id -> the minute you were first in its room (not saved)
+function introWeekBeat(b) {
+  const e = b.release ? SHIP.intro.done[b.id + ':end'] : undefined, d0 = introAbs(b.day, 0);
+  const o = { id: b.id, at: b.at, until: e >= 0 ? Math.min(b.until, Math.max(b.at + 1, e - d0)) : b.until, where: b.where };
+  if (b.early != null) o.early = b.early;
+  return o;
+}
+function introReleased() {
+  if (!introOn()) return '';
+  let s = ''; for (const b of INTRO_WEEK) if (b.release && SHIP.intro.done[b.id + ':end'] >= 0) s += '|' + b.id;
+  return s;
+}
+function introMeetFallback(b, at, m, now) {
+  if (!b.hold) return at + 10;
+  if (INTRO_MEET_IN[b.id] === undefined && typeof inMeeting === 'function' && inMeeting(m)) INTRO_MEET_IN[b.id] = now;
+  return INTRO_MEET_IN[b.id] === undefined ? Infinity : Math.max(introAbs(b.day, b.hold.till), INTRO_MEET_IN[b.id] + b.hold.after);
+}
+function introMeetStand(b) {
+  const pl = b.stand && (DECKS[b.where.deck].places || []).find(q => q.id === b.stand);
+  if (!pl || deckDef.num !== b.where.deck || typeof playerGo !== 'function') return;
+  const to = (DECKS[b.where.deck].places || []).find(q => q.id === (b.where.placeId || '')), face = () => {
+    if (to) { const p = player.obj.position, c = cellPos(...to.at); player.face = Math.atan2(c.x - p.x, c.z - p.z); } };
+  if (K(pl.at) === K(player.here()) && !player.path.length) face(); else playerGo(pl.at, face);
+}
+function introMeetEnded(now) {                          // a released beat's meeting is over once its panel has closed
+  const I = SHIP.intro, open = typeof DIALOGUE !== 'undefined' && DIALOGUE && DIALOGUE.m ? DIALOGUE.m.id : null;
+  for (const b of INTRO_WEEK) if (b.release && I.done[b.id + ':met'] >= 0 && I.done[b.id + ':end'] === undefined && open !== 'intro-' + b.id) I.done[b.id + ':end'] = now;
+}
 // ---- end of slot: Onboarding engineer ----
 
 // =====================================================================
