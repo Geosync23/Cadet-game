@@ -79,3 +79,13 @@ The first address is Friday Day 5. It's a separate plan from the playtest patch 
 **New question:** fp-v2-q1. Day 12's address falls during the storm, and the storm was settled with no auditorium all-hands. Recommended: hold it as usual in the auditorium as the regular Friday address. Alternatives: ship's speakers that week; the plaza that week. Plus fp-v2-general.
 
 `design-doc.md` is updated in the same commit: the shifts section (Short Fridays), the weekly traditions (the Captain's Friday address) and the weekday shapes (a short Friday).
+
+## Revision 3 (2026-10-20, 18:45): the user's two notes
+
+- **Day 12** (fp-v2-q1, answered): held as the regular address in the auditorium, with the ion storm at its heart. Beats: calm first words, what the storm is and how long it lasts, what's broken and who's fixing it, what she needs this weekend, your promotion, a joke, the all-clear she expects.
+- **Longer addresses: each is a full speech for the writer**, about 25-30 lines built on 7-8 beats (3-5 lines each). The beats for each week are on the page.
+- **The math:**
+  - 28 lines at 5 real seconds is about 140 real seconds. At the normal 0.6 ship minutes a real second that's about 84 ship minutes, running to about 17:25, past dinner.
+  - So while you're in the auditorium for it, the ship's clock runs at about a third (0.21 ship minutes a real second), and the speech fits 16:00-16:30. Elsewhere time runs as normal.
+  - Owner: the sim engineer (a new rate multiplier in section 13, applied to the needs, the machines and Dev mode's jumps alike; nothing frozen).
+  - The address now ends at 16:30, leaving 30 ship minutes to file out, wash and ride up. Dinner is still at 17:00, with arrivals spread to 17:50. The perf scene for the lift lobby is at 16:32.

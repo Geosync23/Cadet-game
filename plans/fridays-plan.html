@@ -62,7 +62,7 @@ a{color:var(--teal)}
 <body>
 <main>
 <h1>Short Fridays and the Captain's Address</h1>
-<div class="sub">A plan for your decision of 2026-10-20: <i>"Friday is good. Let's make it so everyone gets off work early on Friday. Get off at 1530, then meeting at 1600. Then dinner at 1700. We need dialog explaining the short work day Fridays."</i> Every Friday the day shift stops at 15:30, the Captain speaks to the whole crew at 16:00, and dinner is at 17:00, as it already is. The first is <b>Friday Day 5</b>, in your arrival week. Planned by PP1 for lead 21 on claude/integration (0.64.2 to 0.64.4). Nothing is built yet. <b>Revision 2</b> (later that day): your answers are in. The address is held in the rec deck auditorium, it's expected, there are four full addresses following the progression, and both happen when an event is on. One new question is at the bottom, about Day 12, which falls during the ion storm.</div>
+<div class="sub">A plan for your decision of 2026-10-20: <i>"Friday is good. Let's make it so everyone gets off work early on Friday. Get off at 1530, then meeting at 1600. Then dinner at 1700. We need dialog explaining the short work day Fridays."</i> Every Friday the day shift stops at 15:30, the Captain speaks to the whole crew at 16:00, and dinner is at 17:00, as it already is. The first is <b>Friday Day 5</b>, in your arrival week. Planned by PP1 for lead 21 on claude/integration (0.64.2 to 0.64.4). Nothing is built yet. <b>Revision 2</b> (later that day): your answers are in. The address is held in the rec deck auditorium, it's expected, there are four full addresses following the progression, and both happen when an event is on. <b>Revision 3:</b> Day 12's address is held as usual with the storm at its heart, and the addresses are longer: each is a full speech of 25-30 lines, with the clock slowed while you listen.</div>
 
 <div class="card">
 <h3>At a glance</h3>
@@ -118,13 +118,18 @@ a{color:var(--teal)}
 <div class="meta">Traditions engineer (the tradition), writers (the words, four full addresses), dialogue engineer (rotating parts) · 2½ turns · events_check, join_check, lines_check, content_gen --check</div>
 <p><b>A weekly tradition,</b> <code>captains-address.trad</code>, built like the existing season all-hands (<code>rec-all-hands</code>). It brings people together through the gathering spots, not the broadcast. <code>captainAddress()</code> (section 18, line 35495) only sends a banner and Mail today.</p>
 <ul>
-<li><code>when: weekly friday</code>, <code>at: 16:00-16:40</code>, <code>where: 7 room Auditorium: rec:seat</code>.</li>
+<li><code>when: weekly friday</code>, <code>at: 16:00-16:30</code>, <code>where: 7 room Auditorium: rec:seat</code>.</li>
 <li>Captain Marrow at the lectern (<code>rec:lectern</code>), Commander Vance beside her, as in the season's all-hands.</li>
 <li><code>who:</code> everyone 90%, the night shift 50%, the skeleton never. The skeleton gets the banner and the Mail.</li>
 </ul>
 <p><b>How it plays</b> <span class="dec">decided: bubbles</span>:</p>
 <ul>
-<li>The Captain's lines are speech bubbles over her. Your comment asked for substantial addresses, so the length is set by reading time. About 12-16 lines at one every 5 real seconds is 60-80 real seconds. At the ship's 0.6 ship minutes a real second, that's 36-48 ship minutes, so the address runs 16:00-16:40 (it was 16:25).</li>
+<li>The Captain's lines are speech bubbles over her. Each address is a <b>full speech of about 25-30 lines</b>, one every 5 real seconds, about 2½ real minutes in all.</li>
+<li><b>The clock slows while you listen.</b> At the normal pace (0.6 ship minutes a real second) 28 lines would run to about 17:25, past dinner. So while you're in the auditorium for the address, the ship's clock runs at about a third of its speed (about 0.21 ship minutes a real second). That fits the whole speech into 16:00-16:30 of ship time. Anywhere else the clock runs as normal, and the crowd sits through the same 30 minutes.
+  <ul>
+  <li>Owner: sim engineer (section 13's clock, a new multiplier read by the main loop). Nothing is frozen, so crew, bubbles and the room move as usual.</li>
+  <li>The same multiplier must apply to the needs, the machines and Dev mode's jumps.</li>
+  </ul></li>
 <li>The crowd's bubbles are hushed while she speaks.</li>
 <li>Tap to join, as with any tradition.</li>
 <li>Anyone not there gets the banner and the Mail ("All hands: the Captain's Friday address").</li>
@@ -147,14 +152,14 @@ a{color:var(--teal)}
 <div class="meta">Galley engineer · ½-1 turn · food_check (its Friday rush), events_check</div>
 <ul>
 <li><b>The galley keeps cooking through the address.</b> The cooks are on 14:30-16:30, and the bar hand preps 15:00-17:00 (<code>GALLEY_SHIFTS</code>, line 15255). Dinner still opens at 17:00 with at least 10 portions ready.</li>
-<li><b>The ride up.</b> The address ends at 16:40 and the crew leave the auditorium in waves, row by row (seeded per person, so the plan stays repeatable).
+<li><b>The ride up.</b> The address ends at 16:30 and the crew leave the auditorium in waves, row by row (seeded per person, so the plan stays repeatable).
   <ul>
   <li>Some go to Deck 4 to wash or change; most ride up to Deck 3.</li>
   <li>The planner already counts a deck change as travel time, so their dinner starts after it.</li>
   <li>On the rec deck, the lift lobby must not jam: the sim engineer checks the lift queue with about 60 leaving.</li>
   <li>You can take the lift, or the ladder (#5) if it's on.</li>
   </ul></li>
-<li><b>The rush.</b> 60 people at once would queue far longer than food_check's 25-minute cap, and the mess has 44 seats and 22 benches. So each attendee's dinner time is spread from 17:00 to about 17:50.</li>
+<li><b>The rush.</b> 60 people at once would queue far longer than food_check's 25-minute cap, and the mess has 44 seats and 22 benches. So each attendee's dinner time is spread from 17:00 to about 17:50. Leaving at 16:30 gives 30 ship minutes to file out, wash and ride up. The planner's deck-change travel time fits easily, and the first diners reach the mess as it opens.</li>
 <li><b>food_check</b> gains a Friday case (the rush from 17:00) to prove it.</li>
 <li><b>Fridays' pudding</b> stays.</li>
 </ul></div>
@@ -180,27 +185,66 @@ a{color:var(--teal)}
 
 <div class="card batch"><h3>G. The crowd on phones (performance)</h3>
 <div class="meta">Performance engineer · ½ turn · perf_check (a new scene), deck_check</div>
-<p>A new perf_check scene: the rec deck auditorium on a Friday at 16:10, with about 65 seated, at zoom 1.5, at 0.7 and in landscape (budget 450). Plus the rec deck's lift lobby at 16:42, when the crowd leaves. Film night (Saturday 20:00) is the nearest seated crowd there today, at about a third of the crew. Over 70 people the crowd already draws more simply (<code>CROWD_MANY</code>).</p>
+<p>A new perf_check scene: the rec deck auditorium on a Friday at 16:10, with about 65 seated, at zoom 1.5, at 0.7 and in landscape (budget 450). Plus the rec deck's lift lobby at 16:32, when the crowd leaves. Film night (Saturday 20:00) is the nearest seated crowd there today, at about a third of the crew. Over 70 people the crowd already draws more simply (<code>CROWD_MANY</code>).</p>
 <p><b>A sample of the first address</b> (Day 5, for the writers to finish; Captain Marrow: "calm, curious, a quiet joke folded in; 'we' for the ship"):</p>
 <blockquote><b>DRAFT</b>"Afternoon, everyone. Short Friday, so I'll be short too. Mostly."<br>"Good week. The chiller held at three degrees all week, and Brennan says that's a personal record."<br>"A welcome to our newest hand, {me}, five days aboard. You picked a good ship."<br>"This week's nod goes to the galley. Sixty dinners a night and nobody's waited more than five minutes. I checked."<br>"Next week: the tasting table's on Wednesday, and Raman tells me we pass the Hollis Reach on Thursday. Look out of a window."<br>"Dinner's at five. Enjoy your weekend, those of you who have one."</blockquote>
 </div>
 
 <div class="card batch"><h3>The four addresses (an outline for the writer seat)</h3>
-<div class="meta">A writer seat writes them in full, about 12-16 lines each, in Marrow's voice ("calm, curious, a quiet joke folded in; 'we' for the ship") · checked against the events plan (claude/events-plan f6996d86) and the career's days</div>
-<p>There are four Fridays in the 30 days, Days 5, 12, 19 and 26, so four addresses written in full. After Day 26 (the career ends there; the Veyli visit runs on), Fridays use the weekly shape with its changing parts.</p>
+<div class="meta">A writer seat writes each one as a full speech, about 25-30 lines, in Marrow's voice ("calm, curious, a quiet joke folded in; 'we' for the ship") · checked against the events plan (claude/events-plan f6996d86) and the career's days</div>
+<p>There are four Fridays in the 30 days, Days 5, 12, 19 and 26, so four addresses. <b>Each is a full speech for the writer, not a list of lines:</b> it opens, builds to its heart, and closes, with the beats below as its spine, each beat 3-5 lines. After Day 26 (the career ends there; the Veyli visit runs on), Fridays use the weekly shape with its changing parts.</p>
 <p>Each address has a fixed core, written for that week, and slots filled from what really happened. Those are read when she speaks, never by the crew's planner, and a line is left out if it didn't happen.</p>
 <div class="tw"><table><tr><th>Friday</th><th>Topic</th><th>The progression it follows</th><th>Real things it can draw on</th></tr>
-<tr><td><b>Day 5</b><br>Week 1</td><td><b>Welcome aboard.</b> A short Friday is a good Friday.</td><td>Your first week. Crossing the Line on Sunday (Day 7): the Wren crosses into the Veyli reach, "first crossing" for you and the new hands. The New hands' tea that evening.</td><td>Your name by name, five days aboard. Your name on the beam (Day 1) and your first solo job (Day 2). The week's ship health. The galley's nod. Next week's traditions.</td></tr>
-<tr><td><b>Day 12</b><br>Week 2</td><td><b>Steady in the storm.</b> The ion storm is on (Days 11-15), so this is the Captain's storm update.</td><td>Your promotion to Officer (Day 10), two days before. Calder's storm briefing (Day 11). Crossing the Line last Sunday.</td><td>What the storm has broken and who fixed it (the storm's repairs this week, your share in them). "Officer {me}" for the first time. The all-clear is expected around Sunday. Works' nod.</td></tr>
-<tr><td><b>Day 19</b><br>Week 3</td><td><b>After the storm.</b> Thanks, and what comes next.</td><td>The all-clear (Day 14) and the commendation (summons on Day 18). The comet (Day 16). Senior Officer (Day 16, Pillar 5). Your night shifts start tonight (Days 19-20). The new junior arrives on Sunday (Day 21).</td><td>The storm's final tally. Who stood at the comet viewing. Your commendation and rank. A goodbye and a welcome from the rota. "To the night watch tonight, including our newest night hand."</td></tr>
-<tr><td><b>Day 26</b><br>Week 4</td><td><b>Four weeks, and guests.</b> The Veyli visit's warning (Day 26; Vance's memo was Day 22).</td><td>The career's end (Day 26). Four weeks aboard (the cake at 18:40). The visit runs on as the finale.</td><td>Your four weeks: what you fixed, your rank, the friends you made. What the ship needs from everyone while the delegation is aboard. A thank-you that closes the month.</td></tr>
+<tr><td><b>Day 5</b><br>Week 1</td><td><b>Welcome aboard.</b> A short Friday is a good Friday. Beats:
+  <ol>
+  <li>why Fridays are short;</li>
+  <li>where the Wren is and where she's going;</li>
+  <li>the week behind;</li>
+  <li>new hands by name;</li>
+  <li>the Line on Sunday, what it means to cross;</li>
+  <li>the galley's nod;</li>
+  <li>the week ahead;</li>
+  <li>the close.</li>
+  </ol></td><td>Your first week. Crossing the Line on Sunday (Day 7): the Wren crosses into the Veyli reach, "first crossing" for you and the new hands. The New hands' tea that evening.</td><td>Your name by name, five days aboard. Your name on the beam (Day 1) and your first solo job (Day 2). The week's ship health. The galley's nod. Next week's traditions.</td></tr>
+<tr><td><b>Day 12</b><br>Week 2</td><td><b>Steady in the storm.</b> The ion storm is on (Days 11-15) and is the heart of the speech (decided): held as the regular address, in the auditorium. Beats:
+  <ol>
+  <li>calm first words;</li>
+  <li>what the storm is and how long it will last;</li>
+  <li>what's broken, what's held, and who's been fixing it;</li>
+  <li>what she needs from everyone this weekend;</li>
+  <li>your promotion, said plainly;</li>
+  <li>a joke that lets the room breathe;</li>
+  <li>the all-clear she expects, and dinner.</li>
+  </ol></td><td>Your promotion to Officer (Day 10), two days before. Calder's storm briefing (Day 11). Crossing the Line last Sunday.</td><td>What the storm has broken and who fixed it (the storm's repairs this week, your share in them). "Officer {me}" for the first time. The all-clear is expected around Sunday. Works' nod.</td></tr>
+<tr><td><b>Day 19</b><br>Week 3</td><td><b>After the storm.</b> Thanks, and what comes next. Beats:
+  <ol>
+  <li>the storm's tally;</li>
+  <li>the people who carried it (Works first);</li>
+  <li>the comet, a gift after the storm;</li>
+  <li>commendations and ranks, yours among them;</li>
+  <li>tonight's night watch;</li>
+  <li>a goodbye and a welcome (the new junior on Sunday);</li>
+  <li>the week ahead;</li>
+  <li>the close.</li>
+  </ol></td><td>The all-clear (Day 14) and the commendation (summons on Day 18). The comet (Day 16). Senior Officer (Day 16, Pillar 5). Your night shifts start tonight (Days 19-20). The new junior arrives on Sunday (Day 21).</td><td>The storm's final tally. Who stood at the comet viewing. Your commendation and rank. A goodbye and a welcome from the rota. "To the night watch tonight, including our newest night hand."</td></tr>
+<tr><td><b>Day 26</b><br>Week 4</td><td><b>Four weeks, and guests.</b> The Veyli visit's warning (Day 26; Vance's memo was Day 22). Beats:
+  <ol>
+  <li>a month of Fridays;</li>
+  <li>who came and who went;</li>
+  <li>the hardest week (the storm) remembered;</li>
+  <li>what you've become (your rank, your work);</li>
+  <li>the Veyli: who they are and how we host them;</li>
+  <li>what she asks of everyone;</li>
+  <li>four weeks aboard tonight;</li>
+  <li>the close.</li>
+  </ol></td><td>The career's end (Day 26). Four weeks aboard (the cake at 18:40). The visit runs on as the finale.</td><td>Your four weeks: what you fixed, your rank, the friends you made. What the ship needs from everyone while the delegation is aboard. A thank-you that closes the month.</td></tr>
 </table></div>
 <p>A player who's behind, for example not yet an Officer on Day 12, or let go by Day 20, hears the version for where they actually are. Each rank line has a version without it.</p>
 </div>
 
 <div class="card batch"><h3>When an event is on (decided: both)</h3>
 <ul>
-<li><b>Day 12, the ion storm</b> (Days 11-15). The address goes ahead at 16:00 and is the Captain's storm update; the storm's own phases keep their times. If a storm phase falls between 16:00 and 16:40, it waits until the address ends, or the address waits for an emergency phase. The storm's design was settled without an all-hands in the auditorium; this is the regular Friday address, not a storm all-hands. Question fp-v2-q1 checks that's what you want.</li>
+<li><b>Day 12, the ion storm</b> (Days 11-15). The address goes ahead at 16:00 and is the Captain's storm update; the storm's own phases keep their times. If a storm phase falls between 16:00 and 16:30, it waits until the address ends, or the address waits for an emergency phase. The storm's design was settled without an all-hands in the auditorium; this is the regular Friday address, not a storm all-hands. Decided (fp-v2-q1): held as the regular address, in the auditorium, with the storm at its heart.</li>
 <li><b>Day 26, the visit's warning.</b> The address happens and the visit's warning keeps its own time and form. The Captain refers to it ("Commander Vance will brief you on the details"), and Four weeks aboard is at 18:40 after dinner.</li>
 <li><b>Days 7, 16 and 18</b> (Crossing the Line on a Sunday, the comet on a Tuesday, the summons on a Thursday) aren't Fridays, so there's no overlap. The events plan's calendar (F0) marks Friday 15:30-17:00 as taken, so a future event is never put on top of the address.</li>
 <li><b>Pillar 5's night shifts</b> (Days 19-20): you're excused from the address on Day 19, and the address wishes the night watch well.</li>
@@ -229,16 +273,11 @@ a{color:var(--teal)}
 <tr><td>fp-q5 What she says</td><td>The weekly shape with parts that change</td></tr>
 <tr><td>fp-q6 Events on a Friday</td><td>Both happen</td></tr>
 <tr><td>fp-q7 Friday sign-out</td><td>16:00</td></tr>
+<tr><td>fp-v2-q1 Day 12, during the storm</td><td>Held as the regular address, the storm at its heart. Later note: the addresses are longer, a full speech each (25-30 lines), so the clock slows while you listen and the address runs 16:00-16:30</td></tr>
 </table></div>
 
-<h2>One new question</h2>
+<h2>Any last comment</h2>
 <form id="answers" data-collection="answers" data-doc="fridays-plan-v2">
-
-<div class="q" data-qid="fp-v2-q1"><div class="qh">FP-V2-Q1 · DAY 12, DURING THE ION STORM</div><div class="qt">The second Friday address (Day 12) falls in the middle of the ion storm, and you'd settled that the storm has no all-hands in the auditorium. With "both", what should Day 12's address be?</div>
-<label><input type="radio" name="fp-v2-q1" value="as-usual"><span>As usual, in the auditorium: it's the regular Friday address, and the Captain gives the storm update in it<span class="rec">recommended</span></span></label>
-<label><input type="radio" name="fp-v2-q1" value="speakers"><span>That week only, over the ship's speakers (the banner and her voice on every deck), with nobody gathering</span></label>
-<label><input type="radio" name="fp-v2-q1" value="plaza"><span>That week only, on the Deck 3 plaza instead</span></label>
-<textarea name="fp-v2-q1-comment" placeholder="Comment (optional)"></textarea></div>
 
 <div class="q" data-qid="fp-v2-general"><div class="qh">ANYTHING ELSE</div><div class="qt">Anything about the four addresses or the plan?</div>
 <textarea name="fp-v2-general" placeholder="Your thoughts, e.g. something you'd like the Captain to say"></textarea></div>
