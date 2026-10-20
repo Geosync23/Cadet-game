@@ -65,4 +65,4 @@ The Dev mode engineer DB1, 2026-10-20, branch `claude/devmode` (from `claude/int
 - **Clear Dev save** also removes Mark and Undo. The next Dev game starts by shuttle.
 - **Copy my real game** keeps that game's own luck (its career seed), so it's not repeatable. Set career (Stop 2) brings the fixed Dev seed.
 - **The panel's CSS** is made inside section 25, not in the page's style block: one seat, no page edit.
-- **Locked rooms:** Take me to puts you in a room you couldn't walk into (2:P, 5:d). Take me to again gets you out.
+- **Rooms with no walking way back to the lift:** the Probe bay (Deck 2) and the Bay door gear (Deck 5) are marked "(no way back)" in the room list; Take me to still puts you there, and again gets you out. devmode_check keeps the list (`DM_SHUT`) true.

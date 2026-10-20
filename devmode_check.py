@@ -185,7 +185,10 @@ def part_clock(b):
     check(miss == ['d1-briefing', 'd2-solo'], f'clock: the first week\'s meetings passed: {miss}')
     pg.ev("devmodeRun('Clock: to Day 2', () => devmodeSkipTo(1440 + 600))")
     check('Skipped: the Day 1 briefing counted as missed' in pg.ev('devmodeState().note') and 'solo job' in pg.ev('devmodeState().note'), f'clock: no skipped-meeting notice: {pg.ev("devmodeState().note")}')
-    # a Dev game the Skip to Monday way: Day 1, 06:00
+    # a Dev game the Skip to Monday way; DR1's case: Day 2 08:00 to 09:30 leaves the day open (clock in still works)
+    pg.ev('newGameStart(false); introSkip(); devmodeState().ex = []; devmodeState().note = ""'); pg.step(10)
+    pg.ev("devmodeRun('Clock', () => devmodeSkipTo(1440 + 8 * 60)); devmodeRun('Clock', () => devmodeSkipTo(1440 + 9 * 60 + 30))")
+    check(pg.ev('devmodeState().ex') == [] and pg.ev('playerShiftOn(2)') and pg.ev("careerClock() === 'in'"), f'clock: Day 2 08:00 to 09:30 closed the day: {pg.ev("devmodeState().ex")}')
     pg.ev('newGameStart(false); introSkip(); devmodeState().ex = []; devmodeState().note = ""'); pg.step(10)
     check(pg.ev('clockText()') == 'Day 1, Monday 06:00', f'clock: the Skip-to-Monday game starts at {pg.ev("clockText()")}')
     t = pg.page.evaluate('() => { const t = performance.now(); return t; }')
@@ -251,6 +254,7 @@ def part_move(b):
             if r['room'] != k: bad.append((n, k, 'landed in ' + str(r['room'])))
             elif not r['walk']: shut.append(f'{n}:{k}')
     check(not bad, f'move: Take me to a room failed: {bad[:6]}')
+    check(sorted(shut) == sorted(pg.ev('DM_SHUT')), f'move: DM_SHUT ({pg.ev("DM_SHUT")}) isn\'t the rooms with no walking way to the lift: {shut}')
     pg.step(5); check(not pg.errors, f'move: errors after the rooms {pg.errors[:3]}')
     # the testing spots and the next appointment, through the panel's own functions
     def spot(src, deck):

@@ -50050,6 +50050,7 @@ function devmodeStory() {                                // why you can't be mov
   if (typeof DIALOGUE !== 'undefined' && DIALOGUE && !/^moment:/.test(DIALOGUE.id)) return 'Not inside a meeting: it needs you in the room. Walk out to end it (its notes come by Mail), then try again.';
   return null;
 }
+const DM_SHUT = ['2:P', '5:d'];                         // rooms with no walking way back to the lift (the Probe bay, the Bay door gear): devmode_check keeps this list true
 const devmodeSpine = (n, k) => k === '@' || !!(DECKS[n].rooms && DECKS[n].rooms[k] && (DECKS[n].rooms[k].spine || DECKS[n].rooms[k].void));   // the lift car, the spine: not rooms to be taken to
 // to deck n, then the free tile nearest the world spot aim() (worked out on deck n), in a room ok(key) accepts
 function devmodeMove(n, aim, ok) {
@@ -50098,7 +50099,7 @@ function devmodeRooms(body) {                             // A room…: the deck
   if (!DECKS[n]) return;
   const rooms = Object.keys(DECKS[n].rooms || {}).filter(k => !devmodeSpine(n, k) && DECKS[n].rooms[k].name).sort((a, b) => DECKS[n].rooms[a].name.localeCompare(DECKS[n].rooms[b].name));
   for (let i = 0; i < rooms.length; i += 3)
-    devmodeRow(body, rooms.slice(i, i + 3).map(k => [DECKS[n].rooms[k].name, () => { DM_UI.rooms = null; devmodeTake(DECKS[n].rooms[k].name, n, () => ixGoalWorld({ room: k }), r => r === k); }])).classList.add('dmRoom');
+    devmodeRow(body, rooms.slice(i, i + 3).map(k => [DECKS[n].rooms[k].name + (DM_SHUT.includes(n + ':' + k) ? ' (no way back)' : ''), () => { DM_UI.rooms = null; devmodeTake(DECKS[n].rooms[k].name, n, () => ixGoalWorld({ room: k }), r => r === k); }])).classList.add('dmRoom');
 }
 function devmodeHere() { const r = roomAt(...player.here()); return clockText() + ', ' + (r && ROOMS[r] ? ROOMS[r].name : deckIn(deckDef.num)); }
 function devmodeMark() {
