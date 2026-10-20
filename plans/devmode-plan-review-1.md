@@ -134,3 +134,26 @@ On the questions: I agree with the recommendations for q2, q3, q4, q5, q8, q9 an
 - `skiponly.py`: skip-only, 30-minute steps, Days 1-30: misses, the warning steps, let go, the end.
 - names_check on a copy with the plan's `DEV` line (S2).
 - Setup as DEV_NOTES "Testing"; each run in its own `CADET_WORK`.
+
+## Re-check of v2 (claude/devmode-plan 97da6b9), 2026-10-20
+
+In plain words: **every one of my findings is fixed in v2**, including the blocker. Two new gaps, both small: "Excused" skips have no mechanism or hook yet (the game's leave runs out after 3 days), and the first-week meetings need the real deck drawn, which costs time in the replay.
+
+| Finding | v2 | Status |
+|---|---|---|
+| B1 kept days stamped with the build number | the game script's fingerprint + the steady player's version + the seed; devmode_check changes one character and the kept days must drop (4.1, risks) | **fixed** |
+| S1 random seed | gs from the Dev seed (career engineer's hook); "two saving-on runs identical" in D2's devmode_check; DP1's v2 measured the same twice with saving on, seed 1 | **fixed**. One thing left: say what *Copy my real game* does with the copied save's random gs (keep it = that game's luck, not repeatable; or replace it with the Dev seed) |
+| S2 `DEV` taken, order of SAVE_KEY | `DEVMODE`, `.devmode`, declarations swapped or read first, "no top-level name already in use" | **fixed** |
+| S3 the replay must freeze | freezeSync for every Dev action; frozen half-day pieces; crew placed once at the end; pop-ups quiet, not off | **fixed** |
+| S4 Start promotion now | needs shown; `ladderOpen` only when just the day is missing, agreed with 24's owner | **fixed** |
+| S5 End now / Start now / F6 | End and undo by default; End and keep waits for the split (section 18 owner, with the events plan); start today if its first phase is still ahead, else tomorrow; F6 shrinks in the events plan | **fixed** (the events plan must actually be edited to match; the lead tracks that) |
+| S6 ten readers of eventsOn | the readers table with each one's behaviour; traditions engineer reviews first | **fixed** (the table is right against owners.md; "keeps its answer" for 16, 20/20c, 24c and 24f is said on the panel) |
+| S7 the size | 13-17 turns, 3 stops, Officer-on-Day-10 starts as "not yet" | **fixed** |
+| S8 Undo | Undo last for every Dev action (q11) | **fixed** |
+
+### New, from v2
+
+- **V2-1 (should fix): "Excused" has no mechanism or hook.** v2 (3.2): "A skipped workday counts as leave." But the game's leave is real state: 3 days to start (`CAREER.leave`), +1 every 28 days, at most 5. It must be booked before 08:30 the day before (`careerCanBook`), and it's spent (`c.l--`). So "Excused" by real leave runs out after 3 skipped workdays, uses up the player's leave, and can't excuse today once the shift has started. Leave also feeds `careerOff`, which feeds `playerShiftOn`, read in 42 places, the crew planner (section 14) among them. Checked on a scratch copy: a new game's `c.l` is 3. **Fix:** a Dev-only "excused" list read in `careerOff` (one line, the career engineer, section 20). It's set before a day is planned, and for today mid-shift the miss isn't counted (one line in `careerTick`'s miss loop). Add both to section 9's hook list.
+- **V2-2 (should fix, small): the needs hook isn't listed.** "Needs kept as a normal day would leave them" changes section 15's skip step (`SIM_ADVANCE` at line 13533, `needsDrain`). That's the player engineer's, so add it to the hook list. Top up needs is Dev-only, so it's fine in section 25.
+- **V2-3 (nit): the first week in person costs deck changes.** `inMeeting` needs `deckDef.num === w.deck` and the player in the room, and the speaker check falls back after 10 minutes (`introWeekMeetings`), so frozen crew are fine. But the replay must `goToDeck` for each first-week meeting and back. Measured on a scratch copy (`deckswap.py`): 0.3-1.7 s a deck change on a computer (Deck 3 the slowest), so roughly 5× on a phone. Count it in D7's timing, and check memory over those round trips (deck_check's rule).
+- **Checked true in v2:** the readers table matches owners.md; `inMeeting` and `introWeekMeetings` read as v2 says; `#dev.debug` stays on the Dev key by design (the `SAVE_KEY` suffix).
