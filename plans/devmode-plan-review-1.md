@@ -157,3 +157,29 @@ In plain words: **every one of my findings is fixed in v2**, including the block
 - **V2-2 (should fix, small): the needs hook isn't listed.** "Needs kept as a normal day would leave them" changes section 15's skip step (`SIM_ADVANCE` at line 13533, `needsDrain`). That's the player engineer's, so add it to the hook list. Top up needs is Dev-only, so it's fine in section 25.
 - **V2-3 (nit): the first week in person costs deck changes.** `inMeeting` needs `deckDef.num === w.deck` and the player in the room, and the speaker check falls back after 10 minutes (`introWeekMeetings`), so frozen crew are fine. But the replay must `goToDeck` for each first-week meeting and back. Measured on a scratch copy (`deckswap.py`): 0.3-1.7 s a deck change on a computer (Deck 3 the slowest), so roughly 5× on a phone. Count it in D7's timing, and check memory over those round trips (deck_check's rule).
 - **Checked true in v2:** the readers table matches owners.md; `inMeeting` and `introWeekMeetings` read as v2 says; `#dev.debug` stays on the Dev key by design (the `SAVE_KEY` suffix).
+
+## Quick check of v3, the lean Dev mode (claude/devmode-plan 2cc8898), 2026-10-20
+
+In plain words: **Set career works, with three conditions.** I ran a rough Set career on a scratch copy: a Dev save, workdays excused day by day, the career written each morning from the ladder's days, Officer from Day 10, then Day 11 played as a player who doesn't turn up. It ran with no errors. The career exists and survives a save, and the ladder carries on correctly (Day 11 offers Team jobs, m8). The three conditions:
+1. Start the Dev game with **Skip to Monday**, not by shuttle.
+2. Write the **opened** rows (`op`) as well as the trained ones (`tr`).
+3. Expect the storm's missed-meeting Mail.
+
+Scripts: `plans/devmode-review-1/setcareer.py` (by shuttle, beats marked done) and `setcareer_skip.py` (Skip to Monday). Printouts: `out_setcareer_*.txt`.
+
+| What the lead asked | Result |
+|---|---|
+| The career exists (`SHIP.works` after Day 1 17:00) | yes: `worksInit` from Day 2's morning; rank, tier, `home` (the cabin, 4-23), `done` (summons2, ceremony2, move2, and the game added cake2 itself) all kept by `worksClean` after a save |
+| Officer on Day 10 | yes (set from Day 10's morning); `playerBed()` is the cabin, so "wake in your bed" wakes you in the cabin |
+| The ladder carries on | **only if `W.op` is written too.** With `op`: Day 11 opens m8 (ask, then meeting), as for a real Officer. With only `tr`: Day 11 re-opens **m3i, the inspection, already trained** (`worksOpened` reads only `W.op`; `out_setcareer_noop.txt`) |
+| No missed-meeting Mail | none from the first week. There is "Storm briefing (notes)" (the storm's Day 10 briefing, missed while excused), plus "Recycler membrane change (notes)" from my Day 11 no-show (expected). The storm one is the "no part in the storm" v3 already lists; say it on the panel |
+| Settling-in, Zeke's lines | with Skip to Monday: every week flag set (`intro.device`, `met.calder`, `week1.d2`-`d7`, `week1.done`), the arrival ended, no clock trouble. Not set: `mug`, `seedling` and the Settling-in ticks (`SHIP.intro.settle` empty). That's approximate and fine, but list it in "What's set" |
+
+### Findings
+
+- **V3-1 (should fix): "A new Dev game by shuttle" then marked beats stops the clock at Day 0.** While the arrival is on its first step, `introTick` sets the clock back to **Day 0, 17:30 on every frame** (line 40016: `if (I.step === 'manifest') { SHIP.time.day = INTRO_START.day; ... }`). Marking `SHIP.intro.done` doesn't move `I.step`. In my run, the first frame after reaching Day 11 put the clock back to Day 0 17:30 (`out_setcareer_shuttle.txt`: `step "manifest"`, the week's flags unset). **Fix:** Set career starts with `newGameStart(false)` + `introSkip()`. intro_check part 5 says that gives the same points and flags as the arrival evening. Then mark the first-week meetings `:met` before the skip passes them, and let the game's own week run set its flags (it did). That also answers v3-q2: "always new" is fine, but **by Skip to Monday**.
+- **V3-2 (should fix): write `W.op`, not just `W.tr`.** Each trained row must also sit in `W.op[its day]`, or the ladder offers it again (seen: m3i re-opened on Day 11). devmode_check: after Set career to Day N, play Day N+1 and expect no row that's already trained to open.
+- **V3-3 (should fix): set the fresh-save start switch first.** A brand-new Dev save has `INTRO_BOOT` on (no save, not nosave), so the first `introTick` frame calls `newGameStart(true)` and starts the arrival over whatever Dev mode has done. In my first run it wiped a finished Set career back to Day 0. D1 should let that first frame happen before any Dev action, or clear `INTRO_BOOT` when Dev mode starts its own game (a section 21 hook, owner first).
+- **V3-4 (nit): with no fixed seed, two Set careers to the same day can differ.** About 57% of games have a sick day by Day 30 (`gs` random). Mark and Undo are exact, so for the user that's fine. But devmode_check can only compare fields, not save bytes, unless the one-line seed hook stays (Dev only, cheap). Say which.
+- **V3-5 (nit): the hooks list.** Add **20 (social)** for "friendships get a starting level" (that writes `SHIP.social`, so the social engineer's shapes apply), and **21** for `introSkip` + `INTRO_BOOT` (V3-1, V3-3). The rest (13, 15, 18, 20 excused, 24/24p, page) matches what v3 does. The pip: `promoPip()` isn't called by writing `W.done`, so the collar may show no pip until something calls it. Call it after Set career.
+- **Stop 1 and the dropped parts:** nothing in Stop 1 needed the replay, the kept days or IndexedDB. Mark, Undo and Copy my real game are plain localStorage saves, three at about 120 KB each, well inside the limit. The only thing that leaned on the dropped seed is devmode_check's repeatability (V3-4).

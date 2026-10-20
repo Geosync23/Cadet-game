@@ -1,0 +1,101 @@
+start Day 1, Monday 06:00 intro true clothes true
+op 10 10.1 s
+{
+ "before": {
+  "clock": "Day 11, Thursday 00:00",
+  "rank": "officer",
+  "tier": 2,
+  "tr": 10,
+  "cur": null,
+  "ms": 0,
+  "missed": []
+ },
+ "after": {
+  "clock": "Day 11, Thursday 18:00",
+  "cur": {
+   "id": "m8",
+   "st": "ask",
+   "d": 11,
+   "by": "halloran-emeka",
+   "occ": "works.m8@11",
+   "j": null,
+   "w": 0
+  },
+  "opToday": [
+   "m8"
+  ],
+  "opened": [
+   "m8:meet",
+   "m8:ask"
+  ],
+  "ms": 1
+ },
+ "mail": [
+  "Captain Odile Marrow: All hands",
+  "Pell Okafor: Film night has moved",
+  "Emeka Halloran: Recycler membrane change (notes)",
+  "Emeka Halloran: team jobs",
+  "Emeka Halloran: Recycler membrane change",
+  "Chief Ines Calder: Storm briefing (notes)",
+  "Chief Ines Calder: Storm prep",
+  "Tomas Lind: The bell board",
+  "The Wren: Ship traditions tomorrow: Pick-your-own breakfast 06:15; Open door 16:40; Brennan's tasting table 18:15; Late piano 21:45",
+  "Chef Brennan: Cake tonight",
+  "Stores: Out of membranes",
+  "Stores: Out of cells",
+  "The Wren: Ship traditions tomorrow: Open lab 17:30; Spice shelf supper 18:15; Knit and natter 20:00; Tiles night 20:00; Birthday 20:15",
+  "Chef Brennan: Cake tonight",
+  "Matthias Oduya: This week aboard",
+  "The Wren: Ship traditions tomorrow: Sunrise stretch 06:30; Chief's talk 19:00; Gym club 19:15; Birthday 20:15",
+  "Stores: Out of filters",
+  "The Wren: Ship traditions tomorrow: Slow stretch 08:00; Sunday swap meet 10:30; Winner Stays On 11:30; Reading corner 16:00; One week aboard 17:15; Sunday long table 18:00; Lap of the Wren 20:30",
+  "The Wren: Ship traditions tomorrow: Long breakfast 08:00; Harvest morning 09:30; Sowing morning 11:45; Garden hour 14:00; Tiles ladder 15:00; Cook-along 15:30; Film night 20:00; Observatory night 21:15",
+  "The Wren: Ship traditions tomorrow: Sunrise stretch 06:30; New hand's tea 18:40; Music jam 19:45; Tap night 20:00",
+  "Chef Brennan: Cake tonight",
+  "The Wren: Ship traditions tomorrow: Postcard night 18:45; Quiz night 20:00; Birthday 20:15; Late piano 21:45",
+  "Tomas Lind: The bell board",
+  "The Wren: Ship traditions tomorrow: Pick-your-own breakfast 06:15; Open door 16:40; Brennan's tasting table 18:15; Paddle club 18:30; Float hour 21:30; Late piano 21:45",
+  "The Wren: Ship traditions tomorrow: Dawn swim 06:15; Spice shelf supper 18:15; Wall night 18:30; Knit and natter 20:00; Tiles night 20:00",
+  "Works Office: Welcome aboard the Wren"
+ ],
+ "settle": {},
+ "step": null,
+ "flags": [
+  "escort.torres-zeke=true",
+  "week1=true",
+  "intro.device=true",
+  "met.calder=true",
+  "week1.d2=true",
+  "week1.d3=true",
+  "week1.d4=true",
+  "week1.d5=true",
+  "week1.d6=true",
+  "week1.d7=true",
+  "week1.done=true",
+  "mug=undefined",
+  "seedling=undefined"
+ ],
+ "escortToday": "null",
+ "notesMissed": [
+  "shiftMissed@11"
+ ],
+ "introOn": true,
+ "ended": true,
+ "week1": true,
+ "saved": {
+  "rank": "officer",
+  "tier": 2,
+  "home": "4-23",
+  "tr": 10,
+  "done": [
+   "summons2",
+   "ceremony2",
+   "move2",
+   "cake2"
+  ]
+ },
+ "errs": [],
+ "ngs": [],
+ "playerBed": "4-23"
+}
+pageerrors []
