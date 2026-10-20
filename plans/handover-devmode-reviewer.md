@@ -1,6 +1,6 @@
 # Handover: Dev mode reviewer (DR1)
 
-DR1, session_01WfFmjT31bVcy4mvsNVi5Mz, 2026-10-20, written at about 47% memory, before any automatic summary. Reports to lead 20 (session_019UJSCUCdtC1kTpYiABWKhs). Never contact the user directly.
+DR1, session_01WfFmjT31bVcy4mvsNVi5Mz, 2026-10-20, written at about 47% memory, before any automatic summary. Reports to **lead 21 (session_01KYPEbF745ZQ9g9kr4XJgre)**, who took over from lead 20 (session_019UJSCUCdtC1kTpYiABWKhs) at 18:11. Never contact the user directly.
 
 ## Role
 - An adversarial technical reviewer of Dev mode: the plan, then each build step.
