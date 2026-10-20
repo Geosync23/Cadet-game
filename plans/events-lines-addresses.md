@@ -141,9 +141,13 @@ A month aboard. Tomorrow a Veyli delegation comes aboard; Commander Vance's own 
 3. **Commander Vance** opens each address ("Settle, please. The Captain.") and has one dry line on Day 26 about his list.
 4. **She talks to the room, not only to you.** You get two or three lines each Friday; the rest is the ship's week.
 
-## Questions for you
+## Your answers (2026-10-20)
 
-- **q1.** Are 16-19 lines, spread evenly over 16:00-16:48, all right? Or trim to 16 (I'd cut the "what's held" detail on Day 12 and the comet joke on Day 19)?
-- **q2.** Day 12: is "I've borrowed this room for an hour" a good way to square the closed rec deck with the auditorium?
-- **q3.** Day 5's "And a quiet ship, I hope" is a small wink before the storm. Keep it?
-- **Comments:** any line you'd change, in any speech.
+| Question | Decision |
+|---|---|
+| q1 Length | **Decided:** keep 16-19 lines, spread evenly over 16:00-16:48 |
+| q2 Day 12 and the closed rec deck | **Decided:** "I've borrowed this room for an hour, then it shuts." The rec deck opens for the Friday address, 16:00-16:50, during the storm (the events engineer builds it in the storm update) |
+| q3 "And a quiet ship, I hope" (Day 5) | **Decided:** keep it |
+| q4 The two place names for First Light Cocoa | Open (see `plans/events-lines-events.md`) |
+
+design-doc.md: the short Fridays section comes with the Fridays plan's own design-doc changes (on claude/patch-plan, not yet in claude/integration); these three decisions go into it when it's merged: the addresses are 16-19 lines spread over 16:00-16:48, and Day 12's opens the closed rec deck for its hour.
