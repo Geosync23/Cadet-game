@@ -8844,6 +8844,7 @@ function applyLight(k) {
   const ml = deckDef && deckDef.light;                   // a deck's own mood (Deck 6 runs warm and dim)
   if (ml) { hemi.color.multiply(ml.sky); hemi.intensity *= ml.hemi; sun.color.multiply(ml.sun); sun.intensity *= ml.sunI; }
   if (REC_SHOW.dim) { const q = 1 - REC_SHOW.dim; hemi.intensity *= q; sun.intensity *= q; }   // 0.84.8: the auditorium's house lights down for a show (8c)
+  if (typeof flcDim === 'function' && flcDim()) { const q = 1 - flcDim(); hemi.intensity *= q; sun.intensity *= q; }   // patch #26: the bow lounge's lights down for First Light Cocoa (section 15's slot)
   for (const L of LAMPS) L.l.intensity = lerp(L.day, L.night, k);
   renderer.toneMappingExposure = lerp(DAY.exp, NIGHT.exp, k);
   scene.background.copy(DAY.bg).lerp(NIGHT.bg, k);
