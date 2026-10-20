@@ -62,3 +62,23 @@ Harness gotcha (new): speech bubbles pop in with a real-time CSS animation (`.bu
 - **Notes:**
   - The Captain is 4.5 h a week on Deck 4 (the plan said about 3-4).
   - 9 of 35 visits still miss the stall.
+
+## PA batch C re-review: claude/patch-a ffd8ed7. PASS
+
+- **Fixes read:**
+  - escToYou (the stop never applies while leading).
+  - trkAway (a tracked place clears only after you've been away).
+  - The done key `d1-end:told`; d1-end starts at 16:44; the board arrow yields.
+- **intro_check --evening:** OK. The dinner chat at 18:39, the Chief 0 m from her next-table seat, her welcome at 18:43, the goodnight said.
+- **rvC.py at 390×844:**
+  - Zeke follows from 16:46, with a gap of 2 m or more.
+  - walk.trainend.1-3 at 16:51, 16:53 and 16:55.
+  - The clock-out arrow at 16:56; the beam arrow straight after clocking out, through 17:13 (`rvC_clockout.png`, `rvC_beam.png`).
+- **Nits:**
+  - "That's the day! You did well." repeats the good-job line just after clocking out.
+  - The board arrow stays during his three lines.
+- **Still owed by PA:**
+  - The batch B pointer fix.
+  - #19's dinner nudges.
+  - #31.
+  - The full intro_check parts 9-12.
