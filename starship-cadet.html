@@ -14283,6 +14283,16 @@ SAVE_EXTRA.push(s => { const p = s.player || (s.player = {}); p.cart = SHIP.play
 // ---- the device: its screens (Home, Needs, Mail, Wallet and the rest) are section 19's apps (0.35.0) ----
 
 // ---- slot: Player engineer (section 15). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// patch #21 (plans/patch-plan.html, the user's "Junior Officer"): the rank before the title on a crew card and in the device's
+// crew lists ("Junior Officer · Storekeeper · stranger"). Left out where the title already says it (Captain, Executive Officer,
+// Head of …) and for guests. The words live in content/banks/talk.lines (card.rank.*). Off = identical; ?rankcard turns it on.
+let RANK_CARD_ON = URL_FLAGS.has('rankcard');
+const RANK_CARD_WORDS = { captain: 'Captain', xo: 'Commander', chief: 'Department Chief', senior: 'Senior Officer', officer: 'Officer', junior: 'Junior Officer' };
+function rankCardWord(p) {
+  if (!RANK_CARD_ON || !p || p.player || !RANK_CARD_WORDS[p.rank] || /^(Captain|Executive Officer|Head of )/.test(p.role || '')) return null;
+  return typeof talkText === 'function' ? talkText('card.rank.' + p.rank, RANK_CARD_WORDS[p.rank]) : RANK_CARD_WORDS[p.rank];
+}
+function rankCardRole(p) { const w = rankCardWord(p); return w ? w + (p.role ? ' · ' + p.role : '') : p && p.role; }
 // ---- end of slot: Player engineer ----
 
 // =====================================================================
@@ -27953,6 +27963,18 @@ const LINES = JSON.parse([
   '{"text":"same time as {trad}","id":"1pjq9ag"}]',
   ',"cal.title":[',
   '{"text":"The next 7 days","id":"16gpefm"}]',
+  ',"card.rank.captain":[',
+  '{"text":"Captain","id":"11ebe8e"}]',
+  ',"card.rank.chief":[',
+  '{"text":"Department Chief","id":"1mr4t3i"}]',
+  ',"card.rank.junior":[',
+  '{"text":"Junior Officer","id":"1nmvw5e"}]',
+  ',"card.rank.officer":[',
+  '{"text":"Officer","id":"1s89kti"}]',
+  ',"card.rank.senior":[',
+  '{"text":"Senior Officer","id":"2zsk08"}]',
+  ',"card.rank.xo":[',
+  '{"text":"Commander","id":"5br9kx"}]',
   ',"career.back":[',
   '{"text":"{hi}. Back from leave? You look rested.","id":"1186734","tier":[1,4]},',
   '{"text":"Welcome back. The board missed you. Well, someone had to say it.","id":"1epolhb","tone":"funny","tier":[1,4]}]',
@@ -37796,7 +37818,7 @@ if (typeof deviceApp === 'function') deviceApp({ id: 'crew', title: 'Relationshi
   view: () => {
     const c = CREW_PICK && crewContacts({ all: true }).find(x => x.id === CREW_PICK);
     if (c) return { title: c.name, blocks: [
-      { kind: 'text', text: c.role + '. ' + c.tierName[0].toUpperCase() + c.tierName.slice(1) + (c.toNext !== null ? ' (' + c.toNext + ' more to ' + REL_NAMES[c.tier + 1] + ')' : '') + '.' },
+      { kind: 'text', text: (RANK_CARD_ON ? rankCardRole(SOC.crew[SOC.idx.get(c.id)]) : c.role) + '. ' + c.tierName[0].toUpperCase() + c.tierName.slice(1) + (c.toNext !== null ? ' (' + c.toNext + ' more to ' + REL_NAMES[c.tier + 1] + ')' : '') + '.' },
       ...(typeof knowBlocks === 'function' ? knowBlocks(c.id) : [{ kind: 'list', rows: c.known.length ? c.known.map(k => ({ text: k })) : [{ text: 'Nothing yet. Ask them about themselves.' }] }]),   // what you know, by section (20c)
       { kind: 'buttons', items: [{ label: 'Where are they?', action: { app: 'roster', who: c.id } }].concat(c.met !== null ? [{ label: 'Meet up', action: { app: 'appointments', with: c.id } }] : [], [{ label: 'Back', action: { app: 'crew', do: 'back' } }]) }] };
     const cs = crewContacts(), mo = movedOn(), gone = mo.length ? [{ kind: 'text', text: 'Moved on', mark: 'head' }, { kind: 'list', rows: mo.map(x => ({ text: x.name, sub: x.to ? 'Now on the ' + x.to.replace(/^the /i, '') : 'Transferred', mark: 'past' })) }] : [];
@@ -38024,7 +38046,7 @@ function chatShow() {
   const gift = !C.ask && !C.offer && !talking && giftInHands(); if (gift) buttons.push(r.giftWeek === socWeek() + 1 ? { id: 'give', label: 'Given this week', off: true } : { id: 'give', label: 'Give ' + gift });
   if (!C.ask && !C.offer && !talking && typeof caseAskButton === 'function') { const cb = caseAskButton(p); if (cb) buttons.push(cb); }
   if (!C.ask && !C.offer && !talking && typeof shopGiveButton === 'function') { const sb = shopGiveButton(p); if (sb) buttons.push(sb); }   // 24j: Give the thing you made them (M10)   // 24k P2: Ask about the fault (only a witness, only after Tomas's word)
-  const v = { who: p.name, role: p.role, tier: REL_NAMES[relTier(p.id)], line: C.line.text, say: C.line.say !== false, buttons };
+  const v = { who: p.name, role: rankCardRole(p), tier: REL_NAMES[relTier(p.id)],   /* patch #21: the rank first (off: p.role) */ line: C.line.text, say: C.line.say !== false, buttons };
   const el = chatEl(); el.hidden = false;
   (CHAT_SKIN.draw || chatDraw)(el, v);
   if (C.talk) talkMeter(el, C.talk);                     // the Talk a while meter, over the buttons (either skin)
