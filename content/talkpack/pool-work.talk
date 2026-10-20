@@ -95,7 +95,7 @@ listen: What broke that was new?
 share: Learning. While I'm learning, it's fine.
   them: Then you've got years before it's the same. Good.
 cheer: Fixing things before they break. Smugly.
-  them: That's the job, really. Prevention's just quiet showing off.   #funny
+  them: That's the job, really: prevention's just quiet showing off.   #funny
 
 == pressure
 when: tier>=friend !thread:notgood !who:pell
