@@ -12384,9 +12384,13 @@ const teachRecent = (at, c, ms = 120000) => at !== undefined && c.now - at < ms;
 const teachMeal = m => m >= MEALS.breakfast[0] && m < MEALS.breakfast[1] || m >= MEALS.dinner[0] && m < MEALS.dinner[1];   // breakfast and dinner at the servery
 const TEACH = [   // text: head writer 3. A 4th element { sure: true }: shown when due whatever the 3-minute and 60 s pacing says
   // playtest 2 (0.72.5, HUD U; texts: the head writer's tip.device and tip.laundry.day2, read when shown): item 9, once on your
-  // training day while you're on shift; item 19, the laundry tip at the start of Day 2 (from 06:00, before 09:00's shift)
+  // training day while you're on shift; item 19, the laundry tip at the start of Day 2 (from 06:00, before 09:00's shift).
+  // The patch (#28): any time on Day 2 you're up and not clocked in, in the words for the time (before, late, after the shift)
   ['t:devwork', c => c.d === 1 && c.work && c.min >= 9 * 60 + 30 && c.min < 17 * 60 && !c.app, () => careerText('tip.device') || 'Working is a good chance to check out your device. Schedule, Jobs and Tracked are a tap away.'],
-  ['t:laund2', c => c.d === 2 && c.min >= 6 * 60 && c.min < 9 * 60, () => careerText('tip.laundry.day2') || 'New day: fresh clothes from your wardrobe. When they run out, take your hamper to the laundry on Deck 4.', { sure: true }],
+  ['t:laund2', c => c.d === 2 && c.min >= 6 * 60 && !sleeping && !(typeof careerClockedIn === 'function' && careerClockedIn() && !careerClockedOut()),
+    () => SHIP.time.min < DAY_SHIFT[0] ? careerText('tip.laundry.day2') || 'New day: fresh clothes from your wardrobe. When they run out, take your hamper to the laundry on Deck 4.'
+      : SHIP.time.min < DAY_SHIFT[1] ? careerText('tip.laundry.day2.late') || 'Laundry\'s for after your shift. Clock in first; the washers will wait.'
+      : careerText('tip.laundry.day2.after') || 'Laundry day: your hamper\'s in Bunk 1, the washers are on the far corridor.', { sure: true }],
   ['t:rep', c => c.d >= 1 && (c.S.turnin !== undefined && shipNow() - c.S.turnin >= 30 || c.min >= 1020 || c.d >= 2), 'Not just jobs: kindness and joining in count too. Each department has its own view of you, and so does the ship.', { sure: true }],   // the user's: on the 2nd day (Monday), after your first job's turned in or at the shift's end; half an hour after the turn-in, so Zeke says his part first (0.28.50)
   // free time (0.28.63, the 0.60.7 plan's "Tips for your first evenings"; the plan's approved words): off shift, then one an evening, Days 1-4
   ['t:offshift', c => c.d >= 1 && c.min >= 1020 && c.min < 1290, 'Off shift. Your evening is yours: call home from the booths on Deck 3, go to a ship tradition (Calendar), talk a while with someone, or try a hobby.', { sure: true }],
@@ -32303,6 +32307,10 @@ const LINES = JSON.parse([
   '{"text":"Out of clean clothes. Carry the hamper to the laundry on Deck 4, past the washrooms in the junior wing. Load a washer, and come back when it\'s done.","id":"bsfjuc"}]',
   ',"tip.laundry.day2":[',
   '{"text":"Tuesday is laundry day. Take your hamper to the laundry on Deck 4, before your shift or after it.","id":"1rnyvjy"}]',
+  ',"tip.laundry.day2.after":[',
+  '{"text":"Laundry day: your hamper\'s in Bunk 1, the washers are on the far corridor.","id":"1eagq7c"}]',
+  ',"tip.laundry.day2.late":[',
+  '{"text":"Laundry\'s for after your shift. Clock in first; the washers will wait.","id":"1hsjxic"}]',
   ',"tip.offshift":[',
   '{"text":"Off shift. Your evening is yours: call home from the booths on Deck 3, go to a ship tradition (Calendar), talk a while with someone, or try a hobby.","id":"1kzqg2"}]',
   ',"tip.round.done":[',

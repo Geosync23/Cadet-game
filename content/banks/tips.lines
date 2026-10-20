@@ -16,3 +16,9 @@
 // item 19: at the start of Day 2 (the laundry day)
 == tip.laundry.day2
 - Tuesday is laundry day. Take your hamper to the laundry on Deck 4, before your shift or after it.
+// the patch (#28): the same tip, any time on Day 2 you're up and not clocked in. Up late, the shift already on:
+== tip.laundry.day2.late
+- Laundry's for after your shift. Clock in first; the washers will wait.
+// after the shift (17:00 on):
+== tip.laundry.day2.after
+- Laundry day: your hamper's in Bunk 1, the washers are on the far corridor.
