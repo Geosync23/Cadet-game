@@ -1,0 +1,123 @@
+@talks pool
+topic: news
+// TW1, the Talk a while pack: shared pool, topic news. Ship gossip, never news that may not have happened:
+// anything about an event, a promotion or an arc needs a condition (plans/talk-pack-plan.md, "Conditions").
+
+== tea-queue
+them: Have you heard? There's always something going round.
+them: I heard it in the tea queue, so it's half made up.   #funny
+ask: Where do you hear the ship's news?
+listen: What's the latest, then?
+  them: Someone's moving bunks. Big news, here.   #funny
+share: Nowhere yet. I'm always last to know.
+  them: Stick with me. You'll know everything by Friday.
+cheer: I just make it up. Saves time.
+  them: That's how half of it starts.   #funny
+
+== gull
+when: !who:vance
+them: Did you read Gull this week? In the newsletter?
+them: The poem about the treadmill. "Thou belt of endless toil."   #funny
+ask: Do you read the newsletter?
+listen: Who do you think Gull is?
+  them: Nobody knows. The guesses get wilder every week.   #funny
+share: Sometimes. I like the poems, honestly.
+  them: You do? Brave. Don't say it too loudly.   #funny
+cheer: Only for Gull. Gull's the best bit.
+  them: The best worst bit. Every Friday, I'm there.   #funny
+
+== twins
+when: tier>=acquaintance !who:navarro-mateo|salo-saad|nakamura-bilal
+them: Did you know three people aboard have twins on the Halcyon?
+them: The Halcyon calls them "the set". They find it very funny.
+ask: Have you got any brothers or sisters?
+listen: Do they look alike?
+  them: I've no idea. Nobody's seen the Halcyon lot in ages.   #funny
+share: I have family back home. I miss them.
+  them: Write to them. Tell them about the Wren. They'll love it.   #warm
+cheer: Not that I know of. I'll check.
+  them: Do check. Apparently it happens.   #funny
+
+== lost-property
+when: tier>=acquaintance !who:navarro-mateo|tran-chloe|fonseca-arjun|grieve-thea
+them: There are four lost-property boxes now. On four decks.
+them: Four people each think they're the only one in charge.   #funny
+ask: Have you lost anything aboard yet?
+listen: Does anyone ever get anything back?
+  them: Eventually. It might be on Deck 2 by then.   #funny
+share: My way, mostly. Every day.
+  them: There's no box for that. Ask anyone. They'll walk you.
+cheer: My dignity. In the lift.
+  them: Nobody's handed that in yet. Keep checking.   #funny
+
+== rumour-true
+when: tier>=acquaintance !who:marrow
+them: Half the rumours are true. The other half are more fun.   #funny
+them: I can never tell which half I've got.
+ask: What's the best rumour you've heard so far?
+listen: What's the silliest one you've heard?
+  them: That the Admiral in the ready room is real. Well. Nobody knows.   #funny
+share: I've not heard any good ones yet.
+  them: Give it a week. You'll be in one, probably.   #funny
+cheer: That the coffee machine has feelings.
+  them: Works says it does. Works would know.   #funny
+
+== bunk-moves
+when: tier>=acquaintance rank:junior !who:tomas
+them: Someone in my bunk room snores. We're having a vote about it.   #funny
+them: Not to move them. To buy them a better pillow.
+ask: How are your bunkmates? Getting on all right?
+listen: Will a pillow help?
+  them: No. But it's a nice gesture. That's how we do things.   #funny
+share: Really well. I got lucky.
+  them: You did. A good bunk room makes the whole ship easier.   #warm
+cheer: Tomas talks to the stars. Out loud.
+  them: That's lovely, actually. Don't tell him I said so.   #warm
+
+== delivery
+when: tier>=acquaintance
+them: The store's getting new stock soon. Socks, apparently.
+them: Everyone's very excited about the socks.   #funny
+ask: What would you want from the store, if you could ask for anything?
+listen: Why socks?
+  them: The ship eats them. Nobody knows how. Laundry, probably.   #funny
+share: Something from home. A taste of it.
+  them: Ask the storekeepers. They'll try. They always try.
+cheer: More socks. I'm with the ship on this.
+  them: The people have spoken. Socks for all.   #funny
+
+== heard-about-you
+when: tier>=colleague
+them: Can I tell you what I heard about you? It's nice, don't worry.
+them: Someone said you're easy to work with. And you say thank you.   #warm
+ask: Have you heard anything about yourself yet?
+listen: Who said it?
+  them: I promised not to say. But they meant it.   #warm
+share: No. I'm a bit nervous to, honestly.
+  them: Don't be. They're kind about you. I'd tell you otherwise.   #warm
+cheer: Only that I eat a lot.
+  them: That too. But mostly the nice stuff.   #funny
+
+== messages
+when: tier>=colleague !who:tran-chloe|santos-zofia
+them: The Comms juniors sort the ship's messages. And they peek at the gossip.   #funny
+them: Not the private ones. Just the notice board. They swear.
+ask: Do you keep up with your Mail?
+listen: Do they really peek?
+  them: They say "glance". It's a different word. Same thing.   #funny
+share: I try. I'm behind on replies.
+  them: Everyone is. Answer one tonight. Just one.
+cheer: I read it all, then forget it all.
+  them: That's most of us. Your device remembers for you.   #funny
+
+== news-from-home
+when: tier>=friend
+them: I had some news from home. Good news. Small, but good.
+them: Someone I love is doing better. That's all. That's everything.   #warm
+ask: Has home had good news for you lately?
+listen: Are they all right now?
+  them: Getting there. I wanted to tell someone. Thanks for being it.   #warm
+share: A little. I'll tell you sometime.
+  them: Do. I like hearing it. Good news is better shared.   #warm
+cheer: My family finally learned to send Mail.
+  them: That's huge, actually. Celebrate it.   #funny

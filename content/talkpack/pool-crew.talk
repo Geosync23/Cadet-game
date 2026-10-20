@@ -1,0 +1,122 @@
+@talks pool
+topic: crew
+// TW1, the Talk a while pack: shared pool, topic crew (a crewmate). {friend} is a crewmate they're bonded with: a talk
+// with {friend} is skipped for anyone who has none yet.
+
+== story-each
+them: Everyone's got a story on this ship. Ask and you'll see.
+them: The quietest people have the best ones. Every time.
+ask: Who've you got to know so far?
+listen: Whose story surprised you most?
+  them: Can't say. It's theirs to tell. But ask around. Kindly.
+share: A few people. Everyone's been kind.
+  them: Kind's the Wren's whole thing. You'll fit right in.   #warm
+cheer: You. You're my best source.
+  them: An honour. I'll try to be worth it.   #funny
+
+== knew-nobody
+them: I knew nobody when I came aboard. Now look.
+them: I can't walk the length of Deck 3 without a chat.   #funny
+ask: Have you made any friends yet? Apart from me.   #funny
+listen: Who was your first friend here?
+  them: Someone who sat with me at dinner on my first night. Still do.   #warm
+share: A few. It's getting easier.
+  them: It does. Then one day you're the one sitting with the new face.
+cheer: The lift. We have an understanding.
+  them: The lift's everyone's friend. Ask the lift club.   #funny
+
+== friend-funny
+when: tier>=acquaintance
+them: {friend} did the funniest thing this morning.
+them: Walked into the mess, sat down, and fell asleep in the porridge queue.   #funny
+ask: Who makes you laugh, aboard?
+listen: How long have you two been friends?
+  them: Feels like always. That happens fast out here.   #warm
+share: My bunkmates. Every night.
+  them: That's the best kind. Laughing yourself to sleep.   #warm
+cheer: Whoever falls asleep in the porridge.
+  them: I'll pass it on. {friend} will be thrilled.   #funny
+
+== get-on
+when: tier>=acquaintance
+them: Have you met {friend} yet? You'd get on, I think.
+them: Same sense of humour. Laughs at the wrong bits of things.   #funny
+ask: What kind of people do you get on with?
+listen: How did you two meet?
+  them: Same table, first week. Never looked back.   #warm
+share: Kind ones. Funny ones, if I'm lucky.
+  them: Then you'll like it here. We've got plenty of both.
+cheer: Ones who share their pudding.
+  them: That's a short list. {friend}'s on it.   #funny
+
+== look-out
+when: tier>=acquaintance !who:brennan
+them: People look out for each other here. It's nice.
+them: You go quiet at dinner, someone asks. Every time.
+ask: Has anyone looked out for you yet?
+listen: Has someone looked out for you?
+  them: Lots of times. I try to pay it back. Can't always.   #warm
+share: Yes. More than I expected.
+  them: Good. That's the ship working properly.   #warm
+cheer: Brennan. She checks I've eaten. Twice.
+  them: Only twice? You're doing well, then.   #funny
+
+== senior-crew
+when: tier>=acquaintance rank:junior
+them: The senior crew seem scary at first. They're not, mostly.
+them: Holt's the exception. Holt is a little bit scary.   #funny
+ask: Who did you find hardest to talk to, at first?
+listen: Is Holt really scary?
+  them: No. He just looks it. He'd do anything for us juniors.   #warm
+share: The Chief. I wasn't sure what she thought.
+  them: She thinks well of you, if you do the work. That's Calder.
+cheer: The coffee machine. It hates me.
+  them: It hates everyone. It's fair, at least.   #funny
+
+== couples-days
+when: tier>=colleague !who:silva-bea|soto-marta|jovanovic-petra|dlamini-lukas
+them: Some people aboard got married just before the tour.
+them: They compare the days at breakfast. Up from the wedding, down to home.
+ask: Do you count days for anything?
+listen: Who counts the most?
+  them: Depends who you ask. They're very competitive about it.   #funny
+share: Days aboard. I'm still counting.
+  them: You'll stop counting soon. That's when it's home.   #warm
+cheer: Days until soup day.
+  them: The best countdown aboard. Every week, worth it.   #funny
+
+== friend-help
+when: tier>=colleague !who:brennan
+them: {friend} helped me through a bad patch last year. Never made a fuss.
+them: Just turned up. Every evening, for a week.   #warm
+ask: Who would you go to, if you had a bad day?
+listen: Have you thanked them?
+  them: Tried. They said "don't be daft". That's how you know.   #warm
+share: You, maybe. If that's all right.
+  them: More than all right. Any day. I mean that.   #warm
+cheer: Brennan. With a spoon.
+  them: Good choice. A spoon fixes most things.   #funny
+
+== new-faces
+when: tier>=colleague !newhere
+them: I like it when new people come aboard. The ship gets bigger.
+them: Not the corridors. The ship. You know what I mean.
+ask: What's it like, being one of the new faces?
+listen: Do you remember being new?
+  them: Every bit. That's why I talk to new people. Someone talked to me.   #warm
+share: Strange. Lovely. A bit lonely sometimes.
+  them: Lonely goes. Faster than you think. I'll help.   #warm
+cheer: Great. I get all the free advice.
+  them: And we have so much of it. Most of it about food.   #funny
+
+== not-close
+when: tier>=friend
+them: There's someone aboard I used to be close to. We drifted.
+them: Nothing happened. Just shifts and bunks and time.
+ask: Has that ever happened to you? Drifting from someone?
+listen: Could you fix it?
+  them: Maybe. A cup of tea, a bit of nerve. I'll think about it.
+share: Yes. A friend back home. It stings.
+  them: Write to them. Short is fine. Drifting goes both ways.   #warm
+cheer: Only from my bed in the mornings.
+  them: That's a hard drift. You keep fighting it.   #funny

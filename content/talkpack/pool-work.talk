@@ -1,0 +1,122 @@
+@talks pool
+topic: work
+// TW1, the Talk a while pack: shared pool, topic work. You're a Works junior; {boss} is the speaker's chief.
+
+== small-jobs
+them: Some days it's all small jobs. I like those, secretly.
+them: You finish ten things. You feel like a genius.   #funny
+ask: Do you like the big jobs or the little ones?
+listen: Why the small ones?
+  them: You can see them done. Big jobs, you just see more big job.
+share: Little ones, for now. I'm still learning.
+  them: That's how it should be. Big ones come soon enough.
+cheer: Whichever comes with tea.
+  them: There's always tea at one. Plan around it.   #funny
+
+== asking
+when: !who:calder
+them: The trick here is to ask. Nobody minds.
+them: They like being asked. It means you trust them.
+ask: Who do you go to when you're stuck?
+listen: Who did you ask, when you were new?
+  them: Everyone. Twice. Nobody minded once.   #funny
+share: Whoever's nearest. Calder, if it's big.
+  them: Good order. Calder likes a question that's been thought about.
+cheer: The board. It never answers, though.
+  them: The board's a terrible conversationalist.   #funny
+
+== good-at-it
+when: !who:calder|pell
+them: Everyone here's good at what they do. Makes you want to keep up.
+them: I learned more my first year aboard than in all my training.
+ask: What's the most useful thing you've learned so far?
+listen: What did you learn first?
+  them: Where things are kept. Half of any job is finding the thing.
+share: Check twice, then turn it on.
+  them: That's Calder in one line. You've been listening.   #funny
+cheer: Which panel sticks on Deck 5.
+  them: Ha! Pell got to you. Good.   #funny
+
+== mistake
+when: tier>=acquaintance
+them: I made a mistake last month. A proper one.
+them: I owned up, fixed it, and nobody shouted. That's the Wren.
+ask: Have you made one yet? Everyone does.
+listen: What happened?
+  them: Put a cover on backwards. It hummed for a week. Very loudly.   #funny
+share: A small one. I fixed it and told someone.
+  them: That's it exactly. Fix it and tell. Then forget it.
+cheer: Not yet. I'm saving it for something big.
+  them: Aim high. Just not the reactor.   #funny
+
+== well-done
+when: tier>=acquaintance !rank:captain !who:calder
+them: {boss} said "nice work" to me today. I'm still floating.   #warm
+them: Two words. I'll be living on them for a week.
+ask: What's the best thing anyone's said about your work?
+listen: What had you done?
+  them: Nothing big. Just did it right, start to finish. That's what counts.
+share: Calder said "Good." Once. I heard it.
+  them: From Calder? That's a speech. Frame it.   #funny
+cheer: "Is that it? Already?" Twice.
+  them: The best review there is. Fast and finished.   #funny
+
+== run-the-place
+when: tier>=acquaintance rank:junior !who:halloran-emeka
+them: One day I'll run the place. Or a bit of it. A corner.   #funny
+them: A small corner. With a kettle.
+ask: Where do you want to be in a few years?
+listen: Which corner?
+  them: Somewhere with a window. Corners with windows are rare.   #funny
+share: Good at this. Really good. Then we'll see.
+  them: That's the right order. Good first. The rest follows.
+cheer: Running the tea rota. Power.
+  them: The tea rota is real power. Halloran knows.   #funny
+
+== invisible
+when: tier>=colleague
+them: The best work aboard is the work nobody notices.
+them: The air's clean. The water's hot till ten. Nobody says thank you.
+ask: Does it bother you, nobody noticing?
+listen: Do you ever wish they would?
+  them: Sometimes. Then I remember that's how you know it's working.
+share: No. I like knowing I did it.
+  them: That's the Works way. You'll fit right in.   #warm
+cheer: I notice. I say thank you to the air.
+  them: Ha! The air's grateful. Probably.   #funny
+
+== tired-of-it
+when: tier>=colleague
+them: Some weeks the job's all the same. Same checks, same faults.
+them: Then something new breaks and I'm happy again. Odd, that.   #funny
+ask: What keeps a job interesting, do you think?
+listen: What broke that was new?
+  them: Something nobody had seen fail before. We all went to look.
+share: Learning. While I'm learning, it's fine.
+  them: Then you've got years before it's the same. Good.
+cheer: Fixing things before they break. Show-off.
+  them: That's the job, really. Prevention's just quiet showing off.   #funny
+
+== pressure
+when: tier>=friend
+them: I worry I'm not as good as people think I am.
+them: Silly. I know. Everyone does it. Doesn't help.
+ask: Do you ever feel like that?
+listen: What makes you think you're not?
+  them: Nothing, really. A feeling. It's quieter when I say it out loud.
+share: All the time. I'm the newest here.
+  them: You're doing well. I'd tell you if you weren't. I mean that.   #warm
+cheer: Only on days ending in "day".
+  them: Ha! Then we're in good company. All of us.   #funny
+
+== proud
+when: tier>=friend aboard>=14
+them: Can I say something? You've got good at this. Quickly.
+them: People talk. It's all good, what they say.   #warm
+ask: Are you proud of how it's going?
+listen: What do people say?
+  them: That you finish things. That you ask. That's high praise aboard.
+share: A bit. I try not to say it.
+  them: Say it to me. I won't tell. Well, I might.   #funny
+cheer: Proud enough to have seconds.
+  them: Earned. Go and get them.   #funny
