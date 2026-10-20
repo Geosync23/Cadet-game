@@ -177,3 +177,4 @@ GitHub check: ON for every push to claude/** and main (the user, 2026-10-20; the
 | Patch planner PP1 | session_01QfLuMmrJSgMQ3A4tBtXAmf | `claude/patch-plan` | the user's 28 playtest notes: reproduce, cause, fix, owner, order, questions; `plans/patch-plan.html` |
 **Overnight mode (the user, ~05:35 UTC 2026-10-20): 5 working seats at most; no phone notifications; calls logged in `plans/overnight-decisions-lead20.md`.**
 | Head writer TW1 | session_019ek4xmi5Yp9xijbzuAo2kN | `claude/talk-pack` | Talk a while pack, content only (~1,300 lines; no repeats; pool + own; keep the question) |
+**Status ~11:50 UTC 2026-10-20 (normal mode):** Dev mode plan v2 (claude/devmode-plan 97da6b9) → DR1 + DR2 re-checking. Events plan v3 (claude/events-plan f399143f, design-doc updated) → ER1 reviewing. Patch plan (PP1) in progress (WIP 6e342fa). Talk pack (TW1): 140 talks / 1,260 lines so far (claude/talk-pack f8ecd40).
