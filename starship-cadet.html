@@ -13422,8 +13422,9 @@ function playerUpdate(dt, t) {
   bagTick();                                             // the kit bag into your locker after the bunk step (0.28.26)
   handTick();                                            // the Repair button (0.28.52)
   dinnerTick();                                          // sit down at your table for the arrival dinner (0.28.28)
+  if (typeof mugTick === 'function') mugTick();          // the mug in your hands (patch #30, in this section's slot; off: nothing)
   const P = SHIP.player, hold = P.cart ? (P.cart.stage === 'full' ? 'cartfull' : 'cart') : P.carry.length > 0 || typeof hamperHeld === 'function' && hamperHeld() ? true
-    : ACT && ACT.kind === 'eat' && ACT.o.fed && ACT.phase === 'walk' || !ACT && P.tray ? 'tray' : typeof ixHold === 'function' && ixHold() || false;   // a tray from the servery to your seat (0.28.15); 15b's ixHold: a job's toolbox or crate
+    : ACT && ACT.kind === 'eat' && ACT.o.fed && ACT.phase === 'walk' || !ACT && P.tray ? 'tray' : typeof ixHold === 'function' && ixHold() || typeof mugHeld === 'function' && mugHeld() || false;   // a tray from the servery to your seat (0.28.15); 15b's ixHold: a job's toolbox or crate
   if (hold || player.holding) player.holding = hold;   // in hand (Walker.update): parts (true, the crate) or a hover cart ('cart', 'cartfull')
   player.maxV = PLAYER_V0 * playerSpeed();
   const crouch = crawlTiles().has(K(player.here()));   // a crawlway (0.28.11): crouch-walk, slower
@@ -13851,7 +13852,8 @@ function barTap(it, at) {
       const id = usual ? (i === 0 ? usual : ids[i - 1]) : ids[i]; if (!id) return;
       if (SHIP.player.credits < BAR_PRICE) { toast(name, barSays(who, 'bar.broke', 'That\'s ' + BAR_PRICE + ' credits, and you\'re a bit short. Next time.')); return; }
       SHIP.player.credits -= BAR_PRICE; SHIP.player.drink = id; B.run = B.last === id ? B.run + 1 : 1; B.last = id;
-      toast(name, barSays(who, 'bar.serve', 'One ' + BAR_DRINKS[id].short + '. Enjoy.', { drink: BAR_DRINKS[id].short }) + ' Take it to a stool.');
+      const mug = typeof MUG_ON !== 'undefined' && MUG_ON && MUG_DRINKS.has(id);   // patch #29/#30: cocoa's own line; a mug can be drunk as you go
+      toast(name, (mug && id === 'cocoa' ? barSays(who, 'bar.serve.cocoa', 'One cocoa. Careful, it\'s hot.') : barSays(who, 'bar.serve', 'One ' + BAR_DRINKS[id].short + '. Enjoy.', { drink: BAR_DRINKS[id].short })) + (mug ? ' Take it to a stool, or drink it as you go.' : ' Take it to a stool.'));
     };
     if (typeof deviceChoose === 'function') deviceChoose({ title: name, text: barSays(who, 'bar.ask', 'What\'ll it be?'), choices }, pick); else pick(usual ? 0 : 0);
   };
@@ -14494,6 +14496,40 @@ function ladderStep(r, dt) {                             // section 11's updateR
   fadeEl.style.opacity = 0; ride = null;
   toast(deckWord(deckDef.num) + ', ' + deckDef.name, (DECK_ORDER.indexOf(deckDef.num) < DECK_ORDER.indexOf(L.from) ? 'Up' : 'Down') + ' the spine ladder, ' + L.k + (L.k > 1 ? ' decks' : ' deck') + '. Energy −' + LADDER.energy * L.k + ', fitness +' + LADDER.fitness * L.k + '.');
 }
+// ---- the mug in your hands (patch plan #30; patch builder DB1 for the player engineer): a cocoa or tea from the bar
+// (barTap's SHIP.player.drink) is a mug in your hand, held one-handed at the chest (8b's HOLDS.mug) while you walk or
+// stand, and in the lift. You drink it at a stool as before (15b's ixDrink, with the mug: 8b's 'cocoa' pose), set it down
+// (15b's Put down), or after MUG_MINS ship minutes you've drunk it as you go (the stool's gains, without company).
+// Picking up something two-handed (parts, a tray, the hamper, a cart) or sitting down to eat finishes it first. Not
+// saved, as the drink in hand never was: a reload clears it. Behind MUG_ON (off: the game is unchanged; #mug on the link
+// turns it on for a test until the switch-on step). Nothing here calls R().
+const MUG_ON = URL_FLAGS.has('mug'), MUG_DRINKS = new Set(['cocoa', 'tea']), MUG_MINS = 20;
+let MUG = null;                                          // { drink, from }: the mug in hand and the ship minute it was served
+const mugText = (k, fb, v = {}) => (typeof barSays === 'function' ? barSays(null, k, fb, v) : fb);
+function mugFinish(quiet) {                              // drunk as you go: the stool's gains, then it's gone
+  const P = SHIP.player, d = MUG && MUG.drink, def = PLAYER_ACTS.ixDrink, n = P.needs; MUG = null; P.drink = null; if (!d) return;
+  if (def) { const also = mugAlso(d, def.also); n[def.need] = needClamp(n[def.need] + def.gain); for (const k in also) n[k] = needClamp(n[k] + also[k]); }
+  if (!quiet) toast(BAR_DRINKS[d].name, mugText('bar.finish.' + d, d === 'cocoa' ? 'You finish your cocoa. Warm all the way down.' : 'You finish your ' + BAR_DRINKS[d].short + '.'));
+}
+// patch #29: a cocoa from the bar is leisure +8 (the stool's +5 for the rest), at a stool (15b's ixSide asks) or as you go
+const mugAlso = (d, also) => MUG_ON && d === 'cocoa' ? { ...(also || {}), leisure: 8 } : { ...(also || {}) };
+function mugTick() {                                     // each frame (section 15's player tick): the mug's minutes, and hands wanted elsewhere
+  if (!MUG_ON) return;
+  const P = SHIP.player, d = P.drink;
+  if (!d || !MUG_DRINKS.has(d)) { MUG = null; return; }
+  if (!MUG || MUG.drink !== d) MUG = { drink: d, from: shipNow() };
+  const busy = P.cart || P.carry.length > 0 || P.tray || (typeof hamperHeld === 'function' && hamperHeld()) || ACT && ACT.kind === 'eat';
+  if (busy || shipNow() - MUG.from >= MUG_MINS) mugFinish(false);
+}
+// section 15's hold: 'mug' while it's in hand and you're walking or standing (an activity's own pose wins, but walking to it)
+const mugHeld = () => MUG_ON && MUG && SHIP.player.drink === MUG.drink && (!ACT || ACT.phase === 'walk') ? 'mug' : null;
+// 15b's drink at a stool: the pose with the mug (8b's ACTS.cocoa) for a cocoa or tea, else null (the glass)
+const mugPose = () => MUG_ON && MUG_DRINKS.has(SHIP.player.drink || ACT && ACT.o && ACT.o.drink || '') ? 'cocoa' : null;
+function mugPut() {                                      // 15b's Put down: the mug goes (someone clears it)
+  if (!mugHeld()) return null;
+  MUG = null; SHIP.player.drink = null;
+  return mugText('bar.putdown', 'You set your mug down. Someone will clear it.');
+}
 // ---- end of slot: Player engineer ----
 
 // =====================================================================
@@ -14556,7 +14592,7 @@ const ixBond = s => typeof bondBest === 'function' ? bondBest(DECK_CREW.filter(c
 // the side gains as the minutes pass (ixFrame, below, each frame while one of ours runs): also{}, plus `with` more
 // social for company (scaled by needEffects' socialGain). They follow A.done, so needEffects' task speed applies
 function ixSide(A) {
-  if (A.kind === 'ixDrink' && !A.o.drink && SHIP.player.drink) { A.o.drink = SHIP.player.drink; SHIP.player.drink = null; A.def.done = 'You finish your ' + BAR_DRINKS[A.o.drink].short + '.'; }   // the drink from the bar goes as you drink it (0.28.62)
+  if (A.kind === 'ixDrink' && !A.o.drink && SHIP.player.drink) { A.o.drink = SHIP.player.drink; SHIP.player.drink = null; A.def.done = 'You finish your ' + BAR_DRINKS[A.o.drink].short + '.'; if (typeof mugAlso === 'function') A.def.also = mugAlso(A.o.drink, A.def.also); }   // the drink from the bar goes as you drink it (0.28.62)
   const d = A.def, f = Math.max(0, Math.min(1, A.done / d.mins));
   if (!A.o.ixSide) {
     let mult = 1; try { const e = typeof needEffects === 'function' ? needEffects(SHIP.player.needs) : null; if (e && isFinite(e.socialGain)) mult = e.socialGain; } catch (e) { mult = 1; }
@@ -14578,7 +14614,7 @@ function ixPose(kind, pl, spot, company) {
   if (kind === 'ixMusic') return base === 'sit' ? 'sit:play' : 'play';
   if (kind === 'ixGarden' || kind === 'ixFold' || kind === 'ixWater') return IX_ACTS[kind].pose;
   if (kind === 'ixTea') return 'drink';
-  if (kind === 'ixDrink') return base === 'sit' ? 'sit:drink' : 'drink';
+  if (kind === 'ixDrink') { const d = typeof mugPose === 'function' && mugPose() || 'drink'; return base === 'sit' ? 'sit:' + d : d; }   // a cocoa or tea: the mug (15's mugPose, patch #30)
   if (base === 'sit' && own === 'sit') return company ? 'sit:talk' : kind === 'ixStars' ? 'sit' : 'sit:read';
   return own;
 }
@@ -14713,7 +14749,7 @@ function putDelivery() {                                 // your delivery job, w
 }
 const crateHeld = () => { const d = putDelivery(); return !!d && d.st[d.pick].done && !(d.drop >= 0 && d.st[d.drop].done) && !crateDown(d.j); };
 const trayHeld = () => !!SHIP.player.tray;
-const putWhat = () => putParts().length > 0 || trayHeld() || crateHeld() || typeof hamperHeld === 'function' && hamperHeld();   // section 21b's laundry hamper (0.42.40)
+const putWhat = () => putParts().length > 0 || trayHeld() || crateHeld() || typeof hamperHeld === 'function' && hamperHeld() || typeof mugHeld === 'function' && !!mugHeld();   // 15's mug (patch #30)   // section 21b's laundry hamper (0.42.40)
 function stepUndo(j, step) {                             // open a stop of your job again (section 17's stepsDone)
   const k = jobStops(j).findIndex(x => x.step === step); if (k < 0 || !Array.isArray(j.stepsDone)) return;
   j.stepsDone = j.stepsDone.filter(x => x !== k); if (typeof MACH_REV !== 'undefined') MACH_REV++;
@@ -14743,6 +14779,7 @@ function putDown() {
     said.push('You set the crate down here. Tap it to pick it up again; your job stays yours.');
   }
   if (typeof hamperPut === 'function') { const h = hamperPut(); if (h) said.push(h); }   // section 21b (0.42.40)
+  if (typeof mugPut === 'function') { const m = mugPut(); if (m) said.push(m); }   // section 15's mug (patch #30)
   if (typeof ixGoalAt !== 'undefined') ixGoalAt = -1;
   if (typeof device !== 'undefined' && device.refresh) device.refresh();
   toast('Put down', said.join(' ') + (P.carry.length ? ' Still in your hands: ' + partList(P.carry) + '.' : ''));
@@ -28074,13 +28111,21 @@ const LINES = JSON.parse([
   '{"text":"Juice","id":"1i9s1b8"}]',
   ',"bar.drink.tea":[',
   '{"text":"Tea","id":"1d6iuxc"}]',
+  ',"bar.finish.cocoa":[',
+  '{"text":"You finish your cocoa. Warm all the way down.","id":"74tjry"}]',
+  ',"bar.finish.tea":[',
+  '{"text":"You finish your tea.","id":"ghteu2"}]',
   ',"bar.order":[',
   '{"text":"Order a drink (2 credits)","id":"a4iynu"}]',
+  ',"bar.putdown":[',
+  '{"text":"You set your mug down. Someone will clear it.","id":"kvz0ss"}]',
   ',"bar.serve":[',
   '{"text":"One {drink}. Enjoy.","id":"137tz96"},',
   '{"text":"There you go. One {drink}, nice and fresh.","id":"938j4o"},',
   '{"text":"Here\'s your {drink}. Find a stool, put your feet up.","id":"zbmvfu"},',
   '{"text":"Here you are. Careful, it\'s full.","id":"4pn7xq"}]',
+  ',"bar.serve.cocoa":[',
+  '{"text":"One cocoa. Careful, it\'s hot.","id":"18f53bx"}]',
   ',"bar.tap":[',
   '{"text":"Tap night! The drink of the week is {drink}. Go on.","id":"1o09367"},',
   '{"text":"Drink of the week: {drink}. I\'m very proud of it.","id":"83dork","tone":"funny"}]',
@@ -48587,6 +48632,22 @@ const CROWD_DEMO = (() => {
 })();
 
 // ---- slot: Performance engineer (section 8b). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- the mug (patch plan #30; patch builder DB1 for the performance engineer), only with section 15's MUG_ON: a cream
+// mug at about 1.6x life size (8 px tall at a phone's usual zoom), its cocoa 0.005 below the rim and its handle sunk into
+// the wall (no shared faces); held one-handed at the chest (HOLDS.mug, the other arm swinging); ACTS.cocoa is the drink
+// pose with the mug in place of the glass, seated or standing, for you at a stool and for the crew at a tradition (their
+// mugs ride in the crowd's meshes: no draw calls). Built when first needed; colours through part's col(); no R().
+if (typeof MUG_ON !== 'undefined' && MUG_ON) {
+  PROP_KIT.mug = p => {
+    part(p, cylG(.061, .067, .152, 12), '#efe6d4', 0, -.12, .104, 1, 1, 1, -Math.PI / 2);   // the body; its top end (wider) at z .180
+    part(p, cylG(.058, .058, .006, 12), '#6b3e22', 0, -.12, .182, 1, 1, 1, -Math.PI / 2);   // the cocoa: its face at z .185, sunk .001 into the body
+    part(p, torG(.064, .008), '#efe6d4', 0, -.12, .182);                                    // the rim, its edge at z .190: .005 past the cocoa
+    part(p, GEO.box, '#efe6d4', .078, -.12, .104, .032, .025, .08);                         // the handle, overlapping the wall
+  };
+  HOLDS.mug = { prop: 'mug', bone: 'R', one: -1, sx: -.45, ex: -1.25, sz: .1, hx: .25, look: .12 };
+  ACTS.cocoa = { props: { R: 'mug' }, f: ACTS.drink.f };
+  ACT_SEATED.add('cocoa'); CROWD_ANIMS.add('cocoa');
+}
 // ---- end of slot: Performance engineer ----
 
 // =====================================================================
