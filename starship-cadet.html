@@ -13495,7 +13495,7 @@ function squeezeStep() {                                 // each frame: slow dow
 const SHUFFLE_STEP = .5, SHUFFLE_SHORT = .25, SHUFFLE_V = 2, SHUFFLE_NEAR = .45, SHUFFLE_SAY = 60000, SHUFFLE_COOL = 1500;
 const SHUFFLE_WORDS = ['Oh, sorry.', 'After you.', 'Excuse me.', 'Oops, mind out.', 'Sorry, go ahead.'];
 const SHUFFLE = new Map(), SHUFFLE_SAID = new Map(), SHUFFLE_DONE = new Map();   // crew agent -> { x, z, left } (the step still to take); person id -> when they last said it; crew agent -> when their step ended
-const shuffleable = a => !!a && !a.settled && !(a.esc && !/^follow\|/.test(a.esc)) && !(a.talking > 0) && !(a.p && a.p.player) && a.pose !== 'sit' && a.pose !== 'lie';
+const shuffleable = a => !!a && !a.settled && !(a.esc && !/^follow\|/.test(a.esc)) && !(a.talking > 0 && !(a.esc && /^follow\|/.test(a.esc))) && !(a.p && a.p.player) && a.pose !== 'sit' && a.pose !== 'lie';   // the patch (#12): an escort following you steps aside even while talking (and talks on)
 const shuffleStep = (b, c) => {                           // from tile b to the next tile c: no wall between (a diagonal: open round one corner)
   const di = c[0] - b[0], dj = c[1] - b[1]; if (Math.abs(di) > 1 || Math.abs(dj) > 1) return false;
   if (!di || !dj) return edgeOpen(b[0], b[1], c[0], c[1], null);
