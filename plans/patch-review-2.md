@@ -82,3 +82,17 @@ Harness gotcha (new): speech bubbles pop in with a real-time CSS animation (`.bu
   - #19's dinner nudges.
   - #31.
   - The full intro_check parts 9-12.
+
+## PB batch F: claude/patch-b d3b028f + 6c7be04 (#16, #20, #22, #27). PASS
+
+- **The numbers, against the user's answers:**
+  - JOB_PACE .72 on every tier (the 1.25 step kept). The board shows your minutes at that pace; the crew's are unchanged.
+  - Hunger 4 + 3 an hour while workingNow().
+  - Social [3, .25].
+  - SLEEP_TAPER [90, 1/3]. The alarm forecast follows it.
+- **Checks:** check_fast OK (282 s). cadet_test 2e517ff→d3b028f ALL IDENTICAL. player_check OK.
+- **6c7be04:** the lane eases to the middle while escorting or walking up to you.
+- **Judgement calls, passed to the lead:**
+  - Tier 1 "Relied on" 40→48.
+  - The lower bands come about 1.4× sooner, untested.
+  - player_check's steady player now has company at meals and two chats a day.
