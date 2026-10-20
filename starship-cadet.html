@@ -11715,7 +11715,7 @@ deviceApp({ id: 'roster', title: 'Roster', icon: 'crew', order: 52,
       if (title) B.push({ kind: 'text', text: title, mark: 'head' });
       let rows = [];
       for (const x of list) {
-        rows.push({ text: x.p.name, sub: (x.p.role || '') + (x.tier >= 1 && typeof REL_NAMES !== 'undefined' ? ' · ' + REL_NAMES[x.tier] : ''), mark: x.p.id === rosterPick ? 'hot' : null, action: { app: 'roster', do: 'pick', arg: x.p.id } });
+        rows.push({ text: x.p.name, sub: ((typeof rankCardRole === 'function' ? rankCardRole(x.p) : x.p.role) || '') + (x.tier >= 1 && typeof REL_NAMES !== 'undefined' ? ' · ' + REL_NAMES[x.tier] : ''), mark: x.p.id === rosterPick ? 'hot' : null, action: { app: 'roster', do: 'pick', arg: x.p.id } });
         if (x.p.id !== rosterPick) continue;
         const w = rosterWhere(x.p); B.push({ kind: 'list', rows }); rows = [];
         B.push({ kind: 'text', text: w.line, mark: 'hot' });
