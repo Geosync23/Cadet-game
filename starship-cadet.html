@@ -36921,7 +36921,7 @@ function careerSick(d, on = true) {                      // a sick day: excused 
   if (c.md > 0 && c.md === d) { c.md = 0; c.ms = Math.max(0, c.ms - 1); repAdd('works', CAREER.hitDept, null, 'sickNote'); if (SHIP.rep && SHIP.rep.ship) SHIP.rep.ship.work = Math.min(100, careerWork() + (c.mx || 0)); }   // reviewer 1d: the work it took, not more
 }
 function careerOff(d) {                                  // no shift that day: leave, sick, or let go (section 14's playerShiftOn asks)
-  const c = SHIP.career; return !!c && (c.b.includes(d) || c.s.includes(d) || (c.go != null && d >= c.go));
+  const c = SHIP.career; return !!c && (c.b.includes(d) || c.s.includes(d) || (c.go != null && d >= c.go) || typeof devmodeExcused === 'function' && devmodeExcused(d));   // devmodeExcused: a workday Dev mode skipped (section 25; false with Dev mode off)
 }
 const careerDeadline = d => (d - 1) * 1440 + CAREER.bookBy;
 function careerCanBook(d, now = shipNow()) {             // 'book', 'cancel' or null
