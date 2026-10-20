@@ -6,7 +6,7 @@ The user: "I don't care about usage, we will get it there." Order:
 3. **Dev mode** (the user, 2026-10-20), after the split and clean-up: a hidden testing panel to move the clock forward (hours, days), set career progress (xp / rank), and start any ship tradition on demand to test it. Plan page first. Built gated, so the normal game is unchanged with it off.
 4. Pillar 5, Steps 5 and 6.
 5. Ship-wide events, only those up to the end of the promotions (the user cut the rest), one at a time, each built switched off, then switched on. They touch every system: do them after the split.
-6. Basic text-based stories for key crew members, written alongside 3 and 4 (mostly content/ files) and added when ready.
+6. Basic text-based stories for key crew members, written alongside 4 and 5 (mostly content/ files) and added when ready.
 
 ## Ways of working to keep quality up on a big codebase (APPROVED by the user, 2026-10-19: "integrate all this into the plan for the next team")
 Set them up in step 2, alongside the split (the split's plan page shows the user how; the user still signs off that page before the file is cut). The rec deck (step 1) finishes the current way, so it isn't held up.
