@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Playtest Patch Plan</title>
+<style>
+:root{--ink:#e8eef0;--muted:#93a6ae;--teal:#4cc3b5;--amber:#e9c46a;--rose:#e58f8f;--glass:rgba(13,21,33,.78);--line:rgba(150,200,196,.22);--bg:#121a27}
+:root[data-theme="light"]{--ink:#18232b;--muted:#4f6168;--teal:#167e72;--amber:#8a6510;--rose:#a33b3b;--glass:rgba(255,255,255,.86);--line:rgba(30,80,76,.22);--bg:#eef2f3}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--ink:#18232b;--muted:#4f6168;--teal:#167e72;--amber:#8a6510;--rose:#a33b3b;--glass:rgba(255,255,255,.86);--line:rgba(30,80,76,.22);--bg:#eef2f3}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Avenir Next","Segoe UI",system-ui,sans-serif}
+body{line-height:1.5}
+main{max-width:860px;margin:0 auto;padding:16px 16px 60px}
+h1{font-size:21px;font-weight:600;margin:4px 0 0}
+h2{font-size:17px;font-weight:600;margin:30px 0 8px;color:var(--teal)}
+h3{font-size:15px;font-weight:600;margin:0}
+p,li{font-size:14px}
+.sub{font-size:13px;color:var(--muted);margin-top:4px}
+.card{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:10px 0}
+.batch{border-left:3px solid var(--teal)}
+.batch .meta{font-size:12.5px;color:var(--muted)}
+details.item{background:var(--glass);border:1px solid var(--line);border-radius:12px;margin:8px 0;padding:0}
+details.item>summary{cursor:pointer;padding:10px 12px;list-style:none;display:flex;gap:8px;align-items:baseline}
+details.item>summary::-webkit-details-marker{display:none}
+details.item>summary .n{font-weight:700;color:var(--teal);min-width:30px}
+details.item>summary .t{flex:1;font-size:14.5px}
+details.item>summary .s{font-size:11.5px;color:var(--muted);white-space:nowrap}
+details.item[open]>summary{border-bottom:1px solid var(--line)}
+.body{padding:8px 12px 12px}
+.body p{margin:6px 0}
+blockquote{margin:6px 0 10px;padding:6px 10px;border-left:3px solid var(--amber);font-size:13.5px;color:var(--ink);background:rgba(233,196,106,.07);border-radius:0 8px 8px 0}
+blockquote b{color:var(--amber);font-weight:600;font-size:11.5px;letter-spacing:.04em;display:block}
+.k{font-weight:600;color:var(--teal)}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;background:rgba(127,160,170,.14);padding:0 4px;border-radius:4px;word-break:break-word}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.chip{font-size:12px;border:1px solid var(--line);border-radius:999px;padding:2px 9px;color:var(--muted)}
+.chip.tune{border-color:var(--amber);color:var(--amber)}
+.chip.q{border-color:var(--rose);color:var(--rose)}
+.shots{display:flex;gap:8px;overflow-x:auto;padding:4px 0}
+.shots a{flex:0 0 auto}
+.shots img{height:220px;border-radius:8px;border:1px solid var(--line);display:block}
+.shots figcaption{font-size:11.5px;color:var(--muted);max-width:110px}
+figure{margin:0}
+table{border-collapse:collapse;width:100%;font-size:13px;margin:6px 0}
+th,td{border-bottom:1px solid var(--line);padding:4px 6px;text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:600}
+.tw{overflow-x:auto}
+.q{background:var(--glass);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:12px 0}
+.q .qh{font-size:12px;color:var(--rose);font-weight:600;letter-spacing:.03em}
+.q .qt{font-size:14.5px;font-weight:600;margin:3px 0 8px}
+.q label{display:flex;gap:8px;align-items:flex-start;font-size:13.5px;padding:5px 0;cursor:pointer}
+.q input[type=radio]{margin-top:4px;accent-color:var(--teal)}
+.rec{font-size:11px;color:var(--bg);background:var(--teal);border-radius:999px;padding:0 7px;margin-left:4px;white-space:nowrap}
+textarea{width:100%;min-height:58px;background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font:inherit;font-size:13.5px;margin-top:6px}
+.why{font-size:12.5px;color:var(--muted);margin:2px 0 0 24px}
+a{color:var(--teal)}
+.legend{font-size:12.5px;color:var(--muted)}
+</style>
+</head>
+<body>
+<main>
+<h1>Playtest Patch Plan</h1>
+<div class="sub">The 28 notes from your playtest of 0.64.2, each one tried in the real game (claude/integration 5dd740c, phone size 390×844), with what causes it, the fix, who builds it and the risk. Planned by the patch planner PP1 for lead 20, 2026-10-20. <b>Nothing is built yet:</b> the patch is built after Dev mode, and Dev mode's day jump and tradition start make every item quick to test. Your answers to the questions at the bottom shape the build.</div>
+
+<div class="card">
+<h3>At a glance</h3>
+<ul>
+<li><b>27 of 28 reproduced.</b> #25 is a wording change, so there was nothing to reproduce; #13 and #18 were confirmed from the code and the words, and #17 is partly reproduced.</li>
+<li><b>Five batches, about 19 turns:</b> the arrival week (A, B, C), the crew's life (D), small features (E), and the four needs numbers (F). #23 goes to the events plan.</li>
+<li><b>17 questions for you</b>, each with a recommended answer. Batches A to C mostly don't depend on them, so they can start straight after Dev mode.</li>
+<li><b>Two causes worth knowing.</b> Day 2's meeting fails because the Chief's appointment has no spot in her office, so she stays in storage. The meeting is also only open from 08:45 to 09:00, and the shift starts at 09:00 (#1). The arrival week's arrows get stuck because a tracked arrow never clears itself (#11).</li>
+</ul>
+<div class="legend">Chips: <span class="chip">owner seat</span> <span class="chip">size in turns</span> <span class="chip tune">tuning</span> <span class="chip q">your answer needed</span>. "Lines" are at 5dd740c; <code>python3 tools/section.py --where LINE</code> finds them later.</div>
+</div>
+
+<h2>Build order</h2>
+
+<div class="card batch"><h3>A. Day 2, your first solo job (#1, #2, #28)</h3>
+<div class="meta">Onboarding engineer, writers, player engineer · about 1.5 turns · intro only, so every regression stays identical at test URLs</div>
+<p>The meeting starts when the Chief and you are both in her office. Everything says "first solo job". The laundry lesson works whenever you wake up.</p></div>
+
+<div class="card batch"><h3>B. The arrival evening (#3, #4, #14, #15)</h3>
+<div class="meta">Onboarding engineer, writers, player engineer · about 2 turns · intro only</div>
+<p>The Chief walks over to your table. Zeke's "evening's yours" lines become speech bubbles. The device button glows until you first open it. Zeke's laundry line gets new words.</p></div>
+
+<div class="card batch"><h3>C. Training day (#11, #12, #17, #13, #18, #19)</h3>
+<div class="meta">Interactions, sim, player, onboarding and traditions engineers, writers · about 3 turns · mostly intro only; #19's earlier time moves the Works crew on Day 1</div>
+<p>The arrows move on from a tracked briefing. Zeke steps aside instead of blocking you, and keeps a little apart on the tour and at work. The device tip names the long job's bar. Zeke ends the day with "good job" (no breakfast). Your name goes on the beam before dinner, with the arrow at the right spot.</p></div>
+
+<div class="card batch"><h3>D. The crew's life (#7, #9, #10, #8)</h3>
+<div class="meta">Sim engineer, crew designer, deck architect, performance engineer · about 3.5 turns · changes the crew's plans: day_check and cadet_test differences are expected and checked one by one</div>
+<p>The Captain comes to Deck 4 less often. Crew allow time to walk to the toilet, so they actually reach it. Crew walking together drift apart. The stall light turns red when a stall is taken.</p></div>
+
+<div class="card batch"><h3>E. Small features (#25, #21, #6, #24, #5, #26)</h3>
+<div class="meta">HUD seat, social, device, player and traditions engineers, deck architect, writers · about 7 turns · each feature behind its own switch where it adds something new</div>
+<p>The Deck 2 label. Rank and title when you tap someone. Undo for the time clock. A buy menu at the shop. A working ladder with no tier locks. One more tradition for your first days.</p></div>
+
+<div class="card batch"><h3>F. Needs tuning (#16, #20, #22, #27)</h3>
+<div class="meta">Player engineer · about 2 turns · numbers only; player_check's expectations are updated in the same turn</div>
+<p>Shorter Tier 1 repairs, hungrier work days, social that falls like fitness, and fewer mornings at 100 energy. Built last, so the numbers are your answers, and so the balance pass sees them together.</p></div>
+
+<div class="card"><p><span class="k">Why this order.</span> A, B and C only run during the arrival week, and they're what every new player sees first. They change nothing at test URLs, so they're the safest start. D changes the crew's day, so it gets its own careful check round. E's features each come with a switch. F waits for your numbers. <b>#23</b> (more large-group moments) is a note for the ship-wide events plan, not a build item; see the item.</p></div>
+
+<h2>The 28 items</h2>
+<p class="legend">Tap an item to open it. Your note comes first, word for word.</p>
+
+<!-- ============ A ============ -->
+<details class="item"><summary><span class="n">#1</span><span class="t">Day 2: the Chief isn't in her office for your first solo job</span><span class="s">A · 1 turn</span></summary><div class="body">
+<blockquote><b>YOUR NOTE</b>Day 2, "Your first solo job": the meeting never started when the user walked into the Chief's office; Calder wasn't there, a red-haired crew member was. Fix so Calder is in her office for it and the meeting starts reliably on arrival. No cutscenes, but the conversation may auto-play, and the player may auto-sit.</blockquote>
+<p><span class="k">Reproduced: yes.</span> On Day 2 Calder spent the whole meeting time (08:40-09:04) in Main storage. At 08:56 the meeting opened with only you in the room (its 10-minute fallback). The red-haired person is <b>Marta Soto</b>, a Works technician with an auburn buzz cut. The office's only desk, <code>5-office-1</code>, is given to her as an ordinary Works desk.</p>
+<p><span class="k">Cause, three things.</span> (1) The Chief's appointment has no spot in her office. <code>introPlan</code> (section 14, lines 10518-10531) looks for a free place in the room that isn't anyone's own or a desk. The office only has the desk and two "event" places, which it doesn't look at. So she gets an appointment with nowhere to go and stays in storage. (2) The meeting is only open from 08:45 to 09:00 (section 21, line 39207; <code>introWeekMeetings</code>, lines 39866-39878). If you walk in at 09:00 or later, after clocking in, you only get its gist in Mail. That's most likely why yours "never started". (3) The Chief's own desk is handed out as a Works desk.</p>
+<p><span class="k">Fix.</span> Give the appointment its spot, <code>5-office-stand-1</code>, which is already her standing spot for the promotion meeting. Send her early enough for her 14-minute walk. Keep the meeting open from 08:45 to 10:00, counted as work time. Start it when <b>both</b> of you are in the room; if she isn't there 3 minutes after you, the fallback runs. On arrival you're walked to the visitor's spot facing her, and the lines play by themselves. You stand rather than sit, because her first line is "Come in. Don't sit." Tried on a scratch copy: she leaves storage at 08:40, walks in at 08:54, and the meeting starts with her there. Optional, as a separate crew change: give the office desk to Calder and another desk to Marta.</p>
+<div class="chips"><span class="chip">Onboarding engineer (21); sim engineer reviews 14</span><span class="chip">1 turn (+1 for the optional desk)</span><span class="chip">intro_check, interactions_check, events_check, day_check Day 2 with the intro on</span></div>
+<p><span class="k">Risk:</span> low, intro only. The optional desk swap moves crew (day_check and cadet_test differences on Deck 5). <span class="k">Dev mode:</span> jump to Day 2 08:30 with the arrival done, then walk in at 08:44, 08:58, 09:05 and 09:40.</p>
+<div class="shots"><figure><a href="patch-plan-shots/01-day2-office-no-calder.png"><img src="patch-plan-shots/01-day2-office-no-calder.png" alt="Day 2 08:46, the office with Marta at the desk and no Calder"></a><figcaption>08:46, Marta at the desk, no Chief</figcaption></figure><figure><a href="patch-plan-shots/01-day2-meeting-without-calder.png"><img src="patch-plan-shots/01-day2-meeting-without-calder.png" alt="the meeting playing with no Calder"></a><figcaption>08:56, the meeting plays without her</figcaption></figure><figure><a href="patch-plan-shots/01-probe-fixed-meeting.png"><img src="patch-plan-shots/01-probe-fixed-meeting.png" alt="scratch copy with the fix: Calder in her office"></a><figcaption>scratch fix: she's there</figcaption></figure></div>
+</div></details>
+
+<details class="item"><summary><span class="n">#2</span><span class="t">Naming: "first job" → "first solo job"</span><span class="s">A · in #1's turn</span></summary><div class="body">
+<blockquote><b>YOUR NOTE</b>Naming: everything about it says "first solo job" (e.g. the Schedule/heads-up title "The Chief's office: your first job" → "…your first solo job"; Mail, Tracked, Settling-in, lines).</blockquote>
+<p><span class="k">Reproduced: yes</span> (a search of the game and <code>content/</code>; the heads-up in #1's first screenshot reads "your first job is starting"). The places to change:</p>
+<ol>
+<li>Section 19, line 10909, <code>DEV_BEATS['d2-solo']</code>: "The Chief's office: your first job". This one title feeds the Schedule, the heads-up and Tracked.</li>
+<li><code>content/lines/calder.lines:138</code>: "Your first job's mine. Glass office, quarter to nine…"</li>
+<li><code>content/meetings/introChief.meet</code>, the gist that goes to Mail if you miss it ("Your first job on Tuesday is hers") and line 13 ("Tuesday, your first job's mine").</li>
+<li>Section 21's stand-in words, which only show if the writers' words are missing: line 39189's gist, and line 39543. Line 39543 also gives the <b>wrong time</b>, "Ten to eight". The briefing is at ten to nine.</li>
+</ol>
+<p>Already right: the solo job's Mail, its Settling-in item, and Zeke's "your first solo job today". Left alone: lines about any first job ("First job's always the hardest", calls home).</p>
+<div class="chips"><span class="chip">writers (content/), device engineer (19), onboarding engineer (21)</span><span class="chip">part of #1's turn</span><span class="chip">content_gen --check, lines_check, intro_check, device_check</span></div>
+<p><span class="k">Risk:</span> words only. <span class="k">Dev mode:</span> jump to Day 1 evening and Day 2 08:30 and read the Schedule, the heads-up and Tracked.</p>
+</div></details>
+
+<details class="item"><summary><span class="n">#28</span><span class="t">Day 2's laundry lesson only works if you wake before 09:00</span><span class="s">A · ½ turn</span></summary><div class="body">
+<blockquote><b>YOUR NOTE</b>Day 2 laundry tutorial breaks if you don't wake up at 06:00; it must work whenever you get up.</blockquote>
+<p><span class="k">Reproduced: yes.</span> Waking at 06:00, the tip "Tuesday is laundry day…" shows at 06:18, and the wardrobe, hamper, arrow and washer all work. Waking at 09:00 or 10:00, it never shows. Nothing mentions laundry until the 10:00 "Yesterday's clothes" toast or Zeke's line after 16:45.</p>
+<p><span class="k">Cause.</span> The lesson is a tip that may only show between 06:00 and 09:00 on Day 2 (section 15, line 12389: <code>c.d === 2 &amp;&amp; c.min &gt;= 6*60 &amp;&amp; c.min &lt; 9*60</code>). If you wake after 09:00, its moment never comes.</p>
+<p><span class="k">Fix.</span> The tip becomes due any time on Day 2 when you're awake and not clocked in. Wake late and it shows at once; wake in shift time and it shows when you clock off. A second wording is used once the shift has started, without "before your shift" (writers).</p>
+<div class="chips"><span class="chip">Player engineer (15's tips), writers; onboarding engineer reviews</span><span class="chip">½ turn</span><span class="chip">clothes_check, player_check, interactions_check (+ cases at 09:30 and 17:30)</span></div>
+<p><span class="k">Dev mode:</span> jump to Day 2 with alarms at 06:00, 09:00, 10:30 and 13:00.</p>
+<div class="shots"><figure><a href="patch-plan-shots/28-woke-0600.png"><img src="patch-plan-shots/28-woke-0600.png" alt="woke at 06:00, the laundry tip"></a><figcaption>woke 06:00: the tip</figcaption></figure><figure><a href="patch-plan-shots/28-woke-0900.png"><img src="patch-plan-shots/28-woke-0900.png" alt="woke at 09:00, no tip"></a><figcaption>woke 09:00: nothing</figcaption></figure></div>
+</div></details>
+
+<!-- ============ B ============ -->
+<details class="item"><summary><span class="n">#3</span><span class="t">The Chief doesn't walk up to you at the arrival dinner</span><span class="s">B · 1 turn</span></summary><div class="body">
+<blockquote><b>YOUR NOTE</b>Welcome tour / intro to the Chief: Calder is there but doesn't walk up to you. She should.</blockquote>
+<p><span class="k">Reproduced: yes.</span> When you reach the table at 18:32, Calder is already sitting across from your seat. She never moves. Zeke's "Oh. Look who's coming over. Sit up straight." plays after she has been sitting there for 14 minutes.</p>
+<p><span class="k">Cause.</span> Your earlier note (0.71.3: "the Chief isn't at the dinner with Zeke") was fixed by seating her across from you from the start of the dinner (section 21, lines 39176-39179). A named seat means she is "there and sitting when it starts" (section 14, line 10529). The writers' lines were written for her arriving.</p>
+<p><span class="k">Fix.</span> During Zeke's chat she eats at a nearby table you can see, so she is still visibly at the dinner (your 0.71.3 point). On "Look who's coming over" she gets up, walks to your table (<code>crewComeTo</code>) and sits across from you. Her meeting starts once she's seated, with a fallback if she's held up.</p>
+<div class="chips"><span class="chip">Onboarding engineer (21); sim engineer reviews</span><span class="chip">1 turn</span><span class="chip q">question pp-q12</span><span class="chip">intro_check (part 8's Chief checks updated), social_check</span></div>
+<p><span class="k">Dev mode:</span> jump to Day 0 18:30 and replay the dinner.</p>
+<div class="shots"><figure><a href="patch-plan-shots/03-coming-over-already-seated.png"><img src="patch-plan-shots/03-coming-over-already-seated.png" alt="Look who's coming over, with Calder already seated"></a><figcaption>"Look who's coming over": she's been seated 14 min</figcaption></figure></div>
+</div></details>
+
+<details class="item"><summary><span class="n">#4</span><span class="t">Zeke's "the evening's yours" plays in the green panel, not a bubble</span><span class="s">B · ½ turn</span></summary><div class="body">
+<blockquote><b>YOUR NOTE</b>Zeke's line after the dinner with the Chief ("the evening's ours" or similar) should be a speech bubble over Zeke, not the green text at the bottom of the screen.</blockquote>
+<p><span class="k">Reproduced: yes, and there are two such lines.</span> The green text is in the dinner chat (a meeting, so it plays in the device panel): "Off at five. Dinner from five till half eight. Then the evening's yours. Gym, lounge, Tiles, bed." Because the Chief sits through that chat (#3), it feels like "after the dinner with the Chief". After she leaves, Zeke's goodnight ("Right, that's me. Evening's yours. Have a wander, explore.") is already a bubble. But only 2 bubbles show at once (section 8b, line 47596), so on a busy table the crowd's chatter can push it off early.</p>
+<p><span class="k">Fix.</span> The writers move the "how a day runs … the evening's yours" lines out of the dinner chat into Zeke's goodnight bubbles (<code>walk.goodnight.1..4</code>, which already takes 4 lines). The chat keeps the question with three replies, which needs the panel. Small code part: hold back the crowd's chatter near you while Zeke says goodnight.</p>
+<div class="chips"><span class="chip">writers; dialogue engineer for the hush</span><span class="chip">½ turn</span><span class="chip q">question pp-q13</span><span class="chip">content_gen --check, lines_check, intro_check</span></div>
+<p><span class="k">Dev mode:</span> jump to Day 0 18:30.</p>
+<div class="shots"><figure><a href="patch-plan-shots/04-evening-yours-in-panel.png"><img src="patch-plan-shots/04-evening-yours-in-panel.png" alt="the evening's yours in the dinner panel"></a><figcaption>in the panel today</figcaption></figure><figure><a href="patch-plan-shots/04-goodnight-is-a-bubble.png"><img src="patch-plan-shots/04-goodnight-is-a-bubble.png" alt="the goodnight bubble"></a><figcaption>the goodnight bubble</figcaption></figure></div>
+</div></details>
+
+<details class="item"><summary><span class="n">#14</span><span class="t">The device button the first time you get it</span><span class="s">B · ½ turn</span></summary><div class="body">
+<blockquote><b>YOUR NOTE</b>The device button the first time you get the device: an arrow to it, or it lights up.</blockquote>
+<p><span class="k">Reproduced: yes.</span> When Zeke hands the device over in Bunk 1 (18:16), the button changes from a dim "No device yet" to "Device" with a Mail count. There's no arrow and no lasting glow, only the short pulse that every new Mail gets.</p>
+<p><span class="k">Cause.</span> <code>deviceLockLook()</code> (section 15, lines 13245-13249) only resets the button's look. Nothing points you to the first open (<code>SHIP.device.booted</code>, section 19, line 11069).</p>
+<p><span class="k">Fix.</span> From the moment it's yours until you first open it, the button's teal ring pulses gently and a small "Tap your device" pointer sits under it. Both stop on the first open and never come back. (The same applies on a Monday-start game, where you get the device at the briefing.)</p>
+<div class="chips"><span class="chip">Player engineer (15), HUD seat (CSS); device engineer reviews</span><span class="chip">½ turn</span><span class="chip q">question pp-q14</span><span class="chip">device_check, intro_check</span></div>
+<p><span class="k">Dev mode:</span> jump to Day 0 18:10.</p>
+<div class="shots"><figure><a href="patch-plan-shots/14-device-handed-over.png"><img src="patch-plan-shots/14-device-handed-over.png" alt="the device just handed over"></a><figcaption>just handed over</figcaption></figure></div>
+</div></details>
+
+<details class="item"><summary><span class="n">#15</span><span class="t">Zeke points out the laundry on the wrong side of the ship</span><span class="s">B · tiny</span></summary><div class="body">
+<blockquote><b>YOUR NOTE</b>Welcome tour: Zeke points out the laundry room, but it's on the other side of the ship. Fix where he points (or what he says).</blockquote>
+<p><span class="k">Reproduced: yes, from the map.</span> "Laundry there. Put your name in everything. Trust me." (<code>content/lines/torres-zeke.lines:295</code>) is said at the tour stop in the north junior corridor (Deck 4 tile 12,4). The laundry's door is on the south corridor, twelve rows away. It's one of the spare lines said only if there's time, so not everyone hears it.</p>
+<p><span class="k">Fix.</span> Change the words, since the tour doesn't pass the laundry. For example: "Laundry's on the far corridor, past Bunk 4. Put your name in everything." Section 21's stand-in line 39529 gets the same fix.</p>
+<div class="chips"><span class="chip">writers</span><span class="chip">tiny, with #4</span><span class="chip">content_gen --check, lines_check, intro_check</span></div>
+</div></details>
+
+<!-- ============ C ============ -->
+<details class="item"><summary><span class="n">#11</span><span class="t">After the Chief's first briefing, a tracked arrow blocks the next arrows</span><span class="s">C · ½ turn</span></summary><div class="body">
+<blockquote><b>YOUR NOTE</b>Arrow after the Chief's first briefing (Day 1): if you track the briefing, the arrow doesn't then point to the job board.</blockquote>
+<p><span class="k">Reproduced: yes, exactly.</span> With the briefing tracked, the arrow says "Works bay, Deck 5" from 08:20 to 09:25. It never moves on to "Clock in" or "Take a job at the job board". Untracked, you get "Clock in…" at 08:50 and the board at 09:22.</p>
+<p><span class="k">Cause.</span> A tracked arrow never clears itself when its event is over or you've arrived (section 15b, <code>trkTap</code>, line 14923). The arrival week's own arrows wait politely for any arrow that isn't theirs (section 21, <code>introArrowTick</code>, line 39939), so they wait forever.</p>
+<p><span class="k">Fix.</span> A tracked arrow clears itself once its event has started with you in the room, or once it's over. This fixes any tracked tradition, not just the briefing.</p>
+<div class="chips"><span class="chip">Interactions engineer (15b)</span><span class="chip">½ turn</span><span class="chip">interactions_check, intro_check, join_check</span></div>
+<p><span class="k">Dev mode:</span> jump to Day 1 08:20, track the briefing, and watch after 09:05. Start any tradition while it's tracked.</p>
+<div class="shots"><figure><a href="patch-plan-shots/11-after-briefing-tracked.png"><img src="patch-plan-shots/11-after-briefing-tracked.png" alt="tracked: still Works bay"></a><figcaption>tracked: stuck on "Works bay"</figcaption></figure><figure><a href="patch-plan-shots/11-after-briefing-untracked.png"><img src="patch-plan-shots/11-after-briefing-untracked.png" alt="untracked: the job board"></a><figcaption>untracked: the board</figcaption></figure></div>
+</div></details>
+
+<details class="item"><summary><span class="n">#12</span><span class="t">Stuck on Zeke with hold-to-walk on training day</span><span class="s">C · with #17</span></summary><div class="body">
+<blockquote><b>YOUR NOTE</b>Stuck on Zeke on training day: with hold-to-walk you get stuck on him (collision drops only after ~2 s of pushing); tap-to-walk gets past. Hold-to-walk must slide past him.</blockquote>
+<p><span class="k">Reproduced: yes.</span> Holding to walk into Zeke took 2.87 s to get past, from three angles.</p>
+<p><span class="k">Cause.</span> Crew step aside for you (they "shuffle") unless they're talking (section 15, line 13480: <code>!(a.talking &gt; 0)</code>). On training day Zeke is "talking" nearly all day, because his lesson lines keep that flag on (section 21, line 39817). You only get through by the 2-second push (section 15, line 14143, <code>PUSH_MS = 2000</code>).</p>
+<p><span class="k">Fix.</span> An escort who is following you steps aside even while talking. He carries on talking as he moves.</p>
+<div class="chips"><span class="chip">Player engineer (15)</span><span class="chip">½ turn, with #17</span><span class="chip">intro_check, interactions_check, player_check</span></div>
+<p><span class="k">Dev mode:</span> jump to Day 1 09:15 and hold-walk into him.</p>
+</div></details>
+
+<details class="item"><summary><span class="n">#17</span><span class="t">Zeke and you in the same spot (tour and training day)</span><span class="s">C · 1 turn</span></summary><div class="body">
+<blockquote><b>YOUR NOTE</b>Zeke and the player clip into the same spot during the welcome tour and training day; they should stand apart.</blockquote>
+<p><span class="k">Reproduced: yes on the tour, partly on training day.</span> Following the arrow, Zeke stood inside you in 3 of 12 checks in the Deck 4 wing, and 11 of 13 leaving for the lift. On training day it follows from the same code.</p>
+<p><span class="k">Cause.</span> Zeke walks to the step's spot, which is the same tile the arrow sends you to, and waits on it. He keeps no gap from you (section 10, <code>escortStep</code>, lines 48728-48751). A tap-to-walk path also walks straight through crew; only other players' walkers are avoided (line 48195). Holding to walk lets you through after #12's push, and since he stands still while talking, you stay overlapped.</p>
+<p><span class="k">Fix.</span> He stops about 0.9 m short of you. When his spot is yours, he takes the free tile beside you and faces you (as crew who come to find you already do, <code>SEEK_BESIDE</code>). A tap that ends on a standing crew member stops on the tile next to them; that part touches every tap, so it's gated or proven identical. The teacher's walk on later training days uses the same code, so it's fixed too.</p>
+<div class="chips"><span class="chip">Sim engineer (10)</span><span class="chip">1 turn (with #12)</span><span class="chip">intro_check, join_check, interactions_check, career_check, mech_check, cadet_test</span></div>
+<p><span class="k">Dev mode:</span> jump to Day 0 17:30 and Day 1 09:00.</p>
+<div class="shots"><figure><a href="patch-plan-shots/17-tour-overlap.png"><img src="patch-plan-shots/17-tour-overlap.png" alt="Zeke and the player overlapping on Deck 4"></a><figcaption>Deck 4, the tour</figcaption></figure></div>
+</div></details>
+
+<details class="item"><summary><span class="n">#13</span><span class="t">The green tip about using your device while you work</span><span class="s">C · ½ turn</span></summary><div class="body">
+<blockquote><b>YOUR NOTE</b>The green tip about checking your device while working: great timing, keep it, but make it more specific: it's about using the device while a long work action fills up (don't say "meters", don't say "in between jobs"); it popping during a long work action makes it clear.</blockquote>
+<p><span class="k">Confirmed from the code.</span> Today's words (<code>content/banks/tips.lines</code>, <code>tip.device</code>): "Working is a good chance to check out your device. Have a look at the apps between jobs." It shows any time you're on shift on Day 1 between 09:30 and 17:00 (section 15, line 12388). That it popped during a long job for you was luck of the timing.</p>
+<p><span class="k">Fix.</span> New words (writers): <b>"While a long job's bar fills, you can open your device: check your Schedule, Mail or Tracked. The work carries on."</b> To keep the timing you liked every time, it now waits for a long work step (a repair hold of about 10 ship minutes or more) to be under way.</p>
+<div class="chips"><span class="chip">writers; player engineer (15)</span><span class="chip">½ turn</span><span class="chip">device_check, player_check, content_gen --check</span></div>
+<p><span class="k">Dev mode:</span> jump to Day 1 09:30 and start the first repair.</p>
+</div></details>
+
+<details class="item"><summary><span class="n">#18</span><span class="t">End of training day: Zeke says breakfast, at the wrong time</span><span class="s">C · ½ turn</span></summary><div class="body">
+<blockquote><b>YOUR NOTE</b>End of training day: Zeke mentions breakfast instead of dinner and gets the time wrong (it's after 5). When the shift ends he should say good job and that you'll be on your own tomorrow.</blockquote>
+<p><span class="k">Partly reproduced.</span> Nothing is written for the end of training day: Zeke's lesson lines end at 16:30 (section 21b, line 39204). After that he only says his everyday small talk, and one of those lines isn't tied to a time of day: <b>"Ten more minutes with the coils. Breakfast in five."</b> (<code>content/lines/torres-zeke.lines</code>, line 376). That's the breakfast line at the wrong time.</p>
+<p><span class="k">Fix.</span> (1) Writers: that line only in the mornings (<code>? time:morning</code>). (2) A new end-of-day moment on Day 1 at about 16:30-17:15: Zeke comes to find you. Proposed: <b>"Good job today. Proper work, that."</b> then <b>"Tomorrow you're on your own. You'll be fine. Read the card twice."</b> He then walks you to the beam (#19).</p>
+<div class="chips"><span class="chip">writers; onboarding engineer (21b)</span><span class="chip">½ turn</span><span class="chip">intro_check, lines_check, content_gen --check</span></div>
+<p><span class="k">Dev mode:</span> jump to Day 1 16:25 in the Works bay.</p>
+<div class="shots"><figure><a href="patch-plan-shots/18-end-of-training-day.png"><img src="patch-plan-shots/18-end-of-training-day.png" alt="end of training day"></a><figcaption>end of the shift today</figcaption></figure></div>
+</div></details>
+
+<details class="item"><summary><span class="n">#19</span><span class="t">Your name on the Works beam: before dinner, arrow at your spot</span><span class="s">C · 1 turn</span></summary><div class="body">
+<blockquote><b>YOUR NOTE</b>Your name on the Works beam: should happen before dinner so players don't miss it; and the arrow must point to the right spot on the beam (upper left, where your name goes).</blockquote>
+<p><span class="k">Reproduced: yes.</span> The tradition runs from 17:05 to 17:40, after the shift (<code>content/traditions/name-on-the-beam.trad</code>). The arrow points at the middle of the beam, about 3.4 m right of the top-left slot where your name goes.</p>
+<p><span class="k">Cause.</span> The arrow aims at the beam's centre (section 18, line 34743). It's after the shift, Zeke's day with you ends at 16:30, and dinner opens at 17:00, so players walk off.</p>
+<p><span class="k">Fix.</span> The arrow points at the top-left name slot (<code>BEAM.slots[0]</code>), raised to the beam's height. On your first Monday only, the tradition runs from 16:45 to 17:20, inside the shift: Zeke walks you there as he says good job (#18), and the Works crew come 15 minutes before clock-off. The yearly one for other new hands is unchanged.</p>
+<div class="chips"><span class="chip">Traditions engineer (18); writers (.trad); onboarding engineer (Zeke's lead)</span><span class="chip">1 turn</span><span class="chip q">question pp-q15</span><span class="chip">events_check, join_check, day_check, food_check, intro_check</span></div>
+<p><span class="k">Risk:</span> the Works crew's Day 1 plans move, so day_check and events_check differ on Day 1 and food_check's dinner queue changes shape. <span class="k">Dev mode:</span> start the beam tradition on demand to check the arrow; jump to Day 1 16:30 for Zeke's lead.</p>
+<div class="shots"><figure><a href="patch-plan-shots/19-beam-arrow.png"><img src="patch-plan-shots/19-beam-arrow.png" alt="the beam's arrow at 17:06"></a><figcaption>17:06, the arrow mid-beam</figcaption></figure></div>
+</div></details>
+
+<!-- ============ D ============ -->
+<details class="item"><summary><span class="n">#7</span><span class="t">The Captain spends too long on Deck 4</span><span class="s">D · 1 turn</span></summary><div class="body">
+<blockquote><b>YOUR NOTE</b>Captain on Deck 4: she hangs out there too often; occasionally is fine.</blockquote>
+<p><span class="k">Reproduced: yes</span> (her plans over Days 1-28). Captain Marrow spends <b>11.3 hours a week on Deck 4 in about 10 visits</b>. The other 13 Deck 2 officers average 3 hours. Most of it is the music room.</p>
+<p><span class="k">Cause.</span> She has two music pulls: a music habit (section 14, line 9197, a strong pull to the Deck 4 music room in any free time), and her "musician" story, which plays on 55% of evenings plus every Thursday (line 10185; Thursday is the late piano tradition).</p>
+<p><span class="k">Fix.</span> Drop the music habit (crew designer, roster generator) and lower the "other evenings" chance from .55 to .15, keeping Thursday's piano. Expected result: about 3-4 hours and 2-3 visits a week, like the other officers.</p>
+<div class="chips"><span class="chip">crew designer; sim engineer (14)</span><span class="chip">1 turn</span><span class="chip tune">tuning</span><span class="chip q">question pp-q11</span><span class="chip">day_check, events_check, social_check, cadet_test (crew differences expected)</span></div>
+<p><span class="k">Dev mode:</span> jump through a week of evenings and count her visits.</p>
+</div></details>
+
+<details class="item"><summary><span class="n">#9</span><span class="t">Crew don't visibly use the toilets</span><span class="s">D · 1 turn</span></summary><div class="body">
+<blockquote><b>YOUR NOTE</b>Toilets: the user sees few or no crew using them; crew should visibly use them.</blockquote>
+<p><span class="k">Reproduced: yes, and it's a real bug.</span> The crew plan about 130 toilet visits a day, but <b>only about 16 leave enough time to walk there</b> (none of Deck 3's 34). Example: Tomas leaves his mess seat at 08:56 for a stall and is still walking at 08:59. At 09:00 his visit is over and he heads back, never reaching it.</p>
+<p><span class="k">Cause.</span> A visit lasts 3-6 ship minutes (section 14, lines 9958-9959). Travel time is only added for a deck change (line 9896), but a walk on the same deck takes 5-13 ship minutes.</p>
+<p><span class="k">Fix.</span> Same-deck toilet and handwashing visits get a walk lead: the walking distance between the two places divided by walking speed, then the visit. Both places are fixed map data, so the crew's planner stays repeatable. Optional: a few more people go after waking (morning chance .5 → .7), when you're on Deck 4.</p>
+<div class="chips"><span class="chip">Sim engineer (14)</span><span class="chip">1 turn</span><span class="chip">day_check, food_check, events_check, cadet_test (crew differences on every deck)</span></div>
+<p><span class="k">Dev mode:</span> jump to 07:00 and 22:00 on Deck 4; best paired with #8's red light.</p>
+</div></details>
+
+<details class="item"><summary><span class="n">#10</span><span class="t">Crew walking inside each other</span><span class="s">D · 1 turn</span></summary><div class="body">
+<blockquote><b>YOUR NOTE</b>Crew walking inside each other: two crew with the same destination who leave the lift together stay overlapped for long stretches; they should keep apart.</blockquote>
+<p><span class="k">Reproduced: yes</span> (Deck 3 at dinner, Day 1 18:07-19:11). 27 pairs came within 0.3 tiles of each other. Two crew stayed one body for about 22 real seconds, and three walked as one stack for 12.</p>
+<p><span class="k">Cause.</span> Everyone walks tile centre to tile centre at the same speed and never looks at other crew (section 10, lines 48642-48645). Two people on the same route stay exactly on top of each other.</p>
+<p><span class="k">Fix.</span> A small sideways lane for each person (about a fifth of a tile, from their own seed, kept off walls). Each person's walking speed varies by a few percent, so pairs drift apart. Optional: a short stagger stepping out of the lift. Their tile positions and paths stay the same, so the "nobody stuck" checks are unchanged.</p>
+<div class="chips"><span class="chip">Sim engineer (10); performance engineer reviews</span><span class="chip">1 turn</span><span class="chip">day_check, cadet_test, perf_check, bubble_check</span></div>
+<p><span class="k">Risk:</span> the speed spread changes who reaches a seat first, so day_check and cadet_test differ. The lane alone only changes screenshots. <span class="k">Dev mode:</span> jump to 18:00 on Deck 3.</p>
+</div></details>
+
+<details class="item"><summary><span class="n">#8</span><span class="t">The washroom stall light never turns red</span><span class="s">D · ½-1 turn</span></summary><div class="body">
+<blockquote><b>YOUR NOTE</b>Washroom light: should actually show red when a toilet is in use.</blockquote>
+<p><span class="k">Reproduced: yes, from the code.</span> The light can't change at all. It's a small green box merged into the stall's mesh (section 4b, line 1434, <code>KM.vacant</code>). Tapping a busy stall already says "Occupied: the little light is red" (section 15, line 12865).</p>
+<p><span class="k">Fix.</span> Each stall's light becomes its own small piece, tied to the stall's place. A shared red material is added (made at load, no random calls). The light turns red while anyone (crew or you) is using the stall.</p>
+<div class="chips"><span class="chip">Deck architect (4b); sim engineer for the switch</span><span class="chip">½-1 turn</span><span class="chip">perf_check, deck_check, cadet_test</span></div>
+<p><span class="k">Risk:</span> about one extra draw call per stall on screen (2-8 per washroom; the budget is 450). Screenshots with stalls in view change. <span class="k">Dev mode:</span> jump to 07:30 on Deck 4.</p>
+</div></details>
+
+<!-- ============ E ============ -->
+<details class="item"><summary><span class="n">#25</span><span class="t">The lift panel's Deck 2 label</span><span class="s">E · ¼ turn</span></summary><div class="body">
+<blockquote><b>YOUR NOTE</b>Lift panel label: should read "Officer's Quarters - Science" (which deck: to confirm with the user in the patch plan).</blockquote>
+<p><span class="k">Today</span> (section 11, line 49658, <code>DECK_NAMES</code>):</p>
+<div class="tw"><table><tr><th>Deck</th><th>On the panel</th></tr><tr><td>1</td><td>Bridge</td></tr><tr><td>2</td><td>Officers' quarters and science</td></tr><tr><td>3</td><td>Commons</td></tr><tr><td>4</td><td>Quarters</td></tr><tr><td>R</td><td>Recreation</td></tr><tr><td>5</td><td>Operations</td></tr><tr><td>6</td><td>Engineering</td></tr></table></div>
+<p>Deck 2 is the only deck with both the officers' quarters (aft, the Captain's across the stern) and science (the survey labs and the sensor array, forward).</p>
+<p><span class="k">Fix.</span> Change Deck 2's name, and any copies in the words and the deck signs.</p>
+<div class="chips"><span class="chip">HUD seat (11); writers for copies</span><span class="chip">¼ turn</span><span class="chip q">question pp-q1</span><span class="chip">cadet_test (lift text differs), device_check</span></div>
+<div class="shots"><figure><a href="patch-plan-shots/25-lift-panel.png"><img src="patch-plan-shots/25-lift-panel.png" alt="the lift panel today"></a><figcaption>the lift panel today</figcaption></figure></div>
+</div></details>
+
+<details class="item"><summary><span class="n">#21</span><span class="t">Tapping someone: show rank and title</span><span class="s">E · ½ turn</span></summary><div class="body">
+<blockquote><b>YOUR NOTE</b>Clicking someone: show their rank and title along with their name.</blockquote>
+<p><span class="k">Reproduced: yes.</span> Tapping the storekeeper shows "Yara Esposito / Storekeeper · stranger": the job title and how well you know them, but no rank. The card is built in section 20 (line 38027) and drawn in section 19 (line 11370). The roster gives every crew member a rank: captain, xo, chief, senior, officer, junior.</p>
+<p><span class="k">Fix.</span> Each rank gets a word (Captain, Commander, Department Chief, Senior Officer, Officer, Crew), e.g. "Crew · Storekeeper · stranger". The rank is left out where the title already says it ("Captain", "Executive Officer", "Head of …"). The same in the device's crew list. The words live in <code>content/</code>.</p>
+<div class="chips"><span class="chip">Social engineer (20), device engineer (19), writers</span><span class="chip">½ turn</span><span class="chip q">question pp-q16</span><span class="chip">device_check, social_check, cadet_test (tap text)</span></div>
+<div class="shots"><figure><a href="patch-plan-shots/21-tap-crew-card.png"><img src="patch-plan-shots/21-tap-crew-card.png" alt="the crew card today"></a><figcaption>the card today</figcaption></figure></div>
+</div></details>
+
+<details class="item"><summary><span class="n">#6</span><span class="t">Clocking in or out by accident</span><span class="s">E · 1-2 turns</span></summary><div class="body">
+<blockquote><b>YOUR NOTE</b>Clocking in/out: it's too easy to clock in and out by accident; add a way to undo a clock-out (and clock-in) right after punching.</blockquote>
+<p><span class="k">Reproduced: yes</span> (Day 3, Deck 5's time clock). After you clock in, "Clock out" appears in exactly the same spot as "Clock in". Before 17:00 it asks "Clock out early?", and the confirm button is again "Clock out" in that same spot. So a double tap clocks you in and straight out, and you can't clock back in ("Shift done. See you tomorrow.").</p>
+<p><span class="k">Cause.</span> The clock screen redraws its buttons in place (section 20, <code>clockScreen</code>, lines 37056-37085). A punch is final at once (<code>careerClock</code>, lines 37026-37042). Clocking out early also costs 2 work reputation, a crew remark and a note to the rest of the game.</p>
+<p><span class="k">Fix, either way:</span> taps are ignored for half a second after the screen changes, and the next button is never where the last one was. Then, per pp-q3: <b>Undo</b> leaves an Undo button on the other side for a few seconds after each punch, and nothing counts (reputation, remark) until it's gone. Or <b>Confirm</b> asks "Clock in now?" with Yes and Cancel set apart, an extra tap twice a day.</p>
+<div class="chips"><span class="chip">Works career engineer builds (the clock is its code, in section 20); social engineer reviews; HUD seat for layout</span><span class="chip">Undo 1-2 turns, Confirm 1</span><span class="chip q">question pp-q3</span><span class="chip">leave_check, career_check, interactions_check, player_check, device_check</span></div>
+<p><span class="k">Dev mode:</span> jump to any workday at 08:55 or 15:00 and punch twice quickly.</p>
+<div class="shots"><figure><a href="patch-plan-shots/06-clock-in-screen.png"><img src="patch-plan-shots/06-clock-in-screen.png" alt="clock in"></a><figcaption>"Clock in"</figcaption></figure><figure><a href="patch-plan-shots/06-clock-after-in.png"><img src="patch-plan-shots/06-clock-after-in.png" alt="clock out in the same spot"></a><figcaption>"Clock out", same spot</figcaption></figure><figure><a href="patch-plan-shots/06-clock-out-double-tap.png"><img src="patch-plan-shots/06-clock-out-double-tap.png" alt="after a double tap"></a><figcaption>a double tap: out for the day</figcaption></figure></div>
+</div></details>
+
+<details class="item"><summary><span class="n">#24</span><span class="t">The shopkeeper opens a buy menu</span><span class="s">E · 1-1½ turns</span></summary><div class="body">
+<blockquote><b>YOUR NOTE</b>The shopkeeper: tapping them opens a simple buy menu.</blockquote>
+<p><span class="k">Today:</span> tapping a storekeeper opens the chat card. The store does work, but you can't choose. Tapping a shelf hands you "the next thing on that shelf", and you pay at the counter (section 15, <code>storePick</code> line 12716, <code>pay</code> line 12838). The storekeepers are Yara Esposito (mornings) and Orla Ishikawa (14:30-21:00) at Deck 3's crew store. There are 19 goods (<code>STORE</code>, line 12707):</p>
+<ul><li>Snacks: dried apple 2, chocolate 3, spiced nuts 3, flapjack 2, biscuits 3.</li>
+<li>Drinks: fizzy lime 2, cold tea 2, oat milk 2, tin of tea 4.</li>
+<li>Things for your locker or to give: novel 8, soft socks 6, postcard 3, succulent 10, cards 5, candle 7, puzzle book 6, music chip 4, pocket puzzle 4, tiles set 6.</li>
+<li>Hobby supplies.</li></ul>
+<p>You start with 40 credits and earn 15 a job.</p>
+<p><span class="k">Fix.</span> When a storekeeper is at the counter, their card gets a "Buy something" button. It opens a simple menu: your credits at the top, then Snacks, Drinks and Things for your locker, with prices. What you can't afford is greyed out ("3 more credits"). Choosing runs today's pay step ("Orla rings it up"), so eating, the locker, gifts and hobbies all work as now. The shelves keep browse-and-pick.</p>
+<div class="chips"><span class="chip">Player engineer (15), social engineer (20), device engineer (19), HUD seat</span><span class="chip">1-1½ turns, behind a switch</span><span class="chip q">question pp-q4</span><span class="chip">player_check, interactions_check, device_check, social_check</span></div>
+<p><span class="k">Dev mode:</span> jump to 15:00 (Orla on duty).</p>
+</div></details>
+
+<details class="item"><summary><span class="n">#5</span><span class="t">No tiers on maintenance places, and a ladder that works</span><span class="s">E · 2 turns</span></summary><div class="body">
+<blockquote><b>YOUR NOTE</b>Maintenance access: no more tiered (rank-based) access to maintenance areas like the ladder. And the ladder must work: tap it and a panel like the lift's comes up, with up/down and which deck is which.</blockquote>
+<p><span class="k">Reproduced: yes.</span> Tapping Deck 4's ladder hatch only says "Spine ladder … Tier 2 access." Nothing opens. Service hatches already let you through at any tier; what's still shut:</p>
+<ul>
+<li>The ladder hatches on Decks 1, 2, 3, 4, 6 and R. Deck 5 has only glass.</li>
+<li>Rooms whose text names a tier: Engine control (Tier 3), the Reactor (Tier 4), the Sensor array (Tier 3).</li>
+<li>A few other hatches: the Manifold room's (its room is already open another way), the bay booth and the bay door gear.</li>
+</ul>
+<p>Some open rooms still say "Tier N access" in their text. Tiers still decide which jobs you may take, which is your career, not access.</p>
+<p><span class="k">Cause.</span> The ladder hatch isn't on its deck's list of service hatches (section 4c, line 3159), so it stays shut (4a, line 682). Nothing handles a tap on the ladder. "Tier 2 access" is written into the deck texts (4d, 4e).</p>
+<p><span class="k">Fix.</span> Tapping the ladder walks you to it and opens a "Spine ladder" panel in the lift's style (copying <code>openLiftPanel</code>, section 11). It has Up and Down lists, nearest deck first, each with its name, "You are here" and the goal mark. Climbing fades the view, takes about a ship minute a deck, and lands you by that deck's ladder. It also works while the lift is stuck (the lift incident). Each deck gets a landing tile, and Deck 5 gets a ladder hatch. The tier words come out of every text, including backlog #7's "Seven decks". Sealed rooms open per pp-q5. All of it sits behind a <code>LADDER_ON</code> switch.</p>
+<div class="chips"><span class="chip">HUD seat (11, page CSS); deck architect (4d); rec engineer (4e)</span><span class="chip">2 turns</span><span class="chip q">questions pp-q5, pp-q6</span><span class="chip">deck_check, interactions_check, cadet_test; day_check if rooms open</span></div>
+<p><span class="k">Risk:</span> the hatch stays a hatch for walking, so paths and crew routes don't change. Opening sealed rooms changes the crew's routes on Decks 2 and 6, unless those doors stay shut to the crew. <span class="k">Dev mode:</span> start the stuck-lift incident on demand; jump to try every deck's landing.</p>
+<div class="shots"><figure><a href="patch-plan-shots/05-ladder-hatch.png"><img src="patch-plan-shots/05-ladder-hatch.png" alt="the ladder hatch's Tier 2 text"></a><figcaption>"Tier 2 access" today</figcaption></figure></div>
+</div></details>
+
+<details class="item"><summary><span class="n">#26</span><span class="t">One more tradition for your first days</span><span class="s">E · 1-2 turns</span></summary><div class="body">
+<blockquote><b>YOUR NOTE</b>One more tradition on Day 1, so a new player sees how traditions flow.</blockquote>
+<p><span class="k">Today:</span></p>
+<ul>
+<li><b>Day 0:</b> Sunday's earlier traditions are over before you land. The Sunday long table <i>is</i> your arrival dinner.</li>
+<li><b>Day 1, Monday:</b> Sunrise stretch (06:30), Name on the beam (17:05, a one-off, #19) and Gym club (19:15).</li>
+<li>Monday's Mail goes out on Day 0 at 18:00 with no pop-up, during the tour (section 18, line 34522).</li>
+<li>Gym club comes after Zeke's dinner lines and the bed arrows, and nothing invites you to it.</li>
+<li>The first tradition with the whole flow (Mail, heads-up, invite, tap to join) is Tuesday's Spice shelf supper.</li>
+</ul>
+<p><span class="k">Fix.</span> The tradition shows the flow on purpose: a Mail pop-up at a quiet moment (end of shift); an invite at dinner from Zeke or Pell, using the tradition's own invite line; tap to join; and Settling-in's "Join a tradition" ticks (its teacher is Pell, in the bow lounge). Recommended: a new short, seated, social one on Monday evening, about 19:30-20:15 in the bow lounge with Pell. The writers name it. The arrival evening is the other option, but your 0.70.0 call kept that evening free (Lap of the Wren was moved off it), and it's already full.</p>
+<div class="chips"><span class="chip">Traditions engineer (18), writers, onboarding engineer</span><span class="chip">1-2 turns, behind its own switch</span><span class="chip q">question pp-q2</span><span class="chip">events_check, join_check, day_check, intro_check, cadet_test, perf_check if it draws a crowd</span></div>
+<p><span class="k">Dev mode:</span> jump to Day 1 17:00 as a new arrival, and start the tradition on demand to test the invite and the join.</p>
+</div></details>
+
+<!-- ============ F ============ -->
+<details class="item"><summary><span class="n">#16</span><span class="t">Tier 1 repairs have got slow</span><span class="s">F · ½ turn</span></summary><div class="body">
+<blockquote><b>YOUR NOTE</b>Repair times, Tier 1: have got a bit slow (tuning).</blockquote>
+<p><span class="k">Today</span> (one ship minute is 1.67 real seconds):</p>
+<div class="tw"><table><tr><th>Step</th><th>Ship min</th><th>Real s</th></tr><tr><td>Fetch parts</td><td>4</td><td>7</td></tr><tr><td>Look it over</td><td>3</td><td>5</td></tr><tr><td>Service</td><td>20</td><td>33</td></tr><tr><td><b>Repair</b></td><td><b>45</b></td><td><b>75</b></td></tr><tr><td>Overhaul</td><td>90</td><td>150</td></tr></table></div>
+<p>With walking, a Tier 1 repair takes about 2.5-3 real minutes. <span class="k">Why it feels slower lately:</span> 0.73.0 made leisure drain while you work. From Tuesday afternoon you're "Restless", and that slows tasks by a tenth, so the repair becomes 50 ship minutes (83 s). The same repair runs 59-94 s depending on your needs (section 15, <code>jobMins</code>, line 13596).</p>
+<p><span class="k">Proposed:</span> Tier 1 jobs take two thirds of the time, for you only (the crew's times are unchanged). Repair 45 → <b>30 ship min (50 s)</b>, service 20 → 13, overhaul 90 → 60. Tier 2 and up are unchanged.</p>
+<div class="chips"><span class="chip">Player engineer (15)</span><span class="chip">½ turn</span><span class="chip tune">tuning</span><span class="chip q">question pp-q7</span><span class="chip">player_check, career_check, mech_check, machine_check</span></div>
+</div></details>
+
+<details class="item"><summary><span class="n">#20</span><span class="t">Hunger hardly moves on a work day</span><span class="s">F · ½ turn</span></summary><div class="body">
+<blockquote><b>YOUR NOTE</b>Hunger should go down more during a work day (tuning).</blockquote>
+<p><span class="k">Today:</span> hunger drains 4 an hour awake, whatever you do (section 15, line 12164). On a normal Monday it's 100 after breakfast, 82 at noon and 62 at 17:00. You're never even peckish (under 50) before dinner.</p>
+<div class="tw"><table><tr><th>Hunger</th><th>Today (4/h)</th><th>7/h at work (proposed)</th><th>6/h at work</th></tr><tr><td>Noon</td><td>82</td><td>73</td><td>76</td></tr><tr><td>17:00</td><td>62</td><td><b>38</b> (peckish from about 14:30)</td><td>46</td></tr></table></div>
+<p>Off shift it stays at 4 an hour.</p>
+<div class="chips"><span class="chip">Player engineer (15)</span><span class="chip">½ turn</span><span class="chip tune">tuning</span><span class="chip q">question pp-q8</span><span class="chip">player_check, food_check, leave_check</span></div>
+</div></details>
+
+<details class="item"><summary><span class="n">#22</span><span class="t">Social should fall like fitness</span><span class="s">F · ½ turn</span></summary><div class="body">
+<blockquote><b>YOUR NOTE</b>Social should go down faster, the same as fitness (tuning).</blockquote>
+<p><span class="k">Today:</span> social already drains faster than fitness (1 an hour awake against fitness's 0.6), but meals in company refill it. Each companion adds 0.2 a minute, so a meal at a table of three gives +12 to +24. Chats add 6, a talk 30, a tradition 12-20. Take a quiet week with no gym, no calls and two chats a day: fitness goes 60 → 0, while social stays at 95.</p>
+<p><span class="k">Proposed:</span> social drains 2.5 an hour (0.5 asleep), and company at meals counts half (0.1). The same quiet week reads 62, 49, 37, 25, 13, 0: about 12 a day, like fitness. A call home (+40), a talk or a tradition brings it back. With the gym and a call every other day, social sits between 63 and 92.</p>
+<div class="chips"><span class="chip">Player engineer (15)</span><span class="chip">½ turn</span><span class="chip tune">tuning</span><span class="chip q">question pp-q9</span><span class="chip">player_check (its paper week gains meal company)</span></div>
+<p><span class="k">Risk:</span> low social now really happens. "Lonely" makes energy drain slightly faster, and the call-booth nudges show more. The crew's own needs are untouched.</p>
+</div></details>
+
+<details class="item"><summary><span class="n">#27</span><span class="t">Waking at Energy 100 is too easy</span><span class="s">F · ½ turn</span></summary><div class="body">
+<blockquote><b>YOUR NOTE</b>Waking up: it shouldn't be so easy to wake up with Energy at 100 (tuning).</blockquote>
+<p><span class="k">Today:</span> sleep gives 12.5 energy an hour (section 15, line 12165). A normal day ends at 20-30 energy, so you wake at 100 whether you go to bed at 22:00 or 23:00.</p>
+<div class="tw"><table><tr><th>Bed (alarm 06:00)</th><th>Today</th><th>Proposed</th></tr><tr><td>21:00</td><td>100</td><td>100</td></tr><tr><td>22:00</td><td>100</td><td>97-99</td></tr><tr><td>23:00</td><td>100</td><td>89-91</td></tr><tr><td>00:00</td><td>about 75</td><td>the same</td></tr></table></div>
+<p><span class="k">Proposed:</span> above 85, sleep gives a third as much (about 4 an hour). "Well rested" (75 and over) still comes after a 7-hour night. The alarm clock's energy preview uses the same sum, so it shows the new number.</p>
+<div class="chips"><span class="chip">Player engineer (15)</span><span class="chip">½ turn</span><span class="chip tune">tuning</span><span class="chip q">question pp-q10</span><span class="chip">player_check (its 21:00 bunk test), leave_check (the sick nap)</span></div>
+</div></details>
+
+<details class="item"><summary><span class="n">#23</span><span class="t">More large-group moments (for the events plan)</span><span class="s">note</span></summary><div class="body">
+<blockquote><b>YOUR NOTE</b>Large-group moments: the user loves them; more of them, especially in ship-wide events (feeds the events plan).</blockquote>
+<p><span class="k">Today's big gatherings</span> (share of the crew asked):</p>
+<ul>
+<li>Every week: the Sunday long table (.6, the game's busiest scene, 68 people), Spice shelf supper (.4), Long breakfast (.4), Film night and Tasting table (.35).</li>
+<li>Monthly to yearly: the Captain's all-hands (.7), Harvest supper (.7), Year's end (.8), Midtour (.5), the Lightdisc Cup and talent nights (.4).</li>
+</ul>
+<p>Your first week already has the arrival dinner, Name on the beam, Spice shelf supper, New hand's tea, Long breakfast, Film night and the long table.</p>
+<p><span class="k">Proposal for the events plan:</span> one all-hands moment in every ship-wide event. The ion storm: everyone sheltering in the mess for the Captain's address. The comet: crowds at the bow lounge and promenade windows. The diplomatic visit: a welcome line in the Deck 5 bay, then a state dinner. Each needs its own perf_check scene. Not a build item in this patch.</p>
+<div class="chips"><span class="chip">traditions engineer and writers, through the events plan</span><span class="chip">not in this patch</span><span class="chip q">question pp-q17</span></div>
+</div></details>
+
+<h2>Found in passing (added to the backlog, not in this patch)</h2>
+<ul>
+<li>The goal arrow's label lowercases a person's name: "Take the lift to Deck 3: zeke Torres" (section 15b, line 14872; visible in #17's screenshot). Backlog #15.</li>
+<li>The solo job's meeting file header says "Tuesday 07:45"; the game uses 08:45. It's a comment, not shown on screen, and is fixed with #2.</li>
+</ul>
+
+<h2>Your answers</h2>
+<p class="legend">Each question has a recommended answer (marked). Pick one, or add a comment. There's a box at the end for anything else.</p>
+<form id="answers">
+
+<div class="q" data-qid="pp-q1"><div class="qh">PP-Q1 · #25 LIFT LABEL</div><div class="qt">Which deck gets "Officer's Quarters - Science", and with which apostrophe?</div>
+<label><input type="radio" name="pp-q1" value="deck2-as-written"><span>Deck 2, exactly as you wrote it: "Officer's Quarters - Science"<span class="rec">recommended</span></span></label>
+<label><input type="radio" name="pp-q1" value="deck2-officers-plural"><span>Deck 2, written "Officers' Quarters - Science" (many officers live there; today's label has the apostrophe this way)</span></label>
+<label><input type="radio" name="pp-q1" value="other-deck"><span>Another deck (say which below)</span></label>
+<div class="why">Deck 2 is the only deck with both the officers' rooms and science. Where the apostrophe goes is your call.</div>
+<textarea name="pp-q1-comment" placeholder="Comment (optional)"></textarea></div>
+
+<div class="q" data-qid="pp-q2"><div class="qh">PP-Q2 · #26 ONE MORE TRADITION</div><div class="qt">Where should the extra tradition go, so a new player sees how traditions work?</div>
+<label><input type="radio" name="pp-q2" value="monday"><span>Monday (Day 1) evening: a new short one in the bow lounge with Pell, with the Mail, an invite at dinner and tap to join<span class="rec">recommended</span></span></label>
+<label><input type="radio" name="pp-q2" value="arrival"><span>The arrival evening (Day 0), after dinner (goes against your 0.70.0 call to keep that evening free)</span></label>
+<label><input type="radio" name="pp-q2" value="gym-club"><span>No new tradition: Monday's Gym club becomes the one that teaches the flow</span></label>
+<textarea name="pp-q2-comment" placeholder="Comment (optional), e.g. an idea for what it is"></textarea></div>
+
+<div class="q" data-qid="pp-q3"><div class="qh">PP-Q3 · #6 THE TIME CLOCK</div><div class="qt">When you tap the time clock by mistake, what should save you?</div>
+<label><input type="radio" name="pp-q3" value="undo"><span>Undo: an Undo button for a few seconds after each punch, and nothing counts until it's gone. No extra taps on a normal day<span class="rec">recommended</span></span></label>
+<label><input type="radio" name="pp-q3" value="confirm"><span>Confirm every punch: "Clock in now? Yes / Cancel" (an extra tap twice a day)</span></label>
+<label><input type="radio" name="pp-q3" value="both"><span>Both: confirm only an early clock-out, and Undo for the rest</span></label>
+<label><input type="radio" name="pp-q3" value="guard-only"><span>Only fix the double tap (buttons apart, a short tap guard)</span></label>
+<div class="why">Every option includes the double-tap fix.</div>
+<textarea name="pp-q3-comment" placeholder="Comment (optional)"></textarea></div>
+
+<div class="q" data-qid="pp-q4"><div class="qh">PP-Q4 · #24 THE SHOP</div><div class="qt">What should the shop menu sell?</div>
+<label><input type="radio" name="pp-q4" value="today"><span>Today's 19 goods plus hobby supplies, by shelf, at today's prices: nothing new to balance<span class="rec">recommended</span></span></label>
+<label><input type="radio" name="pp-q4" value="plus-new"><span>The same, plus a few new things (sweets to give, a mug, a plant pot), with new words and effects</span></label>
+<label><input type="radio" name="pp-q4" value="daily-pick"><span>A short daily pick of about 6, fresh each day</span></label>
+<textarea name="pp-q4-comment" placeholder="Comment (optional), e.g. things you'd like to buy"></textarea></div>
+
+<div class="q" data-qid="pp-q5"><div class="qh">PP-Q5 · #5 SHUT ROOMS</div><div class="qt">With no tiers on maintenance places, which shut rooms should you be able to walk into?</div>
+<label><input type="radio" name="pp-q5" value="ladder-engine-sensor"><span>The ladder works; Engine control and the Sensor array open (their insides are built); the Reactor stays sealed for safety, not rank; the bay booth and door gear stay as they are<span class="rec">recommended</span></span></label>
+<label><input type="radio" name="pp-q5" value="everything"><span>Everything opens, the Reactor too</span></label>
+<label><input type="radio" name="pp-q5" value="ladder-only"><span>Only the ladder and the words change; sealed rooms wait for the story work</span></label>
+<textarea name="pp-q5-comment" placeholder="Comment (optional)"></textarea></div>
+
+<div class="q" data-qid="pp-q6"><div class="qh">PP-Q6 · #5 CLIMBING</div><div class="qt">Should climbing the ladder cost energy and give fitness?</div>
+<label><input type="radio" name="pp-q6" value="yes"><span>Yes: 2 energy and +1 fitness a deck, about a ship minute a deck<span class="rec">recommended</span></span></label>
+<label><input type="radio" name="pp-q6" value="no"><span>No, it's just a slower lift</span></label>
+<textarea name="pp-q6-comment" placeholder="Comment (optional)"></textarea></div>
+
+<div class="q" data-qid="pp-q7"><div class="qh">PP-Q7 · #16 TIER 1 REPAIR (TUNING)</div><div class="qt">How long should a Tier 1 repair's hold at the panel be? (Today 45 ship min, about 75 s.)</div>
+<label><input type="radio" name="pp-q7" value="30"><span>30 ship min, about 50 s (service 13, overhaul 60)<span class="rec">recommended</span></span></label>
+<label><input type="radio" name="pp-q7" value="35"><span>35 ship min, about a minute</span></label>
+<label><input type="radio" name="pp-q7" value="25"><span>25 ship min, about 40 s</span></label>
+<label><input type="radio" name="pp-q7" value="45-no-restless"><span>Keep 45, but stop "Restless" slowing your tasks</span></label>
+<textarea name="pp-q7-comment" placeholder="Comment (optional)"></textarea></div>
+
+<div class="q" data-qid="pp-q8"><div class="qh">PP-Q8 · #20 HUNGER (TUNING)</div><div class="qt">How hungry should you be at the end of a shift? (Today 62 at 17:00.)</div>
+<label><input type="radio" name="pp-q8" value="7"><span>About 38 at 17:00: peckish from mid-afternoon (7 an hour at work)<span class="rec">recommended</span></span></label>
+<label><input type="radio" name="pp-q8" value="6"><span>About 46 (6 an hour)</span></label>
+<label><input type="radio" name="pp-q8" value="8"><span>About 30 (8 an hour): you'll want lunch</span></label>
+<textarea name="pp-q8-comment" placeholder="Comment (optional)"></textarea></div>
+
+<div class="q" data-qid="pp-q9"><div class="qh">PP-Q9 · #22 SOCIAL (TUNING)</div><div class="qt">How fast should social fall if you keep to yourself? (Today it hardly falls.)</div>
+<label><input type="radio" name="pp-q9" value="12"><span>About 12 a day, like fitness<span class="rec">recommended</span></span></label>
+<label><input type="radio" name="pp-q9" value="18"><span>About 18 a day (faster than fitness)</span></label>
+<label><input type="radio" name="pp-q9" value="5"><span>About 5 a day (gentle)</span></label>
+<textarea name="pp-q9-comment" placeholder="Comment (optional)"></textarea></div>
+
+<div class="q" data-qid="pp-q10"><div class="qh">PP-Q10 · #27 WAKING ENERGY (TUNING)</div><div class="qt">When should you wake at a full 100 energy?</div>
+<label><input type="radio" name="pp-q10" value="9h"><span>Only after about 9 hours (bed by 21:00); 8 hours gives about 97, 7 hours about 90<span class="rec">recommended</span></span></label>
+<label><input type="radio" name="pp-q10" value="8h"><span>After 8 hours (the slowdown starts above 90 instead)</span></label>
+<label><input type="radio" name="pp-q10" value="never"><span>Never quite: waking energy tops out at 95</span></label>
+<textarea name="pp-q10-comment" placeholder="Comment (optional)"></textarea></div>
+
+<div class="q" data-qid="pp-q11"><div class="qh">PP-Q11 · #7 THE CAPTAIN</div><div class="qt">How often should the Captain be on Deck 4? (Today about 11 hours and 10 visits a week.)</div>
+<label><input type="radio" name="pp-q11" value="thu-plus-one"><span>Thursday's late piano plus about one other evening a week (3-4 hours): she keeps her musician story<span class="rec">recommended</span></span></label>
+<label><input type="radio" name="pp-q11" value="thu-only"><span>Only Thursday's piano</span></label>
+<label><input type="radio" name="pp-q11" value="half"><span>About half of today (about 5 hours)</span></label>
+<textarea name="pp-q11-comment" placeholder="Comment (optional)"></textarea></div>
+
+<div class="q" data-qid="pp-q12"><div class="qh">PP-Q12 · #3 THE CHIEF AT DINNER</div><div class="qt">How should the Chief join you at the arrival dinner?</div>
+<label><input type="radio" name="pp-q12" value="walks-over"><span>She eats at a nearby table you can see, then on "Look who's coming over" walks to your table and sits across from you<span class="rec">recommended</span></span></label>
+<label><input type="radio" name="pp-q12" value="from-servery"><span>She arrives from the servery with her tray just as Zeke finishes</span></label>
+<label><input type="radio" name="pp-q12" value="stands"><span>She walks up and stands at the table for her minute, then goes back to her own table</span></label>
+<textarea name="pp-q12-comment" placeholder="Comment (optional)"></textarea></div>
+
+<div class="q" data-qid="pp-q13"><div class="qh">PP-Q13 · #4 ZEKE'S LINE</div><div class="qt">The "how a day runs … then the evening's yours" lines: how should they play?</div>
+<label><input type="radio" name="pp-q13" value="goodnight-bubbles"><span>They move from the dinner panel into Zeke's goodnight bubbles, after the Chief leaves<span class="rec">recommended</span></span></label>
+<label><input type="radio" name="pp-q13" value="keep-panel"><span>Leave the panel as it is; only make sure the goodnight bubble can't be pushed off</span></label>
+<label><input type="radio" name="pp-q13" value="all-bubbles"><span>The whole dinner chat as bubbles (the question with three replies would lose its panel)</span></label>
+<textarea name="pp-q13-comment" placeholder="Comment (optional), e.g. if you meant a different line"></textarea></div>
+
+<div class="q" data-qid="pp-q14"><div class="qh">PP-Q14 · #14 THE DEVICE BUTTON</div><div class="qt">How should the device button get your attention the first time?</div>
+<label><input type="radio" name="pp-q14" value="glow-pointer"><span>A gentle glow plus a small "Tap your device" pointer, until you first open it<span class="rec">recommended</span></span></label>
+<label><input type="radio" name="pp-q14" value="glow"><span>The glow only</span></label>
+<label><input type="radio" name="pp-q14" value="arrow"><span>An arrow only</span></label>
+<textarea name="pp-q14-comment" placeholder="Comment (optional)"></textarea></div>
+
+<div class="q" data-qid="pp-q15"><div class="qh">PP-Q15 · #19 THE BEAM</div><div class="qt">When should your name go on the beam on your first day?</div>
+<label><input type="radio" name="pp-q15" value="1645"><span>16:45, inside the shift, with Zeke walking you there as he says good job<span class="rec">recommended</span></span></label>
+<label><input type="radio" name="pp-q15" value="1705-held"><span>Keep 17:05, but Zeke keeps you in the bay from 16:50 and the dinner nudges wait</span></label>
+<label><input type="radio" name="pp-q15" value="arrow-only"><span>Keep the time; only fix the arrow</span></label>
+<textarea name="pp-q15-comment" placeholder="Comment (optional)"></textarea></div>
+
+<div class="q" data-qid="pp-q16"><div class="qh">PP-Q16 · #21 RANK WORDS</div><div class="qt">On a crew member's card, what is the most junior rank called?</div>
+<label><input type="radio" name="pp-q16" value="crew"><span>"Crew" (e.g. "Crew · Storekeeper")<span class="rec">recommended</span></span></label>
+<label><input type="radio" name="pp-q16" value="crewman"><span>"Crewman"</span></label>
+<label><input type="radio" name="pp-q16" value="rating"><span>"Rating"</span></label>
+<label><input type="radio" name="pp-q16" value="junior-officer"><span>"Junior Officer"</span></label>
+<div class="why">The other ranks: Captain, Commander, Department Chief, Senior Officer, Officer.</div>
+<textarea name="pp-q16-comment" placeholder="Comment (optional)"></textarea></div>
+
+<div class="q" data-qid="pp-q17"><div class="qh">PP-Q17 · #23 LARGE-GROUP MOMENTS</div><div class="qt">Where should the next large-group moments go?</div>
+<label><input type="radio" name="pp-q17" value="events"><span>One in each ship-wide event (the storm's shelter in the mess, the comet at the windows, the visit's welcome and dinner), planned in the events plan<span class="rec">recommended</span></span></label>
+<label><input type="radio" name="pp-q17" value="events-plus-weekly"><span>That, plus a new big weekly one in this patch</span></label>
+<label><input type="radio" name="pp-q17" value="events-later"><span>Only in the events, and decide the moments there</span></label>
+<textarea name="pp-q17-comment" placeholder="Comment (optional)"></textarea></div>
+
+<div class="q" data-qid="pp-general"><div class="qh">ANYTHING ELSE</div><div class="qt">Anything about the order, an item, or something I missed?</div>
+<textarea name="pp-general" placeholder="Your thoughts"></textarea></div>
+
+</form>
+<p class="legend">Planned on claude/patch-plan from claude/integration 5dd740c. The reproduction scripts are kept with the planner's handover; the screenshots are in plans/patch-plan-shots/.</p>
+</main>
+</body>
+</html>
