@@ -34106,12 +34106,13 @@ function talkPackFill(tk, p, ctx) {                       // every line of a tal
   return { lines, tones: tk.lines.map(x => x.tone || 'light'), ask, askTone: tk.ask.tone || 'light', replies };
 }
 // a talk's when: on the conditions that never change for this speaker (who they are, their department, rank, traits,
-// story theme): false means it can never be theirs, so it isn't "waiting" for them
-const TALK_FIXED = ['who', 'dept', 'rank', 'trait', 'thread'];
+// story theme; and !moved:, as someone who's left never comes back): false means it can never be theirs, so it isn't
+// "waiting" for them (TR1)
+const TALK_FIXED = ['who', 'dept', 'rank', 'trait', 'thread'], TALK_FIXED_NOT = TALK_FIXED.concat('moved');
 function talkPackFits(tk, p, ctx) {
   const w = tk.when; if (!w) return true;
   const f = {}; for (const k of TALK_FIXED) if (k in w) f[k] = w[k];
-  if (w.not) { const n = {}; for (const k of TALK_FIXED) if (k in w.not) n[k] = w.not[k]; if (Object.keys(n).length) f.not = n; }
+  if (w.not) { const n = {}; for (const k of TALK_FIXED_NOT) if (k in w.not) n[k] = w.not[k]; if (Object.keys(n).length) f.not = n; }
   return linesOk(f, p, ctx);
 }
 function talkPackPick(who, t = shipNow()) {
