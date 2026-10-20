@@ -213,3 +213,57 @@ What v1.1 changes against my findings:
 - In 0.64.2, `.hud` is `pointer-events: none` (line 15 of the style): a tap on the clock today goes through to the deck and walks the player there. With Dev on, only the clock line would catch taps. On a phone that's one 12 px line of text (`.hud .clock`, 12px at phone width). That's about 16 px tall, against the game's 44 px buttons.
 - A slightly-off tap moves the player instead of opening the panel. In the arrival evening that can step you off Zeke's tour.
 - **Fix:** in Dev, make the whole HUD box (room, deck, clock: about 60 px tall) the tap target, with a visible "DEV" word in the underline, not colour alone. The user also needs to be able to tell Dev from the real game at a glance, for example in a screenshot they send.
+
+## Addendum 2: v2 (claude/devmode-plan 97da6b9)
+
+**In short:** v2 fixes both blockers and nearly all of my points. Three things are left:
+1. **Stop 1's recipe for the Day 2 meeting skips Day 1.** v2 itself found that a skipped first week counts the meetings as missed and the career never starts. So the Day 2 you'd reach that way isn't a real player's.
+2. **Stop 1 is now six turns (D1-D6),** but the patch only needs D1-D4.
+3. **"Take me to…" isn't defined during the arrival evening, while Zeke is escorting you, or during a meeting.**
+
+### My findings against v2
+
+| Finding | v2 | Status |
+|---|---|---|
+| B1 order | Stop 1 = the playtest kit (Clock, Take me to, Mark, Undo, needs, traditions, Copy my real game); career and replay at Stop 2. | **Fixed.** See new point R1 for Stop 1's size. |
+| B2 storage | Kept days in IndexedDB; only the Dev save, Mark and Undo in localStorage (~120 KB each); a space check before every write; never removes the real game's data; Clear; devmode_check fills Dev storage and proves the real save still writes. | **Fixed.** |
+| S1 measured without the arrival | Re-measured from the Day 0 arrival with saving on and seed 1: Day 2 08:40 in 1.2-1.4 s, Day 10 in 6.3-7.3 s, Day 26 in 15.7-17.1 s, the same twice. The first week's meetings are attended in person (D7). | **Fixed.** |
+| S2 needs | Kept as a normal day leaves them, plus Top up needs (dm-q15). | **Fixed.** |
+| S3 excused skip | "Excused" is the default, "Counts as missed" is a choice, and skipping while clocked in counts as worked. | **Fixed.** |
+| S4 ready link | A ready Dev link, checked in the Claude app, a phone browser and "Open in browser" at Stop 1; the fallback is a separate copy; a change to the link offers a reload. | **Fixed.** |
+| S5 copy real game | "Copy my real game into Dev" (reads, never writes). | **Fixed.** |
+| S6 44 px | 44-point buttons, at most three to a row, the most used first. | **Fixed.** |
+| S7 promotion / D6 risk | The test's needs are shown; "Open the test now" works only when just the day is missing; set rank is marked approximate; "Officer on Day 10" starts as "not yet". | **Fixed.** |
+| S8 clock tap target | The whole place-and-clock card is the target, with a gold outline and "DEV" in letters. | **Fixed.** |
+| N1-N6 | Beat shortcuts (Day 1 briefing, Day 2 solo job, Day 3 store, …); trainings by name with the code small; no "Trad."; the card instead of a chip; Day 0 refusals; plain `#debug` goes to the backlog. | **Fixed.** |
+
+The catches from DR1 that v2 takes in are good ones: `DEV` already names section 19's device (`DEVMODE` instead), the random career seed, and kept days fingerprinted by the script, not the build number.
+
+### The five tasks again, on v2
+
+1. **Day 2 solo meeting.**
+   - **Stop 1:** new Dev game, play the arrival, Next morning twice, To 08:30, Take me to: next appointment, Mark, then Back to mark as often as needed. **Fast to retry now.**
+   - **But the recipe skips Day 1.** v2's own finding (section 4.3): skipped on paper, the Day 1 briefing, the Day 2 solo job and the tea are marked missed and the career doesn't start. So "Next morning, twice" gives a player who missed the Day 1 briefing. In the code, the briefing's `team` Settling-in item and Zeke's Day 1 opener read `d1-briefing:met`. The Day 2 meeting may behave differently for that player than for the user, and **the fix could look fine (or broken) when it isn't.** See R2.
+   - **Stop 2:** the beat shortcut "Day 2 solo job" with every first-week beat met. **Fixed.**
+2. **Ladder.** Take me to: "the ladder" (a testing spot). **Fixed**, and a 3-tap test. Trying it as an Officer needs set rank (Stop 2). The patch removes rank gates anyway, so testing as a Junior is enough.
+3. **Clock-in / clock-out undo.**
+   - To 08:55, Take me to: "the time clock", clock in, then To 16:55; you stay clocked in. **Fixed.**
+   - New naming clash, see R4.
+4. **A tradition.** Traditions tab, search, In 20 min. Refused on Day 0 and during a big event, with the reason. **Works.**
+5. **Promotion and storm.** At Stop 2 the Career tab shows the test's needs and opens the test only when just the day is missing. The jump to "Day 10 Officer" is honestly marked "not yet" until the career lines are in (DJ1's careful player reaches Officer only on Day 16). The storm is at Stop 3, with End and undo. **Fine for the order the user asked for.**
+
+### New points
+
+- **R1 (should fix): Stop 1 has grown to six turns, and the patch needs only four.**
+  - D5-D6 (traditions, with the plans remade and the traditions engineer reviewing first) are the riskiest part of Stop 1. Not one of the six patch items needs them.
+  - Suggest: the D4 build is published as **"Stop 1a: the patch kit"** as soon as it passes, so the playtest patch can be checked against it, and traditions complete Stop 1 after. Or ask the user.
+- **R2 (should fix): make the Stop 1 Day 2 recipe the real one.**
+  - Recommend **"play Day 0 and Day 1 once (or Copy my real game), then Mark at Day 2 08:30"** as the first step, not "Next morning, twice".
+  - When a skip passes a first-week meeting, the panel says so in words ("Skipped: the Day 1 briefing counted as missed. This isn't a real player's Day 2."), so a test result isn't trusted by mistake.
+  - A 25-real-minute Day 1 played once, then Mark, is still far quicker than today.
+- **R3 (should fix): say what "Take me to…" does mid-story.**
+  - During the arrival evening (Zeke escorting, steps checked by where you stand), during a first-week meeting, a conversation, or a seated meal, a jump could skip or break a step.
+  - Suggest: refused during the arrival evening and inside a meeting (the button says why); otherwise it settles what's in progress first, like the other Dev actions. devmode_check: Take me to during the escort's walk is refused.
+- **R4 (nit): two "undo"s.** The playtest patch adds an in-game undo for clocking in or out, and Dev mode adds "Undo last". When testing the patch's undo, a tester could easily press Dev's. Name Dev's **"Undo my last Dev action"** and keep it inside the panel only.
+- **R5 (nit): six tabs at 390 px.** "Quick Clock Traditions Career Jump Big events" in one row is about 60 px per tab, so "Traditions" and "Big events" will squeeze. Check in the 390 × 844 shot; two rows or shorter words ("Events") would do.
+- **R6 (nit):** Back to mark reloads the page. On a phone, check the reload keeps `#dev` and lands within a couple of seconds. It's the step repeated most at Stop 1.
