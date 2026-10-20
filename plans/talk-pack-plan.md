@@ -87,7 +87,8 @@ cheer: Sleep. I'm very good at sleep.
   A slug is never reused for a different talk (the "parked, never deleted" rule: a cut talk's id stays retired).
 - Saved per save as `{ id: [day, crewId] }` (when and with whom it fired), not a bare set: "a topic you haven't talked
   about with this person lately" reads it, and it helps debugging. Small talk keeps one `lastDone[crewId]`.
-- The pool is fired **per save, not per person** (the lead is asking the user whether to keep this): once you've had
+- The pool is fired **per save, not per person** (**the user's decision, 2026-10-20:** keep strict once-per-save, no
+  repeats; more pool talks will be written when the game grows past Day 30): once you've had
   `pool.hobby.one-hour` with anyone, nobody offers it again (otherwise the same story comes from three mouths, which
   reads as a repeat). Own talks are only ever said by their owner.
 
